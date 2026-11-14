@@ -5,8 +5,8 @@
   "scope": "Program completion gaps. Earlier bounded functional smoke is evidence of partial execution only; no model is working until terminal success, primary mechanism motion and valid output are verified. No physical accuracy is implied.",
   "summary": {
     "total": 82,
-    "working": 26,
-    "partial": 56,
+    "working": 35,
+    "partial": 47,
     "blocked": 0
   },
   "models": [
@@ -2830,7 +2830,7 @@
     },
     {
       "id": "pivot-exchange",
-      "status": "PARTIAL",
+      "status": "WORKING",
       "modelPath": "overlay/scratch-gui/static/sim-lab/models/pivot-exchange.ldr",
       "modelSha256": "dac8d0d5003ae68f90d8c3b4f1233d4e20aa3c2f50fc6fc2ff884e32b1d990fd",
       "programPath": "overlay/scratch-gui/static/sim-lab/programs/pivot-exchange.bw",
@@ -2846,10 +2846,132 @@
         "simLimitMs": 15000,
         "runnerSha256": "a3989ddb1033fcaf11f1a6a24e100a7104c8418b223fb17ee7aa714671718005"
       },
-      "gaps": [
-        "Program reached the earlier simulated-time cutoff; no terminal outcome was established.",
-        "Primary mechanism movement and a valid output, preview or measurement at the terminal state are not yet verified."
-      ]
+      "gaps": [],
+      "latestCompletionRun": {
+        "sourceHead": "ef4a6cdf9a46a13ea02c6b34dcc9a931ce10f8e5",
+        "runnerSha256": "1fc25fa99445590569da31a81f905216949739ca3eaf93a5e541ec0010a1a638",
+        "engineVersion": "1.1.0-bw.10",
+        "simLimitMs": 70000,
+        "simulatedMs": 18066.666666666726,
+        "execution": "COMPLETED",
+        "finishedAt": 18066.666666666726,
+        "primitiveCalls": 12949,
+        "terminalObservation": {
+          "sawZero": true,
+          "sawTransition": true
+        },
+        "messages": [
+          "Observation complete. The two nearly conjugate suspensions should keep similar time; the central-hole control swings more slowly."
+        ],
+        "outputMeasurement": {
+          "part": "arm_near_beam",
+          "type": "pose",
+          "samples": 543,
+          "invalid": false,
+          "travelM": 0.006600117382538052,
+          "homeErrorM": 0.002441487710931967,
+          "rotationDeg": 15.806676843121496,
+          "initialQuat": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "initial": [
+            0.04400000048252574,
+            0.09623356435242397,
+            -0.027340153411754727
+          ],
+          "final": [
+            0.04399999150796578,
+            0.09601680411178569,
+            -0.024908306944432065
+          ]
+        },
+        "outputMeasurements": [
+          {
+            "part": "arm_near_beam",
+            "type": "pose",
+            "samples": 543,
+            "invalid": false,
+            "travelM": 0.006600117382538052,
+            "homeErrorM": 0.002441487710931967,
+            "rotationDeg": 15.806676843121496,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              0.04400000048252574,
+              0.09623356435242397,
+              -0.027340153411754727
+            ],
+            "final": [
+              0.04399999150796578,
+              0.09601680411178569,
+              -0.024908306944432065
+            ]
+          },
+          {
+            "part": "arm_far_beam",
+            "type": "pose",
+            "samples": 543,
+            "invalid": false,
+            "travelM": 0.015397322172873755,
+            "homeErrorM": 0.005743053947065291,
+            "rotationDeg": 15.803699570006081,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              0.04400000048252574,
+              0.06454498427495978,
+              0.048206306667374514
+            ],
+            "final": [
+              0.0439996990230664,
+              0.06403726605734258,
+              0.053926874013322294
+            ]
+          },
+          {
+            "part": "arm_control_beam",
+            "type": "pose",
+            "samples": 543,
+            "invalid": false,
+            "travelM": 1.2053644341034705e-07,
+            "homeErrorM": 3.1522018238264494e-08,
+            "rotationDeg": 15.883277884825594,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              0.04400000048252574,
+              0.11999999745324873,
+              0.13599999775116337
+            ],
+            "final": [
+              0.04399999893358664,
+              0.12000002798115371,
+              0.13599999005145955
+            ]
+          }
+        ],
+        "completion": {
+          "status": "COMPLETE",
+          "gaps": [],
+          "failures": [],
+          "terminalVerified": true
+        }
+      }
     },
     {
       "id": "pivot-exchange-wide",
@@ -3228,7 +3350,7 @@
     },
     {
       "id": "thirdline",
-      "status": "PARTIAL",
+      "status": "WORKING",
       "modelPath": "overlay/scratch-gui/static/sim-lab/models/thirdline.ldr",
       "modelSha256": "3c3b709d22b97448827f352bc10827c5e0df6b1a9ab08756036efdef63b1761d",
       "programPath": "overlay/scratch-gui/static/sim-lab/programs/thirdline.bw",
@@ -3244,10 +3366,139 @@
         "simLimitMs": 15000,
         "runnerSha256": "d099131ecbb493fd424e49eec3ac322a6a308d6be6b4294818c3fa18b0b54332"
       },
-      "gaps": [
-        "Program reached the earlier simulated-time cutoff; no terminal outcome was established.",
-        "Primary mechanism movement and a valid output, preview or measurement at the terminal state are not yet verified."
-      ]
+      "gaps": [],
+      "latestCompletionRun": {
+        "sourceHead": "ef4a6cdf9a46a13ea02c6b34dcc9a931ce10f8e5",
+        "runnerSha256": "1fc25fa99445590569da31a81f905216949739ca3eaf93a5e541ec0010a1a638",
+        "engineVersion": "1.1.0-bw.10",
+        "simLimitMs": 70000,
+        "simulatedMs": 28533.333333333012,
+        "execution": "COMPLETED",
+        "finishedAt": 28533.333333333012,
+        "primitiveCalls": 8818,
+        "terminalObservation": {
+          "sawZero": true,
+          "sawTransition": true
+        },
+        "messages": [
+          "Input 50 degrees: observe the passive ruler angle.",
+          "Input 65 degrees: compare the first 15-degree input step.",
+          "Input 80 degrees: compare another 15-degree input step.",
+          "Input 95 degrees: compare the third 15-degree step.",
+          "Continuous reverse sweep to input 50 degrees.",
+          "Continuous forward sweep to input 95 degrees.",
+          "Return to the saved 90-degree input pose.",
+          "Complete. A holds its original datum; the ruler and sliders remain passive."
+        ],
+        "outputMeasurement": {
+          "part": "ruler_mark_beam",
+          "type": "pose",
+          "samples": 857,
+          "invalid": false,
+          "travelM": 0.0063147205308033815,
+          "homeErrorM": 2.748691919965304e-05,
+          "rotationDeg": 13.362783384233028,
+          "initialQuat": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "initial": [
+            0.004000000947248781,
+            0.12800000424599928,
+            0.06135898382307718
+          ],
+          "final": [
+            0.003979910583571613,
+            0.12799996020470442,
+            0.06134022466332063
+          ]
+        },
+        "outputMeasurements": [
+          {
+            "part": "ruler_mark_beam",
+            "type": "pose",
+            "samples": 857,
+            "invalid": false,
+            "travelM": 0.0063147205308033815,
+            "homeErrorM": 2.748691919965304e-05,
+            "rotationDeg": 13.362783384233028,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              0.004000000947248781,
+              0.12800000424599928,
+              0.06135898382307718
+            ],
+            "final": [
+              0.003979910583571613,
+              0.12799996020470442,
+              0.06134022466332063
+            ]
+          },
+          {
+            "part": "a_cross",
+            "type": "pose",
+            "samples": 857,
+            "invalid": false,
+            "travelM": 0.021937078392927467,
+            "homeErrorM": 9.36111091598616e-05,
+            "rotationDeg": 13.36277322242105,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              0.024000002528533702,
+              0.08000000048294943,
+              0.09599999993758107
+            ],
+            "final": [
+              0.02400005831491594,
+              0.08000006381294567,
+              0.09609361100869625
+            ]
+          },
+          {
+            "part": "c_cross",
+            "type": "pose",
+            "samples": 857,
+            "invalid": false,
+            "travelM": 0.005894619448143905,
+            "homeErrorM": 3.025039012754272e-05,
+            "rotationDeg": 0.0003300737942882084,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              -0.00799999899138473,
+              0.12000000289843141,
+              0.040574374643134126
+            ],
+            "final": [
+              -0.008000079954345329,
+              0.11999997309609607,
+              0.04054412437603302
+            ]
+          }
+        ],
+        "completion": {
+          "status": "COMPLETE",
+          "gaps": [],
+          "failures": [],
+          "terminalVerified": true
+        }
+      }
     },
     {
       "id": "thirdline-control",
@@ -3434,7 +3685,7 @@
     },
     {
       "id": "sarrus-lift-single-chain",
-      "status": "PARTIAL",
+      "status": "WORKING",
       "modelPath": "overlay/scratch-gui/static/sim-lab/models/sarrus-lift-single-chain.ldr",
       "modelSha256": "602698633267bcd2823bb8f6063042caae415a47b0fac33ae82c70eff4f75f97",
       "programPath": "overlay/scratch-gui/static/sim-lab/programs/sarrus-lift-single-chain.bw",
@@ -3450,10 +3701,86 @@
         "simLimitMs": 15000,
         "runnerSha256": "d099131ecbb493fd424e49eec3ac322a6a308d6be6b4294818c3fa18b0b54332"
       },
-      "gaps": [
-        "Program threads ended in the earlier smoke run; meaningful success and output are not yet reviewed.",
-        "Primary mechanism movement and a valid output, preview or measurement at the terminal state are not yet verified."
-      ]
+      "gaps": [],
+      "latestCompletionRun": {
+        "sourceHead": "ef4a6cdf9a46a13ea02c6b34dcc9a931ce10f8e5",
+        "runnerSha256": "1fc25fa99445590569da31a81f905216949739ca3eaf93a5e541ec0010a1a638",
+        "engineVersion": "1.1.0-bw.10",
+        "simLimitMs": 70000,
+        "simulatedMs": 8066.666666666638,
+        "execution": "COMPLETED",
+        "finishedAt": 8066.666666666638,
+        "primitiveCalls": 5741,
+        "terminalObservation": {
+          "sawZero": false,
+          "sawTransition": false
+        },
+        "terminalOutcome": {
+          "verified": true,
+          "kind": "natural-exit-message"
+        },
+        "messages": [
+          "Single-chain control complete: compare the deck with the full Sarrus Lift."
+        ],
+        "outputMeasurement": {
+          "part": "deck_plate",
+          "type": "pose",
+          "samples": 243,
+          "invalid": false,
+          "travelM": 0.05222498188786546,
+          "homeErrorM": 0.0468496904443572,
+          "rotationDeg": 43.598679906838925,
+          "initialQuat": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "initial": [
+            -2.2320912965168027e-09,
+            0.1318822513467991,
+            1.0122002125356744e-09
+          ],
+          "final": [
+            0.01484727234335405,
+            0.08744747286211611,
+            4.892371228526657e-05
+          ]
+        },
+        "outputMeasurements": [
+          {
+            "part": "deck_plate",
+            "type": "pose",
+            "samples": 243,
+            "invalid": false,
+            "travelM": 0.05222498188786546,
+            "homeErrorM": 0.0468496904443572,
+            "rotationDeg": 43.598679906838925,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              -2.2320912965168027e-09,
+              0.1318822513467991,
+              1.0122002125356744e-09
+            ],
+            "final": [
+              0.01484727234335405,
+              0.08744747286211611,
+              4.892371228526657e-05
+            ]
+          }
+        ],
+        "completion": {
+          "status": "COMPLETE",
+          "gaps": [],
+          "failures": [],
+          "terminalVerified": true
+        }
+      }
     },
     {
       "id": "phasor-twin",
@@ -3503,7 +3830,7 @@
     },
     {
       "id": "rimrun",
-      "status": "PARTIAL",
+      "status": "WORKING",
       "modelPath": "overlay/scratch-gui/static/sim-lab/models/rimrun.ldr",
       "modelSha256": "ad5e908db04a5fe326d81c5861d77b8f43f5985080ca9ffcee6263d81e8d9100",
       "programPath": "overlay/scratch-gui/static/sim-lab/programs/rimrun.bw",
@@ -3519,10 +3846,108 @@
         "simLimitMs": 15000,
         "runnerSha256": "d099131ecbb493fd424e49eec3ac322a6a308d6be6b4294818c3fa18b0b54332"
       },
-      "gaps": [
-        "Program threads ended in the earlier smoke run; meaningful success and output are not yet reviewed.",
-        "Primary mechanism movement and a valid output, preview or measurement at the terminal state are not yet verified."
-      ]
+      "gaps": [],
+      "latestCompletionRun": {
+        "sourceHead": "ef4a6cdf9a46a13ea02c6b34dcc9a931ce10f8e5",
+        "runnerSha256": "1fc25fa99445590569da31a81f905216949739ca3eaf93a5e541ec0010a1a638",
+        "engineVersion": "1.1.0-bw.10",
+        "simLimitMs": 70000,
+        "simulatedMs": 6766.66666666665,
+        "execution": "COMPLETED",
+        "finishedAt": 6766.66666666665,
+        "primitiveCalls": 3149,
+        "terminalObservation": {
+          "sawZero": true,
+          "sawTransition": true
+        },
+        "messages": [
+          "The gate holds open. Compare the free rollers on the same slope.",
+          "Gate returned. Reload the model before running the swapped lane order."
+        ],
+        "outputMeasurement": {
+          "part": "left_wheel_-1",
+          "type": "pose",
+          "samples": 204,
+          "invalid": false,
+          "travelM": 0.36526784455551253,
+          "homeErrorM": 0.3175866431208491,
+          "rotationDeg": 179.60551811676237,
+          "initialQuat": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "initial": [
+            -0.010631252372947674,
+            0.04569616183561341,
+            0.004000006974568121
+          ],
+          "final": [
+            0.30466891678623303,
+            0.0076584749325259134,
+            0.004462167146296299
+          ]
+        },
+        "outputMeasurements": [
+          {
+            "part": "left_wheel_-1",
+            "type": "pose",
+            "samples": 204,
+            "invalid": false,
+            "travelM": 0.36526784455551253,
+            "homeErrorM": 0.3175866431208491,
+            "rotationDeg": 179.60551811676237,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              -0.010631252372947674,
+              0.04569616183561341,
+              0.004000006974568121
+            ],
+            "final": [
+              0.30466891678623303,
+              0.0076584749325259134,
+              0.004462167146296299
+            ]
+          },
+          {
+            "part": "right_wheel_-1",
+            "type": "pose",
+            "samples": 204,
+            "invalid": false,
+            "travelM": 0.36523135915728927,
+            "homeErrorM": 0.3176874239737631,
+            "rotationDeg": 170.74266046092052,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              -0.010631252372962204,
+              0.045696161835598575,
+              0.21200000009023162
+            ],
+            "final": [
+              0.30476928492704564,
+              0.007646643930327257,
+              0.2121860353779804
+            ]
+          }
+        ],
+        "completion": {
+          "status": "COMPLETE",
+          "gaps": [],
+          "failures": [],
+          "terminalVerified": true
+        }
+      }
     },
     {
       "id": "rimrun-swapped",
@@ -3549,7 +3974,7 @@
     },
     {
       "id": "swayshift",
-      "status": "PARTIAL",
+      "status": "WORKING",
       "modelPath": "overlay/scratch-gui/static/sim-lab/models/swayshift.ldr",
       "modelSha256": "f5198199c280fc362ed09dd29bb82d68c2c5a6ef1e5baee4ce4d27be87037bf7",
       "programPath": "overlay/scratch-gui/static/sim-lab/programs/swayshift.bw",
@@ -3565,10 +3990,108 @@
         "simLimitMs": 15000,
         "runnerSha256": "d099131ecbb493fd424e49eec3ac322a6a308d6be6b4294818c3fa18b0b54332"
       },
-      "gaps": [
-        "Program threads ended in the earlier smoke run; meaningful success and output are not yet reviewed.",
-        "Primary mechanism movement and a valid output, preview or measurement at the terminal state are not yet verified."
-      ]
+      "gaps": [],
+      "latestCompletionRun": {
+        "sourceHead": "ef4a6cdf9a46a13ea02c6b34dcc9a931ce10f8e5",
+        "runnerSha256": "1fc25fa99445590569da31a81f905216949739ca3eaf93a5e541ec0010a1a638",
+        "engineVersion": "1.1.0-bw.10",
+        "simLimitMs": 70000,
+        "simulatedMs": 11500.000000000031,
+        "execution": "COMPLETED",
+        "finishedAt": 11500.000000000031,
+        "primitiveCalls": 7308,
+        "terminalObservation": {
+          "sawZero": true,
+          "sawTransition": true
+        },
+        "messages": [
+          "The trolley holds its target. Watch the remaining free pendulum swing.",
+          "Transfer and return complete. Reload the model before trying the other timing."
+        ],
+        "outputMeasurement": {
+          "part": "trolley_crossbeam",
+          "type": "pose",
+          "samples": 346,
+          "invalid": false,
+          "travelM": 0.04448135702138768,
+          "homeErrorM": 3.0566043627749984e-05,
+          "rotationDeg": 0.0005005997500046186,
+          "initialQuat": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "initial": [
+            0.062400001589931364,
+            0.2779999959004209,
+            0.04799999987024054
+          ],
+          "final": [
+            0.06243056649839537,
+            0.2779999510671718,
+            0.04799974028668939
+          ]
+        },
+        "outputMeasurements": [
+          {
+            "part": "trolley_crossbeam",
+            "type": "pose",
+            "samples": 346,
+            "invalid": false,
+            "travelM": 0.04448135702138768,
+            "homeErrorM": 3.0566043627749984e-05,
+            "rotationDeg": 0.0005005997500046186,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              0.062400001589931364,
+              0.2779999959004209,
+              0.04799999987024054
+            ],
+            "final": [
+              0.06243056649839537,
+              0.2779999510671718,
+              0.04799974028668939
+            ]
+          },
+          {
+            "part": "pendulum_lower",
+            "type": "pose",
+            "samples": 346,
+            "invalid": false,
+            "travelM": 0.01705445162034326,
+            "homeErrorM": 0.003350892423804727,
+            "rotationDeg": 6.110077051138827,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              1.0314194776039898e-09,
+              -0.15199999485845156,
+              -0.07199999406989316
+            ],
+            "final": [
+              0.0033507112658363735,
+              -0.15196505268172622,
+              -0.07200006598292658
+            ]
+          }
+        ],
+        "completion": {
+          "status": "COMPLETE",
+          "gaps": [],
+          "failures": [],
+          "terminalVerified": true
+        }
+      }
     },
     {
       "id": "swayshift-in-phase",
@@ -3595,7 +4118,7 @@
     },
     {
       "id": "tipline",
-      "status": "PARTIAL",
+      "status": "WORKING",
       "modelPath": "overlay/scratch-gui/static/sim-lab/models/tipline.ldr",
       "modelSha256": "890b7a6da4b3db341d25a4637214e3b06f49d7f8bd97bcd17b7bbc98bdfaa3ef",
       "programPath": "overlay/scratch-gui/static/sim-lab/programs/tipline.bw",
@@ -3611,10 +4134,133 @@
         "simLimitMs": 15000,
         "runnerSha256": "d099131ecbb493fd424e49eec3ac322a6a308d6be6b4294818c3fa18b0b54332"
       },
-      "gaps": [
-        "Program reached the earlier simulated-time cutoff; no terminal outcome was established.",
-        "Primary mechanism movement and a valid output, preview or measurement at the terminal state are not yet verified."
-      ]
+      "gaps": [],
+      "latestCompletionRun": {
+        "sourceHead": "ef4a6cdf9a46a13ea02c6b34dcc9a931ce10f8e5",
+        "runnerSha256": "1fc25fa99445590569da31a81f905216949739ca3eaf93a5e541ec0010a1a638",
+        "engineVersion": "1.1.0-bw.10",
+        "simLimitMs": 70000,
+        "simulatedMs": 34066.666666666286,
+        "execution": "COMPLETED",
+        "finishedAt": 34066.666666666286,
+        "primitiveCalls": 18508,
+        "terminalObservation": {
+          "sawZero": true,
+          "sawTransition": true
+        },
+        "messages": [
+          "Watch the two loads: which tips, and which slides first?",
+          "Deck returned. Reload the model before comparing the ballast swap."
+        ],
+        "outputMeasurement": {
+          "part": "left_load_base",
+          "type": "pose",
+          "samples": 1023,
+          "invalid": false,
+          "travelM": 0.030308687933337214,
+          "homeErrorM": 0.02874485387358679,
+          "rotationDeg": 15.688636943608818,
+          "initialQuat": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "initial": [
+            -0.012000003897584502,
+            0.006400003840815224,
+            0.032000000323766896
+          ],
+          "final": [
+            0.016744838560586447,
+            0.0063886716622587,
+            0.031977025326062766
+          ]
+        },
+        "outputMeasurements": [
+          {
+            "part": "left_load_base",
+            "type": "pose",
+            "samples": 1023,
+            "invalid": false,
+            "travelM": 0.030308687933337214,
+            "homeErrorM": 0.02874485387358679,
+            "rotationDeg": 15.688636943608818,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              -0.012000003897584502,
+              0.006400003840815224,
+              0.032000000323766896
+            ],
+            "final": [
+              0.016744838560586447,
+              0.0063886716622587,
+              0.031977025326062766
+            ]
+          },
+          {
+            "part": "right_load_base",
+            "type": "pose",
+            "samples": 1023,
+            "invalid": false,
+            "travelM": 0.009854553506810535,
+            "homeErrorM": 0.00948174597913574,
+            "rotationDeg": 34.93564967215257,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              -0.012000003897584502,
+              0.006400003122737044,
+              0.08800000298362423
+            ],
+            "final": [
+              -0.007619787908696326,
+              0.014786001151067077,
+              0.0873737029178491
+            ]
+          },
+          {
+            "part": "deck_edge_rail_-150_main",
+            "type": "pose",
+            "samples": 1023,
+            "invalid": false,
+            "travelM": 0.02326002160640783,
+            "homeErrorM": 1.719841617198458e-05,
+            "rotationDeg": 23.56376661491245,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              -0.047999999376722696,
+              0.13039999882465114,
+              -0.012000000208925207
+            ],
+            "final": [
+              -0.047996769108983414,
+              0.13041689077532548,
+              -0.012000113749988868
+            ]
+          }
+        ],
+        "completion": {
+          "status": "COMPLETE",
+          "gaps": [],
+          "failures": [],
+          "terminalVerified": true
+        }
+      }
     },
     {
       "id": "tipline-swapped",
@@ -3731,7 +4377,7 @@
     },
     {
       "id": "evenhand",
-      "status": "PARTIAL",
+      "status": "WORKING",
       "modelPath": "overlay/scratch-gui/static/sim-lab/models/evenhand.ldr",
       "modelSha256": "73b23359937976e2e3e1af7136ad9536d9e6b48837eb22eab83b1645e95f7f82",
       "programPath": "overlay/scratch-gui/static/sim-lab/programs/evenhand.bw",
@@ -3747,10 +4393,108 @@
         "simLimitMs": 15000,
         "runnerSha256": "d099131ecbb493fd424e49eec3ac322a6a308d6be6b4294818c3fa18b0b54332"
       },
-      "gaps": [
-        "Program reached the earlier simulated-time cutoff; no terminal outcome was established.",
-        "Primary mechanism movement and a valid output, preview or measurement at the terminal state are not yet verified."
-      ]
+      "gaps": [],
+      "latestCompletionRun": {
+        "sourceHead": "fedfc3d5009a02f8647c6d2454cce3296a4f0a1a",
+        "runnerSha256": "1fc25fa99445590569da31a81f905216949739ca3eaf93a5e541ec0010a1a638",
+        "engineVersion": "1.1.0-bw.10",
+        "simLimitMs": 70000,
+        "simulatedMs": 27699.99999999971,
+        "execution": "COMPLETED",
+        "finishedAt": 27699.99999999971,
+        "primitiveCalls": 15819,
+        "terminalObservation": {
+          "sawZero": true,
+          "sawTransition": true
+        },
+        "messages": [
+          "The same arm visits nine poses. Watch the two counterweights rise as the links fall.",
+          "Nine poses and return complete. Reload the comparison model to move the same weights inward."
+        ],
+        "outputMeasurement": {
+          "part": "forearm",
+          "type": "pose",
+          "samples": 834,
+          "invalid": false,
+          "travelM": 0.03387876420526825,
+          "homeErrorM": 1.8207761154524614e-07,
+          "rotationDeg": 50.10315278388628,
+          "initialQuat": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "initial": [
+            -0.05599999893252251,
+            0.11200000204947236,
+            0.06400000054422456
+          ],
+          "final": [
+            -0.05599993199047283,
+            0.11200016912287515,
+            0.0640000280668823
+          ]
+        },
+        "outputMeasurements": [
+          {
+            "part": "forearm",
+            "type": "pose",
+            "samples": 834,
+            "invalid": false,
+            "travelM": 0.03387876420526825,
+            "homeErrorM": 1.8207761154524614e-07,
+            "rotationDeg": 50.10315278388628,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              -0.05599999893252251,
+              0.11200000204947236,
+              0.06400000054422456
+            ],
+            "final": [
+              -0.05599993199047283,
+              0.11200016912287515,
+              0.0640000280668823
+            ]
+          },
+          {
+            "part": "upper_arm_-20",
+            "type": "pose",
+            "samples": 834,
+            "invalid": false,
+            "travelM": 0.014395669731782254,
+            "homeErrorM": 7.839650179511274e-09,
+            "rotationDeg": 20.326225302407092,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              -0.015999999155382,
+              0.12000000204947237,
+              0.008000005536411222
+            ],
+            "final": [
+              -0.01599999682122969,
+              0.12000000946581817,
+              0.008000004531591392
+            ]
+          }
+        ],
+        "completion": {
+          "status": "COMPLETE",
+          "gaps": [],
+          "failures": [],
+          "terminalVerified": true
+        }
+      }
     },
     {
       "id": "evenhand-control",
@@ -3777,7 +4521,7 @@
     },
     {
       "id": "helixgate",
-      "status": "PARTIAL",
+      "status": "WORKING",
       "modelPath": "overlay/scratch-gui/static/sim-lab/models/helixgate.ldr",
       "modelSha256": "6208f9ee96f1da2d1947f0f2b92ea69706624bdfa0fa09a1aa812210b942a796",
       "programPath": "overlay/scratch-gui/static/sim-lab/programs/helixgate.bw",
@@ -3793,10 +4537,109 @@
         "simLimitMs": 15000,
         "runnerSha256": "d099131ecbb493fd424e49eec3ac322a6a308d6be6b4294818c3fa18b0b54332"
       },
-      "gaps": [
-        "Program reached the earlier simulated-time cutoff; no terminal outcome was established.",
-        "Primary mechanism movement and a valid output, preview or measurement at the terminal state are not yet verified."
-      ]
+      "gaps": [],
+      "latestCompletionRun": {
+        "sourceHead": "fedfc3d5009a02f8647c6d2454cce3296a4f0a1a",
+        "runnerSha256": "1fc25fa99445590569da31a81f905216949739ca3eaf93a5e541ec0010a1a638",
+        "engineVersion": "1.1.0-bw.10",
+        "simLimitMs": 70000,
+        "simulatedMs": 27199.999999999727,
+        "execution": "COMPLETED",
+        "finishedAt": 27199.999999999727,
+        "primitiveCalls": 2121,
+        "terminalObservation": {
+          "sawZero": false,
+          "sawTransition": false
+        },
+        "terminalOutcome": {
+          "verified": true,
+          "kind": "finite-route"
+        },
+        "messages": [],
+        "outputMeasurement": {
+          "part": "wheel_24",
+          "type": "pose",
+          "samples": 817,
+          "invalid": false,
+          "travelM": 2.748055268570797e-08,
+          "homeErrorM": 8.152777970512666e-09,
+          "rotationDeg": 30.011003890938753,
+          "initialQuat": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "initial": [
+            -0.016000002191082212,
+            0.05599999880002746,
+            -4.137450087399186e-10
+          ],
+          "final": [
+            -0.016000001973794094,
+            0.05600000624508662,
+            2.901623541288852e-09
+          ]
+        },
+        "outputMeasurements": [
+          {
+            "part": "wheel_24",
+            "type": "pose",
+            "samples": 817,
+            "invalid": false,
+            "travelM": 2.748055268570797e-08,
+            "homeErrorM": 8.152777970512666e-09,
+            "rotationDeg": 30.011003890938753,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              -0.016000002191082212,
+              0.05599999880002746,
+              -4.137450087399186e-10
+            ],
+            "final": [
+              -0.016000001973794094,
+              0.05600000624508662,
+              2.901623541288852e-09
+            ]
+          },
+          {
+            "part": "blue_tip",
+            "type": "pose",
+            "samples": 817,
+            "invalid": false,
+            "travelM": 0.013099849801682911,
+            "homeErrorM": 3.052747516207927e-06,
+            "rotationDeg": 30.011003890938753,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              -0.04000000219108221,
+              0.04799999880002746,
+              -0.036000000413745015
+            ],
+            "final": [
+              -0.0400008915206293,
+              0.048002918647417035,
+              -0.03600005381389481
+            ]
+          }
+        ],
+        "completion": {
+          "status": "COMPLETE",
+          "gaps": [],
+          "failures": [],
+          "terminalVerified": true
+        }
+      }
     },
     {
       "id": "looprelay",
@@ -3869,7 +4712,7 @@
     },
     {
       "id": "toggle-press",
-      "status": "PARTIAL",
+      "status": "WORKING",
       "modelPath": "overlay/scratch-gui/static/sim-lab/models/toggle-press.ldr",
       "modelSha256": "699e150095dee717794502548fc64e5301ffb9acd331f1a8585ba207f3611a11",
       "programPath": "overlay/scratch-gui/static/sim-lab/programs/toggle-press.bw",
@@ -3885,10 +4728,82 @@
         "simLimitMs": 15000,
         "runnerSha256": "a3989ddb1033fcaf11f1a6a24e100a7104c8418b223fb17ee7aa714671718005"
       },
-      "gaps": [
-        "Program threads ended in the earlier smoke run; meaningful success and output are not yet reviewed.",
-        "Primary mechanism movement and a valid output, preview or measurement at the terminal state are not yet verified."
-      ]
+      "gaps": [],
+      "latestCompletionRun": {
+        "sourceHead": "ef4a6cdf9a46a13ea02c6b34dcc9a931ce10f8e5",
+        "runnerSha256": "1fc25fa99445590569da31a81f905216949739ca3eaf93a5e541ec0010a1a638",
+        "engineVersion": "1.1.0-bw.10",
+        "simLimitMs": 70000,
+        "simulatedMs": 12800.000000000055,
+        "execution": "COMPLETED",
+        "finishedAt": 12800.000000000055,
+        "primitiveCalls": 7067,
+        "terminalObservation": {
+          "sawZero": true,
+          "sawTransition": true
+        },
+        "messages": [
+          "Toggle Press cycle complete. Compare ram travel and reset before repeating."
+        ],
+        "outputMeasurement": {
+          "part": "slider_cross",
+          "type": "pose",
+          "samples": 385,
+          "invalid": false,
+          "travelM": 0.02629674340200969,
+          "homeErrorM": 8.299045855904721e-05,
+          "rotationDeg": 0.0014040919569979556,
+          "initialQuat": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "initial": [
+            0.024000000359054016,
+            0.03199999994982357,
+            0.005589453529064495
+          ],
+          "final": [
+            0.023999970360703497,
+            0.03200000553773065,
+            0.005506463076115284
+          ]
+        },
+        "outputMeasurements": [
+          {
+            "part": "slider_cross",
+            "type": "pose",
+            "samples": 385,
+            "invalid": false,
+            "travelM": 0.02629674340200969,
+            "homeErrorM": 8.299045855904721e-05,
+            "rotationDeg": 0.0014040919569979556,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              0.024000000359054016,
+              0.03199999994982357,
+              0.005589453529064495
+            ],
+            "final": [
+              0.023999970360703497,
+              0.03200000553773065,
+              0.005506463076115284
+            ]
+          }
+        ],
+        "completion": {
+          "status": "COMPLETE",
+          "gaps": [],
+          "failures": [],
+          "terminalVerified": true
+        }
+      }
     },
     {
       "id": "footfall",
