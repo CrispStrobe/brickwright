@@ -22,6 +22,15 @@ export const PROGRAM_OUTPUT_CONTRACTS = {
     vectorsum: {terminal:'done',part:'output_pointer_tip',relativeTo:'bench_rail_40_-100',description:'Authored differential output pointer point path',minTravelM:0.001,drive:'commanded-motion',terminalValues:{phase:99,targetA:0,targetB:0},message:'VectorSum cycle complete. Compare the red carrier and orange pointer, then reset before repeating.'},
     pointweaver: {terminal: 'done', part: 'endpoint_marker', relativeTo: 'base_cross_-40', description: 'Five-bar endpoint loop and return to saved pose', minTravelM: 0.001, drive: 'commanded-motion', terminalValues: {phase: 99}, message: 'PointWeaver loop complete. Compare the dashed straight edges with the endpoint path, then reset before repeating.'}
 };
+// Control variants deliberately preserve absent/weak passive responses as data.
+Object.assign(PROGRAM_OUTPUT_CONTRACTS,{
+    'impulse-line-missing-middle':{...PROGRAM_OUTPUT_CONTRACTS['impulse-line'],comparisonModel:'impulse-line',outputs:[{part:'pendulum_left_bob_key',relativeTo:'bridge_rail',minTravelM:0.001},{part:'pendulum_right_bob_key',relativeTo:'bridge_rail',observeOnly:true}]},
+    'travel-dial-wheel-raised':{...PROGRAM_OUTPUT_CONTRACTS['travel-dial'],comparisonModel:'travel-dial',outputs:[{part:'sled_deck',relativeTo:'guide_-60_axle',minTravelM:0.001},{part:'wheel',relativeTo:'guide_-60_axle',observeOnly:true}]},
+    'ghost-pivot-unequal-link':{...PROGRAM_OUTPUT_CONTRACTS['ghost-pivot'],comparisonModel:'ghost-pivot'},
+    'afterturn-fixed-masses':{...PROGRAM_OUTPUT_CONTRACTS.afterturn,comparisonModel:'afterturn',outputs:[{part:'yaw_top',relativeTo:'yaw_bottom',observeOnly:true},...['slider_left_plate_0','slider_right_plate_0'].map(part=>({part,relativeTo:'yaw_top',observeOnly:true}))]},
+    'quiet-partner-control':{...PROGRAM_OUTPUT_CONTRACTS['quiet-partner'],comparisonModel:'quiet-partner',outputs:[{part:'primary_axle',relativeTo:'lower_rail_neg',minRotationDeg:0.1},{part:'absorber_axle',relativeTo:'lower_rail_neg',observeOnly:true}]},
+    'air-budget-two-tanks':{...PROGRAM_OUTPUT_CONTRACTS['air-budget'],comparisonModel:'air-budget'}
+});
 // Ask the product API for the authored measurement point. A nearby marker tip can
 // rotate about that point, so its path cannot substitute for the named origin.
 const conjugate=q=>[-q[0],-q[1],-q[2],q[3]];
