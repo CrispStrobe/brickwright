@@ -144,6 +144,7 @@ if(args.child){
     if(args['require-completion']){
         report.failures.push(...nonFinitePaths(report.programVariables).map(p=>'nonfinite-program-variable:'+p));
         if(contract?.drive==='intentional-hold'){report.intentionalHoldMotorObservations=report.failures.filter(f=>f.startsWith('motor:'));report.failures=report.failures.filter(f=>!f.startsWith('motor:'));report.motorCoverage='INTENTIONAL_HOLD_NO_DRIVE';}
+        if(contract?.passiveBrakePorts){const intentional=f=>f.startsWith('motor:')&&contract.passiveBrakePorts.includes(f.split(':').at(-2));report.passiveBrakeMotorObservations=report.failures.filter(intentional);report.failures=report.failures.filter(f=>!intentional(f));}
         report.completion=programCompletion(report,contract);report.status=report.completion.status;
         if(contract?.terminalMode)report.terminalOutcome={verified:report.completion.terminalVerified,kind:contract.terminalMode};
         report.outputContract=contract||null;
