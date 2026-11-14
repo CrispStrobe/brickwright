@@ -40,3 +40,7 @@ test('local measurement uses placed scene rotation, including mat-start quarter 
     const placed=new Map([['foot',{rotation:[0,0,1,0,1,0,-1,0,0]}]]);
     assert.deepEqual(readOutputPose(api,c,placed).position,[0,0,0.04]);
 });
+test('explicit flagless finite routes require natural exit, exact calls and no silent guarded stop',()=>{
+    const c={terminalMode:'finite-route',outputs:[{minRotationDeg:0.1}],requiredOpcodes:{move:2,hold:5},forbiddenOpcodes:['control_stop']},r={...valid(),programKind:'SUPPLIED',outputMeasurements:[{samples:3,invalid:false,rotationDeg:30}],executedOpcodes:{move:2,hold:5}};
+    assert.equal(programCompletion(r,c).status,'COMPLETE');r.executedOpcodes.control_stop=1;assert.equal(programCompletion(r,c).status,'PARTIAL');delete r.executedOpcodes.control_stop;r.executedOpcodes.move=1;assert.equal(programCompletion(r,c).status,'PARTIAL');
+});

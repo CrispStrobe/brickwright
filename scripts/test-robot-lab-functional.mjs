@@ -143,7 +143,9 @@ if(args.child){
     report.needsLongerRun=!r.finishedAt&&report.failures.length>0&&report.failures.every(f=>f.startsWith('motor:'));report.status=report.failures.length?(report.needsLongerRun?'INCONCLUSIVE':'FAIL'):'PASS';
     if(args['require-completion']){
         report.failures.push(...nonFinitePaths(report.programVariables).map(p=>'nonfinite-program-variable:'+p));
+        if(contract?.drive==='intentional-hold'){report.intentionalHoldMotorObservations=report.failures.filter(f=>f.startsWith('motor:'));report.failures=report.failures.filter(f=>!f.startsWith('motor:'));report.motorCoverage='INTENTIONAL_HOLD_NO_DRIVE';}
         report.completion=programCompletion(report,contract);report.status=report.completion.status;
+        if(contract?.terminalMode)report.terminalOutcome={verified:report.completion.terminalVerified,kind:contract.terminalMode};
         report.outputContract=contract||null;
         if(measurementWriter){measurementWriter.finish();measurementWriter=null;}else writeFileSync(String(args.result)+'.measurement.json',JSON.stringify({...measurementMetadata,samples:outputTrace},null,2)+'\n');
     }

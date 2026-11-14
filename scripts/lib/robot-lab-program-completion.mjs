@@ -15,6 +15,15 @@ export const PROGRAM_OUTPUT_CONTRACTS = {
     'quiet-partner': {terminal:'complete',outputs:['primary_axle','absorber_axle'].map(part=>({part,relativeTo:'lower_rail_neg',minRotationDeg:0.1})),drive:'commanded-motion',terminalValues:{phase:4,cycle:16,half:0,target:0},message:'Complete. Compare the primary motion with and without the partner bands. Reload before the other run.'},
     'high-select': {terminal:'complete',outputs:['input_A_pad','input_B_pad','bridge_A_foot','bridge_B_foot'].map(part=>({part,relativeTo:'floor_back_beam_0',minTravelM:0.001})),drive:'commanded-motion',terminalValues:{stage:10,settled:0,targetA:0,targetB:0,targetHeightA:0,targetHeightB:0},message:'High Select complete: compare measured input heights and the passive bridge at each hold.'},
     foldback: {terminal:'completed',outputs:[{part:'output_arm',relativeTo:'D_bearing_upper',minRotationDeg:0.1}],drive:'commanded-motion',terminalValues:{stage:7,held:1,targetA:0},message:'Complete. A holds at its original datum; the output remains passive.'},
+    thirdline:{terminal:'completed',outputs:[{part:'ruler_mark_beam',relativeTo:'guide_base_rail_-240_100',minRotationDeg:0.1},...['a_cross','c_cross'].map(part=>({part,relativeTo:'guide_base_rail_-240_100',minTravelM:0.001}))],drive:'commanded-motion',terminalValues:{stage:7,held:1,targetA:0},message:'Complete. A holds its original datum; the ruler and sliders remain passive.'},
+    rimrun:{terminal:'completed',outputs:['left_wheel_-1','right_wheel_-1'].map(part=>({part,relativeTo:'track_left_0_0',minTravelM:0.001,minRotationDeg:0.1})),drive:'commanded-motion',terminalValues:{stage:4,homed:1,arrivals:2,targetA:0},message:'Gate returned. Reload the model before running the swapped lane order.'},
+    swayshift:{terminal:'completed',outputs:[{part:'trolley_crossbeam',relativeTo:'base_frame_left',minTravelM:0.001},{part:'pendulum_lower',relativeTo:'pendulum_support',minRotationDeg:0.1}],drive:'commanded-motion',terminalValues:{stage:5,arrivals:3,targetA:0},message:'Transfer and return complete. Reload the model before trying the other timing.'},
+    tipline:{terminal:'completed',outputs:[...['left_load_base','right_load_base'].map(part=>({part,relativeTo:'deck_edge_rail_-150_main',observeOnly:true})),{part:'deck_edge_rail_-150_main',relativeTo:'base_frame_left',minRotationDeg:0.1}],drive:'commanded-motion',terminalValues:{stage:4,held:1,targetA:0},message:'Deck returned. Reload the model before comparing the ballast swap.'},
+    evenhand:{terminal:'completed',outputs:[{part:'forearm',relativeTo:'base_cross_80',minTravelM:0.001},{part:'upper_arm_-20',relativeTo:'base_cross_80',minRotationDeg:0.1}],drive:'commanded-motion',terminalValues:{stage:10,phase:3,arrivals:10,targetA:0,targetB:0},message:'Nine poses and return complete. Reload the comparison model to move the same weights inward.'},
+    'toggle-press':{terminal:'done',part:'slider_cross',localPointLdu:[0,0,0],relativeTo:'support_rail_60',referencePointLdu:[0,0,0],minTravelM:0.001,drive:'commanded-motion',terminalValues:{phase:99,targetA:0},message:'Toggle Press cycle complete. Compare ram travel and reset before repeating.'},
+    'pivot-exchange':{terminal:'complete',outputs:['arm_near_beam','arm_far_beam','arm_control_beam'].map(part=>({part,relativeTo:'floor_back_-140',minRotationDeg:0.1})),drive:'passive',terminalValues:{observing:0},message:'Observation complete. The two nearly conjugate suspensions should keep similar time; the central-hole control swings more slowly.'},
+    'sarrus-lift-single-chain':{terminalMode:'natural-exit-message',outputs:[{part:'deck_plate',relativeTo:'baseplate',observeOnly:true}],drive:'intentional-hold',requiredOpcodes:{robotlab_startSimulation:1,robotlab_stopMotor:1},message:'Single-chain control complete: compare the deck with the full Sarrus Lift.'},
+    helixgate:{terminalMode:'finite-route',outputs:[{part:'wheel_24',relativeTo:'base_cross',minRotationDeg:0.1},{part:'gate_arm',relativeTo:'base_cross',minTravelM:0.001}],drive:'commanded-motion',requiredOpcodes:{robotlab_runMotorDegrees:2,robotlab_stopMotor:5},forbiddenOpcodes:['control_stop']},
     samebeat: {terminal:'completed',part:'pendulum_ballast',relativeTo:'pendulum_support_axle',description:'Free pendulum swing while input is held',minTravelM:0.001,observeWhen:{stage:2,held:1},drive:'commanded-motion',terminalValues:{stage:2,held:1,targetA:0},message:'Complete. The input holds zero; the pendulum can keep swinging freely.'},
     twistspan: {terminal:'completed',part:'payload_bar',relativeTo:'upper_bar',description:'Passive beam rotation relative to held upper bar',minRotationDeg:0.1,observeWhen:{held:1},drive:'commanded-motion',terminalValues:{stage:2,held:1,targetA:0},message:'Complete. A holds zero; the passive beam is free to keep ringing down.'},
     footfall: {terminal:'done',part:'lower_triangle_h_FG',localPointLdu:[0,0,140],relativeTo:'frame_top_X_AP',referencePointLdu:[0,-20,140],description:'Authored foot G path relative to chassis P',minTravelM:0.001,drive:'commanded-motion',terminalValues:{phase:99,targetA:0},message:'Footfall cycle complete. Compare the traced path and reset before repeating.'},
@@ -71,7 +80,14 @@ export function programCompletion(report, contract) {
     const gaps = [];
     if (!contract) gaps.push('OUTPUT_CONTRACT_UNREVIEWED');
     if (report.execution !== 'COMPLETED') gaps.push('PROGRAM_DID_NOT_EXIT');
-    if (contract && (!report.terminalObservation?.sawTransition || Number(report.programVariables?.[contract.terminal]) !== 1)) gaps.push('TERMINAL_FLAG_NOT_REACHED');
+    let terminalVerified=false;
+    if(contract?.terminalMode){
+        terminalVerified=report.execution==='COMPLETED'&&report.programKind==='SUPPLIED';
+        for(const [opcode,count] of Object.entries(contract.requiredOpcodes||{}))if(report.executedOpcodes?.[opcode]!==count)terminalVerified=false;
+        if(contract.forbiddenOpcodes?.some(opcode=>report.executedOpcodes?.[opcode]))terminalVerified=false;
+        if(contract.message&&!report.messages?.includes(contract.message))terminalVerified=false;
+        if(!terminalVerified)gaps.push('DOCUMENTED_TERMINAL_PATH_NOT_REACHED');
+    }else if(contract){terminalVerified=report.terminalObservation?.sawTransition&&Number(report.programVariables?.[contract.terminal])===1;if(!terminalVerified)gaps.push('TERMINAL_FLAG_NOT_REACHED');}
     if (contract?.drive === 'commanded-motion' && !Object.values(report.motors || {}).some(m => m.commanded && m.moved)) gaps.push('PRIMARY_DRIVE_MOVEMENT_UNVERIFIED');
     const contracts=contract?.outputs||[contract],outputs=report.outputMeasurements||[report.outputMeasurement];
     if(contract)for(let i=0;i<contracts.length;i++){
@@ -82,7 +98,7 @@ export function programCompletion(report, contract) {
     for (const [name, value] of Object.entries(contract?.terminalValues || {})) if (Number(report.programVariables?.[name]) !== value) gaps.push('TERMINAL_STAGE_NOT_REACHED:' + name);
     if (contract?.message && !report.messages?.includes(contract.message)) gaps.push('TERMINAL_MESSAGE_UNVERIFIED');
     const faults = [...(report.failures || [])];
-    return {status: faults.length ? 'FAIL' : gaps.length ? 'PARTIAL' : 'COMPLETE', gaps, failures: faults};
+    return {status: faults.length ? 'FAIL' : gaps.length ? 'PARTIAL' : 'COMPLETE', gaps, failures: faults,terminalVerified:Boolean(terminalVerified)};
 }
 
 export const outputRules=contract=>contract?.outputs||[contract];
