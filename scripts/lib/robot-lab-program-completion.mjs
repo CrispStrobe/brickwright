@@ -41,6 +41,13 @@ export const PROGRAM_OUTPUT_CONTRACTS = {
     'helios-transmission':{terminal:'completed',outputs:[{part:'output_pointer',relativeTo:'motor_deck_spacer_100_0',minRotationDeg:0.1},{part:'output_tip',relativeTo:'motor_deck_spacer_100_0',minTravelM:0.001}],drive:'commanded-motion',terminalValues:{stage:8,returnedA:1,returnedB:1},message:'Helios complete: forward, neutral, reverse and return. Reset to repeat.'},
     'meridian-linkage':{terminal:'completed',part:'marker_output',relativeTo:'fixed_O_bearing',minTravelM:0.001,drive:'commanded-motion',terminalValues:{stage:7,moving:0,targetDegrees:0},message:'Meridian complete: slow sweep, repeat, reverse and home. Reset to repeat.'},
     'phasor-twin':{terminal:'completed',outputs:['A','B'].map(side=>({part:'pistonrod_'+side,relativeTo:'cylinder_'+side,minTravelM:0.001})),drive:'commanded-motion',terminalValues:{stage:3,settled:0,targetA:0},message:'Phasor Twin complete: compare the two passive piston traces.'},
+    'solstice-pumpjack':{terminal:'completed',outputs:[{part:'walking_beam',relativeTo:'base_cross_piston',minRotationDeg:0.1},{part:'pump_rod',relativeTo:'base_cross_piston',minTravelM:0.001},{part:'piston_rack',relativeTo:'base_cross_piston',minTravelM:0.001}],drive:'commanded-motion',terminalValues:{stage:7,moving:0,targetDegrees:0},message:'Solstice complete: slow cycle, reverse, repeat and home. Reset to repeat.'},
+    'offset-relay':{terminal:'completed',outputs:[...['input_beam_x','middle_front_beam_x','output_beam_x'].map(part=>({part,relativeTo:'input_bearing',minRotationDeg:0.1})),{part:'output_bearing',relativeTo:'input_bearing',minTravelM:0.001}],drive:'commanded-motion',terminalValues:{stage:9,arrived:0,movingMask:0},message:'Complete: compare actual input, middle and output angles throughout the changing offset. Both inputs hold.'},
+    'rack-decoder':{terminal:'completed',outputs:[...['rack_A','rack_B','carrier_bearing'].map(part=>({part,relativeTo:'base_angle_front_-1',minTravelM:0.001})),...['passive_pinion','passive_pointer'].map(part=>({part,relativeTo:'base_angle_front_-1',minRotationDeg:0.1}))],drive:'commanded-motion',terminalValues:{stage:9,arrived:0,movingMask:0},message:'Complete: compare the actual passive carrier translation and pinion rotation. Both rack inputs hold.'},
+    'cadence-geneva':{terminal:'completed',outputs:['star_center','dial_hand_tip'].map(part=>({part,relativeTo:'hub',minRotationDeg:0.1})),drive:'commanded-motion',terminalValues:{ticks:12},message:'Cadence complete: twelve mechanical dial steps, one full dial revolution.'},
+    'aster-governor':{terminal:'completed',outputs:[{type:'axis-projection',part:'collar',axisPart:'spindle',axisLocalLdu:[-100,0,0],observeOnly:true},...['flyweight_pos','flyweight_neg'].map(part=>({type:'radial-distance',part,axisPart:'spindle',axisLocalLdu:[-100,0,0],observeOnly:true}))],drive:'commanded-motion',terminalValues:{stage:17,driveSpeed:0},message:'Aster complete: speed response, repeatability and gravity return. Reset to repeat.'},
+    'orion-cardan':{terminal:'completed',outputs:['shaft_input','shaft_middle','shaft_output'].map(part=>({part,relativeTo:'input_rear_bearing',minRotationDeg:0.1})),drive:'commanded-motion',terminalValues:{stage:19},message:'Orion complete: ripple, cancellation, reverse, restart and return. Reset to repeat.'},
+    'tangent-table':{terminal:'completed',outputs:[{part:'output_carriage',relativeTo:'hub',minTravelM:0.001},{part:'follower_key',relativeTo:'hub',minTravelM:0.001},{part:'angle_hub',relativeTo:'hub',minRotationDeg:0.1}],drive:'commanded-motion',terminalValues:{stage:8,arrived:0,movingMask:0},message:'Complete: compare signed gain and the two equal-output endpoints. Both inputs hold.'},
     samebeat: {terminal:'completed',part:'pendulum_ballast',relativeTo:'pendulum_support_axle',description:'Free pendulum swing while input is held',minTravelM:0.001,observeWhen:{stage:2,held:1},drive:'commanded-motion',terminalValues:{stage:2,held:1,targetA:0},message:'Complete. The input holds zero; the pendulum can keep swinging freely.'},
     twistspan: {terminal:'completed',part:'payload_bar',relativeTo:'upper_bar',description:'Passive beam rotation relative to held upper bar',minRotationDeg:0.1,observeWhen:{held:1},drive:'commanded-motion',terminalValues:{stage:2,held:1,targetA:0},message:'Complete. A holds zero; the passive beam is free to keep ringing down.'},
     footfall: {terminal:'done',part:'lower_triangle_h_FG',localPointLdu:[0,0,140],relativeTo:'frame_top_X_AP',referencePointLdu:[0,-20,140],description:'Authored foot G path relative to chassis P',minTravelM:0.001,drive:'commanded-motion',terminalValues:{phase:99,targetA:0},message:'Footfall cycle complete. Compare the traced path and reset before repeating.'},
@@ -50,6 +57,7 @@ export const PROGRAM_OUTPUT_CONTRACTS = {
 };
 // Control variants deliberately preserve absent/weak passive responses as data.
 Object.assign(PROGRAM_OUTPUT_CONTRACTS,{
+    'phasor-twin-control':{...PROGRAM_OUTPUT_CONTRACTS['phasor-twin'],comparisonModel:'phasor-twin'},
     'poise-mass-control':{...PROGRAM_OUTPUT_CONTRACTS.poise,comparisonModel:'poise',outputs:[...PROGRAM_OUTPUT_CONTRACTS.poise.outputs,{part:'control_mass',relativeTo:'base_cross_120',observeOnly:true}]},
     'carry-ratio-control':{...PROGRAM_OUTPUT_CONTRACTS['carry-ratio'],comparisonModel:'carry-ratio',outputs:[{part:'tray_deck',relativeTo:'base_plate',minTravelM:0.001},{part:'roller_ball',relativeTo:'tray_deck',observeOnly:true},{part:'roller_ball',relativeTo:'base_plate',observeOnly:true}]},
     'pivot-exchange-wide':{...PROGRAM_OUTPUT_CONTRACTS['pivot-exchange'],comparisonModel:'pivot-exchange'},
@@ -136,6 +144,15 @@ export function programCompletion(report, contract) {
 export const outputRules=contract=>contract?.outputs||[contract];
 export function createOutputMeasurement(rule){return {part:rule?.part||null,type:rule?.type||'pose',samples:0,invalid:false,travelM:0,homeErrorM:null,rotationDeg:0,initialQuat:null,initial:null,final:null,...(rule?.type==='air-pressure'?{networks:{}}:{})};}
 export function observeOutput(output,rule,{api,core,placements}){
+    if(['axis-projection','radial-distance'].includes(rule.type)){
+        const point=readOutputPose(api,{part:rule.part},placements),origin=readOutputPose(api,{part:rule.axisPart},placements),endpoint=readOutputPose(api,{part:rule.axisPart,localPointLdu:rule.axisLocalLdu},placements);
+        if(!point||!origin||!endpoint){output.invalid=true;return null;}
+        const axis=endpoint.position.map((v,i)=>v-origin.position[i]),length=Math.hypot(...axis);
+        if(!Number.isFinite(length)||!length){output.invalid=true;return null;}
+        const unit=axis.map(v=>v/length),delta=point.position.map((v,i)=>v-origin.position[i]),projection=delta.reduce((v,x,i)=>v+x*unit[i],0),valueM=rule.type==='axis-projection'?projection:Math.hypot(...delta.map((v,i)=>v-projection*unit[i]));
+        output.samples++;output.initialM??=valueM;output.minM=Math.min(output.minM??valueM,valueM);output.maxM=Math.max(output.maxM??valueM,valueM);output.finalM=valueM;output.rangeM=output.maxM-output.minM;
+        return {valueM,point:point.position,axisOrigin:origin.position,axisEnd:endpoint.position};
+    }
     if(rule.type==='distance'){
         const readings=rule.parts.map(part=>readOutputPose(api,{part},placements));
         if(readings.some(r=>!r)){output.invalid=true;return null;}

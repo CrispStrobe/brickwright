@@ -70,7 +70,7 @@ if(args.child){
         if(count)report.steps++;
         if(args['require-completion'])report.finalEncoders=Object.fromEntries(prepared.mechanism.actuators.map(a=>[a.id,currentApi?.encoder(a.id)]));
         if(args['require-completion'] && contract && Object.entries(contract.observeWhen||{}).every(([k,v])=>Number(report.programVariables[k])===v)){
-            outputRules(contract).forEach((rule,index)=>{const reading=observeOutput(report.outputMeasurements[index],rule,{api:currentApi,core:session.core,placements});if(reading&&count)retainMeasurement({t:session.time,channel:index,variables:Object.fromEntries(['stage','phase','cycle','held','settled','observing','pulsing'].filter(k=>k in report.programVariables).map(k=>[k,report.programVariables[k]])),...reading});});
+            outputRules(contract).forEach((rule,index)=>{const reading=observeOutput(report.outputMeasurements[index],rule,{api:currentApi,core:session.core,placements});if(reading&&count)retainMeasurement({t:session.time,channel:index,variables:Object.fromEntries(['stage','phase','cycle','held','settled','observing','pulsing','driveSpeed','caseIndex','checkpoint','observationWindow','targetA','targetB','targetDegrees'].filter(k=>k in report.programVariables).map(k=>[k,report.programVariables[k]])),...reading});});
         }
         if(session.failed)failures.add(String(session.failed));
         for(const a of prepared.mechanism.actuators){

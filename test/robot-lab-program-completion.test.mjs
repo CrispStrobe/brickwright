@@ -48,3 +48,9 @@ test('distance outputs measure actual paired span and reject rigid scene transla
     const rule={type:'distance',parts:['a','b'],minRangeM:0.001},output=createOutputMeasurement(rule),points={a:[0,0,0],b:[0.1,0,0]},api={pose:id=>({ok:true,position:points[id],quat:[0,0,0,1]})};
     observeOutput(output,rule,{api});points.a=[10,0,0];points.b=[10.1,0,0];observeOutput(output,rule,{api});assert.ok(output.rangeM<1e-12);points.b=[10.12,0,0];observeOutput(output,rule,{api});assert.ok(Math.abs(output.rangeM-0.02)<1e-12);
 });
+test('spindle projection and radius follow actual axis rather than spinning world position',()=>{
+    const points={spindle:[1,2,3],weight:[1.02,2,3.01]},api={pose:id=>({ok:true,position:points[id],quat:[0,0,0,1]})},placements=new Map([['spindle',{rotation:[1,0,0,0,1,0,0,0,1]}]]);
+    const radial={type:'radial-distance',part:'weight',axisPart:'spindle',axisLocalLdu:[100,0,0]},r=createOutputMeasurement(radial);
+    observeOutput(r,radial,{api,placements});points.weight=[1.02,2.01,3];observeOutput(r,radial,{api,placements});assert.ok(r.rangeM<1e-12);assert.ok(Math.abs(r.finalM-0.01)<1e-12);
+    const axial={...radial,type:'axis-projection'},a=createOutputMeasurement(axial);observeOutput(a,axial,{api,placements});assert.ok(Math.abs(a.finalM-0.02)<1e-12);
+});
