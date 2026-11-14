@@ -35,3 +35,8 @@ test('every required output channel and actual pressure rise must be observed',(
     const c={...contract,outputs:[{minTravelM:0.001},{type:'air-pressure',requireRise:true}]},r=valid();r.outputMeasurements=[r.outputMeasurement,{samples:3,invalid:false,networks:{tank:{initialKpa:150,maxKpa:160}}}];
     assert.equal(programCompletion(r,c).status,'COMPLETE');r.outputMeasurements[1].networks.tank.maxKpa=150;assert.equal(programCompletion(r,c).status,'PARTIAL');r.outputMeasurements.pop();assert.equal(programCompletion(r,c).status,'PARTIAL');
 });
+test('local measurement uses placed scene rotation, including mat-start quarter turn',()=>{
+    const c={part:'foot',localPointLdu:[100,0,0]},api={pose:()=>({ok:true,position:[0,0,0],quat:[0,0,0,1]})};
+    const placed=new Map([['foot',{rotation:[0,0,1,0,1,0,-1,0,0]}]]);
+    assert.deepEqual(readOutputPose(api,c,placed).position,[0,0,0.04]);
+});

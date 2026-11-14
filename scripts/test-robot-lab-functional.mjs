@@ -95,7 +95,7 @@ if(args.child){
     const r=await runRobotLabProgram(program,{modelText,timeLimitMs:simMs,withSpike,afterMs,
         observeSetup:ctx=>{
             const {vm,prepared}=ctx;
-            if(args['require-completion']){currentApi=vm.runtime.robotLab;placements=new Map(prepared.model.parts.map(p=>[p.id,p]));vm.runtime.on('SAY',(_target,type,text)=>{if(type==='say'&&String(text).trim())report.messages.push(String(text));});}
+            if(args['require-completion']){currentApi=vm.runtime.robotLab;placements=new Map(prepared.runModel.parts.map(p=>[p.id,p]));vm.runtime.on('SAY',(_target,type,text)=>{if(type==='say'&&String(text).trim())report.messages.push(String(text));});}
             for(const ref of probeMotors){const a=prepared.mechanism.actuators.find(a=>a.id===ref||String(a.port)===ref);if(!a){const error=new Error('Unknown diagnostic motor '+ref);error.code='INVALID_DIAGNOSTIC_TARGET';throw error;}probeKeys.add((a.hub?String(a.hub)+':':'')+a.port);}
             report.dynamicBodyCount=prepared.mechanism.bodies.filter(b=>b.motion==='dynamic').length;
             for(const [opcode,original] of Object.entries(vm.runtime._primitives))if(typeof original==='function')vm.runtime._primitives[opcode]=function(...values){report.primitiveCalls++;report.executedOpcodes[opcode]=(report.executedOpcodes[opcode]||0)+1;return original.apply(this,values);};
