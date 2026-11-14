@@ -989,7 +989,9 @@ class Parser {
         if (this.eat('else')) {
             alternate = this.at('if') ? [this.parseIf()] : this.parseBlockOrStatement();
         }
-        return {type: 'If', test, consequent, alternate};
+        return {type: 'If', test, consequent, alternate,
+            ...(this.retainAuthoredEmptyBranches && consequent.length===0 ? {bwAuthoredEmptyConsequent:true} : {}),
+            ...(this.retainAuthoredEmptyBranches && Array.isArray(alternate) && alternate.length===0 ? {bwAuthoredEmptyAlternate:true} : {})};
     }
 
     parseWhile () {
@@ -1478,6 +1480,7 @@ export function parseMakeCodeTs (source, opts = {}) {
     parser.namedFunctionExpressions = Boolean(opts.namedFunctionExpressions);
     parser.parameterDefaults = Boolean(opts.parameterDefaults);
     parser.retainParentheses = Boolean(opts.retainParentheses);
+    parser.retainAuthoredEmptyBranches = Boolean(opts.retainAuthoredEmptyBranches);
     parser.retainWhenUsed = Boolean(opts.retainWhenUsed);
     parser.retainClassHeritage = Boolean(opts.retainClassHeritage);
     parser.lowerHeritage = Boolean(opts.lowerHeritage);

@@ -74,10 +74,10 @@ export function parseSharedImageSourceBoundary(preparation,entry,namedFunctionEx
     return program;
 }
 /** Same ordinary parse/options at its original call position, not another parse. */
-export function parseSharedImageSourceProgram(preparation,source,retainCallableMetadata=false,retainPrimitiveProcedureDefaults=true,namedFunctionExpressions=false){
+export function parseSharedImageSourceProgram(preparation,source,retainCallableMetadata=false,retainPrimitiveProcedureDefaults=true,namedFunctionExpressions=false,retainAuthoredEmptyBranches=false){
     const program=parseMakeCodeTs(source,{parameterDefaults:true,retainParentheses:true,retainWhenUsed:true,
         retainClassHeritage:true,retainOrdinaryDefaultProvenance:true,
-        retainCallableMetadata,retainPrimitiveProcedureDefaults,namedFunctionExpressions});
+        retainCallableMetadata,retainPrimitiveProcedureDefaults,namedFunctionExpressions,retainAuthoredEmptyBranches});
     const p=preparations.get(preparation);
     if(p&&p.current()&&source===p.selectedSource.source&&typeof retainCallableMetadata==='boolean'&&retainPrimitiveProcedureDefaults===!retainCallableMetadata){
         combinedReturns.set(program,{preparation,current:snapshot(program)});
