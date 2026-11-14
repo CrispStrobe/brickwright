@@ -135,6 +135,7 @@ import {lowerSourceLoopControl} from './lower-source-loop-control.js';
 import {lowerLazyValues} from './lower-lazy-values.js';
 import {arrayCopyCall} from './array-copy-calls.js';
 import {indexedStringValue} from './indexed-string-values.js';
+import {closedStringCompare} from './closed-string-compare.js';
 import {lowerPxtStagedValues} from './lower-pxt-staged-values.js';
 import {lowerNamespaceBindings} from './namespace-bindings.js';
 import {ARCADE_SCENE_CONSTANTS} from './arcade-scene-constants.js';
@@ -872,6 +873,8 @@ class ArcadeTranslator extends BaseTranslator {
         if(arrayCopy!==null)return arrayCopy;
         const indexedString = indexedStringValue(this,node);
         if(indexedString!==null)return indexedString;
+        const stringComparison = closedStringCompare(this,node);
+        if(stringComparison!==null)return stringComparison;
         if(this.handleTemplates && node.callee?.type==='Member' && node.callee.name==='kind' && !a.length && this.spriteReferences?.has(node.callee.object))return `arcade property kind of (${this.expr(node.callee.object)})`;
         const fn = node.callee?.type === 'Identifier' && this.returnFunctions?.get(node.callee.name);
         if (fn) {
