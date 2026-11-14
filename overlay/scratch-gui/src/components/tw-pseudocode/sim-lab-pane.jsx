@@ -23,6 +23,8 @@
 // project load put there, so nothing is lost and nothing is pending.
 
 import React from 'react';
+import SimLabNotice from './sim-lab-notice.jsx';
+import paneStyles from './sim-lab-pane.css';
 import {connect} from 'react-redux';
 import {setProjectTitle} from '../../reducers/project-title';
 import {pickLocale, browserLocale} from '../../lib/bw-i18n.js';
@@ -2850,25 +2852,46 @@ class SimLabPane extends React.Component {
         if (this.compact()) {
             // One line ("Before you press Run: (2)") that opens to the list.
             return (
-                <details role="alert" data-testid="bw-sim-lab-blockers"
-                    style={{fontSize: 12, color: '#7c2d12', background: '#fff7ed', border: '1px solid #fdba74', borderRadius: 6, padding: '4px 8px', minWidth: 0}}>
-                    <summary style={{cursor: 'pointer', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
-                        <strong>{this.itext.blockersTitle}</strong> ({blockers.length})
-                    </summary>
-                    <ul style={{margin: '2px 0 0', paddingLeft: 18}}>
-                        {blockers.map(b => this.renderIssue({...b, severity: 'warning'}, b.code))}
-                    </ul>
-                </details>
+                <SimLabNotice content={blockers} testId="bw-sim-lab-blockers" closeLabel={`${this.itext.close}: ${this.itext.blockersTitle}`}>
+                    <details role="alert" data-testid="bw-sim-lab-blockers"
+                        style={{fontSize: 12, color: '#7c2d12', background: '#fff7ed', border: '1px solid #fdba74', borderRadius: 6, padding: '4px 32px 4px 8px', minWidth: 0}}>
+                        <summary style={{cursor: 'pointer', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
+                            <strong>{this.itext.blockersTitle}</strong> ({blockers.length})
+                        </summary>
+                        <ul style={{margin: '2px 0 0', paddingLeft: 18}}>
+                            {blockers.map(b => this.renderIssue({...b, severity: 'warning'}, b.code))}
+                        </ul>
+                    </details>
+                </SimLabNotice>
             );
         }
         return (
-            <div role="alert" data-testid="bw-sim-lab-blockers"
-                style={{fontSize: 12, color: '#7c2d12', background: '#fff7ed', border: '1px solid #fdba74', borderRadius: 6, padding: '6px 8px'}}>
-                <strong>{this.itext.blockersTitle}</strong>
-                <ul style={{margin: '2px 0 0', paddingLeft: 18}}>
-                    {blockers.map(b => this.renderIssue({...b, severity: 'warning'}, b.code))}
-                </ul>
-            </div>
+            <SimLabNotice content={blockers} testId="bw-sim-lab-blockers" closeLabel={`${this.itext.close}: ${this.itext.blockersTitle}`}>
+                <div role="alert" data-testid="bw-sim-lab-blockers"
+                    style={{fontSize: 12, color: '#7c2d12', background: '#fff7ed', border: '1px solid #fdba74', borderRadius: 6, padding: '6px 32px 6px 8px'}}>
+                    <strong>{this.itext.blockersTitle}</strong>
+                    <ul style={{margin: '2px 0 0', paddingLeft: 18}}>
+                        {blockers.map(b => this.renderIssue({...b, severity: 'warning'}, b.code))}
+                    </ul>
+                </div>
+            </SimLabNotice>
+        );
+    }
+
+    renderIssues () {
+        const issues = this.state.issues;
+        if (!issues.length) return null;
+        const compact = this.compact();
+        const T = this.text;
+        return (
+            <SimLabNotice content={issues} testId="bw-sim-lab-issues" closeLabel={`${this.itext.close}: ${T.issues}`}>
+                <details data-testid="bw-sim-lab-issues" style={{fontSize: 12, paddingRight: 32}} open={!compact && issues.some(i => i.code !== 'locked-hinges')}>
+                    <summary style={compact ? {whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', cursor: 'pointer'} : {cursor: 'pointer'}}>
+                        {T.issues} ({issues.length})
+                    </summary>
+                    <ul style={{margin: '4px 0', paddingLeft: 18, maxHeight: 120, overflowY: 'auto'}}>{issues.map((i, n) => this.renderIssue(i, n))}</ul>
+                </details>
+            </SimLabNotice>
         );
     }
 
@@ -3424,7 +3447,7 @@ class SimLabPane extends React.Component {
     }
 
     render () {
-        const {status, message, issues} = this.state;
+        const {status, message} = this.state;
         const compact = this.compact();
         const coarse = this.state.coarse;
         const button = {padding: compact ? '4px 8px' : '4px 10px', marginRight: compact ? 0 : 6, borderRadius: 6, border: '1px solid #94a3b8', background: '#fff', cursor: 'pointer',
@@ -3434,7 +3457,7 @@ class SimLabPane extends React.Component {
         const simulate = this.state.mode === 'simulate';
         const build = this.state.mode === 'build';
         return (
-            <div ref={this.root} data-testid="bw-sim-lab" data-status={status} data-layout={compact ? 'compact' : 'wide'} data-mode={this.state.mode}
+            <div ref={this.root} className={paneStyles.root} data-testid="bw-sim-lab" data-status={status} data-layout={compact ? 'compact' : 'wide'} data-mode={this.state.mode}
                 style={{position: 'relative', display: 'flex', flexDirection: 'column', gap: 6, padding: compact ? 6 : 8, height: '100%', width: '100%',
                     flex: '1 1 auto', boxSizing: 'border-box', minWidth: 0, minHeight: 0, background: '#f8fafc'}}>
                 {this.renderToolbar()}
@@ -3533,14 +3556,7 @@ class SimLabPane extends React.Component {
                         this.editView?.canvas.focus();
                     }} />
                 )}
-                {issues.length > 0 && (
-                    <details data-testid="bw-sim-lab-issues" style={{fontSize: 12}} open={!compact && issues.some(i => i.code !== 'locked-hinges')}>
-                        <summary style={compact ? {whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', cursor: 'pointer'} : {cursor: 'pointer'}}>
-                            {T.issues} ({issues.length})
-                        </summary>
-                        <ul style={{margin: '4px 0', paddingLeft: 18, maxHeight: 120, overflowY: 'auto'}}>{issues.map((i, n) => this.renderIssue(i, n))}</ul>
-                    </details>
-                )}
+                {this.renderIssues()}
             </div>
         );
     }
