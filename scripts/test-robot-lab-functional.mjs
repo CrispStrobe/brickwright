@@ -9,7 +9,7 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {createRequire} from 'node:module';
 import {nonFinitePaths, summarizeMotor, functionalFailures} from './lib/robot-lab-functional.mjs';
-import {PROGRAM_OUTPUT_CONTRACTS, readOutputPose, orientationTravelDeg, observeTerminal, programCompletion} from './lib/robot-lab-program-completion.mjs';
+import {PROGRAM_OUTPUT_CONTRACTS, outputRules, createOutputMeasurement, observeOutput, observeTerminal, programCompletion} from './lib/robot-lab-program-completion.mjs';
 import {latchProgramFailures} from './lib/robot-lab-program-flags.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const runnerSha256=hashRunner();
@@ -56,7 +56,7 @@ if(args.child){
         partFailures:[],missingOpcodes:[],vmErrors:[],sessionFailures:[],nonfinite:[],steps:0,primitiveCalls:0,executedOpcodes:{},motors:{},
         programVariables:{},programFailedObserved:false,programFaultObserved:false,invalidPoses:[],bodySanity:{status:'UNASSESSED',assessed:false,initialBodyExtentM:null,travelBoundM:null,travelOverBound:[],factor:100,floorM:1},motorPartCount:0,unboundMotorCount:0,maxBodyDisplacementM:0,maxBodyRadiusM:0,bodyTravel:{},scope:'Finite functional smoke only; no precision, physical accuracy, full GUI, or full-program completion requirement.'};
     const contract=PROGRAM_OUTPUT_CONTRACTS[id];
-    if(args['require-completion']){report.terminalObservation={sawZero:false,sawTransition:false};report.messages=[];report.outputMeasurement={part:contract?.part||null,samples:0,invalid:false,travelM:0,homeErrorM:null,rotationDeg:0,initialQuat:null,initial:null,final:null};report.scope='Actual headless program completion and reviewed product pose measurement; no rendered GUI, physical accuracy or device claim.';}
+    if(args['require-completion']){report.terminalObservation={sawZero:false,sawTransition:false};report.messages=[];report.outputMeasurements=outputRules(contract).map(createOutputMeasurement);report.outputMeasurement=report.outputMeasurements[0];report.scope='Actual headless program completion and reviewed product pose measurement; no rendered GUI, physical accuracy or device claim.';}
     let currentApi=null,placements=null;
     const outputTrace=[];
     const motorSamples=new Map(),initialBodies=new Map(),finite=new Set(),failures=new Set(),probeKeys=new Set(),programFlags=new Set();
@@ -64,9 +64,7 @@ if(args.child){
         if(count)report.steps++;
         if(args['require-completion'])report.finalEncoders=Object.fromEntries(prepared.mechanism.actuators.map(a=>[a.id,currentApi?.encoder(a.id)]));
         if(args['require-completion'] && contract && Object.entries(contract.observeWhen||{}).every(([k,v])=>Number(report.programVariables[k])===v)){
-            const output=report.outputMeasurement,reading=readOutputPose(currentApi,contract,placements);
-            if(!reading)output.invalid=true;
-            else {output.samples++;output.initial ||= reading.position.slice();output.initialQuat ||= reading.quat.slice();output.rotationDeg=Math.max(output.rotationDeg,orientationTravelDeg(output.initialQuat,reading.quat));output.final=reading.position.slice();output.homeErrorM=Math.hypot(...reading.position.map((v,i)=>v-output.initial[i]));output.travelM=Math.max(output.travelM,output.homeErrorM);if(count)outputTrace.push({t:session.time,position:reading.position,quat:reading.quat});}
+            outputRules(contract).forEach((rule,index)=>{const reading=observeOutput(report.outputMeasurements[index],rule,{api:currentApi,core:session.core,placements});if(reading&&count)outputTrace.push({t:session.time,channel:index,...reading});});
         }
         if(session.failed)failures.add(String(session.failed));
         for(const a of prepared.mechanism.actuators){
@@ -141,7 +139,7 @@ if(args.child){
         report.failures.push(...nonFinitePaths(report.programVariables).map(p=>'nonfinite-program-variable:'+p));
         report.completion=programCompletion(report,contract);report.status=report.completion.status;
         report.outputContract=contract||null;
-        writeFileSync(String(args.result)+'.measurement.json',JSON.stringify({schema:1,kind:'product-robotLab.pose',part:contract?.part||null,relativeTo:contract?.relativeTo||null,sourceHead,modelSha256:report.modelSha256,programSha256:report.programSha256,samples:outputTrace},null,2)+'\n');
+        writeFileSync(String(args.result)+'.measurement.json',JSON.stringify({schema:1,kind:'product-robotLab.pose',part:contract?.part||null,relativeTo:contract?.relativeTo||null,outputRules:contract?outputRules(contract):[],sourceHead,modelSha256:report.modelSha256,programSha256:report.programSha256,samples:outputTrace},null,2)+'\n');
     }
     writeFileSync(String(args.result),JSON.stringify(report,null,2)+'\n');
     process.exit(['PASS','COMPLETE'].includes(report.status)?0:1);

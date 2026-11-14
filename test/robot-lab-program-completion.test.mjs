@@ -31,3 +31,7 @@ test('fixed origins can still produce meaningful output rotation, quaternion sig
     const r=valid();r.outputMeasurement.travelM=0;r.outputMeasurement.rotationDeg=30;
     assert.equal(programCompletion(r,{...contract,minTravelM:undefined,minRotationDeg:0.1}).status,'COMPLETE');
 });
+test('every required output channel and actual pressure rise must be observed',()=>{
+    const c={...contract,outputs:[{minTravelM:0.001},{type:'air-pressure',requireRise:true}]},r=valid();r.outputMeasurements=[r.outputMeasurement,{samples:3,invalid:false,networks:{tank:{initialKpa:150,maxKpa:160}}}];
+    assert.equal(programCompletion(r,c).status,'COMPLETE');r.outputMeasurements[1].networks.tank.maxKpa=150;assert.equal(programCompletion(r,c).status,'PARTIAL');r.outputMeasurements.pop();assert.equal(programCompletion(r,c).status,'PARTIAL');
+});
