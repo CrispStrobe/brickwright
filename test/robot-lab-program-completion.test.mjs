@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readOutputPose, orientationTravelDeg, observeTerminal, programCompletion, PROGRAM_OUTPUT_CONTRACTS} from '../scripts/lib/robot-lab-program-completion.mjs';
+import {readOutputPose, orientationTravelDeg, createOutputMeasurement, observeOutput, observeTerminal, programCompletion, PROGRAM_OUTPUT_CONTRACTS} from '../scripts/lib/robot-lab-program-completion.mjs';
 const contract=PROGRAM_OUTPUT_CONTRACTS['toggle-lever'];
 const valid=()=>({execution:'COMPLETED',terminalObservation:{sawZero:true,sawTransition:true},programVariables:{completed:1,stage:4},motors:{A:{commanded:true,moved:true}},outputMeasurement:{samples:3,invalid:false,travelM:0.02,homeErrorM:0.0001},messages:['ToggleLever complete: compare the passive lever arc with the link closure.'],failures:[]});
 test('requires actual zero-to-one terminal transition and final terminal value',()=>{const state={};observeTerminal(state,{completed:1},'completed');assert.equal(state.sawTransition,undefined);observeTerminal(state,{completed:0},'completed');observeTerminal(state,{completed:1},'completed');assert.equal(state.sawTransition,true);const r=valid();r.programVariables.completed=0;assert.equal(programCompletion(r,contract).status,'PARTIAL');});
@@ -43,4 +43,8 @@ test('local measurement uses placed scene rotation, including mat-start quarter 
 test('explicit flagless finite routes require natural exit, exact calls and no silent guarded stop',()=>{
     const c={terminalMode:'finite-route',outputs:[{minRotationDeg:0.1}],requiredOpcodes:{move:2,hold:5},forbiddenOpcodes:['control_stop']},r={...valid(),programKind:'SUPPLIED',outputMeasurements:[{samples:3,invalid:false,rotationDeg:30}],executedOpcodes:{move:2,hold:5}};
     assert.equal(programCompletion(r,c).status,'COMPLETE');r.executedOpcodes.control_stop=1;assert.equal(programCompletion(r,c).status,'PARTIAL');delete r.executedOpcodes.control_stop;r.executedOpcodes.move=1;assert.equal(programCompletion(r,c).status,'PARTIAL');
+});
+test('distance outputs measure actual paired span and reject rigid scene translation as expansion',()=>{
+    const rule={type:'distance',parts:['a','b'],minRangeM:0.001},output=createOutputMeasurement(rule),points={a:[0,0,0],b:[0.1,0,0]},api={pose:id=>({ok:true,position:points[id],quat:[0,0,0,1]})};
+    observeOutput(output,rule,{api});points.a=[10,0,0];points.b=[10.1,0,0];observeOutput(output,rule,{api});assert.ok(output.rangeM<1e-12);points.b=[10.12,0,0];observeOutput(output,rule,{api});assert.ok(Math.abs(output.rangeM-0.02)<1e-12);
 });

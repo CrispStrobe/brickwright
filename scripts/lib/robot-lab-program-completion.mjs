@@ -24,6 +24,14 @@ export const PROGRAM_OUTPUT_CONTRACTS = {
     'pivot-exchange':{terminal:'complete',outputs:['arm_near_beam','arm_far_beam','arm_control_beam'].map(part=>({part,relativeTo:'floor_back_-140',minRotationDeg:0.1})),drive:'passive',terminalValues:{observing:0},message:'Observation complete. The two nearly conjugate suspensions should keep similar time; the central-hole control swings more slowly.'},
     'sarrus-lift-single-chain':{terminalMode:'natural-exit-message',outputs:[{part:'deck_plate',relativeTo:'baseplate',observeOnly:true}],drive:'intentional-hold',requiredOpcodes:{robotlab_startSimulation:1,robotlab_stopMotor:1},message:'Single-chain control complete: compare the deck with the full Sarrus Lift.'},
     helixgate:{terminalMode:'finite-route',outputs:[{part:'wheel_24',relativeTo:'base_cross',minRotationDeg:0.1},{part:'blue_tip',relativeTo:'base_cross',minTravelM:0.001}],drive:'commanded-motion',requiredOpcodes:{robotlab_runMotorDegrees:2,robotlab_stopMotor:5},forbiddenOpcodes:['control_stop']},
+    looprelay:{terminalMode:'finite-route',outputs:[{part:'indicator_hand',relativeTo:'base_cross',minRotationDeg:0.1},{part:'axle_mid',relativeTo:'base_cross',minRotationDeg:0.1}],drive:'commanded-motion',requiredOpcodes:{robotlab_runMotorDegrees:2,robotlab_stopMotor:4},forbiddenOpcodes:['control_stop']},
+    paritydial:{terminalMode:'finite-route',outputs:['dial_left','dial_right'].map(part=>({part,relativeTo:'base_cross',minRotationDeg:0.1})),drive:'commanded-motion',requiredOpcodes:{robotlab_runMotorDegrees:3,robotlab_stopMotor:5},forbiddenOpcodes:['control_stop']},
+    counterslide:{terminalMode:'finite-route',outputs:['jaw_high','jaw_low','rack_high','rack_low'].map(part=>({part,relativeTo:'motor_mount_beam',minTravelM:0.001})),drive:'commanded-motion',requiredOpcodes:{robotlab_runMotorDegrees:2,robotlab_stopMotor:4},forbiddenOpcodes:['control_stop']},
+    apex:{terminal:'completed',outputs:['rotor_hub','carrier_rear_cross'].map(part=>({part,relativeTo:'base_long_-20',minRotationDeg:0.1})),drive:'commanded-motion',terminalValues:{stage:4,settled:1,target:0},message:'Complete: one passive rotor turn out and back. Motor A holds home.'},
+    bloom:{terminal:'completed',outputs:['XY','YZ','ZX'].map(axis=>({type:'distance',parts:['cage_'+axis+'_00_B_end_start','cage_'+axis+'_04_B_end_start'],minRangeM:0.001})),drive:'commanded-motion',terminalValues:{stage:5},message:'Bloom cycle complete. The measured inner cage span has returned home; motor A holds.'},
+    'vector-delta':{terminal:'completed',part:'tool_star',relativeTo:'hub',minTravelM:0.001,drive:'commanded-motion',terminalValues:{waypoint:12,atTarget:1},message:'Vector complete: three stations visited, tool head home, all three motors holding.'},
+    'tempest-pendulum':{terminal:'completed',outputs:[{part:'upper_arm',relativeTo:'carrier_bearing',minRotationDeg:0.1},{part:'lower_arm',relativeTo:'upper_arm',minRotationDeg:0.1},{part:'upper_bob_wheel',relativeTo:'carrier_bearing',minTravelM:0.001},{part:'lower_bob_wheel',relativeTo:'upper_arm',minTravelM:0.001}],drive:'commanded-motion',terminalValues:{stage:4,phase:'complete',moving:0,trimStage:0,observationWindow:0,targetDegrees:0},message:'Tempest complete. The carrier is home; Reset to repeat the experiment.'},
+    'equal-share':{terminal:'completed',outputs:[{part:'equalizer',relativeTo:'base_cross_left_120',minTravelM:0.001},...['left','right_front','right_back'].map(side=>({part:side+'_rod',relativeTo:side+'_cylinder',minTravelM:0.001}))],drive:'commanded-motion',terminalValues:{stage:6,targetA:0,dwelling:0},message:'Complete: compare the held shock compressions and the return to zero.'},
     samebeat: {terminal:'completed',part:'pendulum_ballast',relativeTo:'pendulum_support_axle',description:'Free pendulum swing while input is held',minTravelM:0.001,observeWhen:{stage:2,held:1},drive:'commanded-motion',terminalValues:{stage:2,held:1,targetA:0},message:'Complete. The input holds zero; the pendulum can keep swinging freely.'},
     twistspan: {terminal:'completed',part:'payload_bar',relativeTo:'upper_bar',description:'Passive beam rotation relative to held upper bar',minRotationDeg:0.1,observeWhen:{held:1},drive:'commanded-motion',terminalValues:{stage:2,held:1,targetA:0},message:'Complete. A holds zero; the passive beam is free to keep ringing down.'},
     footfall: {terminal:'done',part:'lower_triangle_h_FG',localPointLdu:[0,0,140],relativeTo:'frame_top_X_AP',referencePointLdu:[0,-20,140],description:'Authored foot G path relative to chassis P',minTravelM:0.001,drive:'commanded-motion',terminalValues:{phase:99,targetA:0},message:'Footfall cycle complete. Compare the traced path and reset before repeating.'},
@@ -92,10 +100,10 @@ export function programCompletion(report, contract) {
     const contracts=contract?.outputs||[contract],outputs=report.outputMeasurements||[report.outputMeasurement];
     if(contract)for(let i=0;i<contracts.length;i++){
         const rule=contracts[i],output=outputs[i];
-        if(!output||output.samples<2||output.invalid||(rule.minTravelM!==undefined&&(!Number.isFinite(output.travelM)||output.travelM<rule.minTravelM))||(rule.minRotationDeg!==undefined&&(!Number.isFinite(output.rotationDeg)||output.rotationDeg<rule.minRotationDeg))||(rule.requireRise&&(!output.networks||!Object.values(output.networks).some(n=>n.maxKpa>n.initialKpa))))gaps.push('MEANINGFUL_OUTPUT_NOT_OBSERVED:'+i);
+        if(!output||output.samples<2||output.invalid||(rule.minTravelM!==undefined&&(!Number.isFinite(output.travelM)||output.travelM<rule.minTravelM))||(rule.minRotationDeg!==undefined&&(!Number.isFinite(output.rotationDeg)||output.rotationDeg<rule.minRotationDeg))||(rule.minRangeM!==undefined&&(!Number.isFinite(output.rangeM)||output.rangeM<rule.minRangeM))||(rule.requireRise&&(!output.networks||!Object.values(output.networks).some(n=>n.maxKpa>n.initialKpa))))gaps.push('MEANINGFUL_OUTPUT_NOT_OBSERVED:'+i);
     }
     if (contract?.outputReviewPending) gaps.push('OUTPUT_GEOMETRY_REVIEW_PENDING');
-    for (const [name, value] of Object.entries(contract?.terminalValues || {})) if (Number(report.programVariables?.[name]) !== value) gaps.push('TERMINAL_STAGE_NOT_REACHED:' + name);
+    for (const [name, value] of Object.entries(contract?.terminalValues || {})) if (typeof value==='string'?String(report.programVariables?.[name])!==value:Number(report.programVariables?.[name])!==value) gaps.push('TERMINAL_STAGE_NOT_REACHED:' + name);
     if (contract?.message && !report.messages?.includes(contract.message)) gaps.push('TERMINAL_MESSAGE_UNVERIFIED');
     const faults = [...(report.failures || [])];
     return {status: faults.length ? 'FAIL' : gaps.length ? 'PARTIAL' : 'COMPLETE', gaps, failures: faults,terminalVerified:Boolean(terminalVerified)};
@@ -104,6 +112,13 @@ export function programCompletion(report, contract) {
 export const outputRules=contract=>contract?.outputs||[contract];
 export function createOutputMeasurement(rule){return {part:rule?.part||null,type:rule?.type||'pose',samples:0,invalid:false,travelM:0,homeErrorM:null,rotationDeg:0,initialQuat:null,initial:null,final:null,...(rule?.type==='air-pressure'?{networks:{}}:{})};}
 export function observeOutput(output,rule,{api,core,placements}){
+    if(rule.type==='distance'){
+        const readings=rule.parts.map(part=>readOutputPose(api,{part},placements));
+        if(readings.some(r=>!r)){output.invalid=true;return null;}
+        const distanceM=Math.hypot(...readings[0].position.map((v,i)=>v-readings[1].position[i]));
+        output.samples++;output.initialM ??= distanceM;output.minM=Math.min(output.minM??distanceM,distanceM);output.maxM=Math.max(output.maxM??distanceM,distanceM);output.finalM=distanceM;output.rangeM=output.maxM-output.minM;
+        return {parts:rule.parts,distanceM,positions:readings.map(r=>r.position)};
+    }
     if(rule.type==='air-pressure'){
         const networks=core.airState();
         if(!Array.isArray(networks)||!networks.length||networks.some(n=>!Number.isFinite(n.kPa))){output.invalid=true;return null;}
