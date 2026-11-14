@@ -14,3 +14,28 @@ test('pressure evidence is validated as pressure rather than translation',()=>{
     r.latestCompletionRun.outputMeasurements=[{type:'air-pressure',samples:10,invalid:false,networks:{air:{initialKpa:150,minKpa:150,maxKpa:160,finalKpa:160}}}];
     assert.deepEqual(programGapErrors(m,inventory),[]);r.latestCompletionRun.outputMeasurements[0].networks.air.maxKpa=NaN;assert.ok(programGapErrors(m,inventory).some(e=>e.endsWith('valid-output-missing')));
 });
+
+test('working evidence requires integer sample counts of at least two',()=>{
+    for(const samples of [undefined,NaN,Infinity,1.5,'3',null,0,1]){
+        const altered=structuredClone(matrix),row=altered.models.find(r=>r.status==='WORKING');
+        const output=(row.latestCompletionRun.outputMeasurements||[row.latestCompletionRun.outputMeasurement])[0];
+        if(samples===undefined)delete output.samples;else output.samples=samples;
+        assert.ok(programGapErrors(altered,inventory).includes(row.id+':valid-output-missing'),String(samples));
+    }
+    const altered=structuredClone(matrix),row=altered.models.find(r=>r.status==='WORKING');
+    (row.latestCompletionRun.outputMeasurements||[row.latestCompletionRun.outputMeasurement])[0].samples=2;
+    assert.deepEqual(programGapErrors(altered,inventory),[]);
+});
+
+test('prototype property names are invalid statuses',()=>{
+    for(const status of ['constructor','__proto__','toString']){
+        const altered={models:[{id:'example',status,gaps:['reason']}],summary:{total:1,working:0,partial:0,blocked:0}};
+        assert.ok(programGapErrors(altered,[{id:'example'}]).includes('example:invalid-status'),status);
+    }
+});
+test('working evidence retains every required output channel',()=>{
+    const altered=structuredClone(matrix),row=altered.models.find(r=>r.id==='kestrel-flapper');
+    assert.equal(row.latestCompletionRun.outputMeasurements.length,2);
+    row.latestCompletionRun.outputMeasurements.pop();
+    assert.ok(programGapErrors(altered,inventory).includes('kestrel-flapper:output-channel-count'));
+});

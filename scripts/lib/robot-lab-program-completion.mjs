@@ -140,7 +140,7 @@ export function programCompletion(report, contract) {
     const contracts=contract?.outputs||[contract],outputs=report.outputMeasurements||[report.outputMeasurement];
     if(contract)for(let i=0;i<contracts.length;i++){
         const rule=contracts[i],output=outputs[i];
-        if(!output||output.samples<2||output.invalid||(rule.minTravelM!==undefined&&(!Number.isFinite(output.travelM)||output.travelM<rule.minTravelM))||(rule.minRotationDeg!==undefined&&(!Number.isFinite(output.rotationDeg)||output.rotationDeg<rule.minRotationDeg))||(rule.minRangeM!==undefined&&(!Number.isFinite(output.rangeM)||output.rangeM<rule.minRangeM))||(rule.requireRise&&(!output.networks||!Object.values(output.networks).some(n=>n.maxKpa>n.initialKpa))))gaps.push('MEANINGFUL_OUTPUT_NOT_OBSERVED:'+i);
+        if(!output||!Number.isInteger(output.samples)||output.samples<2||output.invalid||(rule.minTravelM!==undefined&&(!Number.isFinite(output.travelM)||output.travelM<rule.minTravelM))||(rule.minRotationDeg!==undefined&&(!Number.isFinite(output.rotationDeg)||output.rotationDeg<rule.minRotationDeg))||(rule.minRangeM!==undefined&&(!Number.isFinite(output.rangeM)||output.rangeM<rule.minRangeM))||(rule.requireRise&&(!output.networks||!Object.values(output.networks).some(n=>n.maxKpa>n.initialKpa))))gaps.push('MEANINGFUL_OUTPUT_NOT_OBSERVED:'+i);
     }
     if (contract?.outputReviewPending) gaps.push('OUTPUT_GEOMETRY_REVIEW_PENDING');
     for (const [name, value] of Object.entries(contract?.terminalValues || {})) if (typeof value==='string'?String(report.programVariables?.[name])!==value:Number(report.programVariables?.[name])!==value) gaps.push('TERMINAL_STAGE_NOT_REACHED:' + name);

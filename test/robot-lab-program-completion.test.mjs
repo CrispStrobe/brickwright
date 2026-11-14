@@ -58,3 +58,15 @@ test('spindle projection and radius follow actual axis rather than spinning worl
 
 test('every checkpoint model has an explicit reviewed program-output contract',()=>{const inventory=JSON.parse(readFileSync(new URL('../docs/data/robot-lab-experimental-checkpoint.json',import.meta.url))).models;assert.deepEqual(Object.keys(PROGRAM_OUTPUT_CONTRACTS).sort(),inventory.map(m=>m.id).sort());});
 test('a diagnostic motor program cannot substitute for the supplied primary program',()=>{const r=valid();r.programKind='DIAGNOSTIC_MOTOR_SMOKE';assert.equal(programCompletion(r,contract).status,'PARTIAL');});
+
+test('completion rejects missing, nonfinite, fractional and nonnumeric sample counts',()=>{
+    for(const samples of [undefined,NaN,Infinity,1.5,'3',null,0,1]){
+        const report=valid();
+        if(samples===undefined)delete report.outputMeasurement.samples;else report.outputMeasurement.samples=samples;
+        const result=programCompletion(report,contract);
+        assert.equal(result.status,'PARTIAL',String(samples));
+        assert.ok(result.gaps.includes('MEANINGFUL_OUTPUT_NOT_OBSERVED:0'),String(samples));
+    }
+    const report=valid();report.outputMeasurement.samples=2;
+    assert.equal(programCompletion(report,contract).status,'COMPLETE');
+});
