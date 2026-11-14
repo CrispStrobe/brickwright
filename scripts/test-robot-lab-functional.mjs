@@ -64,7 +64,7 @@ if(args.child){
         if(count)report.steps++;
         if(args['require-completion'])report.finalEncoders=Object.fromEntries(prepared.mechanism.actuators.map(a=>[a.id,currentApi?.encoder(a.id)]));
         if(args['require-completion'] && contract && Object.entries(contract.observeWhen||{}).every(([k,v])=>Number(report.programVariables[k])===v)){
-            outputRules(contract).forEach((rule,index)=>{const reading=observeOutput(report.outputMeasurements[index],rule,{api:currentApi,core:session.core,placements});if(reading&&count)outputTrace.push({t:session.time,channel:index,...reading});});
+            outputRules(contract).forEach((rule,index)=>{const reading=observeOutput(report.outputMeasurements[index],rule,{api:currentApi,core:session.core,placements});if(reading&&count)outputTrace.push({t:session.time,channel:index,variables:Object.fromEntries(['stage','phase','cycle','held','settled','observing','pulsing'].filter(k=>k in report.programVariables).map(k=>[k,report.programVariables[k]])),...reading});});
         }
         if(session.failed)failures.add(String(session.failed));
         for(const a of prepared.mechanism.actuators){
@@ -109,7 +109,7 @@ if(args.child){
             for(const emitter of [vm,vm.runtime])for(const event of ['ERROR','BLOCKS_ERROR'])emitter.on(event,e=>report.vmErrors.push(String(e)));
             report.missingOpcodes=[...new Set(vm.runtime.targets.flatMap(t=>Object.values(t.blocks._blocks)).filter(b=>!(b.opcode in vm.runtime._primitives)&&!(b.opcode in vm.runtime._hats)&&!(Object.keys(b.fields||{}).length===1&&Object.keys(b.inputs||{}).length===0)).map(b=>b.opcode))];
             collect(ctx,false);
-        },observeFrame:ctx=>{collect(ctx);report.programVariables=Object.fromEntries(ctx.vm.runtime.targets.flatMap(t=>Object.values(t.variables||{}).filter(v=>v.type!=='list').map(v=>[v.name,v.value])));latchProgramFailures(programFlags,report.programVariables);if(args['require-completion'])observeTerminal(report.terminalObservation,report.programVariables,contract?.terminal);return null;}});
+        },observeFrame:ctx=>{report.programVariables=Object.fromEntries(ctx.vm.runtime.targets.flatMap(t=>Object.values(t.variables||{}).filter(v=>v.type!=='list').map(v=>[v.name,v.value])));collect(ctx);latchProgramFailures(programFlags,report.programVariables);if(args['require-completion'])observeTerminal(report.terminalObservation,report.programVariables,contract?.terminal);return null;}});
     report.finishedAt=r.finishedAt;report.simulatedMs=r.track.at(-1)?.t;report.sessionFailures=[...failures];report.nonfinite=[...finite];
     report.vmErrors=[...new Set([...report.vmErrors,...(r.vmErrors||[])])];
     const initialPositions=[...initialBodies.values()];
