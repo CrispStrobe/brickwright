@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {readOutputPose, orientationTravelDeg, createOutputMeasurement, observeOutput, observeTerminal, programCompletion, PROGRAM_OUTPUT_CONTRACTS} from '../scripts/lib/robot-lab-program-completion.mjs';
 const contract=PROGRAM_OUTPUT_CONTRACTS['toggle-lever'];
-const valid=()=>({execution:'COMPLETED',terminalObservation:{sawZero:true,sawTransition:true},programVariables:{completed:1,stage:4},motors:{A:{commanded:true,moved:true}},outputMeasurement:{samples:3,invalid:false,travelM:0.02,homeErrorM:0.0001},messages:['ToggleLever complete: compare the passive lever arc with the link closure.'],failures:[]});
+const valid=()=>({programKind:'SUPPLIED',execution:'COMPLETED',terminalObservation:{sawZero:true,sawTransition:true},programVariables:{completed:1,stage:4},motors:{A:{commanded:true,moved:true}},outputMeasurement:{samples:3,invalid:false,travelM:0.02,homeErrorM:0.0001},messages:['ToggleLever complete: compare the passive lever arc with the link closure.'],failures:[]});
 test('requires actual zero-to-one terminal transition and final terminal value',()=>{const state={};observeTerminal(state,{completed:1},'completed');assert.equal(state.sawTransition,undefined);observeTerminal(state,{completed:0},'completed');observeTerminal(state,{completed:1},'completed');assert.equal(state.sawTransition,true);const r=valid();r.programVariables.completed=0;assert.equal(programCompletion(r,contract).status,'PARTIAL');});
 test('completed program, primary drive and real passive output are jointly required',()=>{assert.equal(programCompletion(valid(),contract).status,'COMPLETE');for(const mutate of [r=>r.execution='BOUNDED_PARTIAL',r=>r.outputMeasurement.travelM=0,r=>r.outputMeasurement.invalid=true,r=>r.motors={},r=>r.messages=[],r=>r.terminalObservation.sawTransition=false]){const r=valid();mutate(r);assert.equal(programCompletion(r,contract).status,'PARTIAL');}});
 test('motor diagnostic, error and unreviewed output can never complete',()=>{const r=valid();r.failures=['program-fault-flag'];assert.equal(programCompletion(r,contract).status,'FAIL');assert.equal(programCompletion(valid(),null).status,'PARTIAL');});
@@ -54,3 +55,6 @@ test('spindle projection and radius follow actual axis rather than spinning worl
     observeOutput(r,radial,{api,placements});points.weight=[1.02,2.01,3];observeOutput(r,radial,{api,placements});assert.ok(r.rangeM<1e-12);assert.ok(Math.abs(r.finalM-0.01)<1e-12);
     const axial={...radial,type:'axis-projection'},a=createOutputMeasurement(axial);observeOutput(a,axial,{api,placements});assert.ok(Math.abs(a.finalM-0.02)<1e-12);
 });
+
+test('every checkpoint model has an explicit reviewed program-output contract',()=>{const inventory=JSON.parse(readFileSync(new URL('../docs/data/robot-lab-experimental-checkpoint.json',import.meta.url))).models;assert.deepEqual(Object.keys(PROGRAM_OUTPUT_CONTRACTS).sort(),inventory.map(m=>m.id).sort());});
+test('a diagnostic motor program cannot substitute for the supplied primary program',()=>{const r=valid();r.programKind='DIAGNOSTIC_MOTOR_SMOKE';assert.equal(programCompletion(r,contract).status,'PARTIAL');});

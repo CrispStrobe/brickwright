@@ -126,6 +126,7 @@ export function observeTerminal(state, variables, name) {
 export function programCompletion(report, contract) {
     const gaps = [];
     if (!contract) gaps.push('OUTPUT_CONTRACT_UNREVIEWED');
+    if(report.programKind!=='SUPPLIED')gaps.push('PRIMARY_SUPPLIED_PROGRAM_NOT_RUN');
     if (report.execution !== 'COMPLETED') gaps.push('PROGRAM_DID_NOT_EXIT');
     let terminalVerified=false;
     if(contract?.terminalMode){
