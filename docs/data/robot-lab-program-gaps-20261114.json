@@ -5,8 +5,8 @@
   "scope": "Program completion gaps. Earlier bounded functional smoke is evidence of partial execution only; no model is working until terminal success, primary mechanism motion and valid output are verified. No physical accuracy is implied.",
   "summary": {
     "total": 82,
-    "working": 75,
-    "partial": 7,
+    "working": 82,
+    "partial": 0,
     "blocked": 0
   },
   "models": [
@@ -101,12 +101,15 @@
           "status": "COMPLETE",
           "gaps": [],
           "failures": []
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
       "id": "bend-ripple",
-      "status": "PARTIAL",
+      "status": "WORKING",
       "modelPath": "overlay/scratch-gui/static/sim-lab/models/bend-ripple.ldr",
       "modelSha256": "ff9fee60b1c13bb31f31b86c22d54747beaceec530f2617eec7497c31f5249df",
       "programPath": "overlay/scratch-gui/static/sim-lab/programs/bend-ripple.bw",
@@ -122,10 +125,135 @@
         "simLimitMs": 180000,
         "runnerSha256": "a3989ddb1033fcaf11f1a6a24e100a7104c8418b223fb17ee7aa714671718005"
       },
-      "gaps": [
-        "Program threads ended in the earlier smoke run; meaningful success and output are not yet reviewed.",
-        "Primary mechanism movement and a valid output, preview or measurement at the terminal state are not yet verified."
-      ]
+      "gaps": [],
+      "latestCompletionRun": {
+        "sourceHead": "ab60f57e341cc568cfe14005431575c93e00f04b",
+        "runnerSha256": "f26ec0ba939a151ea91bf823fe20f817620ba71eb4422be96bfbc4d2ee4feee2",
+        "engineVersion": "1.1.0-bw.10",
+        "simLimitMs": 1000000,
+        "simulatedMs": 110299.9999999954,
+        "execution": "COMPLETED",
+        "finishedAt": 110299.9999999954,
+        "primitiveCalls": 158202,
+        "terminalObservation": {
+          "sawZero": true,
+          "sawTransition": true
+        },
+        "messages": [
+          "Complete: compare low and high bend ripple, then output motion while the input shaft held. Both inputs hold."
+        ],
+        "outputMeasurement": {
+          "part": "input_indicator",
+          "type": "pose",
+          "samples": 3310,
+          "invalid": false,
+          "travelM": 6.585062003332462e-08,
+          "homeErrorM": 3.1430794575142305e-08,
+          "rotationDeg": 179.8955950138991,
+          "initialQuat": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "initial": [
+            -0.016000000055200046,
+            -2.4428142147980836e-09,
+            0.016000000071371076
+          ],
+          "final": [
+            -0.016000006375544915,
+            2.81197429881026e-08,
+            0.01599999634602739
+          ]
+        },
+        "outputMeasurements": [
+          {
+            "part": "input_indicator",
+            "type": "pose",
+            "samples": 3310,
+            "invalid": false,
+            "travelM": 6.585062003332462e-08,
+            "homeErrorM": 3.1430794575142305e-08,
+            "rotationDeg": 179.8955950138991,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              -0.016000000055200046,
+              -2.4428142147980836e-09,
+              0.016000000071371076
+            ],
+            "final": [
+              -0.016000006375544915,
+              2.81197429881026e-08,
+              0.01599999634602739
+            ]
+          },
+          {
+            "part": "output_indicator",
+            "type": "pose",
+            "samples": 3310,
+            "invalid": false,
+            "travelM": 7.946656950922491e-08,
+            "homeErrorM": 4.502125617775677e-08,
+            "rotationDeg": 179.8732039109608,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              0.001389185437815345,
+              6.034120772491214e-11,
+              0.007878459477881801
+            ],
+            "final": [
+              0.001389220825620495,
+              2.774009952230238e-08,
+              0.007878456571383197
+            ]
+          },
+          {
+            "part": "output_bearing_60",
+            "type": "pose",
+            "samples": 3310,
+            "invalid": false,
+            "travelM": 0.00831223570834659,
+            "homeErrorM": 5.561081252481762e-05,
+            "rotationDeg": 19.944534851206434,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              -0.011832443674934367,
+              -2.5031554225229957e-09,
+              0.05563538803534333
+            ],
+            "final": [
+              -0.011777690288242536,
+              5.500755979187533e-09,
+              0.05562566028887343
+            ]
+          }
+        ],
+        "completion": {
+          "status": "COMPLETE",
+          "gaps": [],
+          "failures": [],
+          "terminalVerified": true
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
+      }
     },
     {
       "id": "apex",
@@ -244,7 +372,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -357,7 +488,22 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [
+          {
+            "severity": "warning",
+            "code": "locked-hinges",
+            "message": "Hinges between b16 and b83 lock, merging islands",
+            "parts": [
+              "cage_XY_02_A_elbow",
+              "cage_XY_02_A_end_start",
+              "drive_input_axle",
+              "drive_secondary_axle"
+            ]
+          }
+        ],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -452,7 +598,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -572,7 +721,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -721,7 +873,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -842,7 +997,10 @@
           "status": "COMPLETE",
           "gaps": [],
           "failures": []
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -1071,7 +1229,10 @@
           "status": "COMPLETE",
           "gaps": [],
           "failures": []
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -1198,7 +1359,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -1328,7 +1492,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -1492,7 +1659,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -1595,7 +1765,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -1750,12 +1923,15 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
       "id": "inertia-loop",
-      "status": "PARTIAL",
+      "status": "WORKING",
       "modelPath": "overlay/scratch-gui/static/sim-lab/models/inertia-loop.ldr",
       "modelSha256": "62de372b6541e8b4f4d5c9541991cc69377f188ab8b734cc0a5b6c56e2acfb6f",
       "programPath": "overlay/scratch-gui/static/sim-lab/programs/inertia-loop.bw",
@@ -1771,10 +1947,209 @@
         "simLimitMs": 180000,
         "runnerSha256": "a3989ddb1033fcaf11f1a6a24e100a7104c8418b223fb17ee7aa714671718005"
       },
-      "gaps": [
-        "Program reached the earlier simulated-time cutoff; no terminal outcome was established.",
-        "Primary mechanism movement and a valid output, preview or measurement at the terminal state are not yet verified."
-      ]
+      "gaps": [],
+      "latestCompletionRun": {
+        "sourceHead": "ab60f57e341cc568cfe14005431575c93e00f04b",
+        "runnerSha256": "f26ec0ba939a151ea91bf823fe20f817620ba71eb4422be96bfbc4d2ee4feee2",
+        "engineVersion": "1.1.0-bw.10",
+        "simLimitMs": 1000000,
+        "simulatedMs": 207800.0000000147,
+        "execution": "COMPLETED",
+        "finishedAt": 207800.0000000147,
+        "primitiveCalls": 233135,
+        "terminalObservation": {
+          "sawZero": true,
+          "sawTransition": true
+        },
+        "messages": [
+          "Complete: compare each case with its own starting heading. Both inputs hold; platform yaw remains free."
+        ],
+        "outputMeasurement": {
+          "part": "yaw_platform",
+          "type": "pose",
+          "samples": 6235,
+          "invalid": false,
+          "travelM": 2.316761645744488e-08,
+          "homeErrorM": 1.115139047670652e-08,
+          "rotationDeg": 179.92447976343803,
+          "initialQuat": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "initial": [
+            -1.57110389628623e-09,
+            2.0515285303890352e-10,
+            2.436145556117264e-10
+          ],
+          "final": [
+            6.7508966605068685e-09,
+            2.531384967487628e-09,
+            7.292476906830089e-09
+          ]
+        },
+        "outputMeasurements": [
+          {
+            "part": "yaw_platform",
+            "type": "pose",
+            "samples": 6235,
+            "invalid": false,
+            "travelM": 2.316761645744488e-08,
+            "homeErrorM": 1.115139047670652e-08,
+            "rotationDeg": 179.92447976343803,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              -1.57110389628623e-09,
+              2.0515285303890352e-10,
+              2.436145556117264e-10
+            ],
+            "final": [
+              6.7508966605068685e-09,
+              2.531384967487628e-09,
+              7.292476906830089e-09
+            ]
+          },
+          {
+            "part": "rotor_beam_x",
+            "type": "pose",
+            "samples": 6235,
+            "invalid": false,
+            "travelM": 2.437242456947443e-07,
+            "homeErrorM": 1.3853220774416548e-07,
+            "rotationDeg": 179.9989713601518,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              1.6620984623350044e-09,
+              0.20800000415410325,
+              -2.4361455908117335e-10
+            ],
+            "final": [
+              -3.077252974832525e-08,
+              0.207999991212963,
+              -1.343021628300748e-07
+            ]
+          },
+          {
+            "part": "rotor_beam_z",
+            "type": "pose",
+            "samples": 6235,
+            "invalid": false,
+            "travelM": 1.8204780107017656e-07,
+            "homeErrorM": 1.0411619532520076e-07,
+            "rotationDeg": 179.9989713601518,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              1.6620984623350044e-09,
+              0.19200000415410323,
+              -2.4361455908117335e-10
+            ],
+            "final": [
+              -2.6119268807234386e-08,
+              0.19199999135825538,
+              -9.976569270929987e-08
+            ]
+          },
+          {
+            "part": "ballast_z_-1_0",
+            "type": "pose",
+            "samples": 6235,
+            "invalid": false,
+            "travelM": 0.11200000406247256,
+            "homeErrorM": 0.0001221695513610792,
+            "rotationDeg": 179.9989713601518,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              -0.05595682436738193,
+              0.20000000415410324,
+              -0.0021985499261225616
+            ],
+            "final": [
+              -0.055961521443158295,
+              0.19999997052852422,
+              -0.0020764707074641883
+            ]
+          }
+        ],
+        "completion": {
+          "status": "COMPLETE",
+          "gaps": [],
+          "failures": [],
+          "terminalVerified": true
+        },
+        "issues": [
+          {
+            "severity": "warning",
+            "code": "gear-not-on-hinge",
+            "message": "Gear negative_ballast_0 not on hinge",
+            "parts": [
+              "negative_ballast_0"
+            ]
+          },
+          {
+            "severity": "warning",
+            "code": "gear-not-on-hinge",
+            "message": "Gear negative_ballast_1 not on hinge",
+            "parts": [
+              "negative_ballast_1"
+            ]
+          },
+          {
+            "severity": "warning",
+            "code": "gear-not-on-hinge",
+            "message": "Gear negative_ballast_2 not on hinge",
+            "parts": [
+              "negative_ballast_2"
+            ]
+          },
+          {
+            "severity": "warning",
+            "code": "gear-not-on-hinge",
+            "message": "Gear positive_ballast_0 not on hinge",
+            "parts": [
+              "positive_ballast_0"
+            ]
+          },
+          {
+            "severity": "warning",
+            "code": "gear-not-on-hinge",
+            "message": "Gear positive_ballast_1 not on hinge",
+            "parts": [
+              "positive_ballast_1"
+            ]
+          },
+          {
+            "severity": "warning",
+            "code": "gear-not-on-hinge",
+            "message": "Gear positive_ballast_2 not on hinge",
+            "parts": [
+              "positive_ballast_2"
+            ]
+          }
+        ],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
+      }
     },
     {
       "id": "offset-relay",
@@ -1943,7 +2318,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -2138,7 +2516,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -2283,12 +2664,15 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
       "id": "pan-shift",
-      "status": "PARTIAL",
+      "status": "WORKING",
       "modelPath": "overlay/scratch-gui/static/sim-lab/models/pan-shift.ldr",
       "modelSha256": "d4a21d566ae36e6b16515255e79764c95ceb102ac39d6474c1aaba300630ef55",
       "programPath": "overlay/scratch-gui/static/sim-lab/programs/pan-shift.bw",
@@ -2304,14 +2688,189 @@
         "simLimitMs": 180000,
         "runnerSha256": "a3989ddb1033fcaf11f1a6a24e100a7104c8418b223fb17ee7aa714671718005"
       },
-      "gaps": [
-        "Program reached the earlier simulated-time cutoff; no terminal outcome was established.",
-        "Primary mechanism movement and a valid output, preview or measurement at the terminal state are not yet verified."
-      ]
+      "gaps": [],
+      "latestCompletionRun": {
+        "sourceHead": "ab60f57e341cc568cfe14005431575c93e00f04b",
+        "runnerSha256": "f26ec0ba939a151ea91bf823fe20f817620ba71eb4422be96bfbc4d2ee4feee2",
+        "engineVersion": "1.1.0-bw.10",
+        "simLimitMs": 1000000,
+        "simulatedMs": 371999.9999999666,
+        "execution": "COMPLETED",
+        "finishedAt": 371999.9999999666,
+        "primitiveCalls": 549915,
+        "terminalObservation": {
+          "sawZero": true,
+          "sawTransition": true
+        },
+        "messages": [
+          "Complete: compare load positions at equal trim, then the two beam biases. Both inputs hold."
+        ],
+        "outputMeasurement": {
+          "part": "upper_beam",
+          "type": "pose",
+          "samples": 11161,
+          "invalid": false,
+          "travelM": 9.512724478312187e-06,
+          "homeErrorM": 5.7908670714464515e-08,
+          "rotationDeg": 14.308821347074051,
+          "initialQuat": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "initial": [
+            0.02400000015708141,
+            0.03999999978989043,
+            1.7469339169684517e-09
+          ],
+          "final": [
+            0.02399995520493597,
+            0.039999989599911565,
+            -3.330849497690667e-08
+          ]
+        },
+        "outputMeasurements": [
+          {
+            "part": "upper_beam",
+            "type": "pose",
+            "samples": 11161,
+            "invalid": false,
+            "travelM": 9.512724478312187e-06,
+            "homeErrorM": 5.7908670714464515e-08,
+            "rotationDeg": 14.308821347074051,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              0.02400000015708141,
+              0.03999999978989043,
+              1.7469339169684517e-09
+            ],
+            "final": [
+              0.02399995520493597,
+              0.039999989599911565,
+              -3.330849497690667e-08
+            ]
+          },
+          {
+            "part": "lower_beam",
+            "type": "pose",
+            "samples": 11161,
+            "invalid": false,
+            "travelM": 0.0059782842772577935,
+            "homeErrorM": 3.507190055732185e-05,
+            "rotationDeg": 14.309258423008144,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              0.023999999296387096,
+              0.007740995816276991,
+              -0.023998601704913275
+            ],
+            "final": [
+              0.024000164886951742,
+              0.0077059293115435195,
+              -0.023998009223483188
+            ]
+          },
+          {
+            "part": "pan_post",
+            "type": "pose",
+            "samples": 11161,
+            "invalid": false,
+            "travelM": 0.01195642250375636,
+            "homeErrorM": 7.017099173973791e-05,
+            "rotationDeg": 0.2812584568178486,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              0.008000000723513426,
+              0.023481993594329887,
+              -0.04799720308416152
+            ],
+            "final": [
+              0.008000016921442595,
+              0.023411830563084175,
+              -0.04799614626545491
+            ]
+          },
+          {
+            "part": "A_ballast_0",
+            "type": "pose",
+            "samples": 11161,
+            "invalid": false,
+            "travelM": 0.04800041511811744,
+            "homeErrorM": 3.965153102945839e-05,
+            "rotationDeg": 179.91444314927733,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              -0.007999999825125215,
+              0.07599999937815999,
+              -0.016000000900907363
+            ],
+            "final": [
+              -0.007960348377775017,
+              0.07600004178478821,
+              -0.016000070454429367
+            ]
+          },
+          {
+            "part": "B_ballast_0",
+            "type": "pose",
+            "samples": 11161,
+            "invalid": false,
+            "travelM": 0.023971780344438323,
+            "homeErrorM": 4.364939859038579e-05,
+            "rotationDeg": 59.92158600551991,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              -0.09200000122840934,
+              -0.023481994731494767,
+              0.04799720053123686
+            ],
+            "final": [
+              -0.09200002008619707,
+              -0.023481924856249736,
+              0.04795355119264924
+            ]
+          }
+        ],
+        "completion": {
+          "status": "COMPLETE",
+          "gaps": [],
+          "failures": [],
+          "terminalVerified": true
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
+      }
     },
     {
       "id": "remote-pivot",
-      "status": "PARTIAL",
+      "status": "WORKING",
       "modelPath": "overlay/scratch-gui/static/sim-lab/models/remote-pivot.ldr",
       "modelSha256": "5ae709b12107c6759420ba74c8e4554e1ec337deb7bff37ca0e5150dbd0f43a4",
       "programPath": "overlay/scratch-gui/static/sim-lab/programs/remote-pivot.bw",
@@ -2327,14 +2886,139 @@
         "simLimitMs": 15000,
         "runnerSha256": "d099131ecbb493fd424e49eec3ac322a6a308d6be6b4294818c3fa18b0b54332"
       },
-      "gaps": [
-        "Program reached the earlier simulated-time cutoff; no terminal outcome was established.",
-        "Primary mechanism movement and a valid output, preview or measurement at the terminal state are not yet verified."
-      ]
+      "gaps": [],
+      "latestCompletionRun": {
+        "sourceHead": "ab60f57e341cc568cfe14005431575c93e00f04b",
+        "runnerSha256": "f26ec0ba939a151ea91bf823fe20f817620ba71eb4422be96bfbc4d2ee4feee2",
+        "engineVersion": "1.1.0-bw.10",
+        "simLimitMs": 1000000,
+        "simulatedMs": 63066.666666668396,
+        "execution": "COMPLETED",
+        "finishedAt": 63066.666666668396,
+        "primitiveCalls": 79693,
+        "terminalObservation": {
+          "sawZero": true,
+          "sawTransition": true
+        },
+        "messages": [
+          "Complete: compare the output link with the empty remote centre. Input A holds at its saved datum."
+        ],
+        "outputMeasurement": {
+          "part": "output_beam",
+          "type": "pose",
+          "samples": 1893,
+          "invalid": false,
+          "travelM": 0.024814421241402568,
+          "homeErrorM": 3.9821882784930473e-05,
+          "rotationDeg": 29.95376639711417,
+          "initialQuat": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "initial": [
+            0.031999999191837644,
+            0.0720000008583909,
+            0.016000000359701956
+          ],
+          "final": [
+            0.03199810378733081,
+            0.07200037183230025,
+            0.016039775379106738
+          ]
+        },
+        "outputMeasurements": [
+          {
+            "part": "output_beam",
+            "type": "pose",
+            "samples": 1893,
+            "invalid": false,
+            "travelM": 0.024814421241402568,
+            "homeErrorM": 3.9821882784930473e-05,
+            "rotationDeg": 29.95376639711417,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              0.031999999191837644,
+              0.0720000008583909,
+              0.016000000359701956
+            ],
+            "final": [
+              0.03199810378733081,
+              0.07200037183230025,
+              0.016039775379106738
+            ]
+          },
+          {
+            "part": "input_beam",
+            "type": "pose",
+            "samples": 1893,
+            "invalid": false,
+            "travelM": 0.016541489296827774,
+            "homeErrorM": 2.7592643463452368e-05,
+            "rotationDeg": 29.957016229987804,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              0.03199999912392712,
+              0.01600000031189655,
+              -0.01600000116021648
+            ],
+            "final": [
+              0.03199999224280878,
+              0.015999997845958073,
+              -0.01597240851772123
+            ]
+          },
+          {
+            "part": "follower_beam",
+            "type": "pose",
+            "samples": 1893,
+            "invalid": false,
+            "travelM": 0.008271372492260051,
+            "homeErrorM": 1.3564041419770179e-05,
+            "rotationDeg": 29.960097785892724,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              0.016000000366747483,
+              0.015999999187993108,
+              0.016000000359701956
+            ],
+            "final": [
+              0.015999979028990065,
+              0.01600001180127691,
+              0.01601356437847378
+            ]
+          }
+        ],
+        "completion": {
+          "status": "COMPLETE",
+          "gaps": [],
+          "failures": [],
+          "terminalVerified": true
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
+      }
     },
     {
       "id": "vesper-quickreturn",
-      "status": "PARTIAL",
+      "status": "WORKING",
       "modelPath": "overlay/scratch-gui/static/sim-lab/models/vesper-quickreturn.ldr",
       "modelSha256": "791e9b8843359153bde34aa803c7cf39228643819be45c562f79f27dbaa3c5a3",
       "programPath": "overlay/scratch-gui/static/sim-lab/programs/vesper-quickreturn.bw",
@@ -2350,10 +3034,90 @@
         "simLimitMs": 15000,
         "runnerSha256": "d099131ecbb493fd424e49eec3ac322a6a308d6be6b4294818c3fa18b0b54332"
       },
-      "gaps": [
-        "Program reached the earlier simulated-time cutoff; no terminal outcome was established.",
-        "Primary mechanism movement and a valid output, preview or measurement at the terminal state are not yet verified."
-      ]
+      "gaps": [],
+      "latestCompletionRun": {
+        "sourceHead": "ab60f57e341cc568cfe14005431575c93e00f04b",
+        "runnerSha256": "f26ec0ba939a151ea91bf823fe20f817620ba71eb4422be96bfbc4d2ee4feee2",
+        "engineVersion": "1.1.0-bw.10",
+        "simLimitMs": 1000000,
+        "simulatedMs": 123299.99999999351,
+        "execution": "COMPLETED",
+        "finishedAt": 123299.99999999351,
+        "primitiveCalls": 127700,
+        "terminalObservation": {
+          "sawZero": true,
+          "sawTransition": true
+        },
+        "messages": [
+          "At home: the crank drives the passive quick-return ram.",
+          "Slow forward: three continuous shaping cycles.",
+          "Slow reverse: three continuous return cycles.",
+          "Faster forward: three continuous quick-return cycles.",
+          "Faster reverse: three cycles, then home.",
+          "Vesper complete: slow and fast cycles in both directions, then home. Reset to repeat."
+        ],
+        "outputMeasurement": {
+          "part": "ram_rack",
+          "type": "pose",
+          "samples": 3700,
+          "invalid": false,
+          "travelM": 0.06307126725994551,
+          "homeErrorM": 4.7640539730126076e-05,
+          "rotationDeg": 0.0029095062618223508,
+          "initialQuat": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "initial": [
+            -0.03999999940636894,
+            0.032000000019728275,
+            -0.075724715080002
+          ],
+          "final": [
+            -0.04000007921894587,
+            0.031999859362042325,
+            -0.07567707481477241
+          ]
+        },
+        "outputMeasurements": [
+          {
+            "part": "ram_rack",
+            "type": "pose",
+            "samples": 3700,
+            "invalid": false,
+            "travelM": 0.06307126725994551,
+            "homeErrorM": 4.7640539730126076e-05,
+            "rotationDeg": 0.0029095062618223508,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              -0.03999999940636894,
+              0.032000000019728275,
+              -0.075724715080002
+            ],
+            "final": [
+              -0.04000007921894587,
+              0.031999859362042325,
+              -0.07567707481477241
+            ]
+          }
+        ],
+        "completion": {
+          "status": "COMPLETE",
+          "gaps": [],
+          "failures": [],
+          "terminalVerified": true
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
+      }
     },
     {
       "id": "tempest-pendulum",
@@ -2531,7 +3295,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -2676,7 +3443,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -2896,7 +3666,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -3141,7 +3914,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -3311,7 +4087,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -3456,7 +4235,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -3585,12 +4367,15 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
       "id": "stroke-shift",
-      "status": "PARTIAL",
+      "status": "WORKING",
       "modelPath": "overlay/scratch-gui/static/sim-lab/models/stroke-shift.ldr",
       "modelSha256": "bc3857651b1d588517c61fd81ce2ea08c0df7227c35dedc9b1a8e992c2367ec0",
       "programPath": "overlay/scratch-gui/static/sim-lab/programs/stroke-shift.bw",
@@ -3606,14 +4391,139 @@
         "simLimitMs": 15000,
         "runnerSha256": "d099131ecbb493fd424e49eec3ac322a6a308d6be6b4294818c3fa18b0b54332"
       },
-      "gaps": [
-        "Program reached the earlier simulated-time cutoff; no terminal outcome was established.",
-        "Primary mechanism movement and a valid output, preview or measurement at the terminal state are not yet verified."
-      ]
+      "gaps": [],
+      "latestCompletionRun": {
+        "sourceHead": "ab60f57e341cc568cfe14005431575c93e00f04b",
+        "runnerSha256": "f26ec0ba939a151ea91bf823fe20f817620ba71eb4422be96bfbc4d2ee4feee2",
+        "engineVersion": "1.1.0-bw.10",
+        "simLimitMs": 1000000,
+        "simulatedMs": 61566.66666666829,
+        "execution": "COMPLETED",
+        "finishedAt": 61566.66666666829,
+        "primitiveCalls": 38179,
+        "terminalObservation": {
+          "sawZero": true,
+          "sawTransition": true
+        },
+        "messages": [
+          "Stroke Shift complete: three crank radii compared; both inputs home and held."
+        ],
+        "outputMeasurement": {
+          "part": "output_marker",
+          "type": "pose",
+          "samples": 1848,
+          "invalid": false,
+          "travelM": 0.044001152600871486,
+          "homeErrorM": 2.4830951346219936e-06,
+          "rotationDeg": 0.0009859632983247623,
+          "initialQuat": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "initial": [
+            -0.003999999908202084,
+            0.14959999685750447,
+            0.20000000742064067
+          ],
+          "final": [
+            -0.003999661387973345,
+            0.1495999549476496,
+            0.1999975478659927
+          ]
+        },
+        "outputMeasurements": [
+          {
+            "part": "output_marker",
+            "type": "pose",
+            "samples": 1848,
+            "invalid": false,
+            "travelM": 0.044001152600871486,
+            "homeErrorM": 2.4830951346219936e-06,
+            "rotationDeg": 0.0009859632983247623,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              -0.003999999908202084,
+              0.14959999685750447,
+              0.20000000742064067
+            ],
+            "final": [
+              -0.003999661387973345,
+              0.1495999549476496,
+              0.1999975478659927
+            ]
+          },
+          {
+            "part": "piston_slide_-40",
+            "type": "pose",
+            "samples": 1848,
+            "invalid": false,
+            "travelM": 0.04400112195335514,
+            "homeErrorM": 2.570730718948786e-06,
+            "rotationDeg": 0.0009859632983247623,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              -0.019999999908202084,
+              0.12959999685750445,
+              0.20000000742064067
+            ],
+            "final": [
+              -0.01999978267542785,
+              0.12960005197847332,
+              0.19999744647783968
+            ]
+          },
+          {
+            "part": "adjuster_slide_cross_40",
+            "type": "pose",
+            "samples": 1848,
+            "invalid": false,
+            "travelM": 0.012001670128297011,
+            "homeErrorM": 2.6693881037991345e-06,
+            "rotationDeg": 0.0010990424900081397,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              -2.3200742455681267e-10,
+              0.07200000001435919,
+              0.01599999851958106
+            ],
+            "final": [
+              1.8828924583621826e-08,
+              0.07200004152872617,
+              0.01599732952237482
+            ]
+          }
+        ],
+        "completion": {
+          "status": "COMPLETE",
+          "gaps": [],
+          "failures": [],
+          "terminalVerified": true
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
+      }
     },
     {
       "id": "triad-table",
-      "status": "PARTIAL",
+      "status": "WORKING",
       "modelPath": "overlay/scratch-gui/static/sim-lab/models/triad-table.ldr",
       "modelSha256": "c15ac7cf3c3bb9bab2ccf19d930094f89ec3c4c330a291bd7f6316da07a015fd",
       "programPath": "overlay/scratch-gui/static/sim-lab/programs/triad-table.bw",
@@ -3629,10 +4539,143 @@
         "simLimitMs": 15000,
         "runnerSha256": "d099131ecbb493fd424e49eec3ac322a6a308d6be6b4294818c3fa18b0b54332"
       },
-      "gaps": [
-        "Program reached the earlier simulated-time cutoff; no terminal outcome was established.",
-        "Primary mechanism movement and a valid output, preview or measurement at the terminal state are not yet verified."
-      ]
+      "gaps": [],
+      "latestCompletionRun": {
+        "sourceHead": "ab60f57e341cc568cfe14005431575c93e00f04b",
+        "runnerSha256": "f26ec0ba939a151ea91bf823fe20f817620ba71eb4422be96bfbc4d2ee4feee2",
+        "engineVersion": "1.1.0-bw.10",
+        "simLimitMs": 1000000,
+        "simulatedMs": 153866.66666666567,
+        "execution": "COMPLETED",
+        "finishedAt": 153866.66666666567,
+        "primitiveCalls": 98017,
+        "terminalObservation": {
+          "sawZero": true,
+          "sawTransition": true
+        },
+        "messages": [
+          "Triad Table complete: translation and yaw compared; all three spindles home and held."
+        ],
+        "outputMeasurement": {
+          "part": "platform_pointer",
+          "type": "pose",
+          "samples": 4617,
+          "invalid": false,
+          "travelM": 0.009646572375545729,
+          "homeErrorM": 5.858627971937558e-06,
+          "rotationDeg": 10.004373344615953,
+          "initialQuat": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "initial": [
+            0.03600000142919664,
+            0.18560000379074343,
+            0.00799999992976863
+          ],
+          "final": [
+            0.035996824203117374,
+            0.18560089179737677,
+            0.007995158421700482
+          ]
+        },
+        "outputMeasurements": [
+          {
+            "part": "platform_pointer",
+            "type": "pose",
+            "samples": 4617,
+            "invalid": false,
+            "travelM": 0.009646572375545729,
+            "homeErrorM": 5.858627971937558e-06,
+            "rotationDeg": 10.004373344615953,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              0.03600000142919664,
+              0.18560000379074343,
+              0.00799999992976863
+            ],
+            "final": [
+              0.035996824203117374,
+              0.18560089179737677,
+              0.007995158421700482
+            ]
+          },
+          {
+            "part": "platform_tip",
+            "type": "pose",
+            "samples": 4617,
+            "invalid": false,
+            "travelM": 0.014224595532528757,
+            "homeErrorM": 1.0346875339976959e-05,
+            "rotationDeg": 10.004373344615953,
+            "initialQuat": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "initial": [
+              0.07600000142919663,
+              0.1936000037907434,
+              0.00799999992976863
+            ],
+            "final": [
+              0.07599671338954334,
+              0.1936014443675396,
+              0.007990295736704102
+            ]
+          }
+        ],
+        "completion": {
+          "status": "COMPLETE",
+          "gaps": [],
+          "failures": [],
+          "terminalVerified": true
+        },
+        "issues": [
+          {
+            "severity": "warning",
+            "code": "locked-hinges",
+            "message": "Hinges between b0 and b10 lock, merging islands",
+            "parts": [
+              "leg_body_cross_0_A",
+              "leg_body_cross_20_A",
+              "leg_body_pin_0_A",
+              "leg_body_pin_20_A"
+            ]
+          },
+          {
+            "severity": "warning",
+            "code": "locked-hinges",
+            "message": "Hinges between b1 and b11 lock, merging islands",
+            "parts": [
+              "leg_body_cross_0_B",
+              "leg_body_cross_20_B",
+              "leg_body_pin_0_B",
+              "leg_body_pin_20_B"
+            ]
+          },
+          {
+            "severity": "warning",
+            "code": "locked-hinges",
+            "message": "Hinges between b12 and b2 lock, merging islands",
+            "parts": [
+              "actuator_body_C",
+              "leg_body_pin_0_C",
+              "leg_body_pin_20_C"
+            ]
+          }
+        ],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
+      }
     },
     {
       "id": "paired-door-sync",
@@ -3750,7 +4793,10 @@
           "status": "COMPLETE",
           "gaps": [],
           "failures": []
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -3809,7 +4855,10 @@
           "status": "COMPLETE",
           "gaps": [],
           "failures": []
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -3953,7 +5002,10 @@
           "status": "COMPLETE",
           "gaps": [],
           "failures": []
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -4072,7 +5124,10 @@
           "status": "COMPLETE",
           "gaps": [],
           "failures": []
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -4191,7 +5246,10 @@
           "status": "COMPLETE",
           "gaps": [],
           "failures": []
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -4310,7 +5368,10 @@
           "status": "COMPLETE",
           "gaps": [],
           "failures": []
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -4429,7 +5490,10 @@
           "status": "COMPLETE",
           "gaps": [],
           "failures": []
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -4548,7 +5612,10 @@
           "status": "COMPLETE",
           "gaps": [],
           "failures": []
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -4667,7 +5734,10 @@
           "status": "COMPLETE",
           "gaps": [],
           "failures": []
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -4761,7 +5831,10 @@
           "status": "COMPLETE",
           "gaps": [],
           "failures": []
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -4905,7 +5978,37 @@
           "status": "COMPLETE",
           "gaps": [],
           "failures": []
-        }
+        },
+        "issues": [
+          {
+            "severity": "warning",
+            "code": "locked-hinges",
+            "message": "Hinges between b0 and b4 lock, merging islands",
+            "parts": [
+              "guide_left_axle_-60",
+              "guide_left_axle_60",
+              "rod_left_cart_pin",
+              "slider_left_clevis",
+              "slider_left_guide_-60",
+              "slider_left_guide_60"
+            ]
+          },
+          {
+            "severity": "warning",
+            "code": "locked-hinges",
+            "message": "Hinges between b0 and b5 lock, merging islands",
+            "parts": [
+              "guide_right_axle_-60",
+              "guide_right_axle_60",
+              "rod_right_cart_pin",
+              "slider_right_clevis",
+              "slider_right_guide_-60",
+              "slider_right_guide_60"
+            ]
+          }
+        ],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -5024,7 +6127,77 @@
           "status": "COMPLETE",
           "gaps": [],
           "failures": []
-        }
+        },
+        "issues": [
+          {
+            "severity": "warning",
+            "code": "locked-hinges",
+            "message": "Hinges between b0 and b1 lock, merging islands",
+            "parts": [
+              "absorber_anchor_axle_neg",
+              "absorber_anchor_axle_pos",
+              "absorber_anchor_bridge",
+              "absorber_axle",
+              "absorber_key"
+            ]
+          },
+          {
+            "severity": "warning",
+            "code": "locked-hinges",
+            "message": "Hinges between b0 and b2 lock, merging islands",
+            "parts": [
+              "absorber_anchor_axle_neg",
+              "absorber_anchor_axle_pos",
+              "absorber_beam"
+            ]
+          },
+          {
+            "severity": "warning",
+            "code": "locked-hinges",
+            "message": "Hinges between b4 and b5 lock, merging islands",
+            "parts": [
+              "input_anchor_axle_neg",
+              "input_anchor_axle_pos",
+              "input_anchor_bridge",
+              "input_axle",
+              "input_key"
+            ]
+          },
+          {
+            "severity": "warning",
+            "code": "locked-hinges",
+            "message": "Hinges between b4 and b6 lock, merging islands",
+            "parts": [
+              "input_anchor_axle_neg",
+              "input_anchor_axle_pos",
+              "input_beam"
+            ]
+          },
+          {
+            "severity": "warning",
+            "code": "locked-hinges",
+            "message": "Hinges between b7 and b8 lock, merging islands",
+            "parts": [
+              "primary_anchor_axle_neg",
+              "primary_anchor_axle_pos",
+              "primary_anchor_bridge",
+              "primary_axle",
+              "primary_key"
+            ]
+          },
+          {
+            "severity": "warning",
+            "code": "locked-hinges",
+            "message": "Hinges between b7 and b9 lock, merging islands",
+            "parts": [
+              "primary_anchor_axle_neg",
+              "primary_anchor_axle_pos",
+              "primary_beam"
+            ]
+          }
+        ],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -5143,7 +6316,77 @@
           "status": "COMPLETE",
           "gaps": [],
           "failures": []
-        }
+        },
+        "issues": [
+          {
+            "severity": "warning",
+            "code": "locked-hinges",
+            "message": "Hinges between b0 and b1 lock, merging islands",
+            "parts": [
+              "absorber_anchor_axle_neg",
+              "absorber_anchor_axle_pos",
+              "absorber_anchor_bridge",
+              "absorber_axle",
+              "absorber_key"
+            ]
+          },
+          {
+            "severity": "warning",
+            "code": "locked-hinges",
+            "message": "Hinges between b0 and b2 lock, merging islands",
+            "parts": [
+              "absorber_anchor_axle_neg",
+              "absorber_anchor_axle_pos",
+              "absorber_beam"
+            ]
+          },
+          {
+            "severity": "warning",
+            "code": "locked-hinges",
+            "message": "Hinges between b4 and b5 lock, merging islands",
+            "parts": [
+              "input_anchor_axle_neg",
+              "input_anchor_axle_pos",
+              "input_anchor_bridge",
+              "input_axle",
+              "input_key"
+            ]
+          },
+          {
+            "severity": "warning",
+            "code": "locked-hinges",
+            "message": "Hinges between b4 and b6 lock, merging islands",
+            "parts": [
+              "input_anchor_axle_neg",
+              "input_anchor_axle_pos",
+              "input_beam"
+            ]
+          },
+          {
+            "severity": "warning",
+            "code": "locked-hinges",
+            "message": "Hinges between b7 and b8 lock, merging islands",
+            "parts": [
+              "primary_anchor_axle_neg",
+              "primary_anchor_axle_pos",
+              "primary_anchor_bridge",
+              "primary_axle",
+              "primary_key"
+            ]
+          },
+          {
+            "severity": "warning",
+            "code": "locked-hinges",
+            "message": "Hinges between b7 and b9 lock, merging islands",
+            "parts": [
+              "primary_anchor_axle_neg",
+              "primary_anchor_axle_pos",
+              "primary_beam"
+            ]
+          }
+        ],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -5312,7 +6555,10 @@
           "status": "COMPLETE",
           "gaps": [],
           "failures": []
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -5482,7 +6728,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -5677,7 +6926,52 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [
+          {
+            "severity": "warning",
+            "code": "locked-hinges",
+            "message": "Hinges between b2 and b3 lock, merging islands",
+            "parts": [
+              "beam_middle",
+              "post_mid_low_e",
+              "post_mid_low_w"
+            ]
+          },
+          {
+            "severity": "warning",
+            "code": "locked-hinges",
+            "message": "Hinges between b2 and b6 lock, merging islands",
+            "parts": [
+              "hub",
+              "hub_pin_front",
+              "hub_pin_rear"
+            ]
+          },
+          {
+            "severity": "warning",
+            "code": "locked-hinges",
+            "message": "Hinges between b3 and b4 lock, merging islands",
+            "parts": [
+              "beam_top",
+              "bearing_upper",
+              "post_top_e",
+              "post_top_w"
+            ]
+          },
+          {
+            "severity": "warning",
+            "code": "locked-hinges",
+            "message": "Hinges between b3 and b7 lock, merging islands",
+            "parts": [
+              "motor_top_beam",
+              "post_top_e",
+              "post_top_w"
+            ]
+          }
+        ],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -5847,7 +7141,41 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [
+          {
+            "severity": "warning",
+            "code": "locked-hinges",
+            "message": "Hinges between b2 and b3 lock, merging islands",
+            "parts": [
+              "beam_middle",
+              "post_mid_low_e",
+              "post_mid_low_w"
+            ]
+          },
+          {
+            "severity": "warning",
+            "code": "locked-hinges",
+            "message": "Hinges between b2 and b6 lock, merging islands",
+            "parts": [
+              "hub",
+              "hub_pin_front",
+              "hub_pin_rear"
+            ]
+          },
+          {
+            "severity": "warning",
+            "code": "locked-hinges",
+            "message": "Hinges between b3 and b4 lock, merging islands",
+            "parts": [
+              "beam_top",
+              "post_top_e",
+              "post_top_w"
+            ]
+          }
+        ],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -5992,7 +7320,17 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [
+          {
+            "severity": "warning",
+            "code": "no-motor",
+            "message": "No motor is connected to a hub port, so nothing will move on its own.",
+            "parts": []
+          }
+        ],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -6137,7 +7475,17 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [
+          {
+            "severity": "warning",
+            "code": "no-motor",
+            "message": "No motor is connected to a hub port, so nothing will move on its own.",
+            "parts": []
+          }
+        ],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -6251,7 +7599,10 @@
           "status": "COMPLETE",
           "gaps": [],
           "failures": []
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -6365,7 +7716,10 @@
           "status": "COMPLETE",
           "gaps": [],
           "failures": []
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -6466,7 +7820,10 @@
           "status": "COMPLETE",
           "gaps": [],
           "failures": []
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -6568,7 +7925,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -6720,7 +8080,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -6872,7 +8235,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -6940,7 +8306,10 @@
           "status": "COMPLETE",
           "gaps": [],
           "failures": []
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -7087,7 +8456,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -7234,7 +8606,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -7379,7 +8754,19 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [
+          {
+            "severity": "warning",
+            "code": "loose-part",
+            "message": "Not connected to the rest of the model: roller_ball",
+            "parts": [
+              "roller_ball"
+            ]
+          }
+        ],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -7524,7 +8911,19 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [
+          {
+            "severity": "warning",
+            "code": "loose-part",
+            "message": "Not connected to the rest of the model: roller_ball",
+            "parts": [
+              "roller_ball"
+            ]
+          }
+        ],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -7623,7 +9022,23 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [
+          {
+            "severity": "warning",
+            "code": "locked-hinges",
+            "message": "Hinges between b2 and b5 lock, merging islands",
+            "parts": [
+              "gearbox_case",
+              "gearbox_case_pin_-20_-30",
+              "gearbox_case_pin_-20_30",
+              "gearbox_case_pin_20_-30",
+              "gearbox_case_pin_20_30"
+            ]
+          }
+        ],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -7743,7 +9158,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -7863,7 +9281,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -7984,7 +9405,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -8105,7 +9529,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -8226,7 +9653,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -8347,7 +9777,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -8493,7 +9926,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -8639,7 +10075,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -8706,7 +10145,10 @@
           "status": "COMPLETE",
           "gaps": [],
           "failures": []
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -8827,7 +10269,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -8948,7 +10393,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -9069,7 +10517,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -9191,7 +10642,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -9313,7 +10767,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -9435,7 +10892,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -9607,7 +11067,10 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -9702,7 +11165,21 @@
           "gaps": [],
           "failures": [],
           "terminalVerified": true
-        }
+        },
+        "issues": [
+          {
+            "severity": "warning",
+            "code": "locked-hinges",
+            "message": "Hinges between b0 and b6 lock, merging islands",
+            "parts": [
+              "pivot_bridge",
+              "pivot_bridge_axle_20",
+              "pivot_bridge_axle_220"
+            ]
+          }
+        ],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -9796,7 +11273,10 @@
           "status": "COMPLETE",
           "gaps": [],
           "failures": []
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -9862,7 +11342,10 @@
           "status": "COMPLETE",
           "gaps": [],
           "failures": []
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -9928,7 +11411,10 @@
           "status": "COMPLETE",
           "gaps": [],
           "failures": []
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     },
     {
@@ -9987,7 +11473,10 @@
           "status": "COMPLETE",
           "gaps": [],
           "failures": []
-        }
+        },
+        "issues": [],
+        "compileWarnings": [],
+        "programKind": "SUPPLIED"
       }
     }
   ],

@@ -319,3 +319,11 @@ node --import ./scripts/lib/register-gui-scope.mjs scripts/test-robot-lab-functi
 ```
 
 Omit `--models` to run the checkpoint inventory serially. Use a fresh output directory for each run. Longer program phases may require a larger simulated interval; an inconclusive motor observation is not a pass.
+
+The separate program gap list now records all 82 supplied programs reaching their documented terminal states with observed mechanism outputs in headless runs. Its entries retain each run's source, output observations and nonfatal model warnings; this is not a precision-law, rendered-GUI or physical-device qualification. To repeat the program checks with bounded-memory measurement streaming:
+
+```sh
+node --import ./scripts/lib/register-gui-scope.mjs scripts/test-robot-lab-programs.mjs --bounded-memory --sim-ms=1000000 --wall-ms=1200000 --out=./program-results
+```
+
+Use `--models=id1,id2` for a subset and a fresh output directory for each run. A program that reaches the test's time limit without its required terminal outcome remains partial.

@@ -7,6 +7,7 @@ export function programGapErrors(matrix,inventory){
         if(!(row.status in counts)){errors.push(row.id+':invalid-status');continue;}counts[row.status]++;
         if(row.status==='WORKING'){
             const run=row.latestCompletionRun;
+            if(run?.programKind!=='SUPPLIED')errors.push(row.id+':supplied-program-missing');
             if(row.gaps?.length||run?.execution!=='COMPLETED'||!Number.isFinite(run?.finishedAt)||run.finishedAt<=0||run.completion?.status!=='COMPLETE'||run.completion?.failures?.length||run.completion?.gaps?.length)errors.push(row.id+':terminal-success-missing');
             if(!run?.terminalObservation?.sawTransition&&!run?.terminalOutcome?.verified)errors.push(row.id+':terminal-observation-missing');
             if(!/^[0-9a-f]{40}$/.test(run?.sourceHead||'')||!/^[0-9a-f]{64}$/.test(run?.runnerSha256||''))errors.push(row.id+':runner-evidence-missing');
