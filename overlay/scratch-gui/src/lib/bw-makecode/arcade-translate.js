@@ -136,6 +136,7 @@ import {lowerLazyValues} from './lower-lazy-values.js';
 import {arrayCopyCall} from './array-copy-calls.js';
 import {indexedStringValue} from './indexed-string-values.js';
 import {closedStringCompare} from './closed-string-compare.js';
+import {closedCreatedImageDimensions,createdImageDimensionSourceSafe,markCreatedImageDimensions} from './closed-created-image-dimensions.js';
 import {lowerPxtStagedValues} from './lower-pxt-staged-values.js';
 import {lowerNamespaceBindings} from './namespace-bindings.js';
 import {ARCADE_SCENE_CONSTANTS} from './arcade-scene-constants.js';
@@ -382,6 +383,7 @@ class ArcadeTranslator extends BaseTranslator {
             value?.type==='Assignment'&&['&=','|=','^=','<<=','>>=','>>>='].includes(value.op)?[value.left,value.right]:null;
         const bitwise=value=>bitwiseOperands(value)!==null;
         if(containsAst(node,bitwise)){
+            const createdDimensions=closedCreatedImageDimensions(node);
             const facts=analyseSourceValueProducers(node,{arrayValues:true,parenthesized:true,unboundIsOpaque:true,
                 declaredLocalUndefined:true,ordinaryPrimitiveSdkNumbers:true,sceneClockNumbers:true});
             const primitive=new Set(['Number','String','Boolean','Null','Undefined']);
@@ -390,7 +392,7 @@ class ArcadeTranslator extends BaseTranslator {
                     const types=facts.typesAt(operand),array=type=>type?.kind==='Array';
                     if([...types].some(array)||references.arrays.has(operand))this.possibleBitwiseArrays.add(operand);
                     if(types.size&&[...types].every(type=>primitive.has(type)||array(type)))this.sourceBitwiseOperands.add(operand);
-                    if(references.primitives.has(operand)||types.size&&[...types].every(type=>primitive.has(type)))this.primitiveBitwiseOperands.add(operand);
+                    if(operand.bwClosedCreatedImageDimension===true&&createdDimensions.has(operand)||references.primitives.has(operand)||types.size&&[...types].every(type=>primitive.has(type)))this.primitiveBitwiseOperands.add(operand);
                     if([...types].some(type=>typeof type==='string'&&!primitive.has(type)&&type!=='Opaque'))this.objectBitwiseOperands.add(operand);
                 }
                 return false;
@@ -5598,6 +5600,7 @@ export function arcadeToPseudocode (files, opts = {}) {
     const callableParseOptions={namedFunctionExpressions:true,parameterDefaults:true,retainParentheses:true,retainWhenUsed:true,retainClassHeritage:true,retainOrdinaryDefaultProvenance:true};
     const ordinarySource=markHighScoreCalls(markDefaultTextPrompts(markNumberPromptLengths(markLegacyNoteMelodies(lowerAnyButtonRegistrations(normalizeUnusedNamedCallbacks(markGameResets(markPlayerButtonRegistrations(parseSharedImageSourceProgram(sharedSourcePreparation,source,opts.procedureConstraintsPrototype===true,opts.procedureConstraintsPrototype!==true,true,true),playerButtonSourceSafe),resetSourceSafe),map,callbackRegistrationSpec,projectInputDiagnostics),anyButtonSourceSafe,projectInputDiagnostics),legacyMelodySourceSafe),numberPromptSourceSafe),defaultTextPromptSourceSafe),highScoreSourceSafe);
     const callableSourceParsed=markHighScoreCalls(markDefaultTextPrompts(markNumberPromptLengths(markLegacyNoteMelodies(lowerAnyButtonRegistrations(normalizeUnusedNamedCallbacks(markGameResets(markPlayerButtonRegistrations(parseMakeCodeTs(source,{...callableParseOptions,retainCallableMetadata:true,retainAuthoredEmptyBranches:true}),playerButtonSourceSafe),resetSourceSafe),map,callbackRegistrationSpec,projectInputDiagnostics),anyButtonSourceSafe),legacyMelodySourceSafe),numberPromptSourceSafe),defaultTextPromptSourceSafe),highScoreSourceSafe);
+    const createdDimensionSourceSafe=createdImageDimensionSourceSafe(map);
     const namedEligibility=selectNamedFunctionSourceProof(callableSourceParsed,{ordinaryProgram:ordinarySource,registrationSpec:callbackRegistrationSpec});
     const namedEnabled=namedEligibility.eligible;
     const namedLowering=namedEnabled?lowerNamedFunctionValues(callableSourceParsed):null;
@@ -5773,6 +5776,7 @@ export function arcadeToPseudocode (files, opts = {}) {
     }
     projectInputDiagnostics.push(...built.diagnostics);
     const ast = built.ast;
+    if(!sharedPreparation)markCreatedImageDimensions(ast,createdDimensionSourceSafe);
     if(source.includes('onScore')&&source.includes('assets.image'))bindScoreImageSource(ast,map);
     const sharedImageTransport = currentSharedImageArrayTransport(ast);
     // Issue only for the actual chosen output, after transport finishing or
