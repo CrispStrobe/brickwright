@@ -44,7 +44,7 @@ Object.assign(PROGRAM_OUTPUT_CONTRACTS,{
     'rimrun-swapped':{...PROGRAM_OUTPUT_CONTRACTS.rimrun,comparisonModel:'rimrun'},
     'swayshift-in-phase':{...PROGRAM_OUTPUT_CONTRACTS.swayshift,comparisonModel:'swayshift'},
     'samebeat-conjugate':{...PROGRAM_OUTPUT_CONTRACTS.samebeat,comparisonModel:'samebeat',outputs:[{part:'pendulum_ballast',relativeTo:'pendulum_support_axle',minTravelM:0.001},{part:'pendulum_spine_-140',relativeTo:'pendulum_support_axle',minRotationDeg:0.1},{part:'pendulum_support_axle',relativeTo:'base_floor_rail_-60',observeOnly:true}]},
-    'samebeat-control':{...PROGRAM_OUTPUT_CONTRACTS.samebeat,comparisonModel:'samebeat',outputs:[{part:'pendulum_ballast',relativeTo:'pendulum_support_axle',minTravelM:0.001},{part:'pendulum_spine_-140',relativeTo:'pendulum_support_axle',minRotationDeg:0.1},{part:'pendulum_support_axle',relativeTo:'base_floor_rail_-60',observeOnly:true}]},
+    'samebeat-control':{...PROGRAM_OUTPUT_CONTRACTS.samebeat,comparisonModel:'samebeat',outputs:[{part:'pendulum_ballast',relativeTo:'pendulum_support_axle',minRotationDeg:0.1},{part:'pendulum_spine_-140',relativeTo:'pendulum_support_axle',minRotationDeg:0.1},{part:'pendulum_support_axle',relativeTo:'base_floor_rail_-60',observeOnly:true}]},
     'twistspan-inner':{...PROGRAM_OUTPUT_CONTRACTS.twistspan,comparisonModel:'twistspan',outputs:[{part:'payload_bar',relativeTo:'upper_bar',minRotationDeg:0.1},{part:'payload_bar',relativeTo:'base_frame_left',observeOnly:true}]},
     'high-select-mirror':{...PROGRAM_OUTPUT_CONTRACTS['high-select'],comparisonModel:'high-select'},
     'foldback-open':{...PROGRAM_OUTPUT_CONTRACTS.foldback,comparisonModel:'foldback'},
