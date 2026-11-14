@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readOutputPose, observeTerminal, programCompletion, PROGRAM_OUTPUT_CONTRACTS} from '../scripts/lib/robot-lab-program-completion.mjs';
+import {readOutputPose, orientationTravelDeg, observeTerminal, programCompletion, PROGRAM_OUTPUT_CONTRACTS} from '../scripts/lib/robot-lab-program-completion.mjs';
 const contract=PROGRAM_OUTPUT_CONTRACTS['toggle-lever'];
 const valid=()=>({execution:'COMPLETED',terminalObservation:{sawZero:true,sawTransition:true},programVariables:{completed:1,stage:4},motors:{A:{commanded:true,moved:true}},outputMeasurement:{samples:3,invalid:false,travelM:0.02,homeErrorM:0.0001},messages:['ToggleLever complete: compare the passive lever arc with the link closure.'],failures:[]});
 test('requires actual zero-to-one terminal transition and final terminal value',()=>{const state={};observeTerminal(state,{completed:1},'completed');assert.equal(state.sawTransition,undefined);observeTerminal(state,{completed:0},'completed');observeTerminal(state,{completed:1},'completed');assert.equal(state.sawTransition,true);const r=valid();r.programVariables.completed=0;assert.equal(programCompletion(r,contract).status,'PARTIAL');});
@@ -15,4 +15,19 @@ test('PointWeaver observes authored endpoint origin relative to its base, not ro
     assert.deepEqual(readOutputPose(api,c),first);assert.deepEqual(requested,['endpoint_marker','base_cross_-40','endpoint_marker','base_cross_-40']);
     assert.deepEqual(first.position,poses.endpoint_marker.position.map((v,i)=>v-poses['base_cross_-40'].position[i]));
     poses.endpoint_marker.position[0]=NaN;assert.equal(readOutputPose(api,c),null);
+});
+test('local point follows placement and body rotation; reference removes world translation and rotation',()=>{
+    const half=Math.sqrt(0.5),q=[0,0,half,half];
+    const placements=new Map([['foot',{rotation:[1,0,0,0,1,0,0,0,1]}],['frame',{rotation:[1,0,0,0,1,0,0,0,1]}]]);
+    const poses={foot:{ok:true,position:[1,2,3],quat:q},frame:{ok:true,position:[1,2,3],quat:q}};
+    const r=readOutputPose({pose:id=>poses[id]},{part:'foot',localPointLdu:[100,0,0],relativeTo:'frame',referencePointLdu:[0,-50,0]},placements);
+    assert.ok(Math.abs(r.position[0]-0.04)<1e-12);assert.ok(Math.abs(r.position[1]+0.02)<1e-12);assert.ok(Math.abs(r.position[2])<1e-12);
+    assert.ok(Math.abs(r.quat[3]-1)<1e-12);
+    assert.equal(readOutputPose({pose:id=>poses[id]},{part:'foot',localPointLdu:[100,0,0]},null),null);
+});
+test('fixed origins can still produce meaningful output rotation, quaternion sign is equivalent',()=>{
+    const q=[0,Math.sqrt(0.5),0,Math.sqrt(0.5)];assert.ok(Math.abs(orientationTravelDeg([0,0,0,1],q)-90)<1e-10);
+    assert.equal(orientationTravelDeg(q,q.map(v=>-v)),0);
+    const r=valid();r.outputMeasurement.travelM=0;r.outputMeasurement.rotationDeg=30;
+    assert.equal(programCompletion(r,{...contract,minTravelM:undefined,minRotationDeg:0.1}).status,'COMPLETE');
 });
