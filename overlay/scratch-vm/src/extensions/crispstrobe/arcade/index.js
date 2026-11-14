@@ -19,6 +19,9 @@ module.exports = makeExt(`// Name: Arcade
   "use strict";
 
   const dependencies = Scratch.BWExtensionDependencies;
+  const nullFilterDescriptor=Object.getOwnPropertyDescriptor,nullFilterKeys=Reflect.ownKeys;
+  const nullFilterPrototype=Object.getPrototypeOf,nullFilterArrayPrototype=Array.prototype;
+  const nullFilterDefine=Object.defineProperty;
   const fontSelectorOwner = dependencies.fontSelectorOwner;
   const spriteUpdateHosts = new WeakMap();
   const classCallableHosts = new WeakMap();
@@ -1060,6 +1063,8 @@ module.exports = makeExt(`// Name: Arcade
           {opcode:'initializeSpriteKindLibrary',blockType:Scratch.BlockType.COMMAND,text:'Arcade initialize sprite kind library [LIBRARY] version [VERSION]',arguments:{...str('LIBRARY','textsprite'),...str('VERSION','v1.3.0')}},
           { opcode: 'spritesOfKind', blockType: Scratch.BlockType.REPORTER,
             text: 'array of Arcade sprites of kind [KIND]', arguments: str('KIND', 'Player') },
+          {opcode:'withoutNullSprites',blockType:Scratch.BlockType.REPORTER,
+            text:'Arcade sprite array [ARRAY] without null',arguments:str('ARRAY','')},
           { opcode: 'spriteCount', blockType: Scratch.BlockType.REPORTER,
             text: 'Arcade sprites of kind [KIND]', arguments: str('KIND', 'Player') },
           { opcode: 'whenSpriteCreated', blockType: Scratch.BlockType.HAT,
@@ -6728,6 +6733,28 @@ module.exports = makeExt(`// Name: Arcade
     }
     spritesOfKind(args) {
       return Scratch.BWValues.arrayReference(this._runtime, this._spritesOfKind(args.KIND).map(s => s.id));
+    }
+    withoutNullSprites(args) {
+      const fail=()=>this._objectError(new Error('Null filtering requires a dense native Sprite/null array'));
+      if(!Scratch.BWValues.hasNativeReferenceMetadata(args.ARRAY))return fail();
+      const array=Scratch.BWValues.arrayValue(this._runtime,args.ARRAY);
+      if(!array||nullFilterPrototype(array)!==nullFilterArrayPrototype)return fail();
+      const size=nullFilterDescriptor(array,'length');
+      if(!size||!Object.hasOwn(size,'value')||typeof size.value!=='number'||size.value<0||size.value%1!==0)return fail();
+      const keys=nullFilterKeys(array);
+      if(keys.length!==size.value+1)return fail();
+      const result=[];
+      for(let i=0;i<size.value;i++){
+        const cell=nullFilterDescriptor(array,String(i));
+        if(!cell||!Object.hasOwn(cell,'value'))return fail();
+        const value=cell.value;
+        if(value===null)continue;
+        // Retained destroyed Sprites are still the same Sprite handles.
+        if(typeof value!=='string'||!this._spriteValues.has(value))return fail();
+        nullFilterDefine(result,String(result.length),{value,writable:true,enumerable:true,configurable:true});
+      }
+      // A synchronous reporter: no guest callback, loop block or VM yield.
+      return Scratch.BWValues.arrayReference(this._runtime,result);
     }
     spriteCount(args) { return this._spritesOfKind(args.KIND).length; }
     whenSpriteCreated(args, util) {

@@ -137,6 +137,7 @@ import {arrayCopyCall} from './array-copy-calls.js';
 import {indexedStringValue} from './indexed-string-values.js';
 import {closedStringCompare} from './closed-string-compare.js';
 import {closedCreatedImageDimensions,createdImageDimensionSourceSafe,markCreatedImageDimensions} from './closed-created-image-dimensions.js';
+import {withClosedSpriteNullFilters,lowerClosedSpriteNullFilters,currentClosedSpriteNullFilter,bindClosedSpriteNullFilterConsumer,emitClosedSpriteNullFilter} from './closed-sprite-null-filter.js';
 import {lowerPxtStagedValues} from './lower-pxt-staged-values.js';
 import {lowerNamespaceBindings} from './namespace-bindings.js';
 import {ARCADE_SCENE_CONSTANTS} from './arcade-scene-constants.js';
@@ -362,6 +363,7 @@ class ArcadeTranslator extends BaseTranslator {
         this.sourceReferenceTypes=new Map((node.sourceReferenceDeclarations || sourceReferenceDeclarations(node)).map(({name,type})=>[name,type]));
         this.sourceFunctions=new Map(node.body.filter(fn=>fn.type==='FunctionDeclaration').map(fn=>[fn.name,fn]));
         const references = inferImageReferences(node, value => this.path(value), value => this.imageOf(value), value => !!this.assetKindLookup && value?.type === 'Template' && ['assets.image', 'assets.tile'].includes(value.tag));
+        bindClosedSpriteNullFilterConsumer(this,node);
         this.objectReferences = references.objects;this.fontReferences=references.fonts;
         this.bufferReferences = references.buffers;this.imageReferences = references.images;this.spriteReferences = references.sprites;this.dataReferences = references.data;
         this.exactStringReferences=references.exactStrings;this.textSpriteReferences=references.textSprites;this.playerReferences=references.players;this.sceneReferences=references.scenes;this.physicsEngineReferences=references.physicsEngines;this.tileReferences = references.tiles;this.tilemapDataReferences = references.tilemapData;this.sceneTilemapReferences = references.sceneTilemaps;this.legacyTileReferences=references.legacyTiles;this.animationReferences = references.animations;this.sevensegDigitReferences=references.sevensegDigits;this.sevensegCounterReferences=references.sevensegCounters;this.dartReferences=references.darts;this.corgiReferences=references.corgis;this.nullReferences=references.nulls;this.arrayReferences = references.arrays;this.numberReferences=references.numbers;this.stringReferences=references.strings;this.booleanReferences=references.booleans;
@@ -1172,6 +1174,7 @@ class ArcadeTranslator extends BaseTranslator {
         return undefined;
     }
     expr (node) {
+        if(node?.type==='ClosedSpriteNullFilter')return emitClosedSpriteNullFilter(this,node);
         if(this.handleTemplates && ((node?.type==='Template' && /^(tilemap|assets\.tilemap)$/.test(node.tag||'')) || (node?.type==='Call' && this.path(node.callee)==='tiles.createTilemap'))) {
             const data=this.tilemapValueData(node);
             if(data===undefined)return 'undefined value';
@@ -3830,6 +3833,7 @@ const inferImageReferences = (ast, pathOf, imageOf, isScopedAssetFactory = () =>
     const mathDeclared=entries.some(({node})=>node.type==='Declaration' && node.decls?.some(decl=>decl.name==='Math') ||
         ['FunctionDeclaration','FunctionExpression'].includes(node.type) && (node.params || []).includes('Math'));
     const typeOf = (node, owner) => {
+        if(currentClosedSpriteNullFilter(node))return new Set(['array','sprite-array']);
         if(highScoreIntrinsic(node))return new Set(['number']);
         if(node?.bwConsoleInspectIntrinsic===true && node.callee?.name==='__bwConsoleInspectValue')return new Set(['string']);
         if(node?.bwFontIntrinsic && node.bwFontType==='image.Font')return new Set(['font']);
@@ -5448,7 +5452,10 @@ export function nameArtworkSprites (result) {
  *   sprites: Array<string>
  * }}
  */
-export function arcadeToPseudocode (files, opts = {}) {
+export function arcadeToPseudocode(files,opts={}) {
+    return withClosedSpriteNullFilters(typeof files==='string'?{'main.ts':files}:files||{},()=>arcadeToPseudocodeImpl(files,opts));
+}
+function arcadeToPseudocodeImpl (files, opts = {}) {
     const map = typeof files === 'string' ? {'main.ts': files} : (files || {});
     const selectedSource = arcadeProjectSource(map);
     const source = selectedSource.source;
@@ -5618,7 +5625,8 @@ export function arcadeToPseudocode (files, opts = {}) {
     const sharedSourceContext = !namedEnabled&&!callableEnabled&&!classEnabled ? bindPreparedSharedImageSource(sharedSourcePreparation,ordinarySource) : null;
     const generatedProfile=(namedEnabled||classEnabled||callableEnabled||opts.procedureConstraintsPrototype===true)?
         GENERATED_HELPER_PROFILES.metadata:GENERATED_HELPER_PROFILES.ordinary;
-    const sourceOperatorInputs=lowerRuntimeDispatchAddHelpers(lowerSourceValueOperatorHelpers(callableSourceInput,generatedProfile),generatedProfile);
+    const closedFilterInputs=lowerClosedSpriteNullFilters(callableSourceInput);
+    const sourceOperatorInputs=lowerRuntimeDispatchAddHelpers(lowerSourceValueOperatorHelpers(closedFilterInputs,generatedProfile),generatedProfile);
     const nativeBinaryInputs=lowerNativeArrayBinaryHelpers(sourceOperatorInputs,generatedProfile);
     const namedArrayInputs=lowerNamedArrayItemHelpers(inlineValueHelpers(nativeBinaryInputs.program,true),{profile:generatedProfile});
     // Recognition consumes the selected parse context before clone-heavy

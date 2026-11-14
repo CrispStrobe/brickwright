@@ -129,3 +129,5 @@ export function closedCreatedImageDimensions(program) {
     }
     return result;
 }
+
+export {executableBindings};
