@@ -1,7 +1,8 @@
+import {closedResetStringArraySyntax} from './reset-closed-string-array-source.js';
 import {playerButtonConfiguredSourceSafe} from './player-button-registration-source.js';
 // The configured-source census rejects mutations and aliases of game and
 // its transitive control.reset implementation, including hidden test sources.
-export const gameResetSourceSafe=playerButtonConfiguredSourceSafe;
+export const gameResetSourceSafe=files=>playerButtonConfiguredSourceSafe(files,closedResetStringArraySyntax(files));
 export const gameResetIntrinsic=node=>node?.type==='Call'&&node.bwGameResetIntrinsic===true&&!node.isNew&&!node.constructorCall&&!node.optional&&!node.typeArguments?.length&&node.args?.length===0&&node.callee?.type==='Member'&&!node.callee.optional&&node.callee.name==='reset'&&node.callee.object?.type==='Identifier'&&node.callee.object.name==='game';
 export function markGameResets(program,safe){
  if(!safe)return program;

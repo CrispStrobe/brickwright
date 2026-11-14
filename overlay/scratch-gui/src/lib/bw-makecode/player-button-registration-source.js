@@ -1,3 +1,4 @@
+import {resetArraySyntaxAdmits} from './reset-closed-string-array-source.js';
 import {parseMakeCodeTs,tokenize} from './ts-import.js';
 const buttons=Object.freeze({A:'A',B:'B',Left:'left',Up:'up',Right:'right',Down:'down'});
 const events=Object.freeze({Pressed:2049,Released:2048,Repeated:2054});
@@ -7,7 +8,7 @@ const writes=new Set(['=','+=','-=','*=','/=','%=','&=','|=','^=','<<=','>>=','>
 const controlCalls=new Set(['control.onEvent','control.raiseEvent','control.waitForEvent','control.allocateNotifyEvent','control.runInParallel','control.pause','control.millis']);
 const gameCalls=new Set(['onUpdate','onUpdateInterval','onPaint','onShade','forever','pushScene','popScene','addScenePushHandler','addScenePopHandler','removeScenePushHandler','removeScenePopHandler','runtime','splash','showLongText','ask','askForString','askForNumber','over','gameOver','reset','setGameOverEffect','setGameOverMessage','setGameOverScoringType','setGameOverPlayable','setDialogFrame','setDialogCursor','setDialogTextColor']);
 const controllerCall=name=>/^controller\.player[1-4]\.onButtonEvent$/.test(name)||/^controller\.(?:player[1-4]\.)?(?:A|B|up|down|left|right)\.(?:onEvent|isPressed|pauseUntil)$/.test(name)||/^controller\.(?:player[1-4]\.)?(?:moveSprite|stopControllingSprite|dx|dy|isPressed)$/.test(name)||['controller.setRepeatDefault','controller._setUserEventsEnabled','controller.pauseUntilAnyButtonIsPressed'].includes(name);
-export function playerButtonConfiguredSourceSafe(files){
+export function playerButtonConfiguredSourceSafe(files,provenArraySyntax=null){
  try{
   const config=JSON.parse(files['pxt.json']||'null'),names=config?.files??['main.ts'],tests=config?.testFiles??[];
   if(!Array.isArray(names)||!Array.isArray(tests)||![...names,...tests].every(n=>typeof n==='string')||config&&(config.dependencies?.device!=='*'||Object.keys(config.dependencies).some(n=>n!=='device')))return false;
@@ -24,7 +25,7 @@ export function playerButtonConfiguredSourceSafe(files){
     const t=tokens[i],before=tokens[i-1];if(t.unknownBefore||t.invalidLiteral||t.type==='template'&&t.value.includes('${'))return false;
     if(['ident','string'].includes(t.type)&&ambient.has(t.value))return false;
     const typeSuffix=['let','const','var'].includes(tokens[i-4]?.type)&&tokens[i-3]?.type==='ident'&&suffixes.has(tokens[i-3].value)&&tokens[i-2]?.value===':'&&['Sprite','Image'].includes(before?.value)&&t.value==='['&&tokens[i+1]?.value===']'&&tokens[i+2]?.value==='=';
-    if(t.value==='['&&!typeSuffix&&(['ident','number','string','template'].includes(before?.type)||[')',']','}','.'].includes(before?.value)))return false;
+    if(t.value==='['&&!typeSuffix&&!resetArraySyntaxAdmits(provenArraySyntax,files,name,file.value,i)&&(['ident','number','string','template'].includes(before?.type)||[')',']','}','.'].includes(before?.value)))return false;
     if(t.type!=='ident'||!['controller','ControllerButton','ControllerButtonEvent','control','game'].includes(t.value))continue;
     let end=i,top=t.value;while(tokens[end+1]?.value==='.'&&tokens[end+2]?.type==='ident'){top+='.'+tokens[end+2].value;end+=2;}
     if(before?.value==='.'||['new','function','class','namespace','delete'].includes(before?.value))return false;
