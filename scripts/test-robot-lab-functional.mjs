@@ -10,6 +10,7 @@ import {createHash} from 'node:crypto';
 import {createRequire} from 'node:module';
 import {nonFinitePaths, summarizeMotor, functionalFailures} from './lib/robot-lab-functional.mjs';
 import {PROGRAM_OUTPUT_CONTRACTS, outputRules, createOutputMeasurement, observeOutput, observeTerminal, programCompletion} from './lib/robot-lab-program-completion.mjs';
+import {createMotorSummary,observeMotorSummary,finishMotorSummary,createMeasurementWriter} from './lib/robot-lab-run-retention.mjs';
 import {latchProgramFailures} from './lib/robot-lab-program-flags.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const runnerSha256=hashRunner();
@@ -21,9 +22,10 @@ const inventory=JSON.parse(readFileSync(join(root,'docs/data/robot-lab-experimen
 const afterMs=Number(args['after-ms']||0);
 if(!Number.isFinite(afterMs)||afterMs<0||afterMs>10000)throw Error('Settling observation must be between 0 and 10000 ms');
 const simMs=Number(args['sim-ms']||120000), wallMs=Number(args['wall-ms']||180000);
-if(!Number.isFinite(simMs)||simMs<=0||simMs>600000||!Number.isFinite(wallMs)||wallMs<=0||wallMs>600000)throw Error('Bounds must be positive and at most 600000 ms');
+const maxBound=args['bounded-memory']?1200000:600000;
+if(!Number.isFinite(simMs)||simMs<=0||simMs>maxBound||!Number.isFinite(wallMs)||wallMs<=0||wallMs>maxBound)throw Error('Bounds must be positive and at most '+maxBound+' ms');
 if(args.child){
-    let stage='setup';
+    let stage='setup',measurementWriter=null;
     const mark=value=>{stage=value;writeFileSync(String(args.result)+'.progress.json',JSON.stringify({id:String(args.child),stage})+'\n');};
     try{
     const id=String(args.child), item=inventory.find(m=>m.id===id);if(!item)throw Error('Unknown inventory ID');
@@ -55,16 +57,20 @@ if(args.child){
         withSpike,compileErrors:parsed?.errors||creator.errors||[],compileWarnings:parsed?.warnings||creator.warnings||[],
         partFailures:[],missingOpcodes:[],vmErrors:[],sessionFailures:[],nonfinite:[],steps:0,primitiveCalls:0,executedOpcodes:{},motors:{},
         programVariables:{},programFailedObserved:false,programFaultObserved:false,invalidPoses:[],bodySanity:{status:'UNASSESSED',assessed:false,initialBodyExtentM:null,travelBoundM:null,travelOverBound:[],factor:100,floorM:1},motorPartCount:0,unboundMotorCount:0,maxBodyDisplacementM:0,maxBodyRadiusM:0,bodyTravel:{},scope:'Finite functional smoke only; no precision, physical accuracy, full GUI, or full-program completion requirement.'};
+    if(args['bounded-memory'])report.retention={track:'LAST_FRAME',motorSamples:'INCREMENTAL',measurements:args['require-completion']?'STREAMED_JSON':'NONE'};
     const contract=PROGRAM_OUTPUT_CONTRACTS[id];
     if(args['require-completion']){report.terminalObservation={sawZero:false,sawTransition:false};report.messages=[];report.outputMeasurements=outputRules(contract).map(createOutputMeasurement);report.outputMeasurement=report.outputMeasurements[0];report.scope='Actual headless program completion and reviewed product pose measurement; no rendered GUI, physical accuracy or device claim.';}
     let currentApi=null,placements=null;
     const outputTrace=[];
+    const measurementMetadata={schema:1,kind:'product-robotLab.pose',part:contract?.part||null,relativeTo:contract?.relativeTo||null,outputRules:contract?outputRules(contract):[],sourceHead,modelSha256:report.modelSha256,programSha256:report.programSha256};
+    if(args['require-completion']&&args['bounded-memory'])measurementWriter=createMeasurementWriter(String(args.result)+'.measurement.json',measurementMetadata);
+    const retainMeasurement=value=>measurementWriter?measurementWriter.append(value):outputTrace.push(value);
     const motorSamples=new Map(),initialBodies=new Map(),finite=new Set(),failures=new Set(),probeKeys=new Set(),programFlags=new Set();
     const collect=({session,hub,prepared},count=true)=>{
         if(count)report.steps++;
         if(args['require-completion'])report.finalEncoders=Object.fromEntries(prepared.mechanism.actuators.map(a=>[a.id,currentApi?.encoder(a.id)]));
         if(args['require-completion'] && contract && Object.entries(contract.observeWhen||{}).every(([k,v])=>Number(report.programVariables[k])===v)){
-            outputRules(contract).forEach((rule,index)=>{const reading=observeOutput(report.outputMeasurements[index],rule,{api:currentApi,core:session.core,placements});if(reading&&count)outputTrace.push({t:session.time,channel:index,variables:Object.fromEntries(['stage','phase','cycle','held','settled','observing','pulsing'].filter(k=>k in report.programVariables).map(k=>[k,report.programVariables[k]])),...reading});});
+            outputRules(contract).forEach((rule,index)=>{const reading=observeOutput(report.outputMeasurements[index],rule,{api:currentApi,core:session.core,placements});if(reading&&count)retainMeasurement({t:session.time,channel:index,variables:Object.fromEntries(['stage','phase','cycle','held','settled','observing','pulsing'].filter(k=>k in report.programVariables).map(k=>[k,report.programVariables[k]])),...reading});});
         }
         if(session.failed)failures.add(String(session.failed));
         for(const a of prepared.mechanism.actuators){
@@ -75,7 +81,7 @@ if(args.child){
             const nonzeroDrive=['speed','power','position','time','servo'].includes(mode)&&Number.isFinite(requested)&&Math.abs(requested)>0;
             const position=session.core.jointState(a.joint).angle*180/Math.PI;
             const key=(a.hub?String(a.hub)+':':'')+port;
-            const samples=motorSamples.get(key)||[];samples.push({position,mode,nonzeroDrive});motorSamples.set(key,samples);
+            const samples=motorSamples.get(key)||(args['bounded-memory']?createMotorSummary():[]);if(args['bounded-memory'])observeMotorSummary(samples,{position,mode,nonzeroDrive});else samples.push({position,mode,nonzeroDrive});motorSamples.set(key,samples);
         }
         const poses={};for(const b of prepared.mechanism.bodies.filter(b=>b.motion==='dynamic')){
             const p=session.core.bodyPose(b.id);poses[b.id]=p;
@@ -92,7 +98,7 @@ if(args.child){
         for(const p of nonFinitePaths({poses,joints,motors:hub.data.motors}))if(finite.size<50)finite.add(p);
     };
     mark('vm-and-physics-runtime');
-    const r=await runRobotLabProgram(program,{modelText,timeLimitMs:simMs,withSpike,afterMs,
+    const r=await runRobotLabProgram(program,{modelText,timeLimitMs:simMs,withSpike,afterMs,retainTrack:!args['bounded-memory'],
         observeSetup:ctx=>{
             const {vm,prepared}=ctx;
             if(args['require-completion']){currentApi=vm.runtime.robotLab;placements=new Map(prepared.runModel.parts.map(p=>[p.id,p]));vm.runtime.on('SAY',(_target,type,text)=>{if(type==='say'&&String(text).trim())report.messages.push(String(text));});}
@@ -122,7 +128,7 @@ if(args.child){
     }
     report.bodySanity.status=report.dynamicBodyCount===0?'NOT_APPLICABLE_STATIC_ONLY':report.bodySanity.assessed?'ASSESSED':'UNASSESSED';
     report.execution=r.finishedAt?'COMPLETED':'BOUNDED_PARTIAL';
-    report.motors=Object.fromEntries([...motorSamples].map(([p,s])=>[p,summarizeMotor(s)]));
+    report.motors=Object.fromEntries([...motorSamples].map(([p,s])=>[p,args['bounded-memory']?finishMotorSummary(s):summarizeMotor(s)]));
     report.failures=functionalFailures(report);
     report.failures=report.failures.filter(f=>!f.includes('UNCOMMANDED_MOVED'));
     if(probeMotors.length)report.failures=report.failures.filter(f=>!f.startsWith('motor:')||probeKeys.has(f.split(':').slice(1,-1).join(':')));
@@ -139,14 +145,16 @@ if(args.child){
         report.failures.push(...nonFinitePaths(report.programVariables).map(p=>'nonfinite-program-variable:'+p));
         report.completion=programCompletion(report,contract);report.status=report.completion.status;
         report.outputContract=contract||null;
-        writeFileSync(String(args.result)+'.measurement.json',JSON.stringify({schema:1,kind:'product-robotLab.pose',part:contract?.part||null,relativeTo:contract?.relativeTo||null,outputRules:contract?outputRules(contract):[],sourceHead,modelSha256:report.modelSha256,programSha256:report.programSha256,samples:outputTrace},null,2)+'\n');
+        if(measurementWriter){measurementWriter.finish();measurementWriter=null;}else writeFileSync(String(args.result)+'.measurement.json',JSON.stringify({...measurementMetadata,samples:outputTrace},null,2)+'\n');
     }
     writeFileSync(String(args.result),JSON.stringify(report,null,2)+'\n');
     process.exit(['PASS','COMPLETE'].includes(report.status)?0:1);
     }catch(error){
+        measurementWriter?.abort();
         const missingDependency=['ERR_MODULE_NOT_FOUND','MODULE_NOT_FOUND','ERR_PACKAGE_PATH_NOT_EXPORTED'].includes(error.code);
-        const setup=stage==='setup'||missingDependency||error.code==='INVALID_DIAGNOSTIC_TARGET';
-        const report={id:String(args.child),sourceHead,runnerSha256,status:setup?'BLOCKED':'FAIL',stage,failures:[setup?'DEPENDENCY_OR_SETUP_ERROR':'PRODUCT_EXCEPTION'],error:{name:error.name,code:error.code||null,message:error.message}};
+        const externalIO=['ENOSPC','EIO','EACCES','EROFS','EDQUOT'].includes(error.code);
+        const setup=externalIO||stage==='setup'||missingDependency||error.code==='INVALID_DIAGNOSTIC_TARGET';
+        const report={id:String(args.child),sourceHead,runnerSha256,status:setup?'BLOCKED':'FAIL',stage,failures:[externalIO?'EXTERNAL_EVIDENCE_WRITE_ERROR':setup?'DEPENDENCY_OR_SETUP_ERROR':'PRODUCT_EXCEPTION'],error:{name:error.name,code:error.code||null,message:error.message}};
         writeFileSync(String(args.result),JSON.stringify(report,null,2)+'\n');console.error(error);process.exit(1);
     }
 }else{
@@ -158,7 +166,7 @@ if(args.child){
     for(const id of wanted){
         const result=join(out,id+'.json'),log=join(out,id+'.log');
         if(existsSync(result)||existsSync(log))throw Error('Use fresh output files for '+id);
-        const child=spawnSync(process.execPath,['--max-old-space-size=768','--import',join(root,'scripts/lib/register-gui-scope.mjs'),fileURLToPath(import.meta.url),'--child='+id,'--result='+result,'--sim-ms='+simMs,'--after-ms='+afterMs,...(args['require-completion']?['--require-completion']:[]),...(args['probe-motors']?['--probe-motors='+args['probe-motors']]:[])],{cwd:root,timeout:wallMs,maxBuffer:4*1024*1024,encoding:'utf8'});
+        const child=spawnSync(process.execPath,['--max-old-space-size=768','--import',join(root,'scripts/lib/register-gui-scope.mjs'),fileURLToPath(import.meta.url),'--child='+id,'--result='+result,'--sim-ms='+simMs,'--after-ms='+afterMs,...(args['require-completion']?['--require-completion']:[]),...(args['bounded-memory']?['--bounded-memory']:[]),...(args['probe-motors']?['--probe-motors='+args['probe-motors']]:[])],{cwd:root,timeout:wallMs,maxBuffer:4*1024*1024,encoding:'utf8'});
         writeFileSync(log,(child.stdout||'')+(child.stderr||''));
         let row;try{row=JSON.parse(readFileSync(result));}catch{let progress={};try{progress=JSON.parse(readFileSync(result+'.progress.json'));}catch{}
         const crashed=child.signal&&progress.stage==='vm-and-physics-runtime'&&!/heap out of memory|out of memory/i.test(child.stderr||'');row={id,stage:progress.stage,status:child.error?.code==='ETIMEDOUT'||crashed?'FAIL':'BLOCKED',failures:[child.error?.code==='ETIMEDOUT'?'PROCESS_TIMEOUT':crashed?'RUNTIME_PROCESS_CRASH':'PROCESS_ERROR_UNATTRIBUTED'],error:String(child.error||child.signal||child.status)};writeFileSync(result,JSON.stringify(row,null,2)+'\n');}

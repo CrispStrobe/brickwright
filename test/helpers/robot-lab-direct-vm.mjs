@@ -2,6 +2,7 @@
 // Copyright (c) 2026 CrispStrobe
 // Real parser, Scratch VM, bundled Robot Lab extension and API. Only the clock
 // is simulated, following spike-arena-vm.mjs; all motor completion is feedback.
+import {retainFrame} from '../../scripts/lib/robot-lab-run-retention.mjs';
 import {createRequire} from 'node:module';
 import {readFileSync} from 'node:fs';
 import {VM,FakeClock,HubState,registerVirtualHub} from './spike-arena-vm.mjs';
@@ -12,7 +13,7 @@ import {loadJolt} from '../../overlay/scratch-gui/src/lib/bw-sim/physics/jolt-co
 import {createRobotLabApi} from '../../overlay/scratch-gui/src/lib/bw-sim/api/robot-lab-api.js';
 const CATALOG=catalogFrom(JSON.parse(readFileSync(new URL('../../overlay/scratch-gui/src/lib/bw-sim/part-meta/parts.json',import.meta.url))));
 const Timer=createRequire(import.meta.url)(VM_SRC+'/util/timer.js');
-export async function runRobotLabProgram(source,{modelText,timeLimitMs,catalog=CATALOG,autoPorts,frameMs=1000/30,observeFrame,observeSetup,coldMs=0,afterMs=0,withSpike=false}){
+export async function runRobotLabProgram(source,{modelText,timeLimitMs,catalog=CATALOG,autoPorts,frameMs=1000/30,observeFrame,observeSetup,coldMs=0,afterMs=0,withSpike=false,retainTrack=true}){
  const p=prepareModel(modelText,catalog,{mat:'plain',...(autoPorts===undefined?{}:{autoPorts})}),J=await loadJolt(),clock=new FakeClock(1.7e12);
  let clockInstalled=false;if(withSpike){clock.install();clockInstalled=true;}
  const registered=withSpike?registerVirtualHub():null,hub=registered?.hub||new HubState();hub.setSimulationEnabled(true);
@@ -27,7 +28,7 @@ export async function runRobotLabProgram(source,{modelText,timeLimitMs,catalog=C
   if(withSpike){vm.runtime.on('BLOCKS_ERROR',e=>vmErrors.push(String(e)));vm.on('BLOCKS_ERROR',e=>vmErrors.push(String(e)));}
   await vm.loadProject(data);vm.setCompatibilityMode(true);vm.runtime.currentStepTime=1000/30;
   if(!clockInstalled){clock.install();clockInstalled=true;}let budget=0;vm.runtime.sequencer.timer=new Timer({now:()=>budget++});
-  const snapshot=phase=>track.push({t:session.time,phase,bodies:Object.fromEntries(p.mechanism.bodies.filter(b=>b.motion==='dynamic').map(b=>[b.id,session.core.bodyPose(b.id)])),joints:Object.fromEntries(p.mechanism.joints.filter(j=>['hinge','slider'].includes(j.type)).map(j=>[j.id,session.core.jointState(j.id)])),busy:Object.fromEntries(p.mechanism.actuators.map(a=>[a.port,hub.motors.busy(a.port)])),...(observeFrame?{extra:observeFrame({session,vm,hub,prepared:p})}:{})});
+  const snapshot=phase=>retainFrame(track,{t:session.time,phase,bodies:Object.fromEntries(p.mechanism.bodies.filter(b=>b.motion==='dynamic').map(b=>[b.id,session.core.bodyPose(b.id)])),joints:Object.fromEntries(p.mechanism.joints.filter(j=>['hinge','slider'].includes(j.type)).map(j=>[j.id,session.core.jointState(j.id)])),busy:Object.fromEntries(p.mechanism.actuators.map(a=>[a.port,hub.motors.busy(a.port)])),...(observeFrame?{extra:observeFrame({session,vm,hub,prepared:p})}:{})},retainTrack);
   if(withSpike){
    if(!spike)throw Error('Program did not load the real SPIKE extension');
    spike.setConnectionMode({MODE:'web-ble'});const connecting=spike.connectHub();
