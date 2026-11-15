@@ -2723,6 +2723,11 @@ class ArcadeEmitter {
         case 'looks_sayforsecs': if (me) push(`${me}.sayText(${v('MESSAGE', '""')}, ${v('SECS')} * 1000, true)`); return;
         case 'looks_say': if (me) push(`${me}.sayText(${v('MESSAGE', '""')})`); return;
         case 'arcade_setBackgroundImage': push(`scene.setBackgroundImage(${this.literalInput(b,'IMAGE') === '' ? 'null' : v('IMAGE')})`); return;
+        case 'arcade_setGameStats': {
+            const mode=this.field(b,'MODE');
+            if(Object.hasOwn(b.inputs||{},'MODE')||!['enabled','disabled'].includes(mode)){push(`// ${this.note('Game stats export requires a fixed enabled or disabled mode')}`);return;}
+            push(`game.stats = ${mode==='enabled'?'true':'false'}`);return;
+        }
         case 'arcade_setPalette': push(`image.setPalette(Buffer.fromHex(${v('DATA', '""')}))`); return;
         case 'arcade_setBackgroundColor': push(`scene.setBackgroundColor(${v('COLOR')})`); return;
         case 'arcade_controlSprite': push(`controller.moveSprite(${v('ID')}, ${v('VX')}, ${v('VY')})`); return;

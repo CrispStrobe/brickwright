@@ -147,6 +147,10 @@ module.exports = makeExt(`// Name: Arcade
       this._fallbackState = null;
       // Palette is display state shared by every scene, never an image mutation.
       this._projectPalette = null;
+      this._gameStats=dependencies.createGameStats(text=>{
+        runtime.bwArcadeStatsText=text;runtime.emit?.('ARCADE_DEVICE_STATS',text);
+      });
+      this._gameStats.reset();
       this._sceneStack = [];this._sceneParents=new WeakMap();this._seeThroughSources=new WeakMap();this._renderingScenes=new WeakSet();this._sceneFrames=new WeakMap();this._pendingSceneSeconds=new WeakMap();this._frameFaults=new WeakSet();
       this._sceneBundles = new Set();
       this._sceneFlags=dependencies.sceneFlags.create();
@@ -278,6 +282,7 @@ module.exports = makeExt(`// Name: Arcade
         runtime.on('RUNTIME_DISPOSED', () => {this._bufferSuspended=true;this._musicHost?.reset();this._musicHost=null;this._musicIds=new Map();this._musicValues=new Map();this._musicGeneration=dependencies.buffers.newHeapId();this._carnivalHost?.cancel();this._carnivalHost=null;this._bufferHeap=null;cancelCreations();this._clearTilemap();this._tileLocations.clear();this._animationAssetCache.clear();for(const id of this._imageSkins.keys())this._clearImage(id);});
         const reset = () => {
           this._resetProgramClock();
+          this._gameStats.reset();
           cancelCreations();
           this._terrainStopped = false;
           this._projectPalette = null;
@@ -408,6 +413,7 @@ module.exports = makeExt(`// Name: Arcade
           {opcode:'registerScoreHandler',blockType:Scratch.BlockType.COMMAND,text:'Arcade register score player [PLAYER] threshold [SCORE] as [TOKEN] capturing [CAPTURES]',arguments:{...n('PLAYER',1),...n('SCORE',10),...str('TOKEN','handler'),...str('CAPTURES','')}},
           {opcode:'whenRegisteredScore',blockType:Scratch.BlockType.HAT,isEdgeActivated:false,text:'when Arcade score handler [TOKEN] runs',arguments:str('TOKEN','handler')},
           {opcode:'pushScene',blockType:Scratch.BlockType.COMMAND,text:'Arcade push scene'},
+          {opcode:'setGameStats',blockType:Scratch.BlockType.COMMAND,text:'Arcade game stats [MODE]',arguments:{MODE:{type:Scratch.ArgumentType.STRING,menu:'gameStatsModes',defaultValue:'enabled'}}},
           {opcode:'setPalette',blockType:Scratch.BlockType.COMMAND,text:'Arcade set palette hex [DATA]',arguments:str('DATA','000000ffffffff2121ff93c4ff8135fff609249ca378dc52003fad87f2ff8e2ec4a4839f5c406ce5cdc491463d000000')},
           {opcode:'popScene',blockType:Scratch.BlockType.COMMAND,text:'Arcade pop scene'},
           {opcode:'buttonRepeatProperty',blockType:Scratch.BlockType.REPORTER,text:'Arcade player [PLAYER] button [BUTTON] repeat property [PROPERTY]',arguments:{PLAYER:{type:Scratch.ArgumentType.STRING,menu:'controlPlayers',defaultValue:'1'},BUTTON:{type:Scratch.ArgumentType.STRING,menu:'repeatButtons',defaultValue:'A'},PROPERTY:{type:Scratch.ArgumentType.STRING,menu:'repeatProperties',defaultValue:'repeatDelay'}}},
@@ -1126,6 +1132,7 @@ module.exports = makeExt(`// Name: Arcade
           constraintParameters:{acceptReporters:false,items:'_constraintParameters'},
           sourceBinaryOperations:{acceptReporters:false,items:['+','-','*','/','%','**','&','|','^','<<','>>','>>>']},
           sourceUnaryOperations:{acceptReporters:false,items:['~']},
+          gameStatsModes:{acceptReporters:false,items:['enabled','disabled']},
           sourceScalarTypes:{acceptReporters:false,items:['Number','Boolean','String','Any']},
           mathOperations:{acceptReporters:false,items:['min','max','randomRange','atan2']},
           mathUnaryOperations:{acceptReporters:false,items:['truncate','sign']},
@@ -1527,7 +1534,9 @@ module.exports = makeExt(`// Name: Arcade
             if(this._state()!==owner)return;
             this._globalElapsedMs=this._programMillis();this._pumpQuestion(delta);
             const result=this._advance(delta/1000);this._musicHost?.pump();return result;
-          }),onError:error=>this._runtime?.emit?.('BLOCKS_ERROR',String(error?.message || error))});
+          }),onFrameBegin:owner=>this._gameStats.begin(owner),
+          onFrameEnd:(owner,runtime)=>this._gameStats.finish(owner,runtime),
+          onError:error=>this._runtime?.emit?.('BLOCKS_ERROR',String(error?.message || error))});
       }
       return this._sceneFrameHost;
     }
@@ -2127,6 +2136,15 @@ module.exports = makeExt(`// Name: Arcade
         for(const h of particles.intervals.slice())if(h.timer<=(state.elapsedMs || 0)){h.timer=(state.elapsedMs || 0)+h.period;h.fn();}
         particles.update?.();
       }
+    }
+    setGameStats(args) {
+      const mode=Scratch.BWValues.decode(args.MODE);
+      if(mode!=='enabled' && mode!=='disabled')return this._objectError(new TypeError('Arcade game stats requires a fixed enabled or disabled mode'));
+      this._gameStats.setEnabled(mode==='enabled');
+    }
+    _drawGameStats(state) {
+      this._gameStats.ensure(state);
+      if(this._gameStats.enabled)this._gameStats.draw(state,this._sceneSpriteObjects(state).length);
     }
     _changed() {
       if (this._runtime && this._runtime.emit) this._runtime.emit('ARCADE_DEVICE_CHANGED', this._state());
@@ -6858,8 +6876,11 @@ module.exports = makeExt(`// Name: Arcade
     }
     *_advanceFrameSteps(dt) {
       const epoch=this._terrainEpoch,owner=this._state();
-      try {yield* this._advanceFrameBody(dt);}
+      const manual=!this._sourceSceneTimers(),began=manual?this._programMillis():0;let completed=false;
+      if(manual)this._gameStats.ensure(owner);
+      try {yield* this._advanceFrameBody(dt);completed=true;}
       finally {
+        if(manual && completed && epoch===this._terrainEpoch && !this._frameFaults.has(owner))this._gameStats.finish(owner,this._programMillis()-began);
         owner._framesDone=(owner._framesDone || 0)+1;
         const queued=owner._afterFrame;owner._afterFrame=undefined;
         if(queued && epoch===this._terrainEpoch)for(const start of queued)start();
@@ -6877,7 +6898,7 @@ module.exports = makeExt(`// Name: Arcade
       const live = Object.values(state.sprites).filter(s => s.id);
       this._moveControlledSprites(live);yield* this._moveFollowingSpriteSteps();
       if(epoch!==this._terrainEpoch || this._state()!==state)return;
-      if (!live.length && !state.physicsEngine.members.length) {this._runFrameHandlers(state,0,19);if(yield* this._sceneUpdates())return;if(this._state()!==state)return;this._advanceAnimations(dt);this._updateCamera();this._runFrameHandlers(state);if(state.tilemap?.legacy)this._renderTilemap(true);yield* this._advanceSpeechSteps(dt);if(this._state()!==state)return;yield* this._composeSceneSteps();if(this._state()!==state || epoch!==this._terrainEpoch || state._defaultGameOverPending)return;if(!this._frameFaults.has(state))this._startFrameHats();return;}
+      if (!live.length && !state.physicsEngine.members.length) {this._runFrameHandlers(state,0,19);if(yield* this._sceneUpdates())return;if(this._state()!==state)return;this._advanceAnimations(dt);this._updateCamera();this._runFrameHandlers(state);if(state.tilemap?.legacy)this._renderTilemap(true);yield* this._advanceSpeechSteps(dt);if(this._state()!==state)return;yield* this._composeSceneSteps();if(this._state()!==state || epoch!==this._terrainEpoch || state._defaultGameOverPending)return;this._drawGameStats(state);if(!this._frameFaults.has(state))this._startFrameHats();return;}
       yield* this._advancePhysicsSteps(state.physicsEngine.members.slice(),dt,state.tilemap);
       if(epoch!==this._terrainEpoch || this._state()!==state)return;
       for(const sprite of live)if(state.sprites[sprite.id])this._positionSprite(sprite.id);
@@ -6898,6 +6919,7 @@ module.exports = makeExt(`// Name: Arcade
       if(this._state()!==state)return;
       yield* this._composeSceneSteps();
       if(this._state()!==state || epoch!==this._terrainEpoch || state._defaultGameOverPending)return;
+      this._drawGameStats(state);
       this._changed();
       if(!this._frameFaults.has(state))this._startFrameHats();
     }
@@ -7015,6 +7037,7 @@ module.exports = makeExt(`// Name: Arcade
   createManagedReturnValues: require('./managed-return-values'),
   currentNumberInput: require('./current-number-input'),
   createSceneFrameContexts: require('./scene-frame-contexts'),
+  createGameStats: require('./game-stats'),
   createControlEvents: require('./control-events'),
   createPollEvents: require('./poll-events'),
   createKindRegistry: require('./kind-registry'),

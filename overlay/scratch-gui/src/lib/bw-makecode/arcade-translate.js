@@ -1,5 +1,6 @@
 import {normalizeOwnedPromptOptions,literalLimitedTextPrompt} from './owned-prompt-options-source.js';
 import {gameResetSourceSafe,markGameResets,gameResetIntrinsic} from './game-reset-source.js';
+import {gameStatsConfiguredSourceSafe,gameStatsAssignmentProof} from './game-stats-source.js';
 import {playerButtonConfiguredSourceSafe,markPlayerButtonRegistrations,playerButtonRegistration} from './player-button-registration-source.js';
 import {playerConnectionConfiguredSourceSafe,markPlayerConnectionRegistrations,playerConnectionRegistration} from './player-connection-registration-source.js';
 import {normalizeUnusedNamedCallbacks} from './unused-named-callbacks.js';
@@ -2989,6 +2990,9 @@ class ArcadeTranslator extends BaseTranslator {
     expressionStatement (expr, indent, out) {
         const pad = '  '.repeat(indent);
         const push = line => out.push(pad + line);
+        if(expr.type==='Assignment' && this.path(expr.left)==='game.stats' && this.gameStatsAssignments?.has(expr)) {
+            push(`arcade game stats ${expr.right.value?'enabled':'disabled'}`);return;
+        }
         const dataTarget=expr.type==='Assignment'?expr.left:expr.type==='Update'?expr.argument:null;
         if(dataTarget?.type==='Member' && Object.prototype.hasOwnProperty.call(ARCADE_SCENE_CONSTANTS,this.path(dataTarget))){push(this.note(`${this.path(dataTarget)} assignment requires a mutable object; SDK Scene constants are readonly`));return;}
         if(dataTarget?.type==='Member' && this.playerReferences?.has(dataTarget.object)){push(this.note(`mp.Player.${dataTarget.name} assignment requires native player member support`));return;}
@@ -4728,7 +4732,7 @@ const unreadableArtPath = (t, node) => {
 
 /** Handle-valued globals plus onCreated/onOverlap callbacks. Kept separate
  * from the fixed-target path until its other sprite APIs can use handles. */
-const translateNamedHandleEvents = (ast, assets, tilemaps = {}, forceSpriteRuntime = false, assetKindLookup = null, scrollerVersion = 'v0.1.2', characterVersion = 'v0.1.0') => {
+const translateNamedHandleEvents = (ast, assets, tilemaps = {}, forceSpriteRuntime = false, assetKindLookup = null, scrollerVersion = 'v0.1.2', characterVersion = 'v0.1.0', statsSourceSafe = false) => {
     const t = new ArcadeTranslator(assets, tilemaps, assetKindLookup, scrollerVersion, characterVersion);
     t.callableProcedures=new Map(ast.body.filter(fn=>fn.bwCallableDefinition).map(fn=>[fn.name,fn.name+fn.params.map(()=> ' %s').join('')]));
     const needsProjectileHandles = node => {
@@ -5223,6 +5227,8 @@ const translateNamedHandleEvents = (ast, assets, tilemaps = {}, forceSpriteRunti
         t.handleImageLiterals.set(call, index);
     }
     if ([...frameArrays.keys()].some(name => !usedFrameArrays.has(name))) return null;
+    // Reprove the actual handle-projected AST immediately before emission.
+    t.gameStatsAssignments=statsSourceSafe?gameStatsAssignmentProof(ast):{has:()=>false};
     const declaredGlobals = ast.body.filter(plainDeclaration).flatMap(st => st.decls.filter(d=>!d.temporary).map(d => d.name));
     const out = ['DEVICE ARCADE', '', ...[...new Set([...t.handleVars, ...declaredGlobals])]
         .map(name => `GLOBAL ${t.varName(name)}`),
@@ -5481,6 +5487,7 @@ function arcadeToPseudocodeImpl (files, opts = {}) {
     const playerButtonSourceSafe=source.includes('onButtonEvent')&&playerButtonConfiguredSourceSafe(map);
     const playerConnectionSourceSafe=source.includes('onEvent')&&playerConnectionConfiguredSourceSafe(map);
     const resetSourceSafe=source.includes('reset')&&gameResetSourceSafe(map);
+    const statsSourceSafe=source.includes('stats')&&gameStatsConfiguredSourceSafe(map);
     const logValueSourceSafe = source.includes('logValue') && consoleLogValueConfiguredSourceSafe(map);
     const defaultTextPromptSourceSafe = source.includes('askForString') && numberPromptLengthSourceSafe(map);
     const numberPromptSourceSafe = source.includes('askForNumber') && numberPromptLengthSourceSafe(map);
@@ -5815,7 +5822,7 @@ function arcadeToPseudocodeImpl (files, opts = {}) {
     sharedSourceConsumed=!!sharedImageTransport&&!!sharedSourceContext;
     const flattened = namespaceBindings.program ? ast : null;
     const nativeTilemaps = createNativeTilemapRegistry(map,tileImageOf,assetFileOrder?{fileOrder:assetFileOrder}:{});
-    const namedEvents = flattened && translateNamedHandleEvents(flattened, assets, nativeTilemaps, !!projectPaletteHex || runtimePaletteRequested || sourceScalarDeclarations(flattened).length > 0, assetKindLookup, scrollerVersion, characterVersion);
+    const namedEvents = flattened && translateNamedHandleEvents(flattened, assets, nativeTilemaps, !!projectPaletteHex || runtimePaletteRequested || sourceScalarDeclarations(flattened).length > 0, assetKindLookup, scrollerVersion, characterVersion, statsSourceSafe);
     if (namedEvents) return withAnimationDiagnostics(namedEvents);
     const creationEvents = flattened && translateCreationEvents(flattened, assets, assetKindLookup, scrollerVersion, characterVersion);
     if (creationEvents) return withAnimationDiagnostics(creationEvents);
@@ -6246,6 +6253,7 @@ function arcadeToPseudocodeImpl (files, opts = {}) {
     /** name → array of script line-blocks */
     const scriptsFor = new Map(t.sprites.map(s => [s.name, []]));
     const setup = [];
+    t.gameStatsAssignments=statsSourceSafe?gameStatsAssignmentProof(ast):{has:()=>false};
     // Pass-one probes (including enum bookkeeping into discarded output) must
     // not register resources. Only the actual script/procedure emission does.
     t.planImageValue = collectImageValue;
