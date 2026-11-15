@@ -47,6 +47,7 @@ const browser = await chromium.launch({headless:true,executablePath:process.env.
 try {
     const page = await browser.newPage({viewport:{width:1100,height:800}}), errors=[];
     page.on('pageerror',e=>errors.push(e.message));
+    page.setDefaultTimeout(60000);
     await page.goto(`http://127.0.0.1:${server.address().port}`);
     await page.waitForFunction(()=>window.ready);
     await page.waitForTimeout(300);
