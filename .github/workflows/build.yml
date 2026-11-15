@@ -875,6 +875,13 @@ jobs:
           node scripts/check-tap-failures.mjs /tmp/unit.tap
           exit "$rc"
 
+      - name: Verify Robot Lab pane interactions in Chromium
+        if: ${{ !cancelled() && matrix.shard == 3 && steps.overlays.outcome == 'success' && steps.unit_playwright.outcome == 'success' }}
+        timeout-minutes: 3
+        env:
+          BW_UX_EVIDENCE: ${{ runner.temp }}/robot-lab-pane-ux
+        run: node scripts/verify-sim-lab-pane-ux.mjs
+
       - name: Preserve unit shard evidence
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

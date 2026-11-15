@@ -6,6 +6,21 @@ const BWValues = require('../../util/bw-values');
 const currentNumberInput = require('../../util/bw-current-number-input');
 const formatMessage = require('format-message');
 
+// TurboWarp extensions can declare LABEL, while the underlying Scratch VM
+// enum lacks it. Supply the supported literal to the extension without changing
+// the shared VM enum or the vendored source.
+const extensionBlockType = Object.freeze({...BlockType, LABEL: 'label'});
+const prepareLabels = info => {
+    if (!info || !Array.isArray(info.blocks)) return info;
+    info.blocks = info.blocks.map(block => {
+        if (!block || block.blockType !== 'label' || block.xml != null) return block;
+        const text = String(block.text == null ? '' : block.text)
+            .replace(/[&<>"']/g, ch => `&#${ch.charCodeAt(0)};`);
+        return {...block, xml: `<label text="${text}"></label>`};
+    });
+    return info;
+};
+
 // Older bundled extensions sometimes use stable English menu values directly
 // as their labels. Preserve those values for saved projects and localize only
 // what the learner sees. This also covers bundles whose own translation table
@@ -91,7 +106,7 @@ module.exports = function makeCrispExtension (source, dependencies = null, array
             this.runtime = runtime;
             let captured = null, inst = null;
             const Scratch = {
-                BlockType, ArgumentType, TargetType, Cast, BWValues,
+                BlockType: extensionBlockType, ArgumentType, TargetType, Cast, BWValues,
                 BWNumberInput: (args, util, opcode, name) => currentNumberInput(runtime, args, util, opcode, name),
                 translate: Object.assign(m => (m && typeof m === 'object' ? (m.default || '') : m), { setup: () => {} }),
                 extensions: { register: inst => { captured = inst; }, unsandboxed: true, isPenguinMod: false },
@@ -145,7 +160,7 @@ module.exports = function makeCrispExtension (source, dependencies = null, array
             }
         }
         getInfo () {
-            const info = localizeLegacyMenus(this._inst.getInfo());
+            const info = prepareLabels(localizeLegacyMenus(this._inst.getInfo()));
             // Only Arcade's supplied module closure owns this optional hook.
             // Ordinary adapters and the separate Array token path are unchanged.
             if (typeof dependencies?.bindScoreAdapterInfo === 'function') {
