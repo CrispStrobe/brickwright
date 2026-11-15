@@ -807,3 +807,19 @@ converges slowly. Arms then pass end stops, holds slip and gear trains can
 become unstable. Keep `legacy` for such models; a solver change that solves the
 rotor row with those rows is separate future work. Qualify an opted-in model on
 a runtime revision that includes this setting.
+
+An authored linkage with light moving bodies attached to a much heavier frame
+can request stronger solver convergence with one declaration in its main model:
+
+```text
+0 !BW SOLVER light-links
+```
+
+This preset requests 120 velocity and 10 position iterations on hinges and sliders
+whose lighter body is below 10 g and whose mass ratio exceeds 20. The existing
+motor conditioning still applies. It changes neither masses, geometry nor
+collision filtering. Save and reopen preserve the declaration; invalid or
+duplicate declarations refuse simulation. Models without it retain their existing
+settings. Solstice opts in with its linkage saved at gravity rest and connected
+automatic instruction pages. It remains experimental; the preset does not establish
+physical accuracy or buildability.

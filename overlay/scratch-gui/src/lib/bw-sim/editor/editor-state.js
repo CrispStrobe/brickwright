@@ -50,6 +50,7 @@ const makeModel = (version, parts, groups, steps, belts = null, ropes = null, ho
     if (carried && carried.motorDirection !== undefined) out.motorDirection = carried.motorDirection;
     if (carried && carried.rotor !== undefined) out.rotor = carried.rotor;
     if (carried && carried.internalEdgeRemovalPairs !== undefined) out.internalEdgeRemovalPairs = carried.internalEdgeRemovalPairs;
+    if (carried && carried.solver !== undefined) out.solver = carried.solver;
     if (groups) out.groups = deepFreeze(groups);
     if (steps) out.steps = deepFreeze(steps);
     if (belts && belts.length) out.belts = deepFreeze(belts);
@@ -69,7 +70,8 @@ const importModel = model => {
         files: model.files ? Object.freeze({...model.files}) : null,
         ...(model.motorDirection !== undefined ? {motorDirection: model.motorDirection} : {}),
         ...(model.rotor !== undefined ? {rotor: model.rotor} : {}),
-        ...(model.internalEdgeRemovalPairs !== undefined ? {internalEdgeRemovalPairs: deepFreeze(model.internalEdgeRemovalPairs.map(pair => pair.slice()))} : {})};
+        ...(model.internalEdgeRemovalPairs !== undefined ? {internalEdgeRemovalPairs: deepFreeze(model.internalEdgeRemovalPairs.map(pair => pair.slice()))} : {}),
+        ...(model.solver !== undefined ? {solver: model.solver} : {})};
     return makeModel(model.version, model.parts.map(frozenPart), groups, steps, belts, ropes, hoses, carried);
 };
 
@@ -379,7 +381,7 @@ export const createEditor = ({model, catalog}) => {
                 const {around, lengthLdu} = cmd;
                 if (!Array.isArray(around) || around.length < 2 || new Set(around).size !== around.length) throw new Error('a rope runs from a drum to a hook');
                 for (const pid of around) if (!hasPart(pid)) throw new Error(`unknown id '${pid}'`);
-                if (!(typeof lengthLdu === 'number' && lengthLdu > 0)) throw new Error('bad rope length');
+                if (!(Number.isFinite(lengthLdu) && lengthLdu > 0)) throw new Error('bad rope length');
                 const ids = new Set((current.ropes || []).map(r => r.id));
                 let n = 1;
                 while (ids.has(`r${n}`)) n++;

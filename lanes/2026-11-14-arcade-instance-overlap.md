@@ -1,6 +1,6 @@
 # Historical Arcade receiver-overlap import
 
-Status: local implementation and canonical compiler integration; corpus measurement pending.
+Status: implementation and bounded qualification DONE; current-head CI acceptance and supplier landing pending.
 Owner: Codex, user-requested MakeCode coverage continuation.
 Branch: `lane/arcade-instance-overlap-20261114`.
 Base: `43f534195db2dcfa072a68b17654fad4d14a7c08`.
@@ -28,3 +28,14 @@ replacement, deferred lookup, orientation, pair locks, fault/reset/ghost cases,
 negative domains and pseudocode roundtrips. Independent review passed. These
 are source/compiler and bounded method tests, not full VM game qualification.
 The unchanged 184-input corpus run follows this clean local candidate.
+
+
+The same-owner continuation in PR #1785 includes the later parser, producer and
+native runtime slices. The latest diagnostics slice has focused original/native
+Code and SB3 qualification, six detected causal mutants, and one immutable
+partial-to-translated comparison. The stored complete 500-project result remains
+336/135/17/9/3; targeted improvements are separate. Private research inputs are
+excluded. Current-main integration preserves both palette-label preparation and
+Array-result owner bindings, with eight actual adapter checks passing. Supplier
+#184 remains a prerequisite; its exact inventory/schema regression has eleven
+focused checks passing. Final acceptance uses the integration head's own checks.

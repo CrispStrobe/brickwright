@@ -18,6 +18,7 @@ export const INSIGHT_TEXT = {
         issues: {
             'bad-motor-direction': 'The motor direction setting on line {line} is unknown or repeated, so the robot cannot run. Check this setting in the model file.',
             'bad-rotor-model': 'The motor rotor setting on line {line} is unknown or repeated, so the robot cannot run. Use legacy or native once in the model file.',
+            'bad-solver-preset': 'The solver setting on line {line} is unknown or repeated, so the robot cannot run. Use light-links once in the model file.',
             'bad-internal-edge-pair': 'A selected contact pair is invalid or repeated. Check that it names two different parts in this model before starting the robot.',
             'bad-slide': '{parts}: the sliding-hole instruction does not name a supported round hole. Check its connector name.',
             'bad-rotor': '{parts}: the saved motor angle is not valid. Use a finite angle for a supported motor.',
@@ -99,6 +100,7 @@ export const INSIGHT_TEXT = {
         issues: {
             'bad-motor-direction': 'Die Einstellung für die Motordrehrichtung in Zeile {line} ist unbekannt oder steht mehrfach in der Datei. Darum kann der Roboter nicht starten. Prüfe diese Einstellung in der Modelldatei.',
             'bad-rotor-model': 'Die Einstellung für den Motorrotor in Zeile {line} ist unbekannt oder steht mehrfach in der Datei. Darum kann der Roboter nicht starten. Verwende legacy oder native genau einmal in der Modelldatei.',
+            'bad-solver-preset': 'Die Solver-Einstellung in Zeile {line} ist unbekannt oder steht mehrfach in der Datei. Darum kann der Roboter nicht starten. Verwende light-links genau einmal in der Modelldatei.',
             'bad-internal-edge-pair': 'Ein ausgewähltes Kontaktpaar ist ungültig oder mehrfach vorhanden. Prüfe, ob es zwei verschiedene Teile dieses Modells nennt, bevor du den Roboter startest.',
             'bad-slide': '{parts}: Die Gleitbohrungsangabe nennt kein unterstütztes rundes Loch. Prüfe den Anschlussnamen.',
             'bad-rotor': '{parts}: Der gespeicherte Motorwinkel ist ungültig. Verwende einen endlichen Winkel für einen unterstützten Motor.',

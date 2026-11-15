@@ -42,6 +42,9 @@ export const structuralCouplingLinks = couplings => couplings.flatMap(c => {
  * times heavier (physics/jolt-core.js lightLinks). Bodies keep their parts' masses.
  */
 export const FOREIGN_LIGHT_LINKS = Object.freeze({massKg: 0.01, ratio: 20, velocity: 30, position: 10});
+// Explicit authored-model preset: light links in a closed linkage need velocity
+// convergence from the first gravity step. Mass, contacts and topology stay unchanged.
+export const AUTHORED_LIGHT_LINKS = Object.freeze({...FOREIGN_LIGHT_LINKS, velocity: 120});
 /**
  * A model from elsewhere: no body moves faster than this (Jolt's own limit is 500 m/s). A LEGO model's fastest part
  * is well under it; a part the solver flings is caught before it reaches a non-finite pose (42109, 42052, 75253 and
@@ -187,6 +190,7 @@ export const compile = (model, catalog, opts = {}) => {
     }
     const edgeProblems = validateInternalEdgeRemovalPairs(model?.internalEdgeRemovalPairs, new Set((Array.isArray(model?.parts) ? model.parts : []).map(p => p?.id)), 'model.internalEdgeRemovalPairs');
     if (edgeProblems.length) throw new RangeError(edgeProblems.join('; '));
+    if (model?.solver !== undefined && model.solver !== 'light-links') throw new RangeError('solver must be light-links');
     const diagnostics = [];
     const catalogMap = toCatalogMap(catalog);
     const kinds = opts.kinds || BUILTIN_KINDS;
@@ -556,6 +560,7 @@ export const compile = (model, catalog, opts = {}) => {
     }
     // Only an opted-in model carries the rotor setting: legacy mechanisms stay byte-identical.
     if (model.rotor === 'native') mechanism.rotor = 'native';
+    if (model.solver === 'light-links') mechanism.solver = {lightLinks: {...AUTHORED_LIGHT_LINKS}};
     if (!v2) return mechanism;
 
     // Meshes relative to a frame that is not both hinges' (mech/gears.js, gearbox lane): v2 only.
@@ -581,6 +586,9 @@ export const compile = (model, catalog, opts = {}) => {
         }
         mechanismV2.noCollide.sort((x, y) => (x[0] + '|' + x[1] < y[0] + '|' + y[1] ? -1 : 1));
         delete mechanismV2.noCollideParts;
+    }
+    if (model.solver === 'light-links') {
+        mechanismV2.solver = {...mechanismV2.solver, lightLinks: {...AUTHORED_LIGHT_LINKS}};
     }
     const problemsV2 = validateCompiledMechanism(mechanismV2, {kinds});
     if (problemsV2.length > 0) {

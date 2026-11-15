@@ -52,6 +52,7 @@
   },
   "jolt-physics/wasm-compat": {
     "tests": [
+      "test/solstice-solver-preset.test.mjs",
       "test/bw-sim-internal-edge-pairs-native.test.mjs",
       "test/bw-sim-rotor-model.test.mjs",
       "test/bw-sim-motor-direction-compat.test.mjs",
@@ -611,6 +612,7 @@
   },
   "jolt-physics/wasm-simd-compat": {
     "tests": [
+      "test/solstice-solver-preset.test.mjs",
       "test/bw-sim-internal-edge-pairs-native.test.mjs",
       "test/bw-sim-rotor-model.test.mjs",
       "test/bw-sim-motor-direction-compat.test.mjs",

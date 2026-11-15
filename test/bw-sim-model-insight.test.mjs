@@ -75,6 +75,12 @@ test('every issue code in the sources has a child\'s sentence in English and Ger
     assert.deepEqual(stale, [], 'sentences for codes nothing produces');
 });
 
+test('invalid solver preset identifies the line and remedy in both languages', () => {
+    const issue = {code: 'bad-solver-preset', line: 12};
+    assert.match(issueSentence(INSIGHT_TEXT.en, issue, () => ''), /line 12.*light-links/);
+    assert.match(issueSentence(INSIGHT_TEXT.de, issue, () => ''), /Zeile 12.*light-links/);
+});
+
 test('a motor with no port in its file is plugged into a free port, and the note says so (hubs/auto-ports.js)', () => {
     // The shipped driving base with motor A's port line taken out, as a file from elsewhere (not ours: no
     // `0 Author: Brickwright`): A is free, so motorL goes there — in the model, so Build shows it.
