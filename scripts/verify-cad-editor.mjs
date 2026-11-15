@@ -131,7 +131,7 @@ try{
   const sameEditor=await page.evaluate(()=>{window.__bwThemeEditor=window.__bwCad.editor;return window.__bwCad.editor.session.serialize();});
   for(const mode of ['dark','default']){
    await page.getByTestId('bw-settings-menu-trigger').click();
-   const preference=page.getByLabel(/^Color mode$/i);
+   const preference=page.getByLabel(/Color mode/i);
    if(!await preference.isVisible())await page.getByText('Preferences',{exact:true}).click();
    await preference.selectOption(mode);
    await page.waitForFunction(mode=>window.__bwCad.editor.colorMode===(mode==='dark'?'dark':'light'),mode);
