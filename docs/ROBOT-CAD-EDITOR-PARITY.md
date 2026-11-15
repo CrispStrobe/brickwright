@@ -22,6 +22,14 @@ an identical vendored copy under `packages/editor/src/vendor`, following its
 existing touch-gestures/transform-math reuse policy, with source commit and hash
 recorded in `docs/brickwright-provenance.json`.
 
+## Follow-up: optional CAD host
+
+The default-off CAD host is now implemented; see
+[CAD-EDITOR-INTEGRATION.md](CAD-EDITOR-INTEGRATION.md). It consumes the canonical
+CAD editor/core as a pinned browser SDK, keeps the SDK's worker and WASM lazy,
+and adds Settings → Workspace → CAD Editor. CAD state travels in the SDK's
+`brickwright/cad.json` sidecar, including when the editor is disabled.
+
 ## Next work, in priority order
 
 | Area | Current evidence | Recommended next change |
@@ -29,7 +37,7 @@ recorded in `docs/brickwright-provenance.json`.
 | Camera controls | Robots has Brickwright/Studio mouse presets and wheel/trackpad modes; CAD has navigation profiles and Space-drag pan. | Define common gesture intents and shortcut labels, then adapt the existing camera controllers. Keep touch orbit and Simulate's camera behavior explicit. |
 | Transform feedback | Robots has grid snapping, typed position/rotation and status feedback; CAD has transient transform readouts and precision controls. | Add a live distance/angle readout to Robots using its LDU-to-mm conversion. Preview must not create undo entries. Share formatting/precision arithmetic where the units are explicit. |
 | Selection actions | Robots already has group/ungroup, connected selection, align, distribute, mirror, hide/isolate, paint, duplicate and fit-selection. CAD has its own solid operations and source editing. | Keep these domain commands; share gesture cancellation and selection-set operations when both need them. Do not transfer CAD scaling to Technic parts, whose connectors/colliders have fixed dimensions. |
-| Embedding CAD | CAD exports `mountCadEditor` and host callbacks for files, selection and command state; its Brickwright adapter already stores `brickwright/cad.json` and converts CAD/LDraw coordinates. | Integrate the SDK through the Brickwright host, with lazy editor/worker loading and explicit mount/dispose ownership. Extend project-bundle roundtrip coverage so existing robot data and CAD state both survive. |
+| Embedding CAD (implemented) | CAD exports `mountCadEditor` and host callbacks for files, selection and command state; its Brickwright adapter already stores `brickwright/cad.json` and converts CAD/LDraw coordinates. | The host now lazy-loads the pinned SDK and owns its session, disposal and SB3 sidecar. Continue with native iPad coverage and shared camera/readout contracts. |
 | User-created robot parts | CAD's `toBrickwrightPart` exports LDraw geometry with `requiresPhysicsMetadata: true`. | Start with visual parts. Require authored connectors/colliders before a generated part participates in robot mechanics; keep source CAD definitions editable. |
 
 Avoid sharing either viewport wholesale: Robots renders LDraw in metres with Y

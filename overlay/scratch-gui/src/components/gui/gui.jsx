@@ -8,6 +8,7 @@ import {connect} from 'react-redux';
 import MediaQuery from 'react-responsive';
 import {Tab, Tabs, TabList, TabPanel} from 'react-tabs';
 import CircuitTab from '../tw-pseudocode/circuit-tab.jsx';
+import {getCadEnabled, CAD_TOGGLE_EVENT} from '../../lib/bw-cad-preferences.js';
 import {getFpgaEnabled, FPGA_TOGGLE_EVENT} from '../../lib/bw-fpga-preferences.js';
 import {pinsToValue} from '../../lib/bw-fpga/pin-value.js';
 // FpgaTab ships only in a build that carries it (BW_ENABLE_FPGA), and even then
@@ -18,6 +19,9 @@ import {pinsToValue} from '../../lib/bw-fpga/pin-value.js';
 // code is emitted — the build-time drop the payload guards depend on is intact.
 const FpgaTab = process.env.BW_ENABLE_FPGA
     ? React.lazy(() => import(/* webpackChunkName: "bw-fpga-tab" */ '../tw-pseudocode/fpga-tab.jsx'))
+    : null;
+const CadTab = process.env.BW_ENABLE_CAD
+    ? React.lazy(() => import(/* webpackChunkName: "bw-cad-tab" */ '../tw-pseudocode/cad-tab.jsx'))
     : null;
 const MicrobitSimPane = React.lazy(() =>
     import(/* webpackChunkName: "bw-microbit-sim" */ '../tw-pseudocode/microbit-sim-pane.jsx')
@@ -172,6 +176,13 @@ const GUIComponent = props => {
         return () => window.removeEventListener(FPGA_TOGGLE_EVENT, onToggle);
     }, []);
     const showFpga = FPGA_BUILT && fpgaEnabled;
+    const [cadEnabled, setCadEnabled] = React.useState(getCadEnabled);
+    React.useEffect(() => {
+        const onToggle = () => setCadEnabled(getCadEnabled());
+        window.addEventListener(CAD_TOGGLE_EVENT, onToggle);
+        return () => window.removeEventListener(CAD_TOGGLE_EVENT, onToggle);
+    }, []);
+    const showCad = process.env.BW_ENABLE_CAD && cadEnabled;
     const [starterBusy, setStarterBusy] = React.useState(false);
     const [starterError, setStarterError] = React.useState('');
     const [lessonsOpen, setLessonsOpen] = React.useState(false);
@@ -254,6 +265,13 @@ const GUIComponent = props => {
     // answered here: show the tab, which then mounts visible and takes the hub.
     const [robotLabWanted, setRobotLabWanted] = React.useState(false);
     const robotLabIndex = robotLabTabIndex(showFpga);
+    // Append CAD after Robots so every existing tab keeps its index.
+    const cadTabIndex = robotLabIndex + 1;
+    const [cadWanted, setCadWanted] = React.useState(false);
+    if (showCad && !cadWanted && props.activeTabIndex === cadTabIndex) setCadWanted(true);
+    React.useEffect(() => {
+        if (!showCad && props.activeTabIndex === cadTabIndex) props.onActivateTab(robotLabIndex);
+    }, [showCad, props.activeTabIndex, props.onActivateTab, cadTabIndex, robotLabIndex]);
     if (!robotLabWanted && props.activeTabIndex === robotLabIndex) setRobotLabWanted(true);
     React.useEffect(() => {
         const onOpen = () => {
@@ -1045,6 +1063,12 @@ const GUIComponent = props => {
                                         </svg>
                                         <span data-bw-tab-label=""><FormattedMessage defaultMessage="Robots" description="Brickwright Robot Lab (3D LEGO model and physics) tab" id="gui.gui.robotLabTab" /></span>
                                     </Tab>
+                                    {showCad ? <Tab className={tabClassNames.tab}
+                                        title={intl.formatMessage({id: 'gui.gui.cadTab', defaultMessage: 'CAD'})}
+                                        aria-label={intl.formatMessage({id: 'gui.gui.cadTab', defaultMessage: 'CAD'})}>
+                                        <span aria-hidden="true" data-bw-tab-icon="">◇</span>
+                                        <span data-bw-tab-label="">{'CAD'}</span>
+                                    </Tab> : null}
                                 </TabList>
                                 <TabPanel className={tabClassNames.tabPanel}>
                                     {middleContent === 'code' ? (
@@ -1125,6 +1149,13 @@ const GUIComponent = props => {
                                         </React.Suspense></EditorErrorBoundary>
                                     ) : <div data-testid="bw-robot-lab-tab" data-state="idle" />}
                                 </TabPanel>
+                                {showCad ? <TabPanel className={tabClassNames.tabPanel}>
+                                    {cadWanted ? <EditorErrorBoundary name="CAD">
+                                        <React.Suspense fallback={<div role="status">{intl.locale.startsWith('de') ? 'CAD wird geladen…' : 'Loading CAD…'}</div>}>
+                                            <CadTab isVisible={activeTabIndex === cadTabIndex} locale={intl.locale} />
+                                        </React.Suspense>
+                                    </EditorErrorBoundary> : null}
+                                </TabPanel> : null}
                             </Tabs>
                             <button
                                 type="button"

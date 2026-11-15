@@ -171,6 +171,7 @@ const baseConfig = new ScratchWebpackConfigBuilder(
         // 5.53 MB and ratchets against 7 (see bw-board target-kinds.js), which a
         // runtime toggle could not promise. Enabling it by DEFAULT is a separate,
         // later decision that may never be taken -- see docs/TANG-NANO.md.
+        'process.env.BW_ENABLE_CAD': JSON.stringify(process.env.BW_ENABLE_CAD === '1'),
         'process.env.BW_ENABLE_FPGA': JSON.stringify(process.env.BW_ENABLE_FPGA === '1'),
         // Peer sessions (task E11, docs/PEERS-SECURITY-REVIEW.md): LAN sharing between two
         // apps, OFF unless a build asks for it. A BUILD-TIME boolean so an off build carries no
@@ -318,7 +319,7 @@ const buildConfig = baseConfig.clone()
             // renderer. CI builds a separate profiling artifact for the 8086
             // benchmark; the deployable build remains on the ordinary
             // renderer and keeps its normal runtime cost.
-            path: path.resolve(__dirname, reactProfiling ? 'build-profile' : 'build'),
+            path: path.resolve(__dirname, process.env.BW_GUI_OUTPUT_DIR || (reactProfiling ? 'build-profile' : 'build')),
             filename: '[name].[contenthash:8].js',
             // Keep lazy feature chunks addressable across Pages deploys.
             // Hashed lazy URLs let a cached HTML/runtime request a chunk that
@@ -345,6 +346,7 @@ const buildConfig = baseConfig.clone()
             {
                 from: 'static',
                 to: 'static',
+                globOptions: {ignore: process.env.BW_ENABLE_CAD === '1' ? [] : ['**/cad-sdk/**']},
                 info: preserveProofAssetInfo
             },
             {
