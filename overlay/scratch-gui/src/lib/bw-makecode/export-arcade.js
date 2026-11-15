@@ -1,3 +1,8 @@
+const boundedTextPromptInputs=node=>{
+    const question=node?.inputs?.QUESTION?.[1],length=node?.inputs?.LENGTH?.[1];
+    return Object.keys(node?.fields||{}).length===0&&Object.keys(node?.inputs||{}).sort().join(',')==='LENGTH,QUESTION'&&
+        Array.isArray(question)&&question[0]===10&&typeof question[1]==='string'&&Array.isArray(length)&&[4,5,6,7,8].includes(length[0])&&['string','number'].includes(typeof length[1])&&/^[1-3]$/.test(String(length[1]));
+};
 import {createProjectFrameDeltaNumber,currentFrameDeltaReporter} from './project-frame-delta-number.js';
 import {EXTERNAL_NAME} from './external-references.js';
 import {createProjectMathNormalResults} from './project-math-normal-results.js';
@@ -2274,6 +2279,9 @@ class ArcadeEmitter {
         case 'arcade_spritesOfKind': return `sprites.allOfKind(${this.kindExpr(b, 'KIND')})`;
         case 'arcade_spriteCount': return `sprites.allOfKind(${this.kindExpr(b, 'KIND')}).length`;
         case 'arcade_ask': return `game.ask(${this.arrayValue(b,'TITLE')}, ${this.arrayValue(b,'SUBTITLE')})`;
+        case 'arcade_askForStringLength':
+            if(!boundedTextPromptInputs(b)){this.note('Arcade limited text prompt requires literal String question and length one to three');return this.na();}
+            return `game.askForString(${v('QUESTION')}, ${v('LENGTH')})`;
         case 'arcade_askForNumberLength': return `game.askForNumber(${v('QUESTION')}, ${v('LENGTH')})`;
         case 'arcade_askForNumber': return `game.askForNumber(${v('QUESTION')})`;
         case 'arcade_controllerStep': {
@@ -3907,6 +3915,11 @@ class ArcadeEmitter {
                 }
                 if(value.opcode==='arcade_spriteDataReadBoolean'){const id=Symbol('sprite data boolean');booleans.add(id);return id;}
                 if(['arcade_createSpriteKind','arcade_spriteKindValue'].includes(value.opcode)){const id=Symbol('sprite kind number');numbers.add(id);return id;}
+                if(value.opcode==='arcade_askForStringLength'){
+                    if(boundedTextPromptInputs(value)){
+                        const id=Symbol('bounded text prompt String');strings.add(id);inspectionLeaves.set(id,'string');return id;
+                    }
+                }
                 if(['arrays_stringFromCharCode','arrays_stringConcat'].includes(value.opcode)){const id=Symbol('string primitive');strings.add(id);return id;}
                 if(value.opcode==='arrays_stringCharCodeAt'){const id=Symbol('character code number');numbers.add(id);return id;}
                 if(['arcade_spriteToString','arcade_characterRuleToString'].includes(value.opcode)) {const id=Symbol('sprite text');strings.add(id);return id;}

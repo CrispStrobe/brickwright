@@ -25,8 +25,8 @@ const sourceDescriptor=Object.getOwnPropertyDescriptor,sourceDefine=Object.defin
 const sourceAppend=(array,value)=>sourceDefine(array,sourceText(array.length),{__proto__:null,value,writable:true,enumerable:true,configurable:true});
 const sourceWeakGet=WeakMap.prototype.get,sourceWeakSet=WeakMap.prototype.set,sourceWeakHas=WeakMap.prototype.has;
 const sourceHeld=owner=>sourceApply(sourceWeakGet,sourceAdapters,[owner]);
-const sourceOpcodes = ['sourceValueBinary','sourceValueUnary','highScore'];
-const sourceNames=owner=>sourceOpcodes.filter(name=>name!=='highScore'||typeof owner.isHighScoreCurrent==='function');
+const sourceOpcodes = ['sourceValueBinary','sourceValueUnary','highScore','askForStringLength'];
+const sourceNames=owner=>sourceOpcodes.filter(name=>name==='highScore'?typeof owner.isHighScoreCurrent==='function':name==='askForStringLength'?typeof owner.isPromptCurrent==='function':true);
 function bindSourceOperationAdapter(adapter,instance,owner) {
     if(!owner?.isInstance(instance)||typeof owner.isSourceCurrent!=='function'||!owner.isSourceCurrent())throw Error('Arcade source result owner differs');
     if(sourceApply(sourceWeakHas,sourceAdapters,[owner]))throw Error('Arcade source result adapter was already bound');
@@ -36,8 +36,8 @@ function bindSourceOperationAdapter(adapter,instance,owner) {
 }
 const sourceAdapterCurrent=(owner,name=null)=>{
     const held=sourceHeld(owner);
-    if(!held||!(name==='highScore'?owner.isHighScoreCurrent?.():owner.isSourceCurrent())||!owner.isInstance(held.instance)||sourceDescriptor(held.adapter,'_inst')?.value!==held.instance)return false;
-    const names=sourceNames(owner);for(let i=0;i<names.length;i++)if((name==='highScore'?names[i]==='highScore':names[i]!=='highScore')&&sourceDescriptor(held.adapter,names[i])?.value!==held.delegates[i])return false;
+    if(!held||!(name==='highScore'?owner.isHighScoreCurrent?.():name==='askForStringLength'?owner.isPromptCurrent?.():owner.isSourceCurrent())||!owner.isInstance(held.instance)||sourceDescriptor(held.adapter,'_inst')?.value!==held.instance)return false;
+    const names=sourceNames(owner);for(let i=0;i<names.length;i++)if((name==='highScore'?names[i]==='highScore':name==='askForStringLength'?names[i]==='askForStringLength':!['highScore','askForStringLength'].includes(names[i]))&&sourceDescriptor(held.adapter,names[i])?.value!==held.delegates[i])return false;
     return true;
 };
 const sourcePreparedRecord=func=>sourceApply(sourceWeakGet,sourcePrepared,[func]);
@@ -151,9 +151,9 @@ function bindScoreAdapterInfo(info,adapter,instance) {
     if(Object.prototype.hasOwnProperty.call(entry,scoreIssue))throw Error('Arcade score metadata row was already issued');
     const token=Object.freeze({});
     const sourceRows=typeof owner.isSourceCurrent==='function'?sourceNames(owner).map(name=>{const row=info.blocks.find(block=>block.opcode===name);
-        if(!row||scoreSourceRows.get(row)!==owner||Object.getOwnPropertyDescriptor(row,scoreInfoOwner)?.value!==owner)return null;
-        try{registerSourceResultFactory(row,adapter,owner,name);}catch(_){return null;}
-        return {name,arguments:row.arguments};}):[];
+        if(!row||scoreSourceRows.get(row)!==owner||Object.getOwnPropertyDescriptor(row,scoreInfoOwner)?.value!==owner)return name==='askForStringLength'?{optionalMissing:true}:null;
+        try{registerSourceResultFactory(row,adapter,owner,name);}catch(_){return name==='askForStringLength'?{optionalMissing:true}:null;}
+        return {name,arguments:row.arguments};}).filter(row=>!row?.optionalMissing):[];
     scoreIssues.set(token,{owner,adapter:scoreAdapters.get(owner),arguments:entry.arguments,sourceRows:sourceRows.some(row=>!row)?[]:sourceRows,serial:++scoreIssueSerial,consumed:false});
     Object.defineProperty(entry,scoreIssue,{value:token,enumerable:true});
 }
@@ -202,9 +202,9 @@ function scoreRegistration(runtime,owner) {
         try {
             for(const row of issue.sourceRows||[]){
                 const matches=(category.blocks||[]).filter(value=>value.json?.type==='arcade_'+row.name),prepared=matches.length===1&&matches[0];
-                if(!prepared||prepared.info?.[scoreInfoOwner]!==owner||prepared.info?.arguments!==row.arguments||typeof prepared.info?.func!=='function'||sourceApply(getter,runtime,['arcade_'+row.name])!==prepared.info.func){sourceOperations.length=0;break;}
+                if(!prepared||prepared.info?.[scoreInfoOwner]!==owner||prepared.info?.arguments!==row.arguments||typeof prepared.info?.func!=='function'||sourceApply(getter,runtime,['arcade_'+row.name])!==prepared.info.func){if(row.name==='askForStringLength')continue;sourceOperations.length=0;break;}
                 const bound=sourcePreparedRecord(prepared.info.func),lookupCurrent=sourceLookup(runtime,getter);
-                if(!sourceOrigin||!categoryOrigin||sourceDescriptor(runtime,'_primitives')?.value!==sourceTable||sourceDescriptor(runtime,'_blockInfo')?.value!==sourceCategories||sourceDescriptor(category,'blocks')?.value!==sourceBlocks||!lookupCurrent||!bound||bound.owner!==owner||bound.adapter!==adapter.adapter||bound.name!==row.name||bound.info!==prepared.info||!bound.valid){sourceOperations.length=0;break;}
+                if(!sourceOrigin||!categoryOrigin||sourceDescriptor(runtime,'_primitives')?.value!==sourceTable||sourceDescriptor(runtime,'_blockInfo')?.value!==sourceCategories||sourceDescriptor(category,'blocks')?.value!==sourceBlocks||!lookupCurrent||!bound||bound.owner!==owner||bound.adapter!==adapter.adapter||bound.name!==row.name||bound.info!==prepared.info||!bound.valid){if(row.name==='askForStringLength')continue;sourceOperations.length=0;break;}
                 sourceAppend(sourceOperations,{name:row.name,entry:prepared,func:prepared.info.func,bound,lookupCurrent,table:sourceTable,categories:sourceCategories,blocks:sourceBlocks});
             }
         }catch(_){sourceOperations.length=0;}
@@ -347,6 +347,21 @@ function create(runtime, cells, scoreOwner=null, sceneClock=null, frameDelta=nul
                 if(!operation._parentValues||typeof operation._parentValues[operation._parentKey]!=='number')return refuseScore('active score result is not native Number');
             }
             return true;
+        };
+        const promptString=node=>{
+            const name='askForStringLength',opcode='arcade_'+name;
+            if(!score?.valid||score.disposed||!score.category||!scoreAdapterCurrent(scoreOwner,score.adapter)||!sourceAdapterCurrent(scoreOwner,name)||runtime.getOpcodeFunction!==score.getter)return false;
+            const row=score.sourceOperations.find(value=>value.name===name);if(!row)return false;
+            if(node.opcode!==opcode||Object.keys(node.fields||{}).length||Object.keys(node.inputs||{}).sort().join(',')!=='LENGTH,QUESTION')return false;
+            const length=input(node,'LENGTH'),question=input(node,'QUESTION'),raw=sourceDescriptor(sourceDescriptor(length?.fields,'NUM')?.value,'value')?.value;
+            const limit=typeof raw==='number'?raw:typeof raw==='string'&&/^[1-3]$/.test(raw)?Number(raw):NaN;
+            if(length?.opcode!=='math_number'||length.parent!==node.id||!Number.isInteger(limit)||limit<1||limit>3||Object.keys(length.inputs||{}).length||question?.opcode!=='text'||question.parent!==node.id||Object.keys(question.inputs||{}).length)return false;
+            liveProof?.(); // Recheck prototype/delegate/metadata ownership each time.
+            return row.lookupCurrent()&&sourceDescriptor(runtime,'_primitives')?.value===row.table&&sourceDescriptor(runtime,'_blockInfo')?.value===row.categories&&
+                sourceDescriptor(score.category,'blocks')?.value===row.blocks&&sourceMember(row.categories,score.category)&&sourceMember(row.blocks,row.entry)&&
+                sourceDescriptor(row.entry,'info')?.value===row.bound.info&&sourceDescriptor(row.bound.info,scoreInfoOwner)?.value===scoreOwner&&
+                sourceDescriptor(row.bound.info,'func')?.value===row.func&&sourceDescriptor(row.table,opcode)?.value===row.func&&
+                sourceApply(score.getter,runtime,[opcode])===row.func&&sourcePreparedRecord(row.func)===row.bound&&row.bound.valid;
         };
         const sourceNumber=node=>{
             // Only Number-on-normal-return; operands still execute and validate.
@@ -1210,6 +1225,7 @@ function create(runtime, cells, scoreOwner=null, sceneClock=null, frameDelta=nul
                     // The same Number-valued reporters as arcade_truncateNumber and arcade_signNumber.
                     origins?.add(node);domains.add('number');return true;
                 }
+                if(!player&&op==='arcade_askForStringLength'){if(!promptString(node))return false;origins?.add(node);domains?.add('string');return true;}
                 if(!player&&op==='arrays_referenceItem'){
                     // Literal-index reads use the separately closed local prefix
                     // or the existing global publication proof. The selected

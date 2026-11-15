@@ -80,11 +80,13 @@ module.exports = makeExt(`// Name: Arcade
           [name,Object.getOwnPropertyDescriptor(scorePrototype,name)?.value]));
       const sourceResultDescriptor=Object.getOwnPropertyDescriptor,sourceResultPrototype=Object.getPrototypeOf,sourceResultOwn=Object.prototype.hasOwnProperty,sourceResultApply=Reflect.apply;
       const sourceResultMethods=['sourceValueBinary','sourceValueUnary','_bindSourceOperationAdapter'].map(name=>[name,Object.getOwnPropertyDescriptor(scorePrototype,name)?.value]);
+      const promptResultMethods=['askForStringLength','_askForString'].map(name=>[name,Object.getOwnPropertyDescriptor(scorePrototype,name)?.value]);
       const highScoreMethods=['highScore','_readHighScore','_settingsStore','_highScoreFailure'].map(name=>[name,Object.getOwnPropertyDescriptor(scorePrototype,name)?.value]);
       const scoreNumberOwner=Object.freeze({isInstance:value=>value===this,isHighScoreCurrent:()=>Object.getPrototypeOf(this)===scorePrototype&&Object.getOwnPropertyDescriptor(this,'_runtime')?.value===runtime&&highScoreMethods.every(([name,method])=>typeof method==='function'&&!Object.hasOwn(this,name)&&Object.getOwnPropertyDescriptor(scorePrototype,name)?.value===method),isCurrent:()=>Object.getPrototypeOf(this)===scorePrototype &&
         Object.getOwnPropertyDescriptor(this,'_runtime')?.value===runtime && [...scoreMethods].every(([name,method])=>
           typeof method==='function' && !Object.prototype.hasOwnProperty.call(this,name) &&
           Object.getOwnPropertyDescriptor(scorePrototype,name)?.value===method),
+        isPromptCurrent:()=>sourceResultPrototype(this)===scorePrototype&&sourceResultDescriptor(this,'_runtime')?.value===runtime&&promptResultMethods.every(([name,method])=>typeof method==='function'&&!sourceResultApply(sourceResultOwn,this,[name])&&sourceResultDescriptor(scorePrototype,name)?.value===method),
         isSourceCurrent:()=>{
           if(sourceResultPrototype(this)!==scorePrototype||sourceResultDescriptor(this,'_runtime')?.value!==runtime)return false;
           for(let i=0;i<sourceResultMethods.length;i++){
@@ -672,6 +674,8 @@ module.exports = makeExt(`// Name: Arcade
             text: 'ask Arcade number [QUESTION]', arguments: str('QUESTION', 'Number?') },
           { opcode: 'askForNumberLength', blockType: Scratch.BlockType.REPORTER,
             text: 'ask Arcade number [QUESTION] length [LENGTH]', arguments: {...str('QUESTION', 'Number?'),...n('LENGTH', 3)} },
+          { opcode: 'askForStringLength', blockType: Scratch.BlockType.REPORTER,
+            text: 'ask Arcade text [QUESTION] length [LENGTH]', arguments: {...str('QUESTION', 'Text?'),...n('LENGTH', 2)} },
           { opcode: 'askForString', blockType: Scratch.BlockType.REPORTER,
             text: 'ask Arcade text [QUESTION]', arguments: str('QUESTION', 'Text?') },
           { opcode: 'setBackgroundColor', blockType: Scratch.BlockType.COMMAND,
@@ -2801,6 +2805,14 @@ module.exports = makeExt(`// Name: Arcade
       return operation;
     }
     askForString(args, util) { return this._askForString(args, util); }
+    askForStringLength(args, util) {
+      if(typeof Scratch.BWValues.decode(args.QUESTION)!=='string')throw new TypeError('Arcade limited text prompt requires a String question');
+      const length=dependencies.readPromptLength(this._runtime,args,util);
+      return Promise.resolve(this._askForString(args,util,length,false,false)).then(reply=>{
+        if(typeof reply!=='string')throw new TypeError('Arcade limited text prompt result must remain a String');
+        return reply;
+      });
+    }
     askForNumber(args, util) {
       return Promise.resolve(this._askForString(args, util,6,true)).then(reply => parseFloat(reply));
     }
@@ -6979,6 +6991,7 @@ module.exports = makeExt(`// Name: Arcade
   primitiveOwner: require('../../../util/bw-primitive-owner'),
   cachedPrimitiveOwner: require('../../../util/bw-cached-primitive-owner'),
   arcadeExceptions: require('../../../util/bw-arcade-exceptions'),
+  readPromptLength: require('./prompt-length-input'),
   sourceValueBinary: require('../../../util/bw-array-source-values').sourceValueBinary,
   sourceValueUnary: require('../../../util/bw-array-source-values').sourceValueUnary,
   createClassCallableHost: require('./class-callable-host'),

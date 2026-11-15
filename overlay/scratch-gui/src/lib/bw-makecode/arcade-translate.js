@@ -1,3 +1,4 @@
+import {normalizeOwnedPromptOptions,literalLimitedTextPrompt} from './owned-prompt-options-source.js';
 import {gameResetSourceSafe,markGameResets,gameResetIntrinsic} from './game-reset-source.js';
 import {playerButtonConfiguredSourceSafe,markPlayerButtonRegistrations,playerButtonRegistration} from './player-button-registration-source.js';
 import {playerConnectionConfiguredSourceSafe,markPlayerConnectionRegistrations,playerConnectionRegistration} from './player-connection-registration-source.js';
@@ -1001,6 +1002,7 @@ class ArcadeTranslator extends BaseTranslator {
             this.unsupported.push('game.askForNumber() with digit limit or other options');
             return '0';
         case 'game.askForString':
+            if(node.bwPxtLimitedTextPrompt===true&&literalLimitedTextPrompt(node))return `arcade ask text ${this.expr(a[0])} length ${this.expr(a[1])}`;
             if (a.length === 1 || node.bwPxtDefaultTextPrompt===true&&literalDefaultTextPrompt(node)) return `arcade ask text ${this.expr(a[0])}`;
             this.unsupported.push('game.askForString() with length limit or other options');
             return '""';
@@ -5621,8 +5623,8 @@ function arcadeToPseudocodeImpl (files, opts = {}) {
         return Object.fromEntries(Object.entries(node).map(([key, value]) => [key, lowerAnimationAssets(value)]));
     };
     const callableParseOptions={namedFunctionExpressions:true,parameterDefaults:true,retainParentheses:true,retainWhenUsed:true,retainClassHeritage:true,retainOrdinaryDefaultProvenance:true};
-    const ordinarySource=markHighScoreCalls(markDefaultTextPrompts(markNumberPromptLengths(markLegacyNoteMelodies(lowerAnyButtonRegistrations(normalizeUnusedNamedCallbacks(markGameResets(markPlayerConnectionRegistrations(markPlayerButtonRegistrations(parseSharedImageSourceProgram(sharedSourcePreparation,source,opts.procedureConstraintsPrototype===true,opts.procedureConstraintsPrototype!==true,true,true),playerButtonSourceSafe),playerConnectionSourceSafe),resetSourceSafe),map,callbackRegistrationSpec,projectInputDiagnostics),anyButtonSourceSafe,projectInputDiagnostics),legacyMelodySourceSafe),numberPromptSourceSafe),defaultTextPromptSourceSafe),highScoreSourceSafe);
-    const callableSourceParsed=markHighScoreCalls(markDefaultTextPrompts(markNumberPromptLengths(markLegacyNoteMelodies(lowerAnyButtonRegistrations(normalizeUnusedNamedCallbacks(markGameResets(markPlayerConnectionRegistrations(markPlayerButtonRegistrations(parseMakeCodeTs(source,{...callableParseOptions,retainCallableMetadata:true,retainAuthoredEmptyBranches:true}),playerButtonSourceSafe),playerConnectionSourceSafe),resetSourceSafe),map,callbackRegistrationSpec,projectInputDiagnostics),anyButtonSourceSafe),legacyMelodySourceSafe),numberPromptSourceSafe),defaultTextPromptSourceSafe),highScoreSourceSafe);
+    const ordinarySource=normalizeOwnedPromptOptions(markHighScoreCalls(markDefaultTextPrompts(markNumberPromptLengths(markLegacyNoteMelodies(lowerAnyButtonRegistrations(normalizeUnusedNamedCallbacks(markGameResets(markPlayerConnectionRegistrations(markPlayerButtonRegistrations(parseSharedImageSourceProgram(sharedSourcePreparation,source,opts.procedureConstraintsPrototype===true,opts.procedureConstraintsPrototype!==true,true,true),playerButtonSourceSafe),playerConnectionSourceSafe),resetSourceSafe),map,callbackRegistrationSpec,projectInputDiagnostics),anyButtonSourceSafe,projectInputDiagnostics),legacyMelodySourceSafe),numberPromptSourceSafe),defaultTextPromptSourceSafe),highScoreSourceSafe),map);
+    const callableSourceParsed=normalizeOwnedPromptOptions(markHighScoreCalls(markDefaultTextPrompts(markNumberPromptLengths(markLegacyNoteMelodies(lowerAnyButtonRegistrations(normalizeUnusedNamedCallbacks(markGameResets(markPlayerConnectionRegistrations(markPlayerButtonRegistrations(parseMakeCodeTs(source,{...callableParseOptions,retainCallableMetadata:true,retainAuthoredEmptyBranches:true}),playerButtonSourceSafe),playerConnectionSourceSafe),resetSourceSafe),map,callbackRegistrationSpec,projectInputDiagnostics),anyButtonSourceSafe),legacyMelodySourceSafe),numberPromptSourceSafe),defaultTextPromptSourceSafe),highScoreSourceSafe),map);
     const createdDimensionSourceSafe=createdImageDimensionSourceSafe(map);
     const namedEligibility=selectNamedFunctionSourceProof(callableSourceParsed,{ordinaryProgram:ordinarySource,registrationSpec:callbackRegistrationSpec});
     const namedEnabled=namedEligibility.eligible;
