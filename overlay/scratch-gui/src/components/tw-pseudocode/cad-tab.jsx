@@ -103,14 +103,14 @@ const CadTab = ({isVisible, locale}) => {
     React.useEffect(() => {
         if (isVisible && editor.current) { activateUndoSurface('cad'); editor.current.focus(); }
     }, [isVisible]);
-    return <div data-testid="bw-cad-tab" style={{height: '100%', minHeight: 350, display: 'flex', flexDirection: 'column'}}>
+    return <div data-testid="bw-cad-tab" style={{width: '100%', height: '100%', flex: 1, minWidth: 0, minHeight: 350, display: 'flex', flexDirection: 'column'}}>
         {storageWarning ? <div role="status">{locale.startsWith('de')
             ? 'Nur für diese Sitzung gespeichert. Speichere das Projekt als Datei.'
             : 'Saved for this session. Save the project to a file to keep it.'}</div> : null}
         {error ? <div role="alert">{error} <button onClick={() => setRetry(value => value + 1)}>
             {locale.startsWith('de') ? 'Erneut versuchen' : 'Retry'}
         </button></div> : null}
-        <div ref={host} style={{flex: 1, minHeight: 350}} />
+        <div ref={host} style={{width: '100%', flex: 1, minWidth: 0, minHeight: 350}} />
     </div>;
 };
 CadTab.propTypes = {isVisible: PropTypes.bool.isRequired, locale: PropTypes.string.isRequired};

@@ -59,11 +59,19 @@ node --test --import ./scripts/lib/register-gui-scope.mjs test/cad-project-bundl
 node scripts/verify-cad-editor.mjs --sdk-only
 # After a BW_ENABLE_CAD=1 GUI build:
 node scripts/verify-cad-editor.mjs
+node scripts/verify-cad-editor.mjs --ipad
+# For a build made with BW_ENABLE_CAD=0:
+node scripts/verify-cad-editor.mjs --expect-absent
 ```
 
 The SDK check evaluates a real WASM solid and preserves a session across
 viewport disposal/remount. The GUI check covers default-off visibility, lazy
 loading, the Settings toggle, the real shape library, persistence and host Undo.
+`--ipad` uses an iPad-sized touch viewport in Chromium; it is not a physical-device
+UI test. `--expect-absent` verifies that a CAD-excluded build stays excluded even
+with a saved opt-in. `BW_GUI_BUILD_ROOT` can select a separate compiled directory.
+For concurrent native/frontend work, webpack accepts `BW_GUI_OUTPUT_DIR` so an
+active native build keeps its frontend inputs unchanged.
 
 ## Next parity steps
 
