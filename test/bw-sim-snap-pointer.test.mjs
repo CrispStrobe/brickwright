@@ -274,3 +274,17 @@ test('select connected follows pairs; a pin turned 15° about its hole keeps its
     const l2 = connectionLine({version: 1, parts: [gear, ax]}, CATALOG, 'ax');
     assert.equal(l2.round, false);
 });
+
+test('7 x 11 side bores snap flat onto pins beside the long side of the SPIKE hub',()=>{
+    const hub={id:'hub',part:'45601.dat',position:[0,0,0],rotation:I};
+    const pins=[40,80].map((z,i)=>({id:`pin${i}`,part:'2780.dat',position:[70,-10,z],rotation:I}));
+    const model={version:1,parts:[hub,...pins]};
+    const held={parts:[{id:'frame',part:'39794.dat',position:[140,-10,0],rotation:I}],grab:[80,-10,40]};
+    const cam=camera([400,-150,180],[70,-10,40]);
+    const pointer=cam.project([80,-10,40]);
+    const result=snap(model,held,pointer,{only:{partId:'pin0',connectorId:'p'}},cam);
+    assert.ok(result.chosen,'a flat side-hole mounting is offered');
+    assert.equal(result.chosen.blocked,null);
+    assert.deepEqual(result.chosen.moves[0].rotation,I,'the frame does not rotate upward');
+    assert.ok(result.chosen.pairs.length>=2,'both pins engage the frame');
+});

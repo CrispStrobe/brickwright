@@ -19,6 +19,7 @@ await editor.whenIdle();window.ready=true;</script>`;
 const server=createServer(async(req,res)=>{
  try{
   const path=new URL(req.url,'http://localhost').pathname;
+  if(sdkOnly&&path==='/motor-fixture.bcad'&&process.env.BW_CAD_MOTOR_FIXTURE){res.setHeader('Content-Type','application/json');res.end(await readFile(process.env.BW_CAD_MOTOR_FIXTURE));return;}
   if(sdkOnly&&path==='/'){res.setHeader('Content-Type','text/html');res.end(fixture);return;}
   const prefix='/static/cad-sdk/';
   const base=sdkOnly&&path.startsWith(prefix)?resolve(root,'overlay/scratch-gui/static/cad-sdk'):build;
@@ -54,6 +55,20 @@ try{
   });
   trace('SDK geometry and remount complete');
   assert.ok(Math.abs(result.volume-6000)<1e-6);assert.equal(result.undo,true);assert.equal(result.roots,0);
+  if(process.env.BW_CAD_MOTOR_FIXTURE){
+   await page.evaluate(async()=>editor.openFile('hinge.bcad',new Uint8Array(await(await fetch('/motor-fixture.bcad')).arrayBuffer())));
+   const before=await page.evaluate(()=>session.serialize());
+   await page.getByRole('button',{name:'Simulate',exact:true}).click();
+   const panel=page.getByRole('region',{name:'Assembly simulation'});
+   const speed=panel.getByRole('spinbutton',{name:/Speed \(degrees\/s\)/});await speed.fill('90');await speed.press('Tab');
+   await panel.getByRole('button',{name:'Run simulation',exact:true}).click();
+   await page.waitForFunction(()=>Number(document.querySelector('#cad').shadowRoot.querySelector('.simulation-panel').dataset.time)>.2);
+   await panel.getByRole('button',{name:'Pause simulation',exact:true}).click();
+   assert.ok(Math.abs(parseFloat(await panel.getByRole('status',{name:/Joint angle/}).textContent()))>1);
+   await panel.getByRole('button',{name:'Reset simulation',exact:true}).click();
+   assert.equal(await page.evaluate(()=>session.serialize()),before);
+  }
+
  }else{
   await page.getByRole('tab',{name:'Robots',exact:true}).waitFor();
   if(process.argv.includes('--robots')){
