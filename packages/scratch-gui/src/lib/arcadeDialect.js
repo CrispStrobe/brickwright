@@ -194,6 +194,7 @@ export const ARCADE_WORDS = Object.freeze([
     w('arcade_cameraShake', 'command', 'arcade shake camera by {AMPLITUDE} pixels for {DURATION} ms'),
     w('arcade_centerCameraAt', 'command', 'arcade center camera x {X} y {Y}'),
     w('arcade_cameraFollowSprite', 'command', 'arcade camera follow sprite {ID}'),
+    w('arcade_setGameStats', 'command', 'arcade game stats {MODE:enabled|disabled}'),
     w('arcade_setPalette', 'command', 'arcade set palette hex {DATA}'),
     w('arcade_setBackgroundColor', 'command', 'arcade set background color to {COLOR}'),
     w('arcade_setBackgroundImage', 'command', 'arcade set background image {IMAGE}'),
@@ -449,6 +450,7 @@ export const ARCADE_WORDS = Object.freeze([
     w('arcade_highScore', 'reporter', 'arcade high score', { early: true }),
     w('arcade_askForNumberLength', 'reporter', 'arcade ask number {QUESTION} length {LENGTH}', { early: true }),
     w('arcade_askForNumber', 'reporter', 'arcade ask number {QUESTION}', { early: true }),
+    w('arcade_askForStringLength', 'reporter', 'arcade ask text {QUESTION} length {LENGTH}', { early: true }),
     w('arcade_askForString', 'reporter', 'arcade ask text {QUESTION}', { early: true }),
 
     // ---- reporters: sprites ------------------------------------------------------------
