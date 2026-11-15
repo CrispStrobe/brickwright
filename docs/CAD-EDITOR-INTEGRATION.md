@@ -129,8 +129,11 @@ The signed package hashes, source/SDK identity and tester-state verification are
 recorded in [the delivery receipt](receipts/2026-11-15-cad-testflight-0.1.33.json).
 
 For local builds, use Apple's `/usr/bin` tools first in PATH when exporting the
-iOS archive: Homebrew rsync rejects Xcode's extended-attribute argument. Select
-`brickwright-build.keychain-db` explicitly for `productbuild`. Simulator binaries
+iOS archive: Homebrew rsync rejects Xcode's extended-attribute argument. Use
+`~/Library/Keychains/brickwright-build.keychain-db` for all Apple signing,
+including `codesign`, `productbuild`, and Xcode/Tauri signing/export. Select it
+explicitly where the tool supports `--keychain`; never fall back to the login
+keychain. See [the native signing instructions](../apps/tauri/AGENTS.md). Simulator binaries
 copied from an installed TestFlight app carry Apple's beta signatures and must
 be signed with our distribution identity before upload. Compute the packaged
 runtime pin after this signing step and rebuild with that pin. The receipt's
