@@ -73,9 +73,11 @@ try{
   await page.getByRole('tab',{name:'Robots',exact:true}).waitFor();
   if(process.argv.includes('--robots')){
    await page.getByRole('tab',{name:'Robots',exact:true}).click();
-   await page.waitForFunction(()=>window.__bwSimLab?._pane?.lib);
+   await page.waitForFunction(()=>window.__bwSimLab?._pane?.lib&&['ready','paused'].includes(window.__bwSimLab.status));
+   trace('Robots ready');
    const state=values=>page.evaluate(values=>new Promise(resolve=>window.__bwSimLab._pane.setState(values,resolve)),values);
    await state({status:'ready',mode:'simulate',blockers:[{code:'no-motor'}]});
+   trace('Blocker fixture set');
    const notice=page.getByTestId('bw-sim-lab-blockers').first();await notice.waitFor();
    await page.getByTestId('bw-sim-lab-blockers-close').click();
    await state({status:'loading',blockers:[]});await state({status:'ready',blockers:[{code:'no-motor'}]});
