@@ -63,4 +63,3 @@ test(`real ${name} adapter retains localized palette headers and executable bloc
 });
 
 }
-
