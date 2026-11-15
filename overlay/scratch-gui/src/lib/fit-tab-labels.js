@@ -60,7 +60,7 @@ class TabLabelFit {
                 return rect.width > 0 ? rect.right : 0;
             })) : 0;
             available = compact ? Math.min(window.innerWidth, list.parentElement.clientWidth) - 64 :
-                window.innerWidth - occupied - 60;
+                window.innerWidth - occupied - 72;
         }
         const gap = parseFloat(getComputedStyle(list).columnGap) || 0;
         const tabs = Array.from(list.querySelectorAll('[role="tab"]'));

@@ -1419,7 +1419,7 @@ jobs:
       - name: Build the editor
         id: build_editor
         if: ${{ !cancelled() && steps.overlays.outcome == 'success' && steps.package_provenance.outcome == 'success' }}
-        run: cd packages/scratch-gui && NODE_ENV=production NODE_OPTIONS=--max-old-space-size=2560 BW_ENABLE_FPGA=1 BW_SYNTHESIS_ENDPOINT=https://synth.crispstro.be/api npm run build
+        run: cd packages/scratch-gui && NODE_ENV=production NODE_OPTIONS=--max-old-space-size=2560 BW_ENABLE_CAD=1 BW_ENABLE_FPGA=1 BW_SYNTHESIS_ENDPOINT=https://synth.crispstro.be/api npm run build
 
       - name: Guard — emitted native broker proof bytes retain reviewed authority
         if: ${{ !cancelled() && steps.build_editor.outcome == 'success' }}

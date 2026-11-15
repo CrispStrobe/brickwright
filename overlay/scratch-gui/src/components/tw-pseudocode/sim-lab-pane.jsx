@@ -31,7 +31,6 @@ import {pickLocale, browserLocale} from '../../lib/bw-i18n.js';
 import {activateUndoSurface, getUndoState, notifyUndoState, registerUndoSurface} from '../../lib/global-undo.js';
 import {SIM_LAB_STORAGE_KEY, simLabRecordFromText, readSimLabStorage, isStorableName} from '../../lib/bw-sim/model/sim-lab-persist.js';
 import SimLabPalette from './sim-lab-palette.jsx';
-import SimLabInfo from './sim-lab-info.jsx';
 import SimLabReadings from './sim-lab-readings.jsx';
 import SimLabConnections from './sim-lab-connections.jsx';
 import SimLabBrickButtons from './sim-lab-brick-buttons.jsx';
@@ -171,7 +170,7 @@ const TEXT = {
         firmwareFault: 'The program on the SPIKE firmware stopped with an error ({error}). Press Run to start it again.',
         firmwareControlFailed: 'The SPIKE firmware did not take the command: {error}',
         st: {
-            idle: 'Click a part to select it. Drag it to move it; Shift+click adds parts; drag empty space to look around.',
+            idle: 'Click a part to select it. Drag it to move it; Shift+click adds parts; drag empty space to box-select, middle-drag to look around.',
             hover: '{part}: click to select, drag to move', hoverSelected: '{part}: drag to move, R turns, Delete removes',
             placing: 'Placing {part}: click to place, R turns, Alt: no magnet, Esc stops',
             idleTouch: 'Tap a part to select it and drag it to move it. A long press adds parts. Drag empty space to look around, pinch to zoom; long-press empty space, then drag, to select with a box.',
@@ -180,6 +179,7 @@ const TEXT = {
             dragging: 'Drag {part} into the view and let go to place it (Esc cancels)',
             snap: 'Snaps to {target} hole {hole}', snapNoHole: 'Snaps to {target}', snapped: 'Snapped to {target} hole {hole}', snappedNoHole: 'Snapped to {target}',
             floor: 'On the floor', onTop: 'On top of {target}', moving: 'Moving x {x}, y {y}, z {z} LDU (1 hole = 20)',
+            transformPreviewTitle: 'Transform preview', transformPreview: 'Δ {distance} mm · θ {deg}° · X {x} Y {y} Z {z} mm',
             turning: 'Turning {deg}° (hold Shift for 15° steps)', turned: 'Turned 90°', turnedAbout: 'Turned about its connection to {target}',
             grouped: '{n} parts grouped: clicking one selects all', ungrouped: 'Group taken apart',
             groupNeedsTwo: 'Select at least two parts to group them (Shift+click).', notGrouped: 'The selection is not in a group.',
@@ -288,7 +288,7 @@ const TEXT = {
         firmwareFault: 'Das Programm auf der SPIKE-Firmware hat mit einem Fehler angehalten ({error}). Drücke Ausführen, um es neu zu starten.',
         firmwareControlFailed: 'Die SPIKE-Firmware hat den Befehl nicht angenommen: {error}',
         st: {
-            idle: 'Klicke ein Teil an, um es auszuwählen. Ziehen verschiebt es; Umschalt+Klick wählt mehr Teile; Ziehen auf leerer Fläche dreht die Ansicht.',
+            idle: 'Klicke ein Teil an, um es auszuwählen. Ziehen verschiebt es; Umschalt+Klick wählt mehr Teile; Ziehen auf leerer Fläche wählt mit Rahmen, Mitte ziehen dreht die Ansicht.',
             hover: '{part}: klicken wählt aus, ziehen verschiebt', hoverSelected: '{part}: ziehen verschiebt, R dreht, Entf löscht',
             placing: '{part} platzieren: klicken setzt, R dreht, Alt: ohne Magnet, Esc beendet',
             idleTouch: 'Tippe ein Teil an, um es auszuwählen, und zieh es, um es zu verschieben. Lange drücken wählt mehr Teile. Ziehen auf leerer Fläche dreht die Ansicht, zwei Finger zoomen; lange auf leere Fläche drücken und ziehen wählt mit einem Rahmen.',
@@ -297,6 +297,7 @@ const TEXT = {
             dragging: 'Zieh {part} in die Ansicht und lass los, um es zu setzen (Esc bricht ab)',
             snap: 'Rastet an {target} Loch {hole} ein', snapNoHole: 'Rastet an {target} ein', snapped: 'An {target} Loch {hole} eingerastet', snappedNoHole: 'An {target} eingerastet',
             floor: 'Auf dem Boden', onTop: 'Oben auf {target}', moving: 'Verschieben x {x}, y {y}, z {z} LDU (1 Loch = 20)',
+            transformPreviewTitle: 'Transformationsvorschau', transformPreview: 'Δ {distance} mm · θ {deg}° · X {x} Y {y} Z {z} mm',
             turning: 'Drehen {deg}° (Umschalt halten: 15°-Schritte)', turned: 'Um 90° gedreht', turnedAbout: 'Um die Verbindung zu {target} gedreht',
             grouped: '{n} Teile gruppiert: ein Klick wählt alle', ungrouped: 'Gruppe aufgelöst',
             groupNeedsTwo: 'Wähle mindestens zwei Teile aus, um sie zu gruppieren (Umschalt+Klick).', notGrouped: 'Die Auswahl ist in keiner Gruppe.',
@@ -955,6 +956,8 @@ class SimLabPane extends React.Component {
                 onShortcuts: () => this.setState({shortcuts: true}),
                 onHold: hold => this.setState({hold}),
                 onAnnounce: info => this.setState({announce: this.announceText(info)}),
+                transformPreviewTitle: this.text.st.transformPreviewTitle,
+                transformPreviewLabel: m => fillText(this.text.st.transformPreview, {x: this.decimal(m.deltaMm[0]), y: this.decimal(m.deltaMm[1]), z: this.decimal(m.deltaMm[2]), deg: this.decimal(m.angleDegrees), distance: this.decimal(m.distanceMm)}),
                 viewCubeLabels: this.etext.connect.cube});
             this.editView.setGrid(this.state.grid);
             this.editView.setWheelMode(this.state.wheelMode);
@@ -2796,7 +2799,7 @@ class SimLabPane extends React.Component {
         case 'gliding': return fill(E.gliding, {ldu: this.decimal(st.ldu)});
         case 'roped': return fill(E.roped, {cm: this.decimal(st.cm)});
         case 'hosed': return fill(E.hosed, {from: E.hosePort[st.from] || st.from, to: E.hosePort[st.to] || st.to});
-        case 'idle': return ''; // nothing to report; the (i) beside the status explains how to build
+        case 'idle': return ''; // Build help lives in the top Help control
         default:
             if (E[st.kind]) return fill(E[st.kind], {n: st.count});
             return T[st.kind] ? fill(T[st.kind], {n: st.count}) : '';
@@ -2847,12 +2850,24 @@ class SimLabPane extends React.Component {
 
     /** What stops Run from doing what a child expects, said before Run. */
     renderBlockers () {
-        const blockers = this.state.blockers || [];
-        if (!blockers.length || this.state.status === 'loading') return null;
+        if (!this.dismissedBlockers) {
+            let codes = [];
+            try { const stored = JSON.parse(window.sessionStorage.getItem('bw-robot-dismissed-blockers') || '[]');
+                if (Array.isArray(stored)) codes = stored.filter(code => typeof code === 'string');
+            } catch (_) { /* Private browsing may disable session storage. */ }
+            this.dismissedBlockers = new Set(codes);
+        }
+        const dismissed = this.dismissedBlockers;
+        const blockers = (this.state.blockers || []).filter(item => !dismissed.has(item.code));
+        if (!blockers.length || this.state.status === 'loading' || this.state.mode === 'build') return null;
+        const dismiss = () => {
+            blockers.forEach(item => dismissed.add(item.code));
+            try { window.sessionStorage.setItem('bw-robot-dismissed-blockers', JSON.stringify([...dismissed])); } catch (_) { /* In-memory dismissal still works. */ }
+        };
         if (this.compact()) {
             // One line ("Before you press Run: (2)") that opens to the list.
             return (
-                <SimLabNotice content={blockers} testId="bw-sim-lab-blockers" closeLabel={`${this.itext.close}: ${this.itext.blockersTitle}`}>
+                <SimLabNotice content={blockers} onDismiss={dismiss} testId="bw-sim-lab-blockers" closeLabel={`${this.itext.close}: ${this.itext.blockersTitle}`}>
                     <details role="alert" data-testid="bw-sim-lab-blockers"
                         style={{fontSize: 12, color: '#7c2d12', background: '#fff7ed', border: '1px solid #fdba74', borderRadius: 6, padding: '4px 32px 4px 8px', minWidth: 0}}>
                         <summary style={{cursor: 'pointer', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
@@ -2866,7 +2881,7 @@ class SimLabPane extends React.Component {
             );
         }
         return (
-            <SimLabNotice content={blockers} testId="bw-sim-lab-blockers" closeLabel={`${this.itext.close}: ${this.itext.blockersTitle}`}>
+            <SimLabNotice content={blockers} onDismiss={dismiss} testId="bw-sim-lab-blockers" closeLabel={`${this.itext.close}: ${this.itext.blockersTitle}`}>
                 <div role="alert" data-testid="bw-sim-lab-blockers"
                     style={{fontSize: 12, color: '#7c2d12', background: '#fff7ed', border: '1px solid #fdba74', borderRadius: 6, padding: '6px 32px 6px 8px'}}>
                     <strong>{this.itext.blockersTitle}</strong>
@@ -3150,6 +3165,9 @@ class SimLabPane extends React.Component {
                     {rows(TT.camera)}
                     {this.state.mode === 'build' && <strong>{TT.buildTitle}</strong>}
                     {this.state.mode === 'build' && rows(TT.build)}
+                    {this.state.mode === 'build' && <p style={{margin: '4px 0 8px', color: '#334155'}}>
+                        {this.state.coarse ? this.etext.connect.hintIdleTouch : this.etext.connect.hintIdle}
+                    </p>}
                     {this.state.mode === 'build' && (
                         <button type="button" data-testid="bw-sim-lab-help-shortcuts" style={{...s.button, border: '1px solid #94a3b8'}}
                             onClick={() => this.setState({shortcuts: true})}>{TT.allShortcuts}</button>
@@ -3353,10 +3371,12 @@ class SimLabPane extends React.Component {
         const field = this.state.coarse ? {minHeight: 40} : {height: 26};
         const chip = {display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap', padding: '2px 8px', borderRadius: 999, fontSize: 12};
         const hint = this.buildStatusText();
+        const lesson = this.renderLessonToggle();
+        if (!selection.length && !this.state.hidden.length && !this.state.editGroup && !lesson && (!st.kind || st.kind === 'idle')) return null;
         const selectionText = sel ? TT.selectedOne.replace('{name}', this.partName(sel.part)) : TT.selectedMany.replace('{n}', selection.length);
         return (
             <div data-testid="bw-sim-lab-context" style={{display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, minHeight: 26, fontSize: 12}}>
-                {this.renderLessonToggle()}
+                {lesson}
                 {selection.length > 0 && (
                     <span data-testid="bw-sim-lab-selection" title={sel ? this.t('selectedOne', {name: this.partName(sel.part)}) : this.t('selectedMany', {n: selection.length})}
                         style={{...chip, background: '#dbeafe', color: '#1e3a8a', fontWeight: 600, maxWidth: '40%', overflow: 'hidden', textOverflow: 'ellipsis'}}>
@@ -3383,15 +3403,10 @@ class SimLabPane extends React.Component {
                         {E.groupBanner.replace('{name}', this.state.editGroup.name)}
                     </span>
                 )}
-                <SimLabInfo testid="bw-sim-lab-help-build" label={T.helpBuild}
-                    text={<React.Fragment>
-                        <span style={{display: 'block', marginBottom: 6}}>{this.state.coarse ? T.idleTouch : T.idle}</span>
-                        <span style={{display: 'block'}}>{this.state.coarse ? this.etext.connect.hintIdleTouch : this.etext.connect.hintIdle}</span>
-                    </React.Fragment>} />
                 <span role="status" data-testid="bw-sim-lab-build-status" data-kind={st.kind || 'idle'} title={hint}
                     style={{color: refused || blocked ? '#b91c1c' : '#475569', fontWeight: refused ? 600 : 400,
                         flex: '1 1 0', minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
-                    {hint}
+                    {st.kind && st.kind !== 'idle' ? hint : ''}
                 </span>
             </div>
         );

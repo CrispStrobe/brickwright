@@ -2742,3 +2742,13 @@ Original model and program designs by CrispStrobe, BSD-3-Clause. SineShuttle sup
 ### Experimental Technic checkpoint sources
 
 Original user-owned models and programs by CrispStrobe, BSD-3-Clause. The twenty-one checkpoint sources are listed with original and canonical hashes in `docs/data/robot-lab-experimental-checkpoint.json`; individual full notices are under `static/sim-lab/licenses/`. These are experimental, not physically qualified library examples. Standard LDraw part drawings retain their existing authors and licences.
+
+
+## Optional Brickwright CAD SDK
+
+The optional CAD Editor is packaged from CrispStrobe/brickwright-cad under
+BSD-3-Clause. Its exact source commit and file hashes are recorded in
+`overlay/scratch-gui/static/cad-sdk/manifest.json`. The complete SDK license and
+runtime dependency notices ship alongside it as `LICENSE` and `NOTICE.txt`,
+including Three.js (MIT), Manifold (Apache-2.0) and the bundled font licenses.
+The SDK is copied to the application only when `BW_ENABLE_CAD=1`.

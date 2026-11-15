@@ -25,7 +25,7 @@ export const EDITOR_TEXT = {
         coach: [
             {title: 'Build from the parts list', body: 'Drag a part from the list on the left into the view. Near another part it snaps to a hole, a pin or a stud: green means it fits.'},
             {title: 'Holes first', body: 'Click a part, then one of its lit holes: now pick a part in the list and it goes right into that hole.'},
-            {title: 'Turn and look', body: 'R turns the part in hand, [ and ] turn a part 15° on its pin. Drag empty space to turn the view. Press ? for every control.'}
+            {title: 'Turn and look', body: 'R turns the part in hand, [ and ] turn a part 15° on its pin. Drag empty space to select with a box; middle-drag turns the view. Press ? for every control.'}
         ],
         hinge: 'On its hinge', minus15: '−15°', plus15: '+15°', nextHinge: 'Next hinge (N)',
         pen: 'Draws on the floor (a pen)', penHelp: 'In Simulate this part draws a line wherever it touches the floor: build a plotter or a drawing robot',
@@ -48,10 +48,11 @@ export const EDITOR_TEXT = {
         sheet: [
             ['Mouse', [
                 ['Click', 'select a part (a grouped part selects its group)'],
-                ['Shift+click', 'add or remove a part'], ['Shift+drag', 'select with a box'],
+                ['Shift+click', 'add or remove a part'], ['Drag empty space', 'select with a box; Shift adds parts'],
                 ['Drag a part', 'move it (it rests on what is under it; magnets snap)'],
                 ['Double click', 'centre the view there (on a grouped part: edit inside the group)'],
-                ['Drag empty space / middle drag', 'turn the view about the point under the pointer'],
+                ['Middle drag', 'turn the view about the point under the pointer'],
+                ['Space+drag (no part in hand)', 'slide the view'],
                 ['Right drag', 'slide the view (Studio mouse: turn it)'], ['Ctrl+drag a pin or axle', 'slide it along its hole'], ['Wheel', 'zoom toward the pointer'],
                 ['Trackpad: two fingers / Shift / pinch', 'turn the view / slide it / zoom'],
                 ['Click a selected part\'s lit hole, then a palette part', 'the part goes into that hole'], ['Ctrl+click', 'select everything connected'],
@@ -77,7 +78,7 @@ export const EDITOR_TEXT = {
         ],
         // Connection-first building (docs/ROBOT-LAB-UX.md): hints, the target chip, the screen reader, the view cube.
         connect: {
-            hintIdle: 'Drag a part to move it · Select a part, click its lit hole, then a palette part: it goes in · Drag empty space to turn the view · Right-drag slides · Wheel zooms · Double-click centres',
+            hintIdle: 'Drag a part to move it · Select a part, click its lit hole, then a palette part: it goes in · Drag empty space to box-select · Middle-drag turns · Right-drag slides · Wheel zooms · Double-click centres',
             hintIdleTouch: 'Tap a part to select it, drag it to move it · One finger on empty space turns the view, two fingers zoom and slide',
             hintHolding: 'Click to place · R turn · Tab other spot · X flip · Alt no magnet · Esc cancel',
             hintHoldingKeyboard: 'Enter places · Tab next spot · R turn · X flip · Arrows nudge · Esc cancel',
@@ -187,7 +188,7 @@ export const EDITOR_TEXT = {
         coach: [
             {title: 'Aus der Teileliste bauen', body: 'Zieh ein Teil aus der Liste links in die Ansicht. Nahe an einem anderen Teil rastet es an einem Loch, Pin oder Noppen ein: Grün heißt, es passt.'},
             {title: 'Erst das Loch', body: 'Klick ein Teil an, dann eines seiner leuchtenden Löcher: Wähl jetzt ein Teil in der Liste, und es kommt genau in dieses Loch.'},
-            {title: 'Drehen und schauen', body: 'R dreht das Teil in der Hand, [ und ] drehen ein Teil um 15° auf seinem Pin. Zieh auf freier Fläche, um die Ansicht zu drehen. ? zeigt alle Tasten.'}
+            {title: 'Drehen und schauen', body: 'R dreht das Teil in der Hand, [ und ] drehen ein Teil um 15° auf seinem Pin. Zieh auf freier Fläche einen Auswahlrahmen; die mittlere Maustaste dreht die Ansicht. ? zeigt alle Tasten.'}
         ],
         hinge: 'Im Gelenk', minus15: '−15°', plus15: '+15°', nextHinge: 'Nächstes Gelenk (N)',
         pen: 'Malt auf den Boden (ein Stift)', penHelp: 'In der Simulation zieht dieses Teil eine Linie, wo es den Boden berührt: Bau einen Plotter oder einen Malroboter',
@@ -210,10 +211,11 @@ export const EDITOR_TEXT = {
         sheet: [
             ['Maus', [
                 ['Klick', 'ein Teil auswählen (ein Teil einer Gruppe wählt die Gruppe)'],
-                ['Umschalt+Klick', 'ein Teil dazu nehmen oder weglassen'], ['Umschalt+Ziehen', 'mit einem Rahmen auswählen'],
+                ['Umschalt+Klick', 'ein Teil dazu nehmen oder weglassen'], ['Leere Fläche ziehen', 'mit einem Rahmen auswählen; Umschalt nimmt Teile dazu'],
                 ['Teil ziehen', 'verschieben (es liegt auf dem, was darunter ist; Magnete rasten ein)'],
                 ['Doppelklick', 'Ansicht dorthin zentrieren (auf einem Gruppenteil: in der Gruppe bearbeiten)'],
-                ['Leere Fläche ziehen / mittlere Taste ziehen', 'Ansicht um den Punkt unter dem Mauszeiger drehen'],
+                ['Mittlere Taste ziehen', 'Ansicht um den Punkt unter dem Mauszeiger drehen'],
+                ['Leertaste+Ziehen (kein Teil in der Hand)', 'Ansicht schieben'],
                 ['Rechts ziehen', 'Ansicht schieben (Studio-Maus: drehen)'], ['Strg+Ziehen an Pin oder Achse', 'im Loch entlang schieben'], ['Mausrad', 'zum Mauszeiger hin zoomen'],
                 ['Trackpad: zwei Finger / Umschalt / Zusammenziehen', 'Ansicht drehen / schieben / zoomen'],
                 ['Leuchtendes Loch eines ausgewählten Teils anklicken, dann ein Teil', 'das Teil kommt in dieses Loch'], ['Strg+Klick', 'alles Verbundene auswählen'],
@@ -238,7 +240,7 @@ export const EDITOR_TEXT = {
             ]]
         ],
         connect: {
-            hintIdle: 'Teil ziehen verschiebt es · Teil auswählen, sein leuchtendes Loch anklicken, dann ein Teil der Teileliste: es kommt hinein · Leere Fläche ziehen dreht die Ansicht · Rechts ziehen schiebt · Mausrad zoomt · Doppelklick zentriert',
+            hintIdle: 'Teil ziehen verschiebt es · Teil auswählen, sein leuchtendes Loch anklicken, dann ein Teil der Teileliste: es kommt hinein · Leere Fläche ziehen wählt mit Rahmen · Mitte ziehen dreht · Rechts ziehen schiebt · Mausrad zoomt · Doppelklick zentriert',
             hintIdleTouch: 'Teil antippen wählt es aus, ziehen verschiebt es · Ein Finger auf leerer Fläche dreht die Ansicht, zwei Finger zoomen und schieben',
             hintHolding: 'Klicken setzt · R dreht · Tab andere Stelle · X wendet · Alt ohne Magnet · Esc bricht ab',
             hintHoldingKeyboard: 'Eingabe setzt · Tab nächste Stelle · R dreht · X wendet · Pfeiltasten schieben · Esc bricht ab',

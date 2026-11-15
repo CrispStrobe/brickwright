@@ -51,7 +51,7 @@ export const MENU_H = 44;
 /** Tab strip height on a touch screen, in CSS pixels. */
 export const TABS_H = 44;
 /** Distance from the right edge, clearing the menu bar's right-hand item. */
-export const TABS_RIGHT = 48;
+export const TABS_RIGHT = 60;
 /**
  * Floor for the editor column, in CSS pixels — upstream's own flex-basis.
  * It is a FLOOR and not a fixed width: the point is to let that column shrink

@@ -14,6 +14,7 @@
 // The vendored file list (ldraw-lock.json) then says which files are here, so a
 // files are resolved directly, including primitives, without speculative 404s.
 
+import {visualAssembly} from './visual-assemblies.js';
 import {OWNED_PART_FILES} from './owned-parts.js';
 import {parseLDraw, refKey, SEARCH_DIRS} from './ldraw-geometry.js';
 
@@ -110,7 +111,7 @@ export const fetchLDrawClosure = async (parts, {fetchImpl = globalThis.fetch, ba
         missing.push(ref);
         return null;
     };
-    let wave = [...new Set(parts.map(refKey))];
+    let wave = [...new Set(parts.flatMap(name => [refKey(name), refKey(visualAssembly(name))]))];
     while (wave.length) {
         const found = await Promise.all(wave.filter(k => !tried.has(k)).map(k => {
             tried.add(k);

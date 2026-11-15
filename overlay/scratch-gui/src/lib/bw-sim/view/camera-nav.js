@@ -4,7 +4,7 @@
 // One camera navigation for both Robot Lab views (Simulate: sim-view3d.js, Build:
 // editor/editor-view3d.js), so the 3D view moves the same way in either mode:
 //
-//   left-drag on empty space, middle-drag   orbit about the target
+//   middle-drag (Build); left-drag (Simulate) orbit about the target
 //   right-drag, Shift+drag (Simulate)        pan (slide the view)
 //   wheel                                    zoom toward the pointer
 //   one finger / two fingers                 orbit / pinch-zoom and pan
@@ -15,7 +15,7 @@
 //
 // In Build a press on a part, or on the gizmo, belongs to the part (editor-view3d.js
 // decides first); Shift+drag there draws a selection box, so Build pans with the
-// right button (or Shift+arrows, or two fingers). The arithmetic here has no DOM
+// right button (or Shift+arrows, or two fingers). Empty-space left drag selects. The arithmetic here has no DOM
 // and no three.js (test/bw-sim-camera-nav.test.mjs); the views apply it.
 
 import {orbitOffset, panAmounts} from '../editor/touch-gestures.js';
@@ -30,7 +30,7 @@ export const ZOOM_STEP = 0.8;
 /**
  * The mouse presets (docs/ROBOT-LAB-UX.md §3.7): 'brickwright' (left or middle drag orbits, right
  * drag pans) and 'studio' (BrickLink Studio and LDD: right drag orbits, middle drag pans). Left drag
- * on empty space orbits in both.
+ * on empty space orbits in Simulate; in Build it draws a selection rectangle.
  */
 export const MOUSE_PRESETS = Object.freeze({brickwright: 'brickwright', studio: 'studio'});
 /** The mouse button that orbits about the point under the pointer in Build: middle, or right in 'studio'. */

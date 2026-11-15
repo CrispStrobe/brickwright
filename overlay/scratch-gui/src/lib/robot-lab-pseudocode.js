@@ -23,6 +23,7 @@
 //
 // The word table itself is robotLabDialect.js (one table for all of this).
 
+import {CADLAB_RUNTIME, cadLabWordFor, cadLabWordsOf, cadLabCallToPseudo} from './cadLabDialect.js';
 import MENU_ARGS from './extension-menu-table.js';
 import pythonToPseudocode, {Translator} from './sb3-creator-python.js';
 import javascriptToPseudocode from './sb3-creator-javascript.js';
@@ -36,9 +37,9 @@ import {legoHubWordFor, legoHubWordsOf, isLegoHubText} from './legoHubsDialect.j
 import SB3Creator from './sb3-creator-register-art.js';
 
 /** The `lab` words, then the LEGO hub words, of the given kinds (table order is precedence within each). */
-const wordsOf = kinds => [...robotLabWordsOf(kinds), ...legoHubWordsOf(kinds)];
+const wordsOf = kinds => [...robotLabWordsOf(kinds), ...cadLabWordsOf(kinds), ...legoHubWordsOf(kinds)];
 /** The entry for a robotlab or LEGO hub opcode, or null. */
-const wordFor = opcode => robotLabWordFor(opcode) || legoHubWordFor(opcode);
+const wordFor = opcode => robotLabWordFor(opcode) || cadLabWordFor(opcode) || legoHubWordFor(opcode);
 
 // ---- top-level matching (the compiler's own masking rule, which it does not export) ----
 
@@ -66,7 +67,7 @@ const matchTopLevel = (line, re) => {
     return m.indices.map(span => (span ? line.slice(span[0], span[1]) : undefined));
 };
 
-const isLabLine = text => /^(?:lab|when\s+lab)\s/i.test(text) || isLegoHubText(text);
+const isLabLine = text => /^(?:lab|cad|when\s+lab)\s/i.test(text) || isLegoHubText(text);
 
 // ---- the compiler ------------------------------------------------------------------------
 
@@ -112,7 +113,7 @@ export function withRobotLab (Base) {
         /** `lab …` reporters, read whole: they hold no operator of their own. */
         parseReporter (s, context) {
             const text = String(s).trim();
-            if (/^lab\s/i.test(text) || isLegoHubText(text)) {
+            if (/^(?:lab|cad)\s/i.test(text) || isLegoHubText(text)) {
                 for (const entry of wordsOf(['reporter', 'boolean'])) {
                     const m = matchTopLevel(text, compileArcadeWord(entry).re);
                     if (!m) continue;
@@ -163,6 +164,7 @@ export function withRobotLab (Base) {
         }
 
         runtimeShim (extId, lang, mode = 'shim') {
+            if (extId === 'cadlab' && mode === 'simulator') return cadLabSimulatorDriver(lang);
             if (extId === 'robotlab' && mode === 'simulator') return robotLabSimulatorDriver(lang);
             return super.runtimeShim(extId, lang, mode);
         }
@@ -235,12 +237,19 @@ export const robotLabSimulatorDriver = lang => {
 };
 
 /** The registry entry the door sets: SB3Creator.RUNTIME_EXTENSIONS.robotlab. */
-export {ROBOTLAB_RUNTIME};
+export {ROBOTLAB_RUNTIME, CADLAB_RUNTIME};
+export const cadLabSimulatorDriver = lang => {
+    // The block VM is the execution host; generated scripts have the same fallback as Robot Lab.
+    const lines = robotLabSimulatorDriver(lang).map(line => line.replaceAll('_robotlab', '_cadlab')
+        .replaceAll('_RobotlabDriver', '_CadlabDriver').replaceAll('Robot Lab', 'CAD models')
+        .replaceAll('globalThis.__bwSimLab && globalThis.__bwSimLab.api', 'globalThis.__bwCadProgramApi'));
+    return lines;
+};
 
 // ---- the readers ---------------------------------------------------------------------------
 
 const asLab = node => (node && node.type === 'Call' && node.func.type === 'Attribute' &&
-    node.func.value.type === 'Name' && node.func.value.id === '_robotlab' ? {method: node.func.attr, args: node.args} : null);
+    node.func.value.type === 'Name' && ['_robotlab', '_cadlab'].includes(node.func.value.id) ? {method: node.func.attr, args: node.args, cad: node.func.value.id === '_cadlab'} : null);
 
 /** `_robotlab.on("robotlab_whenTouch", handler, part, other)` as {fn, header}, or null. */
 const labRegistration = (translator, statement) => {
@@ -329,7 +338,7 @@ export const installRobotLabReaders = () => {
         }
         const call = asLab(node);
         if (call) {
-            const word = robotLabCallToPseudo(call.method, call.args.map(x => this.expr(x)));
+            const word = (call.cad ? cadLabCallToPseudo : robotLabCallToPseudo)(call.method, call.args.map(x => this.expr(x)));
             if (word) return `(${word})`;
             this.warn(`unknown _robotlab.${call.method} in expression`);
             return '""';
@@ -347,7 +356,7 @@ export const installRobotLabReaders = () => {
         }
         const call = asLab(e);
         if (call) {
-            const word = robotLabCallToPseudo(call.method, call.args.map(x => this.expr(x)));
+            const word = (call.cad ? cadLabCallToPseudo : robotLabCallToPseudo)(call.method, call.args.map(x => this.expr(x)));
             if (word) return [this.pad(indent) + word];
             this.warn(`unknown _robotlab.${call.method}`);
             return [];

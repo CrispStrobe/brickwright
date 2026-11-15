@@ -1812,3 +1812,25 @@ editor responsive below 1024 px, which is app work, not listing work.
 
 An earlier note here claimed a phone user could not import a machine at all.
 That was wrong: a person can pan and tap. The timeout was an automation limit.
+
+## What to Test — 0.1.33 en-US
+
+This update adds the optional CAD Editor and repairs Robot Lab interactions. Enable CAD Editor under Settings → Workspace; it starts off by default. CAD and standalone Brickwright CAD now use the same editor, geometry and simulation code.
+
+- Open the model library: editable source models should have thumbnails and previews, and insert directly into the design. Original Adafruit STL files can be screened and inserted after choosing units and up axis. Native STEP/Fusion originals remain source downloads.
+- Switch between the light and dark colour modes in Settings. Simulation controls should remain readable, and the simulation panel's × button should close it even while running or paused.
+- Try rectangle selection in Robot Lab, dismiss the motor guidance, switch tabs, and check that dismissed guidance stays dismissed. Check Technic frame dimensions and the SPIKE hub battery.
+- Drive CAD motors and sliders with controls, pseudocode or blocks. Exercise Undo, save/reload and the CAD/FPGA settings switches. Simulation previews must not rewrite the saved design.
+
+Full Tinkercad Sim Lab feature parity is still in progress. Please report the model and steps for any import, connector or simulation problem.
+
+## What to Test — 0.1.33 de-DE
+
+Dieses Update ergänzt den optionalen CAD-Editor und verbessert die Bedienung im Roboter-Labor. Aktiviere den CAD-Editor unter Einstellungen → Arbeitsbereich; standardmäßig bleibt er ausgeschaltet. CAD und die eigenständige App Brickwright CAD verwenden denselben Editor sowie dieselbe Geometrie- und Simulationslogik.
+
+- Öffne die Modellbibliothek: Bearbeitbare Quellmodelle sollen Vorschaubilder anzeigen und direkt im Entwurf eingefügt werden. Originale Adafruit-STL-Dateien lassen sich nach Auswahl von Einheit und Hochachse prüfen und einfügen. STEP-/Fusion-Originale bleiben herunterladbare Quelldateien.
+- Wechsle in den Einstellungen zwischen heller und dunkler Darstellung. Simulationssteuerungen sollen lesbar bleiben. Das × im Simulationsfenster muss auch bei laufender oder pausierter Simulation schließen.
+- Teste die Rechteckauswahl im Roboter-Labor, schließe den Motorhinweis und wechsle die Registerkarte. Der geschlossene Hinweis soll geschlossen bleiben. Prüfe Technic-Rahmengrößen und die Batterie des SPIKE-Hubs.
+- Steuere CAD-Motoren und Schlitten über Regler, Pseudocode oder Blöcke. Prüfe Rückgängig, Speichern/Laden und die CAD-/FPGA-Einstellungen. Simulationsvorschauen dürfen den gespeicherten Entwurf nicht verändern.
+
+Die vollständige Funktionsgleichheit mit Tinkercad Sim Lab ist weiterhin in Arbeit. Bitte nenne bei Problemen das Modell und die genauen Schritte.

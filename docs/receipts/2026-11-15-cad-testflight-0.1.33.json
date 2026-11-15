@@ -1,0 +1,65 @@
+{
+  "version": "0.1.33",
+  "bundleId": "com.crispstrobe.brickwright",
+  "sourceCommit": "98b38d0476dcd08fc52d654b624a73741e1fa6e3",
+  "cadCommit": "89b379b8df0a1f273025a1892dec12663081655f",
+  "sdkAssets": 10,
+  "frontend": "packages/scratch-gui/build-cad-library-colors",
+  "sdkManifestSha256": "02befa80cd7b9973cc6b430bd1457766b2d60c123a5e3e0af6b82f94c4a44d5f",
+  "platforms": [
+    "IOS",
+    "MAC_OS"
+  ],
+  "status": "distributed-internal-external-review-submitted",
+  "preparedAt": "2026-11-15T16:32:20.742Z",
+  "iosBuildId": "1be50c42-89d7-412e-b7c7-bd029bf418ab",
+  "ipaSha256": "3753ac6266568f9d940794a4f06c9a66ce23847a8369dd9c71c3d67ab663edb0",
+  "macPackageSha256": "82f23fbd997fc7fa29e5534b759a3eff21eecaa66a7d6137dacf4fd5c768d6d9",
+  "macRuntime": {
+    "sourceApp": "/Applications/Brickwright.app",
+    "sourceVersion": "0.1.32",
+    "sourceManifestSha256": "d559f25e4eaa176eeeb0ea05de399fdffb424cc8a855326615795d96387c7c8e",
+    "originalRenodeHostSha256": "9f371157e92587423a2c7776c091b2ad6e9e5f798d51d1fb34b39cd500883d41",
+    "distributedRenodeHostSha256": "7793a8208da94bbef8f530563931eb3fdbfeec8985371955109efc064cc2bcaa",
+    "distributionCertificateSha1": "56D3B7D782F2CEF0BBEFEEE30D98C6BA0F31C632"
+  },
+  "updatedAt": "2026-11-15T17:05:08.210Z",
+  "betaURL": "https://testflight.apple.com/join/UngCMwHZ",
+  "macDeliveryId": "f73fd1cc-d46b-4377-aeeb-cd4602f692c7",
+  "iosDeliveryId": "1be50c42-89d7-412e-b7c7-bd029bf418ab",
+  "verifiedAt": "2026-11-15T17:09:50.886Z",
+  "builds": [
+    {
+      "platform": "MAC_OS",
+      "buildId": "f73fd1cc-d46b-4377-aeeb-cd4602f692c7",
+      "processingState": "VALID",
+      "internalBuildState": "IN_BETA_TESTING",
+      "externalBuildState": "WAITING_FOR_BETA_REVIEW",
+      "internalGroup": true,
+      "externalGroup": true,
+      "testerNotes": [
+        "en-US",
+        "de-DE"
+      ]
+    },
+    {
+      "platform": "IOS",
+      "buildId": "1be50c42-89d7-412e-b7c7-bd029bf418ab",
+      "processingState": "VALID",
+      "internalBuildState": "IN_BETA_TESTING",
+      "externalBuildState": "WAITING_FOR_BETA_REVIEW",
+      "internalGroup": true,
+      "externalGroup": true,
+      "testerNotes": [
+        "en-US",
+        "de-DE"
+      ]
+    }
+  ],
+  "verification": {
+    "appleValidation": "passed for both packages",
+    "packageSignatures": "verified",
+    "macSimulatorPin": "verified before TestFlight re-signing",
+    "installedTestFlightSimulator": "not exercised"
+  }
+}

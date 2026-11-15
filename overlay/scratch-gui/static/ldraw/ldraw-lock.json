@@ -91,6 +91,12 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Willy Tschager [Holly-Wood]"
   },
+  "p/1-4con1.dat": {
+   "sha256": "da6bd834f802df4f9d87cf03ad7b425dcdfa257555beca40c9ae62f9352ecaa0",
+   "release": "G Primitive UPDATE 2024-01",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Willy Tschager [Holly-Wood]"
+  },
   "p/1-4con10.dat": {
    "sha256": "769e66e0abea62533d437bb46f663288e75e28304709fb959eac4709174ce728",
    "release": "G Primitive UPDATE 2024-02",
@@ -372,6 +378,12 @@
    "release": "G Primitive UPDATE 2024-05",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Willy Tschager [Holly-Wood]"
+  },
+  "p/1-8cyls2.dat": {
+   "sha256": "f7081b23e7976155fee32fc28278882d05b16e0a01c89d56aea7855564a158a4",
+   "release": "G Primitive UPDATE 2024-05",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Paul Easter [pneaster]"
   },
   "p/1-8disc.dat": {
    "sha256": "cbf50bb291076da998dd1b11eb39ab9d1896d646281fd1b6a10911e13c3198ae",
@@ -714,6 +726,12 @@
    "release": "G Primitive UPDATE 2017-01",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Donald Sutter [technog]"
+  },
+  "p/3-16ering.dat": {
+   "sha256": "895e74f279b274b5a9a6bddc44c16305f064cfb665b39f9c37c85cbaeab58223",
+   "release": "G Primitive UPDATE 2022-01",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Gerald Lasser [GeraldLasser]"
   },
   "p/3-16ndis.dat": {
    "sha256": "abb7da370e72fe9e75faf5d10c637b476202dbd8ced9cb5b0f96433e1f72f529",
@@ -1129,6 +1147,12 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Willy Tschager [Holly-Wood]"
   },
+  "p/4-4ring15.dat": {
+   "sha256": "d0eafd1cabc3eaf0d254f590d1ab5dfa9eaafed9719f6257d1ab3fb181f2bd8f",
+   "release": "G Primitive UPDATE 2024-02",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Mark Kennedy [mkennedy]"
+  },
   "p/4-4ring16.dat": {
    "sha256": "cd5f42d8e6fe1b9b5da727bee596d71b55f769d551952e398fb61dc95b48a9b9",
    "release": "G Primitive UPDATE 2024-02",
@@ -1194,6 +1218,12 @@
    "release": "G Primitive UPDATE 2024-02",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Michael Heidemann [mikeheide]"
+  },
+  "p/4-4ring35.dat": {
+   "sha256": "a30ce49d30a9a92de0ea648c700a9cd5601d0f83bd220df2c7337a89b86864b9",
+   "release": "G Primitive UPDATE 2019-02",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Evert-Jan Boer [ejboer]"
   },
   "p/4-4ring39.dat": {
    "sha256": "fc114976fb8d0e3c628de5a4840eff338e1444b4e32c6b267e0238a524b65f61",
@@ -1272,6 +1302,18 @@
    "release": "G 48_Primitive UPDATE 2024-01",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Willy Tschager [Holly-Wood]"
+  },
+  "p/48/1-12ring17.dat": {
+   "sha256": "31254f26cbc4acf4f636edeb9835dcec1f00c64ca36fb833ea0639d5d59ef867",
+   "release": "G 48_Primitive UPDATE 2014-02",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Alex Taylor [anathema]"
+  },
+  "p/48/1-12ring18.dat": {
+   "sha256": "49ee87d8b5e479967849e05ffee7d8f2baa174680752c2c00efa8845ec566f17",
+   "release": "G 48_Primitive UPDATE 2024-10",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Rene Rechthaler [Blechtaler]"
   },
   "p/48/1-12tndis.dat": {
    "sha256": "3f529632b6b106417845f683f40f3666b191e421233e9ffebc6d8b89e6b0767b",
@@ -1392,6 +1434,12 @@
    "release": "G 48_Primitive UPDATE 2024-02",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
+  },
+  "p/48/1-16tndis.dat": {
+   "sha256": "0da96332426c7338615e569de80f8fbf92c0a35703d02dfe43cf6faecc1e00c2",
+   "release": "G 48_Primitive UPDATE 2022-03",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Massimo Maso [Sirio]"
   },
   "p/48/1-24chrd.dat": {
    "sha256": "9c1442d69aa0acfe4de87e4b9cdce8b164c88289640c9aa980afafb7b4aabd74",
@@ -1825,6 +1873,12 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Willy Tschager [Holly-Wood]"
   },
+  "p/48/1-8tndis.dat": {
+   "sha256": "5ccc455b497d9d0a9a83ff40690d6fc2b0ea81b4db1abd77804b83848e69f934",
+   "release": "G 48_Primitive UPDATE 2022-04",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Massimo Maso [Sirio]"
+  },
   "p/48/11-48chrd.dat": {
    "sha256": "a64269a71c6212d410359b6f75f8e5635d61b86b77cb0f84d009738bc12707ed",
    "release": "G 48_Primitive UPDATE 2020-03",
@@ -1879,6 +1933,12 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Santeri Piippo [arezey]"
   },
+  "p/48/2-4chrd.dat": {
+   "sha256": "7e2992507dbdb62dc8797facc505fe10550a57e63c70502780f46b0a700c2fb5",
+   "release": "G 48_Primitive UPDATE 2017-01",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
   "p/48/2-4cyli.dat": {
    "sha256": "685652b02ba31d357cb53ab845f0256a3d1580f530d28e57e9a34fe00e82111b",
    "release": "G 48_Primitive UPDATE 2024-01",
@@ -1902,6 +1962,12 @@
    "release": "G 48_Primitive UPDATE 2024-02",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Alex Taylor [anathema]"
+  },
+  "p/48/2-4ring5.dat": {
+   "sha256": "038171f4bf388a3b1e7bc73b688dc9d888a8ec4cfe8e1d01b35571f8db6bc1a6",
+   "release": "G 48_Primitive UPDATE 2024-02",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Willy Tschager [Holly-Wood]"
   },
   "p/48/3-16chrd.dat": {
    "sha256": "e9ff2d0b0d79857f5599489d1aa0f7ead77accdee8257959d917c85a463c3e15",
@@ -2491,6 +2557,12 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Magnus Forsberg [MagFors]"
   },
+  "p/8/1-8sphe.dat": {
+   "sha256": "e3227b1d5255603bae9963eb4f5c464063743d62f78acccb712008358b47f6f7",
+   "release": "G 8_Primitive UPDATE 2017-01",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Magnus Forsberg [MagFors]"
+  },
   "p/8/2-4chrd.dat": {
    "sha256": "2caebc5de687f190e7ef2f25724665284bf0139e4db42844d0e2691128b9c0ea",
    "release": "G 8_Primitive UPDATE 2017-01",
@@ -2518,6 +2590,12 @@
   "p/8/2-4ndis.dat": {
    "sha256": "4f646d4ca8dd67205faf9b0e233c4921b85d3b30a9283090b0482397aad1a487",
    "release": "G 8_Primitive UPDATE 2018-02",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Magnus Forsberg [MagFors]"
+  },
+  "p/8/2-8sphe.dat": {
+   "sha256": "be99677c7e9f436c29e4b879df467dfac14e73ded64be04495c5726d33c0f366",
+   "release": "G 8_Primitive UPDATE 2017-01",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Magnus Forsberg [MagFors]"
   },
@@ -2928,6 +3006,12 @@
    "release": "G Primitive UPDATE 2014-01",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "J.C. Tchang [tchang]"
+  },
+  "p/box5-2p.dat": {
+   "sha256": "fd9dc34999a135f90f0947492cc36c042c9dcd2fa853429b8c3d060c5f9ec581",
+   "release": "G Primitive UPDATE 2024-01",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Willy Tschager [Holly-Wood]"
   },
   "p/box5-4a.dat": {
    "sha256": "70d5f7f2d0720b84a06100b12b449b8ad37d66a02fc4650b31d556d7b1d0fe41",
@@ -3343,11 +3427,23 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "James Jessiman"
   },
+  "p/peghole4.dat": {
+   "sha256": "c069464ddda30be6baf80328c644b79f013943740a8969cc5ac8edeed04dc8d6",
+   "release": "G Primitive UPDATE 2024-02",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Willy Tschager [Holly-Wood]"
+  },
   "p/peghole5.dat": {
    "sha256": "bf60f74a91fe9741a1e51c5729dfbe5c2972231a5782557f9184b11f412e3aa5",
    "release": "G Primitive UPDATE 2024-02",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Willy Tschager [Holly-Wood]"
+  },
+  "p/plug34.dat": {
+   "sha256": "171db29375ea86a182f594d819fb05d0f7d4c4ec2bba0dd04b77fdc293ea6914",
+   "release": "G Primitive UPDATE 2024-10",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Steffen [Steffen]"
   },
   "p/r04o1000.dat": {
    "sha256": "35adc0c850087378df2c0696b8c78a011d738b876555bb1b777c5b659e5e9d85",
@@ -3799,6 +3895,12 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Max Martin Richter [MMR1988]"
   },
+  "p/t01o2500.dat": {
+   "sha256": "ba98b2eef60399e05c6e1f775a0c5fa41a7049369f240324663cd6e80a3e58e3",
+   "release": "G Primitive UPDATE 2013-02",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Michael Heidemann [mikeheide]"
+  },
   "p/t01o3571.dat": {
    "sha256": "c43decdedac74a56d547392eb18cce7d509d0f69bd253f0899ec2a704f07e52f",
    "release": "G Primitive UPDATE 2013-01",
@@ -4087,6 +4189,36 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
   },
+  "parts/11142.dat": {
+   "sha256": "66914439a17f6b136c41baa8c5d514aa57645ed8efafc110b21e514258619da0",
+   "release": "G Part UPDATE 2013-02",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/11143.dat": {
+   "sha256": "186aab8d301b5a7f1c9c48f05fc4b8ce8bfac904086e7ed139db57f70e32516f",
+   "release": "G Part UPDATE 2020-03",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/11177.dat": {
+   "sha256": "96e3dd88f973f5d293515a2b7e30e9e7f833acc51b517444f470a7efce949ef6",
+   "release": "G Part UPDATE 2013-02",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/11178.dat": {
+   "sha256": "51cc1aaf299733cc81ec920bc4dbcb3dc17a5d5107ad64b7389d1b179f880bdb",
+   "release": "G Part UPDATE 2013-02",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/11186.dat": {
+   "sha256": "d7683b6a5b223bf79feefde1495eb7992958719d2014b7ba2fee51b2f5cb8c87",
+   "release": "G Part UPDATE 2013-02",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
   "parts/11212.dat": {
    "sha256": "c527adbbc5db2983cdc9d0b28481d57a248fd0125d8aa00c13aebd7c32b6633f",
    "release": "G Part UPDATE 2012-03",
@@ -4303,6 +4435,12 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
   },
+  "parts/22167.dat": {
+   "sha256": "c72792b3a462d7bf7dcf49eb769b182ec0fe799ad03fa0414cca9a3864f723c7",
+   "release": "G Shortcut UPDATE 2022-03",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
   "parts/22169.dat": {
    "sha256": "28aab174b89f9eacdbfb66f43f1768c7a049e1601e8045312d8f65c560c6d907",
    "release": "G Shortcut UPDATE 2019-03",
@@ -4429,15 +4567,51 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
   },
+  "parts/24849c01.dat": {
+   "sha256": "c52917bff0b8b823ed559001a8046ba2ff015a52e2608a850c801ba558d1826a",
+   "release": "G Shortcut UPDATE 2022-03",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
   "parts/24851.dat": {
    "sha256": "b8d0901af0aab7d8f2a0527413edadd01a54fa7b741092621421d5d00eccedd2",
    "release": "G Part UPDATE 2024-02",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
   },
+  "parts/24851c01.dat": {
+   "sha256": "bc3278785755de62ffe082c06e3923951c665ffd03218449d32e7723d122c1ba",
+   "release": "G Shortcut UPDATE 2022-03",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/24852.dat": {
+   "sha256": "292d3c14e1e3229c61866684d2c5d83e743ddb262411c6e521f773c9388f6970",
+   "release": "G Part UPDATE 2022-03",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/24852c01.dat": {
+   "sha256": "c2188a75553e1ec8bdc28b8fb39447890468a5105276fcc71f402148c41c82a4",
+   "release": "G Shortcut UPDATE 2022-03",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/24852c02.dat": {
+   "sha256": "2b38f963caad8a4956ba60923c3f503ad94bdde8984f41b0c1f01d1cd85c7d02",
+   "release": "G Shortcut UPDATE 2025-09",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
   "parts/24853.dat": {
    "sha256": "ce6fb042955c0d5de3b4677be1116256d16c2762a056f9991b84da9ab1936dc4",
    "release": "G Part UPDATE 2022-03",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/24854.dat": {
+   "sha256": "5378867126a220d03fe2b012d9341ab5c77beba4bb5d8b626b131f03e0f1a4b1",
+   "release": "G Part UPDATE 2022-01",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
   },
@@ -4626,6 +4800,60 @@
    "release": "G Part UPDATE 2026-04",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "James Jessiman"
+  },
+  "parts/2846.dat": {
+   "sha256": "14c19da92690952a4c405db4eee46353f728ce698d3ee028792fdda0974cfccf",
+   "release": "G Part UPDATE 2024-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Marc Klein [marckl]"
+  },
+  "parts/2847.dat": {
+   "sha256": "5740810f2add0322f206c3fcfacd529c5aef038c534c181be6a9085058c10d0f",
+   "release": "G Part UPDATE 2024-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Gerald Lasser [GeraldLasser]"
+  },
+  "parts/2847c00.dat": {
+   "sha256": "f7c37aa0b29a963e7a461fe212a21b835b0391dcef575b92c692f43d3f3d41e4",
+   "release": "G Shortcut UPDATE 2024-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Gerald Lasser [GeraldLasser]"
+  },
+  "parts/2847c02.dat": {
+   "sha256": "f49e57dcae2c9a83161637964e7cee629d171f402505a657de683b9ad0aef5ea",
+   "release": "G Shortcut UPDATE 2024-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Magnus Forsberg [MagFors]"
+  },
+  "parts/2849.dat": {
+   "sha256": "cbbc1d6573e17a7c6c3ec3317e2ece454ac0d16ee6b0e5342fbfde0445e14cfe",
+   "release": "G Part UPDATE 2024-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Gerald Lasser [GeraldLasser]"
+  },
+  "parts/2849c01.dat": {
+   "sha256": "5405321e7397ab1f97bb73ebc0a901056b4885ad01b5e2e8d66e6926d916072e",
+   "release": "G Part UPDATE 2024-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Gerald Lasser [GeraldLasser]"
+  },
+  "parts/2849k01.dat": {
+   "sha256": "c77d5a84e01bf3ffcc7501bc67cf5d925bb7ec43c36d294f3525678b778a662a",
+   "release": "G Part UPDATE 2024-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Gerald Lasser [GeraldLasser]"
+  },
+  "parts/2849k02.dat": {
+   "sha256": "ffaf2976a352241d64de13cd7c5e8574c124a77914b9f55e7163d240d166621b",
+   "release": "G Part UPDATE 2024-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Gerald Lasser [GeraldLasser]"
+  },
+  "parts/2849k03.dat": {
+   "sha256": "8f5f6ae68034948a8f0fbddcc45dea219146a12304280b200f591883bb246f2b",
+   "release": "G Part UPDATE 2024-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Gerald Lasser [GeraldLasser]"
   },
   "parts/28738.dat": {
    "sha256": "b48802eb67db47847ada8f10d11d3c6a6aca2eaf85db6f1caec4496911540f67",
@@ -6079,6 +6307,42 @@
    "license": "Licensed under CC BY 2.0 and CC BY 4.0 : see CAreadme.txt",
    "author": "Guy Vivan [guyvivan]"
   },
+  "parts/4350.dat": {
+   "sha256": "dbfb481601a5ed97383afb224eff8d52a68053c5417b9ece69a9c4386e93efd4",
+   "release": "G Part UPDATE 2024-10",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Rene Rechthaler [Blechtaler]"
+  },
+  "parts/4351.dat": {
+   "sha256": "7212197c99ac37acfffda49e4698bb86d88ccc185fde33bc6a161f2b97cdb0dc",
+   "release": "G Part UPDATE 2024-10",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Rene Rechthaler [Blechtaler]"
+  },
+  "parts/4352.dat": {
+   "sha256": "089bbaf0eec4df1b0ed1f5eea61d5727aea75e25edf59a872b88e5da7cb309cb",
+   "release": "G Part UPDATE 2024-10",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Rene Rechthaler [Blechtaler]"
+  },
+  "parts/4352c01.dat": {
+   "sha256": "926eabfef354a9b1ee59c17ddd3ff19be7493cd720d384703cff653ef63bc11c",
+   "release": "G Shortcut UPDATE 2024-10",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Rene Rechthaler [Blechtaler]"
+  },
+  "parts/4353.dat": {
+   "sha256": "022302e0af6506abb215a74444e22081e8c3c689ecded5529993a436b6a56909",
+   "release": "G Part UPDATE 2024-10",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Rene Rechthaler [Blechtaler]"
+  },
+  "parts/4354.dat": {
+   "sha256": "08e91e0c75b34f8b0d87770ff77788dfa8e448e9837822d523539fe6339881b9",
+   "release": "G Part UPDATE 2024-10",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Rene Rechthaler [Blechtaler]"
+  },
   "parts/43722a.dat": {
    "sha256": "cb9c4cfc5c9254fab8191a085ed77d170e16d6f90647bac2c36ce666c1764f59",
    "release": "G Part UPDATE 2026-05",
@@ -6169,6 +6433,18 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
   },
+  "parts/45601c01.dat": {
+   "sha256": "77e9209fb26f26a4f93f0e2fb7f312b72c9319d36cd043c5639db0935304dff4",
+   "release": "G Shortcut UPDATE 2020-03",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/45610.dat": {
+   "sha256": "e07bfee06bcef651ba7c675997babf9d70b4a9fbf5d84e9f59a12a6ba1cecc47",
+   "release": "G Shortcut UPDATE 2020-03",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
   "parts/458.dat": {
    "sha256": "0abc25c0df1556b68fe3117fe1b3cbb2814393ede040fde6c46bb837910c8d8a",
    "release": "G Part UPDATE 2025-09",
@@ -6228,6 +6504,30 @@
    "release": "G Part UPDATE 2020-03",
    "license": "Licensed under CC BY 2.0 and CC BY 4.0 : see CAreadme.txt",
    "author": "Remco Braak [remco1974]"
+  },
+  "parts/4760.dat": {
+   "sha256": "e335ba87935d5d1124d67818c32b141189568609569c564067c776a4122db6c6",
+   "release": "G Part UPDATE 2011-01",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Alex Taylor [anathema]"
+  },
+  "parts/4760c01.dat": {
+   "sha256": "7c2270fae9e06660162ef2520f7e319f5b0237892f4d84c995f6e1a7b24e0703",
+   "release": "G Shortcut UPDATE 2025-09",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Deanna Earley [DeannaEarley]"
+  },
+  "parts/4761.dat": {
+   "sha256": "be442d54d9c5a7d2b4e928d0b239c892a73b6e24cc27a0305e9eb622a1e886f3",
+   "release": "G Part UPDATE 2025-07",
+   "license": "Licensed under CC BY 2.0 and CC BY 4.0 : see CAreadme.txt",
+   "author": "Jonathan Wilson [jonwil]"
+  },
+  "parts/4762.dat": {
+   "sha256": "2290e4f8f0335499963134272ddf02488457b47d26a9db1eae17b6f895a6432a",
+   "release": "G Part UPDATE 2011-01",
+   "license": "Licensed under CC BY 2.0 and CC BY 4.0 : see CAreadme.txt",
+   "author": "Jonathan Wilson [jonwil]"
   },
   "parts/48288.dat": {
    "sha256": "747602cd513690beb4ad77f97a805719b31760165c5ec48827db8551becf3e14",
@@ -6421,6 +6721,18 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
   },
+  "parts/54734.dat": {
+   "sha256": "3e32610c8d90d4105911a96ca29050f03bb3263f5699f7c6447a4249249cf00e",
+   "release": "G Shortcut UPDATE 2025-09",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/54746.dat": {
+   "sha256": "db06a5a018a7d93c60d46acbcd5687766bceb4a4b6fb12b37db6c09d6bea5015",
+   "release": "G Part UPDATE 2025-09",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
   "parts/55013.dat": {
    "sha256": "33df6317275cd8d01e333ff9d727f8741d7f59fe877d0098b8f688edda8d8ee6",
    "release": "G Part UPDATE 2025-09",
@@ -6487,6 +6799,36 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
   },
+  "parts/560.dat": {
+   "sha256": "1d8bfea31f6d936513511f40d1be788f35807427bfff870a171f98e4e59f4dea",
+   "release": "G Part UPDATE 2013-02",
+   "license": "Licensed under CC BY 2.0 and CC BY 4.0 : see CAreadme.txt",
+   "author": "Guy Vivan [guyvivan]"
+  },
+  "parts/561.dat": {
+   "sha256": "9187db8ce548c9d4f428af1e36434e06b5a7f48fb34139dcd4380eff3aacb64b",
+   "release": "G Part UPDATE 2011-01",
+   "license": "Licensed under CC BY 2.0 and CC BY 4.0 : see CAreadme.txt",
+   "author": "Guy Vivan [guyvivan]"
+  },
+  "parts/561c01.dat": {
+   "sha256": "7ef2f8614bc309f60c0b488f65ed52ef5abbc6624e7bbff71909fb9b18c6759b",
+   "release": "G Shortcut UPDATE 2011-02",
+   "license": "Licensed under CC BY 2.0 and CC BY 4.0 : see CAreadme.txt",
+   "author": "Guy Vivan [guyvivan]"
+  },
+  "parts/562.dat": {
+   "sha256": "03cf958f86b8d4d0425753008216f7c7bf43fdf0dbcaaafb595c33384599118a",
+   "release": "G Part UPDATE 2011-02",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Michael Heidemann [mikeheide]"
+  },
+  "parts/563.dat": {
+   "sha256": "d24f735a9ff4ff480742984cc93b8a61b686d3441e4843cf07e25ce868566c65",
+   "release": "G Part UPDATE 2011-01",
+   "license": "Licensed under CC BY 2.0 and CC BY 4.0 : see CAreadme.txt",
+   "author": "Guy Vivan [guyvivan]"
+  },
   "parts/56467.dat": {
    "sha256": "bc137143507bcede29bda59d0af223b87139cd556d84a92a9a687e4a0cb6483c",
    "release": "G Part UPDATE 2012-01",
@@ -6508,6 +6850,18 @@
   "parts/56476.dat": {
    "sha256": "03c4b85747b1b955504f0c3c33027db72d110fd9eafcd5814f126f61950360e9",
    "release": "G Part UPDATE 2012-01",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/56554.dat": {
+   "sha256": "4ecc3a790c625d69e785c536b648c2f0630f225bc14bce293f4cf37190ddea7f",
+   "release": "G Part UPDATE 2013-02",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/56555.dat": {
+   "sha256": "c853fdabb4efb38c919d0360a88abe2f39b69927e6a386671895ef1d4957609e",
+   "release": "G Part UPDATE 2013-02",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
   },
@@ -6534,6 +6888,12 @@
    "release": "G Part UPDATE 2010-02",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Donald Sutter [technog]"
+  },
+  "parts/58119.dat": {
+   "sha256": "935822e2668376905664a1bb30b3bc5c35994489a52d8a5982ba87aa6b71cd3c",
+   "release": "G Shortcut UPDATE 2025-09",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
   },
   "parts/58120.dat": {
    "sha256": "d5b603cbff5e6a00038c0970c4155ab12567c55f599a201c1f00e75fa9ed047f",
@@ -6571,6 +6931,18 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
   },
+  "parts/593.dat": {
+   "sha256": "48536def9d0100763411708ce1c38bcfa9ec99d36a850c34e6f82f6cbe1d6a5e",
+   "release": "G Part UPDATE 2011-01",
+   "license": "Licensed under CC BY 2.0 and CC BY 4.0 : see CAreadme.txt",
+   "author": "Guy Vivan [guyvivan]"
+  },
+  "parts/593c01.dat": {
+   "sha256": "40591fb8a640951cec7b6aed539499998b91b2b485dc491444a86925c248fcaf",
+   "release": "G Shortcut UPDATE 2022-06",
+   "license": "Licensed under CC BY 2.0 and CC BY 4.0 : see CAreadme.txt",
+   "author": "Guy Vivan [guyvivan]"
+  },
   "parts/59426.dat": {
    "sha256": "d199b792bf7a94b1e1f19ba8169d754c4d99640e7076e3836c13c2f735931655",
    "release": "G Part UPDATE 2025-12",
@@ -6580,6 +6952,12 @@
   "parts/59443.dat": {
    "sha256": "4c451f31b44a80755de7ed364ddf606a472bdbdf4b36a410646b09b3623911f5",
    "release": "G Part UPDATE 2011-02",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/59494.dat": {
+   "sha256": "ce8a184b4c26ff950e90326abd8387213226f14761c408515e3298a2cd57a0e6",
+   "release": "G Part UPDATE 2025-09",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
   },
@@ -6612,6 +6990,12 @@
    "release": "G Part UPDATE 2025-09",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/6051a.dat": {
+   "sha256": "882f6d8a1856522328b7cdc13e9fa7d797a49263d55a8822ecadf945c02ac742",
+   "release": "G Part UPDATE 2020-03",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Michael Heidemann [mikeheide]"
   },
   "parts/6091.dat": {
    "sha256": "5853e6f0ca1d4453802972ddc92cb1c289e11ae762aef87f36eeb11c58dda312",
@@ -6708,6 +7092,18 @@
    "release": "G Part UPDATE 2012-03",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Santeri Piippo [arezey]"
+  },
+  "parts/64228.dat": {
+   "sha256": "a3c3271354173c84d984d8e7ee221a42eacf6461ebdcfff23198cda393e556a5",
+   "release": "G Shortcut UPDATE 2015-01",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/64228c01.dat": {
+   "sha256": "d4e13e67dab3f7e9de3731482c3d3b4d2302419b72e3eb592ba603a7a594657a",
+   "release": "G Shortcut UPDATE 2015-01",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
   },
   "parts/64781.dat": {
    "sha256": "573b3cca0ea2ddbe716f831f4fe605baa9c84a11628eb102761991f2f3b3a859",
@@ -6913,6 +7309,12 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Tore Eriksson [Tore_Eriksson]"
   },
+  "parts/69702.dat": {
+   "sha256": "59a04203ab1bd2c3d84a6e8fba2efe8737792cb04b799e79cb8d9ae507670319",
+   "release": "G Part UPDATE 2025-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
   "parts/69729.dat": {
    "sha256": "2145aca5aa453d2a7ba512fb6be58ce7a77e9136fbbc137536aa759ef377ec61",
    "release": "G Part UPDATE 2020-03",
@@ -7021,6 +7423,24 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Vincent Messenet [Cheenzo]"
   },
+  "parts/73261.dat": {
+   "sha256": "79a6d547e70b86217af0f09d0e404e5dd8517000f6a588a921dfb51648bbfc6e",
+   "release": "G Shortcut UPDATE 2024-10",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Rene Rechthaler [Blechtaler]"
+  },
+  "parts/73264.dat": {
+   "sha256": "01ef5eaa40b631356fe9824914ac5d2c8ee6f113185d2986cfe451389b8f1ded",
+   "release": "G Shortcut UPDATE 2024-10",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Rene Rechthaler [Blechtaler]"
+  },
+  "parts/73264c01.dat": {
+   "sha256": "50d94c2d02235e1c70d6fba58c864ecb0a4e48f1bbbc662690c87e6b4c9d805e",
+   "release": "G Shortcut UPDATE 2024-10",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Rene Rechthaler [Blechtaler]"
+  },
   "parts/73507.dat": {
    "sha256": "f327c3a7a1156d58025badf4ea656599872df9b053b0f18623082a2e399221aa",
    "release": "G Part UPDATE 2022-04",
@@ -7038,6 +7458,24 @@
    "release": "G Shortcut UPDATE 2026-04",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "James Jessiman"
+  },
+  "parts/74650c01.dat": {
+   "sha256": "dfed772b49c88c55d38b611eed32024eebc97c4f978e4752691f522eb2dbf532",
+   "release": "G Shortcut UPDATE 2024-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Marc Klein [marckl]"
+  },
+  "parts/74650c02.dat": {
+   "sha256": "481d2faf79a5d953ddc9038b3b359a6729e1538ab3d8b630b0a63e90ffbf66ed",
+   "release": "G Shortcut UPDATE 2024-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Magnus Forsberg [MagFors]"
+  },
+  "parts/74650c03.dat": {
+   "sha256": "9329bf1025962b77d3fa599f43c918b3404f09e6be32a9324465bad7cbe1e6d3",
+   "release": "G Shortcut UPDATE 2024-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Magnus Forsberg [MagFors]"
   },
   "parts/75973.dat": {
    "sha256": "fd520f467a9069d2f077a0c44fa56cea3320e91a6331508080b8ec76d5403a26",
@@ -7081,6 +7519,12 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
   },
+  "parts/80737.dat": {
+   "sha256": "bb1c3abd36de390fbe7cd166b923018e3618303efd232637a51dc82c8fefb405",
+   "release": "G Part UPDATE 2025-09",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
   "parts/80910.dat": {
    "sha256": "22496f41d1d4cdd1d69b7225b92aba464d1e504fac8a0a98b0a1a34c6e2726b0",
    "release": "G Part UPDATE 2025-03",
@@ -7090,6 +7534,48 @@
   "parts/81346.dat": {
    "sha256": "e319e48b306bda589863d8a3c0175a443b5c0e1978bd975169db3f1106e41887",
    "release": "G Part UPDATE 2024-05",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/84599.dat": {
+   "sha256": "218eff3a8940eae9f8c1d4a359d76969ab43f78ebdf19357a71277cdc462ae8e",
+   "release": "G Shortcut UPDATE 2010-02",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/84724.dat": {
+   "sha256": "5721c5b4ac2bbabb01ebf48c4e74c1645d8b524469f4a415c2228acf6bbc2b10",
+   "release": "G Part UPDATE 2010-02",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/84725.dat": {
+   "sha256": "bd5a01adaee28070fe86ff212e5719697ffc9ff78bfcc672f0e1519f543d78ee",
+   "release": "G Part UPDATE 2010-02",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/84726.dat": {
+   "sha256": "c8856dacf138aa75cd48cd446b75a0d98f7cda963990ba34567e3dfe80fb9694",
+   "release": "G Part UPDATE 2022-02",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/84727.dat": {
+   "sha256": "0d7d07c896c44d824031d07277ecb23128328c5daca6c69ee5ddb229c6c02409",
+   "release": "G Part UPDATE 2010-02",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/84728.dat": {
+   "sha256": "71bd2f8c6ce70cb68a73366c7537712ae9949afa2eec4957b687de431182fd16",
+   "release": "G Part UPDATE 2013-02",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/85825.dat": {
+   "sha256": "4cf372bab9a157e4dbc9bb459810935139d1f15cd08468015eac3d2bedbd0418",
+   "release": "G Shortcut UPDATE 2025-09",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
   },
@@ -7135,6 +7621,24 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
   },
+  "parts/87513.dat": {
+   "sha256": "86a783dfc2cade766d6f761b6729b8115c59d16dfb4ded452abf7d7bc54d0216",
+   "release": "G Part UPDATE 2013-02",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/87515.dat": {
+   "sha256": "25a5b9fecc6e79ad5b020886005d7a0f8ac486f39aa576a45e28aac48dddf94a",
+   "release": "G Part UPDATE 2015-01",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/87520.dat": {
+   "sha256": "e3c18da8bc7baac19be756e2147519f315d46ba0c67ab4c114972a9a2dd592d9",
+   "release": "G Part UPDATE 2015-01",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
   "parts/87580.dat": {
    "sha256": "9f1fee81902d00778bb6e91d6239d83ac6e3fca788954f30bbaab149abff6d54",
    "release": "G Part UPDATE 2017-01",
@@ -7144,6 +7648,30 @@
   "parts/88323.dat": {
    "sha256": "7b99a2484630af22386d392068bc3659bdc79f03f60630cf017ca4b9304ce87f",
    "release": "G Part UPDATE 2022-04",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/89662.dat": {
+   "sha256": "780e2ffedaa635676867a66f04d6b0e871e0cc2a97403d47a9208475c43f9513",
+   "release": "G Part UPDATE 2018-02",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/89663.dat": {
+   "sha256": "71528718f6e7f2a1fffb1c4819e1b9650d949411acf0a7b3c785e36f35803611",
+   "release": "G Part UPDATE 2019-03",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/89664.dat": {
+   "sha256": "80068397e8329ed217a259dc507330d940f8b5456f358a6c40a2cb8e514ace35",
+   "release": "G Part UPDATE 2018-02",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/89668.dat": {
+   "sha256": "85749b541e5af488e38ba9e5c32dbc35bb8bfd83410a7f81c93151308f8e29c3",
+   "release": "G Shortcut UPDATE 2019-03",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
   },
@@ -7165,11 +7693,47 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Donald Sutter [technog]"
   },
+  "parts/918.dat": {
+   "sha256": "c324528da15742020121fc0eb67f02de95625855cd49e9131e03e245bcdbbecc",
+   "release": "G Part UPDATE 2020-03",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "[PTadmin]"
+  },
+  "parts/919.dat": {
+   "sha256": "9633dc7fa1cb962f1a6f125fa8172c3f38476920023e867c85dbaf8000eff5d7",
+   "release": "G Part UPDATE 2025-09",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
   "parts/91988.dat": {
    "sha256": "873411a516fab0f053bbbf77cfd8d9babc64647d6432400a42a0026635debb42",
    "release": "G Part UPDATE 2012-02",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Owen Burgoyne [C3POwen]"
+  },
+  "parts/920.dat": {
+   "sha256": "9c7bc74d4393e8ea4a31a95fa5fd42aa4d5e61f34660559aff5d0ae469d27568",
+   "release": "G Part UPDATE 2025-09",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/921.dat": {
+   "sha256": "1b0f36235c5c73f9ab660ef70bd354512005b114bb2a8da63f2cd7461fae4a3d",
+   "release": "G Part UPDATE 2020-03",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "[PTadmin]"
+  },
+  "parts/922.dat": {
+   "sha256": "44bac7e9687e71ffd681eb08fafa5182356785b44d52a7d5c2889c8c20ecbfd0",
+   "release": "G Part UPDATE 2025-09",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/923.dat": {
+   "sha256": "1fb4f5371e92bbcd4491b7c5bfa5ef07af4f9ae9ce35376a7265605a269b23f1",
+   "release": "G Part UPDATE 2011-01",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
   },
   "parts/92438.dat": {
    "sha256": "d180860e2598fa2576ef9d7af7084179c04bf5f5092662c491ee1b90576657e4",
@@ -7258,6 +7822,12 @@
   "parts/95652.dat": {
    "sha256": "c51de317fae7e9ec46d095d2f5c9e4c04d7f3971f67d5882f26c9dfc6f97a9b5",
    "release": "G Shortcut UPDATE 2013-02",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/95656.dat": {
+   "sha256": "d4319b8c59b72e3a8a304fafcb419afff6cf7a1e0e538bb7103d57e991ccd7b3",
+   "release": "G Shortcut UPDATE 2020-03",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
   },
@@ -7711,6 +8281,12 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
   },
+  "parts/s/24852s01.dat": {
+   "sha256": "2d84ad869b1d25b63442437d7fcef851b22a53e2c8ea432f2f9813ff367e1987",
+   "release": "G Subpart UPDATE 2022-03",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
   "parts/s/24853s01.dat": {
    "sha256": "ba80569a46600ae0893d0a8510dc8be006f7441c4e94723f38a05a0f9d019345",
    "release": "G Subpart UPDATE 2022-03",
@@ -7776,6 +8352,54 @@
    "release": "G Subpart UPDATE 2013-02",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Max Martin Richter [MMR1988]"
+  },
+  "parts/s/2847s01.dat": {
+   "sha256": "646e1660a7659f5568cb8c69e7b267c2934abd660ca37ecd1cf84ddf089b6ebb",
+   "release": "G Subpart UPDATE 2024-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Gerald Lasser [GeraldLasser]"
+  },
+  "parts/s/2847s02.dat": {
+   "sha256": "c74702b777f744e7c3d03cec700d3e6387842439f9fdf2d0b43510e77c1eb1bc",
+   "release": "G Subpart UPDATE 2024-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Gerald Lasser [GeraldLasser]"
+  },
+  "parts/s/2847s03.dat": {
+   "sha256": "9d028961f47d2a91d7834e76b0e30921c6d0b60e2680b8e63e77f98839169d4f",
+   "release": "G Subpart UPDATE 2024-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Gerald Lasser [GeraldLasser]"
+  },
+  "parts/s/2847s04.dat": {
+   "sha256": "ec533d92590cb1b241d6dae6c2b4afd33b52d9ec9516dfb00d1a4c585e2c7161",
+   "release": "G Subpart UPDATE 2024-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Gerald Lasser [GeraldLasser]"
+  },
+  "parts/s/2847s05.dat": {
+   "sha256": "bff9ce874544adc96dfd9dfad61fbfae3fd48961d8212b8c56517b5449ccafa6",
+   "release": "G Subpart UPDATE 2024-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Gerald Lasser [GeraldLasser]"
+  },
+  "parts/s/2849s01.dat": {
+   "sha256": "386128870742579590e94b301e1ebaa28d6967f525bb4c9c430b178b0eefc013",
+   "release": "G Subpart UPDATE 2024-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Gerald Lasser [GeraldLasser]"
+  },
+  "parts/s/2849s02.dat": {
+   "sha256": "0301dd3d44538dda4b7bd91d2e07deb5d38facd332e75c66961831ddd7f79737",
+   "release": "G Subpart UPDATE 2024-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Gerald Lasser [GeraldLasser]"
+  },
+  "parts/s/2849s03.dat": {
+   "sha256": "0ca213f32dcb95cbf934d6e00791291cf62615eb964f63a3d0b010cb02d22f11",
+   "release": "G Subpart UPDATE 2024-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Gerald Lasser [GeraldLasser]"
   },
   "parts/s/28943s01.dat": {
    "sha256": "c5d5981a250c15a7f0e0bc2205e086c015473adb7d672cd2d31c697893c5b699",
@@ -8329,6 +8953,48 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Chris BÃ¶hnke [KnightOfTarenta]"
   },
+  "parts/s/4350s01.dat": {
+   "sha256": "1d006d35fc8331eb20fa3dcb809579e75d750770198e9e13202de2e561794ccb",
+   "release": "G Subpart UPDATE 2024-10",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Rene Rechthaler [Blechtaler]"
+  },
+  "parts/s/4350s02.dat": {
+   "sha256": "a5f59047aab3daa1b51a1f60e972e74a8ae42ef0745740d44ff04fc4764067ac",
+   "release": "G Subpart UPDATE 2024-10",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Rene Rechthaler [Blechtaler]"
+  },
+  "parts/s/4351s01.dat": {
+   "sha256": "72522904d120220ac1d887a537f03d92c0e15c4e490405b3c491c0c70506f720",
+   "release": "G Subpart UPDATE 2024-10",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Rene Rechthaler [Blechtaler]"
+  },
+  "parts/s/4352s01.dat": {
+   "sha256": "9210a60aef1f375d68c7ac6a945d0c3231189bc27e0f8bb9aa00a1a67d1c7221",
+   "release": "G Subpart UPDATE 2024-10",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Rene Rechthaler [Blechtaler]"
+  },
+  "parts/s/4352s02.dat": {
+   "sha256": "d8492b872300a0f731ef732d7adfb126fe8103f6c89d9c9141d98a1756094d41",
+   "release": "G Subpart UPDATE 2024-10",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Rene Rechthaler [Blechtaler]"
+  },
+  "parts/s/4353s01.dat": {
+   "sha256": "b9fb186c70a87e1ddd81079654f24b6d638c7e3cd0086c7d9a33c6898dece7df",
+   "release": "G Subpart UPDATE 2024-10",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Rene Rechthaler [Blechtaler]"
+  },
+  "parts/s/4353s02.dat": {
+   "sha256": "7bfad68c8e7b1515244446af5a123a7d885012e363365a73ef897d4b4510d14f",
+   "release": "G Subpart UPDATE 2024-10",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Rene Rechthaler [Blechtaler]"
+  },
   "parts/s/43722as01.dat": {
    "sha256": "e2dddcddb4bf0c30f9ba2f5880d9bca822bde31d07a3bfb094b8b2c4b8711d68",
    "release": "G Subpart UPDATE 2026-05",
@@ -8382,6 +9048,12 @@
    "release": "G Subpart UPDATE 2020-03",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Magnus Forsberg [MagFors]"
+  },
+  "parts/s/4760s01.dat": {
+   "sha256": "16110eb50c8bddf2bc6070d8408f4958026d055d80d44baeca164f886395f4d3",
+   "release": "G Subpart UPDATE 2024-09",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Alex Taylor [anathema]"
   },
   "parts/s/48288s01.dat": {
    "sha256": "62dc4173c5a3a4ed0147733aee37954e8b7a720267d6b36949d1112aad62619a",
@@ -8497,6 +9169,12 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
   },
+  "parts/s/561s01.dat": {
+   "sha256": "e18ce0a804a9e09760379108a1bbd21b686fdfe0d87cdf35eef2a8179ec8313e",
+   "release": "G Subpart UPDATE 2013-01",
+   "license": "Licensed under CC BY 2.0 and CC BY 4.0 : see CAreadme.txt",
+   "author": "Guy Vivan [guyvivan]"
+  },
   "parts/s/57518s01.dat": {
    "sha256": "3cd549f71cb00011be8fadc7ccc70b6d1bfc565d78c6874b20c8a799233fac35",
    "release": "G Subpart UPDATE 2024-02",
@@ -8520,6 +9198,12 @@
    "release": "G Subpart UPDATE 2010-02",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Donald Sutter [technog]"
+  },
+  "parts/s/58124s01.dat": {
+   "sha256": "bd8308cfda99d4198f1a845bfba7f0dc458dd1a286fb70c8c3ba128e84f0c50e",
+   "release": "G Subpart UPDATE 2025-09",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
   },
   "parts/s/58124s03.dat": {
    "sha256": "7f8d5006ac64f0b1df9547a2d2c63f22b33b563c931afeb0b4e4242c879620bd",
@@ -8653,6 +9337,12 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
   },
+  "parts/s/69702s01.dat": {
+   "sha256": "c1c56dd73005b82ed58d2572cd3aad93fd773c7710527eca57ff1ca34664f70e",
+   "release": "G Subpart UPDATE 2025-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
   "parts/s/69729s01.dat": {
    "sha256": "54b5a49c4e6f91eb599696cec9decc6d3f3d1c41f4cdd9edb08349004dfab768",
    "release": "G Subpart UPDATE 2020-03",
@@ -8713,6 +9403,18 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
   },
+  "parts/s/80737s01.dat": {
+   "sha256": "8af9b8499e1b56c3b3f47b9c4087ae1b42e22112b079e8014a078380b74704b8",
+   "release": "G Subpart UPDATE 2025-09",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/s/80737s02.dat": {
+   "sha256": "2cea53db321aa73aada2a4b13ce30765b2ddf8633b56773f250c07ac42899b8d",
+   "release": "G Subpart UPDATE 2025-09",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
   "parts/s/81346s01.dat": {
    "sha256": "3a1d5e1e93914e23c95a61b9659f08750b181d7c587c512397866ffd0d1634f6",
    "release": "G Subpart UPDATE 2024-05",
@@ -8760,6 +9462,36 @@
    "release": "G Subpart UPDATE 2010-03",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Donald Sutter [technog]"
+  },
+  "parts/s/918s01.dat": {
+   "sha256": "a5a2ed3e0114e5cfed1d17375b4aae77e8f5fd6da42c155864cd634c348f22ef",
+   "release": "G Subpart UPDATE 2025-09",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/s/919s01.dat": {
+   "sha256": "eddb20197913a1d47b082f482814203c092a3ed5918a8c3cfad3131f806a0bf3",
+   "release": "G Subpart UPDATE 2023-06",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/s/919s02.dat": {
+   "sha256": "fcf89ba80f62753c46edebcef4462e94918826f68fb9e0a1aaf0d70748f46117",
+   "release": "G Subpart UPDATE 2025-09",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/s/919s03.dat": {
+   "sha256": "5f518467c4361177d88164a4cb5a5c40e4b4d25ed1e77323383f15486043e96f",
+   "release": "G Subpart UPDATE 2025-09",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/s/919s04.dat": {
+   "sha256": "43393065e608111e177edabd2a5f79eac8639dcd4d6a064d8f4cd6a693caf97f",
+   "release": "G Subpart UPDATE 2025-09",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
   },
   "parts/s/98138s01.dat": {
    "sha256": "dff4bf55eb5b4d6a8f3889fc208b5946a8f7b139e297a1edb67e2f976fc165b9",
@@ -8839,6 +9571,24 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Max Martin Richter [MMR1988]"
   },
+  "parts/s/u9284s01.dat": {
+   "sha256": "8fb6b3a24c79564880cea78dc3578f4e6aa091352608f3f375e3887ad931e7eb",
+   "release": "G Subpart UPDATE 2026-06",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Max Martin Richter [MMR1988]"
+  },
+  "parts/s/u9336s01.dat": {
+   "sha256": "f84fd3b0308cbe2a2b664e62300f27c29c2707b6ae206716c09d51ed63eb6db4",
+   "release": "G Subpart UPDATE 2025-09",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/s/u9336s02.dat": {
+   "sha256": "e2a93597547396bc48858bdea7fc06dff74920bd490d4150c31e5f17ca91488a",
+   "release": "G Subpart UPDATE 2025-09",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
   "parts/s/u9363s01.dat": {
    "sha256": "379910b5956a5353bd5a245c759fc8569b889c4c5b2c350ead6c6c14e5000465",
    "release": "G Subpart UPDATE 2024-03",
@@ -8907,6 +9657,12 @@
   },
   "parts/s/u9393s02.dat": {
    "sha256": "5836acf3faf2fc4cd6250a6a69e78e295faf6793555e1c413706d0ca9339c157",
+   "release": "G Subpart UPDATE 2020-03",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/s/u9399s01.dat": {
+   "sha256": "0edbf1611e48aeb095bfa66f67c575f653e1553bbef9f96b213ff47ec50b0a10",
    "release": "G Subpart UPDATE 2020-03",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
@@ -9019,11 +9775,77 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
   },
+  "parts/s/u9641s01.dat": {
+   "sha256": "a30cb233f2c56039221fb8e2181372fe1cd1c956296238597ac2d77044368c27",
+   "release": "G Subpart UPDATE 2024-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Gerald Lasser [GeraldLasser]"
+  },
+  "parts/u9000.dat": {
+   "sha256": "b798d0109f89eaba53419f5c8a73db169d2e8fc2db5945475eee5854b979d066",
+   "release": "G Part UPDATE 2020-03",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "[PTadmin]"
+  },
   "parts/u9013.dat": {
    "sha256": "cc597be1b3e40bee352e82c73248bb4e902e9f0b06107fcb173ddc98a9aa303c",
    "release": "G Part UPDATE 2011-02",
    "license": "Licensed under CC BY 2.0 and CC BY 4.0 : see CAreadme.txt",
    "author": "Guy Vivan [guyvivan]"
+  },
+  "parts/u9020.dat": {
+   "sha256": "db3646af2105a7505cf794364733faac050799752af7b59f3d537ec6c3f29903",
+   "release": "G Part UPDATE 2011-01",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Chris Dee [cwdee]"
+  },
+  "parts/u9023.dat": {
+   "sha256": "3b553f85591946d42b50375a925fd6d53876a060dd53baf8be05a4c2296ca283",
+   "release": "G Part UPDATE 2022-06",
+   "license": "Licensed under CC BY 2.0 and CC BY 4.0 : see CAreadme.txt",
+   "author": "Guy Vivan [guyvivan]"
+  },
+  "parts/u9024.dat": {
+   "sha256": "a4dce1e8e20142c3e5c63ef1c3af34eef8ac6e572f683a64c7ae4606e45637e4",
+   "release": "G Part UPDATE 2022-06",
+   "license": "Licensed under CC BY 2.0 and CC BY 4.0 : see CAreadme.txt",
+   "author": "Guy Vivan [guyvivan]"
+  },
+  "parts/u9025.dat": {
+   "sha256": "11184bc305c017300810d13d372f1f22f724bc21f85a8227035f22e4531e2e71",
+   "release": "G Part UPDATE 2011-01",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Michael Heidemann [mikeheide]"
+  },
+  "parts/u9039.dat": {
+   "sha256": "1bea8d5a7dfcbf5dac5be4e315c1f80af7b9c1f9ec6e1821de25eb10377939b3",
+   "release": "G Part UPDATE 2011-02",
+   "license": "Licensed under CC BY 2.0 and CC BY 4.0 : see CAreadme.txt",
+   "author": "Guy Vivan [guyvivan]"
+  },
+  "parts/u9040.dat": {
+   "sha256": "2f4befd14c593f58af80c2d5772dd1a7c7754f37038085ee04ece13421fc1f38",
+   "release": "G Part UPDATE 2011-01",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Michael Heidemann [mikeheide]"
+  },
+  "parts/u9040c01.dat": {
+   "sha256": "459ec7d339429c03b64dab84dcf937192dbcea65a7c368972b96f7daac55df1c",
+   "release": "G Shortcut UPDATE 2011-02",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Michael Heidemann [mikeheide]"
+  },
+  "parts/u9041.dat": {
+   "sha256": "ac10c26d2dc0d35d3424f129777c4d050bf389d94919da34c16f8a2d33519955",
+   "release": "G Part UPDATE 2011-01",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Michael Heidemann [mikeheide]"
+  },
+  "parts/u9041c01.dat": {
+   "sha256": "3bb44ef9aa473252fde24bebc86447c708775ef29d63e125ebbac30403f77aad",
+   "release": "G Shortcut UPDATE 2011-02",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Michael Heidemann [mikeheide]"
   },
   "parts/u9077.dat": {
    "sha256": "39f398414dcc5f87514f0996ad00a059c4bd0edc21d8db2682bc3227a9fbaedc",
@@ -9055,6 +9877,12 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
   },
+  "parts/u9208.dat": {
+   "sha256": "d2fe9b8b6d3d5ceb8fd2c0e76eedbd3f6e3a4471e0a0cba8bd38a302e8dcfd92",
+   "release": "G Part UPDATE 2013-02",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
   "parts/u9265.dat": {
    "sha256": "1883476ac530f537311a61f70dc91a28c4d30f8f0db4c41462250469eb180907",
    "release": "G Part UPDATE 2013-01",
@@ -9066,6 +9894,12 @@
    "release": "G Part UPDATE 2013-02",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "James Jessiman"
+  },
+  "parts/u9284.dat": {
+   "sha256": "9d680bbea9a2bf5c683a19b901439bf16f295d393bd480d854fde0f674814d35",
+   "release": "G Part UPDATE 2026-06",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Max Martin Richter [MMR1988]"
   },
   "parts/u9288.dat": {
    "sha256": "c6d33c95644bcb085e9edee21b0725dfebfb75bcd2de2fcc95fd8dddf47a4ab8",
@@ -9103,6 +9937,24 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
   },
+  "parts/u9325.dat": {
+   "sha256": "db1710fa05d02defa72661a21fa8a6ea374193c634be98b1b5f30c917efa57dc",
+   "release": "G Part UPDATE 2016-01",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/u9325c01.dat": {
+   "sha256": "4d678be3cb973090078037c1dc0ff5f8ddb1250b918c9f1383b6c842c78da54a",
+   "release": "G Shortcut UPDATE 2016-01",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/u9326.dat": {
+   "sha256": "d2c543a5e6d67289d83e42bea3911da2dfd485118c9a2641f22c4bcf6e9aafd1",
+   "release": "G Part UPDATE 2016-01",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
   "parts/u9327.dat": {
    "sha256": "02363c25baee904d2fabf89a9f275a8ec8c815e9606d4b0ec658da13e95cbb37",
    "release": "G Part UPDATE 2016-01",
@@ -9112,6 +9964,18 @@
   "parts/u9327c01.dat": {
    "sha256": "c70dd930de9647f350e19cdf597b1a43c1623d18852e4f726e1cf2656170359f",
    "release": "G Shortcut UPDATE 2016-01",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/u9336.dat": {
+   "sha256": "4292b95c1619a154da090ec0355857dae93b1dec0d8f0f786cb943b77b3d170b",
+   "release": "G Part UPDATE 2025-09",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/u9336c01.dat": {
+   "sha256": "e00c7918b662e2b453443b7e69da2e3a7b0b68eeb166126b12b515ef3efba772",
+   "release": "G Shortcut UPDATE 2025-09",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
   },
@@ -9301,6 +10165,12 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
   },
+  "parts/u9399.dat": {
+   "sha256": "5ebaee6b3573664afa25217ae3215511a00d3eb7d84ffae0f6192bbf5bf0ff74",
+   "release": "G Part UPDATE 2020-03",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
   "parts/u9401.dat": {
    "sha256": "ae5cded93a21428cc3e181c19592f694bae2ccb4e39d6244282bb5027a4e2724",
    "release": "G Part UPDATE 2020-03",
@@ -9475,6 +10345,18 @@
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
   },
+  "parts/u9472.dat": {
+   "sha256": "49a8592b3ae61202a3a359ad68a1385511da4c4a3b2f93063f26fb923d95f1b2",
+   "release": "G Part UPDATE 2020-03",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/u9473.dat": {
+   "sha256": "35ba7738b021f402c65185f0dd2fcab2be4b7166ace29cac36be82446176866d",
+   "release": "G Part UPDATE 2020-03",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Philippe Hurbain [Philo]"
+  },
   "parts/u9474.dat": {
    "sha256": "1b0b6c6cbec7cbd6b92417a09826c5f0606fa9872669cbea91159ca5fc82a80c",
    "release": "G Part UPDATE 2020-03",
@@ -9540,6 +10422,72 @@
    "release": "G Part UPDATE 2022-03",
    "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
    "author": "Philippe Hurbain [Philo]"
+  },
+  "parts/u9566.dat": {
+   "sha256": "19933b8514d4ad4fcb327476820f3407fa049edf17a5472ee65887e9f08bab5e",
+   "release": "G Part UPDATE 2022-06",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Willy Tschager [Holly-Wood]"
+  },
+  "parts/u9574-f1.dat": {
+   "sha256": "261428703db2465a2707edcda9603deff79c2b98ae934b7fdf8c9c0350f9ebe5",
+   "release": "G Part UPDATE 2024-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Gerald Lasser [GeraldLasser]"
+  },
+  "parts/u9575.dat": {
+   "sha256": "79beda55268032b9c37285eb83a0f593e223e4ebd3c5d2bb8be6449b16ccd23f",
+   "release": "G Part UPDATE 2024-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Gerald Lasser [GeraldLasser]"
+  },
+  "parts/u9600.dat": {
+   "sha256": "498a12ca822d188e247d3de2e45aafe3ea5697d74d62ed50dc45fae5700c86eb",
+   "release": "G Part UPDATE 2024-10",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Rene Rechthaler [Blechtaler]"
+  },
+  "parts/u9601.dat": {
+   "sha256": "1d7e591fe8be3cd10ce67f006a53490b4ef485385a7de0b73d60917433220fdf",
+   "release": "G Part UPDATE 2024-10",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Rene Rechthaler [Blechtaler]"
+  },
+  "parts/u9641.dat": {
+   "sha256": "e513b6d2e15663675e143c3dcc8078441798d3a6b6c379be91443eecc85622a2",
+   "release": "G Part UPDATE 2024-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Gerald Lasser [GeraldLasser]"
+  },
+  "parts/u9642.dat": {
+   "sha256": "596460714962b598c3160f9101e83234e37f89a438a32fdd24d4828dd6bb1f73",
+   "release": "G Part UPDATE 2024-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Gerald Lasser [GeraldLasser]"
+  },
+  "parts/u9643.dat": {
+   "sha256": "0ebb57156c517edd9434fd06635625a13690db237a2cacd54dda53245c34145f",
+   "release": "G Part UPDATE 2024-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Gerald Lasser [GeraldLasser]"
+  },
+  "parts/u9644.dat": {
+   "sha256": "01bb7ddcf35db3b2604992ee1bca71a078ca383c68009d62eff6c58b85dd15b1",
+   "release": "G Part UPDATE 2024-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Gerald Lasser [GeraldLasser]"
+  },
+  "parts/u9645.dat": {
+   "sha256": "9791c042f286b807dc5d8db146022e38884fe8eb4dbbeaa85e82e99ebe3731b8",
+   "release": "G Part UPDATE 2024-08",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Gerald Lasser [GeraldLasser]"
+  },
+  "parts/u9669.dat": {
+   "sha256": "174326d4930dbfeeaf21f8d0da4579200747b90a5988cea7f795172bb1fd25bc",
+   "release": "G Part UPDATE 2026-06",
+   "license": "Licensed under CC BY 4.0 : see CAreadme.txt",
+   "author": "Chris BÃ¶hnke [KnightOfTarenta]"
   },
   "LDConfig.ldr": {
    "sha256": "0178cd14fba46acb9df049c835e60e223b134d178f7e928ace0be1dfbe78895d"

@@ -16,7 +16,7 @@ test('only content-addressed broker proof sources opt out of asset minification'
     for (const filename of ['gui.js', 'chunks/foo.js', 'static/native-broker/native-broker-host.js', 'static/test-fixtures/capability-probe.js', 'static/native-broker/proof-pins/sources/moving.js']) {
         assert.equal(info({filename}).minimized, undefined, filename);
     }
-    assert.match(config, /from: 'static',\s+to: 'static',\s+info: preserveProofAssetInfo/);
+    assert.match(config, /from: 'static',\s+to: 'static',\s+(?:globOptions:[^\n]+\s+)?info: preserveProofAssetInfo/);
     assert.equal(await readFile(path.join(rootDir, 'packages/scratch-gui/webpack.config.js'), 'utf8'), config);
 });
 

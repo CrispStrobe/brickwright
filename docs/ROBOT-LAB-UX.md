@@ -163,7 +163,7 @@ This is cursor-driven. A new pure export, `snapAtPointer(model, catalog, held, r
 - **Orbit pivot,** fixed when the gesture starts. This is a design choice, not one documented by LEGO editors.
   - The pivot is the 3D point under the pointer. Without one, it is the selection centre; without a selection, the model centre.
   - The camera and its target turn together about the pivot, so nothing jumps. A dot marks the pivot during the drag.
-- **Mouse:** left-drag on empty space or middle-drag orbits, right-drag pans, the wheel zooms to the cursor. These are kept as they are.
+- **Mouse (Build):** left-drag on empty space draws a selection rectangle; intersecting part bounds select, including whole groups. Shift adds to the selection (Shift+click toggles). Middle-drag orbits, right-drag pans, and the wheel zooms to the cursor. Studio keeps right-drag orbit and middle-drag pan. Touch keeps one-finger orbit and long-press then drag to add with a box. Escape, pointer cancellation and window blur cancel the rectangle.
   - P3, built (§14): an "LDD/Studio" preset where right-drag orbits and middle-drag pans.
 - **Trackpad:**
   - A pinch (`ctrlKey` wheel) zooms to the cursor.

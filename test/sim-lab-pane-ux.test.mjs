@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: BSD-3-Clause
-import test, {after} from 'node:test';
+import test, {after, beforeEach} from 'node:test';
 import assert from 'node:assert/strict';
 import fixture from './helpers/sim-lab-pane-ux.cjs';
 const {gui, load, paneClass, css, texts, source} = fixture;
 const React = gui('react'), jsdom = gui('jsdom');
-const document = jsdom.JSDOM ? new jsdom.JSDOM('<!doctype html><body></body>').window.document : jsdom.jsdom('<!doctype html><body></body>');
+const document = jsdom.JSDOM ? new jsdom.JSDOM('<!doctype html><body></body>', {url: 'http://localhost'}).window.document : jsdom.jsdom('<!doctype html><body></body>');
 globalThis.window = document.defaultView; globalThis.document = document;
 Object.defineProperty(globalThis, 'navigator', {value: window.navigator, configurable: true});
 window.requestAnimationFrame = cb => setTimeout(cb, 0); window.cancelAnimationFrame = clearTimeout;
@@ -12,6 +12,9 @@ const channel = globalThis.MessageChannel; globalThis.MessageChannel = undefined
 const ReactDOM = gui('react-dom'), {act} = gui('react-dom/test-utils'); globalThis.MessageChannel = channel;
 const Notice = load('sim-lab-notice.jsx').default, Pane = paneClass(React, Notice);
 after(() => window.close());
+const sessionValues = new Map();
+Object.defineProperty(window, 'sessionStorage', {configurable: true, value: {getItem: key => sessionValues.get(key) ?? null, setItem: (key,value) => sessionValues.set(key,String(value))}});
+beforeEach(() => { sessionValues.clear(); });
 function mount(kind, compact, locale) {
     const pane = Object.create(Pane.prototype);
     pane.state = {status: 'ready', blockers: [], issues: []}; pane.compact = () => compact;
@@ -22,7 +25,7 @@ function mount(kind, compact, locale) {
         close() {act(() => {ReactDOM.unmountComponentAtNode(box);}); box.remove();}};
 }
 for (const kind of ['blockers', 'issues']) for (const compact of [true, false]) {
-    test(`${kind} ${compact ? 'compact' : 'wide'}: initially visible, X retains DOM, same content stays hidden and changed content reappears`, () => {
+    test(`${kind} ${compact ? 'compact' : 'wide'}: initially visible, X retains DOM, dismissal survives refresh; new diagnostic types remain visible`, () => {
         const v = mount(kind, compact, 'de');
         try {
             const first = [{code: 'no-motor', message: 'Motor fehlt', parts: ['a']}]; v.render(first);
@@ -31,8 +34,17 @@ for (const kind of ['blockers', 'issues']) for (const compact of [true, false]) 
             assert.equal(close.querySelector('span').getAttribute('aria-hidden'), 'true'); assert.equal([...notice.querySelectorAll('summary')].some(summary => summary.contains(close)), false);
             act(() => close.click()); assert.equal(notice.hidden, true); assert.equal(notice.firstChild, warning);
             v.render(JSON.parse(JSON.stringify(first))); assert.equal(notice.hidden, true);
-            v.render([{...first[0], message: 'Anderer Motor fehlt'}]); assert.equal(notice.hidden, false);
-            act(() => close.click()); v.render(first); assert.equal(notice.hidden, false, 'returning warning after a different warning is new content');
+            v.render([{...first[0], message: 'Anderer Motor fehlt'}]);
+            assert.equal(kind === 'blockers' ? v.box.childElementCount : Number(notice.hidden), 0, 'blocker dismissal is semantic, not tied to translated message text');
+            if (kind === 'blockers') {
+                v.render([]); v.render(first);
+                assert.equal(v.box.childElementCount, 0, 'loading or switching modes must not resurrect the same blocker');
+                v.render([{code: 'no-hub', message: 'Hub fehlt'}]);
+                assert.equal(v.box.firstChild.hidden, false, 'a different diagnostic can still be shown');
+            } else {
+                act(() => close.click()); v.render(first);
+                assert.equal(notice.hidden, false, 'changed issue content remains visible');
+            }
         } finally {v.close();}
     });
 }
@@ -46,4 +58,11 @@ test('pane root uses scoped CSS selection guard with native editable exceptions,
     assert.match(source, /ref=\{this.root\} className=\{paneStyles.root\}/);
     assert.match(css, /\.root\s*\{[^}]*-webkit-user-select:\s*none;[^}]*user-select:\s*none;/);
     assert.match(css, /\.root input,[\s\S]*\.root textarea,[\s\S]*contenteditable[\s\S]*user-select:\s*text/);
+});
+
+test('dismissed pre-Run warning stays dismissed after releasing and remounting the pane',()=>{
+ const first=mount('blockers',true,'de');first.render([{code:'no-motor'}]);
+ act(()=>first.box.querySelector('button').click());first.close();
+ const second=mount('blockers',true,'de');second.render([{code:'no-motor'}]);assert.equal(second.box.childElementCount,0);
+ second.render([{code:'no-hub'}]);assert.ok(second.box.querySelector('button'));second.close();
 });
