@@ -1734,6 +1734,26 @@ Erstelle zuerst den Workspace. Oberfläche und MCP verwenden denselben begrenzte
   "The model changed while loading. Retry insertion.": "Das Modell wurde während des Ladens geändert. Füge es erneut ein.",
   "Adafruit · Original files": "Adafruit · Originaldateien"
 }, S6 = {
+  Robots: "Roboter",
+  "Scout TT rover": "Scout-TT-Rover",
+  "Scout PLA print layout": "Scout-PLA-Druckanordnung",
+  "Scout shaft fit gauge": "Scout-Wellenpasslehre",
+  "A buildable two-wheel robot with Adafruit TT motors, original PLA parts and A/B simulation drives. Print parts separately; see the build guide.": "Ein baubarer Zweiradroboter mit Adafruit-TT-Motoren, selbst entworfenen PLA-Teilen und den Simulationsantrieben A/B. Drucke die Teile einzeln; siehe Bauanleitung.",
+  "Only the eleven original PLA parts, laid flat in two labelled groups. Export each part separately for your printer.": "Nur die elf selbst entworfenen PLA-Teile, flach in zwei beschrifteten Gruppen angeordnet. Exportiere jedes Teil einzeln für deinen Drucker.",
+  "Five double-D sockets with 0.15–0.55 mm total clearance. Print this first and check your actual TT shaft.": "Fünf Doppel-D-Aufnahmen mit 0,15–0,55 mm Gesamtspiel. Drucke zuerst diese Lehre und prüfe deine tatsächliche TT-Welle.",
+  "PLA chassis": "PLA-Fahrgestell",
+  "PLA motor cradle": "PLA-Motorhalter",
+  "PLA clamping wheel": "PLA-Klemmrad",
+  "PLA electronics deck": "PLA-Elektronikplattform",
+  "PLA deck standoff": "PLA-Plattformabstandshalter",
+  "PLA rear skid": "Hintere PLA-Gleitkufe",
+  "Double-D shaft fit gauge": "Passlehre für Doppel-D-Wellen",
+  "Left TT motor": "Linker TT-Motor",
+  "Right TT motor": "Rechter TT-Motor",
+  "Purchased O-ring tire": "Zugekaufter O-Ring-Reifen",
+  "Purchased AA pack envelope": "Bauraum des zugekauften AA-Batteriehalters",
+  "Feather board clearance": "Freiraum für die Feather-Platine",
+  "Motor driver clearance": "Freiraum für den Motortreiber",
   "Invalid collision assembly": "Ungültige Kollisionsbaugruppe",
   Motors: "Motoren",
   "DC toy motor": "DC-Spielzeugmotor",
@@ -1795,7 +1815,7 @@ function f6(A) {
   };
   if (A.simulation !== void 0) {
     const I = A.simulation;
-    (!I || !q5(I.gravity, 1e3) || typeof I.ground != "boolean" || !D3(I.groundFriction, 0, 2) || !D3(I.groundRestitution, 0, 1)) && g();
+    (!I || !q5(I.gravity, 1e3) || typeof I.ground != "boolean" || !D3(I.groundFriction, 0, 2) || !D3(I.groundRestitution, 0, 1) || I.fixBase !== void 0 && typeof I.fixBase != "boolean") && g();
   }
   if (A.tracers !== void 0) {
     (!Array.isArray(A.tracers) || A.tracers.length > 32) && g();
@@ -9601,7 +9621,7 @@ async function w8(A, g, I, C = {}) {
     }
   if ([...I.values()].reduce((U, T) => U + T.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = C.J ?? await (M5 ?? (M5 = import("./jolt-physics.wasm-compat-DdHjLBPW.js").then((U) => U.default()))), o = new i.JoltSettings();
+  const i = C.J ?? await (M5 ?? (M5 = import("./jolt-physics.wasm-compat-BaxusNuG.js").then((U) => U.default()))), o = new i.JoltSettings();
   o.mMaxBodies = 512, o.mMaxBodyPairs = Math.max(1024, e.length * e.length), o.mMaxContactConstraints = 8192;
   const c = new i.ObjectLayerPairFilterTable(2);
   c.EnableCollision(0, 1), c.EnableCollision(1, 1);
@@ -10063,7 +10083,7 @@ async function u8(A, g, I) {
         const k = C.nodes[R];
         M[R] = k, k.kind === "boolean" && k.inputs.forEach(m);
       };
-      m(D), s = I.evaluate({ ...C, nodes: M, roots: [D], joints: void 0, parametric: C.parametric ? { ...C.parametric, bindings: C.parametric.bindings.filter((R) => Object.hasOwn(M, R.nodeId)) } : void 0 }).bodies[0], E.set(D, s);
+      m(D), s = I.evaluate({ ...C, nodes: M, roots: [D], joints: void 0, provenance: void 0, tracers: void 0, parametric: C.parametric ? { ...C.parametric, bindings: C.parametric.bindings.filter((R) => Object.hasOwn(M, R.nodeId)) } : void 0 }).bodies[0], E.set(D, s);
     }
     if (!a.length)
       return s;
