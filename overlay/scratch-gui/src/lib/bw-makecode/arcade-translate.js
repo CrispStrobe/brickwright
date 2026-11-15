@@ -139,6 +139,7 @@ import {indexedStringValue} from './indexed-string-values.js';
 import {closedStringCompare} from './closed-string-compare.js';
 import {closedCreatedImageDimensions,createdImageDimensionSourceSafe,markCreatedImageDimensions} from './closed-created-image-dimensions.js';
 import {withClosedSpriteNullFilters,lowerClosedSpriteNullFilters,currentClosedSpriteNullFilter,bindClosedSpriteNullFilterConsumer,emitClosedSpriteNullFilter} from './closed-sprite-null-filter.js';
+import {withLiteralRenderableSource,bindLiteralRenderableConsumer,literalRenderablePacket} from './literal-renderable-source.js';
 import {lowerPxtStagedValues} from './lower-pxt-staged-values.js';
 import {lowerNamespaceBindings} from './namespace-bindings.js';
 import {ARCADE_SCENE_CONSTANTS} from './arcade-scene-constants.js';
@@ -365,6 +366,7 @@ class ArcadeTranslator extends BaseTranslator {
         this.sourceFunctions=new Map(node.body.filter(fn=>fn.type==='FunctionDeclaration').map(fn=>[fn.name,fn]));
         const references = inferImageReferences(node, value => this.path(value), value => this.imageOf(value), value => !!this.assetKindLookup && value?.type === 'Template' && ['assets.image', 'assets.tile'].includes(value.tag));
         bindClosedSpriteNullFilterConsumer(this,node);
+        bindLiteralRenderableConsumer(this,node);
         this.objectReferences = references.objects;this.fontReferences=references.fonts;
         this.bufferReferences = references.buffers;this.imageReferences = references.images;this.spriteReferences = references.sprites;this.dataReferences = references.data;
         this.exactStringReferences=references.exactStrings;this.textSpriteReferences=references.textSprites;this.playerReferences=references.players;this.sceneReferences=references.scenes;this.physicsEngineReferences=references.physicsEngines;this.tileReferences = references.tiles;this.tilemapDataReferences = references.tilemapData;this.sceneTilemapReferences = references.sceneTilemaps;this.legacyTileReferences=references.legacyTiles;this.animationReferences = references.animations;this.sevensegDigitReferences=references.sevensegDigits;this.sevensegCounterReferences=references.sevensegCounters;this.dartReferences=references.darts;this.corgiReferences=references.corgis;this.nullReferences=references.nulls;this.arrayReferences = references.arrays;this.numberReferences=references.numbers;this.stringReferences=references.strings;this.booleanReferences=references.booleans;
@@ -1651,6 +1653,8 @@ class ArcadeTranslator extends BaseTranslator {
 
     command (node, indent, out) {
         const pad = '  '.repeat(indent);
+        const drawing=literalRenderablePacket(this,node);
+        if(drawing){out.push(`${pad}arcade add drawing commands (${JSON.stringify(JSON.stringify(drawing))}) at depth 0`);return;}
         if(node?.callee?.type==='Member' && this.physicsEngineReferences?.has(node.callee.object)) {
             if(node.callee.name==='setMaxSpeed' && node.args?.length===1){out.push(`${pad}arcade set physics engine property maxSpeed of (${this.expr(node.callee.object)}) to (${this.expr(node.args[0])})`);return;}
             out.push(`${pad}${this.note(`Arcade PhysicsEngine.${node.callee.name} requires native PhysicsEngine method support`)}`);return;
@@ -5456,7 +5460,8 @@ export function nameArtworkSprites (result) {
  * }}
  */
 export function arcadeToPseudocode(files,opts={}) {
-    return withClosedSpriteNullFilters(typeof files==='string'?{'main.ts':files}:files||{},()=>arcadeToPseudocodeImpl(files,opts));
+    const map=typeof files==='string'?{'main.ts':files}:files||{};
+    return withLiteralRenderableSource(map,()=>withClosedSpriteNullFilters(map,()=>arcadeToPseudocodeImpl(files,opts)));
 }
 function arcadeToPseudocodeImpl (files, opts = {}) {
     const map = typeof files === 'string' ? {'main.ts': files} : (files || {});

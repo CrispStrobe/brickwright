@@ -413,6 +413,7 @@ module.exports = makeExt(`// Name: Arcade
           {opcode:'setButtonRepeatDefaults',blockType:Scratch.BlockType.COMMAND,text:'set Arcade button repeat defaults delay [DELAY] interval [INTERVAL]',arguments:{...n('DELAY',500),...n('INTERVAL',30)}},
           {opcode:'registerUpdateHandler',blockType:Scratch.BlockType.COMMAND,text:'Arcade register update as [TOKEN] capturing [CAPTURES]',arguments:{...str('TOKEN','handler'),...str('CAPTURES','')}},
           {opcode:'whenRegisteredUpdate',blockType:Scratch.BlockType.HAT,isEdgeActivated:false,text:'when Arcade update handler [TOKEN] runs',arguments:str('TOKEN','handler')},
+          {opcode:'addLiteralDrawing',blockType:Scratch.BlockType.COMMAND,hideFromPalette:true,text:'Arcade add drawing commands [COMMANDS] at depth 0',arguments:str('COMMANDS','[]')},
           {opcode:'registerPaintHandler',blockType:Scratch.BlockType.COMMAND,text:'Arcade register paint as [TOKEN] capturing [CAPTURES]',arguments:{...str('TOKEN','handler'),...str('CAPTURES','')}},
           {opcode:'whenRegisteredPaint',blockType:Scratch.BlockType.HAT,isEdgeActivated:false,text:'when Arcade paint handler [TOKEN] runs',arguments:str('TOKEN','handler')},
           {opcode:'registerShadeHandler',blockType:Scratch.BlockType.COMMAND,text:'Arcade register shade as [TOKEN] capturing [CAPTURES]',arguments:{...str('TOKEN','handler'),...str('CAPTURES','')}},
@@ -5860,6 +5861,33 @@ module.exports = makeExt(`// Name: Arcade
       // sprites by z then id. game.onPaint is ON_PAINT_Z -20, onShade ON_SHADE_Z 80.
       const state=this._state();
       this._addSceneRenderable(state,{...this._handlerRegistration(args,util),z,id:state.nextSpriteId++});
+    }
+    addLiteralDrawing(args) {
+      const fail=()=>this._objectError(new Error('Literal drawing requires bounded rectangle/line commands'));
+      const text=Scratch.BWValues.decode(args.COMMANDS);
+      if(typeof text!=='string'||text.length>4096)return fail();
+      let commands;try{commands=JSON.parse(text);}catch{return fail();}
+      if(!Array.isArray(commands)||commands.length>32)return fail();
+      for(const row of commands){
+        if(!Array.isArray(row)||row.length!==6||!['fillRect','drawRect','drawLine'].includes(row[0])||!row.slice(1).every(Number.isInteger)||row[5]<0||row[5]>15)return fail();
+        const a=row[1],b=row[2],c=row[3],d=row[4];
+        if(row[0]==='drawLine'?(a<0||a>=160||c<0||c>=160||b<0||b>=120||d<0||d>=120):(a<0||b<0||c<0||d<0||a+c>160||b+d>120))return fail();
+      }
+      const state=this._state();
+      // The ignored original Renderable still allocates a scene id at z=0.
+      // Pure literal drawing runs synchronously in the real render pass.
+      this._addSceneRenderable(state,{z:0,id:state.nextSpriteId++,draw:screen=>{
+        for(const row of commands){
+          if(row[0]!=='drawRect'){imageEngine.draw(screen,row[0],row[1],row[2],row[3],row[4],row[5]);continue;}
+          // The SDK drawRect helper delegates to four inclusive drawLine edges.
+          const x=row[1],y=row[2],w=row[3]-1,h=row[4]-1,c=row[5];
+          if(row[3]===0||row[4]===0)continue;
+          imageEngine.draw(screen,'drawLine',x,y,x+w,y,c);
+          imageEngine.draw(screen,'drawLine',x,y,x,y+h,c);
+          imageEngine.draw(screen,'drawLine',x+w,y,x+w,y+h,c);
+          imageEngine.draw(screen,'drawLine',x,y+h,x+w,y+h,c);
+        }
+      }});
     }
     registerPaintHandler(args,util) {this._registerRenderable(args,util,-20);}
     registerShadeHandler(args,util) {this._registerRenderable(args,util,80);}
