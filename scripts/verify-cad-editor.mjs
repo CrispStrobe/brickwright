@@ -19,6 +19,7 @@ await editor.whenIdle();window.ready=true;</script>`;
 const server=createServer(async(req,res)=>{
  try{
   const path=new URL(req.url,'http://localhost').pathname;
+  if(path==='/cad-program.sb3'&&process.env.BW_CAD_PROGRAM_FIXTURE){res.end(await readFile(process.env.BW_CAD_PROGRAM_FIXTURE));return;}
   if(path==='/motor-fixture.bcad'&&process.env.BW_CAD_MOTOR_FIXTURE){res.setHeader('Content-Type','application/json');res.end(await readFile(process.env.BW_CAD_MOTOR_FIXTURE));return;}
   if(sdkOnly&&path==='/'){res.setHeader('Content-Type','text/html');res.end(fixture);return;}
   const prefix='/static/cad-sdk/';
@@ -157,6 +158,19 @@ try{
    assert.ok(Math.abs(result.angle-720)<2,JSON.stringify(result));assert.equal(result.status,'paused');
    assert.equal(await page.evaluate(()=>window.__bwCad.sdk.serializeDocument(window.__bwCad.editor.session.state.document)),before);
    trace('CAD motor program ran while Code tab was visible');
+   if(process.env.BW_CAD_PROGRAM_FIXTURE){
+    const result=await page.evaluate(async before=>{
+     const vm=window.__bwSimLab?._pane?.props?.vm;if(!vm)throw new Error('Open Robots first for the VM diagnostic boundary');
+     await vm.loadProject(await(await fetch('/cad-program.sb3')).arrayBuffer());
+     window.__bwCad.editor.session.load(window.__bwCad.sdk.parseDocument(before));await window.__bwCad.editor.whenIdle();
+     vm.start();vm.greenFlag();await new Promise(resolve=>setTimeout(resolve,100));const until=performance.now()+60000;
+     while(vm.runtime.threads.some(t=>t.status!==4)&&performance.now()<until)await new Promise(resolve=>setTimeout(resolve,100));
+     const api=window.__bwCadProgramApi,result={angle:api.motorAngle('A'),status:api.status(),threads:vm.runtime.threads.filter(t=>t.status!==4).length};vm.stopAll();return result;
+    },before);
+    assert.ok(Math.abs(result.angle-720)<2,JSON.stringify(result));assert.equal(result.status,'paused');assert.equal(result.threads,0);
+    trace('Real Scratch VM loaded CAD blocks and completed the encoder-based program');
+   }
+
   }
   }
  }
