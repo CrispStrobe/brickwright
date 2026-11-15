@@ -58,3 +58,14 @@ Four-bar, slider, pivot-pendulum and material-drop examples are in Shapes →
 Simulation examples. The four-bar geometry was generated with the pinned MIT
 `dart_csp` solver and checked independently. Drive A and leave the other joints
 passive. The solver is used at build time; Jolt advances the live simulation.
+
+Recorded motion can be scrubbed or played back in Simulate. Replay is a view of
+recorded poses; Run resumes the latest solver state. Its bounded window contains
+at most 1,200 frames and 20,000 body poses. CSV exports retain the trace data;
+video can also capture a playing replay.
+
+Orange connector handles move the shared anchor while preserving body transforms,
+ports and limits. A drag writes one undoable edit on release; Escape cancels it.
+Use the surface picker to choose both a position and axis. Minimize the controls
+to expose the canvas on smaller screens; surface picking does this temporarily.
+Balls and boxes are temporary preview projectiles, limited to 32 per run.
