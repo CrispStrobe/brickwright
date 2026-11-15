@@ -119,6 +119,26 @@ try{
   await page.getByRole('tab',{name:'CAD',exact:true}).click();
   await page.waitForFunction(()=>window.__bwCad?.editor);
   const cad=page.getByTestId('bw-cad-tab');
+  // Exercise the shipping host, including the deferred catalogue and Redux preference.
+  await cad.getByLabel('File menu',{exact:true}).click();
+  await cad.getByRole('button',{name:'Model library',exact:true}).click();
+  const models=cad.getByRole('dialog',{name:'Model library',exact:true});
+  await models.getByLabel('Model type',{exact:true}).selectOption('source');
+  await page.waitForFunction(()=>document.querySelector('[data-testid="bw-cad-tab"] [data-state]')?.shadowRoot?.querySelectorAll('.model-library-card').length>130);
+  await models.locator('.model-library-card').first().click();
+  assert.ok(await models.locator('.model-library-preview img').isVisible());
+  await models.getByRole('button',{name:'Close model library'}).click();
+  const sameEditor=await page.evaluate(()=>{window.__bwThemeEditor=window.__bwCad.editor;return window.__bwCad.editor.session.serialize();});
+  for(const mode of ['dark','default']){
+   await page.getByTestId('bw-settings-menu-trigger').click();
+   const preference=page.getByLabel(/^Color mode$/i);
+   if(!await preference.isVisible())await page.getByText('Preferences',{exact:true}).click();
+   await preference.selectOption(mode);
+   await page.waitForFunction(mode=>window.__bwCad.editor.colorMode===(mode==='dark'?'dark':'light'),mode);
+   assert.equal(await page.evaluate(()=>window.__bwCad.editor===window.__bwThemeEditor),true,'theme changes keep the same editor/session');
+   assert.equal(await page.evaluate(()=>window.__bwCad.editor.session.serialize()),sameEditor,'theme does not alter history');
+  }
+  trace('Shipping host loads catalogue previews and changes light/dark mode without losing the session');
   await cad.getByRole('button',{name:'Shapes',exact:true}).click();
   trace('GUI Shapes clicked');
   const library=cad.getByRole('dialog',{name:'Shape library',exact:true});

@@ -15,7 +15,7 @@ import styles from './settings-menu.css';
 import dropdownCaret from './dropdown-caret.svg';
 import settingsIcon from './icon--settings.svg';
 import {selectLocale} from '../../reducers/locales.js';
-import {DEFAULT_THEME, HIGH_CONTRAST_THEME, themeMap} from '../../lib/themes';
+import {DEFAULT_THEME, DARK_THEME, HIGH_CONTRAST_THEME, themeMap} from '../../lib/themes';
 import {persistTheme} from '../../lib/themes/themePersistance';
 import {setTheme} from '../../reducers/theme.js';
 import {hardReload} from '../../lib/hard-reload.js';
@@ -230,7 +230,7 @@ const SettingsMenu = ({intl, canChangeLanguage, canChangeTheme, isRtl, onRequest
 
 const PreferencesSubmenuComponent = ({intl, canChangeLanguage, canChangeTheme, currentLocale, currentTheme, isRtl, onChangeLocale, onChangeTheme, onRequestClose}) => {
     const t = (id, defaultMessage) => intl.formatMessage({id, defaultMessage});
-    const enabledThemes = [DEFAULT_THEME, HIGH_CONTRAST_THEME];
+    const enabledThemes = [DEFAULT_THEME, DARK_THEME, HIGH_CONTRAST_THEME];
 
     return (
         <Submenu className={styles.preferencesSubmenu} place={isRtl ? 'left' : 'right'}>

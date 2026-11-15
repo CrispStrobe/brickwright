@@ -2,6 +2,12 @@ var n6 = Object.defineProperty;
 var r6 = (A, g, I) => g in A ? n6(A, g, { enumerable: !0, configurable: !0, writable: !0, value: I }) : A[g] = I;
 var FA = (A, g, I) => r6(A, typeof g != "symbol" ? g + "" : g, I);
 const D6 = {
+  "Color mode": "Farbmodus",
+  Light: "Hell",
+  Dark: "Dunkel",
+  "Choose light or dark mode": "Hellen oder dunklen Modus wählen",
+  "Loading models…": "Modelle werden geladen…",
+  "Original source files": "Originale Quelldateien",
   "Model source uses project version 6, 7 or 8": "Modellquelltext verwendet Projektversion 6, 7 oder 8",
   "Unknown material preset": "Unbekannte Materialvorlage",
   "Initial velocity requires project version 8": "Anfangsgeschwindigkeit erfordert Projektversion 8",
@@ -545,7 +551,7 @@ const D6 = {
   "Working tree": "Arbeitsverzeichnis",
   "Bundled workbench": "Mitgelieferte Arbeitsumgebung",
   "Native hosts": "Native App-Hüllen",
-  "Optional physics SDK": "Optionales Physik-SDK",
+  "Simulation engine": "Simulationsengine",
   "3D rendering and geometry utilities": "3D-Darstellung und Geometriewerkzeuge",
   "Mesh-solid booleans": "Boolesche Operationen für Netzvolumenkörper",
   Archives: "Archive",
@@ -556,7 +562,7 @@ const D6 = {
   "Native app host": "Native App-Hülle",
   "Native file access": "Nativer Dateizugriff",
   "Native sharing": "Natives Teilen",
-  "Headless rigid-body simulation; not bundled in the standalone editor UI": "Starrkörpersimulation ohne Oberfläche; nicht in der eigenständigen Editor-Oberfläche enthalten",
+  "Shared Jolt rigid-body simulation": "Gemeinsame Jolt-Starrkörpersimulation",
   "Application licence (BSD-3-Clause)": "Anwendungslizenz (BSD-3-Clause)",
   "Full third-party notices": "Vollständige Hinweise zu Drittanbietern",
   "Unclosed OpenSCAD comment": "Nicht abgeschlossener OpenSCAD-Kommentar",
@@ -1815,7 +1821,7 @@ function Y6(A, g) {
   if (!E2(o) || o.maxAnalysisBytes !== 16777216 || o.maxAnalysisTriangles !== 83333 || I.bytes > o.maxAnalysisBytes || o.maxTriangles > o.maxAnalysisTriangles || !Number.isSafeInteger(C.triangles) || C.triangles < 1 || C.triangles > o.maxTriangles || !K1(C.boundsMm, "min max") || !i5(C.boundsMm.min) || !i5(C.boundsMm.max) || !C.boundsMm.max.every((s, w) => s >= C.boundsMm.min[w] && s - C.boundsMm.min[w] <= o.maxExtentMm) || !u2(C.signedVolumeMm3))
     return !1;
   const c = A.evidence;
-  if (!K1(c, "fileSha256 checkedOn toMillimetresZUp engine engineVersion qualifierVersion qualified scope geometrySha256 sourceVolumeMm3 hulls certificate nativeCheck") || c.fileSha256 !== I.sha256 || c.checkedOn !== C.checkedOn || !v1(c.toMillimetresZUp, o.toMillimetresZUp) || c.engine !== "Jolt" || c.engineVersion !== "1.1.0-bw.9" || c.qualifierVersion !== "brickwright-library-collision/1" || c.qualified !== !0 || c.scope !== "rigid-collision-preview" || !U6(c.geometrySha256) || !u2(c.sourceVolumeMm3))
+  if (!K1(c, "fileSha256 checkedOn toMillimetresZUp engine engineVersion qualifierVersion qualified scope geometrySha256 sourceVolumeMm3 hulls certificate nativeCheck") || c.fileSha256 !== I.sha256 || c.checkedOn !== C.checkedOn || !v1(c.toMillimetresZUp, o.toMillimetresZUp) || c.engine !== "Jolt" || !["1.1.0-bw.9", "1.1.0-bw.10"].includes(c.engineVersion) || c.qualifierVersion !== "brickwright-library-collision/1" || c.qualified !== !0 || c.scope !== "rigid-collision-preview" || !U6(c.geometrySha256) || !u2(c.sourceVolumeMm3))
     return !1;
   const l = c.certificate;
   if (!(K1(l, "sourceSHA256 algorithm strategy maxHulls missingVolumeMm3 extraVolumeMm3 relativeError boundsErrorMm tolerance") || K1(l, "sourceSHA256 algorithm strategy maxHulls missingVolumeMm3 extraVolumeMm3 numericalResidualVolumeMm3 relativeError boundsErrorMm tolerance")) || l.sourceSHA256 !== c.geometrySha256 || l.algorithm !== "manifold-compound/v1" || l.strategy !== "bsp" || !Number.isSafeInteger(l.maxHulls) || l.maxHulls < 1 || l.maxHulls > 2048 || !Number.isSafeInteger(c.hulls) || c.hulls < 1 || c.hulls > l.maxHulls)
@@ -9595,7 +9601,7 @@ async function w8(A, g, I, C = {}) {
     }
   if ([...I.values()].reduce((U, T) => U + T.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = C.J ?? await (M5 ?? (M5 = import("./jolt-physics.wasm-compat-ok1RzOYL.js").then((U) => U.default()))), o = new i.JoltSettings();
+  const i = C.J ?? await (M5 ?? (M5 = import("./jolt-physics.wasm-compat-DdHjLBPW.js").then((U) => U.default()))), o = new i.JoltSettings();
   o.mMaxBodies = 512, o.mMaxBodyPairs = Math.max(1024, e.length * e.length), o.mMaxContactConstraints = 8192;
   const c = new i.ObjectLayerPairFilterTable(2);
   c.EnableCollision(0, 1), c.EnableCollision(1, 1);

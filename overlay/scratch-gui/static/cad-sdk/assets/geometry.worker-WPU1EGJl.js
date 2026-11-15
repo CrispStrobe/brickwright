@@ -2,6 +2,12 @@ var L6 = Object.defineProperty;
 var H6 = (A, g, I) => g in A ? L6(A, g, { enumerable: !0, configurable: !0, writable: !0, value: I }) : A[g] = I;
 var $A = (A, g, I) => H6(A, typeof g != "symbol" ? g + "" : g, I);
 const _6 = {
+  "Color mode": "Farbmodus",
+  Light: "Hell",
+  Dark: "Dunkel",
+  "Choose light or dark mode": "Hellen oder dunklen Modus wählen",
+  "Loading models…": "Modelle werden geladen…",
+  "Original source files": "Originale Quelldateien",
   "Model source uses project version 6, 7 or 8": "Modellquelltext verwendet Projektversion 6, 7 oder 8",
   "Unknown material preset": "Unbekannte Materialvorlage",
   "Initial velocity requires project version 8": "Anfangsgeschwindigkeit erfordert Projektversion 8",
@@ -545,7 +551,7 @@ const _6 = {
   "Working tree": "Arbeitsverzeichnis",
   "Bundled workbench": "Mitgelieferte Arbeitsumgebung",
   "Native hosts": "Native App-Hüllen",
-  "Optional physics SDK": "Optionales Physik-SDK",
+  "Simulation engine": "Simulationsengine",
   "3D rendering and geometry utilities": "3D-Darstellung und Geometriewerkzeuge",
   "Mesh-solid booleans": "Boolesche Operationen für Netzvolumenkörper",
   Archives: "Archive",
@@ -556,7 +562,7 @@ const _6 = {
   "Native app host": "Native App-Hülle",
   "Native file access": "Nativer Dateizugriff",
   "Native sharing": "Natives Teilen",
-  "Headless rigid-body simulation; not bundled in the standalone editor UI": "Starrkörpersimulation ohne Oberfläche; nicht in der eigenständigen Editor-Oberfläche enthalten",
+  "Shared Jolt rigid-body simulation": "Gemeinsame Jolt-Starrkörpersimulation",
   "Application licence (BSD-3-Clause)": "Anwendungslizenz (BSD-3-Clause)",
   "Full third-party notices": "Vollständige Hinweise zu Drittanbietern",
   "Unclosed OpenSCAD comment": "Nicht abgeschlossener OpenSCAD-Kommentar",
@@ -1811,7 +1817,7 @@ function B0(A, g) {
   if (!q2(l) || l.maxAnalysisBytes !== 16777216 || l.maxAnalysisTriangles !== 83333 || I.bytes > l.maxAnalysisBytes || l.maxTriangles > l.maxAnalysisTriangles || !Number.isSafeInteger(C.triangles) || C.triangles < 1 || C.triangles > l.maxTriangles || !d1(C.boundsMm, "min max") || !V3(C.boundsMm.min) || !V3(C.boundsMm.max) || !C.boundsMm.max.every((D, N) => D >= C.boundsMm.min[N] && D - C.boundsMm.min[N] <= l.maxExtentMm) || !h2(C.signedVolumeMm3))
     return !1;
   const c = A.evidence;
-  if (!d1(c, "fileSha256 checkedOn toMillimetresZUp engine engineVersion qualifierVersion qualified scope geometrySha256 sourceVolumeMm3 hulls certificate nativeCheck") || c.fileSha256 !== I.sha256 || c.checkedOn !== C.checkedOn || !J1(c.toMillimetresZUp, l.toMillimetresZUp) || c.engine !== "Jolt" || c.engineVersion !== "1.1.0-bw.9" || c.qualifierVersion !== "brickwright-library-collision/1" || c.qualified !== !0 || c.scope !== "rigid-collision-preview" || !i0(c.geometrySha256) || !h2(c.sourceVolumeMm3))
+  if (!d1(c, "fileSha256 checkedOn toMillimetresZUp engine engineVersion qualifierVersion qualified scope geometrySha256 sourceVolumeMm3 hulls certificate nativeCheck") || c.fileSha256 !== I.sha256 || c.checkedOn !== C.checkedOn || !J1(c.toMillimetresZUp, l.toMillimetresZUp) || c.engine !== "Jolt" || !["1.1.0-bw.9", "1.1.0-bw.10"].includes(c.engineVersion) || c.qualifierVersion !== "brickwright-library-collision/1" || c.qualified !== !0 || c.scope !== "rigid-collision-preview" || !i0(c.geometrySha256) || !h2(c.sourceVolumeMm3))
     return !1;
   const Q = c.certificate;
   if (!(d1(Q, "sourceSHA256 algorithm strategy maxHulls missingVolumeMm3 extraVolumeMm3 relativeError boundsErrorMm tolerance") || d1(Q, "sourceSHA256 algorithm strategy maxHulls missingVolumeMm3 extraVolumeMm3 numericalResidualVolumeMm3 relativeError boundsErrorMm tolerance")) || Q.sourceSHA256 !== c.geometrySha256 || Q.algorithm !== "manifold-compound/v1" || Q.strategy !== "bsp" || !Number.isSafeInteger(Q.maxHulls) || Q.maxHulls < 1 || Q.maxHulls > 2048 || !Number.isSafeInteger(c.hulls) || c.hulls < 1 || c.hulls > Q.maxHulls)

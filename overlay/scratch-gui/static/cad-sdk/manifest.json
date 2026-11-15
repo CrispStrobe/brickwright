@@ -2,17 +2,20 @@
   "format": "brickwright-cad-sdk",
   "version": 1,
   "repository": "https://github.com/CrispStrobe/brickwright-cad",
-  "commit": "2654f4367e13eb62189e3bf6b1af27bdd9b5aa28",
+  "commit": "89b379b8df0a1f273025a1892dec12663081655f",
   "dirty": false,
   "entry": "sdk.js",
   "wasm": "cad-assets/manifold.wasm",
   "files": {
     "LICENSE": "ed121de3496066a2ddc8c11b30b48142165ab84bdb066fee351392ecaccf36ad",
-    "NOTICE.txt": "6e1d0ec2745992351e11419c75fe0b306c3c53f568b35504444db4c742d93d79",
-    "assets/geometry.worker-Dl3OYZ2w.js": "b874fd7097a35f0a1d88bdf5f43c25ac3ffccebbdbf0bc9936ae9e84d4805701",
-    "assets/jolt-physics.wasm-compat-ok1RzOYL.js": "14f08d2b4811a94d1367bb4c759ed7d16fba6c36dde1ebcaedeebe1e9e933d4d",
-    "assets/simulation.worker-B2HuSG5g.js": "b44fb8ec6826c3b9d36a3b34a7018be507054508ba40242c27554909f9ddd3f5",
+    "NOTICE.txt": "dea50eee6d6781549af4e3740bfaf7661b29479696e5ae6cbe41eafd93c0fa70",
+    "assets/geometry.worker-WPU1EGJl.js": "84f6c0e5ee267004841ebfa223fbd91a32f18d42557d4193f215b13a433de4bf",
+    "assets/jolt-physics.wasm-compat-DdHjLBPW.js": "70cd4dfe9a4137a443846f04e46a2801ba2f78484442c66e073256ea5ff49b65",
+    "assets/simulation.worker-DzPJVE2X.js": "1520578c7c6c39e19c9f792846b901525f92223b4c2e48f03d046f1251317d86",
     "cad-assets/manifold.wasm": "73e3b419ad31294f6b1cc478173944e50efc4a34bfdeeff0107bdfc12975f11c",
-    "sdk.js": "7a21d80d9622caad57f6a831fde79e1bb2ea903eae2a9c6453c309740721cdf6"
+    "model-library-cache-DiMFGzp9.js": "75dc4ad7999b4571b227f1c675ca00af698fcc886dc73e98dd4c0eb2604e2b20",
+    "model-library-local-DE7mK7RX.js": "db58bb2c6ca0b96bda19a52c302fab7741f5ada665c701b4b968d24a35f18ac5",
+    "sdk-BW05fSfl.js": "d38e25639ebb4f0c70660705660c10cf78278dfe0b2d064b2485698cb29c2ded",
+    "sdk.js": "cf051fef9e76dd8eab8e2bf7f70303df9adb1661226db16585fb557f30f94d4c"
   }
 }

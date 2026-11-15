@@ -1,3 +1,4 @@
+import '../../lib/bw-color-mode.css';
 import classNames from 'classnames';
 import omit from 'lodash.omit';
 import PropTypes from 'prop-types';
@@ -166,6 +167,7 @@ const RobotLabTab = React.lazy(() =>
 const ROBOT_LAB_OPEN_EVENT = 'bw-open-robot-lab';
 
 const GUIComponent = props => {
+    React.useEffect(() => { document.documentElement.dataset.bwColorMode = props.theme === 'dark' ? 'dark' : 'light'; }, [props.theme]);
     const [starterOpen, setStarterOpen] = React.useState(false);
     // RUNTIME: has the user switched the FPGA tab on (Settings ▸ FPGA lab)? It
     // ships hidden even when built. The settings menu and this tab list are
@@ -1173,7 +1175,7 @@ const GUIComponent = props => {
                                 {showCad ? <TabPanel className={tabClassNames.tabPanel}>
                                     {cadWanted ? <EditorErrorBoundary name="CAD">
                                         <React.Suspense fallback={<div role="status">{intl.locale.startsWith('de') ? 'CAD wird geladen…' : 'Loading CAD…'}</div>}>
-                                            <CadTab isVisible={activeTabIndex === cadTabIndex} locale={intl.locale} />
+                                            <CadTab isVisible={activeTabIndex === cadTabIndex} locale={intl.locale} theme={theme} />
                                         </React.Suspense>
                                     </EditorErrorBoundary> : null}
                                 </TabPanel> : null}

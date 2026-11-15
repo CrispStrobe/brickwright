@@ -85,3 +85,27 @@ Technic dimensions, connector snapping and physics model; the SDK retains its
 solid document and millimetre/Z-up coordinate system. CAD-to-Robots geometry
 export already exists in the CAD adapter; enabling simulated custom parts still
 requires explicit authored connectors and collision metadata.
+
+## Shared fixes upstreamed on 15 November 2026
+
+CAD PRs #53 and #54 merge the simulation work and embedded-library/appearance
+fixes into `CrispStrobe/brickwright-cad` main. PR #55 updates archive regression
+coverage for the source-details disclosure. Lite pins source
+`89b379b8df0a1f273025a1892dec12663081655f`, already included in CAD main.
+The SDK owns the catalogue, thumbnails, source insertion, simulation UI and
+light/dark palette. Lite supplies its persisted colour preference and retains
+SB3/VM adapters. Changing colour mode preserves the editor session and history.
+
+Before pinning future shared changes, build a clean CAD checkout and run:
+
+```sh
+node scripts/sync-cad-sdk.mjs /path/to/cad-worktree
+node /path/to/cad-worktree/scripts/verify-brickwright-sync.mjs "$PWD"
+```
+
+Local validation: 49 focused CAD unit tests; three embedded regressions on iPad
+WebKit (catalogue/thumbnails/preview/insertion, simulation close, light/dark
+contrast); Chromium coverage of the same behavior plus both archive flows;
+seven Lite CAD host/VM/persistence unit tests; production webpack build; all ten
+emitted SDK asset hashes verified. These source changes require a new native app
+build before appearing in an installed app.

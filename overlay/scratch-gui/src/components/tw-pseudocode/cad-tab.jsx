@@ -29,7 +29,10 @@ const pickFile = accept => new Promise((resolve, reject) => {
     input.click();
 });
 
-const CadTab = ({isVisible, locale}) => {
+const CadTab = ({isVisible, locale, theme}) => {
+    const colorMode = theme === 'dark' ? 'dark' : 'light';
+    const mode = React.useRef(colorMode);
+    mode.current = colorMode;
     const host = React.useRef(null);
     const editor = React.useRef(null);
     const visible = React.useRef(isVisible);
@@ -74,6 +77,7 @@ const CadTab = ({isVisible, locale}) => {
             retainedGeneration = getCadProjectGeneration();
             const mounted = sdk.mountCadEditor(host.current, {
                 session: retainedSession,
+                colorMode: mode.current,
                 wasmURL: cadAssetURL('cad-assets/manifold.wasm'),
                 onDocumentChange: persist,
                 onCommandStateChange: () => notifyUndoState(),
@@ -103,6 +107,7 @@ const CadTab = ({isVisible, locale}) => {
             delete window.__bwCad;
         };
     }, [locale, retry]);
+    React.useEffect(() => { if (editor.current) editor.current.setColorMode(colorMode); }, [colorMode]);
     React.useEffect(() => {
         if (isVisible && editor.current) { activateUndoSurface('cad'); editor.current.focus(); }
     }, [isVisible]);
@@ -116,5 +121,9 @@ const CadTab = ({isVisible, locale}) => {
         <div ref={host} style={{width: '100%', flex: 1, minWidth: 0, minHeight: 350}} />
     </div>;
 };
-CadTab.propTypes = {isVisible: PropTypes.bool.isRequired, locale: PropTypes.string.isRequired};
+CadTab.propTypes = {
+    theme: PropTypes.string,
+    isVisible: PropTypes.bool.isRequired,
+    locale: PropTypes.string.isRequired
+};
 export default CadTab;

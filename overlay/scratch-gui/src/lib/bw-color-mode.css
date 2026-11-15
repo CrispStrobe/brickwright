@@ -1,0 +1,17 @@
+/* Shared light/dark surfaces for Brickwright chrome. CAD uses matching SDK tokens. */
+:root {--bw-bg:#f3f7fc;--bw-panel:#fff;--bw-surface:#edf3fb;--bw-text:#26374d;--bw-muted:#52657d;--bw-border:#758ba7;--bw-accent:#075eb7}
+:root[data-bw-color-mode=dark] {color-scheme:dark;--bw-bg:#101a24;--bw-panel:#17232e;--bw-surface:#233543;--bw-text:#edf3fa;--bw-muted:#bacbdc;--bw-border:#64809c;--bw-accent:#9ac8ff}
+:root[data-bw-color-mode=dark] body,
+:root[data-bw-color-mode=dark] [class*="gui_body-wrapper"],
+:root[data-bw-color-mode=dark] [class*="gui_editor-wrapper"],
+:root[data-bw-color-mode=dark] [class*="gui_tab"],
+:root[data-bw-color-mode=dark] [class*="menu_menu"],
+:root[data-bw-color-mode=dark] [class*="settings-menu_"],
+:root[data-bw-color-mode=dark] [class*="modal_modal-content"],
+:root[data-bw-color-mode=dark] [class*="stage-selector_stage-selector"],
+:root[data-bw-color-mode=dark] [class*="sprite-selector_sprite-selector"],
+:root[data-bw-color-mode=dark] [class*="target-pane_target-pane"] {background-color:var(--bw-panel);color:var(--bw-text);border-color:var(--bw-border)}
+:root[data-bw-color-mode=dark] [role=tab][aria-selected=true] {background:var(--bw-surface);color:var(--bw-text)}
+:root[data-bw-color-mode=dark] input:not([type=color]):not([type=range]),
+:root[data-bw-color-mode=dark] select,
+:root[data-bw-color-mode=dark] textarea {background-color:var(--bw-surface);color:var(--bw-text);border-color:var(--bw-border)}
