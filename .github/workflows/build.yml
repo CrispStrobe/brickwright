@@ -809,6 +809,12 @@ jobs:
         id: arrays_number_value_source
         if: ${{ !cancelled() && steps.overlays.outcome == 'success' }}
         run: node scripts/admit-arrays-number-value-test-source.mjs
+      - name: Verify Robot Lab pane interactions in Chromium
+        if: ${{ !cancelled() && matrix.shard == 3 && steps.overlays.outcome == 'success' && steps.unit_playwright.outcome == 'success' }}
+        timeout-minutes: 3
+        env:
+          BW_UX_EVIDENCE: ${{ runner.temp }}/robot-lab-pane-ux
+        run: node scripts/verify-sim-lab-pane-ux.mjs
       - name: Run unit tests
         if: ${{ !cancelled() && steps.overlays.outcome == 'success' && steps.unit_playwright.outcome == 'success' && steps.stc_flasher_pin.outcome == 'success' && steps.stc_flasher_source.outcome == 'success' && steps.arrays_number_value_source.outcome == 'success' }}
         env:
