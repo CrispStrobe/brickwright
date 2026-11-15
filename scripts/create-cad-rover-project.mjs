@@ -2,8 +2,8 @@
 // Package the actual CAD rover and its two-wheel demonstration in one SB3.
 import {readFile, writeFile, mkdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
-import {resolve, dirname} from 'node:path';
-import {fileURLToPath, pathToFileURL} from 'node:url';
+import {resolve} from 'node:path';
+import {pathToFileURL} from 'node:url';
 import JSZip from 'jszip';
 import SB3Creator from '../overlay/scratch-gui/src/lib/sb3-creator-register-art.js';
 import {CAD_PROJECT_PATH} from '../overlay/scratch-gui/src/lib/bw-cad-project.js';
@@ -66,7 +66,7 @@ async function main() {
     const output = resolve(process.argv[3] || 'artifacts/cad-rover');
     const documentText = await readFile(resolve(input), 'utf8');
     const project = await createCadRoverProject(documentText);
-    const sdk = JSON.parse(await readFile(resolve(dirname(fileURLToPath(import.meta.url)), '../overlay/scratch-gui/static/cad-sdk/manifest.json'), 'utf8'));
+    const document = JSON.parse(documentText); // Already checked by the SDK above.
     const files = {
         'tt-rover.bcad': documentText,
         'tt-rover.sb3': project,
@@ -77,7 +77,11 @@ async function main() {
     for (const [name, bytes] of Object.entries(files)) await writeFile(resolve(output, name), bytes);
     await writeFile(resolve(output, 'manifest.json'), JSON.stringify({
         format: 'brickwright-cad-rover-example', version: 1,
-        sdkCommit: sdk.commit,
+        // Artifact identity is independent of the SDK used to validate it.
+        // verify-cad-rover-project reports the current SDK separately, so a
+        // later SDK pin never requires rewriting the saved private project.
+        cadDocument: {format: document.format, version: document.version, units: document.units, id: document.id},
+        program: {format: 'brickwright-pseudocode', entry: 'green-flag'},
         controls: {A: 'left wheel', B: 'right wheel'},
         execution: 'CAD simulation; no physical Adafruit transport',
         files: Object.fromEntries(Object.entries(files).map(([name, bytes]) => [name, createHash('sha256').update(bytes).digest('hex')]))

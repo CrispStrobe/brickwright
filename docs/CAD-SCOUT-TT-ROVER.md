@@ -9,8 +9,8 @@ create the demonstration locally using the command below.
 
 ## Run the example
 
-1. Use a Brickwright Lite build containing the CAD Editor and the SDK recorded
-   in the demonstration's `manifest.json`.
+1. Use a Brickwright Lite build containing the CAD Editor and the shared SDK
+   supporting the Scout TT model's mobile base.
 2. Choose **Settings → Workspace → CAD Editor** and enable it. This is a device
    preference; opening the example does not change it.
 3. Choose **File → Load from your computer** and select `tt-rover.sb3`.
@@ -61,8 +61,10 @@ node --import ./scripts/lib/register-gui-scope.mjs \
 ```
 
 The generator validates the model with the shipped SDK, preserves its exact
-bytes in the sidecar, and records hashes for the distributed files. The checks
+bytes in the sidecar, and records document/program formats and hashes for the
+distributed files. The artifact manifest does not pin an SDK commit. The checks
 in `test/cad-rover-project.test.mjs` cover packaging and the A/B program; the
-verification command checks the generated example's exact source, notices and
-hashes against the currently pinned SDK. Native apps need to be rebuilt to
+verification command checks the saved example's exact source, notices and
+hashes using the currently pinned SDK and reports that SDK's commit separately.
+Updating the SDK therefore never changes the saved example. Native apps need to be rebuilt to
 include a newly pinned SDK.

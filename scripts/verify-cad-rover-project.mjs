@@ -15,7 +15,8 @@ const base = resolve(input);
 const manifest = JSON.parse(await readFile(resolve(base, 'manifest.json'), 'utf8'));
 const sdk = JSON.parse(await readFile(new URL('../overlay/scratch-gui/static/cad-sdk/manifest.json', import.meta.url), 'utf8'));
 assert.equal(manifest.format, 'brickwright-cad-rover-example');
-assert.equal(manifest.sdkCommit, sdk.commit, 'example was validated with the current SDK');
+assert.equal(manifest.version, 1);
+assert.deepEqual(manifest.program, {format: 'brickwright-pseudocode', entry: 'green-flag'});
 const files = ['tt-rover.bcad', 'tt-rover.sb3', 'tt-rover-program.txt', 'ADAFRUIT-MIT-LICENSE.txt', 'BRICKWRIGHT-BSD-3-CLAUSE.txt'];
 assert.deepEqual(Object.keys(manifest.files).sort(), [...files].sort());
 for (const name of files) {
@@ -24,6 +25,7 @@ for (const name of files) {
 }
 const source = await readFile(resolve(base, 'tt-rover.bcad'), 'utf8');
 const document = parseDocument(source);
+assert.deepEqual(manifest.cadDocument, {format: document.format, version: document.version, units: document.units, id: document.id});
 for (const port of ['A', 'B']) assert.equal(document.joints?.find(j => j.control?.port === port)?.kind, 'hinge');
 const bytes = await readFile(resolve(base, 'tt-rover.sb3'));
 const archive = await JSZip.loadAsync(bytes);
@@ -33,4 +35,4 @@ for (const name of files.filter(name => name.endsWith('LICENSE.txt') || name.end
     assert.equal(await archive.file(`brickwright/licenses/${name}`).async('text'), await readFile(resolve(base, name), 'utf8'));
 }
 assert.notEqual((await inspectBrickwrightState(bytes)).outcome, 'invalid');
-console.log(`PASS complete Scout TT project: exact CAD bytes, A/B drives, program, notices and ${files.length} hashes; SDK ${sdk.commit}`);
+console.log(`PASS complete Scout TT project: exact CAD bytes, A/B drives, program, notices and ${files.length} hashes; independently validated with SDK ${sdk.commit}`);
