@@ -162,6 +162,7 @@ import {
 import {svgToPixels} from './pixel-image.js';
 import {parseAnimationJres} from './arcade-animation-assets.js';
 import {parseSongJres} from './song-jres.js';
+import {prepareRootFixedImages} from './root-fixed-jres-images.js';
 import {BUILTIN_IMAGES} from './arcade-builtin-images.js';
 import {ANIMATION_COMPANION_PATH, recoverAnimationCompanion} from './animation-companion.js';
 import {HELPERS} from './arcade-runtime.js';
@@ -4668,6 +4669,10 @@ const planImageValues = (t, ast, {creationApis, requiresSpriteRuntime, directIma
             t.imageValueResources.set(node,{...resource,value:{type:'Number',value:selected.index}});
             return;
         }
+        // A namespace Image binding has useful artwork metadata, but reading
+        // that binding is not another allocation. Only its initializer owns
+        // the literal resource; aliases and comparisons read the actual cell.
+        if (node.type === 'Identifier') return;
         const image = acceptImage(node) ? t.imageOf(node) : null;
         // Runtime setImage owns a newly evaluated Image, including a creation
         // callback whose kind can be computed. Static costume-slot matching
@@ -5461,7 +5466,9 @@ export function nameArtworkSprites (result) {
  */
 export function arcadeToPseudocode(files,opts={}) {
     const map=typeof files==='string'?{'main.ts':files}:files||{};
-    return withLiteralRenderableSource(map,()=>withClosedSpriteNullFilters(map,()=>arcadeToPseudocodeImpl(files,opts)));
+    const prepared=prepareRootFixedImages(map),view=prepared.files;
+    const result=withLiteralRenderableSource(view,()=>withClosedSpriteNullFilters(view,()=>arcadeToPseudocodeImpl(view,opts)));
+    return prepared.diagnostics.length?{...result,unsupported:[...new Set([...result.unsupported,...prepared.diagnostics])]}:result;
 }
 function arcadeToPseudocodeImpl (files, opts = {}) {
     const map = typeof files === 'string' ? {'main.ts': files} : (files || {});
@@ -5715,7 +5722,8 @@ function arcadeToPseudocodeImpl (files, opts = {}) {
     try {const cfg=JSON.parse(map['pxt.json'] || '{}');textSpriteInitializer=cfg.bwArcadeNativeLibraries?.textsprite==='v1.3.0' && selectedSource.entries.some(entry=>entry.name.startsWith('__bwDependencyInputs/arcade-text/') && entry.source===TEXT_SPRITE_INITIALIZER);}catch{}
     const namespaceBindings = lowerNamespaceBindings(parsed,{spriteKinds:true,textSpriteInitializer});
     // Namespace image constants (\`namespace myTiles { export const tile0 = img\`...\` }\`)
-    // become generated top-level consts; they are immutable, so read them as images.
+    // keep pixel metadata for artwork planning. Their runtime reads still use
+    // the actual binding; an immutable binding can hold a mutable Image.
     for (const statement of namespaceBindings.program?.body || []) {
         if (statement.type !== 'Declaration' || statement.kind !== 'const') continue;
         for (const decl of statement.decls) {

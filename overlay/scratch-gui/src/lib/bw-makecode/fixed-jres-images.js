@@ -135,7 +135,8 @@ export function createFixedImageResourceMaterializer(originalFiles, resolved) {
     return (packageId,file,source) => {
         // No parser/source-census work for packages with no bounded candidates.
         if (!source.includes('fixedInstance') || !source.includes('jres') || !/image\s*\.\s*ofBuffer\s*\(\s*hex``\s*\)/.test(source)) return {source,resources:[]};
-        const ctx = build(), record = ctx.records.get('dependency:' + packageId + '/' + file);
+        const sourceKey = packageId === null ? 'root:' + file : 'dependency:' + packageId + '/' + file;
+        const ctx = build(), record = ctx.records.get(sourceKey);
         if (!record || record.text !== source) fail('actual configured package source differs');
         const declarations = new Map();
         namespaceDeclarations(record.program.body,(node,scope) => {
@@ -153,7 +154,7 @@ export function createFixedImageResourceMaterializer(originalFiles, resolved) {
                 const entries = key && declarations.get(key);
                 if (entries?.length !== 1) fail('missing or ambiguous actual declaration: ' + match[2]);
                 const {node,decl,scope:actualScope} = entries[0], owners = ctx.bindings.get(key);
-                if (owners?.length !== 1 || owners[0].decl !== decl || owners[0].sourceKey !== 'dependency:' + packageId + '/' + file) fail('ambiguous configured declaration: ' + key);
+                if (owners?.length !== 1 || owners[0].decl !== decl || owners[0].sourceKey !== sourceKey) fail('ambiguous configured declaration: ' + key);
                 if (node.kind !== 'const' || !node.exported || node.decls.length !== 1 || !factory(decl) || !ctx.sdk.has(decl.init.callee)) fail('factory is not the unchanged actual SDK declaration: ' + key);
                 const actualTokens = record.tokens.filter(token => token.startLine === lineNumber);
                 const expected = ['export','const',match[2],'=','image','.','ofBuffer','(','hex','',')'];
@@ -164,8 +165,8 @@ export function createFixedImageResourceMaterializer(originalFiles, resolved) {
                     const bound = ctx.declared.get(actualScope.slice(0,depth).join('.'));
                     if (bound?.has('image') || bound?.has('hex') || bound?.has('img')) fail('image/hex/img is shadowed in actual merged namespace: ' + key);
                 }
-                const pkg = resolved.packages[packageId], entry = resolved.jres[key];
-                if (!pkg.resourceIds?.includes(key) || ctx.resourceOwners.get(key)?.size !== 1) fail('missing or ambiguous actual package resource: ' + key);
+                const pkg = packageId === null ? {resourceIds:resolved.rootResourceIds} : resolved.packages[packageId], entry = resolved.jres[key];
+                if (!pkg.resourceIds?.includes(key) || (packageId === null ? ctx.resourceOwners.has(key) : ctx.resourceOwners.get(key)?.size !== 1)) fail('missing or ambiguous actual package resource: ' + key);
                 if (!entry || entry.id !== key || String(entry.namespace || '').replace(/\.$/,'') !== actualScope.join('.') ||
                     entry.mimeType !== 'image/x-mkcd-f4' || entry.dataEncoding !== 'base64' || typeof entry.data !== 'string') fail('resource metadata does not match factory: ' + key);
                 if (entry.data.length > 8 * 1024 * 1024) fail('resource exceeds bounded image decoder: ' + key);

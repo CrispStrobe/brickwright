@@ -113,15 +113,19 @@ const decodeBase64 = text => {
  */
 export function decodeMkcdImage (base64) {
     const bytes = decodeBase64(base64);
-    if (bytes.length < 8 || bytes[0] !== 0x87 || bytes[1] !== 0x04) return null;
-    const width = bytes[2] | (bytes[3] << 8);
-    const height = bytes[4] | (bytes[5] << 8);
+    // The SDK also accepts legacy f4 artwork: E4, u8 width, u8 height,
+    // reserved byte, then the same padded column-major nibble body.
+    const legacy = bytes.length >= 5 && bytes[0] === 0xe4;
+    if (!legacy && (bytes.length < 8 || bytes[0] !== 0x87 || bytes[1] !== 0x04)) return null;
+    const header = legacy ? 4 : 8;
+    const width = legacy ? bytes[1] : bytes[2] | (bytes[3] << 8);
+    const height = legacy ? bytes[2] : bytes[4] | (bytes[5] << 8);
     const stride = Math.ceil(height / 8) * 4;
-    if (!width || !height || bytes.length !== 8 + (width * stride)) return null;
+    if (!width || !height || bytes.length !== header + (width * stride)) return null;
     const pixels = new Uint8Array(width * height);
     for (let x = 0; x < width; x++) {
         for (let y = 0; y < height; y++) {
-            const byte = bytes[8 + (x * stride) + (y >> 1)];
+            const byte = bytes[header + (x * stride) + (y >> 1)];
             pixels[(y * width) + x] = (y % 2 === 0) ? (byte & 0x0F) : (byte >> 4);
         }
     }
