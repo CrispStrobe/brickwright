@@ -58,3 +58,29 @@ dependency.
   multi-body rectangle/Escape browser test.
 
 The focused viewport check does not exercise the complete Scratch shell.
+
+## Robot Lab corrections and motor preview (2026-11-15)
+
+Pre-Run warning dismissal is keyed by diagnostic code and retained for the app
+session, including loading transitions and released/reopened Robot tabs. The
+idle build info row is folded into the existing top Help control. Touch tab
+layout reserves 60 px beside the 44 px menu toggle and its 8 px right inset.
+
+Frame 39794 is correctly named 7×11. It and 64179 now include the side bores
+from their official LDraw primitives, retain existing connector IDs, and use four
+rail collision boxes instead of a solid window. Rails use their actual 20 LDU
+width so side contact does not create a false collision. A two-pin regression
+fixture connects the flat 7×11 frame beside the SPIKE hub's long side.
+
+Existing 45601 placements render the official complete 45601c01 assembly with
+45610 battery; their model ID and hub profile stay compatible. The loader fetches
+both the original part and visual assembly closures. The battery category adds
+25 boxes/packs/cells across Power Functions AA/AAA/rechargeable, Powered Up,
+Control+, 9 V, 4.5 V, SPIKE and EV3 families from the same pinned official archive.
+These are part/attachment additions; electrical battery discharge is not modeled.
+
+The shared CAD SDK now supplies a worker-based motor/joint preview with hinge
+speed, finite torque, joint angle, Run/Pause/Stop/Reset and an explicit fixed-base
+option. Preview poses remain outside documents and undo. Existing geometry and
+collision qualification still applies. Mate authoring and virtual robot programs
+remain follow-up work.

@@ -24,6 +24,7 @@
 
 import {BufferGeometry, Color, Float32BufferAttribute} from 'three';
 import {flattenPart, refKey} from '../ldraw/ldraw-geometry.js';
+import {visualAssembly} from '../ldraw/visual-assemblies.js';
 import {phasedMotorRead} from '../ldraw/motor-phase.js';
 export {driveHubRef} from '../ldraw/motor-phase.js';
 
@@ -199,7 +200,7 @@ export const partVisual = (name, read, colors, piece = null) => {
     const key = name.toLowerCase() + (piece?.ref !== undefined ? `#${piece.take}${piece.ref}` : '') + `@${piece?.rotor?.angle || 0}`;
     if (cache.has(key)) return cache.get(key);
     const source = piece?.rotor ? phasedMotorRead(name, read, piece.rotor.meta, piece.rotor.angle) : read;
-    const flat = flattenPart(name, source, piece?.ref !== undefined ? {topRef: i => (i === piece.ref) === (piece.take === 'ref'), topOwn: piece.take === 'rest'} : {});
+    const flat = flattenPart(visualAssembly(name), source, piece?.ref !== undefined ? {topRef: i => (i === piece.ref) === (piece.take === 'ref'), topOwn: piece.take === 'rest'} : {});
     const visual = {
         faces: flat.polys.length ? facesGeometry(flat, colors) : new BufferGeometry(),
         edges: linesGeometry(flat.edges, flat.edgeColours, flat.edgeDirect, colors, false),

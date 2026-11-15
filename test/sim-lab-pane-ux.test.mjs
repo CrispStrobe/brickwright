@@ -22,7 +22,7 @@ function mount(kind, compact, locale) {
         close() {act(() => {ReactDOM.unmountComponentAtNode(box);}); box.remove();}};
 }
 for (const kind of ['blockers', 'issues']) for (const compact of [true, false]) {
-    test(`${kind} ${compact ? 'compact' : 'wide'}: initially visible, X retains DOM, same content stays hidden and changed content reappears`, () => {
+    test(`${kind} ${compact ? 'compact' : 'wide'}: initially visible, X retains DOM, dismissal survives refresh; new diagnostic types remain visible`, () => {
         const v = mount(kind, compact, 'de');
         try {
             const first = [{code: 'no-motor', message: 'Motor fehlt', parts: ['a']}]; v.render(first);
@@ -31,8 +31,17 @@ for (const kind of ['blockers', 'issues']) for (const compact of [true, false]) 
             assert.equal(close.querySelector('span').getAttribute('aria-hidden'), 'true'); assert.equal([...notice.querySelectorAll('summary')].some(summary => summary.contains(close)), false);
             act(() => close.click()); assert.equal(notice.hidden, true); assert.equal(notice.firstChild, warning);
             v.render(JSON.parse(JSON.stringify(first))); assert.equal(notice.hidden, true);
-            v.render([{...first[0], message: 'Anderer Motor fehlt'}]); assert.equal(notice.hidden, false);
-            act(() => close.click()); v.render(first); assert.equal(notice.hidden, false, 'returning warning after a different warning is new content');
+            v.render([{...first[0], message: 'Anderer Motor fehlt'}]);
+            assert.equal(kind === 'blockers' ? v.box.childElementCount : Number(notice.hidden), 0, 'blocker dismissal is semantic, not tied to translated message text');
+            if (kind === 'blockers') {
+                v.render([]); v.render(first);
+                assert.equal(v.box.childElementCount, 0, 'loading or switching modes must not resurrect the same blocker');
+                v.render([{code: 'no-hub', message: 'Hub fehlt'}]);
+                assert.equal(v.box.firstChild.hidden, false, 'a different diagnostic can still be shown');
+            } else {
+                act(() => close.click()); v.render(first);
+                assert.equal(notice.hidden, false, 'changed issue content remains visible');
+            }
         } finally {v.close();}
     });
 }

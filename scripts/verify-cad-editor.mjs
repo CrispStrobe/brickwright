@@ -56,6 +56,20 @@ try{
   assert.ok(Math.abs(result.volume-6000)<1e-6);assert.equal(result.undo,true);assert.equal(result.roots,0);
  }else{
   await page.getByRole('tab',{name:'Robots',exact:true}).waitFor();
+  if(process.argv.includes('--robots')){
+   await page.getByRole('tab',{name:'Robots',exact:true}).click();
+   await page.waitForFunction(()=>window.__bwSimLab?._pane?.lib);
+   const state=values=>page.evaluate(values=>new Promise(resolve=>window.__bwSimLab._pane.setState(values,resolve)),values);
+   await state({status:'ready',mode:'simulate',blockers:[{code:'no-motor'}]});
+   const notice=page.getByTestId('bw-sim-lab-blockers').first();await notice.waitFor();
+   await page.getByTestId('bw-sim-lab-blockers-close').click();
+   await state({status:'loading',blockers:[]});await state({status:'ready',blockers:[{code:'no-motor'}]});
+   assert.equal(await page.getByTestId('bw-sim-lab-blockers').count(),0);
+   await state({mode:'build',selection:[],hidden:[],editGroup:null,buildStatus:{kind:'idle'}});
+   assert.equal(await page.getByTestId('bw-sim-lab-help-build').count(),0);
+   if(ipad){const a=await page.getByRole('tab',{name:'Robots',exact:true}).boundingBox(),b=await page.getByTestId('bw-chrome-toggle').boundingBox();assert.ok(a.x+a.width<=b.x,`Robots tab overlaps menu toggle: ${JSON.stringify({a,b})}`);}
+   await page.getByRole('tab',{name:'Code',exact:true}).click();
+  }
   assert.equal(await page.getByRole('tab',{name:'CAD',exact:true}).count(),0);
   assert.equal(requests.some(url=>url.includes('/cad-sdk/')),false);
   if(expectAbsent){

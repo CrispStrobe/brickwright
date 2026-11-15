@@ -8,6 +8,7 @@ import {parseLDConfig} from '../view/ldraw-colors.js';
 
 export const PALETTE_CATEGORIES = [
     {id: 'hub', en: 'Hub', de: 'Hub'},
+    {id: 'battery', en: 'Batteries / power', de: 'Batterien / Stromversorgung'},
     {id: 'motor', en: 'Motor', de: 'Motor'},
     {id: 'sensor', en: 'Sensor', de: 'Sensor'},
     {id: 'beam', en: 'Beam', de: 'Lochbalken'},

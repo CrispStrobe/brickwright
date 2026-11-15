@@ -31,7 +31,6 @@ import {pickLocale, browserLocale} from '../../lib/bw-i18n.js';
 import {activateUndoSurface, getUndoState, notifyUndoState, registerUndoSurface} from '../../lib/global-undo.js';
 import {SIM_LAB_STORAGE_KEY, simLabRecordFromText, readSimLabStorage, isStorableName} from '../../lib/bw-sim/model/sim-lab-persist.js';
 import SimLabPalette from './sim-lab-palette.jsx';
-import SimLabInfo from './sim-lab-info.jsx';
 import SimLabReadings from './sim-lab-readings.jsx';
 import SimLabConnections from './sim-lab-connections.jsx';
 import SimLabBrickButtons from './sim-lab-brick-buttons.jsx';
@@ -2847,12 +2846,24 @@ class SimLabPane extends React.Component {
 
     /** What stops Run from doing what a child expects, said before Run. */
     renderBlockers () {
-        const blockers = this.state.blockers || [];
-        if (!blockers.length || this.state.status === 'loading') return null;
+        if (!this.dismissedBlockers) {
+            let codes = [];
+            try { const stored = JSON.parse(window.sessionStorage.getItem('bw-robot-dismissed-blockers') || '[]');
+                if (Array.isArray(stored)) codes = stored.filter(code => typeof code === 'string');
+            } catch (_) { /* Private browsing may disable session storage. */ }
+            this.dismissedBlockers = new Set(codes);
+        }
+        const dismissed = this.dismissedBlockers;
+        const blockers = (this.state.blockers || []).filter(item => !dismissed.has(item.code));
+        if (!blockers.length || this.state.status === 'loading' || this.state.mode === 'build') return null;
+        const dismiss = () => {
+            blockers.forEach(item => dismissed.add(item.code));
+            try { window.sessionStorage.setItem('bw-robot-dismissed-blockers', JSON.stringify([...dismissed])); } catch (_) { /* In-memory dismissal still works. */ }
+        };
         if (this.compact()) {
             // One line ("Before you press Run: (2)") that opens to the list.
             return (
-                <SimLabNotice content={blockers} testId="bw-sim-lab-blockers" closeLabel={`${this.itext.close}: ${this.itext.blockersTitle}`}>
+                <SimLabNotice content={blockers} onDismiss={dismiss} testId="bw-sim-lab-blockers" closeLabel={`${this.itext.close}: ${this.itext.blockersTitle}`}>
                     <details role="alert" data-testid="bw-sim-lab-blockers"
                         style={{fontSize: 12, color: '#7c2d12', background: '#fff7ed', border: '1px solid #fdba74', borderRadius: 6, padding: '4px 32px 4px 8px', minWidth: 0}}>
                         <summary style={{cursor: 'pointer', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
@@ -2866,7 +2877,7 @@ class SimLabPane extends React.Component {
             );
         }
         return (
-            <SimLabNotice content={blockers} testId="bw-sim-lab-blockers" closeLabel={`${this.itext.close}: ${this.itext.blockersTitle}`}>
+            <SimLabNotice content={blockers} onDismiss={dismiss} testId="bw-sim-lab-blockers" closeLabel={`${this.itext.close}: ${this.itext.blockersTitle}`}>
                 <div role="alert" data-testid="bw-sim-lab-blockers"
                     style={{fontSize: 12, color: '#7c2d12', background: '#fff7ed', border: '1px solid #fdba74', borderRadius: 6, padding: '6px 32px 6px 8px'}}>
                     <strong>{this.itext.blockersTitle}</strong>
@@ -3150,6 +3161,9 @@ class SimLabPane extends React.Component {
                     {rows(TT.camera)}
                     {this.state.mode === 'build' && <strong>{TT.buildTitle}</strong>}
                     {this.state.mode === 'build' && rows(TT.build)}
+                    {this.state.mode === 'build' && <p style={{margin: '4px 0 8px', color: '#334155'}}>
+                        {this.state.coarse ? this.etext.connect.hintIdleTouch : this.etext.connect.hintIdle}
+                    </p>}
                     {this.state.mode === 'build' && (
                         <button type="button" data-testid="bw-sim-lab-help-shortcuts" style={{...s.button, border: '1px solid #94a3b8'}}
                             onClick={() => this.setState({shortcuts: true})}>{TT.allShortcuts}</button>
@@ -3353,10 +3367,12 @@ class SimLabPane extends React.Component {
         const field = this.state.coarse ? {minHeight: 40} : {height: 26};
         const chip = {display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap', padding: '2px 8px', borderRadius: 999, fontSize: 12};
         const hint = this.buildStatusText();
+        const lesson = this.renderLessonToggle();
+        if (!selection.length && !this.state.hidden.length && !this.state.editGroup && !lesson && (!st.kind || st.kind === 'idle')) return null;
         const selectionText = sel ? TT.selectedOne.replace('{name}', this.partName(sel.part)) : TT.selectedMany.replace('{n}', selection.length);
         return (
             <div data-testid="bw-sim-lab-context" style={{display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, minHeight: 26, fontSize: 12}}>
-                {this.renderLessonToggle()}
+                {lesson}
                 {selection.length > 0 && (
                     <span data-testid="bw-sim-lab-selection" title={sel ? this.t('selectedOne', {name: this.partName(sel.part)}) : this.t('selectedMany', {n: selection.length})}
                         style={{...chip, background: '#dbeafe', color: '#1e3a8a', fontWeight: 600, maxWidth: '40%', overflow: 'hidden', textOverflow: 'ellipsis'}}>
@@ -3383,15 +3399,10 @@ class SimLabPane extends React.Component {
                         {E.groupBanner.replace('{name}', this.state.editGroup.name)}
                     </span>
                 )}
-                <SimLabInfo testid="bw-sim-lab-help-build" label={T.helpBuild}
-                    text={<React.Fragment>
-                        <span style={{display: 'block', marginBottom: 6}}>{this.state.coarse ? T.idleTouch : T.idle}</span>
-                        <span style={{display: 'block'}}>{this.state.coarse ? this.etext.connect.hintIdleTouch : this.etext.connect.hintIdle}</span>
-                    </React.Fragment>} />
                 <span role="status" data-testid="bw-sim-lab-build-status" data-kind={st.kind || 'idle'} title={hint}
                     style={{color: refused || blocked ? '#b91c1c' : '#475569', fontWeight: refused ? 600 : 400,
                         flex: '1 1 0', minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
-                    {hint}
+                    {st.kind && st.kind !== 'idle' ? hint : ''}
                 </span>
             </div>
         );
