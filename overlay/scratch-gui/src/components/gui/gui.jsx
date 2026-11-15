@@ -267,12 +267,23 @@ const GUIComponent = props => {
     const robotLabIndex = robotLabTabIndex(showFpga);
     // Append CAD after Robots so every existing tab keeps its index.
     const cadTabIndex = robotLabIndex + 1;
+    const previousFpgaVisibility = React.useRef(showFpga);
+    const fpgaLayoutChanging = previousFpgaVisibility.current !== showFpga;
+    React.useEffect(() => {
+        const wasShown = previousFpgaVisibility.current;
+        previousFpgaVisibility.current = showFpga;
+        if (wasShown === showFpga) return;
+        const index = props.activeTabIndex;
+        if (showFpga && index >= 5) props.onActivateTab(index + 1);
+        else if (!showFpga && index > 5) props.onActivateTab(index - 1);
+        else if (!showFpga && index === 5) props.onActivateTab(4);
+    }, [showFpga, props.activeTabIndex, props.onActivateTab]);
     const [cadWanted, setCadWanted] = React.useState(false);
-    if (showCad && !cadWanted && props.activeTabIndex === cadTabIndex) setCadWanted(true);
+    if (showCad && !cadWanted && !fpgaLayoutChanging && props.activeTabIndex === cadTabIndex) setCadWanted(true);
     React.useEffect(() => {
         if (!showCad && props.activeTabIndex === cadTabIndex) props.onActivateTab(robotLabIndex);
     }, [showCad, props.activeTabIndex, props.onActivateTab, cadTabIndex, robotLabIndex]);
-    if (!robotLabWanted && props.activeTabIndex === robotLabIndex) setRobotLabWanted(true);
+    if (!robotLabWanted && !fpgaLayoutChanging && props.activeTabIndex === robotLabIndex) setRobotLabWanted(true);
     React.useEffect(() => {
         const onOpen = () => {
             setRobotLabWanted(true);

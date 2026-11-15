@@ -83,6 +83,20 @@ try{
   assert.equal(await page.evaluate(()=>window.__bwCad.editor.session.state.document.roots.length),1);
   const text=await page.evaluate(()=>localStorage.getItem('bw-cad-document'));
   assert.ok(JSON.parse(text).roots.length===1);
+  // In shipping builds both optional editors are present. Adding/removing FPGA
+  // must preserve the selected CAD surface as its numerical tab index shifts.
+  await page.getByTestId('bw-settings-menu-trigger').click();
+  await page.getByText('Workspace',{exact:true}).click();
+  const fpga=page.getByLabel('FPGA lab (⬢ tab)',{exact:true});
+  if(await fpga.count()){
+   await fpga.selectOption('1');
+   await page.waitForFunction(()=>document.querySelector('[role="tab"][aria-label="CAD"]')?.getAttribute('aria-selected')==='true');
+   await page.getByTestId('bw-settings-menu-trigger').click();await page.getByText('Workspace',{exact:true}).click();
+   await page.getByLabel('FPGA lab (⬢ tab)',{exact:true}).selectOption('0');
+   await page.waitForFunction(()=>document.querySelector('[role="tab"][aria-label="CAD"]')?.getAttribute('aria-selected')==='true');
+   assert.equal(await page.evaluate(()=>localStorage.getItem('bw-cad-document')),text);
+  }else await page.getByTestId('bw-settings-menu-trigger').click();
+
   await toggle('0');assert.equal(await page.getByRole('tab',{name:'CAD',exact:true}).count(),0);
   assert.equal(await page.evaluate(()=>localStorage.getItem('bw-cad-document')),text);
   await toggle('1');await page.getByRole('tab',{name:'CAD',exact:true}).click();

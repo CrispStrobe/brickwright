@@ -23,10 +23,12 @@ exports use Brickwright's existing Files/share integration.
 
 ## Visibility and lifecycle
 
-The build flag is off by default, as with FPGA. A build without it has no CAD
+The build flag is off by default, as with FPGA. Shipping web builds explicitly
+compile it alongside FPGA, while the user preference stays off. A build without it has no CAD
 tab, setting or copied SDK assets. A build with it still defaults to CAD **off**.
 Turn it on under Settings → Workspace → CAD Editor. The tab is appended after
-Robots so the Code/Circuit/FPGA/Robots indices stay unchanged. Enabling the
+Robots so the Code/Circuit/FPGA/Robots indices stay unchanged. Toggling FPGA
+keeps the active Robots or CAD surface selected as optional tab indices shift. Enabling the
 setting adds the tab; the SDK/worker load only when CAD is first opened.
 
 A host-owned session keeps undo history while switching tabs or turning the
