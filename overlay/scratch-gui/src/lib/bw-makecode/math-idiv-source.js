@@ -52,6 +52,10 @@ function proveOperands(program,call){
     const entry=(at,binding,path=new Set())=>{
         const owner=owners.get(at);if(escaped.has(owner))return false;
         if(facts.isBindingInitializedAt(at,binding))return true;
+        // A closure cannot execute before its creation. Reprove readiness at
+        // that actual expression (and its enclosing callers), not from a type
+        // annotation or the callback API's name. Writer/type checks stay below.
+        if(owner?.type==='FunctionExpression'&&!path.has(owner))return entry(owner,binding,new Set([...path,owner]));
         if(!owner||!functions.has(owner)||path.has(owner))return false;
         const next=new Set([...path,owner]),entries=callers.get(owner)||[];
         return entries.length>0&&entries.every(invocation=>entry(invocation,binding,next));
