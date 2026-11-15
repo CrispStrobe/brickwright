@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
 import {importGuiDependency} from './helpers/bw-integrated.mjs';
 import {loadExtensionClass} from './helpers/bw-extensions.mjs';
 
@@ -65,15 +64,3 @@ test(`real ${name} adapter retains localized palette headers and executable bloc
 
 }
 
-test('active LEGO palette helpers escape XML attributes without changing header text', () => {
-    const text = 'A & "B" <C> \'D\'';
-    for (const name of ['ev3dev', 'ev3comprehensive', 'legorcx']) {
-        const bundle = readFileSync(new URL(`../overlay/scratch-vm/src/extensions/crispstrobe/${name}/index.js`, import.meta.url), 'utf8');
-        const source = JSON.parse(bundle.slice(bundle.indexOf('makeExt(') + 8, -3));
-        const match = source.match(/  const paletteLabel = text => \([\s\S]*?\n  \}\);/);
-        assert.ok(match, name);
-        const label = Function(`${match[0]}; return paletteLabel;`)()(text);
-        assert.equal(label.text, text);
-        assert.equal(label.xml, '<label text="A &#38; &#34;B&#34; &#60;C&#62; &#39;D&#39;"></label>');
-    }
-});

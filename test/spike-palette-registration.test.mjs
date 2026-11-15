@@ -1,15 +1,12 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
 import {importGuiDependency} from './helpers/bw-integrated.mjs';
 import {loadExtensionClass} from './helpers/bw-extensions.mjs';
 
 // Import the real VM before installing browser globals (DOMPurify detects window).
 const {default: VM} = await importGuiDependency('scratch-vm/src/index.js');
 const Spike = loadExtensionClass('spikeprime');
-const bundle = readFileSync(new URL('../overlay/scratch-vm/src/extensions/crispstrobe/spikeprime/index.js', import.meta.url), 'utf8');
-const source = JSON.parse(bundle.slice(bundle.indexOf('makeExt(') + 8, -3));
 
 const makeExtension = (vm, locale) => {
     const descriptors = new Map();
@@ -61,18 +58,23 @@ test('real SPIKE adapter registers all three localized palette headers and ordin
     }
 });
 
-test('SPIKE palette label XML escapes attribute metacharacters without changing visible text', () => {
-    const start = source.indexOf('  const paletteLabel =');
-    assert.ok(start >= 0);
-    const declaration = source.slice(start, source.indexOf('  // Watch for language changes', start));
-    const label = Function(`${declaration}; return paletteLabel;`)()('A & "B" <C> \'D\'');
-    assert.equal(label.text, 'A & "B" <C> \'D\'');
-    assert.equal(label.blockType, 'label');
-    assert.equal(label.xml, '<label text="A &#38; &#34;B&#34; &#60;C&#62; &#39;D&#39;"></label>');
-    assert.equal(label.opcode, undefined);
+test('adapter escapes label text and preserves existing XML and executable metadata', () => {
     const vm = new VM();
     try {
+        const {extension} = makeExtension(vm, 'en');
+        const text = `A & "B" <C> 'D'`;
+        const command = {blockType: 'command', opcode: 'ordinary', text: 'ordinary'};
+        const existing = {blockType: 'label', text: 'existing', xml: '<label text="custom"></label>'};
+        extension._inst.getInfo = () => ({id: 'spikeprime', blocks: [
+            {blockType: 'label', text}, existing, command, '---'
+        ]});
+        const [label, retained, actualCommand, separator] = extension.getInfo().blocks;
+        assert.equal(label.text, text);
+        assert.equal(label.xml, '<label text="A &#38; &#34;B&#34; &#60;C&#62; &#39;D&#39;"></label>');
         assert.equal(vm.runtime._convertForScratchBlocks(label, {id: 'spikeprime'}).xml, label.xml);
+        assert.strictEqual(retained, existing);
+        assert.strictEqual(actualCommand, command);
+        assert.equal(separator, '---');
     } finally {
         vm.quit();
     }
