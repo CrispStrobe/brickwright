@@ -28,7 +28,7 @@ function identity(program){
 }
 
 function proveOperands(program,call){
-    const facts=analyseSourceValueProducers(program,{parenthesized:true,unboundIsOpaque:true,opaqueDeclarationValues:true,ordinaryPrimitiveSdkNumbers:true,sceneClockNumbers:true,initializationEntries:true});
+    const facts=analyseSourceValueProducers(program,{parenthesized:true,unboundIsOpaque:true,opaqueDeclarationValues:true,ordinaryPrimitiveSdkNumbers:true,sceneClockNumbers:true,initializationEntries:true,closedNumericArrayResults:true});
     const owners=new WeakMap(),parents=new WeakMap(),functions=new Set(),allCalls=[],callers=new Map(),escaped=new Set();
     const scan=(node,owner=null,parent=null)=>{
         if(!node||typeof node!=='object')return;
@@ -78,9 +78,10 @@ function proveOperands(program,call){
                 if(!plain(node)||escaped.has(fn)||checking.has(fn)||node.args.length!==fn.params.length)return false;
                 checking.add(fn);const result=node.args.every(references)&&fn.body.every(references);checking.delete(fn);return result;
             }
-            // Namespace calls are still selected/validated by their existing
-            // emitter. They cannot make an opaque result into a Number here.
-            if(!(plain(node)&&node.callee?.type==='Member'&&facts.isSdkNamespace(node.callee.object)))return false;
+            // Namespace calls retain their existing emitter validation. Other
+            // methods need the independent current-source effect witness;
+            // method spelling alone cannot make an opaque result Number.
+            if(!(plain(node)&&node.callee?.type==='Member'&&(facts.isSdkNamespace(node.callee.object)||facts.closedNumericArrayEffectAt(node))))return false;
         }
         return Object.entries(node).every(([key,value])=>key==='originalBody'||!value||typeof value!=='object'||references(value));
     };

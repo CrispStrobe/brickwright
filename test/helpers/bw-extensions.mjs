@@ -82,7 +82,8 @@ function shimRequire (spec, from) {
     // This one lazy consumer needs the actual Runtime class whose constructor
     // issued the private origin facts. Do not admit an arbitrary engine path
     // or make another source-evaluated Runtime/metadata-factory instance.
-    if (spec === '../../../engine/runtime' && from === path.join(OVERLAY_EXT, 'arcade', 'console-inspect-values.js')) {
+    if (spec === '../../../engine/runtime' && from === path.join(OVERLAY_EXT, 'arcade', 'console-inspect-values.js') ||
+        spec === '../../engine/runtime' && from === path.join(OVERLAY_EXT, 'adapter.js')) {
         return nodeRequire(path.join(VM_SRC, 'engine', 'runtime.js'));
     }
     if (base === 'adapter') return loadAdapter();

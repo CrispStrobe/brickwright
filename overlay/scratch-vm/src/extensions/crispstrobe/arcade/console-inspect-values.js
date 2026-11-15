@@ -738,6 +738,66 @@ function create(runtime, cells, scoreOwner=null, sceneClock=null, frameDelta=nul
             if(!facts||!statementIn(node,facts.body)||localCellOf(index)!==facts.counter||!facts.receiver.has(localCellOf(array)))return null;
             return values;
         };
+        // Independent lowered normal-result proof. Unlike familyElement this
+        // establishes no bounds and admits no alias: only a fresh local empty
+        // Array, Number pushes and the literal zero-argument reverse operation.
+        // Every absent slot remains Undefined. No source type/loan is read.
+        const numericFamilyResult=(node,origins)=>{
+            const array=input(node,'ARRAY'),cell=localCellOf(array),scope=cell?.scope,proof=cell&&captureProof.proof(cell);
+            if(array?.opcode!=='arcade_getLocal'||!proof||proof.index>=0||proof.escaped||scope.target!==target||typeof scope.procedure!=='string')return null;
+            const closed=(b,names)=>!!b&&Object.keys(b.fields||{}).length===0&&Object.keys(b.inputs||{}).sort().join(',')===names.slice().sort().join(',');
+            const fixedText=(b,name,value)=>{const child=input(b,name);return child?.opcode==='text'&&child.parent===b.id&&child.next==null&&!Object.keys(child.inputs||{}).length&&text(child)===value;};
+            if(!closed(node,['ARRAY','INDEX'])||array.parent!==node.id)return null;
+            // Closed native source effects only; no callback, captured cell,
+            // object/prototype access, extension effect or computed call entry.
+            const allowed=new Set(['math_number','bw_numberLiteral','text','bw_stringLiteral','data_variable','data_setvariableto','data_changevariableby',
+                'looks_hide','procedures_definition','procedures_prototype','procedures_call','argument_reporter_string_number','argument_reporter_boolean',
+                'arcade_whenSourceStarts','arcade_declareParameterConstraint','arcade_declareSourceScalar','arcade_functionArgument','arcade_callFunction',
+                'arcade_getLocal','arcade_setLocal','arcade_returnValue','arcade_sourceWhile','control_if','control_if_else','arcade_break','arcade_continue',
+                'arrays_createReference','arrays_referenceItem','arrays_referenceLength','arrays_mutateReference','arrays_specialValue',
+                'arrays_valueBinary','arrays_valueUnary','arrays_valueCompare','arrays_valueTruthy','arcade_inspectValue',
+                'operator_add','operator_subtract','operator_multiply','operator_divide','operator_mod','operator_equals','operator_lt','operator_gt',
+                'operator_not','operator_and','operator_or','operator_join','operator_length','operator_letter_of']);
+            for(const t of runtime.targets)if(t.isOriginal!==false)for(const b of Object.values(t.blocks?._blocks||{})){
+                if(!allowed.has(b.opcode))return null;
+                if(b.opcode==='arrays_mutateReference'&&!['push','reverse'].includes(literal(b,'OP')))return null;
+                if(b.opcode==='arcade_callFunction'){
+                    const name=literal(b,'NAME');if(typeof name!=='string'||Object.values(t.blocks._blocks).filter(d=>d.opcode==='procedures_definition'&&t.blocks.getBlock(d.inputs?.custom_block?.block)?.mutation?.proccode===name).length!==1)return null;
+                }
+            }
+            let allocation=null;const mutations=[];
+            for(const use of localsOf(cell)){
+                if(captureProof.scopeOf(use)!==scope)return null;
+                if(use.opcode==='arcade_setLocal'){
+                    if(!closed(use,['NAME','VALUE'])||!fixedText(use,'NAME',cell.name))return null;
+                    const value=input(use,'VALUE');if(fixedReset(value))continue;
+                    if(allocation||!closed(value,['VALUES'])||value.opcode!=='arrays_createReference'||value.parent!==use.id||!fixedText(value,'VALUES','[]'))return null;
+                    allocation=use;continue;
+                }
+                if(!closed(use,['NAME'])||!fixedText(use,'NAME',cell.name))return null;
+                const parent=read(use.parent);
+                if(!parent||parent.inputs?.ARRAY?.block!==use.id)return null;
+                if(parent.opcode==='arrays_mutateReference'){
+                    const op=literal(parent,'OP');
+                    if(!closed(parent,['ARRAY','OP','INDEX','VALUE'])||!['push','reverse'].includes(op)||!fixedText(parent,'OP',op)||constNumber(input(parent,'INDEX'))!==0)return null;
+                    if(op==='reverse'&&constNumber(input(parent,'VALUE'))!==0)return null;
+                    mutations.push(parent);continue;
+                }
+                if(parent.opcode==='arrays_referenceItem'&&closed(parent,['ARRAY','INDEX'])||parent.opcode==='arrays_referenceLength'&&closed(parent,['ARRAY']))continue;
+                return null;
+            }
+            if(!allocation||!mutations.some(b=>literal(b,'OP')==='push')||!mutations.some(b=>literal(b,'OP')==='reverse'))return null;
+            const chain=chainOf(allocation),before=at=>{const statement=chain&&statementIn(at,chain);return !!statement&&chain.indexOf(allocation)<chain.indexOf(statement);};
+            if(!before(node)||mutations.some(b=>!before(b))||proof.writers.some(({node:b})=>b!==allocation&&(!fixedReset(input(b,'VALUE'))||!chain?.includes(b)||chain.indexOf(b)>chain.indexOf(allocation))))return null;
+            const domains=new Set(['number','undefined']);
+            const number=value=>{const found=new Set();if(!safe(value,false,origins,found)||!found.has('number')||[...found].some(type=>!['number',PENDING].includes(type)))return false;if(found.has(PENDING))domains.add(PENDING);return true;};
+            if(!number(input(node,'INDEX'))||mutations.some(b=>literal(b,'OP')==='push'&&!number(input(b,'VALUE'))))return null;
+            // Genuine builtin constructor/metadata/current cached delegates,
+            // independently of source flags or the proposed primitive domain.
+            if(!require('../adapter').localArrayResultBindingsCurrent(runtime))return null;
+            liveProof?.(); // Never cache across operation/delegate changes.
+            origins?.add(node);return domains;
+        };
         const constantLogicalOverwrite=(writer,cell,at)=>{
             const proof=captureProof.proof(cell),scope=cell?.scope;
             if(!at||!proof||proof.escaped||proof.index!==-1||scope?.target!==target||scope.root.opcode!=='arcade_whenSourceStarts'||captureProof.scopeOf(at)!==scope)return false;
@@ -1158,6 +1218,7 @@ function create(runtime, cells, scoreOwner=null, sceneClock=null, frameDelta=nul
                     if(slot){const valid=safe(slot,false,origins,domains);if(valid)origins?.add(node);return valid;}
                     const elements=familyElement(node);
                     if(elements){const valid=elements.every(value=>safe(value,false,origins,domains));if(valid)origins?.add(node);return valid;}
+                    const normal=numericFamilyResult(node,origins);if(normal){for(const type of normal)domains?.add(type);return true;}
                 }
                 if(!player&&op==='arcade_getPlayerScore'){
                     if(!scoreNumber(node))return false;
