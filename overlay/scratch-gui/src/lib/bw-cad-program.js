@@ -33,6 +33,7 @@ export function installCadProgramAPI (runtime) {
     const api = {
         start: () => command(sim => sim.start(true)), stop, reset,
         motors: () => enabled() ? simulation()?.motors() || [] : [],
+        sliders: () => enabled() ? simulation()?.sliders() || [] : [],
         setMotorPower: (motor, power) => command(sim => {
             if (!Number.isFinite(power) || Math.abs(power) > 100) throw new Error('Motor power must be between -100 and 100 %');
             return sim.setMotor(String(motor), power * 7.2);
@@ -42,19 +43,27 @@ export function installCadProgramAPI (runtime) {
         stopMotor: (motor, action = 'brake') => command(sim => sim.stopMotor(String(motor), action)),
         motorAngle: motor => enabled() ? simulation()?.angle(String(motor)) || 0 : 0,
         motorSpeed: motor => enabled() ? simulation()?.speed(String(motor)) || 0 : 0,
+        setSliderSpeed: (slider, speed) => command(sim => sim.setSlider(String(slider), speed)),
+        runSliderDistance: (slider, distance, speed) => command(sim => sim.runDistance(String(slider), distance, speed)),
+        stopSlider: (slider, action = 'brake') => command(sim => sim.stopSlider(String(slider), action)),
+        sliderPosition: slider => enabled() ? simulation()?.sliderPosition(String(slider)) || 0 : 0,
+        sliderSpeed: slider => enabled() ? simulation()?.sliderSpeed(String(slider)) || 0 : 0,
         status: () => !enabled() ? 'disabled' : error || simulation()?.state.error || simulation()?.state.state || 'not-open'
     };
     const onStop = () => { Promise.resolve(stop()).catch(e => { error = e.message; }); };
-    const onToggle = () => { if (!enabled()) onStop(); };
+    const interrupt = () => { rejectPending(); runtime.stopAll(); };
+    const onToggle = () => { if (!enabled()) {if (simulation()?.state.program || pending.size) interrupt();else onStop();} };
     runtime.cadSimulation = api; globalThis.__bwCadProgramApi = api;
     runtime.on('PROJECT_STOP_ALL', onStop);
     window.addEventListener(CAD_TOGGLE_EVENT, onToggle);
     window.addEventListener('bw-project-bundle-loaded', onStop);
+    window.addEventListener('bw-cad-simulation-interrupt', interrupt);
     return () => {
         onStop(); disposed = true;
         runtime.off('PROJECT_STOP_ALL', onStop);
         window.removeEventListener(CAD_TOGGLE_EVENT, onToggle);
         window.removeEventListener('bw-project-bundle-loaded', onStop);
+        window.removeEventListener('bw-cad-simulation-interrupt', interrupt);
         if (runtime.cadSimulation === api) delete runtime.cadSimulation;
         if (globalThis.__bwCadProgramApi === api) delete globalThis.__bwCadProgramApi;
     };

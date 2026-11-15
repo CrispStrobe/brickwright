@@ -21,6 +21,8 @@ const server=createServer(async(req,res)=>{
   const path=new URL(req.url,'http://localhost').pathname;
   if(path==='/cad-program.sb3'&&process.env.BW_CAD_PROGRAM_FIXTURE){res.end(await readFile(process.env.BW_CAD_PROGRAM_FIXTURE));return;}
   if(path==='/motor-fixture.bcad'&&process.env.BW_CAD_MOTOR_FIXTURE){res.setHeader('Content-Type','application/json');res.end(await readFile(process.env.BW_CAD_MOTOR_FIXTURE));return;}
+  if(path==='/slider-fixture.bcad'&&process.env.BW_CAD_SLIDER_FIXTURE){res.setHeader('Content-Type','application/json');res.end(await readFile(process.env.BW_CAD_SLIDER_FIXTURE));return;}
+  if(path==='/cad-slider-program.sb3'&&process.env.BW_CAD_SLIDER_PROGRAM_FIXTURE){res.end(await readFile(process.env.BW_CAD_SLIDER_PROGRAM_FIXTURE));return;}
   if(sdkOnly&&path==='/'){res.setHeader('Content-Type','text/html');res.end(fixture);return;}
   const prefix='/static/cad-sdk/';
   const base=sdkOnly&&path.startsWith(prefix)?resolve(root,'overlay/scratch-gui/static/cad-sdk'):build;
@@ -169,6 +171,19 @@ try{
     },before);
     assert.ok(Math.abs(result.angle-720)<2,JSON.stringify(result));assert.equal(result.status,'paused');assert.equal(result.threads,0);
     trace('Real Scratch VM loaded CAD blocks and completed the encoder-based program');
+   }
+   if(process.env.BW_CAD_SLIDER_FIXTURE&&process.env.BW_CAD_SLIDER_PROGRAM_FIXTURE){
+    const result=await page.evaluate(async()=>{
+     const vm=window.__bwSimLab?._pane?.props?.vm;if(!vm)throw new Error('Open Robots first for the VM diagnostic boundary');
+     const doc=await(await fetch('/slider-fixture.bcad')).text();
+     await vm.loadProject(await(await fetch('/cad-slider-program.sb3')).arrayBuffer());
+     window.__bwCad.editor.session.load(window.__bwCad.sdk.parseDocument(doc));await window.__bwCad.editor.whenIdle();
+     const before=window.__bwCad.editor.session.serialize();vm.start();vm.greenFlag();await new Promise(resolve=>setTimeout(resolve,100));const until=performance.now()+60000;
+     while(vm.runtime.threads.some(t=>t.status!==4)&&performance.now()<until)await new Promise(resolve=>setTimeout(resolve,100));
+     const api=window.__bwCadProgramApi,result={position:api.sliderPosition('A'),status:api.status(),threads:vm.runtime.threads.filter(t=>t.status!==4).length,same:before===window.__bwCad.editor.session.serialize()};vm.stopAll();return result;
+    });
+    assert.ok(Math.abs(result.position-10)<.1,JSON.stringify(result));assert.equal(result.status,'paused');assert.equal(result.threads,0);assert.equal(result.same,true);
+    trace('Real Scratch VM completed a CAD slider program in mm with unchanged design');
    }
 
   }

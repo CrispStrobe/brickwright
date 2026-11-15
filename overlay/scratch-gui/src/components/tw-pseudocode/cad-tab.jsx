@@ -77,6 +77,7 @@ const CadTab = ({isVisible, locale}) => {
                 wasmURL: cadAssetURL('cad-assets/manifold.wasm'),
                 onDocumentChange: persist,
                 onCommandStateChange: () => notifyUndoState(),
+                onSimulationInterrupt: () => window.dispatchEvent(new CustomEvent('bw-cad-simulation-interrupt')),
                 onExport: file => download(file.name, new Blob([file.bytes], {type: file.mime})),
                 saveProject: () => download('design.bcad', new Blob([retainedSession.serialize()], {type: 'application/json'})),
                 requestOpen: () => pickFile('.bcad,.json,.stl'), requestImport: () => pickFile('.stl'),

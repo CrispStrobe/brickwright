@@ -13,6 +13,11 @@ const PROGRAM = `WHEN green flag clicked:
   say (cad motor A angle)
   say (cad motor A speed)
   say (cad status)
+  cad run slider B at 50 mm per second
+  cad run slider B for -10 mm at 25 mm per second
+  cad stop slider B coast
+  say (cad slider B position)
+  say (cad slider B speed)
   cad stop
   cad reset
 `;
