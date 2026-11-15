@@ -61,7 +61,7 @@ const SettingsMenu = ({intl, canChangeLanguage, canChangeTheme, isRtl, onRequest
     const workspaceSelect = (label, value, onChange, options, title) => (
         <label className={styles.preferenceRow} title={title}>
             <span>{label}</span>
-            <select value={value} onChange={event => onChange(event.target.value)}>
+            <select aria-label={label} value={value} onChange={event => onChange(event.target.value)}>
                 {options.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
         </label>

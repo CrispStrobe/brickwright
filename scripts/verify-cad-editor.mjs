@@ -55,12 +55,14 @@ try{
   assert.equal(await page.getByRole('tab',{name:'CAD',exact:true}).count(),0);
   assert.equal(requests.some(url=>url.includes('/cad-sdk/')),false);
   const toggle=async value=>{
+   trace('Setting CAD '+value);
    await page.getByTestId('bw-settings-menu-trigger').click();
    await page.getByText('Workspace',{exact:true}).click();
    await page.getByLabel('CAD Editor',{exact:true}).selectOption(value);
   };
   await toggle('1');await page.getByRole('tab',{name:'CAD',exact:true}).waitFor();
   assert.equal(requests.some(url=>url.includes('/cad-sdk/')),false,'enabling alone does not load CAD');
+  trace('Opening CAD tab');
   await page.getByRole('tab',{name:'CAD',exact:true}).click();
   await page.waitForFunction(()=>window.__bwCad?.editor);
   const cad=page.getByTestId('bw-cad-tab');

@@ -10,14 +10,17 @@ import {registerUndoSurface, activateUndoSurface, notifyUndoState} from '../../l
 let retainedSession = null;
 let retainedText;
 let retainedGeneration;
-const pickFile = () => new Promise(resolve => {
+const pickFile = accept => new Promise((resolve, reject) => {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = '.bwcad,.json,.stl,.obj,.3mf,.svg,.scad,.jscad,.js';
+    input.accept = accept;
     input.onchange = async () => {
-        const file = input.files[0];
-        resolve(file ? {name: file.name, bytes: new Uint8Array(await file.arrayBuffer())} : null);
-        input.remove();
+        try {
+            const file = input.files[0];
+            if (file && file.size > 64 * 1024 * 1024) throw new Error('Project exceeds 64 MiB');
+            resolve(file ? {name: file.name, bytes: new Uint8Array(await file.arrayBuffer())} : null);
+        } catch (error) { reject(error); }
+        finally { input.remove(); }
     };
     input.oncancel = () => { resolve(null); input.remove(); };
     input.style.display = 'none';
@@ -74,8 +77,8 @@ const CadTab = ({isVisible, locale}) => {
                 onDocumentChange: persist,
                 onCommandStateChange: () => notifyUndoState(),
                 onExport: file => download(file.name, new Blob([file.bytes], {type: file.mime})),
-                saveProject: () => download('design.bwcad', new Blob([retainedSession.serialize()], {type: 'application/json'})),
-                requestOpen: pickFile, requestImport: pickFile,
+                saveProject: () => download('design.bcad', new Blob([retainedSession.serialize()], {type: 'application/json'})),
+                requestOpen: () => pickFile('.bcad,.json,.stl'), requestImport: () => pickFile('.stl'),
                 onError: fail
             });
             editor.current = mounted;
