@@ -5,8 +5,9 @@ import {initializeNativeDosClock, adaptNativeDosService, validateNativeCgaQuerie
 import {collectBenchmarkOutput} from './benchmark-output.mjs';
 import {whetstoneResult} from './whetstone-result.mjs';
 
+export const mediaCommit = provenance.assetsCommit || provenance.commit;
 export {catalog, provenance};
-const base = `https://raw.githubusercontent.com/${provenance.repository}/${provenance.commit}/${provenance.base}/`;
+const base = `https://raw.githubusercontent.com/${provenance.repository}/${mediaCommit}/${provenance.base}/`;
 const decoder = new TextDecoder();
 const cancelled = signal => { if (signal?.aborted) throw new Error('Stopped; no accepted result.'); };
 export async function verifyBytes (bytes, expected, name) {
@@ -24,10 +25,10 @@ export async function fetchAssets (project, {signal, onNotice = () => {}, fetche
     if (!Object.hasOwn(catalog, project)) throw new Error('Unknown benchmark');
     let cache;
     try { cache = await cacheStorage?.open('brickwright-native-benchmarks-v1'); } catch (_) { /* memory only */ }
-    const files = {};
+    const files = {}, notices = [];
     for (const [name, proof] of Object.entries(catalog[project].files)) {
         cancelled(signal);
-        const url = `${base}${project}/${name}`;
+        const url = `${base}${catalog[project].directory || project}/${name}`;
         let bytes;
         try {
             const saved = await cache?.match(url);
@@ -41,16 +42,12 @@ export async function fetchAssets (project, {signal, onNotice = () => {}, fetche
         }
         cancelled(signal);
         files[name] = bytes;
-        if (name === 'LICENSE') onNotice(decoder.decode(bytes));
+        if (name === 'LICENSE' || name === 'RUNTIME-NOTICES.txt' || name.startsWith('licenses/')) {
+            notices.push(decoder.decode(bytes)); onNotice(notices.join('\n\n'));
+        }
     }
     return {project, files, manifest: JSON.parse(decoder.decode(files['brickwright-media.json'])),
-        mediaCommit: provenance.commit};
-}
-
-export async function acceptValidationImage (assets, bytes) {
-    if (assets.project !== 'whetstone') throw new Error('Validation image belongs to Whetstone');
-    await verifyBytes(bytes, catalog.whetstone.validationImage, 'Whetstone validation executable');
-    return {...assets, validationImage: bytes};
+        mediaCommit};
 }
 
 const yieldToUI = () => new Promise(resolve => setTimeout(resolve, 0));
@@ -60,9 +57,9 @@ export async function runNativeBenchmark (assets, {signal, onProgress = () => {}
     const {project, manifest, files} = assets;
     if (!Object.hasOwn(catalog, project)) throw new Error('Unknown benchmark');
     const imageName = manifest.slots.exe;
-    const program = project === 'whetstone' ? assets.validationImage : files[imageName];
-    if (!program) throw new Error('Whetstone executable is not hosted in the pinned source package. Select the qualified validation build.');
-    await verifyBytes(program, project === 'whetstone' ? catalog.whetstone.validationImage : catalog[project].files[imageName], imageName);
+    const program = files[imageName];
+    if (!program) throw new Error('Verified benchmark executable unavailable.');
+    await verifyBytes(program, catalog[project].files[imageName], imageName);
     cancelled(signal);
     const [{ExperimentalI80386ATMachine, PCAT80386_EXPERIMENTAL}, {createDos8086, trapRegion}] = await Promise.all([
         import(/* webpackChunkName: "bw-board-i80386" */ 'bw-board/experimental/i80386-at-machine.js'),
@@ -102,7 +99,7 @@ export async function runNativeBenchmark (assets, {signal, onProgress = () => {}
         manifest.expect.every(text => output.text.includes(text));
     return {status: accepted ? 'complete' : dos.terminated ? 'terminal-unqualified' : 'budget-exhausted',
         accepted, backend: 'ExperimentalI80386ATMachine', mediaCommit: assets.mediaCommit,
-        imageSha256: project === 'whetstone' ? catalog.whetstone.validationImage.sha256 : catalog[project].files[imageName].sha256,
+        imageSha256: catalog[project].files[imageName].sha256,
         steps, retired: machine.cpu.cycles - start, exitCode: dos.exitCode, terminated: dos.terminated,
         stdout: dos.stdout, screen: dos.screenText(), unsupported: report.unsupported, videoQueriesValid, whetstone};
 }

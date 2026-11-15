@@ -42,7 +42,9 @@ test('registered projects pin immutable metadata, licence and only owned inputs'
             assert.ok(proof.bytes > 0); assert.match(proof.sha256, /^[a-f0-9]{64}$/);
         }
     }
-    assert.ok(!catalog.whetstone.files['WHT.EXE'], 'unhosted runtime is not silently offered');
+    assert.equal(catalog.whetstone.files['WHT.EXE'].sha256, 'f7003e37da058b1a41b8520b010c9791aafa10fa8a9cb11a4c0998055936b8ac');
+    assert.ok(catalog.whetstone.files['RUNTIME-NOTICES.txt']);
+    assert.ok(catalog.whetstone.files['licenses/COPYING.RUNTIME']);
 });
 
 test('cache hits are rehashed; corruption refetches; storage refusal keeps hash verification', async () => {
@@ -55,7 +57,7 @@ test('cache hits are rehashed; corruption refetches; storage refusal keeps hash 
     const saved = new Map(), fetched = [], notices = [];
     const store = {open: async () => ({match: async url => saved.get(url)?.clone(),
         put: async (url, response) => {saved.set(url, response);}, delete: async url => saved.delete(url)})};
-    const fetcher = async url => {const name = url.split('/whetstone/')[1]; fetched.push(name); return new Response(payloads[name]);};
+    const fetcher = async url => {const name = url.split('/' + catalog.whetstone.directory + '/')[1]; fetched.push(name); return new Response(payloads[name]);};
     try {
         await fetchAssets('whetstone', {fetcher, cacheStorage: store, onNotice: notice => notices.push(notice)});
         assert.equal(fetched.length, 4); assert.deepEqual(notices, ['fixture permission']);

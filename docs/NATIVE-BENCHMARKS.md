@@ -15,13 +15,22 @@ DOS service startup, six screen score checks, exit4 and zero unsupported service
 are required; a terminal exit alone is insufficient. These values are functional
 guest-clock results, without a physical CPU timing or speedup claim.
 
-Whetstone currently fetches its source and retained permission only. The owned
-package does not host its qualified software floating point PRINTOUT executable.
-The generated build links ia16 runtime libraries; source permission alone does
-not establish those runtime redistribution obligations. Automatic browser Run
-remains disabled until an owned executable package carries the exact build,
-source, linked-runtime notices/exception and byte identity. This explicit
-boundary does not reclassify the already-qualified native CLI path.
+Whetstone fetches the exact already-qualified software floating point PRINTOUT
+validation executable, unmodified source, all runtime notices and a 139-member
+source/notice inventory from the owned `whetstone-validation` package. It uses
+full floating-point printf; admission requires all ten numeric modules, a
+positive guest-clock duration, exit0 and zero unsupported services. The original
+build did not capture runtime archive hashes: the supplied current package
+archive hashes/source mappings do not establish bit-identical historical
+archives or blanket license clearance. The complete Berkeley acknowledgment,
+Newlib/Libgloss notices and applicable GCC runtime exception are displayed
+before Run. The executable is fetched separately and is not bundled into Lite.
+
+Asset identity is pinned to media-lab commit
+`c8dc584d39b69b1ed9f98af69e548d9da3d5b240`, introduced by
+[the owned validation asset PR](https://github.com/CrispStrobe/brickwright-media-lab/pull/37).
+The startup/result helper byte identity remains pinned separately to
+`01d06fb63d5bdd4c0ede48e811e8fc1f6971d2ce`.
 
 Validation commands:
 

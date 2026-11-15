@@ -18,7 +18,7 @@ dom.window.HTMLDialogElement.prototype.showModal = function () {this.open = true
 dom.window.HTMLDialogElement.prototype.close = function () {this.open = false;};
 const React = gui('react'), ReactDOM = gui('react-dom'), {act, Simulate} = gui('react-dom/test-utils');
 let fetchImpl, runImpl;
-const api = {catalog: {topbench: {title: 'TOPBENCH', files: {}}, whetstone: {title: 'Whetstone validation', files: {}}},
+const api = {mediaCommit: 'b'.repeat(40), catalog: {topbench: {title: 'TOPBENCH', files: {}}, whetstone: {title: 'Whetstone validation', files: {}}},
     provenance: {repository: 'CrispStrobe/brickwright-media-lab', commit: 'a'.repeat(40), base: 'projects/x86-benchmarks'},
     fetchAssets: (...args) => fetchImpl(...args), runNativeBenchmark: (...args) => runImpl(...args)};
 const source = readFileSync(new URL('../overlay/scratch-gui/src/components/menu-bar/native-benchmarks.jsx', import.meta.url), 'utf8');
@@ -54,12 +54,14 @@ test('license precedes Run; live output renders; Stop rejects stale completion a
     click('run'); await flush(); assert.match(select('status').textContent, /Complete/); assert.equal(select('screen').textContent, 'new');
     act(() => ReactDOM.unmountComponentAtNode(app));
 });
-test('fetch failure, source-only Whetstone and close during fetch never enable stale Run', async () => {
+test('fetch failure, Whetstone launch error and close during fetch never publish stale completion', async () => {
     open(); fetchImpl = async () => {throw Error('hash mismatch');}; click('fetch'); await flush();
     assert.match(select('status').textContent, /Error: hash mismatch/); assert.equal(select('run').disabled, true);
     act(() => Simulate.change(select('project'), {target: {value: 'whetstone'}}));
     fetchImpl = async (_, options) => {options.onNotice('source permission'); return {project: 'whetstone'};};
-    click('fetch'); await flush(); assert.equal(select('run').disabled, true); assert.match(select('status').textContent, /unavailable/);
+    click('fetch'); await flush(); assert.equal(select('run').disabled, false);
+    runImpl = async assets => {assert.equal(assets.project, 'whetstone'); throw Error('native shutdown');};
+    click('run'); await flush(); assert.match(select('status').textContent, /Error: native shutdown/);
     let finish, signal; fetchImpl = (_, options) => {signal = options.signal; return new Promise(resolve => {finish = resolve;});};
     click('fetch'); act(() => Simulate.click(document.querySelector('button'))); assert.equal(signal.aborted, true);
     finish({project: 'topbench'}); await flush(); assert.equal(document.querySelector('[data-testid="native-benchmarks"]'), null);

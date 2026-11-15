@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {createPortal} from 'react-dom';
-import {catalog, provenance, fetchAssets, runNativeBenchmark} from '../../lib/bw-native-benchmarks/index.js';
+import {catalog, provenance, mediaCommit, fetchAssets, runNativeBenchmark} from '../../lib/bw-native-benchmarks/index.js';
 import styles from './i8086-lab.css';
 
 export default function NativeBenchmarks () {
@@ -49,8 +49,7 @@ export default function NativeBenchmarks () {
             onNotice: text => { if (active.current === controller) setNotice(text); }});
         if (active.current !== controller) return;
         setAssets(result);
-        setStatus(project === 'topbench' ? 'Ready. Review the notice, then run the native i80386 engine.' :
-            'Source verified. Automatic execution unavailable: the pinned package does not distribute a validation executable.');
+        setStatus('Ready. Review the retained notices, then run the native i80386 engine.');
     });
     const run = () => execute(async controller => {
         setStatus('Launching native i80386…');
@@ -81,17 +80,17 @@ export default function NativeBenchmarks () {
         </label>
         {project === 'topbench' ? <p>Release 0.40c displays a 0.40b banner. Declared CGA shim reports only the
             observed EGA/VGA/font queries absent. An exit code alone does not validate the result.</p> :
-            <p>Whetstone software floating point PRINTOUT validation build. This owned package supplies source
-                and a local ia16 build recipe. Automatic browser execution is unavailable until the qualified
-                executable has distributable runtime provenance and notices.</p>}
+            <p>Whetstone software floating point PRINTOUT validation build, with the exact previously qualified
+                executable, source and runtime notices. Ten numeric module checks and a positive guest-clock
+                duration are required; these are validation output, not physical CPU timing.</p>}
         <button disabled={busy} onClick={prepare} data-testid="native-benchmark-fetch">Fetch / verify assets</button>
-        <button disabled={busy || !assets || project !== 'topbench'} onClick={run}
+        <button disabled={busy || !assets} onClick={run}
             data-testid="native-benchmark-run">Run native benchmark</button>
         {busy && <button onClick={stop} data-testid="native-benchmark-stop">Stop</button>}
         <p role="status" data-testid="native-benchmark-status">{status}</p>
         <details><summary>Asset provenance and exact hashes</summary>
-            <p><a href={`https://github.com/${provenance.repository}/tree/${provenance.commit}/${provenance.base}/${project}`}
-                target="_blank" rel="noreferrer">Owned media package</a> at {provenance.commit}</p>
+            <p><a href={`https://github.com/${provenance.repository}/tree/${mediaCommit}/${provenance.base}/${catalog[project].directory || project}`}
+                target="_blank" rel="noreferrer">Owned media package</a> at {mediaCommit}</p>
             <pre>{JSON.stringify(catalog[project].files, null, 2)}</pre>
             <p>Verified bytes are cached in this browser when storage is available and rehashed before use.</p>
         </details>

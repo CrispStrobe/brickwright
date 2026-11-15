@@ -78,8 +78,21 @@ try {
     const terminalStatus = await status.textContent();
     await page.getByTestId('native-benchmark-project').selectOption('whetstone');
     await page.getByTestId('native-benchmark-fetch').click();
-    await status.filter({hasText: /^Source verified/}).waitFor({timeout: 60000});
-    if (await page.getByTestId('native-benchmark-run').isEnabled()) throw Error('unhosted Whetstone executable was runnable');
+    await status.filter({hasText: /^Ready/}).waitFor({timeout: 60000});
+    const whetstoneNotice = await page.getByTestId('native-benchmark-license').textContent();
+    if (!whetstoneNotice.includes('This product includes software developed by the University of California, Berkeley and its contributors.') ||
+        !whetstoneNotice.includes('GCC RUNTIME LIBRARY EXCEPTION')) throw Error('runtime notices incomplete');
+    await page.locator('details[open]').evaluateAll(nodes => {for (const node of nodes) node.open = false;});
+    await page.getByTestId('native-benchmark-run').click();
+    await status.filter({hasText: /^Complete/}).waitFor({timeout: 120000});
+    const whetstone = JSON.parse(await page.getByTestId('native-benchmark-result').textContent());
+    if (!whetstone.accepted || whetstone.exitCode !== 0 || whetstone.retired < 20000000 ||
+        whetstone.backend !== 'ExperimentalI80386ATMachine' || !whetstone.terminated ||
+        whetstone.unsupported.length || !whetstone.whetstone?.valid || !whetstone.whetstone.modulesValid ||
+        whetstone.imageSha256 !== 'f7003e37da058b1a41b8520b010c9791aafa10fa8a9cb11a4c0998055936b8ac' ||
+        !(await page.getByTestId('native-benchmark-stdout').textContent()).includes('C Converted Double Precision Whetstones:'))
+        throw Error('actual native Whetstone validation predicates failed');
+    await page.screenshot({path: join(artifacts, 'native-whetstone.png'), fullPage: true});
     if (errors.length) throw Error(errors.join('; '));
     const sha = bytes => createHash('sha256').update(bytes).digest('hex');
     const pins = JSON.parse(await readFile(join(root, 'vendor-pins.json')));
@@ -90,8 +103,8 @@ try {
         runtimeSha256: Object.fromEntries(await Promise.all(['experimental/i80386-at-machine.js', 'experimental/i80386.js', 'i8086-dos.js'].map(async name =>
             [name, sha(await readFile(gui.resolve('bw-board/' + name)))]))),
         stoppedRetired, stoppedNativeScreenObserved: typeof stopped === 'string', terminalStatus, actualNativeResult: result,
-        whetstone: 'source/license fetched and verified; automatic execution unavailable: no distributed validation binary/runtime notices',
+        actualNativeWhetstone: whetstone,
         errors};
     await writeFile(join(artifacts, 'browser.json'), JSON.stringify(receipt, null, 2) + '\n');
-    console.log(`PASS actual browser native TOPBENCH: ${result.retired} retired instructions, exit4, complete screen; Stop and Whetstone refusal verified`);
+    console.log(`PASS actual browser native TOPBENCH: ${result.retired} retired instructions, exit4, complete screen; Stop and actual Whetstone ${whetstone.retired} retired/exit0/numeric validation verified`);
 } finally {await browser?.close(); await new Promise(done => server.close(done));}

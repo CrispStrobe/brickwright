@@ -60,22 +60,63 @@
   },
   "whetstone": {
     "title": "Whetstone 1.2 (1998), software floating point validation build",
+    "directory": "whetstone-validation",
     "files": {
       "LICENSE": {
         "bytes": 1638,
         "sha256": "fbbd2c86b33ce4747212e78163e36257d2d5027ad8aa13daf6653442f543bb02"
       },
+      "RUNTIME-NOTICES.txt": {
+        "bytes": 35348,
+        "sha256": "fb0c11a5176f96d2be5a6203e4bae6daba0bd3f0e934f84a0fb4146494166d47"
+      },
+      "WHT.EXE": {
+        "bytes": 83776,
+        "sha256": "f7003e37da058b1a41b8520b010c9791aafa10fa8a9cb11a4c0998055936b8ac"
+      },
+      "brickwright-media.json": {
+        "bytes": 764,
+        "sha256": "3a49ef0aeb4d082d60e9e09a620635f887c3df741eb5694fcfedb50c4e12632a"
+      },
+      "compiler.txt": {
+        "bytes": 227,
+        "sha256": "afb098330d323e207469a4c5aa3688ad1f3a3d42fba39419c214b222cf091974"
+      },
+      "licenses/COPYING.LIBGLOSS": {
+        "bytes": 20896,
+        "sha256": "b6080f61e7bb33cf9c4f1eceddd2b9a3cf919711413ef5b0873b5cb08c0823df"
+      },
+      "licenses/COPYING.NEWLIB": {
+        "bytes": 50155,
+        "sha256": "992848088cfd1a1a7807828dd8623385713aeba2e3c49f81d1bcefcb23645399"
+      },
+      "licenses/COPYING.RUNTIME": {
+        "bytes": 3324,
+        "sha256": "9d6b43ce4d8de0c878bf16b54d8e7a10d9bd42b75178153e3af6a815bdc90f74"
+      },
+      "licenses/COPYING3": {
+        "bytes": 35147,
+        "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+      },
+      "runtime-members.json": {
+        "bytes": 165462,
+        "sha256": "c17d4f78fdae440aec9bcc75657856f004ca0d4f64538b429c1a67465bcd9008"
+      },
+      "runtime-provenance.json": {
+        "bytes": 5252,
+        "sha256": "6a920e245ae8571773154f1ba4f56625def1ca08bee37ca6d90a3af7259b4a99"
+      },
       "source/whetstone.c": {
         "bytes": 8121,
         "sha256": "333e4ceca042c146f63eec605573d16ae8b07166cbc44a17bec1ea97c6f1efbf"
       },
-      "assets.json": {
-        "bytes": 1508,
-        "sha256": "d905ea11d1f159dc7e092b01668ec675099ca3df354a2c50f7d2ee7983bd44bf"
+      "README.md": {
+        "bytes": 2810,
+        "sha256": "3f8a6e455d91c7d8a7cd885e7256f0911a8cf6692998e4c78bb353d42318477e"
       },
-      "brickwright-media.json": {
-        "bytes": 743,
-        "sha256": "445a83cf6649d55059309702d61bd327d4e95d1c19455e757288424786d97f34"
+      "assets.json": {
+        "bytes": 2813,
+        "sha256": "e968c1959f0456622405bb139f0420dcf47e8a1dec7122a290d6c13b338890b7"
       }
     },
     "manifest": {
@@ -83,7 +124,7 @@
       "machine": "i8086",
       "license": "Painter Engineering permission; see LICENSE and full source comment",
       "slots": {
-        "exe": ".build/8086-absent/WHT.EXE"
+        "exe": "WHT.EXE"
       },
       "program": {
         "kind": "dos",
@@ -91,7 +132,7 @@
         "preset": "xt",
         "variant": "8086",
         "args": "1",
-        "max": 20000000
+        "max": 30000000
       },
       "expect": [
         "Loops: 1, Iterations: 1, Duration:",
@@ -100,12 +141,8 @@
       "expectedExitCodes": [
         0
       ],
-      "notes": "Software-FP PRINTOUT validation build. Requires complete numeric module output and a positive guest-clock duration; source exit1 on insufficient duration is terminal-unqualified, never a score PASS."
+      "notes": "Pinned software-FP PRINTOUT validation executable. Native i80386 DOS shim only; exact numeric modules, positive guest-clock duration, exit0 and zero unsupported services required. No physical timing/speedup or legacy CPU completion claim."
     },
-    "sourceUrl": "https://www.netlib.org/benchmark/whetstone.c",
-    "validationImage": {
-      "sha256": "f7003e37da058b1a41b8520b010c9791aafa10fa8a9cb11a4c0998055936b8ac",
-      "bytes": 83776
-    }
+    "sourceUrl": "https://www.netlib.org/benchmark/whetstone.c"
   }
 }

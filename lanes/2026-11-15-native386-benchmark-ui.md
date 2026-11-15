@@ -10,11 +10,13 @@ No changes to the engine, physics, CAD, Sim2, or other x86 lanes.
 
 TOPBENCH uses the owned pinned release package and declared CGA query shim.
 Its release 0.40c / displayed 0.40b discrepancy remains visible. Whetstone keeps
-its software floating point PRINTOUT validation labeling. The current package
-contains source/build recipe, without a hosted qualified executable; automatic
-execution remains unavailable pending linked runtime redistribution provenance.
+its software floating point PRINTOUT validation labeling. The owned asset PR
+https://github.com/CrispStrobe/brickwright-media-lab/pull/37 supplies the exact
+qualified executable/source/runtime notices and 139-member source mapping;
+this panel pins its immutable asset commit. Native GUI qualification remains
+separate from the already-qualified CLI executable.
 No FreeDOS, physical accuracy, general CPU completion, or speedup claim.
 
 Qualification: focused React/jsdom lifecycle controls are distinct from the
 production panel browser proof, which executes the real native engine and owned
-TOPBENCH bytes. No benchmark comparison is repeated.
+TOPBENCH/Whetstone bytes. No benchmark comparison is repeated.
