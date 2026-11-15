@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import {createServer} from 'node:http';
-import {readFile,mkdir} from 'node:fs/promises';
+import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import {resolve,dirname,extname,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import assert from 'node:assert/strict';
@@ -55,6 +55,16 @@ try{
   });
   trace('SDK geometry and remount complete');
   assert.ok(Math.abs(result.volume-6000)<1e-6);assert.equal(result.undo,true);assert.equal(result.roots,0);
+  if(process.argv.includes('--shapes-ui')){
+   await page.getByRole('button',{name:'Shapes',exact:true}).click();
+   trace('SDK Shapes clicked');
+   const shapes=page.getByRole('dialog',{name:'Shape library',exact:true});
+   await shapes.waitFor({state:'visible'});
+   await shapes.getByLabel('Search shapes',{exact:true}).fill('Box');
+   await shapes.getByRole('button',{name:'Add Box',exact:true}).click();
+   await page.evaluate(()=>editor.whenIdle());
+   assert.equal(await page.evaluate(()=>session.state.document.roots.length),1);
+  }
   if(process.env.BW_CAD_MOTOR_FIXTURE){
    await page.evaluate(async()=>editor.openFile('hinge.bcad',new Uint8Array(await(await fetch('/motor-fixture.bcad')).arrayBuffer())));
    const before=await page.evaluate(()=>session.serialize());
@@ -107,7 +117,9 @@ try{
   await page.waitForFunction(()=>window.__bwCad?.editor);
   const cad=page.getByTestId('bw-cad-tab');
   await cad.getByRole('button',{name:'Shapes',exact:true}).click();
+  trace('GUI Shapes clicked');
   const library=cad.getByRole('dialog',{name:'Shape library',exact:true});
+  await library.waitFor({state:'visible'});
   await library.getByLabel('Search shapes',{exact:true}).fill('Box');
   await library.getByRole('button',{name:'Add Box',exact:true}).click();
   await page.evaluate(()=>window.__bwCad.editor.whenIdle());
@@ -142,6 +154,12 @@ try{
  assert.deepEqual(errors,[]);
  console.log(expectAbsent?'PASS CAD-off build: stored opt-in cannot reveal a tab, setting or fetch the SDK':sdkOnly?'PASS CAD SDK: real WASM box volume, worker, disposal/remount and host-owned undo':'PASS CAD tab: default off, lazy SDK, setting on/off, real shape UI, persistence and host Undo');
 }catch(error){
- if(activePage){await mkdir(resolve(root,'artifacts'),{recursive:true});await activePage.screenshot({path:resolve(root,'artifacts/cad-editor-failure.png'),fullPage:true}).catch(()=>{});}
+ if(activePage){
+  await mkdir(resolve(root,'artifacts'),{recursive:true});
+  await writeFile(resolve(root,'artifacts/cad-editor-failure-dom.json'),JSON.stringify(await Promise.race([
+   activePage.evaluate(()=>({body:document.body.innerText,cad:document.querySelector('[data-testid="bw-cad-tab"]')?.innerHTML,shadow:(document.querySelector('#cad')??document.querySelector('[data-testid="bw-cad-tab"]')?.querySelector('[data-state]'))?.shadowRoot?.innerHTML})),
+   new Promise(resolve=>setTimeout(()=>resolve({diagnostic:'page did not answer DOM query'}),5000))
+  ]).catch(error=>({diagnostic:error.message})),null,2)).catch(()=>{});
+  await activePage.screenshot({path:resolve(root,'artifacts/cad-editor-failure.png'),fullPage:true,timeout:5000}).catch(()=>{});}
  throw error;
 }finally{trace('Closing browser');await browser.close();trace('Closing server');server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}

@@ -113,3 +113,13 @@ lost capture and focus loss now relinquish gesture ownership before ending the
 Three.js drag, restoring original poses without committing them. Selection is
 retained. Tests exercise the real viewport preview and cancellation, alongside
 pure unit conversion and orientation checks.
+
+The follow-up frontend was built separately under `build-parity` from
+`a5b2c016f`, with both optional editors compiled and default-off. The compiled
+GUI's iPad touch check passed Robot warning dismissal/header clearance and CAD
+opt-in, shape creation, persistence, FPGA tab-index changes and host Undo. The
+shape-library check waits explicitly for its dialog to become visible before
+filling the search field. SDK shape UI and geometry/remount checks also passed.
+
+The prior signed frontend `3a36d37` was successfully installed and launched on
+the physical iPad over WLAN; receipts are in `artifacts/ipad-cad-final`.
