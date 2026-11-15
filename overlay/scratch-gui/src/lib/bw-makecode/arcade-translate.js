@@ -1,5 +1,6 @@
 import {gameResetSourceSafe,markGameResets,gameResetIntrinsic} from './game-reset-source.js';
 import {playerButtonConfiguredSourceSafe,markPlayerButtonRegistrations,playerButtonRegistration} from './player-button-registration-source.js';
+import {playerConnectionConfiguredSourceSafe,markPlayerConnectionRegistrations,playerConnectionRegistration} from './player-connection-registration-source.js';
 import {normalizeUnusedNamedCallbacks} from './unused-named-callbacks.js';
 import {highScoreConfiguredSourceSafe,markHighScoreCalls,highScoreIntrinsic} from './high-score-source.js';
 import {consoleLogValueConfiguredSourceSafe,lowerConsoleLogValues} from './lower-console-log-values.js';
@@ -427,7 +428,7 @@ class ArcadeTranslator extends BaseTranslator {
             }
         } while (added);
         this.kindRuntimeProgram=containsAst(node,value=>value.type==='SpriteKindReset' || value.type==='Member' && this.path(value.object)==='SpriteKind' || value.type==='Call' && (this.path(value.callee)==='SpriteKind.create' || value.callee?.type==='Member' && ['kind','setKind'].includes(value.callee.name)));
-        this.sceneStackProgram=this.kindRuntimeProgram || containsAst(node,value=>!!playerButtonRegistration(value) || value.type==='Call' && /^(?:mp\.(?:onControllerEvent|onButtonEvent|getPlayerState|setPlayerState|changePlayerStateBy)|game\.(?:pushScene|popScene|addScenePushHandler|addScenePopHandler|removeScenePushHandler|removeScenePopHandler))$/.test(this.path(value.callee)||''));
+        this.sceneStackProgram=this.kindRuntimeProgram || containsAst(node,value=>!!playerButtonRegistration(value) || !!playerConnectionRegistration(value) || value.type==='Call' && /^(?:mp\.(?:onControllerEvent|onButtonEvent|getPlayerState|setPlayerState|changePlayerStateBy)|game\.(?:pushScene|popScene|addScenePushHandler|addScenePopHandler|removeScenePushHandler|removeScenePopHandler))$/.test(this.path(value.callee)||''));
         this.nativeInfoProgram=this.sceneStackProgram || containsAst(node,value=>value.type==='Call' && isInfoRegistration(this.path(value.callee)));
         this.scoreRegistrationProof=scoreRegistrationProof(node);
         const registrations=discoverRuntimeRegistrations(node,this);
@@ -1813,6 +1814,7 @@ class ArcadeTranslator extends BaseTranslator {
             if(!registration){push(this.note(isParallelLaunch(name)?'control.runInParallel requires one inline callback without parameters':`${name} requires exact arguments, fixed sprite kinds and a supported inline callback; lifecycle oldScene access is not yet supported`));return;}
             const suffix=`as "${registration.token}" capturing ${JSON.stringify([...registration.ownCaptures].join(' '))}`;
             switch(registration.kind) {
+            case 'playerConnection':{const connection=playerConnectionRegistration(node);push(`arcade register control event source (arcade controller event source player ${connection.player}) value (${connection.event}) flags (16) ${suffix}`);break;}
             case 'controlEvent':push(`arcade register control event source (${this.expr(a[0])}) value (${this.expr(a[1])}) flags (${a[3]?this.expr(a[3]):'16'}) ${suffix}`);break;
             case 'update':push(`arcade register update ${suffix}`);break;
             case 'paint':push(`arcade register paint ${suffix}`);break;
@@ -4214,6 +4216,7 @@ const isParallelLaunch = name => name==='control.runInParallel';
 const isControlRegistration = name => name==='control.onEvent';
 const isIndependentRegistration = name => isControlRegistration(name) || isParallelLaunch(name) || isFrameRegistration(name) || isButtonRegistration(name) || isInfoRegistration(name) || isForeverRegistration(name) || isSpriteRegistration(name);
 const sceneRegistrationSpec = (name,node) => {
+    if(playerConnectionRegistration(node))return {kind:'playerConnection',handlerIndex:1,arity:2,prefix:'__bwPlayerConnection',maxParams:0};
     if(playerButtonRegistration(node))return {kind:'button',handlerIndex:2,arity:3,prefix:'__bwPlayerButton',maxParams:0};
     const specs={
         'mp.onControllerEvent':{kind:'multiplayerConnection',handlerIndex:1,arity:2,prefix:'__bwMPConnection',maxParams:1},
@@ -4356,7 +4359,7 @@ const emitSceneRegistrations = (translator,out,localHandles=new Map(),callbackLo
         const spriteParams=kind==='instanceOverlap'?handler.params.slice(0,1):kind==='destroyed'?handler.params.slice(0,1):kind==='overlap'?handler.params.slice(0,2):[];
         translator.localHandleVars=new Set([...(localHandles.get(callbackLocals.get(handler)) || []),...spriteParams]);
         translator.handleAliases=new Map();
-        const label=kind==='controlEvent'?'control event':kind==='multiplayerConnection'?'multiplayer connection':kind==='multiplayerButton'?'multiplayer button':kind==='scenePush'?'scene push':kind==='scenePop'?'scene pop':kind==='instanceOverlap'?'instance overlap':kind==='instanceDestroyed'?'instance destruction':kind==='destroyed'?'destroyed kind':kind==='lifeZero'?'life zero':kind;
+        const label=['controlEvent','playerConnection'].includes(kind)?'control event':kind==='multiplayerConnection'?'multiplayer connection':kind==='multiplayerButton'?'multiplayer button':kind==='scenePush'?'scene push':kind==='scenePop'?'scene pop':kind==='instanceOverlap'?'instance overlap':kind==='instanceDestroyed'?'instance destruction':kind==='destroyed'?'destroyed kind':kind==='lifeZero'?'life zero':kind;
         out.push(`WHEN arcade ${label} handler "${token}" runs:`);
         if(['multiplayerButton','multiplayerConnection'].includes(kind) && handler.params[0])out.push(`  arcade set local ${translator.varName(handler.params[0])} to arcade event player`);
         for(const [index,param] of spriteParams.entries())out.push(`  arcade set local ${translator.varName(param)} to arcade event ${kind==='instanceOverlap'?'second':index===0?'first':'second'}`);
@@ -5462,6 +5465,7 @@ function arcadeToPseudocodeImpl (files, opts = {}) {
     const anyButtonSourceSafe = source.includes('anyButton') && anyButtonConfiguredSourceSafe(map);
     const highScoreSourceSafe = source.includes('highScore') && highScoreConfiguredSourceSafe(map);
     const playerButtonSourceSafe=source.includes('onButtonEvent')&&playerButtonConfiguredSourceSafe(map);
+    const playerConnectionSourceSafe=source.includes('onEvent')&&playerConnectionConfiguredSourceSafe(map);
     const resetSourceSafe=source.includes('reset')&&gameResetSourceSafe(map);
     const logValueSourceSafe = source.includes('logValue') && consoleLogValueConfiguredSourceSafe(map);
     const defaultTextPromptSourceSafe = source.includes('askForString') && numberPromptLengthSourceSafe(map);
@@ -5605,8 +5609,8 @@ function arcadeToPseudocodeImpl (files, opts = {}) {
         return Object.fromEntries(Object.entries(node).map(([key, value]) => [key, lowerAnimationAssets(value)]));
     };
     const callableParseOptions={namedFunctionExpressions:true,parameterDefaults:true,retainParentheses:true,retainWhenUsed:true,retainClassHeritage:true,retainOrdinaryDefaultProvenance:true};
-    const ordinarySource=markHighScoreCalls(markDefaultTextPrompts(markNumberPromptLengths(markLegacyNoteMelodies(lowerAnyButtonRegistrations(normalizeUnusedNamedCallbacks(markGameResets(markPlayerButtonRegistrations(parseSharedImageSourceProgram(sharedSourcePreparation,source,opts.procedureConstraintsPrototype===true,opts.procedureConstraintsPrototype!==true,true,true),playerButtonSourceSafe),resetSourceSafe),map,callbackRegistrationSpec,projectInputDiagnostics),anyButtonSourceSafe,projectInputDiagnostics),legacyMelodySourceSafe),numberPromptSourceSafe),defaultTextPromptSourceSafe),highScoreSourceSafe);
-    const callableSourceParsed=markHighScoreCalls(markDefaultTextPrompts(markNumberPromptLengths(markLegacyNoteMelodies(lowerAnyButtonRegistrations(normalizeUnusedNamedCallbacks(markGameResets(markPlayerButtonRegistrations(parseMakeCodeTs(source,{...callableParseOptions,retainCallableMetadata:true,retainAuthoredEmptyBranches:true}),playerButtonSourceSafe),resetSourceSafe),map,callbackRegistrationSpec,projectInputDiagnostics),anyButtonSourceSafe),legacyMelodySourceSafe),numberPromptSourceSafe),defaultTextPromptSourceSafe),highScoreSourceSafe);
+    const ordinarySource=markHighScoreCalls(markDefaultTextPrompts(markNumberPromptLengths(markLegacyNoteMelodies(lowerAnyButtonRegistrations(normalizeUnusedNamedCallbacks(markGameResets(markPlayerConnectionRegistrations(markPlayerButtonRegistrations(parseSharedImageSourceProgram(sharedSourcePreparation,source,opts.procedureConstraintsPrototype===true,opts.procedureConstraintsPrototype!==true,true,true),playerButtonSourceSafe),playerConnectionSourceSafe),resetSourceSafe),map,callbackRegistrationSpec,projectInputDiagnostics),anyButtonSourceSafe,projectInputDiagnostics),legacyMelodySourceSafe),numberPromptSourceSafe),defaultTextPromptSourceSafe),highScoreSourceSafe);
+    const callableSourceParsed=markHighScoreCalls(markDefaultTextPrompts(markNumberPromptLengths(markLegacyNoteMelodies(lowerAnyButtonRegistrations(normalizeUnusedNamedCallbacks(markGameResets(markPlayerConnectionRegistrations(markPlayerButtonRegistrations(parseMakeCodeTs(source,{...callableParseOptions,retainCallableMetadata:true,retainAuthoredEmptyBranches:true}),playerButtonSourceSafe),playerConnectionSourceSafe),resetSourceSafe),map,callbackRegistrationSpec,projectInputDiagnostics),anyButtonSourceSafe),legacyMelodySourceSafe),numberPromptSourceSafe),defaultTextPromptSourceSafe),highScoreSourceSafe);
     const createdDimensionSourceSafe=createdImageDimensionSourceSafe(map);
     const namedEligibility=selectNamedFunctionSourceProof(callableSourceParsed,{ordinaryProgram:ordinarySource,registrationSpec:callbackRegistrationSpec});
     const namedEnabled=namedEligibility.eligible;
