@@ -115,3 +115,24 @@ lazy catalogue/preview loading, live dark/light switching with an unchanged
 session/history, shape creation, CAD/FPGA toggles, persistence and global Undo.
 The check waits for asynchronous shape insertion and respects Settings sections
 that remain expanded across menu openings.
+
+## TestFlight delivery: 0.1.33
+
+The iOS/iPad and macOS packages were rebuilt from native source commit
+`98b38d047` with the tested CAD SDK and uploaded to App Store Connect.
+Both builds are VALID and IN_BETA_TESTING for the internal group. Both are also
+assigned to the external group and submitted for beta review; Apple reports
+WAITING_FOR_BETA_REVIEW. English and German tester notes were read back and
+verified against `docs/app-store-metadata.md`.
+
+The signed package hashes, source/SDK identity and tester-state verification are
+recorded in [the delivery receipt](receipts/2026-11-15-cad-testflight-0.1.33.json).
+
+For local builds, use Apple's `/usr/bin` tools first in PATH when exporting the
+iOS archive: Homebrew rsync rejects Xcode's extended-attribute argument. Select
+`brickwright-build.keychain-db` explicitly for `productbuild`. Simulator binaries
+copied from an installed TestFlight app carry Apple's beta signatures and must
+be signed with our distribution identity before upload. Compute the packaged
+runtime pin after this signing step and rebuild with that pin. The receipt's
+runtime-pin check covers the package before Apple's TestFlight re-signing;
+launching the installed TestFlight simulator was not tested in this delivery.
