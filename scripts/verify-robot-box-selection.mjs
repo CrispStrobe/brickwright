@@ -85,6 +85,25 @@ try {
     await page.evaluate(()=>{v.showAll();v.select(['a','b']);v.groupSelection();v.select([]);});
     await drag(...around(a));assert.deepEqual(await selected(),['a','b']);
     assert.equal(await page.evaluate(()=>editor.canUndo),true); // grouping only
+    // Space pans over parts without starting selection or a model edit.
+    const beforePan=await page.evaluate(()=>{v.canvas.focus();window.panModel=editor.model;return {camera:v.camera,selected:v.selection.slice().sort()};});
+    const point=await center('a');
+    await page.keyboard.down('Space');await page.mouse.move(...point);await page.mouse.down();
+    await page.mouse.move(point[0]+65,point[1]+30,{steps:8});await page.mouse.up();await page.keyboard.up('Space');
+    const afterPan=await page.evaluate(()=>({camera:v.camera,selected:v.selection.slice().sort(),sameModel:window.panModel===editor.model}));
+    assert.notDeepEqual(afterPan.camera.target,beforePan.camera.target);
+    const offset=c=>c.position.map((v,i)=>v-c.target[i]);
+    offset(afterPan.camera).forEach((v,i)=>assert.ok(Math.abs(v-offset(beforePan.camera)[i])<1e-9));
+    assert.deepEqual(afterPan.selected,beforePan.selected);assert.equal(afterPan.sameModel,true);
+    assert.equal(await page.getByTestId('bw-sim-lab-box-select').isVisible(),false);
+    // Escape ends camera capture without clearing the selection.
+    await page.keyboard.down('Space');await page.mouse.down();await page.mouse.move(point[0]+95,point[1]+40);
+    await page.keyboard.press('Escape');const canceledCamera=await page.evaluate(()=>v.camera);
+    await page.mouse.move(point[0]+125,point[1]+60);await page.mouse.up();await page.keyboard.up('Space');
+    assert.deepEqual(await page.evaluate(()=>v.camera),canceledCamera);assert.deepEqual(await selected(),beforePan.selected);
+    // Losing focus clears the held modifier; the next plain drag selects normally.
+    await page.keyboard.down('Space');await page.evaluate(()=>window.dispatchEvent(new Event('blur')));
+    await page.keyboard.up('Space');await drag([20,20],[900,660]);assert.ok((await selected()).length>0);
     assert.deepEqual(errors,[]);
-    console.log('PASS Robots: visible rectangle, replace/add, reverse/edge selection, Escape/cancel/blur, camera/history, hidden parts and groups');
+    console.log('PASS Robots: visible rectangle, replace/add, reverse/edge selection, Escape/cancel/blur, camera/history, hidden parts/groups and Space-pan/cancellation');
 } finally {await browser.close();await new Promise(resolve=>server.close(resolve));}

@@ -77,6 +77,7 @@
 // contract's lduToWorld — a 180° turn about x, so a placed rotation R becomes
 // F·R·F with F = diag(1, -1, -1).
 
+import {cameraPointerIntent} from '../../editor-interaction/camera-pointer.js';
 import {selectionRectangle, projectedBoxIntersects} from '../../editor-interaction/box-selection.js';
 
 import {
@@ -86,7 +87,7 @@ import {
 } from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {
-    BUILD_POLAR, CAMERA_ANIMATION_MS, VIEW_DIRECTIONS, applyCameraAction, cameraKeyAction, configureOrbitControls, easeOut, orbitAboutPivot, orbitButtonOf, MOUSE_PRESETS,
+    BUILD_POLAR, CAMERA_ANIMATION_MS, VIEW_DIRECTIONS, applyCameraAction, cameraKeyAction, configureOrbitControls, easeOut, orbitAboutPivot, MOUSE_PRESETS,
     viewCubeDirection, wheelIntent, wheelZoomFactor, zoomAbout
 } from '../view/camera-nav.js';
 import {TransformControls} from 'three/addons/controls/TransformControls.js';
@@ -232,6 +233,7 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
     let candidate = null; // palette ghost: magnet candidate
     let freePose = null; // palette ghost: pose on a surface
     let floorY = null;
+    let spaceHeld = false;
     let gesture = null; // what the pressed pointer is doing
     let preview = null; // {moves, candidate} while a selection is being moved
     let modifiers = {alt: false, shift: false};
@@ -2279,7 +2281,18 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
             gesture = null;
             return;
         }
-        if (event.button === orbitButtonOf(mousePreset)) {
+        const cameraIntent = cameraPointerIntent(event, mousePreset, spaceHeld);
+        if (event.button === 0 && cameraIntent === 'pan' && !tool && !pickMode) {
+            gesture = {kind: 'cameraPan', x: event.clientX, y: event.clientY, pointerId: event.pointerId};
+            controls.enabled = false;
+            transform.enabled = false;
+            canvas.setPointerCapture(event.pointerId);
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            setCursor('grabbing');
+            return;
+        }
+        if (event.button !== 0 && cameraIntent === 'orbit') {
             // Middle drag (right drag in the Studio preset): orbit about the point under the pointer.
             gesture = {x: event.clientX, y: event.clientY, pointerId: event.pointerId, kind: 'orbit', orbit: orbitStart(event), button: event.button};
             canvas.setPointerCapture(event.pointerId);
@@ -2374,6 +2387,12 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
         if (gesture && !gesture.touch && gesture.pointerId !== event.pointerId) return;
         if (event.pointerType === 'mouse') lastTouch = false;
         readModifiers(event);
+        if (gesture?.kind === 'cameraPan') {
+            panBy(event.clientX - gesture.x, event.clientY - gesture.y);
+            gesture.x = event.clientX; gesture.y = event.clientY;
+            event.preventDefault(); event.stopImmediatePropagation();
+            return;
+        }
         if (paletteDrag && paletteDrag.dragging) return; // onPaletteMove follows it
         if (gesture && gesture.kind === 'connected' && (gesture.glide || travelled(event, gesture) > CLICK_PX)) {
             if (gesture.glide === undefined) {
@@ -2571,6 +2590,7 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
         boxDiv.style.display = 'none';
         if (!g) return;
         try { canvas.releasePointerCapture(event.pointerId); } catch { /* not captured */ }
+        if (g.kind === 'cameraPan') { setCursor(''); return; }
         if (g.orbit) endOrbit();
         if (event.type === 'pointercancel') {
             preview = null; clearGhost(); placeMeshes(); showConnectors([]); setCursor(''); emitHold();
@@ -2801,7 +2821,7 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
 
     /** Esc (or its button): a drag in progress is called off, else the placing tool ends, else the selection is cleared. */
     const escape = () => {
-        if (gesture && gesture.kind === 'box') {
+        if (gesture && (gesture.kind === 'box' || gesture.kind === 'cameraPan')) {
             onUp({pointerId: gesture.pointerId, type: 'pointercancel'});
             stopLongPress(); tracker.reset();
             return;
@@ -2838,6 +2858,9 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
                 a: () => { setSelection(editor.model.parts.map(p => p.id)); status({kind: 'selected', count: selection.length}); }};
             if (actions[key]) { event.preventDefault(); actions[key](); }
             return;
+        }
+        if ((event.code === 'Space' || key === ' ') && !tool && !dragging() && !pickMode && !event.altKey) {
+            spaceHeld = true; event.preventDefault(); return;
         }
         // [ ] turn 15° (German keyboards type them with Alt/AltGr, so before the Alt check).
         if (key === '[' || key === ']') { event.preventDefault(); fineTurn(key === ']' ? 1 : -1); return; }
@@ -2878,11 +2901,14 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
         };
         if (plain[key]) { event.preventDefault(); plain[key](); }
     };
-    const onKeyUp = event => readModifiers(event);
-    const cancelPointer = () => { if (gesture && !gesture.touch) onUp({pointerId: gesture.pointerId, type: 'pointercancel'}); };
-    const lostCapture = event => { if (gesture?.kind === 'box' && gesture.pointerId === event.pointerId) cancelPointer(); };
+    const releaseSpace = event => { if (event.code === 'Space' || event.key === ' ') spaceHeld = false; };
+    const onKeyUp = event => { releaseSpace(event); readModifiers(event); };
+    const cancelPointer = () => { spaceHeld = false; if (gesture && !gesture.touch) onUp({pointerId: gesture.pointerId, type: 'pointercancel'}); };
+    const lostCapture = event => { if ((gesture?.kind === 'box' || gesture?.kind === 'cameraPan') && gesture.pointerId === event.pointerId) cancelPointer(); };
     canvas.addEventListener('lostpointercapture', lostCapture);
     window.addEventListener('blur', cancelPointer);
+    window.addEventListener('keyup', releaseSpace);
+    canvas.addEventListener('blur', cancelPointer);
     const onLeave = () => {
         if (hovered && !gesture) { hovered = null; drawOutlines(); }
         if (idleLit && !gesture && !tool) { idleLit = null; showConnectors([]); }
@@ -3058,6 +3084,8 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
         disposed = true;
         cancelPointer();
         window.removeEventListener('blur', cancelPointer);
+        window.removeEventListener('keyup', releaseSpace);
+        canvas.removeEventListener('blur', cancelPointer);
         canvas.removeEventListener('lostpointercapture', lostCapture);
         unsubscribe();
         dropFences();

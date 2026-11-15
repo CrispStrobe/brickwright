@@ -40,6 +40,7 @@ export const TOOLBAR_TEXT = {
         camera: [
             ['Middle drag · drag empty space in Simulate', 'turn the view'],
             ['Right drag · Shift+drag (Simulate)', 'slide the view'],
+            ['Space+drag (Build, no part in hand)', 'slide the view'],
             ['Wheel · pinch', 'zoom toward the pointer'],
             ['Arrows · Shift+arrows · + / -', 'turn · slide · zoom (click the view first; in Build with nothing selected)'],
             ['Home · Fit (F) · Top · Front · Side', 'the view buttons']
@@ -86,6 +87,7 @@ export const TOOLBAR_TEXT = {
         camera: [
             ['Mitte ziehen · leere Fläche ziehen beim Simulieren', 'Ansicht drehen'],
             ['Rechts ziehen · Umschalt+Ziehen (Simulieren)', 'Ansicht schieben'],
+            ['Leertaste+Ziehen (Bauen, kein Teil in der Hand)', 'Ansicht schieben'],
             ['Mausrad · zwei Finger', 'zum Mauszeiger hin zoomen'],
             ['Pfeile · Umschalt+Pfeile · + / -', 'drehen · schieben · zoomen (erst in die Ansicht klicken; beim Bauen, wenn nichts ausgewählt ist)'],
             ['Start · Einpassen (F) · Oben · Vorne · Seite', 'die Ansichtsknöpfe']
