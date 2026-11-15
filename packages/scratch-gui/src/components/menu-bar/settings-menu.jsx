@@ -9,6 +9,7 @@ import MenuBarMenu from './menu-bar-menu.jsx';
 import {menuTriggerStyle, openMenuFromKeyboard} from '../../lib/menu-keyboard.js';
 import BwAbout from './bw-about.jsx';
 import I8086Lab from './i8086-lab.jsx';
+import NativeBenchmarks from './native-benchmarks.jsx';
 import {MenuItem, MenuSection, Submenu} from '../menu/menu.jsx';
 import menuBarStyles from './menu-bar.css';
 import styles from './settings-menu.css';
@@ -213,10 +214,14 @@ const SettingsMenu = ({intl, canChangeLanguage, canChangeTheme, isRtl, onRequest
                     <MenuItem onClick={() => { emit('bw-open-i8086-lab'); onRequestClose(); }}>
                         {t('gui.menuBar.i8086Diagnostics', '8086 execution diagnostics…')}
                     </MenuItem>
+                    <MenuItem onClick={() => { emit('bw-open-native-benchmarks'); onRequestClose(); }}>
+                        {t('gui.menuBar.nativeBenchmarks', 'Benchmarks (native i80386)…')}
+                    </MenuItem>
                 </MenuSection>
             </MenuBarMenu>
             <BwAbout hideTrigger />
             <I8086Lab />
+            <NativeBenchmarks />
         </div>
     );
 };

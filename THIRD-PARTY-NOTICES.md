@@ -2742,3 +2742,14 @@ Original model and program designs by CrispStrobe, BSD-3-Clause. SineShuttle sup
 ### Experimental Technic checkpoint sources
 
 Original user-owned models and programs by CrispStrobe, BSD-3-Clause. The twenty-one checkpoint sources are listed with original and canonical hashes in `docs/data/robot-lab-experimental-checkpoint.json`; individual full notices are under `static/sim-lab/licenses/`. These are experimental, not physically qualified library examples. Standard LDraw part drawings retain their existing authors and licences.
+
+## Native benchmark startup and result helpers — MIT
+
+The native benchmark panel mechanically mirrors the owned media-lab
+`native-dos.mjs`, `benchmark-output.mjs` and `whetstone-result.mjs` helpers at
+commit `01d06fb63d5bdd4c0ede48e811e8fc1f6971d2ce` from
+https://github.com/CrispStrobe/brickwright-media-lab/tree/01d06fb63d5bdd4c0ede48e811e8fc1f6971d2ce/projects/x86-benchmarks.
+Copyright (c) 2026 Brickwright contributors. The complete MIT notice is retained
+beside the helpers and shipped as `static/licenses/native-benchmark-helpers.MIT.txt`.
+Payloads are fetched only on explicit request; the panel displays their own
+retained notices and exact provenance before Run.

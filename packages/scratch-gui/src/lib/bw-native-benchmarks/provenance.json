@@ -1,0 +1,23 @@
+{
+  "repository": "CrispStrobe/brickwright-media-lab",
+  "commit": "01d06fb63d5bdd4c0ede48e811e8fc1f6971d2ce",
+  "base": "projects/x86-benchmarks",
+  "files": {
+    "native-dos.mjs": {
+      "bytes": 5066,
+      "sha256": "7063ae8094a3fcdaef281780e6c25ac8d7aa3f738aafc65c10bca286090e1afa"
+    },
+    "benchmark-output.mjs": {
+      "bytes": 837,
+      "sha256": "4de015f779bd401300d37483a14ccbc1d89d41cd41f28404420c1e6511cbbba0"
+    },
+    "whetstone-result.mjs": {
+      "bytes": 1580,
+      "sha256": "f6895dc7a807a66de8e79d92e4066250f93bcc364cdd3e01ea1a40ddc057bcfe"
+    },
+    "LICENSE": {
+      "bytes": 1081,
+      "sha256": "a991ac2aa77fe1dba902be47419cfc5a0d30ab032a6f9e697387dc4d5a6ed1f3"
+    }
+  }
+}
