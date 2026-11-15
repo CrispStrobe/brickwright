@@ -9,6 +9,11 @@ import SB3Creator from '../overlay/scratch-gui/src/lib/sb3-creator-register-art.
 import {CAD_PROJECT_PATH} from '../overlay/scratch-gui/src/lib/bw-cad-project.js';
 import {parseDocument} from '../overlay/scratch-gui/static/cad-sdk/sdk.js';
 
+const distributionLicences = async () => ({
+    'ADAFRUIT-MIT-LICENSE.txt': await readFile(new URL('../licenses/adafruit-cad-parts-MIT.txt', import.meta.url)),
+    'BRICKWRIGHT-BSD-3-CLAUSE.txt': await readFile(new URL('../LICENSE', import.meta.url))
+});
+
 // Both wheel axes must be authored in the same direction. Speed commands return
 // immediately, so both wheels run together. A degree command would wait before
 // starting the second wheel. These commands operate the CAD simulation only.
@@ -49,6 +54,9 @@ export async function createCadRoverProject(documentText) {
     // Preserve authored CAD bytes rather than normalizing IDs or geometry.
     archive.file(CAD_PROJECT_PATH, documentText);
     archive.file('brickwright/tt-rover-program.txt', CAD_ROVER_PROGRAM);
+    for (const [name, bytes] of Object.entries(await distributionLicences())) {
+        archive.file(`brickwright/licenses/${name}`, bytes);
+    }
     return archive.generateAsync({type: 'uint8array', compression: 'DEFLATE'});
 }
 
@@ -62,7 +70,8 @@ async function main() {
     const files = {
         'tt-rover.bcad': documentText,
         'tt-rover.sb3': project,
-        'tt-rover-program.txt': CAD_ROVER_PROGRAM
+        'tt-rover-program.txt': CAD_ROVER_PROGRAM,
+        ...await distributionLicences()
     };
     await mkdir(output, {recursive: true});
     for (const [name, bytes] of Object.entries(files)) await writeFile(resolve(output, name), bytes);

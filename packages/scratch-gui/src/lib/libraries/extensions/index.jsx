@@ -96,6 +96,14 @@ export default [
         description: 'Set and read generic GPIO pins (0–7) — lights the Widgets pane strip; round-trips with the DOS Forth bench.',
         featured: true
     },
+    ...(process.env.BW_ENABLE_CAD ? [{
+        name: browserLocale().toLowerCase().startsWith('de') ? 'CAD-Modelle' : 'CAD models', extensionId: 'cadlab', iconURL: 'static/extension-posters/cad-models.svg',
+        insetIconURL: 'static/extension-posters/cad-models.svg',
+        description: browserLocale().toLowerCase().startsWith('de')
+            ? 'CAD-Motoren antreiben, um Grad drehen und Drehgeber lesen. Aktiviere CAD Editor unter Einstellungen → Arbeitsbereich.'
+            : 'Drive CAD hinge motors, turn by degrees and read encoders. Enable CAD Editor in Settings → Workspace.',
+        featured: true
+    }] : []),
     {
         name: 'Robot Lab',
         extensionId: 'robotlab',

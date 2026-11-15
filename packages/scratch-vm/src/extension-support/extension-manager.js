@@ -154,6 +154,7 @@ const lazyBuiltinExtensions = {
     // Robot Lab pane installs (gui lib/bw-sim/api/robot-lab-api.js). LITE_ONLY, classified in
     // scripts/spike/bundled-upstream.mjs. Lazy: only a Robot Lab project needs them, and eager
     // they pushed the 8086 benchmark's initial JS over its budget (PR #1097).
+    cadlab: () => import(/* webpackChunkName: "ext-cadlab" */ '../extensions/crispstrobe/cadlab/index.js'),
     robotlab: () => import(/* webpackChunkName: "ext-robotlab" */ '../extensions/crispstrobe/robotlab/index.js'),
     planetemaths: () => import(/* webpackChunkName: "ext-planetemaths" */ '../extensions/crispstrobe/planetemaths/index.js'),
     legopoweredup: () => import(/* webpackChunkName: "ext-legopoweredup" */ '../extensions/crispstrobe/legopoweredup/index.js'),

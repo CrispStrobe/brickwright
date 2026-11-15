@@ -2752,3 +2752,9 @@ BSD-3-Clause. Its exact source commit and file hashes are recorded in
 runtime dependency notices ship alongside it as `LICENSE` and `NOTICE.txt`,
 including Three.js (MIT), Manifold (Apache-2.0) and the bundled font licenses.
 The SDK is copied to the application only when `BW_ENABLE_CAD=1`.
+
+The optional Scout TT project generator retains the Adafruit CAD Parts MIT
+notice at `licenses/adafruit-cad-parts-MIT.txt` (Copyright (c) 2016 Adafruit
+Industries). Generated SB3 examples include that notice and Brickwright's
+BSD-3-Clause license under `brickwright/licenses/`. The supplied CAD document
+retains the exact motor source revision, conversion and attribution records.
