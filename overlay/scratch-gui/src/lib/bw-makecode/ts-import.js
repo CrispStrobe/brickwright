@@ -1040,7 +1040,7 @@ class Parser {
         if (!this.at('punct', ';')) {
             init = (this.at('let') || this.at('const') || this.at('var')) ?
                 this.parseDeclaration() :
-                {type: 'ExpressionStatement', expr: this.parseExpression()};
+                this.parseForHeaderStatements();
         }
         // `for (let x: T of list)`: the typed form the check above does not see.
         if (this.eat('ident', 'of')) {
@@ -1060,9 +1060,29 @@ class Parser {
         this.eat('punct', ';');
         const test = this.at('punct', ';') ? null : this.parseExpression();
         this.eat('punct', ';');
-        const update = this.at('punct', ')') ? null : this.parseExpression();
+        const update = this.at('punct', ')') ? null : this.parseForHeaderExpression();
         this.expect('punct', ')');
         return {type: 'For', init, test, update, body: this.parseBlockOrStatement()};
+    }
+
+    // Commas here order discarded-value header operations. Keep argument,
+    // declaration and value-position commas outside this narrow grammar.
+    parseForHeaderExpression () {
+        const expressions = [this.parseExpression()];
+        while (this.eat('punct', ',')) {
+            if (this.at('punct', ';') || this.at('punct', ')') || this.at('punct', ',') || this.peek().type === 'eof') {
+                throw new Error('for header comma requires another expression');
+            }
+            expressions.push(this.parseExpression());
+        }
+        return expressions.length === 1 ? expressions[0] : {type: 'ForHeaderSequence', expressions};
+    }
+
+    parseForHeaderStatements () {
+        const expression = this.parseForHeaderExpression();
+        const body = (expression.type === 'ForHeaderSequence' ? expression.expressions : [expression])
+            .map(expr => ({type: 'ExpressionStatement', expr}));
+        return body.length === 1 ? body[0] : {type: 'Block', body};
     }
 
     parseEnum () {
