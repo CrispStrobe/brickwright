@@ -77,6 +77,7 @@
 // contract's lduToWorld — a 180° turn about x, so a placed rotation R becomes
 // F·R·F with F = diag(1, -1, -1).
 
+import {transformPreviewMetrics} from './transform-preview.js';
 import {cameraPointerIntent} from '../../editor-interaction/camera-pointer.js';
 import {selectionRectangle, projectedBoxIntersects} from '../../editor-interaction/box-selection.js';
 
@@ -183,12 +184,14 @@ let clipboard = [];
  * @param {(hold: {holding: boolean, tone: string|null, round: boolean, touch: boolean, keyboard: boolean, pinned: object|null}) => void} [options.onHold]
  *        what is in hand and how it would land (the pane's hint bar, target chip and touch buttons)
  * @param {(info: object) => void} [options.onAnnounce] a new target or a refusal, for the screen reader (aria-live)
+ * @param {(metrics: {deltaMm: number[], distanceMm: number, angleDegrees: number}) => string} [options.transformPreviewLabel]
+ * @param {string} [options.transformPreviewTitle]
  * @param {{top: string, bottom: string, front: string, back: string, left: string, right: string}} [options.viewCubeLabels] the view cube's faces
  */
 export const createEditorView3D = ({container, read, colors, catalog, editor,
     onSelect = () => {}, onChange = () => {}, onStatus = () => {}, onTool = () => {}, onMode = () => {},
     portLabel = () => '', onPortLabel = null, onViewState = () => {}, onColorPicked = () => {},
-    measureLabel = m => `${m.ldu} LDU`, onShortcuts = () => {}, onHold = () => {}, onAnnounce = () => {}, viewCubeLabels = null}) => {
+    measureLabel = m => `${m.ldu} LDU`, onShortcuts = () => {}, onHold = () => {}, onAnnounce = () => {}, viewCubeLabels = null, transformPreviewLabel = m => `Δ ${m.distanceMm.toFixed(1)} mm · θ ${m.angleDegrees.toFixed(1)}° · X ${m.deltaMm[0].toFixed(1)} Y ${m.deltaMm[1].toFixed(1)} Z ${m.deltaMm[2].toFixed(1)} mm`, transformPreviewTitle = 'Transform preview'}) => {
     const renderer = new WebGLRenderer({antialias: true});
     const canvas = renderer.domElement;
     canvas.dataset.testid = 'bw-sim-lab-editor-canvas';
@@ -233,6 +236,18 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
     let candidate = null; // palette ghost: magnet candidate
     let freePose = null; // palette ghost: pose on a surface
     let floorY = null;
+    const transformReadout = document.createElement('output');
+    transformReadout.dataset.testid = 'bw-sim-lab-transform-preview';
+    transformReadout.setAttribute('aria-label', transformPreviewTitle);
+    // The drag is visual feedback, not a stream of screen-reader announcements.
+    transformReadout.setAttribute('aria-live', 'off');
+    transformReadout.hidden = true;
+    Object.assign(transformReadout.style, {position: 'absolute', left: '50%', bottom: '12px', transform: 'translateX(-50%)',
+        pointerEvents: 'none', zIndex: 4, maxWidth: 'calc(100% - 24px)', overflow: 'hidden', textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap', color: '#fff', background: '#334155', borderRadius: '6px', padding: '5px 8px',
+        font: '600 12px system-ui, sans-serif', fontVariantNumeric: 'tabular-nums'});
+    container.appendChild(transformReadout);
+    let gizmoPointerId = null;
     let spaceHeld = false;
     let gesture = null; // what the pressed pointer is doing
     let preview = null; // {moves, candidate} while a selection is being moved
@@ -890,7 +905,7 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
     transform.addEventListener('mouseDown', () => {
         controls.enabled = false;
         const parts = selectedParts();
-        gesture = {kind: 'gizmo', start: parts, pivotWorld: pivotObject.position.clone(), pivot: pivotLdu()};
+        gesture = {kind: 'gizmo', pointerId: gizmoPointerId, start: parts, pivotWorld: pivotObject.position.clone(), pivot: pivotLdu()};
         preview = {moves: translatePoses(parts, [0, 0, 0]), candidate: null};
     });
     transform.addEventListener('objectChange', () => {
@@ -2268,6 +2283,7 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
     const travelled = (event, g) => Math.hypot(event.clientX - g.x, event.clientY - g.y);
 
     function onDown (event) {
+        gizmoPointerId = event.pointerId;
         lastTouch = event.pointerType === 'touch';
         stopCameraAnimation();
         if (lastTouch) { onTouchDown(event); return; }
@@ -2593,7 +2609,13 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
         if (g.kind === 'cameraPan') { setCursor(''); return; }
         if (g.orbit) endOrbit();
         if (event.type === 'pointercancel') {
-            preview = null; clearGhost(); placeMeshes(); showConnectors([]); setCursor(''); emitHold();
+            preview = null;
+            if (g.kind === 'gizmo') {
+                // End Three's drag after relinquishing model ownership, so its
+                // mouseUp event cannot commit the canceled preview.
+                transform.reset(); transform.pointerUp({button: 0});
+            }
+            clearGhost(); placeMeshes(); updateGizmo(); showConnectors([]); setCursor(''); emitHold();
             return;
         }
         const click = travelled(event, g) <= CLICK_PX;
@@ -2821,7 +2843,7 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
 
     /** Esc (or its button): a drag in progress is called off, else the placing tool ends, else the selection is cleared. */
     const escape = () => {
-        if (gesture && (gesture.kind === 'box' || gesture.kind === 'cameraPan')) {
+        if (gesture && (gesture.kind === 'box' || gesture.kind === 'cameraPan' || gesture.kind === 'gizmo')) {
             onUp({pointerId: gesture.pointerId, type: 'pointercancel'});
             stopLongPress(); tracker.reset();
             return;
@@ -2904,7 +2926,7 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
     const releaseSpace = event => { if (event.code === 'Space' || event.key === ' ') spaceHeld = false; };
     const onKeyUp = event => { releaseSpace(event); readModifiers(event); };
     const cancelPointer = () => { spaceHeld = false; if (gesture && !gesture.touch) onUp({pointerId: gesture.pointerId, type: 'pointercancel'}); };
-    const lostCapture = event => { if ((gesture?.kind === 'box' || gesture?.kind === 'cameraPan') && gesture.pointerId === event.pointerId) cancelPointer(); };
+    const lostCapture = event => { if ((gesture?.kind === 'box' || gesture?.kind === 'cameraPan' || gesture?.kind === 'gizmo') && gesture.pointerId === event.pointerId) cancelPointer(); };
     canvas.addEventListener('lostpointercapture', lostCapture);
     window.addEventListener('blur', cancelPointer);
     window.addEventListener('keyup', releaseSpace);
@@ -3064,6 +3086,15 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
             dirty = true; // drawn once the GPU has finished the frame before
             return false;
         }
+        const metrics = preview ? transformPreviewMetrics(editor.model.parts, preview.moves) : null;
+        transformReadout.hidden = !metrics;
+        if (metrics) {
+            transformReadout.textContent = transformPreviewLabel(metrics);
+            transformReadout.title = transformReadout.textContent;
+            transformReadout.dataset.metrics = JSON.stringify(metrics);
+            transformReadout.dataset.blocked = String(Boolean(preview.blocked));
+            transformReadout.style.background = preview.blocked ? '#991b1b' : '#334155';
+        } else { delete transformReadout.dataset.metrics; }
         dirty = false;
         drawnCamera.copy(camera.matrixWorld);
         drawnProjection.copy(camera.projectionMatrix);
@@ -3114,6 +3145,7 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
         ropeLayer.dispose();
         hoseLayer.dispose();
         measureDiv.remove();
+        transformReadout.remove();
         clearGhost();
         for (const mesh of meshes.values()) for (const m of [].concat(mesh.material)) m.dispose();
         if (instanced) instanced.dispose();

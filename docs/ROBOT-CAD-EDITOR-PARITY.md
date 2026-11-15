@@ -98,3 +98,18 @@ Robot camera unit checks, CAD package/production builds, its two pointer/wheel
 unit checks and two real browser camera/history checks. The previously signed
 iPad package remains fixed at frontend `3a36d37`; this subsequent parity change
 is committed for the next package, independently of the pending WLAN install.
+
+## Transform feedback
+
+Build now shows a transient on-canvas readout while parts or gizmos move. It
+reports the actual snapped displacement and per-axis deltas in millimetres
+(0.4 mm/LDU, with Robot viewport Y/Z signs), plus the shortest orientation
+change from the original pose (0–180°). The badge is hidden at idle, does not
+intercept pointers, and uses the pane's EN/DE labels and number formatting.
+Blocked previews are tinted red. No model or history data is written to display it.
+
+The regression also exposed missing gizmo cancellation. Escape, pointer cancel,
+lost capture and focus loss now relinquish gesture ownership before ending the
+Three.js drag, restoring original poses without committing them. Selection is
+retained. Tests exercise the real viewport preview and cancellation, alongside
+pure unit conversion and orientation checks.

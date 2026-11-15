@@ -85,6 +85,24 @@ try {
     await page.evaluate(()=>{v.showAll();v.select(['a','b']);v.groupSelection();v.select([]);});
     await drag(...around(a));assert.deepEqual(await selected(),['a','b']);
     assert.equal(await page.evaluate(()=>editor.canUndo),true); // grouping only
+    // Live feedback describes the transient, snapped pose in millimetres.
+    const readout=page.getByTestId('bw-sim-lab-transform-preview');
+    await page.evaluate(()=>{v.select(['a']);v.canvas.focus();window.previewModel=editor.model;});
+    const dragPoint=await center('a');await page.mouse.move(...dragPoint);await page.mouse.down();
+    await page.mouse.move(dragPoint[0]+80,dragPoint[1]+35,{steps:8});
+    await readout.waitFor({state:'visible'});assert.match(await readout.textContent(),/mm/);
+    const metrics=JSON.parse(await readout.getAttribute('data-metrics'));
+    assert.ok(metrics.distanceMm>0);assert.equal(await page.evaluate(()=>editor.model===window.previewModel),true);
+    await page.keyboard.press('Escape');await page.mouse.up();await readout.waitFor({state:'hidden'});
+    assert.equal(await page.evaluate(()=>editor.model===window.previewModel),true);
+    for(const cancel of ['pointer','blur']){
+        await page.mouse.move(...dragPoint);await page.mouse.down();await page.mouse.move(dragPoint[0]+80,dragPoint[1]+35,{steps:4});
+        await readout.waitFor({state:'visible'});
+        if(cancel==='pointer')await page.evaluate(()=>v.canvas.dispatchEvent(new PointerEvent('pointercancel',{pointerId:window.pointerId,pointerType:'mouse'})));
+        else await page.evaluate(()=>window.dispatchEvent(new Event('blur')));
+        await page.mouse.up();await readout.waitFor({state:'hidden'});
+        assert.equal(await page.evaluate(()=>editor.model===window.previewModel),true);
+    }
     // Space pans over parts without starting selection or a model edit.
     const beforePan=await page.evaluate(()=>{v.canvas.focus();window.panModel=editor.model;return {camera:v.camera,selected:v.selection.slice().sort()};});
     const point=await center('a');
@@ -105,5 +123,5 @@ try {
     await page.keyboard.down('Space');await page.evaluate(()=>window.dispatchEvent(new Event('blur')));
     await page.keyboard.up('Space');await drag([20,20],[900,660]);assert.ok((await selected()).length>0);
     assert.deepEqual(errors,[]);
-    console.log('PASS Robots: visible rectangle, replace/add, reverse/edge selection, Escape/cancel/blur, camera/history, hidden parts/groups and Space-pan/cancellation');
+    console.log('PASS Robots: visible rectangle, replace/add, reverse/edge selection, Escape/cancel/blur, camera/history, hidden parts/groups and Space-pan/cancellation and live transform feedback');
 } finally {await browser.close();await new Promise(resolve=>server.close(resolve));}

@@ -179,6 +179,7 @@ const TEXT = {
             dragging: 'Drag {part} into the view and let go to place it (Esc cancels)',
             snap: 'Snaps to {target} hole {hole}', snapNoHole: 'Snaps to {target}', snapped: 'Snapped to {target} hole {hole}', snappedNoHole: 'Snapped to {target}',
             floor: 'On the floor', onTop: 'On top of {target}', moving: 'Moving x {x}, y {y}, z {z} LDU (1 hole = 20)',
+            transformPreviewTitle: 'Transform preview', transformPreview: 'Δ {distance} mm · θ {deg}° · X {x} Y {y} Z {z} mm',
             turning: 'Turning {deg}° (hold Shift for 15° steps)', turned: 'Turned 90°', turnedAbout: 'Turned about its connection to {target}',
             grouped: '{n} parts grouped: clicking one selects all', ungrouped: 'Group taken apart',
             groupNeedsTwo: 'Select at least two parts to group them (Shift+click).', notGrouped: 'The selection is not in a group.',
@@ -296,6 +297,7 @@ const TEXT = {
             dragging: 'Zieh {part} in die Ansicht und lass los, um es zu setzen (Esc bricht ab)',
             snap: 'Rastet an {target} Loch {hole} ein', snapNoHole: 'Rastet an {target} ein', snapped: 'An {target} Loch {hole} eingerastet', snappedNoHole: 'An {target} eingerastet',
             floor: 'Auf dem Boden', onTop: 'Oben auf {target}', moving: 'Verschieben x {x}, y {y}, z {z} LDU (1 Loch = 20)',
+            transformPreviewTitle: 'Transformationsvorschau', transformPreview: 'Δ {distance} mm · θ {deg}° · X {x} Y {y} Z {z} mm',
             turning: 'Drehen {deg}° (Umschalt halten: 15°-Schritte)', turned: 'Um 90° gedreht', turnedAbout: 'Um die Verbindung zu {target} gedreht',
             grouped: '{n} Teile gruppiert: ein Klick wählt alle', ungrouped: 'Gruppe aufgelöst',
             groupNeedsTwo: 'Wähle mindestens zwei Teile aus, um sie zu gruppieren (Umschalt+Klick).', notGrouped: 'Die Auswahl ist in keiner Gruppe.',
@@ -954,6 +956,8 @@ class SimLabPane extends React.Component {
                 onShortcuts: () => this.setState({shortcuts: true}),
                 onHold: hold => this.setState({hold}),
                 onAnnounce: info => this.setState({announce: this.announceText(info)}),
+                transformPreviewTitle: this.text.st.transformPreviewTitle,
+                transformPreviewLabel: m => fillText(this.text.st.transformPreview, {x: this.decimal(m.deltaMm[0]), y: this.decimal(m.deltaMm[1]), z: this.decimal(m.deltaMm[2]), deg: this.decimal(m.angleDegrees), distance: this.decimal(m.distanceMm)}),
                 viewCubeLabels: this.etext.connect.cube});
             this.editView.setGrid(this.state.grid);
             this.editView.setWheelMode(this.state.wheelMode);
@@ -2795,7 +2799,7 @@ class SimLabPane extends React.Component {
         case 'gliding': return fill(E.gliding, {ldu: this.decimal(st.ldu)});
         case 'roped': return fill(E.roped, {cm: this.decimal(st.cm)});
         case 'hosed': return fill(E.hosed, {from: E.hosePort[st.from] || st.from, to: E.hosePort[st.to] || st.to});
-        case 'idle': return ''; // nothing to report; the (i) beside the status explains how to build
+        case 'idle': return ''; // Build help lives in the top Help control
         default:
             if (E[st.kind]) return fill(E[st.kind], {n: st.count});
             return T[st.kind] ? fill(T[st.kind], {n: st.count}) : '';
