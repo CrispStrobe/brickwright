@@ -8,6 +8,7 @@ import {connect} from 'react-redux';
 import MediaQuery from 'react-responsive';
 import {Tab, Tabs, TabList, TabPanel} from 'react-tabs';
 import CircuitTab from '../tw-pseudocode/circuit-tab.jsx';
+import {installCadProgramAPI, CAD_OPEN_EVENT} from '../../lib/bw-cad-program.js';
 import {getCadEnabled, CAD_TOGGLE_EVENT} from '../../lib/bw-cad-preferences.js';
 import {getFpgaEnabled, FPGA_TOGGLE_EVENT} from '../../lib/bw-fpga-preferences.js';
 import {pinsToValue} from '../../lib/bw-fpga/pin-value.js';
@@ -279,6 +280,15 @@ const GUIComponent = props => {
         else if (!showFpga && index === 5) props.onActivateTab(4);
     }, [showFpga, props.activeTabIndex, props.onActivateTab]);
     const [cadWanted, setCadWanted] = React.useState(false);
+    React.useEffect(() => {
+        if (!process.env.BW_ENABLE_CAD || !props.vm?.runtime) return undefined;
+        return installCadProgramAPI(props.vm.runtime);
+    }, [props.vm]);
+    React.useEffect(() => {
+        const open = () => { if (showCad) { setCadWanted(true); props.onActivateTab(cadTabIndex); } };
+        window.addEventListener(CAD_OPEN_EVENT, open);
+        return () => window.removeEventListener(CAD_OPEN_EVENT, open);
+    }, [showCad, cadTabIndex, props.onActivateTab]);
     if (showCad && !cadWanted && !fpgaLayoutChanging && props.activeTabIndex === cadTabIndex) setCadWanted(true);
     React.useEffect(() => {
         if (!showCad && props.activeTabIndex === cadTabIndex) props.onActivateTab(robotLabIndex);

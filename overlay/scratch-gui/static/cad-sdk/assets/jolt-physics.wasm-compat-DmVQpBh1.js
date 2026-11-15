@@ -1,7 +1,7 @@
 async function uOt(iOt = {}) {
   var r = iOt, pOt = !!globalThis.window, _Ot = !!globalThis.WorkerGlobalScope, pi = globalThis.process?.versions?.node && globalThis.process?.type != "renderer";
   if (pi) {
-    let { createRequire: t } = await import("./simulation.worker-B7rXe3o8.js").then(function(A) {
+    let { createRequire: t } = await import("./simulation.worker-DqqLJntE.js").then(function(A) {
       return A._;
     });
     var zo = t(import.meta.url);

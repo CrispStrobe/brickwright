@@ -89,7 +89,7 @@ function shimRequire (spec, from) {
     if (spec === 'format-message') return nodeRequire(path.join(INTEGRATED, 'node_modules', spec));
     if (OVERLAY_SUPPORT.has(base)) return installedOverlaySupport(base);
     if (SUPPORT[base]) return nodeRequire(path.join(VM_SRC, SUPPORT[base]));
-    if (spec.startsWith('./')) {
+    if (spec.startsWith('./') || spec.startsWith('../')) {
         const candidate = path.resolve(path.dirname(from), spec);
         if (candidate.startsWith(OVERLAY_EXT + path.sep)) {
             const file = existsSync(candidate) ? candidate : candidate + '.js';

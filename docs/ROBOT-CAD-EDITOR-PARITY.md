@@ -123,3 +123,9 @@ filling the search field. SDK shape UI and geometry/remount checks also passed.
 
 The prior signed frontend `3a36d37` was successfully installed and launched on
 the physical iPad over WLAN; receipts are in `artifacts/ipad-cad-final`.
+
+The shared SDK now includes saved motor ports, encoder-based program controls,
+MIT-licensed DC/yellow TT motor presets and the full Adafruit archive browser.
+See [CAD motor programs](CAD-EDITOR.md) for the Code/Blocks workflow. The archive
+loads all 1,825 verified originals from brickwright-media-lab on demand; qualified
+STL insertion records explicitly selected units and orientation.

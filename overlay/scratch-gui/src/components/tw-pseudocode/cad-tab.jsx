@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import React from 'react';
 import PropTypes from 'prop-types';
+import {CAD_READY_EVENT} from '../../lib/bw-cad-program.js';
 import download from '../../lib/download-blob.js';
 import {loadCadSDK, cadAssetURL} from '../../lib/bw-cad-sdk.js';
 import {CAD_STORAGE_KEY, readCadText, setLiveCadText, getCadProjectGeneration} from '../../lib/bw-cad-project.js';
@@ -90,6 +91,7 @@ const CadTab = ({isVisible, locale}) => {
             if (visible.current) { activateUndoSurface('cad'); mounted.focus(); }
             // Same diagnostic boundary as __bwSimLab, for focused browser checks.
             window.__bwCad = {editor: mounted, sdk};
+            window.dispatchEvent(new CustomEvent(CAD_READY_EVENT));
         }).catch(fail);
         return () => {
             stopped = true;

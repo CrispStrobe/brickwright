@@ -19,7 +19,7 @@ await editor.whenIdle();window.ready=true;</script>`;
 const server=createServer(async(req,res)=>{
  try{
   const path=new URL(req.url,'http://localhost').pathname;
-  if(sdkOnly&&path==='/motor-fixture.bcad'&&process.env.BW_CAD_MOTOR_FIXTURE){res.setHeader('Content-Type','application/json');res.end(await readFile(process.env.BW_CAD_MOTOR_FIXTURE));return;}
+  if(path==='/motor-fixture.bcad'&&process.env.BW_CAD_MOTOR_FIXTURE){res.setHeader('Content-Type','application/json');res.end(await readFile(process.env.BW_CAD_MOTOR_FIXTURE));return;}
   if(sdkOnly&&path==='/'){res.setHeader('Content-Type','text/html');res.end(fixture);return;}
   const prefix='/static/cad-sdk/';
   const base=sdkOnly&&path.startsWith(prefix)?resolve(root,'overlay/scratch-gui/static/cad-sdk'):build;
@@ -149,6 +149,15 @@ try{
   await page.getByRole('button',{name:'Undo',exact:true}).first().click();
   await page.evaluate(()=>window.__bwCad.editor.whenIdle());
   assert.equal(await page.evaluate(()=>window.__bwCad.editor.session.state.document.roots.length),0);
+  if(process.argv.includes('--program')){
+   await page.evaluate(async()=>{await window.__bwCad.editor.openFile('motor.bcad',new Uint8Array(await(await fetch('/motor-fixture.bcad')).arrayBuffer()));await window.__bwCad.editor.whenIdle();});
+   const before=await page.evaluate(()=>window.__bwCad.sdk.serializeDocument(window.__bwCad.editor.session.state.document));
+   await page.getByRole('tab',{name:'Code',exact:true}).click();
+   const result=await page.evaluate(async()=>{const api=window.__bwCadProgramApi;await api.runMotorDegrees('A',720,360);const angle=api.motorAngle('A');await api.stop();return {angle,status:api.status()};});
+   assert.ok(Math.abs(result.angle-720)<2,JSON.stringify(result));assert.equal(result.status,'paused');
+   assert.equal(await page.evaluate(()=>window.__bwCad.sdk.serializeDocument(window.__bwCad.editor.session.state.document)),before);
+   trace('CAD motor program ran while Code tab was visible');
+  }
   }
  }
  assert.deepEqual(errors,[]);
