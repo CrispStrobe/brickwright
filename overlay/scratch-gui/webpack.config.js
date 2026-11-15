@@ -32,11 +32,12 @@ for (const [name, value] of Object.entries(distributionPolicy)) {
 
 const ScratchWebpackConfigBuilder = require('scratch-webpack-configuration');
 
-// Digest-bound proof sources and runtime glue retain their verified bytes.
+// Digest-bound proof sources, runtime glue and the pinned CAD SDK retain their verified bytes.
 // CopyWebpackPlugin forwards this flag; Terser skips only the marked assets.
 const preserveProofAssetInfo = ({filename}) =>
     (/^static\/native-broker\/proof-pins\/sources\/[0-9a-f]{64}\.js$/.test(filename.replace(/\\/g, '/')) ||
-        filename.replace(/\\/g, '/') === 'static/labwired/labwired_wasm.js')
+        filename.replace(/\\/g, '/') === 'static/labwired/labwired_wasm.js' ||
+        filename.replace(/\\/g, '/').startsWith('static/cad-sdk/'))
         ? {minimized: true} : {};
 
 /**
