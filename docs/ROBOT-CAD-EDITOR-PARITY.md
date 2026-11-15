@@ -34,7 +34,7 @@ and adds Settings → Workspace → CAD Editor. CAD state travels in the SDK's
 
 | Area | Current evidence | Recommended next change |
 | --- | --- | --- |
-| Camera controls | Robots has Brickwright/Studio mouse presets and wheel/trackpad modes; CAD has navigation profiles and Space-drag pan. | Define common gesture intents and shortcut labels, then adapt the existing camera controllers. Keep touch orbit and Simulate's camera behavior explicit. |
+| Camera controls (shared) | Both editors now use pinned `camera-pointer.js` intentions; Robots Build adds Space-drag pan with cancellation and EN/DE help. Existing preset mappings are preserved. | Continue sharing wheel/trackpad intentions where policies match; keep touch and Simulate behavior explicit. |
 | Transform feedback | Robots has grid snapping, typed position/rotation and status feedback; CAD has transient transform readouts and precision controls. | Add a live distance/angle readout to Robots using its LDU-to-mm conversion. Preview must not create undo entries. Share formatting/precision arithmetic where the units are explicit. |
 | Selection actions | Robots already has group/ungroup, connected selection, align, distribute, mirror, hide/isolate, paint, duplicate and fit-selection. CAD has its own solid operations and source editing. | Keep these domain commands; share gesture cancellation and selection-set operations when both need them. Do not transfer CAD scaling to Technic parts, whose connectors/colliders have fixed dimensions. |
 | Embedding CAD (implemented) | CAD exports `mountCadEditor` and host callbacks for files, selection and command state; its Brickwright adapter already stores `brickwright/cad.json` and converts CAD/LDraw coordinates. | The host now lazy-loads the pinned SDK and owns its session, disposal and SB3 sidecar. Continue with native iPad coverage and shared camera/readout contracts. |
@@ -84,3 +84,17 @@ speed, finite torque, joint angle, Run/Pause/Stop/Reset and an explicit fixed-ba
 option. Preview poses remain outside documents and undo. Existing geometry and
 collision qualification still applies. Mate authoring and virtual robot programs
 remain follow-up work.
+
+## Further camera parity
+
+Robots Build now supports Space-left-drag panning over empty space and parts.
+The gesture preserves the model, selection and history and ends on Escape,
+pointer cancellation, lost capture or focus loss. Space still places a palette
+part when a part is in hand. CAD and Robots share `camera-pointer.js` button/
+modifier intentions, with their established navigation presets preserved.
+
+Validation: the real Robots viewport selection/Space-pan check, 10 shared and
+Robot camera unit checks, CAD package/production builds, its two pointer/wheel
+unit checks and two real browser camera/history checks. The previously signed
+iPad package remains fixed at frontend `3a36d37`; this subsequent parity change
+is committed for the next package, independently of the pending WLAN install.

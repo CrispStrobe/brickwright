@@ -2,7 +2,7 @@
   "format": "brickwright-cad-sdk",
   "version": 1,
   "repository": "https://github.com/CrispStrobe/brickwright-cad",
-  "commit": "bb1bd5422d1839c2a23f75593eea81d20810c5de",
+  "commit": "f7611789d4d29f8d9bc12fece0d219d894f9807b",
   "dirty": false,
   "entry": "sdk.js",
   "wasm": "cad-assets/manifold.wasm",
@@ -13,6 +13,6 @@
     "assets/jolt-physics.wasm-compat-D4tONE_7.js": "4a98f747b32851996c3bb9984afdf26e433136cd4f96d114f8dc9dbad89f9f0f",
     "assets/simulation.worker-B7rXe3o8.js": "ec7ec6ff1935c8d9eb7d49df6f51b1e6791464f67cd681f46e37f3d7f11bf3a6",
     "cad-assets/manifold.wasm": "73e3b419ad31294f6b1cc478173944e50efc4a34bfdeeff0107bdfc12975f11c",
-    "sdk.js": "6b483cb23403f8c932e24f71e8dfdd33da974e30c5e437ee60f7aba25010ceff"
+    "sdk.js": "39f7f8b6c0de0217db474448d8119879ffc5a66994d905b578ac313962b5afb8"
   }
 }

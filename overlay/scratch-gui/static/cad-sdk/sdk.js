@@ -1634,7 +1634,7 @@ Erstelle zuerst den Workspace. Oberfläche und MCP verwenden denselben begrenzte
 };
 let m0 = "en";
 const f0 = () => m0;
-function jb(n) {
+function Wb(n) {
   return m0 = n.toLowerCase().split(/[-_]/)[0] === "de" ? "de" : "en", m0;
 }
 function g(n, ...e) {
@@ -38238,6 +38238,15 @@ class tb extends j_ {
     super.pointerUp(t), this.pointerPrecision = void 0, this.usedFine = !1, this.snaps(this.isFine());
   }
 }
+const nb = (n, e, t = !1) => {
+  const i = e === "brickwright" || e === "studio";
+  if (n.button === 0)
+    return t ? "pan" : !i && (n.altKey || n.ctrlKey) ? "orbit" : void 0;
+  if (n.button === 1)
+    return i ? e === "studio" ? "pan" : "orbit" : e === "fusion" && n.shiftKey ? "orbit" : "pan";
+  if (n.button === 2)
+    return i ? e === "studio" ? "orbit" : "pan" : n.shiftKey ? "pan" : "orbit";
+};
 function T7(n, e, t) {
   const i = n.deltaMode === 1 ? 16 : n.deltaMode === 2 ? t : 1, r = Math.max(-1e3, Math.min(1e3, n.deltaX * i)), s = Math.max(-1e3, Math.min(1e3, n.deltaY * i));
   if (!Number.isFinite(r) || !Number.isFinite(s))
@@ -38245,15 +38254,10 @@ function T7(n, e, t) {
   const a = n.precise ?? (n.deltaMode === 0 && (r !== 0 || Math.abs(s) < 50 || !Number.isInteger(s)));
   return { kind: n.ctrlKey ? "zoom" : n.altKey ? "orbit" : e === "fusion" && a ? n.shiftKey ? "orbit" : "pan" : n.shiftKey ? "pan" : "zoom", dx: r, dy: s, factor: Math.exp(-s * (n.ctrlKey ? 0.01 : 2e-3)) };
 }
-function nb(n, e, t, i, r, s) {
-  if (n === 0)
-    return r ? "pan" : t || i ? "orbit" : void 0;
-  if (n === 1)
-    return s === "fusion" && e ? "orbit" : "pan";
-  if (n === 2)
-    return e ? "pan" : "orbit";
+function ib(n, e, t, i, r, s) {
+  return nb({ button: n, shiftKey: e, altKey: t, ctrlKey: i }, s, r);
 }
-const c0 = 10, ib = 500, rb = ({ slop: n = c0, longPressMs: e = ib } = {}) => {
+const c0 = 10, rb = 500, sb = ({ slop: n = c0, longPressMs: e = rb } = {}) => {
   const t = /* @__PURE__ */ new Map();
   let i = null, r = "idle", s = null;
   const a = () => {
@@ -38322,7 +38326,7 @@ const c0 = 10, ib = 500, rb = ({ slop: n = c0, longPressMs: e = ib } = {}) => {
       t.clear(), i = null, r = "idle", s = null;
     }
   };
-}, sb = {
+}, ab = {
   Simulate: "M7 3 21 12 7 21Z",
   Solid: "M12 2 22 7v10l-10 5-10-5V7Z M2 7l10 5 10-5 M12 12v10",
   Hole: "M12 2 22 7v10l-10 5-10-5V7Z M2 7l10 5 10-5 M12 12v10 M6 9v9 M9 11v9 M15 11v9 M18 9v9",
@@ -38372,7 +38376,7 @@ const c0 = 10, ib = 500, rb = ({ slop: n = c0, longPressMs: e = ib } = {}) => {
   "Multi-select": "M3 3h7v7H3Z M14 3h7v7h-7Z M3 14h7v7H3Z M14 18l3 3 5-7"
 };
 function wn(n) {
-  const e = sb[n];
+  const e = ab[n];
   if (!e)
     return null;
   const t = "http://www.w3.org/2000/svg", i = document.createElementNS(t, "svg");
@@ -38406,7 +38410,7 @@ function ul(n, e, t, i) {
   const d = new et().makeRotationFromQuaternion(n.rotation), p = new et().makeTranslation(...h.toArray()).multiply(d).multiply(new et().makeScale(...l)).multiply(d.clone().invert()).multiply(new et().makeTranslation(...h.clone().negate().toArray())), _ = new K(...n.center).applyMatrix4(p).toArray();
   return { delta: p, factors: l, frame: { ...n, center: _, size: n.size.map((f, m) => f * l[m]) } };
 }
-function ab(n, e, t, i) {
+function ob(n, e, t, i) {
   if (!Number.isFinite(t) || t <= 0)
     throw new Error(g("Enter a positive dimension"));
   const r = [0, 0, 0];
@@ -38414,10 +38418,10 @@ function ab(n, e, t, i) {
   const s = [0, 0, 0];
   return s[e] = (t - n.size[e]) / (i.center ? 2 : 1), ul(n, r, s, { ...i, grid: 0, fine: !1 });
 }
-function ob(n, e) {
+function lb(n, e) {
   return n.map(({ id: t, transform: i }) => ({ id: t, transform: h0(i, e.delta, "scale", e.factors) }));
 }
-function lb(n, e) {
+function qb(n, e) {
   const t = document.createElement("section");
   t.className = "resize-controls", t.setAttribute("aria-label", g("Resize selection")), n.append(t);
   const i = "http://www.w3.org/2000/svg", r = document.createElementNS(i, "svg");
@@ -38501,7 +38505,7 @@ function lb(n, e) {
     return E.type = "number", E.min = ".001", E.step = ".1", E.className = "resize-number", E.setAttribute("aria-label", g`Resize ${S} (mm)`), E.title = g`Size ${S} (mm)`, t.append(E), E.onchange = () => {
       if (!(!d || u)) {
         try {
-          const R = ab(d, w, Number(E.value), { uniform: a, center: o || c });
+          const R = ob(d, w, Number(E.value), { uniform: a, center: o || c });
           if (R.factors.every((D) => Math.abs(D - 1) < 1e-12)) {
             x();
             return;
@@ -38574,7 +38578,7 @@ const P7 = (n, e) => n.map((t) => {
   const i = Math.round(t / e) * e;
   return i === 0 ? 0 : i;
 }), H5 = Math.PI / 180, ir = { top: [0, -1e-5, 1], bottom: [0, -1e-5, -1], front: [0, -1, 0], back: [0, 1, 0], right: [1, 0, 0], left: [-1, 0, 0], iso: [1, -1.4, 1] };
-function qb(n, e, t, i) {
+function cb(n, e, t, i) {
   const r = { background: "#111e29", baseplate: "#233644", ...i }, s = (ae) => /^#[0-9a-f]{6}$/i.test(ae);
   if (!s(r.background) || !s(r.baseplate))
     throw new Error(g("Choose a six-digit colour"));
@@ -38886,7 +38890,7 @@ function qb(n, e, t, i) {
   });
   Xe.observe(n), l.addEventListener("change", Be), w.addEventListener("change", Be);
   let pe = null;
-  const e1 = rb();
+  const e1 = sb();
   let je = !1;
   function f1(ae) {
     const Ie = q.getBoundingClientRect();
@@ -38965,7 +38969,7 @@ function qb(n, e, t, i) {
   window.addEventListener("blur", xt);
   const gt = (ae) => {
     I = ae.shiftKey, q.dataset.fine = String(w.isFine()), q.focus({ preventScroll: !0 });
-    const Ie = ae.pointerType === "touch" ? void 0 : nb(ae.button, ae.shiftKey, ae.altKey, ae.ctrlKey, E, v);
+    const Ie = ae.pointerType === "touch" ? void 0 : ib(ae.button, ae.shiftKey, ae.altKey, ae.ctrlKey, E, v);
     if (Ie && !oe && !ee) {
       R = { id: ae.pointerId, x: ae.clientX, y: ae.clientY, kind: Ie, gizmoEnabled: w.enabled }, l.enabled = !1, w.enabled = !1, q.setPointerCapture(ae.pointerId), ae.preventDefault(), ae.stopImmediatePropagation();
       return;
@@ -39137,7 +39141,7 @@ function qb(n, e, t, i) {
     }
     o.position.copy(r1).addScaledVector(rt.normalize(), L1), l.target.copy(r1), l.update(), Be();
   }
-  return se = lb(n, {
+  return se = qb(n, {
     frame: () => N === "dimensions" && !C.active && !ee?.moved && !de && !R && (L === "select" || L === "scale") ? F : void 0,
     project: (ae) => {
       const Ie = ae.clone().project(o);
@@ -39160,7 +39164,7 @@ function qb(n, e, t, i) {
     preview: (ae) => {
       if (!oe)
         return;
-      const Ie = ob([...oe.transforms].map(([Ze, r1]) => ({ id: Ze, transform: r1 })), ae);
+      const Ie = lb([...oe.transforms].map(([Ze, r1]) => ({ id: Ze, transform: r1 })), ae);
       for (const Ze of Ie)
         y0(e.state.document, { ...e.state.document.nodes[Ze.id], transform: Ze.transform });
       W = ae.delta, G = ae.factors, a1();
@@ -39314,7 +39318,7 @@ function qb(n, e, t, i) {
     }
   };
 }
-const cb = `
+const ub = `
 .parameters-dialog{width:min(850px,calc(100% - 24px));max-height:calc(100% - 32px);overflow:auto;background:#17232e;color:#e7edf5;border:1px solid #67757b;border-radius:12px;padding:20px;box-shadow:0 20px 70px #0009}.parameters-dialog::backdrop{background:#0008}.parameters-dialog header,.parameters-dialog footer{display:flex;align-items:center;justify-content:space-between;gap:12px}.parameters-dialog h2{font-size:20px;letter-spacing:0;text-transform:none;color:#fac15a}.parameters-dialog h3{font-size:14px;margin:22px 0 8px}.parameters-dialog p{font-size:12px;color:#bdcdd8}.parameter-row,.binding-row{display:grid;grid-template-columns:minmax(90px,1fr) minmax(120px,2fr) 85px 90px auto;gap:7px;align-items:center;margin:8px 0}.binding-row{grid-template-columns:minmax(110px,1.2fr) minmax(100px,1fr) minmax(130px,1.5fr) auto}.parameters-dialog input,.parameters-dialog select{width:100%;min-width:0;padding:8px;background:#101c26;color:inherit;border:1px solid #405565;border-radius:6px}.parameters-dialog button{font-size:12px}.parameter-row output{font-size:11px;overflow-wrap:anywhere;color:#fac15a}.parameter-status{min-height:36px;margin-top:20px}.driven-expression{display:block;color:#fac15a;font-size:11px;margin:3px 0 6px;overflow-wrap:anywhere}.parameters-dialog footer{justify-content:flex-end;border-top:1px solid #405565;padding-top:15px}@container(max-width:650px){.parameter-row{grid-template-columns:minmax(100px,1fr) minmax(100px,1.5fr) 70px}.parameter-row output{grid-column:1/3}.binding-row{grid-template-columns:1fr 1fr}.parameters-dialog{padding:12px}.binding-row input{grid-column:1/2}}
 :host{container-type:inline-size;display:block;min-height:320px;height:100%;color:#e7edf5;font:14px/1.4 ui-sans-serif,system-ui,-apple-system,sans-serif;color-scheme:dark;--panel:#17232e;--line:#304252;--accent:#fac15a}
 *{box-sizing:border-box}button,input,select{font:inherit}button{color:inherit;background:#233543;border:1px solid #405565;border-radius:7px;padding:8px 11px;cursor:pointer;min-height:40px}button:hover:not(:disabled){background:#344c60;border-color:#81949e}button:focus-visible,input:focus-visible,select:focus-visible,[role=button]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}button:disabled{opacity:.35;cursor:default}button.primary{background:#fac15a;color:#17202b;border-color:#fac15a;font-weight:700}button[aria-pressed=true]{border-color:var(--accent);color:var(--accent);background:#3a352b}input,select{color:inherit;background:#0e1922;border:1px solid #405565;border-radius:5px;padding:7px;min-width:0;width:100%}input[type=color]{padding:2px;height:34px}input[type=checkbox]{width:auto;min-width:18px;min-height:18px;accent-color:var(--accent)}[hidden]{display:none!important}h2{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#9bb0c0;margin:0 0 12px}p{margin:0 0 10px;color:#9bb0c0}.editor{height:100%;display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;background:#101a24;border:1px solid var(--line);overflow:hidden;border-radius:10px}
@@ -39455,8 +39459,8 @@ class ua extends Nt {
     );
   }
 }
-const d0 = 0, ub = 1, hb = new K(), D7 = new Em(), rr = new X2(), R7 = new K(), Y4 = new D2();
-class db {
+const d0 = 0, hb = 1, db = new K(), D7 = new Em(), rr = new X2(), R7 = new K(), Y4 = new D2();
+class mb {
   /**
    * Constructs a new convex hull.
    */
@@ -39473,7 +39477,7 @@ class db {
     if (e.length >= 4) {
       this.makeEmpty();
       for (let t = 0, i = e.length; t < i; t++)
-        this.vertices.push(new mb(e[t]));
+        this.vertices.push(new fb(e[t]));
       this._compute();
     }
     return this;
@@ -39537,7 +39541,7 @@ class db {
    * @return {boolean} Whether the given ray intersects with this convex hull or not.
    */
   intersectsRay(e) {
-    return this.intersectRay(e, hb) !== null;
+    return this.intersectRay(e, db) !== null;
   }
   /**
    * Makes the convex hull empty.
@@ -39783,7 +39787,7 @@ class db {
    * @return {ConvexHull} A reference to this convex hull.
    */
   _computeHorizon(e, t, i, r) {
-    this._deleteFaceVertices(i), i.mark = ub;
+    this._deleteFaceVertices(i), i.mark = hb;
     let s;
     t === null ? s = t = i.getEdge(0) : s = t.next;
     do {
@@ -39980,7 +39984,7 @@ class sr {
     return this.twin = e, e.twin = this, this;
   }
 }
-class mb {
+class fb {
   /**
    * Constructs a new vertex node.
    *
@@ -40107,7 +40111,7 @@ class Ss extends nt {
    */
   constructor(e = []) {
     super();
-    const t = [], i = [], s = new db().setFromPoints(e).faces;
+    const t = [], i = [], s = new mb().setFromPoints(e).faces;
     for (let a = 0; a < s.length; a++) {
       const o = s[a];
       let c = o.edge;
@@ -40119,7 +40123,7 @@ class Ss extends nt {
     this.setAttribute("position", new V1(t, 3)), this.setAttribute("normal", new V1(i, 3));
   }
 }
-function fb(n, e = !1) {
+function pb(n, e = !1) {
   const t = n[0].index !== null, i = new Set(Object.keys(n[0].attributes)), r = new Set(Object.keys(n[0].morphAttributes)), s = {}, a = {}, o = n[0].morphTargetsRelative, c = new nt();
   let q = 0;
   for (let l = 0; l < n.length; ++l) {
@@ -40236,13 +40240,13 @@ class ar {
    * @return {Array<Shape>} An array of shapes representing the text.
    */
   generateShapes(e, t = 100, i = "ltr") {
-    const r = [], s = pb(e, t, this.data, i);
+    const r = [], s = xb(e, t, this.data, i);
     for (let a = 0, o = s.length; a < o; a++)
       r.push(...s[a].toShapes());
     return r;
   }
 }
-function pb(n, e, t, i) {
+function xb(n, e, t, i) {
   const r = Array.from(n), s = e / t.resolution, a = (t.boundingBox.yMax - t.boundingBox.yMin + t.underlineThickness) * s, o = [];
   let c = 0, q = 0;
   (i == "rtl" || i == "tb") && r.reverse();
@@ -40252,13 +40256,13 @@ function pb(n, e, t, i) {
 `)
       c = 0, q -= a;
     else {
-      const u = xb(h, s, c, q, t);
+      const u = gb(h, s, c, q, t);
       i == "tb" ? (c = 0, q += t.ascender * s) : c += u.offsetX, o.push(u.path);
     }
   }
   return o;
 }
-function xb(n, e, t, i, r) {
+function gb(n, e, t, i, r) {
   const s = r.glyphs[n] || r.glyphs["?"];
   if (!s) {
     console.error('THREE.Font: character "' + n + '" does not exists in font family ' + r.familyName + ".");
@@ -40286,9 +40290,9 @@ function xb(n, e, t, i, r) {
   }
   return { offsetX: s.ha * e, path: a };
 }
-const gb = { sans: new ar(u6("sans")), serif: new ar(u6("serif")), mono: new ar(u6("mono")) };
-function _b(n, e, t, i) {
-  const r = gb[e];
+const _b = { sans: new ar(u6("sans")), serif: new ar(u6("serif")), mono: new ar(u6("mono")) };
+function bb(n, e, t, i) {
+  const r = _b[e];
   for (const c of [...n])
     if (!r.data.glyphs[c])
       throw new Error(g`The selected font has no glyph for “${c}”`);
@@ -40300,11 +40304,11 @@ function _b(n, e, t, i) {
   const o = a.boundingBox;
   return a.translate(-o.min.x, -o.min.y, 0), a.computeBoundingBox(), a;
 }
-function bb(n, e, t, i) {
+function yb(n, e, t, i) {
   const r = Math.min(t, n / 2, e / 2), s = new y2();
   return s.moveTo(r, 0), s.lineTo(n - r, 0), s.quadraticCurveTo(n, 0, n, r), s.lineTo(n, e - r), s.quadraticCurveTo(n, e, n - r, e), s.lineTo(r, e), s.quadraticCurveTo(0, e, 0, e - r), s.lineTo(0, r), s.quadraticCurveTo(0, 0, r, 0), new Qn(s, { depth: i, bevelEnabled: !1, curveSegments: 10 });
 }
-const yb = b2;
+const vb = b2;
 class U0 extends qa {
   /**
    * Constructs a new SVG loader.
@@ -40386,7 +40390,7 @@ class U0 extends qa {
           Ee ? i(Ee, B) : console.warn("SVGLoader: 'use node' references non-existent node id: " + oe);
           break;
       }
-      ee && (B.fill !== void 0 && B.fill !== "none" && ee.color.setStyle(B.fill, yb), S(ee, _e), I.push(ee), ee.userData = { node: C, style: B });
+      ee && (B.fill !== void 0 && B.fill !== "none" && ee.color.setStyle(B.fill, vb), S(ee, _e), I.push(ee), ee.userData = { node: C, style: B });
       const ue = C.childNodes;
       for (let Y = 0; Y < ue.length; Y++) {
         const oe = ue[Y];
@@ -41331,7 +41335,7 @@ class U0 extends qa {
     }
   }
 }
-function vb(n) {
+function wb(n) {
   if (new TextEncoder().encode(n).length > 65536 || /<!DOCTYPE|<!ENTITY/i.test(n))
     throw new Error("SVG exceeds 64 KiB or contains unsupported XML declarations");
   const e = new DOMParser().parseFromString(n, "image/svg+xml");
@@ -41501,16 +41505,16 @@ const jn = function(n, e) {
     let E = null;
     switch (v) {
       case "Numeric":
-        E = wb(w);
-        break;
-      case "Alphanumeric":
         E = Sb(w);
         break;
-      case "Byte":
+      case "Alphanumeric":
         E = Mb(w);
         break;
-      case "Kanji":
+      case "Byte":
         E = Eb(w);
+        break;
+      case "Kanji":
+        E = Ab(w);
         break;
       default:
         throw "mode:" + v;
@@ -41563,7 +41567,7 @@ const jn = function(n, e) {
   }, l.createDataURL = function(w, v) {
     w = w || 2, v = typeof v > "u" ? w * 4 : v;
     const E = l.getModuleCount() * w + v * 2, R = v, D = E - v;
-    return kb(E, E, function(I, U) {
+    return Pb(E, E, function(I, U) {
       if (R <= I && I < D && R <= U && U < D) {
         const z = Math.floor((I - R) / w), H = Math.floor((U - R) / w);
         return l.isDark(H, z) ? 0 : 1;
@@ -41657,7 +41661,7 @@ jn.stringToBytes = function(n) {
 };
 jn.createStringToBytes = function(n, e) {
   const t = (function() {
-    const r = Cb(n), s = function() {
+    const r = Tb(n), s = function() {
       const c = r.read();
       if (c == -1) throw "eof";
       return c;
@@ -42187,7 +42191,7 @@ const d2 = {
     const r = Math.floor(e / 8);
     n.length <= r && n.push(0), i && (n[r] |= 128 >>> e % 8), e += 1;
   }, t;
-}, wb = function(n) {
+}, Sb = function(n) {
   const e = d2.MODE_NUMBER, t = n, i = {};
   i.getMode = function() {
     return e;
@@ -42211,7 +42215,7 @@ const d2 = {
     throw "illegal char :" + a;
   };
   return i;
-}, Sb = function(n) {
+}, Mb = function(n) {
   const e = d2.MODE_ALPHA_NUM, t = n, i = {};
   i.getMode = function() {
     return e;
@@ -42256,7 +42260,7 @@ const d2 = {
     }
   };
   return i;
-}, Mb = function(n) {
+}, Eb = function(n) {
   const e = d2.MODE_8BIT_BYTE, t = jn.stringToBytes(n), i = {};
   return i.getMode = function() {
     return e;
@@ -42266,7 +42270,7 @@ const d2 = {
     for (let s = 0; s < t.length; s += 1)
       r.put(t[s], 8);
   }, i;
-}, Eb = function(n) {
+}, Ab = function(n) {
   const e = d2.MODE_KANJI, t = jn.stringToBytes;
   (function(s, a) {
     const o = t(s);
@@ -42316,7 +42320,7 @@ const d2 = {
       i > 0 && (t += ","), t += n[i];
     return t += "]", t;
   }, e;
-}, Ab = function() {
+}, Cb = function() {
   let n = 0, e = 0, t = 0, i = "";
   const r = {}, s = function(o) {
     i += String.fromCharCode(a(o & 63));
@@ -42347,7 +42351,7 @@ const d2 = {
   }, r.toString = function() {
     return i;
   }, r;
-}, Cb = function(n) {
+}, Tb = function(n) {
   const e = n;
   let t = 0, i = 0, r = 0;
   const s = {};
@@ -42382,7 +42386,7 @@ const d2 = {
     throw "c:" + o;
   };
   return s;
-}, Tb = function(n, e) {
+}, kb = function(n, e) {
   const t = n, i = e, r = new Array(n * e), s = {};
   s.setPixel = function(q, l, h) {
     r[l * t + q] = h;
@@ -42440,14 +42444,14 @@ const d2 = {
     }, h;
   };
   return s;
-}, kb = function(n, e, t) {
-  const i = Tb(n, e);
+}, Pb = function(n, e, t) {
+  const i = kb(n, e);
   for (let o = 0; o < e; o += 1)
     for (let c = 0; c < n; c += 1)
       i.setPixel(c, o, t(c, o));
   const r = hl();
   i.write(r);
-  const s = Ab(), a = r.toByteArray();
+  const s = Cb(), a = r.toByteArray();
   for (let o = 0; o < a.length; o += 1)
     s.writeByte(a[o]);
   return s.flush(), "data:image/gif;base64," + s;
@@ -42494,7 +42498,7 @@ const dl = [
   const e = new J0(n.map((t) => new We(t[0], t[1])), 64).rotateX(Math.PI / 2);
   return e.userData.collisionHint = { kind: "radial-profile", segments: 64, sides: n.length - 1, layout: "rows", closed: !0 }, e;
 }, N3 = (n, e, t) => ki([[e, 0], [n, 0], [n, t], [e, t], [e, 0]]);
-function Pb(n, e) {
+function Db(n, e) {
   const t = new y2();
   t.absarc(0, 0, n, 0, Math.PI * 2, !1);
   const i = new w5();
@@ -42506,7 +42510,7 @@ function U7() {
     return [i * Math.cos(t), i * Math.sin(t)];
   }));
 }
-function Db() {
+function Rb() {
   const t = 20 * Math.PI / 180, i = 1.5 * 20 / 2, r = i * Math.cos(t), s = i - 1.25 * 1.5, a = i + 1.5, o = (u) => {
     const d = Math.sqrt(Math.max(0, (u / r) ** 2 - 1));
     return d - Math.atan(d);
@@ -42585,14 +42589,14 @@ function J4(n = 5, e = 2, t = 10, i = 0, r = 1, s = 1, a = 0, o = e, c) {
   const p = new nt();
   return p.setAttribute("position", new V1(l, 3)), p.setIndex(h), p.userData.collisionHint = { kind: "tube-grid", segments: q, sides: 3, layout: "rows", closed: !1, seam: !1, stride: 1 }, p;
 }
-const Rb = { A: "01110/10001/10001/11111/10001/10001/10001", B: "11110/10001/10001/11110/10001/10001/11110", C: "01111/10000/10000/10000/10000/10000/01111", D: "11110/10001/10001/10001/10001/10001/11110", E: "11111/10000/10000/11110/10000/10000/11111", F: "11111/10000/10000/11110/10000/10000/10000", G: "01111/10000/10000/10111/10001/10001/01111", H: "10001/10001/10001/11111/10001/10001/10001", I: "11111/00100/00100/00100/00100/00100/11111", J: "00111/00010/00010/00010/10010/10010/01100", K: "10001/10010/10100/11000/10100/10010/10001", L: "10000/10000/10000/10000/10000/10000/11111", M: "10001/11011/10101/10101/10001/10001/10001", N: "10001/11001/10101/10011/10001/10001/10001", O: "01110/10001/10001/10001/10001/10001/01110", P: "11110/10001/10001/11110/10000/10000/10000", Q: "01110/10001/10001/10001/10101/10010/01101", R: "11110/10001/10001/11110/10100/10010/10001", S: "01111/10000/10000/01110/00001/00001/11110", T: "11111/00100/00100/00100/00100/00100/00100", U: "10001/10001/10001/10001/10001/10001/01110", V: "10001/10001/10001/10001/10001/01010/00100", W: "10001/10001/10001/10101/10101/11011/10001", X: "10001/10001/01010/00100/01010/10001/10001", Y: "10001/10001/01010/00100/00100/00100/00100", Z: "11111/00001/00010/00100/01000/10000/11111", 0: "01110/10001/10011/10101/11001/10001/01110", 1: "00100/01100/00100/00100/00100/00100/01110", 2: "01110/10001/00001/00110/01000/10000/11111", 3: "11110/00001/00001/01110/00001/00001/11110", 4: "00010/00110/01010/10010/11111/00010/00010", 5: "11111/10000/10000/11110/00001/00001/11110", 6: "01110/10000/10000/11110/10001/10001/01110", 7: "11111/00001/00010/00100/01000/01000/01000", 8: "01110/10001/10001/01110/10001/10001/01110", 9: "01110/10001/10001/01111/00001/00001/01110", "-": "00000/00000/00000/11111/00000/00000/00000", ".": "00000/00000/00000/00000/00000/00110/00110" };
-function Ib(n, e = 0) {
+const Ib = { A: "01110/10001/10001/11111/10001/10001/10001", B: "11110/10001/10001/11110/10001/10001/11110", C: "01111/10000/10000/10000/10000/10000/01111", D: "11110/10001/10001/10001/10001/10001/11110", E: "11111/10000/10000/11110/10000/10000/11111", F: "11111/10000/10000/11110/10000/10000/10000", G: "01111/10000/10000/10111/10001/10001/01111", H: "10001/10001/10001/11111/10001/10001/10001", I: "11111/00100/00100/00100/00100/00100/11111", J: "00111/00010/00010/00010/10010/10010/01100", K: "10001/10010/10100/11000/10100/10010/10001", L: "10000/10000/10000/10000/10000/10000/11111", M: "10001/11011/10101/10101/10001/10001/10001", N: "10001/11001/10101/10011/10001/10001/10001", O: "01110/10001/10001/10001/10001/10001/01110", P: "11110/10001/10001/11110/10000/10000/10000", Q: "01110/10001/10001/10001/10101/10010/01101", R: "11110/10001/10001/11110/10100/10010/10001", S: "01111/10000/10000/01110/00001/00001/11110", T: "11111/00100/00100/00100/00100/00100/00100", U: "10001/10001/10001/10001/10001/10001/01110", V: "10001/10001/10001/10001/10001/01010/00100", W: "10001/10001/10001/10101/10101/11011/10001", X: "10001/10001/01010/00100/01010/10001/10001", Y: "10001/10001/01010/00100/00100/00100/00100", Z: "11111/00001/00010/00100/01000/10000/11111", 0: "01110/10001/10011/10101/11001/10001/01110", 1: "00100/01100/00100/00100/00100/00100/01110", 2: "01110/10001/00001/00110/01000/10000/11111", 3: "11110/00001/00001/01110/00001/00001/11110", 4: "00010/00110/01010/10010/11111/00010/00010", 5: "11111/10000/10000/11110/00001/00001/11110", 6: "01110/10000/10000/11110/10001/10001/01110", 7: "11111/00001/00010/00100/01000/01000/01000", 8: "01110/10001/10001/01110/10001/10001/01110", 9: "01110/10001/10001/01111/00001/00001/01110", "-": "00000/00000/00000/11111/00000/00000/00000", ".": "00000/00000/00000/00000/00000/00110/00110" };
+function Lb(n, e = 0) {
   const t = n.trim().toUpperCase();
   if (!t || t.length > 24 || /[^A-Z0-9 .-]/.test(t))
     throw new Error(g("Lettering supports 1–24 characters: A–Z, 0–9, spaces, dots and hyphens."));
   const i = [];
   for (let r = 0; r < t.length; r++) {
-    const s = Rb[t[r]];
+    const s = Ib[t[r]];
     s && s.split("/").forEach((a, o) => {
       let c = -1;
       for (let q = 0; q <= 5; q++)
@@ -42670,7 +42674,7 @@ function ml(n, e = "ABC", t = !1, i, r) {
       return q.setAttribute("position", new V1(a, 3)), q.setIndex(o), { add: [q] };
     }
     case "bent-tube": {
-      const a = Pb(5, 3);
+      const a = Db(5, 3);
       class o extends en {
         constructor() {
           super();
@@ -42714,7 +42718,7 @@ function ml(n, e = "ABC", t = !1, i, r) {
     case "spring":
       return { add: [F7(new z7(10, 40, 6), t ? 96 : 288, 1.4, t ? 6 : 12)] };
     case "gear":
-      return { add: [Db()] };
+      return { add: [Rb()] };
     case "hirth": {
       const a = [N3(16, 4, 4)];
       for (let o = 0; o < 24; o++) {
@@ -42743,13 +42747,13 @@ function ml(n, e = "ABC", t = !1, i, r) {
       const a = r ?? v5(n), o = a.values, c = r?.text ?? e, q = a.font ?? "sans", l = o.textDepth + (n === "name-tag" ? 0.05 : 0);
       let h;
       if (q === "block") {
-        h = Ib(c);
+        h = Lb(c);
         const x = o.textHeight / 8.4;
         h.forEach((y) => {
           y.scale(x, x, l / 2);
         });
       } else
-        h = [_b(c, q, o.textHeight, l)];
+        h = [bb(c, q, o.textHeight, l)];
       const u = new e2();
       for (const x of h)
         x.computeBoundingBox(), u.union(x.boundingBox);
@@ -42757,10 +42761,10 @@ function ml(n, e = "ABC", t = !1, i, r) {
       if (h.forEach((x) => x.translate(-u.min.x, -u.min.y, -u.min.z)), n === "text")
         return { add: h };
       const p = o.holeRadius, _ = o.padding, f = p * 2 + _ * 2, m = d.x + f + _, b = Math.max(d.y + _ * 2, p * 2 + _ * 2);
-      return h.forEach((x) => x.translate(f, (b - d.y) / 2, o.baseThickness - 0.05)), { add: [bb(m, b, o.cornerRadius, o.baseThickness), ...h], cut: [kt(p, o.baseThickness * 4, [p + _, b / 2, o.baseThickness / 2])] };
+      return h.forEach((x) => x.translate(f, (b - d.y) / 2, o.baseThickness - 0.05)), { add: [yb(m, b, o.cornerRadius, o.baseThickness), ...h], cut: [kt(p, o.baseThickness * 4, [p + _, b / 2, o.baseThickness / 2])] };
     }
     case "icon-tag":
-      return { add: [kt(20, 3), ...i ? vb(i) : [cn(U7(), 2).translate(0, 0, 1.4)]], cut: [kt(2, 10, [0, 17, 0])] };
+      return { add: [kt(20, 3), ...i ? wb(i) : [cn(U7(), 2).translate(0, 0, 1.4)]], cut: [kt(2, 10, [0, 17, 0])] };
     case "qr": {
       const a = jn(0, "M"), o = jn.stringToBytes;
       try {
@@ -42807,7 +42811,7 @@ function B7(n, e) {
     return o.setAttribute("position", a.getAttribute("position").clone()), a !== s && a.dispose(), s.dispose(), o;
   });
   t.cut?.forEach((s) => s.dispose());
-  const r = fb(i);
+  const r = pb(i);
   return i.forEach((s) => s.dispose()), r;
 }
 function V7(n, e, t, i, r, s) {
@@ -42857,7 +42861,7 @@ function V7(n, e, t, i, r, s) {
   const d = { counterbore: 6, countersink: 6, "finishing-washer": 6 };
   return u.physics && d[n] && (u.physics.collisionHint = { kind: "radial-profile", segments: 64, sides: d[n] - 1, layout: "rows", closed: !0 }), c;
 }
-const Lb = [
+const Nb = [
   ["cube", "Cube", "Basic solids", "A cube with one linked edge length.", "cube equal edges square", "#f1b84b"],
   ["box", "Box", "Basic solids", "A rectangular solid with editable width, depth and height.", "cube block rectangular", "#e9a743"],
   ["rounded-box", "Rounded box", "Basic solids", "A box with rounded corners.", "filleted soft rectangle", "#ef8763"],
@@ -42885,11 +42889,11 @@ const Lb = [
   "Supports & connections": ["rib", "boss", "screw", "hex-head-screw", "socket-head-screw", "countersunk-screw", "pan-head-screw", "nut", "hinge", "dovetail", "snap-fit"],
   "Motion parts": ["gear", "spring"],
   "Labels & outlines": ["text", "name-tag", "star", "heart"]
-}, Nb = [
+}, Ob = [
   { id: "l-bracket", name: "L bracket", category: "", description: "A dimensioned angle bracket. Edit width, depth, height and wall thickness in Parameters.", keywords: "support angle wall mount parametric", color: "#e9a743" },
   { id: "mounting-plate", name: "Mounting plate", category: "", description: "A dimensioned plate with two bores. Edit the plate and hole dimensions in Parameters.", keywords: "mount base holes flange parametric", color: "#74b7cb" },
   { id: "spacer", name: "Spacer", category: "", description: "A dimensioned ring with an editable outer radius, bore radius and length.", keywords: "bushing sleeve standoff bearing parametric", color: "#abc1cd" }
-], Ob = [["hex-head-screw", "Hex-head screw"], ["socket-head-screw", "Socket-head screw"], ["countersunk-screw", "Countersunk screw"], ["pan-head-screw", "Pan-head screw"]], G7 = [...Nb, ...Ob.map(([n, e]) => ({ id: n, name: e, category: "", description: "A screw with editable head, drive and V-thread dimensions.", keywords: "screw bolt thread fastener hex socket countersunk pan", color: "#b0b7c2" })), ...Lb], Ms = Object.freeze([
+], Ub = [["hex-head-screw", "Hex-head screw"], ["socket-head-screw", "Socket-head screw"], ["countersunk-screw", "Countersunk screw"], ["pan-head-screw", "Pan-head screw"]], G7 = [...Ob, ...Ub.map(([n, e]) => ({ id: n, name: e, category: "", description: "A screw with editable head, drive and V-thread dimensions.", keywords: "screw bolt thread fastener hex socket countersunk pan", color: "#b0b7c2" })), ...Nb], Ms = Object.freeze([
   ...Object.entries(H7).flatMap(([n, e]) => e.map((t) => Object.freeze({ ...G7.find((i) => i.id === t), category: n, additional: !1 }))),
   ...G7.filter((n) => !Object.values(H7).flat().includes(n.id)).map((n) => Object.freeze({ ...n, category: "Additional shapes", additional: !0 }))
 ]);
@@ -42953,7 +42957,7 @@ function fl(n, e = !1) {
       return B7(n);
   }
 }
-function Ub(n) {
+function zb(n) {
   if (n === "cube")
     return { shape: { kind: "box", size: [30, 30, 30] }, height: 30 };
   if (n === "box")
@@ -42992,7 +42996,7 @@ function or(n, e = "BRICKWRIGHT", t = {}) {
     let l = t.recipe;
     return !l && ["text", "name-tag"].includes(n) && (l = v5(n), l = { ...l, text: e, font: t.font ?? "sans" }), V7(n, g(i.name), i.color, e, t.svg, l);
   }
-  const s = T5(), a = Ub(n).shape;
+  const s = T5(), a = zb(n).shape;
   if (n === "cube") {
     const l = ri(t.recipe ?? v5("cube"));
     if (l.preset !== "cube")
@@ -43006,7 +43010,7 @@ function or(n, e = "BRICKWRIGHT", t = {}) {
   const q = { "curved-cone": 18, hemisphere: 18, paraboloid: 26, tube: 5, vase: 14, washer: 5 };
   return q[n] && (c.physics.collisionHint = { kind: "radial-profile", segments: 64, sides: q[n] - 1, layout: "rows", closed: !0 }), s.dispose(), o;
 }
-function zb(n) {
+function Fb(n) {
   const e = j7.get(n.id);
   if (e)
     return e;
@@ -43049,7 +43053,7 @@ function pl(n) {
     q.beginPath(), h.points.forEach((u, d) => d ? q.lineTo(u[0], u[1]) : q.moveTo(u[0], u[1])), q.closePath(), q.fillStyle = q.strokeStyle = h.color, q.lineWidth = 0.55, q.fill(), q.stroke();
   return c.toDataURL("image/png");
 }
-function Fb(n, e, t, i, r, s = {}) {
+function Bb(n, e, t, i, r, s = {}) {
   const a = document.createElement("section");
   a.className = "shape-picker", a.hidden = !0, a.setAttribute("role", "dialog"), a.setAttribute("aria-label", g("Shape library")), a.tabIndex = -1;
   const o = document.createElement("header"), c = document.createElement("h2");
@@ -43138,7 +43142,7 @@ function Fb(n, e, t, i, r, s = {}) {
         N.type = "button", N.className = "shape-card", N.setAttribute("aria-label", g`Add ${g(k.name)}`), N.title = g(k.description);
         const se = document.createElement("img");
         se.alt = "", ee.set(N, () => {
-          se.src = zb(k), r && r(k).then((W) => {
+          se.src = Fb(k), r && r(k).then((W) => {
             a.contains(N) && (se.src = W);
           }).catch(() => {
           });
@@ -43245,7 +43249,7 @@ const C2 = (n, e) => {
   const t = document.createElement(n);
   return e !== void 0 && (t.textContent = e), t;
 };
-function Bb(n, e, t, i, r) {
+function Vb(n, e, t, i, r) {
   const s = C2("section");
   s.className = "model-source-pane", s.hidden = !0, s.setAttribute("aria-label", g("Model source"));
   const a = C2("header"), o = C2("strong", g("Model source")), c = C2("input"), q = C2("label", g("Follow selection")), l = C2("button", g("Close model source"));
@@ -43371,7 +43375,7 @@ const j1 = (n, e) => {
   const t = document.createElement(n);
   return e !== void 0 && (t.textContent = e), t;
 };
-function Vb(n, e, t, i, r, s) {
+function Hb(n, e, t, i, r, s) {
   const a = j1("dialog");
   a.className = "code-dialog", a.setAttribute("aria-label", g("Code object")), n.append(a);
   let o = !1;
@@ -43542,7 +43546,7 @@ const Qt = (n, e) => {
   const t = document.createElement(n);
   return e !== void 0 && (t.textContent = e), t;
 }, G5 = (n) => n.trim() !== "" && Number.isFinite(Number(n)) ? Number(n) : n.trim();
-function Hb(n, e, t, i) {
+function Gb(n, e, t, i) {
   const r = Qt("dialog");
   r.className = "sketch-dialog", r.setAttribute("aria-label", g("Sketch and extrusion")), n.append(r);
   let s = !1;
@@ -43656,7 +43660,7 @@ function $5(n, e) {
   const t = It("button", g(n));
   return t.type = "button", t.onclick = e, t;
 }
-function Gb(n, e) {
+function $b(n, e) {
   const t = It("dialog");
   t.className = "parameters-dialog", t.setAttribute("aria-label", g("Model parameters")), n.append(t);
   let i = 0;
@@ -43765,12 +43769,12 @@ function Ye(n, e = "", t) {
   const i = document.createElement(n);
   return i.className = e, t !== void 0 && (i.textContent = t), i;
 }
-function Wb(n, e) {
+function Xb(n, e) {
   const t = e.session ?? T5(e.document), i = !e.session, r = n.shadowRoot ?? n.attachShadow({ mode: "open" });
   if (r.childElementCount)
     throw new Error(g("Mount target is already in use"));
   const s = Ye("style");
-  s.textContent = cb;
+  s.textContent = ub;
   const a = Ye("section", "editor");
   a.setAttribute("aria-label", "CAD editor");
   const o = Ye("div", "toolbar");
@@ -43800,7 +43804,7 @@ function Wb(n, e) {
   }, Q = eh(new URL(e.wasmURL, document.baseURI).href, e.createWorker);
   let V;
   try {
-    V = qb(u, t, z, e.appearance), V.setNavigation(e.navigationPreset ?? "tinkercad"), V.setResizeControls(e.resizeControls ?? "dimensions");
+    V = cb(u, t, z, e.appearance), V.setNavigation(e.navigationPreset ?? "tinkercad"), V.setResizeControls(e.resizeControls ?? "dimensions");
   } catch (fe) {
     throw Q.dispose(), r.replaceChildren(), i && t.dispose(), fe;
   }
@@ -43851,11 +43855,11 @@ function Wb(n, e) {
   L.title = g("Show objects");
   const ee = C("Properties", () => B(d, ee), p, "panel-toggle properties-toggle"), ue = Qu(a, t, (fe) => Q.evaluate(fe), e.modelLibrary, async () => {
     await W1(), V.frame();
-  }), Y = Gb(a, t), oe = Hb(a, t, (fe) => Q.evaluate(fe), async () => {
+  }), Y = $b(a, t), oe = Gb(a, t, (fe) => Q.evaluate(fe), async () => {
     await W1(), V.frame();
   });
   C("Sketch", () => oe.open(), o, "compact-icon").title = g("Create a dimensioned sketch and extrusion");
-  const Ee = Bb(a, p, t, (fe) => Q.evaluate(fe), (fe, $e) => or(fe.preset, $e, { recipe: fe })), P = Vb(a, t, (fe) => Q.evaluate(fe), async () => {
+  const Ee = Vb(a, p, t, (fe) => Q.evaluate(fe), (fe, $e) => or(fe.preset, $e, { recipe: fe })), P = Hb(a, t, (fe) => Q.evaluate(fe), async () => {
     await W1(), V.frame();
   }, e.onExport, () => H(() => Ee.open()));
   C("Code", () => P.open(t.state.selection.length === 1 && t.state.document.nodes[t.state.selection[0]]?.kind === "code" ? t.state.selection[0] : void 0), o, "compact-icon").title = g("Code an object");
@@ -43922,7 +43926,7 @@ function Wb(n, e) {
   V.setPlacementHandlers((fe) => {
     ze(fe).catch(z);
   }, $);
-  const De = Fb(l, N, async (fe, $e, Le, Fe) => {
+  const De = Bb(l, N, async (fe, $e, Le, Fe) => {
     const t1 = t.state.document.id, Qe = !t.state.document.roots.length, { document: c1, geometry: I1 } = await W(fe, $e, Le, Fe);
     if (x)
       return;
@@ -44744,8 +44748,8 @@ function Wb(n, e) {
 export {
   T5 as createCadSession,
   Ii as createDocument,
-  Wb as mountCadEditor,
+  Xb as mountCadEditor,
   Q9 as parseDocument,
   Os as serializeDocument,
-  jb as setLocale
+  Wb as setLocale
 };
