@@ -30,7 +30,7 @@ test('the runtime exception leaves unrelated code and near-miss paths optimized'
 
 test('both tracked configurations wire the same exact-byte static-copy hook', () => {
     assert.equal(readFileSync(path.join(root, 'packages/scratch-gui/webpack.config.js'), 'utf8'), config);
-    assert.match(config, /from: 'static',\s+to: 'static',\s+info: preserveProofAssetInfo/);
+    assert.match(config, /from: 'static',\s+to: 'static',\s+(?:globOptions:[^\n]+\s+)?info: preserveProofAssetInfo/);
 });
 
 test('omitting the real runtime pathname removes its byte preservation', () => {
@@ -38,4 +38,9 @@ test('omitting the real runtime pathname removes its byte preservation', () => {
     assert.equal(expression.split(literal).length, 2, 'one exact runtime pathname guard');
     const omitted = vm.runInNewContext(`(${expression.replace(literal, "'static/labwired/omitted.js'")})`);
     assert.equal(omitted({filename: glue}).minimized, undefined);
+});
+
+test('the pinned CAD SDK preserves manifest hashes through asset optimization',()=>{
+ for(const filename of ['static/cad-sdk/sdk.js','static/cad-sdk/assets/simulation.worker.js'])assert.equal(info({filename}).minimized,true);
+ assert.equal(info({filename:'static/cad-sdk-other/sdk.js'}).minimized,undefined);
 });
