@@ -449,8 +449,11 @@ class Parser {
             if (arrowReturn && depth === 0 && t.type === 'punct' && t.value === '(') {
                 throw new Error('MakeCode TS: grouped arrow return annotations are not supported');
             }
-            // A return type ends at the function body: `): void {`.
-            if (depth === 0 && t.type === 'punct' && t.value === '{' && this.lastType) return isArray;
+            // A return type ends at the function body: `): void {`. After a
+            // type arrow, however, `{` starts its object result type, as in
+            // `handler: () => {}`; the enclosing parameter/body is still ahead.
+            if (depth === 0 && t.type === 'punct' && t.value === '{' && this.lastType &&
+                !this.lastType.endsWith('=>')) return isArray;
             // Once a type is complete, only a type suffix/operator can
             // continue it. A following declaration or expression belongs to
             // the program, even when an optional semicolon was omitted.
