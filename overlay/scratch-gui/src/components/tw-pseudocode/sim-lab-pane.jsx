@@ -171,7 +171,7 @@ const TEXT = {
         firmwareFault: 'The program on the SPIKE firmware stopped with an error ({error}). Press Run to start it again.',
         firmwareControlFailed: 'The SPIKE firmware did not take the command: {error}',
         st: {
-            idle: 'Click a part to select it. Drag it to move it; Shift+click adds parts; drag empty space to look around.',
+            idle: 'Click a part to select it. Drag it to move it; Shift+click adds parts; drag empty space to box-select, middle-drag to look around.',
             hover: '{part}: click to select, drag to move', hoverSelected: '{part}: drag to move, R turns, Delete removes',
             placing: 'Placing {part}: click to place, R turns, Alt: no magnet, Esc stops',
             idleTouch: 'Tap a part to select it and drag it to move it. A long press adds parts. Drag empty space to look around, pinch to zoom; long-press empty space, then drag, to select with a box.',
@@ -288,7 +288,7 @@ const TEXT = {
         firmwareFault: 'Das Programm auf der SPIKE-Firmware hat mit einem Fehler angehalten ({error}). Drücke Ausführen, um es neu zu starten.',
         firmwareControlFailed: 'Die SPIKE-Firmware hat den Befehl nicht angenommen: {error}',
         st: {
-            idle: 'Klicke ein Teil an, um es auszuwählen. Ziehen verschiebt es; Umschalt+Klick wählt mehr Teile; Ziehen auf leerer Fläche dreht die Ansicht.',
+            idle: 'Klicke ein Teil an, um es auszuwählen. Ziehen verschiebt es; Umschalt+Klick wählt mehr Teile; Ziehen auf leerer Fläche wählt mit Rahmen, Mitte ziehen dreht die Ansicht.',
             hover: '{part}: klicken wählt aus, ziehen verschiebt', hoverSelected: '{part}: ziehen verschiebt, R dreht, Entf löscht',
             placing: '{part} platzieren: klicken setzt, R dreht, Alt: ohne Magnet, Esc beendet',
             idleTouch: 'Tippe ein Teil an, um es auszuwählen, und zieh es, um es zu verschieben. Lange drücken wählt mehr Teile. Ziehen auf leerer Fläche dreht die Ansicht, zwei Finger zoomen; lange auf leere Fläche drücken und ziehen wählt mit einem Rahmen.',

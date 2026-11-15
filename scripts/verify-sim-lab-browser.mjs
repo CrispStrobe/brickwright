@@ -1367,7 +1367,7 @@ try {
         console.log('PASS the Robot Lab tab: every toolbar control is named and its tooltip gives its shortcut; every Build action works by click and by key');
         for (const mode of ['simulate', 'build']) {
             const m = moved[`${mode}Camera`];
-            console.log(`PASS camera (${mode}): Top/Front/Side/Home frame the model; a left drag on empty space orbits ${(m.orbitM * 100).toFixed(1)} cm ` +
+            console.log(`PASS camera (${mode}): Top/Front/Side/Home frame the model; the orbit gesture turns ${(m.orbitM * 100).toFixed(1)} cm ` +
                 `about a fixed target, a right drag pans ${(m.panM * 100).toFixed(1)} cm, the wheel zooms ×${m.zoom.toFixed(2)}, arrows orbit, Shift+arrows pan, - zooms out`);
         }
         console.log(`PASS Build: a drag on a part moves it ${moved.partDrag.movedLdu.toFixed(0)} LDU and leaves the camera; with a part selected the arrows leave the camera`);

@@ -144,10 +144,10 @@ export const cameraInteractions = async (page, {build}) => {
     const home = await cameraOf(page, build);
     const start = build ? await emptySpot(page) : [0.12, 0.2];
     const end = [Math.min(0.9, start[0] + 0.25), Math.min(0.9, start[1] + 0.12)];
-    // Orbit: a left drag on empty space turns the camera about its target.
-    await dragOn(page, canvasId, start, end);
+    // Build uses middle drag for orbit; empty-space left drag selects.
+    await dragOn(page, canvasId, start, end, {button: build ? 'middle' : 'left'});
     const orbited = await cameraOf(page, build);
-    assert.ok(dist(orbited.position, home.position) > 0.01, `${where}: a left drag on empty space orbits`);
+    assert.ok(dist(orbited.position, home.position) > 0.01, `${where}: the orbit gesture turns the view`);
     assert.ok(dist(orbited.target, home.target) < EPS, `${where}: orbiting keeps the target`);
     assert.ok(Math.abs(orbited.distance - home.distance) < 1e-4, `${where}: orbiting keeps the distance`);
     out.orbitM = dist(orbited.position, home.position);

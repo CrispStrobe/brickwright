@@ -10,7 +10,7 @@
 //
 //   click a part          select it (a grouped part selects its whole group)
 //   Shift+click           add / remove a part;   click on empty space: clear
-//   Shift+drag on empty   box-select
+//   drag empty space      box-select (Shift adds)
 //   drag a part           slide it on the surface under the pointer (floor or
 //                         the top of another part), grid-snapped; the pressed
 //                         point stays under the pointer
@@ -54,7 +54,7 @@
 //                         selection on the system clipboard as LDraw text, so it
 //                         pastes into another model, BrickLink Studio or LeoCAD, and
 //                         Ctrl+V takes LDraw text from there; ? opens the shortcut sheet
-//   camera                left-drag on empty space or middle-drag: orbit;
+//   camera                middle-drag: orbit;
 //                         right-drag: pan; wheel: zoom toward the pointer;
 //                         with nothing selected, arrows orbit, Shift+arrows
 //                         pan, + / - zoom (view/camera-nav.js, as Simulate)
@@ -77,10 +77,12 @@
 // contract's lduToWorld — a 180° turn about x, so a placed rotation R becomes
 // F·R·F with F = diag(1, -1, -1).
 
+import {selectionRectangle, projectedBoxIntersects} from '../../editor-interaction/box-selection.js';
+
 import {
     Box3, BoxGeometry, CanvasTexture, Color, DoubleSide, EdgesGeometry, GridHelper, Group, LineBasicMaterial, LineSegments,
     BufferGeometry, Float32BufferAttribute, Matrix4, Mesh, MeshBasicMaterial, MeshStandardMaterial, MOUSE, Object3D, PerspectiveCamera, Plane, Quaternion, Raycaster,
-    RingGeometry, Scene, Sphere, SphereGeometry, Vector2, Vector3, WebGLRenderer
+    RingGeometry, Scene, Sphere, SphereGeometry, Vector2, Vector3, Vector4, WebGLRenderer
 } from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {
@@ -781,7 +783,7 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
     canvas.addEventListener('wheel', event => onWheel(event), {passive: false});
     const controls = new OrbitControls(camera, canvas);
     // view/camera-nav.js, as in Simulate: the right drag pans (three's controls). Orbiting is this view's own
-    // (about the point under the pointer: left drag on empty space, middle drag, one finger, a trackpad's scroll).
+    // (about the point under the pointer: middle drag, one finger, a trackpad's scroll).
     configureOrbitControls(controls, MOUSE);
     controls.enableRotate = false;
     controls.enableZoom = false;
@@ -2300,11 +2302,13 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
             gesture = {...base, kind: 'connected', id: hit.object.name};
             return;
         }
-        if (event.shiftKey) {
-            // Shift: click toggles a part, drag on anything draws a selection box.
+        if (event.shiftKey || !hit) {
+            // Empty-space drag replaces selection; Shift adds and Shift+click toggles.
+            event.preventDefault();
+            event.stopImmediatePropagation();
             controls.enabled = false;
             transform.enabled = false; // even when the gizmo's picker reaches over the part
-            gesture = {...base, kind: 'box', hit: hit ? hit.object.name : null};
+            gesture = {...base, kind: 'box', hit: hit ? hit.object.name : null, additive: event.shiftKey, base: selection.slice()};
             canvas.setPointerCapture(event.pointerId);
             return;
         }
@@ -2367,6 +2371,7 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
     };
 
     const onMove = event => {
+        if (gesture && !gesture.touch && gesture.pointerId !== event.pointerId) return;
         if (event.pointerType === 'mouse') lastTouch = false;
         readModifiers(event);
         if (paletteDrag && paletteDrag.dragging) return; // onPaletteMove follows it
@@ -2542,21 +2547,24 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
     };
     const boxSelect = (g, event) => {
         const rect = canvas.getBoundingClientRect();
-        const [x0, x1] = [Math.min(g.x, event.clientX), Math.max(g.x, event.clientX)];
-        const [y0, y1] = [Math.min(g.y, event.clientY), Math.max(g.y, event.clientY)];
+        const rectangle = selectionRectangle(g.x - rect.left, g.y - rect.top, event.clientX - rect.left, event.clientY - rect.top);
+        camera.updateMatrixWorld();
+        modelGroup.updateMatrixWorld(true);
         const inside = [];
         for (const [id, mesh] of meshes) {
             if (!pickable(id)) continue;
-            const c = new Box3().setFromObject(mesh).getCenter(new Vector3()).project(camera);
-            const sx = rect.left + (c.x + 1) / 2 * rect.width;
-            const sy = rect.top + (1 - c.y) / 2 * rect.height;
-            if (c.z < 1 && sx >= x0 && sx <= x1 && sy >= y0 && sy <= y1) inside.push(id);
+            const box = new Box3().setFromObject(mesh), corners = [];
+            for (const x of [box.min.x, box.max.x]) for (const y of [box.min.y, box.max.y]) for (const z of [box.min.z, box.max.z]) {
+                corners.push(new Vector4(x, y, z, 1).applyMatrix4(camera.matrixWorldInverse).applyMatrix4(camera.projectionMatrix));
+            }
+            if (projectedBoxIntersects(corners, rectangle, rect)) inside.push(id);
         }
         return inside;
     };
 
     const onUp = event => {
         const g = gesture;
+        if (g && g.pointerId !== event.pointerId) return;
         gesture = null;
         controls.enabled = true;
         transform.enabled = !pickMode;
@@ -2564,6 +2572,10 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
         if (!g) return;
         try { canvas.releasePointerCapture(event.pointerId); } catch { /* not captured */ }
         if (g.orbit) endOrbit();
+        if (event.type === 'pointercancel') {
+            preview = null; clearGhost(); placeMeshes(); showConnectors([]); setCursor(''); emitHold();
+            return;
+        }
         const click = travelled(event, g) <= CLICK_PX;
         if ((g.kind === 'right' || (g.kind === 'orbit' && g.button === 2)) && click) {
             if (tool) { setTool(null); status({kind: 'idle'}); }
@@ -2596,11 +2608,11 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
             updateGizmo();
         } else if (g.kind === 'box') {
             if (click) {
-                if (!g.hit) return;
-                toggleSelected(g.hit);
+                if (g.hit) toggleSelected(g.hit);
+                else if (!g.additive) { setSelection([]); if (pinned) setPinned(null); }
             } else {
                 const inside = boxSelect(g, event);
-                setSelection([...new Set([...selection, ...inside])]);
+                setSelection(g.additive ? [...new Set([...g.base, ...inside])] : inside);
             }
             status({kind: 'selected', count: selection.length});
         } else if (g.kind === 'pick' && click) {
@@ -2789,6 +2801,11 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
 
     /** Esc (or its button): a drag in progress is called off, else the placing tool ends, else the selection is cleared. */
     const escape = () => {
+        if (gesture && gesture.kind === 'box') {
+            onUp({pointerId: gesture.pointerId, type: 'pointercancel'});
+            stopLongPress(); tracker.reset();
+            return;
+        }
         if (gesture && gesture.kind === 'part') {
             preview = null; gesture = null; clearGhost(); placeMeshes(); showConnectors([]); setCursor(''); emitHold();
             return;
@@ -2862,6 +2879,10 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
         if (plain[key]) { event.preventDefault(); plain[key](); }
     };
     const onKeyUp = event => readModifiers(event);
+    const cancelPointer = () => { if (gesture && !gesture.touch) onUp({pointerId: gesture.pointerId, type: 'pointercancel'}); };
+    const lostCapture = event => { if (gesture?.kind === 'box' && gesture.pointerId === event.pointerId) cancelPointer(); };
+    canvas.addEventListener('lostpointercapture', lostCapture);
+    window.addEventListener('blur', cancelPointer);
     const onLeave = () => {
         if (hovered && !gesture) { hovered = null; drawOutlines(); }
         if (idleLit && !gesture && !tool) { idleLit = null; showConnectors([]); }
@@ -3035,6 +3056,9 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
     };
     const dispose = () => {
         disposed = true;
+        cancelPointer();
+        window.removeEventListener('blur', cancelPointer);
+        canvas.removeEventListener('lostpointercapture', lostCapture);
         unsubscribe();
         dropFences();
         if (paletteDrag) detachPaletteDrag();

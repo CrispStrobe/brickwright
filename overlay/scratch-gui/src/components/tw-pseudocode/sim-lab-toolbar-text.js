@@ -38,7 +38,7 @@ export const TOOLBAR_TEXT = {
         helpIntro: 'A model from real LEGO® Technic parts with physics. Write a program for its hub (SPIKE Prime: ports A and B drive the wheels) and press Run: it starts on the green flag.',
         cameraTitle: 'Moving the view',
         camera: [
-            ['Drag empty space · middle drag', 'turn the view'],
+            ['Middle drag · drag empty space in Simulate', 'turn the view'],
             ['Right drag · Shift+drag (Simulate)', 'slide the view'],
             ['Wheel · pinch', 'zoom toward the pointer'],
             ['Arrows · Shift+arrows · + / -', 'turn · slide · zoom (click the view first; in Build with nothing selected)'],
@@ -47,7 +47,7 @@ export const TOOLBAR_TEXT = {
         buildTitle: 'Building',
         build: [
             ['Click · Shift+click', 'select a part · add one'],
-            ['Drag a part', 'move it (in Build, Shift+drag draws a selection box)']
+            ['Drag a part', 'move it (in Build, drag empty space to select; Shift adds parts)']
         ],
         allShortcuts: 'All shortcuts…',
         resizeParts: 'Resize the parts panel', resizeProperties: 'Resize the properties panel',
@@ -84,7 +84,7 @@ export const TOOLBAR_TEXT = {
         helpIntro: 'Ein Modell aus echten LEGO®-Technic-Teilen mit Physik. Schreibe ein Programm für seinen Hub (SPIKE Prime: Ports A und B treiben die Räder an) und drücke Start: es beginnt mit der grünen Flagge.',
         cameraTitle: 'Die Ansicht bewegen',
         camera: [
-            ['Leere Fläche ziehen · mittlere Taste ziehen', 'Ansicht drehen'],
+            ['Mitte ziehen · leere Fläche ziehen beim Simulieren', 'Ansicht drehen'],
             ['Rechts ziehen · Umschalt+Ziehen (Simulieren)', 'Ansicht schieben'],
             ['Mausrad · zwei Finger', 'zum Mauszeiger hin zoomen'],
             ['Pfeile · Umschalt+Pfeile · + / -', 'drehen · schieben · zoomen (erst in die Ansicht klicken; beim Bauen, wenn nichts ausgewählt ist)'],
@@ -93,7 +93,7 @@ export const TOOLBAR_TEXT = {
         buildTitle: 'Bauen',
         build: [
             ['Klick · Umschalt+Klick', 'ein Teil auswählen · eins dazu nehmen'],
-            ['Teil ziehen', 'verschieben (beim Bauen zieht Umschalt+Ziehen einen Auswahlrahmen)']
+            ['Teil ziehen', 'verschieben (leere Fläche ziehen wählt mit Rahmen; Umschalt nimmt Teile dazu)']
         ],
         allShortcuts: 'Alle Tastenkürzel…',
         resizeParts: 'Breite der Teileleiste ändern', resizeProperties: 'Breite der Eigenschaftenleiste ändern',
