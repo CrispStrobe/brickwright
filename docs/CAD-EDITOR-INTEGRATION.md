@@ -109,3 +109,9 @@ contrast); Chromium coverage of the same behavior plus both archive flows;
 seven Lite CAD host/VM/persistence unit tests; production webpack build; all ten
 emitted SDK asset hashes verified. These source changes require a new native app
 build before appearing in an installed app.
+
+The updated production host check (`verify-cad-editor.mjs --ipad`) also passes:
+lazy catalogue/preview loading, live dark/light switching with an unchanged
+session/history, shape creation, CAD/FPGA toggles, persistence and global Undo.
+The check waits for asynchronous shape insertion and respects Settings sections
+that remain expanded across menu openings.
