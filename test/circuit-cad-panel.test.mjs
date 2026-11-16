@@ -138,7 +138,7 @@ function observed (options = {}) {
     };
 }
 
-test('hidden and collapsed views do no catalogue work; visible summary has bounded updates', () => {
+test('hidden views do no work; collapsed views hydrate document identity without enumerating parts', () => {
     const h = observed();
     const hidden = h.observe({isVisible: false});
     h.event(CAD_READY_EVENT); h.progress('running', 13, 1000); h.pulse(); hidden();
@@ -152,7 +152,9 @@ test('hidden and collapsed views do no catalogue work; visible summary has bound
     assert.equal(h.outputs.statuses.length, 2);
     h.progress('error', 14, 2001);
     assert.equal(h.outputs.statuses.at(-1).phase, 'error', 'phase transitions bypass progress throttling');
-    assert.equal(h.reads, 0); assert.equal(h.scheduled.size, 0); collapsed();
+    assert.equal(h.reads, 1); assert.equal(h.scheduled.size, 0);
+    assert.equal(h.outputs.catalogs.at(-1).documentId, 'rover');
+    assert.equal(h.m.counts.motors, 0); collapsed();
 });
 
 test('expanded view reacts to model and board changes, never rebuilds for progress, and cleans up', () => {

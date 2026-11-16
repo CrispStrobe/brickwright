@@ -64,3 +64,16 @@ test('a preserved future Brickwright bundle carries its own CAD sidecar rather t
  assert.equal(await after.file(CAD_PROJECT_PATH).async('text'),futureCad);
  assert.equal(JSON.parse(await after.file('brickwright/state.json').async('text')).version,999);
 });
+
+test('quota-limited CAD recovery keeps exact sidecar live, saves it again and can roll back',async()=>{
+ const large=JSON.stringify({...doc,title:'Recovered large design',extra:'x'.repeat(20000)});
+ const quota=Object.create(storage);quota.setItem=(key,value)=>{if(value.length>10000)throw new DOMException('Storage quota exceeded','QuotaExceededError');storage.setItem(key,value);};
+ storage.setItem(CAD_STORAGE_KEY,text);setLiveCadText('previous live');
+ const applied=applyBrickwrightInspection(await inspectBrickwrightState(await project(large)),quota);
+ assert.equal(applied.outcome,'legacy');assert.equal(applied.storageMode,'session-cad');
+ assert.equal(readCadText(),large);assert.equal(storage.getItem(CAD_STORAGE_KEY),null);
+ const saved=await attachBrickwrightState(new Blob([await project()]));
+ assert.equal(await(await JSZip.loadAsync(await saved.arrayBuffer())).file(CAD_PROJECT_PATH).async('text'),large);
+ assert.equal(rollbackBrickwrightInspection(applied,quota).rolledBack,true);
+ assert.equal(readCadText(),'previous live');assert.equal(storage.getItem(CAD_STORAGE_KEY),text);
+});

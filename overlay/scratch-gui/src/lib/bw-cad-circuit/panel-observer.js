@@ -14,6 +14,7 @@ export function observeCircuitCadPanel ({
 }) {
     if (!isVisible) return () => {};
     const readCatalog = createCircuitCadCatalogReader();
+    let collapsedDocumentId;
     let lastStatusAt = -Infinity, lastPhase, publishedCatalog, observedSession, unsubscribe, stopped = false;
     const publishStatus = (next, force = false) => {
         if (!next || stopped) return;
@@ -24,8 +25,16 @@ export function observeCircuitCadPanel ({
         onStatus(next);
     };
     const updateCatalog = () => {
-        if (!expanded || stopped) return;
+        if (stopped) return;
         const editor = readEditor();
+        if (!expanded) {
+            const documentId = editor?.session?.state.document.id || '';
+            if (documentId !== collapsedDocumentId) {
+                collapsedDocumentId = documentId;
+                onCatalog({documentId, bodies: [], joints: [], motors: [], servos: [], sensors: []});
+            }
+            return;
+        }
         if (observedSession !== editor?.session) {
             unsubscribe?.();
             observedSession = editor?.session;

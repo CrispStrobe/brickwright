@@ -42,6 +42,7 @@ export default function CadCircuitPanel({vm,locale,colorMode,isVisible,toolbarHo
     const change=(index,key,value)=>write({...current,drives:current.drives.map((d,i)=>i===index?{...d,[key]:value}:d)});
     const execute=async()=>{
         if(!canRun){setExpanded(true);return;}
+        if(runner==='blocks'&&!vm.runtime.targets.some(target=>Object.values(target.blocks?._blocks||{}).some(block=>block.opcode==='event_whenflagclicked'))){setError(text('No start program. Add a “when green flag clicked” script in Blocks or Code, or open the Scout example.','Kein Startprogramm. Ergänze in Blöcke oder Code ein Skript „Wenn die grüne Flagge angeklickt wird“, oder öffne das Scout-Beispiel.'));setExpanded(true);return;}
         try{setError('');setExpanded(false);if(!current.enabled&&directProgram){vm.greenFlag();setDirectRunning(true);}else await vm.runtime.cadCircuitSimulation.start(runner);}catch(e){setError(e.message);setExpanded(true);}
     };
     const stop=()=>vm.runtime.cadCircuitSimulation.stop();
@@ -66,7 +67,7 @@ export default function CadCircuitPanel({vm,locale,colorMode,isVisible,toolbarHo
             <button aria-label={text('Stop program','Programm stoppen')} title={text('Stop program','Programm stoppen')} disabled={!active} onClick={stop}>■</button>
             <button aria-label={text('Reset simulation','Simulation zurücksetzen')} title={text('Reset simulation','Simulation zurücksetzen')} onClick={reset}>↺</button>
             <button ref={trigger} data-testid="bw-cad-program-settings" aria-label={text('Program & connections','Programm und Verbindungen')} aria-expanded={expanded} onClick={()=>setExpanded(v=>!v)}><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5 2 12l6 7M16 5l6 7-6 7M14 3l-4 18" fill="none" stroke="currentColor" strokeWidth="2" /></svg>{text('Program','Programm')}{hasActuators?<span className={styles.count}>{current.drives.length+current.servos.length}</span>:null}</button>
-            <output className={styles.status} aria-live="polite">{problem?text('Check setup','Einrichtung prüfen'):!coupledActive&&active?text('Running','Läuft'):phase}{active?` · ${(coupledActive?status.time:mechanical.time).toFixed(1)} s`:''}</output>
+            {problem?<button className={`${styles.status} ${styles.problem}`} title={problem} aria-label={`${text('Run problem','Startproblem')}: ${problem}`} onClick={()=>setExpanded(true)} style={{maxWidth:220,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',color:'var(--cad-program-error, #b42318)'}}>{problem}</button>:<output className={styles.status} aria-live="polite">{!coupledActive&&active?text('Running','Läuft'):phase}{active?` · ${(coupledActive?status.time:mechanical.time).toFixed(1)} s`:''}</output>}
         </div>,toolbarHost)}
         {expanded?<aside className={`${styles.root} ${styles.drawer}`} data-color-mode={colorMode} data-testid="bw-cad-circuit-panel" role="dialog" aria-label={text('Program & connections','Programm und Verbindungen')}>
             <header className={styles.header}><h2>{text('Program & connections','Programm und Verbindungen')}</h2><button ref={closeButton} aria-label={text('Close program settings','Programmeinstellungen schließen')} onClick={close}>×</button></header>

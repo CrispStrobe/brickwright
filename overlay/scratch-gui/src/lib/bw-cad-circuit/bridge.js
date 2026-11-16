@@ -74,7 +74,7 @@ export function installCircuitCadBridge(vm) {
         if (ownsCircuit) {ownsCircuit=false;
             if(ownedBoard){for(const pin of ownedBoard.getPinStates())if(!['input','input-pullup'].includes(pin.mode))ownedBoard.setPin(pin.pin,'input',false);ownedBoard.setPower(false);ownedBoard=null;}
             window.dispatchEvent(new CustomEvent('bw-circuit-clock-owner',{detail:{board:null}}));}
-        publish({phase:'idle'});
+        publish({phase:'idle',error:''});
     };
     const fail = error => {shutdown();vm.stopAll();publish({phase:'error',error:error.message || String(error)});};
     const api = {

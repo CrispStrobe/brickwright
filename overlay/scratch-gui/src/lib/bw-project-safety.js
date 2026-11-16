@@ -6,7 +6,8 @@
 //   - a visible note when an editor's error boundary stopped it.
 
 import {instrumentProjectHistory} from './bw-project-history.js';
-import {recoveryCandidate, restoreVersion, startAutosave} from './bw-autosave.js';
+import {recoveryCandidate, restoreVersion, readVersion, startAutosave} from './bw-autosave.js';
+import download from './download-blob.js';
 import {getUndoState, redoActiveSurface, undoActiveSurface} from './global-undo.js';
 
 const waitFor = (read, tries = 150) => new Promise((resolve, reject) => {
@@ -106,9 +107,9 @@ const installShortcuts = () => {
 // After a session that ended with unsaved changes: offer its last autosave.
 const RECOVERY_TEXT = {
     en: {title: 'Brickwright closed with unsaved changes', body: 'Reopen “{title}” as autosaved at {time}?',
-        open: 'Reopen', later: 'Not now', failed: 'Could not reopen it: {error}'},
+        opening: 'Reopening…', copy: 'Save autosave copy…', open: 'Reopen', later: 'Not now', failed: 'Could not reopen it: {error}'},
     de: {title: 'Brickwright wurde mit ungespeicherten Änderungen beendet', body: '„{title}“ wie um {time} automatisch gespeichert wieder öffnen?',
-        open: 'Wieder öffnen', later: 'Nicht jetzt', failed: 'Konnte nicht geöffnet werden: {error}'}
+        opening: 'Wird geöffnet…', copy: 'Autosave-Kopie speichern…', open: 'Wieder öffnen', later: 'Nicht jetzt', failed: 'Konnte nicht geöffnet werden: {error}'}
 };
 const offerRecovery = async store => {
     const candidate = await recoveryCandidate();
@@ -144,14 +145,20 @@ const offerRecovery = async store => {
     open.setAttribute('data-testid', 'bw-autosave-recovery-open');
     const later = button(T.later, false);
     open.onclick = () => {
-        open.disabled = true;
+        open.disabled = true;open.textContent = T.opening;
         restoreVersion(candidate.id).then(() => box.remove(), error => {
             body.textContent = fill(T.failed, {error: describe(error)});
-            open.disabled = false;
+            open.disabled = false;open.textContent = T.open;backup.hidden = false;
         });
     };
+    const backup = button(T.copy, false);backup.hidden = true;
+    backup.onclick = async () => {try {const saved = await readVersion(candidate.id);if (saved) await download(`${candidate.title || 'Recovered project'}.sb3`, saved.blob);} catch (error) {body.textContent = fill(T.failed, {error: describe(error)});}};
     later.onclick = () => box.remove();
-    box.append(title, body, open, later);
+    const close = button('×', false);
+    close.setAttribute('aria-label', String(locale).startsWith('de') ? 'Wiederherstellung schließen' : 'Dismiss recovery');
+    Object.assign(close.style, {float: 'right', marginRight: 0});
+    close.onclick = () => box.remove();
+    box.append(close, title, body, open, later, backup);
     document.body.appendChild(box);
 };
 

@@ -2,6 +2,7 @@ var L6 = Object.defineProperty;
 var H6 = (A, g, I) => g in A ? L6(A, g, { enumerable: !0, configurable: !0, writable: !0, value: I }) : A[g] = I;
 var $A = (A, g, I) => H6(A, typeof g != "symbol" ? g + "" : g, I);
 const _6 = {
+  "Drag the corner to resize; drag the upper handle to set height. Then choose Create extrusion.": "Ziehe die Ecke für die Größe und den oberen Griff für die Höhe. Wähle danach Extrusion erstellen.",
   "Invalid position servo target": "Ungültiger Positionsservo-Sollwert",
   "Invalid body sensor ray": "Ungültiger Sensorstrahl am Körper",
   "Front steering servo": "Vorderer Lenkservo",
