@@ -51,9 +51,9 @@ test('ordered genuine scalar import VM Code export and exact-file reimport reach
     const observed = expandConversionObservationGraph(compactConversionObservationGraph(result));
     assert.deepEqual(observed, conversionObservationGraph(result), 'whole return survives the actual lossless observer codec');
     // Mechanical completion is distinct from actual reported warnings. The
-    // public importer/Creator's known empty-body warning is not fabricated.
+    // public importer/Creator's warning for an untranslated body is not fabricated.
     let warnedCreator;
-    const warned = await auditConversionSubject(subject(input('if (0) {\n}\nlet x = 1\n')), {
+    const warned = await auditConversionSubject(subject(input('if (0) {\n    unknownCall()\n}\nlet x = 1\n')), {
         animationResources: true, onCreator: value => { warnedCreator = value; }
     });
     assert.ok(warned.creator.channels.warnings.value.some(value => value.includes('Empty body')));

@@ -1,3 +1,5 @@
+import {validateLocalNumericResultEffects} from './local-numeric-result-effects.js';
+
 // Optional ordinary-constraint entry proof for function-local push-only
 // Arrays. A family is the locals of one function rooted at a single empty
 // allocation and otherwise only aliased, pushed to, measured or index-read
@@ -12,7 +14,24 @@
 // - a constant index of such a loop's single unconditional push target, below
 //   the loop receiver's straight-line pushes before the loop.
 // The result maps each proven read to its family's pushed value nodes.
-export function proveLocalArrayFamilyReads(program,graph){
+export function proveLocalArrayFamilyReads(program,graph){return localArrayFamilyReads(program,graph,false);}
+
+// Normal-result domain only: this does not prove bounds or an Array receiver.
+// An absent slot stays Undefined; values must come from actual Number pushes.
+// Cheap syntax filter only. All authority still comes from the full proof.
+export function hasLocalNumericArrayResultCandidate(program){
+    let empty=false,index=false,reverse=false;
+    const visit=node=>{if(!node||typeof node!=='object')return;if(Array.isArray(node)){node.forEach(visit);return;}
+        if(node.type==='Array'&&node.items?.length===0)empty=true;
+        if(node.type==='Index')index=true;
+        if(node.type==='Call'&&node.callee?.type==='Member'&&node.callee.name==='reverse'&&node.args?.length===0)reverse=true;
+        for(const value of Object.values(node))if(value&&typeof value==='object')visit(value);};
+    visit(program);return empty&&index&&reverse;
+}
+
+export function proveLocalNumericArrayResults(program,graph){return localArrayFamilyReads(program,graph,true);}
+
+function localArrayFamilyReads(program,graph,primitiveResults){
     const parents=new WeakMap(),nodes=[],owners=new WeakMap();
     const FN=new Set(['FunctionDeclaration','FunctionExpression']);
     const visit=(node,parent,owner)=>{
@@ -23,7 +42,30 @@ export function proveLocalArrayFamilyReads(program,graph){
         for(const value of Object.values(node))if(value&&typeof value==='object')visit(value,node,inner);
     };
     visit(program,null,program);
+    if(primitiveResults){
+        const ambient=new Set(['this','arguments','globalThis','global','window','self','eval','Function','Reflect','Object','Proxy','Array']);
+        if(nodes.some(n=>['Unknown','Class','Object','Namespace','FunctionExpression'].includes(n.type)||n.opaque||
+            n.type==='Identifier'&&ambient.has(n.name)||n.type==='Member'&&['constructor','prototype','__proto__'].includes(n.name)||
+            n.type==='Call'&&(n.isNew||n.constructorCall||n.optional||n.typeArguments?.length||n.args?.some(a=>a?.type==='Spread'))))return null;
+        for(const n of nodes){
+            if(n.type==='Index'){const types=graph.typesAt(n.index);if(types.size!==1||!types.has('Number'))return null;}
+            if(n.type==='Call'&&n.callee?.type==='Identifier'&&!graph.immutableFunctionAt(n))return null;
+            if(n.type==='Call'&&n.callee?.type==='Member'){
+                const name=n.callee.name,root=n.callee.object;
+                const sdk=root?.type==='Identifier'&&graph.isSdkNamespace(root)&&
+                    (root.name==='game'&&['splash','askForNumber','askForString'].includes(name)||root.name==='Math'&&name==='idiv');
+                if(!sdk&&!['push','reverse','charAt'].includes(name))return null;
+            }
+            const target=n.type==='Assignment'?n.left:n.type==='Update'?n.argument:null;
+            if(target?.type==='Member'||target?.type==='Index')return null;
+            if(n.type==='Identifier'&&['game','Math'].includes(n.name)&&graph.isSdkNamespace(n)){
+                const m=parents.get(n),c=parents.get(m);if(m?.type!=='Member'||m.object!==n||c?.type!=='Call'||c.callee!==m)return null;
+            }
+        }
+    }
     const binding=(node,name=node?.name)=>graph.bindingOf(node,name);
+    const ready=node=>!node||typeof node!=='object'||(Array.isArray(node)?node.every(ready):
+        node.type==='Identifier'?(graph.isSdkNamespace(node)||graph.isInitializedAt(node)):Object.values(node).every(ready));
     const closed=node=>{
         if(node?.type==='Parenthesized')return closed(node.expression);
         if(node?.type==='Number'&&Number.isFinite(Number(node.value)))return Number(node.value);
@@ -67,8 +109,9 @@ export function proveLocalArrayFamilyReads(program,graph){
             for(const {node,decl} of declarations.get(key)||[]){
                 if(node.kind==='const'){valid=false;return;}
                 if(owner.value!==null&&owners.get(node)!==owner.value){valid=false;return;}owner.value=owners.get(node);
+                if(primitiveResults&&!FN.has(owner.value?.type)){valid=false;return;}
                 const init=unwrap(decl.init);
-                if(!init||init.type==='Null')continue;
+                if(!init||init.type==='Null'){if(primitiveResults)valid=false;continue;}
                 if(init.type==='Array'&&Array.isArray(init.items)&&!init.items.length){allocations.push(node);continue;}
                 valid=false;return;
             }
@@ -80,7 +123,7 @@ export function proveLocalArrayFamilyReads(program,graph){
                 if(parent?.type==='Assignment'&&parent.left===child){
                     if(parent.op!=='=' ){valid=false;return;}
                     const value=unwrap(parent.right);
-                    if(value?.type==='Null')continue;
+                    if(value?.type==='Null'){if(primitiveResults)valid=false;continue;}
                     if(value?.type==='Array'&&Array.isArray(value.items)&&!value.items.length){allocations.push(parent);continue;}
                     if(value?.type==='Identifier'&&binding(value)){add(binding(value));continue;}
                     valid=false;return;
@@ -91,7 +134,10 @@ export function proveLocalArrayFamilyReads(program,graph){
                     if(outer?.type==='Call'&&outer.callee===parent||outer?.type==='Assignment'&&outer.left===parent||outer?.type==='Update'||outer?.type==='Unary'&&outer.op==='delete'){valid=false;return;}continue;}
                 if(parent?.type==='Member'&&parent.object===child&&parent.name==='push'){
                     const call=parents.get(parent);if(call?.type!=='Call'||call.callee!==parent||call.args?.length!==1||call.isNew||call.optional||parent.optional){valid=false;return;}
+                    if(primitiveResults&&(!graph.isInitializedAt(use)||!call.args.every(ready))){valid=false;return;}
                     pushes.push(call);continue;}
+                if(primitiveResults&&parent?.type==='Member'&&parent.object===child&&parent.name==='reverse'){
+                    const call=parents.get(parent);if(call?.type!=='Call'||call.callee!==parent||call.args?.length||call.isNew||call.optional||parent.optional||!graph.isInitializedAt(use)){valid=false;return;}continue;}
                 if(parent?.type==='Index'&&parent.object===child){
                     const outer=parents.get(parent);if(outer?.type==='Assignment'&&outer.left===parent||outer?.type==='Update'||outer?.type==='Unary'&&outer.op==='delete'){valid=false;return;}continue;}
                 valid=false;return;
@@ -102,6 +148,14 @@ export function proveLocalArrayFamilyReads(program,graph){
         for(const key of members)families.set(key,family);
         return family;
     };
+    if(primitiveResults)for(const node of nodes){
+        if(node.type!=='Call'||node.callee?.type!=='Member')continue;
+        const receiver=unwrap(node.callee.object),name=node.callee.name;
+        if(['push','reverse'].includes(name)){
+            const family=receiver?.type==='Identifier'&&familyOf(binding(receiver));
+            if(!family||family.members.size!==1)return null;
+        }
+    }
     const straightPushesBefore=(family,list,before,after)=>family.pushes.filter(call=>{
         const statement=statementOf(call);const at=list.indexOf(statement);
         return at>=0&&at<list.indexOf(before)&&at>list.indexOf(after);
@@ -132,6 +186,11 @@ export function proveLocalArrayFamilyReads(program,graph){
         if(node.type!=='Index'||unwrap(node.object)?.type!=='Identifier')continue;
         const key=binding(unwrap(node.object)),family=key&&familyOf(key);if(!family||!family.pushes.length)continue;
         const values=family.pushes.map(call=>call.args[0]);
+        if(primitiveResults){
+            if(family.members.size!==1||!graph.isInitializedAt(node.object)||!ready(node.index))continue;
+            if(!values.every(value=>{const types=graph.typesAt(value);return types.size===1&&types.has('Number');}))continue;
+            entries.set(node,values);continue;
+        }
         const k=closed(node.index);
         if(k!==null){
             if(!Number.isInteger(k)||k<0)continue;
@@ -151,5 +210,6 @@ export function proveLocalArrayFamilyReads(program,graph){
         if(!facts||binding(index)!==facts.counter||!facts.receiver.members.has(key)||!loop.body.includes(statementOf(node)))continue;
         entries.set(node,values);
     }
+    if(primitiveResults&&entries.size&&!validateLocalNumericResultEffects(program,graph,entries))return null;
     return entries.size?entries:null;
 }

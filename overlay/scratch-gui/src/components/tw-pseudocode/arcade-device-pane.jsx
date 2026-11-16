@@ -3,6 +3,8 @@ import {makeT, browserLocale} from '../../lib/bw-i18n.js';
 import React from 'react';
 import {mirrorArcadeDeviceFrame, paintArcadeDeviceFrame} from '../../lib/bw-arcade-device-frame.js';
 import VM from 'scratch-vm';
+import {createArcadeStatsOutput} from '../../lib/bw-arcade-stats-output.js';
+const ArcadeStatsOutput=createArcadeStatsOutput(React,PropTypes);
 
 // Our component, so a local table rather than react-intl — see lib/bw-i18n.js.
 const A11Y_L10N = {
@@ -150,7 +152,11 @@ const ArcadeDevicePane = ({vm}) => {
     React.useEffect(() => {
         const changed = () => setRevision(value => value + 1);
         vm.runtime.on('ARCADE_DEVICE_CHANGED', changed);
-        return () => vm.runtime.removeListener('ARCADE_DEVICE_CHANGED', changed);
+        vm.runtime.on('ARCADE_DEVICE_STATS', changed);
+        return () => {
+            vm.runtime.removeListener('ARCADE_DEVICE_CHANGED', changed);
+            vm.runtime.removeListener('ARCADE_DEVICE_STATS', changed);
+        };
     }, [vm]);
 
     React.useEffect(() => {
@@ -216,6 +222,7 @@ const ArcadeDevicePane = ({vm}) => {
                     </div>
                     <div style={{maxWidth: 512, margin: '0 auto', background: '#020617', padding: 12, borderRadius: 10, border: '3px solid #111827', boxShadow: 'inset 0 0 18px #000'}}>
                         <canvas ref={canvasRef} width="160" height="128" style={{display: 'block', width: '100%', aspectRatio: '5 / 4', imageRendering: 'pixelated', background: '#020617'}} />
+                        <ArcadeStatsOutput runtime={vm.runtime} />
                     </div>
                     <div style={{height: 220, position: 'relative', marginTop: 20}}>
                         <div style={{position: 'absolute', left: 8, top: 13, width: 164, height: 164}}>

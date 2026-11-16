@@ -118,7 +118,7 @@ test('the corpus is what the importer was given by its tests', () => {
     }
 });
 
-test('the pinned parser retains the reviewed Arcade word table (435 opcodes)', () => {
+test('the pinned parser retains the reviewed Arcade word table (446 opcodes)', () => {
     // Binary/unary source reporters extended the earlier 402 words to 404.
     // Reviewed supplier #160 adds the two explicit Score registration words.
     // Retain every prior word assertion and check both exact canonical additions.
@@ -126,8 +126,12 @@ test('the pinned parser retains the reviewed Arcade word table (435 opcodes)', (
     // sb3-creator #173 adds the fifteen tilemap words (tile image, neighbour, sprite location, random tile, TileMapData values and events): 414 to 429.
     // sb3-creator #180 adds arcade_mathUnary (truncate | sign) and arcade_play (music.play): 429 to 431.
     // sb3-creator #182 adds the TileMapData scale setter and tileset, and the scene TileMap (Location.tileMap) words: 431 to 435.
-    assert.equal(ARCADE_DIALECT_OPS.length, 435);
+    // The reviewed overlap, controller, reset, prompt, drawing and diagnostics
+    // additions are canonical at the current supplier pin; retain exact counts.
+    assert.equal(ARCADE_DIALECT_OPS.length, 446);
     const qualifiedWords = [
+        {op: 'arcade_setGameStats', kind: 'command', words: 'arcade game stats {MODE:enabled|disabled}'},
+        {op: 'arcade_askForStringLength', kind: 'reporter', words: 'arcade ask text {QUESTION} length {LENGTH}'},
         {op: 'arcade_externalValue', kind: 'reporter', words: 'arcade external value {NAME}'},
         {op: 'arcade_externalImage', kind: 'reporter', words: 'arcade external image {NAME}'},
         {op: 'arcade_externalImageCall', kind: 'reporter', words: 'arcade external image call {NAME} arguments {ARGS}'},

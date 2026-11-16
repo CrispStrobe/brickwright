@@ -201,6 +201,47 @@ c=load('actual_controller','scripts/run-i80386-hdd-gui-actual.py')
 E=r.encode;H=r.sha;D=r.decode
 ROW=lambda raw:{'byteLength':len(raw),'sha256':H(raw)}
 FIXTURE_CHECKOUT='/checkout'
+def fixture_lstat(real_paths, real_lstat, mocked_lstat):
+    # A real selected tree needs real ancestor directory metadata too. Strict
+    # realpath checks every nonterminal component's kind.
+    selected_paths=tuple(pathlib.Path(path) for path in real_paths)
+    def selected(path,*args,**kwargs):
+        named=pathlib.Path(path)
+        if any(named==path or path in named.parents or named in path.parents for path in selected_paths):
+            return real_lstat(path,*args,**kwargs)
+        return mocked_lstat(path,*args,**kwargs)
+    return selected
+
+class FixturePaths(unittest.TestCase):
+    def test_real_ancestors_children_and_mocked_siblings(self):
+        real_lstat=os.lstat;mocked=[]
+        sentinel=SimpleNamespace(st_mode=stat.S_IFREG|0o444)
+        def fallback(path,*args,**kwargs):mocked.append(str(path));return sentinel
+        with tempfile.TemporaryDirectory(dir=root.parent) as temporary,tempfile.TemporaryDirectory(dir=root.parent) as other:
+            checkout=pathlib.Path(temporary);child=checkout/'file';child.write_bytes(b'held')
+            source=pathlib.Path(other)/'empty.py';source.write_bytes(b'')
+            link=checkout/'alias';link.symlink_to(child.name)
+            selected=fixture_lstat((checkout,source),real_lstat,fallback)
+            for directory in (checkout,*checkout.parents,source.parent,*source.parents):
+                self.assertTrue(stat.S_ISDIR(selected(directory).st_mode),str(directory))
+            self.assertEqual(selected(child,dir_fd=None),real_lstat(child))
+            self.assertEqual(selected(source).st_size,0,'separately selected source keeps its real metadata')
+            self.assertTrue(stat.S_ISLNK(selected(link).st_mode),'symlink metadata is not resolved away')
+            for outside in (checkout.with_name(checkout.name+'-sibling'),source.with_name('unselected.py'),pathlib.Path('/synthetic-tool')):
+                self.assertIs(selected(outside),sentinel)
+            self.assertEqual(len(mocked),3,'only unrelated siblings and synthetic tool paths use the mock')
+            child.unlink()
+            with self.assertRaises(FileNotFoundError):selected(child)
+        owner=Originals();typed=owner.selected_empty_source_fixture();observed={}
+        typed(c.EMPTY_PYTHON_PATH,owner.empty_selection()[c.EMPTY_PYTHON_PATH],observed)
+        self.assertEqual(observed['read'],{'byteLength':0,'sha256':H(b''),'eof':True})
+        self.assertTrue(observed['close']['attempted'] and observed['close']['succeeded'])
+        for path,selection in [('/different-source',owner.empty_selection()[c.EMPTY_PYTHON_PATH]),
+          (c.EMPTY_PYTHON_PATH,dict(owner.empty_selection()[c.EMPTY_PYTHON_PATH],byteLength=False))]:
+            target={}
+            with self.assertRaisesRegex(ValueError,'fixture selected empty Python source identity'):typed(path,selection,target)
+            self.assertEqual(target,{})
+
 PNG=b'\x89PNG\r\n\x1a\nmanufactured'
 def zip_(files,compression=zipfile.ZIP_DEFLATED):
     out=io.BytesIO()
@@ -1259,6 +1300,16 @@ class Originals(unittest.TestCase):
             if cut=='close-error' or close_error:raise OSError('CLOSE_FAILED')
         with patch.object(c.Path,'lstat',named),patch.object(c.Path,'resolve',return_value=pathlib.Path(c.EMPTY_PYTHON_PATH)),patch.object(c.os,'open',side_effect=open_),patch.object(c.os,'fstat',side_effect=held),patch.object(c.os,'read',side_effect=read_),patch.object(c.os,'close',side_effect=close_):
             yield events
+    def selected_empty_source_fixture(self):
+        # Exercise the real typed reader against its existing manufactured
+        # kernel edges, independently of the host's Python installation.
+        observed={};selection=self.empty_selection()[c.EMPTY_PYTHON_PATH]
+        with self.empty_source_edges():c.read_empty_python_source(c.EMPTY_PYTHON_PATH,selection,observed)
+        def selected(path,admitted,target):
+            if type(path) is not str or path!=c.EMPTY_PYTHON_PATH or E(admitted)!=E(selection):
+                raise ValueError('fixture selected empty Python source identity')
+            target.update(copy.deepcopy(observed))
+        return selected
     def typed_inventory_fixture(self,failed=False,cut=None,close_error=False):
         faults={('lstat','/missing-font'):FileNotFoundError('FIRST_FONT')} if failed else {}
         files=['/node','/usr/bin/python3.12','/chrome','/usr/bin/git','/usr/bin/gh']+(['/missing-font'] if failed else [])
@@ -4002,7 +4053,7 @@ class Originals(unittest.TestCase):
     @patch.object(c,'FINITE_INVENTORY_V7_ENABLED',True)
     def test_finite_v7_real_scanner_index_only_and_failed_partial(self):
         paths=['/node','/usr/bin/python3.12','/chrome','/usr/bin/git','/usr/bin/gh','/usr/bin/curl','/usr/lib/libselected.so']
-        real_lstat=os.lstat
+        real_lstat=os.lstat;typed_source=self.selected_empty_source_fixture()
         with tempfile.TemporaryDirectory(dir=root.parent) as temporary:
             checkout=pathlib.Path(temporary)
             for name in c.INSTALLED_V6_CRITICAL:
@@ -4029,10 +4080,8 @@ class Originals(unittest.TestCase):
                             name=str(pathlib.Path(path).relative_to(checkout))
                             return E(c.FINITE_V7_PINS) if name=='vendor-pins.json' else ('source:'+name).encode()
                         return fake_regular(path,cap)
-                    def selected_lstat(path,*args,**kwargs):
-                        if str(path).startswith(str(checkout)+'/'):return real_lstat(path,*args,**kwargs)
-                        return fake_lstat(path,*args,**kwargs)
-                    with patch.object(c,'regular',side_effect=selected_regular),patch.object(c.os,'lstat',side_effect=selected_lstat),patch.object(c,'FINITE_INVENTORY_V7_ENABLED',True),patch.object(c,'FINITE_V7_CUI_WITNESSES',tiny_witnesses),patch.object(r,'FINITE_V7_CUI_WITNESSES',tiny_witnesses):
+                    selected_lstat=fixture_lstat((checkout,),real_lstat,fake_lstat)
+                    with patch.object(c,'read_empty_python_source',side_effect=typed_source),patch.object(c,'regular',side_effect=selected_regular),patch.object(c.os,'lstat',side_effect=selected_lstat),patch.object(c,'FINITE_INVENTORY_V7_ENABLED',True),patch.object(c,'FINITE_V7_CUI_WITNESSES',tiny_witnesses),patch.object(r,'FINITE_V7_CUI_WITNESSES',tiny_witnesses):
                         value=c.inventory_observation(raw,pin,checkout,env,'/out/a.json')
                         selected={'schema':'bw.gui-hdd.inventory-admission.v7' if state=='present' else 'bw.gui-hdd.inventory-failure-expectation.v7',
                           'source':source,'template':ROW(raw),'runId':90,'workflowSha':'d'*40,
@@ -4041,6 +4090,7 @@ class Originals(unittest.TestCase):
                             'BW_FINITE_INVENTORY_V7_TEMPLATE_B64':base64.b64encode(raw).decode()}}
                         selected['original' if state=='present' else 'failure']=ROW(E(value))
                         if state=='present':
+                            self.assertEqual(value['schema'],'bw.gui-hdd.inventory-original.v7',value.get('firstFailure'))
                             self.assertEqual(value['installedFiles']['node_modules/bw-circuit-ui/src/index.js'],ROW(b'synthetic-408'))
                             self.assertEqual(r.verify_inventory_original(E(value),raw,selected)['schema'],'bw.gui-hdd.inventory-reader.v7')
                         else:
@@ -4147,7 +4197,7 @@ class Originals(unittest.TestCase):
         self.assertTrue(all(value[key] is False for key in ('fontSelectionProved','browserFontSelectionProved','guestApproved')))
     def test_finite_v6_real_installed_scanner_collector_and_reader_index_only(self):
         paths=['/node','/usr/bin/python3.12','/chrome','/usr/bin/git','/usr/bin/gh','/usr/bin/curl','/usr/lib/libselected.so']
-        real_lstat=os.lstat
+        real_lstat=os.lstat;typed_source=self.selected_empty_source_fixture()
         with tempfile.TemporaryDirectory(dir=root.parent) as temporary:
             checkout=pathlib.Path(temporary)
             for name in c.INSTALLED_V6_CRITICAL:
@@ -4168,10 +4218,8 @@ class Originals(unittest.TestCase):
                         if str(path)==str(checkout/'gui-finite-inventory-v6/guard-admission.json'):return guard_raw
                         if str(path).startswith(str(checkout)+'/'):return ('source:'+str(pathlib.Path(path).relative_to(checkout))).encode()
                         return fake_regular(path,cap)
-                    def selected_lstat(path,*args,**kwargs):
-                        if str(path).startswith(str(checkout)+'/'):return real_lstat(path,*args,**kwargs)
-                        return fake_lstat(path,*args,**kwargs)
-                    with patch.object(c,'regular',side_effect=selected_regular),patch.object(c.os,'lstat',side_effect=selected_lstat),patch.object(c,'FINITE_INVENTORY_V6_ENABLED',True):
+                    selected_lstat=fixture_lstat((checkout,),real_lstat,fake_lstat)
+                    with patch.object(c,'read_empty_python_source',side_effect=typed_source),patch.object(c,'regular',side_effect=selected_regular),patch.object(c.os,'lstat',side_effect=selected_lstat),patch.object(c,'FINITE_INVENTORY_V6_ENABLED',True):
                         value=c.inventory_observation(raw,pin,checkout,env,'/out/a.json')
                 variables={'BW_FINITE_INVENTORY_V6_SHA256':pin,
                   'BW_FINITE_INVENTORY_V6_TEMPLATE_B64':base64.b64encode(raw).decode()}
@@ -4180,6 +4228,7 @@ class Originals(unittest.TestCase):
                   'runId':90,'workflowSha':'d'*40,'repositoryVariables':variables}
                 selected['original' if state=='present' else 'failure']=ROW(E(value))
                 if state=='present':
+                    self.assertEqual(value['schema'],'bw.gui-hdd.inventory-original.v6',value.get('firstFailure'))
                     self.assertEqual(value['installedFiles']['node_modules/bw-circuit-ui/src/index.js'],ROW(b'critical'))
                     self.assertNotIn('node_modules/bw-circuit-ui/src/current.js',value['installedFiles'])
                     self.assertEqual(r.verify_inventory_original(E(value),raw,selected)['schema'],'bw.gui-hdd.inventory-reader.v6')
@@ -4231,7 +4280,7 @@ class Originals(unittest.TestCase):
                 return genuine(checkout/prefix,prefix,failure,checkout)
             with patch.object(c,'FINITE_INVENTORY_V5_ENABLED',True),self.inventory_edges(paths,finite=True,finite_version=5) as (raw,pin,env,events),patch.object(c,'read_empty_python_source',side_effect=typed),patch.object(c,'installed_inventory_v5',side_effect=installed):
                 faux_lstat=c.os.lstat
-                with patch.object(c.os,'lstat',side_effect=lambda path,*args,**kwargs:real_lstat(path,*args,**kwargs) if str(path).startswith(str(checkout)) else faux_lstat(path,*args,**kwargs)):
+                with patch.object(c.os,'lstat',side_effect=fixture_lstat((checkout,),real_lstat,faux_lstat)):
                     value=c.inventory_observation(raw,pin,pathlib.Path('/checkout'),env,'/out/a.json')
         self.assertEqual(value['schema'],'bw.gui-hdd.inventory-failure.v5')
         self.assertEqual(value['firstFailure']['phase'],'inventory-installed',value['firstFailure'])
@@ -6346,6 +6395,16 @@ test('parallel original control deadline and child failures cannot be ignored', 
     assert.equal(aggregate.aggregateOverflow,true,'two individually bounded children exceed the one retained 4 MiB budget');
     assert.ok(aggregate.capturedBytes<=4*1024*1024);
     assert.ok(aggregate.results.every(result=>result.overflow===false && result.stdout.length<4*1024*1024));
+});
+
+test('mixed inventory fixture lstat preserves real ancestors and refuses mock leakage', () => {
+    const start=controls.indexOf('suite=unittest.TestSuite(Originals(name)');
+    const end=controls.indexOf('\n',start);
+    assert.ok(start>=0&&end>start);
+    const selected=controls.slice(0,start)+"suite=unittest.TestSuite([FixturePaths('test_real_ancestors_children_and_mocked_siblings')])"+controls.slice(end);
+    const result=spawnSync('/usr/bin/python3',['-B','-',root],{input:selected,cwd:root,encoding:'utf8',timeout:60000,maxBuffer:4*1024*1024});
+    assert.equal(result.status,0,`\n${result.stdout}\n${result.stderr}`);
+    assert.deepEqual(readOriginalControlSummary(result.stdout),{controls:1,failures:0,errors:0});
 });
 
 test('standalone original reader: complete manufactured packet and coherent negative controls', async () => {

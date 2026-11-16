@@ -76,7 +76,7 @@ import {readFileSync, existsSync, lstatSync, mkdtempSync, writeFileSync, rmSync}
 import {tmpdir} from 'node:os';
 import path from 'node:path';
 import vm from 'node:vm';
-import {hddBeforeConcurrencyControl, hddHistoricalHashBody, studyBeforeConcurrencyPolicy} from './helpers/reviewed-concurrency-projections.mjs';
+import {hddBeforeFixtureControl, hddBeforeConcurrencyControl, hddHistoricalHashBody, studyBeforeConcurrencyPolicy} from './helpers/reviewed-concurrency-projections.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const PINS = path.join(ROOT, 'vendor-pins.json');
@@ -115,8 +115,10 @@ const HISTORICAL_X86_CURRENT_BOARD = '836867513c3e7fac420ddaa32c17e1c7b6d3e513';
 // a previous pin that only the exact named SB3/CURRENT_SB3/F7/F8 positions of
 // the reviewed bodies (historicalSb3Spans) and this declaration may carry.
 const HISTORICAL_X86_SB3 = '1cbaeed325f5a890e43b78a4211acae8f801f2d2';
-// The live F10 sb3-creator identity; it follows the current pin.
-const LIVE_X86_SB3 = '8e53c1621a1b9eeb42e0565f987c4c47ab598961';
+// The live supplier identity follows the current pin, separate from consumed F10.
+const LIVE_X86_SB3 = '7befb941e7e6ab71577bc28fbfe6dfe134a78c3a';
+// Consumed F10 controllers remain whole-file sealed at this shipped epoch.
+const HISTORICAL_X86_F10_SB3 = '8e53c1621a1b9eeb42e0565f987c4c47ab598961';
 const HISTORICAL_X86_FINITE_V7_PINS = "FINITE_V7_PINS = {'bw-board':'" + HISTORICAL_X86_CURRENT_BOARD + "','bw-circuit-ui':'" + HISTORICAL_X86_V8_CUI + "','sb3-creator':'" + HISTORICAL_X86_SB3 + "'}";
 const HISTORICAL_X86_FINITE_V8_PINS = "FINITE_V8_PINS = {'bw-board':'" + HISTORICAL_X86_CURRENT_BOARD + "','bw-circuit-ui':'" + HISTORICAL_X86_V8_CUI + "','sb3-creator':'" + HISTORICAL_X86_SB3 + "'}";
 const CURRENT_X86_FINITE_V9_PRODUCER = "FINITE_V9_PINS = {'bw-board':CURRENT_BOARD,'bw-circuit-ui':CUI,'sb3-creator':CURRENT_SB3}";
@@ -467,13 +469,12 @@ export const historicalV8CuiSpans = (file, text, known) =>
 // current inputs. Reuse their exact named-role readers in an explicit legacy
 // context ONLY to obtain positions. judgeFile still scans every other token
 // using the ORIGINAL live current/previous sets. No caller supplies profiles.
-const F10_CURRENT_MAP = "FINITE_V10_PINS = {'bw-board':'" + LIVE_X86_BOARD +
-    "','bw-circuit-ui':'" + LIVE_X86_CUI + "','sb3-creator':'" + LIVE_X86_SB3 + "'}";
-// The F10 sb3-creator identity follows the current pin. Once it moved past
-// HISTORICAL_X86_SB3, the consumed SB3/CURRENT_SB3/F7/F8 positions of the same
-// reviewed bodies keep that shipped previous pin, exactly like the CUI/Board
-// epochs above. A never-shipped value or any other occurrence stays red.
-const sb3Moved = known => known.current.has(LIVE_X86_SB3) && !known.current.has(HISTORICAL_X86_SB3) &&
+const F10_REVIEWED_MAP = "FINITE_V10_PINS = {'bw-board':'" + LIVE_X86_BOARD +
+    "','bw-circuit-ui':'" + LIVE_X86_CUI + "','sb3-creator':'" + HISTORICAL_X86_F10_SB3 + "'}";
+// The live pin may advance while the whole-file-sealed F10 controller remains
+// a consumed reference. Only its exact F10 map field gains a historical role;
+// the four earlier SB3 roles and all source-body guards remain unchanged.
+const sb3Moved = known => (known.current.has(LIVE_X86_SB3) || known.current.has(HISTORICAL_X86_F10_SB3)) && !known.current.has(HISTORICAL_X86_SB3) &&
     known.previous.get(HISTORICAL_X86_SB3)?.repo === 'sb3-creator';
 const historicalV10SpansForProfile = (file, text, known, profiles) => {
     if (!known.current.has(LIVE_X86_CUI) || !known.current.has(LIVE_X86_BOARD) ||
@@ -481,6 +482,8 @@ const historicalV10SpansForProfile = (file, text, known, profiles) => {
         known.previous.get(CURRENT_X86_CUI)?.repo !== 'bw-circuit-ui' ||
         known.previous.get(HISTORICAL_X86_CURRENT_BOARD)?.repo !== 'bw-board') return [];
     const moved = sb3Moved(known);
+    const f10Moved = known.current.has(LIVE_X86_SB3) &&
+        known.previous.get(HISTORICAL_X86_F10_SB3)?.repo === 'sb3-creator';
     const legacy = {...known, current: new Set([...known.current, CURRENT_X86_CUI, HISTORICAL_X86_CURRENT_BOARD,
         ...(moved ? [HISTORICAL_X86_SB3] : [])])};
     const policy = file === 'test/pin-move-chain.test.mjs';
@@ -497,7 +500,8 @@ const historicalV10SpansForProfile = (file, text, known, profiles) => {
     if (policy) {
         for (const [name, pin] of [['CURRENT_X86_CUI', CURRENT_X86_CUI],
             ['HISTORICAL_X86_CURRENT_BOARD', HISTORICAL_X86_CURRENT_BOARD],
-            ...(moved ? [['HISTORICAL_X86_SB3', HISTORICAL_X86_SB3]] : [])]) {
+            ...(moved ? [['HISTORICAL_X86_SB3', HISTORICAL_X86_SB3]] : []),
+            ...(f10Moved ? [['HISTORICAL_X86_F10_SB3', HISTORICAL_X86_F10_SB3]] : [])]) {
             const line = `const ${name} = '${pin}';`;
             const rows = [...text.matchAll(new RegExp('^const ' + name + ' = .*$', 'gm'))];
             if (rows.length !== 1 || rows[0][0] !== line) return [];
@@ -519,7 +523,7 @@ const historicalV10SpansForProfile = (file, text, known, profiles) => {
             ['FINITE_V7_PINS', HISTORICAL_X86_FINITE_V7_PINS],
             ['FINITE_V8_PINS', HISTORICAL_X86_FINITE_V8_PINS],
             ['FINITE_V9_PINS', producer ? CURRENT_X86_FINITE_V9_PRODUCER : CURRENT_X86_FINITE_V9_READER],
-            ['FINITE_V10_PINS', F10_CURRENT_MAP],
+            ['FINITE_V10_PINS', F10_REVIEWED_MAP],
         ];
         const positions = new Map();
         for (const [name, line] of declarations) {
@@ -535,6 +539,10 @@ const historicalV10SpansForProfile = (file, text, known, profiles) => {
             slots.push(positions.get(name) + line.indexOf(pin));
         }
         slots.push(positions.get(cuiName) + declarations.find(([key]) => key === cuiName)[1].indexOf(CURRENT_X86_CUI));
+        if (f10Moved) {
+            if (text.split(`'${HISTORICAL_X86_F10_SB3}'`).length - 1 !== 1) return [];
+            slots.push(positions.get('FINITE_V10_PINS') + F10_REVIEWED_MAP.indexOf(`'${HISTORICAL_X86_F10_SB3}'`) + 1);
+        }
         if (moved) {
             if (text.split(`'${HISTORICAL_X86_SB3}'`).length - 1 !== 4) return [];
             for (const name of ['SB3', 'CURRENT_SB3', 'FINITE_V7_PINS', 'FINITE_V8_PINS']) {
@@ -1093,7 +1101,7 @@ test('reviewed scheduler-test delta reconstructs the original historical test by
     const source = readFileSync(path.join(ROOT, file), 'utf8');
     const delta = JSON.parse(readFileSync(path.join(ROOT, 'test/fixtures/i80386-concurrency-test-review.json'), 'utf8'));
     assert.equal(delta.length, 4, 'one helper and three caller changes, no producer or reader change');
-    let restored = source;
+    let restored = hddBeforeFixtureControl(file, source);
     for (const {before, after} of delta) {
         assert.equal(restored.split(after).length, 2, 'each exact reviewed source replacement occurs once');
         restored = restored.replace(after, before);
@@ -1101,6 +1109,26 @@ test('reviewed scheduler-test delta reconstructs the original historical test by
     assert.equal(Buffer.byteLength(restored), PRE_CONCURRENCY_X86_TEST_PROFILE.bytes);
     assert.equal(createHash('sha256').update(restored).digest('hex'), PRE_CONCURRENCY_X86_TEST_PROFILE.sha256,
         'the original complete source profile remains binding after reversing the reviewed delta');
+});
+
+test('reviewed fixture inverse retains sealed extents and rejects missing duplicate or altered hunks', () => {
+    const file='test/i80386-hdd-gui-actual.test.mjs';
+    const source=readFileSync(path.join(ROOT,file),'utf8');
+    const review=JSON.parse(readFileSync(path.join(ROOT,'test/fixtures/i80386-fixture-path-review.json'),'utf8'));
+    const held=hddBeforeFixtureControl(file,source);
+    assert.equal(Buffer.byteLength(held),review.before.bytes);
+    assert.equal(createHash('sha256').update(held).digest('hex'),review.before.sha256);
+    assert.equal(Buffer.byteLength(source),review.after.bytes);
+    assert.equal(createHash('sha256').update(source).digest('hex'),review.after.sha256);
+    for(const {after} of review.changes){
+        for(const changed of [source.replace(after,''),source+after,source.replace(after,after.slice(0,-1)+'X')]){
+            assert.notEqual(changed,source);
+            assert.throws(()=>hddBeforeFixtureControl(file,changed),/exact reviewed fixture hunk/);
+        }
+    }
+    const drift=hddBeforeConcurrencyControl(file,source+'// unrelated drift\n');
+    assert.notEqual(createHash('sha256').update(drift).digest('hex'),PRE_CONCURRENCY_X86_TEST_PROFILE.sha256);
+    assert.equal(hddBeforeFixtureControl('test/unreviewed.mjs',source),source);
 });
 
 test('completed study scheduler projection rejects policy drift and retains unrelated bytes', () => {
@@ -1511,10 +1539,10 @@ test('captured Resonance source receipts preserve actual old pins but refuse inv
 
 test('F10 keeps every consumed supplier position historical and every new input current', () => {
     const f = historicalRoleFixtures();
-    const source = `BOARD = '${HISTORICAL_X86_BOARD}'\n` + f.producer + F10_CURRENT_MAP + '\n';
+    const source = `BOARD = '${HISTORICAL_X86_BOARD}'\n` + f.producer + F10_REVIEWED_MAP + '\n';
     const file = f.producerPath;
     const k = {current: new Set([LIVE_X86_CUI, LIVE_X86_BOARD, LIVE_X86_SB3]),
-        previous: new Map([[CURRENT_X86_CUI, {repo:'bw-circuit-ui'}],
+        previous: new Map([[HISTORICAL_X86_F10_SB3, {repo:'sb3-creator'}],[CURRENT_X86_CUI, {repo:'bw-circuit-ui'}],
             [HISTORICAL_X86_SB3, {repo:'sb3-creator'}],
             [HISTORICAL_X86_CURRENT_BOARD, {repo:'bw-board'}],
             [HISTORICAL_X86_BOARD, {repo:'bw-board'}],
@@ -1523,16 +1551,16 @@ test('F10 keeps every consumed supplier position historical and every new input 
     const profile = text => ({[file]:{bytes:Buffer.byteLength(text),sha256:createHash('sha256').update(text).digest('hex')}});
     const recognize = (path, text, known) => historicalV10SpansForProfile(path, text, known, profile(source));
     const judge = historicalJudgeWith(() => [], () => [], () => [], recognize);
-    assert.equal(recognize(file, source, k).length, 12, 'eight CUI/Board positions plus four consumed SB3 positions');
+    assert.equal(recognize(file, source, k).length, 13, 'eight CUI/Board, four consumed SB3 and one sealed F10 SB3 position');
     assert.equal(judge(file, source, k).length, 0);
     assert.equal(historicalV10Spans(file, source, k).length, 0, 'public API refuses a manufactured body');
-    assert.equal(historicalJudgeWith(() => [], () => [], () => [])(file, source, k).length, 12,
+    assert.equal(historicalJudgeWith(() => [], () => [], () => [])(file, source, k).length, 13,
         'omitting the new role restores every stale-supplier finding');
     assert.equal(historicalV10Spans(file, source, {...k, profiles:profile(source)}).length, 0,
         'caller-supplied profiles cannot replace the fixed public policy');
     for (const changed of [
-        source.replace(F10_CURRENT_MAP, F10_CURRENT_MAP.replace(LIVE_X86_CUI, CURRENT_X86_CUI)),
-        source.replace(F10_CURRENT_MAP, F10_CURRENT_MAP.replace(LIVE_X86_BOARD, HISTORICAL_X86_CURRENT_BOARD)),
+        source.replace(F10_REVIEWED_MAP, F10_REVIEWED_MAP.replace(LIVE_X86_CUI, CURRENT_X86_CUI)),
+        source.replace(F10_REVIEWED_MAP, F10_REVIEWED_MAP.replace(LIVE_X86_BOARD, HISTORICAL_X86_CURRENT_BOARD)),
         source.replace(CURRENT_X86_FINITE_V9_PRODUCER, CURRENT_X86_FINITE_V9_PRODUCER.replace('CURRENT_BOARD','BOARD')),
         source + `EXTRA = '${CURRENT_X86_CUI}'\n`,
         source + `CURRENT_BOARD = '${HISTORICAL_X86_CURRENT_BOARD}'\n`,
@@ -1555,6 +1583,28 @@ test('F10 keeps every consumed supplier position historical and every new input 
     }
 });
 
+
+test('live SB3 stays current while sealed F10 and earlier epochs keep only exact historical positions', () => {
+    assert.equal(currentPins()['sb3-creator'],LIVE_X86_SB3);
+    assert.ok(known.current.has(LIVE_X86_SB3));
+    assert.equal(known.previous.get(HISTORICAL_X86_F10_SB3)?.repo,'sb3-creator');
+    for(const file of ['scripts/run-i80386-hdd-gui-actual.py','scripts/read-i80386-hdd-gui-originals.py',
+        'test/i80386-hdd-gui-actual.test.mjs','test/pin-move-chain.test.mjs']){
+        const text=readFileSync(path.join(ROOT,file),'utf8');
+        assert.equal(roleOf(file),'code');
+        assert.deepEqual(judgeFile(file,text,known),[],file);
+        const slots=historicalV10Spans(file,text,known);
+        assert.equal(slots.filter(at=>text.slice(at,at+40)===HISTORICAL_X86_F10_SB3).length,file.endsWith('.py')||file==='test/pin-move-chain.test.mjs'?1:0);
+        assert.ok(judgeFile(file,text+`\nCURRENT = '${HISTORICAL_X86_F10_SB3}'\n`,known).length>0,
+            'an extra old F10 pin is not a whole-file historical exemption');
+        assert.ok(judgeFile(file,text+`\nCURRENT = '${HISTORICAL_X86_SB3}'\n`,known).length>0,
+            'an extra old F7/F8/F9 pin remains red');
+    }
+    for(const file of ['scripts/current.py','test/current.test.mjs','docs/generated/current.json']){
+        assert.equal(judgeFile(file,`CURRENT = '${LIVE_X86_SB3}'\n`,known).length,0);
+        assert.equal(judgeFile(file,`CURRENT = '${HISTORICAL_X86_F10_SB3}'\n`,known).length,1);
+    }
+});
 
 test('a real merge replacement remains previous-pin evidence instead of a never-pinned finding', () => {
     const directory=mkdtempSync(path.join(tmpdir(),'bw-pin-merge-history-'));

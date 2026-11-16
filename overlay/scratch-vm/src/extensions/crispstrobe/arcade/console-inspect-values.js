@@ -25,18 +25,19 @@ const sourceDescriptor=Object.getOwnPropertyDescriptor,sourceDefine=Object.defin
 const sourceAppend=(array,value)=>sourceDefine(array,sourceText(array.length),{__proto__:null,value,writable:true,enumerable:true,configurable:true});
 const sourceWeakGet=WeakMap.prototype.get,sourceWeakSet=WeakMap.prototype.set,sourceWeakHas=WeakMap.prototype.has;
 const sourceHeld=owner=>sourceApply(sourceWeakGet,sourceAdapters,[owner]);
-const sourceOpcodes = ['sourceValueBinary','sourceValueUnary'];
+const sourceOpcodes = ['sourceValueBinary','sourceValueUnary','highScore','askForStringLength'];
+const sourceNames=owner=>sourceOpcodes.filter(name=>name==='highScore'?typeof owner.isHighScoreCurrent==='function':name==='askForStringLength'?typeof owner.isPromptCurrent==='function':true);
 function bindSourceOperationAdapter(adapter,instance,owner) {
     if(!owner?.isInstance(instance)||typeof owner.isSourceCurrent!=='function'||!owner.isSourceCurrent())throw Error('Arcade source result owner differs');
     if(sourceApply(sourceWeakHas,sourceAdapters,[owner]))throw Error('Arcade source result adapter was already bound');
-    const delegates=[sourceDescriptor(adapter,sourceOpcodes[0])?.value,sourceDescriptor(adapter,sourceOpcodes[1])?.value];
-    if(typeof delegates[0]!=='function'||typeof delegates[1]!=='function'||sourceDescriptor(adapter,'_inst')?.value!==instance)throw Error('Arcade source result delegates are missing');
+    const delegates=sourceNames(owner).map(name=>sourceDescriptor(adapter,name)?.value);
+    if(delegates.some(delegate=>typeof delegate!=='function')||sourceDescriptor(adapter,'_inst')?.value!==instance)throw Error('Arcade source result delegates are missing');
     sourceApply(sourceWeakSet,sourceAdapters,[owner,{adapter,instance,delegates}]);
 }
-const sourceAdapterCurrent=owner=>{
+const sourceAdapterCurrent=(owner,name=null)=>{
     const held=sourceHeld(owner);
-    if(!held||!owner.isSourceCurrent()||!owner.isInstance(held.instance)||sourceDescriptor(held.adapter,'_inst')?.value!==held.instance)return false;
-    for(let i=0;i<sourceOpcodes.length;i++)if(sourceDescriptor(held.adapter,sourceOpcodes[i])?.value!==held.delegates[i])return false;
+    if(!held||!(name==='highScore'?owner.isHighScoreCurrent?.():name==='askForStringLength'?owner.isPromptCurrent?.():owner.isSourceCurrent())||!owner.isInstance(held.instance)||sourceDescriptor(held.adapter,'_inst')?.value!==held.instance)return false;
+    const names=sourceNames(owner);for(let i=0;i<names.length;i++)if((name==='highScore'?names[i]==='highScore':name==='askForStringLength'?names[i]==='askForStringLength':!['highScore','askForStringLength'].includes(names[i]))&&sourceDescriptor(held.adapter,names[i])?.value!==held.delegates[i])return false;
     return true;
 };
 const sourcePreparedRecord=func=>sourceApply(sourceWeakGet,sourcePrepared,[func]);
@@ -49,8 +50,8 @@ const sourceMember=(list,value)=>{
 function registerSourceResultFactory(metadata,adapter,owner,name){
     resultFactory.register(metadata,(serviceObject,funcName,preparedInfo)=>{
         try{
-            const held=sourceHeld(owner),index=name==='sourceValueBinary'?0:1;
-            if(!held||held.adapter!==adapter||serviceObject!==adapter||funcName!==name||!sourceAdapterCurrent(owner)||
+            const held=sourceHeld(owner),index=sourceNames(owner).indexOf(name);
+            if(!held||held.adapter!==adapter||serviceObject!==adapter||funcName!==name||!sourceAdapterCurrent(owner,name)||
                 sourceDescriptor(preparedInfo,'opcode')?.value!==name||sourceDescriptor(preparedInfo,'blockType')?.value!=='reporter'||
                 sourceDescriptor(preparedInfo,'isDynamic')?.value)return null;
             const record={owner,adapter,name,delegate:held.delegates[index],info:preparedInfo,valid:true};
@@ -93,9 +94,9 @@ const sourceSchema=(node,name,all)=>{
     try{
         if(data(node,'opcode')!=='arcade_'+name||data(node,'shadow')!==false||data(node,'topLevel')!==false||data(node,'next')!=null||sourceDescriptor(node,'mutation')?.value!=null)return null;
         sourceAppend(rows,{object:node,key:'mutation',descriptor:sourceDescriptor(node,'mutation')});
-        const fields=data(node,'fields'),inputs=data(node,'inputs'),id=data(node,'id'),parentId=data(node,'parent');if(typeof id!=='string'||typeof parentId!=='string')return null;keys(fields,['OP']);
-        const selector=data(fields,'OP'),op=data(selector,'value'),slots=name==='sourceValueBinary'?['LEFT','RIGHT']:['VALUE'];
-        if(name==='sourceValueBinary'?!['&','|','^','<<','>>','>>>'].includes(op):op!=='~')return null;
+        const fields=data(node,'fields'),inputs=data(node,'inputs'),id=data(node,'id'),parentId=data(node,'parent');if(typeof id!=='string'||typeof parentId!=='string')return null;keys(fields,name==='highScore'?[]:['OP']);
+        const selector=name==='highScore'?null:data(fields,'OP'),op=selector&&data(selector,'value'),slots=name==='highScore'?[]:name==='sourceValueBinary'?['LEFT','RIGHT']:['VALUE'];
+        if(name!=='highScore'&&(name==='sourceValueBinary'?!['&','|','^','<<','>>','>>>'].includes(op):op!=='~'))return null;
         keys(inputs,slots);
         for(const slot of slots){const edge=data(inputs,slot),childId=data(edge,'block');if(typeof childId!=='string')return null;const child=data(all,childId);if(data(child,'parent')!==id)return null;}
         const parent=data(all,parentId),parentInputs=data(parent,'inputs'),parentKeys=sourceKeys(parentInputs);sourceAppend(keyRows,{object:parentInputs,keys:parentKeys});
@@ -118,7 +119,7 @@ function scoreInfo(info,owner) {
     if(entries?.length!==1||!owner)throw Error('Arcade score declaration owner is missing');
     Object.defineProperty(entries[0],scoreInfoOwner,{value:owner,enumerable:true});
     scoreSourceRows.set(entries[0],owner);
-    if(typeof owner.isSourceCurrent==='function')for(const name of sourceOpcodes){
+    if(typeof owner.isSourceCurrent==='function')for(const name of sourceNames(owner)){
         const rows=info.blocks.filter(block=>block.opcode===name);if(rows.length!==1)continue;
         Object.defineProperty(rows[0],scoreInfoOwner,{value:owner,enumerable:true});scoreSourceRows.set(rows[0],owner);
     }
@@ -149,10 +150,10 @@ function bindScoreAdapterInfo(info,adapter,instance) {
     if(!scoreAdapterCurrent(owner,scoreAdapters.get(owner)))throw Error('Arcade score adapter issuance owner differs');
     if(Object.prototype.hasOwnProperty.call(entry,scoreIssue))throw Error('Arcade score metadata row was already issued');
     const token=Object.freeze({});
-    const sourceRows=typeof owner.isSourceCurrent==='function'?sourceOpcodes.map(name=>{const row=info.blocks.find(block=>block.opcode===name);
-        if(!row||scoreSourceRows.get(row)!==owner||Object.getOwnPropertyDescriptor(row,scoreInfoOwner)?.value!==owner)return null;
-        try{registerSourceResultFactory(row,adapter,owner,name);}catch(_){return null;}
-        return {name,arguments:row.arguments};}):[];
+    const sourceRows=typeof owner.isSourceCurrent==='function'?sourceNames(owner).map(name=>{const row=info.blocks.find(block=>block.opcode===name);
+        if(!row||scoreSourceRows.get(row)!==owner||Object.getOwnPropertyDescriptor(row,scoreInfoOwner)?.value!==owner)return name==='askForStringLength'?{optionalMissing:true}:null;
+        try{registerSourceResultFactory(row,adapter,owner,name);}catch(_){return name==='askForStringLength'?{optionalMissing:true}:null;}
+        return {name,arguments:row.arguments};}).filter(row=>!row?.optionalMissing):[];
     scoreIssues.set(token,{owner,adapter:scoreAdapters.get(owner),arguments:entry.arguments,sourceRows:sourceRows.some(row=>!row)?[]:sourceRows,serial:++scoreIssueSerial,consumed:false});
     Object.defineProperty(entry,scoreIssue,{value:token,enumerable:true});
 }
@@ -201,9 +202,9 @@ function scoreRegistration(runtime,owner) {
         try {
             for(const row of issue.sourceRows||[]){
                 const matches=(category.blocks||[]).filter(value=>value.json?.type==='arcade_'+row.name),prepared=matches.length===1&&matches[0];
-                if(!prepared||prepared.info?.[scoreInfoOwner]!==owner||prepared.info?.arguments!==row.arguments||typeof prepared.info?.func!=='function'||sourceApply(getter,runtime,['arcade_'+row.name])!==prepared.info.func){sourceOperations.length=0;break;}
+                if(!prepared||prepared.info?.[scoreInfoOwner]!==owner||prepared.info?.arguments!==row.arguments||typeof prepared.info?.func!=='function'||sourceApply(getter,runtime,['arcade_'+row.name])!==prepared.info.func){if(row.name==='askForStringLength')continue;sourceOperations.length=0;break;}
                 const bound=sourcePreparedRecord(prepared.info.func),lookupCurrent=sourceLookup(runtime,getter);
-                if(!sourceOrigin||!categoryOrigin||sourceDescriptor(runtime,'_primitives')?.value!==sourceTable||sourceDescriptor(runtime,'_blockInfo')?.value!==sourceCategories||sourceDescriptor(category,'blocks')?.value!==sourceBlocks||!lookupCurrent||!bound||bound.owner!==owner||bound.adapter!==adapter.adapter||bound.name!==row.name||bound.info!==prepared.info||!bound.valid){sourceOperations.length=0;break;}
+                if(!sourceOrigin||!categoryOrigin||sourceDescriptor(runtime,'_primitives')?.value!==sourceTable||sourceDescriptor(runtime,'_blockInfo')?.value!==sourceCategories||sourceDescriptor(category,'blocks')?.value!==sourceBlocks||!lookupCurrent||!bound||bound.owner!==owner||bound.adapter!==adapter.adapter||bound.name!==row.name||bound.info!==prepared.info||!bound.valid){if(row.name==='askForStringLength')continue;sourceOperations.length=0;break;}
                 sourceAppend(sourceOperations,{name:row.name,entry:prepared,func:prepared.info.func,bound,lookupCurrent,table:sourceTable,categories:sourceCategories,blocks:sourceBlocks});
             }
         }catch(_){sourceOperations.length=0;}
@@ -283,11 +284,16 @@ function create(runtime, cells, scoreOwner=null, sceneClock=null, frameDelta=nul
         for (const target of runtime.targets) if (target.isOriginal !== false) graphVersion.track(target.blocks);
         if(score&&!score.disposed)score.targets=new Set(runtime.targets);
         for (const target of runtime.targets) if (target.isOriginal !== false)
-            snapshots.set(target,{container:target.blocks,variables:new Map(Object.entries(target.variables||{}).map(([id,variable])=>[id,{variable,signature:JSON.stringify([variable.id,variable.name,variable.type])}])),blocks:new Map(Object.entries(target.blocks._blocks).map(([id,block]) =>
+            snapshots.set(target,{stage:target.isStage===true,container:target.blocks,variables:new Map(Object.entries(target.variables||{}).map(([id,variable])=>[id,{variable,signature:JSON.stringify([variable.id,variable.name,variable.type])}])),blocks:new Map(Object.entries(target.blocks._blocks).map(([id,block]) =>
                 [id,{block,semantic:semantic(block)}]))});
     };
-    const prove = (target, block, requested=null, possible=null, util=null, args=null) => {
+    const prove = (target, block, requested=null, possible=null, util=null, args=null, liveProof=null) => {
         let structural=false;
+        const nativeCell=id=>{
+            const local=id&&snapshots.get(target)?.variables.get(id),stages=id&&!local?[...snapshots].filter(([,saved])=>saved.stage):[];
+            const owner=local?target:stages.length===1?stages[0][0]:null,saved=local||stages.length===1&&stages[0][1].variables.get(id),table=owner&&sourceDescriptor(owner,'variables')?.value;
+            return saved&&sourceDescriptor(table,id)?.value===saved.variable&&sourceDescriptor(owner,'variables')?.value===table?saved.variable:null;
+        };
         const all = target.blocks._blocks, read = id => target.blocks.getBlock(id);
         const input = (node,name) => read(node?.inputs?.[name]?.block);
         const text = node => node?.opcode === 'text' ? node.fields?.TEXT?.value : null;
@@ -342,10 +348,25 @@ function create(runtime, cells, scoreOwner=null, sceneClock=null, frameDelta=nul
             }
             return true;
         };
+        const promptString=node=>{
+            const name='askForStringLength',opcode='arcade_'+name;
+            if(!score?.valid||score.disposed||!score.category||!scoreAdapterCurrent(scoreOwner,score.adapter)||!sourceAdapterCurrent(scoreOwner,name)||runtime.getOpcodeFunction!==score.getter)return false;
+            const row=score.sourceOperations.find(value=>value.name===name);if(!row)return false;
+            if(node.opcode!==opcode||Object.keys(node.fields||{}).length||Object.keys(node.inputs||{}).sort().join(',')!=='LENGTH,QUESTION')return false;
+            const length=input(node,'LENGTH'),question=input(node,'QUESTION'),raw=sourceDescriptor(sourceDescriptor(length?.fields,'NUM')?.value,'value')?.value;
+            const limit=typeof raw==='number'?raw:typeof raw==='string'&&/^[1-3]$/.test(raw)?Number(raw):NaN;
+            if(length?.opcode!=='math_number'||length.parent!==node.id||!Number.isInteger(limit)||limit<1||limit>3||Object.keys(length.inputs||{}).length||question?.opcode!=='text'||question.parent!==node.id||Object.keys(question.inputs||{}).length)return false;
+            liveProof?.(); // Recheck prototype/delegate/metadata ownership each time.
+            return row.lookupCurrent()&&sourceDescriptor(runtime,'_primitives')?.value===row.table&&sourceDescriptor(runtime,'_blockInfo')?.value===row.categories&&
+                sourceDescriptor(score.category,'blocks')?.value===row.blocks&&sourceMember(row.categories,score.category)&&sourceMember(row.blocks,row.entry)&&
+                sourceDescriptor(row.entry,'info')?.value===row.bound.info&&sourceDescriptor(row.bound.info,scoreInfoOwner)?.value===scoreOwner&&
+                sourceDescriptor(row.bound.info,'func')?.value===row.func&&sourceDescriptor(row.table,opcode)?.value===row.func&&
+                sourceApply(score.getter,runtime,[opcode])===row.func&&sourcePreparedRecord(row.func)===row.bound&&row.bound.valid;
+        };
         const sourceNumber=node=>{
             // Only Number-on-normal-return; operands still execute and validate.
-            if(!score?.valid||score.disposed||!score.category||!scoreAdapterCurrent(scoreOwner,score.adapter)||!sourceAdapterCurrent(scoreOwner)||runtime.getOpcodeFunction!==score.getter)return false;
-            const name=node.opcode==='arcade_sourceValueBinary'?'sourceValueBinary':node.opcode==='arcade_sourceValueUnary'?'sourceValueUnary':null;
+            const name=node.opcode==='arcade_sourceValueBinary'?'sourceValueBinary':node.opcode==='arcade_sourceValueUnary'?'sourceValueUnary':node.opcode==='arcade_highScore'?'highScore':null;
+            if(!score?.valid||score.disposed||!score.category||!scoreAdapterCurrent(scoreOwner,score.adapter)||!sourceAdapterCurrent(scoreOwner,name)||runtime.getOpcodeFunction!==score.getter)return false;
             let row;for(let i=0;i<score.sourceOperations.length;i++)if(score.sourceOperations[i].name===name)row=score.sourceOperations[i];
             if(!row)return false;
             const schema=sourceSchema(node,name,all);if(!schema)return false;
@@ -355,17 +376,25 @@ function create(runtime, cells, scoreOwner=null, sceneClock=null, frameDelta=nul
             // not mint or renew a registration or operand proof.
             if(actual!==row.func||!oldFacetCurrent||!row.lookupCurrent()||
                 sourceDescriptor(runtime,'_primitives')?.value!==row.table)return false;
+            // A completed direct writer may be inspected later. Admit only its
+            // current actual native Number cell; no String/handle or historical
+            // result claim follows from the writer's opcode.
+            const parent=name==='highScore'&&read(node.parent),cellId=parent?.opcode==='data_setvariableto'&&parent.inputs?.VALUE?.block===node.id&&parent.fields?.VARIABLE?.id;
+            const cell=nativeCell(cellId);
+            const currentNumberCell=cell&&typeof sourceDescriptor(cell,'value')?.value==='number';
+            if(name==='highScore')liveProof?.(); // Recheck live Number/owner evidence on every query; never cache it by graph stamp.
             const root=util?.thread?.peekStack?.(),operations=target.blocks._cache?._executeCached?.[root]?._ops||[];
+            if(!currentNumberCell){
             let operation,count=0;
             for(let i=0;i<operations.length;i++)if(operations[i].id===node.id){operation=operations[i];count++;}
             if(count!==1||operation._blockFunction!==row.func)return false;
             // Join the actual already-executed source reporter, not merely a
             // current table entry restored after a foreign cached function ran.
-            const actualArgs=operation._argValues,slots=name==='sourceValueBinary'?['LEFT','RIGHT']:['VALUE'];
-            const expectedKeys=name==='sourceValueBinary'?['LEFT','RIGHT','OP','mutation']:['VALUE','OP','mutation'];
+            const actualArgs=operation._argValues,slots=name==='highScore'?[]:name==='sourceValueBinary'?['LEFT','RIGHT']:['VALUE'];
+            const expectedKeys=name==='highScore'?['mutation']:name==='sourceValueBinary'?['LEFT','RIGHT','OP','mutation']:['VALUE','OP','mutation'];
             const actualKeys=sourceKeys(actualArgs||{});if(actualKeys.length!==expectedKeys.length)return false;
             for(let i=0;i<expectedKeys.length;i++){let found=false;for(let j=0;j<actualKeys.length;j++)if(actualKeys[j]===expectedKeys[i])found=true;if(!found)return false;}
-            if(sourceDescriptor(actualArgs,'OP')?.value!==sourceDescriptor(sourceDescriptor(node.fields,'OP')?.value,'value')?.value||
+            if(name!=='highScore'&&sourceDescriptor(actualArgs,'OP')?.value!==sourceDescriptor(sourceDescriptor(node.fields,'OP')?.value,'value')?.value||
                 sourceDescriptor(actualArgs,'mutation')?.value!==operation.mutation||operation.mutation!==node.mutation)return false;
             for(let i=0;i<slots.length;i++){
                 const child=read(node.inputs[slots[i]].block),cached=child&&target.blocks._cache?._executeCached?.[child.id];
@@ -377,12 +406,13 @@ function create(runtime, cells, scoreOwner=null, sceneClock=null, frameDelta=nul
                 if(!childOperation&&cached&&cached._parentValues&&
                     (cached._parentValues!==actualArgs||cached._parentKey!==slots[i]))return false;
             }
-            try{if(reporterOwner(runtime,util,actualArgs,opcode,['OP'])!==node)return false;}catch(_){return false;}
+            try{if(reporterOwner(runtime,util,actualArgs,opcode,name==='highScore'?[]:['OP'])!==node)return false;}catch(_){return false;}
             if(!operation._parentValues||typeof sourceDescriptor(operation._parentValues,operation._parentKey)?.value!=='number')return false;
-            if(!schema())return false;
+            }
+            if(!schema()||currentNumberCell&&(nativeCell(cellId)!==cell||typeof sourceDescriptor(cell,'value')?.value!=='number'))return false;
             const reflected=sourceDescriptor(row.entry,'info')?.value===row.bound.info&&
                 sourceDescriptor(row.bound.info,scoreInfoOwner)?.value===scoreOwner&&
-                sourceDescriptor(row.bound.info,'func')?.value===row.func&&sourceAdapterCurrent(scoreOwner);
+                sourceDescriptor(row.bound.info,'func')?.value===row.func&&sourceAdapterCurrent(scoreOwner,name);
             // Runtime-private construction origins close these containers; no
             // observational shape or constructor-time snapshot proves native origin.
             // No reflective schema/table work follows these
@@ -722,6 +752,66 @@ function create(runtime, cells, scoreOwner=null, sceneClock=null, frameDelta=nul
             const facts=loopFacts(loop);
             if(!facts||!statementIn(node,facts.body)||localCellOf(index)!==facts.counter||!facts.receiver.has(localCellOf(array)))return null;
             return values;
+        };
+        // Independent lowered normal-result proof. Unlike familyElement this
+        // establishes no bounds and admits no alias: only a fresh local empty
+        // Array, Number pushes and the literal zero-argument reverse operation.
+        // Every absent slot remains Undefined. No source type/loan is read.
+        const numericFamilyResult=(node,origins)=>{
+            const array=input(node,'ARRAY'),cell=localCellOf(array),scope=cell?.scope,proof=cell&&captureProof.proof(cell);
+            if(array?.opcode!=='arcade_getLocal'||!proof||proof.index>=0||proof.escaped||scope.target!==target||typeof scope.procedure!=='string')return null;
+            const closed=(b,names)=>!!b&&Object.keys(b.fields||{}).length===0&&Object.keys(b.inputs||{}).sort().join(',')===names.slice().sort().join(',');
+            const fixedText=(b,name,value)=>{const child=input(b,name);return child?.opcode==='text'&&child.parent===b.id&&child.next==null&&!Object.keys(child.inputs||{}).length&&text(child)===value;};
+            if(!closed(node,['ARRAY','INDEX'])||array.parent!==node.id)return null;
+            // Closed native source effects only; no callback, captured cell,
+            // object/prototype access, extension effect or computed call entry.
+            const allowed=new Set(['math_number','bw_numberLiteral','text','bw_stringLiteral','data_variable','data_setvariableto','data_changevariableby',
+                'looks_hide','procedures_definition','procedures_prototype','procedures_call','argument_reporter_string_number','argument_reporter_boolean',
+                'arcade_whenSourceStarts','arcade_declareParameterConstraint','arcade_declareSourceScalar','arcade_functionArgument','arcade_callFunction',
+                'arcade_getLocal','arcade_setLocal','arcade_returnValue','arcade_sourceWhile','control_if','control_if_else','arcade_break','arcade_continue',
+                'arrays_createReference','arrays_referenceItem','arrays_referenceLength','arrays_mutateReference','arrays_specialValue',
+                'arrays_valueBinary','arrays_valueUnary','arrays_valueCompare','arrays_valueTruthy','arcade_inspectValue',
+                'operator_add','operator_subtract','operator_multiply','operator_divide','operator_mod','operator_equals','operator_lt','operator_gt',
+                'operator_not','operator_and','operator_or','operator_join','operator_length','operator_letter_of']);
+            for(const t of runtime.targets)if(t.isOriginal!==false)for(const b of Object.values(t.blocks?._blocks||{})){
+                if(!allowed.has(b.opcode))return null;
+                if(b.opcode==='arrays_mutateReference'&&!['push','reverse'].includes(literal(b,'OP')))return null;
+                if(b.opcode==='arcade_callFunction'){
+                    const name=literal(b,'NAME');if(typeof name!=='string'||Object.values(t.blocks._blocks).filter(d=>d.opcode==='procedures_definition'&&t.blocks.getBlock(d.inputs?.custom_block?.block)?.mutation?.proccode===name).length!==1)return null;
+                }
+            }
+            let allocation=null;const mutations=[];
+            for(const use of localsOf(cell)){
+                if(captureProof.scopeOf(use)!==scope)return null;
+                if(use.opcode==='arcade_setLocal'){
+                    if(!closed(use,['NAME','VALUE'])||!fixedText(use,'NAME',cell.name))return null;
+                    const value=input(use,'VALUE');if(fixedReset(value))continue;
+                    if(allocation||!closed(value,['VALUES'])||value.opcode!=='arrays_createReference'||value.parent!==use.id||!fixedText(value,'VALUES','[]'))return null;
+                    allocation=use;continue;
+                }
+                if(!closed(use,['NAME'])||!fixedText(use,'NAME',cell.name))return null;
+                const parent=read(use.parent);
+                if(!parent||parent.inputs?.ARRAY?.block!==use.id)return null;
+                if(parent.opcode==='arrays_mutateReference'){
+                    const op=literal(parent,'OP');
+                    if(!closed(parent,['ARRAY','OP','INDEX','VALUE'])||!['push','reverse'].includes(op)||!fixedText(parent,'OP',op)||constNumber(input(parent,'INDEX'))!==0)return null;
+                    if(op==='reverse'&&constNumber(input(parent,'VALUE'))!==0)return null;
+                    mutations.push(parent);continue;
+                }
+                if(parent.opcode==='arrays_referenceItem'&&closed(parent,['ARRAY','INDEX'])||parent.opcode==='arrays_referenceLength'&&closed(parent,['ARRAY']))continue;
+                return null;
+            }
+            if(!allocation||!mutations.some(b=>literal(b,'OP')==='push')||!mutations.some(b=>literal(b,'OP')==='reverse'))return null;
+            const chain=chainOf(allocation),before=at=>{const statement=chain&&statementIn(at,chain);return !!statement&&chain.indexOf(allocation)<chain.indexOf(statement);};
+            if(!before(node)||mutations.some(b=>!before(b))||proof.writers.some(({node:b})=>b!==allocation&&(!fixedReset(input(b,'VALUE'))||!chain?.includes(b)||chain.indexOf(b)>chain.indexOf(allocation))))return null;
+            const domains=new Set(['number','undefined']);
+            const number=value=>{const found=new Set();if(!safe(value,false,origins,found)||!found.has('number')||[...found].some(type=>!['number',PENDING].includes(type)))return false;if(found.has(PENDING))domains.add(PENDING);return true;};
+            if(!number(input(node,'INDEX'))||mutations.some(b=>literal(b,'OP')==='push'&&!number(input(b,'VALUE'))))return null;
+            // Genuine builtin constructor/metadata/current cached delegates,
+            // independently of source flags or the proposed primitive domain.
+            if(!require('../adapter').localArrayResultBindingsCurrent(runtime))return null;
+            liveProof?.(); // Never cache across operation/delegate changes.
+            origins?.add(node);return domains;
         };
         const constantLogicalOverwrite=(writer,cell,at)=>{
             const proof=captureProof.proof(cell),scope=cell?.scope;
@@ -1135,6 +1225,7 @@ function create(runtime, cells, scoreOwner=null, sceneClock=null, frameDelta=nul
                     // The same Number-valued reporters as arcade_truncateNumber and arcade_signNumber.
                     origins?.add(node);domains.add('number');return true;
                 }
+                if(!player&&op==='arcade_askForStringLength'){if(!promptString(node))return false;origins?.add(node);domains?.add('string');return true;}
                 if(!player&&op==='arrays_referenceItem'){
                     // Literal-index reads use the separately closed local prefix
                     // or the existing global publication proof. The selected
@@ -1143,6 +1234,7 @@ function create(runtime, cells, scoreOwner=null, sceneClock=null, frameDelta=nul
                     if(slot){const valid=safe(slot,false,origins,domains);if(valid)origins?.add(node);return valid;}
                     const elements=familyElement(node);
                     if(elements){const valid=elements.every(value=>safe(value,false,origins,domains));if(valid)origins?.add(node);return valid;}
+                    const normal=numericFamilyResult(node,origins);if(normal){for(const type of normal)domains?.add(type);return true;}
                 }
                 if(!player&&op==='arcade_getPlayerScore'){
                     if(!scoreNumber(node))return false;
@@ -1168,7 +1260,7 @@ function create(runtime, cells, scoreOwner=null, sceneClock=null, frameDelta=nul
                     'operator_equals','operator_gt','operator_lt','operator_not','operator_and','operator_or',
                     'arrays_valueTruthy','arrays_valueCompare','arcade_sourceTypeOf','arcade_askForString',
                     'arcade_spriteToString','arcade_bufferToString','arcade_bufferToHex'].includes(op)) {origins?.add(node);terminalDomain(node,domains);return true;}
-                if(!player&&domains&&(op==='arcade_sourceValueBinary'||op==='arcade_sourceValueUnary')){
+                if(!player&&(op==='arcade_highScore'||domains&&(op==='arcade_sourceValueBinary'||op==='arcade_sourceValueUnary'))){
                     if(!sourceNumber(node))return false;
                     origins?.add(node);domains?.add('number');return true;
                 }
@@ -1186,7 +1278,7 @@ function create(runtime, cells, scoreOwner=null, sceneClock=null, frameDelta=nul
                 }
                 if (op === 'data_variable') {
                     const id=node.fields?.VARIABLE?.id, variable=target.lookupVariableById(id);
-                    if (!variable || cells.referenceTypeOf(target,id) || (player?!!cells.typeOf(target,id):cells.typeOf(target,id) && !kinds.has(cells.typeOf(target,id)))) return false;
+                    if (!variable || nativeCell(id)!==variable || cells.referenceTypeOf(target,id) || (player?!!cells.typeOf(target,id):cells.typeOf(target,id) && !kinds.has(cells.typeOf(target,id)))) return false;
                     const writers=runtime.targets.filter(t=>t.isOriginal!==false).flatMap(t=>Object.values(t.blocks._blocks)
                         .filter(b=>['data_setvariableto','data_changevariableby'].includes(b.opcode) && t.lookupVariableById(b.fields?.VARIABLE?.id)===variable)
                         .map(writer=>({target:t,writer})));
@@ -1300,9 +1392,9 @@ function create(runtime, cells, scoreOwner=null, sceneClock=null, frameDelta=nul
             const stamp=verifiedStamp&&verifiedStamp.key;
             const cached=stamp&&proofs.get(key);
             if(cached&&cached.stamp===stamp)return cached.result;
-            const possible=new Map();prove(target,block,requests,possible,util,args);
+            let cacheable=true;const possible=new Map();prove(target,block,requests,possible,util,args,()=>{cacheable=false;});
             const result=Object.freeze(requests.map((_,index)=>Object.freeze([...possible.get(index)])));
-            if(stamp)proofs.set(key,{stamp,result});
+            if(stamp&&cacheable)proofs.set(key,{stamp,result});
             return result;
         }finally{active=false;}
     };

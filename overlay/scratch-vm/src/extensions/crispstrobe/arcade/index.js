@@ -1,6 +1,7 @@
 const makeExt = require('../adapter');
 const createConsoleInspectValues = require('./console-inspect-values');
 const nullSpriteGetter = require('../../../util/bw-null-sprite-getter');
+const highScoreFaults = require('./high-score-faults');
 const tileLookupFaults = require('../../../util/bw-tile-lookup-faults');
 const sceneClockNumber = require('./scene-clock-number');
 const frameDeltaNumber = require('./frame-delta-number');
@@ -18,6 +19,9 @@ module.exports = makeExt(`// Name: Arcade
   "use strict";
 
   const dependencies = Scratch.BWExtensionDependencies;
+  const nullFilterDescriptor=Object.getOwnPropertyDescriptor,nullFilterKeys=Reflect.ownKeys;
+  const nullFilterPrototype=Object.getPrototypeOf,nullFilterArrayPrototype=Array.prototype;
+  const nullFilterDefine=Object.defineProperty;
   const fontSelectorOwner = dependencies.fontSelectorOwner;
   const spriteUpdateHosts = new WeakMap();
   const classCallableHosts = new WeakMap();
@@ -76,10 +80,13 @@ module.exports = makeExt(`// Name: Arcade
           [name,Object.getOwnPropertyDescriptor(scorePrototype,name)?.value]));
       const sourceResultDescriptor=Object.getOwnPropertyDescriptor,sourceResultPrototype=Object.getPrototypeOf,sourceResultOwn=Object.prototype.hasOwnProperty,sourceResultApply=Reflect.apply;
       const sourceResultMethods=['sourceValueBinary','sourceValueUnary','_bindSourceOperationAdapter'].map(name=>[name,Object.getOwnPropertyDescriptor(scorePrototype,name)?.value]);
-      const scoreNumberOwner=Object.freeze({isInstance:value=>value===this,isCurrent:()=>Object.getPrototypeOf(this)===scorePrototype &&
+      const promptResultMethods=['askForStringLength','_askForString'].map(name=>[name,Object.getOwnPropertyDescriptor(scorePrototype,name)?.value]);
+      const highScoreMethods=['highScore','_readHighScore','_settingsStore','_highScoreFailure'].map(name=>[name,Object.getOwnPropertyDescriptor(scorePrototype,name)?.value]);
+      const scoreNumberOwner=Object.freeze({isInstance:value=>value===this,isHighScoreCurrent:()=>Object.getPrototypeOf(this)===scorePrototype&&Object.getOwnPropertyDescriptor(this,'_runtime')?.value===runtime&&highScoreMethods.every(([name,method])=>typeof method==='function'&&!Object.hasOwn(this,name)&&Object.getOwnPropertyDescriptor(scorePrototype,name)?.value===method),isCurrent:()=>Object.getPrototypeOf(this)===scorePrototype &&
         Object.getOwnPropertyDescriptor(this,'_runtime')?.value===runtime && [...scoreMethods].every(([name,method])=>
           typeof method==='function' && !Object.prototype.hasOwnProperty.call(this,name) &&
           Object.getOwnPropertyDescriptor(scorePrototype,name)?.value===method),
+        isPromptCurrent:()=>sourceResultPrototype(this)===scorePrototype&&sourceResultDescriptor(this,'_runtime')?.value===runtime&&promptResultMethods.every(([name,method])=>typeof method==='function'&&!sourceResultApply(sourceResultOwn,this,[name])&&sourceResultDescriptor(scorePrototype,name)?.value===method),
         isSourceCurrent:()=>{
           if(sourceResultPrototype(this)!==scorePrototype||sourceResultDescriptor(this,'_runtime')?.value!==runtime)return false;
           for(let i=0;i<sourceResultMethods.length;i++){
@@ -92,8 +99,8 @@ module.exports = makeExt(`// Name: Arcade
       // One sealed owner and fault service per faulting primitive (null Sprite
       // getter, missing Sprite setter, missing Image operations).
       const getterPrototype=Object.getPrototypeOf(this),getterOwners=new Map(),getterFaults=new Map();
-      for(const {method,kind} of [...dependencies.nullSpriteGetter.kinds,...dependencies.tileLookupFaults.kinds]){
-        const getterMethods=new Map(['getInfo',method].map(name=>[name,Object.getOwnPropertyDescriptor(getterPrototype,name)?.value]));
+      for(const {method,kind} of [...dependencies.nullSpriteGetter.kinds,...dependencies.tileLookupFaults.kinds,...dependencies.highScoreFaults.kinds]){
+        const getterMethods=new Map(['getInfo',method,...(dependencies.highScoreFaults.kinds.some(row=>row.method===method)?['_readHighScore','_settingsStore','_highScoreFailure',...(method==='highScore'?[]:['_runGameOver','_prepareGameOverScores','_isBetterScore'])]:[])].map(name=>[name,Object.getOwnPropertyDescriptor(getterPrototype,name)?.value]));
         const getterOwner=Object.freeze({isInstance:value=>value===this,isCurrent:()=>Object.getPrototypeOf(this)===getterPrototype &&
           Object.getOwnPropertyDescriptor(this,'_runtime')?.value===runtime && [...getterMethods].every(([name,method])=>
             typeof method==='function' && !Object.prototype.hasOwnProperty.call(this,name) &&
@@ -140,6 +147,11 @@ module.exports = makeExt(`// Name: Arcade
       this._fallbackState = null;
       // Palette is display state shared by every scene, never an image mutation.
       this._projectPalette = null;
+      this._gameStats=dependencies.createGameStats(text=>{
+        if(!runtime)return; // Metadata-only construction has no display owner.
+        runtime.bwArcadeStatsText=text;runtime.emit?.('ARCADE_DEVICE_STATS',text);
+      });
+      this._gameStats.reset();
       this._sceneStack = [];this._sceneParents=new WeakMap();this._seeThroughSources=new WeakMap();this._renderingScenes=new WeakSet();this._sceneFrames=new WeakMap();this._pendingSceneSeconds=new WeakMap();this._frameFaults=new WeakSet();
       this._sceneBundles = new Set();
       this._sceneFlags=dependencies.sceneFlags.create();
@@ -231,6 +243,7 @@ module.exports = makeExt(`// Name: Arcade
       this._tileHandlers = [];
       this._terrainWaits = new Set();
       this._nativeButtonWaiters = new Set();
+      this._resetSuspensions = new Set();
       this._textPromptWaits = new Set();this._textPromptTail=Promise.resolve();
       this._controllerEventIds = null;this._controlEvents = null;this._controlEventContexts = new WeakMap();
       this._terrainEpoch = 0;
@@ -245,6 +258,7 @@ module.exports = makeExt(`// Name: Arcade
         runtime.on('ARCADE_PLAYER_BUTTON_EDGE',(player,button,isDown)=>this._controllerButtonEdge(player,button,isDown));
         runtime.on('KEY_STATE_CHANGED',(key,isDown)=>this._keyboardButtonEdge(key,isDown));
         const cancelCreations = () => {
+          for(const resolve of this._resetSuspensions)resolve();this._resetSuspensions.clear();
           spriteOwner.stop();
           for(const resolve of this._nativeButtonWaiters)resolve();this._nativeButtonWaiters.clear();
           for(const cancel of this._textPromptWaits)cancel();this._textPromptWaits.clear();
@@ -269,6 +283,7 @@ module.exports = makeExt(`// Name: Arcade
         runtime.on('RUNTIME_DISPOSED', () => {this._bufferSuspended=true;this._musicHost?.reset();this._musicHost=null;this._musicIds=new Map();this._musicValues=new Map();this._musicGeneration=dependencies.buffers.newHeapId();this._carnivalHost?.cancel();this._carnivalHost=null;this._bufferHeap=null;cancelCreations();this._clearTilemap();this._tileLocations.clear();this._animationAssetCache.clear();for(const id of this._imageSkins.keys())this._clearImage(id);});
         const reset = () => {
           this._resetProgramClock();
+          this._gameStats.reset();
           cancelCreations();
           this._terrainStopped = false;
           this._projectPalette = null;
@@ -354,7 +369,7 @@ module.exports = makeExt(`// Name: Arcade
     getInfo() {
       const str = (name, def) => ({ [name]: { type: Scratch.ArgumentType.STRING, defaultValue: def || '' } });
       const n = (name, def) => ({ [name]: { type: Scratch.ArgumentType.NUMBER, defaultValue: def == null ? 0 : def } });
-      return dependencies.palette.arrange(this,dependencies.frameDeltaNumber.declaration(dependencies.sceneClockNumber.declaration(dependencies.tileLookupFaults.declareAll(dependencies.nullSpriteGetter.declareAll(dependencies.createConsoleInspectValues.scoreInfo({
+      return dependencies.highScoreFaults.declareAll(dependencies.palette.arrange(this,dependencies.frameDeltaNumber.declaration(dependencies.sceneClockNumber.declaration(dependencies.tileLookupFaults.declareAll(dependencies.nullSpriteGetter.declareAll(dependencies.createConsoleInspectValues.scoreInfo({
         id: 'arcade',
         name: 'Arcade',
         color1: '#E64980',
@@ -399,6 +414,7 @@ module.exports = makeExt(`// Name: Arcade
           {opcode:'registerScoreHandler',blockType:Scratch.BlockType.COMMAND,text:'Arcade register score player [PLAYER] threshold [SCORE] as [TOKEN] capturing [CAPTURES]',arguments:{...n('PLAYER',1),...n('SCORE',10),...str('TOKEN','handler'),...str('CAPTURES','')}},
           {opcode:'whenRegisteredScore',blockType:Scratch.BlockType.HAT,isEdgeActivated:false,text:'when Arcade score handler [TOKEN] runs',arguments:str('TOKEN','handler')},
           {opcode:'pushScene',blockType:Scratch.BlockType.COMMAND,text:'Arcade push scene'},
+          {opcode:'setGameStats',blockType:Scratch.BlockType.COMMAND,text:'Arcade game stats [MODE]',arguments:{MODE:{type:Scratch.ArgumentType.STRING,menu:'gameStatsModes',defaultValue:'enabled'}}},
           {opcode:'setPalette',blockType:Scratch.BlockType.COMMAND,text:'Arcade set palette hex [DATA]',arguments:str('DATA','000000ffffffff2121ff93c4ff8135fff609249ca378dc52003fad87f2ff8e2ec4a4839f5c406ce5cdc491463d000000')},
           {opcode:'popScene',blockType:Scratch.BlockType.COMMAND,text:'Arcade pop scene'},
           {opcode:'buttonRepeatProperty',blockType:Scratch.BlockType.REPORTER,text:'Arcade player [PLAYER] button [BUTTON] repeat property [PROPERTY]',arguments:{PLAYER:{type:Scratch.ArgumentType.STRING,menu:'controlPlayers',defaultValue:'1'},BUTTON:{type:Scratch.ArgumentType.STRING,menu:'repeatButtons',defaultValue:'A'},PROPERTY:{type:Scratch.ArgumentType.STRING,menu:'repeatProperties',defaultValue:'repeatDelay'}}},
@@ -406,6 +422,7 @@ module.exports = makeExt(`// Name: Arcade
           {opcode:'setButtonRepeatDefaults',blockType:Scratch.BlockType.COMMAND,text:'set Arcade button repeat defaults delay [DELAY] interval [INTERVAL]',arguments:{...n('DELAY',500),...n('INTERVAL',30)}},
           {opcode:'registerUpdateHandler',blockType:Scratch.BlockType.COMMAND,text:'Arcade register update as [TOKEN] capturing [CAPTURES]',arguments:{...str('TOKEN','handler'),...str('CAPTURES','')}},
           {opcode:'whenRegisteredUpdate',blockType:Scratch.BlockType.HAT,isEdgeActivated:false,text:'when Arcade update handler [TOKEN] runs',arguments:str('TOKEN','handler')},
+          {opcode:'addLiteralDrawing',blockType:Scratch.BlockType.COMMAND,hideFromPalette:true,text:'Arcade add drawing commands [COMMANDS] at depth 0',arguments:str('COMMANDS','[]')},
           {opcode:'registerPaintHandler',blockType:Scratch.BlockType.COMMAND,text:'Arcade register paint as [TOKEN] capturing [CAPTURES]',arguments:{...str('TOKEN','handler'),...str('CAPTURES','')}},
           {opcode:'whenRegisteredPaint',blockType:Scratch.BlockType.HAT,isEdgeActivated:false,text:'when Arcade paint handler [TOKEN] runs',arguments:str('TOKEN','handler')},
           {opcode:'registerShadeHandler',blockType:Scratch.BlockType.COMMAND,text:'Arcade register shade as [TOKEN] capturing [CAPTURES]',arguments:{...str('TOKEN','handler'),...str('CAPTURES','')}},
@@ -437,6 +454,7 @@ module.exports = makeExt(`// Name: Arcade
             arguments:{...str('TEXT','Hello'),...str('IMAGE',''),...n('X',0),...n('Y',0),...n('COLOR',1),FONT:{type:Scratch.ArgumentType.STRING,menu:'imageFonts',defaultValue:'auto'}}},
           {opcode:'legacyGameOver',blockType:Scratch.BlockType.COMMAND,text:'Arcade legacy game over win [WIN] effect [EFFECT]',arguments:{WIN:{type:Scratch.ArgumentType.BOOLEAN},EFFECT:{type:Scratch.ArgumentType.STRING,menu:'legacyGameOverEffects',defaultValue:'unset'}}},
           {opcode:'gameOver',blockType:Scratch.BlockType.COMMAND,text:'Arcade game over win [WIN]',arguments:{WIN:{type:Scratch.ArgumentType.BOOLEAN}}},
+          {opcode:'resetGame',blockType:Scratch.BlockType.COMMAND,text:'Arcade reset game',arguments:{}},
           {opcode:'setGameOverEffect',blockType:Scratch.BlockType.COMMAND,text:'Arcade set game over effect [EFFECT] for win [WIN]',arguments:{EFFECT:{type:Scratch.ArgumentType.STRING,menu:'backgroundEffects',defaultValue:'confetti'},WIN:{type:Scratch.ArgumentType.BOOLEAN}}},
           {opcode:'setGameOverMessage',blockType:Scratch.BlockType.COMMAND,text:'Arcade set game over message [MESSAGE] for win [WIN]',arguments:{...str('MESSAGE','GAME OVER!'),WIN:{type:Scratch.ArgumentType.BOOLEAN}}},
           {opcode:'setGameOverPlayable',blockType:Scratch.BlockType.COMMAND,text:'Arcade set game over sound [PLAYABLE] looping [LOOPING] for win [WIN]',arguments:{...str('PLAYABLE',''),LOOPING:{type:Scratch.ArgumentType.BOOLEAN},WIN:{type:Scratch.ArgumentType.BOOLEAN}}},
@@ -477,6 +495,7 @@ module.exports = makeExt(`// Name: Arcade
           {opcode:'playMusic',blockType:Scratch.BlockType.COMMAND,text:'Arcade play music [PLAYABLE] mode [MODE]',arguments:{...str('PLAYABLE',''),MODE:{type:Scratch.ArgumentType.STRING,menu:'playbackModes',defaultValue:'UntilDone'}}},
           {opcode:'play',blockType:Scratch.BlockType.COMMAND,text:'Arcade play [PLAYABLE] mode [MODE]',arguments:{...str('PLAYABLE',''),MODE:{type:Scratch.ArgumentType.STRING,menu:'playbackModes',defaultValue:'UntilDone'}}},
           {opcode:'playMelody',blockType:Scratch.BlockType.COMMAND,text:'Arcade play melody [MELODY] mode [MODE]',arguments:{...str('MELODY',''),MODE:{type:Scratch.ArgumentType.STRING,menu:'melodyModes',defaultValue:'play'}}},
+          {opcode:'playNoteMelody',blockType:Scratch.BlockType.COMMAND,text:'Arcade play note melody [NOTES] at [TEMPO] bpm',arguments:{...str('NOTES','C D E F G A B C5'),...n('TEMPO',120)}},
           {opcode:'playSoundEffect',blockType:Scratch.BlockType.COMMAND,text:'Arcade play sound effect [EFFECT] mode [MODE]',arguments:{...str('EFFECT',''),MODE:{type:Scratch.ArgumentType.STRING,menu:'soundPlayModes',defaultValue:'UntilDone'}}},
           {opcode:'playSound',blockType:Scratch.BlockType.COMMAND,text:'Arcade play sound [SOUND] until done [UNTIL_DONE]',arguments:{...str('SOUND','c d e'),UNTIL_DONE:{type:Scratch.ArgumentType.BOOLEAN}}},
           {opcode:'playTone',blockType:Scratch.BlockType.COMMAND,text:'Arcade play tone [FREQUENCY] Hz for [DURATION] ms',arguments:{...n('FREQUENCY',262),...n('DURATION',500)}},
@@ -522,6 +541,7 @@ module.exports = makeExt(`// Name: Arcade
           {opcode:'bufferPackAt',blockType:Scratch.BlockType.COMMAND,text:'Arcade pack number array [ARRAY] into byte buffer [BUFFER] at [OFFSET] format [FORMAT]',arguments:{...str('ARRAY',''),...str('BUFFER',''),...n('OFFSET',0),...str('FORMAT','<BH')}},
           {opcode:'bufferFromArray',blockType:Scratch.BlockType.REPORTER,text:'Arcade byte buffer from number array [ARRAY]',arguments:str('ARRAY','')},
           {opcode:'settingsWrite',blockType:Scratch.BlockType.COMMAND,text:'Arcade write setting [KEY] type [TYPE] value [VALUE]',arguments:{...str('KEY',''),...str('VALUE',''),TYPE:{type:Scratch.ArgumentType.STRING,menu:'settingWriteTypes',defaultValue:'Number'}}},
+          {opcode:'highScore',blockType:Scratch.BlockType.REPORTER,text:'Arcade high score',arguments:{}},
           {opcode:'settingsRead',blockType:Scratch.BlockType.REPORTER,text:'Arcade read setting [KEY] type [TYPE]',arguments:{...str('KEY',''),TYPE:{type:Scratch.ArgumentType.STRING,menu:'settingReadTypes',defaultValue:'Number'}}},
           {opcode:'settingsExists',blockType:Scratch.BlockType.BOOLEAN,text:'Arcade setting [KEY] exists',arguments:str('KEY','')},
           {opcode:'settingsRemove',blockType:Scratch.BlockType.COMMAND,text:'Arcade remove setting [KEY]',arguments:str('KEY','')},
@@ -572,8 +592,11 @@ module.exports = makeExt(`// Name: Arcade
           {opcode:'eventPlayer',blockType:Scratch.BlockType.REPORTER,text:'Arcade event player'},
           {opcode:'playerConnected',blockType:Scratch.BlockType.BOOLEAN,text:'Arcade player [PLAYER] connected?',arguments:str('PLAYER','')},
           {opcode:'playerButtonPressed',blockType:Scratch.BlockType.BOOLEAN,text:'Arcade player [PLAYER] button [BUTTON] pressed?',arguments:{...str('PLAYER',''),...n('BUTTON',0)}},
+          {opcode:'registerPlayerButtonHandler',blockType:Scratch.BlockType.COMMAND,text:'Arcade register player [PLAYER] button [BUTTON] event [EVENT] as [TOKEN] capturing [CAPTURES]',arguments:{...n('PLAYER',1),BUTTON:{type:Scratch.ArgumentType.STRING,menu:'buttons',defaultValue:'a'},EVENT:{type:Scratch.ArgumentType.NUMBER,menu:'buttonEvents',defaultValue:2049},...str('TOKEN','handler'),...str('CAPTURES','')}},
           {opcode:'registerButtonHandler',blockType:Scratch.BlockType.COMMAND,text:'Arcade register button [BUTTON] event [EVENT] as [TOKEN] capturing [CAPTURES]',arguments:{BUTTON:{type:Scratch.ArgumentType.STRING,menu:'buttons',defaultValue:'a'},EVENT:{type:Scratch.ArgumentType.NUMBER,menu:'buttonEvents',defaultValue:2049},...str('TOKEN','handler'),...str('CAPTURES','')}},
           {opcode:'whenRegisteredButton',blockType:Scratch.BlockType.HAT,isEdgeActivated:false,text:'when Arcade button handler [TOKEN] runs',arguments:str('TOKEN','handler')},
+          {opcode:'registerInstanceOverlapHandler',blockType:Scratch.BlockType.COMMAND,text:'Arcade register instance overlap of [ID] as [TOKEN] capturing [CAPTURES]',arguments:{...str('ID',''),...str('TOKEN','handler'),...str('CAPTURES','')}},
+          {opcode:'whenRegisteredInstanceOverlap',blockType:Scratch.BlockType.HAT,isEdgeActivated:false,text:'when Arcade instance overlap handler [TOKEN] runs',arguments:str('TOKEN','handler')},
           {opcode:'registerInstanceDestroyedHandler',blockType:Scratch.BlockType.COMMAND,text:'Arcade register instance destruction of [ID] as [TOKEN] capturing [CAPTURES]',arguments:{...str('ID',''),...str('TOKEN','handler'),...str('CAPTURES','')}},
           {opcode:'whenRegisteredInstanceDestroyed',blockType:Scratch.BlockType.HAT,isEdgeActivated:false,text:'when Arcade instance destruction handler [TOKEN] runs',arguments:str('TOKEN','handler')},
           {opcode:'registerDestroyedHandler',blockType:Scratch.BlockType.COMMAND,text:'Arcade register destroyed kind [KIND] as [TOKEN] capturing [CAPTURES]',arguments:{...str('KIND','Player'),...str('TOKEN','handler'),...str('CAPTURES','')}},
@@ -656,6 +679,10 @@ module.exports = makeExt(`// Name: Arcade
             text: 'ask Arcade yes/no [TITLE] subtitle [SUBTITLE]', arguments: {...str('TITLE','Continue?'),...str('SUBTITLE','')} },
           { opcode: 'askForNumber', blockType: Scratch.BlockType.REPORTER,
             text: 'ask Arcade number [QUESTION]', arguments: str('QUESTION', 'Number?') },
+          { opcode: 'askForNumberLength', blockType: Scratch.BlockType.REPORTER,
+            text: 'ask Arcade number [QUESTION] length [LENGTH]', arguments: {...str('QUESTION', 'Number?'),...n('LENGTH', 3)} },
+          { opcode: 'askForStringLength', blockType: Scratch.BlockType.REPORTER,
+            text: 'ask Arcade text [QUESTION] length [LENGTH]', arguments: {...str('QUESTION', 'Text?'),...n('LENGTH', 2)} },
           { opcode: 'askForString', blockType: Scratch.BlockType.REPORTER,
             text: 'ask Arcade text [QUESTION]', arguments: str('QUESTION', 'Text?') },
           { opcode: 'setBackgroundColor', blockType: Scratch.BlockType.COMMAND,
@@ -1048,6 +1075,8 @@ module.exports = makeExt(`// Name: Arcade
           {opcode:'initializeSpriteKindLibrary',blockType:Scratch.BlockType.COMMAND,text:'Arcade initialize sprite kind library [LIBRARY] version [VERSION]',arguments:{...str('LIBRARY','textsprite'),...str('VERSION','v1.3.0')}},
           { opcode: 'spritesOfKind', blockType: Scratch.BlockType.REPORTER,
             text: 'array of Arcade sprites of kind [KIND]', arguments: str('KIND', 'Player') },
+          {opcode:'withoutNullSprites',blockType:Scratch.BlockType.REPORTER,
+            text:'Arcade sprite array [ARRAY] without null',arguments:str('ARRAY','')},
           { opcode: 'spriteCount', blockType: Scratch.BlockType.REPORTER,
             text: 'Arcade sprites of kind [KIND]', arguments: str('KIND', 'Player') },
           { opcode: 'whenSpriteCreated', blockType: Scratch.BlockType.HAT,
@@ -1104,6 +1133,7 @@ module.exports = makeExt(`// Name: Arcade
           constraintParameters:{acceptReporters:false,items:'_constraintParameters'},
           sourceBinaryOperations:{acceptReporters:false,items:['+','-','*','/','%','**','&','|','^','<<','>>','>>>']},
           sourceUnaryOperations:{acceptReporters:false,items:['~']},
+          gameStatsModes:{acceptReporters:false,items:['enabled','disabled']},
           sourceScalarTypes:{acceptReporters:false,items:['Number','Boolean','String','Any']},
           mathOperations:{acceptReporters:false,items:['min','max','randomRange','atan2']},
           mathUnaryOperations:{acceptReporters:false,items:['truncate','sign']},
@@ -1198,7 +1228,7 @@ module.exports = makeExt(`// Name: Arcade
           spriteFlags: {acceptReporters: false, items: Object.keys(spriteFlags)}
           ,speechModes: {acceptReporters: false, items: ['text', 'legacy']}
         }
-      },scoreNumberOwners.get(this)),method=>nullSpriteOwners.get(this).get(method)),method=>nullSpriteOwners.get(this).get(method)),sceneClockOwners.get(this)),frameDeltaOwners.get(this)));
+      },scoreNumberOwners.get(this)),method=>nullSpriteOwners.get(this).get(method)),method=>nullSpriteOwners.get(this).get(method)),sceneClockOwners.get(this)),frameDeltaOwners.get(this))),method=>nullSpriteOwners.get(this).get(method));
     }
 
     // An owned runtime may inject {now:()=>milliseconds} for deterministic
@@ -1317,6 +1347,15 @@ module.exports = makeExt(`// Name: Arcade
       if(type==='Buffer' && value)return this._bufferReference(value);
       return Scratch.BWValues.encode(value);
     });}
+    _readHighScore() {return this._settingsStore().call('readNumber','high-score') || 0;}
+    _highScoreFailure(method,args,util,error) {
+      if(!util)throw error;
+      return dependencies.highScoreFaults.fault(method,nullSpriteFaults.get(this).get(method),args,util,error,
+        fault=>exceptionOwners.get(this).rejectPrimitiveFault(args,util,fault.error,fault.lease));
+    }
+    highScore(args,util) {
+      try{return this._readHighScore();}catch(error){return this._highScoreFailure('highScore',args,util,error);}
+    }
     settingsExists(args){return this._settingsGuard(()=>this._settingsStore().call('exists',Scratch.BWValues.decode(args.KEY)),true);}
     settingsRemove(args){return this._settingsGuard(()=>this._settingsStore().call('remove',Scratch.BWValues.decode(args.KEY)));}
     settingsClear(){return this._settingsGuard(()=>this._settingsStore().call('clear'));}
@@ -1463,9 +1502,10 @@ module.exports = makeExt(`// Name: Arcade
     }
     setPlayerState(args,util) {return this._runTerrainGenerator(this._setPlayerStateSteps(args,util));}
     *_setPlayerStateSteps(args,util) {
+      const epoch=this._terrainEpoch;
       const player=this._player(args.PLAYER);if(!player)return;
       const key=this._playerStateNumber(args.KEY),value=this._playerStateNumber(args.VALUE);
-      if(key===0){yield* this._setPlayerScoreSteps({PLAYER:player.index+1,VALUE:value},util);if(this._terrainStopped)return;}
+      if(key===0){yield* this._setPlayerScoreSteps({PLAYER:player.index+1,VALUE:value},util);if(epoch!==this._terrainEpoch)return;}
       if(key===1)this.setLife({PLAYER:player.index+1,VALUE:value});
       this._customPlayerState(player,key).value=value;
     }
@@ -1495,7 +1535,9 @@ module.exports = makeExt(`// Name: Arcade
             if(this._state()!==owner)return;
             this._globalElapsedMs=this._programMillis();this._pumpQuestion(delta);
             const result=this._advance(delta/1000);this._musicHost?.pump();return result;
-          }),onError:error=>this._runtime?.emit?.('BLOCKS_ERROR',String(error?.message || error))});
+          }),onFrameBegin:owner=>this._gameStats.begin(owner),
+          onFrameEnd:(owner,runtime)=>this._gameStats.finish(owner,runtime),
+          onError:error=>this._runtime?.emit?.('BLOCKS_ERROR',String(error?.message || error))});
       }
       return this._sceneFrameHost;
     }
@@ -1588,7 +1630,9 @@ module.exports = makeExt(`// Name: Arcade
     }
     // Program and extension scene handlers, in registration order.
     *_sceneHandlerSteps(handlers,opcode,util) {
+      const epoch=this._terrainEpoch;
       for(const handler of handlers){
+        if(epoch!==this._terrainEpoch)return;
         if(handler.host)handler.host();
         else yield* this._registeredCallbackSteps([handler],opcode,{},util);
       }
@@ -1673,6 +1717,14 @@ module.exports = makeExt(`// Name: Arcade
       const index=this._buttonHandlers.findIndex(h=>h.player===1 && h.button===button && h.event===event);
       if(index<0){this._buttonHandlers.push(registration);this._registerControlButton(1,button,event);}else this._buttonHandlers[index]=registration;
     }
+    registerPlayerButtonHandler(args,util) {
+      const player=Number(Scratch.BWValues.decode(args.PLAYER));
+      if(!Number.isInteger(player)||player<1||player>4)throw new TypeError('Button registration requires player 1 through 4');
+      const button=String(args.BUTTON).toLowerCase(),event=Number(args.EVENT);
+      const registration={...this._handlerRegistration(args,util),button,event,player};
+      const index=this._buttonHandlers.findIndex(h=>h.player===player && h.button===button && h.event===event);
+      if(index<0){this._buttonHandlers.push(registration);this._registerControlButton(player,button,event);}else this._buttonHandlers[index]=registration;
+    }
     _multiplayerButton(value) {const raw=Scratch.BWValues.decode(value);return raw===null || raw===undefined?undefined:['a','b','up','right','down','left'][Number(raw)];}
     registerMultiplayerButtonHandler(args,util) {
       const button=this._multiplayerButton(args.BUTTON),event=Number(args.EVENT);if(!button)throw new TypeError('Invalid multiplayer button');
@@ -1733,9 +1785,11 @@ module.exports = makeExt(`// Name: Arcade
       this._controlEventBus().raise(source,id);
     }
     *_controllerButtonCallbacks(number,button,event,deferred=false,explicitEvent=false) {
+      const epoch=this._terrainEpoch;
       if(!explicitEvent && !this._userControllerEvents)return;
       const handlers=this._buttonHandlers.filter(h=>h.player===number && h.button===button && h.event===event);
       for(const handler of handlers){
+        if(epoch!==this._terrainEpoch)return;
         if(handler.host){handler.host();continue;}
         // A handler fiber that died keeps its event queue locked: later events of this button never run it.
         if(handler.fiberDied)continue;
@@ -1769,13 +1823,16 @@ module.exports = makeExt(`// Name: Arcade
       timer.handle?.unref?.();this._foreverTimer=timer;
     }
     _pumpForever(source) {
+      const epoch=this._terrainEpoch;
       if(this._terrainStopped)return;
       for(const h of this._foreverHandlers.slice())if(!h.lock){
+        if(epoch!==this._terrainEpoch)return;
         h.lock=true;
         const work=this._runTerrainGenerator(this._registeredCallbackSteps([h],'arcade_whenRegisteredForever',{}));
         // PXT's h.lock = false follows h.handler() in the same fiber, so a handler that dies stays locked.
-        if(work?.then)work.then(faulted=>{if(faulted!==true)h.lock=false;},error=>{h.lock=false;throw error;});else if(work!==true)h.lock=false;
+        if(work?.then)work.then(faulted=>{if(epoch===this._terrainEpoch&&faulted!==true)h.lock=false;},error=>{if(epoch!==this._terrainEpoch)return;h.lock=false;throw error;});else if(epoch===this._terrainEpoch&&work!==true)h.lock=false;
       }
+      if(epoch!==this._terrainEpoch)return;
       this._scheduleForever(20);
       // A handler that waits continues in source turns, which arm its timers.
       if(source && this._sourceSceneTimers())this._runtime._arcadeFramePhase.requestContinuation()
@@ -1878,6 +1935,7 @@ module.exports = makeExt(`// Name: Arcade
     hasPlayerScore(args) {const state=this._lifeState(args.PLAYER);return !!state && state.score!==undefined;}
     setPlayerScore(args,util) {return this._runTerrainGenerator(this._setPlayerScoreSteps(args,util));}
     *_setPlayerScoreSteps(args,util) {
+      const epoch=this._terrainEpoch;
       const owner=this._infoState(),state=this._lifeState(args.PLAYER);if(!state)return;
       const hud=owner.hudInfo,V=this._hud().info.Visibility;
       if(!(hud.visibilityFlag & V._ExplicitlySetScore))hud.visibilityFlag|=V.Score;
@@ -1894,7 +1952,7 @@ module.exports = makeExt(`// Name: Arcade
           const registration=scoreThresholdRegistrations.get(this).get(entry.handler);
           if(!registration)throw new Error('Arcade score handler has no current registration');
           yield* this._registeredCallbackSteps([registration],'arcade_whenRegisteredScore',{},util);
-          if(this._terrainStopped)return;
+          if(epoch!==this._terrainEpoch)return;
         }
       }
     }
@@ -1948,25 +2006,26 @@ module.exports = makeExt(`// Name: Arcade
     // Returns true when a callback fiber died with an uncaught exception (PXT:
     // the fiber ends and whatever waited on its completion never resumes).
     *_registeredCallbackSteps(registrations,opcode,event,util,deferred=false) {
-      const runtime=this._runtime;if(!runtime?.allScriptsByOpcodeDo || !runtime?._pushThread)return false;
+      const runtime=this._runtime,epoch=this._terrainEpoch;if(!runtime?.allScriptsByOpcodeDo || !runtime?._pushThread)return false;
       let faulted=false;
       // Scene transitions do not cancel callback fibers already running.
       for(const registration of registrations){
-        if(registration.host){yield registration.host();if(this._terrainStopped)return faulted;continue;}
+        if(epoch!==this._terrainEpoch || this._terrainStopped)return faulted;
+        if(registration.host){yield registration.host();if(epoch!==this._terrainEpoch || this._terrainStopped)return faulted;continue;}
         const scripts=[];
         runtime.allScriptsByOpcodeDo(opcode,(script,target)=>{
           const hat=target.blocks.getBlock(script.blockId),token=target.blocks.getBlock(hat.inputs?.TOKEN?.block);
           if(token?.fields?.TEXT?.value===registration.token)scripts.push({script,target});
         });
         for(const {script,target} of scripts){
-          if(this._terrainStopped)return;
+          if(epoch!==this._terrainEpoch || this._terrainStopped)return faulted;
           const thread=runtime._pushThread(script.blockId,target);thread.bwArcadeEvent={...event,TOKEN:registration.token};thread.bwArcadeCaptures=registration.captures;
           const caller=util?.thread,active=runtime.sequencer.activeThread;
           try{if(!deferred){runtime.sequencer.activeThread=thread;dependencies.primitiveOwner.stepChild(runtime,thread,()=>runtime.sequencer.stepThread(thread));}}
           finally{if(util){util.thread=caller;util.sequencer=runtime.sequencer;}runtime.sequencer.activeThread=active;}
           if(thread.status!==thread.constructor.STATUS_DONE && !thread.isKilled && runtime.threads.includes(thread))
             yield new Promise(resolve=>this._terrainWaits.add({thread,resolve}));
-          if(this._terrainStopped)return faulted;
+          if(epoch!==this._terrainEpoch || this._terrainStopped)return faulted;
           if(exceptionOwners.get(this).failure(thread))faulted=true;
         }
       }
@@ -2078,6 +2137,15 @@ module.exports = makeExt(`// Name: Arcade
         for(const h of particles.intervals.slice())if(h.timer<=(state.elapsedMs || 0)){h.timer=(state.elapsedMs || 0)+h.period;h.fn();}
         particles.update?.();
       }
+    }
+    setGameStats(args) {
+      const mode=Scratch.BWValues.decode(args.MODE);
+      if(mode!=='enabled' && mode!=='disabled')return this._objectError(new TypeError('Arcade game stats requires a fixed enabled or disabled mode'));
+      this._gameStats.setEnabled(mode==='enabled');
+    }
+    _drawGameStats(state) {
+      this._gameStats.ensure(state);
+      if(this._gameStats.enabled)this._gameStats.draw(state,this._sceneSpriteObjects(state).length);
     }
     _changed() {
       if (this._runtime && this._runtime.emit) this._runtime.emit('ARCADE_DEVICE_CHANGED', this._state());
@@ -2756,8 +2824,22 @@ module.exports = makeExt(`// Name: Arcade
       return operation;
     }
     askForString(args, util) { return this._askForString(args, util); }
+    askForStringLength(args, util) {
+      if(typeof Scratch.BWValues.decode(args.QUESTION)!=='string')throw new TypeError('Arcade limited text prompt requires a String question');
+      const length=dependencies.readPromptLength(this._runtime,args,util);
+      return Promise.resolve(this._askForString(args,util,length,false,false)).then(reply=>{
+        if(typeof reply!=='string')throw new TypeError('Arcade limited text prompt result must remain a String');
+        return reply;
+      });
+    }
     askForNumber(args, util) {
       return Promise.resolve(this._askForString(args, util,6,true)).then(reply => parseFloat(reply));
+    }
+    askForNumberLength(args, util) {
+      // This reporter represents only the literal-String message slice.
+      if(typeof Scratch.BWValues.decode(args.QUESTION)!=='string')throw new TypeError('Arcade limited number prompt requires a String question');
+      const length=Math.max(0,Math.min(10,this._mathArgument(args,'LENGTH',util)));
+      return Promise.resolve(this._askForString(args,util,length,true,false)).then(reply=>parseFloat(reply));
     }
     // PXT game.ask waits 500 ms, then requires release before A/B confirmation.
     // Behaviour reference: microsoft/pxt-common-packages libs/game/ask.ts (MIT).
@@ -3540,26 +3622,34 @@ module.exports = makeExt(`// Name: Arcade
       delete sprite._wallHitbox;
     }
     *_setSpriteScalePropertySteps(sprite,property,value,util){
-      if(property==='scale'){yield* this._setSpriteScalePropertySteps(sprite,'sy',value,util);yield* this._setSpriteScalePropertySteps(sprite,'sx',value,util);return;}
+      const epoch=this._terrainEpoch;if(this._spriteValues.get(sprite.id)!==sprite)return;
+      if(property==='scale'){yield* this._setSpriteScalePropertySteps(sprite,'sy',value,util);if(epoch!==this._terrainEpoch)return;yield* this._setSpriteScalePropertySteps(sprite,'sx',value,util);return;}
       const oldX=sprite._fx,oldY=sprite._fy;sprite[property]=value;
       const desiredX=sprite._fx,desiredY=sprite._fy;sprite._fx=oldX;sprite._fy=oldY;
       yield* this._moveSpriteExplicitSteps(sprite,0,(desiredY-sprite._fy)|0,util);
+      if(epoch!==this._terrainEpoch)return;
       yield* this._moveSpriteExplicitSteps(sprite,(desiredX-sprite._fx)|0,0,util);
     }
     setSpriteScaleCore(args,util) {
       const sprite=this._spriteValues.get(String(args.ID)) || this._sprite(args.ID);if(!sprite)return;
-      const finish=()=>{this._renderSpriteImageIfPresent(sprite);this._positionSprite(sprite.id);this._changed();};
+      const epoch=this._terrainEpoch;
+      const finish=()=>{if(epoch!==this._terrainEpoch || this._spriteValues.get(sprite.id)!==sprite)return;this._renderSpriteImageIfPresent(sprite);this._positionSprite(sprite.id);this._changed();};
       const work=this._runTerrainGenerator(this._setSpriteScaleCoreSteps(sprite,args,util));return work?.then?work.then(finish):finish();
     }
     *_setSpriteScaleCoreSteps(sprite,args,util){
+      const epoch=this._terrainEpoch;
       const sx=Scratch.BWValues.decode(args.SX),sy=Scratch.BWValues.decode(args.SY),anchor=Number(args.ANCHOR)||0;
       const hasX=sx!=null,hasY=sy!=null,oldW=sprite.width,oldH=sprite.height;
-      if(hasX){const old=sprite.sx;yield* this._setSpriteScalePropertySteps(sprite,'sx',Number(sx),util);if(!hasY && Scratch.Cast.toBoolean(args.PROPORTIONAL))yield* this._setSpriteScalePropertySteps(sprite,'sy',sprite.sy*Number(sx)/old,util);}
-      if(hasY){const old=sprite.sy;yield* this._setSpriteScalePropertySteps(sprite,'sy',Number(sy),util);if(!hasX && Scratch.Cast.toBoolean(args.PROPORTIONAL))yield* this._setSpriteScalePropertySteps(sprite,'sx',sprite.sx*Number(sy)/old,util);}
+      if(hasX){const old=sprite.sx;yield* this._setSpriteScalePropertySteps(sprite,'sx',Number(sx),util);if(epoch!==this._terrainEpoch)return;if(!hasY && Scratch.Cast.toBoolean(args.PROPORTIONAL))yield* this._setSpriteScalePropertySteps(sprite,'sy',sprite.sy*Number(sx)/old,util);}
+      if(hasY){const old=sprite.sy;yield* this._setSpriteScalePropertySteps(sprite,'sy',Number(sy),util);if(epoch!==this._terrainEpoch)return;if(!hasX && Scratch.Cast.toBoolean(args.PROPORTIONAL))yield* this._setSpriteScalePropertySteps(sprite,'sx',sprite.sx*Number(sy)/old,util);}
+      if(epoch!==this._terrainEpoch)return;
       const dx=(sprite.width-oldW)/2,dy=(sprite.height-oldH)/2;
       if(anchor&2)yield* this._moveSpriteExplicitSteps(sprite,(dx*256)|0,0,util);
+      if(epoch!==this._terrainEpoch)return;
       if(anchor&4)yield* this._moveSpriteExplicitSteps(sprite,(-dx*256)|0,0,util);
+      if(epoch!==this._terrainEpoch)return;
       if(anchor&1)yield* this._moveSpriteExplicitSteps(sprite,0,(dy*256)|0,util);
+      if(epoch!==this._terrainEpoch)return;
       if(anchor&8)yield* this._moveSpriteExplicitSteps(sprite,0,(-dy*256)|0,util);
     }
     setSpriteScale(args,util){return this.setSpriteScaleCore({...args,SX:Number(args.VALUE),SY:Number(args.VALUE)},util);}
@@ -3570,6 +3660,7 @@ module.exports = makeExt(`// Name: Arcade
       if(sprite.image)this._renderSpriteImage(sprite.id);
     }
     setSpritePosition(args, util) {
+      const epoch=this._terrainEpoch;
       if(this._missingOperand(util,args,'ID'))return this._primitiveFault('setSpritePosition',args,util);
       const sprite = this._spriteValues.get(String(args.ID)) || this._sprite(args.ID);
       if (!sprite) return;
@@ -3577,14 +3668,14 @@ module.exports = makeExt(`// Name: Arcade
       const dx = ((Number(args.X) - sprite.x) * 256) | 0;
       const dy = ((Number(args.Y) - sprite.y) * 256) | 0;
       const result = this._moveSpriteExplicit(sprite, dx, dy, util);
-      const finish = () => {this._positionSprite(String(args.ID));this._changed();};
+      const finish = () => {if(epoch!==this._terrainEpoch || this._spriteValues.get(sprite.id)!==sprite)return;this._positionSprite(String(args.ID));this._changed();};
       return result?.then ? result.then(finish) : finish();
     }
     spawnSprite(args, util) {
       // The positioned factory is constructor + setPosition, just as exported
       // TypeScript is. Creation callbacks see the constructor's center first.
-      const created = this.createSprite(args, util);
-      const position = id => {const moved=this.setSpritePosition({ID:id, X:args.X, Y:args.Y},util);return moved?.then ? moved.then(()=>id) : id;};
+      const epoch=this._terrainEpoch,created = this.createSprite(args, util);
+      const position = id => {if(epoch!==this._terrainEpoch)return "";const moved=this.setSpritePosition({ID:id, X:args.X, Y:args.Y},util);return moved?.then ? moved.then(()=>id) : id;};
       return created && typeof created.then === 'function' ? created.then(position) : position(created);
     }
     _reserveSdkSprite() {const id=dependencies.sdkSpriteClasses.allocateHandle();this._spriteValues.set(id,{id,_sdkBaseOnly:true});return id;}
@@ -3637,12 +3728,14 @@ module.exports = makeExt(`// Name: Arcade
       return id;
     }
     spawnProjectile(args, util) {
+      const epoch=this._terrainEpoch;
       args = {...args, KIND:this._kindValue(args.KIND) || this._kindRegistry.builtin('Projectile')};
       // PXT creates at the scene center, runs creation handlers, then applies
       // projectile motion and edge/source placement using the resulting size.
       const created = this.createSprite({TEMPLATE: args.TEMPLATE, KIND: args.KIND,
         X: 80, Y: 60, WIDTH: args.WIDTH, HEIGHT: args.HEIGHT, IMAGE: args.IMAGE}, util);
       const finish = id => {
+        if(epoch!==this._terrainEpoch)return "";
         const state=this._state();
         // Creation handlers can destroy either reference or change the current
         // scene. PXT still finalizes the actual allocated projectile object.
@@ -3666,6 +3759,20 @@ module.exports = makeExt(`// Name: Arcade
       };
       return created && typeof created.then === 'function' ? created.then(finish) : finish(created);
     }
+    registerInstanceOverlapHandler(args,util) {
+      const sprite=this._spriteValues.get(String(args.ID)) || this._state().sprites[String(args.ID)];if(!sprite)return;
+      sprite._overlapRegistration=this._handlerRegistration(args,util);
+    }
+    whenRegisteredInstanceOverlap(args,util) {return this.whenRegisteredWall(args,util);}
+    *_instanceOverlapSteps(receiver,other) {
+      const clock=this._sourceSceneTimers()?this._programClockEpoch:null;
+      yield new Promise(resolve=>(clock?clock.setTimeout:setTimeout)(resolve,0));
+      if(this._terrainStopped || this._spriteValues.get(receiver.id)!==receiver)return false;
+      // The historical SDK reads the replacing slot when the fiber starts.
+      const registration=receiver._overlapRegistration;if(!registration)return false;
+      return yield* this._registeredCallbackSteps([registration],'arcade_whenRegisteredInstanceOverlap',
+        {first:receiver.id,second:other.id},undefined,false);
+    }
     registerInstanceDestroyedHandler(args,util) {
       const id=String(args.ID),state=this._state();
       const sprite=this._spriteValues.get(id) || state.sprites[id];if(!sprite)return;
@@ -3674,7 +3781,9 @@ module.exports = makeExt(`// Name: Arcade
     }
     whenRegisteredInstanceDestroyed(args,util) {return this.whenRegisteredWall(args,util);}
     *_instanceDestroyedSteps(registration,kind,id,util) {
+      const epoch=this._terrainEpoch;
       if(registration && typeof registration==='object')yield* this._registeredCallbackSteps([registration],'arcade_whenRegisteredInstanceDestroyed',{first:id},util);
+      if(epoch!==this._terrainEpoch)return;
       yield* this._registeredCallbackSteps(this._destroyedHandlers.filter(h=>h.kind===kind),'arcade_whenRegisteredKindDestroyed',{first:id},util);
     }
     registerSpriteDestroyed(args) {
@@ -3717,6 +3826,7 @@ module.exports = makeExt(`// Name: Arcade
       return this._runTerrainGenerator(this._instanceDestroyedSteps(token,sprite.kind,id,util));
     }
     setSpriteProperty(args, util) {
+      const epoch=this._terrainEpoch;
       if(this._missingOperand(util,args,'ID') && ['x','y','left','right','top','bottom','vx','vy','ax','ay','fx','fy','sx','sy','scale','width','height','z','lifespan','rotation','rotationDegrees','data','flags'].includes(String(args.PROPERTY)))return this._primitiveFault('setSpriteProperty',args,util);
       const sprite = this._spriteValues.get(String(args.ID)) || this._sprite(args.ID);
       const name = String(args.PROPERTY);
@@ -3736,7 +3846,7 @@ module.exports = makeExt(`// Name: Arcade
       }
       const value = Number(args.VALUE);
       if(['sx','sy','scale'].includes(name)){
-        const finish=()=>{this._renderSpriteImageIfPresent(sprite);this._positionSprite(sprite.id);this._changed();};
+        const finish=()=>{if(epoch!==this._terrainEpoch || this._spriteValues.get(sprite.id)!==sprite)return;this._renderSpriteImageIfPresent(sprite);this._positionSprite(sprite.id);this._changed();};
         const work=this._runTerrainGenerator(this._setSpriteScalePropertySteps(sprite,name,value,util));return work?.then?work.then(finish):finish();
       }
       const oldX = sprite._fx, oldY = sprite._fy;
@@ -3752,6 +3862,7 @@ module.exports = makeExt(`// Name: Arcade
         sprite._fx = oldX; sprite._fy = oldY;moved=this._moveSpriteExplicit(sprite, dx, dy, util);
       }
       const finish = () => {
+        if(epoch!==this._terrainEpoch || this._spriteValues.get(sprite.id)!==sprite)return;
         if(['sx','sy','scale','rotation','rotationDegrees'].includes(name))this._renderSpriteImageIfPresent(sprite);
         this._clampSprite(sprite);
         if (['sx','sy','scale','rotation','rotationDegrees','x', 'y', 'left', 'right', 'top', 'bottom'].includes(name)) this._positionSprite(String(args.ID));
@@ -3826,6 +3937,7 @@ module.exports = makeExt(`// Name: Arcade
     }
     _moveSpriteExplicit(sprite, dx, dy, util) {return this._runTerrainGenerator(this._moveSpriteExplicitSteps(sprite,dx,dy,util));}
     *_moveSpriteExplicitSteps(sprite, dx, dy, util) {
+      if(this._spriteValues.get(sprite.id)!==sprite)return;
       const oldX = sprite._fx, oldY = sprite._fy;
       sprite._fx = (oldX+dx)|0;sprite._fy = (oldY+dy)|0;
       const map = this._state().tilemap;if (!map) return;
@@ -3940,7 +4052,7 @@ module.exports = makeExt(`// Name: Arcade
       const pair=[first.id,second.id].sort().join('|');if(owner.overlapLocks.has(pair) || !matches.length)return;
       owner.overlapLocks.add(pair);let remaining=matches.length;
       for(const h of matches){
-        const flipped=h.kind!==first.kind,a=flipped?second:first,b=flipped?first:second;
+        const flipped=h.instanceReceiver?h.instanceReceiver!==first.id:h.kind!==first.kind,a=flipped?second:first,b=flipped?first:second;
         const finish=()=>{if(--remaining===0)owner.overlapLocks.delete(pair);};
         let work;
         if(h.legacy){
@@ -3948,22 +4060,28 @@ module.exports = makeExt(`// Name: Arcade
           thread.bwArcadeEvent={A:h.kind,B:h.otherKind,first:a.id,second:b.id};
           // A hat-based handler that ends in an uncaught exception keeps its pair overlapping, like a dead fiber.
           work=new Promise(resolve=>this._terrainWaits.add({thread,resolve})).then(()=>!!exceptionOwners.get(this).failure(thread));
-        }else work=this._runTerrainGenerator(this._registeredCallbackSteps([h],'arcade_whenRegisteredOverlap',{first:a.id,second:b.id,deferredFiber:true},undefined,true));
+        }else if(h.instanceReceiver)work=this._runTerrainGenerator(this._instanceOverlapSteps(a,b));
+        else work=this._runTerrainGenerator(this._registeredCallbackSteps([h],'arcade_whenRegisteredOverlap',{first:a.id,second:b.id,deferredFiber:true},undefined,true));
         // PXT removes the pair from _overlappers after the handler returns; a dead fiber leaves it overlapping.
         if(work?.then)work.then(faulted=>{if(faulted!==true)finish();},error=>{finish();throw error;});else if(work!==true)finish();
       }
     }
     _physicsOverlapRounds(grid,handlers,owner) {
-      if(!handlers.length)return;
+      const instanceOverlap=Object.values(owner.sprites).some(sprite=>sprite._overlapRegistration);
+      if(!handlers.length && !instanceOverlap)return;
       const checked=new Set(),blocked=s=>s._destroyed || s.flags&(2|spriteFlags.GhostThroughSprites|spriteFlags.RelativeToCamera);
       for(const bucket of grid.filled){
         if(bucket.length===1)continue;
         for(const first of bucket){if(blocked(first))continue;
           for(const second of bucket){
-            if(first===second)continue;
+            if(first===second || blocked(second))continue;
             const pair=[first.id,second.id].sort().join('|');if(checked.has(pair))continue;checked.add(pair);
             if(owner.overlapLocks?.has(pair))continue;
             const matches=handlers.filter(h=>(h.kind===first.kind && h.otherKind===second.kind)||(h.kind===second.kind && h.otherKind===first.kind));
+            if(instanceOverlap) {
+              const receiver=[first,second].sort((a,b)=>a.pxtId-b.pxtId).find(sprite=>sprite._overlapRegistration);
+              if(receiver)matches.unshift({...receiver._overlapRegistration,instanceReceiver:receiver.id});
+            }
             if(!matches.length)continue;
             const higher=first.pxtId>second.pxtId?first:second,lower=higher===first?second:first;
             if(this.spriteOverlaps({A:higher.id,B:lower.id}))this._queueOverlapPair(first,second,matches,owner);
@@ -3981,7 +4099,7 @@ module.exports = makeExt(`// Name: Arcade
       const ratio=((engine.maxVelocity<<8)/engine.minSingleStep)|0;
       const count=(Math.trunc(Math.imul(ratio,Math.trunc(dtMs))/1000)+128)>>8;
       for(let round=0;round<count && movers.length;round++){
-        const remaining=[];
+        const remaining=[],instanceOverlap=live.some(sprite=>sprite._overlapRegistration);
         for(const motion of movers){
           const sprite=motion.sprite;
           for(const axis of ['x','y']){
@@ -3997,7 +4115,8 @@ module.exports = makeExt(`// Name: Arcade
           motion.dx-=dx;motion.dy-=dy;
           sprite._fx=(sprite._fx+dx)|0;sprite._fy=(sprite._fy+dy)|0;
           if(!sprite._destroyed && !(sprite.flags&(2|spriteFlags.GhostThroughSprites|spriteFlags.RelativeToCamera)) &&
-            [...this._overlapHandlers,...handlers.filter(h=>h.legacy)].some(h=>h.kind===sprite.kind || h.otherKind===sprite.kind))this._physicsInsert(grid,sprite);
+            (instanceOverlap ||
+            [...this._overlapHandlers,...handlers.filter(h=>h.legacy)].some(h=>h.kind===sprite.kind || h.otherKind===sprite.kind)))this._physicsInsert(grid,sprite);
           if(map)yield* this._collideTileWallsSteps(sprite,map,dx,dy,motion);
           if(epoch!==this._terrainEpoch || this._state()!==owner)return;
           this._clampSprite(sprite);
@@ -4856,13 +4975,29 @@ module.exports = makeExt(`// Name: Arcade
         HAS_SOUND:Scratch.Cast.toBoolean(args.HAS_SOUND),HAS_SCORE:Scratch.Cast.toBoolean(args.HAS_SCORE),
         SCORE:Number(Scratch.BWValues.decode(args.SCORE))});
     }
-    gameOver(args,util) {return this._runGameOver(Scratch.Cast.toBoolean(args.WIN),util);}
+    gameOver(args,util) {return this._runGameOver(Scratch.Cast.toBoolean(args.WIN),util,undefined,{method:'gameOver',args});}
+    resetGame(args,util) {
+      const runtime=this._runtime;
+      if(runtime?.bwArcadeHoldControlReset){
+        runtime.bwArcadeControlResets=(runtime.bwArcadeControlResets||0)+1;
+        // The original simulator posts its request and never resumes this
+        // fiber. Stop/Load invalidates its async lease before cleanup resolves it.
+        return new Promise(resolve=>this._resetSuspensions.add(resolve));
+      }
+      if(typeof runtime?.greenFlag!=='function'||typeof runtime.sequencer?.retireThread!=='function'||!Array.isArray(runtime.threads))throw new Error('Arcade reset requires the real VM restart lifecycle');
+      // The sequencer may still hold its current thread-array snapshot. Retire
+      // every old entry through its lifecycle API before greenFlag replaces it;
+      // merely removing runtime.threads could run an old sibling in this pass.
+      const old=new Set(runtime.threads);if(util?.thread)old.add(util.thread);
+      for(const thread of old)runtime.sequencer.retireThread(thread);
+      runtime.greenFlag();
+    }
     // game.over(win, effect?): the effect applies unless the program chose one.
     legacyGameOver(args,util) {
       const win=Scratch.Cast.toBoolean(args.WIN),effect=this._gameOverEffect(args.EFFECT,true);
       if(effect===null)return;
       this._gameOverState().config.setEffect(win,effect,false);
-      return this._runGameOver(win,util);
+      return this._runGameOver(win,util,undefined,{method:'legacyGameOver',args});
     }
     // Resolves after ms of Arcade time (PXT pause).
     _arcadePause(ms) {return new Promise(resolve=>this._music().spawn((function*(){yield ms;resolve();})()));}
@@ -4870,28 +5005,43 @@ module.exports = makeExt(`// Name: Arcade
     _nextButtonPress() {return new Promise(resolve=>{(this._buttonPressWaiters || (this._buttonPressWaiters=[])).push(resolve);});}
     waitAnyButton() {return new Promise(resolve=>this._nativeButtonWaiters.add(resolve));}
     _buttonPressed() {const waiters=this._buttonPressWaiters;this._buttonPressWaiters=[];if(waiters)for(const resolve of waiters)resolve();for(const resolve of this._nativeButtonWaiters)resolve();this._nativeButtonWaiters.clear();}
-    async _runGameOver(win,util,capturedFrame) {
+    _prepareGameOverScores(judged,win,players) {
+      const {game}=this._gameOverModule();
+      // Display fallback and raw comparator reads are separate SDK operations.
+      const previousBest=judged && this._readHighScore();
+      let winner=null,winningScore=null;
+      if(judged && win)for(const player of players)if(this._isBetterScore(player.score,winningScore)){winningScore=player.score;winner=player;}
+      const scores=players.map(player=>new game.GameOverPlayerScore(player.number,player.score,player===winner));
+      if(judged && winner){
+        const stored=this._settingsStore().call('readNumber','high-score');
+        if(this._isBetterScore(winner.score,stored))this._settingsStore().call('writeNumber','high-score',winner.score);
+      }
+      return {previousBest,winner,scores};
+    }
+    async _runGameOver(win,util,capturedFrame,storageCall) {
+      const epoch=this._terrainEpoch;
       const go=this._gameOverState();
       if(go.over)return;
       go.over=true;
       const ext=this,{game}=this._gameOverModule(),goc=go.config,state=this._infoState();
       const judged=goc.scoringType!==game.ScoringType.None;
       const players=(state.players || []).map((player,index)=>({number:index+1,score:player?.score})).filter(player=>player.score!==undefined);
-      const best=this._highScore===undefined?null:this._highScore;
-      // info.highScore() reads 0 when nothing was saved.
-      const previousBest=judged && (best || 0);
-      let winner=null,winningScore=null;
-      if(judged && win)for(const player of players)if(this._isBetterScore(player.score,winningScore)){winningScore=player.score;winner=player;}
-      const scores=players.map(player=>new game.GameOverPlayerScore(player.number,player.score,player===winner));
-      if(judged && winner && this._isBetterScore(winner.score,best))this._highScore=winner.score;
+      let previousBest,winner,scores;
+      try {({previousBest,winner,scores}=this._prepareGameOverScores(judged,win,players));}
+      catch(error) {
+        // No yield preceded this actual storage failure; retain its primitive loan.
+        if(storageCall)return this._highScoreFailure(storageCall.method,storageCall.args,util,error);
+        throw error;
+      }
+      if(epoch!==this._terrainEpoch)return;
       const message=goc.getMessage(win,false),effect=goc.getEffect(win),sound=goc.getSound(win);
       const mode=goc.getSoundLooping(win)?this._music().pxt.music.PlaybackMode.LoopingInBackground:this._music().pxt.music.PlaybackMode.InBackground;
       // Explicit game over captures the last frame; default info loss captures
       // the partial HUD pass at the original terminal draw boundary.
       const shown=capturedFrame || (state._hudPass?.epoch===this._terrainEpoch && state._hudPass.screen.pixels.slice()) ||
         (this._state()._renderPass?.epoch===this._terrainEpoch && this._state()._renderPass.screen.pixels.slice()) || state.sceneFrame?.pixels?.slice() || new Uint8Array(160*120);
-      while(this._sceneStack.length){const pending=this.popScene({},util);if(pending?.then)await pending;}
-      const pushed=this.pushScene({},util);if(pushed?.then)await pushed;
+      while(this._sceneStack.length){const pending=this.popScene({},util);if(epoch!==this._terrainEpoch)return;if(pending?.then)await pending;if(epoch!==this._terrainEpoch)return;}
+      const pushed=this.pushScene({},util);if(epoch!==this._terrainEpoch)return;if(pushed?.then)await pushed;if(epoch!==this._terrainEpoch)return;
       const scene=this._state();
       scene.backgroundImage={width:160,height:120,pixels:shown};this._renderBackgroundImage();
       if(sound)this._music().spawn(this._music().pxt.music.play(sound,mode));
@@ -4899,19 +5049,21 @@ module.exports = makeExt(`// Name: Arcade
       else if(effect?.kind==='image') {
         // An image effect runs in control.runInParallel: its first step comes after
         // the fiber that started it yields, i.e. after the new scene's first frame.
-        const imageEffect=this._particles().effects[effect.name],start=()=>{if(ext._state()===scene)imageEffect.startScreenEffect();};
+        const imageEffect=this._particles().effects[effect.name],start=()=>{if(epoch===ext._terrainEpoch && ext._state()===scene)imageEffect.startScreenEffect();};
         if(scene._framesDone)start();else (scene._afterFrame || (scene._afterFrame=[])).push(start);
       }
       await this._arcadePause(400);
-      if(this._state()!==scene)return;
+      if(epoch!==this._terrainEpoch || this._state()!==scene)return;
       const dialog=new game.GameOverDialog(win,message,judged,scores,previousBest,undefined);
       this._addSceneRenderable(scene,{z:100,id:scene.nextSpriteId++,draw:screen=>{
         dialog.update();
         imageEngine.blit(screen,dialog.image.raw,'drawTransparentImage',0,(120-dialog.image.height)>>1);
       }});
       await this._arcadePause(500);
+      if(epoch!==this._terrainEpoch)return;
       dialog.displayCursor();
       await this._nextButtonPress();
+      if(epoch!==this._terrainEpoch)return;
       // control.reset restarts the program. A host that owns restarts (the
       // differential harness: the original simulator only posts a restart
       // message to its parent) holds it and counts the request instead.
@@ -5483,6 +5635,16 @@ module.exports = makeExt(`// Name: Arcade
       if(mode!=='play' && mode!=='playUntilDone'){this._musicMenu({},mode);return;}
       return music.run(melody[mode]());
     }
+    playNoteMelody(args,util) {
+      const music=this._music(),notes=Scratch.BWValues.decode(args.NOTES);
+      let tempo=Scratch.BWValues.decode(args.TEMPO);
+      // Only a numeric editor shadow needs parsing. Opaque connected operands
+      // reach the original generator unchanged, after its notes.split check.
+      if(typeof tempo==='string')tempo=this._mathArgument(args,'TEMPO',util);
+      // This original API formats rests/octaves and uses Melody's default255;
+      // stringPlayable instead reads the mutable global music.volume().
+      return music.run(music.pxt.music.playMelody(notes,tempo));
+    }
     playSoundEffect(args) {
       const music=this._music(),effect=this._musicValue(args.EFFECT,'Playable'),mode=this._musicMenu(music.pxt.SoundExpressionPlayMode,String(args.MODE));
       if(!effect || mode===null)return;
@@ -5730,6 +5892,33 @@ module.exports = makeExt(`// Name: Arcade
       // sprites by z then id. game.onPaint is ON_PAINT_Z -20, onShade ON_SHADE_Z 80.
       const state=this._state();
       this._addSceneRenderable(state,{...this._handlerRegistration(args,util),z,id:state.nextSpriteId++});
+    }
+    addLiteralDrawing(args) {
+      const fail=()=>this._objectError(new Error('Literal drawing requires bounded rectangle/line commands'));
+      const text=Scratch.BWValues.decode(args.COMMANDS);
+      if(typeof text!=='string'||text.length>4096)return fail();
+      let commands;try{commands=JSON.parse(text);}catch{return fail();}
+      if(!Array.isArray(commands)||commands.length>32)return fail();
+      for(const row of commands){
+        if(!Array.isArray(row)||row.length!==6||!['fillRect','drawRect','drawLine'].includes(row[0])||!row.slice(1).every(Number.isInteger)||row[5]<0||row[5]>15)return fail();
+        const a=row[1],b=row[2],c=row[3],d=row[4];
+        if(row[0]==='drawLine'?(a<0||a>=160||c<0||c>=160||b<0||b>=120||d<0||d>=120):(a<0||b<0||c<0||d<0||a+c>160||b+d>120))return fail();
+      }
+      const state=this._state();
+      // The ignored original Renderable still allocates a scene id at z=0.
+      // Pure literal drawing runs synchronously in the real render pass.
+      this._addSceneRenderable(state,{z:0,id:state.nextSpriteId++,draw:screen=>{
+        for(const row of commands){
+          if(row[0]!=='drawRect'){imageEngine.draw(screen,row[0],row[1],row[2],row[3],row[4],row[5]);continue;}
+          // The SDK drawRect helper delegates to four inclusive drawLine edges.
+          const x=row[1],y=row[2],w=row[3]-1,h=row[4]-1,c=row[5];
+          if(row[3]===0||row[4]===0)continue;
+          imageEngine.draw(screen,'drawLine',x,y,x+w,y,c);
+          imageEngine.draw(screen,'drawLine',x,y,x,y+h,c);
+          imageEngine.draw(screen,'drawLine',x+w,y,x+w,y+h,c);
+          imageEngine.draw(screen,'drawLine',x,y+h,x+w,y+h,c);
+        }
+      }});
     }
     registerPaintHandler(args,util) {this._registerRenderable(args,util,-20);}
     registerShadeHandler(args,util) {this._registerRenderable(args,util,80);}
@@ -6521,8 +6710,10 @@ module.exports = makeExt(`// Name: Arcade
       const previous = this._state().tilemap;
       const outgoing = previous && !previous.legacy && previous !== data;
       if (!this._tilemapHandlers.length || (!outgoing && !data) || (data && data.legacy)) return this._applyTilemap(data);
+      const epoch=this._terrainEpoch;
       const steps = function* () {
         if (outgoing) yield* this._tilemapEventSteps('Unloaded', previous, util);
+        if(epoch!==this._terrainEpoch)return;
         this._applyTilemap(data);
         if (data && previous !== data) yield* this._tilemapEventSteps('Loaded', data, util);
       }.call(this);
@@ -6602,6 +6793,28 @@ module.exports = makeExt(`// Name: Arcade
     spritesOfKind(args) {
       return Scratch.BWValues.arrayReference(this._runtime, this._spritesOfKind(args.KIND).map(s => s.id));
     }
+    withoutNullSprites(args) {
+      const fail=()=>this._objectError(new Error('Null filtering requires a dense native Sprite/null array'));
+      if(!Scratch.BWValues.hasNativeReferenceMetadata(args.ARRAY))return fail();
+      const array=Scratch.BWValues.arrayValue(this._runtime,args.ARRAY);
+      if(!array||nullFilterPrototype(array)!==nullFilterArrayPrototype)return fail();
+      const size=nullFilterDescriptor(array,'length');
+      if(!size||!Object.hasOwn(size,'value')||typeof size.value!=='number'||size.value<0||size.value%1!==0)return fail();
+      const keys=nullFilterKeys(array);
+      if(keys.length!==size.value+1)return fail();
+      const result=[];
+      for(let i=0;i<size.value;i++){
+        const cell=nullFilterDescriptor(array,String(i));
+        if(!cell||!Object.hasOwn(cell,'value'))return fail();
+        const value=cell.value;
+        if(value===null)continue;
+        // Retained destroyed Sprites are still the same Sprite handles.
+        if(typeof value!=='string'||!this._spriteValues.has(value))return fail();
+        nullFilterDefine(result,String(result.length),{value,writable:true,enumerable:true,configurable:true});
+      }
+      // A synchronous reporter: no guest callback, loop block or VM yield.
+      return Scratch.BWValues.arrayReference(this._runtime,result);
+    }
     spriteCount(args) { return this._spritesOfKind(args.KIND).length; }
     whenSpriteCreated(args, util) {
       const event = this._currentEvent || (util && util.thread && util.thread.bwArcadeEvent);
@@ -6664,8 +6877,11 @@ module.exports = makeExt(`// Name: Arcade
     }
     *_advanceFrameSteps(dt) {
       const epoch=this._terrainEpoch,owner=this._state();
-      try {yield* this._advanceFrameBody(dt);}
+      const manual=!this._sourceSceneTimers(),began=manual?this._programMillis():0;let completed=false;
+      if(manual)this._gameStats.ensure(owner);
+      try {yield* this._advanceFrameBody(dt);completed=true;}
       finally {
+        if(manual && completed && epoch===this._terrainEpoch && !this._frameFaults.has(owner))this._gameStats.finish(owner,this._programMillis()-began);
         owner._framesDone=(owner._framesDone || 0)+1;
         const queued=owner._afterFrame;owner._afterFrame=undefined;
         if(queued && epoch===this._terrainEpoch)for(const start of queued)start();
@@ -6683,7 +6899,7 @@ module.exports = makeExt(`// Name: Arcade
       const live = Object.values(state.sprites).filter(s => s.id);
       this._moveControlledSprites(live);yield* this._moveFollowingSpriteSteps();
       if(epoch!==this._terrainEpoch || this._state()!==state)return;
-      if (!live.length && !state.physicsEngine.members.length) {this._runFrameHandlers(state,0,19);if(yield* this._sceneUpdates())return;if(this._state()!==state)return;this._advanceAnimations(dt);this._updateCamera();this._runFrameHandlers(state);if(state.tilemap?.legacy)this._renderTilemap(true);yield* this._advanceSpeechSteps(dt);if(this._state()!==state)return;yield* this._composeSceneSteps();if(this._state()!==state || epoch!==this._terrainEpoch || state._defaultGameOverPending)return;if(!this._frameFaults.has(state))this._startFrameHats();return;}
+      if (!live.length && !state.physicsEngine.members.length) {this._runFrameHandlers(state,0,19);if(yield* this._sceneUpdates())return;if(this._state()!==state)return;this._advanceAnimations(dt);this._updateCamera();this._runFrameHandlers(state);if(state.tilemap?.legacy)this._renderTilemap(true);yield* this._advanceSpeechSteps(dt);if(this._state()!==state)return;yield* this._composeSceneSteps();if(this._state()!==state || epoch!==this._terrainEpoch || state._defaultGameOverPending)return;this._drawGameStats(state);if(!this._frameFaults.has(state))this._startFrameHats();return;}
       yield* this._advancePhysicsSteps(state.physicsEngine.members.slice(),dt,state.tilemap);
       if(epoch!==this._terrainEpoch || this._state()!==state)return;
       for(const sprite of live)if(state.sprites[sprite.id])this._positionSprite(sprite.id);
@@ -6704,19 +6920,23 @@ module.exports = makeExt(`// Name: Arcade
       if(this._state()!==state)return;
       yield* this._composeSceneSteps();
       if(this._state()!==state || epoch!==this._terrainEpoch || state._defaultGameOverPending)return;
+      this._drawGameStats(state);
       this._changed();
       if(!this._frameFaults.has(state))this._startFrameHats();
     }
     *_sdkSpriteBaseUpdateSteps(sprite,dt,camera) {
+      const epoch=this._terrainEpoch;
       // Selected Sprite.__update orders lifespan, AutoDestroy, then speech.
       // Its caller still invokes ExtendableSprite.update after destruction.
       if(sprite.lifespan!==undefined){sprite.lifespan-=dt*1000;if(sprite.lifespan<=0){
         sprite.lifespan=undefined;const work=this.destroySprite({ID:sprite.id,_core:true});if(work?.then)yield work;
       }}
+      if(epoch!==this._terrainEpoch)return;
       const relative=!!(sprite.flags & spriteFlags.RelativeToCamera),ox=relative?0:camera.drawOffsetX,oy=relative?0:camera.drawOffsetY;
       if(sprite.autoDestroy && (sprite.x+sprite.width/2<ox || sprite.x-sprite.width/2>ox+160 ||
           sprite.y+sprite.height/2<oy || sprite.y-sprite.height/2>oy+120)){
         const work=this.destroySprite({ID:sprite.id});if(work?.then)yield work;
+        if(epoch!==this._terrainEpoch)return;
       }
       yield* this._advanceSpeechSteps(dt,sprite.id);
     }
@@ -6794,6 +7014,7 @@ module.exports = makeExt(`// Name: Arcade
   primitiveOwner: require('../../../util/bw-primitive-owner'),
   cachedPrimitiveOwner: require('../../../util/bw-cached-primitive-owner'),
   arcadeExceptions: require('../../../util/bw-arcade-exceptions'),
+  readPromptLength: require('./prompt-length-input'),
   sourceValueBinary: require('../../../util/bw-array-source-values').sourceValueBinary,
   sourceValueUnary: require('../../../util/bw-array-source-values').sourceValueUnary,
   createClassCallableHost: require('./class-callable-host'),
@@ -6809,13 +7030,15 @@ module.exports = makeExt(`// Name: Arcade
   frameDeltaNumber,
   bindFrameDeltaAdapterInfo: frameDeltaNumber.bindAdapterInfo,
   nullSpriteGetter,
+  highScoreFaults,
   tileLookupFaults,
-  bindNullSpriteAdapterInfo: (info, adapter, instance) => {nullSpriteGetter.bindAll(info, adapter, instance);tileLookupFaults.bindAll(info, adapter, instance);},
+  bindNullSpriteAdapterInfo: (info, adapter, instance) => {nullSpriteGetter.bindAll(info, adapter, instance);tileLookupFaults.bindAll(info, adapter, instance);highScoreFaults.bindAll(info, adapter, instance);},
   createProcedureConstraints: require('./procedure-parameter-constraints'),
   procedureEntry: require('../../../util/bw-procedure-entry'),
   createManagedReturnValues: require('./managed-return-values'),
   currentNumberInput: require('./current-number-input'),
   createSceneFrameContexts: require('./scene-frame-contexts'),
+  createGameStats: require('./game-stats'),
   createControlEvents: require('./control-events'),
   createPollEvents: require('./poll-events'),
   createKindRegistry: require('./kind-registry'),

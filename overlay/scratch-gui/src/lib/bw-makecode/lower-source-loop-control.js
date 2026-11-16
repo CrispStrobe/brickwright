@@ -86,14 +86,17 @@ export function lowerSourceLoopControl(program) {
         if(node.type==='Break' && context.breakName)return {...assign(context.breakName,1),sourceExit:true};
         if(node.type==='Continue' && context.continueName)return {...assign(context.continueName,1),sourceExit:true};
         if(['While','For'].includes(node.type)){
-            if(!node.doWhile && !exits(node.body))return {...node,init:node.init?visit(node.init,{flags:[]}):node.init,test:expression(node.test),update:expression(node.update),body:list(node.body,{flags:[],breakName:null,continueName:null})};
+            const headerSequence=node.type==='For' && node.update?.type==='ForHeaderSequence';
+            if(!node.doWhile && !headerSequence && !exits(node.body))return {...node,init:node.init?visit(node.init,{flags:[]}):node.init,test:expression(node.test),update:expression(node.update),body:list(node.body,{flags:[],breakName:null,continueName:null})};
             changed=true;
             if(node.doWhile && ownedContinue(node.doWhileBody))warnings.add('Selected Arcade SDK do-while continue skips its posttest; native uses standard posttest semantics and normalized export (pxt-arcade 4.2.1 / pxt-core 13.2.1 boundary).');
             const stop=fresh(),skip=fresh(),inner={flags:[stop,skip],breakName:stop,continueName:skip};
             const test=node.doWhile?{type:'Boolean',value:true}:node.test || {type:'Boolean',value:true};
-            const body=[decl(skip),{type:'If',test:{type:'Unary',op:'!',argument:expression(test)},consequent:[assign(stop,1)],alternate:[]},guard([stop],list(node.doWhile?node.doWhileBody:node.body,inner))];
+            const loopBody=list(node.doWhile?node.doWhileBody:node.body,inner);
+            const body=[decl(skip),{type:'If',test:{type:'Unary',op:'!',argument:expression(test)},consequent:[assign(stop,1)],alternate:[]},...(loopBody.length?[guard([stop],loopBody)]:[])];
             if(node.doWhile)body.push(guard([stop],[{type:'If',test:{type:'Unary',op:'!',argument:expression(node.doWhileTest)},consequent:[assign(stop,1)],alternate:[]}]));
-            if(node.type==='For' && node.update)body.push(guard([stop],[{type:'ExpressionStatement',expr:expression(node.update)}]));
+            if(node.type==='For' && node.update)body.push(guard([stop],
+                (headerSequence?node.update.expressions:[node.update]).map(expr=>({type:'ExpressionStatement',expr:expression(expr)}))));
             return {type:'Block',sourceLoop:true,body:[...(node.init?[visit(node.init,{flags:[]})]:[]),decl(stop),{type:'While',test:zero(stop),body}]};
         }
         if(node.type==='Switch')return context.flags.length || containsControlledLoop(node)?switchNode(node,context):{...node,cases:node.cases.map(c=>({...c,test:expression(c.test),body:list(c.body,context)}))};

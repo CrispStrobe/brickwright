@@ -22,7 +22,7 @@ const words = text => text.trim().split(/\s+/);
 // declarations, external references, callables and classes); a learner has no use picking them.
 const PLUMBING = new Set(words(`
   whenSourceStarts declareSourceReference declareParameterConstraint declareSourceScalar sourceWhile
-  sourceValueBinary sourceValueUnary sourceTypeOf inspectValue
+  sourceValueBinary sourceValueUnary sourceTypeOf inspectValue addLiteralDrawing
   startParallelHandler whenParallelHandler registerForeverHandler whenRegisteredForever
   registerCountdownHandler whenRegisteredCountdown registerLifeZeroHandler whenRegisteredLifeZero
   registerScoreHandler whenRegisteredScore registerUpdateHandler whenRegisteredUpdate
@@ -31,7 +31,8 @@ const PLUMBING = new Set(words(`
   externalValue externalImage externalImageCall externalCall externalCommand registerExternalHandler whenRegisteredExternal
   allocateControlEventSource controllerEventSource registerMultiplayerConnection
   whenRegisteredMultiplayerConnection registerControlEvent whenRegisteredControlEvent
-  registerMultiplayerButtonHandler whenRegisteredMultiplayerButton registerButtonHandler whenRegisteredButton
+  registerMultiplayerButtonHandler whenRegisteredMultiplayerButton registerButtonHandler registerPlayerButtonHandler whenRegisteredButton
+  registerInstanceOverlapHandler whenRegisteredInstanceOverlap
   registerInstanceDestroyedHandler whenRegisteredInstanceDestroyed registerDestroyedHandler
   whenRegisteredKindDestroyed registerOverlapHandler whenRegisteredOverlap
   registerScenePushHandler whenRegisteredScenePush registerScenePopHandler whenRegisteredScenePop
@@ -70,7 +71,7 @@ const SECTIONS = [
     words(`createSprite createOwnedImageSprite spawnSprite spawnImageSprite ---
       followSprite unfollowSprite --- spriteImage setSpriteCostume ---
       startSpriteEffect clearSpriteEffects destroySpriteWithEffect --- spawnImageProjectile ---
-      spriteOverlaps setSpriteKind spritesOfKind spriteCount createSpriteKind spriteKindValue spriteToString ---
+      spriteOverlaps setSpriteKind spritesOfKind withoutNullSprites spriteCount createSpriteKind spriteKindValue spriteToString ---
       whenSpriteCreated whenSpriteDestroyed --- setSpriteScale changeSpriteScale setSpriteScaleCore ---
       textSpriteCreate textSpriteSetText textSpriteSetMaxFontHeight textSpriteSetIcon textSpriteSetBorder
       textSpriteSetOutline textSpriteUpdate textSpriteProperty textSpriteSetProperty`)],
@@ -81,12 +82,12 @@ const SECTIONS = [
       movePlayerWithButtons --- setControllerConnected setUserEventsEnabled waitAnyButton ---
       buttonRepeatProperty setButtonRepeatProperty setButtonRepeatDefaults --- lightLevel tilt setPixel clearPixels`)],
   ['game', 'Game', 'Spiel',
-    words('whenUpdate whenInterval gameOver splash ask askForNumber askForString programMillis'),
+    words('whenUpdate whenInterval gameOver resetGame splash ask askForNumber askForNumberLength askForString programMillis'),
     words(`setGameOverEffect setGameOverMessage setGameOverPlayable setGameOverScoringType legacyGameOver ---
-      showLongText --- sceneMillis frameDeltaTime --- carnivalCountdown carnivalGameOver carnivalCustomGameOver carnivalAddLabel`)],
+      showLongText askForStringLength --- sceneMillis frameDeltaTime setGameStats --- carnivalCountdown carnivalGameOver carnivalCustomGameOver carnivalAddLabel`)],
   ['music', 'Music', 'Musik',
     words('play playTone ringTone rest setMusicVolume setTempo changeTempo stopAllSounds'),
-    words(`melodyPlayable stringPlayable tonePlayable songPlayable
+    words(`playNoteMelody melodyPlayable stringPlayable tonePlayable songPlayable
       songFromBuffer namedSongPlayable soundEffect namedMelody soundMelody beat --- musicVolume musicTempo`)],
   ['scene', 'Scene', 'Szene',
     words(`setBackgroundColor setBackgroundImage backgroundColor backgroundImage cameraFollowSprite centerCameraAt
@@ -106,7 +107,7 @@ const SECTIONS = [
   ['info', 'Info', 'Info',
     words(`getPlayerScore setPlayerScore changePlayerScore getLife setLife changeLife startCountdown stopCountdown
       whenCountdownEnds`),
-    words('hasPlayerScore hasLife setHudVisibility')],
+    words('hasPlayerScore highScore hasLife setHudVisibility')],
   ['animation', 'Animation', 'Animation',
     words('runImageAnimation stopAnimation createAnimation addAnimationFrame attachAnimation setAnimationAction'),
     words(`setAnimationInterval animationProperty animationAssetFrames animationAssetFreshFrames

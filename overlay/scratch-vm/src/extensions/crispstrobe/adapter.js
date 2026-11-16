@@ -1,3 +1,4 @@
+const localArrayResultBindings = require('./arcade/local-array-result-bindings')();
 const ArgumentType = require('../../extension-support/argument-type');
 const BlockType = require('../../extension-support/block-type');
 const TargetType = require('../../extension-support/target-type');
@@ -152,6 +153,9 @@ module.exports = function makeCrispExtension (source, dependencies = null, array
                     if (k !== 'constructor' && typeof inst[k] === 'function' && !(k in this)) this[k] = inst[k].bind(inst);
                 }
             }
+            if (arrayRegistration !== null) {
+                localArrayResultBindings.bindConstructor(runtime, this, inst, require('../../engine/runtime'));
+            }
             // Capture genuine source-operation delegates before this adapter
             // escapes; later getInfo/registration cannot bless a replacement.
             if (typeof dependencies?.bindSourceOperationAdapter === 'function') {
@@ -161,6 +165,8 @@ module.exports = function makeCrispExtension (source, dependencies = null, array
         }
         getInfo () {
             const info = prepareLabels(localizeLegacyMenus(this._inst.getInfo()));
+            // Capture result ownership after the final owned palette transform.
+            if (arrayRegistration !== null) localArrayResultBindings.bindInfo(info, this, this._inst);
             // Only Arcade's supplied module closure owns this optional hook.
             // Ordinary adapters and the separate Array token path are unchanged.
             if (typeof dependencies?.bindScoreAdapterInfo === 'function') {
@@ -179,3 +185,5 @@ module.exports = function makeCrispExtension (source, dependencies = null, array
         }
     };
 };
+
+Object.defineProperty(module.exports, 'localArrayResultBindingsCurrent', {value: localArrayResultBindings.current});

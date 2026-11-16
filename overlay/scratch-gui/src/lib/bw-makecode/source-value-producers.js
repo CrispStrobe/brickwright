@@ -1,4 +1,5 @@
-import {proveLocalArrayFamilyReads} from './local-array-family-entry.js';
+import {highScoreIntrinsic} from './high-score-source.js';
+import {proveLocalArrayFamilyReads,proveLocalNumericArrayResults,hasLocalNumericArrayResultCandidate} from './local-array-family-entry.js';
 import {inspectNativeArrayAddHelpers} from './native-array-binary-helper-source.js';
 import {createOrdinaryFrameDeltaNumberSource} from './ordinary-frame-delta-number-source.js';
 import {createOrdinaryParseIntegerNumberSource} from './ordinary-parse-integer-number-source.js';
@@ -163,7 +164,7 @@ function builderPositionalReads(program,reads){
     return out;
 }
 
-function analyseGraph(program,{numericArrows:provedArrows=new Set(),numericHelpers:provedHelpers=new Set(),parenthesized=false,unboundIsOpaque=false,opaqueDeclarationValues=false,uninitializedLocalsAreOpaque=false,declaredLocalUndefined=false,multiplayerPlayerProperties=false,consoleInspection=false,arrayValues=false,arrayEffectSites=false,arrayCallbackParameters=false,arrayLoopEntries=false,provenArrayLength=false,ordinaryPrimitiveSdkNumbers=false,ordinaryMusicNumbers=true,ordinaryDestroyedNumbers=true,ordinaryParseIntegerNumbers=true,ordinaryParseIntegerEffects=true,sceneClockNumbers=false,initializationEntries=false,primitiveComparisons=false,closureEntries=false,normalCompletion=null,closedOrdinaryEntries=false,physicalUpdateSource=null}={},privateSpriteAyProof=null,identityInput=null,cameraNumberInput=null,controlEntry=null,arrayCallbackBootstrap=false) {
+function analyseGraph(program,{numericArrows:provedArrows=new Set(),numericHelpers:provedHelpers=new Set(),parenthesized=false,unboundIsOpaque=false,opaqueDeclarationValues=false,uninitializedLocalsAreOpaque=false,declaredLocalUndefined=false,multiplayerPlayerProperties=false,consoleInspection=false,arrayValues=false,arrayEffectSites=false,arrayCallbackParameters=false,arrayLoopEntries=false,closedNumericArrayResults=false,provenArrayLength=false,ordinaryPrimitiveSdkNumbers=false,ordinaryMusicNumbers=true,ordinaryDestroyedNumbers=true,ordinaryParseIntegerNumbers=true,ordinaryParseIntegerEffects=true,sceneClockNumbers=false,initializationEntries=false,primitiveComparisons=false,closureEntries=false,normalCompletion=null,closedOrdinaryEntries=false,physicalUpdateSource=null}={},privateSpriteAyProof=null,identityInput=null,cameraNumberInput=null,controlEntry=null,arrayCallbackBootstrap=false) {
     const ordinaryEntry=closedOrdinaryEntries?createClosedOrdinarySourceEntry(program):null;
     const nullableLengthSource=arrayValues?nullableArrayLengthSource(program):null;
     const nullableLengthIssued=new Set();let nullableLengthUsed=false;
@@ -191,6 +192,8 @@ function analyseGraph(program,{numericArrows:provedArrows=new Set(),numericHelpe
         find(program);return entries.size?entries:null;
     })():null;
     const familyEntry=arrayLoopEntries&&!arrayValues?proveLocalArrayFamilyReads(program,analyseGraph(program,{parenthesized:true,unboundIsOpaque:true})):null;
+    const numericArraySnapshot=closedNumericArrayResults&&!arrayValues&&hasLocalNumericArrayResultCandidate(program)?physicalUpdateSourceSnapshot(program):null;
+    const numericArrayResults=numericArraySnapshot?proveLocalNumericArrayResults(program,analyseGraph(program,{parenthesized:true,unboundIsOpaque:true,initializationEntries:true,provenArrayLength:true,ordinaryPrimitiveSdkNumbers:true,arrayValues:true,arrayLoopEntries:true,closureEntries:true,closedOrdinaryEntries:true,primitiveComparisons:true})):null;
     const positionalEntry=arrayLoopEntries&&!arrayValues?(()=>{
         const reads=[];const find=node=>{if(!node||typeof node!=='object')return;if(Array.isArray(node)){node.forEach(find);return;}
             if(node.type==='Index'&&node.index?.type==='Number')reads.push(node);for(const v of Object.values(node))if(v&&typeof v==='object')find(v);};
@@ -358,6 +361,7 @@ function analyseGraph(program,{numericArrows:provedArrows=new Set(),numericHelpe
         if(node.type==='Index'&&loopEntry?.entries.has(node)){for(const type of loopEntry.entries.get(node))add(current,type);return;}
         if(node.type==='Index'&&positionalEntry?.has(node)){edge(cell(positionalEntry.get(node)),current);return;}
         if(node.type==='Index'&&familyEntry?.has(node)){for(const value of familyEntry.get(node))edge(cell(value),current);return;}
+        if(node.type==='Index'&&numericArrayResults?.has(node)){for(const value of numericArrayResults.get(node))edge(cell(value),current);add(current,'Undefined');return;}
         if(node.type==='Index'&&mappedEntry?.has(node)){cell(node.object);const scope=functionScopes.get(mappedEntry.get(node));if(scope){edge(scope.result,current);return;}}
         if(arrayValues&&node.type==='Index'){arrayOperations.push({kind:'read',receiver:cell(node.object),result:current,index:node.index,node});return;}
         if(provenArrayLengthAt(node)){add(current,'Number');return;}
@@ -407,6 +411,7 @@ function analyseGraph(program,{numericArrows:provedArrows=new Set(),numericHelpe
         else if(['Undefined','Null','String','Number','Boolean'].includes(node.type))add(current,node.type);
         else if(node.type==='Member'&&frameDeltaNumbers?.isNumberRead(node)){frameDeltaNumberUsed=true;add(current,'Number');}
         else if(musicNumbers?.has(node)){musicNumberUsed=true;add(current,'Number');}
+        else if(highScoreIntrinsic(node))add(current,'Number');
         else if(ordinaryNumbers?.has(node)||sceneBackgroundNumbers?.has(node)||cameraPropertyNumbers?.has(node)||numberFormatNumbers?.has(node)||mathNumbers?.has(node)||sceneNumbers?.has(node)||buttonEventNumbers?.has(node)||spriteAyNumbers?.has(node)||cameraNumberInput?.has(node))add(current,'Number');
         else if(destroyedNumbers?.has(node)){destroyedNumberUsed=true;add(current,'Number');}
         else if(spriteAyNumbers?.primitiveHas?.(node)){for(const type of ['Number','String','Boolean','Null','Undefined'])add(current,type);}
@@ -676,7 +681,7 @@ function analyseGraph(program,{numericArrows:provedArrows=new Set(),numericHelpe
     let invalidated;do{invalidated=false;for(const op of nullableLengthIssued)if(!nullableLengthEligible(op))invalidated=add(op.result,'Opaque')||invalidated;if(!unsafePlayerWrite&&playerWriteUnsafe()){unsafePlayerWrite=true;invalidated=true;}for(const item of derived)if(!derivedValid(item))invalidated=add(item.result,'Opaque')||invalidated;for(const item of numericCalls)if(item.node.args.length||!exactType(item.receiver,'NumericCallable'))invalidated=add(item.result,'Opaque')||invalidated;propagate();}while(invalidated);
     const fontAnnotations=new Set();const collectScope=node=>{if(!node||typeof node!=='object')return;if(Array.isArray(node)){node.forEach(collectScope);return;}const owner=owners.get(node);for(let s=owner;s;s=s.parent)for(const value of s.fontAnnotations||[])fontAnnotations.add(value);Object.values(node).forEach(value=>{if(value&&typeof value==='object')collectScope(value);});};collectScope(program);
     const immutableFunction=node=>{const fn=unchangedFunction(node);return fn&&!cyclic(knownBinding(fn))?fn:null;};
-    const factsCurrent=()=>declarationArrayResetCurrent()&&(!stringCharCodeNumberUsed||stringCharCodeNumbers.current())&&(!parseIntegerNumberUsed||parseIntegerNumbers.current())&&(!controlEntryUsed||controlEntry.current())&&(!frameDeltaNumberUsed||frameDeltaNumbers.current())&&(!ordinaryEntry||ordinaryEntry.current())&&(!nullableLengthUsed||nullableLengthSource.current())&&(!callbackEntry||callbackEntry.current())&&(!loopEntry||loopEntry.current())&&(!spriteAyNumbers||spriteAyNumbers.current())&&(!musicNumberUsed||musicNumbers.current())&&(!destroyedNumberUsed||destroyedNumbers.current())&&(!cameraNumberInput||cameraNumberInput.current());
+    const factsCurrent=()=> (!numericArrayResults||numericArraySnapshot.current())&&declarationArrayResetCurrent()&&(!stringCharCodeNumberUsed||stringCharCodeNumbers.current())&&(!parseIntegerNumberUsed||parseIntegerNumbers.current())&&(!controlEntryUsed||controlEntry.current())&&(!frameDeltaNumberUsed||frameDeltaNumbers.current())&&(!ordinaryEntry||ordinaryEntry.current())&&(!nullableLengthUsed||nullableLengthSource.current())&&(!callbackEntry||callbackEntry.current())&&(!loopEntry||loopEntry.current())&&(!spriteAyNumbers||spriteAyNumbers.current())&&(!musicNumberUsed||musicNumbers.current())&&(!destroyedNumberUsed||destroyedNumbers.current())&&(!cameraNumberInput||cameraNumberInput.current());
     const currentTypes=value=>new Set(factsCurrent()?types.get(value)||[]:[]);
     const currentArrayTypes=value=>factsCurrent()?arrayTypes(value):null;
     // Construct this independent execution frontier only on demand. It cannot
@@ -718,6 +723,11 @@ function analyseGraph(program,{numericArrows:provedArrows=new Set(),numericHelpe
         declarationCountAt:(node,name=node?.name)=>declarations.get(knownBinding(node,name))?.size||0,
         immutableFunctionAt:immutableFunction,
         unchangedFunctionAt:unchangedFunction,
+        // This is an effect witness for actual calls in this private graph,
+        // not an Array receiver or index/bounds permission. The staged source
+        // validator checked all producers/writers before issuing the loan.
+        closedNumericArrayEffectAt:node=>factsCurrent()&&!!numericArrayResults&&owners.has(node)&&node?.type==='Call'&&
+            node.callee?.type==='Member'&&['push','reverse','charAt'].includes(node.callee.name),
         isSdkNamespace:node=>sdk.has(node),
         fontAnnotatedAt:node=>fontAnnotations.has(cell(node)),
         fontScales:Object.freeze(scales.map(item=>item.node)),
@@ -1819,7 +1829,7 @@ function primitiveConstraintGraphOptions(program,ordinaryPrimitiveSdkNumbers,sce
   for(const child of Object.values(node))if(child&&typeof child==='object')scanWrites(child);};
  scanWrites(program);
  const numericHelpers=new Set([...helperNames].filter(([name,fn])=>fn&&!written.has(name)).map(([,fn])=>fn));
- return {unboundIsOpaque:true,opaqueDeclarationValues:true,ordinaryPrimitiveSdkNumbers,sceneClockNumbers,arrayCallbackParameters:true,arrayLoopEntries:true,provenArrayLength:true,primitiveComparisons:true,closureEntries:true,numericHelpers,closedOrdinaryEntries};
+ return {unboundIsOpaque:true,opaqueDeclarationValues:true,ordinaryPrimitiveSdkNumbers,sceneClockNumbers,closedNumericArrayResults:ordinaryPrimitiveSdkNumbers,arrayCallbackParameters:true,arrayLoopEntries:true,provenArrayLength:true,primitiveComparisons:true,closureEntries:true,numericHelpers,closedOrdinaryEntries};
 }
 export function validateProcedureConstraintSource(program,{onlyFunctions=null,ordinaryPrimitiveSdkNumbers=false,sceneClockNumbers=false,closedOrdinaryEntries=false}={}) {
  const graph=analyseSourceValues(program,primitiveConstraintGraphOptions(program,ordinaryPrimitiveSdkNumbers,sceneClockNumbers,closedOrdinaryEntries),null,null,true);

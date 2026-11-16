@@ -65,19 +65,19 @@ export function capturePreparedSharedImageSources(files,selectedSource){
     const token=Object.freeze({});preparations.set(token,{files,receipt,selectedSource,admitted,entry:matches[0],current,observed:[]});return token;
 }
 /** The existing boundary parse executes here; callers cannot register an AST. */
-export function parseSharedImageSourceBoundary(preparation,entry){
+export function parseSharedImageSourceBoundary(preparation,entry,namedFunctionExpressions=false){
     const p=preparations.get(preparation);
-    const program=parseMakeCodeTs(entry.source,{parameterDefaults:true});
+    const program=parseMakeCodeTs(entry.source,{parameterDefaults:true,namedFunctionExpressions});
     if(p&&p.current()&&p.selectedSource.entries.includes(entry)){
         p.observed.push({entry,program,current:snapshot(program)});
     }
     return program;
 }
 /** Same ordinary parse/options at its original call position, not another parse. */
-export function parseSharedImageSourceProgram(preparation,source,retainCallableMetadata=false,retainPrimitiveProcedureDefaults=true){
+export function parseSharedImageSourceProgram(preparation,source,retainCallableMetadata=false,retainPrimitiveProcedureDefaults=true,namedFunctionExpressions=false,retainAuthoredEmptyBranches=false){
     const program=parseMakeCodeTs(source,{parameterDefaults:true,retainParentheses:true,retainWhenUsed:true,
         retainClassHeritage:true,retainOrdinaryDefaultProvenance:true,
-        retainCallableMetadata,retainPrimitiveProcedureDefaults});
+        retainCallableMetadata,retainPrimitiveProcedureDefaults,namedFunctionExpressions,retainAuthoredEmptyBranches});
     const p=preparations.get(preparation);
     if(p&&p.current()&&source===p.selectedSource.source&&typeof retainCallableMetadata==='boolean'&&retainPrimitiveProcedureDefaults===!retainCallableMetadata){
         combinedReturns.set(program,{preparation,current:snapshot(program)});
