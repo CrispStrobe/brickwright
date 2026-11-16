@@ -17,6 +17,7 @@ refs were fetched, recent PRs reviewed, and these checkpoints saved remotely:
 | `c9cd717b2666190da6c5f576bf38d3eb9b541649` | Immediate cancellation of Circuit readiness and owner acknowledgement waits |
 | `4f971858567cf1d9a1dac5e8fdc7245c3cdc7ba6` | Immediate release of circuit ports and clock during cancelled initial sensing |
 | `77b392bcbcd21f0226d9cf5fcf82623a8b064e3f` | Newly pushed current-versus-historical x86 dependency identity correction |
+| `c86588468b68025ce8447bbb1b0a9a8217ce1a6a` | Reusable shipped-worker verifier and dated source/validation evidence |
 
 The current CAD SDK stays pinned to
 `fb8c3671aef1a2d5dc3673e7eb04bde38cc3f77b`. CAD main
@@ -125,11 +126,23 @@ stack; the separate integration tests cover the stated circuit/AVR behavior.
 
 ## Production build and browser boundary
 
-The production CAD+FPGA GUI build is being completed locally from runtime source
-at `77b392bcbcd21f0226d9cf5fcf82623a8b064e3f`. The unchanged production
-webpack configuration uses its default two-pass Terser options with serial
-minification and a 4 GiB heap to bound local resource use. This receipt will be
-updated with the observed build and packaged-SDK results.
+The production CAD+FPGA GUI build **passed** from runtime source
+`77b392bcbcd21f0226d9cf5fcf82623a8b064e3f` in **360,957 ms**. Webpack
+reported zero errors and two warnings: asset size and entrypoint size. Its hash
+is `2a558e57645f9c20cb3f`. The unchanged production webpack configuration used
+its default two-pass Terser options with serial minification and a 4 GiB heap
+to bound local resource use.
+
+The emitted SDK passed `verify-built-cad-sdk.mjs`: **all ten final packaged
+files retain their exact manifest digests** at CAD
+`fb8c3671aef1a2d5dc3673e7eb04bde38cc3f77b`. The integrated bridge and session
+sources match their overlay inputs byte-for-byte. Subsequent commits add
+verification scripts, packaging descriptions and evidence; they do not alter
+the built runtime or its dependency pins.
+
+The [production receipt](../receipts/2026-11-16-cad-sim-production-build.json)
+records the configuration, bundle and entry-asset hashes, final SDK checks and
+focused test counts. The local output is `packages/scratch-gui/build-cad-resume`.
 
 Chromium was attempted with a writable temporary directory and aborted before
 opening the page because `process_singleton_posix.cc` could not create a Unix

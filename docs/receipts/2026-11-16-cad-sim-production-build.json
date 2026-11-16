@@ -1,0 +1,67 @@
+{
+  "recordedAt": "2026-11-16T13:26:12.683943+00:00",
+  "sourceCommit": "77b392bcbcd21f0226d9cf5fcf82623a8b064e3f",
+  "runtime": "Node v22.23.5",
+  "configuration": {
+    "NODE_ENV": "production",
+    "BW_ENABLE_CAD": "1",
+    "BW_ENABLE_FPGA": "1",
+    "heapMiB": 4096,
+    "terserCompressPasses": 2,
+    "terserParallel": false,
+    "sourceWebpackConfigurationUnchanged": true
+  },
+  "passed": true,
+  "webpackHash": "2a558e57645f9c20cb3f",
+  "buildTimeMs": 360957,
+  "errors": 0,
+  "warnings": [
+    "asset size limit",
+    "entrypoint size limit"
+  ],
+  "files": {
+    "index.html": {
+      "bytes": 9491,
+      "sha256": "f905aedf82bde19f3cafbc27a38e57d3558b818b7791c9ef261b430606edb730"
+    },
+    "gui.9112f911.js": {
+      "bytes": 1675284,
+      "sha256": "4ce10dfd70ce41fa464a5a1e68ba47dbb37249348b3cd4aa5c135e0b5eb02aae"
+    },
+    "chunks/322.6e9e835710860eba0c01.js": {
+      "bytes": 2832885,
+      "sha256": "91c2baa2b890d359fb839f9cfed51deffbdbc19cb468418ca8edba5fde4663cd"
+    },
+    "chunks/1683.02e60a9bea497954cae7.js": {
+      "bytes": 20542,
+      "sha256": "65d896a307ca973706807b72d0c94b82aa9292b275792d364bfecaeed9bf2a72"
+    },
+    "static/cad-sdk/manifest.json": {
+      "bytes": 1267,
+      "sha256": "d0be9a147259f4e0062f1ff3add5185616bf68e08c72ebb06b95e3ae2aa271ca"
+    }
+  },
+  "sdkCommit": "fb8c3671aef1a2d5dc3673e7eb04bde38cc3f77b",
+  "sdkFilesVerified": 10,
+  "validation": {
+    "cadIntegrationTests": {
+      "passed": 57,
+      "failed": 0,
+      "skipped": 0
+    },
+    "focusedX86IdentityTests": {
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0
+    },
+    "canonicalDependenciesVerified": true,
+    "mirrorsVerified": true,
+    "integratedCadSourceMatchesOverlay": true,
+    "guiScopeRedirects": 0
+  },
+  "limits": [
+    "Browser smoke blocked before page load by Chromium Unix-socket policy; no browser pass.",
+    "No hosted compiler request or native release/deployment.",
+    "GitHub Actions not awaited, dispatched or rerun."
+  ]
+}

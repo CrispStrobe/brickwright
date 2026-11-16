@@ -1,6 +1,6 @@
 # CAD SIM robot optimization and integration
 
-Status: CLAIMED, 2026-11-16.
+Status: DONE, 2026-11-16; implementation and local qualification saved on the continuation branch for review.
 Owner: Codex, user-requested CAD SIM continuation.
 Branch: `feat/cad-sim-optimization-20261116`.
 Continuation branch: `feat/cad-sim-optimization-resume-20261116`.
@@ -26,6 +26,20 @@ sequential movement program has not been physically qualified; its model stays
 on the upstream feature branch. Kestrel's recorded gripper failure and the
 dependency-tooling deferral remain in force.
 
-Remaining work: cancel pending Circuit readiness/ownership waits immediately on
-Stop or disposal, verify restart isolation, rerun focused local integration
-checks, and close this claim with the final remote checkpoint.
+Completed: Stop/disposal cancels pending Circuit readiness and ownership waits;
+cancellation during initial CAD sensing immediately releases circuit ports and
+clock ownership. Late success/failure cannot disturb a restarted run. The newly
+pushed x86 current/historical pin correction was integrated at `77b392bcb`.
+
+Fresh local qualification: 57 CAD integration tests and six focused x86 identity
+controls pass. The unchanged shipped Jolt worker produces 100 identical control
+samples and 25 identical complete frames at 200 Hz with 71.1585% fewer serialized
+feedback bytes. The production CAD+FPGA build passes in 360,957 ms with zero
+errors and two size warnings; all ten packaged SDK hashes verify. Canonical
+dependency, mirror and integrated-source checks pass.
+
+The [continuation evidence](../docs/evidence/2026-11-16-cad-sim-continuation.md)
+and linked dated receipts record exact identities, reproduction and limitations.
+Chromium cannot start under this executor's Unix-socket policy, so no fresh
+browser pass is claimed. GitHub Actions were not awaited, dispatched or rerun.
+No deployment or native application release is included.
