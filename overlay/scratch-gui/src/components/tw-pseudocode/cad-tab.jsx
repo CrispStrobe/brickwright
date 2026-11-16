@@ -67,6 +67,7 @@ const CadTab = ({vm, isVisible, locale, theme}) => {
         };
         const reload = event => {
             if (!['loaded', 'legacy'].includes(event.detail?.outcome)) return;
+            setStorageWarning(false);
             // Retire the previous view even when the incoming CAD version cannot be
             // opened. Keeping its old editor writable would overwrite the new sidecar.
             setRetry(value => value + 1);
