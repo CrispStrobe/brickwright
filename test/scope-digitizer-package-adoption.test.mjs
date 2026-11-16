@@ -15,7 +15,7 @@ const run = args => spawnSync(process.execPath, [cli, ...args],
 
 test('installed ideal ADC helper has the selected supplier and exact threshold/zero authority', async () => {
     const pins = JSON.parse(readFileSync(path.join(root, 'vendor-pins.json'), 'utf8'));
-    assert.equal(pins['bw-board'], '33d3ee399db9224105e70f34864f1af962ccdb41');
+    assert.equal(pins['bw-board'], '67d7af9de398e20c77b64b9e8aaf530f476e66ef');
     assert.equal(pins['bw-circuit-ui'], '6b4d70290d7ebd088ad32b525f99eb02af475533');
     const {createScopeDigitizer} = await import(path.join(root,
         'node_modules/bw-circuit-ui/src/model/scope-digitizer.js'));

@@ -52,6 +52,41 @@ new owner. Servo drive commands are cleared when their owner releases the clock.
 
 ## Limits and validation
 
+### Component and controller coverage
+
+An editable 3D model, an electrical device model, a firmware target, and a
+physical CAD feedback connection are separate capabilities. Importing an STL or
+STEP file does not create an electrical or behavioral simulation model.
+
+| Component | Circuit support | Coupled CAD support |
+| --- | --- | --- |
+| DC motor, gearmotor, encoder motor | Winding/current/back-EMF models | Hinge or lead-screw slider, measured shaft feedback |
+| L293D / L298N-style driver | Generic dual `h_bridge`: direction, brake/coast, voltage loss and optional clamp diodes | Drives any connected DC motor through the electrical solver |
+| ULN2803 | Low-side Darlington array | Can drive circuit loads; no dedicated stepper-to-CAD binding |
+| Servo | PWM target decoding | Ideal torque-limited position control |
+| Ultrasonic | Trigger/echo protocol | Body-mounted collision ray |
+| Stepper, solenoid | Electrical/behavioral device models | No coil-to-CAD actuator binding yet |
+| ADXL335, MEMSIC2125, MPU6050 | Sensor models | No automatic CAD acceleration/orientation input yet |
+| VL53L0X, AS5600 | Distance/angle device models | No automatic CAD range/joint-angle input yet |
+| BMP280, BH1750, TCS34725, INA219, DHT11/22 and other environment sensors | Device models with supplied inputs | No physical environment synthesis yet |
+
+The generic H-bridge is not a complete vendor-specific L298N module: it has no
+separate logic-supply domain and uses a supply-relative logic threshold. A 3.3 V
+controller therefore cannot be assumed compatible with every motor supply.
+TB6612FNG, DRV8833, A4988/DRV8825 and TMC modules do not currently have dedicated
+functional models. Existing generic drivers should not be relabelled as those ICs.
+
+Blocks/pseudocode use the VM pin route. The coupled compiled-firmware route is
+currently Uno/ATmega328P only. RP2040/Pico emulation and compilation already exist
+in the independent Circuit editor, but are not yet accepted by this coupled
+runner. Other MCU adapters likewise require explicit integration and qualification;
+their presence in the board engine alone does not establish CAD support.
+
+Useful next physical bindings are contact/limit switches, body IMU measurements,
+VL53L0X rays, AS5600 joint angles, stepper coil torque and solenoid slider force.
+These need units, mounting transforms, timing and load feedback, rather than
+simply adding palette icons or visual models.
+
 The demo's DC parameters are an ideal equivalent output-shaft model, not calibrated
 manufacturer specifications. Motor constants and mechanical inertia need suitable
 values for the 200 Hz coupling interval. A quadrature sample may cross at most

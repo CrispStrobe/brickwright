@@ -477,14 +477,19 @@ const F10_REVIEWED_MAP = "FINITE_V10_PINS = {'bw-board':'" + LIVE_X86_BOARD +
 const sb3Moved = known => (known.current.has(LIVE_X86_SB3) || known.current.has(HISTORICAL_X86_F10_SB3)) && !known.current.has(HISTORICAL_X86_SB3) &&
     known.previous.get(HISTORICAL_X86_SB3)?.repo === 'sb3-creator';
 const historicalV10SpansForProfile = (file, text, known, profiles) => {
-    if (!known.current.has(LIVE_X86_CUI) || !known.current.has(LIVE_X86_BOARD) ||
+    // F10's measured Board is immutable too. Admit its exact reviewed positions
+    // after a real pin advance; never accept an invented predecessor or body.
+    const boardMoved = !known.current.has(LIVE_X86_BOARD) &&
+        known.current.has(currentPins()['bw-board']) &&
+        known.previous.get(LIVE_X86_BOARD)?.repo === 'bw-board';
+    if (!known.current.has(LIVE_X86_CUI) || (!known.current.has(LIVE_X86_BOARD) && !boardMoved) ||
         known.current.has(CURRENT_X86_CUI) || known.current.has(HISTORICAL_X86_CURRENT_BOARD) ||
         known.previous.get(CURRENT_X86_CUI)?.repo !== 'bw-circuit-ui' ||
         known.previous.get(HISTORICAL_X86_CURRENT_BOARD)?.repo !== 'bw-board') return [];
     const moved = sb3Moved(known);
     const f10Moved = known.current.has(LIVE_X86_SB3) &&
         known.previous.get(HISTORICAL_X86_F10_SB3)?.repo === 'sb3-creator';
-    const legacy = {...known, current: new Set([...known.current, CURRENT_X86_CUI, HISTORICAL_X86_CURRENT_BOARD,
+    const legacy = {...known, current: new Set([...known.current, LIVE_X86_BOARD, CURRENT_X86_CUI, HISTORICAL_X86_CURRENT_BOARD,
         ...(moved ? [HISTORICAL_X86_SB3] : [])])};
     const policy = file === 'test/pin-move-chain.test.mjs';
     const producer = file === 'scripts/run-i80386-hdd-gui-actual.py';
@@ -500,6 +505,7 @@ const historicalV10SpansForProfile = (file, text, known, profiles) => {
     if (policy) {
         for (const [name, pin] of [['CURRENT_X86_CUI', CURRENT_X86_CUI],
             ['HISTORICAL_X86_CURRENT_BOARD', HISTORICAL_X86_CURRENT_BOARD],
+            ...(boardMoved ? [['LIVE_X86_BOARD', LIVE_X86_BOARD]] : []),
             ...(moved ? [['HISTORICAL_X86_SB3', HISTORICAL_X86_SB3]] : []),
             ...(f10Moved ? [['HISTORICAL_X86_F10_SB3', HISTORICAL_X86_F10_SB3]] : [])]) {
             const line = `const ${name} = '${pin}';`;
@@ -539,6 +545,10 @@ const historicalV10SpansForProfile = (file, text, known, profiles) => {
             slots.push(positions.get(name) + line.indexOf(pin));
         }
         slots.push(positions.get(cuiName) + declarations.find(([key]) => key === cuiName)[1].indexOf(CURRENT_X86_CUI));
+        if (boardMoved) {
+            if (text.split(`'${LIVE_X86_BOARD}'`).length - 1 !== 1) return [];
+            slots.push(positions.get('FINITE_V10_PINS') + F10_REVIEWED_MAP.indexOf(`'${LIVE_X86_BOARD}'`) + 1);
+        }
         if (f10Moved) {
             if (text.split(`'${HISTORICAL_X86_F10_SB3}'`).length - 1 !== 1) return [];
             slots.push(positions.get('FINITE_V10_PINS') + F10_REVIEWED_MAP.indexOf(`'${HISTORICAL_X86_F10_SB3}'`) + 1);
@@ -550,6 +560,11 @@ const historicalV10SpansForProfile = (file, text, known, profiles) => {
                 slots.push(positions.get(name) + line.indexOf(`'${HISTORICAL_X86_SB3}'`) + 1);
             }
         }
+    } else if (control && boardMoved) {
+        const line = `            self.assertEqual(c.FINITE_V10_PINS['bw-board'],'${LIVE_X86_BOARD}')`;
+        const at = text.indexOf(line);
+        if (at < 0 || text.indexOf(line, at + 1) >= 0 || text.split(`'${LIVE_X86_BOARD}'`).length - 1 !== 1) return [];
+        slots.push(at + line.indexOf(LIVE_X86_BOARD));
     }
     return [...new Set([...slots,
         ...historicalCuiSpansForProfile(file, text, legacy, profiles),
@@ -1536,6 +1551,21 @@ test('captured Resonance source receipts preserve actual old pins but refuse inv
  assert.equal(roleOf('test/fixtures/model-files/resonance-lab-source/active.json'),'code');
 });
 
+
+test('a Board pin advance preserves only exact sealed F10 positions', () => {
+    assert.equal(known.previous.get(LIVE_X86_BOARD)?.repo, 'bw-board');
+    for (const file of ['scripts/run-i80386-hdd-gui-actual.py', 'scripts/read-i80386-hdd-gui-originals.py',
+        'test/i80386-hdd-gui-actual.test.mjs', 'test/pin-move-chain.test.mjs']) {
+        const text = readFileSync(path.join(ROOT, file), 'utf8');
+        const slots = historicalV10Spans(file, text, known);
+        assert.equal(slots.filter(at => text.slice(at, at + 40) === LIVE_X86_BOARD).length, 1, file);
+        assert.ok(judgeFile(file, text + `\nNEW_INPUT = '${LIVE_X86_BOARD}'\n`, known).length > 0);
+        assert.equal(historicalV10Spans(file, text, {...known,
+            previous: new Map([...known.previous].filter(([sha]) => sha !== LIVE_X86_BOARD))}).length, 0);
+        if (file !== 'test/pin-move-chain.test.mjs')
+            assert.equal(historicalV10Spans(file, text + '\n# unreviewed body change\n', known).length, 0);
+    }
+});
 
 test('F10 keeps every consumed supplier position historical and every new input current', () => {
     const f = historicalRoleFixtures();

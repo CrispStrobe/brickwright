@@ -14,7 +14,7 @@ const terminals = ['vout_1', 'vout_2', 'sense_adj', 'gnd', 'en', 'ss', 'vin_7', 
 
 test('the exact installed packages expose and solve the physical ADP7118', async () => {
     const pins = JSON.parse(readFileSync(path.join(root, 'vendor-pins.json'), 'utf8'));
-    assert.equal(pins['bw-board'], '33d3ee399db9224105e70f34864f1af962ccdb41');
+    assert.equal(pins['bw-board'], '67d7af9de398e20c77b64b9e8aaf530f476e66ef');
     assert.equal(pins['bw-circuit-ui'], '6b4d70290d7ebd088ad32b525f99eb02af475533');
 
     const sidecar = JSON.parse(readFileSync(

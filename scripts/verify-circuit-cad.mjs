@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
 const url=process.env.PROOF_URL || 'http://127.0.0.1:8134/';
 const engine=process.argv.includes('--webkit')?webkit:chromium;
-const browser=await engine.launch({headless:true,args:engine===chromium?['--use-angle=swiftshader','--enable-unsafe-swiftshader']:[]});
+const browser=await engine.launch({headless:true,args:engine===chromium?['--use-angle=swiftshader','--enable-unsafe-swiftshader']:[],...(engine===chromium&&process.env.BW_BROWSER_EXECUTABLE?{executablePath:process.env.BW_BROWSER_EXECUTABLE}:{})});
 const page=await browser.newPage({viewport:{width:1366,height:1024},hasTouch:engine===webkit,serviceWorkers:'block'}),errors=[];
 page.on('pageerror',e=>{errors.push(e.message);console.error('pageerror',e.message);});
 page.on('dialog',d=>d.accept());page.setDefaultTimeout(180000);
