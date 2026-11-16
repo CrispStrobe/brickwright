@@ -69,3 +69,12 @@ permissions and digests. It keeps the existing deterministic digest format
 and public array walker, while avoiding a retained full stat census during
 blocking npm work. Source memory diagnostics do not establish installer or
 native benchmark execution success.
+
+For a current-key store transaction, `BW_LITE_REUSE_PREPARED_GIT=1` seeds the
+fresh GUI dependency tree with private copies of matching Git packages already
+prepared successfully by that transaction's root install. It compares both
+locks and installed metadata, preserves binary links, and refuses a differing
+pin or existing GUI tree. Stock npm still performs the full GUI installation,
+and the completed store must pass the original verification. Failed GUI trees
+are never seeds. This avoids redundant preparation of an already installed
+immutable Git package; it does not skip required preparation of new packages.

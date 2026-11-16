@@ -297,6 +297,64 @@ function gitDepShas (nm) {
     return out;
 }
 
+/** Reuse complete, matching Git payloads from this transaction's root install.
+ * Copies are private: npm may reify the GUI tree without writing through the
+ * read-only completed root. The full GUI install and final verification remain
+ * mandatory; this seed is never a qualified GUI store on its own.
+ */
+export function seedPreparedGit (rootTree, guiTree) {
+    const rootNm = path.join(rootTree, 'node_modules');
+    const guiNm = path.join(guiTree, 'node_modules');
+    if (existsSync(guiNm)) throw new Error('Git seed requires a fresh GUI tree');
+    const completed = readJson(path.join(rootTree, 'package-lock.installed.json'));
+    const hidden = readJson(path.join(rootNm, '.package-lock.json'));
+    const wanted = readJson(path.join(guiTree, 'package-lock.json'));
+    const selected = [];
+    for (const [key, target] of Object.entries(wanted.packages || {})) {
+        if (!/^node_modules\/(?:@[^/]+\/)?[^/]+$/.test(key) || key.split('/').some(p => p === '.' || p === '..')) continue;
+        if (!/^git\+/.test(target.resolved || '') || !shaOf(target.resolved)) continue;
+        const source = hidden.packages?.[key];
+        if (!source) continue;
+        const recorded = completed.packages?.[key];
+        if (!recorded || source.resolved !== target.resolved || recorded.resolved !== target.resolved ||
+            source.version !== target.version || recorded.version !== target.version) {
+            throw new Error(`Prepared Git identity differs from GUI lock: ${key}`);
+        }
+        selected.push(key);
+    }
+    if (!selected.length) return [];
+    mkdirSync(guiNm, {recursive: true});
+    const packages = {};
+    for (const key of selected) {
+        const relative = key.slice('node_modules/'.length);
+        const source = path.join(rootNm, relative);
+        const destination = path.join(guiNm, relative);
+        // Materialize every payload file as a writable private copy, retaining
+        // internal symlinks. No borrowed node_modules or failed GUI tree.
+        linkTree(source, destination, readdirSync(source));
+        for (const [name, item] of Object.entries(hidden.packages)) {
+            if (name === key || name.startsWith(`${key}/`)) packages[name] = item;
+        }
+    }
+    const bin = path.join(rootNm, '.bin');
+    if (existsSync(bin)) for (const name of readdirSync(bin)) {
+        const source = path.join(bin, name);
+        if (!lstatSync(source).isSymbolicLink()) continue;
+        const target = readlinkSync(source), absolute = path.resolve(bin, target);
+        if (!selected.some(key => absolute.startsWith(`${path.join(rootTree, key)}${path.sep}`))) continue;
+        mkdirSync(path.join(guiNm, '.bin'), {recursive: true});
+        symlinkSync(target, path.join(guiNm, '.bin', name));
+    }
+    const gui = readJson(path.join(guiTree, 'package.json'));
+    const lock = path.join(guiNm, '.package-lock.json');
+    writeFileSync(lock, JSON.stringify({...hidden, name: gui.name, version: gui.version, packages}, null, 2) + '\n');
+    // npm's hidden-lock freshness check compares package-directory mtimes.
+    // Write the metadata last so copied payloads are recognized as installed.
+    const latest = Math.max(Date.now(), ...Object.keys(packages).map(key => statSync(path.join(guiTree, key)).mtimeMs));
+    const fresh = new Date(Math.ceil(latest) + 1); utimesSync(lock, fresh, fresh);
+    return selected.map(key => ({package: key, resolved: packages[key].resolved}));
+}
+
 function withLock (lockPath, fn) {
     const deadline = Date.now() + 30 * 60e3;
     for (;;) {
@@ -336,6 +394,9 @@ export function populate (wt, store, k, {install = npmInstall, log = console.log
                 const dir = path.join(staging, t.id);
                 mkdirSync(dir, {recursive: true});
                 for (const f of ['package.json', 'package-lock.json']) copyFileSync(path.join(wt, t.dir, f), path.join(dir, f));
+                const preparedGit = t.id === 'gui' && process.env.BW_LITE_REUSE_PREPARED_GIT === '1' ?
+                    seedPreparedGit(path.join(staging, 'root'), dir) : [];
+                if (preparedGit.length) log(`  reused ${preparedGit.length} completed matching root Git payloads for GUI reification`);
                 log(`  installing ${t.id} (npm ${t.args.join(' ')}) into the store staging dir`);
                 install(dir, t);
                 const nm = path.join(dir, 'node_modules');
@@ -344,7 +405,7 @@ export function populate (wt, store, k, {install = npmInstall, log = console.log
                 // The lock the install actually resolved (npm install may update it).
                 copyFileSync(path.join(dir, 'package-lock.json'), path.join(dir, 'package-lock.installed.json'));
                 makeReadOnly(nm);
-                manifest.trees[t.id] = {...treeDigest(nm), gitDeps: gitDepShas(nm)};
+                manifest.trees[t.id] = {...treeDigest(nm), gitDeps: gitDepShas(nm), ...(preparedGit.length ? {preparedGit} : {})};
             }
             writeFileSync(path.join(staging, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
             renameSync(staging, final);
