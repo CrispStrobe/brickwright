@@ -17,12 +17,27 @@ lessons the whole way.
 
 **Try it now (web):** <https://brickwright-lite.vercel.app> ·
 <https://crispstrobe.github.io/brickwright-lite> — both auto-deploy from `main`.
-**Native apps:** CI builds signed binaries for macOS, Windows, Linux, iOS and
-Android (see the repository's **Actions** and **Releases**).
+**Native apps:** Tauri wrappers target macOS, Windows, Linux, iOS and Android.
+See [local macOS testing](docs/LOCAL-MACOS-ROBOT-CAD.md) for the robot/CAD build;
+repository merges do not imply a new App Store or TestFlight delivery.
 
 ---
 
 ## What you can do
+
+### Build and control 3D robot assemblies
+
+Enable **Settings → Workspace → CAD Editor**, then open CAD and expand
+**Circuit → CAD connections**. The self-contained Scout example includes an
+editable printable rover, yellow TT motors, an Uno, a battery, an H-bridge and
+its blocks/pseudocode. Motor current drives physical joints; measured shaft
+motion returns encoder feedback to the program. Compiled Uno firmware can use
+the same connection. Atlas adds a forklift with a driven mast and tilt joint.
+
+CAD stays optional and off by default. The simulation is educational rather
+than calibrated hardware certification; Pico firmware coupling and additional
+physical sensor bindings remain open work. See
+[supported components, limits and validation](docs/CIRCUIT-CAD-CO-SIMULATION.md).
 
 ### Design and measure circuits
 

@@ -1,4 +1,6 @@
-> **Current coordinator handoff, 2026-10-29:** [Delivery continuation](docs/DELIVERY-CONTINUATION-2026-10-29.md) scopes P0–P5, source checkpoints, ownership and completion gates. Earlier lane notes below remain historical where they disagree.
+> **Robot/CAD continuation, 2026-11-16:** [Circuit/CAD capabilities](docs/CIRCUIT-CAD-CO-SIMULATION.md), [local macOS build and acceptance](docs/LOCAL-MACOS-ROBOT-CAD.md), and [integration receipt](docs/receipts/2026-11-16-circuit-cad-main-integration.json) describe the current shared editor and its limits. CAD remains default-off. Scout and Atlas are integrated; Kestrel remains deferred after failed physical qualification. RP2040 exists in Circuit but has no coupled CAD firmware runner yet. The new fourteen-model LDraw cohort and Arcade dependency-scope correction are included in the next local build. Preserve saved designs and history, use isolated worktrees, run checks locally, and retain dated evidence unchanged. Signing must use the Brickwright keychain, never login. Earlier lane notes and App Store delivery claims below remain historical.
+
+> **Coordinator handoff, 2026-10-29:** [Delivery continuation](docs/DELIVERY-CONTINUATION-2026-10-29.md) scopes P0–P5, source checkpoints, ownership and completion gates.
 
 # Current handoff — 2026-10-18
 

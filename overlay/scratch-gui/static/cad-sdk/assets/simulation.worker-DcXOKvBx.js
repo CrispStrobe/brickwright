@@ -5,6 +5,7 @@ const d6 = {
   "Invalid position servo target": "Ungültiger Positionsservo-Sollwert",
   "Invalid body sensor ray": "Ungültiger Sensorstrahl am Körper",
   "Front steering servo": "Vorderer Lenkservo",
+  "Fork tilt servo": "Gabelneigungsservo",
   "Output spline": "Abtriebsverzahnung",
   "Invalid actuator impulse": "Ungültiger Aktuatorimpuls",
   "Choose a hinge or slider actuator": "Ein Dreh- oder Schubgelenk wählen",
@@ -9728,7 +9729,7 @@ async function k8(A, g, I, C = {}) {
     }
   if ([...I.values()].reduce((D, u) => D + u.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = C.J ?? await (b5 ?? (b5 = import("./jolt-physics.wasm-compat-B4vu3cUG.js").then((D) => D.default()))), o = new i.JoltSettings();
+  const i = C.J ?? await (b5 ?? (b5 = import("./jolt-physics.wasm-compat-DFP4Oqbs.js").then((D) => D.default()))), o = new i.JoltSettings();
   o.mMaxBodies = 512, o.mMaxBodyPairs = Math.max(1024, e.length * e.length), o.mMaxContactConstraints = 8192;
   const r = new i.ObjectLayerPairFilterTable(2);
   r.EnableCollision(0, 1), r.EnableCollision(1, 1);

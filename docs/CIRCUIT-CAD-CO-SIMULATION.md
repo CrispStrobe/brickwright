@@ -6,6 +6,12 @@ SB3 containing the Uno pin declarations, blocks, pseudocode, wired L293D, 6 V
 battery, two yellow TT output-shaft motor models, and the printable Scout rover.
 Save the current project before replacing it.
 
+For the native Mac test build, see [build and acceptance instructions](LOCAL-MACOS-ROBOT-CAD.md).
+Scout and Atlas are available; Kestrel is held on its feature branch after its
+gripper failed physical qualification. The latest library cohort adds fourteen
+qualified authored LDraw originals with retained provenance and previews. Model
+library screening does not certify a complete moving assembly.
+
 Connect each circuit DC motor to a CAD hinge or lead-screw slider. Select the
 motor and joint explicitly. Ratio is rotor revolutions per joint revolution;
 slider lead is mm per output revolution. Direction reverses the transmission.
