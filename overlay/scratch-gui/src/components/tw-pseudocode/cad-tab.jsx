@@ -113,7 +113,7 @@ const CadTab = ({vm, isVisible, locale, theme}) => {
         if (isVisible && editor.current) { activateUndoSurface('cad'); editor.current.focus(); }
     }, [isVisible]);
     return <div data-testid="bw-cad-tab" style={{width: '100%', height: '100%', flex: 1, minWidth: 0, minHeight: 350, display: 'flex', flexDirection: 'column'}}>
-        <CadCircuitPanel vm={vm} locale={locale} colorMode={colorMode} />
+        <CadCircuitPanel vm={vm} locale={locale} colorMode={colorMode} isVisible={isVisible} />
         {storageWarning ? <div role="status">{locale.startsWith('de')
             ? 'Nur für diese Sitzung gespeichert. Speichere das Projekt als Datei.'
             : 'Saved for this session. Save the project to a file to keep it.'}</div> : null}
