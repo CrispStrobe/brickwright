@@ -17,8 +17,8 @@ gripper failed physical qualification. The latest library cohort adds fourteen
 qualified authored LDraw originals with retained provenance and previews. Model
 library screening does not certify a complete moving assembly.
 
-The current bundled catalogue contains **281 models: 154 editable code/source
-models and 127 mesh models**, with 281 registered previews and none missing.
+The current bundled catalogue contains **302 models: 154 editable code/source
+models and 148 mesh models**, with 302 registered previews and none missing.
 The earlier figures over 130 (editable sources) and 212 (an earlier qualified
 cohort) are not current total-library counts. The source filter retains the
 editable models; inserting a selected compatible model modifies the current

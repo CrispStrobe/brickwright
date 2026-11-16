@@ -48043,7 +48043,7 @@ function Nv(t, e) {
 }
 let Yt;
 async function Ov() {
-  const [{ createBundledModelLibrary: t }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-0BuOH9LW.js"), import("./model-library-cache-DiMFGzp9.js")]);
+  const [{ createBundledModelLibrary: t }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-CkVC9V-N.js"), import("./model-library-cache-DiMFGzp9.js")]);
   return Yt ?? (Yt = t()), { ...Yt, cache: e() };
 }
 function Vv(t, e) {
