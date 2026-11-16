@@ -1,0 +1,648 @@
+{
+  "recordedAt": "2026-11-16T12:34:38.337193+00:00",
+  "liteVerifiedBase": "e4b576776",
+  "cad": "5a560c23c47c4bd3d7dd9c7c6aa67b3c3d09337d",
+  "pins": {
+    "bw-circuit-ui": "6b4d70290d7ebd088ad32b525f99eb02af475533",
+    "bw-board": "67d7af9de398e20c77b64b9e8aaf530f476e66ef",
+    "sb3-creator": "7befb941e7e6ab71577bc28fbfe6dfe134a78c3a",
+    "stc-compiler-flasher": "30f43384a9f226de3c3cb753e119dd93ca2e81ff",
+    "arrays-values": "035ab22a4d946fe5b8e367013caf898cd763e5f4",
+    "microbitplus": "3dc133320c2b9c3725bfc69b0f2d2406c4e8900f",
+    "circuitplayground": "0c4e3b4a0cee57d65474082938c352818426eebb",
+    "wedo2unified": "a6950fac246c28c6299b31a708f6071fd7b8e388",
+    "spikeprime": "ff74f1309b8807713508884048292182a369f8f5",
+    "ev3comprehensive": "ff74f1309b8807713508884048292182a369f8f5",
+    "legoboostunified": "ff74f1309b8807713508884048292182a369f8f5",
+    "legonxt": "cc7b802cd4c149d401ef0d289baa975aed6ea443",
+    "legopoweredup": "817f01ac3c8edbc4bf3e4a19af6b1cc3bf3c22ec"
+  },
+  "checks": {
+    "liteIncomingChanges": {
+      "passed": 428,
+      "skipped": 1,
+      "failed": 0
+    },
+    "packageAdoption": {
+      "passed": 72,
+      "skipped": 1,
+      "failed": 0
+    },
+    "coupledScoutAndDosbox": {
+      "passed": 37,
+      "failed": 0
+    },
+    "atlasForklift": {
+      "passed": 11,
+      "failed": 0
+    },
+    "nativeBenchmarkPanel": {
+      "passed": 7,
+      "failed": 0
+    },
+    "priorBuiltSdk": {
+      "filesVerified": 10,
+      "cadCommit": "c7e8d48fe89862a5cd94b0d18553a23be68929ad"
+    },
+    "coupledBrowsers": [
+      "Chrome firmware: motion, encoder feedback, immutable document, Stop, Reset",
+      "Chrome blocks, dark mode: same physical checks plus >130 editable models and preview"
+    ]
+  },
+  "physicalScout": {
+    "passed": true,
+    "steps": 500,
+    "stepHz": 200,
+    "sourceUnchanged": true,
+    "sourceSha256": "67441b5ca2443dcffb825e7fe67a7e0c1f3298fb8e617aefe07e87bca2d09f5c",
+    "cSha256": "66d34801417e1a1c76636aa391f6ddc276c52a82a9e1953858330cfd067d53cb",
+    "firmwareBytes": 2124,
+    "wallMs": 16870.133499999996,
+    "peakStepMs": 221.96191700000054,
+    "peakCurrentA": 0.3069935514117831,
+    "peakEncoder": 9,
+    "separatedHingePairs": 2,
+    "phases": [
+      {
+        "time": 0.5000000000000003,
+        "positionMm": [
+          131.70059025287628,
+          -0.2980288118124008,
+          -0.35466626286506653
+        ],
+        "yawDegrees": 0.02698606108924707,
+        "encoder": 6,
+        "pins": [
+          {
+            "pin": "D8",
+            "mode": "pushpull",
+            "driveHigh": true
+          },
+          {
+            "pin": "D9",
+            "mode": "pushpull",
+            "driveHigh": false
+          },
+          {
+            "pin": "D10",
+            "mode": "pushpull",
+            "driveHigh": true
+          },
+          {
+            "pin": "D11",
+            "mode": "pushpull",
+            "driveHigh": false
+          },
+          {
+            "pin": "D12",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D13",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A0",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A1",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A2",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A3",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A4",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A5",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D0",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D1",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D2",
+            "mode": "input-pullup",
+            "driveHigh": true
+          },
+          {
+            "pin": "D3",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D4",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D5",
+            "mode": "pushpull",
+            "driveHigh": true
+          },
+          {
+            "pin": "D6",
+            "mode": "pushpull",
+            "driveHigh": true
+          },
+          {
+            "pin": "D7",
+            "mode": "input",
+            "driveHigh": false
+          }
+        ]
+      },
+      {
+        "time": 1.0000000000000007,
+        "positionMm": [
+          209.23002064228058,
+          -0.4010426055174321,
+          -0.38890354335308075
+        ],
+        "yawDegrees": -0.014798519364551569,
+        "encoder": 9,
+        "pins": [
+          {
+            "pin": "D8",
+            "mode": "pushpull",
+            "driveHigh": true
+          },
+          {
+            "pin": "D9",
+            "mode": "pushpull",
+            "driveHigh": false
+          },
+          {
+            "pin": "D10",
+            "mode": "pushpull",
+            "driveHigh": true
+          },
+          {
+            "pin": "D11",
+            "mode": "pushpull",
+            "driveHigh": false
+          },
+          {
+            "pin": "D12",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D13",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A0",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A1",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A2",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A3",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A4",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A5",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D0",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D1",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D2",
+            "mode": "input-pullup",
+            "driveHigh": true
+          },
+          {
+            "pin": "D3",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D4",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D5",
+            "mode": "pushpull",
+            "driveHigh": false
+          },
+          {
+            "pin": "D6",
+            "mode": "pushpull",
+            "driveHigh": false
+          },
+          {
+            "pin": "D7",
+            "mode": "input",
+            "driveHigh": false
+          }
+        ]
+      },
+      {
+        "time": 1.49999999999999,
+        "positionMm": [
+          216.93749725818634,
+          -21.162766963243484,
+          -0.39063021540641785
+        ],
+        "yawDegrees": 66.70422585599086,
+        "encoder": 5,
+        "pins": [
+          {
+            "pin": "D8",
+            "mode": "pushpull",
+            "driveHigh": false
+          },
+          {
+            "pin": "D9",
+            "mode": "pushpull",
+            "driveHigh": true
+          },
+          {
+            "pin": "D10",
+            "mode": "pushpull",
+            "driveHigh": true
+          },
+          {
+            "pin": "D11",
+            "mode": "pushpull",
+            "driveHigh": false
+          },
+          {
+            "pin": "D12",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D13",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A0",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A1",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A2",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A3",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A4",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A5",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D0",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D1",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D2",
+            "mode": "input-pullup",
+            "driveHigh": true
+          },
+          {
+            "pin": "D3",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D4",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D5",
+            "mode": "pushpull",
+            "driveHigh": true
+          },
+          {
+            "pin": "D6",
+            "mode": "pushpull",
+            "driveHigh": true
+          },
+          {
+            "pin": "D7",
+            "mode": "input",
+            "driveHigh": false
+          }
+        ]
+      },
+      {
+        "time": 1.9999999999999793,
+        "positionMm": [
+          256.2131881713867,
+          -8.805670775473118,
+          -0.38411282002925873
+        ],
+        "yawDegrees": -177.28527047891544,
+        "encoder": -1,
+        "pins": [
+          {
+            "pin": "D8",
+            "mode": "pushpull",
+            "driveHigh": false
+          },
+          {
+            "pin": "D9",
+            "mode": "pushpull",
+            "driveHigh": true
+          },
+          {
+            "pin": "D10",
+            "mode": "pushpull",
+            "driveHigh": true
+          },
+          {
+            "pin": "D11",
+            "mode": "pushpull",
+            "driveHigh": false
+          },
+          {
+            "pin": "D12",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D13",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A0",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A1",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A2",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A3",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A4",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A5",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D0",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D1",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D2",
+            "mode": "input-pullup",
+            "driveHigh": true
+          },
+          {
+            "pin": "D3",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D4",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D5",
+            "mode": "pushpull",
+            "driveHigh": true
+          },
+          {
+            "pin": "D6",
+            "mode": "pushpull",
+            "driveHigh": true
+          },
+          {
+            "pin": "D7",
+            "mode": "input",
+            "driveHigh": false
+          }
+        ]
+      },
+      {
+        "time": 2.499999999999969,
+        "positionMm": [
+          258.09454917907715,
+          16.012361273169518,
+          -0.39965659379959106
+        ],
+        "yawDegrees": -130.0767722813094,
+        "encoder": -4,
+        "pins": [
+          {
+            "pin": "D8",
+            "mode": "pushpull",
+            "driveHigh": false
+          },
+          {
+            "pin": "D9",
+            "mode": "pushpull",
+            "driveHigh": true
+          },
+          {
+            "pin": "D10",
+            "mode": "pushpull",
+            "driveHigh": true
+          },
+          {
+            "pin": "D11",
+            "mode": "pushpull",
+            "driveHigh": false
+          },
+          {
+            "pin": "D12",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D13",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A0",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A1",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A2",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A3",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A4",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "A5",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D0",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D1",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D2",
+            "mode": "input-pullup",
+            "driveHigh": true
+          },
+          {
+            "pin": "D3",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D4",
+            "mode": "input",
+            "driveHigh": false
+          },
+          {
+            "pin": "D5",
+            "mode": "pushpull",
+            "driveHigh": false
+          },
+          {
+            "pin": "D6",
+            "mode": "pushpull",
+            "driveHigh": false
+          },
+          {
+            "pin": "D7",
+            "mode": "input",
+            "driveHigh": false
+          }
+        ]
+      }
+    ]
+  },
+  "deferred": [
+    {
+      "repository": "CrispStrobe/brickwright-cad",
+      "branch": "feat/kestrel-gripper-arm-20261116",
+      "reason": "Physical gripper test reached 7.033780033697906 degrees instead of greater than 8; extremely slow contact processing. The model and its tests are preserved on the feature branch. Atlas was integrated independently."
+    },
+    {
+      "repository": "CrispStrobe/brickwright-lite",
+      "branch": "lane/native386-benchmark-ui-20261115",
+      "scope": "Dependency reuse/scheduler tooling only; benchmark panel retained",
+      "reason": "Two local macOS failures: Arborist still schedules extraction of seeded Git payload, and filesystem digest fixture assumes different symlink metadata. Original dependency tooling retained."
+    }
+  ],
+  "limitations": [
+    "No complete Tinkercad Sim Lab parity claim.",
+    "Coupled compiled firmware supports Uno/ATmega328P, not RP2040 yet.",
+    "No native app release or TestFlight upload in this integration.",
+    "Broad Board CI previously reported two unchanged x86 assembled-fixture hash failures; focused circuit/CAD tests pass.",
+    "MakeCode simulator-only cache extracted from SHA-verified pinned tarballs because firmware-base fetch failed. Browser checks used installed Google Chrome because Playwright cache points to unavailable external drive."
+  ]
+}
