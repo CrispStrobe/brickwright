@@ -41968,7 +41968,7 @@ const ms = "robot-mantis-walker", Bc = [
 ` + t.trim() + `
 ` }), W_ = {
   torso: R7(`let spine=move([0,0,4],box(96,28,8));
-let boss=move([-13.5,0,10],box(28,18,4));
+let boss=move([-13.5,0,12],box(28,18,8));
 return union(spine,boss);`),
   leg: R7(`let bridge=move([0,24,3],box(92,12,6));
 let frontPillar=move([40,9,3],box(12,18,6));
@@ -42002,7 +42002,7 @@ return subtract(bar,holes);`)
     indices: [0, 2, 1, 0, 3, 2, 4, 5, 6, 4, 6, 7, 0, 1, 5, 0, 5, 4, 1, 2, 6, 1, 6, 5, 2, 3, 7, 2, 7, 6, 3, 0, 4, 3, 4, 7]
   };
 }, Z_ = {
-  torso: [y4(0, 0, 4, 96, 28, 8), y4(-13.5, 0, 10, 28, 18, 4)],
+  torso: [y4(0, 0, 4, 96, 28, 8), y4(-13.5, 0, 12, 28, 18, 8)],
   leg: [y4(0, 24, 3, 92, 12, 6), y4(40, 9, 3, 12, 18, 6), y4(-40, 9, 3, 12, 18, 6)],
   pendulum: [y4(0, 18, 4, 12, 36, 8), y4(0, 32, 4, 24, 14, 8)]
 };
@@ -42032,7 +42032,7 @@ function Y_(t = ms) {
   const e = X3(h(t === "robot-mantis-walker-print" ? "Mantis walker PLA print layout" : "Mantis 3-servo walker"));
   if (e.id = t, e.version = 8, t === "robot-mantis-walker-print")
     return m5(e, "torso", "torso", [-45, -40, 0]), m5(e, "leg", "left-leg", [-45, 25, 0]), m5(e, "leg", "right-leg", [55, 25, 0]), m5(e, "pendulum", "pendulum", [45, -40, 0]), e;
-  e.simulation = { ...L8(), fixBase: !1, groundFriction: 0.9, groundRestitution: 0.02 }, e.joints = [], m5(e, "torso", "torso", [0, 0, 22], [0, 0, 0], 0.3), m5(e, "leg", "left-leg", [0, 23, 0], [90, 0, 0], 0.95), m5(e, "leg", "right-leg", [0, -17, 0], [90, 0, 0], 0.95), m5(e, "pendulum", "pendulum", [0, 0, 38], [90, 0, 90], 0.2, 2400);
+  e.simulation = { ...L8(), fixBase: !1, groundFriction: 0.9, groundRestitution: 0.02 }, e.joints = [], m5(e, "torso", "torso", [0, 0, 22], [0, 0, 0], 0.3), m5(e, "leg", "left-leg", [0, 23, 0], [90, 0, 0], 0.95), m5(e, "leg", "right-leg", [0, -17, 0], [90, 0, 0], 0.95), m5(e, "pendulum", "pendulum", [0, 0, 44], [90, 0, 90], 0.2, 2400);
   const i = j4("micro-servo-1143");
   e.provenance = {
     version: 1,
@@ -42047,7 +42047,7 @@ function Y_(t = ms) {
     const p = W3(e, "hinge", `${r}-casing`, `${r}-shaft`, q, u);
     p.id = `${r}-${l.toLowerCase()}`, p.limits = b, p.control = { port: l }, e.joints.push(p), Ga(e, `${r}-shaft`, m);
   }, s = Math.PI / 180, o = Ha.hipLimitDeg * s, a = Ha.rollLimitDeg * s;
-  return n("left-hip", "Left hip servo", "A", [16, -11.18, 26], [-90, 0, 0], [16, 16, 26], [0, 1, 0], [-o, o], "torso", "left-leg"), n("right-hip", "Right hip servo", "B", [-16, 11.18, 26], [90, 0, 0], [-16, -16, 26], [0, 1, 0], [-o, o], "torso", "right-leg"), n("roll", "Roll balance servo", "C", [-27.18, 0, 38], [0, 90, 0], [0, 0, 38], [1, 0, 0], [-a, a], "torso", "pendulum"), e.tracers = [{ id: "walker-path", bodyId: "torso", point: [0, 0, 26], color: "#8b5cf6" }], e;
+  return n("left-hip", "Left hip servo", "A", [16, -11.18, 26], [-90, 0, 0], [16, 16, 26], [0, 1, 0], [-o, o], "torso", "left-leg"), n("right-hip", "Right hip servo", "B", [-16, 11.18, 26], [90, 0, 0], [-16, -16, 26], [0, 1, 0], [-o, o], "torso", "right-leg"), n("roll", "Roll balance servo", "C", [-27.18, 0, 44], [0, 90, 0], [0, 0, 44], [1, 0, 0], [-a, a], "torso", "pendulum"), e.tracers = [{ id: "walker-path", bodyId: "torso", point: [0, 0, 26], color: "#8b5cf6" }], e;
 }
 function Q_(t) {
   const e = [];
@@ -48122,7 +48122,7 @@ function Jv(t, e) {
 }
 let ei;
 async function eS() {
-  const [{ createBundledModelLibrary: t }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-BTp-97Lq.js"), import("./model-library-cache-DiMFGzp9.js")]);
+  const [{ createBundledModelLibrary: t }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-D3_3wBlp.js"), import("./model-library-cache-DiMFGzp9.js")]);
   return ei ?? (ei = t()), { ...ei, cache: e() };
 }
 function nS(t, e) {
