@@ -8,9 +8,16 @@ import {readFileSync} from 'node:fs';
 const gui = createRequire(new URL('../packages/scratch-gui/package.json', import.meta.url));
 const {JSDOM} = createRequire(gui.resolve('isomorphic-dompurify'))('jsdom');
 const dom = new JSDOM('<!doctype html><body><div id="app"></div></body>', {url: 'http://localhost/'});
+// React 16's browser scheduler owns a MessageChannel when a DOM is present.
+// Node's ports keep the test worker alive after jsdom closes, unlike browser
+// ports. Retain real channels/scheduling and dispose this test's ports explicitly.
+const schedulerChannels = [];
+const NativeMessageChannel = globalThis.MessageChannel;
 const descriptors = new Map();
 for (const [key, value] of Object.entries({window: dom.window, document: dom.window.document,
-    navigator: dom.window.navigator})) {
+    navigator: dom.window.navigator, MessageChannel: class extends NativeMessageChannel {
+        constructor () {super(); schedulerChannels.push(this);}
+    }})) {
     descriptors.set(key, Object.getOwnPropertyDescriptor(globalThis, key));
     Object.defineProperty(globalThis, key, {configurable: true, value});
 }
@@ -28,12 +35,13 @@ const module = {exports: {}};
 new Function('require', 'module', 'exports', code)(name => name.includes('bw-native-benchmarks') ? api : name.endsWith('.css') ? {} : gui(name), module, module.exports);
 const Panel = module.exports.default, app = document.querySelector('#app');
 const select = id => document.querySelector(`[data-testid="native-benchmark-${id}"]`);
-const click = id => act(() => Simulate.click(select(id)));
-const open = () => {act(() => ReactDOM.render(React.createElement(Panel), app));
-    act(() => window.dispatchEvent(new window.Event('bw-open-native-benchmarks')));};
+const click = id => act(() => {Simulate.click(select(id));});
+const open = () => {act(() => {ReactDOM.render(React.createElement(Panel), app);});
+    act(() => {window.dispatchEvent(new window.Event('bw-open-native-benchmarks'));});};
 const flush = async () => {await act(async () => {await new Promise(resolve => setTimeout(resolve, 0));});};
 after(() => {
     ReactDOM.unmountComponentAtNode(app); dom.window.close();
+    for (const channel of schedulerChannels) {channel.port1.close(); channel.port2.close();}
     for (const [key, descriptor] of descriptors) {
         if (descriptor) Object.defineProperty(globalThis, key, descriptor); else delete globalThis[key];
     }
@@ -52,18 +60,18 @@ test('license precedes Run; live output renders; Stop rejects stale completion a
     assert.match(select('status').textContent, /Stopped/); assert.equal(select('screen').textContent, 'live CGA');
     runImpl = async () => ({status: 'complete', accepted: true, exitCode: 4, retired: 20, steps: 22, screen: ['new'], stdout: ''});
     click('run'); await flush(); assert.match(select('status').textContent, /Complete/); assert.equal(select('screen').textContent, 'new');
-    act(() => ReactDOM.unmountComponentAtNode(app));
+    act(() => {ReactDOM.unmountComponentAtNode(app);});
 });
 test('fetch failure, Whetstone launch error and close during fetch never publish stale completion', async () => {
     open(); fetchImpl = async () => {throw Error('hash mismatch');}; click('fetch'); await flush();
     assert.match(select('status').textContent, /Error: hash mismatch/); assert.equal(select('run').disabled, true);
-    act(() => Simulate.change(select('project'), {target: {value: 'whetstone'}}));
+    act(() => {Simulate.change(select('project'), {target: {value: 'whetstone'}});});
     fetchImpl = async (_, options) => {options.onNotice('source permission'); return {project: 'whetstone'};};
     click('fetch'); await flush(); assert.equal(select('run').disabled, false);
     runImpl = async assets => {assert.equal(assets.project, 'whetstone'); throw Error('native shutdown');};
     click('run'); await flush(); assert.match(select('status').textContent, /Error: native shutdown/);
     let finish, signal; fetchImpl = (_, options) => {signal = options.signal; return new Promise(resolve => {finish = resolve;});};
-    click('fetch'); act(() => Simulate.click(document.querySelector('button'))); assert.equal(signal.aborted, true);
+    click('fetch'); act(() => {Simulate.click(document.querySelector('button'));}); assert.equal(signal.aborted, true);
     finish({project: 'topbench'}); await flush(); assert.equal(document.querySelector('[data-testid="native-benchmarks"]'), null);
-    act(() => ReactDOM.unmountComponentAtNode(app));
+    act(() => {ReactDOM.unmountComponentAtNode(app);});
 });
