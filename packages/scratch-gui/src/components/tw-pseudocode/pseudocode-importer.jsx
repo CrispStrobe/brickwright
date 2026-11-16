@@ -2121,14 +2121,14 @@ class PseudocodeImporter extends React.Component {
     codeMenuActions () {
         if (this._unmounted || !this.props.isVisible || !this.state.revealed) return null;
         return {
-            open: {
+            open: {label:'Open code file…',location:'file',
                 enabled: !this.state.busy && !!this._codeFileInput.current,
                 run: () => this._codeFileInput.current.click()
             },
             // Match the toolbar: saving a snapshot is allowed while compiling.
-            save: {enabled: true, run: this.saveCodeFile},
-            'to-blocks': {enabled: this.canCompileToBlocks(), run: this.compile},
-            'from-blocks': {enabled: !this.state.busy, run: this.fromBlocks}
+            save: {label:'Save code as…',location:'file',enabled: true, run: this.saveCodeFile},
+            'to-blocks': {label:'Convert code to blocks',location:'edit',enabled: this.canCompileToBlocks(), run: this.compile},
+            'from-blocks': {label:'Generate code from blocks',location:'edit',enabled: !this.state.busy, run: this.fromBlocks}
         };
     }
 

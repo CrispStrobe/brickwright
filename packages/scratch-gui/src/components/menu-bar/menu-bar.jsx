@@ -6,6 +6,8 @@ import PropTypes from 'prop-types';
 import bindAll from 'lodash.bindall';
 import bowser from 'bowser';
 import React from 'react';
+import {createPortal} from 'react-dom';
+import {installDesktopEditorMenu} from '../../lib/desktop-editor-menu';
 
 import VM from 'scratch-vm';
 
@@ -225,6 +227,9 @@ class MenuBar extends React.Component {
     }
     componentDidMount () {
         this._mounted = true;
+        this._removeDesktopMenu=installDesktopEditorMenu(this);
+        this._ribbonChanged=()=>this.setState(state=>({ribbonVersion:(state.ribbonVersion||0)+1}));
+        window.addEventListener('bw-project-ribbon-changed',this._ribbonChanged);
         document.addEventListener('keydown', this.handleKeyPress);
         nativeDocumentsAvailable().then(nativeDocuments => {
             if (this._mounted && nativeDocuments) this.setState({nativeDocuments});
@@ -255,11 +260,14 @@ class MenuBar extends React.Component {
     }
     componentWillUnmount () {
         this._mounted = false;
+        this._removeDesktopMenu?.();
+        window.removeEventListener('bw-project-ribbon-changed',this._ribbonChanged);
         document.removeEventListener('keydown', this.handleKeyPress);
         if (this._unsubscribeUndo) this._unsubscribeUndo();
         if (this._unsubscribeCodeActions) this._unsubscribeCodeActions();
     }
     componentDidUpdate (prevProps) {
+        this._refreshDesktopMenu?.();
         if (prevProps.activeTabIndex !== this.props.activeTabIndex) this.activateTabUndoSurface();
     }
     activateTabUndoSurface () {
@@ -289,6 +297,7 @@ class MenuBar extends React.Component {
         return null;
     }
     refreshAssetMenuItems () {
+        this._refreshDesktopMenu?.();
         const surface = this.resolveAssetMenuSurface();
         const assetFileItems = getEditorMenuItems(surface, 'file');
         const assetEditItems = getEditorMenuItems(surface, 'edit');
@@ -304,6 +313,12 @@ class MenuBar extends React.Component {
         if (!surface) return false;
         if (!getEditorMenuItems(surface, location).some(item => item.name === name && item.enabled)) return false;
         return runEditorMenuAction(surface, name);
+    }
+    renderRibbonItem (content) {
+        if (typeof document==='undefined'||!document.body.classList.contains('bw-compact-chrome')) return content;
+        const cad=this.resolveAssetMenuSurface()==='cad';
+        const target=cad?document.querySelector('[data-bw-project-ribbon]'):document.querySelector('[data-bw-editor-tabs]');
+        return target?createPortal(<div className="bw-compact-file-menu">{content}</div>,target):content;
     }
     renderAssetMenuItems (location) {
         const items = location === 'file' ? this.state.assetFileItems : this.state.assetEditItems;
@@ -632,7 +647,8 @@ class MenuBar extends React.Component {
                             onRequestOpen={this.props.onClickSettings}
                             settingsMenuOpen={this.props.settingsMenuOpen}
                         />
-                        {(this.props.canManageFiles) && (
+                        <SB3Downloader>{(unused,save)=>{this._desktopSave=save;return null;}}</SB3Downloader>
+                        {(this.props.canManageFiles) && this.renderRibbonItem(
                             <div
                                 className={classNames(styles.menuBarItem, styles.hoverable, {
                                     [styles.active]: this.props.fileMenuOpen
@@ -657,6 +673,7 @@ class MenuBar extends React.Component {
                                 <MenuBarMenu
                                     className={classNames(styles.menuBarMenu)}
                                     open={this.props.fileMenuOpen}
+                                    ribbonAnchor='[data-testid="bw-file-menu-trigger"]'
                                     place={this.props.isRtl ? 'left' : 'right'}
                                     onRequestClose={this.props.onRequestCloseFile}
                                 >
@@ -1008,7 +1025,7 @@ class MenuBar extends React.Component {
                                 strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                     </button>
-                    <button
+                    {this.renderRibbonItem(<button
                         type="button"
                         className={classNames(styles.menuBarItem, styles.globalUndoButton)}
                         data-testid="bw-global-history"
@@ -1021,7 +1038,7 @@ class MenuBar extends React.Component {
                                 fill="none" stroke="currentColor" strokeWidth="2"
                                 strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
-                    </button>
+                    </button>)}
                     {this.props.canEditTitle ? (
                         <div className={classNames(styles.menuBarItem, styles.growable)}>
                             <MenuBarItemTooltip

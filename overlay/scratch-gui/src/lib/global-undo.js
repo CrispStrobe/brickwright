@@ -83,8 +83,8 @@ export const notifyUndoState = () => announce();
  * @param {'undo'|'redo'} direction which way
  * @returns {*} the surface's result; false when there was nothing to do
  */
-const step = direction => {
-    const surface = surfaces.get(activeSurface);
+const step = (direction, name = activeSurface) => {
+    const surface = surfaces.get(name);
     const depth = depthOf(surface);
     if (!surface || typeof surface[direction] !== 'function' || !depth[direction]) return false;
     lastError = '';

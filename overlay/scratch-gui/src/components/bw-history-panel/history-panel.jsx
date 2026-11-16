@@ -13,7 +13,7 @@ import {
 import downloadBlob from '../../lib/download-blob';
 
 const t = makeT({en: {
-    history: 'History', autosave: 'Autosave', autosaveLink: 'Autosave…', close: 'Close',
+    history: 'Project history', autosave: 'Autosave', autosaveLink: 'Autosave…', close: 'Close',
     now: 'Now', noSteps: 'No changes yet.', older: 'Steps from before the last reload are kept as autosave versions:', showVersions: 'Show versions', undone: 'Undone: click to redo up to here', more: '… {n} more',
     enabled: 'Save versions automatically', every: 'Every', keep: 'Keep', versions: '{n} versions',
     where: 'Where', browser: 'In this browser (always)', folder: 'Also in folder: {name}',
@@ -26,7 +26,7 @@ const t = makeT({en: {
     reasons_auto: 'auto', reasons_manual: 'manual', reasons_hidden: 'on leave', 'reasons_before-restore': 'before restore',
     sec: '{n} s', min: '{n} min'
 }, de: {
-    history: 'Verlauf', autosave: 'Autospeichern', autosaveLink: 'Autospeichern…', close: 'Schließen',
+    history: 'Projektverlauf', autosave: 'Autospeichern', autosaveLink: 'Autospeichern…', close: 'Schließen',
     now: 'Jetzt', noSteps: 'Noch keine Änderungen.', older: 'Schritte von vor dem letzten Neuladen sind als Autospeicherungen erhalten:', showVersions: 'Versionen zeigen', undone: 'Rückgängig gemacht: klicken, um bis hier wiederherzustellen',
     more: '… {n} weitere',
     enabled: 'Versionen automatisch speichern', every: 'Alle', keep: 'Behalten', versions: '{n} Versionen',
@@ -100,7 +100,7 @@ class HistoryPanel extends React.Component {
         };
     }
     componentDidMount () {
-        this.unsubscribeUndo = subscribeUndoState(undo => this.setState({undo, timeline: timeline()}));
+        this.unsubscribeUndo = subscribeUndoState(undo => this.setState({undo, timeline: timeline('workspace')}));
         document.addEventListener('pointerdown', this.handleOutside, true);
         this.unsubscribeAutosave = subscribeAutosave(autosave => {
             const saved = this.state.autosave && this.state.autosave.lastSavedAt;
@@ -148,7 +148,7 @@ class HistoryPanel extends React.Component {
                     {t(L, 'showVersions')}</button></> : null}</p>;
         }
         const shownFuture = future.slice(0, SHOW_STEPS);
-        const jump = steps => this.run(() => moveHistory(steps, 'all').then(() => ''));
+        const jump = steps => this.run(() => moveHistory(steps, 'workspace').then(() => ''));
         return <div role="listbox" aria-label={t(L, 'history')} data-testid="bw-history-list" ref={this.list}
             onKeyDown={this.handleListKey}
             style={{maxHeight: 340, overflow: 'auto', display: 'flex', flexDirection: 'column'}}>

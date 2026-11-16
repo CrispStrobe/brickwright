@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import React from 'react';
+import {notifyEditorMenuActions} from '../../lib/editor-menu-actions.js';
+import ProjectTitleInput from '../menu-bar/project-title-input.jsx';
 import CadRobotControls from './cad-robot-controls.jsx';
 import {CAD_ROBOT_EXAMPLES} from '../../lib/bw-cad-robot-catalog.js';
 import {openCadRobotProject, ROBOT_PROJECT_OPENED} from '../../lib/bw-cad-robot-projects.js';
@@ -17,6 +19,7 @@ export default function CadCircuitPanel({vm,locale,colorMode,isVisible,toolbarHo
     const [status,setStatus]=React.useState({phase:'idle',time:0,readings:[]}),[error,setError]=React.useState('');
     const [catalog,setCatalog]=React.useState(emptyCatalog),[expanded,setExpanded]=React.useState(false),[runner,setRunner]=React.useState('blocks');
     const [view,setView]=React.useState('program');
+    React.useEffect(()=>{notifyEditorMenuActions();},[status.phase,toolbarHost,isVisible]);
     const openView=next=>{setView(next);setExpanded(!(expanded&&view===next));};
     React.useEffect(()=>{const opened=()=>{setRunner('blocks');setError('');setView('controls');setExpanded(true);};window.addEventListener(ROBOT_PROJECT_OPENED,opened);return()=>window.removeEventListener(ROBOT_PROJECT_OPENED,opened);},[]);
     const openExample=async id=>{try{await openCadRobotProject(vm,id,locale);}catch(e){setError(e.message);}};
@@ -66,7 +69,7 @@ export default function CadCircuitPanel({vm,locale,colorMode,isVisible,toolbarHo
     const problem=error||status.error||mechanical.error;
     if(!toolbarHost)return null;
     return <React.Fragment>
-        {createPortal(<div className={`${styles.root} ${styles.toolbar}`} data-color-mode={colorMode} data-testid="bw-cad-program-toolbar">
+        {createPortal(<div className={`${styles.root} ${styles.toolbar}`} data-color-mode={colorMode} data-testid="bw-cad-program-toolbar"><span className="bw-compact-project-title"><ProjectTitleInput /></span>
             <button className={styles.run} data-testid="bw-cad-run" aria-label={text('Run program','Programm starten')} disabled={active} onClick={execute}>▶ {text('Run','Start')}</button>
             <button aria-label={text('Stop program','Programm stoppen')} title={text('Stop program','Programm stoppen')} disabled={!active} onClick={stop}>■</button>
             <button aria-label={text('Reset simulation','Simulation zurücksetzen')} title={text('Reset simulation','Simulation zurücksetzen')} onClick={reset}>↺</button>

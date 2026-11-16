@@ -40,7 +40,7 @@ async function fixture ({text = documentText('First project'), loadSDK} = {}) {
         getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, value),
         removeItem: key => values.delete(key)};
     globalThis.document = {body: {appendChild () {}}, createElement: type => {
-        if (type === 'div') return {remove () {}};
+        if (type === 'div') return {dataset:{},style:{},querySelector:()=>null,remove () {}};
         assert.equal(type, 'input');
         const input = {style: {}, files: [], removed: false, click () {}, remove () { this.removed = true; }};
         inputs.push(input);
