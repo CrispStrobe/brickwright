@@ -1,0 +1,94 @@
+{
+  "format": "brickwright-cad-host-bounded-verification",
+  "version": 1,
+  "sourceBlob": "a6e5f6caaced76071f4e311e22fc641c2c46c584",
+  "sourcePath": "overlay/scratch-gui/src/components/tw-pseudocode/cad-tab.jsx",
+  "runtime": "functions.exec V8",
+  "scope": "Exact extracted pickFile and requestFile functions; explicit DOM/signal/session state doubles; no React, browser, SDK session or SB3 execution.",
+  "passed": 13,
+  "failed": 0,
+  "results": [
+    {
+      "name": "current selection returns filename and exact bytes",
+      "passed": true
+    },
+    {
+      "name": "native picker cancellation returns null and cleans up",
+      "passed": true
+    },
+    {
+      "name": "disposal before request creates no input",
+      "passed": true
+    },
+    {
+      "name": "disposal while choosing settles before any file arrives",
+      "passed": true
+    },
+    {
+      "name": "current read failure remains observable",
+      "passed": true
+    },
+    {
+      "name": "oversize selection rejects before reading bytes",
+      "passed": true
+    },
+    {
+      "name": "project generation change cancels late success",
+      "passed": true
+    },
+    {
+      "name": "project generation change cancels late failure",
+      "passed": true
+    },
+    {
+      "name": "document revision change cancels late success",
+      "passed": true
+    },
+    {
+      "name": "document revision change cancels late failure",
+      "passed": true
+    },
+    {
+      "name": "disposal during read ignores late success",
+      "passed": true
+    },
+    {
+      "name": "disposal during read ignores late failure",
+      "passed": true
+    },
+    {
+      "name": "retained session replacement cancels a pending selection",
+      "passed": true
+    }
+  ],
+  "compatibilityReview": {
+    "sdkCommit": "fb8c3671aef1a2d5dc3673e7eb04bde38cc3f77b",
+    "sourcePaths": [
+      "packages/core/src/document.ts",
+      "packages/core/src/session.ts",
+      "packages/editor/src/index.ts"
+    ],
+    "confirmed": [
+      "createDocument(title) accepts a title string",
+      "session.rename(title) commits a title edit",
+      "state.revision increments on committed document changes, undo, redo, and load",
+      "subscribe(listener) returns unsubscribe and does not emit immediately",
+      "editor onDocumentChange follows document revision changes",
+      "editor async open/import checks disposal and expected revision before committing"
+    ],
+    "bundleSource": "8d2aac3fd9dc62ecd16b8c89d9087796506ca5ec:overlay/scratch-gui/src/lib/bw-project-bundle.js",
+    "bundleConfirmed": "Successful compatible/legacy apply increments CAD project generation; rollback restores it; incoming unknown CAD versions remain exact sidecar text.",
+    "dependencyScope": "Source review found no required new fallback admission: explicit createRequire resolves GUI React/Babel/renderer dependencies at the integrated GUI package; JSZip is root-declared. No actual scope-log execution was possible."
+  },
+  "negativeControl": {
+    "sourceBlob": "d9451f1e7d2fb9f152dfa0764fa487efe72497a0",
+    "scenario": "An intervening document revision followed by file.arrayBuffer rejection",
+    "observed": "The previous requestFile rejected with the stale read error; the revised source resolves null."
+  },
+  "limits": {
+    "reactRendererSuiteExecuted": false,
+    "browserExecuted": false,
+    "productionBuildExecuted": false,
+    "actualSDKSessionExecutedInThisReview": false
+  }
+}
