@@ -6,6 +6,7 @@ const yd = {
   "Invalid body sensor ray": "Ungültiger Sensorstrahl am Körper",
   "Front steering servo": "Vorderer Lenkservo",
   "Fork tilt servo": "Gabelneigungsservo",
+  "Sweeper servo": "Schwenkservo",
   "Output spline": "Abtriebsverzahnung",
   "Invalid actuator impulse": "Ungültiger Aktuatorimpuls",
   "Choose a hinge or slider actuator": "Ein Dreh- oder Schubgelenk wählen",
@@ -11364,7 +11365,7 @@ function Hf(t, e, i = {}) {
 function Gf() {
   const t = new Worker(new URL(
     /* @vite-ignore */
-    "" + new URL("assets/simulation.worker-DcXOKvBx.js", import.meta.url).href,
+    "" + new URL("assets/simulation.worker-B-95AvFJ.js", import.meta.url).href,
     import.meta.url
   ), { type: "module" });
   let e = 0, i = !1;
@@ -13728,7 +13729,7 @@ function cp(t, e) {
     o.clear();
   }, r = () => i || (i = e ? e() : new Worker(new URL(
     /* @vite-ignore */
-    "" + new URL("assets/geometry.worker-78gylB5i.js", import.meta.url).href,
+    "" + new URL("assets/geometry.worker-BPtfmUIM.js", import.meta.url).href,
     import.meta.url
   ), { type: "module" }), i.onmessage = (d) => {
     const l = d.data, c = o.get(l.request);
@@ -48442,7 +48443,7 @@ function PS(t, e) {
 }
 let ci;
 async function DS() {
-  const [{ createBundledModelLibrary: t }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-DUu8CNCt.js"), import("./model-library-cache-DiMFGzp9.js")]);
+  const [{ createBundledModelLibrary: t }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-rVX4Ny2X.js"), import("./model-library-cache-DiMFGzp9.js")]);
   return ci ?? (ci = t()), { ...ci, cache: e() };
 }
 function LS(t, e) {

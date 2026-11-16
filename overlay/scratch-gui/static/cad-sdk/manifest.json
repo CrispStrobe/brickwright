@@ -2,7 +2,7 @@
   "format": "brickwright-cad-sdk",
   "version": 1,
   "repository": "https://github.com/CrispStrobe/brickwright-cad",
-  "commit": "e828887fc4295a35be9d4d2a6bad6ff1a58973ef",
+  "commit": "b1f6fa43fa175298248094fbc8b9f1d1b500dca9",
   "dirty": false,
   "entry": "sdk.js",
   "wasm": "cad-assets/manifold.wasm",
@@ -10,13 +10,13 @@
     "LICENSE": "ed121de3496066a2ddc8c11b30b48142165ab84bdb066fee351392ecaccf36ad",
     "NOTICE.txt": "dea50eee6d6781549af4e3740bfaf7661b29479696e5ae6cbe41eafd93c0fa70",
     "adafruit-preview-data-BWhkbkqw.js": "c37d14c1f115a63599555fd4193b2df1f9426a9b4cab8962282d6794ba6e11b6",
-    "assets/geometry.worker-78gylB5i.js": "57ea7c4e99946c4654263871f0acfceb96d1cf8fe6effab5023cba64ea5c6267",
-    "assets/jolt-physics.wasm-compat-DFP4Oqbs.js": "0429b71e1d06b3938063d0bc86620ab16eb199c2aab7ebb610000a708bb736ba",
-    "assets/simulation.worker-DcXOKvBx.js": "80e20d08cbe6240eb1a2b08a35101e49fd1137f0ab2e158c1836c605072b82ee",
+    "assets/geometry.worker-BPtfmUIM.js": "0c6b0bea57288c647cd9836899aa14603c14d87e030786ea83cd5182f9cef589",
+    "assets/jolt-physics.wasm-compat-DHxwb_VA.js": "8f475fe3ea5330d547d790adf69080deeddcd9a5d50280b0da5fdf7d4dff23b0",
+    "assets/simulation.worker-B-95AvFJ.js": "88debb1be85b7ea87eba7a8827e35945a82b660b1de48d8858099a487d65cfb8",
     "cad-assets/manifold.wasm": "73e3b419ad31294f6b1cc478173944e50efc4a34bfdeeff0107bdfc12975f11c",
     "model-library-cache-DiMFGzp9.js": "75dc4ad7999b4571b227f1c675ca00af698fcc886dc73e98dd4c0eb2604e2b20",
-    "model-library-local-DUu8CNCt.js": "7c2900d32e2b5992372da3ea68e1cecaabbd0ddcae1d84447af9be982fb8c675",
-    "sdk-C6okJ6A9.js": "5eba990333470c5158681306c33e8eb0b78d44307e5f6fc33dc8ab775f7eaea8",
-    "sdk.js": "f5409f0c8e43669a73f79b795b8b77dae46c61f8029970e3a998e430eba3c3ff"
+    "model-library-local-rVX4Ny2X.js": "4e17fd7dc461d753d55a80f039d197f9e3261456be1728a1d6639a849ff61c47",
+    "sdk-CfY4g-Vh.js": "2c10c023fea4191d64f2e482d19f6a23ec00d900746aebe365af1a9f3ded5504",
+    "sdk.js": "055c31b7fa21edd3cb22becff0336d4f0f13b259ff25a63a5418669ba6b6a542"
   }
 }
