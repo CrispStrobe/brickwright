@@ -1178,7 +1178,7 @@ const GUIComponent = props => {
                                 {showCad ? <TabPanel className={tabClassNames.tabPanel}>
                                     {cadWanted ? <EditorErrorBoundary name="CAD">
                                         <React.Suspense fallback={<div role="status">{intl.locale.startsWith('de') ? 'CAD wird geladen…' : 'Loading CAD…'}</div>}>
-                                            <CadTab vm={vm} isVisible={activeTabIndex === cadTabIndex} locale={intl.locale} theme={theme} />
+                                            <CadTab vm={vm} isVisible={activeTabIndex === cadTabIndex} locale={intl.locale} theme={theme} onEditProgram={()=>props.onActivateTab(CODE_TAB_INDEX)} onOpenCircuit={()=>props.onActivateTab(4)} />
                                         </React.Suspense>
                                     </EditorErrorBoundary> : null}
                                 </TabPanel> : null}

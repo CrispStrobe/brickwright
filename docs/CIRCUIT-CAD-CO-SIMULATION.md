@@ -1,10 +1,15 @@
 # Circuit and CAD co-simulation
 
-Enable CAD Editor in Settings → Workspace, open CAD, and expand **Circuit → CAD
-connections**. The **Open Scout circuit + CAD example…** button loads one editable
-SB3 containing the Uno pin declarations, blocks, pseudocode, wired L293D, 6 V
-battery, two yellow TT output-shaft motor models, and the printable Scout rover.
-Save the current project before replacing it.
+Enable CAD Editor in Settings → Workspace, then open CAD. The existing CAD
+toolbar contains **Run**, **Stop**, **Reset** and **Program**. **Program** opens a
+side drawer; setup never adds another row above the canvas. In the drawer choose
+**Open Scout example…** to load one editable SB3 containing an Uno, blocks,
+pseudocode, H-bridge, battery, two yellow TT motors and the printable rover.
+Save the current project before replacing it. The drawer guides program choice
+and motor-to-joint connections. Transmission, sensor mounting and measurements
+stay in optional details. The shared app File menu exposes CAD file actions;
+there is no additional embedded CAD File menu. The ⋯ control restores app menus
+when the workspace is compact.
 
 For the native Mac test build, see [build and acceptance instructions](LOCAL-MACOS-ROBOT-CAD.md).
 Scout and Atlas are available; Kestrel is held on its feature branch after its
@@ -18,7 +23,11 @@ The earlier figures over 130 (editable sources) and 212 (an earlier qualified
 cohort) are not current total-library counts. The source filter retains the
 editable models; inserting a selected compatible model modifies the current
 CAD project directly. Downloading a verified original is a separate operation.
-Adafruit archive folders are not counted as screened curated models.
+Adafruit archive folders are not counted as screened curated models. All 482
+component folders now have bundled thumbnails and selection previews, including
+367 upstream images and 115 genuine geometry/embedded previews. They require no
+image download while browsing; originals retain their separate verified-file
+loading and insertion screening. The archive metadata root is not a component.
 
 Connect each circuit DC motor to a CAD hinge or lead-screw slider. Select the
 motor and joint explicitly. Ratio is rotor revolutions per joint revolution;
@@ -29,9 +38,9 @@ They travel in the SB3 `cadCircuit` section independently of the device's defaul
 CAD preference. Missing or conflicting IDs refuse the run instead of reconnecting
 by name. The design and all saved CAD history revisions remain unchanged.
 
-**Run blocks / pseudocode** uses the current VM program. Its waits and pin writes
+**Blocks / pseudocode** in Program uses the current VM program when Run is pressed. Its waits and pin writes
 share the mechanical clock. When connections are enabled, the ordinary green
-flag also takes this route. **Run on simulated Arduino** compiles those same
+flag also takes this route. Choosing **Arduino Uno** in Program compiles those same
 blocks using the existing compiler route and executes the resulting instructions
 in the ATmega328P emulator. It does not also execute VM scripts. Edited Arduino
 programs need the configured compiler service; no compiler or debug clock is

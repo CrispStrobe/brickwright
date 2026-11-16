@@ -8,15 +8,14 @@ isolated worktree; do not mutate another agent's dependency tree or Cargo target
 ## Try the coupled Scout
 
 1. Launch the local test app and enable **Settings → Workspace → CAD Editor**.
-2. Save any current project. Open **CAD → Circuit → CAD connections → Open Scout
-   circuit + CAD example…**. This replaces the current project with one editable
+2. Save any current project. Open **CAD → Program → Open Scout example…**. This replaces the current project with one editable
    SB3 containing the circuit, rover and program.
-3. Choose **Run blocks / pseudocode**. Check that the rover moves and turns and
+3. Choose **Blocks / pseudocode** under Program, then press **Run program**. Check that the rover moves and turns and
    that the program receives actual encoder feedback. Switching to Code should
    keep the coupled run advancing.
 4. Stop, then Reset. Stop removes power; Reset restores the initial mechanical
    pose. Simulation preview must not alter the saved CAD or its history.
-5. Try **Run on simulated Arduino** with an internet connection to the configured
+5. Choose **Arduino Uno** under Program and Run with an internet connection to the configured
    compiler service. This executes compiled Uno/ATmega328P instructions rather
    than also executing the VM program. Stop an independent debugger first.
 6. Switch between light and dark settings. Open the model library, select Source,
@@ -24,7 +23,9 @@ isolated worktree; do not mutate another agent's dependency tree or Cargo target
 
 The bundled curated catalogue contains 281 models with previews: 154 editable
 source models and 127 mesh models. Check both filters. The standalone Adafruit
-archive folders contain original files and are separate from those totals.
+archive folders contain original files and are separate from those totals. All
+482 component folders also have local thumbnails and selection previews. The
+metadata-only archive root is not a component.
 
 Atlas is also available in the robot catalogue. Kestrel is deferred because its
 physical gripper qualification failed. Dedicated newer motor drivers, CAD-fed
@@ -48,7 +49,8 @@ Install the CLI with `npm ci --ignore-scripts` in `apps/tauri`. Pass a local
 Tauri configuration overriding `build.frontendDist` with the absolute GUI output,
 and giving the test app its own product name, bundle ID and deep-link scheme.
 Run `npm run build -- --bundles app --config /path/to/local-config.json` there.
-Keep that machine-specific configuration and Cargo caches under ignored artifacts.
+If overriding `bundle.macOS.infoPlist`, retain the privacy descriptions from
+`src-tauri/Info.plist` along with local build metadata. Keep that machine-specific configuration and Cargo caches under ignored artifacts.
 
 For local ad-hoc signing, use signing identity `-`; this does not select an Apple
 private key or create a store-distribution artifact. Explicit final signing uses

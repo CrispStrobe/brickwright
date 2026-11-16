@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 const motorKinds = new Set(['dc_motor', 'gearmotor', 'dc_motor_encoder']);
+export const hasDirectCadProgram = runtime => (runtime?.targets||[]).some(target =>
+    Object.values(target.blocks?._blocks||{}).some(block => typeof block.opcode==='string'&&block.opcode.startsWith('cadlab_')));
 const partFields = ['id', 'name', 'kind'];
 const jointFields = ['id', 'name', 'port', 'kind'];
 const sameRows = (a, b, fields) => a.length === b.length && a.every((row, index) =>

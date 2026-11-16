@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {availableActuatorJoints, availableCircuitParts, connectionDocumentMismatch, connectionsForDocument,
-    createCircuitCadCatalogReader, emptyConnections, nextActuatorConnection}
+    createCircuitCadCatalogReader, emptyConnections, nextActuatorConnection, hasDirectCadProgram}
     from '../overlay/scratch-gui/src/lib/bw-cad-circuit/panel-model.js';
 import {observeCircuitCadPanel} from '../overlay/scratch-gui/src/lib/bw-cad-circuit/panel-observer.js';
 import {validateConnections} from '../overlay/scratch-gui/src/lib/bw-cad-circuit/session.js';
@@ -189,4 +189,12 @@ test('late CAD readiness and bindings replaced while hidden are observed on reop
     assert.equal(h.outputs.statuses.at(-1).time, 25);
     assert.equal(h.outputs.configs.at(-1), updated);
     reopened();
+});
+
+
+test('the shared Run control recognizes existing direct CAD motor and slider programs',()=>{
+    assert.equal(hasDirectCadProgram({targets:[{blocks:{_blocks:{motor:{opcode:'cadlab_setMotorSpeed'}}}}]}),true);
+    assert.equal(hasDirectCadProgram({targets:[{blocks:{_blocks:{slider:{opcode:'cadlab_runSliderDistance'}}}}]}),true);
+    assert.equal(hasDirectCadProgram({targets:[{blocks:{_blocks:{motor:{opcode:'robotlab_setMotorSpeed'},pin:{opcode:'stc12_digitalWrite'}}}}]}),false);
+    assert.equal(hasDirectCadProgram({targets:[{}, {blocks:{_blocks:{}}}]}),false);
 });

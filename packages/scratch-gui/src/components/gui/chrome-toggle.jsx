@@ -45,10 +45,12 @@ class ChromeToggle extends React.Component {
             document.body.classList.contains(CLASS)};
         this.toggle = this.toggle.bind(this);
         this.button = React.createRef();
+        this.requestCompact=event=>{const compact=event.detail?.compact===true;document.body.classList.toggle(CLASS,compact);this.setState({compact});window.dispatchEvent(new Event('resize'));};
     }
 
     componentDidMount () {
         this.mounted = true;
+        window.addEventListener('bw-chrome-compact-request',this.requestCompact);
         // Icons fit while the small local measurement chunk loads.
         this.tabList = document.querySelector('[data-bw-editor-tabs]');
         if (this.tabList) this.tabList.setAttribute('data-bw-tab-icons-only', '');
@@ -65,6 +67,7 @@ class ChromeToggle extends React.Component {
 
     componentWillUnmount () {
         this.mounted = false;
+        window.removeEventListener('bw-chrome-compact-request',this.requestCompact);
         if (this.labelFit) this.labelFit.dispose();
     }
 

@@ -285,6 +285,7 @@ class MenuBar extends React.Component {
         // The Robot provider additionally requires the full tab's explicit
         // visibility, so an unshown arena dock cannot supply commands here.
         if (surface === 'robots') return surface;
+        if (surface === 'cad') return surface;
         return null;
     }
     refreshAssetMenuItems () {
