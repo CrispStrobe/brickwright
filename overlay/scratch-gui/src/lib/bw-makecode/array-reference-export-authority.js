@@ -2150,7 +2150,7 @@ export function createArrayReferenceExportAuthority(project, options = {}, anima
             const expected=registrationPairs[scope.root.opcode],token=literal(scope.root,'TOKEN',scope.target);
             if(expected&&typeof token==='string'&&scope.root.inputs?.TOKEN){
                 const hats=scopes.filter(s=>s.root.opcode===scope.root.opcode&&literal(s.root,'TOKEN',s.target)===token);
-                const found=records.filter(r=>r.node.opcode===expected&&(literal(r.node,'TOKEN',r.target)===token||literal(r.node,'TOKEN',r.target)===null));
+                const found=records.filter(r=>(r.node.opcode===expected||expected==='arcade_registerButtonHandler'&&r.node.opcode==='arcade_registerPlayerButtonHandler')&&(literal(r.node,'TOKEN',r.target)===token||literal(r.node,'TOKEN',r.target)===null));
                 if(hats.length===1&&found.length===1&&found[0].target===scope.target&&found[0].node.inputs?.TOKEN&&!invalid.has(found[0].node))entries=found;
             }
         }

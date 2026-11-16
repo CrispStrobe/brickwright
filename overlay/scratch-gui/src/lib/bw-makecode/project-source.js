@@ -30,6 +30,10 @@ export function arcadeProjectSource(files) {
         if (typeof files[name] !== 'string') {
             diagnostics.push(`Missing declared project source file: ${JSON.stringify(name)}`);continue;
         }
+        // Pinned PXT converts Python only for pyprj. In explicitly selected
+        // block/TypeScript projects, retained Python attachments are not inputs
+        // to its TypeScript compiler; this does not establish source equivalence.
+        if (/\.py$/.test(name) && (config?.preferredEditor === 'blocksprj' || config?.preferredEditor === 'tsprj')) continue;
         // Exact owned helper contains only namespace function installation;
         // the native Settings adapter installs those same two functions.
         if(name===STRING_ARRAY_SETTINGS_PATH && files[name]===STRING_ARRAY_SETTINGS_SOURCE)continue;

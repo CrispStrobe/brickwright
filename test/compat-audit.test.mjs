@@ -140,24 +140,28 @@ test('CLI reports both a real MakeCode import and a missing Scratch extension op
     } finally { fs.rmSync(dir, {recursive: true, force: true}); }
 });
 
-test('CLI preserves the named empty-body warning without treating it as a parse failure', () => {
+test('CLI distinguishes authored empty branches from named warnings for untranslated bodies', () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'bw-compat-warnings-'));
     try {
-        // Empty bodies parse, but the parser still reports its named warning.
-        // Keep that warning visible in the static compatibility classification.
-        fs.writeFileSync(path.join(dir, 'optional.ts'), 'if (0) {\n}\nlet x = 1\n');
-        const json = path.join(dir, 'audit.json');
-        const run = spawnSync(process.execPath, ['--disable-warning=MODULE_TYPELESS_PACKAGE_JSON', CLI,
-            '--target', 'arcade', '--out', json, path.join(dir, 'optional.ts')],
-        {cwd: ROOT, encoding: 'utf8'});
-        assert.equal(run.status, 0, run.stderr);
-        const row = JSON.parse(fs.readFileSync(json, 'utf8')).rows[0];
-        assert.equal(row.stage, 'partial');
-        assert.equal(row.staticTranslation.status, 'partial');
-        assert.ok(row.blockCount > 0);
-        assert.ok(row.unsupported.some(gap => gap.includes('Code to Blocks:') &&
-            gap.includes('Empty body')));
-        assert.equal(row.qualification.behavioralEquivalence, 'not-measured');
+        for (const [name, source, expected] of [
+            ['authored', 'if (0) {\n}\nlet x = 1\n', 'translated'],
+            ['untranslated', 'if (0) {\n    unknownCall()\n}\nlet x = 1\n', 'partial']
+        ]) {
+            const input = path.join(dir, name + '.ts'), json = path.join(dir, name + '.json');
+            fs.writeFileSync(input, source);
+            const run = spawnSync(process.execPath, ['--disable-warning=MODULE_TYPELESS_PACKAGE_JSON', CLI,
+                '--target', 'arcade', '--out', json, input], {cwd: ROOT, encoding: 'utf8'});
+            assert.equal(run.status, 0, run.stderr);
+            const row = JSON.parse(fs.readFileSync(json, 'utf8')).rows[0];
+            assert.equal(row.stage, expected);
+            assert.equal(row.staticTranslation.status, expected);
+            assert.ok(row.blockCount > 0);
+            if (name === 'untranslated') {
+                assert.ok(row.unsupported.some(gap => gap.includes('unknownCall')));
+                assert.ok(row.unsupported.some(gap => gap.includes('Code to Blocks:') && gap.includes('Empty body')));
+            } else assert.deepEqual(row.unsupported, []);
+            assert.equal(row.qualification.behavioralEquivalence, 'not-measured');
+        }
     } finally { fs.rmSync(dir, {recursive: true, force: true}); }
 });
 

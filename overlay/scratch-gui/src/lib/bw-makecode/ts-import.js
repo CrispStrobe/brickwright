@@ -404,13 +404,23 @@ class Parser {
         return t;
     }
 
+    // `type` starts an alias only in declaration grammar. It remains a
+    // contextual keyword when used as a parameter, variable or field name.
+    isIdentifier (token = this.peek()) {
+        return token.type === 'ident' || token.type === 'type';
+    }
+
+    expectIdentifier () {
+        return this.isIdentifier() ? this.next() : this.expect('ident');
+    }
+
     /** Type annotations carry no runtime meaning here; step over them. */
     /**
      * Skip `: number[]`. Returns true when the type was an array — the
      * translator needs that to declare a Scratch LIST rather than a
      * variable, and `let a: number[] = []` carries the fact nowhere else.
      */
-    skipTypeAnnotation (assertion = false) {
+    skipTypeAnnotation (assertion = false, arrowReturn = false) {
         // The type's text rides along (`lastType`): `let bird: game.LedSprite = null`
         // says it holds a sprite, and nothing else in the declaration does.
         this.lastType = '';
@@ -430,8 +440,20 @@ class Parser {
             if (depth === 0 && prev && t.line > prev.line && this.lastType &&
                 !(prev.type === 'punct' && ['|', '&', '.', '<', ',', '=>', ':'].includes(prev.value))) return isArray;
             prev = t;
-            // A return type ends at the function body: `): void {`.
-            if (depth === 0 && t.type === 'punct' && t.value === '{' && this.lastType) return isArray;
+            // An arrow return annotation ends before its body delimiter. The
+            // ordinary type scanner also accepts function types, whose => must
+            // remain part of the type in declarations and named functions.
+            if (arrowReturn && depth === 0 && t.type === 'punct' && t.value === '=>') return isArray;
+            // Bare callable/grouped return types need a separate type grammar;
+            // refuse them rather than interpreting their type arrow as a body.
+            if (arrowReturn && depth === 0 && t.type === 'punct' && t.value === '(') {
+                throw new Error('MakeCode TS: grouped arrow return annotations are not supported');
+            }
+            // A return type ends at the function body: `): void {`. After a
+            // type arrow, however, `{` starts its object result type, as in
+            // `handler: () => {}`; the enclosing parameter/body is still ahead.
+            if (depth === 0 && t.type === 'punct' && t.value === '{' && this.lastType &&
+                !this.lastType.endsWith('=>')) return isArray;
             // Once a type is complete, only a type suffix/operator can
             // continue it. A following declaration or expression belongs to
             // the program, even when an optional semicolon was omitted.
@@ -505,7 +527,8 @@ class Parser {
             // is what its object literals are).
             return this.parseInterface();
         }
-        if (this.at('type')) {
+        if (this.at('type') && this.peek(1).line === this.peek().line && this.isIdentifier(this.peek(1)) &&
+            this.peek(2).type === 'punct' && ['=','<'].includes(this.peek(2).value)) {
             // A type alias: no runtime behaviour.
             this.next();
             this.skipBalanced();
@@ -680,7 +703,7 @@ class Parser {
             const modifiers = [];
             for (;;) {
                 const t = this.peek();
-                const nextIsName = this.peek(1).type === 'ident' || MODIFIERS.has(this.peek(1).value) ||
+                const nextIsName = this.isIdentifier(this.peek(1)) || MODIFIERS.has(this.peek(1).value) ||
                     ['get', 'set', 'constructor', 'static'].includes(this.peek(1).value);
                 if ((t.type === 'public' || t.type === 'private' || t.type === 'static' ||
                     (t.type === 'ident' && MODIFIERS.has(t.value))) && nextIsName) {
@@ -694,7 +717,7 @@ class Parser {
             const t = this.next();
             const member = t.value;
             // `get kind(): number {` / `set kind(x) {`
-            if ((member === 'get' || member === 'set') && this.at('ident') && this.peek(1).type === 'punct' &&
+            if ((member === 'get' || member === 'set') && this.isIdentifier() && this.peek(1).type === 'punct' &&
                 this.peek(1).value === '(') {
                 const prop = this.next().value;
                 const params = this.parseParams();
@@ -783,7 +806,7 @@ class Parser {
         let destructured = false;
         do {
             const pattern = this.at('punct', '{') || this.at('punct', '[') ? this.parseBindingPattern() :
-                {type: 'Identifier', name: this.expect('ident').value};
+                {type: 'Identifier', name: this.expectIdentifier().value};
             destructured ||= pattern.type !== 'Identifier';
             const isArray = this.skipTypeAnnotation();
             const typeName = this.lastType;
@@ -841,7 +864,7 @@ class Parser {
             this.expect('punct', ']');
             return {type: 'ArrayPattern', elements};
         }
-        return {type: 'Identifier', name: this.expect('ident').value};
+        return {type: 'Identifier', name: this.expectIdentifier().value};
     }
 
     parseTypeParameters () {
@@ -895,10 +918,10 @@ class Parser {
             } else {
                 const modifiers = [];
                 while (['public','private','protected','readonly'].includes(this.peek().value) &&
-                    (this.peek(1).type === 'ident' || ['public','private','protected'].includes(this.peek(1).value))) {
+                    (this.isIdentifier(this.peek(1)) || ['public','private','protected'].includes(this.peek(1).value))) {
                     modifiers.push(this.next().value);
                 }
-                const name = this.expect('ident').value;
+                const name = this.expectIdentifier().value;
                 // `input?: Buffer` — an optional parameter: the marker changes
                 // the type, not the name bound in the body; a default is
                 // applied at the top of the body when the argument is undefined.
@@ -936,7 +959,7 @@ class Parser {
 
     parseFunction () {
         this.expect('function');
-        const name = this.at('ident') ? this.next().value : null;
+        const name = this.isIdentifier() ? this.next().value : null;
         const typeParameters = this.parseTypeParameters();
         const params = this.parseParams();
         const paramTypes = this.lastParamTypes;
@@ -969,7 +992,9 @@ class Parser {
         if (this.eat('else')) {
             alternate = this.at('if') ? [this.parseIf()] : this.parseBlockOrStatement();
         }
-        return {type: 'If', test, consequent, alternate};
+        return {type: 'If', test, consequent, alternate,
+            ...(this.retainAuthoredEmptyBranches && consequent.length===0 ? {bwAuthoredEmptyConsequent:true} : {}),
+            ...(this.retainAuthoredEmptyBranches && Array.isArray(alternate) && alternate.length===0 ? {bwAuthoredEmptyAlternate:true} : {})};
     }
 
     parseWhile () {
@@ -1018,7 +1043,7 @@ class Parser {
         if (!this.at('punct', ';')) {
             init = (this.at('let') || this.at('const') || this.at('var')) ?
                 this.parseDeclaration() :
-                {type: 'ExpressionStatement', expr: this.parseExpression()};
+                this.parseForHeaderStatements();
         }
         // `for (let x: T of list)`: the typed form the check above does not see.
         if (this.eat('ident', 'of')) {
@@ -1038,9 +1063,29 @@ class Parser {
         this.eat('punct', ';');
         const test = this.at('punct', ';') ? null : this.parseExpression();
         this.eat('punct', ';');
-        const update = this.at('punct', ')') ? null : this.parseExpression();
+        const update = this.at('punct', ')') ? null : this.parseForHeaderExpression();
         this.expect('punct', ')');
         return {type: 'For', init, test, update, body: this.parseBlockOrStatement()};
+    }
+
+    // Commas here order discarded-value header operations. Keep argument,
+    // declaration and value-position commas outside this narrow grammar.
+    parseForHeaderExpression () {
+        const expressions = [this.parseExpression()];
+        while (this.eat('punct', ',')) {
+            if (this.at('punct', ';') || this.at('punct', ')') || this.at('punct', ',') || this.peek().type === 'eof') {
+                throw new Error('for header comma requires another expression');
+            }
+            expressions.push(this.parseExpression());
+        }
+        return expressions.length === 1 ? expressions[0] : {type: 'ForHeaderSequence', expressions};
+    }
+
+    parseForHeaderStatements () {
+        const expression = this.parseForHeaderExpression();
+        const body = (expression.type === 'ForHeaderSequence' ? expression.expressions : [expression])
+            .map(expr => ({type: 'ExpressionStatement', expr}));
+        return body.length === 1 ? body[0] : {type: 'Block', body};
     }
 
     parseEnum () {
@@ -1249,7 +1294,7 @@ class Parser {
                 const k = this.next();
                 if (!['ident', 'string', 'number'].includes(k.type) && !KEYWORDS.has(k.type)) return null;
                 if (this.eat('punct', ':')) props.push({key: k.value, value: this.parseExpression()});
-                else if (k.type === 'ident' && (this.at('punct', ',') || this.at('punct', '}'))) {
+                else if (this.isIdentifier(k) && (this.at('punct', ',') || this.at('punct', '}'))) {
                     props.push({key: k.value, value: {type: 'Identifier', name: k.value}});
                 } else return null;
                 if (!this.eat('punct', ',')) break;
@@ -1300,12 +1345,16 @@ class Parser {
         }
         if (t.type === 'function') {
             this.next();
+            // Other targets retain their existing grammar boundary. Arcade's
+            // caller keeps the local self binding until its callback proof.
+            const selfName = this.namedFunctionExpressions && this.isIdentifier() ? this.next().value : null;
             const params = this.parseParams();
             const paramTypes = this.lastParamTypes;
             this.skipTypeAnnotation();
             const returnType = this.lastType;
             const body = this.parseBlock();
             return {type: 'FunctionExpression', params, paramTypes, returnType,
+                ...(selfName ? {selfName, selfNameDefaults: params.parameterDefaults} : {}),
                 ...(this.retainCallableMetadata ? {functionKind: 'function', parameterDefaults: params.parameterDefaults,
                     parameterDefaultPrologue: this.parameterDefaults} : {}),
                 optionalParams:params.optionalParams || [], body: [...this.defaultStatements(params), ...body]};
@@ -1324,7 +1373,7 @@ class Parser {
             return {type: 'Call', callee, args: this.at('punct', '(') ? this.parseArguments() : [],
                 ...(typeArguments ? {typeArguments} : {}), isNew: true, constructorCall: true};
         }
-        if (t.type === 'ident') {
+        if (this.isIdentifier(t)) {
             this.next();
             // Arrow functions: `sprite => {...}` and `(a, b) => {...}`.
             if (this.at('punct', '=>')) {
@@ -1342,11 +1391,15 @@ class Parser {
             try {
                 const params = this.parseParams();
                 const paramTypes = this.lastParamTypes;
+                const annotated = this.at('punct', ':');
+                this.skipTypeAnnotation(false, true);
+                const returnType = this.lastType;
+                if (annotated && !returnType) throw new Error('MakeCode TS: missing arrow return type');
                 if (this.at('punct', '=>')) {
                     this.next();
                     const body = this.at('punct', '{') ? this.parseBlock() :
                         [{type: 'Return', value: this.parseExpression()}];
-                    return {type: 'FunctionExpression', params, paramTypes,
+                    return {type: 'FunctionExpression', params, paramTypes, ...(annotated ? {returnType} : {}),
                         ...(this.retainCallableMetadata ? {functionKind: 'arrow', parameterDefaults: params.parameterDefaults,
                             parameterDefaultPrologue: this.parameterDefaults} : {}),
                         optionalParams:params.optionalParams || [], body: [...this.defaultStatements(params), ...body]};
@@ -1447,8 +1500,10 @@ function templateString (raw, strict = false) {
 
 export function parseMakeCodeTs (source, opts = {}) {
     const parser = new Parser(tokenize(source));
+    parser.namedFunctionExpressions = Boolean(opts.namedFunctionExpressions);
     parser.parameterDefaults = Boolean(opts.parameterDefaults);
     parser.retainParentheses = Boolean(opts.retainParentheses);
+    parser.retainAuthoredEmptyBranches = Boolean(opts.retainAuthoredEmptyBranches);
     parser.retainWhenUsed = Boolean(opts.retainWhenUsed);
     parser.retainClassHeritage = Boolean(opts.retainClassHeritage);
     parser.lowerHeritage = Boolean(opts.lowerHeritage);

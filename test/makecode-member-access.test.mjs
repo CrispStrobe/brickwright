@@ -157,6 +157,16 @@ for (const [src, why, member] of REFUSED) {
         for (const [target, translate] of Object.entries(TARGETS)) {
             if (target === 'Arcade' && /serial\.|class /.test(src)) continue;
             const {code, unsupported} = translate(src);
+            if (target === 'Arcade' && why === 's.compare()') {
+                assert.deepEqual(unsupported, [], code);
+                assert.match(code, /_mcCompareLeft\d+/);
+                assert.match(code, /compare value .* op "<" with/);
+                const opaqueSource=src.replace('d("abc")','d(unknown)');
+                assert.notEqual(opaqueSource,src,'the negative changes the actual argument producer');
+                const opaque=translate(opaqueSource);
+                assert.ok(opaque.unsupported.length>0, 'unknown input remains refused');
+                continue;
+            }
             if (target === 'Arcade' && ['s.charCodeAt()', 'String.fromCharCode()'].includes(why)) {
                 assert.deepEqual(unsupported, [], code);
                 assert.match(code, why === 's.charCodeAt()' ? /char code of text \(arcade local s\) at/ : /text from char code/);

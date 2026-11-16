@@ -14,7 +14,7 @@ function ownDataValue(args, name) {
     const descriptor = Object.getOwnPropertyDescriptor(args, name);
     return descriptor && Object.hasOwn(descriptor, 'value') ? descriptor : null;
 }
-function makeKind({method, label, read}) {
+function makeKind({method, label, read, errorFor}) {
 const opcode = 'arcade_' + method;
 const rows = new WeakMap(), adapters = new WeakMap(), issues = new WeakMap();
 const rowOwner = Symbol('actual ' + label + ' declaration');
@@ -113,7 +113,7 @@ function create(runtime, owner) {
         const witness = physical(args, util);
         const call = primitiveOwner.captureActiveCall(util, args);
         if (!call) throw Error(label + ' requires its actual invocation');
-        const error = new TypeError(read(args).message);
+        const error = errorFor ? errorFor(args) : new TypeError(read(args).message);
         const lease = Object.freeze({});
         receipts.set(lease, {runtime, args, util, thread: util.thread, generation, error, witness, call,
             current: () => generation, physical});

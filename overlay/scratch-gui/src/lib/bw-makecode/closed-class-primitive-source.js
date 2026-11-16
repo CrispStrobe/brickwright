@@ -116,17 +116,26 @@ export function closedClassPrimitiveSource(program,graph) {
   // intermediates; its operand still needs this closed Number producer proof.
   // Retain the original expression; no intermediate value is folded or assumed
   // finite. Calls, nested accessors and external names cannot borrow this proof.
+  // Conditional accessors retain their original lazy branches. The guard must
+  // be a pure Boolean literal or a comparison of independently closed Numbers;
+  // neither calls nor nested accessors acquire authority from branch typing.
+  const conditionalGuard=(node,isNumber)=>node?.type==='Boolean'||
+   node?.type==='Binary'&&['<','<=','>','>=','===','!==','==','!='].includes(node.op)&&
+   isNumber(node.left)&&isNumber(node.right);
   const getterNumber=node=>node?.type==='Number'&&Number.isFinite(Number(node.value))||
    ownMember(node)&&node.object?.name==='this'&&fields.has(node.name)||
    node?.type==='Unary'&&['+','-','~'].includes(node.op)&&getterNumber(node.argument)||
-   node?.type==='Binary'&&['+','-','*','|','&','^','<<','>>','>>>'].includes(node.op)&&getterNumber(node.left)&&getterNumber(node.right);
+   node?.type==='Binary'&&['+','-','*','|','&','^','<<','>>','>>>'].includes(node.op)&&getterNumber(node.left)&&getterNumber(node.right)||
+   node?.type==='Conditional'&&conditionalGuard(node.test,getterNumber)&&getterNumber(node.consequent)&&getterNumber(node.alternate);
   // Setter arithmetic retains the formal's actual producer obligation at every
   // dispatch. Own field reads have the same closed initialization proof as a
   // getter; external cells, calls and nested accessors remain outside it.
   const setterNumber=(node,method)=>node?.type==='Number'&&Number.isFinite(Number(node.value))||formalNumber(node,method)||
    ownMember(node)&&node.object?.name==='this'&&fields.has(node.name)||
    node?.type==='Unary'&&['+','-','~'].includes(node.op)&&setterNumber(node.argument,method)||
-   node?.type==='Binary'&&['+','-','*','|','&','^','<<','>>','>>>'].includes(node.op)&&setterNumber(node.left,method)&&setterNumber(node.right,method);
+   node?.type==='Binary'&&['+','-','*','|','&','^','<<','>>','>>>'].includes(node.op)&&setterNumber(node.left,method)&&setterNumber(node.right,method)||
+   node?.type==='Conditional'&&conditionalGuard(node.test,value=>setterNumber(value,method))&&
+   setterNumber(node.consequent,method)&&setterNumber(node.alternate,method);
   for(const method of cls.methods){
    const statements=method.body||[],body=statements.slice(-1);
    if(!statements.slice(0,-1).every(statement=>scalarEffect(statement,method)))valid=false;

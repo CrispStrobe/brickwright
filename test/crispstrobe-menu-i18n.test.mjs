@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import test from 'node:test';
+import {createRequire} from 'node:module';
 
 const source = readFileSync(new URL(
     '../overlay/scratch-vm/src/extensions/crispstrobe/adapter.js', import.meta.url), 'utf8');
@@ -12,7 +13,8 @@ const dependencies = new Map([
     ['../../extension-support/block-type', {}],
     ['../../extension-support/target-type', {}],
     ['../../util/cast', {}],
-    ['format-message', fakeFormatMessage]
+    ['format-message', fakeFormatMessage],
+    ['./arcade/local-array-result-bindings', createRequire(import.meta.url)('../overlay/scratch-vm/src/extensions/crispstrobe/arcade/local-array-result-bindings.js')]
 ]);
 const adapterModule = {exports: {}};
 new Function('require', 'module', 'exports', source)(

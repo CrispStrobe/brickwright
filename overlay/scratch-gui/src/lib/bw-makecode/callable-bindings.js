@@ -15,7 +15,7 @@ export function analyseCallableBindings(program) {
         const previous=owner.names.get(name);
         if (previous) return previous;
         const binding={id:bindings.length+1,name,kind,node,scope:owner,functionOwner:owner.functionOwner,
-            written:false,declared:['parameter','receiver','class','function','global','loop'].includes(kind)};
+            written:false,declared:['parameter','receiver','class','function','function-expression-name','global','loop'].includes(kind)};
         owner.names.set(name,binding);bindings.push(binding);return binding;
     };
     const lookup = (owner,name) => {
@@ -35,10 +35,10 @@ export function analyseCallableBindings(program) {
         if(!binding)return;
         if(write)binding.written=true;
         if(binding.functionOwner===global)return;
-        for(let current=owner.functionOwner;current && current!==binding.functionOwner;current=current.parent?.functionOwner) {
+        const parentFunction=current=>{let parent=current.parent;while(parent?.functionOwner===current)parent=parent.parent;return parent?.functionOwner;};
+        for(let current=owner.functionOwner;current && current!==binding.functionOwner;current=parentFunction(current)) {
             current.captures.add(binding);
             if (!binding.declared) current.capturedBeforeDeclaration.add(binding);
-            if(current.parent?.functionOwner===current)break;
         }
     };
     const block = (body,parent,node) => {
@@ -50,13 +50,19 @@ export function analyseCallableBindings(program) {
         const className=Object.hasOwn(options,'className')?options.className:parent.className;
         const method=Object.hasOwn(options,'method')&&options.method===true;
         const constructor=Object.hasOwn(options,'constructor')&&options.constructor===true;
-        const child=scope(parent,method?'method':'function',node,className);
+        // A named expression's immutable self name is outside its parameter
+        // environment. A same-named formal shadows it without binding an outer
+        // declaration or exporting the expression's name to the parent.
+        const selfScope=node.type==='FunctionExpression'&&node.selfName?scope(parent,'function-name',node,className):null;
+        const child=scope(selfScope||parent,method?'method':'function',node,className);
         child.functionOwner=child;child.constructor=constructor;
+        if(selfScope){selfScope.functionOwner=child;declare(selfScope,node.selfName,'function-expression-name',node);}
         scopes.set(node,child);functions.push(child);
         for(const name of node.params || [])declare(child,name,'parameter',node);
         if(method)declare(child,'this','receiver',node);
         const defaults=node.type==='FunctionExpression'?callableDefaultBody(node):{body:node.body,unsupported:[]};
         child.unsupported=defaults.unsupported;
+        for(const entry of node.selfNameDefaults||[])visit(entry.value,child);
         predeclare(defaults.body,child);
         for(const statement of defaults.body || [])visit(statement,child);
         return child;

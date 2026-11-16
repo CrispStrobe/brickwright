@@ -898,10 +898,13 @@ export class BaseTranslator {
 
         case 'If':
             push(`IF ${this.condition(st.test)} THEN:`);
-            this.block(st.consequent, indent + 1, out);
-            if (st.alternate && st.alternate.length) {
+            if (st.bwAuthoredEmptyConsequent===true && Array.isArray(st.consequent) && st.consequent.length===0) out.push(pad+'  PASS:');
+            else this.block(st.consequent, indent + 1, out);
+            const emptyAlternate=st.bwAuthoredEmptyAlternate===true && Array.isArray(st.alternate) && st.alternate.length===0;
+            if (st.alternate && st.alternate.length || emptyAlternate) {
                 push('ELSE:');
-                this.block(st.alternate, indent + 1, out);
+                if(emptyAlternate)out.push(pad+'  PASS:');
+                else this.block(st.alternate, indent + 1, out);
             }
             return;
 

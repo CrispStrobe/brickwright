@@ -40,6 +40,13 @@ test('every Arcade opcode is placed in a section or is plumbing or a hidden alia
     assert.deepEqual([...palette.HIDDEN_ALIASES].filter(name => listed.includes(name) || palette.PLUMBING.has(name)), [], 'a hidden alias is listed in a section or in PLUMBING');
 });
 
+test('reset and completed music, prompt and high-score commands have their owning palette section', () => {
+    for (const [opcode, owner] of [['resetGame','game'], ['askForNumberLength','game'], ['askForStringLength','game'], ['setGameStats','game'], ['withoutNullSprites','sprites'], ['playNoteMelody','music'], ['highScore','info']]) {
+        const section = palette.SECTIONS.find(row => row[0] === owner);
+        assert.ok([...section[3], ...section[4]].includes(opcode), opcode);
+    }
+});
+
 test('sections show 5 to 10 basic blocks, hide the rest, and keep plumbing out of the palette', () => {
     const {extension} = makeVm();
     const info = extension.getInfo();

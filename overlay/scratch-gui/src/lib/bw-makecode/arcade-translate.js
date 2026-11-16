@@ -1,3 +1,14 @@
+import {normalizeOwnedPromptOptions,literalLimitedTextPrompt} from './owned-prompt-options-source.js';
+import {gameResetSourceSafe,markGameResets,gameResetIntrinsic} from './game-reset-source.js';
+import {gameStatsConfiguredSourceSafe,gameStatsAssignmentProof} from './game-stats-source.js';
+import {playerButtonConfiguredSourceSafe,markPlayerButtonRegistrations,playerButtonRegistration} from './player-button-registration-source.js';
+import {playerConnectionConfiguredSourceSafe,markPlayerConnectionRegistrations,playerConnectionRegistration} from './player-connection-registration-source.js';
+import {normalizeUnusedNamedCallbacks} from './unused-named-callbacks.js';
+import {highScoreConfiguredSourceSafe,markHighScoreCalls,highScoreIntrinsic} from './high-score-source.js';
+import {consoleLogValueConfiguredSourceSafe,lowerConsoleLogValues} from './lower-console-log-values.js';
+import {bindScoreImageSource,scoreImageBindingView} from './score-owned-image-source.js';
+import {numberPromptLengthSourceSafe,markNumberPromptLengths,literalNumberPromptLength,markDefaultTextPrompts,literalDefaultTextPrompt} from './number-prompt-length-source.js';
+import {MUSIC_MELODIES} from './music-melodies.js';
 import {lowerSourceValueOperatorHelpers} from './source-value-operator-helpers.js';
 import {NUMBER_FORMAT_MEMBERS} from './ordinary-primitive-sdk-number-source.js';
 import {setExternalRoots,externalPath,externalAssetNode,externalAssetText} from './external-references.js';
@@ -7,6 +18,8 @@ import {capturePreparedSharedImageSources,parseSharedImageSourceBoundary,parseSh
 import {prepareSharedImageArrayTransport,projectSharedImageArrayTransport,finishSharedImageArrayTransport,currentSharedImageArrayTransport,reproveSharedImageArrayTransport} from './source-shared-image-array-transport.js';
 import {prepareProcedureConstraintSourceForTranslation,procedureConstraintAstMetadata} from './procedure-constraint-source.js';
 import {BUTTON_EVENTS,controllerButtonEventNumberLeaves} from './controller-button-event-number-source.js';
+import {lowerAnyButtonRegistrations,anyButtonConfiguredSourceSafe} from './any-button-registration-source.js';
+import {legacyNoteMelodySourceSafe,markLegacyNoteMelodies,literalLegacyNoteMelody} from './legacy-note-melody-source.js';
 import {CAMERA_PROPERTIES} from './camera-property-constants.js';
 import {createProcedureOwnerEmission} from './procedure-owner-emission.js';
 import {prepareThrowSource,prepareThrowEmission,reproveThrowEmission,hasThrowEmission} from './throw-source-gate.js';
@@ -44,8 +57,7 @@ const PARTICLE_EFFECTS = new Set(['spray', 'trail', 'fountain', 'rings', 'fire',
 // enum members and the Note frequencies of the pinned enum.
 // PXT effects.ImageEffect instances, also background effects for game over.
 const IMAGE_EFFECTS = new Set(['dissolve', 'melt', 'slash', 'splatter']);
-const MUSIC_MELODIES = new Set(['baDing', 'wawawawaa', 'jumpUp', 'jumpDown', 'powerUp', 'powerDown', 'magicWand', 'siren',
-    'pewPew', 'knock', 'footstep', 'thump', 'smallCrash', 'bigCrash', 'zapped', 'buzzer', 'sonar', 'spooky', 'beamUp']);
+
 // The seven segment extension's enums by member name (sevenseg.ts).
 // The sprite extensions' calls and adjustable fields (darts.ts, corgio.ts).
 // arcade-character-animations: Predicate bits and FacingDirection (= the facing predicates).
@@ -126,6 +138,10 @@ import {lowerSourceLoopControl} from './lower-source-loop-control.js';
 import {lowerLazyValues} from './lower-lazy-values.js';
 import {arrayCopyCall} from './array-copy-calls.js';
 import {indexedStringValue} from './indexed-string-values.js';
+import {closedStringCompare} from './closed-string-compare.js';
+import {closedCreatedImageDimensions,createdImageDimensionSourceSafe,markCreatedImageDimensions} from './closed-created-image-dimensions.js';
+import {withClosedSpriteNullFilters,lowerClosedSpriteNullFilters,currentClosedSpriteNullFilter,bindClosedSpriteNullFilterConsumer,emitClosedSpriteNullFilter} from './closed-sprite-null-filter.js';
+import {withLiteralRenderableSource,bindLiteralRenderableConsumer,literalRenderablePacket} from './literal-renderable-source.js';
 import {lowerPxtStagedValues} from './lower-pxt-staged-values.js';
 import {lowerNamespaceBindings} from './namespace-bindings.js';
 import {ARCADE_SCENE_CONSTANTS} from './arcade-scene-constants.js';
@@ -148,6 +164,7 @@ import {
 import {svgToPixels} from './pixel-image.js';
 import {parseAnimationJres} from './arcade-animation-assets.js';
 import {parseSongJres} from './song-jres.js';
+import {prepareRootFixedImages} from './root-fixed-jres-images.js';
 import {BUILTIN_IMAGES} from './arcade-builtin-images.js';
 import {ANIMATION_COMPANION_PATH, recoverAnimationCompanion} from './animation-companion.js';
 import {HELPERS} from './arcade-runtime.js';
@@ -351,6 +368,8 @@ class ArcadeTranslator extends BaseTranslator {
         this.sourceReferenceTypes=new Map((node.sourceReferenceDeclarations || sourceReferenceDeclarations(node)).map(({name,type})=>[name,type]));
         this.sourceFunctions=new Map(node.body.filter(fn=>fn.type==='FunctionDeclaration').map(fn=>[fn.name,fn]));
         const references = inferImageReferences(node, value => this.path(value), value => this.imageOf(value), value => !!this.assetKindLookup && value?.type === 'Template' && ['assets.image', 'assets.tile'].includes(value.tag));
+        bindClosedSpriteNullFilterConsumer(this,node);
+        bindLiteralRenderableConsumer(this,node);
         this.objectReferences = references.objects;this.fontReferences=references.fonts;
         this.bufferReferences = references.buffers;this.imageReferences = references.images;this.spriteReferences = references.sprites;this.dataReferences = references.data;
         this.exactStringReferences=references.exactStrings;this.textSpriteReferences=references.textSprites;this.playerReferences=references.players;this.sceneReferences=references.scenes;this.physicsEngineReferences=references.physicsEngines;this.tileReferences = references.tiles;this.tilemapDataReferences = references.tilemapData;this.sceneTilemapReferences = references.sceneTilemaps;this.legacyTileReferences=references.legacyTiles;this.animationReferences = references.animations;this.sevensegDigitReferences=references.sevensegDigits;this.sevensegCounterReferences=references.sevensegCounters;this.dartReferences=references.darts;this.corgiReferences=references.corgis;this.nullReferences=references.nulls;this.arrayReferences = references.arrays;this.numberReferences=references.numbers;this.stringReferences=references.strings;this.booleanReferences=references.booleans;
@@ -372,6 +391,7 @@ class ArcadeTranslator extends BaseTranslator {
             value?.type==='Assignment'&&['&=','|=','^=','<<=','>>=','>>>='].includes(value.op)?[value.left,value.right]:null;
         const bitwise=value=>bitwiseOperands(value)!==null;
         if(containsAst(node,bitwise)){
+            const createdDimensions=closedCreatedImageDimensions(node);
             const facts=analyseSourceValueProducers(node,{arrayValues:true,parenthesized:true,unboundIsOpaque:true,
                 declaredLocalUndefined:true,ordinaryPrimitiveSdkNumbers:true,sceneClockNumbers:true});
             const primitive=new Set(['Number','String','Boolean','Null','Undefined']);
@@ -380,7 +400,7 @@ class ArcadeTranslator extends BaseTranslator {
                     const types=facts.typesAt(operand),array=type=>type?.kind==='Array';
                     if([...types].some(array)||references.arrays.has(operand))this.possibleBitwiseArrays.add(operand);
                     if(types.size&&[...types].every(type=>primitive.has(type)||array(type)))this.sourceBitwiseOperands.add(operand);
-                    if(references.primitives.has(operand)||types.size&&[...types].every(type=>primitive.has(type)))this.primitiveBitwiseOperands.add(operand);
+                    if(operand.bwClosedCreatedImageDimension===true&&createdDimensions.has(operand)||references.primitives.has(operand)||types.size&&[...types].every(type=>primitive.has(type)))this.primitiveBitwiseOperands.add(operand);
                     if([...types].some(type=>typeof type==='string'&&!primitive.has(type)&&type!=='Opaque'))this.objectBitwiseOperands.add(operand);
                 }
                 return false;
@@ -413,7 +433,7 @@ class ArcadeTranslator extends BaseTranslator {
             }
         } while (added);
         this.kindRuntimeProgram=containsAst(node,value=>value.type==='SpriteKindReset' || value.type==='Member' && this.path(value.object)==='SpriteKind' || value.type==='Call' && (this.path(value.callee)==='SpriteKind.create' || value.callee?.type==='Member' && ['kind','setKind'].includes(value.callee.name)));
-        this.sceneStackProgram=this.kindRuntimeProgram || containsAst(node,value=>value.type==='Call' && /^(?:mp\.(?:onControllerEvent|onButtonEvent|getPlayerState|setPlayerState|changePlayerStateBy)|game\.(?:pushScene|popScene|addScenePushHandler|addScenePopHandler|removeScenePushHandler|removeScenePopHandler))$/.test(this.path(value.callee)||''));
+        this.sceneStackProgram=this.kindRuntimeProgram || containsAst(node,value=>!!playerButtonRegistration(value) || !!playerConnectionRegistration(value) || value.type==='Call' && /^(?:mp\.(?:onControllerEvent|onButtonEvent|getPlayerState|setPlayerState|changePlayerStateBy)|game\.(?:pushScene|popScene|addScenePushHandler|addScenePopHandler|removeScenePushHandler|removeScenePopHandler))$/.test(this.path(value.callee)||''));
         this.nativeInfoProgram=this.sceneStackProgram || containsAst(node,value=>value.type==='Call' && isInfoRegistration(this.path(value.callee)));
         this.scoreRegistrationProof=scoreRegistrationProof(node);
         const registrations=discoverRuntimeRegistrations(node,this);
@@ -863,6 +883,8 @@ class ArcadeTranslator extends BaseTranslator {
         if(arrayCopy!==null)return arrayCopy;
         const indexedString = indexedStringValue(this,node);
         if(indexedString!==null)return indexedString;
+        const stringComparison = closedStringCompare(this,node);
+        if(stringComparison!==null)return stringComparison;
         if(this.handleTemplates && node.callee?.type==='Member' && node.callee.name==='kind' && !a.length && this.spriteReferences?.has(node.callee.object))return `arcade property kind of (${this.expr(node.callee.object)})`;
         const fn = node.callee?.type === 'Identifier' && this.returnFunctions?.get(node.callee.name);
         if (fn) {
@@ -967,6 +989,9 @@ class ArcadeTranslator extends BaseTranslator {
         // Arcade's score is the game's on-screen score: the extension's own, on both
         // paths. (The fixed-sprite path used to keep it in a Scratch variable named
         // `score`, which the export could not tell from a user's, so the HUD was lost.)
+        case 'info.highScore':
+            if(highScoreIntrinsic(node))return 'arcade high score';
+            this.unsupported.push('info.highScore requires its unchanged builtin and settings bindings');return '0';
         case 'info.score': return 'arcade player (1) score';
         case 'info.life': return 'lives';
         case 'game.ask':
@@ -974,10 +999,12 @@ class ArcadeTranslator extends BaseTranslator {
             this.unsupported.push('game.ask() requires a title and optional subtitle');return '0';
         case 'game.askForNumber':
             if (a.length === 1) return `arcade ask number ${this.expr(a[0])}`;
+            if(node.bwPxtNumberPromptLength===true&&literalNumberPromptLength(node))return `arcade ask number ${this.expr(a[0])} length ${this.expr(a[1])}`;
             this.unsupported.push('game.askForNumber() with digit limit or other options');
             return '0';
         case 'game.askForString':
-            if (a.length === 1) return `arcade ask text ${this.expr(a[0])}`;
+            if(node.bwPxtLimitedTextPrompt===true&&literalLimitedTextPrompt(node))return `arcade ask text ${this.expr(a[0])} length ${this.expr(a[1])}`;
+            if (a.length === 1 || node.bwPxtDefaultTextPrompt===true&&literalDefaultTextPrompt(node)) return `arcade ask text ${this.expr(a[0])}`;
             this.unsupported.push('game.askForString() with length limit or other options');
             return '""';
         case 'scene.cameraLeft':
@@ -1154,6 +1181,7 @@ class ArcadeTranslator extends BaseTranslator {
         return undefined;
     }
     expr (node) {
+        if(node?.type==='ClosedSpriteNullFilter')return emitClosedSpriteNullFilter(this,node);
         if(this.handleTemplates && ((node?.type==='Template' && /^(tilemap|assets\.tilemap)$/.test(node.tag||'')) || (node?.type==='Call' && this.path(node.callee)==='tiles.createTilemap'))) {
             const data=this.tilemapValueData(node);
             if(data===undefined)return 'undefined value';
@@ -1629,6 +1657,8 @@ class ArcadeTranslator extends BaseTranslator {
 
     command (node, indent, out) {
         const pad = '  '.repeat(indent);
+        const drawing=literalRenderablePacket(this,node);
+        if(drawing){out.push(`${pad}arcade add drawing commands (${JSON.stringify(JSON.stringify(drawing))}) at depth 0`);return;}
         if(node?.callee?.type==='Member' && this.physicsEngineReferences?.has(node.callee.object)) {
             if(node.callee.name==='setMaxSpeed' && node.args?.length===1){out.push(`${pad}arcade set physics engine property maxSpeed of (${this.expr(node.callee.object)}) to (${this.expr(node.args[0])})`);return;}
             out.push(`${pad}${this.note(`Arcade PhysicsEngine.${node.callee.name} requires native PhysicsEngine method support`)}`);return;
@@ -1786,12 +1816,13 @@ class ArcadeTranslator extends BaseTranslator {
                 push(`arcade ${name==='control.raiseEvent'?'raise control event':'wait for control event'} source (${this.expr(a[0])}) value (${this.expr(a[1])})`);return;
             }
         }
-        const sceneSpec=(this.sceneStackProgram || isIndependentRegistration(name)) && sceneRegistrationSpec(name);
+        const sceneSpec=(this.sceneStackProgram || isIndependentRegistration(name)) && sceneRegistrationSpec(name,node);
         if(this.handleTemplates && sceneSpec) {
             const registration=this.sceneRegistrations.get(node);
             if(!registration){push(this.note(isParallelLaunch(name)?'control.runInParallel requires one inline callback without parameters':`${name} requires exact arguments, fixed sprite kinds and a supported inline callback; lifecycle oldScene access is not yet supported`));return;}
             const suffix=`as "${registration.token}" capturing ${JSON.stringify([...registration.ownCaptures].join(' '))}`;
             switch(registration.kind) {
+            case 'playerConnection':{const connection=playerConnectionRegistration(node);push(`arcade register control event source (arcade controller event source player ${connection.player}) value (${connection.event}) flags (16) ${suffix}`);break;}
             case 'controlEvent':push(`arcade register control event source (${this.expr(a[0])}) value (${this.expr(a[1])}) flags (${a[3]?this.expr(a[3]):'16'}) ${suffix}`);break;
             case 'update':push(`arcade register update ${suffix}`);break;
             case 'paint':push(`arcade register paint ${suffix}`);break;
@@ -1804,7 +1835,7 @@ class ArcadeTranslator extends BaseTranslator {
             case 'interval':push(`arcade register interval (${this.expr(a[0])}) ${suffix}`);break;
             case 'multiplayerConnection':push(`arcade register multiplayer connection event (${this.expr(a[0])}) ${suffix}`);break;
             case 'multiplayerButton':push(`arcade register multiplayer button (${this.expr(a[0])}) event (${this.expr(a[1])}) ${suffix}`);break;
-            case 'button':push(`arcade register button "${/^controller\.(\w+)\./.exec(name)[1]}" event (${this.expr(a[0])}) ${suffix}`);break;
+            case 'button':{const playerButton=playerButtonRegistration(node);if(playerButton){push(`arcade register player (${playerButton.player}) button ${JSON.stringify(playerButton.button)} event (${playerButton.event}) ${suffix}`);break;}push(`arcade register button "${/^controller\.(\w+)\./.exec(name)[1]}" event (${this.expr(a[0])}) ${suffix}`);break;}
             case 'destroyed':push(`arcade register destroyed kind ${this.kindSlot(a[0])} ${suffix}`);break;
             case 'overlap':push(`arcade register overlap kind ${this.kindSlot(a[0])} with kind ${this.kindSlot(a[1])} ${suffix}`);break;
             case 'scenePush':push(`arcade register scene push ${suffix}`);break;
@@ -1817,8 +1848,9 @@ class ArcadeTranslator extends BaseTranslator {
         if(this.textSpriteStatement(node,a,push))return;
         if(this.spriteExtensionStatement(node,a,push))return;
         if(this.sevensegStatement(node,a,push))return;
-        if(this.musicStatement(name,a,push))return;
+        if(this.musicStatement(name,a,push,node))return;
         if(this.carnivalStatement(name,a,push))return;
+        if(name==='game.reset'){if(gameResetIntrinsic(node))push('arcade reset game');else push(this.note('game.reset requires an unchanged builtin, no arguments and a standalone statement'));return;}
         if(this.gameOverStatement(name,a,push))return;
         const screenEffect=/^effects\.(\w+)\.(startScreenEffect|endScreenEffect)$/.exec(name||'');
         if(this.handleTemplates && screenEffect && IMAGE_EFFECTS.has(screenEffect[1]) && screenEffect[2]==='startScreenEffect') {
@@ -2063,10 +2095,11 @@ class ArcadeTranslator extends BaseTranslator {
             else if (node.callee.name === 'say' || node.callee.name === 'sayText') {
                 this.spriteSpeech(handle, node.callee.name, a, push);
             }
-            else if (node.callee.name === 'onDestroyed') {
+            else if (['onDestroyed', 'onOverlap'].includes(node.callee.name)) {
+                const overlap = node.callee.name === 'onOverlap';
                 const registration = this.sceneRegistrations.get(node);
-                if (registration) push(`arcade register instance destruction of (${handle}) as "${registration.token}" capturing ${JSON.stringify([...registration.ownCaptures].join(' '))}`);
-                else push(this.note('sprite.onDestroyed() requires one inline callback without parameters and a typed sprite reference'));
+                if (registration) push(`arcade register instance ${overlap ? 'overlap' : 'destruction'} of (${handle}) as "${registration.token}" capturing ${JSON.stringify([...registration.ownCaptures].join(' '))}`);
+                else push(this.note(overlap ? 'sprite.onOverlap() requires one inline callback with zero parameters or one Sprite-typed parameter and a typed sprite reference' : 'sprite.onDestroyed() requires one inline callback without parameters and a typed sprite reference'));
             }
             else if (node.callee.name === 'setKind') push(`arcade set kind of ${handle} to ${this.kindSlot(a[0])}`);
             else if (node.callee.name === 'setFlag' && this.path(a[0]) === 'SpriteFlag.AutoDestroy') {
@@ -2884,7 +2917,7 @@ class ArcadeTranslator extends BaseTranslator {
         }
     }
     /** PXT mixer statements; returns whether `name` was music. */
-    musicStatement (name, a, push) {
+    musicStatement (name, a, push, node) {
         if (!this.handleTemplates || !/^music\./.test(name || '') || this.bindsName('music')) return false;
         const value = i => `(${this.expr(a[i])})`;
         const melody = /^music\.(\w+)\.(play|playUntilDone|loop)$/.exec(name);
@@ -2899,6 +2932,10 @@ class ArcadeTranslator extends BaseTranslator {
             return true;
         };
         switch (name) {
+        case 'music.playMelody':
+            if(node?.bwPxtLegacyNoteMelody===true&&literalLegacyNoteMelody(node))push(`arcade play note melody ${value(0)} at ${value(1)} bpm`);
+            else push(this.note('music.playMelody() requires unchanged direct SDK bindings, literal melody-editor notes and a finite literal tempo'));
+            return true;
         case 'music.play': {
             const mode = a.length === 2 && this.musicEnum(a[1], 'music.PlaybackMode');
             if (mode) push(`arcade play playable ${value(0)} mode ${mode}`);
@@ -2953,6 +2990,9 @@ class ArcadeTranslator extends BaseTranslator {
     expressionStatement (expr, indent, out) {
         const pad = '  '.repeat(indent);
         const push = line => out.push(pad + line);
+        if(expr.type==='Assignment' && this.path(expr.left)==='game.stats' && this.gameStatsAssignments?.has(expr)) {
+            push(`arcade game stats ${expr.right.value?'enabled':'disabled'}`);return;
+        }
         const dataTarget=expr.type==='Assignment'?expr.left:expr.type==='Update'?expr.argument:null;
         if(dataTarget?.type==='Member' && Object.prototype.hasOwnProperty.call(ARCADE_SCENE_CONSTANTS,this.path(dataTarget))){push(this.note(`${this.path(dataTarget)} assignment requires a mutable object; SDK Scene constants are readonly`));return;}
         if(dataTarget?.type==='Member' && this.playerReferences?.has(dataTarget.object)){push(this.note(`mp.Player.${dataTarget.name} assignment requires native player member support`));return;}
@@ -3806,6 +3846,8 @@ const inferImageReferences = (ast, pathOf, imageOf, isScopedAssetFactory = () =>
     const mathDeclared=entries.some(({node})=>node.type==='Declaration' && node.decls?.some(decl=>decl.name==='Math') ||
         ['FunctionDeclaration','FunctionExpression'].includes(node.type) && (node.params || []).includes('Math'));
     const typeOf = (node, owner) => {
+        if(currentClosedSpriteNullFilter(node))return new Set(['array','sprite-array']);
+        if(highScoreIntrinsic(node))return new Set(['number']);
         if(node?.bwConsoleInspectIntrinsic===true && node.callee?.name==='__bwConsoleInspectValue')return new Set(['string']);
         if(node?.bwFontIntrinsic && node.bwFontType==='image.Font')return new Set(['font']);
         if(node?.bwFontIntrinsic==='field' && node.bwFontType==='number')return new Set(['number']);
@@ -4020,6 +4062,7 @@ const inferImageReferences = (ast, pathOf, imageOf, isScopedAssetFactory = () =>
             const name={font:'Font',buffer:'Buffer',image:'Image',sprite:'Sprite',tile:'TileLocation',tilemap:'TileMapData','scene-tilemap':'SceneTileMap','legacy-tile':'LegacyTile',animation:'Animation','sevenseg-digit':'SevenSegDigit','sevenseg-counter':'DigitCounter',dart:'Dart',corgio:'Corgio','text-sprite':'TextSprite',scene:'Scene','physics-engine':'PhysicsEngine',player:'Player',number:'number',string:'string',boolean:'boolean',null:'null',undefined:'undefined',object:'object',any:'unknown',array:'array'}[type];
             if(name)graph.add(value,name);
         }
+        if(highScoreIntrinsic(node))graph.add(value,'number');
         if(node.bwConsoleInspectIntrinsic===true && node.callee?.name==='__bwConsoleInspectValue')graph.add(value,'string');
         if(node.bwFontType==='image.Font' && ['constant','getFontForText','scaledFont'].includes(node.bwFontIntrinsic))graph.add(value,'Font');
         if(node.bwFontIntrinsic==='field' && node.bwFontType==='number')graph.add(value,'number');
@@ -4144,8 +4187,9 @@ const SCORE_REGISTRATION_APIS = new Map([...['info','info.player1','info.player2
 const scoreRegistrationProof = program => {
     const pathOf=node=>node?.type==='Identifier'?node.name:node?.type==='Member'?pathOf(node.object)+'.'+node.name:null;
     if(!containsAst(program,node=>node.type==='Call'&&SCORE_REGISTRATION_APIS.has(pathOf(node.callee))))return {has:()=>false};
-    const proof=inspectGeneratedHelperBindings(program,GENERATED_HELPER_PROFILES.ordinary);
-    if(!proof.isCurrent())return {has:()=>false};
+    let proof=inspectGeneratedHelperBindings(program,GENERATED_HELPER_PROFILES.ordinary),view=null;
+    if(!proof.isCurrent()){view=scoreImageBindingView(program);if(view)proof=inspectGeneratedHelperBindings(view.program,GENERATED_HELPER_PROFILES.ordinary);}
+    if(!proof.isCurrent()||view&&!view.current())return {has:()=>false};
     const methods=['score','hasScore','setScore','changeScoreBy','life','hasLife','setLife','changeLifeBy','onLifeZero','onScore'];
     const publicCalls=new Set(['info','info.player1','info.player2','info.player3','info.player4'].flatMap(root=>methods.map(method=>root+'.'+method)));
     for(const method of ['startCountdown','stopCountdown','onCountdownEnd','showScore','showLife','showCountdown'])publicCalls.add('info.'+method);
@@ -4167,12 +4211,14 @@ const scoreRegistrationProof = program => {
     for(const node of proof.nodes)if(node.type==='Call'&&SCORE_REGISTRATION_APIS.has(pathOf(node.callee))){
         let root=node.callee;while(root?.type==='Member')root=root.object;
         if(!node.args?.length)continue;
-        const types=facts.typesAt(node.args[0]);
+        const actual=view?view.originalOf(node):node;
+        if(view&&(actual?.args?.[0]?.type!=='Number'||!Number.isFinite(Number(actual.args[0].value))))continue;
+        const types=facts.typesAt(actual.args[0]);
         const internal=pathOf(node.callee)==='info.player1.impl.onScore';
         if(!node.isNew&&!node.constructorCall&&!node.optional&&!node.typeArguments?.length&&!node.args.some(arg=>arg?.type==='Spread')&&
-            proof.unbound(root)&&types.size&&[...types].every(type=>type==='Number')&&(!internal||pureRead(node.args[0])))selected.add(node);
+            proof.unbound(root)&&types.size&&[...types].every(type=>type==='Number')&&(!internal||pureRead(actual.args[0])))selected.add(actual);
     }
-    return {has:node=>proof.isCurrent()&&selected.has(node)};
+    return {has:node=>proof.isCurrent()&&(!view||view.current())&&selected.has(node)};
 };
 const isInfoRegistration = name => SCORE_REGISTRATION_APIS.has(name)||/^info(?:\.player[1-4])?\.onLifeZero$/.test(name || '') || name==='info.onCountdownEnd';
 const isForeverRegistration = name => ['forever','game.forever','basic.forever'].includes(name);
@@ -4180,7 +4226,9 @@ const isSpriteRegistration = name => ['sprites.onDestroyed','sprites.onOverlap']
 const isParallelLaunch = name => name==='control.runInParallel';
 const isControlRegistration = name => name==='control.onEvent';
 const isIndependentRegistration = name => isControlRegistration(name) || isParallelLaunch(name) || isFrameRegistration(name) || isButtonRegistration(name) || isInfoRegistration(name) || isForeverRegistration(name) || isSpriteRegistration(name);
-const sceneRegistrationSpec = name => {
+const sceneRegistrationSpec = (name,node) => {
+    if(playerConnectionRegistration(node))return {kind:'playerConnection',handlerIndex:1,arity:2,prefix:'__bwPlayerConnection',maxParams:0};
+    if(playerButtonRegistration(node))return {kind:'button',handlerIndex:2,arity:3,prefix:'__bwPlayerButton',maxParams:0};
     const specs={
         'mp.onControllerEvent':{kind:'multiplayerConnection',handlerIndex:1,arity:2,prefix:'__bwMPConnection',maxParams:1},
         'control.onEvent':{kind:'controlEvent',handlerIndex:2,arities:[3,4],prefix:'__bwControlEvent',maxParams:0},
@@ -4243,17 +4291,18 @@ const discoverRuntimeRegistrations = (ast, translator) => {
             for (const param of node.params || []) bindings.set(param, {key:translator.varName(param),owner});
             for (const local of localNames(node.body)) bindings.set(local, {key:local,owner});
         }
-        const instance=node.type==='Call' && node.callee?.type==='Member' && node.callee.name==='onDestroyed' && translator.spriteReferences.has(node.callee.object);
+        const instance=node.type==='Call' && node.callee?.type==='Member' && ['onDestroyed','onOverlap'].includes(node.callee.name) && translator.spriteReferences.has(node.callee.object);
         const externalName=node.type==='Call' && node.callee?.type==='Member' && translator.externalName(node.callee);
         const externalHandler=externalName && node.args?.length && node.args[node.args.length-1]?.type==='FunctionExpression'?
             {kind:'external',handlerIndex:node.args.length-1,arity:node.args.length,prefix:'__bwExternal',maxParams:0}:null;
-        const baseSpec=instance?{kind:'instanceDestroyed',handlerIndex:0,arity:1,prefix:'__bwInstanceDestroyed',maxParams:0}:node.type==='Call' && (specs[translator.path(node.callee)] || (translator.sceneStackProgram || isIndependentRegistration(translator.path(node.callee))) && sceneRegistrationSpec(translator.path(node.callee)));
+        const baseSpec=instance?(node.callee.name==='onOverlap'?{kind:'instanceOverlap',handlerIndex:0,arity:1,prefix:'__bwInstanceOverlap',maxParams:1}:{kind:'instanceDestroyed',handlerIndex:0,arity:1,prefix:'__bwInstanceDestroyed',maxParams:0}):node.type==='Call' && (specs[translator.path(node.callee)] || (translator.sceneStackProgram || isIndependentRegistration(translator.path(node.callee))) && sceneRegistrationSpec(translator.path(node.callee),node));
         const spec=externalHandler||baseSpec;
         if (spec && (spec.kind!=='score'||translator.scoreRegistrationProof.has(node))) {
             const handler=node.args?.[spec.handlerIndex];
             const kind=node.args?.[0];
             const nativeScene=spec.maxParams!==undefined;
             const validScene=nativeScene && handler?.params?.length<=spec.maxParams &&
+                (spec.kind!=='instanceOverlap' || handler.params.every(param=>{const type=handler.paramTypes?.[param];return type==='Sprite' || type?.text==='Sprite' && !type.isArray;})) &&
                 (spec.kinds||[]).every(index=>fixedKind(node.args[index])) &&
                 (!['scenePush','scenePop'].includes(spec.kind) || !handler.params.length || !containsAst(handler.body,value=>value.type==='Identifier' && value.name===handler.params[0]));
             if (handler?.type==='FunctionExpression' && (spec.arities?spec.arities.includes(node.args.length):node.args.length===spec.arity) &&
@@ -4318,13 +4367,13 @@ const emitSceneRegistrations = (translator,out,localHandles=new Map(),callbackLo
         translator.capturedBindings=captures;
         translator.localVars=new Set([...locals,...handler.params]);
         translator.currentParameters=new Set(handler.params);
-        const spriteParams=kind==='destroyed'?handler.params.slice(0,1):kind==='overlap'?handler.params.slice(0,2):[];
+        const spriteParams=kind==='instanceOverlap'?handler.params.slice(0,1):kind==='destroyed'?handler.params.slice(0,1):kind==='overlap'?handler.params.slice(0,2):[];
         translator.localHandleVars=new Set([...(localHandles.get(callbackLocals.get(handler)) || []),...spriteParams]);
         translator.handleAliases=new Map();
-        const label=kind==='controlEvent'?'control event':kind==='multiplayerConnection'?'multiplayer connection':kind==='multiplayerButton'?'multiplayer button':kind==='scenePush'?'scene push':kind==='scenePop'?'scene pop':kind==='instanceDestroyed'?'instance destruction':kind==='destroyed'?'destroyed kind':kind==='lifeZero'?'life zero':kind;
+        const label=['controlEvent','playerConnection'].includes(kind)?'control event':kind==='multiplayerConnection'?'multiplayer connection':kind==='multiplayerButton'?'multiplayer button':kind==='scenePush'?'scene push':kind==='scenePop'?'scene pop':kind==='instanceOverlap'?'instance overlap':kind==='instanceDestroyed'?'instance destruction':kind==='destroyed'?'destroyed kind':kind==='lifeZero'?'life zero':kind;
         out.push(`WHEN arcade ${label} handler "${token}" runs:`);
         if(['multiplayerButton','multiplayerConnection'].includes(kind) && handler.params[0])out.push(`  arcade set local ${translator.varName(handler.params[0])} to arcade event player`);
-        for(const [index,param] of spriteParams.entries())out.push(`  arcade set local ${translator.varName(param)} to arcade event ${index===0?'first':'second'}`);
+        for(const [index,param] of spriteParams.entries())out.push(`  arcade set local ${translator.varName(param)} to arcade event ${kind==='instanceOverlap'?'second':index===0?'first':'second'}`);
         translator.block(handler.body,1,out);out.push('');
         translator.capturedBindings=previous.captures;translator.localVars=previous.locals;translator.currentParameters=previous.parameters;translator.localHandleVars=previous.handles;translator.handleAliases=previous.aliases;
     }
@@ -4626,6 +4675,10 @@ const planImageValues = (t, ast, {creationApis, requiresSpriteRuntime, directIma
             t.imageValueResources.set(node,{...resource,value:{type:'Number',value:selected.index}});
             return;
         }
+        // A namespace Image binding has useful artwork metadata, but reading
+        // that binding is not another allocation. Only its initializer owns
+        // the literal resource; aliases and comparisons read the actual cell.
+        if (node.type === 'Identifier') return;
         const image = acceptImage(node) ? t.imageOf(node) : null;
         // Runtime setImage owns a newly evaluated Image, including a creation
         // callback whose kind can be computed. Static costume-slot matching
@@ -4679,7 +4732,7 @@ const unreadableArtPath = (t, node) => {
 
 /** Handle-valued globals plus onCreated/onOverlap callbacks. Kept separate
  * from the fixed-target path until its other sprite APIs can use handles. */
-const translateNamedHandleEvents = (ast, assets, tilemaps = {}, forceSpriteRuntime = false, assetKindLookup = null, scrollerVersion = 'v0.1.2', characterVersion = 'v0.1.0') => {
+const translateNamedHandleEvents = (ast, assets, tilemaps = {}, forceSpriteRuntime = false, assetKindLookup = null, scrollerVersion = 'v0.1.2', characterVersion = 'v0.1.0', statsSourceSafe = false) => {
     const t = new ArcadeTranslator(assets, tilemaps, assetKindLookup, scrollerVersion, characterVersion);
     t.callableProcedures=new Map(ast.body.filter(fn=>fn.bwCallableDefinition).map(fn=>[fn.name,fn.name+fn.params.map(()=> ' %s').join('')]));
     const needsProjectileHandles = node => {
@@ -4765,6 +4818,7 @@ const translateNamedHandleEvents = (ast, assets, tilemaps = {}, forceSpriteRunti
         if(node.type==='Call' && /^game\.(?:gameOver|over|setGameOver\w+)$/.test(t.path(node.callee)||''))return true;
         if(node.type==='Call' && node.callee?.type==='Member' && (node.callee.name==='startEffect' || node.callee.name==='destroy' && node.args?.length))return true;
         if(node.type==='Call' && (['controller.setRepeatDefault','controller._setUserEventsEnabled','game.splash','game.showLongText','game.currentScene','ArcadePhysicsEngine','sprites.allOfKind','scene.onHitTile','scene.tileHitFrom','scene.onHitWall','scene.onOverlapTile','scene.centerCameraAt','scene.cameraShake','scene.cameraFollowSprite','scene.cameraProperty','scene.cameraLeft','scene.cameraTop','game.pushScene','game.popScene','game.addScenePushHandler','game.addScenePopHandler','game.removeScenePushHandler','game.removeScenePopHandler'].includes(t.path(node.callee)) || /^tiles\./.test(t.path(node.callee)||'')))return true;
+        if(highScoreIntrinsic(node)||playerButtonRegistration(node)||gameResetIntrinsic(node))return true;
         if(node.type==='Call' && /^info(?:\.player[1-4])?\.(?:life|hasLife|setLife|changeLifeBy|onLifeZero|onScore)$/.test(t.path(node.callee)||''))return true;
         if(node.type==='Member' && ['repeatDelay','repeatInterval'].includes(node.name) && (t.path(node.object)||'').startsWith('controller.'))return true;
         if(node.type==='Member' && ['fx','fy','sx','sy','scale','flags'].includes(node.name))return true;
@@ -5173,6 +5227,8 @@ const translateNamedHandleEvents = (ast, assets, tilemaps = {}, forceSpriteRunti
         t.handleImageLiterals.set(call, index);
     }
     if ([...frameArrays.keys()].some(name => !usedFrameArrays.has(name))) return null;
+    // Reprove the actual handle-projected AST immediately before emission.
+    t.gameStatsAssignments=statsSourceSafe?gameStatsAssignmentProof(ast):{has:()=>false};
     const declaredGlobals = ast.body.filter(plainDeclaration).flatMap(st => st.decls.filter(d=>!d.temporary).map(d => d.name));
     const out = ['DEVICE ARCADE', '', ...[...new Set([...t.handleVars, ...declaredGlobals])]
         .map(name => `GLOBAL ${t.varName(name)}`),
@@ -5416,10 +5472,26 @@ export function nameArtworkSprites (result) {
  *   sprites: Array<string>
  * }}
  */
-export function arcadeToPseudocode (files, opts = {}) {
+export function arcadeToPseudocode(files,opts={}) {
+    const map=typeof files==='string'?{'main.ts':files}:files||{};
+    const prepared=prepareRootFixedImages(map),view=prepared.files;
+    const result=withLiteralRenderableSource(view,()=>withClosedSpriteNullFilters(view,()=>arcadeToPseudocodeImpl(view,opts)));
+    return prepared.diagnostics.length?{...result,unsupported:[...new Set([...result.unsupported,...prepared.diagnostics])]}:result;
+}
+function arcadeToPseudocodeImpl (files, opts = {}) {
     const map = typeof files === 'string' ? {'main.ts': files} : (files || {});
     const selectedSource = arcadeProjectSource(map);
     const source = selectedSource.source;
+    const anyButtonSourceSafe = source.includes('anyButton') && anyButtonConfiguredSourceSafe(map);
+    const highScoreSourceSafe = source.includes('highScore') && highScoreConfiguredSourceSafe(map);
+    const playerButtonSourceSafe=source.includes('onButtonEvent')&&playerButtonConfiguredSourceSafe(map);
+    const playerConnectionSourceSafe=source.includes('onEvent')&&playerConnectionConfiguredSourceSafe(map);
+    const resetSourceSafe=source.includes('reset')&&gameResetSourceSafe(map);
+    const statsSourceSafe=source.includes('stats')&&gameStatsConfiguredSourceSafe(map);
+    const logValueSourceSafe = source.includes('logValue') && consoleLogValueConfiguredSourceSafe(map);
+    const defaultTextPromptSourceSafe = source.includes('askForString') && numberPromptLengthSourceSafe(map);
+    const numberPromptSourceSafe = source.includes('askForNumber') && numberPromptLengthSourceSafe(map);
+    const legacyMelodySourceSafe = source.includes('playMelody') && legacyNoteMelodySourceSafe(map);
     setExternalRoots(map, source);
     const sharedSourcePreparation = capturePreparedSharedImageSources(map,selectedSource);
     let sharedSourceConsumed=false;
@@ -5429,7 +5501,7 @@ export function arcadeToPseudocode (files, opts = {}) {
     // while the combined parser allocates its generated temporary names once.
     if (selectedSource.entries.length > 1) {
         for (const entry of selectedSource.entries) {
-            try { parseSharedImageSourceBoundary(sharedSourcePreparation,entry); }
+            try { parseSharedImageSourceBoundary(sharedSourcePreparation,entry,true); }
             catch (error) { throw new Error(`${entry.name}: ${error.message}`, {cause: error}); }
         }
     }
@@ -5557,9 +5629,10 @@ export function arcadeToPseudocode (files, opts = {}) {
         if (Array.isArray(node)) return node.map(lowerAnimationAssets);
         return Object.fromEntries(Object.entries(node).map(([key, value]) => [key, lowerAnimationAssets(value)]));
     };
-    const callableParseOptions={parameterDefaults:true,retainParentheses:true,retainWhenUsed:true,retainClassHeritage:true,retainOrdinaryDefaultProvenance:true};
-    const ordinarySource=parseSharedImageSourceProgram(sharedSourcePreparation,source,opts.procedureConstraintsPrototype===true,opts.procedureConstraintsPrototype!==true);
-    const callableSourceParsed=parseMakeCodeTs(source,{...callableParseOptions,retainCallableMetadata:true});
+    const callableParseOptions={namedFunctionExpressions:true,parameterDefaults:true,retainParentheses:true,retainWhenUsed:true,retainClassHeritage:true,retainOrdinaryDefaultProvenance:true};
+    const ordinarySource=normalizeOwnedPromptOptions(markHighScoreCalls(markDefaultTextPrompts(markNumberPromptLengths(markLegacyNoteMelodies(lowerAnyButtonRegistrations(normalizeUnusedNamedCallbacks(markGameResets(markPlayerConnectionRegistrations(markPlayerButtonRegistrations(parseSharedImageSourceProgram(sharedSourcePreparation,source,opts.procedureConstraintsPrototype===true,opts.procedureConstraintsPrototype!==true,true,true),playerButtonSourceSafe),playerConnectionSourceSafe),resetSourceSafe),map,callbackRegistrationSpec,projectInputDiagnostics),anyButtonSourceSafe,projectInputDiagnostics),legacyMelodySourceSafe),numberPromptSourceSafe),defaultTextPromptSourceSafe),highScoreSourceSafe),map);
+    const callableSourceParsed=normalizeOwnedPromptOptions(markHighScoreCalls(markDefaultTextPrompts(markNumberPromptLengths(markLegacyNoteMelodies(lowerAnyButtonRegistrations(normalizeUnusedNamedCallbacks(markGameResets(markPlayerConnectionRegistrations(markPlayerButtonRegistrations(parseMakeCodeTs(source,{...callableParseOptions,retainCallableMetadata:true,retainAuthoredEmptyBranches:true}),playerButtonSourceSafe),playerConnectionSourceSafe),resetSourceSafe),map,callbackRegistrationSpec,projectInputDiagnostics),anyButtonSourceSafe),legacyMelodySourceSafe),numberPromptSourceSafe),defaultTextPromptSourceSafe),highScoreSourceSafe),map);
+    const createdDimensionSourceSafe=createdImageDimensionSourceSafe(map);
     const namedEligibility=selectNamedFunctionSourceProof(callableSourceParsed,{ordinaryProgram:ordinarySource,registrationSpec:callbackRegistrationSpec});
     const namedEnabled=namedEligibility.eligible;
     const namedLowering=namedEnabled?lowerNamedFunctionValues(callableSourceParsed):null;
@@ -5577,7 +5650,8 @@ export function arcadeToPseudocode (files, opts = {}) {
     const sharedSourceContext = !namedEnabled&&!callableEnabled&&!classEnabled ? bindPreparedSharedImageSource(sharedSourcePreparation,ordinarySource) : null;
     const generatedProfile=(namedEnabled||classEnabled||callableEnabled||opts.procedureConstraintsPrototype===true)?
         GENERATED_HELPER_PROFILES.metadata:GENERATED_HELPER_PROFILES.ordinary;
-    const sourceOperatorInputs=lowerRuntimeDispatchAddHelpers(lowerSourceValueOperatorHelpers(callableSourceInput,generatedProfile),generatedProfile);
+    const closedFilterInputs=lowerClosedSpriteNullFilters(callableSourceInput);
+    const sourceOperatorInputs=lowerRuntimeDispatchAddHelpers(lowerSourceValueOperatorHelpers(closedFilterInputs,generatedProfile),generatedProfile);
     const nativeBinaryInputs=lowerNativeArrayBinaryHelpers(sourceOperatorInputs,generatedProfile);
     const namedArrayInputs=lowerNamedArrayItemHelpers(inlineValueHelpers(nativeBinaryInputs.program,true),{profile:generatedProfile});
     // Recognition consumes the selected parse context before clone-heavy
@@ -5657,7 +5731,8 @@ export function arcadeToPseudocode (files, opts = {}) {
     try {const cfg=JSON.parse(map['pxt.json'] || '{}');textSpriteInitializer=cfg.bwArcadeNativeLibraries?.textsprite==='v1.3.0' && selectedSource.entries.some(entry=>entry.name.startsWith('__bwDependencyInputs/arcade-text/') && entry.source===TEXT_SPRITE_INITIALIZER);}catch{}
     const namespaceBindings = lowerNamespaceBindings(parsed,{spriteKinds:true,textSpriteInitializer});
     // Namespace image constants (\`namespace myTiles { export const tile0 = img\`...\` }\`)
-    // become generated top-level consts; they are immutable, so read them as images.
+    // keep pixel metadata for artwork planning. Their runtime reads still use
+    // the actual binding; an immutable binding can hold a mutable Image.
     for (const statement of namespaceBindings.program?.body || []) {
         if (statement.type !== 'Declaration' || statement.kind !== 'const') continue;
         for (const decl of statement.decls) {
@@ -5688,7 +5763,8 @@ export function arcadeToPseudocode (files, opts = {}) {
     const throwProgram=throwSource.program;
     const inspectionValues=lowerConsoleInspectValues(throwProgram);
     projectInputDiagnostics.push(...inspectionValues.unsupported);
-    const fontValues = lowerSdkFontValues(inspectionValues.program);
+    const logValues = lowerConsoleLogValues(inspectionValues.program,logValueSourceSafe);
+    const fontValues = lowerSdkFontValues(logValues);
     projectInputDiagnostics.push(...fontValues.unsupported);
     const fontSource = lowerLiveFontMetrics(fontValues.program);
     const sharedPreparation = !namedEnabled && !callableEnabled && !classEnabled ? prepareSharedImageArrayTransport(fontSource,{sourceContext:sharedSourceContext}) : null;
@@ -5734,6 +5810,8 @@ export function arcadeToPseudocode (files, opts = {}) {
     }
     projectInputDiagnostics.push(...built.diagnostics);
     const ast = built.ast;
+    if(!sharedPreparation)markCreatedImageDimensions(ast,createdDimensionSourceSafe);
+    if(source.includes('onScore')&&source.includes('assets.image'))bindScoreImageSource(ast,map);
     const sharedImageTransport = currentSharedImageArrayTransport(ast);
     // Issue only for the actual chosen output, after transport finishing or
     // ordinary-current fallback. No abandoned build transfers an emission fact.
@@ -5744,7 +5822,7 @@ export function arcadeToPseudocode (files, opts = {}) {
     sharedSourceConsumed=!!sharedImageTransport&&!!sharedSourceContext;
     const flattened = namespaceBindings.program ? ast : null;
     const nativeTilemaps = createNativeTilemapRegistry(map,tileImageOf,assetFileOrder?{fileOrder:assetFileOrder}:{});
-    const namedEvents = flattened && translateNamedHandleEvents(flattened, assets, nativeTilemaps, !!projectPaletteHex || runtimePaletteRequested || sourceScalarDeclarations(flattened).length > 0, assetKindLookup, scrollerVersion, characterVersion);
+    const namedEvents = flattened && translateNamedHandleEvents(flattened, assets, nativeTilemaps, !!projectPaletteHex || runtimePaletteRequested || sourceScalarDeclarations(flattened).length > 0, assetKindLookup, scrollerVersion, characterVersion, statsSourceSafe);
     if (namedEvents) return withAnimationDiagnostics(namedEvents);
     const creationEvents = flattened && translateCreationEvents(flattened, assets, assetKindLookup, scrollerVersion, characterVersion);
     if (creationEvents) return withAnimationDiagnostics(creationEvents);
@@ -6175,6 +6253,7 @@ export function arcadeToPseudocode (files, opts = {}) {
     /** name → array of script line-blocks */
     const scriptsFor = new Map(t.sprites.map(s => [s.name, []]));
     const setup = [];
+    t.gameStatsAssignments=statsSourceSafe?gameStatsAssignmentProof(ast):{has:()=>false};
     // Pass-one probes (including enum bookkeeping into discarded output) must
     // not register resources. Only the actual script/procedure emission does.
     t.planImageValue = collectImageValue;

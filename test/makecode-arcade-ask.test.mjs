@@ -54,7 +54,7 @@ test('Arcade number prompt waits and stores a numeric answer', async () => {
     assert.equal(value(), 13.5);
 });
 
-test('Arcade number prompt options stay visible until their semantics are implemented', () => {
-    const translated = arcadeToPseudocode('let n = game.askForNumber("Number?", 2)');
+test('Arcade number prompt keyboard option stays visible until its semantics are implemented', () => {
+    const translated = arcadeToPseudocode('let n = game.askForNumber("Number?", 2, true)');
     assert.ok(translated.unsupported.some(gap => gap.includes('digit limit')));
 });

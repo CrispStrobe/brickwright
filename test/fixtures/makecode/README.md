@@ -93,3 +93,12 @@ Player/Hat overlap callback invokes `sprite.say("Excuse Me!", 500)`. The speech
 tests (`test/makecode-arcade-say-text.test.mjs`) exercise its actual callback
 handle and nonblocking lifetime. The original source remains in the private
 compatibility corpus.
+
+Historical receiver-overlap source projects from the same pinned MIT Arcade corpus:
+
+| Fixture | Original source | License |
+|---|---|---|
+| `arcade-instance-overlap-runner.ts` | https://github.com/microsoft/pxt-arcade/blob/8ae4f42df2b2f4a0472b0da04c3cdcd3438dbb02/docs/examples/jumper.md#0 | MIT |
+| `arcade-instance-overlap-jumper.ts` | https://github.com/microsoft/pxt-arcade/blob/8ae4f42df2b2f4a0472b0da04c3cdcd3438dbb02/docs/examples/runner.md#0 | MIT |
+| `arcade-instance-overlap-shooter.ts` | https://github.com/microsoft/pxt-arcade/blob/8ae4f42df2b2f4a0472b0da04c3cdcd3438dbb02/docs/examples/asteroids.md#0 | MIT |
+| `arcade-instance-overlap-racer.ts` | https://github.com/microsoft/pxt-arcade/blob/8ae4f42df2b2f4a0472b0da04c3cdcd3438dbb02/docs/examples/car-race.md#0 | MIT |

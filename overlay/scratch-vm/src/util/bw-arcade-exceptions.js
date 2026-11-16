@@ -202,7 +202,7 @@ function createCoordinator(runtime) {
             if(!live(thread)||util.runtime!==runtime)throw Error('Primitive fault requires its live actual caller');
             const witness=require('./bw-null-sprite-getter').consume(runtime,args,util,error,lease);
             if(!witness)throw Error('Primitive fault requires its private current receipt');
-            // Preserve the actual privately issued TypeError, never a public
+            // Preserve the actual privately issued Error, never a public
             // Error tag or copied message. Shared lineage cleanup is unchanged.
             setCurrent(signals,error,Object.freeze({owner,runtime,generation,kind:'primitive-fault',message:error.message,
                 property:witness.property,target:thread.target,block:witness.block,stack:Object.freeze([...thread.stack])}));
