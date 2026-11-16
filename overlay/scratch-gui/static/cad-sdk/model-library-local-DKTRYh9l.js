@@ -1,4 +1,4 @@
-import { v, p as N } from "./sdk--LS-jYPY.js";
+import { v, p as N } from "./sdk-B3Db3LKK.js";
 function l(c) {
   if (!c || typeof c != "object")
     throw new Error("Invalid local model library manifest.");
