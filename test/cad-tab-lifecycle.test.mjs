@@ -40,6 +40,7 @@ async function fixture ({text = documentText('First project'), loadSDK} = {}) {
         getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, value),
         removeItem: key => values.delete(key)};
     globalThis.document = {body: {appendChild () {}}, createElement: type => {
+        if (type === 'div') return {remove () {}};
         assert.equal(type, 'input');
         const input = {style: {}, files: [], removed: false, click () {}, remove () { this.removed = true; }};
         inputs.push(input);
@@ -66,6 +67,8 @@ async function fixture ({text = documentText('First project'), loadSDK} = {}) {
         if (name.endsWith('/download-blob.js')) return {__esModule: true, default: () => {}};
         if (name.endsWith('/bw-cad-sdk.js')) return {loadCadSDK: () => loadSDK ? loadSDK(hostedSDK) : Promise.resolve(hostedSDK), cadAssetURL: path => path};
         if (name.endsWith('/bw-cad-project.js')) return project;
+        if (name.endsWith('/editor-menu-actions.js')) return {notifyEditorMenuActions () {},
+            registerEditorMenuActions: () => () => {}};
         if (name.endsWith('/global-undo.js')) return {activateUndoSurface () {}, notifyUndoState () {},
             registerUndoSurface: (id, surface) => { surfaces.set(id, surface); return () => surfaces.delete(id); }};
         return gui(name);
