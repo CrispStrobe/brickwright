@@ -1,0 +1,141 @@
+{
+  "recordedAt": "2026-11-16T09:32:50.113Z",
+  "liteImplementation": "4daa17867a3e0ecbd2d737b7ffe4731712dc63db",
+  "cad": "10c58fbfd96a9f1f95787e47e1a301614c9d163f",
+  "board": "67d7af9de398e20c77b64b9e8aaf530f476e66ef",
+  "isolatedWorktrees": {
+    "lite": "/Users/christianstrobele/code/local/circuit-cad-lite-work",
+    "cad": "/Users/christianstrobele/code/local/circuit-cad-engine-work",
+    "board": "/Users/christianstrobele/code/local/circuit-cad-board-work"
+  },
+  "nativeAVRPhysicalQualification": "2026-11-16-circuit-cad-physical.json",
+  "checks": {
+    "hostTests": {
+      "passed": 32,
+      "failed": 0
+    },
+    "newCouplingTests": {
+      "passed": 8,
+      "failed": 0
+    },
+    "boardFocused": {
+      "passed": 32,
+      "failed": 0
+    },
+    "boardAdditional": {
+      "passed": 20,
+      "skipped": 6,
+      "reason": "8051 WASM emulator unavailable"
+    },
+    "cadActuatorTests": {
+      "passed": 5
+    },
+    "cadCompleteRover": {
+      "passed": 1
+    },
+    "germanMessages": true,
+    "finalBuiltSDKDigests": 10,
+    "installedBoardAndCircuitPayloadsVerified": true,
+    "sourceModelLibrary": {
+      "editableSources": ">130",
+      "previewVisible": true
+    },
+    "productionBuild": {
+      "CAD": true,
+      "FPGA": true,
+      "warnings": "asset and entrypoint size only"
+    },
+    "browser": {
+      "chromium-blocks": {
+        "passed": true,
+        "simulationTime": 2.5649999999999675,
+        "chassis": {
+          "id": "chassis",
+          "positionMm": [
+            258.2390308380127,
+            12.81684823334217,
+            -0.3977138549089432
+          ],
+          "quaternion": [
+            -0.002158875111490488,
+            -0.0009027815540321171,
+            0.9153468012809753,
+            -0.4026598036289215
+          ]
+        },
+        "peakEncoder": 9,
+        "stopped": {
+          "powered": false,
+          "t": "3100000000",
+          "clock": false
+        },
+        "pageErrors": []
+      },
+      "chromium-firmware": {
+        "passed": true,
+        "simulationTime": 2.599999999999967,
+        "chassis": {
+          "id": "chassis",
+          "positionMm": [
+            258.0417990684509,
+            15.081826597452164,
+            -0.39414316415786743
+          ],
+          "quaternion": [
+            -0.002111501293256879,
+            -0.0009498178260400891,
+            0.9129346609115601,
+            -0.4080992043018341
+          ]
+        },
+        "peakEncoder": 9,
+        "stopped": {
+          "powered": false,
+          "t": "3075000000",
+          "clock": false
+        },
+        "pageErrors": []
+      },
+      "webkit-firmware": {
+        "passed": true,
+        "simulationTime": 2.5649999999999675,
+        "chassis": {
+          "id": "chassis",
+          "positionMm": [
+            258.0417990684509,
+            15.081826597452164,
+            -0.39414316415786743
+          ],
+          "quaternion": [
+            -0.002111501293256879,
+            -0.0009498178260400891,
+            0.9129346609115601,
+            -0.4080992043018341
+          ]
+        },
+        "peakEncoder": 9,
+        "stopped": {
+          "powered": false,
+          "t": "2950000000",
+          "clock": false
+        },
+        "pageErrors": []
+      }
+    }
+  },
+  "upstream": {
+    "cadPR": "https://github.com/CrispStrobe/brickwright-cad/pull/64",
+    "boardPR": "https://github.com/CrispStrobe/bw-board/pull/735",
+    "boardBroadCI": {
+      "passed": 9468,
+      "skipped": 307,
+      "failed": 2,
+      "failureScope": "Unchanged x86 assembly fixture/image comparisons",
+      "run": "https://github.com/CrispStrobe/bw-board/actions/runs/43826724918",
+      "oracleHashesUnchanged": true
+    }
+  },
+  "release": {
+    "newTestFlightUpload": false
+  }
+}
