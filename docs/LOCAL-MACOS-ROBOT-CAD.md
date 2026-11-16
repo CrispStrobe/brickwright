@@ -22,6 +22,10 @@ isolated worktree; do not mutate another agent's dependency tree or Cargo target
 6. Switch between light and dark settings. Open the model library, select Source,
    inspect a preview, and insert a compatible editable source into the editor.
 
+The bundled curated catalogue contains 281 models with previews: 154 editable
+source models and 127 mesh models. Check both filters. The standalone Adafruit
+archive folders contain original files and are separate from those totals.
+
 Atlas is also available in the robot catalogue. Kestrel is deferred because its
 physical gripper qualification failed. Dedicated newer motor drivers, CAD-fed
 IMUs/contact sensors, and coupled Pico firmware remain gaps. See

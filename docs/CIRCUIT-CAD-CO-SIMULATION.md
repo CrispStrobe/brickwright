@@ -12,6 +12,14 @@ gripper failed physical qualification. The latest library cohort adds fourteen
 qualified authored LDraw originals with retained provenance and previews. Model
 library screening does not certify a complete moving assembly.
 
+The current bundled catalogue contains **281 models: 154 editable code/source
+models and 127 mesh models**, with 281 registered previews and none missing.
+The earlier figures over 130 (editable sources) and 212 (an earlier qualified
+cohort) are not current total-library counts. The source filter retains the
+editable models; inserting a selected compatible model modifies the current
+CAD project directly. Downloading a verified original is a separate operation.
+Adafruit archive folders are not counted as screened curated models.
+
 Connect each circuit DC motor to a CAD hinge or lead-screw slider. Select the
 motor and joint explicitly. Ratio is rotor revolutions per joint revolution;
 slider lead is mm per output revolution. Direction reverses the transmission.

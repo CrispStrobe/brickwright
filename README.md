@@ -33,6 +33,9 @@ editable printable rover, yellow TT motors, an Uno, a battery, an H-bridge and
 its blocks/pseudocode. Motor current drives physical joints; measured shaft
 motion returns encoder feedback to the program. Compiled Uno firmware can use
 the same connection. Atlas adds a forklift with a driven mast and tilt joint.
+The bundled curated library has **281 models with previews: 154 editable source
+models and 127 mesh models**. Additional Adafruit archive folders are original
+files, separate from this screened catalogue.
 
 CAD stays optional and off by default. The simulation is educational rather
 than calibrated hardware certification; Pico firmware coupling and additional

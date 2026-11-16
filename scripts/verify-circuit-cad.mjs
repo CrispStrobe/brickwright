@@ -26,9 +26,26 @@ try{
  }
  if(process.argv.includes('--library')){
   const cad=page.getByTestId('bw-cad-tab');await cad.getByLabel('File menu',{exact:true}).click();await cad.getByRole('button',{name:'Model library',exact:true}).click();
-  const models=cad.getByRole('dialog',{name:'Model library',exact:true});await models.getByLabel('Model type',{exact:true}).selectOption('source');
-  await wait(()=>document.querySelector('[data-testid="bw-cad-tab"] [data-state]')?.shadowRoot?.querySelectorAll('.model-library-card').length>130);
-  await models.locator('.model-library-card').first().click();assert.ok(await models.locator('.model-library-preview img').isVisible());await models.getByRole('button',{name:'Close model library'}).click();console.log('PASS more than 130 editable source models and library preview');
+  const models=cad.getByRole('dialog',{name:'Model library',exact:true}),filter=models.getByLabel('Model type',{exact:true});
+  const cards=models.locator('.model-library-card:has(.model-card-meta)');
+  await filter.selectOption('source');await wait(()=>document.querySelector('[data-testid="bw-cad-tab"] [data-state]')?.shadowRoot?.querySelectorAll('.model-library-card').length>=154);
+  const sources=await cards.count();assert.ok(sources>=154,'editable sources must remain available');
+  await filter.selectOption('');const thumbnails=await cards.evaluateAll(async entries=>{
+   const failures=[];await Promise.all(entries.map(async card=>{const source=card.querySelector('img')?.src;if(!source){failures.push(card.textContent);return;}try{const bitmap=new Image();bitmap.src=source;await bitmap.decode();if(!bitmap.naturalWidth||!bitmap.naturalHeight)failures.push(card.textContent);}catch{failures.push(card.textContent);}}));return{models:entries.length,failures};
+  });assert.ok(thumbnails.models>=281);assert.deepEqual(thumbnails.failures,[],'every curated thumbnail must decode');
+  let downloads=0;const downloaded=()=>downloads++;page.on('download',downloaded);
+  await page.evaluate(()=>{window.__libraryInitialRoots=window.__bwCad.editor.session.state.document.roots.length;});
+  await filter.selectOption('source');await cards.first().click();assert.ok(await models.locator('.model-library-preview img').isVisible());
+  await models.getByRole('button',{name:'Insert editable source',exact:true}).click();
+  await wait(()=>window.__bwCad.editor.session.state.document.roots.length>window.__libraryInitialRoots);
+  const source=await page.evaluate(()=>{const s=window.__bwCad.editor.session.state,n=s.document.nodes[s.selection[0]];return{kind:n.kind,source:n.program?.source,provenance:n.provenance?.length};});
+  assert.equal(source.kind,'code');assert.ok(source.source?.length);assert.ok(source.provenance);
+  await page.evaluate(()=>window.__bwCad.editor.whenIdle());await filter.selectOption('mesh');const meshes=await cards.count();assert.ok(meshes>=127);
+  await cards.first().click();await models.getByRole('button',{name:'Insert selected STL',exact:true}).click();
+  await wait(()=>window.__bwCad.editor.session.state.document.roots.length>=window.__libraryInitialRoots+2);
+  const mesh=await page.evaluate(()=>{const s=window.__bwCad.editor.session.state,n=s.document.nodes[s.selection[0]];return{kind:n.kind,provenance:n.provenance?.length};});assert.equal(mesh.kind,'mesh');assert.ok(mesh.provenance);assert.equal(downloads,0,'insertion must not become a browser download');page.off('download',downloaded);
+  await writeFile(`${out}/library-verification.json`,JSON.stringify({sources,meshes,thumbnails,sourceInserted:source.kind,meshInserted:mesh.kind,downloads},null,2));
+  await models.getByRole('button',{name:'Close model library'}).click();console.log(`PASS ${thumbnails.models} curated previews, ${sources} editable sources, ${meshes} meshes, and direct source/STL insertion`);
  }
  const panel=page.getByTestId('bw-cad-circuit-panel');await panel.locator('summary').click();
  await panel.getByRole('button',{name:'Open Scout circuit + CAD example…',exact:true}).click();
