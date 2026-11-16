@@ -13,5 +13,6 @@ export const CAD_ROBOT_EXAMPLES = Object.freeze([
     {id:'robot-titan-vise',name:'Titan 3-axis rotary vise',file:'titan.sb3'},
     {id:'robot-hermes-crane',name:'Hermes 3-axis bridge crane',file:'hermes.sb3'},
     {id:'robot-chronos-drawbridge',name:'Chronos 3-axis bascule drawbridge',file:'chronos.sb3'},
-    {id:'robot-polaris-tracker',name:'Polaris 3-axis pan-tilt tracker',file:'polaris.sb3'}
+    {id:'robot-polaris-tracker',name:'Polaris 3-axis pan-tilt tracker',file:'polaris.sb3'},
+    {id:'robot-boreal-launcher',name:'Boreal 3-axis ball launcher',file:'boreal.sb3'}
 ]);
