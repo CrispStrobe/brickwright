@@ -175,7 +175,33 @@ const shiftSetterSource=`class Box{constructor(public n:number){}
  box.n=1e308;box.nonfinite=1e308;let nonfinite=take(box.value);
  box.n=1e308;box.left=1e308;let hugeLeft=take(box.value);
  box.n=1e308;box.unsigned=1e308;let hugeUnsigned=take(box.value);let done=hugeUnsigned;`;
+const conditionalGetterSource=`let trace=0;
+ class Box{constructor(public n:number){}
+ get value():number{trace=trace*10+1;return this.n<0?-this.n:(this.n>10?10:this.n)}}
+ function take(n:number){trace=trace*10+2;return n}
+ let box=new Box(-3);let negative=take(box.value);
+ box.n=4;let middle=take(box.value);box.n=20;let capped=take(box.value);
+ let selected=true?take(box.value):take(box.value);
+ let skipped=false&&take(box.value);let done=trace;`;
+const conditionalSetterSource=`let trace=0;
+ class Box{constructor(public n:number){}
+ get value():number{trace=trace*10+1;return this.n}
+ set value(v:number){trace=trace*10+2;this.n=v<0?0:(v>this.n?this.n:v)}}
+ function take(n:number){trace=trace*10+3;return n}
+ let box=new Box(10);box.value=-3;let negative=take(box.value);
+ box.n=10;box.value=4;let middle=take(box.value);
+ box.n=10;box.value=20;let capped=take(box.value);
+ let selected=false?take(box.value):take(box.value);
+ let skipped=false&&take(box.value);let done=trace;`;
+const conditionalNonfiniteSource=`class Box{constructor(public n:number){}
+ get value():number{return this.n*1e308-this.n*1e308>=0?this.n:7}}
+ function take(n:number){return n}
+ let box=new Box(1e308);let unordered=take(box.value);
+ box.n=0;let ordered=take(box.value);let done=unordered;`;
 for(const [name,source,expected]of [
+ ['conditional nonfinite guard',conditionalNonfiniteSource,{unordered:7,ordered:0,done:7}],
+ ['conditional getter',conditionalGetterSource,{negative:3,middle:4,capped:10,selected:10,skipped:false,trace:12121212,done:12121212}],
+ ['conditional setter',conditionalSetterSource,{negative:0,middle:4,capped:10,selected:10,skipped:false,trace:21321321313,done:21321321313}],
  ['binary bitwise setter',binarySetterSource,{first:6,ordered:3216,signed:-2147483648,negative:-3,huge:1,skipped:false,trace:3211212121,done:3211212121}],
  ['binary shift setter',shiftSetterSource,{left:-16,signed:-4,unsigned:2147483644,fullUnsigned:4294967295,negativeLeft:0,negativeSigned:-1,negativeUnsigned:1,wrapLeft:5,wrapSigned:5,wrapUnsigned:5,nonfinite:0,hugeLeft:0,hugeUnsigned:0,done:0}],
  ['binary bitwise getter',binaryGetterSource,{first:6,ordered:16,signed:-2147483648,negative:-3,huge:1,skipped:false,trace:112111,done:112111}],

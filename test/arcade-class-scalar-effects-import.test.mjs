@@ -216,3 +216,32 @@ test('binary bitwise setters require both closed Number operands and every actua
   refused(source.replace('let box=new Box(2);','let before=take(box.value);let box=new Box(2);'));
  }
 });
+
+test('conditional accessors prove pure Number guards and both Number branches',()=>{
+ const getter=scalarAccessorSource.replace('return this.n','return this.n<0?-this.n:this.n');
+ const setter=scalarAccessorSource.replace('this.n=v','this.n=v<0?0:(v>this.n?this.n:v)');
+ for(const source of [getter,setter,getter.replace('this.n<0','this.n*1e308<this.n'),
+  getter.replace('-this.n:this.n','this.n<1?1:2:this.n'),
+  setter.replace('v<0','true')])accepted(source);
+ for(const base of [getter,setter]){
+  for(const extra of ['box.n=<any>"x";','box.n=<any>true;','box.value=<any>"x";',
+   'box.value=<any>true;','let alias=box;','function capture(){box.n=2}',
+   'let missing:number;box.value=missing;'])refused(base+extra);
+  refused(base.replace('new Box(2)','new Box(<any>"x")'));
+  refused(base.replace('constructor(public n:number){}','n:number;constructor(n:number){}'));
+ }
+ for(const expression of ['this.n<0?<any>"x":this.n','this.n<0?this.n:<any>true',
+  'this.n<0?<any>undefined:this.n','this.n<0?this.n:this.value',
+  'this.n<0?take(this.n):this.n','this.n<0?this.n:take(this.n)',
+  'take(this.n)<0?-this.n:this.n','this.value<0?-this.n:this.n',
+  'trace<0?-this.n:this.n','external?-this.n:this.n',
+  '(<any>"x")<this.n?-this.n:this.n',
+  'this.n<(<any>"x")?-this.n:this.n','this.n<0?-this.n:external',
+  '(this.n=1)<0?-this.n:this.n','this.n++<0?-this.n:this.n'])
+  refused(getter.replace('this.n<0?-this.n:this.n',expression));
+ for(const expression of ['v<0?<any>"x":v','v<0?v:<any>true','v<0?<any>undefined:v',
+  'v<0?take(v):this.n','v<0?this.n:take(v)','take(v)<0?0:v',
+  'this.value<0?0:v','external?0:v','v<(<any>true)?0:v','v<0?external:v',
+  '(v=1)<0?0:v','v++<0?0:v'])
+  refused(setter.replace('v<0?0:(v>this.n?this.n:v)',expression));
+});
