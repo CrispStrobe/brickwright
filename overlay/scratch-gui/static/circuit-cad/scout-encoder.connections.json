@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "cadDocumentId": "robot-tt-rover",
+  "enabled": true,
+  "drives": [
+    {
+      "partId": "left",
+      "jointId": "drive-a",
+      "ratio": 1,
+      "efficiency": 1,
+      "direction": 1
+    },
+    {
+      "partId": "right",
+      "jointId": "drive-b",
+      "ratio": 1,
+      "efficiency": 1,
+      "direction": 1
+    }
+  ],
+  "servos": [],
+  "sensors": []
+}

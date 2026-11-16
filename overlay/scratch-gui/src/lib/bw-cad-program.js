@@ -32,6 +32,7 @@ export function installCadProgramAPI (runtime) {
     const reset = () => { rejectPending(); return simulation()?.reset(); };
     const api = {
         start: () => command(sim => sim.start(true)), stop, reset,
+        acquireExternalClock: () => command(sim => sim.acquireExternalClock()),
         motors: () => enabled() ? simulation()?.motors() || [] : [],
         sliders: () => enabled() ? simulation()?.sliders() || [] : [],
         setMotorPower: (motor, power) => command(sim => {
@@ -50,7 +51,7 @@ export function installCadProgramAPI (runtime) {
         sliderSpeed: slider => enabled() ? simulation()?.sliderSpeed(String(slider)) || 0 : 0,
         status: () => !enabled() ? 'disabled' : error || simulation()?.state.error || simulation()?.state.state || 'not-open'
     };
-    const onStop = () => { Promise.resolve(stop()).catch(e => { error = e.message; }); };
+    const onStop = () => { if (runtime.cadCircuitSimulation?.starting) return; Promise.resolve(stop()).catch(e => { error = e.message; }); };
     const interrupt = () => { rejectPending(); runtime.stopAll(); };
     const onToggle = () => { if (!enabled()) {if (simulation()?.state.program || pending.size) interrupt();else onStop();} };
     runtime.cadSimulation = api; globalThis.__bwCadProgramApi = api;

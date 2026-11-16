@@ -2758,3 +2758,17 @@ notice at `licenses/adafruit-cad-parts-MIT.txt` (Copyright (c) 2016 Adafruit
 Industries). Generated SB3 examples include that notice and Brickwright's
 BSD-3-Clause license under `brickwright/licenses/`. The supplied CAD document
 retains the exact motor source revision, conversion and attribution records.
+
+## YoWASP Yosys — ISC (optional FPGA synthesis worker)
+
+The existing optional FPGA worker imports `@yowasp/yosys`. It is now an explicit,
+exact dependency at **0.71.188-dev.1267**, so a clean install can build that worker
+without relying on a leftover package. It is separate from CAD co-simulation.
+The package exposes the Yosys application through a virtual-filesystem API.
+
+Upstream package and licence: [YoWASP/yosys](https://github.com/YoWASP/yosys),
+[ISC licence](https://github.com/YoWASP/yosys/blob/develop/LICENSE.txt).
+Yosys source and licence: [YosysHQ/yosys](https://github.com/YosysHQ/yosys),
+[COPYING](https://github.com/YosysHQ/yosys/blob/main/COPYING).
+The original notices are shipped at `static/licenses/yowasp-yosys.LICENSE.txt`
+and `static/licenses/yosys.COPYING.txt`.

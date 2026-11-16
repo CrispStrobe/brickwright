@@ -40,6 +40,31 @@ const preserveProofAssetInfo = ({filename}) =>
         filename.replace(/\\/g, '/').startsWith('static/cad-sdk/'))
         ? {minimized: true} : {};
 
+// SDK filenames and imports are owned by Vite. Webpack's RealContentHash
+// pass can rewrite hash-like strings in copied JS without renaming those files.
+// Restore the digest-verified snapshot AFTER all hash/minify passes.
+class PinnedCadSdkPlugin {
+    apply(compiler) {
+        compiler.hooks.thisCompilation.tap('PinnedCadSdk', compilation => {
+            compilation.hooks.processAssets.tap({name:'PinnedCadSdk',stage:webpack.Compilation.PROCESS_ASSETS_STAGE_REPORT}, () => {
+                if (process.env.BW_ENABLE_CAD !== '1') return;
+                const fs=require('fs'),crypto=require('crypto'),base=path.resolve(__dirname,'static/cad-sdk');
+                const manifestBytes=fs.readFileSync(path.join(base,'manifest.json'));
+                const manifest=JSON.parse(manifestBytes);
+                if(manifest.format!=='brickwright-cad-sdk'||manifest.dirty)throw new Error('CAD SDK must be a clean pinned build');
+                for(const name of Object.keys(compilation.assets))if(name.startsWith('static/cad-sdk/'))compilation.deleteAsset(name);
+                for(const [name,hash] of Object.entries(manifest.files)){
+                    if(name.includes('..')||path.isAbsolute(name))throw new Error('Invalid CAD SDK asset path');
+                    const bytes=fs.readFileSync(path.join(base,name));
+                    if(crypto.createHash('sha256').update(bytes).digest('hex')!==hash)throw new Error(`CAD SDK source digest mismatch: ${name}`);
+                    compilation.emitAsset(`static/cad-sdk/${name}`,new webpack.sources.RawSource(bytes),{minimized:true});
+                }
+                compilation.emitAsset('static/cad-sdk/manifest.json',new webpack.sources.RawSource(manifestBytes),{minimized:true});
+            });
+        });
+    }
+}
+
 /**
  * The commit this bundle was built from, short form.
  *
@@ -213,6 +238,7 @@ const baseConfig = new ScratchWebpackConfigBuilder(
         'process.env.GTM_ID': process.env.GTM_ID ? `"${process.env.GTM_ID}"` : null
     }))
     .addPlugin(new BuildManifestPlugin())
+    .addPlugin(new PinnedCadSdkPlugin())
     .addPlugin(new CopyWebpackPlugin({
         patterns: [
             {

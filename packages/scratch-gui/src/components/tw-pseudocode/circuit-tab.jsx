@@ -232,6 +232,16 @@ class CircuitTab extends React.Component {
     }
 
     componentDidMount () {
+        this._couplingHandler = event => {
+            const {board, ready, reject} = event.detail || {};
+            if (board && this.props.vm?.runtime?.bwRunBoard) { reject?.(new Error('Stop the circuit debugger first')); return; }
+            if (!board) this._coupledBoard = null;
+            else this._coupledBoard = board;
+            this.setState({board: board || null}, () => setTimeout(() => ready?.(), 0));
+        };
+        this._couplingOpen = () => this.load({explicit: true});
+        window.addEventListener('bw-circuit-clock-owner', this._couplingHandler);
+        window.addEventListener('bw-circuit-ensure-ready', this._couplingOpen);
         this._menuMounted = true;
         this._designerMenuActions = [];
         this.unregisterMenu = registerEditorMenuActions('circuit', () => this.editorMenuActions());
@@ -702,6 +712,8 @@ class CircuitTab extends React.Component {
     }
 
     componentWillUnmount () {
+        window.removeEventListener('bw-circuit-clock-owner', this._couplingHandler);
+        window.removeEventListener('bw-circuit-ensure-ready', this._couplingOpen);
         this.releaseEsp32S040Input();
         this._menuMounted = false;
         this._designerMenuActions = [];
@@ -856,10 +868,12 @@ class CircuitTab extends React.Component {
     }
 
     handleProjectStart () {
+        if (this._coupledBoard) return;
         this.setState(state => ({runToken: (state.runToken || 0) + 1}));
     }
 
     handleProjectStop () {
+        if (this._coupledBoard) return;
         this.setState(state => ({stopToken: (state.stopToken || 0) + 1}));
     }
 
@@ -1860,6 +1874,7 @@ class CircuitTab extends React.Component {
      * freezes coherently and no pause() is needed (DEBUG-CONTROL-MODEL §3.1).
      */
     handleRunnerChange (runner, ui) {
+        if (this._coupledBoard) return;
         // An accepted touch-up emits inside release(). It must not recreate
         // the owner being released, including during this component's unmount.
         if (this._releasingEsp32S040Input) return;

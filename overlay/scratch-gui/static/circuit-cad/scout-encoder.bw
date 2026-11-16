@@ -1,0 +1,32 @@
+# Arduino Uno -> L293D -> two yellow TT output shafts -> Scout CAD rover.
+# The motor parameters describe an ideal equivalent output shaft, not a calibrated TT product.
+DEVICE ARDUINO-UNO
+CLOCK 16000000
+PIN leftEnable = D5 OUTPUT
+PIN rightEnable = D6 OUTPUT
+PIN leftForward = D8 OUTPUT
+PIN leftReverse = D9 OUTPUT
+PIN rightForward = D10 OUTPUT
+PIN rightReverse = D11 OUTPUT
+PIN encoder = D2 INPUT
+
+WHEN flag clicked:
+  turn on leftForward
+  turn off leftReverse
+  turn on rightForward
+  turn off rightReverse
+  turn on leftEnable
+  turn on rightEnable
+  repeat 2:
+    wait until not read encoder
+    wait until read encoder
+  turn off leftEnable
+  turn off rightEnable
+  wait 0.5 seconds
+  turn off leftForward
+  turn on leftReverse
+  turn on leftEnable
+  turn on rightEnable
+  wait 1 seconds
+  turn off leftEnable
+  turn off rightEnable

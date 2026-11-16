@@ -9,6 +9,7 @@ import {connect} from 'react-redux';
 import MediaQuery from 'react-responsive';
 import {Tab, Tabs, TabList, TabPanel} from 'react-tabs';
 import CircuitTab from '../tw-pseudocode/circuit-tab.jsx';
+import {installCircuitCadBridge} from '../../lib/bw-cad-circuit/bridge.js';
 import {installCadProgramAPI, CAD_OPEN_EVENT} from '../../lib/bw-cad-program.js';
 import {getCadEnabled, CAD_TOGGLE_EVENT} from '../../lib/bw-cad-preferences.js';
 import {getFpgaEnabled, FPGA_TOGGLE_EVENT} from '../../lib/bw-fpga-preferences.js';
@@ -284,7 +285,9 @@ const GUIComponent = props => {
     const [cadWanted, setCadWanted] = React.useState(false);
     React.useEffect(() => {
         if (!process.env.BW_ENABLE_CAD || !props.vm?.runtime) return undefined;
-        return installCadProgramAPI(props.vm.runtime);
+        const removeCad = installCadProgramAPI(props.vm.runtime);
+        const removeCoupling = installCircuitCadBridge(props.vm);
+        return () => {removeCoupling();removeCad();};
     }, [props.vm]);
     React.useEffect(() => {
         const open = () => { if (showCad) { setCadWanted(true); props.onActivateTab(cadTabIndex); } };
@@ -1175,7 +1178,7 @@ const GUIComponent = props => {
                                 {showCad ? <TabPanel className={tabClassNames.tabPanel}>
                                     {cadWanted ? <EditorErrorBoundary name="CAD">
                                         <React.Suspense fallback={<div role="status">{intl.locale.startsWith('de') ? 'CAD wird geladen…' : 'Loading CAD…'}</div>}>
-                                            <CadTab isVisible={activeTabIndex === cadTabIndex} locale={intl.locale} theme={theme} />
+                                            <CadTab vm={vm} isVisible={activeTabIndex === cadTabIndex} locale={intl.locale} theme={theme} />
                                         </React.Suspense>
                                     </EditorErrorBoundary> : null}
                                 </TabPanel> : null}

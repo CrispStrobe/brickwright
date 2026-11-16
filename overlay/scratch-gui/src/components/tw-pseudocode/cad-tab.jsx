@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import React from 'react';
+import CadCircuitPanel from './cad-circuit-panel.jsx';
 import PropTypes from 'prop-types';
 import {CAD_READY_EVENT} from '../../lib/bw-cad-program.js';
 import download from '../../lib/download-blob.js';
@@ -29,7 +30,7 @@ const pickFile = accept => new Promise((resolve, reject) => {
     input.click();
 });
 
-const CadTab = ({isVisible, locale, theme}) => {
+const CadTab = ({vm, isVisible, locale, theme}) => {
     const colorMode = theme === 'dark' ? 'dark' : 'light';
     const mode = React.useRef(colorMode);
     mode.current = colorMode;
@@ -112,6 +113,7 @@ const CadTab = ({isVisible, locale, theme}) => {
         if (isVisible && editor.current) { activateUndoSurface('cad'); editor.current.focus(); }
     }, [isVisible]);
     return <div data-testid="bw-cad-tab" style={{width: '100%', height: '100%', flex: 1, minWidth: 0, minHeight: 350, display: 'flex', flexDirection: 'column'}}>
+        <CadCircuitPanel vm={vm} locale={locale} colorMode={colorMode} />
         {storageWarning ? <div role="status">{locale.startsWith('de')
             ? 'Nur für diese Sitzung gespeichert. Speichere das Projekt als Datei.'
             : 'Saved for this session. Save the project to a file to keep it.'}</div> : null}
@@ -122,6 +124,7 @@ const CadTab = ({isVisible, locale, theme}) => {
     </div>;
 };
 CadTab.propTypes = {
+    vm: PropTypes.object.isRequired,
     theme: PropTypes.string,
     isVisible: PropTypes.bool.isRequired,
     locale: PropTypes.string.isRequired

@@ -4054,6 +4054,13 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
     const runner = {
         /** Use this image instead of compiling the blocks. */
         setFirmware(fw) { userFirmware = fw || null; },
+        // Compile the same blocks/pseudocode image without attaching another clock.
+        async compileForCoSimulation() {
+            if (destroyed || session || target || vm?.runtime?.bwRunBoard) throw new Error('Stop the circuit debugger before compiling a coupled simulation');
+            const device = String(projectStc(null)?.device || '').toLowerCase();
+            if (!['uno', 'arduino_uno', 'arduino-uno', 'atmega328p'].includes(device)) throw new Error('Circuit–CAD firmware currently requires Arduino Uno / ATmega328P');
+            return userFirmware ? builtFromUserFirmware('avr8js') : build();
+        },
         /** Engineering-unit channels and one atomic pose on the live target. */
         discoverInputs: () => engineeringInputs.discoverInputs(),
         setInputs: sets => engineeringInputs.setInputs(sets),
@@ -4067,6 +4074,9 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
 
         /** Build, attach, and run. The ⚑ of the debug world. */
         async start() {
+            if (['preparing','compiling','running'].includes(vm?.runtime?.cadCircuitSimulation?.state().phase)) {
+                throw new Error('Stop the circuit–CAD simulation before starting the debugger');
+            }
             const forked = beginForwardBranch();
             if (!forked.accepted) { setStatus('paused', forked.reason || forked.code); return forked; }
             reverseCursor = null;
@@ -5371,15 +5381,15 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
 
         symbols: () => symbols,
 
-        destroy() {
+        destroy({preserveRuntime = false} = {}) {
             i8086ExecutionLifetime.abort();
             i8086Execution.release(i8086ExecutionResult);
             // The aborted lifetime fences reentry even if release throws.
             hddSnapshotOwner = {};
             i8086ExecutionResult = null;
             destroyed = true;
-            setValueResolver(null);
-            if (vm && vm.runtime) delete vm.runtime._bwDebugVariables;
+            if (!preserveRuntime) {setValueResolver(null);
+                if (vm && vm.runtime) delete vm.runtime._bwDebugVariables;}
             unschedule();
             if (activeRunTo) {
                 runToController.cancel();
@@ -5390,7 +5400,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             debugEventsTarget = null;
             if (unsubscribeDebugInputs) { unsubscribeDebugInputs(); unsubscribeDebugInputs = null; }
             unsubscribeRecordingEvents();
-            clearGlow();
+            if (!preserveRuntime) clearGlow();
             const cleanupErrors = [];
             try { if (session) session.destroy(); }
             catch (error) { cleanupErrors.push(error); }

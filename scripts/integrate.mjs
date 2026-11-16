@@ -13,7 +13,7 @@
 //   in extension-manager.js's builtinExtensions map.
 //
 // Idempotent; run after `vendor`.
-import { cpSync, readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { cpSync, readFileSync, writeFileSync, existsSync, mkdirSync, rmSync } from 'node:fs';
 import {spawnSync} from 'node:child_process';
 import path from 'node:path';
 import {AVR8JS_SPEC} from './lib/avr8js-spec.mjs';
@@ -31,6 +31,8 @@ if (brokerAssets.status !== 0) throw new Error('native broker asset freshness ch
 // 1) overlay our owned scratch-gui files onto the vendored source. (The scratch-vm delta lives
 // in overlay/scratch-vm and is applied to node_modules/scratch-vm AFTER install by
 // apply-vm-overlay.mjs — see step 3 for why it can't be a file: package.)
+// The CAD SDK is one immutable snapshot: do not retain chunks from an older pin.
+if (existsSync(path.join(ROOT,'overlay/scratch-gui/static/cad-sdk'))) rmSync(path.join(GUI,'static/cad-sdk'),{recursive:true,force:true});
 cpSync(path.join(ROOT, 'overlay', 'scratch-gui'), GUI, { recursive: true });
 console.log('  overlaid scratch-gui delta (Code tab, SoundFX, de-brand, webpack, extension picker)');
 
@@ -108,6 +110,7 @@ for (const name of ['bw-board', 'bw-circuit-ui']) {
 //                           one of them WTFPL-only.
 // A range on either could move onto a version where those subpaths or their trees differ,
 // and the audit would be silently stale. See docs/TANG-NANO.md §8a.
+pkg.dependencies['@yowasp/yosys'] = '0.71.188-dev.1267';          // ISC; existing optional FPGA synthesis worker
 pkg.dependencies['digitaljs'] = '0.14.2';                        // BSD-2 (headless core only)
 pkg.dependencies['yosys2digitaljs'] = '0.10.3';                  // BSD-2 (core subpath only)
 pkg.dependencies['scratch-vm'] = '4.8.115';                      // last BSD-3; built from src via alias

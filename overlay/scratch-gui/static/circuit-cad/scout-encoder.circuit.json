@@ -1,0 +1,325 @@
+{
+  "version": 1,
+  "vcc": 5,
+  "parts": [
+    {
+      "id": "uno",
+      "kind": "arduino_uno",
+      "terminals": [
+        "d2",
+        "d3",
+        "d5",
+        "d6",
+        "d8",
+        "d9",
+        "d10",
+        "d11",
+        "5v",
+        "gnd"
+      ],
+      "params": {},
+      "x": 80,
+      "y": 60
+    },
+    {
+      "id": "logic",
+      "kind": "vcc",
+      "terminals": [
+        "vcc"
+      ],
+      "params": {},
+      "x": 80,
+      "y": 0
+    },
+    {
+      "id": "ground",
+      "kind": "gnd",
+      "terminals": [
+        "gnd"
+      ],
+      "params": {},
+      "x": 80,
+      "y": 240
+    },
+    {
+      "id": "battery",
+      "kind": "battery",
+      "terminals": [
+        "pos",
+        "neg"
+      ],
+      "params": {
+        "volts": 6,
+        "rInternal": 0.5
+      },
+      "x": 320,
+      "y": 0
+    },
+    {
+      "id": "driver",
+      "kind": "h_bridge",
+      "terminals": [
+        "vcc",
+        "gnd",
+        "en1",
+        "in1",
+        "in2",
+        "out1",
+        "out2",
+        "en2",
+        "in3",
+        "in4",
+        "out3",
+        "out4"
+      ],
+      "params": {},
+      "x": 320,
+      "y": 130
+    },
+    {
+      "id": "left",
+      "kind": "dc_motor_encoder",
+      "terminals": [
+        "a",
+        "b",
+        "enc_a",
+        "enc_b"
+      ],
+      "params": {
+        "windingR": 10,
+        "windingH": 0.005,
+        "kV": 0.25,
+        "kT": 0.25,
+        "pulsesPerRev": 2
+      },
+      "x": 550,
+      "y": 70
+    },
+    {
+      "id": "right",
+      "kind": "dc_motor_encoder",
+      "terminals": [
+        "a",
+        "b",
+        "enc_a",
+        "enc_b"
+      ],
+      "params": {
+        "windingR": 10,
+        "windingH": 0.005,
+        "kV": 0.25,
+        "kT": 0.25,
+        "pulsesPerRev": 2
+      },
+      "x": 550,
+      "y": 220
+    }
+  ],
+  "wires": [
+    {
+      "id": "logic-0",
+      "netId": "logic",
+      "from": {
+        "part": "logic",
+        "terminal": "vcc"
+      },
+      "to": {
+        "part": "uno",
+        "terminal": "5v"
+      }
+    },
+    {
+      "id": "ground-0",
+      "netId": "ground",
+      "from": {
+        "part": "ground",
+        "terminal": "gnd"
+      },
+      "to": {
+        "part": "uno",
+        "terminal": "gnd"
+      }
+    },
+    {
+      "id": "ground-1",
+      "netId": "ground",
+      "from": {
+        "part": "ground",
+        "terminal": "gnd"
+      },
+      "to": {
+        "part": "battery",
+        "terminal": "neg"
+      }
+    },
+    {
+      "id": "ground-2",
+      "netId": "ground",
+      "from": {
+        "part": "ground",
+        "terminal": "gnd"
+      },
+      "to": {
+        "part": "driver",
+        "terminal": "gnd"
+      }
+    },
+    {
+      "id": "motor-power-0",
+      "netId": "motor-power",
+      "from": {
+        "part": "battery",
+        "terminal": "pos"
+      },
+      "to": {
+        "part": "driver",
+        "terminal": "vcc"
+      }
+    },
+    {
+      "id": "control-D5-0",
+      "netId": "control-D5",
+      "from": {
+        "part": "uno",
+        "terminal": "d5"
+      },
+      "to": {
+        "part": "driver",
+        "terminal": "en1"
+      }
+    },
+    {
+      "id": "control-D6-0",
+      "netId": "control-D6",
+      "from": {
+        "part": "uno",
+        "terminal": "d6"
+      },
+      "to": {
+        "part": "driver",
+        "terminal": "en2"
+      }
+    },
+    {
+      "id": "control-D8-0",
+      "netId": "control-D8",
+      "from": {
+        "part": "uno",
+        "terminal": "d8"
+      },
+      "to": {
+        "part": "driver",
+        "terminal": "in1"
+      }
+    },
+    {
+      "id": "control-D9-0",
+      "netId": "control-D9",
+      "from": {
+        "part": "uno",
+        "terminal": "d9"
+      },
+      "to": {
+        "part": "driver",
+        "terminal": "in2"
+      }
+    },
+    {
+      "id": "control-D10-0",
+      "netId": "control-D10",
+      "from": {
+        "part": "uno",
+        "terminal": "d10"
+      },
+      "to": {
+        "part": "driver",
+        "terminal": "in3"
+      }
+    },
+    {
+      "id": "control-D11-0",
+      "netId": "control-D11",
+      "from": {
+        "part": "uno",
+        "terminal": "d11"
+      },
+      "to": {
+        "part": "driver",
+        "terminal": "in4"
+      }
+    },
+    {
+      "id": "lefta-0",
+      "netId": "lefta",
+      "from": {
+        "part": "left",
+        "terminal": "a"
+      },
+      "to": {
+        "part": "driver",
+        "terminal": "out1"
+      }
+    },
+    {
+      "id": "leftb-0",
+      "netId": "leftb",
+      "from": {
+        "part": "left",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "driver",
+        "terminal": "out2"
+      }
+    },
+    {
+      "id": "righta-0",
+      "netId": "righta",
+      "from": {
+        "part": "right",
+        "terminal": "a"
+      },
+      "to": {
+        "part": "driver",
+        "terminal": "out3"
+      }
+    },
+    {
+      "id": "rightb-0",
+      "netId": "rightb",
+      "from": {
+        "part": "right",
+        "terminal": "b"
+      },
+      "to": {
+        "part": "driver",
+        "terminal": "out4"
+      }
+    },
+    {
+      "id": "encoder-a-0",
+      "netId": "encoder-a",
+      "from": {
+        "part": "left",
+        "terminal": "enc_a"
+      },
+      "to": {
+        "part": "uno",
+        "terminal": "d2"
+      }
+    },
+    {
+      "id": "encoder-b-0",
+      "netId": "encoder-b",
+      "from": {
+        "part": "left",
+        "terminal": "enc_b"
+      },
+      "to": {
+        "part": "uno",
+        "terminal": "d3"
+      }
+    }
+  ],
+  "holeWires": []
+}

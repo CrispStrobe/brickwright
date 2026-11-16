@@ -2,6 +2,16 @@ var L6 = Object.defineProperty;
 var H6 = (A, g, I) => g in A ? L6(A, g, { enumerable: !0, configurable: !0, writable: !0, value: I }) : A[g] = I;
 var $A = (A, g, I) => H6(A, typeof g != "symbol" ? g + "" : g, I);
 const _6 = {
+  "Invalid position servo target": "Ungültiger Positionsservo-Sollwert",
+  "Invalid body sensor ray": "Ungültiger Sensorstrahl am Körper",
+  "Front steering servo": "Vorderer Lenkservo",
+  "Output spline": "Abtriebsverzahnung",
+  "Invalid actuator impulse": "Ungültiger Aktuatorimpuls",
+  "Choose a hinge or slider actuator": "Ein Dreh- oder Schubgelenk wählen",
+  "Actuator bodies belong to the same rigid assembly": "Die Aktuatorkörper gehören zur selben starren Baugruppe",
+  "The circuit owns this simulation clock": "Die Schaltung steuert diesen Simulationstakt",
+  "Stop the current simulation before connecting a circuit": "Vor dem Verbinden einer Schaltung die laufende Simulation stoppen",
+  "A mechanical step is already pending": "Ein mechanischer Simulationsschritt läuft bereits",
   "Color mode": "Farbmodus",
   Light: "Hell",
   Dark: "Dunkel",
