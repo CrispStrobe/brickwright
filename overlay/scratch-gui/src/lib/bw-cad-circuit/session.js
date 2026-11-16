@@ -34,6 +34,9 @@ export async function createCoupledSession({board, mechanics, connections, firmw
     if (board.timeNs !== 0n || mechanics.snapshot().time !== 0) throw new Error('Reset the circuit and CAD simulation before connecting');
     const servoPorts = new Map(), sensorPorts = new Map(), rays=config.sensors.map(s=>({id:s.partId,...s}));
     const releases = [], readouts = new Map(); let lease, stopped = false, generation = 0, pending = Promise.resolve(), budgetMs = 0, frame = mechanics.snapshot(), failed = null;
+    // Intermediate control samples omit body poses. Public snapshots always keep
+    // the most recent complete frame, including while a worker reply is pending.
+    let fullFrame = frame;
     const sample = (drive, value) => {
         const positions = drive.kind === 'hinge' ? value.angles : value.linearPositions, speeds = drive.kind === 'hinge' ? value.speeds : value.linearSpeeds;
         if (!Object.hasOwn(positions,drive.jointId) || !Object.hasOwn(speeds,drive.jointId)) throw new Error('A connected CAD joint is missing or has changed kind');
@@ -65,9 +68,9 @@ export async function createCoupledSession({board, mechanics, connections, firmw
             const port=board.attachExternalServo(servo.partId,servo.centerDeg+frame.angles[servo.jointId]*servo.direction);servoPorts.set(servo.partId,port);releases.push(()=>port.release());
         }
         for(const sensor of config.sensors){const port=board.attachExternalDistanceSensor(sensor.partId);sensorPorts.set(sensor.partId,port);releases.push(()=>port.release());}
-        if(rays.length)frame=await mechanics.sense(rays);publish();
+        if(rays.length)frame=fullFrame=await mechanics.sense(rays);publish();
     } catch (error) { stop(); throw error; }
-    async function step() {
+    async function step(telemetryOnly) {
         const expected = generation, target = BigInt(Math.round((frame.time + .005) * 1e9));
         lease.run(() => {
             if (firmware) {
@@ -86,9 +89,11 @@ export async function createCoupledSession({board, mechanics, connections, firmw
             return {id:drive.jointId,impulse};
         });
         const servos=config.servos.map(servo=>{const target=servoPorts.get(servo.partId).target();return{id:servo.jointId,angleRad:(target.angleDeg-servo.centerDeg)*servo.direction*Math.PI/180,torqueNm:servo.torqueNm,enabled:target.powered};});
-        const next = await mechanics.step(impulses,rays,servos,false);
+        const compact = telemetryOnly && typeof mechanics.stepTelemetry === 'function';
+        const next = compact ? await mechanics.stepTelemetry(impulses,rays,servos) : await mechanics.step(impulses,rays,servos,false);
         if (stopped || expected !== generation) return;
         frame = next;
+        if (!compact) fullFrame = next;
         for (const drive of config.drives) {
             const rotor=sample(drive,frame); board.setMechanicalShaftState(drive.partId,rotor);
             readouts.set(drive.partId,{...readouts.get(drive.partId),...rotor});
@@ -100,13 +105,22 @@ export async function createCoupledSession({board, mechanics, connections, firmw
             if (stopped) return;
             if (!finite(ms,0,100)) throw new Error('Invalid coupled simulation duration');
             budgetMs += ms;
-            pending = pending.then(async () => {const before=frame.time;while (!stopped && budgetMs >= 5-1e-9) {budgetMs-=5;await step();}if(!stopped && frame.time!==before){mechanics.present?.();onFrame(frame);}}).catch(error => {failed=error;stop();onError(error);throw error;});
+            pending = pending.then(async () => {
+                const before = frame.time;
+                while (!stopped && budgetMs >= 5-1e-9) {
+                    budgetMs -= 5;
+                    // Keep electrical/encoder feedback at 200 Hz. Only the final
+                    // step needs poses for presentation; legacy SDKs stay full.
+                    await step(budgetMs >= 5-1e-9);
+                }
+                if (!stopped && frame.time !== before) {mechanics.present?.();onFrame(fullFrame);}
+            }).catch(error => {failed=error;stop();onError(error);throw error;});
             // The caller observes failures through idle(); keep the pending chain handled.
             pending.catch(()=>{});
         },
         idle: () => pending, stop,
         get time() {return frame.time * 1000;}, get failed() {return failed;}, get _disposed() {return stopped;},
-        snapshot: () => structuredClone(frame),
+        snapshot: () => structuredClone(fullFrame),
         readings: () => config.drives.map(drive=>({partId:drive.partId,jointId:drive.jointId,...readouts.get(drive.partId)}))
     };
 }
