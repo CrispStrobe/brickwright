@@ -7,7 +7,7 @@ asset catalog and test inputs remained unchanged. Only the browser fixture's
 UTF-8 declaration and failure diagnostics changed. The retained production JS
 was reused byte for byte; npm, tests and webpack were not repeated.
 
-The [machine-readable result](browser.json) records actual native execution,
+The [machine-readable result](../../receipts/2026-11-16-native-benchmarks-browser.json) records actual native execution,
 exact runtime module/bundle hashes, original output, Stop progress, source and
 media identities. [TOPBENCH screenshot](native-topbench.png) and
 [Whetstone screenshot](native-whetstone.png) show the actual rendered panel.
