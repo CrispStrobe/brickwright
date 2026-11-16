@@ -1,12 +1,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import React from 'react';
 import PropTypes from 'prop-types';
-export default function CadRobotControls({vm,locale}) {
+import {CAD_ROBOT_EXAMPLES} from '../../lib/bw-cad-robot-catalog.js';
+export default function CadRobotControls({vm,locale,documentId}) {
     const [,refresh]=React.useReducer(n=>n+1,0),de=locale.startsWith('de');
+    const example=CAD_ROBOT_EXAMPLES.find(item=>item.id===documentId);
+    const note=de?example?.simulationNoteDe:example?.simulationNote;
     const panel=vm.runtime.controllerPanel;
     React.useEffect(()=>{if(!panel)return undefined;const changed=()=>refresh();panel.addListener(changed);return()=>panel.removeListener(changed);},[panel]);
     const widgets=panel?.getWidgets()||[];
     return <section data-testid="bw-cad-robot-controls">
+        {note?<p role="status">{note}</p>:null}
         <p>{de?'Drücke Start. Diese Regler sind dieselben Widgets, die dein Programm liest.':'Press Run. These are the same Widgets controls that your program reads.'}</p>
         {widgets.length?widgets.map(widget=>widget.type==='slider'?<label key={widget.name} style={{display:'flex',flexDirection:'column',gap:8,margin:'18px 0'}}>
             <span>{widget.layout.label||widget.name} <output>{widget.state.value}</output></span>
@@ -16,4 +20,4 @@ export default function CadRobotControls({vm,locale}) {
         <p>{de?'Blöcke/Pseudocode verwenden. Du kannst die Widgets im Widgets-Editor bearbeiten.':'Use Blocks / pseudocode mode. You can edit these controls in the Widgets editor.'}</p>
     </section>;
 }
-CadRobotControls.propTypes={vm:PropTypes.object.isRequired,locale:PropTypes.string.isRequired};
+CadRobotControls.propTypes={vm:PropTypes.object.isRequired,locale:PropTypes.string.isRequired,documentId:PropTypes.string};

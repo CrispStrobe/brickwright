@@ -7,7 +7,8 @@ export async function openCadRobotProject(vm,id,locale='en') {
     const item=CAD_ROBOT_EXAMPLES.find(entry=>entry.id===id);
     if(!item)throw new Error('This shape has no complete robot project');
     const de=locale.startsWith('de');
-    if(!window.confirm(de?`${item.name} als komplettes Projekt öffnen? Modell, Programm, Schaltung und Widgets werden ersetzt. Speichere zuerst deine Arbeit.`:`Open ${item.name} as a complete project? This replaces the model, program, circuit and widgets. Save your work first.`))return false;
+    const note=de?item.simulationNoteDe:item.simulationNote;
+    if(!window.confirm((note?`${note}\n\n`:'')+(de?`${item.name} als komplettes Projekt öffnen? Modell, Programm, Schaltung und Widgets werden ersetzt. Speichere zuerst deine Arbeit.`:`Open ${item.name} as a complete project? This replaces the model, program, circuit and widgets. Save your work first.`)))return false;
     const response=await fetch(new URL(`static/cad-robots/${item.file}`,document.baseURI));
     if(!response.ok)throw new Error(de?'Roboterprojekt konnte nicht geladen werden.':'Robot project could not be loaded.');
     const bytes=await response.arrayBuffer(),inspection=await inspectBrickwrightState(bytes);

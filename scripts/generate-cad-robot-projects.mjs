@@ -17,22 +17,26 @@ export function robotProjectState(doc){
  const slider=(name,label,min,max,value)=>widgets.push({name,type:'slider',config:{min,max,step:1,value},layout:{x:12,y:12+widgets.length*100,w:320,h:88,label},binding:{target:'program'}});
  for(const [i,j]of motors.entries()){
   const id=doc.id==='robot-tt-rover'?['left','right'][i]:'motor'+j.control.port,bridge='bridge'+i,[enable,forward,reverse]=pinsets[i];
-  parts.push({id,kind:doc.id==='robot-tt-rover'?'dc_motor_encoder':'dc_motor',terminals:doc.id==='robot-tt-rover'?['a','b','enc_a','enc_b']:['a','b'],params:{windingR:10,windingH:.005,kV:.25,kT:.25,pulsesPerRev:2},x:580,y:70+i*150},{id:bridge,kind:'h_bridge',terminals:['vcc','gnd','en1','in1','in2','out1','out2','en2','in3','in4','out3','out4'],params:{},x:330,y:100+i*150});
+  // Linear stages use a nominal bare DC rotor; the TT value is output-shaft equivalent.
+  // Applying that geared output constant to an 8 mm lead screw overstates its drive.
+  const motorConstant=j.kind==='slider'?.005:.25;
+  parts.push({id,kind:doc.id==='robot-tt-rover'?'dc_motor_encoder':'dc_motor',terminals:doc.id==='robot-tt-rover'?['a','b','enc_a','enc_b']:['a','b'],params:{windingR:10,windingH:.005,kV:motorConstant,kT:motorConstant,pulsesPerRev:2},x:580,y:70+i*150},{id:bridge,kind:'h_bridge',terminals:['vcc','gnd','en1','in1','in2','out1','out2','en2','in3','in4','out3','out4'],params:{},x:330,y:100+i*150});
   net('power-'+i,t('battery','pos'),t(bridge,'vcc'));net('return-'+i,t('ground','gnd'),t(bridge,'gnd'),t(bridge,'en2'),t(bridge,'in3'),t(bridge,'in4'));
   for(const [pin,input]of[[enable,'en1'],[forward,'in1'],[reverse,'in2']])net(id+'-'+input,t('uno',pin),t(bridge,input));
   if(doc.id==='robot-tt-rover'&&i===0){net('encoder-a',t(id,'enc_a'),t('uno','d0'));net('encoder-b',t(id,'enc_b'),t('uno','d1'));}
   net(id+'-a',t(bridge,'out1'),t(id,'a'));net(id+'-b',t(bridge,'out2'),t(id,'b'));
   connections.drives.push({partId:id,jointId:j.id,kind:j.kind,direction:1,ratio:1,efficiency:1,leadMm:8});
   slider(id,`${j.control.port} · ${j.name||j.id} (%)`,-100,100,doc.id==='robot-tt-rover'?30:0);
-  lines.push(`    if widget value "${id}" < 0 THEN:`,`      set "${id}" direction reverse`,`      set "${id}" speed to (0 - widget value "${id}")`,'    else:',`      set "${id}" direction forward`,`      set "${id}" speed to widget value "${id}"`);
+  lines.push(`    IF NOT (widget value "${id}" = previous_${id}) THEN:`,`      IF widget value "${id}" < 0 THEN:`,`        set "${id}" direction reverse`,`        set "${id}" speed to (0 - widget value "${id}")`,'      ELSE:',`        set "${id}" direction forward`,`        set "${id}" speed to widget value "${id}"`,`      set previous_${id} to widget value "${id}"`);
  }
  for(const [i,j]of servos.entries()){
   const id='servo'+j.control.port,pin=['d11','d12','d13'][i];parts.push({id,kind:'servo',terminals:['signal','vcc','gnd'],params:{},x:580,y:100+(motors.length+i)*140});
   net(id+'-power',t('logic','vcc'),t(id,'vcc'));net(id+'-ground',t('ground','gnd'),t(id,'gnd'));net(id+'-signal',t('uno',pin),t(id,'signal'));
   connections.servos.push({partId:id,jointId:j.id,direction:1,centerDeg:90,torqueNm:.35});
   slider(id,`${j.control.port} · ${j.name||j.id} (°)`,Math.max(0,Math.ceil(90+j.limits[0]*180/Math.PI)),Math.min(180,Math.floor(90+j.limits[1]*180/Math.PI)),90);
-  lines.push(`    set "${id}" angle to widget value "${id}"`);
+  lines.push(`    IF NOT (widget value "${id}" = previous_${id}) THEN:`,`      set "${id}" angle to widget value "${id}"`,`      set previous_${id} to widget value "${id}"`);
  }
+ lines.splice(6,0,...widgets.map(w=>`  set previous_${w.name} to -999`));
  lines.push('    wait 0.02 seconds','');
  return {circuit:{version:1,vcc:5,parts,wires,holeWires:[]},controller:{version:1,mode:'play',hideBindings:true,widgets},cadCircuit:connections,code:{lang:'pseudocode',code:lines.join('\n')}};
 }

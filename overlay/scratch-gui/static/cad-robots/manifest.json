@@ -5,8 +5,8 @@
       "id": "robot-tt-rover",
       "name": "Scout TT rover",
       "file": "scout.sb3",
-      "bytes": 817406,
-      "sha256": "6a57ef0189f77afe9423e2fc3c3ac00b8ed2df80cc5e8df1b32b840583f36ae3",
+      "bytes": 818280,
+      "sha256": "bac45b844addabc08eb29854fefb8bdfd83f1a164a5620fa187ac454170280a1",
       "widgets": [
         "left",
         "right"
@@ -20,8 +20,8 @@
       "id": "robot-steerable-rover",
       "name": "Trident steerable rover",
       "file": "trident.sb3",
-      "bytes": 1051755,
-      "sha256": "9bc7ae0581dc46bc86a58c972a5d54d5fb60e9117abb22727cf3a514e5938fc9",
+      "bytes": 1052971,
+      "sha256": "3d7535bb4f0fe66411846ebf938c8ca32032f027db42bc0b4ebb12e2c943df18",
       "widgets": [
         "motorA",
         "motorB",
@@ -37,8 +37,8 @@
       "id": "robot-atlas-forklift",
       "name": "Atlas forklift",
       "file": "atlas.sb3",
-      "bytes": 1050041,
-      "sha256": "48fdb8e921fe5898b67bf9474db961e4392a168e95a86ab0060eb4cf2fa7ea06",
+      "bytes": 1051626,
+      "sha256": "0fe2ef68ec9df0cd42b762406fd4848df0e8c1a581aee243b6be00667fdbcce9",
       "widgets": [
         "motorA",
         "motorB",
@@ -56,8 +56,8 @@
       "id": "robot-mantis-walker",
       "name": "Mantis 3-servo walker",
       "file": "mantis.sb3",
-      "bytes": 273646,
-      "sha256": "642cff48839a9b876597e3b421f47eab2b76ba164fdaeac88101bc65b9ba1cbe",
+      "bytes": 274898,
+      "sha256": "65af45459d1fbc137e0024e72c77ae2b36364f9f090ffd79c3b4054d1fc2a9b1",
       "widgets": [
         "servoA",
         "servoB",
@@ -73,8 +73,8 @@
       "id": "robot-cyclone-sorter",
       "name": "Cyclone 2-axis gantry sorter",
       "file": "cyclone.sb3",
-      "bytes": 99592,
-      "sha256": "12eb21dec11a66c619e13b3ebda3aee92507e9129f21dbd746b5525c4504b7b8",
+      "bytes": 100797,
+      "sha256": "49adebd2035ac6210f2cb6c7b1432c24bd0b36d46babe2533492335c25c9c25b",
       "widgets": [
         "motorA",
         "motorB",
@@ -90,8 +90,8 @@
       "id": "robot-helios-catapult",
       "name": "Helios turret catapult",
       "file": "helios.sb3",
-      "bytes": 275387,
-      "sha256": "9daf98fbb3d8d753c4af27791105ce8541853ae506443e52384fe80956b5dc6b",
+      "bytes": 276645,
+      "sha256": "69d3ab79ccebb9921a2b7ea10865dbd019130e9446d71a905b9362b1c750ac91",
       "widgets": [
         "servoA",
         "servoB",

@@ -13435,7 +13435,9 @@ function lp(t, e, i, n, s, o) {
     for (const $ of R) {
       const U = l2("button");
       U.type = "button", U.className = "model-library-card", U.disabled = x, U.setAttribute("aria-pressed", String(y === $)), U.dataset.archiveFolder = $.name, U.append(N($), l2("strong", $.name), l2("small", h("Adafruit · Original files"))), U.onclick = () => {
-        g = void 0, y = $, H(), q1();
+        g = void 0, y = $, H(), q1(), $.name !== "Adafruit archive files" && !c && u().catch((G) => {
+          p || r1(G);
+        });
       }, e1.append(U);
     }
     e1.scrollTop = Q;
@@ -13686,9 +13688,7 @@ Mirror commit: ${Q.commit}`, U.href = `https://github.com/adafruit/Adafruit_CAD_
         r1(k);
       }
   }, { open() {
-    !p && !A.open && (c || u().catch((Q) => {
-      p || r1(Q);
-    }), H(), x || q1(), A.showModal(), D.focus(), w || (Y.textContent = h("Loading models…"), b ?? (b = n.load().then((Q) => {
+    !p && !A.open && (H(), x || q1(), A.showModal(), D.focus(), w || (Y.textContent = h("Loading models…"), b ?? (b = n.load().then((Q) => {
       if (p)
         return;
       const k = G4(Q.catalogue);
@@ -48459,7 +48459,7 @@ function PS(t, e) {
 }
 let ci;
 async function DS() {
-  const [{ createBundledModelLibrary: t }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-BpAQjYEe.js"), import("./model-library-cache-DiMFGzp9.js")]);
+  const [{ createBundledModelLibrary: t }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-PXrXJiue.js"), import("./model-library-cache-DiMFGzp9.js")]);
   return ci ?? (ci = t()), { ...ci, cache: e() };
 }
 function LS(t, e) {
