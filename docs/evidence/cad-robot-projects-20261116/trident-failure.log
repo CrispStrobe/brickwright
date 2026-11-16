@@ -1,0 +1,38 @@
+(node:33183) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/christianstrobele/code/local/circuit-cad-lite-work/overlay/scratch-gui/src/lib/bw-cad-robot-catalog.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/christianstrobele/code/local/circuit-cad-lite-work/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+GUI CAD ready
+Selecting robot-steerable-rover
+Project choice returned robot-steerable-rover
+Waiting for CAD geometry robot-steerable-rover
+Geometry ready robot-steerable-rover
+Widgets operated robot-steerable-rover
+Run pressed robot-steerable-rover
+{
+  alerts: [],
+  status: {
+    phase: 'error',
+    time: 0,
+    readings: [],
+    error: 'Simulation exceeded its time budget'
+  }
+}
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Simulation exceeded its time budget
+
+'error' !== 'running'
+
+    at file:///Users/christianstrobele/code/local/circuit-cad-lite-work/scripts/verify-cad-robot-projects.mjs:26:365 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 'error',
+  expected: 'running',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v26.4.0

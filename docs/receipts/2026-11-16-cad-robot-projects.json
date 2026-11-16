@@ -1,0 +1,187 @@
+{
+  "date": "2026-11-16",
+  "task": "Complete CAD robot project selection, including programs/circuits/Widgets",
+  "liteSource": "a1c48e937a5e0baccda3bc4b44db202ee94430bb",
+  "cadSource": "987eab683a6a2f97be855805139a8c6629ad5ae9",
+  "cadSdkDirty": false,
+  "sdkFilesVerified": 11,
+  "latestCadPRsIntegrated": [
+    70,
+    71,
+    72
+  ],
+  "projectExamples": [
+    {
+      "id": "robot-tt-rover",
+      "name": "Scout TT rover",
+      "file": "scout.sb3",
+      "bytes": 818280,
+      "sha256": "bac45b844addabc08eb29854fefb8bdfd83f1a164a5620fa187ac454170280a1",
+      "widgets": [
+        "left",
+        "right"
+      ],
+      "joints": [
+        "drive-a",
+        "drive-b"
+      ]
+    },
+    {
+      "id": "robot-steerable-rover",
+      "name": "Trident steerable rover",
+      "file": "trident.sb3",
+      "bytes": 1052971,
+      "sha256": "3d7535bb4f0fe66411846ebf938c8ca32032f027db42bc0b4ebb12e2c943df18",
+      "widgets": [
+        "motorA",
+        "motorB",
+        "servoC"
+      ],
+      "joints": [
+        "drive-a",
+        "drive-b",
+        "steer-c"
+      ]
+    },
+    {
+      "id": "robot-atlas-forklift",
+      "name": "Atlas forklift",
+      "file": "atlas.sb3",
+      "bytes": 1051626,
+      "sha256": "0fe2ef68ec9df0cd42b762406fd4848df0e8c1a581aee243b6be00667fdbcce9",
+      "widgets": [
+        "motorA",
+        "motorB",
+        "motorD",
+        "servoC"
+      ],
+      "joints": [
+        "drive-a",
+        "drive-b",
+        "lift-d",
+        "tilt-c"
+      ]
+    },
+    {
+      "id": "robot-mantis-walker",
+      "name": "Mantis 3-servo walker",
+      "file": "mantis.sb3",
+      "bytes": 274898,
+      "sha256": "65af45459d1fbc137e0024e72c77ae2b36364f9f090ffd79c3b4054d1fc2a9b1",
+      "widgets": [
+        "servoA",
+        "servoB",
+        "servoC"
+      ],
+      "joints": [
+        "left-hip-a",
+        "right-hip-b",
+        "roll-c"
+      ]
+    },
+    {
+      "id": "robot-cyclone-sorter",
+      "name": "Cyclone 2-axis gantry sorter",
+      "file": "cyclone.sb3",
+      "bytes": 100797,
+      "sha256": "49adebd2035ac6210f2cb6c7b1432c24bd0b36d46babe2533492335c25c9c25b",
+      "widgets": [
+        "motorA",
+        "motorB",
+        "servoC"
+      ],
+      "joints": [
+        "gantry-a",
+        "gantry-b",
+        "sweeper-c"
+      ]
+    },
+    {
+      "id": "robot-helios-catapult",
+      "name": "Helios turret catapult",
+      "file": "helios.sb3",
+      "bytes": 276645,
+      "sha256": "69d3ab79ccebb9921a2b7ea10865dbd019130e9446d71a905b9362b1c750ac91",
+      "widgets": [
+        "servoA",
+        "servoB",
+        "servoC"
+      ],
+      "joints": [
+        "pan-a",
+        "throw-b",
+        "gate-c"
+      ]
+    }
+  ],
+  "validation": {
+    "liteUnit": {
+      "passed": 84,
+      "failed": 0,
+      "skipped": 0
+    },
+    "latestCadCatalogUnit": {
+      "passed": 25,
+      "failed": 0
+    },
+    "cadTypeBuild": "passed",
+    "cadGermanMessages": 1760,
+    "cadGermanReferences": 1399,
+    "guiBuild": {
+      "status": "passed",
+      "mode": "production behavior; minification explicitly disabled for local testing",
+      "warnings": 2
+    },
+    "browser": {
+      "engine": "Google Chrome 157 / Playwright / software WebGL",
+      "completeStateRestoration": [
+        "Scout",
+        "Trident",
+        "Atlas",
+        "Mantis",
+        "Cyclone",
+        "Helios"
+      ],
+      "oneSecondAllActuatorMotionStopResetPassed": [
+        "Scout",
+        "Atlas",
+        "Mantis",
+        "Cyclone",
+        "Helios"
+      ],
+      "failed": [
+        "Trident: simulation time budget exceeded; explicitly marked experimental in chooser confirmation, example list and Controls"
+      ],
+      "finalSdkTabletViewport": {
+        "model": "Scout",
+        "viewport": "1024x768, touch-enabled Chromium; not physical iPad/WebKit",
+        "route": "CAD Examples",
+        "cancelPreservesSource": true,
+        "fullProjectRestored": true,
+        "widgetsCircuitMotionStopReset": "passed"
+      },
+      "scope": "Initial five-model motion proofs use clean SDK c9c9680; final Scout tablet proof uses integrated clean SDK 987eab6. Changes between SDKs are qualified model-library cohorts and deferred archive preview loading. This is not a claim of all-model rerun on final SDK."
+    },
+    "physicalClaims": "Actuator response only; no gait, sorting/task success, calibrated product physics or manufacturing qualification. Nominal electrical/linear-transmission assumptions are documented.",
+    "githubActions": "not used"
+  },
+  "evidenceDirectory": "docs/evidence/cad-robot-projects-20261116",
+  "native": {
+    "status": "built, signed and installed",
+    "product": "Brickwright Robots Projects Test",
+    "build": "20261116.5",
+    "installationPolicy": "new product; running old app preserved",
+    "path": "/Users/christianstrobele/Applications/Brickwright Robots Projects Test.app",
+    "identifier": "com.crispstrobe.brickwright.robotcadtest",
+    "binarySha256": "fb38db8c0303d4f74dd1fe91aad9df48f31dfcc13e398cf75299fd6a3148d9d6",
+    "liteSource": "a1c48e937a5e0baccda3bc4b44db202ee94430bb",
+    "cadSource": "987eab683a6a2f97be855805139a8c6629ad5ae9",
+    "signer": "Apple Development: Created via API (9RMU3C7422)",
+    "team": "N9XSJ4M3GT",
+    "keychain": "/Users/christianstrobele/Library/Keychains/brickwright-build.keychain-db",
+    "codesignVerification": "deep strict passed",
+    "notarized": false,
+    "nativeUiLaunch": "not attempted while old test app is running; fixed ports and shared test profile",
+    "warning": "Rust debug-info stripping helper lacks libLLVM.dylib; compilation/bundling succeeded."
+  }
+}

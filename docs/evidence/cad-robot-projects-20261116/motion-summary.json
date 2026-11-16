@@ -1,0 +1,54 @@
+{
+  "robot-cyclone-sorter": {
+    "time": 1.0000000000000007,
+    "phase": "running",
+    "angles": {
+      "sweeper-c": 61.00503668526278
+    },
+    "linearPositions": {
+      "gantry-a": 32.38653019070625,
+      "gantry-b": 23.51660281419754
+    }
+  },
+  "robot-tt-rover": {
+    "time": 1.0000000000000007,
+    "phase": "running",
+    "angles": {
+      "drive-a": 308.8317949272001,
+      "drive-b": 308.58992085321705
+    },
+    "linearPositions": {}
+  },
+  "robot-atlas-forklift": {
+    "time": 1.0000000000000007,
+    "phase": "running",
+    "angles": {
+      "drive-a": 289.38609609601144,
+      "drive-b": 288.3881849677061,
+      "tilt-c": 14.727702973319651
+    },
+    "linearPositions": {
+      "lift-d": 35.48361733555794
+    }
+  },
+  "robot-helios-catapult": {
+    "time": 1.0000000000000007,
+    "phase": "running",
+    "angles": {
+      "pan-a": 15.042494439334519,
+      "throw-b": 14.926560515909841,
+      "gate-c": 14.999097124895343
+    },
+    "linearPositions": {}
+  },
+  "robot-mantis-walker": {
+    "time": 1.0000000000000007,
+    "phase": "running",
+    "angles": {
+      "left-hip-a": 16.968291889028137,
+      "right-hip-b": 16.510877535407644,
+      "roll-c": -12.027526850059303
+    },
+    "linearPositions": {}
+  }
+}

@@ -1,0 +1,143 @@
+(node:59318) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/christianstrobele/code/local/circuit-cad-lite-work/overlay/scratch-gui/src/lib/bw-cad-project.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/christianstrobele/code/local/circuit-cad-lite-work/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ CAD sidecar saves live content and preserves Scratch and existing archive entries (56.917958ms)
+✔ legacy SB3s with CAD load atomically, old projects clear CAD, and rollback restores its live cache (11.573166ms)
+✔ CAD survives save/load with the editor off, including future CAD documents (8.989917ms)
+✔ invalid CAD or tab state refuses the whole archive before touching current content (7.195125ms)
+✔ a preserved future Brickwright bundle carries its own CAD sidecar rather than the previous project design (88.6205ms)
+✔ quota-limited CAD recovery keeps exact sidecar live, saves it again and can roll back (114.253125ms)
+(node:59319) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/christianstrobele/code/local/circuit-cad-lite-work/overlay/scratch-gui/src/lib/bw-cad-robot-catalog.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/christianstrobele/code/local/circuit-cad-lite-work/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:59319) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+✔ Scout TT rover: one project restores CAD, editable Blocks/Code, real circuit and live Widgets (656.063917ms)
+✔ Trident steerable rover: one project restores CAD, editable Blocks/Code, real circuit and live Widgets (388.85575ms)
+✔ Atlas forklift: one project restores CAD, editable Blocks/Code, real circuit and live Widgets (444.651041ms)
+✔ Mantis 3-servo walker: one project restores CAD, editable Blocks/Code, real circuit and live Widgets (83.867792ms)
+✔ Cyclone 2-axis gantry sorter: one project restores CAD, editable Blocks/Code, real circuit and live Widgets (130.523166ms)
+✔ Helios turret catapult: one project restores CAD, editable Blocks/Code, real circuit and live Widgets (78.268917ms)
+(node:59320) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/christianstrobele/code/local/circuit-cad-lite-work/overlay/scratch-gui/src/lib/bw-cad-project.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/christianstrobele/code/local/circuit-cad-lite-work/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:59320) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+✔ unsupported incoming CAD retires the previous editor and preserves its exact sidecar on save (175.22725ms)
+✔ an initially unsupported CAD project recovers automatically after a supported project loads (10.016292ms)
+✔ Open and Import file reads settle as cancellation when a different project loads (19.433ms)
+✔ file selections are cancelled on unmount or intervening document edits (8.269625ms)
+✔ ordinary settings remounts retain undo while supported and empty project replacements reset it (11.668709ms)
+✔ a failed file read is discarded after the same project is edited (5.884625ms)
+✔ current file read and size failures still reject and clean up the input (7.488958ms)
+✔ a current file selection still returns its bytes and cancellation cleans up its input (2.34075ms)
+✔ a project replacement during SDK loading mounts only the latest document (16.276792ms)
+(node:59321) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/christianstrobele/code/local/circuit-cad-lite-work/overlay/scratch-gui/src/lib/bw-cad-circuit/bridge.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/christianstrobele/code/local/circuit-cad-lite-work/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:59321) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+✔ Stop settles an unavailable Circuit start and removes its listener and deadline (25.683125ms)
+✔ Stop releases initial sensor ownership before a late reply, preserving restart (10.991125ms)
+✔ Stop releases initial sensor ownership before a late failure, preserving restart (5.641625ms)
+✔ an active initial sensor failure remains observable and releases Board ownership (7.657042ms)
+✔ Disposal releases a pending Circuit readiness wait (4.597167ms)
+✔ Disposal releases a pending owner acknowledgement wait (2.197416ms)
+✔ late owner callbacks from a cancelled start cannot change a restarted run (2.756041ms)
+✔ Stop inside the Circuit wake event cancels synchronously (3.901875ms)
+✔ Stop inside the owner request event cancels synchronously (3.491958ms)
+✔ a real Circuit readiness timeout still rejects and removes its listener (1.823417ms)
+✔ a real owner rejection stays observable and cuts power (2.758625ms)
+✔ a real owner timeout stays observable and cuts power (1.584834ms)
+✔ Stop settles pending CAD reset before a late reply and preserves restart (2.306542ms)
+✔ Stop settles pending CAD reset before a late failure and preserves restart (2.693167ms)
+✔ Disposal settles pending CAD reset and releases a late lease (3.464417ms)
+✔ Stop settles pending CAD acquireExternalClock before a late reply and preserves restart (8.922375ms)
+✔ Stop settles pending CAD acquireExternalClock before a late failure and preserves restart (3.077834ms)
+✔ Disposal settles pending CAD acquireExternalClock and releases a late lease (2.132375ms)
+✔ a real CAD reset failure remains observable and returns circuit ownership (2.614291ms)
+✔ Stop inside CAD reset prevents a late startup (1.766583ms)
+✔ a real CAD acquireExternalClock failure remains observable and returns circuit ownership (3.04675ms)
+✔ Stop inside CAD acquireExternalClock prevents a late startup (3.559375ms)
+✔ CAD waits past an empty first board until saved motor parts are hydrated (11.738583ms)
+(node:59322) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/christianstrobele/code/local/circuit-cad-lite-work/overlay/scratch-gui/src/lib/bw-cad-circuit/panel-model.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/christianstrobele/code/local/circuit-cad-lite-work/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ a steering servo leaves the other hinge and slider available to DC motors (65.214916ms)
+✔ motor-first and existing-row choices respect shared actuator occupancy (0.938209ms)
+✔ a replacement document cannot inherit old bindings even when joint IDs coincide (11.479792ms)
+✔ catalogue ignores live electrical readings and unchanged polls but observes in-place metadata edits (9.647209ms)
+✔ document revisions refresh names and ports, and model replacement clears stale choices (0.66925ms)
+✔ hidden views do no work; collapsed views hydrate document identity without enumerating parts (7.046333ms)
+✔ expanded view reacts to model and board changes, never rebuilds for progress, and cleans up (5.403542ms)
+✔ late CAD readiness and bindings replaced while hidden are observed on reopening (2.434417ms)
+✔ the shared Run control recognizes existing direct CAD motor and slider programs (1.495792ms)
+(node:59323) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/christianstrobele/code/local/circuit-cad-lite-work/overlay/scratch-gui/src/lib/bw-cad-circuit/session.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/christianstrobele/code/local/circuit-cad-lite-work/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:59323) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+✔ a real H-bridge/current/back-EMF drives an independently integrated shaft and reverses (459.525166ms)
+✔ a real AVR program drives the bridge and stops it when physical encoder A goes low (1269.376625ms)
+✔ stop during a mechanical reply discards the stale frame and refuses duplicate connections (6.16075ms)
+✔ an old session cannot power off or change shafts after a reset and a new owner (9.674375ms)
+✔ compact feedback preserves real circuit current, back-EMF and encoder behavior (411.847333ms)
+(node:59324) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/christianstrobele/code/local/circuit-cad-lite-work/overlay/scratch-gui/src/lib/bw-cad-circuit/session.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/christianstrobele/code/local/circuit-cad-lite-work/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 200 Hz feedback is identical with 60 Hz full-pose presentation and legacy fallback (305.270541ms)
+✔ fractional program ticks preserve the mechanical remainder and always end with full poses (12.992333ms)
+✔ an in-flight compact sample never replaces a public full-frame snapshot (22.032417ms)
+✔ stop discards a late compact reply and never publishes an incomplete frame (3.06125ms)
+✔ ticks arriving during a terminal reply still finish on a coherent full frame (1.449833ms)
+✔ a rejected compact step cuts power and releases its clock exactly once (27.03825ms)
+(node:59326) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/christianstrobele/code/local/circuit-cad-lite-work/overlay/scratch-gui/src/lib/bw-project-bundle.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/christianstrobele/code/local/circuit-cad-lite-work/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:59326) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+▶ project bundle typed document census
+  ✔ all 11 contract fixtures have exact named outcomes (4.721333ms)
+  ✔ oversized bundle and known sections are refused before storage (13.112292ms)
+  ✔ v1 migrates and v2 decodes to the same exact storage state (1.440542ms)
+  ✔ an untrusted v1 bundle cannot write arbitrary storage keys (0.342958ms)
+✔ project bundle typed document census (23.144125ms)
+▶ project state is replacement, not merge
+  ✔ A to B(code only) removes circuit/widgets and preserves personal preferences (0.770791ms)
+  ✔ A to vanilla removes the complete project namespace (0.268834ms)
+  ✔ failure during replacement restores A byte-for-byte (0.29ms)
+  ✔ a later Scratch VM failure rolls the auxiliary half back byte-for-byte (0.986ms)
+✔ project state is replacement, not merge (2.782917ms)
+▶ real archive extraction applies the classified outcome
+  ✔ a vanilla archive clears A and reports legacy (31.029208ms)
+  ✔ invalid archive is classified before storage mutation (31.981792ms)
+  ✔ future archive is classified before storage mutation (66.022458ms)
+  ✔ unknown v2 data survives load to save but never becomes a storage key (57.434417ms)
+  ✔ a future document mutates no storage and survives the next save opaquely (25.552833ms)
+✔ real archive extraction applies the classified outcome (213.204458ms)
+▶ the project file carries every tab
+  ✔ a bundle round-trips through the zip (56.244584ms)
+  ✔ an existing reader sees an ordinary project — the entry is inert (33.862042ms)
+(node:59327) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/christianstrobele/code/local/circuit-cad-lite-work/overlay/scratch-gui/src/lib/bw-project-bundle.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/christianstrobele/code/local/circuit-cad-lite-work/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✔ a project with no bundle loads as legacy, not as an error (75.112375ms)
+  ✔ only project-content keys are carried, not UI preferences (2.471875ms)
+✔ the project file carries every tab (172.419958ms)
+▶ save-what-you-see and the widgets key (2026-08-25)
+  ✔ attach dispatches the collect event BEFORE reading state (97.582625ms)
+  ✔ a controller panel round-trips through the bw-ctl-widgets key (7.542625ms)
+  ✔ bw-ctl-widgets is on the bundle allowlist (0.333583ms)
+✔ save-what-you-see and the widgets key (2026-08-25) (105.96925ms)
+ℹ tests 84
+ℹ suites 5
+ℹ pass 84
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3349.897917

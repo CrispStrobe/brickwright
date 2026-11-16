@@ -1,0 +1,12 @@
+(node:48924) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/christianstrobele/code/local/circuit-cad-lite-work/overlay/scratch-gui/src/lib/bw-cad-robot-catalog.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/christianstrobele/code/local/circuit-cad-lite-work/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+GUI CAD ready
+Selecting robot-mantis-walker
+Project choice returned robot-mantis-walker
+Waiting for CAD geometry robot-mantis-walker
+Geometry ready robot-mantis-walker
+Widgets operated robot-mantis-walker
+Run pressed robot-mantis-walker
+PASS Mantis 3-servo walker complete project; Widgets -> Circuit -> moving CAD joints; Stop/Reset

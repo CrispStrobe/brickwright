@@ -1,0 +1,13 @@
+
+> brickwright-cad-workspace@0.1.0 test
+> vitest run tests/model-library-expanded-batch007.test.ts tests/model-library-expanded-batch008.test.ts tests/model-library-expanded-batch009.test.ts
+
+
+ RUN  v4.1.12 /Users/christianstrobele/code/local/circuit-cad-engine-work
+
+
+ Test Files  3 passed (3)
+      Tests  25 passed (25)
+   Start at  20:43:52
+   Duration  2.70s (transform 1.76s, setup 0ms, import 2.61s, tests 1.60s, environment 0ms)
+
