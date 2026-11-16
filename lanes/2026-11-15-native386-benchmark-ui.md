@@ -20,3 +20,8 @@ No FreeDOS, physical accuracy, general CPU completion, or speedup claim.
 Qualification: focused React/jsdom lifecycle controls are distinct from the
 production panel browser proof, which executes the real native engine and owned
 TOPBENCH/Whetstone bytes. No benchmark comparison is repeated.
+
+Qualification setup also owns an opt-in canonical installer resource scheduler:
+serialize concurrent Git preparation npm subprocesses while preserving their
+arguments, scripts, dependency pins and store verification. Synthetic scheduler
+controls and canonical store controls do not establish native GUI execution.

@@ -166,7 +166,17 @@ export function computeKey (wt, env = {}) {
 }
 
 /** npm, run under the SAME node as this script (so the key's node major is the install's). */
-const npmEnv = () => ({...process.env, PATH: `${path.dirname(process.execPath)}${path.delimiter}${process.env.PATH}`});
+export const npmEnv = () => {
+    const env = {...process.env, PATH: `${path.dirname(process.execPath)}${path.delimiter}${process.env.PATH}`};
+    if (env.BW_LITE_SERIAL_GIT_PREPARE === '1') {
+        if (process.platform !== 'linux' || !env.BW_LITE_NPM_PREPARE_LOCK) {
+            throw new Error('Serial git preparation needs Linux and BW_LITE_NPM_PREPARE_LOCK');
+        }
+        env.BW_LITE_REAL_NPM = path.join(path.dirname(process.execPath), 'npm');
+        env.PATH = `${path.join(import.meta.dirname, 'lib', 'npm-prepare-gate')}${path.delimiter}${env.PATH}`;
+    }
+    return env;
+};
 let npmMajorCache;
 function npmMajor () {
     if (npmMajorCache === undefined) {

@@ -45,3 +45,19 @@ bundle with the real pinned native engine, fetches exact owned media and drives
 Run/Stop/render/terminal status. It is not a full installed application proof,
 benchmark comparison or new performance measurement. The screenshot and JSON
 receipt bind the actual native result and source/package identity.
+
+On a bounded Linux host, npm can start parallel Git dependency preparation
+installs despite the outer `--ignore-scripts`. The canonical dependency helper
+can serialize those subprocesses without changing package inputs, pins, scripts
+or the store key:
+
+```sh
+mkdir -p artifacts
+BW_LITE_SERIAL_GIT_PREPARE=1 BW_LITE_NPM_PREPARE_LOCK="$PWD/artifacts/git-prepare.lock" \
+  node scripts/worktree-deps.mjs link
+```
+
+This opt-in scheduler leaves top-level npm commands unchanged, permits
+descendant preparation without self-deadlock, and bounds queue waits. Existing
+RSS, disk and time guards still apply. Its synthetic subprocess controls are
+separate from the actual browser/native-engine proof.
