@@ -53,11 +53,11 @@ const hddReplacements = [
 // Exact host-fixture repairs are inverted before the older concurrency delta.
 // This receipt is source review data, never a general historical-file role.
 const fixtureReviewRaw = readFileSync(new URL('../fixtures/i80386-fixture-path-review.json', import.meta.url));
-assert.equal(createHash('sha256').update(fixtureReviewRaw).digest('hex'), '266441dffb4eaedbb363939bcd015d7256d90b40a32bcc0c1afbf271798456cf');
+assert.equal(createHash('sha256').update(fixtureReviewRaw).digest('hex'), '68cc6221a66df4454f064ec2f929fbf3358de752d50cb81d0c29673239c2c3b1');
 const fixtureReview = JSON.parse(fixtureReviewRaw);
 assert.equal(fixtureReview.schema, 'bw.x86-fixture-source-review.v1');
 assert.equal(fixtureReview.file, 'test/i80386-hdd-gui-actual.test.mjs');
-assert.equal(fixtureReview.changes.length, 10);
+assert.equal(fixtureReview.changes.length, 11);
 export const hddBeforeFixtureControl = (file, text) => {
     if (file !== fixtureReview.file) return text;
     let held = text;
