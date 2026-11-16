@@ -41,7 +41,7 @@ test('every Arcade opcode is placed in a section or is plumbing or a hidden alia
 });
 
 test('reset and completed music, prompt and high-score commands have their owning palette section', () => {
-    for (const [opcode, owner] of [['resetGame','game'], ['askForNumberLength','game'], ['playNoteMelody','music'], ['highScore','info']]) {
+    for (const [opcode, owner] of [['resetGame','game'], ['askForNumberLength','game'], ['askForStringLength','game'], ['setGameStats','game'], ['withoutNullSprites','sprites'], ['playNoteMelody','music'], ['highScore','info']]) {
         const section = palette.SECTIONS.find(row => row[0] === owner);
         assert.ok([...section[3], ...section[4]].includes(opcode), opcode);
     }

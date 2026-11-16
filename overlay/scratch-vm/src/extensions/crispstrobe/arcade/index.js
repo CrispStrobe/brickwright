@@ -148,6 +148,7 @@ module.exports = makeExt(`// Name: Arcade
       // Palette is display state shared by every scene, never an image mutation.
       this._projectPalette = null;
       this._gameStats=dependencies.createGameStats(text=>{
+        if(!runtime)return; // Metadata-only construction has no display owner.
         runtime.bwArcadeStatsText=text;runtime.emit?.('ARCADE_DEVICE_STATS',text);
       });
       this._gameStats.reset();

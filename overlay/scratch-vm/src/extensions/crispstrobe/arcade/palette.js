@@ -22,7 +22,7 @@ const words = text => text.trim().split(/\s+/);
 // declarations, external references, callables and classes); a learner has no use picking them.
 const PLUMBING = new Set(words(`
   whenSourceStarts declareSourceReference declareParameterConstraint declareSourceScalar sourceWhile
-  sourceValueBinary sourceValueUnary sourceTypeOf inspectValue
+  sourceValueBinary sourceValueUnary sourceTypeOf inspectValue addLiteralDrawing
   startParallelHandler whenParallelHandler registerForeverHandler whenRegisteredForever
   registerCountdownHandler whenRegisteredCountdown registerLifeZeroHandler whenRegisteredLifeZero
   registerScoreHandler whenRegisteredScore registerUpdateHandler whenRegisteredUpdate
@@ -71,7 +71,7 @@ const SECTIONS = [
     words(`createSprite createOwnedImageSprite spawnSprite spawnImageSprite ---
       followSprite unfollowSprite --- spriteImage setSpriteCostume ---
       startSpriteEffect clearSpriteEffects destroySpriteWithEffect --- spawnImageProjectile ---
-      spriteOverlaps setSpriteKind spritesOfKind spriteCount createSpriteKind spriteKindValue spriteToString ---
+      spriteOverlaps setSpriteKind spritesOfKind withoutNullSprites spriteCount createSpriteKind spriteKindValue spriteToString ---
       whenSpriteCreated whenSpriteDestroyed --- setSpriteScale changeSpriteScale setSpriteScaleCore ---
       textSpriteCreate textSpriteSetText textSpriteSetMaxFontHeight textSpriteSetIcon textSpriteSetBorder
       textSpriteSetOutline textSpriteUpdate textSpriteProperty textSpriteSetProperty`)],
@@ -84,7 +84,7 @@ const SECTIONS = [
   ['game', 'Game', 'Spiel',
     words('whenUpdate whenInterval gameOver resetGame splash ask askForNumber askForNumberLength askForString programMillis'),
     words(`setGameOverEffect setGameOverMessage setGameOverPlayable setGameOverScoringType legacyGameOver ---
-      showLongText --- sceneMillis frameDeltaTime --- carnivalCountdown carnivalGameOver carnivalCustomGameOver carnivalAddLabel`)],
+      showLongText askForStringLength --- sceneMillis frameDeltaTime setGameStats --- carnivalCountdown carnivalGameOver carnivalCustomGameOver carnivalAddLabel`)],
   ['music', 'Music', 'Musik',
     words('play playTone ringTone rest setMusicVolume setTempo changeTempo stopAllSounds'),
     words(`playNoteMelody melodyPlayable stringPlayable tonePlayable songPlayable
