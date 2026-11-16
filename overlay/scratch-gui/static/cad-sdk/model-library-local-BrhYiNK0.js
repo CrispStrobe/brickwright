@@ -1,4 +1,4 @@
-import { v, p as N } from "./sdk-DULk9CIk.js";
+import { v, p as N } from "./sdk-CrAoveb3.js";
 function l(c) {
   if (!c || typeof c != "object")
     throw new Error("Invalid local model library manifest.");
