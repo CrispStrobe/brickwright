@@ -232,7 +232,7 @@ const replaceProjectState = (storage, next) => {
     } catch (error) {
         try {
             writeSnapshot(storage, previous);
-            return {outcome: 'storage-failed', keys: 0, rolledBack: true, reason: error.message};
+            return {outcome: 'storage-failed', keys: 0, rolledBack: true, reason: error.message, errorName: error.name};
         } catch (rollbackError) {
             return {outcome: 'storage-failed', keys: 0, rolledBack: false,
                 reason: error.message, rollbackReason: rollbackError.message};
@@ -274,13 +274,25 @@ const applyBrickwrightInspection = (inspection, storage = localStorage) => {
     const previousSimLabRefusal = simLabSaveFailure();
     const previousCadText = getLiveCadText();
     const previousCadGeneration = getCadProjectGeneration();
-    const result = replaceProjectState(storage, inspection.state || {});
+    let result = replaceProjectState(storage, inspection.state || {});
+    let sessionCad;
+    if (result.outcome === 'storage-failed' && result.rolledBack &&
+        ['QuotaExceededError', 'NS_ERROR_DOM_QUOTA_REACHED'].includes(result.errorName) &&
+        typeof inspection.state?.[CAD_STORAGE_KEY] === 'string') {
+        // CAD supports 16 MiB; localStorage often supports only 5 MiB for the
+        // entire origin. Keep the exact CAD sidecar live for SB3/IndexedDB
+        // autosaves while committing the smaller editor state transactionally.
+        const {[CAD_STORAGE_KEY]: cad, ...smallState} = inspection.state;
+        result = replaceProjectState(storage, smallState);
+        if (result.outcome === 'loaded') sessionCad = cad;
+    }
     if (result.outcome !== 'loaded') return {...result, report: inspection.report};
     clearSimLabSaveFailure();
     setLiveCadText(undefined);
+    if (sessionCad !== undefined) setLiveCadText(sessionCad);
     preservedBundle = inspection.outcome === 'loaded' && inspection.version === BUNDLE_VERSION ?
         {outcome: 'loaded', document: inspection.passthrough} : null;
-    return {...result, outcome: inspection.outcome, version: inspection.version,
+    return {...result, storageMode: sessionCad === undefined ? 'persistent' : 'session-cad', outcome: inspection.outcome, version: inspection.version,
         found: inspection.outcome === 'loaded', report: inspection.report, previousPreserved, previousSimLabRefusal, previousCadText, previousCadGeneration};
 };
 

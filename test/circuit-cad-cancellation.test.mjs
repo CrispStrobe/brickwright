@@ -25,7 +25,7 @@ function fixture (t, {ready = false} = {}) {
     const resources = {clocks: new Set(), ports: new Set(), sensorSamples: []};
     let flags = 0, epoch = 0;
     const board = {
-        parts: [{id: 'motor', kind: 'dc_motor'}], timeNs: 0n, powered: true,
+        parts: [{id: 'motor', kind: 'dc_motor'}, {id: 'distance', kind: 'ultrasonic'}], timeNs: 0n, powered: true,
         reset () {epoch++; this.timeNs = 0n; resources.clocks.clear(); resources.ports.clear();},
         setPower (value) {this.powered = value;}, getPinStates: () => [],
         setMechanicalShaftState () {},
@@ -336,3 +336,15 @@ for (const phase of ['reset', 'acquireExternalClock']) {
         } finally {f.close();}
     });
 }
+
+test('CAD waits past an empty first board until saved motor parts are hydrated', async t => {
+    const f=fixture(t);
+    try {
+        f.runtime.circuitBoard={parts:[]};
+        const run=f.start();await nextTurn();
+        assert.equal(f.owners.length,0,'an empty designer mount is not the restored motor circuit');
+        f.runtime.circuitBoard=f.board;window.dispatchEvent(new Event('bw-board-ready'));await nextTurn();
+        assert.equal(f.owners.length,1);f.api.stop();await nextTurn();assert.equal(run.settled,true);assert.equal(run.error,undefined);
+        assert.equal(f.api.state().phase,'idle');assert.equal(f.owners.length,1);
+    } finally {f.close();}
+});

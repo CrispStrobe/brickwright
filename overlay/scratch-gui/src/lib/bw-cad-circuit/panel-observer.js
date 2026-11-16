@@ -43,9 +43,9 @@ export function observeCircuitCadPanel ({
         const next = readCatalog(runtime.circuitBoard, editor);
         if (next !== publishedCatalog) {publishedCatalog = next; onCatalog(next);}
     };
-    const loaded = () => {
+    const loaded = event => {
         if (stopped) return;
-        try {onConnections(readSavedConnections()); onError('');} catch (error) {onError(error.message);}
+        try {onConnections(readSavedConnections()); if (event) onError('');} catch (error) {onError(error.message);}
         updateCatalog();
         publishStatus(runtime.cadCircuitSimulation?.state(), true);
     };

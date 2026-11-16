@@ -40,9 +40,11 @@ const circuitOwner = (board, signal) => new Promise((resolve, reject) => {
     window.dispatchEvent(new CustomEvent('bw-circuit-clock-owner', {detail: {board,
         ready: () => finish(resolve), reject: error => finish(reject, error)}}));
 });
-async function circuitReady(runtime, signal) {
+async function circuitReady(runtime, signal, config) {
+    const expected = [...config.drives, ...config.servos, ...config.sensors].map(item => item.partId);
+    const ready = () => runtime.circuitBoard && expected.every(id => runtime.circuitBoard.parts?.some(part => part.id === id));
     if (signal.aborted) throw stoppedError();
-    if (runtime.circuitBoard) return runtime.circuitBoard;
+    if (ready()) return runtime.circuitBoard;
     return new Promise((resolve, reject) => {
         let settled = false;
         const finish = (callback, value) => {
@@ -50,7 +52,7 @@ async function circuitReady(runtime, signal) {
             settled = true; clearTimeout(timer); window.removeEventListener('bw-board-ready', check);
             signal.removeEventListener('abort', abort); callback(value);
         };
-        const check = () => {if (runtime.circuitBoard) finish(resolve, runtime.circuitBoard);};
+        const check = () => {if (ready()) finish(resolve, runtime.circuitBoard);};
         const abort = () => finish(reject, stoppedError());
         const timer = setTimeout(() => finish(reject, new Error('Open a wired motor circuit in the Circuit tab first')), 30000);
         signal.addEventListener('abort', abort, {once: true});
@@ -89,7 +91,7 @@ export function installCircuitCadBridge(vm) {
             try {
                 const config=readConnections();if(!config?.enabled)throw new Error('Enable and save circuit–CAD connections first');
                 publish({phase:'preparing',error:'',time:0,readings:[]});
-                const board=await circuitReady(runtime,controller.signal);check();
+                const board=await circuitReady(runtime,controller.signal,config);check();
                 // Acquire the host before compiling or resetting: the designer relinquishes its clock.
                 ownedBoard=board;ownsCircuit=true;await circuitOwner(board,controller.signal);check();
                 await prepareCad(controller.signal, () => runtime.cadSimulation.reset());check();

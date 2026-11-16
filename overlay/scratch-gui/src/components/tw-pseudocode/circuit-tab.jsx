@@ -237,9 +237,9 @@ class CircuitTab extends React.Component {
             if (board && this.props.vm?.runtime?.bwRunBoard) { reject?.(new Error('Stop the circuit debugger first')); return; }
             if (!board) this._coupledBoard = null;
             else this._coupledBoard = board;
-            this.setState({board: board || null}, () => setTimeout(() => ready?.(), 0));
+            this.setState({board: board || null, cadCircuitRequested: false}, () => setTimeout(() => ready?.(), 0));
         };
-        this._couplingOpen = () => this.load({explicit: true});
+        this._couplingOpen = () => {this.setState({cadCircuitRequested: true});this.load({explicit: true});};
         window.addEventListener('bw-circuit-clock-owner', this._couplingHandler);
         window.addEventListener('bw-circuit-ensure-ready', this._couplingOpen);
         this._menuMounted = true;
@@ -2210,7 +2210,7 @@ class CircuitTab extends React.Component {
         // keeps the designer beside the panel (below) and 'solo' falls back
         // to the instruments-column dock, so the designer stays reachable.
         if ((this.state.debugDock === 'solo' || this.state.debugDock === 'right' ||
-            this._controllerSplitLive()) && this._stagePortalOn()) {
+            this._controllerSplitLive()) && this._stagePortalOn() && !this.state.cadCircuitRequested) {
             this._portalOn = true;
             // Read by the host layout pass: only a debugger with a live machine
             // or program shares the column with a dock pane (_layoutStageHost).
@@ -2242,7 +2242,9 @@ class CircuitTab extends React.Component {
                     ReactDOM.createPortal(this.renderDebugPanel(), this._ensureDebugHost(), 'debug-panel')
             ];
         }
-        this._portalOn = this._stagePortalOn();
+        // CAD preparation needs the actual Designer to instantiate its Board,
+        // even while the default right/solo dock shows only the debugger.
+        this._portalOn = !this.state.cadCircuitRequested && this._stagePortalOn();
         // On the dedicated Circuit tab 'solo' behaves as 'top': the designer
         // with the compact debugger in its Instruments column.
         const dock = this.state.debugDock === 'solo' ? 'top'
