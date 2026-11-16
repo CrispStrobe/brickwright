@@ -2772,3 +2772,14 @@ Yosys source and licence: [YosysHQ/yosys](https://github.com/YosysHQ/yosys),
 [COPYING](https://github.com/YosysHQ/yosys/blob/main/COPYING).
 The original notices are shipped at `static/licenses/yowasp-yosys.LICENSE.txt`
 and `static/licenses/yosys.COPYING.txt`.
+
+## Native benchmark startup and result helpers — MIT
+
+The native benchmark panel mechanically mirrors the owned media-lab
+`native-dos.mjs`, `benchmark-output.mjs` and `whetstone-result.mjs` helpers at
+commit `01d06fb63d5bdd4c0ede48e811e8fc1f6971d2ce` from
+https://github.com/CrispStrobe/brickwright-media-lab/tree/01d06fb63d5bdd4c0ede48e811e8fc1f6971d2ce/projects/x86-benchmarks.
+Copyright (c) 2026 Brickwright contributors. The complete MIT notice is retained
+beside the helpers and shipped as `static/licenses/native-benchmark-helpers.MIT.txt`.
+Payloads are fetched only on explicit request; the panel displays their own
+retained notices and exact provenance before Run.

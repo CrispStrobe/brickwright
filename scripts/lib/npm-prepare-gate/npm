@@ -1,0 +1,75 @@
+#!/usr/bin/env python3
+"""Serialize npm's Git preparation subprocesses without changing their inputs.
+
+Opt-in via worktree-deps.mjs. npm/pacote can start several full dev-dependency
+installs concurrently even when the outer install uses --ignore-scripts.
+Top-level npm commands pass through. Descendant preparations are reentrant so
+an outer preparation cannot deadlock waiting for its own dependency.
+"""
+import fcntl
+import os
+import signal
+import sys
+
+
+def preparation(args):
+    return (args[:1] == ['install'] and '--force' in args and
+            ('--include=dev' in args or any(
+                args[i:i + 2] == ['--include', 'dev']
+                for i in range(len(args) - 1))))
+
+
+def ancestor(owner):
+    pid = os.getppid()
+    for _ in range(128):
+        if pid == owner:
+            return True
+        if pid <= 1:
+            break
+        try:
+            with open(f'/proc/{pid}/stat', encoding='utf8') as stream:
+                text = stream.read()
+            pid = int(text[text.rindex(')') + 2:].split()[1])
+        except (OSError, ValueError, IndexError):
+            break
+    return False
+
+
+def main():
+    args = sys.argv[1:]
+    real = os.environ['BW_LITE_REAL_NPM']
+    if os.path.realpath(real) == os.path.realpath(__file__):
+        raise RuntimeError('The real npm executable must differ from its gate')
+    if not preparation(args):
+        os.execv(real, [real, *args])
+    lock = os.path.realpath(os.environ['BW_LITE_NPM_PREPARE_LOCK'])
+    owner = int(os.environ.get('BW_LITE_NPM_PREPARE_OWNER', '0'))
+    if os.environ.get('BW_LITE_NPM_PREPARE_HELD') == lock and ancestor(owner):
+        os.execv(real, [real, *args])
+    seconds = int(os.environ.get('BW_LITE_NPM_PREPARE_WAIT_SECONDS', '300'))
+    if not 0 < seconds <= 600:
+        raise ValueError('Preparation wait must be bounded to 1..600 seconds')
+
+    def expired(_signal, _frame):
+        raise TimeoutError('Timed out waiting to serialize Git preparation')
+
+    signal.signal(signal.SIGALRM, expired)
+    fd = os.open(lock, os.O_CREAT | os.O_RDWR, 0o600)
+    signal.alarm(seconds)
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX)
+    except TimeoutError as error:
+        print(str(error), file=sys.stderr)
+        sys.exit(124)
+    finally:
+        signal.alarm(0)
+    # Keep the lock while npm executes. Its descendant preparation recognizes
+    # the live ancestor, while independent branches wait outside npm's heap.
+    os.set_inheritable(fd, True)
+    os.environ['BW_LITE_NPM_PREPARE_OWNER'] = str(os.getpid())
+    os.environ['BW_LITE_NPM_PREPARE_HELD'] = lock
+    os.execv(real, [real, *args])
+
+
+if __name__ == '__main__':
+    main()

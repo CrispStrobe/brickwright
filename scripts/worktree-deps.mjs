@@ -166,7 +166,19 @@ export function computeKey (wt, env = {}) {
 }
 
 /** npm, run under the SAME node as this script (so the key's node major is the install's). */
-const npmEnv = () => ({...process.env, PATH: `${path.dirname(process.execPath)}${path.delimiter}${process.env.PATH}`});
+export const npmEnv = () => {
+    const env = {...process.env, PATH: `${path.dirname(process.execPath)}${path.delimiter}${process.env.PATH}`};
+    if (env.BW_LITE_SERIAL_GIT_PREPARE === '1') {
+        if (process.platform !== 'linux' || !env.BW_LITE_NPM_PREPARE_LOCK) {
+            throw new Error('Serial git preparation needs Linux and BW_LITE_NPM_PREPARE_LOCK');
+        }
+        env.BW_LITE_REAL_NPM = path.join(path.dirname(process.execPath), 'npm');
+        const gate = path.join(import.meta.dirname, 'lib', 'npm-prepare-gate');
+        env.PATH = `${gate}${path.delimiter}${env.PATH}`;
+        env.NODE_OPTIONS = `${env.NODE_OPTIONS || ''} --require ${JSON.stringify(path.join(gate, 'config.cjs'))}`.trim();
+    }
+    return env;
+};
 let npmMajorCache;
 function npmMajor () {
     if (npmMajorCache === undefined) {
@@ -180,26 +192,29 @@ function npmMajor () {
 // ---------------------------------------------------------------- tree walks
 
 /** Every entry under dir, depth-first, sorted: [{rel, st}] (lstat, symlinks not followed). */
-export function walk (dir) {
-    const out = [];
-    const rec = rel => {
+/** Stream one stat entry at a time; retain directory names, not a whole census. */
+export function *walkEntries (dir, {postOrder = false} = {}) {
+    function *rec (rel) {
         const names = readdirSync(path.join(dir, rel)).sort();
         for (const n of names) {
             const r = rel ? `${rel}/${n}` : n;
             const st = lstatSync(path.join(dir, r));
-            out.push({rel: r, st});
-            if (st.isDirectory()) rec(r);
+            if (st.isDirectory() && postOrder) yield *rec(r);
+            yield {rel: r, st};
+            if (st.isDirectory() && !postOrder) yield *rec(r);
         }
-    };
-    rec('');
-    return out;
+    }
+    yield *rec('');
 }
+
+// Keep the existing public array API for callers that need a materialized list.
+export const walk = dir => Array.from(walkEntries(dir));
 
 /** mode/size/mtime of every entry: changes if anything in the store is written, chmod-ed, added or removed. */
 export function treeDigest (dir) {
     const h = createHash('sha256');
     let files = 0, bytes = 0;
-    for (const {rel, st} of walk(dir)) {
+    for (const {rel, st} of walkEntries(dir)) {
         const kind = st.isDirectory() ? 'd' : st.isSymbolicLink() ? 'l' : 'f';
         const extra = kind === 'l' ? readlinkSync(path.join(dir, rel)) : kind === 'f' ? `${st.size}:${st.mtimeMs}` : '';
         h.update(`${kind}\0${rel}\0${(st.mode & 0o7777).toString(8)}\0${extra}\n`);
@@ -213,8 +228,7 @@ const ownedAncestor = (rel, owned) => owned.some(o => o.startsWith(rel + '/'));
 
 /** Remove write bits everywhere under dir (files and dirs), bottom-up so the walk can finish. */
 export function makeReadOnly (dir) {
-    const entries = walk(dir).reverse();
-    for (const {rel, st} of entries) if (!st.isSymbolicLink()) chmodSync(path.join(dir, rel), st.mode & 0o7555);
+    for (const {rel, st} of walkEntries(dir, {postOrder: true})) if (!st.isSymbolicLink()) chmodSync(path.join(dir, rel), st.mode & 0o7555);
     chmodSync(dir, statSync(dir).mode & 0o7555);
 }
 
@@ -225,7 +239,7 @@ function makeWritable (dir) {
     if (top.isSymbolicLink()) return;
     chmodSync(dir, top.mode | 0o200);
     if (!top.isDirectory()) return;
-    for (const {rel, st} of walk(dir)) if (st.isDirectory()) chmodSync(path.join(dir, rel), st.mode | 0o200);
+    for (const {rel, st} of walkEntries(dir)) if (st.isDirectory()) chmodSync(path.join(dir, rel), st.mode | 0o200);
 }
 
 export function removeTree (dir) {
@@ -242,7 +256,7 @@ const isSymlink = p => { try { return lstatSync(p).isSymbolicLink(); } catch { r
  */
 export function linkTree (src, dst, owned = []) {
     mkdirSync(dst, {recursive: true});
-    for (const {rel, st} of walk(src)) {
+    for (const {rel, st} of walkEntries(src)) {
         const s = path.join(src, rel), d = path.join(dst, rel);
         if (st.isDirectory()) { mkdirSync(d, {recursive: true}); continue; }
         if (st.isSymbolicLink()) { symlinkSync(readlinkSync(s), d); continue; }
@@ -281,6 +295,64 @@ function gitDepShas (nm) {
     const out = {};
     for (const d of GIT_DEPS) out[d] = shaOf(pk[`node_modules/${d}`]?.resolved);
     return out;
+}
+
+/** Reuse complete, matching Git payloads from this transaction's root install.
+ * Copies are private: npm may reify the GUI tree without writing through the
+ * read-only completed root. The full GUI install and final verification remain
+ * mandatory; this seed is never a qualified GUI store on its own.
+ */
+export function seedPreparedGit (rootTree, guiTree) {
+    const rootNm = path.join(rootTree, 'node_modules');
+    const guiNm = path.join(guiTree, 'node_modules');
+    if (existsSync(guiNm)) throw new Error('Git seed requires a fresh GUI tree');
+    const completed = readJson(path.join(rootTree, 'package-lock.installed.json'));
+    const hidden = readJson(path.join(rootNm, '.package-lock.json'));
+    const wanted = readJson(path.join(guiTree, 'package-lock.json'));
+    const selected = [];
+    for (const [key, target] of Object.entries(wanted.packages || {})) {
+        if (!/^node_modules\/(?:@[^/]+\/)?[^/]+$/.test(key) || key.split('/').some(p => p === '.' || p === '..')) continue;
+        if (!/^git\+/.test(target.resolved || '') || !shaOf(target.resolved)) continue;
+        const source = hidden.packages?.[key];
+        if (!source) continue;
+        const recorded = completed.packages?.[key];
+        if (!recorded || source.resolved !== target.resolved || recorded.resolved !== target.resolved ||
+            source.version !== target.version || recorded.version !== target.version) {
+            throw new Error(`Prepared Git identity differs from GUI lock: ${key}`);
+        }
+        selected.push(key);
+    }
+    if (!selected.length) return [];
+    mkdirSync(guiNm, {recursive: true});
+    const packages = {};
+    for (const key of selected) {
+        const relative = key.slice('node_modules/'.length);
+        const source = path.join(rootNm, relative);
+        const destination = path.join(guiNm, relative);
+        // Materialize every payload file as a writable private copy, retaining
+        // internal symlinks. No borrowed node_modules or failed GUI tree.
+        linkTree(source, destination, readdirSync(source));
+        for (const [name, item] of Object.entries(hidden.packages)) {
+            if (name === key || name.startsWith(`${key}/`)) packages[name] = item;
+        }
+    }
+    const bin = path.join(rootNm, '.bin');
+    if (existsSync(bin)) for (const name of readdirSync(bin)) {
+        const source = path.join(bin, name);
+        if (!lstatSync(source).isSymbolicLink()) continue;
+        const target = readlinkSync(source), absolute = path.resolve(bin, target);
+        if (!selected.some(key => absolute.startsWith(`${path.join(rootTree, key)}${path.sep}`))) continue;
+        mkdirSync(path.join(guiNm, '.bin'), {recursive: true});
+        symlinkSync(target, path.join(guiNm, '.bin', name));
+    }
+    const gui = readJson(path.join(guiTree, 'package.json'));
+    const lock = path.join(guiNm, '.package-lock.json');
+    writeFileSync(lock, JSON.stringify({...hidden, name: gui.name, version: gui.version, packages}, null, 2) + '\n');
+    // npm's hidden-lock freshness check compares package-directory mtimes.
+    // Write the metadata last so copied payloads are recognized as installed.
+    const latest = Math.max(Date.now(), ...Object.keys(packages).map(key => statSync(path.join(guiTree, key)).mtimeMs));
+    const fresh = new Date(Math.ceil(latest) + 1); utimesSync(lock, fresh, fresh);
+    return selected.map(key => ({package: key, resolved: packages[key].resolved}));
 }
 
 function withLock (lockPath, fn) {
@@ -322,6 +394,9 @@ export function populate (wt, store, k, {install = npmInstall, log = console.log
                 const dir = path.join(staging, t.id);
                 mkdirSync(dir, {recursive: true});
                 for (const f of ['package.json', 'package-lock.json']) copyFileSync(path.join(wt, t.dir, f), path.join(dir, f));
+                const preparedGit = t.id === 'gui' && process.env.BW_LITE_REUSE_PREPARED_GIT === '1' ?
+                    seedPreparedGit(path.join(staging, 'root'), dir) : [];
+                if (preparedGit.length) log(`  reused ${preparedGit.length} completed matching root Git payloads for GUI reification`);
                 log(`  installing ${t.id} (npm ${t.args.join(' ')}) into the store staging dir`);
                 install(dir, t);
                 const nm = path.join(dir, 'node_modules');
@@ -330,7 +405,7 @@ export function populate (wt, store, k, {install = npmInstall, log = console.log
                 // The lock the install actually resolved (npm install may update it).
                 copyFileSync(path.join(dir, 'package-lock.json'), path.join(dir, 'package-lock.installed.json'));
                 makeReadOnly(nm);
-                manifest.trees[t.id] = {...treeDigest(nm), gitDeps: gitDepShas(nm)};
+                manifest.trees[t.id] = {...treeDigest(nm), gitDeps: gitDepShas(nm), ...(preparedGit.length ? {preparedGit} : {})};
             }
             writeFileSync(path.join(staging, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
             renameSync(staging, final);
@@ -449,7 +524,7 @@ export function verify (wt, {store, k} = {}) {
                 const dst = path.join(wt, t.dir, 'node_modules');
                 let diverged = 0, missing = 0;
                 const sample = [];
-                for (const {rel, st} of walk(src)) {
+                for (const {rel, st} of walkEntries(src)) {
                     if (!st.isFile() || isOwned(rel, OWNED[t.id])) continue;
                     let wst;
                     try { wst = lstatSync(path.join(dst, rel)); } catch { missing++; if (sample.length < 5) sample.push(`${rel} missing`); continue; }
@@ -475,7 +550,7 @@ export function inUse (final) {
     for (const t of TREES) {
         const nm = path.join(final, t.id, 'node_modules');
         if (!existsSync(nm)) continue;
-        for (const {st} of walk(nm)) if (st.isFile() && st.nlink > 1) return true;
+        for (const {st} of walkEntries(nm)) if (st.isFile() && st.nlink > 1) return true;
     }
     return false;
 }
