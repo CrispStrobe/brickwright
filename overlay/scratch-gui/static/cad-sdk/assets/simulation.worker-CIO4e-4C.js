@@ -1748,13 +1748,16 @@ Erstelle zuerst den Workspace. Oberfläche und MCP verwenden denselben begrenzte
   "Scout TT rover": "Scout-TT-Rover",
   "Scout PLA print layout": "Scout-PLA-Druckanordnung",
   "Scout shaft fit gauge": "Scout-Wellenpasslehre",
+  "Scout electronics carrier": "Scout-Elektronikträger",
   "A buildable two-wheel robot with Adafruit TT motors, original PLA parts and A/B simulation drives. Print parts separately; see the build guide.": "Ein baubarer Zweiradroboter mit Adafruit-TT-Motoren, selbst entworfenen PLA-Teilen und den Simulationsantrieben A/B. Drucke die Teile einzeln; siehe Bauanleitung.",
-  "Eleven original PLA parts laid flat for inspection. Export each part separately for your printer.": "Elf selbst entworfene PLA-Teile, flach zur Prüfung angeordnet. Exportiere jedes Teil einzeln für deinen Drucker.",
+  "Twelve original PLA parts laid flat for inspection, including a bolted electronics carrier. Export each part separately for your printer.": "Zwölf selbst entworfene PLA-Teile, flach zur Prüfung angeordnet, einschließlich eines verschraubten Elektronikträgers. Exportiere jedes Teil einzeln für deinen Drucker.",
+  "Original PLA carrier for a Feather RP2040 and DRV8833, with insulating bosses and through-bolt mounts matching the Scout deck slots. Verify board revisions and solder clearance.": "Selbst entworfener PLA-Träger für Feather RP2040 und DRV8833, mit isolierenden Abstandshaltern und Durchgangsverschraubungen passend zu den Schlitzen der Scout-Plattform. Prüfe die Platinenrevisionen und den Freiraum für Lötstellen.",
   "Five double-D sockets with 0.15–0.55 mm total clearance. Print this first and check your actual TT shaft.": "Fünf Doppel-D-Aufnahmen mit 0,15–0,55 mm Gesamtspiel. Drucke zuerst diese Lehre und prüfe deine tatsächliche TT-Welle.",
   "PLA chassis": "PLA-Fahrgestell",
   "PLA motor cradle": "PLA-Motorhalter",
   "PLA clamping wheel": "PLA-Klemmrad",
   "PLA electronics deck": "PLA-Elektronikplattform",
+  "PLA electronics carrier": "PLA-Elektronikträger",
   "PLA deck standoff": "PLA-Plattformabstandshalter",
   "PLA rear skid": "Hintere PLA-Gleitkufe",
   "Double-D shaft fit gauge": "Passlehre für Doppel-D-Wellen",
@@ -9725,7 +9728,7 @@ async function x8(A, g, I, C = {}) {
     }
   if ([...I.values()].reduce((D, u) => D + u.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = C.J ?? await (b5 ?? (b5 = import("./jolt-physics.wasm-compat-Bz5PUtFv.js").then((D) => D.default()))), o = new i.JoltSettings();
+  const i = C.J ?? await (b5 ?? (b5 = import("./jolt-physics.wasm-compat-Cqb3ELcp.js").then((D) => D.default()))), o = new i.JoltSettings();
   o.mMaxBodies = 512, o.mMaxBodyPairs = Math.max(1024, e.length * e.length), o.mMaxContactConstraints = 8192;
   const r = new i.ObjectLayerPairFilterTable(2);
   r.EnableCollision(0, 1), r.EnableCollision(1, 1);
