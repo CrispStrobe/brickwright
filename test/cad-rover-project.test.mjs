@@ -112,6 +112,41 @@ test('rover drive qualification uses transformed axes, fixed casings and signed 
     assert.doesNotThrow(() => parseCadRoverDocument(JSON.stringify(casings)), 'equivalent reversed connector remains usable');
 });
 
+test('rover requires continuous wheel hinges and coincident transformed anchors at the solver tolerance', () => {
+    const check = document => parseCadRoverDocument(JSON.stringify(document));
+    for (const limits of [[0, 0], [-Math.PI, Math.PI], [-2 * Math.PI, 2 * Math.PI]]) {
+        const limited = fixture();
+        limited.joints[0].limits = limits;
+        assert.throws(() => check(limited), /unlimited continuous wheel hinge at port A/);
+    }
+    const transformed = fixture();
+    transformed.nodes.base.transform = {position: [10, 20, 30], rotation: [90, 90, 90], scale: [2, 3, 4]};
+    transformed.nodes.left.transform = {position: [13, 28, 32], rotation: [0, 0, 90], scale: [2, 3, 4]};
+    transformed.nodes.right.transform = {position: [12, 26, 28], rotation: [0, 90, 0], scale: [2, 3, 4]};
+    // Each local anchor transforms to [22, 26, 28] mm. Local values differ,
+    // proving scale/rotation/translation participate in the admission check.
+    for (const joint of transformed.joints) {joint.anchorA = [1, 2, 3]; joint.axisA = [0, 0, 1];}
+    transformed.joints[0].anchorB = [-1, -3, -1];
+    transformed.joints[0].axisB = [0, -1, 0];
+    transformed.joints[1].anchorB = [0, 0, 2.5];
+    transformed.joints[1].axisB = [0, 0, 1];
+    assert.doesNotThrow(() => check(transformed));
+    const shifted = structuredClone(transformed);
+    shifted.joints[0].anchorB[0] += 10;
+    assert.throws(() => check(shifted), /matching world-space joint anchors within 0.1 mm at A/);
+    for (const [offset, accepted] of [[0.099, true], [0.1, true], [0.101, false]]) {
+        const near = fixture();
+        near.joints[1].anchorB[0] = offset;
+        if (accepted) assert.doesNotThrow(() => check(near));
+        else assert.throws(() => check(near), /joint anchors within 0.1 mm at B/);
+    }
+    const fixed = fixture();
+    fixed.nodes.casing = node('casing'); fixed.roots.push('casing');
+    fixed.joints.push({id: 'fixed-casing', kind: 'fixed', bodyA: 'base', bodyB: 'casing',
+        anchorA: [0, 0, 0], anchorB: [1, 0, 0], axisA: [1, 0, 0], axisB: [1, 0, 0]});
+    assert.throws(() => check(fixed), /joint anchors within 0.1 mm at fixed-casing/);
+});
+
 test('saved executable demo rejects changed speed, reordered drives, broken ownership and hidden scripts', async () => {
     const archive = await JSZip.loadAsync(await createCadRoverProject(JSON.stringify(fixture())));
     const original = JSON.parse(await archive.file('project.json').async('text'));
@@ -147,11 +182,16 @@ test('saved executable demo rejects changed speed, reordered drives, broken owne
         const speed = speedEntry(blocks)[1];
         speed.inputs.SPEED = [3, speed.inputs.MOTOR[1], [4, '120']];
     });
+    for (const visible of [true, false]) mutate(project => {
+        project.monitors = [{id: 'rogue-motor', mode: 'default', opcode: 'cadlab_setMotorSpeed',
+            params: {MOTOR: 'A', SPEED: 720}, spriteName: null, value: '', width: 0, height: 0,
+            x: 0, y: 0, visible}];
+    });
     assert.equal(await archive.file('brickwright/tt-rover-program.txt').async('text'), CAD_ROVER_PROGRAM,
         'none of these executable corruptions needs to change the text sidecar');
 });
 
-test('saved-file CLI rejects an executable edit even when its artifact hash has been refreshed', async () => {
+test('saved-file CLI rejects executable edits and monitors even when artifact hashes have been refreshed', async () => {
     const root = fileURLToPath(new URL('../', import.meta.url));
     await mkdir(resolve(root, 'artifacts'), {recursive: true});
     const output = await mkdtemp(resolve(root, 'artifacts/cad-rover-verifier-'));
@@ -176,15 +216,23 @@ test('saved-file CLI rejects an executable edit even when its artifact hash has 
             ['--import', './scripts/lib/register-gui-scope.mjs', 'scripts/verify-cad-rover-project.mjs', output],
             {cwd: root, timeout: 30000});
         assert.match((await verify()).stdout, /PASS complete Scout TT project/);
-        const project = JSON.parse(await archive.file('project.json').async('text'));
-        Object.values(project.targets[0].blocks).find(block => block.opcode === 'cadlab_setMotorSpeed')
+        const originalProject = JSON.parse(await archive.file('project.json').async('text'));
+        const changedSpeed = structuredClone(originalProject);
+        Object.values(changedSpeed.targets[0].blocks).find(block => block.opcode === 'cadlab_setMotorSpeed')
             .inputs.SPEED[1][1] = '121';
-        archive.file('project.json', JSON.stringify(project));
-        const changed = await archive.generateAsync({type: 'uint8array', compression: 'DEFLATE'});
-        await writeFile(resolve(output, 'tt-rover.sb3'), changed);
-        manifest.files['tt-rover.sb3'] = createHash('sha256').update(changed).digest('hex');
-        await saveManifest();
-        await assert.rejects(verify(), error => /Invalid Scout TT demo: SPEED differs from the demo/.test(error.stderr));
+        const changedMonitor = structuredClone(originalProject);
+        changedMonitor.monitors = [{id: 'rogue-motor', mode: 'default', opcode: 'cadlab_setMotorSpeed',
+            params: {MOTOR: 'A', SPEED: 720}, spriteName: null, value: '', width: 0, height: 0,
+            x: 0, y: 0, visible: true}];
+        for (const [project, diagnostic] of [[changedSpeed, /SPEED differs from the demo/],
+            [changedMonitor, /the demo must have no monitors/]]) {
+            archive.file('project.json', JSON.stringify(project));
+            const changed = await archive.generateAsync({type: 'uint8array', compression: 'DEFLATE'});
+            await writeFile(resolve(output, 'tt-rover.sb3'), changed);
+            manifest.files['tt-rover.sb3'] = createHash('sha256').update(changed).digest('hex');
+            await saveManifest();
+            await assert.rejects(verify(), error => diagnostic.test(error.stderr));
+        }
     } finally {
         await rm(output, {recursive: true, force: true});
     }

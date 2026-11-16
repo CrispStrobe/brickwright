@@ -62,8 +62,9 @@ node --import ./scripts/lib/register-gui-scope.mjs \
 
 The generator validates the model with the shipped SDK and checks the control
 assumptions needed by this demonstration: an explicit free base, a dynamic
-chassis, independent A/B wheel assemblies and matching signed world-space
-wheel axes. Separate motor casings and other fixed components are supported;
+chassis, independent continuous A/B wheel hinges, coincident connector anchors
+within the solver's 0.1 mm tolerance, and matching signed world-space wheel
+axes. Angular limits on the wheel drives are refused. Separate motor casings and other fixed components are supported;
 body rotations and reversed connector body order are accounted for. These
 nominal control checks do not qualify collision geometry, traction or physical
 fit. The assembled Scout in the kit has separate CAD qualification evidence.
@@ -75,6 +76,8 @@ manifest does not pin an SDK commit. The checks in
 generation and saved-example verification inspect the actual compiled
 `project.json` block chain: both wheels start before each wait, braking and
 final Stop are retained, and extra or detached executable blocks are refused.
+Saved monitors are also refused because Scratch loads them into a separate
+executable block table; the canonical demonstration has no monitors.
 The verification command also checks the saved example's exact source,
 notices and hashes using the currently pinned SDK and reports that SDK's
 commit separately.
