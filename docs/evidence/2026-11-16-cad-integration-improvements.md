@@ -114,3 +114,32 @@ Mantis's simultaneous-motor test does not qualify its generated sequential Lite 
 | `072dd0faab399132faa01db5d9375046ba143305` | Clear obsolete storage warning after successful replacement |
 
 These commits are all reachable from the draft PR branch; the following documentation checkpoint records their evidence.
+
+## Completed local integration — 2026-11-16
+
+PRs #1798 and CAD #69 are merged into the respective main branches. Their
+ancestry is retained alongside the compact CAD toolbar and all 482 local
+Adafruit thumbnails. Lite now pins the clean combined CAD SDK
+`b1f6fa43fa175298248094fbc8b9f1d1b500dca9`, built locally with the three new
+models and the latest qualified library cohorts; it no longer relies on the
+old `fb8c3671` SDK. No existing library file was removed or modified.
+
+All 49 checks from the saved continuation command passed, including all nine
+actual React-host/SDK-session/SB3 cases. The test boundary now also accounts
+for the host's light-DOM toolbar container and shared menu registration. The
+broader circuit/CAD/packager/rover suite passed 74 cases with zero failures or
+skips. The nine host cases were repeated against the exact shipping SDK and
+passed. No GUI-scope redirects occurred in this locally installed dependency
+tree, so that run does not claim a newly measured fallback dependency boundary.
+
+The shipped worker's compact and legacy feedback, motor stepping, body ray and
+immutable source checks pass on the exact combined SDK bytes. CAD's 53 distinct
+model/physics cases have passing executions, with a rover deadline failure and
+resource-isolated retry documented in the upstream qualification record.
+
+The signed Mac bundle and final optimized GUI/browser verification are recorded
+in [the completion receipt](../receipts/2026-11-16-cad-branch-integration-completed.json).
+The original disk-exhaustion receipts above remain historical evidence. The
+new model packagers have structural/SB3 tests; their complete sequential physical
+tasks are not claimed as newly browser-qualified. Kestrel remains deferred.
+No GitHub Actions were dispatched, rerun or awaited.

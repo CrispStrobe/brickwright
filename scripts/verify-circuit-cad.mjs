@@ -19,6 +19,16 @@ try{
  await wait(()=>window.__brickwrightStore?.getState()?.scratchGui?.vm?.runtime);
  console.log('GUI ready');
  await page.getByRole('tab',{name:'CAD',exact:true}).click();await wait(()=>window.__bwCad?.editor);
+ if(process.argv.includes('--presets')){
+  const cad=page.getByTestId('bw-cad-tab');await cad.getByRole('button',{name:'Shapes',exact:true}).click();
+  const shapes=cad.getByRole('dialog',{name:'Shape library',exact:true});
+  for(const name of ['Mantis 3-servo walker','Cyclone 2-axis gantry sorter','Helios turret catapult']){
+   await shapes.getByLabel('Search shapes',{exact:true}).fill(name);
+   assert.ok(await shapes.getByRole('button',{name:`Add ${name}`,exact:true}).isVisible(),name);
+  }
+  await shapes.getByRole('button',{name:'Close shape library',exact:true}).click();
+  console.log('PASS Mantis, Cyclone and Helios are available in the shipping shape picker');
+ }
  if(process.argv.includes('--dark')){
   if(!await page.getByTestId('bw-settings-menu-trigger').isVisible())await page.getByTestId('bw-chrome-toggle').click();
   await page.getByTestId('bw-settings-menu-trigger').click();const preference=page.getByLabel(/Color mode/i);

@@ -1,0 +1,92 @@
+{
+  "recordedAt": "2026-11-16T14:38:48.602Z",
+  "sdkCommit": "b1f6fa43fa175298248094fbc8b9f1d1b500dca9",
+  "sdkDirty": false,
+  "sdkManifestSha256": "aec639f95bf728cb1a403fd8c687d2dae38b4bb7346065c3ef5046b5d71a74d4",
+  "sdkFilesVerified": 11,
+  "sdkFiles": {
+    "LICENSE": "ed121de3496066a2ddc8c11b30b48142165ab84bdb066fee351392ecaccf36ad",
+    "NOTICE.txt": "dea50eee6d6781549af4e3740bfaf7661b29479696e5ae6cbe41eafd93c0fa70",
+    "adafruit-preview-data-BWhkbkqw.js": "c37d14c1f115a63599555fd4193b2df1f9426a9b4cab8962282d6794ba6e11b6",
+    "assets/geometry.worker-BPtfmUIM.js": "0c6b0bea57288c647cd9836899aa14603c14d87e030786ea83cd5182f9cef589",
+    "assets/jolt-physics.wasm-compat-DHxwb_VA.js": "8f475fe3ea5330d547d790adf69080deeddcd9a5d50280b0da5fdf7d4dff23b0",
+    "assets/simulation.worker-B-95AvFJ.js": "88debb1be85b7ea87eba7a8827e35945a82b660b1de48d8858099a487d65cfb8",
+    "cad-assets/manifold.wasm": "73e3b419ad31294f6b1cc478173944e50efc4a34bfdeeff0107bdfc12975f11c",
+    "model-library-cache-DiMFGzp9.js": "75dc4ad7999b4571b227f1c675ca00af698fcc886dc73e98dd4c0eb2604e2b20",
+    "model-library-local-rVX4Ny2X.js": "4e17fd7dc461d753d55a80f039d197f9e3261456be1728a1d6639a849ff61c47",
+    "sdk-CfY4g-Vh.js": "2c10c023fea4191d64f2e482d19f6a23ec00d900746aebe365af1a9f3ded5504",
+    "sdk.js": "055c31b7fa21edd3cb22becff0336d4f0f13b259ff25a63a5418669ba6b6a542"
+  },
+  "scoutProjectSha256": "c5631219450bccb326220039b46d012d3bf7d15418518b490b7fe78176277182",
+  "cadSourceSha256": "67441b5ca2443dcffb825e7fe67a7e0c1f3298fb8e617aefe07e87bca2d09f5c",
+  "verificationScriptSha256": "1008085d9847867064d31f919a94c0f6d3d89f7a2ceb4cc7ce140003419cfa15",
+  "adapterSha256": "34a2bea39bdce527aa056241e21510ef04c1c3676d5f6779721ac24880c795a9",
+  "runtime": "Node v26.4.0",
+  "adapter": "Node worker_threads supplies self, postMessage and browser Emscripten global detection; production worker, geometry, Jolt and SDK bytes unchanged",
+  "limitations": [
+    "Worker-level qualification of the shipped CAD simulation and release Jolt WASM; no browser or UI claim.",
+    "No mounted editor, public-controller history/display/lease lifecycle or full Lite application exercised.",
+    "Direct mechanical impulses with a body ray, not circuit electronics or compiled firmware.",
+    "Diagnostic elapsed times are not a controlled performance benchmark."
+  ],
+  "passed": true,
+  "stage": "complete",
+  "result": {
+    "stepsPerComparisonRun": 100,
+    "stepSeconds": 0.005,
+    "physicsHz": 200,
+    "renderedBodyPoses": 23,
+    "exactMatchingTelemetrySamples": 100,
+    "exactMatchingCompletePoseFrames": 25,
+    "finalTime": 0.5000000000000003,
+    "finalAngles": {
+      "drive-a": 203.98169075192914,
+      "drive-b": 112.1880837591284
+    },
+    "finalSpeeds": {
+      "drive-a": 344.8070738319075,
+      "drive-b": -323.47912512964285
+    },
+    "finalDistances": {
+      "downward": 33.615708351135254
+    },
+    "chassisStartMm": [
+      0,
+      0,
+      0
+    ],
+    "chassisEndMm": [
+      80.36080002784729,
+      7.348093204200268,
+      -0.3842916339635849
+    ],
+    "chassisDisplacementMm": 80.69696608245697,
+    "traffic": {
+      "measurement": "UTF-8 JSON bytes of reply frames, excluding the request envelope",
+      "full": {
+        "fullReplies": 100,
+        "compactReplies": 0,
+        "bytes": 472059
+      },
+      "compact": {
+        "fullReplies": 25,
+        "compactReplies": 75,
+        "bytes": 136149
+      },
+      "payloadReduction": 0.7115847807159699
+    },
+    "stopPreservesTimeAndPoses": true,
+    "sensePreservesTimeAndPoses": true,
+    "invalidInputDoesNotAdvance": true,
+    "restartInitialAndFirstFrameExact": true,
+    "inputSourceUnchanged": true,
+    "scoutProjectUnchanged": true,
+    "sdkBytesUnchanged": true,
+    "timing": {
+      "elapsedMs": 19303.642540999997,
+      "fullRunMs": 991.7170830000005,
+      "compactRunMs": 808.9228329999987,
+      "performanceClaim": false
+    }
+  }
+}

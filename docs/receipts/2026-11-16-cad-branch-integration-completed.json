@@ -1,0 +1,116 @@
+{
+  "recordedAt": "2026-11-16T14:48:14.034304+00:00",
+  "source": {
+    "lite": "d913578567733472f3be4ef9311719864449d653",
+    "cadSDK": "b1f6fa43fa175298248094fbc8b9f1d1b500dca9",
+    "incomingLite": "ac6440bddaf84c8d579f08fe163a09dd7b8d8c17",
+    "incomingCad": "0df09ad88148eeb2b89240a2bfafdfe8aa764cf5"
+  },
+  "mergedPRs": {
+    "brickwright-lite": 1798,
+    "brickwright-cad": 69
+  },
+  "githubActions": "No workflows dispatched, rerun or awaited",
+  "preservation": {
+    "cadMainBase": "5802e536e4042e395a76dbc1496e4914ca275869",
+    "libraryFiles": 2246,
+    "allModesAndBlobsUnchanged": true,
+    "compactCadToolbarRetained": true,
+    "adafruitOfflinePreviewsRetained": 482,
+    "kestrelStillDeferred": true
+  },
+  "checks": {
+    "savedContinuationSuite": {
+      "passed": 49,
+      "failed": 0,
+      "skipped": 0,
+      "includesNineReactSdkSb3Cases": true
+    },
+    "broaderLiteSuite": {
+      "passed": 74,
+      "failed": 0,
+      "skipped": 0
+    },
+    "shippingSdkHostSuite": {
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0
+    },
+    "cadCombinedSuite": {
+      "initialPassed": 52,
+      "initialFailed": 1,
+      "totalCases": 53,
+      "failure": "Existing rover startup-torque test exceeded unchanged 60000ms deadline (86341ms). Initial retry also timed out (68100ms).",
+      "isolatedRetry": {
+        "passed": 1,
+        "durationMs": 10337,
+        "timeoutMs": 60000,
+        "change": "Temporarily suspended our GUI minifier, then resumed it; assertions and deadline unchanged."
+      },
+      "allDistinctCasesHavePassingExecution": true,
+      "newModelTests": "Mantis, Cyclone and Helios all passed on the initial combined run"
+    },
+    "librarySuite": {
+      "passed": 25,
+      "failed": 0
+    },
+    "germanAudit": {
+      "passed": true,
+      "messages": 1756,
+      "references": 1395
+    },
+    "shippingWorkerReceipt": "2026-11-16-cad-combined-worker.json",
+    "builtSdkDigests": {
+      "passed": true,
+      "files": 11
+    },
+    "mirrors": "pass",
+    "dependencyScope": "No redirects were logged in the locally installed dependency tree; not a new measured fallback boundary."
+  },
+  "library": {
+    "sources": 154,
+    "meshes": 148,
+    "thumbnails": {
+      "models": 302,
+      "failures": []
+    },
+    "archiveImages": {
+      "models": 482,
+      "failures": []
+    },
+    "sourceInserted": "code",
+    "meshInserted": "mesh",
+    "downloads": 0
+  },
+  "app": {
+    "path": "/Users/christianstrobele/Applications/Brickwright Robots UX Test.app",
+    "version": "20261116.3",
+    "bundleId": "com.crispstrobe.brickwright.robotcadtest",
+    "architecture": "arm64",
+    "binarySha256": "c0196e42367655fcf38c16899a9f472f87bbbdf2b0b78a83d19ba5fcf85187ec",
+    "infoPlistSha256": "8e4fe53f0bad87b1b78d41f058eee6073fb29291a3631845232441ec82f21662",
+    "codeResourcesSha256": "c7a9e0dad7673e48a112ed36815a8c921264065edb6b81dbfd1ff7a3ca98dc4b",
+    "signature": "Apple Development: Created via API (9RMU3C7422)",
+    "team": "N9XSJ4M3GT",
+    "keychain": "~/Library/Keychains/brickwright-build.keychain-db",
+    "codesignDeepStrictVerification": "pass, built and installed bundles",
+    "buildMode": "Optimized NODE_ENV=production webpack build with standard minimization; native release package opt-level=1, codegen-units=16. Local test, not a notarized store release.",
+    "replacesLocalBuild": "20261116.2 at the same UX Test path; its previous receipt remains historical.",
+    "launch": "Not launched while original Brickwright Robots Test.app remains open with user work; save and close old test first."
+  },
+  "limits": [
+    "Full generated sequential Mantis/Cyclone/Helios tasks are structurally packaged and model-physics tested, not newly qualified end to end in the browser.",
+    "iPad validation is touch-enabled 1024\u00d7768 Chromium, not physical device installation."
+  ],
+  "browser": {
+    "darkBlocksAndPresets": "passed",
+    "curatedAndAdafruitImages": "302 + 482 decoded; direct source/STL insertion, zero browser downloads",
+    "lightUnoFirmware": "passed",
+    "ipadWidthBlocks": "passed",
+    "runtimeChecks": "Physical chassis movement, actual encoders, design/history immutability, Code-tab continuation, Stop and Reset"
+  },
+  "buildWarnings": [
+    "Nonfatal private toolchain rust-objcopy debug stripping warning; native bundle completed successfully.",
+    "Webpack asset/entrypoint size recommendations exceeded."
+  ]
+}

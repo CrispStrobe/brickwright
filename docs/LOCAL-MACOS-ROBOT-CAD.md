@@ -49,6 +49,11 @@ archive folders contain original files and are separate from those totals. All
 482 component folders also have local thumbnails and selection previews. The
 metadata-only archive root is not a component.
 
+Mantis 3-servo walker, Cyclone 2-axis gantry sorter, and Helios turret catapult
+are available from **Shapes → Robots** with separate print layouts and fit gauges.
+Their model/print-geometry/physics cases and SB3 packager structure pass; the full
+generated sequential tasks still need browser-driven physical qualification.
+
 Atlas is also available in the robot catalogue. Kestrel is deferred because its
 physical gripper qualification failed. Dedicated newer motor drivers, CAD-fed
 IMUs/contact sensors, and coupled Pico firmware remain gaps. See
