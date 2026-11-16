@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import React from 'react';
+import {CAD_ROBOT_EXAMPLES} from '../../lib/bw-cad-robot-catalog.js';
+import {openCadRobotProject} from '../../lib/bw-cad-robot-projects.js';
 import CadCircuitPanel from './cad-circuit-panel.jsx';
 import PropTypes from 'prop-types';
 import {CAD_READY_EVENT} from '../../lib/bw-cad-program.js';
@@ -111,6 +113,7 @@ const CadTab = ({vm, isVisible, locale, theme, onEditProgram, onOpenCircuit}) =>
             const mounted = sdk.mountCadEditor(host.current, {
                 session: retainedSession,
                 embedded:true, toolbarContent:controls,
+                presetProjects:{ids:CAD_ROBOT_EXAMPLES.map(item=>item.id),open:async id=>{await openCadRobotProject(vm,id,locale);}},
                 colorMode: mode.current,
                 wasmURL: cadAssetURL('cad-assets/manifold.wasm'),
                 onDocumentChange: persist,

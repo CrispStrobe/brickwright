@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import React from 'react';
+import CadRobotControls from './cad-robot-controls.jsx';
+import {CAD_ROBOT_EXAMPLES} from '../../lib/bw-cad-robot-catalog.js';
+import {openCadRobotProject, ROBOT_PROJECT_OPENED} from '../../lib/bw-cad-robot-projects.js';
 import {createPortal} from 'react-dom';
 import PropTypes from 'prop-types';
 import styles from './cad-circuit-panel.css';
@@ -13,6 +16,10 @@ export default function CadCircuitPanel({vm,locale,colorMode,isVisible,toolbarHo
     const [config,setConfig]=React.useState(()=>{try{return readConnections();}catch{return null;}});
     const [status,setStatus]=React.useState({phase:'idle',time:0,readings:[]}),[error,setError]=React.useState('');
     const [catalog,setCatalog]=React.useState(emptyCatalog),[expanded,setExpanded]=React.useState(false),[runner,setRunner]=React.useState('blocks');
+    const [view,setView]=React.useState('program');
+    const openView=next=>{setView(next);setExpanded(!(expanded&&view===next));};
+    React.useEffect(()=>{const opened=()=>{setRunner('blocks');setError('');setView('controls');setExpanded(true);};window.addEventListener(ROBOT_PROJECT_OPENED,opened);return()=>window.removeEventListener(ROBOT_PROJECT_OPENED,opened);},[]);
+    const openExample=async id=>{try{await openCadRobotProject(vm,id,locale);}catch(e){setError(e.message);}};
     const trigger=React.useRef(null),closeButton=React.useRef(null);
     const [mechanical,setMechanical]=React.useState({state:'idle',time:0}),[directRunning,setDirectRunning]=React.useState(false);
     React.useEffect(()=>{
@@ -53,10 +60,7 @@ export default function CadCircuitPanel({vm,locale,colorMode,isVisible,toolbarHo
         const {part,joint}=next;
         write(kind==='servo'?{...current,enabled:true,servos:[...current.servos,{partId:part.id,jointId:joint.id,direction:1,centerDeg:90,torqueNm:.02}]}:{...current,enabled:true,drives:[...current.drives,{partId:part.id,jointId:joint.id,kind:joint.kind,direction:1,ratio:1,efficiency:1,leadMm:8}]});
     };
-    const openScout=async()=>{
-        if(!window.confirm(text('Open Scout? This replaces the current project. Save your work first.','Scout öffnen? Dies ersetzt das aktuelle Projekt. Speichere zuerst deine Arbeit.')))return;
-        try{const response=await fetch(new URL('static/circuit-cad/scout-encoder.sb3',document.baseURI));if(!response.ok)throw new Error('Example could not be loaded');const {default:loadProjectFile}=await import('../../lib/bw-project-load.js');vm.stopAll();await loadProjectFile(vm,await response.arrayBuffer(),'scout-encoder.sb3');setError('');}catch(e){setError(e.message);}
-    };
+    const openScout=()=>openExample('robot-tt-rover');
     const jointName=j=>`${j.port?`${j.port} · `:''}${j.name||j.id}`;
     const phase={idle:text('Ready','Bereit'),running:text('Running','Läuft'),preparing:text('Preparing…','Wird vorbereitet…'),compiling:text('Compiling…','Wird kompiliert…'),error:text('Needs attention','Bitte prüfen')}[status.phase]||status.phase;
     const problem=error||status.error||mechanical.error;
@@ -66,12 +70,15 @@ export default function CadCircuitPanel({vm,locale,colorMode,isVisible,toolbarHo
             <button className={styles.run} data-testid="bw-cad-run" aria-label={text('Run program','Programm starten')} disabled={active} onClick={execute}>▶ {text('Run','Start')}</button>
             <button aria-label={text('Stop program','Programm stoppen')} title={text('Stop program','Programm stoppen')} disabled={!active} onClick={stop}>■</button>
             <button aria-label={text('Reset simulation','Simulation zurücksetzen')} title={text('Reset simulation','Simulation zurücksetzen')} onClick={reset}>↺</button>
-            <button ref={trigger} data-testid="bw-cad-program-settings" aria-label={text('Program & connections','Programm und Verbindungen')} aria-expanded={expanded} onClick={()=>setExpanded(v=>!v)}><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5 2 12l6 7M16 5l6 7-6 7M14 3l-4 18" fill="none" stroke="currentColor" strokeWidth="2" /></svg>{text('Program','Programm')}{hasActuators?<span className={styles.count}>{current.drives.length+current.servos.length}</span>:null}</button>
+            <button ref={trigger} data-testid="bw-cad-program-settings" aria-label={text('Program & connections','Programm und Verbindungen')} aria-expanded={expanded} onClick={()=>openView('program')}><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5 2 12l6 7M16 5l6 7-6 7M14 3l-4 18" fill="none" stroke="currentColor" strokeWidth="2" /></svg>{text('Program','Programm')}{hasActuators?<span className={styles.count}>{current.drives.length+current.servos.length}</span>:null}</button>
+            <button aria-label={text('Robot examples','Roboterbeispiele')} onClick={()=>openView('examples')}>▤ {text('Examples','Beispiele')}</button>
+            <button aria-label={text('Robot controls','Robotersteuerung')} onClick={()=>openView('controls')}>☷ {text('Controls','Steuerung')}</button>
             {problem?<button className={`${styles.status} ${styles.problem}`} title={problem} aria-label={`${text('Run problem','Startproblem')}: ${problem}`} onClick={()=>setExpanded(true)} style={{maxWidth:220,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',color:'var(--cad-program-error, #b42318)'}}>{problem}</button>:<output className={styles.status} aria-live="polite">{!coupledActive&&active?text('Running','Läuft'):phase}{active?` · ${(coupledActive?status.time:mechanical.time).toFixed(1)} s`:''}</output>}
         </div>,toolbarHost)}
-        {expanded?<aside className={`${styles.root} ${styles.drawer}`} data-color-mode={colorMode} data-testid="bw-cad-circuit-panel" role="dialog" aria-label={text('Program & connections','Programm und Verbindungen')}>
-            <header className={styles.header}><h2>{text('Program & connections','Programm und Verbindungen')}</h2><button ref={closeButton} aria-label={text('Close program settings','Programmeinstellungen schließen')} onClick={close}>×</button></header>
+        {expanded?<aside className={`${styles.root} ${styles.drawer}`} data-color-mode={colorMode} data-testid="bw-cad-circuit-panel" role="dialog" aria-label={view==='examples'?text('Robot examples','Roboterbeispiele'):view==='controls'?text('Robot controls','Robotersteuerung'):text('Program & connections','Programm und Verbindungen')}>
+            <header className={styles.header}><h2>{view==='examples'?text('Robot examples','Roboterbeispiele'):view==='controls'?text('Robot controls','Robotersteuerung'):text('Program & connections','Programm und Verbindungen')}</h2><button ref={closeButton} aria-label={text('Close program settings','Programmeinstellungen schließen')} onClick={close}>×</button></header>
             {problem?<p role="alert" className={styles.error}>{problem}</p>:null}
+            {view==='examples'?<section><p>{text('Each example loads its model, Blocks/Code program, circuit, connections and Widgets.','Jedes Beispiel lädt Modell, Blöcke/Code-Programm, Schaltung, Verbindungen und Widgets.')}</p>{CAD_ROBOT_EXAMPLES.map(item=><button key={item.id} style={{display:'flex',width:'100%',margin:'10px 0',justifyContent:'flex-start'}} disabled={active} aria-label={`Open ${item.name} project`} onClick={()=>openExample(item.id)}>{item.name}</button>)}</section>:view==='controls'?<CadRobotControls vm={vm} locale={locale}/>:<React.Fragment>
             <section className={styles.section}>
                 <h3>{text('1 · Choose a program','1 · Programm wählen')}</h3>
                 <p>{text('Runs the program from your Code tab.','Startet das Programm aus deinem Code-Tab.')}</p>
@@ -109,7 +116,7 @@ export default function CadCircuitPanel({vm,locale,colorMode,isVisible,toolbarHo
                 <button disabled={editingDisabled} onClick={()=>{const part=availableCircuitParts(catalog.sensors,current)[0],body=catalog.bodies[0];if(!part||!body){setError(text('Add an ultrasonic sensor in Circuit and a body in CAD first.','Füge zuerst einen Ultraschallsensor in der Schaltung und einen CAD-Körper hinzu.'));return;}write({...current,sensors:[...current.sensors,{partId:part.id,bodyId:body.id,originMm:[0,0,0],direction:[1,0,0],rangeMm:4000}]});}}>+ {text('Distance sensor','Abstandssensor')}</button>
             </details>
             <details className={styles.section}><summary>{text('Measurements','Messwerte')}</summary>{status.readings.length?status.readings.map(r=><p key={r.partId}>{r.partId}: {(r.currentA||0).toFixed(3)} A · {((r.velocityRadS||0)*60/(2*Math.PI)).toFixed(1)} rpm</p>):<p>{text('Measurements appear while the program runs.','Messwerte erscheinen während der Programmausführung.')}</p>}</details>
-            <footer className={styles.footer}><button className={styles.run} disabled={active||!canRun} onClick={execute}>▶ {text('Run program','Programm starten')}</button><button disabled={active} onClick={()=>{globalThis.__bwCad?.editor.simulation.open();setExpanded(false);}}>{text('Physics preview','Physikvorschau')}</button><button onClick={()=>globalThis.__bwCad?.editor.frame()}>{text('Fit model','Modell einpassen')}</button></footer>
+            <footer className={styles.footer}><button className={styles.run} disabled={active||!canRun} onClick={execute}>▶ {text('Run program','Programm starten')}</button><button disabled={active} onClick={()=>{globalThis.__bwCad?.editor.simulation.open();setExpanded(false);}}>{text('Physics preview','Physikvorschau')}</button><button onClick={()=>globalThis.__bwCad?.editor.frame()}>{text('Fit model','Modell einpassen')}</button></footer></React.Fragment>}
         </aside>:null}
     </React.Fragment>;
 }

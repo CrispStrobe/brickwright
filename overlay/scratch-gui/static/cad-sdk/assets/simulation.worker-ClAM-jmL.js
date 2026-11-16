@@ -2,6 +2,9 @@ var m6 = Object.defineProperty;
 var w6 = (A, g, I) => g in A ? m6(A, g, { enumerable: !0, configurable: !0, writable: !0, value: I }) : A[g] = I;
 var VA = (A, g, I) => w6(A, typeof g != "symbol" ? g + "" : g, I);
 const d6 = {
+  "Complete project": "Komplettes Projekt",
+  "Open {0} project": "Projekt {0} öffnen",
+  "Opened {0} project.": "Projekt {0} geöffnet.",
   "Drag the corner to resize; drag the upper handle to set height. Then choose Create extrusion.": "Ziehe die Ecke für die Größe und den oberen Griff für die Höhe. Wähle danach Extrusion erstellen.",
   "Invalid position servo target": "Ungültiger Positionsservo-Sollwert",
   "Invalid body sensor ray": "Ungültiger Sensorstrahl am Körper",
@@ -9731,7 +9734,7 @@ async function k8(A, g, I, C = {}) {
     }
   if ([...I.values()].reduce((D, u) => D + u.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = C.J ?? await (b5 ?? (b5 = import("./jolt-physics.wasm-compat-sRzf0Rkq.js").then((D) => D.default()))), o = new i.JoltSettings();
+  const i = C.J ?? await (b5 ?? (b5 = import("./jolt-physics.wasm-compat-B4q7-I2h.js").then((D) => D.default()))), o = new i.JoltSettings();
   o.mMaxBodies = 512, o.mMaxBodyPairs = Math.max(1024, e.length * e.length), o.mMaxContactConstraints = 8192;
   const r = new i.ObjectLayerPairFilterTable(2);
   r.EnableCollision(0, 1), r.EnableCollision(1, 1);

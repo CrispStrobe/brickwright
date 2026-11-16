@@ -63,6 +63,8 @@ async function fixture ({text = documentText('First project'), loadSDK} = {}) {
     const module = {exports: {}};
     new Function('require', 'module', 'exports', code)(name => {
         if (name === './cad-circuit-panel.jsx') return {__esModule: true, default: () => null};
+        if (name.endsWith('/bw-cad-robot-catalog.js')) return {CAD_ROBOT_EXAMPLES:[{id:'robot-tt-rover'}]};
+        if (name.endsWith('/bw-cad-robot-projects.js')) return {openCadRobotProject:async()=>false};
         if (name.endsWith('/bw-cad-program.js')) return {CAD_READY_EVENT: 'bw-cad-ready'};
         if (name.endsWith('/download-blob.js')) return {__esModule: true, default: () => {}};
         if (name.endsWith('/bw-cad-sdk.js')) return {loadCadSDK: () => loadSDK ? loadSDK(hostedSDK) : Promise.resolve(hostedSDK), cadAssetURL: path => path};

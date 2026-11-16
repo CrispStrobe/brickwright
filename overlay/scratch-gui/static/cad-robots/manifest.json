@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "examples": [
+    {
+      "id": "robot-tt-rover",
+      "name": "Scout TT rover",
+      "file": "scout.sb3",
+      "bytes": 817406,
+      "sha256": "6a57ef0189f77afe9423e2fc3c3ac00b8ed2df80cc5e8df1b32b840583f36ae3",
+      "widgets": [
+        "left",
+        "right"
+      ],
+      "joints": [
+        "drive-a",
+        "drive-b"
+      ]
+    },
+    {
+      "id": "robot-steerable-rover",
+      "name": "Trident steerable rover",
+      "file": "trident.sb3",
+      "bytes": 1051755,
+      "sha256": "9bc7ae0581dc46bc86a58c972a5d54d5fb60e9117abb22727cf3a514e5938fc9",
+      "widgets": [
+        "motorA",
+        "motorB",
+        "servoC"
+      ],
+      "joints": [
+        "drive-a",
+        "drive-b",
+        "steer-c"
+      ]
+    },
+    {
+      "id": "robot-atlas-forklift",
+      "name": "Atlas forklift",
+      "file": "atlas.sb3",
+      "bytes": 1050041,
+      "sha256": "48fdb8e921fe5898b67bf9474db961e4392a168e95a86ab0060eb4cf2fa7ea06",
+      "widgets": [
+        "motorA",
+        "motorB",
+        "motorD",
+        "servoC"
+      ],
+      "joints": [
+        "drive-a",
+        "drive-b",
+        "lift-d",
+        "tilt-c"
+      ]
+    },
+    {
+      "id": "robot-mantis-walker",
+      "name": "Mantis 3-servo walker",
+      "file": "mantis.sb3",
+      "bytes": 273646,
+      "sha256": "642cff48839a9b876597e3b421f47eab2b76ba164fdaeac88101bc65b9ba1cbe",
+      "widgets": [
+        "servoA",
+        "servoB",
+        "servoC"
+      ],
+      "joints": [
+        "left-hip-a",
+        "right-hip-b",
+        "roll-c"
+      ]
+    },
+    {
+      "id": "robot-cyclone-sorter",
+      "name": "Cyclone 2-axis gantry sorter",
+      "file": "cyclone.sb3",
+      "bytes": 99592,
+      "sha256": "12eb21dec11a66c619e13b3ebda3aee92507e9129f21dbd746b5525c4504b7b8",
+      "widgets": [
+        "motorA",
+        "motorB",
+        "servoC"
+      ],
+      "joints": [
+        "gantry-a",
+        "gantry-b",
+        "sweeper-c"
+      ]
+    },
+    {
+      "id": "robot-helios-catapult",
+      "name": "Helios turret catapult",
+      "file": "helios.sb3",
+      "bytes": 275387,
+      "sha256": "9daf98fbb3d8d753c4af27791105ce8541853ae506443e52384fe80956b5dc6b",
+      "widgets": [
+        "servoA",
+        "servoB",
+        "servoC"
+      ],
+      "joints": [
+        "pan-a",
+        "throw-b",
+        "gate-c"
+      ]
+    }
+  ]
+}
