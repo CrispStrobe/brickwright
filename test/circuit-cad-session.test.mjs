@@ -57,3 +57,15 @@ test('an old session cannot power off or change shafts after a reset and a new o
  const b=motorBoard(),old=await createCoupledSession({board:b,mechanics:inertia(),connections});
  b.reset();b.setPower(true);const current=await createCoupledSession({board:b,mechanics:inertia(),connections});drive(b);old.stop();assert.equal(b.powered,true);current.tick(5);await current.idle();assert.ok(current.readings()[0].currentA>0);current.stop();
 });
+test('compact feedback preserves real circuit current, back-EMF and encoder behavior',async()=>{
+ const run=async compact=>{
+  const b=motorBoard(),m=inertia();let compactSteps=0;
+  if(compact)m.stepTelemetry=async(...args)=>{compactSteps++;const {poses,...sample}=await m.step(...args);return sample;};
+  const s=await createCoupledSession({board:b,mechanics:m,connections});drive(b);
+  for(let i=0;i<60;i++){if(i===30)drive(b,false);s.tick(1000/60);await s.idle();}
+  const result={frame:s.snapshot(),readings:s.readings(),motor:structuredClone(b.getDeviceState('motor')),time:String(b.timeNs)};
+  s.stop();return{result,compactSteps};
+ };
+ const legacy=await run(false),optimized=await run(true);
+ assert.equal(optimized.compactSteps,140);assert.deepEqual(optimized.result,legacy.result);
+});
