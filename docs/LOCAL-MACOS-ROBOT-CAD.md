@@ -91,3 +91,30 @@ user's Applications folder, and launch that exact installed path. Record the
 Lite commit, CAD SDK commit, app/binary hashes, architecture, signing method,
 build result and native launch outcome in a dated delivery receipt. Do not claim
 device functionality or calibrated physics from compilation/launch alone.
+
+## Recovery / first Run / sketch repair build (20261116.4)
+
+Use `~/Applications/Brickwright Robots Repair Test.app`. Save and close UX Test
+first; Repair Test preserves its bundle identity and native bridge ports. The
+older running bundle is not overwritten.
+
+Reopen can now restore large CAD autosaves when localStorage is full. A failed
+recovery exposes X, Not now and Save autosave copy. The original IndexedDB
+autosave is retained.
+
+**Run** executes the green-flag program. **Program** opens runner and connection
+settings. First Run initializes the saved Circuit in the background and waits
+for its mapped motors to load; no preparatory Circuit visit is required. With
+no start script it explains what to add, and clicking a toolbar error opens its
+full explanation.
+
+For Sketch: choose a profile and plane, drag the corner for size and the upper
+handle for extrusion height, or type the named dimensions, then press Create
+extrusion. Dragging through the base clamps at 0.01 mm. Invalid typed dimensions
+keep Create disabled; Create commits one undoable step.
+
+Scout's motors are source-derived meshes; its PCB and battery parts are still
+clearance envelopes. Parametric screws and nuts are under Shapes → Supports &
+connections, but Scout does not yet include its fasteners/headers. The detailed
+Feather candidate failed source-mesh checks and is not substituted silently.
+See [actual UI regression evidence](receipts/2026-11-16-cad-recovery-run-sketch.json).

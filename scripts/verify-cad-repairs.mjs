@@ -26,7 +26,7 @@ try{
  const source=await page.evaluate(()=>window.__bwCad.editor.session.serialize());
  await page.getByTestId('bw-cad-run').click();await wait(()=>{const s=window.__brickwrightStore.getState().scratchGui.vm.runtime.cadCircuitSimulation.state();return s.phase==='error'||s.time>1.5;});
  const run=await page.evaluate(()=>({state:window.__brickwrightStore.getState().scratchGui.vm.runtime.cadCircuitSimulation.state(),frame:window.__bwCad.editor.simulation.snapshot(),source:window.__bwCad.editor.session.serialize()}));
- assert.equal(run.state.phase,'running',run.state.error);assert.equal(run.source,source);assert.ok(Math.hypot(...run.frame.poses.find(p=>p.id==='chassis').positionMm)>10);
+ assert.equal(run.state.phase,'running',run.state.error);assert.equal(run.source,source);assert.ok(Math.hypot(...run.frame.poses.find(p=>p.id==='chassis').positionMm.slice(0,2))>25);
  await page.getByRole('button',{name:'Stop program',exact:true}).click();console.log('PASS first Run after recovery moves Scout without visiting Circuit or opening Program');
  await page.evaluate(()=>{const vm=window.__brickwrightStore.getState().scratchGui.vm;for(const target of vm.runtime.targets)for(const id of target.blocks.getScripts())target.blocks.deleteBlock(id);});
  await page.getByTestId('bw-cad-run').click();const setup=page.getByTestId('bw-cad-circuit-panel');await setup.waitFor();assert.match(await setup.getByRole('alert').innerText(),/No start program/);

@@ -1,0 +1,91 @@
+{
+  "recordedAt": "2026-11-16T16:30:59.026043+00:00",
+  "source": {
+    "lite": "c91637c947a0edaaa8e3ac3cb7f3a9cddf6428df",
+    "cadSDK": "4ed03b8569b389bff0b57b1dbaece9b112310134"
+  },
+  "issues": [
+    "Autosave Reopen blocked by large CAD localStorage quota",
+    "First CAD Run before visiting Circuit accepted no board or an empty first board",
+    "Empty-program error disappeared as Program drawer mounted",
+    "Sketch height drag could cross zero and emit an internal feature UUID diagnostic"
+  ],
+  "changes": [
+    "Transactional quota fallback keeps exact CAD sidecar in live SB3/IndexedDB autosave pipeline; smaller sidecar state still applies atomically and rollback remains available",
+    "Recovery shows Reopening status; failed recovery offers Save autosave copy and a close X",
+    "CAD explicitly initializes its hidden Circuit designer even under the default debugger-only dock",
+    "Bridge waits for mapped motors/servos/sensors to arrive in the board before clock ownership",
+    "No start script is explained; actual errors are clickable and no longer replaced by Check setup",
+    "Sketch drag clamps positive kernel design range, retains captured pointer scale, shows field names and handle instructions; form diagnostics omit internal feature IDs"
+  ],
+  "checks": {
+    "hostBridgeAndSidecarTests": {
+      "passed": 63,
+      "failed": 0,
+      "skipped": 0
+    },
+    "cadFeatures": {
+      "passed": 14,
+      "failed": 0
+    },
+    "germanAudit": {
+      "passed": true,
+      "messages": 1757,
+      "references": 1396
+    },
+    "sdkDigests": {
+      "passed": true,
+      "files": 11
+    },
+    "mirrors": "pass",
+    "playwright": {
+      "script": "scripts/verify-cad-repairs.mjs",
+      "engine": "Installed Chrome, 1366\u00d71000, actual built GUI/Scratch VM/IndexedDB/worker/Jolt",
+      "cases": [
+        "Real Scout IndexedDB recovery under 4 MiB localStorage filler: exact CAD restored outside localStorage; dialog removed; green-flag script restored",
+        "First Run without opening Circuit or Program: actual horizontal chassis displacement >25 mm; source/history unchanged; Stop works",
+        "Actual VM scripts deleted: missing-start explanation stays visible; clickable toolbar error reopens details",
+        "Real sketch pointer dragged across zero: positive dimension, no UUID diagnostic, Create and one-step Undo succeed",
+        "Explicit storage write failure injection: error exposes autosave-copy action; X removes recovery dialog"
+      ],
+      "chassisAfterRun": {
+        "id": "chassis",
+        "positionMm": [
+          227.53363847732544,
+          -22.524746134877205,
+          -0.37226639688014984
+        ],
+        "quaternion": [
+          -0.001312675536610186,
+          0.0017414818285033107,
+          0.5992556214332581,
+          0.8005548119544983
+        ]
+      },
+      "simulationTime": 1.5299999999999894,
+      "unhandledPageErrors": [],
+      "faultInjectionScope": "Only final failure-dismissal control replaces Storage.setItem for Circuit writes. The successful quota recovery uses actual Web Storage quota, not a storage double."
+    }
+  },
+  "geometryBoundary": {
+    "motors": "Source-derived Adafruit meshes",
+    "scoutBoardsAndBattery": "Still conservative clearance envelopes",
+    "screwsAndNuts": "Existing parametric Shapes \u2192 Supports & connections; not automatically in Scout",
+    "pinsAndHeaders": "Not fully represented in Scout",
+    "featherCandidate": "Original STEP could not triangulate a 0.002203902 mm\u00b2 face; vendor STL failed closed manifold screening under a proper positive-determinant rotation. Original files kept locally as unadmitted research; no replacement is shipped."
+  },
+  "app": {
+    "path": "/Users/christianstrobele/Applications/Brickwright Robots Repair Test.app",
+    "build": "20261116.4",
+    "bundleId": "com.crispstrobe.brickwright.robotcadtest",
+    "architecture": "arm64",
+    "signature": "Apple Development: Created via API (9RMU3C7422)",
+    "keychain": "~/Library/Keychains/brickwright-build.keychain-db",
+    "codesignDeepStrict": "passed built and installed bundle",
+    "binarySha256": "3045eedf74684b70f9269744489f987ed3a7d756ea8234a51a60955eab38e511",
+    "infoPlistSha256": "d2fc79bf52346131fe40c3f2e4476fbbe88adabc27bd26189a28e23c1b2bd9ad",
+    "buildMode": "Local production-behaviour GUI, JavaScript minimization disabled; native release package opt-level=1, codegen-units=16. Not a notarized store release.",
+    "nativeLaunch": "Not launched: user is editing in UX Test; no forced quit or overwrite of that bundle. Save and close it before opening Repair Test."
+  },
+  "githubActions": "None dispatched or awaited"
+}
