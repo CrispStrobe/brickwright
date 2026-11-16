@@ -12,19 +12,31 @@ import {registerUndoSurface, activateUndoSurface, notifyUndoState} from '../../l
 let retainedSession = null;
 let retainedText;
 let retainedGeneration;
-const pickFile = accept => new Promise((resolve, reject) => {
+const pickFile = (accept, signal) => new Promise((resolve, reject) => {
+    if (signal.aborted) { resolve(null); return; }
     const input = document.createElement('input');
+    let settled = false;
+    const finish = (file, error) => {
+        if (settled) return;
+        settled = true;
+        signal.removeEventListener('abort', cancel);
+        input.onchange = input.oncancel = null;
+        input.remove();
+        if (error) reject(error);
+        else resolve(file);
+    };
+    const cancel = () => finish(null);
     input.type = 'file';
     input.accept = accept;
     input.onchange = async () => {
         try {
             const file = input.files[0];
             if (file && file.size > 64 * 1024 * 1024) throw new Error('Project exceeds 64 MiB');
-            resolve(file ? {name: file.name, bytes: new Uint8Array(await file.arrayBuffer())} : null);
-        } catch (error) { reject(error); }
-        finally { input.remove(); }
+            finish(file ? {name: file.name, bytes: new Uint8Array(await file.arrayBuffer())} : null);
+        } catch (error) { finish(null, error); }
     };
-    input.oncancel = () => { resolve(null); input.remove(); };
+    input.oncancel = cancel;
+    signal.addEventListener('abort', cancel, {once: true});
     input.style.display = 'none';
     document.body.appendChild(input);
     input.click();
@@ -42,9 +54,11 @@ const CadTab = ({vm, isVisible, locale, theme}) => {
     const [storageWarning, setStorageWarning] = React.useState(false);
     const [retry, setRetry] = React.useState(0);
     React.useEffect(() => {
-        let stopped = false, removeUndo, sdk;
+        let stopped = false, removeUndo, sdk, mountedGeneration;
+        const fileSelection = new AbortController();
         const fail = error => { if (!stopped) setError(String(error.message || error)); };
         const persist = doc => {
+            if (stopped || mountedGeneration !== getCadProjectGeneration()) return;
             const text = sdk.serializeDocument(doc);
             retainedText = text;
             setLiveCadText(text);
@@ -52,17 +66,19 @@ const CadTab = ({vm, isVisible, locale, theme}) => {
             catch { setStorageWarning(true); }
         };
         const reload = event => {
-            if (!['loaded', 'legacy'].includes(event.detail?.outcome) || !editor.current) return;
-            try {
-                const text = readCadText();
-                // Validate before touching the live session; unsupported versions stay intact.
-                const doc = text ? sdk.parseDocument(text) : sdk.createDocument();
-                retainedSession.load(doc);
-                retainedGeneration = getCadProjectGeneration();
-                persist(doc);
-                setError('');
-            } catch (error) { fail(error); }
+            if (!['loaded', 'legacy'].includes(event.detail?.outcome)) return;
+            // Retire the previous view even when the incoming CAD version cannot be
+            // opened. Keeping its old editor writable would overwrite the new sidecar.
+            setRetry(value => value + 1);
         };
+        const requestFile = async accept => {
+            const session = retainedSession;
+            const generation = getCadProjectGeneration(), revision = session.state.revision;
+            const file = await pickFile(accept, fileSelection.signal);
+            return !stopped && generation === getCadProjectGeneration() && session === retainedSession &&
+                revision === session.state.revision ? file : null;
+        };
+        window.addEventListener('bw-project-bundle-loaded', reload);
         setError('');
         loadCadSDK().then(loaded => {
             if (stopped) return;
@@ -76,6 +92,7 @@ const CadTab = ({vm, isVisible, locale, theme}) => {
             }
             retainedText = text;
             retainedGeneration = getCadProjectGeneration();
+            mountedGeneration = retainedGeneration;
             const mounted = sdk.mountCadEditor(host.current, {
                 session: retainedSession,
                 colorMode: mode.current,
@@ -85,7 +102,7 @@ const CadTab = ({vm, isVisible, locale, theme}) => {
                 onSimulationInterrupt: () => window.dispatchEvent(new CustomEvent('bw-cad-simulation-interrupt')),
                 onExport: file => download(file.name, new Blob([file.bytes], {type: file.mime})),
                 saveProject: () => download('design.bcad', new Blob([retainedSession.serialize()], {type: 'application/json'})),
-                requestOpen: () => pickFile('.bcad,.json,.stl'), requestImport: () => pickFile('.stl'),
+                requestOpen: () => requestFile('.bcad,.json,.stl'), requestImport: () => requestFile('.stl'),
                 onError: fail
             });
             editor.current = mounted;
@@ -93,7 +110,6 @@ const CadTab = ({vm, isVisible, locale, theme}) => {
                 label: 'CAD', canUndo: () => retainedSession.state.canUndo, canRedo: () => retainedSession.state.canRedo,
                 undo: () => retainedSession.undo(), redo: () => retainedSession.redo()
             });
-            window.addEventListener('bw-project-bundle-loaded', reload);
             if (visible.current) { activateUndoSurface('cad'); mounted.focus(); }
             // Same diagnostic boundary as __bwSimLab, for focused browser checks.
             window.__bwCad = {editor: mounted, sdk};
@@ -101,6 +117,7 @@ const CadTab = ({vm, isVisible, locale, theme}) => {
         }).catch(fail);
         return () => {
             stopped = true;
+            fileSelection.abort();
             window.removeEventListener('bw-project-bundle-loaded', reload);
             if (removeUndo) removeUndo();
             if (editor.current) editor.current.dispose();
