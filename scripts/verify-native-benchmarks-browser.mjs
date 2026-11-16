@@ -37,22 +37,23 @@ await new Promise((done, fail) => webpack({mode: 'production', devtool: false, e
     if (error) fail(error); else if (stats.hasErrors()) fail(Error(stats.toString({all: false, errors: true})));
     else done();
 }));
-await writeFile(join(build, 'index.html'), '<!doctype html><title>Native benchmark panel proof</title><button id="open">Benchmarks (native i80386)…</button><div id="app"></div><script src="/panel.js"></script>');
+await writeFile(join(build, 'index.html'), '<!doctype html><meta charset="utf-8"><title>Native benchmark panel proof</title><button id="open">Benchmarks (native i80386)…</button><div id="app"></div><script src="/panel.js"></script>');
 const server = createServer(async (req, res) => {
     try {
         const path = new URL(req.url, 'http://localhost').pathname;
         const file = join(build, path === '/' ? 'index.html' : path);
         if (!file.startsWith(build + '/')) throw Error('path');
         const bytes = await readFile(file);
-        res.setHeader('content-type', extname(file) === '.html' ? 'text/html' : 'text/javascript'); res.end(bytes);
+        res.setHeader('content-type', extname(file) === '.html' ? 'text/html; charset=utf-8' : 'text/javascript; charset=utf-8'); res.end(bytes);
     } catch {res.writeHead(404); res.end();}
 });
 await new Promise(done => server.listen(0, '127.0.0.1', done));
-let browser;
+let browser, page;
+const errors = [];
 try {
     browser = await chromium.launch({headless: true, args: ['--disable-dev-shm-usage', '--renderer-process-limit=1']});
-    const page = await browser.newPage({viewport: {width: 1200, height: 1000}});
-    const errors = []; page.on('pageerror', error => errors.push(error.message));
+    page = await browser.newPage({viewport: {width: 1200, height: 1000}});
+    page.on('pageerror', error => errors.push(error.message));
     await page.goto(`http://127.0.0.1:${server.address().port}/`);
     await page.getByRole('button', {name: 'Benchmarks (native i80386)…', exact: true}).click();
     const status = page.getByTestId('native-benchmark-status');
@@ -107,4 +108,18 @@ try {
         errors};
     await writeFile(join(artifacts, 'browser.json'), JSON.stringify(receipt, null, 2) + '\n');
     console.log(`PASS actual browser native TOPBENCH: ${result.retired} retired instructions, exit4, complete screen; Stop and actual Whetstone ${whetstone.retired} retired/exit0/numeric validation verified`);
+} catch (error) {
+    // Preserve the actual rendered failure before teardown, without replacing
+    // the original assertion or turning a failed launch into native evidence.
+    if (page && !page.isClosed()) {
+        try {
+            await writeFile(join(artifacts, 'failure.html'), await page.content());
+            await page.screenshot({path: join(artifacts, 'failure.png'), fullPage: true});
+            await writeFile(join(artifacts, 'failure.json'), JSON.stringify({
+                message: error.message, title: await page.title(), errors,
+                status: await page.getByTestId('native-benchmark-status').textContent({timeout: 1000}).catch(() => null)
+            }, null, 2) + '\n');
+        } catch (captureError) {console.error(`Failure capture: ${captureError.message}`);}
+    }
+    throw error;
 } finally {await browser?.close(); await new Promise(done => server.close(done));}
