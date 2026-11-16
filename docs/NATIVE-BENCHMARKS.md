@@ -46,6 +46,10 @@ Run/Stop/render/terminal status. It is not a full installed application proof,
 benchmark comparison or new performance measurement. The screenshot and JSON
 receipt bind the actual native result and source/package identity.
 
+The [completed browser evidence](evidence/native-benchmarks-2026-11-16/README.md)
+records the tested source, byte-identical bundle/runtime identities, actual
+TOPBENCH/Stop/Whetstone output and screenshots.
+
 On a bounded Linux host, npm can start parallel Git dependency preparation
 installs despite the outer `--ignore-scripts`. The canonical dependency helper
 can serialize those subprocesses without changing package inputs, pins, scripts

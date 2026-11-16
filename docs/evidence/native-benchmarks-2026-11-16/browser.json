@@ -1,0 +1,140 @@
+{
+  "schema": "brickwright.native-benchmark-browser.v1",
+  "scope": "focused production bundle of shipped panel with actual native engine; no full-app or performance claim",
+  "head": "869f8df1c57f7e19da810cee278ec14bb464d83a",
+  "bwBoardCommit": "33d3ee399db9224105e70f34864f1af962ccdb41",
+  "sourceSha256": "2ab482f1b5156ce68c4c7cc4fed4d64d5139848f6ceb91e0a6ff705261175868",
+  "runtimeSha256": {
+    "experimental/i80386-at-machine.js": "a8499180c8ba158e37adf761f22cf5df495701afd3e55686ec917d9b4ed15a94",
+    "experimental/i80386.js": "53ed55c709a1b2becf4fbd8172bcbd15b89e97e7f403314666630fd075a55928",
+    "i8086-dos.js": "f17c2cefc80082545b4e1caedcc365216db88048eaa65e362d7fe7ee0d1b02ce"
+  },
+  "stoppedRetired": 49999,
+  "stoppedNativeScreenObserved": true,
+  "terminalStatus": "Complete \u2014 native execution validated; exit 4.",
+  "actualNativeResult": {
+    "status": "complete",
+    "accepted": true,
+    "backend": "ExperimentalI80386ATMachine",
+    "mediaCommit": "c8dc584d39b69b1ed9f98af69e548d9da3d5b240",
+    "imageSha256": "c739a73c6955d9798cfeae2d7b0c46011fdc9f943071ecf2bb730ebf4eab52eb",
+    "steps": 2236466,
+    "retired": 2222281,
+    "exitCode": 4,
+    "terminated": true,
+    "stdout": "",
+    "screen": [
+      "Support unit starting...",
+      "TOPBENCH small detection unit starting...",
+      "TOPBENCH Initializing...",
+      "TOPBENCH | 16-bit real-mode x86 Benchmarking Suite | Version 0.40b",
+      "Score:                  19",
+      "Memory:                 923 \u00e6s",
+      "Effective addressing:   393 \u00e6s",
+      "Opcode exercise:        420 \u00e6s",
+      "Vid adapter speed:      340 \u00e6s",
+      "3DGame opcode exercise: 444 \u00e6s",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "unsupported": [],
+    "videoQueriesValid": true,
+    "whetstone": null
+  },
+  "actualNativeWhetstone": {
+    "status": "complete",
+    "accepted": true,
+    "backend": "ExperimentalI80386ATMachine",
+    "mediaCommit": "c8dc584d39b69b1ed9f98af69e548d9da3d5b240",
+    "imageSha256": "f7003e37da058b1a41b8520b010c9791aafa10fa8a9cb11a4c0998055936b8ac",
+    "steps": 24021727,
+    "retired": 24021261,
+    "exitCode": 0,
+    "terminated": true,
+    "stdout": "      0       0       0   1.0000e+00  -1.0000e+00  -1.0000e+00  -1.0000e+00\r\n     12      14      12  -6.6821e-02  -4.6627e-01  -7.3298e-01  -1.1324e+00\r\n     14      12      12  -6.5513e-02  -4.6469e-01  -7.3107e-01  -1.1303e+00\r\n    345       0       0   1.0000e+00  -1.0000e+00  -1.0000e+00  -1.0000e+00\r\n    210       1       2   6.0000e+00   6.0000e+00  -7.3107e-01  -1.1303e+00\r\n     32       1       2   4.9904e-01   4.9904e-01   4.9902e-01   4.9902e-01\r\n    899       1       2   1.0000e+00   1.0000e+00   9.9994e-01   9.9994e-01\r\n    616       1       2   3.0000e+00   2.0000e+00   3.0000e+00  -1.1303e+00\r\n      0       2       3   1.0000e+00  -1.0000e+00  -1.0000e+00  -1.0000e+00\r\n     93       2       3   7.5987e-01   7.5987e-01   7.5987e-01   7.5987e-01\r\n\r\nLoops: 1, Iterations: 1, Duration: 23 sec.\r\nC Converted Double Precision Whetstones: 4.3 KIPS\r\n",
+    "screen": [
+      "      0       0       0   1.0000e+00  -1.0000e+00  -1.0000e+00  -1.0000e+00",
+      "     12      14      12  -6.6821e-02  -4.6627e-01  -7.3298e-01  -1.1324e+00",
+      "     14      12      12  -6.5513e-02  -4.6469e-01  -7.3107e-01  -1.1303e+00",
+      "    345       0       0   1.0000e+00  -1.0000e+00  -1.0000e+00  -1.0000e+00",
+      "    210       1       2   6.0000e+00   6.0000e+00  -7.3107e-01  -1.1303e+00",
+      "     32       1       2   4.9904e-01   4.9904e-01   4.9902e-01   4.9902e-01",
+      "    899       1       2   1.0000e+00   1.0000e+00   9.9994e-01   9.9994e-01",
+      "    616       1       2   3.0000e+00   2.0000e+00   3.0000e+00  -1.1303e+00",
+      "      0       2       3   1.0000e+00  -1.0000e+00  -1.0000e+00  -1.0000e+00",
+      "     93       2       3   7.5987e-01   7.5987e-01   7.5987e-01   7.5987e-01",
+      "",
+      "Loops: 1, Iterations: 1, Duration: 23 sec.",
+      "C Converted Double Precision Whetstones: 4.3 KIPS",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "unsupported": [],
+    "videoQueriesValid": true,
+    "whetstone": {
+      "valid": true,
+      "modulesValid": true,
+      "durationSeconds": 23,
+      "reportedScore": {
+        "value": 4.3,
+        "unit": "KIPS",
+        "scope": "guest functional clock; PRINTOUT validation, not physical CPU timing"
+      }
+    }
+  },
+  "errors": [],
+  "testedHead": "869f8df1c57f7e19da810cee278ec14bb464d83a",
+  "productionBuildHead": "da17bc965786c89d1da01910496835566187c214",
+  "focusedTests": {
+    "head": "da17bc965786c89d1da01910496835566187c214",
+    "tests": 7,
+    "passed": 7,
+    "failed": 0,
+    "skipped": 0,
+    "boundary": "React/jsdom with mocked async runner; fixture hash/cache tests; separate from actual native proof"
+  },
+  "retainedBundleSha256": {
+    "panel.js": "ca762a38b02e9cbbb7144778a559a325f7f9425e892ad6b86e0ce2f676f9e6c7",
+    "576.panel.js": "e77cea62ae4d9836fd77ceb10ebbfa13517193d42515b074b5c46c09fa6f9dbb",
+    "entry.js": "f2ec36bc06258b8c66379a0456c9e69e00355abed27781f738a7fc431fe826e2",
+    "249.panel.js": "15223d97659792c2ff8e2df66a6e293e0129d9f1b66e81a48353503946a628cd"
+  },
+  "driverBoundary": "Previously successful production JS reused byte-identically. Driver changes are explicit UTF-8 fixture/response, module location for evidence execution and durable failure console/DOM/screenshot capture; original launch/native/Stop/terminal assertions unchanged. No repeated npm, tests or build.",
+  "topbenchExit4": "The pinned source TOPBENCH.PAS -i branch prints all six result rows then calls halt(4). This expected code is accepted only with six finite positive screen rows, zero unsupported services and the declared CGA absence query contract. No broad TOPBENCH conformance claim.",
+  "functionalOnly": "Instruction counts and guest-clock values are functional observations, without physical timing, calibration or speedup claims.",
+  "resourceResult": {
+    "elapsedSeconds": 69.59,
+    "peakTreeRssBytes": 735997952
+  },
+  "screenshots": {
+    "native-topbench.png": {
+      "sha256": "fcf8dd921647a4498399a1a0a9eb1871659b417bf021cf7924e7608e96e5cfbb"
+    },
+    "native-whetstone.png": {
+      "sha256": "aafa4060a49129ecf7a9f308cf937373adb60f3b9834d7cc6e275eb08ab6c996"
+    }
+  }
+}
