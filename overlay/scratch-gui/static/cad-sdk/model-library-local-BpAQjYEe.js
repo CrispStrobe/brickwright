@@ -1,4 +1,8 @@
+<<<<<<<< HEAD:overlay/scratch-gui/static/cad-sdk/model-library-local-BpAQjYEe.js
 import { v, p as Q } from "./sdk-p0NNYW99.js";
+========
+import { v, p as N } from "./sdk-VCrL-QEk.js";
+>>>>>>>> feat/polaris-tracker-20261116:overlay/scratch-gui/static/cad-sdk/model-library-local-BGpNDxTJ.js
 function l(c) {
   if (!c || typeof c != "object")
     throw new Error("Invalid local model library manifest.");

@@ -2,7 +2,11 @@
   "format": "brickwright-cad-sdk",
   "version": 1,
   "repository": "https://github.com/CrispStrobe/brickwright-cad",
+<<<<<<< HEAD
   "commit": "c9c9680322d257da3439943e52e9bb26a277a4d9",
+=======
+  "commit": "ec88d942d03af69a787cc24466b6c76e88fe4454",
+>>>>>>> feat/polaris-tracker-20261116
   "dirty": false,
   "entry": "sdk.js",
   "wasm": "cad-assets/manifold.wasm",
@@ -15,8 +19,14 @@
     "assets/simulation.worker-ClAM-jmL.js": "4f43779a2bf2eed38fc59fa78e333f822794448283472a622ae0070fc457af56",
     "cad-assets/manifold.wasm": "73e3b419ad31294f6b1cc478173944e50efc4a34bfdeeff0107bdfc12975f11c",
     "model-library-cache-DiMFGzp9.js": "75dc4ad7999b4571b227f1c675ca00af698fcc886dc73e98dd4c0eb2604e2b20",
+<<<<<<< HEAD
     "model-library-local-BpAQjYEe.js": "b6821a819397b3d8e4babcf94f2639d5732a1ac4b7ff8ed3c2a75f2190757112",
     "sdk-p0NNYW99.js": "071b6d66459df39706c7a9b1378ef7c8ac85b9f90a7857e2a301c8853b6c56b1",
     "sdk.js": "ab3ab6ada64cc2ea83ae77ac4b64c50836c2099a3851302029fb9f30d06c851d"
+=======
+    "model-library-local-BGpNDxTJ.js": "b492fe6527d9fa403096afbecbd787af116bca3b5ef689bf26c1962ceddaec97",
+    "sdk-VCrL-QEk.js": "566dfd9b6351dd4b3a72d17ed19c59d59c76ba23183ec17505ab4fed928b1984",
+    "sdk.js": "41072c92edb4698a8989449c34de6ba23113fabacc6ef9967a739ecdeac608f1"
+>>>>>>> feat/polaris-tracker-20261116
   }
 }
