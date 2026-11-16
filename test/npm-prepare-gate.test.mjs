@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
-import {mkdtempSync, writeFileSync, readFileSync, rmSync} from 'node:fs';
+import {mkdtempSync, writeFileSync, readFileSync, rmSync, realpathSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join, dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -28,6 +28,11 @@ event('exit')
         BW_LITE_NPM_PREPARE_WAIT_SECONDS: '2', GATE_EVENTS: join(root, 'events'), GATE_PATH: gate};
     return {root, env, events: () => {try {return readFileSync(env.GATE_EVENTS, 'utf8').trim().split('\n').filter(Boolean).map(JSON.parse);} catch {return [];}}};
 };
+const runNode = (env, code, cwd, args = []) => new Promise((done, fail) => {
+    const child = spawn(process.execPath, ['-e', code, ...args], {env, cwd});let output = '', error = '';
+    child.stdout.on('data', chunk => {output += chunk;});child.stderr.on('data', chunk => {error += chunk;});
+    child.once('error', fail);child.once('close', status => done({status, output, error}));
+});
 const invoke = (env, args) => new Promise((done, fail) => {
     const child = spawn(gate, args, {env});let error = '';
     child.stderr.on('data', chunk => {error += chunk;});child.once('error', fail);
@@ -68,4 +73,42 @@ linuxTest('a bounded preparation wait refuses without launching npm', async t =>
         const result = await invoke({...f.env, BW_LITE_NPM_PREPARE_WAIT_SECONDS: '1'}, ['install', '--force', '--include=dev']);
         assert.equal(result.code, 124);assert.match(result.error, /Timed out/);assert.deepEqual(f.events(), []);
     } finally {holder.kill('SIGTERM');await new Promise(done => holder.once('close', done));}
+});
+
+linuxTest('actual npm flat configuration and pacote absolute-executable route serialize fake preparations', async t => {
+    const f = fixture(t), saved = [process.env.BW_LITE_SERIAL_GIT_PREPARE, process.env.BW_LITE_NPM_PREPARE_LOCK];
+    let routed;
+    try {
+        process.env.BW_LITE_SERIAL_GIT_PREPARE = '1';process.env.BW_LITE_NPM_PREPARE_LOCK = f.env.BW_LITE_NPM_PREPARE_LOCK;
+        routed = {...f.env, ...npmEnv()};
+        // Preserve the actual npm identity for its configuration preload;
+        // only the eventual scheduler child executes the synthetic fixture.
+        routed.BW_LITE_REAL_NPM = npmEnv().BW_LITE_REAL_NPM;
+    } finally {
+        ['BW_LITE_SERIAL_GIT_PREPARE', 'BW_LITE_NPM_PREPARE_LOCK'].forEach((key, i) => {
+            if (saved[i] === undefined) delete process.env[key];else process.env[key] = saved[i];
+        });
+    }
+    const cli = realpathSync(routed.BW_LITE_REAL_NPM);
+    const setup = `const path=require('node:path'),fs=require('node:fs');
+const npmRoot=path.dirname(path.dirname(fs.realpathSync(process.env.BW_LITE_REAL_NPM)));
+const Config=require(require.resolve('@npmcli/config',{paths:[npmRoot]}));
+const definitions=require(path.join(npmRoot,'node_modules/@npmcli/config/lib/definitions'));
+const config=new Config({...definitions,npmPath:npmRoot,argv:[]});`;
+    assert.equal(routed.PATH.split(':')[0], dirname(gate));
+    const baseline = await runNode({...routed, NODE_OPTIONS: f.env.NODE_OPTIONS || ''}, setup + '\nconsole.log(config.flat.npmBin);', f.root, [cli]);
+    assert.equal(baseline.status, 0, baseline.error);
+    assert.notEqual(baseline.output.trim(), gate, 'negative control must reproduce the PATH-only bypass');
+    const probe = await runNode(routed, setup + `
+const assert=require('node:assert/strict');assert.equal(config.flat.npmBin,${JSON.stringify(gate)});
+assert.equal(config.npmBin,path.join(npmRoot,'bin/npm-cli.js'),'lifecycle npm_execpath must remain the real CLI');
+const npm=require(path.join(npmRoot,'node_modules/pacote/lib/util/npm'));
+const env={...process.env,BW_LITE_REAL_NPM:${JSON.stringify(f.env.BW_LITE_REAL_NPM)}};
+Promise.all([1,2].map(()=>npm(config.flat.npmBin,['install','--force','--include=dev'],process.cwd(),env,{})))
+.then(()=>console.log('routed')).catch(error=>{console.error(error);process.exitCode=1;});`, f.root, [cli]);
+    assert.equal(probe.status, 0, probe.error);assert.match(probe.output, /routed/);
+    assert.equal(peak(f.events()), 1, 'actual Config/pacote route must serialize, not only direct gate invocation');
+    const unrelated = await runNode(routed, setup + '\nconsole.log(config.flat.npmBin);', f.root);
+    assert.equal(unrelated.status, 0, unrelated.error);
+    assert.equal(unrelated.output.trim(), cli, 'non-npm scripts must retain unmodified configuration');
 });

@@ -173,7 +173,9 @@ export const npmEnv = () => {
             throw new Error('Serial git preparation needs Linux and BW_LITE_NPM_PREPARE_LOCK');
         }
         env.BW_LITE_REAL_NPM = path.join(path.dirname(process.execPath), 'npm');
-        env.PATH = `${path.join(import.meta.dirname, 'lib', 'npm-prepare-gate')}${path.delimiter}${env.PATH}`;
+        const gate = path.join(import.meta.dirname, 'lib', 'npm-prepare-gate');
+        env.PATH = `${gate}${path.delimiter}${env.PATH}`;
+        env.NODE_OPTIONS = `${env.NODE_OPTIONS || ''} --require ${JSON.stringify(path.join(gate, 'config.cjs'))}`.trim();
     }
     return env;
 };

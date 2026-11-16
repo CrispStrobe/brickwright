@@ -57,7 +57,9 @@ BW_LITE_SERIAL_GIT_PREPARE=1 BW_LITE_NPM_PREPARE_LOCK="$PWD/artifacts/git-prepar
   node scripts/worktree-deps.mjs link
 ```
 
-This opt-in scheduler leaves top-level npm commands unchanged, permits
-descendant preparation without self-deadlock, and bounds queue waits. Existing
+This opt-in scheduler redirects npm's absolute preparation executable through
+the gate using its flat configuration. Lifecycle `npm_execpath` and non-npm
+compiler/script startup remain unchanged. It permits descendant preparation
+without self-deadlock and bounds queue waits. Existing
 RSS, disk and time guards still apply. Its synthetic subprocess controls are
 separate from the actual browser/native-engine proof.
