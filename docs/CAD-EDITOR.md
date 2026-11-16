@@ -7,6 +7,11 @@ Ports remain stable when other motors are deleted; duplicate/insert assigns
 unused ports. Existing projects without ports can use their joint IDs or assign
 ports in Simulate.
 
+For a complete mobile robot, open the
+[Scout TT rover example](CAD-SCOUT-TT-ROVER.md). Its SB3 includes
+the editable model and a two-wheel A/B program, alongside the physical print-kit
+link and build limitations.
+
 ```text
 WHEN green flag clicked:
   cad start

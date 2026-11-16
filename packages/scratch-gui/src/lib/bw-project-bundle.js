@@ -1,3 +1,4 @@
+import {CAD_PROJECT_PATH, CAD_STORAGE_KEY, CAD_PROJECT_LIMIT, inspectCadText, readCadText, getLiveCadText, setLiveCadText, getCadProjectGeneration, setCadProjectGeneration} from './bw-cad-project.js';
 import {sandboxWorld, SANDBOX_STORAGE_KEY} from './spike-arena/arena-sandbox.js';
 import {simLabRecord, SIM_LAB_STORAGE_KEY, SIM_LAB_LIMIT} from './bw-sim/model/sim-lab-persist.js';
 import {simLabSaveFailure, refuseSimLabSave, clearSimLabSaveFailure} from './bw-sim/model/sim-lab-save-state.js';
@@ -54,7 +55,7 @@ const utf8Size = value => new TextEncoder().encode(value).byteLength;
  * project, and copying them between machines would be a surprise.
  */
 const EXACT_KEYS = ['bw-circuit-autosave', 'bw-code-autosave', 'bw-ctl-widgets', SANDBOX_STORAGE_KEY,
-    SIM_LAB_STORAGE_KEY, FPGA_DESIGN_KEY, FPGA_GATES_KEY];
+    SIM_LAB_STORAGE_KEY, FPGA_DESIGN_KEY, FPGA_GATES_KEY, CAD_STORAGE_KEY];
 // The old per-widget prefix stays on the allowlist so a file saved while it
 // was documented (nothing ever wrote such keys, but a hand-built bundle
 // might) still restores; the panel itself serializes to ONE key above.
@@ -239,9 +240,13 @@ const inspectBrickwrightState = async buffer => {
     try {
         const JSZip = await loadJSZip();
         const zip = await JSZip.loadAsync(buffer);
+        const cadEntry = zip.file(CAD_PROJECT_PATH);
+        if (cadEntry?._data?.uncompressedSize > CAD_PROJECT_LIMIT) throw new Error('CAD project exceeds 16 MiB');
+        const cadText = cadEntry ? inspectCadText(await cadEntry.async('text')) : null;
+        const cadState = cadText === null ? {} : {[CAD_STORAGE_KEY]: cadText};
         const entry = zip.file(BUNDLE_PATH);
         if (!entry) {
-            return {outcome: 'legacy', version: 0, state: {}, found: false,
+            return {outcome: 'legacy', version: 0, state: cadState, found: Boolean(cadText),
                 report: {action: 'cleared', supportedVersion: BUNDLE_VERSION}};
         }
         if (entry._data?.uncompressedSize > MAX_BUNDLE_BYTES) {
@@ -250,7 +255,7 @@ const inspectBrickwrightState = async buffer => {
                 report: {action: 'refused', supportedVersion: BUNDLE_VERSION}};
         }
         const parsed = parseBundleDocument(await entry.async('text'));
-        return {...parsed, found: parsed.outcome === 'loaded', keys: 0};
+        return {...parsed, state: parsed.state ? {...parsed.state, ...cadState} : parsed.state, cadText, found: parsed.outcome === 'loaded', keys: 0};
     } catch (error) {
         return {outcome: 'invalid', found: false, keys: 0, reason: error.message,
             report: {action: 'refused', supportedVersion: BUNDLE_VERSION}};
@@ -262,13 +267,16 @@ const applyBrickwrightInspection = (inspection, storage = localStorage) => {
     if (inspection.outcome !== 'loaded' && inspection.outcome !== 'legacy') return inspection;
     const previousPreserved = preservedBundle;
     const previousSimLabRefusal = simLabSaveFailure();
+    const previousCadText = getLiveCadText();
+    const previousCadGeneration = getCadProjectGeneration();
     const result = replaceProjectState(storage, inspection.state || {});
     if (result.outcome !== 'loaded') return {...result, report: inspection.report};
     clearSimLabSaveFailure();
+    setLiveCadText(undefined);
     preservedBundle = inspection.outcome === 'loaded' && inspection.version === BUNDLE_VERSION ?
         {outcome: 'loaded', document: inspection.passthrough} : null;
     return {...result, outcome: inspection.outcome, version: inspection.version,
-        found: inspection.outcome === 'loaded', report: inspection.report, previousPreserved, previousSimLabRefusal};
+        found: inspection.outcome === 'loaded', report: inspection.report, previousPreserved, previousSimLabRefusal, previousCadText, previousCadGeneration};
 };
 
 /** Restore auxiliary state when the Scratch half fails after a successful apply. */
@@ -279,6 +287,8 @@ const rollbackBrickwrightInspection = (applied, storage = localStorage) => {
     const restored = replaceProjectState(storage, applied.previous);
     if (restored.outcome === 'loaded') {
         preservedBundle = applied.previousPreserved || null;
+        setLiveCadText(applied.previousCadText);
+        setCadProjectGeneration(applied.previousCadGeneration ?? getCadProjectGeneration());
         if (applied.previousSimLabRefusal) refuseSimLabSave(applied.previousSimLabRefusal);
         else clearSimLabSaveFailure();
     }
@@ -297,6 +307,9 @@ const collectState = () => {
         // Private mode, or storage disabled. An empty bundle is correct here:
         // there is nothing to carry, and refusing to save would be worse.
     }
+    const cad = readCadText();
+    if (cad !== null) out[CAD_STORAGE_KEY] = cad;
+    else delete out[CAD_STORAGE_KEY];
     return out;
 };
 
@@ -337,6 +350,7 @@ const attachBrickwrightState = async (blob, {now = () => new Date(), mutateZip =
     const pendingSimLabFailure = simLabSaveFailure();
     if (pendingSimLabFailure || simLabSaveRefusals.length) throw new Error(pendingSimLabFailure || simLabSaveRefusals[0]);
     const state = collectState();
+    if (state[CAD_STORAGE_KEY]) inspectCadText(state[CAD_STORAGE_KEY]);
     if (Object.keys(state).length === 0 && !preservedBundle && !mutateZip) return blob;
     try {
         const JSZip = await loadJSZip();
@@ -361,6 +375,9 @@ const attachBrickwrightState = async (blob, {now = () => new Date(), mutateZip =
             }
             zip.file(BUNDLE_PATH, serialized);
         }
+        const cadText = preservedBundle?.outcome === 'future' ? preservedBundle.cadText : state[CAD_STORAGE_KEY];
+        if (cadText) zip.file(CAD_PROJECT_PATH, inspectCadText(cadText));
+        else zip.remove(CAD_PROJECT_PATH);
         if (mutateZip) await mutateZip(zip);
         return await zip.generateAsync({type: 'blob', compression: 'DEFLATE'});
     } catch (e) {
@@ -381,7 +398,7 @@ const extractBrickwrightState = async buffer => {
     try {
         const inspection = await inspectBrickwrightState(buffer);
         if (inspection.outcome === 'future') {
-            preservedBundle = {outcome: 'future', text: inspection.passthroughText};
+            preservedBundle = {outcome: 'future', text: inspection.passthroughText, cadText: inspection.cadText};
             return inspection;
         }
         if (inspection.outcome === 'invalid') {

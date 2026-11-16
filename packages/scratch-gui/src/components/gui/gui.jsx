@@ -1,3 +1,4 @@
+import '../../lib/bw-color-mode.css';
 import classNames from 'classnames';
 import omit from 'lodash.omit';
 import PropTypes from 'prop-types';
@@ -8,6 +9,8 @@ import {connect} from 'react-redux';
 import MediaQuery from 'react-responsive';
 import {Tab, Tabs, TabList, TabPanel} from 'react-tabs';
 import CircuitTab from '../tw-pseudocode/circuit-tab.jsx';
+import {installCadProgramAPI, CAD_OPEN_EVENT} from '../../lib/bw-cad-program.js';
+import {getCadEnabled, CAD_TOGGLE_EVENT} from '../../lib/bw-cad-preferences.js';
 import {getFpgaEnabled, FPGA_TOGGLE_EVENT} from '../../lib/bw-fpga-preferences.js';
 import {pinsToValue} from '../../lib/bw-fpga/pin-value.js';
 // FpgaTab ships only in a build that carries it (BW_ENABLE_FPGA), and even then
@@ -18,6 +21,9 @@ import {pinsToValue} from '../../lib/bw-fpga/pin-value.js';
 // code is emitted — the build-time drop the payload guards depend on is intact.
 const FpgaTab = process.env.BW_ENABLE_FPGA
     ? React.lazy(() => import(/* webpackChunkName: "bw-fpga-tab" */ '../tw-pseudocode/fpga-tab.jsx'))
+    : null;
+const CadTab = process.env.BW_ENABLE_CAD
+    ? React.lazy(() => import(/* webpackChunkName: "bw-cad-tab" */ '../tw-pseudocode/cad-tab.jsx'))
     : null;
 const MicrobitSimPane = React.lazy(() =>
     import(/* webpackChunkName: "bw-microbit-sim" */ '../tw-pseudocode/microbit-sim-pane.jsx')
@@ -161,6 +167,7 @@ const RobotLabTab = React.lazy(() =>
 const ROBOT_LAB_OPEN_EVENT = 'bw-open-robot-lab';
 
 const GUIComponent = props => {
+    React.useEffect(() => { document.documentElement.dataset.bwColorMode = props.theme === 'dark' ? 'dark' : 'light'; }, [props.theme]);
     const [starterOpen, setStarterOpen] = React.useState(false);
     // RUNTIME: has the user switched the FPGA tab on (Settings ▸ FPGA lab)? It
     // ships hidden even when built. The settings menu and this tab list are
@@ -172,6 +179,13 @@ const GUIComponent = props => {
         return () => window.removeEventListener(FPGA_TOGGLE_EVENT, onToggle);
     }, []);
     const showFpga = FPGA_BUILT && fpgaEnabled;
+    const [cadEnabled, setCadEnabled] = React.useState(getCadEnabled);
+    React.useEffect(() => {
+        const onToggle = () => setCadEnabled(getCadEnabled());
+        window.addEventListener(CAD_TOGGLE_EVENT, onToggle);
+        return () => window.removeEventListener(CAD_TOGGLE_EVENT, onToggle);
+    }, []);
+    const showCad = process.env.BW_ENABLE_CAD && cadEnabled;
     const [starterBusy, setStarterBusy] = React.useState(false);
     const [starterError, setStarterError] = React.useState('');
     const [lessonsOpen, setLessonsOpen] = React.useState(false);
@@ -254,7 +268,34 @@ const GUIComponent = props => {
     // answered here: show the tab, which then mounts visible and takes the hub.
     const [robotLabWanted, setRobotLabWanted] = React.useState(false);
     const robotLabIndex = robotLabTabIndex(showFpga);
-    if (!robotLabWanted && props.activeTabIndex === robotLabIndex) setRobotLabWanted(true);
+    // Append CAD after Robots so every existing tab keeps its index.
+    const cadTabIndex = robotLabIndex + 1;
+    const previousFpgaVisibility = React.useRef(showFpga);
+    const fpgaLayoutChanging = previousFpgaVisibility.current !== showFpga;
+    React.useEffect(() => {
+        const wasShown = previousFpgaVisibility.current;
+        previousFpgaVisibility.current = showFpga;
+        if (wasShown === showFpga) return;
+        const index = props.activeTabIndex;
+        if (showFpga && index >= 5) props.onActivateTab(index + 1);
+        else if (!showFpga && index > 5) props.onActivateTab(index - 1);
+        else if (!showFpga && index === 5) props.onActivateTab(4);
+    }, [showFpga, props.activeTabIndex, props.onActivateTab]);
+    const [cadWanted, setCadWanted] = React.useState(false);
+    React.useEffect(() => {
+        if (!process.env.BW_ENABLE_CAD || !props.vm?.runtime) return undefined;
+        return installCadProgramAPI(props.vm.runtime);
+    }, [props.vm]);
+    React.useEffect(() => {
+        const open = () => { if (showCad) { setCadWanted(true); props.onActivateTab(cadTabIndex); } };
+        window.addEventListener(CAD_OPEN_EVENT, open);
+        return () => window.removeEventListener(CAD_OPEN_EVENT, open);
+    }, [showCad, cadTabIndex, props.onActivateTab]);
+    if (showCad && !cadWanted && !fpgaLayoutChanging && props.activeTabIndex === cadTabIndex) setCadWanted(true);
+    React.useEffect(() => {
+        if (!showCad && props.activeTabIndex === cadTabIndex) props.onActivateTab(robotLabIndex);
+    }, [showCad, props.activeTabIndex, props.onActivateTab, cadTabIndex, robotLabIndex]);
+    if (!robotLabWanted && !fpgaLayoutChanging && props.activeTabIndex === robotLabIndex) setRobotLabWanted(true);
     React.useEffect(() => {
         const onOpen = () => {
             setRobotLabWanted(true);
@@ -1045,6 +1086,12 @@ const GUIComponent = props => {
                                         </svg>
                                         <span data-bw-tab-label=""><FormattedMessage defaultMessage="Robots" description="Brickwright Robot Lab (3D LEGO model and physics) tab" id="gui.gui.robotLabTab" /></span>
                                     </Tab>
+                                    {showCad ? <Tab className={tabClassNames.tab}
+                                        title={intl.formatMessage({id: 'gui.gui.cadTab', defaultMessage: 'CAD'})}
+                                        aria-label={intl.formatMessage({id: 'gui.gui.cadTab', defaultMessage: 'CAD'})}>
+                                        <span aria-hidden="true" data-bw-tab-icon="">◇</span>
+                                        <span data-bw-tab-label="">{'CAD'}</span>
+                                    </Tab> : null}
                                 </TabList>
                                 <TabPanel className={tabClassNames.tabPanel}>
                                     {middleContent === 'code' ? (
@@ -1125,6 +1172,13 @@ const GUIComponent = props => {
                                         </React.Suspense></EditorErrorBoundary>
                                     ) : <div data-testid="bw-robot-lab-tab" data-state="idle" />}
                                 </TabPanel>
+                                {showCad ? <TabPanel className={tabClassNames.tabPanel}>
+                                    {cadWanted ? <EditorErrorBoundary name="CAD">
+                                        <React.Suspense fallback={<div role="status">{intl.locale.startsWith('de') ? 'CAD wird geladen…' : 'Loading CAD…'}</div>}>
+                                            <CadTab isVisible={activeTabIndex === cadTabIndex} locale={intl.locale} theme={theme} />
+                                        </React.Suspense>
+                                    </EditorErrorBoundary> : null}
+                                </TabPanel> : null}
                             </Tabs>
                             <button
                                 type="button"

@@ -15,10 +15,11 @@ import styles from './settings-menu.css';
 import dropdownCaret from './dropdown-caret.svg';
 import settingsIcon from './icon--settings.svg';
 import {selectLocale} from '../../reducers/locales.js';
-import {DEFAULT_THEME, HIGH_CONTRAST_THEME, themeMap} from '../../lib/themes';
+import {DEFAULT_THEME, DARK_THEME, HIGH_CONTRAST_THEME, themeMap} from '../../lib/themes';
 import {persistTheme} from '../../lib/themes/themePersistance';
 import {setTheme} from '../../reducers/theme.js';
 import {hardReload} from '../../lib/hard-reload.js';
+import {getCadEnabled, setCadEnabled} from '../../lib/bw-cad-preferences.js';
 import {getFpgaEnabled, setFpgaEnabled} from '../../lib/bw-fpga-preferences.js';
 import {getLegacySpikeVisible, setLegacySpikeVisible} from '../../lib/spike-legacy-debug.js';
 
@@ -60,7 +61,7 @@ const SettingsMenu = ({intl, canChangeLanguage, canChangeTheme, isRtl, onRequest
     const workspaceSelect = (label, value, onChange, options, title) => (
         <label className={styles.preferenceRow} title={title}>
             <span>{label}</span>
-            <select value={value} onChange={event => onChange(event.target.value)}>
+            <select aria-label={label} value={value} onChange={event => onChange(event.target.value)}>
                 {options.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
         </label>
@@ -121,6 +122,12 @@ const SettingsMenu = ({intl, canChangeLanguage, canChangeTheme, isRtl, onRequest
                                     {value: '0', label: t('gui.workspace.off', 'Off')},
                                     {value: '1', label: t('gui.workspace.on', 'On')}
                                 ], t('gui.workspace.fpgaHint', 'Show the ⬢ FPGA tab: synthesise Verilog for the Tang Nano 20K and drive the on-screen board')) : null}
+                            {process.env.BW_ENABLE_CAD ? workspaceSelect(
+                                t('gui.workspace.cad', /^de/i.test(intl.locale) ? 'CAD-Editor' : 'CAD Editor'), getCadEnabled() ? '1' : '0',
+                                value => { setCadEnabled(value === '1'); onRequestClose(); }, [
+                                    {value: '0', label: t('gui.workspace.off', 'Off')},
+                                    {value: '1', label: t('gui.workspace.on', 'On')}
+                                ], t('gui.workspace.cadHint', /^de/i.test(intl.locale) ? 'CAD-Tab zum Entwerfen von Körpern anzeigen' : 'Show the CAD tab to design solid models')) : null}
                             {workspaceSelect(t('gui.workspace.legacySpike', 'Legacy SPIKE extensions'), getLegacySpikeVisible() ? '1' : '0',
                                 value => { setLegacySpikeVisible(value === '1'); onRequestClose(); }, [
                                     {value: '0', label: t('gui.workspace.off', 'Off')},
@@ -223,7 +230,7 @@ const SettingsMenu = ({intl, canChangeLanguage, canChangeTheme, isRtl, onRequest
 
 const PreferencesSubmenuComponent = ({intl, canChangeLanguage, canChangeTheme, currentLocale, currentTheme, isRtl, onChangeLocale, onChangeTheme, onRequestClose}) => {
     const t = (id, defaultMessage) => intl.formatMessage({id, defaultMessage});
-    const enabledThemes = [DEFAULT_THEME, HIGH_CONTRAST_THEME];
+    const enabledThemes = [DEFAULT_THEME, DARK_THEME, HIGH_CONTRAST_THEME];
 
     return (
         <Submenu className={styles.preferencesSubmenu} place={isRtl ? 'left' : 'right'}>

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
 import JSZip from 'jszip';
 import {createCadRoverProject, CAD_ROVER_PROGRAM} from '../scripts/create-cad-rover-project.mjs';
 import {inspectBrickwrightState} from '../overlay/scratch-gui/src/lib/bw-project-bundle.js';
@@ -19,6 +20,10 @@ test('rover SB3 preserves the exact CAD document and compiles concurrent two-whe
     const archive = await JSZip.loadAsync(bytes);
     assert.equal(await archive.file('brickwright/cad.json').async('text'), text);
     assert.equal(await archive.file('brickwright/tt-rover-program.txt').async('text'), CAD_ROVER_PROGRAM);
+    assert.equal(await archive.file('brickwright/licenses/ADAFRUIT-MIT-LICENSE.txt').async('text'),
+        await readFile(new URL('../licenses/adafruit-cad-parts-MIT.txt', import.meta.url), 'utf8'));
+    assert.equal(await archive.file('brickwright/licenses/BRICKWRIGHT-BSD-3-CLAUSE.txt').async('text'),
+        await readFile(new URL('../LICENSE', import.meta.url), 'utf8'));
     const project = JSON.parse(await archive.file('project.json').async('text'));
     assert.deepEqual(project.extensions, ['cadlab']);
     const byId = Object.assign({}, ...project.targets.map(target => target.blocks));
@@ -43,3 +48,4 @@ test('rover packaging rejects missing drive ports and invalid SDK geometry', asy
     invalid.nodes.base.size[0] = -1;
     await assert.rejects(createCadRoverProject(JSON.stringify(invalid)), /Invalid CAD project/);
 });
+
