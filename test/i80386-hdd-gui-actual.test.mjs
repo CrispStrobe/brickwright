@@ -6851,27 +6851,34 @@ const assertGuiCuiSelection = (consumer, selected, dependency='bw-circuit-ui') =
     assert.deepEqual(selected,[...Array(4).fill('github:CrispStrobe/'+dependency+'#'+consumer),
         ...Array(2).fill('git+ssh://git@github.com/CrispStrobe/'+dependency+'.git#'+consumer),consumer]);
 };
-test('GUI consumer explicitly matches current canonical Board and CUI declarations', () => {
-    const controller=fs.readFileSync(root+'scripts/run-i80386-hdd-gui-actual.py','utf8');
-    const reader=fs.readFileSync(root+'scripts/read-i80386-hdd-gui-originals.py','utf8');
-    const pattern=/^FINITE_V10_PINS = \{'bw-board':'([0-9a-f]{40})','bw-circuit-ui':'([0-9a-f]{40})','sb3-creator':'([0-9a-f]{40})'\}$/m;
-    for(const [dependency,index] of [['bw-board',1],['bw-circuit-ui',2]]){
-        const consumer=controller.match(pattern)?.[index], selected=guiCuiSelection(dependency);
+test('live GUI declarations and frozen finite-v10 consumers retain independent identities', () => {
+    // These sealed consumers validate the already measured finite-v10 role.
+    // Moving today's package pin must not relabel their original qualification.
+    const frozen = new Map([
+        ['scripts/run-i80386-hdd-gui-actual.py','48f4a46bad836b352181f5c200e4fd65970e5cd54463aa33a56f1d194d32e0c3'],
+        ['scripts/read-i80386-hdd-gui-originals.py','d5c7c652549a2bdb1b603f401f8d4af83ee60a8c1e88c76e2cf5812f74aac011'],
+    ]);
+    const assertFrozen = (source, expected) => assert.equal(createHash('sha256').update(source).digest('hex'), expected);
+    for (const [file, expected] of frozen) {
+        const source=fs.readFileSync(root+file,'utf8');assertFrozen(source,expected);
+        assert.throws(()=>assertFrozen(source+'# unreviewed drift\n',expected));
+        const changed=source.replace(/^FINITE_V10_PINS = .*$/m,"FINITE_V10_PINS = {} ");
+        assert.notEqual(changed,source);assert.throws(()=>assertFrozen(changed,expected));
+    }
+    const pins=JSON.parse(fs.readFileSync(root+'vendor-pins.json','utf8'));
+    for(const dependency of ['bw-board','bw-circuit-ui']){
+        const consumer=pins[dependency],selected=guiCuiSelection(dependency);
         assertGuiCuiSelection(consumer,selected,dependency);
-        assertGuiCuiSelection(reader.match(pattern)?.[index],selected,dependency);
         assert.throws(()=>assertGuiCuiSelection('0'.repeat(40),selected,dependency));
         for(let i=0;i<selected.length;i++){
             const drift=[...selected];drift[i]=drift[i].replace(consumer,'0'.repeat(40));
             assert.throws(()=>assertGuiCuiSelection(consumer,drift,dependency));
         }
-        for(const source of [controller,reader]){
-            const changed=source.replace(pattern,line=>line.replace(consumer,'0'.repeat(40)));
-            assert.notEqual(changed,source);
-            assert.throws(()=>assertGuiCuiSelection(changed.match(pattern)?.[index],selected,dependency));
-        }
     }
-    assert.doesNotMatch(reader,/^CUI = /m,'unused historical reader literal removed without changing old validators');
+    assert.doesNotMatch(fs.readFileSync(root+'scripts/read-i80386-hdd-gui-originals.py','utf8'),/^CUI = /m,
+        'unused historical reader literal removed without changing old validators');
 });
+
 const producerV10Controls = String.raw`
 class ProducerV10(unittest.TestCase):
     def test_actual9_dispatch_inputs_admit_only_omitted_empty_historical_inputs(self):
