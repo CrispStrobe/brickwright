@@ -83,3 +83,11 @@ notices and hashes using the currently pinned SDK and reports that SDK's
 commit separately.
 Updating the SDK therefore never changes the saved example. Native apps need to be rebuilt to
 include a newly pinned SDK.
+
+## Carrier completion, 16 November 2026
+
+The [completion receipt](evidence/2026-11-16-scout-tt-completion.md) records the
+clean CAD SDK pin for the bolted Feather RP2040/DRV8833 carrier, the 18 focused
+Lite checks, and verification of the final saved Scout project. The kit's
+assembly guide includes the board fasteners, print settings and fit checks.
+The saved model and SB3 retain their verified identities when the SDK is updated.
