@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
 
 // Exact policy from the reviewed workflow/ref cancellation change. A projection
 // changes only this block; historical hashes still bind every other byte.
@@ -41,10 +43,29 @@ const hddReplacements = [
         "createHash('sha256').update(workflow)"
     ]
 ];
+// Exact host-fixture repairs are inverted before the older concurrency delta.
+// This receipt is source review data, never a general historical-file role.
+const fixtureReviewRaw = readFileSync(new URL('../fixtures/i80386-fixture-path-review.json', import.meta.url));
+assert.equal(createHash('sha256').update(fixtureReviewRaw).digest('hex'), '266441dffb4eaedbb363939bcd015d7256d90b40a32bcc0c1afbf271798456cf');
+const fixtureReview = JSON.parse(fixtureReviewRaw);
+assert.equal(fixtureReview.schema, 'bw.x86-fixture-source-review.v1');
+assert.equal(fixtureReview.file, 'test/i80386-hdd-gui-actual.test.mjs');
+assert.equal(fixtureReview.changes.length, 10);
+export const hddBeforeFixtureControl = (file, text) => {
+    if (file !== fixtureReview.file) return text;
+    let held = text;
+    for (const {before, after} of fixtureReview.changes) {
+        assert.equal(held.split(after).length, 2, 'one exact reviewed fixture hunk');
+        held = held.replace(after, before);
+    }
+    return held;
+};
+
 export const hddBeforeConcurrencyControl = (file, text) => {
     if (file !== 'test/i80386-hdd-gui-actual.test.mjs') return text;
-    assert.equal(text.split(hddHelper).length, 2, 'exact reviewed HDD projection helper');
-    let held = text.replace(hddHelper, '');
+    const fixture = hddBeforeFixtureControl(file, text);
+    assert.equal(fixture.split(hddHelper).length, 2, 'exact reviewed HDD projection helper');
+    let held = fixture.replace(hddHelper, '');
     for (const [current, previous] of hddReplacements) {
         assert.equal(held.split(current).length, 2, 'one exact reviewed HDD projection call');
         held = held.replace(current, previous);

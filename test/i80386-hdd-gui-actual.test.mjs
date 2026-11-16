@@ -232,6 +232,15 @@ class FixturePaths(unittest.TestCase):
             self.assertEqual(len(mocked),3,'only unrelated siblings and synthetic tool paths use the mock')
             child.unlink()
             with self.assertRaises(FileNotFoundError):selected(child)
+        owner=Originals();typed=owner.selected_empty_source_fixture();observed={}
+        typed(c.EMPTY_PYTHON_PATH,owner.empty_selection()[c.EMPTY_PYTHON_PATH],observed)
+        self.assertEqual(observed['read'],{'byteLength':0,'sha256':H(b''),'eof':True})
+        self.assertTrue(observed['close']['attempted'] and observed['close']['succeeded'])
+        for path,selection in [('/different-source',owner.empty_selection()[c.EMPTY_PYTHON_PATH]),
+          (c.EMPTY_PYTHON_PATH,dict(owner.empty_selection()[c.EMPTY_PYTHON_PATH],byteLength=False))]:
+            target={}
+            with self.assertRaisesRegex(ValueError,'fixture selected empty Python source identity'):typed(path,selection,target)
+            self.assertEqual(target,{})
 
 PNG=b'\x89PNG\r\n\x1a\nmanufactured'
 def zip_(files,compression=zipfile.ZIP_DEFLATED):
@@ -1291,6 +1300,16 @@ class Originals(unittest.TestCase):
             if cut=='close-error' or close_error:raise OSError('CLOSE_FAILED')
         with patch.object(c.Path,'lstat',named),patch.object(c.Path,'resolve',return_value=pathlib.Path(c.EMPTY_PYTHON_PATH)),patch.object(c.os,'open',side_effect=open_),patch.object(c.os,'fstat',side_effect=held),patch.object(c.os,'read',side_effect=read_),patch.object(c.os,'close',side_effect=close_):
             yield events
+    def selected_empty_source_fixture(self):
+        # Exercise the real typed reader against its existing manufactured
+        # kernel edges, independently of the host's Python installation.
+        observed={};selection=self.empty_selection()[c.EMPTY_PYTHON_PATH]
+        with self.empty_source_edges():c.read_empty_python_source(c.EMPTY_PYTHON_PATH,selection,observed)
+        def selected(path,admitted,target):
+            if type(path) is not str or path!=c.EMPTY_PYTHON_PATH or E(admitted)!=E(selection):
+                raise ValueError('fixture selected empty Python source identity')
+            target.update(copy.deepcopy(observed))
+        return selected
     def typed_inventory_fixture(self,failed=False,cut=None,close_error=False):
         faults={('lstat','/missing-font'):FileNotFoundError('FIRST_FONT')} if failed else {}
         files=['/node','/usr/bin/python3.12','/chrome','/usr/bin/git','/usr/bin/gh']+(['/missing-font'] if failed else [])
@@ -4034,7 +4053,7 @@ class Originals(unittest.TestCase):
     @patch.object(c,'FINITE_INVENTORY_V7_ENABLED',True)
     def test_finite_v7_real_scanner_index_only_and_failed_partial(self):
         paths=['/node','/usr/bin/python3.12','/chrome','/usr/bin/git','/usr/bin/gh','/usr/bin/curl','/usr/lib/libselected.so']
-        real_lstat=os.lstat
+        real_lstat=os.lstat;typed_source=self.selected_empty_source_fixture()
         with tempfile.TemporaryDirectory(dir=root.parent) as temporary:
             checkout=pathlib.Path(temporary)
             for name in c.INSTALLED_V6_CRITICAL:
@@ -4061,8 +4080,8 @@ class Originals(unittest.TestCase):
                             name=str(pathlib.Path(path).relative_to(checkout))
                             return E(c.FINITE_V7_PINS) if name=='vendor-pins.json' else ('source:'+name).encode()
                         return fake_regular(path,cap)
-                    selected_lstat=fixture_lstat((checkout,c.EMPTY_PYTHON_PATH),real_lstat,fake_lstat)
-                    with patch.object(c,'regular',side_effect=selected_regular),patch.object(c.os,'lstat',side_effect=selected_lstat),patch.object(c,'FINITE_INVENTORY_V7_ENABLED',True),patch.object(c,'FINITE_V7_CUI_WITNESSES',tiny_witnesses),patch.object(r,'FINITE_V7_CUI_WITNESSES',tiny_witnesses):
+                    selected_lstat=fixture_lstat((checkout,),real_lstat,fake_lstat)
+                    with patch.object(c,'read_empty_python_source',side_effect=typed_source),patch.object(c,'regular',side_effect=selected_regular),patch.object(c.os,'lstat',side_effect=selected_lstat),patch.object(c,'FINITE_INVENTORY_V7_ENABLED',True),patch.object(c,'FINITE_V7_CUI_WITNESSES',tiny_witnesses),patch.object(r,'FINITE_V7_CUI_WITNESSES',tiny_witnesses):
                         value=c.inventory_observation(raw,pin,checkout,env,'/out/a.json')
                         selected={'schema':'bw.gui-hdd.inventory-admission.v7' if state=='present' else 'bw.gui-hdd.inventory-failure-expectation.v7',
                           'source':source,'template':ROW(raw),'runId':90,'workflowSha':'d'*40,
@@ -4178,7 +4197,7 @@ class Originals(unittest.TestCase):
         self.assertTrue(all(value[key] is False for key in ('fontSelectionProved','browserFontSelectionProved','guestApproved')))
     def test_finite_v6_real_installed_scanner_collector_and_reader_index_only(self):
         paths=['/node','/usr/bin/python3.12','/chrome','/usr/bin/git','/usr/bin/gh','/usr/bin/curl','/usr/lib/libselected.so']
-        real_lstat=os.lstat
+        real_lstat=os.lstat;typed_source=self.selected_empty_source_fixture()
         with tempfile.TemporaryDirectory(dir=root.parent) as temporary:
             checkout=pathlib.Path(temporary)
             for name in c.INSTALLED_V6_CRITICAL:
@@ -4199,8 +4218,8 @@ class Originals(unittest.TestCase):
                         if str(path)==str(checkout/'gui-finite-inventory-v6/guard-admission.json'):return guard_raw
                         if str(path).startswith(str(checkout)+'/'):return ('source:'+str(pathlib.Path(path).relative_to(checkout))).encode()
                         return fake_regular(path,cap)
-                    selected_lstat=fixture_lstat((checkout,c.EMPTY_PYTHON_PATH),real_lstat,fake_lstat)
-                    with patch.object(c,'regular',side_effect=selected_regular),patch.object(c.os,'lstat',side_effect=selected_lstat),patch.object(c,'FINITE_INVENTORY_V6_ENABLED',True):
+                    selected_lstat=fixture_lstat((checkout,),real_lstat,fake_lstat)
+                    with patch.object(c,'read_empty_python_source',side_effect=typed_source),patch.object(c,'regular',side_effect=selected_regular),patch.object(c.os,'lstat',side_effect=selected_lstat),patch.object(c,'FINITE_INVENTORY_V6_ENABLED',True):
                         value=c.inventory_observation(raw,pin,checkout,env,'/out/a.json')
                 variables={'BW_FINITE_INVENTORY_V6_SHA256':pin,
                   'BW_FINITE_INVENTORY_V6_TEMPLATE_B64':base64.b64encode(raw).decode()}
