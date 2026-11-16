@@ -251,3 +251,88 @@ for (const timedOut of [false, true]) test(`a real owner ${timedOut ? 'timeout' 
         assert.equal(f.api.state().phase, 'error'); assert.equal(f.flags, 0);
     } finally {f.close();}
 });
+
+for (const phase of ['reset', 'acquireExternalClock']) {
+    for (const lateFailure of [false, true]) test(`Stop settles pending CAD ${phase} before a late ${lateFailure ? 'failure' : 'reply'} and preserves restart`, async t => {
+        const f = fixture(t, {ready: true});
+        let resolveFirst, rejectFirst, calls = 0, oldReleases = 0, currentReleases = 0;
+        const waiting = new Promise((resolve, reject) => {resolveFirst = resolve; rejectFirst = reject;});
+        const lease = release => ({snapshot: () => structuredClone(f.frame), release});
+        const original = f.runtime.cadSimulation[phase];
+        f.runtime.cadSimulation[phase] = (...args) => ++calls === 1 ? waiting
+            : phase === 'acquireExternalClock' ? Promise.resolve(lease(() => {currentReleases++;})) : original(...args);
+        try {
+            const first = f.start(); await nextTurn(); f.owners[0].ready(); await nextTurn();
+            assert.equal(calls, 1); assert.equal(first.settled, false);
+            f.api.stop(); await nextTurn();
+            assert.equal(first.settled, true, 'Stop must settle Run without waiting for the CAD worker');
+            assert.equal(first.error, undefined); assert.equal(f.board.powered, false);
+            const second = f.start(); await nextTurn(); f.owners[1].ready(); await nextTurn();
+            assert.equal(second.settled, true); assert.equal(second.error, undefined);
+            const clock = f.runtime.bwProgramClock;
+            if (lateFailure) rejectFirst(new Error('cancelled CAD worker failed'));
+            else resolveFirst(phase === 'acquireExternalClock' ? lease(() => {oldReleases++;}) : undefined);
+            await nextTurn();
+            assert.equal(oldReleases, phase === 'acquireExternalClock' && !lateFailure ? 1 : 0);
+            assert.equal(currentReleases, 0, 'the old acquisition must not release the new clock');
+            assert.equal(f.api.state().phase, 'running'); assert.equal(f.api.state().error, '');
+            assert.equal(f.runtime.bwProgramClock, clock); assert.equal(f.board.powered, true);
+            assert.equal(f.flags, 1);
+        } finally {
+            // Settle the worker even if the old-source cancellation assertion failed.
+            resolveFirst(phase === 'acquireExternalClock' ? lease(() => {oldReleases++;}) : undefined);
+            await nextTurn(); f.close();
+        }
+    });
+
+    test(`Disposal settles pending CAD ${phase} and releases a late lease`, async t => {
+        const f = fixture(t, {ready: true});
+        let resolveFirst, oldReleases = 0;
+        const waiting = new Promise(resolve => {resolveFirst = resolve;});
+        f.runtime.cadSimulation[phase] = () => waiting;
+        try {
+            const run = f.start(); await nextTurn(); f.owners[0].ready(); await nextTurn();
+            f.dispose(); await nextTurn();
+            assert.equal(run.settled, true); assert.equal(run.error, undefined);
+            assert.equal(f.runtime.cadCircuitSimulation, undefined); assert.equal(f.board.powered, false);
+            resolveFirst(phase === 'acquireExternalClock' ? {release () {oldReleases++;}} : undefined);
+            await nextTurn();
+            assert.equal(oldReleases, phase === 'acquireExternalClock' ? 1 : 0);
+            assert.equal(f.flags, 0); assert.equal(f.runtime.bwProgramClock, undefined);
+        } finally {
+            resolveFirst(phase === 'acquireExternalClock' ? {release () {oldReleases++;}} : undefined);
+            await nextTurn(); f.close();
+        }
+    });
+}
+
+for (const phase of ['reset', 'acquireExternalClock']) {
+    test(`a real CAD ${phase} failure remains observable and returns circuit ownership`, async t => {
+        const f = fixture(t, {ready: true}), error = new Error(`CAD ${phase} failed`);
+        f.runtime.cadSimulation[phase] = async () => {throw error;};
+        try {
+            const run = f.start(); await nextTurn(); f.owners[0].ready(); await nextTurn();
+            assert.equal(run.settled, true); assert.equal(run.error, error);
+            assert.equal(f.api.state().phase, 'error'); assert.equal(f.api.state().error, error.message);
+            assert.equal(f.board.powered, false); assert.equal(f.runtime.bwProgramClock, undefined);
+            assert.equal(f.resources.clocks.size, 0); assert.equal(f.resources.ports.size, 0);
+            assert.equal(f.flags, 0);
+        } finally {f.close();}
+    });
+
+    test(`Stop inside CAD ${phase} prevents a late startup`, async t => {
+        const f = fixture(t, {ready: true});
+        let released = 0;
+        f.runtime.cadSimulation[phase] = () => {
+            f.api.stop();
+            return phase === 'acquireExternalClock' ? {release () {released++;}} : undefined;
+        };
+        try {
+            const run = f.start(); await nextTurn(); f.owners[0].ready(); await nextTurn();
+            assert.equal(run.settled, true); assert.equal(run.error, undefined);
+            assert.equal(released, phase === 'acquireExternalClock' ? 1 : 0);
+            assert.equal(f.api.state().phase, 'idle'); assert.equal(f.board.powered, false);
+            assert.equal(f.flags, 0); assert.equal(f.runtime.bwProgramClock, undefined);
+        } finally {f.close();}
+    });
+}

@@ -5,6 +5,27 @@ import {CAD_TOGGLE_EVENT} from '../bw-cad-preferences.js';
 import {SimLabClock} from '../bw-sim/sim-clock.js';
 export const STATUS_EVENT = 'bw-cad-circuit-status';
 const stoppedError = () => new Error('Coupled simulation was stopped');
+// CAD worker operations can outlive the bridge's preparation attempt. Stop must
+// settle its Run immediately, while a clock arriving afterwards is still released.
+const prepareCad = (signal, action, discard = () => {}) => new Promise((resolve, reject) => {
+    let settled = false;
+    const finish = (callback, value) => {
+        if (settled) return;
+        settled = true; signal.removeEventListener('abort', abort); callback(value);
+    };
+    const abort = () => finish(reject, stoppedError());
+    if (signal.aborted) {abort(); return;}
+    signal.addEventListener('abort', abort, {once: true});
+    try {
+        Promise.resolve(action()).then(value => {
+            if (settled) {
+                try {discard(value);} catch { /* A cancelled lease cannot fail a later run. */ }
+                return;
+            }
+            finish(resolve, value);
+        }, error => finish(reject, error));
+    } catch (error) {finish(reject, error);}
+});
 const circuitOwner = (board, signal) => new Promise((resolve, reject) => {
     let timeout, settled = false;
     const finish = (callback, value) => {
@@ -71,8 +92,8 @@ export function installCircuitCadBridge(vm) {
                 const board=await circuitReady(runtime,controller.signal);check();
                 // Acquire the host before compiling or resetting: the designer relinquishes its clock.
                 ownedBoard=board;ownsCircuit=true;await circuitOwner(board,controller.signal);check();
-                await runtime.cadSimulation.reset();check();
-                const acquired=await runtime.cadSimulation.acquireExternalClock();
+                await prepareCad(controller.signal, () => runtime.cadSimulation.reset());check();
+                const acquired=await prepareCad(controller.signal, () => runtime.cadSimulation.acquireExternalClock(), lease => lease.release());
                 if(disposed || generation!==expected){acquired.release();check();}
                 mechanics=acquired;
                 if(globalThis.__bwCad?.editor?.session.state.document.id!==config.cadDocumentId)throw new Error('These connections belong to a different CAD design');
