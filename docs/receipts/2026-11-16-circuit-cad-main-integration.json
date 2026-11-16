@@ -47,7 +47,25 @@
     "coupledBrowsers": [
       "Chrome firmware: motion, encoder feedback, immutable document, Stop, Reset",
       "Chrome blocks, dark mode: same physical checks plus >130 editable models and preview"
-    ]
+    ],
+    "finalBuiltSDK": {
+      "cadCommit": "5a560c23c47c4bd3d7dd9c7c6aa67b3c3d09337d",
+      "filesVerified": 10,
+      "productionBuild": true,
+      "warnings": "asset/entrypoint size"
+    },
+    "finalCoupledBrowser": {
+      "browser": "installed Chrome",
+      "firmware": true,
+      "motionEncoderImmutableSourceStopAndReset": true
+    },
+    "nativeBenchmarkCurrentBoard": {
+      "receipt": "2026-11-16-native-benchmarks-main-browser.json",
+      "scope": "focused production bundle of shipped panel with actual native engine; no full-app or performance claim",
+      "topbenchRetired": 2222281,
+      "whetstoneRetired": 24021261,
+      "passed": true
+    }
   },
   "physicalScout": {
     "passed": true,
@@ -644,5 +662,6 @@
     "No native app release or TestFlight upload in this integration.",
     "Broad Board CI previously reported two unchanged x86 assembled-fixture hash failures; focused circuit/CAD tests pass.",
     "MakeCode simulator-only cache extracted from SHA-verified pinned tarballs because firmware-base fetch failed. Browser checks used installed Google Chrome because Playwright cache points to unavailable external drive."
-  ]
+  ],
+  "finalVerificationAt": "2026-11-16T12:39:30.874445+00:00"
 }

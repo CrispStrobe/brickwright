@@ -51,7 +51,8 @@ await new Promise(done => server.listen(0, '127.0.0.1', done));
 let browser, page;
 const errors = [];
 try {
-    browser = await chromium.launch({headless: true, args: ['--disable-dev-shm-usage', '--renderer-process-limit=1']});
+    browser = await chromium.launch({headless: true, args: ['--disable-dev-shm-usage', '--renderer-process-limit=1'],
+        ...(process.env.BW_BROWSER_EXECUTABLE ? {executablePath: process.env.BW_BROWSER_EXECUTABLE} : {})});
     page = await browser.newPage({viewport: {width: 1200, height: 1000}});
     page.on('pageerror', error => errors.push(error.message));
     await page.goto(`http://127.0.0.1:${server.address().port}/`);
