@@ -1,0 +1,98 @@
+(node:7510) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/christianstrobele/code/local/circuit-cad-lite-work/overlay/scratch-gui/src/lib/bw-cad-robot-catalog.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/christianstrobele/code/local/circuit-cad-lite-work/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:7510) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+✔ Scout TT rover: one project restores CAD, editable Blocks/Code, real circuit and live Widgets (135.477375ms)
+✔ Trident steerable rover: one project restores CAD, editable Blocks/Code, real circuit and live Widgets (120.661459ms)
+✔ Atlas forklift: one project restores CAD, editable Blocks/Code, real circuit and live Widgets (128.232875ms)
+✔ Mantis 3-servo walker: one project restores CAD, editable Blocks/Code, real circuit and live Widgets (29.180792ms)
+✔ Cyclone 2-axis gantry sorter: one project restores CAD, editable Blocks/Code, real circuit and live Widgets (22.712875ms)
+✔ Helios turret catapult: one project restores CAD, editable Blocks/Code, real circuit and live Widgets (26.018542ms)
+(node:7511) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/christianstrobele/code/local/circuit-cad-lite-work/overlay/scratch-gui/src/lib/bw-cad-project.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/christianstrobele/code/local/circuit-cad-lite-work/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:7511) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+✔ unsupported incoming CAD retires the previous editor and preserves its exact sidecar on save (53.204375ms)
+✔ an initially unsupported CAD project recovers automatically after a supported project loads (3.223792ms)
+✔ Open and Import file reads settle as cancellation when a different project loads (7.041292ms)
+✔ file selections are cancelled on unmount or intervening document edits (2.261833ms)
+✔ ordinary settings remounts retain undo while supported and empty project replacements reset it (4.592666ms)
+✔ a failed file read is discarded after the same project is edited (2.633542ms)
+✔ current file read and size failures still reject and clean up the input (3.020584ms)
+✔ a current file selection still returns its bytes and cancellation cleans up its input (1.84525ms)
+✔ a project replacement during SDK loading mounts only the latest document (2.522291ms)
+(node:7512) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/christianstrobele/code/local/circuit-cad-lite-work/overlay/scratch-gui/src/lib/editor-menu-actions.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/christianstrobele/code/local/circuit-cad-lite-work/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ desktop menu invokes the visible editor provider and rejects stale or disabled commands (1.801167ms)
+✔ native menu refresh is deduplicated and listener disposal prevents late commands (0.31925ms)
+(node:7513) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/christianstrobele/code/local/circuit-cad-lite-work/overlay/scratch-gui/src/lib/global-undo.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/christianstrobele/code/local/circuit-cad-lite-work/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ a new edit is told apart from undo and redo, including on a capped stack (0.774208ms)
+✔ Redo and multi-step history move the active editor back and forth (12.638417ms)
+✔ merged History awaits async editor steps before crossing project edits (18.127292ms)
+✔ merged History stops on an async editor refusal (0.597ms)
+✔ merged History stops on an async editor rejection (0.486167ms)
+✔ Undo reverts whichever came last: a project edit or the editor edit (0.553792ms)
+✔ the History list merges editor and project steps in order, each named by area and action (1.528625ms)
+✔ a project step that cannot be reverted is dropped and reported, not left to fail again (0.608625ms)
+✔ a throwing editor does not break the control (0.347375ms)
+✔ every editor with a history registers with the menu-bar control, with redo (4.967084ms)
+✔ editor tabs fail in place instead of replacing the app with the crash page (1.84475ms)
+✔ the safety net loads after first paint, never at startup (1.097333ms)
+✔ Robot Lab steps are named by command, and the names follow Undo and Redo (69.487584ms)
+✔ Circuit and Tilemap steps are named by comparing snapshots (10.157209ms)
+(node:7514) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/christianstrobele/code/local/circuit-cad-lite-work/overlay/scratch-gui/src/lib/global-undo.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/christianstrobele/code/local/circuit-cad-lite-work/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ global undo routes only to the active editor and reports its availability (7.1975ms)
+✔ Widget Editor mode switch is two compact accessible icons, not translated text (2.066416ms)
+✔ each requested editor registers with the global control (3.018083ms)
+✔ Widget Editor records structural, layout, configuration and binding mutations (0.62075ms)
+(node:7515) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/christianstrobele/code/local/circuit-cad-lite-work/overlay/scratch-gui/src/lib/global-undo.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/christianstrobele/code/local/circuit-cad-lite-work/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ all jump stops when the active editor changes while a step is pending (1.673625ms)
+✔ editor jump stops when the active editor changes while a step is pending (0.271084ms)
+✔ a project-only jump continues after an editor switch (0.731709ms)
+✔ a project-only jump stops before history from a replacement project (0.404ms)
+✔ all jump stops when a surface is replaced under the same name (0.496458ms)
+✔ editor jump stops when a surface is replaced under the same name (0.208333ms)
+✔ old project undo failure preserves replacement project redo history (0.260625ms)
+(node:7516) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/christianstrobele/code/local/circuit-cad-lite-work/overlay/scratch-gui/src/lib/bw-project-history.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/christianstrobele/code/local/circuit-cad-lite-work/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ a user title edit undoes and redoes without recording project loading (1.4655ms)
+✔ two concurrent script copies are independent reversible steps, with their local variables (117.19125ms)
+✔ a script copy finishing after project replacement cannot restore old History (12.048792ms)
+✔ a queued script copy is canceled while project loading has cleared its target (3.903625ms)
+✔ deleting a costume is undone in place and redone, many times (4.430292ms)
+✔ the Edit menu Restore and the history never restore the same costume twice (3.054125ms)
+✔ renames, reorders and duplicates are steps too, and History walks them back (4.679875ms)
+✔ a deleted sprite comes back, and older steps follow it to its new target (28.685083ms)
+✔ costume edits follow their asset identities through repeated sprite restoration (15.519417ms)
+✔ sound edits follow their asset identities through repeated sprite restoration (15.467209ms)
+✔ stage drags and sprite info edits are one step each (6.327458ms)
+✔ loading a project clears the structural history (5.428208ms)
+(node:7517) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/christianstrobele/code/local/circuit-cad-lite-work/overlay/scratch-gui/src/lib/global-undo.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/christianstrobele/code/local/circuit-cad-lite-work/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ project timeline traverses interleaved hidden CAD, Code and project edits, then redoes them (2.49275ms)
+✔ workspace jump stops if its CAD owner is replaced during an async undo (0.207083ms)
+ℹ tests 56
+ℹ suites 0
+ℹ pass 56
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 968.831541
