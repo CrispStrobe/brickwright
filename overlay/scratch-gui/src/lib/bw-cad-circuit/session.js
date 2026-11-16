@@ -27,7 +27,7 @@ export function validateConnections(value) {
     });
     return {version: 1, cadDocumentId: value.cadDocumentId, enabled: value.enabled === true, drives,servos,sensors};
 }
-export async function createCoupledSession({board, mechanics, connections, firmware = null, onFrame = () => {}, onError = () => {}}) {
+export async function createCoupledSession({board, mechanics, connections, firmware = null, onFrame = () => {}, onError = () => {}, signal}) {
     const config = validateConnections(connections);
     if (!config.drives.length && !config.servos.length) throw new Error('Connect a circuit motor to a CAD joint first');
     if (typeof board?.attachMechanicalShaft !== 'function' || typeof board?.claimExternalClock !== 'function') throw new Error('This circuit engine does not support mechanical connections');
@@ -56,7 +56,27 @@ export async function createCoupledSession({board, mechanics, connections, firmw
         for (const pin of board.getPinStates()) if (!['input','input-pullup'].includes(pin.mode)) board.setPin(pin.pin,'input',false);
         board.setPower(false);
     };
+    // The session is not returned to its caller until initial sensing finishes.
+    // Own cancellation here so Stop releases Board ports and the clock even if
+    // the mechanical worker never replies. Keep late success/failure handled.
+    const senseInitial = () => {
+        if (!signal) return mechanics.sense(rays);
+        return new Promise((resolve, reject) => {
+            let settled = false;
+            const finish = (callback, value) => {
+                if (settled) return;
+                settled = true; signal.removeEventListener('abort', abort); callback(value);
+            };
+            const abort = () => {stop(); finish(reject, new Error('Coupled simulation was stopped'));};
+            signal.addEventListener('abort', abort, {once: true});
+            if (signal.aborted) {abort(); return;}
+            try {
+                Promise.resolve(mechanics.sense(rays)).then(value => finish(resolve, value), error => finish(reject, error));
+            } catch (error) {finish(reject, error);}
+        });
+    };
     try {
+        if (signal?.aborted) throw new Error('Coupled simulation was stopped');
         lease = board.claimExternalClock();
         for (const drive of config.drives) {
             const part = board.parts.find(p => p.id === drive.partId);
@@ -68,7 +88,9 @@ export async function createCoupledSession({board, mechanics, connections, firmw
             const port=board.attachExternalServo(servo.partId,servo.centerDeg+frame.angles[servo.jointId]*servo.direction);servoPorts.set(servo.partId,port);releases.push(()=>port.release());
         }
         for(const sensor of config.sensors){const port=board.attachExternalDistanceSensor(sensor.partId);sensorPorts.set(sensor.partId,port);releases.push(()=>port.release());}
-        if(rays.length)frame=fullFrame=await mechanics.sense(rays);publish();
+        if(rays.length)frame=fullFrame=await senseInitial();
+        if (signal?.aborted) throw new Error('Coupled simulation was stopped');
+        publish();
     } catch (error) { stop(); throw error; }
     async function step(telemetryOnly) {
         const expected = generation, target = BigInt(Math.round((frame.time + .005) * 1e9));

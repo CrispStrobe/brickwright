@@ -1,0 +1,87 @@
+{
+  "format": "brickwright-lite-cad-integration-validation",
+  "version": 1,
+  "date": "2026-11-16",
+  "base": "259a563d71391f8b310b2c4b7fb2d3bb4d607971",
+  "continuation": "773971932cf6e6aa4f2ef1cf163787626a33d77b",
+  "branch": "feat/cad-integration-improvements-20261116",
+  "checkpoints": [
+    {
+      "commit": "8d2aac3fd9dc62ecd16b8c89d9087796506ca5ec",
+      "purpose": "Preserve PR 1797 ancestry with identical provenance files"
+    },
+    {
+      "commit": "78a27b2008dccbd1adba719b8ac617ffa5f378f5",
+      "purpose": "Integrate Helios/Cyclone project packagers and recent model branch ancestry while retaining qualified SDK"
+    },
+    {
+      "commit": "3a086b0ff101ebf07ccddfbb4a9c58f7fcf569b4",
+      "purpose": "Cancel pending CAD reset/acquisition and release late clock leases"
+    },
+    {
+      "commit": "40afeb8d1d206287a555d7b70220a2c987ce5111",
+      "purpose": "Preserve incoming CAD sidecars and fence pending file choices"
+    },
+    {
+      "commit": "93e15b9f3a1b1103ca6e1d00a2e4f7bab61fef55",
+      "purpose": "Ignore stale file-read errors and retain current read/size failures"
+    },
+    {
+      "commit": "072dd0faab399132faa01db5d9375046ba143305",
+      "purpose": "Clear the previous CAD document's storage warning after successful persisted project replacement"
+    }
+  ],
+  "runtimeValidation": {
+    "status": "passed",
+    "command": "node --test test/circuit-cad-cancellation.test.mjs test/circuit-cad-telemetry.test.mjs",
+    "passed": 28,
+    "failed": 0,
+    "skipped": 0,
+    "newControls": 10,
+    "regressionsObservedOnPreviousSource": 6,
+    "bridgeBlob": "b33689c7013bfea49dec2b1f233d52ed93fc50ef",
+    "cancellationTestBlob": "8e399fac8bdabf20e7f0b28ccb4ae9c91433c487",
+    "executedBeforeDiskExhaustion": true
+  },
+  "sdk": {
+    "repository": "CrispStrobe/brickwright-cad",
+    "retainedCommit": "fb8c3671aef1a2d5dc3673e7eb04bde38cc3f77b",
+    "pinAdvanced": false,
+    "combinedSourceCommit": "adac88f945d654bbf0af62ffee049d5380782362",
+    "combinedCheckpoint": "0df09ad88148eeb2b89240a2bfafdfe8aa764cf5",
+    "combinedPullRequest": 69
+  },
+  "qualification": {
+    "newProductionBuild": false,
+    "newBrowserPass": false,
+    "newCombinedCadTests": false,
+    "githubActionsRequested": false,
+    "githubActionsAwaited": false,
+    "blocker": "ENOSPC during canonical GUI dependency installation; subsequent sandbox bootstrap failed before commands, including cleanup. Automatic permission policy rejected escalation because sandbox approvals are disabled."
+  },
+  "editorHostValidation": {
+    "status": "not-run",
+    "cases": 9,
+    "sourceBlob": "057d292aaa958ebd247d68cadc64b01b7e4cd445",
+    "testBlob": "b2f7b04c20673ccf4ee5139210755cf86ec61bd3",
+    "reason": "Required GUI dependencies unavailable after disk exhaustion",
+    "command": "node --test --import ./scripts/lib/register-gui-scope.mjs test/cad-tab-lifecycle.test.mjs test/cad-project-bundle.test.mjs test/cad-program-api.test.mjs"
+  },
+  "sourceHead": "072dd0faab399132faa01db5d9375046ba143305",
+  "sourceTree": "32c8a157604aac8f1c95b17c5b76502dc13a0b87",
+  "pickerValidation": {
+    "status": "passed",
+    "passed": 13,
+    "failed": 0,
+    "sourceBlob": "a6e5f6caaced76071f4e311e22fc641c2c46c584",
+    "runtime": "functions.exec V8",
+    "scope": "Exact extracted pickFile and requestFile functions with explicit DOM, signal and session-state doubles",
+    "finalHostBlob": "057d292aaa958ebd247d68cadc64b01b7e4cd445",
+    "pickerFunctionsByteIdenticalInFinalHost": true,
+    "reactExecuted": false,
+    "actualSDKSessionExecuted": false,
+    "sb3Executed": false,
+    "browserExecuted": false,
+    "receipt": "docs/receipts/2026-11-16-cad-host-picker-v8.json"
+  }
+}
