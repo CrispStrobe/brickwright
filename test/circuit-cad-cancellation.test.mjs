@@ -22,15 +22,30 @@ function fixture (t, {ready = false} = {}) {
     globalThis.localStorage = {getItem: () => JSON.stringify(config)};
     globalThis.__bwCad = {editor: {session: {state: {document: {id: 'robot'}}}}};
     const owners = [], runtime = new EventEmitter();
+    const resources = {clocks: new Set(), ports: new Set(), sensorSamples: []};
     let flags = 0, epoch = 0;
     const board = {
         parts: [{id: 'motor', kind: 'dc_motor'}], timeNs: 0n, powered: true,
-        reset () {epoch++; this.timeNs = 0n;},
+        reset () {epoch++; this.timeNs = 0n; resources.clocks.clear(); resources.ports.clear();},
         setPower (value) {this.powered = value;}, getPinStates: () => [],
-        setMechanicalShaftState () {}, attachMechanicalShaft: () => () => {},
+        setMechanicalShaftState () {},
+        attachMechanicalShaft () {
+            const token = Symbol('shaft'); resources.ports.add(token);
+            return () => resources.ports.delete(token);
+        },
+        attachExternalDistanceSensor () {
+            const token = Symbol('distance'); resources.ports.add(token);
+            return {sample (value) {
+                resources.sensorSamples.push(value);
+                assert.ok(resources.ports.has(token), 'a released sensor must not receive a late sample');
+            }, release () {resources.ports.delete(token);}};
+        },
         claimExternalClock () {
             const expected = epoch; let released = false;
-            return {isActive: () => !released && expected === epoch, release () {released = true;}};
+            const token = Symbol('clock'); resources.clocks.add(token);
+            return {isActive: () => !released && expected === epoch, release () {
+                released = true; resources.clocks.delete(token);
+            }};
         }
     };
     const frame = {time: 0, poses: [], angles: {axle: 0}, speeds: {axle: 0}, linearPositions: {}, linearSpeeds: {}};
@@ -54,7 +69,7 @@ function fixture (t, {ready = false} = {}) {
             error => Object.assign(result, {settled: true, error}));
         return result;
     };
-    return {runtime, vm, board, owners, api, deadlines, originalFlag,
+    return {runtime, vm, board, owners, api, deadlines, originalFlag, config, frame, resources,
         get flags () {return flags;},
         start: () => track(api.start()),
         fireDeadline (ms) {
@@ -93,6 +108,58 @@ test('Stop settles an unavailable Circuit start and removes its listener and dea
         window.dispatchEvent(new Event('bw-board-ready')); await nextTurn();
         assert.equal(f.owners.length, 0, 'late readiness does not acquire the circuit after Stop');
         assert.equal(f.flags, 0);
+    } finally {f.close();}
+});
+
+for (const lateFailure of [false, true]) test(`Stop releases initial sensor ownership before a late ${lateFailure ? 'failure' : 'reply'}, preserving restart`, async t => {
+    const f = fixture(t, {ready: true});
+    try {
+        f.config.sensors = [{partId: 'distance', bodyId: 'chassis'}];
+        let resolveSense, rejectSense, acquired = 0;
+        const oldSense = new Promise((resolve, reject) => {resolveSense = resolve; rejectSense = reject;});
+        f.runtime.cadSimulation.acquireExternalClock = async () => {
+            const first = ++acquired === 1;
+            return {snapshot: () => structuredClone(f.frame), release () {}, sense: () => first ? oldSense
+                : Promise.resolve({...structuredClone(f.frame), distances: {distance: 200}})};
+        };
+        const first = f.start(); await nextTurn(); f.owners[0].ready(); await nextTurn();
+        assert.equal(f.resources.clocks.size, 1); assert.equal(f.resources.ports.size, 2);
+        assert.equal(first.settled, false);
+        f.api.stop();
+        assert.equal(f.resources.clocks.size, 0, 'Stop must return the Board clock without waiting for the worker');
+        assert.equal(f.resources.ports.size, 0, 'Stop must detach shaft and sensor ports immediately');
+        await nextTurn(); assert.equal(first.settled, true); assert.equal(first.error, undefined);
+        const second = f.start(); await nextTurn(); f.owners[1].ready(); await nextTurn();
+        assert.equal(second.settled, true); assert.equal(second.error, undefined);
+        assert.equal(f.api.state().phase, 'running'); assert.equal(f.board.powered, true);
+        const clock = f.runtime.bwProgramClock;
+        assert.equal(f.resources.clocks.size, 1); assert.equal(f.resources.ports.size, 2);
+        assert.deepEqual(f.resources.sensorSamples, [200]);
+        if (lateFailure) rejectSense(new Error('old worker failed'));
+        else resolveSense({...structuredClone(f.frame), distances: {distance: 999}});
+        await nextTurn();
+        assert.equal(f.api.state().phase, 'running'); assert.equal(f.api.state().error, '');
+        assert.equal(f.runtime.bwProgramClock, clock); assert.equal(f.board.powered, true);
+        assert.equal(f.resources.clocks.size, 1); assert.equal(f.resources.ports.size, 2);
+        assert.deepEqual(f.resources.sensorSamples, [200], 'a cancelled sense must not publish to old or new ports');
+        f.api.stop(); assert.equal(f.resources.clocks.size, 0); assert.equal(f.resources.ports.size, 0);
+    } finally {f.close();}
+});
+
+test('an active initial sensor failure remains observable and releases Board ownership', async t => {
+    const f = fixture(t, {ready: true});
+    try {
+        f.config.sensors = [{partId: 'distance', bodyId: 'chassis'}];
+        let rejectSense;
+        f.runtime.cadSimulation.acquireExternalClock = async () => ({
+            snapshot: () => structuredClone(f.frame), release () {},
+            sense: () => new Promise((resolve, reject) => {rejectSense = reject;})
+        });
+        const run = f.start(); await nextTurn(); f.owners[0].ready(); await nextTurn();
+        const error = new Error('distance worker failed'); rejectSense(error); await nextTurn();
+        assert.equal(run.error, error); assert.equal(f.api.state().phase, 'error');
+        assert.equal(f.resources.clocks.size, 0); assert.equal(f.resources.ports.size, 0);
+        assert.equal(f.board.powered, false); assert.deepEqual(f.resources.sensorSamples, []);
     } finally {f.close();}
 });
 

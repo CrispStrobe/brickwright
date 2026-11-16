@@ -89,7 +89,7 @@ export function installCircuitCadBridge(vm) {
                     firmware=createAvr8jsAdapter({chip:'atmega328p',clockHz:built.f_cpu || 16000000,program:parseIntelHex(built.hex)});
                     firmware.attachBoard(board);
                 } else if(mode!=='blocks')throw new Error('Unsupported controller mode');
-                const coupled=await createCoupledSession({board,mechanics,connections:config,firmware,
+                const coupled=await createCoupledSession({board,mechanics,connections:config,firmware,signal:controller.signal,
                     onFrame:frame=>{if(generation===expected)publish({phase:'running',time:frame.time,readings:session?.readings() || []});},onError:error=>{if(generation===expected)fail(error);}});
                 if(disposed || generation!==expected){coupled.stop();check();}
                 session=coupled;
