@@ -63,3 +63,9 @@ compiler/script startup remain unchanged. It permits descendant preparation
 without self-deadlock and bounds queue waits. Existing
 RSS, disk and time guards still apply. Its synthetic subprocess controls are
 separate from the actual browser/native-engine proof.
+
+The dependency helper streams filesystem metadata for ownership, linking,
+permissions and digests. It keeps the existing deterministic digest format
+and public array walker, while avoiding a retained full stat census during
+blocking npm work. Source memory diagnostics do not establish installer or
+native benchmark execution success.

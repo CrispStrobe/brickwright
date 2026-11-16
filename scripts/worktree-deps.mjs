@@ -192,26 +192,29 @@ function npmMajor () {
 // ---------------------------------------------------------------- tree walks
 
 /** Every entry under dir, depth-first, sorted: [{rel, st}] (lstat, symlinks not followed). */
-export function walk (dir) {
-    const out = [];
-    const rec = rel => {
+/** Stream one stat entry at a time; retain directory names, not a whole census. */
+export function *walkEntries (dir, {postOrder = false} = {}) {
+    function *rec (rel) {
         const names = readdirSync(path.join(dir, rel)).sort();
         for (const n of names) {
             const r = rel ? `${rel}/${n}` : n;
             const st = lstatSync(path.join(dir, r));
-            out.push({rel: r, st});
-            if (st.isDirectory()) rec(r);
+            if (st.isDirectory() && postOrder) yield *rec(r);
+            yield {rel: r, st};
+            if (st.isDirectory() && !postOrder) yield *rec(r);
         }
-    };
-    rec('');
-    return out;
+    }
+    yield *rec('');
 }
+
+// Keep the existing public array API for callers that need a materialized list.
+export const walk = dir => Array.from(walkEntries(dir));
 
 /** mode/size/mtime of every entry: changes if anything in the store is written, chmod-ed, added or removed. */
 export function treeDigest (dir) {
     const h = createHash('sha256');
     let files = 0, bytes = 0;
-    for (const {rel, st} of walk(dir)) {
+    for (const {rel, st} of walkEntries(dir)) {
         const kind = st.isDirectory() ? 'd' : st.isSymbolicLink() ? 'l' : 'f';
         const extra = kind === 'l' ? readlinkSync(path.join(dir, rel)) : kind === 'f' ? `${st.size}:${st.mtimeMs}` : '';
         h.update(`${kind}\0${rel}\0${(st.mode & 0o7777).toString(8)}\0${extra}\n`);
@@ -225,8 +228,7 @@ const ownedAncestor = (rel, owned) => owned.some(o => o.startsWith(rel + '/'));
 
 /** Remove write bits everywhere under dir (files and dirs), bottom-up so the walk can finish. */
 export function makeReadOnly (dir) {
-    const entries = walk(dir).reverse();
-    for (const {rel, st} of entries) if (!st.isSymbolicLink()) chmodSync(path.join(dir, rel), st.mode & 0o7555);
+    for (const {rel, st} of walkEntries(dir, {postOrder: true})) if (!st.isSymbolicLink()) chmodSync(path.join(dir, rel), st.mode & 0o7555);
     chmodSync(dir, statSync(dir).mode & 0o7555);
 }
 
@@ -237,7 +239,7 @@ function makeWritable (dir) {
     if (top.isSymbolicLink()) return;
     chmodSync(dir, top.mode | 0o200);
     if (!top.isDirectory()) return;
-    for (const {rel, st} of walk(dir)) if (st.isDirectory()) chmodSync(path.join(dir, rel), st.mode | 0o200);
+    for (const {rel, st} of walkEntries(dir)) if (st.isDirectory()) chmodSync(path.join(dir, rel), st.mode | 0o200);
 }
 
 export function removeTree (dir) {
@@ -254,7 +256,7 @@ const isSymlink = p => { try { return lstatSync(p).isSymbolicLink(); } catch { r
  */
 export function linkTree (src, dst, owned = []) {
     mkdirSync(dst, {recursive: true});
-    for (const {rel, st} of walk(src)) {
+    for (const {rel, st} of walkEntries(src)) {
         const s = path.join(src, rel), d = path.join(dst, rel);
         if (st.isDirectory()) { mkdirSync(d, {recursive: true}); continue; }
         if (st.isSymbolicLink()) { symlinkSync(readlinkSync(s), d); continue; }
@@ -461,7 +463,7 @@ export function verify (wt, {store, k} = {}) {
                 const dst = path.join(wt, t.dir, 'node_modules');
                 let diverged = 0, missing = 0;
                 const sample = [];
-                for (const {rel, st} of walk(src)) {
+                for (const {rel, st} of walkEntries(src)) {
                     if (!st.isFile() || isOwned(rel, OWNED[t.id])) continue;
                     let wst;
                     try { wst = lstatSync(path.join(dst, rel)); } catch { missing++; if (sample.length < 5) sample.push(`${rel} missing`); continue; }
@@ -487,7 +489,7 @@ export function inUse (final) {
     for (const t of TREES) {
         const nm = path.join(final, t.id, 'node_modules');
         if (!existsSync(nm)) continue;
-        for (const {st} of walk(nm)) if (st.isFile() && st.nlink > 1) return true;
+        for (const {st} of walkEntries(nm)) if (st.isFile() && st.nlink > 1) return true;
     }
     return false;
 }
