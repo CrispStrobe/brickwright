@@ -5,6 +5,28 @@ the normal installed app and use a distinct product name and bundle identifier
 for the test app. The CAD workspace remains off by default. Build from an
 isolated worktree; do not mutate another agent's dependency tree or Cargo target.
 
+## Compact CAD workspace
+
+CAD uses the shared tabs and one modeling/program toolbar. Entering CAD compacts
+Brickwright’s upper menu without changing the saved preference; leaving CAD
+restores that preference. Use the tab-row ellipsis to show the shared menu when
+needed. CAD New/Open/Save/Import/Export and Model library are in its File menu;
+the embedded editor does not add another File button. Standalone CAD retains its
+own document controls.
+
+**Run**, **Stop**, **Reset** and **Program** sit in the existing CAD toolbar.
+Program opens a closeable side drawer over the workspace, with program choice
+and motor-to-joint connections. Opening it does not reduce canvas height. Use
+**Edit program** or **Open circuit** to switch to the relevant editor. Gear,
+servo, mounting and measurement details stay collapsed until needed. **Physics
+preview** is available in the drawer for manual assembly checks. The drawer
+follows Brickwright’s light/dark setting and closes with its X or Escape.
+
+The updated local bundle is `~/Applications/Brickwright Robots UX Test.app`.
+Save and close the earlier `Brickwright Robots Test.app` before opening it:
+these local bundles share the test identity and native bridge ports. Do not
+replace or forcibly terminate a running test app with unsaved user work.
+
 ## Try the coupled Scout
 
 1. Launch the local test app and enable **Settings → Workspace → CAD Editor**.

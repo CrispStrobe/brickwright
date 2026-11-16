@@ -1,0 +1,80 @@
+{
+  "date": "2026-11-16T14:25:10.358363+00:00",
+  "scope": "Compact shared CAD UX, local Adafruit thumbnails and latest qualified parts batches",
+  "source": {
+    "lite": "3cb332050657effbfce854a419d4905b8c91397e",
+    "cad": "5802e536e4042e395a76dbc1496e4914ca275869",
+    "media": "bd5c73276191131f3b4b53ce10980c63ef129d05"
+  },
+  "behaviour": [
+    "CAD automatically uses compact chrome without persisting a changed user preference",
+    "Tabs and a single modeling/program toolbar precede canvas",
+    "Run/Stop/Reset/Program in existing CAD toolbar; no permanent Circuit \u2192 CAD row",
+    "Program is a closeable side drawer; canvas top and height stay unchanged",
+    "Shared File menu provides CAD document actions; standalone CAD keeps own controls",
+    "Advanced transmission, servo and sensor settings collapsed; light and dark modes supported",
+    "482 source-bound genuine Adafruit previews bundled locally, lazy-loaded"
+  ],
+  "library": {
+    "sources": 154,
+    "meshes": 148,
+    "thumbnails": {
+      "models": 302,
+      "failures": []
+    },
+    "archiveImages": {
+      "models": 482,
+      "failures": []
+    },
+    "sourceInserted": "code",
+    "meshInserted": "mesh",
+    "downloads": 0
+  },
+  "checks": {
+    "liteUnitTests": {
+      "passed": 43,
+      "failed": 0
+    },
+    "cadFocusedTests": {
+      "passed": 35,
+      "failed": 0
+    },
+    "mirrors": "pass",
+    "builtSdkDigests": {
+      "files": 11,
+      "result": "pass"
+    },
+    "browser": [
+      "Final GUI: dark blocks, all curated and Adafruit image decoding, direct source and STL insertion without browser download",
+      "Final GUI: light Arduino Uno firmware",
+      "Final GUI: 1024\u00d7768 touch-enabled Chromium layout and blocks",
+      "Physical chassis movement, encoders, immutable design/history, Code-tab continuation, Stop and Reset passed in each run"
+    ],
+    "browserNote": "iPad-width browser qualification; not a new physical iPad installation"
+  },
+  "app": {
+    "path": "/Users/christianstrobele/Applications/Brickwright Robots UX Test.app",
+    "bundleId": "com.crispstrobe.brickwright.robotcadtest",
+    "bundleVersion": "20261116.2",
+    "architecture": "arm64",
+    "signature": "Apple Development: Created via API (9RMU3C7422)",
+    "team": "N9XSJ4M3GT",
+    "keychain": "~/Library/Keychains/brickwright-build.keychain-db",
+    "verification": "codesign --verify --deep --strict passed for both built and installed bundle",
+    "binarySha256": "3b777e8d7fcfd881f3b0ab4f9c79cc7853786342b33f8a4589b530db2fd63f2a",
+    "infoPlistSha256": "7c4b7a5dc6286d8c8802e55c246d40bea2612abd538173dcd306f2f2fef6e3ca",
+    "codeResourcesSha256": "c7a9e0dad7673e48a112ed36815a8c921264065edb6b81dbfd1ff7a3ca98dc4b",
+    "launch": "Not launched: older test app remains open with user work. Save and close it before opening this build.",
+    "buildMode": "Local production-behaviour GUI with JavaScript minimization disabled; native release package opt-level=1 and codegen-units=16. Not a notarized store release."
+  },
+  "buildNotes": [
+    "Nonfatal rust-objcopy debug stripping warning from private Rust toolchain; bundle build completed successfully."
+  ],
+  "commands": [
+    "node scripts/verify-built-cad-sdk.mjs packages/scratch-gui/build-robot-cad-final",
+    "BW_BROWSER_EXECUTABLE=/Applications/Google Chrome.app/Contents/MacOS/Google Chrome PROOF_URL=http://127.0.0.1:8138/ node scripts/verify-circuit-cad.mjs --library --dark",
+    "Same browser verifier with --firmware and --ipad",
+    "node --test test/circuit-cad-*.test.mjs test/cad-rover-project.test.mjs test/phone-chrome.test.mjs test/chrome-menu-locale.test.mjs test/chrome-library-request.test.mjs",
+    "node scripts/check-mirrors.mjs"
+  ]
+}

@@ -34,7 +34,7 @@ try{
   const sources=await cards.count();assert.ok(sources>=154,'editable sources must remain available');
   await filter.selectOption('');const thumbnails=await cards.evaluateAll(async entries=>{
    const failures=[];await Promise.all(entries.map(async card=>{const source=card.querySelector('img')?.src;if(!source){failures.push(card.textContent);return;}try{const bitmap=new Image();bitmap.src=source;await bitmap.decode();if(!bitmap.naturalWidth||!bitmap.naturalHeight)failures.push(card.textContent);}catch{failures.push(card.textContent);}}));return{models:entries.length,failures};
-  });assert.ok(thumbnails.models>=281);assert.deepEqual(thumbnails.failures,[],'every curated thumbnail must decode');
+  });assert.ok(thumbnails.models>=302);assert.deepEqual(thumbnails.failures,[],'every curated thumbnail must decode');
   const adafruit=models.locator('.model-library-card[data-archive-folder]');
   await wait(()=>{const root=document.querySelector('[data-testid="bw-cad-tab"] [data-state]')?.shadowRoot;return root?.querySelectorAll('.model-library-card img[data-adafruit-preview][src^="data:image/png"]').length===482;});
   const archiveImages=await adafruit.locator('img').evaluateAll(async entries=>{const failures=[];await Promise.all(entries.map(async image=>{try{const copy=new Image();copy.src=image.src;await copy.decode();if(copy.naturalWidth!==256||copy.naturalHeight!==192)failures.push(image.alt);}catch{failures.push(image.alt);}}));return{models:entries.length,failures};});assert.equal(archiveImages.models,482);assert.deepEqual(archiveImages.failures,[]);
@@ -47,7 +47,7 @@ try{
   await wait(()=>window.__bwCad.editor.session.state.document.roots.length>window.__libraryInitialRoots);
   const source=await page.evaluate(()=>{const s=window.__bwCad.editor.session.state,n=s.document.nodes[s.selection[0]];return{kind:n.kind,source:n.program?.source,provenance:n.provenance?.length};});
   assert.equal(source.kind,'code');assert.ok(source.source?.length);assert.ok(source.provenance);
-  await page.evaluate(()=>window.__bwCad.editor.whenIdle());await filter.selectOption('mesh');const meshes=await cards.count();assert.ok(meshes>=127);
+  await page.evaluate(()=>window.__bwCad.editor.whenIdle());await filter.selectOption('mesh');const meshes=await cards.count();assert.ok(meshes>=148);
   await cards.first().click();await models.getByRole('button',{name:'Insert selected STL',exact:true}).click();
   await wait(()=>window.__bwCad.editor.session.state.document.roots.length>=window.__libraryInitialRoots+2);
   const mesh=await page.evaluate(()=>{const s=window.__bwCad.editor.session.state,n=s.document.nodes[s.selection[0]];return{kind:n.kind,provenance:n.provenance?.length};});assert.equal(mesh.kind,'mesh');assert.ok(mesh.provenance);assert.equal(downloads,0,'insertion must not become a browser download');page.off('download',downloaded);
