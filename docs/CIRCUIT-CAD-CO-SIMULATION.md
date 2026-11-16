@@ -63,6 +63,9 @@ initial mechanical pose and circuit time. Project replacement, CAD edits, closin
 simulation, disabling CAD and hiding the page interrupt the coupled run. Stale
 worker replies and old leases cannot restart a stopped experiment or power off a
 new owner. Servo drive commands are cleared when their owner releases the clock.
+Stop also cancels pending Circuit readiness and owner acknowledgement immediately.
+If the first CAD sensor reply is still pending, its circuit ports and clock are
+released without waiting for that reply.
 
 ## Limits and validation
 
@@ -120,6 +123,7 @@ and VM coordination live in Lite. No Board/electronics dependency enters CAD.
 Local validation commands:
 
 - `node --test test/circuit-cad-*.test.mjs`
+- `node scripts/verify-cad-telemetry.mjs` compares full and compact feedback through the shipped Jolt worker without a browser or hosted compiler.
 - `node scripts/verify-built-cad-sdk.mjs packages/scratch-gui/build-circuit-cad`
 - `PROOF_URL=http://127.0.0.1:8134/ node scripts/verify-circuit-cad.mjs`
 - `node scripts/qualify-circuit-cad.mjs <built-cad-checkout>` runs the compiled AVR, circuit and CAD together without the GUI.
@@ -130,3 +134,7 @@ Local validation commands:
 The final app preserves every manifest-bound SDK byte after webpack's hashing and
 minification passes. `verify-built-cad-sdk` checks the packaged output rather than
 only the source snapshot, catching broken renamed imports and modified assets.
+
+The [CAD SIM continuation receipt](evidence/2026-11-16-cad-sim-continuation.md)
+records the fresh cancellation checks, real-worker feedback equivalence and
+current validation limits.

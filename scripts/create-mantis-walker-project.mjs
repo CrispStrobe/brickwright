@@ -29,7 +29,7 @@ export const CAD_MANTIS_WALKER_PROGRAM = `WHEN green flag clicked:
 `;
 
 /**
- * Package a Mantis 3-servo walker CAD document and its gait Scratch program into an SB3 archive.
+ * Package a Mantis CAD document and its experimental Scratch movement program into an SB3 archive.
  * @param {string} documentText Serialized Brickwright CAD document JSON.
  * @returns {Promise<Uint8Array>} Compressed SB3 archive bytes.
  */
@@ -92,7 +92,7 @@ async function main() {
             Object.entries(files).map(([name, bytes]) => [name, createHash('sha256').update(bytes).digest('hex')])
         )
     }, null, 2) + '\n');
-    console.log(`Wrote ${resolve(output, 'mantis-walker.sb3')} with its CAD model, A/B/C walking gait and hashes.`);
+    console.log(`Wrote ${resolve(output, 'mantis-walker.sb3')} with its CAD model, experimental A/B/C movement sequence and hashes.`);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
