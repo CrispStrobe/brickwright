@@ -197,6 +197,7 @@
   },
   "scratch-vm/src/util/bw-procedure-constraint-model.js": {
     "tests": [
+      "test/makecode-owned-prompt-options-runtime.test.mjs",
       "test/makecode-arcade-charat-order.test.mjs",
       "test/makecode-arcade-charat-order-runtime.test.mjs",
       "test/makecode-arcade-text-coercion-fixed-point.test.mjs",
