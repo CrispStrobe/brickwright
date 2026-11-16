@@ -310,7 +310,7 @@ hardware calibration is inferred from these controlled boundaries.
 
 ## Functional model sweep (2026-11-14)
 
-The [functional matrix](data/robot-lab-functional-matrix-20261114.json) records a bounded headless run of all 82 checkpoint models using the Scratch VM, Robot Lab extension and Jolt. All 104 motor shafts moved, including two passive Equinox outputs and a separate motor exercise for the intentionally held Sarrus control. The supplied programs completed for 13 models; the other 69 were still running at their recorded time bounds. This checks simulator catalogue resolution and functional motion, not rendered mesh loading, the built GUI, physical-device behavior or precision laws.
+The [functional matrix](data/robot-lab-functional-matrix-20261114.json) records a bounded headless smoke run of all 82 checkpoint models using the Scratch VM, Robot Lab extension and Jolt. All 104 motor shafts moved, including two passive Equinox outputs and a separate motor exercise for the intentionally held Sarrus control. The supplied program threads ended for 13 models; the other 69 were still running at their recorded time bounds. These smoke results do not establish successful program completion or valid output. The [program gap list](data/robot-lab-program-gaps-20261114.json) tracks those requirements per model. Neither list establishes rendered mesh loading, the built GUI, physical-device behavior or precision laws.
 
 With the repository's integrated GUI dependencies installed, run selected models with Node 22:
 
@@ -319,3 +319,11 @@ node --import ./scripts/lib/register-gui-scope.mjs scripts/test-robot-lab-functi
 ```
 
 Omit `--models` to run the checkpoint inventory serially. Use a fresh output directory for each run. Longer program phases may require a larger simulated interval; an inconclusive motor observation is not a pass.
+
+The separate program gap list now records all 82 supplied programs reaching their documented terminal states with observed mechanism outputs in headless runs. Its entries retain each run's source, output observations and nonfatal model warnings; this is not a precision-law, rendered-GUI or physical-device qualification. To repeat the program checks with bounded-memory measurement streaming:
+
+```sh
+node --import ./scripts/lib/register-gui-scope.mjs scripts/test-robot-lab-programs.mjs --bounded-memory --sim-ms=1000000 --wall-ms=1200000 --out=./program-results
+```
+
+Use `--models=id1,id2` for a subset and a fresh output directory for each run. A program that reaches the test's time limit without its required terminal outcome remains partial.

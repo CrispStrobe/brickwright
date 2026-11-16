@@ -72,3 +72,13 @@ test('a wait lasts as many frames headlessly as on the pane\'s program clock', a
     const frames = WAITS_MS.map((_, i) => Math.round((firstSeen.get(i + 2) - firstSeen.get(i + 1)) / FRAME_MS));
     assert.deepEqual(frames, expected, 'each wait must end on the frame the pane ends it on');
 });
+
+test('last-frame mode preserves real VM finish, timeout and observer failure cleanup', async()=>{
+    const source='WHEN flag clicked:\n  wait 0.3 seconds\n';
+    const options={modelText:read('models/motor-bench.ldr'),timeLimitMs:1000};
+    const full=await runRobotLabProgram(source,options),bounded=await runRobotLabProgram(source,{...options,retainTrack:false});
+    assert.ok(full.track.length>1);assert.equal(bounded.track.length,1);assert.equal(bounded.finishedAt,full.finishedAt);assert.deepEqual(bounded.track[0],full.track.at(-1));
+    const timed=await runRobotLabProgram('WHEN flag clicked:\n  wait 10 seconds\n',{...options,retainTrack:false});assert.equal(timed.finishedAt,null);assert.equal(timed.track.length,1);assert.ok(timed.track[0].t>=1000-1e-6);
+    const originalNow=Date.now;
+    await assert.rejects(runRobotLabProgram(source,{...options,retainTrack:false,observeFrame:()=>{throw Error('observer failed');}}),/observer failed/);assert.equal(Date.now,originalNow);
+});
