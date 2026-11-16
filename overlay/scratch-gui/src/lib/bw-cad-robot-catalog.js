@@ -18,5 +18,6 @@ export const CAD_ROBOT_EXAMPLES = Object.freeze([
     {id:'robot-zephyr-conveyor',name:'Zephyr 3-axis sorting conveyor',file:'zephyr.sb3'},
     {id:'robot-quasar-press',name:'Quasar 3-axis rotary press',file:'quasar.sb3'},
     {id:'robot-nova-loader',name:'Nova 3-axis wheeled loader',file:'nova.sb3'},
-    {id:'robot-vector-plotter',name:'Vector 3-axis XY plotter',file:'vector.sb3'}
+    {id:'robot-vector-plotter',name:'Vector 3-axis XY plotter',file:'vector.sb3'},
+    {id:'robot-aegis-sentry',name:'Aegis 3-axis sentry gate',file:'aegis.sb3'}
 ]);

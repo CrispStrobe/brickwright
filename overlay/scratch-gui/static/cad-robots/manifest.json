@@ -5,8 +5,8 @@
       "id": "robot-tt-rover",
       "name": "Scout TT rover",
       "file": "scout.sb3",
-      "bytes": 817400,
-      "sha256": "0ab68774fa1c0e76ee7d130969a64b758af58789ecb858e22ff07774f5bd8627",
+      "bytes": 817398,
+      "sha256": "5e0a04c451a43a42249bf54bcfecc61cca17cfdf4b15ee8cf31ffadf6bed397e",
       "widgets": [
         "left",
         "right"
@@ -20,8 +20,8 @@
       "id": "robot-steerable-rover",
       "name": "Trident steerable rover",
       "file": "trident.sb3",
-      "bytes": 1051757,
-      "sha256": "17df15a49ad278ff4443f4fee12151100df6c1ab3f7f92d035d470ce2c12a4b5",
+      "bytes": 1051760,
+      "sha256": "5a1955ac91c7779e2ae1e0fb99222999e8785ca014655ad75dab928bc6e79a50",
       "widgets": [
         "motorA",
         "motorB",
@@ -37,8 +37,8 @@
       "id": "robot-atlas-forklift",
       "name": "Atlas forklift",
       "file": "atlas.sb3",
-      "bytes": 1050053,
-      "sha256": "91ac717322047cdeef5311d4007eb602e09296b414b12b9589ee6abaaf563776",
+      "bytes": 1050058,
+      "sha256": "632c157424d0cb669d5573f940d38be31b35ad2f47d6d84b301398a6e0a86dfb",
       "widgets": [
         "motorA",
         "motorB",
@@ -56,8 +56,8 @@
       "id": "robot-mantis-walker",
       "name": "Mantis 3-servo walker",
       "file": "mantis.sb3",
-      "bytes": 273648,
-      "sha256": "645b31b28c3ceb7c9b39544559046588560f478bbce3cdb18da5a179a209d4fe",
+      "bytes": 273645,
+      "sha256": "b6fd362f9e92f623d6810d874a37c06c7b82531301f4da0f3e62af49d11b9952",
       "widgets": [
         "servoA",
         "servoB",
@@ -73,8 +73,8 @@
       "id": "robot-cyclone-sorter",
       "name": "Cyclone 2-axis gantry sorter",
       "file": "cyclone.sb3",
-      "bytes": 99591,
-      "sha256": "84b8c44774037dff4afa1ea06d067dafe6fcb8ec7826b59d00a2713b123e7c89",
+      "bytes": 99589,
+      "sha256": "fb0195ae8e06f469a0212f38dd60e2583e4b1340c5fa841c5f506f4aaa06b0ef",
       "widgets": [
         "motorA",
         "motorB",
@@ -90,8 +90,8 @@
       "id": "robot-helios-catapult",
       "name": "Helios turret catapult",
       "file": "helios.sb3",
-      "bytes": 275391,
-      "sha256": "c38bfbf7f4e5b32b5941af92391a5b511e0d23ba698ae60e38dc5728737cbedb",
+      "bytes": 275396,
+      "sha256": "5df7e7beea45a54e84a11a78f06056a0a2af341fdad846c450e28f08e251211c",
       "widgets": [
         "servoA",
         "servoB",
@@ -107,8 +107,8 @@
       "id": "robot-labyrinth-tilter",
       "name": "Labyrinth 2-axis tilt maze",
       "file": "labyrinth.sb3",
-      "bytes": 273838,
-      "sha256": "f396561d8b8853f85e67ee175e5aadfa0e4248d73a30d7928bada853f71d5c08",
+      "bytes": 273836,
+      "sha256": "febcdee1c447b16e798bb7d0e3b629b224699d919a0056878c55d153439469c1",
       "widgets": [
         "servoA",
         "servoB",
@@ -124,8 +124,8 @@
       "id": "robot-apex-scara",
       "name": "Apex SCARA 3-axis arm",
       "file": "apex.sb3",
-      "bytes": 186174,
-      "sha256": "7a12603ed732fcdc2d9168c0facf52391c4b0030ac2fa745dcad5b7ff0d174a5",
+      "bytes": 186175,
+      "sha256": "0ece7f1ddc2ed6f68c3f4ccd3e4a19b3acda6b1e32d94cf099f982193fac7c1d",
       "widgets": [
         "motorC",
         "servoA",
@@ -141,8 +141,8 @@
       "id": "robot-orion-carousel",
       "name": "Orion 3-axis sorting carousel",
       "file": "orion.sb3",
-      "bytes": 186497,
-      "sha256": "f6e831dfcc6b592987c600bb3c4c1b1c5b9580f6f23bb51789b567bb70dad0a1",
+      "bytes": 186499,
+      "sha256": "668759d6bd5f953be2a8ddf6066ddca0bb4b67c24901139b5584142e6750779f",
       "widgets": [
         "motorB",
         "servoA",
@@ -158,8 +158,8 @@
       "id": "robot-vortex-pinball",
       "name": "Vortex 3-axis pinball arena",
       "file": "vortex.sb3",
-      "bytes": 186395,
-      "sha256": "d2d357c1142d583c0641bad3e3f93e95452a7e65d82a5af5e723b45462f12268",
+      "bytes": 186390,
+      "sha256": "5809bea8921673c2e6ced737c642852bb1b49d65a907c769984a0148a4659a5b",
       "widgets": [
         "motorC",
         "servoA",
@@ -175,8 +175,8 @@
       "id": "robot-titan-vise",
       "name": "Titan 3-axis rotary vise",
       "file": "titan.sb3",
-      "bytes": 98672,
-      "sha256": "f888d03d1589e9d58c79454bdce048e414c9de0f07ac89345d090890b29d983c",
+      "bytes": 98677,
+      "sha256": "533a5b400d5d5e50a1df20b1ac4d79be11d860b547b5e0a58a56171ba7b145e0",
       "widgets": [
         "motorB",
         "motorC",
@@ -192,8 +192,8 @@
       "id": "robot-hermes-crane",
       "name": "Hermes 3-axis bridge crane",
       "file": "hermes.sb3",
-      "bytes": 98873,
-      "sha256": "f5a1fc4d3c840d3f3135043d131edbdf278bda11464976a60a04498249cfabe6",
+      "bytes": 98880,
+      "sha256": "e50145efccf06db06bf8f0cd2d31e661101e6bbf1bb5afc4af03955dd0128aa3",
       "widgets": [
         "motorA",
         "motorB",
@@ -209,8 +209,8 @@
       "id": "robot-chronos-drawbridge",
       "name": "Chronos 3-axis bascule drawbridge",
       "file": "chronos.sb3",
-      "bytes": 186197,
-      "sha256": "ff3623d26aa8b00df96bd3674e91815e1408c265fea346582c770cb037fd2442",
+      "bytes": 186202,
+      "sha256": "05139f486f9cf3d5cb5b9e7ec1c2cd80854402cca1d15cc065742c136c28b4b8",
       "widgets": [
         "motorC",
         "servoA",
@@ -226,8 +226,8 @@
       "id": "robot-polaris-tracker",
       "name": "Polaris 3-axis pan-tilt tracker",
       "file": "polaris.sb3",
-      "bytes": 186408,
-      "sha256": "90a5781586a08e0994d0d4733b9905bb00cc8f40cd706b652bfd0db4633b0553",
+      "bytes": 186405,
+      "sha256": "c4259dc93b264f6e5bf7836c3e6d71b42d151a1aec46cfd7754186055dc8852a",
       "widgets": [
         "motorA",
         "servoB",
@@ -243,8 +243,8 @@
       "id": "robot-boreal-launcher",
       "name": "Boreal 3-axis ball launcher",
       "file": "boreal.sb3",
-      "bytes": 98740,
-      "sha256": "6ac3fa382602d6a31006ddc907a873e1885d9148c9cd8c41829fbd02b2d3e118",
+      "bytes": 98739,
+      "sha256": "74ed65b9dda182468526af2a2646a10e2e3e520a08267623c4c194c5702652ac",
       "widgets": [
         "motorB",
         "motorC",
@@ -260,8 +260,8 @@
       "id": "robot-zephyr-conveyor",
       "name": "Zephyr 3-axis sorting conveyor",
       "file": "zephyr.sb3",
-      "bytes": 98874,
-      "sha256": "8a587bccfd8e1d5a7d10f27e609fc858362b98c266097299c640cff8f7efa4bb",
+      "bytes": 98878,
+      "sha256": "f577cbf93c701146f4065d4ca8e7692e4960dff85f6460d77ef7ba27d364b586",
       "widgets": [
         "motorA",
         "motorB",
@@ -277,8 +277,8 @@
       "id": "robot-quasar-press",
       "name": "Quasar 3-axis rotary press",
       "file": "quasar.sb3",
-      "bytes": 98697,
-      "sha256": "5e81d3809e7afb94586b300aea85acb5fa8a374f9a34972640930fb744fb94a8",
+      "bytes": 98699,
+      "sha256": "ae47aca8a36edd6b633d9463d614e9bf16578878d2f042b75c47fe2a3b72aaf2",
       "widgets": [
         "motorB",
         "motorC",
@@ -294,8 +294,8 @@
       "id": "robot-nova-loader",
       "name": "Nova 3-axis wheeled loader",
       "file": "nova.sb3",
-      "bytes": 98748,
-      "sha256": "8fd357b22821d6f098ceae063a7743770f58c1fcf1651d644ff7d07d48f22af3",
+      "bytes": 98750,
+      "sha256": "5dd5302f3f3f4711aeb285d591d791203d662182c529d89e2b155b0234fc1fe4",
       "widgets": [
         "motorA",
         "motorB",
@@ -311,8 +311,8 @@
       "id": "robot-vector-plotter",
       "name": "Vector 3-axis XY plotter",
       "file": "vector.sb3",
-      "bytes": 98799,
-      "sha256": "bfadd5c0dcff82d521cf8fa5034fc9ffdfd53cafd724c9b55681da4b725be931",
+      "bytes": 98807,
+      "sha256": "329c0531ab9054f40186e8415013cf3d9452db6d290aea72d7aa7d06cd1c4fa1",
       "widgets": [
         "motorA",
         "motorB",
@@ -322,6 +322,23 @@
         "y-axis-a",
         "x-axis-b",
         "pen-c"
+      ]
+    },
+    {
+      "id": "robot-aegis-sentry",
+      "name": "Aegis 3-axis sentry gate",
+      "file": "aegis.sb3",
+      "bytes": 186296,
+      "sha256": "10ef7dcceead0c209271ccf16dc2971d0f40bb4243899eb4e50d32e239e68f5c",
+      "widgets": [
+        "motorB",
+        "servoA",
+        "servoC"
+      ],
+      "joints": [
+        "gate-b",
+        "sweep-a",
+        "latch-c"
       ]
     }
   ]
