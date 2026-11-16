@@ -24,6 +24,23 @@ import {newMachineConfig} from './machine-config.js';
  *  the AT-class default (same rule as run-dos.mjs). */
 const XT_MACHINE_RE = /^(cga|hercules|herc|pcjr|tandy)/;
 
+// Filenames in autoexec commands may contain comment markers inside quotes.
+// DOS paths use backslashes literally, so they do not escape a closing quote.
+function withoutComment(line) {
+    let quote = null;
+    for (let i = 0; i < line.length; i += 1) {
+        const ch = line[i];
+        if (quote) {
+            if (ch === quote) quote = null;
+        } else if ((ch === '"' || ch === "'") && (i === 0 || /[\s=]/.test(line[i - 1]))) {
+            quote = ch;
+        } else if (ch === '#' || ch === ';') {
+            return line.slice(0, i);
+        }
+    }
+    return line;
+}
+
 /**
  * @param {string} text the contents of a dosbox.conf
  * @param {object} [opts]
@@ -39,7 +56,7 @@ export function fromDosboxConf(text, opts = {}) {
     let machineKey = null, cycles = null, cputype = null, core = null;
 
     for (const raw of text.split(/\r?\n/)) {
-        const line = raw.replace(/[#;].*$/, '').trim();
+        const line = withoutComment(raw).trim();
         if (!line) continue;
         const sec = line.match(/^\[(\w+)\]$/);
         if (sec) { section = sec[1].toLowerCase(); continue; }
