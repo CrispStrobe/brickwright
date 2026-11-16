@@ -7,7 +7,7 @@ import {pathToFileURL} from 'node:url';
 import JSZip from 'jszip';
 import SB3Creator from '../overlay/scratch-gui/src/lib/sb3-creator-register-art.js';
 import {CAD_PROJECT_PATH} from '../overlay/scratch-gui/src/lib/bw-cad-project.js';
-import {parseDocument} from '../overlay/scratch-gui/static/cad-sdk/sdk.js';
+import {parseCadRoverDocument, assertCadRoverProgram} from './lib/cad-rover-contract.mjs';
 
 const distributionLicences = async () => ({
     'ADAFRUIT-MIT-LICENSE.txt': await readFile(new URL('../licenses/adafruit-cad-parts-MIT.txt', import.meta.url)),
@@ -42,15 +42,13 @@ export const CAD_ROVER_PROGRAM = `WHEN green flag clicked:
 `;
 
 export async function createCadRoverProject(documentText) {
-    // Use the exact shipped SDK validator, including geometry/physics checks.
-    const document = parseDocument(documentText);
-    for (const port of ['A', 'B']) {
-        const joint = document.joints?.find(item => item.control?.port === port);
-        if (!joint || joint.kind !== 'hinge') throw new Error(`Rover requires an angular drive at port ${port}`);
-    }
+    // Use the shipped SDK and require the mobile, independent, same-direction
+    // wheel drives assumed by this particular demonstration.
+    parseCadRoverDocument(documentText);
     const creator = new SB3Creator();
     creator.parse(CAD_ROVER_PROGRAM);
     const archive = await JSZip.loadAsync(await (await creator.generateSB3()).arrayBuffer());
+    assertCadRoverProgram(JSON.parse(await archive.file('project.json').async('text')));
     // Preserve authored CAD bytes rather than normalizing IDs or geometry.
     archive.file(CAD_PROJECT_PATH, documentText);
     archive.file('brickwright/tt-rover-program.txt', CAD_ROVER_PROGRAM);

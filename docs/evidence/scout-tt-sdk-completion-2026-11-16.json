@@ -1,0 +1,76 @@
+{
+  "format": "brickwright-scout-tt-sdk-completion",
+  "version": 1,
+  "date": "2026-11-16",
+  "runtime": "v24.22.1",
+  "liteSourceCommit": "7b9e191691081e9b1b608a18674eb86c7f5d9e87",
+  "liteSdkCheckpoint": "0bbc92e932c3ea8d1a1b8d43b816924947ecaebd",
+  "cadSourceCommit": "5922e226ae98ed8b99a7054d27adcd9fca0c2245",
+  "sdk": {
+    "dirty": false,
+    "fileCount": 10,
+    "exactManifestAndFileSetsMatch": true,
+    "verifiedCopies": [
+      "CAD dist/brickwright-sdk",
+      "Lite overlay/scratch-gui/static/cad-sdk",
+      "Lite packages/scratch-gui/static/cad-sdk"
+    ],
+    "files": {
+      "LICENSE": "ed121de3496066a2ddc8c11b30b48142165ab84bdb066fee351392ecaccf36ad",
+      "NOTICE.txt": "dea50eee6d6781549af4e3740bfaf7661b29479696e5ae6cbe41eafd93c0fa70",
+      "assets/geometry.worker-B8ovkVAD.js": "8d289ccb12e33751be322fe3903bc61a72a366f15ff39f9c2781e490af84b5c3",
+      "assets/jolt-physics.wasm-compat-Blj3n6Su.js": "44c4fb9483013dd47019553c7324e271366fe453db76c19ae61c21a695c6f0c6",
+      "assets/simulation.worker-Bif4fNdo.js": "632a67d4fcded23670efa0436c4d19d621862033ee706ad886dac8d9636f60e6",
+      "cad-assets/manifold.wasm": "73e3b419ad31294f6b1cc478173944e50efc4a34bfdeeff0107bdfc12975f11c",
+      "model-library-cache-DiMFGzp9.js": "75dc4ad7999b4571b227f1c675ca00af698fcc886dc73e98dd4c0eb2604e2b20",
+      "model-library-local-CGitQ4Nv.js": "1e58de967608885c3d12aecf763fc77d0d171c5c7cdb37179554ae5fb2e7c498",
+      "sdk-ClH33gl-.js": "407afdb1db0a9f6c001e8889ea7234be1102dc6711af5ec13be0b13e8b806efe",
+      "sdk.js": "8a84e55b4a97f3fee50401149baa12a5d7f5afd14f8dd235e4bccd3151f7eff9"
+    }
+  },
+  "tests": {
+    "passed": 18,
+    "failed": 0,
+    "skipped": 0,
+    "files": [
+      "test/cad-rover-project.test.mjs",
+      "test/cad-lab-dialect.test.mjs",
+      "test/cad-project-bundle.test.mjs",
+      "test/bw-cad-preferences.test.mjs",
+      "test/cad-program-api.test.mjs"
+    ],
+    "dependencyScope": "isolated BW_INTEGRATED_ROOT; owned source from this Lite checkout",
+    "dependencies": {
+      "jszip": "3.10.1",
+      "format-message": "6.2.4",
+      "scratch-vm": "4.8.115"
+    }
+  },
+  "checks": {
+    "sharedInteractionAndJoltPins": "pass",
+    "mirror": "pass",
+    "whitespace": "pass",
+    "savedProjectVerifier": "pass",
+    "generatedProjectVerifier": "pass"
+  },
+  "savedArtifacts": {
+    "bcadSha256": "5f12065a6162370c070ab9206cf7d9123d2c72c80b8ca14bc5c488af0b3e3c85",
+    "sb3Sha256": "553a30d0d98f5230d3294d4aae853720449632df31189004f84c7db8a64cbe8b",
+    "unchanged": true
+  },
+  "regeneration": {
+    "executableGraphEquivalentAfterRenamingRandomIds": true,
+    "cadProgramAndLicenseEntriesByteIdentical": true,
+    "sb3ByteReproducibilityClaimed": false,
+    "reason": "Upstream compiler randomizes block IDs and its unused default sound; ZIP metadata varies."
+  },
+  "boundaries": {
+    "newFullLiteProductionBuild": false,
+    "generatedStaticCopyIsProductionBundle": false,
+    "previousBuildReceipt": "2026-11-16-scout-tt-cad-resumption.md",
+    "browser": "Blocked before page startup: Chromium process_singleton_posix.cc:297 socket() failed: Operation not permitted",
+    "githubActionsUsed": false,
+    "nativeReleaseOrDeployment": false,
+    "hardwareTransportOrPhysicalFitQualified": false
+  }
+}
