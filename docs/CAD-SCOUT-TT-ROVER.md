@@ -60,11 +60,23 @@ node --import ./scripts/lib/register-gui-scope.mjs \
   scripts/verify-cad-rover-project.mjs artifacts/cad-rover
 ```
 
-The generator validates the model with the shipped SDK, preserves its exact
-bytes in the sidecar, and records document/program formats and hashes for the
-distributed files. The artifact manifest does not pin an SDK commit. The checks
-in `test/cad-rover-project.test.mjs` cover packaging and the A/B program; the
-verification command checks the saved example's exact source, notices and
-hashes using the currently pinned SDK and reports that SDK's commit separately.
+The generator validates the model with the shipped SDK and checks the control
+assumptions needed by this demonstration: an explicit free base, a dynamic
+chassis, independent A/B wheel assemblies and matching signed world-space
+wheel axes. Separate motor casings and other fixed components are supported;
+body rotations and reversed connector body order are accounted for. These
+nominal control checks do not qualify collision geometry, traction or physical
+fit. The assembled Scout in the kit has separate CAD qualification evidence.
+
+The generator preserves exact model bytes in the sidecar and records
+document/program formats and hashes for the distributed files. The artifact
+manifest does not pin an SDK commit. The checks in
+`test/cad-rover-project.test.mjs` cover packaging and the A/B program. Both
+generation and saved-example verification inspect the actual compiled
+`project.json` block chain: both wheels start before each wait, braking and
+final Stop are retained, and extra or detached executable blocks are refused.
+The verification command also checks the saved example's exact source,
+notices and hashes using the currently pinned SDK and reports that SDK's
+commit separately.
 Updating the SDK therefore never changes the saved example. Native apps need to be rebuilt to
 include a newly pinned SDK.
