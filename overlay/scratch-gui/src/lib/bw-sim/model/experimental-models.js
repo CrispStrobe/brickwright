@@ -3,29 +3,6 @@
 // Checkpoint candidates are deliberately separate from the qualified registry.
 export const EXPERIMENTAL_MODELS = Object.freeze([
     {
-        "file": "apex.ldr",
-        "title": {
-            "en": "Apex — Wankel rotary geometry",
-            "de": "Apex — Wankel-Rotorgeometrie"
-        },
-        "example": "apex.bw",
-        "mat": "plain",
-        "experimental": true,
-        "blocked": false,
-        "intro": {
-            "en": "Wankel engine kinematics without combustion: the carrier acts as eccentric shaft and gears make the three-apex rotor turn at exactly one third of its speed.",
-            "de": "Wankel-Kinematik ohne Verbrennung: Der Träger wirkt als Exzenterwelle, und Zahnräder lassen den Rotor mit drei Spitzen mit genau einem Drittel seiner Drehzahl umlaufen."
-        },
-        "manualJog": {
-            "A": {
-                "minDeg": 0,
-                "maxDeg": 1512,
-                "stepDeg": 126,
-                "speedDps": 36
-            }
-        }
-    },
-    {
         "file": "bloom.ldr",
         "title": {
             "en": "Bloom — expanding scissor sphere",
@@ -222,29 +199,6 @@ export const EXPERIMENTAL_MODELS = Object.freeze([
                 "maxDeg": 1082,
                 "stepDeg": 15,
                 "speedDps": 30
-            }
-        }
-    },
-    {
-        "file": "tempest-pendulum.ldr",
-        "title": {
-            "en": "Tempest — serial double pendulum",
-            "de": "Tempest — serielles Doppelpendel"
-        },
-        "example": "tempest-pendulum.bw",
-        "mat": "plain",
-        "experimental": true,
-        "blocked": false,
-        "intro": {
-            "en": "A serial double pendulum: motor A pulses a short carrier, then two free 64mm arms swing under gravity alone. Small swings settle into normal modes with periods near 0.66s and 0.27s.",
-            "de": "Ein serielles Doppelpendel: Motor A gibt einem kurzen Träger einen Impuls, danach schwingen zwei freie, 64mm lange Arme allein unter der Schwerkraft. Kleine Ausschläge zerfallen in Eigenschwingungen mit Perioden um 0,66s und 0,27s."
-        },
-        "manualJog": {
-            "A": {
-                "minDeg": -60,
-                "maxDeg": 60,
-                "stepDeg": 15,
-                "speedDps": 90
             }
         }
     },
@@ -833,42 +787,6 @@ export const EXPERIMENTAL_MODELS = Object.freeze([
     }
 ]);
 export const EXPERIMENTAL_MODEL_DETAILS = Object.freeze({
-    "apex.ldr": {
-        "pieces": 477,
-        "motors": 1,
-        "hubs": [
-            "spike-prime"
-        ],
-        "topic": "gears",
-        "description": {
-            "en": "Wankel engine kinematics without combustion: the carrier acts as eccentric shaft and gears make the three-apex rotor turn at exactly one third of its speed.",
-            "de": "Wankel-Kinematik ohne Verbrennung: Der Träger wirkt als Exzenterwelle, und Zahnräder lassen den Rotor mit drei Spitzen mit genau einem Drittel seiner Drehzahl umlaufen."
-        },
-        "author": "CrispStrobe",
-        "license": "BSD-3-Clause",
-        "mechanism": {
-            "en": "Wankel rotary geometry",
-            "de": "Wankel-Rotorgeometrie"
-        },
-        "keywords": [
-            "Wankel",
-            "rotary engine",
-            "epitrochoid",
-            "eccentric shaft",
-            "three-apex rotor",
-            "Wankelmotor",
-            "Kreiskolbenmotor",
-            "Epitrochoide",
-            "Exzenterwelle",
-            "rotary mechanism",
-            "eccentric rotor",
-            "experimental",
-            "prototype",
-            "unverified",
-            "experimentell"
-        ],
-        "experimental": true
-    },
     "bloom.ldr": {
         "pieces": 781,
         "motors": 1,
@@ -1157,38 +1075,6 @@ export const EXPERIMENTAL_MODEL_DETAILS = Object.freeze({
             "Shapingmaschine",
             "Zeitverhältnis",
             "stroke timing",
-            "experimental",
-            "prototype",
-            "unverified",
-            "experimentell"
-        ],
-        "experimental": true
-    },
-    "tempest-pendulum.ldr": {
-        "pieces": 69,
-        "motors": 1,
-        "hubs": [
-            "spike-prime"
-        ],
-        "topic": "forces",
-        "description": {
-            "en": "A serial double pendulum: motor A pulses a short carrier, then two free 64mm arms swing under gravity alone. Small swings settle into normal modes with periods near 0.66s and 0.27s.",
-            "de": "Ein serielles Doppelpendel: Motor A gibt einem kurzen Träger einen Impuls, danach schwingen zwei freie, 64mm lange Arme allein unter der Schwerkraft. Kleine Ausschläge zerfallen in Eigenschwingungen mit Perioden um 0,66s und 0,27s."
-        },
-        "author": "CrispStrobe",
-        "license": "BSD-3-Clause",
-        "mechanism": {
-            "en": "serial double pendulum",
-            "de": "serielles Doppelpendel"
-        },
-        "keywords": [
-            "double pendulum",
-            "coupled oscillators",
-            "normal modes",
-            "chaos",
-            "Doppelpendel",
-            "Eigenschwingung",
-            "gekoppelte Pendel",
             "experimental",
             "prototype",
             "unverified",

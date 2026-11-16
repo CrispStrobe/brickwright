@@ -1,0 +1,155 @@
+0 Tempest - Serial Double Pendulum
+0 Name: tempest-pendulum.ldr
+0 Author: CrispStrobe
+0 !LICENSE BSD-3-Clause : see ../licenses/tempest-pendulum.txt
+0 !LDRAW_ORG Unofficial_Model
+0 // Original Tempest design assembled with OpenAI assistance.
+0 // New native PlacedModel exported by the unchanged Brickwright serializeModel function.
+0 // Application Author is the native serializer default; design provenance is stated above.
+0 // One motor moves the support carrier; two serial pendulum arms remain passive.
+0 // The free elbow is carried by the upper arm, giving coupled gravity dynamics.
+0 // All motion comes from stock connections and unmodified native physics.
+0 // Companion: tempest-pendulum.bw. Robot Lab Plain; open model, then Code > To blocks.
+0 // Reset the complete model before running and before repeating the demonstration.
+0 // Use the supplied program to excite the support and observe both free arms during holds.
+0 // Digital kinematic demonstrator; physical assembly and output loading are untested.
+0 !BW ID motor_deck_0
+1 72 0 0 100 0 0 1 1 0 0 0 1 0 32524.dat
+0 !BW ID motor_deck_pin_-60_0
+1 0 -60 0 110 0 1 0 0 0 1 1 0 0 2780.dat
+0 !BW ID motor_deck_pin_60_0
+1 0 60 0 110 0 1 0 0 0 1 1 0 0 2780.dat
+0 !BW ID motor_deck_140
+1 72 0 140 100 0 0 1 1 0 0 0 1 0 32524.dat
+0 !BW ID motor_deck_pin_-60_140
+1 0 -60 140 110 0 1 0 0 0 1 1 0 0 2780.dat
+0 !BW ID motor_deck_pin_60_140
+1 0 60 140 110 0 1 0 0 0 1 1 0 0 2780.dat
+0 !BW ID motor_front_mount_-20
+1 0 -20 0 90 0 1 0 0 0 1 1 0 0 2780.dat
+0 !BW ID motor_front_mount_20
+1 0 20 0 90 0 1 0 0 0 1 1 0 0 2780.dat
+0 !BW ID motor_rear_mount
+1 0 0 140 90 0 1 0 0 0 1 1 0 0 2780.dat
+0 !BW ID tower_upper_-60
+1 72 -60 100 120 -1 0 0 0 0 1 0 1 0 32278.dat
+0 !BW ID tower_lower_-60
+1 72 -60 360 100 -1 0 0 0 0 1 0 1 0 32278.dat
+0 !BW ID tower_lap_-60_220
+1 0 -60 220 110 0 1 0 0 0 1 1 0 0 2780.dat
+0 !BW ID tower_lap_-60_240
+1 0 -60 240 110 0 1 0 0 0 1 1 0 0 2780.dat
+0 !BW ID tower_foot_-60_480
+1 72 -60 480 120 0 0 1 0 1 0 -1 0 0 15100.dat
+0 !BW ID tower_foot_-60_500
+1 72 -60 500 120 0 0 1 0 1 0 -1 0 0 15100.dat
+0 !BW ID tower_floor_pin_-60
+1 1 -60 500 120 0 1 0 1 0 0 0 0 -1 6558.dat
+0 !BW ID tower_upper_60
+1 72 60 100 120 -1 0 0 0 0 1 0 1 0 32278.dat
+0 !BW ID tower_lower_60
+1 72 60 360 100 -1 0 0 0 0 1 0 1 0 32278.dat
+0 !BW ID tower_lap_60_220
+1 0 60 220 110 0 1 0 0 0 1 1 0 0 2780.dat
+0 !BW ID tower_lap_60_240
+1 0 60 240 110 0 1 0 0 0 1 1 0 0 2780.dat
+0 !BW ID tower_foot_60_480
+1 72 60 480 120 0 0 1 0 1 0 -1 0 0 15100.dat
+0 !BW ID tower_foot_60_500
+1 72 60 500 120 0 0 1 0 1 0 -1 0 0 15100.dat
+0 !BW ID tower_floor_pin_60
+1 1 60 500 120 0 1 0 1 0 0 0 0 -1 6558.dat
+0 !BW ID front_floor_cross
+1 0 0 520 120 0 0 1 0 1 0 -1 0 0 32278.dat
+0 !BW ID front_runner_-100
+1 0 -100 540 80 1 0 0 0 1 0 0 0 1 32278.dat
+0 !BW ID front_floor_pin_-100
+1 0 -100 530 120 0 1 0 1 0 0 0 0 -1 2780.dat
+0 !BW ID front_runner_100
+1 0 100 540 80 1 0 0 0 1 0 0 0 1 32278.dat
+0 !BW ID front_floor_pin_100
+1 0 100 530 120 0 1 0 1 0 0 0 0 -1 2780.dat
+0 !BW ID hub_runner_20
+1 0 20 540 280 1 0 0 0 1 0 0 0 1 32278.dat
+0 !BW ID hub_runner_140
+1 0 140 540 280 1 0 0 0 1 0 0 0 1 32278.dat
+0 !BW ID hub_deck_180
+1 72 100 520 180 0 0 1 0 1 0 -1 0 0 32278.dat
+0 !BW ID hub_stack_20_180
+1 1 20 520 180 0 1 0 1 0 0 0 0 -1 6558.dat
+0 !BW ID hub_stack_140_180
+1 1 140 520 180 0 1 0 1 0 0 0 0 -1 6558.dat
+0 !BW ID hub_deck_380
+1 72 100 520 380 0 0 1 0 1 0 -1 0 0 32278.dat
+0 !BW ID hub_stack_20_380
+1 1 20 520 380 0 1 0 1 0 0 0 0 -1 6558.dat
+0 !BW ID hub_stack_140_380
+1 1 140 520 380 0 1 0 1 0 0 0 0 -1 6558.dat
+0 !BW ID hub_to_front_base
+1 0 100 530 180 0 1 0 1 0 0 0 0 -1 2780.dat
+0 !BW ID hub
+1 15 80 510 280 1 0 0 0 1 0 0 0 1 45601.dat
+0 !BW ID motor_A
+0 !BW PORT A
+0 !BW ROTOR 102.5
+1 71 0 0 60 -1 0 0 0 0 1 0 1 0 54696p01.dat
+0 !BW ID carrier
+1 25 0 0 0 -0.976296 0 -0.21644 -0.21644 0 0.976296 0 1 0 40490.dat
+0 !BW ID motor_pin_h3
+1 0 4.328792 -19.52592 0 0 -0.21644 -0.976296 0 0.976296 -0.21644 1 0 0 6558.dat
+0 !BW ID motor_pin_h5
+1 0 -4.328792 19.52592 0 0 -0.21644 -0.976296 0 0.976296 -0.21644 1 0 0 6558.dat
+0 !BW ID carrier_inertia_frame
+1 25 117.155521 25.972754 0 -0.976296 0 -0.21644 -0.21644 0 0.976296 0 1 0 64179.dat
+0 !BW ID carrier_stringer_left
+1 25 43.380633 -10.868336 -20 0.21644 0 -0.976296 -0.976296 0 -0.21644 0 1 0 32316.dat
+0 !BW ID carrier_frame_pin_left
+1 0 82.432473 -2.210751 -10 0 -0.21644 -0.976296 0 0.976296 -0.21644 1 0 0 2780.dat
+0 !BW ID carrier_stringer_right
+1 25 34.723048 28.183505 -20 0.21644 0 -0.976296 -0.976296 0 -0.21644 0 1 0 32316.dat
+0 !BW ID carrier_frame_pin_right
+1 0 73.774888 36.841089 -10 0 -0.21644 -0.976296 0 0.976296 -0.21644 1 0 0 2780.dat
+0 !BW ID carrier_bearing
+1 25 -12.986377 58.57776 -20 -0.976296 0 -0.21644 -0.21644 0 0.976296 0 1 0 32523.dat
+0 !BW ID carrier_lap_pin_h6
+1 0 -8.657585 39.05184 -10 0 -0.21644 -0.976296 0 0.976296 -0.21644 1 0 0 2780.dat
+0 !BW ID carrier_lap_pin_h7
+1 0 -12.986377 58.57776 -10 0 -0.21644 -0.976296 0 0.976296 -0.21644 1 0 0 2780.dat
+0 !BW ID upper_arm
+1 4 -17.315169 158.103681 -40 -1 0 0 0 0 1 0 1 0 40490.dat
+0 !BW ID shoulder_pin
+1 19 -17.315169 78.103681 -30 0 -0.21644 -0.976296 0 0.976296 -0.21644 1 0 0 3673.dat
+0 !BW ID upper_bob_adapter
+1 4 -17.315169 238.103681 -60 1 0 0 0 0 -1 0 1 0 60483.dat
+0 !BW ID upper_adapter_pin
+1 0 -17.315169 218.103681 -50 0 1 0 0 0 1 1 0 0 2780.dat
+0 !BW ID elbow_axle
+1 71 -17.315169 238.103681 -90 0 1 0 0 0 1 1 0 0 44294.dat
+0 !BW ID upper_bob_wheel
+1 71 -17.315169 238.103681 -90 1 0 0 0 1 0 0 0 1 39367p01.dat
+0 !BW ID elbow_retainer_rear
+1 4 -17.315169 238.103681 -25 1 0 0 0 1 0 0 0 1 4265c.dat
+0 !BW ID upper_bob_spacer_rear
+1 4 -17.315169 238.103681 -75 1 0 0 0 1 0 0 0 1 4265c.dat
+0 !BW ID upper_bob_retainer_front
+1 4 -17.315169 238.103681 -105 1 0 0 0 1 0 0 0 1 4265c.dat
+0 !BW ID elbow_spacer
+1 4 -17.315169 238.103681 -120 1 0 0 0 1 0 0 0 1 3713.dat
+0 !BW ID elbow_retainer_front
+1 4 -17.315169 238.103681 -155 1 0 0 0 1 0 0 0 1 4265c.dat
+0 !BW ID lower_arm
+1 1 -17.315169 318.103681 -140 -1 0 0 0 0 1 0 1 0 40490.dat
+0 !BW ID lower_bob_adapter
+1 1 -17.315169 398.103681 -160 1 0 0 0 0 -1 0 1 0 60483.dat
+0 !BW ID lower_adapter_pin
+1 0 -17.315169 378.103681 -150 0 1 0 0 0 1 1 0 0 2780.dat
+0 !BW ID lower_bob_axle
+1 71 -17.315169 398.103681 -160 0 1 0 0 0 1 1 0 0 32073.dat
+0 !BW ID lower_bob_wheel
+1 71 -17.315169 398.103681 -190 1 0 0 0 1 0 0 0 1 39367p01.dat
+0 !BW ID lower_retainer_rear
+1 1 -17.315169 398.103681 -125 1 0 0 0 1 0 0 0 1 4265c.dat
+0 !BW ID lower_bob_spacer_rear
+1 1 -17.315169 398.103681 -175 1 0 0 0 1 0 0 0 1 4265c.dat
+0 !BW ID lower_bob_retainer_front
+1 1 -17.315169 398.103681 -205 1 0 0 0 1 0 0 0 1 4265c.dat

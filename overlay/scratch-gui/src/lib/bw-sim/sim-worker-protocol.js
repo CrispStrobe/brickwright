@@ -43,6 +43,7 @@
 // hubs and the view — the clock the hubs and the VM see does not advance meanwhile.
 
 import {collectFixedObservations, observationSelection} from './measurements/precision.js';
+import {collectStartupDiagnostic, startupDiagnosticSelection} from './measurements/startup-diagnostic.js';
 import {SimHubBridge} from './hub-bridge.js';
 import {hubRegistry} from './hubs/index.js';
 
@@ -118,8 +119,9 @@ export const createSimRunner = ({J, createPhysicsCore, mechanism, hubs = [], ste
          *        a hub: the core steps them as the in-thread session does); redo: from the
          *        last batch's checkpoint again
          */
-        run ({steps = 0, ticks = [], hubs: states = {}, redo = false, observation = null}) {
+        run ({steps = 0, ticks = [], hubs: states = {}, redo = false, observation = null, startupDiagnostic = null}) {
             observation = observationSelection(observation, mechanism);
+            const diagnosticSelection = startupDiagnostic == null ? null : startupDiagnosticSelection(startupDiagnostic, mechanism);
             if (redo) {
                 core.rollback();
                 if (bridge) bridge.restoreState(saved);
@@ -129,15 +131,18 @@ export const createSimRunner = ({J, createPhysicsCore, mechanism, hubs = [], ste
             }
             const frames = [];
             const collector = collectFixedObservations(core, mechanism, observation);
+            let diagnostic = null;
             try {
+                if (diagnosticSelection) diagnostic = collectStartupDiagnostic(core, diagnosticSelection);
                 if (bridge) {
                     for (const {hub} of mirrors) hub.importState(states[hub.id]);
                     for (let i = 0; i < steps; i++) frames.push(bridge.step());
                 } else {
                     for (const ms of ticks) core.step(ms / 1000);
                 }
-                return {frames, ...posesOf(core, mechanism, observation), observations: collector.take()};
-            } finally { collector.detach(); }
+                return {frames, ...posesOf(core, mechanism, observation), observations: collector.take(),
+                    ...(diagnostic ? {startupDiagnostic: diagnostic.take()} : {})};
+            } finally { diagnostic?.detach(); collector.detach(); }
         },
         destroy: () => core.destroy()
     };

@@ -3,13 +3,18 @@ import assert from 'node:assert/strict';
 // Exact policy from the reviewed workflow/ref cancellation change. A projection
 // changes only this block; historical hashes still bind every other byte.
 export const reviewedPolicy = "concurrency:\n  group: ${{ github.workflow }}${{ !(github.ref_type != 'tag' && (github.event_name == 'push' || github.event_name == 'pull_request')) && format('-isolated-{0}', github.run_id) || '' }}-${{ github.ref }}\n  cancel-in-progress: ${{ github.ref_type != 'tag' && (github.event_name == 'push' || github.event_name == 'pull_request') }}\n";
-// Model and cycle still use the exact earlier policy until their separate
-// isolation change lands. This is an explicit consumer selection, never fallback.
-export const automaticOnlyPolicy = "concurrency:\n  group: ${{ github.workflow }}-${{ github.ref }}\n  cancel-in-progress: ${{ github.ref_type != 'tag' && (github.event_name == 'push' || github.event_name == 'pull_request') }}\n";
+export const workflowRefPolicy = "concurrency:\n  group: ${{ github.workflow }}-${{ github.ref }}\n  cancel-in-progress: ${{ github.ref_type != 'tag' && (github.event_name == 'push' || github.event_name == 'pull_request') }}\n";
+// Main's earlier public option names the same exact workflow/ref policy.
+// Keep both explicit interfaces; conflicting or unknown selections refuse.
+export const automaticOnlyPolicy = workflowRefPolicy;
 const labelSuffix = "-${{ (github.event.action == 'labeled' || github.event.action == 'unlabeled') && format('label-{0}', github.event.label.name) || 'code' }}";
-export const assertReviewedConcurrency = (text, {labels = false, automaticOnly = false} = {}) => {
-    const selected = automaticOnly ? automaticOnlyPolicy : reviewedPolicy;
-    const policy = labels ? selected.replace('${{ github.ref }}', '${{ github.ref }}' + labelSuffix) : selected;
+export const assertReviewedConcurrency = (text, {labels = false, profile, automaticOnly} = {}) => {
+    assert.ok(profile === undefined || ['isolated', 'workflow-ref'].includes(profile), 'explicit reviewed concurrency profile');
+    assert.ok(automaticOnly === undefined || typeof automaticOnly === 'boolean', 'explicit automatic-only selection');
+    const aliasProfile = automaticOnly === undefined ? undefined : automaticOnly ? 'workflow-ref' : 'isolated';
+    assert.ok(profile === undefined || aliasProfile === undefined || profile === aliasProfile, 'concurrency selections agree');
+    const sourcePolicy = (profile ?? aliasProfile ?? 'isolated') === 'workflow-ref' ? workflowRefPolicy : reviewedPolicy;
+    const policy = labels ? sourcePolicy.replace('${{ github.ref }}', '${{ github.ref }}' + labelSuffix) : sourcePolicy;
     assert.equal((text.match(/^concurrency:/gm) || []).length, 1, 'one workflow concurrency block');
     const heading = /^concurrency:\n/m.exec(text);
     assert.ok(heading, 'workflow concurrency mapping exists');
@@ -20,7 +25,9 @@ export const assertReviewedConcurrency = (text, {labels = false, automaticOnly =
 };
 export const studyBeforeConcurrencyPolicy = (file, text) => {
     if (file !== '.github/workflows/reference-qualified-instruments.yml') return text;
-    assertReviewedConcurrency(text);
+    try { assertReviewedConcurrency(text); } catch (cause) {
+        throw new Error('sealed completed-study source changed: exact reviewed scheduler policy required', {cause});
+    }
     return text.replace(reviewedPolicy, "concurrency:\n  group: reference-qualified-instruments-${{ github.event_name }}-${{ github.sha }}\n  cancel-in-progress: false\n\n");
 };
 
@@ -58,7 +65,7 @@ export const hddHistoricalHashBody = (file, text) => {
 };
 
 export const modelWorkflowBeforeConcurrencyPolicy = text => {
-    assertReviewedConcurrency(text, {automaticOnly: true});
-    assert.equal(text.split(automaticOnlyPolicy + '\n').length, 2, 'exact inserted model policy extent');
-    return text.replace(automaticOnlyPolicy + '\n', '');
+    assertReviewedConcurrency(text, {profile: 'workflow-ref'});
+    assert.equal(text.split(workflowRefPolicy + '\n').length, 2, 'exact inserted model policy extent');
+    return text.replace(workflowRefPolicy + '\n', '');
 };

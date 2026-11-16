@@ -57,7 +57,7 @@ const craneProjectRoundtrip = async (page, {openSimLab, shotsDir}) => {
 export const mechanicsInteractions = async (page, {openSimLab, shotsDir, timeout,
     models = PROGRAM_MACHINES, judge = judgeMechanicsRun, simulatedMs = 18000,
     simulatedMsFor = () => simulatedMs, completeWhenPausedFor = () => false, completionHoldMsFor = () => null,
-    fileFor = id => `${id}.ldr`, keyFor = id => fileFor(id), programMarker = null, speed = 1, observeProgram = false, captureModel = null, extendedObservations = false, observeDynamics = false, stepParts = null, includeExperimental = false}) => {
+    fileFor = id => `${id}.ldr`, keyFor = id => fileFor(id), programMarker = null, speed = 1, observeProgram = false, captureModel = null, extendedObservations = false, observeDynamics = false, stepParts = null, includeExperimental = false, startupDiagnosticFor = null}) => {
     mkdirSync(shotsDir, {recursive: true});
     await openSimLab(page, {program: null});
     const results = {};
@@ -92,7 +92,9 @@ export const mechanicsInteractions = async (page, {openSimLab, shotsDir, timeout
             el.textContent.includes(marker)), programMarker(id), {timeout: 30000});
         await page.getByTestId('bw-sim-lab-3d-canvas').waitFor();
         await (captureModel ? captureModel(page,resolve(shotsDir, `${id}.png`)) : page.screenshot({path: resolve(shotsDir, `${id}.png`)}));
-        await page.evaluate(installBrowserMechanicsRecorder,{recordKey:'__bwMechanics',captureKey:'__bwCaptureMechanics',extended:extendedObservations,observeProgram,observeDynamics,stepParts});
+        const startupDiagnostic = startupDiagnosticFor ? await startupDiagnosticFor(page, id) : null;
+        await page.evaluate(installBrowserMechanicsRecorder,{recordKey:'__bwMechanics',captureKey:'__bwCaptureMechanics',extended:extendedObservations,observeProgram,observeDynamics,stepParts,
+            ...(startupDiagnostic ? {startupDiagnostic} : {})});
         await page.getByTestId('bw-sim-lab-speed').selectOption(String(speed));
         await page.getByTestId('bw-sim-lab-run').click();
         const simulatedForThis = simulatedMsFor(id);

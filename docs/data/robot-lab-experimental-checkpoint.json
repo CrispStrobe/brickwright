@@ -188,10 +188,10 @@
       "archiveSha256": "1bb7219d2e2c27a6f0ea9b98c6b8186c18d5c34278e2d7652fec2b5877f42678",
       "originalLdrawEntry": "04-apex/apex.ldr",
       "originalLdrawSha256": "7f810fd131b0aa2854d224f9830adc2e519093752960a5159ecdf03462e2359e",
-      "canonicalLdrawSha256": "5172c27b1828dd068b7b0ea9130e44009ee4eee0e9ade33874d1ae19d2e2cb18",
+      "canonicalLdrawSha256": "e65e644cab84fd17bac43c3133b7015f73f64676833f5e718a49845f6a108337",
       "originalProgramEntry": "04-apex/apex.bw",
       "programSha256": "4db8b69cfc7bde6e39b58309b143a5bfa357b6384534052ada3f1a98643c10c3",
-      "adaptation": "Author/license comments normalized to user-authorized CrispStrobe BSD-3-Clause; geometry unchanged; MPD wrapper generated from canonical LDR; program bytes unchanged.",
+      "adaptation": "Author/license comments normalized to user-authorized CrispStrobe BSD-3-Clause; geometry unchanged; MPD wrapper generated from canonical LDR; program bytes unchanged. Promotion (R3, 2026-11-12): housing ring repair: 16 of the 32 two-hole links (43857) move to another layer (y -340/-360/-380) so that no two links within two places share a layer where the ring curves (their box colliders overlapped by up to 0.6 LDU beyond the 1 LDU tolerance in 24 pairs); 8 pins move from y -350 to -370 and 8 become 3L pins (6558) at y -360. In-plane link and pin positions, the rotor, gears, carrier and frame unchanged. The author STEP groups (up to 220 parts) are split in order into 86 steps of at most six parts.",
       "basicChecks": {
         "id": "apex",
         "checked": [
@@ -253,6 +253,11 @@
           "notes": "Carrier turns opposite to the drive gear (external mesh), rotor same sense as carrier. Apex epitrochoid not traced directly; follows from measured ratio plus rigid rotor and 4 mm offset."
         },
         "scope": "one headless run on the app branch engine; not a physical build"
+      },
+      "promotionReview": {
+        "date": "2026-11-12",
+        "decision": "PROMOTED",
+        "reason": "Registered judge wankel-ratio-v1 (judgeWankelRatio): 20T:28T carrier drive, 16T:8T and 8T:24T rotor train (rotor = carrier/3) from catalogue tooth counts, rotor bearing 4.000 mm eccentric from the compiled hinges. Native run (COLD 500): 1512.6 deg on A, carrier -(20/28)A within 0.0016 deg (gate 0.25), rotor carrier/3 within 0.0017 deg (gate 0.25), rotor centre on the eccentric circle within 0.00005 mm (gate 0.1); 3.001 carrier turns, 1.000 rotor turns; frozen-output and 1 cm shift refused. Disconnection idler_upper_8t: carrier 3.0 turns, rotor-law error 14.0 deg (lost, bar 5), judge refuses. Wrong-model mutant (rotor gear 24T -> 40T) refused."
       }
     },
     {
@@ -358,6 +363,11 @@
         "revisedProgramSha256": "d050c34a652675c3cc3a277d2faf76b9ccc163d8a0216ff77d100abd478b7a78",
         "reason": "The original passed or failed on a one-frame timing shift: at 72-144 deg/s the three scissor rings lose sync near full expansion and the loop diverges (NaN in the app). Revision: coarse moves at 36 deg/s; bounded trim with a 4-deg fine search; fail-safe hold when rings disagree, total trim exceeds 450 deg, the span stops following the motor or the error grows. Targets, thresholds and the final shape guard unchanged; completes at start offsets 0-1000 ms.",
         "date": "2026-10-25"
+      },
+      "promotionReview": {
+        "date": "2026-11-12",
+        "decision": "BLOCKED",
+        "reason": "R3 construction triage (solid suite on the shipped bytes): 24 centre anchor pins (43093) reach 2.0 LDU into their elbows (32192 angle connector #4) and drive_secondary_axle 2.1 LDU into cage_XY_02_A_elbow; 12 solid collider overlaps between cage ends/spacers and the six cage hubs (44809), 9 to 19 LDU deep (e.g. cage_XY_04_B_end_start with cage_hub_inner_Xm), plus cage_hub_outer_Yp with drive_input_bush_2; and the compiler's locked-hinges warning. The pin overlap is the same in every cell and for every rotation of the pin about its axis (2.0 LDU) or with the pin flipped (2.2 LDU): the points are on the pin's bore, inside the solid of 32192's composite mesh around its centre pin hole, so the scissor pivot as designed (a pin in that hole) cannot pass the mesh check. A fix needs a different pivot part and re-seated hubs across 48 links, which is a redesign, not a minimal repair; no judge (scissor-sphere-v1) was written or run."
       }
     },
     {
@@ -928,10 +938,10 @@
       "archiveSha256": "1bb7219d2e2c27a6f0ea9b98c6b8186c18d5c34278e2d7652fec2b5877f42678",
       "originalLdrawEntry": "12-aster/aster-governor.ldr",
       "originalLdrawSha256": "8c5526def87c2f20bb718305000f62391a8e736df55ccb419a821305aea0a300",
-      "canonicalLdrawSha256": "cb459d98ecff3f6b9f1b6706b06cea3cf5e21c3434886989a6241ba063f020d9",
+      "canonicalLdrawSha256": "7ed33792f4335ee02fcbd021be458db74c74a839a50e03c2624a6b76cbdbd3ab",
       "originalProgramEntry": "12-aster/aster-governor.bw",
       "programSha256": "3f6fc4aff0e58e3d1e825c1a6bb2dfafe88400379ac700f9abdf90c7dbdc6c06",
-      "adaptation": "Author/license comments normalized to user-authorized CrispStrobe BSD-3-Clause; geometry unchanged; MPD wrapper generated from canonical LDR; program bytes unchanged.",
+      "adaptation": "Author/license comments normalized to user-authorized CrispStrobe BSD-3-Clause; geometry unchanged; MPD wrapper generated from canonical LDR; program bytes unchanged. Promotion (R3, 2026-11-12): real-part repair on both flyweight axles: each 56 mm wheel (39367p01) moved from +-60 to +-67.5 LDU along its axle (it reached 7.5 LDU into the 2L key beam 60483), the axle 8 (3707) became an axle 10 (3737) and the outer half bushes moved from +-75 to +-90. The author STEP groups (up to 63 parts) are removed so the instructions derive 62 connected steps of at most six parts; every other placement, colour and ID unchanged.",
       "basicChecks": {
         "id": "aster-governor",
         "checked": [
@@ -1030,6 +1040,11 @@
           "note": "fitted k is ~3-10% above the point-mass value from catalogue masses (distributed arm/weight mass); the law's form holds, the lesson keeps it as an approximation. No throttle: speed is fully programmed."
         },
         "scope": "one headless run on the app branch engine; not a physical build"
+      },
+      "promotionReview": {
+        "date": "2026-11-12",
+        "decision": "BLOCKED",
+        "reason": "Construction repaired (shipped) and native law passes, but the hosted chromium browser gate refused it (robotaddon21, job 131019155176): the law checks held, then the judge's hinge-closure bound failed, gapMm 0.550 (bound 0.5) and axisDeg 0.73 at 800 deg/s; natively the same bound reads 0.365 mm. The bound is not loosened, so Aster stays experimental; its disconnected control passed in the same job (lift -0.16 mm at 799.5 deg/s). Native evidence kept: Registered judge governor-lift-v1 (judgeGovernorLift): equal 48 mm arms on 25.30 mm hinge offsets from the compiled joints; omega^2(h) = 2g (dY/dh)/(dJ/dh) from the compiled collider masses and inertias, lift-off 628.2 deg/s. Native run (COLD 500): plateau lifts 3.04/7.84/16.09/7.80/3.05/7.86 mm at 675/725/800/725/675/725 deg/s, each held speed 1.26-1.46 % above the speed the lift predicts (gate 3 %), rest lift 0.021 mm (gate 0.1), repeatability 0.041 mm (gate 0.5); frozen-output and 1 cm shift refused. The engine's step count moves this equilibrium: with 4 collision steps the same plateaus sit 0.4-1.1 % below the prediction. The handoff's point-mass form (k = (m + M)/m from compiled masses) is 7-11 % slow and is not used. Disconnection lower_arm_pos + lower_arm_neg: spindle at 800 deg/s, collar lift -0.16 mm (lost: must exceed 1 mm), judge refuses. Wrong-model mutant (collar four times as heavy) refused."
       }
     },
     {
@@ -1255,10 +1270,10 @@
       "archiveSha256": "1bb7219d2e2c27a6f0ea9b98c6b8186c18d5c34278e2d7652fec2b5877f42678",
       "originalLdrawEntry": "15-solstice/solstice-pumpjack.ldr",
       "originalLdrawSha256": "db4b2b9c62d70d24a1ae488c48c3975a2ec2accc34e28016ae725f70a5755b7f",
-      "canonicalLdrawSha256": "fb7edde35e329b35af4bcab107be8e5c560db48cbfcaaea451cc60cc9a168d72",
+      "canonicalLdrawSha256": "096fee118bbbb3cd89030fa1f6f58330cba3be8b6ad8fb4f992d9abf9b360a71",
       "originalProgramEntry": "15-solstice/solstice-pumpjack.bw",
       "programSha256": "77ebf25fd16693953e719959294c28d9bfe23690a06f3d31f2c4e0686c513a41",
-      "adaptation": "Author/license comments normalized to user-authorized CrispStrobe BSD-3-Clause; geometry unchanged; MPD wrapper generated from canonical LDR; program bytes unchanged.",
+      "adaptation": "Author/license comments normalized to user-authorized CrispStrobe BSD-3-Clause; geometry unchanged; MPD wrapper generated from canonical LDR; program bytes unchanged. Promotion (R4, 2026-11-12): start-guard pose repair: the crank (ROTOR) is re-posed to its gravity rest at -75 deg and the pitman, walking beam, pump rod and piston are placed by solving the linkage at that crank angle (link lengths, pins, parts, colours, IDs and the program unchanged). The saved pose was not an equilibrium: the unpowered cold settle sagged the crank 5.9 deg at 500 ms and 12.6 deg at 1 s; after the re-pose it moves 0.13 deg in 3 s (gravity equilibrium about -74.8 deg; poses at -70 and -80 deg sag 2.8 and 3.0 deg in 3 s).",
       "basicChecks": {
         "id": "solstice-pumpjack",
         "checked": [
@@ -1338,6 +1353,11 @@
           "note": "positive encoder = rack reaches top near 115°, so the lesson now names the 90° pause as near the top"
         },
         "scope": "one headless run on the app branch engine; not a physical build"
+      },
+      "promotionReview": {
+        "date": "2026-11-12",
+        "decision": "STAYS_EXPERIMENTAL",
+        "reason": "Not promoted (browser/native solver parity). Native runs pass walking-beam-v1 (COLD 500, strict ports): beam vs the compiled loop 0.019 deg, piston 0.022 mm, at both 25 ms and 33 ms frames; disconnection pin_P refused (beam-law error 42.39 deg, crank span 360.3 deg). The local chromium browser gate (Node 22, production build) measured beam error 0.132 deg and piston 0.17 mm against the frozen 0.1 deg / 0.1 mm bounds, a steady offset during the fast reverse cycle at crank 235-247 deg. The likely cause is a solver-setting difference between the browser and the native helper, to be investigated separately; the bounds are not changed. Next: browser/native solver parity, then re-promotion at 0.1 deg. The re-pose (start-guard fix) and the registered judge walking-beam-v1 stay."
       }
     },
     {
@@ -1980,10 +2000,10 @@
       "archiveSha256": "23de5c20d88547286a399ef950b9d30c23f988a4479ee252b9078d76421d8a70",
       "originalLdrawEntry": "models/vesper-quickreturn.ldr",
       "originalLdrawSha256": "953b0232b5f5af1fbbcede365e5ba5d20d8df69140779f7076b1d645b88631c9",
-      "canonicalLdrawSha256": "791e9b8843359153bde34aa803c7cf39228643819be45c562f79f27dbaa3c5a3",
+      "canonicalLdrawSha256": "a8bdcc02769af95593d82bd0d6be66dd3b952f4b6729be2db35e42928523692d",
       "originalProgramEntry": "programs/vesper-quickreturn.bw",
       "programSha256": "1d0aa655c223bbf4511967202ea56dd376e4dcea053943442cce87fda6643bfd",
-      "adaptation": "Author/license comments normalized to user-authorized CrispStrobe BSD-3-Clause; geometry unchanged; MPD wrapper generated from canonical LDR; program bytes unchanged.",
+      "adaptation": "Author/license comments normalized to user-authorized CrispStrobe BSD-3-Clause; geometry unchanged; MPD wrapper generated from canonical LDR; program bytes unchanged. Promotion (R3, 2026-11-12): one real-part repair: the fixed bearing on the lever pivot pin pin_O, a 3L beam (32523) at z -40 LDU whose collider reached 5.5 LDU into the SPIKE motor's output-side plate, is now a thin 1 x 5 liftarm (32017) at z -45 on the same two pins. The twelve author STEP groups (up to 78 parts) are removed so the instructions derive 46 connected steps of at most four parts; every other placement, colour and ID unchanged.",
       "basicChecks": {
         "id": "vesper-quickreturn",
         "checked": [
@@ -2062,6 +2082,11 @@
           "residual": "ratio -0.0014 (30°/s) and -0.004 (60°/s); stroke +0.017 mm"
         },
         "scope": "one headless run on the app branch engine; not a physical build"
+      },
+      "promotionReview": {
+        "date": "2026-11-12",
+        "decision": "BLOCKED",
+        "reason": "Construction repaired (shipped) and native law passes, but the hosted chromium browser gate refused it (robotaddon20, job 131019155159): ram vs the compiled kinematics 0.504 mm against the judge's 0.5 mm bound (natively 0.300 mm). The browser record also showed 17 arc ratios with a minimum of 1.281: a turning point detected at a stage boundary, so the judge's turning-point extraction needs work on browser frames before this model is retried. Bounds are not loosened; Vesper stays experimental. Its disconnected control passed in its own step (pin_P removed: law error 47.1 mm). Native evidence kept: Registered judge quick-return-v1 (judgeQuickReturn, scripts/lib/sim-lab-r3-judges.mjs): crank 16.000 mm, pivot distance 56.000 mm, guide offset 8.000 mm, lever 112 mm and rod 64 mm from the compiled joints; predicted stroke 66.168 mm and crank-arc ratio 213.59/146.41 = 1.4588. Native run (COLD 500): ram within 0.300 mm of the predicted position at every crank angle (gate 0.5), stroke 66.184 mm (gate +-0.5), 16 arc ratios 1.4541-1.4582 (error 0.0048, gate 0.02), slow side swaps on reversal, crank 1:1 with motor A; frozen-output and 1 cm shift refused. Disconnection pin_P: crank 1080 deg, ram span 0.0002 mm, law error 47.1 mm (lost, bar 5), judge refuses. Wrong-model mutant (lever pivot moved 8 mm toward the crank) refused: law error 11.2 mm."
       }
     },
     {
@@ -2072,9 +2097,9 @@
       "originalLdrawEntry": "tempest-pendulum.ldr",
       "originalLdrawSha256": "b7c6ac8f6d0b91227945f46424fe4b0668299fb65618e27bfed4a1b07c08e9c3",
       "originalProgramEntry": "tempest-pendulum.bw",
-      "adaptation": "Author header normalized from the serializer default Brickwright to CrispStrobe (both select the same own-file import policy) and a BSD-3-Clause !LICENSE line added; geometry and program bytes unchanged; MPD wrapper generated from canonical LDR.",
+      "adaptation": "Author header normalized from the serializer default Brickwright to CrispStrobe (both select the same own-file import policy) and a BSD-3-Clause !LICENSE line added; geometry and program bytes unchanged; MPD wrapper generated from canonical LDR. Promotion (R4, 2026-11-12): start-guard pose repair: the carrier (ROTOR) is re-posed to its gravity rest at 102.5 deg and both arms translated so they hang straight down from the moved shoulder (parts, colours, IDs and the program unchanged). The saved pose was not an equilibrium: the unpowered cold settle swung the carrier 39.8 deg by 400 ms (settling near 102.7 deg); after the re-pose it moves 0.08 deg at 500 ms and 0.25 deg at 2 s.",
       "placements": 69,
-      "canonicalLdrawSha256": "83b3e27b932f8356b5d2fff557f524f1ef589d871cf8f3aa64bd5647d86a3902",
+      "canonicalLdrawSha256": "c8c430c9224fe0348e6bc74425f59aa1d6ffe67c6c9f2d48b9f3ed7ae4173951",
       "programSha256": "6b4bd9bf40610de86dbd773622592b65127d72fd52d0b795a8b9ba3cc4786fd8",
       "basicChecks": {
         "id": "tempest-pendulum",
@@ -2123,6 +2148,11 @@
           "summary": "Slow normal mode: period 0.664 s (point-mass ideal 0.66 s), lower/upper amplitude about 1.4 (ideal sqrt 2), in phase; COLD=1000 start sags 86 deg and trips the datum guard."
         },
         "scope": "one headless run on the app branch engine; not a physical build"
+      },
+      "promotionReview": {
+        "date": "2026-11-12",
+        "decision": "PROMOTED",
+        "reason": "Registered judge double-pendulum-mode-v1 (judgeDoublePendulum, scripts/lib/sim-lab-r4-judges.mjs): two compound pendulums in series; normal modes from the engine's compiled mass properties (slow 0.6650 s, lower/upper +1.485; fast 0.2989 s, -1.436), recomputed by the qualification test. Native run (COLD 500, strict ports, 1832 frames): slow period 0.6664 / 0.6656 s in the two held windows (0.2 / 0.09 %, gate 1 %), fast 0.2988 s vs 0.2989, two-mode residuals 6.5 % / 3.4 % (gate 15 %). Disconnection motor_pin_h3 + motor_pin_h5 (motor no longer drives the carrier): motor span 120.8 deg, carrier drive error 107.1 deg (lost, bar 5), judge refuses. Cuts that change the hanging load (elbow_axle, either bob wheel) make the carrier re-settle (elbow cut 36.5 deg in 3.2 s) and the program's own start guard refuses at stage 0, so they cannot serve as the control. Wrong-model mutant (lower bob replaced by another wheel part) refused. Browser gate robotaddon24 pending (CI)."
       }
     },
     {
@@ -2776,6 +2806,11 @@
         "date": "2026-10-27",
         "decision": "STAYS_EXPERIMENTAL",
         "reason": "The qualification contract requires a cold settle of at least 500 ms; the recorded unpowered pusher droops about 4 deg/s and the unchanged program refuses to start beyond 2 deg (cold 1000 refused). The law is also only qualitative (dissipative contact chain). Not run on this branch."
+      },
+      "r4StartGuardReview": {
+        "date": "2026-11-12",
+        "decision": "STAYS_EXPERIMENTAL",
+        "reason": "Measured (COLD, unpowered): the pusher saved at +30 deg droops about 4 deg/s (-1.98 deg at 500 ms, -4.06 deg at 1 s, against the program's 2 deg guard) and comes to rest leaning on the first bob at -13.9 deg (bob -1.34 deg). Free contact begins near -12.5 deg, so the saved pose has about 12.5 deg of clearance and no gravity-rest pose exists short of the bob. A rest stop would block the program's -24.5 deg preload (same direction), so the fix is a design change (a counterweight of roughly 5.7 g on the pusher's free -40 hole; pusher 13.24 g with its centre of mass about 6.9 mm off the axis) plus a quantitative law. The supplied impact is strongly dissipative and no restitution is compiled, so no bound is derivable from compiled geometry yet."
       }
     },
     {

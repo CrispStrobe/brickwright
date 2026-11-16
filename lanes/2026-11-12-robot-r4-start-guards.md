@@ -2,13 +2,14 @@
 
 Status: IN REVIEW 2026-11-12 — claim and change in one PR. Promotes Tempest only. Impulse Line stays
 experimental: its pusher has no gravity-rest pose short of the first bob (handoff 00000).
-Solstice is not promoted: native runs pass walking-beam-v1 (beam 0.019°, piston 0.022 mm at both 25 ms and
-33 ms frames), but the local chromium browser gate (Node 22, production build) measured beam error 0.132° and
-piston 0.17 mm against the frozen 0.1° / 0.1 mm bounds, a steady offset during the fast reverse cycle at crank
-235–247°. The likely cause is a solver-setting difference between the browser and the native helper, to be
-investigated separately; no bound changes. Its contract, registry move, fixture and shard were withdrawn; the
-re-pose and the registered judge `walking-beam-v1` stay. Next: browser/native solver parity, then re-promotion
-at 0.1°.
+Solstice is not promoted. The original browser verdict was 0.132° / 0.17 mm
+against unchanged 0.1° / 0.1 mm limits. The original judge mixed first-frame
+angles with authored geometry; the corrected judge still refuses the retained
+browser track at 0.115890° / 0.171740 mm, while retained native tracks pass.
+The largest browser deviation begins before motor movement; an initial-condition
+difference is observed, not proof of a solver defect. Preserve all startup frames
+and original failures. Investigate the early constraint relaxation and require
+fresh affected browser qualification before any promotion.
 Owner: Claude, Robot Lab promotion lane.
 Branch: `lane/robot-r4-start-guards-20261112`.
 
@@ -43,4 +44,24 @@ Measured (native, COLD 500, frameMs 25, strict ports):
 
 Controls (Tempest): frozen-output and 1 cm shift; the disconnection above; a wrong-model mutant (other bob wheel), refused.
 
-Qualification: hosted unit/build checks and the chromium browser gates, `ci:full` once on the final head.
+Qualification: run the affected Chromium browser journeys and relevant checks.
+Use bounded local or Kaggle compute where appropriate; do not add `ci:full`.
+Solstice remains experimental. With the opt-in light-links solver preset, the
+integrated local browser run passed the existing 0.1° / 0.1 mm limits
+(0.00977° / 0.01258 mm), disconnected control, instructions, saved-project
+replay and English/German lessons in 407 seconds. Before any promotion, review
+the preset and its effect on other models, run the applicable promotion suite,
+and update the registry, catalogue and qualification contract together.
+
+Startup follow-up: the browser's early Solstice samples exceed both 0.1 bounds
+before settling. An isolated 5 ms-step comparison using the existing light-link
+solver policy produced the same startup errors as the baseline; raising its
+position iterations to the existing engine cap reduced but did not resolve them.
+The native rotor representation increased the startup errors in the same
+short comparison, so neither experiment is a fix.
+A comparison using the existing light-link policy with 120 velocity iterations
+kept all 110 startup samples within both bounds. A narrowly scoped authored
+model preset also passed the full simulated program and the disconnected
+control under the unchanged bounds. Run the held browser diagnostic, including
+startup observations, before considering promotion. Keep early samples and
+the bounds unchanged; Solstice remains experimental.

@@ -2,7 +2,7 @@
 // Copyright (c) 2026 CrispStrobe
 // Browser gates for the two Q5 promotions (#1683) that had none, Evenhand and RimRun, for the R1 promotion
 // Obliquity Orrery (obliquity-tilt-v1, its crank-A disconnection as the control) and for the R2 judge family
-// (Cadence, Equinox, Helios, Orion; sim-lab-r2-judges.mjs, each with its registry disconnection). Each runs the model's own
+// (Cadence, Equinox, Helios, Orion; sim-lab-r2-judges.mjs), R3 Apex and R4 Tempest; each runs the model's own
 // law through the real GUI with the qualification registry's judge and thresholds
 // (scripts/lib/robot-lab-qualification.mjs, docs/data/robot-lab-qualification.json), its causal control, then the
 // checks the nine-intake gate runs: bounded manual control, connected instructions and placement BOM, LDR/MPD
@@ -13,7 +13,7 @@
 // not one fixed step). Every law threshold, gate and control is the registry's own and is not changed here.
 import assert from 'node:assert/strict';
 import {readFileSync, writeFileSync, mkdirSync} from 'node:fs';
-import {resolve} from 'node:path';
+import {resolve, dirname} from 'node:path';
 import {mechanicsInteractions, manualMechanicsInteractions} from './sim-lab-mechanics-gate.mjs';
 import {captureRenderedModel, captureUiScreenshot} from './sim-lab-rendered-model-gate.mjs';
 import {intakeRoundtrip, projectProgramReady} from './sim-lab-intake-roundtrip.mjs';
@@ -23,14 +23,24 @@ import {qualificationContracts, QUALIFICATION_JUDGES, disconnectedSource} from '
 import {p6DisconnectionLoss} from './sim-lab-p6-judges.mjs';
 import {obliquityDisconnectionLoss} from './sim-lab-obliquity-judge.mjs';
 import {r2DisconnectionLoss} from './sim-lab-r2-judges.mjs';
+import {r3DisconnectionLoss} from './sim-lab-r3-judges.mjs';
+import {r4DisconnectionLoss} from './sim-lab-r4-judges.mjs';
+import {Q5_HELD, heldQ5Contract, heldUsesR4Control, runHeldQ5Checks, assertHeldManualCoverage, withHeldPageErrors, finishHeldCleanup, heldErrorDetails, heldRuntimeSnapshot, heldStartupFailureSnapshot, assertHeldPrivateDirectory, heldModelSource, heldStartupDiagnostic} from './sim-lab-q5-held.mjs';
+export {Q5_HELD} from './sim-lab-q5-held.mjs';
 
 export const R2_BROWSER_MODELS = Object.freeze(['cadence-geneva', 'helios-transmission', 'orion-cardan']);
 // Cadence's program sweeps 4320° at 30°/s (about 2.7 min per run); the law run, the disconnected run and the
 // fresh-context replay together exceed the 8-minute step cap, so its disconnected control is its own gate step
 // (`--examples=cadence-geneva-disconnected`, same shard), with the same assertions.
+// R3 (2026-11-12): only Apex qualified in the browser. Vesper (law 0.504 mm vs its 0.5 mm bound) and Aster (a hinge
+// open 0.55 mm vs its 0.5 mm closure bound at 800°/s) stay experimental; their judges stay registered.
+export const R3_BROWSER_MODELS = Object.freeze(['apex']);
+// R4: Tempest uses motor-to-carrier pin removal; Solstice stays experimental.
+export const R4_BROWSER_MODELS = Object.freeze(['tempest-pendulum']);
 export const SEPARATE_CONTROL = Object.freeze(['cadence-geneva']);
-export const Q5_BROWSER_MODELS = Object.freeze(['evenhand', 'rimrun', 'obliquity-orrery', ...R2_BROWSER_MODELS]);
-export const Q5_HELD = Object.freeze({});
+export const Q5_BROWSER_MODELS = Object.freeze(['evenhand', 'rimrun', 'obliquity-orrery', ...R2_BROWSER_MODELS, ...R3_BROWSER_MODELS, ...R4_BROWSER_MODELS]);
+/** The registry's disconnection-loss measure of an R2 or R3 model. */
+const familyLoss = (id, r) => ((R4_BROWSER_MODELS.includes(id) || heldUsesR4Control(id)) ? r4DisconnectionLoss : R3_BROWSER_MODELS.includes(id) ? r3DisconnectionLoss : r2DisconnectionLoss)(id, r);
 // One browser frame is one accepted worker batch. With the program clock installed, each VM step (1/30 s)
 // advances the world, so a frame spans 30 or 35 ms (whole 5 ms steps) at any speed setting; 1× is used.
 export const GATE_SPEED = 1;
@@ -180,19 +190,17 @@ async function orreryDisconnected(browser, opts, c) {
     } finally { await page.close(); }
 }
 
-// The R2 family's disconnected controls: the registry's own part removal (Cadence's drive pin axle, Helios's control gear,
-// Orion's far middle fork), loaded as an LDraw file under the same example
-// program. The input still completes its route, the model's law is lost (r2DisconnectionLoss), and the registry
-// judge refuses the run.
+// The R2, R3 and R4 controls remove each registry's own parts and require the law to be lost.
 async function r2Disconnected(browser, opts, c, id) {
     const page = await browser.newPage({viewport: {width: 1600, height: 1050}, serviceWorkers: 'block'}), errors = [];
     page.on('pageerror', e => errors.push(e.stack || e.message));
     page.on('dialog', d => d.accept());
+    let primary, hasPrimary = false;
     try {
         await openExample(page, opts, id + '.ldr');
         const program = await page.evaluate(projectProgramReady);
         assert.ok(program.some(t => t.operations.length), 'the example program is loaded');
-        const source = readFileSync('overlay/scratch-gui/static/sim-lab/models/' + id + '.ldr', 'utf8');
+        const source = heldUsesR4Control(id) ? heldModelSource(id) : readFileSync('overlay/scratch-gui/static/sim-lab/models/' + id + '.ldr', 'utf8');
         const cut = disconnectedSource(source, c.disconnect);
         await openFile(page, {name: id + '-disconnected.ldr', buffer: Buffer.from(cut)});
         assert.equal(await page.evaluate(() => window.__bwSimLab.status), 'ready');
@@ -204,14 +212,25 @@ async function r2Disconnected(browser, opts, c, id) {
         const input = r.mechanism.joints.find(j => j.motor?.port === c.ports[0]);
         const travel = Math.max(...r.track.map(f => Math.abs(f.joints[input.id].angle))) * 180 / Math.PI;
         assert.ok(travel > c.disconnectInputDeg, `input genuinely still turns: ${travel}°`);
-        const loss = r2DisconnectionLoss(id, r);
+        const loss = familyLoss(id, r);
         assert.ok(loss.lost, 'disconnection loses the law: ' + JSON.stringify(loss));
         assert.throws(() => judgeQ5Browser(id, r, c), `the registry judge refuses the disconnected ${id}`);
         await captureRenderedModel(page, resolve(opts.shotsDir, id + '-disconnected.png'));
         assert.deepEqual(errors, []);
         console.log(`PASS ${id} disconnected control: ${c.disconnect.join(', ')} removed, input ${travel.toFixed(1)}°, ${JSON.stringify(loss)}, judge refuses`);
         return {inputTravelDeg: travel, loss};
-    } finally { await page.close(); }
+    } catch (error) {
+        primary = error;
+        hasPrimary = true;
+        throw error;
+    } finally {
+        if (heldUsesR4Control(id)) await finishHeldCleanup(primary, [
+            async () => writeFileSync(resolve(opts.shotsDir, id + '-disconnected-runtime.json'), JSON.stringify(await page.evaluate(heldRuntimeSnapshot), null, 2) + '\n'),
+            () => writeFileSync(resolve(opts.shotsDir, id + '-disconnected-page-errors.json'), JSON.stringify(errors, null, 2) + '\n'),
+            () => page.close()
+        ], hasPrimary);
+        else await page.close();
+    }
 }
 
 /** The disconnected control of a SEPARATE_CONTROL model, run as its own gate step. */
@@ -245,18 +264,58 @@ async function rimrunSwapped(browser, opts, c, main) {
 
 export async function q5BrowserInteractions(page, opts, id) {
     assert.ok(Q5_BROWSER_MODELS.includes(id) || Object.hasOwn(Q5_HELD, id), 'a Q5 browser model');
-    const c = contractOf(id), observeDynamics = Boolean(c.observeDynamics);
-    mkdirSync(opts.shotsDir, {recursive: true});
-    const main = (await mechanicsInteractions(page, {
-        ...opts, models: [id], judge: (_, r) => judgeQ5Browser(id, r, c), captureModel: captureRenderedModel,
+    const held = Object.hasOwn(Q5_HELD, id);
+    const c = held ? heldQ5Contract(id) : contractOf(id), observeDynamics = Boolean(c.observeDynamics);
+    if (held) {
+        // All held outputs, including screenshots and generic helper files, live
+        // under a newly created exclusive directory; never overwrite a prior run.
+        assertHeldPrivateDirectory(dirname(opts.shotsDir));
+        mkdirSync(opts.shotsDir, {mode: 0o700});
+    } else mkdirSync(opts.shotsDir, {recursive: true});
+    if (held && opts.heldIdentity) writeFileSync(resolve(opts.shotsDir, id + '-identity.json'), JSON.stringify(opts.heldIdentity, null, 2) + '\n');
+    const measureMain = async () => (await mechanicsInteractions(page, {
+        ...opts, ...(held ? {includeExperimental: true} : {}), models: [id],
+        startupDiagnosticFor: held ? (loadedPage, loadedId) => loadedPage.evaluate(heldStartupDiagnostic, loadedId) : null,
+        judge: (_, r) => judgeQ5Browser(id, r, c), captureModel: captureRenderedModel,
         extendedObservations: true, observeDynamics, stepParts: STEP_PARTS[id] ?? null, completionHoldMsFor: () => c.afterMs, speed: GATE_SPEED, observeProgram: true
     }))[id];
-    const control = id === 'evenhand' ? await evenhandDisconnected(page.context().browser(), opts, c)
-        : id === 'obliquity-orrery' ? await orreryDisconnected(page.context().browser(), opts, c)
+    const mainCheck = async () => {
+        if (!held) return measureMain();
+        let primary, hasPrimary = false;
+        try { return await measureMain(); }
+        catch (error) { primary = error; hasPrimary = true; throw error; }
+        finally { await finishHeldCleanup(primary, [
+            ...(hasPrimary ? [async () => writeFileSync(resolve(opts.shotsDir, id + '-base-startup-partial.json'), JSON.stringify(await page.evaluate(heldStartupFailureSnapshot), null, 2) + '\n')] : []),
+            async () => writeFileSync(resolve(opts.shotsDir, id + '-base-runtime.json'), JSON.stringify(await page.evaluate(heldRuntimeSnapshot), null, 2) + '\n'),
+            async () => {
+                if (await page.evaluate(() => window.__bwSimLab?.status) === 'running') {
+                    await page.getByTestId('bw-sim-lab-pause').click();
+                    await page.waitForFunction(() => window.__bwSimLab.status === 'paused');
+                }
+            }
+        ], hasPrimary); }
+    };
+    const controlCheck = main => id === 'evenhand' ? evenhandDisconnected(page.context().browser(), opts, c)
+        : id === 'obliquity-orrery' ? orreryDisconnected(page.context().browser(), opts, c)
         : SEPARATE_CONTROL.includes(id) ? {separateStep: id + '-disconnected'}
-        : R2_BROWSER_MODELS.includes(id) ? await r2Disconnected(page.context().browser(), opts, c, id)
-        : await rimrunSwapped(page.context().browser(), opts, c, main);
+        : heldUsesR4Control(id) || [...R2_BROWSER_MODELS, ...R3_BROWSER_MODELS, ...R4_BROWSER_MODELS].includes(id) ? r2Disconnected(page.context().browser(), opts, c, id)
+        : rimrunSwapped(page.context().browser(), opts, c, main);
+    const checkDownstream = async () => {
+    let main, control;
+    if (held) {
+        try {
+            ({main, control} = await runHeldQ5Checks(mainCheck, () => controlCheck(), c));
+        } catch (error) {
+            await finishHeldCleanup(error, [() => writeFileSync(resolve(opts.shotsDir, id + '-held-failure.json'), JSON.stringify({
+                message: error.message,
+                failures: (error.errors || [error]).map(heldErrorDetails),
+                observations: error.observations
+            }, null, 2) + '\n')], true);
+            throw error;
+        }
+    } else { main = await mainCheck(); control = await controlCheck(main); }
     const manual = await manualMechanicsInteractions(page, {...opts, models: [id], captureModel: captureRenderedModel});
+    if (held) assertHeldManualCoverage(id, manual, c);
     await page.getByTestId('bw-sim-lab-instructions').click();
     await page.waitForFunction(() => window.__bwSimLabInstructions?.status === 'ready', null, {timeout: 120000});
     const plan = await page.evaluate(() => window.__bwSimLabInstructions.plan);
@@ -270,9 +329,19 @@ export async function q5BrowserInteractions(page, opts, id) {
         .evaluateAll(es => es.reduce((n, e) => n + Number(e.dataset.count), 0)), c.parts, `${id}: placement BOM`);
     await captureUiScreenshot(page, {path: resolve(opts.shotsDir, id + '-bom.png')}, page.getByTestId('bw-sim-instructions'));
     await page.keyboard.press('Escape');
-    await intakeRoundtrip(page, {...opts, extendedObservations: true, observeDynamics, afterMs: c.afterMs, replaySpeed: GATE_SPEED, stepParts: STEP_PARTS[id] ?? null}, id,
+    await intakeRoundtrip(page, {...opts, ...(held ? {retainPageErrors: true, modelSourceFor: heldModelSource} : {}), extendedObservations: true, observeDynamics, afterMs: c.afterMs, replaySpeed: GATE_SPEED, stepParts: STEP_PARTS[id] ?? null}, id,
         (_, r) => judgeQ5Browser(id, r, c));
     writeFileSync(resolve(opts.shotsDir, id + '-q5-browser.json'), JSON.stringify({id, judge: c.judge, main, control, manual,
         instructions: {steps: plan.steps.length, parts: parts.length}}, null, 2) + '\n');
-    console.log(`PASS ${id}: registry law (${c.judge}), ${id === 'rimrun' ? 'rimrun-swapped' : 'disconnected'} control, bounded manual control, connected instructions, placement BOM, LDR/MPD and fresh saved-project replay`);
+    };
+    if (held) await withHeldPageErrors(page,
+        errors => writeFileSync(resolve(opts.shotsDir, id + '-main-page-errors.json'), JSON.stringify(errors, null, 2) + '\n'), async () => {
+            let primary, hasPrimary = false;
+            try { return await checkDownstream(); }
+            catch (error) { primary = error; hasPrimary = true; throw error; }
+            finally { await finishHeldCleanup(primary, [async () => writeFileSync(
+                resolve(opts.shotsDir, id + '-main-runtime.json'), JSON.stringify(await page.evaluate(heldRuntimeSnapshot), null, 2) + '\n')], hasPrimary); }
+        });
+    else await checkDownstream();
+    console.log(`${held ? 'OBSERVATION ONLY (no producer/source qualification)' : 'PASS'} ${id}: registry law (${c.judge}), ${id === 'rimrun' ? 'rimrun-swapped' : 'disconnected'} control, bounded manual control, connected instructions, placement BOM, LDR/MPD and fresh saved-project replay`);
 }

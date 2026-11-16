@@ -28,13 +28,20 @@ The full task list with exact steps is section 00 of
   equinox-differential, helios-transmission, orion-cardan (judge family; DONE 2026-11-12, #1729, except
   equinox-differential: browser manual-control check vs a locked differential, see handoff 00000;
   `lanes/2026-11-11-robot-r2-judge-family.md`);
-  R3 apex, aster-governor, vesper-quickreturn, bloom (geometry repairs);
-  R4 solstice-pumpjack, tempest-pendulum, impulse-line (start-guard poses);
+  R3 apex (repaired and promoted, #1731, `lanes/2026-11-12-robot-r3-geometry-repairs.md`),
+  vesper-quickreturn (repaired, not promoted: browser law 0.504 mm vs 0.5 mm bound and a stage-boundary turning point),
+  aster-governor (repaired, not promoted: browser hinge gap 0.55 mm vs 0.5 mm bound), bloom (not promoted: its scissor pivots need a redesign, see handoff 00000);
+  R4 solstice-pumpjack, tempest-pendulum, impulse-line (start-guard poses; both re-posed; tempest-pendulum
+  promoted in review on `lane/robot-r4-start-guards-20261112`; solstice-pumpjack stays experimental: browser beam
+  0.132° / piston 0.17 mm vs 0.1 bounds, native 0.019° / 0.022 mm, needs browser/native solver parity; impulse-line stays
+  experimental: no gravity-rest pose short of the bob, needs a design change, see handoff 00000;
+  `lanes/2026-11-12-robot-r4-start-guards.md`);
   R5 spiral-scribe, quiet-partner; R6 pan-shift, inertia-loop; R7
   vector-delta (blocked by a missing part).
 - E1 (2026-11-10, open): Jolt enhanced internal-edge removal for tile-joint
   bumps; diagnose pair order first, then opt-in per model.
 
-Rules: iterate without `ci:full`, add it once on the final head; merge only
-with `--match-head-commit` after every enabled check passes; never weaken a
-threshold, judge or gate; no force-push or rebase of shared branches.
+Rules: do not add `ci:full` or dispatch full CI. Use bounded local or Kaggle
+runs where appropriate and retry failed checks normally. Keep model assertions
+and numerical bounds unchanged. Merge only at the reviewed head after enabled
+checks pass; use normal pushes and do not rewrite shared branches.

@@ -2,24 +2,26 @@
   "version": 1,
   "id": "tempest-pendulum",
   "language": "en",
-  "what": "Serial double pendulum. Motor A turns a short carrier lever; at its end a free shoulder hinge carries a 64mm upper arm with a wheel as bob, and a second free elbow hinge carries an equal 64mm lower arm with its own wheel. Only the carrier is driven. The program swings the carrier 60° quickly, holds it for 12 seconds, returns it home and holds for 8 seconds, then repeats the pulse in the other direction. During every hold both arms move only under gravity, their hinge constraints and the motion left over from the pulse. Experimental model: its mechanical law has not yet been independently measured against a physical control.",
+  "what": "Serial double pendulum — normal modes. Serial double pendulum. Motor A turns a short carrier; from it hangs a 64 mm upper arm, and from the upper arm's end a second free arm. Each arm carries a SPIKE wheel as a bob. Both hinges are free: the motor only moves and then holds the carrier. Motor A pulses a short carrier and then holds it still; two free 64 mm arms swing under gravity alone. Every small swing is the sum of two normal modes computed from the arms' masses and inertias: a slow 0.665 s mode with both arms in step and a fast 0.299 s mode with the arms opposed.",
   "try": [
-    "Open Examples, choose Tempest with experimental examples included, and load model plus program. Press Reset, then Run. Reset again before every repeat; the carrier must start at its home angle.",
-    "Watch the two arms during the first hold. Do they swing in the same direction at the same moment, or against each other? Compare how far the lower bob moves with how far the upper arm turns.",
-    "Count swings for ten seconds during a hold and estimate the period. Then compare the first hold (after the pulse outward) with the hold after the return: does a different carrier move excite a different pattern?",
-    "Watch the amplitude over the 12-second hold. Hinge friction and contact damping make the swing die away; note whether both arms fade together."
+    "Open Tempest with its program, press Reset, then Run. The run takes about 46 s.",
+    "The carrier swings quickly to −60°, then is held for 12 s. Watch the two arms: sometimes they swing together, sometimes against each other.",
+    "The carrier returns home and is held for 8 s, then pulses to +60° and holds again. Compare how the motion passes back and forth between the upper and lower arm.",
+    "Count swings: the slow, in-step motion takes about two thirds of a second per swing; the fast, opposed wobble is a bit over twice as quick."
   ],
-  "why": "Two equal point masses m on equal massless rods L have two normal modes. In the slow mode both arms swing in phase and the lower arm's angle from vertical is √2 times the upper arm's; in the fast mode they swing in opposition with ratio −√2. For small angles ω² = (2 ∓ √2)·g/L. With L = 64mm the slow mode has a period of about 0.66s and the fast mode about 0.27s. A short, smooth carrier pulse mainly excites the slow mode, so the arms mostly swing together. Large swings or a sharp mixed start excite both modes; then energy visibly passes between the arms and the motion becomes sensitive to the starting state, the famous chaotic double pendulum.",
-  "matters": "Coupled oscillators with normal modes appear in buildings during earthquakes, in cranes carrying a swinging hook and load, in vehicle suspensions and in molecules. Separating a motion into modes explains why some excitations die out calmly while others exchange energy.",
-  "question": "After the carrier stops, the upper arm swings about 6° either side of vertical. If the slow normal mode dominates, how far does the lower arm swing, and do the two arms move together or against each other?",
-  "answer": "In the slow mode the lower arm swings in phase with the upper arm, about √2 ≈ 1.4 times as far from vertical, so roughly 8–9°. The real arms and wheel bobs are not point masses, so the ratio is only approximately √2; the opposite-phase fast mode would show the lower arm swinging the other way.",
+  "why": "For small swings about the hanging rest, the two arm angles obey M·q̈ + K·q = 0. The mass matrix M comes from each arm's mass, centre of mass and moment of inertia; the stiffness K from gravity acting on the arms' centres of mass. Such a system has exactly two normal modes: a slow one (0.665 s) in which the lower arm swings 1.49 times as far as the upper arm in the same direction, and a fast one (0.299 s) in which it swings 1.44 times as far in the opposite direction. Every small swing is a sum of these two.",
+  "matters": "Normal modes describe any set of coupled oscillators: buildings in earthquakes, molecules, bridges and suspension systems. Engineers compute them from masses and stiffnesses before anything is built. For large swings the double pendulum becomes chaotic, which is why this law is only checked while the swings stay small.",
+  "question": "Why are the periods not those of two ideal point masses on massless 64 mm strings?",
+  "answer": "The real arms are beams with their own mass and inertia, and the bobs are wheels, not points. Using the engine's mass properties, the slow and fast periods are 0.6650 s and 0.2989 s with shape ratios +1.485 and −1.436, not the point-mass ratio of √2. The simulated arms show slow periods of 0.666 s in both held windows and a fast period of 0.299 s.",
   "further": [
-    "Measure both arm angles against the vertical from their actual poses, not from the motor encoder, and estimate period and amplitude ratio during a hold. Compare them with the point-mass prediction and explain any difference with the real mass distribution.",
-    "Design a physical control: lock the elbow with a real part so the two arms form one rigid pendulum. Which period would you then predict, and which observation must stay comparable?",
-    "The carrier lever only moves within its programmed ±60° pulses. Large swing angles, where chaos appears, are outside this experiment; the small-angle formulas no longer hold there."
+    "Doubling both masses changes nothing: the modes depend on ratios of mass and inertia, and on lengths.",
+    "A larger pulse gives larger swings; beyond a few tens of degrees the linear model no longer holds and the motion stops being a clean sum of two modes.",
+    "If the motor's pins to the carrier are removed, the motor still turns but the carrier no longer follows it: that is the causal control used to qualify this model.",
+    "Compare Cascade, a two-link pendulum on a moving crank, and Pendulum Array, which shows period against length."
   ],
-  "formula": "Small angles, equal point masses m and lengths L: ω² = (2 ∓ √2)·g/L; mode shapes θ₂/θ₁ = ±√2. L = 0.064m, g = 9.81m/s² ⇒ T_slow ≈ 0.66s, T_fast ≈ 0.27s.",
+  "formula": "M·q̈ + K·q = 0, M = [[I₁ + m₁|c₁−S|² + m₂|E−S|², m₂(E−S)·(c₂−E)], [·, I₂ + m₂|c₂−E|²]], K = g·diag(m₁h₁ + m₂h_E, m₂h₂). Compiled arms: slow mode 0.6650 s (lower/upper +1.485), fast mode 0.2989 s (−1.436).",
   "related": [
+    "cascade.ldr",
     "pendulum-array.ldr"
   ]
 }

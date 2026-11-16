@@ -37,7 +37,7 @@ test('the published addon gates remain unique with their exact commands and acce
     assert.equal(assigned.size,11,'No omitted or duplicated published gate');
 });
 test('additional addon shards use the existing Robot Lab scope predicate',()=>{
-    for(const shard of ['robotaddon5','robotaddon6','robotaddon7','robotaddon8','robotaddon9','robotaddon10','robotaddon11','robotaddon12','robotaddon13','robotaddon14','robotaddon15','robotaddon16','robotaddon18','robotaddon19']){
+    for(const shard of ['robotaddon5','robotaddon6','robotaddon7','robotaddon8','robotaddon9','robotaddon10','robotaddon11','robotaddon12','robotaddon13','robotaddon14','robotaddon15','robotaddon16','robotaddon18','robotaddon19','robotaddon22','robotaddon24']){
         assert.equal(job.shards.filter(s=>s===shard).length,1,'Unique matrix registration');
         const exclusion="          - shard: ${{ needs.scope.outputs.robotlab != 'true' && '"+shard+"' || 'none' }}";
         assert.equal(lines.filter(line=>line===exclusion).length,1,'Same existing path-scope predicate');
@@ -59,9 +59,9 @@ test('all newly delivered primary experiments have one complete journey with unc
     }
 });
 
-test('the promotions Evenhand, RimRun (Q5), Obliquity Orrery (R1) and the R2 family each have one browser gate on their own shard',()=>{
+test('the promotions Evenhand, RimRun (Q5), Obliquity Orrery (R1) and the R2 family and Apex (R3) each have one browser gate on their own shard',()=>{
     const selectors=[...workflow.matchAll(/--part=examples --examples=([^\s]+)/g)].flatMap(m=>m[1].split(','));
-    for(const [shard,id]of [['robotaddon13','evenhand'],['robotaddon14','rimrun'],['robotaddon15','obliquity-orrery'],['robotaddon16','cadence-geneva'],['robotaddon18','helios-transmission'],['robotaddon19','orion-cardan']]){
+    for(const [shard,id]of [['robotaddon13','evenhand'],['robotaddon14','rimrun'],['robotaddon15','obliquity-orrery'],['robotaddon16','cadence-geneva'],['robotaddon18','helios-transmission'],['robotaddon19','orion-cardan'],['robotaddon22','apex'],['robotaddon24','tempest-pendulum']]){
         assert.equal(selectors.filter(value=>value===id).length,1,'No omitted or duplicated selector: '+id);
         const steps=job.steps.filter(s=>s.name==='Browser gate — Robot Lab '+id+' promotion');assert.equal(steps.length,1,id);
         const step=steps[0];assert.deepEqual(shardsOf(step),[shard]);

@@ -1,6 +1,7 @@
 # Solstice startup — optional session and browser recorder plumbing
 
-Status: CLAIMED 2026-11-12. Owner: Codex, Robot Lab startup investigation.
+Status: LOCAL SOURCE CANDIDATE 2026-11-12; actual qualification pending.
+Owner: Codex, Robot Lab startup investigation.
 Base: `8aa4a4d137d5e8cc748a782363d3fa69a34faa7e`.
 Depends on the local optional worker diagnostic candidate; no solver change.
 
@@ -21,3 +22,12 @@ replies, including redo/disposal/stale revision, copied data, missing/invalid pa
 restoration and disabled-option parity; nonvacuous mutation checks. Actual engine,
 native/browser trajectory and independent original qualification remain owed.
 Source stays local pending review; this claim does not authorize a guest run.
+
+Local evidence: 26 pure controls pass across the optional raw worker collector,
+session/client admission, serialized recorder, existing precision and original API
+identity tests. Rejected batches, stale selections, divergence and disposal do not
+publish telemetry; unavailable packets remain explicit. Sparse IDs are rejected by
+the raw validator under the prior startup-worker-diagnostic claim, and sparse rows
+and non-finite observations are refused by this consumer. Five admission/copy/stop/
+default-shape mutations and sparse-ID/row mutations are detected. No engine, guest
+or browser execution, source push, solver fix or promotion is claimed.

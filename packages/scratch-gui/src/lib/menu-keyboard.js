@@ -10,6 +10,13 @@ export const focusMenuEdge = (menu, last = false) => {
     else menu?.focus?.();
 };
 
+// A deferred submenu callback must not steal a newer pointer or keyboard focus.
+export const focusSubmenuIfStillOnOpener = opener => {
+    if (opener && opener.ownerDocument.activeElement === opener) {
+        focusMenuEdge(opener.querySelector('[role="menu"]'));
+    }
+};
+
 export const openMenuFromKeyboard = (event, open, close) => {
     if (['Escape', 'Tab'].includes(event.key) &&
         event.currentTarget.getAttribute('aria-expanded') === 'true' && typeof close === 'function') {

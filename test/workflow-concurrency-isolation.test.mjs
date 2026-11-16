@@ -3,6 +3,7 @@ import {readFileSync} from 'node:fs';
 import test from 'node:test';
 import vm from 'node:vm';
 
+import {asHeldLegacyPredecessor} from './helpers/held-legacy-concurrency.mjs';
 import {assertReviewedConcurrency} from './helpers/reviewed-concurrency-projections.mjs';
 const names = ["ack-z80-cpm", "arcade-controls", "basic-oracle", "build", "cycle-core-qualification", "debugger", "i80386-freedos-circuits-direct-actual", "i80386-hdd-gui-actual", "i80386-native-font-selection", "i8086-execution", "makecode-arcade-bases", "mobile", "model-measurements", "native-installed-qualification", "pascal-ack-image", "reference-qualified-instruments", "robot-lab-own-firmware", "robot-model-webkit-comparison", "rust-notices", "spike-linux-package", "target-performance", "tauri", "vendor-freshness"];
 const labeled = new Set(['build','i80386-freedos-circuits-direct-actual','i80386-hdd-gui-actual','i80386-native-font-selection']);
@@ -84,4 +85,26 @@ for (const name of names) test(`${name}: event/ref isolation, pending preservati
         ['never supersede',source.replace(/^  cancel-in-progress:.*$/m,'  cancel-in-progress: false')],
         ['unbounded extra block',source+'\nconcurrency:\n'],
     ]) {assert.notEqual(source,mutation,title); if (name !== 'build') assert.throws(()=>check(mutation,labeled.has(name)),title); if (title !== 'unbounded extra block') assert.throws(()=>check(mutation,labeled.has(name),false,name==='build'),title+' behavioral refusal');}
+});
+
+
+test('current cycle and model isolation preserves their exact workflow/ref predecessor', () => {
+    for (const name of ['cycle-core-qualification', 'model-measurements']) {
+        const current = readFileSync(new URL(`../.github/workflows/${name}.yml`, import.meta.url), 'utf8');
+        assertReviewedConcurrency(current);
+        const source = asHeldLegacyPredecessor(current);
+        assertReviewedConcurrency(source, {profile: 'workflow-ref'});
+        assert.throws(() => assertReviewedConcurrency(source), 'old workflow cannot enter isolated profile');
+        const changed = source.replace('${{ github.workflow }}', "${{ github.workflow }}${{ !(github.ref_type != 'tag' && (github.event_name == 'push' || github.event_name == 'pull_request')) && format('-isolated-{0}', github.run_id) || '' }}");
+        assert.notEqual(changed, source);
+        assert.throws(() => assertReviewedConcurrency(changed, {profile: 'workflow-ref'}),
+            'isolated policy cannot enter unchanged workflow/ref profile');
+        assertReviewedConcurrency(changed);
+    }
+    for (const name of names) {
+        const source = readFileSync(new URL(`../.github/workflows/${name}.yml`, import.meta.url), 'utf8');
+        assert.throws(() => assertReviewedConcurrency(source, {labels: labeled.has(name), profile: 'workflow-ref'}),
+            'isolated workflow cannot enter old workflow/ref profile');
+    }
+    assert.throws(() => assertReviewedConcurrency('', {profile: 'unreviewed'}));
 });

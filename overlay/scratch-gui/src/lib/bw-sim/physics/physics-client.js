@@ -161,8 +161,9 @@ export class PhysicsClient {
      *        hubs: each hub's exportState() by hub id
      * @returns {Promise<{frames: object[], t: number, bodies: Float64Array, joints: Float64Array, air: object[], workMs: number}>}
      */
-    async simBatch({ scene, steps = 0, ticks = [], hubs = {}, redo = false, observation = null }) {
-        const reply = await this._request({ type: 'sim-batch', scene, steps, ticks, hubs, redo, observation });
+    async simBatch({ scene, steps = 0, ticks = [], hubs = {}, redo = false, observation = null, startupDiagnostic = null }) {
+        const reply = await this._request({ type: 'sim-batch', scene, steps, ticks, hubs, redo, observation,
+            ...(startupDiagnostic == null ? {} : {startupDiagnostic}) });
         if (reply.type !== 'sim-frames') throw new Error(reply.message ?? 'sim batch failed');
         return reply;
     }

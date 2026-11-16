@@ -1,0 +1,10 @@
+{
+ "author": "CrispStrobe",
+ "license": "BSD-3-Clause",
+ "files": {
+  "models/apex.ldr": "e65e644cab84fd17bac43c3133b7015f73f64676833f5e718a49845f6a108337",
+  "programs/apex.bw": "4db8b69cfc7bde6e39b58309b143a5bfa357b6384534052ada3f1a98643c10c3",
+  "LICENSE.txt": "a096c77ac7c151875cdcfcc89285d7372701076a3e53e29b3ee8abcd4e71ec9e",
+  "SOURCES.md": "db67d04dff233ef6a551e76a69f8523282e4e2fcc189af84e07cff8525b86379"
+ }
+}

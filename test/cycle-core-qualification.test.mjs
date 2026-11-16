@@ -26,6 +26,7 @@ test('heavy qualification is hosted, bounded, fail-closed and retains evidence',
     assert.match(qualifier, /cycle-core qualification is CI-only/);
     assert.match(workflow, /timeout-minutes: 45/);
     assertHeldLegacyConcurrency(asHeldLegacyPredecessor(workflow));
+    assertReviewedConcurrency(asHeldLegacyPredecessor(workflow), {profile: 'workflow-ref'});
     assertReviewedConcurrency(asHeldLegacyPredecessor(workflow), {automaticOnly: true});
     assertReviewedConcurrency(workflow);
     assert.match(workflow, /if: always\(\)/);

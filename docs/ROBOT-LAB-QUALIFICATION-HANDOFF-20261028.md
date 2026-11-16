@@ -1,5 +1,11 @@
 # Robot Lab qualification, rotor inertia and #1435: handoff (2026-10-28)
 
+> Current policy (2026-11-13): Do not add `ci:full` or dispatch full CI.
+> Use bounded local or Kaggle runs when appropriate, retry failed checks
+> normally, and keep product assertions and numerical bounds unchanged.
+> Historical claim, admission, provenance and one-shot instructions below
+> are superseded. Refresh current task status before acting.
+
 This handoff is for a fresh agent. It covers four open work streams: model
 qualification, geometry and collider repairs, the rotor-inertia fix (#1494), and
 the resting-frame creep (#1435). Each section states what is done, what is open,
@@ -126,6 +132,76 @@ differential's carrier is locked (K = (L + R)/2), so motor A cannot reach its jo
 210° and 30° steps). That is the mechanism's physics; promotion needs a manual-control rule for coupled
 multi-motor mechanisms (the gate owner's decision). Its contract, registry move, fixture and shard were withdrawn;
 `differential-sum-v1` stays registered and its STEP split stays.
+
+**R3 (#1731, `lanes/2026-11-12-robot-r3-geometry-repairs.md`): Apex repaired and qualified; Vesper and Aster repaired but
+stay experimental (browser gates, below); Bloom stays experimental (below).** One judge module, `scripts/lib/sim-lab-r3-judges.mjs`; every constant is read from the
+compiled joints, colliders and catalogue tooth counts. Repairs (real parts only; source records in
+`test/fixtures/model-files/<id>-source/SOURCES.md`): Vesper's fixed pivot bearing 3L beam → thin 1 × 5 liftarm 5 LDU
+further out (it reached 5.5 LDU into the motor's output-side plate); Aster's four flyweight wheels 7.5 LDU further out
+on axle 10s (they reached 7.5 LDU into the key beams); Apex's housing ring links redistributed over three layers (24
+same-layer pairs overlapped by up to 0.6 LDU beyond the collider tolerance where the ring curves), 8 pins moved and 8
+made 3L. Construction suite clean on all three (the repairs ship for all three). Native runs (COLD 500), measured / gate:
+
+| Model | Judge | Law error | Other measured | Disconnection (lost) |
+|---|---|---|---|---|
+| vesper-quickreturn | `quick-return-v1` | ram vs compiled kinematics 0.30 mm / 0.5 mm | stroke 66.18 mm (pred. 66.17); arc ratios 1.4541–1.4582 vs 1.4588 / ±0.02; slow side swaps on reversal | `pin_P`: ram span 0.0002 mm, error 47.1 mm |
+| aster-governor | `governor-lift-v1` | held speed vs speed the lift predicts 1.26–1.46 % / 3 % | lifts 3.04 / 7.84 / 16.09 mm at 675 / 725 / 800 °/s; lift-off 628 °/s; rest 0.02 mm; repeat 0.04 mm | `lower_arm_pos` + `lower_arm_neg`: lift −0.16 mm at 800 °/s |
+| apex | `wankel-ratio-v1` | carrier vs −(20/28)A 0.0016°, rotor vs carrier/3 0.0017° / 0.25° | rotor centre on the 4 mm eccentric circle within 0.00005 mm / 0.1 mm | `idler_upper_8t`: error 14.0° |
+
+Corrections to the table below, by measurement: Vesper's 1.4589 and 66.17 mm are right (the slot is 8 mm off the
+pivot; the centred-slot formula would give 1.452). Aster's point-mass form ω² = g·k·tan a/(e + L sin a) with k from the
+compiled masses is 7–11 % slow, because the arms' and wheels' own mass and inertia are not at the weight axle; the judge
+uses the distributed form ω²(h) = 2g·(dY/dh)/(dJ/dh) from the compiled colliders. Its 1.3–1.5 % residual is the
+engine's step size: with 4 collision steps the same plateaus sit 0.4–1.1 % on the other side of the prediction. Apex's
+law is exact as proposed (eccentricity 4.000 mm). Wrong-model mutants are refused (Vesper pivot moved 8 mm, Aster collar
+×4 mass, Apex rotor gear 24T→40T). Instructions: Vesper and Aster author STEP groups removed (46 and 62 derived steps);
+Apex's author steps split in order (86 steps of ≤ 6; its derived plan has an 8-part step). Browser gate on shard robotaddon22 (Apex): passed (hosted chromium).
+**Vesper is not promoted:** its hosted chromium gate (robotaddon20) measured the ram 0.504 mm from the kinematics
+(bound 0.5 mm; natively 0.300 mm) and found 17 arc ratios with a minimum of 1.281, a turning point picked up at a stage
+boundary on browser frames; the judge's turning-point extraction needs work before a retry. Its disconnected control
+passed. Same withdrawal as Aster below.
+**Aster is not promoted:** in the hosted chromium gate (robotaddon21) its law checks held, then the judge's hinge-closure
+bound refused the run: a hinge opened 0.550 mm (bound 0.5 mm; natively 0.365 mm) with axes 0.73° apart at 800 °/s.
+The bound is not loosened; its contract, registry move, fixture and shard are withdrawn, `governor-lift-v1` stays
+registered and the construction repair stays. A fix would stiffen the arm hinges or lower the top speed (a program
+change), the owner's choice. **Bloom is not promoted:** every one of its 24 scissor pivots
+is a pin (43093) in the centre hole of angle connector #4 (32192), which reaches 2.0 LDU into that part's mesh for any
+rotation of the pin (2.2 LDU flipped); its six cage hubs (44809) overlap ring ends and spacers by 9–19 LDU (12 pairs);
+the compiler reports locked hinges. That is a redesign of the pivots and hubs, not a minimal repair; no judge was
+written. Details in its checkpoint `promotionReview`.
+**R4 (2026-11-12, `lanes/2026-11-12-robot-r4-start-guards.md`, in review): Tempest promoted after a start-guard
+pose repair; Solstice (re-posed) and Impulse Line stay experimental (below).** Both saved poses were not gravity rests, so
+the unpowered cold settle moved the input before the program's start guard read it. Solstice's crank is re-posed to
+its rest at −75° with the linkage solved by kinematics; Tempest's carrier to 102.5° with both arms translated to
+hang straight. Programs are unchanged; link lengths, parts, colours and IDs are unchanged. One judge module,
+`scripts/lib/sim-lab-r4-judges.mjs`; constants come from the compiled joints and (Tempest) the engine's compiled
+mass properties, which the qualification test recomputes. Native runs (COLD 500, frameMs 25, strict ports),
+measured / gate:
+
+| Model | Judge | Cold sag before → after | Law error | Other measured | Disconnection (lost) |
+|---|---|---|---|---|---|
+| solstice-pumpjack | `walking-beam-v1` | crank 5.9° @ 500 ms, 12.6° @ 1 s → 0.13° in 3 s | beam vs loop 0.0187° / 0.1°; piston 0.022 mm / 0.1 mm | drive 0.00002°; swing 42.417° vs 42.403° predicted; stroke 40.596 vs 40.578 mm; 2193 frames | `pin_P`: crank span 360.3°, beam-law error 42.39° |
+| tempest-pendulum | `double-pendulum-mode-v1` | carrier 39.8° @ 400 ms → 0.08° @ 500 ms, 0.25° @ 2 s | slow period 0.6664 / 0.6656 s vs 0.6650 (0.2 % / 0.09 %, gate 1 %) | fast 0.2988 s vs 0.2989; two-mode residuals 6.5 % / 3.4 % (gate 15 %); 1832 frames | `motor_pin_h3` + `motor_pin_h5`: motor span 120.8°, carrier drive error 107.1° |
+
+Solstice's gravity equilibrium is about −74.8°; poses at −70° and −80° sag 2.8° and 3.0° in 3 s. Tempest's
+disconnection must leave the hanging load intact: cutting the elbow axle or either bob makes the carrier re-settle
+(elbow cut 36.5° in 3.2 s) and the program's own start guard refuses at stage 0, so those cuts cannot serve as the
+control; removing motor A's two pins to the carrier can. Tempest's wrong-model mutant (lower bob replaced by another
+wheel) is refused. Browser gate on shard robotaddon24, one step (the program runs about a minute).
+**Solstice is not promoted:** native runs pass walking-beam-v1 (beam 0.019°, piston 0.022 mm at both 25 ms and
+33 ms frames), but the local chromium browser gate (Node 22, production build) measured beam error 0.132° and
+piston 0.17 mm against the frozen 0.1° / 0.1 mm bounds, a steady offset during the fast reverse cycle at crank
+235–247°. The likely cause is a solver-setting difference between the browser and the native helper, to be
+investigated separately; no bound changes. Its contract, registry move, fixture and shard were withdrawn; the
+re-pose and the registered judge `walking-beam-v1` stay. Next: browser/native solver parity, then re-promotion
+at 0.1°.
+**Impulse Line is not promoted:** its unpowered pusher (saved at +30°) droops about 4°/s (−1.98° at 500 ms,
+−4.06° at 1 s, against the program's 2° guard) and comes to rest leaning on the first bob at −13.9° (bob −1.34°).
+Free contact begins near −12.5°, so the saved pose has about 12.5° of clearance and no gravity-rest pose exists
+short of the bob. A rest stop would block the program's −24.5° preload (same direction), so the fix is a design
+change (a counterweight of roughly 5.7 g on the pusher's free −40 hole; the pusher is 13.24 g with its centre of
+mass about 6.9 mm off the axis) plus a quantitative law. The supplied impact is strongly dissipative and no
+restitution is compiled, so no bound is derivable from compiled geometry yet.
 
 Read-only triage from code and data on main `d318ed6e`; nothing was compiled
 or run. The experimental set is every id in

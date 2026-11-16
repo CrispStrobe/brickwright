@@ -1,6 +1,7 @@
 # Solstice startup — optional read-only worker diagnostic
 
-Status: CLAIMED 2026-11-12. Owner: Codex, Robot Lab startup investigation.
+Status: LOCAL SOURCE CANDIDATE 2026-11-12; runtime qualification pending.
+Owner: Codex, Robot Lab startup investigation.
 Base: `d98897ce52bc1e0e2e0177747d4617828688f96e`.
 
 Scope: a new `overlay/scratch-gui/src/lib/bw-sim/measurements/startup-diagnostic.js`;
@@ -20,3 +21,9 @@ binding temporaries, bounded prefix, validation, detach-on-error and redo isolat
 nonvacuous copy/redo mutations. Actual affected native/browser observation, source
 and engine binding and independent original reading remain required before runtime
 claims, a solver fix or promotion. No guest run is authorized by this claim alone.
+
+Local evidence: six actual-runner/host fake-core controls and five existing precision
+controls pass (11 tests). Omitting copied getter results or rollback is detected by
+the corresponding regression. No actual engine, browser or guest was run. The
+optional packet is forwarded on raw worker replies only; session/UI adoption and
+accepted-batch consumer admission remain outside this candidate's scope.

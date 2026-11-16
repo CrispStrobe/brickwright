@@ -12,7 +12,7 @@ import {decide, loadContext, needlesOf, mentions, entriesOf, outputLines, closur
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const ctx = loadContext(ROOT);
-const ROBOT = ['robotlab', 'robotdraw', 'robotlink', 'robotmotion', 'robotbench', 'robotlink2', 'robotbench2', 'robotdraw2', 'robotdraw3', 'robotmotion2', 'robotaddon1', 'robotaddon2', 'robotaddon3', 'robotaddon4', 'robotaddon5', 'robotaddon6', 'robotaddon7', 'robotaddon8', 'robotaddon9', 'robotaddon10', 'robotaddon11', 'robotaddon12', 'robotaddon13', 'robotaddon14', 'robotaddon15', 'robotaddon16', 'robotaddon18', 'robotaddon19'];
+const ROBOT = ['robotlab', 'robotdraw', 'robotlink', 'robotmotion', 'robotbench', 'robotlink2', 'robotbench2', 'robotdraw2', 'robotdraw3', 'robotmotion2', 'robotaddon1', 'robotaddon2', 'robotaddon3', 'robotaddon4', 'robotaddon5', 'robotaddon6', 'robotaddon7', 'robotaddon8', 'robotaddon9', 'robotaddon10', 'robotaddon11', 'robotaddon12', 'robotaddon13', 'robotaddon14', 'robotaddon15', 'robotaddon16', 'robotaddon18', 'robotaddon19', 'robotaddon22', 'robotaddon24'];
 const ALL = ['heavy', 'light', ...ROBOT, 'fpga'];
 const run = files => decide(files, ctx).needed;
 

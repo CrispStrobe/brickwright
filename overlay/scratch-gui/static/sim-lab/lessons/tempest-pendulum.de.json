@@ -2,24 +2,26 @@
   "version": 1,
   "id": "tempest-pendulum",
   "language": "de",
-  "what": "Serielles Doppelpendel. Motor A dreht einen kurzen Trägerhebel; an seinem Ende trägt ein freies Schultergelenk einen 64mm langen Oberarm mit einem Rad als Pendelmasse, und ein zweites freies Ellbogengelenk trägt einen gleich langen Unterarm mit eigenem Rad. Nur der Träger wird angetrieben. Das Programm schwenkt den Träger schnell um 60°, hält ihn 12 Sekunden, fährt ihn zurück und hält 8 Sekunden; danach folgt derselbe Impuls in die andere Richtung. Während jeder Haltephase bewegen sich beide Arme nur unter Schwerkraft, ihren Gelenken und dem Schwung aus dem Impuls. Experimentelles Modell: Sein mechanisches Gesetz wurde noch nicht unabhängig mit einer physischen Kontrolle gemessen.",
+  "what": "Serielles Doppelpendel — Eigenschwingungen. Serielles Doppelpendel. Motor A dreht einen kurzen Träger; daran hängt ein 64 mm langer Oberarm und an dessen Ende ein zweiter freier Arm. Jeder Arm trägt ein SPIKE-Rad als Pendelgewicht. Beide Gelenke sind frei: Der Motor bewegt den Träger nur und hält ihn dann fest. Motor A gibt einem kurzen Träger einen Impuls und hält ihn dann still; zwei freie, 64 mm lange Arme schwingen allein unter der Schwerkraft. Jeder kleine Ausschlag ist die Summe zweier Eigenschwingungen, berechnet aus Massen und Trägheitsmomenten der Arme: einer langsamen mit 0,665 s, bei der beide Arme gleichsinnig schwingen, und einer schnellen mit 0,299 s, bei der sie gegeneinander schwingen.",
   "try": [
-    "Öffne Beispiele, blende experimentelle Beispiele ein, wähle Tempest und lade Modell und Programm. Drücke Zurücksetzen und dann Start. Setze vor jeder Wiederholung zurück; der Träger muss in seiner Ausgangslage beginnen.",
-    "Beobachte die beiden Arme in der ersten Haltephase. Schwingen sie gleichzeitig in dieselbe Richtung oder gegeneinander? Vergleiche, wie weit die untere Pendelmasse ausschlägt und wie weit sich der Oberarm dreht.",
-    "Zähle zehn Sekunden lang die Schwingungen und schätze die Periode. Vergleiche dann die erste Haltephase nach dem Impuls nach außen mit der Phase nach der Rückfahrt: Regt eine andere Trägerbewegung ein anderes Muster an?",
-    "Verfolge die Amplitude über die 12 Sekunden. Reibung in den Gelenken und Kontaktdämpfung lassen die Schwingung abklingen; achte darauf, ob beide Arme gemeinsam abklingen."
+    "Öffne Tempest mit Programm, drücke Zurücksetzen und dann Start. Der Lauf dauert etwa 46 s.",
+    "Der Träger schwenkt schnell auf −60° und wird dann 12 s gehalten. Beobachte die beiden Arme: Mal schwingen sie gleichsinnig, mal gegeneinander.",
+    "Der Träger kehrt zurück und wird 8 s gehalten, dann schwenkt er auf +60° und hält wieder. Vergleiche, wie die Bewegung zwischen Ober- und Unterarm hin- und herwandert.",
+    "Zähle Schwingungen: Die langsame, gleichsinnige Bewegung braucht etwa zwei Drittel Sekunden je Schwingung; das schnelle Gegeneinander ist gut doppelt so schnell."
   ],
-  "why": "Zwei gleiche Punktmassen m an gleichen masselosen Stäben L besitzen zwei Eigenschwingungsformen. In der langsamen schwingen beide Arme gleichphasig, und der Winkel des Unterarms zur Senkrechten ist √2-mal so groß wie der des Oberarms; in der schnellen schwingen sie gegenphasig mit dem Verhältnis −√2. Für kleine Winkel gilt ω² = (2 ∓ √2)·g/L. Mit L = 64mm hat die langsame Form eine Periode von etwa 0,66s, die schnelle etwa 0,27s. Ein kurzer, gleichmäßiger Trägerimpuls regt vor allem die langsame Form an, deshalb schwingen die Arme überwiegend gemeinsam. Große Ausschläge oder ein gemischter Start regen beide Formen an; dann wandert Energie sichtbar zwischen den Armen hin und her, und die Bewegung hängt empfindlich vom Anfangszustand ab – das bekannte chaotische Doppelpendel.",
-  "matters": "Gekoppelte Schwinger mit Eigenformen gibt es bei Gebäuden im Erdbeben, bei Kranen mit pendelndem Haken und Last, in Fahrzeugfederungen und in Molekülen. Die Zerlegung einer Bewegung in Eigenformen erklärt, warum manche Anregungen ruhig abklingen, während andere Energie austauschen.",
-  "question": "Nach dem Halt des Trägers schwingt der Oberarm etwa 6° zu jeder Seite der Senkrechten. Wenn die langsame Eigenform überwiegt: Wie weit schwingt der Unterarm, und bewegen sich die Arme gemeinsam oder gegeneinander?",
-  "answer": "In der langsamen Eigenform schwingt der Unterarm gleichphasig mit dem Oberarm und etwa √2 ≈ 1,4-mal so weit aus der Senkrechten, also ungefähr 8–9°. Die echten Arme und Räder sind keine Punktmassen, daher ist das Verhältnis nur ungefähr √2; in der gegenphasigen schnellen Form würde der Unterarm in die Gegenrichtung ausschlagen.",
+  "why": "Für kleine Ausschläge um die hängende Ruhelage gehorchen die beiden Armwinkel M·q̈ + K·q = 0. Die Massenmatrix M folgt aus Masse, Schwerpunkt und Trägheitsmoment jedes Arms, die Steifigkeit K aus der Schwerkraft an den Schwerpunkten. Ein solches System hat genau zwei Eigenschwingungen: eine langsame (0,665 s), bei der der Unterarm 1,49-mal so weit gleichsinnig schwingt wie der Oberarm, und eine schnelle (0,299 s), bei der er 1,44-mal so weit gegensinnig schwingt. Jeder kleine Ausschlag ist eine Summe dieser beiden.",
+  "matters": "Eigenschwingungen beschreiben jedes System gekoppelter Schwinger: Gebäude bei Erdbeben, Moleküle, Brücken und Fahrwerke. Ingenieure berechnen sie aus Massen und Steifigkeiten, bevor etwas gebaut wird. Bei großen Ausschlägen wird das Doppelpendel chaotisch; deshalb wird das Gesetz nur bei kleinen Ausschlägen geprüft.",
+  "question": "Warum sind die Perioden nicht die zweier idealer Punktmassen an masselosen 64-mm-Fäden?",
+  "answer": "Die echten Arme sind Balken mit eigener Masse und Trägheit, und die Gewichte sind Räder, keine Punkte. Mit den Masseneigenschaften der Simulation ergeben sich 0,6650 s und 0,2989 s mit Formverhältnissen +1,485 und −1,436 statt √2 für Punktmassen. Die simulierten Arme zeigen in beiden Haltefenstern langsame Perioden von 0,666 s und eine schnelle von 0,299 s.",
   "further": [
-    "Miss beide Armwinkel zur Senkrechten aus den tatsächlichen Lagen, nicht aus dem Motorencoder, und bestimme in einer Haltephase Periode und Amplitudenverhältnis. Vergleiche sie mit der Punktmassen-Vorhersage und erkläre Abweichungen durch die echte Massenverteilung.",
-    "Entwirf eine physische Kontrolle: Sperre den Ellbogen mit einem echten Bauteil, sodass beide Arme ein starres Pendel bilden. Welche Periode sagst du dann voraus, und welche Beobachtung muss vergleichbar bleiben?",
-    "Der Trägerhebel bewegt sich nur innerhalb seiner programmierten Impulse von ±60°. Große Ausschläge, bei denen Chaos auftritt, liegen außerhalb dieses Experiments; dort gelten die Kleinwinkelformeln nicht mehr."
+    "Verdoppelt man beide Massen, ändert sich nichts: Die Eigenschwingungen hängen von Verhältnissen der Massen und Trägheiten und von Längen ab.",
+    "Ein größerer Impuls gibt größere Ausschläge; jenseits einiger zehn Grad gilt das lineare Modell nicht mehr, und die Bewegung ist keine saubere Summe zweier Eigenschwingungen mehr.",
+    "Entfernt man die Stifte zwischen Motor und Träger, dreht der Motor weiter, aber der Träger folgt ihm nicht mehr: Das ist die Kausalkontrolle, mit der dieses Modell geprüft wird.",
+    "Vergleiche Cascade, ein Doppelpendel an einer bewegten Kurbel, und Pendulum Array, das die Periode über der Länge zeigt."
   ],
-  "formula": "Kleine Winkel, gleiche Punktmassen m und Längen L: ω² = (2 ∓ √2)·g/L; Eigenformen θ₂/θ₁ = ±√2. L = 0,064m, g = 9,81m/s² ⇒ T_langsam ≈ 0,66s, T_schnell ≈ 0,27s.",
+  "formula": "M·q̈ + K·q = 0, M = [[I₁ + m₁|c₁−S|² + m₂|E−S|², m₂(E−S)·(c₂−E)], [·, I₂ + m₂|c₂−E|²]], K = g·diag(m₁h₁ + m₂h_E, m₂h₂). Gebaute Arme: langsame Eigenschwingung 0,6650 s (unten/oben +1,485), schnelle 0,2989 s (−1,436).",
   "related": [
+    "cascade.ldr",
     "pendulum-array.ldr"
   ]
 }

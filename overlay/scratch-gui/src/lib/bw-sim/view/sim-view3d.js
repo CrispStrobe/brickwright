@@ -190,20 +190,29 @@ export const createSimView3D = ({container, model, mechanism, read, catalog = nu
     };
     canvas.addEventListener('webglcontextlost', onLost);
 
-    const resize = () => {
+    const resize = ({defer = true} = {}) => {
         const width = Math.max(1, container.clientWidth || 0);
         const height = Math.max(1, container.clientHeight || Math.round(width * 0.6));
         // Only when it changes: setPixelRatio re-sizes the canvas, and assigning a canvas its size, even
         // the same size, throws its drawing buffer away and waits for the GPU — every frame, a stall
         // that scales with the model (most of a big model's frame time on a software renderer).
         const ratio = Math.min(2, window.devicePixelRatio || 1);
-        if (renderer.getPixelRatio() !== ratio) renderer.setPixelRatio(ratio);
         const size = renderer.getSize(new Vector2());
+        const resized = renderer.getPixelRatio() !== ratio || size.x !== width || size.y !== height;
+        if (!resized) return false;
+        // A backing-buffer change needs a redraw even when logical size and pose stay
+        // unchanged (pixel ratio only), including calls through the public resize API.
+        dirty = true;
+        // Keep the displayed frame while its GPU work finishes. Resizing first clears
+        // the canvas, then the busy-frame guard would leave it blank without a redraw.
+        if (defer && gpuFrames.busy()) return null;
+        if (renderer.getPixelRatio() !== ratio) renderer.setPixelRatio(ratio);
         if (size.x !== width || size.y !== height) {
             renderer.setSize(width, height, false);
             camera.aspect = width / height;
             camera.updateProjectionMatrix();
         }
+        return true;
     };
 
     // Follow the chassis translation: moving arms must not move the camera.
@@ -384,7 +393,7 @@ export const createSimView3D = ({container, model, mechanism, read, catalog = nu
      */
     const gpuFrames = createGpuFrameQueue(renderer.getContext());
     const render = (snapshot, {force = false} = {}) => {
-        resize();
+        if (resize({defer: !force}) === null) return;
         if (onDemand && !force && !dirty && !changed(snapshot, renderer.getSize(new Vector2()))) {
             const size = renderer.getSize(new Vector2());
             measurementOverlay.update(measurementRows ? measurementRows() : [], camera, size.x, size.y);

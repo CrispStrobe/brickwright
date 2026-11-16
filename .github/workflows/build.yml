@@ -1606,7 +1606,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [heavy, light, robotlab, robotdraw, robotlink, robotmotion, robotbench, robotlink2, robotbench2, robotdraw2, robotdraw3, robotmotion2, robotaddon1, robotaddon2, robotaddon3, robotaddon4, robotaddon5, robotaddon6, robotaddon7, robotaddon8, robotaddon9, robotaddon10, robotaddon11, robotaddon12, robotaddon13, robotaddon14, robotaddon15, robotaddon16, robotaddon18, robotaddon19]
+        shard: [heavy, light, robotlab, robotdraw, robotlink, robotmotion, robotbench, robotlink2, robotbench2, robotdraw2, robotdraw3, robotmotion2, robotaddon1, robotaddon2, robotaddon3, robotaddon4, robotaddon5, robotaddon6, robotaddon7, robotaddon8, robotaddon9, robotaddon10, robotaddon11, robotaddon12, robotaddon13, robotaddon14, robotaddon15, robotaddon16, robotaddon18, robotaddon19, robotaddon22, robotaddon24]
         # Path-aware PR runs (scripts/ci-browser-scope.mjs): a shard the changed
         # files do not reach is left out. Non-PR events set every shard true.
         exclude:
@@ -1640,6 +1640,8 @@ jobs:
           - shard: ${{ needs.scope.outputs.robotlab != 'true' && 'robotaddon16' || 'none' }}
           - shard: ${{ needs.scope.outputs.robotlab != 'true' && 'robotaddon18' || 'none' }}
           - shard: ${{ needs.scope.outputs.robotlab != 'true' && 'robotaddon19' || 'none' }}
+          - shard: ${{ needs.scope.outputs.robotlab != 'true' && 'robotaddon22' || 'none' }}
+          - shard: ${{ needs.scope.outputs.robotlab != 'true' && 'robotaddon24' || 'none' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     # Job-level permissions REPLACE the workflow's for this job, so the two it
@@ -2263,6 +2265,17 @@ jobs:
         timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
         if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'robotaddon19' }}
         run: npm run verify:sim-lab -- --part=examples --examples=orion-cardan
+
+      - name: Browser gate — Robot Lab apex promotion
+        id: bw_browser_audit_0277
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'robotaddon22' }}
+        run: npm run verify:sim-lab -- --part=examples --examples=apex
+      - name: Browser gate — Robot Lab tempest-pendulum promotion
+        id: bw_browser_audit_0279
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'robotaddon24' }}
+        run: npm run verify:sim-lab -- --part=examples --examples=tempest-pendulum
 
 
       - name: Browser gate — Robot Lab pantograph-doubler complete example
@@ -3966,6 +3979,8 @@ jobs:
             bw_browser_audit_0272	${{ steps['bw_browser_audit_0272'].outcome }}	${{ steps['bw_browser_audit_0272'].conclusion }}
             bw_browser_audit_0270	${{ steps['bw_browser_audit_0270'].outcome }}	${{ steps['bw_browser_audit_0270'].conclusion }}
             bw_browser_audit_0271	${{ steps['bw_browser_audit_0271'].outcome }}	${{ steps['bw_browser_audit_0271'].conclusion }}
+            bw_browser_audit_0277	${{ steps['bw_browser_audit_0277'].outcome }}	${{ steps['bw_browser_audit_0277'].conclusion }}
+            bw_browser_audit_0279	${{ steps['bw_browser_audit_0279'].outcome }}	${{ steps['bw_browser_audit_0279'].conclusion }}
             bw_browser_audit_0064	${{ steps['bw_browser_audit_0064'].outcome }}	${{ steps['bw_browser_audit_0064'].conclusion }}
             bw_browser_audit_0065	${{ steps['bw_browser_audit_0065'].outcome }}	${{ steps['bw_browser_audit_0065'].conclusion }}
             bw_browser_audit_0066	${{ steps['bw_browser_audit_0066'].outcome }}	${{ steps['bw_browser_audit_0066'].conclusion }}
@@ -3973,9 +3988,9 @@ jobs:
             bw_browser_audit_0067	${{ steps['bw_browser_audit_0067'].outcome }}	${{ steps['bw_browser_audit_0067'].conclusion }}
             bw_browser_audit_0068	${{ steps['bw_browser_audit_0068'].outcome }}	${{ steps['bw_browser_audit_0068'].conclusion }}
             bw_browser_audit_0069	${{ steps['bw_browser_audit_0069'].outcome }}	${{ steps['bw_browser_audit_0069'].conclusion }}
+          BW_BROWSER_RUNNER_TERMINALS_V1_2: |
             bw_browser_audit_0070	${{ steps['bw_browser_audit_0070'].outcome }}	${{ steps['bw_browser_audit_0070'].conclusion }}
             bw_browser_audit_0071	${{ steps['bw_browser_audit_0071'].outcome }}	${{ steps['bw_browser_audit_0071'].conclusion }}
-          BW_BROWSER_RUNNER_TERMINALS_V1_2: |
             bw_browser_audit_0072	${{ steps['bw_browser_audit_0072'].outcome }}	${{ steps['bw_browser_audit_0072'].conclusion }}
             bw_browser_audit_0073	${{ steps['bw_browser_audit_0073'].outcome }}	${{ steps['bw_browser_audit_0073'].conclusion }}
             bw_browser_audit_0074	${{ steps['bw_browser_audit_0074'].outcome }}	${{ steps['bw_browser_audit_0074'].conclusion }}
@@ -4074,9 +4089,9 @@ jobs:
             bw_browser_audit_0165	${{ steps['bw_browser_audit_0165'].outcome }}	${{ steps['bw_browser_audit_0165'].conclusion }}
             bw_browser_audit_0166	${{ steps['bw_browser_audit_0166'].outcome }}	${{ steps['bw_browser_audit_0166'].conclusion }}
             bw_browser_audit_0167	${{ steps['bw_browser_audit_0167'].outcome }}	${{ steps['bw_browser_audit_0167'].conclusion }}
+          BW_BROWSER_RUNNER_TERMINALS_V1_3: |
             bw_browser_audit_0168	${{ steps['bw_browser_audit_0168'].outcome }}	${{ steps['bw_browser_audit_0168'].conclusion }}
             bw_browser_audit_0169	${{ steps['bw_browser_audit_0169'].outcome }}	${{ steps['bw_browser_audit_0169'].conclusion }}
-          BW_BROWSER_RUNNER_TERMINALS_V1_3: |
             bw_browser_audit_0170	${{ steps['bw_browser_audit_0170'].outcome }}	${{ steps['bw_browser_audit_0170'].conclusion }}
             bw_browser_audit_0171	${{ steps['bw_browser_audit_0171'].outcome }}	${{ steps['bw_browser_audit_0171'].conclusion }}
             bw_browser_audit_0172	${{ steps['bw_browser_audit_0172'].outcome }}	${{ steps['bw_browser_audit_0172'].conclusion }}

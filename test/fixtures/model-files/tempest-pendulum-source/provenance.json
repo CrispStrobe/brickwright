@@ -1,0 +1,10 @@
+{
+ "author": "CrispStrobe",
+ "license": "BSD-3-Clause",
+ "files": {
+  "models/tempest-pendulum.ldr": "70d89973c4a6ee89ac5e324820627ca8ad22db1ffc0c2736a4fd04dc8f43bf32",
+  "programs/tempest-pendulum.bw": "6b4bd9bf40610de86dbd773622592b65127d72fd52d0b795a8b9ba3cc4786fd8",
+  "LICENSE.txt": "a096c77ac7c151875cdcfcc89285d7372701076a3e53e29b3ee8abcd4e71ec9e",
+  "SOURCES.md": "a74c1b2278a586983a8300829507270c96f4c89c7464d527bbb21e978d7fba0e"
+ }
+}

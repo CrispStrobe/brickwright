@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {menuItems, focusMenuEdge, handleMenuKeyDown, openMenuFromKeyboard} from '../overlay/scratch-gui/src/lib/menu-keyboard.js';
+import {menuItems, focusMenuEdge, focusSubmenuIfStillOnOpener, handleMenuKeyDown, openMenuFromKeyboard} from '../overlay/scratch-gui/src/lib/menu-keyboard.js';
 const setup=()=>{
     let focus=null;
     const opener={focus:()=>{focus='opener';}};
@@ -90,4 +90,19 @@ test('an empty menu receives keyboard focus and can dismiss itself with Escape',
     handleMenuKeyDown(s.event('Escape'),()=>closed++);
     assert.equal(closed,1);
     assert.equal(s.focus(),'opener');
+});
+
+
+test('deferred submenu focus preserves a newer selection and still opens normally',()=>{
+    let selected='opener';
+    const menu={querySelectorAll:()=>items};
+    const opener={ownerDocument:{activeElement:null},querySelector:()=>menu};
+    const items=[{closest:()=>menu,getAttribute:()=>null,focus:()=>{selected='first';},scrollIntoView:()=>{}}];
+    opener.ownerDocument.activeElement=opener;
+    focusSubmenuIfStillOnOpener(opener);
+    assert.equal(selected,'first','unchanged focus receives the first submenu item');
+    selected='walls';opener.ownerDocument.activeElement={};
+    focusSubmenuIfStillOnOpener(opener);
+    assert.equal(selected,'walls','later selection is not overwritten by a deferred callback');
+    focusSubmenuIfStillOnOpener(null);
 });

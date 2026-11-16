@@ -1,0 +1,89 @@
+# APEX — one complete passive-rotor turn, then return to the saved pose.
+# Original rebuilt control program. Copyright (c) 2026 CrispStrobe.
+# SPDX-License-Identifier: BSD-3-Clause
+# Import the matching apex.ldr and Reset the complete model before running.
+# Motor A alone drives the mechanism. Speeds are degrees per second.
+# The intended physical ratios are carrier/A = 5/7 and rotor/carrier = 1/3.
+# Thus 1512 input degrees produce 1080 carrier degrees and 360 rotor degrees.
+# Each finite command uses fresh absolute unwrapped encoder feedback.
+# At most three calls per target; later corrections use 6 degrees per second.
+# The passive rotor and its three apexes are never directly commanded.
+DEVICE SPIKE
+GLOBAL target
+GLOBAL requestedSpeed
+GLOBAL moveSpeed
+GLOBAL attempts
+GLOBAL stage
+GLOBAL settled
+GLOBAL completed
+GLOBAL failed
+
+WHEN flag clicked:
+  set completed to 0
+  set failed to 0
+  set stage to 0
+  set settled to 0
+  set attempts to 0
+  IF (lab status) = "no-model" THEN:
+    set failed to 1
+    say "Import Apex in Robot Lab, then Reset and Run."
+    stop all
+  reset timer
+  broadcast "Apex watchdog"
+  lab start
+  lab stop motor A hold
+  wait 0.25 seconds
+  IF (abs of (lab motor A angle)) > 5 THEN:
+    set failed to 1
+    lab stop motor A hold
+    say "Saved-angle guard: Reset the complete Apex model before retrying."
+    stop all
+  set stage to 1
+  set target to 0
+  set requestedSpeed to 6
+  broadcast "Apex move" and wait
+  set stage to 2
+  set target to 1512
+  set requestedSpeed to 36
+  broadcast "Apex move" and wait
+  set stage to 3
+  set target to 0
+  set requestedSpeed to 48
+  broadcast "Apex move" and wait
+  lab stop motor A hold
+  set stage to 4
+  set completed to 1
+  say "Complete: one passive rotor turn out and back. Motor A holds home."
+
+WHEN I receive "Apex move":
+  set settled to 0
+  set attempts to 0
+  repeat until ((abs of (target - (lab motor A angle))) < 0.4) or (attempts > 2):
+    set moveSpeed to requestedSpeed
+    IF attempts > 0 THEN:
+      set moveSpeed to 6
+    lab run motor A for (target - (lab motor A angle)) degrees at moveSpeed degrees per second
+    lab stop motor A hold
+    wait 0.05 seconds
+    change attempts by 1
+  IF (abs of (target - (lab motor A angle))) > 1.5 THEN:
+    set failed to 1
+    lab stop motor A hold
+    say "Target arrival failed. Inspect the drive and Reset before retrying."
+    stop all
+  set settled to 1
+  wait 0.5 seconds
+  IF (abs of (target - (lab motor A angle))) > 1.5 THEN:
+    set failed to 1
+    lab stop motor A hold
+    say "Hold drift exceeded the guard. Reset before retrying."
+    stop all
+
+WHEN I receive "Apex watchdog":
+  repeat until completed = 1:
+    IF timer > 110 THEN:
+      set failed to 1
+      lab stop motor A hold
+      say "110 second watchdog: stopped and holding. Reset before retrying."
+      stop all
+    wait 0.02 seconds

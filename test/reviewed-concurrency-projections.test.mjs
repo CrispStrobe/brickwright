@@ -24,3 +24,20 @@ test('pending model/cycle policy selection is explicit and cannot admit global p
         reviewedPolicy.replace("format('-isolated-{0}', github.run_id)", "format('-isolated-{0}', github.sha)"),
     ]) assert.throws(() => assertReviewedConcurrency(changed));
 });
+
+test('profile and automatic-only options reject invalid and contradictory selections', () => {
+    assertReviewedConcurrency(automaticOnlyPolicy, {profile: 'workflow-ref'});
+    assertReviewedConcurrency(reviewedPolicy, {profile: 'isolated'});
+    assertReviewedConcurrency(automaticOnlyPolicy, {profile: 'workflow-ref', automaticOnly: true});
+    assertReviewedConcurrency(reviewedPolicy, {profile: 'isolated', automaticOnly: false});
+    for (const profile of ['unknown', null, true, 1]) {
+        assert.throws(() => assertReviewedConcurrency(reviewedPolicy, {profile}));
+    }
+    for (const automaticOnly of ['true', null, 1]) {
+        assert.throws(() => assertReviewedConcurrency(reviewedPolicy, {automaticOnly}));
+    }
+    assert.throws(() => assertReviewedConcurrency(automaticOnlyPolicy,
+        {profile: 'isolated', automaticOnly: true}));
+    assert.throws(() => assertReviewedConcurrency(automaticOnlyPolicy,
+        {profile: 'workflow-ref', automaticOnly: false}));
+});

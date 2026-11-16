@@ -581,7 +581,9 @@ export const judgeFile = (file, text, known, frozenAdmissions = new Map()) => {
     const role = roleOf(file);
     if (role !== 'code' && role !== 'receipt') return [];
     if (Object.hasOwn(SEALED_STUDY_FILES, file)) {
-        assert.equal(createHash('sha256').update(sealedStudyBody(file, text)).digest('hex'), SEALED_STUDY_FILES[file],
+        assert.equal(studyBeforeConcurrencyPolicy(file, text), sealedStudyBody(file, text),
+            'reviewed completed-study projections preserve the same historical bytes');
+        assert.equal(createHash('sha256').update(studyBeforeConcurrencyPolicy(file, text)).digest('hex'), SEALED_STUDY_FILES[file],
             `${file}: sealed completed-study source changed; preserve the consumed experiment`);
     }
     let body = text;

@@ -1344,6 +1344,86 @@
         "Doppelkardan",
         "Gleichlauf"
       ]
+    },
+    {
+      "models": [
+        "vesper-quickreturn"
+      ],
+      "name": {
+        "en": "Quick-return mechanism",
+        "de": "Schnellrücklauf"
+      },
+      "aliases": [
+        "quick return",
+        "slotted lever",
+        "crank and slotted lever",
+        "shaper",
+        "shaping machine",
+        "Whitworth",
+        "Schnellrücklauf",
+        "Kurbelschleife",
+        "schwingende Kurbelschleife",
+        "Stoßmaschine"
+      ]
+    },
+    {
+      "models": [
+        "aster-governor"
+      ],
+      "name": {
+        "en": "Centrifugal governor",
+        "de": "Fliehkraftregler"
+      },
+      "aliases": [
+        "flyball governor",
+        "Porter governor",
+        "Watt governor",
+        "centrifugal",
+        "speed sensor",
+        "Fliehkraft",
+        "Fliehgewicht",
+        "Porter-Regler",
+        "Watt-Regler",
+        "Drehzahlregler"
+      ]
+    },
+    {
+      "models": [
+        "apex"
+      ],
+      "name": {
+        "en": "Wankel rotor kinematics",
+        "de": "Wankel-Kinematik"
+      },
+      "aliases": [
+        "Wankel",
+        "rotary engine",
+        "eccentric shaft",
+        "epitrochoid",
+        "three-apex rotor",
+        "Kreiskolbenmotor",
+        "Wankelmotor",
+        "Exzenterwelle",
+        "Epitrochoide",
+        "Rotor"
+      ]
+    },
+    {
+      "models": [
+        "tempest-pendulum"
+      ],
+      "name": {
+        "en": "Serial double pendulum — normal modes",
+        "de": "Serielles Doppelpendel — Eigenschwingungen"
+      },
+      "aliases": [
+        "double pendulum",
+        "coupled oscillators",
+        "normal modes",
+        "Doppelpendel",
+        "Eigenschwingung",
+        "gekoppelte Pendel"
+      ]
     }
   ]
 }

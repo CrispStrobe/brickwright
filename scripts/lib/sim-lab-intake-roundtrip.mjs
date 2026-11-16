@@ -6,6 +6,7 @@ import {resolve} from 'node:path';
 import {installBrowserMechanicsRecorder} from './sim-lab-browser-recorder.mjs';
 import {SIX_INTAKES} from './sim-lab-six-intake-contracts.mjs';
 import {captureRenderedModel} from './sim-lab-rendered-model-gate.mjs';
+import {finishHeldCleanup, assertHeldPrivateDirectory} from './sim-lab-q5-held.mjs';
 import {openFile} from './sim-lab-scale-gate.mjs';
 import {exportedProject} from './sim-lab-integral-gate.mjs';
 import {intakeIdentity, writeIntakeReceipt, readIntakeReceipt} from './sim-lab-intake-receipt.mjs';
@@ -34,7 +35,7 @@ export async function captureIntakeProject(page,opts,id){
  assert.match(record.ldraw,/^0 Author: (?:CrispStrobe|Christian Ströbele)/m);
  const project=resolve(opts.shotsDir,id+'.sb3');
  await page.getByText('File',{exact:true}).click();await exportedProject(page,project);
- const source=readFileSync('overlay/scratch-gui/static/sim-lab/models/'+id+'.ldr','utf8');
+ const source=opts.modelSourceFor ? opts.modelSourceFor(id) : readFileSync('overlay/scratch-gui/static/sim-lab/models/'+id+'.ldr','utf8');
  for(const [name,text]of [[id+'.ldr',source],[id+'.mpd','0 FILE '+id+'.ldr\n'+source+'\n0 NOFILE\n']]){
   await openFile(page,{name,buffer:Buffer.from(text)});
   const actual=await page.evaluate(()=>({status:window.__bwSimLab.status,parts:window.__bwSimLab._pane.session.model.parts}));
@@ -47,9 +48,11 @@ export async function captureIntakeProject(page,opts,id){
 }
 
 export async function replayIntakeProject(browser,opts,id,judge,receiptPath){
+ if(opts.retainPageErrors)assertHeldPrivateDirectory(opts.shotsDir);
  const {project,record,program,expected}=readIntakeReceipt(receiptPath,{id,identity:intakeIdentity(id,opts.buildDir)});
  const reopened=await browser.newPage({viewport:{width:1600,height:1050},serviceWorkers:'block'}),errors=[];
  reopened.on('pageerror',e=>errors.push(e.message));reopened.on('dialog',d=>d.accept());
+ let primary,hasPrimary=false;
  try{
   await opts.openSimLab(reopened,{program:null});
   await reopened.evaluate(()=>{window.__bwIntakeProjectVm=window.__bwSimLab._pane.props.vm;});
@@ -89,7 +92,14 @@ export async function replayIntakeProject(browser,opts,id,judge,receiptPath){
   if(await reopened.evaluate(()=>window.__bwSimLab.status==='running'))await reopened.getByTestId('bw-sim-lab-pause').click();
   await captureRenderedModel(reopened,resolve(opts.shotsDir,id+'-reopened.png'));
   console.log(`PASS ${id}: raw LDR/MPD, actual project save, fresh-context reopen and complete saved program`);
- }finally{await reopened.close();}
+ }catch(error){primary=error;hasPrimary=true;throw error;}
+ finally{
+  if(opts.retainPageErrors)await finishHeldCleanup(primary,[
+   ()=>writeFileSync(resolve(opts.shotsDir,id+'-reopened-page-errors.json'),JSON.stringify(errors,null,2)+'\n'),
+   ()=>reopened.close()
+  ],hasPrimary);
+  else await reopened.close();
+ }
 }
 
 export async function intakeRoundtrip(page,opts,id,judge){

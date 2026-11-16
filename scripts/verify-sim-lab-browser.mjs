@@ -6,7 +6,8 @@ import {newModelsInteractions, newModelLesson, judgeNewModel} from './lib/sim-la
 import {replayIntakeProject} from './lib/sim-lab-intake-roundtrip.mjs';
 import {nineIntakeInteractions} from './lib/sim-lab-nine-intake-gate.mjs';
 import {NINE_INTAKES} from './lib/sim-lab-nine-intake-judge.mjs';
-import {q5BrowserInteractions,q5SeparateControl,Q5_BROWSER_MODELS,Q5_HELD,SEPARATE_CONTROL} from './lib/sim-lab-q5-browser-gate.mjs';
+import {q5BrowserInteractions,q5SeparateControl,Q5_BROWSER_MODELS,SEPARATE_CONTROL} from './lib/sim-lab-q5-browser-gate.mjs';
+import {Q5_HELD, heldDiagnosticIdentity, heldCLIRequest, assertHeldPrivateDirectory, finishHeldDriver, heldBrowserOptions, withHeldPageErrors, finishHeldCleanup} from './lib/sim-lab-q5-held.mjs';
 import {scalingSteeringInteractions,scalingSteeringLesson} from './lib/sim-lab-scaling-steering-gate.mjs';
 import {ellipseEngineInteractions,ellipseEngineLesson} from './lib/sim-lab-ellipse-engine-gate.mjs';
 import {magneticChessInteractions,magneticChessLesson} from './lib/sim-lab-magnetic-chess-gate.mjs';
@@ -150,7 +151,7 @@ import {phaseBridgeInteractions,phaseBridgeGermanLessons} from './lib/sim-lab-ph
 // Run after the integrated GUI build:  node scripts/verify-sim-lab-browser.mjs
 import {chromium, webkit} from 'playwright';
 import {createServer} from 'node:http';
-import {readFile, mkdir} from 'node:fs/promises';
+import {readFile, mkdir, writeFile} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import {resolve, extname, sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -199,6 +200,14 @@ const build = resolve(process.env.BW_BUILD || `${root}/packages/scratch-gui/buil
 const artifacts = resolve(root, 'artifacts/sim-lab');
 const types = {'.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json',
     '.wasm': 'application/wasm', '.svg': 'image/svg+xml', '.png': 'image/png', '.ldr': 'text/plain', '.dat': 'text/plain'};
+const heldRequest = heldCLIRequest(process.argv);
+const ONLY_EXAMPLES = heldRequest.examples;
+const HELD_MODELS = heldRequest.models;
+const PRIVATE_HELD_OUTPUT = HELD_MODELS.length ? assertHeldPrivateDirectory(heldRequest.privateOutput) : null;
+const REQUESTED_EXAMPLES = heldRequest.requested;
+const runExample = file => !REQUESTED_EXAMPLES.length || REQUESTED_EXAMPLES.includes(file.replace(/\.ldr$/, ''));
+// Observes local source/build bytes only; no producer receipt is admitted.
+const HELD_IDENTITY = HELD_MODELS.length ? heldDiagnosticIdentity(build) : null;
 const server = createServer(async (request, response) => {
     try {
         const name = decodeURIComponent(request.url.split('?')[0]);
@@ -286,8 +295,6 @@ const WORKER_LATENCY = Number((process.argv.find(a => a.startsWith('--worker-lat
 const wallBudget = simMs => 240000 + Math.ceil(simMs / (1000 / 30)) * (2 * WORKER_LATENCY + 20);
 /** `--examples=a,b` filters the examples part; mechanics-machines runs all four mechanism programs,
  * mechanics-manual operates their seven motor controls, and physics-workshops checks the example browser. */
-const ONLY_EXAMPLES = (process.argv.find(a => a.startsWith('--examples=')) || '').slice('--examples='.length).split(',').filter(Boolean);
-const runExample = file => !ONLY_EXAMPLES.length || ONLY_EXAMPLES.includes(file.replace(/\.ldr$/, ''));
 
 /**
  * Opens the Robot Lab with `program` in the Code tab. `via: 'tab'` (default) clicks the Robot Lab tab;
@@ -382,7 +389,7 @@ const INSIGHT_ONLY = process.argv.includes('--ui-only=insight');
 const MIXER_ONLY = process.argv.includes('--ui-only=mixer');
 const MEASUREMENTS_ONLY = process.argv.includes('--ui-only=measurements');
 
-let browser;
+let browser, driverFailure, hasDriverFailure = false;
 const errors = [];
 try {
     const browserName = process.env.BW_SIMLAB_BROWSER || 'chromium';
@@ -862,7 +869,7 @@ try {
                 finally { await lesson.close(); }
             }
         }
-        // Q5 promotions (#1683) Evenhand and RimRun, R1 Obliquity Orrery and the R2 family: the registry law and its causal control, then the
+        // Q5 promotions (#1683) Evenhand and RimRun, R1 Obliquity Orrery and the R2, R3 and R4 families: the registry law and its causal control, then the
         // nine-intake gate's checks (scripts/lib/sim-lab-q5-browser-gate.mjs).
         // A promotion whose disconnected control runs as its own step (SEPARATE_CONTROL, sim-lab-q5-browser-gate.mjs).
         for (const id of SEPARATE_CONTROL.filter(id => id === 'cadence-geneva' && runExample('cadence-geneva-disconnected.ldr'))) {
@@ -872,20 +879,36 @@ try {
             try { await q5SeparateControl(page, {openSimLab, buildDir: build, shotsDir: resolve(artifacts, 'q5-models'), timeout: wallBudget(240000)}, id); }
             finally { await page.close(); }
         }
-        for (const id of [...Q5_BROWSER_MODELS, ...Object.keys(Q5_HELD).filter(id => ONLY_EXAMPLES.includes(id))].filter(id => runExample(id + '.ldr'))) {
-            const opts = {openSimLab, buildDir: build, shotsDir: resolve(artifacts, 'q5-models'), timeout: wallBudget(240000)};
+        for (const id of [...Q5_BROWSER_MODELS, ...HELD_MODELS].filter(id => runExample(id + '.ldr'))) {
+            const held = Object.hasOwn(Q5_HELD, id);
+            const opts = {openSimLab, buildDir: build, shotsDir: held ? resolve(PRIVATE_HELD_OUTPUT, `${id}-held`) : resolve(artifacts, 'q5-models'), timeout: wallBudget(240000),
+                ...heldBrowserOptions(id), ...(held ? {heldIdentity: HELD_IDENTITY} : {})};
             const page = await browser.newPage({viewport: {width: 1600, height: 1050}, serviceWorkers: 'block'});
             page.on('pageerror', error => errors.push(error.stack || error.message));
             page.on('dialog', dialog => dialog.accept());
+            let primary, hasPrimary = false;
             try { await q5BrowserInteractions(page, opts, id); }
-            finally { await page.close(); }
+            catch (error) { primary = error; hasPrimary = true; throw error; }
+            finally {
+                if (held) await finishHeldCleanup(primary, [() => page.close()], hasPrimary);
+                else await page.close();
+            }
             for (const language of ['en', 'de']) {
                 const lesson = await browser.newPage({viewport: {width: 1600, height: 1050},
                     locale: language === 'de' ? 'de-DE' : 'en-US', serviceWorkers: 'block'});
                 lesson.on('pageerror', error => errors.push(error.stack || error.message));
                 lesson.on('dialog', dialog => dialog.accept());
-                try { await newModelLesson(lesson, opts, id, language); }
-                finally { await lesson.close(); }
+                let lessonFailure, hasLessonFailure = false;
+                try {
+                    if (held) await withHeldPageErrors(lesson,
+                        pageErrors => writeFile(resolve(opts.shotsDir, `${id}-lesson-${language}-page-errors.json`), JSON.stringify(pageErrors, null, 2) + '\n'),
+                        () => newModelLesson(lesson, opts, id, language));
+                    else await newModelLesson(lesson, opts, id, language);
+                } catch (error) { lessonFailure = error; hasLessonFailure = true; throw error; }
+                finally {
+                    if (held) await finishHeldCleanup(lessonFailure, [() => lesson.close()], hasLessonFailure);
+                    else await lesson.close();
+                }
             }
         }
         if (process.env.BW_SIMLAB_LIBRARY && runExample('fixed-machines.ldr')) {
@@ -1595,7 +1618,8 @@ try {
     assert.deepEqual(errors, [], `page errors: ${errors.join('\n')}`);
     console.log('PASS no page errors');
 } catch (error) {
-    if (process.env.SIM_DEBUG && browser) for (const context of browser.contexts()) for (const page of context.pages()) {
+    driverFailure = error; hasDriverFailure = true;
+    if (!HELD_MODELS.length && process.env.SIM_DEBUG && browser) for (const context of browser.contexts()) for (const page of context.pages()) {
         console.error('Robot Lab failure state', await page.evaluate(() => {
             const p=window.__bwSimLab?._pane, i=window.__bwSimLabInstructions, vm=p?.props.vm;
             return {url:location.href,model:p?.state.modelFile,status:p?.state.status,
@@ -1609,6 +1633,6 @@ try {
     }
     throw error;
 } finally {
-    await browser?.close();
-    server.close();
+    if (HELD_MODELS.length) await finishHeldDriver(driverFailure, hasDriverFailure, browser, server);
+    else { await browser?.close(); server.close(); }
 }

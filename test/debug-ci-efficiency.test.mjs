@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {assertReviewedConcurrency} from './helpers/reviewed-concurrency-projections.mjs';
 import {assertHeldLegacyConcurrency, asHeldLegacyPredecessor} from './helpers/held-legacy-concurrency.mjs';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -9,6 +10,8 @@ test('cycle qualification gives a cheap verdict before heavy candidate and brows
     const workflow = read('cycle-core-qualification.yml');
     const predecessor = asHeldLegacyPredecessor(workflow);
     assertHeldLegacyConcurrency(predecessor);
+    assertReviewedConcurrency(predecessor, {profile: 'workflow-ref'});
+    assertReviewedConcurrency(workflow);
     const contracts = workflow.indexOf('  contracts:');
     const qualify = workflow.indexOf('  qualify:');
     assert.ok(contracts >= 0 && contracts < qualify);

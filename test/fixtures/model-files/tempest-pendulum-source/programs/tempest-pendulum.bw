@@ -1,0 +1,185 @@
+# TEMPEST — Serial Double Pendulum.
+# Open tempest-pendulum.ldr in Robot Lab, select Plain, Reset, then Run.
+# Motor A moves the short carrier. Both serial pendulum hinges stay free.
+# The carrier holds still while you watch the upper and lower arms swing.
+# Reset the complete model before every run.
+DEVICE SPIKE
+GLOBAL completed
+GLOBAL failed
+GLOBAL stage
+GLOBAL phase
+GLOBAL moving
+GLOBAL carrierEncoder
+GLOBAL carrierDegrees
+GLOBAL targetDegrees
+GLOBAL targetCarrierDegrees
+GLOBAL moveDegrees
+GLOBAL observationWindow
+GLOBAL trimStage
+GLOBAL trimAttempts
+GLOBAL trimStartedAt
+
+WHEN flag clicked:
+  set completed to 0
+  set failed to 0
+  set stage to 0
+  set phase to "initial-rest"
+  set moving to 1
+  set carrierEncoder to 0
+  set carrierDegrees to 0
+  set targetDegrees to 0
+  set targetCarrierDegrees to 0
+  set moveDegrees to 0
+  set observationWindow to 0
+  set trimStage to 0
+  set trimAttempts to 0
+  set trimStartedAt to 0
+  IF ((lab status) = "no-model") or ((lab status) = "not-open") THEN:
+    set failed to 1
+    say "Open Tempest in Robot Lab, select Plain, then Reset and Run."
+    stop all
+  lab start
+  lab stop motor A hold
+  IF (abs of (lab motor A angle)) > 3 THEN:
+    set failed to 1
+    say "Reset the complete Tempest model before this demonstration."
+    stop all
+  reset timer
+  broadcast "Tempest observe"
+  broadcast "Tempest watchdog"
+  set phase to "home-settle"
+  wait 0.75 seconds
+  set phase to "home-trim"
+  set trimStage to 1
+  set moving to 1
+  set trimAttempts to 0
+  set trimStartedAt to timer
+  repeat until (abs of (lab motor A angle)) < 0.15 or trimAttempts = 100 or (timer - trimStartedAt) > 2:
+    IF (lab motor A angle) > 0 THEN:
+      lab run motor A at -2 degrees per second
+    ELSE:
+      lab run motor A at 2 degrees per second
+    wait 0.02 seconds
+    change trimAttempts by 1
+  lab stop motor A hold
+  IF (abs of (lab motor A angle)) > 0.15 THEN:
+    set failed to 1
+    say "The bounded home trim did not reach zero. Inspect Tempest and Reset."
+    stop all
+  set trimStage to 0
+  set phase to "initial-rest"
+  set moving to 0
+  say "Two free arms hang in series. The short carrier gives them a push."
+  wait 2 seconds
+  set stage to 1
+  set phase to "excitation"
+  set observationWindow to 0
+  set targetCarrierDegrees to 60
+  set targetDegrees to -60
+  set moving to 1
+  say "Carrier pulse; then watch both free arms."
+  set moveDegrees to (targetDegrees - (lab motor A angle))
+  lab run motor A for moveDegrees degrees at 180 degrees per second
+  lab stop motor A hold
+  set moving to 0
+  set phase to "observe"
+  set observationWindow to 1
+  say "Carrier held. Watch how motion passes between the two arms."
+  wait 12 seconds
+  IF (abs of ((lab motor A angle) - targetDegrees)) > 1 THEN:
+    set failed to 1
+    say "The carrier missed its held position. Inspect Tempest and Reset."
+    stop all
+  set stage to 2
+  set phase to "return"
+  set observationWindow to 0
+  set targetCarrierDegrees to 0
+  set targetDegrees to -0
+  set moving to 1
+  say "Returning the carrier home; both arms remain free."
+  set moveDegrees to (targetDegrees - (lab motor A angle))
+  lab run motor A for moveDegrees degrees at 90 degrees per second
+  lab stop motor A hold
+  set moving to 0
+  set phase to "home-observe"
+  set observationWindow to 0
+  say "Carrier held. Watch how motion passes between the two arms."
+  wait 8 seconds
+  IF (abs of ((lab motor A angle) - targetDegrees)) > 1 THEN:
+    set failed to 1
+    say "The carrier missed its held position. Inspect Tempest and Reset."
+    stop all
+  set stage to 3
+  set phase to "excitation"
+  set observationWindow to 0
+  set targetCarrierDegrees to -60
+  set targetDegrees to 60
+  set moving to 1
+  say "Carrier pulse; then watch both free arms."
+  set moveDegrees to (targetDegrees - (lab motor A angle))
+  lab run motor A for moveDegrees degrees at 180 degrees per second
+  lab stop motor A hold
+  set moving to 0
+  set phase to "observe"
+  set observationWindow to 2
+  say "Carrier held. Watch how motion passes between the two arms."
+  wait 12 seconds
+  IF (abs of ((lab motor A angle) - targetDegrees)) > 1 THEN:
+    set failed to 1
+    say "The carrier missed its held position. Inspect Tempest and Reset."
+    stop all
+  set stage to 4
+  set phase to "return"
+  set observationWindow to 0
+  set targetCarrierDegrees to 0
+  set targetDegrees to -0
+  set moving to 1
+  say "Returning the carrier home; both arms remain free."
+  set moveDegrees to (targetDegrees - (lab motor A angle))
+  lab run motor A for moveDegrees degrees at 90 degrees per second
+  lab stop motor A hold
+  set phase to "home-trim"
+  set trimStage to 2
+  set moving to 1
+  set trimAttempts to 0
+  set trimStartedAt to timer
+  repeat until (abs of (lab motor A angle)) < 0.15 or trimAttempts = 100 or (timer - trimStartedAt) > 2:
+    IF (lab motor A angle) > 0 THEN:
+      lab run motor A at -2 degrees per second
+    ELSE:
+      lab run motor A at 2 degrees per second
+    wait 0.02 seconds
+    change trimAttempts by 1
+  lab stop motor A hold
+  IF (abs of (lab motor A angle)) > 0.15 THEN:
+    set failed to 1
+    say "The bounded home trim did not reach zero. Inspect Tempest and Reset."
+    stop all
+  set trimStage to 0
+  set moving to 0
+  set phase to "home-observe"
+  set observationWindow to 0
+  say "Carrier held. Watch how motion passes between the two arms."
+  wait 8 seconds
+  IF (abs of ((lab motor A angle) - targetDegrees)) > 1 THEN:
+    set failed to 1
+    say "The carrier missed its held position. Inspect Tempest and Reset."
+    stop all
+  set phase to "complete"
+  set completed to 1
+  say "Tempest complete. The carrier is home; Reset to repeat the experiment."
+
+WHEN I receive "Tempest observe":
+  repeat until completed = 1:
+    set carrierEncoder to (lab motor A angle)
+    set carrierDegrees to (carrierEncoder * -1)
+    wait 0.05 seconds
+
+WHEN I receive "Tempest watchdog":
+  repeat until completed = 1:
+    IF timer > 65 THEN:
+      set failed to 1
+      lab stop motor A hold
+      say "Tempest stopped after its time limit. Inspect the model and Reset."
+      stop all
+    wait 0.05 seconds
