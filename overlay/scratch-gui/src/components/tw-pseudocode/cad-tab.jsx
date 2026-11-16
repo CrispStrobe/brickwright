@@ -74,9 +74,15 @@ const CadTab = ({vm, isVisible, locale, theme}) => {
         const requestFile = async accept => {
             const session = retainedSession;
             const generation = getCadProjectGeneration(), revision = session.state.revision;
-            const file = await pickFile(accept, fileSelection.signal);
-            return !stopped && generation === getCadProjectGeneration() && session === retainedSession &&
-                revision === session.state.revision ? file : null;
+            const isCurrent = () => !stopped && generation === getCadProjectGeneration() &&
+                session === retainedSession && revision === session.state.revision;
+            try {
+                const file = await pickFile(accept, fileSelection.signal);
+                return isCurrent() ? file : null;
+            } catch (error) {
+                if (isCurrent()) throw error;
+                return null;
+            }
         };
         window.addEventListener('bw-project-bundle-loaded', reload);
         setError('');

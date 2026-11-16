@@ -202,6 +202,44 @@ test('ordinary settings remounts retain undo while supported and empty project r
     } finally { await f.close(); }
 });
 
+test('a failed file read is discarded after the same project is edited', async () => {
+    const f = await fixture();
+    try {
+        const current = f.current(), reading = deferred(), selected = current.options.requestOpen();
+        const result = selected.then(file => ({file}), error => ({error}));
+        const input = f.inputs.at(-1);
+        input.files = [{name: 'old.bcad', size: 1, arrayBuffer: () => reading.promise}];
+        const changed = input.onchange();
+        current.session.rename('Edited while reading');
+        reading.reject(new Error('stale file read failed'));
+        await changed;
+        assert.deepEqual(await result, {file: null});
+        assert.equal(input.removed, true);
+        assert.equal(current.session.state.document.title, 'Edited while reading');
+        assert.equal(JSON.parse(project.readCadText()).title, 'Edited while reading');
+    } finally { await f.close(); }
+});
+
+test('current file read and size failures still reject and clean up the input', async () => {
+    for (const kind of ['read', 'size']) {
+        const f = await fixture();
+        try {
+            const failure = new Error('current file read failed'), selected = f.current().options.requestOpen();
+            const rejected = assert.rejects(selected, kind === 'read' ? error => error === failure : /Project exceeds 64 MiB/);
+            const input = f.inputs.at(-1);
+            let reads = 0;
+            input.files = [{name: 'design.bcad', size: kind === 'size' ? 64 * 1024 * 1024 + 1 : 1,
+                arrayBuffer: async () => { reads++; throw failure; }}];
+            await input.onchange();
+            await rejected;
+            assert.equal(reads, kind === 'size' ? 0 : 1);
+            assert.equal(input.removed, true);
+            assert.equal(input.onchange, null);
+            assert.equal(input.oncancel, null);
+        } finally { await f.close(); }
+    }
+});
+
 test('a current file selection still returns its bytes and cancellation cleans up its input', async () => {
     const f = await fixture();
     try {
