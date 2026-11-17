@@ -1,0 +1,437 @@
+{
+  "date": "2026-11-17",
+  "liteSource": "759c8968bc3d5d56f3f7bf0cf3a2bd17c03bde15",
+  "cadSource": "48694e4c437da25c3e1c1e107db5adf9fe3ae1d6",
+  "boardSource": "1db3d1b9eb2a7fe0283ef79f23373ef3b52d29b6",
+  "integration": {
+    "firstLiteBranch": "529d00d2d7d3b5cdf09a867eabf1933a7248663a",
+    "firstCadBranch": "380775a8ecca382630625ad998626d22d08b8698",
+    "laterCadBranch": "5b33a83",
+    "robotProjects": 22,
+    "retained": "coalesced rendering, independent widget restoration, shared history, live sensor/electrical feedback and complete project loading"
+  },
+  "checks": {
+    "cadRobotSuite": {
+      "total": 248,
+      "passedInitial": 247,
+      "failedInitial": 1,
+      "failure": "Cyclone wall-clock test timeout at 30 seconds during concurrent GUI compilation",
+      "quietRerun": {
+        "cases": 9,
+        "passed": 9,
+        "failed": 0,
+        "durationSeconds": 18.67
+      },
+      "note": "Runtime assertions and timeout were not relaxed. Do not sum reruns with initial case count."
+    },
+    "additionalDetailedRobotLibraryScoutPhysicsClearanceActuatorSuite": {
+      "passed": 169,
+      "failed": 0,
+      "note": "Overlaps the main CAD suite; not an additional unique-test total."
+    },
+    "liteCadRobotSuite": {
+      "passed": 178,
+      "failed": 0,
+      "skipped": 0
+    },
+    "defaultTravelRegression": {
+      "failedBefore": 3,
+      "affected": [
+        "Apex",
+        "Hermes",
+        "Quasar"
+      ],
+      "casesPassedAfter": 22,
+      "note": "Presets now start toward available travel, preferring the longer direction for asymmetric sliders."
+    },
+    "motorAssetReproduction": "byte-for-byte passed before the detailed-part integration; motor asset and generator unchanged afterwards",
+    "builtSdkDigests": 11,
+    "builtRobotArchives": 22,
+    "guiBuild": {
+      "runtimeSource": "5389b9b17",
+      "runtimeBuild": "Full production-behavior webpack build, 136530 ms, minification disabled for local testing, two size warnings.",
+      "finalPayload": "Whole CAD SDK and 22-project snapshots refreshed from the canonical committed producers. GUI JS/CSS source unchanged since the runtime build, verified by git diff; all 11 SDK file and 22 robot archive hashes reverified."
+    },
+    "latestAtlasMotorScoutPhysicsActuatorSuite": {
+      "passed": 20,
+      "failed": 0,
+      "scope": "After contact-layer changes; overlaps other CAD suites."
+    },
+    "germanTranslations": {
+      "passed": true,
+      "messages": 1772,
+      "references": 1427,
+      "note": "Nine missing imported labels added; placeholder and duplicate-value checks passed."
+    },
+    "atlasCandidateReproduction": "byte for byte passed",
+    "serialServoRegression": {
+      "passed": 43,
+      "failed": 0,
+      "scope": "Five files including the new six-second Polaris settling case, actuator impulse/reaction controls, fixed-assembly contacts, Helios and Stratos model controls. Overlaps preceding CAD suites."
+    }
+  },
+  "controlledMotorProxyBenchmark": {
+    "scope": "Consecutive isolated Node runs, same original Atlas geometry and motor commands, excluding Board and GUI. Compact candidates applied without other model edits.",
+    "before": {
+      "evaluateMs": 358.27516699999995,
+      "prepareMs": 8377.236499999999,
+      "createMs": 466.5997500000012,
+      "oneSimSecondMs": 1916.5827919999992,
+      "hulls": 3624
+    },
+    "compact": {
+      "evaluateMs": 304.77475000000004,
+      "prepareMs": 3627.0700000000006,
+      "createMs": 334.98412499999995,
+      "oneSimSecondMs": 964.0104999999994,
+      "hulls": 1811
+    },
+    "tolerance": {
+      "volumeFraction": 0.02,
+      "boundsMm": 0.2
+    },
+    "fullVisualSourceAndMassProperties": "unchanged",
+    "timestepsAndSolverGuards": "unchanged"
+  },
+  "sdkSizeExperiment": {
+    "beforeBytes": 10292060,
+    "compactMotorOnlyBytes": 7870910,
+    "note": "Vite-reported SDK chunk sizes rounded to 10 bytes, before the later detailed-part merge. Not the size of the entire application."
+  },
+  "browserBaseline": {
+    "scope": "Complete Atlas project, CAD 8915f20 / Lite ada738c76 before compact candidates and later detailed-part updates",
+    "preparationSeconds": 15.623,
+    "runningRealTimeFactor": 0.17641895845523387,
+    "wallSeconds": 49.696120166,
+    "simSeconds": 6.029999999999894
+  },
+  "browserFinal": {
+    "status": "passed",
+    "engine": "Playwright WebKit 2336",
+    "models": [
+      {
+        "id": "robot-tt-rover",
+        "simSeconds": 6.064999999999893,
+        "wallSecondsIncludingPreparation": 15.709830625,
+        "preparationSeconds": 6.34,
+        "runningRealTimeFactor": 0.6432283381058324,
+        "lastWindowRealTimeFactor": 0.6381934216985705,
+        "sceneDraws": 185,
+        "sameAnimationFrameDuplicates": 0,
+        "maxHeartbeatGapMs": 179
+      },
+      {
+        "id": "robot-steerable-rover",
+        "simSeconds": 6.099999999999892,
+        "wallSecondsIncludingPreparation": 9.915735875,
+        "preparationSeconds": 3.745,
+        "runningRealTimeFactor": 0.978504972730172,
+        "lastWindowRealTimeFactor": 1.0011488593467828,
+        "sceneDraws": 186,
+        "sameAnimationFrameDuplicates": 0,
+        "maxHeartbeatGapMs": 121
+      },
+      {
+        "id": "robot-atlas-forklift",
+        "simSeconds": 6.064999999999893,
+        "wallSecondsIncludingPreparation": 17.251599959,
+        "preparationSeconds": 4.817,
+        "runningRealTimeFactor": 0.4833054426647457,
+        "lastWindowRealTimeFactor": 0.5095332018408895,
+        "sceneDraws": 185,
+        "sameAnimationFrameDuplicates": 0,
+        "maxHeartbeatGapMs": 136
+      },
+      {
+        "id": "robot-mantis-walker",
+        "simSeconds": 6.029999999999894,
+        "wallSecondsIncludingPreparation": 8.981368374999992,
+        "preparationSeconds": 2.942,
+        "runningRealTimeFactor": 0.9924292297564012,
+        "lastWindowRealTimeFactor": 1.0001639613051239,
+        "sceneDraws": 184,
+        "sameAnimationFrameDuplicates": 0,
+        "maxHeartbeatGapMs": 77
+      },
+      {
+        "id": "robot-cyclone-sorter",
+        "simSeconds": 6.064999999999893,
+        "wallSecondsIncludingPreparation": 10.913753958999994,
+        "preparationSeconds": 1.965,
+        "runningRealTimeFactor": 0.6761426978818164,
+        "lastWindowRealTimeFactor": 0.3972194637537203,
+        "sceneDraws": 180,
+        "sameAnimationFrameDuplicates": 0,
+        "maxHeartbeatGapMs": 68
+      },
+      {
+        "id": "robot-helios-catapult",
+        "simSeconds": 6.1299999999998915,
+        "wallSecondsIncludingPreparation": 10.067898916999999,
+        "preparationSeconds": 3.525,
+        "runningRealTimeFactor": 0.9317525459796158,
+        "lastWindowRealTimeFactor": 1.0001639613051232,
+        "sceneDraws": 176,
+        "sameAnimationFrameDuplicates": 0,
+        "maxHeartbeatGapMs": 82
+      },
+      {
+        "id": "robot-labyrinth-tilter",
+        "simSeconds": 6.099999999999892,
+        "wallSecondsIncludingPreparation": 8.009703834,
+        "preparationSeconds": 1.883,
+        "runningRealTimeFactor": 0.9921925829537886,
+        "lastWindowRealTimeFactor": 0.9999999999999911,
+        "sceneDraws": 185,
+        "sameAnimationFrameDuplicates": 0,
+        "maxHeartbeatGapMs": 71
+      },
+      {
+        "id": "robot-apex-scara",
+        "simSeconds": 6.029999999999894,
+        "wallSecondsIncludingPreparation": 7.352250417000003,
+        "preparationSeconds": 1.284,
+        "runningRealTimeFactor": 0.9935739001482771,
+        "lastWindowRealTimeFactor": 0.9999999999999916,
+        "sceneDraws": 184,
+        "sameAnimationFrameDuplicates": 0,
+        "maxHeartbeatGapMs": 73
+      },
+      {
+        "id": "robot-orion-carousel",
+        "simSeconds": 6.1299999999998915,
+        "wallSecondsIncludingPreparation": 7.467891207999986,
+        "preparationSeconds": 1.323,
+        "runningRealTimeFactor": 0.9970722186076597,
+        "lastWindowRealTimeFactor": 0.9995002498750534,
+        "sceneDraws": 186,
+        "sameAnimationFrameDuplicates": 0,
+        "maxHeartbeatGapMs": 77
+      },
+      {
+        "id": "robot-vortex-pinball",
+        "simSeconds": 6.064999999999893,
+        "wallSecondsIncludingPreparation": 7.3530205419999835,
+        "preparationSeconds": 1.285,
+        "runningRealTimeFactor": 0.9993409128357049,
+        "lastWindowRealTimeFactor": 0.9996722386102833,
+        "sceneDraws": 183,
+        "sameAnimationFrameDuplicates": 0,
+        "maxHeartbeatGapMs": 84
+      },
+      {
+        "id": "robot-titan-vise",
+        "simSeconds": 6.029999999999894,
+        "wallSecondsIncludingPreparation": 6.797480333000014,
+        "preparationSeconds": 0.775,
+        "runningRealTimeFactor": 1.0011622115224794,
+        "lastWindowRealTimeFactor": 0.9999999999999916,
+        "sceneDraws": 183,
+        "sameAnimationFrameDuplicates": 0,
+        "maxHeartbeatGapMs": 68
+      },
+      {
+        "id": "robot-hermes-crane",
+        "simSeconds": 6.029999999999894,
+        "wallSecondsIncludingPreparation": 6.922360333000019,
+        "preparationSeconds": 0.845,
+        "runningRealTimeFactor": 0.993737640079086,
+        "lastWindowRealTimeFactor": 0.9999999999999916,
+        "sceneDraws": 184,
+        "sameAnimationFrameDuplicates": 0,
+        "maxHeartbeatGapMs": 60
+      },
+      {
+        "id": "robot-chronos-drawbridge",
+        "simSeconds": 6.099999999999892,
+        "wallSecondsIncludingPreparation": 7.444438334000006,
+        "preparationSeconds": 1.335,
+        "runningRealTimeFactor": 0.9973839110529582,
+        "lastWindowRealTimeFactor": 1.000656167978994,
+        "sceneDraws": 186,
+        "sameAnimationFrameDuplicates": 0,
+        "maxHeartbeatGapMs": 83
+      },
+      {
+        "id": "robot-polaris-tracker",
+        "simSeconds": 6.029999999999894,
+        "wallSecondsIncludingPreparation": 7.355918749999983,
+        "preparationSeconds": 1.309,
+        "runningRealTimeFactor": 0.995542347696862,
+        "lastWindowRealTimeFactor": 0.9999999999999916,
+        "sceneDraws": 184,
+        "sameAnimationFrameDuplicates": 0,
+        "maxHeartbeatGapMs": 59
+      },
+      {
+        "id": "robot-boreal-launcher",
+        "simSeconds": 6.029999999999894,
+        "wallSecondsIncludingPreparation": 6.805718332999997,
+        "preparationSeconds": 0.774,
+        "runningRealTimeFactor": 0.9993370898243112,
+        "lastWindowRealTimeFactor": 0.9999999999999916,
+        "sceneDraws": 184,
+        "sameAnimationFrameDuplicates": 0,
+        "maxHeartbeatGapMs": 62
+      },
+      {
+        "id": "robot-zephyr-conveyor",
+        "simSeconds": 6.099999999999892,
+        "wallSecondsIncludingPreparation": 6.895714875000005,
+        "preparationSeconds": 0.818,
+        "runningRealTimeFactor": 1.0027946736807318,
+        "lastWindowRealTimeFactor": 0.9999999999999911,
+        "sceneDraws": 185,
+        "sameAnimationFrameDuplicates": 0,
+        "maxHeartbeatGapMs": 56
+      },
+      {
+        "id": "robot-quasar-press",
+        "simSeconds": 6.064999999999893,
+        "wallSecondsIncludingPreparation": 6.791437458000001,
+        "preparationSeconds": 0.745,
+        "runningRealTimeFactor": 1.0024793388429576,
+        "lastWindowRealTimeFactor": 0.9995002498750538,
+        "sceneDraws": 183,
+        "sameAnimationFrameDuplicates": 0,
+        "maxHeartbeatGapMs": 77
+      },
+      {
+        "id": "robot-nova-loader",
+        "simSeconds": 6.064999999999893,
+        "wallSecondsIncludingPreparation": 6.914250874999998,
+        "preparationSeconds": 0.799,
+        "runningRealTimeFactor": 0.9940993279790022,
+        "lastWindowRealTimeFactor": 0.9995002498750538,
+        "sceneDraws": 184,
+        "sameAnimationFrameDuplicates": 0,
+        "maxHeartbeatGapMs": 58
+      },
+      {
+        "id": "robot-vector-plotter",
+        "simSeconds": 6.099999999999892,
+        "wallSecondsIncludingPreparation": 6.911035457999999,
+        "preparationSeconds": 0.799,
+        "runningRealTimeFactor": 0.9981999672721146,
+        "lastWindowRealTimeFactor": 1.000656167978994,
+        "sceneDraws": 185,
+        "sameAnimationFrameDuplicates": 0,
+        "maxHeartbeatGapMs": 63
+      },
+      {
+        "id": "robot-aegis-sentry",
+        "simSeconds": 6.099999999999892,
+        "wallSecondsIncludingPreparation": 7.683387000000017,
+        "preparationSeconds": 1.568,
+        "runningRealTimeFactor": 0.996569188041152,
+        "lastWindowRealTimeFactor": 0.9999999999999911,
+        "sceneDraws": 185,
+        "sameAnimationFrameDuplicates": 0,
+        "maxHeartbeatGapMs": 94
+      },
+      {
+        "id": "robot-stratos-gimbal",
+        "simSeconds": 6.099999999999892,
+        "wallSecondsIncludingPreparation": 8.15092975000001,
+        "preparationSeconds": 2.029,
+        "runningRealTimeFactor": 0.9968949174701572,
+        "lastWindowRealTimeFactor": 0.9999999999999911,
+        "sceneDraws": 186,
+        "sameAnimationFrameDuplicates": 0,
+        "maxHeartbeatGapMs": 110
+      },
+      {
+        "id": "robot-kestrel-arm",
+        "simSeconds": 6.029999999999894,
+        "wallSecondsIncludingPreparation": 7.882316125000012,
+        "preparationSeconds": 1.836,
+        "runningRealTimeFactor": 0.995542347696862,
+        "lastWindowRealTimeFactor": 0.999500249875054,
+        "sceneDraws": 183,
+        "sameAnimationFrameDuplicates": 0,
+        "maxHeartbeatGapMs": 84
+      }
+    ],
+    "errors": [],
+    "scope": "All 22 final bundled projects: actual VM, Widgets, Board and Jolt; six simulated seconds with untouched default values, Controls closed first Run and open on restart, Center controls, Stop/Reset, each mapped actuator moved, source CAD document unchanged. Scout additionally confirms cancel preserves the old project.",
+    "polarisFinalAnglesDegrees": {
+      "pan-b": 14.996534096410869,
+      "tilt-c": 14.962249961870384
+    }
+  },
+  "knownLimits": [
+    "Later detailed robot parts add geometry work; the controlled motor-only speedup is not an end-to-end claim for those redesigned models.",
+    "Older saved projects preserve their own geometry and programs. Reopen a complete Example to use the updated presets.",
+    "Whole-app unrelated Arcade/MakeCode and Sky Courier qualifications are not claimed by these CAD checks.",
+    "Atlas passes controlled motion but remains below real time; do not claim 1x speed for every preset."
+  ],
+  "githubActions": "not dispatched, rerun or awaited; an existing completed Board CI receipt was read by the normal pin verifier",
+  "atlasContactBrowser": {
+    "wallSeconds": 35.07129591699999,
+    "preparationSeconds": 7.932,
+    "runningRealTimeFactor": 0.22302770277767112,
+    "draws": {
+      "count": 184,
+      "duplicate": 0,
+      "frame": 1089,
+      "lastFrame": 1087
+    },
+    "simSeconds": 6.029999999999894,
+    "scope": "Final SDK and archive payload, default Widgets, first Run with Controls closed, restart with Controls open, Center, Stop/Reset; every mapped actuator moved and source document stayed unchanged."
+  },
+  "atlasContactBefore": {
+    "scope": "Detailed-part source 49872f4 and Lite 5389b9b17 before the layered contact decomposition",
+    "timeoutSeconds": 180,
+    "simSecondsReached": 5.33,
+    "phase": "running",
+    "lastWindowRealTimeFactor": 0.0098039,
+    "note": "Unsuccessful browser run retained; not counted as a pass."
+  },
+  "atlasLayerBenchmark": {
+    "before": {
+      "evaluateMs": 678.8121659999999,
+      "prepareMs": 5453.901667,
+      "createMs": 649.151167,
+      "oneSimSecondMs": 11804.818541
+    },
+    "after": {
+      "evaluateMs": 955.6802500000001,
+      "prepareMs": 6022.819541999999,
+      "createMs": 706.1230000000005,
+      "oneSimSecondMs": 2833.8483749999996
+    },
+    "scope": "Same detailed Atlas design, consecutive isolated Node runs with identical commands; only fork/crate collision compounds differ. Concurrent external machine load is not controlled.",
+    "forkHulls": {
+      "before": 127,
+      "after": 56
+    },
+    "crateHulls": {
+      "before": 59,
+      "after": 14
+    }
+  },
+  "serialServoDiagnostic": {
+    "beforeMaxLateErrorDegrees": 42.849147779258416,
+    "afterMaxLateErrorDegrees": 0.058770780126403466,
+    "beforePeakSpeedDegreesPerSecond": 912.868442950544,
+    "afterPeakSpeedDegreesPerSecond": 239.15685397651617,
+    "scope": "Release backend; six seconds simultaneous pan/tilt targets with sustained rail force. Joint iterations increased only for connected mechanisms with adjacent serial bounded axes; 80 per bounded axis, capped at 320. Contact settings, torque limits, position gain and time step retained."
+  },
+  "native": {
+    "status": "built, signed and installed",
+    "path": "/Users/christianstrobele/Applications/Brickwright Robots Performance Test.app",
+    "build": "20261117.3",
+    "identifier": "com.crispstrobe.brickwright.robotcadtest",
+    "liteSource": "759c8968bc3d5d56f3f7bf0cf3a2bd17c03bde15",
+    "cadSource": "48694e4c437da25c3e1c1e107db5adf9fe3ae1d6",
+    "guiRuntimeSource": "5389b9b17d915c7e99437954c0c682a57108edec",
+    "robotManifestSha256": "47c76d3e76e5bdbb2dfa566e98fd04b6ac60e30ef2b5cd35b0acdd33767a953a",
+    "binarySha256": "ca86efbe928e7773de22cf61fa7dc272af72769639a6ea30a0041e47595a34f9",
+    "signature": "Apple Development: Created via API (9RMU3C7422); Team N9XSJ4M3GT; deep strict verified",
+    "keychain": "/Users/christianstrobele/Library/Keychains/brickwright-build.keychain-db",
+    "nativeUi": "Not launched over the older test app; shared profile and unsaved work preserved. Final embedded frontend payload was exercised in Playwright WebKit.",
+    "notarized": false,
+    "buildNote": "Nonfatal rust-objcopy debug stripping warning for unavailable libLLVM.dylib; release compilation and bundling succeeded."
+  },
+  "artifactCleanup": "Removed obsolete generated frontend outputs and internal native bundle copies only. Preserved all source, installed applications, current build and verification receipts."
+}

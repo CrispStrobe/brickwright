@@ -152,3 +152,10 @@ post-rendering-change results and precise performance limitations are recorded i
 [the simulation repair receipt](receipts/2026-11-17-cad-simulation-fix.json).
 Atlas remains below real time; successful control runs do not certify 1x speed
 for every model. Purchased electronics detail work is separate.
+
+The subsequent performance continuation integrates 22 complete robot examples,
+shared compact motor collision candidates, and layered Atlas fork/crate contacts.
+Generated slider defaults now point toward available travel. See the
+[performance evidence](evidence/2026-11-17-robot-performance.md) and its receipt
+for actual browser rates and the distinction between isolated physics timing,
+whole-project control checks and native window verification.
