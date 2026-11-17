@@ -50974,7 +50974,7 @@ function bC(i, e) {
 }
 let un;
 async function gC() {
-  const [{ createBundledModelLibrary: i }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-B29HZ5kV.js"), import("./model-library-cache-DiMFGzp9.js")]);
+  const [{ createBundledModelLibrary: i }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-jY2rsWZ-.js"), import("./model-library-cache-DiMFGzp9.js")]);
   return un ?? (un = i()), { ...un, cache: e() };
 }
 function vC(i, e) {

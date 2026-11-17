@@ -42,3 +42,14 @@ now pass. Nine real-GUI input checks passed, and all 126 Lite CAD/bridge checks
 passed before final native packaging. The final receipt binds the exact source,
 app metadata, SDK and project hashes and separates native routing from release
 window interaction.
+
+
+## Final upstream reconciliation
+
+CAD PRs #74 and #75 landed during final validation. They add seven qualified LDraw
+originals and their evidence/previews. Their tests pass 7/7. Git tree comparison
+preserved all 2,355 remote library files exactly, including file modes. The merge
+retains the complete robot/input lifecycle fixes; the refreshed SDK is built from
+CAD 9b5be9f521fd01fc9691a771b97c702a23fa0992, now on remote main. This is a library
+payload update after the clean GUI compilation at Lite 65463f90cb9c7bba9c427984b1b8ed76e337409f;
+the app records GUI runtime and complete payload source commits separately.
