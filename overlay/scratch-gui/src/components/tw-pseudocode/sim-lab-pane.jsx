@@ -2855,7 +2855,7 @@ class SimLabPane extends React.Component {
         if (this.compact()) {
             // One line ("Before you press Run: (2)") that opens to the list.
             return (
-                <SimLabNotice content={blockers} testId="bw-sim-lab-blockers" closeLabel={`${this.itext.close}: ${this.itext.blockersTitle}`}>
+                <SimLabNotice content={blockers} displayContent={{title: this.itext.blockersTitle, sentences: blockers.map(issue => issueSentence(this.itext, issue, id => this.partNameById(id)))}} testId="bw-sim-lab-blockers" closeLabel={`${this.itext.close}: ${this.itext.blockersTitle}`}>
                     <details role="alert" data-testid="bw-sim-lab-blockers"
                         style={{fontSize: 12, color: '#7c2d12', background: '#fff7ed', border: '1px solid #fdba74', borderRadius: 6, padding: '4px 32px 4px 8px', minWidth: 0}}>
                         <summary style={{cursor: 'pointer', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
@@ -2869,7 +2869,7 @@ class SimLabPane extends React.Component {
             );
         }
         return (
-            <SimLabNotice content={blockers} testId="bw-sim-lab-blockers" closeLabel={`${this.itext.close}: ${this.itext.blockersTitle}`}>
+            <SimLabNotice content={blockers} displayContent={{title: this.itext.blockersTitle, sentences: blockers.map(issue => issueSentence(this.itext, issue, id => this.partNameById(id)))}} testId="bw-sim-lab-blockers" closeLabel={`${this.itext.close}: ${this.itext.blockersTitle}`}>
                 <div role="alert" data-testid="bw-sim-lab-blockers"
                     style={{fontSize: 12, color: '#7c2d12', background: '#fff7ed', border: '1px solid #fdba74', borderRadius: 6, padding: '6px 32px 6px 8px'}}>
                     <strong>{this.itext.blockersTitle}</strong>
@@ -2887,7 +2887,7 @@ class SimLabPane extends React.Component {
         const compact = this.compact();
         const T = this.text;
         return (
-            <SimLabNotice content={issues} testId="bw-sim-lab-issues" closeLabel={`${this.itext.close}: ${T.issues}`}>
+            <SimLabNotice content={issues} displayContent={{title: T.issues, sentences: issues.map(issue => issueSentence(this.itext, issue, id => this.partNameById(id)))}} testId="bw-sim-lab-issues" closeLabel={`${this.itext.close}: ${T.issues}`}>
                 <details data-testid="bw-sim-lab-issues" style={{fontSize: 12, paddingRight: 32}} open={!compact && issues.some(i => i.code !== 'locked-hinges')}>
                     <summary style={compact ? {whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', cursor: 'pointer'} : {cursor: 'pointer'}}>
                         {T.issues} ({issues.length})
