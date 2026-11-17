@@ -4468,7 +4468,15 @@ jobs:
       - name: Integrate the owned GUI libraries
         run: node scripts/integrate.mjs
       - name: Install the declared GUI dependencies
-        run: cd packages/scratch-gui && npm install --ignore-scripts --legacy-peer-deps --no-audit --no-fund
+        run: |
+          set -euo pipefail
+          (cd packages/scratch-gui && npm ci --ignore-scripts --legacy-peer-deps --no-audit --no-fund)
+          git diff --exit-code -- packages/scratch-gui/package.json packages/scratch-gui/package-lock.json
+          sha256sum packages/scratch-gui/package.json packages/scratch-gui/package-lock.json \
+            packages/scratch-gui/node_modules/scratch-vm/src/index.js
+          printf '%s  %s\n' \
+            '814d2a96184f7b490905f25317197ec0dcea8128e234efcf3fe3f173f799300a' packages/scratch-gui/node_modules/bw-board/src/i8086.js \
+            'd161cb339cf171729a3fec7dbf27b6350da23c702f415bf9b2b328d7e448a089' packages/scratch-gui/node_modules/bw-circuit-ui/package.json | sha256sum --check
       - name: Apply the scratch-vm overlay
         run: node scripts/apply-vm-overlay.mjs
       - name: Actual production IDE numeric/settings/source-loop authoring
