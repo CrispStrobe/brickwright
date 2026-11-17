@@ -2,6 +2,15 @@ var m6 = Object.defineProperty;
 var w6 = (A, g, I) => g in A ? m6(A, g, { enumerable: !0, configurable: !0, writable: !0, value: I }) : A[g] = I;
 var VA = (A, g, I) => w6(A, typeof g != "symbol" ? g + "" : g, I);
 const d6 = {
+  "Aiming yaw servo": "Servo für die horizontale Ausrichtung",
+  "Swivel spreader servo": "Drehservo für die Lasttraverse",
+  "Purchased Feather controller clearance": "Bauraum für den gekauften Feather-Controller",
+  "Purchased LiPo counterweight clearance": "Bauraum für das gekaufte LiPo-Gegengewicht",
+  "Bucket tilt servo": "Servo für die Schaufelneigung",
+  "Rotary dial servo": "Servo für den Drehteller",
+  "Rotary indexer servo": "Servo für den Rundschalttisch",
+  "Stylus arm servo": "Servo für den Stiftarm",
+  "Exit diverter servo": "Servo für die Ausgangsweiche",
   "Self collisions inside connected robots": "Selbstkollisionen innerhalb verbundener Roboter",
   "Collisions between connected links": "Kollisionen zwischen verbundenen Gliedern",
   "Invalid connected-link collision setting": "Ungültige Kollisionseinstellung für verbundene Glieder",
@@ -9737,7 +9746,7 @@ async function k8(A, g, I, C = {}) {
     }
   if ([...I.values()].reduce((D, u) => D + u.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = C.J ?? await (b5 ?? (b5 = import("./jolt-physics.wasm-compat-Dzm_c_4S.js").then((D) => D.default()))), o = new i.JoltSettings();
+  const i = C.J ?? await (b5 ?? (b5 = import("./jolt-physics.wasm-compat-CHkj04-t.js").then((D) => D.default()))), o = new i.JoltSettings();
   o.mMaxBodies = 512, o.mMaxBodyPairs = Math.max(1024, e.length * e.length), o.mMaxContactConstraints = 8192;
   const r = new i.ObjectLayerPairFilterTable(2);
   r.EnableCollision(0, 1), r.EnableCollision(1, 1);

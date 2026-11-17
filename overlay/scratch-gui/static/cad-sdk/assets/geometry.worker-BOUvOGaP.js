@@ -2,6 +2,15 @@ var L6 = Object.defineProperty;
 var H6 = (A, g, I) => g in A ? L6(A, g, { enumerable: !0, configurable: !0, writable: !0, value: I }) : A[g] = I;
 var $A = (A, g, I) => H6(A, typeof g != "symbol" ? g + "" : g, I);
 const _6 = {
+  "Aiming yaw servo": "Servo für die horizontale Ausrichtung",
+  "Swivel spreader servo": "Drehservo für die Lasttraverse",
+  "Purchased Feather controller clearance": "Bauraum für den gekauften Feather-Controller",
+  "Purchased LiPo counterweight clearance": "Bauraum für das gekaufte LiPo-Gegengewicht",
+  "Bucket tilt servo": "Servo für die Schaufelneigung",
+  "Rotary dial servo": "Servo für den Drehteller",
+  "Rotary indexer servo": "Servo für den Rundschalttisch",
+  "Stylus arm servo": "Servo für den Stiftarm",
+  "Exit diverter servo": "Servo für die Ausgangsweiche",
   "Self collisions inside connected robots": "Selbstkollisionen innerhalb verbundener Roboter",
   "Collisions between connected links": "Kollisionen zwischen verbundenen Gliedern",
   "Invalid connected-link collision setting": "Ungültige Kollisionseinstellung für verbundene Glieder",
