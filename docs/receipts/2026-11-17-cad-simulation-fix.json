@@ -1,0 +1,139 @@
+{
+  "date": "2026-11-17",
+  "liteFunctionalSource": "b15ff59f0",
+  "cadCollisionSource": "9abfb73fa183e2e17743c6d27332aeb045d3e0cb",
+  "cadRenderingSource": "22d86009c6744c328ed12ce5a00dfe3e57d6beeb",
+  "tests": {
+    "liteUnit": {
+      "passed": 54,
+      "failed": 0,
+      "skipped": 0
+    },
+    "cadPhysics": {
+      "passed": 49,
+      "failed": 0
+    },
+    "cadTelemetryReplay": {
+      "passed": 11,
+      "failed": 0
+    },
+    "cadSdkBuild": "passed"
+  },
+  "browserBeforeCoalescing": {
+    "webkit": {
+      "passedModels": [
+        {
+          "id": "robot-tt-rover",
+          "simSeconds": 6.029999999999894,
+          "lastWindowRealTimeFactor": 0.18921475875118088,
+          "maxHeartbeatGapMs": 559
+        },
+        {
+          "id": "robot-steerable-rover",
+          "simSeconds": 6.029999999999894,
+          "lastWindowRealTimeFactor": 0.16983171221244248,
+          "maxHeartbeatGapMs": 426
+        },
+        {
+          "id": "robot-atlas-forklift",
+          "simSeconds": 6.029999999999894,
+          "lastWindowRealTimeFactor": 0.0695023630803441,
+          "maxHeartbeatGapMs": 325
+        },
+        {
+          "id": "robot-mantis-walker",
+          "simSeconds": 6.064999999999893,
+          "lastWindowRealTimeFactor": 0.45484080571799457,
+          "maxHeartbeatGapMs": 237
+        },
+        {
+          "id": "robot-cyclone-sorter",
+          "simSeconds": 6.029999999999894,
+          "lastWindowRealTimeFactor": 0.8321096426823223,
+          "maxHeartbeatGapMs": 168
+        },
+        {
+          "id": "robot-helios-catapult",
+          "simSeconds": 6.1299999999998915,
+          "lastWindowRealTimeFactor": 0.997506234413956,
+          "maxHeartbeatGapMs": 177
+        }
+      ],
+      "errors": [],
+      "scope": "Final b15ff59 GUI, CAD 9abfb73; six simulated seconds untouched defaults, Controls closed initially, then open while running, Stop/Reset, restart with Controls open, Center controls, Stop/Reset. Before render-coalescing patch."
+    },
+    "chromium": {
+      "passedModels": [
+        {
+          "id": "robot-tt-rover",
+          "simSeconds": 6.029999999999894,
+          "lastWindowRealTimeFactor": 0.16693224068593823,
+          "maxHeartbeatGapMs": 30624
+        },
+        {
+          "id": "robot-steerable-rover",
+          "simSeconds": 6.029999999999894,
+          "lastWindowRealTimeFactor": 0.19786006727295957,
+          "maxHeartbeatGapMs": 899.3999999985099
+        },
+        {
+          "id": "robot-atlas-forklift",
+          "simSeconds": 6.029999999999894,
+          "lastWindowRealTimeFactor": 0.07448123817600356,
+          "maxHeartbeatGapMs": 3409.60000000149
+        },
+        {
+          "id": "robot-mantis-walker",
+          "simSeconds": 6.029999999999894,
+          "lastWindowRealTimeFactor": 0.686678438298035,
+          "maxHeartbeatGapMs": 11214.89999999851
+        },
+        {
+          "id": "robot-cyclone-sorter",
+          "simSeconds": 6.1299999999998915,
+          "lastWindowRealTimeFactor": 0.09891957838280631,
+          "maxHeartbeatGapMs": 14373.60000000149
+        },
+        {
+          "id": "robot-helios-catapult",
+          "simSeconds": 6.064999999999893,
+          "lastWindowRealTimeFactor": 0.46922730711425714,
+          "maxHeartbeatGapMs": 17799.60000000149
+        }
+      ],
+      "errors": [],
+      "scope": "Final b15ff59 GUI, CAD 9abfb73; six simulated seconds untouched defaults, Controls closed initially, then open while running, Stop/Reset, restart with Controls open, Center controls, Stop/Reset. Before render-coalescing patch."
+    }
+  },
+  "renderBaseline": {
+    "model": "robot-helios-catapult",
+    "browser": "WebKit",
+    "simSeconds": 2.1,
+    "sceneDraws": 132,
+    "sameAnimationFrameDuplicates": 74
+  },
+  "modelPolicy": {
+    "newRobotProjectVersion": 2,
+    "motor": "Functional R/back-EMF/current/torque model. No winding inductance or flyback diode transients. Dual H-bridge channels paired. Existing edited projects retained.",
+    "contacts": "New robot templates disable collision within each joint-connected assembly. Ground and independent object contacts retained. Optional self collisions in world settings. Legacy documents retain previous behavior."
+  },
+  "diagnosticElectricalTiming": {
+    "detailedModel": {
+      "measuredSimSeconds": 0.01,
+      "measuredWallSeconds": 5.055,
+      "note": "The earlier approximately 250 wall seconds per 0.5 simulated seconds was an extrapolation, not a measured 0.5-second run."
+    },
+    "pairedFunctionalModel": {
+      "measuredSimSeconds": 0.5,
+      "measuredWallSeconds": 0.7187
+    },
+    "scope": "Isolated electrical diagnostic; not end-to-end GUI performance."
+  },
+  "knownLimits": [
+    "Atlas remains below real time; do not claim every robot achieves real-time speed.",
+    "Measured rates depend on browser, rendering backend and concurrent system load.",
+    "Old saved robot projects are preserved and do not acquire new circuits/programs automatically; reopen a complete robot example to use the new defaults.",
+    "Detailed purchased electronics geometry remains paused and is not included in this repair."
+  ],
+  "githubActions": "not dispatched, awaited or rerun"
+}
