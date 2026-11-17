@@ -17,7 +17,9 @@
       "passed": 11,
       "failed": 0
     },
-    "cadSdkBuild": "passed"
+    "cadSdkBuild": "passed",
+    "guiBuild": "passed, webpack 5.96.1, 180521 ms, two size warnings; production behavior with minification disabled for local testing",
+    "builtArchiveHashes": "11 SDK files plus 6 robot SB3 files and manifest verified"
   },
   "browserBeforeCoalescing": {
     "webkit": {
@@ -135,5 +137,112 @@
     "Old saved robot projects are preserved and do not acquire new circuits/programs automatically; reopen a complete robot example to use the new defaults.",
     "Detailed purchased electronics geometry remains paused and is not included in this repair."
   ],
-  "githubActions": "not dispatched, awaited or rerun"
+  "githubActions": "not dispatched, awaited or rerun",
+  "browserAfterCoalescing": {
+    "engine": "Playwright WebKit 2336",
+    "source": "Lite 0876da531 / CAD 22d8600; production behavior, local GUI minification disabled",
+    "passedModels": [
+      {
+        "id": "robot-tt-rover",
+        "simSeconds": 6.029999999999894,
+        "lastWindowRealTimeFactor": 0.2850356294536791,
+        "wallSecondsIncludingPreparation": 30.919513417,
+        "averageRealTimeFactorIncludingPreparation": 0.19502247395279226,
+        "sceneDraws": 184,
+        "sameAnimationFrameDuplicates": 0,
+        "maxHeartbeatGapMs": 268
+      },
+      {
+        "id": "robot-steerable-rover",
+        "simSeconds": 6.029999999999894,
+        "lastWindowRealTimeFactor": 0.14800197335964346,
+        "wallSecondsIncludingPreparation": 62.41828662500001,
+        "averageRealTimeFactorIncludingPreparation": 0.09660630443490474,
+        "sceneDraws": 184,
+        "sameAnimationFrameDuplicates": 0,
+        "maxHeartbeatGapMs": 365
+      },
+      {
+        "id": "robot-atlas-forklift",
+        "simSeconds": 6.029999999999894,
+        "lastWindowRealTimeFactor": 0.07857928650007787,
+        "wallSecondsIncludingPreparation": 71.91720412499998,
+        "averageRealTimeFactorIncludingPreparation": 0.08384641857766179,
+        "sceneDraws": 184,
+        "sameAnimationFrameDuplicates": 0,
+        "maxHeartbeatGapMs": 314
+      },
+      {
+        "id": "robot-mantis-walker",
+        "simSeconds": 6.099999999999892,
+        "lastWindowRealTimeFactor": 0.6732348111658395,
+        "wallSecondsIncludingPreparation": 19.02005245899997,
+        "averageRealTimeFactorIncludingPreparation": 0.32071415224270183,
+        "sceneDraws": 185,
+        "sameAnimationFrameDuplicates": 0,
+        "maxHeartbeatGapMs": 157
+      },
+      {
+        "id": "robot-cyclone-sorter",
+        "simSeconds": 6.064999999999893,
+        "lastWindowRealTimeFactor": 0.9995002498750538,
+        "wallSecondsIncludingPreparation": 9.081971541000007,
+        "averageRealTimeFactorIncludingPreparation": 0.6678065409718386,
+        "sceneDraws": 167,
+        "sameAnimationFrameDuplicates": 0,
+        "maxHeartbeatGapMs": 158
+      },
+      {
+        "id": "robot-helios-catapult",
+        "simSeconds": 6.064999999999893,
+        "lastWindowRealTimeFactor": 0.9995002498750538,
+        "wallSecondsIncludingPreparation": 13.048921417000004,
+        "averageRealTimeFactorIncludingPreparation": 0.4647893727138606,
+        "sceneDraws": 183,
+        "sameAnimationFrameDuplicates": 0,
+        "maxHeartbeatGapMs": 106
+      }
+    ],
+    "errors": [],
+    "scope": "Same complete six-second default-input and repeated-control sequence as the preceding run. Every connected actuator moved; canonical document remained unchanged."
+  },
+  "renderAfter": {
+    "model": "robot-helios-catapult",
+    "browser": "WebKit",
+    "simSeconds": 2.129999999999977,
+    "sceneDraws": 60,
+    "sameAnimationFrameDuplicates": 0,
+    "lastWindowRealTimeFactor": 1.007598282127518,
+    "wallSecondsIncludingPreparation": 12.938089459000002,
+    "explicitDuplicateBudgetAssertion": "passed (maximum 5, observed 0)"
+  },
+  "native": {
+    "status": "built, signed and installed",
+    "path": "/Users/christianstrobele/Applications/Brickwright Robots Simulation Fix Test.app",
+    "build": "20261117.2",
+    "identifier": "com.crispstrobe.brickwright.robotcadtest",
+    "liteSource": "0876da5313434eeaf26907d6eb15115e55856c5e",
+    "cadSource": "22d86009c6744c328ed12ce5a00dfe3e57d6beeb",
+    "robotManifestSha256": "61a7c2a18129c27a2c16ca002509a274b1fe82d9d78a0d39afc6a4d2df8f9632",
+    "binarySha256": "c4c413dbf1f2f3f0424567677b3e6ae4759c598d284895dc3aed929ae5edb551",
+    "signature": "Apple Development: Created via API (9RMU3C7422); Team N9XSJ4M3GT; codesign deep strict verified",
+    "keychain": "/Users/christianstrobele/Library/Keychains/brickwright-build.keychain-db",
+    "nativeUi": "Not launched over the running Workspace Test app; shared document profile and unsaved state preserved. Complete GUI exercised in Playwright WebKit instead.",
+    "notarized": false,
+    "buildNote": "Nonfatal rust-objcopy debug stripping warning for missing libLLVM.dylib; release build and bundle completed successfully."
+  },
+  "heliosTiming": {
+    "wallSeconds": 16.394628167,
+    "averageRealTimeFactor": 0.37207309234852326,
+    "preparationSeconds": 10.018,
+    "runningRealTimeFactor": 0.9763124199743746,
+    "draws": {
+      "count": 183,
+      "duplicate": 0,
+      "frame": 519,
+      "lastFrame": 519
+    },
+    "simSeconds": 6.099999999999892,
+    "lastWindowRealTimeFactor": 0.9995002498750536
+  }
 }

@@ -129,3 +129,26 @@ MIT-licensed DC/yellow TT motor presets and the full Adafruit archive browser.
 See [CAD motor programs](CAD-EDITOR.md) for the Code/Blocks workflow. The archive
 loads all 1,825 verified originals from brickwright-media-lab on demand; qualified
 STL insertion records explicitly selected units and orientation.
+
+## 2026-11-17 simulation qualification
+
+Complete CAD robot presets now use version 2 project bundles. Widget restoration
+and collection belongs to the GUI, so Run works before opening Circuit or
+Controls. Run preserves an open Controls drawer. The generator synchronizes GUI
+static inputs; final SDK verification also checks all six built project archives.
+Existing saved projects remain unchanged: reopen an Example to use the new
+circuit and program defaults.
+
+Interactive presets use a functional motor circuit (R, back-EMF, current and torque,
+without winding/flyback transients) and explicitly disable self collisions within
+the joint-connected robot. Ground and independent bodies still collide; world
+settings can enable internal collisions. These are control examples, not internal
+clearance or switching-transient qualification. CAD poses and trails now share
+one scheduled browser draw while electrical/mechanical feedback remains 200 Hz.
+
+All six models passed real-GUI six-second WebKit and Chromium runs with default
+inputs, Controls closed/open, restart, Center controls and Stop/Reset. The
+post-rendering-change results and precise performance limitations are recorded in
+[the simulation repair receipt](receipts/2026-11-17-cad-simulation-fix.json).
+Atlas remains below real time; successful control runs do not certify 1x speed
+for every model. Purchased electronics detail work is separate.
