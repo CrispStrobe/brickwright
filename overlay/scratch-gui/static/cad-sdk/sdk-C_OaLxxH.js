@@ -7512,6 +7512,10 @@ function i5(t = d3()) {
     get state() {
       return l();
     },
+    // Labels describe the actions restored by each undo/redo, without copying geometry.
+    get history() {
+      return { past: a.map((p, x) => a[x + 1]?.label ?? s), future: [...r].reverse().map((p) => p.label) };
+    },
     get modelSource() {
       return e.version >= 6 && e.modelSource ? e.modelSource.source : xl(e);
     },
@@ -47395,7 +47399,7 @@ function PS(t, e) {
   const g = i2("div", "design-bar"), y = i2("input");
   y.setAttribute("aria-label", "Design title"), y.addEventListener("keydown", (c1) => {
     c1.key === "Enter" ? y.blur() : c1.key === "Escape" && (y.value = i.state.document.title, y.blur());
-  }), y.addEventListener("change", () => t1(() => i.rename(y.value))), g.append(y, i2("span", "units-label", h("mm · Z up"))), c.append(f, q, u), g.append(r), a.append(g, c, m), s.append(o, a);
+  }), y.addEventListener("change", () => t1(() => i.rename(y.value))), g.append(y, i2("span", "units-label", h("mm · Z up"))), e.showDocumentTitle === !1 && (y.hidden = !0, g.style.gridTemplateColumns = "minmax(0,1fr) auto"), c.append(f, q, u), g.append(r), a.append(g, c, m), s.append(o, a);
   let E = !1, A = -1, v = null, _ = !1, S = -1, L = "", D = "", B = "select", O = 1;
   const X = /* @__PURE__ */ new Set();
   let W = "";
@@ -48459,7 +48463,7 @@ function PS(t, e) {
 }
 let ci;
 async function DS() {
-  const [{ createBundledModelLibrary: t }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-PXrXJiue.js"), import("./model-library-cache-DiMFGzp9.js")]);
+  const [{ createBundledModelLibrary: t }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-DZp_-QA0.js"), import("./model-library-cache-DiMFGzp9.js")]);
   return ci ?? (ci = t()), { ...ci, cache: e() };
 }
 function LS(t, e) {

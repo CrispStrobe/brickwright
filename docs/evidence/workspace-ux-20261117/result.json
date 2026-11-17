@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "checks": [
+    "collapsed File opens CAD model library",
+    "one project title in both layouts",
+    "collapse preference survives Robots/CAD switches",
+    "named multi-step CAD history",
+    "hidden CAD undo from main project history",
+    "tablet File popup visible",
+    "expanded preference survives tab switches"
+  ],
+  "errors": []
+}

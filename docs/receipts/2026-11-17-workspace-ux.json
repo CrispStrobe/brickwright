@@ -1,0 +1,59 @@
+{
+  "date": "2026-11-17",
+  "liteSource": "d9aa15eef03c692214b7749efe5260405ea7dbce",
+  "cadSource": "a278012474700319b077906555e97ccdd746f4ce",
+  "checks": {
+    "unit": {
+      "passed": 56,
+      "failed": 0,
+      "skipped": 0
+    },
+    "cadUnit": {
+      "passed": 11,
+      "failed": 0
+    },
+    "cadTypeBuild": "passed",
+    "nativeLibraryCompile": "passed",
+    "gui": "passed, production behavior with minification disabled; two asset-size warnings",
+    "sdkFilesHashVerified": 11,
+    "playwright": {
+      "passed": true,
+      "checks": [
+        "collapsed File opens CAD model library",
+        "one project title in both layouts",
+        "collapse preference survives Robots/CAD switches",
+        "named multi-step CAD history",
+        "hidden CAD undo from main project history",
+        "tablet File popup visible",
+        "expanded preference survives tab switches"
+      ],
+      "errors": []
+    },
+    "scoutProjectConfirmationCancelWidgetsCircuitMotionStopReset": "passed in 1024x768 touch-enabled Chromium",
+    "nativeMenuDispatch": "provider staleness/disabled actions, snapshot deduplication, save routing and teardown unit controls passed; native UI not yet exercised",
+    "nativeConfirm": "complete robot selection now awaits nativeMessage rather than treating a Promise as confirmation"
+  },
+  "historyPolicy": {
+    "mainPanel": "chronological histories across mounted editors and project edits",
+    "toolbarUndo": "active editor plus structural project actions",
+    "durableVersions": "whole project via existing autosave SB3 versions",
+    "CADLocalUndo": "retained with named full-depth steps"
+  },
+  "physicalComponentVisuals": "Existing electronics envelopes retained; detailed Feather and AA-holder source locations, failed solid-import status, and separate DRV8833 PCB licence documented. No new purchased component geometry claimed.",
+  "githubActions": "not used",
+  "native": {
+    "status": "built, signed and installed",
+    "product": "Brickwright Robots Workspace Test",
+    "build": "20261117.1",
+    "path": "/Users/christianstrobele/Applications/Brickwright Robots Workspace Test.app",
+    "identifier": "com.crispstrobe.brickwright.robotcadtest",
+    "version": "20261117.1",
+    "liteSource": "d9aa15eef03c692214b7749efe5260405ea7dbce",
+    "cadSource": "a278012474700319b077906555e97ccdd746f4ce",
+    "binarySha256": "2815041e2603b4c4be6623dc84253934e6f1fca19bd263f83ecdb254cea4be8f",
+    "signature": "Apple Development: Created via API (9RMU3C7422), team N9XSJ4M3GT; deep strict verified",
+    "keychain": "/Users/christianstrobele/Library/Keychains/brickwright-build.keychain-db",
+    "nativeUi": "not launched over the running older test app; preserve its unsaved work and shared document profile",
+    "notarized": false
+  }
+}

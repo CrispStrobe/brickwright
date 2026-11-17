@@ -80,6 +80,7 @@ class ChromeToggle extends React.Component {
         // change that alters the height has to be announced or the workspace keeps
         // the old one and the blocks sit under the strip.
         window.dispatchEvent(new Event('resize'));
+        window.dispatchEvent(new Event('bw-project-ribbon-changed'));
     }
 
     render () {

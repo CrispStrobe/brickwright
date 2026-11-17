@@ -134,7 +134,7 @@
 
 /* The menu bar hides entirely — its functionality is one click away via the
    hamburger icon that now lives in the tab row. */
-:global(body.bw-compact-chrome) [class*="menu-bar_menu-bar"] {
+:global(body.bw-compact-chrome) [class*="menu-bar_menu-bar_"] {
     display: none !important;
 }
 
@@ -197,3 +197,19 @@
     margin: 0;
     flex-shrink: 0;
 }
+
+/* The shared File menu and History move into the current ribbon, retaining
+   the same project/editor commands and ownership as the expanded menu. */
+:global(.bw-compact-file-menu) {position:relative;display:inline-flex;align-items:center;flex-shrink:0;order:-3;color:var(--text-primary,#23374b);}
+:global(.bw-compact-file-menu button[data-bw-menu-trigger]) {min-height:36px;min-width:54px;border:1px solid #9cb2ce;border-radius:6px;color:inherit;background:var(--ui-primary,#fff);}
+:global(.bw-compact-file-menu) [class*="collapsible-label"] {display:inline!important;}
+:global(.bw-compact-project-title) {display:none;}
+:global(body.bw-compact-chrome .bw-compact-project-title) {display:inline-flex;max-width:170px;flex-shrink:0;}
+:global(.bw-compact-project-title input) {max-width:170px;width:150px;color:inherit;background:transparent;border:1px solid transparent;}
+
+:global(.bw-compact-file-menu) {--compact-menu-fg:#24364b;--compact-menu-bg:#fff;--compact-menu-border:#9cb2ce;}
+:global([data-cad-color-mode="dark"] .bw-compact-file-menu) {--compact-menu-fg:#edf3fa;--compact-menu-bg:#203447;--compact-menu-border:#526d83;}
+:global(body.bw-compact-chrome .bw-compact-file-menu [data-bw-menu-trigger]),
+:global(body.bw-compact-chrome .bw-compact-file-menu [data-testid="bw-global-history"]) {color:var(--compact-menu-fg)!important;background:var(--compact-menu-bg)!important;border:1px solid var(--compact-menu-border);border-radius:6px;min-height:36px;}
+:global(.bw-compact-file-menu [data-bw-menu-trigger] img) {filter:brightness(.35);}
+:global([data-cad-color-mode="dark"] .bw-compact-file-menu [data-bw-menu-trigger] img) {filter:none;}

@@ -10,6 +10,8 @@ mod embedded_asset_audit;
 mod autosave;
 mod fileio;
 #[cfg(desktop)]
+mod editor_menu;
+#[cfg(desktop)]
 mod native_broker;
 #[cfg(desktop)]
 #[allow(dead_code)]
@@ -128,6 +130,8 @@ pub fn run_with_context(context: tauri::Context<tauri::Wry>) {
 
     builder
         .invoke_handler(tauri::generate_handler![
+            #[cfg(desktop)]
+            editor_menu::update_editor_menu,
             fileio::save_project,
             fileio::open_project_document,
             fileio::open_recent_project,
@@ -209,6 +213,8 @@ pub fn run_with_context(context: tauri::Context<tauri::Wry>) {
             }
             #[cfg(desktop)]
             native_broker::create(app, native_policy.clone())?;
+            #[cfg(desktop)]
+            editor_menu::install(app.handle());
             #[cfg(desktop)]
             {
                 use tauri::Manager;

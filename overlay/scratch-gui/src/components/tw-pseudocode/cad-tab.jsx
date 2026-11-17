@@ -57,11 +57,6 @@ const CadTab = ({vm, isVisible, locale, theme, onEditProgram, onOpenCircuit}) =>
     const [storageWarning, setStorageWarning] = React.useState(false);
     const [retry, setRetry] = React.useState(0);
     const [toolbarHost,setToolbarHost]=React.useState(null);
-    React.useEffect(()=>{
-        if(!isVisible)return undefined;
-        window.dispatchEvent(new CustomEvent('bw-chrome-compact-request',{detail:{compact:true}}));
-        return()=>{let compact=false;try{compact=localStorage.getItem('bw:compact-chrome')==='1';}catch{/* private mode */}window.dispatchEvent(new CustomEvent('bw-chrome-compact-request',{detail:{compact}}));};
-    },[isVisible]);
     React.useEffect(() => {
         let stopped = false, removeUndo, removeMenus, sdk, mountedGeneration;
         const fileSelection = new AbortController();
@@ -109,10 +104,10 @@ const CadTab = ({vm, isVisible, locale, theme, onEditProgram, onOpenCircuit}) =>
             retainedText = text;
             retainedGeneration = getCadProjectGeneration();
             mountedGeneration = retainedGeneration;
-            const controls=document.createElement('div');
+            const controls=document.createElement('div');controls.dataset.bwProjectRibbon='';controls.style.cssText='display:flex;align-items:center;gap:6px';
             const mounted = sdk.mountCadEditor(host.current, {
                 session: retainedSession,
-                embedded:true, toolbarContent:controls,
+                embedded:true, showDocumentTitle:false, toolbarContent:controls,
                 presetProjects:{ids:CAD_ROBOT_EXAMPLES.map(item=>item.id),open:async id=>{await openCadRobotProject(vm,id,locale);}},
                 colorMode: mode.current,
                 wasmURL: cadAssetURL('cad-assets/manifold.wasm'),
@@ -125,7 +120,7 @@ const CadTab = ({vm, isVisible, locale, theme, onEditProgram, onOpenCircuit}) =>
                 onError: fail
             });
             editor.current = mounted;
-            setToolbarHost(controls);
+            setToolbarHost(controls);window.dispatchEvent(new Event('bw-project-ribbon-changed'));
             removeMenus=registerEditorMenuActions('cad',()=>{
                 if(!visible.current)return null;
                 const de=locale.startsWith('de'),label=(en,ger)=>de?ger:en;
@@ -136,11 +131,25 @@ const CadTab = ({vm, isVisible, locale, theme, onEditProgram, onOpenCircuit}) =>
                     cadSave:action(label('Save CAD design (.bcad)…','CAD-Modell speichern (.bcad)…'),'save'),
                     cadImport:action(label('Import STL into CAD…','STL ins CAD importieren…'),'import'),
                     cadExport:action(label('Export CAD model…','CAD-Modell exportieren…'),'export',mounted.commandState.canExport),
-                    cadLibrary:action(label('Model library…','Modellbibliothek…'),'model-library')
+                    cadLibrary:action(label('Model library…','Modellbibliothek…'),'model-library'),
+                    ...Object.fromEntries([
+                        ['run','Run program','Programm starten','[data-testid="bw-cad-run"]'],
+                        ['stop','Stop program','Programm stoppen','[aria-label="Stop program"], [aria-label="Programm stoppen"]'],
+                        ['reset','Reset simulation','Simulation zurücksetzen','[aria-label="Reset simulation"], [aria-label="Simulation zurücksetzen"]'],
+                        ['examples','Robot examples…','Roboterbeispiele…','[aria-label="Robot examples"], [aria-label="Roboterbeispiele"]'],
+                        ['controls','Robot controls…','Robotersteuerung…','[aria-label="Robot controls"], [aria-label="Robotersteuerung"]'],
+                        ['program','Program & connections…','Programm und Verbindungen…','[data-testid="bw-cad-program-settings"]']
+                    ].map(([name,en,ger,selector])=>['cad-'+name,{label:label(en,ger),location:'edit',submenu:label('Robot program','Roboterprogramm'),enabled:!!controls.querySelector(selector)&&!controls.querySelector(selector).disabled,run:()=>controls.querySelector(selector)?.click()}])),
+                    ...Object.fromEntries([
+                        ['cut','Cut objects','Objekte ausschneiden'],['copy','Copy objects','Objekte kopieren'],['paste','Paste objects','Objekte einfügen'],['duplicate','Duplicate objects','Objekte duplizieren'],['delete','Delete objects','Objekte löschen'],['select-all','Select all objects','Alle Objekte auswählen'],['deselect','Clear selection','Auswahl aufheben'],
+                        ['shapes','Shapes…','Formen…'],['sketch','Sketch & extrude…','Skizze und Extrusion…'],['code','Code an object…','Objekt programmieren…'],['parameters','Model parameters…','Modellparameter…'],['model-source','Model source…','Modellquelltext…'],
+                        ['select','Select tool','Auswahlwerkzeug'],['move','Move tool','Verschieben'],['rotate','Rotate tool','Drehen'],['scale','Scale tool','Skalieren'],['union','Union solids','Körper vereinigen'],['subtract','Subtract solids','Körper abziehen'],['intersect','Intersect solids','Körper schneiden'],
+                        ['fit','Fit model in view','Modell einpassen'],['home','Home view','Startansicht'],['top','Top view','Ansicht von oben'],['front','Front view','Vorderansicht'],['right','Right view','Rechte Ansicht'],['objects','Toggle Objects panel','Objektliste umschalten'],['properties','Toggle Properties panel','Eigenschaften umschalten']
+                    ].map(([command,en,ger])=>['cad-'+command,{...action(label(en,ger),command,['union','subtract','intersect'].includes(command)?mounted.commandState.canCombine:['cut','copy','duplicate','delete'].includes(command)?mounted.commandState.hasSelection:true),location:'edit',submenu:label('CAD tools','CAD-Werkzeuge')}]))
                 };
             });
             removeUndo = registerUndoSurface('cad', {
-                label: 'CAD', canUndo: () => retainedSession.state.canUndo, canRedo: () => retainedSession.state.canRedo,
+                label: 'CAD', depth:()=>({undo:retainedSession.history?.past.length||0,redo:retainedSession.history?.future.length||0}),steps:()=>retainedSession.history, canUndo: () => retainedSession.state.canUndo, canRedo: () => retainedSession.state.canRedo,
                 undo: () => retainedSession.undo(), redo: () => retainedSession.redo()
             });
             if (visible.current) { activateUndoSurface('cad'); mounted.focus(); }
@@ -162,7 +171,7 @@ const CadTab = ({vm, isVisible, locale, theme, onEditProgram, onOpenCircuit}) =>
     React.useEffect(() => { if (editor.current) editor.current.setColorMode(colorMode); }, [colorMode]);
     React.useEffect(() => {
         if (isVisible && editor.current) { activateUndoSurface('cad'); editor.current.focus(); }
-        notifyEditorMenuActions();
+        notifyEditorMenuActions();window.dispatchEvent(new Event('bw-project-ribbon-changed'));
     }, [isVisible]);
     return <div data-testid="bw-cad-tab" style={{position:'relative',width: '100%', height: '100%', flex: 1, minWidth: 0, minHeight: 350, display: 'flex', flexDirection: 'column'}}>
         <CadCircuitPanel vm={vm} locale={locale} colorMode={colorMode} isVisible={isVisible} toolbarHost={toolbarHost} onEditProgram={onEditProgram} onOpenCircuit={onOpenCircuit} />

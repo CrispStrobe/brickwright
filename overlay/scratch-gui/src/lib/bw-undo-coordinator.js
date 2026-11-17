@@ -130,13 +130,17 @@ export const moveHistory = async (steps, scope = 'editor') => {
     const generation = projectGeneration;
     const surfaceName = core.active();
     const surface = core.surfaces.get(surfaceName);
+    const owners=new Map(core.surfaces);
     for (let i = Math.abs(steps | 0); i > 0; i--) {
         // A jump describes the timeline shown when it started. Do not continue
         // into a different editor or a replacement project's history.
         if (generation !== projectGeneration || (scope !== PROJECT_SURFACE &&
-            (core.active() !== surfaceName || core.surfaces.get(surfaceName) !== surface))) break;
+            (scope !== 'workspace' && (core.active() !== surfaceName || core.surfaces.get(surfaceName) !== surface)))) break;
+        if(scope==='workspace'&&([...owners].some(([name,owner])=>core.surfaces.get(name)!==owner)||core.surfaces.size!==owners.size))break;
         let ok;
-        if (scope === 'all') {
+        if(scope==='workspace'){
+            ok=await stepWorkspace(back?'undo':'redo');
+        } else if (scope === 'all') {
             // The merged timeline: each step is whichever Undo / Redo would do next.
             ok = await Promise.resolve(back ? undoNewest() : redoNewest()).catch(error => {
                 core.setError(message(error));
@@ -200,6 +204,17 @@ const stepEditor = direction => {
 const undoNewest = () => (projectNewer() ? undoProject() : stepEditor('undo'));
 const redoNewest = () => (redoProjectNewer() ? redoProject() : stepEditor('redo'));
 
+// Project History may traverse a hidden editor without switching tabs or focus.
+const stepWorkspace = async direction => {
+    const back=direction==='undo',candidates=[];
+    for(const [name,surface] of core.surfaces){if(core.depthOf(surface)[direction]>0)candidates.push({name,order:top(stepsOf(name)[back?'past':'future'])});}
+    const project=back?projectPast:projectFuture;
+    if(project.length)candidates.push({name:PROJECT_SURFACE,order:back?top(project).seq:top(project).undoneSeq});
+    candidates.sort((a,b)=>b.order-a.order);const next=candidates[0];if(!next)return false;
+    if(next.name===PROJECT_SURFACE)return back?undoProject():redoProject();
+    try{return await core.step(direction,next.name)!==false;}catch(error){core.setError(message(error));return false;}
+};
+
 /**
  * The History list: the active editor's steps and the project steps in one
  * order, each named "Area: action" ("Blocks: Add whenflagclicked",
@@ -208,8 +223,7 @@ const redoNewest = () => (redoProjectNewer() ? redoProject() : stepEditor('redo'
  * step is "<editor>: Edit". Moving k entries back is k Undos (moveHistory 'all').
  * @returns {{past: Array<string>, future: Array<string>}} past newest first, future next first
  */
-export const timeline = () => {
-    const name = core.active();
+const surfaceTimeline = name => {
     const surface = core.surfaces.get(name);
     const depth = core.depthOf(surface);
     let labels = null;
@@ -235,12 +249,14 @@ export const timeline = () => {
     const futureLabels = named(labels && labels.future, depth.redo, false);
     const future = futureLabels.map((label, i) => ({label,
         order: steps.future[steps.future.length - 1 - i] || -(i + 1)}));
-    return {
-        past: past.concat(projectPast.map(entry => ({label: entry.label, order: entry.seq})))
-            .sort((a, b) => b.order - a.order).map(entry => entry.label),
-        future: future.concat(projectFuture.map(entry => ({label: entry.label, order: entry.undoneSeq})))
-            .sort((a, b) => b.order - a.order).map(entry => entry.label)
-    };
+    return {past,future};
+};
+export const timeline = (scope='editor') => {
+    const names=scope==='workspace'?[...core.surfaces.keys()]:[core.active()];
+    const lists=names.map(surfaceTimeline);
+    const past=lists.flatMap(list=>list.past).concat(projectPast.map(entry=>({label:entry.label,order:entry.seq})));
+    const future=lists.flatMap(list=>list.future).concat(projectFuture.map(entry=>({label:entry.label,order:entry.undoneSeq})));
+    return {past:past.sort((a,b)=>b.order-a.order).map(entry=>entry.label),future:future.sort((a,b)=>b.order-a.order).map(entry=>entry.label)};
 };
 
 core = installUndoCoordinator({

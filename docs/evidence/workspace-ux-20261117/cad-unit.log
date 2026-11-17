@@ -1,0 +1,13 @@
+
+> brickwright-cad-workspace@0.1.0 test
+> vitest run tests/session-history-labels.test.ts tests/core.test.ts
+
+
+ RUN  v4.1.12 /Users/christianstrobele/code/local/circuit-cad-engine-work
+
+
+ Test Files  2 passed (2)
+      Tests  11 passed (11)
+   Start at  00:11:10
+   Duration  1.37s (transform 1.57s, setup 0ms, import 1.92s, tests 43ms, environment 0ms)
+
