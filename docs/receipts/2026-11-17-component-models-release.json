@@ -1,0 +1,99 @@
+{
+  "recordedAt": "2026-11-17T20:49:59.444518+00:00",
+  "litePayloadCommit": "6696ef96348e5fc2d59d95c443340987c105c8f7",
+  "guiRuntimeCommit": "65463f90cb9c7bba9c427984b1b8ed76e337409f",
+  "cadCommit": "04e197ca32c6cf522dc9e408f709b3276e75aaf0",
+  "app": {
+    "path": "/Users/christianstrobele/Applications/Brickwright Robots Models Test.app",
+    "version": "0.1.33",
+    "build": "20261117.6",
+    "binarySHA256": "243e6cdc32d6cfbafe856e69b0b9895ba7b77fbdc83f62bb036970124dd2b4e5",
+    "signatureVerified": true,
+    "keychain": "/Users/christianstrobele/Library/Keychains/brickwright-build.keychain-db",
+    "signerSHA1": "9484C58A114CBAFE53518D4ACEFE065A60CA2A24",
+    "launchedInUserProfile": false,
+    "notarized": false
+  },
+  "payload": {
+    "sdkManifestSHA256": "b2d66f3c1f5c6c40d3ec946dd8d9be7430d553755e36f714673c66d78bfa3592",
+    "robotManifestSHA256": "4d5bb875466b7cfa6cfd2a519145c574f1c7ec3765385d518680371617e13b4d",
+    "sdkFiles": 11,
+    "robotArchives": 22
+  },
+  "verification": {
+    "cadFocused": {
+      "passed": 40,
+      "failed": 0,
+      "logSHA256": "b82defb4c4f19fe91438e85e06b9439eb05f03ca483bc17c42bb17fb10f3ec3b"
+    },
+    "liteCadBridge": {
+      "passed": 130,
+      "failed": 0,
+      "logSHA256": "d489262effa652baf68667ff519a08464ffef31b50560bb04fd45be3461c9fbf"
+    },
+    "webKitInputs": {
+      "checks": [
+        "ordinary two-axis wheel pans Blocks without changing code",
+        "native trackpad pan moves Blocks once in both axes",
+        "native pinch zooms Blocks without moving authored blocks",
+        "editor input leaves the app toolbar unhandled",
+        "native scrolling reaches the block palette",
+        "one pointer gesture selects and drags an unselected CAD solid",
+        "native input reaches CAD after switching tabs without changing the design",
+        "CAD Stop restores dragging without Reset and retains recording until an edit",
+        "Blocks native panning still works after a CAD round trip"
+      ],
+      "errors": []
+    },
+    "webKitRobots": {
+      "passed": 22,
+      "errors": [],
+      "ids": [
+        "robot-tt-rover",
+        "robot-steerable-rover",
+        "robot-atlas-forklift",
+        "robot-mantis-walker",
+        "robot-cyclone-sorter",
+        "robot-helios-catapult",
+        "robot-labyrinth-tilter",
+        "robot-apex-scara",
+        "robot-orion-carousel",
+        "robot-vortex-pinball",
+        "robot-titan-vise",
+        "robot-hermes-crane",
+        "robot-chronos-drawbridge",
+        "robot-polaris-tracker",
+        "robot-boreal-launcher",
+        "robot-zephyr-conveyor",
+        "robot-quasar-press",
+        "robot-nova-loader",
+        "robot-vector-plotter",
+        "robot-aegis-sentry",
+        "robot-stratos-gimbal",
+        "robot-kestrel-arm"
+      ],
+      "resultSHA256": "fb8b4009565b59c76d089ebb29b12c848913ff64bf02754cf0e2a028bd2105b4",
+      "scope": "Actual GUI examples -> VM -> Widgets -> Circuit -> CAD motion, cold Run with preparation blur, Controls closed, repeat, Stop and Reset. Quasar also checks the physical cycle; other joint-motion checks do not certify complete tasks."
+    },
+    "componentPicking": {
+      "result": "passed",
+      "scope": "Actual WebKit SDK editor: pointer click on visible Feather surface selects owner; pointer drag changes its transform; Undo restores. No browser/host errors. Screenshot inspected.",
+      "logSHA256": "087bb6ecfd157bcac29b1efed9fb06e68c3abde15ac734ad96de704d5c5bfec3",
+      "image": "docs/images/scout-component-detail.png",
+      "imageSHA256": "0e6e9e85a8291100e84918d34dde9fe00ec9559ff0ddc3656a29aad7c7df1846"
+    },
+    "builtPayload": "All 11 SDK digests and all 22 SB3 archive digests verified after native build.",
+    "nativeBuild": "Succeeded; debug stripping warned about missing libLLVM. Explicit Brickwright-keychain signing and strict installed signature verification succeeded."
+  },
+  "scope": [
+    "Actual Adafruit 4884 Feather and 830 holder STEP surfaces, rigid placement without scaling, pinned MIT attribution.",
+    "Original illustrative DRV8833-style layout; not verified PCB artwork or wiring.",
+    "Separate original material palettes over the existing TT, DC and micro-servo source solids.",
+    "Visuals only: existing clearance colliders, mass, joints, ports and print-only layouts unchanged. Not watertight manufacturing exports.",
+    "Edited box dimensions or motor child geometry disable the replacement appearance.",
+    "Reopen updated examples; old projects without the explicit appearance preset are preserved.",
+    "Mantis shortened controller placeholder, Trident battery and FeatherWing, and calibrated electronics physics remain incomplete.",
+    "Close existing robot test apps before opening this build; same project profile. No running user app was replaced or closed.",
+    "No GitHub Actions dispatched, rerun or awaited."
+  ]
+}
