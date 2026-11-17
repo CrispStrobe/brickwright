@@ -46,6 +46,7 @@ fn main() {
     // application commands. Keep this list in exact lockstep with
     // `generate_handler!` in src/lib.rs; the structural test enforces that.
     const APP_COMMANDS: &[&str] = &[
+        "update_editor_menu",
         "save_project",
         "open_project_document",
         "open_recent_project",

@@ -217,7 +217,8 @@ jobs:
   # below crosses the real Tauri ACL in the real process.
   e2e:
     if: github.event_name != 'workflow_dispatch' || (inputs.spike_prime_only != true && inputs.ev3_only != true)
-    runs-on: ubuntu-latest
+    # The Tauri WebDriver package below is provided by Ubuntu 24.04.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 

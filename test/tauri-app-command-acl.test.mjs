@@ -103,7 +103,7 @@ const audit = ({handler, build, main, mobile, ack, runtime, peers, editor}) => {
 
     const entries = all.filter(entry => entry.cfg !== PEER_CFG);
     const registered = entries.map(entry => entry.name);
-    assert.equal(registered.length, 43, 'review a deliberate command-count change');
+    assert.equal(registered.length, 44, 'review a deliberate command-count change');
     assert.equal(new Set(registered).size, registered.length, 'handler commands must be unique');
     assert.equal(new Set(manifested).size, manifested.length, 'manifest commands must be unique');
     assert.deepEqual(uniqueSorted(manifested), uniqueSorted(registered),
@@ -118,7 +118,7 @@ const audit = ({handler, build, main, mobile, ack, runtime, peers, editor}) => {
         assert.equal(entry.cfg, 'desktop', `${entry.name} must be registered only on desktop`);
     }
     for (const entry of ordinary) {
-        assert.equal(entry.cfg, null, `${entry.name} must not be conditionally registered`);
+        assert.equal(entry.cfg, entry.name === 'update_editor_menu' ? 'desktop' : null, `${entry.name} registration platform`);
     }
 
     const brokerAllows = broker.map(entry => allowName(entry.name));
@@ -224,6 +224,9 @@ test('Tauri application-command manifest and main grants exactly match generate_
 
 test('Tauri application-command ACL rejects omissions, extras, and mobile duplication', () => {
     const mutations = [
+        input => { input.main.permissions = input.main.permissions.filter(value => value !== 'allow-update-editor-menu'); },
+        input => { input.build = input.build.replace('        "update_editor_menu",\n', ''); },
+        input => { input.handler = input.handler.replace('#[cfg(desktop)]\n            editor_menu::update_editor_menu', 'editor_menu::update_editor_menu'); },
         input => { input.build = input.build.replace('        "save_project",\n', ''); },
         input => { input.build = input.build.replace('        "save_project",', '        "invented_command",'); },
         input => { input.main.permissions = input.main.permissions.filter(value => value !== 'allow-save-project'); },

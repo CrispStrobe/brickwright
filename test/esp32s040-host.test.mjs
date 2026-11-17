@@ -559,7 +559,18 @@ test('the checked host source connects exact owner, input and live video and rel
     assert.match(circuitSource, /video: s040\?\.video/);
     assert.match(circuitSource, /previousS040\.runner !== runner \|\| previousS040\.partId !== ownerId/);
     assert.match(circuitSource, /handleRunnerGone \(\) \{\s*this\.releaseEsp32S040Input\(\)/);
-    assert.match(circuitSource, /componentWillUnmount \(\) \{\s*this\.releaseEsp32S040Input\(\)/);
+    const unmount = circuitClass.body.body.find(node => node.key?.name === 'componentWillUnmount');
+    const statements = unmount.body.body;
+    const releaseIndex = statements.findIndex(node => node.type === 'ExpressionStatement' &&
+        node.expression.type === 'CallExpression' && node.expression.callee.type === 'MemberExpression' &&
+        node.expression.callee.object.type === 'ThisExpression' &&
+        node.expression.callee.property.name === 'releaseEsp32S040Input');
+    assert.ok(releaseIndex >= 0, 'unmount unconditionally releases the S040 owner');
+    assert.ok(statements.slice(0, releaseIndex).every(node => node.type === 'ExpressionStatement' &&
+        node.expression.type === 'CallExpression' && node.expression.callee.type === 'MemberExpression' &&
+        node.expression.callee.object.name === 'window' &&
+        node.expression.callee.property.name === 'removeEventListener'),
+    'only window listener detachment may precede owner release; other cleanup follows it');
     assert.doesNotMatch(circuitSource, /data-no-code-indicator/);
     assert.match(panelSource, /esp32S040McuId: this\.state\.esp32S040McuId \|\| null/);
     assert.match(panelSource, /data-esp32s040-part/);

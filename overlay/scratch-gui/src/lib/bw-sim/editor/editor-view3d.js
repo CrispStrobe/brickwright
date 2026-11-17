@@ -3247,6 +3247,8 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
         get selection () { return selection.slice(); },
         get mode () { return mode; },
         get grid () { return gridStep; },
+        /** Whether the current programmatic camera movement has settled. */
+        get cameraAnimating () { return camAnim !== null; },
         /** The camera now (for the browser gate to read what a gesture did): position, target, distance (metres). */
         get camera () {
             return {position: camera.position.toArray(), target: controls.target.toArray(), distance: camera.position.distanceTo(controls.target)};

@@ -5,8 +5,8 @@
       "id": "robot-tt-rover",
       "name": "Scout TT rover",
       "file": "scout.sb3",
-      "bytes": 818337,
-      "sha256": "3af775483e961bed28ea3fd9d5407714720c5f29bcf753b40de0faeabb227305",
+      "bytes": 818346,
+      "sha256": "78d9208db9a9350e229d0ea6c65d9e79d9d96825cc8fd19d314447db2c9eb21e",
       "widgets": [
         "left",
         "right"
@@ -22,8 +22,8 @@
       "file": "trident.sb3",
       "simulationNote": "Experimental: this model can exceed the simulation time budget.",
       "simulationNoteDe": "Experimentell: Dieses Modell kann das Zeitlimit der Simulation überschreiten.",
-      "bytes": 1053033,
-      "sha256": "1d4f8e4b4c4f71926ddaeb7a7fe048123889ed8d545b49b0e73cdc9ed4f201d8",
+      "bytes": 844569,
+      "sha256": "25872bf49edf97326616491a5d4e8e78ae48fc49dab3e63e052969410783e9f5",
       "widgets": [
         "motorA",
         "motorB",
@@ -39,8 +39,8 @@
       "id": "robot-atlas-forklift",
       "name": "Atlas forklift",
       "file": "atlas.sb3",
-      "bytes": 1051698,
-      "sha256": "063b2b79a3a1e69380eb64b7ef008c8f0903e9158b3484540f141ee361c96219",
+      "bytes": 1051697,
+      "sha256": "7e4324ab0721fd00c46ad2cb7e1ba5a1fffc546a5279b8bad838b3e6dccd1078",
       "widgets": [
         "motorA",
         "motorB",
@@ -58,8 +58,8 @@
       "id": "robot-mantis-walker",
       "name": "Mantis 3-servo walker",
       "file": "mantis.sb3",
-      "bytes": 275028,
-      "sha256": "9f29fd53155901f2a3426fd97e8f6e0d2efbc9b4283f399d43add8dbd9ae8298",
+      "bytes": 346476,
+      "sha256": "ede78b63fde54c47f33b87f9596f7a6ff4ba1d2483d8dfb621ea3718a4fc9b0c",
       "widgets": [
         "servoA",
         "servoB",
@@ -75,8 +75,8 @@
       "id": "robot-cyclone-sorter",
       "name": "Cyclone 2-axis gantry sorter",
       "file": "cyclone.sb3",
-      "bytes": 100878,
-      "sha256": "d03f492e9f64ac17ce07139298f86aafe79c1605d1be27963708c07ed63c7def",
+      "bytes": 100873,
+      "sha256": "5ceb63a2a625ed5ba203ea7bb1bd2bc80b12cc0101ab589afbbe48b79da38763",
       "widgets": [
         "motorA",
         "motorB",
@@ -92,8 +92,8 @@
       "id": "robot-helios-catapult",
       "name": "Helios turret catapult",
       "file": "helios.sb3",
-      "bytes": 276786,
-      "sha256": "d4237864f4a2b67acb821542438313706cc4bba1cdf0882597851cc6523670a0",
+      "bytes": 276782,
+      "sha256": "2b92d38176cc9bea8bf56bfd7f1353169c1895ffee3518a8b59dd13d23fb4cb8",
       "widgets": [
         "servoA",
         "servoB",
@@ -103,6 +103,278 @@
         "pan-a",
         "throw-b",
         "gate-c"
+      ]
+    },
+    {
+      "id": "robot-labyrinth-tilter",
+      "name": "Labyrinth 2-axis tilt maze",
+      "file": "labyrinth.sb3",
+      "bytes": 275226,
+      "sha256": "c018f3ebafc536aac1ab9a903a1fa971e163f8669599be25d3f17f21a0854fc3",
+      "widgets": [
+        "servoA",
+        "servoB",
+        "servoC"
+      ],
+      "joints": [
+        "outer-a",
+        "inner-b",
+        "gate-c"
+      ]
+    },
+    {
+      "id": "robot-apex-scara",
+      "name": "Apex SCARA 3-axis arm",
+      "file": "apex.sb3",
+      "bytes": 187547,
+      "sha256": "b36dbde7cb8961052dba32d5702946c2e28ecde59824781244393f5fde3ee4b3",
+      "widgets": [
+        "motorC",
+        "servoA",
+        "servoB"
+      ],
+      "joints": [
+        "quill-c",
+        "shoulder-a",
+        "elbow-b"
+      ]
+    },
+    {
+      "id": "robot-orion-carousel",
+      "name": "Orion 3-axis sorting carousel",
+      "file": "orion.sb3",
+      "bytes": 187861,
+      "sha256": "4d0f62481d62a63af467b40c346d1845b9c606fc66371a54248e13eaf7ecb017",
+      "widgets": [
+        "motorB",
+        "servoA",
+        "servoC"
+      ],
+      "joints": [
+        "pusher-b",
+        "carousel-a",
+        "gate-c"
+      ]
+    },
+    {
+      "id": "robot-vortex-pinball",
+      "name": "Vortex 3-axis pinball arena",
+      "file": "vortex.sb3",
+      "bytes": 187767,
+      "sha256": "34765ff2d9fcf13aa8bdfe734a88485000e0c73041474f3a9cc9beb6178927e5",
+      "widgets": [
+        "motorC",
+        "servoA",
+        "servoB"
+      ],
+      "joints": [
+        "plunger-c",
+        "flip-left-a",
+        "flip-right-b"
+      ]
+    },
+    {
+      "id": "robot-titan-vise",
+      "name": "Titan 3-axis rotary vise",
+      "file": "titan.sb3",
+      "bytes": 99949,
+      "sha256": "7a4fb4cdad771046f488804ae14ce0762981923ddf6b62668054c80c21341524",
+      "widgets": [
+        "motorB",
+        "motorC",
+        "servoA"
+      ],
+      "joints": [
+        "jaw-left-b",
+        "jaw-right-c",
+        "indexer-a"
+      ]
+    },
+    {
+      "id": "robot-hermes-crane",
+      "name": "Hermes 3-axis bridge crane",
+      "file": "hermes.sb3",
+      "bytes": 100161,
+      "sha256": "a41bbb4abb973539acaf06038798bfb471434c19d7a36a996b7b3314f2ea6020",
+      "widgets": [
+        "motorA",
+        "motorB",
+        "servoC"
+      ],
+      "joints": [
+        "bridge-a",
+        "hoist-b",
+        "swivel-c"
+      ]
+    },
+    {
+      "id": "robot-chronos-drawbridge",
+      "name": "Chronos 3-axis bascule drawbridge",
+      "file": "chronos.sb3",
+      "bytes": 187567,
+      "sha256": "88fb4ee50b2f22e87dff07af5536b676a2228c8642ef4e8c289e34d12894adfe",
+      "widgets": [
+        "motorC",
+        "servoA",
+        "servoB"
+      ],
+      "joints": [
+        "barrier-c",
+        "west-a",
+        "east-b"
+      ]
+    },
+    {
+      "id": "robot-polaris-tracker",
+      "name": "Polaris 3-axis pan-tilt tracker",
+      "file": "polaris.sb3",
+      "bytes": 187770,
+      "sha256": "a0d7745b3cf572fba50b0d7555f622e006769cb0bc99b97d4a1cf036abb4f144",
+      "widgets": [
+        "motorA",
+        "servoB",
+        "servoC"
+      ],
+      "joints": [
+        "rail-a",
+        "pan-b",
+        "tilt-c"
+      ]
+    },
+    {
+      "id": "robot-boreal-launcher",
+      "name": "Boreal 3-axis ball launcher",
+      "file": "boreal.sb3",
+      "bytes": 100029,
+      "sha256": "3507882818adf3c4e4309c406f512d77f0208b30efde69a47e2535c420843291",
+      "widgets": [
+        "motorB",
+        "motorC",
+        "servoA"
+      ],
+      "joints": [
+        "roller-b",
+        "feeder-c",
+        "yaw-a"
+      ]
+    },
+    {
+      "id": "robot-zephyr-conveyor",
+      "name": "Zephyr 3-axis sorting conveyor",
+      "file": "zephyr.sb3",
+      "bytes": 100164,
+      "sha256": "68c817daf6cbd0dc5101ece55e81b1792f9c868365e28d41e90407a4ff398551",
+      "widgets": [
+        "motorA",
+        "motorB",
+        "servoC"
+      ],
+      "joints": [
+        "feed-a",
+        "roller-b",
+        "gate-c"
+      ]
+    },
+    {
+      "id": "robot-quasar-press",
+      "name": "Quasar 3-axis rotary press",
+      "file": "quasar.sb3",
+      "bytes": 99990,
+      "sha256": "d12be9f0fa84d039ffcded55fbe46b36585782d310112f303ec256b5d0963d66",
+      "widgets": [
+        "motorB",
+        "motorC",
+        "servoA"
+      ],
+      "joints": [
+        "ram-b",
+        "eject-c",
+        "dial-a"
+      ]
+    },
+    {
+      "id": "robot-nova-loader",
+      "name": "Nova 3-axis wheeled loader",
+      "file": "nova.sb3",
+      "bytes": 100035,
+      "sha256": "46edc145a45bf7bbfd0d4d739b946468c3a9baafb1daf73754b0ac144ca7510b",
+      "widgets": [
+        "motorA",
+        "motorB",
+        "servoC"
+      ],
+      "joints": [
+        "drive-left-a",
+        "drive-right-b",
+        "bucket-c"
+      ]
+    },
+    {
+      "id": "robot-vector-plotter",
+      "name": "Vector 3-axis XY plotter",
+      "file": "vector.sb3",
+      "bytes": 100094,
+      "sha256": "e2e733b5088423dd8afcaa361c8fa56abe61f5138053bf1c149b6e46f8df7e7d",
+      "widgets": [
+        "motorA",
+        "motorB",
+        "servoC"
+      ],
+      "joints": [
+        "y-axis-a",
+        "x-axis-b",
+        "pen-c"
+      ]
+    },
+    {
+      "id": "robot-aegis-sentry",
+      "name": "Aegis 3-axis sentry gate",
+      "file": "aegis.sb3",
+      "bytes": 187669,
+      "sha256": "85a13144155ceafdd0f614cc322577c997cd8a17cafe668cba2a48f247e91a92",
+      "widgets": [
+        "motorB",
+        "servoA",
+        "servoC"
+      ],
+      "joints": [
+        "gate-b",
+        "sweep-a",
+        "latch-c"
+      ]
+    },
+    {
+      "id": "robot-stratos-gimbal",
+      "name": "Stratos 3-axis gimbal stage",
+      "file": "stratos.sb3",
+      "bytes": 275187,
+      "sha256": "80a8e8ace4cade848142eb6711c7c3a09956775309cf4daad43026a9150c10db",
+      "widgets": [
+        "servoA",
+        "servoB",
+        "servoC"
+      ],
+      "joints": [
+        "yaw-a",
+        "pitch-b",
+        "roll-c"
+      ]
+    },
+    {
+      "id": "robot-kestrel-arm",
+      "name": "Kestrel 3-servo arm",
+      "file": "kestrel.sb3",
+      "bytes": 276120,
+      "sha256": "919601cedb17699309aa6be402be34b2f3063528086e447296a615f2b0a5aebd",
+      "widgets": [
+        "servoA",
+        "servoB",
+        "servoC"
+      ],
+      "joints": [
+        "yaw-a",
+        "lift-b",
+        "grip-c"
       ]
     }
   ]

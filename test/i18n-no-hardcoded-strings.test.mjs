@@ -16,6 +16,7 @@ import assert from 'node:assert/strict';
 import {readFileSync, readdirSync} from 'node:fs';
 import {resolve, dirname, relative} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {createRequire} from 'node:module';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -36,19 +37,45 @@ const files = [
     ...walk(resolve(root, 'overlay/scratch-gui/src/containers'))
 ];
 
-/** Attributes a person reads: tooltips, accessible names, input hints. */
-const ATTR = /(?:title|aria-label|placeholder)="([A-Z][^"]{4,})"/g;
+/** Read actual JSX attributes, not CSS selectors or other JavaScript strings. */
+const babel = createRequire(resolve(root, 'packages/scratch-gui/package.json'))('@babel/core');
+const literalAttributes = text => {
+    const ast = babel.parseSync(text, {babelrc: false, configFile: false, parserOpts: {plugins: ['jsx']}});
+    const found = [];
+    const visit = node => {
+        if (!node || typeof node !== 'object') return;
+        if (node.type === 'JSXAttribute' && ['title', 'aria-label', 'placeholder'].includes(node.name?.name)) {
+            const value = node.value?.type === 'JSXExpressionContainer' ? node.value.expression : node.value;
+            if (value?.type === 'StringLiteral' && /^[A-Z][\s\S]{4,}$/.test(value.value)) found.push(value.value);
+        }
+        for (const [key, value] of Object.entries(node)) {
+            if (key === 'loc' || key === 'tokens' || key === 'comments') continue;
+            if (Array.isArray(value)) value.forEach(visit);
+            else if (value && typeof value === 'object') visit(value);
+        }
+    };
+    visit(ast);
+    return found;
+};
 
 /** Brand names are the same in every language and are not translated. */
 const BRANDS = new Set(['Scratch', 'BrickWright', 'Arduboy']);
+
+test('attribute inventory distinguishes rendered literals from selector text and translated expressions', () => {
+    const source = `const s = '[aria-label="Stop program"]'; const obj = {title: 'Ignored object'};
+      const panel = <div title="Hardcoded tooltip" aria-label="Hardcoded label" placeholder="Search here" />;
+      const shadowed = <div title={'Hidden literal'} />;
+      const translated = <div title={translate('Hardcoded tooltip')} aria-label={labels.title} />;`;
+    assert.deepEqual(literalAttributes(source), ['Hardcoded tooltip', 'Hardcoded label', 'Search here', 'Hidden literal']);
+});
 
 test('no component hardcodes a title, aria-label or placeholder', () => {
     const offenders = [];
     for (const rel of files) {
         const text = readFileSync(resolve(root, rel), 'utf8');
-        for (const m of text.matchAll(ATTR)) {
-            if (BRANDS.has(m[1])) continue;
-            offenders.push(`${rel.replace('overlay/scratch-gui/src/', '')}: ${m[1].slice(0, 50)}`);
+        for (const value of literalAttributes(text)) {
+            if (BRANDS.has(value)) continue;
+            offenders.push(`${rel.replace('overlay/scratch-gui/src/', '')}: ${value.slice(0, 50)}`);
         }
     }
     assert.deepEqual(offenders, [],

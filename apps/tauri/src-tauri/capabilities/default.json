@@ -11,6 +11,7 @@
     "dialog:allow-message",
     "deep-link:default",
     "opener:allow-open-url",
+    "allow-update-editor-menu",
     "allow-save-project",
     "allow-open-project-document",
     "allow-open-recent-project",

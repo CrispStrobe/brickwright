@@ -98,10 +98,16 @@ async function verify () {
             await page.waitForTimeout(500);
             const searchPanel = page.locator('.cm-search').first();
             if (await searchPanel.count() > 0) {
+                await searchPanel.waitFor({state: 'visible'});
+                await page.waitForFunction(() => Boolean(document.activeElement?.closest('.cm-search')));
                 pass('Search panel opens (Ctrl+F)');
-                // Close the search panel
+                const textBeforeClose = await cmContent.innerText();
                 await page.keyboard.press('Escape');
-                await page.waitForTimeout(200);
+                await searchPanel.waitFor({state: 'hidden'});
+                const focused = await cmContent.evaluate(el => el === document.activeElement || el.contains(document.activeElement));
+                if (!focused || await cmContent.innerText() !== textBeforeClose) {
+                    fail('Closing search must restore editor focus without changing the text');
+                }
             } else {
                 fail('Search panel did not open');
             }

@@ -50,7 +50,7 @@ try {
     page.setDefaultTimeout(60000);
     await page.goto(`http://127.0.0.1:${server.address().port}`);
     await page.waitForFunction(()=>window.ready);
-    await page.waitForTimeout(300);
+    await page.waitForFunction(()=>!window.v.cameraAnimating);
     const selected=()=>page.evaluate(()=>v.selection.slice().sort());
     const center=id=>page.evaluate(id=>v.toScreen(v.debugPoint(id)),id);
     const drag=async(a,b,{shift=false,cancel=false}={})=>{
@@ -80,7 +80,8 @@ try {
     await page.mouse.click(30,30);assert.deepEqual(await selected(),[]);
     await page.mouse.move(30,30);await page.mouse.down({button:'middle'});await page.mouse.move(90,70,{steps:8});await page.mouse.up({button:'middle'});
     assert.notDeepEqual(await page.evaluate(()=>v.camera),camera);
-    await page.evaluate(()=>v.view('top'));await page.waitForTimeout(300);
+    assert.equal(await page.evaluate(()=>{v.view('top');return v.cameraAnimating;}),true, 'the view is still animating immediately after the request');
+    await page.waitForFunction(()=>!window.v.cameraAnimating);
     await page.evaluate(()=>{v.select(['b']);v.hideSelection();});
     await drag([20,20],[850,660]);assert.deepEqual(await selected(),['a','c']);
     await page.evaluate(()=>{v.showAll();v.select(['a','b']);v.groupSelection();v.select([]);});

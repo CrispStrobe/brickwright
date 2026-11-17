@@ -34,3 +34,15 @@ test('explicit Git identity attests the actual clean checkout and rejects tracke
         assert.throws(()=>inspectGuiHarnessSource({root,executable}),/tracked source must match/);
     } finally {await rm(root,{recursive:true,force:true});}
 });
+
+test('the official numeric harness installs the locked GUI without rewriting source', async () => {
+    const workflow = await readFile(new URL('../.github/workflows/build.yml', import.meta.url), 'utf8');
+    const start = workflow.indexOf('      - name: Install the declared GUI dependencies\n');
+    const end = workflow.indexOf('      - name: Apply the scratch-vm overlay\n', start);
+    assert.ok(start >= 0 && end > start, 'numeric harness dependency-install boundary exists');
+    const install = workflow.slice(start, end);
+    assert.match(install, /npm ci --ignore-scripts --legacy-peer-deps --no-audit --no-fund/);
+    assert.match(install, /git diff --exit-code -- packages\/scratch-gui\/package\.json packages\/scratch-gui\/package-lock\.json/);
+    assert.match(install, /sha256sum --check/);
+    assert.doesNotMatch(install, /git (?:checkout|restore|reset)/, 'the guard must not conceal a changed lock');
+});
