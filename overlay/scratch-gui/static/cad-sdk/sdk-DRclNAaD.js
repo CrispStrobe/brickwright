@@ -44681,7 +44681,7 @@ function bE(i = Qo) {
   const e = K2(h(i === "robot-quasar-press-print" ? "Quasar press PLA print layout" : "Quasar 3-axis rotary press"));
   if (e.id = i, e.version = 8, i === "robot-quasar-press-print")
     return $4(e, "stand", "stand", [0, -35, 0]), $4(e, "dialPlate", "dial-plate", [-45, 45, 0]), $4(e, "ram", "ram", [10, 45, 0]), $4(e, "wiper", "wiper", [40, 45, 0]), $4(e, "blank", "blank", [65, 45, 0]), e;
-  e.simulation = { ...A0(), fixBase: !0, groundFriction: 0.6, groundRestitution: 0.05, selfCollisions: !0 }, e.joints = [], $4(e, "stand", "stand", [0, 0, 0], [0, 0, 0], "static", 0.1), $4(e, "dialPlate", "dial-plate", [0, 0, 35], [0, 0, 0], "dynamic", 0.4), $4(e, "ram", "ram", [20, 0, 56]), $4(e, "wiper", "wiper", [-50, 0, 41.1]), $4(e, "blank", "blank", [0, -20, 41.2], [0, 0, 0], "dynamic", 0.35);
+  e.simulation = { ...A0(), fixBase: !0, groundFriction: 0.6, groundRestitution: 0.05, selfCollisions: !0 }, e.joints = [], $4(e, "stand", "stand", [0, 0, 0], [0, 0, 0], "static", 0.1), $4(e, "dialPlate", "dial-plate", [0, 0, 35], [0, 0, 0], "dynamic", 0.4), $4(e, "ram", "ram", [20, 0, 56]), $4(e, "wiper", "wiper", [-50, 0, 42.1]), $4(e, "blank", "blank", [0, -20, 41.2], [0, 0, 0], "dynamic", 0.35);
   const t = V0("micro-servo-1143");
   e.provenance = {
     version: 1,
@@ -44696,7 +44696,7 @@ function bE(i = Qo) {
   o.id = "dial-a", o.collideConnected = !1, o.limits = [-s, s], o.control = { port: "A" }, e.joints.push(o), Jl(e, "dial-shaft", "dial-plate");
   const a = S2(e, "slider", "stand", "ram", [20, 0, 63], [0, 0, 1]);
   a.id = "ram-b", a.limits = [...hn.ramLimitsMm], a.control = { port: "B" }, e.joints.push(a);
-  const r = S2(e, "slider", "stand", "wiper", [-50, 0, 43.6], [1, 0, 0]);
+  const r = S2(e, "slider", "stand", "wiper", [-50, 0, 44.6], [1, 0, 0]);
   return r.id = "eject-c", r.limits = [...hn.ejectLimitsMm], r.control = { port: "C" }, e.joints.push(r), e3(e), e.tracers = [{ id: "blank-path", bodyId: "blank", point: [0, 0, 5], color: "#f59e0b" }], e;
 }
 function gE(i) {
@@ -51450,7 +51450,7 @@ function XC(i, e) {
 }
 let _n;
 async function ZC() {
-  const [{ createBundledModelLibrary: i }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-D-UG8OQb.js"), import("./model-library-cache-DiMFGzp9.js")]);
+  const [{ createBundledModelLibrary: i }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-uzngUnAu.js"), import("./model-library-cache-DiMFGzp9.js")]);
   return _n ?? (_n = i()), { ..._n, cache: e() };
 }
 function QC(i, e) {

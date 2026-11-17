@@ -21,7 +21,7 @@
       "name": "Trident steerable rover",
       "file": "trident.sb3",
       "simulationNote": "Experimental: this model can exceed the simulation time budget.",
-      "simulationNoteDe": "Experimentell: Dieses Modell kann das Zeitlimit der Simulation überschreiten.",
+      "simulationNoteDe": "Experimentell: Dieses Modell kann das Zeitlimit der Simulation \u00fcberschreiten.",
       "bytes": 642029,
       "sha256": "e2329b61aebb054fceecc678fa858831aa29b60e82f8147e2fd4f9f0a52ef283",
       "widgets": [
@@ -279,10 +279,10 @@
       "id": "robot-quasar-press",
       "name": "Quasar 3-axis rotary press",
       "file": "quasar.sb3",
-      "simulationNote": "Run performs one index → press → eject cycle, then enables manual Widgets. Reset restores the blank. The blank is rigid: pressing does not deform it. Linear stages are ideal actuators.",
-      "simulationNoteDe": "Start führt einen Indexier-, Press- und Auswurfzyklus aus, danach steuern die Widgets manuell. Zurücksetzen setzt das Werkstück zurück. Es bleibt starr und wird nicht verformt. Die Linearachsen sind ideale Aktuatoren.",
-      "bytes": 82102,
-      "sha256": "5056728b4872b64e961455efda8f0c50aaeb36397b20592b49d1f5ca6f163cb6",
+      "simulationNote": "Run performs one index \u2192 press \u2192 eject cycle, then enables manual Widgets. Reset restores the blank. The blank is rigid: pressing does not deform it. Linear stages are ideal actuators.",
+      "simulationNoteDe": "Start f\u00fchrt einen Indexier-, Press- und Auswurfzyklus aus, danach steuern die Widgets manuell. Zur\u00fccksetzen setzt das Werkst\u00fcck zur\u00fcck. Es bleibt starr und wird nicht verformt. Die Linearachsen sind ideale Aktuatoren.",
+      "bytes": 82103,
+      "sha256": "021d3e81286b8ca2748cbe27292380e41b44e38f5101cb3a0e11a6616f95f2ba",
       "widgets": [
         "motorB",
         "motorC",
