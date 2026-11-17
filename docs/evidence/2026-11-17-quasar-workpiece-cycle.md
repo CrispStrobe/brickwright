@@ -13,3 +13,32 @@ Final CAD SDK source: e803d8f49d9c9245e340a9f1b86e2e036c709dcc. CAD targeted tes
 The GUI was rebuilt with production webpack behavior (minification disabled), then its generated SDK and robot payloads were refreshed from the qualified source. There were two webpack asset/entrypoint size warnings. Quasar was checked through the real GUI/VM/Board/Jolt in WebKit, including screenshots and workpiece trajectories; a complete final-payload 22-robot run and native packaging are recorded in the accompanying final receipt when finished. Native window interaction is distinct from headless WebKit validation.
 
 Existing saved projects are preserved. To use the corrected default example, select CAD → Examples → Quasar again. Reset restores the blank for a new cycle. Purchased electronics appearance is still separate work: this update does not replace the Feather/battery/driver clearance boxes in other robots.
+
+
+## Trackpad and Stop continuation
+
+The final Quasar pusher includes its visible carriage, with mass/inertia derived
+from that geometry. The whole trajectory test rejects a blank dropping through
+the dial. Three complete cycles passed, and a subsequent 22-project WebKit run
+passed with no page errors. Verification also covers Controls closed/open and
+Stop/Reset; motion-only checks on other robots do not certify their full tasks.
+
+The Mac trackpad bridge is application-local and attached only to the main
+webview. It routes precise wheel/magnification through `brickwright-camera-input`.
+Blocks forwards wheel input to its existing SVG handlers and handles pinch only
+inside the workspace. Unhandled native events go to their original NSWindow;
+application-level redispatch failed the ordinary-panel regression. Non-precise
+mouse wheel events follow their original native path. The isolated native test
+uses an ephemeral WebKit data store and generated precise CGEvents, not the
+user’s project profile. Actual finger motion on the physical trackpad remains a
+user acceptance check distinct from these native-event tests.
+
+The CAD native host has the same corrected window forwarding. Stop/release now
+returns the viewport to the editable design and disposes the worker, preserving
+recorded replay/traces. Pause retains the preview. The last measured snapshot
+remains inspectable after Stop, and Live exits stopped replay to the design.
+Regression controls failed against the preceding behavior; 31 focused CAD checks
+now pass. Nine real-GUI input checks passed, and all 126 Lite CAD/bridge checks
+passed before final native packaging. The final receipt binds the exact source,
+app metadata, SDK and project hashes and separates native routing from release
+window interaction.

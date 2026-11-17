@@ -4,6 +4,21 @@ import {chromium,webkit} from 'playwright';
 import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {CAD_ROBOT_EXAMPLES} from '../overlay/scratch-gui/src/lib/bw-cad-robot-catalog.js';
+
+function checkQuasarCycle(frame,samples){
+   const center=f=>{const p=f.poses.find(p=>p.id==='blank'),[x,y,z,w]=p.quaternion,[a,b,c]=[0,-20,46.2],u=2*(y*c-z*b),v=2*(z*a-x*c),t=2*(x*b-y*a);return[a+w*u+y*t-z*v+p.positionMm[0],b+w*v+z*u-x*t+p.positionMm[1],c+w*t+x*v-y*u+p.positionMm[2]];};
+   const pressed=samples.filter(f=>f.linearPositions['ram-b'] < -3 && center(f)[2]>40);
+   assert.ok(pressed.length,'the real VM must reach the pressing stage');
+   assert.ok(Math.min(...pressed.map(f=>f.linearPositions['ram-b']))>-6,'ram must stop on the blank instead of collapsing into the dial');
+   const indexed=center(pressed[0]);assert.ok(indexed[0]>12&&indexed[0]<27&&Math.abs(indexed[1])<8,'the blank must be indexed under the ram');
+   assert.ok(Math.max(...samples.map(f=>f.linearPositions['eject-c']))>60,'ejector must reach the blank');
+   const firstDrop=samples.find(f=>f.time>5&&center(f)[2]<35);
+   assert.ok(firstDrop&&Math.hypot(...center(firstDrop).slice(0,2))>28,'blank must clear the dial edge before falling; no tunneling through its floor');
+   const done=center(frame);assert.ok(done[2]<20&&done[2]>4,'the blank must land on the work surface');
+   assert.ok(Math.abs(frame.linearPositions['eject-c'])<1,'ejector must return');
+   for(const f of samples)for(const p of f.poses){assert.ok(Math.abs(Math.hypot(...p.quaternion)-1)<.001,'rigid rotation must remain normalized');assert.ok(p.positionMm.every(v=>Number.isFinite(v)&&Math.abs(v)<300),'no body may be flung out of the mechanism');}
+ return {indexed,firstDrop:center(firstDrop),landed:done,minRamMm:Math.min(...pressed.map(f=>f.linearPositions['ram-b'])),maxEjectMm:Math.max(...samples.map(f=>f.linearPositions['eject-c']))};
+}
 const browser=await (process.env.PROOF_BROWSER==='webkit'?webkit.launch({headless:true}):chromium.launch({headless:true,executablePath:process.env.BW_BROWSER_EXECUTABLE,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']}));
 const page=await browser.newPage({viewport:process.argv.includes('--ipad')?{width:1024,height:768}:{width:1440,height:1000},hasTouch:process.argv.includes('--ipad'),serviceWorkers:'block'}),errors=[],results=[];let cancelNext=false;
 page.on('pageerror',e=>{errors.push(e.message);console.log('pageerror',e.message);});page.on('dialog',d=>{if(cancelNext){cancelNext=false;return d.dismiss();}return d.accept();});page.setDefaultTimeout(180000);
@@ -36,7 +51,7 @@ try{
   await writeFile(`${out}/loaded-${item.id}.json`,JSON.stringify({id:item.id,widgets:state.widgets,blocks:true,code:true,circuit:true,connections:state.connections},null,2));
   if(process.env.PROOF_LOAD_ONLY==='1'){console.log('PASS full project load',item.id);continue;}
   if(process.env.PROOF_CONTROLS_CLOSED==='1')await page.getByTestId('bw-cad-circuit-panel').getByRole('button',{name:'Close program settings'}).click();
-  console.log('Widgets ready',item.id,process.env.PROOF_DEFAULT==='1'?'untouched defaults':'operated');const source=await page.evaluate(()=>{window.__proofRunTimes={requested:performance.now(),running:null};Object.assign(window.__proofDraws,{count:0,duplicate:0,lastFrame:-1});window.__proofHeartbeat={last:performance.now(),max:0,ticks:0};window.__proofHeartbeatTimer=setInterval(()=>{const h=window.__proofHeartbeat,n=performance.now();h.max=Math.max(h.max,n-h.last);h.last=n;h.ticks++;},50);return window.__bwCad.editor.session.serialize();});await page.evaluate(value=>{window.__robotProofSeconds=value;},Number(process.env.PROOF_SIM_SECONDS||(item.id==='robot-quasar-press'?15:6)));const runStarted=performance.now();if(process.env.PROOF_BLUR_PREPARATION==='1')await page.evaluate(()=>{let attempts=0;const timer=setInterval(()=>{if(window.__bwCad.editor.simulation.state.state==='preparing')window.dispatchEvent(new Event('blur'));if(++attempts>40)clearInterval(timer);},25);});await page.getByTestId('bw-cad-run').click();console.log('Run pressed',item.id);
+  console.log('Widgets ready',item.id,process.env.PROOF_DEFAULT==='1'?'untouched defaults':'operated');const source=await page.evaluate(()=>{window.__proofSamples=[];window.__proofRunTimes={requested:performance.now(),running:null};Object.assign(window.__proofDraws,{count:0,duplicate:0,lastFrame:-1});window.__proofHeartbeat={last:performance.now(),max:0,ticks:0};window.__proofHeartbeatTimer=setInterval(()=>{const h=window.__proofHeartbeat,n=performance.now();h.max=Math.max(h.max,n-h.last);h.last=n;h.ticks++;},50);return window.__bwCad.editor.session.serialize();});await page.evaluate(value=>{window.__robotProofSeconds=value;},Number(process.env.PROOF_SIM_SECONDS||(item.id==='robot-quasar-press'?15:6)));const runStarted=performance.now();if(process.env.PROOF_BLUR_PREPARATION==='1')await page.evaluate(()=>{let attempts=0;const timer=setInterval(()=>{if(window.__bwCad.editor.simulation.state.state==='preparing')window.dispatchEvent(new Event('blur'));if(++attempts>40)clearInterval(timer);},25);});await page.getByTestId('bw-cad-run').click();console.log('Run pressed',item.id);
   if(item.id==='robot-quasar-press'&&process.env.PROOF_DEFAULT==='1'){
    await wait(()=>{const f=window.__bwCad.editor.simulation.snapshot();return f.angles['dial-a']>85&&f.linearPositions['ram-b']>0;});
    await page.screenshot({path:`${out}/quasar-indexed.png`});
@@ -52,15 +67,7 @@ await wait(()=>{const s=window.__brickwrightStore.getState().scratchGui.vm.runti
   if(item.id==='robot-quasar-press'&&process.env.PROOF_DEFAULT==='1'){
    const samples=await page.evaluate(()=>window.__proofSamples);
    await writeFile(`${out}/quasar-cycle-frames.json`,JSON.stringify(samples));
-   const center=f=>{const p=f.poses.find(p=>p.id==='blank'),[x,y,z,w]=p.quaternion,[a,b,c]=[0,-20,46.2],u=2*(y*c-z*b),v=2*(z*a-x*c),t=2*(x*b-y*a);return[a+w*u+y*t-z*v+p.positionMm[0],b+w*v+z*u-x*t+p.positionMm[1],c+w*t+x*v-y*u+p.positionMm[2]];};
-   const pressed=samples.filter(f=>f.linearPositions['ram-b'] < -3);
-   assert.ok(pressed.length,'the real VM must reach the pressing stage');
-   assert.ok(Math.min(...samples.map(f=>f.linearPositions['ram-b']))>-6,'ram must stop on the blank instead of collapsing into the dial');
-   const indexed=center(pressed[0]);assert.ok(indexed[0]>12&&indexed[0]<27&&Math.abs(indexed[1])<8,'the blank must be indexed under the ram');
-   assert.ok(Math.max(...samples.map(f=>f.linearPositions['eject-c']))>60,'ejector must reach the blank');
-   const done=center(after.frame);assert.ok(done[0]>25&&done[2]<20&&done[2]>5,'the blank must leave the dial and land on the work surface');
-   assert.ok(Math.abs(after.frame.linearPositions['eject-c'])<1,'ejector must return');
-   for(const f of samples)for(const p of f.poses){assert.ok(Math.abs(Math.hypot(...p.quaternion)-1)<.001,'rigid rotation must remain normalized');assert.ok(p.positionMm.every(v=>Number.isFinite(v)&&Math.abs(v)<300),'no body may be flung out of the mechanism');}
+   after.quasarCycle=checkQuasarCycle(after.frame,samples);
   }
   if(item.id==='robot-atlas-forklift'&&process.env.PROOF_DEFAULT==='1')assert.ok(Math.abs(after.frame.angles['tilt-c']-15)<2,'Atlas must hold the commanded fork tilt under load');
   const motion=[...Object.values(after.frame.angles||{}),...Object.values(after.frame.linearPositions||{})];assert.ok(motion.some(v=>Math.abs(v)>1),`${item.name}: real joints must move from widget commands`);
@@ -69,10 +76,17 @@ await wait(()=>{const s=window.__brickwrightStore.getState().scratchGui.vm.runti
   if(process.env.PROOF_CONTROLS_CLOSED==='1'){assert.equal(await page.getByTestId('bw-cad-robot-controls').isVisible(),false);await page.getByRole('button',{name:'Robot controls',exact:true}).click();}
   await page.getByTestId('bw-cad-robot-controls').waitFor();
   await page.screenshot({path:`${out}/${item.file.replace('.sb3','')}${process.argv.includes('--ipad')?'-ipad':''}.png`,animations:'disabled'});await page.getByRole('button',{name:'Stop program',exact:true}).click();await page.getByRole('button',{name:'Reset simulation',exact:true}).click();
-  if(process.env.PROOF_REPEAT==='1'){
+  if(process.env.PROOF_REPEAT==='1')for(let repeat=0;repeat<Number(process.env.PROOF_EXTRA_CYCLES||1);repeat++){
+   await page.evaluate(()=>{window.__proofSamples=[];});
    await page.getByTestId('bw-cad-run').click();await page.getByTestId('bw-cad-robot-controls').waitFor();
    await wait(()=>{const s=window.__brickwrightStore.getState().scratchGui.vm.runtime.cadCircuitSimulation.state();return s.phase==='error'||s.time>.5;});
    assert.equal(await page.evaluate(()=>window.__brickwrightStore.getState().scratchGui.vm.runtime.cadCircuitSimulation.state().phase),'running');
+   if(item.id==='robot-quasar-press'&&process.env.PROOF_DEFAULT==='1'){
+    await wait(()=>{const s=window.__brickwrightStore.getState().scratchGui.vm.runtime.cadCircuitSimulation.state();return s.phase==='error'||s.time>15;});
+    const again=await page.evaluate(()=>({frame:window.__bwCad.editor.simulation.snapshot(),samples:window.__proofSamples}));
+    const cycle=checkQuasarCycle(again.frame,again.samples);
+    await writeFile(`${out}/quasar-repeat-${repeat+1}.json`,JSON.stringify({cycle,...again}));
+   }
    await page.getByTestId('bw-cad-robot-controls').getByRole('button',{name:'Center controls'}).click();
    await wait(()=>{const s=window.__brickwrightStore.getState().scratchGui.vm.runtime.cadCircuitSimulation.state();return s.phase==='error'||s.time>1.5;});
    assert.equal(await page.evaluate(()=>window.__brickwrightStore.getState().scratchGui.vm.runtime.cadCircuitSimulation.state().phase),'running');

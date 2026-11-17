@@ -8,10 +8,13 @@ fn main() {
         cc::Build::new()
             .file("src/scratchlink/bt_macos.m")
             .file("src/macos_share.m")
+            .file("src/macos_editor_input.m")
             .flag("-fobjc-arc")
             .compile("bt_macos");
         println!("cargo:rerun-if-changed=src/scratchlink/bt_macos.m");
         println!("cargo:rerun-if-changed=src/macos_share.m");
+        println!("cargo:rerun-if-changed=src/macos_editor_input.m");
+        println!("cargo:rustc-link-lib=framework=WebKit");
         println!("cargo:rustc-link-lib=framework=IOBluetooth");
         println!("cargo:rustc-link-lib=framework=AppKit");
         println!("cargo:rustc-link-lib=framework=Foundation");

@@ -5255,7 +5255,7 @@ function w8(i) {
   const d = a ? a - 1023 - 52 : -1074;
   d >= 0 ? l <<= BigInt(d) : c <<= BigInt(-d);
   let u = Math.floor(Math.log10(t));
-  const p = (M) => M >= 0 ? l - c * 10n ** BigInt(M) : l * 10n ** BigInt(-M) - c;
+  const p = (k) => k >= 0 ? l - c * 10n ** BigInt(k) : l * 10n ** BigInt(-k) - c;
   for (; p(u) < 0n; )
     u--;
   for (; p(u + 1) >= 0n; )
@@ -5265,8 +5265,8 @@ function w8(i) {
   g % v * 2n >= v && m++, m >= 1000000n && (m /= 10n, u++);
   const x = String(m).padStart(6, "0");
   if (u >= 6 || u < -5) {
-    const M = x.slice(1).replace(/0+$/, "");
-    return e + x[0] + (M ? "." + M : "") + "e" + (u >= 0 ? "+" : "") + u;
+    const k = x.slice(1).replace(/0+$/, "");
+    return e + x[0] + (k ? "." + k : "") + "e" + (u >= 0 ? "+" : "") + u;
   }
   const b = u + 1, y = b <= 0 ? "0." + "0".repeat(-b) + x : x.slice(0, b) + (b < x.length ? "." + x.slice(b) : "");
   return e + (y.includes(".") ? y.replace(/0+$/, "").replace(/\.$/, "") : y);
@@ -5498,12 +5498,12 @@ function N9(i, e, t = {}) {
         const q = f.args[0].name, [x, b, y] = f.args.slice(1, 4).map((S) => {
           const I = p(S);
           return (I.boolean || I.length || I.angle) && N2(h("function requires a dimensionless argument")), I.value;
-        }), M = (b - x) / y, k = y === 0 ? 0 : Math.max(0, Math.floor(M + 4 * Number.EPSILON * Math.max(1, Math.abs(M))) + 1);
-        (!y || !Number.isSafeInteger(k)) && N2(h("Invalid range reduction")), k > 256 && a6(h("Range reduction exceeds 256 values"));
+        }), k = (b - x) / y, M = y === 0 ? 0 : Math.max(0, Math.floor(k + 4 * Number.EPSILON * Math.max(1, Math.abs(k))) + 1);
+        (!y || !Number.isSafeInteger(M)) && N2(h("Invalid range reduction")), M > 256 && a6(h("Range reduction exceeds 256 values"));
         const _ = c.get(q);
         let w;
         try {
-          for (let S = 0; S < k; S++) {
+          for (let S = 0; S < M; S++) {
             if (c.set(q, s(x + S * y)), f.args.length === 6 && !o(p(f.args[4])))
               continue;
             const I = p(f.args.at(-1));
@@ -5517,18 +5517,18 @@ function N9(i, e, t = {}) {
       if (f.name === "sumRange" || f.name === "filterAt") {
         const q = f.name === "sumRange" ? 5 : 6;
         (f.args.length !== q || f.args[0].kind !== "name") && N2(h("Invalid range reduction"));
-        const x = f.args[0].name, [b, y, M] = f.args.slice(1, 4).map((B) => {
+        const x = f.args[0].name, [b, y, k] = f.args.slice(1, 4).map((B) => {
           const O = p(B);
           return (O.boolean || O.length || O.angle) && N2(h("function requires a dimensionless argument")), O.value;
-        }), k = (y - b) / M, _ = M === 0 ? 0 : Math.max(0, Math.floor(k + 4 * Number.EPSILON * Math.max(1, Math.abs(k))) + 1);
-        (!M || !Number.isSafeInteger(_) || _ > 256) && N2(h("Range reduction exceeds 256 values"));
+        }), M = (y - b) / k, _ = k === 0 ? 0 : Math.max(0, Math.floor(M + 4 * Number.EPSILON * Math.max(1, Math.abs(M))) + 1);
+        (!k || !Number.isSafeInteger(_) || _ > 256) && N2(h("Range reduction exceeds 256 values"));
         const w = f.name === "filterAt" ? p(f.args[5]) : void 0;
         w && (w.boolean || w.length || w.angle || !Number.isInteger(w.value) || w.value < 0) && N2(h("List index is outside the available values"));
         const S = c.get(x);
         let I = 0, R = 0;
         try {
           for (let B = 0; B < _; B++) {
-            const O = b + B * M;
+            const O = b + B * k;
             c.set(x, s(O));
             const X = p(f.args[4]);
             if (f.name === "sumRange")
@@ -5864,7 +5864,7 @@ function d7(i, e, t, n, s, o) {
         const [v, m, q] = f.scalars.map((y) => e(y, "scalar", -1e6, 1e6));
         q || t(h("Range step must be nonzero"), f.at);
         const x = (m - v) / q, b = x < 0 ? 0 : Math.floor(x + 4 * Number.EPSILON * Math.max(1, Math.abs(x))) + 1;
-        (!Number.isSafeInteger(b) || b > 256) && t(h("Profile point budget exceeded"), f.at), g = Array.from({ length: b }, (y, M) => v + M * q);
+        (!Number.isSafeInteger(b) || b > 256) && t(h("Profile point budget exceeded"), f.at), g = Array.from({ length: b }, (y, k) => v + k * q);
       }
       for (const v of g)
         s(f.variable, v, () => p(f.parts[0]));
@@ -5885,7 +5885,7 @@ function d7(i, e, t, n, s, o) {
           if (v === 0 && x === p.length - 1)
             continue;
           const b = p[x], y = p[(x + 1) % p.length];
-          [0, 1].every((k) => Math.max(Math.min(m[k], q[k]), Math.min(b[k], y[k])) <= Math.min(Math.max(m[k], q[k]), Math.max(b[k], y[k])) + 1e-9) && f(m, q, b) * f(m, q, y) <= 1e-10 && f(b, y, m) * f(b, y, q) <= 1e-10 && t(h("Extrusion profile intersects itself"), i.at);
+          [0, 1].every((M) => Math.max(Math.min(m[M], q[M]), Math.min(b[M], y[M])) <= Math.min(Math.max(m[M], q[M]), Math.max(b[M], y[M])) + 1e-9) && f(m, q, b) * f(m, q, y) <= 1e-10 && f(b, y, m) * f(b, y, q) <= 1e-10 && t(h("Extrusion profile intersects itself"), i.at);
         }
       }
       Math.abs(g) < 1e-8 && t(h("Extrusion profile has zero area"), i.at);
@@ -5964,8 +5964,8 @@ function Eq(i) {
           continue;
         if (++a > 131072)
           throw new Error(h("Loft exceeds the section or vertex budget"));
-        const y = d[b], M = d[(b + 1) % n];
-        [0, 1].every((_) => Math.max(Math.min(q[_], x[_]), Math.min(y[_], M[_])) <= Math.min(Math.max(q[_], x[_]), Math.max(y[_], M[_])) + u * 1e-10) && v(q, x, y) * v(q, x, M) <= p * p && v(y, M, q) * v(y, M, x) <= p * p && t();
+        const y = d[b], k = d[(b + 1) % n];
+        [0, 1].every((_) => Math.max(Math.min(q[_], x[_]), Math.min(y[_], k[_])) <= Math.min(Math.max(q[_], x[_]), Math.max(y[_], k[_])) + u * 1e-10) && v(q, x, y) * v(q, x, k) <= p * p && v(y, k, q) * v(y, k, x) <= p * p && t();
       }
     }
   }
@@ -6014,11 +6014,11 @@ function Pq(i, e, t, n, s = 0, o = 360, a) {
     throw new Error(h("Elliptical sector needs at least one angular segment"));
   const d = [], u = [], p = c + (l ? 0 : 1), f = (q, x) => {
     if (!q[0] && !q[1]) {
-      const M = d.length;
-      return d.push([0, 0, x]), { ids: Array(p).fill(M), center: M, tip: !0 };
+      const k = d.length;
+      return d.push([0, 0, x]), { ids: Array(p).fill(k), center: k, tip: !0 };
     }
-    const b = Array.from({ length: p }, (M, k) => {
-      const _ = l && s === 0 ? k * 2 * Math.PI / c : r.start + k * r.span / c, w = d.length;
+    const b = Array.from({ length: p }, (k, M) => {
+      const _ = l && s === 0 ? M * 2 * Math.PI / c : r.start + M * r.span / c, w = d.length;
       return d.push([q[0] * Math.cos(_), q[1] * Math.sin(_), x]), w;
     }), y = d.length;
     return d.push([0, 0, x]), { ids: b, center: y, tip: !1 };
@@ -6026,8 +6026,8 @@ function Pq(i, e, t, n, s = 0, o = 360, a) {
     q !== x && x !== b && q !== b && u.push([q, x, b]);
   };
   for (let q = 0; q < c; q++) {
-    const x = l ? (q + 1) % c : q + 1, b = g.ids[q], y = g.ids[x], M = v.ids[q], k = v.ids[x];
-    g.tip || (m(g.center, y, b), m(b, y, M)), v.tip || (m(v.center, M, k), m(M, y, k));
+    const x = l ? (q + 1) % c : q + 1, b = g.ids[q], y = g.ids[x], k = v.ids[q], M = v.ids[x];
+    g.tip || (m(g.center, y, b), m(b, y, k)), v.tip || (m(v.center, k, M), m(k, y, M));
   }
   return l || (m(g.center, g.ids[0], v.center), m(g.ids[0], v.ids[0], v.center), m(g.center, v.center, g.ids[c]), m(g.ids[c], v.center, v.ids[c])), { points: d, faces: u };
 }
@@ -6226,25 +6226,25 @@ function Dq(i) {
     d(";");
   }
   b || t(h("Finish the program with return shape;"));
-  const M = structuredClone({ ...v, ...m });
+  const k = structuredClone({ ...v, ...m });
   for (const [N, G] of Object.entries(i.parameters))
-    Object.hasOwn(v, N) || t(h`Unknown parameter override “${N}”`), (typeof G != "string" || !G.trim()) && t(h`Invalid override for “${N}”`), M[N].expression = G;
-  let k = /* @__PURE__ */ new Map(), _ = 0;
+    Object.hasOwn(v, N) || t(h`Unknown parameter override “${N}”`), (typeof G != "string" || !G.trim()) && t(h`Invalid override for “${N}”`), k[N].expression = G;
+  let M = /* @__PURE__ */ new Map(), _ = 0;
   const w = /* @__PURE__ */ Object.create(null), S = /* @__PURE__ */ new WeakMap(), I = /* @__PURE__ */ new Set();
   let R = 0;
   function B(N, G) {
     if (G?.has(N))
       return G.get(N);
-    if (k.has(N))
-      return k.get(N);
+    if (M.has(N))
+      return M.get(N);
     if (Object.hasOwn(w, N))
       return w[N];
-    const C = M[N];
+    const C = k[N];
     if (!C)
       throw new Error(h`Unknown parameter “${N}”`);
     ++R > 65536 && n(h("Code evaluation budget exceeded"), q.get(N)), I.has(N) && t(h`dependency cycle at “${N}”`, q.get(N)), I.size >= 32 && n(h("Dependency depth exceeds 32"), q.get(N));
-    let F = S.get(k);
-    F || (F = /* @__PURE__ */ new Map(), S.set(k, F));
+    let F = S.get(M);
+    F || (F = /* @__PURE__ */ new Map(), S.set(M, F));
     const p1 = N + "|" + (G?.size ? JSON.stringify([...G]) : ""), m1 = F.get(p1);
     if (m1)
       return m1;
@@ -6293,8 +6293,8 @@ function Dq(i) {
     if (++_ > 16384)
       throw new w0(h("Code evaluation budget exceeded"), N.at, e, "resource-limit");
     if (G > 32 && n(h("Dependency depth exceeds 32"), N.at), N.kind === "reference") {
-      let T = X.get(k);
-      if (T || (T = /* @__PURE__ */ new Map(), X.set(k, T)), T.has(N.name))
+      let T = X.get(M);
+      if (T || (T = /* @__PURE__ */ new Map(), X.set(M, T)), T.has(N.name))
         return T.get(N.name);
       W.has(N.name) && t(h`Shape dependency cycle at “${N.name}”`, N.at);
       const E = x.get(N.name);
@@ -6333,12 +6333,12 @@ function Dq(i) {
         T = Array.from({ length: H }, (w1, v1) => $ + v1 * V);
       } else
         T = N.scalars.map(($) => O($, "scalar", -1e6, 1e6));
-      const E = [], D = k;
+      const E = [], D = M;
       try {
         for (const $ of T)
-          k = new Map(D), k.set(N.variable, { value: $, length: 0, angle: 0 }), E.push(J(N.shapes[0], G + 1));
+          M = new Map(D), M.set(N.variable, { value: $, length: 0, angle: 0 }), E.push(J(N.shapes[0], G + 1));
       } finally {
-        k = D;
+        M = D;
       }
       return E.length === 0 ? { kind: "empty" } : E.length === 1 ? E[0] : { kind: "union", shapes: E };
     }
@@ -6346,12 +6346,12 @@ function Dq(i) {
       const T = d7(N.profile, O, t, () => {
         ++_ > 16384 && n(h("Code evaluation budget exceeded"), N.at);
       }, (E, D, $) => {
-        const U = k;
-        k = new Map(U), k.set(E, { value: D, length: 0, angle: 0 });
+        const U = M;
+        M = new Map(U), M.set(E, { value: D, length: 0, angle: 0 });
         try {
           return $();
         } finally {
-          k = U;
+          M = U;
         }
       }, (E, D) => {
         const $ = N9(E.text, B);
@@ -6861,15 +6861,15 @@ function cd(i, e, t = {}) {
       const q = g[2] === null ? void 0 : O9(g[2]);
       let x = Object.hasOwn(e.nodes, g[0]) ? e.nodes[g[0]] : void 0, b = e;
       x || ((!q || !t.regenerate) && s(h("Generator source edits need the shape reconstruction callback"), p), b = Z9(t.regenerate(q, v.name ?? q.preset)), (b.roots.length !== 1 || b.joints?.length || b.parametric || b.sketches || b.provenance) && s(h("Expected one generated body"), p), x = b.nodes[b.roots[0]]);
-      const y = x.id, M = /* @__PURE__ */ new Set(), k = (_) => {
-        if (M.has(_))
+      const y = x.id, k = /* @__PURE__ */ new Set(), M = (_) => {
+        if (k.has(_))
           return;
-        M.add(_);
+        k.add(_);
         const w = b.nodes[_];
-        w?.kind === "boolean" && w.inputs.forEach(k);
+        w?.kind === "boolean" && w.inputs.forEach(M);
       };
-      k(y);
-      for (const _ of M)
+      M(y);
+      for (const _ of k)
         if (_ !== y) {
           if (r.has(_)) {
             q && s(h("Edit generated construction through its recipe, or detach the generator"), p);
@@ -7449,14 +7449,14 @@ function w5(i = W2()) {
       const S = e.nodes[_];
       S && Kq(w, S) && (b.nodes[_] = S);
     }
-    const M = (_) => {
+    const k = (_) => {
       const { nodes: w, ...S } = _;
       return JSON.stringify(S);
     };
-    if (M(b) === M(e) && Object.keys(b.nodes).length === Object.keys(e.nodes).length && Object.entries(b.nodes).every(([_, w]) => e.nodes[_] === w))
+    if (k(b) === k(e) && Object.keys(b.nodes).length === Object.keys(e.nodes).length && Object.entries(b.nodes).every(([_, w]) => e.nodes[_] === w))
       return;
-    const k = z8(b);
-    a.push(u()), a.length > 100 && a.shift(), r.length = 0, e = k, t = y ?? t.filter((_) => !!e.nodes[_]), s = q, n++, d();
+    const M = z8(b);
+    a.push(u()), a.length > 100 && a.shift(), r.length = 0, e = M, t = y ?? t.filter((_) => !!e.nodes[_]), s = q, n++, d();
   }
   const f = /* @__PURE__ */ new WeakSet(), g = () => {
     if (e.version < 6 && Object.hasOwn(e, "modelSource"))
@@ -7475,7 +7475,7 @@ function w5(i = W2()) {
     for (const _ of Object.values(b.nodes))
       if (_.kind === "boolean" && _.inputs.some((w) => b.nodes[w]?.reference))
         throw new Error(h("Reference helpers cannot be combined into printable solids"));
-    const y = [], M = (_) => {
+    const y = [], k = (_) => {
       const { name: w, color: S, transform: I, physics: R, provenance: B, generator: O, ...X } = _;
       return X;
     };
@@ -7494,7 +7494,7 @@ function w5(i = W2()) {
       for (const B of I)
         if (B !== _ && !X9(e.nodes[B], b.nodes[B]))
           throw new Error(h("Edit generated construction through its recipe, or detach the generator"));
-      if (!X9(M(w), M(S)))
+      if (!X9(k(w), k(S)))
         throw new Error(h("Edit generated construction through its recipe, or detach the generator"));
       X9(w.generator, S.generator) || y.push(_);
     }
@@ -7517,8 +7517,8 @@ function w5(i = W2()) {
       }
     }
     b.modelSource = { version: 1, language: "brickwright-design", source: ui(q, b) };
-    const k = Object.freeze({ document: z8(Z9(b)), revision: n });
-    return f.add(k), k;
+    const M = Object.freeze({ document: z8(Z9(b)), revision: n });
+    return f.add(M), M;
   }
   const m = {
     get state() {
@@ -7559,15 +7559,15 @@ function w5(i = W2()) {
     /** Record reviewed source metadata for existing geometry; no fetching or insertion. */
     attachProvenance(q, x) {
       p("Record model provenance", (b) => {
-        if (!q.length || !q.every((k) => Object.hasOwn(b.nodes, k)))
+        if (!q.length || !q.every((M) => Object.hasOwn(b.nodes, M)))
           throw new Error("Select existing objects for model provenance");
         _6(b);
-        const y = structuredClone(x), M = b.provenance?.records.find((k) => k.id === y.id);
-        if (M && JSON.stringify(M) !== JSON.stringify(y))
+        const y = structuredClone(x), k = b.provenance?.records.find((M) => M.id === y.id);
+        if (k && JSON.stringify(k) !== JSON.stringify(y))
           throw new Error("Source record identity already exists with different metadata");
-        b.version = Math.max(b.version, 5), b.provenance = { version: 1, records: [...b.provenance?.records ?? [], ...M ? [] : [y]] };
-        for (const k of q)
-          b.nodes[k].provenance = [.../* @__PURE__ */ new Set([...b.nodes[k].provenance ?? [], y.id])];
+        b.version = Math.max(b.version, 5), b.provenance = { version: 1, records: [...b.provenance?.records ?? [], ...k ? [] : [y]] };
+        for (const M of q)
+          b.nodes[M].provenance = [.../* @__PURE__ */ new Set([...b.nodes[M].provenance ?? [], y.id])];
       });
     },
     rename(q) {
@@ -7593,18 +7593,18 @@ function w5(i = W2()) {
       const y = Z9(x);
       if (y.roots.length !== 1 || y.joints?.length || y.parametric || y.sketches || y.version >= 5 && y.provenance)
         throw new Error(h("Expected one generated body"));
-      p(b.label ?? "Edit shape parameters", (M) => {
-        M.version >= 5 && _6(y);
-        const k = M.nodes[q];
-        if (!k)
+      p(b.label ?? "Edit shape parameters", (k) => {
+        k.version >= 5 && _6(y);
+        const M = k.nodes[q];
+        if (!M)
           throw new Error(h("Object does not exist"));
-        if (b.resetScale && M.parametric?.bindings.some((O) => O.nodeId === q && ["scaleX", "scaleY", "scaleZ"].includes(O.property)))
+        if (b.resetScale && k.parametric?.bindings.some((O) => O.nodeId === q && ["scaleX", "scaleY", "scaleZ"].includes(O.property)))
           throw new Error(h("Detach driving scale expressions before rebuilding"));
         if (b.resetScale) {
           const O = /* @__PURE__ */ new Set(), X = (W) => {
             if (!O.has(W)) {
               O.add(W);
-              for (const J of Object.values(M.nodes))
+              for (const J of Object.values(k.nodes))
                 if (J.kind === "boolean" && J.inputs.includes(W)) {
                   if (J.transform.scale.some((e1) => Math.abs(e1 - 1) > 1e-9))
                     throw new Error(h("Reset parent scaling before rebuilding this body"));
@@ -7618,10 +7618,10 @@ function w5(i = W2()) {
           if (_.has(O))
             return;
           _.add(O);
-          const X = M.nodes[O];
+          const X = k.nodes[O];
           X.kind === "boolean" && X.inputs.forEach(w);
         };
-        if (w(q), M.parametric?.bindings.some((O) => _.has(O.nodeId) && O.nodeId !== q))
+        if (w(q), k.parametric?.bindings.some((O) => _.has(O.nodeId) && O.nodeId !== q))
           throw new Error(h("Detach driving expressions on the construction operands before regenerating"));
         const S = (O, X = /* @__PURE__ */ new Set()) => {
           if (O === q)
@@ -7629,25 +7629,25 @@ function w5(i = W2()) {
           if (X.has(O))
             return !1;
           X.add(O);
-          const W = M.nodes[O];
+          const W = k.nodes[O];
           return W?.kind === "boolean" && W.inputs.some((J) => S(J, X));
         };
-        if (M.joints?.some((O) => S(O.bodyA) || S(O.bodyB)))
+        if (k.joints?.some((O) => S(O.bodyA) || S(O.bodyB)))
           throw new Error(h("Detach joints before regenerating their bodies"));
         const I = new Map(Object.keys(y.nodes).map((O) => [O, O === y.roots[0] ? q : d0()]));
         for (const [O, X] of Object.entries(y.nodes)) {
           const W = V8(X);
-          W.id = I.get(O), W.kind === "boolean" && (W.inputs = W.inputs.map((J) => I.get(J))), M.nodes[W.id] = W;
+          W.id = I.get(O), W.kind === "boolean" && (W.inputs = W.inputs.map((J) => I.get(J))), k.nodes[W.id] = W;
         }
-        const R = M.version >= 5 ? [...new Set([..._].flatMap((O) => e.nodes[O]?.provenance ?? []))] : [];
-        M.version < 5 && Object.hasOwn(k, "provenance") && (M.nodes[q].provenance = structuredClone(k.provenance));
-        const B = M.nodes[q];
-        return R.length && (B.provenance = R), B.name = k.name, B.color = k.color, k.role && (B.role = k.role), B.transform = structuredClone(k.transform), b.resetScale && (B.transform.scale = [1, 1, 1]), k.physics && B.physics && (B.physics = { ...B.physics, densityKgM3: k.physics.densityKgM3, friction: k.physics.friction, restitution: k.physics.restitution, motion: k.physics.motion }), M.version === 1 && (M.version = 2), ze(M), [q];
+        const R = k.version >= 5 ? [...new Set([..._].flatMap((O) => e.nodes[O]?.provenance ?? []))] : [];
+        k.version < 5 && Object.hasOwn(M, "provenance") && (k.nodes[q].provenance = structuredClone(M.provenance));
+        const B = k.nodes[q];
+        return R.length && (B.provenance = R), B.name = M.name, B.color = M.color, M.role && (B.role = M.role), B.transform = structuredClone(M.transform), b.resetScale && (B.transform.scale = [1, 1, 1]), M.physics && B.physics && (B.physics = { ...B.physics, densityKgM3: M.physics.densityKgM3, friction: M.physics.friction, restitution: M.physics.restitution, motion: M.physics.motion }), k.version === 1 && (k.version = 2), ze(k), [q];
       });
     },
     addCode(q, x = "Code object", b = {}) {
       const y = d0();
-      return p("Add code object", (M) => (M.version = Math.max(M.version, 4), M.nodes[y] = { id: y, kind: "code", program: structuredClone(q), name: S6(x, new Set(M.roots.map((k) => M.nodes[k].name))), color: "#76b7ce", transform: { ...z2(), position: b.position ?? [0, 0, 0] } }, M.roots.push(y), [y])), y;
+      return p("Add code object", (k) => (k.version = Math.max(k.version, 4), k.nodes[y] = { id: y, kind: "code", program: structuredClone(q), name: S6(x, new Set(k.roots.map((M) => k.nodes[M].name))), color: "#76b7ce", transform: { ...z2(), position: b.position ?? [0, 0, 0] } }, k.roots.push(y), [y])), y;
     },
     updateCode(q, x) {
       p("Edit code object", (b) => {
@@ -7655,8 +7655,8 @@ function w5(i = W2()) {
         if (y?.kind !== "code")
           throw new Error(h("Select a code object"));
         j8(b, q);
-        const M = { ...y, program: structuredClone(x) };
-        M.physics && !X9(y.program, x) && (M.physics = { ...M.physics }, delete M.physics.collisionAssembly), b.nodes[q] = M;
+        const k = { ...y, program: structuredClone(x) };
+        k.physics && !X9(y.program, x) && (k.physics = { ...k.physics }, delete k.physics.collisionAssembly), b.nodes[q] = k;
       });
     },
     addSketch(q, x = {}) {
@@ -7667,11 +7667,11 @@ function w5(i = W2()) {
     },
     extrudeSketch(q, x = {}) {
       const b = d0();
-      return p("Extrude sketch", (y) => (y.version = Math.max(y.version, 3), y.nodes[b] = { id: b, kind: "extrusion", featureVersion: 1, sketchId: q, distance: x.distance ?? 10, symmetric: x.symmetric ?? !1, name: S6(h("Extrusion"), new Set(y.roots.map((M) => y.nodes[M].name))), color: "#eea52b", transform: z2() }, y.roots.push(b), [b])), b;
+      return p("Extrude sketch", (y) => (y.version = Math.max(y.version, 3), y.nodes[b] = { id: b, kind: "extrusion", featureVersion: 1, sketchId: q, distance: x.distance ?? 10, symmetric: x.symmetric ?? !1, name: S6(h("Extrusion"), new Set(y.roots.map((k) => y.nodes[k].name))), color: "#eea52b", transform: z2() }, y.roots.push(b), [b])), b;
     },
     addSketchExtrusion(q, x = {}) {
       const b = d0(), y = d0();
-      return p("Add sketch extrusion", (M) => (M.version = Math.max(M.version, 3), M.sketches ?? (M.sketches = {}), M.sketches[b] = { version: 1, id: b, name: x.name ?? "Sketch", plane: x.plane ?? "XY", profile: structuredClone(q) }, M.nodes[y] = { id: y, kind: "extrusion", featureVersion: 1, sketchId: b, distance: x.distance ?? 10, symmetric: x.symmetric ?? !1, name: S6(h("Extrusion"), new Set(M.roots.map((k) => M.nodes[k].name))), color: "#eea52b", transform: { ...z2(), position: x.position ?? [0, 0, 0] } }, M.roots.push(y), [y])), y;
+      return p("Add sketch extrusion", (k) => (k.version = Math.max(k.version, 3), k.sketches ?? (k.sketches = {}), k.sketches[b] = { version: 1, id: b, name: x.name ?? "Sketch", plane: x.plane ?? "XY", profile: structuredClone(q) }, k.nodes[y] = { id: y, kind: "extrusion", featureVersion: 1, sketchId: b, distance: x.distance ?? 10, symmetric: x.symmetric ?? !1, name: S6(h("Extrusion"), new Set(k.roots.map((M) => k.nodes[M].name))), color: "#eea52b", transform: { ...z2(), position: x.position ?? [0, 0, 0] } }, k.roots.push(y), [y])), y;
     },
     updateSketch(q, x) {
       p("Edit sketch", (b) => {
@@ -7690,34 +7690,34 @@ function w5(i = W2()) {
       return Xq(e, q);
     },
     insert(q, x = [0, 0, 0], b = {}) {
-      const y = Z9(q), M = new Map(Object.keys(y.nodes).map((k) => [k, d0()]));
+      const y = Z9(q), k = new Map(Object.keys(y.nodes).map((M) => [M, d0()]));
       if (y.parametric && !b.mergeParameters)
         throw new Error(h("Enable parameter namespace merging when inserting a parametric model"));
-      p(b.label ?? "Add shape", (k) => {
-        Math.max(k.version, y.version) >= 5 && (_6(k), _6(y)), y.version >= 8 && k.version < 8 && w6(k), !k.roots.length && k.simulation === void 0 && y.version >= 8 && y.simulation && (k.simulation = structuredClone(y.simulation)), k.version = Math.max(k.version, y.version);
+      p(b.label ?? "Add shape", (M) => {
+        Math.max(M.version, y.version) >= 5 && (_6(M), _6(y)), y.version >= 8 && M.version < 8 && w6(M), !M.roots.length && M.simulation === void 0 && y.version >= 8 && y.simulation && (M.simulation = structuredClone(y.simulation)), M.version = Math.max(M.version, y.version);
         const _ = new Map((y.version >= 5 ? y.provenance?.records ?? [] : []).map((R) => [R.id, d0()]));
-        y.version >= 5 && y.provenance && (k.provenance = { version: 1, records: [...k.provenance?.records ?? [], ...y.provenance.records.map((R) => ({ ...structuredClone(R), id: _.get(R.id) }))] });
+        y.version >= 5 && y.provenance && (M.provenance = { version: 1, records: [...M.provenance?.records ?? [], ...y.provenance.records.map((R) => ({ ...structuredClone(R), id: _.get(R.id) }))] });
         const w = new Map(Object.keys(y.sketches ?? {}).map((R) => [R, d0()]));
         for (const [R, B] of Object.entries(y.sketches ?? {})) {
-          k.sketches ?? (k.sketches = {});
+          M.sketches ?? (M.sketches = {});
           const O = structuredClone(B);
-          O.id = w.get(R), O.profile.id = d0(), k.sketches[O.id] = O;
+          O.id = w.get(R), O.profile.id = d0(), M.sketches[O.id] = O;
         }
-        const S = new Set(k.roots.map((R) => k.nodes[R].name));
+        const S = new Set(M.roots.map((R) => M.nodes[R].name));
         for (const [R, B] of Object.entries(y.nodes)) {
           const O = V8(B);
-          y.version >= 5 && O.provenance && (O.provenance = O.provenance.map((X) => _.get(X))), O.id = M.get(R), O.kind === "extrusion" && (O.sketchId = w.get(O.sketchId)), O.kind === "boolean" && (O.inputs = O.inputs.map((X) => M.get(X))), y.roots.includes(R) && (O.transform.position = O.transform.position.map((X, W) => X + x[W])), k.nodes[O.id] = O;
+          y.version >= 5 && O.provenance && (O.provenance = O.provenance.map((X) => _.get(X))), O.id = k.get(R), O.kind === "extrusion" && (O.sketchId = w.get(O.sketchId)), O.kind === "boolean" && (O.inputs = O.inputs.map((X) => k.get(X))), y.roots.includes(R) && (O.transform.position = O.transform.position.map((X, W) => X + x[W])), M.nodes[O.id] = O;
         }
-        const I = y.roots.map((R) => M.get(R));
-        k.roots.push(...I);
+        const I = y.roots.map((R) => k.get(R));
+        M.roots.push(...I);
         for (const R of I)
-          k.nodes[R].name = S6(k.nodes[R].name, S), S.add(k.nodes[R].name);
-        return b.mergeParameters && Zq(k, y, M, x, w), y.version >= 8 && y.tracers?.length && (k.version < 8 && w6(k), k.tracers = [...k.tracers ?? [], ...y.tracers.map((R) => ({ ...structuredClone(R), id: d0(), bodyId: M.get(R.bodyId) }))]), y.joints?.length && (k.joints = [...k.joints ?? [], ...ba(y.joints, M, k.joints ?? [])]), I;
+          M.nodes[R].name = S6(M.nodes[R].name, S), S.add(M.nodes[R].name);
+        return b.mergeParameters && Zq(M, y, k, x, w), y.version >= 8 && y.tracers?.length && (M.version < 8 && w6(M), M.tracers = [...M.tracers ?? [], ...y.tracers.map((R) => ({ ...structuredClone(R), id: d0(), bodyId: k.get(R.bodyId) }))]), y.joints?.length && (M.joints = [...M.joints ?? [], ...ba(y.joints, k, M.joints ?? [])]), I;
       });
     },
     add(q, x = {}) {
       const b = d0();
-      return p(`Add ${q.kind}`, (y) => (y.nodes[b] = { ...structuredClone(q), id: b, name: S6(x.name ?? `${q.kind[0].toUpperCase()}${q.kind.slice(1)}`, new Set(y.roots.map((M) => y.nodes[M].name))), color: x.color ?? "#eea52b", transform: structuredClone(x.transform ?? z2()) }, y.roots.push(b), [b])), b;
+      return p(`Add ${q.kind}`, (y) => (y.nodes[b] = { ...structuredClone(q), id: b, name: S6(x.name ?? `${q.kind[0].toUpperCase()}${q.kind.slice(1)}`, new Set(y.roots.map((k) => y.nodes[k].name))), color: x.color ?? "#eea52b", transform: structuredClone(x.transform ?? z2()) }, y.roots.push(b), [b])), b;
     },
     update(q, x) {
       p("Edit object", (b) => {
@@ -7741,44 +7741,44 @@ function w5(i = W2()) {
           if (!x.nodes[b])
             throw new Error(h("Object does not exist"));
           j8(x, b);
-          const M = { ...x.nodes[b], transform: q8(x.nodes[b], structuredClone(y)) };
-          di(x, M), x.nodes[b] = M;
+          const k = { ...x.nodes[b], transform: q8(x.nodes[b], structuredClone(y)) };
+          di(x, k), x.nodes[b] = k;
         }
       });
     },
     setRole(q, x = t) {
       p("Change solid/hole role", (b) => {
         const y = [...new Set(x)];
-        if (!y.length || !y.every((M) => b.roots.includes(M)))
+        if (!y.length || !y.every((k) => b.roots.includes(k)))
           throw new Error(h("Select a top-level body"));
-        if (y.some((M) => b.nodes[M].reference))
+        if (y.some((k) => b.nodes[k].reference))
           throw new Error(h("Reference helpers cannot be hole cutters"));
-        if (q === "hole" && b.joints?.some((M) => y.includes(M.bodyA) || y.includes(M.bodyB)))
+        if (q === "hole" && b.joints?.some((k) => y.includes(k.bodyA) || y.includes(k.bodyB)))
           throw new Error(h("Detach the selected bodies’ joints before changing them to holes"));
         b.version = Math.max(b.version, 7);
-        for (const M of y)
-          b.nodes[M] = { ...b.nodes[M], role: q };
+        for (const k of y)
+          b.nodes[k] = { ...b.nodes[k], role: q };
         ze(b);
       });
     },
     combine(q, x = t) {
       const b = [...new Set(x)], y = d0();
-      return p(q === "subtract" ? "Subtract (first selected is the base)" : q, (M) => {
-        if (b.length < 2 || !b.every((O) => M.roots.includes(O)))
+      return p(q === "subtract" ? "Subtract (first selected is the base)" : q, (k) => {
+        if (b.length < 2 || !b.every((O) => k.roots.includes(O)))
           throw new Error(h("Select at least two top-level bodies"));
-        if (b.some((O) => M.nodes[O].reference))
+        if (b.some((O) => k.nodes[O].reference))
           throw new Error(h("Reference helpers cannot be combined into printable solids"));
-        if (M.joints?.some((O) => b.includes(O.bodyA) || b.includes(O.bodyB)))
+        if (k.joints?.some((O) => b.includes(O.bodyA) || b.includes(O.bodyB)))
           throw new Error(h("Detach the selected bodies’ joints before combining them"));
-        const k = q === "union" ? b.filter((O) => M.nodes[O].role === "hole") : [], _ = b.filter((O) => !k.includes(O)), w = k.length > 0, S = _.length ? _ : b, I = S[0], R = M.nodes[I].physics ?? J2();
+        const M = q === "union" ? b.filter((O) => k.nodes[O].role === "hole") : [], _ = b.filter((O) => !M.includes(O)), w = M.length > 0, S = _.length ? _ : b, I = S[0], R = k.nodes[I].physics ?? J2();
         if (S.some((O) => {
-          const X = M.nodes[O].physics ?? J2();
+          const X = k.nodes[O].physics ?? J2();
           return X.densityKgM3 !== R.densityKgM3 || X.friction !== R.friction || X.restitution !== R.restitution || X.motion !== R.motion;
         }))
           throw new Error(h("Combined solids must share density, contact material and motion type. Keep different materials as separate bodies."));
-        M.nodes[y] = { id: y, kind: "boolean", operation: q, inputs: b, ...w ? { useHoleRoles: !0, ..._.length ? {} : { role: "hole" } } : {}, name: q[0].toUpperCase() + q.slice(1), color: M.nodes[I].color, transform: z2(), physics: { ...R, intent: "rigid", parameters: void 0, sourcePreset: void 0, collisionHint: void 0 } }, w && (M.version = Math.max(M.version, 7));
-        const B = Math.min(...b.map((O) => M.roots.indexOf(O)));
-        return M.roots = M.roots.filter((O) => !b.includes(O)), M.roots.splice(B, 0, y), [y];
+        k.nodes[y] = { id: y, kind: "boolean", operation: q, inputs: b, ...w ? { useHoleRoles: !0, ..._.length ? {} : { role: "hole" } } : {}, name: q[0].toUpperCase() + q.slice(1), color: k.nodes[I].color, transform: z2(), physics: { ...R, intent: "rigid", parameters: void 0, sourcePreset: void 0, collisionHint: void 0 } }, w && (k.version = Math.max(k.version, 7));
+        const B = Math.min(...b.map((O) => k.roots.indexOf(O)));
+        return k.roots = k.roots.filter((O) => !b.includes(O)), k.roots.splice(B, 0, y), [y];
       }), y;
     },
     separate(q) {
@@ -7801,7 +7801,7 @@ function w5(i = W2()) {
         const b = q.filter((w) => x.roots.includes(w));
         if (!b.length)
           throw new Error(h("Select a top-level body"));
-        const y = x.parametric?.bindings.slice() ?? [], M = [], k = /* @__PURE__ */ new Map(), _ = /* @__PURE__ */ new Map();
+        const y = x.parametric?.bindings.slice() ?? [], k = [], M = /* @__PURE__ */ new Map(), _ = /* @__PURE__ */ new Map();
         for (const w of b) {
           const S = /* @__PURE__ */ new Map(), I = (O) => {
             if (S.has(O))
@@ -7810,9 +7810,9 @@ function w5(i = W2()) {
             S.set(O, X);
             const W = V8(x.nodes[O]);
             if (W.id = X, W.kind === "boolean" && (W.inputs = W.inputs.map(I)), W.kind === "extrusion") {
-              let J = k.get(W.sketchId);
+              let J = M.get(W.sketchId);
               if (!J) {
-                J = d0(), k.set(W.sketchId, J);
+                J = d0(), M.set(W.sketchId, J);
                 const e1 = structuredClone(x.sketches[W.sketchId]);
                 e1.id = J, e1.profile.id = d0(), x.sketches[J] = e1;
               }
@@ -7820,7 +7820,7 @@ function w5(i = W2()) {
             }
             return x.nodes[X] = W, X;
           }, R = I(w), B = x.nodes[R];
-          B.name = S6(B.name.replace(/(?: copy| Kopie)(?: \d+)?$/, "") + h(" copy"), new Set(x.roots.map((O) => x.nodes[O].name))), B.transform.position[0] += 10, x.roots.push(R), M.push(R);
+          B.name = S6(B.name.replace(/(?: copy| Kopie)(?: \d+)?$/, "") + h(" copy"), new Set(x.roots.map((O) => x.nodes[O].name))), B.transform.position[0] += 10, x.roots.push(R), k.push(R);
           for (const [O, X] of S)
             _.set(O, X);
           x.parametric && x.parametric.bindings.push(...y.filter((O) => S.has(O.nodeId)).map((O) => ({ ...O, nodeId: S.get(O.nodeId), expression: O.nodeId === w && O.property === "positionX" ? Wq(O.expression, x.parametric, 10) : O.expression })));
@@ -7829,7 +7829,7 @@ function w5(i = W2()) {
           const w = x.tracers.slice();
           x.tracers.push(...w.filter((S) => _.has(S.bodyId)).map((S) => ({ ...structuredClone(S), id: d0(), bodyId: _.get(S.bodyId) })));
         }
-        return x.joints && x.joints.push(...ba(x.joints.filter((w) => b.includes(w.bodyA) && b.includes(w.bodyB)), _, x.joints)), M;
+        return x.joints && x.joints.push(...ba(x.joints.filter((w) => b.includes(w.bodyA) && b.includes(w.bodyB)), _, x.joints)), k;
       });
     },
     remove(q = t, x = "Delete") {
@@ -7862,27 +7862,27 @@ function w5(i = W2()) {
         }
       });
     },
-    addJoint(q, x, b, y, M, k = {}) {
+    addJoint(q, x, b, y, k, M = {}) {
       let _ = "";
       return p("Add connector", (w) => {
         w6(w);
-        const S = S2(w, q, x, b, y, M, k);
+        const S = S2(w, q, x, b, y, k, M);
         ["hinge", "slider"].includes(q) && (S.control = { port: Xs(w.joints ?? []) }), _ = S.id, (w.joints ?? (w.joints = [])).push(S);
       }), _;
     },
     moveJoint(q, x, b) {
       p("Move connector", (y) => {
-        const M = y.joints?.find((_) => _.id === q);
-        if (!M)
+        const k = y.joints?.find((_) => _.id === q);
+        if (!k)
           throw new Error(h("Unknown connector"));
-        const k = S2(y, M.kind, M.bodyA, M.bodyB, x, b);
+        const M = S2(y, k.kind, k.bodyA, k.bodyB, x, b);
         for (const _ of ["anchorA", "anchorB", "axisA", "axisB"])
-          M[_] = k[_];
+          k[_] = M[_];
       });
     },
     updateJoint(q, x) {
       p("Edit connector", (b) => {
-        const y = b.joints?.find((M) => M.id === q);
+        const y = b.joints?.find((k) => k.id === q);
         if (!y)
           throw new Error(h("Unknown connector"));
         Object.assign(y, structuredClone(x));
@@ -7895,8 +7895,8 @@ function w5(i = W2()) {
     },
     addTracer(q, x, b = "#ef8354") {
       let y = "";
-      return p("Add motion tracer", (M) => {
-        w6(M), y = d0(), (M.tracers ?? (M.tracers = [])).push({ id: y, bodyId: q, point: [...x], color: b });
+      return p("Add motion tracer", (k) => {
+        w6(k), y = d0(), (k.tracers ?? (k.tracers = [])).push({ id: y, bodyId: q, point: [...x], color: b });
       }), y;
     },
     removeTracer(q) {
@@ -7906,7 +7906,7 @@ function w5(i = W2()) {
     },
     setMotorPort(q, x) {
       p("Configure motor port", (b) => {
-        const y = b.joints?.find((M) => M.id === q);
+        const y = b.joints?.find((k) => k.id === q);
         if (!y || !["hinge", "slider"].includes(y.kind))
           throw new Error(h("Unknown hinge joint"));
         x === null ? delete y.control : y.control = { port: x };
@@ -8496,7 +8496,7 @@ function Ys(i, e = []) {
   const c = /* @__PURE__ */ new Set(), d = /* @__PURE__ */ new Map(), u = [], p = /* @__PURE__ */ new WeakMap(), f = /* @__PURE__ */ new Map(), g = (A, L) => {
     c.add(L), d.set(A + "|" + L, { id: A, message: L });
   }, v = /* @__PURE__ */ new Map(), m = /* @__PURE__ */ new Map(), q = /* @__PURE__ */ new Map(), x = /* @__PURE__ */ new Map(), b = /* @__PURE__ */ new WeakSet();
-  let y = !1, M = !1, k = !1, _;
+  let y = !1, k = !1, M = !1, _;
   const w = /* @__PURE__ */ new Map(), S = /* @__PURE__ */ new WeakMap(), I = /* @__PURE__ */ new WeakMap(), R = /* @__PURE__ */ new Map();
   let B = /* @__PURE__ */ new Map();
   const O = /* @__PURE__ */ new Set();
@@ -9578,7 +9578,7 @@ function Ys(i, e = []) {
     return t1 === void 0 ? S1(j) : `assertValue(${S1(j)}, true, ${x2(t1)})`;
   }
   function c0(A) {
-    if (!w.size && !k)
+    if (!w.size && !M)
       return;
     const L = /* @__PURE__ */ new Set();
     function j(t1) {
@@ -9630,7 +9630,7 @@ function Ys(i, e = []) {
       return new m0(g0(A, L.condition), L.yes, L.no);
     if (L instanceof G2) {
       const t1 = new G2(L.reason);
-      return I.set(t1, { condition: A, value: L }), k = !0, t1;
+      return I.set(t1, { condition: A, value: L }), M = !0, t1;
     }
     return j === 0 && G(h("Assertion failed")), T("parameter-dependent assertion returning empty, string or undefined value");
   }
@@ -10118,7 +10118,7 @@ function Ys(i, e = []) {
     if (j === "#")
       return g("scad.preview.highlight", h("Preview highlights are omitted; rendered geometry is retained.")), Z2(A + 1);
     if (j === "!") {
-      M = !0;
+      k = !0;
       const n1 = Z2(A + 1);
       return u.push(n1), n1;
     }
@@ -10243,7 +10243,7 @@ function Ys(i, e = []) {
     }
     B1 = t[s]?.at ?? 0, E1.push(Z2());
   }
-  y && M && T("assertions combined with root modifier"), E1.length || G(h("OpenSCAD block contains no supported solid"));
+  y && k && T("assertions combined with root modifier"), E1.length || G(h("OpenSCAD block contains no supported solid"));
   const H1 = O2(u.length ? u : E1), Y1 = /* @__PURE__ */ new Map(), p2 = /* @__PURE__ */ new Set(), L2 = (A) => [...A.matchAll(/"(?:\\.|[^"\\])*"|\bcadShape[0-9]+\b/g)].map((L) => L[0]).filter((L) => t0.has(L));
   function X2(A) {
     for (const L of L2(A))
@@ -10564,8 +10564,8 @@ function yd(i, e = {}, t = {}) {
   const g = (T) => (["__proto__", "prototype", "constructor"].includes(T) && c(T), T), v = () => /* @__PURE__ */ Object.create(null), m = (T) => typeof T == "object" && T !== null && Object.getPrototypeOf(T) === null, q = (T) => ((typeof T != "number" || !Number.isFinite(T) || Math.abs(T) > 1e9) && l(h("Expected a finite JSCAD number")), T), x = (T) => ((!Array.isArray(T) || T.length > it.arrayItems) && l(h("Expected a bounded JSCAD array")), T), b = (T, E = 3) => {
     const D = x(T);
     return D.length !== E && l(h`Expected a JSCAD vector with ${E} components`), D.map(q);
-  }, y = (T) => (T.length > it.arrayItems && l(h("JSCAD array limit exceeded"), void 0, "resource-limit"), T), M = (T, E) => (T.length > L0.sourceBytes && l(h("JSCAD expanded source limit exceeded"), void 0, "resource-limit"), new Sa(T, E));
-  function k(T) {
+  }, y = (T) => (T.length > it.arrayItems && l(h("JSCAD array limit exceeded"), void 0, "resource-limit"), T), k = (T, E) => (T.length > L0.sourceBytes && l(h("JSCAD expanded source limit exceeded"), void 0, "resource-limit"), new Sa(T, E));
+  function M(T) {
     const E = [], D = ($, U = 0) => {
       if (U > 32 && l(h("JSCAD array nesting limit exceeded"), void 0, "resource-limit"), Array.isArray($))
         for (const V of $)
@@ -10577,7 +10577,7 @@ function yd(i, e = {}, t = {}) {
       D($);
     return E;
   }
-  const _ = (T) => (T.length > L0.sourceBytes && l(h("JSCAD generated profile exceeds source budget"), void 0, "resource-limit"), new A3([], T)), w = (T, E) => (E.length || l(h("JSCAD construction returned no solids")), E.length === 1 && T !== "hull" ? E[0] : M(`${T}(${E.map((D) => D.source).join(", ")})`)), S = new G8(), I = v(), R = v();
+  const _ = (T) => (T.length > L0.sourceBytes && l(h("JSCAD generated profile exceeds source budget"), void 0, "resource-limit"), new A3([], T)), w = (T, E) => (E.length || l(h("JSCAD construction returned no solids")), E.length === 1 && T !== "hull" ? E[0] : k(`${T}(${E.map((D) => D.source).join(", ")})`)), S = new G8(), I = v(), R = v();
   I.exports = R, S.values.set("module", I), S.values.set("exports", R), S.values.set("require", new T5("require")), S.values.set("Math", new T5("Math")), S.values.set("undefined", void 0);
   function B(T, E) {
     g(E);
@@ -10960,13 +10960,13 @@ function yd(i, e = {}, t = {}) {
         return v1.length === 1 ? v1[0] : v1;
       }
       if (D === "geometries.geom3.create")
-        return E.length ? c("geom3.create with polygons") : M("empty()");
+        return E.length ? c("geom3.create with polygons") : k("empty()");
       if (D === "primitives.polyhedron") {
         const U = E[0];
         if (!m(U) || Object.keys(U).some((w1) => !["points", "faces", "orientation"].includes(w1)) || E.length !== 1)
           return c("polyhedron options");
         const V = x(U.points).map((w1) => b(w1)), z = x(U.faces).map((w1) => x(w1).map(q)), H = U.orientation ?? "outward";
-        return ["outward", "inward"].includes(H) ? M(`polyhedron([${V.map((w1) => "[" + w1.join(",") + "]").join(",")}],[${z.map((w1) => "[" + (H === "inward" ? [...w1].reverse() : w1).join(",") + "]").join(",")}])`) : c("polyhedron orientation");
+        return ["outward", "inward"].includes(H) ? k(`polyhedron([${V.map((w1) => "[" + w1.join(",") + "]").join(",")}],[${z.map((w1) => "[" + (H === "inward" ? [...w1].reverse() : w1).join(",") + "]").join(",")}])`) : c("polyhedron orientation");
       }
       if (D === "primitives.polygon") {
         const U = E[0];
@@ -11029,11 +11029,11 @@ function yd(i, e = {}, t = {}) {
           }, 0) * (z.at(-1)[0][2] - v1[2]) < 0)
             return c("inside-out slice loft");
         }
-        return M(`loft([${z.map((w1) => "[" + w1.map((v1) => "[" + v1.join(",") + "]").join(",") + "]").join(",")}])`);
+        return k(`loft([${z.map((w1) => "[" + w1.map((v1) => "[" + v1.join(",") + "]").join(",") + "]").join(",")}])`);
       }
       if (D === "extrusions.extrudeLinear") {
         const U = E[0], V = E[1];
-        return !m(U) || !(V instanceof A3) || Object.keys(U).some((z) => !["height", "twistAngle", "twistSteps"].includes(z)) || E.length !== 2 ? c("extrusions.extrudeLinear options/profile") : (q(U.twistAngle ?? 0) !== 0 && (r = !0), M(`extrudeProfile(${q(U.height ?? 1)}, ${V.source}, ${q(U.twistAngle ?? 0) * 180 / Math.PI}, ${q(U.twistSteps ?? 1)})`));
+        return !m(U) || !(V instanceof A3) || Object.keys(U).some((z) => !["height", "twistAngle", "twistSteps"].includes(z)) || E.length !== 2 ? c("extrusions.extrudeLinear options/profile") : (q(U.twistAngle ?? 0) !== 0 && (r = !0), k(`extrudeProfile(${q(U.height ?? 1)}, ${V.source}, ${q(U.twistAngle ?? 0) * 180 / Math.PI}, ${q(U.twistSteps ?? 1)})`));
       }
       if (D === "extrusions.extrudeRotate") {
         const U = E[0], V = E[1];
@@ -11041,7 +11041,7 @@ function yd(i, e = {}, t = {}) {
           return c("extrusions.extrudeRotate options/profile");
         r = !0;
         const z = q(U.angle ?? 2 * Math.PI), H = q(U.startAngle ?? 0);
-        return z <= 0 || z > 2 * Math.PI || H < 0 || H + z > 2 * Math.PI + 1e-10 ? c("extrudeRotate angle interval") : M(`rotate([0,0,${H * 180 / Math.PI}], revolve(${V.source}, ${z * 180 / Math.PI}, ${q(U.segments ?? 12)}))`);
+        return z <= 0 || z > 2 * Math.PI || H < 0 || H + z > 2 * Math.PI + 1e-10 ? c("extrudeRotate angle interval") : k(`rotate([0,0,${H * 180 / Math.PI}], revolve(${V.source}, ${z * 180 / Math.PI}, ${q(U.segments ?? 12)}))`);
       }
       if (D === "geometries.geom2.create")
         return E.length ? c("geom2.create with sides") : _("union2d()");
@@ -11056,21 +11056,21 @@ function yd(i, e = {}, t = {}) {
           return D === "hulls.hullChain" ? z.length < 2 ? c("hullChain needs two profiles") : _(`union2d(${z.slice(1).map((w1, v1) => `hull2d(${z[v1].source},${w1.source})`).join(",")})`) : _(`${H}(${z.map((w1) => w1.source).join(",")})`);
         }
         if (D === "hulls.hullChain") {
-          const z = k(E);
+          const z = M(E);
           return z.length < 2 ? c("hullChain needs two solids") : w("union", z.slice(1).map((H, w1) => w("hull", [z[w1], H])));
         }
       }
       if (D === "hulls.hull")
-        return w("hull", k(E));
+        return w("hull", M(E));
       const $ = { "booleans.union": "union", "booleans.subtract": "subtract", "booleans.intersect": "intersect" };
       if ($[D])
-        return w($[D], k(E));
+        return w($[D], M(E));
       if (D === "colors.colorize") {
         a = !0;
         const U = b(E[0], Array.isArray(E[0]) ? E[0].length : 3);
         if (U.length < 3 || U.length > 4 || U.some((H) => H < 0 || H > 1) || U.length === 4 && U[3] !== 1)
           return c("colorize alpha/color");
-        const V = "#" + U.slice(0, 3).map((H) => Math.round(H * 255).toString(16).padStart(2, "0")).join(""), z = k(E.slice(1)).map((H) => M(H.source, V));
+        const V = "#" + U.slice(0, 3).map((H) => Math.round(H * 255).toString(16).padStart(2, "0")).join(""), z = M(E.slice(1)).map((H) => k(H.source, V));
         return z.length === 1 ? z[0] : z;
       }
       if (D === "primitives.torus") {
@@ -11078,14 +11078,14 @@ function yd(i, e = {}, t = {}) {
         if (!m(U) || E.length > 1 || Object.keys(U).some((H) => !["innerRadius", "outerRadius", "innerSegments", "outerSegments", "innerRotation", "outerRotation", "startAngle"].includes(H)))
           return c("torus options");
         const V = q(U.outerRotation ?? 2 * Math.PI), z = q(U.startAngle ?? 0);
-        return V <= 0 || V > 2 * Math.PI || z < 0 || z >= 2 * Math.PI ? c("torus angle interval") : M(`torus(${q(U.outerRadius ?? 4)},${q(U.innerRadius ?? 1)},${q(U.innerSegments ?? 32)},${q(U.outerSegments ?? 32)},${q(U.innerRotation ?? 0) * 180 / Math.PI},${V * 180 / Math.PI},${z * 180 / Math.PI})`);
+        return V <= 0 || V > 2 * Math.PI || z < 0 || z >= 2 * Math.PI ? c("torus angle interval") : k(`torus(${q(U.outerRadius ?? 4)},${q(U.innerRadius ?? 1)},${q(U.innerSegments ?? 32)},${q(U.outerSegments ?? 32)},${q(U.innerRotation ?? 0) * 180 / Math.PI},${V * 180 / Math.PI},${z * 180 / Math.PI})`);
       }
       if (D === "primitives.ellipsoid" || D === "primitives.roundedCylinder") {
         const U = E[0] === void 0 ? v() : E[0], V = D === "primitives.ellipsoid";
         if (!m(U) || E.length > 1 || Object.keys(U).some((H) => !(V ? ["radius", "center", "segments"] : ["radius", "height", "roundRadius", "center", "segments"]).includes(H)))
           return c(D + " options");
         let z = V ? `ellipsoid(${b(U.radius ?? [1, 1, 1]).join(",")},${q(U.segments ?? 32)})` : `roundedCylinder(${q(U.radius ?? 1)},${q(U.height ?? 2)},${q(U.roundRadius ?? 0.2)},${q(U.segments ?? 32)})`;
-        return !V && U.roundRadius === 0 && (z = `cylinder(${q(U.radius ?? 1)},${q(U.height ?? 2)},32)`), U.center !== void 0 && (z = `move([${b(U.center).join(",")}],${z})`), M(z);
+        return !V && U.roundRadius === 0 && (z = `cylinder(${q(U.radius ?? 1)},${q(U.height ?? 2)},32)`), U.center !== void 0 && (z = `move([${b(U.center).join(",")}],${z})`), k(z);
       }
       if (D.startsWith("primitives.")) {
         const U = E[0] === void 0 ? v() : E[0];
@@ -11124,20 +11124,20 @@ function yd(i, e = {}, t = {}) {
           } else
             w1 = `frustum(${v1[0]},${S1[0]},${q(U.height ?? 2)},${H})`;
         } else V === "cylinder" ? w1 = `cylinder(${q(U.radius ?? 1)}, ${q(U.height ?? 2)}, ${H})` : w1 = `sphere(${q(U.radius ?? 1)}, ${H})`;
-        return U.center !== void 0 && (w1 = `move([${b(U.center).join(", ")}], ${w1})`), M(w1);
+        return U.center !== void 0 && (w1 = `move([${b(U.center).join(", ")}], ${w1})`), k(w1);
       }
       if (D === "transforms.transform") {
         const U = x(E[0]).map(q);
         if (U.length !== 16 || U[3] !== 0 || U[7] !== 0 || U[11] !== 0 || U[15] !== 1)
           return c("affine matrix");
-        const V = [U[0], U[4], U[8], U[12], U[1], U[5], U[9], U[13], U[2], U[6], U[10], U[14]], z = k(E.slice(1)).map((H) => M(`affine([${V.join(",")}],${H.source})`, H.color));
+        const V = [U[0], U[4], U[8], U[12], U[1], U[5], U[9], U[13], U[2], U[6], U[10], U[14]], z = M(E.slice(1)).map((H) => k(`affine([${V.join(",")}],${H.source})`, H.color));
         return z.length === 1 ? z[0] : z;
       }
       if (D === "transforms.mirror") {
         const U = E[0];
         if (!m(U) || Object.keys(U).some((w1) => !["normal", "origin"].includes(w1)))
           return c(D + " options");
-        const V = b(U.normal ?? [0, 0, 1]), z = b(U.origin ?? [0, 0, 0]), H = k(E.slice(1)).map((w1) => M(`move([${z.join(",")}],mirror([${V.join(",")}],move([${z.map((v1) => -v1).join(",")}],${w1.source})))`, w1.color));
+        const V = b(U.normal ?? [0, 0, 1]), z = b(U.origin ?? [0, 0, 0]), H = M(E.slice(1)).map((w1) => k(`move([${z.join(",")}],mirror([${V.join(",")}],move([${z.map((v1) => -v1).join(",")}],${w1.source})))`, w1.color));
         return H.length === 1 ? H[0] : H;
       }
       if (D.startsWith("transforms.")) {
@@ -11157,7 +11157,7 @@ function yd(i, e = {}, t = {}) {
         else
           return c(D);
         V === "rotate" && (z = z.map((w1) => w1 * 180 / Math.PI));
-        const H = k(E.slice(1)).map((w1) => M(`${V}([${z.join(", ")}], ${w1.source})`, w1.color));
+        const H = M(E.slice(1)).map((w1) => k(`${V}([${z.join(", ")}], ${w1.source})`, w1.color));
         return H.length === 1 ? H[0] : H;
       }
       return c(D);
@@ -11189,7 +11189,7 @@ function yd(i, e = {}, t = {}) {
     for (const T of p1)
       typeof T == "number" ? q(T) : (typeof T != "string" && typeof T != "boolean" || typeof T == "string" && T.length > 1024) && l(h("Invalid JSCAD entry argument"));
   }
-  const m1 = k([L1(N, p1)]);
+  const m1 = M([L1(N, p1)]);
   m1.length || l(h("JSCAD construction returned no solids"));
   const s1 = [h("JSCAD conversion is an evaluated snapshot; keep the original source for parametric edits.")];
   r && s1.push(h("Curved and twisted extrusion meshes use native tessellation; coarse slice counts can differ from JSCAD.")), m1.length > 1 && s1.push(h("Multiple JSCAD outputs are combined into one rigid body in the code editor.")), a && s1.push(h("Only whole-output JSCAD colours are retained in conversion metadata; face colours are not converted."));
@@ -11277,7 +11277,7 @@ async function Ah(i) {
     q > k4.depth && Z0("Include nesting exceeds the existing depth limit", m, 0, t.get(m)?.original.source ?? "", "resource-limit"), a.has(m) && Z0("Cyclic include dependency", m, 0, t.get(m).original.source);
     const b = t.get(m), y = b.original.source;
     a.add(m);
-    let M = 0, k = 0, _ = 0, w = !0;
+    let k = 0, M = 0, _ = 0, w = !0;
     const S = (I) => {
       let R = I;
       for (; R < y.length; ) {
@@ -11300,23 +11300,23 @@ async function Ah(i) {
       }
       return R;
     };
-    for (; M < y.length; ) {
-      const I = S(M);
-      if (I !== M) {
-        M = I;
+    for (; k < y.length; ) {
+      const I = S(k);
+      if (I !== k) {
+        k = I;
         continue;
       }
-      if (M >= y.length)
+      if (k >= y.length)
         break;
-      const R = M;
+      const R = k;
       let B;
-      if (y[M] === '"') {
-        M++;
+      if (y[k] === '"') {
+        k++;
         let O = !1;
-        for (; M < y.length; ) {
-          const X = y[M++];
+        for (; k < y.length; ) {
+          const X = y[k++];
           if (X === "\\") {
-            M++;
+            k++;
             continue;
           }
           if (X === '"') {
@@ -11324,11 +11324,11 @@ async function Ah(i) {
             break;
           }
         }
-        O || Z0("Unclosed source string", m, R, y), B = y.slice(R, M);
+        O || Z0("Unclosed source string", m, R, y), B = y.slice(R, k);
       } else
-        B = /^(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?|^[A-Za-z_$][A-Za-z0-9_$]*|^(?:==|!=|<=|>=|&&|\|\|)|^[\s\S]/.exec(y.slice(M))[0], M += B.length;
+        B = /^(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?|^[A-Za-z_$][A-Za-z0-9_$]*|^(?:==|!=|<=|>=|&&|\|\|)|^[\s\S]/.exec(y.slice(k))[0], k += B.length;
       if (B === "use" && (!x || _ !== 0 || !w) && Z0("OpenSCAD use requires file scope", m, R, y, "unsupported-feature"), B === "include" || B === "use") {
-        const O = S(M);
+        const O = S(k);
         y[O] !== "<" && Z0("Expected a literal include <relative/path> directive", m, R, y);
         const X = y.indexOf(">", O + 1);
         X < 0 && Z0("Unclosed include path", m, R, y);
@@ -11338,15 +11338,15 @@ async function Ah(i) {
           const a1 = qi(W, [], m, R, y);
           t.has(a1) && (J = a1, e1 = "bundle-root");
         }
-        t.has(J) || Z0(h`Included source file is missing: ${J}`, m, R, y), o.length >= k4.includes && Z0("Include occurrences exceed the existing token budget", m, R, y, "resource-limit"), o.push(Object.freeze({ ...e1 ? { resolution: e1 } : {}, ...B === "use" ? { kind: "use" } : {}, fromPath: m, path: J, sourceOffset: R, ...kh(b.lines, R), depth: q + 1 })), u(y.slice(k, R), m, k), u(`
+        t.has(J) || Z0(h`Included source file is missing: ${J}`, m, R, y), o.length >= k4.includes && Z0("Include occurrences exceed the existing token budget", m, R, y, "resource-limit"), o.push(Object.freeze({ ...e1 ? { resolution: e1 } : {}, ...B === "use" ? { kind: "use" } : {}, fromPath: m, path: J, sourceOffset: R, ...kh(b.lines, R), depth: q + 1 })), u(y.slice(M, R), m, M), u(`
 `, m, R);
         const K = { start: c, end: c };
         B === "use" && r.push(K), p(J, q + 1, x && _ === 0 && w), K.end = c, u(`
-`, m, R), M = X + 1, k = M;
+`, m, R), k = X + 1, M = k;
       } else
         ["{", "(", "["].includes(B) && _++, ["}", ")", "]"].includes(B) && _--, w = _ === 0 && (B === ";" || B === "}"), d++, d > k4.expandedTokens && Z0("Expanded include tokens exceed the existing 8192-token limit", m, R, y, "resource-limit");
     }
-    u(y.slice(k), m, k), a.delete(m);
+    u(y.slice(M), m, M), a.delete(m);
   };
   p(e.rootPath, 0);
   const f = n.join(""), g = await _5(An.encode(f));
@@ -11356,7 +11356,7 @@ async function Ah(i) {
   } catch (m) {
     if (!(m instanceof w0))
       throw m;
-    const q = s.find((M) => m.offset >= M.start && m.offset < M.end) ?? s.at(-1), x = q?.path ?? e.rootPath, b = t.get(x).original.source, y = q ? Math.min(b.length, q.sourceStart + Math.max(0, m.offset - q.start)) : b.length;
+    const q = s.find((k) => m.offset >= k.start && m.offset < k.end) ?? s.at(-1), x = q?.path ?? e.rootPath, b = t.get(x).original.source, y = q ? Math.min(b.length, q.sourceStart + Math.max(0, m.offset - q.start)) : b.length;
     throw new vd(m.detail, x, y, b, m.code);
   }
   return { program: v, provenance: Object.freeze({
@@ -11492,7 +11492,7 @@ function Ph() {
 }
 const Aa = () => ({ time: 0, poses: [], angles: {}, speeds: {}, linearPositions: {}, linearSpeeds: {} });
 function Dh(i, e, t, n, s, o) {
-  let a, r, l = 0, c = 0, d = !1, u = !1, p = !1, f, g = !1, v = 1, m, q = 0, x = 0, b, y = Aa(), M = "", k, _ = !1, w;
+  let a, r, l = 0, c = 0, d = !1, u = !1, p = !1, f, g = !1, v = 1, m, q = 0, x = 0, b, y = Aa(), k = "", M, _ = !1, w;
   const S = Ph(), I = Th(), R = /* @__PURE__ */ new Map(), B = /* @__PURE__ */ new Map(), O = /* @__PURE__ */ new Map(), X = () => f ?? s8(i.state.document).fixBase ?? !!i.state.document.joints?.length, W = (P) => {
     P ? (I.record(i.state.document, P), S.record(P)) : I.clear(), s(P);
   }, J = () => {
@@ -11517,17 +11517,17 @@ function Dh(i, e, t, n, s, o) {
   }
   function N(P) {
     const Q = S.at(P);
-    Q && (k = Q.time, s(Q));
+    Q && (M = Q.time, s(Q));
   }
   function G() {
     b = void 0, $1(), a && !r && a.send({ op: "release-grab" }).catch(() => {
     }), c++, d = !1, u = !1, clearTimeout(m), m = void 0, q = 0, x = 0, P1(h("Simulation was stopped")), J();
   }
   function C() {
-    l++, G(), a?.dispose(), a = void 0, r = void 0, y = Aa(), M = "", S.clear(), k = void 0, W(null), J();
+    l++, G(), a?.dispose(), a = void 0, r = void 0, y = Aa(), k = "", S.clear(), M = void 0, W(null), J();
   }
   function F(P) {
-    p || (C(), M = P instanceof Error ? P.message : String(P), J());
+    p || (C(), k = P instanceof Error ? P.message : String(P), J());
   }
   async function p1() {
     if (p)
@@ -11536,8 +11536,9 @@ function Dh(i, e, t, n, s, o) {
       return;
     if (r)
       return r;
+    S.clear(), I.clear(), M = void 0;
     const P = l;
-    M = "";
+    k = "";
     const Q = (async () => {
       if (await t(), P !== l || p)
         throw new Error(h("Simulation was stopped"));
@@ -11559,7 +11560,7 @@ function Dh(i, e, t, n, s, o) {
   async function m1(P = !1) {
     if (b)
       throw new Error(h("The circuit owns this simulation clock"));
-    $1(), k !== void 0 && (k = void 0, s(y));
+    $1(), M !== void 0 && (M = void 0, s(y));
     const Q = c;
     if (u = P || u, await p1(), Q !== c)
       throw new Error(h("Simulation was stopped"));
@@ -11650,7 +11651,10 @@ function Dh(i, e, t, n, s, o) {
     J();
   }
   async function V() {
-    G(), await U();
+    l++, G(), a?.dispose(), a = void 0, r = void 0;
+    for (const [P, Q] of B)
+      B.set(P, { ...Q, speed: 0 });
+    M = void 0, s(null), J();
   }
   async function z(P, Q, d1, M1) {
     const R1 = _1(P, Q);
@@ -11671,7 +11675,7 @@ function Dh(i, e, t, n, s, o) {
       throw new Error(h("Invalid replay time"));
     u && o?.(), G();
     const Q = S.at(P);
-    Q && (k = Q.time, s(Q), J());
+    Q && (M = Q.time, s(Q), J());
   }
   const w1 = () => {
     document.hidden && (u && o?.(), V().catch(F));
@@ -11754,11 +11758,7 @@ function Dh(i, e, t, n, s, o) {
         W(y), J();
       },
       release() {
-        if (b === P) {
-          const d1 = a;
-          G(), d1 && d1.send({ op: "stop-motors" }).catch(() => {
-          });
-        }
+        b === P && V();
       }
     };
   }
@@ -11799,7 +11799,7 @@ function Dh(i, e, t, n, s, o) {
       return { speed: Q?.speed ?? 0, force: Q?.limit ?? 10, enabled: Q?.enabled ?? !1 };
     },
     async step() {
-      if ($1(), k = void 0, d || r || b)
+      if ($1(), M = void 0, d || r || b)
         throw new Error(h("Pause simulation before stepping"));
       const P = l, Q = c;
       if (await p1(), P !== l || Q !== c)
@@ -11841,10 +11841,10 @@ function Dh(i, e, t, n, s, o) {
         throw new Error(h("Simulation was stopped"));
       await a.send({ op: "ball", id: "preview-" + d0(), positionMm: P, velocityMmS: Q, radiusMm: d1 });
     },
-    tracePaths: () => I.paths().map((P) => ({ ...P, samples: k === void 0 ? P.samples : P.samples.filter((Q) => Q.time <= k + 1e-9) })),
+    tracePaths: () => I.paths().map((P) => ({ ...P, samples: M === void 0 ? P.samples : P.samples.filter((Q) => Q.time <= M + 1e-9) })),
     traceCSV: () => I.csv(),
     clearTraces() {
-      I.clear(), s(k === void 0 ? y : S.at(k) ?? y);
+      I.clear(), s(M === void 0 ? y : S.at(M) ?? y);
     },
     setTimeScale(P) {
       if (!Number.isFinite(P) || P < 0.1 || P > 2)
@@ -11867,15 +11867,15 @@ function Dh(i, e, t, n, s, o) {
       return X();
     },
     refresh() {
-      a && s(k === void 0 ? y : S.at(k) ?? y);
+      a && s(M === void 0 ? y : S.at(M) ?? y);
     },
     replayRange: () => S.range(),
     get replayTime() {
-      return k;
+      return M;
     },
     seekReplay: H,
     previousFrame() {
-      const P = S.previous(k ?? y.time);
+      const P = S.previous(M ?? y.time);
       P && H(P.time);
     },
     playReplay() {
@@ -11883,7 +11883,7 @@ function Dh(i, e, t, n, s, o) {
       const P = S.range();
       if (P.count < 2)
         return;
-      let Q = k === void 0 || k >= P.last ? P.first : k, d1 = performance.now();
+      let Q = M === void 0 || M >= P.last ? P.first : M, d1 = performance.now();
       _ = !0, N(Q), J();
       const M1 = () => {
         if (!_ || p)
@@ -11900,11 +11900,11 @@ function Dh(i, e, t, n, s, o) {
       return _;
     },
     live() {
-      $1(), k = void 0, s(y), J();
+      $1(), M = void 0, s(a ? y : null), J();
     },
     snapshot: () => structuredClone(y),
     get state() {
-      return { state: r ? "preparing" : d || b ? "running" : a ? "paused" : "idle", program: u, error: M, time: y.time };
+      return { state: r ? "preparing" : d || b ? "running" : a || M !== void 0 ? "paused" : "idle", program: u, error: k, time: y.time };
     },
     dispose() {
       p || (u && (u = !1, o?.()), C(), p = !0, T1(), document.removeEventListener("visibilitychange", w1), window.removeEventListener("blur", v1));
@@ -11958,9 +11958,9 @@ function Rh(i, e, t, n) {
   r(f, "Apply world settings", () => {
     e.setSimulation({ ...s8(e.state.document), gravity: d(g), ground: q.checked, groundFriction: Number(x.value), groundRestitution: Number(b.value) }), p = !1;
   });
-  const y = document.createElement("input"), M = document.createElement("label");
-  y.type = "checkbox", y.checked = s8(e.state.document).selfCollisions !== !1, y.onchange = () => e.setSimulation({ ...s8(e.state.document), selfCollisions: y.checked }), M.append(y, document.createTextNode(h("Self collisions inside connected robots"))), f.append(M);
-  const k = o("Connectors"), _ = l(k, "Connector type", [["hinge", "Axle (hinge)"], ["slider", "Slider"], ["pivot", "Pivot"], ["fixed", "Fixed connector"]]), w = l(k, "Connector body A", []), S = l(k, "Connector body B", []), I = c(k, "Connector point (mm)", [0, 0, 0]), R = c(k, "Connector axis", [0, 0, 1]), B = r(k, "Use selected bodies", () => {
+  const y = document.createElement("input"), k = document.createElement("label");
+  y.type = "checkbox", y.checked = s8(e.state.document).selfCollisions !== !1, y.onchange = () => e.setSimulation({ ...s8(e.state.document), selfCollisions: y.checked }), k.append(y, document.createTextNode(h("Self collisions inside connected robots"))), f.append(k);
+  const M = o("Connectors"), _ = l(M, "Connector type", [["hinge", "Axle (hinge)"], ["slider", "Slider"], ["pivot", "Pivot"], ["fixed", "Fixed connector"]]), w = l(M, "Connector body A", []), S = l(M, "Connector body B", []), I = c(M, "Connector point (mm)", [0, 0, 0]), R = c(M, "Connector axis", [0, 0, 1]), B = r(M, "Use selected bodies", () => {
     const E = e.state.selection.filter((D) => e.state.document.roots.includes(D));
     if (E.length !== 2)
       throw new Error(h("Select two physical bodies"));
@@ -11968,23 +11968,23 @@ function Rh(i, e, t, n) {
   });
   let O = () => {
   };
-  const X = r(k, "Pick connector point", () => {
+  const X = r(M, "Pick connector point", () => {
     n && (O(), X.setAttribute("aria-pressed", "true"), O = n((E) => {
       X.setAttribute("aria-pressed", "false"), E && (u(I, E.point), u(R, E.normal));
     }));
   });
   X.disabled = !n;
   const W = document.createElement("label"), J = document.createElement("input");
-  J.type = "checkbox", W.append(J, document.createTextNode(h("Limit travel"))), k.append(W);
-  const e1 = a(k, "Lower travel limit", -180), K = a(k, "Upper travel limit", 180), a1 = a(k, "Cone half-angle (degrees)", 45), _1 = document.createElement("p");
-  k.append(_1);
+  J.type = "checkbox", W.append(J, document.createTextNode(h("Limit travel"))), M.append(W);
+  const e1 = a(M, "Lower travel limit", -180), K = a(M, "Upper travel limit", 180), a1 = a(M, "Cone half-angle (degrees)", 45), _1 = document.createElement("p");
+  M.append(_1);
   const L1 = () => {
     const E = _.value === "slider";
     _1.textContent = h(E ? "Slider limits use millimetres." : "Axle limits use degrees."), J.disabled = !["hinge", "slider"].includes(_.value), e1.disabled = K.disabled = J.disabled || !J.checked, a1.disabled = _.value !== "pivot";
   };
   _.onchange = () => {
     e1.value = _.value === "slider" ? "-50" : "-180", K.value = _.value === "slider" ? "50" : "180", L1();
-  }, J.onchange = L1, L1(), r(k, "Add connector", () => {
+  }, J.onchange = L1, L1(), r(M, "Add connector", () => {
     const E = {};
     if (J.checked && ["hinge", "slider"].includes(_.value)) {
       const D = _.value === "hinge" ? Math.PI / 180 : 1;
@@ -11993,9 +11993,9 @@ function Rh(i, e, t, n) {
     _.value === "pivot" && (E.coneAngle = Number(a1.value) * Math.PI / 180), e.addJoint(_.value, w.value, S.value, d(I), d(R), E);
   });
   const P1 = document.createElement("small");
-  P1.textContent = h("Drag the orange handles to move connector anchors. Shift makes finer adjustments."), k.append(P1);
+  P1.textContent = h("Drag the orange handles to move connector anchors. Shift makes finer adjustments."), M.append(P1);
   const $1 = document.createElement("div");
-  k.append($1);
+  M.append($1);
   const N = o("Motion tracers"), G = l(N, "Tracer body", []), C = c(N, "Tracer point (local mm)", [0, 0, 0]), F = document.createElement("input");
   F.type = "color", F.value = "#ef8354", F.setAttribute("aria-label", h("Tracer colour")), N.append(F), r(N, "Add motion tracer", () => e.addTracer(G.value, d(C), F.value));
   const p1 = r(N, "Place motion tracer", () => {
@@ -12170,10 +12170,10 @@ function Ih(i, e, t, n, s, o = {}) {
     await C.start();
   }), x = p("Pause simulation", () => {
     m(), C.pause();
-  }), b = p("Step simulation", () => C.step()), y = p("Stop motors", () => (m(), C.stopMotors())), M = p("Reset simulation", () => {
+  }), b = p("Step simulation", () => C.step()), y = p("Stop motors", () => (m(), C.stopMotors())), k = p("Reset simulation", () => {
     m(), C.reset();
-  }), k = p("Close simulation", _, l);
-  k.textContent = "×", Object.assign(k.style, { minWidth: "44px", height: "44px", fontSize: "24px" });
+  }), M = p("Close simulation", _, l);
+  M.textContent = "×", Object.assign(M.style, { minWidth: "44px", height: "44px", fontSize: "24px" });
   function _() {
     a.hidden = !0;
     try {
@@ -12296,7 +12296,7 @@ function Ih(i, e, t, n, s, o = {}) {
   function v1() {
     w1();
     const P = C.state;
-    o.connectorHandles?.(!a.hidden && P.state === "idle"), o.dragEnabled?.(a1.checked && P.state === "running"), a.dataset.state = P.state, a.dataset.owner = P.program ? "program" : "manual", q.disabled = ["running", "preparing"].includes(P.state), x.disabled = P.state !== "running", b.disabled = ["running", "preparing"].includes(P.state), y.disabled = P.state === "idle" || P.state === "preparing", M.disabled = P.state === "idle", _1.disabled = L1.disabled = P.state !== "idle", _1.checked = C.fixBase, L1.checked = C.rigidPreview, F.setDisabled(P.state !== "idle"), N.textContent = P.error || (P.state === "preparing" ? h("Preparing simulation") : "");
+    o.connectorHandles?.(!a.hidden && P.state === "idle"), o.dragEnabled?.(a1.checked && P.state === "running"), a.dataset.state = P.state, a.dataset.owner = P.program ? "program" : "manual", q.disabled = ["running", "preparing"].includes(P.state), x.disabled = P.state !== "running", b.disabled = ["running", "preparing"].includes(P.state), y.disabled = P.state === "idle" || P.state === "preparing", k.disabled = P.state === "idle", _1.disabled = L1.disabled = P.state !== "idle", _1.checked = C.fixBase, L1.checked = C.rigidPreview, F.setDisabled(P.state !== "idle"), N.textContent = P.error || (P.state === "preparing" ? h("Preparing simulation") : "");
     for (const [Q, d1] of G) {
       if (!(d1.kind === "hinge" ? C.motors() : C.sliders()).some((I1) => I1.id === Q))
         continue;
@@ -12392,7 +12392,7 @@ function Bh(i, e, t, n, s) {
   m.append(q, x), r.append(m);
   const b = f("Thread pitch (mm)", d, ".1"), y = f("Turns per start", u, ".1");
   b.min = ".5", b.max = "10", y.max = "64", g.min = "2.4", g.max = "90", v.min = "1", v.max = "200", y.title = h("Based on nominal threaded length; end runouts are trimmed");
-  function M() {
+  function k() {
     b.readOnly = p === "turns", y.readOnly = p === "pitch";
     const _ = Number(v.value), w = p === "pitch" ? d : _ / (u * e.values.starts), S = p === "turns" ? u : _ / (d * e.values.starts);
     b.value = Number.isFinite(w) && w > 0 ? String(Number(w.toFixed(6))) : "", y.value = Number.isFinite(S) && S > 0 ? String(Number(S.toFixed(6))) : "";
@@ -12405,20 +12405,20 @@ function Bh(i, e, t, n, s) {
     u = Number(y.value);
     const _ = Number(v.value) / (u * e.values.starts);
     b.value = Number.isFinite(_) && _ > 0 ? String(Number(_.toFixed(6))) : "";
-  }, v.oninput = M, x.onchange = () => {
-    p = x.value, M();
-  }, M();
-  const k = document.createElement("button");
-  k.type = "button", k.className = "primary", k.textContent = h("Apply thread redesign"), k.onclick = async () => {
-    k.disabled = !0;
+  }, v.oninput = k, x.onchange = () => {
+    p = x.value, k();
+  }, k();
+  const M = document.createElement("button");
+  M.type = "button", M.className = "primary", M.textContent = h("Apply thread redesign"), M.onclick = async () => {
+    M.disabled = !0;
     try {
       await n({ diameter: Number(g.value), length: Number(v.value), ...p === "pitch" ? { pitch: Number(b.value) } : { turnsPerStart: Number(y.value) } });
     } catch (_) {
       s(_);
     } finally {
-      k.disabled = !1;
+      M.disabled = !1;
     }
-  }, r.append(k);
+  }, r.append(M);
 }
 const Fh = /* @__PURE__ */ JSON.parse('{"0":{"x_min":66,"x_max":700,"ha":765,"o":"m 700 496 q 682 281 700 376 q 627 121 665 186 q 528 20 588 55 q 381 -14 467 -14 q 242 20 301 -14 q 143 121 182 55 q 85 281 104 186 q 66 496 66 376 q 83 711 66 616 q 138 872 100 806 q 236 972 175 937 q 381 1007 296 1007 q 522 972 462 1007 q 621 873 581 938 q 680 712 660 807 q 700 496 700 617 m 191 497 q 201 319 191 395 q 234 192 211 243 q 292 116 256 142 q 381 91 329 91 q 470 116 433 91 q 530 191 506 141 q 564 318 553 241 q 574 497 574 394 q 564 675 574 599 q 530 801 553 751 q 470 876 506 851 q 381 901 433 901 q 292 876 329 901 q 234 801 256 851 q 201 675 211 751 q 191 497 191 599 "},"1":{"x_min":121,"x_max":482.375,"ha":765,"o":"m 482 0 l 363 0 l 363 619 q 363 682 363 648 q 364 748 363 715 q 366 811 365 781 q 368 864 367 841 q 348 843 356 852 q 330 826 339 834 q 310 809 320 818 q 286 788 300 800 l 186 706 l 121 789 l 380 992 l 482 992 l 482 0 "},"2":{"x_min":65,"x_max":683.34375,"ha":765,"o":"m 683 0 l 65 0 l 65 105 l 301 364 q 392 464 352 419 q 460 553 432 510 q 503 640 488 596 q 518 736 518 684 q 507 806 518 775 q 474 857 495 836 q 423 890 452 879 q 358 900 394 900 q 242 874 294 900 q 144 808 190 849 l 75 889 q 133 935 102 913 q 200 972 164 956 q 276 996 236 987 q 360 1006 316 1006 q 478 987 425 1006 q 567 935 530 969 q 623 851 603 900 q 644 740 644 802 q 626 630 644 683 q 576 528 608 578 q 501 426 545 477 q 406 320 457 375 l 216 118 l 216 112 l 683 112 l 683 0 "},"3":{"x_min":56,"x_max":682,"ha":765,"o":"m 651 759 q 635 668 651 709 q 591 598 619 628 q 524 548 563 568 q 436 521 484 529 l 436 517 q 619 441 556 502 q 682 281 682 379 q 659 162 682 216 q 593 68 637 108 q 480 7 548 29 q 318 -14 411 -14 q 178 -2 244 -14 q 56 39 113 9 l 56 154 q 184 107 115 124 q 316 91 252 91 q 424 104 378 91 q 499 142 469 118 q 542 204 528 167 q 556 285 556 240 q 538 363 556 331 q 487 417 520 396 q 405 448 453 438 q 297 458 357 458 l 207 458 l 207 564 l 297 564 q 395 577 352 564 q 466 616 437 591 q 510 675 495 641 q 525 751 525 710 q 513 814 525 786 q 478 861 501 842 q 425 890 456 880 q 355 900 393 900 q 227 878 283 900 q 122 819 172 855 l 60 904 q 117 943 85 925 q 185 975 148 961 q 265 997 223 989 q 355 1006 307 1006 q 483 987 428 1006 q 575 936 538 969 q 632 858 613 903 q 651 759 651 812 "},"4":{"x_min":16,"x_max":738,"ha":765,"o":"m 738 222 l 593 222 l 593 0 l 474 0 l 474 222 l 16 222 l 16 329 l 465 997 l 593 997 l 593 334 l 738 334 l 738 222 m 474 334 l 474 576 q 475 656 474 614 q 477 737 476 697 q 480 811 478 777 q 482 869 482 846 l 476 869 q 464 839 471 855 q 449 806 457 822 q 431 773 440 789 q 415 747 423 758 l 136 334 l 474 334 "},"5":{"x_min":89,"x_max":688,"ha":765,"o":"m 369 608 q 494 589 436 608 q 596 534 552 570 q 663 443 639 497 q 688 317 688 388 q 664 178 688 240 q 596 74 641 116 q 484 8 550 31 q 330 -14 417 -14 q 262 -10 295 -14 q 197 0 228 -7 q 139 15 167 5 q 89 39 111 26 l 89 156 q 141 128 111 140 q 205 108 172 116 q 272 95 238 99 q 334 91 306 91 q 430 103 388 91 q 501 142 472 116 q 546 208 531 169 q 562 303 562 248 q 502 451 562 400 q 328 502 442 502 q 288 501 310 502 q 245 496 267 499 q 204 491 224 494 q 171 485 185 487 l 110 523 l 147 992 l 615 992 l 615 879 l 254 879 l 228 594 q 285 603 249 598 q 369 608 320 608 "},"6":{"x_min":77,"x_max":701,"ha":765,"o":"m 77 423 q 84 565 77 494 q 109 700 91 636 q 158 821 127 765 q 237 918 189 877 q 352 982 285 959 q 509 1006 419 1006 q 538 1005 522 1006 q 569 1002 553 1004 q 600 998 585 1001 q 626 992 614 996 l 626 884 q 573 896 602 892 q 514 900 543 900 q 407 886 453 900 q 327 845 361 872 q 271 783 294 819 q 234 703 248 747 q 213 609 220 659 q 205 505 207 559 l 213 505 q 245 551 226 530 q 290 588 265 572 q 348 612 316 603 q 420 621 380 621 q 536 600 484 621 q 624 542 588 580 q 681 447 661 503 q 701 319 701 391 q 680 180 701 242 q 619 75 659 118 q 524 9 580 32 q 400 -14 469 -14 q 273 12 332 -14 q 170 93 213 38 q 102 229 127 147 q 77 423 77 311 m 399 91 q 473 105 440 91 q 531 147 506 118 q 568 218 555 175 q 581 320 581 261 q 570 405 581 367 q 537 469 559 442 q 481 509 514 495 q 403 524 448 524 q 321 508 358 524 q 257 466 283 492 q 216 408 231 441 q 202 343 202 376 q 214 253 202 298 q 251 172 227 208 q 313 113 276 136 q 399 91 350 91 "},"7":{"x_min":61,"x_max":699,"ha":765,"o":"m 190 0 l 572 879 l 61 879 l 61 992 l 699 992 l 699 893 l 322 0 l 190 0 "},"8":{"x_min":72,"x_max":694,"ha":765,"o":"m 383 1007 q 490 992 440 1007 q 579 947 540 977 q 639 873 617 917 q 662 768 662 828 q 648 686 662 723 q 610 620 634 650 q 554 568 587 591 q 483 525 521 544 q 561 478 523 504 q 628 420 598 453 q 675 348 657 388 q 694 258 694 308 q 671 145 694 196 q 607 59 648 94 q 509 5 566 24 q 383 -14 452 -14 q 250 4 308 -14 q 152 57 192 22 q 92 141 113 91 q 72 253 72 190 q 87 344 72 304 q 128 418 102 385 q 189 476 154 451 q 264 520 225 501 q 202 566 231 541 q 151 621 172 590 q 117 688 130 651 q 105 770 105 725 q 127 873 105 829 q 188 947 150 917 q 277 992 227 977 q 383 1007 328 1007 m 191 253 q 202 187 191 217 q 236 136 213 157 q 295 102 259 114 q 379 91 330 91 q 464 102 427 91 q 525 136 500 114 q 562 189 550 158 q 574 258 574 220 q 561 322 574 293 q 523 374 547 350 q 463 420 498 399 q 385 463 428 442 l 364 472 q 235 379 278 432 q 191 253 191 327 m 381 901 q 266 866 309 901 q 224 762 224 830 q 236 696 224 724 q 269 647 248 669 q 320 609 290 626 q 384 576 349 592 q 446 608 417 590 q 496 647 475 625 q 530 698 518 670 q 542 762 542 726 q 499 866 542 830 q 381 901 456 901 "},"9":{"x_min":72,"x_max":697,"ha":765,"o":"m 697 568 q 689 426 697 497 q 664 290 682 355 q 615 170 646 226 q 536 73 584 114 q 421 9 488 32 q 263 -14 354 -14 q 235 -13 250 -14 q 204 -11 219 -12 q 173 -7 188 -9 q 147 -2 158 -5 l 147 99 q 200 87 171 91 q 259 82 230 82 q 410 115 351 82 q 504 203 469 147 q 553 332 538 258 q 571 486 568 405 l 562 486 q 530 440 549 461 q 485 404 511 419 q 426 379 459 388 q 354 371 394 371 q 237 391 289 371 q 148 449 185 411 q 92 544 112 488 q 72 672 72 600 q 93 811 72 749 q 153 916 114 873 q 248 982 192 959 q 373 1006 304 1006 q 501 979 442 1006 q 603 898 560 953 q 671 762 646 844 q 697 568 697 679 m 374 900 q 300 887 334 900 q 242 845 266 873 q 204 773 217 816 q 191 671 191 730 q 202 586 191 624 q 236 522 213 549 q 292 482 258 496 q 370 467 326 467 q 454 483 417 467 q 518 525 491 499 q 559 583 545 550 q 574 648 574 615 q 561 738 574 693 q 524 819 549 783 q 462 878 499 856 q 374 900 424 900 "},"ǻ":{"x_min":64,"x_max":626,"ha":737,"o":"m 308 1166 q 338 1203 322 1182 q 370 1246 354 1224 q 401 1290 386 1268 q 426 1331 415 1311 l 575 1331 l 575 1320 q 542 1283 564 1305 q 495 1236 521 1261 q 441 1190 469 1212 q 389 1153 413 1167 l 308 1153 l 308 1166 m 536 0 l 511 102 l 505 102 q 461 50 483 72 q 412 13 439 28 q 353 -7 386 0 q 278 -14 321 -14 q 193 0 232 -14 q 125 40 153 12 q 80 109 96 67 q 64 208 64 151 q 142 379 64 320 q 379 445 220 439 l 503 450 l 503 496 q 494 572 503 541 q 465 620 484 602 q 419 647 447 639 q 357 655 392 655 q 253 639 301 655 q 160 599 204 623 l 117 692 q 228 739 167 720 q 357 758 290 758 q 477 744 427 758 q 560 700 527 730 q 609 623 593 669 q 626 509 626 576 l 626 0 l 536 0 m 310 88 q 386 101 351 88 q 447 140 422 114 q 488 205 473 166 q 502 298 502 245 l 502 365 l 405 360 q 303 346 345 357 q 237 316 262 336 q 202 270 213 297 q 191 208 191 243 q 224 117 191 146 q 310 88 257 88 m 522 959 q 510 897 522 924 q 477 850 498 869 q 428 821 456 831 q 366 812 400 812 q 305 821 332 812 q 257 850 277 831 q 226 896 237 869 q 215 958 215 923 q 226 1019 215 992 q 257 1065 237 1046 q 305 1094 277 1084 q 366 1104 332 1104 q 427 1094 399 1104 q 477 1065 456 1084 q 510 1020 498 1046 q 522 959 522 993 m 447 958 q 425 1014 447 994 q 368 1034 403 1034 q 311 1014 333 1034 q 289 958 289 994 q 309 901 289 921 q 368 881 329 881 q 425 901 403 881 q 447 958 447 921 "},"Á":{"x_min":-0.25,"x_max":844.25,"ha":844,"o":"m 715 0 l 606 307 l 237 307 l 127 0 l 0 0 l 364 996 l 479 996 l 844 0 l 715 0 m 566 419 l 466 706 q 456 736 462 719 q 444 774 450 754 q 432 817 438 795 q 421 860 426 839 q 410 816 416 839 q 397 773 404 794 q 386 735 391 752 q 376 706 380 718 l 277 419 l 566 419 m 362 1089 q 392 1134 376 1108 q 424 1187 408 1160 q 455 1242 440 1215 q 480 1293 469 1269 l 629 1293 l 629 1278 q 596 1233 618 1260 q 549 1175 575 1205 q 495 1118 523 1146 q 444 1071 467 1089 l 362 1071 l 362 1089 "},"ĥ":{"x_min":118,"x_max":707,"ha":818,"o":"m 583 0 l 583 479 q 547 611 583 567 q 436 655 512 655 q 343 637 381 655 q 283 585 306 620 q 251 501 261 551 q 241 385 241 450 l 241 0 l 118 0 l 118 1055 l 241 1055 l 241 741 l 236 644 l 242 644 q 283 694 259 673 q 334 730 306 715 q 393 751 362 744 q 457 758 424 758 q 644 693 581 758 q 707 486 707 628 l 707 0 l 583 0 m 655 1109 l 573 1109 q 501 1164 538 1131 q 430 1234 465 1197 q 357 1164 393 1197 q 287 1109 321 1131 l 205 1109 l 205 1127 q 245 1172 222 1146 q 291 1225 268 1198 q 334 1280 314 1253 q 364 1331 354 1307 l 495 1331 q 525 1280 505 1307 q 568 1225 545 1253 q 614 1172 591 1198 q 655 1127 638 1146 l 655 1109 "},"Κ":{"x_min":135,"x_max":804.25,"ha":804,"o":"m 804 0 l 661 0 l 355 473 l 261 396 l 261 0 l 135 0 l 135 992 l 261 992 l 261 496 l 343 609 l 649 992 l 791 992 l 438 559 l 804 0 "},"»":{"x_min":57,"x_max":621.5,"ha":676,"o":"m 621 356 l 411 78 l 333 130 l 494 367 l 333 603 l 411 656 l 621 375 l 621 356 m 345 356 l 136 78 l 57 130 l 218 367 l 57 603 l 136 656 l 345 375 l 345 356 "},"∆":{"x_min":28,"x_max":761,"ha":789,"o":"m 28 76 l 330 992 l 457 992 l 761 75 l 761 0 l 28 0 l 28 76 m 456 625 q 419 748 434 691 q 393 856 403 805 q 367 748 381 805 q 333 629 353 691 l 161 111 l 627 111 l 456 625 "},"ў":{"x_min":6.75,"x_max":672.25,"ha":679,"o":"m 6 745 l 134 745 l 280 329 q 300 272 290 301 q 318 212 310 242 q 333 154 327 182 q 341 103 339 126 l 346 103 q 356 149 349 120 q 373 211 364 178 q 392 276 382 244 q 409 330 402 308 l 544 745 l 672 745 l 377 -96 q 336 -195 358 -152 q 285 -270 314 -239 q 217 -317 256 -300 q 123 -334 177 -334 q 62 -330 88 -334 q 18 -322 36 -326 l 18 -223 q 54 -229 32 -226 q 99 -231 75 -231 q 156 -223 132 -231 q 197 -201 179 -216 q 227 -164 215 -186 q 250 -115 240 -142 l 289 -6 l 6 745 m 607 1058 q 586 964 602 1005 q 538 897 569 924 q 458 855 506 869 q 342 842 410 842 q 225 855 273 842 q 148 895 177 868 q 104 963 118 922 q 87 1058 90 1003 l 202 1058 q 214 990 205 1016 q 241 949 224 964 q 283 929 258 934 q 345 923 309 923 q 400 930 375 923 q 443 952 425 937 q 473 993 461 968 q 488 1058 484 1019 l 607 1058 "},"ţ":{"x_min":23,"x_max":445,"ha":471,"o":"m 343 88 q 371 89 355 88 q 400 93 386 91 q 426 97 415 95 q 445 102 438 100 l 445 8 q 422 0 436 3 q 392 -7 409 -4 q 358 -12 376 -10 q 324 -14 341 -14 q 246 -3 282 -14 q 184 34 210 7 q 142 106 157 61 q 128 221 128 152 l 128 656 l 23 656 l 23 709 l 128 759 l 180 915 l 251 915 l 251 745 l 439 745 l 439 656 l 251 656 l 251 221 q 272 121 251 155 q 343 88 294 88 m 138 -288 q 154 -246 145 -271 q 171 -191 163 -220 q 185 -135 179 -163 q 194 -85 192 -107 l 317 -85 l 317 -98 q 302 -141 312 -115 q 276 -197 291 -167 q 242 -255 261 -226 q 204 -307 224 -284 l 138 -307 l 138 -288 "},"«":{"x_min":55.5,"x_max":620,"ha":676,"o":"m 55 375 l 264 656 l 344 603 l 183 367 l 344 130 l 264 78 l 55 356 l 55 375 m 331 375 l 541 656 l 620 603 l 459 367 l 620 130 l 541 78 l 331 356 l 331 375 "},"í":{"x_min":118,"x_max":392,"ha":359,"o":"m 241 0 l 118 0 l 118 745 l 241 745 l 241 0 m 125 860 q 155 905 139 879 q 187 958 171 931 q 218 1013 203 986 q 243 1064 232 1040 l 392 1064 l 392 1049 q 359 1004 381 1031 q 312 946 338 976 q 258 889 286 917 q 207 842 230 860 l 125 842 l 125 860 "},"ņ":{"x_min":118,"x_max":707,"ha":818,"o":"m 583 0 l 583 479 q 547 611 583 567 q 436 655 512 655 q 343 637 381 655 q 283 585 306 620 q 251 501 261 551 q 241 385 241 450 l 241 0 l 118 0 l 118 745 l 218 745 l 236 644 l 242 644 q 283 694 259 673 q 334 730 306 715 q 393 751 362 744 q 457 758 424 758 q 644 693 581 758 q 707 486 707 628 l 707 0 l 583 0 m 300 -288 q 316 -246 307 -271 q 333 -191 325 -220 q 347 -135 341 -163 q 356 -85 354 -107 l 479 -85 l 479 -98 q 464 -141 474 -115 q 438 -197 453 -167 q 404 -255 423 -226 q 366 -307 386 -284 l 300 -307 l 300 -288 "},"µ":{"x_min":118,"x_max":706,"ha":825,"o":"m 241 264 q 277 132 241 176 q 388 88 313 88 q 481 106 443 88 q 540 158 518 123 q 573 242 563 192 q 582 357 582 292 l 582 745 l 706 745 l 706 0 l 606 0 l 588 99 l 581 99 q 500 14 548 43 q 381 -14 451 -14 q 296 1 332 -14 q 237 45 261 17 q 239 -7 238 19 q 241 -59 240 -30 q 241 -117 241 -88 l 241 -334 l 118 -334 l 118 745 l 241 745 l 241 264 "},"ỳ":{"x_min":6.75,"x_max":672.25,"ha":679,"o":"m 6 745 l 134 745 l 280 329 q 300 272 290 301 q 318 212 310 242 q 333 154 327 182 q 341 103 339 126 l 346 103 q 356 149 349 120 q 373 211 364 178 q 392 276 382 244 q 409 330 402 308 l 544 745 l 672 745 l 377 -96 q 336 -195 358 -152 q 285 -270 314 -239 q 217 -317 256 -300 q 123 -334 177 -334 q 62 -330 88 -334 q 18 -322 36 -326 l 18 -223 q 54 -229 32 -226 q 99 -231 75 -231 q 156 -223 132 -231 q 197 -201 179 -216 q 227 -164 215 -186 q 250 -115 240 -142 l 289 -6 l 6 745 m 411 842 l 329 842 q 277 889 305 860 q 223 946 249 917 q 176 1004 197 976 q 144 1049 154 1031 l 144 1064 l 292 1064 q 318 1013 303 1040 q 348 958 332 986 q 380 905 364 931 q 411 860 396 879 l 411 842 "},"Ι":{"x_min":55.34375,"x_max":414.8125,"ha":471,"o":"m 414 0 l 55 0 l 55 69 l 172 96 l 172 895 l 55 922 l 55 992 l 414 992 l 414 922 l 298 895 l 298 96 l 414 69 l 414 0 "},"Ύ":{"x_min":-18,"x_max":924.25,"ha":925,"o":"m 557 490 l 788 992 l 924 992 l 621 386 l 621 0 l 495 0 l 495 379 l 192 992 l 330 992 l 557 490 m -18 789 q -4 835 -11 809 q 8 889 2 861 q 20 943 15 916 q 29 993 26 970 l 164 993 l 164 978 q 148 936 159 962 q 122 880 137 909 q 89 821 106 850 q 55 771 71 792 l -18 771 l -18 789 "},"ѕ":{"x_min":61.15625,"x_max":564,"ha":627,"o":"m 564 203 q 544 108 564 149 q 487 40 524 68 q 398 0 450 13 q 281 -14 346 -14 q 154 -2 207 -14 q 61 33 101 9 l 61 146 q 107 125 82 135 q 161 106 133 114 q 219 93 189 98 q 279 88 249 88 q 353 95 323 88 q 403 116 384 103 q 431 150 423 130 q 440 194 440 170 q 433 232 440 215 q 409 265 427 249 q 360 299 391 282 q 280 337 329 316 q 193 378 232 358 q 127 424 154 399 q 86 482 100 449 q 72 560 72 515 q 90 645 72 608 q 143 707 109 682 q 224 745 177 732 q 330 758 272 758 q 451 743 396 758 q 554 706 505 729 l 512 606 q 422 641 468 626 q 329 655 376 655 q 228 632 261 655 q 195 568 195 610 q 203 526 195 544 q 229 493 210 509 q 279 461 248 477 q 358 426 311 445 q 444 385 406 405 q 509 339 482 365 q 549 281 535 314 q 564 203 564 249 "},"Ш":{"x_min":135,"x_max":1250,"ha":1385,"o":"m 1250 0 l 135 0 l 135 992 l 261 992 l 261 111 l 629 111 l 629 992 l 755 992 l 755 111 l 1123 111 l 1123 992 l 1250 992 l 1250 0 "},"M":{"x_min":135,"x_max":1074,"ha":1209,"o":"m 544 0 l 253 868 l 248 868 q 255 768 252 818 q 259 678 257 726 q 261 593 261 631 l 261 0 l 135 0 l 135 992 l 331 992 l 601 183 l 605 183 l 886 992 l 1074 992 l 1074 0 l 947 0 l 947 601 q 949 682 947 637 q 952 769 950 728 q 957 867 955 817 l 951 867 l 648 0 l 544 0 "},"Ψ":{"x_min":71,"x_max":994,"ha":1065,"o":"m 994 667 q 985 582 994 625 q 959 499 977 539 q 913 423 942 458 q 844 360 885 387 q 749 318 803 334 q 626 303 694 303 l 594 303 l 594 0 l 468 0 l 468 303 l 436 303 q 314 318 368 303 q 220 359 260 333 q 151 421 179 386 q 105 497 122 456 q 79 580 87 537 q 71 664 71 623 l 71 992 l 204 992 l 204 667 q 219 560 204 607 q 265 479 235 512 q 342 428 295 446 q 450 410 388 410 l 468 410 l 468 992 l 594 992 l 594 410 l 611 410 q 798 477 737 410 q 860 664 860 544 l 860 992 l 994 992 l 994 667 "},"ũ":{"x_min":111,"x_max":700,"ha":818,"o":"m 600 0 l 582 99 l 575 99 q 534 48 558 70 q 483 13 511 27 q 424 -7 455 0 q 360 -14 393 -14 q 252 1 299 -14 q 174 50 205 17 q 126 135 142 83 q 111 258 111 186 l 111 745 l 234 745 l 234 264 q 270 132 234 176 q 381 88 306 88 q 474 106 436 88 q 534 158 511 123 q 566 242 556 192 q 576 357 576 292 l 576 745 l 700 745 l 700 0 l 600 0 m 510 843 q 456 854 483 843 q 404 881 430 866 q 354 907 378 895 q 309 919 330 919 q 262 901 278 919 q 236 841 246 883 l 166 841 q 180 915 169 882 q 209 972 191 948 q 252 1008 227 995 q 309 1021 277 1021 q 365 1009 337 1021 q 418 982 392 997 q 467 956 444 968 q 510 944 491 944 q 556 962 541 944 q 582 1022 572 980 l 654 1022 q 639 948 650 981 q 610 892 628 915 q 567 855 592 868 q 510 843 542 843 "},"ŭ":{"x_min":111,"x_max":700,"ha":818,"o":"m 600 0 l 582 99 l 575 99 q 534 48 558 70 q 483 13 511 27 q 424 -7 455 0 q 360 -14 393 -14 q 252 1 299 -14 q 174 50 205 17 q 126 135 142 83 q 111 258 111 186 l 111 745 l 234 745 l 234 264 q 270 132 234 176 q 381 88 306 88 q 474 106 436 88 q 534 158 511 123 q 566 242 556 192 q 576 357 576 292 l 576 745 l 700 745 l 700 0 l 600 0 m 612 1030 q 594 954 609 988 q 553 894 579 920 q 490 855 527 869 q 405 842 453 842 q 318 855 355 842 q 257 893 281 868 q 219 952 232 918 q 204 1030 206 987 l 278 1030 q 290 983 281 1000 q 316 957 300 965 q 355 946 332 948 q 408 943 378 943 q 454 946 432 943 q 494 959 476 949 q 523 985 511 968 q 537 1030 534 1002 l 612 1030 "},"―":{"x_min":56,"x_max":1333,"ha":1389,"o":"m 56 315 l 56 429 l 1333 429 l 1333 315 l 56 315 "},"{":{"x_min":41,"x_max":456,"ha":492,"o":"m 338 -10 q 346 -64 338 -43 q 369 -96 354 -84 q 407 -113 385 -108 q 456 -118 428 -117 l 456 -220 q 359 -208 404 -219 q 283 -172 315 -196 q 233 -110 251 -148 q 215 -19 215 -73 l 215 208 q 170 307 215 278 q 41 337 125 337 l 41 439 q 170 468 125 439 q 215 567 215 497 l 215 793 q 233 883 215 846 q 283 944 251 920 q 359 980 315 968 q 456 992 404 991 l 456 890 q 407 885 428 889 q 369 868 385 880 q 346 836 354 857 q 338 783 338 815 l 338 559 q 298 446 338 488 q 180 391 258 405 l 180 383 q 298 328 258 369 q 338 214 338 286 l 338 -10 "},"¼":{"x_min":42,"x_max":962.765625,"ha":1023,"o":"m 207 992 l 297 992 l 297 397 l 201 397 l 201 754 q 201 792 201 771 q 202 833 201 813 q 204 873 203 854 q 206 908 205 893 q 184 881 196 895 q 156 853 171 866 l 92 799 l 42 864 l 207 992 m 815 992 l 264 0 l 157 0 l 708 992 l 815 992 m 962 133 l 877 133 l 877 0 l 781 0 l 781 133 l 526 133 l 526 208 l 782 599 l 877 599 l 877 217 l 962 217 l 962 133 m 781 217 l 781 368 q 782 439 781 400 q 785 515 783 477 q 774 492 781 507 q 760 462 767 478 q 744 430 752 445 q 729 403 736 414 l 622 217 l 781 217 "},"Ḿ":{"x_min":135,"x_max":1074,"ha":1209,"o":"m 544 0 l 253 868 l 248 868 q 255 768 252 818 q 259 678 257 726 q 261 593 261 631 l 261 0 l 135 0 l 135 992 l 331 992 l 601 183 l 605 183 l 886 992 l 1074 992 l 1074 0 l 947 0 l 947 601 q 949 682 947 637 q 952 769 950 728 q 957 867 955 817 l 951 867 l 648 0 l 544 0 m 522 1091 q 552 1136 536 1110 q 584 1189 568 1162 q 615 1244 600 1217 q 640 1295 629 1271 l 789 1295 l 789 1280 q 756 1235 778 1262 q 709 1177 735 1207 q 655 1120 683 1148 q 604 1073 627 1091 l 522 1073 l 522 1091 "},"ι":{"x_min":111,"x_max":428,"ha":454,"o":"m 234 743 l 234 220 q 255 121 234 154 q 326 88 277 88 q 353 89 338 88 q 383 93 368 91 q 409 97 397 95 q 428 102 421 100 l 428 8 q 405 0 419 3 q 375 -7 391 -4 q 341 -12 358 -10 q 307 -14 323 -14 q 229 -3 265 -14 q 167 34 193 7 q 125 105 140 60 q 111 219 111 150 l 111 743 l 234 743 "},"Ĳ":{"x_min":55.34375,"x_max":722.15625,"ha":847,"o":"m 414 0 l 55 0 l 55 69 l 172 96 l 172 895 l 55 922 l 55 992 l 414 992 l 414 922 l 298 895 l 298 96 l 414 69 l 414 0 m 451 -264 q 390 -259 416 -264 q 346 -247 364 -255 l 346 -139 q 395 -149 369 -145 q 452 -152 422 -152 q 503 -146 477 -152 q 549 -122 528 -139 q 583 -76 570 -105 q 596 0 596 -46 l 596 992 l 722 992 l 722 13 q 702 -109 722 -57 q 646 -196 682 -162 q 561 -247 611 -230 q 451 -264 511 -264 "},"Ê":{"x_min":135,"x_max":650,"ha":733,"o":"m 650 0 l 135 0 l 135 992 l 650 992 l 650 880 l 261 880 l 261 574 l 624 574 l 624 462 l 261 462 l 261 111 l 650 111 l 650 0 m 616 1071 l 534 1071 q 462 1126 499 1093 q 391 1196 426 1159 q 318 1126 354 1159 q 248 1071 282 1093 l 166 1071 l 166 1089 q 206 1134 183 1108 q 252 1187 229 1160 q 295 1242 275 1215 q 325 1293 315 1269 l 456 1293 q 486 1242 466 1269 q 529 1187 506 1215 q 575 1134 552 1160 q 616 1089 599 1108 l 616 1071 "},"Ά":{"x_min":-16,"x_max":844.25,"ha":844,"o":"m 715 0 l 606 307 l 237 307 l 127 0 l 0 0 l 364 996 l 479 996 l 844 0 l 715 0 m 566 419 l 466 706 q 456 736 462 719 q 444 774 450 754 q 432 817 438 795 q 421 860 426 839 q 410 816 416 839 q 397 773 404 794 q 386 735 391 752 q 376 706 380 718 l 277 419 l 566 419 m -16 789 q -2 835 -9 809 q 10 889 4 861 q 22 943 17 916 q 31 993 28 970 l 166 993 l 166 978 q 150 936 161 962 q 124 880 139 909 q 91 821 108 850 q 57 771 73 792 l -16 771 l -16 789 "},")":{"x_min":42,"x_max":363,"ha":418,"o":"m 363 380 q 350 214 363 296 q 313 57 338 133 q 249 -89 287 -19 q 158 -220 211 -158 l 43 -220 q 126 -84 90 -156 q 186 64 162 -12 q 223 221 211 141 q 235 381 235 301 q 186 704 235 547 q 42 992 137 861 l 158 992 q 249 857 211 928 q 313 708 287 785 q 350 547 338 630 q 363 380 363 465 "},"ε":{"x_min":61,"x_max":583,"ha":629,"o":"m 453 439 l 453 336 l 366 336 q 229 305 273 336 q 184 210 184 274 q 198 152 184 176 q 235 114 212 129 q 291 94 259 100 q 360 88 323 88 q 426 93 395 88 q 484 106 457 98 q 535 125 511 114 q 580 146 559 135 l 580 37 q 486 0 540 14 q 359 -14 433 -14 q 226 2 282 -14 q 133 48 170 19 q 78 117 96 77 q 61 203 61 157 q 73 275 61 245 q 108 326 86 305 q 157 361 129 347 q 215 385 185 375 l 215 392 q 162 416 185 402 q 121 452 138 431 q 94 500 103 473 q 85 561 85 527 q 104 645 85 608 q 159 707 124 682 q 244 745 195 732 q 351 758 293 758 q 417 754 387 758 q 475 745 448 751 q 529 729 503 739 q 583 706 555 720 l 540 606 q 445 642 489 629 q 353 655 401 655 q 240 629 279 655 q 201 551 201 603 q 214 499 201 520 q 252 464 228 477 q 311 445 277 451 q 386 439 345 439 l 453 439 "},"э":{"x_min":37,"x_max":566,"ha":642,"o":"m 218 -14 q 115 -3 157 -14 q 37 26 73 6 l 37 135 q 118 106 73 118 q 219 93 163 93 q 308 107 269 93 q 376 149 348 121 q 420 223 404 178 q 439 331 437 268 l 114 331 l 114 434 l 438 434 q 379 598 429 547 q 234 650 329 650 q 197 647 217 650 q 156 638 176 644 q 116 627 135 633 q 82 614 97 621 l 45 718 q 83 733 62 726 q 130 746 105 741 q 180 754 154 751 q 233 758 207 758 q 363 736 302 758 q 468 669 424 715 q 539 548 513 623 q 566 367 566 474 q 538 196 566 268 q 463 78 511 125 q 352 8 415 31 q 218 -14 289 -14 "},"ш":{"x_min":118,"x_max":1089,"ha":1207,"o":"m 665 102 l 965 102 l 965 745 l 1089 745 l 1089 0 l 118 0 l 118 745 l 241 745 l 241 102 l 542 102 l 542 745 l 665 745 l 665 102 "},"Я":{"x_min":16.75,"x_max":685,"ha":819,"o":"m 391 410 l 165 0 l 16 0 l 275 444 q 204 479 237 458 q 145 533 170 500 q 104 612 119 566 q 90 721 90 658 q 175 923 90 855 q 431 992 261 992 l 685 992 l 685 0 l 558 0 l 558 410 l 391 410 m 558 884 l 432 884 q 343 874 382 884 q 277 843 304 864 q 237 789 251 822 q 223 710 223 756 q 236 630 223 666 q 276 569 249 595 q 342 531 302 544 q 437 517 382 517 l 558 517 l 558 884 "},"a":{"x_min":64,"x_max":626,"ha":737,"o":"m 536 0 l 511 102 l 505 102 q 461 50 483 72 q 412 13 439 28 q 353 -7 386 0 q 278 -14 321 -14 q 193 0 232 -14 q 125 40 153 12 q 80 109 96 67 q 64 208 64 151 q 142 379 64 320 q 379 445 220 439 l 503 450 l 503 496 q 494 572 503 541 q 465 620 484 602 q 419 647 447 639 q 357 655 392 655 q 253 639 301 655 q 160 599 204 623 l 117 692 q 228 739 167 720 q 357 758 290 758 q 477 744 427 758 q 560 700 527 730 q 609 623 593 669 q 626 509 626 576 l 626 0 l 536 0 m 310 88 q 386 101 351 88 q 447 140 422 114 q 488 205 473 166 q 502 298 502 245 l 502 365 l 405 360 q 303 346 345 357 q 237 316 262 336 q 202 270 213 297 q 191 208 191 243 q 224 117 191 146 q 310 88 257 88 "},"Ę":{"x_min":135,"x_max":650,"ha":733,"o":"m 650 0 l 135 0 l 135 992 l 650 992 l 650 880 l 261 880 l 261 574 l 624 574 l 624 462 l 261 462 l 261 111 l 650 111 l 650 0 m 489 -161 q 507 -206 489 -191 q 549 -220 525 -220 q 582 -218 566 -220 q 608 -214 598 -217 l 608 -291 q 568 -299 590 -296 q 527 -302 547 -302 q 425 -266 459 -302 q 392 -170 392 -231 q 401 -116 392 -142 q 427 -69 411 -91 q 460 -30 442 -48 q 496 0 479 -12 l 583 0 q 489 -161 489 -90 "},"Z":{"x_min":56,"x_max":693,"ha":749,"o":"m 693 0 l 56 0 l 56 97 l 537 880 l 70 880 l 70 992 l 679 992 l 679 894 l 197 111 l 693 111 l 693 0 "}," ":{"x_min":0,"x_max":0,"ha":231},"k":{"x_min":118,"x_max":684.25,"ha":689,"o":"m 233 384 l 324 500 l 522 745 l 665 745 l 394 422 l 684 0 l 542 0 l 315 341 l 241 286 l 241 0 l 118 0 l 118 1055 l 241 1055 l 241 571 l 230 384 l 233 384 "},"Ù":{"x_min":125,"x_max":845,"ha":970,"o":"m 845 993 l 845 349 q 822 205 845 272 q 755 90 800 139 q 641 13 709 41 q 481 -14 573 -14 q 327 12 394 -14 q 216 86 261 38 q 148 202 171 134 q 125 352 125 269 l 125 991 l 251 991 l 251 346 q 309 162 251 227 q 487 97 368 97 q 591 115 548 97 q 663 167 635 133 q 704 246 690 200 q 718 347 718 292 l 718 993 l 845 993 m 575 1071 l 493 1071 q 441 1118 469 1089 q 387 1175 413 1146 q 340 1233 361 1205 q 308 1278 318 1260 l 308 1293 l 456 1293 q 482 1242 467 1269 q 512 1187 496 1215 q 544 1134 528 1160 q 575 1089 560 1108 l 575 1071 "},"Ů":{"x_min":125,"x_max":845,"ha":970,"o":"m 845 993 l 845 349 q 822 205 845 272 q 755 90 800 139 q 641 13 709 41 q 481 -14 573 -14 q 327 12 394 -14 q 216 86 261 38 q 148 202 171 134 q 125 352 125 269 l 125 991 l 251 991 l 251 346 q 309 162 251 227 q 487 97 368 97 q 591 115 548 97 q 663 167 635 133 q 704 246 690 200 q 718 347 718 292 l 718 993 l 845 993 m 639 1218 q 627 1156 639 1183 q 594 1109 615 1128 q 545 1080 573 1090 q 483 1071 516 1071 q 421 1080 449 1071 q 373 1109 393 1090 q 342 1155 353 1128 q 332 1217 332 1182 q 342 1278 332 1251 q 373 1324 353 1305 q 421 1353 393 1343 q 483 1363 449 1363 q 544 1353 516 1363 q 594 1324 573 1343 q 627 1279 615 1305 q 639 1218 639 1252 m 564 1217 q 542 1273 564 1253 q 485 1293 520 1293 q 428 1273 450 1293 q 406 1217 406 1253 q 426 1160 406 1180 q 485 1140 446 1140 q 542 1160 520 1140 q 564 1217 564 1180 "},"¢":{"x_min":128,"x_max":647,"ha":765,"o":"m 634 162 q 574 133 605 143 q 498 121 542 123 l 498 -14 l 382 -14 l 382 126 q 276 160 323 134 q 196 230 229 185 q 145 343 163 275 q 128 503 128 410 q 145 668 128 599 q 196 783 163 737 q 276 854 229 829 q 382 889 323 880 l 382 1006 l 498 1006 l 498 894 q 580 880 540 892 q 647 853 620 869 l 611 747 q 576 761 595 754 q 537 772 557 767 q 496 780 516 777 q 459 783 476 783 q 304 715 353 783 q 255 504 255 647 q 304 296 255 362 q 454 231 353 231 q 553 243 509 231 q 634 272 598 256 l 634 162 "},"В":{"x_min":135,"x_max":786,"ha":863,"o":"m 135 992 l 405 992 q 558 978 492 992 q 668 936 624 965 q 735 858 713 906 q 758 740 758 810 q 744 662 758 698 q 707 597 731 625 q 645 551 682 569 q 563 526 609 532 l 563 519 q 650 496 609 511 q 720 454 690 480 q 768 386 751 427 q 786 287 786 345 q 763 166 786 219 q 700 76 741 113 q 598 19 658 39 q 463 0 539 0 l 135 0 l 135 992 m 261 572 l 427 572 q 523 582 485 572 q 586 612 562 592 q 621 662 610 632 q 631 732 631 692 q 579 848 631 813 q 413 884 526 884 l 261 884 l 261 572 m 261 464 l 261 107 l 441 107 q 541 121 500 107 q 606 159 581 134 q 641 217 630 183 q 652 292 652 251 q 641 362 652 330 q 604 416 630 393 q 537 451 579 439 q 433 464 495 464 l 261 464 "},"І":{"x_min":55.34375,"x_max":414.8125,"ha":471,"o":"m 414 0 l 55 0 l 55 69 l 172 96 l 172 895 l 55 922 l 55 992 l 414 992 l 414 922 l 298 895 l 298 96 l 414 69 l 414 0 "},"ē":{"x_min":77,"x_max":673,"ha":743,"o":"m 412 -14 q 276 11 337 -14 q 170 84 214 36 q 101 203 125 132 q 77 366 77 274 q 99 531 77 458 q 162 654 121 604 q 259 731 202 705 q 384 758 316 758 q 505 733 451 758 q 595 665 558 709 q 653 560 633 621 q 673 423 673 498 l 673 346 l 204 346 q 259 155 207 216 q 413 93 311 93 q 477 97 448 93 q 534 107 507 100 q 587 123 561 113 q 639 145 613 133 l 639 35 q 586 13 612 22 q 533 -2 560 3 q 476 -11 505 -8 q 412 -14 446 -14 m 384 655 q 260 602 306 655 q 207 449 214 549 l 545 449 q 536 533 545 495 q 507 598 526 571 q 457 640 487 625 q 384 655 427 655 m 192 943 l 582 943 l 582 842 l 192 842 l 192 943 "},"β":{"x_min":118,"x_max":774,"ha":836,"o":"m 427 1063 q 548 1046 493 1063 q 643 996 603 1029 q 706 913 683 963 q 729 796 729 863 q 677 637 729 695 q 528 563 625 578 l 528 559 q 711 476 648 544 q 774 281 774 407 q 752 152 774 207 q 690 60 731 97 q 591 4 649 23 q 458 -14 532 -14 q 337 -3 393 -14 q 241 28 282 7 l 241 -334 l 118 -334 l 118 743 q 141 887 118 826 q 205 986 164 947 q 303 1044 246 1025 q 427 1063 360 1063 m 427 960 q 355 950 389 960 q 296 913 321 939 q 256 845 271 888 q 241 737 241 802 l 241 142 q 289 120 263 130 q 344 102 316 110 q 399 92 371 95 q 452 88 427 88 q 544 101 506 88 q 605 141 581 115 q 640 205 629 167 q 650 291 650 243 q 632 385 650 345 q 581 451 614 425 q 504 490 549 477 q 405 502 459 502 l 336 502 l 336 605 l 388 605 q 483 618 443 605 q 550 656 523 632 q 589 715 576 681 q 601 791 601 750 q 588 865 601 834 q 552 918 575 897 q 497 950 529 939 q 427 960 465 960 "},"≠":{"x_min":69,"x_max":696,"ha":765,"o":"m 237 300 l 69 300 l 69 402 l 285 402 l 367 577 l 69 577 l 69 679 l 414 679 l 504 870 l 598 830 l 526 679 l 696 679 l 696 577 l 479 577 l 396 402 l 696 402 l 696 300 l 349 300 l 260 111 l 167 150 l 237 300 "},"‼":{"x_min":100,"x_max":587.265625,"ha":688,"o":"m 543 280 l 461 280 l 427 992 l 577 992 l 543 280 m 415 74 q 421 118 415 100 q 440 147 428 136 q 467 163 451 158 q 501 169 482 169 q 534 163 518 169 q 562 147 550 158 q 580 118 573 136 q 587 74 587 100 q 580 31 587 49 q 562 2 573 13 q 534 -14 550 -9 q 501 -20 518 -20 q 467 -14 482 -20 q 440 2 451 -9 q 421 31 428 13 q 415 74 415 49 m 228 280 l 146 280 l 112 992 l 262 992 l 228 280 m 100 74 q 106 118 100 100 q 125 147 113 136 q 152 163 136 158 q 186 169 167 169 q 219 163 203 169 q 247 147 235 158 q 265 118 258 136 q 272 74 272 100 q 265 31 272 49 q 247 2 258 13 q 219 -14 235 -9 q 186 -20 203 -20 q 152 -14 167 -20 q 125 2 136 -9 q 106 31 113 13 q 100 74 100 49 "},"¥":{"x_min":20,"x_max":751,"ha":765,"o":"m 384 490 l 621 992 l 751 992 l 490 471 l 652 471 l 652 363 l 448 363 l 448 271 l 652 271 l 652 163 l 448 163 l 448 0 l 322 0 l 322 163 l 118 163 l 118 271 l 322 271 l 322 363 l 118 363 l 118 471 l 276 471 l 20 992 l 150 992 l 384 490 "},"Ĥ":{"x_min":135,"x_max":839,"ha":974,"o":"m 839 0 l 712 0 l 712 462 l 261 462 l 261 0 l 135 0 l 135 992 l 261 992 l 261 574 l 712 574 l 712 992 l 839 992 l 839 0 m 712 1071 l 630 1071 q 558 1126 595 1093 q 487 1196 522 1159 q 414 1126 450 1159 q 344 1071 378 1093 l 262 1071 l 262 1089 q 302 1134 279 1108 q 348 1187 325 1160 q 391 1242 371 1215 q 421 1293 411 1269 l 552 1293 q 582 1242 562 1269 q 625 1187 602 1215 q 671 1134 648 1160 q 712 1089 695 1108 l 712 1071 "},"U":{"x_min":125,"x_max":845,"ha":970,"o":"m 845 993 l 845 349 q 822 205 845 272 q 755 90 800 139 q 641 13 709 41 q 481 -14 573 -14 q 327 12 394 -14 q 216 86 261 38 q 148 202 171 134 q 125 352 125 269 l 125 991 l 251 991 l 251 346 q 309 162 251 227 q 487 97 368 97 q 591 115 548 97 q 663 167 635 133 q 704 246 690 200 q 718 347 718 292 l 718 993 l 845 993 "},"Ñ":{"x_min":135,"x_max":878,"ha":1013,"o":"m 878 0 l 724 0 l 253 821 l 248 821 q 255 717 252 768 q 259 624 257 673 q 261 538 261 576 l 261 0 l 135 0 l 135 992 l 288 992 l 757 174 l 762 174 q 757 276 759 226 q 755 321 756 298 q 753 366 754 343 q 752 410 752 389 q 751 449 751 431 l 751 992 l 878 992 l 878 0 m 614 1072 q 560 1083 587 1072 q 508 1110 534 1095 q 458 1136 482 1124 q 413 1148 434 1148 q 366 1130 382 1148 q 340 1070 350 1112 l 270 1070 q 284 1144 273 1111 q 313 1201 295 1177 q 356 1237 331 1224 q 413 1250 381 1250 q 469 1238 441 1250 q 522 1211 496 1226 q 571 1185 548 1197 q 614 1173 595 1173 q 660 1191 645 1173 q 686 1251 676 1209 l 758 1251 q 743 1177 754 1210 q 714 1121 732 1144 q 671 1084 696 1097 q 614 1072 646 1072 "},"F":{"x_min":135,"x_max":649,"ha":682,"o":"m 261 0 l 135 0 l 135 992 l 649 992 l 649 880 l 261 880 l 261 531 l 623 531 l 623 419 l 261 419 l 261 0 "},"ϑ":{"x_min":7.125,"x_max":815.203125,"ha":834,"o":"m 594 664 q 566 793 585 736 q 521 888 547 850 q 464 948 495 927 q 401 968 433 968 q 321 939 350 968 q 292 861 292 909 q 307 788 292 824 q 359 726 323 753 q 452 681 394 698 q 594 664 509 664 m 722 575 q 724 540 723 560 q 725 499 725 520 q 703 296 725 390 q 637 133 681 202 q 527 25 594 64 q 372 -14 461 -14 q 247 4 297 -14 q 169 55 198 23 q 128 129 140 87 q 117 218 117 172 q 120 277 117 245 q 127 338 123 308 q 134 394 131 368 q 138 435 138 419 q 127 477 138 466 q 95 488 117 488 q 61 483 79 488 q 32 471 43 478 l 7 560 q 66 581 32 572 q 136 591 100 591 q 194 581 171 591 q 233 555 218 572 q 255 515 248 538 q 261 465 261 492 q 258 412 261 441 q 250 351 254 383 q 243 287 247 320 q 240 224 240 254 q 247 170 240 195 q 270 127 254 145 q 313 98 287 109 q 379 88 340 88 q 546 192 490 88 q 601 503 601 296 q 600 540 601 519 q 598 575 600 561 q 398 601 480 576 q 265 667 316 626 q 191 759 214 707 q 169 865 169 810 q 182 947 169 909 q 222 1012 195 985 q 293 1055 250 1040 q 396 1071 336 1071 q 521 1042 466 1071 q 615 961 576 1014 q 680 833 655 908 q 718 664 706 757 l 815 664 l 815 575 l 722 575 "},"Ќ":{"x_min":135,"x_max":804.25,"ha":804,"o":"m 804 0 l 655 0 l 261 502 l 261 0 l 135 0 l 135 992 l 261 992 l 261 511 l 644 992 l 784 992 l 401 515 l 804 0 m 359 1089 q 389 1134 373 1108 q 421 1187 405 1160 q 452 1242 437 1215 q 477 1293 466 1269 l 626 1293 l 626 1278 q 593 1233 615 1260 q 546 1175 572 1205 q 492 1118 520 1146 q 441 1071 464 1089 l 359 1071 l 359 1089 "},"å":{"x_min":64,"x_max":626,"ha":737,"o":"m 536 0 l 511 102 l 505 102 q 461 50 483 72 q 412 13 439 28 q 353 -7 386 0 q 278 -14 321 -14 q 193 0 232 -14 q 125 40 153 12 q 80 109 96 67 q 64 208 64 151 q 142 379 64 320 q 379 445 220 439 l 503 450 l 503 496 q 494 572 503 541 q 465 620 484 602 q 419 647 447 639 q 357 655 392 655 q 253 639 301 655 q 160 599 204 623 l 117 692 q 228 739 167 720 q 357 758 290 758 q 477 744 427 758 q 560 700 527 730 q 609 623 593 669 q 626 509 626 576 l 626 0 l 536 0 m 310 88 q 386 101 351 88 q 447 140 422 114 q 488 205 473 166 q 502 298 502 245 l 502 365 l 405 360 q 303 346 345 357 q 237 316 262 336 q 202 270 213 297 q 191 208 191 243 q 224 117 191 146 q 310 88 257 88 m 531 989 q 519 927 531 954 q 486 880 507 899 q 437 851 465 861 q 375 842 408 842 q 313 851 341 842 q 265 880 285 861 q 234 926 245 899 q 224 988 224 953 q 234 1049 224 1022 q 265 1095 245 1076 q 313 1124 285 1114 q 375 1134 341 1134 q 436 1124 408 1134 q 486 1095 465 1114 q 519 1050 507 1076 q 531 989 531 1023 m 456 988 q 434 1044 456 1024 q 377 1064 412 1064 q 320 1044 342 1064 q 298 988 298 1024 q 318 931 298 951 q 377 911 338 911 q 434 931 412 911 q 456 988 456 951 "},"Ϋ":{"x_min":-0.25,"x_max":731.25,"ha":732,"o":"m 364 490 l 595 992 l 731 992 l 428 386 l 428 0 l 302 0 l 302 379 l 0 992 l 137 992 l 364 490 m 174 1174 q 192 1227 174 1211 q 239 1244 211 1244 q 285 1227 265 1244 q 304 1174 304 1210 q 285 1121 304 1138 q 239 1105 265 1105 q 192 1121 211 1105 q 174 1174 174 1138 m 428 1174 q 447 1227 428 1211 q 493 1244 466 1244 q 518 1239 506 1244 q 539 1227 530 1235 q 553 1206 548 1218 q 559 1174 559 1193 q 539 1121 559 1138 q 493 1105 519 1105 q 447 1121 466 1105 q 428 1174 428 1138 "},"ō":{"x_min":77,"x_max":725,"ha":802,"o":"m 725 373 q 702 208 725 280 q 637 86 679 135 q 534 11 594 37 q 398 -14 474 -14 q 270 11 329 -14 q 168 86 211 37 q 101 208 125 135 q 77 373 77 280 q 99 537 77 465 q 164 657 122 608 q 267 732 206 707 q 403 758 327 758 q 531 732 472 758 q 633 657 590 707 q 700 537 676 608 q 725 373 725 465 m 204 373 q 250 159 204 231 q 401 88 297 88 q 551 159 506 88 q 597 373 597 231 q 551 585 597 515 q 400 655 504 655 q 250 585 295 655 q 204 373 204 515 m 206 943 l 596 943 l 596 842 l 206 842 l 206 943 "},"”":{"x_min":16,"x_max":489,"ha":504,"o":"m 219 992 l 228 977 q 205 898 218 939 q 176 815 192 857 q 143 731 160 772 q 108 652 125 690 l 16 652 q 38 737 26 692 q 60 827 49 782 q 79 913 70 871 q 94 992 88 956 l 219 992 m 480 992 l 489 977 q 466 898 479 939 q 437 815 453 857 q 404 731 421 772 q 369 652 386 690 l 277 652 q 299 737 287 692 q 321 827 310 782 q 340 913 331 871 q 355 992 349 956 l 480 992 "},"ö":{"x_min":77,"x_max":725,"ha":802,"o":"m 725 373 q 702 208 725 280 q 637 86 679 135 q 534 11 594 37 q 398 -14 474 -14 q 270 11 329 -14 q 168 86 211 37 q 101 208 125 135 q 77 373 77 280 q 99 537 77 465 q 164 657 122 608 q 267 732 206 707 q 403 758 327 758 q 531 732 472 758 q 633 657 590 707 q 700 537 676 608 q 725 373 725 465 m 204 373 q 250 159 204 231 q 401 88 297 88 q 551 159 506 88 q 597 373 597 231 q 551 585 597 515 q 400 655 504 655 q 250 585 295 655 q 204 373 204 515 m 204 945 q 222 998 204 982 q 269 1015 241 1015 q 315 998 295 1015 q 334 945 334 981 q 315 892 334 909 q 269 876 295 876 q 222 892 241 876 q 204 945 204 909 m 458 945 q 477 998 458 982 q 523 1015 496 1015 q 548 1010 536 1015 q 569 998 560 1006 q 583 977 578 989 q 589 945 589 964 q 569 892 589 909 q 523 876 549 876 q 477 892 496 876 q 458 945 458 909 "},"ć":{"x_min":77,"x_max":596,"ha":643,"o":"m 402 -14 q 274 7 334 -14 q 171 75 215 28 q 102 193 127 121 q 77 367 77 266 q 102 548 77 474 q 173 669 128 623 q 278 736 218 715 q 408 758 339 758 q 511 746 461 758 q 596 718 562 735 l 559 614 q 524 627 543 621 q 485 638 505 633 q 445 647 465 644 q 408 650 425 650 q 253 581 302 650 q 204 369 204 513 q 253 160 204 226 q 402 93 302 93 q 502 106 457 93 q 583 135 546 118 l 583 26 q 504 -3 546 6 q 402 -14 463 -14 m 316 860 q 346 905 330 879 q 378 958 362 931 q 409 1013 394 986 q 434 1064 423 1040 l 583 1064 l 583 1049 q 550 1004 572 1031 q 503 946 529 976 q 449 889 477 917 q 398 842 421 860 l 316 842 l 316 860 "},"þ":{"x_min":118,"x_max":737,"ha":814,"o":"m 241 644 q 276 688 257 667 q 322 724 296 709 q 381 748 348 739 q 454 758 413 758 q 570 733 518 758 q 659 660 622 709 q 716 540 696 612 q 737 373 737 468 q 716 205 737 277 q 659 84 696 133 q 570 10 622 35 q 454 -14 518 -14 q 381 -5 414 -14 q 323 18 349 3 q 277 52 297 32 q 241 93 257 72 l 233 93 q 237 49 235 70 q 240 13 238 32 q 241 -16 241 -5 l 241 -334 l 118 -334 l 118 1055 l 241 1055 l 241 744 l 236 644 l 241 644 m 430 655 q 343 639 379 655 q 285 592 307 624 q 253 513 263 560 q 241 401 242 465 l 241 373 q 250 251 241 304 q 281 162 259 198 q 340 107 303 125 q 431 88 377 88 q 566 162 523 88 q 609 374 609 236 q 566 585 609 515 q 430 655 523 655 "},"]":{"x_min":35,"x_max":310,"ha":421,"o":"m 35 -118 l 186 -118 l 186 890 l 35 890 l 35 992 l 310 992 l 310 -220 l 35 -220 l 35 -118 "},"А":{"x_min":-0.25,"x_max":844.25,"ha":844,"o":"m 715 0 l 606 307 l 237 307 l 127 0 l 0 0 l 364 996 l 479 996 l 844 0 l 715 0 m 566 419 l 466 706 q 456 736 462 719 q 444 774 450 754 q 432 817 438 795 q 421 860 426 839 q 410 816 416 839 q 397 773 404 794 q 386 735 391 752 q 376 706 380 718 l 277 419 l 566 419 "},"′":{"x_min":90,"x_max":223.609375,"ha":314,"o":"m 223 992 l 195 634 l 117 634 l 90 992 l 223 992 "},"Ы":{"x_min":135,"x_max":1008,"ha":1143,"o":"m 729 290 q 708 170 729 224 q 645 79 688 117 q 537 20 602 41 q 380 0 471 0 l 135 0 l 135 992 l 261 992 l 261 574 l 362 574 q 536 551 465 574 q 648 490 606 529 q 710 400 691 452 q 729 290 729 349 m 261 107 l 368 107 q 540 152 485 107 q 595 290 595 197 q 579 370 595 337 q 533 424 564 403 q 456 453 503 444 q 347 462 410 462 l 261 462 l 261 107 m 881 0 l 881 992 l 1008 992 l 1008 0 l 881 0 "},"ẁ":{"x_min":13.75,"x_max":1022.25,"ha":1036,"o":"m 683 0 l 570 417 q 563 445 567 430 q 555 477 559 460 q 546 512 551 494 q 538 546 542 529 q 518 628 528 586 l 514 628 q 496 546 505 585 q 480 476 488 512 q 464 415 471 440 l 347 0 l 204 0 l 13 745 l 143 745 l 232 348 q 245 282 239 318 q 258 211 252 246 q 269 146 264 177 q 277 95 274 115 l 281 95 q 290 142 284 113 q 303 205 296 172 q 317 270 310 238 q 331 324 325 302 l 453 745 l 586 745 l 702 324 q 716 270 709 301 q 732 207 724 239 q 745 145 739 175 q 754 95 751 115 l 758 95 q 764 142 760 113 q 775 207 769 172 q 788 279 781 242 q 803 348 795 316 l 896 745 l 1022 745 l 829 0 l 683 0 m 585 842 l 503 842 q 451 889 479 860 q 397 946 423 917 q 350 1004 371 976 q 318 1049 328 1031 l 318 1064 l 466 1064 q 492 1013 477 1040 q 522 958 506 986 q 554 905 538 931 q 585 860 570 879 l 585 842 "},"ĭ":{"x_min":-23,"x_max":385,"ha":359,"o":"m 241 0 l 118 0 l 118 745 l 241 745 l 241 0 m 385 1030 q 367 954 382 988 q 326 894 352 920 q 263 855 300 869 q 178 842 226 842 q 91 855 128 842 q 30 893 54 868 q -7 952 5 918 q -23 1030 -20 987 l 51 1030 q 63 983 54 1000 q 89 957 73 965 q 128 946 105 948 q 181 943 151 943 q 227 946 205 943 q 267 959 249 949 q 296 985 284 968 q 310 1030 307 1002 l 385 1030 "},"R":{"x_min":135,"x_max":803.25,"ha":819,"o":"m 261 410 l 261 0 l 135 0 l 135 992 l 376 992 q 642 922 556 992 q 729 710 729 852 q 712 607 729 651 q 668 531 695 563 q 605 479 640 500 q 533 444 570 458 l 803 0 l 654 0 l 416 410 l 261 410 m 261 517 l 371 517 q 473 529 431 517 q 543 564 516 541 q 582 623 570 588 q 595 704 595 658 q 581 787 595 753 q 540 842 567 821 q 469 874 512 864 q 368 884 426 884 l 261 884 l 261 517 "},"Ż":{"x_min":56,"x_max":693,"ha":749,"o":"m 693 0 l 56 0 l 56 97 l 537 880 l 70 880 l 70 992 l 679 992 l 679 894 l 197 111 l 693 111 l 693 0 m 310 1174 q 330 1233 310 1215 q 381 1252 351 1252 q 410 1247 396 1252 q 433 1233 423 1243 q 448 1209 442 1224 q 454 1174 454 1195 q 433 1116 454 1135 q 381 1097 411 1097 q 330 1115 351 1097 q 310 1174 310 1134 "},"ħ":{"x_min":12.1875,"x_max":707,"ha":818,"o":"m 583 0 l 583 451 q 547 583 583 539 q 436 627 512 627 q 343 609 381 627 q 283 557 306 592 q 251 473 261 523 q 241 357 241 422 l 241 0 l 118 0 l 118 843 l 12 843 l 12 932 l 118 932 l 118 1055 l 241 1055 l 241 932 l 498 932 l 498 843 l 241 843 l 241 715 l 236 616 l 242 616 q 283 666 259 645 q 334 702 306 687 q 393 723 362 716 q 457 730 424 730 q 644 665 581 730 q 707 458 707 600 l 707 0 l 583 0 "},"õ":{"x_min":77,"x_max":725,"ha":802,"o":"m 725 373 q 702 208 725 280 q 637 86 679 135 q 534 11 594 37 q 398 -14 474 -14 q 270 11 329 -14 q 168 86 211 37 q 101 208 125 135 q 77 373 77 280 q 99 537 77 465 q 164 657 122 608 q 267 732 206 707 q 403 758 327 758 q 531 732 472 758 q 633 657 590 707 q 700 537 676 608 q 725 373 725 465 m 204 373 q 250 159 204 231 q 401 88 297 88 q 551 159 506 88 q 597 373 597 231 q 551 585 597 515 q 400 655 504 655 q 250 585 295 655 q 204 373 204 515 m 499 843 q 445 854 472 843 q 393 881 419 866 q 343 907 367 895 q 298 919 319 919 q 251 901 267 919 q 225 841 235 883 l 155 841 q 169 915 158 882 q 198 972 180 948 q 241 1008 216 995 q 298 1021 266 1021 q 354 1009 326 1021 q 407 982 381 997 q 456 956 433 968 q 499 944 480 944 q 545 962 530 944 q 571 1022 561 980 l 643 1022 q 628 948 639 981 q 599 892 617 915 q 556 855 581 868 q 499 843 531 843 "},"˙":{"x_min":109,"x_max":253.46875,"ha":359,"o":"m 109 945 q 129 1004 109 986 q 180 1023 150 1023 q 209 1018 195 1023 q 232 1004 222 1014 q 247 980 241 995 q 253 945 253 966 q 232 887 253 906 q 180 868 210 868 q 129 886 150 868 q 109 945 109 905 "},"ê":{"x_min":77,"x_max":673,"ha":743,"o":"m 412 -14 q 276 11 337 -14 q 170 84 214 36 q 101 203 125 132 q 77 366 77 274 q 99 531 77 458 q 162 654 121 604 q 259 731 202 705 q 384 758 316 758 q 505 733 451 758 q 595 665 558 709 q 653 560 633 621 q 673 423 673 498 l 673 346 l 204 346 q 259 155 207 216 q 413 93 311 93 q 477 97 448 93 q 534 107 507 100 q 587 123 561 113 q 639 145 613 133 l 639 35 q 586 13 612 22 q 533 -2 560 3 q 476 -11 505 -8 q 412 -14 446 -14 m 384 655 q 260 602 306 655 q 207 449 214 549 l 545 449 q 536 533 545 495 q 507 598 526 571 q 457 640 487 625 q 384 655 427 655 m 602 842 l 520 842 q 448 897 485 864 q 377 967 412 930 q 304 897 340 930 q 234 842 268 864 l 152 842 l 152 860 q 192 905 169 879 q 238 958 215 931 q 281 1013 261 986 q 311 1064 301 1040 l 442 1064 q 472 1013 452 1040 q 515 958 492 986 q 561 905 538 931 q 602 860 585 879 l 602 842 "},"″":{"x_min":90,"x_max":468.609375,"ha":558,"o":"m 223 992 l 195 634 l 117 634 l 90 992 l 223 992 m 468 992 l 440 634 l 362 634 l 335 992 l 468 992 "},"„":{"x_min":43,"x_max":517,"ha":608,"o":"m 246 161 l 256 145 q 233 67 246 108 q 204 -15 220 26 q 170 -99 188 -57 q 136 -179 153 -141 l 43 -179 q 66 -92 54 -137 q 88 -3 77 -48 q 107 82 98 40 q 122 161 116 125 l 246 161 m 508 161 l 517 145 q 494 67 507 108 q 465 -15 481 26 q 432 -99 449 -57 q 397 -179 414 -141 l 305 -179 q 327 -92 315 -137 q 349 -3 338 -48 q 368 82 359 40 q 383 161 377 125 l 508 161 "},"ч":{"x_min":104,"x_max":693,"ha":811,"o":"m 227 745 l 227 466 q 352 348 227 348 q 410 353 382 348 q 462 368 437 358 q 514 392 488 377 q 569 427 541 407 l 569 745 l 693 745 l 693 0 l 569 0 l 569 332 q 512 295 539 311 q 456 268 485 279 q 395 251 427 257 q 324 246 363 246 q 230 261 271 246 q 161 306 188 277 q 118 373 133 334 q 104 458 104 412 l 104 745 l 227 745 "},"δ":{"x_min":75,"x_max":725,"ha":802,"o":"m 360 635 q 291 683 322 657 q 236 737 259 708 q 201 800 214 767 q 189 872 189 833 q 206 956 189 921 q 254 1016 223 992 q 328 1051 286 1039 q 421 1063 370 1063 q 505 1056 467 1063 q 576 1038 543 1049 q 636 1015 609 1028 q 687 989 663 1001 l 637 890 q 590 916 615 903 q 538 938 565 928 q 479 954 510 948 q 413 960 448 960 q 364 952 385 960 q 331 933 344 945 q 311 904 317 920 q 305 869 305 887 q 314 823 305 844 q 344 781 324 802 q 398 738 364 760 q 479 689 431 716 q 583 619 537 655 q 660 539 629 582 q 708 447 691 496 q 725 337 725 397 q 701 185 725 251 q 635 75 678 120 q 531 8 592 31 q 397 -14 471 -14 q 268 6 327 -14 q 166 67 209 27 q 99 164 123 106 q 75 296 75 222 q 97 423 75 368 q 159 520 120 479 q 249 590 197 562 q 360 635 301 618 m 597 325 q 587 410 597 372 q 557 478 577 448 q 510 533 538 508 q 446 579 482 557 q 363 548 407 568 q 284 495 320 528 q 225 413 249 462 q 202 294 202 363 q 215 211 202 249 q 253 146 228 173 q 314 103 278 118 q 395 88 350 88 q 545 149 492 88 q 597 325 597 210 "},"Â":{"x_min":-0.25,"x_max":844.25,"ha":844,"o":"m 715 0 l 606 307 l 237 307 l 127 0 l 0 0 l 364 996 l 479 996 l 844 0 l 715 0 m 566 419 l 466 706 q 456 736 462 719 q 444 774 450 754 q 432 817 438 795 q 421 860 426 839 q 410 816 416 839 q 397 773 404 794 q 386 735 391 752 q 376 706 380 718 l 277 419 l 566 419 m 647 1071 l 565 1071 q 493 1126 530 1093 q 422 1196 457 1159 q 349 1126 385 1159 q 279 1071 313 1093 l 197 1071 l 197 1089 q 237 1134 214 1108 q 283 1187 260 1160 q 326 1242 306 1215 q 356 1293 346 1269 l 487 1293 q 517 1242 497 1269 q 560 1187 537 1215 q 606 1134 583 1160 q 647 1089 630 1108 l 647 1071 "},"Į":{"x_min":55.34375,"x_max":414.8125,"ha":471,"o":"m 414 0 l 55 0 l 55 69 l 172 96 l 172 895 l 55 922 l 55 992 l 414 992 l 414 922 l 298 895 l 298 96 l 414 69 l 414 0 m 224 -161 q 242 -206 224 -191 q 284 -220 260 -220 q 317 -218 301 -220 q 343 -214 333 -217 l 343 -291 q 303 -299 325 -296 q 262 -302 282 -302 q 160 -266 194 -302 q 127 -170 127 -231 q 136 -116 127 -142 q 162 -69 146 -91 q 195 -30 177 -48 q 231 0 214 -12 l 318 0 q 224 -161 224 -90 "},"ω":{"x_min":77,"x_max":970,"ha":1046,"o":"m 332 -14 q 223 13 271 -14 q 143 91 176 41 q 93 209 110 140 q 77 360 77 278 q 82 464 77 415 q 97 558 87 512 q 124 650 108 604 q 162 745 140 696 l 289 745 q 251 649 267 695 q 225 558 235 604 q 209 464 214 512 q 204 360 204 416 q 214 243 204 294 q 242 158 224 192 q 285 106 260 123 q 340 88 310 88 q 394 102 371 88 q 432 140 417 116 q 454 198 447 165 q 462 270 462 231 l 462 478 l 585 478 l 585 270 q 618 135 585 182 q 706 88 651 88 q 761 106 736 88 q 804 158 786 123 q 832 243 823 192 q 842 360 842 294 q 837 464 842 416 q 821 558 832 512 q 795 649 811 604 q 757 745 779 695 l 884 745 q 922 650 906 696 q 949 558 938 604 q 964 464 959 512 q 970 360 970 415 q 953 209 970 278 q 903 91 936 140 q 823 13 871 41 q 714 -14 775 -14 q 595 15 642 -14 q 527 106 548 45 l 520 106 q 452 15 499 45 q 332 -14 404 -14 "},"Ţ":{"x_min":14,"x_max":706,"ha":721,"o":"m 423 0 l 297 0 l 297 880 l 14 880 l 14 992 l 706 992 l 706 880 l 423 880 l 423 0 m 244 -288 q 260 -246 251 -271 q 277 -191 269 -220 q 291 -135 285 -163 q 300 -85 298 -107 l 423 -85 l 423 -98 q 408 -141 418 -115 q 382 -197 397 -167 q 348 -255 367 -226 q 310 -307 330 -284 l 244 -307 l 244 -288 "},"´":{"x_min":267,"x_max":534,"ha":802,"o":"m 267 860 q 297 905 281 879 q 329 958 313 931 q 360 1013 345 986 q 385 1064 374 1040 l 534 1064 l 534 1049 q 501 1004 523 1031 q 454 946 480 976 q 400 889 428 917 q 349 842 372 860 l 267 842 l 267 860 "},"Ĉ":{"x_min":85,"x_max":798,"ha":838,"o":"m 538 894 q 406 867 465 894 q 305 788 347 839 q 241 662 264 736 q 218 496 218 588 q 238 326 218 400 q 298 200 258 251 q 398 123 338 150 q 538 97 458 97 q 652 108 598 97 q 760 135 707 120 l 760 26 q 707 8 733 15 q 651 -4 680 0 q 590 -11 622 -9 q 517 -14 557 -14 q 324 22 405 -14 q 189 126 243 59 q 110 288 136 193 q 85 497 85 382 q 114 703 85 609 q 201 864 144 796 q 343 968 258 931 q 538 1006 428 1006 q 677 991 611 1006 q 798 947 744 976 l 745 841 q 652 879 702 863 q 538 894 601 894 m 747 1071 l 665 1071 q 593 1126 630 1093 q 522 1196 557 1159 q 449 1126 485 1159 q 379 1071 413 1093 l 297 1071 l 297 1089 q 337 1134 314 1108 q 383 1187 360 1160 q 426 1242 406 1215 q 456 1293 446 1269 l 587 1293 q 617 1242 597 1269 q 660 1187 637 1215 q 706 1134 683 1160 q 747 1089 730 1108 l 747 1071 "},"И":{"x_min":136,"x_max":879,"ha":1013,"o":"m 136 992 l 262 992 l 262 449 q 261 410 262 431 q 260 366 261 389 q 259 321 260 343 q 257 276 258 298 q 251 174 254 226 l 256 174 l 725 992 l 879 992 l 879 0 l 752 0 l 752 538 q 754 624 752 576 q 759 717 756 673 q 765 821 762 768 l 760 821 l 289 0 l 136 0 l 136 992 "},"Љ":{"x_min":0,"x_max":1193,"ha":1264,"o":"m 1193 290 q 1172 170 1193 224 q 1109 79 1152 117 q 1000 20 1066 41 q 843 0 934 0 l 625 0 l 625 880 l 431 880 q 410 721 420 804 q 388 558 399 638 q 366 406 377 478 q 343 279 354 334 q 310 154 329 209 q 262 61 291 99 q 194 4 234 24 q 98 -16 154 -16 q 46 -10 73 -16 q 0 1 20 -5 l 0 111 q 35 97 15 102 q 76 91 54 91 q 129 113 108 91 q 164 167 150 134 q 187 239 179 200 q 204 315 196 279 q 223 421 213 354 q 247 577 234 488 q 275 771 261 665 q 305 992 290 877 l 751 992 l 751 574 l 825 574 q 999 551 928 574 q 1112 490 1069 529 q 1174 400 1155 452 q 1193 290 1193 349 m 751 107 l 831 107 q 1004 152 948 107 q 1059 290 1059 197 q 1043 370 1059 337 q 997 424 1028 403 q 920 453 966 444 q 810 462 873 462 l 751 462 l 751 107 "},"р":{"x_min":118,"x_max":737,"ha":814,"o":"m 454 -14 q 381 -5 414 -14 q 323 18 349 3 q 277 52 297 32 q 241 93 257 72 l 233 93 q 237 49 235 70 q 240 13 238 32 q 241 -16 241 -5 l 241 -334 l 118 -334 l 118 745 l 218 745 l 236 644 l 241 644 q 276 688 257 667 q 322 724 296 709 q 381 748 348 739 q 454 758 413 758 q 570 733 518 758 q 659 660 622 709 q 716 540 696 612 q 737 373 737 468 q 716 205 737 277 q 659 84 696 133 q 570 10 622 35 q 454 -14 518 -14 m 430 655 q 343 639 379 655 q 285 592 307 624 q 253 513 263 560 q 241 401 242 465 l 241 373 q 250 251 241 304 q 281 162 259 198 q 340 107 303 125 q 431 88 377 88 q 566 162 523 88 q 609 374 609 236 q 566 585 609 515 q 430 655 523 655 "},"Ω":{"x_min":53.0625,"x_max":980.9375,"ha":1031,"o":"m 517 895 q 384 872 439 895 q 292 805 328 849 q 239 699 256 762 q 222 556 222 636 q 234 425 222 488 q 273 304 246 362 q 345 194 301 246 q 455 99 390 143 l 455 0 l 53 0 l 53 111 l 321 111 q 229 189 271 143 q 155 292 186 235 q 106 416 124 349 q 89 559 89 484 q 116 743 89 661 q 198 884 143 826 q 332 975 252 943 q 517 1007 412 1007 q 701 975 622 1007 q 835 884 781 943 q 917 743 890 826 q 945 559 945 661 q 927 416 945 484 q 878 292 909 349 q 805 189 847 235 q 712 111 762 143 l 980 111 l 980 0 l 579 0 l 579 99 q 688 194 643 143 q 760 304 732 246 q 799 425 787 362 q 811 556 811 488 q 794 699 811 636 q 741 805 777 762 q 649 872 705 849 q 517 895 594 895 "},"т":{"x_min":28,"x_max":584,"ha":612,"o":"m 584 642 l 367 642 l 367 0 l 244 0 l 244 642 l 28 642 l 28 745 l 584 745 l 584 642 "},"П":{"x_min":135,"x_max":826,"ha":960,"o":"m 826 0 l 699 0 l 699 880 l 261 880 l 261 0 l 135 0 l 135 992 l 826 992 l 826 0 "},"Ö":{"x_min":85,"x_max":945,"ha":1031,"o":"m 945 496 q 917 287 945 382 q 835 126 890 193 q 701 22 781 59 q 515 -14 620 -14 q 324 22 405 -14 q 189 126 243 59 q 110 288 136 193 q 85 498 85 382 q 110 707 85 613 q 190 867 136 801 q 325 970 243 934 q 517 1007 406 1007 q 701 970 622 1007 q 835 867 781 934 q 917 706 890 800 q 945 496 945 612 m 218 497 q 236 330 218 404 q 290 204 253 255 q 382 124 326 152 q 515 97 438 97 q 648 124 593 97 q 741 204 704 152 q 794 330 777 255 q 811 497 811 404 q 794 664 811 590 q 741 789 777 738 q 649 868 705 840 q 517 895 594 895 q 383 868 439 895 q 290 789 327 840 q 236 664 253 738 q 218 497 218 590 m 323 1174 q 341 1227 323 1211 q 388 1244 360 1244 q 434 1227 414 1244 q 453 1174 453 1210 q 434 1121 453 1138 q 388 1105 414 1105 q 341 1121 360 1105 q 323 1174 323 1138 m 577 1174 q 596 1227 577 1211 q 642 1244 615 1244 q 667 1239 655 1244 q 688 1227 679 1235 q 702 1206 697 1218 q 708 1174 708 1193 q 688 1121 708 1138 q 642 1105 668 1105 q 596 1121 615 1105 q 577 1174 577 1138 "},"z":{"x_min":56,"x_max":556.21875,"ha":612,"o":"m 556 0 l 56 0 l 56 80 l 418 656 l 78 656 l 78 745 l 544 745 l 544 650 l 189 88 l 556 88 l 556 0 "},"™":{"x_min":25,"x_max":922,"ha":1040,"o":"m 244 503 l 158 503 l 158 918 l 25 918 l 25 992 l 379 992 l 379 918 l 244 918 l 244 503 m 636 503 l 511 875 l 506 875 q 508 852 507 864 q 509 831 508 841 q 509 812 509 821 q 510 800 510 804 l 510 503 l 424 503 l 424 992 l 552 992 l 673 618 l 801 992 l 922 992 l 922 503 l 835 503 l 835 793 q 836 809 835 799 q 836 831 836 819 q 837 855 837 843 q 838 875 837 867 l 834 875 l 703 503 l 636 503 "},"Θ":{"x_min":85,"x_max":945,"ha":1031,"o":"m 334 560 l 696 560 l 696 452 l 334 452 l 334 560 m 945 496 q 917 287 945 382 q 835 126 890 193 q 701 22 781 59 q 515 -14 620 -14 q 324 22 405 -14 q 189 126 243 59 q 110 288 136 193 q 85 498 85 382 q 110 707 85 613 q 190 867 136 801 q 325 970 243 934 q 517 1007 406 1007 q 701 970 622 1007 q 835 867 781 934 q 917 706 890 800 q 945 496 945 612 m 218 497 q 236 330 218 404 q 290 204 253 255 q 382 124 326 152 q 515 97 438 97 q 648 124 593 97 q 741 204 704 152 q 794 330 777 255 q 811 497 811 404 q 794 664 811 590 q 741 789 777 738 q 649 868 705 840 q 517 895 594 895 q 383 868 439 895 q 290 789 327 840 q 236 664 253 738 q 218 497 218 590 "},"Ř":{"x_min":135,"x_max":803.25,"ha":819,"o":"m 261 410 l 261 0 l 135 0 l 135 992 l 376 992 q 642 922 556 992 q 729 710 729 852 q 712 607 729 651 q 668 531 695 563 q 605 479 640 500 q 533 444 570 458 l 803 0 l 654 0 l 416 410 l 261 410 m 261 517 l 371 517 q 473 529 431 517 q 543 564 516 541 q 582 623 570 588 q 595 704 595 658 q 581 787 595 753 q 540 842 567 821 q 469 874 512 864 q 368 884 426 884 l 261 884 l 261 517 m 635 1274 q 594 1229 618 1255 q 548 1176 571 1203 q 505 1121 525 1148 q 475 1071 485 1094 l 344 1071 q 314 1121 334 1094 q 271 1176 294 1148 q 225 1229 248 1203 q 185 1274 202 1255 l 185 1293 l 267 1293 q 337 1237 301 1270 q 410 1166 373 1204 q 481 1237 445 1204 q 553 1293 518 1270 l 635 1293 l 635 1274 "},"Ň":{"x_min":135,"x_max":878,"ha":1013,"o":"m 878 0 l 724 0 l 253 821 l 248 821 q 255 717 252 768 q 259 624 257 673 q 261 538 261 576 l 261 0 l 135 0 l 135 992 l 288 992 l 757 174 l 762 174 q 757 276 759 226 q 755 321 756 298 q 753 366 754 343 q 752 410 752 389 q 751 449 751 431 l 751 992 l 878 992 l 878 0 m 732 1274 q 691 1229 715 1255 q 645 1176 668 1203 q 602 1121 622 1148 q 572 1071 582 1094 l 441 1071 q 411 1121 431 1094 q 368 1176 391 1148 q 322 1229 345 1203 q 282 1274 299 1255 l 282 1293 l 364 1293 q 434 1237 398 1270 q 507 1166 470 1204 q 578 1237 542 1204 q 650 1293 615 1270 l 732 1293 l 732 1274 "},"É":{"x_min":135,"x_max":650,"ha":733,"o":"m 650 0 l 135 0 l 135 992 l 650 992 l 650 880 l 261 880 l 261 574 l 624 574 l 624 462 l 261 462 l 261 111 l 650 111 l 650 0 m 309 1089 q 339 1134 323 1108 q 371 1187 355 1160 q 402 1242 387 1215 q 427 1293 416 1269 l 576 1293 l 576 1278 q 543 1233 565 1260 q 496 1175 522 1205 q 442 1118 470 1146 q 391 1071 414 1089 l 309 1071 l 309 1089 "},"и":{"x_min":118,"x_max":735,"ha":853,"o":"m 234 745 l 234 291 l 226 120 l 576 745 l 735 745 l 735 0 l 618 0 l 618 439 l 625 622 l 276 0 l 118 0 l 118 745 l 234 745 "},"³":{"x_min":21,"x_max":418,"ha":460,"o":"m 400 852 q 372 764 400 800 q 298 712 345 729 q 388 660 358 697 q 418 571 418 624 q 404 496 418 530 q 362 437 390 461 q 291 399 334 413 q 190 386 249 386 q 101 394 143 386 q 21 423 59 402 l 21 514 q 110 481 64 493 q 192 469 155 469 q 290 497 260 469 q 321 575 321 525 q 283 648 321 625 q 179 671 246 671 l 111 671 l 111 745 l 179 745 q 273 771 244 745 q 303 839 303 797 q 296 876 303 860 q 277 901 289 891 q 248 915 264 911 q 213 920 232 920 q 138 907 172 920 q 69 870 105 894 l 22 935 q 62 963 41 951 q 106 985 83 976 q 155 998 129 993 q 210 1004 180 1004 q 293 992 257 1004 q 352 961 328 981 q 388 913 376 940 q 400 852 400 885 "},"[":{"x_min":111,"x_max":386,"ha":421,"o":"m 386 -220 l 111 -220 l 111 992 l 386 992 l 386 890 l 234 890 l 234 -118 l 386 -118 l 386 -220 "},"ζ":{"x_min":77,"x_max":593,"ha":632,"o":"m 118 952 l 118 1055 l 589 1055 l 589 960 q 439 811 502 880 q 334 680 377 741 q 266 567 291 619 q 226 470 240 515 q 208 387 213 425 q 204 317 204 349 q 219 220 204 256 q 263 161 235 183 q 332 128 291 140 q 424 104 373 116 q 504 78 472 94 q 556 43 536 63 q 584 -1 576 23 q 593 -54 593 -25 q 585 -114 593 -84 q 567 -172 578 -144 q 541 -225 555 -200 q 511 -272 526 -250 l 396 -272 q 426 -225 412 -250 q 451 -176 440 -201 q 469 -129 463 -152 q 476 -87 476 -107 q 471 -61 476 -73 q 450 -37 466 -48 q 403 -15 434 -25 q 321 5 373 -4 q 215 39 261 17 q 139 98 170 61 q 92 186 108 135 q 77 307 77 238 q 108 495 77 408 q 191 661 139 582 q 311 813 243 740 q 453 960 380 887 q 392 956 424 958 q 332 953 365 955 q 268 952 299 952 l 118 952 "},"∏":{"x_min":135,"x_max":895,"ha":1030,"o":"m 768 -334 l 768 880 l 261 880 l 261 -334 l 135 -334 l 135 992 l 895 992 l 895 -334 l 768 -334 "},"Έ":{"x_min":-17,"x_max":747,"ha":831,"o":"m 747 0 l 232 0 l 232 992 l 747 992 l 747 880 l 358 880 l 358 574 l 721 574 l 721 462 l 358 462 l 358 111 l 747 111 l 747 0 m -17 789 q -3 835 -10 809 q 9 889 3 861 q 21 943 16 916 q 30 993 27 970 l 165 993 l 165 978 q 149 936 160 962 q 123 880 138 909 q 90 821 107 850 q 56 771 72 792 l -17 771 l -17 789 "},"Ρ":{"x_min":135,"x_max":729,"ha":800,"o":"m 729 701 q 710 582 729 639 q 648 482 691 525 q 536 412 606 438 q 362 386 465 386 l 261 386 l 261 0 l 135 0 l 135 992 l 380 992 q 537 972 471 992 q 645 916 602 953 q 708 825 688 879 q 729 701 729 770 m 261 493 l 347 493 q 456 504 410 493 q 533 539 503 515 q 579 601 564 563 q 595 695 595 640 q 540 837 595 791 q 368 884 485 884 l 261 884 l 261 493 "},"ğ":{"x_min":25,"x_max":692.484375,"ha":720,"o":"m 692 745 l 692 668 l 559 649 q 591 588 578 625 q 604 504 604 551 q 588 409 604 453 q 539 333 572 365 q 459 283 507 301 q 348 266 412 266 q 319 266 333 266 q 294 268 304 266 q 271 253 282 261 q 251 233 260 244 q 236 208 242 222 q 230 178 230 194 q 238 148 230 159 q 260 130 246 136 q 293 122 274 124 q 333 120 312 120 l 453 120 q 560 104 516 120 q 631 61 603 88 q 670 -2 658 34 q 683 -80 683 -38 q 660 -186 683 -139 q 593 -266 638 -233 q 478 -316 547 -298 q 314 -334 408 -334 q 187 -319 241 -334 q 96 -278 132 -305 q 42 -213 60 -251 q 25 -128 25 -175 q 38 -57 25 -87 q 73 -4 51 -26 q 125 32 96 17 q 187 53 155 46 q 140 94 158 66 q 122 159 122 122 q 143 231 122 201 q 212 291 165 262 q 158 324 182 303 q 118 373 134 346 q 92 433 101 401 q 83 500 83 466 q 99 608 83 561 q 150 689 116 656 q 233 740 183 722 q 348 758 282 758 q 400 754 373 758 q 445 745 427 750 l 692 745 m 141 -126 q 150 -173 141 -151 q 179 -211 159 -195 q 232 -235 199 -226 q 314 -245 265 -245 q 503 -205 440 -245 q 566 -92 566 -166 q 558 -41 566 -61 q 531 -10 550 -21 q 482 4 512 0 q 407 8 451 8 l 287 8 q 238 3 263 8 q 190 -17 212 -2 q 155 -58 169 -32 q 141 -126 141 -84 m 206 504 q 242 388 206 426 q 344 350 278 350 q 446 388 411 350 q 480 506 480 426 q 445 629 480 590 q 343 669 410 669 q 241 628 277 669 q 206 504 206 587 m 551 1030 q 533 954 548 988 q 492 894 518 920 q 429 855 466 869 q 344 842 392 842 q 257 855 294 842 q 196 893 220 868 q 158 952 171 918 q 143 1030 145 987 l 217 1030 q 229 983 220 1000 q 255 957 239 965 q 294 946 271 948 q 347 943 317 943 q 393 946 371 943 q 433 959 415 949 q 462 985 450 968 q 476 1030 473 1002 l 551 1030 "},"ª":{"x_min":46,"x_max":392,"ha":460,"o":"m 328 541 l 308 597 q 283 570 296 582 q 254 549 270 558 q 219 536 238 540 q 177 532 201 532 q 124 540 148 532 q 82 566 100 549 q 55 610 65 584 q 46 671 46 636 q 93 777 46 740 q 236 817 140 813 l 303 820 l 303 841 q 282 909 303 890 q 224 929 262 929 q 162 919 192 929 q 104 894 132 909 l 72 961 q 146 991 106 979 q 226 1003 185 1003 q 351 967 311 1003 q 392 848 392 931 l 392 541 l 328 541 m 253 743 q 196 736 219 741 q 160 720 174 730 q 140 698 146 711 q 134 666 134 684 q 151 620 134 634 q 196 605 168 605 q 238 612 219 605 q 272 632 257 619 q 294 667 286 646 q 303 715 303 687 l 303 746 l 253 743 "},"ї":{"x_min":-13,"x_max":372,"ha":359,"o":"m 241 0 l 118 0 l 118 745 l 241 745 l 241 0 m -13 945 q 5 998 -13 982 q 52 1015 24 1015 q 98 998 78 1015 q 117 945 117 981 q 98 892 117 909 q 52 876 78 876 q 5 892 24 876 q -13 945 -13 909 m 241 945 q 260 998 241 982 q 306 1015 279 1015 q 331 1010 319 1015 q 352 998 343 1006 q 366 977 361 989 q 372 945 372 964 q 352 892 372 909 q 306 876 332 876 q 260 892 279 876 q 241 945 241 909 "},"T":{"x_min":14,"x_max":706,"ha":721,"o":"m 423 0 l 297 0 l 297 880 l 14 880 l 14 992 l 706 992 l 706 880 l 423 880 l 423 0 "},"š":{"x_min":61.15625,"x_max":564,"ha":627,"o":"m 564 203 q 544 108 564 149 q 487 40 524 68 q 398 0 450 13 q 281 -14 346 -14 q 154 -2 207 -14 q 61 33 101 9 l 61 146 q 107 125 82 135 q 161 106 133 114 q 219 93 189 98 q 279 88 249 88 q 353 95 323 88 q 403 116 384 103 q 431 150 423 130 q 440 194 440 170 q 433 232 440 215 q 409 265 427 249 q 360 299 391 282 q 280 337 329 316 q 193 378 232 358 q 127 424 154 399 q 86 482 100 449 q 72 560 72 515 q 90 645 72 608 q 143 707 109 682 q 224 745 177 732 q 330 758 272 758 q 451 743 396 758 q 554 706 505 729 l 512 606 q 422 641 468 626 q 329 655 376 655 q 228 632 261 655 q 195 568 195 610 q 203 526 195 544 q 229 493 210 509 q 279 461 248 477 q 358 426 311 445 q 444 385 406 405 q 509 339 482 365 q 549 281 535 314 q 564 203 564 249 m 554 1045 q 513 1000 537 1026 q 467 947 490 974 q 424 892 444 919 q 394 842 404 865 l 263 842 q 233 892 253 865 q 190 947 213 919 q 144 1000 167 974 q 104 1045 121 1026 l 104 1064 l 186 1064 q 256 1008 220 1041 q 329 937 292 975 q 400 1008 364 975 q 472 1064 437 1041 l 554 1064 l 554 1045 "},"є":{"x_min":77,"x_max":596,"ha":643,"o":"m 402 -14 q 274 7 334 -14 q 171 75 215 28 q 102 193 127 121 q 77 367 77 266 q 102 548 77 474 q 173 669 128 623 q 278 736 218 715 q 408 758 339 758 q 511 746 461 758 q 596 718 562 735 l 559 614 q 524 627 543 621 q 485 638 505 633 q 445 647 465 644 q 408 650 425 650 q 264 598 314 650 q 205 434 215 547 l 528 434 l 528 331 l 204 331 q 260 149 210 205 q 402 93 309 93 q 502 106 457 93 q 583 135 546 118 l 583 26 q 504 -3 546 6 q 402 -14 463 -14 "},"Þ":{"x_min":135,"x_max":729,"ha":800,"o":"m 729 530 q 710 411 729 468 q 648 311 691 354 q 536 241 606 267 q 362 215 465 215 l 261 215 l 261 0 l 135 0 l 135 992 l 261 992 l 261 821 l 380 821 q 537 801 471 821 q 645 745 602 782 q 708 654 688 708 q 729 530 729 599 m 261 322 l 347 322 q 456 333 410 322 q 533 368 503 344 q 579 430 564 392 q 595 524 595 469 q 540 667 595 621 q 368 713 485 713 l 261 713 l 261 322 "},"j":{"x_min":-46,"x_max":252.96875,"ha":359,"o":"m 44 -334 q -9 -329 12 -334 q -46 -317 -30 -324 l -46 -217 q -10 -227 -28 -224 q 31 -231 8 -231 q 65 -226 50 -231 q 93 -208 81 -221 q 111 -172 105 -194 q 118 -116 118 -150 l 118 745 l 241 745 l 241 -107 q 229 -201 241 -159 q 193 -272 218 -243 q 132 -318 169 -302 q 44 -334 95 -334 m 108 945 q 129 1004 108 986 q 180 1023 149 1023 q 208 1018 195 1023 q 231 1004 221 1014 q 247 980 241 995 q 252 945 252 966 q 231 887 252 906 q 180 868 210 868 q 129 886 149 868 q 108 945 108 905 "},"Σ":{"x_min":53,"x_max":706,"ha":739,"o":"m 53 0 l 53 103 l 333 519 l 61 892 l 61 992 l 666 992 l 666 880 l 200 880 l 466 520 l 186 111 l 706 111 l 706 0 l 53 0 "},"ϒ":{"x_min":-0.25,"x_max":742,"ha":750,"o":"m 366 496 q 403 603 383 546 q 445 714 424 660 q 487 815 467 769 q 523 891 507 861 q 554 939 538 918 q 588 973 570 960 q 628 993 606 986 q 677 1000 649 1000 q 715 996 701 1000 q 742 988 730 993 l 742 890 q 722 893 733 892 q 702 895 711 895 q 685 893 695 895 q 665 883 676 890 q 642 860 654 875 q 617 823 630 846 q 595 778 609 806 q 565 711 582 749 q 529 631 548 674 q 493 542 511 587 q 457 452 474 497 q 428 367 441 407 l 428 0 l 302 0 l 302 379 l 0 992 l 137 992 l 366 496 "},"ℓ":{"x_min":81,"x_max":605,"ha":695,"o":"m 426 82 q 466 90 447 82 q 500 114 485 97 q 525 158 515 130 q 537 225 535 185 l 605 225 q 589 124 602 168 q 552 49 576 79 q 493 2 528 18 q 410 -14 457 -14 q 334 -1 370 -14 q 271 39 298 11 q 227 114 243 68 q 211 228 211 161 l 211 385 q 147 364 179 374 q 81 347 114 355 l 81 422 q 148 442 116 431 q 211 462 180 452 l 211 801 q 220 878 211 841 q 251 943 230 915 q 308 989 273 972 q 395 1006 344 1006 q 461 991 431 1006 q 511 950 491 977 q 543 886 532 924 q 555 802 555 848 q 537 679 555 735 q 489 577 519 622 q 418 496 459 532 q 330 436 377 461 l 330 232 q 335 172 330 199 q 353 125 341 145 q 383 94 365 105 q 426 82 401 82 m 461 795 q 396 925 461 925 q 363 916 376 925 q 343 889 350 906 q 333 848 336 872 q 330 795 330 824 l 330 516 q 389 566 364 539 q 430 626 413 593 q 453 702 446 660 q 461 795 461 743 "},"ĉ":{"x_min":77,"x_max":618,"ha":643,"o":"m 402 -14 q 274 7 334 -14 q 171 75 215 28 q 102 193 127 121 q 77 367 77 266 q 102 548 77 474 q 173 669 128 623 q 278 736 218 715 q 408 758 339 758 q 511 746 461 758 q 596 718 562 735 l 559 614 q 524 627 543 621 q 485 638 505 633 q 445 647 465 644 q 408 650 425 650 q 253 581 302 650 q 204 369 204 513 q 253 160 204 226 q 402 93 302 93 q 502 106 457 93 q 583 135 546 118 l 583 26 q 504 -3 546 6 q 402 -14 463 -14 m 618 842 l 536 842 q 464 897 501 864 q 393 967 428 930 q 320 897 356 930 q 250 842 284 864 l 168 842 l 168 860 q 208 905 185 879 q 254 958 231 931 q 297 1013 277 986 q 327 1064 317 1040 l 458 1064 q 488 1013 468 1040 q 531 958 508 986 q 577 905 554 931 q 618 860 601 879 l 618 842 "},"ī":{"x_min":-14,"x_max":376,"ha":359,"o":"m 241 0 l 118 0 l 118 745 l 241 745 l 241 0 m -14 943 l 376 943 l 376 842 l -14 842 l -14 943 "},"О":{"x_min":85,"x_max":945,"ha":1031,"o":"m 945 496 q 917 287 945 382 q 835 126 890 193 q 701 22 781 59 q 515 -14 620 -14 q 324 22 405 -14 q 189 126 243 59 q 110 288 136 193 q 85 498 85 382 q 110 707 85 613 q 190 867 136 801 q 325 970 243 934 q 517 1007 406 1007 q 701 970 622 1007 q 835 867 781 934 q 917 706 890 800 q 945 496 945 612 m 218 497 q 236 330 218 404 q 290 204 253 255 q 382 124 326 152 q 515 97 438 97 q 648 124 593 97 q 741 204 704 152 q 794 330 777 255 q 811 497 811 404 q 794 664 811 590 q 741 789 777 738 q 649 868 705 840 q 517 895 594 895 q 383 868 439 895 q 290 789 327 840 q 236 664 253 738 q 218 497 218 590 "},"ξ":{"x_min":77,"x_max":593,"ha":632,"o":"m 543 601 l 543 512 l 433 512 q 336 495 379 512 q 264 449 293 478 q 219 382 234 420 q 204 299 204 343 q 219 213 204 246 q 263 160 235 181 q 332 129 291 140 q 424 106 373 117 q 504 80 472 95 q 556 44 536 64 q 584 0 576 24 q 593 -53 593 -24 q 585 -113 593 -83 q 566 -171 578 -143 q 540 -225 555 -199 q 510 -272 525 -250 l 394 -272 q 425 -225 410 -250 q 451 -176 439 -201 q 469 -129 462 -152 q 476 -86 476 -106 q 471 -60 476 -73 q 450 -36 466 -47 q 403 -14 434 -24 q 321 6 373 -3 q 139 97 201 29 q 77 288 77 165 q 92 383 77 340 q 135 459 108 426 q 195 515 161 493 q 267 550 230 538 l 267 558 q 160 622 199 577 q 122 747 122 667 q 137 830 122 796 q 179 889 152 865 q 242 931 206 914 q 321 960 278 947 q 271 956 297 958 q 220 953 249 955 q 160 952 191 952 l 117 952 l 117 1055 l 553 1055 l 553 960 l 515 960 q 415 947 465 960 q 326 908 366 934 q 262 841 287 881 q 238 748 238 801 q 249 685 238 712 q 284 638 260 657 q 346 610 308 620 q 440 601 385 601 l 543 601 "},"Ď":{"x_min":135,"x_max":865,"ha":950,"o":"m 865 505 q 832 285 865 379 q 738 127 799 190 q 586 31 676 63 q 383 0 496 0 l 135 0 l 135 992 l 410 992 q 598 960 514 992 q 741 868 682 929 q 832 715 800 806 q 865 505 865 624 m 731 501 q 709 672 731 600 q 643 791 686 744 q 538 861 601 838 q 397 884 476 884 l 261 884 l 261 107 l 370 107 q 640 207 549 107 q 731 501 731 306 m 676 1274 q 635 1229 659 1255 q 589 1176 612 1203 q 546 1121 566 1148 q 516 1071 526 1094 l 385 1071 q 355 1121 375 1094 q 312 1176 335 1148 q 266 1229 289 1203 q 226 1274 243 1255 l 226 1293 l 308 1293 q 378 1237 342 1270 q 451 1166 414 1204 q 522 1237 486 1204 q 594 1293 559 1270 l 676 1293 l 676 1274 "},"&":{"x_min":74,"x_max":953,"ha":975,"o":"m 289 789 q 294 744 289 766 q 311 700 300 722 q 340 655 322 678 q 381 608 357 633 q 448 652 420 631 q 494 695 476 673 q 522 740 513 717 q 531 792 531 764 q 523 837 531 816 q 499 872 515 857 q 462 896 483 887 q 412 904 440 904 q 322 874 355 904 q 289 789 289 844 m 377 93 q 449 101 416 93 q 511 123 483 109 q 565 155 540 137 q 611 195 589 174 l 349 471 q 285 427 313 449 q 239 381 258 406 q 211 328 220 357 q 201 261 201 299 q 213 193 201 224 q 247 140 225 162 q 302 106 270 118 q 377 93 335 93 m 74 257 q 87 352 74 310 q 127 427 101 393 q 191 490 153 461 q 277 548 228 519 q 235 598 256 572 q 200 654 215 624 q 175 717 184 683 q 166 789 166 751 q 182 881 166 840 q 231 949 199 921 q 310 992 263 977 q 416 1007 356 1007 q 516 992 472 1007 q 591 949 560 977 q 638 881 622 921 q 655 790 655 840 q 638 709 655 746 q 593 641 621 672 q 529 582 565 609 q 452 531 492 556 l 690 279 q 723 319 708 299 q 749 362 738 339 q 770 411 761 385 q 786 470 779 438 l 910 470 q 886 387 899 425 q 854 317 872 350 q 814 255 836 283 q 766 198 792 226 l 953 0 l 800 0 l 686 116 q 620 61 653 85 q 551 21 588 37 q 472 -4 514 4 q 377 -14 430 -14 q 250 3 306 -14 q 154 56 193 21 q 94 142 115 91 q 74 257 74 192 "},"G":{"x_min":85,"x_max":858,"ha":958,"o":"m 530 524 l 858 524 l 858 36 q 782 15 820 24 q 704 0 744 5 q 620 -10 664 -7 q 526 -14 576 -14 q 337 21 419 -14 q 199 123 255 57 q 114 284 143 189 q 85 497 85 378 q 117 708 85 613 q 211 868 149 802 q 363 970 272 934 q 569 1006 453 1006 q 713 991 644 1006 q 842 947 782 976 l 793 837 q 741 859 769 849 q 683 877 713 869 q 621 890 653 885 q 559 894 590 894 q 412 867 476 894 q 306 788 349 839 q 240 662 263 736 q 218 496 218 588 q 237 334 218 407 q 296 208 255 261 q 401 126 336 155 q 556 97 465 97 q 610 98 585 97 q 656 103 635 100 q 695 109 677 106 q 731 116 714 113 l 731 412 l 530 412 l 530 524 "},"ΰ":{"x_min":111,"x_max":736,"ha":819,"o":"m 409 -14 q 264 13 322 -14 q 172 87 206 40 q 124 199 138 135 q 111 337 111 263 l 111 745 l 234 745 l 234 345 q 245 239 234 286 q 278 158 256 192 q 335 106 300 125 q 417 88 370 88 q 564 167 516 88 q 612 412 612 245 q 609 503 612 461 q 601 585 606 545 q 587 664 595 625 q 569 745 580 703 l 693 745 q 711 664 703 703 q 725 585 719 626 q 733 501 730 545 q 736 406 736 457 q 653 88 736 190 q 409 -14 570 -14 m 357 959 q 372 1005 364 980 q 389 1057 381 1030 q 404 1112 397 1084 q 417 1164 412 1139 l 558 1164 l 558 1150 q 529 1102 545 1128 q 494 1049 513 1076 q 454 994 475 1022 q 412 942 434 967 l 357 942 l 357 959 m 198 945 q 212 998 198 982 q 247 1015 226 1015 q 265 1010 256 1015 q 281 998 274 1006 q 291 977 287 989 q 295 945 295 964 q 280 892 295 909 q 247 876 266 876 q 212 892 226 876 q 198 945 198 909 m 527 945 q 541 998 527 982 q 576 1015 555 1015 q 594 1010 585 1015 q 610 998 603 1006 q 620 977 616 989 q 625 945 625 964 q 610 892 625 909 q 576 876 595 876 q 541 892 555 876 q 527 945 527 909 "},"`":{"x_min":267,"x_max":534,"ha":802,"o":"m 534 842 l 452 842 q 400 889 428 860 q 346 946 372 917 q 299 1004 320 976 q 267 1049 277 1031 l 267 1064 l 415 1064 q 441 1013 426 1040 q 471 958 455 986 q 503 905 487 931 q 534 860 519 879 l 534 842 "},"ŏ":{"x_min":77,"x_max":725,"ha":802,"o":"m 725 373 q 702 208 725 280 q 637 86 679 135 q 534 11 594 37 q 398 -14 474 -14 q 270 11 329 -14 q 168 86 211 37 q 101 208 125 135 q 77 373 77 280 q 99 537 77 465 q 164 657 122 608 q 267 732 206 707 q 403 758 327 758 q 531 732 472 758 q 633 657 590 707 q 700 537 676 608 q 725 373 725 465 m 204 373 q 250 159 204 231 q 401 88 297 88 q 551 159 506 88 q 597 373 597 231 q 551 585 597 515 q 400 655 504 655 q 250 585 295 655 q 204 373 204 515 m 605 1030 q 587 954 602 988 q 546 894 572 920 q 483 855 520 869 q 398 842 446 842 q 311 855 348 842 q 250 893 274 868 q 212 952 225 918 q 197 1030 199 987 l 271 1030 q 283 983 274 1000 q 309 957 293 965 q 348 946 325 948 q 401 943 371 943 q 447 946 425 943 q 487 959 469 949 q 516 985 504 968 q 530 1030 527 1002 l 605 1030 "},"ý":{"x_min":6.75,"x_max":672.25,"ha":679,"o":"m 6 745 l 134 745 l 280 329 q 300 272 290 301 q 318 212 310 242 q 333 154 327 182 q 341 103 339 126 l 346 103 q 356 149 349 120 q 373 211 364 178 q 392 276 382 244 q 409 330 402 308 l 544 745 l 672 745 l 377 -96 q 336 -195 358 -152 q 285 -270 314 -239 q 217 -317 256 -300 q 123 -334 177 -334 q 62 -330 88 -334 q 18 -322 36 -326 l 18 -223 q 54 -229 32 -226 q 99 -231 75 -231 q 156 -223 132 -231 q 197 -201 179 -216 q 227 -164 215 -186 q 250 -115 240 -142 l 289 -6 l 6 745 m 276 860 q 306 905 290 879 q 338 958 322 931 q 369 1013 354 986 q 394 1064 383 1040 l 543 1064 l 543 1049 q 510 1004 532 1031 q 463 946 489 976 q 409 889 437 917 q 358 842 381 860 l 276 842 l 276 860 "},"º":{"x_min":45,"x_max":441,"ha":486,"o":"m 441 768 q 427 668 441 712 q 387 594 413 624 q 324 547 361 563 q 241 532 287 532 q 162 547 198 532 q 100 594 126 563 q 59 668 74 624 q 45 768 45 712 q 58 868 45 824 q 98 942 72 912 q 161 987 124 971 q 244 1003 197 1003 q 322 987 285 1003 q 384 942 358 971 q 426 868 411 912 q 441 768 441 824 m 133 769 q 159 647 133 688 q 243 605 184 605 q 326 647 301 605 q 352 769 352 688 q 326 889 352 850 q 243 929 301 929 q 159 889 184 929 q 133 769 133 850 "},"∞":{"x_min":81,"x_max":901,"ha":982,"o":"m 901 486 q 886 405 901 443 q 845 336 871 366 q 782 289 819 307 q 700 272 745 272 q 585 307 637 272 q 488 421 532 343 q 445 362 468 388 q 395 316 421 335 q 340 287 368 297 q 283 277 312 277 q 202 291 239 277 q 138 334 164 306 q 96 402 111 362 q 81 490 81 441 q 95 573 81 534 q 136 641 110 612 q 200 687 162 670 q 283 704 238 704 q 394 667 340 704 q 489 555 447 631 q 532 614 509 588 q 582 659 555 640 q 638 689 609 678 q 700 699 668 699 q 782 684 745 699 q 845 641 819 669 q 886 574 871 613 q 901 486 901 534 m 296 369 q 372 398 337 369 q 441 490 407 426 q 374 581 409 552 q 294 611 339 611 q 247 601 268 611 q 212 575 227 592 q 190 536 198 558 q 182 489 182 514 q 189 443 182 465 q 210 405 196 422 q 246 379 225 389 q 296 369 267 369 m 690 607 q 612 578 648 607 q 538 486 575 550 q 609 395 573 425 q 692 365 646 365 q 740 374 718 365 q 777 400 762 384 q 800 439 792 417 q 808 487 808 462 q 800 534 808 512 q 776 572 791 556 q 739 597 760 588 q 690 607 717 607 "},"ź":{"x_min":56,"x_max":556.21875,"ha":612,"o":"m 556 0 l 56 0 l 56 80 l 418 656 l 78 656 l 78 745 l 544 745 l 544 650 l 189 88 l 556 88 l 556 0 m 238 860 q 268 905 252 879 q 300 958 284 931 q 331 1013 316 986 q 356 1064 345 1040 l 505 1064 l 505 1049 q 472 1004 494 1031 q 425 946 451 976 q 371 889 399 917 q 320 842 343 860 l 238 842 l 238 860 "},"я":{"x_min":22.75,"x_max":619,"ha":737,"o":"m 157 0 l 22 0 l 220 315 q 161 339 190 323 q 111 381 133 355 q 75 443 89 407 q 62 527 62 479 q 81 621 62 580 q 133 689 100 662 q 214 730 167 716 q 317 745 261 745 l 619 745 l 619 0 l 495 0 l 495 295 l 330 295 l 157 0 m 178 525 q 191 468 178 492 q 226 428 203 444 q 278 405 248 413 q 346 398 309 398 l 495 398 l 495 642 l 322 642 q 214 610 249 642 q 178 525 178 577 "},"Ё":{"x_min":135,"x_max":650,"ha":733,"o":"m 650 0 l 135 0 l 135 992 l 650 992 l 650 880 l 261 880 l 261 574 l 624 574 l 624 462 l 261 462 l 261 111 l 650 111 l 650 0 m 201 1174 q 219 1227 201 1211 q 266 1244 238 1244 q 312 1227 292 1244 q 331 1174 331 1210 q 312 1121 331 1138 q 266 1105 292 1105 q 219 1121 238 1105 q 201 1174 201 1138 m 455 1174 q 474 1227 455 1211 q 520 1244 493 1244 q 545 1239 533 1244 q 566 1227 557 1235 q 580 1206 575 1218 q 586 1174 586 1193 q 566 1121 586 1138 q 520 1105 546 1105 q 474 1121 493 1105 q 455 1174 455 1138 "},"ń":{"x_min":118,"x_max":707,"ha":818,"o":"m 583 0 l 583 479 q 547 611 583 567 q 436 655 512 655 q 343 637 381 655 q 283 585 306 620 q 251 501 261 551 q 241 385 241 450 l 241 0 l 118 0 l 118 745 l 218 745 l 236 644 l 242 644 q 283 694 259 673 q 334 730 306 715 q 393 751 362 744 q 457 758 424 758 q 644 693 581 758 q 707 486 707 628 l 707 0 l 583 0 m 342 860 q 372 905 356 879 q 404 958 388 931 q 435 1013 420 986 q 460 1064 449 1040 l 609 1064 l 609 1049 q 576 1004 598 1031 q 529 946 555 976 q 475 889 503 917 q 424 842 447 860 l 342 842 l 342 860 "}," ":{"x_min":0,"x_max":0,"ha":347},"Г":{"x_min":135,"x_max":649,"ha":682,"o":"m 649 992 l 649 880 l 261 880 l 261 0 l 135 0 l 135 992 l 649 992 "},"Ь":{"x_min":135,"x_max":729,"ha":800,"o":"m 729 290 q 708 170 729 224 q 645 79 688 117 q 537 20 602 41 q 380 0 471 0 l 135 0 l 135 992 l 261 992 l 261 574 l 362 574 q 536 551 465 574 q 648 490 606 529 q 710 400 691 452 q 729 290 729 349 m 261 107 l 368 107 q 540 152 485 107 q 595 290 595 197 q 579 370 595 337 q 533 424 564 403 q 456 453 503 444 q 347 462 410 462 l 261 462 l 261 107 "},"¤":{"x_min":83.640625,"x_max":680.03125,"ha":765,"o":"m 126 490 q 137 566 126 530 q 170 634 149 602 l 83 721 l 149 788 l 235 700 q 304 734 267 722 q 381 747 341 747 q 458 734 422 747 q 526 700 495 722 l 613 788 l 680 723 l 592 635 q 626 567 613 604 q 639 490 639 530 q 627 412 639 449 q 592 344 615 375 l 678 258 l 613 193 l 526 279 q 458 246 495 258 q 381 235 422 235 q 303 247 341 235 q 235 281 266 259 l 149 195 l 85 259 l 170 345 q 137 412 149 376 q 126 490 126 449 m 227 489 q 239 426 227 455 q 273 375 252 397 q 323 340 295 353 q 385 327 352 327 q 448 340 419 327 q 499 375 478 353 q 534 426 521 397 q 546 489 546 455 q 534 554 546 524 q 499 606 521 584 q 448 641 478 628 q 385 654 419 654 q 323 641 352 654 q 273 606 295 628 q 239 554 252 584 q 227 489 227 524 "},"Ĝ":{"x_min":85,"x_max":858,"ha":958,"o":"m 530 524 l 858 524 l 858 36 q 782 15 820 24 q 704 0 744 5 q 620 -10 664 -7 q 526 -14 576 -14 q 337 21 419 -14 q 199 123 255 57 q 114 284 143 189 q 85 497 85 378 q 117 708 85 613 q 211 868 149 802 q 363 970 272 934 q 569 1006 453 1006 q 713 991 644 1006 q 842 947 782 976 l 793 837 q 741 859 769 849 q 683 877 713 869 q 621 890 653 885 q 559 894 590 894 q 412 867 476 894 q 306 788 349 839 q 240 662 263 736 q 218 496 218 588 q 237 334 218 407 q 296 208 255 261 q 401 126 336 155 q 556 97 465 97 q 610 98 585 97 q 656 103 635 100 q 695 109 677 106 q 731 116 714 113 l 731 412 l 530 412 l 530 524 m 771 1071 l 689 1071 q 617 1126 654 1093 q 546 1196 581 1159 q 473 1126 509 1159 q 403 1071 437 1093 l 321 1071 l 321 1089 q 361 1134 338 1108 q 407 1187 384 1160 q 450 1242 430 1215 q 480 1293 470 1269 l 611 1293 q 641 1242 621 1269 q 684 1187 661 1215 q 730 1134 707 1160 q 771 1089 754 1108 l 771 1071 "},"p":{"x_min":118,"x_max":737,"ha":814,"o":"m 454 -14 q 381 -5 414 -14 q 323 18 349 3 q 277 52 297 32 q 241 93 257 72 l 233 93 q 237 49 235 70 q 240 13 238 32 q 241 -16 241 -5 l 241 -334 l 118 -334 l 118 745 l 218 745 l 236 644 l 241 644 q 276 688 257 667 q 322 724 296 709 q 381 748 348 739 q 454 758 413 758 q 570 733 518 758 q 659 660 622 709 q 716 540 696 612 q 737 373 737 468 q 716 205 737 277 q 659 84 696 133 q 570 10 622 35 q 454 -14 518 -14 m 430 655 q 343 639 379 655 q 285 592 307 624 q 253 513 263 560 q 241 401 242 465 l 241 373 q 250 251 241 304 q 281 162 259 198 q 340 107 303 125 q 431 88 377 88 q 566 162 523 88 q 609 374 609 236 q 566 585 609 515 q 430 655 523 655 "},"Ю":{"x_min":135,"x_max":1323,"ha":1409,"o":"m 1323 496 q 1296 287 1323 382 q 1216 126 1269 193 q 1086 22 1164 59 q 906 -14 1008 -14 q 728 19 804 -14 q 600 116 651 53 q 521 266 548 178 q 490 462 494 354 l 261 462 l 261 0 l 135 0 l 135 992 l 261 992 l 261 574 l 493 574 q 529 752 500 672 q 609 889 558 832 q 735 976 661 946 q 908 1007 809 1007 q 1087 970 1009 1007 q 1217 867 1164 934 q 1296 706 1269 800 q 1323 496 1323 612 m 626 497 q 643 330 626 404 q 694 204 659 255 q 782 124 729 152 q 908 97 835 97 q 1035 124 981 97 q 1122 204 1088 152 q 1173 330 1156 255 q 1189 497 1189 404 q 1173 664 1189 590 q 1122 789 1156 738 q 1035 868 1088 840 q 909 895 982 895 q 782 868 836 895 q 694 789 729 840 q 643 664 659 738 q 626 497 626 590 "},"ο":{"x_min":77,"x_max":725,"ha":802,"o":"m 725 373 q 702 208 725 280 q 637 86 679 135 q 534 11 594 37 q 398 -14 474 -14 q 270 11 329 -14 q 168 86 211 37 q 101 208 125 135 q 77 373 77 280 q 99 537 77 465 q 164 657 122 608 q 267 732 206 707 q 403 758 327 758 q 531 732 472 758 q 633 657 590 707 q 700 537 676 608 q 725 373 725 465 m 204 373 q 250 159 204 231 q 401 88 297 88 q 551 159 506 88 q 597 373 597 231 q 551 585 597 515 q 400 655 504 655 q 250 585 295 655 q 204 373 204 515 "},"S":{"x_min":70.109375,"x_max":657,"ha":721,"o":"m 657 264 q 633 147 657 199 q 566 59 610 95 q 460 4 523 23 q 320 -14 398 -14 q 179 -2 245 -14 q 70 32 114 9 l 70 153 q 122 131 93 142 q 184 112 151 120 q 251 99 216 104 q 319 93 285 93 q 479 134 427 93 q 530 252 530 176 q 521 316 530 289 q 486 366 511 343 q 420 410 461 389 q 316 456 379 431 q 212 508 256 480 q 139 572 168 537 q 96 652 110 607 q 83 754 83 697 q 104 860 83 813 q 165 939 126 907 q 259 989 205 972 q 380 1006 314 1006 q 525 990 460 1006 q 640 951 589 975 l 595 845 q 495 880 551 865 q 381 894 440 894 q 254 856 299 894 q 209 752 209 818 q 219 686 209 714 q 252 635 229 657 q 315 592 276 612 q 410 549 353 572 q 517 499 471 525 q 594 441 563 473 q 641 366 625 408 q 657 264 657 323 "},"/":{"x_min":13.75,"x_max":504.015625,"ha":518,"o":"m 504 992 l 135 0 l 13 0 l 383 992 l 504 992 "},"Ŧ":{"x_min":14,"x_max":706,"ha":721,"o":"m 297 556 l 297 880 l 14 880 l 14 992 l 706 992 l 706 880 l 423 880 l 423 556 l 623 556 l 623 448 l 423 448 l 423 0 l 297 0 l 297 448 l 95 448 l 95 556 l 297 556 "},"ђ":{"x_min":12.1875,"x_max":707,"ha":818,"o":"m 510 -334 q 456 -329 477 -334 q 419 -317 435 -324 l 419 -217 q 455 -227 437 -224 q 497 -231 473 -231 q 531 -226 515 -231 q 558 -208 546 -221 q 577 -172 570 -194 q 583 -116 583 -150 l 583 451 q 547 583 583 539 q 436 627 512 627 q 343 609 381 627 q 283 557 306 592 q 251 473 261 523 q 241 357 241 422 l 241 0 l 118 0 l 118 843 l 12 843 l 12 932 l 118 932 l 118 1055 l 241 1055 l 241 932 l 498 932 l 498 843 l 241 843 l 241 715 l 236 616 l 242 616 q 283 666 259 645 q 334 702 306 687 q 393 723 362 716 q 457 730 424 730 q 644 665 581 730 q 707 458 707 600 l 707 -107 q 695 -201 707 -159 q 659 -272 683 -243 q 598 -318 635 -302 q 510 -334 561 -334 "},"y":{"x_min":6.75,"x_max":672.25,"ha":679,"o":"m 6 745 l 134 745 l 280 329 q 300 272 290 301 q 318 212 310 242 q 333 154 327 182 q 341 103 339 126 l 346 103 q 356 149 349 120 q 373 211 364 178 q 392 276 382 244 q 409 330 402 308 l 544 745 l 672 745 l 377 -96 q 336 -195 358 -152 q 285 -270 314 -239 q 217 -317 256 -300 q 123 -334 177 -334 q 62 -330 88 -334 q 18 -322 36 -326 l 18 -223 q 54 -229 32 -226 q 99 -231 75 -231 q 156 -223 132 -231 q 197 -201 179 -216 q 227 -164 215 -186 q 250 -115 240 -142 l 289 -6 l 6 745 "},"Π":{"x_min":135,"x_max":826,"ha":960,"o":"m 826 0 l 699 0 l 699 880 l 261 880 l 261 0 l 135 0 l 135 992 l 826 992 l 826 0 "},"‗":{"x_min":-3,"x_max":574,"ha":571,"o":"m 574 -314 l -3 -314 l -3 -219 l 574 -219 l 574 -314 m 574 -125 l -3 -125 l -3 -31 l 574 -31 l 574 -125 "},"–":{"x_min":56,"x_max":639,"ha":695,"o":"m 56 315 l 56 429 l 639 429 l 639 315 l 56 315 "},"ë":{"x_min":77,"x_max":673,"ha":743,"o":"m 412 -14 q 276 11 337 -14 q 170 84 214 36 q 101 203 125 132 q 77 366 77 274 q 99 531 77 458 q 162 654 121 604 q 259 731 202 705 q 384 758 316 758 q 505 733 451 758 q 595 665 558 709 q 653 560 633 621 q 673 423 673 498 l 673 346 l 204 346 q 259 155 207 216 q 413 93 311 93 q 477 97 448 93 q 534 107 507 100 q 587 123 561 113 q 639 145 613 133 l 639 35 q 586 13 612 22 q 533 -2 560 3 q 476 -11 505 -8 q 412 -14 446 -14 m 384 655 q 260 602 306 655 q 207 449 214 549 l 545 449 q 536 533 545 495 q 507 598 526 571 q 457 640 487 625 q 384 655 427 655 m 183 945 q 201 998 183 982 q 248 1015 220 1015 q 294 998 274 1015 q 313 945 313 981 q 294 892 313 909 q 248 876 274 876 q 201 892 220 876 q 183 945 183 909 m 437 945 q 456 998 437 982 q 502 1015 475 1015 q 527 1010 515 1015 q 548 998 539 1006 q 562 977 557 989 q 568 945 568 964 q 548 892 568 909 q 502 876 528 876 q 456 892 475 876 q 437 945 437 909 "},"б":{"x_min":79,"x_max":716,"ha":791,"o":"m 79 446 q 95 664 79 569 q 147 828 112 759 q 237 940 182 897 q 369 999 292 982 q 535 1034 453 1018 q 686 1065 617 1051 l 709 957 q 633 944 675 951 q 549 928 592 936 q 467 912 507 920 q 398 897 428 904 q 322 865 356 887 q 264 804 288 843 q 225 710 239 766 q 209 577 211 654 l 218 577 q 251 617 230 597 q 300 654 272 638 q 365 682 329 671 q 445 693 401 693 q 562 668 512 693 q 647 599 613 643 q 699 493 682 554 q 716 359 716 432 q 692 196 716 266 q 627 79 669 126 q 526 9 585 32 q 396 -14 467 -14 q 265 16 324 -14 q 165 105 207 46 q 101 249 123 163 q 79 446 79 335 m 406 88 q 481 101 447 88 q 538 144 514 114 q 575 223 562 174 q 588 343 588 271 q 579 445 588 400 q 550 523 570 491 q 500 573 531 555 q 425 590 469 590 q 347 574 383 590 q 282 534 311 557 q 234 486 254 511 q 206 444 215 462 q 215 312 206 376 q 245 198 223 248 q 306 118 268 148 q 406 88 345 88 "},"ƒ":{"x_min":138,"x_max":679,"ha":765,"o":"m 444 552 l 444 -89 q 429 -207 444 -160 q 385 -282 413 -254 q 314 -322 356 -310 q 220 -334 272 -334 q 177 -330 198 -334 q 138 -323 156 -327 l 138 -219 q 174 -228 155 -224 q 215 -231 194 -231 q 262 -225 242 -231 q 295 -202 282 -218 q 314 -159 308 -187 q 321 -88 321 -131 l 321 552 l 189 552 l 189 610 l 321 664 l 321 757 q 336 877 321 829 q 380 953 351 925 q 451 994 409 982 q 546 1006 493 1006 q 619 998 586 1006 q 679 980 653 990 l 647 884 q 601 897 626 892 q 550 903 577 903 q 503 897 523 903 q 470 874 483 890 q 450 830 457 858 q 444 758 444 802 l 444 660 l 611 660 l 611 552 l 444 552 "},"у":{"x_min":6.75,"x_max":672.25,"ha":679,"o":"m 6 745 l 134 745 l 280 329 q 300 272 290 301 q 318 212 310 242 q 333 154 327 182 q 341 103 339 126 l 346 103 q 356 149 349 120 q 373 211 364 178 q 392 276 382 244 q 409 330 402 308 l 544 745 l 672 745 l 377 -96 q 336 -195 358 -152 q 285 -270 314 -239 q 217 -317 256 -300 q 123 -334 177 -334 q 62 -330 88 -334 q 18 -322 36 -326 l 18 -223 q 54 -229 32 -226 q 99 -231 75 -231 q 156 -223 132 -231 q 197 -201 179 -216 q 227 -164 215 -186 q 250 -115 240 -142 l 289 -6 l 6 745 "},"J":{"x_min":-125,"x_max":251.15625,"ha":376,"o":"m -19 -264 q -80 -259 -54 -264 q -125 -247 -106 -255 l -125 -139 q -75 -149 -101 -145 q -18 -152 -48 -152 q 32 -146 6 -152 q 78 -122 57 -139 q 112 -76 99 -105 q 125 0 125 -46 l 125 992 l 251 992 l 251 13 q 231 -109 251 -57 q 175 -196 211 -162 q 90 -247 140 -230 q -19 -264 40 -264 "},"ŷ":{"x_min":6.75,"x_max":672.25,"ha":679,"o":"m 6 745 l 134 745 l 280 329 q 300 272 290 301 q 318 212 310 242 q 333 154 327 182 q 341 103 339 126 l 346 103 q 356 149 349 120 q 373 211 364 178 q 392 276 382 244 q 409 330 402 308 l 544 745 l 672 745 l 377 -96 q 336 -195 358 -152 q 285 -270 314 -239 q 217 -317 256 -300 q 123 -334 177 -334 q 62 -330 88 -334 q 18 -322 36 -326 l 18 -223 q 54 -229 32 -226 q 99 -231 75 -231 q 156 -223 132 -231 q 197 -201 179 -216 q 227 -164 215 -186 q 250 -115 240 -142 l 289 -6 l 6 745 m 566 842 l 484 842 q 412 897 449 864 q 341 967 376 930 q 268 897 304 930 q 198 842 232 864 l 116 842 l 116 860 q 156 905 133 879 q 202 958 179 931 q 245 1013 225 986 q 275 1064 265 1040 l 406 1064 q 436 1013 416 1040 q 479 958 456 986 q 525 905 502 931 q 566 860 549 879 l 566 842 "},"ŕ":{"x_min":118,"x_max":526,"ha":554,"o":"m 439 758 q 483 756 459 758 q 526 751 508 754 l 509 637 q 470 643 490 640 q 433 645 450 645 q 355 628 390 645 q 294 578 320 610 q 255 501 269 546 q 241 401 241 456 l 241 0 l 118 0 l 118 745 l 218 745 l 233 608 l 238 608 q 274 664 255 637 q 318 712 294 691 q 372 745 342 732 q 439 758 402 758 m 232 860 q 262 905 246 879 q 294 958 278 931 q 325 1013 310 986 q 350 1064 339 1040 l 499 1064 l 499 1049 q 466 1004 488 1031 q 419 946 445 976 q 365 889 393 917 q 314 842 337 860 l 232 842 l 232 860 "},"ώ":{"x_min":77,"x_max":970,"ha":1046,"o":"m 332 -14 q 223 13 271 -14 q 143 91 176 41 q 93 209 110 140 q 77 360 77 278 q 82 464 77 415 q 97 558 87 512 q 124 650 108 604 q 162 745 140 696 l 289 745 q 251 649 267 695 q 225 558 235 604 q 209 464 214 512 q 204 360 204 416 q 214 243 204 294 q 242 158 224 192 q 285 106 260 123 q 340 88 310 88 q 394 102 371 88 q 432 140 417 116 q 454 198 447 165 q 462 270 462 231 l 462 478 l 585 478 l 585 270 q 618 135 585 182 q 706 88 651 88 q 761 106 736 88 q 804 158 786 123 q 832 243 823 192 q 842 360 842 294 q 837 464 842 416 q 821 558 832 512 q 795 649 811 604 q 757 745 779 695 l 884 745 q 922 650 906 696 q 949 558 938 604 q 964 464 959 512 q 970 360 970 415 q 953 209 970 278 q 903 91 936 140 q 823 13 871 41 q 714 -14 775 -14 q 595 15 642 -14 q 527 106 548 45 l 520 106 q 452 15 499 45 q 332 -14 404 -14 m 474 860 q 487 906 480 880 q 500 960 494 932 q 512 1014 507 987 q 521 1064 518 1041 l 656 1064 l 656 1049 q 640 1007 651 1033 q 614 951 629 980 q 581 892 598 921 q 547 842 563 863 l 474 842 l 474 860 "},"˘":{"x_min":196,"x_max":604,"ha":802,"o":"m 604 1030 q 586 954 601 988 q 545 894 571 920 q 482 855 519 869 q 397 842 445 842 q 310 855 347 842 q 249 893 273 868 q 211 952 224 918 q 196 1030 198 987 l 270 1030 q 282 983 273 1000 q 308 957 292 965 q 347 946 324 948 q 400 943 370 943 q 446 946 424 943 q 486 959 468 949 q 515 985 503 968 q 529 1030 526 1002 l 604 1030 "},"D":{"x_min":135,"x_max":865,"ha":950,"o":"m 865 505 q 832 285 865 379 q 738 127 799 190 q 586 31 676 63 q 383 0 496 0 l 135 0 l 135 992 l 410 992 q 598 960 514 992 q 741 868 682 929 q 832 715 800 806 q 865 505 865 624 m 731 501 q 709 672 731 600 q 643 791 686 744 q 538 861 601 838 q 397 884 476 884 l 261 884 l 261 107 l 370 107 q 640 207 549 107 q 731 501 731 306 "},"ł":{"x_min":-7,"x_max":367,"ha":359,"o":"m 118 513 l 118 1055 l 241 1055 l 241 593 l 314 641 l 367 558 l 241 477 l 241 0 l 118 0 l 118 396 l 45 350 l -7 432 l 118 513 "},"ĺ":{"x_min":116,"x_max":383,"ha":359,"o":"m 241 0 l 118 0 l 118 1055 l 241 1055 l 241 0 m 116 1128 q 146 1173 130 1147 q 178 1226 162 1199 q 209 1281 194 1254 q 234 1332 223 1308 l 383 1332 l 383 1317 q 350 1272 372 1299 q 303 1214 329 1244 q 249 1157 277 1185 q 198 1110 221 1128 l 116 1110 l 116 1128 "},"ц":{"x_min":118,"x_max":815,"ha":836,"o":"m 815 -258 l 691 -258 l 691 0 l 118 0 l 118 745 l 241 745 l 241 102 l 582 102 l 582 745 l 706 745 l 706 102 l 815 102 l 815 -258 "},"Л":{"x_min":0,"x_max":794,"ha":929,"o":"m 794 0 l 667 0 l 667 880 l 432 880 q 411 721 421 804 q 389 558 400 638 q 367 406 378 478 q 344 279 355 334 q 311 154 330 209 q 263 61 291 99 q 195 4 234 24 q 99 -16 155 -16 q 46 -11 73 -16 q 0 0 20 -6 l 0 105 q 35 95 15 99 q 76 91 55 91 q 130 113 109 91 q 165 167 151 134 q 188 239 180 200 q 205 315 197 279 q 224 421 214 354 q 248 577 235 488 q 276 771 262 665 q 306 992 291 877 l 794 992 l 794 0 "},"$":{"x_min":83,"x_max":668,"ha":765,"o":"m 668 303 q 651 216 668 255 q 602 149 634 177 q 525 102 570 120 q 423 75 480 83 l 423 -81 l 330 -81 l 330 69 q 261 72 296 69 q 194 81 226 75 q 133 96 161 87 q 83 116 104 104 l 83 233 q 134 212 105 222 q 197 193 164 201 q 263 179 229 185 q 330 174 298 174 l 330 466 q 225 509 269 487 q 151 560 180 531 q 108 626 122 589 q 94 713 94 663 q 110 796 94 759 q 158 862 127 834 q 232 908 188 890 q 330 932 276 926 l 330 1054 l 423 1054 l 423 935 q 548 917 491 931 q 651 882 606 903 l 606 783 q 521 812 568 799 q 423 829 473 826 l 423 547 q 529 504 483 526 q 605 453 574 481 q 652 388 636 425 q 668 303 668 352 m 548 302 q 541 344 548 325 q 520 378 535 362 q 482 406 505 393 q 423 432 458 420 l 423 180 q 517 222 486 190 q 548 302 548 254 m 213 711 q 219 668 213 687 q 238 633 224 649 q 274 605 252 617 q 330 580 296 592 l 330 827 q 241 787 269 816 q 213 711 213 757 "},"w":{"x_min":13.75,"x_max":1022.25,"ha":1036,"o":"m 683 0 l 570 417 q 563 445 567 430 q 555 477 559 460 q 546 512 551 494 q 538 546 542 529 q 518 628 528 586 l 514 628 q 496 546 505 585 q 480 476 488 512 q 464 415 471 440 l 347 0 l 204 0 l 13 745 l 143 745 l 232 348 q 245 282 239 318 q 258 211 252 246 q 269 146 264 177 q 277 95 274 115 l 281 95 q 290 142 284 113 q 303 205 296 172 q 317 270 310 238 q 331 324 325 302 l 453 745 l 586 745 l 702 324 q 716 270 709 301 q 732 207 724 239 q 745 145 739 175 q 754 95 751 115 l 758 95 q 764 142 760 113 q 775 207 769 172 q 788 279 781 242 q 803 348 795 316 l 896 745 l 1022 745 l 829 0 l 683 0 "},"о":{"x_min":77,"x_max":725,"ha":802,"o":"m 725 373 q 702 208 725 280 q 637 86 679 135 q 534 11 594 37 q 398 -14 474 -14 q 270 11 329 -14 q 168 86 211 37 q 101 208 125 135 q 77 373 77 280 q 99 537 77 465 q 164 657 122 608 q 267 732 206 707 q 403 758 327 758 q 531 732 472 758 q 633 657 590 707 q 700 537 676 608 q 725 373 725 465 m 204 373 q 250 159 204 231 q 401 88 297 88 q 551 159 506 88 q 597 373 597 231 q 551 585 597 515 q 400 655 504 655 q 250 585 295 655 q 204 373 204 515 "},"Д":{"x_min":10,"x_max":876,"ha":903,"o":"m 876 -261 l 749 -261 l 749 0 l 136 0 l 136 -261 l 10 -261 l 10 111 l 86 111 q 147 223 118 170 q 203 354 177 277 q 251 512 229 431 q 290 675 273 593 q 316 837 306 757 q 329 992 326 917 l 744 992 l 744 111 l 876 111 l 876 -261 m 617 111 l 617 880 l 455 880 q 440 766 452 829 q 413 634 429 703 q 374 494 396 565 q 326 355 352 423 q 273 224 301 286 q 216 111 245 162 l 617 111 "},"Ç":{"x_min":85,"x_max":798,"ha":838,"o":"m 538 894 q 406 867 465 894 q 305 788 347 839 q 241 662 264 736 q 218 496 218 588 q 238 326 218 400 q 298 200 258 251 q 398 123 338 150 q 538 97 458 97 q 652 108 598 97 q 760 135 707 120 l 760 26 q 707 8 733 15 q 651 -4 680 0 q 590 -11 622 -9 q 517 -14 557 -14 q 324 22 405 -14 q 189 126 243 59 q 110 288 136 193 q 85 497 85 382 q 114 703 85 609 q 201 864 144 796 q 343 968 258 931 q 538 1006 428 1006 q 677 991 611 1006 q 798 947 744 976 l 745 841 q 652 879 702 863 q 538 894 601 894 m 622 -194 q 574 -297 622 -260 q 424 -334 526 -334 q 394 -331 409 -334 q 369 -327 379 -329 l 369 -254 q 395 -257 379 -256 q 422 -258 412 -258 q 497 -247 470 -258 q 524 -208 524 -235 q 515 -186 524 -195 q 491 -169 506 -176 q 454 -157 476 -162 q 409 -147 433 -152 l 470 0 l 552 0 l 513 -78 q 556 -92 536 -83 q 590 -115 575 -101 q 613 -148 605 -128 q 622 -194 622 -168 "},"Ŝ":{"x_min":70.109375,"x_max":657,"ha":721,"o":"m 657 264 q 633 147 657 199 q 566 59 610 95 q 460 4 523 23 q 320 -14 398 -14 q 179 -2 245 -14 q 70 32 114 9 l 70 153 q 122 131 93 142 q 184 112 151 120 q 251 99 216 104 q 319 93 285 93 q 479 134 427 93 q 530 252 530 176 q 521 316 530 289 q 486 366 511 343 q 420 410 461 389 q 316 456 379 431 q 212 508 256 480 q 139 572 168 537 q 96 652 110 607 q 83 754 83 697 q 104 860 83 813 q 165 939 126 907 q 259 989 205 972 q 380 1006 314 1006 q 525 990 460 1006 q 640 951 589 975 l 595 845 q 495 880 551 865 q 381 894 440 894 q 254 856 299 894 q 209 752 209 818 q 219 686 209 714 q 252 635 229 657 q 315 592 276 612 q 410 549 353 572 q 517 499 471 525 q 594 441 563 473 q 641 366 625 408 q 657 264 657 323 m 612 1071 l 530 1071 q 458 1126 495 1093 q 387 1196 422 1159 q 314 1126 350 1159 q 244 1071 278 1093 l 162 1071 l 162 1089 q 202 1134 179 1108 q 248 1187 225 1160 q 291 1242 271 1215 q 321 1293 311 1269 l 452 1293 q 482 1242 462 1269 q 525 1187 502 1215 q 571 1134 548 1160 q 612 1089 595 1108 l 612 1071 "},"C":{"x_min":85,"x_max":798,"ha":838,"o":"m 538 894 q 406 867 465 894 q 305 788 347 839 q 241 662 264 736 q 218 496 218 588 q 238 326 218 400 q 298 200 258 251 q 398 123 338 150 q 538 97 458 97 q 652 108 598 97 q 760 135 707 120 l 760 26 q 707 8 733 15 q 651 -4 680 0 q 590 -11 622 -9 q 517 -14 557 -14 q 324 22 405 -14 q 189 126 243 59 q 110 288 136 193 q 85 497 85 382 q 114 703 85 609 q 201 864 144 796 q 343 968 258 931 q 538 1006 428 1006 q 677 991 611 1006 q 798 947 744 976 l 745 841 q 652 879 702 863 q 538 894 601 894 "},"Ḁ":{"x_min":-0.25,"x_max":844.25,"ha":844,"o":"m 715 0 l 606 307 l 237 307 l 127 0 l 0 0 l 364 996 l 479 996 l 844 0 l 715 0 m 566 419 l 466 706 q 456 736 462 719 q 444 774 450 754 q 432 817 438 795 q 421 860 426 839 q 410 816 416 839 q 397 773 404 794 q 386 735 391 752 q 376 706 380 718 l 277 419 l 566 419 m 576 -229 q 564 -291 576 -264 q 531 -338 552 -319 q 482 -367 510 -357 q 420 -377 453 -377 q 358 -367 386 -377 q 310 -338 330 -357 q 279 -292 290 -319 q 269 -231 269 -265 q 279 -169 269 -196 q 310 -123 290 -142 q 358 -94 330 -104 q 420 -85 386 -85 q 481 -94 453 -85 q 531 -123 510 -104 q 564 -168 552 -142 q 576 -229 576 -195 m 501 -231 q 479 -174 501 -194 q 422 -154 456 -154 q 365 -174 387 -154 q 343 -231 343 -194 q 363 -287 343 -267 q 422 -307 383 -307 q 479 -287 456 -307 q 501 -231 501 -267 "},"Ĵ":{"x_min":-125,"x_max":414,"ha":376,"o":"m -19 -264 q -80 -259 -54 -264 q -125 -247 -106 -255 l -125 -139 q -75 -149 -101 -145 q -18 -152 -48 -152 q 32 -146 6 -152 q 78 -122 57 -139 q 112 -76 99 -105 q 125 0 125 -46 l 125 992 l 251 992 l 251 13 q 231 -109 251 -57 q 175 -196 211 -162 q 90 -247 140 -230 q -19 -264 40 -264 m 414 1071 l 332 1071 q 260 1126 297 1093 q 189 1196 224 1159 q 116 1126 152 1159 q 46 1071 80 1093 l -36 1071 l -36 1089 q 4 1134 -18 1108 q 50 1187 27 1160 q 93 1242 73 1215 q 123 1293 113 1269 l 254 1293 q 284 1242 264 1269 q 327 1187 304 1215 q 373 1134 350 1160 q 414 1089 397 1108 l 414 1071 "},"È":{"x_min":135,"x_max":650,"ha":733,"o":"m 650 0 l 135 0 l 135 992 l 650 992 l 650 880 l 261 880 l 261 574 l 624 574 l 624 462 l 261 462 l 261 111 l 650 111 l 650 0 m 484 1071 l 402 1071 q 350 1118 378 1089 q 296 1175 322 1146 q 249 1233 270 1205 q 217 1278 227 1260 l 217 1293 l 365 1293 q 391 1242 376 1269 q 421 1187 405 1215 q 453 1134 437 1160 q 484 1089 469 1108 l 484 1071 "},"ﬁ":{"x_min":19,"x_max":709.96875,"ha":817,"o":"m 441 656 l 274 656 l 274 0 l 151 0 l 151 656 l 19 656 l 19 704 l 151 749 l 151 814 q 166 934 151 886 q 210 1010 181 982 q 280 1051 238 1039 q 375 1063 322 1063 q 449 1055 415 1063 q 509 1037 482 1047 l 477 941 q 431 954 456 949 q 379 960 406 960 q 332 954 352 960 q 300 931 313 947 q 280 887 287 915 q 274 815 274 859 l 274 745 l 441 745 l 441 656 m 698 0 l 575 0 l 575 745 l 698 745 l 698 0 m 565 945 q 586 1004 565 986 q 637 1023 606 1023 q 665 1018 652 1023 q 688 1004 678 1014 q 704 980 698 995 q 709 945 709 966 q 688 887 709 906 q 637 868 667 868 q 586 886 606 868 q 565 945 565 905 "},"X":{"x_min":-0.25,"x_max":760.25,"ha":760,"o":"m 760 0 l 617 0 l 376 430 l 127 0 l 0 0 l 307 518 l 20 992 l 155 992 l 380 612 l 608 992 l 737 992 l 450 522 l 760 0 "},"ô":{"x_min":77,"x_max":725,"ha":802,"o":"m 725 373 q 702 208 725 280 q 637 86 679 135 q 534 11 594 37 q 398 -14 474 -14 q 270 11 329 -14 q 168 86 211 37 q 101 208 125 135 q 77 373 77 280 q 99 537 77 465 q 164 657 122 608 q 267 732 206 707 q 403 758 327 758 q 531 732 472 758 q 633 657 590 707 q 700 537 676 608 q 725 373 725 465 m 204 373 q 250 159 204 231 q 401 88 297 88 q 551 159 506 88 q 597 373 597 231 q 551 585 597 515 q 400 655 504 655 q 250 585 295 655 q 204 373 204 515 m 622 842 l 540 842 q 468 897 505 864 q 397 967 432 930 q 324 897 360 930 q 254 842 288 864 l 172 842 l 172 860 q 212 905 189 879 q 258 958 235 931 q 301 1013 281 986 q 331 1064 321 1040 l 462 1064 q 492 1013 472 1040 q 535 958 512 986 q 581 905 558 931 q 622 860 605 879 l 622 842 "},"Ė":{"x_min":135,"x_max":650,"ha":733,"o":"m 650 0 l 135 0 l 135 992 l 650 992 l 650 880 l 261 880 l 261 574 l 624 574 l 624 462 l 261 462 l 261 111 l 650 111 l 650 0 m 325 1155 q 345 1214 325 1196 q 396 1233 366 1233 q 425 1228 411 1233 q 448 1214 438 1224 q 463 1190 457 1205 q 469 1155 469 1176 q 448 1097 469 1116 q 396 1078 426 1078 q 345 1096 366 1078 q 325 1155 325 1115 "},"г":{"x_min":118,"x_max":527,"ha":555,"o":"m 527 642 l 241 642 l 241 0 l 118 0 l 118 745 l 527 745 l 527 642 "},"Ŀ":{"x_min":135,"x_max":649.4375,"ha":682,"o":"m 135 0 l 135 992 l 261 992 l 261 111 l 649 111 l 649 0 l 135 0 m 436 493 q 456 552 436 534 q 507 571 477 571 q 536 566 522 571 q 559 552 549 562 q 574 528 568 543 q 580 493 580 514 q 559 435 580 454 q 507 416 537 416 q 456 434 477 416 q 436 493 436 453 "},"х":{"x_min":24,"x_max":670,"ha":695,"o":"m 276 382 l 38 745 l 178 745 l 347 466 l 517 745 l 658 745 l 416 382 l 670 0 l 529 0 l 347 295 l 164 0 l 24 0 l 276 382 "},"ŋ":{"x_min":118,"x_max":706.34375,"ha":818,"o":"m 508 -334 q 454 -329 476 -334 q 418 -317 433 -324 l 418 -217 q 453 -227 435 -224 q 495 -231 472 -231 q 529 -226 513 -231 q 556 -208 545 -221 q 575 -172 568 -194 q 581 -116 581 -150 l 582 479 q 547 611 582 567 q 435 655 511 655 q 343 637 381 655 q 283 585 306 620 q 251 501 261 551 q 241 385 241 450 l 241 0 l 118 0 l 118 745 l 218 745 l 236 644 l 242 644 q 283 694 259 673 q 334 730 306 715 q 393 751 362 744 q 456 758 424 758 q 643 693 580 758 q 706 486 706 628 l 705 -107 q 693 -201 705 -159 q 657 -272 681 -243 q 596 -318 633 -302 q 508 -334 559 -334 "},"Ч":{"x_min":113,"x_max":782,"ha":917,"o":"m 782 0 l 655 0 l 655 406 q 511 360 577 376 q 379 345 445 345 q 266 361 316 345 q 183 410 217 378 q 130 489 148 442 q 113 596 113 536 l 113 992 l 239 992 l 239 612 q 274 495 239 534 q 393 456 310 456 q 517 469 454 456 q 655 510 579 483 l 655 992 l 782 992 l 782 0 "},"ü":{"x_min":111,"x_max":700,"ha":818,"o":"m 600 0 l 582 99 l 575 99 q 534 48 558 70 q 483 13 511 27 q 424 -7 455 0 q 360 -14 393 -14 q 252 1 299 -14 q 174 50 205 17 q 126 135 142 83 q 111 258 111 186 l 111 745 l 234 745 l 234 264 q 270 132 234 176 q 381 88 306 88 q 474 106 436 88 q 534 158 511 123 q 566 242 556 192 q 576 357 576 292 l 576 745 l 700 745 l 700 0 l 600 0 m 210 945 q 228 998 210 982 q 275 1015 247 1015 q 321 998 301 1015 q 340 945 340 981 q 321 892 340 909 q 275 876 301 876 q 228 892 247 876 q 210 945 210 909 m 464 945 q 483 998 464 982 q 529 1015 502 1015 q 554 1010 542 1015 q 575 998 566 1006 q 589 977 584 989 q 595 945 595 964 q 575 892 595 909 q 529 876 555 876 q 483 892 502 876 q 464 945 464 909 "},"ь":{"x_min":118,"x_max":711,"ha":787,"o":"m 241 439 l 429 439 q 641 386 572 439 q 711 227 711 333 q 695 133 711 175 q 644 61 679 91 q 556 15 610 31 q 426 0 502 0 l 118 0 l 118 745 l 241 745 l 241 439 m 241 336 l 241 102 l 416 102 q 485 108 454 102 q 539 127 516 113 q 574 164 561 141 q 587 219 587 186 q 576 275 587 252 q 543 311 565 297 q 489 330 521 325 q 413 336 456 336 l 241 336 "},"Ÿ":{"x_min":-0.25,"x_max":731.25,"ha":732,"o":"m 364 490 l 595 992 l 731 992 l 428 386 l 428 0 l 302 0 l 302 379 l 0 992 l 137 992 l 364 490 m 174 1174 q 192 1227 174 1211 q 239 1244 211 1244 q 285 1227 265 1244 q 304 1174 304 1210 q 285 1121 304 1138 q 239 1105 265 1105 q 192 1121 211 1105 q 174 1174 174 1138 m 428 1174 q 447 1227 428 1211 q 493 1244 466 1244 q 518 1239 506 1244 q 539 1227 530 1235 q 553 1206 548 1218 q 559 1174 559 1193 q 539 1121 559 1138 q 493 1105 519 1105 q 447 1121 466 1105 q 428 1174 428 1138 "},"€":{"x_min":42.984375,"x_max":744.875,"ha":765,"o":"m 526 893 q 440 875 480 893 q 368 825 400 858 q 313 743 336 791 q 279 634 291 695 l 571 634 l 571 526 l 268 526 q 268 509 268 517 q 267 494 267 502 q 267 481 267 487 q 267 458 267 470 q 268 434 267 446 l 529 434 l 529 326 l 281 326 q 367 155 304 214 q 530 97 429 97 q 627 107 581 97 q 713 135 673 118 l 713 26 q 627 -3 672 7 q 521 -14 582 -14 q 381 9 443 -14 q 273 77 319 33 q 198 184 228 121 q 154 326 168 247 l 42 326 l 42 434 l 143 434 q 142 456 142 447 q 142 481 142 464 q 142 508 142 494 q 143 526 143 521 l 42 526 l 42 634 l 151 634 q 193 787 163 718 q 269 904 223 855 q 377 979 314 953 q 517 1006 439 1006 q 637 991 582 1006 q 744 943 691 976 l 690 844 q 615 879 656 865 q 526 893 575 893 "},"в":{"x_min":118,"x_max":711,"ha":787,"o":"m 687 557 q 645 447 687 486 q 531 395 603 407 l 531 390 q 602 373 569 385 q 659 340 635 361 q 697 289 683 320 q 711 215 711 258 q 695 130 711 169 q 644 61 679 91 q 556 16 610 32 q 426 0 502 0 l 118 0 l 118 745 l 424 745 q 529 735 481 745 q 612 704 577 726 q 667 646 647 682 q 687 557 687 610 m 587 224 q 543 312 587 287 q 413 336 500 336 l 241 336 l 241 102 l 416 102 q 485 108 454 102 q 539 128 516 114 q 574 166 561 143 q 587 224 587 190 m 570 545 q 533 620 570 598 q 422 642 496 642 l 241 642 l 241 439 l 401 439 q 475 444 443 439 q 527 461 506 449 q 559 494 549 473 q 570 545 570 515 "},"Η":{"x_min":135,"x_max":839,"ha":974,"o":"m 839 0 l 712 0 l 712 462 l 261 462 l 261 0 l 135 0 l 135 992 l 261 992 l 261 574 l 712 574 l 712 992 l 839 992 l 839 0 "},"С":{"x_min":85,"x_max":798,"ha":838,"o":"m 538 894 q 406 867 465 894 q 305 788 347 839 q 241 662 264 736 q 218 496 218 588 q 238 326 218 400 q 298 200 258 251 q 398 123 338 150 q 538 97 458 97 q 652 108 598 97 q 760 135 707 120 l 760 26 q 707 8 733 15 q 651 -4 680 0 q 590 -11 622 -9 q 517 -14 557 -14 q 324 22 405 -14 q 189 126 243 59 q 110 288 136 193 q 85 497 85 382 q 114 703 85 609 q 201 864 144 796 q 343 968 258 931 q 538 1006 428 1006 q 677 991 611 1006 q 798 947 744 976 l 745 841 q 652 879 702 863 q 538 894 601 894 "},"ß":{"x_min":118,"x_max":774,"ha":836,"o":"m 685 854 q 670 785 685 815 q 633 730 655 755 q 586 685 612 706 q 538 646 560 665 q 502 609 517 627 q 487 570 487 591 q 492 545 487 556 q 510 521 497 534 q 547 491 523 507 q 610 448 571 474 q 679 399 649 423 q 730 347 709 374 q 762 286 751 319 q 774 211 774 254 q 755 110 774 152 q 701 39 736 67 q 619 0 667 12 q 514 -14 571 -14 q 401 -2 448 -14 q 318 32 353 9 l 318 145 q 357 124 335 134 q 404 106 379 114 q 454 93 428 98 q 505 88 480 88 q 571 96 543 88 q 616 120 598 105 q 642 156 634 135 q 650 205 650 178 q 644 249 650 229 q 624 288 639 269 q 585 327 609 307 q 522 370 560 347 q 450 421 479 397 q 403 466 422 444 q 378 513 385 489 q 371 565 371 537 q 385 629 371 602 q 420 677 399 655 q 466 716 441 698 q 512 754 490 735 q 547 797 533 774 q 561 849 561 820 q 550 899 561 878 q 518 933 539 920 q 469 954 498 947 q 406 960 441 960 q 343 954 373 960 q 290 931 313 947 q 254 887 268 915 q 241 814 241 858 l 241 0 l 118 0 l 118 814 q 139 932 118 884 q 199 1009 160 980 q 290 1050 237 1037 q 405 1063 343 1063 q 519 1050 467 1063 q 607 1011 571 1037 q 664 946 644 985 q 685 854 685 906 "},"њ":{"x_min":118,"x_max":1121,"ha":1197,"o":"m 241 745 l 241 437 l 554 437 l 554 745 l 677 745 l 677 439 l 837 439 q 1051 386 982 439 q 1121 228 1121 333 q 1105 133 1121 176 q 1054 61 1089 91 q 966 15 1020 31 q 835 0 912 0 l 554 0 l 554 334 l 241 334 l 241 0 l 118 0 l 118 745 l 241 745 m 997 220 q 986 276 997 253 q 953 312 975 298 q 898 332 931 326 q 823 337 865 337 l 677 337 l 677 102 l 826 102 q 894 108 863 102 q 948 128 925 114 q 984 164 971 142 q 997 220 997 187 "},"Ű":{"x_min":125,"x_max":845,"ha":970,"o":"m 845 993 l 845 349 q 822 205 845 272 q 755 90 800 139 q 641 13 709 41 q 481 -14 573 -14 q 327 12 394 -14 q 216 86 261 38 q 148 202 171 134 q 125 352 125 269 l 125 991 l 251 991 l 251 346 q 309 162 251 227 q 487 97 368 97 q 591 115 548 97 q 663 167 635 133 q 704 246 690 200 q 718 347 718 292 l 718 993 l 845 993 m 273 1089 q 303 1134 287 1108 q 335 1187 319 1160 q 365 1242 351 1215 q 391 1293 380 1269 l 526 1293 l 526 1278 q 493 1233 515 1260 q 446 1175 472 1205 q 392 1118 420 1146 q 341 1071 365 1089 l 273 1071 l 273 1089 m 519 1089 q 549 1134 533 1108 q 581 1187 565 1160 q 611 1242 597 1215 q 636 1293 626 1269 l 771 1293 l 771 1278 q 738 1233 760 1260 q 691 1175 717 1205 q 637 1118 665 1146 q 586 1071 610 1089 l 519 1071 l 519 1089 "},"c":{"x_min":77,"x_max":596,"ha":643,"o":"m 402 -14 q 274 7 334 -14 q 171 75 215 28 q 102 193 127 121 q 77 367 77 266 q 102 548 77 474 q 173 669 128 623 q 278 736 218 715 q 408 758 339 758 q 511 746 461 758 q 596 718 562 735 l 559 614 q 524 627 543 621 q 485 638 505 633 q 445 647 465 644 q 408 650 425 650 q 253 581 302 650 q 204 369 204 513 q 253 160 204 226 q 402 93 302 93 q 502 106 457 93 q 583 135 546 118 l 583 26 q 504 -3 546 6 q 402 -14 463 -14 "},"¶":{"x_min":77,"x_max":764,"ha":910,"o":"m 764 -176 l 682 -176 l 682 947 l 541 947 l 541 -176 l 460 -176 l 460 379 q 361 366 418 366 q 244 384 296 366 q 154 441 191 401 q 97 546 117 481 q 77 706 77 611 q 99 872 77 806 q 161 980 121 939 q 258 1038 201 1021 q 382 1055 314 1055 l 764 1055 l 764 -176 "},"Ή":{"x_min":-17,"x_max":922,"ha":1057,"o":"m 922 0 l 795 0 l 795 462 l 344 462 l 344 0 l 218 0 l 218 992 l 344 992 l 344 574 l 795 574 l 795 992 l 922 992 l 922 0 m -17 789 q -3 835 -10 809 q 9 889 3 861 q 21 943 16 916 q 30 993 27 970 l 165 993 l 165 978 q 149 936 160 962 q 123 880 138 909 q 90 821 107 850 q 56 771 72 792 l -17 771 l -17 789 "},"Ὅ":{"x_min":-203,"x_max":1001,"ha":1087,"o":"m 1001 496 q 973 287 1001 382 q 891 126 946 193 q 757 22 837 59 q 571 -14 676 -14 q 380 22 461 -14 q 245 126 299 59 q 166 288 192 193 q 141 498 141 382 q 166 707 141 613 q 246 867 192 801 q 381 970 299 934 q 573 1007 462 1007 q 757 970 678 1007 q 891 867 837 934 q 973 706 946 800 q 1001 496 1001 612 m 274 497 q 292 330 274 404 q 346 204 309 255 q 438 124 382 152 q 571 97 494 97 q 704 124 649 97 q 797 204 760 152 q 850 330 833 255 q 867 497 867 404 q 850 664 867 590 q 797 789 833 738 q 705 868 761 840 q 573 895 650 895 q 439 868 495 895 q 346 789 383 840 q 292 664 309 738 q 274 497 274 590 m -10 787 q 5 833 -2 807 q 22 885 14 858 q 38 939 30 911 q 50 991 45 966 l 191 991 l 191 977 q 162 929 178 955 q 127 876 146 903 q 87 822 108 849 q 45 770 66 795 l -10 770 l -10 787 m -203 851 q -162 942 -203 904 q -38 1003 -121 981 l -38 951 q -98 920 -79 936 q -118 889 -118 905 q -107 870 -118 876 q -84 858 -97 864 q -61 844 -72 853 q -51 816 -51 835 q -67 778 -51 791 q -116 765 -84 765 q -179 788 -156 765 q -203 851 -203 812 "},"γ":{"x_min":6.75,"x_max":672.25,"ha":679,"o":"m 412 12 q 385 -76 397 -30 q 365 -167 373 -122 q 352 -255 356 -213 q 348 -334 348 -298 l 220 -334 q 225 -264 220 -305 q 240 -176 230 -223 q 262 -82 249 -130 q 289 8 274 -34 l 6 745 l 134 745 l 282 349 q 301 291 291 322 q 320 229 312 259 q 336 171 329 198 q 346 126 343 144 l 350 126 q 360 171 353 143 q 375 230 367 199 q 393 292 383 262 q 409 345 402 323 l 544 745 l 672 745 l 412 12 "},"­":{"x_min":56,"x_max":392,"ha":447,"o":"m 56 315 l 56 429 l 392 429 l 392 315 l 56 315 "},":":{"x_min":100,"x_max":272,"ha":372,"o":"m 100 74 q 106 118 100 100 q 125 147 113 136 q 152 163 136 158 q 186 169 167 169 q 219 163 203 169 q 246 147 235 158 q 265 118 258 136 q 272 74 272 100 q 265 31 272 49 q 246 2 258 13 q 219 -14 235 -9 q 186 -20 203 -20 q 152 -14 167 -20 q 125 2 136 -9 q 106 31 113 13 q 100 74 100 49 m 100 669 q 106 714 100 696 q 125 743 113 732 q 152 759 136 754 q 186 764 167 764 q 219 759 203 764 q 246 743 235 754 q 265 714 258 732 q 272 669 272 696 q 265 626 272 644 q 246 597 258 609 q 219 580 235 585 q 186 575 203 575 q 152 580 167 575 q 125 597 136 585 q 106 626 113 609 q 100 669 100 644 "},"ś":{"x_min":61.15625,"x_max":564,"ha":627,"o":"m 564 203 q 544 108 564 149 q 487 40 524 68 q 398 0 450 13 q 281 -14 346 -14 q 154 -2 207 -14 q 61 33 101 9 l 61 146 q 107 125 82 135 q 161 106 133 114 q 219 93 189 98 q 279 88 249 88 q 353 95 323 88 q 403 116 384 103 q 431 150 423 130 q 440 194 440 170 q 433 232 440 215 q 409 265 427 249 q 360 299 391 282 q 280 337 329 316 q 193 378 232 358 q 127 424 154 399 q 86 482 100 449 q 72 560 72 515 q 90 645 72 608 q 143 707 109 682 q 224 745 177 732 q 330 758 272 758 q 451 743 396 758 q 554 706 505 729 l 512 606 q 422 641 468 626 q 329 655 376 655 q 228 632 261 655 q 195 568 195 610 q 203 526 195 544 q 229 493 210 509 q 279 461 248 477 q 358 426 311 445 q 444 385 406 405 q 509 339 482 365 q 549 281 535 314 q 564 203 564 249 m 242 860 q 272 905 256 879 q 304 958 288 931 q 335 1013 320 986 q 360 1064 349 1040 l 509 1064 l 509 1049 q 476 1004 498 1031 q 429 946 455 976 q 375 889 403 917 q 324 842 347 860 l 242 842 l 242 860 "}," ":{"x_min":0,"x_max":0,"ha":361},"У":{"x_min":16.75,"x_max":813.25,"ha":813,"o":"m 813 992 l 522 289 q 468 172 496 227 q 402 75 440 116 q 311 10 364 34 q 183 -14 258 -14 q 117 -8 148 -14 q 62 6 87 -3 l 62 131 q 117 106 87 116 q 183 97 147 97 q 246 105 219 97 q 297 130 274 112 q 338 178 319 149 q 376 250 357 207 l 16 992 l 155 992 l 415 440 q 422 425 418 433 q 428 408 425 417 q 434 391 431 399 q 440 377 437 383 l 441 377 q 447 394 443 383 q 455 416 451 404 q 462 437 458 427 q 468 451 466 447 l 679 992 l 813 992 "},"¾":{"x_min":21,"x_max":1008.765625,"ha":1023,"o":"m 400 852 q 372 764 400 800 q 298 712 345 729 q 388 660 358 697 q 418 571 418 624 q 404 496 418 530 q 362 437 390 461 q 291 399 334 413 q 190 386 249 386 q 101 394 143 386 q 21 423 59 402 l 21 514 q 110 481 64 493 q 192 469 155 469 q 290 497 260 469 q 321 575 321 525 q 283 648 321 625 q 179 671 246 671 l 111 671 l 111 745 l 179 745 q 273 771 244 745 q 303 839 303 797 q 296 876 303 860 q 277 901 289 891 q 248 915 264 911 q 213 920 232 920 q 138 907 172 920 q 69 870 105 894 l 22 935 q 62 963 41 951 q 106 985 83 976 q 155 998 129 993 q 210 1004 180 1004 q 293 992 257 1004 q 352 961 328 981 q 388 913 376 940 q 400 852 400 885 m 879 992 l 328 0 l 221 0 l 772 992 l 879 992 m 1008 133 l 923 133 l 923 0 l 827 0 l 827 133 l 572 133 l 572 208 l 828 599 l 923 599 l 923 217 l 1008 217 l 1008 133 m 827 217 l 827 368 q 828 439 827 400 q 831 515 829 477 q 820 492 827 507 q 806 462 813 478 q 790 430 798 445 q 775 403 782 414 l 668 217 l 827 217 "},"Ί":{"x_min":-17,"x_max":585.8125,"ha":642,"o":"m 585 0 l 226 0 l 226 69 l 343 96 l 343 895 l 226 922 l 226 992 l 585 992 l 585 922 l 469 895 l 469 96 l 585 69 l 585 0 m -17 789 q -3 835 -10 809 q 9 889 3 861 q 21 943 16 916 q 30 993 27 970 l 165 993 l 165 978 q 149 936 160 962 q 123 880 138 909 q 90 821 107 850 q 56 771 72 792 l -17 771 l -17 789 "},"ŉ":{"x_min":0,"x_max":804,"ha":916,"o":"m 680 0 l 680 479 q 644 611 680 567 q 533 655 609 655 q 440 637 478 655 q 380 585 403 620 q 348 501 358 551 q 338 385 338 450 l 338 0 l 215 0 l 215 745 l 315 745 l 333 644 l 339 644 q 380 694 356 673 q 431 730 403 715 q 490 751 459 744 q 554 758 521 758 q 741 693 678 758 q 804 486 804 628 l 804 0 l 680 0 m 203 992 l 212 977 q 189 898 202 939 q 160 815 176 857 q 127 731 144 772 q 92 652 109 690 l 0 652 q 22 737 10 692 q 44 827 33 782 q 63 913 54 871 q 78 992 72 956 l 203 992 "},"Ģ":{"x_min":85,"x_max":858,"ha":958,"o":"m 530 524 l 858 524 l 858 36 q 782 15 820 24 q 704 0 744 5 q 620 -10 664 -7 q 526 -14 576 -14 q 337 21 419 -14 q 199 123 255 57 q 114 284 143 189 q 85 497 85 378 q 117 708 85 613 q 211 868 149 802 q 363 970 272 934 q 569 1006 453 1006 q 713 991 644 1006 q 842 947 782 976 l 793 837 q 741 859 769 849 q 683 877 713 869 q 621 890 653 885 q 559 894 590 894 q 412 867 476 894 q 306 788 349 839 q 240 662 263 736 q 218 496 218 588 q 237 334 218 407 q 296 208 255 261 q 401 126 336 155 q 556 97 465 97 q 610 98 585 97 q 656 103 635 100 q 695 109 677 106 q 731 116 714 113 l 731 412 l 530 412 l 530 524 m 437 -288 q 453 -246 444 -271 q 470 -191 462 -220 q 484 -135 478 -163 q 493 -85 491 -107 l 616 -85 l 616 -98 q 601 -141 611 -115 q 575 -197 590 -167 q 541 -255 560 -226 q 503 -307 523 -284 l 437 -307 l 437 -288 "},"m":{"x_min":118,"x_max":1134,"ha":1245,"o":"m 1010 0 l 1010 479 q 976 611 1010 567 q 871 655 942 655 q 786 639 821 655 q 729 592 752 623 q 697 516 707 562 q 687 410 687 470 l 687 0 l 564 0 l 564 479 q 530 611 564 567 q 425 655 496 655 q 337 637 373 655 q 281 585 302 620 q 250 501 259 551 q 241 385 241 450 l 241 0 l 118 0 l 118 745 l 218 745 l 236 644 l 242 644 q 281 694 259 673 q 330 730 303 715 q 387 751 357 744 q 448 758 417 758 q 584 728 530 758 q 663 634 637 698 l 669 634 q 711 689 686 666 q 765 727 736 712 q 828 750 795 743 q 894 758 860 758 q 1073 693 1013 758 q 1134 486 1134 628 l 1134 0 l 1010 0 "},"Е":{"x_min":135,"x_max":650,"ha":733,"o":"m 650 0 l 135 0 l 135 992 l 650 992 l 650 880 l 261 880 l 261 574 l 624 574 l 624 462 l 261 462 l 261 111 l 650 111 l 650 0 "},"ž":{"x_min":56,"x_max":556.21875,"ha":612,"o":"m 556 0 l 56 0 l 56 80 l 418 656 l 78 656 l 78 745 l 544 745 l 544 650 l 189 88 l 556 88 l 556 0 m 542 1045 q 501 1000 525 1026 q 455 947 478 974 q 412 892 432 919 q 382 842 392 865 l 251 842 q 221 892 241 865 q 178 947 201 919 q 132 1000 155 974 q 92 1045 109 1026 l 92 1064 l 174 1064 q 244 1008 208 1041 q 317 937 280 975 q 388 1008 352 975 q 460 1064 425 1041 l 542 1064 l 542 1045 "},"á":{"x_min":64,"x_max":626,"ha":737,"o":"m 536 0 l 511 102 l 505 102 q 461 50 483 72 q 412 13 439 28 q 353 -7 386 0 q 278 -14 321 -14 q 193 0 232 -14 q 125 40 153 12 q 80 109 96 67 q 64 208 64 151 q 142 379 64 320 q 379 445 220 439 l 503 450 l 503 496 q 494 572 503 541 q 465 620 484 602 q 419 647 447 639 q 357 655 392 655 q 253 639 301 655 q 160 599 204 623 l 117 692 q 228 739 167 720 q 357 758 290 758 q 477 744 427 758 q 560 700 527 730 q 609 623 593 669 q 626 509 626 576 l 626 0 l 536 0 m 310 88 q 386 101 351 88 q 447 140 422 114 q 488 205 473 166 q 502 298 502 245 l 502 365 l 405 360 q 303 346 345 357 q 237 316 262 336 q 202 270 213 297 q 191 208 191 243 q 224 117 191 146 q 310 88 257 88 m 302 860 q 332 905 316 879 q 364 958 348 931 q 395 1013 380 986 q 420 1064 409 1040 l 569 1064 l 569 1049 q 536 1004 558 1031 q 489 946 515 976 q 435 889 463 917 q 384 842 407 860 l 302 842 l 302 860 "},"×":{"x_min":95.28125,"x_max":670.421875,"ha":765,"o":"m 310 490 l 95 706 l 166 778 l 381 562 l 599 778 l 670 708 l 452 490 l 669 273 l 599 204 l 381 419 l 166 205 l 96 275 l 310 490 "},"п":{"x_min":118,"x_max":706,"ha":825,"o":"m 241 0 l 118 0 l 118 745 l 706 745 l 706 0 l 582 0 l 582 642 l 241 642 l 241 0 "},"Ǻ":{"x_min":-0.25,"x_max":844.25,"ha":844,"o":"m 575 974 q 554 894 575 926 q 499 844 534 861 l 844 0 l 715 0 l 610 266 l 233 266 l 127 0 l 0 0 l 341 843 q 287 892 307 860 q 268 972 268 925 q 278 1034 268 1007 q 309 1080 289 1061 q 357 1109 329 1099 q 419 1119 385 1119 q 480 1109 452 1119 q 530 1080 509 1099 q 563 1035 551 1061 q 575 974 575 1008 m 566 378 l 466 636 q 456 662 462 647 q 444 696 450 678 q 432 734 438 714 q 421 773 426 754 q 410 734 416 754 q 397 695 404 714 q 386 662 391 677 q 376 636 380 646 l 277 378 l 566 378 m 368 1166 q 398 1203 382 1182 q 430 1246 414 1224 q 460 1290 446 1268 q 486 1331 475 1311 l 635 1331 l 635 1320 q 602 1283 624 1305 q 555 1236 581 1261 q 501 1190 528 1212 q 450 1153 473 1167 l 368 1153 l 368 1166 m 500 973 q 478 1029 500 1008 q 421 1049 456 1049 q 364 1029 386 1049 q 342 973 342 1008 q 360 918 342 938 q 412 896 378 898 l 421 896 q 478 916 456 896 q 500 973 500 937 "},"K":{"x_min":135,"x_max":804.25,"ha":804,"o":"m 804 0 l 661 0 l 355 473 l 261 396 l 261 0 l 135 0 l 135 992 l 261 992 l 261 496 l 343 609 l 649 992 l 791 992 l 438 559 l 804 0 "},"¨":{"x_min":208,"x_max":593,"ha":802,"o":"m 208 945 q 226 998 208 982 q 273 1015 245 1015 q 319 998 299 1015 q 338 945 338 981 q 319 892 338 909 q 273 876 299 876 q 226 892 245 876 q 208 945 208 909 m 462 945 q 481 998 462 982 q 527 1015 500 1015 q 552 1010 540 1015 q 573 998 564 1006 q 587 977 582 989 q 593 945 593 964 q 573 892 593 909 q 527 876 553 876 q 481 892 500 876 q 462 945 462 909 "},"Y":{"x_min":-0.25,"x_max":731.25,"ha":732,"o":"m 364 490 l 595 992 l 731 992 l 428 386 l 428 0 l 302 0 l 302 379 l 0 992 l 137 992 l 364 490 "},"E":{"x_min":135,"x_max":650,"ha":733,"o":"m 650 0 l 135 0 l 135 992 l 650 992 l 650 880 l 261 880 l 261 574 l 624 574 l 624 462 l 261 462 l 261 111 l 650 111 l 650 0 "},"Ô":{"x_min":85,"x_max":945,"ha":1031,"o":"m 945 496 q 917 287 945 382 q 835 126 890 193 q 701 22 781 59 q 515 -14 620 -14 q 324 22 405 -14 q 189 126 243 59 q 110 288 136 193 q 85 498 85 382 q 110 707 85 613 q 190 867 136 801 q 325 970 243 934 q 517 1007 406 1007 q 701 970 622 1007 q 835 867 781 934 q 917 706 890 800 q 945 496 945 612 m 218 497 q 236 330 218 404 q 290 204 253 255 q 382 124 326 152 q 515 97 438 97 q 648 124 593 97 q 741 204 704 152 q 794 330 777 255 q 811 497 811 404 q 794 664 811 590 q 741 789 777 738 q 649 868 705 840 q 517 895 594 895 q 383 868 439 895 q 290 789 327 840 q 236 664 253 738 q 218 497 218 590 m 744 1071 l 662 1071 q 590 1126 627 1093 q 519 1196 554 1159 q 446 1126 482 1159 q 376 1071 410 1093 l 294 1071 l 294 1089 q 334 1134 311 1108 q 380 1187 357 1160 q 423 1242 403 1215 q 453 1293 443 1269 l 584 1293 q 614 1242 594 1269 q 657 1187 634 1215 q 703 1134 680 1160 q 744 1089 727 1108 l 744 1071 "},"Є":{"x_min":85,"x_max":798,"ha":838,"o":"m 538 894 q 419 872 473 894 q 324 809 365 850 q 257 708 283 767 q 222 574 231 649 l 649 574 l 649 462 l 218 462 q 243 307 222 374 q 305 192 265 239 q 403 121 345 145 q 538 97 461 97 q 652 108 598 97 q 760 135 707 120 l 760 26 q 707 8 733 15 q 651 -4 680 0 q 590 -11 622 -9 q 517 -14 557 -14 q 324 22 405 -14 q 189 126 243 59 q 110 288 136 193 q 85 497 85 382 q 114 703 85 609 q 201 864 144 796 q 343 968 258 931 q 538 1006 428 1006 q 677 991 611 1006 q 798 947 744 976 l 745 841 q 652 879 702 863 q 538 894 601 894 "},"Ï":{"x_min":43,"x_max":428,"ha":471,"o":"m 414 0 l 55 0 l 55 69 l 172 96 l 172 895 l 55 922 l 55 992 l 414 992 l 414 922 l 298 895 l 298 96 l 414 69 l 414 0 m 43 1174 q 61 1227 43 1211 q 108 1244 80 1244 q 154 1227 134 1244 q 173 1174 173 1210 q 154 1121 173 1138 q 108 1105 134 1105 q 61 1121 80 1105 q 43 1174 43 1138 m 297 1174 q 316 1227 297 1211 q 362 1244 335 1244 q 387 1239 375 1244 q 408 1227 399 1235 q 422 1206 417 1218 q 428 1174 428 1193 q 408 1121 428 1138 q 362 1105 388 1105 q 316 1121 335 1105 q 297 1174 297 1138 "},"ġ":{"x_min":25,"x_max":692.484375,"ha":720,"o":"m 692 745 l 692 668 l 559 649 q 591 588 578 625 q 604 504 604 551 q 588 409 604 453 q 539 333 572 365 q 459 283 507 301 q 348 266 412 266 q 319 266 333 266 q 294 268 304 266 q 271 253 282 261 q 251 233 260 244 q 236 208 242 222 q 230 178 230 194 q 238 148 230 159 q 260 130 246 136 q 293 122 274 124 q 333 120 312 120 l 453 120 q 560 104 516 120 q 631 61 603 88 q 670 -2 658 34 q 683 -80 683 -38 q 660 -186 683 -139 q 593 -266 638 -233 q 478 -316 547 -298 q 314 -334 408 -334 q 187 -319 241 -334 q 96 -278 132 -305 q 42 -213 60 -251 q 25 -128 25 -175 q 38 -57 25 -87 q 73 -4 51 -26 q 125 32 96 17 q 187 53 155 46 q 140 94 158 66 q 122 159 122 122 q 143 231 122 201 q 212 291 165 262 q 158 324 182 303 q 118 373 134 346 q 92 433 101 401 q 83 500 83 466 q 99 608 83 561 q 150 689 116 656 q 233 740 183 722 q 348 758 282 758 q 400 754 373 758 q 445 745 427 750 l 692 745 m 141 -126 q 150 -173 141 -151 q 179 -211 159 -195 q 232 -235 199 -226 q 314 -245 265 -245 q 503 -205 440 -245 q 566 -92 566 -166 q 558 -41 566 -61 q 531 -10 550 -21 q 482 4 512 0 q 407 8 451 8 l 287 8 q 238 3 263 8 q 190 -17 212 -2 q 155 -58 169 -32 q 141 -126 141 -84 m 206 504 q 242 388 206 426 q 344 350 278 350 q 446 388 411 350 q 480 506 480 426 q 445 629 480 590 q 343 669 410 669 q 241 628 277 669 q 206 504 206 587 m 273 945 q 293 1004 273 986 q 344 1023 314 1023 q 373 1018 359 1023 q 396 1004 386 1014 q 411 980 405 995 q 417 945 417 966 q 396 887 417 906 q 344 868 374 868 q 293 886 314 868 q 273 945 273 905 "},"έ":{"x_min":61,"x_max":583,"ha":629,"o":"m 453 439 l 453 336 l 366 336 q 229 305 273 336 q 184 210 184 274 q 198 152 184 176 q 235 114 212 129 q 291 94 259 100 q 360 88 323 88 q 426 93 395 88 q 484 106 457 98 q 535 125 511 114 q 580 146 559 135 l 580 37 q 486 0 540 14 q 359 -14 433 -14 q 226 2 282 -14 q 133 48 170 19 q 78 117 96 77 q 61 203 61 157 q 73 275 61 245 q 108 326 86 305 q 157 361 129 347 q 215 385 185 375 l 215 392 q 162 416 185 402 q 121 452 138 431 q 94 500 103 473 q 85 561 85 527 q 104 645 85 608 q 159 707 124 682 q 244 745 195 732 q 351 758 293 758 q 417 754 387 758 q 475 745 448 751 q 529 729 503 739 q 583 706 555 720 l 540 606 q 445 642 489 629 q 353 655 401 655 q 240 629 279 655 q 201 551 201 603 q 214 499 201 520 q 252 464 228 477 q 311 445 277 451 q 386 439 345 439 l 453 439 m 305 860 q 318 906 311 880 q 331 960 325 932 q 343 1014 338 987 q 352 1064 349 1041 l 487 1064 l 487 1049 q 471 1007 482 1033 q 445 951 460 980 q 412 892 429 921 q 378 842 394 863 l 305 842 l 305 860 "}," ":{"x_min":0,"x_max":0,"ha":463},"ϋ":{"x_min":111,"x_max":736,"ha":819,"o":"m 409 -14 q 264 13 322 -14 q 172 87 206 40 q 124 199 138 135 q 111 337 111 263 l 111 745 l 234 745 l 234 345 q 245 239 234 286 q 278 158 256 192 q 335 106 300 125 q 417 88 370 88 q 564 167 516 88 q 612 412 612 245 q 609 503 612 461 q 601 585 606 545 q 587 664 595 625 q 569 745 580 703 l 693 745 q 711 664 703 703 q 725 585 719 626 q 733 501 730 545 q 736 406 736 457 q 653 88 736 190 q 409 -14 570 -14 m 208 945 q 226 998 208 982 q 273 1015 245 1015 q 319 998 299 1015 q 338 945 338 981 q 319 892 338 909 q 273 876 299 876 q 226 892 245 876 q 208 945 208 909 m 462 945 q 481 998 462 982 q 527 1015 500 1015 q 552 1010 540 1015 q 573 998 564 1006 q 587 977 582 989 q 593 945 593 964 q 573 892 593 909 q 527 876 553 876 q 481 892 500 876 q 462 945 462 909 "},"й":{"x_min":118,"x_max":735,"ha":853,"o":"m 234 745 l 234 291 l 226 120 l 576 745 l 735 745 l 735 0 l 618 0 l 618 439 l 625 622 l 276 0 l 118 0 l 118 745 l 234 745 m 686 1058 q 665 964 681 1005 q 617 897 648 924 q 537 855 585 869 q 421 842 489 842 q 304 855 352 842 q 227 895 256 868 q 183 963 197 922 q 166 1058 169 1003 l 281 1058 q 293 990 284 1016 q 320 949 303 964 q 362 929 337 934 q 424 923 388 923 q 479 930 454 923 q 522 952 504 937 q 552 993 540 968 q 567 1058 563 1019 l 686 1058 "},"b":{"x_min":118,"x_max":737,"ha":814,"o":"m 454 758 q 570 733 518 758 q 659 660 622 709 q 716 540 696 612 q 737 373 737 468 q 716 205 737 277 q 659 84 696 133 q 570 10 622 35 q 454 -14 518 -14 q 381 -5 414 -14 q 323 18 349 3 q 277 52 297 32 q 241 93 257 72 l 233 93 l 208 0 l 118 0 l 118 1055 l 241 1055 l 241 800 q 240 749 241 776 q 238 699 240 722 q 236 646 237 672 l 241 646 q 276 690 257 670 q 322 726 296 711 q 381 749 348 741 q 454 758 413 758 m 430 655 q 340 638 376 655 q 281 585 303 621 q 250 497 259 550 q 241 373 241 444 q 250 251 241 304 q 281 162 259 198 q 340 107 303 125 q 431 88 377 88 q 566 162 523 88 q 609 374 609 236 q 566 585 609 515 q 430 655 523 655 "},"ύ":{"x_min":111,"x_max":736,"ha":819,"o":"m 409 -14 q 264 13 322 -14 q 172 87 206 40 q 124 199 138 135 q 111 337 111 263 l 111 745 l 234 745 l 234 345 q 245 239 234 286 q 278 158 256 192 q 335 106 300 125 q 417 88 370 88 q 564 167 516 88 q 612 412 612 245 q 609 503 612 461 q 601 585 606 545 q 587 664 595 625 q 569 745 580 703 l 693 745 q 711 664 703 703 q 725 585 719 626 q 733 501 730 545 q 736 406 736 457 q 653 88 736 190 q 409 -14 570 -14 m 352 860 q 365 906 358 880 q 378 960 372 932 q 390 1014 385 987 q 399 1064 396 1041 l 534 1064 l 534 1049 q 518 1007 529 1033 q 492 951 507 980 q 459 892 476 921 q 425 842 441 863 l 352 842 l 352 860 "},"ﬂ":{"x_min":19,"x_max":698.4375,"ha":817,"o":"m 441 656 l 274 656 l 274 0 l 151 0 l 151 656 l 19 656 l 19 704 l 151 749 l 151 814 q 166 934 151 886 q 210 1010 181 982 q 280 1051 238 1039 q 375 1063 322 1063 q 449 1055 415 1063 q 509 1037 482 1047 l 477 941 q 431 954 456 949 q 379 960 406 960 q 332 954 352 960 q 300 931 313 947 q 280 887 287 915 q 274 815 274 859 l 274 745 l 441 745 l 441 656 m 698 0 l 575 0 l 575 1055 l 698 1055 l 698 0 "},"ф":{"x_min":77,"x_max":892,"ha":968,"o":"m 545 756 q 685 719 621 747 q 794 641 749 690 q 866 525 840 593 q 892 373 892 458 q 868 221 892 289 q 799 104 844 153 q 689 25 753 54 q 545 -11 625 -3 l 545 -334 l 429 -334 l 429 -11 q 286 24 351 -4 q 175 103 221 54 q 102 220 128 151 q 77 373 77 288 q 101 526 77 458 q 170 642 125 593 q 281 719 215 690 q 429 756 346 748 l 429 1055 l 545 1055 l 545 756 m 204 373 q 257 175 204 246 q 429 91 310 104 l 429 653 q 326 626 369 647 q 256 571 284 606 q 217 486 229 536 q 204 373 204 437 m 764 373 q 712 569 764 500 q 545 652 660 638 l 545 91 q 712 175 661 104 q 764 373 764 246 "},"Ŋ":{"x_min":135,"x_max":878,"ha":1013,"o":"m 615 -264 q 554 -259 580 -264 q 510 -247 528 -255 l 510 -139 q 557 -149 532 -145 q 613 -152 583 -152 q 662 -146 637 -152 q 706 -122 686 -139 q 739 -76 726 -105 q 751 0 751 -46 l 253 821 l 248 821 q 255 717 252 768 q 259 624 257 673 q 261 538 261 576 l 261 0 l 135 0 l 135 992 l 288 992 l 757 202 l 762 202 q 757 291 759 246 q 753 371 755 329 q 751 449 751 413 l 751 992 l 878 992 l 878 13 q 859 -109 878 -57 q 806 -196 840 -162 q 724 -247 772 -230 q 615 -264 675 -264 "},"Ũ":{"x_min":125,"x_max":845,"ha":970,"o":"m 845 993 l 845 349 q 822 205 845 272 q 755 90 800 139 q 641 13 709 41 q 481 -14 573 -14 q 327 12 394 -14 q 216 86 261 38 q 148 202 171 134 q 125 352 125 269 l 125 991 l 251 991 l 251 346 q 309 162 251 227 q 487 97 368 97 q 591 115 548 97 q 663 167 635 133 q 704 246 690 200 q 718 347 718 292 l 718 993 l 845 993 m 585 1072 q 531 1083 558 1072 q 479 1110 505 1095 q 429 1136 453 1124 q 384 1148 405 1148 q 337 1130 353 1148 q 311 1070 321 1112 l 241 1070 q 255 1144 244 1111 q 284 1201 266 1177 q 327 1237 302 1224 q 384 1250 352 1250 q 440 1238 412 1250 q 493 1211 467 1226 q 542 1185 519 1197 q 585 1173 566 1173 q 631 1191 616 1173 q 657 1251 647 1209 l 729 1251 q 714 1177 725 1210 q 685 1121 703 1144 q 642 1084 667 1097 q 585 1072 617 1072 "},"Щ":{"x_min":135,"x_max":1369,"ha":1385,"o":"m 1250 111 l 1369 111 l 1369 -261 l 1242 -261 l 1242 0 l 135 0 l 135 992 l 261 992 l 261 111 l 629 111 l 629 992 l 755 992 l 755 111 l 1123 111 l 1123 992 l 1250 992 l 1250 111 "},"L":{"x_min":135,"x_max":649.4375,"ha":682,"o":"m 135 0 l 135 992 l 261 992 l 261 111 l 649 111 l 649 0 l 135 0 "},"ď":{"x_min":77,"x_max":924,"ha":814,"o":"m 577 99 l 572 99 q 537 55 557 76 q 491 19 517 34 q 432 -5 465 3 q 359 -14 400 -14 q 244 10 296 -14 q 154 83 192 34 q 97 203 117 131 q 77 370 77 275 q 97 538 77 466 q 154 659 117 610 q 244 733 192 708 q 359 758 296 758 q 432 749 399 758 q 490 725 464 740 q 537 690 516 710 q 572 649 557 671 l 580 649 q 576 693 578 672 q 573 729 575 711 q 572 759 572 748 l 572 1055 l 696 1055 l 696 0 l 596 0 l 577 99 m 383 88 q 470 104 434 88 q 528 151 506 119 q 560 231 550 183 q 572 342 571 279 l 572 370 q 563 492 572 439 q 532 581 554 545 q 473 636 510 618 q 382 655 437 655 q 247 581 290 655 q 204 369 204 507 q 247 157 204 227 q 383 88 290 88 m 760 850 q 772 897 766 871 q 784 950 778 923 q 794 1005 789 978 q 801 1055 799 1032 l 924 1055 l 924 1041 q 909 997 919 1024 q 885 942 898 971 q 855 883 871 913 q 825 833 840 854 l 760 833 l 760 850 "},"Ο":{"x_min":85,"x_max":945,"ha":1031,"o":"m 945 496 q 917 287 945 382 q 835 126 890 193 q 701 22 781 59 q 515 -14 620 -14 q 324 22 405 -14 q 189 126 243 59 q 110 288 136 193 q 85 498 85 382 q 110 707 85 613 q 190 867 136 801 q 325 970 243 934 q 517 1007 406 1007 q 701 970 622 1007 q 835 867 781 934 q 917 706 890 800 q 945 496 945 612 m 218 497 q 236 330 218 404 q 290 204 253 255 q 382 124 326 152 q 515 97 438 97 q 648 124 593 97 q 741 204 704 152 q 794 330 777 255 q 811 497 811 404 q 794 664 811 590 q 741 789 777 738 q 649 868 705 840 q 517 895 594 895 q 383 868 439 895 q 290 789 327 840 q 236 664 253 738 q 218 497 218 590 "},"Ĭ":{"x_min":33,"x_max":441,"ha":471,"o":"m 414 0 l 55 0 l 55 69 l 172 96 l 172 895 l 55 922 l 55 992 l 414 992 l 414 922 l 298 895 l 298 96 l 414 69 l 414 0 m 441 1259 q 423 1183 438 1217 q 382 1123 408 1149 q 319 1084 356 1098 q 234 1071 282 1071 q 147 1084 184 1071 q 86 1122 110 1097 q 48 1181 61 1147 q 33 1259 35 1216 l 107 1259 q 119 1212 110 1229 q 145 1186 129 1194 q 184 1175 161 1177 q 237 1172 207 1172 q 283 1175 261 1172 q 323 1188 305 1178 q 352 1214 340 1197 q 366 1259 363 1231 l 441 1259 "},"ŧ":{"x_min":23,"x_max":445,"ha":471,"o":"m 343 88 q 371 89 355 88 q 400 93 386 91 q 426 97 415 95 q 445 102 438 100 l 445 8 q 422 0 436 3 q 392 -7 409 -4 q 358 -12 376 -10 q 324 -14 341 -14 q 246 -3 282 -14 q 184 34 210 8 q 142 107 157 61 q 128 222 128 153 l 128 395 l 33 395 l 33 484 l 128 484 l 128 656 l 23 656 l 23 709 l 128 759 l 180 915 l 251 915 l 251 745 l 439 745 l 439 656 l 251 656 l 251 484 l 427 484 l 427 395 l 251 395 l 251 222 q 272 122 251 155 q 343 88 294 88 "},"À":{"x_min":-0.25,"x_max":844.25,"ha":844,"o":"m 715 0 l 606 307 l 237 307 l 127 0 l 0 0 l 364 996 l 479 996 l 844 0 l 715 0 m 566 419 l 466 706 q 456 736 462 719 q 444 774 450 754 q 432 817 438 795 q 421 860 426 839 q 410 816 416 839 q 397 773 404 794 q 386 735 391 752 q 376 706 380 718 l 277 419 l 566 419 m 488 1071 l 406 1071 q 354 1118 382 1089 q 300 1175 326 1146 q 253 1233 274 1205 q 221 1278 231 1260 l 221 1293 l 369 1293 q 395 1242 380 1269 q 425 1187 409 1215 q 457 1134 441 1160 q 488 1089 473 1108 l 488 1071 "},"Ϊ":{"x_min":43,"x_max":428,"ha":471,"o":"m 414 0 l 55 0 l 55 69 l 172 96 l 172 895 l 55 922 l 55 992 l 414 992 l 414 922 l 298 895 l 298 96 l 414 69 l 414 0 m 43 1174 q 61 1227 43 1211 q 108 1244 80 1244 q 154 1227 134 1244 q 173 1174 173 1210 q 154 1121 173 1138 q 108 1105 134 1105 q 61 1121 80 1105 q 43 1174 43 1138 m 297 1174 q 316 1227 297 1211 q 362 1244 335 1244 q 387 1239 375 1244 q 408 1227 399 1235 q 422 1206 417 1218 q 428 1174 428 1193 q 408 1121 428 1138 q 362 1105 388 1105 q 316 1121 335 1105 q 297 1174 297 1138 "},"ḁ":{"x_min":64,"x_max":626,"ha":737,"o":"m 536 0 l 511 102 l 505 102 q 461 50 483 72 q 412 13 439 28 q 353 -7 386 0 q 278 -14 321 -14 q 193 0 232 -14 q 125 40 153 12 q 80 109 96 67 q 64 208 64 151 q 142 379 64 320 q 379 445 220 439 l 503 450 l 503 496 q 494 572 503 541 q 465 620 484 602 q 419 647 447 639 q 357 655 392 655 q 253 639 301 655 q 160 599 204 623 l 117 692 q 228 739 167 720 q 357 758 290 758 q 477 744 427 758 q 560 700 527 730 q 609 623 593 669 q 626 509 626 576 l 626 0 l 536 0 m 310 88 q 386 101 351 88 q 447 140 422 114 q 488 205 473 166 q 502 298 502 245 l 502 365 l 405 360 q 303 346 345 357 q 237 316 262 336 q 202 270 213 297 q 191 208 191 243 q 224 117 191 146 q 310 88 257 88 m 512 -229 q 500 -291 512 -264 q 467 -338 488 -319 q 418 -367 446 -357 q 356 -377 389 -377 q 294 -367 322 -377 q 246 -338 266 -357 q 215 -292 226 -319 q 205 -231 205 -265 q 215 -169 205 -196 q 246 -123 226 -142 q 294 -94 266 -104 q 356 -85 322 -85 q 417 -94 389 -85 q 467 -123 446 -104 q 500 -168 488 -142 q 512 -229 512 -195 m 437 -231 q 415 -174 437 -194 q 358 -154 392 -154 q 301 -174 323 -154 q 279 -231 279 -194 q 299 -287 279 -267 q 358 -307 319 -307 q 415 -287 392 -307 q 437 -231 437 -267 "},"½":{"x_min":29,"x_max":976.734375,"ha":1023,"o":"m 194 992 l 284 992 l 284 397 l 188 397 l 188 754 q 188 792 188 771 q 189 833 188 813 q 191 873 190 854 q 193 908 192 893 q 171 881 183 895 q 143 853 158 866 l 79 799 l 29 864 l 194 992 m 801 992 l 250 0 l 143 0 l 694 992 l 801 992 m 976 0 l 588 0 l 588 75 l 730 230 q 793 300 769 272 q 832 352 818 329 q 850 394 845 374 q 856 437 856 414 q 833 502 856 481 q 774 523 810 523 q 707 506 739 523 q 645 463 675 489 l 592 527 q 673 584 628 561 q 774 607 719 607 q 848 595 815 607 q 904 563 881 584 q 940 510 927 541 q 953 440 953 479 q 942 377 953 406 q 911 318 931 347 q 862 258 891 289 q 794 190 832 227 l 684 83 l 976 83 l 976 0 "},"\'":{"x_min":90,"x_max":223.609375,"ha":314,"o":"m 223 992 l 195 634 l 117 634 l 90 992 l 223 992 "},"ĳ":{"x_min":108.5,"x_max":611.96875,"ha":720,"o":"m 241 0 l 118 0 l 118 745 l 241 745 l 241 0 m 108 945 q 129 1004 108 986 q 180 1023 149 1023 q 208 1018 195 1023 q 231 1004 221 1014 q 247 980 241 995 q 252 945 252 966 q 231 887 252 906 q 180 868 210 868 q 129 886 149 868 q 108 945 108 905 m 403 -334 q 349 -329 371 -334 q 313 -317 328 -324 l 313 -217 q 348 -227 330 -224 q 390 -231 367 -231 q 424 -226 409 -231 q 452 -208 440 -221 q 470 -172 464 -194 q 477 -116 477 -150 l 477 745 l 600 745 l 600 -107 q 588 -201 600 -159 q 552 -272 577 -243 q 491 -318 528 -302 q 403 -334 454 -334 m 467 945 q 488 1004 467 986 q 539 1023 508 1023 q 567 1018 554 1023 q 590 1004 580 1014 q 606 980 600 995 q 611 945 611 966 q 590 887 611 906 q 539 868 569 868 q 488 886 508 868 q 467 945 467 905 "},"Р":{"x_min":135,"x_max":729,"ha":800,"o":"m 729 701 q 710 582 729 639 q 648 482 691 525 q 536 412 606 438 q 362 386 465 386 l 261 386 l 261 0 l 135 0 l 135 992 l 380 992 q 537 972 471 992 q 645 916 602 953 q 708 825 688 879 q 729 701 729 770 m 261 493 l 347 493 q 456 504 410 493 q 533 539 503 515 q 579 601 564 563 q 595 695 595 640 q 540 837 595 791 q 368 884 485 884 l 261 884 l 261 493 "},"˛":{"x_min":21,"x_max":237,"ha":257,"o":"m 118 -161 q 136 -206 118 -191 q 178 -220 154 -220 q 211 -218 195 -220 q 237 -214 227 -217 l 237 -291 q 197 -299 219 -296 q 156 -302 176 -302 q 54 -266 88 -302 q 21 -170 21 -231 q 30 -116 21 -142 q 56 -69 40 -91 q 89 -30 71 -48 q 125 0 108 -12 l 212 0 q 118 -161 118 -90 "},"Ć":{"x_min":85,"x_max":798,"ha":838,"o":"m 538 894 q 406 867 465 894 q 305 788 347 839 q 241 662 264 736 q 218 496 218 588 q 238 326 218 400 q 298 200 258 251 q 398 123 338 150 q 538 97 458 97 q 652 108 598 97 q 760 135 707 120 l 760 26 q 707 8 733 15 q 651 -4 680 0 q 590 -11 622 -9 q 517 -14 557 -14 q 324 22 405 -14 q 189 126 243 59 q 110 288 136 193 q 85 497 85 382 q 114 703 85 609 q 201 864 144 796 q 343 968 258 931 q 538 1006 428 1006 q 677 991 611 1006 q 798 947 744 976 l 745 841 q 652 879 702 863 q 538 894 601 894 m 447 1089 q 477 1134 461 1108 q 509 1187 493 1160 q 540 1242 525 1215 q 565 1293 554 1269 l 714 1293 l 714 1278 q 681 1233 703 1260 q 634 1175 660 1205 q 580 1118 608 1146 q 529 1071 552 1089 l 447 1071 l 447 1089 "},"Т":{"x_min":14,"x_max":706,"ha":721,"o":"m 423 0 l 297 0 l 297 880 l 14 880 l 14 992 l 706 992 l 706 880 l 423 880 l 423 0 "},"£":{"x_min":46,"x_max":718,"ha":765,"o":"m 451 1004 q 582 988 523 1004 q 686 948 641 972 l 641 850 q 556 884 603 869 q 457 898 508 898 q 397 889 425 898 q 349 860 370 880 q 318 809 329 840 q 307 732 307 777 l 307 534 l 561 534 l 561 437 l 307 437 l 307 295 q 299 224 307 254 q 278 173 291 194 q 248 137 265 152 q 212 112 230 123 l 718 112 l 718 0 l 46 0 l 46 103 q 100 124 75 110 q 143 161 125 138 q 171 216 161 183 q 182 294 182 249 l 182 437 l 47 437 l 47 534 l 182 534 l 182 753 q 201 859 182 812 q 257 937 221 905 q 342 987 293 970 q 451 1004 392 1004 "},"ů":{"x_min":111,"x_max":700,"ha":818,"o":"m 600 0 l 582 99 l 575 99 q 534 48 558 70 q 483 13 511 27 q 424 -7 455 0 q 360 -14 393 -14 q 252 1 299 -14 q 174 50 205 17 q 126 135 142 83 q 111 258 111 186 l 111 745 l 234 745 l 234 264 q 270 132 234 176 q 381 88 306 88 q 474 106 436 88 q 534 158 511 123 q 566 242 556 192 q 576 357 576 292 l 576 745 l 700 745 l 700 0 l 600 0 m 563 989 q 551 927 563 954 q 518 880 539 899 q 469 851 497 861 q 407 842 440 842 q 345 851 373 842 q 297 880 317 861 q 266 926 277 899 q 256 988 256 953 q 266 1049 256 1022 q 297 1095 277 1076 q 345 1124 317 1114 q 407 1134 373 1134 q 468 1124 440 1134 q 518 1095 497 1114 q 551 1050 539 1076 q 563 989 563 1023 m 488 988 q 466 1044 488 1024 q 409 1064 444 1064 q 352 1044 374 1064 q 330 988 330 1024 q 350 931 330 951 q 409 911 370 911 q 466 931 444 911 q 488 988 488 951 "},"Ō":{"x_min":85,"x_max":945,"ha":1031,"o":"m 945 496 q 917 287 945 382 q 835 126 890 193 q 701 22 781 59 q 515 -14 620 -14 q 324 22 405 -14 q 189 126 243 59 q 110 288 136 193 q 85 498 85 382 q 110 707 85 613 q 190 867 136 801 q 325 970 243 934 q 517 1007 406 1007 q 701 970 622 1007 q 835 867 781 934 q 917 706 890 800 q 945 496 945 612 m 218 497 q 236 330 218 404 q 290 204 253 255 q 382 124 326 152 q 515 97 438 97 q 648 124 593 97 q 741 204 704 152 q 794 330 777 255 q 811 497 811 404 q 794 664 811 590 q 741 789 777 738 q 649 868 705 840 q 517 895 594 895 q 383 868 439 895 q 290 789 327 840 q 236 664 253 738 q 218 497 218 590 m 320 1172 l 710 1172 l 710 1071 l 320 1071 l 320 1172 "},"а":{"x_min":64,"x_max":626,"ha":737,"o":"m 536 0 l 511 102 l 505 102 q 461 50 483 72 q 412 13 439 28 q 353 -7 386 0 q 278 -14 321 -14 q 193 0 232 -14 q 125 40 153 12 q 80 109 96 67 q 64 208 64 151 q 142 379 64 320 q 379 445 220 439 l 503 450 l 503 496 q 494 572 503 541 q 465 620 484 602 q 419 647 447 639 q 357 655 392 655 q 253 639 301 655 q 160 599 204 623 l 117 692 q 228 739 167 720 q 357 758 290 758 q 477 744 427 758 q 560 700 527 730 q 609 623 593 669 q 626 509 626 576 l 626 0 l 536 0 m 310 88 q 386 101 351 88 q 447 140 422 114 q 488 205 473 166 q 502 298 502 245 l 502 365 l 405 360 q 303 346 345 357 q 237 316 262 336 q 202 270 213 297 q 191 208 191 243 q 224 117 191 146 q 310 88 257 88 "},"Ğ":{"x_min":85,"x_max":858,"ha":958,"o":"m 530 524 l 858 524 l 858 36 q 782 15 820 24 q 704 0 744 5 q 620 -10 664 -7 q 526 -14 576 -14 q 337 21 419 -14 q 199 123 255 57 q 114 284 143 189 q 85 497 85 378 q 117 708 85 613 q 211 868 149 802 q 363 970 272 934 q 569 1006 453 1006 q 713 991 644 1006 q 842 947 782 976 l 793 837 q 741 859 769 849 q 683 877 713 869 q 621 890 653 885 q 559 894 590 894 q 412 867 476 894 q 306 788 349 839 q 240 662 263 736 q 218 496 218 588 q 237 334 218 407 q 296 208 255 261 q 401 126 336 155 q 556 97 465 97 q 610 98 585 97 q 656 103 635 100 q 695 109 677 106 q 731 116 714 113 l 731 412 l 530 412 l 530 524 m 740 1259 q 722 1183 737 1217 q 681 1123 707 1149 q 618 1084 655 1098 q 533 1071 581 1071 q 446 1084 483 1071 q 385 1122 409 1097 q 347 1181 360 1147 q 332 1259 334 1216 l 406 1259 q 418 1212 409 1229 q 444 1186 428 1194 q 483 1175 460 1177 q 536 1172 506 1172 q 582 1175 560 1172 q 622 1188 604 1178 q 651 1214 639 1197 q 665 1259 662 1231 l 740 1259 "},"v":{"x_min":-0.25,"x_max":665.25,"ha":665,"o":"m 254 0 l 0 745 l 127 745 l 262 330 q 280 272 269 308 q 300 200 290 237 q 319 131 310 164 q 330 82 327 99 l 335 82 q 346 131 338 99 q 364 200 354 164 q 385 272 375 237 q 402 330 395 308 l 537 745 l 665 745 l 410 0 l 254 0 "},"Ї":{"x_min":43,"x_max":428,"ha":471,"o":"m 414 0 l 55 0 l 55 69 l 172 96 l 172 895 l 55 922 l 55 992 l 414 992 l 414 922 l 298 895 l 298 96 l 414 69 l 414 0 m 43 1174 q 61 1227 43 1211 q 108 1244 80 1244 q 154 1227 134 1244 q 173 1174 173 1210 q 154 1121 173 1138 q 108 1105 134 1105 q 61 1121 80 1105 q 43 1174 43 1138 m 297 1174 q 316 1227 297 1211 q 362 1244 335 1244 q 387 1239 375 1244 q 408 1227 399 1235 q 422 1206 417 1218 q 428 1174 428 1193 q 408 1121 428 1138 q 362 1105 388 1105 q 316 1121 335 1105 q 297 1174 297 1138 "},"û":{"x_min":111,"x_max":700,"ha":818,"o":"m 600 0 l 582 99 l 575 99 q 534 48 558 70 q 483 13 511 27 q 424 -7 455 0 q 360 -14 393 -14 q 252 1 299 -14 q 174 50 205 17 q 126 135 142 83 q 111 258 111 186 l 111 745 l 234 745 l 234 264 q 270 132 234 176 q 381 88 306 88 q 474 106 436 88 q 534 158 511 123 q 566 242 556 192 q 576 357 576 292 l 576 745 l 700 745 l 700 0 l 600 0 m 631 842 l 549 842 q 477 897 514 864 q 406 967 441 930 q 333 897 369 930 q 263 842 297 864 l 181 842 l 181 860 q 221 905 198 879 q 267 958 244 931 q 310 1013 290 986 q 340 1064 330 1040 l 471 1064 q 501 1013 481 1040 q 544 958 521 986 q 590 905 567 931 q 631 860 614 879 l 631 842 "},"Ź":{"x_min":56,"x_max":693,"ha":749,"o":"m 693 0 l 56 0 l 56 97 l 537 880 l 70 880 l 70 992 l 679 992 l 679 894 l 197 111 l 693 111 l 693 0 m 305 1089 q 335 1134 319 1108 q 367 1187 351 1160 q 398 1242 383 1215 q 423 1293 412 1269 l 572 1293 l 572 1278 q 539 1233 561 1260 q 492 1175 518 1205 q 438 1118 466 1146 q 387 1071 410 1089 l 305 1071 l 305 1089 "},"ˉ":{"x_min":192,"x_max":582,"ha":774,"o":"m 192 943 l 582 943 l 582 842 l 192 842 l 192 943 "},"Ĺ":{"x_min":135,"x_max":649.4375,"ha":682,"o":"m 135 0 l 135 992 l 261 992 l 261 111 l 649 111 l 649 0 l 135 0 m 161 1089 q 191 1134 175 1108 q 223 1187 207 1160 q 254 1242 239 1215 q 279 1293 268 1269 l 428 1293 l 428 1278 q 395 1233 417 1260 q 348 1175 374 1205 q 294 1118 322 1146 q 243 1071 266 1089 l 161 1071 l 161 1089 "},"₤":{"x_min":46,"x_max":718,"ha":765,"o":"m 451 1004 q 582 988 523 1004 q 686 948 641 972 l 641 850 q 556 884 603 869 q 457 898 508 898 q 397 889 425 898 q 349 860 370 880 q 318 809 329 840 q 307 733 307 777 l 307 604 l 561 604 l 561 507 l 307 507 l 307 404 l 561 404 l 561 307 l 307 307 l 307 294 q 299 223 307 253 q 278 172 291 194 q 248 137 265 151 q 212 112 230 123 l 718 112 l 718 0 l 46 0 l 46 104 q 100 125 75 111 q 143 161 125 138 q 171 216 161 184 q 182 293 182 248 l 182 307 l 47 307 l 47 404 l 182 404 l 182 507 l 47 507 l 47 604 l 182 604 l 182 753 q 201 859 182 812 q 257 937 221 905 q 342 987 293 970 q 451 1004 392 1004 "},"Č":{"x_min":85,"x_max":798,"ha":838,"o":"m 538 894 q 406 867 465 894 q 305 788 347 839 q 241 662 264 736 q 218 496 218 588 q 238 326 218 400 q 298 200 258 251 q 398 123 338 150 q 538 97 458 97 q 652 108 598 97 q 760 135 707 120 l 760 26 q 707 8 733 15 q 651 -4 680 0 q 590 -11 622 -9 q 517 -14 557 -14 q 324 22 405 -14 q 189 126 243 59 q 110 288 136 193 q 85 497 85 382 q 114 703 85 609 q 201 864 144 796 q 343 968 258 931 q 538 1006 428 1006 q 677 991 611 1006 q 798 947 744 976 l 745 841 q 652 879 702 863 q 538 894 601 894 m 739 1274 q 698 1229 722 1255 q 652 1176 675 1203 q 609 1121 629 1148 q 579 1071 589 1094 l 448 1071 q 418 1121 438 1094 q 375 1176 398 1148 q 329 1229 352 1203 q 289 1274 306 1255 l 289 1293 l 371 1293 q 441 1237 405 1270 q 514 1166 477 1204 q 585 1237 549 1204 q 657 1293 622 1270 l 739 1293 l 739 1274 "},"x":{"x_min":24,"x_max":670,"ha":695,"o":"m 276 382 l 38 745 l 178 745 l 347 466 l 517 745 l 658 745 l 416 382 l 670 0 l 529 0 l 347 295 l 164 0 l 24 0 l 276 382 "},"è":{"x_min":77,"x_max":673,"ha":743,"o":"m 412 -14 q 276 11 337 -14 q 170 84 214 36 q 101 203 125 132 q 77 366 77 274 q 99 531 77 458 q 162 654 121 604 q 259 731 202 705 q 384 758 316 758 q 505 733 451 758 q 595 665 558 709 q 653 560 633 621 q 673 423 673 498 l 673 346 l 204 346 q 259 155 207 216 q 413 93 311 93 q 477 97 448 93 q 534 107 507 100 q 587 123 561 113 q 639 145 613 133 l 639 35 q 586 13 612 22 q 533 -2 560 3 q 476 -11 505 -8 q 412 -14 446 -14 m 384 655 q 260 602 306 655 q 207 449 214 549 l 545 449 q 536 533 545 495 q 507 598 526 571 q 457 640 487 625 q 384 655 427 655 m 461 842 l 379 842 q 327 889 355 860 q 273 946 299 917 q 226 1004 247 976 q 194 1049 204 1031 l 194 1064 l 342 1064 q 368 1013 353 1040 q 398 958 382 986 q 430 905 414 931 q 461 860 446 879 l 461 842 "},"Ń":{"x_min":135,"x_max":878,"ha":1013,"o":"m 878 0 l 724 0 l 253 821 l 248 821 q 255 717 252 768 q 259 624 257 673 q 261 538 261 576 l 261 0 l 135 0 l 135 992 l 288 992 l 757 174 l 762 174 q 757 276 759 226 q 755 321 756 298 q 753 366 754 343 q 752 410 752 389 q 751 449 751 431 l 751 992 l 878 992 l 878 0 m 431 1089 q 461 1134 445 1108 q 493 1187 477 1160 q 524 1242 509 1215 q 549 1293 538 1269 l 698 1293 l 698 1278 q 665 1233 687 1260 q 618 1175 644 1205 q 564 1118 592 1146 q 513 1071 536 1089 l 431 1071 l 431 1089 "},"ḿ":{"x_min":118,"x_max":1134,"ha":1245,"o":"m 1010 0 l 1010 479 q 976 611 1010 567 q 871 655 942 655 q 786 639 821 655 q 729 592 752 623 q 697 516 707 562 q 687 410 687 470 l 687 0 l 564 0 l 564 479 q 530 611 564 567 q 425 655 496 655 q 337 637 373 655 q 281 585 302 620 q 250 501 259 551 q 241 385 241 450 l 241 0 l 118 0 l 118 745 l 218 745 l 236 644 l 242 644 q 281 694 259 673 q 330 730 303 715 q 387 751 357 744 q 448 758 417 758 q 584 728 530 758 q 663 634 637 698 l 669 634 q 711 689 686 666 q 765 727 736 712 q 828 750 795 743 q 894 758 860 758 q 1073 693 1013 758 q 1134 486 1134 628 l 1134 0 l 1010 0 m 575 860 q 605 905 589 879 q 637 958 621 931 q 668 1013 653 986 q 693 1064 682 1040 l 842 1064 l 842 1049 q 809 1004 831 1031 q 762 946 788 976 q 708 889 736 917 q 657 842 680 860 l 575 842 l 575 860 "},"μ":{"x_min":118,"x_max":706,"ha":825,"o":"m 241 264 q 277 132 241 176 q 388 88 313 88 q 481 106 443 88 q 540 158 518 123 q 573 242 563 192 q 582 357 582 292 l 582 745 l 706 745 l 706 0 l 606 0 l 588 99 l 581 99 q 500 14 548 42 q 381 -14 451 -14 q 296 1 332 -14 q 237 45 261 17 q 239 -7 238 19 q 241 -59 240 -30 q 241 -117 241 -88 l 241 -334 l 118 -334 l 118 745 l 241 745 l 241 264 "},".":{"x_min":100,"x_max":272,"ha":372,"o":"m 100 74 q 106 118 100 100 q 125 147 113 136 q 152 163 136 158 q 186 169 167 169 q 219 163 203 169 q 246 147 235 158 q 265 118 258 136 q 272 74 272 100 q 265 31 272 49 q 246 2 258 13 q 219 -14 235 -9 q 186 -20 203 -20 q 152 -14 167 -20 q 125 2 136 -9 q 106 31 113 13 q 100 74 100 49 "},"‘":{"x_min":16,"x_max":228,"ha":243,"o":"m 24 652 l 16 666 q 38 744 25 703 q 67 828 51 786 q 100 912 82 870 q 135 992 118 954 l 228 992 q 204 905 216 950 q 183 816 193 861 q 164 730 173 772 q 149 652 155 687 l 24 652 "},"π":{"x_min":17.109375,"x_max":831,"ha":875,"o":"m 749 88 q 783 92 767 88 q 810 102 799 97 l 810 3 q 774 -8 799 -2 q 717 -14 749 -14 q 602 30 640 -14 q 564 164 564 75 l 564 642 l 290 642 l 290 0 l 167 0 l 167 642 l 17 642 l 17 691 l 110 745 l 831 745 l 831 642 l 688 642 l 688 173 q 703 107 688 125 q 749 88 719 88 "},"l":{"x_min":118,"x_max":241.4375,"ha":359,"o":"m 241 0 l 118 0 l 118 1055 l 241 1055 l 241 0 "},"Ъ":{"x_min":14,"x_max":839,"ha":910,"o":"m 839 290 q 818 170 839 224 q 755 79 798 117 q 647 20 712 41 q 490 0 581 0 l 244 0 l 244 880 l 14 880 l 14 992 l 370 992 l 370 574 l 471 574 q 645 551 574 574 q 758 490 715 529 q 820 400 801 452 q 839 290 839 349 m 370 107 l 478 107 q 650 152 595 107 q 705 290 705 197 q 690 370 705 337 q 644 424 675 403 q 566 453 612 444 q 457 462 519 462 l 370 462 l 370 107 "}," ":{"x_min":0,"x_max":0,"ha":139},"Ś":{"x_min":70.109375,"x_max":657,"ha":721,"o":"m 657 264 q 633 147 657 199 q 566 59 610 95 q 460 4 523 23 q 320 -14 398 -14 q 179 -2 245 -14 q 70 32 114 9 l 70 153 q 122 131 93 142 q 184 112 151 120 q 251 99 216 104 q 319 93 285 93 q 479 134 427 93 q 530 252 530 176 q 521 316 530 289 q 486 366 511 343 q 420 410 461 389 q 316 456 379 431 q 212 508 256 480 q 139 572 168 537 q 96 652 110 607 q 83 754 83 697 q 104 860 83 813 q 165 939 126 907 q 259 989 205 972 q 380 1006 314 1006 q 525 990 460 1006 q 640 951 589 975 l 595 845 q 495 880 551 865 q 381 894 440 894 q 254 856 299 894 q 209 752 209 818 q 219 686 209 714 q 252 635 229 657 q 315 592 276 612 q 410 549 353 572 q 517 499 471 525 q 594 441 563 473 q 641 366 625 408 q 657 264 657 323 m 306 1089 q 336 1134 320 1108 q 368 1187 352 1160 q 399 1242 384 1215 q 424 1293 413 1269 l 573 1293 l 573 1278 q 540 1233 562 1260 q 493 1175 519 1205 q 439 1118 467 1146 q 388 1071 411 1089 l 306 1071 l 306 1089 "},"Ü":{"x_min":125,"x_max":845,"ha":970,"o":"m 845 993 l 845 349 q 822 205 845 272 q 755 90 800 139 q 641 13 709 41 q 481 -14 573 -14 q 327 12 394 -14 q 216 86 261 38 q 148 202 171 134 q 125 352 125 269 l 125 991 l 251 991 l 251 346 q 309 162 251 227 q 487 97 368 97 q 591 115 548 97 q 663 167 635 133 q 704 246 690 200 q 718 347 718 292 l 718 993 l 845 993 m 293 1174 q 311 1227 293 1211 q 358 1244 330 1244 q 404 1227 384 1244 q 423 1174 423 1210 q 404 1121 423 1138 q 358 1105 384 1105 q 311 1121 330 1105 q 293 1174 293 1138 m 547 1174 q 566 1227 547 1211 q 612 1244 585 1244 q 637 1239 625 1244 q 658 1227 649 1235 q 672 1206 667 1218 q 678 1174 678 1193 q 658 1121 678 1138 q 612 1105 638 1105 q 566 1121 585 1105 q 547 1174 547 1138 "},"à":{"x_min":64,"x_max":626,"ha":737,"o":"m 536 0 l 511 102 l 505 102 q 461 50 483 72 q 412 13 439 28 q 353 -7 386 0 q 278 -14 321 -14 q 193 0 232 -14 q 125 40 153 12 q 80 109 96 67 q 64 208 64 151 q 142 379 64 320 q 379 445 220 439 l 503 450 l 503 496 q 494 572 503 541 q 465 620 484 602 q 419 647 447 639 q 357 655 392 655 q 253 639 301 655 q 160 599 204 623 l 117 692 q 228 739 167 720 q 357 758 290 758 q 477 744 427 758 q 560 700 527 730 q 609 623 593 669 q 626 509 626 576 l 626 0 l 536 0 m 310 88 q 386 101 351 88 q 447 140 422 114 q 488 205 473 166 q 502 298 502 245 l 502 365 l 405 360 q 303 346 345 357 q 237 316 262 336 q 202 270 213 297 q 191 208 191 243 q 224 117 191 146 q 310 88 257 88 m 460 842 l 378 842 q 326 889 354 860 q 272 946 298 917 q 225 1004 246 976 q 193 1049 203 1031 l 193 1064 l 341 1064 q 367 1013 352 1040 q 397 958 381 986 q 429 905 413 931 q 460 860 445 879 l 460 842 "},"η":{"x_min":118,"x_max":707,"ha":818,"o":"m 583 -334 l 583 479 q 547 611 583 567 q 436 655 512 655 q 343 637 381 655 q 283 585 306 620 q 251 501 261 551 q 241 385 241 450 l 241 0 l 118 0 l 118 745 l 218 745 l 236 644 l 242 644 q 283 694 259 673 q 334 730 306 715 q 393 751 362 744 q 457 758 424 758 q 644 693 581 758 q 707 486 707 628 l 707 -334 l 583 -334 "},"ó":{"x_min":77,"x_max":725,"ha":802,"o":"m 725 373 q 702 208 725 280 q 637 86 679 135 q 534 11 594 37 q 398 -14 474 -14 q 270 11 329 -14 q 168 86 211 37 q 101 208 125 135 q 77 373 77 280 q 99 537 77 465 q 164 657 122 608 q 267 732 206 707 q 403 758 327 758 q 531 732 472 758 q 633 657 590 707 q 700 537 676 608 q 725 373 725 465 m 204 373 q 250 159 204 231 q 401 88 297 88 q 551 159 506 88 q 597 373 597 231 q 551 585 597 515 q 400 655 504 655 q 250 585 295 655 q 204 373 204 515 m 321 860 q 351 905 335 879 q 383 958 367 931 q 414 1013 399 986 q 439 1064 428 1040 l 588 1064 l 588 1049 q 555 1004 577 1031 q 508 946 534 976 q 454 889 482 917 q 403 842 426 860 l 321 842 l 321 860 "},"¦":{"x_min":332,"x_max":433.734375,"ha":765,"o":"m 332 1055 l 433 1055 l 433 526 l 332 526 l 332 1055 m 332 196 l 433 196 l 433 -334 l 332 -334 l 332 196 "},"Ő":{"x_min":85,"x_max":945,"ha":1031,"o":"m 945 496 q 917 287 945 382 q 835 126 890 193 q 701 22 781 59 q 515 -14 620 -14 q 324 22 405 -14 q 189 126 243 59 q 110 288 136 193 q 85 498 85 382 q 110 707 85 613 q 190 867 136 801 q 325 970 243 934 q 517 1007 406 1007 q 701 970 622 1007 q 835 867 781 934 q 917 706 890 800 q 945 496 945 612 m 218 497 q 236 330 218 404 q 290 204 253 255 q 382 124 326 152 q 515 97 438 97 q 648 124 593 97 q 741 204 704 152 q 794 330 777 255 q 811 497 811 404 q 794 664 811 590 q 741 789 777 738 q 649 868 705 840 q 517 895 594 895 q 383 868 439 895 q 290 789 327 840 q 236 664 253 738 q 218 497 218 590 m 312 1089 q 342 1134 326 1108 q 374 1187 358 1160 q 404 1242 390 1215 q 430 1293 419 1269 l 565 1293 l 565 1278 q 532 1233 554 1260 q 485 1175 511 1205 q 431 1118 459 1146 q 380 1071 404 1089 l 312 1071 l 312 1089 m 558 1089 q 588 1134 572 1108 q 620 1187 604 1160 q 650 1242 636 1215 q 675 1293 665 1269 l 810 1293 l 810 1278 q 777 1233 799 1260 q 730 1175 756 1205 q 676 1118 704 1146 q 625 1071 649 1089 l 558 1071 l 558 1089 "},"Ž":{"x_min":56,"x_max":693,"ha":749,"o":"m 693 0 l 56 0 l 56 97 l 537 880 l 70 880 l 70 992 l 679 992 l 679 894 l 197 111 l 693 111 l 693 0 m 604 1274 q 563 1229 587 1255 q 517 1176 540 1203 q 474 1121 494 1148 q 444 1071 454 1094 l 313 1071 q 283 1121 303 1094 q 240 1176 263 1148 q 194 1229 217 1203 q 154 1274 171 1255 l 154 1293 l 236 1293 q 306 1237 270 1270 q 379 1166 342 1204 q 450 1237 414 1204 q 522 1293 487 1270 l 604 1293 l 604 1274 "},"е":{"x_min":77,"x_max":673,"ha":743,"o":"m 412 -14 q 276 11 337 -14 q 170 84 214 36 q 101 203 125 132 q 77 366 77 274 q 99 531 77 458 q 162 654 121 604 q 259 731 202 705 q 384 758 316 758 q 505 733 451 758 q 595 665 558 709 q 653 560 633 621 q 673 423 673 498 l 673 346 l 204 346 q 259 155 207 216 q 413 93 311 93 q 477 97 448 93 q 534 107 507 100 q 587 123 561 113 q 639 145 613 133 l 639 35 q 586 13 612 22 q 533 -2 560 3 q 476 -11 505 -8 q 412 -14 446 -14 m 384 655 q 260 602 306 655 q 207 449 214 549 l 545 449 q 536 533 545 495 q 507 598 526 571 q 457 640 487 625 q 384 655 427 655 "},"Î":{"x_min":12,"x_max":462,"ha":471,"o":"m 414 0 l 55 0 l 55 69 l 172 96 l 172 895 l 55 922 l 55 992 l 414 992 l 414 922 l 298 895 l 298 96 l 414 69 l 414 0 m 462 1071 l 380 1071 q 308 1126 345 1093 q 237 1196 272 1159 q 164 1126 200 1159 q 94 1071 128 1093 l 12 1071 l 12 1089 q 52 1134 29 1108 q 98 1187 75 1160 q 141 1242 121 1215 q 171 1293 161 1269 l 302 1293 q 332 1242 312 1269 q 375 1187 352 1215 q 421 1134 398 1160 q 462 1089 445 1108 l 462 1071 "},"e":{"x_min":77,"x_max":673,"ha":743,"o":"m 412 -14 q 276 11 337 -14 q 170 84 214 36 q 101 203 125 132 q 77 366 77 274 q 99 531 77 458 q 162 654 121 604 q 259 731 202 705 q 384 758 316 758 q 505 733 451 758 q 595 665 558 709 q 653 560 633 621 q 673 423 673 498 l 673 346 l 204 346 q 259 155 207 216 q 413 93 311 93 q 477 97 448 93 q 534 107 507 100 q 587 123 561 113 q 639 145 613 133 l 639 35 q 586 13 612 22 q 533 -2 560 3 q 476 -11 505 -8 q 412 -14 446 -14 m 384 655 q 260 602 306 655 q 207 449 214 549 l 545 449 q 536 533 545 495 q 507 598 526 571 q 457 640 487 625 q 384 655 427 655 "},"ό":{"x_min":77,"x_max":725,"ha":802,"o":"m 725 373 q 702 208 725 280 q 637 86 679 135 q 534 11 594 37 q 398 -14 474 -14 q 270 11 329 -14 q 168 86 211 37 q 101 208 125 135 q 77 373 77 280 q 99 537 77 465 q 164 657 122 608 q 267 732 206 707 q 403 758 327 758 q 531 732 472 758 q 633 657 590 707 q 700 537 676 608 q 725 373 725 465 m 204 373 q 250 159 204 231 q 401 88 297 88 q 551 159 506 88 q 597 373 597 231 q 551 585 597 515 q 400 655 504 655 q 250 585 295 655 q 204 373 204 515 m 352 860 q 365 906 358 880 q 378 960 372 932 q 390 1014 385 987 q 399 1064 396 1041 l 534 1064 l 534 1049 q 518 1007 529 1033 q 492 951 507 980 q 459 892 476 921 q 425 842 441 863 l 352 842 l 352 860 "},"Ĕ":{"x_min":135,"x_max":650,"ha":733,"o":"m 650 0 l 135 0 l 135 992 l 650 992 l 650 880 l 261 880 l 261 574 l 624 574 l 624 462 l 261 462 l 261 111 l 650 111 l 650 0 m 601 1259 q 583 1183 598 1217 q 542 1123 568 1149 q 479 1084 516 1098 q 394 1071 442 1071 q 307 1084 344 1071 q 246 1122 270 1097 q 208 1181 221 1147 q 193 1259 195 1216 l 267 1259 q 279 1212 270 1229 q 305 1186 289 1194 q 344 1175 321 1177 q 397 1172 367 1172 q 443 1175 421 1172 q 483 1188 465 1178 q 512 1214 500 1197 q 526 1259 523 1231 l 601 1259 "},"ļ":{"x_min":69,"x_max":248,"ha":359,"o":"m 241 0 l 118 0 l 118 1055 l 241 1055 l 241 0 m 69 -288 q 85 -246 76 -271 q 102 -191 94 -220 q 116 -135 110 -163 q 125 -85 123 -107 l 248 -85 l 248 -98 q 233 -141 243 -115 q 207 -197 222 -167 q 173 -255 192 -226 q 135 -307 155 -284 l 69 -307 l 69 -288 "}," ":{"x_min":0,"x_max":0,"ha":695},"Ѓ":{"x_min":135,"x_max":649,"ha":682,"o":"m 649 992 l 649 880 l 261 880 l 261 0 l 135 0 l 135 992 l 649 992 m 301 1089 q 331 1134 315 1108 q 363 1187 347 1160 q 394 1242 379 1215 q 419 1293 408 1269 l 568 1293 l 568 1278 q 535 1233 557 1260 q 488 1175 514 1205 q 434 1118 462 1146 q 383 1071 406 1089 l 301 1071 l 301 1089 "},"ò":{"x_min":77,"x_max":725,"ha":802,"o":"m 725 373 q 702 208 725 280 q 637 86 679 135 q 534 11 594 37 q 398 -14 474 -14 q 270 11 329 -14 q 168 86 211 37 q 101 208 125 135 q 77 373 77 280 q 99 537 77 465 q 164 657 122 608 q 267 732 206 707 q 403 758 327 758 q 531 732 472 758 q 633 657 590 707 q 700 537 676 608 q 725 373 725 465 m 204 373 q 250 159 204 231 q 401 88 297 88 q 551 159 506 88 q 597 373 597 231 q 551 585 597 515 q 400 655 504 655 q 250 585 295 655 q 204 373 204 515 m 507 842 l 425 842 q 373 889 401 860 q 319 946 345 917 q 272 1004 293 976 q 240 1049 250 1031 l 240 1064 l 388 1064 q 414 1013 399 1040 q 444 958 428 986 q 476 905 460 931 q 507 860 492 879 l 507 842 "},"ﬄ":{"x_min":19,"x_max":1155.4375,"ha":1274,"o":"m 441 656 l 274 656 l 274 0 l 151 0 l 151 656 l 19 656 l 19 704 l 151 749 l 151 814 q 166 934 151 886 q 210 1010 181 982 q 280 1051 238 1039 q 375 1063 322 1063 q 449 1055 415 1063 q 509 1037 482 1047 l 477 941 q 431 954 456 949 q 379 960 406 960 q 332 954 352 960 q 300 931 313 947 q 280 887 287 915 q 274 815 274 859 l 274 745 l 441 745 l 441 656 m 898 656 l 731 656 l 731 0 l 608 0 l 608 656 l 476 656 l 476 704 l 608 749 l 608 814 q 623 934 608 886 q 667 1010 638 982 q 737 1051 695 1039 q 832 1063 779 1063 q 906 1055 872 1063 q 966 1037 939 1047 l 934 941 q 888 954 913 949 q 836 960 863 960 q 789 954 809 960 q 757 931 770 947 q 737 887 744 915 q 731 815 731 859 l 731 745 l 898 745 l 898 656 m 1155 0 l 1032 0 l 1032 1055 l 1155 1055 l 1155 0 "},"^":{"x_min":28,"x_max":711,"ha":739,"o":"m 28 372 l 339 999 l 408 999 l 711 372 l 601 372 l 373 870 l 137 372 l 28 372 "},"ⁿ":{"x_min":72,"x_max":446,"ha":515,"o":"m 357 540 l 357 827 q 336 905 357 882 q 274 929 315 929 q 223 921 244 929 q 188 897 202 914 q 167 849 174 879 q 160 775 160 820 l 160 540 l 72 540 l 72 994 l 145 994 l 156 934 l 162 934 q 292 1003 205 1003 q 446 833 446 1003 l 446 540 l 357 540 "},"к":{"x_min":118,"x_max":676.25,"ha":682,"o":"m 516 745 l 649 745 l 369 387 l 676 0 l 536 0 l 241 377 l 241 0 l 118 0 l 118 745 l 241 745 l 241 383 l 516 745 "},"￼":{"x_min":57,"x_max":1346,"ha":1389,"o":"m 57 823 l 57 1030 l 262 1030 l 262 954 l 132 954 l 132 823 l 57 823 m 1139 954 l 1139 1030 l 1346 1030 l 1346 823 l 1272 823 l 1272 954 l 1139 954 m 57 -260 l 57 -54 l 132 -54 l 132 -186 l 262 -186 l 262 -260 l 57 -260 m 1139 -260 l 1139 -186 l 1272 -186 l 1272 -54 l 1346 -54 l 1346 -260 l 1139 -260 m 875 -260 l 875 -186 l 1060 -186 l 1060 -260 l 875 -260 m 345 -260 l 345 -186 l 528 -186 l 528 -260 l 345 -260 m 345 954 l 345 1030 l 528 1030 l 528 954 l 345 954 m 1346 26 l 1272 26 l 1272 210 l 1346 210 l 1346 26 m 1346 558 l 1272 558 l 1272 742 l 1346 742 l 1346 558 m 610 -260 l 610 -186 l 794 -186 l 794 -260 l 610 -260 m 132 26 l 57 26 l 57 210 l 132 210 l 132 26 m 610 954 l 610 1030 l 794 1030 l 794 954 l 610 954 m 875 954 l 875 1030 l 1060 1030 l 1060 954 l 875 954 m 132 291 l 57 291 l 57 476 l 132 476 l 132 291 m 132 558 l 57 558 l 57 742 l 132 742 l 132 558 m 1346 291 l 1272 291 l 1272 476 l 1346 476 l 1346 291 m 408 224 q 276 277 322 224 q 231 427 231 331 q 276 577 231 525 q 408 631 322 630 q 540 578 494 631 q 586 427 586 525 q 540 277 586 331 q 408 224 494 224 m 408 294 q 478 329 457 294 q 499 427 499 364 q 478 525 499 490 q 408 559 457 559 q 339 525 361 559 q 317 427 317 490 q 339 329 317 364 q 408 294 361 294 m 643 626 l 759 626 q 871 603 833 626 q 909 524 909 580 q 893 468 909 491 q 847 439 878 445 l 847 437 q 903 406 886 429 q 921 344 921 383 q 884 259 921 289 q 783 229 847 229 l 643 229 l 643 626 m 726 469 l 770 469 q 814 480 801 469 q 826 513 826 491 q 812 546 826 536 q 766 556 798 556 l 726 556 l 726 469 m 726 402 l 726 298 l 776 298 q 822 312 809 298 q 834 352 834 327 q 821 388 834 374 q 773 402 809 402 l 726 402 m 956 231 l 956 300 q 978 297 967 298 q 1002 295 989 295 q 1044 307 1028 295 q 1061 353 1061 319 l 1061 626 l 1146 626 l 1146 356 q 1110 258 1146 292 q 1011 225 1075 225 q 956 231 969 225 "},"ū":{"x_min":111,"x_max":700,"ha":818,"o":"m 600 0 l 582 99 l 575 99 q 534 48 558 70 q 483 13 511 27 q 424 -7 455 0 q 360 -14 393 -14 q 252 1 299 -14 q 174 50 205 17 q 126 135 142 83 q 111 258 111 186 l 111 745 l 234 745 l 234 264 q 270 132 234 176 q 381 88 306 88 q 474 106 436 88 q 534 158 511 123 q 566 242 556 192 q 576 357 576 292 l 576 745 l 700 745 l 700 0 l 600 0 m 214 943 l 604 943 l 604 842 l 214 842 l 214 943 "},"ˆ":{"x_min":175,"x_max":625,"ha":802,"o":"m 625 842 l 543 842 q 471 897 508 864 q 400 967 435 930 q 327 897 363 930 q 257 842 291 864 l 175 842 l 175 860 q 215 905 192 879 q 261 958 238 931 q 304 1013 284 986 q 334 1064 324 1040 l 465 1064 q 495 1013 475 1040 q 538 958 515 986 q 584 905 561 931 q 625 860 608 879 l 625 842 "},"Ẅ":{"x_min":13.75,"x_max":1214.25,"ha":1228,"o":"m 549 992 l 682 992 l 837 411 q 857 335 847 373 q 876 261 867 297 q 891 194 884 225 q 901 136 897 162 q 908 192 904 162 q 917 256 912 223 q 929 325 923 290 q 943 393 936 360 l 1079 992 l 1214 992 l 965 0 l 837 0 l 665 636 q 647 707 656 671 q 631 776 638 744 q 615 848 622 813 q 600 776 608 814 q 585 707 593 745 q 567 632 576 669 l 402 0 l 275 0 l 13 992 l 147 992 l 298 388 q 313 323 306 357 q 325 257 320 290 q 336 192 331 223 q 344 136 341 162 q 352 194 347 161 q 364 264 358 227 q 379 338 371 301 q 396 409 387 376 l 549 992 m 421 1174 q 439 1227 421 1211 q 486 1244 458 1244 q 532 1227 512 1244 q 551 1174 551 1210 q 532 1121 551 1138 q 486 1105 512 1105 q 439 1121 458 1105 q 421 1174 421 1138 m 675 1174 q 694 1227 675 1211 q 740 1244 713 1244 q 765 1239 753 1244 q 786 1227 777 1235 q 800 1206 795 1218 q 806 1174 806 1193 q 786 1121 806 1138 q 740 1105 766 1105 q 694 1121 713 1105 q 675 1174 675 1138 "},"č":{"x_min":77,"x_max":630,"ha":643,"o":"m 402 -14 q 274 7 334 -14 q 171 75 215 28 q 102 193 127 121 q 77 367 77 266 q 102 548 77 474 q 173 669 128 623 q 278 736 218 715 q 408 758 339 758 q 511 746 461 758 q 596 718 562 735 l 559 614 q 524 627 543 621 q 485 638 505 633 q 445 647 465 644 q 408 650 425 650 q 253 581 302 650 q 204 369 204 513 q 253 160 204 226 q 402 93 302 93 q 502 106 457 93 q 583 135 546 118 l 583 26 q 504 -3 546 6 q 402 -14 463 -14 m 630 1045 q 589 1000 613 1026 q 543 947 566 974 q 500 892 520 919 q 470 842 480 865 l 339 842 q 309 892 329 865 q 266 947 289 919 q 220 1000 243 974 q 180 1045 197 1026 l 180 1064 l 262 1064 q 332 1008 296 1041 q 405 937 368 975 q 476 1008 440 975 q 548 1064 513 1041 l 630 1064 l 630 1045 "},"’":{"x_min":16,"x_max":228,"ha":243,"o":"m 219 992 l 228 977 q 205 898 218 939 q 176 815 192 857 q 143 731 160 772 q 108 652 125 690 l 16 652 q 38 737 26 692 q 60 827 49 782 q 79 913 70 871 q 94 992 88 956 l 219 992 "},"Ν":{"x_min":135,"x_max":878,"ha":1013,"o":"m 878 0 l 724 0 l 253 821 l 248 821 q 255 717 252 768 q 259 624 257 673 q 261 538 261 576 l 261 0 l 135 0 l 135 992 l 288 992 l 757 174 l 762 174 q 757 276 759 226 q 755 321 756 298 q 753 366 754 343 q 752 410 752 389 q 751 449 751 431 l 751 992 l 878 992 l 878 0 "},"-":{"x_min":56,"x_max":392,"ha":447,"o":"m 56 315 l 56 429 l 392 429 l 392 315 l 56 315 "},"Q":{"x_min":85,"x_max":945,"ha":1030,"o":"m 945 496 q 928 331 945 407 q 879 193 911 254 q 799 87 847 131 q 687 16 751 42 q 763 -95 717 -47 q 871 -184 810 -144 l 789 -281 q 660 -164 719 -231 q 567 -11 601 -97 q 541 -13 555 -12 q 515 -14 527 -14 q 324 22 405 -14 q 189 126 243 59 q 110 288 136 193 q 85 498 85 382 q 110 707 85 613 q 190 867 136 801 q 325 970 243 934 q 517 1007 406 1007 q 701 970 622 1007 q 835 867 781 934 q 917 706 890 800 q 945 496 945 612 m 218 497 q 236 330 218 404 q 290 204 253 255 q 382 124 326 152 q 515 97 438 97 q 648 124 593 97 q 741 204 704 152 q 794 330 777 255 q 811 497 811 404 q 794 664 811 590 q 741 789 777 738 q 649 868 705 840 q 517 895 594 895 q 383 868 439 895 q 290 789 327 840 q 236 664 253 738 q 218 497 218 590 "},"ј":{"x_min":-46,"x_max":252.96875,"ha":359,"o":"m 44 -334 q -9 -329 12 -334 q -46 -317 -30 -324 l -46 -217 q -10 -227 -28 -224 q 31 -231 8 -231 q 65 -226 50 -231 q 93 -208 81 -221 q 111 -172 105 -194 q 118 -116 118 -150 l 118 745 l 241 745 l 241 -107 q 229 -201 241 -159 q 193 -272 218 -243 q 132 -318 169 -302 q 44 -334 95 -334 m 108 945 q 129 1004 108 986 q 180 1023 149 1023 q 208 1018 195 1023 q 231 1004 221 1014 q 247 980 241 995 q 252 945 252 966 q 231 887 252 906 q 180 868 210 868 q 129 886 149 868 q 108 945 108 905 "},"ě":{"x_min":77,"x_max":673,"ha":743,"o":"m 412 -14 q 276 11 337 -14 q 170 84 214 36 q 101 203 125 132 q 77 366 77 274 q 99 531 77 458 q 162 654 121 604 q 259 731 202 705 q 384 758 316 758 q 505 733 451 758 q 595 665 558 709 q 653 560 633 621 q 673 423 673 498 l 673 346 l 204 346 q 259 155 207 216 q 413 93 311 93 q 477 97 448 93 q 534 107 507 100 q 587 123 561 113 q 639 145 613 133 l 639 35 q 586 13 612 22 q 533 -2 560 3 q 476 -11 505 -8 q 412 -14 446 -14 m 384 655 q 260 602 306 655 q 207 449 214 549 l 545 449 q 536 533 545 495 q 507 598 526 571 q 457 640 487 625 q 384 655 427 655 m 606 1045 q 565 1000 589 1026 q 519 947 542 974 q 476 892 496 919 q 446 842 456 865 l 315 842 q 285 892 305 865 q 242 947 265 919 q 196 1000 219 974 q 156 1045 173 1026 l 156 1064 l 238 1064 q 308 1008 272 1041 q 381 937 344 975 q 452 1008 416 975 q 524 1064 489 1041 l 606 1064 l 606 1045 "},"œ":{"x_min":77,"x_max":1194,"ha":1264,"o":"m 934 -14 q 777 23 846 -14 q 665 135 708 61 q 554 23 622 61 q 400 -14 487 -14 q 271 11 330 -14 q 168 86 211 37 q 101 208 125 135 q 77 373 77 280 q 99 537 77 465 q 164 657 122 608 q 267 732 207 707 q 404 758 328 758 q 553 720 486 758 q 662 610 619 682 q 765 720 702 682 q 906 758 827 758 q 1026 733 973 758 q 1117 665 1079 709 q 1174 560 1154 621 q 1194 423 1194 498 l 1194 346 l 727 346 q 782 155 730 216 q 935 93 833 93 q 999 97 970 93 q 1056 107 1028 100 q 1108 123 1083 113 q 1160 145 1134 133 l 1160 35 q 1107 13 1133 22 q 1054 -2 1081 3 q 997 -11 1027 -8 q 934 -14 968 -14 m 204 373 q 251 159 204 231 q 402 88 297 88 q 552 156 505 88 q 600 366 600 224 q 552 585 600 515 q 401 655 504 655 q 250 585 296 655 q 204 373 204 515 m 1066 449 q 1057 533 1066 495 q 1028 598 1048 571 q 979 640 1009 625 q 906 655 948 655 q 783 602 828 655 q 730 449 737 549 l 1066 449 "},"#":{"x_min":35,"x_max":863,"ha":897,"o":"m 666 606 l 623 382 l 814 382 l 814 290 l 605 290 l 550 0 l 450 0 l 507 290 l 310 290 l 254 0 l 157 0 l 209 290 l 35 290 l 35 382 l 228 382 l 272 606 l 87 606 l 87 699 l 289 699 l 345 992 l 444 992 l 389 699 l 587 699 l 644 992 l 742 992 l 685 699 l 863 699 l 863 606 l 666 606 m 327 382 l 524 382 l 568 606 l 371 606 l 327 382 "},"Џ":{"x_min":135,"x_max":826,"ha":960,"o":"m 826 0 l 546 0 l 546 -261 l 420 -261 l 420 0 l 135 0 l 135 992 l 261 992 l 261 111 l 699 111 l 699 992 l 826 992 l 826 0 "},"Å":{"x_min":-0.25,"x_max":844.25,"ha":844,"o":"m 715 0 l 606 307 l 237 307 l 127 0 l 0 0 l 364 996 l 479 996 l 844 0 l 715 0 m 566 419 l 466 706 q 456 736 462 719 q 444 774 450 754 q 432 817 438 795 q 421 860 426 839 q 410 816 416 839 q 397 773 404 794 q 386 735 391 752 q 376 706 380 718 l 277 419 l 566 419 m 576 1074 q 564 1012 576 1039 q 531 965 552 984 q 482 936 510 946 q 420 927 453 927 q 358 936 386 927 q 310 965 330 946 q 279 1011 290 984 q 269 1073 269 1038 q 279 1134 269 1107 q 310 1180 290 1161 q 358 1209 330 1199 q 420 1219 386 1219 q 481 1209 453 1219 q 531 1180 510 1199 q 564 1135 552 1161 q 576 1074 576 1108 m 501 1073 q 479 1129 501 1109 q 422 1149 457 1149 q 365 1129 387 1149 q 343 1073 343 1109 q 363 1016 343 1036 q 422 996 383 996 q 479 1016 457 996 q 501 1073 501 1036 "},"ș":{"x_min":61.15625,"x_max":564,"ha":627,"o":"m 564 203 q 544 108 564 149 q 487 40 524 68 q 398 0 450 13 q 281 -14 346 -14 q 154 -2 207 -14 q 61 33 101 9 l 61 146 q 107 125 82 135 q 161 106 133 114 q 219 93 189 98 q 279 88 249 88 q 353 95 323 88 q 403 116 384 103 q 431 150 423 130 q 440 194 440 170 q 433 232 440 215 q 409 265 427 249 q 360 299 391 282 q 280 337 329 316 q 193 378 232 358 q 127 424 154 399 q 86 482 100 449 q 72 560 72 515 q 90 645 72 608 q 143 707 109 682 q 224 745 177 732 q 330 758 272 758 q 451 743 396 758 q 554 706 505 729 l 512 606 q 422 641 468 626 q 329 655 376 655 q 228 632 261 655 q 195 568 195 610 q 203 526 195 544 q 229 493 210 509 q 279 461 248 477 q 358 426 311 445 q 444 385 406 405 q 509 339 482 365 q 549 281 535 314 q 564 203 564 249 m 202 -288 q 218 -246 209 -271 q 235 -191 227 -220 q 249 -135 243 -163 q 258 -85 256 -107 l 381 -85 l 381 -98 q 366 -141 376 -115 q 340 -197 355 -167 q 306 -255 325 -226 q 268 -307 288 -284 l 202 -307 l 202 -288 "},"¸":{"x_min":24,"x_max":277,"ha":285,"o":"m 277 -194 q 229 -297 277 -260 q 79 -334 181 -334 q 49 -331 64 -334 q 24 -327 34 -329 l 24 -254 q 50 -257 34 -256 q 77 -258 67 -258 q 152 -247 125 -258 q 179 -208 179 -235 q 170 -186 179 -195 q 146 -169 161 -176 q 109 -157 131 -162 q 64 -147 88 -152 l 125 0 l 207 0 l 168 -78 q 211 -92 191 -83 q 245 -115 230 -101 q 268 -148 260 -128 q 277 -194 277 -168 "},"=":{"x_min":69,"x_max":696,"ha":765,"o":"m 69 577 l 69 679 l 696 679 l 696 577 l 69 577 m 69 300 l 69 402 l 696 402 l 696 300 l 69 300 "},"ρ":{"x_min":111,"x_max":725,"ha":802,"o":"m 725 373 q 703 208 725 280 q 642 86 682 135 q 546 11 602 37 q 418 -14 489 -14 q 319 1 368 -14 q 234 47 271 16 l 230 47 q 232 -13 231 17 q 234 -72 233 -39 q 234 -136 234 -105 l 234 -334 l 111 -334 l 111 373 q 133 537 111 465 q 195 657 155 608 q 293 732 236 707 q 422 758 351 758 q 543 732 488 758 q 639 657 598 707 q 702 537 679 608 q 725 373 725 465 m 417 655 q 280 589 324 655 q 234 386 236 522 l 234 156 q 319 105 271 121 q 419 88 368 88 q 555 159 514 88 q 597 373 597 231 q 555 585 597 515 q 417 655 512 655 "},"Ћ":{"x_min":13,"x_max":873,"ha":977,"o":"m 370 609 l 605 609 q 718 592 668 609 q 802 543 768 575 q 854 464 836 511 q 873 357 873 417 l 873 0 l 746 0 l 746 340 q 711 458 746 419 q 591 497 675 497 l 370 497 l 370 0 l 244 0 l 244 880 l 13 880 l 13 992 l 654 992 l 654 880 l 370 880 l 370 609 "},"ú":{"x_min":111,"x_max":700,"ha":818,"o":"m 600 0 l 582 99 l 575 99 q 534 48 558 70 q 483 13 511 27 q 424 -7 455 0 q 360 -14 393 -14 q 252 1 299 -14 q 174 50 205 17 q 126 135 142 83 q 111 258 111 186 l 111 745 l 234 745 l 234 264 q 270 132 234 176 q 381 88 306 88 q 474 106 436 88 q 534 158 511 123 q 566 242 556 192 q 576 357 576 292 l 576 745 l 700 745 l 700 0 l 600 0 m 331 860 q 361 905 345 879 q 393 958 377 931 q 424 1013 409 986 q 449 1064 438 1040 l 598 1064 l 598 1049 q 565 1004 587 1031 q 518 946 544 976 q 464 889 492 917 q 413 842 436 860 l 331 842 l 331 860 "},"˚":{"x_min":248,"x_max":555,"ha":802,"o":"m 555 989 q 543 927 555 954 q 510 880 531 899 q 461 851 489 861 q 399 842 432 842 q 337 851 365 842 q 289 880 309 861 q 258 926 269 899 q 248 988 248 953 q 258 1049 248 1022 q 289 1095 269 1076 q 337 1124 309 1114 q 399 1134 365 1134 q 460 1124 432 1134 q 510 1095 489 1114 q 543 1050 531 1076 q 555 989 555 1023 m 480 988 q 458 1044 480 1024 q 401 1064 436 1064 q 344 1044 366 1064 q 322 988 322 1024 q 342 931 322 951 q 401 911 362 911 q 458 931 436 911 q 480 988 480 951 "},"д":{"x_min":28,"x_max":732,"ha":760,"o":"m 732 -258 l 615 -258 l 615 0 l 144 0 l 144 -258 l 28 -258 l 28 102 l 85 102 q 163 242 130 167 q 220 401 197 318 q 254 571 243 484 q 267 745 266 658 l 630 745 l 630 102 l 732 102 l 732 -258 m 506 102 l 506 656 l 383 656 q 365 511 378 585 q 332 365 352 437 q 282 226 311 293 q 215 102 253 159 l 506 102 "},"¯":{"x_min":-4,"x_max":699,"ha":695,"o":"m 699 1055 l -4 1055 l -4 1150 l 699 1150 l 699 1055 "},"u":{"x_min":111,"x_max":700,"ha":818,"o":"m 600 0 l 582 99 l 575 99 q 534 48 558 70 q 483 13 511 27 q 424 -7 455 0 q 360 -14 393 -14 q 252 1 299 -14 q 174 50 205 17 q 126 135 142 83 q 111 258 111 186 l 111 745 l 234 745 l 234 264 q 270 132 234 176 q 381 88 306 88 q 474 106 436 88 q 534 158 511 123 q 566 242 556 192 q 576 357 576 292 l 576 745 l 700 745 l 700 0 l 600 0 "},"З":{"x_min":49,"x_max":681,"ha":757,"o":"m 663 759 q 645 668 663 709 q 597 598 628 628 q 524 548 566 568 q 431 521 481 529 l 431 517 q 536 490 489 509 q 615 441 583 471 q 664 370 647 410 q 681 281 681 330 q 658 162 681 216 q 589 68 635 108 q 473 7 543 29 q 311 -14 404 -14 q 171 -2 236 -14 q 49 39 106 9 l 49 154 q 110 128 78 140 q 176 109 143 117 q 243 97 209 102 q 308 93 276 93 q 487 142 428 93 q 547 281 547 192 q 477 414 547 371 q 281 457 407 457 l 153 457 l 153 565 l 271 565 q 382 578 334 565 q 462 615 430 591 q 512 673 495 639 q 529 747 529 706 q 516 811 529 783 q 481 858 504 839 q 426 888 458 878 q 354 898 394 898 q 223 876 280 898 q 115 819 166 854 l 53 904 q 112 943 78 925 q 184 975 145 961 q 268 997 223 989 q 361 1006 312 1006 q 491 987 435 1006 q 585 936 547 969 q 643 858 624 903 q 663 759 663 812 "},"Α":{"x_min":-0.25,"x_max":844.25,"ha":844,"o":"m 715 0 l 606 307 l 237 307 l 127 0 l 0 0 l 364 996 l 479 996 l 844 0 l 715 0 m 566 419 l 466 706 q 456 736 462 719 q 444 774 450 754 q 432 817 438 795 q 421 860 426 839 q 410 816 416 839 q 397 773 404 794 q 386 735 391 752 q 376 706 380 718 l 277 419 l 566 419 "},"⅝":{"x_min":54,"x_max":1011,"ha":1051,"o":"m 232 769 q 310 757 274 769 q 373 722 346 745 q 415 664 400 699 q 431 586 431 630 q 374 438 431 491 q 208 385 318 385 q 124 394 166 385 q 54 422 83 404 l 54 518 q 92 497 71 506 q 133 481 112 488 q 174 471 154 475 q 211 468 194 468 q 301 493 269 468 q 334 577 334 519 q 301 657 334 628 q 208 685 269 685 q 186 684 199 685 q 160 680 174 682 q 134 676 147 678 q 112 672 122 674 l 67 702 l 89 992 l 389 992 l 389 908 l 170 908 l 158 762 q 191 766 172 764 q 232 769 210 769 m 860 992 l 309 0 l 202 0 l 753 992 l 860 992 m 815 604 q 883 594 851 604 q 938 567 914 585 q 976 519 962 548 q 991 453 991 491 q 983 407 991 428 q 962 369 976 386 q 931 338 949 352 q 893 313 914 325 q 938 285 917 300 q 975 251 959 270 q 1001 209 991 233 q 1011 157 1011 186 q 996 87 1011 119 q 956 33 982 56 q 894 0 930 11 q 816 -13 858 -13 q 670 31 721 -13 q 620 153 620 75 q 628 205 620 182 q 651 247 636 228 q 684 281 665 266 q 724 307 703 295 q 690 335 705 321 q 662 368 674 350 q 644 407 650 386 q 638 453 638 428 q 652 519 638 491 q 691 566 667 547 q 748 594 716 585 q 815 604 780 604 m 716 155 q 741 93 716 116 q 814 70 766 70 q 888 93 863 70 q 914 155 914 116 q 906 190 914 174 q 885 219 899 206 q 854 242 872 232 q 813 262 835 253 l 802 266 q 738 219 760 244 q 716 155 716 193 m 813 520 q 755 502 776 520 q 734 449 734 484 q 741 417 734 431 q 757 392 747 404 q 783 371 768 380 q 815 353 798 361 q 846 370 831 360 q 871 390 860 379 q 887 416 881 402 q 894 449 894 430 q 872 502 894 484 q 813 520 850 520 "},"é":{"x_min":77,"x_max":673,"ha":743,"o":"m 412 -14 q 276 11 337 -14 q 170 84 214 36 q 101 203 125 132 q 77 366 77 274 q 99 531 77 458 q 162 654 121 604 q 259 731 202 705 q 384 758 316 758 q 505 733 451 758 q 595 665 558 709 q 653 560 633 621 q 673 423 673 498 l 673 346 l 204 346 q 259 155 207 216 q 413 93 311 93 q 477 97 448 93 q 534 107 507 100 q 587 123 561 113 q 639 145 613 133 l 639 35 q 586 13 612 22 q 533 -2 560 3 q 476 -11 505 -8 q 412 -14 446 -14 m 384 655 q 260 602 306 655 q 207 449 214 549 l 545 449 q 536 533 545 495 q 507 598 526 571 q 457 640 487 625 q 384 655 427 655 m 322 860 q 352 905 336 879 q 384 958 368 931 q 415 1013 400 986 q 440 1064 429 1040 l 589 1064 l 589 1049 q 556 1004 578 1031 q 509 946 535 976 q 455 889 483 917 q 404 842 427 860 l 322 842 l 322 860 "},"Ş":{"x_min":70.109375,"x_max":657,"ha":721,"o":"m 657 264 q 633 147 657 199 q 566 59 610 95 q 460 4 523 23 q 320 -14 398 -14 q 179 -2 245 -14 q 70 32 114 9 l 70 153 q 122 131 93 142 q 184 112 151 120 q 251 99 216 104 q 319 93 285 93 q 479 134 427 93 q 530 252 530 176 q 521 316 530 289 q 486 366 511 343 q 420 410 461 389 q 316 456 379 431 q 212 508 256 480 q 139 572 168 537 q 96 652 110 607 q 83 754 83 697 q 104 860 83 813 q 165 939 126 907 q 259 989 205 972 q 380 1006 314 1006 q 525 990 460 1006 q 640 951 589 975 l 595 845 q 495 880 551 865 q 381 894 440 894 q 254 856 299 894 q 209 752 209 818 q 219 686 209 714 q 252 635 229 657 q 315 592 276 612 q 410 549 353 572 q 517 499 471 525 q 594 441 563 473 q 641 366 625 408 q 657 264 657 323 m 486 -194 q 438 -297 486 -260 q 288 -334 390 -334 q 258 -331 273 -334 q 233 -327 243 -329 l 233 -254 q 259 -257 243 -256 q 286 -258 276 -258 q 361 -247 334 -258 q 388 -208 388 -235 q 379 -186 388 -195 q 355 -169 370 -176 q 318 -157 340 -162 q 273 -147 297 -152 l 334 0 l 416 0 l 377 -78 q 420 -92 400 -83 q 454 -115 439 -101 q 477 -148 469 -128 q 486 -194 486 -168 "},"B":{"x_min":135,"x_max":786,"ha":863,"o":"m 135 992 l 405 992 q 558 978 492 992 q 668 936 624 965 q 735 858 713 906 q 758 740 758 810 q 744 662 758 698 q 707 597 731 625 q 645 551 682 569 q 563 526 609 532 l 563 519 q 650 496 609 511 q 720 454 690 480 q 768 386 751 427 q 786 287 786 345 q 763 166 786 219 q 700 76 741 113 q 598 19 658 39 q 463 0 539 0 l 135 0 l 135 992 m 261 572 l 427 572 q 523 582 485 572 q 586 612 562 592 q 621 662 610 632 q 631 732 631 692 q 579 848 631 813 q 413 884 526 884 l 261 884 l 261 572 m 261 464 l 261 107 l 441 107 q 541 121 500 107 q 606 159 581 134 q 641 217 630 183 q 652 292 652 251 q 641 362 652 330 q 604 416 630 393 q 537 451 579 439 q 433 464 495 464 l 261 464 "},"…":{"x_min":100,"x_max":1017,"ha":1117,"o":"m 100 74 q 106 118 100 100 q 125 147 113 136 q 152 163 136 158 q 186 169 167 169 q 219 163 203 169 q 246 147 235 158 q 265 118 258 136 q 272 74 272 100 q 265 31 272 49 q 246 2 258 13 q 219 -14 235 -9 q 186 -20 203 -20 q 152 -14 167 -20 q 125 2 136 -9 q 106 31 113 13 q 100 74 100 49 m 473 74 q 479 118 473 100 q 498 147 486 136 q 525 163 509 158 q 559 169 540 169 q 592 163 576 169 q 619 147 608 158 q 638 118 631 136 q 645 74 645 100 q 638 31 645 49 q 619 2 631 13 q 592 -14 608 -9 q 559 -20 576 -20 q 525 -14 540 -20 q 498 2 509 -9 q 479 31 486 13 q 473 74 473 49 m 845 74 q 851 118 845 100 q 869 147 857 136 q 897 163 881 158 q 931 169 912 169 q 964 163 948 169 q 991 147 980 158 q 1010 118 1003 136 q 1017 74 1017 100 q 1010 31 1017 49 q 991 2 1003 13 q 964 -14 980 -9 q 931 -20 948 -20 q 869 2 894 -20 q 845 74 845 24 "},"H":{"x_min":135,"x_max":839,"ha":974,"o":"m 839 0 l 712 0 l 712 462 l 261 462 l 261 0 l 135 0 l 135 992 l 261 992 l 261 574 l 712 574 l 712 992 l 839 992 l 839 0 "},"î":{"x_min":-45,"x_max":405,"ha":359,"o":"m 241 0 l 118 0 l 118 745 l 241 745 l 241 0 m 405 842 l 323 842 q 251 897 288 864 q 180 967 215 930 q 107 897 143 930 q 37 842 71 864 l -45 842 l -45 860 q -4 905 -27 879 q 41 958 18 931 q 84 1013 64 986 q 114 1064 104 1040 l 245 1064 q 275 1013 255 1040 q 318 958 295 986 q 364 905 341 931 q 405 860 388 879 l 405 842 "},"ν":{"x_min":-0.25,"x_max":661,"ha":718,"o":"m 0 745 l 127 745 l 263 343 q 282 287 271 320 q 302 218 292 253 q 321 152 313 183 q 333 104 330 121 l 337 104 q 437 239 398 169 q 498 387 475 308 q 529 553 520 465 q 537 745 537 642 l 661 745 q 648 536 661 634 q 604 348 635 439 q 521 172 573 257 q 389 0 469 86 l 259 0 l 0 745 "},"Ό":{"x_min":-16,"x_max":1001,"ha":1087,"o":"m 1001 496 q 973 287 1001 382 q 891 126 946 193 q 757 22 837 59 q 571 -14 676 -14 q 380 22 461 -14 q 245 126 299 59 q 166 288 192 193 q 141 498 141 382 q 166 707 141 613 q 246 867 192 801 q 381 970 299 934 q 573 1007 462 1007 q 757 970 678 1007 q 891 867 837 934 q 973 706 946 800 q 1001 496 1001 612 m 274 497 q 292 330 274 404 q 346 204 309 255 q 438 124 382 152 q 571 97 494 97 q 704 124 649 97 q 797 204 760 152 q 850 330 833 255 q 867 497 867 404 q 850 664 867 590 q 797 789 833 738 q 705 868 761 840 q 573 895 650 895 q 439 868 495 895 q 346 789 383 840 q 292 664 309 738 q 274 497 274 590 m -16 789 q -2 835 -9 809 q 10 889 4 861 q 22 943 17 916 q 31 993 28 970 l 166 993 l 166 978 q 150 936 161 962 q 124 880 139 909 q 91 821 108 850 q 57 771 73 792 l -16 771 l -16 789 "},"−":{"x_min":69,"x_max":696,"ha":765,"o":"m 69 439 l 69 541 l 696 541 l 696 439 l 69 439 "},"⅜":{"x_min":35,"x_max":1011,"ha":1051,"o":"m 414 852 q 386 764 414 800 q 312 712 359 729 q 402 660 372 697 q 432 571 432 624 q 418 496 432 530 q 376 437 404 461 q 305 399 348 413 q 204 386 263 386 q 115 394 157 386 q 35 423 73 402 l 35 514 q 124 481 78 493 q 206 469 169 469 q 304 497 274 469 q 335 575 335 525 q 297 648 335 625 q 193 671 260 671 l 125 671 l 125 745 l 193 745 q 287 771 258 745 q 317 839 317 797 q 310 876 317 860 q 291 901 303 891 q 262 915 278 911 q 227 920 246 920 q 152 907 186 920 q 83 870 119 894 l 36 935 q 76 963 55 951 q 120 985 97 976 q 169 998 143 993 q 224 1004 194 1004 q 307 992 271 1004 q 366 961 342 981 q 402 913 390 940 q 414 852 414 885 m 860 992 l 309 0 l 202 0 l 753 992 l 860 992 m 815 604 q 883 594 851 604 q 938 567 914 585 q 976 519 962 548 q 991 453 991 491 q 983 407 991 428 q 962 369 976 386 q 931 338 949 352 q 893 313 914 325 q 938 285 917 300 q 975 251 959 270 q 1001 209 991 233 q 1011 157 1011 186 q 996 87 1011 119 q 956 33 982 56 q 894 0 930 11 q 816 -13 858 -13 q 670 31 721 -13 q 620 153 620 75 q 628 205 620 182 q 651 247 636 228 q 684 281 665 266 q 724 307 703 295 q 690 335 705 321 q 662 368 674 350 q 644 407 650 386 q 638 453 638 428 q 652 519 638 491 q 691 566 667 547 q 748 594 716 585 q 815 604 780 604 m 716 155 q 741 93 716 116 q 814 70 766 70 q 888 93 863 70 q 914 155 914 116 q 906 190 914 174 q 885 219 899 206 q 854 242 872 232 q 813 262 835 253 l 802 266 q 738 219 760 244 q 716 155 716 193 m 813 520 q 755 502 776 520 q 734 449 734 484 q 741 417 734 431 q 757 392 747 404 q 783 371 768 380 q 815 353 798 361 q 846 370 831 360 q 871 390 860 379 q 887 416 881 402 q 894 449 894 430 q 872 502 894 484 q 813 520 850 520 "},"ǰ":{"x_min":-46,"x_max":405,"ha":359,"o":"m 44 -334 q -9 -329 12 -334 q -46 -317 -30 -324 l -46 -217 q -10 -227 -28 -224 q 31 -231 8 -231 q 65 -226 50 -231 q 93 -208 81 -221 q 111 -172 105 -194 q 118 -116 118 -150 l 118 745 l 241 745 l 241 -107 q 229 -201 241 -159 q 193 -272 218 -243 q 132 -318 169 -302 q 44 -334 95 -334 m 405 1045 q 364 1000 388 1026 q 318 947 341 974 q 275 892 295 919 q 245 842 255 865 l 114 842 q 84 892 104 865 q 41 947 64 919 q -4 1000 18 974 q -45 1045 -27 1026 l -45 1064 l 37 1064 q 107 1008 71 1041 q 180 937 143 975 q 251 1008 215 975 q 323 1064 288 1041 l 405 1064 l 405 1045 "},"ā":{"x_min":64,"x_max":626,"ha":737,"o":"m 536 0 l 511 102 l 505 102 q 461 50 483 72 q 412 13 439 28 q 353 -7 386 0 q 278 -14 321 -14 q 193 0 232 -14 q 125 40 153 12 q 80 109 96 67 q 64 208 64 151 q 142 379 64 320 q 379 445 220 439 l 503 450 l 503 496 q 494 572 503 541 q 465 620 484 602 q 419 647 447 639 q 357 655 392 655 q 253 639 301 655 q 160 599 204 623 l 117 692 q 228 739 167 720 q 357 758 290 758 q 477 744 427 758 q 560 700 527 730 q 609 623 593 669 q 626 509 626 576 l 626 0 l 536 0 m 310 88 q 386 101 351 88 q 447 140 422 114 q 488 205 473 166 q 502 298 502 245 l 502 365 l 405 360 q 303 346 345 357 q 237 316 262 336 q 202 270 213 297 q 191 208 191 243 q 224 117 191 146 q 310 88 257 88 m 174 943 l 564 943 l 564 842 l 174 842 l 174 943 "},"ĵ":{"x_min":-46,"x_max":405,"ha":359,"o":"m 44 -334 q -9 -329 12 -334 q -46 -317 -30 -324 l -46 -217 q -10 -227 -28 -224 q 31 -231 8 -231 q 65 -226 50 -231 q 93 -208 81 -221 q 111 -172 105 -194 q 118 -116 118 -150 l 118 745 l 241 745 l 241 -107 q 229 -201 241 -159 q 193 -272 218 -243 q 132 -318 169 -302 q 44 -334 95 -334 m 405 842 l 323 842 q 251 897 288 864 q 180 967 215 930 q 107 897 143 930 q 37 842 71 864 l -45 842 l -45 860 q -4 905 -27 879 q 41 958 18 931 q 84 1013 64 986 q 114 1064 104 1040 l 245 1064 q 275 1013 255 1040 q 318 958 295 986 q 364 905 341 931 q 405 860 388 879 l 405 842 "},"Ĩ":{"x_min":-8,"x_max":480,"ha":471,"o":"m 414 0 l 55 0 l 55 69 l 172 96 l 172 895 l 55 922 l 55 992 l 414 992 l 414 922 l 298 895 l 298 96 l 414 69 l 414 0 m 336 1072 q 282 1083 309 1072 q 230 1110 256 1095 q 180 1136 204 1124 q 135 1148 156 1148 q 88 1130 104 1148 q 62 1070 72 1112 l -8 1070 q 6 1144 -4 1111 q 35 1201 17 1177 q 78 1237 53 1224 q 135 1250 103 1250 q 191 1238 163 1250 q 244 1211 218 1226 q 293 1185 270 1197 q 336 1173 317 1173 q 382 1191 367 1173 q 408 1251 398 1209 l 480 1251 q 465 1177 476 1210 q 436 1121 454 1144 q 393 1084 418 1097 q 336 1072 368 1072 "},"*":{"x_min":55.3125,"x_max":707.71875,"ha":765,"o":"m 450 1055 l 420 788 l 690 863 l 707 733 l 451 714 l 617 493 l 496 428 l 377 670 l 270 428 l 145 493 l 309 714 l 55 733 l 74 863 l 340 788 l 311 1055 l 450 1055 "},"ă":{"x_min":64,"x_max":626,"ha":737,"o":"m 536 0 l 511 102 l 505 102 q 461 50 483 72 q 412 13 439 28 q 353 -7 386 0 q 278 -14 321 -14 q 193 0 232 -14 q 125 40 153 12 q 80 109 96 67 q 64 208 64 151 q 142 379 64 320 q 379 445 220 439 l 503 450 l 503 496 q 494 572 503 541 q 465 620 484 602 q 419 647 447 639 q 357 655 392 655 q 253 639 301 655 q 160 599 204 623 l 117 692 q 228 739 167 720 q 357 758 290 758 q 477 744 427 758 q 560 700 527 730 q 609 623 593 669 q 626 509 626 576 l 626 0 l 536 0 m 310 88 q 386 101 351 88 q 447 140 422 114 q 488 205 473 166 q 502 298 502 245 l 502 365 l 405 360 q 303 346 345 357 q 237 316 262 336 q 202 270 213 297 q 191 208 191 243 q 224 117 191 146 q 310 88 257 88 m 574 1030 q 556 954 571 988 q 515 894 541 920 q 452 855 489 869 q 367 842 415 842 q 280 855 317 842 q 219 893 243 868 q 181 952 194 918 q 166 1030 168 987 l 240 1030 q 252 983 243 1000 q 278 957 262 965 q 317 946 294 948 q 370 943 340 943 q 416 946 394 943 q 456 959 438 949 q 485 985 473 968 q 499 1030 496 1002 l 574 1030 "},"Χ":{"x_min":-0.25,"x_max":760.25,"ha":760,"o":"m 760 0 l 617 0 l 376 430 l 127 0 l 0 0 l 307 518 l 20 992 l 155 992 l 380 612 l 608 992 l 737 992 l 450 522 l 760 0 "},"†":{"x_min":83,"x_max":591.171875,"ha":675,"o":"m 591 670 l 366 691 l 404 0 l 257 0 l 294 691 l 83 670 l 83 793 l 294 772 l 257 1055 l 404 1055 l 366 772 l 591 793 l 591 670 "},"°":{"x_min":83,"x_max":512,"ha":595,"o":"m 83 791 q 100 874 83 835 q 145 942 117 913 q 213 989 174 972 q 297 1006 252 1006 q 380 989 341 1006 q 448 942 419 972 q 495 874 478 913 q 512 791 512 835 q 495 708 512 747 q 448 641 478 669 q 380 595 419 612 q 297 579 341 579 q 213 595 252 579 q 145 641 174 612 q 100 708 117 669 q 83 791 83 747 m 184 790 q 193 744 184 766 q 218 707 203 723 q 256 681 234 690 q 301 671 277 671 q 347 681 326 671 q 385 707 369 690 q 410 744 401 723 q 419 790 419 766 q 410 838 419 815 q 385 877 401 860 q 347 903 369 893 q 301 913 326 913 q 256 903 277 913 q 218 877 234 893 q 193 838 203 860 q 184 790 184 815 "},"Ξ":{"x_min":56,"x_max":682,"ha":737,"o":"m 139 574 l 599 574 l 599 462 l 139 462 l 139 574 m 84 992 l 654 992 l 654 880 l 84 880 l 84 992 m 682 111 l 682 0 l 56 0 l 56 111 l 682 111 "},"Ķ":{"x_min":135,"x_max":804.25,"ha":804,"o":"m 804 0 l 661 0 l 355 473 l 261 396 l 261 0 l 135 0 l 135 992 l 261 992 l 261 496 l 343 609 l 649 992 l 791 992 l 438 559 l 804 0 m 327 -288 q 343 -246 334 -271 q 360 -191 352 -220 q 374 -135 368 -163 q 383 -85 381 -107 l 506 -85 l 506 -98 q 491 -141 501 -115 q 465 -197 480 -167 q 431 -255 450 -226 q 393 -307 413 -284 l 327 -307 l 327 -288 "},"ŵ":{"x_min":13.75,"x_max":1022.25,"ha":1036,"o":"m 683 0 l 570 417 q 563 445 567 430 q 555 477 559 460 q 546 512 551 494 q 538 546 542 529 q 518 628 528 586 l 514 628 q 496 546 505 585 q 480 476 488 512 q 464 415 471 440 l 347 0 l 204 0 l 13 745 l 143 745 l 232 348 q 245 282 239 318 q 258 211 252 246 q 269 146 264 177 q 277 95 274 115 l 281 95 q 290 142 284 113 q 303 205 296 172 q 317 270 310 238 q 331 324 325 302 l 453 745 l 586 745 l 702 324 q 716 270 709 301 q 732 207 724 239 q 745 145 739 175 q 754 95 751 115 l 758 95 q 764 142 760 113 q 775 207 769 172 q 788 279 781 242 q 803 348 795 316 l 896 745 l 1022 745 l 829 0 l 683 0 m 743 842 l 661 842 q 589 897 626 864 q 518 967 553 930 q 445 897 481 930 q 375 842 409 864 l 293 842 l 293 860 q 333 905 310 879 q 379 958 356 931 q 422 1013 402 986 q 452 1064 442 1040 l 583 1064 q 613 1013 593 1040 q 656 958 633 986 q 702 905 679 931 q 743 860 726 879 l 743 842 "},"΄":{"x_min":342,"x_max":524,"ha":802,"o":"m 342 860 q 355 906 348 880 q 368 960 362 932 q 380 1014 375 987 q 389 1064 386 1041 l 524 1064 l 524 1049 q 508 1007 519 1033 q 482 951 497 980 q 449 892 466 921 q 415 842 431 863 l 342 842 l 342 860 "},"ǽ":{"x_min":64,"x_max":1088,"ha":1157,"o":"m 64 208 q 142 379 64 320 q 382 445 221 439 l 508 450 l 508 496 q 498 572 508 541 q 469 620 488 602 q 423 647 450 639 q 360 655 395 655 q 254 639 303 655 q 160 599 205 623 l 117 692 q 229 739 167 720 q 359 758 291 758 q 505 729 448 758 q 591 637 562 700 q 681 726 625 694 q 807 758 737 758 q 924 733 872 758 q 1013 665 976 709 q 1068 560 1049 622 q 1088 424 1088 499 l 1088 347 l 634 347 q 687 157 637 218 q 836 96 737 96 q 897 99 869 96 q 952 109 926 103 q 1004 126 979 116 q 1054 148 1029 135 l 1054 36 q 1002 13 1027 23 q 950 -2 977 4 q 895 -11 923 -8 q 833 -14 866 -14 q 672 24 740 -14 q 562 141 604 63 q 513 75 539 104 q 454 27 487 47 q 383 -3 422 7 q 293 -14 343 -14 q 202 0 244 -14 q 130 40 160 12 q 81 109 99 67 q 64 208 64 151 m 191 207 q 224 117 191 146 q 312 88 258 88 q 389 101 354 88 q 451 139 425 113 q 492 204 477 165 q 507 296 507 243 l 507 363 l 408 358 q 305 345 347 355 q 238 315 263 334 q 202 269 213 296 q 191 207 191 241 m 807 655 q 688 603 731 655 q 637 450 644 550 l 960 450 q 951 533 960 495 q 923 598 942 572 q 876 640 904 625 q 807 655 847 655 m 519 860 q 549 905 533 879 q 581 958 565 931 q 612 1013 597 986 q 637 1064 626 1040 l 786 1064 l 786 1049 q 753 1004 775 1031 q 706 946 732 976 q 652 889 680 917 q 601 842 624 860 l 519 842 l 519 860 "},"Β":{"x_min":135,"x_max":786,"ha":863,"o":"m 135 992 l 405 992 q 558 978 492 992 q 668 936 624 965 q 735 858 713 906 q 758 740 758 810 q 744 662 758 698 q 707 597 731 625 q 645 551 682 569 q 563 526 609 532 l 563 519 q 650 496 609 511 q 720 454 690 480 q 768 386 751 427 q 786 287 786 345 q 763 166 786 219 q 700 76 741 113 q 598 19 658 39 q 463 0 539 0 l 135 0 l 135 992 m 261 572 l 427 572 q 523 582 485 572 q 586 612 562 592 q 621 662 610 632 q 631 732 631 692 q 579 848 631 813 q 413 884 526 884 l 261 884 l 261 572 m 261 464 l 261 107 l 441 107 q 541 121 500 107 q 606 159 581 134 q 641 217 630 183 q 652 292 652 251 q 641 362 652 330 q 604 416 630 393 q 537 451 579 439 q 433 464 495 464 l 261 464 "},"Ļ":{"x_min":135,"x_max":649.4375,"ha":682,"o":"m 135 0 l 135 992 l 261 992 l 261 111 l 649 111 l 649 0 l 135 0 m 279 -288 q 295 -246 286 -271 q 312 -191 304 -220 q 326 -135 320 -163 q 335 -85 333 -107 l 458 -85 l 458 -98 q 443 -141 453 -115 q 417 -197 432 -167 q 383 -255 402 -226 q 345 -307 365 -284 l 279 -307 l 279 -288 "},"Õ":{"x_min":85,"x_max":945,"ha":1031,"o":"m 945 496 q 917 287 945 382 q 835 126 890 193 q 701 22 781 59 q 515 -14 620 -14 q 324 22 405 -14 q 189 126 243 59 q 110 288 136 193 q 85 498 85 382 q 110 707 85 613 q 190 867 136 801 q 325 970 243 934 q 517 1007 406 1007 q 701 970 622 1007 q 835 867 781 934 q 917 706 890 800 q 945 496 945 612 m 218 497 q 236 330 218 404 q 290 204 253 255 q 382 124 326 152 q 515 97 438 97 q 648 124 593 97 q 741 204 704 152 q 794 330 777 255 q 811 497 811 404 q 794 664 811 590 q 741 789 777 738 q 649 868 705 840 q 517 895 594 895 q 383 868 439 895 q 290 789 327 840 q 236 664 253 738 q 218 497 218 590 m 604 1072 q 550 1083 577 1072 q 498 1110 524 1095 q 448 1136 472 1124 q 403 1148 424 1148 q 356 1130 372 1148 q 330 1070 340 1112 l 260 1070 q 274 1144 263 1111 q 303 1201 285 1177 q 346 1237 321 1224 q 403 1250 371 1250 q 459 1238 431 1250 q 512 1211 486 1226 q 561 1185 538 1197 q 604 1173 585 1173 q 650 1191 635 1173 q 676 1251 666 1209 l 748 1251 q 733 1177 744 1210 q 704 1121 722 1144 q 661 1084 686 1097 q 604 1072 636 1072 "},"№":{"x_min":135,"x_max":1308,"ha":1372,"o":"m 807 0 l 653 0 l 253 821 l 248 821 q 255 717 252 768 q 259 624 257 673 q 261 538 261 576 l 261 0 l 135 0 l 135 992 l 288 992 l 686 174 l 690 174 q 685 276 688 226 q 683 321 684 298 q 682 366 682 343 q 681 410 681 389 q 680 449 680 431 l 680 992 l 807 992 l 807 0 m 1308 412 q 1294 309 1308 354 q 1254 234 1280 264 q 1190 187 1227 203 q 1107 171 1153 171 q 1028 187 1064 171 q 966 234 992 203 q 924 309 939 264 q 910 412 910 354 q 923 513 910 469 q 963 588 937 558 q 1027 635 990 619 q 1110 651 1064 651 q 1188 635 1152 651 q 1251 588 1225 619 q 1293 513 1278 558 q 1308 412 1308 469 m 1006 412 q 1031 294 1006 334 q 1109 254 1055 254 q 1187 294 1163 254 q 1211 412 1211 334 q 1187 529 1211 491 q 1109 567 1163 567 q 1031 529 1055 567 q 1006 412 1006 491 m 938 0 l 938 83 l 1275 83 l 1275 0 l 938 0 "},"χ":{"x_min":-14.25,"x_max":720,"ha":728,"o":"m 126 747 q 182 736 157 747 q 226 704 207 725 q 263 652 246 683 q 294 580 279 621 l 377 346 l 573 745 l 694 745 l 424 218 l 544 -107 q 564 -155 554 -132 q 586 -194 574 -177 q 617 -221 599 -211 q 660 -231 635 -231 q 693 -229 677 -231 q 720 -226 709 -228 l 720 -322 q 685 -330 705 -326 q 639 -334 666 -334 q 561 -321 593 -334 q 505 -284 529 -308 q 463 -226 481 -260 q 430 -147 446 -191 l 342 98 l 117 -334 l -14 -334 l 294 228 l 185 530 q 142 614 167 584 q 82 644 118 644 q 39 637 58 644 l 39 735 q 75 743 53 740 q 126 747 96 747 "},"ί":{"x_min":111,"x_max":428,"ha":454,"o":"m 234 743 l 234 220 q 255 121 234 154 q 326 88 277 88 q 353 89 338 88 q 383 93 368 91 q 409 97 397 95 q 428 102 421 100 l 428 8 q 405 0 419 3 q 375 -7 391 -4 q 341 -12 358 -10 q 307 -14 323 -14 q 229 -3 265 -14 q 167 34 193 7 q 125 105 140 60 q 111 219 111 150 l 111 743 l 234 743 m 134 860 q 147 906 140 880 q 160 960 154 932 q 172 1014 167 987 q 181 1064 178 1041 l 316 1064 l 316 1049 q 300 1007 311 1033 q 274 951 289 980 q 241 892 258 921 q 207 842 223 863 l 134 842 l 134 860 "},"Ζ":{"x_min":56,"x_max":693,"ha":749,"o":"m 693 0 l 56 0 l 56 97 l 537 880 l 70 880 l 70 992 l 679 992 l 679 894 l 197 111 l 693 111 l 693 0 "},"Ľ":{"x_min":135,"x_max":649.4375,"ha":682,"o":"m 135 0 l 135 992 l 261 992 l 261 111 l 649 111 l 649 0 l 135 0 m 439 787 q 451 834 445 808 q 463 887 457 860 q 473 942 468 915 q 480 992 478 969 l 603 992 l 603 978 q 588 934 598 961 q 564 879 577 908 q 534 820 550 850 q 504 770 519 791 l 439 770 l 439 787 "},"ť":{"x_min":23,"x_max":505,"ha":471,"o":"m 343 88 q 371 89 355 88 q 400 93 386 91 q 426 97 415 95 q 445 102 438 100 l 445 8 q 422 0 436 3 q 392 -7 409 -4 q 358 -12 376 -10 q 324 -14 341 -14 q 246 -3 282 -14 q 184 34 210 7 q 142 106 157 61 q 128 221 128 152 l 128 656 l 23 656 l 23 709 l 128 759 l 180 915 l 251 915 l 251 745 l 439 745 l 439 656 l 251 656 l 251 221 q 272 121 251 155 q 343 88 294 88 m 341 850 q 353 897 347 871 q 365 950 359 923 q 375 1005 370 978 q 382 1055 380 1032 l 505 1055 l 505 1041 q 490 997 500 1024 q 466 942 479 971 q 436 883 452 913 q 406 833 421 854 l 341 833 l 341 850 "},"o":{"x_min":77,"x_max":725,"ha":802,"o":"m 725 373 q 702 208 725 280 q 637 86 679 135 q 534 11 594 37 q 398 -14 474 -14 q 270 11 329 -14 q 168 86 211 37 q 101 208 125 135 q 77 373 77 280 q 99 537 77 465 q 164 657 122 608 q 267 732 206 707 q 403 758 327 758 q 531 732 472 758 q 633 657 590 707 q 700 537 676 608 q 725 373 725 465 m 204 373 q 250 159 204 231 q 401 88 297 88 q 551 159 506 88 q 597 373 597 231 q 551 585 597 515 q 400 655 504 655 q 250 585 295 655 q 204 373 204 515 "},"Ѕ":{"x_min":70.109375,"x_max":657,"ha":721,"o":"m 657 264 q 633 147 657 199 q 566 59 610 95 q 460 4 523 23 q 320 -14 398 -14 q 179 -2 245 -14 q 70 32 114 9 l 70 153 q 122 131 93 142 q 184 112 151 120 q 251 99 216 104 q 319 93 285 93 q 479 134 427 93 q 530 252 530 176 q 521 316 530 289 q 486 366 511 343 q 420 410 461 389 q 316 456 379 431 q 212 508 256 480 q 139 572 168 537 q 96 652 110 607 q 83 754 83 697 q 104 860 83 813 q 165 939 126 907 q 259 989 205 972 q 380 1006 314 1006 q 525 990 460 1006 q 640 951 589 975 l 595 845 q 495 880 551 865 q 381 894 440 894 q 254 856 299 894 q 209 752 209 818 q 219 686 209 714 q 252 635 229 657 q 315 592 276 612 q 410 549 353 572 q 517 499 471 525 q 594 441 563 473 q 641 366 625 408 q 657 264 657 323 "},"�":{"x_min":57.328125,"x_max":1331.03125,"ha":1389,"o":"m 693 1055 l 1331 419 l 693 -216 l 57 419 l 693 1055 m 737 249 l 737 280 q 748 331 737 310 q 811 392 759 352 q 904 488 878 443 q 931 592 931 532 q 914 676 931 639 q 866 737 897 712 q 791 775 835 762 q 692 789 747 789 q 632 783 662 789 q 572 769 601 778 q 514 747 542 759 q 464 722 487 736 l 519 601 q 608 640 565 624 q 689 656 651 656 q 753 636 732 656 q 774 584 774 616 q 761 528 774 551 q 692 461 747 505 q 620 384 645 425 q 595 289 595 343 l 595 249 l 737 249 m 577 62 q 601 -4 577 20 q 672 -29 625 -29 q 742 -4 718 -29 q 767 62 767 20 q 742 130 767 105 q 672 155 718 155 q 601 130 625 155 q 577 62 577 105 "},"d":{"x_min":77,"x_max":696,"ha":814,"o":"m 577 99 l 572 99 q 537 55 557 76 q 491 19 517 34 q 432 -5 465 3 q 359 -14 400 -14 q 244 10 296 -14 q 154 83 192 34 q 97 203 117 131 q 77 370 77 275 q 97 538 77 466 q 154 659 117 610 q 244 733 192 708 q 359 758 296 758 q 432 749 399 758 q 490 725 464 740 q 537 690 516 710 q 572 649 557 671 l 580 649 q 576 693 578 672 q 573 729 575 711 q 572 759 572 748 l 572 1055 l 696 1055 l 696 0 l 596 0 l 577 99 m 383 88 q 470 104 434 88 q 528 151 506 119 q 560 231 550 183 q 572 342 571 279 l 572 370 q 563 492 572 439 q 532 581 554 545 q 473 636 510 618 q 382 655 437 655 q 247 581 290 655 q 204 369 204 507 q 247 157 204 227 q 383 88 290 88 "},",":{"x_min":43,"x_max":256,"ha":347,"o":"m 245 161 l 256 145 q 233 67 246 108 q 204 -15 220 26 q 170 -99 188 -57 q 136 -179 153 -141 l 43 -179 q 63 -92 53 -137 q 82 -3 72 -48 q 98 82 91 40 q 111 161 106 125 l 245 161 "},"\\"":{"x_min":90,"x_max":468.609375,"ha":558,"o":"m 223 992 l 195 634 l 117 634 l 90 992 l 223 992 m 468 992 l 440 634 l 362 634 l 335 992 l 468 992 "},"ľ":{"x_min":118,"x_max":469,"ha":359,"o":"m 241 0 l 118 0 l 118 1055 l 241 1055 l 241 0 m 305 850 q 317 897 311 871 q 329 950 323 923 q 339 1005 334 978 q 346 1055 344 1032 l 469 1055 l 469 1041 q 454 997 464 1024 q 430 942 443 971 q 400 883 416 913 q 370 833 385 854 l 305 833 l 305 850 "},"ė":{"x_min":77,"x_max":673,"ha":743,"o":"m 412 -14 q 276 11 337 -14 q 170 84 214 36 q 101 203 125 132 q 77 366 77 274 q 99 531 77 458 q 162 654 121 604 q 259 731 202 705 q 384 758 316 758 q 505 733 451 758 q 595 665 558 709 q 653 560 633 621 q 673 423 673 498 l 673 346 l 204 346 q 259 155 207 216 q 413 93 311 93 q 477 97 448 93 q 534 107 507 100 q 587 123 561 113 q 639 145 613 133 l 639 35 q 586 13 612 22 q 533 -2 560 3 q 476 -11 505 -8 q 412 -14 446 -14 m 384 655 q 260 602 306 655 q 207 449 214 549 l 545 449 q 536 533 545 495 q 507 598 526 571 q 457 640 487 625 q 384 655 427 655 m 311 945 q 331 1004 311 986 q 382 1023 352 1023 q 411 1018 397 1023 q 434 1004 424 1014 q 449 980 443 995 q 455 945 455 966 q 434 887 455 906 q 382 868 412 868 q 331 886 352 868 q 311 945 311 905 "},"Í":{"x_min":55.34375,"x_max":441,"ha":471,"o":"m 414 0 l 55 0 l 55 69 l 172 96 l 172 895 l 55 922 l 55 992 l 414 992 l 414 922 l 298 895 l 298 96 l 414 69 l 414 0 m 174 1089 q 204 1134 188 1108 q 236 1187 220 1160 q 267 1242 252 1215 q 292 1293 281 1269 l 441 1293 l 441 1278 q 408 1233 430 1260 q 361 1175 387 1205 q 307 1118 335 1146 q 256 1071 279 1089 l 174 1071 l 174 1089 "},"Ú":{"x_min":125,"x_max":845,"ha":970,"o":"m 845 993 l 845 349 q 822 205 845 272 q 755 90 800 139 q 641 13 709 41 q 481 -14 573 -14 q 327 12 394 -14 q 216 86 261 38 q 148 202 171 134 q 125 352 125 269 l 125 991 l 251 991 l 251 346 q 309 162 251 227 q 487 97 368 97 q 591 115 548 97 q 663 167 635 133 q 704 246 690 200 q 718 347 718 292 l 718 993 l 845 993 m 401 1089 q 431 1134 415 1108 q 463 1187 447 1160 q 494 1242 479 1215 q 519 1293 508 1269 l 668 1293 l 668 1278 q 635 1233 657 1260 q 588 1175 614 1205 q 534 1118 562 1146 q 483 1071 506 1089 l 401 1071 l 401 1089 "}," ":{"x_min":0,"x_max":0,"ha":278},"Ŷ":{"x_min":-0.25,"x_max":731.25,"ha":732,"o":"m 364 490 l 595 992 l 731 992 l 428 386 l 428 0 l 302 0 l 302 379 l 0 992 l 137 992 l 364 490 m 592 1071 l 510 1071 q 438 1126 475 1093 q 367 1196 402 1159 q 294 1126 330 1159 q 224 1071 258 1093 l 142 1071 l 142 1089 q 182 1134 159 1108 q 228 1187 205 1160 q 271 1242 251 1215 q 301 1293 291 1269 l 432 1293 q 462 1242 442 1269 q 505 1187 482 1215 q 551 1134 528 1160 q 592 1089 575 1108 l 592 1071 "},"Ý":{"x_min":-0.25,"x_max":731.25,"ha":732,"o":"m 364 490 l 595 992 l 731 992 l 428 386 l 428 0 l 302 0 l 302 379 l 0 992 l 137 992 l 364 490 m 299 1089 q 329 1134 313 1108 q 361 1187 345 1160 q 392 1242 377 1215 q 417 1293 406 1269 l 566 1293 l 566 1278 q 533 1233 555 1260 q 486 1175 512 1205 q 432 1118 460 1146 q 381 1071 404 1089 l 299 1071 l 299 1089 "},"ŝ":{"x_min":61.15625,"x_max":564,"ha":627,"o":"m 564 203 q 544 108 564 149 q 487 40 524 68 q 398 0 450 13 q 281 -14 346 -14 q 154 -2 207 -14 q 61 33 101 9 l 61 146 q 107 125 82 135 q 161 106 133 114 q 219 93 189 98 q 279 88 249 88 q 353 95 323 88 q 403 116 384 103 q 431 150 423 130 q 440 194 440 170 q 433 232 440 215 q 409 265 427 249 q 360 299 391 282 q 280 337 329 316 q 193 378 232 358 q 127 424 154 399 q 86 482 100 449 q 72 560 72 515 q 90 645 72 608 q 143 707 109 682 q 224 745 177 732 q 330 758 272 758 q 451 743 396 758 q 554 706 505 729 l 512 606 q 422 641 468 626 q 329 655 376 655 q 228 632 261 655 q 195 568 195 610 q 203 526 195 544 q 229 493 210 509 q 279 461 248 477 q 358 426 311 445 q 444 385 406 405 q 509 339 482 365 q 549 281 535 314 q 564 203 564 249 m 557 842 l 475 842 q 403 897 440 864 q 332 967 367 930 q 259 897 295 930 q 189 842 223 864 l 107 842 l 107 860 q 147 905 124 879 q 193 958 170 931 q 236 1013 216 986 q 266 1064 256 1040 l 397 1064 q 427 1013 407 1040 q 470 958 447 986 q 516 905 493 931 q 557 860 540 879 l 557 842 "}," ":{"x_min":0,"x_max":0,"ha":1389},"ą":{"x_min":64,"x_max":646,"ha":737,"o":"m 536 0 l 511 102 l 505 102 q 461 50 483 72 q 412 13 439 28 q 353 -7 386 0 q 278 -14 321 -14 q 193 0 232 -14 q 125 40 153 12 q 80 109 96 67 q 64 208 64 151 q 142 379 64 320 q 379 445 220 439 l 503 450 l 503 496 q 494 572 503 541 q 465 620 484 602 q 419 647 447 639 q 357 655 392 655 q 253 639 301 655 q 160 599 204 623 l 117 692 q 228 739 167 720 q 357 758 290 758 q 477 744 427 758 q 560 700 527 730 q 609 623 593 669 q 626 509 626 576 l 626 0 l 536 0 m 310 88 q 386 101 351 88 q 447 140 422 114 q 488 205 473 166 q 502 298 502 245 l 502 365 l 405 360 q 303 346 345 357 q 237 316 262 336 q 202 270 213 297 q 191 208 191 243 q 224 117 191 146 q 310 88 257 88 m 527 -161 q 545 -206 527 -191 q 587 -220 563 -220 q 620 -218 604 -220 q 646 -214 636 -217 l 646 -291 q 606 -299 628 -296 q 565 -302 585 -302 q 463 -266 497 -302 q 430 -170 430 -231 q 439 -116 430 -142 q 465 -69 449 -91 q 498 -30 480 -48 q 534 0 517 -12 l 621 0 q 527 -161 527 -90 "},"​":{"x_min":0,"x_max":0,"ha":0},"ã":{"x_min":64,"x_max":626,"ha":737,"o":"m 536 0 l 511 102 l 505 102 q 461 50 483 72 q 412 13 439 28 q 353 -7 386 0 q 278 -14 321 -14 q 193 0 232 -14 q 125 40 153 12 q 80 109 96 67 q 64 208 64 151 q 142 379 64 320 q 379 445 220 439 l 503 450 l 503 496 q 494 572 503 541 q 465 620 484 602 q 419 647 447 639 q 357 655 392 655 q 253 639 301 655 q 160 599 204 623 l 117 692 q 228 739 167 720 q 357 758 290 758 q 477 744 427 758 q 560 700 527 730 q 609 623 593 669 q 626 509 626 576 l 626 0 l 536 0 m 310 88 q 386 101 351 88 q 447 140 422 114 q 488 205 473 166 q 502 298 502 245 l 502 365 l 405 360 q 303 346 345 357 q 237 316 262 336 q 202 270 213 297 q 191 208 191 243 q 224 117 191 146 q 310 88 257 88 m 473 843 q 419 854 446 843 q 367 881 393 866 q 317 907 341 895 q 272 919 293 919 q 225 901 241 919 q 199 841 209 883 l 129 841 q 143 915 132 882 q 172 972 154 948 q 215 1008 190 995 q 272 1021 240 1021 q 328 1009 300 1021 q 381 982 355 997 q 430 956 407 968 q 473 944 454 944 q 519 962 504 944 q 545 1022 535 980 l 617 1022 q 602 948 613 981 q 573 892 591 915 q 530 855 555 868 q 473 843 505 843 "},"æ":{"x_min":64,"x_max":1088,"ha":1157,"o":"m 64 208 q 142 379 64 320 q 382 445 221 439 l 508 450 l 508 496 q 498 572 508 541 q 469 620 488 602 q 423 647 450 639 q 360 655 395 655 q 254 639 303 655 q 160 599 205 623 l 117 692 q 229 739 167 720 q 359 758 291 758 q 505 729 448 758 q 591 637 562 700 q 681 726 625 694 q 807 758 737 758 q 924 733 872 758 q 1013 665 976 709 q 1068 560 1049 622 q 1088 424 1088 499 l 1088 347 l 634 347 q 687 157 637 218 q 836 96 737 96 q 897 99 869 96 q 952 109 926 103 q 1004 126 979 116 q 1054 148 1029 135 l 1054 36 q 1002 13 1027 23 q 950 -2 977 4 q 895 -11 923 -8 q 833 -14 866 -14 q 672 24 740 -14 q 562 141 604 63 q 513 75 539 104 q 454 27 487 47 q 383 -3 422 7 q 293 -14 343 -14 q 202 0 244 -14 q 130 40 160 12 q 81 109 99 67 q 64 208 64 151 m 191 207 q 224 117 191 146 q 312 88 258 88 q 389 101 354 88 q 451 139 425 113 q 492 204 477 165 q 507 296 507 243 l 507 363 l 408 358 q 305 345 347 355 q 238 315 263 334 q 202 269 213 296 q 191 207 191 241 m 807 655 q 688 603 731 655 q 637 450 644 550 l 960 450 q 951 533 960 495 q 923 598 942 572 q 876 640 904 625 q 807 655 847 655 "},"ĩ":{"x_min":-63,"x_max":425,"ha":359,"o":"m 241 0 l 118 0 l 118 745 l 241 745 l 241 0 m 281 843 q 227 854 254 843 q 175 881 201 866 q 125 907 149 895 q 80 919 101 919 q 33 901 49 919 q 7 841 17 883 l -63 841 q -48 915 -59 882 q -19 972 -37 948 q 23 1008 -1 995 q 80 1021 48 1021 q 136 1009 108 1021 q 189 982 163 997 q 238 956 215 968 q 281 944 262 944 q 327 962 312 944 q 353 1022 343 980 l 425 1022 q 410 948 421 981 q 381 892 399 915 q 338 855 363 868 q 281 843 313 843 "},"~":{"x_min":69,"x_max":696,"ha":765,"o":"m 359 441 q 315 459 334 452 q 281 471 297 467 q 252 477 266 475 q 223 479 238 479 q 184 472 204 479 q 143 455 164 466 q 104 429 123 444 q 69 397 85 414 l 69 507 q 237 581 136 581 q 273 579 256 581 q 309 573 290 577 q 350 560 328 568 q 405 538 373 552 q 449 520 430 527 q 483 508 468 512 q 513 502 499 504 q 541 500 527 500 q 581 507 560 500 q 621 524 601 513 q 660 550 641 535 q 696 582 679 565 l 696 472 q 527 399 628 399 q 491 400 508 399 q 455 406 474 402 q 414 419 436 411 q 359 441 391 428 "},"ŀ":{"x_min":118,"x_max":457.46875,"ha":416,"o":"m 241 0 l 118 0 l 118 1055 l 241 1055 l 241 0 m 313 462 q 333 521 313 503 q 384 540 354 540 q 413 535 399 540 q 436 521 426 531 q 451 497 445 512 q 457 462 457 483 q 436 404 457 423 q 384 385 414 385 q 333 403 354 385 q 313 462 313 422 "},"Ċ":{"x_min":85,"x_max":798,"ha":838,"o":"m 538 894 q 406 867 465 894 q 305 788 347 839 q 241 662 264 736 q 218 496 218 588 q 238 326 218 400 q 298 200 258 251 q 398 123 338 150 q 538 97 458 97 q 652 108 598 97 q 760 135 707 120 l 760 26 q 707 8 733 15 q 651 -4 680 0 q 590 -11 622 -9 q 517 -14 557 -14 q 324 22 405 -14 q 189 126 243 59 q 110 288 136 193 q 85 497 85 382 q 114 703 85 609 q 201 864 144 796 q 343 968 258 931 q 538 1006 428 1006 q 677 991 611 1006 q 798 947 744 976 l 745 841 q 652 879 702 863 q 538 894 601 894 m 456 1174 q 476 1233 456 1215 q 527 1252 497 1252 q 556 1247 542 1252 q 579 1233 569 1243 q 594 1209 588 1224 q 600 1174 600 1195 q 579 1116 600 1135 q 527 1097 557 1097 q 476 1115 497 1097 q 456 1174 456 1134 "},"¡":{"x_min":100,"x_max":272.265625,"ha":374,"o":"m 144 458 l 226 458 l 261 -253 l 110 -253 l 144 458 m 272 663 q 265 619 272 637 q 247 590 259 601 q 220 574 235 579 q 186 569 204 569 q 152 574 168 569 q 125 590 137 579 q 106 619 113 601 q 100 663 100 637 q 106 706 100 688 q 125 735 113 724 q 152 752 137 747 q 186 758 168 758 q 220 752 204 758 q 247 735 235 747 q 265 706 259 724 q 272 663 272 688 "},"ẅ":{"x_min":13.75,"x_max":1022.25,"ha":1036,"o":"m 683 0 l 570 417 q 563 445 567 430 q 555 477 559 460 q 546 512 551 494 q 538 546 542 529 q 518 628 528 586 l 514 628 q 496 546 505 585 q 480 476 488 512 q 464 415 471 440 l 347 0 l 204 0 l 13 745 l 143 745 l 232 348 q 245 282 239 318 q 258 211 252 246 q 269 146 264 177 q 277 95 274 115 l 281 95 q 290 142 284 113 q 303 205 296 172 q 317 270 310 238 q 331 324 325 302 l 453 745 l 586 745 l 702 324 q 716 270 709 301 q 732 207 724 239 q 745 145 739 175 q 754 95 751 115 l 758 95 q 764 142 760 113 q 775 207 769 172 q 788 279 781 242 q 803 348 795 316 l 896 745 l 1022 745 l 829 0 l 683 0 m 325 945 q 343 998 325 982 q 390 1015 362 1015 q 436 998 416 1015 q 455 945 455 981 q 436 892 455 909 q 390 876 416 876 q 343 892 362 876 q 325 945 325 909 m 579 945 q 598 998 579 982 q 644 1015 617 1015 q 669 1010 657 1015 q 690 998 681 1006 q 704 977 699 989 q 710 945 710 964 q 690 892 710 909 q 644 876 670 876 q 598 892 617 876 q 579 945 579 909 "},"К":{"x_min":135,"x_max":804.25,"ha":804,"o":"m 804 0 l 655 0 l 261 502 l 261 0 l 135 0 l 135 992 l 261 992 l 261 511 l 644 992 l 784 992 l 401 515 l 804 0 "},"Γ":{"x_min":135,"x_max":649,"ha":682,"o":"m 649 992 l 649 880 l 261 880 l 261 0 l 135 0 l 135 992 l 649 992 "},"P":{"x_min":135,"x_max":729,"ha":800,"o":"m 729 701 q 710 582 729 639 q 648 482 691 525 q 536 412 606 438 q 362 386 465 386 l 261 386 l 261 0 l 135 0 l 135 992 l 380 992 q 537 972 471 992 q 645 916 602 953 q 708 825 688 879 q 729 701 729 770 m 261 493 l 347 493 q 456 504 410 493 q 533 539 503 515 q 579 601 564 563 q 595 695 595 640 q 540 837 595 791 q 368 884 485 884 l 261 884 l 261 493 "},"%":{"x_min":69,"x_max":1076,"ha":1146,"o":"m 169 695 q 193 527 169 583 q 271 471 217 471 q 377 695 377 471 q 271 917 377 917 q 193 862 217 917 q 169 695 169 807 m 478 695 q 465 564 478 622 q 428 465 453 505 q 364 404 403 425 q 271 383 325 383 q 184 404 222 383 q 120 465 146 425 q 81 564 94 505 q 69 695 69 622 q 80 826 69 769 q 117 924 92 884 q 180 984 142 963 q 271 1006 218 1006 q 360 984 322 1006 q 425 924 399 963 q 464 826 451 884 q 478 695 478 769 m 768 297 q 792 129 768 185 q 870 74 816 74 q 975 297 975 74 q 870 519 975 519 q 792 464 816 519 q 768 297 768 409 m 1076 298 q 1064 166 1076 224 q 1027 68 1052 108 q 963 7 1002 28 q 870 -14 924 -14 q 782 7 820 -14 q 719 68 744 28 q 680 166 693 108 q 668 298 668 224 q 679 428 668 371 q 716 526 691 486 q 779 586 741 565 q 870 608 817 608 q 959 586 921 608 q 1023 526 998 565 q 1062 428 1049 486 q 1076 298 1076 371 m 902 992 l 351 0 l 244 0 l 795 992 l 902 992 "},"ϖ":{"x_min":11.828125,"x_max":1106.265625,"ha":1150,"o":"m 374 -14 q 185 65 251 -14 q 119 310 119 145 q 125 392 119 349 q 142 477 131 434 q 167 562 152 520 q 199 642 182 604 l 11 642 l 11 691 l 102 745 l 1106 745 l 1106 642 l 941 642 q 970 562 957 604 q 992 477 983 520 q 1006 392 1001 434 q 1012 310 1012 349 q 945 65 1012 145 q 756 -14 879 -14 q 637 15 684 -14 q 569 106 590 45 l 562 106 q 493 15 541 45 q 374 -14 446 -14 m 321 642 q 293 565 306 605 q 269 484 279 525 q 252 401 258 442 q 246 320 246 359 q 256 208 246 253 q 284 137 266 164 q 327 99 302 110 q 382 88 352 88 q 436 102 413 88 q 474 140 459 116 q 496 198 489 165 q 504 270 504 231 l 504 390 l 627 390 l 627 270 q 660 135 627 182 q 748 88 693 88 q 803 99 778 88 q 846 137 828 110 q 874 208 865 164 q 884 320 884 253 q 879 401 884 359 q 865 484 874 442 q 845 565 857 525 q 819 642 833 605 l 321 642 "},"_":{"x_min":-3,"x_max":574,"ha":571,"o":"m 574 -219 l -3 -219 l -3 -125 l 574 -125 l 574 -219 "},"ñ":{"x_min":118,"x_max":707,"ha":818,"o":"m 583 0 l 583 479 q 547 611 583 567 q 436 655 512 655 q 343 637 381 655 q 283 585 306 620 q 251 501 261 551 q 241 385 241 450 l 241 0 l 118 0 l 118 745 l 218 745 l 236 644 l 242 644 q 283 694 259 673 q 334 730 306 715 q 393 751 362 744 q 457 758 424 758 q 644 693 581 758 q 707 486 707 628 l 707 0 l 583 0 m 514 843 q 460 854 487 843 q 408 881 434 866 q 358 907 382 895 q 313 919 334 919 q 266 901 282 919 q 240 841 250 883 l 170 841 q 184 915 173 882 q 213 972 195 948 q 256 1008 231 995 q 313 1021 281 1021 q 369 1009 341 1021 q 422 982 396 997 q 471 956 448 968 q 514 944 495 944 q 560 962 545 944 q 586 1022 576 980 l 658 1022 q 643 948 654 981 q 614 892 632 915 q 571 855 596 868 q 514 843 546 843 "},"Ŕ":{"x_min":135,"x_max":803.25,"ha":819,"o":"m 261 410 l 261 0 l 135 0 l 135 992 l 376 992 q 642 922 556 992 q 729 710 729 852 q 712 607 729 651 q 668 531 695 563 q 605 479 640 500 q 533 444 570 458 l 803 0 l 654 0 l 416 410 l 261 410 m 261 517 l 371 517 q 473 529 431 517 q 543 564 516 541 q 582 623 570 588 q 595 704 595 658 q 581 787 595 753 q 540 842 567 821 q 469 874 512 864 q 368 884 426 884 l 261 884 l 261 517 m 324 1089 q 354 1134 338 1108 q 386 1187 370 1160 q 417 1242 402 1215 q 442 1293 431 1269 l 591 1293 l 591 1278 q 558 1233 580 1260 q 511 1175 537 1205 q 457 1118 485 1146 q 406 1071 429 1089 l 324 1071 l 324 1089 "},"‚":{"x_min":43,"x_max":256,"ha":347,"o":"m 246 161 l 256 145 q 233 67 246 108 q 204 -15 220 26 q 170 -99 188 -57 q 136 -179 153 -141 l 43 -179 q 66 -92 54 -137 q 88 -3 77 -48 q 107 82 98 40 q 122 161 116 125 l 246 161 "},"⅞":{"x_min":77,"x_max":1011,"ha":1051,"o":"m 141 397 l 363 908 l 77 908 l 77 992 l 460 992 l 460 924 l 243 397 l 141 397 m 804 992 l 253 0 l 146 0 l 697 992 l 804 992 m 815 604 q 883 594 851 604 q 938 567 914 585 q 976 519 962 548 q 991 453 991 491 q 983 407 991 428 q 962 369 976 386 q 931 338 949 352 q 893 313 914 325 q 938 285 917 300 q 975 251 959 270 q 1001 209 991 233 q 1011 157 1011 186 q 996 87 1011 119 q 956 33 982 56 q 894 0 930 11 q 816 -13 858 -13 q 670 31 721 -13 q 620 153 620 75 q 628 205 620 182 q 651 247 636 228 q 684 281 665 266 q 724 307 703 295 q 690 335 705 321 q 662 368 674 350 q 644 407 650 386 q 638 453 638 428 q 652 519 638 491 q 691 566 667 547 q 748 594 716 585 q 815 604 780 604 m 716 155 q 741 93 716 116 q 814 70 766 70 q 888 93 863 70 q 914 155 914 116 q 906 190 914 174 q 885 219 899 206 q 854 242 872 232 q 813 262 835 253 l 802 266 q 738 219 760 244 q 716 155 716 193 m 813 520 q 755 502 776 520 q 734 449 734 484 q 741 417 734 431 q 757 392 747 404 q 783 371 768 380 q 815 353 798 361 q 846 370 831 360 q 871 390 860 379 q 887 416 881 402 q 894 449 894 430 q 872 502 894 484 q 813 520 850 520 "},"Æ":{"x_min":-1.25,"x_max":1101,"ha":1184,"o":"m 1101 0 l 585 0 l 585 307 l 262 307 l 124 0 l -1 0 l 443 992 l 1101 992 l 1101 880 l 711 880 l 711 574 l 1075 574 l 1075 462 l 711 462 l 711 111 l 1101 111 l 1101 0 m 311 419 l 585 419 l 585 880 l 512 880 l 311 419 "},"₣":{"x_min":65,"x_max":694,"ha":765,"o":"m 310 271 l 503 271 l 503 163 l 310 163 l 310 0 l 184 0 l 184 163 l 65 163 l 65 271 l 184 271 l 184 992 l 694 992 l 694 880 l 310 880 l 310 531 l 668 531 l 668 419 l 310 419 l 310 271 "},"Ū":{"x_min":125,"x_max":845,"ha":970,"o":"m 845 993 l 845 349 q 822 205 845 272 q 755 90 800 139 q 641 13 709 41 q 481 -14 573 -14 q 327 12 394 -14 q 216 86 261 38 q 148 202 171 134 q 125 352 125 269 l 125 991 l 251 991 l 251 346 q 309 162 251 227 q 487 97 368 97 q 591 115 548 97 q 663 167 635 133 q 704 246 690 200 q 718 347 718 292 l 718 993 l 845 993 m 290 1172 l 680 1172 l 680 1071 l 290 1071 l 290 1172 "},"ы":{"x_min":118,"x_max":922,"ha":1040,"o":"m 241 439 l 401 439 q 613 386 544 439 q 683 227 683 333 q 667 133 683 175 q 616 61 651 91 q 528 15 582 31 q 398 0 475 0 l 118 0 l 118 745 l 241 745 l 241 439 m 922 0 l 798 0 l 798 745 l 922 745 l 922 0 m 241 336 l 241 102 l 388 102 q 457 108 426 102 q 511 127 488 113 q 546 164 534 141 q 559 219 559 186 q 548 275 559 252 q 515 311 537 297 q 461 330 493 325 q 386 336 429 336 l 241 336 "},"ѓ":{"x_min":118,"x_max":527,"ha":555,"o":"m 527 642 l 241 642 l 241 0 l 118 0 l 118 745 l 527 745 l 527 642 m 236 860 q 266 905 250 879 q 298 958 282 931 q 329 1013 314 986 q 354 1064 343 1040 l 503 1064 l 503 1049 q 470 1004 492 1031 q 423 946 449 976 q 369 889 397 917 q 318 842 341 860 l 236 842 l 236 860 "},"Œ":{"x_min":85,"x_max":1153,"ha":1236,"o":"m 1153 0 l 639 0 q 578 -10 609 -6 q 515 -14 548 -14 q 324 22 405 -14 q 189 126 243 59 q 110 288 136 193 q 85 498 85 382 q 110 707 85 613 q 190 867 136 801 q 325 970 243 934 q 516 1007 406 1007 q 640 992 583 1007 l 1153 992 l 1153 880 l 764 880 l 764 574 l 1127 574 l 1127 462 l 764 462 l 764 111 l 1153 111 l 1153 0 m 517 895 q 383 868 439 895 q 290 789 327 840 q 236 664 253 738 q 218 497 218 590 q 236 330 218 404 q 290 204 253 255 q 382 124 326 152 q 515 97 438 97 q 581 103 551 97 q 638 119 612 109 l 638 873 q 582 890 612 884 q 517 895 551 895 "},"΅":{"x_min":187,"x_max":614,"ha":802,"o":"m 346 959 q 361 1005 353 980 q 378 1057 370 1030 q 393 1112 386 1084 q 406 1164 401 1139 l 547 1164 l 547 1150 q 518 1102 534 1128 q 483 1049 502 1076 q 443 994 464 1022 q 401 942 423 967 l 346 942 l 346 959 m 187 945 q 201 998 187 982 q 236 1015 215 1015 q 254 1010 245 1015 q 270 998 263 1006 q 280 977 276 989 q 284 945 284 964 q 269 892 284 909 q 236 876 255 876 q 201 892 215 876 q 187 945 187 909 m 516 945 q 530 998 516 982 q 565 1015 544 1015 q 583 1010 574 1015 q 599 998 592 1006 q 609 977 605 989 q 614 945 614 964 q 599 892 614 909 q 565 876 584 876 q 530 892 544 876 q 516 945 516 909 "},"Ą":{"x_min":-0.25,"x_max":844.25,"ha":844,"o":"m 715 0 l 606 307 l 237 307 l 127 0 l 0 0 l 364 996 l 479 996 l 844 0 l 715 0 m 566 419 l 466 706 q 456 736 462 719 q 444 774 450 754 q 432 817 438 795 q 421 860 426 839 q 410 816 416 839 q 397 773 404 794 q 386 735 391 752 q 376 706 380 718 l 277 419 l 566 419 m 706 -161 q 724 -206 706 -191 q 766 -220 742 -220 q 799 -218 783 -220 q 825 -214 815 -217 l 825 -291 q 785 -299 807 -296 q 744 -302 764 -302 q 642 -266 676 -302 q 609 -170 609 -231 q 618 -116 609 -142 q 644 -69 628 -91 q 677 -30 659 -48 q 713 0 696 -12 l 800 0 q 706 -161 706 -90 "},"Њ":{"x_min":135,"x_max":1224,"ha":1295,"o":"m 1224 290 q 1203 170 1224 224 q 1140 79 1183 117 q 1031 20 1097 41 q 874 0 965 0 l 656 0 l 656 462 l 261 462 l 261 0 l 135 0 l 135 992 l 261 992 l 261 574 l 656 574 l 656 992 l 782 992 l 782 574 l 856 574 q 1030 551 959 574 q 1143 490 1100 529 q 1205 400 1186 452 q 1224 290 1224 349 m 782 107 l 862 107 q 1035 152 979 107 q 1090 290 1090 197 q 1074 370 1090 337 q 1028 424 1059 403 q 951 453 997 444 q 841 462 904 462 l 782 462 l 782 107 "},"›":{"x_min":56,"x_max":343.5,"ha":400,"o":"m 343 356 l 134 78 l 56 130 l 216 367 l 56 603 l 134 656 l 343 375 l 343 356 "},"ћ":{"x_min":12.1875,"x_max":707,"ha":818,"o":"m 583 0 l 583 451 q 547 583 583 539 q 436 627 512 627 q 343 609 381 627 q 283 557 306 592 q 251 473 261 523 q 241 357 241 422 l 241 0 l 118 0 l 118 843 l 12 843 l 12 932 l 118 932 l 118 1055 l 241 1055 l 241 932 l 498 932 l 498 843 l 241 843 l 241 715 l 236 616 l 242 616 q 283 666 259 645 q 334 702 306 687 q 393 723 362 716 q 457 730 424 730 q 644 665 581 730 q 707 458 707 600 l 707 0 l 583 0 "},"<":{"x_min":69,"x_max":696,"ha":765,"o":"m 696 161 l 69 448 l 69 517 l 696 844 l 696 735 l 197 488 l 696 270 l 696 161 "},"¬":{"x_min":69,"x_max":696,"ha":765,"o":"m 696 541 l 696 178 l 594 178 l 594 439 l 69 439 l 69 541 l 696 541 "},"t":{"x_min":23,"x_max":445,"ha":471,"o":"m 343 88 q 371 89 355 88 q 400 93 386 91 q 426 97 415 95 q 445 102 438 100 l 445 8 q 422 0 436 3 q 392 -7 409 -4 q 358 -12 376 -10 q 324 -14 341 -14 q 246 -3 282 -14 q 184 34 210 7 q 142 106 157 61 q 128 221 128 152 l 128 656 l 23 656 l 23 709 l 128 759 l 180 915 l 251 915 l 251 745 l 439 745 l 439 656 l 251 656 l 251 221 q 272 121 251 155 q 343 88 294 88 "},"Ц":{"x_min":135,"x_max":945,"ha":973,"o":"m 826 111 l 945 111 l 945 -261 l 818 -261 l 818 0 l 135 0 l 135 992 l 261 992 l 261 111 l 699 111 l 699 992 l 826 992 l 826 111 "},"ù":{"x_min":111,"x_max":700,"ha":818,"o":"m 600 0 l 582 99 l 575 99 q 534 48 558 70 q 483 13 511 27 q 424 -7 455 0 q 360 -14 393 -14 q 252 1 299 -14 q 174 50 205 17 q 126 135 142 83 q 111 258 111 186 l 111 745 l 234 745 l 234 264 q 270 132 234 176 q 381 88 306 88 q 474 106 436 88 q 534 158 511 123 q 566 242 556 192 q 576 357 576 292 l 576 745 l 700 745 l 700 0 l 600 0 m 471 842 l 389 842 q 337 889 365 860 q 283 946 309 917 q 236 1004 257 976 q 204 1049 214 1031 l 204 1064 l 352 1064 q 378 1013 363 1040 q 408 958 392 986 q 440 905 424 931 q 471 860 456 879 l 471 842 "},"ï":{"x_min":-13,"x_max":372,"ha":359,"o":"m 241 0 l 118 0 l 118 745 l 241 745 l 241 0 m -13 945 q 5 998 -13 982 q 52 1015 24 1015 q 98 998 78 1015 q 117 945 117 981 q 98 892 117 909 q 52 876 78 876 q 5 892 24 876 q -13 945 -13 909 m 241 945 q 260 998 241 982 q 306 1015 279 1015 q 331 1010 319 1015 q 352 998 343 1006 q 366 977 361 989 q 372 945 372 964 q 352 892 372 909 q 306 876 332 876 q 260 892 279 876 q 241 945 241 909 "},"Ф":{"x_min":71,"x_max":994,"ha":1065,"o":"m 468 1006 l 594 1006 l 594 884 l 643 884 q 801 852 735 884 q 910 768 867 820 q 973 649 953 716 q 994 514 994 583 q 985 429 994 472 q 959 343 977 385 q 913 264 942 301 q 844 199 885 227 q 749 155 803 171 q 626 139 694 139 l 594 139 l 594 -14 l 468 -14 l 468 139 l 436 139 q 314 155 368 139 q 220 199 260 171 q 151 264 179 227 q 105 343 122 301 q 79 429 87 385 q 71 514 71 472 q 91 649 71 583 q 154 768 112 716 q 262 852 197 820 q 418 884 328 884 l 468 884 l 468 1006 m 594 246 l 611 246 q 721 266 674 246 q 798 322 768 286 q 844 408 829 358 q 860 517 860 458 q 846 617 860 570 q 804 700 832 665 q 734 755 776 735 q 632 776 691 776 l 594 776 l 594 246 m 468 776 l 429 776 q 329 755 371 776 q 259 700 287 735 q 217 617 231 665 q 204 517 204 570 q 219 408 204 458 q 265 322 235 358 q 342 266 295 286 q 450 246 388 246 l 468 246 l 468 776 "},"Ò":{"x_min":85,"x_max":945,"ha":1031,"o":"m 945 496 q 917 287 945 382 q 835 126 890 193 q 701 22 781 59 q 515 -14 620 -14 q 324 22 405 -14 q 189 126 243 59 q 110 288 136 193 q 85 498 85 382 q 110 707 85 613 q 190 867 136 801 q 325 970 243 934 q 517 1007 406 1007 q 701 970 622 1007 q 835 867 781 934 q 917 706 890 800 q 945 496 945 612 m 218 497 q 236 330 218 404 q 290 204 253 255 q 382 124 326 152 q 515 97 438 97 q 648 124 593 97 q 741 204 704 152 q 794 330 777 255 q 811 497 811 404 q 794 664 811 590 q 741 789 777 738 q 649 868 705 840 q 517 895 594 895 q 383 868 439 895 q 290 789 327 840 q 236 664 253 738 q 218 497 218 590 m 591 1071 l 509 1071 q 457 1118 485 1089 q 403 1175 429 1146 q 356 1233 377 1205 q 324 1278 334 1260 l 324 1293 l 472 1293 q 498 1242 483 1269 q 528 1187 512 1215 q 560 1134 544 1160 q 591 1089 576 1108 l 591 1071 "},"I":{"x_min":55.34375,"x_max":414.8125,"ha":471,"o":"m 414 0 l 55 0 l 55 69 l 172 96 l 172 895 l 55 922 l 55 992 l 414 992 l 414 922 l 298 895 l 298 96 l 414 69 l 414 0 "},"˝":{"x_min":151,"x_max":649,"ha":802,"o":"m 151 860 q 181 905 165 879 q 213 958 197 931 q 243 1013 229 986 q 269 1064 258 1040 l 404 1064 l 404 1049 q 371 1004 393 1031 q 324 946 350 976 q 270 889 298 917 q 219 842 243 860 l 151 842 l 151 860 m 397 860 q 427 905 411 879 q 459 958 443 931 q 489 1013 475 986 q 514 1064 504 1040 l 649 1064 l 649 1049 q 616 1004 638 1031 q 569 946 595 976 q 515 889 543 917 q 464 842 488 860 l 397 842 l 397 860 "},"·":{"x_min":100,"x_max":272,"ha":372,"o":"m 100 490 q 106 534 100 516 q 125 563 113 552 q 152 579 136 574 q 186 585 167 585 q 219 579 203 585 q 246 563 235 574 q 265 534 258 552 q 272 490 272 516 q 265 447 272 465 q 246 418 258 430 q 219 401 235 406 q 186 396 203 396 q 152 401 167 396 q 125 418 136 406 q 106 447 113 430 q 100 490 100 465 "},"¿":{"x_min":46,"x_max":567,"ha":591,"o":"m 401 458 l 401 432 q 395 362 401 393 q 376 304 390 331 q 341 251 363 276 q 285 196 319 225 q 229 146 252 169 q 191 100 206 123 q 169 50 176 76 q 162 -12 162 23 q 172 -72 162 -45 q 202 -118 183 -99 q 250 -148 221 -138 q 317 -159 279 -159 q 425 -141 374 -159 q 523 -100 476 -124 l 567 -199 q 447 -247 511 -227 q 318 -267 383 -267 q 204 -249 254 -267 q 118 -199 153 -232 q 64 -120 83 -167 q 46 -14 46 -73 q 54 67 46 32 q 79 133 62 102 q 120 192 95 163 q 179 252 145 220 q 231 305 211 283 q 263 349 252 328 q 280 393 275 370 q 284 445 284 415 l 284 458 l 401 458 m 433 663 q 426 619 433 637 q 408 590 420 601 q 380 574 396 579 q 346 569 365 569 q 313 574 329 569 q 286 590 298 579 q 267 619 274 601 q 260 663 260 637 q 267 706 260 688 q 286 735 274 724 q 313 752 298 747 q 346 758 329 758 q 380 752 365 758 q 408 735 396 747 q 426 706 420 724 q 433 663 433 688 "},"ſ":{"x_min":118,"x_max":476,"ha":399,"o":"m 118 0 l 118 814 q 133 934 118 886 q 177 1010 148 982 q 248 1051 206 1039 q 343 1063 290 1063 q 416 1055 383 1063 q 476 1037 450 1047 l 444 941 q 398 954 423 949 q 347 960 374 960 q 300 954 320 960 q 267 931 280 947 q 247 887 254 915 q 241 814 241 858 l 241 0 l 118 0 "},"Ђ":{"x_min":13,"x_max":873,"ha":977,"o":"m 628 -14 q 572 -9 596 -14 q 532 2 548 -5 l 532 111 q 574 101 551 105 q 624 97 597 97 q 667 103 646 97 q 707 127 689 110 q 735 174 724 144 q 746 250 746 203 l 746 340 q 711 458 746 419 q 591 497 675 497 l 370 497 l 370 0 l 244 0 l 244 880 l 13 880 l 13 992 l 654 992 l 654 880 l 370 880 l 370 609 l 605 609 q 718 592 668 609 q 802 543 768 575 q 854 464 836 511 q 873 356 873 417 l 873 263 q 855 140 873 192 q 804 53 837 87 q 727 2 772 19 q 628 -14 682 -14 "},"ű":{"x_min":111,"x_max":704,"ha":818,"o":"m 600 0 l 582 99 l 575 99 q 534 48 558 70 q 483 13 511 27 q 424 -7 455 0 q 360 -14 393 -14 q 252 1 299 -14 q 174 50 205 17 q 126 135 142 83 q 111 258 111 186 l 111 745 l 234 745 l 234 264 q 270 132 234 176 q 381 88 306 88 q 474 106 436 88 q 534 158 511 123 q 566 242 556 192 q 576 357 576 292 l 576 745 l 700 745 l 700 0 l 600 0 m 206 860 q 236 905 220 879 q 268 958 252 931 q 298 1013 284 986 q 324 1064 313 1040 l 459 1064 l 459 1049 q 426 1004 448 1031 q 379 946 405 976 q 325 889 353 917 q 274 842 298 860 l 206 842 l 206 860 m 452 860 q 482 905 466 879 q 514 958 498 931 q 544 1013 530 986 q 569 1064 559 1040 l 704 1064 l 704 1049 q 671 1004 693 1031 q 624 946 650 976 q 570 889 598 917 q 519 842 543 860 l 452 842 l 452 860 "},"Ǽ":{"x_min":-1.25,"x_max":1101,"ha":1184,"o":"m 1101 0 l 585 0 l 585 307 l 262 307 l 124 0 l -1 0 l 443 992 l 1101 992 l 1101 880 l 711 880 l 711 574 l 1075 574 l 1075 462 l 711 462 l 711 111 l 1101 111 l 1101 0 m 311 419 l 585 419 l 585 880 l 512 880 l 311 419 m 639 1089 q 669 1134 653 1108 q 701 1187 685 1160 q 732 1242 717 1215 q 757 1293 746 1269 l 906 1293 l 906 1278 q 873 1233 895 1260 q 826 1175 852 1205 q 772 1118 800 1146 q 721 1071 744 1089 l 639 1071 l 639 1089 "},"φ":{"x_min":77,"x_max":893,"ha":970,"o":"m 417 -334 l 417 -12 q 280 14 343 -8 q 173 83 218 36 q 102 201 127 129 q 77 376 77 274 q 87 484 77 432 q 117 582 98 535 q 163 671 136 629 q 220 751 189 713 l 315 686 q 269 616 290 651 q 232 542 247 581 q 208 462 217 504 q 200 371 200 419 q 217 244 200 296 q 264 160 235 193 q 334 111 294 127 q 417 90 373 95 l 417 500 q 472 692 417 627 q 626 758 528 758 q 737 730 687 758 q 821 654 786 703 q 874 538 855 606 q 893 387 893 469 q 864 212 893 286 q 786 90 835 139 q 674 16 738 41 q 540 -12 610 -8 l 540 -334 l 417 -334 m 765 386 q 755 502 765 452 q 727 586 745 552 q 684 638 709 621 q 631 655 660 655 q 596 647 613 655 q 567 622 580 640 q 547 574 555 604 q 540 501 540 545 l 540 90 q 630 115 588 95 q 701 171 671 135 q 748 261 731 207 q 765 386 765 314 "},";":{"x_min":43,"x_max":272,"ha":372,"o":"m 245 161 l 256 145 q 233 67 246 108 q 204 -15 220 26 q 170 -99 188 -57 q 136 -179 153 -141 l 43 -179 q 63 -92 53 -137 q 82 -3 72 -48 q 98 82 91 40 q 111 161 106 125 l 245 161 m 100 669 q 106 714 100 696 q 125 743 113 732 q 152 759 136 754 q 186 764 167 764 q 219 759 203 764 q 246 743 235 754 q 265 714 258 732 q 272 669 272 696 q 265 626 272 644 q 246 597 258 609 q 219 580 235 585 q 186 575 203 575 q 152 580 167 575 q 125 597 136 585 q 106 626 113 609 q 100 669 100 644 "},"Ș":{"x_min":70.109375,"x_max":657,"ha":721,"o":"m 657 264 q 633 147 657 199 q 566 59 610 95 q 460 4 523 23 q 320 -14 398 -14 q 179 -2 245 -14 q 70 32 114 9 l 70 153 q 122 131 93 142 q 184 112 151 120 q 251 99 216 104 q 319 93 285 93 q 479 134 427 93 q 530 252 530 176 q 521 316 530 289 q 486 366 511 343 q 420 410 461 389 q 316 456 379 431 q 212 508 256 480 q 139 572 168 537 q 96 652 110 607 q 83 754 83 697 q 104 860 83 813 q 165 939 126 907 q 259 989 205 972 q 380 1006 314 1006 q 525 990 460 1006 q 640 951 589 975 l 595 845 q 495 880 551 865 q 381 894 440 894 q 254 856 299 894 q 209 752 209 818 q 219 686 209 714 q 252 635 229 657 q 315 592 276 612 q 410 549 353 572 q 517 499 471 525 q 594 441 563 473 q 641 366 625 408 q 657 264 657 323 m 249 -288 q 265 -246 256 -271 q 282 -191 274 -220 q 296 -135 290 -163 q 305 -85 303 -107 l 428 -85 l 428 -98 q 413 -141 423 -115 q 387 -197 402 -167 q 353 -255 372 -226 q 315 -307 335 -284 l 249 -307 l 249 -288 "},"Ġ":{"x_min":85,"x_max":858,"ha":958,"o":"m 530 524 l 858 524 l 858 36 q 782 15 820 24 q 704 0 744 5 q 620 -10 664 -7 q 526 -14 576 -14 q 337 21 419 -14 q 199 123 255 57 q 114 284 143 189 q 85 497 85 378 q 117 708 85 613 q 211 868 149 802 q 363 970 272 934 q 569 1006 453 1006 q 713 991 644 1006 q 842 947 782 976 l 793 837 q 741 859 769 849 q 683 877 713 869 q 621 890 653 885 q 559 894 590 894 q 412 867 476 894 q 306 788 349 839 q 240 662 263 736 q 218 496 218 588 q 237 334 218 407 q 296 208 255 261 q 401 126 336 155 q 556 97 465 97 q 610 98 585 97 q 656 103 635 100 q 695 109 677 106 q 731 116 714 113 l 731 412 l 530 412 l 530 524 m 464 1174 q 484 1233 464 1215 q 535 1252 505 1252 q 564 1247 550 1252 q 587 1233 577 1243 q 602 1209 596 1224 q 608 1174 608 1195 q 587 1116 608 1135 q 535 1097 565 1097 q 484 1115 505 1097 q 464 1174 464 1134 "},"n":{"x_min":118,"x_max":707,"ha":818,"o":"m 583 0 l 583 479 q 547 611 583 567 q 436 655 512 655 q 343 637 381 655 q 283 585 306 620 q 251 501 261 551 q 241 385 241 450 l 241 0 l 118 0 l 118 745 l 218 745 l 236 644 l 242 644 q 283 694 259 673 q 334 730 306 715 q 393 751 362 744 q 457 758 424 758 q 644 693 581 758 q 707 486 707 628 l 707 0 l 583 0 "},"ά":{"x_min":77,"x_max":792.984375,"ha":814,"o":"m 383 88 q 470 104 434 88 q 528 153 506 120 q 560 238 550 186 q 572 360 571 289 l 572 370 q 563 492 572 439 q 532 581 554 545 q 473 636 510 618 q 382 655 437 655 q 247 581 290 655 q 204 369 204 507 q 247 157 204 227 q 383 88 290 88 m 359 -14 q 244 10 296 -14 q 154 83 192 34 q 97 203 117 131 q 77 370 77 275 q 97 538 77 466 q 156 659 118 610 q 249 733 194 708 q 372 758 304 758 q 497 729 448 758 q 579 644 546 701 l 587 644 q 605 695 594 667 q 633 745 616 723 l 730 745 q 716 687 723 722 q 705 610 710 651 q 698 527 701 569 q 696 446 696 484 l 696 162 q 712 104 696 121 q 752 87 729 87 q 775 89 762 87 q 792 93 787 91 l 792 3 q 760 -8 782 -2 q 715 -14 738 -14 q 668 -8 689 -14 q 630 10 647 -3 q 601 45 613 23 q 580 99 588 66 l 572 99 q 537 55 557 76 q 491 19 517 34 q 432 -5 465 3 q 359 -14 400 -14 m 359 860 q 372 906 365 880 q 385 960 379 932 q 397 1014 392 987 q 406 1064 403 1041 l 541 1064 l 541 1049 q 525 1007 536 1033 q 499 951 514 980 q 466 892 483 921 q 432 842 448 863 l 359 842 l 359 860 "},"ϊ":{"x_min":14,"x_max":428,"ha":454,"o":"m 234 743 l 234 220 q 255 121 234 154 q 326 88 277 88 q 353 89 338 88 q 383 93 368 91 q 409 97 397 95 q 428 102 421 100 l 428 8 q 405 0 419 3 q 375 -7 391 -4 q 341 -12 358 -10 q 307 -14 323 -14 q 229 -3 265 -14 q 167 34 193 7 q 125 105 140 60 q 111 219 111 150 l 111 743 l 234 743 m 14 945 q 32 998 14 982 q 79 1015 51 1015 q 125 998 105 1015 q 144 945 144 981 q 125 892 144 909 q 79 876 105 876 q 32 892 51 876 q 14 945 14 909 m 268 945 q 287 998 268 982 q 333 1015 306 1015 q 358 1010 346 1015 q 379 998 370 1006 q 393 977 388 989 q 399 945 399 964 q 379 892 399 909 q 333 876 359 876 q 287 892 306 876 q 268 945 268 909 "},"\uFEFF":{"x_min":0,"x_max":0,"ha":0},"ģ":{"x_min":25,"x_max":692.484375,"ha":720,"o":"m 692 745 l 692 668 l 559 649 q 591 588 578 625 q 604 504 604 551 q 588 409 604 453 q 539 333 572 365 q 459 283 507 301 q 348 266 412 266 q 319 266 333 266 q 294 268 304 266 q 271 253 282 261 q 251 233 260 244 q 236 208 242 222 q 230 178 230 194 q 238 148 230 159 q 260 130 246 136 q 293 122 274 124 q 333 120 312 120 l 453 120 q 560 104 516 120 q 631 61 603 88 q 670 -2 658 34 q 683 -80 683 -38 q 660 -186 683 -139 q 593 -266 638 -233 q 478 -316 547 -298 q 314 -334 408 -334 q 187 -319 241 -334 q 96 -278 132 -305 q 42 -213 60 -251 q 25 -128 25 -175 q 38 -57 25 -87 q 73 -4 51 -26 q 125 32 96 17 q 187 53 155 46 q 140 94 158 66 q 122 159 122 122 q 143 231 122 201 q 212 291 165 262 q 158 324 182 303 q 118 373 134 346 q 92 433 101 401 q 83 500 83 466 q 99 608 83 561 q 150 689 116 656 q 233 740 183 722 q 348 758 282 758 q 400 754 373 758 q 445 745 427 750 l 692 745 m 141 -126 q 150 -173 141 -151 q 179 -211 159 -195 q 232 -235 199 -226 q 314 -245 265 -245 q 503 -205 440 -245 q 566 -92 566 -166 q 558 -41 566 -61 q 531 -10 550 -21 q 482 4 512 0 q 407 8 451 8 l 287 8 q 238 3 263 8 q 190 -17 212 -2 q 155 -58 169 -32 q 141 -126 141 -84 m 206 504 q 242 388 206 426 q 344 350 278 350 q 446 388 411 350 q 480 506 480 426 q 445 629 480 590 q 343 669 410 669 q 241 628 277 669 q 206 504 206 587 m 467 1045 q 450 1003 458 1028 q 433 948 441 977 q 418 892 424 920 q 410 842 412 864 l 288 842 l 288 856 q 302 898 291 872 q 328 954 312 925 q 362 1012 343 983 q 400 1064 381 1041 l 467 1064 l 467 1045 "},"∂":{"x_min":66,"x_max":734,"ha":807,"o":"m 734 633 q 723 485 734 561 q 690 336 712 408 q 633 201 668 264 q 552 89 599 137 q 446 13 506 41 q 312 -14 386 -14 q 192 8 240 -14 q 117 68 145 30 q 77 153 89 105 q 66 254 66 202 q 73 342 66 294 q 98 438 81 390 q 142 530 115 486 q 209 609 170 575 q 299 664 247 643 q 417 685 351 685 q 529 658 479 685 q 609 584 578 631 q 610 611 610 597 q 610 633 610 626 q 563 831 610 762 q 424 899 516 899 q 380 895 403 899 q 334 883 357 891 q 289 865 311 876 q 249 841 268 854 l 249 959 q 288 975 266 968 q 336 989 311 983 q 389 998 362 995 q 441 1002 415 1002 q 582 971 525 1002 q 671 890 638 941 q 719 773 705 839 q 734 633 734 706 m 319 88 q 387 103 355 88 q 446 145 418 118 q 496 207 473 171 q 537 285 519 243 q 567 373 555 327 q 586 465 580 419 q 566 516 580 492 q 532 557 552 540 q 487 585 512 575 q 434 596 462 596 q 358 579 392 596 q 296 535 323 563 q 250 471 270 507 q 218 397 230 435 q 199 321 205 359 q 193 251 193 283 q 200 186 193 216 q 222 135 207 157 q 261 100 238 113 q 319 88 285 88 "},"κ":{"x_min":118,"x_max":684.25,"ha":689,"o":"m 545 0 l 315 331 l 241 276 l 241 0 l 118 0 l 118 745 l 241 745 l 241 554 q 239 479 241 513 q 236 418 238 444 q 230 364 233 388 l 319 483 l 526 745 l 665 745 l 394 412 l 684 0 l 545 0 "},"‡":{"x_min":84,"x_max":606.171875,"ha":689,"o":"m 380 336 l 606 357 l 606 235 l 380 256 l 418 0 l 271 0 l 308 256 l 84 235 l 84 357 l 308 336 l 277 532 l 308 718 l 84 697 l 84 820 l 308 799 l 271 1055 l 418 1055 l 380 799 l 606 820 l 606 697 l 380 718 l 412 532 l 380 336 "},"ň":{"x_min":118,"x_max":707,"ha":818,"o":"m 583 0 l 583 479 q 547 611 583 567 q 436 655 512 655 q 343 637 381 655 q 283 585 306 620 q 251 501 261 551 q 241 385 241 450 l 241 0 l 118 0 l 118 745 l 218 745 l 236 644 l 242 644 q 283 694 259 673 q 334 730 306 715 q 393 751 362 744 q 457 758 424 758 q 644 693 581 758 q 707 486 707 628 l 707 0 l 583 0 m 634 1045 q 593 1000 617 1026 q 547 947 570 974 q 504 892 524 919 q 474 842 484 865 l 343 842 q 313 892 333 865 q 270 947 293 919 q 224 1000 247 974 q 184 1045 201 1026 l 184 1064 l 266 1064 q 336 1008 300 1041 q 409 937 372 975 q 480 1008 444 975 q 552 1064 517 1041 l 634 1064 l 634 1045 "},"√":{"x_min":25,"x_max":828.25,"ha":762,"o":"m 424 -10 l 334 -10 l 147 522 l 25 522 l 25 615 l 226 615 l 381 165 l 729 1150 l 828 1150 l 424 -10 "},"ę":{"x_min":77,"x_max":673,"ha":743,"o":"m 412 -14 q 276 11 337 -14 q 170 84 214 36 q 101 203 125 132 q 77 366 77 274 q 99 531 77 458 q 162 654 121 604 q 259 731 202 705 q 384 758 316 758 q 505 733 451 758 q 595 665 558 709 q 653 560 633 621 q 673 423 673 498 l 673 346 l 204 346 q 259 155 207 216 q 413 93 311 93 q 477 97 448 93 q 534 107 507 100 q 587 123 561 113 q 639 145 613 133 l 639 35 q 586 13 612 22 q 533 -2 560 3 q 476 -11 505 -8 q 412 -14 446 -14 m 384 655 q 260 602 306 655 q 207 449 214 549 l 545 449 q 536 533 545 495 q 507 598 526 571 q 457 640 487 625 q 384 655 427 655 m 506 -140 q 524 -185 506 -170 q 566 -199 542 -199 q 599 -197 583 -199 q 625 -193 615 -196 l 625 -270 q 585 -278 607 -275 q 544 -281 564 -281 q 442 -245 476 -281 q 409 -149 409 -210 q 418 -95 409 -121 q 444 -48 428 -70 q 477 -9 459 -27 q 513 21 496 8 l 600 21 q 506 -140 506 -69 "},"į":{"x_min":47,"x_max":263,"ha":359,"o":"m 241 0 l 118 0 l 118 745 l 241 745 l 241 0 m 108 945 q 129 1004 108 986 q 180 1023 149 1023 q 208 1018 195 1023 q 231 1004 221 1014 q 247 980 241 995 q 252 945 252 966 q 231 887 252 906 q 180 868 210 868 q 129 886 149 868 q 108 945 108 905 m 144 -161 q 162 -206 144 -191 q 204 -220 180 -220 q 237 -218 221 -220 q 263 -214 253 -217 l 263 -291 q 223 -299 245 -296 q 182 -302 202 -302 q 80 -266 114 -302 q 47 -170 47 -231 q 56 -116 47 -142 q 82 -69 66 -91 q 115 -30 97 -48 q 151 0 134 -12 l 238 0 q 144 -161 144 -90 "},"Τ":{"x_min":14,"x_max":706,"ha":721,"o":"m 423 0 l 297 0 l 297 880 l 14 880 l 14 992 l 706 992 l 706 880 l 423 880 l 423 0 "},"≈":{"x_min":69,"x_max":696,"ha":765,"o":"m 359 300 q 315 318 334 311 q 281 330 297 326 q 252 336 266 334 q 223 338 238 338 q 184 331 204 338 q 143 314 164 325 q 104 288 123 303 q 69 256 85 273 l 69 366 q 237 440 136 440 q 273 438 256 440 q 309 432 290 436 q 350 419 328 427 q 405 397 373 411 q 449 379 430 386 q 483 367 468 371 q 513 361 499 363 q 541 359 527 359 q 581 366 560 359 q 621 383 601 372 q 660 409 641 394 q 696 441 679 424 l 696 331 q 527 258 628 258 q 491 259 508 258 q 455 265 474 261 q 414 278 436 270 q 359 300 391 287 m 359 578 q 315 596 334 589 q 281 608 297 604 q 252 614 266 612 q 223 616 238 616 q 184 609 204 616 q 143 592 164 603 q 104 566 123 581 q 69 533 85 551 l 69 643 q 237 718 136 718 q 273 716 256 718 q 309 709 290 714 q 350 696 328 705 q 405 674 373 688 q 449 656 430 664 q 483 645 468 649 q 513 639 499 641 q 541 637 527 637 q 581 644 560 637 q 621 661 601 650 q 660 687 641 672 q 696 719 679 702 l 696 609 q 527 536 630 536 q 491 537 508 536 q 455 543 474 539 q 414 556 436 548 q 359 578 391 565 "},"ΐ":{"x_min":-19,"x_max":428,"ha":454,"o":"m 234 743 l 234 220 q 255 121 234 154 q 326 88 277 88 q 353 89 338 88 q 383 93 368 91 q 409 97 397 95 q 428 102 421 100 l 428 8 q 405 0 419 3 q 375 -7 391 -4 q 341 -12 358 -10 q 307 -14 323 -14 q 229 -3 265 -14 q 167 34 193 7 q 125 105 140 60 q 111 219 111 150 l 111 743 l 234 743 m 140 959 q 155 1005 147 980 q 172 1057 164 1030 q 187 1112 180 1084 q 200 1164 195 1139 l 341 1164 l 341 1150 q 312 1102 328 1128 q 277 1049 296 1076 q 237 994 258 1022 q 195 942 217 967 l 140 942 l 140 959 m -19 945 q -4 998 -19 982 q 30 1015 9 1015 q 48 1010 39 1015 q 64 998 57 1006 q 74 977 70 989 q 78 945 78 964 q 63 892 78 909 q 30 876 49 876 q -4 892 9 876 q -19 945 -19 909 m 310 945 q 324 998 310 982 q 359 1015 338 1015 q 377 1010 368 1015 q 393 998 386 1006 q 403 977 399 989 q 408 945 408 964 q 393 892 408 909 q 359 876 378 876 q 324 892 338 876 q 310 945 310 909 "},"ĸ":{"x_min":118,"x_max":684.25,"ha":689,"o":"m 545 0 l 315 331 l 241 276 l 241 0 l 118 0 l 118 745 l 241 745 l 241 554 q 239 479 241 513 q 236 418 238 444 q 230 364 233 388 l 319 483 l 526 745 l 665 745 l 394 412 l 684 0 l 545 0 "},"g":{"x_min":25,"x_max":692.484375,"ha":720,"o":"m 692 745 l 692 668 l 559 649 q 591 588 578 625 q 604 504 604 551 q 588 409 604 453 q 539 333 572 365 q 459 283 507 301 q 348 266 412 266 q 319 266 333 266 q 294 268 304 266 q 271 253 282 261 q 251 233 260 244 q 236 208 242 222 q 230 178 230 194 q 238 148 230 159 q 260 130 246 136 q 293 122 274 124 q 333 120 312 120 l 453 120 q 560 104 516 120 q 631 61 603 88 q 670 -2 658 34 q 683 -80 683 -38 q 660 -186 683 -139 q 593 -266 638 -233 q 478 -316 547 -298 q 314 -334 408 -334 q 187 -319 241 -334 q 96 -278 132 -305 q 42 -213 60 -251 q 25 -128 25 -175 q 38 -57 25 -87 q 73 -4 51 -26 q 125 32 96 17 q 187 53 155 46 q 140 94 158 66 q 122 159 122 122 q 143 231 122 201 q 212 291 165 262 q 158 324 182 303 q 118 373 134 346 q 92 433 101 401 q 83 500 83 466 q 99 608 83 561 q 150 689 116 656 q 233 740 183 722 q 348 758 282 758 q 400 754 373 758 q 445 745 427 750 l 692 745 m 141 -126 q 150 -173 141 -151 q 179 -211 159 -195 q 232 -235 199 -226 q 314 -245 265 -245 q 503 -205 440 -245 q 566 -92 566 -166 q 558 -41 566 -61 q 531 -10 550 -21 q 482 4 512 0 q 407 8 451 8 l 287 8 q 238 3 263 8 q 190 -17 212 -2 q 155 -58 169 -32 q 141 -126 141 -84 m 206 504 q 242 388 206 426 q 344 350 278 350 q 446 388 411 350 q 480 506 480 426 q 445 629 480 590 q 343 669 410 669 q 241 628 277 669 q 206 504 206 587 "},"ǿ":{"x_min":78,"x_max":727,"ha":802,"o":"m 727 373 q 704 208 727 280 q 639 86 681 135 q 536 11 596 37 q 400 -14 475 -14 q 249 21 315 -14 l 202 -52 l 113 -1 l 168 87 q 101 208 125 135 q 78 373 78 280 q 100 537 78 465 q 165 657 123 608 q 268 732 207 707 q 404 758 329 758 q 485 748 447 758 q 557 719 524 738 l 603 793 l 692 743 l 638 655 q 703 535 680 606 q 727 373 727 464 m 205 373 q 211 271 205 316 q 233 192 218 227 l 503 631 q 457 649 483 643 q 401 655 432 655 q 251 585 297 655 q 205 373 205 515 m 599 373 q 573 548 599 481 l 302 110 q 348 93 323 99 q 403 88 372 88 q 553 159 507 88 q 599 373 599 231 m 321 860 q 351 905 335 879 q 383 958 367 931 q 414 1013 399 986 q 439 1064 428 1040 l 588 1064 l 588 1049 q 555 1004 577 1031 q 508 946 534 976 q 454 889 482 917 q 403 842 426 860 l 321 842 l 321 860 "},"²":{"x_min":33,"x_max":421.734375,"ha":460,"o":"m 421 397 l 33 397 l 33 472 l 175 627 q 238 697 214 669 q 277 749 263 726 q 295 791 290 771 q 301 834 301 811 q 278 899 301 878 q 219 920 255 920 q 152 903 184 920 q 90 860 120 886 l 37 924 q 118 981 73 958 q 219 1004 164 1004 q 293 992 260 1004 q 349 960 326 981 q 385 907 372 938 q 398 837 398 876 q 387 774 398 803 q 356 715 376 744 q 307 655 336 686 q 239 587 277 624 l 129 480 l 421 480 l 421 397 "},"Ã":{"x_min":-0.25,"x_max":844.25,"ha":844,"o":"m 715 0 l 606 307 l 237 307 l 127 0 l 0 0 l 364 996 l 479 996 l 844 0 l 715 0 m 566 419 l 466 706 q 456 736 462 719 q 444 774 450 754 q 432 817 438 795 q 421 860 426 839 q 410 816 416 839 q 397 773 404 794 q 386 735 391 752 q 376 706 380 718 l 277 419 l 566 419 m 523 1072 q 469 1083 496 1072 q 417 1110 443 1095 q 367 1136 391 1124 q 322 1148 343 1148 q 275 1130 291 1148 q 249 1070 259 1112 l 179 1070 q 193 1144 182 1111 q 222 1201 204 1177 q 265 1237 240 1224 q 322 1250 290 1250 q 378 1238 350 1250 q 431 1211 405 1226 q 480 1185 457 1197 q 523 1173 504 1173 q 569 1191 554 1173 q 595 1251 585 1209 l 667 1251 q 652 1177 663 1210 q 623 1121 641 1144 q 580 1084 605 1097 q 523 1072 555 1072 "},"Ј":{"x_min":-125,"x_max":251.15625,"ha":376,"o":"m -19 -264 q -80 -259 -54 -264 q -125 -247 -106 -255 l -125 -139 q -75 -149 -101 -145 q -18 -152 -48 -152 q 32 -146 6 -152 q 78 -122 57 -139 q 112 -76 99 -105 q 125 0 125 -46 l 125 992 l 251 992 l 251 13 q 231 -109 251 -57 q 175 -196 211 -162 q 90 -247 140 -230 q -19 -264 40 -264 "},"©":{"x_min":68,"x_max":1088,"ha":1156,"o":"m 604 713 q 531 698 563 713 q 477 655 499 683 q 444 587 455 627 q 433 495 433 546 q 443 402 433 443 q 473 334 453 361 q 526 291 494 306 q 604 277 559 277 q 638 279 620 277 q 676 286 657 281 q 714 295 695 290 q 751 307 734 301 l 751 218 q 718 205 734 211 q 683 194 701 199 q 645 187 665 189 q 600 185 624 185 q 479 207 531 185 q 393 271 428 229 q 342 370 359 312 q 325 497 325 427 q 343 622 325 566 q 397 719 361 679 q 484 783 432 760 q 604 806 536 806 q 692 794 647 806 q 777 763 736 783 l 734 677 q 666 704 699 694 q 604 713 633 713 m 68 495 q 86 631 68 566 q 137 753 104 696 q 217 856 170 809 q 320 936 264 903 q 442 987 377 969 q 578 1006 507 1006 q 713 987 648 1006 q 835 936 778 969 q 938 856 892 903 q 1018 753 985 809 q 1069 631 1051 696 q 1088 495 1088 566 q 1069 359 1088 425 q 1018 238 1051 294 q 938 134 985 181 q 835 55 892 88 q 713 3 778 21 q 578 -14 648 -14 q 442 3 507 -14 q 320 55 377 21 q 217 134 264 88 q 137 238 170 181 q 86 359 104 294 q 68 495 68 425 m 141 496 q 176 326 141 405 q 269 187 210 247 q 408 94 329 128 q 578 59 487 59 q 747 94 668 59 q 886 187 826 128 q 979 326 945 247 q 1014 496 1014 405 q 979 665 1014 586 q 886 804 945 744 q 747 897 826 863 q 578 932 668 932 q 408 897 487 932 q 269 804 329 863 q 176 665 210 744 q 141 496 141 586 "},"≥":{"x_min":69,"x_max":696,"ha":765,"o":"m 69 270 l 569 488 l 69 734 l 69 844 l 696 517 l 696 448 l 69 161 l 69 270 m 69 0 l 69 101 l 696 101 l 696 0 l 69 0 "},"Ă":{"x_min":-0.25,"x_max":844.25,"ha":844,"o":"m 715 0 l 606 307 l 237 307 l 127 0 l 0 0 l 364 996 l 479 996 l 844 0 l 715 0 m 566 419 l 466 706 q 456 736 462 719 q 444 774 450 754 q 432 817 438 795 q 421 860 426 839 q 410 816 416 839 q 397 773 404 794 q 386 735 391 752 q 376 706 380 718 l 277 419 l 566 419 m 626 1259 q 608 1183 623 1217 q 567 1123 593 1149 q 504 1084 541 1098 q 419 1071 467 1071 q 332 1084 369 1071 q 271 1122 295 1097 q 233 1181 246 1147 q 218 1259 220 1216 l 292 1259 q 304 1212 295 1229 q 330 1186 314 1194 q 369 1175 346 1177 q 422 1172 392 1172 q 468 1175 446 1172 q 508 1188 490 1178 q 537 1214 525 1197 q 551 1259 548 1231 l 626 1259 "},"ґ":{"x_min":118,"x_max":527,"ha":555,"o":"m 527 656 l 241 656 l 241 0 l 118 0 l 118 745 l 403 745 l 403 961 l 527 961 l 527 656 "},"ÿ":{"x_min":6.75,"x_max":672.25,"ha":679,"o":"m 6 745 l 134 745 l 280 329 q 300 272 290 301 q 318 212 310 242 q 333 154 327 182 q 341 103 339 126 l 346 103 q 356 149 349 120 q 373 211 364 178 q 392 276 382 244 q 409 330 402 308 l 544 745 l 672 745 l 377 -96 q 336 -195 358 -152 q 285 -270 314 -239 q 217 -317 256 -300 q 123 -334 177 -334 q 62 -330 88 -334 q 18 -322 36 -326 l 18 -223 q 54 -229 32 -226 q 99 -231 75 -231 q 156 -223 132 -231 q 197 -201 179 -216 q 227 -164 215 -186 q 250 -115 240 -142 l 289 -6 l 6 745 m 155 945 q 173 998 155 982 q 220 1015 192 1015 q 266 998 246 1015 q 285 945 285 981 q 266 892 285 909 q 220 876 246 876 q 173 892 192 876 q 155 945 155 909 m 409 945 q 428 998 409 982 q 474 1015 447 1015 q 499 1010 487 1015 q 520 998 511 1006 q 534 977 529 989 q 540 945 540 964 q 520 892 540 909 q 474 876 500 876 q 428 892 447 876 q 409 945 409 909 "},"Ł":{"x_min":20,"x_max":649.4375,"ha":682,"o":"m 135 458 l 135 992 l 261 992 l 261 537 l 415 635 l 468 550 l 261 420 l 261 111 l 649 111 l 649 0 l 135 0 l 135 341 l 69 301 l 20 385 l 135 458 "}," ":{"x_min":0,"x_max":0,"ha":372},"∫":{"x_min":10.578125,"x_max":524.65625,"ha":538,"o":"m 435 1055 q 484 1051 458 1055 q 524 1042 509 1048 l 524 944 q 491 956 512 950 q 446 962 471 962 q 389 948 412 962 q 354 913 367 935 q 335 862 340 891 q 330 803 330 834 l 330 -92 q 313 -202 330 -156 q 265 -276 296 -247 q 193 -320 235 -306 q 101 -334 151 -334 q 51 -330 77 -334 q 10 -321 26 -326 l 10 -224 q 45 -235 24 -230 q 89 -241 66 -241 q 147 -228 124 -241 q 185 -194 171 -215 q 205 -143 199 -172 q 212 -82 212 -115 l 212 814 q 227 923 212 878 q 273 998 243 969 q 343 1041 302 1027 q 435 1055 384 1055 "},"\\\\":{"x_min":15.75,"x_max":505.375,"ha":518,"o":"m 136 992 l 505 0 l 384 0 l 15 992 l 136 992 "},"Ì":{"x_min":42,"x_max":414.8125,"ha":471,"o":"m 414 0 l 55 0 l 55 69 l 172 96 l 172 895 l 55 922 l 55 992 l 414 992 l 414 922 l 298 895 l 298 96 l 414 69 l 414 0 m 309 1071 l 227 1071 q 175 1118 203 1089 q 121 1175 147 1146 q 74 1233 95 1205 q 42 1278 52 1260 l 42 1293 l 190 1293 q 216 1242 201 1269 q 246 1187 230 1215 q 278 1134 262 1160 q 309 1089 294 1108 l 309 1071 "},"ъ":{"x_min":28,"x_max":865,"ha":942,"o":"m 395 439 l 582 439 q 795 386 726 439 q 865 227 865 333 q 849 133 865 175 q 798 61 833 91 q 710 15 764 31 q 580 0 656 0 l 272 0 l 272 642 l 28 642 l 28 745 l 395 745 l 395 439 m 741 219 q 730 275 741 252 q 697 311 719 297 q 643 330 675 325 q 567 336 610 336 l 395 336 l 395 102 l 570 102 q 638 108 607 102 q 693 127 670 113 q 728 164 715 141 q 741 219 741 186 "},"ς":{"x_min":77,"x_max":596,"ha":632,"o":"m 204 351 q 213 245 204 286 q 248 177 223 204 q 315 135 272 151 q 424 104 358 119 q 504 78 472 94 q 556 42 536 62 q 584 -1 576 22 q 593 -54 593 -25 q 585 -114 593 -84 q 567 -172 578 -144 q 541 -225 555 -200 q 511 -272 526 -250 l 396 -272 q 426 -225 412 -250 q 451 -177 440 -201 q 469 -129 463 -152 q 476 -87 476 -107 q 471 -61 476 -74 q 450 -37 466 -48 q 403 -15 434 -25 q 321 5 373 -4 q 224 37 269 15 q 147 99 180 59 q 95 200 114 139 q 77 349 77 261 q 101 530 77 454 q 170 657 126 607 q 275 733 215 708 q 408 758 336 758 q 511 746 461 758 q 596 718 562 735 l 559 614 q 524 627 543 621 q 485 638 505 633 q 445 647 465 644 q 408 650 425 650 q 315 630 354 650 q 252 573 276 611 q 216 479 227 535 q 204 351 204 423 "},"Ē":{"x_min":135,"x_max":650,"ha":733,"o":"m 650 0 l 135 0 l 135 992 l 650 992 l 650 880 l 261 880 l 261 574 l 624 574 l 624 462 l 261 462 l 261 111 l 650 111 l 650 0 m 199 1172 l 589 1172 l 589 1071 l 199 1071 l 199 1172 "},"!":{"x_min":100,"x_max":272.265625,"ha":374,"o":"m 228 280 l 146 280 l 112 992 l 262 992 l 228 280 m 100 74 q 106 118 100 100 q 125 147 113 136 q 152 163 136 158 q 186 169 167 169 q 219 163 203 169 q 247 147 235 158 q 265 118 258 136 q 272 74 272 100 q 265 31 272 49 q 247 2 258 13 q 219 -14 235 -9 q 186 -20 203 -20 q 152 -14 167 -20 q 125 2 136 -9 q 106 31 113 13 q 100 74 100 49 "},"ç":{"x_min":77,"x_max":596,"ha":643,"o":"m 402 -14 q 274 7 334 -14 q 171 75 215 28 q 102 193 127 121 q 77 367 77 266 q 102 548 77 474 q 173 669 128 623 q 278 736 218 715 q 408 758 339 758 q 511 746 461 758 q 596 718 562 735 l 559 614 q 524 627 543 621 q 485 638 505 633 q 445 647 465 644 q 408 650 425 650 q 253 581 302 650 q 204 369 204 513 q 253 160 204 226 q 402 93 302 93 q 502 106 457 93 q 583 135 546 118 l 583 26 q 504 -3 546 6 q 402 -14 463 -14 m 495 -194 q 447 -297 495 -260 q 297 -334 399 -334 q 267 -331 282 -334 q 242 -327 252 -329 l 242 -254 q 268 -257 252 -256 q 295 -258 285 -258 q 370 -247 343 -258 q 397 -208 397 -235 q 388 -186 397 -195 q 364 -169 379 -176 q 327 -157 349 -162 q 282 -147 306 -152 l 343 0 l 425 0 l 386 -78 q 429 -92 409 -83 q 463 -115 448 -101 q 486 -148 478 -128 q 495 -194 495 -168 "},"Й":{"x_min":136,"x_max":879,"ha":1013,"o":"m 136 992 l 262 992 l 262 449 q 261 410 262 431 q 260 366 261 389 q 259 321 260 343 q 257 276 258 298 q 251 174 254 226 l 256 174 l 725 992 l 879 992 l 879 0 l 752 0 l 752 538 q 754 624 752 576 q 759 717 756 673 q 765 821 762 768 l 760 821 l 289 0 l 136 0 l 136 992 m 754 1287 q 733 1193 749 1234 q 685 1126 716 1153 q 605 1084 653 1098 q 489 1071 557 1071 q 372 1084 420 1071 q 295 1124 324 1097 q 251 1192 265 1151 q 234 1287 237 1232 l 349 1287 q 361 1219 352 1245 q 388 1178 371 1193 q 430 1158 405 1163 q 492 1152 456 1152 q 547 1159 522 1152 q 590 1181 572 1166 q 620 1222 608 1197 q 635 1287 631 1248 l 754 1287 "},"Б":{"x_min":135,"x_max":729,"ha":800,"o":"m 729 290 q 708 170 729 224 q 645 79 688 117 q 537 20 602 41 q 380 0 471 0 l 135 0 l 135 992 l 669 992 l 669 880 l 261 880 l 261 574 l 362 574 q 536 551 465 574 q 648 490 606 529 q 710 400 691 452 q 729 290 729 349 m 261 107 l 368 107 q 540 152 485 107 q 595 290 595 197 q 579 370 595 337 q 533 424 564 403 q 456 453 503 444 q 347 462 410 462 l 261 462 l 261 107 "},"đ":{"x_min":77,"x_max":801.796875,"ha":814,"o":"m 577 99 l 572 99 q 537 55 557 76 q 491 19 517 34 q 432 -5 465 3 q 359 -14 400 -14 q 244 9 296 -14 q 154 80 192 33 q 97 196 117 127 q 77 356 77 265 q 97 517 77 447 q 154 634 117 587 q 244 705 192 681 q 359 730 296 730 q 432 721 399 730 q 490 698 464 713 q 537 663 516 683 q 572 622 557 643 l 580 622 q 576 666 578 645 q 573 703 575 684 q 572 733 572 722 l 572 843 l 316 843 l 316 932 l 572 932 l 572 1055 l 696 1055 l 696 932 l 801 932 l 801 843 l 696 843 l 696 0 l 596 0 l 577 99 m 383 88 q 470 103 434 88 q 528 148 506 118 q 560 223 550 178 q 572 329 571 268 l 572 356 q 563 472 572 422 q 532 557 554 523 q 473 609 510 592 q 382 627 437 627 q 247 557 290 627 q 204 354 204 487 q 247 154 204 220 q 383 88 290 88 "},"ċ":{"x_min":77,"x_max":596,"ha":643,"o":"m 402 -14 q 274 7 334 -14 q 171 75 215 28 q 102 193 127 121 q 77 367 77 266 q 102 548 77 474 q 173 669 128 623 q 278 736 218 715 q 408 758 339 758 q 511 746 461 758 q 596 718 562 735 l 559 614 q 524 627 543 621 q 485 638 505 633 q 445 647 465 644 q 408 650 425 650 q 253 581 302 650 q 204 369 204 513 q 253 160 204 226 q 402 93 302 93 q 502 106 457 93 q 583 135 546 118 l 583 26 q 504 -3 546 6 q 402 -14 463 -14 m 317 945 q 337 1004 317 986 q 388 1023 358 1023 q 417 1018 403 1023 q 440 1004 430 1014 q 455 980 449 995 q 461 945 461 966 q 440 887 461 906 q 388 868 418 868 q 337 886 358 868 q 317 945 317 905 "},"Ā":{"x_min":-0.25,"x_max":844.25,"ha":844,"o":"m 715 0 l 606 307 l 237 307 l 127 0 l 0 0 l 364 996 l 479 996 l 844 0 l 715 0 m 566 419 l 466 706 q 456 736 462 719 q 444 774 450 754 q 432 817 438 795 q 421 860 426 839 q 410 816 416 839 q 397 773 404 794 q 386 735 391 752 q 376 706 380 718 l 277 419 l 566 419 m 227 1172 l 617 1172 l 617 1071 l 227 1071 l 227 1172 "},"Ẃ":{"x_min":13.75,"x_max":1214.25,"ha":1228,"o":"m 549 992 l 682 992 l 837 411 q 857 335 847 373 q 876 261 867 297 q 891 194 884 225 q 901 136 897 162 q 908 192 904 162 q 917 256 912 223 q 929 325 923 290 q 943 393 936 360 l 1079 992 l 1214 992 l 965 0 l 837 0 l 665 636 q 647 707 656 671 q 631 776 638 744 q 615 848 622 813 q 600 776 608 814 q 585 707 593 745 q 567 632 576 669 l 402 0 l 275 0 l 13 992 l 147 992 l 298 388 q 313 323 306 357 q 325 257 320 290 q 336 192 331 223 q 344 136 341 162 q 352 194 347 161 q 364 264 358 227 q 379 338 371 301 q 396 409 387 376 l 549 992 m 549 1089 q 579 1134 563 1108 q 611 1187 595 1160 q 642 1242 627 1215 q 667 1293 656 1269 l 816 1293 l 816 1278 q 783 1233 805 1260 q 736 1175 762 1205 q 682 1118 710 1146 q 631 1071 654 1089 l 549 1071 l 549 1089 "},"ø":{"x_min":78,"x_max":727,"ha":802,"o":"m 727 373 q 704 208 727 280 q 639 86 681 135 q 536 11 596 37 q 400 -14 475 -14 q 249 21 315 -14 l 202 -52 l 113 -1 l 168 87 q 101 208 125 135 q 78 373 78 280 q 100 537 78 465 q 165 657 123 608 q 268 732 207 707 q 404 758 329 758 q 485 748 447 758 q 557 719 524 738 l 603 793 l 692 743 l 638 655 q 703 535 680 606 q 727 373 727 464 m 205 373 q 211 271 205 316 q 233 192 218 227 l 503 631 q 457 649 483 643 q 401 655 432 655 q 251 585 297 655 q 205 373 205 515 m 599 373 q 573 548 599 481 l 302 110 q 348 93 323 99 q 403 88 372 88 q 553 159 507 88 q 599 373 599 231 "},"â":{"x_min":64,"x_max":626,"ha":737,"o":"m 536 0 l 511 102 l 505 102 q 461 50 483 72 q 412 13 439 28 q 353 -7 386 0 q 278 -14 321 -14 q 193 0 232 -14 q 125 40 153 12 q 80 109 96 67 q 64 208 64 151 q 142 379 64 320 q 379 445 220 439 l 503 450 l 503 496 q 494 572 503 541 q 465 620 484 602 q 419 647 447 639 q 357 655 392 655 q 253 639 301 655 q 160 599 204 623 l 117 692 q 228 739 167 720 q 357 758 290 758 q 477 744 427 758 q 560 700 527 730 q 609 623 593 669 q 626 509 626 576 l 626 0 l 536 0 m 310 88 q 386 101 351 88 q 447 140 422 114 q 488 205 473 166 q 502 298 502 245 l 502 365 l 405 360 q 303 346 345 357 q 237 316 262 336 q 202 270 213 297 q 191 208 191 243 q 224 117 191 146 q 310 88 257 88 m 605 842 l 523 842 q 451 897 488 864 q 380 967 415 930 q 307 897 343 930 q 237 842 271 864 l 155 842 l 155 860 q 195 905 172 879 q 241 958 218 931 q 284 1013 264 986 q 314 1064 304 1040 l 445 1064 q 475 1013 455 1040 q 518 958 495 986 q 564 905 541 931 q 605 860 588 879 l 605 842 "},"}":{"x_min":36,"x_max":451,"ha":492,"o":"m 153 214 q 193 328 153 286 q 311 383 233 369 l 311 391 q 193 446 233 405 q 153 559 153 488 l 153 783 q 145 836 153 815 q 122 868 137 857 q 84 885 106 880 q 36 890 63 889 l 36 992 q 132 980 87 991 q 208 944 176 968 q 258 883 240 920 q 277 793 277 846 l 277 567 q 288 507 277 531 q 321 467 299 483 q 376 445 343 452 q 451 439 408 439 l 451 337 q 321 307 366 337 q 277 208 277 278 l 277 -19 q 258 -110 277 -73 q 208 -172 240 -148 q 132 -208 176 -196 q 36 -220 87 -219 l 36 -118 q 84 -113 63 -117 q 122 -96 106 -108 q 145 -64 137 -84 q 153 -10 153 -43 l 153 214 "},"Δ":{"x_min":25,"x_max":765,"ha":789,"o":"m 765 84 l 765 0 l 25 0 l 25 90 l 330 992 l 457 992 l 765 84 m 393 852 q 367 745 381 802 q 333 626 352 688 l 158 111 l 631 111 l 457 622 q 419 745 435 688 q 393 852 403 802 "},"‰":{"x_min":69,"x_max":1555,"ha":1624,"o":"m 169 695 q 193 527 169 583 q 271 471 217 471 q 377 695 377 471 q 271 917 377 917 q 193 862 217 917 q 169 695 169 807 m 478 695 q 465 564 478 622 q 428 465 453 505 q 364 404 403 425 q 271 383 325 383 q 184 404 222 383 q 120 465 146 425 q 81 564 94 505 q 69 695 69 622 q 80 826 69 769 q 117 924 92 884 q 180 984 142 963 q 271 1006 218 1006 q 360 984 322 1006 q 425 924 399 963 q 464 826 451 884 q 478 695 478 769 m 769 297 q 793 129 769 185 q 871 74 817 74 q 976 297 976 74 q 871 519 976 519 q 793 464 817 519 q 769 297 769 409 m 1077 298 q 1065 166 1077 224 q 1028 68 1053 108 q 964 7 1003 28 q 871 -14 925 -14 q 783 7 821 -14 q 720 68 745 28 q 681 166 694 108 q 669 298 669 224 q 680 428 669 371 q 717 526 692 486 q 780 586 742 565 q 871 608 818 608 q 960 586 922 608 q 1024 526 999 565 q 1063 428 1050 486 q 1077 298 1077 371 m 903 992 l 352 0 l 245 0 l 796 992 l 903 992 m 1247 297 q 1271 129 1247 185 q 1349 74 1295 74 q 1454 297 1454 74 q 1349 519 1454 519 q 1271 464 1295 519 q 1247 297 1247 409 m 1555 298 q 1543 166 1555 224 q 1506 68 1531 108 q 1442 7 1481 28 q 1349 -14 1403 -14 q 1261 7 1299 -14 q 1198 68 1223 28 q 1159 166 1172 108 q 1147 298 1147 224 q 1158 428 1147 371 q 1195 526 1170 486 q 1258 586 1220 565 q 1349 608 1296 608 q 1438 586 1399 608 q 1502 526 1477 565 q 1541 428 1528 486 q 1555 298 1555 371 "},"Ä":{"x_min":-0.25,"x_max":844.25,"ha":844,"o":"m 715 0 l 606 307 l 237 307 l 127 0 l 0 0 l 364 996 l 479 996 l 844 0 l 715 0 m 566 419 l 466 706 q 456 736 462 719 q 444 774 450 754 q 432 817 438 795 q 421 860 426 839 q 410 816 416 839 q 397 773 404 794 q 386 735 391 752 q 376 706 380 718 l 277 419 l 566 419 m 230 1174 q 248 1227 230 1211 q 295 1244 267 1244 q 341 1227 321 1244 q 360 1174 360 1210 q 341 1121 360 1138 q 295 1105 321 1105 q 248 1121 267 1105 q 230 1174 230 1138 m 484 1174 q 503 1227 484 1211 q 549 1244 522 1244 q 574 1239 562 1244 q 595 1227 586 1235 q 609 1206 604 1218 q 615 1174 615 1193 q 595 1121 615 1138 q 549 1105 575 1105 q 503 1121 522 1105 q 484 1174 484 1138 "},"ř":{"x_min":78,"x_max":528,"ha":554,"o":"m 439 758 q 483 756 459 758 q 526 751 508 754 l 509 637 q 470 643 490 640 q 433 645 450 645 q 355 628 390 645 q 294 578 320 610 q 255 501 269 546 q 241 401 241 456 l 241 0 l 118 0 l 118 745 l 218 745 l 233 608 l 238 608 q 274 664 255 637 q 318 712 294 691 q 372 745 342 732 q 439 758 402 758 m 528 1045 q 487 1000 511 1026 q 441 947 464 974 q 398 892 418 919 q 368 842 378 865 l 237 842 q 207 892 227 865 q 164 947 187 919 q 118 1000 141 974 q 78 1045 95 1026 l 78 1064 l 160 1064 q 230 1008 194 1041 q 303 937 266 975 q 374 1008 338 975 q 446 1064 411 1041 l 528 1064 l 528 1045 "},"—":{"x_min":56,"x_max":1333,"ha":1389,"o":"m 56 315 l 56 429 l 1333 429 l 1333 315 l 56 315 "},"N":{"x_min":135,"x_max":878,"ha":1013,"o":"m 878 0 l 724 0 l 253 821 l 248 821 q 255 717 252 768 q 259 624 257 673 q 261 538 261 576 l 261 0 l 135 0 l 135 992 l 288 992 l 757 174 l 762 174 q 757 276 759 226 q 755 321 756 298 q 753 366 754 343 q 752 410 752 389 q 751 449 751 431 l 751 992 l 878 992 l 878 0 "},"⁄":{"x_min":-239.25,"x_max":418.25,"ha":180,"o":"m 418 992 l -132 0 l -239 0 l 311 992 l 418 992 "},"М":{"x_min":135,"x_max":1074,"ha":1209,"o":"m 544 0 l 253 868 l 248 868 q 255 768 252 818 q 259 678 257 726 q 261 593 261 631 l 261 0 l 135 0 l 135 992 l 331 992 l 601 183 l 605 183 l 886 992 l 1074 992 l 1074 0 l 947 0 l 947 601 q 949 682 947 637 q 952 769 950 728 q 957 867 955 817 l 951 867 l 648 0 l 544 0 "},"Ó":{"x_min":85,"x_max":945,"ha":1031,"o":"m 945 496 q 917 287 945 382 q 835 126 890 193 q 701 22 781 59 q 515 -14 620 -14 q 324 22 405 -14 q 189 126 243 59 q 110 288 136 193 q 85 498 85 382 q 110 707 85 613 q 190 867 136 801 q 325 970 243 934 q 517 1007 406 1007 q 701 970 622 1007 q 835 867 781 934 q 917 706 890 800 q 945 496 945 612 m 218 497 q 236 330 218 404 q 290 204 253 255 q 382 124 326 152 q 515 97 438 97 q 648 124 593 97 q 741 204 704 152 q 794 330 777 255 q 811 497 811 404 q 794 664 811 590 q 741 789 777 738 q 649 868 705 840 q 517 895 594 895 q 383 868 439 895 q 290 789 327 840 q 236 664 253 738 q 218 497 218 590 m 441 1089 q 471 1134 455 1108 q 503 1187 487 1160 q 534 1242 519 1215 q 559 1293 548 1269 l 708 1293 l 708 1278 q 675 1233 697 1260 q 628 1175 654 1205 q 574 1118 602 1146 q 523 1071 546 1089 l 441 1071 l 441 1089 "},"˜":{"x_min":175,"x_max":663,"ha":802,"o":"m 519 843 q 465 854 492 843 q 413 881 439 866 q 363 907 387 895 q 318 919 339 919 q 271 901 287 919 q 245 841 255 883 l 175 841 q 189 915 178 882 q 218 972 200 948 q 261 1008 236 995 q 318 1021 286 1021 q 374 1009 346 1021 q 427 982 401 997 q 476 956 453 968 q 519 944 500 944 q 565 962 550 944 q 591 1022 581 980 l 663 1022 q 648 948 659 981 q 619 892 637 915 q 576 855 601 868 q 519 843 551 843 "}," ":{"x_min":0,"x_max":0,"ha":695},"ˇ":{"x_min":175,"x_max":625,"ha":802,"o":"m 625 1045 q 584 1000 608 1026 q 538 947 561 974 q 495 892 515 919 q 465 842 475 865 l 334 842 q 304 892 324 865 q 261 947 284 919 q 215 1000 238 974 q 175 1045 192 1026 l 175 1064 l 257 1064 q 327 1008 291 1041 q 400 937 363 975 q 471 1008 435 975 q 543 1064 508 1041 l 625 1064 l 625 1045 "},"ų":{"x_min":111,"x_max":710,"ha":818,"o":"m 600 0 l 582 99 l 575 99 q 534 48 558 70 q 483 13 511 27 q 424 -7 455 0 q 360 -14 393 -14 q 252 1 299 -14 q 174 50 205 17 q 126 135 142 83 q 111 258 111 186 l 111 745 l 234 745 l 234 264 q 270 132 234 176 q 381 88 306 88 q 474 106 436 88 q 534 158 511 123 q 566 242 556 192 q 576 357 576 292 l 576 745 l 700 745 l 700 0 l 600 0 m 591 -161 q 609 -206 591 -191 q 651 -220 627 -220 q 684 -218 668 -220 q 710 -214 700 -217 l 710 -291 q 670 -299 692 -296 q 629 -302 649 -302 q 527 -266 561 -302 q 494 -170 494 -231 q 503 -116 494 -142 q 529 -69 513 -91 q 562 -30 544 -48 q 598 0 581 -12 l 685 0 q 591 -161 591 -90 "},"Ў":{"x_min":16.75,"x_max":813.25,"ha":813,"o":"m 813 992 l 522 289 q 468 172 496 227 q 402 75 440 116 q 311 10 364 34 q 183 -14 258 -14 q 117 -8 148 -14 q 62 6 87 -3 l 62 131 q 117 106 87 116 q 183 97 147 97 q 246 105 219 97 q 297 130 274 112 q 338 178 319 149 q 376 250 357 207 l 16 992 l 155 992 l 415 440 q 422 425 418 433 q 428 408 425 417 q 434 391 431 399 q 440 377 437 383 l 441 377 q 447 394 443 383 q 455 416 451 404 q 462 437 458 427 q 468 451 466 447 l 679 992 l 813 992 m 684 1287 q 663 1193 679 1234 q 615 1126 646 1153 q 535 1084 583 1098 q 419 1071 487 1071 q 302 1084 350 1071 q 225 1124 254 1097 q 181 1192 195 1151 q 164 1287 167 1232 l 279 1287 q 291 1219 282 1245 q 318 1178 301 1193 q 360 1158 335 1163 q 422 1152 386 1152 q 477 1159 452 1152 q 520 1181 502 1166 q 550 1222 538 1197 q 565 1287 561 1248 l 684 1287 "},"Ŭ":{"x_min":125,"x_max":845,"ha":970,"o":"m 845 993 l 845 349 q 822 205 845 272 q 755 90 800 139 q 641 13 709 41 q 481 -14 573 -14 q 327 12 394 -14 q 216 86 261 38 q 148 202 171 134 q 125 352 125 269 l 125 991 l 251 991 l 251 346 q 309 162 251 227 q 487 97 368 97 q 591 115 548 97 q 663 167 635 133 q 704 246 690 200 q 718 347 718 292 l 718 993 l 845 993 m 689 1259 q 671 1183 686 1217 q 630 1123 656 1149 q 567 1084 604 1098 q 482 1071 530 1071 q 395 1084 432 1071 q 334 1122 358 1097 q 296 1181 309 1147 q 281 1259 283 1216 l 355 1259 q 367 1212 358 1229 q 393 1186 377 1194 q 432 1175 409 1177 q 485 1172 455 1172 q 531 1175 509 1172 q 571 1188 553 1178 q 600 1214 588 1197 q 614 1259 611 1231 l 689 1259 "},"ĝ":{"x_min":25,"x_max":692.484375,"ha":720,"o":"m 692 745 l 692 668 l 559 649 q 591 588 578 625 q 604 504 604 551 q 588 409 604 453 q 539 333 572 365 q 459 283 507 301 q 348 266 412 266 q 319 266 333 266 q 294 268 304 266 q 271 253 282 261 q 251 233 260 244 q 236 208 242 222 q 230 178 230 194 q 238 148 230 159 q 260 130 246 136 q 293 122 274 124 q 333 120 312 120 l 453 120 q 560 104 516 120 q 631 61 603 88 q 670 -2 658 34 q 683 -80 683 -38 q 660 -186 683 -139 q 593 -266 638 -233 q 478 -316 547 -298 q 314 -334 408 -334 q 187 -319 241 -334 q 96 -278 132 -305 q 42 -213 60 -251 q 25 -128 25 -175 q 38 -57 25 -87 q 73 -4 51 -26 q 125 32 96 17 q 187 53 155 46 q 140 94 158 66 q 122 159 122 122 q 143 231 122 201 q 212 291 165 262 q 158 324 182 303 q 118 373 134 346 q 92 433 101 401 q 83 500 83 466 q 99 608 83 561 q 150 689 116 656 q 233 740 183 722 q 348 758 282 758 q 400 754 373 758 q 445 745 427 750 l 692 745 m 141 -126 q 150 -173 141 -151 q 179 -211 159 -195 q 232 -235 199 -226 q 314 -245 265 -245 q 503 -205 440 -245 q 566 -92 566 -166 q 558 -41 566 -61 q 531 -10 550 -21 q 482 4 512 0 q 407 8 451 8 l 287 8 q 238 3 263 8 q 190 -17 212 -2 q 155 -58 169 -32 q 141 -126 141 -84 m 206 504 q 242 388 206 426 q 344 350 278 350 q 446 388 411 350 q 480 506 480 426 q 445 629 480 590 q 343 669 410 669 q 241 628 277 669 q 206 504 206 587 m 586 842 l 504 842 q 432 897 469 864 q 361 967 396 930 q 288 897 324 930 q 218 842 252 864 l 136 842 l 136 860 q 176 905 153 879 q 222 958 199 931 q 265 1013 245 986 q 295 1064 285 1040 l 426 1064 q 456 1013 436 1040 q 499 958 476 986 q 545 905 522 931 q 586 860 569 879 l 586 842 "},"Ω":{"x_min":53.0625,"x_max":980.9375,"ha":1031,"o":"m 517 895 q 384 872 439 895 q 292 805 328 849 q 239 699 256 762 q 222 556 222 636 q 234 425 222 488 q 273 304 246 362 q 345 194 301 246 q 455 99 390 143 l 455 0 l 53 0 l 53 111 l 321 111 q 229 189 271 143 q 155 292 186 235 q 106 416 124 349 q 89 559 89 484 q 116 743 89 661 q 198 884 143 826 q 332 975 252 943 q 517 1007 412 1007 q 701 975 622 1007 q 835 884 781 943 q 917 743 890 826 q 945 559 945 661 q 927 416 945 484 q 878 292 909 349 q 805 189 847 235 q 712 111 762 143 l 980 111 l 980 0 l 579 0 l 579 99 q 688 194 643 143 q 760 304 732 246 q 799 425 787 362 q 811 556 811 488 q 794 699 811 636 q 741 805 777 762 q 649 872 705 849 q 517 895 594 895 "},"s":{"x_min":61.15625,"x_max":564,"ha":627,"o":"m 564 203 q 544 108 564 149 q 487 40 524 68 q 398 0 450 13 q 281 -14 346 -14 q 154 -2 207 -14 q 61 33 101 9 l 61 146 q 107 125 82 135 q 161 106 133 114 q 219 93 189 98 q 279 88 249 88 q 353 95 323 88 q 403 116 384 103 q 431 150 423 130 q 440 194 440 170 q 433 232 440 215 q 409 265 427 249 q 360 299 391 282 q 280 337 329 316 q 193 378 232 358 q 127 424 154 399 q 86 482 100 449 q 72 560 72 515 q 90 645 72 608 q 143 707 109 682 q 224 745 177 732 q 330 758 272 758 q 451 743 396 758 q 554 706 505 729 l 512 606 q 422 641 468 626 q 329 655 376 655 q 228 632 261 655 q 195 568 195 610 q 203 526 195 544 q 229 493 210 509 q 279 461 248 477 q 358 426 311 445 q 444 385 406 405 q 509 339 482 365 q 549 281 535 314 q 564 203 564 249 "},"?":{"x_min":25,"x_max":546,"ha":591,"o":"m 191 280 l 191 305 q 196 375 191 343 q 214 433 201 406 q 250 486 227 460 q 306 541 272 512 q 362 592 339 569 q 400 638 385 614 q 422 688 415 661 q 429 751 429 715 q 419 811 429 784 q 389 857 408 838 q 341 887 370 876 q 274 898 312 898 q 166 880 217 898 q 67 839 115 862 l 25 937 q 143 985 79 965 q 273 1006 207 1006 q 386 988 336 1006 q 472 938 437 971 q 527 858 508 906 q 546 752 546 811 q 537 671 546 707 q 512 605 529 635 q 471 546 495 574 q 412 485 446 517 q 360 432 380 455 q 328 388 339 409 q 311 344 316 366 q 307 292 307 322 l 307 280 l 191 280 m 158 74 q 164 118 158 100 q 183 147 171 136 q 210 163 194 158 q 244 169 225 169 q 277 163 261 169 q 305 147 293 158 q 323 118 316 136 q 330 74 330 100 q 323 31 330 49 q 305 2 316 13 q 277 -14 293 -9 q 244 -20 261 -20 q 210 -14 225 -20 q 183 2 194 -9 q 164 31 171 13 q 158 74 158 49 "},"Ņ":{"x_min":135,"x_max":878,"ha":1013,"o":"m 878 0 l 724 0 l 253 821 l 248 821 q 255 717 252 768 q 259 624 257 673 q 261 538 261 576 l 261 0 l 135 0 l 135 992 l 288 992 l 757 174 l 762 174 q 757 276 759 226 q 755 321 756 298 q 753 366 754 343 q 752 410 752 389 q 751 449 751 431 l 751 992 l 878 992 l 878 0 m 396 -288 q 412 -246 403 -271 q 429 -191 421 -220 q 443 -135 437 -163 q 452 -85 450 -107 l 575 -85 l 575 -98 q 560 -141 570 -115 q 534 -197 549 -167 q 500 -255 519 -226 q 462 -307 482 -284 l 396 -307 l 396 -288 "},"Ī":{"x_min":41,"x_max":431,"ha":471,"o":"m 414 0 l 55 0 l 55 69 l 172 96 l 172 895 l 55 922 l 55 992 l 414 992 l 414 922 l 298 895 l 298 96 l 414 69 l 414 0 m 41 1172 l 431 1172 l 431 1071 l 41 1071 l 41 1172 "},"Μ":{"x_min":135,"x_max":1074,"ha":1209,"o":"m 544 0 l 253 868 l 248 868 q 255 768 252 818 q 259 678 257 726 q 261 593 261 631 l 261 0 l 135 0 l 135 992 l 331 992 l 601 183 l 605 183 l 886 992 l 1074 992 l 1074 0 l 947 0 l 947 601 q 949 682 947 637 q 952 769 950 728 q 957 867 955 817 l 951 867 l 648 0 l 544 0 "},"•":{"x_min":102,"x_max":421,"ha":522,"o":"m 102 507 q 114 589 102 555 q 147 644 126 623 q 198 675 169 666 q 261 685 227 685 q 323 675 294 685 q 374 644 352 666 q 408 589 395 623 q 421 507 421 555 q 408 425 421 459 q 374 370 395 392 q 323 339 352 349 q 261 329 294 329 q 198 339 227 329 q 147 370 169 349 q 114 425 126 392 q 102 507 102 459 "},"н":{"x_min":118,"x_max":735,"ha":853,"o":"m 241 745 l 241 436 l 611 436 l 611 745 l 735 745 l 735 0 l 611 0 l 611 333 l 241 333 l 241 0 l 118 0 l 118 745 l 241 745 "},"(":{"x_min":56,"x_max":376.34375,"ha":418,"o":"m 56 380 q 68 547 56 465 q 105 708 80 630 q 168 857 130 785 q 259 992 207 928 l 376 992 q 232 704 281 861 q 183 381 183 547 q 196 221 183 301 q 232 64 208 141 q 292 -84 256 -12 q 375 -220 328 -156 l 259 -220 q 168 -89 207 -158 q 105 57 130 -19 q 68 214 80 133 q 56 380 56 296 "},"◊":{"x_min":74,"x_max":737,"ha":810,"o":"m 737 499 l 430 0 l 379 0 l 74 498 l 379 1000 l 430 1000 l 737 499 m 618 499 l 405 898 l 175 499 l 405 101 l 618 499 "},"α":{"x_min":77,"x_max":792.984375,"ha":814,"o":"m 383 88 q 470 104 434 88 q 528 153 506 120 q 560 238 550 186 q 572 360 571 289 l 572 370 q 563 492 572 439 q 532 581 554 545 q 473 636 510 618 q 382 655 437 655 q 247 581 290 655 q 204 369 204 507 q 247 157 204 227 q 383 88 290 88 m 359 -14 q 244 10 296 -14 q 154 83 192 34 q 97 203 117 131 q 77 370 77 275 q 97 538 77 466 q 156 659 118 610 q 249 733 194 708 q 372 758 304 758 q 497 729 448 758 q 579 644 546 701 l 587 644 q 605 695 594 667 q 633 745 616 723 l 730 745 q 716 687 723 722 q 705 610 710 651 q 698 527 701 569 q 696 446 696 484 l 696 162 q 712 104 696 121 q 752 87 729 87 q 775 89 762 87 q 792 93 787 91 l 792 3 q 760 -8 782 -2 q 715 -14 738 -14 q 668 -8 689 -14 q 630 10 647 -3 q 601 45 613 23 q 580 99 588 66 l 572 99 q 537 55 557 76 q 491 19 517 34 q 432 -5 465 3 q 359 -14 400 -14 "},"Ħ":{"x_min":0.03125,"x_max":973.953125,"ha":974,"o":"m 135 827 l 135 992 l 261 992 l 261 827 l 712 827 l 712 992 l 839 992 l 839 827 l 973 827 l 973 719 l 839 719 l 839 0 l 712 0 l 712 462 l 261 462 l 261 0 l 135 0 l 135 719 l 0 719 l 0 827 l 135 827 m 712 574 l 712 719 l 261 719 l 261 574 l 712 574 "},"м":{"x_min":118,"x_max":879,"ha":997,"o":"m 879 0 l 762 0 l 762 608 q 752 575 758 594 q 740 535 747 555 q 728 497 733 515 q 717 466 722 479 l 543 0 l 453 0 l 278 466 q 269 492 275 475 q 257 528 264 508 q 245 569 251 548 q 234 608 239 591 l 234 0 l 118 0 l 118 745 l 274 745 l 450 272 q 465 226 458 248 q 479 183 473 203 q 490 145 485 162 q 498 118 495 128 q 506 146 502 129 q 517 182 511 162 q 531 224 523 202 q 546 269 538 246 l 724 745 l 879 745 l 879 0 "},"з":{"x_min":45.859375,"x_max":577,"ha":639,"o":"m 250 439 q 326 445 292 439 q 385 464 360 451 q 423 499 409 477 q 436 551 436 520 q 397 629 436 603 q 284 655 357 655 q 192 642 235 655 q 96 606 148 629 l 54 706 q 107 729 81 720 q 161 745 133 739 q 219 754 189 751 q 286 758 250 758 q 393 745 344 758 q 477 707 442 732 q 533 645 513 682 q 553 561 553 608 q 543 501 553 527 q 516 455 533 475 q 475 421 499 435 q 422 398 451 407 l 422 390 q 480 366 452 381 q 529 328 508 351 q 564 275 551 306 q 577 202 577 245 q 559 117 577 157 q 504 48 541 77 q 411 2 467 19 q 278 -14 354 -14 q 144 -1 204 -14 q 45 33 85 10 l 45 146 q 92 125 66 135 q 147 106 118 114 q 209 93 176 98 q 276 88 242 88 q 346 94 313 88 q 402 114 378 100 q 439 152 425 129 q 453 210 453 176 q 408 305 453 274 q 270 336 363 336 l 184 336 l 184 439 l 250 439 "},"Ґ":{"x_min":135,"x_max":649,"ha":682,"o":"m 522 992 l 522 1196 l 649 1196 l 649 880 l 261 880 l 261 0 l 135 0 l 135 992 l 522 992 "},"Û":{"x_min":125,"x_max":845,"ha":970,"o":"m 845 993 l 845 349 q 822 205 845 272 q 755 90 800 139 q 641 13 709 41 q 481 -14 573 -14 q 327 12 394 -14 q 216 86 261 38 q 148 202 171 134 q 125 352 125 269 l 125 991 l 251 991 l 251 346 q 309 162 251 227 q 487 97 368 97 q 591 115 548 97 q 663 167 635 133 q 704 246 690 200 q 718 347 718 292 l 718 993 l 845 993 m 708 1071 l 626 1071 q 554 1126 591 1093 q 483 1196 518 1159 q 410 1126 446 1159 q 340 1071 374 1093 l 258 1071 l 258 1089 q 298 1134 275 1108 q 344 1187 321 1160 q 387 1242 367 1215 q 417 1293 407 1269 l 548 1293 q 578 1242 558 1269 q 621 1187 598 1215 q 667 1134 644 1160 q 708 1089 691 1108 l 708 1071 "},"і":{"x_min":108.5,"x_max":252.96875,"ha":359,"o":"m 241 0 l 118 0 l 118 745 l 241 745 l 241 0 m 108 945 q 129 1004 108 986 q 180 1023 149 1023 q 208 1018 195 1023 q 231 1004 221 1014 q 247 980 241 995 q 252 945 252 966 q 231 887 252 906 q 180 868 210 868 q 129 886 149 868 q 108 945 108 905 "},"V":{"x_min":-0.25,"x_max":789.25,"ha":789,"o":"m 654 992 l 789 992 l 457 0 l 330 0 l 0 992 l 133 992 l 333 362 q 367 243 353 301 q 393 136 381 186 q 419 243 403 186 q 455 367 434 301 l 654 992 "},"Ŗ":{"x_min":135,"x_max":803.25,"ha":819,"o":"m 261 410 l 261 0 l 135 0 l 135 992 l 376 992 q 642 922 556 992 q 729 710 729 852 q 712 607 729 651 q 668 531 695 563 q 605 479 640 500 q 533 444 570 458 l 803 0 l 654 0 l 416 410 l 261 410 m 261 517 l 371 517 q 473 529 431 517 q 543 564 516 541 q 582 623 570 588 q 595 704 595 658 q 581 787 595 753 q 540 842 567 821 q 469 874 512 864 q 368 884 426 884 l 261 884 l 261 517 m 330 -288 q 346 -246 337 -271 q 363 -191 355 -220 q 377 -135 371 -163 q 386 -85 384 -107 l 509 -85 l 509 -98 q 494 -141 504 -115 q 468 -197 483 -167 q 434 -255 453 -226 q 396 -307 416 -284 l 330 -307 l 330 -288 "},"@":{"x_min":74,"x_max":1129,"ha":1203,"o":"m 1129 496 q 1122 411 1129 453 q 1103 330 1116 369 q 1071 259 1091 292 q 1026 202 1052 226 q 967 163 1000 177 q 895 150 934 150 q 840 160 865 150 q 797 187 815 170 q 769 226 780 204 q 753 272 757 248 l 751 272 q 720 224 738 246 q 678 185 702 202 q 623 159 654 168 q 557 150 593 150 q 465 169 505 150 q 396 222 424 188 q 354 304 369 256 q 340 411 340 353 q 360 536 340 479 q 417 635 380 594 q 509 699 455 676 q 629 723 562 723 q 690 720 659 723 q 748 712 720 717 q 799 702 776 708 q 838 691 823 696 l 823 408 q 822 384 822 393 q 822 369 822 375 q 822 361 822 364 q 822 357 822 359 q 829 297 822 321 q 847 261 836 274 q 873 242 859 247 q 903 237 888 237 q 958 258 935 237 q 998 314 982 278 q 1022 396 1014 349 q 1030 497 1030 444 q 1001 668 1030 593 q 920 795 972 743 q 798 873 869 846 q 644 900 727 900 q 442 862 529 900 q 295 757 354 825 q 205 597 236 690 q 175 395 175 505 q 201 213 175 292 q 280 79 228 134 q 409 -2 332 25 q 585 -30 486 -30 q 667 -25 627 -30 q 745 -12 707 -20 q 816 6 783 -4 q 880 28 850 16 l 880 -67 q 748 -108 821 -93 q 587 -123 675 -123 q 370 -88 465 -123 q 209 12 275 -53 q 108 173 143 78 q 74 390 74 269 q 114 628 74 517 q 228 819 154 738 q 407 945 302 899 q 644 992 513 992 q 838 957 749 992 q 992 859 927 923 q 1093 703 1057 795 q 1129 496 1129 611 m 448 408 q 482 277 448 318 q 574 237 517 237 q 638 252 612 237 q 682 296 665 268 q 708 363 699 324 q 719 449 716 402 l 729 621 q 683 631 710 626 q 629 635 657 635 q 544 615 578 635 q 488 564 510 596 q 458 491 467 532 q 448 408 448 450 "},"ʼ":{"x_min":16,"x_max":228,"ha":243,"o":"m 219 992 l 228 977 q 205 898 218 939 q 176 815 192 857 q 143 731 160 772 q 108 652 125 690 l 16 652 q 38 737 26 692 q 60 827 49 782 q 79 913 70 871 q 94 992 88 956 l 219 992 "},"℅":{"x_min":96,"x_max":1016,"ha":1112,"o":"m 874 992 l 325 0 l 218 0 l 767 992 l 874 992 m 1016 227 q 1000 127 1016 170 q 958 55 985 84 q 893 10 931 25 q 809 -5 855 -5 q 729 10 766 -5 q 664 55 691 25 q 620 127 636 84 q 605 227 605 170 q 619 326 605 283 q 661 398 634 369 q 727 443 689 428 q 811 459 765 459 q 891 443 853 459 q 956 398 928 428 q 1000 326 984 369 q 1016 227 1016 283 m 705 228 q 711 164 705 193 q 729 114 716 135 q 762 82 742 93 q 811 70 782 70 q 859 82 839 70 q 891 114 879 93 q 909 164 904 135 q 915 228 915 193 q 909 291 915 263 q 891 340 904 320 q 859 372 879 361 q 811 383 839 383 q 762 372 782 383 q 729 340 742 361 q 711 291 716 320 q 705 228 705 263 m 320 534 q 233 546 274 534 q 161 587 192 559 q 113 658 131 615 q 96 763 96 702 q 113 872 96 827 q 163 945 131 917 q 236 986 194 973 q 327 999 278 999 q 395 991 362 999 q 451 973 429 984 l 429 901 q 380 916 408 910 q 328 923 351 923 q 228 884 259 923 q 196 764 196 844 q 326 609 196 609 q 390 615 360 609 q 444 631 420 620 l 444 559 q 386 540 420 546 q 320 534 353 534 "},"i":{"x_min":108.5,"x_max":252.96875,"ha":359,"o":"m 241 0 l 118 0 l 118 745 l 241 745 l 241 0 m 108 945 q 129 1004 108 986 q 180 1023 149 1023 q 208 1018 195 1023 q 231 1004 221 1014 q 247 980 241 995 q 252 945 252 966 q 231 887 252 906 q 180 868 210 868 q 129 886 149 868 q 108 945 108 905 "},"ќ":{"x_min":118,"x_max":676.25,"ha":682,"o":"m 516 745 l 649 745 l 369 387 l 676 0 l 536 0 l 241 377 l 241 0 l 118 0 l 118 745 l 241 745 l 241 383 l 516 745 m 272 860 q 302 905 286 879 q 334 958 318 931 q 365 1013 350 986 q 390 1064 379 1040 l 539 1064 l 539 1049 q 506 1004 528 1031 q 459 946 485 976 q 405 889 433 917 q 354 842 377 860 l 272 842 l 272 860 "},"≤":{"x_min":69,"x_max":696,"ha":765,"o":"m 696 161 l 69 448 l 69 517 l 696 844 l 696 735 l 197 488 l 696 270 l 696 161 m 69 0 l 69 101 l 696 101 l 696 0 l 69 0 "},"ё":{"x_min":77,"x_max":673,"ha":743,"o":"m 412 -14 q 276 11 337 -14 q 170 84 214 36 q 101 203 125 132 q 77 366 77 274 q 99 531 77 458 q 162 654 121 604 q 259 731 202 705 q 384 758 316 758 q 505 733 451 758 q 595 665 558 709 q 653 560 633 621 q 673 423 673 498 l 673 346 l 204 346 q 259 155 207 216 q 413 93 311 93 q 477 97 448 93 q 534 107 507 100 q 587 123 561 113 q 639 145 613 133 l 639 35 q 586 13 612 22 q 533 -2 560 3 q 476 -11 505 -8 q 412 -14 446 -14 m 384 655 q 260 602 306 655 q 207 449 214 549 l 545 449 q 536 533 545 495 q 507 598 526 571 q 457 640 487 625 q 384 655 427 655 m 183 945 q 201 998 183 982 q 248 1015 220 1015 q 294 998 274 1015 q 313 945 313 981 q 294 892 313 909 q 248 876 274 876 q 201 892 220 876 q 183 945 183 909 m 437 945 q 456 998 437 982 q 502 1015 475 1015 q 527 1010 515 1015 q 548 998 539 1006 q 562 977 557 989 q 568 945 568 964 q 548 892 568 909 q 502 876 528 876 q 456 892 475 876 q 437 945 437 909 "},"υ":{"x_min":111,"x_max":736,"ha":819,"o":"m 409 -14 q 264 13 322 -14 q 172 87 206 40 q 124 199 138 135 q 111 337 111 263 l 111 745 l 234 745 l 234 345 q 245 239 234 286 q 278 158 256 192 q 335 106 300 125 q 417 88 370 88 q 564 167 516 88 q 612 412 612 245 q 609 503 612 461 q 601 585 606 545 q 587 664 595 625 q 569 745 580 703 l 693 745 q 711 664 703 703 q 725 585 719 626 q 733 501 730 545 q 736 406 736 457 q 653 88 736 190 q 409 -14 570 -14 "},"ĕ":{"x_min":77,"x_max":673,"ha":743,"o":"m 412 -14 q 276 11 337 -14 q 170 84 214 36 q 101 203 125 132 q 77 366 77 274 q 99 531 77 458 q 162 654 121 604 q 259 731 202 705 q 384 758 316 758 q 505 733 451 758 q 595 665 558 709 q 653 560 633 621 q 673 423 673 498 l 673 346 l 204 346 q 259 155 207 216 q 413 93 311 93 q 477 97 448 93 q 534 107 507 100 q 587 123 561 113 q 639 145 613 133 l 639 35 q 586 13 612 22 q 533 -2 560 3 q 476 -11 505 -8 q 412 -14 446 -14 m 384 655 q 260 602 306 655 q 207 449 214 549 l 545 449 q 536 533 545 495 q 507 598 526 571 q 457 640 487 625 q 384 655 427 655 m 589 1030 q 571 954 586 988 q 530 894 556 920 q 467 855 504 869 q 382 842 430 842 q 295 855 332 842 q 234 893 258 868 q 196 952 209 918 q 181 1030 183 987 l 255 1030 q 267 983 258 1000 q 293 957 277 965 q 332 946 309 948 q 385 943 355 943 q 431 946 409 943 q 471 959 453 949 q 500 985 488 968 q 514 1030 511 1002 l 589 1030 "},"ﬃ":{"x_min":19,"x_max":1166.96875,"ha":1274,"o":"m 441 656 l 274 656 l 274 0 l 151 0 l 151 656 l 19 656 l 19 704 l 151 749 l 151 814 q 166 934 151 886 q 210 1010 181 982 q 280 1051 238 1039 q 375 1063 322 1063 q 449 1055 415 1063 q 509 1037 482 1047 l 477 941 q 431 954 456 949 q 379 960 406 960 q 332 954 352 960 q 300 931 313 947 q 280 887 287 915 q 274 815 274 859 l 274 745 l 441 745 l 441 656 m 898 656 l 731 656 l 731 0 l 608 0 l 608 656 l 476 656 l 476 704 l 608 749 l 608 814 q 623 934 608 886 q 667 1010 638 982 q 737 1051 695 1039 q 832 1063 779 1063 q 906 1055 872 1063 q 966 1037 939 1047 l 934 941 q 888 954 913 949 q 836 960 863 960 q 789 954 809 960 q 757 931 770 947 q 737 887 744 915 q 731 815 731 859 l 731 745 l 898 745 l 898 656 m 1155 0 l 1032 0 l 1032 745 l 1155 745 l 1155 0 m 1022 945 q 1043 1004 1022 986 q 1094 1023 1063 1023 q 1122 1018 1109 1023 q 1145 1004 1135 1014 q 1161 980 1155 995 q 1166 945 1166 966 q 1145 887 1166 906 q 1094 868 1124 868 q 1043 886 1063 868 q 1022 945 1022 905 "},"ż":{"x_min":56,"x_max":556.21875,"ha":612,"o":"m 556 0 l 56 0 l 56 80 l 418 656 l 78 656 l 78 745 l 544 745 l 544 650 l 189 88 l 556 88 l 556 0 m 248 945 q 268 1004 248 986 q 319 1023 289 1023 q 348 1018 334 1023 q 371 1004 361 1014 q 386 980 380 995 q 392 945 392 966 q 371 887 392 906 q 319 868 349 868 q 268 886 289 868 q 248 945 248 905 "},"Э":{"x_min":40,"x_max":740,"ha":825,"o":"m 301 894 q 186 879 237 894 q 93 841 136 863 l 40 947 q 159 991 93 976 q 299 1006 226 1006 q 491 969 409 1006 q 629 866 574 932 q 712 710 684 801 q 740 513 740 620 q 712 294 740 392 q 628 128 684 197 q 489 22 572 59 q 294 -14 405 -14 q 222 -11 255 -14 q 160 -4 189 -9 q 104 8 131 0 q 52 26 78 15 l 52 135 q 159 108 105 120 q 274 97 214 97 q 520 191 436 97 q 609 462 605 285 l 179 462 l 179 574 l 606 574 q 576 708 600 649 q 512 809 551 768 q 419 873 473 851 q 301 894 366 894 "},"ő":{"x_min":77,"x_max":725,"ha":802,"o":"m 725 373 q 702 208 725 280 q 637 86 679 135 q 534 11 594 37 q 398 -14 474 -14 q 270 11 329 -14 q 168 86 211 37 q 101 208 125 135 q 77 373 77 280 q 99 537 77 465 q 164 657 122 608 q 267 732 206 707 q 403 758 327 758 q 531 732 472 758 q 633 657 590 707 q 700 537 676 608 q 725 373 725 465 m 204 373 q 250 159 204 231 q 401 88 297 88 q 551 159 506 88 q 597 373 597 231 q 551 585 597 515 q 400 655 504 655 q 250 585 295 655 q 204 373 204 515 m 199 860 q 229 905 213 879 q 261 958 245 931 q 291 1013 277 986 q 317 1064 306 1040 l 452 1064 l 452 1049 q 419 1004 441 1031 q 372 946 398 976 q 318 889 346 917 q 267 842 291 860 l 199 842 l 199 860 m 445 860 q 475 905 459 879 q 507 958 491 931 q 537 1013 523 986 q 562 1064 552 1040 l 697 1064 l 697 1049 q 664 1004 686 1031 q 617 946 643 976 q 563 889 591 917 q 512 842 536 860 l 445 842 l 445 860 "},"Ŏ":{"x_min":85,"x_max":945,"ha":1031,"o":"m 945 496 q 917 287 945 382 q 835 126 890 193 q 701 22 781 59 q 515 -14 620 -14 q 324 22 405 -14 q 189 126 243 59 q 110 288 136 193 q 85 498 85 382 q 110 707 85 613 q 190 867 136 801 q 325 970 243 934 q 517 1007 406 1007 q 701 970 622 1007 q 835 867 781 934 q 917 706 890 800 q 945 496 945 612 m 218 497 q 236 330 218 404 q 290 204 253 255 q 382 124 326 152 q 515 97 438 97 q 648 124 593 97 q 741 204 704 152 q 794 330 777 255 q 811 497 811 404 q 794 664 811 590 q 741 789 777 738 q 649 868 705 840 q 517 895 594 895 q 383 868 439 895 q 290 789 327 840 q 236 664 253 738 q 218 497 218 590 m 720 1259 q 702 1183 717 1217 q 661 1123 687 1149 q 598 1084 635 1098 q 513 1071 561 1071 q 426 1084 463 1071 q 365 1122 389 1097 q 327 1181 340 1147 q 312 1259 314 1216 l 386 1259 q 398 1212 389 1229 q 424 1186 408 1194 q 463 1175 440 1177 q 516 1172 486 1172 q 562 1175 540 1172 q 602 1188 584 1178 q 631 1214 619 1197 q 645 1259 642 1231 l 720 1259 "},"ю":{"x_min":118,"x_max":1047,"ha":1124,"o":"m 1047 373 q 1025 208 1047 280 q 962 86 1003 135 q 864 11 922 37 q 734 -14 806 -14 q 613 8 668 -14 q 518 75 558 31 q 455 184 478 119 q 426 333 431 248 l 241 333 l 241 0 l 118 0 l 118 745 l 241 745 l 241 436 l 428 436 q 459 574 434 514 q 523 675 483 634 q 617 736 563 715 q 739 758 672 758 q 862 732 805 758 q 959 657 918 707 q 1023 537 1000 608 q 1047 373 1047 465 m 555 373 q 598 159 555 231 q 737 88 641 88 q 876 159 834 88 q 919 373 919 231 q 876 585 919 515 q 736 655 833 655 q 598 585 640 655 q 555 373 555 515 "},"İ":{"x_min":55.34375,"x_max":414.8125,"ha":471,"o":"m 414 0 l 55 0 l 55 69 l 172 96 l 172 895 l 55 922 l 55 992 l 414 992 l 414 922 l 298 895 l 298 96 l 414 69 l 414 0 m 163 1174 q 183 1233 163 1215 q 234 1252 204 1252 q 263 1247 249 1252 q 286 1233 276 1243 q 301 1209 295 1224 q 307 1174 307 1195 q 286 1116 307 1135 q 234 1097 264 1097 q 183 1115 204 1097 q 163 1174 163 1134 "},"Ě":{"x_min":135,"x_max":650,"ha":733,"o":"m 650 0 l 135 0 l 135 992 l 650 992 l 650 880 l 261 880 l 261 574 l 624 574 l 624 462 l 261 462 l 261 111 l 650 111 l 650 0 m 620 1274 q 579 1229 603 1255 q 533 1176 556 1203 q 490 1121 510 1148 q 460 1071 470 1094 l 329 1071 q 299 1121 319 1094 q 256 1176 279 1148 q 210 1229 233 1203 q 170 1274 187 1255 l 170 1293 l 252 1293 q 322 1237 286 1270 q 395 1166 358 1204 q 466 1237 430 1204 q 538 1293 503 1270 l 620 1293 l 620 1274 "},"‹":{"x_min":55.5,"x_max":344,"ha":400,"o":"m 55 375 l 264 656 l 344 603 l 183 367 l 344 130 l 264 78 l 55 356 l 55 375 "},"ķ":{"x_min":118,"x_max":684.25,"ha":689,"o":"m 233 384 l 324 500 l 522 745 l 665 745 l 394 422 l 684 0 l 542 0 l 315 341 l 241 286 l 241 0 l 118 0 l 118 1055 l 241 1055 l 241 571 l 230 384 l 233 384 m 271 -288 q 287 -246 278 -271 q 304 -191 296 -220 q 318 -135 312 -163 q 327 -85 325 -107 l 450 -85 l 450 -98 q 435 -141 445 -115 q 409 -197 424 -167 q 375 -255 394 -226 q 337 -307 357 -284 l 271 -307 l 271 -288 "},"ì":{"x_min":-23,"x_max":244,"ha":359,"o":"m 241 0 l 118 0 l 118 745 l 241 745 l 241 0 m 244 842 l 162 842 q 110 889 138 860 q 56 946 82 917 q 9 1004 30 976 q -23 1049 -12 1031 l -23 1064 l 125 1064 q 151 1013 136 1040 q 181 958 165 986 q 213 905 197 931 q 244 860 229 879 l 244 842 "},"±":{"x_min":69.515625,"x_max":696.203125,"ha":765,"o":"m 332 439 l 69 439 l 69 541 l 332 541 l 332 804 l 433 804 l 433 541 l 696 541 l 696 439 l 433 439 l 433 178 l 332 178 l 332 439 m 69 0 l 69 101 l 696 101 l 696 0 l 69 0 "},"|":{"x_min":332,"x_max":433.734375,"ha":765,"o":"m 332 1055 l 433 1055 l 433 -334 l 332 -334 l 332 1055 "},"§":{"x_min":82.140625,"x_max":585,"ha":675,"o":"m 93 550 q 101 612 93 584 q 125 661 110 640 q 159 698 139 683 q 198 723 178 713 q 121 788 149 749 q 93 883 93 826 q 111 958 93 925 q 164 1014 130 991 q 245 1050 198 1037 q 351 1063 293 1063 q 470 1048 417 1063 q 572 1011 523 1034 l 534 915 q 442 947 490 934 q 346 960 394 960 q 244 941 279 960 q 209 886 209 922 q 217 852 209 868 q 245 822 226 837 q 297 791 264 807 q 377 755 329 775 q 464 714 426 736 q 529 666 503 692 q 570 606 556 639 q 585 531 585 573 q 577 467 585 496 q 555 415 569 438 q 525 376 542 392 q 489 348 508 359 q 560 285 535 322 q 585 195 585 248 q 564 110 585 147 q 508 46 544 72 q 419 6 471 20 q 301 -7 366 -7 q 175 4 228 -7 q 82 40 122 16 l 82 151 q 129 130 103 140 q 184 112 155 120 q 243 100 213 104 q 303 95 274 95 q 382 103 351 95 q 433 124 414 111 q 460 154 452 137 q 468 190 468 171 q 462 224 468 209 q 439 254 456 239 q 389 286 421 269 q 305 323 357 302 q 215 365 254 344 q 148 412 176 386 q 107 471 121 438 q 93 550 93 505 m 209 563 q 218 517 209 538 q 248 476 228 495 q 302 437 269 456 q 383 398 335 419 l 406 388 q 428 409 417 397 q 448 437 439 421 q 462 472 457 453 q 468 514 468 491 q 459 561 468 539 q 429 603 451 583 q 372 642 408 623 q 282 682 336 662 q 256 666 268 676 q 232 640 243 655 q 215 605 222 625 q 209 563 209 586 "},"џ":{"x_min":118,"x_max":706,"ha":825,"o":"m 241 102 l 582 102 l 582 745 l 706 745 l 706 0 l 479 0 l 479 -258 l 356 -258 l 356 0 l 118 0 l 118 745 l 241 745 l 241 102 "},"љ":{"x_min":11,"x_max":1054,"ha":1131,"o":"m 611 439 l 771 439 q 985 386 916 439 q 1054 227 1054 333 q 1038 133 1054 175 q 988 61 1022 91 q 900 15 954 31 q 769 0 846 0 l 488 0 l 488 642 l 351 642 q 315 342 337 466 q 259 139 293 218 q 181 25 226 61 q 75 -10 135 -10 q 39 -8 56 -10 q 11 -2 22 -6 l 11 82 q 44 78 26 78 q 111 118 81 78 q 165 241 141 158 q 205 448 188 323 q 235 745 222 574 l 611 745 l 611 439 m 930 219 q 919 275 930 252 q 886 311 908 297 q 832 330 864 325 q 756 336 799 336 l 611 336 l 611 102 l 759 102 q 828 108 796 102 q 882 127 859 113 q 917 164 904 141 q 930 219 930 186 "},"q":{"x_min":77,"x_max":696,"ha":814,"o":"m 383 88 q 470 104 434 88 q 528 151 506 119 q 560 231 550 183 q 572 342 571 279 l 572 370 q 563 492 572 439 q 532 581 554 545 q 473 636 510 618 q 382 655 437 655 q 247 581 290 655 q 204 369 204 507 q 247 157 204 227 q 383 88 290 88 m 359 -14 q 244 10 296 -14 q 154 83 192 34 q 97 203 117 131 q 77 370 77 275 q 97 538 77 466 q 154 659 117 610 q 244 733 192 708 q 359 758 296 758 q 432 748 399 758 q 490 724 464 739 q 536 688 516 709 q 572 644 556 667 l 577 644 l 596 745 l 696 745 l 696 -334 l 572 -334 l 572 -16 q 573 16 572 -3 q 576 54 575 36 q 580 99 578 76 l 572 99 q 537 55 557 76 q 491 19 517 34 q 432 -5 465 3 q 359 -14 400 -14 "},"˳":{"x_min":78,"x_max":385,"ha":463,"o":"m 385 -229 q 373 -291 385 -264 q 340 -338 361 -319 q 291 -367 319 -357 q 229 -377 262 -377 q 167 -367 195 -377 q 119 -338 139 -357 q 88 -292 99 -319 q 78 -231 78 -265 q 88 -169 78 -196 q 119 -123 99 -142 q 167 -94 139 -104 q 229 -85 195 -85 q 290 -94 262 -85 q 340 -123 319 -104 q 373 -168 361 -142 q 385 -229 385 -195 m 310 -231 q 288 -174 310 -194 q 231 -154 265 -154 q 174 -174 196 -154 q 152 -231 152 -194 q 172 -287 152 -267 q 231 -307 192 -307 q 288 -287 265 -307 q 310 -231 310 -267 "},"ή":{"x_min":118,"x_max":707,"ha":818,"o":"m 583 -334 l 583 479 q 547 611 583 567 q 436 655 512 655 q 343 637 381 655 q 283 585 306 620 q 251 501 261 551 q 241 385 241 450 l 241 0 l 118 0 l 118 745 l 218 745 l 236 644 l 242 644 q 283 694 259 673 q 334 730 306 715 q 393 751 362 744 q 457 758 424 758 q 644 693 581 758 q 707 486 707 628 l 707 -334 l 583 -334 m 388 860 q 401 906 394 880 q 414 960 408 932 q 426 1014 421 987 q 435 1064 432 1041 l 570 1064 l 570 1049 q 554 1007 565 1033 q 528 951 543 980 q 495 892 512 921 q 461 842 477 863 l 388 842 l 388 860 "},"Ж":{"x_min":2.75,"x_max":1129.25,"ha":1132,"o":"m 372 511 l 12 992 l 151 992 l 505 511 l 505 992 l 631 992 l 631 511 l 980 992 l 1119 992 l 764 511 l 1129 0 l 986 0 l 631 502 l 631 0 l 505 0 l 505 502 l 145 0 l 2 0 l 372 511 "},"®":{"x_min":68,"x_max":1088,"ha":1156,"o":"m 506 521 l 554 521 q 641 545 615 521 q 668 616 668 569 q 640 686 668 666 q 553 706 612 706 l 506 706 l 506 521 m 776 617 q 767 559 776 584 q 743 513 758 533 q 709 480 728 494 q 669 458 689 467 q 749 326 714 384 q 779 277 765 301 q 804 235 793 254 q 822 205 816 216 l 829 194 l 707 194 l 569 429 l 506 429 l 506 194 l 398 194 l 398 799 l 555 799 q 723 754 669 799 q 776 617 776 710 m 68 495 q 86 631 68 566 q 137 753 104 696 q 217 856 170 809 q 320 936 264 903 q 442 987 377 969 q 578 1006 507 1006 q 713 987 648 1006 q 835 936 778 969 q 938 856 892 903 q 1018 753 985 809 q 1069 631 1051 696 q 1088 495 1088 566 q 1069 359 1088 425 q 1018 238 1051 294 q 938 134 985 181 q 835 55 892 88 q 713 3 778 21 q 578 -14 648 -14 q 442 3 507 -14 q 320 55 377 21 q 217 134 264 88 q 137 238 170 181 q 86 359 104 294 q 68 495 68 425 m 141 496 q 176 326 141 405 q 269 187 210 247 q 408 94 329 128 q 578 59 487 59 q 747 94 668 59 q 886 187 826 128 q 979 326 945 247 q 1014 496 1014 405 q 979 665 1014 586 q 886 804 945 744 q 747 897 826 863 q 578 932 668 932 q 408 897 487 932 q 269 804 329 863 q 176 665 210 744 q 141 496 141 586 "},"Н":{"x_min":135,"x_max":839,"ha":974,"o":"m 839 0 l 712 0 l 712 462 l 261 462 l 261 0 l 135 0 l 135 992 l 261 992 l 261 574 l 712 574 l 712 992 l 839 992 l 839 0 "},"Ε":{"x_min":135,"x_max":650,"ha":733,"o":"m 650 0 l 135 0 l 135 992 l 650 992 l 650 880 l 261 880 l 261 574 l 624 574 l 624 462 l 261 462 l 261 111 l 650 111 l 650 0 "},"₧":{"x_min":102,"x_max":992,"ha":1042,"o":"m 908 82 q 931 84 918 82 q 955 87 943 85 q 977 92 966 89 q 992 97 987 95 l 992 6 q 948 -7 976 0 q 878 -14 921 -14 q 812 -2 842 -14 q 760 32 782 8 q 725 91 738 56 q 713 175 713 127 l 713 477 l 607 477 l 607 534 l 713 588 l 758 717 l 833 717 l 833 574 l 974 574 l 974 477 l 833 477 l 833 187 q 850 109 833 135 q 908 82 868 82 m 616 701 q 598 582 616 639 q 538 482 580 525 q 426 412 496 438 q 253 386 357 386 l 221 386 l 221 0 l 102 0 l 102 992 l 272 992 q 428 972 363 992 q 534 916 493 953 q 596 825 576 879 q 616 701 616 770 m 221 491 l 239 491 q 349 502 302 491 q 428 537 397 513 q 474 600 459 561 q 490 695 490 639 q 434 839 490 792 q 260 886 378 886 l 221 886 l 221 491 "},"л":{"x_min":11,"x_max":640,"ha":758,"o":"m 640 0 l 516 0 l 516 642 l 352 642 q 316 342 338 466 q 260 139 293 218 q 181 25 227 61 q 76 -10 136 -10 q 39 -8 56 -10 q 11 -2 22 -6 l 11 82 q 44 78 26 78 q 112 118 82 78 q 165 241 142 158 q 206 448 189 323 q 236 745 223 574 l 640 745 l 640 0 "},"σ":{"x_min":77,"x_max":784.6875,"ha":817,"o":"m 725 342 q 703 201 725 267 q 641 88 682 136 q 539 13 600 40 q 398 -14 478 -14 q 267 9 326 -14 q 165 80 207 33 q 100 196 123 127 q 77 355 77 265 q 103 535 77 461 q 178 656 129 609 q 296 723 226 702 q 453 745 366 745 l 784 745 l 784 642 l 604 642 q 651 583 629 614 q 689 514 673 551 q 715 435 706 477 q 725 342 725 393 m 204 356 q 215 249 204 298 q 250 164 226 200 q 312 108 274 128 q 401 88 349 88 q 490 107 453 88 q 551 159 527 125 q 586 238 575 192 q 597 337 597 284 q 570 508 597 435 q 493 642 543 581 l 453 642 q 341 627 388 642 q 264 578 294 612 q 219 490 233 545 q 204 356 204 435 "},"θ":{"x_min":77,"x_max":710,"ha":786,"o":"m 710 528 q 692 300 710 401 q 636 129 674 199 q 538 22 598 59 q 392 -14 477 -14 q 252 22 312 -14 q 154 129 193 59 q 95 300 114 199 q 77 528 77 401 q 94 757 77 656 q 149 927 111 857 q 246 1034 186 997 q 392 1071 306 1071 q 531 1034 472 1071 q 631 928 591 998 q 690 758 670 859 q 710 528 710 657 m 392 88 q 477 113 442 88 q 537 189 513 138 q 572 315 560 239 q 586 493 584 391 l 200 493 q 213 317 201 393 q 247 190 224 241 q 306 113 270 139 q 392 88 341 88 m 392 968 q 309 945 343 968 q 251 875 274 921 q 215 758 227 828 q 200 596 203 689 l 585 596 q 533 875 579 781 q 392 968 488 968 "}," ":{"x_min":0,"x_max":0,"ha":361},"∑":{"x_min":50,"x_max":848,"ha":876,"o":"m 50 -334 l 50 -255 l 473 364 l 60 914 l 60 992 l 804 992 l 804 880 l 237 880 l 606 365 l 222 -222 l 848 -222 l 848 -334 l 50 -334 "},"Ώ":{"x_min":-17,"x_max":1041.9375,"ha":1092,"o":"m 578 895 q 445 872 500 895 q 353 805 389 849 q 300 699 317 762 q 283 556 283 636 q 295 425 283 488 q 334 304 307 362 q 406 194 362 246 q 516 99 451 143 l 516 0 l 114 0 l 114 111 l 382 111 q 290 189 332 143 q 216 292 247 235 q 167 416 185 349 q 150 559 150 484 q 177 743 150 661 q 259 884 204 826 q 393 975 313 943 q 578 1007 473 1007 q 762 975 683 1007 q 896 884 842 943 q 978 743 951 826 q 1006 559 1006 661 q 988 416 1006 484 q 939 292 970 349 q 866 189 908 235 q 773 111 823 143 l 1041 111 l 1041 0 l 640 0 l 640 99 q 749 194 704 143 q 821 304 793 246 q 860 425 848 362 q 872 556 872 488 q 855 699 872 636 q 802 805 838 762 q 710 872 766 849 q 578 895 655 895 m -17 789 q -3 835 -10 809 q 9 889 3 861 q 21 943 16 916 q 30 993 27 970 l 165 993 l 165 978 q 149 936 160 962 q 123 880 138 909 q 90 821 107 850 q 56 771 72 792 l -17 771 l -17 789 "},"ẃ":{"x_min":13.75,"x_max":1022.25,"ha":1036,"o":"m 683 0 l 570 417 q 563 445 567 430 q 555 477 559 460 q 546 512 551 494 q 538 546 542 529 q 518 628 528 586 l 514 628 q 496 546 505 585 q 480 476 488 512 q 464 415 471 440 l 347 0 l 204 0 l 13 745 l 143 745 l 232 348 q 245 282 239 318 q 258 211 252 246 q 269 146 264 177 q 277 95 274 115 l 281 95 q 290 142 284 113 q 303 205 296 172 q 317 270 310 238 q 331 324 325 302 l 453 745 l 586 745 l 702 324 q 716 270 709 301 q 732 207 724 239 q 745 145 739 175 q 754 95 751 115 l 758 95 q 764 142 760 113 q 775 207 769 172 q 788 279 781 242 q 803 348 795 316 l 896 745 l 1022 745 l 829 0 l 683 0 m 456 860 q 486 905 470 879 q 518 958 502 931 q 549 1013 534 986 q 574 1064 563 1040 l 723 1064 l 723 1049 q 690 1004 712 1031 q 643 946 669 976 q 589 889 617 917 q 538 842 561 860 l 456 842 l 456 860 "},"+":{"x_min":69.515625,"x_max":696.203125,"ha":765,"o":"m 332 439 l 69 439 l 69 541 l 332 541 l 332 804 l 433 804 l 433 541 l 696 541 l 696 439 l 433 439 l 433 178 l 332 178 l 332 439 "},"Ë":{"x_min":135,"x_max":650,"ha":733,"o":"m 650 0 l 135 0 l 135 992 l 650 992 l 650 880 l 261 880 l 261 574 l 624 574 l 624 462 l 261 462 l 261 111 l 650 111 l 650 0 m 201 1174 q 219 1227 201 1211 q 266 1244 238 1244 q 312 1227 292 1244 q 331 1174 331 1210 q 312 1121 331 1138 q 266 1105 292 1105 q 219 1121 238 1105 q 201 1174 201 1138 m 455 1174 q 474 1227 455 1211 q 520 1244 493 1244 q 545 1239 533 1244 q 566 1227 557 1235 q 580 1206 575 1218 q 586 1174 586 1193 q 566 1121 586 1138 q 520 1105 546 1105 q 474 1121 493 1105 q 455 1174 455 1138 "},"Š":{"x_min":70.109375,"x_max":657,"ha":721,"o":"m 657 264 q 633 147 657 199 q 566 59 610 95 q 460 4 523 23 q 320 -14 398 -14 q 179 -2 245 -14 q 70 32 114 9 l 70 153 q 122 131 93 142 q 184 112 151 120 q 251 99 216 104 q 319 93 285 93 q 479 134 427 93 q 530 252 530 176 q 521 316 530 289 q 486 366 511 343 q 420 410 461 389 q 316 456 379 431 q 212 508 256 480 q 139 572 168 537 q 96 652 110 607 q 83 754 83 697 q 104 860 83 813 q 165 939 126 907 q 259 989 205 972 q 380 1006 314 1006 q 525 990 460 1006 q 640 951 589 975 l 595 845 q 495 880 551 865 q 381 894 440 894 q 254 856 299 894 q 209 752 209 818 q 219 686 209 714 q 252 635 229 657 q 315 592 276 612 q 410 549 353 572 q 517 499 471 525 q 594 441 563 473 q 641 366 625 408 q 657 264 657 323 m 607 1274 q 566 1229 590 1255 q 520 1176 543 1203 q 477 1121 497 1148 q 447 1071 457 1094 l 316 1071 q 286 1121 306 1094 q 243 1176 266 1148 q 197 1229 220 1203 q 157 1274 174 1255 l 157 1293 l 239 1293 q 309 1237 273 1270 q 382 1166 345 1204 q 453 1237 417 1204 q 525 1293 490 1270 l 607 1293 l 607 1274 "}," ":{"x_min":0,"x_max":0,"ha":1389},"ð":{"x_min":75,"x_max":725,"ha":802,"o":"m 725 388 q 702 217 725 291 q 637 91 679 142 q 534 12 594 39 q 398 -14 473 -14 q 268 8 328 -14 q 166 73 209 30 q 99 179 123 116 q 75 323 75 242 q 96 466 75 403 q 157 571 117 528 q 254 635 197 613 q 383 658 311 658 q 504 637 452 658 q 585 577 556 617 l 591 580 q 529 725 570 660 q 427 845 488 790 l 254 742 l 204 819 l 350 907 q 294 945 323 926 q 234 981 265 964 l 281 1065 q 367 1018 325 1043 q 448 964 408 994 l 602 1058 l 653 981 l 520 902 q 603 805 566 858 q 668 689 641 752 q 710 550 695 625 q 725 388 725 475 m 597 355 q 585 429 597 393 q 550 493 574 466 q 488 538 526 521 q 400 555 451 555 q 310 540 347 555 q 248 494 272 524 q 213 420 225 464 q 202 318 202 376 q 213 224 202 267 q 249 152 225 182 q 310 104 273 121 q 400 88 348 88 q 551 155 505 88 q 597 355 597 223 "},"щ":{"x_min":118,"x_max":1197,"ha":1218,"o":"m 1197 -258 l 1073 -258 l 1073 0 l 118 0 l 118 745 l 241 745 l 241 102 l 542 102 l 542 745 l 665 745 l 665 102 l 965 102 l 965 745 l 1089 745 l 1089 102 l 1197 102 l 1197 -258 "},"℮":{"x_min":69,"x_max":789,"ha":860,"o":"m 429 -24 q 273 7 341 -24 q 161 92 206 39 q 92 215 115 146 q 69 359 69 284 q 83 480 69 426 q 124 577 98 534 q 185 651 150 620 q 259 702 219 682 q 343 733 299 723 q 429 743 386 743 q 571 716 506 743 q 685 639 637 689 q 761 518 734 589 q 789 359 789 448 l 213 359 l 213 117 q 251 86 228 100 q 300 59 273 71 q 357 40 327 47 q 420 33 388 33 q 512 44 472 33 q 585 75 553 55 q 645 125 618 96 q 696 193 672 155 l 746 165 q 693 92 721 126 q 628 31 665 58 q 542 -9 590 5 q 429 -24 493 -24 m 644 417 l 644 604 q 609 632 630 618 q 560 658 588 646 q 498 677 532 670 q 426 685 465 685 q 358 678 389 685 q 300 661 327 672 q 252 635 274 650 q 213 606 230 621 l 213 417 l 644 417 "},"Φ":{"x_min":71,"x_max":994,"ha":1065,"o":"m 468 1006 l 594 1006 l 594 884 l 643 884 q 801 852 735 884 q 910 768 867 820 q 973 649 953 716 q 994 514 994 583 q 985 429 994 472 q 959 343 977 385 q 913 264 942 301 q 844 199 885 227 q 749 155 803 171 q 626 139 694 139 l 594 139 l 594 -14 l 468 -14 l 468 139 l 436 139 q 314 155 368 139 q 220 199 260 171 q 151 264 179 227 q 105 343 122 301 q 79 429 87 385 q 71 514 71 472 q 91 649 71 583 q 154 768 112 716 q 262 852 197 820 q 418 884 328 884 l 468 884 l 468 1006 m 594 246 l 611 246 q 721 266 674 246 q 798 322 768 286 q 844 408 829 358 q 860 517 860 458 q 846 617 860 570 q 804 700 832 665 q 734 755 776 735 q 632 776 691 776 l 594 776 l 594 246 m 468 776 l 429 776 q 329 755 371 776 q 259 700 287 735 q 217 617 231 665 q 204 517 204 570 q 219 408 204 458 q 265 322 235 358 q 342 266 295 286 q 450 246 388 246 l 468 246 l 468 776 "},"ş":{"x_min":61.15625,"x_max":564,"ha":627,"o":"m 564 203 q 544 108 564 149 q 487 40 524 68 q 398 0 450 13 q 281 -14 346 -14 q 154 -2 207 -14 q 61 33 101 9 l 61 146 q 107 125 82 135 q 161 106 133 114 q 219 93 189 98 q 279 88 249 88 q 353 95 323 88 q 403 116 384 103 q 431 150 423 130 q 440 194 440 170 q 433 232 440 215 q 409 265 427 249 q 360 299 391 282 q 280 337 329 316 q 193 378 232 358 q 127 424 154 399 q 86 482 100 449 q 72 560 72 515 q 90 645 72 608 q 143 707 109 682 q 224 745 177 732 q 330 758 272 758 q 451 743 396 758 q 554 706 505 729 l 512 606 q 422 641 468 626 q 329 655 376 655 q 228 632 261 655 q 195 568 195 610 q 203 526 195 544 q 229 493 210 509 q 279 461 248 477 q 358 426 311 445 q 444 385 406 405 q 509 339 482 365 q 549 281 535 314 q 564 203 564 249 m 440 -194 q 392 -297 440 -260 q 242 -334 344 -334 q 212 -331 227 -334 q 187 -327 197 -329 l 187 -254 q 213 -257 197 -256 q 240 -258 230 -258 q 315 -247 288 -258 q 342 -208 342 -235 q 333 -186 342 -195 q 309 -169 324 -176 q 272 -157 294 -162 q 227 -147 251 -152 l 288 0 l 370 0 l 331 -78 q 374 -92 354 -83 q 408 -115 393 -101 q 431 -148 423 -128 q 440 -194 440 -168 "}," ":{"x_min":0,"x_max":0,"ha":765},"ı":{"x_min":118,"x_max":241.4375,"ha":359,"o":"m 241 0 l 118 0 l 118 745 l 241 745 l 241 0 "},"ä":{"x_min":64,"x_max":626,"ha":737,"o":"m 536 0 l 511 102 l 505 102 q 461 50 483 72 q 412 13 439 28 q 353 -7 386 0 q 278 -14 321 -14 q 193 0 232 -14 q 125 40 153 12 q 80 109 96 67 q 64 208 64 151 q 142 379 64 320 q 379 445 220 439 l 503 450 l 503 496 q 494 572 503 541 q 465 620 484 602 q 419 647 447 639 q 357 655 392 655 q 253 639 301 655 q 160 599 204 623 l 117 692 q 228 739 167 720 q 357 758 290 758 q 477 744 427 758 q 560 700 527 730 q 609 623 593 669 q 626 509 626 576 l 626 0 l 536 0 m 310 88 q 386 101 351 88 q 447 140 422 114 q 488 205 473 166 q 502 298 502 245 l 502 365 l 405 360 q 303 346 345 357 q 237 316 262 336 q 202 270 213 297 q 191 208 191 243 q 224 117 191 146 q 310 88 257 88 m 185 945 q 203 998 185 982 q 250 1015 222 1015 q 296 998 276 1015 q 315 945 315 981 q 296 892 315 909 q 250 876 276 876 q 203 892 222 876 q 185 945 185 909 m 439 945 q 458 998 439 982 q 504 1015 477 1015 q 529 1010 517 1015 q 550 998 541 1006 q 564 977 559 989 q 570 945 570 964 q 550 892 570 909 q 504 876 530 876 q 458 892 477 876 q 439 945 439 909 "},"¹":{"x_min":42,"x_max":297.984375,"ha":460,"o":"m 207 992 l 297 992 l 297 397 l 201 397 l 201 754 q 201 792 201 771 q 202 833 201 813 q 204 873 203 854 q 206 908 205 893 q 184 881 196 895 q 156 853 171 866 l 92 799 l 42 864 l 207 992 "},"W":{"x_min":13.75,"x_max":1214.25,"ha":1228,"o":"m 549 992 l 682 992 l 837 411 q 857 335 847 373 q 876 261 867 297 q 891 194 884 225 q 901 136 897 162 q 908 192 904 162 q 917 256 912 223 q 929 325 923 290 q 943 393 936 360 l 1079 992 l 1214 992 l 965 0 l 837 0 l 665 636 q 647 707 656 671 q 631 776 638 744 q 615 848 622 813 q 600 776 608 814 q 585 707 593 745 q 567 632 576 669 l 402 0 l 275 0 l 13 992 l 147 992 l 298 388 q 313 323 306 357 q 325 257 320 290 q 336 192 331 223 q 344 136 341 162 q 352 194 347 161 q 364 264 358 227 q 379 338 371 301 q 396 409 387 376 l 549 992 "},"λ":{"x_min":-10.25,"x_max":710,"ha":710,"o":"m -10 0 l 288 729 l 252 837 q 233 887 243 864 q 208 926 222 910 q 172 952 193 943 q 122 961 152 961 q 82 959 99 961 q 52 953 65 956 l 52 1052 q 92 1060 69 1057 q 138 1064 114 1064 q 224 1049 188 1064 q 286 1005 260 1035 q 335 929 313 975 q 377 820 356 883 l 600 163 q 627 107 612 127 q 669 88 643 88 q 691 90 678 88 q 710 95 704 93 l 710 3 q 675 -9 694 -4 q 632 -14 657 -14 q 585 -8 605 -14 q 549 11 565 -2 q 521 46 533 24 q 498 99 508 68 l 406 382 q 389 437 399 405 q 370 502 379 469 q 353 564 361 534 q 343 610 346 594 l 338 610 q 312 501 330 558 q 272 389 294 443 l 117 0 l -10 0 "},">":{"x_min":69,"x_max":696,"ha":765,"o":"m 69 270 l 568 488 l 69 735 l 69 844 l 696 517 l 696 448 l 69 161 l 69 270 "},"τ":{"x_min":13,"x_max":590.296875,"ha":624,"o":"m 590 745 l 590 642 l 337 642 l 337 230 q 345 162 337 190 q 369 117 354 134 q 406 92 385 100 q 451 84 427 84 q 478 85 463 84 q 506 88 492 86 q 531 92 519 90 q 553 97 544 95 l 553 5 q 530 -2 544 1 q 502 -10 517 -6 q 468 -15 486 -13 q 432 -18 450 -18 q 349 -8 388 -18 q 279 27 309 1 q 231 99 249 54 q 214 216 214 145 l 214 642 l 13 642 l 13 691 l 103 745 l 590 745 "},"Ų":{"x_min":125,"x_max":845,"ha":970,"o":"m 845 993 l 845 349 q 822 205 845 272 q 755 90 800 139 q 641 13 709 41 q 481 -14 573 -14 q 327 12 394 -14 q 216 86 261 38 q 148 202 171 134 q 125 352 125 269 l 125 991 l 251 991 l 251 346 q 309 162 251 227 q 487 97 368 97 q 591 115 548 97 q 663 167 635 133 q 704 246 690 200 q 718 347 718 292 l 718 993 l 845 993 m 483 -161 q 501 -206 483 -191 q 543 -220 519 -220 q 576 -218 560 -220 q 602 -214 592 -217 l 602 -291 q 562 -299 584 -296 q 521 -302 541 -302 q 419 -266 453 -302 q 386 -170 386 -231 q 395 -116 386 -142 q 421 -69 405 -91 q 454 -30 436 -48 q 490 0 473 -12 l 577 0 q 483 -161 483 -90 "},"Ŵ":{"x_min":13.75,"x_max":1214.25,"ha":1228,"o":"m 549 992 l 682 992 l 837 411 q 857 335 847 373 q 876 261 867 297 q 891 194 884 225 q 901 136 897 162 q 908 192 904 162 q 917 256 912 223 q 929 325 923 290 q 943 393 936 360 l 1079 992 l 1214 992 l 965 0 l 837 0 l 665 636 q 647 707 656 671 q 631 776 638 744 q 615 848 622 813 q 600 776 608 814 q 585 707 593 745 q 567 632 576 669 l 402 0 l 275 0 l 13 992 l 147 992 l 298 388 q 313 323 306 357 q 325 257 320 290 q 336 192 331 223 q 344 136 341 162 q 352 194 347 161 q 364 264 358 227 q 379 338 371 301 q 396 409 387 376 l 549 992 m 839 1071 l 757 1071 q 685 1126 722 1093 q 614 1196 649 1159 q 541 1126 577 1159 q 471 1071 505 1093 l 389 1071 l 389 1089 q 429 1134 406 1108 q 475 1187 452 1160 q 518 1242 498 1215 q 548 1293 538 1269 l 679 1293 q 709 1242 689 1269 q 752 1187 729 1215 q 798 1134 775 1160 q 839 1089 822 1108 l 839 1071 "},"‛":{"x_min":17,"x_max":229,"ha":243,"o":"m 150 992 q 165 913 156 956 q 184 827 174 871 q 205 737 194 782 q 229 652 217 692 l 136 652 q 101 731 119 690 q 68 815 83 772 q 39 898 52 857 q 17 977 26 939 l 25 992 l 150 992 "},"Ð":{"x_min":32,"x_max":865,"ha":950,"o":"m 32 546 l 135 546 l 135 992 l 410 992 q 598 960 514 992 q 741 868 682 929 q 832 715 800 806 q 865 505 865 624 q 832 285 865 379 q 738 127 799 190 q 586 31 676 63 q 383 0 496 0 l 135 0 l 135 434 l 32 434 l 32 546 m 731 501 q 709 672 731 600 q 643 791 686 744 q 538 861 601 838 q 397 884 476 884 l 261 884 l 261 546 l 489 546 l 489 434 l 261 434 l 261 107 l 370 107 q 640 207 549 107 q 731 501 731 306 "},"Λ":{"x_min":-0.25,"x_max":789.25,"ha":789,"o":"m 789 0 l 654 0 l 455 625 q 419 748 434 691 q 393 856 403 805 q 367 748 381 805 q 333 629 353 691 l 133 0 l 0 0 l 330 992 l 457 992 l 789 0 "},"·":{"x_min":100,"x_max":272,"ha":372,"o":"m 100 490 q 106 534 100 516 q 125 563 113 552 q 152 579 136 574 q 186 585 167 585 q 219 579 203 585 q 246 563 235 574 q 265 534 258 552 q 272 490 272 516 q 265 447 272 465 q 246 418 258 430 q 219 401 235 406 q 186 396 203 396 q 152 401 167 396 q 125 418 136 406 q 106 447 113 430 q 100 490 100 465 "},"Х":{"x_min":-0.25,"x_max":760.25,"ha":760,"o":"m 760 0 l 617 0 l 376 430 l 127 0 l 0 0 l 307 518 l 20 992 l 155 992 l 380 612 l 608 992 l 737 992 l 450 522 l 760 0 "},"Υ":{"x_min":-0.25,"x_max":731.25,"ha":732,"o":"m 364 490 l 595 992 l 731 992 l 428 386 l 428 0 l 302 0 l 302 379 l 0 992 l 137 992 l 364 490 "},"r":{"x_min":118,"x_max":526,"ha":554,"o":"m 439 758 q 483 756 459 758 q 526 751 508 754 l 509 637 q 470 643 490 640 q 433 645 450 645 q 355 628 390 645 q 294 578 320 610 q 255 501 269 546 q 241 401 241 456 l 241 0 l 118 0 l 118 745 l 218 745 l 233 608 l 238 608 q 274 664 255 637 q 318 712 294 691 q 372 745 342 732 q 439 758 402 758 "},"ж":{"x_min":2.75,"x_max":997.25,"ha":1000,"o":"m 444 383 l 444 745 l 560 745 l 560 383 l 837 745 l 971 745 l 688 383 l 997 0 l 857 0 l 560 377 l 560 0 l 444 0 l 444 377 l 143 0 l 2 0 l 316 383 l 29 745 l 162 745 l 444 383 "},"Ø":{"x_min":85,"x_max":945,"ha":1031,"o":"m 881 985 l 819 884 q 913 719 881 817 q 945 496 945 620 q 917 287 945 382 q 835 126 890 193 q 701 22 781 59 q 515 -14 620 -14 q 297 34 387 -14 l 244 -51 l 151 0 l 212 99 q 115 268 146 167 q 85 498 85 369 q 110 707 85 613 q 190 867 136 801 q 325 970 243 934 q 517 1007 406 1007 q 635 992 580 1007 q 734 952 689 978 l 789 1038 l 881 985 m 218 497 q 234 337 218 408 q 282 213 249 266 l 675 854 q 603 884 642 874 q 517 895 565 895 q 383 868 439 895 q 290 789 327 840 q 236 664 253 738 q 218 497 218 590 m 811 497 q 751 773 811 671 l 359 136 q 430 107 391 117 q 515 97 468 97 q 648 124 593 97 q 741 204 704 152 q 794 330 777 255 q 811 497 811 404 "},"Ỳ":{"x_min":-0.25,"x_max":731.25,"ha":732,"o":"m 364 490 l 595 992 l 731 992 l 428 386 l 428 0 l 302 0 l 302 379 l 0 992 l 137 992 l 364 490 m 437 1071 l 355 1071 q 303 1118 331 1089 q 249 1175 275 1146 q 202 1233 223 1205 q 170 1278 180 1260 l 170 1293 l 318 1293 q 344 1242 329 1269 q 374 1187 358 1215 q 406 1134 390 1160 q 437 1089 422 1108 l 437 1071 "},"÷":{"x_min":69.65625,"x_max":696.34375,"ha":765,"o":"m 69 439 l 69 541 l 696 541 l 696 439 l 69 439 m 305 219 q 309 243 305 234 q 319 259 313 253 q 335 268 326 265 q 355 270 344 270 q 375 268 365 270 q 391 259 384 265 q 402 243 398 253 q 406 219 406 234 q 402 196 406 206 q 391 181 398 187 q 375 171 384 174 q 355 169 365 169 q 335 171 344 169 q 319 181 326 174 q 309 196 313 187 q 305 219 305 206 m 305 761 q 309 784 305 775 q 319 800 313 794 q 335 809 326 806 q 355 812 344 812 q 375 809 365 812 q 391 800 384 806 q 402 784 398 794 q 406 761 406 775 q 402 738 406 747 q 391 722 398 728 q 375 713 384 715 q 355 710 365 710 q 335 713 344 710 q 319 722 326 715 q 309 738 313 728 q 305 761 305 747 "},"с":{"x_min":77,"x_max":596,"ha":643,"o":"m 402 -14 q 274 7 334 -14 q 171 75 215 28 q 102 193 127 121 q 77 367 77 266 q 102 548 77 474 q 173 669 128 623 q 278 736 218 715 q 408 758 339 758 q 511 746 461 758 q 596 718 562 735 l 559 614 q 524 627 543 621 q 485 638 505 633 q 445 647 465 644 q 408 650 425 650 q 253 581 302 650 q 204 369 204 513 q 253 160 204 226 q 402 93 302 93 q 502 106 457 93 q 583 135 546 118 l 583 26 q 504 -3 546 6 q 402 -14 463 -14 "},"h":{"x_min":118,"x_max":707,"ha":818,"o":"m 583 0 l 583 479 q 547 611 583 567 q 436 655 512 655 q 343 637 381 655 q 283 585 306 620 q 251 501 261 551 q 241 385 241 450 l 241 0 l 118 0 l 118 1055 l 241 1055 l 241 741 l 236 644 l 242 644 q 283 694 259 673 q 334 730 306 715 q 393 751 362 744 q 457 758 424 758 q 644 693 581 758 q 707 486 707 628 l 707 0 l 583 0 "},"f":{"x_min":19,"x_max":509,"ha":457,"o":"m 441 656 l 274 656 l 274 0 l 151 0 l 151 656 l 19 656 l 19 704 l 151 749 l 151 814 q 166 934 151 886 q 210 1010 181 982 q 280 1051 238 1039 q 375 1063 322 1063 q 449 1055 415 1063 q 509 1037 482 1047 l 477 941 q 431 954 456 949 q 379 960 406 960 q 332 954 352 960 q 300 931 313 947 q 280 887 287 915 q 274 815 274 859 l 274 745 l 441 745 l 441 656 "},"“":{"x_min":16,"x_max":489,"ha":504,"o":"m 285 652 l 277 666 q 299 744 286 703 q 328 828 312 786 q 361 912 343 870 q 396 992 379 954 l 489 992 q 465 905 477 950 q 444 816 454 861 q 425 730 434 772 q 410 652 416 687 l 285 652 m 24 652 l 16 666 q 38 744 25 703 q 67 828 51 786 q 100 912 82 870 q 135 992 118 954 l 228 992 q 204 905 216 950 q 183 816 193 861 q 164 730 173 772 q 149 652 155 687 l 24 652 "},"A":{"x_min":-0.25,"x_max":844.25,"ha":844,"o":"m 715 0 l 606 307 l 237 307 l 127 0 l 0 0 l 364 996 l 479 996 l 844 0 l 715 0 m 566 419 l 466 706 q 456 736 462 719 q 444 774 450 754 q 432 817 438 795 q 421 860 426 839 q 410 816 416 839 q 397 773 404 794 q 386 735 391 752 q 376 706 380 718 l 277 419 l 566 419 "},"O":{"x_min":85,"x_max":945,"ha":1031,"o":"m 945 496 q 917 287 945 382 q 835 126 890 193 q 701 22 781 59 q 515 -14 620 -14 q 324 22 405 -14 q 189 126 243 59 q 110 288 136 193 q 85 498 85 382 q 110 707 85 613 q 190 867 136 801 q 325 970 243 934 q 517 1007 406 1007 q 701 970 622 1007 q 835 867 781 934 q 917 706 890 800 q 945 496 945 612 m 218 497 q 236 330 218 404 q 290 204 253 255 q 382 124 326 152 q 515 97 438 97 q 648 124 593 97 q 741 204 704 152 q 794 330 777 255 q 811 497 811 404 q 794 664 811 590 q 741 789 777 738 q 649 868 705 840 q 517 895 594 895 q 383 868 439 895 q 290 789 327 840 q 236 664 253 738 q 218 497 218 590 "},"Đ":{"x_min":32,"x_max":865,"ha":950,"o":"m 32 546 l 135 546 l 135 992 l 410 992 q 598 960 514 992 q 741 868 682 929 q 832 715 800 806 q 865 505 865 624 q 832 285 865 379 q 738 127 799 190 q 586 31 676 63 q 383 0 496 0 l 135 0 l 135 434 l 32 434 l 32 546 m 731 501 q 709 672 731 600 q 643 791 686 744 q 538 861 601 838 q 397 884 476 884 l 261 884 l 261 546 l 489 546 l 489 434 l 261 434 l 261 107 l 370 107 q 640 207 549 107 q 731 501 731 306 "},"Ǿ":{"x_min":85,"x_max":945,"ha":1031,"o":"m 881 985 l 819 884 q 913 719 881 817 q 945 496 945 620 q 917 287 945 382 q 835 126 890 193 q 701 22 781 59 q 515 -14 620 -14 q 297 34 387 -14 l 244 -51 l 151 0 l 212 99 q 115 268 146 167 q 85 498 85 369 q 110 707 85 613 q 190 867 136 801 q 325 970 243 934 q 517 1007 406 1007 q 635 992 580 1007 q 734 952 689 978 l 789 1038 l 881 985 m 218 497 q 234 337 218 408 q 282 213 249 266 l 675 854 q 603 884 642 874 q 517 895 565 895 q 383 868 439 895 q 290 789 327 840 q 236 664 253 738 q 218 497 218 590 m 811 497 q 751 773 811 671 l 359 136 q 430 107 391 117 q 515 97 468 97 q 648 124 593 97 q 741 204 704 152 q 794 330 777 255 q 811 497 811 404 m 441 1089 q 471 1134 455 1108 q 503 1187 487 1160 q 534 1242 519 1215 q 559 1293 548 1269 l 708 1293 l 708 1278 q 675 1233 697 1260 q 628 1175 654 1205 q 574 1118 602 1146 q 523 1071 546 1089 l 441 1071 l 441 1089 "},"⅛":{"x_min":56,"x_max":1011,"ha":1051,"o":"m 221 992 l 311 992 l 311 397 l 215 397 l 215 754 q 215 792 215 771 q 216 833 215 813 q 218 873 217 854 q 220 908 219 893 q 198 881 210 895 q 170 853 185 866 l 106 799 l 56 864 l 221 992 m 829 992 l 278 0 l 171 0 l 722 992 l 829 992 m 815 604 q 883 594 851 604 q 938 567 914 585 q 976 519 962 548 q 991 453 991 491 q 983 407 991 428 q 962 369 976 386 q 931 338 949 352 q 893 313 914 325 q 938 285 917 300 q 975 251 959 270 q 1001 209 991 233 q 1011 157 1011 186 q 996 87 1011 119 q 956 33 982 56 q 894 0 930 11 q 816 -13 858 -13 q 670 31 721 -13 q 620 153 620 75 q 628 205 620 182 q 651 247 636 228 q 684 281 665 266 q 724 307 703 295 q 690 335 705 321 q 662 368 674 350 q 644 407 650 386 q 638 453 638 428 q 652 519 638 491 q 691 566 667 547 q 748 594 716 585 q 815 604 780 604 m 716 155 q 741 93 716 116 q 814 70 766 70 q 888 93 863 70 q 914 155 914 116 q 906 190 914 174 q 885 219 899 206 q 854 242 872 232 q 813 262 835 253 l 802 266 q 738 219 760 244 q 716 155 716 193 m 813 520 q 755 502 776 520 q 734 449 734 484 q 741 417 734 431 q 757 392 747 404 q 783 371 768 380 q 815 353 798 361 q 846 370 831 360 q 871 390 860 379 q 887 416 881 402 q 894 449 894 430 q 872 502 894 484 q 813 520 850 520 "},"Ẁ":{"x_min":13.75,"x_max":1214.25,"ha":1228,"o":"m 549 992 l 682 992 l 837 411 q 857 335 847 373 q 876 261 867 297 q 891 194 884 225 q 901 136 897 162 q 908 192 904 162 q 917 256 912 223 q 929 325 923 290 q 943 393 936 360 l 1079 992 l 1214 992 l 965 0 l 837 0 l 665 636 q 647 707 656 671 q 631 776 638 744 q 615 848 622 813 q 600 776 608 814 q 585 707 593 745 q 567 632 576 669 l 402 0 l 275 0 l 13 992 l 147 992 l 298 388 q 313 323 306 357 q 325 257 320 290 q 336 192 331 223 q 344 136 341 162 q 352 194 347 161 q 364 264 358 227 q 379 338 371 301 q 396 409 387 376 l 549 992 m 691 1071 l 609 1071 q 557 1118 585 1089 q 503 1175 529 1146 q 456 1233 477 1205 q 424 1278 434 1260 l 424 1293 l 572 1293 q 598 1242 583 1269 q 628 1187 612 1215 q 660 1134 644 1160 q 691 1089 676 1108 l 691 1071 "},"Ť":{"x_min":14,"x_max":706,"ha":721,"o":"m 423 0 l 297 0 l 297 880 l 14 880 l 14 992 l 706 992 l 706 880 l 423 880 l 423 0 m 587 1274 q 546 1229 570 1255 q 500 1176 523 1203 q 457 1121 477 1148 q 427 1071 437 1094 l 296 1071 q 266 1121 286 1094 q 223 1176 246 1148 q 177 1229 200 1203 q 137 1274 154 1255 l 137 1293 l 219 1293 q 289 1237 253 1270 q 362 1166 325 1204 q 433 1237 397 1204 q 505 1293 470 1270 l 587 1293 l 587 1274 "},"ψ":{"x_min":111,"x_max":945,"ha":1028,"o":"m 582 1054 l 582 91 q 678 118 634 97 q 754 175 722 138 q 804 264 786 211 q 821 386 821 317 q 818 478 821 434 q 811 564 816 521 q 797 651 805 606 q 778 745 789 695 l 901 745 q 920 651 912 696 q 934 564 928 607 q 942 479 939 521 q 945 390 945 436 q 915 209 945 283 q 837 87 886 134 q 721 16 787 39 q 582 -12 655 -7 l 582 -334 l 459 -334 l 459 -12 q 319 12 383 -9 q 209 80 255 34 q 136 199 162 127 q 111 376 111 272 l 111 745 l 234 745 l 234 372 q 252 242 234 294 q 301 157 271 190 q 373 109 332 124 q 459 90 414 93 l 459 1054 l 582 1054 "},"ŗ":{"x_min":65,"x_max":526,"ha":554,"o":"m 439 758 q 483 756 459 758 q 526 751 508 754 l 509 637 q 470 643 490 640 q 433 645 450 645 q 355 628 390 645 q 294 578 320 610 q 255 501 269 546 q 241 401 241 456 l 241 0 l 118 0 l 118 745 l 218 745 l 233 608 l 238 608 q 274 664 255 637 q 318 712 294 691 q 372 745 342 732 q 439 758 402 758 m 65 -288 q 81 -246 72 -271 q 98 -191 90 -220 q 112 -135 106 -163 q 121 -85 119 -107 l 244 -85 l 244 -98 q 229 -141 239 -115 q 203 -197 218 -167 q 169 -255 188 -226 q 131 -307 151 -284 l 65 -307 l 65 -288 "}}'), Nh = "normal", Oh = 1290, Uh = -154, zh = "normal", Vh = { yMin: -377, xMin: -239.25, yMax: 1363, xMax: 1555 }, jh = 1e3, Hh = { postscript_name: "DroidSans", version_string: "Version 1.00 build 107", vendor_url: "http://www.ascendercorp.com/", full_font_name: "Droid Sans", font_family_name: "Droid Sans", copyright: "Digitized data copyright © 2006, Google Corporation.", description: "Droid Sans is a humanist sans serif typeface designed for user interfaces and electronic communication.", trademark: "Droid is a trademark of Google and may be registered in certain jurisdictions.", designer: "", designer_url: "http://www.ascendercorp.com/typedesigners.html", unique_font_identifier: "Ascender - Droid Sans", license_url: "http://ascendercorp.com/eula10.html", license_description: `This font software is the valuable property of Ascender Corporation and/or its suppliers and its use by you is covered under the terms of a license agreement. This font software is licensed to you by Ascender Corporation for your personal or business use on up to five personal computers. You may not use this font software on more than five personal computers unless you have obtained a license from Ascender to do so. Except as specifically permitted by the license, you may not copy this font software.
 
@@ -12635,8 +12635,8 @@ var Mm = /* @__PURE__ */ h8(q6, 9, 0), km = /* @__PURE__ */ h8(hi, 5, 0), Sd = f
     var a = new U9(t[0].s + 1);
     return a[t[0].s] = 1, { t: a, l: 1 };
   }
-  t.sort(function(M, k) {
-    return M.f - k.f;
+  t.sort(function(k, M) {
+    return k.f - M.f;
   }), t.push({ s: -1, f: 25001 });
   var r = t[0], l = t[1], c = 0, d = 1, u = 2;
   for (t[0] = { s: -1, f: r.f + l.f, l: r, r: l }; d != s - 1; )
@@ -12646,8 +12646,8 @@ var Mm = /* @__PURE__ */ h8(q6, 9, 0), km = /* @__PURE__ */ h8(hi, 5, 0), Sd = f
   var f = new c3(p + 1), g = Tn(t[d - 1], f, 0);
   if (g > e) {
     var n = 0, v = 0, m = g - e, q = 1 << m;
-    for (o.sort(function(k, _) {
-      return f[_.s] - f[k.s] || k.f - _.f;
+    for (o.sort(function(M, _) {
+      return f[_.s] - f[M.s] || M.f - _.f;
     }); n < s; ++n) {
       var x = o[n].s;
       if (f[x] > e)
@@ -12703,10 +12703,10 @@ var Mm = /* @__PURE__ */ h8(q6, 9, 0), km = /* @__PURE__ */ h8(hi, 5, 0), Sd = f
   return (s + 4 + n) * 8;
 }, Pa = function(i, e, t, n, s, o, a, r, l, c, d) {
   P5(e, d++, t), ++s[256];
-  for (var u = tt(s, 15), p = u.t, f = u.l, g = tt(o, 15), v = g.t, m = g.l, q = Ta(p), x = q.c, b = q.n, y = Ta(v), M = y.c, k = y.n, _ = new c3(19), w = 0; w < x.length; ++w)
+  for (var u = tt(s, 15), p = u.t, f = u.l, g = tt(o, 15), v = g.t, m = g.l, q = Ta(p), x = q.c, b = q.n, y = Ta(v), k = y.c, M = y.n, _ = new c3(19), w = 0; w < x.length; ++w)
     ++_[x[w] & 31];
-  for (var w = 0; w < M.length; ++w)
-    ++_[M[w] & 31];
+  for (var w = 0; w < k.length; ++w)
+    ++_[k[w] & 31];
   for (var S = tt(_, 7), I = S.t, R = S.l, B = 19; B > 4 && !I[Ea[B - 1]]; --B)
     ;
   var O = c + 5 << 3, X = I7(s, q6) + I7(o, hi) + a, W = I7(s, p) + I7(o, v) + a + 14 + 3 * B + I7(_, I) + 2 * _[16] + 3 * _[17] + 7 * _[18];
@@ -12716,11 +12716,11 @@ var Mm = /* @__PURE__ */ h8(q6, 9, 0), km = /* @__PURE__ */ h8(hi, 5, 0), Sd = f
   if (P5(e, d, 1 + (W < X)), d += 2, W < X) {
     J = h8(p, f, 0), e1 = p, K = h8(v, m, 0), a1 = v;
     var _1 = h8(I, R, 0);
-    P5(e, d, b - 257), P5(e, d + 5, k - 1), P5(e, d + 10, B - 4), d += 14;
+    P5(e, d, b - 257), P5(e, d + 5, M - 1), P5(e, d + 10, B - 4), d += 14;
     for (var w = 0; w < B; ++w)
       P5(e, d + 3 * w, I[Ea[w]]);
     d += 3 * B;
-    for (var L1 = [x, M], P1 = 0; P1 < 2; ++P1)
+    for (var L1 = [x, k], P1 = 0; P1 < 2; ++P1)
       for (var $1 = L1[P1], w = 0; w < $1.length; ++w) {
         var N = $1[w] & 31;
         P5(e, d, _1[N]), d += I[N], N > 15 && (P5(e, d, $1[w] >> 5 & 127), d += $1[w] >> 12);
@@ -12744,16 +12744,16 @@ var Mm = /* @__PURE__ */ h8(q6, 9, 0), km = /* @__PURE__ */ h8(hi, 5, 0), Sd = f
     d && (l[0] = o.r >> 3);
     for (var u = Em[e - 1], p = u >> 13, f = u & 8191, g = (1 << t) - 1, v = o.p || new c3(32768), m = o.h || new c3(g + 1), q = Math.ceil(t / 3), x = 2 * q, b = function(E) {
       return (i[E] ^ i[E + 1] << q ^ i[E + 2] << x) & g;
-    }, y = new Qs(25e3), M = new c3(288), k = new c3(32), _ = 0, w = 0, S = o.i || 0, I = 0, R = o.w || 0, B = 0; S + 2 < a; ++S) {
+    }, y = new Qs(25e3), k = new c3(288), M = new c3(32), _ = 0, w = 0, S = o.i || 0, I = 0, R = o.w || 0, B = 0; S + 2 < a; ++S) {
       var O = b(S), X = S & 32767, W = m[O];
       if (v[X] = W, m[O] = X, R <= S) {
         var J = a - S;
         if ((_ > 7e3 || I > 24576) && (J > 423 || !c)) {
-          d = Pa(i, l, 0, y, M, k, w, I, B, S - B, d), I = _ = w = 0, B = S;
+          d = Pa(i, l, 0, y, k, M, w, I, B, S - B, d), I = _ = w = 0, B = S;
           for (var e1 = 0; e1 < 286; ++e1)
-            M[e1] = 0;
-          for (var e1 = 0; e1 < 30; ++e1)
             k[e1] = 0;
+          for (var e1 = 0; e1 < 30; ++e1)
+            M[e1] = 0;
         }
         var K = 2, a1 = 0, _1 = f, L1 = X - W & 32767;
         if (J > 2 && O == b(S - L1))
@@ -12775,14 +12775,14 @@ var Mm = /* @__PURE__ */ h8(q6, 9, 0), km = /* @__PURE__ */ h8(hi, 5, 0), Sd = f
         if (a1) {
           y[I++] = 268435456 | En[K] << 18 | Ca[a1];
           var u1 = En[K] & 31, r1 = Ca[a1] & 31;
-          w += Js[u1] + eo[r1], ++M[257 + u1], ++k[r1], R = S + K, ++_;
+          w += Js[u1] + eo[r1], ++k[257 + u1], ++M[r1], R = S + K, ++_;
         } else
-          y[I++] = i[S], ++M[i[S]];
+          y[I++] = i[S], ++k[i[S]];
       }
     }
     for (S = Math.max(S, R); S < a; ++S)
-      y[I++] = i[S], ++M[i[S]];
-    d = Pa(i, l, c, y, M, k, w, I, B, S - B, d), c || (o.r = d & 7 | l[d / 8 | 0] << 3, d -= 7, o.h = m, o.p = v, o.i = S, o.w = R);
+      y[I++] = i[S], ++k[i[S]];
+    d = Pa(i, l, c, y, k, M, w, I, B, S - B, d), c || (o.r = d & 7 | l[d / 8 | 0] << 3, d -= 7, o.h = m, o.p = v, o.i = S, o.w = R);
   } else {
     for (var S = o.w || 0; S < a + c; S += 65535) {
       var T = S + 65535;
@@ -12897,13 +12897,13 @@ function Td(i, e) {
       compression: d
     })), s += 30 + p + m + x, o += 76 + 2 * (p + m) + (v || 0) + x;
   }
-  for (var y = new U9(o + 22), M = s, k = o - s, _ = 0; _ < n.length; ++_) {
+  for (var y = new U9(o + 22), k = s, M = o - s, _ = 0; _ < n.length; ++_) {
     var u = n[_];
     Ra(y, u.o, u, u.f, u.u, u.c.length);
     var w = 30 + u.f.length + Pn(u.extra);
     y.set(u.c, u.o + w), Ra(y, s, u, u.f, u.u, u.c.length, u.o, u.m), s += 16 + w + (u.m ? u.m.length : 0);
   }
-  return Bm(y, s, n.length, k, M), y;
+  return Bm(y, s, n.length, M, k), y;
 }
 function io(i) {
   i = i.filter((o) => !o.reference && !o.hole);
@@ -13027,7 +13027,7 @@ async function Id(i, e) {
   l.checks.parseable = "pass", l.triangles = c.length / 9, l.checks.withinTriangleLimits = l.triangles <= s ? "pass" : "fail";
   const d = [], u = /* @__PURE__ */ new Map(), p = [], f = [1 / 0, 1 / 0, 1 / 0], g = [-1 / 0, -1 / 0, -1 / 0];
   for (let b = 0; b < c.length; b += 3) {
-    const [y, M, k] = c.slice(b, b + 3), _ = [0, 1, 2].map((I) => t[I] * y + t[I + 4] * M + t[I + 8] * k + t[I + 12]);
+    const [y, k, M] = c.slice(b, b + 3), _ = [0, 1, 2].map((I) => t[I] * y + t[I + 4] * k + t[I + 8] * M + t[I + 12]);
     if (!_.every(Number.isFinite))
       return l.checks.withinSizeLimits = "fail", l.diagnostics.push("Conversion exceeds finite coordinate range."), l;
     for (let I = 0; I < 3; I++)
@@ -13040,8 +13040,8 @@ async function Id(i, e) {
   const v = /* @__PURE__ */ new Map(), m = d.map(() => /* @__PURE__ */ new Map());
   let q = !0, x = 0;
   for (const b of p) {
-    const [y, M, k] = b.map((S) => d[S].map((I, R) => I - f[R])), _ = M.map((S, I) => S - y[I]), w = k.map((S, I) => S - y[I]);
-    Math.hypot(_[1] * w[2] - _[2] * w[1], _[2] * w[0] - _[0] * w[2], _[0] * w[1] - _[1] * w[0]) === 0 && (q = !1), x += (y[0] * (M[1] * k[2] - M[2] * k[1]) + y[1] * (M[2] * k[0] - M[0] * k[2]) + y[2] * (M[0] * k[1] - M[1] * k[0])) / 6;
+    const [y, k, M] = b.map((S) => d[S].map((I, R) => I - f[R])), _ = k.map((S, I) => S - y[I]), w = M.map((S, I) => S - y[I]);
+    Math.hypot(_[1] * w[2] - _[2] * w[1], _[2] * w[0] - _[0] * w[2], _[0] * w[1] - _[1] * w[0]) === 0 && (q = !1), x += (y[0] * (k[1] * M[2] - k[2] * M[1]) + y[1] * (k[2] * M[0] - k[0] * M[2]) + y[2] * (k[0] * M[1] - k[1] * M[0])) / 6;
     for (let S = 0; S < 3; S++) {
       const I = b[S], R = b[(S + 1) % 3], B = b[(S + 2) % 3], O = I < R ? `${I},${R}` : `${R},${I}`, X = v.get(O) ?? { count: 0, direction: 0 };
       X.count++, X.direction += I < R ? 1 : -1, v.set(O, X);
@@ -13053,14 +13053,14 @@ async function Id(i, e) {
   }
   [...v.values()].some((b) => b.count !== 2 || b.direction !== 0) && (q = !1);
   for (const b of m) {
-    if ([...b.values()].some((k) => k.length !== 2)) {
+    if ([...b.values()].some((M) => M.length !== 2)) {
       q = !1;
       break;
     }
-    const y = /* @__PURE__ */ new Set(), M = [b.keys().next().value];
-    for (; M.length; ) {
-      const k = M.pop();
-      y.has(k) || (y.add(k), M.push(...b.get(k)));
+    const y = /* @__PURE__ */ new Set(), k = [b.keys().next().value];
+    for (; k.length; ) {
+      const M = k.pop();
+      y.has(M) || (y.add(M), k.push(...b.get(M)));
     }
     if (y.size !== b.size) {
       q = !1;
@@ -13114,11 +13114,11 @@ async function Rn(i, e, t, n, s) {
   if (!Object.values(y.checks).every((B) => B === "pass"))
     throw new Error(`Selected STL failed fresh quality screening. ${y.diagnostics.join(" ")}`);
   o?.throwIfAborted();
-  const M = Ld(b), k = [];
-  for (let B = 0; B < M.length; B += 3) {
-    const [O, X, W] = M.slice(B, B + 3);
+  const k = Ld(b), M = [];
+  for (let B = 0; B < k.length; B += 3) {
+    const [O, X, W] = k.slice(B, B + 3);
     for (let J = 0; J < 3; J++)
-      k.push(f[J] * O + f[J + 4] * X + f[J + 8] * W + f[J + 12]);
+      M.push(f[J] * O + f[J + 4] * X + f[J + 8] * W + f[J + 12]);
   }
   const _ = d0(), w = d0(), S = { format: "brickwright-cad", id: d0(), version: 5, title: l.title, units: "mm", roots: [_], nodes: {
     [_]: {
@@ -13127,8 +13127,8 @@ async function Rn(i, e, t, n, s) {
       name: l.title,
       color: "#eea52b",
       transform: z2(),
-      positions: k,
-      indices: Array.from({ length: k.length / 3 }, (B, O) => O),
+      positions: M,
+      indices: Array.from({ length: M.length / 3 }, (B, O) => O),
       provenance: [w]
     }
   }, provenance: { version: 1, records: [{ id: w, asset: l, selectedFile: d, modificationNotes: v }] } }, I = w5(a.document);
@@ -13178,9 +13178,9 @@ async function Bd(i, e, t, n, s) {
   if (y.length > 4096)
     throw new Error("Incorporation modification notes exceed the provenance limit after recording source conversion.");
   v5(x);
-  const M = d0(), k = d0(), _ = { format: "brickwright-cad", id: d0(), version: 5, title: d.title, units: "mm", roots: [M], nodes: {
-    [M]: { id: M, kind: "code", program: x, name: d.title, color: "#76b7ce", transform: z2(), provenance: [k] }
-  }, provenance: { version: 1, records: [{ id: k, asset: d, selectedFile: u, modificationNotes: y }] } }, w = w5(o.document);
+  const k = d0(), M = d0(), _ = { format: "brickwright-cad", id: d0(), version: 5, title: d.title, units: "mm", roots: [k], nodes: {
+    [k]: { id: k, kind: "code", program: x, name: d.title, color: "#76b7ce", transform: z2(), provenance: [M] }
+  }, provenance: { version: 1, records: [{ id: M, asset: d, selectedFile: u, modificationNotes: y }] } }, w = w5(o.document);
   try {
     w.insert(_, [0, 0, 0], { label: "Insert library source" }), a?.throwIfAborted();
     const I = (await r(w.state.document)).bodies.find((R) => R.id === w.state.selection[0]);
@@ -13370,7 +13370,7 @@ function Gm(i, e, t, n, s, o) {
   const l = Hm, c = n?.cache ?? Vm();
   let d, u;
   const p = () => {
-    for (const r1 of k.querySelectorAll("img[data-adafruit-preview]")) {
+    for (const r1 of M.querySelectorAll("img[data-adafruit-preview]")) {
       const T = d?.[r1.dataset.adafruitPreview];
       T && (r1.src = T);
     }
@@ -13383,12 +13383,12 @@ function Gm(i, e, t, n, s, o) {
   }));
   let g, v = !n?.load;
   const m = new Map([...n?.localFiles ?? []].map(([r1, T]) => [r1, T.slice()]));
-  let q = !1, x = !1, b, y, M;
-  const k = c2("dialog");
-  k.className = "model-library-dialog", k.setAttribute("aria-label", h("Model library"));
+  let q = !1, x = !1, b, y, k;
+  const M = c2("dialog");
+  M.className = "model-library-dialog", M.setAttribute("aria-label", h("Model library"));
   const _ = c2("header"), w = c2("h2", h("Model library")), S = c2("button", "×");
   S.type = "button", S.className = "library-close", S.setAttribute("aria-label", h("Close model library")), S.title = h("Close model library"), S.onclick = () => {
-    M?.abort(), k.close();
+    k?.abort(), M.close();
   }, _.append(w, S);
   const I = c2("div");
   I.className = "model-library-tools";
@@ -13411,7 +13411,7 @@ function Gm(i, e, t, n, s, o) {
   const e1 = c2("section");
   e1.className = "model-library-details", W.append(J, e1);
   const K = c2("p");
-  K.className = "model-library-status", K.setAttribute("role", "status"), K.setAttribute("aria-label", h("Model library status")), K.textContent = r, k.append(_, I, W, K), i.append(k), k.addEventListener("keydown", (r1) => r1.stopPropagation()), k.addEventListener("cancel", () => M?.abort());
+  K.className = "model-library-status", K.setAttribute("role", "status"), K.setAttribute("aria-label", h("Model library status")), K.textContent = r, M.append(_, I, W, K), i.append(M), M.addEventListener("keydown", (r1) => r1.stopPropagation()), M.addEventListener("cancel", () => k?.abort());
   const a1 = (r1) => {
     K.textContent = r1 instanceof Error ? r1.message : String(r1);
   }, _1 = (r1, T) => {
@@ -13530,9 +13530,9 @@ ${d1.file.url ?? d1.file.path}` : "", C1.replaceChildren(), d1 && M1?.fileSha256
       if (i1.disabled)
         return;
       const d1 = U[Number(V.value)], M1 = e.state, R1 = H.value.trim() || "Inserted without manual changes; recorded millimetres/Z-up conversion applied.", I1 = v1.checked;
-      x = !0, M = new AbortController(), X.disabled = R.disabled = B.disabled = V.disabled = H.disabled = v1.disabled = !0, Q(), G(), K.textContent = h("Verifying selected model…");
+      x = !0, k = new AbortController(), X.disabled = R.disabled = B.disabled = V.disabled = H.disabled = v1.disabled = !0, Q(), G(), K.textContent = h("Verifying selected model…");
       try {
-        const A1 = d1.file.path ? m.get(d1.file.path) : void 0, F1 = A1 ? { bytes: A1.slice(), cached: !0 } : await bh(a, d1.selection, { cache: n?.cache ?? $m, fetch: n?.fetch, offline: I1, signal: M.signal, maxBytes: H5 });
+        const A1 = d1.file.path ? m.get(d1.file.path) : void 0, F1 = A1 ? { bytes: A1.slice(), cached: !0 } : await bh(a, d1.selection, { cache: n?.cache ?? $m, fetch: n?.fetch, offline: I1, signal: k.signal, maxBytes: H5 });
         if (q)
           throw new Error(h("Editor was disposed"));
         if (e.state.document !== M1.document || e.state.revision !== M1.revision)
@@ -13542,7 +13542,7 @@ ${d1.file.url ?? d1.file.path}` : "", C1.replaceChildren(), d1 && M1?.fileSha256
           if (q)
             throw new Error(h("Editor was disposed"));
           return a2;
-        }, toMillimetresZUp: r1.quality.screeningPolicy.toMillimetresZUp, checkedOn: (/* @__PURE__ */ new Date()).toISOString().slice(0, 10), modificationNotes: R1, signal: M.signal }), K.textContent = F1.cached ? h("Inserted with provenance. Verified file is cached for offline reuse.") : h("Inserted with provenance. File could not be cached for offline reuse.");
+        }, toMillimetresZUp: r1.quality.screeningPolicy.toMillimetresZUp, checkedOn: (/* @__PURE__ */ new Date()).toISOString().slice(0, 10), modificationNotes: R1, signal: k.signal }), K.textContent = F1.cached ? h("Inserted with provenance. Verified file is cached for offline reuse.") : h("Inserted with provenance. File could not be cached for offline reuse.");
         try {
           await s();
         } catch {
@@ -13551,7 +13551,7 @@ ${d1.file.url ?? d1.file.path}` : "", C1.replaceChildren(), d1 && M1?.fileSha256
       } catch (A1) {
         q || a1(A1);
       } finally {
-        x = !1, M = void 0, X.disabled = R.disabled = B.disabled = V.disabled = H.disabled = v1.disabled = !1, Q(), G();
+        x = !1, k = void 0, X.disabled = R.disabled = B.disabled = V.disabled = H.disabled = v1.disabled = !1, Q(), G();
       }
     }, e1.append(z, i1, P), C(r1, D), u1(T1, r1, U[Number(V.value)]?.file), Q();
   }
@@ -13606,9 +13606,9 @@ Mirror commit: ${r1.commit}`, U.href = `https://github.com/adafruit/Adafruit_CAD
       v1.value = C1.value = "", Q();
     }, v1.onchange = C1.onchange = Q, P.onclick = async () => {
       const R1 = T.files[Number(D.value)];
-      x = !0, M = new AbortController(), D.disabled = H.disabled = !0, Q(), G(), K.textContent = h("Verifying original file…");
+      x = !0, k = new AbortController(), D.disabled = H.disabled = !0, Q(), G(), K.textContent = h("Verifying original file…");
       try {
-        const I1 = await La(r1, R1, c, n?.fetch, H.checked, M.signal);
+        const I1 = await La(r1, R1, c, n?.fetch, H.checked, k.signal);
         if (q)
           return;
         const A1 = R1.path.split("/").pop() ?? "original";
@@ -13622,18 +13622,18 @@ Mirror commit: ${r1.commit}`, U.href = `https://github.com/adafruit/Adafruit_CAD
       } catch (I1) {
         q || a1(I1);
       } finally {
-        x = !1, M = void 0, D.disabled = H.disabled = !1, Q(), G();
+        x = !1, k = void 0, D.disabled = H.disabled = !1, Q(), G();
       }
     }, T1.onclick = async () => {
       const R1 = T.files[Number(D.value)], I1 = e.state, A1 = v1.value, F1 = C1.value;
-      x = !0, M = new AbortController(), D.disabled = H.disabled = v1.disabled = C1.disabled = !0, Q(), G(), K.textContent = h("Verifying and screening STL…");
+      x = !0, k = new AbortController(), D.disabled = H.disabled = v1.disabled = C1.disabled = !0, Q(), G(), K.textContent = h("Verifying and screening STL…");
       try {
-        const o2 = await La(r1, R1, c, n?.fetch, H.checked, M.signal), a2 = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10), K1 = await jm(r1, T, R1, o2, A1, F1, a2);
+        const o2 = await La(r1, R1, c, n?.fetch, H.checked, k.signal), a2 = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10), K1 = await jm(r1, T, R1, o2, A1, F1, a2);
         if (q)
           throw new Error(h("Editor was disposed"));
         if (e.state.document !== I1.document || e.state.revision !== I1.revision)
           throw new Error(h("The model changed while loading. Retry insertion."));
-        await Rn(e, K1.catalogue, { assetId: K1.id, file: "original" }, o2, { evaluate: t, toMillimetresZUp: K1.matrix, checkedOn: a2, modificationNotes: K1.assumption, signal: M.signal }), K.textContent = h("STL inserted with provenance and selected conversion.");
+        await Rn(e, K1.catalogue, { assetId: K1.id, file: "original" }, o2, { evaluate: t, toMillimetresZUp: K1.matrix, checkedOn: a2, modificationNotes: K1.assumption, signal: k.signal }), K.textContent = h("STL inserted with provenance and selected conversion.");
         try {
           await s();
         } catch {
@@ -13642,7 +13642,7 @@ Mirror commit: ${r1.commit}`, U.href = `https://github.com/adafruit/Adafruit_CAD
       } catch (o2) {
         q || a1(o2);
       } finally {
-        x = !1, M = void 0, D.disabled = H.disabled = v1.disabled = C1.disabled = !1, Q(), G();
+        x = !1, k = void 0, D.disabled = H.disabled = v1.disabled = C1.disabled = !1, Q(), G();
       }
     };
     const d1 = c2("details"), M1 = c2("summary", h("Original source files"));
@@ -13658,9 +13658,9 @@ Mirror commit: ${r1.commit}`, U.href = `https://github.com/adafruit/Adafruit_CAD
     };
     (!D || !U) && e1.append(c2("p", h("Editable source is not bundled in this host."))), H.onclick = async () => {
       if (!(H.disabled || !D)) {
-        x = !0, M = new AbortController(), X.disabled = R.disabled = B.disabled = z.disabled = !0, w1(), G(), K.textContent = h("Verifying selected model…");
+        x = !0, k = new AbortController(), X.disabled = R.disabled = B.disabled = z.disabled = !0, w1(), G(), K.textContent = h("Verifying selected model…");
         try {
-          await Bd(e, a, { assetId: r1.id, file: T === r1.original ? "original" : "editableSource" }, D, { signal: M.signal, sourceFiles: m, modificationNotes: z.value.trim() || "Inserted with default parameters; no manual changes.", evaluate: async (v1) => {
+          await Bd(e, a, { assetId: r1.id, file: T === r1.original ? "original" : "editableSource" }, D, { signal: k.signal, sourceFiles: m, modificationNotes: z.value.trim() || "Inserted with default parameters; no manual changes.", evaluate: async (v1) => {
             const S1 = await t(v1);
             if (q)
               throw new Error(h("Editor was disposed"));
@@ -13674,7 +13674,7 @@ Mirror commit: ${r1.commit}`, U.href = `https://github.com/adafruit/Adafruit_CAD
         } catch (v1) {
           q || a1(v1);
         } finally {
-          x = !1, M = void 0, X.disabled = R.disabled = B.disabled = z.disabled = !1, w1(), G();
+          x = !1, k = void 0, X.disabled = R.disabled = B.disabled = z.disabled = !1, w1(), G();
         }
       }
     }, e1.append(V, H), w1();
@@ -13710,7 +13710,7 @@ Mirror commit: ${r1.commit}`, U.href = `https://github.com/adafruit/Adafruit_CAD
         a1(T);
       }
   }, { open() {
-    !q && !k.open && (G(), x || p1(), k.showModal(), R.focus(), v || (K.textContent = h("Loading models…"), g ?? (g = n.load().then((r1) => {
+    !q && !M.open && (G(), x || p1(), M.showModal(), R.focus(), v || (K.textContent = h("Loading models…"), g ?? (g = n.load().then((r1) => {
       if (q)
         return;
       const T = u6(r1.catalogue);
@@ -13726,7 +13726,7 @@ Mirror commit: ${r1.commit}`, U.href = `https://github.com/adafruit/Adafruit_CAD
       g = void 0;
     }))));
   }, dispose() {
-    q = !0, M?.abort(), k.remove();
+    q = !0, k?.abort(), M.remove();
   } };
 }
 function to(i) {
@@ -13844,14 +13844,14 @@ function Zm(i, e, t, n) {
     s.dataset.dragging = String(p.dragging), s.dataset.valid = String(p.valid);
     const v = [];
     d.forEach((m, q) => {
-      const x = ["X", "Y", "Z"][q], b = `${f}${x}`, y = p.axes.find((X) => X.axis === x), M = c[q];
+      const x = ["X", "Y", "Z"][q], b = `${f}${x}`, y = p.axes.find((X) => X.axis === x), k = c[q];
       m.setAttribute("aria-label", h`On-canvas ${h(g)} ${x}`), m.readOnly = p.dragging, m.disabled = p.poses.some((X) => e.state.document.parametric?.bindings.some((W) => W.nodeId === X.id && W.property === b)), m.title = p.valid ? m.disabled ? h("Driven by an expression; edit it in Parameters") : `${h(g)} ${x} (${f === "rotation" ? "°" : f === "scale" ? "×" : "mm"})${p.poses.length > 1 ? h(" · per-object value") : ""}` : p.warning ?? h("Cannot commit this transform"), (!(m.getRootNode().activeElement === m) || p.dragging) && (m.value = String(Number(p.poses[0].transform[f][q].toFixed(5))));
       const _ = Math.max(34, Math.min(92, m.value.length * 7 + 12));
-      if (m.style.width = `${_}px`, m.hidden = !y?.visible, M.style.display = y?.visible && y.guide ? "" : "none", !y?.visible)
+      if (m.style.width = `${_}px`, m.hidden = !y?.visible, k.style.display = y?.visible && y.guide ? "" : "none", !y?.visible)
         return;
-      y.guide && (M.setAttribute("x1", String(y.guide.from[0])), M.setAttribute("y1", String(y.guide.from[1])), M.setAttribute("x2", String(y.guide.to[0])), M.setAttribute("y2", String(y.guide.to[1])));
+      y.guide && (k.setAttribute("x1", String(y.guide.from[0])), k.setAttribute("y1", String(y.guide.from[1])), k.setAttribute("x2", String(y.guide.to[0])), k.setAttribute("y2", String(y.guide.to[1])));
       const w = y.direction[0], S = y.direction[1], I = 8 + Math.abs(w) * _ / 2 + Math.abs(S) * 11, R = p.screenBounds ? Fd(y.point, y.direction, p.screenBounds, { width: i.clientWidth, height: i.clientHeight }, v, _) : void 0, B = R?.x ?? y.point[0] + w * I, O = R?.y ?? y.point[1] + S * I;
-      m.hidden = !!p.screenBounds && !R || B - _ / 2 < 2 || B + _ / 2 > i.clientWidth - 2 || O < 13 || O > i.clientHeight - 44, m.hidden && (M.style.display = "none"), !m.hidden && R && (v.push(R.rect), M.style.display = "", M.setAttribute("x1", String(y.point[0])), M.setAttribute("y1", String(y.point[1])), M.setAttribute("x2", String(B - w * I)), M.setAttribute("y2", String(O - S * I))), m.style.left = `${B}px`, m.style.top = `${O}px`, m.dataset.anchorX = String(y.point[0]), m.dataset.anchorY = String(y.point[1]);
+      m.hidden = !!p.screenBounds && !R || B - _ / 2 < 2 || B + _ / 2 > i.clientWidth - 2 || O < 13 || O > i.clientHeight - 44, m.hidden && (k.style.display = "none"), !m.hidden && R && (v.push(R.rect), k.style.display = "", k.setAttribute("x1", String(y.point[0])), k.setAttribute("y1", String(y.point[1])), k.setAttribute("x2", String(B - w * I)), k.setAttribute("y2", String(O - S * I))), m.style.left = `${B}px`, m.style.top = `${O}px`, m.dataset.anchorX = String(y.point[0]), m.dataset.anchorY = String(y.point[1]);
     });
   }
   return { update: u, get visible() {
@@ -16234,8 +16234,8 @@ const lt = /* @__PURE__ */ new Z(), Ha = /* @__PURE__ */ new S0(), ea = class ea
    * @return {Matrix3} A reference to this matrix.
    */
   multiplyMatrices(e, t) {
-    const n = e.elements, s = t.elements, o = this.elements, a = n[0], r = n[3], l = n[6], c = n[1], d = n[4], u = n[7], p = n[2], f = n[5], g = n[8], v = s[0], m = s[3], q = s[6], x = s[1], b = s[4], y = s[7], M = s[2], k = s[5], _ = s[8];
-    return o[0] = a * v + r * x + l * M, o[3] = a * m + r * b + l * k, o[6] = a * q + r * y + l * _, o[1] = c * v + d * x + u * M, o[4] = c * m + d * b + u * k, o[7] = c * q + d * y + u * _, o[2] = p * v + f * x + g * M, o[5] = p * m + f * b + g * k, o[8] = p * q + f * y + g * _, this;
+    const n = e.elements, s = t.elements, o = this.elements, a = n[0], r = n[3], l = n[6], c = n[1], d = n[4], u = n[7], p = n[2], f = n[5], g = n[8], v = s[0], m = s[3], q = s[6], x = s[1], b = s[4], y = s[7], k = s[2], M = s[5], _ = s[8];
+    return o[0] = a * v + r * x + l * k, o[3] = a * m + r * b + l * M, o[6] = a * q + r * y + l * _, o[1] = c * v + d * x + u * k, o[4] = c * m + d * b + u * M, o[7] = c * q + d * y + u * _, o[2] = p * v + f * x + g * k, o[5] = p * m + f * b + g * M, o[8] = p * q + f * y + g * _, this;
   }
   /**
    * Multiplies every component of the matrix by the given scalar.
@@ -17219,8 +17219,8 @@ const ia = class ia {
       if (Math.abs(d + p) < 0.1 && Math.abs(u + v) < 0.1 && Math.abs(g + m) < 0.1 && Math.abs(c + f + q - 3) < 0.1)
         return this.set(1, 0, 0, 0), this;
       t = Math.PI;
-      const b = (c + 1) / 2, y = (f + 1) / 2, M = (q + 1) / 2, k = (d + p) / 4, _ = (u + v) / 4, w = (g + m) / 4;
-      return b > y && b > M ? b < 0.01 ? (n = 0, s = 0.707106781, o = 0.707106781) : (n = Math.sqrt(b), s = k / n, o = _ / n) : y > M ? y < 0.01 ? (n = 0.707106781, s = 0, o = 0.707106781) : (s = Math.sqrt(y), n = k / s, o = w / s) : M < 0.01 ? (n = 0.707106781, s = 0.707106781, o = 0) : (o = Math.sqrt(M), n = _ / o, s = w / o), this.set(n, s, o, t), this;
+      const b = (c + 1) / 2, y = (f + 1) / 2, k = (q + 1) / 2, M = (d + p) / 4, _ = (u + v) / 4, w = (g + m) / 4;
+      return b > y && b > k ? b < 0.01 ? (n = 0, s = 0.707106781, o = 0.707106781) : (n = Math.sqrt(b), s = M / n, o = _ / n) : y > k ? y < 0.01 ? (n = 0.707106781, s = 0, o = 0.707106781) : (s = Math.sqrt(y), n = M / s, o = w / s) : k < 0.01 ? (n = 0.707106781, s = 0.707106781, o = 0) : (o = Math.sqrt(k), n = _ / o, s = w / o), this.set(n, s, o, t), this;
     }
     let x = Math.sqrt((m - g) * (m - g) + (u - v) * (u - v) + (p - d) * (p - d));
     return Math.abs(x) < 1e-3 && (x = 1), this.x = (m - g) / x, this.y = (u - v) / x, this.z = (p - d) / x, this.w = Math.acos((c + f + q - 1) / 2), this;
@@ -17955,8 +17955,8 @@ const Li = class Li {
    * @return {Matrix4} A reference to this matrix.
    */
   multiplyMatrices(e, t) {
-    const n = e.elements, s = t.elements, o = this.elements, a = n[0], r = n[4], l = n[8], c = n[12], d = n[1], u = n[5], p = n[9], f = n[13], g = n[2], v = n[6], m = n[10], q = n[14], x = n[3], b = n[7], y = n[11], M = n[15], k = s[0], _ = s[4], w = s[8], S = s[12], I = s[1], R = s[5], B = s[9], O = s[13], X = s[2], W = s[6], J = s[10], e1 = s[14], K = s[3], a1 = s[7], _1 = s[11], L1 = s[15];
-    return o[0] = a * k + r * I + l * X + c * K, o[4] = a * _ + r * R + l * W + c * a1, o[8] = a * w + r * B + l * J + c * _1, o[12] = a * S + r * O + l * e1 + c * L1, o[1] = d * k + u * I + p * X + f * K, o[5] = d * _ + u * R + p * W + f * a1, o[9] = d * w + u * B + p * J + f * _1, o[13] = d * S + u * O + p * e1 + f * L1, o[2] = g * k + v * I + m * X + q * K, o[6] = g * _ + v * R + m * W + q * a1, o[10] = g * w + v * B + m * J + q * _1, o[14] = g * S + v * O + m * e1 + q * L1, o[3] = x * k + b * I + y * X + M * K, o[7] = x * _ + b * R + y * W + M * a1, o[11] = x * w + b * B + y * J + M * _1, o[15] = x * S + b * O + y * e1 + M * L1, this;
+    const n = e.elements, s = t.elements, o = this.elements, a = n[0], r = n[4], l = n[8], c = n[12], d = n[1], u = n[5], p = n[9], f = n[13], g = n[2], v = n[6], m = n[10], q = n[14], x = n[3], b = n[7], y = n[11], k = n[15], M = s[0], _ = s[4], w = s[8], S = s[12], I = s[1], R = s[5], B = s[9], O = s[13], X = s[2], W = s[6], J = s[10], e1 = s[14], K = s[3], a1 = s[7], _1 = s[11], L1 = s[15];
+    return o[0] = a * M + r * I + l * X + c * K, o[4] = a * _ + r * R + l * W + c * a1, o[8] = a * w + r * B + l * J + c * _1, o[12] = a * S + r * O + l * e1 + c * L1, o[1] = d * M + u * I + p * X + f * K, o[5] = d * _ + u * R + p * W + f * a1, o[9] = d * w + u * B + p * J + f * _1, o[13] = d * S + u * O + p * e1 + f * L1, o[2] = g * M + v * I + m * X + q * K, o[6] = g * _ + v * R + m * W + q * a1, o[10] = g * w + v * B + m * J + q * _1, o[14] = g * S + v * O + m * e1 + q * L1, o[3] = x * M + b * I + y * X + k * K, o[7] = x * _ + b * R + y * W + k * a1, o[11] = x * w + b * B + y * J + k * _1, o[15] = x * S + b * O + y * e1 + k * L1, this;
   }
   /**
    * Multiplies every component of the matrix by the given scalar.
@@ -17976,8 +17976,8 @@ const Li = class Li {
    * @return {number} The determinant.
    */
   determinant() {
-    const e = this.elements, t = e[0], n = e[4], s = e[8], o = e[12], a = e[1], r = e[5], l = e[9], c = e[13], d = e[2], u = e[6], p = e[10], f = e[14], g = e[3], v = e[7], m = e[11], q = e[15], x = l * f - c * p, b = r * f - c * u, y = r * p - l * u, M = a * f - c * d, k = a * p - l * d, _ = a * u - r * d;
-    return t * (v * x - m * b + q * y) - n * (g * x - m * M + q * k) + s * (g * b - v * M + q * _) - o * (g * y - v * k + m * _);
+    const e = this.elements, t = e[0], n = e[4], s = e[8], o = e[12], a = e[1], r = e[5], l = e[9], c = e[13], d = e[2], u = e[6], p = e[10], f = e[14], g = e[3], v = e[7], m = e[11], q = e[15], x = l * f - c * p, b = r * f - c * u, y = r * p - l * u, k = a * f - c * d, M = a * p - l * d, _ = a * u - r * d;
+    return t * (v * x - m * b + q * y) - n * (g * x - m * k + q * M) + s * (g * b - v * k + q * _) - o * (g * y - v * M + m * _);
   }
   /**
    * Transposes this matrix in place.
@@ -18010,10 +18010,10 @@ const Li = class Li {
    * @return {Matrix4} A reference to this matrix.
    */
   invert() {
-    const e = this.elements, t = e[0], n = e[1], s = e[2], o = e[3], a = e[4], r = e[5], l = e[6], c = e[7], d = e[8], u = e[9], p = e[10], f = e[11], g = e[12], v = e[13], m = e[14], q = e[15], x = t * r - n * a, b = t * l - s * a, y = t * c - o * a, M = n * l - s * r, k = n * c - o * r, _ = s * c - o * l, w = d * v - u * g, S = d * m - p * g, I = d * q - f * g, R = u * m - p * v, B = u * q - f * v, O = p * q - f * m, X = x * O - b * B + y * R + M * I - k * S + _ * w;
+    const e = this.elements, t = e[0], n = e[1], s = e[2], o = e[3], a = e[4], r = e[5], l = e[6], c = e[7], d = e[8], u = e[9], p = e[10], f = e[11], g = e[12], v = e[13], m = e[14], q = e[15], x = t * r - n * a, b = t * l - s * a, y = t * c - o * a, k = n * l - s * r, M = n * c - o * r, _ = s * c - o * l, w = d * v - u * g, S = d * m - p * g, I = d * q - f * g, R = u * m - p * v, B = u * q - f * v, O = p * q - f * m, X = x * O - b * B + y * R + k * I - M * S + _ * w;
     if (X === 0) return this.set(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     const W = 1 / X;
-    return e[0] = (r * O - l * B + c * R) * W, e[1] = (s * B - n * O - o * R) * W, e[2] = (v * _ - m * k + q * M) * W, e[3] = (p * k - u * _ - f * M) * W, e[4] = (l * I - a * O - c * S) * W, e[5] = (t * O - s * I + o * S) * W, e[6] = (m * y - g * _ - q * b) * W, e[7] = (d * _ - p * y + f * b) * W, e[8] = (a * B - r * I + c * w) * W, e[9] = (n * I - t * B - o * w) * W, e[10] = (g * k - v * y + q * x) * W, e[11] = (u * y - d * k - f * x) * W, e[12] = (r * S - a * R - l * w) * W, e[13] = (t * R - n * S + s * w) * W, e[14] = (v * b - g * M - m * x) * W, e[15] = (d * M - u * b + p * x) * W, this;
+    return e[0] = (r * O - l * B + c * R) * W, e[1] = (s * B - n * O - o * R) * W, e[2] = (v * _ - m * M + q * k) * W, e[3] = (p * M - u * _ - f * k) * W, e[4] = (l * I - a * O - c * S) * W, e[5] = (t * O - s * I + o * S) * W, e[6] = (m * y - g * _ - q * b) * W, e[7] = (d * _ - p * y + f * b) * W, e[8] = (a * B - r * I + c * w) * W, e[9] = (n * I - t * B - o * w) * W, e[10] = (g * M - v * y + q * x) * W, e[11] = (u * y - d * M - f * x) * W, e[12] = (r * S - a * R - l * w) * W, e[13] = (t * R - n * S + s * w) * W, e[14] = (v * b - g * k - m * x) * W, e[15] = (d * k - u * b + p * x) * W, this;
   }
   /**
    * Multiplies the columns of this matrix by the given vector.
@@ -18264,8 +18264,8 @@ const Li = class Li {
    * @return {Matrix4} A reference to this matrix.
    */
   compose(e, t, n) {
-    const s = this.elements, o = t._x, a = t._y, r = t._z, l = t._w, c = o + o, d = a + a, u = r + r, p = o * c, f = o * d, g = o * u, v = a * d, m = a * u, q = r * u, x = l * c, b = l * d, y = l * u, M = n.x, k = n.y, _ = n.z;
-    return s[0] = (1 - (v + q)) * M, s[1] = (f + y) * M, s[2] = (g - b) * M, s[3] = 0, s[4] = (f - y) * k, s[5] = (1 - (p + q)) * k, s[6] = (m + x) * k, s[7] = 0, s[8] = (g + b) * _, s[9] = (m - x) * _, s[10] = (1 - (p + v)) * _, s[11] = 0, s[12] = e.x, s[13] = e.y, s[14] = e.z, s[15] = 1, this;
+    const s = this.elements, o = t._x, a = t._y, r = t._z, l = t._w, c = o + o, d = a + a, u = r + r, p = o * c, f = o * d, g = o * u, v = a * d, m = a * u, q = r * u, x = l * c, b = l * d, y = l * u, k = n.x, M = n.y, _ = n.z;
+    return s[0] = (1 - (v + q)) * k, s[1] = (f + y) * k, s[2] = (g - b) * k, s[3] = 0, s[4] = (f - y) * M, s[5] = (1 - (p + q)) * M, s[6] = (m + x) * M, s[7] = 0, s[8] = (g + b) * _, s[9] = (m - x) * _, s[10] = (1 - (p + v)) * _, s[11] = 0, s[12] = e.x, s[13] = e.y, s[14] = e.z, s[15] = 1, this;
   }
   /**
    * Decomposes this matrix into its position, rotation and scale components
@@ -21720,11 +21720,11 @@ class a0 extends R4 {
           e.getX(O + 2)
         );
     }
-    const b = new Z(), y = new Z(), M = new Z(), k = new Z();
+    const b = new Z(), y = new Z(), k = new Z(), M = new Z();
     function _(w) {
-      M.fromBufferAttribute(s, w), k.copy(M);
+      k.fromBufferAttribute(s, w), M.copy(k);
       const S = r[w];
-      b.copy(S), b.sub(M.multiplyScalar(M.dot(S))).normalize(), y.crossVectors(k, S);
+      b.copy(S), b.sub(k.multiplyScalar(k.dot(S))).normalize(), y.crossVectors(M, S);
       const R = y.dot(l[w]) < 0 ? -1 : 1;
       a.setXYZW(w, b.x, b.y, b.z, R);
     }
@@ -22900,9 +22900,9 @@ class y2 extends $0 {
       if (Array.isArray(a))
         for (let g = 0, v = p.length; g < v; g++) {
           const m = p[g], q = a[m.materialIndex], x = Math.max(m.start, f.start), b = Math.min(r.count, Math.min(m.start + m.count, f.start + f.count));
-          for (let y = x, M = b; y < M; y += 3) {
-            const k = r.getX(y), _ = r.getX(y + 1), w = r.getX(y + 2);
-            s = ue(this, q, e, n, c, d, u, k, _, w), s && (s.faceIndex = Math.floor(y / 3), s.face.materialIndex = m.materialIndex, t.push(s));
+          for (let y = x, k = b; y < k; y += 3) {
+            const M = r.getX(y), _ = r.getX(y + 1), w = r.getX(y + 2);
+            s = ue(this, q, e, n, c, d, u, M, _, w), s && (s.faceIndex = Math.floor(y / 3), s.face.materialIndex = m.materialIndex, t.push(s));
           }
         }
       else {
@@ -22916,9 +22916,9 @@ class y2 extends $0 {
       if (Array.isArray(a))
         for (let g = 0, v = p.length; g < v; g++) {
           const m = p[g], q = a[m.materialIndex], x = Math.max(m.start, f.start), b = Math.min(l.count, Math.min(m.start + m.count, f.start + f.count));
-          for (let y = x, M = b; y < M; y += 3) {
-            const k = y, _ = y + 1, w = y + 2;
-            s = ue(this, q, e, n, c, d, u, k, _, w), s && (s.faceIndex = Math.floor(y / 3), s.face.materialIndex = m.materialIndex, t.push(s));
+          for (let y = x, k = b; y < k; y += 3) {
+            const M = y, _ = y + 1, w = y + 2;
+            s = ue(this, q, e, n, c, d, u, M, _, w), s && (s.faceIndex = Math.floor(y / 3), s.face.materialIndex = m.materialIndex, t.push(s));
           }
         }
       else {
@@ -23242,11 +23242,11 @@ class bo {
    * @return {Frustum} A reference to this frustum.
    */
   setFromProjectionMatrix(e, t = q5, n = !1) {
-    const s = this.planes, o = e.elements, a = o[0], r = o[1], l = o[2], c = o[3], d = o[4], u = o[5], p = o[6], f = o[7], g = o[8], v = o[9], m = o[10], q = o[11], x = o[12], b = o[13], y = o[14], M = o[15];
-    if (s[0].setComponents(c - a, f - d, q - g, M - x).normalize(), s[1].setComponents(c + a, f + d, q + g, M + x).normalize(), s[2].setComponents(c + r, f + u, q + v, M + b).normalize(), s[3].setComponents(c - r, f - u, q - v, M - b).normalize(), n)
-      s[4].setComponents(l, p, m, y).normalize(), s[5].setComponents(c - l, f - p, q - m, M - y).normalize();
-    else if (s[4].setComponents(c - l, f - p, q - m, M - y).normalize(), t === q5)
-      s[5].setComponents(c + l, f + p, q + m, M + y).normalize();
+    const s = this.planes, o = e.elements, a = o[0], r = o[1], l = o[2], c = o[3], d = o[4], u = o[5], p = o[6], f = o[7], g = o[8], v = o[9], m = o[10], q = o[11], x = o[12], b = o[13], y = o[14], k = o[15];
+    if (s[0].setComponents(c - a, f - d, q - g, k - x).normalize(), s[1].setComponents(c + a, f + d, q + g, k + x).normalize(), s[2].setComponents(c + r, f + u, q + v, k + b).normalize(), s[3].setComponents(c - r, f - u, q - v, k - b).normalize(), n)
+      s[4].setComponents(l, p, m, y).normalize(), s[5].setComponents(c - l, f - p, q - m, k - y).normalize();
+    else if (s[4].setComponents(c - l, f - p, q - m, k - y).normalize(), t === q5)
+      s[5].setComponents(c + l, f + p, q + m, k + y).normalize();
     else if (t === A8)
       s[5].setComponents(l, p, m, y).normalize();
     else
@@ -23629,15 +23629,15 @@ class q1 extends a0 {
     const l = [], c = [], d = [], u = [];
     let p = 0, f = 0;
     g("z", "y", "x", -1, -1, n, t, e, a, o, 0), g("z", "y", "x", 1, -1, n, t, -e, a, o, 1), g("x", "z", "y", 1, 1, e, n, t, s, a, 2), g("x", "z", "y", 1, -1, e, n, -t, s, a, 3), g("x", "y", "z", 1, -1, e, t, n, s, o, 4), g("x", "y", "z", -1, -1, e, t, -n, s, o, 5), this.setIndex(l), this.setAttribute("position", new H2(c, 3)), this.setAttribute("normal", new H2(d, 3)), this.setAttribute("uv", new H2(u, 2));
-    function g(v, m, q, x, b, y, M, k, _, w, S) {
-      const I = y / _, R = M / w, B = y / 2, O = M / 2, X = k / 2, W = _ + 1, J = w + 1;
+    function g(v, m, q, x, b, y, k, M, _, w, S) {
+      const I = y / _, R = k / w, B = y / 2, O = k / 2, X = M / 2, W = _ + 1, J = w + 1;
       let e1 = 0, K = 0;
       const a1 = new Z();
       for (let _1 = 0; _1 < J; _1++) {
         const L1 = _1 * R - O;
         for (let P1 = 0; P1 < W; P1++) {
           const $1 = P1 * I - B;
-          a1[v] = $1 * x, a1[m] = L1 * b, a1[q] = X, c.push(a1.x, a1.y, a1.z), a1[v] = 0, a1[m] = 0, a1[q] = k > 0 ? 1 : -1, d.push(a1.x, a1.y, a1.z), u.push(P1 / _), u.push(1 - _1 / w), e1 += 1;
+          a1[v] = $1 * x, a1[m] = L1 * b, a1[q] = X, c.push(a1.x, a1.y, a1.z), a1[v] = 0, a1[m] = 0, a1[q] = M > 0 ? 1 : -1, d.push(a1.x, a1.y, a1.z), u.push(P1 / _), u.push(1 - _1 / w), e1 += 1;
         }
       }
       for (let _1 = 0; _1 < w; _1++)
@@ -23695,26 +23695,26 @@ class U2 extends a0 {
     let q = 0;
     x(), a === !1 && (e > 0 && b(!0), t > 0 && b(!1)), this.setIndex(d), this.setAttribute("position", new H2(u, 3)), this.setAttribute("normal", new H2(p, 3)), this.setAttribute("uv", new H2(f, 2));
     function x() {
-      const y = new Z(), M = new Z();
-      let k = 0;
+      const y = new Z(), k = new Z();
+      let M = 0;
       const _ = (t - e) / n;
       for (let w = 0; w <= o; w++) {
         const S = [], I = w / o, R = I * (t - e) + e;
         for (let B = 0; B <= s; B++) {
           const O = B / s, X = O * l + r, W = Math.sin(X), J = Math.cos(X);
-          M.x = R * W, M.y = -I * n + m, M.z = R * J, u.push(M.x, M.y, M.z), y.set(W, _, J).normalize(), p.push(y.x, y.y, y.z), f.push(O, 1 - I), S.push(g++);
+          k.x = R * W, k.y = -I * n + m, k.z = R * J, u.push(k.x, k.y, k.z), y.set(W, _, J).normalize(), p.push(y.x, y.y, y.z), f.push(O, 1 - I), S.push(g++);
         }
         v.push(S);
       }
       for (let w = 0; w < s; w++)
         for (let S = 0; S < o; S++) {
           const I = v[S][w], R = v[S + 1][w], B = v[S + 1][w + 1], O = v[S][w + 1];
-          (e > 0 || S !== 0) && (d.push(I, R, O), k += 3), (t > 0 || S !== o - 1) && (d.push(R, B, O), k += 3);
+          (e > 0 || S !== 0) && (d.push(I, R, O), M += 3), (t > 0 || S !== o - 1) && (d.push(R, B, O), M += 3);
         }
-      c.addGroup(q, k, 0), q += k;
+      c.addGroup(q, M, 0), q += M;
     }
     function b(y) {
-      const M = g, k = new e2(), _ = new Z();
+      const k = g, M = new e2(), _ = new Z();
       let w = 0;
       const S = y === !0 ? e : t, I = y === !0 ? 1 : -1;
       for (let B = 1; B <= s; B++)
@@ -23722,10 +23722,10 @@ class U2 extends a0 {
       const R = g;
       for (let B = 0; B <= s; B++) {
         const X = B / s * l + r, W = Math.cos(X), J = Math.sin(X);
-        _.x = S * J, _.y = m * I, _.z = S * W, u.push(_.x, _.y, _.z), p.push(0, I, 0), k.x = W * 0.5 + 0.5, k.y = J * 0.5 * I + 0.5, f.push(k.x, k.y), g++;
+        _.x = S * J, _.y = m * I, _.z = S * W, u.push(_.x, _.y, _.z), p.push(0, I, 0), M.x = W * 0.5 + 0.5, M.y = J * 0.5 * I + 0.5, f.push(M.x, M.y), g++;
       }
       for (let B = 0; B < s; B++) {
-        const O = M + B, X = R + B;
+        const O = k + B, X = R + B;
         y === !0 ? d.push(X, X + 1, O) : d.push(X + 1, X, O), w += 3;
       }
       c.addGroup(q, w, y === !0 ? 1 : 2), q += w;
@@ -23799,20 +23799,20 @@ class xo extends a0 {
     const o = [], a = [];
     r(s), c(n), d(), this.setAttribute("position", new H2(o, 3)), this.setAttribute("normal", new H2(o.slice(), 3)), this.setAttribute("uv", new H2(a, 2)), s === 0 ? this.computeVertexNormals() : this.normalizeNormals();
     function r(x) {
-      const b = new Z(), y = new Z(), M = new Z();
-      for (let k = 0; k < t.length; k += 3)
-        f(t[k + 0], b), f(t[k + 1], y), f(t[k + 2], M), l(b, y, M, x);
+      const b = new Z(), y = new Z(), k = new Z();
+      for (let M = 0; M < t.length; M += 3)
+        f(t[M + 0], b), f(t[M + 1], y), f(t[M + 2], k), l(b, y, k, x);
     }
-    function l(x, b, y, M) {
-      const k = M + 1, _ = [];
-      for (let w = 0; w <= k; w++) {
+    function l(x, b, y, k) {
+      const M = k + 1, _ = [];
+      for (let w = 0; w <= M; w++) {
         _[w] = [];
-        const S = x.clone().lerp(y, w / k), I = b.clone().lerp(y, w / k), R = k - w;
+        const S = x.clone().lerp(y, w / M), I = b.clone().lerp(y, w / M), R = M - w;
         for (let B = 0; B <= R; B++)
-          B === 0 && w === k ? _[w][B] = S : _[w][B] = S.clone().lerp(I, B / R);
+          B === 0 && w === M ? _[w][B] = S : _[w][B] = S.clone().lerp(I, B / R);
       }
-      for (let w = 0; w < k; w++)
-        for (let S = 0; S < 2 * (k - w) - 1; S++) {
+      for (let w = 0; w < M; w++)
+        for (let S = 0; S < 2 * (M - w) - 1; S++) {
           const I = Math.floor(S / 2);
           S % 2 === 0 ? (p(_[w][I + 1]), p(_[w + 1][I]), p(_[w][I])) : (p(_[w][I + 1]), p(_[w + 1][I + 1]), p(_[w + 1][I]));
         }
@@ -23826,15 +23826,15 @@ class xo extends a0 {
       const x = new Z();
       for (let b = 0; b < o.length; b += 3) {
         x.x = o[b + 0], x.y = o[b + 1], x.z = o[b + 2];
-        const y = m(x) / 2 / Math.PI + 0.5, M = q(x) / Math.PI + 0.5;
-        a.push(y, 1 - M);
+        const y = m(x) / 2 / Math.PI + 0.5, k = q(x) / Math.PI + 0.5;
+        a.push(y, 1 - k);
       }
       g(), u();
     }
     function u() {
       for (let x = 0; x < a.length; x += 6) {
-        const b = a[x + 0], y = a[x + 2], M = a[x + 4], k = Math.max(b, y, M), _ = Math.min(b, y, M);
-        k > 0.9 && _ < 0.1 && (b < 0.2 && (a[x + 0] += 1), y < 0.2 && (a[x + 2] += 1), M < 0.2 && (a[x + 4] += 1));
+        const b = a[x + 0], y = a[x + 2], k = a[x + 4], M = Math.max(b, y, k), _ = Math.min(b, y, k);
+        M > 0.9 && _ < 0.1 && (b < 0.2 && (a[x + 0] += 1), y < 0.2 && (a[x + 2] += 1), k < 0.2 && (a[x + 4] += 1));
       }
     }
     function p(x) {
@@ -23845,15 +23845,15 @@ class xo extends a0 {
       b.x = e[y + 0], b.y = e[y + 1], b.z = e[y + 2];
     }
     function g() {
-      const x = new Z(), b = new Z(), y = new Z(), M = new Z(), k = new e2(), _ = new e2(), w = new e2();
+      const x = new Z(), b = new Z(), y = new Z(), k = new Z(), M = new e2(), _ = new e2(), w = new e2();
       for (let S = 0, I = 0; S < o.length; S += 9, I += 6) {
-        x.set(o[S + 0], o[S + 1], o[S + 2]), b.set(o[S + 3], o[S + 4], o[S + 5]), y.set(o[S + 6], o[S + 7], o[S + 8]), k.set(a[I + 0], a[I + 1]), _.set(a[I + 2], a[I + 3]), w.set(a[I + 4], a[I + 5]), M.copy(x).add(b).add(y).divideScalar(3);
-        const R = m(M);
-        v(k, I + 0, x, R), v(_, I + 2, b, R), v(w, I + 4, y, R);
+        x.set(o[S + 0], o[S + 1], o[S + 2]), b.set(o[S + 3], o[S + 4], o[S + 5]), y.set(o[S + 6], o[S + 7], o[S + 8]), M.set(a[I + 0], a[I + 1]), _.set(a[I + 2], a[I + 3]), w.set(a[I + 4], a[I + 5]), k.copy(x).add(b).add(y).divideScalar(3);
+        const R = m(k);
+        v(M, I + 0, x, R), v(_, I + 2, b, R), v(w, I + 4, y, R);
       }
     }
-    function v(x, b, y, M) {
-      M < 0 && x.x === 1 && (a[b] = x.x - 1), y.x === 0 && y.z === 0 && (a[b] = M / 2 / Math.PI + 0.5);
+    function v(x, b, y, k) {
+      k < 0 && x.x === 1 && (a[b] = x.x - 1), y.x === 0 && y.z === 0 && (a[b] = k / 2 / Math.PI + 0.5);
     }
     function m(x) {
       return Math.atan2(x.z, -x.x);
@@ -23896,8 +23896,8 @@ class _g extends a0 {
         const { a: v, b: m, c: q } = ge;
         if (v.fromBufferAttribute(r, c[0]), m.fromBufferAttribute(r, c[1]), q.fromBufferAttribute(r, c[2]), ge.getNormal(Dt), u[0] = `${Math.round(v.x * s)},${Math.round(v.y * s)},${Math.round(v.z * s)}`, u[1] = `${Math.round(m.x * s)},${Math.round(m.y * s)},${Math.round(m.z * s)}`, u[2] = `${Math.round(q.x * s)},${Math.round(q.y * s)},${Math.round(q.z * s)}`, !(u[0] === u[1] || u[1] === u[2] || u[2] === u[0]))
           for (let x = 0; x < 3; x++) {
-            const b = (x + 1) % 3, y = u[x], M = u[b], k = ge[d[x]], _ = ge[d[b]], w = `${y}_${M}`, S = `${M}_${y}`;
-            S in p && p[S] ? (Dt.dot(p[S].normal) <= o && (f.push(k.x, k.y, k.z), f.push(_.x, _.y, _.z)), p[S] = null) : w in p || (p[w] = {
+            const b = (x + 1) % 3, y = u[x], k = u[b], M = ge[d[x]], _ = ge[d[b]], w = `${y}_${k}`, S = `${k}_${y}`;
+            S in p && p[S] ? (Dt.dot(p[S].normal) <= o && (f.push(M.x, M.y, M.z), f.push(_.x, _.y, _.z)), p[S] = null) : w in p || (p[w] = {
               index0: c[x],
               index1: c[b],
               normal: Dt.clone()
@@ -25353,11 +25353,11 @@ class w3 extends a0 {
       const l = [], c = t.curveSegments !== void 0 ? t.curveSegments : 12, d = t.steps !== void 0 ? t.steps : 1, u = t.depth !== void 0 ? t.depth : 1;
       let p = t.bevelEnabled !== void 0 ? t.bevelEnabled : !0, f = t.bevelThickness !== void 0 ? t.bevelThickness : 0.2, g = t.bevelSize !== void 0 ? t.bevelSize : f - 0.1, v = t.bevelOffset !== void 0 ? t.bevelOffset : 0, m = t.bevelSegments !== void 0 ? t.bevelSegments : 3;
       const q = t.extrudePath, x = t.UVGenerator !== void 0 ? t.UVGenerator : ex;
-      let b, y = !1, M, k, _, w;
+      let b, y = !1, k, M, _, w;
       if (q) {
         b = q.getSpacedPoints(d), y = !0, p = !1;
         const E = q.isCatmullRomCurve3 ? q.closed : !1;
-        M = q.computeFrenetFrames(d, E), k = new Z(), _ = new Z(), w = new Z();
+        k = q.computeFrenetFrames(d, E), M = new Z(), _ = new Z(), w = new Z();
       }
       p || (m = 0, f = 0, g = 0, v = 0);
       const S = r.extractPoints(c);
@@ -25452,12 +25452,12 @@ class w3 extends a0 {
       const N = $1.length, G = g + v;
       for (let E = 0; E < e1; E++) {
         const D = p ? J(I[E], P1[E], G) : I[E];
-        y ? (_.copy(M.normals[0]).multiplyScalar(D.x), k.copy(M.binormals[0]).multiplyScalar(D.y), w.copy(b[0]).add(_).add(k), m1(w.x, w.y, w.z)) : m1(D.x, D.y, 0);
+        y ? (_.copy(k.normals[0]).multiplyScalar(D.x), M.copy(k.binormals[0]).multiplyScalar(D.y), w.copy(b[0]).add(_).add(M), m1(w.x, w.y, w.z)) : m1(D.x, D.y, 0);
       }
       for (let E = 1; E <= d; E++)
         for (let D = 0; D < e1; D++) {
           const $ = p ? J(I[D], P1[D], G) : I[D];
-          y ? (_.copy(M.normals[E]).multiplyScalar($.x), k.copy(M.binormals[E]).multiplyScalar($.y), w.copy(b[E]).add(_).add(k), m1(w.x, w.y, w.z)) : m1($.x, $.y, u / d * E);
+          y ? (_.copy(k.normals[E]).multiplyScalar($.x), M.copy(k.binormals[E]).multiplyScalar($.y), w.copy(b[E]).add(_).add(M), m1(w.x, w.y, w.z)) : m1($.x, $.y, u / d * E);
         }
       for (let E = m - 1; E >= 0; E--) {
         const D = E / m, $ = f * Math.cos(D * Math.PI / 2), U = g * Math.sin(D * Math.PI / 2) + v;
@@ -25634,17 +25634,17 @@ class B8 extends a0 {
           m = e[x + 1].x - e[x].x, q = e[x + 1].y - e[x].y, f.x = q * 1, f.y = -m, f.z = q * 0, g.copy(f), f.x += v.x, f.y += v.y, f.z += v.z, f.normalize(), l.push(f.x, f.y, f.z), v.copy(g);
       }
     for (let x = 0; x <= t; x++) {
-      const b = n + x * d * s, y = Math.sin(b), M = Math.cos(b);
-      for (let k = 0; k <= e.length - 1; k++) {
-        u.x = e[k].x * y, u.y = e[k].y, u.z = e[k].x * M, a.push(u.x, u.y, u.z), p.x = x / t, p.y = k / (e.length - 1), r.push(p.x, p.y);
-        const _ = l[3 * k + 0] * y, w = l[3 * k + 1], S = l[3 * k + 0] * M;
+      const b = n + x * d * s, y = Math.sin(b), k = Math.cos(b);
+      for (let M = 0; M <= e.length - 1; M++) {
+        u.x = e[M].x * y, u.y = e[M].y, u.z = e[M].x * k, a.push(u.x, u.y, u.z), p.x = x / t, p.y = M / (e.length - 1), r.push(p.x, p.y);
+        const _ = l[3 * M + 0] * y, w = l[3 * M + 1], S = l[3 * M + 0] * k;
         c.push(_, w, S);
       }
     }
     for (let x = 0; x < t; x++)
       for (let b = 0; b < e.length - 1; b++) {
-        const y = b + x * e.length, M = y, k = y + e.length, _ = y + e.length + 1, w = y + 1;
-        o.push(M, k, w), o.push(_, w, k);
+        const y = b + x * e.length, k = y, M = y + e.length, _ = y + e.length + 1, w = y + 1;
+        o.push(k, M, w), o.push(_, w, M);
       }
     this.setIndex(o), this.setAttribute("position", new H2(a, 3)), this.setAttribute("uv", new H2(r, 2)), this.setAttribute("normal", new H2(c, 3));
   }
@@ -25757,8 +25757,8 @@ class v6 extends a0 {
     }
     for (let q = 0; q < l; q++)
       for (let x = 0; x < r; x++) {
-        const b = x + c * q, y = x + c * (q + 1), M = x + 1 + c * (q + 1), k = x + 1 + c * q;
-        f.push(b, y, k), f.push(y, M, k);
+        const b = x + c * q, y = x + c * (q + 1), k = x + 1 + c * (q + 1), M = x + 1 + c * q;
+        f.push(b, y, M), f.push(y, k, M);
       }
     this.setIndex(f), this.setAttribute("position", new H2(g, 3)), this.setAttribute("normal", new H2(v, 3)), this.setAttribute("uv", new H2(m, 2));
   }
@@ -25805,16 +25805,16 @@ class _3 extends a0 {
       const x = [], b = q / n;
       let y = 0;
       q === 0 && a === 0 ? y = 0.5 / t : q === n && l === Math.PI && (y = -0.5 / t);
-      for (let M = 0; M <= t; M++) {
-        const k = M / t;
-        u.x = -e * Math.cos(s + k * o) * Math.sin(a + b * r), u.y = e * Math.cos(a + b * r), u.z = e * Math.sin(s + k * o) * Math.sin(a + b * r), g.push(u.x, u.y, u.z), p.copy(u).normalize(), v.push(p.x, p.y, p.z), m.push(k + y, 1 - b), x.push(c++);
+      for (let k = 0; k <= t; k++) {
+        const M = k / t;
+        u.x = -e * Math.cos(s + M * o) * Math.sin(a + b * r), u.y = e * Math.cos(a + b * r), u.z = e * Math.sin(s + M * o) * Math.sin(a + b * r), g.push(u.x, u.y, u.z), p.copy(u).normalize(), v.push(p.x, p.y, p.z), m.push(M + y, 1 - b), x.push(c++);
       }
       d.push(x);
     }
     for (let q = 0; q < n; q++)
       for (let x = 0; x < t; x++) {
-        const b = d[q][x + 1], y = d[q][x], M = d[q + 1][x], k = d[q + 1][x + 1];
-        (q !== 0 || a > 0) && f.push(b, y, k), (q !== n - 1 || l < Math.PI) && f.push(y, M, k);
+        const b = d[q][x + 1], y = d[q][x], k = d[q + 1][x], M = d[q + 1][x + 1];
+        (q !== 0 || a > 0) && f.push(b, y, M), (q !== n - 1 || l < Math.PI) && f.push(y, k, M);
       }
     this.setIndex(f), this.setAttribute("position", new H2(g, 3)), this.setAttribute("normal", new H2(v, 3)), this.setAttribute("uv", new H2(m, 2));
   }
@@ -25914,17 +25914,17 @@ class wo extends a0 {
     }
     function m(b) {
       d = e.getPointAt(b / t, d);
-      const y = a.normals[b], M = a.binormals[b];
-      for (let k = 0; k <= s; k++) {
-        const _ = k / s * Math.PI * 2, w = Math.sin(_), S = -Math.cos(_);
-        l.x = S * y.x + w * M.x, l.y = S * y.y + w * M.y, l.z = S * y.z + w * M.z, l.normalize(), p.push(l.x, l.y, l.z), r.x = d.x + n * l.x, r.y = d.y + n * l.y, r.z = d.z + n * l.z, u.push(r.x, r.y, r.z);
+      const y = a.normals[b], k = a.binormals[b];
+      for (let M = 0; M <= s; M++) {
+        const _ = M / s * Math.PI * 2, w = Math.sin(_), S = -Math.cos(_);
+        l.x = S * y.x + w * k.x, l.y = S * y.y + w * k.y, l.z = S * y.z + w * k.z, l.normalize(), p.push(l.x, l.y, l.z), r.x = d.x + n * l.x, r.y = d.y + n * l.y, r.z = d.z + n * l.z, u.push(r.x, r.y, r.z);
       }
     }
     function q() {
       for (let b = 1; b <= t; b++)
         for (let y = 1; y <= s; y++) {
-          const M = (s + 1) * (b - 1) + (y - 1), k = (s + 1) * b + (y - 1), _ = (s + 1) * b + y, w = (s + 1) * (b - 1) + y;
-          g.push(M, k, w), g.push(k, _, w);
+          const k = (s + 1) * (b - 1) + (y - 1), M = (s + 1) * b + (y - 1), _ = (s + 1) * b + y, w = (s + 1) * (b - 1) + y;
+          g.push(k, M, w), g.push(M, _, w);
         }
     }
     function x() {
@@ -26417,10 +26417,10 @@ class ux extends _o {
                   q.close();
                 else {
                   v += y.byteLength;
-                  const M = new ProgressEvent("progress", { lengthComputable: g, loaded: v, total: f });
-                  for (let k = 0, _ = d.length; k < _; k++) {
-                    const w = d[k];
-                    w.onProgress && w.onProgress(M);
+                  const k = new ProgressEvent("progress", { lengthComputable: g, loaded: v, total: f });
+                  for (let M = 0, _ = d.length; M < _; M++) {
+                    const w = d[M];
+                    w.onProgress && w.onProgress(k);
                   }
                   q.enqueue(y), x();
                 }
@@ -27952,18 +27952,18 @@ class x4 {
     function t(q) {
       const x = [];
       for (let b = 0, y = q.length; b < y; b++) {
-        const M = q[b], k = new S9();
-        k.curves = M.curves, x.push(k);
+        const k = q[b], M = new S9();
+        M.curves = k.curves, x.push(M);
       }
       return x;
     }
     function n(q, x) {
       const b = x.length;
       let y = !1;
-      for (let M = b - 1, k = 0; k < b; M = k++) {
-        let _ = x[M], w = x[k], S = w.x - _.x, I = w.y - _.y;
+      for (let k = b - 1, M = 0; M < b; k = M++) {
+        let _ = x[k], w = x[M], S = w.x - _.x, I = w.y - _.y;
         if (Math.abs(I) > Number.EPSILON) {
-          if (I < 0 && (_ = x[k], S = -S, w = x[M], I = -I), q.y < _.y || q.y > w.y) continue;
+          if (I < 0 && (_ = x[M], S = -S, w = x[k], I = -I), q.y < _.y || q.y > w.y) continue;
           if (q.y === _.y) {
             if (q.x === _.x) return !0;
           } else {
@@ -27998,9 +27998,9 @@ class x4 {
       for (let b = 0, y = p.length; b < y; b++)
         u[b] = [];
       for (let b = 0, y = p.length; b < y; b++) {
-        const M = f[b];
-        for (let k = 0; k < M.length; k++) {
-          const _ = M[k];
+        const k = f[b];
+        for (let M = 0; M < k.length; M++) {
+          const _ = k[M];
           let w = !0;
           for (let S = 0; S < p.length; S++)
             n(_.p, p[S].p) && (b !== S && x++, w ? (w = !1, u[S].push(_)) : q = !0);
@@ -32558,8 +32558,8 @@ function lw(i, e, t, n, s, o) {
     let b = !1;
     const y = f(x);
     y === null ? m(a, r) : y && y.isColor && (m(y, 1), b = !0);
-    const M = i.xr.getEnvironmentBlendMode();
-    M === "additive" ? t.buffers.color.setClear(0, 0, 0, 1, o) : M === "alpha-blend" && t.buffers.color.setClear(0, 0, 0, 0, o), (i.autoClear || b) && (t.buffers.depth.setTest(!0), t.buffers.depth.setMask(!0), t.buffers.color.setMask(!0), i.clear(i.autoClearColor, i.autoClearDepth, i.autoClearStencil));
+    const k = i.xr.getEnvironmentBlendMode();
+    k === "additive" ? t.buffers.color.setClear(0, 0, 0, 1, o) : k === "alpha-blend" && t.buffers.color.setClear(0, 0, 0, 0, o), (i.autoClear || b) && (t.buffers.depth.setTest(!0), t.buffers.depth.setMask(!0), t.buffers.color.setMask(!0), i.clear(i.autoClearColor, i.autoClearDepth, i.autoClearStencil));
   }
   function v(x, b) {
     const y = f(b);
@@ -32576,7 +32576,7 @@ function lw(i, e, t, n, s, o) {
         fog: !1,
         allowOverride: !1
       })
-    ), c.geometry.deleteAttribute("normal"), c.geometry.deleteAttribute("uv"), c.onBeforeRender = function(M, k, _) {
+    ), c.geometry.deleteAttribute("normal"), c.geometry.deleteAttribute("uv"), c.onBeforeRender = function(k, M, _) {
       this.matrixWorld.copyPosition(_.matrixWorld);
     }, Object.defineProperty(c.material, "envMap", {
       get: function() {
@@ -32789,7 +32789,7 @@ function cw(i, e) {
     }
     x();
   }
-  function M() {
+  function k() {
     S();
     for (const R in n) {
       const B = n[R];
@@ -32805,7 +32805,7 @@ function cw(i, e) {
       delete n[R];
     }
   }
-  function k(R) {
+  function M(R) {
     if (n[R.id] === void 0) return;
     const B = n[R.id];
     for (const O in B) {
@@ -32856,8 +32856,8 @@ function cw(i, e) {
     setup: r,
     reset: S,
     resetDefaultState: I,
-    dispose: M,
-    releaseStatesOfGeometry: k,
+    dispose: k,
+    releaseStatesOfGeometry: M,
     releaseStatesOfObject: w,
     releaseStatesOfProgram: _,
     initAttributes: v,
@@ -32918,7 +32918,7 @@ function pw(i, e, t, n) {
   d !== c && (j2("WebGLRenderer:", c, "not supported, using", d, "instead."), c = d);
   const u = t.logarithmicDepthBuffer === !0, p = t.reversedDepthBuffer === !0 && e.has("EXT_clip_control");
   t.reversedDepthBuffer === !0 && p === !1 && j2("WebGLRenderer: Unable to use reversed depth buffer due to missing EXT_clip_control extension. Fallback to default depth buffer.");
-  const f = i.getParameter(i.MAX_TEXTURE_IMAGE_UNITS), g = i.getParameter(i.MAX_VERTEX_TEXTURE_IMAGE_UNITS), v = i.getParameter(i.MAX_TEXTURE_SIZE), m = i.getParameter(i.MAX_CUBE_MAP_TEXTURE_SIZE), q = i.getParameter(i.MAX_VERTEX_ATTRIBS), x = i.getParameter(i.MAX_VERTEX_UNIFORM_VECTORS), b = i.getParameter(i.MAX_VARYING_VECTORS), y = i.getParameter(i.MAX_FRAGMENT_UNIFORM_VECTORS), M = i.getParameter(i.MAX_SAMPLES), k = i.getParameter(i.SAMPLES);
+  const f = i.getParameter(i.MAX_TEXTURE_IMAGE_UNITS), g = i.getParameter(i.MAX_VERTEX_TEXTURE_IMAGE_UNITS), v = i.getParameter(i.MAX_TEXTURE_SIZE), m = i.getParameter(i.MAX_CUBE_MAP_TEXTURE_SIZE), q = i.getParameter(i.MAX_VERTEX_ATTRIBS), x = i.getParameter(i.MAX_VERTEX_UNIFORM_VECTORS), b = i.getParameter(i.MAX_VARYING_VECTORS), y = i.getParameter(i.MAX_FRAGMENT_UNIFORM_VECTORS), k = i.getParameter(i.MAX_SAMPLES), M = i.getParameter(i.SAMPLES);
   return {
     isWebGL2: !0,
     // keeping this for backwards compatibility
@@ -32937,8 +32937,8 @@ function pw(i, e, t, n) {
     maxVertexUniforms: x,
     maxVaryings: b,
     maxFragmentUniforms: y,
-    maxSamples: M,
-    samples: k
+    maxSamples: k,
+    samples: M
   };
 }
 function uw(i) {
@@ -32964,8 +32964,8 @@ function uw(i) {
       const x = o ? 0 : n, b = x * 4;
       let y = q.clippingState || null;
       l.value = y, y = d(g, p, b, f);
-      for (let M = 0; M !== b; ++M)
-        y[M] = t[M];
+      for (let k = 0; k !== b; ++k)
+        y[k] = t[k];
       q.clippingState = y, this.numIntersection = v ? this.numPlanes : 0, this.numPlanes += x;
     }
   };
@@ -33125,8 +33125,8 @@ class Lr {
     for (let b = 0; b < 6; b++) {
       const y = b % 3;
       y === 0 ? (l.up.set(0, c[b], 0), l.position.set(o.x, o.y, o.z), l.lookAt(o.x + d[b], o.y, o.z)) : y === 1 ? (l.up.set(0, 0, c[b]), l.position.set(o.x, o.y, o.z), l.lookAt(o.x, o.y + d[b], o.z)) : (l.up.set(0, c[b], 0), l.position.set(o.x, o.y, o.z), l.lookAt(o.x, o.y, o.z + d[b]));
-      const M = this._cubeSize;
-      H6(s, y * M, b > 2 ? M : 0, M, M), u.setRenderTarget(s), q && u.render(v, l), u.render(e, l);
+      const k = this._cubeSize;
+      H6(s, y * k, b > 2 ? k : 0, k, k), u.setRenderTarget(s), q && u.render(v, l), u.render(e, l);
     }
     u.toneMapping = f, u.autoClear = p, e.background = x;
   }
@@ -33221,8 +33221,8 @@ class Lr {
     p.envMap.value = e.texture, p.samples.value = m, p.weights.value = q, p.latitudinal.value = a === "latitudinal", r && (p.poleAxis.value = r);
     const { _lodMax: b } = this;
     p.dTheta.value = g, p.mipInt.value = b - n;
-    const y = this._sizeLods[s], M = 3 * y * (s > b - E4 ? s - b + E4 : 0), k = 4 * (this._cubeSize - y);
-    H6(t, M, k, 3 * y, 2 * y), l.setRenderTarget(t), l.render(u, H7);
+    const y = this._sizeLods[s], k = 3 * y * (s > b - E4 ? s - b + E4 : 0), M = 4 * (this._cubeSize - y);
+    H6(t, k, M, 3 * y, 2 * y), l.setRenderTarget(t), l.render(u, H7);
   }
 }
 function hw(i) {
@@ -33235,8 +33235,8 @@ function hw(i) {
     let l = 1 / r;
     a > i - E4 ? l = Dr[a - i + E4 - 1] : a === 0 && (l = 0), t.push(l);
     const c = 1 / (r - 2), d = -c, u = 1 + c, p = [d, d, u, d, u, u, d, d, u, u, d, u], f = 6, g = 6, v = 3, m = 2, q = 1, x = new Float32Array(v * g * f), b = new Float32Array(m * g * f), y = new Float32Array(q * g * f);
-    for (let k = 0; k < f; k++) {
-      const _ = k % 3 * 2 / 3 - 1, w = k > 2 ? 0 : -1, S = [
+    for (let M = 0; M < f; M++) {
+      const _ = M % 3 * 2 / 3 - 1, w = M > 2 ? 0 : -1, S = [
         _,
         w,
         0,
@@ -33256,12 +33256,12 @@ function hw(i) {
         w + 1,
         0
       ];
-      x.set(S, v * g * k), b.set(p, m * g * k);
-      const I = [k, k, k, k, k, k];
-      y.set(I, q * g * k);
+      x.set(S, v * g * M), b.set(p, m * g * M);
+      const I = [M, M, M, M, M, M];
+      y.set(I, q * g * M);
     }
-    const M = new a0();
-    M.setAttribute("position", new f9(x, v)), M.setAttribute("uv", new f9(b, m)), M.setAttribute("faceIndex", new f9(y, q)), n.push(new y2(M, null)), s > E4 && s--;
+    const k = new a0();
+    k.setAttribute("position", new f9(x, v)), k.setAttribute("uv", new f9(b, m)), k.setAttribute("faceIndex", new f9(y, q)), n.push(new y2(k, null)), s > E4 && s--;
   }
   return { lodMeshes: n, sizeLods: e, sigmas: t };
 }
@@ -33833,15 +33833,15 @@ function yw(i, e, t, n) {
       const x = f.array;
       v = f.version;
       for (let b = 0, y = x.length; b < y; b += 3) {
-        const M = x[b + 0], k = x[b + 1], _ = x[b + 2];
-        p.push(M, k, k, _, _, M);
+        const k = x[b + 0], M = x[b + 1], _ = x[b + 2];
+        p.push(k, M, M, _, _, k);
       }
     } else {
       const x = g.array;
       v = g.version;
       for (let b = 0, y = x.length / 3 - 1; b < y; b += 3) {
-        const M = b + 0, k = b + 1, _ = b + 2;
-        p.push(M, k, k, _, _, M);
+        const k = b + 0, M = b + 1, _ = b + 2;
+        p.push(k, M, M, _, _, k);
       }
     }
     const m = new (g.count >= 65535 ? sp : np)(p, 1);
@@ -33947,22 +33947,22 @@ function _w(i, e, t) {
       const f = r.morphAttributes.position !== void 0, g = r.morphAttributes.normal !== void 0, v = r.morphAttributes.color !== void 0, m = r.morphAttributes.position || [], q = r.morphAttributes.normal || [], x = r.morphAttributes.color || [];
       let b = 0;
       f === !0 && (b = 1), g === !0 && (b = 2), v === !0 && (b = 3);
-      let y = r.attributes.position.count * b, M = 1;
-      y > e.maxTextureSize && (M = Math.ceil(y / e.maxTextureSize), y = e.maxTextureSize);
-      const k = new Float32Array(y * M * 4 * u), _ = new ip(k, y, M, u);
+      let y = r.attributes.position.count * b, k = 1;
+      y > e.maxTextureSize && (k = Math.ceil(y / e.maxTextureSize), y = e.maxTextureSize);
+      const M = new Float32Array(y * k * 4 * u), _ = new ip(M, y, k, u);
       _.type = f5, _.needsUpdate = !0;
       const w = b * 4;
       for (let I = 0; I < u; I++) {
-        const R = m[I], B = q[I], O = x[I], X = y * M * 4 * I;
+        const R = m[I], B = q[I], O = x[I], X = y * k * 4 * I;
         for (let W = 0; W < R.count; W++) {
           const J = W * w;
-          f === !0 && (s.fromBufferAttribute(R, W), k[X + J + 0] = s.x, k[X + J + 1] = s.y, k[X + J + 2] = s.z, k[X + J + 3] = 0), g === !0 && (s.fromBufferAttribute(B, W), k[X + J + 4] = s.x, k[X + J + 5] = s.y, k[X + J + 6] = s.z, k[X + J + 7] = 0), v === !0 && (s.fromBufferAttribute(O, W), k[X + J + 8] = s.x, k[X + J + 9] = s.y, k[X + J + 10] = s.z, k[X + J + 11] = O.itemSize === 4 ? s.w : 1);
+          f === !0 && (s.fromBufferAttribute(R, W), M[X + J + 0] = s.x, M[X + J + 1] = s.y, M[X + J + 2] = s.z, M[X + J + 3] = 0), g === !0 && (s.fromBufferAttribute(B, W), M[X + J + 4] = s.x, M[X + J + 5] = s.y, M[X + J + 6] = s.z, M[X + J + 7] = 0), v === !0 && (s.fromBufferAttribute(O, W), M[X + J + 8] = s.x, M[X + J + 9] = s.y, M[X + J + 10] = s.z, M[X + J + 11] = O.itemSize === 4 ? s.w : 1);
         }
       }
       p = {
         count: u,
         texture: _,
-        size: new e2(y, M)
+        size: new e2(y, k)
       }, n.set(r, p), r.addEventListener("dispose", S);
     }
     if (a.isInstancedMesh === !0 && a.morphTexture !== null)
@@ -34088,39 +34088,39 @@ function kw(i, e, t, n, s) {
   this.setSize = function(x, b) {
     o.setSize(x, b), a.setSize(x, b);
     for (let y = 0; y < m.length; y++) {
-      const M = m[y];
-      M.setSize && M.setSize(x, b);
+      const k = m[y];
+      k.setSize && k.setSize(x, b);
     }
   }, this.setEffects = function(x) {
     m = x, q = m.length > 0 && m[0].isRenderPass === !0;
     const b = o.width, y = o.height;
-    for (let M = 0; M < m.length; M++) {
-      const k = m[M];
-      k.setSize && k.setSize(b, y);
+    for (let k = 0; k < m.length; k++) {
+      const M = m[k];
+      M.setSize && M.setSize(b, y);
     }
   }, this.begin = function(x, b) {
     if (f || x.toneMapping === h5 && m.length === 0) return !1;
     if (v = b, b !== null) {
-      const y = b.width, M = b.height;
-      (o.width !== y || o.height !== M) && this.setSize(y, M);
+      const y = b.width, k = b.height;
+      (o.width !== y || o.height !== k) && this.setSize(y, k);
     }
     return q === !1 && x.setRenderTarget(o), g = x.toneMapping, x.toneMapping = h5, !0;
   }, this.hasRenderPass = function() {
     return q;
   }, this.end = function(x, b) {
     x.toneMapping = g, f = !0;
-    let y = o, M = a;
-    for (let k = 0; k < m.length; k++) {
-      const _ = m[k];
-      if (_.enabled !== !1 && (_.render(x, M, y, b), _.needsSwap !== !1)) {
+    let y = o, k = a;
+    for (let M = 0; M < m.length; M++) {
+      const _ = m[M];
+      if (_.enabled !== !1 && (_.render(x, k, y, b), _.needsSwap !== !1)) {
         const w = y;
-        y = M, M = w;
+        y = k, k = w;
       }
     }
     if (u !== x.outputColorSpace || p !== x.toneMapping) {
       u = x.outputColorSpace, p = x.toneMapping, l.defines = {}, b0.getTransfer(u) === A0 && (l.defines.SRGB_TRANSFER = "");
-      const k = Mw[p];
-      k && (l.defines[k] = ""), l.needsUpdate = !0;
+      const M = Mw[p];
+      M && (l.defines[M] = ""), l.needsUpdate = !0;
     }
     l.uniforms.tDiffuse.value = y.texture, x.setRenderTarget(v), x.render(c, d), v = null, f = !1;
   }, this.isCompositing = function() {
@@ -35090,17 +35090,17 @@ function V_(i, e, t, n) {
   ].join(`
 `) + `
 ` + q);
-  const b = x + m + a, y = x + q + r, M = Hr(s, s.VERTEX_SHADER, b), k = Hr(s, s.FRAGMENT_SHADER, y);
-  s.attachShader(v, M), s.attachShader(v, k), t.index0AttributeName !== void 0 ? s.bindAttribLocation(v, 0, t.index0AttributeName) : t.morphTargets === !0 && s.bindAttribLocation(v, 0, "position"), s.linkProgram(v);
+  const b = x + m + a, y = x + q + r, k = Hr(s, s.VERTEX_SHADER, b), M = Hr(s, s.FRAGMENT_SHADER, y);
+  s.attachShader(v, k), s.attachShader(v, M), t.index0AttributeName !== void 0 ? s.bindAttribLocation(v, 0, t.index0AttributeName) : t.morphTargets === !0 && s.bindAttribLocation(v, 0, "position"), s.linkProgram(v);
   function _(R) {
     if (i.debug.checkShaderErrors) {
-      const B = s.getProgramInfoLog(v) || "", O = s.getShaderInfoLog(M) || "", X = s.getShaderInfoLog(k) || "", W = B.trim(), J = O.trim(), e1 = X.trim();
+      const B = s.getProgramInfoLog(v) || "", O = s.getShaderInfoLog(k) || "", X = s.getShaderInfoLog(M) || "", W = B.trim(), J = O.trim(), e1 = X.trim();
       let K = !0, a1 = !0;
       if (s.getProgramParameter(v, s.LINK_STATUS) === !1)
         if (K = !1, typeof i.debug.onShaderError == "function")
-          i.debug.onShaderError(s, v, M, k);
+          i.debug.onShaderError(s, v, k, M);
         else {
-          const _1 = Gr(s, M, "vertex"), L1 = Gr(s, k, "fragment");
+          const _1 = Gr(s, k, "vertex"), L1 = Gr(s, M, "fragment");
           f0(
             "THREE.WebGLProgram: Shader Error " + s.getError() + " - VALIDATE_STATUS " + s.getProgramParameter(v, s.VALIDATE_STATUS) + `
 
@@ -35126,7 +35126,7 @@ Program Info Log: ` + W + `
         }
       });
     }
-    s.deleteShader(M), s.deleteShader(k), w = new Ze(s, v), S = A_(s, v);
+    s.deleteShader(k), s.deleteShader(M), w = new Ze(s, v), S = A_(s, v);
   }
   let w;
   this.getUniforms = function() {
@@ -35141,7 +35141,7 @@ Program Info Log: ` + W + `
     return I === !1 && (I = s.getProgramParameter(v, b_)), I;
   }, this.destroy = function() {
     n.releaseStatesOfProgram(this), s.deleteProgram(v), this.program = void 0;
-  }, this.type = t.shaderType, this.name = t.shaderName, this.id = g_++, this.cacheKey = e, this.usedTimes = 1, this.program = v, this.vertexShader = M, this.fragmentShader = k, this;
+  }, this.type = t.shaderType, this.name = t.shaderName, this.id = g_++, this.cacheKey = e, this.usedTimes = 1, this.program = v, this.vertexShader = k, this.fragmentShader = M, this;
 }
 let j_ = 0;
 class H_ {
@@ -35387,13 +35387,13 @@ function W_(i, e, t, n, s, o) {
     let I = d.get(S);
     return I !== void 0 ? ++I.usedTimes : (I = new V_(i, S, w, s), c.push(I), d.set(S, I)), I;
   }
-  function M(w) {
+  function k(w) {
     if (--w.usedTimes === 0) {
       const S = c.indexOf(w);
       c[S] = c[c.length - 1], c.pop(), d.delete(w.cacheKey), w.destroy();
     }
   }
-  function k(w) {
+  function M(w) {
     r.remove(w);
   }
   function _() {
@@ -35404,8 +35404,8 @@ function W_(i, e, t, n, s, o) {
     getProgramCacheKey: m,
     getUniforms: b,
     acquireProgram: y,
-    releaseProgram: M,
-    releaseShaderCache: k,
+    releaseProgram: k,
+    releaseShaderCache: M,
     // Exposed for resource monitoring & error feedback via renderer.info:
     programs: c,
     dispose: _
@@ -35653,7 +35653,7 @@ function iS(i) {
   function r(c) {
     let d = 0, u = 0, p = 0;
     for (let S = 0; S < 9; S++) n.probe[S].set(0, 0, 0);
-    let f = 0, g = 0, v = 0, m = 0, q = 0, x = 0, b = 0, y = 0, M = 0, k = 0, _ = 0;
+    let f = 0, g = 0, v = 0, m = 0, q = 0, x = 0, b = 0, y = 0, k = 0, M = 0, _ = 0;
     c.sort(eS);
     for (let S = 0, I = c.length; S < I; S++) {
       const R = c[S], B = R.color, O = R.intensity, X = R.distance;
@@ -35675,7 +35675,7 @@ function iS(i) {
         const J = e.get(R);
         J.position.setFromMatrixPosition(R.matrixWorld), J.color.copy(B).multiplyScalar(O), J.distance = X, J.coneCos = Math.cos(R.angle), J.penumbraCos = Math.cos(R.angle * (1 - R.penumbra)), J.decay = R.decay, n.spot[v] = J;
         const e1 = R.shadow;
-        if (R.map && (n.spotLightMap[M] = R.map, M++, e1.updateMatrices(R), R.castShadow && k++), n.spotLightMatrix[v] = e1.matrix, R.castShadow) {
+        if (R.map && (n.spotLightMap[k] = R.map, k++, e1.updateMatrices(R), R.castShadow && M++), n.spotLightMatrix[v] = e1.matrix, R.castShadow) {
           const K = t.get(R);
           K.shadowIntensity = e1.intensity, K.shadowBias = e1.bias, K.shadowNormalBias = e1.normalBias, K.shadowRadius = e1.radius, K.shadowMapSize = e1.mapSize, n.spotShadow[v] = K, n.spotShadowMap[v] = W, y++;
         }
@@ -35697,7 +35697,7 @@ function iS(i) {
     }
     m > 0 && (i.has("OES_texture_float_linear") === !0 ? (n.rectAreaLTC1 = v2.LTC_FLOAT_1, n.rectAreaLTC2 = v2.LTC_FLOAT_2) : (n.rectAreaLTC1 = v2.LTC_HALF_1, n.rectAreaLTC2 = v2.LTC_HALF_2)), n.ambient[0] = d, n.ambient[1] = u, n.ambient[2] = p;
     const w = n.hash;
-    (w.directionalLength !== f || w.pointLength !== g || w.spotLength !== v || w.rectAreaLength !== m || w.hemiLength !== q || w.numDirectionalShadows !== x || w.numPointShadows !== b || w.numSpotShadows !== y || w.numSpotMaps !== M || w.numLightProbes !== _) && (n.directional.length = f, n.spot.length = v, n.rectArea.length = m, n.point.length = g, n.hemi.length = q, n.directionalShadow.length = x, n.directionalShadowMap.length = x, n.pointShadow.length = b, n.pointShadowMap.length = b, n.spotShadow.length = y, n.spotShadowMap.length = y, n.directionalShadowMatrix.length = x, n.pointShadowMatrix.length = b, n.spotLightMatrix.length = y + M - k, n.spotLightMap.length = M, n.numSpotLightShadowsWithMaps = k, n.numLightProbes = _, w.directionalLength = f, w.pointLength = g, w.spotLength = v, w.rectAreaLength = m, w.hemiLength = q, w.numDirectionalShadows = x, w.numPointShadows = b, w.numSpotShadows = y, w.numSpotMaps = M, w.numLightProbes = _, n.version = J_++);
+    (w.directionalLength !== f || w.pointLength !== g || w.spotLength !== v || w.rectAreaLength !== m || w.hemiLength !== q || w.numDirectionalShadows !== x || w.numPointShadows !== b || w.numSpotShadows !== y || w.numSpotMaps !== k || w.numLightProbes !== _) && (n.directional.length = f, n.spot.length = v, n.rectArea.length = m, n.point.length = g, n.hemi.length = q, n.directionalShadow.length = x, n.directionalShadowMap.length = x, n.pointShadow.length = b, n.pointShadowMap.length = b, n.spotShadow.length = y, n.spotShadowMap.length = y, n.directionalShadowMatrix.length = x, n.pointShadowMatrix.length = b, n.spotLightMatrix.length = y + k - M, n.spotLightMap.length = k, n.numSpotLightShadowsWithMaps = M, n.numLightProbes = _, w.directionalLength = f, w.pointLength = g, w.spotLength = v, w.rectAreaLength = m, w.hemiLength = q, w.numDirectionalShadows = x, w.numPointShadows = b, w.numSpotShadows = y, w.numSpotMaps = k, w.numLightProbes = _, n.version = J_++);
   }
   function l(c, d) {
     let u = 0, p = 0, f = 0, g = 0, v = 0;
@@ -35850,8 +35850,8 @@ function rS(i, e, t) {
   const v = new y2(g, p), m = this;
   this.enabled = !1, this.autoUpdate = !0, this.needsUpdate = !1, this.type = je;
   let q = this.type;
-  this.render = function(k, _, w) {
-    if (m.enabled === !1 || m.autoUpdate === !1 && m.needsUpdate === !1 || k.length === 0) return;
+  this.render = function(M, _, w) {
+    if (m.enabled === !1 || m.autoUpdate === !1 && m.needsUpdate === !1 || M.length === 0) return;
     this.type === Qm && (j2("WebGLShadowMap: PCFSoftShadowMap has been deprecated. Using PCFShadowMap instead."), this.type = je);
     const S = i.getRenderTarget(), I = i.getActiveCubeFace(), R = i.getActiveMipmapLevel(), B = i.state;
     B.setBlending(Z5), B.buffers.depth.getReversed() === !0 ? B.buffers.color.setClear(0, 0, 0, 0) : B.buffers.color.setClear(1, 1, 1, 1), B.buffers.depth.setTest(!0), B.setScissorTest(!1);
@@ -35859,8 +35859,8 @@ function rS(i, e, t) {
     O && _.traverse(function(X) {
       X.material && (Array.isArray(X.material) ? X.material.forEach((W) => W.needsUpdate = !0) : X.material.needsUpdate = !0);
     });
-    for (let X = 0, W = k.length; X < W; X++) {
-      const J = k[X], e1 = J.shadow;
+    for (let X = 0, W = M.length; X < W; X++) {
+      const J = M[X], e1 = J.shadow;
       if (e1 === void 0) {
         j2("WebGLShadowMap:", J, "has no shadow.");
         continue;
@@ -35912,16 +35912,16 @@ function rS(i, e, t) {
     }
     q = this.type, m.needsUpdate = !1, i.setRenderTarget(S, I, R);
   };
-  function x(k, _) {
+  function x(M, _) {
     const w = e.update(v);
-    p.defines.VSM_SAMPLES !== k.blurSamples && (p.defines.VSM_SAMPLES = k.blurSamples, f.defines.VSM_SAMPLES = k.blurSamples, p.needsUpdate = !0, f.needsUpdate = !0), k.mapPass === null && (k.mapPass = new b5(s.x, s.y, {
+    p.defines.VSM_SAMPLES !== M.blurSamples && (p.defines.VSM_SAMPLES = M.blurSamples, f.defines.VSM_SAMPLES = M.blurSamples, p.needsUpdate = !0, f.needsUpdate = !0), M.mapPass === null && (M.mapPass = new b5(s.x, s.y, {
       format: m6,
       type: J5
-    })), p.uniforms.shadow_pass.value = k.map.depthTexture, p.uniforms.resolution.value = k.mapSize, p.uniforms.radius.value = k.radius, i.setRenderTarget(k.mapPass), i.clear(), i.renderBufferDirect(_, null, w, p, v, null), f.uniforms.shadow_pass.value = k.mapPass.texture, f.uniforms.resolution.value = k.mapSize, f.uniforms.radius.value = k.radius, i.setRenderTarget(k.map), i.clear(), i.renderBufferDirect(_, null, w, f, v, null);
+    })), p.uniforms.shadow_pass.value = M.map.depthTexture, p.uniforms.resolution.value = M.mapSize, p.uniforms.radius.value = M.radius, i.setRenderTarget(M.mapPass), i.clear(), i.renderBufferDirect(_, null, w, p, v, null), f.uniforms.shadow_pass.value = M.mapPass.texture, f.uniforms.resolution.value = M.mapSize, f.uniforms.radius.value = M.radius, i.setRenderTarget(M.map), i.clear(), i.renderBufferDirect(_, null, w, f, v, null);
   }
-  function b(k, _, w, S) {
+  function b(M, _, w, S) {
     let I = null;
-    const R = w.isPointLight === !0 ? k.customDistanceMaterial : k.customDepthMaterial;
+    const R = w.isPointLight === !0 ? M.customDistanceMaterial : M.customDepthMaterial;
     if (R !== void 0)
       I = R;
     else if (I = w.isPointLight === !0 ? l : r, i.localClippingEnabled && _.clipShadows === !0 && Array.isArray(_.clippingPlanes) && _.clippingPlanes.length !== 0 || _.displacementMap && _.displacementScale !== 0 || _.alphaMap && _.alphaTest > 0 || _.map && _.alphaTest > 0 || _.alphaToCoverage === !0) {
@@ -35929,7 +35929,7 @@ function rS(i, e, t) {
       let X = c[B];
       X === void 0 && (X = {}, c[B] = X);
       let W = X[O];
-      W === void 0 && (W = I.clone(), X[O] = W, _.addEventListener("dispose", M)), I = W;
+      W === void 0 && (W = I.clone(), X[O] = W, _.addEventListener("dispose", k)), I = W;
     }
     if (I.visible = _.visible, I.wireframe = _.wireframe, S === a8 ? I.side = _.shadowSide !== null ? _.shadowSide : _.side : I.side = _.shadowSide !== null ? _.shadowSide : u[_.side], I.alphaMap = _.alphaMap, I.alphaTest = _.alphaToCoverage === !0 ? 0.5 : _.alphaTest, I.map = _.map, I.clipShadows = _.clipShadows, I.clippingPlanes = _.clippingPlanes, I.clipIntersection = _.clipIntersection, I.displacementMap = _.displacementMap, I.displacementScale = _.displacementScale, I.displacementBias = _.displacementBias, I.wireframeLinewidth = _.wireframeLinewidth, I.linewidth = _.linewidth, w.isPointLight === !0 && I.isMeshDistanceMaterial === !0) {
       const B = i.properties.get(I);
@@ -35937,33 +35937,33 @@ function rS(i, e, t) {
     }
     return I;
   }
-  function y(k, _, w, S, I) {
-    if (k.visible === !1) return;
-    if (k.layers.test(_.layers) && (k.isMesh || k.isLine || k.isPoints) && (k.castShadow || k.receiveShadow && I === a8) && (!k.frustumCulled || n.intersectsObject(k))) {
-      k.modelViewMatrix.multiplyMatrices(w.matrixWorldInverse, k.matrixWorld);
-      const O = e.update(k), X = k.material;
+  function y(M, _, w, S, I) {
+    if (M.visible === !1) return;
+    if (M.layers.test(_.layers) && (M.isMesh || M.isLine || M.isPoints) && (M.castShadow || M.receiveShadow && I === a8) && (!M.frustumCulled || n.intersectsObject(M))) {
+      M.modelViewMatrix.multiplyMatrices(w.matrixWorldInverse, M.matrixWorld);
+      const O = e.update(M), X = M.material;
       if (Array.isArray(X)) {
         const W = O.groups;
         for (let J = 0, e1 = W.length; J < e1; J++) {
           const K = W[J], a1 = X[K.materialIndex];
           if (a1 && a1.visible) {
-            const _1 = b(k, a1, S, I);
-            k.onBeforeShadow(i, k, _, w, O, _1, K), i.renderBufferDirect(w, null, O, _1, k, K), k.onAfterShadow(i, k, _, w, O, _1, K);
+            const _1 = b(M, a1, S, I);
+            M.onBeforeShadow(i, M, _, w, O, _1, K), i.renderBufferDirect(w, null, O, _1, M, K), M.onAfterShadow(i, M, _, w, O, _1, K);
           }
         }
       } else if (X.visible) {
-        const W = b(k, X, S, I);
-        k.onBeforeShadow(i, k, _, w, O, W, null), i.renderBufferDirect(w, null, O, W, k, null), k.onAfterShadow(i, k, _, w, O, W, null);
+        const W = b(M, X, S, I);
+        M.onBeforeShadow(i, M, _, w, O, W, null), i.renderBufferDirect(w, null, O, W, M, null), M.onAfterShadow(i, M, _, w, O, W, null);
       }
     }
-    const B = k.children;
+    const B = M.children;
     for (let O = 0, X = B.length; O < X; O++)
       y(B[O], _, w, S, I);
   }
-  function M(k) {
-    k.target.removeEventListener("dispose", M);
+  function k(M) {
+    M.target.removeEventListener("dispose", k);
     for (const w in c) {
-      const S = c[w], I = k.target.uuid;
+      const S = c[w], I = M.target.uuid;
       I in S && (S[I].dispose(), delete S[I]);
     }
   }
@@ -36080,7 +36080,7 @@ function lS(i, e) {
     };
   }
   const o = new t(), a = new n(), r = new s(), l = /* @__PURE__ */ new WeakMap(), c = /* @__PURE__ */ new WeakMap();
-  let d = {}, u = {}, p = {}, f = /* @__PURE__ */ new WeakMap(), g = [], v = null, m = !1, q = null, x = null, b = null, y = null, M = null, k = null, _ = null, w = new i0(0, 0, 0), S = 0, I = !1, R = null, B = null, O = null, X = null, W = null;
+  let d = {}, u = {}, p = {}, f = /* @__PURE__ */ new WeakMap(), g = [], v = null, m = !1, q = null, x = null, b = null, y = null, k = null, M = null, _ = null, w = new i0(0, 0, 0), S = 0, I = !1, R = null, B = null, O = null, X = null, W = null;
   const J = i.getParameter(i.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
   let e1 = !1, K = 0;
   const a1 = i.getParameter(i.VERSION);
@@ -36152,7 +36152,7 @@ function lS(i, e) {
     }
     if (m === !1 && (p1(i.BLEND), m = !0), k1 !== Jm) {
       if (k1 !== q || O2 !== I) {
-        if ((x !== s6 || M !== s6) && (i.blendEquation(i.FUNC_ADD), x = s6, M = s6), O2)
+        if ((x !== s6 || k !== s6) && (i.blendEquation(i.FUNC_ADD), x = s6, k = s6), O2)
           switch (k1) {
             case b7:
               i.blendFuncSeparate(i.ONE, i.ONE_MINUS_SRC_ALPHA, i.ONE, i.ONE_MINUS_SRC_ALPHA);
@@ -36188,11 +36188,11 @@ function lS(i, e) {
               f0("WebGLState: Invalid blending: ", k1);
               break;
           }
-        b = null, y = null, k = null, _ = null, w.set(0, 0, 0), S = 0, q = k1, I = O2;
+        b = null, y = null, M = null, _ = null, w.set(0, 0, 0), S = 0, q = k1, I = O2;
       }
       return;
     }
-    f2 = f2 || l2, t2 = t2 || i2, T2 = T2 || b2, (l2 !== x || f2 !== M) && (i.blendEquationSeparate(T[l2], T[f2]), x = l2, M = f2), (i2 !== b || b2 !== y || t2 !== k || T2 !== _) && (i.blendFuncSeparate(E[i2], E[b2], E[t2], E[T2]), b = i2, y = b2, k = t2, _ = T2), (h2.equals(w) === !1 || l0 !== S) && (i.blendColor(h2.r, h2.g, h2.b, l0), w.copy(h2), S = l0), q = k1, I = !1;
+    f2 = f2 || l2, t2 = t2 || i2, T2 = T2 || b2, (l2 !== x || f2 !== k) && (i.blendEquationSeparate(T[l2], T[f2]), x = l2, k = f2), (i2 !== b || b2 !== y || t2 !== M || T2 !== _) && (i.blendFuncSeparate(E[i2], E[b2], E[t2], E[T2]), b = i2, y = b2, M = t2, _ = T2), (h2.equals(w) === !1 || l0 !== S) && (i.blendColor(h2.r, h2.g, h2.b, l0), w.copy(h2), S = l0), q = k1, I = !1;
   }
   function $(k1, l2) {
     k1.side === y3 ? m1(i.CULL_FACE) : p1(i.CULL_FACE);
@@ -36321,7 +36321,7 @@ function lS(i, e) {
     l.get(l2) !== b2 && (i.uniformBlockBinding(l2, b2, k1.__bindingPointIndex), l.set(l2, b2));
   }
   function X1() {
-    i.disable(i.BLEND), i.disable(i.CULL_FACE), i.disable(i.DEPTH_TEST), i.disable(i.POLYGON_OFFSET_FILL), i.disable(i.SCISSOR_TEST), i.disable(i.STENCIL_TEST), i.disable(i.SAMPLE_ALPHA_TO_COVERAGE), i.blendEquation(i.FUNC_ADD), i.blendFunc(i.ONE, i.ZERO), i.blendFuncSeparate(i.ONE, i.ZERO, i.ONE, i.ZERO), i.blendColor(0, 0, 0, 0), i.colorMask(!0, !0, !0, !0), i.clearColor(0, 0, 0, 0), i.depthMask(!0), i.depthFunc(i.LESS), a.setReversed(!1), i.clearDepth(1), i.stencilMask(4294967295), i.stencilFunc(i.ALWAYS, 0, 4294967295), i.stencilOp(i.KEEP, i.KEEP, i.KEEP), i.clearStencil(0), i.cullFace(i.BACK), i.frontFace(i.CCW), i.polygonOffset(0, 0), i.activeTexture(i.TEXTURE0), i.bindFramebuffer(i.FRAMEBUFFER, null), i.bindFramebuffer(i.DRAW_FRAMEBUFFER, null), i.bindFramebuffer(i.READ_FRAMEBUFFER, null), i.useProgram(null), i.lineWidth(1), i.scissor(0, 0, i.canvas.width, i.canvas.height), i.viewport(0, 0, i.canvas.width, i.canvas.height), i.pixelStorei(i.PACK_ALIGNMENT, 4), i.pixelStorei(i.UNPACK_ALIGNMENT, 4), i.pixelStorei(i.UNPACK_FLIP_Y_WEBGL, !1), i.pixelStorei(i.UNPACK_PREMULTIPLY_ALPHA_WEBGL, !1), i.pixelStorei(i.UNPACK_COLORSPACE_CONVERSION_WEBGL, i.BROWSER_DEFAULT_WEBGL), i.pixelStorei(i.PACK_ROW_LENGTH, 0), i.pixelStorei(i.PACK_SKIP_PIXELS, 0), i.pixelStorei(i.PACK_SKIP_ROWS, 0), i.pixelStorei(i.UNPACK_ROW_LENGTH, 0), i.pixelStorei(i.UNPACK_IMAGE_HEIGHT, 0), i.pixelStorei(i.UNPACK_SKIP_PIXELS, 0), i.pixelStorei(i.UNPACK_SKIP_ROWS, 0), i.pixelStorei(i.UNPACK_SKIP_IMAGES, 0), d = {}, u = {}, _1 = null, L1 = {}, p = {}, f = /* @__PURE__ */ new WeakMap(), g = [], v = null, m = !1, q = null, x = null, b = null, y = null, M = null, k = null, _ = null, w = new i0(0, 0, 0), S = 0, I = !1, R = null, B = null, O = null, X = null, W = null, N.set(0, 0, i.canvas.width, i.canvas.height), G.set(0, 0, i.canvas.width, i.canvas.height), o.reset(), a.reset(), r.reset();
+    i.disable(i.BLEND), i.disable(i.CULL_FACE), i.disable(i.DEPTH_TEST), i.disable(i.POLYGON_OFFSET_FILL), i.disable(i.SCISSOR_TEST), i.disable(i.STENCIL_TEST), i.disable(i.SAMPLE_ALPHA_TO_COVERAGE), i.blendEquation(i.FUNC_ADD), i.blendFunc(i.ONE, i.ZERO), i.blendFuncSeparate(i.ONE, i.ZERO, i.ONE, i.ZERO), i.blendColor(0, 0, 0, 0), i.colorMask(!0, !0, !0, !0), i.clearColor(0, 0, 0, 0), i.depthMask(!0), i.depthFunc(i.LESS), a.setReversed(!1), i.clearDepth(1), i.stencilMask(4294967295), i.stencilFunc(i.ALWAYS, 0, 4294967295), i.stencilOp(i.KEEP, i.KEEP, i.KEEP), i.clearStencil(0), i.cullFace(i.BACK), i.frontFace(i.CCW), i.polygonOffset(0, 0), i.activeTexture(i.TEXTURE0), i.bindFramebuffer(i.FRAMEBUFFER, null), i.bindFramebuffer(i.DRAW_FRAMEBUFFER, null), i.bindFramebuffer(i.READ_FRAMEBUFFER, null), i.useProgram(null), i.lineWidth(1), i.scissor(0, 0, i.canvas.width, i.canvas.height), i.viewport(0, 0, i.canvas.width, i.canvas.height), i.pixelStorei(i.PACK_ALIGNMENT, 4), i.pixelStorei(i.UNPACK_ALIGNMENT, 4), i.pixelStorei(i.UNPACK_FLIP_Y_WEBGL, !1), i.pixelStorei(i.UNPACK_PREMULTIPLY_ALPHA_WEBGL, !1), i.pixelStorei(i.UNPACK_COLORSPACE_CONVERSION_WEBGL, i.BROWSER_DEFAULT_WEBGL), i.pixelStorei(i.PACK_ROW_LENGTH, 0), i.pixelStorei(i.PACK_SKIP_PIXELS, 0), i.pixelStorei(i.PACK_SKIP_ROWS, 0), i.pixelStorei(i.UNPACK_ROW_LENGTH, 0), i.pixelStorei(i.UNPACK_IMAGE_HEIGHT, 0), i.pixelStorei(i.UNPACK_SKIP_PIXELS, 0), i.pixelStorei(i.UNPACK_SKIP_ROWS, 0), i.pixelStorei(i.UNPACK_SKIP_IMAGES, 0), d = {}, u = {}, _1 = null, L1 = {}, p = {}, f = /* @__PURE__ */ new WeakMap(), g = [], v = null, m = !1, q = null, x = null, b = null, y = null, k = null, M = null, _ = null, w = new i0(0, 0, 0), S = 0, I = !1, R = null, B = null, O = null, X = null, W = null, N.set(0, 0, i.canvas.width, i.canvas.height), G.set(0, 0, i.canvas.width, i.canvas.height), o.reset(), a.reset(), r.reset();
   }
   return {
     buffers: {
@@ -36411,11 +36411,11 @@ function cS(i, e, t, n, s, o, a) {
     }
     return (A1 === i.R16F || A1 === i.R32F || A1 === i.RG16F || A1 === i.RG32F || A1 === i.RGBA16F || A1 === i.RGBA32F) && e.get("EXT_color_buffer_float"), A1;
   }
-  function M(i1, P) {
+  function k(i1, P) {
     let Q;
     return i1 ? P === null || P === S5 || P === k8 ? Q = i.DEPTH24_STENCIL8 : P === f5 ? Q = i.DEPTH32F_STENCIL8 : P === M8 && (Q = i.DEPTH24_STENCIL8, j2("DepthTexture: 16 bit depth attachment is not supported with stencil. Using 24-bit attachment.")) : P === null || P === S5 || P === k8 ? Q = i.DEPTH_COMPONENT24 : P === f5 ? Q = i.DEPTH_COMPONENT32F : P === M8 && (Q = i.DEPTH_COMPONENT16), Q;
   }
-  function k(i1, P) {
+  function M(i1, P) {
     return q(i1) === !0 || i1.isFramebufferTexture && i1.minFilter !== b9 && i1.minFilter !== M9 ? Math.log2(Math.max(P.width, P.height)) + 1 : i1.mipmaps !== void 0 && i1.mipmaps.length > 0 ? i1.mipmaps.length : i1.isCompressedTexture && Array.isArray(i1.image) ? P.mipmaps.length : 1;
   }
   function _(i1) {
@@ -36618,9 +36618,9 @@ function cS(i, e, t, n, s, o, a) {
       let K1 = y(P.internalFormat, o2, a2, P.normalized, P.colorSpace, P.isVideoTexture);
       G(d1, P);
       let s2;
-      const q2 = P.mipmaps, R2 = P.isVideoTexture !== !0, X1 = I1.__version === void 0 || M1 === !0, k1 = R1.dataReady, l2 = k(P, F1);
+      const q2 = P.mipmaps, R2 = P.isVideoTexture !== !0, X1 = I1.__version === void 0 || M1 === !0, k1 = R1.dataReady, l2 = M(P, F1);
       if (P.isDepthTexture)
-        K1 = M(P.format === l6, P.type), X1 && (R2 ? t.texStorage2D(i.TEXTURE_2D, 1, K1, F1.width, F1.height) : t.texImage2D(i.TEXTURE_2D, 0, K1, F1.width, F1.height, 0, o2, a2, null));
+        K1 = k(P.format === l6, P.type), X1 && (R2 ? t.texStorage2D(i.TEXTURE_2D, 1, K1, F1.width, F1.height) : t.texImage2D(i.TEXTURE_2D, 0, K1, F1.width, F1.height, 0, o2, a2, null));
       else if (P.isDataTexture)
         if (q2.length > 0) {
           R2 && X1 && t.texStorage2D(i.TEXTURE_2D, l2, K1, q2[0].width, q2[0].height);
@@ -36735,7 +36735,7 @@ function cS(i, e, t, n, s, o, a) {
       for (let t2 = 0; t2 < 6; t2++)
         !o2 && !a2 ? K1[t2] = m(P.image[t2], !0, s.maxCubemapSize) : K1[t2] = a2 ? P.image[t2].image : P.image[t2], K1[t2] = C1(P, K1[t2]);
       const s2 = K1[0], q2 = o.convert(P.format, P.colorSpace), R2 = o.convert(P.type), X1 = y(P.internalFormat, q2, R2, P.normalized, P.colorSpace), k1 = P.isVideoTexture !== !0, l2 = R1.__version === void 0 || d1 === !0, i2 = M1.dataReady;
-      let b2 = k(P, s2);
+      let b2 = M(P, s2);
       G(i.TEXTURE_CUBE_MAP, P);
       let f2;
       if (o2) {
@@ -36782,7 +36782,7 @@ function cS(i, e, t, n, s, o, a) {
   }
   function r1(i1, P, Q) {
     if (i.bindRenderbuffer(i.RENDERBUFFER, i1), P.depthBuffer) {
-      const d1 = P.depthTexture, M1 = d1 && d1.isDepthTexture ? d1.type : null, R1 = M(P.stencilBuffer, M1), I1 = P.stencilBuffer ? i.DEPTH_STENCIL_ATTACHMENT : i.DEPTH_ATTACHMENT;
+      const d1 = P.depthTexture, M1 = d1 && d1.isDepthTexture ? d1.type : null, R1 = k(P.stencilBuffer, M1), I1 = P.stencilBuffer ? i.DEPTH_STENCIL_ATTACHMENT : i.DEPTH_ATTACHMENT;
       v1(P) ? r.renderbufferStorageMultisampleEXT(i.RENDERBUFFER, w1(P), R1, P.width, P.height) : Q ? i.renderbufferStorageMultisample(i.RENDERBUFFER, w1(P), R1, P.width, P.height) : i.renderbufferStorage(i.RENDERBUFFER, R1, P.width, P.height), i.framebufferRenderbuffer(i.FRAMEBUFFER, I1, i.RENDERBUFFER, i1);
     } else {
       const d1 = P.textures;
@@ -37180,7 +37180,7 @@ class qS extends R4 {
     let s = null, o = 1, a = null, r = "local-floor", l = 1, c = null, d = null, u = null, p = null, f = null, g = null;
     const v = typeof XRWebGLBinding < "u", m = new fS(), q = {}, x = t.getContextAttributes();
     let b = null, y = null;
-    const M = [], k = [], _ = new e2();
+    const k = [], M = [], _ = new e2();
     let w = null;
     const S = new F9();
     S.viewport = new K0();
@@ -37189,27 +37189,27 @@ class qS extends R4 {
     const R = [S, I], B = new bx();
     let O = null, X = null;
     this.cameraAutoUpdate = !0, this.enabled = !1, this.isPresenting = !1, this.getController = function(C) {
-      let F = M[C];
-      return F === void 0 && (F = new ft(), M[C] = F), F.getTargetRaySpace();
+      let F = k[C];
+      return F === void 0 && (F = new ft(), k[C] = F), F.getTargetRaySpace();
     }, this.getControllerGrip = function(C) {
-      let F = M[C];
-      return F === void 0 && (F = new ft(), M[C] = F), F.getGripSpace();
+      let F = k[C];
+      return F === void 0 && (F = new ft(), k[C] = F), F.getGripSpace();
     }, this.getHand = function(C) {
-      let F = M[C];
-      return F === void 0 && (F = new ft(), M[C] = F), F.getHandSpace();
+      let F = k[C];
+      return F === void 0 && (F = new ft(), k[C] = F), F.getHandSpace();
     };
     function W(C) {
-      const F = k.indexOf(C.inputSource);
+      const F = M.indexOf(C.inputSource);
       if (F === -1)
         return;
-      const p1 = M[F];
+      const p1 = k[F];
       p1 !== void 0 && (p1.update(C.inputSource, C.frame, c || a), p1.dispatchEvent({ type: C.type, data: C.inputSource }));
     }
     function J() {
       s.removeEventListener("select", W), s.removeEventListener("selectstart", W), s.removeEventListener("selectend", W), s.removeEventListener("squeeze", W), s.removeEventListener("squeezestart", W), s.removeEventListener("squeezeend", W), s.removeEventListener("end", J), s.removeEventListener("inputsourceschange", e1);
-      for (let C = 0; C < M.length; C++) {
-        const F = k[C];
-        F !== null && (k[C] = null, M[C].disconnect(F));
+      for (let C = 0; C < k.length; C++) {
+        const F = M[C];
+        F !== null && (M[C] = null, k[C].disconnect(F));
       }
       O = null, X = null, m.reset();
       for (const C in q)
@@ -37287,24 +37287,24 @@ class qS extends R4 {
     };
     function e1(C) {
       for (let F = 0; F < C.removed.length; F++) {
-        const p1 = C.removed[F], m1 = k.indexOf(p1);
-        m1 >= 0 && (k[m1] = null, M[m1].disconnect(p1));
+        const p1 = C.removed[F], m1 = M.indexOf(p1);
+        m1 >= 0 && (M[m1] = null, k[m1].disconnect(p1));
       }
       for (let F = 0; F < C.added.length; F++) {
         const p1 = C.added[F];
-        let m1 = k.indexOf(p1);
+        let m1 = M.indexOf(p1);
         if (m1 === -1) {
-          for (let u1 = 0; u1 < M.length; u1++)
-            if (u1 >= k.length) {
-              k.push(p1), m1 = u1;
+          for (let u1 = 0; u1 < k.length; u1++)
+            if (u1 >= M.length) {
+              M.push(p1), m1 = u1;
               break;
-            } else if (k[u1] === null) {
-              k[u1] = p1, m1 = u1;
+            } else if (M[u1] === null) {
+              M[u1] = p1, m1 = u1;
               break;
             }
           if (m1 === -1) break;
         }
-        const s1 = M[m1];
+        const s1 = k[m1];
         s1 && s1.connect(p1);
       }
     }
@@ -37394,8 +37394,8 @@ class qS extends R4 {
           }
         }
       }
-      for (let p1 = 0; p1 < M.length; p1++) {
-        const m1 = k[p1], s1 = M[p1];
+      for (let p1 = 0; p1 < k.length; p1++) {
+        const m1 = M[p1], s1 = k[p1];
         m1 !== null && s1 !== void 0 && s1.update(m1, F, c || a);
       }
       $1 && $1(C, F), F.detectedPlanes && n.dispatchEvent({ type: "planesdetected", data: F }), g = null;
@@ -37470,16 +37470,16 @@ function bS(i, e, t, n) {
   function c(x, b) {
     let y = s[x.id];
     y === void 0 && (g(x), y = d(x), s[x.id] = y, x.addEventListener("dispose", m));
-    const M = b.program;
-    n.updateUBOMapping(x, M);
-    const k = e.render.frame;
-    o[x.id] !== k && (p(x), o[x.id] = k);
+    const k = b.program;
+    n.updateUBOMapping(x, k);
+    const M = e.render.frame;
+    o[x.id] !== M && (p(x), o[x.id] = M);
   }
   function d(x) {
     const b = u();
     x.__bindingPointIndex = b;
-    const y = i.createBuffer(), M = x.__size, k = x.usage;
-    return i.bindBuffer(i.UNIFORM_BUFFER, y), i.bufferData(i.UNIFORM_BUFFER, M, k), i.bindBuffer(i.UNIFORM_BUFFER, null), i.bindBufferBase(i.UNIFORM_BUFFER, b, y), y;
+    const y = i.createBuffer(), k = x.__size, M = x.usage;
+    return i.bindBuffer(i.UNIFORM_BUFFER, y), i.bufferData(i.UNIFORM_BUFFER, k, M), i.bindBuffer(i.UNIFORM_BUFFER, null), i.bindBufferBase(i.UNIFORM_BUFFER, b, y), y;
   }
   function u() {
     for (let x = 0; x < r; x++)
@@ -37488,13 +37488,13 @@ function bS(i, e, t, n) {
     return f0("WebGLRenderer: Maximum number of simultaneously usable uniforms groups reached."), 0;
   }
   function p(x) {
-    const b = s[x.id], y = x.uniforms, M = x.__cache;
+    const b = s[x.id], y = x.uniforms, k = x.__cache;
     i.bindBuffer(i.UNIFORM_BUFFER, b);
-    for (let k = 0, _ = y.length; k < _; k++) {
-      const w = Array.isArray(y[k]) ? y[k] : [y[k]];
+    for (let M = 0, _ = y.length; M < _; M++) {
+      const w = Array.isArray(y[M]) ? y[M] : [y[M]];
       for (let S = 0, I = w.length; S < I; S++) {
         const R = w[S];
-        if (f(R, k, S, M) === !0) {
+        if (f(R, M, S, k) === !0) {
           const B = R.__offset, O = Array.isArray(R.value) ? R.value : [R.value];
           let X = 0;
           for (let W = 0; W < O.length; W++) {
@@ -37507,20 +37507,20 @@ function bS(i, e, t, n) {
     }
     i.bindBuffer(i.UNIFORM_BUFFER, null);
   }
-  function f(x, b, y, M) {
-    const k = x.value, _ = b + "_" + y;
-    if (M[_] === void 0)
-      return typeof k == "number" || typeof k == "boolean" ? M[_] = k : ArrayBuffer.isView(k) ? M[_] = k.slice() : M[_] = k.clone(), !0;
+  function f(x, b, y, k) {
+    const M = x.value, _ = b + "_" + y;
+    if (k[_] === void 0)
+      return typeof M == "number" || typeof M == "boolean" ? k[_] = M : ArrayBuffer.isView(M) ? k[_] = M.slice() : k[_] = M.clone(), !0;
     {
-      const w = M[_];
-      if (typeof k == "number" || typeof k == "boolean") {
-        if (w !== k)
-          return M[_] = k, !0;
+      const w = k[_];
+      if (typeof M == "number" || typeof M == "boolean") {
+        if (w !== M)
+          return k[_] = M, !0;
       } else {
-        if (ArrayBuffer.isView(k))
+        if (ArrayBuffer.isView(M))
           return !0;
-        if (w.equals(k) === !1)
-          return w.copy(k), !0;
+        if (w.equals(M) === !1)
+          return w.copy(M), !0;
       }
     }
     return !1;
@@ -37528,19 +37528,19 @@ function bS(i, e, t, n) {
   function g(x) {
     const b = x.uniforms;
     let y = 0;
-    const M = 16;
+    const k = 16;
     for (let _ = 0, w = b.length; _ < w; _++) {
       const S = Array.isArray(b[_]) ? b[_] : [b[_]];
       for (let I = 0, R = S.length; I < R; I++) {
         const B = S[I], O = Array.isArray(B.value) ? B.value : [B.value];
         for (let X = 0, W = O.length; X < W; X++) {
-          const J = O[X], e1 = v(J), K = y % M, a1 = K % e1.boundary, _1 = K + a1;
-          y += a1, _1 !== 0 && M - _1 < e1.storage && (y += M - _1), B.__data = new Float32Array(e1.storage / Float32Array.BYTES_PER_ELEMENT), B.__offset = y, y += e1.storage;
+          const J = O[X], e1 = v(J), K = y % k, a1 = K % e1.boundary, _1 = K + a1;
+          y += a1, _1 !== 0 && k - _1 < e1.storage && (y += k - _1), B.__data = new Float32Array(e1.storage / Float32Array.BYTES_PER_ELEMENT), B.__offset = y, y += e1.storage;
         }
       }
     }
-    const k = y % M;
-    return k > 0 && (y += M - k), x.__size = y, x.__cache = {}, this;
+    const M = y % k;
+    return M > 0 && (y += k - M), x.__size = y, x.__cache = {}, this;
   }
   function v(x) {
     const b = {
@@ -38127,7 +38127,7 @@ class yS {
       ao,
       ro
     ]), x = new Uint32Array(4), b = new Int32Array(4), y = new Z();
-    let M = null, k = null;
+    let k = null, M = null;
     const _ = [], w = [];
     let S = null;
     this.domElement = t, this.debug = {
@@ -38345,11 +38345,11 @@ class yS {
       o1.transparent === !0 && o1.side === y3 && o1.forceSinglePass === !1 ? (o1.side = Y9, o1.needsUpdate = !0, z9(o1, D1, W1), o1.side = P4, o1.needsUpdate = !0, z9(o1, D1, W1), o1.side = y3) : z9(o1, D1, W1);
     }
     this.compile = function(o1, D1, W1 = null) {
-      W1 === null && (W1 = o1), k = o2.get(W1), k.init(D1), w.push(k), W1.traverseVisible(function(j1) {
-        j1.isLight && j1.layers.test(D1.layers) && (k.pushLight(j1), j1.castShadow && k.pushShadow(j1));
+      W1 === null && (W1 = o1), M = o2.get(W1), M.init(D1), w.push(M), W1.traverseVisible(function(j1) {
+        j1.isLight && j1.layers.test(D1.layers) && (M.pushLight(j1), j1.castShadow && M.pushShadow(j1));
       }), o1 !== W1 && o1.traverseVisible(function(j1) {
-        j1.isLight && j1.layers.test(D1.layers) && (k.pushLight(j1), j1.castShadow && k.pushShadow(j1));
-      }), k.setupLights();
+        j1.isLight && j1.layers.test(D1.layers) && (M.pushLight(j1), j1.castShadow && M.pushShadow(j1));
+      }), M.setupLights();
       const z1 = /* @__PURE__ */ new Set();
       return o1.traverse(function(j1) {
         if (!(j1.isMesh || j1.isPoints || j1.isLine || j1.isSprite))
@@ -38363,7 +38363,7 @@ class yS {
             }
           else
             M0(m2, W1, j1), z1.add(m2);
-      }), k = w.pop(), z1;
+      }), M = w.pop(), z1;
     }, this.compileAsync = function(o1, D1, W1 = null) {
       const z1 = this.compile(o1, D1, W1);
       return new Promise((j1) => {
@@ -38400,15 +38400,15 @@ class yS {
       if (R === !0) return;
       B !== null && B.renderStart(o1, D1);
       const W1 = f2.enabled === !0 && f2.isPresenting === !0, z1 = S !== null && (W === null || W1) && S.begin(I, W);
-      if (o1.matrixWorldAutoUpdate === !0 && o1.updateMatrixWorld(), D1.parent === null && D1.matrixWorldAutoUpdate === !0 && D1.updateMatrixWorld(), f2.enabled === !0 && f2.isPresenting === !0 && (S === null || S.isCompositing() === !1) && (f2.cameraAutoUpdate === !0 && f2.updateCamera(D1), D1 = f2.getCamera()), o1.isScene === !0 && o1.onBeforeRender(I, o1, D1, W), k = o2.get(o1, w.length), k.init(D1), k.state.textureUnits = P.getTextureUnits(), w.push(k), E.multiplyMatrices(D1.projectionMatrix, D1.matrixWorldInverse), u1.setFromProjectionMatrix(E, q5, D1.reversedDepth), T = this.localClippingEnabled, r1 = a2.init(this.clippingPlanes, T), M = F1.get(o1, _.length), M.init(), _.push(M), f2.enabled === !0 && f2.isPresenting === !0) {
+      if (o1.matrixWorldAutoUpdate === !0 && o1.updateMatrixWorld(), D1.parent === null && D1.matrixWorldAutoUpdate === !0 && D1.updateMatrixWorld(), f2.enabled === !0 && f2.isPresenting === !0 && (S === null || S.isCompositing() === !1) && (f2.cameraAutoUpdate === !0 && f2.updateCamera(D1), D1 = f2.getCamera()), o1.isScene === !0 && o1.onBeforeRender(I, o1, D1, W), M = o2.get(o1, w.length), M.init(D1), M.state.textureUnits = P.getTextureUnits(), w.push(M), E.multiplyMatrices(D1.projectionMatrix, D1.matrixWorldInverse), u1.setFromProjectionMatrix(E, q5, D1.reversedDepth), T = this.localClippingEnabled, r1 = a2.init(this.clippingPlanes, T), k = F1.get(o1, _.length), k.init(), _.push(k), f2.enabled === !0 && f2.isPresenting === !0) {
         const g2 = I.xr.getDepthSensingMesh();
         g2 !== null && g0(g2, D1, -1 / 0, I.sortObjects);
       }
-      g0(o1, D1, 0, I.sortObjects), M.finish(), I.sortObjects === !0 && M.sort(C, F), V = f2.enabled === !1 || f2.isPresenting === !1 || f2.hasDepthSensing() === !1, V && s2.addToRenderList(M, o1), this.info.render.frame++, r1 === !0 && a2.beginShadows();
-      const j1 = k.state.shadowsArray;
+      g0(o1, D1, 0, I.sortObjects), k.finish(), I.sortObjects === !0 && k.sort(C, F), V = f2.enabled === !1 || f2.isPresenting === !1 || f2.hasDepthSensing() === !1, V && s2.addToRenderList(k, o1), this.info.render.frame++, r1 === !0 && a2.beginShadows();
+      const j1 = M.state.shadowsArray;
       if (K1.render(j1, o1, D1), r1 === !0 && a2.endShadows(), this.info.autoReset === !0 && this.info.reset(), (z1 && S.hasRenderPass()) === !1) {
-        const g2 = M.opaque, d2 = M.transmissive;
-        if (k.setupLights(), D1.isArrayCamera) {
+        const g2 = k.opaque, d2 = k.transmissive;
+        if (M.setupLights(), D1.isArrayCamera) {
           const x2 = D1.cameras;
           if (d2.length > 0)
             for (let P2 = 0, A2 = x2.length; P2 < A2; P2++) {
@@ -38418,12 +38418,12 @@ class yS {
           V && s2.render(o1);
           for (let P2 = 0, A2 = x2.length; P2 < A2; P2++) {
             const E2 = x2[P2];
-            J9(M, o1, E2, E2.viewport);
+            J9(k, o1, E2, E2.viewport);
           }
         } else
-          d2.length > 0 && k3(g2, d2, o1, D1), V && s2.render(o1), J9(M, o1, D1);
+          d2.length > 0 && k3(g2, d2, o1, D1), V && s2.render(o1), J9(k, o1, D1);
       }
-      W !== null && X === 0 && (P.updateMultisampleRenderTarget(W), P.updateRenderTargetMipmap(W)), z1 && S.end(I), o1.isScene === !0 && o1.onAfterRender(I, o1, D1), l2.resetDefaultState(), J = -1, e1 = null, w.pop(), w.length > 0 ? (k = w[w.length - 1], P.setTextureUnits(k.state.textureUnits), r1 === !0 && a2.setGlobalState(I.clippingPlanes, k.state.camera)) : k = null, _.pop(), _.length > 0 ? M = _[_.length - 1] : M = null, B !== null && B.renderEnd();
+      W !== null && X === 0 && (P.updateMultisampleRenderTarget(W), P.updateRenderTargetMipmap(W)), z1 && S.end(I), o1.isScene === !0 && o1.onAfterRender(I, o1, D1), l2.resetDefaultState(), J = -1, e1 = null, w.pop(), w.length > 0 ? (M = w[w.length - 1], P.setTextureUnits(M.state.textureUnits), r1 === !0 && a2.setGlobalState(I.clippingPlanes, M.state.camera)) : M = null, _.pop(), _.length > 0 ? k = _[_.length - 1] : k = null, B !== null && B.renderEnd();
     };
     function g0(o1, D1, W1, z1) {
       if (o1.visible === !1) return;
@@ -38433,14 +38433,14 @@ class yS {
         else if (o1.isLOD)
           o1.autoUpdate === !0 && o1.update(D1);
         else if (o1.isLightProbeGrid)
-          k.pushLightProbeGrid(o1);
+          M.pushLightProbeGrid(o1);
         else if (o1.isLight)
-          k.pushLight(o1), o1.castShadow && k.pushShadow(o1);
+          M.pushLight(o1), o1.castShadow && M.pushShadow(o1);
         else if (o1.isSprite) {
           if (!o1.frustumCulled || u1.intersectsSprite(o1)) {
             z1 && $.setFromMatrixPosition(o1.matrixWorld).applyMatrix4(E);
             const g2 = R1.update(o1), d2 = o1.material;
-            d2.visible && M.push(o1, g2, d2, W1, $.z, null);
+            d2.visible && k.push(o1, g2, d2, W1, $.z, null);
           }
         } else if ((o1.isMesh || o1.isLine || o1.isPoints) && (!o1.frustumCulled || u1.intersectsObject(o1))) {
           const g2 = R1.update(o1), d2 = o1.material;
@@ -38448,9 +38448,9 @@ class yS {
             const x2 = g2.groups;
             for (let P2 = 0, A2 = x2.length; P2 < A2; P2++) {
               const E2 = x2[P2], C2 = d2[E2.materialIndex];
-              C2 && C2.visible && M.push(o1, g2, C2, W1, $.z, E2);
+              C2 && C2.visible && k.push(o1, g2, C2, W1, $.z, E2);
             }
-          } else d2.visible && M.push(o1, g2, d2, W1, $.z, null);
+          } else d2.visible && k.push(o1, g2, d2, W1, $.z, null);
         }
       }
       const m2 = o1.children;
@@ -38459,14 +38459,14 @@ class yS {
     }
     function J9(o1, D1, W1, z1) {
       const { opaque: j1, transmissive: m2, transparent: g2 } = o1;
-      k.setupLightsView(W1), r1 === !0 && a2.setGlobalState(I.clippingPlanes, W1), z1 && C1.viewport(K.copy(z1)), j1.length > 0 && E9(j1, D1, W1), m2.length > 0 && E9(m2, D1, W1), g2.length > 0 && E9(g2, D1, W1), C1.buffers.depth.setTest(!0), C1.buffers.depth.setMask(!0), C1.buffers.color.setMask(!0), C1.setPolygonOffset(!1);
+      M.setupLightsView(W1), r1 === !0 && a2.setGlobalState(I.clippingPlanes, W1), z1 && C1.viewport(K.copy(z1)), j1.length > 0 && E9(j1, D1, W1), m2.length > 0 && E9(m2, D1, W1), g2.length > 0 && E9(g2, D1, W1), C1.buffers.depth.setTest(!0), C1.buffers.depth.setMask(!0), C1.buffers.color.setMask(!0), C1.setPolygonOffset(!1);
     }
     function k3(o1, D1, W1, z1) {
       if ((W1.isScene === !0 ? W1.overrideMaterial : null) !== null)
         return;
-      if (k.state.transmissionRenderTarget[z1.id] === void 0) {
+      if (M.state.transmissionRenderTarget[z1.id] === void 0) {
         const C2 = v1.has("EXT_color_buffer_half_float") || v1.has("EXT_color_buffer_float");
-        k.state.transmissionRenderTarget[z1.id] = new b5(1, 1, {
+        M.state.transmissionRenderTarget[z1.id] = new b5(1, 1, {
           generateMipmaps: !0,
           type: C2 ? J5 : a3,
           minFilter: r6,
@@ -38478,14 +38478,14 @@ class yS {
           colorSpace: b0.workingColorSpace
         });
       }
-      const m2 = k.state.transmissionRenderTarget[z1.id], g2 = z1.viewport || K;
+      const m2 = M.state.transmissionRenderTarget[z1.id], g2 = z1.viewport || K;
       m2.setSize(g2.z * I.transmissionResolutionScale, g2.w * I.transmissionResolutionScale);
       const d2 = I.getRenderTarget(), x2 = I.getActiveCubeFace(), P2 = I.getActiveMipmapLevel();
       I.setRenderTarget(m2), I.getClearColor(L1), P1 = I.getClearAlpha(), P1 < 1 && I.setClearColor(16777215, 0.5), I.clear(), V && s2.render(W1);
       const A2 = I.toneMapping;
       I.toneMapping = h5;
       const E2 = z1.viewport;
-      if (z1.viewport !== void 0 && (z1.viewport = void 0), k.setupLightsView(z1), r1 === !0 && a2.setGlobalState(I.clippingPlanes, z1), E9(o1, W1, z1), P.updateMultisampleRenderTarget(m2), P.updateRenderTargetMipmap(m2), v1.has("WEBGL_multisampled_render_to_texture") === !1) {
+      if (z1.viewport !== void 0 && (z1.viewport = void 0), M.setupLightsView(z1), r1 === !0 && a2.setGlobalState(I.clippingPlanes, z1), E9(o1, W1, z1), P.updateMultisampleRenderTarget(m2), P.updateRenderTargetMipmap(m2), v1.has("WEBGL_multisampled_render_to_texture") === !1) {
         let C2 = !1;
         for (let t0 = 0, x0 = D1.length; t0 < x0; t0++) {
           const Z2 = D1[t0], { object: Y, geometry: B1, material: E1, group: H1 } = Z2;
@@ -38511,7 +38511,7 @@ class yS {
     }
     function z9(o1, D1, W1) {
       D1.isScene !== !0 && (D1 = U);
-      const z1 = i1.get(o1), j1 = k.state.lights, m2 = k.state.shadowsArray, g2 = j1.state.version, d2 = I1.getParameters(o1, j1.state, m2, D1, W1, k.state.lightProbeGridArray), x2 = I1.getProgramCacheKey(d2);
+      const z1 = i1.get(o1), j1 = M.state.lights, m2 = M.state.shadowsArray, g2 = j1.state.version, d2 = I1.getParameters(o1, j1.state, m2, D1, W1, M.state.lightProbeGridArray), x2 = I1.getProgramCacheKey(d2);
       let P2 = z1.programs;
       z1.environment = o1.isMeshStandardMaterial || o1.isMeshLambertMaterial || o1.isMeshPhongMaterial ? D1.environment : null, z1.fog = D1.fog;
       const A2 = o1.isMeshStandardMaterial || o1.isMeshLambertMaterial && !o1.envMap || o1.isMeshPhongMaterial && !o1.envMap;
@@ -38523,7 +38523,7 @@ class yS {
       } else
         d2.uniforms = I1.getUniforms(o1), B !== null && o1.isNodeMaterial && B.build(o1, W1, d2), o1.onBeforeCompile(d2, I), E2 = I1.acquireProgram(d2, x2), P2.set(x2, E2), z1.uniforms = d2.uniforms;
       const C2 = z1.uniforms;
-      return (!o1.isShaderMaterial && !o1.isRawShaderMaterial || o1.clipping === !0) && (C2.clippingPlanes = a2.uniform), q0(o1, d2), z1.needsLights = C9(o1), z1.lightsStateVersion = g2, z1.needsLights && (C2.ambientLightColor.value = j1.state.ambient, C2.lightProbe.value = j1.state.probe, C2.directionalLights.value = j1.state.directional, C2.directionalLightShadows.value = j1.state.directionalShadow, C2.spotLights.value = j1.state.spot, C2.spotLightShadows.value = j1.state.spotShadow, C2.rectAreaLights.value = j1.state.rectArea, C2.ltc_1.value = j1.state.rectAreaLTC1, C2.ltc_2.value = j1.state.rectAreaLTC2, C2.pointLights.value = j1.state.point, C2.pointLightShadows.value = j1.state.pointShadow, C2.hemisphereLights.value = j1.state.hemi, C2.directionalShadowMatrix.value = j1.state.directionalShadowMatrix, C2.spotLightMatrix.value = j1.state.spotLightMatrix, C2.spotLightMap.value = j1.state.spotLightMap, C2.pointShadowMatrix.value = j1.state.pointShadowMatrix), z1.lightProbeGrid = k.state.lightProbeGridArray.length > 0, z1.currentProgram = E2, z1.uniformsList = null, E2;
+      return (!o1.isShaderMaterial && !o1.isRawShaderMaterial || o1.clipping === !0) && (C2.clippingPlanes = a2.uniform), q0(o1, d2), z1.needsLights = C9(o1), z1.lightsStateVersion = g2, z1.needsLights && (C2.ambientLightColor.value = j1.state.ambient, C2.lightProbe.value = j1.state.probe, C2.directionalLights.value = j1.state.directional, C2.directionalLightShadows.value = j1.state.directionalShadow, C2.spotLights.value = j1.state.spot, C2.spotLightShadows.value = j1.state.spotShadow, C2.rectAreaLights.value = j1.state.rectArea, C2.ltc_1.value = j1.state.rectAreaLTC1, C2.ltc_2.value = j1.state.rectAreaLTC2, C2.pointLights.value = j1.state.point, C2.pointLightShadows.value = j1.state.pointShadow, C2.hemisphereLights.value = j1.state.hemi, C2.directionalShadowMatrix.value = j1.state.directionalShadowMatrix, C2.spotLightMatrix.value = j1.state.spotLightMatrix, C2.spotLightMap.value = j1.state.spotLightMap, C2.pointShadowMatrix.value = j1.state.pointShadowMatrix), z1.lightProbeGrid = M.state.lightProbeGridArray.length > 0, z1.currentProgram = E2, z1.uniformsList = null, E2;
     }
     function V9(o1) {
       if (o1.uniformsList === null) {
@@ -38552,19 +38552,19 @@ class yS {
       const m2 = D1.fog, g2 = z1.isMeshStandardMaterial || z1.isMeshLambertMaterial || z1.isMeshPhongMaterial ? D1.environment : null, d2 = W === null ? I.outputColorSpace : W.isXRRenderTarget === !0 ? W.texture.colorSpace : b0.workingColorSpace, x2 = z1.isMeshStandardMaterial || z1.isMeshLambertMaterial && !z1.envMap || z1.isMeshPhongMaterial && !z1.envMap, P2 = Q.get(z1.envMap || g2, x2), A2 = z1.vertexColors === !0 && !!W1.attributes.color && W1.attributes.color.itemSize === 4, E2 = !!W1.attributes.tangent && (!!z1.normalMap || z1.anisotropy > 0), C2 = !!W1.morphAttributes.position, t0 = !!W1.morphAttributes.normal, x0 = !!W1.morphAttributes.color;
       let Z2 = h5;
       z1.toneMapped && (W === null || W.isXRRenderTarget === !0) && (Z2 = I.toneMapping);
-      const Y = W1.morphAttributes.position || W1.morphAttributes.normal || W1.morphAttributes.color, B1 = Y !== void 0 ? Y.length : 0, E1 = i1.get(z1), H1 = k.state.lights;
+      const Y = W1.morphAttributes.position || W1.morphAttributes.normal || W1.morphAttributes.color, B1 = Y !== void 0 ? Y.length : 0, E1 = i1.get(z1), H1 = M.state.lights;
       if (r1 === !0 && (T === !0 || o1 !== e1)) {
         const c1 = o1 === e1 && z1.id === J;
         a2.setState(z1, o1, c1);
       }
       let Y1 = !1;
-      z1.version === E1.__version ? (E1.needsLights && E1.lightsStateVersion !== H1.state.version || E1.outputColorSpace !== d2 || j1.isBatchedMesh && E1.batching === !1 || !j1.isBatchedMesh && E1.batching === !0 || j1.isBatchedMesh && E1.batchingColor === !0 && j1.colorTexture === null || j1.isBatchedMesh && E1.batchingColor === !1 && j1.colorTexture !== null || j1.isInstancedMesh && E1.instancing === !1 || !j1.isInstancedMesh && E1.instancing === !0 || j1.isSkinnedMesh && E1.skinning === !1 || !j1.isSkinnedMesh && E1.skinning === !0 || j1.isInstancedMesh && E1.instancingColor === !0 && j1.instanceColor === null || j1.isInstancedMesh && E1.instancingColor === !1 && j1.instanceColor !== null || j1.isInstancedMesh && E1.instancingMorph === !0 && j1.morphTexture === null || j1.isInstancedMesh && E1.instancingMorph === !1 && j1.morphTexture !== null || E1.envMap !== P2 || z1.fog === !0 && E1.fog !== m2 || E1.numClippingPlanes !== void 0 && (E1.numClippingPlanes !== a2.numPlanes || E1.numIntersection !== a2.numIntersection) || E1.vertexAlphas !== A2 || E1.vertexTangents !== E2 || E1.morphTargets !== C2 || E1.morphNormals !== t0 || E1.morphColors !== x0 || E1.toneMapping !== Z2 || E1.morphTargetsCount !== B1 || !!E1.lightProbeGrid != k.state.lightProbeGridArray.length > 0) && (Y1 = !0) : (Y1 = !0, E1.__version = z1.version);
+      z1.version === E1.__version ? (E1.needsLights && E1.lightsStateVersion !== H1.state.version || E1.outputColorSpace !== d2 || j1.isBatchedMesh && E1.batching === !1 || !j1.isBatchedMesh && E1.batching === !0 || j1.isBatchedMesh && E1.batchingColor === !0 && j1.colorTexture === null || j1.isBatchedMesh && E1.batchingColor === !1 && j1.colorTexture !== null || j1.isInstancedMesh && E1.instancing === !1 || !j1.isInstancedMesh && E1.instancing === !0 || j1.isSkinnedMesh && E1.skinning === !1 || !j1.isSkinnedMesh && E1.skinning === !0 || j1.isInstancedMesh && E1.instancingColor === !0 && j1.instanceColor === null || j1.isInstancedMesh && E1.instancingColor === !1 && j1.instanceColor !== null || j1.isInstancedMesh && E1.instancingMorph === !0 && j1.morphTexture === null || j1.isInstancedMesh && E1.instancingMorph === !1 && j1.morphTexture !== null || E1.envMap !== P2 || z1.fog === !0 && E1.fog !== m2 || E1.numClippingPlanes !== void 0 && (E1.numClippingPlanes !== a2.numPlanes || E1.numIntersection !== a2.numIntersection) || E1.vertexAlphas !== A2 || E1.vertexTangents !== E2 || E1.morphTargets !== C2 || E1.morphNormals !== t0 || E1.morphColors !== x0 || E1.toneMapping !== Z2 || E1.morphTargetsCount !== B1 || !!E1.lightProbeGrid != M.state.lightProbeGridArray.length > 0) && (Y1 = !0) : (Y1 = !0, E1.__version = z1.version);
       let p2 = E1.currentProgram;
       Y1 === !0 && (p2 = z9(z1, D1, j1), B && z1.isNodeMaterial && B.onUpdateProgram(z1, p2, E1));
       let L2 = !1, X2 = !1, M2 = !1;
       const D2 = p2.getUniforms(), I2 = E1.uniforms;
       if (C1.useProgram(p2.program) && (L2 = !0, X2 = !0, M2 = !0), z1.id !== J && (J = z1.id, X2 = !0), E1.needsLights) {
-        const c1 = F0(k.state.lightProbeGridArray, j1);
+        const c1 = F0(M.state.lightProbeGridArray, j1);
         E1.lightProbeGrid !== c1 && (E1.lightProbeGrid = c1, X2 = !0);
       }
       if (L2 || e1 !== o1) {
@@ -38584,7 +38584,7 @@ class yS {
       j1.isBatchedMesh && (D2.setOptional(H, j1, "batchingTexture"), D2.setValue(H, "batchingTexture", j1._matricesTexture, P), D2.setOptional(H, j1, "batchingIdTexture"), D2.setValue(H, "batchingIdTexture", j1._indirectTexture, P), D2.setOptional(H, j1, "batchingColorTexture"), j1._colorsTexture !== null && D2.setValue(H, "batchingColorTexture", j1._colorsTexture, P));
       const Y2 = W1.morphAttributes;
       if ((Y2.position !== void 0 || Y2.normal !== void 0 || Y2.color !== void 0) && q2.update(j1, W1, p2), (X2 || E1.receiveShadow !== j1.receiveShadow) && (E1.receiveShadow = j1.receiveShadow, D2.setValue(H, "receiveShadow", j1.receiveShadow)), (z1.isMeshStandardMaterial || z1.isMeshLambertMaterial || z1.isMeshPhongMaterial) && z1.envMap === null && D1.environment !== null && (I2.envMapIntensity.value = D1.environmentIntensity), I2.dfgLUT !== void 0 && (I2.dfgLUT.value = xS()), X2) {
-        if (D2.setValue(H, "toneMappingExposure", I.toneMappingExposure), E1.needsLights && g9(I2, M2), m2 && z1.fog === !0 && A1.refreshFogUniforms(I2, m2), A1.refreshMaterialUniforms(I2, z1, G, N, k.state.transmissionRenderTarget[o1.id]), E1.needsLights && E1.lightProbeGrid) {
+        if (D2.setValue(H, "toneMappingExposure", I.toneMappingExposure), E1.needsLights && g9(I2, M2), m2 && z1.fog === !0 && A1.refreshFogUniforms(I2, m2), A1.refreshMaterialUniforms(I2, z1, G, N, M.state.transmissionRenderTarget[o1.id]), E1.needsLights && E1.lightProbeGrid) {
           const c1 = E1.lightProbeGrid;
           I2.probesSH.value = c1.texture, I2.probesMin.value.copy(c1.boundingBox.min), I2.probesMax.value.copy(c1.boundingBox.max), I2.probesResolution.value.copy(c1.resolution);
         }
@@ -38821,7 +38821,7 @@ function vS(i, e, t, n, s, o, a, r, l) {
       return;
     const R = I.object.userData.jointId, B = d.get(R);
     v = { pointerId: S.pointerId, jointId: R, point: B.root.position.clone(), hit: I.point.clone(), plane: new B9().setFromNormalAndCoplanarPoint(e().getWorldDirection(new Z()), I.point), axis: B.axis, moved: !1, startX: S.clientX, startY: S.clientY }, o(!1), t.focus(), t.setPointerCapture(S.pointerId), S.preventDefault(), S.stopImmediatePropagation();
-  }, M = (S) => {
+  }, k = (S) => {
     if (!v || v.pointerId !== S.pointerId)
       return;
     m(S);
@@ -38833,7 +38833,7 @@ function vS(i, e, t, n, s, o, a, r, l) {
       d.get(v.jointId).root.position.copy(v.point).add(B), r();
     }
     S.preventDefault(), S.stopImmediatePropagation();
-  }, k = (S) => {
+  }, M = (S) => {
     if (!v || v.pointerId !== S.pointerId)
       return;
     const I = v, R = d.get(I.jointId).root.position.toArray();
@@ -38852,7 +38852,7 @@ function vS(i, e, t, n, s, o, a, r, l) {
   }, _ = (S) => {
     S.key === "Escape" && v && (b(), S.preventDefault(), S.stopImmediatePropagation());
   };
-  t.addEventListener("pointerdown", y, !0), t.addEventListener("pointermove", M, !0), t.addEventListener("pointerup", k, !0), t.addEventListener("pointercancel", b), t.addEventListener("keydown", _, !0), window.addEventListener("blur", b);
+  t.addEventListener("pointerdown", y, !0), t.addEventListener("pointermove", k, !0), t.addEventListener("pointerup", M, !0), t.addEventListener("pointercancel", b), t.addEventListener("keydown", _, !0), window.addEventListener("blur", b);
   const w = n.subscribe((S) => {
     S.revision !== g && (g = S.revision, b(), x());
   });
@@ -38867,7 +38867,7 @@ function vS(i, e, t, n, s, o, a, r, l) {
       R.root.scale.setScalar(B * 6);
     }
   }, dispose() {
-    b(), w(), q(), i.remove(c), t.removeEventListener("pointerdown", y, !0), t.removeEventListener("pointermove", M, !0), t.removeEventListener("pointerup", k, !0), t.removeEventListener("pointercancel", b), t.removeEventListener("keydown", _, !0), window.removeEventListener("blur", b);
+    b(), w(), q(), i.remove(c), t.removeEventListener("pointerdown", y, !0), t.removeEventListener("pointermove", k, !0), t.removeEventListener("pointerup", M, !0), t.removeEventListener("pointercancel", b), t.removeEventListener("keydown", _, !0), window.removeEventListener("blur", b);
   } };
 }
 const wS = (i, e, t, n) => ({
@@ -39012,24 +39012,24 @@ function SS(i, e = Math.PI / 3) {
   for (let v = 0, m = u.count / 3; v < m; v++) {
     const q = 3 * v, x = s[0].fromBufferAttribute(u, q + 0), b = s[1].fromBufferAttribute(u, q + 1), y = s[2].fromBufferAttribute(u, q + 2);
     o.subVectors(y, b), a.subVectors(x, b);
-    const M = new Z().crossVectors(o, a).normalize();
-    for (let k = 0; k < 3; k++) {
-      const _ = s[k], w = c(_);
-      w in p || (p[w] = []), p[w].push(M);
+    const k = new Z().crossVectors(o, a).normalize();
+    for (let M = 0; M < 3; M++) {
+      const _ = s[M], w = c(_);
+      w in p || (p[w] = []), p[w].push(k);
     }
   }
   const f = new Float32Array(u.count * 3), g = new f9(f, 3, !1);
   for (let v = 0, m = u.count / 3; v < m; v++) {
     const q = 3 * v, x = s[0].fromBufferAttribute(u, q + 0), b = s[1].fromBufferAttribute(u, q + 1), y = s[2].fromBufferAttribute(u, q + 2);
     o.subVectors(y, b), a.subVectors(x, b), r.crossVectors(o, a).normalize();
-    for (let M = 0; M < 3; M++) {
-      const k = s[M], _ = c(k), w = p[_];
+    for (let k = 0; k < 3; k++) {
+      const M = s[k], _ = c(M), w = p[_];
       l.set(0, 0, 0);
       for (let S = 0, I = w.length; S < I; S++) {
         const R = w[S];
         r.dot(R) > t && l.add(R);
       }
-      l.normalize(), g.setXYZ(q + M, l.x, l.y, l.z);
+      l.normalize(), g.setXYZ(q + k, l.x, l.y, l.z);
     }
   }
   return d.setAttribute("normal", g), d;
@@ -39058,8 +39058,8 @@ function kS(i, e) {
     const g = r.filter((m) => m.nodeId === l && /^position[XYZ]$/.test(m.property)), v = r.filter((m) => m.nodeId === l && /^rotation[XYZ]$/.test(m.property));
     if (g.length) {
       const m = ["X", "Y", "Z"].map((q, x) => {
-        const b = g.find((M) => M.property === `position${q}`);
-        return b ? N9(b.expression, (M) => a[M]).length ? `(${b.expression})` : `((${b.expression})*1 mm)` : `${d.position[x]} mm`;
+        const b = g.find((k) => k.property === `position${q}`);
+        return b ? N9(b.expression, (k) => a[k]).length ? `(${b.expression})` : `((${b.expression})*1 mm)` : `${d.position[x]} mm`;
       });
       for (const q of g)
         r.splice(r.indexOf(q), 1);
@@ -39069,7 +39069,7 @@ function kS(i, e) {
       }
     }
     if (v.length && Math.abs(n.q.w) < 1 - 1e-12) {
-      const m = ["X", "Y", "Z"].map((X, W) => v.find((J) => J.property === `rotation${X}`)?.expression ?? `${d.rotation[W]} deg`), [q, x, b] = m.map((X) => `(${X})`), y = `sin(${q})`, M = `cos(${q})`, k = `sin(${x})`, _ = `cos(${x})`, w = `sin(${b})`, S = `cos(${b})`, I = [[`${S}*${_}`, `${S}*${k}*${y}-${w}*${M}`, `${S}*${k}*${M}+${w}*${y}`], [`${w}*${_}`, `${w}*${k}*${y}+${S}*${M}`, `${w}*${k}*${M}-${S}*${y}`], [`-${k}`, `${_}*${y}`, `${_}*${M}`]], R = (X, W) => I.map((J, e1) => Math.abs(o[e1 * 3 + X]) < 1e-12 ? "" : `(${o[e1 * 3 + X]})*(${J[W]})`).filter(Boolean).join("+") || "0", B = `abs(${R(2, 0)})<0.9999999`, O = [`(${B})?atan2(${R(2, 1)},${R(2, 2)}):0`, `asin(max(-1,min(1,-(${R(2, 0)}))))`, `(${B})?atan2(${R(1, 0)},${R(0, 0)}):atan2(-(${R(0, 1)}),${R(1, 1)})`];
+      const m = ["X", "Y", "Z"].map((X, W) => v.find((J) => J.property === `rotation${X}`)?.expression ?? `${d.rotation[W]} deg`), [q, x, b] = m.map((X) => `(${X})`), y = `sin(${q})`, k = `cos(${q})`, M = `sin(${x})`, _ = `cos(${x})`, w = `sin(${b})`, S = `cos(${b})`, I = [[`${S}*${_}`, `${S}*${M}*${y}-${w}*${k}`, `${S}*${M}*${k}+${w}*${y}`], [`${w}*${_}`, `${w}*${M}*${y}+${S}*${k}`, `${w}*${M}*${k}-${S}*${y}`], [`-${M}`, `${_}*${y}`, `${_}*${k}`]], R = (X, W) => I.map((J, e1) => Math.abs(o[e1 * 3 + X]) < 1e-12 ? "" : `(${o[e1 * 3 + X]})*(${J[W]})`).filter(Boolean).join("+") || "0", B = `abs(${R(2, 0)})<0.9999999`, O = [`(${B})?atan2(${R(2, 1)},${R(2, 2)}):0`, `asin(max(-1,min(1,-(${R(2, 0)}))))`, `(${B})?atan2(${R(1, 0)},${R(0, 0)}):atan2(-(${R(0, 1)}),${R(1, 1)})`];
       for (const X of v)
         r.splice(r.indexOf(X), 1);
       O.forEach((X, W) => {
@@ -39085,12 +39085,12 @@ function tl(i, e, t, n, s, o, a = () => !1, r = () => !0, l = "placement") {
   const c = new G5(), d = new i4({ color: "#70e5ee", transparent: !0, opacity: 0.3, side: y3, depthWrite: !1, polygonOffset: !0, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }), u = new y2(new a0(), d), p = new _x(new Z(0, 0, 1), new Z(), 12, 10287088, 3, 2);
   u.renderOrder = 30, i.add(c, u, p), c.visible = u.visible = p.visible = !1;
   const f = /* @__PURE__ */ new Set(), g = (K = "") => l + K, v = new v6(50, 50);
-  let m = !1, q = !1, x = "solid", b = [0, 0, 0], y, M = null, k = "";
+  let m = !1, q = !1, x = "solid", b = [0, 0, 0], y, k = null, M = "";
   const _ = new M7(), w = new e2(), S = [], I = [], R = () => {
     c.clear(), S.splice(0).forEach((K) => K.dispose()), I.splice(0).forEach((K) => K.dispose());
   };
   function B(K = [], a1 = !1) {
-    R(), f.clear(), K.forEach((_1) => f.add(_1)), x = "solid", m = !0, q = a1, y = void 0, M = null, k = "", t.dataset[g()] = a1 ? "ready" : "loading";
+    R(), f.clear(), K.forEach((_1) => f.add(_1)), x = "solid", m = !0, q = a1, y = void 0, k = null, M = "", t.dataset[g()] = a1 ? "ready" : "loading";
   }
   function O(K) {
     R();
@@ -39111,11 +39111,11 @@ function tl(i, e, t, n, s, o, a = () => !1, r = () => !0, l = "placement") {
   }
   function X(K, a1, _1) {
     const L1 = `${K.userData.id}:${_1.toArray().map((E) => E.toFixed(5)).join(":")}:${_1.dot(a1.point).toFixed(4)}`;
-    if (L1 === k) {
+    if (L1 === M) {
       u.visible = !0;
       return;
     }
-    k = L1;
+    M = L1;
     const P1 = K.geometry, $1 = P1.getAttribute("position"), N = P1.index, G = [], C = _1.dot(a1.point), F = N ? N.count / 3 : $1.count / 3, p1 = F > 2e4 ? a1.faceIndex ?? 0 : 0, m1 = F > 2e4 ? p1 + 1 : F, s1 = new Z(), u1 = new Z(), r1 = new Z(), T = new Z();
     for (let E = p1; E < m1; E++)
       s1.fromBufferAttribute($1, N?.getX(E * 3) ?? E * 3).applyMatrix4(K.matrixWorld), u1.fromBufferAttribute($1, N?.getX(E * 3 + 1) ?? E * 3 + 1).applyMatrix4(K.matrixWorld), r1.fromBufferAttribute($1, N?.getX(E * 3 + 2) ?? E * 3 + 2).applyMatrix4(K.matrixWorld), T.crossVectors(u1.clone().sub(s1), r1.clone().sub(s1)).normalize(), T.dot(_1) > 1 - 1e-5 && Math.abs(_1.dot(s1) - C) < 1e-4 && G.push(...s1.toArray(), ...u1.toArray(), ...r1.toArray());
@@ -39125,7 +39125,7 @@ function tl(i, e, t, n, s, o, a = () => !1, r = () => !0, l = "placement") {
     if (!m || !y)
       return;
     const K = t.getBoundingClientRect();
-    if (M = null, c.visible = u.visible = p.visible = !1, y.clientX < K.left || y.clientX > K.right || y.clientY < K.top || y.clientY > K.bottom) {
+    if (k = null, c.visible = u.visible = p.visible = !1, y.clientX < K.left || y.clientX > K.right || y.clientY < K.top || y.clientY > K.bottom) {
       t.dataset[g("Target")] = "";
       return;
     }
@@ -39154,13 +39154,13 @@ function tl(i, e, t, n, s, o, a = () => !1, r = () => !0, l = "placement") {
         (!s1 || s1.point.distanceTo(L1) > 1e-3) && (L1 = G, C = !1);
       }
     }
-    _1 ? X(_1.object, _1, P1) : (k = "base", u.geometry !== v && u.geometry.dispose(), u.geometry = v, u.position.copy(L1).addScaledVector(P1, 0.01), u.quaternion.copy($1.q), u.visible = !0), _1 && (u.position.set(0, 0, 0), u.quaternion.identity()), p.position.copy(L1), p.setDirection(P1), p.visible = !!_1, c.position.copy(L1), c.quaternion.copy($1.q), c.visible = q, M = { point: L1.toArray(), normal: P1.toArray(), rotation: $1.rotation, base: [...b], ..._1 ? { bodyId: _1.object.userData.id } : {}, snapped: C }, t.dataset[g("Target")] = M.bodyId ?? "workplane", t.dataset[g("Point")] = JSON.stringify(M.point), t.dataset[g("Normal")] = JSON.stringify(M.normal);
+    _1 ? X(_1.object, _1, P1) : (M = "base", u.geometry !== v && u.geometry.dispose(), u.geometry = v, u.position.copy(L1).addScaledVector(P1, 0.01), u.quaternion.copy($1.q), u.visible = !0), _1 && (u.position.set(0, 0, 0), u.quaternion.identity()), p.position.copy(L1), p.setDirection(P1), p.visible = !!_1, c.position.copy(L1), c.quaternion.copy($1.q), c.visible = q, k = { point: L1.toArray(), normal: P1.toArray(), rotation: $1.rotation, base: [...b], ..._1 ? { bodyId: _1.object.userData.id } : {}, snapped: C }, t.dataset[g("Target")] = k.bodyId ?? "workplane", t.dataset[g("Point")] = JSON.stringify(k.point), t.dataset[g("Normal")] = JSON.stringify(k.normal);
   }
   function J(K) {
-    return y = K, W(), M;
+    return y = K, W(), k;
   }
   function e1() {
-    m = q = !1, y = void 0, M = null, c.visible = u.visible = p.visible = !1, R(), k = "", delete t.dataset[g()], delete t.dataset[g("Target")], delete t.dataset[g("Point")], delete t.dataset[g("Normal")];
+    m = q = !1, y = void 0, k = null, c.visible = u.visible = p.visible = !1, R(), M = "", delete t.dataset[g()], delete t.dataset[g("Target")], delete t.dataset[g("Point")], delete t.dataset[g("Normal")];
   }
   return { begin: B, setGeometry: O, move: J, refresh: W, end: e1, setRole(K) {
     x = K;
@@ -39173,7 +39173,7 @@ function tl(i, e, t, n, s, o, a = () => !1, r = () => !0, l = "placement") {
   }, get ready() {
     return q;
   }, get pose() {
-    return M;
+    return k;
   }, dispose() {
     e1(), i.remove(c, u, p), u.geometry !== v && u.geometry.dispose(), v.dispose(), d.dispose(), p.dispose();
   } };
@@ -39744,13 +39744,13 @@ class jS extends vp {
     this._plane = o, n.add(o);
     const a = this;
     function r(b, y) {
-      let M = y;
+      let k = y;
       Object.defineProperty(a, b, {
         get: function() {
-          return M !== void 0 ? M : y;
+          return k !== void 0 ? k : y;
         },
-        set: function(k) {
-          M !== k && (M = k, o[b] = k, s[b] = k, a.dispatchEvent({ type: b + "-changed", value: k }), a.dispatchEvent(Gt));
+        set: function(M) {
+          k !== M && (k = M, o[b] = M, s[b] = M, a.dispatchEvent({ type: b + "-changed", value: M }), a.dispatchEvent(Gt));
         }
       }), a[b] = y, o[b] = y, s[b] = y;
     }
@@ -40039,7 +40039,7 @@ class KS extends $0 {
       const W = new a0();
       return W.setAttribute("position", new H2([0, 0, 0, 1, 1, 1], 3)), W;
     }
-    const M = {
+    const k = {
       X: [
         [new y2(v, o), [0.5, 0, 0], [0, 0, -Math.PI / 2]],
         [new y2(v, o), [-0.5, 0, 0], [0, 0, Math.PI / 2]],
@@ -40067,7 +40067,7 @@ class KS extends $0 {
       XZ: [
         [new y2(new q1(0.15, 0.15, 0.01), c), [0.15, 0, 0.15], [-Math.PI / 2, 0, 0]]
       ]
-    }, k = {
+    }, M = {
       X: [
         [new y2(new U2(0.2, 0, 0.6, 4), n), [0.3, 0, 0], [0, 0, -Math.PI / 2]],
         [new y2(new U2(0.2, 0, 0.6, 4), n), [-0.3, 0, 0], [0, 0, Math.PI / 2]]
@@ -40222,7 +40222,7 @@ class KS extends $0 {
         }
       return J;
     }
-    this.gizmo = {}, this.picker = {}, this.helper = {}, this.add(this.gizmo.translate = X(M)), this.add(this.gizmo.rotate = X(w)), this.add(this.gizmo.scale = X(R)), this.add(this.picker.translate = X(k)), this.add(this.picker.rotate = X(I)), this.add(this.picker.scale = X(B)), this.add(this.helper.translate = X(_)), this.add(this.helper.rotate = X(S)), this.add(this.helper.scale = X(O)), this.picker.translate.visible = !1, this.picker.rotate.visible = !1, this.picker.scale.visible = !1;
+    this.gizmo = {}, this.picker = {}, this.helper = {}, this.add(this.gizmo.translate = X(k)), this.add(this.gizmo.rotate = X(w)), this.add(this.gizmo.scale = X(R)), this.add(this.picker.translate = X(M)), this.add(this.picker.rotate = X(I)), this.add(this.picker.scale = X(B)), this.add(this.helper.translate = X(_)), this.add(this.helper.rotate = X(S)), this.add(this.helper.scale = X(O)), this.picker.translate.visible = !1, this.picker.rotate.visible = !1, this.picker.scale.visible = !1;
   }
   // updateMatrixWorld will update transformations and appearance of individual handles
   updateMatrixWorld(e) {
@@ -40535,24 +40535,24 @@ function aM(i, e) {
   o.className = "resize-options", t.append(o);
   let a = !1, r = !1, l = !1;
   const c = document.createElement("button"), d = document.createElement("button");
-  for (const [k, _] of [[c, "Keep proportions"], [d, "Resize about center"]])
-    k.type = "button", k.append(Y3(_)), k.setAttribute("aria-label", h(_)), k.title = h(_), o.append(k);
+  for (const [M, _] of [[c, "Keep proportions"], [d, "Resize about center"]])
+    M.type = "button", M.append(Y3(_)), M.setAttribute("aria-label", h(_)), M.title = h(_), o.append(M);
   c.onclick = () => {
     a = !a, b();
   }, d.onclick = () => {
     r = !r, b();
   };
-  const u = [...[-1, 1].flatMap((k) => [-1, 1].map((_) => ({ name: `X${k < 0 ? "-" : "+"} Y${_ < 0 ? "-" : "+"}`, signs: [k, _, 0], corner: !0 }))), { name: "X-", signs: [-1, 0, 0] }, { name: "X+", signs: [1, 0, 0] }, { name: "Y-", signs: [0, -1, 0] }, { name: "Y+", signs: [0, 1, 0] }, { name: "Z+", signs: [0, 0, 1] }];
+  const u = [...[-1, 1].flatMap((M) => [-1, 1].map((_) => ({ name: `X${M < 0 ? "-" : "+"} Y${_ < 0 ? "-" : "+"}`, signs: [M, _, 0], corner: !0 }))), { name: "X-", signs: [-1, 0, 0] }, { name: "X+", signs: [1, 0, 0] }, { name: "Y-", signs: [0, -1, 0] }, { name: "Y+", signs: [0, 1, 0] }, { name: "Z+", signs: [0, 0, 1] }];
   let p, f;
-  const g = (k, _) => new Z(..._).applyQuaternion(k.rotation).add(new Z(...k.center)), v = u.map((k) => {
+  const g = (M, _) => new Z(..._).applyQuaternion(M.rotation).add(new Z(...M.center)), v = u.map((M) => {
     const _ = document.createElement("button");
-    _.type = "button", _.className = "resize-handle" + (k.corner ? " corner" : ""), _.setAttribute("aria-label", h`Resize ${k.name}`), _.title = h("Drag to resize · Shift: proportions · Alt: center · Ctrl/⌘: fine"), t.append(_), _.onpointerdown = (S) => {
+    _.type = "button", _.className = "resize-handle" + (M.corner ? " corner" : ""), _.setAttribute("aria-label", h`Resize ${M.name}`), _.title = h("Drag to resize · Shift: proportions · Alt: center · Ctrl/⌘: fine"), t.append(_), _.onpointerdown = (S) => {
       if (S.button !== 0 || !f || p)
         return;
       S.preventDefault(), S.stopPropagation();
-      const I = f, R = [...k.signs], B = [0, 1, 2].map((K) => new Z(K === 0 ? 1 : 0, K === 1 ? 1 : 0, K === 2 ? 1 : 0).applyQuaternion(I.rotation)), O = g(I, I.size.map((K, a1) => R[a1] ? R[a1] * K / 2 : a1 === 2 ? -K / 2 : 0)), X = e.camera().getWorldDirection(new Z());
+      const I = f, R = [...M.signs], B = [0, 1, 2].map((K) => new Z(K === 0 ? 1 : 0, K === 1 ? 1 : 0, K === 2 ? 1 : 0).applyQuaternion(I.rotation)), O = g(I, I.size.map((K, a1) => R[a1] ? R[a1] * K / 2 : a1 === 2 ? -K / 2 : 0)), X = e.camera().getWorldDirection(new Z());
       let W;
-      if (k.corner && Math.abs(X.dot(B[2])) > 0.08)
+      if (M.corner && Math.abs(X.dot(B[2])) > 0.08)
         W = B[2];
       else {
         const K = [0, 1, 2].filter((_1) => R[_1]), a1 = K.reduce((_1, L1) => Math.abs(X.dot(B[L1])) < Math.abs(X.dot(B[_1])) ? L1 : _1, K[0]);
@@ -40591,23 +40591,23 @@ function aM(i, e) {
       p && m(!0);
     }, _;
   });
-  function m(k) {
+  function m(M) {
     if (!p)
       return;
     const _ = p;
     p = void 0, delete t.dataset.dragging, delete t.dataset.valid, _.button.hasPointerCapture(_.id) && _.button.releasePointerCapture(_.id);
     try {
-      k || _.invalid || !_.result || _.result.factors.every((w) => Math.abs(w - 1) < 1e-12) ? e.cancel() : e.commit(_.result), _.invalid && !k && e.error(_.invalid);
+      M || _.invalid || !_.result || _.result.factors.every((w) => Math.abs(w - 1) < 1e-12) ? e.cancel() : e.commit(_.result), _.invalid && !M && e.error(_.invalid);
     } catch (w) {
       e.cancel(), e.error(w);
     }
     f = void 0, b();
   }
-  const q = ["X", "Y", "Z"].map((k, _) => {
+  const q = ["X", "Y", "Z"].map((M, _) => {
     const w = document.createElementNS(n, "line");
     s.append(w);
     const S = document.createElement("input");
-    return S.type = "number", S.min = ".001", S.step = ".1", S.className = "resize-number", S.setAttribute("aria-label", h`Resize ${k} (mm)`), S.title = h`Size ${k} (mm)`, t.append(S), S.onchange = () => {
+    return S.type = "number", S.min = ".001", S.step = ".1", S.className = "resize-number", S.setAttribute("aria-label", h`Resize ${M} (mm)`), S.title = h`Size ${M} (mm)`, t.append(S), S.onchange = () => {
       if (!(!f || p)) {
         try {
           const I = sM(f, _, Number(S.value), { uniform: a, center: r || l });
@@ -40625,15 +40625,15 @@ function aM(i, e) {
       I.stopPropagation(), !no(S, I) && (I.key === "Enter" && (I.preventDefault(), S.blur()), I.key === "Escape" && (I.preventDefault(), S.value = String(f?.size[_] ?? ""), S.blur()));
     }, { input: S, line: w };
   }), x = Array.from({ length: 12 }, () => {
-    const k = document.createElementNS(n, "line");
-    return k.classList.add("resize-box-edge"), s.append(k), k;
+    const M = document.createElementNS(n, "line");
+    return M.classList.add("resize-box-edge"), s.append(M), M;
   });
   function b() {
-    const k = p ? f ?? p.frame : e.frame();
-    if (f = k, t.hidden = !k, !k)
+    const M = p ? f ?? p.frame : e.frame();
+    if (f = M, t.hidden = !M, !M)
       return;
-    c.setAttribute("aria-pressed", String(a || k.uniformOnly)), c.disabled = k.uniformOnly, d.setAttribute("aria-pressed", String(r));
-    const _ = e.project(new Z(...k.center)), w = Array.from({ length: 8 }, (J, e1) => e.project(g(k, k.size.map((K, a1) => (e1 & 1 << a1 ? 1 : -1) * K / 2))));
+    c.setAttribute("aria-pressed", String(a || M.uniformOnly)), c.disabled = M.uniformOnly, d.setAttribute("aria-pressed", String(r));
+    const _ = e.project(new Z(...M.center)), w = Array.from({ length: 8 }, (J, e1) => e.project(g(M, M.size.map((K, a1) => (e1 & 1 << a1 ? 1 : -1) * K / 2))));
     let S = 0;
     for (let J = 0; J < 8; J++)
       for (let e1 = 0; e1 < 3; e1++)
@@ -40641,40 +40641,40 @@ function aM(i, e) {
           const K = w[J], a1 = w[J | 1 << e1], _1 = x[S++];
           _1.setAttribute("x1", String(K[0])), _1.setAttribute("y1", String(K[1])), _1.setAttribute("x2", String(a1[0])), _1.setAttribute("y2", String(a1[1]));
         }
-    const I = e.camera().getWorldDirection(new Z()), R = (J) => Math.abs(I.dot(new Z(J === 0 ? 1 : 0, J === 1 ? 1 : 0, J === 2 ? 1 : 0).applyQuaternion(k.rotation))) < 0.995;
+    const I = e.camera().getWorldDirection(new Z()), R = (J) => Math.abs(I.dot(new Z(J === 0 ? 1 : 0, J === 1 ? 1 : 0, J === 2 ? 1 : 0).applyQuaternion(M.rotation))) < 0.995;
     v.forEach((J, e1) => {
-      const K = u[e1].signs, a1 = e.project(g(k, k.size.map((L1, P1) => K[P1] ? K[P1] * L1 / 2 : P1 === 2 ? -L1 / 2 : 0))), _1 = (K.filter(Boolean).length > 1 || R(K.findIndex(Boolean))) && a1[2] >= -1 && a1[2] <= 1 && a1[0] > 8 && a1[0] < i.clientWidth - 8 && a1[1] > 8 && a1[1] < i.clientHeight - 44;
+      const K = u[e1].signs, a1 = e.project(g(M, M.size.map((L1, P1) => K[P1] ? K[P1] * L1 / 2 : P1 === 2 ? -L1 / 2 : 0))), _1 = (K.filter(Boolean).length > 1 || R(K.findIndex(Boolean))) && a1[2] >= -1 && a1[2] <= 1 && a1[0] > 8 && a1[0] < i.clientWidth - 8 && a1[1] > 8 && a1[1] < i.clientHeight - 44;
       J.hidden = !_1, J.style.left = `${a1[0]}px`, J.style.top = `${a1[1]}px`;
     });
     const B = { left: Math.min(...w.map((J) => J[0])), right: Math.max(...w.map((J) => J[0])), top: Math.min(...w.map((J) => J[1])), bottom: Math.max(...w.map((J) => J[1])) }, O = Math.max(4, Math.min(i.clientWidth - 74, B.right - 70)), X = Math.max(4, B.top - 42);
     o.style.left = `${O}px`, o.style.top = `${X}px`;
     const W = [{ left: O, top: X, right: O + 64, bottom: X + 28 }];
     q.forEach(({ input: J, line: e1 }, K) => {
-      J.readOnly = !!p, (J.getRootNode().activeElement !== J || p) && (J.value = String(Number(k.size[K].toFixed(5))));
+      J.readOnly = !!p, (J.getRootNode().activeElement !== J || p) && (J.value = String(Number(M.size[K].toFixed(5))));
       const a1 = Math.max(36, Math.min(82, J.value.length * 7 + 12));
       J.style.width = `${a1}px`;
       const _1 = [0, 1, 2].filter(($1) => $1 !== K), L1 = Array.from({ length: 4 }, ($1, N) => {
-        const G = k.size.map((m1) => -m1 / 2);
-        _1.forEach((m1, s1) => G[m1] = (N & 1 << s1 ? 1 : -1) * k.size[m1] / 2);
+        const G = M.size.map((m1) => -m1 / 2);
+        _1.forEach((m1, s1) => G[m1] = (N & 1 << s1 ? 1 : -1) * M.size[m1] / 2);
         const C = [...G];
-        C[K] = k.size[K] / 2;
-        const F = e.project(g(k, G)), p1 = e.project(g(k, C));
+        C[K] = M.size[K] / 2;
+        const F = e.project(g(M, G)), p1 = e.project(g(M, C));
         return { a: G, p: F, q: p1, score: Math.hypot((F[0] + p1[0]) / 2 - _[0], (F[1] + p1[1]) / 2 - _[1]) };
       }).filter(($1) => K === 2 || $1.a[2] < 0).sort(($1, N) => N.score - $1.score), P1 = R(K) ? Xm(L1, B, { width: i.clientWidth, height: i.clientHeight }, W, a1) : void 0;
       J.hidden = !P1, e1.style.display = P1 ? "" : "none", P1 && (W.push(P1.rect), J.style.left = `${P1.x}px`, J.style.top = `${P1.y}px`, e1.setAttribute("x1", String(P1.p[0])), e1.setAttribute("y1", String(P1.p[1])), e1.setAttribute("x2", String(P1.q[0])), e1.setAttribute("y2", String(P1.q[1])));
     });
   }
-  const y = (k) => {
-    l = k.altKey, k.key === "Escape" && p && (k.preventDefault(), k.stopPropagation(), m(!0));
+  const y = (M) => {
+    l = M.altKey, M.key === "Escape" && p && (M.preventDefault(), M.stopPropagation(), m(!0));
   };
   window.addEventListener("keydown", y, !0), window.addEventListener("keyup", y, !0);
-  const M = () => {
+  const k = () => {
     l = !1, m(!0);
   };
-  return window.addEventListener("blur", M), { update: b, get active() {
+  return window.addEventListener("blur", k), { update: b, get active() {
     return !!p;
   }, cancel: () => m(!0), dispose() {
-    m(!0), window.removeEventListener("keydown", y, !0), window.removeEventListener("keyup", y, !0), window.removeEventListener("blur", M), t.remove();
+    m(!0), window.removeEventListener("keydown", y, !0), window.removeEventListener("keyup", y, !0), window.removeEventListener("blur", k), t.remove();
   } };
 }
 const ml = (i, e) => i.map((t) => {
@@ -40719,7 +40719,7 @@ function rM(i, e, t, n) {
   const b = new Sx(45);
   a.add(b);
   const y = [];
-  function M(Y, B1, E1, H1 = "#afc1c9") {
+  function k(Y, B1, E1, H1 = "#afc1c9") {
     const Y1 = document.createElement("canvas");
     Y1.width = 256, Y1.height = 64;
     const p2 = Y1.getContext("2d");
@@ -40730,10 +40730,10 @@ function rM(i, e, t, n) {
     X2.position.set(B1, E1, 0.2), X2.scale.set(23, 5.75, 1), g.add(X2), y.push(X2);
   }
   for (let Y = -200; Y <= 200; Y += 50)
-    M(String(Y), Y, -208), M(String(Y), -210, Y);
-  M("X · mm", 224, -200, "#f38f88"), M("Y · mm", -200, 218, "#8fcea1");
-  const k = new $0();
-  a.add(k);
+    k(String(Y), Y, -208), k(String(Y), -210, Y);
+  k("X · mm", 224, -200, "#f38f88"), k("Y · mm", -200, 218, "#8fcea1");
+  const M = new $0();
+  a.add(M);
   const _ = new QS(r, c);
   _.setSize(0.85), _.setSpace("world"), a.add(_.getHelper());
   let w = "tinkercad", S = !1, I, R = !1, B = !1;
@@ -40806,7 +40806,7 @@ function rM(i, e, t, n) {
     c.dataset.gridDisplay = String(M1), c.dataset.displayGridSpacing = String(Y), Y !== R1 && (R1 = Y, m.visible = q.visible = Y > 0, m.geometry.dispose(), q.geometry.dispose(), m.geometry = ql(Y, "#52677a", "#2f4655"), q.geometry = ql(Y * 10, "#8c9c99", "#536861"));
   }
   let A1 = "dimensions", F1, o2, a2, K1 = [1, 1, 1];
-  const s2 = () => a2 ? K1 : k.scale.toArray(), q2 = () => a2 ? "scale" : v1 === "select" ? "translate" : v1;
+  const s2 = () => a2 ? K1 : M.scale.toArray(), q2 = () => a2 ? "scale" : v1 === "select" ? "translate" : v1;
   let R2, X1 = !1;
   const k1 = "http://www.w3.org/2000/svg", l2 = document.createElement("div");
   l2.className = "view-cube", l2.setAttribute("role", "group"), l2.setAttribute("aria-label", h("View cube"));
@@ -40991,15 +40991,15 @@ function rM(i, e, t, n) {
     const B1 = new e9();
     for (const E1 of Y)
       B1.union(new e9().setFromObject(C.get(E1)));
-    k.position.copy(B1.getCenter(new Z())), k.quaternion.copy(v1 === "scale" ? hl(Y.map((E1) => e.state.document.nodes[E1].transform)) : new S0()), k.scale.set(1, 1, 1), k.updateMatrixWorld(), _.attach(k), h2();
+    M.position.copy(B1.getCenter(new Z())), M.quaternion.copy(v1 === "scale" ? hl(Y.map((E1) => e.state.document.nodes[E1].transform)) : new S0()), M.scale.set(1, 1, 1), M.updateMatrixWorld(), _.attach(M), h2();
   }, g0 = (Y) => {
     d.enabled = !Y.value;
   }, J9 = () => {
     const Y = /* @__PURE__ */ new Map();
     for (const B1 of T1)
       e.state.document.roots.includes(B1) && Y.set(B1, structuredClone(e.state.document.nodes[B1].transform));
-    k.updateMatrixWorld(), i1 = { matrix: k.matrixWorld.clone(), transforms: Y };
-  }, k3 = () => a2 ? a2.clone() : (k.updateMatrixWorld(), new o0().multiplyMatrices(k.matrixWorld, i1.matrix.clone().invert())), E9 = () => {
+    M.updateMatrixWorld(), i1 = { matrix: M.matrixWorld.clone(), transforms: Y };
+  }, k3 = () => a2 ? a2.clone() : (M.updateMatrixWorld(), new o0().multiplyMatrices(M.matrixWorld, i1.matrix.clone().invert())), E9 = () => {
     if (!i1)
       return;
     const Y = k3();
@@ -42296,13 +42296,13 @@ function sk(i = Eo) {
   };
   const n = (c, d, u, p, f, g, v, m, q, x) => {
     const b = Rs("casing"), y = Rs("shaft");
-    for (const [k, _] of Object.entries(t.nodes)) {
+    for (const [M, _] of Object.entries(t.nodes)) {
       const w = structuredClone(_);
-      w.id = `${c}-${k}`, w.kind === "boolean" && (w.inputs = w.inputs.map((S) => `${c}-${S}`)), t.roots.includes(k) && (w.transform.position = [...p], w.transform.rotation = [...f], k === "casing" && b && (w.physics = { ...w.physics, collisionAssembly: b }), k === "shaft" && y && (w.physics = { ...w.physics, collisionAssembly: y })), w.name = h(d) + (k === "shaft" ? " · " + h("Output spline") : ""), e.nodes[w.id] = w;
+      w.id = `${c}-${M}`, w.kind === "boolean" && (w.inputs = w.inputs.map((S) => `${c}-${S}`)), t.roots.includes(M) && (w.transform.position = [...p], w.transform.rotation = [...f], M === "casing" && b && (w.physics = { ...w.physics, collisionAssembly: b }), M === "shaft" && y && (w.physics = { ...w.physics, collisionAssembly: y })), w.name = h(d) + (M === "shaft" ? " · " + h("Output spline") : ""), e.nodes[w.id] = w;
     }
     e.roots.push(`${c}-casing`, `${c}-shaft`), Z7(e, q, `${c}-casing`);
-    const M = S2(e, "hinge", `${c}-casing`, `${c}-shaft`, g, v);
-    M.id = `${c}-${u.toLowerCase()}`, M.limits = m, M.control = { port: u }, e.joints.push(M), Z7(e, `${c}-shaft`, x);
+    const k = S2(e, "hinge", `${c}-casing`, `${c}-shaft`, g, v);
+    k.id = `${c}-${u.toLowerCase()}`, k.limits = m, k.control = { port: u }, e.joints.push(k), Z7(e, `${c}-shaft`, x);
   }, s = Math.PI / 180, o = xl.hipLimitDeg * s, a = xl.rollLimitDeg * s;
   n("left-hip", "Left hip servo", "A", [26, -11.18, 26], [-90, 90, 0], [26, 16, 26], [0, 1, 0], [-o, o], "torso", "left-leg"), n("right-hip", "Right hip servo", "B", [-26, 11.18, 26], [90, 90, 0], [-26, -16, 26], [0, 1, 0], [-o, o], "torso", "right-leg"), n("roll", "Roll balance servo", "C", [-27.18, 0, 44], [0, 90, 0], [0, 0, 44], [1, 0, 0], [-a, a], "torso", "pendulum");
   const r = "feather-envelope";
@@ -42945,7 +42945,7 @@ function Ek(i = Po) {
   const n = (r, l, c, d, u, p, f, g, v, m) => {
     for (const [x, b] of Object.entries(t.nodes)) {
       const y = structuredClone(b);
-      y.id = `${r}-${x}`, y.kind === "boolean" && (y.inputs = y.inputs.map((M) => `${r}-${M}`)), t.roots.includes(x) && (y.transform.position = [...d], y.transform.rotation = [...u]), y.name = h(l) + (x === "shaft" ? " · " + h("Output spline") : ""), e.nodes[y.id] = y;
+      y.id = `${r}-${x}`, y.kind === "boolean" && (y.inputs = y.inputs.map((k) => `${r}-${k}`)), t.roots.includes(x) && (y.transform.position = [...d], y.transform.rotation = [...u]), y.name = h(l) + (x === "shaft" ? " · " + h("Output spline") : ""), e.nodes[y.id] = y;
     }
     e.roots.push(`${r}-casing`, `${r}-shaft`), Ml(e, v, `${r}-casing`);
     const q = S2(e, "hinge", `${r}-casing`, `${r}-shaft`, p, f);
@@ -43112,8 +43112,8 @@ function Bk(i = Do) {
   };
   const n = (l, c, d, u, p, f, g, v, m, q) => {
     for (const [b, y] of Object.entries(t.nodes)) {
-      const M = structuredClone(y);
-      M.id = `${l}-${b}`, M.kind === "boolean" && (M.inputs = M.inputs.map((k) => `${l}-${k}`)), t.roots.includes(b) && (M.transform.position = [...u], M.transform.rotation = [...p]), M.name = h(c) + (b === "shaft" ? " · " + h("Output spline") : ""), e.nodes[M.id] = M;
+      const k = structuredClone(y);
+      k.id = `${l}-${b}`, k.kind === "boolean" && (k.inputs = k.inputs.map((M) => `${l}-${M}`)), t.roots.includes(b) && (k.transform.position = [...u], k.transform.rotation = [...p]), k.name = h(c) + (b === "shaft" ? " · " + h("Output spline") : ""), e.nodes[k.id] = k;
     }
     e.roots.push(`${l}-casing`, `${l}-shaft`), kl(e, m, `${l}-casing`);
     const x = S2(e, "hinge", `${l}-casing`, `${l}-shaft`, f, g);
@@ -43284,8 +43284,8 @@ function Hk(i = Ro) {
   };
   const n = (l, c, d, u, p, f, g, v, m, q) => {
     for (const [b, y] of Object.entries(t.nodes)) {
-      const M = structuredClone(y);
-      M.id = `${l}-${b}`, M.kind === "boolean" && (M.inputs = M.inputs.map((k) => `${l}-${k}`)), t.roots.includes(b) && (M.transform.position = [...u], M.transform.rotation = [...p]), M.name = h(c) + (b === "shaft" ? " · " + h("Output spline") : ""), e.nodes[M.id] = M;
+      const k = structuredClone(y);
+      k.id = `${l}-${b}`, k.kind === "boolean" && (k.inputs = k.inputs.map((M) => `${l}-${M}`)), t.roots.includes(b) && (k.transform.position = [...u], k.transform.rotation = [...p]), k.name = h(c) + (b === "shaft" ? " · " + h("Output spline") : ""), e.nodes[k.id] = k;
     }
     e.roots.push(`${l}-casing`, `${l}-shaft`), Al(e, m, `${l}-casing`);
     const x = S2(e, "hinge", `${l}-casing`, `${l}-shaft`, f, g);
@@ -43445,7 +43445,7 @@ function Qk(i = Lo) {
   const n = (r, l, c, d, u, p, f, g, v, m) => {
     for (const [x, b] of Object.entries(t.nodes)) {
       const y = structuredClone(b);
-      y.id = `${r}-${x}`, y.kind === "boolean" && (y.inputs = y.inputs.map((M) => `${r}-${M}`)), t.roots.includes(x) && (y.transform.position = [...d], y.transform.rotation = [...u]), y.name = h(l) + (x === "shaft" ? " · " + h("Output spline") : ""), e.nodes[y.id] = y;
+      y.id = `${r}-${x}`, y.kind === "boolean" && (y.inputs = y.inputs.map((k) => `${r}-${k}`)), t.roots.includes(x) && (y.transform.position = [...d], y.transform.rotation = [...u]), y.name = h(l) + (x === "shaft" ? " · " + h("Output spline") : ""), e.nodes[y.id] = y;
     }
     e.roots.push(`${r}-casing`, `${r}-shaft`), Tl(e, v, `${r}-casing`);
     const q = S2(e, "hinge", `${r}-casing`, `${r}-shaft`, p, f);
@@ -43774,7 +43774,7 @@ function mA(i = Fo) {
   const n = (r, l, c, d, u, p, f, g, v, m) => {
     for (const [x, b] of Object.entries(t.nodes)) {
       const y = structuredClone(b);
-      y.id = `${r}-${x}`, y.kind === "boolean" && (y.inputs = y.inputs.map((M) => `${r}-${M}`)), t.roots.includes(x) && (y.transform.position = [...d], y.transform.rotation = [...u]), y.name = h(l) + (x === "shaft" ? " · " + h("Output spline") : ""), e.nodes[y.id] = y;
+      y.id = `${r}-${x}`, y.kind === "boolean" && (y.inputs = y.inputs.map((k) => `${r}-${k}`)), t.roots.includes(x) && (y.transform.position = [...d], y.transform.rotation = [...u]), y.name = h(l) + (x === "shaft" ? " · " + h("Output spline") : ""), e.nodes[y.id] = y;
     }
     e.roots.push(`${r}-casing`, `${r}-shaft`), Ll(e, v, `${r}-casing`);
     const q = S2(e, "hinge", `${r}-casing`, `${r}-shaft`, p, f);
@@ -43888,8 +43888,8 @@ function wA(i = No) {
   n.id = "rail-a", n.limits = [...nn.railLimitsMm], n.control = { port: "A" }, e.joints.push(n);
   const s = (l, c, d, u, p, f, g, v, m, q) => {
     for (const [b, y] of Object.entries(t.nodes)) {
-      const M = structuredClone(y);
-      M.id = `${l}-${b}`, M.kind === "boolean" && (M.inputs = M.inputs.map((k) => `${l}-${k}`)), t.roots.includes(b) && (M.transform.position = [...u], M.transform.rotation = [...p]), M.name = h(c) + (b === "shaft" ? " · " + h("Output spline") : ""), e.nodes[M.id] = M;
+      const k = structuredClone(y);
+      k.id = `${l}-${b}`, k.kind === "boolean" && (k.inputs = k.inputs.map((M) => `${l}-${M}`)), t.roots.includes(b) && (k.transform.position = [...u], k.transform.rotation = [...p]), k.name = h(c) + (b === "shaft" ? " · " + h("Output spline") : ""), e.nodes[k.id] = k;
     }
     e.roots.push(`${l}-casing`, `${l}-shaft`), Il(e, m, `${l}-casing`);
     const x = S2(e, "hinge", `${l}-casing`, `${l}-shaft`, f, g);
@@ -44150,7 +44150,11 @@ let channel=move([0,0,9],box(16,100,6));
 let stop=move([0,-28,6.3],box(16,2,1));
 return union(subtract(plate,channel),stop);`),
   ram: s7("return move([0,0,7],box(14,14,14));"),
-  wiper: s7("return move([0,5,0],rotate([90,0,0],extrude(10,[[-8,0],[8,0],[8,0.2],[-8,5]])));"),
+  wiper: s7(`let wedge=move([0,5,0],rotate([90,0,0],extrude(10,[[-8,0],[8,0],[8,0.2],[-8,5]])));
+// A printable carriage supports the wedge instead of an unrealistically
+// light unsupported blade. Its 12 mm width clears the 16 mm dial channel.
+let carriage=move([-16,0,3],box(22,12,6));
+return union(wedge,carriage);`),
   blank: s7("return move([0,0,5],box(12,12,10));"),
   fit: s7(`let bar=move([0,0,2],box(68,22,4));
 let holes=union(
@@ -44545,8 +44549,8 @@ function oE(i = Ho) {
   };
   const n = (l, c, d, u, p, f, g, v, m, q) => {
     for (const [b, y] of Object.entries(t.nodes)) {
-      const M = structuredClone(y);
-      M.id = `${l}-${b}`, M.kind === "boolean" && (M.inputs = M.inputs.map((k) => `${l}-${k}`)), t.roots.includes(b) && (M.transform.position = [...u], M.transform.rotation = [...p]), M.name = h(c) + (b === "shaft" ? " · " + h("Output spline") : ""), e.nodes[M.id] = M;
+      const k = structuredClone(y);
+      k.id = `${l}-${b}`, k.kind === "boolean" && (k.inputs = k.inputs.map((M) => `${l}-${M}`)), t.roots.includes(b) && (k.transform.position = [...u], k.transform.rotation = [...p]), k.name = h(c) + (b === "shaft" ? " · " + h("Output spline") : ""), e.nodes[k.id] = k;
     }
     e.roots.push(`${l}-casing`, `${l}-shaft`), Hl(e, m, `${l}-casing`);
     const x = S2(e, "hinge", `${l}-casing`, `${l}-shaft`, f, g);
@@ -44658,8 +44662,8 @@ function pE(i = $o) {
   };
   const n = (l, c, d, u, p, f, g, v, m, q) => {
     for (const [b, y] of Object.entries(t.nodes)) {
-      const M = structuredClone(y);
-      M.id = `${l}-${b}`, M.kind === "boolean" && (M.inputs = M.inputs.map((k) => `${l}-${k}`)), t.roots.includes(b) && (M.transform.position = [...u], M.transform.rotation = [...p]), M.name = h(c) + (b === "shaft" ? " · " + h("Output spline") : ""), e.nodes[M.id] = M;
+      const k = structuredClone(y);
+      k.id = `${l}-${b}`, k.kind === "boolean" && (k.inputs = k.inputs.map((M) => `${l}-${M}`)), t.roots.includes(b) && (k.transform.position = [...u], k.transform.rotation = [...p]), k.name = h(c) + (b === "shaft" ? " · " + h("Output spline") : ""), e.nodes[k.id] = k;
     }
     e.roots.push(`${l}-casing`, `${l}-shaft`), $l(e, m, `${l}-casing`);
     const x = S2(e, "hinge", `${l}-casing`, `${l}-shaft`, f, g);
@@ -46087,8 +46091,8 @@ function zE(i) {
 function VE(i, e = !1) {
   const t = O9(i), n = t.values;
   if (t.preset === "dovetail") {
-    const q = (n.topWidth - n.baseWidth) / (2 * n.height), x = n.clearance * Math.hypot(1, q), b = -n.clearance, y = n.height + n.clearance, M = n.baseWidth / 2 + q * b + x, k = n.baseWidth / 2 + q * y + x, _ = new S9();
-    return _.moveTo(-M, b), _.lineTo(M, b), _.lineTo(k, y), _.lineTo(-k, y), _.closePath(), new w3(_, { depth: n.length, bevelEnabled: !1 }).rotateX(Math.PI / 2);
+    const q = (n.topWidth - n.baseWidth) / (2 * n.height), x = n.clearance * Math.hypot(1, q), b = -n.clearance, y = n.height + n.clearance, k = n.baseWidth / 2 + q * b + x, M = n.baseWidth / 2 + q * y + x, _ = new S9();
+    return _.moveTo(-k, b), _.lineTo(k, b), _.lineTo(M, y), _.lineTo(-M, y), _.closePath(), new w3(_, { depth: n.length, bevelEnabled: !1 }).rotateX(Math.PI / 2);
   }
   const s = [], o = [], a = t.preset === "bent-tube";
   if (!a && t.preset !== "loft")
@@ -46110,11 +46114,11 @@ function VE(i, e = !1) {
       for (const b of d) {
         const y = q / r;
         if (a) {
-          const M = y * n.bendAngle * Math.PI / 180, k = n.outerDiameter / 2 - (x ? n.wallThickness : 0), _ = n.bendRadius + k * Math.cos(b);
-          s.push(_ * Math.cos(M), _ * Math.sin(M), k * Math.sin(b));
+          const k = y * n.bendAngle * Math.PI / 180, M = n.outerDiameter / 2 - (x ? n.wallThickness : 0), _ = n.bendRadius + M * Math.cos(b);
+          s.push(_ * Math.cos(k), _ * Math.sin(k), M * Math.sin(b));
         } else {
-          const M = x ? n.wallThickness : 0, k = x && n.wallThickness === 0 ? 0 : (1 - y) * p(n.baseWidth - 2 * M, n.baseDepth - 2 * M, b) + y * (n.topDiameter / 2 - M);
-          s.push(k * Math.cos(b), k * Math.sin(b), n.height * y);
+          const k = x ? n.wallThickness : 0, M = x && n.wallThickness === 0 ? 0 : (1 - y) * p(n.baseWidth - 2 * k, n.baseDepth - 2 * k, b) + y * (n.topDiameter / 2 - k);
+          s.push(M * Math.cos(b), M * Math.sin(b), n.height * y);
         }
       }
   const f = (q, x, b = 0) => q * 2 * (u + 1) + b * (u + 1) + x, g = (q, x, b, y) => o.push(q, x, b, q, b, y), v = a || n.wallThickness > 0;
@@ -46135,27 +46139,27 @@ function jE(i, e, t, n = 48) {
   const s = [], o = /* @__PURE__ */ new Map(), a = [], r = ([x, b]) => {
     x = Math.fround(x), b = Math.fround(b);
     const y = `${x}/${b}`;
-    let M = o.get(y);
-    return M === void 0 && (M = s.length, s.push([x, b]), o.set(y, M)), M;
+    let k = o.get(y);
+    return k === void 0 && (k = s.length, s.push([x, b]), o.set(y, k)), k;
   }, l = (x, b, y) => (b[0] - x[0]) * (y[1] - x[1]) - (b[1] - x[1]) * (y[0] - x[0]), c = (x, b, y) => {
-    const M = [];
-    for (let k = 0; k < x.length; k++) {
-      const _ = x[k], w = x[(k + 1) % x.length], S = (B) => y ? B[0] >= b : B[0] <= b, I = S(_), R = S(w);
-      if (I && M.push(_), I !== R) {
+    const k = [];
+    for (let M = 0; M < x.length; M++) {
+      const _ = x[M], w = x[(M + 1) % x.length], S = (B) => y ? B[0] >= b : B[0] <= b, I = S(_), R = S(w);
+      if (I && k.push(_), I !== R) {
         const [B, O] = _[0] < w[0] ? [_, w] : [w, _];
-        M.push([b, B[1] + (O[1] - B[1]) * (b - B[0]) / (O[0] - B[0])]);
+        k.push([b, B[1] + (O[1] - B[1]) * (b - B[0]) / (O[0] - B[0])]);
       }
     }
-    return M;
+    return k;
   }, d = Math.min(...i.map((x) => x.x)), u = Math.max(...i.map((x) => x.x));
   for (const x of W5.triangulateShape(i, [])) {
     const b = x.map((y) => i[y].toArray());
     l(...b) < 0 && b.reverse();
     for (let y = 0; y < n; y++) {
-      const M = d + (u - d) * y / n, k = d + (u - d) * (y + 1) / n;
-      if (Math.max(...b.map((w) => w[0])) < M || Math.min(...b.map((w) => w[0])) > k)
+      const k = d + (u - d) * y / n, M = d + (u - d) * (y + 1) / n;
+      if (Math.max(...b.map((w) => w[0])) < k || Math.min(...b.map((w) => w[0])) > M)
         continue;
-      const _ = c(c(b, M, !0), k, !1);
+      const _ = c(c(b, k, !0), M, !1);
       for (let w = 1; w + 1 < _.length; w++) {
         const S = [r(_[0]), r(_[w]), r(_[w + 1])];
         new Set(S).size === 3 && l(s[S[0]], s[S[1]], s[S[2]]) > 1e-12 && a.push(S);
@@ -46165,8 +46169,8 @@ function jE(i, e, t, n = 48) {
   const p = /* @__PURE__ */ new Map();
   for (const x of a)
     for (let b = 0; b < 3; b++) {
-      const y = x[b], M = x[(b + 1) % 3], k = y < M ? `${y}/${M}` : `${M}/${y}`, _ = p.get(k);
-      _ ? _.count++ : p.set(k, { a: y, b: M, count: 1 });
+      const y = x[b], k = x[(b + 1) % 3], M = y < k ? `${y}/${k}` : `${k}/${y}`, _ = p.get(M);
+      _ ? _.count++ : p.set(M, { a: y, b: k, count: 1 });
     }
   if ([...p.values()].some((x) => x.count > 2))
     throw new Error(h("Bent profile could not form a closed shell"));
@@ -46355,7 +46359,7 @@ class Pi extends _o {
           r1 ? n(r1, G) : console.warn("SVGLoader: 'use node' references non-existent node id: " + u1);
           break;
       }
-      p1 && (G.fill !== void 0 && G.fill !== "none" && p1.color.setStyle(G.fill, ZE), k(p1, L1), B.push(p1), p1.userData = { node: N, style: G });
+      p1 && (G.fill !== void 0 && G.fill !== "none" && p1.color.setStyle(G.fill, ZE), M(p1, L1), B.push(p1), p1.userData = { node: N, style: G });
       const m1 = N.childNodes;
       for (let s1 = 0; s1 < m1.length; s1++) {
         const u1 = m1[s1];
@@ -46821,10 +46825,10 @@ class Pi extends _o {
     function y(N) {
       if (!(N.hasAttribute("transform") || N.nodeName === "use" && (N.hasAttribute("x") || N.hasAttribute("y"))))
         return null;
-      const G = M(N);
+      const G = k(N);
       return X.length > 0 && G.premultiply(X[X.length - 1]), L1.copy(G), X.push(G), G;
     }
-    function M(N) {
+    function k(N) {
       const G = new $2(), C = W;
       if (N.nodeName === "use" && (N.hasAttribute("x") || N.hasAttribute("y"))) {
         const F = b(N.getAttribute("x") || 0), p1 = b(N.getAttribute("y") || 0);
@@ -46905,7 +46909,7 @@ class Pi extends _o {
       }
       return G;
     }
-    function k(N, G) {
+    function M(N, G) {
       function C(s1) {
         _1.set(s1.x, s1.y, 1).applyMatrix3(G), s1.set(_1.x, _1.y);
       }
@@ -47018,7 +47022,7 @@ class Pi extends _o {
       t: 0
     };
     function o(v, m, q, x) {
-      const b = v.x, y = m.x, M = q.x, k = x.x, _ = v.y, w = m.y, S = q.y, I = x.y, R = (k - M) * (_ - S) - (I - S) * (b - M), B = (y - b) * (_ - S) - (w - _) * (b - M), O = (I - S) * (y - b) - (k - M) * (w - _), X = R / O, W = B / O;
+      const b = v.x, y = m.x, k = q.x, M = x.x, _ = v.y, w = m.y, S = q.y, I = x.y, R = (M - k) * (_ - S) - (I - S) * (b - k), B = (y - b) * (_ - S) - (w - _) * (b - k), O = (I - S) * (y - b) - (M - k) * (w - _), X = R / O, W = B / O;
       if (O === 0 && R !== 0 || X <= 0 || X >= 1 || W < 0 || W > 1)
         return null;
       if (R === 0 && O === 0) {
@@ -47042,7 +47046,7 @@ class Pi extends _o {
       }
     }
     function a(v, m, q) {
-      const x = q.x - m.x, b = q.y - m.y, y = v.x - m.x, M = v.y - m.y, k = x * M - y * b;
+      const x = q.x - m.x, b = q.y - m.y, y = v.x - m.x, k = v.y - m.y, M = x * k - y * b;
       if (v.x === m.x && v.y === m.y) {
         s.loc = n.ORIGIN, s.t = 0;
         return;
@@ -47051,31 +47055,31 @@ class Pi extends _o {
         s.loc = n.DESTINATION, s.t = 1;
         return;
       }
-      if (k < -Number.EPSILON) {
+      if (M < -Number.EPSILON) {
         s.loc = n.LEFT;
         return;
       }
-      if (k > Number.EPSILON) {
+      if (M > Number.EPSILON) {
         s.loc = n.RIGHT;
         return;
       }
-      if (x * y < 0 || b * M < 0) {
+      if (x * y < 0 || b * k < 0) {
         s.loc = n.BEHIND;
         return;
       }
-      if (Math.sqrt(x * x + b * b) < Math.sqrt(y * y + M * M)) {
+      if (Math.sqrt(x * x + b * b) < Math.sqrt(y * y + k * k)) {
         s.loc = n.BEYOND;
         return;
       }
       let _;
-      x !== 0 ? _ = y / x : _ = M / b, s.loc = n.BETWEEN, s.t = _;
+      x !== 0 ? _ = y / x : _ = k / b, s.loc = n.BETWEEN, s.t = _;
     }
     function r(v, m) {
       const q = [], x = [];
       for (let b = 1; b < v.length; b++) {
-        const y = v[b - 1], M = v[b];
-        for (let k = 1; k < m.length; k++) {
-          const _ = m[k - 1], w = m[k], S = o(y, M, _, w);
+        const y = v[b - 1], k = v[b];
+        for (let M = 1; M < m.length; M++) {
+          const _ = m[M - 1], w = m[M], S = o(y, k, _, w);
           S !== null && q.find((I) => I.t <= S.t + Number.EPSILON && I.t >= S.t - Number.EPSILON) === void 0 && (q.push(S), x.push(new e2(S.x, S.y)));
         }
       }
@@ -47086,19 +47090,19 @@ class Pi extends _o {
       m.getCenter(x);
       const b = [];
       return q.forEach((y) => {
-        y.boundingBox.containsPoint(x) && r(v, y.points).forEach((k) => {
-          b.push({ identifier: y.identifier, isCW: y.isCW, point: k });
+        y.boundingBox.containsPoint(x) && r(v, y.points).forEach((M) => {
+          b.push({ identifier: y.identifier, isCW: y.isCW, point: M });
         });
-      }), b.sort((y, M) => y.point.x - M.point.x), b;
+      }), b.sort((y, k) => y.point.x - k.point.x), b;
     }
     function c(v, m, q, x, b) {
       (b == null || b === "") && (b = "nonzero");
       const y = new e2();
       v.boundingBox.getCenter(y);
-      const M = [new e2(q, y.y), new e2(x, y.y)], k = l(M, v.boundingBox, m);
-      k.sort((B, O) => B.point.x - O.point.x);
+      const k = [new e2(q, y.y), new e2(x, y.y)], M = l(k, v.boundingBox, m);
+      M.sort((B, O) => B.point.x - O.point.x);
       const _ = [], w = [];
-      k.forEach((B) => {
+      M.forEach((B) => {
         B.identifier === v.identifier ? _.push(B) : w.push(B);
       });
       const S = _[0].point.x, I = [];
@@ -47121,9 +47125,9 @@ class Pi extends _o {
     let d = 999999999, u = -999999999, p = e.subPaths.map((v) => {
       const m = v.getPoints();
       let q = -999999999, x = 999999999, b = -999999999, y = 999999999;
-      for (let M = 0; M < m.length; M++) {
-        const k = m[M];
-        k.y > q && (q = k.y), k.y < x && (x = k.y), k.x > b && (b = k.x), k.x < y && (y = k.x);
+      for (let k = 0; k < m.length; k++) {
+        const M = m[k];
+        M.y > q && (q = M.y), M.y < x && (x = M.y), M.x > b && (b = M.x), M.x < y && (y = M.x);
       }
       return u <= b && (u = b + 1), d >= y && (d = y - 1), { curves: v.curves, points: m, isCW: W5.isClockWise(m), identifier: -1, boundingBox: new gx(new e2(y, x), new e2(b, q)) };
     });
@@ -47135,8 +47139,8 @@ class Pi extends _o {
       if (!f[v.identifier].isHole) {
         const q = new S9();
         q.curves = v.curves, f.filter((b) => b.isHole && b.for === v.identifier).forEach((b) => {
-          const y = p[b.identifier], M = new C4();
-          M.curves = y.curves, q.holes.push(M);
+          const y = p[b.identifier], k = new C4();
+          k.curves = y.curves, q.holes.push(k);
         }), g.push(q);
       }
     }), g;
@@ -47191,7 +47195,7 @@ class Pi extends _o {
    * @return {number} The number of vertices.
    */
   static pointsToStrokeWithBuffers(e, t, n, s, o, a, r, l) {
-    const c = new e2(), d = new e2(), u = new e2(), p = new e2(), f = new e2(), g = new e2(), v = new e2(), m = new e2(), q = new e2(), x = new e2(), b = new e2(), y = new e2(), M = new e2(), k = new e2(), _ = new e2(), w = new e2(), S = new e2();
+    const c = new e2(), d = new e2(), u = new e2(), p = new e2(), f = new e2(), g = new e2(), v = new e2(), m = new e2(), q = new e2(), x = new e2(), b = new e2(), y = new e2(), k = new e2(), M = new e2(), _ = new e2(), w = new e2(), S = new e2();
     n = n !== void 0 ? n : 12, s = s !== void 0 ? s : 1e-3, l = l !== void 0 ? l : 0, e = T(e);
     const I = e.length;
     if (I < 2) return 0;
@@ -47203,8 +47207,8 @@ class Pi extends _o {
     for (let E = 1; E < I; E++) {
       B = e[E], E === I - 1 ? R ? X = e[1] : X = void 0 : X = e[E + 1];
       const D = c;
-      if (C(O, B, D), u.copy(D).multiplyScalar(W), y.copy(B).sub(u), M.copy(B).add(u), K = e1 + J, a1 = !1, X !== void 0) {
-        C(B, X, d), u.copy(d).multiplyScalar(W), k.copy(B).sub(u), _.copy(B).add(u), _1 = !0, u.subVectors(X, O), D.dot(u) < 0 && (_1 = !1), E === 1 && (P1 = _1), u.subVectors(X, B), u.normalize();
+      if (C(O, B, D), u.copy(D).multiplyScalar(W), y.copy(B).sub(u), k.copy(B).add(u), K = e1 + J, a1 = !1, X !== void 0) {
+        C(B, X, d), u.copy(d).multiplyScalar(W), M.copy(B).sub(u), _.copy(B).add(u), _1 = !0, u.subVectors(X, O), D.dot(u) < 0 && (_1 = !1), E === 1 && (P1 = _1), u.subVectors(X, B), u.normalize();
         const $ = Math.abs(D.dot(u));
         if ($ > Number.EPSILON) {
           const U = W / $;
@@ -47212,12 +47216,12 @@ class Pi extends _o {
           const V = f.length(), z = p.length();
           p.divideScalar(z), g.subVectors(X, B);
           const H = g.length();
-          switch (g.divideScalar(H), p.dot(w) < z && g.dot(w) < H && (a1 = !0), S.copy(f).add(B), w.add(B), L1 = !1, a1 ? _1 ? (_.copy(w), M.copy(w)) : (k.copy(w), y.copy(w)) : m1(), t.strokeLineJoin) {
+          switch (g.divideScalar(H), p.dot(w) < z && g.dot(w) < H && (a1 = !0), S.copy(f).add(B), w.add(B), L1 = !1, a1 ? _1 ? (_.copy(w), k.copy(w)) : (M.copy(w), y.copy(w)) : m1(), t.strokeLineJoin) {
             case "bevel":
               s1(_1, a1, K);
               break;
             case "round":
-              u1(_1, a1), _1 ? p1(B, y, k, K, 0) : p1(B, _, M, K, 1);
+              u1(_1, a1), _1 ? p1(B, y, M, K, 0) : p1(B, _, k, K, 1);
               break;
             default:
               const w1 = W * t.strokeMiterLimit / V;
@@ -47226,19 +47230,19 @@ class Pi extends _o {
                   s1(_1, a1, K);
                   break;
                 } else
-                  u1(_1, a1), _1 ? (g.subVectors(S, y).multiplyScalar(w1).add(y), v.subVectors(S, k).multiplyScalar(w1).add(k), F(y, K, 0), F(g, K, 0), F(B, K, 0.5), F(B, K, 0.5), F(g, K, 0), F(v, K, 0), F(B, K, 0.5), F(v, K, 0), F(k, K, 0)) : (g.subVectors(S, M).multiplyScalar(w1).add(M), v.subVectors(S, _).multiplyScalar(w1).add(_), F(M, K, 1), F(g, K, 1), F(B, K, 0.5), F(B, K, 0.5), F(g, K, 1), F(v, K, 1), F(B, K, 0.5), F(v, K, 1), F(_, K, 1));
+                  u1(_1, a1), _1 ? (g.subVectors(S, y).multiplyScalar(w1).add(y), v.subVectors(S, M).multiplyScalar(w1).add(M), F(y, K, 0), F(g, K, 0), F(B, K, 0.5), F(B, K, 0.5), F(g, K, 0), F(v, K, 0), F(B, K, 0.5), F(v, K, 0), F(M, K, 0)) : (g.subVectors(S, k).multiplyScalar(w1).add(k), v.subVectors(S, _).multiplyScalar(w1).add(_), F(k, K, 1), F(g, K, 1), F(B, K, 0.5), F(B, K, 0.5), F(g, K, 1), F(v, K, 1), F(B, K, 0.5), F(v, K, 1), F(_, K, 1));
               else
-                a1 ? (_1 ? (F(q, e1, 1), F(m, e1, 0), F(S, K, 0), F(q, e1, 1), F(S, K, 0), F(w, K, 1)) : (F(q, e1, 1), F(m, e1, 0), F(S, K, 1), F(m, e1, 0), F(w, K, 0), F(S, K, 1)), _1 ? k.copy(S) : _.copy(S)) : _1 ? (F(y, K, 0), F(S, K, 0), F(B, K, 0.5), F(B, K, 0.5), F(S, K, 0), F(k, K, 0)) : (F(M, K, 1), F(S, K, 1), F(B, K, 0.5), F(B, K, 0.5), F(S, K, 1), F(_, K, 1)), L1 = !0;
+                a1 ? (_1 ? (F(q, e1, 1), F(m, e1, 0), F(S, K, 0), F(q, e1, 1), F(S, K, 0), F(w, K, 1)) : (F(q, e1, 1), F(m, e1, 0), F(S, K, 1), F(m, e1, 0), F(w, K, 0), F(S, K, 1)), _1 ? M.copy(S) : _.copy(S)) : _1 ? (F(y, K, 0), F(S, K, 0), F(B, K, 0.5), F(B, K, 0.5), F(S, K, 0), F(M, K, 0)) : (F(k, K, 1), F(S, K, 1), F(B, K, 0.5), F(B, K, 0.5), F(S, K, 1), F(_, K, 1)), L1 = !0;
               break;
           }
         } else
           m1();
       } else
         m1();
-      !R && E === I - 1 && r1(e[0], x, b, _1, !0, e1), e1 = K, O = B, m.copy(k), q.copy(_);
+      !R && E === I - 1 && r1(e[0], x, b, _1, !0, e1), e1 = K, O = B, m.copy(M), q.copy(_);
     }
     if (!R)
-      r1(B, y, M, _1, !1, K);
+      r1(B, y, k, _1, !1, K);
     else if (a1 && o) {
       let E = S, D = w;
       P1 !== _1 && (E = w, D = S), _1 ? (L1 || P1) && (D.toArray(o, 0), D.toArray(o, 9), L1 && E.toArray(o, 3)) : (L1 || !P1) && (D.toArray(o, 3), D.toArray(o, 9), L1 && E.toArray(o, 0));
@@ -47260,13 +47264,13 @@ class Pi extends _o {
       F(u, U, V), F($, U, V), F(E, U, 0.5);
     }
     function m1() {
-      F(q, e1, 1), F(m, e1, 0), F(y, K, 0), F(q, e1, 1), F(y, K, 0), F(M, K, 1);
+      F(q, e1, 1), F(m, e1, 0), F(y, K, 0), F(q, e1, 1), F(y, K, 0), F(k, K, 1);
     }
     function s1(E, D, $) {
-      D ? E ? (F(q, e1, 1), F(m, e1, 0), F(y, K, 0), F(q, e1, 1), F(y, K, 0), F(w, K, 1), F(y, $, 0), F(k, $, 0), F(w, $, 0.5)) : (F(q, e1, 1), F(m, e1, 0), F(M, K, 1), F(m, e1, 0), F(w, K, 0), F(M, K, 1), F(M, $, 1), F(w, $, 0), F(_, $, 1)) : E ? (F(y, $, 0), F(k, $, 0), F(B, $, 0.5)) : (F(M, $, 1), F(_, $, 0), F(B, $, 0.5));
+      D ? E ? (F(q, e1, 1), F(m, e1, 0), F(y, K, 0), F(q, e1, 1), F(y, K, 0), F(w, K, 1), F(y, $, 0), F(M, $, 0), F(w, $, 0.5)) : (F(q, e1, 1), F(m, e1, 0), F(k, K, 1), F(m, e1, 0), F(w, K, 0), F(k, K, 1), F(k, $, 1), F(w, $, 0), F(_, $, 1)) : E ? (F(y, $, 0), F(M, $, 0), F(B, $, 0.5)) : (F(k, $, 1), F(_, $, 0), F(B, $, 0.5));
     }
     function u1(E, D) {
-      D && (E ? (F(q, e1, 1), F(m, e1, 0), F(y, K, 0), F(q, e1, 1), F(y, K, 0), F(w, K, 1), F(y, e1, 0), F(B, K, 0.5), F(w, K, 1), F(B, K, 0.5), F(k, e1, 0), F(w, K, 1)) : (F(q, e1, 1), F(m, e1, 0), F(M, K, 1), F(m, e1, 0), F(w, K, 0), F(M, K, 1), F(M, e1, 1), F(w, K, 0), F(B, K, 0.5), F(B, K, 0.5), F(w, K, 0), F(_, e1, 1)));
+      D && (E ? (F(q, e1, 1), F(m, e1, 0), F(y, K, 0), F(q, e1, 1), F(y, K, 0), F(w, K, 1), F(y, e1, 0), F(B, K, 0.5), F(w, K, 1), F(B, K, 0.5), F(M, e1, 0), F(w, K, 1)) : (F(q, e1, 1), F(m, e1, 0), F(k, K, 1), F(m, e1, 0), F(w, K, 0), F(k, K, 1), F(k, e1, 1), F(w, K, 0), F(B, K, 0.5), F(B, K, 0.5), F(w, K, 0), F(_, e1, 1)));
     }
     function r1(E, D, $, U, V, z) {
       switch (t.strokeLineCap) {
@@ -47525,7 +47529,7 @@ const X5 = function(i, e) {
     typeof arguments[0] == "object" && (R = arguments[0], _ = R.cellSize, w = R.margin, S = R.alt, I = R.title), _ = _ || 2, w = typeof w > "u" ? _ * 4 : w, S = typeof S == "string" ? { text: S } : S || {}, S.text = S.text || null, S.id = S.text ? S.id || "qrcode-description" : null, I = typeof I == "string" ? { text: I } : I || {}, I.text = I.text || null, I.id = I.text ? I.id || "qrcode-title" : null;
     const B = d.getModuleCount() * _ + w * 2;
     let O, X, W, J, e1 = "", K;
-    for (K = "l" + _ + ",0 0," + _ + " -" + _ + ",0 0,-" + _ + "z ", e1 += '<svg version="1.1" xmlns="http://www.w3.org/2000/svg"', e1 += R.scalable ? "" : ' width="' + B + 'px" height="' + B + 'px"', e1 += ' viewBox="0 0 ' + B + " " + B + '" ', e1 += ' preserveAspectRatio="xMinYMin meet"', e1 += I.text || S.text ? ' role="img" aria-labelledby="' + M([I.id, S.id].join(" ").trim()) + '"' : "", e1 += ">", e1 += I.text ? '<title id="' + M(I.id) + '">' + M(I.text) + "</title>" : "", e1 += S.text ? '<description id="' + M(S.id) + '">' + M(S.text) + "</description>" : "", e1 += '<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>', e1 += '<path d="', W = 0; W < d.getModuleCount(); W += 1)
+    for (K = "l" + _ + ",0 0," + _ + " -" + _ + ",0 0,-" + _ + "z ", e1 += '<svg version="1.1" xmlns="http://www.w3.org/2000/svg"', e1 += R.scalable ? "" : ' width="' + B + 'px" height="' + B + 'px"', e1 += ' viewBox="0 0 ' + B + " " + B + '" ', e1 += ' preserveAspectRatio="xMinYMin meet"', e1 += I.text || S.text ? ' role="img" aria-labelledby="' + k([I.id, S.id].join(" ").trim()) + '"' : "", e1 += ">", e1 += I.text ? '<title id="' + k(I.id) + '">' + k(I.text) + "</title>" : "", e1 += S.text ? '<description id="' + k(S.id) + '">' + k(S.text) + "</description>" : "", e1 += '<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>', e1 += '<path d="', W = 0; W < d.getModuleCount(); W += 1)
       for (J = W * _ + w, O = 0; O < d.getModuleCount(); O += 1)
         d.isDark(W, O) && (X = O * _ + w, e1 += "M" + X + "," + J + K);
     return e1 += '" stroke="transparent" fill="black"/>', e1 += "</svg>", e1;
@@ -47543,9 +47547,9 @@ const X5 = function(i, e) {
     _ = _ || 2, w = typeof w > "u" ? _ * 4 : w;
     const I = d.getModuleCount() * _ + w * 2;
     let R = "";
-    return R += "<img", R += ' src="', R += d.createDataURL(_, w), R += '"', R += ' width="', R += I, R += '"', R += ' height="', R += I, R += '"', S && (R += ' alt="', R += M(S), R += '"'), R += "/>", R;
+    return R += "<img", R += ' src="', R += d.createDataURL(_, w), R += '"', R += ' width="', R += I, R += '"', R += ' height="', R += I, R += '"', S && (R += ' alt="', R += k(S), R += '"'), R += "/>", R;
   };
-  const M = function(_) {
+  const k = function(_) {
     let w = "";
     for (let S = 0; S < _.length; S += 1) {
       const I = _.charAt(S);
@@ -47568,7 +47572,7 @@ const X5 = function(i, e) {
       }
     }
     return w;
-  }, k = function(_) {
+  }, M = function(_) {
     _ = typeof _ > "u" ? 2 : _;
     const S = d.getModuleCount() * 1 + _ * 2, I = _, R = S - _;
     let B, O, X, W, J;
@@ -47594,7 +47598,7 @@ const X5 = function(i, e) {
   };
   return d.createASCII = function(_, w) {
     if (_ = _ || 1, _ < 2)
-      return k(w);
+      return M(w);
     _ -= 1, w = typeof w > "u" ? _ * 2 : w;
     const S = d.getModuleCount() * _ + w * 2, I = w, R = S - w;
     let B, O, X, W;
@@ -48528,13 +48532,13 @@ function n8(i = 5, e = 2, t = 10, n = 0, s = 1, o = 1, a = 0, r = e, l, c, d = 0
   const u = Math.ceil(t * 48), p = [], f = [], g = l === void 0 ? r * 0.38 : (s + d) * Math.tan(l * Math.PI / 360);
   for (let q = 0; q <= u; q++) {
     const x = o * q / u * t * 2 * Math.PI + a, b = q / u * t * e;
-    for (const [y, M] of [[i - d, -g], [i + s + n, 0], [i - d, g]])
-      p.push(y * (c?.(b + M) ?? 1) * Math.cos(x), y * (c?.(b + M) ?? 1) * Math.sin(x), b + M);
+    for (const [y, k] of [[i - d, -g], [i + s + n, 0], [i - d, g]])
+      p.push(y * (c?.(b + k) ?? 1) * Math.cos(x), y * (c?.(b + k) ?? 1) * Math.sin(x), b + k);
   }
   for (let q = 0; q < u; q++)
     for (let x = 0; x < 3; x++) {
-      const b = q * 3 + x, y = q * 3 + (x + 1) % 3, M = (q + 1) * 3 + x, k = (q + 1) * 3 + (x + 1) % 3;
-      f.push(b, y, M, y, k, M);
+      const b = q * 3 + x, y = q * 3 + (x + 1) % 3, k = (q + 1) * 3 + x, M = (q + 1) * 3 + (x + 1) % 3;
+      f.push(b, y, k, y, M, k);
     }
   f.push(0, 2, 1, u * 3, u * 3 + 1, u * 3 + 2);
   let v = 0;
@@ -48576,7 +48580,7 @@ function Yu(i, e = "ABC", t = !1, n, s) {
         return [e1 === 16 ? 0 : p * Math.cos(K), g * (0.3 + 0.7 * Math.sin(K))];
       }), [0, 0]]) : B0(d === "countersunk" ? f : p, g, [0, 0, g / 2], d === "hex" ? 6 : 64, p), m = s.driveDepth, q = g - m / 2 + 0.1, x = [];
       u === "slot" && x.push(X0(a.slotWidth, a.headDiameter + 2, m + 0.2, [0, 0, q])), u === "cross" && x.push(X0(a.slotWidth, a.headDiameter * 0.65, m + 0.2, [0, 0, q]), X0(a.headDiameter * 0.65, a.slotWidth, m + 0.2, [0, 0, q])), u === "hex" && x.push(B0(a.slotWidth / Math.sqrt(3), m + 0.2, [0, 0, q], 6));
-      const b = S8(s), y = r + a.threadDepth, M = s.tipStyle !== void 0 || d === "headless", k = M && b.style === "gimlet", _ = M && !["flat", "gimlet"].includes(b.style), w = _ ? a.length - b.length : a.length, S = (a.threadDepth + (s.rootOverlap ?? 0.3)) * Math.tan(s.threadAngle * Math.PI / 360), I = Math.min(S + 0.05, w * 0.4), R = Math.max(0.01, w - 2 * I), B = M ? Array.from({ length: a.starts }, (J, e1) => n8(r, l, R / l, 0, a.threadDepth, a.hand, e1 * 2 * Math.PI / a.starts, a.pitch, s.threadAngle, k ? (K) => Math.max(0, Math.min(1, (a.length - K - I) / b.length)) : void 0, s.rootOverlap ?? 0.3).translate(0, 0, I)) : c(), X = [k ? d5([[0, -a.length], [r, -a.length + b.length], [r, 0], [0, 0]]) : B0(r, w, [0, 0, -w / 2]), ...B.map((J) => J.rotateX(Math.PI)), ...d === "headless" ? [] : [v]];
+      const b = S8(s), y = r + a.threadDepth, k = s.tipStyle !== void 0 || d === "headless", M = k && b.style === "gimlet", _ = k && !["flat", "gimlet"].includes(b.style), w = _ ? a.length - b.length : a.length, S = (a.threadDepth + (s.rootOverlap ?? 0.3)) * Math.tan(s.threadAngle * Math.PI / 360), I = Math.min(S + 0.05, w * 0.4), R = Math.max(0.01, w - 2 * I), B = k ? Array.from({ length: a.starts }, (J, e1) => n8(r, l, R / l, 0, a.threadDepth, a.hand, e1 * 2 * Math.PI / a.starts, a.pitch, s.threadAngle, M ? (K) => Math.max(0, Math.min(1, (a.length - K - I) / b.length)) : void 0, s.rootOverlap ?? 0.3).translate(0, 0, I)) : c(), X = [M ? d5([[0, -a.length], [r, -a.length + b.length], [r, 0], [0, 0]]) : B0(r, w, [0, 0, -w / 2]), ...B.map((J) => J.rotateX(Math.PI)), ...d === "headless" ? [] : [v]];
       d === "headless" && v.dispose();
       const W = [];
       if (_) {
@@ -48783,8 +48787,8 @@ function oc(i, e, t, n, s, o) {
   if (i === "hinge") {
     r.add.forEach((x) => x.dispose());
     const f = (x, b) => {
-      const y = [X0(19, 3, 30, [x * 12.5, 0, 0]), ...b.map((k) => B0(5, 5.7, [0, 0, k]))], M = u("union", y.map(d));
-      return u("subtract", [M, d(B0(3, 40))]);
+      const y = [X0(19, 3, 30, [x * 12.5, 0, 0]), ...b.map((M) => B0(5, 5.7, [0, 0, M]))], k = u("union", y.map(d));
+      return u("subtract", [k, d(B0(3, 40))]);
     }, g = f(-1, [-12, 0, 12]), v = f(1, [-6, 6]), m = u("union", [d(B0(2.5, 32)), d(B0(4, 1, [0, 0, 16.4]))]);
     l.roots = [g, v, m], l.nodes[g].name = h("Hinge leaf A"), l.nodes[v].name = h("Hinge leaf B"), l.nodes[m].name = h("Hinge pin");
     const q = { anchorA: [0, 0, 0], anchorB: [0, 0, 0], axisA: [0, 0, 1], axisB: [0, 0, 1] };
@@ -49066,7 +49070,7 @@ function pC(i) {
       if (q.dot(a) <= 0)
         continue;
       const x = d.clone().multiplyScalar(0.55 + 0.45 * Math.max(0, q.dot(c))).getStyle(), b = m.map((y) => `${(40 + y.dot(r) * n).toFixed(1)},${(40 - y.dot(l) * n).toFixed(1)}`);
-      u.push({ depth: m.reduce((y, M) => y + M.dot(a), 0) / 3, path: `<path d="M${b.join("L")}Z" fill="${x}" stroke="${x}" stroke-width=".35"/>` });
+      u.push({ depth: m.reduce((y, k) => y + k.dot(a), 0) / 3, path: `<path d="M${b.join("L")}Z" fill="${x}" stroke="${x}" stroke-width=".35"/>` });
     }
     u.sort((v, m) => v.depth - m.depth);
     const f = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">${u.map((v) => v.path).join("")}</svg>`, g = `data:image/svg+xml,${encodeURIComponent(f)}`;
@@ -49128,10 +49132,10 @@ function uC(i, e, t, n, s, o = {}) {
   b.className = "shape-scroll";
   const y = document.createElement("div");
   y.className = "shape-picker-status", y.setAttribute("role", "status"), y.textContent = "";
-  const M = document.createElement("details");
-  M.className = "shape-options";
-  const k = document.createElement("summary");
-  k.setAttribute("aria-label", h("Lettering & SVG options")), k.title = h("Lettering & SVG options"), k.append(Y3("Lettering options"));
+  const k = document.createElement("details");
+  k.className = "shape-options";
+  const M = document.createElement("summary");
+  M.setAttribute("aria-label", h("Lettering & SVG options")), M.title = h("Lettering & SVG options"), M.append(Y3("Lettering options"));
   const _ = document.createElement("label");
   _.className = "shape-text", _.textContent = h("Icon tag: upload filled SVG (max 64 KiB)");
   const w = document.createElement("input");
@@ -49146,21 +49150,21 @@ function uC(i, e, t, n, s, o = {}) {
       }
       if (C.size > 65536)
         throw new Error(h("SVG exceeds 64 KiB"));
-      S = await C.text(), M.open = !1, y.textContent = h`Icon tag will use ${C.name}.`;
+      S = await C.text(), k.open = !1, y.textContent = h`Icon tag will use ${C.name}.`;
     } catch (C) {
       S = void 0, y.textContent = C instanceof Error ? C.message : String(C);
     }
   }), _.append(w);
   const I = document.createElement("div");
-  I.className = "shape-option-fields", I.append(f, q, _), M.append(k, I), M.addEventListener("toggle", () => {
+  I.className = "shape-option-fields", I.append(f, q, _), k.append(M, I), k.addEventListener("toggle", () => {
     I.style.maxHeight = `${Math.max(80, a.clientHeight - r.offsetHeight - 8)}px`;
-  }), r.append(p, v, M, d, u), a.append(r, b, y), i.append(a);
+  }), r.append(p, v, k, d, u), a.append(r, b, y), i.append(a);
   let R = o.layout === "docked", B = !1, O, X = !1;
   const W = (C) => ({ clientX: C.clientX, clientY: C.clientY, shiftKey: C.shiftKey, altKey: C.altKey });
   e.setAttribute("aria-haspopup", "dialog"), e.setAttribute("aria-expanded", "false");
   let J;
   function e1(C = !0) {
-    M.open = !1, P1(), o.placement?.cancel(), J?.disconnect(), a.hidden = !0, e.setAttribute("aria-expanded", "false"), C && e.focus({ preventScroll: !0 });
+    k.open = !1, P1(), o.placement?.cancel(), J?.disconnect(), a.hidden = !0, e.setAttribute("aria-expanded", "false"), C && e.focus({ preventScroll: !0 });
   }
   function K() {
     P1(), y.textContent = "";
@@ -49229,12 +49233,12 @@ function uC(i, e, t, n, s, o = {}) {
     K(), a.hidden = !1, e.setAttribute("aria-expanded", "true"), C ? p.focus({ preventScroll: !0 }) : a.focus({ preventScroll: !0 });
   }
   const _1 = (C) => {
-    M.open && !C.composedPath().includes(M) && (M.open = !1), !a.hidden && !R && !C.composedPath().includes(a) && !C.composedPath().includes(e) && e1(!1);
+    k.open && !C.composedPath().includes(k) && (k.open = !1), !a.hidden && !R && !C.composedPath().includes(a) && !C.composedPath().includes(e) && e1(!1);
   };
   i.getRootNode().addEventListener("pointerdown", _1), a.addEventListener("keydown", (C) => {
     if (C.key === "Escape") {
-      if (C.preventDefault(), C.stopPropagation(), M.open) {
-        M.open = !1;
+      if (C.preventDefault(), C.stopPropagation(), k.open) {
+        k.open = !1;
         return;
       }
       P1(), o.placement?.cancel(), R || e1();
@@ -49303,9 +49307,9 @@ function fC(i, e, t, n, s) {
   p.spellcheck = !1, p.wrap = "off", p.setAttribute("aria-label", h("Design source"));
   const f = $9("footer"), g = $9("span"), v = $9("button", h("Merge GUI changes")), m = $9("button", h("Reload model source")), q = $9("button", h("Preview model source")), x = $9("button", h("Apply model source"));
   g.setAttribute("role", "status"), g.setAttribute("aria-label", h("Model source status")), x.className = "primary", f.append(g, m, v, q, x), o.append(a, u, p, f), i.insertBefore(o, e);
-  let b = "", y = -1, M = !1, k = !1, _ = !1, w = "";
+  let b = "", y = -1, k = !1, M = !1, _ = !1, w = "";
   function S() {
-    if (!l.checked || M || o.hidden || p.getRootNode().activeElement === p)
+    if (!l.checked || k || o.hidden || p.getRootNode().activeElement === p)
       return;
     const O = t.state.selection;
     if (O.length === 1)
@@ -49341,12 +49345,12 @@ function fC(i, e, t, n, s) {
   function I(O = !1) {
     if (_ || o.hidden)
       return;
-    if (M && !O) {
+    if (k && !O) {
       t.state.revision !== y && (g.textContent = h("The design changed while editing source. Reload or merge your draft."));
       return;
     }
     const X = p.selectionStart, W = p.selectionEnd;
-    p.value = t.modelSource, b = p.value, p.setSelectionRange(Math.min(X, p.value.length), Math.min(W, p.value.length)), y = t.state.revision, M = !1, g.textContent = h("Source and GUI are synchronized."), S();
+    p.value = t.modelSource, b = p.value, p.setSelectionRange(Math.min(X, p.value.length), Math.min(W, p.value.length)), y = t.state.revision, k = !1, g.textContent = h("Source and GUI are synchronized."), S();
   }
   const R = t.subscribe((O) => {
     if (!o.hidden) {
@@ -49361,7 +49365,7 @@ function fC(i, e, t, n, s) {
     }
   });
   p.oninput = () => {
-    M = !0, g.textContent = t.state.revision === y ? h("Source draft changed. Preview or apply when ready.") : h("The design changed while editing source. Reload or merge your draft.");
+    k = !0, g.textContent = t.state.revision === y ? h("Source draft changed. Preview or apply when ready.") : h("The design changed while editing source. Reload or merge your draft.");
   }, p.onmouseup = () => {
     try {
       const O = Oq(p.value, p.selectionStart);
@@ -49373,7 +49377,7 @@ function fC(i, e, t, n, s) {
   }, v.onclick = () => {
     try {
       const O = Nq(b, p.value, t.modelSource), X = t.prepareModelSource(O, { expectedRevision: t.state.revision, regenerate: s });
-      p.value = X.document.modelSource.source, b = t.modelSource, y = t.state.revision, M = !0, g.textContent = h("GUI changes merged into the draft. Preview or apply.");
+      p.value = X.document.modelSource.source, b = t.modelSource, y = t.state.revision, k = !0, g.textContent = h("GUI changes merged into the draft. Preview or apply.");
     } catch (O) {
       g.textContent = O instanceof Error ? O.message : String(O);
     }
@@ -49381,9 +49385,9 @@ function fC(i, e, t, n, s) {
     o.hidden = !0;
   };
   async function B(O) {
-    if (k)
+    if (M)
       return;
-    k = !0, x.disabled = q.disabled = !0;
+    M = !0, x.disabled = q.disabled = !0;
     const X = p.value;
     try {
       const W = t.prepareModelSource(X, { expectedRevision: y, regenerate: s });
@@ -49393,13 +49397,13 @@ function fC(i, e, t, n, s) {
         throw new Error(h("Source changed during preview. Apply again."));
       if (O) {
         const J = t.applyPreparedModelSource(W);
-        M = !1, I(!0), g.textContent = h(J ? "Model source applied as one history step." : "Model source is unchanged. No history entry was created.");
+        k = !1, I(!0), g.textContent = h(J ? "Model source applied as one history step." : "Model source is unchanged. No history entry was created.");
       } else
         g.textContent = h("Model preview ready. No history entry was created.");
     } catch (W) {
       _ || (g.textContent = W instanceof Error ? W.message : String(W));
     } finally {
-      k = !1, x.disabled = q.disabled = !1;
+      M = !1, x.disabled = q.disabled = !1;
     }
   }
   return q.onclick = () => {
@@ -49441,10 +49445,10 @@ function qC(i, e, t, n, s, o) {
     m.append(x);
     const b = n0("div");
     b.className = "code-layout";
-    const y = n0("div"), M = n0("div");
-    y.className = "code-source-pane", M.className = "code-preview-pane";
-    const k = n0("input");
-    k.value = p?.name ?? h("Coded plate"), k.setAttribute("aria-label", h("Code object name")), k.disabled = !!c;
+    const y = n0("div"), k = n0("div");
+    y.className = "code-source-pane", k.className = "code-preview-pane";
+    const M = n0("input");
+    M.value = p?.name ?? h("Coded plate"), M.setAttribute("aria-label", h("Code object name")), M.disabled = !!c;
     const _ = n0("textarea");
     _.setAttribute("aria-label", h("CAD code source")), _.spellcheck = !1, _.wrap = "off", _.value = f.source;
     const w = n0("details");
@@ -49477,7 +49481,7 @@ Named shapes use let; one final return produces one rigid body.
       if (!X.value)
         return;
       const E = qh(X.value);
-      _.value = E.source, B([]), g = {}, c || (k.value = Sn.find((D) => D.id === X.value).title[ni()]), s1(), $1.hidden = !0, G.textContent = h("Example loaded. Preview or apply to check its geometry.");
+      _.value = E.source, B([]), g = {}, c || (M.value = Sn.find((D) => D.id === X.value).title[ni()]), s1(), $1.hidden = !0, G.textContent = h("Example loaded. Preview or apply to check its geometry.");
     }, O.append(X, W);
     const e1 = n0("div"), K = n0("button", h("Import source…")), a1 = n0("input"), _1 = n0("select"), L1 = n0("button", h("Export source…"));
     e1.className = "code-interchange", a1.type = "file", a1.accept = ".cadcode,.scad,.jscad,.js", a1.hidden = !0, a1.setAttribute("aria-label", h("Import CAD source")), _1.setAttribute("aria-label", h("Source export format"));
@@ -49501,7 +49505,7 @@ Named shapes use let; one final return produces one rigid body.
     }, L1.onclick = async () => {
       try {
         const E = m1(), D = _1.value, $ = D === "scad" ? vh(E) : D === "jscad" ? wh(E) : _h(E);
-        await s?.({ name: `${(k.value || "object").replace(/[^A-Za-z0-9_-]+/g, "_")}.${D}`, bytes: new TextEncoder().encode($), mime: "text/plain" }), G.textContent = h("Source exported. The model and its history are unchanged.");
+        await s?.({ name: `${(M.value || "object").replace(/[^A-Za-z0-9_-]+/g, "_")}.${D}`, bytes: new TextEncoder().encode($), mime: "text/plain" }), G.textContent = h("Source exported. The model and its history are unchanged.");
       } catch (E) {
         G.textContent = E instanceof Error ? E.message : String(E);
       }
@@ -49532,7 +49536,7 @@ Named shapes use let; one final return produces one rigid body.
     function u1(E) {
       const D = w5(u);
       let $ = c;
-      return $ ? D.updateCode($, E) : $ = D.addCode(E, k.value.trim()), { draft: D, target: $ };
+      return $ ? D.updateCode($, E) : $ = D.addCode(E, M.value.trim()), { draft: D, target: $ };
     }
     async function r1(E) {
       if (!v) {
@@ -49540,12 +49544,12 @@ Named shapes use let; one final return produces one rigid body.
         try {
           if (e.state.revision !== d)
             throw new Error(h("The model changed. Close and reopen this editor before applying."));
-          const D = m1(), $ = k.value, { draft: U, target: V } = u1(D), z = await t(U.state.document);
+          const D = m1(), $ = M.value, { draft: U, target: V } = u1(D), z = await t(U.state.document);
           if (r || !a.open)
             return;
           if (e.state.revision !== d)
             throw new Error(h("The model changed while building. Reopen the code editor."));
-          if (JSON.stringify(m1()) !== JSON.stringify(D) || k.value !== $)
+          if (JSON.stringify(m1()) !== JSON.stringify(D) || M.value !== $)
             throw new Error(h("Code changed during the build. Preview again."));
           let H = z.bodies.find((w1) => w1.id === V);
           if (!H) {
@@ -49573,7 +49577,7 @@ Named shapes use let; one final return produces one rigid body.
       G.textContent = h("Source changed. Preview or apply to rebuild.");
     }, _.onkeydown = (E) => {
       E.key === "Tab" && (E.preventDefault(), _.setRangeText("  ", _.selectionStart, _.selectionEnd, "end"), _.dispatchEvent(new Event("input"))), E.key === "Enter" && (E.metaKey || E.ctrlKey) && (E.preventDefault(), r1(!1));
-    }, y.append(k, O, e1, _, S, w), M.append($1, N, P1, p1), b.append(y, M);
+    }, y.append(M, O, e1, _, S, w), k.append($1, N, P1, p1), b.append(y, k);
     const T = n0("footer");
     T.append(G, C, F), a.append(m, b, T);
     try {
@@ -49623,9 +49627,9 @@ function hC(i, e, t, n, s = () => 1) {
       return $.value = E, D.append($), q.append(D), $;
     }, y = x("Sketch name", g?.name ?? h("Sketch"));
     y.parentElement.remove(), y.title = h("Sketch name"), m.insertBefore(y, v);
-    const M = b("Profile", ["rectangle", "circle"], g?.profile.kind ?? "rectangle");
-    M.disabled = !!g;
-    const k = b("Sketch plane", ["XY", "XZ", "YZ"], g?.plane ?? "XY"), _ = g?.profile, w = x("Sketch width (mm)", _?.kind === "rectangle" ? _.width : 40), S = x("Sketch depth (mm)", _?.kind === "rectangle" ? _.depth : 30), I = x("Sketch radius (mm)", _?.kind === "circle" ? _.radius : 10), R = x("Extrusion distance (mm)", f?.kind === "extrusion" ? f.distance : 10), B = N0("input");
+    const k = b("Profile", ["rectangle", "circle"], g?.profile.kind ?? "rectangle");
+    k.disabled = !!g;
+    const M = b("Sketch plane", ["XY", "XZ", "YZ"], g?.plane ?? "XY"), _ = g?.profile, w = x("Sketch width (mm)", _?.kind === "rectangle" ? _.width : 40), S = x("Sketch depth (mm)", _?.kind === "rectangle" ? _.depth : 30), I = x("Sketch radius (mm)", _?.kind === "circle" ? _.radius : 10), R = x("Extrusion distance (mm)", f?.kind === "extrusion" ? f.distance : 10), B = N0("input");
     B.type = "checkbox", B.checked = f?.kind === "extrusion" ? f.symmetric : !1, B.setAttribute("aria-label", h("Symmetric extrusion"));
     const O = N0("label", h("Symmetric extrusion"));
     O.className = "sketch-toggle", O.prepend(B), q.append(O);
@@ -49635,12 +49639,12 @@ function hC(i, e, t, n, s = () => 1) {
     W.className = "parameter-status", W.setAttribute("role", "status"), W.setAttribute("aria-label", h("Sketch status"));
     const J = N0("p", h("Drag the corner to resize; drag the upper handle to set height. Then choose Create extrusion.")), e1 = N0("p", h("Enter dimensions or expressions such as width / 2. Define named dimensions in Parameters."));
     function K() {
-      return M.value === "rectangle" ? { kind: "rectangle", id: g?.profile.id ?? "profile-preview", width: c7(w.value), depth: c7(S.value) } : { kind: "circle", id: g?.profile.id ?? "profile-preview", radius: c7(I.value), segments: _?.kind === "circle" ? _.segments : 64 };
+      return k.value === "rectangle" ? { kind: "rectangle", id: g?.profile.id ?? "profile-preview", width: c7(w.value), depth: c7(S.value) } : { kind: "circle", id: g?.profile.id ?? "profile-preview", radius: c7(I.value), segments: _?.kind === "circle" ? _.segments : 64 };
     }
     function a1() {
       const r1 = w5(p);
       let T = c;
-      return g && T ? (r1.updateSketch(g.id, { name: y.value.trim(), plane: k.value, profile: K() }), r1.update(T, { distance: c7(R.value), symmetric: B.checked })) : T = r1.addSketchExtrusion({ ...K(), id: d0() }, { name: y.value.trim(), plane: k.value, distance: c7(R.value), symmetric: B.checked }), { trial: r1, id: T };
+      return g && T ? (r1.updateSketch(g.id, { name: y.value.trim(), plane: M.value, profile: K() }), r1.update(T, { distance: c7(R.value), symmetric: B.checked })) : T = r1.addSketchExtrusion({ ...K(), id: d0() }, { name: y.value.trim(), plane: M.value, distance: c7(R.value), symmetric: B.checked }), { trial: r1, id: T };
     }
     let _1, L1 = !1;
     const P1 = (r1) => Math.min(1e5, Math.max(0.01, r1)), $1 = (r1, T) => {
@@ -49653,7 +49657,7 @@ function hC(i, e, t, n, s = () => 1) {
     };
     $1(w, "Sketch width"), $1(S, "Sketch depth"), $1(I, "Sketch radius"), $1(R, "Extrude");
     function N() {
-      w.parentElement.hidden = S.parentElement.hidden = M.value !== "rectangle", I.parentElement.hidden = M.value !== "circle", X.replaceChildren(), L1 = !1;
+      w.parentElement.hidden = S.parentElement.hidden = k.value !== "rectangle", I.parentElement.hidden = k.value !== "circle", X.replaceChildren(), L1 = !1;
       try {
         const { trial: r1, id: T } = a1(), E = r1.state.document.nodes[T];
         if (E.kind !== "extrusion")
@@ -49680,7 +49684,7 @@ function hC(i, e, t, n, s = () => 1) {
           const l2 = document.createElementNS(S1, "circle");
           l2.setAttribute("cx", String(K1)), l2.setAttribute("cy", String(s2)), l2.setAttribute("r", String(Q * 0.023)), l2.classList.add("sketch-handle"), C1.append(l2, X1);
         }, a2 = (K1) => K1.trim() !== "" && Number.isFinite(Number(K1));
-        o2(Math.max(...$) + w1, -Math.min(...U) + v1, "size", M.value === "circle" ? a2(I.value) : a2(w.value) && a2(S.value)), o2(Math.min(...$) + w1, -Math.max(...U) + v1, "depth", a2(R.value)), X.append(C1, N0("output", h`${V.toLocaleString()} × ${z.toLocaleString()} mm · ${D.distance.toLocaleString()} mm extrusion`)), W.textContent = "", L1 = !0, r1.dispose();
+        o2(Math.max(...$) + w1, -Math.min(...U) + v1, "size", k.value === "circle" ? a2(I.value) : a2(w.value) && a2(S.value)), o2(Math.min(...$) + w1, -Math.max(...U) + v1, "depth", a2(R.value)), X.append(C1, N0("output", h`${V.toLocaleString()} × ${z.toLocaleString()} mm · ${D.distance.toLocaleString()} mm extrusion`)), W.textContent = "", L1 = !0, r1.dispose();
       } catch (r1) {
         W.textContent = r1 instanceof Error && "diagnostic" in r1 ? r1.diagnostic.message : r1 instanceof Error ? r1.message : String(r1);
       }
@@ -49701,7 +49705,7 @@ function hC(i, e, t, n, s = () => 1) {
       if (_1.kind === "depth") {
         const U = $(_1.d + T - E);
         R.value = String(P1(U));
-      } else M.value === "circle" ? I.value = String(P1($(_1.r + T))) : (w.value = String(P1($(_1.w + 2 * T))), S.value = String(P1($(_1.h + 2 * E))));
+      } else k.value === "circle" ? I.value = String(P1($(_1.r + T))) : (w.value = String(P1($(_1.w + 2 * T))), S.value = String(P1($(_1.h + 2 * E))));
       N();
     };
     const G = () => {
@@ -49710,7 +49714,7 @@ function hC(i, e, t, n, s = () => 1) {
     X.onpointerup = G, X.onpointercancel = G, q.addEventListener("input", N), q.addEventListener("change", N);
     const C = N0("button", h(g ? "Apply sketch changes" : "Create extrusion"));
     C.className = "primary", C.onclick = async () => {
-      const r1 = r, T = { name: y.value.trim(), plane: k.value, profile: K(), distance: c7(R.value), symmetric: B.checked };
+      const r1 = r, T = { name: y.value.trim(), plane: M.value, profile: K(), distance: c7(R.value), symmetric: B.checked };
       d = !0, C.disabled = !0;
       try {
         if (e.state.revision !== u)
@@ -49783,9 +49787,9 @@ function mC(i, e) {
     const u = V0("p");
     u.className = "parameter-status", u.setAttribute("role", "status"), u.setAttribute("aria-label", h("Parameter status")), u.textContent = h("Edits take effect together when you choose Apply parameters. Existing numeric modeling stays available.");
     function p(b = "", y = { expression: "40", unit: "mm" }) {
-      const M = V0("div");
-      M.className = "parameter-row";
-      const k = pn("Parameter name", b), _ = pn("Parameter expression", y.expression), w = V0("select");
+      const k = V0("div");
+      k.className = "parameter-row";
+      const M = pn("Parameter name", b), _ = pn("Parameter expression", y.expression), w = V0("select");
       w.setAttribute("aria-label", h("Parameter unit"));
       for (const I of ["mm", "deg", "scalar"]) {
         const R = V0("option", I);
@@ -49798,11 +49802,11 @@ function mC(i, e) {
           S.textContent = `${y5(a)[b].value.toLocaleString(void 0, { maximumFractionDigits: 5 })} ${y.unit === "scalar" ? "" : y.unit}`;
         } catch {
         }
-      M.append(k, _, w, S, Q4("Remove parameter", () => M.remove())), c.append(M);
+      k.append(M, _, w, S, Q4("Remove parameter", () => k.remove())), c.append(k);
     }
-    function f(b = e.state.selection[0] ?? o.roots[0], y = "width", M = "") {
-      const k = V0("div");
-      k.className = "binding-row";
+    function f(b = e.state.selection[0] ?? o.roots[0], y = "width", k = "") {
+      const M = V0("div");
+      M.className = "binding-row";
       const _ = V0("select");
       _.setAttribute("aria-label", h("Driven object"));
       for (const R of Object.values(o.nodes)) {
@@ -49822,8 +49826,8 @@ function mC(i, e) {
           }
       };
       _.onchange = S, S(), Array.from(w.options).some((R) => R.value === y) && (w.value = y);
-      const I = pn("Driving expression", M);
-      I.placeholder = h("e.g. width / 2"), k.append(_, w, I, Q4("Remove binding", () => k.remove())), d.append(k);
+      const I = pn("Driving expression", k);
+      I.placeholder = h("e.g. width / 2"), M.append(_, w, I, Q4("Remove binding", () => M.remove())), d.append(M);
     }
     for (const [b, y] of Object.entries(a?.parameters ?? {}))
       p(b, y);
@@ -49836,21 +49840,21 @@ function mC(i, e) {
         if (e.state.revision !== n)
           throw new Error(h("The model changed while this panel was open. Close and reopen it before applying."));
         const b = { version: 1, parameters: /* @__PURE__ */ Object.create(null), bindings: [] };
-        for (const M of c.children) {
-          const k = M.querySelectorAll("input"), _ = M.querySelector("select"), w = k[0].value.trim();
+        for (const k of c.children) {
+          const M = k.querySelectorAll("input"), _ = k.querySelector("select"), w = M[0].value.trim();
           if (Object.hasOwn(b.parameters, w))
             throw new Error(h`Duplicate parameter “${w}”`);
-          b.parameters[w] = { expression: k[1].value.trim(), unit: _.value };
+          b.parameters[w] = { expression: M[1].value.trim(), unit: _.value };
         }
-        for (const M of d.children) {
-          const k = M.querySelectorAll("select");
-          b.bindings.push({ nodeId: k[0].value, property: k[1].value, expression: M.querySelector("input").value.trim() });
+        for (const k of d.children) {
+          const M = k.querySelectorAll("select");
+          b.bindings.push({ nodeId: M[0].value, property: M[1].value, expression: k.querySelector("input").value.trim() });
         }
         e.setParametric(b), n = e.state.revision, u.textContent = h("Parameters applied. Geometry is recomputing; this edit is saved in model history."), x();
         const y = y5(b);
-        for (const M of c.children) {
-          const k = M.querySelector("input").value.trim(), _ = b.parameters[k].unit;
-          M.querySelector("output").textContent = `${y[k].value.toLocaleString(void 0, { maximumFractionDigits: 5 })} ${_ === "scalar" ? "" : _}`;
+        for (const k of c.children) {
+          const M = k.querySelector("input").value.trim(), _ = b.parameters[M].unit;
+          k.querySelector("output").textContent = `${y[M].value.toLocaleString(void 0, { maximumFractionDigits: 5 })} ${_ === "scalar" ? "" : _}`;
         }
       } catch (b) {
         u.textContent = b instanceof Error ? b.message : String(b);
@@ -49863,8 +49867,8 @@ function mC(i, e) {
       q.replaceChildren(V0("summary", h("Feature dependencies")));
       const b = qd(e.state.document);
       for (const y of b) {
-        const M = V0("p", `${h(y.kind)}: ${y.label}${y.dependencies.length ? " ← " + y.dependencies.map((k) => b.find((_) => _.key === k)?.label ?? k).join(", ") : ""}`);
-        M.title = y.key, q.append(M);
+        const k = V0("p", `${h(y.kind)}: ${y.label}${y.dependencies.length ? " ← " + y.dependencies.map((M) => b.find((_) => _.key === M)?.label ?? M).join(", ") : ""}`);
+        k.title = y.key, q.append(k);
       }
     }
     x(), t.append(r, l, q, V0("h3", h("Named dimensions and values")), c, Q4("Add parameter", () => p()), V0("h3", h("Driving expressions")), d, g, u, v), t.showModal();
@@ -49907,12 +49911,12 @@ function bC(i, e) {
   y.setAttribute("aria-label", "Design title"), y.addEventListener("keydown", (c1) => {
     c1.key === "Enter" ? y.blur() : c1.key === "Escape" && (y.value = t.state.document.title, y.blur());
   }), y.addEventListener("change", () => e1(() => t.rename(y.value))), b.append(y, n2("span", "units-label", h("mm · Z up"))), e.showDocumentTitle === !1 && (y.hidden = !0, b.style.gridTemplateColumns = "minmax(0,1fr) auto"), d.append(u, p, f), b.append(r), a.append(b, d, m), s.append(o, a);
-  let M = !1, k = -1, _ = null, w = !1, S = -1, I = "", R = "", B = "select", O = 1;
+  let k = !1, M = -1, _ = null, w = !1, S = -1, I = "", R = "", B = "select", O = 1;
   const X = /* @__PURE__ */ new Set();
   let W = "";
   function J(c1) {
     const G1 = c1 instanceof Error ? c1 : new Error(String(c1));
-    W = G1.message, q.textContent = G1.message, M || e.onError?.(G1);
+    W = G1.message, q.textContent = G1.message, k || e.onError?.(G1);
   }
   const e1 = (c1) => {
     try {
@@ -50011,7 +50015,7 @@ function bC(i, e) {
     try {
       const L = w1(c1, G1, Z1, N1), j = { name: h(c1.name), projectId: t.state.document.id, revision: t.state.revision, selection: [...t.state.selection], ready: Promise.all([L, H1()]).then(([t1]) => t1), point: A, dropping: !1, role: "solid" };
       v1 = j, a1.beginPlacement(), t.select([]), A && a1.movePlacement(A), j.ready.then(({ geometry: t1 }) => {
-        v1 !== j || M || (a1.setPlacementGeometry(t1), j.point && a1.movePlacement(j.point));
+        v1 !== j || k || (a1.setPlacementGeometry(t1), j.point && a1.movePlacement(j.point));
       }).catch((t1) => {
         v1 === j && (S1(), J(t1));
       });
@@ -50029,7 +50033,7 @@ function bC(i, e) {
     G1.dropping = !0, G1.point = c1;
     try {
       const Z1 = await G1.ready;
-      if (M || v1 !== G1)
+      if (k || v1 !== G1)
         return !1;
       if (t.state.document.id !== G1.projectId || t.state.revision !== G1.revision)
         return S1(), !1;
@@ -50042,7 +50046,7 @@ function bC(i, e) {
         for (const L of A.roots)
           A.nodes[L].role = "hole";
       }
-      return await K.evaluate(A), M || v1 !== G1 ? !1 : t.state.document.id !== G1.projectId || t.state.revision !== G1.revision ? (S1(), !1) : (v1 = void 0, a1.cancelPlacement(), t.insert(A, [0, 0, 0], { mergeParameters: !0, label: "Place shape" }), await H1(), P.placed(G1.name), a1.canvas.focus({ preventScroll: !0 }), !0);
+      return await K.evaluate(A), k || v1 !== G1 ? !1 : t.state.document.id !== G1.projectId || t.state.revision !== G1.revision ? (S1(), !1) : (v1 = void 0, a1.cancelPlacement(), t.insert(A, [0, 0, 0], { mergeParameters: !0, label: "Place shape" }), await H1(), P.placed(G1.name), a1.canvas.focus({ preventScroll: !0 }), !0);
     } catch (Z1) {
       throw v1 === G1 && S1(), Z1;
     }
@@ -50056,7 +50060,7 @@ function bC(i, e) {
       return;
     }
     const A = t.state.document.id, L = !t.state.document.roots.length, { document: j, geometry: t1 } = await w1(c1, G1, Z1, N1);
-    if (M)
+    if (k)
       return;
     if (t.state.document.id !== A)
       throw new Error(h("Shape insertion was canceled because a different model was opened"));
@@ -50406,7 +50410,7 @@ function bC(i, e) {
     if (j.generator?.preset === "screw" && Bh(f, j.generator, j.transform.scale, async (n1) => {
       const U1 = t.state.revision, J1 = Eh(j.generator, j.transform.scale, n1), r2 = Le("screw", "BRICKWRIGHT", { recipe: J1 }), w2 = w5(t.state.document);
       try {
-        if (w2.replaceGenerated(L, r2, { resetScale: !0, label: "Redesign thread" }), await K.evaluate(w2.state.document), M)
+        if (w2.replaceGenerated(L, r2, { resetScale: !0, label: "Redesign thread" }), await K.evaluate(w2.state.document), k)
           return;
         if (t.state.revision !== U1)
           throw new Error(h("The model changed while generating this shape. Apply again."));
@@ -50520,7 +50524,7 @@ function bC(i, e) {
         V2.disabled = !0;
         try {
           const k2 = Le(n1.preset, "BRICKWRIGHT", { recipe: n1 });
-          if (await K.evaluate(k2), M)
+          if (await K.evaluate(k2), k)
             return;
           if (t.state.revision !== u2)
             throw new Error(h("The model changed while generating this shape. Apply again."));
@@ -50611,25 +50615,25 @@ function bC(i, e) {
     Q1.length && F("Edit driving expressions", () => T.open(), f);
   }
   async function t0() {
-    if (!(w || M || k === t.state.revision)) {
-      for (w = !0, P1.hidden = !1, i.dataset.state = "building"; !M && k !== t.state.revision; ) {
+    if (!(w || k || M === t.state.revision)) {
+      for (w = !0, P1.hidden = !1, i.dataset.state = "building"; !k && M !== t.state.revision; ) {
         const { document: c1, revision: G1 } = t.state;
         try {
           const Z1 = await K.evaluate(c1);
-          if (M)
+          if (k)
             break;
           if (G1 !== t.state.revision)
             continue;
-          _ = Z1, k = G1, R = "", $1.hidden = !0, a1.update(Z1), L1.hidden = !!c1.roots.length, x.textContent = c1.roots.length === 1 ? h`${c1.roots.length} body · ${Z1.triangles.toLocaleString()} triangles · ${Z1.volume.toLocaleString(void 0, { maximumFractionDigits: 1 })} mm³` : h`${c1.roots.length} bodies · ${Z1.triangles.toLocaleString()} triangles · ${Z1.volume.toLocaleString(void 0, { maximumFractionDigits: 1 })} mm³`, q.textContent = W || (c1.roots.length ? "Ready · mm · Z up" : "Add a solid to begin"), i.dataset.state = "ready", i.dataset.triangles = String(Z1.triangles);
+          _ = Z1, M = G1, R = "", $1.hidden = !0, a1.update(Z1), L1.hidden = !!c1.roots.length, x.textContent = c1.roots.length === 1 ? h`${c1.roots.length} body · ${Z1.triangles.toLocaleString()} triangles · ${Z1.volume.toLocaleString(void 0, { maximumFractionDigits: 1 })} mm³` : h`${c1.roots.length} bodies · ${Z1.triangles.toLocaleString()} triangles · ${Z1.volume.toLocaleString(void 0, { maximumFractionDigits: 1 })} mm³`, q.textContent = W || (c1.roots.length ? "Ready · mm · Z up" : "Add a solid to begin"), i.dataset.state = "ready", i.dataset.triangles = String(Z1.triangles);
           for (const N1 of X)
             N1.resolve(Z1);
           X.clear();
         } catch (Z1) {
-          if (M)
+          if (k)
             break;
           if (G1 !== t.state.revision)
             continue;
-          k = G1, _ = null, R = Z1 instanceof Error ? Z1.message : String(Z1), $1.textContent = h`${R} Showing the previous geometry. Fix the edit or Undo.`, $1.hidden = !1, i.dataset.state = "error", J(Z1);
+          M = G1, _ = null, R = Z1 instanceof Error ? Z1.message : String(Z1), $1.textContent = h`${R} Showing the previous geometry. Fix the edit or Undo.`, $1.hidden = !1, i.dataset.state = "error", J(Z1);
           for (const N1 of X)
             N1.reject(new Error(R));
           X.clear();
@@ -50640,19 +50644,19 @@ function bC(i, e) {
   }
   function x0() {
     const c1 = t.state, G1 = c1.selection.filter((Z1) => c1.document.roots.includes(Z1));
-    X1.disabled = !c1.canUndo, k1.disabled = !c1.canRedo, b2.disabled = f2.disabled = !G1.length, l2.disabled = i2.disabled = !G1.length, M1.disabled = !G1.length || w || k !== c1.revision || !_, Q.forEach((Z1) => {
+    X1.disabled = !c1.canUndo, k1.disabled = !c1.canRedo, b2.disabled = f2.disabled = !G1.length, l2.disabled = i2.disabled = !G1.length, M1.disabled = !G1.length || w || M !== c1.revision || !_, Q.forEach((Z1) => {
       Z1.disabled = G1.length < 2;
     }), T2(), t2.hidden = !c1.selection.some((Z1) => c1.document.roots.includes(Z1));
     for (const Z1 of t2.querySelectorAll("button"))
       Z1.disabled = w;
-    g9(), h9.disabled = d3.disabled = V9 || !e.onExport || w || !_ || !_.triangles || k !== c1.revision, e1(() => e.onCommandStateChange?.(Z2()));
+    g9(), h9.disabled = d3.disabled = V9 || !e.onExport || w || !_ || !_.triangles || M !== c1.revision, e1(() => e.onCommandStateChange?.(Z2()));
   }
   function Z2() {
     const c1 = t.state, G1 = c1.selection.filter((Z1) => c1.document.roots.includes(Z1));
-    return { canUndo: c1.canUndo, canRedo: c1.canRedo, hasSelection: !!c1.selection.length, canDelete: !!G1.length, canCombine: G1.length >= 2, canExport: !!e.onExport && !V9 && !w && !!_?.triangles && k === c1.revision, hasBodies: !!c1.document.roots.length, ready: !w && k === c1.revision && !!_ };
+    return { canUndo: c1.canUndo, canRedo: c1.canRedo, hasSelection: !!c1.selection.length, canDelete: !!G1.length, canCombine: G1.length >= 2, canExport: !!e.onExport && !V9 && !w && !!_?.triangles && M === c1.revision, hasBodies: !!c1.document.roots.length, ready: !w && M === c1.revision && !!_ };
   }
   const Y = t.subscribe((c1) => {
-    if (v1 && (c1.document.id !== v1.projectId || c1.revision !== v1.revision) && S1(), M)
+    if (v1 && (c1.document.id !== v1.projectId || c1.revision !== v1.revision) && S1(), k)
       return;
     c1.revision !== S ? (S = c1.revision, W = "", A2(), C2(), x0(), e1(() => e.onDocumentChange?.(c1.document, c1.revision)), t0()) : (A2(), C2());
     const G1 = JSON.stringify(c1.selection);
@@ -50688,7 +50692,7 @@ function bC(i, e) {
   };
   document.addEventListener("pointerdown", E1, !0), document.addEventListener("focusin", E1, !0);
   function H1() {
-    return M ? Promise.reject(new Error(h("Editor was disposed"))) : !w && k === t.state.revision ? _ ? Promise.resolve(_) : Promise.reject(new Error(R)) : new Promise((c1, G1) => {
+    return k ? Promise.reject(new Error(h("Editor was disposed"))) : !w && M === t.state.revision ? _ ? Promise.resolve(_) : Promise.reject(new Error(R)) : new Promise((c1, G1) => {
       X.add({ resolve: c1, reject: G1 });
     });
   }
@@ -50702,7 +50706,7 @@ function bC(i, e) {
       N1.nodes[L] = { id: L, name: N1.title, kind: "mesh", ...A, color: "#eea52b", transform: z2() }, N1.roots = [L];
     } else
       N1 = e.decodeProject ? await e.decodeProject(G1) : bd(new TextDecoder().decode(G1));
-    if (await K.evaluate(N1), !M) {
+    if (await K.evaluate(N1), !k) {
       if (t.state.revision !== Z1)
         throw new Error(h("The model changed while opening the file. Try opening it again."));
       t.load(N1), await H1(), a1.frame(), a1.canvas.focus({ preventScroll: !0 });
@@ -50716,7 +50720,7 @@ function bC(i, e) {
     const Z1 = t.state.revision, N1 = W2(c1.replace(/\.stl$/i, "")), A = d0();
     N1.nodes[A] = { ...Dn(G1), id: A, kind: "mesh", name: N1.title, color: "#eea52b", transform: z2() }, N1.roots = [A];
     const L = await K.evaluate(N1);
-    if (!M) {
+    if (!k) {
       if (t.state.revision !== Z1)
         throw new Error(h("The model changed while importing. Try importing again."));
       t.insert(N1, [t.state.document.roots.length * 12, 0, -L.bodies[0].bounds.min[2]], { label: "Import geometry" }), await H1(), a1.frame();
@@ -50754,7 +50758,7 @@ function bC(i, e) {
     if (N1?.format !== "brickwright-cad-clipboard" || N1.version !== 1)
       throw new Error(h("Clipboard does not contain CAD objects"));
     const A = Z9(N1.document);
-    if (await K.evaluate(A), !M) {
+    if (await K.evaluate(A), !k) {
       if (t.state.revision !== c1)
         throw new Error(h("The model changed while pasting. Try pasting again."));
       X2 = G1 === L2 ? X2 + 1 : 1, L2 = G1, t.insert(A, [10 * X2, 0, 0], { mergeParameters: !0, label: "Paste objects" }), await H1(), a1.canvas.focus({ preventScroll: !0 }), a1.frame();
@@ -50892,7 +50896,7 @@ function bC(i, e) {
       return;
     }
     const N1 = t.state.revision, A = () => {
-      if (M)
+      if (k)
         throw new Error(h("Editor was disposed"));
       if (Z1(), t.state.revision !== N1)
         throw new Error(h("The model changed while exporting. Export again from the current model."));
@@ -50956,11 +50960,11 @@ function bC(i, e) {
       m1.refresh(), a1.canvas.focus();
     },
     setStatus(c1) {
-      M || (q.textContent = c1);
+      k || (q.textContent = c1);
     },
     dispose() {
-      if (!M) {
-        S1(), m1.dispose(), M = !0, h2.disconnect(), Y(), document.removeEventListener("pointerdown", E1, !0), document.removeEventListener("focusin", E1, !0), a.removeEventListener("keydown", B1), P.dispose(), r1.dispose(), T.dispose(), E.dispose(), $.dispose(), D.dispose(), A1.dispose(), a1.dispose(), K.dispose();
+      if (!k) {
+        S1(), m1.dispose(), k = !0, h2.disconnect(), Y(), document.removeEventListener("pointerdown", E1, !0), document.removeEventListener("focusin", E1, !0), a.removeEventListener("keydown", B1), P.dispose(), r1.dispose(), T.dispose(), E.dispose(), $.dispose(), D.dispose(), A1.dispose(), a1.dispose(), K.dispose();
         for (const c1 of X)
           c1.reject(new Error(h("Editor was disposed")));
         X.clear(), n && t.dispose(), s.replaceChildren(), e.toolbarContent?.remove(), i.removeAttribute("data-state"), i.removeAttribute("data-triangles");
@@ -50970,7 +50974,7 @@ function bC(i, e) {
 }
 let un;
 async function gC() {
-  const [{ createBundledModelLibrary: i }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-C9ZrGCaE.js"), import("./model-library-cache-DiMFGzp9.js")]);
+  const [{ createBundledModelLibrary: i }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-B29HZ5kV.js"), import("./model-library-cache-DiMFGzp9.js")]);
   return un ?? (un = i()), { ...un, cache: e() };
 }
 function vC(i, e) {

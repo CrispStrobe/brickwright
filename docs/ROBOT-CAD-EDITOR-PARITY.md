@@ -185,3 +185,20 @@ The coherent robot branch is incorporated. Atlas retains the original hollow
 crate and precise fork spline candidates: the imported solid crate caused a large
 loaded tilt error. New cradle, wheel and mast collision candidates reduce the
 scene from 2,741 to 2,299 hulls without relaxing geometric qualification.
+
+
+## macOS trackpad and editing after Stop
+
+The Mac host now routes precise scrolling and magnification through the shared
+CAD native-input contract. Blocks consumes input only inside its visible workspace;
+the block palette uses its own wheel handler. Other panels receive the original
+event once through its NSWindow. An isolated native AppKit/WKWebView check verifies
+precise Blocks panning and ordinary-panel fallback; a WebKit GUI check also covers
+pinch, tab round trips and source preservation.
+
+Stop now restores CAD selection/dragging immediately while keeping recorded motion.
+Pause keeps the inspection pose. Previous frame begins at the end of a stopped
+recording; Live returns to the editable design if there is no running worker.
+The focused regression suite passes 31/31. The three-cycle Quasar test requires
+the blank to clear the dial before falling, and the pusher is a visible printed
+carriage rather than a blade with overridden mass.

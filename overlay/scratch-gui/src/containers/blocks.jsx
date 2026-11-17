@@ -32,6 +32,7 @@ import {updateMetrics} from '../reducers/workspace-metrics';
 import LazyScratchBlocks from '../lib/lazy-scratch-blocks';
 import {activateUndoSurface, notifyUndoState, registerUndoSurface} from '../lib/global-undo.js';
 import {blocklyConfirm} from '../lib/native-dialog.js';
+import {installBlocksNativeInput} from '../lib/blocks-native-input.js';
 import {runAsWorkspaceReload, vmBlockListenerFor} from '../lib/workspace-reload-events.js';
 
 import {
@@ -140,6 +141,7 @@ class Blocks extends React.Component {
             {rtl: this.props.isRtl, toolbox: toolboxXML, colours: getColorsForTheme(this.props.theme)}
         );
         this.workspace = this.ScratchBlocks.inject(this.blocks, workspaceConfig);
+        this._removeNativeInput = installBlocksNativeInput(this.workspace, this.ScratchBlocks);
         this._undoStateListener = () => notifyUndoState();
         this.workspace.addChangeListener(this._undoStateListener);
         // Blockly's stacks hold events; one step is one event group. The History
@@ -316,6 +318,7 @@ class Blocks extends React.Component {
         }
     }
     componentWillUnmount () {
+        this._removeNativeInput?.();
         this.detachVM();
         if (this.breakpointMenu) {
             this.breakpointMenu.uninstall();

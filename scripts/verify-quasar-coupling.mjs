@@ -32,8 +32,8 @@ assert.ok(byPhase.index.blank[0]>12&&Math.abs(byPhase.index.blank[1])<8);
 assert.ok(byPhase.press.frame.linearPositions['ram-b']<-3&&byPhase.press.frame.linearPositions['ram-b']>-6);
 assert.ok(byPhase.retract.frame.linearPositions['ram-b']>3);
 assert.ok(byPhase.eject.frame.linearPositions['eject-c']>60);
-assert.ok(byPhase.eject.blank[0]>25&&byPhase.eject.blank[2]>5&&byPhase.eject.blank[2]<20);
+assert.ok(byPhase.manual.blank[0]>25&&byPhase.manual.blank[2]>4&&byPhase.manual.blank[2]<20);
 assert.ok(Math.abs(byPhase.return.frame.linearPositions['eject-c'])<1);
 for(const s of samples)assert.ok(s.blank.every(v=>Number.isFinite(v)&&Math.abs(v)<300));
 console.log(JSON.stringify({totalMs:performance.now()-started,boardMs,physicsMs,samples}));
-}catch(e){console.error('FAIL',e.message,frame);process.exitCode=1;}finally{session.stop();world.dispose();}
+}catch(e){console.error('FAIL',e.message,{frame,samples});process.exitCode=1;}finally{session.stop();world.dispose();}

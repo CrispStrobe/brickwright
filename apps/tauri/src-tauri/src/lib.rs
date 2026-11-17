@@ -230,6 +230,13 @@ pub fn run_with_context(context: tauri::Context<tauri::Wry>) {
                 let main = app
                     .get_webview_window("main")
                     .ok_or(tauri::Error::WindowNotFound)?;
+                #[cfg(target_os = "macos")]
+                main.with_webview(|webview| unsafe {
+                    extern "C" {
+                        fn bw_install_editor_input(view: *mut std::ffi::c_void);
+                    }
+                    bw_install_editor_input(webview.inner());
+                })?;
                 let handle = app.handle().clone();
                 let lifecycle_policy = native_policy.clone();
                 main.on_window_event(move |event| {
