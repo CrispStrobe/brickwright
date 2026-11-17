@@ -128,8 +128,9 @@ const stripComments = (text, file) => {
     }).join('\n');
 };
 
-const scanFiles = () => execSync('git ls-files', {cwd: ROOT, maxBuffer: 1 << 28})
-    .toString().split('\n').filter(Boolean)
+const trackedFiles = () => execSync('git ls-files -z', {cwd: ROOT, maxBuffer: 1 << 28})
+    .toString().split('\0').filter(Boolean);
+const scanFiles = () => trackedFiles()
     .filter((f) => f !== THIS_GATE)
     .filter((f) => path.extname(f) !== '.md')
     .filter((f) => !VENDORED.some((r) => r.test(f)));
@@ -233,8 +234,8 @@ const describeSkips = ({unreadable, nul}) => {
 //                 only the separately declared current producer is content-bound.
 //   waived        genuinely cannot be sha-addressed; reason required
 const CENSUS = [
-    nativeBenchmarkFetchPin(ROOT, new Set(execFileSync('git', ['ls-files', '-z'], {cwd: ROOT, encoding: 'utf8'}).split('\0').filter(Boolean)), DETECTORS),
-    ...cadSdkFetchPins(ROOT, new Set(execFileSync('git', ['ls-files', '-z'], {cwd: ROOT, encoding: 'utf8'}).split('\0').filter(Boolean)), DETECTORS),
+    nativeBenchmarkFetchPin(ROOT, new Set(trackedFiles()), DETECTORS),
+    ...cadSdkFetchPins(ROOT, new Set(trackedFiles()), DETECTORS),
     {
         file: 'scripts/i80386-native-font-selection/run.py', kind: 'raw',
         text: 'raw.githubusercontent.com/google/fonts/', class: 'sha-const',

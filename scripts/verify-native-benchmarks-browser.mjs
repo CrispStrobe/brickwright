@@ -7,7 +7,7 @@ import {createServer} from 'node:http';
 import {mkdir, readFile, writeFile} from 'node:fs/promises';
 import {resolve, join, extname, dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {execFileSync} from 'node:child_process';
+import {nativeBenchmarkSourceHead} from './lib/native-benchmark-source-identity.mjs';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -100,7 +100,7 @@ try {
     const pins = JSON.parse(await readFile(join(root, 'vendor-pins.json')));
     const receipt = {schema: 'brickwright.native-benchmark-browser.v1',
         scope: 'focused production bundle of shipped panel with actual native engine; no full-app or performance claim',
-        head: execFileSync('git', ['rev-parse', 'HEAD'], {cwd: root, encoding: 'utf8'}).trim(),
+        head: nativeBenchmarkSourceHead(process.env.BW_GIT_EXECUTABLE, root),
         bwBoardCommit: pins['bw-board'], sourceSha256: sha(await readFile(panel)),
         runtimeSha256: Object.fromEntries(await Promise.all(['experimental/i80386-at-machine.js', 'experimental/i80386.js', 'i8086-dos.js'].map(async name =>
             [name, sha(await readFile(gui.resolve('bw-board/' + name)))]))),

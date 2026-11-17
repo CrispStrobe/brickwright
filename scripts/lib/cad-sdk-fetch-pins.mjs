@@ -6,16 +6,18 @@ import path from 'node:path';
 
 export const CAD_SDK_ROOT = 'overlay/scratch-gui/static/cad-sdk';
 export const CAD_SDK_PRODUCER = 'scripts/sync-cad-sdk.mjs';
+export const APPROVED_CAD_MANIFEST_SHA256 = '125159bc156a050778e01b78a1605c80670047e6b17973acf2a2fbd5c33206fb';
+export const APPROVED_CAD_PRODUCER_SHA256 = '5d1f4ef4cef65b68306cd147237409bd6a77b485137be05b8f66b05dafdf0e7c';
 const SHA = /^[0-9a-f]{40}$/;
 const HASH = /^[0-9a-f]{64}$/;
 const CARRIER = /^model-library-local-[A-Za-z0-9_-]+\.js$/;
-export const APPROVED_CAD_COMMIT = '987eab683a6a2f97be855805139a8c6629ad5ae9';
-export const APPROVED_CAD_CARRIER = 'model-library-local-PXrXJiue.js';
-export const APPROVED_CAD_CARRIER_SHA256 = '294e0021d8d2578e229f83fe7d4e30cbc4601e5674f138ded35ba2da89f80116';
+export const APPROVED_CAD_COMMIT = 'a278012474700319b077906555e97ccdd746f4ce';
+export const APPROVED_CAD_CARRIER = 'model-library-local-DZp_-QA0.js';
+export const APPROVED_CAD_CARRIER_SHA256 = 'f3e883c421a523951a49f9d07a4c8e1a4a4333011a7911a4b3be61b09b6a69f2';
 
 export const APPROVED_CAD_CARRIERS = Object.freeze({
     [APPROVED_CAD_CARRIER]: APPROVED_CAD_CARRIER_SHA256,
-    'sdk-Dt1a4PLn.js': '2201320d1680b85aa617254c85eec6184e18fbe1059a81aa678afee22544b139'
+    'sdk-C_OaLxxH.js': '010857e938a77e7cc2dca8500fcf4f171ef299206226a2bf96629a192e9c11d2'
 });
 
 // Structural validation is not approval. Only the exact frozen carrier below
@@ -50,7 +52,10 @@ export function cadSdkFetchPins(root, tracked, detectors) {
     const manifestName = `${CAD_SDK_ROOT}/manifest.json`;
     assert.ok(tracked.has(manifestName), 'CAD SDK manifest must be tracked');
     assert.ok(tracked.has(CAD_SDK_PRODUCER), 'CAD SDK producer must be tracked');
-    assert.ok(lstatSync(path.join(root, CAD_SDK_PRODUCER)).isFile(), 'CAD SDK producer must be a regular file');
+    const producer = path.join(root, CAD_SDK_PRODUCER);
+    assert.ok(lstatSync(producer).isFile() && !lstatSync(producer).isSymbolicLink(), 'CAD SDK producer must be a regular file');
+    assert.ok(realpathSync(producer).startsWith(realpathSync(root) + path.sep), 'CAD SDK producer escaped checkout');
+    assert.equal(createHash('sha256').update(readFileSync(producer)).digest('hex'), APPROVED_CAD_PRODUCER_SHA256, 'CAD SDK producer needs exact approved source bytes');
     const directory = path.join(root, CAD_SDK_ROOT);
     assert.ok(lstatSync(directory).isDirectory() && !lstatSync(directory).isSymbolicLink(), 'CAD SDK root must be a regular directory');
     const inside = file => {
@@ -61,7 +66,11 @@ export function cadSdkFetchPins(root, tracked, detectors) {
         assert.ok(realpathSync(absolute).startsWith(realpathSync(directory) + path.sep), 'CAD SDK payload escaped its directory');
         return absolute;
     };
-    const manifest = JSON.parse(readFileSync(inside('manifest.json'), 'utf8'));
+    const manifestBytes = readFileSync(inside('manifest.json'));
+    // Freeze the entire map, not only the two carriers: no adjusted payload hash
+    // or additional manifest entry can borrow this admission.
+    assert.equal(createHash('sha256').update(manifestBytes).digest('hex'), APPROVED_CAD_MANIFEST_SHA256, 'CAD SDK manifest needs exact approved bytes');
+    const manifest = JSON.parse(manifestBytes);
     assert.equal(manifest.format, 'brickwright-cad-sdk');
     assert.equal(manifest.version, 1);
     assert.equal(manifest.repository, 'https://github.com/CrispStrobe/brickwright-cad');
@@ -93,7 +102,7 @@ export function cadSdkFetchPins(root, tracked, detectors) {
             assert.equal(kind, 'raw', 'A new CAD carrier fetch shape requires explicit review');
             validateCadProvenanceUrl(value);
             const row = {file: name, kind, text: value, class: 'sha-const',
-                why: 'Immutable full-commit provenance in the exact tracked CAD data carriers, frozen to its explicitly approved source commit and carrier SHA-256. The tracked CAD producer installs a clean commit-matched manifest; this gate independently verifies every tracked distribution payload SHA-256 before deriving these exact source-link rows.'};
+                why: 'Immutable full-commit provenance in the exact tracked CAD data carriers, frozen to its explicitly approved source commit and carrier SHA-256. The exact source-frozen tracked CAD producer installs the exact approved manifest; this gate independently verifies every tracked distribution payload SHA-256 before deriving these exact source-link rows.'};
             rows.set(`${name} ${kind} ${value}`, row);
         }
     }
