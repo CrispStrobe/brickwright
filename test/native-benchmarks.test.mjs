@@ -70,3 +70,20 @@ test('cache hits are rehashed; corruption refetches; storage refusal keeps hash 
             fetcher: async () => new Response('incorrect')}), /Byte count|SHA-256/);
     } finally {catalog.whetstone.files = original;}
 });
+
+test('same-sized corrupt network bytes never reach cache, notices or returned assets', async () => {
+    const original = catalog.topbench.files;
+    const bytes = new TextEncoder().encode('owned fixture licence');
+    catalog.topbench.files = {LICENSE: {bytes: bytes.length, sha256: hash(bytes)}};
+    const corrupt = bytes.slice(); corrupt[0] ^= 1;
+    const calls = [];
+    try {
+        await assert.rejects(fetchAssets('topbench', {
+            cacheStorage: {open: async () => ({match: async () => undefined,
+                put: async () => calls.push('cache-write')})},
+            fetcher: async () => new Response(corrupt),
+            onNotice: () => calls.push('notice')
+        }), /SHA-256/);
+        assert.deepEqual(calls, []);
+    } finally { catalog.topbench.files = original; }
+});

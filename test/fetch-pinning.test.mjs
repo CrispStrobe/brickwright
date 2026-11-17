@@ -57,6 +57,8 @@
  *     asserts a server sent what it promised.
  */
 import {test, describe} from 'node:test';
+import {nativeBenchmarkFetchPin} from '../scripts/lib/native-benchmark-fetch-pin.mjs';
+import {cadSdkFetchPins} from '../scripts/lib/cad-sdk-fetch-pins.mjs';
 import {currentJoltFetchPin} from '../scripts/lib/sim-engine-admission.mjs';
 import assert from 'node:assert/strict';
 import {readFileSync, writeFileSync, mkdtempSync, rmSync} from 'node:fs';
@@ -231,6 +233,8 @@ const describeSkips = ({unreadable, nul}) => {
 //                 only the separately declared current producer is content-bound.
 //   waived        genuinely cannot be sha-addressed; reason required
 const CENSUS = [
+    nativeBenchmarkFetchPin(ROOT, new Set(execFileSync('git', ['ls-files', '-z'], {cwd: ROOT, encoding: 'utf8'}).split('\0').filter(Boolean)), DETECTORS),
+    ...cadSdkFetchPins(ROOT, new Set(execFileSync('git', ['ls-files', '-z'], {cwd: ROOT, encoding: 'utf8'}).split('\0').filter(Boolean)), DETECTORS),
     {
         file: 'scripts/i80386-native-font-selection/run.py', kind: 'raw',
         text: 'raw.githubusercontent.com/google/fonts/', class: 'sha-const',
