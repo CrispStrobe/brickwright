@@ -31,7 +31,9 @@ export function judgeSky(r,{native=false}={}){
  assert.ok(rows.length>=2000);assert.ok(span(rows.map(s=>s.tie[0]))>=30&&span(rows.map(s=>s.tie[1]))>=18);
  assert.ok(max(all,'extensionMm')<=.5,'Sky: every sampled rope extension');assert.ok(max(all,'lawErrorMm')<=.1);
  assert.ok(Math.min(...all.map(s=>s.freeMm))>=80);assert.ok(Math.max(...rows.map(s=>Math.abs(s.tie[2])))<=2);
- assert.ok(max(rows,'gap')<=.5&&max(rows,'axis')<=1&&max(rows,'tilt')<=1&&max(rows,'baseTravel')<=2,'Sky: hinge closure and freestanding frame');
+ const peak=key=>{const row=rows.reduce((a,b)=>b[key]>a[key]?b:a);return {value:row[key],stage:row.stage,time:row.t};};
+ const bounds=Object.fromEntries(['gap','axis','tilt','baseTravel'].map(key=>[key,peak(key)]));
+ assert.ok(max(rows,'gap')<=.5&&max(rows,'axis')<=1&&max(rows,'tilt')<=1&&max(rows,'baseTravel')<=2,`Sky: hinge closure and freestanding frame: ${JSON.stringify(bounds)}`);
  const settled={};
  for(const [stage,target]of Object.entries({top:[0,-24,0],left:[-20,-12,0],right:[20,-12,0],home:[0,0,0]})){
   const samples=rows.filter(s=>s.stage===stage+':settle');assert.ok(samples.length);const end=samples.at(-1).t,window=samples.filter(s=>s.t>=end-500-1e-6);

@@ -1,3 +1,4 @@
+import {selectVdpExample} from './lib/select-vdp-example.mjs';
 // The VDP acceptance probe: Build Machine on the VDP example, then feed a
 // minimal TMS9918 program through the ASM tab (set backdrop color + enable
 // display — the border renders even with an empty name table), and check
@@ -45,8 +46,7 @@ await page.waitForSelector('[role="tab"]', { timeout: 60000 });
 console.log('TABS:', (await page.locator('[role="tab"]').allInnerTexts()).join('|'));
 await page.locator('[role="tab"]', { hasText: 'Circuit' }).first().click();
 await page.waitForTimeout(2500);
-try { await page.locator('input[placeholder*="earch"], input[type="search"]').first().fill('VDP', { timeout: 4000 }); await page.waitForTimeout(800); } catch {}
-await page.locator('text=/6502 \\+ VDP/i').first().click();
+await selectVdpExample(page);
 await page.waitForTimeout(3500);
 try { await page.locator('button', { hasText: 'Build Machine' }).first().click({ timeout: 6000 }); console.log('built machine'); } catch (e) { console.log('no build btn:', e.message.slice(0, 80)); }
 await page.waitForTimeout(2500);

@@ -2765,6 +2765,7 @@ The existing optional FPGA worker imports `@yowasp/yosys`. It is now an explicit
 exact dependency at **0.71.188-dev.1267**, so a clean install can build that worker
 without relying on a leftover package. It is separate from CAD co-simulation.
 The package exposes the Yosys application through a virtual-filesystem API.
+Copyright (C) Catherine <whitequark@whitequark.org>.
 
 Upstream package and licence: [YoWASP/yosys](https://github.com/YoWASP/yosys),
 [ISC licence](https://github.com/YoWASP/yosys/blob/develop/LICENSE.txt).
@@ -2783,3 +2784,9 @@ Copyright (c) 2026 Brickwright contributors. The complete MIT notice is retained
 beside the helpers and shipped as `static/licenses/native-benchmark-helpers.MIT.txt`.
 Payloads are fetched only on explicit request; the panel displays their own
 retained notices and exact provenance before Run.
+
+## bw-native-benchmarks — MIT
+
+Copyright (c) 2026 Brickwright contributors. The vendored benchmark sources and
+full MIT licence ship in `overlay/scratch-gui/src/lib/bw-native-benchmarks/`
+(`LICENSE`).

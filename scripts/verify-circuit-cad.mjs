@@ -69,6 +69,8 @@ try{
  const beforeSetup=await layout();assert.ok(beforeSetup.header<=64,JSON.stringify(beforeSetup));assert.equal(beforeSetup.compact,true);assert.equal(beforeSetup.fileMenuVisible,false);
  await settings.click();const panel=page.getByTestId('bw-cad-circuit-panel');await panel.waitFor({state:'visible'});const afterSetup=await layout();assert.equal(afterSetup.viewportTop,beforeSetup.viewportTop);assert.equal(afterSetup.viewportHeight,beforeSetup.viewportHeight,'setup drawer must not consume a workspace row');
  await page.screenshot({path:`${out}/${flavor}-setup.png`,animations:'disabled',timeout:10000});
+ await panel.getByRole('button',{name:'Close program settings'}).click();await panel.waitFor({state:'hidden'});
+ await settings.click();await panel.waitFor({state:'visible'});
  await panel.getByRole('button',{name:'Open Scout example…',exact:true}).click();
  await wait(()=>window.__bwCad?.editor.session.state.document.id==='robot-tt-rover');
  console.log('Demo CAD loaded');

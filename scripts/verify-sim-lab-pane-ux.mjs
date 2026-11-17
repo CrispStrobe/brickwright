@@ -15,9 +15,11 @@ const {readFileSync} = await import('node:fs');
 const entry = `const React=require('react');const ReactDOM=require('react-dom');
 const Notice=(()=>{const module={exports:{}};const exports=module.exports;${transform(readFileSync(noticePath,'utf8'))};return module.exports.default;})();
 const SimLabNotice=Notice;
+const {issueSentence}=(()=>{const module={exports:{}};const exports=module.exports;${transform(readFileSync(resolve('overlay/scratch-gui/src/components/tw-pseudocode/sim-lab-insight-text.js'),'utf8'))};return module.exports;})();
 ${transform(paneClassSource)}
 const pane=Object.create(SimLabPane.prototype);pane.state={status:'ready',blockers:[],issues:[]};
 let compact=false,locale='en';const texts=${JSON.stringify(texts)};pane.compact=()=>compact;
+pane.partNameById=id=>id;
 pane.renderIssue=(issue,key)=>React.createElement('li',{key},issue.message||issue.code);
 window.update=(options={})=>{compact=options.compact??compact;locale=options.locale||locale;
 pane.state.blockers=options.blockers||pane.state.blockers;pane.state.issues=options.issues||pane.state.issues;

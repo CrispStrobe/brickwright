@@ -16,7 +16,7 @@ function fixture () {
     const declarations = `let session = null;\n${between('    // Invalidate stop/start', '    let i8086ExecutionResult')}`;
     const method = between('        async snapshotAtaMaster()', '\n\n        /** Move the PC.');
     const stop = between('        stop() {', '\n\n        setSpeed');
-    const destroy = between('        destroy() {', '\n    };');
+    const destroy = between('        destroy({preserveRuntime = false} = {}) {', '\n    };');
     const attach = between('    async function attach(built) {', '        const device =');
     vm.runInContext(`
         ${declarations}

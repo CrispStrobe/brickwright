@@ -102,8 +102,11 @@ test('forward execution after reverse forks retained history and honors refusal'
         'stepInstruction(count = 1)', 'stepOver()', 'stepOut()']) {
         const at = runner.indexOf(`\n        ${method}`);
         assert.ok(at >= 0, method);
-        assert.match(runner.slice(at, at + 240), /beginForwardBranch\(\)/, method);
-        assert.match(runner.slice(at, at + 320), /if \(!forked\.accepted\)/, method);
+        const end = runner.indexOf('\n        },', at);
+        assert.ok(end > at, `method boundary for ${method}`);
+        const body = runner.slice(at, end);
+        assert.match(body, /beginForwardBranch\(\)/, method);
+        assert.match(body, /if \(!forked\.accepted\)/, method);
     }
     assert.match(runner, /startDebugRecording\(\)[\s\S]*reverseHistoryRefusal = null/,
         'a new deterministic recording establishes the next valid history epoch');

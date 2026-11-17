@@ -21,6 +21,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {fetchLDrawClosure} from '../overlay/scratch-gui/src/lib/bw-sim/ldraw/ldraw-fetch.js';
 import {flattenPart} from '../overlay/scratch-gui/src/lib/bw-sim/ldraw/ldraw-geometry.js';
+import {visualAssembly} from '../overlay/scratch-gui/src/lib/bw-sim/ldraw/visual-assemblies.js';
 import {SimSession, prepareModel, catalogFrom, MODELS, MODELS_BASE} from '../overlay/scratch-gui/src/lib/bw-sim/sim-session.js';
 import VirtualSpikeHubState from '../overlay/scratch-gui/src/lib/virtual-hub/spike-hub-state.js';
 
@@ -41,7 +42,9 @@ test('the LDraw closure fetch finds exactly what the geometry reader needs', asy
     const parts = ['45601.dat', '54696p01.dat', '39367p01.dat'];
     const {read, files, missing} = await fetchLDrawClosure(parts, {fetchImpl});
     assert.deepEqual(missing, []);
-    const needed = new Set(parts.flatMap(p => flattenPart(p, read).files));
+    // The renderer loads the original device and its complete visual assembly.
+    assert.equal(visualAssembly('45601.dat'), '45601c01.dat');
+    const needed = new Set(parts.flatMap(p => [p, visualAssembly(p)].flatMap(name => flattenPart(name, read).files)));
     assert.deepEqual([...files.keys()].sort(), [...needed].sort());
 });
 
