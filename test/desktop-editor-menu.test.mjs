@@ -12,3 +12,14 @@ test('native menu refresh is deduplicated and listener disposal prevents late co
  const snapshots=[],listeners=new Map();let saves=0;globalThis.document={querySelectorAll:()=>[]};globalThis.window={__TAURI__:{core:{invoke:async(_,value)=>snapshots.push(value.snapshot)},event:{listen:async(name,cb)=>{listeners.set(name,cb);return()=>listeners.delete(name);}}}};const owner={state:{nativeDocuments:true},resolveAssetMenuSurface:()=>null,_desktopSave:()=>saves++};
  try{const dispose=installDesktopEditorMenu(owner);await Promise.resolve();owner._refreshDesktopMenu();assert.equal(snapshots.length,1);listeners.get('bw-desktop-menu')({payload:'project:save'});assert.equal(saves,1);dispose();assert.equal(listeners.size,0);}finally{delete globalThis.document;delete globalThis.window;}
 });
+
+test('block commands follow the editor locale with an English fallback',()=>{
+ globalThis.document={querySelectorAll:()=>[]};
+ try { assert.deepEqual(desktopMenuSnapshot('blocks','de-DE').edit.map(x=>x.label),['Projekt starten','Projekt stoppen']); assert.deepEqual(desktopMenuSnapshot('blocks','fr').edit.map(x=>x.label),['Run project','Stop project']); } finally { delete globalThis.document; }
+});
+test('native menu refresh reflects a live locale change',async()=>{
+ const snapshots=[];globalThis.document={querySelectorAll:()=>[]};
+ globalThis.window={__TAURI__:{core:{invoke:async(_,value)=>snapshots.push(value.snapshot)},event:{listen:async()=>()=>{}}}};
+ const owner={state:{nativeDocuments:true},props:{intl:{locale:'en'}},resolveAssetMenuSurface:()=> 'blocks'};
+ try {const dispose=installDesktopEditorMenu(owner);await Promise.resolve();owner.props.intl.locale='de-DE';owner._refreshDesktopMenu();await Promise.resolve();assert.deepEqual(snapshots.map(x=>x.edit.map(y=>y.label)),[['Run project','Stop project'],['Projekt starten','Projekt stoppen']]);dispose();} finally {delete globalThis.document;delete globalThis.window;}
+});

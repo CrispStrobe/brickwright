@@ -8,7 +8,7 @@ import {pathToFileURL} from 'node:url';
 import {loadCircuitModel} from '../scripts/lib/polarity-oracle.mjs';
 
 const root=path.resolve(import.meta.dirname,'..');
-const boardPin='67d7af9de398e20c77b64b9e8aaf530f476e66ef';
+const boardPin='1db3d1b9eb2a7fe0283ef79f23373ef3b52d29b6';
 const packageSpec=`github:CrispStrobe/bw-board#${boardPin}`;
 const fixture=JSON.parse(readFileSync(path.join(root,'test/fixtures/adp7118-fixed-regulator.json'),'utf8'));
 const terminals=['vout_1','vout_2','sense_adj','gnd','en','ss','vin_7','vin_8'];

@@ -233,6 +233,35 @@ const describeSkips = ({unreadable, nul}) => {
 //                 validation template. Pending records authorize no download;
 //                 only the separately declared current producer is content-bound.
 //   waived        genuinely cannot be sha-addressed; reason required
+// Check detector liveness before building census rows that use these detectors.
+const assertDetectorLiveness = () => {
+        // If a regex is edited into uselessness, every assertion below reports a
+        // clean sweep over an empty list. This runs the SAME detectors over a
+        // synthetic offender assembled here, so their liveness does not depend
+        // on the tree containing an offender — which, after this branch, it
+        // does not. The strings are split so this file is not itself an
+        // offender under its own patterns.
+        const H = 'https://';
+        const offender = [
+            `const R = "${H}raw.` + 'githubusercontent.com/o/r/main/f.js";',
+            `curl ${H}codeload.` + 'github.com/o/r/tar.gz/main',
+            `${H}git` + 'hub.com/o/r/releases/download/v1/a.zip',
+            `${H}git` + 'hub.com/o/r/archive/main.tar.gz',
+            `git clone ${H}git` + 'hub.com/o/r /tmp/r',
+            `${H}micropython.` + 'org/resources/firmware/RPI_PICO.uf2',
+            `${H}developer.` + 'arm.com/-/media/Files/downloads/gnu/x/binrel/arm-gnu-toolchain.tar.xz',
+            'uses: actions/checkout@' + 'v4'
+        ].join('\n');
+        const fired = new Set();
+        for (const [kind, re] of DETECTORS) {
+            if (new RegExp(re.source, re.flags).test(offender)) fired.add(kind);
+        }
+        assert.deepEqual([...fired].sort(), DETECTORS.map(([k]) => k).sort(),
+            'a detector matched nothing in a string built to contain one of each. '
+            + 'Every result below is therefore meaningless. Fix the pattern first.');
+};
+assertDetectorLiveness();
+
 const CENSUS = [
     nativeBenchmarkFetchPin(ROOT, new Set(trackedFiles()), DETECTORS),
     ...cadSdkFetchPins(ROOT, new Set(trackedFiles()), DETECTORS),
@@ -701,32 +730,7 @@ describe('fetch pinning: every fetch that decides what ships names an immutable 
         for (const l of sourceSkips) t.diagnostic(`OPEN DEFECT: ${l}`);
     });
 
-    test('the detectors still fire (instrument before subject)', () => {
-        // If a regex is edited into uselessness, every assertion below reports a
-        // clean sweep over an empty list. This runs the SAME detectors over a
-        // synthetic offender assembled here, so their liveness does not depend
-        // on the tree containing an offender — which, after this branch, it
-        // does not. The strings are split so this file is not itself an
-        // offender under its own patterns.
-        const H = 'https://';
-        const offender = [
-            `const R = "${H}raw.` + 'githubusercontent.com/o/r/main/f.js";',
-            `curl ${H}codeload.` + 'github.com/o/r/tar.gz/main',
-            `${H}git` + 'hub.com/o/r/releases/download/v1/a.zip',
-            `${H}git` + 'hub.com/o/r/archive/main.tar.gz',
-            `git clone ${H}git` + 'hub.com/o/r /tmp/r',
-            `${H}micropython.` + 'org/resources/firmware/RPI_PICO.uf2',
-            `${H}developer.` + 'arm.com/-/media/Files/downloads/gnu/x/binrel/arm-gnu-toolchain.tar.xz',
-            'uses: actions/checkout@' + 'v4'
-        ].join('\n');
-        const fired = new Set();
-        for (const [kind, re] of DETECTORS) {
-            if (new RegExp(re.source, re.flags).test(offender)) fired.add(kind);
-        }
-        assert.deepEqual([...fired].sort(), DETECTORS.map(([k]) => k).sort(),
-            'a detector matched nothing in a string built to contain one of each. '
-            + 'Every result below is therefore meaningless. Fix the pattern first.');
-    });
+    test('the detectors still fire (instrument before subject)', assertDetectorLiveness);
 
     test('comment stripping removes prose about fetches and nothing else', () => {
         // The other half of the instrument. If stripComments over-reaches, real

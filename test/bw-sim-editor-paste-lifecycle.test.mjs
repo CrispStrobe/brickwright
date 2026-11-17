@@ -8,6 +8,8 @@ const source = readFileSync(new URL('../overlay/scratch-gui/src/lib/bw-sim/edito
 // Run the shipped async paste closure and disposal's entry, without a renderer.
 // The rest of disposal releases WebGL/DOM resources and is outside this boundary.
 const lifetime = source.match(/^    let disposed = false;$/m)?.[0] || '';
+const cancelPointer = source.match(/^    const cancelPointer = .*;$/m)?.[0] || '';
+assert.ok(cancelPointer, 'the real pointer cancellation closure must be present');
 const paste = source.slice(source.indexOf('    const paste = async () => {'), source.indexOf('    const undo = () => {'));
 const dispose = source.slice(source.indexOf('    const dispose = () => {'), source.indexOf('        unsubscribe();', source.indexOf('    const dispose = () => {')));
 const fixture = ({local = false, denied = false} = {}) => {
@@ -19,10 +21,13 @@ const fixture = ({local = false, denied = false} = {}) => {
         if (denied) throw Error('clipboard denied');
         return read;
     }}};
-    const api = new Function('navigator', 'clipboard', 'systemHasCopy', 'pasteText',
-        `${lifetime} ${paste} ${dispose}}; return {paste, dispose};`)(
-        navigator, local ? [{}] : [], false, text => { events.push(['paste', text]); return true; });
-    return {...api, events, resolve, reject};
+    const cancelled = [];
+    const api = new Function('navigator', 'clipboard', 'systemHasCopy', 'pasteText', 'onUp', 'window', 'canvas',
+        'releaseSpace', 'lostCapture',
+        `let spaceHeld = true, gesture = {touch: false, pointerId: 7}; ${lifetime} ${paste} ${cancelPointer} ${dispose}}; return {paste, dispose, spaceHeld: () => spaceHeld};`)(
+        navigator, local ? [{}] : [], false, text => { events.push(['paste', text]); return true; },
+        event => cancelled.push(event), {removeEventListener() {}}, {removeEventListener() {}}, () => {}, () => {});
+    return {...api, events, resolve, reject, cancelled};
 };
 
 for (const outcome of ['resolve', 'reject']) {
@@ -63,4 +68,10 @@ test('an open view keeps local and denied-clipboard fallbacks', async () => {
         assert.equal(await pending, true);
         assert.deepEqual(f.events, options.local ? [['paste', null]] : ['read', ['paste', null]]);
     }
+});
+
+test('disposal cancels an active pointer and releases space before clipboard completion', () => {
+    const f = fixture(); f.dispose();
+    assert.equal(f.spaceHeld(), false);
+    assert.deepEqual(f.cancelled, [{pointerId: 7, type: 'pointercancel'}]);
 });
