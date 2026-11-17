@@ -213,3 +213,14 @@ colliders, mass and ports stay unchanged. Reopen an example for the new saved
 appearance presets. Mantis's shortened controller placeholder and Trident's
 battery/FeatherWing still need geometrically appropriate replacements; the
 full-size parts are not scaled into incompatible spaces.
+
+### Visible wiring (2026-11-17)
+
+The 3D view now has coloured functional motor/servo harnesses, plus Scout's
+battery and controller/driver loom. Cables follow their body anchors during
+editing and simulation and reuse tube buffers. They add no mass/collisions and
+are excluded from printed geometry. Port/component roles determine this routing
+illustration; physical pin mapping and direct Circuit-tab wire import remain
+unimplemented. The illustrated Feather does not turn the functional Uno circuit
+into a verified physical Feather build. Existing saved model identities work
+without project migration.
