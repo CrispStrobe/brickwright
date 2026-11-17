@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
+import {confirmAsync} from './native-dialog.js';
 import {CAD_ROBOT_EXAMPLES} from './bw-cad-robot-catalog.js';
 import loadProjectFile from './bw-project-load.js';
 import {inspectBrickwrightState} from './bw-project-bundle.js';
@@ -8,7 +9,7 @@ export async function openCadRobotProject(vm,id,locale='en') {
     if(!item)throw new Error('This shape has no complete robot project');
     const de=locale.startsWith('de');
     const note=de?item.simulationNoteDe:item.simulationNote;
-    if(!window.confirm((note?`${note}\n\n`:'')+(de?`${item.name} als komplettes Projekt öffnen? Modell, Programm, Schaltung und Widgets werden ersetzt. Speichere zuerst deine Arbeit.`:`Open ${item.name} as a complete project? This replaces the model, program, circuit and widgets. Save your work first.`)))return false;
+    if(!await confirmAsync((note?`${note}\n\n`:'')+(de?`${item.name} als komplettes Projekt öffnen? Modell, Programm, Schaltung und Widgets werden ersetzt. Speichere zuerst deine Arbeit.`:`Open ${item.name} as a complete project? This replaces the model, program, circuit and widgets. Save your work first.`)))return false;
     const response=await fetch(new URL(`static/cad-robots/${item.file}`,document.baseURI));
     if(!response.ok)throw new Error(de?'Roboterprojekt konnte nicht geladen werden.':'Robot project could not be loaded.');
     const bytes=await response.arrayBuffer(),inspection=await inspectBrickwrightState(bytes);

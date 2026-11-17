@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
+export const NOTICE = {"name":"Brickwright CAD SDK","licence":"BSD-3-Clause","holder":"CrispStrobe"};
 // Build in the CAD repo with npm run build:brickwright-sdk, then pin its output here.
 import {readFile,writeFile,cp,rm,mkdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
