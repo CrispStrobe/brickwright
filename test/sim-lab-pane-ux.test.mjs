@@ -35,16 +35,10 @@ for (const kind of ['blockers', 'issues']) for (const compact of [true, false]) 
             act(() => close.click()); assert.equal(notice.hidden, true); assert.equal(notice.firstChild, warning);
             v.render(JSON.parse(JSON.stringify(first))); assert.equal(notice.hidden, true);
             v.render([{...first[0], message: 'Anderer Motor fehlt'}]);
-            assert.equal(kind === 'blockers' ? v.box.childElementCount : Number(notice.hidden), 0, 'blocker dismissal is semantic, not tied to translated message text');
-            if (kind === 'blockers') {
-                v.render([]); v.render(first);
-                assert.equal(v.box.childElementCount, 0, 'loading or switching modes must not resurrect the same blocker');
-                v.render([{code: 'no-hub', message: 'Hub fehlt'}]);
-                assert.equal(v.box.firstChild.hidden, false, 'a different diagnostic can still be shown');
-            } else {
-                act(() => close.click()); v.render(first);
-                assert.equal(notice.hidden, false, 'changed issue content remains visible');
-            }
+            assert.equal(notice.hidden, false, 'changed diagnostic text reappears even when its code is unchanged');
+            act(() => close.click());
+            v.render([{code: 'no-hub', message: 'Hub fehlt'}]);
+            assert.equal(notice.hidden, false, 'a different diagnostic remains visible');
         } finally {v.close();}
     });
 }
@@ -60,9 +54,18 @@ test('pane root uses scoped CSS selection guard with native editable exceptions,
     assert.match(css, /\.root input,[\s\S]*\.root textarea,[\s\S]*contenteditable[\s\S]*user-select:\s*text/);
 });
 
-test('dismissed pre-Run warning stays dismissed after releasing and remounting the pane',()=>{
- const first=mount('blockers',true,'de');first.render([{code:'no-motor'}]);
- act(()=>first.box.querySelector('button').click());first.close();
- const second=mount('blockers',true,'de');second.render([{code:'no-motor'}]);assert.equal(second.box.childElementCount,0);
- second.render([{code:'no-hub'}]);assert.ok(second.box.querySelector('button'));second.close();
+for (const kind of ['blockers', 'issues']) test(`${kind}: same-content dismissal survives remount; changed text reappears`, () => {
+    const first = mount(kind, true, 'de'); first.render([{code: 'no-motor', message: 'Motor fehlt'}]);
+    act(() => first.box.querySelector('button').click()); first.close();
+    const second = mount(kind, true, 'de');
+    try {
+        second.render([{code: 'no-motor', message: 'Motor fehlt'}]);
+        assert.equal(second.box.firstChild.hidden, true);
+        second.render([{code: 'no-motor', message: 'Anderer Motor fehlt'}]);
+        assert.equal(second.box.firstChild.hidden, false);
+        act(() => second.box.querySelector('button').click());
+        second.render([]); second.render([{code: 'no-motor', message: 'Anderer Motor fehlt'}]);
+        assert.equal(second.box.firstChild.hidden, true);
+        second.render([{code: 'no-hub'}]); assert.equal(second.box.firstChild.hidden, false);
+    } finally {second.close();}
 });
