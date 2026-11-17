@@ -1,0 +1,98 @@
+{
+  "recordedAt": "2026-11-17T21:47:45.258665+00:00",
+  "litePayloadCommit": "38f96306a29bba3c75fa8ea953ae0293c1758f32",
+  "guiRuntimeCommit": "65463f90cb9c7bba9c427984b1b8ed76e337409f",
+  "cadCommit": "2e2e7ace4455070b31f02ed81ed9f189b6455f00",
+  "app": {
+    "path": "/Users/christianstrobele/Applications/Brickwright Robots Wiring Test.app",
+    "version": "0.1.33",
+    "build": "20261117.7",
+    "binarySHA256": "9f6b058ef8de0f3f1b0da846b61c8568d8404bd390963c08c3b03c52a2dc1cb2",
+    "signatureVerified": true,
+    "keychain": "/Users/christianstrobele/Library/Keychains/brickwright-build.keychain-db",
+    "signerSHA1": "9484C58A114CBAFE53518D4ACEFE065A60CA2A24",
+    "launchedInUserProfile": false,
+    "notarized": false
+  },
+  "payload": {
+    "sdkManifestSHA256": "87c4e1c31892da5c71f4d1597c5bdeb77a1a226bc03bb90233b1c4d9a651145b",
+    "robotManifestSHA256": "4d5bb875466b7cfa6cfd2a519145c574f1c7ec3765385d518680371617e13b4d",
+    "sdkFiles": 11,
+    "robotArchives": 22,
+    "robotArchivesChanged": false
+  },
+  "verification": {
+    "cadFocused": {
+      "passed": 32,
+      "failed": 0,
+      "logSHA256": "bea3a9f24f094fb228b3f15fb120991857f60a7d2934af344529d95abe2b7fc5",
+      "scope": "Harness endpoints under separate owner poses, reused unchanged buffers, hidden deleted anchors, disposal, untouched authored source, print-only exclusion, Scout/Atlas geometry and prior component appearance tests."
+    },
+    "liteCadBridge": {
+      "passed": 130,
+      "failed": 0,
+      "logSHA256": "25e464d8a539700906e11f68f4b6fd4282655cbce6065c9e2bc74751e042b955"
+    },
+    "webKitInputs": {
+      "checks": [
+        "ordinary two-axis wheel pans Blocks without changing code",
+        "native trackpad pan moves Blocks once in both axes",
+        "native pinch zooms Blocks without moving authored blocks",
+        "editor input leaves the app toolbar unhandled",
+        "native scrolling reaches the block palette",
+        "one pointer gesture selects and drags an unselected CAD solid",
+        "native input reaches CAD after switching tabs without changing the design",
+        "CAD Stop restores dragging without Reset and retains recording until an edit",
+        "Blocks native panning still works after a CAD round trip"
+      ],
+      "errors": []
+    },
+    "webKitRobots": {
+      "passed": 22,
+      "errors": [],
+      "wireCounts": {
+        "robot-tt-rover": 11,
+        "robot-steerable-rover": 12,
+        "robot-atlas-forklift": 7,
+        "robot-mantis-walker": 9,
+        "robot-cyclone-sorter": 3,
+        "robot-helios-catapult": 9,
+        "robot-labyrinth-tilter": 9,
+        "robot-apex-scara": 6,
+        "robot-orion-carousel": 6,
+        "robot-vortex-pinball": 6,
+        "robot-titan-vise": 3,
+        "robot-hermes-crane": 3,
+        "robot-chronos-drawbridge": 6,
+        "robot-polaris-tracker": 6,
+        "robot-boreal-launcher": 3,
+        "robot-zephyr-conveyor": 3,
+        "robot-quasar-press": 3,
+        "robot-nova-loader": 3,
+        "robot-vector-plotter": 3,
+        "robot-aegis-sentry": 6,
+        "robot-stratos-gimbal": 9,
+        "robot-kestrel-arm": 9
+      },
+      "resultSHA256": "6af7b21474cb12b79f346eac161e38a916111f7a6bf69224036b05a4d8d6d637",
+      "scope": "Actual GUI examples -> VM -> Widgets -> Circuit -> CAD motion, visible harness count > 0 for each model, cold Run with preparation blur, Controls closed, repeat, Stop and Reset. Quasar also checks its physical cycle; other joint-motion checks do not certify complete tasks."
+    },
+    "screenshot": {
+      "path": "docs/images/scout-wiring.png",
+      "sha256": "d80977b88de74c4babdd8c59424bb922514048a1db2bdcef5153bac3d52fe78c",
+      "scope": "Actual SDK WebKit renderer, inspected, not a mockup."
+    },
+    "builtPayload": "All 11 SDK digests and all 22 SB3 archive digests verified after native build.",
+    "nativeBuild": "Succeeded; debug stripping warned about missing libLLVM. Explicit Brickwright-keychain signing and strict installed signature verification succeeded."
+  },
+  "scope": [
+    "Original coloured visual harness routing for premade robot examples, derived from saved controlled ports and component roles.",
+    "Scout has eleven conductors: battery power/return, motor pairs, controller-driver loom. Servo harnesses have three conductors.",
+    "Routing is illustrative. It does not import Circuit-tab wires or certify physical pin mappings, connector fits, cable dynamics, current capacity or a Feather hardware implementation of the functional Uno circuit.",
+    "Robots lacking a controller drawing terminate harnesses at their mounting body cable-entry surface. Ideal sliders without modeled motor housings do not acquire fictitious motor leads.",
+    "No additional mass, collision geometry, print geometry, authored document revisions or electrical nets. Fixed tube buffers follow owner meshes during edits and simulation.",
+    "Existing saved example identities gain the view without project migration.",
+    "Close existing robot test apps before opening this build; same project profile. No running user app was replaced or closed.",
+    "No GitHub Actions dispatched, rerun or awaited."
+  ]
+}
