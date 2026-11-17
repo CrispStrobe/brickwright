@@ -33,7 +33,9 @@ export function robotProjectState(doc){
   if(doc.id==='robot-tt-rover'&&i===0){net('encoder-a',t(id,'enc_a'),t('uno','d0'));net('encoder-b',t(id,'enc_b'),t('uno','d1'));}
   net(id+'-a',t(bridge,channel[3]),t(id,'a'));net(id+'-b',t(bridge,channel[4]),t(id,'b'));
   connections.drives.push({partId:id,jointId:j.id,kind:j.kind,direction:1,ratio:1,efficiency:1,leadMm:8});
-  slider(id,`${j.control.port} · ${j.name||j.id} (%)`,-100,100,doc.id==='robot-tt-rover'?30:25);
+  // Start within the available travel instead of pushing a limit at zero.
+  const initialDirection=j.kind==='slider'&&j.limits&&-j.limits[0]>j.limits[1]?-1:1;
+  slider(id,`${j.control.port} · ${j.name||j.id} (%)`,-100,100,initialDirection*(doc.id==='robot-tt-rover'?30:25));
   lines.push(`    IF NOT (widget value "${id}" = previous_${id}) THEN:`,`      IF widget value "${id}" < 0 THEN:`,`        set "${id}" direction reverse`,`        set "${id}" speed to (0 - widget value "${id}")`,'      ELSE:',`        set "${id}" direction forward`,`        set "${id}" speed to widget value "${id}"`,`      set previous_${id} to widget value "${id}"`);
  }
  for(const [i,j]of servos.entries()){

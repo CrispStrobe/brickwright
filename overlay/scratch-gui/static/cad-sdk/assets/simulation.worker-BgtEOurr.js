@@ -9737,7 +9737,7 @@ async function k8(A, g, I, C = {}) {
     }
   if ([...I.values()].reduce((D, u) => D + u.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = C.J ?? await (b5 ?? (b5 = import("./jolt-physics.wasm-compat-DaQxscuO.js").then((D) => D.default()))), o = new i.JoltSettings();
+  const i = C.J ?? await (b5 ?? (b5 = import("./jolt-physics.wasm-compat-Dzm_c_4S.js").then((D) => D.default()))), o = new i.JoltSettings();
   o.mMaxBodies = 512, o.mMaxBodyPairs = Math.max(1024, e.length * e.length), o.mMaxContactConstraints = 8192;
   const r = new i.ObjectLayerPairFilterTable(2);
   r.EnableCollision(0, 1), r.EnableCollision(1, 1);
@@ -9792,7 +9792,7 @@ async function k8(A, g, I, C = {}) {
   }
   const E1 = new Set((q.joints ?? []).map((D) => ZA(D.bodyA, D.bodyB))), g1 = /* @__PURE__ */ new Set(), l1 = /* @__PURE__ */ new Map();
   for (const D of q.joints ?? []) {
-    if (D.kind !== "hinge" || D.collideConnected === !1 || B.selfCollisions === !1)
+    if (D.kind !== "hinge" || D.collideConnected === !1)
       continue;
     const u = W(D.bodyA), G = W(D.bodyB), f = ZA(u, G);
     if (u === G || g1.has(f))
@@ -9815,7 +9815,7 @@ async function k8(A, g, I, C = {}) {
     if (!g1.delete(D))
       return;
     const u = l1.get(D);
-    fA.EnableCollision(MA.get(u.bodyA), MA.get(u.bodyB));
+    B.selfCollisions !== !1 && fA.EnableCollision(MA.get(u.bodyA), MA.get(u.bodyB));
   }, IA = (D) => {
     const u = p.get(D);
     for (const [G, f] of l1)
