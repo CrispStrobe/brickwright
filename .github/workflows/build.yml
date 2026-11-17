@@ -1881,14 +1881,20 @@ jobs:
       - name: Browser gate — native benchmark lifecycle
         id: bw_browser_native_bench
         timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
-        if: ${{ !cancelled() && steps.playwright.outcome == 'success' && matrix.shard == 'light' }}
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'light' }}
         run: BW_GIT_EXECUTABLE="$(command -v git)" NATIVE_BENCHMARK_EVIDENCE="$RUNNER_TEMP/native-benchmarks" node scripts/verify-native-benchmarks-browser.mjs
 
       - name: Browser gate — robot viewport selection
         id: bw_browser_robot_selection
         timeout-minutes: 3  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
-        if: ${{ !cancelled() && steps.playwright.outcome == 'success' && matrix.shard == 'light' }}
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'light' }}
         run: node scripts/verify-robot-box-selection.mjs
+
+      - name: Browser gate — workspace menus and project history
+        id: bw_browser_workspace_menus
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'light' }}
+        run: PROOF_URL=http://127.0.0.1:8617/ node scripts/verify-workspace-menus.mjs
 
       - name: Browser gate — named 386 media reaches Widgets and reports attach failures
         id: bw_browser_audit_0022
@@ -3960,6 +3966,7 @@ jobs:
             bw_browser_circuit_cad	${{ steps['bw_browser_circuit_cad'].outcome }}	${{ steps['bw_browser_circuit_cad'].conclusion }}
             bw_browser_native_bench	${{ steps['bw_browser_native_bench'].outcome }}	${{ steps['bw_browser_native_bench'].conclusion }}
             bw_browser_robot_selection	${{ steps['bw_browser_robot_selection'].outcome }}	${{ steps['bw_browser_robot_selection'].conclusion }}
+            bw_browser_workspace_menus	${{ steps['bw_browser_workspace_menus'].outcome }}	${{ steps['bw_browser_workspace_menus'].conclusion }}
             bw_browser_audit_0022	${{ steps['bw_browser_audit_0022'].outcome }}	${{ steps['bw_browser_audit_0022'].conclusion }}
             bw_browser_audit_0023	${{ steps['bw_browser_audit_0023'].outcome }}	${{ steps['bw_browser_audit_0023'].conclusion }}
             bw_browser_audit_0024	${{ steps['bw_browser_audit_0024'].outcome }}	${{ steps['bw_browser_audit_0024'].conclusion }}
@@ -4031,8 +4038,8 @@ jobs:
             bw_browser_audit_0271	${{ steps['bw_browser_audit_0271'].outcome }}	${{ steps['bw_browser_audit_0271'].conclusion }}
             bw_browser_audit_0277	${{ steps['bw_browser_audit_0277'].outcome }}	${{ steps['bw_browser_audit_0277'].conclusion }}
             bw_browser_audit_0279	${{ steps['bw_browser_audit_0279'].outcome }}	${{ steps['bw_browser_audit_0279'].conclusion }}
-            bw_browser_audit_0064	${{ steps['bw_browser_audit_0064'].outcome }}	${{ steps['bw_browser_audit_0064'].conclusion }}
           BW_BROWSER_RUNNER_TERMINALS_V1_2: |
+            bw_browser_audit_0064	${{ steps['bw_browser_audit_0064'].outcome }}	${{ steps['bw_browser_audit_0064'].conclusion }}
             bw_browser_audit_0065	${{ steps['bw_browser_audit_0065'].outcome }}	${{ steps['bw_browser_audit_0065'].conclusion }}
             bw_browser_audit_0066	${{ steps['bw_browser_audit_0066'].outcome }}	${{ steps['bw_browser_audit_0066'].conclusion }}
             bw_browser_audit_0263	${{ steps['bw_browser_audit_0263'].outcome }}	${{ steps['bw_browser_audit_0263'].conclusion }}
@@ -4132,8 +4139,8 @@ jobs:
             bw_browser_audit_0158	${{ steps['bw_browser_audit_0158'].outcome }}	${{ steps['bw_browser_audit_0158'].conclusion }}
             bw_browser_audit_0159	${{ steps['bw_browser_audit_0159'].outcome }}	${{ steps['bw_browser_audit_0159'].conclusion }}
             bw_browser_audit_0160	${{ steps['bw_browser_audit_0160'].outcome }}	${{ steps['bw_browser_audit_0160'].conclusion }}
-            bw_browser_audit_0161	${{ steps['bw_browser_audit_0161'].outcome }}	${{ steps['bw_browser_audit_0161'].conclusion }}
           BW_BROWSER_RUNNER_TERMINALS_V1_3: |
+            bw_browser_audit_0161	${{ steps['bw_browser_audit_0161'].outcome }}	${{ steps['bw_browser_audit_0161'].conclusion }}
             bw_browser_audit_0162	${{ steps['bw_browser_audit_0162'].outcome }}	${{ steps['bw_browser_audit_0162'].conclusion }}
             bw_browser_audit_0163	${{ steps['bw_browser_audit_0163'].outcome }}	${{ steps['bw_browser_audit_0163'].conclusion }}
             bw_browser_audit_0164	${{ steps['bw_browser_audit_0164'].outcome }}	${{ steps['bw_browser_audit_0164'].conclusion }}

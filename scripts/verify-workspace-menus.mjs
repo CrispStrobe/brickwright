@@ -6,7 +6,7 @@ const browser=await chromium.launch({headless:true,executablePath:process.env.BW
 const page=await browser.newPage({viewport:{width:1440,height:1000},serviceWorkers:'block'}),errors=[],out='artifacts/workspace-menus';await mkdir(out,{recursive:true});page.on('pageerror',e=>errors.push(e.message));page.setDefaultTimeout(60000);
 await page.addInitScript(()=>{localStorage.setItem('bw-starter-v1-complete','1');localStorage.setItem('bw-cad-enabled','1');localStorage.setItem('bw:compact-chrome','0');});
 try{
- await page.goto('http://127.0.0.1:8141/',{waitUntil:'commit'});await page.waitForFunction(()=>window.__brickwrightStore?.getState().scratchGui.vm?.runtime);await page.getByRole('tab',{name:'CAD',exact:true}).click();await page.waitForFunction(()=>window.__bwCad?.editor);
+ await page.goto(process.env.PROOF_URL || 'http://127.0.0.1:8141/',{waitUntil:'commit'});await page.waitForFunction(()=>window.__brickwrightStore?.getState().scratchGui.vm?.runtime);await page.getByRole('tab',{name:'CAD',exact:true}).click();await page.waitForFunction(()=>window.__bwCad?.editor);
  assert.equal(await page.evaluate(()=>document.body.classList.contains('bw-compact-chrome')),false,'CAD respects global expanded preference');
  const titles=page.locator('input[placeholder="Project title here"]:visible');assert.equal(await titles.count(),1);await titles.fill('Workspace menu test');await titles.press('Enter');await page.getByTestId('bw-chrome-toggle').click();
  await page.getByTestId('bw-file-menu-trigger').waitFor({state:'visible'});assert.equal(await page.locator('input[placeholder="Project title here"]:visible').inputValue(),'Workspace menu test');
