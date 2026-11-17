@@ -202,3 +202,14 @@ recording; Live returns to the editable design if there is no running worker.
 The focused regression suite passes 31/31. The three-cycle Quasar test requires
 the blank to clear the dial before falling, and the pusher is a visible printed
 carriage rather than a blade with overridden mass.
+
+### Purchased component appearances (2026-11-17)
+
+Scout and Trident examples now show full-size Adafruit Feather RP2040 STEP
+surfaces; Scout also shows the 830 4×AA case and an original illustrative
+DRV8833-style PCB with headers. All source motor cases have distinct plastic,
+can, cap and terminal materials. Rendered details follow the existing body;
+colliders, mass and ports stay unchanged. Reopen an example for the new saved
+appearance presets. Mantis's shortened controller placeholder and Trident's
+battery/FeatherWing still need geometrically appropriate replacements; the
+full-size parts are not scaled into incompatible spaces.
