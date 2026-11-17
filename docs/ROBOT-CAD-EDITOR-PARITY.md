@@ -224,3 +224,30 @@ illustration; physical pin mapping and direct Circuit-tab wire import remain
 unimplemented. The illustrated Feather does not turn the functional Uno circuit
 into a verified physical Feather build. Existing saved model identities work
 without project migration.
+
+### Complete example electronics (2026-11-18)
+
+All 22 default CAD robot projects now contain a METRO Mini ATmega328P/16 MHz
+controller matching their Uno-compatible program target, a regulated 5 V module,
+a nominal 6 V source, a prototype carrier and enough dual H-bridges for their DC
+channels. Servos have a separate power header and direct signal connections.
+Atlas has two bridges for A/B/D and a servo C bus. Mantis uses a split layout;
+Nova has functional compact drive housings and clearance bays; Scout has an ideal
+encoder pickup. The two newly imported Adafruit STEP assets retain MIT provenance.
+
+Older saved examples show **Add controller and power** in CAD Properties. This
+adds the hardware in one revision-checked, undoable CAD edit, keeping the project
+identity, title, earlier history and the sibling Code/Circuit/Blocks/Widgets.
+The isolated SDK and actual integrated Atlas upgrade tests both pass, including
+exact CAD Undo/Redo and unchanged sibling editors. Resized/conflicting mounting
+frames are not silently altered. Reopening a default example also loads the new
+hardware, including Nova's revised chassis bays.
+
+Electronics proxies contribute approximate mass and collisions; all 22 original
+geometry/physics suites and the explicit hardware audit passed (240 local tests).
+Nova's ground-contact regression was corrected without weakening its travel gate.
+Supply/driver/encoder/drive housings and physical pad routes are functional
+illustrations. Converter transients, power ratings, exact physical pin mapping,
+ideal linear-stage internals and fabrication qualification remain outside this
+pass. Existing print-only layouts are retained; added carriers are exportable
+from their assembly. See the final receipt for full GUI/co-simulation/native scope.

@@ -1446,7 +1446,7 @@ separation are documented in scripts/convert-adafruit-motors.py. These models
 provide mechanical geometry and an ideal hinge drive; density, torque and power
 controls do not constitute a calibrated electrical or performance model.
 
-The Feather RP2040 4884 and 4×AA holder 830 display surfaces in
+The Feather RP2040 4884, 4×AA holder 830, METRO Mini 2590 and MPM3610 4739 display surfaces in
 `src/electronics-assets/` derive from the same MIT upstream revision, retained in
 `library/sources/adafruit-electronics/`. Their conversion script, hashes and
 small untessellated blend faces are recorded there. Display-only replacements

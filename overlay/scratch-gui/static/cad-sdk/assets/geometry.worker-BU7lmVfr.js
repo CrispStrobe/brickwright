@@ -826,6 +826,9 @@ const _6 = {
   "Apply thread redesign": "Gewindeauslegung anwenden",
   "Rebuild a resized screw at a chosen pitch or turns per start, resetting its local scale as one saved edit.": "Eine skalierte Schraube mit gewählter Steigung oder Windungszahl pro Gang als einen gespeicherten Schritt neu aufbauen und ihre lokale Skalierung zurücksetzen."
 }, Z6 = {
+  "Add controller and power": "Steuerung und Stromversorgung ergänzen",
+  "Stop simulation before adding electronics.": "Simulation vor dem Ergänzen der Elektronik stoppen.",
+  "The design changed before this edit could be applied.": "Das Modell wurde vor dem Anwenden dieser Änderung verändert.",
   "CAD editor": "CAD-Editor",
   "Model tools": "Modellwerkzeuge",
   "Editor status": "Editorstatus",

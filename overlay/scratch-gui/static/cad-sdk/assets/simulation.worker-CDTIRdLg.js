@@ -826,6 +826,9 @@ const d6 = {
   "Apply thread redesign": "Gewindeauslegung anwenden",
   "Rebuild a resized screw at a chosen pitch or turns per start, resetting its local scale as one saved edit.": "Eine skalierte Schraube mit gewählter Steigung oder Windungszahl pro Gang als einen gespeicherten Schritt neu aufbauen und ihre lokale Skalierung zurücksetzen."
 }, G6 = {
+  "Add controller and power": "Steuerung und Stromversorgung ergänzen",
+  "Stop simulation before adding electronics.": "Simulation vor dem Ergänzen der Elektronik stoppen.",
+  "The design changed before this edit could be applied.": "Das Modell wurde vor dem Anwenden dieser Änderung verändert.",
   "CAD editor": "CAD-Editor",
   "Model tools": "Modellwerkzeuge",
   "Editor status": "Editorstatus",
@@ -9746,7 +9749,7 @@ async function k8(A, g, I, C = {}) {
     }
   if ([...I.values()].reduce((y, R) => y + R.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = C.J ?? await (L5 ?? (L5 = import("./jolt-physics.wasm-compat-C7iNdav3.js").then((y) => y.default()))), o = new i.JoltSettings();
+  const i = C.J ?? await (L5 ?? (L5 = import("./jolt-physics.wasm-compat-BZdoCM3Q.js").then((y) => y.default()))), o = new i.JoltSettings();
   o.mMaxBodies = 512, o.mMaxBodyPairs = Math.max(1024, e.length * e.length), o.mMaxContactConstraints = 8192;
   const r = new i.ObjectLayerPairFilterTable(2);
   r.EnableCollision(0, 1), r.EnableCollision(1, 1);
