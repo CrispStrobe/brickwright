@@ -11385,7 +11385,7 @@ function Ah(t, e, i = {}) {
 function Eh() {
   const t = new Worker(new URL(
     /* @vite-ignore */
-    "" + new URL("assets/simulation.worker-Cr96ogRy.js", import.meta.url).href,
+    "" + new URL("assets/simulation.worker-BbEzgpxn.js", import.meta.url).href,
     import.meta.url
   ), { type: "module" });
   let e = 0, i = !1;
@@ -50741,7 +50741,7 @@ function lC(t, e) {
 }
 let qn;
 async function cC() {
-  const [{ createBundledModelLibrary: t }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-aCWWQaAe.js"), import("./model-library-cache-DiMFGzp9.js")]);
+  const [{ createBundledModelLibrary: t }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-Bm1FirX1.js"), import("./model-library-cache-DiMFGzp9.js")]);
   return qn ?? (qn = t()), { ...qn, cache: e() };
 }
 function uC(t, e) {
