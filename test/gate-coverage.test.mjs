@@ -26,6 +26,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readdirSync, readFileSync} from 'node:fs';
 import path from 'node:path';
+import {directlyExecutesPromisifiedGate} from '../scripts/lib/gate-promisified-exec.mjs';
 import {stepReferenceProblems} from '../scripts/lib/workflow-step-refs.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -194,8 +195,8 @@ const workflowRuns = workflowTexts.flatMap(workflowRunScalars);
 // the argument for having both.
 const testSources = readdirSync(path.join(ROOT, 'test'))
     .filter(f => f.endsWith('.test.mjs') && f !== 'gate-coverage.test.mjs')
-    .map(f => ({file: f, text: readFileSync(path.join(ROOT, 'test', f), 'utf8')
-        .replace(/\/\/[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '')}));
+    .map(f => { const raw = readFileSync(path.join(ROOT, 'test', f), 'utf8'); return {file: f, raw, text: raw
+        .replace(/\/\/[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '')}; });
 // npm-script ALIASES count as invocations. build.yml reaches the debugger smoke test through
 // `npm run smoke:debugger`, which `runInvokesGate` — looking for a literal `node scripts/<gate>` —
 // could not see. That blind spot manufactured a false orphan. A gate that cannot fail reports
@@ -279,8 +280,13 @@ const referencesGatePath = (text, gate) => {
         /\b(?:join|resolve)\s*\(/.test(statement) &&
         new RegExp(`['"]scripts['"][\\s\\S]*?['"]${name}['"]`).test(statement));
 };
-const exercisedIn = ({text}, gate) =>
-    importsGate(text, gate) || (referencesGatePath(text, gate) && SPAWNERS.test(text));
+const exercisedIn = ({text, raw}, gate) => {
+    // Never let an unrelated direct call credit this promisified path.
+    if (/\bpromisify\s*\(\s*execFile\s*\)/.test(raw || '') && raw.includes(`scripts/${gate}`)) {
+        return directlyExecutesPromisifiedGate(raw, gate);
+    }
+    return importsGate(text, gate) || (referencesGatePath(text, gate) && SPAWNERS.test(text));
+};
 
 /**
  * The classification, as a pure function, so the RULE can be exercised on

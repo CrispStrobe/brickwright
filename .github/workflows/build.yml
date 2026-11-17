@@ -1426,6 +1426,12 @@ jobs:
         run: |
           node scripts/verify-emitted-native-broker-proof.mjs packages/scratch-gui/build
           node scripts/package-upstream-notices.mjs --check --build-dir packages/scratch-gui/build
+          node scripts/verify-built-cad-sdk.mjs packages/scratch-gui/build
+
+      - name: Verify shipped CAD worker telemetry
+        if: ${{ !cancelled() && steps.build_editor.outcome == 'success' }}
+        timeout-minutes: 5
+        run: node scripts/verify-cad-telemetry.mjs
 
       - name: Guard — emitted distribution policy is the requested policy
         if: ${{ !cancelled() && steps.build_editor.outcome == 'success' }}
@@ -1743,6 +1749,8 @@ jobs:
       - name: Build the editor
         id: build_editor_browser
         if: ${{ !cancelled() && steps.overlays_browser.outcome == 'success' && steps.browser_package_provenance.outcome == 'success' }}
+        env:
+          BW_ENABLE_CAD: ${{ matrix.shard == 'light' && '1' || '0' }}
         run: cd packages/scratch-gui && NODE_ENV=production NODE_OPTIONS=--max-old-space-size=2560 npm run build
 
       - name: Guard — emitted native broker proof bytes retain reviewed authority
@@ -1846,6 +1854,42 @@ jobs:
         run: |
           python3 -m http.server 8617 --directory packages/scratch-gui/build &
           for i in $(seq 1 30); do curl -sf http://localhost:8617/ >/dev/null && break; sleep 1; done
+      - name: Browser gate — CAD editor
+        id: bw_browser_cad_editor
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'light' }}
+        run: node scripts/verify-cad-editor.mjs
+
+      - name: Browser gate — CAD repairs
+        id: bw_browser_cad_repairs
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'light' }}
+        run: PROOF_URL=http://127.0.0.1:8617/ node scripts/verify-cad-repairs.mjs
+
+      - name: Browser gate — CAD robot projects
+        id: bw_browser_cad_robots
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'light' }}
+        run: PROOF_URL=http://127.0.0.1:8617/ node scripts/verify-cad-robot-projects.mjs
+
+      - name: Browser gate — Circuit and CAD interaction
+        id: bw_browser_circuit_cad
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'light' }}
+        run: PROOF_URL=http://127.0.0.1:8617/ node scripts/verify-circuit-cad.mjs
+
+      - name: Browser gate — native benchmark lifecycle
+        id: bw_browser_native_bench
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.playwright.outcome == 'success' && matrix.shard == 'light' }}
+        run: BW_GIT_EXECUTABLE="$(command -v git)" NATIVE_BENCHMARK_EVIDENCE="$RUNNER_TEMP/native-benchmarks" node scripts/verify-native-benchmarks-browser.mjs
+
+      - name: Browser gate — robot viewport selection
+        id: bw_browser_robot_selection
+        timeout-minutes: 3  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.playwright.outcome == 'success' && matrix.shard == 'light' }}
+        run: node scripts/verify-robot-box-selection.mjs
+
       - name: Browser gate — named 386 media reaches Widgets and reports attach failures
         id: bw_browser_audit_0022
         timeout-minutes: 3  # derived: p95 7 s × 3 → 3 min over 20 green runs to 36823340082; max 11 s in run 36477775870 (gen-gate-budgets.mjs)
@@ -3910,6 +3954,12 @@ jobs:
             playwright	${{ steps['playwright'].outcome }}	${{ steps['playwright'].conclusion }}
             bw_browser_audit_0020	${{ steps['bw_browser_audit_0020'].outcome }}	${{ steps['bw_browser_audit_0020'].conclusion }}
             serve	${{ steps['serve'].outcome }}	${{ steps['serve'].conclusion }}
+            bw_browser_cad_editor	${{ steps['bw_browser_cad_editor'].outcome }}	${{ steps['bw_browser_cad_editor'].conclusion }}
+            bw_browser_cad_repairs	${{ steps['bw_browser_cad_repairs'].outcome }}	${{ steps['bw_browser_cad_repairs'].conclusion }}
+            bw_browser_cad_robots	${{ steps['bw_browser_cad_robots'].outcome }}	${{ steps['bw_browser_cad_robots'].conclusion }}
+            bw_browser_circuit_cad	${{ steps['bw_browser_circuit_cad'].outcome }}	${{ steps['bw_browser_circuit_cad'].conclusion }}
+            bw_browser_native_bench	${{ steps['bw_browser_native_bench'].outcome }}	${{ steps['bw_browser_native_bench'].conclusion }}
+            bw_browser_robot_selection	${{ steps['bw_browser_robot_selection'].outcome }}	${{ steps['bw_browser_robot_selection'].conclusion }}
             bw_browser_audit_0022	${{ steps['bw_browser_audit_0022'].outcome }}	${{ steps['bw_browser_audit_0022'].conclusion }}
             bw_browser_audit_0023	${{ steps['bw_browser_audit_0023'].outcome }}	${{ steps['bw_browser_audit_0023'].conclusion }}
             bw_browser_audit_0024	${{ steps['bw_browser_audit_0024'].outcome }}	${{ steps['bw_browser_audit_0024'].conclusion }}
