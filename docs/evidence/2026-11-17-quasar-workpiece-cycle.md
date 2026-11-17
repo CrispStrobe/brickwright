@@ -8,7 +8,7 @@ The CAD clock now retains circuit ownership through focus loss during preparatio
 
 The coherent branch work is incorporated through CAD 8ac5dfa, alongside current main library originals. The imported solid Atlas crate produced approximately 52 degrees tilt for a 15 degree target in the coupled harness. Retaining the original hollow crate and precise fork candidates restores about 15.55 degrees while preserving the new cradle/wheel/mast candidates: 2,299 total hulls rather than 2,741. A separate actual WebKit run held approximately 15.42 degrees. These are correctness observations, not a controlled speed benchmark.
 
-Final CAD SDK source: e803d8f49d9c9245e340a9f1b86e2e036c709dcc. CAD targeted tests passed 28/28; the five merged robot suites previously passed 47/47. Lite targeted tests passed 126/126, and SDK pin controls passed 8/8. All 11 final SDK digests and all 22 SB3 archive digests pass the built-payload verifier.
+Earlier checkpoint SDK source: e803d8f49d9c9245e340a9f1b86e2e036c709dcc. At that checkpoint CAD targeted tests passed 28/28; the five merged robot suites previously passed 47/47. Lite targeted tests passed 126/126, and SDK pin controls passed 8/8. All 11 final SDK digests and all 22 SB3 archive digests pass the built-payload verifier.
 
 The GUI was rebuilt with production webpack behavior (minification disabled), then its generated SDK and robot payloads were refreshed from the qualified source. There were two webpack asset/entrypoint size warnings. Quasar was checked through the real GUI/VM/Board/Jolt in WebKit, including screenshots and workpiece trajectories; a complete final-payload 22-robot run and native packaging are recorded in the accompanying final receipt when finished. Native window interaction is distinct from headless WebKit validation.
 
@@ -38,8 +38,8 @@ returns the viewport to the editable design and disposes the worker, preserving
 recorded replay/traces. Pause retains the preview. The last measured snapshot
 remains inspectable after Stop, and Live exits stopped replay to the design.
 Regression controls failed against the preceding behavior; 31 focused CAD checks
-now pass. Nine real-GUI input checks passed, and all 126 Lite CAD/bridge checks
-passed before final native packaging. The final receipt binds the exact source,
+now pass. Nine real-GUI input checks passed against the final payload. The expanded final
+Lite CAD/bridge selection passed 130/130 before native packaging. The final receipt binds the exact source,
 app metadata, SDK and project hashes and separates native routing from release
 window interaction.
 

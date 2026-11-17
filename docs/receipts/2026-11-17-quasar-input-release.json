@@ -1,0 +1,100 @@
+{
+  "recordedAt": "2026-11-17T20:10:48.857779+00:00",
+  "litePayloadCommit": "779aec0a82f9336371f599b1026374daa1866a1d",
+  "guiRuntimeCommit": "65463f90cb9c7bba9c427984b1b8ed76e337409f",
+  "cadCommit": "9b5be9f521fd01fc9691a771b97c702a23fa0992",
+  "app": {
+    "path": "/Users/christianstrobele/Applications/Brickwright Robots Input Test.app",
+    "version": "0.1.33",
+    "build": "20261117.5",
+    "binarySHA256": "9b6d59b1ec3ccdc092702f384ede46f1ab2a967e5924a31201116d60b57e8a72",
+    "signatureVerified": true,
+    "signerSHA1": "9484C58A114CBAFE53518D4ACEFE065A60CA2A24",
+    "keychain": "/Users/christianstrobele/Library/Keychains/brickwright-build.keychain-db",
+    "notarized": false,
+    "launchedInUserProfile": false
+  },
+  "payload": {
+    "sdkManifestSHA256": "0e499336d8dc9cc448f92749e4fefc96c5fe44c11da6a38f29a2a48fdb44ef0c",
+    "sdkFiles": 11,
+    "robotManifestSHA256": "1e920b8c1bb7302159ec1ae0c491c2179628a9662d5db3597dda5a235e8bf8f9",
+    "robotArchives": 22
+  },
+  "verification": {
+    "focusedCadTests": {
+      "passed": 31,
+      "failed": 0,
+      "logSHA256": "ae090d22bc02a0c84e9cab0dc1c5a711410b0aba7725770d90587eefd027434f"
+    },
+    "newLibraryCohorts": {
+      "passed": 7,
+      "failed": 0,
+      "logSHA256": "26126210dd5fd98615ef49bfa5108380b2e5c40a9b6314ee29f4f373d07b3aa8"
+    },
+    "liteCadBridgeTests": {
+      "passed": 130,
+      "failed": 0,
+      "logSHA256": "6e3ecb95a5bfa9843716f5c8a76a543763ace13f666830984545f20d869258de"
+    },
+    "webKitInputs": {
+      "checks": [
+        "ordinary two-axis wheel pans Blocks without changing code",
+        "native trackpad pan moves Blocks once in both axes",
+        "native pinch zooms Blocks without moving authored blocks",
+        "editor input leaves the app toolbar unhandled",
+        "native scrolling reaches the block palette",
+        "one pointer gesture selects and drags an unselected CAD solid",
+        "native input reaches CAD after switching tabs without changing the design",
+        "CAD Stop restores dragging without Reset and retains recording until an edit",
+        "Blocks native panning still works after a CAD round trip"
+      ],
+      "errors": []
+    },
+    "webKitRobots": {
+      "passed": 22,
+      "errors": [],
+      "ids": [
+        "robot-tt-rover",
+        "robot-steerable-rover",
+        "robot-atlas-forklift",
+        "robot-mantis-walker",
+        "robot-cyclone-sorter",
+        "robot-helios-catapult",
+        "robot-labyrinth-tilter",
+        "robot-apex-scara",
+        "robot-orion-carousel",
+        "robot-vortex-pinball",
+        "robot-titan-vise",
+        "robot-hermes-crane",
+        "robot-chronos-drawbridge",
+        "robot-polaris-tracker",
+        "robot-boreal-launcher",
+        "robot-zephyr-conveyor",
+        "robot-quasar-press",
+        "robot-nova-loader",
+        "robot-vector-plotter",
+        "robot-aegis-sentry",
+        "robot-stratos-gimbal",
+        "robot-kestrel-arm"
+      ],
+      "resultSHA256": "3f5b2e432d2cb38c36fe6fdebd87e7d0844e8ba87e1b47c50acfb3755058e0a4",
+      "scope": "Actual GUI examples, VM, Widgets, Circuit and moving CAD joints; cold Run with preparation blur, Controls closed, repeat, Stop/Reset. Quasar additionally asserts indexing, contact, ejection past dial edge and rigid workpiece trajectory. Other joint-motion checks do not certify complete tasks."
+    },
+    "nativeInputs": {
+      "result": "passed",
+      "positiveLogSHA256": "7947bfb2e3891ec3fa2336f67cd29bb8af7ed9cad1d5663058ca9de77224a17c",
+      "baselineLogSHA256": "7ab80144ab838faa71519c037fefbb6219301adf72d3ffc9679e561d9e8ba7ca",
+      "scope": "Actual production Objective-C router compiled into isolated AppKit/WKWebView harness with ephemeral storage and generated precise CGEvents; one handled Blocks wheel and one unhandled HTML panel fallback. Without router, Blocks pan does not move. Physical finger gestures and the release Tauri window remain user acceptance checks."
+    },
+    "builtPayload": "All 11 SDK digests and all 22 SB3 digests verified after build.",
+    "nativeBuild": "Succeeded; local rust-objcopy debug stripping warned about missing libLLVM. App bundle and final explicit-keychain codesign verification succeeded."
+  },
+  "notes": [
+    "Close the existing Performance Test before opening Input Test because they share the project profile. No running app was replaced or closed.",
+    "Select CAD > Examples > Quasar to load the corrected model and staged program; saved projects are preserved.",
+    "Stop restores editing and retains replay; Pause keeps the simulation preview; Live exits stopped replay.",
+    "Quasar uses a rigid blank and ideal guided stages; plastic deformation and fabricated actuator realism are not claimed.",
+    "Detailed purchased electronics meshes remain pending.",
+    "No GitHub Actions dispatched, rerun or awaited."
+  ]
+}
