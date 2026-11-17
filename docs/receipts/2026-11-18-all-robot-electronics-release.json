@@ -1,0 +1,387 @@
+{
+  "recordedAt": "2026-11-17T23:38:28.476903+00:00",
+  "litePayloadCommit": "e0d0b4359a5cea3e0a973e2e4a59684c8690dac6",
+  "guiRuntimeCommit": "65463f90cb9c7bba9c427984b1b8ed76e337409f",
+  "cadCommit": "9d2f8325b3bff4304c45a8b6b754979edc1d347a",
+  "app": {
+    "path": "/Users/christianstrobele/Applications/Brickwright Robots Electronics Test.app",
+    "version": "0.1.33",
+    "build": "20261118.2",
+    "binarySHA256": "598d98b16670b134c7cd3f182ed72a9ed318b3a102c6849940b52b5321fcca76",
+    "signatureVerified": true,
+    "keychain": "/Users/christianstrobele/Library/Keychains/brickwright-build.keychain-db",
+    "signerSHA1": "9484C58A114CBAFE53518D4ACEFE065A60CA2A24",
+    "launchedInUserProfile": false,
+    "notarized": false
+  },
+  "payload": {
+    "sdkManifestSHA256": "602e8d3cdf0dd623b0d99924b8d6bbbf5d3c2e541af4e128a54321ef3ee7b42d",
+    "robotManifestSHA256": "ab17075d48d2a9d28e87e9c6c1209068a96b6e3d371c76c456a7674be2318251",
+    "sdkFiles": 11,
+    "robotArchives": 22,
+    "previouslyQualifiedArchivesPreservedExactly": 21,
+    "changedArchive": "quasar.sb3"
+  },
+  "verification": {
+    "cad": {
+      "passed": 240,
+      "failed": 0,
+      "logSHA256": "714b5382309a83f4fe03f2af4e7d4a7fa7d6f1c0209d235dff160485e4e15332",
+      "scope": "27 suites: 22 robots, electronics audits, appearance, wiring and legacy ownership/history. Completed before the final Quasar-only clearance change."
+    },
+    "finalQuasar": {
+      "passed": 9,
+      "failed": 0,
+      "logSHA256": "4f7b0b95b25898d88d5718a0392f24fe8fdce8a0b4b234f439c37319a1c557c7",
+      "scope": "Native contact cycle, STL/printability and retaining-lip clearance on final source."
+    },
+    "lite": {
+      "passed": 83,
+      "failed": 0,
+      "logSHA256": "bf4489dcfce9d7259169d79b633547680fff1cc2d00728769bc15cd8686c0de2",
+      "scope": "SDK pins including negative controls, complete projects, host lifecycle and defaults on final payload."
+    },
+    "bridge": {
+      "passed": 47,
+      "failed": 0,
+      "logSHA256": "201a5c16df8d5a5fbcd9ef83aa023645679d6b436acde79a3fb9e969c52e788b",
+      "scope": "Circuit readiness, ownership, persistence, cancellation, telemetry and drive coupling."
+    },
+    "webKitInputs": {
+      "checks": [
+        "ordinary two-axis wheel pans Blocks without changing code",
+        "native trackpad pan moves Blocks once in both axes",
+        "native pinch zooms Blocks without moving authored blocks",
+        "editor input leaves the app toolbar unhandled",
+        "native scrolling reaches the block palette",
+        "one pointer gesture selects and drags an unselected CAD solid",
+        "native input reaches CAD after switching tabs without changing the design",
+        "CAD Stop restores dragging without Reset and retains recording until an edit",
+        "Blocks native panning still works after a CAD round trip"
+      ],
+      "errors": []
+    },
+    "isolatedSDKViews": {
+      "passed": 22,
+      "legacyUpgrade": true,
+      "resultSHA256": "2bcc1da05b281e8a43b6774d96a5e266a17312d851d62500d1016a95e399b9af",
+      "scope": "Actual renderer and legacy Atlas hardware upgrade; before final Quasar-only clearance."
+    },
+    "integratedRobots": {
+      "passed": 22,
+      "errors": [],
+      "batches": [
+        {
+          "path": "artifacts/robot-electronics-qualified-webkit/result.json",
+          "sha256": "74c9824b6458238a9bd90dc75c42bceee3de946243c4854b2de71a3bd5fa5787"
+        },
+        {
+          "path": "artifacts/robot-electronics-remaining-webkit/result.json",
+          "sha256": "28831f56ee4f257ed36e82464c2fa773b387918ed55637dc5cce12543cddcd4d"
+        },
+        {
+          "path": "artifacts/robot-electronics-quasar-clearance/result.json",
+          "sha256": "5fee2b3f3709b536fa8966b2991e26ee454a4457900733cf2fb3c0a98c06b3f3"
+        },
+        {
+          "path": "artifacts/electronics-nova-smoke/result.json",
+          "sha256": "5c11818633a242d91920a965f3d9e7b3e9ea2adb68ce044d6d49f50989e37a14"
+        }
+      ],
+      "robots": [
+        {
+          "id": "robot-tt-rover",
+          "hardware": {
+            "controller": "visual-metro-mini",
+            "clockHz": 16000000,
+            "drivers": 1,
+            "regulator": true,
+            "servoBus": false,
+            "power": true
+          },
+          "wireCount": 21
+        },
+        {
+          "id": "robot-steerable-rover",
+          "hardware": {
+            "controller": "visual-metro-mini",
+            "clockHz": 16000000,
+            "drivers": 1,
+            "regulator": true,
+            "servoBus": true,
+            "power": true
+          },
+          "wireCount": 22
+        },
+        {
+          "id": "robot-atlas-forklift",
+          "hardware": {
+            "controller": "visual-metro-mini",
+            "clockHz": 16000000,
+            "drivers": 2,
+            "regulator": true,
+            "servoBus": true,
+            "power": true
+          },
+          "wireCount": 33
+        },
+        {
+          "id": "robot-mantis-walker",
+          "hardware": {
+            "controller": "visual-metro-mini",
+            "clockHz": 16000000,
+            "drivers": 0,
+            "regulator": true,
+            "servoBus": true,
+            "power": true
+          },
+          "wireCount": 15
+        },
+        {
+          "id": "robot-cyclone-sorter",
+          "hardware": {
+            "controller": "visual-metro-mini",
+            "clockHz": 16000000,
+            "drivers": 1,
+            "regulator": true,
+            "servoBus": true,
+            "power": true
+          },
+          "wireCount": 22
+        },
+        {
+          "id": "robot-helios-catapult",
+          "hardware": {
+            "controller": "visual-metro-mini",
+            "clockHz": 16000000,
+            "drivers": 0,
+            "regulator": true,
+            "servoBus": true,
+            "power": true
+          },
+          "wireCount": 15
+        },
+        {
+          "id": "robot-labyrinth-tilter",
+          "hardware": {
+            "controller": "visual-metro-mini",
+            "clockHz": 16000000,
+            "drivers": 0,
+            "regulator": true,
+            "servoBus": true,
+            "power": true
+          },
+          "wireCount": 15
+        },
+        {
+          "id": "robot-apex-scara",
+          "hardware": {
+            "controller": "visual-metro-mini",
+            "clockHz": 16000000,
+            "drivers": 1,
+            "regulator": true,
+            "servoBus": true,
+            "power": true
+          },
+          "wireCount": 23
+        },
+        {
+          "id": "robot-orion-carousel",
+          "hardware": {
+            "controller": "visual-metro-mini",
+            "clockHz": 16000000,
+            "drivers": 1,
+            "regulator": true,
+            "servoBus": true,
+            "power": true
+          },
+          "wireCount": 23
+        },
+        {
+          "id": "robot-vortex-pinball",
+          "hardware": {
+            "controller": "visual-metro-mini",
+            "clockHz": 16000000,
+            "drivers": 1,
+            "regulator": true,
+            "servoBus": true,
+            "power": true
+          },
+          "wireCount": 23
+        },
+        {
+          "id": "robot-titan-vise",
+          "hardware": {
+            "controller": "visual-metro-mini",
+            "clockHz": 16000000,
+            "drivers": 1,
+            "regulator": true,
+            "servoBus": true,
+            "power": true
+          },
+          "wireCount": 22
+        },
+        {
+          "id": "robot-hermes-crane",
+          "hardware": {
+            "controller": "visual-metro-mini",
+            "clockHz": 16000000,
+            "drivers": 1,
+            "regulator": true,
+            "servoBus": true,
+            "power": true
+          },
+          "wireCount": 22
+        },
+        {
+          "id": "robot-chronos-drawbridge",
+          "hardware": {
+            "controller": "visual-metro-mini",
+            "clockHz": 16000000,
+            "drivers": 1,
+            "regulator": true,
+            "servoBus": true,
+            "power": true
+          },
+          "wireCount": 23
+        },
+        {
+          "id": "robot-polaris-tracker",
+          "hardware": {
+            "controller": "visual-metro-mini",
+            "clockHz": 16000000,
+            "drivers": 1,
+            "regulator": true,
+            "servoBus": true,
+            "power": true
+          },
+          "wireCount": 23
+        },
+        {
+          "id": "robot-boreal-launcher",
+          "hardware": {
+            "controller": "visual-metro-mini",
+            "clockHz": 16000000,
+            "drivers": 1,
+            "regulator": true,
+            "servoBus": true,
+            "power": true
+          },
+          "wireCount": 22
+        },
+        {
+          "id": "robot-zephyr-conveyor",
+          "hardware": {
+            "controller": "visual-metro-mini",
+            "clockHz": 16000000,
+            "drivers": 1,
+            "regulator": true,
+            "servoBus": true,
+            "power": true
+          },
+          "wireCount": 22
+        },
+        {
+          "id": "robot-vector-plotter",
+          "hardware": {
+            "controller": "visual-metro-mini",
+            "clockHz": 16000000,
+            "drivers": 1,
+            "regulator": true,
+            "servoBus": true,
+            "power": true
+          },
+          "wireCount": 22
+        },
+        {
+          "id": "robot-aegis-sentry",
+          "hardware": {
+            "controller": "visual-metro-mini",
+            "clockHz": 16000000,
+            "drivers": 1,
+            "regulator": true,
+            "servoBus": true,
+            "power": true
+          },
+          "wireCount": 23
+        },
+        {
+          "id": "robot-stratos-gimbal",
+          "hardware": {
+            "controller": "visual-metro-mini",
+            "clockHz": 16000000,
+            "drivers": 0,
+            "regulator": true,
+            "servoBus": true,
+            "power": true
+          },
+          "wireCount": 15
+        },
+        {
+          "id": "robot-kestrel-arm",
+          "hardware": {
+            "controller": "visual-metro-mini",
+            "clockHz": 16000000,
+            "drivers": 0,
+            "regulator": true,
+            "servoBus": true,
+            "power": true
+          },
+          "wireCount": 15
+        },
+        {
+          "id": "robot-quasar-press",
+          "hardware": {
+            "controller": "visual-metro-mini",
+            "clockHz": 16000000,
+            "drivers": 1,
+            "regulator": true,
+            "servoBus": true,
+            "power": true
+          },
+          "wireCount": 22
+        },
+        {
+          "id": "robot-nova-loader",
+          "hardware": {
+            "controller": "visual-metro-mini",
+            "clockHz": 16000000,
+            "drivers": 1,
+            "regulator": true,
+            "servoBus": true,
+            "power": true
+          },
+          "wireCount": 22
+        }
+      ],
+      "scope": "Actual GUI -> VM -> Widgets -> Circuit -> Jolt; closed Controls, cold Run with preparation blur, repeat, Stop/Reset, joint motion and matching hardware roles. Nova translation >5 mm; Atlas loaded tilt. Four batches, not one uninterrupted run. Final SDK differs only in Quasar clearance; 21 exact sibling archives preserved."
+    },
+    "quasar": {
+      "cycles": 3,
+      "scope": "Index, rigid press contact, eject beyond dial edge, land on work surface, retract. The first batch exposed a wedge-lip jam; final source raises wedge above the retaining lip. Original gates retained."
+    },
+    "legacyUpgrade": {
+      "passed": true,
+      "scope": "Actual integrated Atlas action after loading earlier projects: preserves full live canonical circuitModel.toJSON(), Code, Blocks, Widgets, bindings; exact serialized CAD Undo, Redo. Initial raw autosave comparison mistook independent legacy battery/rotation transport normalization for CAD mutation; corrected full live-state snapshot excludes no configuration fields."
+    },
+    "nativeBuild": {
+      "logSHA256": "144bace848e4b01c8309190158f971451bb84dfa7b9e1f353b40236c6b3a41b8",
+      "scope": "Build succeeded. Nonfatal rust-objcopy/libLLVM stripping warning. Explicit Brickwright-keychain signing; strict installed signature verification. Not auto-launched into shared user profile."
+    },
+    "builtPayload": "All 11 SDK and 22 robot archive digests verified after native build.",
+    "screenshots": {
+      "docs/images/atlas-electronics.png": "b60d460928b81bc987539f8f549300bc057638d77295fadc75074732d22e578f",
+      "docs/images/mantis-electronics.png": "17477b0f2e159a1ae5b49c0062efab1d01b12768712e6813ada48d7165afe9ad",
+      "docs/images/nova-electronics.png": "9240dcca221427efd33395d0a598b52ee82ec61a4454c6489457e347f8ab4e4f"
+    }
+  },
+  "limits": [
+    "Adafruit METRO Mini 2590 Rev B and MPM3610 4739 full-size licensed surfaces with pinned STEP originals and MIT notices; other original functional housing illustrations remain explicit.",
+    "Prototype component masses/colliders and carriers are included. Original joint IDs, print-only layouts and existing history remain intact.",
+    "Physical pad coordinates/routes are illustrative, not arbitrary Circuit-wire import, rated modules, current-budget validation or fabrication certification.",
+    "Linear stages and regulated rails remain ideal. No full gearbox, battery-discharge or converter-switching qualification.",
+    "Existing saved projects require explicit CAD Properties > Add controller and power, or selection of a fresh complete Example; no silent project migration.",
+    "No user app stopped. Close older test apps before opening the new build because they share its project profile.",
+    "No GitHub Actions dispatched, awaited or rerun."
+  ]
+}
