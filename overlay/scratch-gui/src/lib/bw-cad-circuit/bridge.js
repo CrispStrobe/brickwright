@@ -113,7 +113,7 @@ export function installCircuitCadBridge(vm) {
                     firmware.attachBoard(board);
                 } else if(mode!=='blocks')throw new Error('Unsupported controller mode');
                 const coupled=await createCoupledSession({board,mechanics,connections:config,firmware,signal:controller.signal,
-                    onFrame:frame=>{if(generation===expected)publish({phase:'running',time:frame.time,readings:session?.readings() || []});},onError:error=>{if(generation===expected)fail(error);}});
+                    onFrame:frame=>{if(generation===expected)publish({phase:'running',time:frame.time,realTimeFactor:clock.realTimeFactor,readings:session?.readings() || []});},onError:error=>{if(generation===expected)fail(error);}});
                 if(disposed || generation!==expected){coupled.stop();check();}
                 session=coupled;
                 // In firmware mode the VM supplies clock ticks only; its scripts must not drive pins too.

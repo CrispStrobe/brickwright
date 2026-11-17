@@ -411,23 +411,7 @@ class CircuitTab extends React.Component {
                     this.setState({circuitData: emptied});
                     this._applyToLiveCircuit(emptied);
                 }
-                const wraw = localStorage.getItem('bw-ctl-widgets');
-                const rt = this.props.vm && this.props.vm.runtime;
-                const p = rt && rt.controllerPanel;
-                if (p && (event?.detail?.outcome === 'legacy' || event?.detail?.outcome === 'loaded')) {
-                    clearControllerPanel(p);
-                    if (wraw) {
-                        const data = JSON.parse(wraw);
-                        if (data && data.version === 1 && Array.isArray(data.widgets)) {
-                            for (const w of data.widgets) {
-                                const added = p.addWidget(w.name, w.type, w.config || {}, w.layout || {});
-                                if (w.binding) added.binding = {...w.binding};
-                            }
-                            p.setHideBindings?.(!!data.hideBindings);
-                            if (data.mode === 'play' || data.mode === 'edit') p.setMode(data.mode);
-                        }
-                    }
-                }
+                // The GUI owns project Widgets restoration, including when Circuit is hidden.
             } catch (e) {
                 console.warn('[brickwright] restoring the loaded project\'s tabs failed', e);
             }

@@ -2,6 +2,9 @@ var L6 = Object.defineProperty;
 var H6 = (A, g, I) => g in A ? L6(A, g, { enumerable: !0, configurable: !0, writable: !0, value: I }) : A[g] = I;
 var $A = (A, g, I) => H6(A, typeof g != "symbol" ? g + "" : g, I);
 const _6 = {
+  "Self collisions inside connected robots": "Selbstkollisionen innerhalb verbundener Roboter",
+  "Collisions between connected links": "Kollisionen zwischen verbundenen Gliedern",
+  "Invalid connected-link collision setting": "Ungültige Kollisionseinstellung für verbundene Glieder",
   "Complete project": "Komplettes Projekt",
   "Open {0} project": "Projekt {0} öffnen",
   "Opened {0} project.": "Projekt {0} geöffnet.",
@@ -1831,7 +1834,7 @@ function q0(A) {
   };
   if (A.simulation !== void 0) {
     const I = A.simulation;
-    (!I || !P3(I.gravity, 1e3) || typeof I.ground != "boolean" || !Q3(I.groundFriction, 0, 2) || !Q3(I.groundRestitution, 0, 1) || I.fixBase !== void 0 && typeof I.fixBase != "boolean") && g();
+    (!I || !P3(I.gravity, 1e3) || typeof I.ground != "boolean" || !Q3(I.groundFriction, 0, 2) || !Q3(I.groundRestitution, 0, 1) || I.fixBase !== void 0 && typeof I.fixBase != "boolean" || I.selfCollisions !== void 0 && typeof I.selfCollisions != "boolean") && g();
   }
   if (A.tracers !== void 0) {
     (!Array.isArray(A.tracers) || A.tracers.length > 32) && g();
@@ -6899,7 +6902,7 @@ function Gg(A) {
   (!Array.isArray(A.joints) || A.joints.length > 2e3) && C(t("bad joint list"));
   const q = /* @__PURE__ */ new Set(), E = /* @__PURE__ */ new Set();
   for (const e of A.joints)
-    (!e || typeof e.id != "string" || !/^[a-zA-Z0-9_-]{1,96}$/.test(e.id) || q.has(e.id) || !["hinge", "fixed", "slider", "pivot"].includes(e.kind) || ["slider", "pivot"].includes(e.kind) && A.version < 8 || e.bodyA === e.bodyB || ![e.bodyA, e.bodyB].every((o) => A.roots.includes(o) && !A.nodes[o].reference && A.nodes[o].role !== "hole") || ![e.anchorA, e.anchorB, e.axisA, e.axisB].every(I) || Math.abs(Math.hypot(...e.axisA) - 1) > 1e-5 || Math.abs(Math.hypot(...e.axisB) - 1) > 1e-5 || e.limits !== void 0 && (!Array.isArray(e.limits) || e.limits.length !== 2 || !["hinge", "slider"].includes(e.kind) || !e.limits.every((o) => g(o, e.kind === "slider" ? -1e5 : -Math.PI * 2, e.kind === "slider" ? 1e5 : Math.PI * 2)) || e.limits[0] > e.limits[1])) && C(t("bad joint")), e.coneAngle !== void 0 && (e.kind !== "pivot" || !g(e.coneAngle, 0, Math.PI)) && C(t("Invalid pivot cone angle")), q.add(e.id), e.control !== void 0 && ((!["hinge", "slider"].includes(e.kind) || !e.control || typeof e.control.port != "string" || !/^[A-Z][A-Z0-9_-]{0,15}$/.test(e.control.port) || E.has(e.control.port)) && C(t("Invalid or duplicate CAD motor port")), E.add(e.control.port));
+    (!e || typeof e.id != "string" || !/^[a-zA-Z0-9_-]{1,96}$/.test(e.id) || q.has(e.id) || !["hinge", "fixed", "slider", "pivot"].includes(e.kind) || ["slider", "pivot"].includes(e.kind) && A.version < 8 || e.bodyA === e.bodyB || ![e.bodyA, e.bodyB].every((o) => A.roots.includes(o) && !A.nodes[o].reference && A.nodes[o].role !== "hole") || ![e.anchorA, e.anchorB, e.axisA, e.axisB].every(I) || Math.abs(Math.hypot(...e.axisA) - 1) > 1e-5 || Math.abs(Math.hypot(...e.axisB) - 1) > 1e-5 || e.limits !== void 0 && (!Array.isArray(e.limits) || e.limits.length !== 2 || !["hinge", "slider"].includes(e.kind) || !e.limits.every((o) => g(o, e.kind === "slider" ? -1e5 : -Math.PI * 2, e.kind === "slider" ? 1e5 : Math.PI * 2)) || e.limits[0] > e.limits[1])) && C(t("bad joint")), e.collideConnected !== void 0 && typeof e.collideConnected != "boolean" && C(t("Invalid connected-link collision setting")), e.coneAngle !== void 0 && (e.kind !== "pivot" || !g(e.coneAngle, 0, Math.PI)) && C(t("Invalid pivot cone angle")), q.add(e.id), e.control !== void 0 && ((!["hinge", "slider"].includes(e.kind) || !e.control || typeof e.control.port != "string" || !/^[A-Z][A-Z0-9_-]{0,15}$/.test(e.control.port) || E.has(e.control.port)) && C(t("Invalid or duplicate CAD motor port")), E.add(e.control.port));
 }
 const R2 = (A) => A.kind === "box" && A.generator?.preset === "cube", Rg = () => ({ position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] });
 function Sg(A) {

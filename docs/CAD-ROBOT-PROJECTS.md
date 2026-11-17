@@ -53,3 +53,31 @@ Solver limits, collision rules and time budgets remain unchanged.
 
 See `docs/receipts/2026-11-16-cad-robot-projects.json` for tested source and
 native build details. No GitHub Actions are used for this delivery.
+
+## Simulation repair checkpoint — 2026-11-17
+
+The earlier shipped app embedded stale SB3 files from the GUI static mirror.
+Its Atlas/Cyclone winding constants and uncached output-writing program were
+older than the directly tested archives. Generation now synchronizes the GUI
+inputs, and the final SDK/app verifier also checks all six SB3 content hashes
+and the canonical manifest. The mismatch was reproduced before applying this fix.
+
+Project Widgets now restore and collect at GUI ownership, independent of opening
+Circuit or Controls. Run retains an open Controls drawer. Examples start with
+nonzero preset commands, and unchanged controls do not rewrite their outputs.
+Two DC motors share the two channels of each driver. These real-time examples
+use a functional resistance/back-EMF/torque circuit without winding inductance
+or flyback diodes. They are not waveform-grade coil/transistor simulations.
+The Circuit editor can model those electrical details explicitly, at extra cost.
+
+New CAD templates opt out of self collisions within each connected robot. Ground
+and loose-object contacts remain active. World settings exposes the policy, and
+older saved documents keep their prior choice. Internal clearance checking is
+a separate, more expensive mode. No solver guard or geometry tolerance was raised.
+
+This checkpoint has54 host/coupling/bundle unit controls and49 CAD physics
+controls passing, a clean SDK build, and matching11SDK plus6robot archive hashes.
+Extended untouched-default runs, closed/open Controls cases, WebKit execution,
+and the next signed Mac application are still being qualified. Previous one-second
+motion receipts do not qualify this changed profile. Reopen an example from the
+new app to obtain its updated circuit and program; saved copies retain old data.

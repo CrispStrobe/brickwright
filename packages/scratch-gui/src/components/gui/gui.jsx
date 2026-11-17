@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import omit from 'lodash.omit';
 import PropTypes from 'prop-types';
 import React from 'react';
-import {clearControllerPanel, connectControllerBoard} from '../../lib/controller-inputs.js';
+import {clearControllerPanel, connectControllerBoard, serializeControllerPanel} from '../../lib/controller-inputs.js';
 import {defineMessages, FormattedMessage, injectIntl, intlShape} from 'react-intl';
 import {connect} from 'react-redux';
 import MediaQuery from 'react-responsive';
@@ -443,8 +443,10 @@ const GUIComponent = props => {
         const onProjectLoad = () => {
             try {
                 const stc = props.vm?.runtime?.stc;
-                if (stc && stc.controller) {
-                    const restored = ControllerPanel.fromJSON(stc.controller);
+                const stored=localStorage.getItem('bw-ctl-widgets');
+                const layout=stored?JSON.parse(stored):stc?.controller;
+                if (layout) {
+                    const restored = ControllerPanel.fromJSON(layout);
                     // Replace widgets in the existing panel
                     clearControllerPanel(controllerPanel);
                     const skipped = [];
@@ -470,11 +472,14 @@ const GUIComponent = props => {
                     // dead the next time the project was loaded.
                     controllerPanel.setHideBindings?.(!!restored.hideBindings);
                     controllerPanel.setMode(restored.mode);
-                }
+                } else {clearControllerPanel(controllerPanel);controllerPanel.setMode('edit');}
             } catch { /* ignore corrupt data */ }
         };
+        const onBundle=event=>{if(['loaded','legacy'].includes(event.detail?.outcome))onProjectLoad();};
         if (props.vm) props.vm.on('PROJECT_LOADED', onProjectLoad);
-        return () => { if (props.vm) props.vm.removeListener('PROJECT_LOADED', onProjectLoad); };
+        window.addEventListener('bw-project-bundle-loaded',onBundle);
+        onProjectLoad();
+        return () => { if (props.vm) props.vm.removeListener('PROJECT_LOADED', onProjectLoad);window.removeEventListener('bw-project-bundle-loaded',onBundle); };
     }, [props.vm, controllerPanel]);
     // Listen for persistence events from the panel view
     React.useEffect(() => {
@@ -484,8 +489,10 @@ const GUIComponent = props => {
                 props.vm.runtime.stc.controller = e.detail.data;
             }
         };
+        const collect=()=>{const data=serializeControllerPanel(controllerPanel);try{localStorage.setItem('bw-ctl-widgets',JSON.stringify(data));}catch{}onChanged({detail:{data}});};
         window.addEventListener('bw-controller-changed', onChanged);
-        return () => window.removeEventListener('bw-controller-changed', onChanged);
+        window.addEventListener('bw-project-bundle-collect',collect);
+        return () => {window.removeEventListener('bw-controller-changed', onChanged);window.removeEventListener('bw-project-bundle-collect',collect);};
     }, [props.vm, controllerPanel]);
 
     // Mirror the FPGA design's OUTPUT pins into the Controller/Widgets view.

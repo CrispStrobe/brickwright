@@ -11,3 +11,6 @@ for(const [file,hash]of Object.entries(manifest.files)){
  if(createHash('sha256').update(bytes).digest('hex')!==hash)throw new Error(`Built CAD SDK was changed: ${file}`);
 }
 console.log(`PASS final app preserves all ${Object.keys(manifest.files).length} CAD SDK file digests (${manifest.commit})`);
+
+// Robot bundles are part of the qualified app, not a separately trusted mirror.
+await import('./verify-built-cad-robot-projects.mjs');

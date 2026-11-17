@@ -17,6 +17,9 @@ for(const item of CAD_ROBOT_EXAMPLES)test(`${item.name}: one project restores CA
  assert.equal(createHash('sha256').update(bytes).digest('hex'),record.sha256);assert.equal(bytes.length,record.bytes);
  const zip=await JSZip.loadAsync(bytes),inspection=await inspectBrickwrightState(bytes);assert.equal(inspection.outcome,'loaded');
  const doc=JSON.parse(inspection.cadText),bundle=JSON.parse(await zip.file('brickwright/state.json').async('text')).state,project=JSON.parse(await zip.file('project.json').async('text'));
+ assert.equal(project.stc.cadRobotProjectVersion,2);assert.equal(doc.simulation.selfCollisions,false);
+ assert.equal(bundle.circuit.parts.filter(p=>p.kind==='h_bridge').length,Math.ceil(bundle.cadCircuit.drives.length/2));
+ assert.ok(bundle.circuit.parts.filter(p=>['dc_motor','dc_motor_encoder'].includes(p.kind)).every(p=>p.params.windingH===0));
  assert.equal(doc.id,item.id);const config=validateConnections(bundle.cadCircuit);assert.equal(config.enabled,true);assert.equal(config.cadDocumentId,doc.id);
  const parts=bundle.circuit.parts,widgets=ControllerPanel.fromJSON(bundle.controller);assert.equal(widgets.mode,'play');
  const actuators=[...config.drives,...config.servos];assert.equal(actuators.length,doc.joints.filter(j=>j.control?.port).length);assert.equal(widgets.getWidgets().length,actuators.length);

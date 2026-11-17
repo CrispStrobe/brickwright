@@ -5,8 +5,8 @@
       "id": "robot-tt-rover",
       "name": "Scout TT rover",
       "file": "scout.sb3",
-      "bytes": 818280,
-      "sha256": "bac45b844addabc08eb29854fefb8bdfd83f1a164a5620fa187ac454170280a1",
+      "bytes": 818337,
+      "sha256": "3af775483e961bed28ea3fd9d5407714720c5f29bcf753b40de0faeabb227305",
       "widgets": [
         "left",
         "right"
@@ -20,8 +20,10 @@
       "id": "robot-steerable-rover",
       "name": "Trident steerable rover",
       "file": "trident.sb3",
-      "bytes": 1052971,
-      "sha256": "3d7535bb4f0fe66411846ebf938c8ca32032f027db42bc0b4ebb12e2c943df18",
+      "simulationNote": "Experimental: this model can exceed the simulation time budget.",
+      "simulationNoteDe": "Experimentell: Dieses Modell kann das Zeitlimit der Simulation überschreiten.",
+      "bytes": 1053033,
+      "sha256": "1d4f8e4b4c4f71926ddaeb7a7fe048123889ed8d545b49b0e73cdc9ed4f201d8",
       "widgets": [
         "motorA",
         "motorB",
@@ -37,8 +39,8 @@
       "id": "robot-atlas-forklift",
       "name": "Atlas forklift",
       "file": "atlas.sb3",
-      "bytes": 1051626,
-      "sha256": "0fe2ef68ec9df0cd42b762406fd4848df0e8c1a581aee243b6be00667fdbcce9",
+      "bytes": 1051698,
+      "sha256": "063b2b79a3a1e69380eb64b7ef008c8f0903e9158b3484540f141ee361c96219",
       "widgets": [
         "motorA",
         "motorB",
@@ -56,8 +58,8 @@
       "id": "robot-mantis-walker",
       "name": "Mantis 3-servo walker",
       "file": "mantis.sb3",
-      "bytes": 274898,
-      "sha256": "65af45459d1fbc137e0024e72c77ae2b36364f9f090ffd79c3b4054d1fc2a9b1",
+      "bytes": 275028,
+      "sha256": "9f29fd53155901f2a3426fd97e8f6e0d2efbc9b4283f399d43add8dbd9ae8298",
       "widgets": [
         "servoA",
         "servoB",
@@ -73,8 +75,8 @@
       "id": "robot-cyclone-sorter",
       "name": "Cyclone 2-axis gantry sorter",
       "file": "cyclone.sb3",
-      "bytes": 100797,
-      "sha256": "49adebd2035ac6210f2cb6c7b1432c24bd0b36d46babe2533492335c25c9c25b",
+      "bytes": 100878,
+      "sha256": "d03f492e9f64ac17ce07139298f86aafe79c1605d1be27963708c07ed63c7def",
       "widgets": [
         "motorA",
         "motorB",
@@ -90,8 +92,8 @@
       "id": "robot-helios-catapult",
       "name": "Helios turret catapult",
       "file": "helios.sb3",
-      "bytes": 276645,
-      "sha256": "69d3ab79ccebb9921a2b7ea10865dbd019130e9446d71a905b9362b1c750ac91",
+      "bytes": 276786,
+      "sha256": "d4237864f4a2b67acb821542438313706cc4bba1cdf0882597851cc6523670a0",
       "widgets": [
         "servoA",
         "servoB",
