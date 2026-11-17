@@ -7,6 +7,25 @@ import {createHash} from 'node:crypto';
 import JSZip from 'jszip';
 import SB3Creator from '../overlay/scratch-gui/src/lib/sb3-creator-register-art.js';
 import {CAD_ROBOT_EXAMPLES} from '../overlay/scratch-gui/src/lib/bw-cad-robot-catalog.js';
+// One physical workpiece per Run; Reset restores it for another cycle.
+export const QUASAR_CYCLE = [
+ '  # Quasar: raise the ram, index slowly, press, retract, eject, return.',
+ '  set "motorC" speed to 0',
+ '  set "motorB" direction forward', '  set "motorB" speed to 25',
+ '  set "servoA" angle to 90', '  wait 0.5 seconds',
+ '  set index_angle to 90', '  repeat 90:',
+ '    change index_angle by 1', '    set "servoA" angle to index_angle',
+ '    wait 0.02 seconds', '  wait 0.5 seconds',
+ '  set "motorB" direction reverse', '  set "motorB" speed to 5',
+ '  wait 1 seconds',
+ '  set "motorB" direction forward', '  set "motorB" speed to 25',
+ '  wait 1 seconds',
+ '  set "motorC" direction forward', '  set "motorC" speed to 10',
+ '  wait 2 seconds',
+ '  set "motorC" direction reverse', '  set "motorC" speed to 10',
+ '  wait 2 seconds', '  set "motorC" speed to 0',
+ '  # Cycle complete. The Widgets below now provide manual control.'
+];
 export function robotProjectState(doc){
  const joints=(doc.joints||[]).filter(j=>j.control?.port),parts=[{id:'uno',kind:'arduino_uno',terminals:[...Array.from({length:14},(_,i)=>'d'+i),'5v','gnd'],params:{},x:70,y:100},{id:'logic',kind:'vcc',terminals:['vcc'],params:{},x:70,y:20},{id:'ground',kind:'gnd',terminals:['gnd'],params:{},x:70,y:480},{id:'battery',kind:'battery',terminals:['pos','neg'],params:{volts:6,rInternal:.5},x:310,y:20}],wires=[];
  const t=(part,terminal)=>({part,terminal}),net=(id,...ends)=>ends.slice(1).forEach((end,i)=>wires.push({id:`${id}-${i}`,netId:id,from:ends[0],to:end}));
@@ -19,7 +38,7 @@ export function robotProjectState(doc){
   const id=doc.id==='robot-tt-rover'?['left','right'][i]:'motor'+j.control.port,bridge='bridge'+Math.floor(i/2),[enable,forward,reverse]=pinsets[i];
   // Linear stages use a nominal bare DC rotor; the TT value is output-shaft equivalent.
   // Applying that geared output constant to an 8 mm lead screw overstates its drive.
-  const motorConstant=j.kind==='slider'?.005:.25;
+  const motorConstant=doc.id==='robot-quasar-press'?(j.control.port==='B'?.003:.001):j.kind==='slider'?.005:.25;
   // Real-time functional circuit: keep resistance, back-EMF and torque coupling.
   // Coil ripple/flyback analysis belongs to the explicit detailed circuit model.
   parts.push({id,kind:doc.id==='robot-tt-rover'?'dc_motor_encoder':'dc_motor',terminals:doc.id==='robot-tt-rover'?['a','b','enc_a','enc_b']:['a','b'],params:{windingR:10,windingH:0,kV:motorConstant,kT:motorConstant,pulsesPerRev:2},x:580,y:70+i*150});
@@ -35,7 +54,7 @@ export function robotProjectState(doc){
   connections.drives.push({partId:id,jointId:j.id,kind:j.kind,direction:1,ratio:1,efficiency:1,leadMm:8});
   // Start within the available travel instead of pushing a limit at zero.
   const initialDirection=j.kind==='slider'&&j.limits&&-j.limits[0]>j.limits[1]?-1:1;
-  slider(id,`${j.control.port} · ${j.name||j.id} (%)`,-100,100,initialDirection*(doc.id==='robot-tt-rover'?30:25));
+  slider(id,`${j.control.port} · ${j.name||j.id} (%)`,-100,100,doc.id==='robot-quasar-press'?(j.control.port==='B'?25:0):initialDirection*(doc.id==='robot-tt-rover'?30:25));
   lines.push(`    IF NOT (widget value "${id}" = previous_${id}) THEN:`,`      IF widget value "${id}" < 0 THEN:`,`        set "${id}" direction reverse`,`        set "${id}" speed to (0 - widget value "${id}")`,'      ELSE:',`        set "${id}" direction forward`,`        set "${id}" speed to widget value "${id}"`,`      set previous_${id} to widget value "${id}"`);
  }
  for(const [i,j]of servos.entries()){
@@ -45,6 +64,7 @@ export function robotProjectState(doc){
   slider(id,`${j.control.port} · ${j.name||j.id} (°)`,Math.max(0,Math.ceil(90+j.limits[0]*180/Math.PI)),Math.min(180,Math.floor(90+j.limits[1]*180/Math.PI)),Math.max(0,Math.min(180,Math.floor(90+j.limits[1]*180/Math.PI),Math.max(90+j.limits[0]*180/Math.PI,105))));
   lines.push(`    IF NOT (widget value "${id}" = previous_${id}) THEN:`,`      set "${id}" angle to widget value "${id}"`,`      set previous_${id} to widget value "${id}"`);
  }
+ if(doc.id==='robot-quasar-press'){widgets.find(w=>w.name==='servoA').config.value=180;lines.splice(lines.indexOf('  forever:'),0,...QUASAR_CYCLE);}
  lines.splice(lines.indexOf('WHEN flag clicked:')+1,0,...widgets.map(w=>`  set previous_${w.name} to -999`));
  lines.push('    wait 0.02 seconds','');
  return {circuit:{version:1,vcc:5,parts,wires,holeWires:[]},controller:{version:1,mode:'play',hideBindings:true,widgets},cadCircuit:connections,code:{lang:'pseudocode',code:lines.join('\n')}};

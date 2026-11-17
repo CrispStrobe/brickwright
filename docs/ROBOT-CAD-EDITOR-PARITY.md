@@ -140,8 +140,9 @@ Existing saved projects remain unchanged: reopen an Example to use the new
 circuit and program defaults.
 
 Interactive presets use a functional motor circuit (R, back-EMF, current and torque,
-without winding/flyback transients) and explicitly disable self collisions within
-the joint-connected robot. Ground and independent bodies still collide; world
+without winding/flyback transients) and normally disable self collisions within
+the joint-connected robot. Quasar enables its internal contacts so the ram
+stops against the blank and the ejector interacts with the dial. Ground and independent bodies still collide; world
 settings can enable internal collisions. These are control examples, not internal
 clearance or switching-transient qualification. CAD poses and trails now share
 one scheduled browser draw while electrical/mechanical feedback remains 200 Hz.
@@ -159,3 +160,28 @@ Generated slider defaults now point toward available travel. See the
 [performance evidence](evidence/2026-11-17-robot-performance.md) and its receipt
 for actual browser rates and the distinction between isolated physics timing,
 whole-project control checks and native window verification.
+
+
+## Quasar workpiece cycle and cold-start preparation
+
+Quasar now loads a staged circuit/Blocks/Code program: retract the ram, index
+90 degrees, press, retract, eject, return, then accept manual Widgets. Reset
+restores the workpiece. The frame is behind the dial, the ram has a guide
+opening, and the wider radial channel avoids a yawed blank bridging the walls.
+The 80 mm wedge stroke clears the exit. Workpieces remain rigid; this is not a
+material deformation or build-qualified press simulation. The two small linear
+actuators use separate nominal motor constants and speeds; these are functional
+control models, not Adafruit motor datasheet calibration.
+
+A circuit-owned mechanical clock survives window blur while preparing. Run
+shows preparation and guards duplicate starts immediately; unavailable
+connections disable it. Actual hidden-page and explicit Stop policies remain.
+
+Native tests now check the workpiece and ram contact. WebKit verification records
+the entire VM-driven cycle, including rigid poses, ejection and return, instead
+of accepting joint displacement alone. See the Quasar evidence and receipt.
+
+The coherent robot branch is incorporated. Atlas retains the original hollow
+crate and precise fork spline candidates: the imported solid crate caused a large
+loaded tilt error. New cradle, wheel and mast collision candidates reduce the
+scene from 2,741 to 2,299 hulls without relaxing geometric qualification.

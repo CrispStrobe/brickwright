@@ -16,7 +16,7 @@ export const CAD_ROBOT_EXAMPLES = Object.freeze([
     {id:'robot-polaris-tracker',name:'Polaris 3-axis pan-tilt tracker',file:'polaris.sb3'},
     {id:'robot-boreal-launcher',name:'Boreal 3-axis ball launcher',file:'boreal.sb3'},
     {id:'robot-zephyr-conveyor',name:'Zephyr 3-axis sorting conveyor',file:'zephyr.sb3'},
-    {id:'robot-quasar-press',name:'Quasar 3-axis rotary press',file:'quasar.sb3'},
+    {id:'robot-quasar-press',name:'Quasar 3-axis rotary press',file:'quasar.sb3',simulationNote:'Run performs one index → press → eject cycle, then enables manual Widgets. Reset restores the blank. The blank is rigid: pressing does not deform it. Linear stages are ideal actuators.',simulationNoteDe:'Start führt einen Indexier-, Press- und Auswurfzyklus aus, danach steuern die Widgets manuell. Zurücksetzen setzt das Werkstück zurück. Es bleibt starr und wird nicht verformt. Die Linearachsen sind ideale Aktuatoren.'},
     {id:'robot-nova-loader',name:'Nova 3-axis wheeled loader',file:'nova.sb3'},
     {id:'robot-vector-plotter',name:'Vector 3-axis XY plotter',file:'vector.sb3'},
     {id:'robot-aegis-sentry',name:'Aegis 3-axis sentry gate',file:'aegis.sb3'},

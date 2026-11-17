@@ -12,6 +12,12 @@ for(const item of CAD_ROBOT_EXAMPLES)test(`${item.name}: initial slider commands
   const joint=doc.joints.find(j=>j.id===drive.jointId);
   const widget=state.controller.widgets.find(w=>w.name===drive.partId);
   const command=widget.config.value*drive.direction;
+  if(item.id==='robot-quasar-press'){
+   assert.match(state.code.code,/repeat 90:/);
+   assert.match(state.code.code,/set "motorB" direction reverse/);
+   assert.match(state.code.code,/set "motorC" direction reverse/);
+   continue; // The staged cycle retracts B first and keeps C parked until ejection.
+  }
   assert.notEqual(command,0,'Run must initially command motion');
   if(joint.limits){
    assert.ok(command>0?joint.limits[1]>0:joint.limits[0]<0,`${joint.id} pushes its initial travel stop`);

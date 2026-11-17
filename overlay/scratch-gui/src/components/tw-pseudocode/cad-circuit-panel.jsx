@@ -19,6 +19,7 @@ export default function CadCircuitPanel({vm,locale,colorMode,isVisible,toolbarHo
     const [status,setStatus]=React.useState({phase:'idle',time:0,readings:[]}),[error,setError]=React.useState('');
     const [catalog,setCatalog]=React.useState(emptyCatalog),[expanded,setExpanded]=React.useState(false),[runner,setRunner]=React.useState('blocks');
     const [view,setView]=React.useState('program');
+    const startingRef=React.useRef(false),[starting,setStarting]=React.useState(false);
     React.useEffect(()=>{notifyEditorMenuActions();},[status.phase,toolbarHost,isVisible]);
     const openView=next=>{setView(next);setExpanded(!(expanded&&view===next));};
     React.useEffect(()=>{const opened=()=>{setRunner('blocks');setError('');setView('controls');setExpanded(true);};window.addEventListener(ROBOT_PROJECT_OPENED,opened);return()=>window.removeEventListener(ROBOT_PROJECT_OPENED,opened);},[]);
@@ -45,15 +46,17 @@ export default function CadCircuitPanel({vm,locale,colorMode,isVisible,toolbarHo
     const current={...emptyConnections(catalog.documentId),...config};
     const mismatch=connectionDocumentMismatch(config,catalog.documentId);
     const coupledActive=['running','preparing','compiling'].includes(status.phase);
-    const active=coupledActive||directRunning||['running','preparing'].includes(mechanical.state),editingDisabled=active||mismatch||!catalog.documentId;
+    const active=starting||coupledActive||directRunning||['running','preparing'].includes(mechanical.state),editingDisabled=active||mismatch||!catalog.documentId;
     const hasActuators=!!(current.drives.length||current.servos.length);
     const directProgram=hasDirectCadProgram(vm.runtime),canRun=!mismatch&&((current.enabled&&hasActuators)||(runner==='blocks'&&directProgram&&!current.enabled));
     const write=next=>{try{connectionsForDocument(config,catalog.documentId);setConfig(saveConnections(next));setError('');}catch(e){setError(e.message);}};
     const change=(index,key,value)=>write({...current,drives:current.drives.map((d,i)=>i===index?{...d,[key]:value}:d)});
     const execute=async()=>{
+        if(startingRef.current||active)return;
         if(!canRun){setExpanded(true);return;}
         if(runner==='blocks'&&!vm.runtime.targets.some(target=>Object.values(target.blocks?._blocks||{}).some(block=>block.opcode==='event_whenflagclicked'))){setError(text('No start program. Add a “when green flag clicked” script in Blocks or Code, or open the Scout example.','Kein Startprogramm. Ergänze in Blöcke oder Code ein Skript „Wenn die grüne Flagge angeklickt wird“, oder öffne das Scout-Beispiel.'));setExpanded(true);return;}
-        try{setError('');if(!current.enabled&&directProgram){vm.greenFlag();setDirectRunning(true);}else await vm.runtime.cadCircuitSimulation.start(runner);}catch(e){setError(e.message);setExpanded(true);}
+        startingRef.current=true;setStarting(true);
+        try{setError('');if(!current.enabled&&directProgram){vm.greenFlag();setDirectRunning(true);}else await vm.runtime.cadCircuitSimulation.start(runner);}catch(e){setError(e.message);setExpanded(true);}finally{startingRef.current=false;setStarting(false);}
     };
     const stop=()=>vm.runtime.cadCircuitSimulation.stop();
     const reset=()=>{try{vm.runtime.cadCircuitSimulation.reset();setError('');}catch(e){setError(e.message);setExpanded(true);}};
@@ -70,7 +73,7 @@ export default function CadCircuitPanel({vm,locale,colorMode,isVisible,toolbarHo
     if(!toolbarHost)return null;
     return <React.Fragment>
         {createPortal(<div className={`${styles.root} ${styles.toolbar}`} data-color-mode={colorMode} data-testid="bw-cad-program-toolbar"><span className="bw-compact-project-title"><ProjectTitleInput /></span>
-            <button className={styles.run} data-testid="bw-cad-run" aria-label={text('Run program','Programm starten')} disabled={active} onClick={execute}>▶ {text('Run','Start')}</button>
+            <button className={styles.run} data-testid="bw-cad-run" aria-label={text('Run program','Programm starten')} aria-busy={starting||status.phase==='preparing'||status.phase==='compiling'} disabled={active||!canRun} onClick={execute}>▶ {starting||status.phase==='preparing'?text('Preparing…','Wird vorbereitet…'):text('Run','Start')}</button>
             <button aria-label={text('Stop program','Programm stoppen')} title={text('Stop program','Programm stoppen')} disabled={!active} onClick={stop}>■</button>
             <button aria-label={text('Reset simulation','Simulation zurücksetzen')} title={text('Reset simulation','Simulation zurücksetzen')} onClick={reset}>↺</button>
             <button ref={trigger} data-testid="bw-cad-program-settings" aria-label={text('Program & connections','Programm und Verbindungen')} aria-expanded={expanded} onClick={()=>openView('program')}><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5 2 12l6 7M16 5l6 7-6 7M14 3l-4 18" fill="none" stroke="currentColor" strokeWidth="2" /></svg>{text('Program','Programm')}{hasActuators?<span className={styles.count}>{current.drives.length+current.servos.length}</span>:null}</button>
