@@ -20,5 +20,6 @@ export const CAD_ROBOT_EXAMPLES = Object.freeze([
     {id:'robot-nova-loader',name:'Nova 3-axis wheeled loader',file:'nova.sb3'},
     {id:'robot-vector-plotter',name:'Vector 3-axis XY plotter',file:'vector.sb3'},
     {id:'robot-aegis-sentry',name:'Aegis 3-axis sentry gate',file:'aegis.sb3'},
-    {id:'robot-stratos-gimbal',name:'Stratos 3-axis gimbal stage',file:'stratos.sb3'}
+    {id:'robot-stratos-gimbal',name:'Stratos 3-axis gimbal stage',file:'stratos.sb3'},
+    {id:'robot-kestrel-arm',name:'Kestrel 3-servo arm',file:'kestrel.sb3'}
 ]);

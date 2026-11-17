@@ -1,8 +1,4 @@
-<<<<<<<< HEAD:overlay/scratch-gui/static/cad-sdk/model-library-local-BzjqMjEB.js
-import { v, p as Q } from "./sdk-Ca_rVUVk.js";
-========
-import { v, p as Q } from "./sdk-n4wWrW5N.js";
->>>>>>>> origin/feat/stratos-gimbal-20261117:overlay/scratch-gui/static/cad-sdk/model-library-local-RAcIch_R.js
+import { v, p as Q } from "./sdk-DhtX-XR4.js";
 function l(c) {
   if (!c || typeof c != "object")
     throw new Error("Invalid local model library manifest.");

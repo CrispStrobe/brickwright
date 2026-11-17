@@ -7,7 +7,7 @@ import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {cadSdkFetchPins,validateCadProvenanceUrl,CAD_SDK_ROOT,CAD_SDK_PRODUCER,APPROVED_CAD_COMMIT,APPROVED_CAD_CARRIER,APPROVED_CAD_CARRIER_SHA256,APPROVED_CAD_CARRIERS,APPROVED_CAD_MANIFEST_SHA256,APPROVED_CAD_PRODUCER_SHA256} from '../scripts/lib/cad-sdk-fetch-pins.mjs';
-const full='1'.repeat(40), carrier=APPROVED_CAD_CARRIER;
+const full='1'.repeat(40), carrier=APPROVED_CAD_CARRIER, sdkCarrier=Object.keys(APPROVED_CAD_CARRIERS).find(name=>name.startsWith('sdk-'));
 const original=fileURLToPath(new URL(`../${CAD_SDK_ROOT}/${carrier}`,import.meta.url));
 const raw = (ref=full,owner='Ghostkeeper',repo='SlicerTestModels',file='models/example.stl') => ['raw.','githubusercontent.com/',owner,'/',repo,'/',ref,'/',file].join('');
 const detectors=[['raw', /raw\.githubusercontent\.com\/[^\s'"`)\\]+/g]];
@@ -33,7 +33,7 @@ function fixture(){
   clean(){assert.equal(digest(readFileSync(path.join(sourceRoot,'manifest.json'))),APPROVED_CAD_MANIFEST_SHA256);assert.equal(digest(readFileSync(producer)),APPROVED_CAD_PRODUCER_SHA256);for(const [name,hash]of Object.entries(JSON.parse(manifestBytes).files))assert.equal(digest(readFileSync(path.join(sourceRoot,name))),hash,'original payload bytes must remain unchanged');rmSync(root,{recursive:true,force:true})}};
 }
 test('the exact approved 10MB carrier admits existing external immutable provenance only',()=>{
- const f=fixture();try{const rows=f.run();assert.ok(rows.length>1000);assert.ok(rows.some(row=>row.text.includes('/Ghostkeeper/SlicerTestModels/')));assert.equal(rows.filter(row=>row.file===`${CAD_SDK_ROOT}/${carrier}`&&row.text.includes('%20')).length,4);assert.equal(rows.filter(row=>row.file.endsWith('/sdk-C_OaLxxH.js')).length,5);assert.ok(rows.every(row=>Object.hasOwn(APPROVED_CAD_CARRIERS,path.basename(row.file))&&row.class==='sha-const'))}finally{f.clean()}
+ const f=fixture();try{const rows=f.run();assert.ok(rows.length>1000);assert.ok(rows.some(row=>row.text.includes('/Ghostkeeper/SlicerTestModels/')));assert.equal(rows.filter(row=>row.file===`${CAD_SDK_ROOT}/${carrier}`&&row.text.includes('%20')).length,4);assert.equal(rows.filter(row=>row.file.endsWith(`/${sdkCarrier}`)).length,5);assert.ok(rows.every(row=>Object.hasOwn(APPROVED_CAD_CARRIERS,path.basename(row.file))&&row.class==='sha-const'))}finally{f.clean()}
 });
 test('structural validation allows immutable external paths and only literal encoded spaces',()=>{
  for(const value of [raw(),raw(full,'AngeloNicoli','OpenSCAD-Snippet','Asset_SCAD/Angle%20Shelf.scad'),raw(full,'jscad','OpenJSCAD.org','examples/example.js')])assert.doesNotThrow(()=>validateCadProvenanceUrl(value));
@@ -71,7 +71,7 @@ test('an extra SDK file is not automatically declared, even when tracked',()=>{
 });
 
 test('second exact carrier cannot gain a URL even with a matching updated manifest',()=>{
- const f=fixture();try{const name='sdk-C_OaLxxH.js',target=path.join(f.directory,name);const bytes=readFileSync(target,'utf8')+'\nconst hostile="https://'+raw('main')+'";';writeFileSync(target,bytes);f.manifest.files[name]=digest(bytes);f.save();assert.throws(f.run,/exact approved (?:carrier hash|bytes)/)}finally{f.clean()}
+ const f=fixture();try{const name=sdkCarrier,target=path.join(f.directory,name);const bytes=readFileSync(target,'utf8')+'\nconst hostile="https://'+raw('main')+'";';writeFileSync(target,bytes);f.manifest.files[name]=digest(bytes);f.save();assert.throws(f.run,/exact approved (?:carrier hash|bytes)/)}finally{f.clean()}
 });
 
 test('noncarrier payload plus adjusted manifest, or producer rewrite, cannot borrow carrier approval',()=>{
