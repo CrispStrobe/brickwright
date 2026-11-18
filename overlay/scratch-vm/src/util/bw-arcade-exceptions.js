@@ -16,6 +16,7 @@ module.exports=failureFreeze({__proto__:null,rejectConditionWait,create,createSt
 const primitiveOwner = require('./bw-primitive-owner');
 const cachedPrimitiveOwner = require('./bw-cached-primitive-owner');
 const consumeArrayFailureLease=require('./bw-array-operations').consumeFailureLease;
+const engineActivations=require('./bw-engine-activations');
 
 // Neither an Error property nor a serialized value can grant exceptional
 // completion. Only the current primitive may issue a signal for this runtime.
@@ -133,7 +134,9 @@ function createCoordinator(runtime) {
             if (!arcadeClaim || !live(util?.thread) || !['arcade_createObject','arcade_callFunction'].includes(opcode)) return null;
             if (!cachedPrimitiveOwner(runtime,util,args,opcode,[])) return null;
             const lease=Object.freeze({});
-            setCurrent(callerLeases,lease,{owner,thread:util.thread,frame:util.thread.peekStackFrame(),generation});
+            const activation=engineActivations.capture(runtime.sequencer,util.thread);
+            const frameLease=activation&&engineActivations.captureFrame(activation);
+            setCurrent(callerLeases,lease,{owner,thread:util.thread,frame:util.thread.peekStackFrame(),generation,frameLease});
             return lease;
         },
         releaseCaller(lease) {if(lease) failureDelete(callerLeases,lease);},
@@ -155,7 +158,12 @@ function createCoordinator(runtime) {
         link(child, caller, cleanup = () => {}, lease = null) {
             const record=lease && failureGet(callerLeases,lease);
             const retained=record?.owner===owner && record.thread===caller && record.generation===generation &&
-                caller.stackFrames.includes(record.frame);
+                caller.stackFrames.includes(record.frame) && (!record.frameLease ||
+                    engineActivations.validFrame(record.frameLease,runtime,caller,record.frame));
+            // A supplied stale lease is not an ordinary direct caller. It may
+            // not downgrade to the active-thread fallback after a pooled frame
+            // is reused. Transfer consumers will require a non-null frameLease.
+            if(lease && !retained)throw new Error('Arcade exception edge requires its current retained caller lease');
             if (!live(child) || !live(caller) || child === caller || (!retained && runtime.sequencer.activeThread !== caller) ||
                 child.target !== caller.target || typeof cleanup !== 'function' || failureHas(edges,child)) {
                 throw new Error('Arcade exception edge requires an actual managed call');

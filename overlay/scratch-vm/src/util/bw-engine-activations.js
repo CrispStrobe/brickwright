@@ -4,6 +4,7 @@
 // authority. Only the actual execute wrapper issues an entry; frame mutators
 // and run cancellation invalidate it even when pooled object identity survives.
 const runtimes=new WeakMap(),entries=new WeakMap(),threads=new WeakMap(),frames=new WeakMap();
+const frameLeases=new WeakMap(),frameLives=new WeakMap();
 const invalidateRecord=record=>{
     if(!record||!record.live)return;
     record.live=false;record.state.records.delete(record);
@@ -11,11 +12,18 @@ const invalidateRecord=record=>{
     if(threads.get(record.thread)===record)threads.delete(record.thread);
 };
 const invalidateThread=thread=>invalidateRecord(threads.get(thread));
-const invalidateFrame=frame=>{const records=frames.get(frame);if(records)for(const record of records)invalidateRecord(record);};
+const invalidateFrame=frame=>{
+    const records=frames.get(frame);if(records)for(const record of records)invalidateRecord(record);
+    const lifetime=frameLives.get(frame);if(lifetime){lifetime.live=false;lifetime.state.lifetimes.delete(lifetime);frameLives.delete(frame);}
+};
 const observeRuntime=runtime=>{
     let state=runtimes.get(runtime);if(state)return state;
-    state={active:true,disposed:false,generation:0,current:null,records:new Set()};
-    const invalidate=()=>{state.generation++;for(const record of state.records)invalidateRecord(record);state.current=null;};
+    state={active:true,disposed:false,generation:0,current:null,records:new Set(),lifetimes:new Set()};
+    const invalidate=()=>{
+        state.generation++;for(const record of state.records)invalidateRecord(record);
+        for(const lifetime of state.lifetimes){lifetime.live=false;if(frameLives.get(lifetime.frame)===lifetime)frameLives.delete(lifetime.frame);}
+        state.lifetimes.clear();state.current=null;
+    };
     const stop=()=>{invalidate();state.active=false;};
     const start=()=>{invalidate();if(!state.disposed)state.active=true;};
     const dispose=()=>{stop();state.disposed=true;for(const [event,handler]of listeners)runtime.off(event,handler);};
@@ -60,6 +68,30 @@ module.exports=Object.freeze({
     },
     valid(token,sequencer,thread){const record=entries.get(token);return !!record&&
         record.sequencer===sequencer&&record.thread===thread&&current(record);},
+    captureFrame(entry){
+        const record=entries.get(entry);
+        if(!current(record)||!record.inScope||record.state.current!==record||
+            record.sequencer.activeThread!==record.thread)return null;
+        let lifetime=frameLives.get(record.frame);
+        if(lifetime&&(lifetime.thread!==record.thread||lifetime.runtime!==record.runtime||
+            lifetime.generation!==record.generation||!lifetime.live))return null;
+        if(!lifetime){
+            const token=Object.freeze(Object.create(null));
+            lifetime={token,state:record.state,runtime:record.runtime,thread:record.thread,
+                frame:record.frame,target:record.target,container:record.container,generation:record.generation,live:true};
+            frameLives.set(record.frame,lifetime);frameLeases.set(token,lifetime);record.state.lifetimes.add(lifetime);
+        }
+        return lifetime.token;
+    },
+    validFrame(lease,runtime,thread,frame){
+        const lifetime=frameLeases.get(lease);
+        return !!lifetime&&lifetime.live&&lifetime.runtime===runtime&&lifetime.thread===thread&&
+            lifetime.frame===frame&&frameLives.get(frame)===lifetime&&lifetime.state.active&&!lifetime.state.disposed&&
+            lifetime.generation===lifetime.state.generation&&runtime.threads.includes(thread)&&!thread.isKilled&&
+            thread.status!==thread.constructor.STATUS_DONE&&thread.target===lifetime.target&&
+            runtime.targets.includes(lifetime.target)&&thread.blockContainer===lifetime.container&&
+            lifetime.target.blocks===lifetime.container&&thread.stackFrames.includes(frame);
+    },
     invalidateThread,
     invalidateFrame
 });
