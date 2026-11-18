@@ -251,3 +251,9 @@ illustrations. Converter transients, power ratings, exact physical pin mapping,
 ideal linear-stage internals and fabrication qualification remain outside this
 pass. Existing print-only layouts are retained; added carriers are exportable
 from their assembly. See the final receipt for full GUI/co-simulation/native scope.
+
+### 2026-11-18: screw forms and tablet Properties
+
+SDK `ac32c189d219437bf06f46075ed645ffd1b510b6` fixes unsupported thread ends, shared head/point geometry, fully threaded cup ends and headless drive sizing. Generic Screw and Thread are covered too. Saved meshes/history stay intact; Apply shape parameters explicitly regenerates an existing part. Properties updates applicable controls immediately and scrolls only vertically on touch. Source/limitations: CAD `docs/evidence/2026-11-18-screw-forms-and-properties.md`.
+
+Local qualification: 35 head/point render combinations and the form/Undo flow pass in iPad WebKit; actual horizontal/vertical Chromium finger gestures pass. The embedded Brickwright SDK additionally passes bounded generic dimensions, changing head/point + exact Undo, editable cup depth with no fictitious length control, and trusted touch without a model edit (`scripts/verify-cad-fasteners.mjs`). All 130 Lite CAD/pinning/bridge tests pass. The 22 robot archives are unchanged. CAD's 134 geometry/physics checks pass across batches: one unrelated five-second hinge timeout during concurrent work passes alone without changing its test or implementation.
