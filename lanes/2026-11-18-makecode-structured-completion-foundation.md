@@ -81,3 +81,12 @@ lifetime condition survives, while removing frame registration is detected.
 No full VM or guest result is claimed for this candidate. The prior committed managed-throw proofs remain
 separate. Parser/default enablement, captured dispatch/lowering and labelled,
 switch and for-each destinations remain unqualified.
+
+
+Four separate new captured-lifetime controls pass. The original eleven-control
+live-flag mutation remains undetected. New reset/pop/Stop restoration controls
+show why registration catches completed invalidation. A new actual reset callback
+counterexample distinguishes the live flag: removing it permits a stale captured
+read before registration deletion. The guard remains unchanged; the new mutation
+result is separate from the original six-cut batch. No VM program or project
+qualification is claimed.

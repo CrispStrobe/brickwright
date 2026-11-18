@@ -222,10 +222,29 @@ Eleven new selected-source controls pass after correcting the callable caller-le
 opcode allowlist. The ordinary-local control now retains a procedure sentinel
 instead of placing persistent locals on a transient body frame. All eleven
 original failures and earlier lock/cgroup admission refusals remain retained.
-Five targeted mutations produce failing controls. Removing only lifetime.live
+Five targeted mutations produce failing controls. In that initial batch, removing only lifetime.live
 survives because frame registration still rejects reset; removing both checks
 is detected. These controls cover escaped cell/value captures,
 normal locals, sharing, writes, map copying, sentinel reset, Stop/reuse and a
 Stop during the actual value reader. No full captured-binding, invocation,
 source-lowering or guest qualification follows. Captured event/held dispatch,
 labelled/switch/for-each destinations and complete lowering remain open.
+
+
+### Captured lifetime counterexample
+
+The first eleven controls do not detect removal of the captured-map live flag.
+That original mutation remains undetected. Three new controls restore sentinel
+fields and identities after reset, pop, or Stop/restart: the live-flag-only cut
+still passes those controls, while removal of frame registration exposes the
+reset/pop cases. Completed invalidation removes registration as well as clearing
+live, so those cases cannot distinguish the checks.
+
+A fourth new control observes the actual reset callback interval: invalidation
+clears live, calls the lifetime Set delete method, then removes frame registration.
+A temporarily instrumented delete method attempts the actual captured read during
+that interval. Current source refuses; the live-flag-only mutation reads the stale
+value 31. The original guard is therefore retained. This is selected-source
+callback evidence, with authored graph/services; no full VM or language result
+follows. The new four-control batch and mutation are separate from the original
+six mutations and eleven controls.
