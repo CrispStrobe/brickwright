@@ -70,6 +70,7 @@ function createCoordinator(runtime) {
     const attachments = new WeakMap();
     let attachmentCount = 0, invocation = null;
     let structuredBridge = null, structuredEngine = false;
+    const throwRoutes = new WeakMap();
     const stagedThrows = new WeakMap(), managedTransfers = new WeakMap(),managedEdgeKey=failureFreeze({});
     let structuredObservations = new WeakMap();
     const invocationCurrent = () => invocation === null ||
@@ -119,6 +120,33 @@ function createCoordinator(runtime) {
             signalAdd(publishedSignals,signal);
         } finally {throw signal;}
     };
+    // Freeze every existing edge before any finalizer or cleanup can replace it.
+    // A later hop may consume only the retained suffix, never discover a new link.
+    const captureRoute = thread => {
+        const route=[];
+        for(let current=thread;failureHas(edges,current);){
+            const edge=failureGet(edges,current);
+            if(edge.generation!==generation||!edge.caller||!edge.frameLease||
+                !engineActivations.validFrame(edge.frameLease,runtime,edge.caller,edge.structuredFrame)||
+                !engineActivations.valid(edge.activation,runtime.sequencer,edge.caller))return null;
+            route.push(failureFreeze({thread:current,edge}));current=edge.caller;
+        }
+        return failureFreeze(route);
+    };
+    const routeCurrent = route => {
+        const epoch=generation;
+        const valid=!!route&&route.every(point=>
+            failureGet(edges,point.thread)===point.edge&&point.edge.generation===generation&&
+            engineActivations.validFrame(point.edge.frameLease,runtime,point.edge.caller,point.edge.structuredFrame)&&
+            engineActivations.valid(point.edge.activation,runtime.sequencer,point.edge.caller));
+        return valid&&epoch===generation&&active&&!disposed&&invocationCurrent();
+    };
+    const stageEscape = (thread,signal,origin=null,completionToken=null) => {
+        const route=failureGet(throwRoutes,signal);
+        if(!route?.length||route[0].thread!==thread||!routeCurrent(route))return false;
+        failureSet(stagedThrows,signal,{thread,signal,origin,completionToken,route,generation,escape:true});
+        return true;
+    };
     const owner = Object.freeze({
         failure,
         consumeStaged(thread,signal) {
@@ -130,26 +158,26 @@ function createCoordinator(runtime) {
             if(staged.generation!==generation||!active||disposed)return true;
             let accepted=false;
             try {
-                const destination=staged.destination||thread;
-                const edgeCurrent=!staged.edge||failureGet(edges,thread)===staged.edge&&
-                    staged.edge.generation===generation&&engineActivations.validFrame(staged.edge.frameLease,runtime,destination,staged.edge.structuredFrame);
-                const originCurrent=staged.completionToken?
-                    engineActivations.takeCompletedThrow(staged.completionToken,runtime.sequencer,thread,signal):
-                    engineActivations.valid(staged.origin,runtime.sequencer,thread);
-                const ack=edgeCurrent&&originCurrent&&
-                    engineActivations.commitHandlerTransfer(staged.request,runtime.sequencer,destination,staged.destinationOrigin||staged.origin);
-                if(ack&&staged.edge){
-                    const settlement=engineActivations.parkHandlerAck(ack,runtime.sequencer,destination);
-                    if(settlement){
-                        staged.edge.cleanup(signal);
-                        if(engineActivations.validHandlerSettlement(settlement,runtime.sequencer,destination)&&
-                            failureGet(edges,thread)===staged.edge&&generation===staged.generation){
-                            const record=failureFreeze({owner,runtime,thread,caller:destination,settlement,signal,generation});
-                            failureSet(managedTransfers,thread,record);failureDelete(edges,thread);
-                            runtime.sequencer.retireThread(thread);accepted=true;
+                if(staged.escape){
+                    const {route}=staged,edge=route[0].edge;
+                    const receipt=routeCurrent(route)&&engineActivations.commitManagedEscape(
+                        staged.origin,staged.completionToken,runtime.sequencer,thread,signal);
+                    if(receipt&&engineActivations.takeManagedEscape(receipt,runtime.sequencer,thread)){
+                        edge.cleanup(signal);
+                        if(routeCurrent(route)&&generation===staged.generation&&active&&!disposed){
+                            const remaining=failureFreeze(route.slice(1));
+                            failureSet(throwRoutes,signal,remaining);
+                            failureSet(managedTransfers,thread,failureFreeze({owner,runtime,thread,
+                                caller:edge.caller,activation:edge.activation,signal,generation,route:remaining,relay:true}));
+                            failureDelete(edges,thread);runtime.sequencer.retireThread(thread);accepted=true;
                         }
                     }
-                }else accepted=!!ack&&engineActivations.takeHandlerAck(ack,runtime.sequencer,thread);
+                }else{
+                    const originCurrent=engineActivations.valid(staged.origin,runtime.sequencer,thread);
+                    const ack=originCurrent&&engineActivations.commitHandlerTransfer(
+                        staged.request,runtime.sequencer,thread,staged.origin);
+                    accepted=!!ack&&engineActivations.takeHandlerAck(ack,runtime.sequencer,thread);
+                }
             }catch { /* The original owned signal is the only terminal fallback. */ }
             if(accepted)return true;
             // Metadata and managed cleanup are callouts. A run invalidated
@@ -172,7 +200,18 @@ function createCoordinator(runtime) {
             if(!record||record.owner!==owner||record.caller!==thread)return false;
             failureDelete(managedSignals,transport);
             if(disposed||!active||record.generation!==generation)return true;
-            if(engineActivations.takeHandlerSettlement(record.settlement,runtime.sequencer,thread))return true;
+            try{
+                if(record.relay&&routeCurrent(record.route)&&engineActivations.valid(record.activation,runtime.sequencer,thread)){
+                    const value=failureGet(signals,record.signal).value;
+                    const request=engineActivations.prepareOwnedThrow(record.activation,value,record.signal);
+                    if(request){
+                        const ack=engineActivations.commitHandlerTransfer(request,runtime.sequencer,thread,record.activation);
+                        if(ack&&engineActivations.takeHandlerAck(ack,runtime.sequencer,thread))return true;
+                    }else if(stageEscape(thread,record.signal,record.activation)){
+                        owner.consumeStaged(thread,record.signal);return true;
+                    }
+                }
+            }catch { /* Retain the exact original owned Error on any refusal. */ }
             if(disposed||!active||record.generation!==generation)return true;
             try {retireLineage(thread,record.signal,true);}catch(error){if(error!==record.signal)throw error;}
             return true;
@@ -231,15 +270,8 @@ function createCoordinator(runtime) {
                 const original=failureGet(signals,completion.signal);
                 if(completion.kind!=='throw'||original?.runtime!==runtime||original.generation!==generation)
                     throw new Error('Structured finalizer requires its original owned completion');
-                const edge=failureGet(edges,thread);
-                if(edge?.generation===generation&&edge.frameLease&&
-                    engineActivations.validFrame(edge.frameLease,runtime,edge.caller,edge.structuredFrame)){
-                    const request=engineActivations.prepareOwnedThrow(edge.activation,completion.value,completion.signal);
-                    if(request){
-                        failureSet(stagedThrows,completion.signal,{thread,completionToken,request,generation,edge,
-                            destination:edge.caller,destinationOrigin:edge.activation});
-                        owner.consumeStaged(thread,completion.signal);return;
-                    }
+                if(stageEscape(thread,completion.signal,null,completionToken)){
+                    owner.consumeStaged(thread,completion.signal);return;
                 }
                 try{retireLineage(thread,completion.signal,true);}catch(error){if(error!==completion.signal)throw error;}
             });
@@ -332,35 +364,37 @@ function createCoordinator(runtime) {
             if (!arcadeClaim || !live(thread) || util.runtime !== runtime || block?.opcode !== 'arcade_throwValue') {
                 throw new Error('Arcade Throw requires its current physical primitive');
             }
+            // Retain the admitted run before the managed primitive-value reader.
+            // Stop inside that reader can mint only an old-run cancellation.
+            const readGeneration=generation;
             // Read while the actual primitive's Number-input loan is live.
             const value = readValue(args, util);
             if (value!==null && !['undefined','boolean','number','string'].includes(typeof value)) {
                 throw new Error('Arcade Throw currently requires a primitive thrown value');
             }
             const signal = new Error('Arcade uncaught thrown value: ' + String(value));
-            const record = Object.freeze({owner, runtime, generation, value, target: thread.target,
+            const record = Object.freeze({owner, runtime, generation:readGeneration, value, target: thread.target,
                 block: block.id, stack: Object.freeze([...thread.stack])});
+            if(structuredEngine&&(readGeneration!==generation||!active||disposed||!invocationCurrent())){
+                // This private tombstone carries no handler or call authority.
+                // The actual execute/Promise consumer absorbs it before stale
+                // origin checks, without mutating a reused thread in a new run.
+                failureSet(signals,signal,record);
+                failureSet(stagedThrows,signal,{thread,generation:readGeneration});throw signal;
+            }
             setCurrent(signals,signal, record);
             if(structuredEngine){
                 // Capture while the real cached primitive loan is still live;
                 // only the actual execute/Promise consumer may commit it later.
                 try {
+                    failureSet(throwRoutes,signal,captureRoute(thread));
                     if(cachedPrimitiveOwner(runtime,util,args,'arcade_throwValue',[])===block){
                         const origin=engineActivations.capture(runtime.sequencer,thread);
-                        let request=origin&&engineActivations.prepareOwnedThrow(origin,value,signal),edge=null;
-                        if(!request&&origin){
-                            const candidate=failureGet(edges,thread);
-                            if(candidate?.generation===generation&&candidate.frameLease&&
-                                engineActivations.validFrame(candidate.frameLease,runtime,candidate.caller,candidate.structuredFrame)){
-                                request=engineActivations.prepareManagedThrow(origin,candidate.activation,value,signal);
-                                if(request)edge=candidate;
-                            }
-                        }
+                        const request=origin&&engineActivations.prepareOwnedThrow(origin,value,signal);
                         if(request){
-                            failureSet(stagedThrows,signal,{thread,origin,request,generation,
-                                ...(edge?{edge,destination:edge.caller,destinationOrigin:edge.activation}:{})});
-                            throw signal;
+                            failureSet(stagedThrows,signal,{thread,origin,request,generation});throw signal;
                         }
+                        if(origin&&stageEscape(thread,signal,origin))throw signal;
                     }
                 }catch(error){if(error===signal)throw signal;}
             }

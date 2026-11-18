@@ -7,6 +7,7 @@ const runtimes=new WeakMap(),entries=new WeakMap(),threads=new WeakMap(),frames=
 const frameLeases=new WeakMap(),frameLives=new WeakMap(),handlerEntries=new WeakMap();
 const loopRuntimes=new WeakSet(),loopPreparations=new WeakMap(),loopByFrame=new WeakMap(),loopBodyOwners=new WeakMap();
 const branchOwners=new WeakMap(),completedThrows=new WeakMap(),branchCancellations=new WeakSet();
+const managedEscapes=new WeakMap();
 const handlerTransfers=new WeakMap(),handlerAcks=new WeakMap(),handlerByFrame=new WeakMap(),handlerSettlements=new WeakMap();
 const invalidateRecord=record=>{
     if(!record||!record.live)return;
@@ -602,6 +603,40 @@ module.exports=Object.freeze({
             unwind.push(handler);
         }
         return null;
+    },
+    commitManagedEscape(origin,completionToken,sequencer,thread,signal){
+        // Only a current selected execute activation or the one-use completed
+        // finalizer token can unwind a procedure. No actionable boundary may
+        // be skipped, including a local catch or a not-yet-run finalizer.
+        const execution=entries.get(origin);
+        if(completionToken){
+            if(!module.exports.takeCompletedThrow(completionToken,sequencer,thread,signal))return null;
+        }else if(!current(execution)||execution.sequencer!==sequencer||execution.thread!==thread)return null;
+        const state=runtimes.get(sequencer.runtime),generation=state?.generation;
+        for(const frame of thread.stackFrames){
+            const handler=handlerByFrame.get(frame);
+            if(handler&&(!handlerCurrent(handler,sequencer.runtime,thread)||throwPhase(handler)))return null;
+        }
+        if(!state?.active||state.disposed||state.generation!==generation)return null;
+        const receipt=Object.freeze(Object.create(null));
+        managedEscapes.set(receipt,{sequencer,thread,state,generation,stack:thread.stack,frames:thread.stackFrames,
+            blocks:[...thread.stack],points:[...thread.stackFrames]});
+        // Ownership is closed before retirement. Actual call settlement, rather
+        // than a normal reporter value, delivers the signal to the next caller.
+        for(const frame of thread.stackFrames){
+            const handler=handlerByFrame.get(frame);
+            if(handler){handler.phase='closed';handlerByFrame.delete(frame);
+                if(handler.branch){handler.branch.live=false;branchOwners.delete(handler.branch.frame);}}
+        }
+        invalidateThread(thread);return receipt;
+    },
+    takeManagedEscape(receipt,sequencer,thread){
+        const record=managedEscapes.get(receipt);if(!record)return false;
+        managedEscapes.delete(receipt);
+        return record.sequencer===sequencer&&record.thread===thread&&record.state.active&&!record.state.disposed&&
+            record.state.generation===record.generation&&thread.stack===record.stack&&thread.stackFrames===record.frames&&
+            thread.stack.length===record.blocks.length&&thread.stackFrames.length===record.points.length&&
+            record.blocks.every((block,index)=>thread.stack[index]===block&&thread.stackFrames[index]===record.points[index]);
     },
     prepareManagedThrow(origin,destinationOrigin,value,signal=null){
         const source=entries.get(origin),destination=entries.get(destinationOrigin);

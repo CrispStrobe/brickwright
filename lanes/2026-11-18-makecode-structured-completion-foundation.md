@@ -26,13 +26,13 @@ remain separate; no corpus or completed structured-language credit is claimed.
 
 Normal/throw branch completion and finally now have disabled source consumers
 through actual Thread advancement, Promise fulfillment and sequencer empty-branch
-exit. Saved throws relay through same-thread and direct managed callers only
+exit. Saved throws relay through same-thread and linked managed callers
 after finalization. Owned returns now retain their actual procedure frame/run
 and value until lexical finally completes; abrupt return/throw replacement and
 cache-observation cancellation have selected-source controls. Unlabelled native
 repeat/forever/repeat-until/while break/continue now have owned destination/frame
 and iteration leases with lexical finally relay. Labelled/switch/for-each targets,
-deeper managed unwind, captured catch bindings and complete lowering remain
+captured catch bindings and complete lowering remain
 unimplemented. Parser admission and default
 enablement require that coupled work plus affected original guest qualification,
 including native/Code/SB3 behavior. All seven original guest fixtures remain UNRUN.
@@ -57,3 +57,14 @@ corrected controls. A cached VM jump probe privately restored only pinned
 minilog/microee, then failed on missing format-message before construction.
 Earlier return/boundary suites and mutations were not rerun; no corpus, VM
 program or guest count changed.
+
+New multi-edge managed throw consumers unwind local finalizers and consume a
+physical procedure-escape receipt before cleanup, retirement and actual call
+settlement. Each immediate caller selects its own handler or relays through the
+captured still-linked edge suffix. Selected-source counterexamples cover
+handler-free middle calls, deeper chains, rethrow, unlink/relink, frame reset,
+Stop/reuse, metadata refusal and ordinary managed value reading. Existing suites
+and corpus measurements remain separate. One new cached VM bootstrap restored
+only pinned format-message dependencies and stopped on missing immutable before
+construction. Parser/default admission and all original guest fixtures remain
+unqualified.

@@ -35,7 +35,7 @@ present; otherwise they enter finally while retaining the original completion.
 Catch throws enter that boundary's finally. Throws escaping a running finally
 replace its pending completion and continue outward. Empty authored branches
 retain their flags and complete through the actual sequencer null-branch path.
-Only same-thread and direct managed-caller destinations are implemented.
+Same-thread handlers and linked managed callers have disabled source consumers.
 
 The actual execute catch and Promise rejection consumer use the coordinator's
 private signal identity. Commit revalidates run, origin, stack, branch and entry,
@@ -52,7 +52,7 @@ Ordinary fulfillment and unknown rejection retain their prior behavior. Overlay
 reapplication accepts only the complete exact current or previous hook shape;
 partial hooks still refuse.
 
-## Lexical cells and direct managed calls
+## Lexical cells and managed calls
 
 The physical catch owns a private cell map tied to its actual frame prefix and
 run lifetime. Actual getLocal/setLocal methods reach that map through their real
@@ -66,14 +66,23 @@ actual caller activation and frame lease. Staging and consumption must observe
 the identical still-linked edge, preventing unlink/relink substitution. A local
 boundary on the throwing child cannot be skipped for a caller catch.
 
-After installing a direct caller catch, the engine consumes its receipt and
-parks the destination until that actual call settles. Child cleanup and
-retirement precede transfer delivery. Synchronous callFunction throws a private
-transfer settlement; queued _pumpFunctionCalls rejects with the same distinct
-private transport. Neither route returns a normal value or runs ordinary
-handleReport/rejection popping. Consumption revalidates the parked installation
-before making it runnable. Foreign, copied or reused transports cannot consume
-it; changed branch state falls back to the original thrown Error. Generation
+Managed throws retain an immutable chain of the actual linked call edges before
+any finalizer executes. Each procedure first finishes its local catch/finally
+selection. Only a current execute activation or a one-use completed-finalizer
+token can issue its physical escape receipt; an actionable local boundary
+refuses escape. The receipt is consumed before cleanup and retirement. The
+actual synchronous callFunction or queued _pumpFunctionCalls then delivers a
+private transport to the immediate caller, before stale-origin filters. No
+normal reporter value or ordinary rejection pop substitutes for settlement.
+
+That caller revalidates the captured edge suffix, frame lifetimes, activation
+and run before selecting its local handler. A handler-free caller escapes via
+its own receipt and actual pending call. This repeats through deeper managed
+calls without prematurely entering the grandparent handler. Unlink/relink of
+the same child cannot replace an edge in the frozen chain. Local finalizers,
+rethrows and exact original Error fallback remain decisive.
+
+Foreign, copied or reused transports cannot settle a call; changed branch state falls back to the original thrown Error. Generation
 checks after metadata and cleanup prevent Stop/restart callbacks from reviving
 or terminally reporting stale work.
 
@@ -95,12 +104,12 @@ that exact original Error. Stop/restart cancels only the retained old branch
 and gives the sequencer a private one-use cancellation handoff; it does not
 repeat old authored work or adopt a reset/reissued frame.
 
-A completed child finalizer can relay its saved throw through the actual direct
-managed-call edge. The engine issues a one-use completion token bound to the
+A completed child finalizer can relay its saved throw through the retained
+managed-call edge chain. The engine issues a one-use completion token bound to the
 actual branch, run, frame and original signal. Only its private coordinator sink
 can combine that token with the retained caller edge/activation and physical
-installation receipt. Caller catch/finally execution waits for synchronous
-callFunction or queued _pumpFunctionCalls settlement, as for direct throws.
+installation receipt. Each caller catch/finally waits for its actual synchronous callFunction or
+queued _pumpFunctionCalls settlement, including handler-free intervening calls.
 
 ## Owned return and procedure settlement
 
@@ -162,8 +171,8 @@ from previous attempts remain separate originals.
 
 ## Remaining coupled work and qualification boundary
 
-Labelled jumps, switch destinations, for-each targets, deeper managed-call
-unwinding, captured catch bindings and complete structured lowering remain
+Labelled jumps, switch destinations, for-each targets, captured catch bindings
+and complete structured lowering remain
 unimplemented. Unlabelled jumps are confined to the admitted native loop kinds.
 Implemented abrupt replacement covers returns, throws and those loop jumps. A running finally must finish before
 an outer handler can be selected. The compiler must prove lexical jump targets
@@ -181,3 +190,18 @@ admitted but failed on a missing cached dependency before VM construction; it
 provides no program output or VM qualification. The earlier entry and stack proofs stay
 separate; successful source controls do not count as completed guest fixtures
 or structured-exception support.
+
+Separate new multi-edge controls execute selected Thread, execute/Promise,
+Sequencer, callFunction and _pumpFunctionCalls with authored graphs and unrelated
+services. They cover synchronous/queued grandchild throws, inner finalization,
+rethrow, same-child edge replacement, frame reset, Stop/reuse, normal managed
+value reading and exact original Error on refusal. They do not rerun the prior
+jump/return/branch suites. A separately guarded private cached VM bootstrap
+restored pinned format-message bytes, then failed on missing immutable before
+VM construction; it earns no VM program, guest or project credit.
+
+The thrown-value reader retains the admitted run before reading. Stop/restart
+inside that reader issues only a private old-run cancellation tombstone, which
+the actual execute/Promise consumer absorbs before stale-origin filtering. It
+cannot stage a new handler, deliver a call value, or publish a failure into a
+reused root frame. The pre-fix disposed-owner error is preserved separately.
