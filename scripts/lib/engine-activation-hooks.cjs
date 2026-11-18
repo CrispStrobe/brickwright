@@ -24,9 +24,13 @@ const threadEdits=[
     ['    reuseStackForNextBlock (blockId) {','    reuseStackForNextBlock (blockId) {\n        bwEngineActivations.invalidateThread(this);'],
     ['    popStack () {','    popStack () {\n        bwEngineActivations.invalidateThread(this);'],
     ['        this.reuseStackForNextBlock(nextBlockId);',
-        '        if (bwEngineActivations.advanceStructuredBranch(this, nextBlockId, () => this.reuseStackForNextBlock(nextBlockId))) return;\n        this.reuseStackForNextBlock(nextBlockId);']
+        '        const bwReuseLoopBody = () => {\n            if (!bwEngineActivations.advanceLoopBody(this, nextBlockId, () => this.reuseStackForNextBlock(nextBlockId))) this.reuseStackForNextBlock(nextBlockId);\n        };\n        if (bwEngineActivations.advanceStructuredBranch(this, nextBlockId, bwReuseLoopBody)) return;\n        bwReuseLoopBody();']
 ];
 const sequencerEdits=[
+    ['        const currentBlockId = thread.peekStack();\n        const branchId = thread.target.blocks.getBranch(',
+        '        const bwLoopPreparation = bwEngineActivations.prepareLoopBranch(this, thread, branchNum, isLoop);\n        const currentBlockId = thread.peekStack();\n        const branchId = thread.target.blocks.getBranch('],
+    ['            thread.pushStack(null);\n        }\n    }\n\n    /**\n     * Step a procedure.',
+        '            thread.pushStack(null);\n        }\n        bwEngineActivations.commitLoopBranch(bwLoopPreparation, this, thread);\n    }\n\n    /**\n     * Step a procedure.'],
     ['                thread.goToNextBlock();\n            }\n            // If no next block',
         '                thread.goToNextBlock();\n                if (bwEngineActivations.takeBranchCancellation(thread)) return;\n            }\n            // If no next block'],
     ['                thread.goToNextBlock();\n            }\n        }\n    }',
@@ -56,12 +60,14 @@ const stripKnown=(source,versions)=>{
 };
 const stripExecute=source=>stripKnown(source,[executeEdits,
     executeEdits.filter(([before])=>!before.startsWith('        handleReport(')),previousExecuteEdits]);
-const stripThread=source=>stripKnown(source,[threadEdits,threadEdits.slice(0,4)]);
+const previousThreadEdits=threadEdits.map(([before,after])=>[before,before==='        this.reuseStackForNextBlock(nextBlockId);'?
+    '        if (bwEngineActivations.advanceStructuredBranch(this, nextBlockId, () => this.reuseStackForNextBlock(nextBlockId))) return;\n        this.reuseStackForNextBlock(nextBlockId);':after]);
+const stripThread=source=>stripKnown(source,[threadEdits,previousThreadEdits,threadEdits.slice(0,4)]);
 module.exports=Object.freeze({
     stripThreadActivations:stripThread,
     stripExecuteActivations:stripExecute,
     patchThreadActivations:source=>prefix+threadEdits.reduce((text,[before,after])=>once(text,before,after),stripThread(source)),
     patchExecuteActivations:source=>prefix+executeEdits.reduce((text,[before,after])=>once(text,before,after),stripExecute(source)),
-    patchSequencerActivations:source=>patch(source,sequencerEdits),
-    stripSequencerActivations:source=>strip(source,sequencerEdits)
+    patchSequencerActivations:source=>prefix+sequencerEdits.reduce((text,[before,after])=>once(text,before,after),stripKnown(source,[sequencerEdits,sequencerEdits.slice(2)])),
+    stripSequencerActivations:source=>stripKnown(source,[sequencerEdits,sequencerEdits.slice(2)])
 });

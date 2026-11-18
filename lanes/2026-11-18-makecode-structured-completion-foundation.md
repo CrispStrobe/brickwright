@@ -29,7 +29,9 @@ through actual Thread advancement, Promise fulfillment and sequencer empty-branc
 exit. Saved throws relay through same-thread and direct managed callers only
 after finalization. Owned returns now retain their actual procedure frame/run
 and value until lexical finally completes; abrupt return/throw replacement and
-cache-observation cancellation have selected-source controls. Break/continue,
+cache-observation cancellation have selected-source controls. Unlabelled native
+repeat/forever/repeat-until/while break/continue now have owned destination/frame
+and iteration leases with lexical finally relay. Labelled/switch/for-each targets,
 deeper managed unwind, captured catch bindings and complete lowering remain
 unimplemented. Parser admission and default
 enablement require that coupled work plus affected original guest qualification,
@@ -47,3 +49,11 @@ finalizer failure and a newly exposed stale return publication during cache
 admission are retained separately from the corrected result. A real cached VM
 return probe passed private JSZip restoration but failed on missing minilog
 before VM construction; no VM program or coverage result follows from it.
+
+Separate new jump controls execute selected native loop/Cast/Color source,
+Sequencer branch entry and Thread reuse as well as the actual jump method.
+Destination and ordinary-body cancellation failures are preserved with their
+corrected controls. A cached VM jump probe privately restored only pinned
+minilog/microee, then failed on missing format-message before construction.
+Earlier return/boundary suites and mutations were not rerun; no corpus, VM
+program or guest count changed.

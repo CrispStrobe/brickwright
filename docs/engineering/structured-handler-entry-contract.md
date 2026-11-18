@@ -127,11 +127,45 @@ separate real cached VM return probe failed on missing minilog before VM
 construction, after private restoration of the pinned JSZip dependency closure.
 It did not execute a program or qualify this candidate in a VM.
 
+## Owned unlabelled loop jumps
+
+The experimental owner admits unlabelled break/continue through the actual
+cached `arcade_structuredJump` primitive. No jump primitive is registered in
+getInfo. The compiler still refuses structured source. A native loop destination
+is issued only when the real Sequencer enters a branch of the current cached
+repeat, forever, repeat-until or while command. A public isLoop flag, copied body
+ID, jump argument object or dynamic caller frame cannot issue that destination.
+
+Each destination retains the actual loop frame lifetime, run generation,
+command/cache/primitive identities, fields, inputs, params and stack prefix.
+Its iteration has a separate private body-frame identity, preserved only across
+observed native sequential reuse. Reset, pool release, a new iteration or changed
+metadata revokes it. Actual block ancestry must reach the admitted loop body;
+procedure parameter/reporter frames prevent borrowing a caller's loop.
+
+Jumps visit intervening lexical finalizers inside out, skipping catches. An
+abrupt finalizer return, throw or new jump replaces the pending completion.
+Break advances through ordinary Thread control flow; continue preserves the
+loop counter/context and uses a null branch to resume native scheduling. Neither
+route can select an outer loop merely because its destination is easier to
+validate. Promise finalization retains the same ownership checks. Stop/restart
+at admission or ordinary loop successor observation consumes only retained old
+work, without publishing an old invariant failure or running its successor.
+
+New controls execute selected actual native control, Cast and Color source in
+addition to Thread, execute/Promise, Sequencer and the extension jump/return
+methods. Graph registration and unrelated service adapters remain authored.
+They provide no full VM, guest, compiler or project coverage. A separate cached
+VM jump probe passed private restoration of pinned minilog/microee but failed on
+missing format-message before VM construction; JSZip and minilog setup failures
+from previous attempts remain separate originals.
+
 ## Remaining coupled work and qualification boundary
 
-Break/continue relay and their owned lexical destinations, deeper managed-call
+Labelled jumps, switch destinations, for-each targets, deeper managed-call
 unwinding, captured catch bindings and complete structured lowering remain
-unimplemented. Implemented abrupt replacement covers returns and throws. A running finally must finish before
+unimplemented. Unlabelled jumps are confined to the admitted native loop kinds.
+Implemented abrupt replacement covers returns, throws and those loop jumps. A running finally must finish before
 an outer handler can be selected. The compiler must prove lexical jump targets
 against actual enclosing control frames. These gaps forbid parser admission and
 default enablement.

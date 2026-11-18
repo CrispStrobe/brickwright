@@ -5,6 +5,7 @@
 // and run cancellation invalidate it even when pooled object identity survives.
 const runtimes=new WeakMap(),entries=new WeakMap(),threads=new WeakMap(),frames=new WeakMap();
 const frameLeases=new WeakMap(),frameLives=new WeakMap(),handlerEntries=new WeakMap();
+const loopRuntimes=new WeakSet(),loopPreparations=new WeakMap(),loopByFrame=new WeakMap(),loopBodyOwners=new WeakMap();
 const branchOwners=new WeakMap(),completedThrows=new WeakMap(),branchCancellations=new WeakSet();
 const handlerTransfers=new WeakMap(),handlerAcks=new WeakMap(),handlerByFrame=new WeakMap(),handlerSettlements=new WeakMap();
 const invalidateRecord=record=>{
@@ -15,6 +16,7 @@ const invalidateRecord=record=>{
 };
 const invalidateThread=thread=>invalidateRecord(threads.get(thread));
 const invalidateFrame=frame=>{
+    const iteration=loopBodyOwners.get(frame);if(iteration&&!iteration.reusing)iteration.live=false;
     const branch=branchOwners.get(frame);
     if(branch&&!branch.reusing){branch.live=false;}
     const records=frames.get(frame);if(records)for(const record of records)invalidateRecord(record);
@@ -200,11 +202,84 @@ const relayReturn=(completion,start,originCurrent)=>{
     }
     completion.live=false;completion.settle(completion.value);return true;
 };
+// Native lexical destinations are issued only at actual Sequencer branch
+// entry under a current native loop execution/cache. Public isLoop, a body ID
+// or an arbitrary parent pointer cannot issue a destination.
+const snapshotData=object=>{
+    if(!object||typeof object!=='object')return null;
+    const descriptors=Object.getOwnPropertyDescriptors(object);
+    if(Reflect.ownKeys(descriptors).some(key=>typeof key!=='string'||!Object.hasOwn(descriptors[key],'value')))return null;
+    return Object.freeze(Reflect.ownKeys(descriptors).map(key=>Object.freeze({key,value:descriptors[key].value})));
+};
+const sameData=(object,snapshot)=>!!snapshot&&Reflect.ownKeys(object).length===snapshot.length&&snapshot.every(({key,value})=>{
+    const descriptor=Object.getOwnPropertyDescriptor(object,key);return descriptor&&Object.hasOwn(descriptor,'value')&&descriptor.value===value;
+});
+const loopMetadata=loop=>{
+    const {container,block,operation}=loop;
+    return container.getBlock===loop.getBlock&&container.getBranch===loop.getBranch&&container.getNextBlock===loop.getNextBlock&&container.getInputs===loop.getInputs&&
+        container.getBlock(loop.root)===block&&block.opcode===loop.opcode&&block.fields===loop.fields&&block.inputs===loop.inputs&&block.mutation===loop.mutation&&
+        sameData(block.fields,loop.fieldMap)&&loop.fieldData.every(({field,data})=>sameData(field,data))&&
+        sameData(block.inputs,loop.inputMap)&&loop.inputData.every(({input,data})=>sameData(input,data))&&
+        container._cache?._executeCached?.[loop.root]?._ops===loop.operations&&loop.operations.length===loop.operationList.length&&
+        loop.operationList.every((op,index)=>loop.operations[index]===op)&&operation._argValues===loop.args&&sameData(loop.args,loop.argData)&&
+        operation.fields===loop.fields&&operation.inputs===container.getInputs(block)&&operation.mutation===loop.mutation&&operation._blockFunction===loop.implementation&&
+        loop.runtime.getOpcodeFunction(loop.opcode)===loop.implementation&&container.getBranch(loop.root,1)===loop.body&&
+        (loop.body===null||container.getBlock(loop.body)===loop.bodyBlock&&loop.bodyBlock.parent===loop.root);
+};
+const loopCurrent=loop=>{
+    if(!loop)return false;
+    const {state,thread,lifetime,iteration}=loop;
+    const lifetimeCurrent=()=>iteration?.live&&loopBodyOwners.get(iteration.frame)===iteration&&
+        thread.stackFrames[loop.depth+1]===iteration.frame&&thread.stack[loop.depth+1]===iteration.blockId&&
+        loopByFrame.get(loop.frame)===loop&&lifetime.live&&frameLives.get(loop.frame)===lifetime&&
+        state.active&&!state.disposed&&state.generation===loop.generation&&loopRuntimes.has(loop.runtime)&&
+        loop.runtime.sequencer===loop.sequencer&&loop.runtime.threads.includes(thread)&&!thread.isKilled&&thread.status!==thread.constructor.STATUS_DONE&&
+        loop.runtime.targets.includes(loop.target)&&thread.target===loop.target&&loop.target.blocks===loop.container&&thread.blockContainer===loop.container&&
+        loop.frame.isLoop===true&&loop.frame.params===loop.params&&loop.frame.waitingReporter===loop.waitingReporter&&
+        loop.frame.executionContext===loop.context&&(loop.context===null||sameData(loop.context,loop.contextData))&&
+        loop.prefix.every((point,index)=>thread.stack[index]===point.block&&thread.stackFrames[index]===point.frame);
+    return lifetimeCurrent()&&loopMetadata(loop)&&lifetimeCurrent();
+};
+const cancelLoopBody=iteration=>{
+    const loop=iteration?.loop;if(!loop)return true;
+    const {thread}=loop;
+    if(iteration.live&&loopByFrame.get(loop.frame)===loop&&
+        thread.stackFrames[loop.depth+1]===iteration.frame&&thread.stack[loop.depth+1]===iteration.blockId&&
+        loop.prefix.every((point,index)=>thread.stack[index]===point.block&&thread.stackFrames[index]===point.frame)&&
+        !current(threads.get(thread))){thread.status=thread.constructor.STATUS_DONE;branchCancellations.add(thread);}
+    return true;
+};
+const relayJump=(completion,start,originCurrent)=>{
+    const {loop}=completion,{thread,runtime}=loop;
+    const owned=()=>completion.live&&originCurrent()&&completion.lexicalCurrent()&&loopCurrent(loop)&&originCurrent()&&
+        completion.live&&loop.iteration.live&&loop.lifetime.live&&loop.state.active&&loop.state.generation===loop.generation;
+    if(!owned())return false;
+    for(let index=start;index>loop.depth;index--){
+        const handler=handlerByFrame.get(thread.stackFrames[index]);if(!handler)continue;
+        if(!handlerCurrent(handler,runtime,thread)||!owned())return false;
+        if(handler.phase!=='finally'&&handler.hasFinally)return installBranch(handler,'finally',completion);
+    }
+    if(!owned())return false;
+    for(let index=thread.stackFrames.length-1;index>loop.depth;index--){
+        const handler=handlerByFrame.get(thread.stackFrames[index]);
+        if(handler){handler.phase='closed';handlerByFrame.delete(handler.frame);
+            if(handler.branch){handler.branch.live=false;branchOwners.delete(handler.branch.frame);}}
+    }
+    // Native mutators revoke discarded branch/activation lifetimes. Continue
+    // leaves the loop's own executionContext/counter intact for its next turn.
+    completion.live=false;loopByFrame.delete(loop.frame);
+    while(thread.stackFrames.length>loop.depth+1)thread.popStack();
+    if(completion.kind==='break')thread.goToNextBlock();
+    else thread.pushStack(null);
+    return true;
+};
 const finishBranch=branch=>{
     const handler=branch.handler,{thread,runtime}=handler;
     if(!branchCurrent(branch)||thread.peekStackFrame()!==branch.frame)return false;
     if(handler.phase!=='finally'&&handler.hasFinally)return installBranch(handler,'finally',normalCompletion);
     const completion=handler.phase==='finally'?handler.pending||normalCompletion:normalCompletion;
+    if(completion.kind==='break'||completion.kind==='continue')return relayJump(completion,handler.prefix.length-2,
+        ()=>branchCurrent(branch)&&branch.live&&thread.peekStackFrame()===branch.frame);
     if(completion.kind==='return')return relayReturn(completion,handler.prefix.length-2,
         ()=>branchCurrent(branch)&&branch.live&&thread.peekStackFrame()===branch.frame);
     if(completion.kind==='throw'){
@@ -347,6 +422,80 @@ module.exports=Object.freeze({
         return record.branch.handler.runtime===sequencer.runtime&&record.branch.handler.thread===thread&&
             record.completion.signal===signal&&branchCurrent(record.branch)&&thread.peekStackFrame()===record.branch.frame;
     },
+    enableLexicalLoops(runtime,enabled){if(enabled)loopRuntimes.add(runtime);else loopRuntimes.delete(runtime);},
+    prepareLoopBranch(sequencer,thread,branchNum,isLoop){
+        if(!loopRuntimes.has(sequencer.runtime)||isLoop!==true||branchNum!==1)return null;
+        const execution=runtimes.get(sequencer.runtime)?.current;
+        if(!current(execution)||!execution.inScope||execution.state.current!==execution||execution.thread!==thread||execution.sequencer!==sequencer)return null;
+        const {runtime,target,container,frame,root,state,generation}=execution;
+        const block=container.getBlock(root),operations=container._cache?._executeCached?.[root]?._ops;
+        if(!block||!['control_repeat','control_forever','control_repeat_until','control_while'].includes(block.opcode)||!Array.isArray(operations))return null;
+        loopByFrame.delete(frame);
+        const commands=operations.filter(op=>op.id===root&&op.opcode===block.opcode),operation=commands.length===1?commands[0]:null;
+        if(!operation||operation!==operations[operations.length-1]||typeof operation._blockFunction!=='function'||
+            runtime.getOpcodeFunction(block.opcode)!==operation._blockFunction||operation.fields!==block.fields||operation.mutation!==block.mutation||block.mutation!=null)return null;
+        const fieldMap=snapshotData(block.fields),inputMap=snapshotData(block.inputs),argData=snapshotData(operation._argValues);
+        const fieldData=fieldMap?.map(({value:field})=>({field,data:snapshotData(field)})),inputData=inputMap?.map(({value:input})=>({input,data:snapshotData(input)}));
+        if(!fieldMap||!inputMap||!argData||fieldData.some(x=>!x.data)||inputData.some(x=>!x.data))return null;
+        const body=container.getBranch(root,1),bodyBlock=body===null?null:container.getBlock(body);
+        if(body!==null&&(!bodyBlock||bodyBlock.parent!==root)||!current(execution))return null;
+        const frameLease=module.exports.captureFrame(execution.token),lifetime=frameLeases.get(frameLease);if(!lifetime)return null;
+        const loop={runtime,target,container,frame,root,state,generation,sequencer,thread,lifetime,depth:thread.stackFrames.length-1,
+            prefix:Object.freeze(thread.stack.map((block,index)=>Object.freeze({block,frame:thread.stackFrames[index]}))),
+            params:frame.params,waitingReporter:frame.waitingReporter,context:frame.executionContext,contextData:snapshotData(frame.executionContext),block,opcode:block.opcode,fields:block.fields,inputs:block.inputs,mutation:block.mutation,
+            operation,operations,operationList:operations.slice(),args:operation._argValues,implementation:operation._blockFunction,
+            fieldMap,inputMap,argData,fieldData,inputData,body,bodyBlock,getBlock:container.getBlock,getBranch:container.getBranch,getNextBlock:container.getNextBlock,getInputs:container.getInputs};
+        const token=Object.freeze(Object.create(null));loopPreparations.set(token,loop);return token;
+    },
+    commitLoopBranch(token,sequencer,thread){
+        const loop=loopPreparations.get(token);if(!loop)return;
+        loopPreparations.delete(token);
+        if(loop.sequencer!==sequencer||loop.thread!==thread||thread.stackFrames.length!==loop.depth+2||thread.peekStack()!==loop.body||
+            thread.peekStackFrame()===loop.frame)return;
+        const iteration={loop,frame:thread.peekStackFrame(),blockId:loop.body,block:loop.bodyBlock,live:true,reusing:false};
+        loop.iteration=iteration;loopBodyOwners.set(iteration.frame,iteration);loopByFrame.set(loop.frame,loop);
+        if(!loopCurrent(loop)){iteration.live=false;loopByFrame.delete(loop.frame);}
+    },
+    beginOwnedJump(entry,kind){
+        const execution=entries.get(entry);
+        if(!current(execution)||!execution.inScope||execution.state.current!==execution||execution.sequencer.activeThread!==execution.thread){
+            if(execution&&(!execution.state.active||execution.state.generation!==execution.generation)){
+                const branch=branchOwners.get(execution.frame);if(branch)cancelOldBranch(branch);return true;
+            }
+            throw Error('Structured jump requires its current engine entry');
+        }
+        if(!['break','continue'].includes(kind))throw Error('Unknown structured jump kind');
+        const {thread,container}=execution;
+        let loop=null;
+        const refuse=message=>{
+            if(!execution.state.active||execution.state.generation!==execution.generation){
+                const branch=branchOwners.get(execution.frame);if(branch)cancelOldBranch(branch);
+                else if(loop)cancelLoopBody(loop.iteration);return true;
+            }
+            throw Error(message);
+        };
+        for(let index=thread.stackFrames.length-2;index>=0;index--){
+            const frame=thread.stackFrames[index];
+            if(loopByFrame.has(frame)){loop=loopByFrame.get(frame);break;}
+            if(frame.params!==null||frame.waitingReporter!==null)break;
+        }
+        if(!loop||!loopCurrent(loop))return refuse('Structured jump requires its owned lexical loop destination');
+        // Actual block ancestry must reach this loop, not merely a copied body
+        // ID or a dynamic caller frame. Snapshot each observed link for relay.
+        const ancestry=[];let id=execution.root;
+        for(let n=0;n<128&&id!==loop.root;n++){
+            const block=container.getBlock(id);if(!block||ancestry.some(point=>point.id===id))break;
+            ancestry.push({id,block,parent:block.parent});id=block.parent;
+        }
+        if(id!==loop.root||!ancestry.some(point=>point.id===loop.body))return refuse('Structured jump is outside its lexical loop body');
+        const lexicalCurrent=()=>ancestry.every(point=>container.getBlock(point.id)===point.block&&point.block.parent===point.parent);
+        const completion={kind,loop,live:true,lexicalCurrent};
+        const origin=()=>current(execution)&&lexicalCurrent();
+        if(!relayJump(completion,thread.stackFrames.length-1,origin)){
+            return refuse('Structured jump ownership changed');
+        }
+        return true;
+    },
     beginOwnedReturn(entry,depth,read,settle){
         const execution=entries.get(entry);
         if(!current(execution)||!execution.inScope||execution.state.current!==execution||
@@ -387,6 +536,25 @@ module.exports=Object.freeze({
             thread.peekStackFrame()!==handler.frame||handler.phase!=='try'||handler.sink||
             typeof handler.container.getNextBlock!=='function')return false;
         handler.sink=sink;return installBranch(handler,'try',normalCompletion);
+    },
+    advanceLoopBody(thread,nextBlockId,reuse){
+        const iteration=loopBodyOwners.get(thread.peekStackFrame());if(!iteration)return false;
+        const {loop}=iteration;
+        const refuse=message=>{
+            if(!loop.state.active||loop.state.disposed||loop.state.generation!==loop.generation)return cancelLoopBody(iteration);
+            throw Error(message);
+        };
+        if(loopByFrame.get(loop.frame)!==loop)return false;
+        const current=()=>loopCurrent(loop)&&iteration.live&&thread.peekStack()===iteration.blockId&&
+            (iteration.blockId===null||loop.container.getBlock(iteration.blockId)===iteration.block);
+        if(!current()||loop.container.getNextBlock(iteration.blockId)!==nextBlockId||!current())
+            return refuse('Lexical loop body ownership changed');
+        const block=nextBlockId===null?null:loop.container.getBlock(nextBlockId);
+        if(nextBlockId!==null&&!block||!current())return refuse('Lexical loop successor ownership changed');
+        iteration.reusing=true;try{reuse();}finally{iteration.reusing=false;}
+        iteration.blockId=nextBlockId;iteration.block=block;
+        if(!current())return refuse('Lexical loop body reuse changed ownership');
+        return true;
     },
     advanceStructuredBranch(thread,nextBlockId,reuse){
         const branch=branchOwners.get(thread.peekStackFrame());if(!branch)return false;

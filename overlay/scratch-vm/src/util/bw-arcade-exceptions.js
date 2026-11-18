@@ -189,6 +189,14 @@ function createCoordinator(runtime) {
             cachedPrimitiveOwner(runtime,util,args,'arcade_setLocal',['NAME']);
             return engineActivations.writeCatchCell(runtime,util.thread,args.NAME,value);
         },
+        jumpStructured(args,util) {
+            if(!structuredEngine)return false;
+            if(!live(util?.thread)||util.runtime!==runtime||primitiveOwner.current(util,args)?.opcode!=='arcade_structuredJump')
+                throw Error('Structured jump requires its actual cached primitive');
+            const entry=engineActivations.capture(runtime.sequencer,util.thread);
+            cachedPrimitiveOwner(runtime,util,args,'arcade_structuredJump',['KIND']);
+            return engineActivations.beginOwnedJump(entry,args.KIND);
+        },
         returnStructured(args,util,depth,read,settle) {
             if(!structuredEngine)return false;
             if(!live(util?.thread)||util.runtime!==runtime||primitiveOwner.current(util,args)?.opcode!=='arcade_returnValue')
@@ -453,6 +461,7 @@ function createCoordinator(runtime) {
             const token = failureFreeze({});
             arcadeClaim = token;readValue = valueReader;consumePhysicalUpdate = physicalUpdate;
             structuredEngine=preview==='engine';
+            engineActivations.enableLexicalLoops(runtime,structuredEngine);
             if(preview){
                 structuredBridge=require('./bw-structured-continuations')(
                     (thread,frame,top=false)=>live(thread)&&thread.stackFrames.includes(frame)&&
@@ -488,6 +497,7 @@ function createCoordinator(runtime) {
                 beginStructuredInvocation(thread) {return current()?invoke('beginStructuredInvocation',[thread]):null;},
                 enterStructuredHandler(...args) {return invoke('enterStructuredHandler',args);},
                 bindStructuredHandlerEntry(...args) {return current()?invoke('bindStructuredHandlerEntry',args):null;},
+                jumpStructured(...args) {return current()&&invoke('jumpStructured',args);},
                 returnStructured(...args) {return current()&&invoke('returnStructured',args);},
                 startStructuredHandler(...args) {return current()&&invoke('startStructuredHandler',args);},
                 suspendStructuredInvocation(...args) {return current()?invoke('suspendStructuredInvocation',args):null;},
@@ -509,7 +519,7 @@ function createCoordinator(runtime) {
                 rejectConstraint(...args) {return invoke('rejectConstraint',args);},
                 dispose() {
                     if (!current()) return;
-                    cancel();structuredBridge=null;structuredEngine=false;arcadeClaim = null;readValue = null;consumePhysicalUpdate = null;
+                    cancel();engineActivations.enableLexicalLoops(runtime,false);structuredBridge=null;structuredEngine=false;arcadeClaim = null;readValue = null;consumePhysicalUpdate = null;
                     failures = new WeakMap();edges = new WeakMap();structuredObservations = new WeakMap();
                     if (attachmentCount === 0) owner.dispose();
                 }
