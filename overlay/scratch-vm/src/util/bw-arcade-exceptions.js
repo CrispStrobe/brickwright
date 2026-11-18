@@ -12,7 +12,7 @@ const failureHas=(map,key)=>failureApply(nativeWeakHas,map,[key]);
 const failureDelete=(map,key)=>failureApply(nativeWeakDelete,map,[key]);
 const signalAdd=(set,key)=>failureApply(nativeSetAdd,set,[key]);
 const signalHas=(set,key)=>failureApply(nativeSetHas,set,[key]);
-module.exports=failureFreeze({__proto__:null,rejectConditionWait,create,consume,failed,capture,stale,diagnostic,reported,arrayCoordinatorReady,rejectArrayOperation,attachArrayCoordinator});
+module.exports=failureFreeze({__proto__:null,rejectConditionWait,create,createStructuredPreview,consume,failed,capture,stale,diagnostic,reported,arrayCoordinatorReady,rejectArrayOperation,attachArrayCoordinator});
 const primitiveOwner = require('./bw-primitive-owner');
 const cachedPrimitiveOwner = require('./bw-cached-primitive-owner');
 const consumeArrayFailureLease=require('./bw-array-operations').consumeFailureLease;
@@ -34,6 +34,15 @@ function failureStack(thread) {
     return failureFreeze(saved);
 }
 function create(runtime, readValue, consumePhysicalUpdate = null) {
+    return claimRuntime(runtime,readValue,consumePhysicalUpdate,false);
+}
+// Explicit experimental inspection seam. The extension constructor still calls
+// create(), never this entry. Previewing a continuation cannot consume a throw,
+// bypass retirement or enable parser support; there is no sequencer commit yet.
+function createStructuredPreview(runtime, readValue, consumePhysicalUpdate = null) {
+    return claimRuntime(runtime,readValue,consumePhysicalUpdate,true);
+}
+function claimRuntime(runtime, readValue, consumePhysicalUpdate, structuredPreview) {
     if (!runtime || typeof runtime.on !== 'function' || !Array.isArray(runtime.targets)) {
         return Object.freeze({raise() {throw new Error('Arcade Throw requires a bound runtime');},
             rejectConstraint() {throw new Error('Arcade constraint rejection requires a bound runtime');},
@@ -42,7 +51,7 @@ function create(runtime, readValue, consumePhysicalUpdate = null) {
             failure: () => null, captureCaller:()=>null,releaseCaller() {}, rethrow() {}, dispose() {}});
     }
     if (!failureHas(owners,runtime)) createCoordinator(runtime);
-    return failureGet(coordinatorControls,runtime).claim(readValue,consumePhysicalUpdate);
+    return failureGet(coordinatorControls,runtime).claim(readValue,consumePhysicalUpdate,structuredPreview);
 }
 
 // Arrays and Arcade share failure lineage, not extension capabilities. The core
@@ -53,6 +62,8 @@ function createCoordinator(runtime) {
     let readValue = null, consumePhysicalUpdate = null, arcadeClaim = null;
     const attachments = new WeakMap();
     let attachmentCount = 0, invocation = null;
+    let structuredBridge = null;
+    let structuredObservations = new WeakMap();
     const invocationCurrent = () => invocation === null ||
         (!disposed && arcadeClaim === invocation.token && generation === invocation.generation);
     const setCurrent = (map,key,value) => {
@@ -70,7 +81,7 @@ function createCoordinator(runtime) {
     const owned = signal => failureGet(signals,signal)?.runtime === runtime;
     const listeners = new Map();
     const listen = (event, handler) => {listeners.set(event, handler);runtime.on(event, handler);};
-    const cancel = () => {active = false;generation++;};
+    const cancel = () => {structuredBridge?.stop();active = false;generation++;};
     const retireLineage = (thread,signal,preserveOriginal=false) => {
         // Mark the complete actual lineage before any cleanup can settle
         // a pending operation. A detached event has no implicit parent.
@@ -88,7 +99,7 @@ function createCoordinator(runtime) {
                 const current=lineage[index];
                 const edge = failureGet(retirementEdges,current);failureDelete(retirementEdges,current);
                 try {edge?.cleanup(signal);} catch (error) {cleanupErrors[cleanupErrors.length]=error;}
-                finally {runtime.sequencer.retireThread(current);}
+                finally {structuredBridge?.retire(current);runtime.sequencer.retireThread(current);}
             }
             if (cleanupErrors.length) {
                 if(preserveOriginal){
@@ -102,6 +113,19 @@ function createCoordinator(runtime) {
     };
     const owner = Object.freeze({
         failure,
+        beginStructuredInvocation(thread) {
+            if(!structuredBridge || !live(thread) || runtime.sequencer.activeThread!==thread)return null;
+            return structuredBridge.begin(thread,thread.peekStackFrame());
+        },
+        enterStructuredHandler(invocation,catchEntry,finallyEntry) {
+            if(!structuredBridge)return null;
+            return structuredBridge.enter(invocation,catchEntry,finallyEntry);
+        },
+        suspendStructuredInvocation(invocation) {
+            return structuredBridge?.current(invocation)?structuredBridge.suspend(invocation):null;
+        },
+        resumeStructuredInvocation(invocation,lease) {return !!structuredBridge?.resume(invocation,lease);},
+        closeStructuredInvocation(invocation) {structuredBridge?.close(invocation);},
         // Object construction and SDK class procedures may resume a caller
         // after an earlier managed call; only their actual cached primitive
         // invocation can retain that caller.
@@ -139,7 +163,8 @@ function createCoordinator(runtime) {
             for (let parent = caller; parent; parent = failureGet(edges,parent)?.caller) {
                 if (parent === child) throw new Error('Cyclic Arcade exception edge');
             }
-            const edge = {caller, cleanup, generation};
+            const edge = {caller, cleanup, generation,
+                ...(structuredBridge?{structuredFrame:retained?record.frame:caller.peekStackFrame()}:{})};
             setCurrent(edges,child, edge);
             return () => {if (failureGet(edges,child) === edge) failureDelete(edges,child);};
         },
@@ -171,6 +196,21 @@ function createCoordinator(runtime) {
             const record = Object.freeze({owner, runtime, generation, value, target: thread.target,
                 block: block.id, stack: Object.freeze([...thread.stack])});
             setCurrent(signals,signal, record);
+            if(structuredBridge){
+                try{
+                    const plan=structuredBridge.offerOwnedThrow(thread,thread.peekStackFrame(),signal,value);
+                    const candidate=plan&&structuredBridge.takePlan(plan,signal);
+                    if(candidate)failureSet(structuredObservations,signal,failureFreeze({
+                        kind:candidate.kind,previewOnly:true,retirementSuppressed:false}));
+                }catch(error){
+                    // Preview failure must not replace or suppress the original
+                    // owned uncaught signal. No external Error is adopted.
+                    failureSet(structuredObservations,signal,failureFreeze({
+                        previewOnly:true,previewFailed:true,retirementSuppressed:false}));
+                }
+            }
+            // A plan is not a physical continuation commit. Until that engine
+            // consumer exists, even opt-in preview retains the uncaught route.
             retireLineage(thread,signal);
         },
         arrayReady() {return active&&!disposed;},
@@ -248,11 +288,22 @@ function createCoordinator(runtime) {
         }
     });
     const controls = failureFreeze({
-        claim(valueReader, physicalUpdate) {
+        claim(valueReader, physicalUpdate, preview = false) {
             if (disposed || arcadeClaim) throw new Error('Arcade exception runtime already has an owner');
             const token = failureFreeze({});
             arcadeClaim = token;readValue = valueReader;consumePhysicalUpdate = physicalUpdate;
-            const claimFailures = failures;
+            if(preview){
+                structuredBridge=require('./bw-structured-continuations')(
+                    (thread,frame,top=false)=>live(thread)&&thread.stackFrames.includes(frame)&&
+                        (!top||thread.peekStackFrame()===frame),
+                    (thread,frame)=>{
+                        const index=thread.stackFrames.lastIndexOf(frame);
+                        if(index>0)return {thread,frame:thread.stackFrames[index-1]};
+                        const edge=failureGet(edges,thread);return edge?.generation===generation&&edge.caller&&edge.structuredFrame?
+                            {thread:edge.caller,frame:edge.structuredFrame}:null;});
+                if(active)structuredBridge.start();
+            }
+            const claimFailures = failures, claimStructuredObservations = structuredObservations;
             const current = () => !disposed && arcadeClaim === token;
             const requireClaim = () => {
                 if (!current()) throw new Error('Arcade exception owner is disposed');
@@ -269,6 +320,12 @@ function createCoordinator(runtime) {
             return failureFreeze({
                 failure: thread => failureGet(claimFailures,thread) || null,
                 rethrow: owner.rethrow,
+                beginStructuredInvocation(thread) {return current()?invoke('beginStructuredInvocation',[thread]):null;},
+                enterStructuredHandler(...args) {return invoke('enterStructuredHandler',args);},
+                suspendStructuredInvocation(...args) {return current()?invoke('suspendStructuredInvocation',args):null;},
+                resumeStructuredInvocation(...args) {return current()&&invoke('resumeStructuredInvocation',args);},
+                closeStructuredInvocation(...args) {if(current())invoke('closeStructuredInvocation',args);},
+                structuredObservation: signal=>failureGet(claimStructuredObservations,signal)||null,
                 captureCaller(...args) {if (!current()) return null;return invoke('captureCaller',args);},
                 releaseCaller(lease) {if (current()) owner.releaseCaller(lease);},
                 capture(thread) {return current() ? invoke('capture',[thread]) : null;},
@@ -283,8 +340,8 @@ function createCoordinator(runtime) {
                 rejectConstraint(...args) {return invoke('rejectConstraint',args);},
                 dispose() {
                     if (!current()) return;
-                    cancel();arcadeClaim = null;readValue = null;consumePhysicalUpdate = null;
-                    failures = new WeakMap();edges = new WeakMap();
+                    cancel();structuredBridge=null;arcadeClaim = null;readValue = null;consumePhysicalUpdate = null;
+                    failures = new WeakMap();edges = new WeakMap();structuredObservations = new WeakMap();
                     if (attachmentCount === 0) owner.dispose();
                 }
             });
@@ -305,7 +362,7 @@ function createCoordinator(runtime) {
     });
     failureSet(coordinatorControls,runtime,controls);
     failureSet(owners,runtime, owner);
-    listen('PROJECT_START', () => {generation++;if (!disposed) active = true;});
+    listen('PROJECT_START', () => {generation++;if (!disposed) {active = true;structuredBridge?.start();}});
     listen('PROJECT_STOP_ALL', cancel);
     listen('PROJECT_LOADED', cancel);
     listen('RUNTIME_DISPOSED', owner.dispose);

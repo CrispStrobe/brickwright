@@ -2020,13 +2020,21 @@ module.exports = makeExt(`// Name: Arcade
         for(const {script,target} of scripts){
           if(epoch!==this._terrainEpoch || this._terrainStopped)return faulted;
           const thread=runtime._pushThread(script.blockId,target);thread.bwArcadeEvent={...event,TOKEN:registration.token};thread.bwArcadeCaptures=registration.captures;
-          const caller=util?.thread,active=runtime.sequencer.activeThread;
-          try{if(!deferred){runtime.sequencer.activeThread=thread;dependencies.primitiveOwner.stepChild(runtime,thread,()=>runtime.sequencer.stepThread(thread));}}
-          finally{if(util){util.thread=caller;util.sequencer=runtime.sequencer;}runtime.sequencer.activeThread=active;}
-          if(thread.status!==thread.constructor.STATUS_DONE && !thread.isKilled && runtime.threads.includes(thread))
-            yield new Promise(resolve=>this._terrainWaits.add({thread,resolve}));
-          if(epoch!==this._terrainEpoch || this._terrainStopped)return faulted;
-          if(exceptionOwners.get(this).failure(thread))faulted=true;
+          const caller=util?.thread,active=runtime.sequencer.activeThread,exceptions=exceptionOwners.get(this);
+          let structuredInvocation=null;
+          try{
+            try{if(!deferred){runtime.sequencer.activeThread=thread;
+              structuredInvocation=exceptions.beginStructuredInvocation?.(thread);
+              dependencies.primitiveOwner.stepChild(runtime,thread,()=>runtime.sequencer.stepThread(thread));}}
+            finally{if(util){util.thread=caller;util.sequencer=runtime.sequencer;}runtime.sequencer.activeThread=active;}
+            if(thread.status!==thread.constructor.STATUS_DONE && !thread.isKilled && runtime.threads.includes(thread)){
+              const suspension=structuredInvocation&&exceptions.suspendStructuredInvocation(structuredInvocation);
+              try{yield new Promise(resolve=>this._terrainWaits.add({thread,resolve}));}
+              finally{if(suspension)exceptions.resumeStructuredInvocation(structuredInvocation,suspension);}
+            }
+            if(epoch!==this._terrainEpoch || this._terrainStopped)return faulted;
+            if(exceptionOwners.get(this).failure(thread))faulted=true;
+          }finally{if(structuredInvocation)exceptions.closeStructuredInvocation(structuredInvocation);}
         }
       }
       return faulted;

@@ -1,9 +1,12 @@
 # Detached structured-completion foundation
 
 This is an unqualified local foundation, not try/catch/finally support. The
-TypeScript reader still rejects those statements. No parser, compiler, runtime
-or exception coordinator imports the new module. No vendor pin or workflow
-changes. The module executes no authored body and observes no actual VM thread.
+TypeScript reader still rejects those statements. The later disabled preview
+seam imports the foundation only for an explicit inspection claim; production
+does not activate it. No compiler bridge, vendor pin or workflow changes. The
+foundation executes no authored body and observes no actual VM thread. See
+[the preview contract](structured-continuation-preview.md) for its separate
+source hooks, pure fake-frame controls and unqualified physical bridge.
 
 The completion owner holds all invocation, frame, target, completion and
 suspension identities privately. A completion is normal, return, break,
