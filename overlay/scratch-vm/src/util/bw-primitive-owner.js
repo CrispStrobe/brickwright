@@ -34,6 +34,12 @@ function installFrameDeltaNumber(owner){
 // A loan alone does not authorize interpretation of arbitrary input sockets.
 const roles=Object.freeze(Object.fromEntries(Object.entries({
     control_wait_until:[],
+    arcade_registerUpdateHandler:[],arcade_registerIntervalHandler:[],arcade_registerButtonHandler:[],arcade_registerPlayerButtonHandler:[],
+    arcade_registerMultiplayerButtonHandler:[],arcade_registerControlEvent:[],arcade_registerMultiplayerConnection:[],
+    arcade_registerDestroyedHandler:[],
+    arcade_registerOverlapHandler:[],arcade_registerLifeZeroHandler:[],arcade_registerCountdownHandler:[],arcade_registerScenePushHandler:[],
+    arcade_registerScenePopHandler:[],arcade_registerScoreHandler:[],arcade_registerParallelHandler:[],arcade_registerForeverHandler:[],
+
     arcade_createCallable:[],arcade_callCallable:[],arcade_runCallableDispatch:[],arcade_getCaptured:[],arcade_objectField:[],procedures_call:[],arcade_callFunction:[],
     arcade_spriteProperty:[],arcade_sceneMillis:[],arcade_frameDeltaTime:[],arcade_highScore:[],arcade_gameOver:[],arcade_legacyGameOver:[],
     arcade_setSpriteImage:[],arcade_blitImage:[],arcade_drawImage:[],arcade_drawImageCircle:[],

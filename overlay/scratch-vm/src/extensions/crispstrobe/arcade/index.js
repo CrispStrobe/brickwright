@@ -2022,6 +2022,8 @@ module.exports = makeExt(`// Name: Arcade
           const thread=runtime._pushThread(script.blockId,target);thread.bwArcadeEvent={...event,TOKEN:registration.token};thread.bwArcadeCaptures=registration.captures;
           const caller=util?.thread,active=runtime.sequencer.activeThread,exceptions=exceptionOwners.get(this);
           let structuredInvocation=null;
+          try{exceptionOwners.get(this).bindStructuredRegistration(registration,thread);}
+          catch(error){runtime.sequencer.retireThread(thread);throw error;}
           try{
             try{if(!deferred){runtime.sequencer.activeThread=thread;
               structuredInvocation=exceptions.beginStructuredInvocation?.(thread);
@@ -2664,7 +2666,8 @@ module.exports = makeExt(`// Name: Arcade
     _terrainRegistration(args, util) {
       const captures = new Map(util?.thread?.bwArcadeCaptures || []), values = this._localParams(util);
       for (const key of String(args.CAPTURES || '').split(/\\s+/).filter(Boolean)) if (values) captures.set(key, {values, key});
-      return {kind:this._kindValue(args.KIND), token: String(args.TOKEN), captures};
+      return {kind:this._kindValue(args.KIND), token: String(args.TOKEN),
+        captures:exceptionOwners.get(this).captureStructuredRegistration(args,util,captures)};
     }
     registerLegacyWallHandler(args,util) {
       const index=Number(Scratch.BWValues.decode(args.INDEX));

@@ -8,7 +8,7 @@ const frameLeases=new WeakMap(),frameLives=new WeakMap(),handlerEntries=new Weak
 const loopRuntimes=new WeakSet(),loopPreparations=new WeakMap(),loopByFrame=new WeakMap(),loopBodyOwners=new WeakMap();
 const branchOwners=new WeakMap(),completedThrows=new WeakMap(),branchCancellations=new WeakSet();
 const catchBindings=new WeakMap(),catchTokens=new WeakMap(),catchInvocations=new WeakMap(),threadCaptures=new WeakMap();
-const managedEscapes=new WeakMap();
+const managedEscapes=new WeakMap(),registeredCatchMaps=new WeakMap();
 const handlerTransfers=new WeakMap(),handlerAcks=new WeakMap(),handlerByFrame=new WeakMap(),handlerSettlements=new WeakMap();
 const invalidateRecord=record=>{
     if(!record||!record.live)return;
@@ -735,6 +735,41 @@ module.exports=Object.freeze({
                 const token=Object.freeze(Object.create(null));catchInvocations.set(token,{map,entries:sealMap(map),caller,runtime,target,container,state,generation});return token;
             }
         });
+    },
+    registerCatchMap(origin,map,token){
+        const execution=entries.get(origin);if(!current(execution))throw Error('Event capture requires its current registration activation');
+        const cells=[...map.values()].filter(cell=>catchTokens.has(cell?.values));
+        if(!cells.length)return map;
+        if(cells.some(cell=>cell.key!=='value'||!bindingCurrent(catchTokens.get(cell.values))))throw Error('Event capture contains expired catch cells');
+        const record={runtime:execution.runtime,target:execution.target,container:execution.container,
+            state:execution.state,generation:execution.generation,token,map,entries:sealMap(map)};
+        if(!current(execution))throw Error('Event capture changed during registration');
+        registeredCatchMaps.set(map,record);return map;
+    },
+    bindRegisteredCatch(runtime,thread,map,token){
+        const record=registeredCatchMaps.get(map);
+        if(!record){
+            if([...map.values()].some(cell=>catchTokens.has(cell?.values)))throw Error('Event capture requires its issued registration map');
+            return;
+        }
+        if(record.runtime!==runtime||record.token!==token||!sameMap(map,record.entries)||
+            !record.state.active||record.state.disposed||record.state.generation!==record.generation||
+            !runtime.targets.includes(record.target)||!runtime.threads.includes(thread)||thread.isKilled||
+            thread.status===thread.constructor.STATUS_DONE||thread.target!==record.target||
+            thread.blockContainer!==record.container||record.target.blocks!==record.container||
+            thread.bwArcadeCaptures!==map||thread.bwArcadeEvent?.TOKEN!==token||
+            thread.stackFrames.length!==1||thread.stack.length!==1||
+            record.entries.some(([,cell])=>catchTokens.has(cell?.values)&&!bindingCurrent(catchTokens.get(cell.values))))
+            throw Error('Event capture registration or run changed');
+        const frame=thread.stackFrames[0],body=thread.peekStack();
+        if(!frame||frameLives.get(frame)?.live||!body)throw Error('Event capture requires a fresh callback frame');
+        const lifetime={state:record.state,runtime,thread,frame,target:record.target,container:record.container,
+            generation:record.generation,live:true};
+        frameLives.set(frame,lifetime);record.state.lifetimes.add(lifetime);
+        threadCaptures.set(thread,{runtime,target:record.target,container:record.container,frame,lifetime,map,entries:record.entries});
+        // The real Thread API keeps the registration's cells on an inert
+        // sentinel while native advancement replaces callback body frames.
+        thread.stack[0]=null;thread.pushStack(body);
     },
     bindCatchInvocation(token,thread,caller,map){
         const record=catchInvocations.get(token);if(!record)return false;catchInvocations.delete(token);

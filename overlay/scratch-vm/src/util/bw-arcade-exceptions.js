@@ -1,3 +1,22 @@
+// Only emitted registration primitives may issue experimental event cells.
+const registeredCaptureOpcodes=new Set([
+    'arcade_registerUpdateHandler',
+    'arcade_registerIntervalHandler',
+    'arcade_registerButtonHandler',
+    'arcade_registerPlayerButtonHandler',
+    'arcade_registerMultiplayerButtonHandler',
+    'arcade_registerControlEvent',
+    'arcade_registerMultiplayerConnection',
+    'arcade_registerDestroyedHandler',
+    'arcade_registerOverlapHandler',
+    'arcade_registerLifeZeroHandler',
+    'arcade_registerCountdownHandler',
+    'arcade_registerScenePushHandler',
+    'arcade_registerScenePopHandler',
+    'arcade_registerScoreHandler',
+    'arcade_registerParallelHandler',
+    'arcade_registerForeverHandler',
+]);
 // Stable function identities are published before dependency evaluation. No
 // failure routing call is made until all three cyclic modules finish loading.
 const failureApply=Reflect.apply,failureFreeze=Object.freeze;
@@ -221,6 +240,26 @@ function createCoordinator(runtime) {
             if(!live(util?.thread)||primitiveOwner.current(util,args)?.opcode!=='arcade_createCallable')throw Error('Catch capture requires its actual create primitive');
             cachedPrimitiveOwner(runtime,util,args,'arcade_createCallable',[]);
             return engineActivations.captureCatchProvider(engineActivations.capture(runtime.sequencer,util.thread));
+        },
+        captureStructuredRegistration(args,util,captures){
+            if(!structuredEngine)return captures;
+            const opcode=primitiveOwner.current(util,args)?.opcode;
+            if(!live(util?.thread)||!registeredCaptureOpcodes.has(opcode))throw Error('Event capture requires its actual registration primitive');
+            cachedPrimitiveOwner(runtime,util,args,opcode,[]);
+            const origin=engineActivations.capture(runtime.sequencer,util.thread);
+            const provider=engineActivations.captureCatchProvider(origin),map=new Map(captures);
+            if(!provider)throw Error('Event capture requires its registration execution');
+            for(const name of String(args.CAPTURES||'').split(/\s+/).filter(Boolean)){
+                const inherited=util.thread.bwArcadeCaptures?.get(name);
+                const cell=provider.cell(name)||(provider.read(inherited)?inherited:null);if(cell)map.set(name,cell);
+            }
+            const token=String(args.TOKEN);
+            cachedPrimitiveOwner(runtime,util,args,opcode,[]);
+            return engineActivations.registerCatchMap(origin,map,token);
+        },
+        bindStructuredRegistration(registration,thread){
+            if(!structuredEngine)return;
+            return engineActivations.bindRegisteredCatch(runtime,thread,registration.captures,registration.token);
         },
         captureStructuredInvocation(args,util,provider,map,opcode='arcade_callCallable'){
             if(!structuredEngine||!provider)return null;
@@ -557,6 +596,8 @@ function createCoordinator(runtime) {
                 failure: thread => failureGet(claimFailures,thread) || null,
                 takeManagedTransfer(...args) {return current()?invoke('takeManagedTransfer',args):null;},
                 captureStructuredLocals(...args){return current()?invoke('captureStructuredLocals',args):null;},
+                captureStructuredRegistration(...args){return current()?invoke('captureStructuredRegistration',args):args[2];},
+                bindStructuredRegistration(...args){if(current())return invoke('bindStructuredRegistration',args);},
                 captureStructuredInvocation(...args){return current()?invoke('captureStructuredInvocation',args):null;},
                 readStructuredCaptured(...args){return current()?invoke('readStructuredCaptured',args):null;},
                 writeStructuredCaptured(...args){return current()&&invoke('writeStructuredCaptured',args);},
