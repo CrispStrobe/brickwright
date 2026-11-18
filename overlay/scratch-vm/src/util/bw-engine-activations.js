@@ -7,6 +7,7 @@ const runtimes=new WeakMap(),entries=new WeakMap(),threads=new WeakMap(),frames=
 const frameLeases=new WeakMap(),frameLives=new WeakMap(),handlerEntries=new WeakMap();
 const loopRuntimes=new WeakSet(),loopPreparations=new WeakMap(),loopByFrame=new WeakMap(),loopBodyOwners=new WeakMap();
 const branchOwners=new WeakMap(),completedThrows=new WeakMap(),branchCancellations=new WeakSet();
+const catchBindings=new WeakMap(),catchTokens=new WeakMap(),catchInvocations=new WeakMap(),threadCaptures=new WeakMap();
 const managedEscapes=new WeakMap();
 const handlerTransfers=new WeakMap(),handlerAcks=new WeakMap(),handlerByFrame=new WeakMap(),handlerSettlements=new WeakMap();
 const invalidateRecord=record=>{
@@ -95,14 +96,49 @@ const handlerCurrent=(record,runtime,thread)=>{
 };
 // Lexical lookup uses the actual owning stack prefix and run lifetime. It
 // never returns the private cell map or borrows procedure params.
-const catchCell=(runtime,thread,name)=>{
+const catchCell=(runtime,thread,name,strict=false)=>{
     for(let index=thread?.stackFrames?.length-1;index>=0;index--){
         const handler=handlerByFrame.get(thread.stackFrames[index]);
         if(handler&&handler.phase==='catch'&&handler.catchName===name){
-            return handlerCurrent(handler,runtime,thread)?handler:null;
+            if(handlerCurrent(handler,runtime,thread))return handler;
+            if(strict)throw Error('Catch capture lexical owner changed');return null;
         }
     }
     return null;
+};
+// Captured catch cells have a run lifetime separate from the physical branch.
+// Only an observed lexical exit detaches them; frame reset never grants exit.
+const detachCatch=handler=>{
+    const binding=catchBindings.get(handler);
+    if(binding&&handler.phase==='catch')binding.detached=true;
+};
+const detachFrames=frames=>{for(const frame of frames){const handler=handlerByFrame.get(frame);if(handler)detachCatch(handler);}};
+const bindingCurrent=binding=>{
+    const {handler,state,generation}=binding,{runtime,target,container}=handler;
+    return state.active&&!state.disposed&&state.generation===generation&&runtime.targets.includes(target)&&
+        target.blocks===container&&(binding.detached||handlerCurrent(handler,runtime,handler.thread)&&
+        handler.phase==='catch'&&handler.cells===binding.cells)&&state.active&&!state.disposed&&state.generation===generation;
+};
+const mapGet=Function.call.bind(Map.prototype.get),mapEntries=Function.call.bind(Map.prototype.entries);
+const mapSize=Function.call.bind(Object.getOwnPropertyDescriptor(Map.prototype,'size').get);
+const sealMap=map=>[...mapEntries(map)];
+const sameMap=(map,entries)=>mapSize(map)===entries.length&&entries.every(([name,cell])=>mapGet(map,name)===cell);
+const capturedMapCurrent=(runtime,thread)=>{
+    const record=threadCaptures.get(thread),lifetime=record?.lifetime;
+    return record&&record.runtime===runtime&&record.map===thread.bwArcadeCaptures&&sameMap(record.map,record.entries)&&lifetime.live&&
+        frameLives.get(record.frame)===lifetime&&lifetime.state.active&&!lifetime.state.disposed&&
+        lifetime.state.generation===lifetime.generation&&runtime.threads.includes(thread)&&!thread.isKilled&&
+        thread.status!==thread.constructor.STATUS_DONE&&thread.stackFrames.includes(record.frame)&&
+        thread.target===record.target&&thread.blockContainer===record.container&&record.target.blocks===record.container;
+};
+const capturedBinding=(runtime,thread,cell,name=null)=>{
+    const binding=catchTokens.get(cell?.values);if(!binding)return null;
+    if(cell.key!=='value'||!capturedMapCurrent(runtime,thread)||!bindingCurrent(binding))
+        throw Error('Captured catch cell outlived its owned invocation or run');
+    const entries=threadCaptures.get(thread).entries;
+    if(!entries.some(([key,actual])=>actual===cell&&(name===null||name===key))||!capturedMapCurrent(runtime,thread))
+        throw Error('Captured catch token is not in its actual invocation map');
+    return binding;
 };
 const installationCurrent=(record,sequencer,thread,status)=>{
     return record.sequencer===sequencer&&record.thread===thread&&
@@ -144,6 +180,7 @@ const installBranch=(handler,phase,pending)=>{
     }
     if(!handlerCurrent(handler,runtime,thread))return false;
     Object.defineProperties(thread,{stack:{value:stack},stackFrames:{value:frames},status:{value:running},justReported:{value:null}});
+    detachCatch(handler);detachFrames(removed);
     for(const old of removed)invalidateFrame(old);
     invalidateThread(thread);handler.phase=phase;handler.pending=pending;
     if(phase!=='catch')handler.cells=Object.create(null);
@@ -198,7 +235,7 @@ const relayReturn=(completion,start,originCurrent)=>{
     // frame. A second completion cannot publish the retained value again.
     for(let index=thread.stackFrames.length-1;index>=completion.depth;index--){
         const handler=handlerByFrame.get(thread.stackFrames[index]);
-        if(handler){handler.phase='closed';handlerByFrame.delete(handler.frame);
+        if(handler){detachCatch(handler);handler.phase='closed';handlerByFrame.delete(handler.frame);
             if(handler.branch){handler.branch.live=false;branchOwners.delete(handler.branch.frame);}}
     }
     completion.live=false;completion.settle(completion.value);return true;
@@ -263,7 +300,7 @@ const relayJump=(completion,start,originCurrent)=>{
     if(!owned())return false;
     for(let index=thread.stackFrames.length-1;index>loop.depth;index--){
         const handler=handlerByFrame.get(thread.stackFrames[index]);
-        if(handler){handler.phase='closed';handlerByFrame.delete(handler.frame);
+        if(handler){detachCatch(handler);handler.phase='closed';handlerByFrame.delete(handler.frame);
             if(handler.branch){handler.branch.live=false;branchOwners.delete(handler.branch.frame);}}
     }
     // Native mutators revoke discarded branch/activation lifetimes. Continue
@@ -305,7 +342,7 @@ const finishBranch=branch=>{
     if(!handlerCurrent(handler,runtime,thread))return false;
     thread.stack=handler.prefix.map(point=>point.block);thread.stackFrames=handler.prefix.map(point=>point.frame);
     for(const frame of removed)invalidateFrame(frame);
-    handler.phase='closed';handlerByFrame.delete(handler.frame);invalidateThread(thread);
+    detachCatch(handler);handler.phase='closed';handlerByFrame.delete(handler.frame);invalidateThread(thread);
     thread.goToNextBlock();return true;
 };
 module.exports=Object.freeze({
@@ -625,7 +662,7 @@ module.exports=Object.freeze({
         // than a normal reporter value, delivers the signal to the next caller.
         for(const frame of thread.stackFrames){
             const handler=handlerByFrame.get(frame);
-            if(handler){handler.phase='closed';handlerByFrame.delete(frame);
+            if(handler){detachCatch(handler);handler.phase='closed';handlerByFrame.delete(frame);
                 if(handler.branch){handler.branch.live=false;branchOwners.delete(handler.branch.frame);}}
         }
         invalidateThread(thread);return receipt;
@@ -646,6 +683,60 @@ module.exports=Object.freeze({
         // A managed edge is admitted separately by the coordinator. This
         // physical helper cannot skip any boundary on the throwing thread.
         return module.exports.prepareOwnedThrow(destinationOrigin,value,signal);
+    },
+    captureCatchProvider(origin){
+        const execution=entries.get(origin);if(!current(execution))return null;
+        const {runtime,thread,state,target,container,generation}=execution;
+        const selected=new Set();
+        const valid=()=>current(execution)&&[...selected].every(bindingCurrent);
+        return Object.freeze({
+            current:valid,
+            cell(name){
+                if(!valid())throw Error('Catch capture requires its original create activation');
+                const handler=catchCell(runtime,thread,name,true);if(!handler)return null;
+                let binding=catchBindings.get(handler);
+                if(!binding||binding.cells!==handler.cells){
+                    binding={handler,state,generation,cells:handler.cells,name,detached:false};
+                    binding.token=Object.freeze({value:undefined});catchTokens.set(binding.token,binding);catchBindings.set(handler,binding);
+                }
+                selected.add(binding);
+                if(!valid()||!bindingCurrent(binding))throw Error('Catch capture changed during binding observation');
+                return Object.freeze({values:binding.token,key:'value'});
+            },
+            read(cell){
+                const binding=catchTokens.get(cell?.values);if(!binding)return null;
+                if(!valid()||cell.key!=='value'||!bindingCurrent(binding))throw Error('Catch capture value reader expired');
+                // Active same-thread catch tokens need no invocation map; an
+                // inherited token must come from this actual callable thread.
+                if(!binding.detached&&binding.handler.thread===thread&&catchCell(runtime,thread,binding.name)===binding.handler)
+                    return Object.freeze({value:binding.cells[binding.name]});
+                const inherited=capturedBinding(runtime,thread,cell);return Object.freeze({value:inherited.cells[inherited.name]});
+            },
+            invocation(map,callerOrigin){
+                const caller=entries.get(callerOrigin);
+                if(!caller||!current(caller)||caller.runtime!==runtime||caller.target!==target||
+                    !state.active||state.generation!==generation)throw Error('Captured catch invocation requires its current caller');
+                const cells=[...map.values()].filter(cell=>catchTokens.has(cell?.values));
+                if(cells.some(cell=>cell.key!=='value'||!bindingCurrent(catchTokens.get(cell.values))))throw Error('Captured catch invocation contains expired cells');
+                const token=Object.freeze(Object.create(null));catchInvocations.set(token,{map,entries:sealMap(map),caller,runtime,target,container,state,generation});return token;
+            }
+        });
+    },
+    bindCatchInvocation(token,thread,caller,map){
+        const record=catchInvocations.get(token);if(!record)return false;catchInvocations.delete(token);
+        if(record.map!==map||!sameMap(map,record.entries)||record.caller.thread!==caller||!current(record.caller)||record.runtime.threads.includes(thread)!==true||
+            thread.target!==record.target||thread.blockContainer!==record.container||!record.state.active||record.state.generation!==record.generation)return false;
+        const frame=thread.stackFrames[0];if(!frame||thread.stackFrames.length!==1||frameLives.get(frame)?.live)return false;
+        const lifetime={state:record.state,runtime:record.runtime,thread,frame,target:record.target,container:record.container,generation:record.generation,live:true};
+        frameLives.set(frame,lifetime);record.state.lifetimes.add(lifetime);
+        threadCaptures.set(thread,{runtime:record.runtime,target:record.target,container:record.container,frame,lifetime,map,entries:record.entries});return true;
+    },
+    readCapturedCatch(runtime,thread,cell,name){
+        const binding=capturedBinding(runtime,thread,cell,name);return binding?Object.freeze({value:binding.cells[binding.name]}):null;
+    },
+    writeCapturedCatch(runtime,thread,cell,value,name){
+        const binding=capturedBinding(runtime,thread,cell,name);if(!binding)return false;
+        binding.cells[binding.name]=value;return true;
     },
     readCatchCell(runtime,thread,name){
         const handler=catchCell(runtime,thread,name);
@@ -714,6 +805,7 @@ module.exports=Object.freeze({
             status:{value:running},justReported:{value:null}});
         Object.defineProperties(handler.frame,{justReported:{value:null},reported:{value:null},
             waitingReporter:{value:null},reporting:{value:''}});
+        detachCatch(handler);detachFrames(removed);
         for(const frame of removed)invalidateFrame(frame);
         invalidateThread(thread);handler.phase=phase;handler.cells=phase==='catch'?cells:Object.create(null);
         handler.failureFallback=Object.freeze({kind:'throw',signal:transfer.signal,value});

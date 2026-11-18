@@ -216,6 +216,30 @@ function createCoordinator(runtime) {
             try {retireLineage(thread,record.signal,true);}catch(error){if(error!==record.signal)throw error;}
             return true;
         },
+        captureStructuredLocals(args,util){
+            if(!structuredEngine)return null;
+            if(!live(util?.thread)||primitiveOwner.current(util,args)?.opcode!=='arcade_createCallable')throw Error('Catch capture requires its actual create primitive');
+            cachedPrimitiveOwner(runtime,util,args,'arcade_createCallable',[]);
+            return engineActivations.captureCatchProvider(engineActivations.capture(runtime.sequencer,util.thread));
+        },
+        captureStructuredInvocation(args,util,provider,map){
+            if(!structuredEngine||!provider)return null;
+            if(!live(util?.thread)||primitiveOwner.current(util,args)?.opcode!=='arcade_callCallable')throw Error('Captured catch invocation requires its actual callable primitive');
+            cachedPrimitiveOwner(runtime,util,args,'arcade_callCallable',[]);
+            return provider.invocation(map,engineActivations.capture(runtime.sequencer,util.thread));
+        },
+        readStructuredCaptured(args,util,cell){
+            if(!structuredEngine)return null;
+            if(primitiveOwner.current(util,args)?.opcode!=='arcade_getCaptured')throw Error('Captured catch read requires its actual primitive');
+            cachedPrimitiveOwner(runtime,util,args,'arcade_getCaptured',['NAME']);
+            return engineActivations.readCapturedCatch(runtime,util.thread,cell,args.NAME);
+        },
+        writeStructuredCaptured(args,util,cell,value){
+            if(!structuredEngine)return false;
+            if(primitiveOwner.current(util,args)?.opcode!=='arcade_setCaptured')throw Error('Captured catch write requires its actual primitive');
+            cachedPrimitiveOwner(runtime,util,args,'arcade_setCaptured',['NAME']);
+            return engineActivations.writeCapturedCatch(runtime,util.thread,cell,value,args.NAME);
+        },
         readStructuredLocal(args,util) {
             if(!structuredEngine||!live(util?.thread)||util.runtime!==runtime)return null;
             if(primitiveOwner.current(util,args)?.opcode!=='arcade_getLocal')return null;
@@ -285,7 +309,7 @@ function createCoordinator(runtime) {
         // after an earlier managed call; only their actual cached primitive
         // invocation can retain that caller.
         captureCaller(args,util,opcode='arcade_createObject') {
-            if (!arcadeClaim || !live(util?.thread) || !['arcade_createObject','arcade_callFunction'].includes(opcode)) return null;
+            if (!arcadeClaim || !live(util?.thread) || !['arcade_createObject','arcade_callFunction','arcade_callCallable'].includes(opcode)) return null;
             if (!cachedPrimitiveOwner(runtime,util,args,opcode,[])) return null;
             const lease=Object.freeze({});
             const activation=engineActivations.capture(runtime.sequencer,util.thread);
@@ -318,7 +342,11 @@ function createCoordinator(runtime) {
                         throw new Error('Managed transfer edge requires its actual cached call');
                 }
             }
-            return owner.link(child,util.thread,cleanup,args.bwExceptionCaller,managedEdgeKey);
+            const unlink=owner.link(child,util.thread,cleanup,args.bwExceptionCaller,managedEdgeKey);
+            if(args.bwStructuredCatchInvocation&&!engineActivations.bindCatchInvocation(args.bwStructuredCatchInvocation,child,util.thread,args.bwCallableCaptures)){
+                unlink();throw Error('Captured catch invocation witness is stale or foreign');
+            }
+            return unlink;
         },
         link(child, caller, cleanup = () => {}, lease = null, admission = null) {
             if(structuredEngine&&admission!==managedEdgeKey)throw new Error('Managed transfer edge requires its private call admission');
@@ -525,6 +553,10 @@ function createCoordinator(runtime) {
             return failureFreeze({
                 failure: thread => failureGet(claimFailures,thread) || null,
                 takeManagedTransfer(...args) {return current()?invoke('takeManagedTransfer',args):null;},
+                captureStructuredLocals(...args){return current()?invoke('captureStructuredLocals',args):null;},
+                captureStructuredInvocation(...args){return current()?invoke('captureStructuredInvocation',args):null;},
+                readStructuredCaptured(...args){return current()?invoke('readStructuredCaptured',args):null;},
+                writeStructuredCaptured(...args){return current()&&invoke('writeStructuredCaptured',args);},
                 readStructuredLocal(...args) {return current()?invoke('readStructuredLocal',args):null;},
                 writeStructuredLocal(...args) {return current()&&invoke('writeStructuredLocal',args);},
                 rethrow: owner.rethrow,

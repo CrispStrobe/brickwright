@@ -32,7 +32,7 @@ and value until lexical finally completes; abrupt return/throw replacement and
 cache-observation cancellation have selected-source controls. Unlabelled native
 repeat/forever/repeat-until/while break/continue now have owned destination/frame
 and iteration leases with lexical finally relay. Labelled/switch/for-each targets,
-captured catch bindings and complete lowering remain
+captured dispatch/binding lowering and complete lowering remain
 unimplemented. Parser admission and default
 enablement require that coupled work plus affected original guest qualification,
 including native/Code/SB3 behavior. All seven original guest fixtures remain UNRUN.
@@ -68,3 +68,16 @@ and corpus measurements remain separate. One new cached VM bootstrap restored
 only pinned format-message dependencies and stopped on missing immutable before
 construction. Parser/default admission and all original guest fixtures remain
 unqualified.
+
+Disabled captured-binding candidate: catch-created callable resources retain opaque
+catch-cell tokens separately from physical handler frames. The candidate binds
+issued callable invocation maps to actual child sentinel lifetimes and current
+cached reads/writes, with a separate escaped-cell run lifetime. Eleven new
+selected-source controls pass after correcting the direct callable caller-lease
+opcode admission and using a persistent caller frame in the ordinary-local
+control. The original eleven failures and earlier unstarted admissions are
+retained. Five targeted mutations are detected; removing only one redundant
+lifetime condition survives, while removing frame registration is detected.
+No full VM or guest result is claimed for this candidate. The prior committed managed-throw proofs remain
+separate. Parser/default enablement, captured dispatch/lowering and labelled,
+switch and for-each destinations remain unqualified.
