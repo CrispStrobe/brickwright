@@ -65,7 +65,9 @@ execute catch or Promise rejection boundary it validates those leases and the
 owned entry above, installs the exact handler stack/status/lexical state, then
 issues a private one-use acknowledgement of that concrete mutation. A Boolean
 acknowledgement, preview identity or old pointer/membership check cannot do it.
-No current code can issue or consume that acknowledgement.
+The internal helper can now issue and consume a same-thread installation
+receipt as described below. No actual execute/Promise exception boundary uses
+it to suppress retirement.
 
 `callFunction` / `_pumpFunctionCalls` currently finish a child by resolving a
 normal return value or rejecting terminal failure, with unlink/retirement.
@@ -87,3 +89,36 @@ leases, transfer commit/ack, managed-call settlement and real guest controls
 remain the next coupled implementation. These prerequisites must exist before
 parser acceptance. No project-coverage or structured-exception support is earned
 by activation tickets alone.
+
+## Disabled canonical entry and first physical dependency
+
+The experimental exception facet now binds an entry through its current
+primitive/cache observations plus the actual activation and frame-lifetime
+lease. The helper retains actual control and branch objects, explicit flags,
+field/argument identities and the enclosing stack prefix. Branch roots must
+retain the actual control as parent. Rebinding a frame supersedes its prior
+entry. Pooled/reset frames and run cancellation invalidate entries. No control
+primitive is registered and the parser still refuses this syntax.
+
+The internal physical helper accepts only a same-thread catch with a nonempty
+branch and no finally. It refuses an intervening registered boundary. Commit
+validates its retained origin activation and stack, prepares a fresh branch
+frame, installs stack/status/reporter state, preserves the owning control frame
+and params, invalidates discarded frames, then issues a private one-use receipt.
+Receipt validation observes the installed stack, reporter state, run and entry
+identities. A Boolean observation or copied receipt cannot acknowledge a commit.
+
+This helper is not called by executeWithContext, handlePromise, callFunction or
+_pumpFunctionCalls. Its private catch-cell storage is not yet connected to actual
+lexical readers/writers. It therefore provides no executable source catch,
+terminal-retirement suppression, managed transfer or finalizer semantics.
+Default uncaught behavior remains intact. Actual engine-boundary consumption,
+owned managed-edge unwind/settlement, lexical binding and branch completion are
+still required before any parser admission.
+
+Pure controls evaluate the real helper and actual instrumented selected Thread
+with authored cache/control metadata. They cover physical mutation and receipt
+expiry, stale origin, Stop during preparation, pool reuse, changed branch
+parents, superseded entries and an inner pending finally. They do not establish
+primitive/coordinator integration, original guest behavior, VM/native equivalence
+or project coverage. Earlier snapshots and bounded failures remain separate.

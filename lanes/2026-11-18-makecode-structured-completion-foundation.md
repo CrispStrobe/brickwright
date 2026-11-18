@@ -26,3 +26,12 @@ UNRUN pending governed execution; no handler-transfer acknowledgement or
 managed-call transfer outcome exists. The required owned entry/branch and
 settlement layout is specified before any parser admission. Terminal fallback,
 all seven guest refusals and the previous scoped results remain separate.
+
+
+The disabled canonical entry binder and first same-thread physical stack
+installer are now implemented. New pure controls exercise actual selected
+Thread code with authored cache/control data. The installer issues a private
+receipt only after mutation and refuses managed destinations and finally.
+It remains unconnected to actual execute/Promise boundaries, lexical readers
+and managed-call settlement. Default terminal retirement and parser refusal
+are unchanged. No guest or project-coverage gain is claimed.

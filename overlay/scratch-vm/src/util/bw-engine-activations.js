@@ -5,6 +5,7 @@
 // and run cancellation invalidate it even when pooled object identity survives.
 const runtimes=new WeakMap(),entries=new WeakMap(),threads=new WeakMap(),frames=new WeakMap();
 const frameLeases=new WeakMap(),frameLives=new WeakMap(),handlerEntries=new WeakMap();
+const handlerTransfers=new WeakMap(),handlerAcks=new WeakMap(),handlerByFrame=new WeakMap();
 const invalidateRecord=record=>{
     if(!record||!record.live)return;
     record.live=false;record.state.records.delete(record);
@@ -50,13 +51,14 @@ const branchValue=input=>{
     return {valid:block.value===null||typeof block.value==='string',id:block.value};
 };
 const handlerCurrent=(record,runtime,thread)=>{
-    if(!record||record.runtime!==runtime||record.thread!==thread)return false;
+    if(!record||record.runtime!==runtime||record.thread!==thread||handlerByFrame.get(record.frame)!==record)return false;
     const lifetime=frameLeases.get(record.frameLease),container=record.container;
     if(!lifetime||!lifetime.live||lifetime.state!==record.state||!record.state.active||record.state.disposed||
         lifetime.generation!==record.state.generation||frameLives.get(record.frame)!==lifetime||
         !runtime.threads.includes(thread)||thread.isKilled||thread.status===thread.constructor.STATUS_DONE||
         thread.target!==record.target||!runtime.targets.includes(record.target)||thread.blockContainer!==container||
-        record.target.blocks!==container||!thread.stackFrames.includes(record.frame))return false;
+        record.target.blocks!==container||!thread.stackFrames.includes(record.frame)||
+        record.prefix.some((point,index)=>thread.stack[index]!==point.block||thread.stackFrames[index]!==point.frame))return false;
     if(container.getBlock!==record.getBlock||container.getBranch!==record.getBranch||
         container.getBlock(record.root)!==record.block||record.block.opcode!=='arcade_structuredTry'||
         record.block.fields!==record.fields||record.block.inputs!==record.inputs||record.block.mutation!==record.mutation||
@@ -76,7 +78,7 @@ const handlerCurrent=(record,runtime,thread)=>{
         const value=branchValue(record.inputs[branch.name]);
         return value.valid&&record.inputs[branch.name]===branch.input&&value.id===branch.id&&
             container.getBranch(record.root,index+1)===branch.id&&
-            (branch.id===null||container.getBlock(branch.id)===branch.block);
+            (branch.id===null||container.getBlock(branch.id)===branch.block&&branch.block.parent===record.root);
     });
 };
 module.exports=Object.freeze({
@@ -167,9 +169,14 @@ module.exports=Object.freeze({
         if(branches.some(branch=>!branch.valid||branch.id!==null&&(typeof branch.id!=='string'||!branch.block))||
             !hasCatch&&branches[1].id!==null||!hasFinally&&branches[2].id!==null)return null;
         const record={runtime,thread,frame,target,container,root,state,frameLease,block,operations,operation,args,
+            prefix:thread.stack.map((block,index)=>({block,frame:thread.stackFrames[index]})),phase:'try',cells:Object.create(null),
             fields:block.fields,inputs:block.inputs,inputNames:Object.keys(block.inputs),mutation:block.mutation,implementation:operation._blockFunction,
             getBlock:container.getBlock,getBranch:container.getBranch,selectors,branches,hasCatch,hasFinally,catchName:args.CATCH_NAME};
-        if(!current(execution)||!handlerCurrent(record,runtime,thread))return null;
+        if(!current(execution))return null;
+        const previous=handlerByFrame.get(frame);handlerByFrame.set(frame,record);
+        if(!handlerCurrent(record,runtime,thread)){
+            if(previous)handlerByFrame.set(frame,previous);else handlerByFrame.delete(frame);return null;
+        }
         const entryToken=Object.freeze(Object.create(null));handlerEntries.set(entryToken,record);return entryToken;
     },
     inspectHandlerEntry(entry,runtime,thread){
@@ -178,6 +185,83 @@ module.exports=Object.freeze({
         return Object.freeze({root:record.root,frame:record.frame,hasCatch:record.hasCatch,hasFinally:record.hasFinally,
             catchName:record.catchName,tryBranch:record.branches[0].id,catchBranch:record.branches[1].id,
             finallyBranch:record.branches[2].id,transferAcknowledged:false});
+    },
+    prepareHandlerTransfer(origin,entry,value){
+        const execution=entries.get(origin),handler=handlerEntries.get(entry);
+        // This first physical dependency is deliberately same-thread/catch-only.
+        // A managed edge or a pending finally cannot be bypassed by this route.
+        if(!current(execution)||!handlerCurrent(handler,execution.runtime,execution.thread)||
+            handler.phase!=='try'||!handler.hasCatch||handler.hasFinally||handler.branches[1].id===null||
+            value!==null&&!['undefined','boolean','number','string'].includes(typeof value))return null;
+        const thread=execution.thread,stack=thread.stack,stackFrames=thread.stackFrames;
+        if(stack.length!==stackFrames.length||!Array.isArray(stack)||!Array.isArray(stackFrames))return null;
+        // Selecting an outer entry may not skip an inner registered boundary,
+        // even if that inner catch has already run. Explicit unwind is pending.
+        if(stackFrames.slice(handler.prefix.length).some(frame=>{
+            const inner=handlerByFrame.get(frame);return inner&&handlerCurrent(inner,execution.runtime,thread);
+        }))return null;
+        const request=Object.freeze(Object.create(null));
+        handlerTransfers.set(request,{execution,handler,value,stack,stackFrames,
+            originStack:[...stack],originFrames:[...stackFrames]});
+        return request;
+    },
+    commitHandlerTransfer(request,sequencer,thread,origin){
+        const transfer=handlerTransfers.get(request);
+        if(!transfer)return null;
+        handlerTransfers.delete(request); // even refused offers cannot be retried
+        const {execution,handler,value}=transfer;
+        if(execution.token!==origin||execution.sequencer!==sequencer||execution.thread!==thread||
+            !current(execution)||!handlerCurrent(handler,sequencer.runtime,thread)||handler.phase!=='try'||
+            thread.stack!==transfer.stack||thread.stackFrames!==transfer.stackFrames||
+            thread.stack.length!==transfer.originStack.length||thread.stackFrames.length!==transfer.originFrames.length||
+            thread.stackFrames.slice(handler.prefix.length).some(frame=>{const inner=handlerByFrame.get(frame);
+                return inner&&handlerCurrent(inner,sequencer.runtime,thread);})||
+            transfer.originStack.some((block,index)=>thread.stack[index]!==block||thread.stackFrames[index]!==transfer.originFrames[index]))return null;
+        // No guest callbacks or Thread pool hooks are run during installation.
+        // Prepare every value before replacing writable own engine fields. Old
+        // frames become unreachable and are invalidated, never returned to a
+        // possibly reentrant free-list hook. The owning control frame survives.
+        const data=(object,name)=>{const descriptor=Object.getOwnPropertyDescriptor(object,name);
+            return descriptor&&Object.hasOwn(descriptor,'value')&&descriptor.writable;};
+        if(!['stack','stackFrames','status','justReported'].every(name=>data(thread,name)))return null;
+        const Frame=handler.frame.constructor,bodyFrame=new Frame(handler.frame.warpMode);
+        if(!['params','justReported','reported','waitingReporter','executionContext','reporting'].every(name=>data(bodyFrame,name)))return null;
+        const nextStack=handler.prefix.map(point=>point.block),nextFrames=handler.prefix.map(point=>point.frame);
+        nextStack.push(handler.branches[1].id);nextFrames.push(bodyFrame);
+        const cells=Object.create(null);if(handler.catchName)cells[handler.catchName]=value;
+        const removed=thread.stackFrames.slice(handler.prefix.length);
+        const running=thread.constructor.STATUS_RUNNING;
+        // Constructor and metadata reads happen before a final run-generation
+        // check; a Stop emitted during preparation must not install old work.
+        if(!handlerCurrent(handler,sequencer.runtime,thread)||!current(execution)||
+            !['stack','stackFrames','status','justReported'].every(name=>data(thread,name))||
+            !['justReported','reported','waitingReporter','reporting'].every(name=>data(handler.frame,name))||
+            transfer.originStack.some((block,index)=>thread.stack[index]!==block||thread.stackFrames[index]!==transfer.originFrames[index]))return null;
+        // Native defineProperties on preflighted data slots performs no user
+        // callout. No acknowledgement exists until the whole state is installed.
+        Object.defineProperties(thread,{stack:{value:nextStack},stackFrames:{value:nextFrames},
+            status:{value:running},justReported:{value:null}});
+        Object.defineProperties(handler.frame,{justReported:{value:null},reported:{value:null},
+            waitingReporter:{value:null},reporting:{value:''}});
+        for(const frame of removed)invalidateFrame(frame);
+        invalidateThread(thread);handler.phase='catch';handler.cells=cells;
+        const ack=Object.freeze(Object.create(null));
+        handlerAcks.set(ack,{handler,thread,sequencer,stack:nextStack,frames:nextFrames,bodyFrame,cells});
+        return ack;
+    },
+    takeHandlerAck(ack,sequencer,thread){
+        const record=handlerAcks.get(ack);if(!record)return false;
+        handlerAcks.delete(ack);
+        return record.sequencer===sequencer&&record.thread===thread&&
+            handlerCurrent(record.handler,sequencer.runtime,thread)&&record.handler.phase==='catch'&&
+            thread.stack===record.stack&&thread.stackFrames===record.frames&&
+            thread.stack.length===record.handler.prefix.length+1&&thread.stackFrames.length===thread.stack.length&&
+            thread.peekStack()===record.handler.branches[1].id&&thread.peekStackFrame()===record.bodyFrame&&
+            record.handler.cells===record.cells&&thread.status===thread.constructor.STATUS_RUNNING&&
+            thread.justReported===null&&record.bodyFrame.justReported===null&&record.bodyFrame.reported===null&&
+            record.bodyFrame.waitingReporter===null&&record.bodyFrame.params===null&&record.bodyFrame.reporting===''&&
+            record.handler.frame.justReported===null&&record.handler.frame.reported===null&&
+            record.handler.frame.waitingReporter===null&&record.handler.frame.reporting==='';
     },
     invalidateThread,
     invalidateFrame

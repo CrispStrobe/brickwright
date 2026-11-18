@@ -15,7 +15,7 @@ const fixture=()=>{
     const fields=Object.fromEntries(Object.entries(args).map(([name,value])=>[name,{name,value}]));
     const inputs={SUBSTACK:{block:'tryBody',shadow:null},SUBSTACK2:{block:'catchBody',shadow:null},SUBSTACK3:{block:'finallyBody',shadow:null}};
     const block={id:'try',opcode:'arcade_structuredTry',fields,inputs,mutation:null};
-    const blocks={try:block,tryBody:{id:'tryBody'},catchBody:{id:'catchBody'},finallyBody:{id:'finallyBody'}};
+    const blocks={try:block,tryBody:{id:'tryBody',parent:'try'},catchBody:{id:'catchBody',parent:'try'},finallyBody:{id:'finallyBody',parent:'try'}};
     const operation={id:'try',opcode:block.opcode,_argValues:args,_blockFunction:implementation,fields,mutation:null};
     const container={_cache:{_executeCached:{try:{_ops:[operation]}}},getBlock:id=>blocks[id],
         getBranch:(_id,number)=>block.inputs[number===1?'SUBSTACK':'SUBSTACK'+number]?.block??null};
