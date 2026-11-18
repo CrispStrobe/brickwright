@@ -120,3 +120,10 @@ test('an outer handler cannot skip a canonical inner boundary with a pending fin
     const origin=engine.enter(v.sequencer,v.thread),lease=engine.captureFrame(origin),inner=engine.bindHandlerEntry(origin,lease,args);assert.ok(inner);
     assert.equal(engine.prepareHandlerTransfer(origin,outer,17),null);
 });
+
+test('Stop during final receipt metadata validation prevents suppression',()=>{
+    const v=fixture(),original=v.container.getBranch;let stop=false;
+    v.container.getBranch=(...args)=>{const value=original(...args);if(stop)v.runtime.emit('PROJECT_STOP_ALL');return value;};
+    const {request,origin}=offer(v),ack=engine.commitHandlerTransfer(request,v.sequencer,v.thread,origin);assert.ok(ack);
+    stop=true;assert.equal(engine.takeHandlerAck(ack,v.sequencer,v.thread),false);
+});

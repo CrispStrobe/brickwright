@@ -74,12 +74,18 @@ const handlerCurrent=(record,runtime,thread)=>{
         if(actual!==field.field||!descriptor||!Object.hasOwn(descriptor,'value')||descriptor.value!==field.value||
             !argument||!Object.hasOwn(argument,'value')||argument.value!==field.value)return false;
     }
-    return record.branches.every((branch,index)=>{
+    const branchesCurrent=record.branches.every((branch,index)=>{
         const value=branchValue(record.inputs[branch.name]);
         return value.valid&&record.inputs[branch.name]===branch.input&&value.id===branch.id&&
             container.getBranch(record.root,index+1)===branch.id&&
             (branch.id===null||container.getBlock(branch.id)===branch.block&&branch.block.parent===record.root);
     });
+    // Actual metadata services can invalidate the run while being observed.
+    // Never return the earlier lifetime observation after such a callout.
+    return branchesCurrent&&lifetime.live&&record.state.active&&!record.state.disposed&&
+        lifetime.generation===record.state.generation&&frameLives.get(record.frame)===lifetime&&
+        handlerByFrame.get(record.frame)===record&&record.prefix.every((point,index)=>
+            thread.stack[index]===point.block&&thread.stackFrames[index]===point.frame);
 };
 module.exports=Object.freeze({
     enter(sequencer,thread){
