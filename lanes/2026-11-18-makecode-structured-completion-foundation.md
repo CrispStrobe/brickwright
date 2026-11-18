@@ -27,8 +27,11 @@ remain separate; no corpus or completed structured-language credit is claimed.
 Normal/throw branch completion and finally now have disabled source consumers
 through actual Thread advancement, Promise fulfillment and sequencer empty-branch
 exit. Saved throws relay through same-thread and direct managed callers only
-after finalization. Return/break/continue, deeper managed unwind, captured catch
-bindings and complete lowering remain unimplemented. Parser admission and default
+after finalization. Owned returns now retain their actual procedure frame/run
+and value until lexical finally completes; abrupt return/throw replacement and
+cache-observation cancellation have selected-source controls. Break/continue,
+deeper managed unwind, captured catch bindings and complete lowering remain
+unimplemented. Parser admission and default
 enablement require that coupled work plus affected original guest qualification,
 including native/Code/SB3 behavior. All seven original guest fixtures remain UNRUN.
 See the structured handler entry contract for the current source boundary.
@@ -37,3 +40,10 @@ New selected-source branch/finally controls retain their own proofs and original
 reset/cancellation failures. A targeted cached VM probe failed before construction
 because its dependency cache was absent; it earns no VM/guest pass. No original
 18-control suite, original mutations or corpus measurement was rerun.
+
+Separate new return controls execute the actual returnValue and managed-call
+methods through selected Thread/execute/Sequencer source. The initial skipped
+finalizer failure and a newly exposed stale return publication during cache
+admission are retained separately from the corrected result. A real cached VM
+return probe passed private JSZip restoration but failed on missing minilog
+before VM construction; no VM program or coverage result follows from it.

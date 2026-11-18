@@ -2560,7 +2560,16 @@ module.exports = makeExt(`// Name: Arcade
       const thread = util?.thread;if (!thread) return;
       let frame = thread.stackFrames.length - 1;
       while (frame >= 0 && thread.stackFrames[frame].params == null) frame--;
-      if (frame < 0 || (frame === 0 && thread.stackFrames[0].waitingReporter)) {thread.bwReturnValue = managedReturnHosts.get(this).value(args,util);util.sequencer.retireThread(thread);return;}
+      const sequencer=util.sequencer;
+      const managed=frame < 0 || (frame === 0 && thread.stackFrames[0].waitingReporter);
+      const read=()=>managed?managedReturnHosts.get(this).value(args,util):undefined;
+      const settle=value=>{
+        if(managed){thread.bwReturnValue=value;sequencer.retireThread(thread);return;}
+        while(thread.stack.length>frame+1)thread.popStack();
+        thread.goToNextBlock();
+      };
+      if(exceptionOwners.get(this).returnStructured(args,util,Math.max(0,frame),read,settle))return;
+      if (managed) {settle(read());return;}
       // A command procedure discards its value but an early return must leave
       // only this invocation, including any nested loop/control frames.
       while (thread.stack.length > frame + 1) thread.popStack();

@@ -102,12 +102,35 @@ can combine that token with the retained caller edge/activation and physical
 installation receipt. Caller catch/finally execution waits for synchronous
 callFunction or queued _pumpFunctionCalls settlement, as for direct throws.
 
+## Owned return and procedure settlement
+
+The experimental return path captures the actual cached return primitive before
+observing its inputs. It retains the destination procedure frame, stack prefix,
+params identity, reporter identity and frame lifetime in the current run. Its
+value is read under the original synchronous primitive loan and remains private
+until finalization finishes. Command procedures retain their ordinary discarded
+return value behavior.
+
+Return skips catches, executes lexical finalizers inside out, and then settles
+only its retained procedure. A return or throw from a running finalizer replaces
+the saved completion. Promise fulfillment uses the same branch completion path;
+Stop/restart, frame reset and changed handler metadata cannot publish a retained
+value. Cancellation during cache admission consumes the old invocation instead
+of falling through to ordinary settlement. These are disabled source consumers,
+not parser admission or completed language support.
+
+New selected-source return controls exercise actual returnValue, callFunction,
+queued settlement, Thread advancement, execute/Promise and Sequencer methods.
+Their graph, registration and unrelated value services remain authored. A
+separate real cached VM return probe failed on missing minilog before VM
+construction, after private restoration of the pinned JSZip dependency closure.
+It did not execute a program or qualify this candidate in a VM.
+
 ## Remaining coupled work and qualification boundary
 
-Return/break/continue relay, their owned lexical destinations, deeper managed-call
+Break/continue relay and their owned lexical destinations, deeper managed-call
 unwinding, captured catch bindings and complete structured lowering remain
-unimplemented. The actual returnValue path still returns/retires before running
-local finalizers. Implemented abrupt replacement covers throws only. A running finally must finish before
+unimplemented. Implemented abrupt replacement covers returns and throws. A running finally must finish before
 an outer handler can be selected. The compiler must prove lexical jump targets
 against actual enclosing control frames. These gaps forbid parser admission and
 default enablement.

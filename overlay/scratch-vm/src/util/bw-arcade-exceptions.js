@@ -189,6 +189,14 @@ function createCoordinator(runtime) {
             cachedPrimitiveOwner(runtime,util,args,'arcade_setLocal',['NAME']);
             return engineActivations.writeCatchCell(runtime,util.thread,args.NAME,value);
         },
+        returnStructured(args,util,depth,read,settle) {
+            if(!structuredEngine)return false;
+            if(!live(util?.thread)||util.runtime!==runtime||primitiveOwner.current(util,args)?.opcode!=='arcade_returnValue')
+                throw Error('Structured return requires its actual cached primitive');
+            const entry=engineActivations.capture(runtime.sequencer,util.thread);
+            cachedPrimitiveOwner(runtime,util,args,'arcade_returnValue',[]);
+            return engineActivations.beginOwnedReturn(entry,depth,read,settle);
+        },
         beginStructuredInvocation(thread) {
             if(!structuredBridge || !live(thread) || runtime.sequencer.activeThread!==thread)return null;
             return structuredBridge.begin(thread,thread.peekStackFrame());
@@ -480,6 +488,7 @@ function createCoordinator(runtime) {
                 beginStructuredInvocation(thread) {return current()?invoke('beginStructuredInvocation',[thread]):null;},
                 enterStructuredHandler(...args) {return invoke('enterStructuredHandler',args);},
                 bindStructuredHandlerEntry(...args) {return current()?invoke('bindStructuredHandlerEntry',args):null;},
+                returnStructured(...args) {return current()&&invoke('returnStructured',args);},
                 startStructuredHandler(...args) {return current()&&invoke('startStructuredHandler',args);},
                 suspendStructuredInvocation(...args) {return current()?invoke('suspendStructuredInvocation',args):null;},
                 resumeStructuredInvocation(...args) {return current()&&invoke('resumeStructuredInvocation',args);},

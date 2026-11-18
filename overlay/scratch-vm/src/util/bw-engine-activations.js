@@ -166,11 +166,45 @@ const refuseBranch=(branch,message)=>{
     if(pending?.kind==='throw'&&handler.sink){handler.sink(pending,null);return true;}
     throw new Error(message);
 };
+// A return retains its real procedure prefix and frame lifetime, not public
+// params or a serialized destination. Finalizers may replace this completion.
+const returnCurrent=completion=>{
+    const {execution,destination,lifetime,prefix}=completion,{thread,state}=execution;
+    return completion.live&&lifetime.live&&frameLives.get(destination)===lifetime&&
+        state.active&&!state.disposed&&state.generation===execution.generation&&
+        execution.runtime.sequencer===execution.sequencer&&execution.runtime.threads.includes(thread)&&
+        !thread.isKilled&&thread.status!==thread.constructor.STATUS_DONE&&
+        execution.runtime.targets.includes(execution.target)&&thread.target===execution.target&&
+        execution.target.blocks===execution.container&&thread.blockContainer===execution.container&&
+        destination.params===completion.params&&destination.waitingReporter===completion.waitingReporter&&
+        prefix.every((point,index)=>thread.stack[index]===point.block&&thread.stackFrames[index]===point.frame);
+};
+const relayReturn=(completion,start)=>{
+    if(!returnCurrent(completion))return false;
+    const {thread,runtime}=completion.execution;
+    for(let index=start;index>=completion.depth;index--){
+        const handler=handlerByFrame.get(thread.stackFrames[index]);
+        if(!handler)continue;
+        if(!handlerCurrent(handler,runtime,thread)||!returnCurrent(completion))return false;
+        if(handler.phase!=='finally'&&handler.hasFinally)
+            return installBranch(handler,'finally',completion);
+    }
+    if(!returnCurrent(completion))return false;
+    // Close exited controls before ordinary procedure settlement can reuse a
+    // frame. A second completion cannot publish the retained value again.
+    for(let index=thread.stackFrames.length-1;index>=completion.depth;index--){
+        const handler=handlerByFrame.get(thread.stackFrames[index]);
+        if(handler){handler.phase='closed';handlerByFrame.delete(handler.frame);
+            if(handler.branch){handler.branch.live=false;branchOwners.delete(handler.branch.frame);}}
+    }
+    completion.live=false;completion.settle(completion.value);return true;
+};
 const finishBranch=branch=>{
     const handler=branch.handler,{thread,runtime}=handler;
     if(!branchCurrent(branch)||thread.peekStackFrame()!==branch.frame)return false;
     if(handler.phase!=='finally'&&handler.hasFinally)return installBranch(handler,'finally',normalCompletion);
     const completion=handler.phase==='finally'?handler.pending||normalCompletion:normalCompletion;
+    if(completion.kind==='return')return relayReturn(completion,handler.prefix.length-2);
     if(completion.kind==='throw'){
         // Completing a finalizer restores its saved throw before any normal
         // successor or outer catch can execute. Each inner boundary is visited.
@@ -310,6 +344,40 @@ module.exports=Object.freeze({
         completedThrows.delete(token);
         return record.branch.handler.runtime===sequencer.runtime&&record.branch.handler.thread===thread&&
             record.completion.signal===signal&&branchCurrent(record.branch)&&thread.peekStackFrame()===record.branch.frame;
+    },
+    beginOwnedReturn(entry,depth,read,settle){
+        const execution=entries.get(entry);
+        if(!current(execution)||!execution.inScope||execution.state.current!==execution||
+            execution.sequencer.activeThread!==execution.thread){
+            // Cache observation may synchronously Stop/restart the run. That
+            // old invocation must never fall back to ordinary publication.
+            if(execution&&(!execution.state.active||execution.state.generation!==execution.generation)){
+                const branch=branchOwners.get(execution.frame);if(branch)cancelOldBranch(branch);return true;
+            }
+            throw Error('Structured return requires its current engine entry');
+        }
+        const {thread,state,runtime,target,container,generation}=execution;
+        if(!Number.isInteger(depth)||depth<0||depth>=thread.stackFrames.length)return false;
+        if(!thread.stackFrames.slice(depth).some(frame=>handlerByFrame.has(frame)))return false;
+        const destination=thread.stackFrames[depth];
+        let lifetime=frameLives.get(destination);
+        if(lifetime&&(!lifetime.live||lifetime.thread!==thread||lifetime.generation!==generation))
+            throw Error('Structured return destination lifetime changed');
+        if(!lifetime){
+            const token=Object.freeze(Object.create(null));
+            lifetime={token,state,runtime,thread,frame:destination,target,container,generation,live:true};
+            frameLives.set(destination,lifetime);frameLeases.set(token,lifetime);state.lifetimes.add(lifetime);
+        }
+        const completion={kind:'return',execution,destination,lifetime,depth,live:true,settle,
+            params:destination.params,waitingReporter:destination.waitingReporter,
+            prefix:Object.freeze(thread.stack.slice(0,depth+1).map((block,index)=>Object.freeze({block,frame:thread.stackFrames[index]})))};
+        const originBranch=branchOwners.get(thread.peekStackFrame());
+        completion.value=read();
+        if(!returnCurrent(completion)||!relayReturn(completion,thread.stackFrames.length-1)){
+            if(!state.active||state.generation!==generation){if(originBranch)cancelOldBranch(originBranch);return true;}
+            throw Error('Structured return ownership changed');
+        }
+        return true;
     },
     beginHandlerBranch(entry,sequencer,thread,sink){
         const handler=handlerEntries.get(entry);
