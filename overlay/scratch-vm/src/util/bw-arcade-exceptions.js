@@ -122,6 +122,15 @@ function createCoordinator(runtime) {
             if(!structuredBridge)return null;
             return structuredBridge.enter(invocation,catchEntry,finallyEntry);
         },
+        bindStructuredHandlerEntry(args,util) {
+            if(!structuredBridge)return null; // default owner remains disabled
+            const block=primitiveOwner.current(util,args);
+            if(!block||block.opcode!=='arcade_structuredTry'||!live(util?.thread)||util.runtime!==runtime)return null;
+            if(cachedPrimitiveOwner(runtime,util,args,'arcade_structuredTry',['HAS_CATCH','HAS_FINALLY','CATCH_NAME'])!==block)return null;
+            const activation=engineActivations.capture(runtime.sequencer,util.thread);
+            const frameLease=activation&&engineActivations.captureFrame(activation);
+            return frameLease?engineActivations.bindHandlerEntry(activation,frameLease,args):null;
+        },
         suspendStructuredInvocation(invocation) {
             return structuredBridge?.current(invocation)?structuredBridge.suspend(invocation):null;
         },
@@ -330,6 +339,7 @@ function createCoordinator(runtime) {
                 rethrow: owner.rethrow,
                 beginStructuredInvocation(thread) {return current()?invoke('beginStructuredInvocation',[thread]):null;},
                 enterStructuredHandler(...args) {return invoke('enterStructuredHandler',args);},
+                bindStructuredHandlerEntry(...args) {return current()?invoke('bindStructuredHandlerEntry',args):null;},
                 suspendStructuredInvocation(...args) {return current()?invoke('suspendStructuredInvocation',args):null;},
                 resumeStructuredInvocation(...args) {return current()&&invoke('resumeStructuredInvocation',args);},
                 closeStructuredInvocation(...args) {if(current())invoke('closeStructuredInvocation',args);},

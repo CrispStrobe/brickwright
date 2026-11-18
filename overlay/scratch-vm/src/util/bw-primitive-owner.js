@@ -41,6 +41,8 @@ const roles=Object.freeze(Object.fromEntries(Object.entries({
     arcade_setSpriteProperty:[],arcade_setSpritePosition:[],
     arcade_imageProperty:[],arcade_imagePixel:[],arcade_scrollImage:[],
     arcade_tilesOfType:[],arcade_randomTileOfType:[],arcade_placeOnRandomTile:[],
+    // Role only: no getInfo/canonical word registers this disabled handler control.
+    arcade_structuredTry:[],
     arcade_throwValue:['VALUE'],arcade_createOwnedImageSprite:['KIND'],
     arcade_returnValue:['VALUE'],arcade_functionArgument:['VALUE'],
     arcade_setLocal:['VALUE'],arcade_setCaptured:['VALUE'],

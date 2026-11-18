@@ -4,7 +4,7 @@
 // authority. Only the actual execute wrapper issues an entry; frame mutators
 // and run cancellation invalidate it even when pooled object identity survives.
 const runtimes=new WeakMap(),entries=new WeakMap(),threads=new WeakMap(),frames=new WeakMap();
-const frameLeases=new WeakMap(),frameLives=new WeakMap();
+const frameLeases=new WeakMap(),frameLives=new WeakMap(),handlerEntries=new WeakMap();
 const invalidateRecord=record=>{
     if(!record||!record.live)return;
     record.live=false;record.state.records.delete(record);
@@ -38,6 +38,47 @@ const current=record=>Boolean(record&&record.live&&record.state.active&&!record.
     record.runtime.targets.includes(record.target)&&record.thread.target===record.target&&
     record.target.blocks===record.container&&record.thread.blockContainer===record.container&&
     record.thread.peekStack()===record.root&&record.thread.peekStackFrame()===record.frame);
+// Entry metadata is still not a physical transfer. It is minted only from a
+// real current control operation and a live same-frame lifetime, never from a
+// preview body object or a copied branch ID. No current product registers this
+// experimental control opcode; default execution cannot create an entry.
+const branchValue=input=>{
+    if(input==null)return {valid:true,id:null};
+    if(typeof input!=='object')return {valid:false};
+    const block=Object.getOwnPropertyDescriptor(input,'block'),shadow=Object.getOwnPropertyDescriptor(input,'shadow');
+    if(!block||!Object.hasOwn(block,'value')||shadow&&!Object.hasOwn(shadow,'value')||shadow?.value!=null)return {valid:false};
+    return {valid:block.value===null||typeof block.value==='string',id:block.value};
+};
+const handlerCurrent=(record,runtime,thread)=>{
+    if(!record||record.runtime!==runtime||record.thread!==thread)return false;
+    const lifetime=frameLeases.get(record.frameLease),container=record.container;
+    if(!lifetime||!lifetime.live||lifetime.state!==record.state||!record.state.active||record.state.disposed||
+        lifetime.generation!==record.state.generation||frameLives.get(record.frame)!==lifetime||
+        !runtime.threads.includes(thread)||thread.isKilled||thread.status===thread.constructor.STATUS_DONE||
+        thread.target!==record.target||!runtime.targets.includes(record.target)||thread.blockContainer!==container||
+        record.target.blocks!==container||!thread.stackFrames.includes(record.frame))return false;
+    if(container.getBlock!==record.getBlock||container.getBranch!==record.getBranch||
+        container.getBlock(record.root)!==record.block||record.block.opcode!=='arcade_structuredTry'||
+        record.block.fields!==record.fields||record.block.inputs!==record.inputs||record.block.mutation!==record.mutation||
+        container._cache?._executeCached?.[record.root]?._ops!==record.operations||
+        record.operations.length!==1||record.operations[0]!==record.operation||record.operation._argValues!==record.args||
+        record.operation._blockFunction!==record.implementation||runtime.getOpcodeFunction('arcade_structuredTry')!==record.implementation||
+        record.operation.fields!==record.fields||record.operation.mutation!==record.mutation)return false;
+    if(Object.keys(record.fields).length!==3||Object.keys(record.args).length!==3||
+        Object.keys(record.inputs).length!==record.inputNames.length||record.inputNames.some(name=>!Object.hasOwn(record.inputs,name)))return false;
+    for(const field of record.selectors){
+        const actual=record.fields[field.name],descriptor=actual&&Object.getOwnPropertyDescriptor(actual,'value');
+        const argument=Object.getOwnPropertyDescriptor(record.args,field.name);
+        if(actual!==field.field||!descriptor||!Object.hasOwn(descriptor,'value')||descriptor.value!==field.value||
+            !argument||!Object.hasOwn(argument,'value')||argument.value!==field.value)return false;
+    }
+    return record.branches.every((branch,index)=>{
+        const value=branchValue(record.inputs[branch.name]);
+        return value.valid&&record.inputs[branch.name]===branch.input&&value.id===branch.id&&
+            container.getBranch(record.root,index+1)===branch.id&&
+            (branch.id===null||container.getBlock(branch.id)===branch.block);
+    });
+};
 module.exports=Object.freeze({
     enter(sequencer,thread){
         const runtime=sequencer?.runtime,target=thread?.target;
@@ -91,6 +132,52 @@ module.exports=Object.freeze({
             thread.status!==thread.constructor.STATUS_DONE&&thread.target===lifetime.target&&
             runtime.targets.includes(lifetime.target)&&thread.blockContainer===lifetime.container&&
             lifetime.target.blocks===lifetime.container&&thread.stackFrames.includes(frame);
+    },
+    bindHandlerEntry(entry,frameLease,args){
+        const execution=entries.get(entry),lifetime=frameLeases.get(frameLease);
+        if(!current(execution)||!execution.inScope||execution.state.current!==execution||
+            execution.sequencer.activeThread!==execution.thread||!lifetime||!lifetime.live||
+            lifetime.frame!==execution.frame||lifetime.thread!==execution.thread||lifetime.state!==execution.state||
+            lifetime.generation!==execution.generation||frameLives.get(execution.frame)!==lifetime)return null;
+        const {runtime,thread,frame,target,container,root,state}=execution;
+        const block=container.getBlock(root),operations=container._cache?._executeCached?.[root]?._ops;
+        const operation=operations?.length===1?operations[0]:null;
+        if(!block||block.opcode!=='arcade_structuredTry'||!operation||operation.id!==root||
+            operation.opcode!==block.opcode||operation._argValues!==args||typeof operation._blockFunction!=='function'||
+            runtime.getOpcodeFunction(block.opcode)!==operation._blockFunction||operation.fields!==block.fields||
+            operation.mutation!==block.mutation||block.mutation||!block.fields||!block.inputs)return null;
+        const names=['HAS_CATCH','HAS_FINALLY','CATCH_NAME'],selectors=[];
+        if(Object.keys(block.fields).length!==names.length||Object.keys(args).length!==names.length||
+            Object.keys(block.inputs).some(name=>!['SUBSTACK','SUBSTACK2','SUBSTACK3'].includes(name)))return null;
+        for(const name of names){
+            const field=block.fields[name],descriptor=field&&Object.getOwnPropertyDescriptor(field,'value');
+            const argument=Object.getOwnPropertyDescriptor(args,name);
+            if(!descriptor||!Object.hasOwn(descriptor,'value')||!argument||!Object.hasOwn(argument,'value')||
+                argument.value!==descriptor.value)return null;
+            selectors.push({name,field,value:descriptor.value});
+        }
+        const hasCatch=args.HAS_CATCH==='1',hasFinally=args.HAS_FINALLY==='1';
+        if(!['0','1'].includes(args.HAS_CATCH)||!['0','1'].includes(args.HAS_FINALLY)||!hasCatch&&!hasFinally||
+            typeof args.CATCH_NAME!=='string'||args.CATCH_NAME!==''&&!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(args.CATCH_NAME)||
+            !hasCatch&&args.CATCH_NAME!=='')return null;
+        const branches=['SUBSTACK','SUBSTACK2','SUBSTACK3'].map(name=>{
+            const input=block.inputs[name],value=branchValue(input),id=value.id;
+            return {name,input,id,valid:value.valid,block:id==null?null:container.getBlock(id)};
+        });
+        if(branches.some(branch=>!branch.valid||branch.id!==null&&(typeof branch.id!=='string'||!branch.block))||
+            !hasCatch&&branches[1].id!==null||!hasFinally&&branches[2].id!==null)return null;
+        const record={runtime,thread,frame,target,container,root,state,frameLease,block,operations,operation,args,
+            fields:block.fields,inputs:block.inputs,inputNames:Object.keys(block.inputs),mutation:block.mutation,implementation:operation._blockFunction,
+            getBlock:container.getBlock,getBranch:container.getBranch,selectors,branches,hasCatch,hasFinally,catchName:args.CATCH_NAME};
+        if(!current(execution)||!handlerCurrent(record,runtime,thread))return null;
+        const entryToken=Object.freeze(Object.create(null));handlerEntries.set(entryToken,record);return entryToken;
+    },
+    inspectHandlerEntry(entry,runtime,thread){
+        const record=handlerEntries.get(entry);if(!handlerCurrent(record,runtime,thread))return null;
+        // Read-only view; copying it cannot register a handler or acknowledge a transfer.
+        return Object.freeze({root:record.root,frame:record.frame,hasCatch:record.hasCatch,hasFinally:record.hasFinally,
+            catchName:record.catchName,tryBranch:record.branches[0].id,catchBranch:record.branches[1].id,
+            finallyBranch:record.branches[2].id,transferAcknowledged:false});
     },
     invalidateThread,
     invalidateFrame
