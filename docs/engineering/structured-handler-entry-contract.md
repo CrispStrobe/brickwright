@@ -316,3 +316,39 @@ pressure refusals are retained separately. The corrected graph uses the real
 RenderedTarget and Runtime.addTarget; engine source is not modified to bypass
 those setup requirements. Coverage totals and the seven original guest
 reservations are unchanged, and structured source/default behavior stays disabled.
+
+
+### Disabled registered-event capture consumer
+
+The emitted TOKEN/CAPTURES registration boundary now has an experimental
+catch-cell consumer shared by admitted update, interval, button and other
+registration primitives delivered through the common callback scheduler. An actual current cached registration selects the
+nearest lexical catch cell before ordinary locals, or validates an inherited
+cell against its current callback invocation. The private engine retains the
+issued map, exact entries, target, token and run generation. Record spreads used
+by event-specific registration retain that same issued map.
+
+Delivery validates that registration before executing its actual callback and
+uses a fresh inert Thread sentinel to retain the cells while the native
+sequencer replaces callback body frames. Repeated delivery gets a new sentinel.
+Copied maps, changed tokens, Stop/restart and sentinel reset cannot grant a
+captured read. The ordinary default owner retains its previous registration
+behavior. No new primitive is registered and structured source is still refused.
+
+Eleven new selected-source controls exercise the actual registration and callback
+methods with Thread/execute/Sequencer and authored metadata. The pinned previous
+source exposes the original outer-local capture and lacks registration-map
+admission. Targeted cuts of catch precedence and the callback sentinel are
+detected separately. An additional authored event
+graph passes the actual cached Runtime/RenderedTarget/Blocks/complete execute
+engine: repeated deliveries read 31 four times after one finalizer and report
+zero errors. This graph uses private experimental hooks, selected extension
+methods and authored sprite metadata; it does not construct the VM wrapper or
+run source import, PXT, Code/SB3, original guest fixtures or a corpus.
+
+Separate creation, wall/tile and tilemap delivery paths are not admitted by
+this shared consumer. General structured binding/lowering, remaining event families, labelled jumps,
+switch and for-each destinations and complete source lowering remain open.
+Parser/default admission and corpus totals remain unchanged. Full VM/import
+setup is still unqualified because the pinned renderer dependency closure has
+not been admitted under the current dependency/license bounds.
