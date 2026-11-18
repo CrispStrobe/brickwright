@@ -205,3 +205,27 @@ inside that reader issues only a private old-run cancellation tombstone, which
 the actual execute/Promise consumer absorbs before stale-origin filtering. It
 cannot stage a new handler, deliver a call value, or publish a failure into a
 reused root frame. The pre-fix disposed-owner error is preserved separately.
+
+## Disabled captured-binding source candidate
+
+The previous capture gap was that createCallable selected procedure
+locals or inherited maps while active catch bindings live in a separate private
+handler cell map. A same-named outer procedure local can therefore supply the
+capture. The disabled candidate gives the nearest admitted catch cell
+precedence and retains an opaque token instead of exposing that private map.
+An explicitly observed lexical exit detaches the cell from its physical frame;
+Stop/load/dispose still expire its run lifetime. Direct callable invocations
+retain the actual issued map and child sentinel lifetime, and cached captured
+read/write methods validate that ownership before touching the cell.
+
+Eleven new selected-source controls pass after correcting the callable caller-lease
+opcode allowlist. The ordinary-local control now retains a procedure sentinel
+instead of placing persistent locals on a transient body frame. All eleven
+original failures and earlier lock/cgroup admission refusals remain retained.
+Five targeted mutations produce failing controls. Removing only lifetime.live
+survives because frame registration still rejects reset; removing both checks
+is detected. These controls cover escaped cell/value captures,
+normal locals, sharing, writes, map copying, sentinel reset, Stop/reuse and a
+Stop during the actual value reader. No full captured-binding, invocation,
+source-lowering or guest qualification follows. Captured event/held dispatch,
+labelled/switch/for-each destinations and complete lowering remain open.
