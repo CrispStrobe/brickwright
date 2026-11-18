@@ -18,3 +18,11 @@ overrides it, and Stop invalidates old leases. Only the disabled preview seam co
 physical engine transfer accepts it. Qualification must distinguish pure-state controls from actual
 VM exception delivery and future original/native/Code/SB3 behavior. No corpus
 execution, numeric coverage gain or full try/catch/finally support is claimed.
+
+The next local source dependency instruments actual execute/Promise and Thread
+mutation paths with engine activation identity. Existing detached and preview
+files remain unchanged. New real-source consumer controls are authored and
+UNRUN pending governed execution; no handler-transfer acknowledgement or
+managed-call transfer outcome exists. The required owned entry/branch and
+settlement layout is specified before any parser admission. Terminal fallback,
+all seven guest refusals and the previous scoped results remain separate.
