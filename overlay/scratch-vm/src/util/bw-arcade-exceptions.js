@@ -133,7 +133,10 @@ function createCoordinator(runtime) {
                 const destination=staged.destination||thread;
                 const edgeCurrent=!staged.edge||failureGet(edges,thread)===staged.edge&&
                     staged.edge.generation===generation&&engineActivations.validFrame(staged.edge.frameLease,runtime,destination,staged.edge.structuredFrame);
-                const ack=edgeCurrent&&engineActivations.valid(staged.origin,runtime.sequencer,thread)&&
+                const originCurrent=staged.completionToken?
+                    engineActivations.takeCompletedThrow(staged.completionToken,runtime.sequencer,thread,signal):
+                    engineActivations.valid(staged.origin,runtime.sequencer,thread);
+                const ack=edgeCurrent&&originCurrent&&
                     engineActivations.commitHandlerTransfer(staged.request,runtime.sequencer,destination,staged.destinationOrigin||staged.origin);
                 if(ack&&staged.edge){
                     const settlement=engineActivations.parkHandlerAck(ack,runtime.sequencer,destination);
@@ -202,6 +205,28 @@ function createCoordinator(runtime) {
             const activation=engineActivations.capture(runtime.sequencer,util.thread);
             const frameLease=activation&&engineActivations.captureFrame(activation);
             return frameLease?engineActivations.bindHandlerEntry(activation,frameLease,args):null;
+        },
+        startStructuredHandler(args,util) {
+            if(!structuredEngine)return false;
+            const entry=owner.bindStructuredHandlerEntry(args,util),epoch=generation,thread=util.thread;
+            if(!entry)return false;
+            return engineActivations.beginHandlerBranch(entry,runtime.sequencer,thread,(completion,completionToken)=>{
+                if(disposed||!active||generation!==epoch)return;
+                const original=failureGet(signals,completion.signal);
+                if(completion.kind!=='throw'||original?.runtime!==runtime||original.generation!==generation)
+                    throw new Error('Structured finalizer requires its original owned completion');
+                const edge=failureGet(edges,thread);
+                if(edge?.generation===generation&&edge.frameLease&&
+                    engineActivations.validFrame(edge.frameLease,runtime,edge.caller,edge.structuredFrame)){
+                    const request=engineActivations.prepareOwnedThrow(edge.activation,completion.value,completion.signal);
+                    if(request){
+                        failureSet(stagedThrows,completion.signal,{thread,completionToken,request,generation,edge,
+                            destination:edge.caller,destinationOrigin:edge.activation});
+                        owner.consumeStaged(thread,completion.signal);return;
+                    }
+                }
+                try{retireLineage(thread,completion.signal,true);}catch(error){if(error!==completion.signal)throw error;}
+            });
         },
         suspendStructuredInvocation(invocation) {
             return structuredBridge?.current(invocation)?structuredBridge.suspend(invocation):null;
@@ -306,12 +331,12 @@ function createCoordinator(runtime) {
                 try {
                     if(cachedPrimitiveOwner(runtime,util,args,'arcade_throwValue',[])===block){
                         const origin=engineActivations.capture(runtime.sequencer,thread);
-                        let request=origin&&engineActivations.prepareOwnedThrow(origin,value),edge=null;
+                        let request=origin&&engineActivations.prepareOwnedThrow(origin,value,signal),edge=null;
                         if(!request&&origin){
                             const candidate=failureGet(edges,thread);
                             if(candidate?.generation===generation&&candidate.frameLease&&
                                 engineActivations.validFrame(candidate.frameLease,runtime,candidate.caller,candidate.structuredFrame)){
-                                request=engineActivations.prepareManagedThrow(origin,candidate.activation,value);
+                                request=engineActivations.prepareManagedThrow(origin,candidate.activation,value,signal);
                                 if(request)edge=candidate;
                             }
                         }
@@ -455,6 +480,7 @@ function createCoordinator(runtime) {
                 beginStructuredInvocation(thread) {return current()?invoke('beginStructuredInvocation',[thread]):null;},
                 enterStructuredHandler(...args) {return invoke('enterStructuredHandler',args);},
                 bindStructuredHandlerEntry(...args) {return current()?invoke('bindStructuredHandlerEntry',args):null;},
+                startStructuredHandler(...args) {return current()&&invoke('startStructuredHandler',args);},
                 suspendStructuredInvocation(...args) {return current()?invoke('suspendStructuredInvocation',args):null;},
                 resumeStructuredInvocation(...args) {return current()&&invoke('resumeStructuredInvocation',args);},
                 closeStructuredInvocation(...args) {if(current())invoke('closeStructuredInvocation',args);},

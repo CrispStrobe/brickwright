@@ -24,8 +24,16 @@ unrelated service adapters. They do not run the full engine loop, production
 overlay, VM, guest or compiler. The original detached/preview/entry/stack proofs
 remain separate; no corpus or completed structured-language credit is claimed.
 
-Normal/abrupt branch completion, finally, deeper managed unwind, captured catch
+Normal/throw branch completion and finally now have disabled source consumers
+through actual Thread advancement, Promise fulfillment and sequencer empty-branch
+exit. Saved throws relay through same-thread and direct managed callers only
+after finalization. Return/break/continue, deeper managed unwind, captured catch
 bindings and complete lowering remain unimplemented. Parser admission and default
 enablement require that coupled work plus affected original guest qualification,
 including native/Code/SB3 behavior. All seven original guest fixtures remain UNRUN.
 See the structured handler entry contract for the current source boundary.
+
+New selected-source branch/finally controls retain their own proofs and original
+reset/cancellation failures. A targeted cached VM probe failed before construction
+because its dependency cache was absent; it earns no VM/guest pass. No original
+18-control suite, original mutations or corpus measurement was rerun.

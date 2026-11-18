@@ -2359,6 +2359,8 @@ module.exports = makeExt(`// Name: Arcade
       return values.size?[...values]:[''];
     }
     declareParameterConstraint(args,util) {return procedureOwners.get(this).declare(args,util);}
+    // Internal disabled control body; getInfo and the parser do not register it.
+    structuredTry(args,util) {if(!exceptionOwners.get(this).startStructuredHandler(args,util))throw new Error('Structured try requires its actual owned entry');}
     throwValue(args,util) {return exceptionOwners.get(this).raise(args,util);}
     _objectError(error) {
       exceptionOwners.get(this).rethrow(error);

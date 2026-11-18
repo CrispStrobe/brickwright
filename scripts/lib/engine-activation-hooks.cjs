@@ -22,7 +22,19 @@ const threadEdits=[
     ['    reset () {','    reset () {\n        bwEngineActivations.invalidateFrame(this);'],
     ['    pushStack (blockId) {','    pushStack (blockId) {\n        bwEngineActivations.invalidateThread(this);'],
     ['    reuseStackForNextBlock (blockId) {','    reuseStackForNextBlock (blockId) {\n        bwEngineActivations.invalidateThread(this);'],
-    ['    popStack () {','    popStack () {\n        bwEngineActivations.invalidateThread(this);']
+    ['    popStack () {','    popStack () {\n        bwEngineActivations.invalidateThread(this);'],
+    ['        this.reuseStackForNextBlock(nextBlockId);',
+        '        if (bwEngineActivations.advanceStructuredBranch(this, nextBlockId, () => this.reuseStackForNextBlock(nextBlockId))) return;\n        this.reuseStackForNextBlock(nextBlockId);']
+];
+const sequencerEdits=[
+    ['                thread.goToNextBlock();\n            }\n            // If no next block',
+        '                thread.goToNextBlock();\n                if (bwEngineActivations.takeBranchCancellation(thread)) return;\n            }\n            // If no next block'],
+    ['                thread.goToNextBlock();\n            }\n        }\n    }',
+        '                thread.goToNextBlock();\n                if (bwEngineActivations.takeBranchCancellation(thread)) return;\n            }\n        }\n    }'],
+    ['            // A "null block" - empty branch.\n            thread.popStack();',
+        '            // A "null block" - empty branch.\n            if (bwEngineActivations.finishEmptyBranch(this, thread)) return;\n            thread.popStack();'],
+    ['            while (!thread.peekStack()) {\n                thread.popStack();',
+        '            while (!thread.peekStack()) {\n                if (bwEngineActivations.finishEmptyBranch(this, thread)) return;\n                thread.popStack();']
 ];
 const executeEdits=[
     ['    const nested = executing;','    const nested = executing;\n    const bwEngineActivationEntry = bwEngineActivations.enter(sequencer, thread);'],
@@ -30,20 +42,26 @@ const executeEdits=[
     ['    primitiveReportedValue.then(resolvedValue => {',
         '    const bwEngineActivationLease = bwEngineActivations.capture(sequencer, thread);\n    primitiveReportedValue.then(resolvedValue => {\n        if (bwEngineActivationLease !== null && !bwEngineActivations.valid(bwEngineActivationLease, sequencer, thread)) return;'],
     ['    }, rejectionReason => {',
-        '    }, rejectionReason => {\n        if (bwArcadeExceptions.consume(sequencer.runtime, thread, rejectionReason)) return;\n        if (bwEngineActivationLease !== null && !bwEngineActivations.valid(bwEngineActivationLease, sequencer, thread)) return;']
+        '    }, rejectionReason => {\n        if (bwArcadeExceptions.consume(sequencer.runtime, thread, rejectionReason)) return;\n        if (bwEngineActivationLease !== null && !bwEngineActivations.valid(bwEngineActivationLease, sequencer, thread)) return;'],
+    ['        handleReport(resolvedValue, sequencer, thread, blockCached, lastOperation);',
+        '        handleReport(resolvedValue, sequencer, thread, blockCached, lastOperation);\n        if (lastOperation && bwEngineActivations.finishPromiseBranch(sequencer, thread, blockCached)) return;']
 ];
 // Admit only the complete exact previous producer shape when updating an
 // existing installed overlay. Partial hooks still refuse in both versions.
-const previousExecuteEdits=executeEdits.map(([before,after])=>[before,
+const previousExecuteEdits=executeEdits.filter(([before])=>!before.startsWith('        handleReport(')).map(([before,after])=>[before,
     after.replace('        if (bwArcadeExceptions.consume(sequencer.runtime, thread, rejectionReason)) return;\n','')]);
-const stripExecute=source=>{
-    try{return strip(source,executeEdits);}catch(error){
-        try{return strip(source,previousExecuteEdits);}catch{throw error;}
-    }
+const stripKnown=(source,versions)=>{
+    let first;for(const edits of versions){try{return strip(source,edits);}catch(error){first ||= error;}}
+    throw first;
 };
+const stripExecute=source=>stripKnown(source,[executeEdits,
+    executeEdits.filter(([before])=>!before.startsWith('        handleReport(')),previousExecuteEdits]);
+const stripThread=source=>stripKnown(source,[threadEdits,threadEdits.slice(0,4)]);
 module.exports=Object.freeze({
-    stripThreadActivations:source=>strip(source,threadEdits),
+    stripThreadActivations:stripThread,
     stripExecuteActivations:stripExecute,
-    patchThreadActivations:source=>patch(source,threadEdits),
-    patchExecuteActivations:source=>prefix+executeEdits.reduce((text,[before,after])=>once(text,before,after),stripExecute(source))
+    patchThreadActivations:source=>prefix+threadEdits.reduce((text,[before,after])=>once(text,before,after),stripThread(source)),
+    patchExecuteActivations:source=>prefix+executeEdits.reduce((text,[before,after])=>once(text,before,after),stripExecute(source)),
+    patchSequencerActivations:source=>patch(source,sequencerEdits),
+    stripSequencerActivations:source=>strip(source,sequencerEdits)
 });

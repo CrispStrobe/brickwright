@@ -5,6 +5,7 @@
 // and run cancellation invalidate it even when pooled object identity survives.
 const runtimes=new WeakMap(),entries=new WeakMap(),threads=new WeakMap(),frames=new WeakMap();
 const frameLeases=new WeakMap(),frameLives=new WeakMap(),handlerEntries=new WeakMap();
+const branchOwners=new WeakMap(),completedThrows=new WeakMap(),branchCancellations=new WeakSet();
 const handlerTransfers=new WeakMap(),handlerAcks=new WeakMap(),handlerByFrame=new WeakMap(),handlerSettlements=new WeakMap();
 const invalidateRecord=record=>{
     if(!record||!record.live)return;
@@ -14,6 +15,8 @@ const invalidateRecord=record=>{
 };
 const invalidateThread=thread=>invalidateRecord(threads.get(thread));
 const invalidateFrame=frame=>{
+    const branch=branchOwners.get(frame);
+    if(branch&&!branch.reusing){branch.live=false;}
     const records=frames.get(frame);if(records)for(const record of records)invalidateRecord(record);
     const lifetime=frameLives.get(frame);if(lifetime){lifetime.live=false;lifetime.state.lifetimes.delete(lifetime);frameLives.delete(frame);}
 };
@@ -100,15 +103,98 @@ const catchCell=(runtime,thread,name)=>{
 };
 const installationCurrent=(record,sequencer,thread,status)=>{
     return record.sequencer===sequencer&&record.thread===thread&&
-            handlerCurrent(record.handler,sequencer.runtime,thread)&&record.handler.phase==='catch'&&
+            handlerCurrent(record.handler,sequencer.runtime,thread)&&record.handler.phase===record.phase&&
             thread.stack===record.stack&&thread.stackFrames===record.frames&&
             thread.stack.length===record.handler.prefix.length+1&&thread.stackFrames.length===thread.stack.length&&
-            thread.peekStack()===record.handler.branches[1].id&&thread.peekStackFrame()===record.bodyFrame&&
+            thread.peekStack()===record.branchId&&thread.peekStackFrame()===record.bodyFrame&&
             record.handler.cells===record.cells&&thread.status===status&&
             thread.justReported===null&&record.bodyFrame.justReported===null&&record.bodyFrame.reported===null&&
             record.bodyFrame.waitingReporter===null&&record.bodyFrame.params===null&&record.bodyFrame.reporting===''&&
             record.handler.frame.justReported===null&&record.handler.frame.reported===null&&
             record.handler.frame.waitingReporter===null&&record.handler.frame.reporting==='';
+};
+const normalCompletion=Object.freeze({kind:'normal'});
+const branchCurrent=branch=>!!branch&&branch.live&&branchOwners.get(branch.frame)===branch&&
+    handlerCurrent(branch.handler,branch.handler.runtime,branch.handler.thread)&&
+    branch.handler.phase===branch.phase&&branch.handler.thread.stackFrames[branch.depth]===branch.frame&&
+    branch.handler.thread.stack[branch.depth]===branch.blockId&&
+    branch.handler.container.getNextBlock===branch.getNextBlock&&
+    (branch.blockId===null||branch.handler.container.getBlock(branch.blockId)===branch.block);
+const trackBranch=(handler,frame,id)=>{
+    if(!handler.sink)return;
+    const branch={handler,frame,blockId:id,block:handler.branches[handler.phase==='try'?0:handler.phase==='catch'?1:2].block,
+        depth:handler.prefix.length,phase:handler.phase,getNextBlock:handler.container.getNextBlock,live:true,reusing:false};
+    branchOwners.set(frame,branch);handler.branch=branch;
+};
+const installBranch=(handler,phase,pending)=>{
+    const {runtime,thread}=handler;
+    if(!handlerCurrent(handler,runtime,thread))return false;
+    const id=handler.branches[phase==='try'?0:phase==='catch'?1:2].id;
+    const frame=new handler.frame.constructor(handler.frame.warpMode);
+    const stack=handler.prefix.map(point=>point.block),frames=handler.prefix.map(point=>point.frame);
+    stack.push(id);frames.push(frame);
+    if(!handlerCurrent(handler,runtime,thread))return false;
+    const removed=thread.stackFrames.slice(handler.prefix.length),running=thread.constructor.STATUS_RUNNING;
+    for(const key of ['stack','stackFrames','status','justReported']){
+        const descriptor=Object.getOwnPropertyDescriptor(thread,key);
+        if(!descriptor||!Object.hasOwn(descriptor,'value')||!descriptor.writable)return false;
+    }
+    if(!handlerCurrent(handler,runtime,thread))return false;
+    Object.defineProperties(thread,{stack:{value:stack},stackFrames:{value:frames},status:{value:running},justReported:{value:null}});
+    for(const old of removed)invalidateFrame(old);
+    invalidateThread(thread);handler.phase=phase;handler.pending=pending;
+    if(phase!=='catch')handler.cells=Object.create(null);
+    trackBranch(handler,frame,id);return true;
+};
+const throwPhase=handler=>handler.phase==='try'&&handler.hasCatch?'catch':
+    handler.phase!=='finally'&&handler.hasFinally?'finally':null;
+const cancelOldBranch=branch=>{
+    const handler=branch.handler,thread=handler.thread;
+    // Only the still-retained old stack may be cancelled. A reset/reissued frame
+    // or a new current execution is never adopted as that old branch.
+    if(branch.live&&thread.stackFrames[branch.depth]===branch.frame&&thread.stack[branch.depth]===branch.blockId&&
+        handlerByFrame.get(handler.frame)===handler&&handler.prefix.every((point,index)=>thread.stack[index]===point.block&&thread.stackFrames[index]===point.frame)&&
+        !current(threads.get(thread))){
+        thread.status=thread.constructor.STATUS_DONE;branchCancellations.add(thread);
+    }
+    return true;
+};
+const refuseBranch=(branch,message)=>{
+    const handler=branch.handler,lifetime=frameLeases.get(handler.frameLease);
+    if(!handler.state.active||handler.state.disposed||lifetime?.generation!==handler.state.generation)return cancelOldBranch(branch);
+    const pending=handler.pending?.kind==='throw'?handler.pending:handler.failureFallback;
+    if(pending?.kind==='throw'&&handler.sink){handler.sink(pending,null);return true;}
+    throw new Error(message);
+};
+const finishBranch=branch=>{
+    const handler=branch.handler,{thread,runtime}=handler;
+    if(!branchCurrent(branch)||thread.peekStackFrame()!==branch.frame)return false;
+    if(handler.phase!=='finally'&&handler.hasFinally)return installBranch(handler,'finally',normalCompletion);
+    const completion=handler.phase==='finally'?handler.pending||normalCompletion:normalCompletion;
+    if(completion.kind==='throw'){
+        // Completing a finalizer restores its saved throw before any normal
+        // successor or outer catch can execute. Each inner boundary is visited.
+        for(let index=handler.prefix.length-2;index>=0;index--){
+            const outer=handlerByFrame.get(handler.prefix[index].frame);
+            if(!outer)continue;
+            if(!handlerCurrent(outer,runtime,thread))return false;
+            const phase=throwPhase(outer);if(!phase)continue;
+            if(!installBranch(outer,phase,phase==='finally'?completion:normalCompletion))return false;
+            if(phase==='catch'&&outer.catchName)outer.cells[outer.catchName]=completion.value;
+            return true;
+        }
+        const completionToken=Object.freeze(Object.create(null));completedThrows.set(completionToken,{branch,completion});
+        try{handler.sink(completion,completionToken);}finally{completedThrows.delete(completionToken);}
+        return true;
+    }
+    // Retain the owning frame until normal successor selection has passed the
+    // outer branch's own goToNextBlock hook. Its params obey ordinary reuse.
+    const removed=thread.stackFrames.slice(handler.prefix.length);
+    if(!handlerCurrent(handler,runtime,thread))return false;
+    thread.stack=handler.prefix.map(point=>point.block);thread.stackFrames=handler.prefix.map(point=>point.frame);
+    for(const frame of removed)invalidateFrame(frame);
+    handler.phase='closed';handlerByFrame.delete(handler.frame);invalidateThread(thread);
+    thread.goToNextBlock();return true;
 };
 module.exports=Object.freeze({
     enter(sequencer,thread){
@@ -215,26 +301,78 @@ module.exports=Object.freeze({
             catchName:record.catchName,tryBranch:record.branches[0].id,catchBranch:record.branches[1].id,
             finallyBranch:record.branches[2].id,transferAcknowledged:false});
     },
-    prepareOwnedThrow(origin,value){
+    takeBranchCancellation(thread){
+        if(!branchCancellations.has(thread))return false;
+        branchCancellations.delete(thread);return true;
+    },
+    takeCompletedThrow(token,sequencer,thread,signal){
+        const record=completedThrows.get(token);if(!record)return false;
+        completedThrows.delete(token);
+        return record.branch.handler.runtime===sequencer.runtime&&record.branch.handler.thread===thread&&
+            record.completion.signal===signal&&branchCurrent(record.branch)&&thread.peekStackFrame()===record.branch.frame;
+    },
+    beginHandlerBranch(entry,sequencer,thread,sink){
+        const handler=handlerEntries.get(entry);
+        if(typeof sink!=='function'||!handlerCurrent(handler,sequencer.runtime,thread)||
+            thread.peekStackFrame()!==handler.frame||handler.phase!=='try'||handler.sink||
+            typeof handler.container.getNextBlock!=='function')return false;
+        handler.sink=sink;return installBranch(handler,'try',normalCompletion);
+    },
+    advanceStructuredBranch(thread,nextBlockId,reuse){
+        const branch=branchOwners.get(thread.peekStackFrame());if(!branch)return false;
+        const handler=branch.handler;
+        if(!branchCurrent(branch)){
+            if(handler.thread!==thread||!thread.stackFrames.includes(handler.frame)||handlerByFrame.get(handler.frame)!==handler){branchOwners.delete(branch.frame);return false;}
+            if(!handler.state.active||handler.state.generation!==frameLeases.get(handler.frameLease)?.generation)return cancelOldBranch(branch);
+            return refuseBranch(branch,'Structured branch ownership changed before completion');
+        }
+        if(handler.container.getNextBlock(branch.blockId)!==nextBlockId||!branchCurrent(branch))
+            return refuseBranch(branch,'Structured branch successor changed before completion');
+        if(nextBlockId===null){if(!finishBranch(branch))return refuseBranch(branch,'Structured branch completion refused');return true;}
+        const block=handler.container.getBlock(nextBlockId);if(!block)return refuseBranch(branch,'Structured branch successor missing');
+        branch.reusing=true;
+        try{reuse();}finally{branch.reusing=false;}
+        branch.blockId=nextBlockId;branch.block=block;
+        if(!branchCurrent(branch)){
+            if(!handler.state.active||handler.state.generation!==frameLeases.get(handler.frameLease)?.generation)return cancelOldBranch(branch);
+            return refuseBranch(branch,'Structured branch reuse changed ownership');
+        }
+        return true;
+    },
+    finishEmptyBranch(sequencer,thread){
+        const branch=branchOwners.get(thread.peekStackFrame());
+        if(!branch||branch.blockId!==null)return false;
+        if(branch.handler.runtime!==sequencer.runtime||!branchCurrent(branch))return refuseBranch(branch,'Empty structured branch ownership changed');
+        if(!finishBranch(branch))return refuseBranch(branch,'Empty structured branch completion refused');return true;
+    },
+    finishPromiseBranch(sequencer,thread,blockCached){
+        const branch=branchOwners.get(thread.peekStackFrame());if(!branch)return false;
+        if(branch.handler.runtime!==sequencer.runtime||blockCached.id!==branch.blockId||!branchCurrent(branch))
+            return refuseBranch(branch,'Structured Promise branch ownership changed');
+        thread.goToNextBlock();return true;
+    },
+    prepareOwnedThrow(origin,value,signal=null){
         const execution=entries.get(origin);if(!current(execution))return null;
         // The first registered boundary is decisive. An inner finally, catch
         // phase or unsupported empty branch may not be skipped for an outer try.
+        const unwind=[];
         for(let index=execution.thread.stackFrames.length-1;index>=0;index--){
             const frame=execution.thread.stackFrames[index],handler=handlerByFrame.get(frame);
             if(!handler)continue;
             if(!handlerCurrent(handler,execution.runtime,execution.thread))return null;
-            return module.exports.prepareHandlerTransfer(origin,handler.token,value);
+            if(throwPhase(handler))return module.exports.prepareHandlerTransfer(origin,handler.token,value,signal,unwind);
+            unwind.push(handler);
         }
         return null;
     },
-    prepareManagedThrow(origin,destinationOrigin,value){
+    prepareManagedThrow(origin,destinationOrigin,value,signal=null){
         const source=entries.get(origin),destination=entries.get(destinationOrigin);
         if(!current(source)||!current(destination)||source.runtime!==destination.runtime||
             source.thread===destination.thread||source.target!==destination.target||
             source.thread.stackFrames.some(frame=>handlerByFrame.has(frame)))return null;
         // A managed edge is admitted separately by the coordinator. This
         // physical helper cannot skip any boundary on the throwing thread.
-        return module.exports.prepareOwnedThrow(destinationOrigin,value);
+        return module.exports.prepareOwnedThrow(destinationOrigin,value,signal);
     },
     readCatchCell(runtime,thread,name){
         const handler=catchCell(runtime,thread,name);
@@ -245,22 +383,22 @@ module.exports=Object.freeze({
         if(!handler)return false;
         handler.cells[name]=value;return true;
     },
-    prepareHandlerTransfer(origin,entry,value){
+    prepareHandlerTransfer(origin,entry,value,signal=null,unwind=[]){
         const execution=entries.get(origin),handler=handlerEntries.get(entry);
         // This first physical dependency is deliberately same-thread/catch-only.
         // A managed edge or a pending finally cannot be bypassed by this route.
         if(!current(execution)||!handlerCurrent(handler,execution.runtime,execution.thread)||
-            handler.phase!=='try'||!handler.hasCatch||handler.hasFinally||handler.branches[1].id===null||
+            !throwPhase(handler)||(!handler.sink&&(handler.phase!=='try'||handler.hasFinally||handler.branches[1].id===null))||
             value!==null&&!['undefined','boolean','number','string'].includes(typeof value))return null;
         const thread=execution.thread,stack=thread.stack,stackFrames=thread.stackFrames;
         if(stack.length!==stackFrames.length||!Array.isArray(stack)||!Array.isArray(stackFrames))return null;
         // Selecting an outer entry may not skip an inner registered boundary,
         // even if that inner catch has already run. Explicit unwind is pending.
         if(stackFrames.slice(handler.prefix.length).some(frame=>{
-            const inner=handlerByFrame.get(frame);return inner&&handlerCurrent(inner,execution.runtime,thread);
+            const inner=handlerByFrame.get(frame);return inner&&(!unwind.includes(inner)||throwPhase(inner)!==null)&&handlerCurrent(inner,execution.runtime,thread);
         }))return null;
         const request=Object.freeze(Object.create(null));
-        handlerTransfers.set(request,{execution,handler,value,stack,stackFrames,
+        handlerTransfers.set(request,{execution,handler,value,signal,phase:throwPhase(handler),originalPhase:handler.phase,unwind,stack,stackFrames,
             originStack:[...stack],originFrames:[...stackFrames]});
         return request;
     },
@@ -268,13 +406,13 @@ module.exports=Object.freeze({
         const transfer=handlerTransfers.get(request);
         if(!transfer)return null;
         handlerTransfers.delete(request); // even refused offers cannot be retried
-        const {execution,handler,value}=transfer;
+        const {execution,handler,value,phase}=transfer;
         if(execution.token!==origin||execution.sequencer!==sequencer||execution.thread!==thread||
-            !current(execution)||!handlerCurrent(handler,sequencer.runtime,thread)||handler.phase!=='try'||
+            !current(execution)||!handlerCurrent(handler,sequencer.runtime,thread)||handler.phase!==transfer.originalPhase||throwPhase(handler)!==phase||
             thread.stack!==transfer.stack||thread.stackFrames!==transfer.stackFrames||
             thread.stack.length!==transfer.originStack.length||thread.stackFrames.length!==transfer.originFrames.length||
             thread.stackFrames.slice(handler.prefix.length).some(frame=>{const inner=handlerByFrame.get(frame);
-                return inner&&handlerCurrent(inner,sequencer.runtime,thread);})||
+                return inner&&(!transfer.unwind.includes(inner)||throwPhase(inner)!==null)&&handlerCurrent(inner,sequencer.runtime,thread);})||
             transfer.originStack.some((block,index)=>thread.stack[index]!==block||thread.stackFrames[index]!==transfer.originFrames[index]))return null;
         // No guest callbacks or Thread pool hooks are run during installation.
         // Prepare every value before replacing writable own engine fields. Old
@@ -286,7 +424,8 @@ module.exports=Object.freeze({
         const Frame=handler.frame.constructor,bodyFrame=new Frame(handler.frame.warpMode);
         if(!['params','justReported','reported','waitingReporter','executionContext','reporting'].every(name=>data(bodyFrame,name)))return null;
         const nextStack=handler.prefix.map(point=>point.block),nextFrames=handler.prefix.map(point=>point.frame);
-        nextStack.push(handler.branches[1].id);nextFrames.push(bodyFrame);
+        const branchId=handler.branches[phase==='catch'?1:2].id;
+        nextStack.push(branchId);nextFrames.push(bodyFrame);
         const cells=Object.create(null);if(handler.catchName)cells[handler.catchName]=value;
         const removed=thread.stackFrames.slice(handler.prefix.length);
         const running=thread.constructor.STATUS_RUNNING;
@@ -303,9 +442,12 @@ module.exports=Object.freeze({
         Object.defineProperties(handler.frame,{justReported:{value:null},reported:{value:null},
             waitingReporter:{value:null},reporting:{value:''}});
         for(const frame of removed)invalidateFrame(frame);
-        invalidateThread(thread);handler.phase='catch';handler.cells=cells;
+        invalidateThread(thread);handler.phase=phase;handler.cells=phase==='catch'?cells:Object.create(null);
+        handler.failureFallback=Object.freeze({kind:'throw',signal:transfer.signal,value});
+        handler.pending=phase==='finally'?handler.failureFallback:normalCompletion;
+        trackBranch(handler,bodyFrame,branchId);
         const ack=Object.freeze(Object.create(null));
-        handlerAcks.set(ack,{handler,thread,sequencer,stack:nextStack,frames:nextFrames,bodyFrame,cells});
+        handlerAcks.set(ack,{handler,thread,sequencer,stack:nextStack,frames:nextFrames,bodyFrame,cells:handler.cells,phase,branchId});
         return ack;
     },
     takeHandlerAck(ack,sequencer,thread){

@@ -30,10 +30,12 @@ cannot bind an entry. Rebinding a frame supersedes the old entry.
 In the experimental engine seam, raise stages only an actual current cached
 arcade_throwValue invocation. It retains its private original Error, primitive
 value, current execution identity and physical transfer request before the
-primitive loan unwinds. The nearest registered boundary is decisive: unsupported
-finally, an already running catch or an empty catch refuses rather than skipping
-to an outer handler. Only same-thread and direct managed-caller catch destinations
-without finally are currently implemented.
+primitive loan unwinds. The nearest registered boundary is decisive. Try throws enter their catch when
+present; otherwise they enter finally while retaining the original completion.
+Catch throws enter that boundary's finally. Throws escaping a running finally
+replace its pending completion and continue outward. Empty authored branches
+retain their flags and complete through the actual sequencer null-branch path.
+Only same-thread and direct managed-caller destinations are implemented.
 
 The actual execute catch and Promise rejection consumer use the coordinator's
 private signal identity. Commit revalidates run, origin, stack, branch and entry,
@@ -75,22 +77,49 @@ it; changed branch state falls back to the original thrown Error. Generation
 checks after metadata and cleanup prevent Stop/restart callbacks from reviving
 or terminally reporting stale work.
 
+## Actual branch exit and finalization
+
+The disabled control body starts a private branch lease through its current
+canonical entry. Thread.goToNextBlock intercepts branch completion before frame
+reuse. Sequential successors preserve the lease only across its observed native
+reuse; a reset or pool release revokes it. Sequencer.stepThread intercepts both
+null-branch pop sites. Promise fulfillment hands the owned command branch back
+to this same advancement path before its ordinary pop/push loop.
+
+Normal try or catch completion enters finally once when present; normal
+finalizer completion restores the saved completion. A saved throw enters the
+nearest enclosing same-thread catch/finally, or uses its original terminal
+signal. Normal completion advances past the owning control while preserving an
+outer branch's own advancement. Metadata refusal during a pending throw uses
+that exact original Error. Stop/restart cancels only the retained old branch
+and gives the sequencer a private one-use cancellation handoff; it does not
+repeat old authored work or adopt a reset/reissued frame.
+
+A completed child finalizer can relay its saved throw through the actual direct
+managed-call edge. The engine issues a one-use completion token bound to the
+actual branch, run, frame and original signal. Only its private coordinator sink
+can combine that token with the retained caller edge/activation and physical
+installation receipt. Caller catch/finally execution waits for synchronous
+callFunction or queued _pumpFunctionCalls settlement, as for direct throws.
+
 ## Remaining coupled work and qualification boundary
 
-Normal try/catch completion, branch completion before sequencer pop/reuse,
-finally entry/continuation, abrupt finalizer replacement, return/break/continue
-relay, deeper managed-call unwinding, captured catch bindings and complete
-structured lowering remain unimplemented. A running finally must finish before
+Return/break/continue relay, their owned lexical destinations, deeper managed-call
+unwinding, captured catch bindings and complete structured lowering remain
+unimplemented. The actual returnValue path still returns/retires before running
+local finalizers. Implemented abrupt replacement covers throws only. A running finally must finish before
 an outer handler can be selected. The compiler must prove lexical jump targets
 against actual enclosing control frames. These gaps forbid parser admission and
 default enablement.
 
-New bounded pure controls evaluate selected real executeWithContext and
-handlePromise bodies, the actual primitive owner, cached owner, coordinator,
-instrumented selected Thread, lexical methods and direct callFunction/pump
-methods. Cache graphs, registration, value adapters and unrelated services are
+Separate bounded pure controls evaluate selected real executeWithContext and
+handlePromise bodies, Sequencer.stepThread, the actual primitive/cache owners,
+coordinator, instrumented selected Thread, disabled control body, lexical methods
+and direct callFunction/pump methods. Cache graphs, registration, value adapters and unrelated services are
 authored test data. This is stronger than detached helper/Boolean checks but
 does not execute the full execute loop, production overlay, VM, native guest,
-PXT, Code/SB3 journey or project corpus. The earlier entry and stack proofs stay
+PXT, Code/SB3 journey or project corpus. A separate targeted cached VM probe was
+admitted but failed on a missing cached dependency before VM construction; it
+provides no program output or VM qualification. The earlier entry and stack proofs stay
 separate; successful source controls do not count as completed guest fixtures
 or structured-exception support.
