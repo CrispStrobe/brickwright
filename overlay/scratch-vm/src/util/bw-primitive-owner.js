@@ -45,7 +45,7 @@ const roles=Object.freeze(Object.fromEntries(Object.entries({
     arcade_structuredTry:[],
     arcade_throwValue:['VALUE'],arcade_createOwnedImageSprite:['KIND'],
     arcade_returnValue:['VALUE'],arcade_functionArgument:['VALUE'],
-    arcade_setLocal:['VALUE'],arcade_setCaptured:['VALUE'],
+    arcade_getLocal:[],arcade_setLocal:['VALUE'],arcade_setCaptured:['VALUE'],
     arcade_setObjectField:['VALUE'],arcade_inspectValue:['VALUE','LIMIT'],
     arcade_sourceValueBinary:['LEFT','RIGHT'],arcade_sourceValueUnary:['VALUE'],
     arrays_create1D:[],arrays_create2D:[],arrays_createEmpty:[],

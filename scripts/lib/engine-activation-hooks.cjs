@@ -30,11 +30,20 @@ const executeEdits=[
     ['    primitiveReportedValue.then(resolvedValue => {',
         '    const bwEngineActivationLease = bwEngineActivations.capture(sequencer, thread);\n    primitiveReportedValue.then(resolvedValue => {\n        if (bwEngineActivationLease !== null && !bwEngineActivations.valid(bwEngineActivationLease, sequencer, thread)) return;'],
     ['    }, rejectionReason => {',
-        '    }, rejectionReason => {\n        if (bwEngineActivationLease !== null && !bwEngineActivations.valid(bwEngineActivationLease, sequencer, thread)) return;']
+        '    }, rejectionReason => {\n        if (bwArcadeExceptions.consume(sequencer.runtime, thread, rejectionReason)) return;\n        if (bwEngineActivationLease !== null && !bwEngineActivations.valid(bwEngineActivationLease, sequencer, thread)) return;']
 ];
+// Admit only the complete exact previous producer shape when updating an
+// existing installed overlay. Partial hooks still refuse in both versions.
+const previousExecuteEdits=executeEdits.map(([before,after])=>[before,
+    after.replace('        if (bwArcadeExceptions.consume(sequencer.runtime, thread, rejectionReason)) return;\n','')]);
+const stripExecute=source=>{
+    try{return strip(source,executeEdits);}catch(error){
+        try{return strip(source,previousExecuteEdits);}catch{throw error;}
+    }
+};
 module.exports=Object.freeze({
     stripThreadActivations:source=>strip(source,threadEdits),
-    stripExecuteActivations:source=>strip(source,executeEdits),
+    stripExecuteActivations:stripExecute,
     patchThreadActivations:source=>patch(source,threadEdits),
-    patchExecuteActivations:source=>patch(source,executeEdits)
+    patchExecuteActivations:source=>prefix+executeEdits.reduce((text,[before,after])=>once(text,before,after),stripExecute(source))
 });

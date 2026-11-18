@@ -12,7 +12,7 @@ const failureHas=(map,key)=>failureApply(nativeWeakHas,map,[key]);
 const failureDelete=(map,key)=>failureApply(nativeWeakDelete,map,[key]);
 const signalAdd=(set,key)=>failureApply(nativeSetAdd,set,[key]);
 const signalHas=(set,key)=>failureApply(nativeSetHas,set,[key]);
-module.exports=failureFreeze({__proto__:null,rejectConditionWait,create,createStructuredPreview,consume,failed,capture,stale,diagnostic,reported,arrayCoordinatorReady,rejectArrayOperation,attachArrayCoordinator});
+module.exports=failureFreeze({__proto__:null,rejectConditionWait,create,createStructuredPreview,createStructuredEngine,consume,failed,capture,stale,diagnostic,reported,arrayCoordinatorReady,rejectArrayOperation,attachArrayCoordinator});
 const primitiveOwner = require('./bw-primitive-owner');
 const cachedPrimitiveOwner = require('./bw-cached-primitive-owner');
 const consumeArrayFailureLease=require('./bw-array-operations').consumeFailureLease;
@@ -27,6 +27,7 @@ const publishedSignals = new WeakSet();
 const failedThreads = new WeakMap();
 const promiseLeases = new WeakMap();
 const callerLeases = new WeakMap();
+const managedSignals = new WeakMap();
 // Identity is private to this coordinator, never a public completion flag.
 const computationMarker=failureFreeze({__proto__:null});
 
@@ -42,6 +43,11 @@ function create(runtime, readValue, consumePhysicalUpdate = null) {
 // bypass retirement or enable parser support; there is no sequencer commit yet.
 function createStructuredPreview(runtime, readValue, consumePhysicalUpdate = null) {
     return claimRuntime(runtime,readValue,consumePhysicalUpdate,true);
+}
+// Disabled executable-boundary seam. The extension continues to use create;
+// preview remains terminal. No parser/control registration selects this seam.
+function createStructuredEngine(runtime, readValue, consumePhysicalUpdate = null) {
+    return claimRuntime(runtime,readValue,consumePhysicalUpdate,'engine');
 }
 function claimRuntime(runtime, readValue, consumePhysicalUpdate, structuredPreview) {
     if (!runtime || typeof runtime.on !== 'function' || !Array.isArray(runtime.targets)) {
@@ -63,7 +69,8 @@ function createCoordinator(runtime) {
     let readValue = null, consumePhysicalUpdate = null, arcadeClaim = null;
     const attachments = new WeakMap();
     let attachmentCount = 0, invocation = null;
-    let structuredBridge = null;
+    let structuredBridge = null, structuredEngine = false;
+    const stagedThrows = new WeakMap(), managedTransfers = new WeakMap(),managedEdgeKey=failureFreeze({});
     let structuredObservations = new WeakMap();
     const invocationCurrent = () => invocation === null ||
         (!disposed && arcadeClaim === invocation.token && generation === invocation.generation);
@@ -114,6 +121,71 @@ function createCoordinator(runtime) {
     };
     const owner = Object.freeze({
         failure,
+        consumeStaged(thread,signal) {
+            const staged=failureGet(stagedThrows,signal);
+            if(!staged||staged.thread!==thread)return false;
+            failureDelete(stagedThrows,signal);
+            // Stop/restart tombstones absorb the old signal without retiring a
+            // possibly reused thread in a new run. They grant no transfer.
+            if(staged.generation!==generation||!active||disposed)return true;
+            let accepted=false;
+            try {
+                const destination=staged.destination||thread;
+                const edgeCurrent=!staged.edge||failureGet(edges,thread)===staged.edge&&
+                    staged.edge.generation===generation&&engineActivations.validFrame(staged.edge.frameLease,runtime,destination,staged.edge.structuredFrame);
+                const ack=edgeCurrent&&engineActivations.valid(staged.origin,runtime.sequencer,thread)&&
+                    engineActivations.commitHandlerTransfer(staged.request,runtime.sequencer,destination,staged.destinationOrigin||staged.origin);
+                if(ack&&staged.edge){
+                    const settlement=engineActivations.parkHandlerAck(ack,runtime.sequencer,destination);
+                    if(settlement){
+                        staged.edge.cleanup(signal);
+                        if(engineActivations.validHandlerSettlement(settlement,runtime.sequencer,destination)&&
+                            failureGet(edges,thread)===staged.edge&&generation===staged.generation){
+                            const record=failureFreeze({owner,runtime,thread,caller:destination,settlement,signal,generation});
+                            failureSet(managedTransfers,thread,record);failureDelete(edges,thread);
+                            runtime.sequencer.retireThread(thread);accepted=true;
+                        }
+                    }
+                }else accepted=!!ack&&engineActivations.takeHandlerAck(ack,runtime.sequencer,thread);
+            }catch { /* The original owned signal is the only terminal fallback. */ }
+            if(accepted)return true;
+            // Metadata and managed cleanup are callouts. A run invalidated
+            // during them must not publish an old failure into the new run.
+            if(staged.generation!==generation||!active||disposed)return true;
+            try {retireLineage(thread,signal,true);}catch(error){if(error!==signal)throw error;}
+            return true;
+        },
+        takeManagedTransfer(thread,caller) {
+            const record=failureGet(managedTransfers,thread);
+            if(!record||record.caller!==caller)return null;
+            failureDelete(managedTransfers,thread);
+            // An actual pending call receives a distinct private settlement,
+            // never a normal value or an ordinary rejection diagnostic.
+            const transport=new Error('Arcade managed handler transfer');
+            failureSet(managedSignals,transport,record);return transport;
+        },
+        consumeManaged(thread,transport) {
+            const record=failureGet(managedSignals,transport);
+            if(!record||record.owner!==owner||record.caller!==thread)return false;
+            failureDelete(managedSignals,transport);
+            if(disposed||!active||record.generation!==generation)return true;
+            if(engineActivations.takeHandlerSettlement(record.settlement,runtime.sequencer,thread))return true;
+            if(disposed||!active||record.generation!==generation)return true;
+            try {retireLineage(thread,record.signal,true);}catch(error){if(error!==record.signal)throw error;}
+            return true;
+        },
+        readStructuredLocal(args,util) {
+            if(!structuredEngine||!live(util?.thread)||util.runtime!==runtime)return null;
+            if(primitiveOwner.current(util,args)?.opcode!=='arcade_getLocal')return null;
+            cachedPrimitiveOwner(runtime,util,args,'arcade_getLocal',['NAME']);
+            return engineActivations.readCatchCell(runtime,util.thread,args.NAME);
+        },
+        writeStructuredLocal(args,util,value) {
+            if(!structuredEngine||!live(util?.thread)||util.runtime!==runtime)return false;
+            if(primitiveOwner.current(util,args)?.opcode!=='arcade_setLocal')return false;
+            cachedPrimitiveOwner(runtime,util,args,'arcade_setLocal',['NAME']);
+            return engineActivations.writeCatchCell(runtime,util.thread,args.NAME,value);
+        },
         beginStructuredInvocation(thread) {
             if(!structuredBridge || !live(thread) || runtime.sequencer.activeThread!==thread)return null;
             return structuredBridge.begin(thread,thread.peekStackFrame());
@@ -163,8 +235,20 @@ function createCoordinator(runtime) {
                 live(record.thread) && record.thread.stackFrames.includes(record.frame) &&
                 record.generation===generation && active && !disposed && invocationCurrent());
         },
-        rethrow(error) {if (owned(error)) throw error;},
-        link(child, caller, cleanup = () => {}, lease = null) {
+        rethrow(error) {if (owned(error)||failureGet(managedSignals,error)?.owner===owner) throw error;},
+        linkManagedCall(child,args,util,cleanup) {
+            if(structuredEngine){
+                const retained=failureGet(callerLeases,args.bwExceptionCaller);
+                if(!retained){
+                    if(primitiveOwner.current(util,args)?.opcode!=='arcade_callFunction'||
+                        !cachedPrimitiveOwner(runtime,util,args,'arcade_callFunction',[]))
+                        throw new Error('Managed transfer edge requires its actual cached call');
+                }
+            }
+            return owner.link(child,util.thread,cleanup,args.bwExceptionCaller,managedEdgeKey);
+        },
+        link(child, caller, cleanup = () => {}, lease = null, admission = null) {
+            if(structuredEngine&&admission!==managedEdgeKey)throw new Error('Managed transfer edge requires its private call admission');
             const record=lease && failureGet(callerLeases,lease);
             const retained=record?.owner===owner && record.thread===caller && record.generation===generation &&
                 caller.stackFrames.includes(record.frame) && (!record.frameLease ||
@@ -180,8 +264,11 @@ function createCoordinator(runtime) {
             for (let parent = caller; parent; parent = failureGet(edges,parent)?.caller) {
                 if (parent === child) throw new Error('Cyclic Arcade exception edge');
             }
-            const edge = {caller, cleanup, generation,
-                ...(structuredBridge?{structuredFrame:retained?record.frame:caller.peekStackFrame()}:{})};
+            const frame=retained?record.frame:caller.peekStackFrame();
+            const activation=engineActivations.capture(runtime.sequencer,caller);
+            const frameLease=retained?record.frameLease:activation&&engineActivations.captureFrame(activation);
+            const edge = failureFreeze({caller, cleanup, generation,
+                ...(structuredBridge?{structuredFrame:frame,frameLease,activation}:{})});
             setCurrent(edges,child, edge);
             return () => {if (failureGet(edges,child) === edge) failureDelete(edges,child);};
         },
@@ -213,6 +300,29 @@ function createCoordinator(runtime) {
             const record = Object.freeze({owner, runtime, generation, value, target: thread.target,
                 block: block.id, stack: Object.freeze([...thread.stack])});
             setCurrent(signals,signal, record);
+            if(structuredEngine){
+                // Capture while the real cached primitive loan is still live;
+                // only the actual execute/Promise consumer may commit it later.
+                try {
+                    if(cachedPrimitiveOwner(runtime,util,args,'arcade_throwValue',[])===block){
+                        const origin=engineActivations.capture(runtime.sequencer,thread);
+                        let request=origin&&engineActivations.prepareOwnedThrow(origin,value),edge=null;
+                        if(!request&&origin){
+                            const candidate=failureGet(edges,thread);
+                            if(candidate?.generation===generation&&candidate.frameLease&&
+                                engineActivations.validFrame(candidate.frameLease,runtime,candidate.caller,candidate.structuredFrame)){
+                                request=engineActivations.prepareManagedThrow(origin,candidate.activation,value);
+                                if(request)edge=candidate;
+                            }
+                        }
+                        if(request){
+                            failureSet(stagedThrows,signal,{thread,origin,request,generation,
+                                ...(edge?{edge,destination:edge.caller,destinationOrigin:edge.activation}:{})});
+                            throw signal;
+                        }
+                    }
+                }catch(error){if(error===signal)throw signal;}
+            }
             if(structuredBridge){
                 try{
                     const plan=structuredBridge.offerOwnedThrow(thread,thread.peekStackFrame(),signal,value);
@@ -309,6 +419,7 @@ function createCoordinator(runtime) {
             if (disposed || arcadeClaim) throw new Error('Arcade exception runtime already has an owner');
             const token = failureFreeze({});
             arcadeClaim = token;readValue = valueReader;consumePhysicalUpdate = physicalUpdate;
+            structuredEngine=preview==='engine';
             if(preview){
                 structuredBridge=require('./bw-structured-continuations')(
                     (thread,frame,top=false)=>live(thread)&&thread.stackFrames.includes(frame)&&
@@ -316,7 +427,8 @@ function createCoordinator(runtime) {
                     (thread,frame)=>{
                         const index=thread.stackFrames.lastIndexOf(frame);
                         if(index>0)return {thread,frame:thread.stackFrames[index-1]};
-                        const edge=failureGet(edges,thread);return edge?.generation===generation&&edge.caller&&edge.structuredFrame?
+                        const edge=failureGet(edges,thread);return edge?.generation===generation&&edge.caller&&edge.structuredFrame&&
+                            (!structuredEngine||edge.frameLease&&engineActivations.validFrame(edge.frameLease,runtime,edge.caller,edge.structuredFrame))?
                             {thread:edge.caller,frame:edge.structuredFrame}:null;});
                 if(active)structuredBridge.start();
             }
@@ -336,6 +448,9 @@ function createCoordinator(runtime) {
             // only failure/rethrow observations retain their original tombstones.
             return failureFreeze({
                 failure: thread => failureGet(claimFailures,thread) || null,
+                takeManagedTransfer(...args) {return current()?invoke('takeManagedTransfer',args):null;},
+                readStructuredLocal(...args) {return current()?invoke('readStructuredLocal',args):null;},
+                writeStructuredLocal(...args) {return current()&&invoke('writeStructuredLocal',args);},
                 rethrow: owner.rethrow,
                 beginStructuredInvocation(thread) {return current()?invoke('beginStructuredInvocation',[thread]):null;},
                 enterStructuredHandler(...args) {return invoke('enterStructuredHandler',args);},
@@ -349,6 +464,7 @@ function createCoordinator(runtime) {
                 capture(thread) {return current() ? invoke('capture',[thread]) : null;},
                 current(lease) {return current() && owner.current(lease);},
                 link(...args) {return invoke('link',args);},
+                linkManagedCall(...args) {return invoke('linkManagedCall',args);},
                 linkPhysicalUpdate(...args) {return invoke('linkPhysicalUpdate',args);},
                 raise(...args) {return invoke('raise',args);},
                 arrayReady() {return current() && owner.arrayReady();},
@@ -358,7 +474,7 @@ function createCoordinator(runtime) {
                 rejectConstraint(...args) {return invoke('rejectConstraint',args);},
                 dispose() {
                     if (!current()) return;
-                    cancel();structuredBridge=null;arcadeClaim = null;readValue = null;consumePhysicalUpdate = null;
+                    cancel();structuredBridge=null;structuredEngine=false;arcadeClaim = null;readValue = null;consumePhysicalUpdate = null;
                     failures = new WeakMap();edges = new WeakMap();structuredObservations = new WeakMap();
                     if (attachmentCount === 0) owner.dispose();
                 }
@@ -391,6 +507,9 @@ function createCoordinator(runtime) {
 // A stale signal is still recognized so it cannot enter Scratch's ordinary
 // rejection path and resume an old thread after Stop/Start.
 function consume(runtime, thread, error) {
+    const managed=failureGet(managedSignals,error);
+    if(managed?.runtime===runtime&&managed.owner.consumeManaged(thread,error))return true;
+    if(failureGet(signals,error)?.runtime===runtime&&failureGet(owners,runtime)?.consumeStaged(thread,error))return true;
     return Boolean(failureGet(signals,error)?.runtime === runtime && failureGet(failedThreads,thread)?.signal === error);
 }
 function failed(runtime, thread) {return failureGet(failedThreads,thread)?.runtime === runtime;}

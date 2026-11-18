@@ -2448,6 +2448,8 @@ module.exports = makeExt(`// Name: Arcade
     }
     _pumpFunctionCalls() {
       for (const call of this._functionCalls) {
+        const transfer=exceptionOwners.get(this).takeManagedTransfer(call.thread,call.caller);
+        if(transfer){this._functionCalls.delete(call);call.reject(transfer);continue;}
         const failure=exceptionOwners.get(this).failure(call.thread) || exceptionOwners.get(this).failure(call.caller);
         if(failure){this._functionCalls.delete(call);call.unlink?.();call.reject(failure);continue;}
         if (call.caller && (call.caller.status === call.caller.constructor.STATUS_DONE || call.caller.isKilled || !this._runtime.threads.includes(call.caller))) {
@@ -2499,7 +2501,7 @@ module.exports = makeExt(`// Name: Arcade
       const exceptions=exceptionOwners.get(this);
       let unlink;
       const cleanup=()=>{classCallableHosts.get(this)?.abortThread(thread);managedReturnHosts.get(this).forget(thread);};
-      try {unlink=util.thread ? exceptions.link(thread,util.thread,cleanup,args.bwExceptionCaller) :
+      try {unlink=util.thread ? exceptions.linkManagedCall(thread,args,util,cleanup) :
         exceptions.linkPhysicalUpdate(thread,args,util,cleanup);}catch(error){runtime.sequencer.retireThread(thread);throw error;}
       // A sentinel caller frame retains arguments/locals while the native
       // sequencer replaces body frames. Each invocation owns its own cells.
@@ -2520,7 +2522,7 @@ module.exports = makeExt(`// Name: Arcade
       catch(error){unlink();classCallableHosts.get(this)?.abortThread(thread);runtime.sequencer.retireThread(thread);return this._objectError(error);}
       managedReturnHosts.get(this).bind(thread,target,name,definition,util.thread);
       const managedCaller=util.thread;
-      const complete=value=>{const failure=exceptions.failure(thread) || exceptions.failure(managedCaller);if(failure)throw failure;unlink();if(classSignature && (managedCaller.isKilled || !runtime.threads.includes(managedCaller)))return Scratch.BWValues.UNDEFINED;try{this._objectHeap.validateTransport(value);return classCallableHosts.get(this)?.result(classSignature,value) ?? value;}catch(error){return this._objectError(error);}};
+      const complete=value=>{const transfer=exceptions.takeManagedTransfer(thread,managedCaller);if(transfer)throw transfer;const failure=exceptions.failure(thread) || exceptions.failure(managedCaller);if(failure)throw failure;unlink();if(classSignature && (managedCaller.isKilled || !runtime.threads.includes(managedCaller)))return Scratch.BWValues.UNDEFINED;try{this._objectHeap.validateTransport(value);return classCallableHosts.get(this)?.result(classSignature,value) ?? value;}catch(error){return this._objectError(error);}};
       thread.bwArcadeEvent = util.thread?.bwArcadeEvent;
       thread.bwArcadeCaptures = args.bwCallableCaptures || util.thread?.bwArcadeCaptures;
       thread.bwFunctionNames = new Set(util.thread?.bwFunctionNames || []);
@@ -2545,6 +2547,7 @@ module.exports = makeExt(`// Name: Arcade
             step();
         }
         finally {util.thread = caller;util.sequencer = sequencer;sequencer.activeThread = active;}
+        const transfer=exceptions.takeManagedTransfer(thread,caller);if(transfer)throw transfer;
         const failure=exceptions.failure(thread) || exceptions.failure(caller);if(failure)throw failure;
         if (!runtime.threads.includes(caller)) {unlink();sequencer.retireThread(caller);sequencer.retireThread(thread);return 0;}
       }
@@ -2616,12 +2619,15 @@ module.exports = makeExt(`// Name: Arcade
       const params = this._localParams(util);
       if (params) {
         const name=String(args.NAME),value=dependencies.currentNumberInput(this._runtime,args,util,'arcade_setLocal');
+        if(exceptionOwners.get(this).writeStructuredLocal(args,util,Scratch.BWValues.decode(value)))return;
         try {procedureOwners.get(this).write(params,name,value,util,args);}
         catch(error){return exceptionOwners.get(this).rejectConstraint(args,util,error);}
         params[name]=value;
       }
     }
     getLocal(args, util) {
+      const lexical=exceptionOwners.get(this).readStructuredLocal(args,util);
+      if(lexical)return Scratch.BWValues.encode(lexical.value);
       const params = this._localParams(util);
       const name = String(args.NAME);
       return params && Object.prototype.hasOwnProperty.call(params, name) ? params[name] : 0;

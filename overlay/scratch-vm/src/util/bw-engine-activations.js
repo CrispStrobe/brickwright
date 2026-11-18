@@ -5,7 +5,7 @@
 // and run cancellation invalidate it even when pooled object identity survives.
 const runtimes=new WeakMap(),entries=new WeakMap(),threads=new WeakMap(),frames=new WeakMap();
 const frameLeases=new WeakMap(),frameLives=new WeakMap(),handlerEntries=new WeakMap();
-const handlerTransfers=new WeakMap(),handlerAcks=new WeakMap(),handlerByFrame=new WeakMap();
+const handlerTransfers=new WeakMap(),handlerAcks=new WeakMap(),handlerByFrame=new WeakMap(),handlerSettlements=new WeakMap();
 const invalidateRecord=record=>{
     if(!record||!record.live)return;
     record.live=false;record.state.records.delete(record);
@@ -86,6 +86,29 @@ const handlerCurrent=(record,runtime,thread)=>{
         lifetime.generation===record.state.generation&&frameLives.get(record.frame)===lifetime&&
         handlerByFrame.get(record.frame)===record&&record.prefix.every((point,index)=>
             thread.stack[index]===point.block&&thread.stackFrames[index]===point.frame);
+};
+// Lexical lookup uses the actual owning stack prefix and run lifetime. It
+// never returns the private cell map or borrows procedure params.
+const catchCell=(runtime,thread,name)=>{
+    for(let index=thread?.stackFrames?.length-1;index>=0;index--){
+        const handler=handlerByFrame.get(thread.stackFrames[index]);
+        if(handler&&handler.phase==='catch'&&handler.catchName===name){
+            return handlerCurrent(handler,runtime,thread)?handler:null;
+        }
+    }
+    return null;
+};
+const installationCurrent=(record,sequencer,thread,status)=>{
+    return record.sequencer===sequencer&&record.thread===thread&&
+            handlerCurrent(record.handler,sequencer.runtime,thread)&&record.handler.phase==='catch'&&
+            thread.stack===record.stack&&thread.stackFrames===record.frames&&
+            thread.stack.length===record.handler.prefix.length+1&&thread.stackFrames.length===thread.stack.length&&
+            thread.peekStack()===record.handler.branches[1].id&&thread.peekStackFrame()===record.bodyFrame&&
+            record.handler.cells===record.cells&&thread.status===status&&
+            thread.justReported===null&&record.bodyFrame.justReported===null&&record.bodyFrame.reported===null&&
+            record.bodyFrame.waitingReporter===null&&record.bodyFrame.params===null&&record.bodyFrame.reporting===''&&
+            record.handler.frame.justReported===null&&record.handler.frame.reported===null&&
+            record.handler.frame.waitingReporter===null&&record.handler.frame.reporting==='';
 };
 module.exports=Object.freeze({
     enter(sequencer,thread){
@@ -183,7 +206,7 @@ module.exports=Object.freeze({
         if(!handlerCurrent(record,runtime,thread)){
             if(previous)handlerByFrame.set(frame,previous);else handlerByFrame.delete(frame);return null;
         }
-        const entryToken=Object.freeze(Object.create(null));handlerEntries.set(entryToken,record);return entryToken;
+        const entryToken=Object.freeze(Object.create(null));record.token=entryToken;handlerEntries.set(entryToken,record);return entryToken;
     },
     inspectHandlerEntry(entry,runtime,thread){
         const record=handlerEntries.get(entry);if(!handlerCurrent(record,runtime,thread))return null;
@@ -191,6 +214,36 @@ module.exports=Object.freeze({
         return Object.freeze({root:record.root,frame:record.frame,hasCatch:record.hasCatch,hasFinally:record.hasFinally,
             catchName:record.catchName,tryBranch:record.branches[0].id,catchBranch:record.branches[1].id,
             finallyBranch:record.branches[2].id,transferAcknowledged:false});
+    },
+    prepareOwnedThrow(origin,value){
+        const execution=entries.get(origin);if(!current(execution))return null;
+        // The first registered boundary is decisive. An inner finally, catch
+        // phase or unsupported empty branch may not be skipped for an outer try.
+        for(let index=execution.thread.stackFrames.length-1;index>=0;index--){
+            const frame=execution.thread.stackFrames[index],handler=handlerByFrame.get(frame);
+            if(!handler)continue;
+            if(!handlerCurrent(handler,execution.runtime,execution.thread))return null;
+            return module.exports.prepareHandlerTransfer(origin,handler.token,value);
+        }
+        return null;
+    },
+    prepareManagedThrow(origin,destinationOrigin,value){
+        const source=entries.get(origin),destination=entries.get(destinationOrigin);
+        if(!current(source)||!current(destination)||source.runtime!==destination.runtime||
+            source.thread===destination.thread||source.target!==destination.target||
+            source.thread.stackFrames.some(frame=>handlerByFrame.has(frame)))return null;
+        // A managed edge is admitted separately by the coordinator. This
+        // physical helper cannot skip any boundary on the throwing thread.
+        return module.exports.prepareOwnedThrow(destinationOrigin,value);
+    },
+    readCatchCell(runtime,thread,name){
+        const handler=catchCell(runtime,thread,name);
+        return handler?Object.freeze({value:handler.cells[name]}):null;
+    },
+    writeCatchCell(runtime,thread,name,value){
+        const handler=catchCell(runtime,thread,name);
+        if(!handler)return false;
+        handler.cells[name]=value;return true;
     },
     prepareHandlerTransfer(origin,entry,value){
         const execution=entries.get(origin),handler=handlerEntries.get(entry);
@@ -258,16 +311,26 @@ module.exports=Object.freeze({
     takeHandlerAck(ack,sequencer,thread){
         const record=handlerAcks.get(ack);if(!record)return false;
         handlerAcks.delete(ack);
-        return record.sequencer===sequencer&&record.thread===thread&&
-            handlerCurrent(record.handler,sequencer.runtime,thread)&&record.handler.phase==='catch'&&
-            thread.stack===record.stack&&thread.stackFrames===record.frames&&
-            thread.stack.length===record.handler.prefix.length+1&&thread.stackFrames.length===thread.stack.length&&
-            thread.peekStack()===record.handler.branches[1].id&&thread.peekStackFrame()===record.bodyFrame&&
-            record.handler.cells===record.cells&&thread.status===thread.constructor.STATUS_RUNNING&&
-            thread.justReported===null&&record.bodyFrame.justReported===null&&record.bodyFrame.reported===null&&
-            record.bodyFrame.waitingReporter===null&&record.bodyFrame.params===null&&record.bodyFrame.reporting===''&&
-            record.handler.frame.justReported===null&&record.handler.frame.reported===null&&
-            record.handler.frame.waitingReporter===null&&record.handler.frame.reporting==='';
+        return installationCurrent(record,sequencer,thread,thread.constructor.STATUS_RUNNING);
+    },
+    parkHandlerAck(ack,sequencer,thread){
+        const record=handlerAcks.get(ack);if(!record)return null;
+        handlerAcks.delete(ack);
+        if(!installationCurrent(record,sequencer,thread,thread.constructor.STATUS_RUNNING))return null;
+        // A managed destination must not run before its actual pending call
+        // settles. The receipt is consumed before this private parked lease.
+        Object.defineProperty(thread,'status',{value:thread.constructor.STATUS_PROMISE_WAIT});
+        const token=Object.freeze(Object.create(null));handlerSettlements.set(token,record);return token;
+    },
+    validHandlerSettlement(token,sequencer,thread){
+        const record=handlerSettlements.get(token);
+        return !!record&&installationCurrent(record,sequencer,thread,thread.constructor.STATUS_PROMISE_WAIT);
+    },
+    takeHandlerSettlement(token,sequencer,thread){
+        const record=handlerSettlements.get(token);if(!record)return false;
+        handlerSettlements.delete(token);
+        if(!installationCurrent(record,sequencer,thread,thread.constructor.STATUS_PROMISE_WAIT))return false;
+        Object.defineProperty(thread,'status',{value:thread.constructor.STATUS_RUNNING});return true;
     },
     invalidateThread,
     invalidateFrame
