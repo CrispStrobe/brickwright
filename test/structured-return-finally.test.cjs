@@ -144,3 +144,13 @@ test('Stop/restart during actual cached return admission cannot fall back to sta
     v.container.getInputs=block=>{if(block.id==='return'){v.runtime.emit('PROJECT_STOP_ALL');v.runtime.emit('PROJECT_START');}return original(block);};
     v.step();assert.equal(v.thread.bwReturnValue,undefined);assert.deepEqual(events,[]);assert.deepEqual(v.errors,[]);
 });
+
+test('reset during managed return value observation cannot adopt a replaced origin branch frame',()=>{
+    const {v,events}=returnFixture();v.readHook=()=>v.thread.peekStackFrame().reset();
+    assert.throws(()=>v.step(),/ownership|entry/);assert.equal(v.thread.bwReturnValue,undefined);assert.deepEqual(events,[]);
+});
+test('outer handler observation cannot adopt a reset inner finalizer branch during return relay',()=>{
+    const {v,events}=returnFixture();inner(v,events);let changed=false;
+    v.container.observeBranch=id=>{if(!changed&&id==='try'&&v.thread.peekStack()==='innerFinally'){changed=true;v.thread.peekStackFrame().reset();}};
+    assert.throws(()=>v.step(),/ownership|completion/);assert.equal(v.thread.bwReturnValue,undefined);assert.deepEqual(events,['innerFinally']);assert.equal(changed,true);
+});

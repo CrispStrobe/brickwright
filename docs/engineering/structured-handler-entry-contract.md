@@ -115,7 +115,8 @@ Return skips catches, executes lexical finalizers inside out, and then settles
 only its retained procedure. A return or throw from a running finalizer replaces
 the saved completion. Promise fulfillment uses the same branch completion path;
 Stop/restart, frame reset and changed handler metadata cannot publish a retained
-value. Cancellation during cache admission consumes the old invocation instead
+value. Relay revalidates the actual origin branch after value and outer-handler
+observation; a reset branch cannot be adopted into a new finalizer. Cancellation during cache admission consumes the old invocation instead
 of falling through to ordinary settlement. These are disabled source consumers,
 not parser admission or completed language support.
 

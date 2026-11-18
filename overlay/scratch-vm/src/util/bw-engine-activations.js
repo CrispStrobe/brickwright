@@ -179,17 +179,18 @@ const returnCurrent=completion=>{
         destination.params===completion.params&&destination.waitingReporter===completion.waitingReporter&&
         prefix.every((point,index)=>thread.stack[index]===point.block&&thread.stackFrames[index]===point.frame);
 };
-const relayReturn=(completion,start)=>{
-    if(!returnCurrent(completion))return false;
+const relayReturn=(completion,start,originCurrent)=>{
+    const owned=()=>originCurrent()&&returnCurrent(completion);
+    if(!owned())return false;
     const {thread,runtime}=completion.execution;
     for(let index=start;index>=completion.depth;index--){
         const handler=handlerByFrame.get(thread.stackFrames[index]);
         if(!handler)continue;
-        if(!handlerCurrent(handler,runtime,thread)||!returnCurrent(completion))return false;
+        if(!handlerCurrent(handler,runtime,thread)||!owned())return false;
         if(handler.phase!=='finally'&&handler.hasFinally)
             return installBranch(handler,'finally',completion);
     }
-    if(!returnCurrent(completion))return false;
+    if(!owned())return false;
     // Close exited controls before ordinary procedure settlement can reuse a
     // frame. A second completion cannot publish the retained value again.
     for(let index=thread.stackFrames.length-1;index>=completion.depth;index--){
@@ -204,7 +205,8 @@ const finishBranch=branch=>{
     if(!branchCurrent(branch)||thread.peekStackFrame()!==branch.frame)return false;
     if(handler.phase!=='finally'&&handler.hasFinally)return installBranch(handler,'finally',normalCompletion);
     const completion=handler.phase==='finally'?handler.pending||normalCompletion:normalCompletion;
-    if(completion.kind==='return')return relayReturn(completion,handler.prefix.length-2);
+    if(completion.kind==='return')return relayReturn(completion,handler.prefix.length-2,
+        ()=>branchCurrent(branch)&&branch.live&&thread.peekStackFrame()===branch.frame);
     if(completion.kind==='throw'){
         // Completing a finalizer restores its saved throw before any normal
         // successor or outer catch can execute. Each inner boundary is visited.
@@ -373,7 +375,7 @@ module.exports=Object.freeze({
             prefix:Object.freeze(thread.stack.slice(0,depth+1).map((block,index)=>Object.freeze({block,frame:thread.stackFrames[index]})))};
         const originBranch=branchOwners.get(thread.peekStackFrame());
         completion.value=read();
-        if(!returnCurrent(completion)||!relayReturn(completion,thread.stackFrames.length-1)){
+        if(!returnCurrent(completion)||!relayReturn(completion,thread.stackFrames.length-1,()=>current(execution))){
             if(!state.active||state.generation!==generation){if(originBranch)cancelOldBranch(originBranch);return true;}
             throw Error('Structured return ownership changed');
         }
