@@ -73,7 +73,11 @@ const handlerCurrent=(record,runtime,thread)=>{
         record.operations.length!==1||record.operations[0]!==record.operation||record.operation._argValues!==record.args||
         record.operation._blockFunction!==record.implementation||runtime.getOpcodeFunction('arcade_structuredTry')!==record.implementation||
         record.operation.fields!==record.fields||record.operation.mutation!==record.mutation)return false;
-    if(Object.keys(record.fields).length!==3||Object.keys(record.args).length!==3||
+    if(Object.keys(record.fields).length!==3||Object.keys(record.args).length!==record.argumentNames.length||
+        record.argumentNames.some(name=>!Object.hasOwn(record.args,name))||
+        record.argumentNames.includes('mutation')&&
+            (!Object.hasOwn(Object.getOwnPropertyDescriptor(record.args,'mutation')||{},'value')||
+                Object.getOwnPropertyDescriptor(record.args,'mutation').value!==record.mutation)||
         Object.keys(record.inputs).length!==record.inputNames.length||record.inputNames.some(name=>!Object.hasOwn(record.inputs,name)))return false;
     for(const field of record.selectors){
         const actual=record.fields[field.name],descriptor=actual&&Object.getOwnPropertyDescriptor(actual,'value');
@@ -413,7 +417,17 @@ module.exports=Object.freeze({
             runtime.getOpcodeFunction(block.opcode)!==operation._blockFunction||operation.fields!==block.fields||
             operation.mutation!==block.mutation||block.mutation||!block.fields||!block.inputs)return null;
         const names=['HAS_CATCH','HAS_FINALLY','CATCH_NAME'],selectors=[];
-        if(Object.keys(block.fields).length!==names.length||Object.keys(args).length!==names.length||
+        // Real execute caches include an engine-owned mutation argument in
+        // addition to literal fields. It must be the canonical mutation value;
+        // extra arguments and accessor substitutions still refuse admission.
+        const argumentNames=names.slice();
+        if(Object.hasOwn(args,'mutation')){
+            const descriptor=Object.getOwnPropertyDescriptor(args,'mutation');
+            if(!Object.hasOwn(descriptor,'value')||descriptor.value!==operation.mutation)return null;
+            argumentNames.push('mutation');
+        }
+        if(Object.keys(block.fields).length!==names.length||Object.keys(args).length!==argumentNames.length||
+            argumentNames.some(name=>!Object.hasOwn(args,name))||
             Object.keys(block.inputs).some(name=>!['SUBSTACK','SUBSTACK2','SUBSTACK3'].includes(name)))return null;
         for(const name of names){
             const field=block.fields[name],descriptor=field&&Object.getOwnPropertyDescriptor(field,'value');
@@ -435,7 +449,7 @@ module.exports=Object.freeze({
         const record={runtime,thread,frame,target,container,root,state,frameLease,block,operations,operation,args,
             prefix:thread.stack.map((block,index)=>({block,frame:thread.stackFrames[index]})),phase:'try',cells:Object.create(null),
             fields:block.fields,inputs:block.inputs,inputNames:Object.keys(block.inputs),mutation:block.mutation,implementation:operation._blockFunction,
-            getBlock:container.getBlock,getBranch:container.getBranch,selectors,branches,hasCatch,hasFinally,catchName:args.CATCH_NAME};
+            getBlock:container.getBlock,getBranch:container.getBranch,selectors,argumentNames,branches,hasCatch,hasFinally,catchName:args.CATCH_NAME};
         if(!current(execution))return null;
         const previous=handlerByFrame.get(frame);handlerByFrame.set(frame,record);
         if(!handlerCurrent(record,runtime,thread)){

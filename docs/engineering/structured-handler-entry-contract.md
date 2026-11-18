@@ -281,3 +281,38 @@ full extension, source import, PXT, Code/SB3, guest or project result follows.
 Captured event registration/lowering and labelled/switch/for-each destinations
 still require their own coupling and qualification. Parser refusal, default
 uncaught retirement and all seven original guest reservations remain in force.
+
+
+### Canonical engine argument shape
+
+The first actual cached Runtime execution refused the disabled handler before
+entering its body: BlockCached always adds a mutation argument, while the
+entry binder required exactly the three literal fields. The candidate now
+admits that extra engine argument only as an own data property equal to the
+canonical operation mutation. It retains the exact argument-key set and checks
+that property again while the handler is live. Extra keys, accessor replacement,
+changed values and deletion still refuse. The three-field selected-source
+adapter shape remains supported; no authored handler mutation is admitted.
+
+Seven new selected-source controls pass for canonical argument admission and
+refusal before and after entry. Removing live mutation-property revalidation
+makes the changed-value and accessor counterexamples fail. These counts are
+separate from earlier dispatch and lifetime suites, which were not rerun.
+
+One authored graph now passes through the actual cached Runtime, RenderedTarget,
+Blocks, complete execute loop, Thread and Sequencer with private experimental
+hooks and selected extension methods. It observes the real catch-created
+capture read of 31 after a native list-block finalizer and held service dispatch.
+The same final graph with the previous engine-activation module refuses entry.
+The graph, sprite metadata, procedure resolver, value/reference services and
+managed-return adapter are authored; this is not a complete production extension,
+VM wrapper, source import, PXT, Code/SB3, renderer or original guest proof.
+
+The full VM wrapper remains unconstructed. The bounded renderer restoration
+attempt refused a pinned dependency archive whose root is dompurify rather
+than package; no restored dependency tree was written. Original archive lookup,
+abstract-target sound setup, omitted executable-target registration and load
+pressure refusals are retained separately. The corrected graph uses the real
+RenderedTarget and Runtime.addTarget; engine source is not modified to bypass
+those setup requirements. Coverage totals and the seven original guest
+reservations are unchanged, and structured source/default behavior stays disabled.

@@ -102,3 +102,15 @@ and exact pinned local parser closure reach missing scratch-svg-renderer before
 VM construction. No program pass/failure, source-lowering or project credit.
 Captured event registration/lowering and all remaining structured destinations
 stay unqualified; default behavior and parser refusals are unchanged.
+
+
+Actual cached Runtime execution exposed the engine-owned mutation argument that
+selected handler-entry adapters omitted. Entry now accepts only its canonical
+data value and retains that argument shape for live revalidation. Seven new
+source controls pass; a revalidation cut exposes two counterexamples. One authored
+held-dispatch graph passes the actual Runtime/RenderedTarget/Blocks/execute loop,
+and the identical graph with the previous engine module refuses entry. Authored
+procedure/value/return adapters limit this result; the full VM wrapper and import
+journey remain unqualified. The bounded renderer closure attempt refused an
+archive root before writing a dependency tree. Earlier proofs and failures remain
+separate, parser/default behavior stays disabled, and corpus totals are unchanged.
