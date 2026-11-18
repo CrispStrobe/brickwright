@@ -192,7 +192,7 @@ module.exports = makeExt(`// Name: Arcade
       this._callableValues=new dependencies.CallableValues(runtime,Scratch.BWValues,classCallables?.provider,classCallables?.subscribeLifecycle);
       classCallableOwner=this._callableValues;
       this._callableDispatch=new dependencies.CallableDispatch(runtime,this._callableValues,
-        (invocation,util)=>this._callableProcedure(invocation,util));
+        (invocation,util,args)=>this._callableProcedure(invocation,util,args,'arcade_runCallableDispatch'));
       this._renderables=new WeakMap();this._screen=null;this._extensionSprites=new Map();this._frameHandlers=new WeakMap();this._extensionCreationWaits=[];
       this._scenePushHandlers = [];this._scenePopHandlers = [];
       this._scrollerVersion = 'v0.1.2';
@@ -2598,15 +2598,15 @@ module.exports = makeExt(`// Name: Arcade
           sourceModule:util?.target?.blocks.getBlock(util?.thread?.topBlock)?.opcode==='arcade_whenSourceStarts',util,operationArgs:args});}
       catch(error){return this._objectError(error);}
     }
-    _callableProcedure(invocation,util,operationArgs=null) {
+    _callableProcedure(invocation,util,operationArgs=null,operationOpcode='arcade_callCallable') {
       const caller=util?.thread;
       const exceptions=exceptionOwners.get(this);let callerLease=null;
       const release=()=>{exceptions.releaseCaller(callerLease);callerLease=null;};
       const failed=error=>{release();this._callableValues.failInvocation(invocation);return this._objectError(error);};
       let result;
       try {
-        const witness=this._callableValues.structuredInvocation(invocation,(provider,map)=>exceptions.captureStructuredInvocation(operationArgs,util,provider,map));
-        if(witness)callerLease=exceptions.captureCaller(operationArgs,util,'arcade_callCallable');
+        const witness=this._callableValues.structuredInvocation(invocation,(provider,map)=>exceptions.captureStructuredInvocation(operationArgs,util,provider,map,operationOpcode));
+        if(witness)callerLease=exceptions.captureCaller(operationArgs,util,operationOpcode);
         result=this.callFunction({NAME:invocation.definition.procedure,
           ARGS:JSON.stringify(invocation.args,Scratch.BWValues.jsonReplacer),bwCallableCaptures:invocation.captures,
           ...(witness?{bwStructuredCatchInvocation:witness,bwExceptionCaller:callerLease}:{})},util);
@@ -2623,7 +2623,7 @@ module.exports = makeExt(`// Name: Arcade
     holdCallable(reference) {return this._callableValues.hold(reference);}
     invokeHeldCallable(reference,args,event) {return this._callableDispatch.dispatch(reference,args,event);}
     whenCallableDispatched(args,util) {return this._callableDispatch.matches(args.NAME,util);}
-    runCallableDispatch(_args,util) {return this._callableDispatch.run(util);}
+    runCallableDispatch(args,util) {return this._callableDispatch.run(util,args);}
     _localParams(util) {
       const frames = util?.thread?.stackFrames || [];
       for (let i = frames.length - 1; i >= 0; i--) {

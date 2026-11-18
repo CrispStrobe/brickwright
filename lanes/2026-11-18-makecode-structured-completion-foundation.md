@@ -90,3 +90,15 @@ counterexample distinguishes the live flag: removing it permits a stale captured
 read before registration deletion. The guard remains unchanged; the new mutation
 result is separate from the original six-cut batch. No VM program or project
 qualification is claimed.
+
+
+Held callable service coupling now forwards its actual cached service arguments
+and validates that service primitive before issuing the child capture witness.
+Eight separate new selected-source controls pass, and three targeted cuts each
+fail the positive cases. The service-opcode cut removes two allowlist entries;
+it is not an isolated caller-lease proof. Prior suites remain separate.
+The actual cached VM probe is still setup-only: a corrected private UUID resolver
+and exact pinned local parser closure reach missing scratch-svg-renderer before
+VM construction. No program pass/failure, source-lowering or project credit.
+Captured event registration/lowering and all remaining structured destinations
+stay unqualified; default behavior and parser refusals are unchanged.

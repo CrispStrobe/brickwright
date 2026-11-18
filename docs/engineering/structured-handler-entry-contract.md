@@ -171,9 +171,9 @@ from previous attempts remain separate originals.
 
 ## Remaining coupled work and qualification boundary
 
-Labelled jumps, switch destinations, for-each targets, captured catch bindings
-and complete structured lowering remain
-unimplemented. Unlabelled jumps are confined to the admitted native loop kinds.
+Labelled jumps, switch destinations, for-each targets and complete structured
+lowering remain unimplemented. Captured catch bindings and held dispatch have
+disabled selected-source consumers below; source lowering remains absent. Unlabelled jumps are confined to the admitted native loop kinds.
 Implemented abrupt replacement covers returns, throws and those loop jumps. A running finally must finish before
 an outer handler can be selected. The compiler must prove lexical jump targets
 against actual enclosing control frames. These gaps forbid parser admission and
@@ -248,3 +248,36 @@ value 31. The original guard is therefore retained. This is selected-source
 callback evidence, with authored graph/services; no full VM or language result
 follows. The new four-control batch and mutation are separate from the original
 six mutations and eleven controls.
+
+
+### Held callable service admission
+
+The disabled captured-binding consumer now carries the actual service command's
+argument object from runCallableDispatch through the dispatch service to
+_callableProcedure. Its separate service opcode must match the current primitive
+loan and canonical cached command before issuing the caller/frame witness.
+The managed child then uses the same one-use map and sentinel lifetime admission
+as a direct callable. A held reference, copied argument object or copied capture
+map cannot replace that admission. The default owner still uses ordinary cells.
+
+Eight new selected-source controls exercise the actual held dispatch, callable,
+primitive/cache, Thread, execute and Sequencer methods with authored graph and
+unrelated value services. They cover escaped cell/value reads, repeated service
+invocations, shared writes, primitive replacement, copied arguments/maps, Stop
+cancellation and ordinary default-owner behavior. The original baseline has
+three positive-case failures. Removing argument forwarding, service opcode
+admission or the primitive role causes three failures each. The opcode cut
+removes both invocation and caller-lease allowlist entries; it is not an isolated
+caller-lease mutation. Earlier tests and mutations were not rerun or added to
+these counts.
+
+A separate private cached VM probe has not constructed the VM or executed a
+program. Its first setup failure was an incorrectly rooted private UUID resolver;
+a corrected resolver reached missing htmlparser2. Restoring only the exact pinned
+local parser dependency closure then reached missing scratch-svg-renderer.
+These are setup failures, not program failures or passes. The cached source is
+unchanged; no downloads or shared dependency writes occurred. No compiler,
+full extension, source import, PXT, Code/SB3, guest or project result follows.
+Captured event registration/lowering and labelled/switch/for-each destinations
+still require their own coupling and qualification. Parser refusal, default
+uncaught retirement and all seven original guest reservations remain in force.

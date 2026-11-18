@@ -68,7 +68,7 @@ class ArcadeCallableDispatch {
         return !!request && request.invocation.definition.procedure === String(name);
     }
 
-    run(util) {
+    run(util, operationArgs) {
         const request = this.request(util);
         if (!request || request.state !== 'queued') throw new Error('Missing or repeated callable service request');
         request.state = 'running';
@@ -82,7 +82,7 @@ class ArcadeCallableDispatch {
             // Recheck the canonical resource after queueing: deletion or a load
             // cannot resurrect an executable closure from a saved reference.
             this.callables.hold(request.invocation.reference);
-            const result = this.invoke(request.invocation, util);
+            const result = this.invoke(request.invocation, util, operationArgs);
             return result && typeof result.then === 'function' ?
                 result.then(value => finish(value), error => finish(undefined, error)) : finish(result);
         } catch (error) {

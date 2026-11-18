@@ -222,10 +222,13 @@ function createCoordinator(runtime) {
             cachedPrimitiveOwner(runtime,util,args,'arcade_createCallable',[]);
             return engineActivations.captureCatchProvider(engineActivations.capture(runtime.sequencer,util.thread));
         },
-        captureStructuredInvocation(args,util,provider,map){
+        captureStructuredInvocation(args,util,provider,map,opcode='arcade_callCallable'){
             if(!structuredEngine||!provider)return null;
-            if(!live(util?.thread)||primitiveOwner.current(util,args)?.opcode!=='arcade_callCallable')throw Error('Captured catch invocation requires its actual callable primitive');
-            cachedPrimitiveOwner(runtime,util,args,'arcade_callCallable',[]);
+            // The service command supplies its own real cached argument object; a
+            // host reference or copied args cannot issue this child witness.
+            if(!['arcade_callCallable','arcade_runCallableDispatch'].includes(opcode)||
+                !live(util?.thread)||primitiveOwner.current(util,args)?.opcode!==opcode)throw Error('Captured catch invocation requires its actual callable primitive');
+            cachedPrimitiveOwner(runtime,util,args,opcode,[]);
             return provider.invocation(map,engineActivations.capture(runtime.sequencer,util.thread));
         },
         readStructuredCaptured(args,util,cell){
@@ -309,7 +312,7 @@ function createCoordinator(runtime) {
         // after an earlier managed call; only their actual cached primitive
         // invocation can retain that caller.
         captureCaller(args,util,opcode='arcade_createObject') {
-            if (!arcadeClaim || !live(util?.thread) || !['arcade_createObject','arcade_callFunction','arcade_callCallable'].includes(opcode)) return null;
+            if (!arcadeClaim || !live(util?.thread) || !['arcade_createObject','arcade_callFunction','arcade_callCallable','arcade_runCallableDispatch'].includes(opcode)) return null;
             if (!cachedPrimitiveOwner(runtime,util,args,opcode,[])) return null;
             const lease=Object.freeze({});
             const activation=engineActivations.capture(runtime.sequencer,util.thread);
