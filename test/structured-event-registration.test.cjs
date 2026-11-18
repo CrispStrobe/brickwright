@@ -78,7 +78,7 @@ test('copied registration args cannot issue a captured event map',()=>{
  assert.throws(()=>s.v.step(),/actual registration primitive/);assert.equal(s.extension._updateHandlers.length,0);
 });
 
-test('a separate terrain callback path cannot borrow the shared event admission',()=>{
- const s=make();s.v.operation('register','arcade_registerWallHandler',{TOKEN:'callback',CAPTURES:'error'},s.extension._terrainRegistration.bind(s.extension),{},'try');
+test('an unadmitted callback command cannot borrow event capture ownership',()=>{
+ const s=make();s.v.operation('register','arcade_registerExternal',{TOKEN:'callback',CAPTURES:'error'},s.extension._terrainRegistration.bind(s.extension),{},'try');
  assert.throws(()=>s.v.step(),/actual registration primitive/);assert.equal(s.extension._updateHandlers.length,0);
 });

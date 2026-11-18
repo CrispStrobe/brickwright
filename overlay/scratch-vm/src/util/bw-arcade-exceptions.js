@@ -1,5 +1,10 @@
 // Only emitted registration primitives may issue experimental event cells.
 const registeredCaptureOpcodes=new Set([
+    'arcade_registerSpriteCreated',
+    'arcade_registerWallHandler',
+    'arcade_registerLegacyWallHandler',
+    'arcade_registerTileHandler',
+    'arcade_registerTilemapEvent',
     'arcade_registerUpdateHandler',
     'arcade_registerIntervalHandler',
     'arcade_registerButtonHandler',

@@ -2661,7 +2661,8 @@ module.exports = makeExt(`// Name: Arcade
       const values = this._localParams(util);
       for (const key of String(args.CAPTURES || '').split(/\\s+/).filter(Boolean)) if (values) captures.set(key, {values, key});
       const kind=this._kindValue(args.KIND);if(kind==null)return;
-      this._createdHandlers.push({kind, token: String(args.TOKEN), captures});
+      this._createdHandlers.push({kind, token: String(args.TOKEN),
+        captures:exceptionOwners.get(this).captureStructuredRegistration(args,util,captures)});
     }
     _terrainRegistration(args, util) {
       const captures = new Map(util?.thread?.bwArcadeCaptures || []), values = this._localParams(util);
@@ -2737,6 +2738,8 @@ module.exports = makeExt(`// Name: Arcade
           const thread = runtime._pushThread(script.blockId, target);
           thread.bwArcadeEvent = {TOKEN:registration.token, first:sprite.id, location};
           thread.bwArcadeCaptures = registration.captures;
+          try{exceptionOwners.get(this).bindStructuredRegistration(registration,thread);}
+          catch(error){runtime.sequencer.retireThread(thread);throw error;}
           const caller = util?.thread, active = runtime.sequencer.activeThread;
           try {runtime.sequencer.activeThread = thread;dependencies.primitiveOwner.stepChild(runtime,thread,()=>runtime.sequencer.stepThread(thread));}
           finally {if (util) {util.thread = caller;util.sequencer = runtime.sequencer;}runtime.sequencer.activeThread = active;}
@@ -3499,6 +3502,10 @@ module.exports = makeExt(`// Name: Arcade
           pending.thread = runtime._pushThread(next.script.blockId, next.target);
           pending.thread.bwArcadeEvent = {...pending.event, TOKEN: next.token};
           pending.thread.bwArcadeCaptures = next.captures;
+          if(next.captures){
+            try{exceptionOwners.get(this).bindStructuredRegistration(next,pending.thread);}
+            catch(error){runtime.sequencer.retireThread(pending.thread);this._creationWaits.delete(pending);pending.reject(error);}
+          }
         } else {
           this._creationWaits.delete(pending);
           pending.resolve(pending.id);
@@ -3541,6 +3548,10 @@ module.exports = makeExt(`// Name: Arcade
           const next = handlers.shift();
           thread = runtime._pushThread(next.script.blockId, next.target);
           thread.bwArcadeEvent = {...event, TOKEN: next.token};thread.bwArcadeCaptures = next.captures;
+          if(next.captures){
+            try{exceptionOwners.get(this).bindStructuredRegistration(next,thread);}
+            catch(error){runtime.sequencer.retireThread(thread);throw error;}
+          }
           const activeThread = sequencer.activeThread;
           try { if(creationContext?.stepNested)creationContext.stepNested(thread);else {sequencer.activeThread = thread;dependencies.primitiveOwner.stepChild(runtime,thread,()=>sequencer.stepThread(thread));} }
           finally { util.thread = caller;util.sequencer = sequencer;sequencer.activeThread = activeThread; }
@@ -6713,6 +6724,8 @@ module.exports = makeExt(`// Name: Arcade
           const thread = runtime._pushThread(script.blockId, target);
           thread.bwArcadeEvent = {TOKEN: registration.token, data: reference};
           thread.bwArcadeCaptures = registration.captures;
+          try{exceptionOwners.get(this).bindStructuredRegistration(registration,thread);}
+          catch(error){runtime.sequencer.retireThread(thread);throw error;}
           const caller = util?.thread, active = runtime.sequencer.activeThread;
           try {runtime.sequencer.activeThread = thread;runtime.sequencer.stepThread(thread);}
           finally {if (util) {util.thread = caller;util.sequencer = runtime.sequencer;}runtime.sequencer.activeThread = active;}
@@ -6729,7 +6742,8 @@ module.exports = makeExt(`// Name: Arcade
       if (this._tilemapHandlers.some(handler => handler.event === event && handler.token === token)) return;
       const captures = new Map(util?.thread?.bwArcadeCaptures || []), values = this._localParams(util);
       for (const key of String(args.CAPTURES || '').split(/\\s+/).filter(Boolean)) if (values) captures.set(key, {values, key});
-      this._tilemapHandlers.push({event, token, captures});
+      this._tilemapHandlers.push({event, token,
+        captures:exceptionOwners.get(this).captureStructuredRegistration(args,util,captures)});
     }
     unregisterTilemapEvent(args) {
       const index = this._tilemapHandlers.findIndex(handler => handler.event === String(args.EVENT) && handler.token === String(args.TOKEN));

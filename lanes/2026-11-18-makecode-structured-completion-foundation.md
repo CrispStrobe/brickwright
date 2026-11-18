@@ -144,9 +144,40 @@ zero errors. This graph uses private experimental hooks, selected extension
 methods and authored sprite metadata; it does not construct the VM wrapper or
 run source import, PXT, Code/SB3, original guest fixtures or a corpus.
 
-Separate creation, wall/tile and tilemap delivery paths are not admitted by
-this shared consumer. General structured binding/lowering, remaining event families, labelled jumps,
+The initial shared consumer did not admit separate creation, wall/tile or
+tilemap delivery. The later consumer below addresses those runtime paths.
+General structured binding/lowering, remaining event families, labelled jumps,
 switch and for-each destinations and complete source lowering remain open.
 Parser/default admission and corpus totals remain unchanged. Full VM/import
 setup is still unqualified because the pinned renderer dependency closure has
 not been admitted under the current dependency/license bounds.
+
+
+### Separate creation and terrain callback consumers
+
+The disabled event capture consumer now reaches the separate creation,
+wall/tile and tilemap delivery paths as well as the common callback scheduler.
+Creation binds a fresh sentinel before either immediate nested execution or
+queued scheduler delivery; queue admission failure retires its new thread and
+rejects its original pending creation request. Legacy unregistered creation
+hats keep their prior behavior. Wall/tile and tilemap delivery bind their own
+issued registration map before any authored callback executes.
+
+Thirteen new controls use actual registration and separate delivery methods,
+Thread, execute and Sequencer with authored metadata and unrelated services.
+They cover repeated delivery, immediate/queued creation, copied maps, queued
+Stop cancellation, ordinary default-owner behavior and an unadmitted opcode.
+The previous common-callback suite is retained separately; its formerly
+unsupported wall command is replaced by an unadmitted external command in the
+negative control, without rerunning that suite.
+
+A separate graph passes actual cached Runtime/RenderedTarget/Blocks/complete
+execute source with immediate creation once, queued creation once, wall and
+tile delivery twice each and tilemap delivery twice. Its sixteen captured reads
+are 31, its finalizer runs once and no errors are reported. The graph uses
+selected actual extension methods, authored blocks and sprite/tile metadata,
+private experimental engine hooks and unrelated value adapters. It is not a
+full VM wrapper, source import/compiler/PXT/Code/SB3 or original guest result.
+General lexical binding and complete structured lowering, labelled/switch/
+for-each destinations and affected original guest qualification remain open.
+Parser/default admission and corpus totals are unchanged.
