@@ -1,0 +1,115 @@
+{
+  "recordedAt": "2026-11-18T19:34:35.767331+00:00",
+  "litePayloadCommit": "2f2a25f0005f4121460f769b4a72bb01293f827e",
+  "guiRuntimeCommit": "65463f90cb9c7bba9c427984b1b8ed76e337409f",
+  "cadCommit": "ac32c189d219437bf06f46075ed645ffd1b510b6",
+  "app": {
+    "path": "/Users/christianstrobele/Applications/Brickwright CAD Fasteners Test.app",
+    "version": "0.1.33",
+    "build": "20261118.3",
+    "binarySHA256": "213133ae45f2e54709f8e96b5a76997213ca05c3a6c076d3e579878a7c0d5ef8",
+    "signatureVerified": true,
+    "keychain": "/Users/christianstrobele/Library/Keychains/brickwright-build.keychain-db",
+    "signerSHA1": "9484C58A114CBAFE53518D4ACEFE065A60CA2A24",
+    "notarized": false,
+    "autoLaunched": false
+  },
+  "payload": {
+    "sdkFiles": 11,
+    "sdkManifestSHA256": "e7a20f7b26bac545e95865c8af89f7dc0f9d1559250e0dc4f642ad50be54a982",
+    "robotArchives": 22,
+    "robotManifestSHA256": "ab17075d48d2a9d28e87e9c6c1209068a96b6e3d371c76c456a7674be2318251",
+    "robotArchivesUnchanged": true,
+    "builtPayloadVerifiedAfterNativeBuild": true
+  },
+  "verification": {
+    "cadGeometryPhysics": {
+      "uniqueChecksCovered": 134,
+      "fullRun": {
+        "passed": 133,
+        "failed": 1,
+        "failure": "Unrelated articulated-hinge test exceeded its unchanged 5000 ms timeout during concurrent work",
+        "logSHA256": "cd8704a5dfd8f373e89e64a86cc18f09b38a25a26ad46a2c3209a5c130adca92"
+      },
+      "isolatedRerun": {
+        "passed": 1,
+        "skipped": 25,
+        "logSHA256": "46b27e2e33ef632102db159f6769224d8c0f4261896d7668eb5d123bbd583407"
+      },
+      "scope": "All 134 checks pass across batches. Includes 35 head/point geometries, connected solids, nominal ends, real point cross-sections, cup opening and full external thread, both hands/two starts, legacy Screw/Thread, saved-recipe loading, history and actual Jolt collider/recess checks. No certificate gate or test timeout was relaxed."
+    },
+    "ipadWebKit": {
+      "passed": 36,
+      "skipped": 1,
+      "headPointRenders": 35,
+      "interactiveApplyUndo": 1,
+      "logSHA256": "aa564fe8f69b61a4376d474ec1089fd42bbfc093dbd0f5b65a49104d0b8a6dcb",
+      "scope": "Actual standalone editor in iPad WebKit; every head/point rendered with no Properties width overflow. Trusted touch is covered in Chromium, not claimed as physical iPad execution."
+    },
+    "chromiumTablet": {
+      "passed": 2,
+      "logSHA256": "ad9015d4d429f22a83b8036cb4e34c73cab6a28f87c9e6154be30fc061ae43d4",
+      "scope": "Head/drive controls and exact Undo; real horizontal and vertical finger gestures through Chromium input protocol."
+    },
+    "embeddedFinalSDK": {
+      "checks": [
+        "Generic screw bounded at 25 mm; change head and threaded point, 23 mm after Apply, exact Undo",
+        "Embedded cup point has a fully bounded shaft and edits its real recess depth without a fictitious external point-length field",
+        "Actual embedded Properties: horizontal finger swipe stays at zero; vertical swipe scrolls; model/history untouched"
+      ],
+      "errors": [],
+      "metrics": {
+        "x": 0,
+        "y": 170,
+        "width": 239,
+        "content": 239,
+        "action": "pan-y"
+      }
+    },
+    "lite": {
+      "passed": 130,
+      "failed": 0,
+      "logSHA256": "128ee0b4870474448a66d3ccaa7365485a28ba7b542b6857bb1aff327bbafeee",
+      "scope": "SDK approval/pinning negative controls, host project lifecycles, ports, bridge, cancellation, persistence and telemetry."
+    },
+    "robotRegression": {
+      "results": [
+        {
+          "id": "robot-quasar-press",
+          "resultSHA256": "3e269275eb97a14244ff9bae12da45d4df3423c6f4840ba9cd7d922c96a51928",
+          "wireCount": 22
+        },
+        {
+          "id": "robot-atlas-forklift",
+          "resultSHA256": "5882e21936fb0da591315b8b20e85f5a8493e9c6e6cb14fcde591de17a9a9f83",
+          "wireCount": 33
+        }
+      ],
+      "logSHA256": "4af8a853973462348bb0fafef7c4a2b010521a29d00562589c3d497b2e9cd7f8",
+      "scope": "Actual new embedded SDK/worker: closed Controls, cold Run with preparation blur, repeat, Stop/Reset. Quasar physical press/eject/land/return cycles and Atlas loaded tilt. The 22 archives are byte-identical to the prior qualified all-robot build."
+    },
+    "build": {
+      "cadSDK": "Clean committed source, TypeScript and SDK packaging pass",
+      "nativeLogSHA256": "2635f6b5e1add82030cb2fc5cf72653c77b29724feafa347b9daaa028efa65e4",
+      "compiler": "Homebrew rustc 1.100.0; previous temporary toolchain was removed, native dependencies rebuilt",
+      "builtPayloadLogSHA256": "c8210719f6cd1ad5b85473613d0f6eb9a53a5b9a2c921ecc19d9f8a5ba25c00e"
+    },
+    "screenshots": {
+      "docs/images/cad-screw-pan-gimlet.png": "59831f99eed913e9235e33703555a18ca5cf40009144cf2629303b225891836b",
+      "docs/images/cad-screw-cylindrical-gimlet.png": "9cfbb4d5108b0f8925067e14a8bfcb314c7a70ce01207be8753fa1208e823a96",
+      "docs/images/cad-screw-hex-flat.png": "faee1d381baf74971a1e5872f33b59c58337121dd2d2b10149aa0babfac76092",
+      "docs/images/cad-screw-embedded-cup.png": "fc530b9285462ba91f0fc92521d37652078bcfd2c5591a6a25451c6f0e92d836"
+    }
+  },
+  "scope": [
+    "Shared original generator fixes every screw variant and generic legacy-direction Screw, plus generic Thread end bounds. No new runtime dependency.",
+    "Fully threaded cup point; threaded gimlet core and ridge taper together. Cone, dog and rounded points retain intentional plain noses.",
+    "Headless recess size uses the shaft, not an invisible former head dimension. New invalid recesses are rejected during generation, without rejecting older saved meshes/recipes.",
+    "Applicable head/drive dimensions update before Apply; cup exposes its recess depth, not a fictitious external point length.",
+    "Saved geometry/history are retained. Select an existing screw and Apply shape parameters to regenerate explicitly; Undo restores the prior design.",
+    "Properties is constrained to vertical touch panning and intrinsic widths; actual embedded trusted gestures leave model serialization unchanged.",
+    "Generic editable forms; no ISO/DIN manufacturing, fit, strength or fabrication certification.",
+    "No user app stopped or automatically launched into the shared robot test profile. Close older robot test apps before opening this build.",
+    "No GitHub Actions dispatched, awaited or rerun."
+  ]
+}
