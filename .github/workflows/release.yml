@@ -214,8 +214,24 @@ jobs:
           echo "${{ secrets.MACOS_CERT_P12 }}" | base64 --decode > "$RUNNER_TEMP/cert.p12"
           security import "$RUNNER_TEMP/cert.p12" -k "$KEYCHAIN" -P "${{ secrets.MACOS_CERT_P12_PASSWORD }}" \
             -T /usr/bin/codesign -T /usr/bin/productbuild -T /usr/bin/productsign -T /usr/bin/security
-          security set-key-partition-list -S apple-tool:,apple:,codesign:,productsign: -s -k "$KEYCHAIN_PASS" "$KEYCHAIN"
+          security set-key-partition-list -S apple-tool:,apple:,codesign:,productsign: -s -k "$KEYCHAIN_PASS" "$KEYCHAIN" >/dev/null
           rm -f "$RUNNER_TEMP/cert.p12"
+
+          # Sign by certificate SHA-1, not by name. On the xcode-27 image
+          # (macOS 27) codesign answered "Apple Distribution: Christian
+          # Str\u00f6bele (...): no identity found" for the name-based
+          # MACOS_SIGNING_IDENTITY although both identities had just been
+          # imported (dry run 44795666090). A hash needs no name matching.
+          security find-identity -v "$KEYCHAIN"
+          APP_ID=$(security find-identity -v -p codesigning "$KEYCHAIN" | awk '/"Apple Distribution: /{print $2; exit}')
+          PKG_ID=$(security find-identity -v "$KEYCHAIN" | awk '/"3rd Party Mac Developer Installer: /{print $2; exit}')
+          if [ -z "$APP_ID" ] || [ -z "$PKG_ID" ]; then
+            echo "::error::Apple Distribution / Mac Installer identity not valid in $KEYCHAIN"
+            security find-identity "$KEYCHAIN"
+            exit 1
+          fi
+          echo "MACOS_APP_SIGN_ID=$APP_ID" >> "$GITHUB_ENV"
+          echo "MACOS_PKG_SIGN_ID=$PKG_ID" >> "$GITHUB_ENV"
 
       - name: Build the Tauri app (+ draft release on tags)
         uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5 # v0.6.2
@@ -231,7 +247,7 @@ jobs:
           # no-op on the ubuntu/windows matrix legs either way. No notarization
           # vars are set on purpose -- Mac App Store builds go through App
           # Review, not notarization.
-          APPLE_SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
+          APPLE_SIGNING_IDENTITY: ${{ env.MACOS_APP_SIGN_ID }}
           APPLE_TEAM_ID: ${{ secrets.MACOS_TEAM_ID }}
         with:
           projectPath: apps/tauri
@@ -269,7 +285,7 @@ jobs:
 
           codesign --force --deep --strict --timestamp --options runtime \
             --entitlements /tmp/merged-entitlements.plist \
-            --sign "${{ secrets.MACOS_SIGNING_IDENTITY }}" \
+            --sign "$MACOS_APP_SIGN_ID" \
             "$APP_PATH"
 
           # SPIKE runtime under Contents/Resources/renode: --deep does not cover
@@ -288,17 +304,17 @@ jobs:
               Mach-O*executable*)
                 codesign --force --timestamp --options runtime \
                   --entitlements apps/tauri/src-tauri/entitlements-renode-child.plist \
-                  --sign "${{ secrets.MACOS_SIGNING_IDENTITY }}" "$f" ;;
+                  --sign "$MACOS_APP_SIGN_ID" "$f" ;;
               Mach-O*)
-                codesign --force --timestamp --options runtime --sign "${{ secrets.MACOS_SIGNING_IDENTITY }}" "$f" ;;
+                codesign --force --timestamp --options runtime --sign "$MACOS_APP_SIGN_ID" "$f" ;;
             esac
           done
           codesign --force --timestamp --options runtime \
             --entitlements apps/tauri/src-tauri/entitlements-renode-child.plist \
-            --sign "${{ secrets.MACOS_SIGNING_IDENTITY }}" "$RENODE_DIR/renode"
+            --sign "$MACOS_APP_SIGN_ID" "$RENODE_DIR/renode"
           codesign --force --strict --timestamp --options runtime \
             --entitlements /tmp/merged-entitlements.plist \
-            --sign "${{ secrets.MACOS_SIGNING_IDENTITY }}" \
+            --sign "$MACOS_APP_SIGN_ID" \
             "$APP_PATH"
           codesign --verify --deep --strict --verbose=2 "$APP_PATH"
           codesign -d --entitlements - "$RENODE_DIR/renode"
@@ -311,7 +327,7 @@ jobs:
         run: |
           APP_PATH=$(find apps/tauri/src-tauri/target/release/bundle/macos -name "*.app" | head -1)
           productbuild --component "$APP_PATH" /Applications \
-            --sign "3rd Party Mac Developer Installer: Christian Ströbele (${{ secrets.MACOS_TEAM_ID }})" \
+            --sign "$MACOS_PKG_SIGN_ID" \
             apps/tauri/src-tauri/target/release/bundle/macos/Brickwright.pkg
 
       # Installed-app test: install the signed .pkg on this hosted runner and boot
@@ -334,7 +350,7 @@ jobs:
             for p in $(pkgutil --pkgs | grep -i brickwright); do pkgutil --pkg-info "$p"; pkgutil --files "$p" | head -5; done
             exit 1
           fi
-          bash scripts/macos/spike-installed-test.sh "$APP" "${{ secrets.MACOS_SIGNING_IDENTITY }}" "$RUNNER_TEMP/spike-installed"
+          bash scripts/macos/spike-installed-test.sh "$APP" "$MACOS_APP_SIGN_ID" "$RUNNER_TEMP/spike-installed"
           # Restore the built bundle for the bundle/** workflow artifact.
           if [ -d "$RUNNER_TEMP/Brickwright.app.built" ]; then mv "$RUNNER_TEMP/Brickwright.app.built" "$BUILT"; fi
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
