@@ -60,7 +60,7 @@ const maskTopLevel = line => {
 };
 
 /** A word's regex matched at top level; the groups are the ORIGINAL text's (as the compiler's matchTopLevel). */
-const matchTopLevel = (line, re) => {
+export const matchTopLevel = (line, re) => {
     const rd = new RegExp(re.source, re.flags.includes('d') ? re.flags : `${re.flags}d`);
     const m = rd.exec(maskTopLevel(line));
     if (!m) return null;

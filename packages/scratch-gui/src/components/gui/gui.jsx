@@ -11,6 +11,7 @@ import {Tab, Tabs, TabList, TabPanel} from 'react-tabs';
 import CircuitTab from '../tw-pseudocode/circuit-tab.jsx';
 import {installCircuitCadBridge} from '../../lib/bw-cad-circuit/bridge.js';
 import {installCadProgramAPI, CAD_OPEN_EVENT} from '../../lib/bw-cad-program.js';
+import {installCadShapesAPI} from '../../lib/bw-cad-blocks.js';
 import {getCadEnabled, CAD_TOGGLE_EVENT} from '../../lib/bw-cad-preferences.js';
 import {getFpgaEnabled, FPGA_TOGGLE_EVENT} from '../../lib/bw-fpga-preferences.js';
 import {pinsToValue} from '../../lib/bw-fpga/pin-value.js';
@@ -286,8 +287,9 @@ const GUIComponent = props => {
     React.useEffect(() => {
         if (!process.env.BW_ENABLE_CAD || !props.vm?.runtime) return undefined;
         const removeCad = installCadProgramAPI(props.vm.runtime);
+        const removeShapes = installCadShapesAPI(props.vm.runtime);
         const removeCoupling = installCircuitCadBridge(props.vm);
-        return () => {removeCoupling();removeCad();};
+        return () => {removeCoupling();removeShapes();removeCad();};
     }, [props.vm]);
     React.useEffect(() => {
         const open = () => { if (showCad) { setCadWanted(true); props.onActivateTab(cadTabIndex); } };

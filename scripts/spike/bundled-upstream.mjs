@@ -140,6 +140,8 @@ export const LITE_ONLY = {
         'GPIO strip and round-trip with the DOS Forth bench\'s pin!/pin@ words through the Code tab.',
     cadlab: 'Lite-native. CAD motor blocks use runtime.cadSimulation, installed by the opt-in CAD host. ' +
         'The independent CAD SDK exposes motor controls; this Scratch VM adapter belongs to Lite.',
+    cadshapes: 'Lite-native. CAD modelling blocks are compiled (not run) by gui lib/bw-cad-blocks.js through ' +
+        'runtime.cadShapes into Brickwright CAD code bodies; without the opt-in CAD host they report not-open.',
     robotlab: 'Lite-native. The Robot Lab blocks call runtime.robotLab, the API the app\'s Robot Lab pane ' +
         'installs over its physics session; without that app there is nothing to steer.',
 };
