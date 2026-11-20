@@ -3080,7 +3080,11 @@ jobs:
   ios-signed:
     needs: build-web
     if: ${{ github.event_name == 'push' || inputs.sign_ios }}
-    runs-on: macos-latest
+    # ITMS-90725: from April 2027 App Store Connect only accepts builds made
+    # with the iOS 27 SDK (Xcode 27). macos-latest still ships Xcode 26.x, so
+    # this job (the one that uploads) builds on the xcode-27 image and fails
+    # before signing if the SDK is older.
+    runs-on: xcode-27
     env:
       IOS_CERTIFICATE: ${{ secrets.MACOS_CERT_P12 }}
       IOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERT_P12_PASSWORD }}
@@ -3088,6 +3092,17 @@ jobs:
       APPLE_DEVELOPMENT_TEAM: N9XSJ4M3GT
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Select the newest Xcode 27 and require the iOS 27 SDK
+        run: |
+          set -euo pipefail
+          XC=$(ls -d /Applications/Xcode_27*.app | sort -V | tail -1)
+          sudo xcode-select -s "$XC/Contents/Developer"
+          xcodebuild -version
+          SDK=$(xcrun --sdk iphoneos --show-sdk-version)
+          echo "iphoneos SDK: $SDK"
+          if [ "${SDK%%.*}" -lt 27 ]; then
+            echo "::error::iOS SDK $SDK < 27 (ITMS-90725)"; exit 1
+          fi
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22

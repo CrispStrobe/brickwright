@@ -105,10 +105,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        # ITMS-90725: from April 2027 App Store Connect only accepts builds
+        # made with the 27 SDKs (Xcode 27). macos-latest still ships Xcode
+        # 26.x, so the macOS (Mac App Store) leg runs on the xcode-27 image.
+        os: [xcode-27, ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Select the newest Xcode 27 and require the macOS 27 SDK
+        if: matrix.os == 'xcode-27'
+        run: |
+          set -euo pipefail
+          XC=$(ls -d /Applications/Xcode_27*.app | sort -V | tail -1)
+          sudo xcode-select -s "$XC/Contents/Developer"
+          xcodebuild -version
+          SDK=$(xcrun --sdk macosx --show-sdk-version)
+          echo "macosx SDK: $SDK"
+          if [ "${SDK%%.*}" -lt 27 ]; then
+            echo "::error::macOS SDK $SDK < 27 (ITMS-90725)"; exit 1
+          fi
 
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
@@ -144,18 +160,18 @@ jobs:
         run: npm ci
 
       - name: Stage the SPIKE runtime as app resources (macOS)
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'xcode-27'
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: renode-spike-macos-osx-arm64
           path: ${{ runner.temp }}/spike-renode
-      - if: matrix.os == 'macos-latest'
+      - if: matrix.os == 'xcode-27'
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: spike-nuttx-package
           path: ${{ runner.temp }}/spike-nuttx
       - name: Freeze SPIKE resources and compile-time pins (macOS)
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'xcode-27'
         run: |
           set -eu
           tar -xzf "$RUNNER_TEMP/spike-renode/renode-spike-macos-osx-arm64.tar.gz" -C "$RUNNER_TEMP/spike-renode"
@@ -164,14 +180,14 @@ jobs:
           node -e 'const p=require(process.argv[1]);for(const[k,v]of Object.entries(p))console.log(`${k}=${v}`)' "$GITHUB_WORKSPACE/.spike-macos/compile-pins.json" >> "$GITHUB_ENV"
           echo "SPIKE_TAURI_CONFIG=$GITHUB_WORKSPACE/.spike-macos/tauri-config.json" >> "$GITHUB_ENV"
       - name: Native SPIKE child-environment test (macOS)
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'xcode-27'
         run: cargo test --manifest-path apps/tauri/src-tauri/Cargo.toml --lib renode_child_env
 
       # Mac App Store provisioning profile: not part of tauri-action's own
       # keychain setup, so install it to the standard Xcode lookup path
       # ourselves before the build.
       - name: Install macOS provisioning profile
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'xcode-27'
         run: |
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           echo "${{ secrets.MACOS_PROVISIONING_PROFILE }}" | base64 --decode > /tmp/brickwright.provisionprofile
@@ -183,10 +199,13 @@ jobs:
       # just Tauri's own build step -- hence a persistent keychain here
       # rather than relying on any built-in ephemeral cert-import.
       - name: Import Apple certificates (persistent, for productbuild)
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'xcode-27'
         run: |
           KEYCHAIN=$RUNNER_TEMP/brickwright-ci.keychain-db
-          KEYCHAIN_PASS=$(openssl rand -base64 24)
+          # Empty password: on the xcode-27 image unlock-keychain rejects the
+          # password the keychain was just created with (runner-images#14837).
+          # The keychain lives in RUNNER_TEMP on a single-use VM.
+          KEYCHAIN_PASS=""
           security create-keychain -p "$KEYCHAIN_PASS" "$KEYCHAIN"
           security set-keychain-settings -lut 21600 "$KEYCHAIN"
           security unlock-keychain -p "$KEYCHAIN_PASS" "$KEYCHAIN"
@@ -223,7 +242,7 @@ jobs:
           releaseDraft: true
           prerelease: false
           # macOS: bundle the staged SPIKE runtime (empty elsewhere).
-          args: ${{ matrix.os == 'macos-latest' && format('--config {0}', env.SPIKE_TAURI_CONFIG) || '' }}
+          args: ${{ matrix.os == 'xcode-27' && format('--config {0}', env.SPIKE_TAURI_CONFIG) || '' }}
 
       # TestFlight (and App Store submission generally) requires the
       # provisioning profile physically embedded in the .app bundle as
@@ -238,7 +257,7 @@ jobs:
       # so extract them from the actual profile and merge rather than
       # hardcoding the team ID a second time here.
       - name: Embed provisioning profile + re-sign
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'xcode-27'
         run: |
           APP_PATH=$(find apps/tauri/src-tauri/target/release/bundle/macos -name "*.app" | head -1)
           cp /tmp/brickwright.provisionprofile "$APP_PATH/Contents/embedded.provisionprofile"
@@ -288,7 +307,7 @@ jobs:
       # the *separate* "3rd Party Mac Developer Installer" identity -- the
       # Apple Distribution identity above only covers the .app itself.
       - name: Build signed .pkg for Mac App Store submission
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'xcode-27'
         run: |
           APP_PATH=$(find apps/tauri/src-tauri/target/release/bundle/macos -name "*.app" | head -1)
           productbuild --component "$APP_PATH" /Applications \
@@ -299,7 +318,7 @@ jobs:
       # the own NuttX guest with the app's own signed SPIKE Renode child, plus the
       # hardened-runtime entitlement measurement with the real Team ID.
       - name: SPIKE installed-app test (macOS)
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'xcode-27'
         run: |
           # macOS Installer relocates a bundle onto an existing copy with the same
           # bundle id that LaunchServices knows -- here the freshly built .app in
@@ -319,7 +338,7 @@ jobs:
           # Restore the built bundle for the bundle/** workflow artifact.
           if [ -d "$RUNNER_TEMP/Brickwright.app.built" ]; then mv "$RUNNER_TEMP/Brickwright.app.built" "$BUILT"; fi
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        if: always() && matrix.os == 'macos-latest'
+        if: always() && matrix.os == 'xcode-27'
         with:
           name: spike-installed-test
           path: ${{ runner.temp }}/spike-installed
@@ -327,7 +346,7 @@ jobs:
           retention-days: 14
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'xcode-27'
         with:
           name: brickwright-macos-appstore-pkg
           path: apps/tauri/src-tauri/target/release/bundle/macos/Brickwright.pkg
@@ -344,7 +363,7 @@ jobs:
       # not a condition. Found 2026-09-11 by the gate written for mobile.yml's
       # identical defect, which is the only reason this one was looked at.
       - name: Validate + upload to App Store Connect
-        if: github.event_name == 'push' && matrix.os == 'macos-latest' && startsWith(github.ref, 'refs/tags/')
+        if: github.event_name == 'push' && matrix.os == 'xcode-27' && startsWith(github.ref, 'refs/tags/')
         run: |
           mkdir -p ~/.appstoreconnect/private_keys
           echo "${{ secrets.APPSTORE_API_KEY_P8 }}" | base64 --decode \
@@ -372,7 +391,7 @@ jobs:
       # 0.1.29 the macOS build was uploaded to nobody. Same scripts, named
       # platform: both wait for the macOS build to be VALID and are idempotent.
       - name: Send macOS tester notes to App Store Connect
-        if: github.event_name == 'push' && matrix.os == 'macos-latest' && startsWith(github.ref, 'refs/tags/')
+        if: github.event_name == 'push' && matrix.os == 'xcode-27' && startsWith(github.ref, 'refs/tags/')
         env:
           APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
           APPSTORE_API_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
@@ -381,7 +400,7 @@ jobs:
         run: node scripts/push-tester-notes.mjs --platform MAC_OS
 
       - name: Distribute the macOS build to TestFlight (internal + external)
-        if: github.event_name == 'push' && matrix.os == 'macos-latest' && startsWith(github.ref, 'refs/tags/')
+        if: github.event_name == 'push' && matrix.os == 'xcode-27' && startsWith(github.ref, 'refs/tags/')
         env:
           APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
           APPSTORE_API_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
