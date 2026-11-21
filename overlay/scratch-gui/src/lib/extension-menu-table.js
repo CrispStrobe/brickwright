@@ -148,6 +148,7 @@ export default {
     "cadlab_sliderSpeed": {"SLIDER":"+sliders"},
     "cadlab_stopMotor": {"MOTOR":"+motors","ACTION":"stopActions"},
     "cadlab_stopSlider": {"SLIDER":"+sliders","ACTION":"stopActions"},
+    "cadshapes_mirror": {"AXIS":"axes"},
     "circuit_branchcurrent": {"PART":"parts"},
     "circuit_buzzertone": {"PART":"buzzers"},
     "circuit_ledbrightness": {"PART":"leds"},

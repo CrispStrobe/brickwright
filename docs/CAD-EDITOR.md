@@ -1,5 +1,7 @@
 # CAD motor programs in Brickwright
 
+To build models from blocks, see [CAD shapes](CAD-BLOCKS-LITE.md).
+
 CAD models can also be driven from Code and Blocks. Enable CAD Editor under
 Settings → Workspace, add an articulated model, then add the **CAD models**
 extension. The Simulate panel shows each hinge’s saved program port (A, B, …).
