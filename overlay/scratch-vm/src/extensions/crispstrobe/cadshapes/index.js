@@ -40,6 +40,7 @@ const CBLOCKS = [
     ['rotate', 'rotate x [X]° y [Y]° z [Z]°', 'drehe x [X]° y [Y]° z [Z]°', ['X', 0], ['Y', 0], ['Z', 0]],
     ['scale', 'scale x [X] y [Y] z [Z]', 'skaliere x [X] y [Y] z [Z]', ['X', 1], ['Y', 1], ['Z', 1]],
     ['mirror', 'mirror along [AXIS]', 'spiegle entlang [AXIS]', ['AXIS', 'x']],
+    ['color', 'color [COLOR]', 'färbe [COLOR]', ['COLOR', '#e6492e']],
     ['group', 'group', 'gruppiere'],
     ['hole', 'hole', 'Loch'],
     ['intersect', 'intersect', 'Schnittmenge'],
@@ -50,6 +51,7 @@ const ICON = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><path d="M8 14 20 7l12 7v13l-12 7-12-7Z" fill="#4C97FF" stroke="white" stroke-width="2"/><path d="m8 14 12 7 12-7M20 21v13" fill="none" stroke="white" stroke-width="2"/><circle cx="20" cy="14" r="2.5" fill="#FFAB19"/></svg>');
 
 const argument = ([name, value]) => [name, name === 'AXIS' ? {type: ArgumentType.STRING, menu: 'axes', defaultValue: value} :
+    name === 'COLOR' ? {type: ArgumentType.COLOR, defaultValue: value} :
     {type: typeof value === 'number' ? ArgumentType.NUMBER : ArgumentType.STRING, defaultValue: value}];
 
 class CadShapesBlocks {

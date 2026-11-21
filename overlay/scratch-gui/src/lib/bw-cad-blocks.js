@@ -2,9 +2,11 @@
 // CAD shapes blocks -> Brickwright CAD. The "build CAD model" C-block's body is read
 // here (never executed), turned into the engine's block program (format
 // brickwright-cad-blocks, docs/CAD-BLOCKS.md in Brickwright CAD) and compiled by the
-// CAD SDK into one parametric code body. Running the block again updates that body.
+// CAD SDK into parametric code bodies, one per colour. Running the block again (or
+// live preview, after an edit) updates them in place as one undo step.
 import {getCadEnabled} from './bw-cad-preferences.js';
 import {CAD_OPEN_EVENT, CAD_READY_EVENT} from './bw-cad-program.js';
+import {loadCadSDK} from './bw-cad-sdk.js';
 import {cadShapesWordFor} from './cadShapesDialect.js';
 
 export class CadBlocksWalkError extends Error {
@@ -96,6 +98,14 @@ export function blocksToCadProgram (getBlock, modelId, variable, name) {
             case 'move': case 'rotate': case 'scale':
                 return {k: entry.stmt, id, x: expr(block, 'X'), y: expr(block, 'Y'), z: expr(block, 'Z'), body: body(block, 'SUBSTACK')};
             case 'mirror': return {k: 'mirror', id, axis: String(block.fields.AXIS ? block.fields.AXIS.value : 'x'), body: body(block, 'SUBSTACK')};
+            case 'color': {
+                // A picked colour (colour_picker) or a typed #rrggbb; computed colours are not part of a model.
+                const shadow = inputBlock(block, 'COLOR');
+                const field = shadow && (shadow.fields.COLOUR || shadow.fields.TEXT);
+                const color = String(field ? field.value : '').trim();
+                if (!/^#[0-9a-fA-F]{6}$/.test(color)) fail('Pick the colour in the block (a #rrggbb colour)', id);
+                return {k: 'color', id, color: color.toLowerCase(), body: body(block, 'SUBSTACK')};
+            }
             case 'for': {
                 const varBlock = inputBlock(block, 'VAR');
                 const varName = varBlock && (varBlock.fields.TEXT || {}).value;
@@ -140,12 +150,24 @@ export const scratchVariable = (runtime, target) => name => {
     return info;
 };
 
+/** The model block's name when it is typed in (not a reporter), else 'Model'. */
+export const modelNameOf = (getBlock, modelId) => {
+    const model = getBlock(modelId);
+    const input = model && model.inputs && model.inputs.NAME;
+    const shadow = input && getBlock(input.block);
+    const field = shadow && shadow.fields && (shadow.fields.TEXT || Object.values(shadow.fields)[0]);
+    return String(field && field.value || 'Model').trim().slice(0, 120) || 'Model';
+};
+
+const LIVE_DELAY = 400;
+
 /** Installs runtime.cadShapes: the bridge the cadshapes extension's model block calls. */
 export function installCadShapesAPI (runtime) {
     let disposed = false;
     const editor = () => globalThis.__bwCad;
+    const enabled = () => Boolean(process.env.BW_ENABLE_CAD) && getCadEnabled() && !disposed;
     const ready = () => {
-        if (!process.env.BW_ENABLE_CAD || !getCadEnabled() || disposed) return Promise.reject(new Error('Enable CAD Editor in Settings → Workspace first.'));
+        if (!enabled()) return Promise.reject(new Error('Enable CAD Editor in Settings → Workspace first.'));
         if (editor()) return Promise.resolve(editor());
         return new Promise((resolve, reject) => {
             const timer = setTimeout(() => { window.removeEventListener(CAD_READY_EVENT, check); reject(new Error('CAD Editor did not become ready')); }, 60000);
@@ -154,34 +176,66 @@ export function installCadShapesAPI (runtime) {
             window.dispatchEvent(new CustomEvent(CAD_OPEN_EVENT)); check();
         });
     };
+    // The SDK alone, for code views: no need to open the editor to read a model's code.
+    const sdkOnly = () => {
+        if (!enabled()) return Promise.reject(new Error('Enable CAD Editor in Settings → Workspace first.'));
+        return editor() ? Promise.resolve(editor().sdk) : loadCadSDK();
+    };
     const report = (blockId, message) => { try { runtime.visualReport(blockId, message); } catch (e) { /* the block may be gone */ } };
+    const programOf = (blockId, target, name) => blocksToCadProgram(id => target.blocks.getBlock(id), blockId,
+        scratchVariable(runtime, target), String(name || modelNameOf(id => target.blocks.getBlock(id), blockId)).trim().slice(0, 120) || 'Model');
+    // Live preview: model blocks rebuilt (debounced) whenever the project changes.
+    const live = new Map();   // model block id -> target id
+    let liveTimer = null;
+    const rebuildLive = () => {
+        liveTimer = null;
+        for (const [blockId, targetId] of live) {
+            const target = runtime.getTargetById(targetId);
+            if (!target || !target.blocks.getBlock(blockId)) { live.delete(blockId); continue; }
+            api.build(blockId, target).catch(() => { /* reported on the block */ });
+        }
+    };
+    const onChange = () => {
+        if (!live.size || disposed) return;
+        if (liveTimer) clearTimeout(liveTimer);
+        liveTimer = setTimeout(rebuildLive, LIVE_DELAY);
+    };
+    runtime.on('PROJECT_CHANGED', onChange);
     const api = {
         async build (blockId, target, name) {
-            const modelName = String(name || 'Model').trim().slice(0, 120) || 'Model';
             let program;
             try {
-                program = blocksToCadProgram(id => target.blocks.getBlock(id), blockId, scratchVariable(runtime, target), modelName);
+                program = programOf(blockId, target, name);
             } catch (error) { report(error.blockId || blockId, error.message); throw error; }
+            const modelName = program.name;
             const {editor: mounted, sdk} = await ready();
             let compiled;
             try { compiled = sdk.compileBlocksToCadScript(program); } catch (error) { report(error.blockId || blockId, error.message); throw error; }
-            const session = mounted.session;
-            const existing = Object.values(session.state.document.nodes).find(n => n.kind === 'code' && n.name === modelName);
-            if (existing) {
-                if (existing.program.source !== compiled.program.source) session.updateCode(existing.id, {...compiled.program, parameters: existing.program.parameters});
-            } else session.addCode(compiled.program, modelName);
+            // One code object per colour, added or updated by name as one undo step (Brickwright CAD).
+            const result = sdk.applyBlocksModel(mounted.session, modelName, compiled);
             await mounted.whenIdle();
-            return {status: existing ? 'updated' : 'built', source: compiled.source};
+            return {status: result.status, source: compiled.source, objects: result.ids.length};
         },
-        /** The model's parametric OpenSCAD / JSCAD / CAD Script text, for the Code tab and exports. */
+        /** The model's parametric CAD Script ('cadcode'), OpenSCAD ('openscad') or JSCAD ('jscad') text. */
         async exportModel (blockId, target, name, format) {
-            const program = blocksToCadProgram(id => target.blocks.getBlock(id), blockId, scratchVariable(runtime, target), String(name || 'Model'));
-            const {sdk} = await ready();
+            const program = programOf(blockId, target, name);
+            const sdk = await sdkOnly();
             if (format === 'openscad') return sdk.exportBlocksOpenSCAD(program);
             if (format === 'jscad') return sdk.exportBlocksJSCAD(program);
             return sdk.compileBlocksToCadScript(program).source;
-        }
+        },
+        /** Live preview of one model block: rebuilt after each edit while on. */
+        setLive (blockId, target, on) {
+            if (on) { live.set(blockId, target.id); onChange(); } else live.delete(blockId);
+        },
+        isLive: blockId => live.has(blockId),
+        modelName: (blockId, target) => modelNameOf(id => target.blocks.getBlock(id), blockId)
     };
     runtime.cadShapes = api;
-    return () => { disposed = true; if (runtime.cadShapes === api) delete runtime.cadShapes; };
+    return () => {
+        disposed = true;
+        if (liveTimer) clearTimeout(liveTimer);
+        runtime.removeListener('PROJECT_CHANGED', onChange);
+        if (runtime.cadShapes === api) delete runtime.cadShapes;
+    };
 }

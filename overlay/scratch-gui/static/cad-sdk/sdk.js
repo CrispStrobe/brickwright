@@ -1,16 +1,17 @@
-import { B as e, C as o, c as r, a as c, b as l, e as t, d, l as i, m, f as B, s as C, g as n, h as p } from "./sdk-DSdTREOj.js";
+import { B as o, C as e, a as r, c as l, b as c, d as t, e as d, f as i, l as p, m as B, g as m, s as C, h as n, i as k } from "./sdk-BTTmw_Xs.js";
 export {
-  e as BLOCK_SHAPES,
-  o as CadBlocksError,
-  r as compileBlocksToCadScript,
+  o as BLOCK_SHAPES,
+  e as CadBlocksError,
+  r as applyBlocksModel,
+  l as compileBlocksToCadScript,
   c as createCadSession,
-  l as createDocument,
-  t as exportBlocksJSCAD,
-  d as exportBlocksOpenSCAD,
-  i as loadBundledModelLibrary,
-  m as mountCadEditor,
-  B as parseDocument,
+  t as createDocument,
+  d as exportBlocksJSCAD,
+  i as exportBlocksOpenSCAD,
+  p as loadBundledModelLibrary,
+  B as mountCadEditor,
+  m as parseDocument,
   C as serializeDocument,
   n as setLocale,
-  p as validateBlocksProgram
+  k as validateBlocksProgram
 };

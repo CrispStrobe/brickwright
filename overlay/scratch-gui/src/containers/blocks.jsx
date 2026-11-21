@@ -257,6 +257,17 @@ class Blocks extends React.Component {
                 // A debugger that fails to load must not take the editor with it.
             });
 
+        // CAD shapes: Build / Show CAD code… / Live preview on model blocks
+        // (lib/bw-cad-blocks-menu.js). CAD Editor builds only.
+        if (process.env.BW_ENABLE_CAD) {
+            import(/* webpackChunkName: "bw-cad-blocks-menu" */ '../lib/bw-cad-blocks-menu.js')
+                .then(({installCadShapesMenu}) => {
+                    if (!this.workspace) return;
+                    this.cadShapesMenu = installCadShapesMenu(this.ScratchBlocks, this.props.vm, () => this.props.locale);
+                })
+                .catch(() => { /* a menu that fails to load must not take the editor with it */ });
+        }
+
         this.attachVM();
         // Only update blocks/vm locale when visible to avoid sizing issues
         // If locale changes while not visible it will get handled in didUpdate
@@ -323,6 +334,10 @@ class Blocks extends React.Component {
         if (this.breakpointMenu) {
             this.breakpointMenu.uninstall();
             this.breakpointMenu = null;
+        }
+        if (this.cadShapesMenu) {
+            this.cadShapesMenu.uninstall();
+            this.cadShapesMenu = null;
         }
         if (this._undoStateListener) this.workspace.removeChangeListener(this._undoStateListener);
         if (this._unregisterUndo) this._unregisterUndo();

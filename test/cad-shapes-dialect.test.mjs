@@ -3,6 +3,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import SB3Creator from '../overlay/scratch-gui/src/lib/sb3-creator-register-art.js';
 import {CADSHAPES_WORDS} from '../overlay/scratch-gui/src/lib/cadShapesDialect.js';
+import pythonToPseudocode from '../overlay/scratch-gui/src/lib/sb3-creator-python.js';
+import javascriptToPseudocode from '../overlay/scratch-gui/src/lib/sb3-creator-javascript.js';
+import {execFileSync, spawnSync} from 'node:child_process';
+import vm from 'node:vm';
 
 export const PEG_BOARD = `WHEN green flag clicked:
   set pos to 0
@@ -25,7 +29,8 @@ export const PEG_BOARD = `WHEN green flag clicked:
               cad hull:
                 cad cone radius 1 top 0 height 3 sides 24
     cad scale x 1 y 1 z 2:
-      cad half sphere radius 2 sides 24
+      cad color #ff8800:
+        cad half sphere radius 2 sides 24
       cad tube radius 4 wall 1 height 2 sides 24
       cad torus radius 4 thickness 1 sides 24
       cad roof 2 by 2 by 2
@@ -69,4 +74,35 @@ test('motor words of the cadlab dialect still read alongside the modelling words
     assert.deepEqual(c.warnings || [], []);
     const ops = blocksOf(c.project).map(b => b.opcode);
     for (const op of ['cadlab_startSimulation', 'cadlab_stopSimulation', 'cadshapes_model', 'cadshapes_box']) assert.ok(ops.includes(op), op);
+});
+
+test('Python and JavaScript views keep C-block bodies and read back to the same blocks', () => {
+    const c = compile(PEG_BOARD), first = semantic(c.project);
+    const py = c.generatePython(c.project), js = c.generateJavaScript(c.project);
+    assert.match(py, /with _cadshapes\.model\("Peg board"\):\n\s+_cadshapes\.box\(\(holes \* 12\), 20, 4\)/);
+    assert.match(py, /with _cadshapes\.hole\(\):\n\s+_cadshapes\.cylinder\(3, 10, 48\)/);
+    assert.match(py, /with _cadshapes\.color\("#ff8800"\):/);
+    assert.match(js, /_cadshapes\.move\(pos, 0, 0, \(\) => \{\n\s+_cadshapes\.hole\(\(\) => \{/);
+    for (const [language, read, source] of [['Python', pythonToPseudocode, py], ['JavaScript', javascriptToPseudocode, js]]) {
+        const back = read(source);
+        assert.deepEqual(back.warnings, [], language);
+        const again = semantic(compile(back.pseudocode).project);
+        assert.equal(again.length, first.length, language);
+        for (let i = 0; i < first.length; i++) assert.deepEqual(again[i], first[i], `${language}\n${back.pseudocode}`);
+    }
+    // The generated code runs: each body once, through the driver stub.
+    const logs = [];
+    vm.runInNewContext(js, {console: {log: m => logs.push(m)}});
+    assert.deepEqual(logs, ['not-open']);
+    if (spawnSync('python3', ['--version']).status === 0) {
+        assert.equal(execFileSync('python3', ['-c', py], {encoding: 'utf8'}).trim(), 'not-open');
+    }
+});
+
+test('unknown _cadshapes calls and bodies are refused by name, not guessed', () => {
+    const back = pythonToPseudocode('def when_flag_clicked():\n    with _cadshapes.wobble(1):\n        pass\n    with _cadshapes.group():\n        _cadshapes.box(1, 2)\n\nwhen_flag_clicked()\n');
+    assert.ok(back.warnings.some(w => /_cadshapes\.wobble/.test(w)), back.warnings.join());
+    assert.ok(back.warnings.some(w => /_cadshapes\.box/.test(w)), back.warnings.join());
+    const mirror = javascriptToPseudocode('function when_flag_clicked() {\n  _cadshapes.mirror("w", () => { _cadshapes.box(1, 2, 3); });\n}\nwhen_flag_clicked();\n');
+    assert.ok(mirror.warnings.some(w => /_cadshapes\.mirror/.test(w)), mirror.warnings.join());
 });

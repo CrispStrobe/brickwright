@@ -41,6 +41,7 @@ export const CADSHAPES_WORDS = Object.freeze([
     cblock('rotate', 'cad rotate x {X} y {Y} z {Z}', {stmt: 'rotate', vector: xyz}),
     cblock('scale', 'cad scale x {X} y {Y} z {Z}', {stmt: 'scale', vector: xyz}),
     cblock('mirror', 'cad mirror {AXIS:x|y|z}', {stmt: 'mirror'}),
+    cblock('color', 'cad color {COLOR}', {stmt: 'color'}),
     cblock('group', 'cad group', {stmt: 'group'}),
     cblock('hole', 'cad hole', {stmt: 'hole'}),
     cblock('intersect', 'cad intersect', {stmt: 'intersect'}),
@@ -52,4 +53,4 @@ export const CADSHAPES_WORDS = Object.freeze([
 export const cadShapesWordFor = opcode => CADSHAPES_WORDS.find(e => e.op === opcode) || null;
 export const cadShapesWordsOf = kinds => CADSHAPES_WORDS.filter(e => kinds.includes(e.kind));
 /** `cad …` lines that are shapes words rather than the motor words of cadLabDialect.js. */
-export const isCadShapesLine = text => /^cad\s+(?:model|box|cylinder|cone|sphere|half\s+sphere|tube|torus|wedge|roof|round\s+roof|pyramid|polygon|star|heart|paraboloid|text|move|rotate|scale|mirror|group|hole|intersect|hull|count\s+with)\b/i.test(String(text).trim());
+export const isCadShapesLine = text => /^cad\s+(?:model|box|cylinder|cone|sphere|half\s+sphere|tube|torus|wedge|roof|round\s+roof|pyramid|polygon|star|heart|paraboloid|text|move|rotate|scale|mirror|color|group|hole|intersect|hull|count\s+with)\b/i.test(String(text).trim());

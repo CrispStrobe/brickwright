@@ -67,6 +67,103 @@ test('a model C-block compiles through the VM and the CAD SDK into one updatable
     }
 });
 
+const COLORED = `WHEN green flag clicked:
+  cad model "Robot":
+    cad color #ff0000:
+      cad box 10 by 10 by 10
+    cad move x 20 y 0 z 0:
+      cad color #0000ff:
+        cad box 10 by 10 by 10
+`;
+
+test('colours become one code object each; live preview rebuilds after an edit; code exports keep colours', async () => {
+    const previousWindow = globalThis.window, previousFlag = process.env.BW_ENABLE_CAD;
+    globalThis.window = new EventTarget(); process.env.BW_ENABLE_CAD = '1'; setCadEnabled(true);
+    const session = sdk.createCadSession();
+    globalThis.__bwCad = {editor: {session, whenIdle: async () => {}}, sdk};
+    let cleanup = () => {};
+    try {
+        const creator = new SB3Creator();
+        creator.parse(COLORED);
+        const result = await runCreatedProgram(creator, {frames: 20, observeRun: partial => {
+            if (partial.state === 'constructed') cleanup = installCadShapesAPI(partial.vm.runtime);
+        }});
+        assert.deepEqual(result.errors, []);
+        const codes = () => session.state.document.roots.map(id => session.state.document.nodes[id]);
+        assert.deepEqual(codes().map(n => [n.name, n.color]), [['Robot', '#ff0000'], ['Robot (#0000ff)', '#0000ff']]);
+        const api = result.vm.runtime.cadShapes;
+        const target = result.vm.runtime.targets.find(t => Object.values(t.blocks._blocks).some(b => b.opcode === 'cadshapes_model'));
+        const blocks = Object.values(target.blocks._blocks);
+        const model = blocks.find(b => b.opcode === 'cadshapes_model');
+        assert.equal(api.modelName(model.id, target), 'Robot');
+        // Live preview: an edit (the blue box's width) rebuilds the model without running the script.
+        api.setLive(model.id, target, true);
+        assert.equal(api.isLive(model.id), true);
+        const blue = blocks.filter(b => b.opcode === 'cadshapes_box')[1];
+        target.blocks.changeBlock({id: blue.inputs.WIDTH.block, element: 'field', name: 'NUM', value: '30'});
+        await new Promise(resolve => setTimeout(resolve, 900));
+        assert.match(codes()[1].program.source, /box\(30, 10, 10\)/);
+        assert.equal(codes().length, 2);
+        api.setLive(model.id, target, false);
+        // Show CAD code: all three languages, colours kept natively in OpenSCAD and JSCAD.
+        assert.match(await api.exportModel(model.id, target, undefined, 'cadcode'), /box\(30, 10, 10\)/);
+        assert.match(await api.exportModel(model.id, target, undefined, 'openscad'), /color\("#0000ff"\) \{/);
+        assert.match(await api.exportModel(model.id, target, undefined, 'jscad'), /colorize\(\[0,0,1\]/);
+    } finally {
+        cleanup();
+        delete globalThis.__bwCad; globalThis.window = previousWindow;
+        if (previousFlag === undefined) delete process.env.BW_ENABLE_CAD; else process.env.BW_ENABLE_CAD = previousFlag;
+    }
+});
+
+test('the code dialog shows each language, offers copy and download, and the menu sits on model blocks', async () => {
+    const {createRequire} = await import('node:module');
+    const requireGui = createRequire(new URL('../packages/scratch-gui/package.json', import.meta.url));
+    const jsdom = requireGui('jsdom');
+    const window = (jsdom.JSDOM ? new jsdom.JSDOM('<!doctype html><body></body>').window : jsdom.jsdom('<!doctype html><body></body>').defaultView);
+    const {showCadCodeDialog, installCadShapesMenu, enclosingModel} = await import('../overlay/scratch-gui/src/lib/bw-cad-blocks-menu.js');
+    const asked = [];
+    const dialog = showCadCodeDialog({name: 'Peg board', locale: 'de', doc: window.document,
+        exportModel: async format => { asked.push(format); if (format === 'jscad') throw new Error('kaputt'); return `code:${format}`; }});
+    await new Promise(resolve => setTimeout(resolve, 0));
+    const pre = window.document.querySelector('.bw-cadcode pre');
+    assert.equal(pre.textContent, 'code:cadcode');
+    assert.match(window.document.querySelector('.bw-cadcode h2').textContent, /CAD-Code von „Peg board“/);
+    await dialog.select('openscad');
+    assert.equal(pre.textContent, 'code:openscad');
+    await dialog.select('jscad');
+    assert.equal(pre.className, 'bw-error');
+    assert.ok([...window.document.querySelectorAll('.bw-cadcode footer button')].slice(0, 2).every(b => b.disabled), 'no copy/download of an error');
+    assert.deepEqual(asked, ['cadcode', 'openscad', 'jscad']);
+    const escape = window.document.createEvent('Event');
+    escape.initEvent('keydown', true, true);
+    escape.key = 'Escape';
+    window.document.dispatchEvent(escape);
+    assert.equal(window.document.querySelector('.bw-cadcode'), null);
+
+    // The menu: model blocks (and blocks inside them) get the three items, other blocks none.
+    const shown = [];
+    const ScratchBlocks = {ContextMenu: {show: (e, options) => shown.push(options)},
+        BlockSvg: {prototype: {showContextMenu_ (e) { ScratchBlocks.ContextMenu.show(e, [{text: 'Duplicate'}]); }}}};
+    const live = new Set();
+    const target = {blocks: {getBlock: id => (id === 'm' ? {} : null)}};
+    const fakeVm = {editingTarget: target, runtime: {cadShapes: {modelName: () => 'M', isLive: id => live.has(id),
+        setLive: (id, t, on) => (on ? live.add(id) : live.delete(id)), build: async () => {}, exportModel: async () => ''}}};
+    const menu = installCadShapesMenu(ScratchBlocks, fakeVm, () => 'en');
+    const model = {id: 'm', type: 'cadshapes_model', getSurroundParent: () => null};
+    const inside = {id: 'b', type: 'cadshapes_box', getSurroundParent: () => model};
+    const other = {id: 'x', type: 'looks_say', getSurroundParent: () => null};
+    assert.equal(enclosingModel(inside), model);
+    for (const block of [inside, other]) ScratchBlocks.BlockSvg.prototype.showContextMenu_.call(block, {});
+    assert.deepEqual(shown[0].map(o => o.text), ['Duplicate', 'Build CAD model', 'Show CAD code…', 'Live preview']);
+    assert.deepEqual(shown[1].map(o => o.text), ['Duplicate']);
+    shown[0][3].callback();
+    assert.ok(live.has('m'));
+    menu.uninstall();
+    ScratchBlocks.BlockSvg.prototype.showContextMenu_.call(inside, {});
+    assert.deepEqual(shown[2].map(o => o.text), ['Duplicate']);
+});
+
 test('the walker reports blocks that cannot be part of a model, by block id', () => {
     const blocks = {
         m: {id: 'm', opcode: 'cadshapes_model', inputs: {SUBSTACK: {block: 's'}}, fields: {}, next: null},

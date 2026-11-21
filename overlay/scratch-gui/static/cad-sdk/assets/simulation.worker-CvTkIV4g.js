@@ -1846,7 +1846,7 @@ Erstelle zuerst den Workspace. Oberfläche und MCP verwenden denselben begrenzte
   "Parameter {0} needs a value": "Parameter {0} braucht einen Wert",
   "Parameter {0} needs finite numbers": "Parameter {0} braucht endliche Zahlen",
   "Random numbers need fixed limits so the model stays reproducible": "Zufallszahlen brauchen feste Grenzen, damit das Modell reproduzierbar bleibt",
-  "Text cannot yet be exported to JSCAD": "Text kann noch nicht nach JSCAD exportiert werden",
+  "Colours must be written #rrggbb": "Farben werden als #rrggbb geschrieben",
   "Text must contain 1–64 characters": "Text muss 1–64 Zeichen enthalten",
   "The block program is too large": "Das Blockprogramm ist zu groß",
   "The loop counter {0} can only be used inside its loop": "Der Schleifenzähler {0} kann nur innerhalb seiner Schleife verwendet werden",
@@ -9830,7 +9830,7 @@ async function K8(A, g, I, C = {}) {
     }
   if ([...I.values()].reduce((u, R) => u + R.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = C.J ?? await (H5 ?? (H5 = import("./jolt-physics.wasm-compat-DyFZATFj.js").then((u) => u.default()))), o = new i.JoltSettings();
+  const i = C.J ?? await (H5 ?? (H5 = import("./jolt-physics.wasm-compat-lKbpuMnX.js").then((u) => u.default()))), o = new i.JoltSettings();
   o.mMaxBodies = 512, o.mMaxBodyPairs = Math.max(1024, e.length * e.length), o.mMaxContactConstraints = 8192;
   const n = new i.ObjectLayerPairFilterTable(2);
   n.EnableCollision(0, 1), n.EnableCollision(1, 1);

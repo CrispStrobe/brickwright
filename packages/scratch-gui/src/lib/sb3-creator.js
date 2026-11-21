@@ -8793,7 +8793,8 @@ class SB3Creator {
                         }
                     } else if (typeof this.parseBodyHeader === 'function'
                         && (newBlockData = this.parseBodyHeader(trimmed.slice(0, -1), target))) {
-                        // A C-block of a dialect layered on this compiler (lib/cad-shapes-pseudocode.js).
+                        // A C-block of a dialect layered on this compiler by a subclass: its
+                        // parseBodyHeader(header, target) returns {block, extraBlocks} or null.
                     } else {
                         // A header this dialect does not have (`WHILE x:`, `FOR …:`).
                         // It used to vanish with no message at all, and its body then
