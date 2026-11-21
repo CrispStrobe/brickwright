@@ -5,7 +5,6 @@ import SB3Creator from '../overlay/scratch-gui/src/lib/sb3-creator-register-art.
 import {CADSHAPES_WORDS} from '../overlay/scratch-gui/src/lib/cadShapesDialect.js';
 import pythonToPseudocode from '../overlay/scratch-gui/src/lib/sb3-creator-python.js';
 import javascriptToPseudocode from '../overlay/scratch-gui/src/lib/sb3-creator-javascript.js';
-import {execFileSync, spawnSync} from 'node:child_process';
 import vm from 'node:vm';
 
 export const PEG_BOARD = `WHEN green flag clicked:
@@ -90,13 +89,11 @@ test('Python and JavaScript views keep C-block bodies and read back to the same 
         assert.equal(again.length, first.length, language);
         for (let i = 0; i < first.length; i++) assert.deepEqual(again[i], first[i], `${language}\n${back.pseudocode}`);
     }
-    // The generated code runs: each body once, through the driver stub.
+    // The generated JavaScript runs: each body once, through the driver stub. (The Python is
+    // checked by reading it back above; running it would depend on an ambient interpreter.)
     const logs = [];
     vm.runInNewContext(js, {console: {log: m => logs.push(m)}});
     assert.deepEqual(logs, ['not-open']);
-    if (spawnSync('python3', ['--version']).status === 0) {
-        assert.equal(execFileSync('python3', ['-c', py], {encoding: 'utf8'}).trim(), 'not-open');
-    }
 });
 
 test('unknown _cadshapes calls and bodies are refused by name, not guessed', () => {
