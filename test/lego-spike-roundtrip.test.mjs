@@ -344,9 +344,13 @@ test('vendored SPIKE compiler emits a canonical executable round-trip artifact',
     // -> a7b8c394 (2026-11-03): the remaining micro:bit namespace words (#181); `git diff 1424ec3f a7b8c394 -- src/` is sb3Creator.js only (micro:bit words and helpers), so the SPIKE emitter is unchanged. Re-run every assertion.
     // -> 8e53c162 (2026-11-03): four Arcade tilemap words (#182); `git diff a7b8c394 8e53c162 -- src/` is arcadeDialect.js only, so the SPIKE emitter is unchanged.
     // -> 7befb941: reviewed Arcade vocabulary and bounded text-length schema.
+    // -> e1e126ae (2026-11-21): doors for C-blocks of layered dialects (sb3-creator #185):
+    // parseBodyHeader, the Python `with` and JS `() => { … }` readers. `git diff 7befb941 e1e126ae -- src/`
+    // is sb3Creator.js (one inert branch), pythonToPseudocode.js and javascriptToPseudocode.js only; the
+    // SPIKE emitter (spike3Python.js, spikeprimeDialect.js) is unchanged. Re-run every assertion.
     // Keep the exact supplier identity gate and every SPIKE artifact assertion below.
     assert.equal(JSON.parse(readFileSync(new URL('../vendor-pins.json', import.meta.url)))['sb3-creator'],
-        '7befb941e7e6ab71577bc28fbfe6dfe134a78c3a');
+        'e1e126ae8374f6cbbf8219dde1c89c057610149f');
 
     const creator = new SB3Creator();
     creator.parse(PROGRAM);
