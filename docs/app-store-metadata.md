@@ -1834,3 +1834,27 @@ Dieses Update ergänzt den optionalen CAD-Editor und verbessert die Bedienung im
 - Steuere CAD-Motoren und Schlitten über Regler, Pseudocode oder Blöcke. Prüfe Rückgängig, Speichern/Laden und die CAD-/FPGA-Einstellungen. Simulationsvorschauen dürfen den gespeicherten Entwurf nicht verändern.
 
 Die vollständige Funktionsgleichheit mit Tinkercad Sim Lab ist weiterhin in Arbeit. Bitte nenne bei Problemen das Modell und die genauen Schritte.
+
+## What to Test — 0.1.34 en-US
+
+This update completes the CAD robot projects and adds CAD modelling blocks. Turn on the CAD Editor under Settings → Workspace.
+
+- Robot projects: open one of the 22 CAD robot projects. Each should come with its circuit, wiring, program and Widgets. Run it, stop it and run it again. Motors, sliders and sensors should respond, and parts should stay in place.
+- CAD blocks: build a model from the new "CAD shapes" blocks: shapes, move, rotate, hole, group and colour. Right-click the "build CAD model" block to build it, turn on Live preview, or open "Show CAD code…" and download it as OpenSCAD or JSCAD.
+- Large projects: save and reopen a big CAD project. Autosave should recover it after a crash, and run errors should say what to fix.
+- Mac: after stopping a simulation, the trackpad and CAD editing should still work.
+- iPad: the Properties panel should be readable in portrait.
+
+Please report the project and the steps for any problem.
+
+## What to Test — 0.1.34 de-DE
+
+Dieses Update vervollständigt die CAD-Roboterprojekte und bringt CAD-Modellierblöcke. Schalte den CAD-Editor unter Einstellungen → Arbeitsbereich ein.
+
+- Roboterprojekte: Öffne eines der 22 CAD-Roboterprojekte. Jedes sollte Schaltung, Verkabelung, Programm und Widgets mitbringen. Starte es, halte es an und starte es erneut. Motoren, Schlitten und Sensoren sollten reagieren, und Teile sollten an ihrem Platz bleiben.
+- CAD-Blöcke: Baue ein Modell aus den neuen „CAD-Formen“-Blöcken: Formen, Verschieben, Drehen, Loch, Gruppe und Farbe. Klicke mit der rechten Maustaste auf den Block „CAD-Modell bauen“, um es zu bauen, die Live-Vorschau einzuschalten oder mit „CAD-Code zeigen…“ als OpenSCAD oder JSCAD herunterzuladen.
+- Große Projekte: Speichere ein großes CAD-Projekt und öffne es erneut. Nach einem Absturz sollte die automatische Sicherung es wiederherstellen, und Fehlermeldungen beim Ausführen sollten sagen, was zu beheben ist.
+- Mac: Nach dem Anhalten einer Simulation sollten Trackpad und CAD-Bearbeitung weiter funktionieren.
+- iPad: Das Eigenschaften-Fenster sollte im Hochformat lesbar sein.
+
+Bitte nenne bei Problemen das Projekt und die genauen Schritte.
