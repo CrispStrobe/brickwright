@@ -43,23 +43,22 @@ try {
  const original=await loops.inputValue();
  const vertex=dialog.locator('[data-resize="vertex"][data-loop="1"][data-vertex="2"]');
  const cdp=await page.context().newCDPSession(page);
- const dragVertex=async dx=>{
-  const [start,end]=await vertex.evaluate((handle,dx)=>{
+ const moveTouch=async(handle,dx,dy=0,release=true)=>{
+  const [start,end]=await handle.evaluate((handle,[dx,dy])=>{
    const x=handle.cx.baseVal.value,y=handle.cy.baseVal.value,matrix=handle.getScreenCTM();
-   return [x,x+dx].map(x=>{
+   return [[x,y],[x+dx,y-dy]].map(([x,y])=>{
     const point=new DOMPoint(x,y).matrixTransform(matrix);
     return {x:point.x,y:point.y};
    });
-  },dx);
+  },[dx,dy]);
   await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[start]});
   await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[end]});
-  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+  if(release)await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
  };
- await dragVertex(4);
+ await moveTouch(vertex,4);
  assert.match(await loops.inputValue(),/44, 30/);
- await dragVertex(-4);
+ await moveTouch(vertex,-4);
  assert.equal(await loops.inputValue(),original);
- await cdp.detach();
  assert.match(original,/^CIRCLE 10, 15, 2\n.*\nCIRCLE 30, 15, 3$/);
  assert.equal((await dialog.locator('.sketch-top').getAttribute('d')).match(/M /g).length,3);
  const rootCount=()=>page.evaluate(()=>window.__bwCad.editor.session.state.document.roots.length);
@@ -112,5 +111,44 @@ try {
  assert.equal(await page.evaluate(()=>window.__bwCad.editor.session.state.document.parametric.parameters.spacing.expression),'20');
  await undo.tap();
  assert.equal(await rootCount(),0);
- console.log('PASS embedded CAD tablet viewport: third-party DXF, holes in preview, touch-dragged vertex, invalid edit, retained layers, named hole spacing, 1:1 DXF and PDF exports, reopen, Undo');
+ await page.evaluate(()=>{
+  const session=window.__bwCad.editor.session;
+  session.addSketch({kind:'rectangle',id:'guide-rectangle',width:40,depth:30},{name:'Rectangle guide'});
+  session.addSketch({kind:'circle',id:'guide-circle',center:[17.5,15],radius:5,segments:12},{name:'Circle guide'});
+ });
+ await cad.getByRole('button',{name:'Sketch',exact:true}).tap();
+ await dialog.getByLabel('Profile',{exact:true}).selectOption('outline');
+ await dialog.getByText('Sketch snap references',{exact:true}).tap();
+ await dialog.getByLabel('Reference sketch',{exact:true}).selectOption({label:'Rectangle guide'});
+ await dialog.getByLabel('Second reference sketch',{exact:true}).selectOption({label:'Circle guide'});
+ const snapVertex=dialog.locator('[data-resize="vertex"][data-vertex="1"]');
+ await moveTouch(snapVertex,-27.2,15.2,false);
+ assert.equal(await dialog.locator('.sketch-snap-label').textContent(),'Intersection');
+ await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+ assert.equal(await dialog.getByLabel('Outline points X, Y (mm)').inputValue(),'0, 0\n12.5, 15\n30, 30\n0, 30');
+ assert.equal(await rootCount(),0);
+ await create.tap();
+ await dialog.waitFor({state:'hidden'});
+ await page.evaluate(()=>window.__bwCad.editor.whenIdle());
+ assert.equal(await rootCount(),1);
+ await undo.tap();
+ assert.equal(await rootCount(),0);
+ await cad.getByRole('button',{name:'Sketch',exact:true}).tap();
+ await dialog.getByLabel('Profile',{exact:true}).selectOption('outline');
+ await dialog.getByRole('checkbox',{name:'Edit edge curves'}).check();
+ await moveTouch(dialog.locator('[data-resize="curve"][data-edge="0"]'),0,-10);
+ assert.equal(await dialog.getByLabel('Outline points X, Y (mm)').inputValue(),'0, 0, 0.5\n40, 0\n30, 30\n0, 30');
+ await cdp.detach();
+ await create.tap();
+ await dialog.waitFor({state:'hidden'});
+ await page.evaluate(()=>window.__bwCad.editor.whenIdle());
+ const curve=await page.evaluate(()=>{
+  const d=window.__bwCad.editor.session.state.document;
+  const node=d.nodes[d.roots[0]];
+  return d.sketches[node.sketchId].profile.bulges;
+ });
+ assert.deepEqual(curve,[.5,0,0,0]);
+ await undo.tap();
+ assert.equal(await rootCount(),0);
+ console.log('PASS embedded CAD tablet viewport: third-party DXF, holes in preview, touch-dragged vertex, invalid edit, retained layers, named hole spacing, 1:1 DXF and PDF exports, reference intersection snap, touching and curving an edge, reopen, Undo');
 } finally {await browser.close();}

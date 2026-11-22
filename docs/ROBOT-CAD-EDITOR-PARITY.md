@@ -279,16 +279,19 @@ closed polylines and circles remain analytic circles. Body transforms, cuts
 and projection of an entire assembly belong to separate export workflows.
 
 **DXF import** is available under **Sketch & Extrude → Import DXF outline**.
-Import a single boundary with optional holes from text DXF circles and closed
-lightweight polylines, including curved segments. Edit the coordinates or radii before creating
+Import a single boundary with optional holes from text DXF circles, closed
+lightweight polylines, or closed chains of native 2D lines and arcs. Edit the coordinates or radii before creating
 the extrusion. Declared inches, feet, millimetres, centimetres and metres
 convert to millimetres. A unitless
 file requires explicit opt-in to millimetres. The import and subsequent edits
 use the shared retained sketch model and history. Region circle centers and
 radii can use named dimensions, and DXF export retains entity layer names and signed polyline bulges.
 Polygon vertices can be dragged in the preview. The coordinates also accept
-relative offsets such as `@40, 0`. Graphical curve editing, entity snaps,
-constraints, standalone ARC entities, layer filtering, linked drawing sheets,
+relative offsets such as `@40, 0`. For exact placement, choose up to two sketches
+on the same plane as snap references. The preview highlights endpoints,
+midpoints, centers and intersections. Turn on **Edit edge curves** to drag
+an edge midpoint and set its curvature while keeping the endpoints fixed.
+Persistent constraints, open DXF contours, layer filtering, linked drawing sheets,
 DWG and STEP remain open.
 
 **Properties → Export drilling template (PDF)** produces a full-size A4
