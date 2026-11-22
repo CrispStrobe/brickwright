@@ -309,7 +309,9 @@ Updates to sketch dimensions and extrusion depth carry into the top, front and
 right views and their vector PDF. Project SB3 files retain the sheet and source
 link. With multiple saved sheets, **Export drawing set (PDF)** produces a
 numbered PDF. **Show section A-A** adds a hatched cut at an exact X or Y
-position in the source sketch. The saved cut follows geometry changes. Run
+position in the source sketch. The saved cut follows geometry changes. Use
+**Drawing dimensions** to place a linked dimension between profile bounds or
+circle centers, or to dimension a circle diameter. Run
 `node scripts/verify-cad-drawing-sheet-browser.mjs <app-url>` to test the
 embedded workflow. Optional second and third arguments save the single-sheet
 and multi-sheet PDFs.

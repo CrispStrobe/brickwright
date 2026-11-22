@@ -69,6 +69,22 @@ try{
  assert.match(await dialog(page).getByRole('status',{name:'Drawing status'}).textContent(),/misses the part/);
  await cut.fill('15');
  assert.equal(await preview(page).locator('.drawing-section').count(),3);
+ await dialog(page).getByText('Drawing dimensions',{exact:true}).tap();
+ const from=dialog(page).getByLabel('First dimension anchor');
+ const to=dialog(page).getByLabel('Second dimension anchor');
+ await from.selectOption({label:'Hole 1'});
+ await to.selectOption({label:'Hole 2'});
+ const pick=dialog(page).getByRole('button',{name:'Pick dimension position',exact:true});
+ await pick.tap();
+ await preview(page).scrollIntoViewIfNeeded();
+ const at=await preview(page).evaluate(svg=>{
+  const point=new DOMPoint(80,85).matrixTransform(svg.getScreenCTM());
+  return {x:point.x,y:point.y};
+ });
+ await page.touchscreen.tap(at.x,at.y);
+ assert.equal(await pick.getAttribute('aria-pressed'),'false');
+ await dialog(page).getByRole('button',{name:'Add dimension',exact:true}).tap();
+ assert.equal(await preview(page).locator('.drawing-annotation').count(),5);
  await dialog(page).getByRole('button',{name:'Save drawing sheet'}).tap();
  await dialog(page).waitFor({state:'hidden'});
 
@@ -80,6 +96,7 @@ try{
  await waitGeometry(page);
  await showSheet(page);
  assert.equal(await spacing(page),28);
+ assert.match(await preview(page).textContent(),/28 mm/);
  assert.equal(await preview(page).locator('.drawing-hidden').count(),8);
  const [pdf]=await Promise.all([
   page.waitForEvent('download'),
@@ -114,8 +131,10 @@ try{
  await save.saveAs(project);
  const zip=await JSZip.loadAsync(await readFile(project));
  const saved=JSON.parse(await zip.file(CAD_PROJECT_PATH).async('text'));
- assert.equal(saved.version,10);
+ assert.equal(saved.version,11);
  assert.deepEqual(saved.drawings[0].section,{axis:'v',position:15});
+ assert.equal(saved.drawings[0].annotations[0].from,'circle:first');
+ assert.equal(saved.drawings[0].annotations[0].to,'circle:second');
  assert.equal(saved.drawings[0].source.featureId,initial.id);
  assert.equal(saved.drawings.length,2);
  assert.equal(saved.drawings[1].scale,'1:2');
@@ -135,12 +154,14 @@ try{
  assert.equal(await spacing(restored),28);
  assert.equal(await preview(restored).locator('.drawing-hidden').count(),8);
  assert.equal(await preview(restored).locator('.drawing-section').count(),3);
+ assert.match(await preview(restored).textContent(),/28 mm/);
+ assert.equal(await preview(restored).locator('.drawing-annotation').count(),5);
  assert.equal(await dialog(restored).getByLabel('Section position (mm)').inputValue(),'15');
  await dialog(restored).getByRole('button',{name:'Close drawing'}).tap();
  await restored.getByRole('button',{name:'Drawing: Motor plate overview',exact:true}).tap();
  assert.equal(await spacing(restored),14);
  assert.equal(await preview(restored).locator('.drawing-hidden').count(),0);
- console.log('PASS linked drawing sheets in Brickwright: touch controls, live parameters, linked section, single and numbered vector PDFs, and SB3 save and reopen');
+ console.log('PASS linked drawing sheets in Brickwright: touch controls, live parameters, linked section and dimensions, single and numbered vector PDFs, and SB3 save and reopen');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});
