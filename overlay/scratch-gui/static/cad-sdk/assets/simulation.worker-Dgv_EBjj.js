@@ -1253,6 +1253,9 @@ const Qg = {
   "This assembly exceeds the drawing detail limit. Use a simpler representation.": "Diese Baugruppe überschreitet die Detailgrenze für Zeichnungen. Verwende eine einfachere Darstellung.",
   "The assembly geometry changed. Refresh the drawing.": "Die Baugruppengeometrie wurde geändert. Aktualisiere die Zeichnung.",
   "The assembly drawing needs evaluated geometry.": "Die Baugruppenzeichnung benötigt berechnete Geometrie.",
+  "The assembly changed while projecting the drawing.": "Die Baugruppe wurde während der Zeichnungsprojektion geändert.",
+  "The assembly projection exceeded 30 seconds.": "Die Projektion der Baugruppe hat 30 Sekunden überschritten.",
+  "Assembly projection worker failed.": "Die Projektion der Baugruppe ist fehlgeschlagen.",
   "Projecting assembly…": "Baugruppe wird projiziert…",
   "The design changed while preparing the drawing set. Export again.": "Das Modell wurde beim Vorbereiten des Zeichnungssatzes geändert. Exportiere ihn erneut.",
   "Drawing dimensions": "Zeichnungsmaße",
@@ -10728,7 +10731,7 @@ async function J9(A, g, I, C = {}) {
     }
   if ([...I.values()].reduce((M, G) => M + G.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = C.J ?? await (w4 ?? (w4 = import("./jolt-physics.wasm-compat-BI39MF7A.js").then((M) => M.default()))), Q = new i.JoltSettings();
+  const i = C.J ?? await (w4 ?? (w4 = import("./jolt-physics.wasm-compat-DOd2zyOD.js").then((M) => M.default()))), Q = new i.JoltSettings();
   Q.mMaxBodies = 512, Q.mMaxBodyPairs = Math.max(1024, B.length * B.length), Q.mMaxContactConstraints = 8192;
   const s = new i.ObjectLayerPairFilterTable(2);
   s.EnableCollision(0, 1), s.EnableCollision(1, 1);

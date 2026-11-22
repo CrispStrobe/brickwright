@@ -148,6 +148,8 @@ try{
    {transform:{position:[55,8,3],rotation:[0,0,20],scale:[1,1,1]}});
  });
  await waitGeometry(page);
+ const drawingWorkers=[];
+ page.on('worker',worker=>{if(worker.url().includes('assembly-projection.worker'))drawingWorkers.push(worker.url());});
  const createAssembly=page.getByRole('button',{name:'Create assembly drawing',exact:true});
  if(!await createAssembly.isVisible())await page.getByRole('button',{name:'Objects',exact:true}).tap();
  await createAssembly.tap();
@@ -171,6 +173,7 @@ try{
  assert.match(setText,/\/Type \/Pages \/Count 3/);
  assert.ok(setText.includes(Buffer.from('Sheet 1 of 3','latin1').toString('hex')));
  assert.ok(setText.includes(Buffer.from('Sheet 3 of 3','latin1').toString('hex')));
+ assert.equal(drawingWorkers.length,1,'preview and drawing-set PDF share the assembly projection');
  if(setOutput)await set.saveAs(setOutput);
  await file(page).tap();
  const [save]=await Promise.all([
@@ -237,7 +240,7 @@ try{
  await restored.getByRole('button',{name:'Drawing: Assembly overview',exact:true}).tap();
  await preview(restored).getByText('Assembly · 2 bodies',{exact:true}).waitFor();
  assert.equal(await preview(restored).locator('.drawing-hidden').count(),0);
- console.log('PASS linked assembly and sketch drawing sheets in Brickwright: touch controls, live parameters, linked offset sections, aligned and curved dimensions, single and numbered vector PDFs, and SB3 save and reopen');
+ console.log('PASS worker-backed assembly and linked sketch drawing sheets in Brickwright: touch controls, live parameters, linked offset sections, aligned and curved dimensions, single and numbered vector PDFs, and SB3 save and reopen');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});

@@ -2,7 +2,7 @@
   "format": "brickwright-cad-sdk",
   "version": 1,
   "repository": "https://github.com/CrispStrobe/brickwright-cad",
-  "commit": "e5c3bcc492901f06ffad04c40462e1007693df48",
+  "commit": "52cb80f4c2b1ccc1d7c74640ae8a53ae95c53816",
   "dirty": false,
   "entry": "sdk.js",
   "wasm": "cad-assets/manifold.wasm",
@@ -10,13 +10,14 @@
     "LICENSE": "ed121de3496066a2ddc8c11b30b48142165ab84bdb066fee351392ecaccf36ad",
     "NOTICE.txt": "c75b43e86dd682f04d167b78e655bff1ea1e7edb2a8fb0c3f28fc50b51d9f6f9",
     "adafruit-preview-data-BWhkbkqw.js": "c37d14c1f115a63599555fd4193b2df1f9426a9b4cab8962282d6794ba6e11b6",
-    "assets/geometry.worker-C2evTUrb.js": "9fd073b7793ea0a49795d61fc8b360520b582346c8c459d51eb8dcc3a9c02e5f",
-    "assets/jolt-physics.wasm-compat-BI39MF7A.js": "193be740eb9f0d0df8df32134d914fa0ac38406e2ec5c6f8fd9dd0457a73b098",
-    "assets/simulation.worker-BpJH1Su5.js": "511cb3d6cda9f6beac0b884585578312538b00669fc3f0177b3e84a0f627c6c9",
+    "assets/assembly-projection.worker-ms5KfuHD.js": "bf3b50582c025364490933a6624e359dc4d1c9399cd382901b5b682c73aaab4e",
+    "assets/geometry.worker-CI7tbA7Z.js": "a9b66cc99788512f409ed31f682520c2b615d93e74a000db08eddb769bf374ce",
+    "assets/jolt-physics.wasm-compat-DOd2zyOD.js": "853ea9ce744ff75827ab72cdeb3faf91028c7a1c99a0dea0e5a0f2ead900ebe4",
+    "assets/simulation.worker-Dgv_EBjj.js": "469c7aab9a39d5550317e01afdc63a61967aad63c53dbc72c06ec319f62aeae1",
     "cad-assets/manifold.wasm": "73e3b419ad31294f6b1cc478173944e50efc4a34bfdeeff0107bdfc12975f11c",
     "model-library-cache-DiMFGzp9.js": "75dc4ad7999b4571b227f1c675ca00af698fcc886dc73e98dd4c0eb2604e2b20",
-    "model-library-local-B0-lGWTZ.js": "74f036242f2466a05f2caae8704fdc06783ce2918688b9426eceb86f81083896",
-    "sdk-Cf637xY1.js": "7826f20b473acfa95961577cdfe9791999d67c352cef0adfd2e01936b6da8fde",
-    "sdk.js": "0401018169812f949151060e93ac2dfa5e150caefbda08fa6a29b2b2ef0411d6"
+    "model-library-local-BsCwx7Dt.js": "a122184f41d7eed8f21dfa8e47c84be983316cfc3ee67521aa7a1f9671056146",
+    "sdk-BPSBP2m3.js": "c813474ee2067668e68c29db29db110de92d330adcd69bfc2ba0fcb9f1a2910b",
+    "sdk.js": "16300e152ea937d3750c5c29c750fcbdbc3f9756c707dc41b6a2c2de85b33677"
   }
 }

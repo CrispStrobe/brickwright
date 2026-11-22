@@ -413,4 +413,6 @@ edge becomes straight, the sheet marks the dimension for repair.
 Open **Objects → Drawings → Create assembly drawing** for top, front and
 right views of the evaluated solids in their design positions. The assembly
 and sketch sheets can be saved together in an SB3 and exported as a numbered
-PDF set. Use a smaller scale to fit larger assemblies on A4.
+PDF set. Use a smaller scale to fit larger assemblies on A4. A dedicated
+worker computes the projection, and preview and PDF export reuse it while
+the evaluated solids stay the same.
