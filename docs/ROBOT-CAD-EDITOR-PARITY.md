@@ -324,3 +324,9 @@ shared profile edit updates both the revolution and the extrusion. These
 features are stored in the CAD sidecar when saving a Brickwright SB3 project.
 Run `node scripts/verify-cad-revolution-browser.mjs <app-url>` to test creating,
 editing and reopening a linked revolution through the embedded editor.
+
+Select a body and choose **Mirror** to reflect it across XY, XZ or YZ at an
+exact offset. The result retains the source under **Inputs** and can be
+re-edited in Properties. Run
+`node scripts/verify-cad-mirror-browser.mjs <app-url>` to check the geometry,
+editing the retained source, and the SB3 round trip on the embedded editor.
