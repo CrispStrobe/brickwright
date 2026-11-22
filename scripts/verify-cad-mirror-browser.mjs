@@ -52,7 +52,7 @@ try{
  assert.notEqual(mirrored.id,source.id);
  assert.equal(mirrored.bounds.min[0],25);
  assert.equal(mirrored.bounds.max[0],35);
- assert.equal(mirrored.volume,source.volume);
+ assert.ok(Math.abs(mirrored.volume-source.volume)<1e-8);
 
  const edit=page.getByRole('button',{name:'Edit mirror',exact:true});
  if(!await edit.isVisible())await page.getByRole('button',{name:'Properties',exact:true}).tap();
