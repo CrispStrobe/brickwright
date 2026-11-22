@@ -106,7 +106,11 @@ const HISTORICAL_X86_CUI_V5_V7 = '91d8434a79d373cef2837c137ab356356f1a3b44';
 const HISTORICAL_X86_V8_CUI = '1bc233c9297e03abb9b7eb603e045b4e92b0bb40';
 const CURRENT_X86_CUI = 'a5860b9cf6cb0e7f652130ce987d51dc42651b8b';
 // CURRENT_X86_CUI retains the F9 epoch meaning; only these F10 values are live.
-const LIVE_X86_CUI = '6b4d70290d7ebd088ad32b525f99eb02af475533';
+const LIVE_X86_CUI = 'aab8059a15ce4ce89751f6bd56936b103ec23f43';
+// The CUI the consumed, whole-file-sealed F10 controllers were shipped at. Like
+// HISTORICAL_X86_F10_SB3, it stays in their exact F10 map field after the live
+// pin moves on (to LIVE_X86_CUI); no other position may carry it.
+const HISTORICAL_X86_F10_CUI = '6b4d70290d7ebd088ad32b525f99eb02af475533';
 const LIVE_X86_BOARD = '33d3ee399db9224105e70f34864f1af962ccdb41';
 const HISTORICAL_X86_BOARD = '761153ff92d521c01107ee7b32922ba7adc10ee2';
 const HISTORICAL_X86_CURRENT_BOARD = '836867513c3e7fac420ddaa32c17e1c7b6d3e513';
@@ -470,7 +474,7 @@ export const historicalV8CuiSpans = (file, text, known) =>
 // context ONLY to obtain positions. judgeFile still scans every other token
 // using the ORIGINAL live current/previous sets. No caller supplies profiles.
 const F10_REVIEWED_MAP = "FINITE_V10_PINS = {'bw-board':'" + LIVE_X86_BOARD +
-    "','bw-circuit-ui':'" + LIVE_X86_CUI + "','sb3-creator':'" + HISTORICAL_X86_F10_SB3 + "'}";
+    "','bw-circuit-ui':'" + HISTORICAL_X86_F10_CUI + "','sb3-creator':'" + HISTORICAL_X86_F10_SB3 + "'}";
 // The live pin may advance while the whole-file-sealed F10 controller remains
 // a consumed reference. Only its exact F10 map field gains a historical role;
 // the four earlier SB3 roles and all source-body guards remain unchanged.
@@ -489,6 +493,8 @@ const historicalV10SpansForProfile = (file, text, known, profiles) => {
     const moved = sb3Moved(known);
     const f10Moved = known.current.has(LIVE_X86_SB3) &&
         known.previous.get(HISTORICAL_X86_F10_SB3)?.repo === 'sb3-creator';
+    const f10CuiMoved = known.current.has(LIVE_X86_CUI) && !known.current.has(HISTORICAL_X86_F10_CUI) &&
+        known.previous.get(HISTORICAL_X86_F10_CUI)?.repo === 'bw-circuit-ui';
     const legacy = {...known, current: new Set([...known.current, LIVE_X86_BOARD, CURRENT_X86_CUI, HISTORICAL_X86_CURRENT_BOARD,
         ...(moved ? [HISTORICAL_X86_SB3] : [])])};
     const policy = file === 'test/pin-move-chain.test.mjs';
@@ -507,7 +513,8 @@ const historicalV10SpansForProfile = (file, text, known, profiles) => {
             ['HISTORICAL_X86_CURRENT_BOARD', HISTORICAL_X86_CURRENT_BOARD],
             ...(boardMoved ? [['LIVE_X86_BOARD', LIVE_X86_BOARD]] : []),
             ...(moved ? [['HISTORICAL_X86_SB3', HISTORICAL_X86_SB3]] : []),
-            ...(f10Moved ? [['HISTORICAL_X86_F10_SB3', HISTORICAL_X86_F10_SB3]] : [])]) {
+            ...(f10Moved ? [['HISTORICAL_X86_F10_SB3', HISTORICAL_X86_F10_SB3]] : []),
+            ...(f10CuiMoved ? [['HISTORICAL_X86_F10_CUI', HISTORICAL_X86_F10_CUI]] : [])]) {
             const line = `const ${name} = '${pin}';`;
             const rows = [...text.matchAll(new RegExp('^const ' + name + ' = .*$', 'gm'))];
             if (rows.length !== 1 || rows[0][0] !== line) return [];
@@ -552,6 +559,10 @@ const historicalV10SpansForProfile = (file, text, known, profiles) => {
         if (f10Moved) {
             if (text.split(`'${HISTORICAL_X86_F10_SB3}'`).length - 1 !== 1) return [];
             slots.push(positions.get('FINITE_V10_PINS') + F10_REVIEWED_MAP.indexOf(`'${HISTORICAL_X86_F10_SB3}'`) + 1);
+        }
+        if (f10CuiMoved) {
+            if (text.split(`'${HISTORICAL_X86_F10_CUI}'`).length - 1 !== 1) return [];
+            slots.push(positions.get('FINITE_V10_PINS') + F10_REVIEWED_MAP.indexOf(`'${HISTORICAL_X86_F10_CUI}'`) + 1);
         }
         if (moved) {
             if (text.split(`'${HISTORICAL_X86_SB3}'`).length - 1 !== 4) return [];
@@ -1573,6 +1584,7 @@ test('F10 keeps every consumed supplier position historical and every new input 
     const file = f.producerPath;
     const k = {current: new Set([LIVE_X86_CUI, LIVE_X86_BOARD, LIVE_X86_SB3]),
         previous: new Map([[HISTORICAL_X86_F10_SB3, {repo:'sb3-creator'}],[CURRENT_X86_CUI, {repo:'bw-circuit-ui'}],
+            [HISTORICAL_X86_F10_CUI, {repo:'bw-circuit-ui'}],
             [HISTORICAL_X86_SB3, {repo:'sb3-creator'}],
             [HISTORICAL_X86_CURRENT_BOARD, {repo:'bw-board'}],
             [HISTORICAL_X86_BOARD, {repo:'bw-board'}],
@@ -1581,15 +1593,15 @@ test('F10 keeps every consumed supplier position historical and every new input 
     const profile = text => ({[file]:{bytes:Buffer.byteLength(text),sha256:createHash('sha256').update(text).digest('hex')}});
     const recognize = (path, text, known) => historicalV10SpansForProfile(path, text, known, profile(source));
     const judge = historicalJudgeWith(() => [], () => [], () => [], recognize);
-    assert.equal(recognize(file, source, k).length, 13, 'eight CUI/Board, four consumed SB3 and one sealed F10 SB3 position');
+    assert.equal(recognize(file, source, k).length, 14, 'eight CUI/Board, four consumed SB3 and the sealed F10 SB3 and CUI positions');
     assert.equal(judge(file, source, k).length, 0);
     assert.equal(historicalV10Spans(file, source, k).length, 0, 'public API refuses a manufactured body');
-    assert.equal(historicalJudgeWith(() => [], () => [], () => [])(file, source, k).length, 13,
+    assert.equal(historicalJudgeWith(() => [], () => [], () => [])(file, source, k).length, 14,
         'omitting the new role restores every stale-supplier finding');
     assert.equal(historicalV10Spans(file, source, {...k, profiles:profile(source)}).length, 0,
         'caller-supplied profiles cannot replace the fixed public policy');
     for (const changed of [
-        source.replace(F10_REVIEWED_MAP, F10_REVIEWED_MAP.replace(LIVE_X86_CUI, CURRENT_X86_CUI)),
+        source.replace(F10_REVIEWED_MAP, F10_REVIEWED_MAP.replace(HISTORICAL_X86_F10_CUI, CURRENT_X86_CUI)),
         source.replace(F10_REVIEWED_MAP, F10_REVIEWED_MAP.replace(LIVE_X86_BOARD, HISTORICAL_X86_CURRENT_BOARD)),
         source.replace(CURRENT_X86_FINITE_V9_PRODUCER, CURRENT_X86_FINITE_V9_PRODUCER.replace('CURRENT_BOARD','BOARD')),
         source + `EXTRA = '${CURRENT_X86_CUI}'\n`,
