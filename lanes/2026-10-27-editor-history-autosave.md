@@ -2,7 +2,7 @@
 
 Status: DONE — landed in #1487 (6248956820), #1493 (1419c02a4) and #1506
 (0e6112ed9); internal TestFlight 0.1.27.1 and 0.1.27.2. Owner request: undo/redo
-on every operation, a Tinkercad-style history, autosave in every editor and of
+on every operation, a step history, autosave in every editor and of
 the whole project with a settable path, and one failing editor must not crash
 the app. Handoff with the code map and the scoped open tasks (T1 device
 acceptance on iPad, T2 palette crash if it recurs, T3 operations not yet

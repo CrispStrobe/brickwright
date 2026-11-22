@@ -60,6 +60,16 @@
     "defaultMessage": "Controller"
   },
   {
+    "id": "gui.stageHeader.cadView",
+    "description": "Button to show the CAD editor (the 3D model the CAD blocks build) in the right pane",
+    "defaultMessage": "CAD model"
+  },
+  {
+    "id": "gui.stageHeader.robotsView",
+    "description": "Button to show the Robot Lab (3D robot simulation) in the right pane",
+    "defaultMessage": "Robot Lab"
+  },
+  {
     "id": "gui.stageHeader.scratchStage",
     "description": "Button to show the Scratch stage while coding",
     "defaultMessage": "Scratch Stage"

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /**
- * CAD shapes: TinkerCAD-style modelling blocks <-> pseudocode words.
+ * CAD shapes: nesting 3D modelling blocks <-> pseudocode words.
  *
  * One table for the `cadshapes` extension blocks (scratch-vm
  * extensions/crispstrobe/cadshapes), the Code tab's `cad …` words

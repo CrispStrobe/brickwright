@@ -174,7 +174,10 @@
           document.body.appendChild(banner);
         }
         window.addEventListener('error', function (e) {
-          if (e && e.message && !/Loading chunk/.test(e.message)) {
+          // "ResizeObserver loop …" is the browser noting that a resize observer's
+          // layout work spilled into the next frame (the 3D views while a pane or the
+          // window resizes). It is not a failure and reported nothing to fix.
+          if (e && e.message && !/Loading chunk/.test(e.message) && !/^ResizeObserver loop/.test(e.message)) {
             showCrash(e.message + (e.filename ? ' (' + e.filename + ':' + e.lineno + ')' : ''));
           }
         });

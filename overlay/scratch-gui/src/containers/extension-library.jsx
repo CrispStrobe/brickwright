@@ -8,6 +8,20 @@ import extensionLibraryContent from '../lib/libraries/extensions/index.jsx';
 import {getLegacySpikeVisible, LEGACY_SPIKE_CHANGE_EVENT} from '../lib/spike-legacy-debug';
 import {remoteExtensionsAllowed} from '../lib/distribution-policy';
 import {confirmAsync, promptAsync} from '../lib/native-dialog';
+import {setCadEnabled} from '../lib/bw-cad-preferences.js';
+import {CAD_OPEN_EVENT} from '../lib/bw-cad-program.js';
+import {setCircuitView} from '../lib/bw-debug/debug-view.js';
+
+// Extensions whose blocks act on a 3D surface show that surface beside the blocks
+// as soon as they are added, so the first block dragged out visibly does something.
+const showSurfaceFor = id => {
+    if ((id === 'cadshapes' || id === 'cadlab') && process.env.BW_ENABLE_CAD) {
+        setCadEnabled(true);
+        window.dispatchEvent(new CustomEvent(CAD_OPEN_EVENT));
+    } else if (id === 'robotlab') {
+        setCircuitView({fullWidth: true, dock: 'robots'});
+    }
+};
 
 import LibraryComponent from '../components/library/library.jsx';
 import extensionIcon from '../components/action-menu/icon--sprite.svg';
@@ -189,7 +203,10 @@ class ExtensionLibrary extends React.PureComponent {
             // this is the consent to run downloaded code.
             if (!(await confirmAsync(this.msg(newEntry ? messages.unpinned : messages.untrusted, {url})))) return;
         }
-        const done = () => (id ? this.props.onCategorySelected(id) : this.props.onRequestClose());
+        const done = () => {
+            if (id) showSurfaceFor(id);
+            return id ? this.props.onCategorySelected(id) : this.props.onRequestClose();
+        };
         if (em.isExtensionLoaded(url)) { done(); return; }
         em.loadExtensionURL(url, item.legacySpikeDebug ? {legacySpikeDebug: true} : undefined).then(done).catch(e => {
             // eslint-disable-next-line no-alert

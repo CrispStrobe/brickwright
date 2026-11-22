@@ -96,15 +96,20 @@ test('colours become one code object each; live preview rebuilds after an edit; 
         const blocks = Object.values(target.blocks._blocks);
         const model = blocks.find(b => b.opcode === 'cadshapes_model');
         assert.equal(api.modelName(model.id, target), 'Robot');
-        // Live preview: an edit (the blue box's width) rebuilds the model without running the script.
-        api.setLive(model.id, target, true);
+        // Live preview is on by default: an edit (the blue box's width) rebuilds the
+        // model without running the script.
         assert.equal(api.isLive(model.id), true);
         const blue = blocks.filter(b => b.opcode === 'cadshapes_box')[1];
         target.blocks.changeBlock({id: blue.inputs.WIDTH.block, element: 'field', name: 'NUM', value: '30'});
         await new Promise(resolve => setTimeout(resolve, 900));
         assert.match(codes()[1].program.source, /box\(30, 10, 10\)/);
         assert.equal(codes().length, 2);
+        // Paused, an edit leaves the model as it was.
         api.setLive(model.id, target, false);
+        target.blocks.changeBlock({id: blue.inputs.WIDTH.block, element: 'field', name: 'NUM', value: '40'});
+        await new Promise(resolve => setTimeout(resolve, 900));
+        assert.match(codes()[1].program.source, /box\(30, 10, 10\)/);
+        target.blocks.changeBlock({id: blue.inputs.WIDTH.block, element: 'field', name: 'NUM', value: '30'});
         // Show CAD code: all three languages, colours kept natively in OpenSCAD and JSCAD.
         assert.match(await api.exportModel(model.id, target, undefined, 'cadcode'), /box\(30, 10, 10\)/);
         assert.match(await api.exportModel(model.id, target, undefined, 'openscad'), /color\("#0000ff"\) \{/);
@@ -112,6 +117,46 @@ test('colours become one code object each; live preview rebuilds after an edit; 
     } finally {
         cleanup();
         delete globalThis.__bwCad; globalThis.window = previousWindow;
+        if (previousFlag === undefined) delete process.env.BW_ENABLE_CAD; else process.env.BW_ENABLE_CAD = previousFlag;
+    }
+});
+
+test('a model block builds without any green flag: loading leaves it alone, the first edit builds it', async () => {
+    const previousWindow = globalThis.window, previousFlag = process.env.BW_ENABLE_CAD;
+    globalThis.window = new EventTarget(); process.env.BW_ENABLE_CAD = '1';
+    setCadEnabled(false);   // using CAD blocks switches the CAD Editor on
+    const session = sdk.createCadSession();
+    let opened = 0;
+    window.addEventListener('bw-open-cad', () => { opened++; globalThis.__bwCad = {editor: {session, whenIdle: async () => {}}, sdk}; window.dispatchEvent(new CustomEvent(CAD_READY_EVENT)); });
+    let cleanup = () => {};
+    try {
+        const creator = new SB3Creator();
+        // Under a hat the green flag never fires: nothing runs this script.
+        creator.parse('WHEN this sprite clicked:\n  cad model "Loose":\n    cad box 10 by 10 by 10\n');
+        const result = await runCreatedProgram(creator, {frames: 5, observeRun: partial => {
+            if (partial.state === 'constructed') cleanup = installCadShapesAPI(partial.vm.runtime);
+        }});
+        assert.deepEqual(result.errors, []);
+        const target = result.vm.runtime.targets.find(t => Object.values(t.blocks._blocks).some(b => b.opcode === 'cadshapes_model'));
+        assert.ok(target, 'the model block is in the project');
+        await new Promise(resolve => setTimeout(resolve, 900));
+        assert.equal(session.state.document.roots.length, 0, 'loading a project builds nothing');
+        assert.equal(opened, 0, 'and opens no CAD view');
+        const box = Object.values(target.blocks._blocks).find(b => b.opcode === 'cadshapes_box');
+        target.blocks.changeBlock({id: box.inputs.HEIGHT.block, element: 'field', name: 'NUM', value: '25'});
+        await new Promise(resolve => setTimeout(resolve, 900));
+        assert.equal(opened, 1, 'the first edit asks for the CAD view once');
+        const codes = session.state.document.roots.map(id => session.state.document.nodes[id]);
+        assert.deepEqual(codes.map(n => n.name), ['Loose']);
+        assert.match(codes[0].program.source, /box\(10, 10, 25\)/);
+        // An edit elsewhere in the project that leaves the model as it is rebuilds nothing.
+        const revision = session.state.revision;
+        result.vm.runtime.emitProjectChanged();
+        await new Promise(resolve => setTimeout(resolve, 900));
+        assert.equal(session.state.revision, revision);
+    } finally {
+        cleanup();
+        delete globalThis.__bwCad; globalThis.window = previousWindow; setCadEnabled(true);
         if (previousFlag === undefined) delete process.env.BW_ENABLE_CAD; else process.env.BW_ENABLE_CAD = previousFlag;
     }
 });

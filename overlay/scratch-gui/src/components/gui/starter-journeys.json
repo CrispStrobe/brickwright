@@ -38,6 +38,25 @@
     }
   },
   {
+    "id": "game",
+    "exampleId": "61-console-pong",
+    "mode": "program-and-circuit",
+    "editorTab": 4,
+    "icon": "🎮",
+    "copy": {
+      "en": {
+        "title": "Make a game",
+        "description": "Play Ball & Paddle on a simulated retro console with its buttons, then change the program: the game is just firmware.",
+        "meta": "About 3 min · No hardware needed"
+      },
+      "de": {
+        "title": "Spiel machen",
+        "description": "Spiele Ball & Schläger mit den Tasten einer simulierten Retro-Konsole und verändere dann das Programm: Das Spiel ist nur Firmware.",
+        "meta": "Ca. 3 Min. · Keine Hardware nötig"
+      }
+    }
+  },
+  {
     "id": "lego",
     "exampleId": "spike01-obstacle-avoid",
     "mode": "program-only",
@@ -45,14 +64,50 @@
     "icon": "🧱",
     "copy": {
       "en": {
-        "title": "Control LEGO",
-        "description": "Open a SPIKE obstacle-avoidance program, inspect its blocks, then connect a hub when you are ready.",
-        "meta": "About 3 min · SPIKE hub optional to explore"
+        "title": "Program LEGO® SPIKE™",
+        "description": "Open a SPIKE™ obstacle-avoidance program, inspect its blocks, then connect a hub when you are ready.",
+        "meta": "About 3 min · SPIKE™ hub optional to explore"
       },
       "de": {
-        "title": "LEGO steuern",
-        "description": "Öffne ein SPIKE-Programm zur Hindernisvermeidung, untersuche seine Blöcke und verbinde später einen Hub.",
-        "meta": "Ca. 3 Min. · SPIKE Hub zum Erkunden optional"
+        "title": "LEGO® SPIKE™ programmieren",
+        "description": "Öffne ein SPIKE™-Programm zur Hindernisvermeidung, untersuche seine Blöcke und verbinde später einen Hub.",
+        "meta": "Ca. 3 Min. · SPIKE™ Hub zum Erkunden optional"
+      }
+    }
+  },
+  {
+    "id": "technic",
+    "action": "robot-lab",
+    "icon": "🤖",
+    "copy": {
+      "en": {
+        "title": "Drive a LEGO® Technic™ robot",
+        "description": "Open the Robot Lab: build a robot from Technic™ parts in 3D, program its hub and watch it drive in the physics simulation.",
+        "meta": "About 5 min · No hardware needed"
+      },
+      "de": {
+        "title": "LEGO® Technic™-Roboter fahren",
+        "description": "Öffne das Roboter-Labor: Baue einen Roboter aus Technic™-Teilen in 3D, programmiere seinen Hub und sieh ihm in der Physiksimulation beim Fahren zu.",
+        "meta": "Ca. 5 Min. · Keine Hardware nötig"
+      }
+    }
+  },
+  {
+    "id": "cad-robot",
+    "action": "cad-robot",
+    "projectId": "robot-tt-rover",
+    "requires": "cad",
+    "icon": "🛠️",
+    "copy": {
+      "en": {
+        "title": "Design a robot in CAD",
+        "description": "Open a complete rover with its 3D model, circuit, program and controls. Change the design, then run it in the simulation.",
+        "meta": "About 5 min · Turns on the CAD Editor"
+      },
+      "de": {
+        "title": "Roboter im CAD entwerfen",
+        "description": "Öffne einen kompletten Rover mit 3D-Modell, Schaltung, Programm und Bedienelementen. Ändere den Entwurf und starte ihn in der Simulation.",
+        "meta": "Ca. 5 Min. · Schaltet den CAD-Editor ein"
       }
     }
   }

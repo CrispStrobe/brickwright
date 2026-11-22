@@ -2,9 +2,12 @@
 // CAD shapes blocks -> Brickwright CAD. The "build CAD model" C-block's body is read
 // here (never executed), turned into the engine's block program (format
 // brickwright-cad-blocks, docs/CAD-BLOCKS.md in Brickwright CAD) and compiled by the
-// CAD SDK into parametric code bodies, one per colour. Running the block again (or
-// live preview, after an edit) updates them in place as one undo step.
-import {getCadEnabled} from './bw-cad-preferences.js';
+// CAD SDK into parametric code bodies, one per colour, updated in place as one undo
+// step. Nothing has to run: every model block rebuilds by itself shortly after an
+// edit (live preview, on unless paused from the block's menu), and the CAD editor
+// opens beside the blocks in the right pane (gui.jsx) the first time it is needed.
+// Running the block (a click, or the green flag) builds it as well.
+import {getCadEnabled, setCadEnabled} from './bw-cad-preferences.js';
 import {CAD_OPEN_EVENT, CAD_READY_EVENT} from './bw-cad-program.js';
 import {loadCadSDK} from './bw-cad-sdk.js';
 import {cadShapesWordFor} from './cadShapesDialect.js';
@@ -165,9 +168,12 @@ const LIVE_DELAY = 400;
 export function installCadShapesAPI (runtime) {
     let disposed = false;
     const editor = () => globalThis.__bwCad;
-    const enabled = () => Boolean(process.env.BW_ENABLE_CAD) && getCadEnabled() && !disposed;
+    const built = () => Boolean(process.env.BW_ENABLE_CAD) && !disposed;
+    const enabled = () => built() && getCadEnabled();
+    // Using CAD blocks is asking for the CAD editor: switch it on rather than refuse.
+    const enable = () => { if (built() && !getCadEnabled()) setCadEnabled(true); return enabled(); };
     const ready = () => {
-        if (!enabled()) return Promise.reject(new Error('Enable CAD Editor in Settings → Workspace first.'));
+        if (!enable()) return Promise.reject(new Error('This build has no CAD Editor.'));
         if (editor()) return Promise.resolve(editor());
         return new Promise((resolve, reject) => {
             const timer = setTimeout(() => { window.removeEventListener(CAD_READY_EVENT, check); reject(new Error('CAD Editor did not become ready')); }, 60000);
@@ -178,29 +184,60 @@ export function installCadShapesAPI (runtime) {
     };
     // The SDK alone, for code views: no need to open the editor to read a model's code.
     const sdkOnly = () => {
-        if (!enabled()) return Promise.reject(new Error('Enable CAD Editor in Settings → Workspace first.'));
+        if (!built()) return Promise.reject(new Error('This build has no CAD Editor.'));
         return editor() ? Promise.resolve(editor().sdk) : loadCadSDK();
     };
     const report = (blockId, message) => { try { runtime.visualReport(blockId, message); } catch (e) { /* the block may be gone */ } };
     const programOf = (blockId, target, name) => blocksToCadProgram(id => target.blocks.getBlock(id), blockId,
         scratchVariable(runtime, target), String(name || modelNameOf(id => target.blocks.getBlock(id), blockId)).trim().slice(0, 120) || 'Model');
-    // Live preview: model blocks rebuilt (debounced) whenever the project changes.
-    const live = new Map();   // model block id -> target id
+    // Live preview: every model block not paused is rebuilt (debounced) after an edit,
+    // and only when what it describes changed since its last build.
+    const paused = new Set();      // model block ids whose live preview is off
+    const lastBuilt = new Map();   // model block id -> the program it was last built from
     let liveTimer = null;
+    const modelBlocks = () => {
+        const found = [];
+        for (const target of runtime.targets || []) {
+            if (!target.isOriginal) continue;
+            for (const block of Object.values(target.blocks._blocks || {})) {
+                if (block.opcode === 'cadshapes_model') found.push([block.id, target]);
+            }
+        }
+        return found;
+    };
+    const signature = (blockId, target) => {
+        try { return JSON.stringify(programOf(blockId, target)); } catch (error) { return `error:${error.message}`; }
+    };
+    const isEmpty = (blockId, target) => {
+        const model = target.blocks.getBlock(blockId);
+        return !(model && model.inputs && model.inputs.SUBSTACK && model.inputs.SUBSTACK.block);
+    };
     const rebuildLive = () => {
         liveTimer = null;
-        for (const [blockId, targetId] of live) {
-            const target = runtime.getTargetById(targetId);
-            if (!target || !target.blocks.getBlock(blockId)) { live.delete(blockId); continue; }
+        if (disposed || !built()) return;
+        for (const [blockId, target] of modelBlocks()) {
+            if (paused.has(blockId)) continue;
+            const key = signature(blockId, target);
+            if (lastBuilt.get(blockId) === key) continue;
+            lastBuilt.set(blockId, key);
+            // A model block just dragged out holds no shapes yet: nothing to build.
+            if (isEmpty(blockId, target)) continue;
             api.build(blockId, target).catch(() => { /* reported on the block */ });
         }
     };
     const onChange = () => {
-        if (!live.size || disposed) return;
+        if (disposed) return;
         if (liveTimer) clearTimeout(liveTimer);
         liveTimer = setTimeout(rebuildLive, LIVE_DELAY);
     };
+    // A loaded project's models are as its CAD design already holds them: remember
+    // them without building, so opening a project neither edits it nor opens panes.
+    const onLoaded = () => {
+        lastBuilt.clear(); paused.clear();
+        for (const [blockId, target] of modelBlocks()) lastBuilt.set(blockId, signature(blockId, target));
+    };
     runtime.on('PROJECT_CHANGED', onChange);
+    runtime.on('PROJECT_LOADED', onLoaded);
     const api = {
         async build (blockId, target, name) {
             let program;
@@ -208,6 +245,12 @@ export function installCadShapesAPI (runtime) {
                 program = programOf(blockId, target, name);
             } catch (error) { report(error.blockId || blockId, error.message); throw error; }
             const modelName = program.name;
+            lastBuilt.set(blockId, JSON.stringify(program));
+            if (!program.body.length) {
+                const message = 'Put shapes inside the model block';
+                report(blockId, message);
+                throw new CadBlocksWalkError(message, blockId);
+            }
             const {editor: mounted, sdk} = await ready();
             let compiled;
             try { compiled = sdk.compileBlocksToCadScript(program); } catch (error) { report(error.blockId || blockId, error.message); throw error; }
@@ -224,11 +267,11 @@ export function installCadShapesAPI (runtime) {
             if (format === 'jscad') return sdk.exportBlocksJSCAD(program);
             return sdk.compileBlocksToCadScript(program).source;
         },
-        /** Live preview of one model block: rebuilt after each edit while on. */
+        /** Live preview of one model block (on by default): rebuilt after each edit while on. */
         setLive (blockId, target, on) {
-            if (on) { live.set(blockId, target.id); onChange(); } else live.delete(blockId);
+            if (on) { paused.delete(blockId); lastBuilt.delete(blockId); onChange(); } else paused.add(blockId);
         },
-        isLive: blockId => live.has(blockId),
+        isLive: blockId => !paused.has(blockId),
         modelName: (blockId, target) => modelNameOf(id => target.blocks.getBlock(id), blockId)
     };
     runtime.cadShapes = api;
@@ -236,6 +279,7 @@ export function installCadShapesAPI (runtime) {
         disposed = true;
         if (liveTimer) clearTimeout(liveTimer);
         runtime.removeListener('PROJECT_CHANGED', onChange);
+        runtime.removeListener('PROJECT_LOADED', onLoaded);
         if (runtime.cadShapes === api) delete runtime.cadShapes;
     };
 }
