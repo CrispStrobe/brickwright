@@ -343,3 +343,10 @@ modeling tools by name or task. For instance, **bolt circle** finds the
 Pattern command once a body is selected. Ctrl/⌘+K still opens shape search.
 Run `node scripts/verify-cad-command-palette-browser.mjs <app-url>` to
 check command dispatch by touch and keyboard in the embedded editor.
+
+Under **Sketch snap references**, select an arc or circle guide and enable
+**Snap straight edges tangent to arcs and circles**. Drag an outline vertex
+near the contact point. The exact contact coordinates and neighboring arcs
+are retained in the sketch. Run
+`node scripts/verify-cad-tangent-browser.mjs <app-url>` for the touch and SB3
+round trip check.

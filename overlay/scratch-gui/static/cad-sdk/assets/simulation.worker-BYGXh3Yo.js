@@ -1057,6 +1057,8 @@ const v6 = {
   "Extrusion adds thickness perpendicular to the plane. Symmetric divides that thickness equally on both sides.": "Beim Extrudieren entsteht eine Dicke senkrecht zur Ebene. Symmetrisch verteilt die Dicke gleichmäßig auf beide Seiten.",
   "Create builds a solid. To change the sketch later, select the solid and choose Edit sketch & extrusion in Properties.": "Erstellen erzeugt einen Körper. Zum späteren Ändern wähle den Körper und dann Skizze und Extrusion bearbeiten in den Eigenschaften.",
   Intersection: "Schnittpunkt",
+  Tangent: "Tangente",
+  "Snap straight edges tangent to arcs and circles": "Gerade Kanten tangential an Bögen und Kreisen einrasten",
   Center: "Zentrum",
   Midpoint: "Mittelpunkt einer Kante",
   Endpoint: "Endpunkt",
@@ -10388,7 +10390,7 @@ async function B9(A, g, I, C = {}) {
     }
   if ([...I.values()].reduce((M, G) => M + G.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = C.J ?? await (I4 ?? (I4 = import("./jolt-physics.wasm-compat-CHfstlB1.js").then((M) => M.default()))), Q = new i.JoltSettings();
+  const i = C.J ?? await (I4 ?? (I4 = import("./jolt-physics.wasm-compat-ghXlQvcg.js").then((M) => M.default()))), Q = new i.JoltSettings();
   Q.mMaxBodies = 512, Q.mMaxBodyPairs = Math.max(1024, q.length * q.length), Q.mMaxContactConstraints = 8192;
   const s = new i.ObjectLayerPairFilterTable(2);
   s.EnableCollision(0, 1), s.EnableCollision(1, 1);

@@ -1057,6 +1057,8 @@ const Q6 = {
   "Extrusion adds thickness perpendicular to the plane. Symmetric divides that thickness equally on both sides.": "Beim Extrudieren entsteht eine Dicke senkrecht zur Ebene. Symmetrisch verteilt die Dicke gleichmäßig auf beide Seiten.",
   "Create builds a solid. To change the sketch later, select the solid and choose Edit sketch & extrusion in Properties.": "Erstellen erzeugt einen Körper. Zum späteren Ändern wähle den Körper und dann Skizze und Extrusion bearbeiten in den Eigenschaften.",
   Intersection: "Schnittpunkt",
+  Tangent: "Tangente",
+  "Snap straight edges tangent to arcs and circles": "Gerade Kanten tangential an Bögen und Kreisen einrasten",
   Center: "Zentrum",
   Midpoint: "Mittelpunkt einer Kante",
   Endpoint: "Endpunkt",
