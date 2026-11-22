@@ -426,3 +426,7 @@ Enable **Show section A-A** on an assembly drawing and choose world X or Y
 for the cutting plane. Enter a coordinate or a named length expression.
 Preview and PDF show the cut line and separately hatched components, and
 the SB3 retains the plane.
+
+Assembly sections also support a single jog. Turn on **Offset section**,
+enter the second parallel cut and select where to switch between the two
+along the perpendicular world axis. Both cuts can use named dimensions.

@@ -2,7 +2,7 @@
   "format": "brickwright-cad-sdk",
   "version": 1,
   "repository": "https://github.com/CrispStrobe/brickwright-cad",
-  "commit": "8c4f20ac17898294a989abcaba968a3ebfa9453c",
+  "commit": "88ef217c6bcf78e59e720598c762f40c67384864",
   "dirty": false,
   "entry": "sdk.js",
   "wasm": "cad-assets/manifold.wasm",
@@ -10,14 +10,14 @@
     "LICENSE": "ed121de3496066a2ddc8c11b30b48142165ab84bdb066fee351392ecaccf36ad",
     "NOTICE.txt": "c75b43e86dd682f04d167b78e655bff1ea1e7edb2a8fb0c3f28fc50b51d9f6f9",
     "adafruit-preview-data-BWhkbkqw.js": "c37d14c1f115a63599555fd4193b2df1f9426a9b4cab8962282d6794ba6e11b6",
-    "assets/assembly-projection.worker-Bi2AbjsA.js": "82f2fbd20ef15d09a9f3ee6b04e2c4d284681dea3c5d923d746f9c7e3ee1ad2c",
-    "assets/geometry.worker-uN63wKZ1.js": "fab90c7228bca5e2017713a358ddc7e84d9f08f8710d009d0519cbcd8e3dd337",
-    "assets/jolt-physics.wasm-compat-ClP6ePKk.js": "eac04044c23f0e6de21dc1b35fcb290fef0cd7bb3fdd0e86d34004e024f80b96",
-    "assets/simulation.worker-DSkq0gup.js": "b515119d8b1a9bfaed970a2091d7e44a2de6a3f0c8041cbb067a526d1a23e433",
+    "assets/assembly-projection.worker-Cdr-BVnX.js": "953099fddc834de56671e4c463da0e6d7ed68a6391632a845b4967de86facafb",
+    "assets/geometry.worker-CbhGdY7M.js": "a974d3ff5947afce034b60ef08dff05f5fd62eaa23d43fd52a22664af5dadd07",
+    "assets/jolt-physics.wasm-compat-Csr3jd7m.js": "cc2fa3daaa8378229e7c2da154097bba289b71809e3830ed4550d3c392b2c497",
+    "assets/simulation.worker-uCTNKfTH.js": "169f36570c6f4cb359d92ad4fa6313f17500597030333d53c21dfa4c0f833b68",
     "cad-assets/manifold.wasm": "73e3b419ad31294f6b1cc478173944e50efc4a34bfdeeff0107bdfc12975f11c",
     "model-library-cache-DiMFGzp9.js": "75dc4ad7999b4571b227f1c675ca00af698fcc886dc73e98dd4c0eb2604e2b20",
-    "model-library-local-BxqIK_CC.js": "6224655505f77d136b99a54923914914ba12f775f738de48260c020d59cfceb5",
-    "sdk--GD6aBjO.js": "a5b30386c734b65e26bfbc52146aadea3aa4a332484a6da4734b539ffb53a82d",
-    "sdk.js": "186c943dc1c5cc2dfa8594d53d61c6ca053c37b81f424c358de3815a5694387b"
+    "model-library-local-BHY9O_W6.js": "a6fecc0c13b6bf99f43f04300dfda71e7566f9b3d168bb989d9ea278dc425072",
+    "sdk-DoU_1wNL.js": "ceb0412b6e18282c6010de2fe916a4c0d7d1d7ec1b107a2b08765ad0f9b12c12",
+    "sdk.js": "49614be2835ca3583aed8ee780f8daa4ac2592862db6b761999975c6662b2de8"
   }
 }
