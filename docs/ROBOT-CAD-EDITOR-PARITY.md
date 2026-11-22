@@ -257,3 +257,24 @@ from their assembly. See the final receipt for full GUI/co-simulation/native sco
 SDK `ac32c189d219437bf06f46075ed645ffd1b510b6` fixes unsupported thread ends, shared head/point geometry, fully threaded cup ends and headless drive sizing. Generic Screw and Thread are covered too. Saved meshes/history stay intact; Apply shape parameters explicitly regenerates an existing part. Properties updates applicable controls immediately and scrolls only vertically on touch. Source/limitations: CAD `docs/evidence/2026-11-18-screw-forms-and-properties.md`.
 
 Local qualification: 35 head/point render combinations and the form/Undo flow pass in iPad WebKit; actual horizontal/vertical Chromium finger gestures pass. The embedded Brickwright SDK additionally passes bounded generic dimensions, changing head/point + exact Undo, editable cup depth with no fictitious length control, and trusted touch without a model edit (`scripts/verify-cad-fasteners.mjs`). All 130 Lite CAD/pinning/bridge tests pass. The 22 robot archives are unchanged. CAD's 134 geometry/physics checks pass across batches: one unrelated five-second hinge timeout during concurrent work passes alone without changing its test or implementation.
+
+### Precision drafting and CAD exchange
+
+The [shared CAD drafting roadmap](https://github.com/CrispStrobe/brickwright-cad/blob/main/docs/DRAFTING-ROADMAP.md)
+sets the order: improve Sketch & Extrude, add precise retained sketches, produce
+linked drawings/PDF, expose visual modeling commands, then extend file exchange.
+DXF is the first fabrication exchange format. DWG follows through a reviewed
+optional codec, with STEP import tracked separately for supplier components.
+The first cross-host acceptance model is a TT motor mounting plate with a
+driving hole-spacing dimension and a 1:1 drilling template.
+
+The embedded editor shares sketch UX and design history with standalone CAD.
+The host owns the compact File and History controls, project title, file pickers
+and native menus. Check compact/expanded layout, keyboard and touch access,
+and light/dark rendering on both desktop and tablet widths before integration.
+
+The first DXF slice is **Properties → Export sketch as DXF** for a selected
+rectangle or circle extrusion. It exports the original profile in its local
+sketch plane at its evaluated dimensions in millimetres. Rectangles use a
+closed polyline and circles remain analytic circles. Body transforms, cuts
+and projection of an entire assembly belong to separate export workflows.
