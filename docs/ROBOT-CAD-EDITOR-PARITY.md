@@ -362,3 +362,9 @@ outside boundary of a region. Enter two points or pick them on the preview.
 The arrow shows which side the cut keeps. The trimmed arc stays editable.
 Run `node scripts/verify-cad-trim-browser.mjs <app-url>` for the touch and SB3
 round trip.
+
+**Offset profile** also accepts editable circular arcs in outlines and holes.
+It keeps the arc centers, adjusts their radii, adds round joins at separating
+edges and trims inside corners. Run
+`node scripts/verify-cad-curved-offset-browser.mjs <app-url>` to verify the
+curves through touch editing and an SB3 round trip.

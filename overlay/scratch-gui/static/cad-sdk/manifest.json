@@ -2,7 +2,7 @@
   "format": "brickwright-cad-sdk",
   "version": 1,
   "repository": "https://github.com/CrispStrobe/brickwright-cad",
-  "commit": "6f08ae25add1e0e2526a5cc10370d8fc8c3d3852",
+  "commit": "1e09957fd8cfa33447acdc55152e4eb2e6f637ff",
   "dirty": false,
   "entry": "sdk.js",
   "wasm": "cad-assets/manifold.wasm",
@@ -10,13 +10,13 @@
     "LICENSE": "ed121de3496066a2ddc8c11b30b48142165ab84bdb066fee351392ecaccf36ad",
     "NOTICE.txt": "c75b43e86dd682f04d167b78e655bff1ea1e7edb2a8fb0c3f28fc50b51d9f6f9",
     "adafruit-preview-data-BWhkbkqw.js": "c37d14c1f115a63599555fd4193b2df1f9426a9b4cab8962282d6794ba6e11b6",
-    "assets/geometry.worker-CdlCYWe5.js": "6c32707202276fad09e4fbe9c4121c3c5e8e12db4fd898d3ef78bba15407af77",
-    "assets/jolt-physics.wasm-compat-C3oCH1uq.js": "4b7a934ba06f2b170221df328544516e1f9574d225631df783696e1a67886c01",
-    "assets/simulation.worker--4LQcMOl.js": "48fd75646f712b5499691d9dccd5d34beb200b0417be65fb1e4ff51d9bbb572b",
+    "assets/geometry.worker-CyLZBnH_.js": "3e63601bab3f960bd4e2e746b74607735119b06f931c5af22cb2cb80b032d5af",
+    "assets/jolt-physics.wasm-compat-B4qYZ0LL.js": "540f8fcc5f73a2d4fcdc7f7213755254189fd920f27ff1b99950d19451b74987",
+    "assets/simulation.worker-BQ4qRmQq.js": "661472bc2649afb3d2396adfac952df3669fc4e0789f8e47885c189543006079",
     "cad-assets/manifold.wasm": "73e3b419ad31294f6b1cc478173944e50efc4a34bfdeeff0107bdfc12975f11c",
     "model-library-cache-DiMFGzp9.js": "75dc4ad7999b4571b227f1c675ca00af698fcc886dc73e98dd4c0eb2604e2b20",
-    "model-library-local-CHLxJfhS.js": "ce211d3c169eb5760b7577b6a57309f875ed4b6ef4dd04d2836a28cd24547a85",
-    "sdk-B8KMWn2O.js": "3041d04a3c73f14f6e583e481b56fcf4c94533c2b6fc22927fc9702159d18f28",
-    "sdk.js": "27dd1da3e6ebb46925a6dd6ebb85b1970dbda0739bdd03c0500dfcfc23afd6e5"
+    "model-library-local-IXluIJbc.js": "cdc829cc9776bcee8e6c0128c00f85128b9961d804fdbaf8a6297ff0a123827d",
+    "sdk-uFClTEUx.js": "21f4785cc69bfe5c740ee0a6f47e7c1de5ef3716fe803e7117c60e6a3a6caa9e",
+    "sdk.js": "c23c13630ee0d74c8ca0d25f1a42e43d93c8f3b52ddb0faccb33f2741db125cf"
   }
 }

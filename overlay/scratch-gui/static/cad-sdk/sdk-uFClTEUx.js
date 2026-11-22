@@ -843,13 +843,13 @@ const Vq = {
   "Trim by line": "Entlang einer Linie schneiden",
   "Choose two points and keep the left or right side looking from the first point to the second.": "Wähle zwei Punkte. Behalte in Blickrichtung vom ersten zum zweiten Punkt die linke oder rechte Seite.",
   "Offset magnitude must be between 0.00001 and 100000 mm.": "Der Betrag des Versatzes muss zwischen 0,00001 und 100000 mm liegen.",
-  "Offset supports straight outlines and full circles. This outline contains arcs.": "Der Versatz unterstützt gerade Umrisse und Vollkreise. Dieser Umriss enthält Bögen.",
   "This offset collapses or splits an outline. Try a smaller distance.": "Der Versatz lässt einen Umriss verschwinden oder teilt ihn. Verwende einen kleineren Abstand.",
   "This offset changes which loop is the outside boundary. Try a smaller distance.": "Der Versatz ändert den äußeren Umriss. Verwende einen kleineren Abstand.",
   "Offset profile": "Profil versetzen",
   "Offset distance (mm)": "Versatzabstand (mm)",
   "Apply offset to draft": "Versatz auf Entwurf anwenden",
-  "Positive grows the outside and shrinks holes. Negative shrinks the outside and grows holes.": "Ein positiver Wert erweitert den Außenrand und verkleinert Löcher. Ein negativer Wert verkleinert den Außenrand und erweitert Löcher.",
+  "Positive grows the outside and shrinks holes. Negative does the reverse. Outlines with arcs use rounded corners where edges move apart.": "Ein positiver Wert erweitert den Außenrand und verkleinert Löcher. Ein negativer Wert kehrt dies um. Umrisse mit Bögen werden an auseinanderlaufenden Kanten abgerundet.",
+  "This curved offset collapses an edge or changes the outline topology. Try a smaller distance.": "Dieser Versatz lässt eine Kante verschwinden oder ändert den Umrissaufbau. Verwende einen kleineren Abstand.",
   "The sketch changed during the offset. Apply the offset again.": "Die Skizze wurde während des Versatzes geändert. Wende den Versatz erneut an.",
   "linear circular repeat bolt circle": "linear kreisförmig wiederholen Lochkreis Bohrbild",
   "shaft sweep": "Welle Drehwinkel",
@@ -38403,7 +38403,7 @@ return subtract(` + (u.length ? "union(" + [p, ...u].join(",") + ")" : p) + ",un
 function pk() {
   const i = new Worker(new URL(
     /* @vite-ignore */
-    "" + new URL("assets/simulation.worker--4LQcMOl.js", import.meta.url).href,
+    "" + new URL("assets/simulation.worker-BQ4qRmQq.js", import.meta.url).href,
     import.meta.url
   ), { type: "module" });
   let e = 0, t = !1;
@@ -40773,7 +40773,7 @@ function CA(i, e) {
     o.clear();
   }, r = () => t || (t = e ? e() : new Worker(new URL(
     /* @vite-ignore */
-    "" + new URL("assets/geometry.worker-CdlCYWe5.js", import.meta.url).href,
+    "" + new URL("assets/geometry.worker-CyLZBnH_.js", import.meta.url).href,
     import.meta.url
   ), { type: "module" }), t.onmessage = (l) => {
     const d = l.data, u = o.get(d.request);
@@ -53353,7 +53353,7 @@ CIRCLE 10, 15, 2`, O.append(j, B2("small", h("One loop per line. Separate outlin
       const J1 = B2("summary", h("Offset profile")), C2 = B2("label", h("Offset distance (mm)")), g2 = B2("input");
       g2.type = "text", g2.value = "1", C2.append(g2);
       const M2 = B2("button", h("Apply offset to draft"));
-      M2.type = "button", Y1.append(J1, C2, M2, B2("p", h("Positive grows the outside and shrinks holes. Negative shrinks the outside and grows holes."))), w.append(Y1), M2.onclick = async () => {
+      M2.type = "button", Y1.append(J1, C2, M2, B2("p", h("Positive grows the outside and shrinks holes. Negative does the reverse. Outlines with arcs use rounded corners where edges move apart."))), w.append(Y1), M2.onclick = async () => {
         if (p || d2)
           return;
         const L2 = c, A2 = w4, S0 = () => !r && L2 === c && a.open;
@@ -54998,7 +54998,7 @@ function pR(i, e) {
 }
 let Xs;
 async function uR() {
-  const [{ createBundledModelLibrary: i }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-CHLxJfhS.js"), import("./model-library-cache-DiMFGzp9.js")]);
+  const [{ createBundledModelLibrary: i }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-IXluIJbc.js"), import("./model-library-cache-DiMFGzp9.js")]);
   return Xs ?? (Xs = i()), { ...Xs, cache: e() };
 }
 function xR(i, e) {
