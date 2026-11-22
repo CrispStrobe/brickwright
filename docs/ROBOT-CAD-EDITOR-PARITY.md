@@ -273,16 +273,17 @@ The host owns the compact File and History controls, project title, file pickers
 and native menus. Check compact/expanded layout, keyboard and touch access,
 and light/dark rendering on both desktop and tablet widths before integration.
 
-The first DXF slice is **Properties → Export sketch as DXF** for a selected
-rectangle or circle extrusion. It exports the original profile in its local
-sketch plane at its evaluated dimensions in millimetres. Rectangles use a
-closed polyline and circles remain analytic circles. Body transforms, cuts
+**Properties → Export sketch as DXF** writes the original profile of a selected
+extrusion in its local sketch plane at 1:1 scale in millimetres. Outlines use
+closed polylines and circles remain analytic circles. Body transforms, cuts
 and projection of an entire assembly belong to separate export workflows.
 
 **DXF import** is available under **Sketch & Extrude → Import DXF outline**.
-Import one text DXF circle or closed straight lightweight polyline, then edit
-its dimensions or coordinates before creating the extrusion. Declared inches,
-feet, millimetres, centimetres and metres convert to millimetres. A unitless
+Import a single boundary with optional holes from text DXF circles and closed
+straight lightweight polylines. Edit the coordinates or radii before creating
+the extrusion. Declared inches, feet, millimetres, centimetres and metres
+convert to millimetres. A unitless
 file requires explicit opt-in to millimetres. The import and subsequent edits
-use the shared retained sketch model and history. Multiple loops, holes, arcs,
-bulges, and DWG remain on the drafting roadmap.
+use the shared retained sketch model and history. Visual editing and dimensions
+for holes, arcs, bulges, layers, linked drawings, DWG and STEP remain on the
+drafting roadmap.
