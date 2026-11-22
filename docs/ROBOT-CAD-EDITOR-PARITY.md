@@ -356,3 +356,9 @@ apply it to the draft. Positive grows the outer boundary and shrinks holes.
 Rectangles, full circles and straight-edged outlines retain their editable
 form. Run `node scripts/verify-cad-offset-browser.mjs <app-url>` for the
 embedded touch and SB3 round trip.
+
+Use **Trim by line** on a closed polygon or arc outline, including the
+outside boundary of a region. Enter two points or pick them on the preview.
+The arrow shows which side the cut keeps. The trimmed arc stays editable.
+Run `node scripts/verify-cad-trim-browser.mjs <app-url>` for the touch and SB3
+round trip.
