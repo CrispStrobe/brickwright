@@ -44,7 +44,7 @@ try{
   const session=window.__bwCad.editor.session;
   session.setParametric({version:1,parameters:{spacing:{expression:'20',unit:'mm'}},bindings:[]});
   const id=session.addSketchExtrusion({kind:'region',id:'profile',loops:[
-   {kind:'outline',id:'plate',points:[[0,0],[40,0],[40,30],[0,30]]},
+   {kind:'outline',id:'plate',points:[[0,0],[40,0],[40,30],[0,30]],bulges:[0,0,-.5,0]},
    {kind:'circle',id:'first',center:['20 mm - spacing / 2',15],radius:2,segments:64},
    {kind:'circle',id:'second',center:['20 mm + spacing / 2',15],radius:3,segments:64}
   ]},{name:'Mounting plate',distance:6});
@@ -98,6 +98,19 @@ try{
  await dialog(page).getByRole('button',{name:'Add dimension',exact:true}).tap();
  assert.equal(await preview(page).locator('.drawing-annotation').count(),10);
  assert.equal(await preview(page).getByText('50 mm',{exact:true}).count(),1);
+ const type=dialog(page).getByLabel('Dimension type');
+ await type.selectOption('radius');
+ await from.selectOption({label:'Outline 1, arc 3'});
+ assert.equal(await preview(page).locator('.drawing-arc-marker').count(),1);
+ await dialog(page).getByLabel('Paper X (mm)').fill('100');
+ await dialog(page).getByRole('button',{name:'Add dimension',exact:true}).tap();
+ assert.equal(await preview(page).getByText('R25 mm',{exact:true}).count(),1);
+ await type.selectOption('arc-length');
+ await from.selectOption({label:'Outline 1, arc 3'});
+ await dialog(page).getByLabel('Paper X (mm)').fill('75');
+ await dialog(page).getByLabel('Paper Y (mm)').fill('120');
+ await dialog(page).getByRole('button',{name:'Add dimension',exact:true}).tap();
+ assert.equal(await preview(page).getByText('Arc length 46.365 mm',{exact:true}).count(),1);
  await dialog(page).getByRole('button',{name:'Save drawing sheet'}).tap();
  await dialog(page).waitFor({state:'hidden'});
 
@@ -121,6 +134,7 @@ try{
  assert.match(text,/\[1\.4 0\.9\] 0 d/);
  assert.match(text,/\[3\.5 1 0\.7 1\] 0 d/);
  assert.ok(text.includes(Buffer.from('Offset section A-A','latin1').toString('hex')));
+ assert.ok(text.includes('<'+Buffer.from('Arc length 46.365 mm','latin1').toString('hex')+'>'));
  if(pdfOutput)await pdf.saveAs(pdfOutput);
  await dialog(page).getByRole('button',{name:'Close drawing'}).tap();
  await make.tap();
@@ -145,7 +159,7 @@ try{
  await save.saveAs(project);
  const zip=await JSZip.loadAsync(await readFile(project));
  const saved=JSON.parse(await zip.file(CAD_PROJECT_PATH).async('text'));
- assert.equal(saved.version,19);
+ assert.equal(saved.version,20);
  assert.deepEqual(saved.drawings[0].section,{axis:'v',position:15,jog:{at:'spacing / 2 + 10 mm',position:16}});
  assert.equal(saved.drawings[0].annotations[0].from,'circle:first');
  assert.equal(saved.drawings[0].annotations[0].to,'circle:second');
@@ -154,6 +168,10 @@ try{
  assert.equal(saved.drawings[0].annotations[1].from,`vertex:plate:${linkedOutline.vertexIds[0]}`);
  assert.equal(saved.drawings[0].annotations[1].to,`vertex:plate:${linkedOutline.vertexIds[2]}`);
  assert.equal(saved.drawings[0].annotations[1].kind,'aligned');
+ const arc=saved.drawings[0].annotations[3];
+ assert.equal(arc.kind,'arc-length');
+ assert.equal(arc.from,`arc:plate:${linkedOutline.vertexIds[2]}:${linkedOutline.vertexIds[3]}`);
+ assert.equal(saved.drawings[0].annotations[2].from,arc.from);
  assert.equal(saved.drawings.length,2);
  assert.equal(saved.drawings[1].scale,'1:2');
  await page.close();
@@ -173,12 +191,17 @@ try{
  assert.equal(await preview(restored).locator('.drawing-hidden').count(),8);
  assert.equal(await preview(restored).locator('.drawing-section').count(),3);
  assert.match(await preview(restored).textContent(),/28 mm/);
- assert.equal(await preview(restored).locator('.drawing-annotation').count(),10);
+ assert.equal(await preview(restored).locator('.drawing-annotation').count(),15);
  await dialog(restored).getByText('Drawing dimensions',{exact:true}).tap();
  await dialog(restored).getByRole('button',{name:'Edit dimension 2',exact:true}).tap();
  assert.equal(await preview(restored).locator('.drawing-vertex-marker').count(),2);
  assert.equal(await dialog(restored).getByLabel('Dimension type').inputValue(),'aligned');
  assert.equal(await preview(restored).getByText('50 mm',{exact:true}).count(),1);
+ assert.equal(await preview(restored).getByText('R25 mm',{exact:true}).count(),1);
+ assert.equal(await preview(restored).getByText('Arc length 46.365 mm',{exact:true}).count(),1);
+ await dialog(restored).getByRole('button',{name:'Edit dimension 4',exact:true}).tap();
+ assert.equal(await preview(restored).locator('.drawing-arc-marker').count(),1);
+ assert.equal(await dialog(restored).getByLabel('Dimension type').inputValue(),'arc-length');
  assert.equal(await dialog(restored).getByLabel('Section position (mm)',{exact:true}).inputValue(),'15');
  assert.equal(await dialog(restored).getByLabel('Second section position (mm)').inputValue(),'16');
  assert.equal(await dialog(restored).getByLabel('Jog at (mm)').inputValue(),'spacing / 2 + 10 mm');
@@ -187,7 +210,7 @@ try{
  await restored.getByRole('button',{name:'Drawing: Motor plate overview',exact:true}).tap();
  assert.equal(await spacing(restored),14);
  assert.equal(await preview(restored).locator('.drawing-hidden').count(),0);
- console.log('PASS linked drawing sheets in Brickwright: touch controls, live parameters, linked offset sections and aligned vertex dimensions, single and numbered vector PDFs, and SB3 save and reopen');
+ console.log('PASS linked drawing sheets in Brickwright: touch controls, live parameters, linked offset sections, aligned and curved dimensions, single and numbered vector PDFs, and SB3 save and reopen');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});

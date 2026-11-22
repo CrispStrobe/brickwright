@@ -404,3 +404,8 @@ Choose **Aligned dimension** in the drawing sheet and select two anchors to
 label the straight-line distance between them. The dimension line runs parallel
 to the two points. Choose a slanted edge's endpoints for its true length.
 Changing the page scale preserves the measured value.
+
+**Radius dimension** measures a circle or an authored arc. **Arc length
+dimension** measures the length along an arc's sweep. The link follows
+curvature edits and is stored with the drawing in the SB3. If the chosen
+edge becomes straight, the sheet marks the dimension for repair.
