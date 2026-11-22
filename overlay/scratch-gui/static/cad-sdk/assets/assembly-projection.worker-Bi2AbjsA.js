@@ -33,7 +33,7 @@ const Ut = {
   "Choose light or dark mode": "Hellen oder dunklen Modus wählen",
   "Loading models…": "Modelle werden geladen…",
   "Original source files": "Originale Quelldateien",
-  "Model source uses project version 6 through 22": "Modellquelltext verwendet Projektversion 6 bis 22",
+  "Model source uses project version 6 through 23": "Modellquelltext verwendet Projektversion 6 bis 23",
   "Unknown material preset": "Unbekannte Materialvorlage",
   "Initial velocity requires project version 8": "Anfangsgeschwindigkeit erfordert Projektversion 8",
   "Invalid initial body velocity": "Ungültige Anfangsgeschwindigkeit",
@@ -822,7 +822,7 @@ const Ut = {
   "Based on nominal threaded length; end runouts are trimmed": "Bezogen auf die Nenngewindelänge; die Ausläufe an den Enden werden beschnitten",
   "Apply thread redesign": "Gewindeauslegung anwenden",
   "Rebuild a resized screw at a chosen pitch or turns per start, resetting its local scale as one saved edit.": "Eine skalierte Schraube mit gewählter Steigung oder Windungszahl pro Gang als einen gespeicherten Schritt neu aufbauen und ihre lokale Skalierung zurücksetzen."
-}, Jt = {
+}, Xt = {
   "Point locks": "Fixierte Punkte",
   "Path point": "Pfadpunkt",
   "Point {0}": "Punkt {0}",
@@ -1250,6 +1250,15 @@ const Ut = {
   "Drawing views": "Zeichnungsansichten",
   Item: "Position",
   "Body name": "Körpername",
+  "Cannot section the evaluated body “{0}”.": "Der berechnete Körper „{0}“ konnte nicht geschnitten werden.",
+  "Section position is outside the assembly coordinate range.": "Die Schnittposition liegt außerhalb des Koordinatenbereichs der Baugruppe.",
+  "The assembly section needs evaluated cut geometry.": "Der Baugruppenschnitt benötigt berechnete Schnittgeometrie.",
+  "The section plane misses the assembly solids.": "Die Schnittebene trifft keinen Volumenkörper der Baugruppe.",
+  "This section exceeds the drawing detail limit.": "Dieser Schnitt überschreitet die Detailgrenze für Zeichnungen.",
+  "World X": "Welt-X",
+  "World Y": "Welt-Y",
+  "World X = {0} mm": "Welt-X = {0} mm",
+  "World Y = {0} mm": "Welt-Y = {0} mm",
   "Create assembly drawing": "Baugruppenzeichnung erstellen",
   "Assembly · 1 body": "Baugruppe · 1 Körper",
   "Assembly · {0} bodies": "Baugruppe · {0} Körper",
@@ -1645,7 +1654,7 @@ Benannte Formen verwenden let; ein abschließendes return erzeugt einen starren 
   "Open shape library as dialog": "Formenbibliothek als Dialog öffnen",
   "Dimension expressions": "Maßausdrücke",
   "Drag to change dimensions": "Ziehen zum Ändern der Maße"
-}, Xt = {
+}, Jt = {
   "At most 64 boolean operands": "Höchstens 64 boolesche Operanden sind erlaubt",
   "Boolean operations need at least two shapes": "Boolesche Operationen benötigen mindestens zwei Formen",
   "Brickwright archive exceeds 64 MiB": "Das Brickwright-Archiv überschreitet 64 MiB",
@@ -2200,7 +2209,7 @@ function ri(e) {
   return Ne = e.toLowerCase().split(/[-_]/)[0] === "de" ? "de" : "en", Ne;
 }
 function rt(e, ...t) {
-  const i = typeof e == "string" ? e : e.reduce((s, o, a) => s + (a ? `{${a - 1}}` : "") + o, ""), n = Ne === "de" ? ni[i] ?? Ut[i] ?? ti[i] ?? ii[i] ?? jt[i] ?? Gt[i] ?? Wt[i] ?? Zt[i] ?? qt[i] ?? Jt[i] ?? Xt[i] ?? ei[i] ?? Yt[i] ?? $t[i] ?? Qt[i] ?? Ht[i] ?? i : i;
+  const i = typeof e == "string" ? e : e.reduce((s, o, a) => s + (a ? `{${a - 1}}` : "") + o, ""), n = Ne === "de" ? ni[i] ?? Ut[i] ?? ti[i] ?? ii[i] ?? jt[i] ?? Gt[i] ?? Wt[i] ?? Zt[i] ?? qt[i] ?? Xt[i] ?? Jt[i] ?? ei[i] ?? Yt[i] ?? $t[i] ?? Qt[i] ?? Ht[i] ?? i : i;
   return typeof e == "string" ? n : n.replace(/\{(\d+)\}/g, (s, o) => String(t[Number(o)]));
 }
 var si = [509, 0, 227, 0, 150, 4, 294, 9, 1368, 2, 2, 1, 6, 3, 41, 2, 5, 0, 166, 1, 574, 3, 9, 9, 7, 9, 32, 4, 318, 1, 78, 5, 71, 10, 50, 3, 123, 2, 54, 14, 32, 10, 3, 1, 11, 3, 46, 10, 8, 0, 46, 9, 7, 2, 37, 13, 2, 9, 6, 1, 45, 0, 13, 2, 49, 13, 9, 3, 2, 11, 83, 11, 7, 0, 3, 0, 158, 11, 6, 9, 7, 3, 56, 1, 2, 6, 3, 1, 3, 2, 10, 0, 11, 1, 3, 6, 4, 4, 68, 8, 2, 0, 3, 0, 2, 3, 2, 4, 2, 0, 15, 1, 83, 17, 10, 9, 5, 0, 82, 19, 13, 9, 214, 6, 3, 8, 28, 1, 83, 16, 16, 9, 82, 12, 9, 9, 7, 19, 58, 14, 5, 9, 243, 14, 166, 9, 71, 5, 2, 1, 3, 3, 2, 0, 2, 1, 13, 9, 120, 6, 3, 6, 4, 0, 29, 9, 41, 6, 2, 3, 9, 0, 10, 10, 47, 15, 199, 7, 137, 9, 54, 7, 2, 7, 17, 9, 57, 21, 2, 13, 123, 5, 4, 0, 2, 1, 2, 6, 2, 0, 9, 9, 49, 4, 2, 1, 2, 4, 9, 9, 55, 9, 266, 3, 10, 1, 2, 0, 49, 6, 4, 4, 14, 10, 5350, 0, 7, 14, 11465, 27, 2343, 9, 87, 9, 39, 4, 60, 6, 26, 9, 535, 9, 470, 0, 2, 54, 8, 3, 82, 0, 12, 1, 19628, 1, 4178, 9, 519, 45, 3, 22, 543, 4, 4, 5, 9, 7, 3, 6, 31, 3, 149, 2, 1418, 49, 513, 54, 5, 49, 9, 0, 15, 0, 23, 4, 2, 14, 1361, 6, 2, 16, 3, 6, 2, 1, 2, 4, 101, 0, 161, 6, 10, 9, 357, 0, 62, 13, 499, 13, 245, 1, 2, 9, 233, 0, 3, 0, 8, 1, 6, 0, 475, 6, 110, 6, 6, 9, 4759, 9, 787719, 239], st = [0, 11, 2, 25, 2, 18, 2, 1, 2, 14, 3, 13, 35, 122, 70, 52, 268, 28, 4, 48, 48, 31, 14, 29, 6, 37, 11, 29, 3, 35, 5, 7, 2, 4, 43, 157, 19, 35, 5, 35, 5, 39, 9, 51, 13, 10, 2, 14, 2, 6, 2, 1, 2, 10, 2, 14, 2, 6, 2, 1, 4, 51, 13, 310, 10, 21, 11, 7, 25, 5, 2, 41, 2, 8, 70, 5, 3, 0, 2, 43, 2, 1, 4, 0, 3, 22, 11, 22, 10, 30, 66, 18, 2, 1, 11, 21, 11, 25, 7, 25, 39, 55, 7, 1, 65, 0, 16, 3, 2, 2, 2, 28, 43, 28, 4, 28, 36, 7, 2, 27, 28, 53, 11, 21, 11, 18, 14, 17, 111, 72, 56, 50, 14, 50, 14, 35, 39, 27, 10, 22, 251, 41, 7, 1, 17, 5, 57, 28, 11, 0, 9, 21, 43, 17, 47, 20, 28, 22, 13, 52, 58, 1, 3, 0, 14, 44, 33, 24, 27, 35, 30, 0, 3, 0, 9, 34, 4, 0, 13, 47, 15, 3, 22, 0, 2, 0, 36, 17, 2, 24, 20, 1, 64, 6, 2, 0, 2, 3, 2, 14, 2, 9, 8, 46, 39, 7, 3, 1, 3, 21, 2, 6, 2, 1, 2, 4, 4, 0, 19, 0, 13, 4, 31, 9, 2, 0, 3, 0, 2, 37, 2, 0, 26, 0, 2, 0, 45, 52, 19, 3, 21, 2, 31, 47, 21, 1, 2, 0, 185, 46, 42, 3, 37, 47, 21, 0, 60, 42, 14, 0, 72, 26, 38, 6, 186, 43, 117, 63, 32, 7, 3, 0, 3, 7, 2, 1, 2, 23, 16, 0, 2, 0, 95, 7, 3, 38, 17, 0, 2, 0, 29, 0, 11, 39, 8, 0, 22, 0, 12, 45, 20, 0, 19, 72, 200, 32, 32, 8, 2, 36, 18, 0, 50, 29, 113, 6, 2, 1, 2, 37, 22, 0, 26, 5, 2, 1, 2, 31, 15, 0, 24, 43, 261, 18, 16, 0, 2, 12, 2, 33, 125, 0, 80, 921, 103, 110, 18, 195, 2637, 96, 16, 1071, 18, 5, 26, 3994, 6, 582, 6842, 29, 1763, 568, 8, 30, 18, 78, 18, 29, 19, 47, 17, 3, 32, 20, 6, 18, 433, 44, 212, 63, 33, 24, 3, 24, 45, 74, 6, 0, 67, 12, 65, 1, 2, 0, 15, 4, 10, 7381, 42, 31, 98, 114, 8702, 3, 2, 6, 2, 1, 2, 290, 16, 0, 30, 2, 3, 0, 15, 3, 9, 395, 2309, 106, 6, 12, 4, 8, 8, 9, 5991, 84, 2, 70, 2, 1, 3, 0, 3, 1, 3, 3, 2, 11, 2, 0, 2, 6, 2, 64, 2, 3, 3, 7, 2, 6, 2, 27, 2, 3, 2, 4, 2, 0, 4, 6, 2, 339, 3, 24, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 7, 1845, 30, 7, 5, 262, 61, 147, 44, 11, 6, 17, 0, 322, 29, 19, 43, 485, 27, 229, 29, 3, 0, 208, 30, 2, 2, 2, 1, 2, 6, 3, 4, 10, 1, 225, 6, 2, 3, 2, 1, 2, 14, 2, 196, 60, 67, 8, 0, 1205, 3, 2, 26, 2, 1, 2, 0, 3, 0, 2, 9, 2, 3, 2, 0, 2, 0, 7, 0, 5, 0, 2, 0, 2, 0, 2, 2, 2, 1, 2, 0, 3, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 1, 2, 0, 3, 3, 2, 6, 2, 3, 2, 3, 2, 0, 2, 9, 2, 16, 6, 2, 2, 4, 2, 16, 4421, 42719, 33, 4381, 3, 5773, 3, 7472, 16, 621, 2467, 541, 1507, 4938, 6, 8489], ai = "‌‍·̀-ͯ·҃-֑҇-ׇֽֿׁׂׅׄؐ-ًؚ-٩ٰۖ-ۜ۟-۪ۤۧۨ-ۭ۰-۹ܑܰ-݊ަ-ް߀-߉߫-߽߳ࠖ-࠙ࠛ-ࠣࠥ-ࠧࠩ-࡙࠭-࡛ࢗ-࢟࣊-ࣣ࣡-ःऺ-़ा-ॏ॑-ॗॢॣ०-९ঁ-ঃ়া-ৄেৈো-্ৗৢৣ০-৯৾ਁ-ਃ਼ਾ-ੂੇੈੋ-੍ੑ੦-ੱੵઁ-ઃ઼ા-ૅે-ૉો-્ૢૣ૦-૯ૺ-૿ଁ-ଃ଼ା-ୄେୈୋ-୍୕-ୗୢୣ୦-୯ஂா-ூெ-ைொ-்ௗ௦-௯ఀ-ఄ఼ా-ౄె-ైొ-్ౕౖౢౣ౦-౯ಁ-ಃ಼ಾ-ೄೆ-ೈೊ-್ೕೖೢೣ೦-೯ೳഀ-ഃ഻഼ാ-ൄെ-ൈൊ-്ൗൢൣ൦-൯ඁ-ඃ්ා-ුූෘ-ෟ෦-෯ෲෳัิ-ฺ็-๎๐-๙ັິ-ຼ່-໎໐-໙༘༙༠-༩༹༵༷༾༿ཱ-྄྆྇ྍ-ྗྙ-ྼ࿆ါ-ှ၀-၉ၖ-ၙၞ-ၠၢ-ၤၧ-ၭၱ-ၴႂ-ႍႏ-ႝ፝-፟፩-፱ᜒ-᜕ᜲ-᜴ᝒᝓᝲᝳ឴-៓៝០-៩᠋-᠍᠏-᠙ᢩᤠ-ᤫᤰ-᤻᥆-᥏᧐-᧚ᨗ-ᨛᩕ-ᩞ᩠-᩿᩼-᪉᪐-᪙᪰-᪽ᪿ-᫝᫠-᫫ᬀ-ᬄ᬴-᭄᭐-᭙᭫-᭳ᮀ-ᮂᮡ-ᮭ᮰-᮹᯦-᯳ᰤ-᰷᱀-᱉᱐-᱙᳐-᳔᳒-᳨᳭᳴᳷-᳹᷀-᷿‌‍‿⁀⁔⃐-⃥⃜⃡-⃰⳯-⵿⳱ⷠ-〪ⷿ-゙゚〯・꘠-꘩꙯ꙴ-꙽ꚞꚟ꛰꛱ꠂ꠆ꠋꠣ-ꠧ꠬ꢀꢁꢴ-ꣅ꣐-꣙꣠-꣱ꣿ-꤉ꤦ-꤭ꥇ-꥓ꦀ-ꦃ꦳-꧀꧐-꧙ꧥ꧰-꧹ꨩ-ꨶꩃꩌꩍ꩐-꩙ꩻ-ꩽꪰꪲ-ꪴꪷꪸꪾ꪿꫁ꫫ-ꫯꫵ꫶ꯣ-ꯪ꯬꯭꯰-꯹ﬞ︀-️︠-︯︳︴﹍-﹏０-９＿･", at = "ªµºÀ-ÖØ-öø-ˁˆ-ˑˠ-ˤˬˮͰ-ʹͶͷͺ-ͽͿΆΈ-ΊΌΎ-ΡΣ-ϵϷ-ҁҊ-ԯԱ-Ֆՙՠ-ֈא-תׯ-ײؠ-يٮٯٱ-ۓەۥۦۮۯۺ-ۼۿܐܒ-ܯݍ-ޥޱߊ-ߪߴߵߺࠀ-ࠕࠚࠤࠨࡀ-ࡘࡠ-ࡪࡰ-ࢇࢉ-࢏ࢠ-ࣉऄ-हऽॐक़-ॡॱ-ঀঅ-ঌএঐও-নপ-রলশ-হঽৎড়ঢ়য়-ৡৰৱৼਅ-ਊਏਐਓ-ਨਪ-ਰਲਲ਼ਵਸ਼ਸਹਖ਼-ੜਫ਼ੲ-ੴઅ-ઍએ-ઑઓ-નપ-રલળવ-હઽૐૠૡૹଅ-ଌଏଐଓ-ନପ-ରଲଳଵ-ହଽଡ଼ଢ଼ୟ-ୡୱஃஅ-ஊஎ-ஐஒ-கஙசஜஞடணதந-பம-ஹௐఅ-ఌఎ-ఐఒ-నప-హఽౘ-ౚ౜ౝౠౡಀಅ-ಌಎ-ಐಒ-ನಪ-ಳವ-ಹಽ೜-ೞೠೡೱೲഄ-ഌഎ-ഐഒ-ഺഽൎൔ-ൖൟ-ൡൺ-ൿඅ-ඖක-නඳ-රලව-ෆก-ะาำเ-ๆກຂຄຆ-ຊຌ-ຣລວ-ະາຳຽເ-ໄໆໜ-ໟༀཀ-ཇཉ-ཬྈ-ྌက-ဪဿၐ-ၕၚ-ၝၡၥၦၮ-ၰၵ-ႁႎႠ-ჅჇჍა-ჺჼ-ቈቊ-ቍቐ-ቖቘቚ-ቝበ-ኈኊ-ኍነ-ኰኲ-ኵኸ-ኾዀዂ-ዅወ-ዖዘ-ጐጒ-ጕጘ-ፚᎀ-ᎏᎠ-Ᏽᏸ-ᏽᐁ-ᙬᙯ-ᙿᚁ-ᚚᚠ-ᛪᛮ-ᛸᜀ-ᜑᜟ-ᜱᝀ-ᝑᝠ-ᝬᝮ-ᝰក-ឳៗៜᠠ-ᡸᢀ-ᢨᢪᢰ-ᣵᤀ-ᤞᥐ-ᥭᥰ-ᥴᦀ-ᦫᦰ-ᧉᨀ-ᨖᨠ-ᩔᪧᬅ-ᬳᭅ-ᭌᮃ-ᮠᮮᮯᮺ-ᯥᰀ-ᰣᱍ-ᱏᱚ-ᱽᲀ-ᲊᲐ-ᲺᲽ-Ჿᳩ-ᳬᳮ-ᳳᳵᳶᳺᴀ-ᶿḀ-ἕἘ-Ἕἠ-ὅὈ-Ὅὐ-ὗὙὛὝὟ-ώᾀ-ᾴᾶ-ᾼιῂ-ῄῆ-ῌῐ-ΐῖ-Ίῠ-Ῥῲ-ῴῶ-ῼⁱⁿₐ-ₜℂℇℊ-ℓℕ℘-ℝℤΩℨK-ℹℼ-ℿⅅ-ⅉⅎⅠ-ↈⰀ-ⳤⳫ-ⳮⳲⳳⴀ-ⴥⴧⴭⴰ-ⵧⵯⶀ-ⶖⶠ-ⶦⶨ-ⶮⶰ-ⶶⶸ-ⶾⷀ-ⷆⷈ-ⷎⷐ-ⷖⷘ-ⷞ々-〇〡-〩〱-〵〸-〼ぁ-ゖ゛-ゟァ-ヺー-ヿㄅ-ㄯㄱ-ㆎㆠ-ㆿㇰ-ㇿ㐀-䶿一-ꒌꓐ-ꓽꔀ-ꘌꘐ-ꘟꘪꘫꙀ-ꙮꙿ-ꚝꚠ-ꛯꜗ-ꜟꜢ-ꞈꞋ-Ƛ꟱-ꠁꠃ-ꠅꠇ-ꠊꠌ-ꠢꡀ-ꡳꢂ-ꢳꣲ-ꣷꣻꣽꣾꤊ-ꤥꤰ-ꥆꥠ-ꥼꦄ-ꦲꧏꧠ-ꧤꧦ-ꧯꧺ-ꧾꨀ-ꨨꩀ-ꩂꩄ-ꩋꩠ-ꩶꩺꩾ-ꪯꪱꪵꪶꪹ-ꪽꫀꫂꫛ-ꫝꫠ-ꫪꫲ-ꫴꬁ-ꬆꬉ-ꬎꬑ-ꬖꬠ-ꬦꬨ-ꬮꬰ-ꭚꭜ-ꭩꭰ-ꯢ가-힣ힰ-ퟆퟋ-ퟻ豈-舘並-龎ﬀ-ﬆﬓ-ﬗיִײַ-ﬨשׁ-זּטּ-לּמּנּסּףּפּצּ-ﮱﯓ-ﴽﵐ-ﶏﶒ-ﷇﷰ-ﷻﹰ-ﹴﹶ-ﻼＡ-Ｚａ-ｚｦ-ﾾￂ-ￇￊ-ￏￒ-ￗￚ-ￜ", Ie = {
@@ -4021,17 +4030,17 @@ De.prototype.separatedFrom = function(t) {
 De.prototype.sibling = function() {
   return new De(this.parent, this.base);
 };
-var J = function(t) {
+var X = function(t) {
   this.parser = t, this.validFlags = "gim" + (t.options.ecmaVersion >= 6 ? "uy" : "") + (t.options.ecmaVersion >= 9 ? "s" : "") + (t.options.ecmaVersion >= 13 ? "d" : "") + (t.options.ecmaVersion >= 15 ? "v" : ""), this.unicodeProperties = Vt[t.options.ecmaVersion >= 14 ? 14 : t.options.ecmaVersion], this.source = "", this.flags = "", this.start = 0, this.switchU = !1, this.switchV = !1, this.switchN = !1, this.pos = 0, this.lastIntValue = 0, this.lastStringValue = "", this.lastAssertionIsQuantifiable = !1, this.numCapturingParens = 0, this.maxBackReference = 0, this.groupNames = /* @__PURE__ */ Object.create(null), this.backReferenceNames = [], this.branchID = null;
 };
-J.prototype.reset = function(t, i, n) {
+X.prototype.reset = function(t, i, n) {
   var s = n.indexOf("v") !== -1, o = n.indexOf("u") !== -1;
   this.start = t | 0, this.source = i + "", this.flags = n, s && this.parser.options.ecmaVersion >= 15 ? (this.switchU = !0, this.switchV = !0, this.switchN = !0) : (this.switchU = o && this.parser.options.ecmaVersion >= 6, this.switchV = !1, this.switchN = o && this.parser.options.ecmaVersion >= 9);
 };
-J.prototype.raise = function(t) {
+X.prototype.raise = function(t) {
   this.parser.raiseRecoverable(this.start, "Invalid regular expression: /" + this.source + "/: " + t);
 };
-J.prototype.at = function(t, i) {
+X.prototype.at = function(t, i) {
   i === void 0 && (i = !1);
   var n = this.source, s = n.length;
   if (t >= s)
@@ -4042,7 +4051,7 @@ J.prototype.at = function(t, i) {
   var a = n.charCodeAt(t + 1);
   return a >= 56320 && a <= 57343 ? (o << 10) + a - 56613888 : o;
 };
-J.prototype.nextIndex = function(t, i) {
+X.prototype.nextIndex = function(t, i) {
   i === void 0 && (i = !1);
   var n = this.source, s = n.length;
   if (t >= s)
@@ -4050,19 +4059,19 @@ J.prototype.nextIndex = function(t, i) {
   var o = n.charCodeAt(t), a;
   return !(i || this.switchU) || o <= 55295 || o >= 57344 || t + 1 >= s || (a = n.charCodeAt(t + 1)) < 56320 || a > 57343 ? t + 1 : t + 2;
 };
-J.prototype.current = function(t) {
+X.prototype.current = function(t) {
   return t === void 0 && (t = !1), this.at(this.pos, t);
 };
-J.prototype.lookahead = function(t) {
+X.prototype.lookahead = function(t) {
   return t === void 0 && (t = !1), this.at(this.nextIndex(this.pos, t), t);
 };
-J.prototype.advance = function(t) {
+X.prototype.advance = function(t) {
   t === void 0 && (t = !1), this.pos = this.nextIndex(this.pos, t);
 };
-J.prototype.eat = function(t, i) {
+X.prototype.eat = function(t, i) {
   return i === void 0 && (i = !1), this.current(i) === t ? (this.advance(i), !0) : !1;
 };
-J.prototype.eatChars = function(t, i) {
+X.prototype.eatChars = function(t, i) {
   i === void 0 && (i = !1);
   for (var n = this.pos, s = 0, o = t; s < o.length; s += 1) {
     var a = o[s], l = this.at(n, i);
@@ -4838,14 +4847,14 @@ c.regexp_eatFixedHexDigits = function(e, t) {
   }
   return !0;
 };
-var Je = function(t) {
+var Xe = function(t) {
   this.type = t.type, this.value = t.value, this.start = t.start, this.end = t.end, t.options.locations && (this.loc = new Ce(t, t.startLoc, t.endLoc)), t.options.ranges && (this.range = [t.start, t.end]);
 }, b = T.prototype;
 b.next = function(e) {
-  !e && this.type.keyword && this.containsEsc && this.raiseRecoverable(this.start, "Escape sequence in keyword " + this.type.keyword), this.options.onToken && this.options.onToken(new Je(this)), this.lastTokEnd = this.end, this.lastTokStart = this.start, this.lastTokEndLoc = this.endLoc, this.lastTokStartLoc = this.startLoc, this.nextToken();
+  !e && this.type.keyword && this.containsEsc && this.raiseRecoverable(this.start, "Escape sequence in keyword " + this.type.keyword), this.options.onToken && this.options.onToken(new Xe(this)), this.lastTokEnd = this.end, this.lastTokStart = this.start, this.lastTokEndLoc = this.endLoc, this.lastTokStartLoc = this.startLoc, this.nextToken();
 };
 b.getToken = function() {
-  return this.next(), new Je(this);
+  return this.next(), new Xe(this);
 };
 typeof Symbol < "u" && (b[Symbol.iterator] = function() {
   var e = this;
@@ -5127,7 +5136,7 @@ b.readRegexp = function() {
   ++this.pos;
   var o = this.pos, a = this.readWord1();
   this.containsEsc && this.unexpected(o);
-  var l = this.regexpState || (this.regexpState = new J(this));
+  var l = this.regexpState || (this.regexpState = new X(this));
   l.reset(i, s, a), this.validateRegExpFlags(l), this.validateRegExpPattern(l);
   var u = null;
   try {
@@ -5361,7 +5370,7 @@ T.acorn = {
   tokContexts: D,
   isIdentifierChar: ne,
   isIdentifierStart: Q,
-  Token: Je,
+  Token: Xe,
   isNewLine: ce,
   lineBreak: O,
   lineBreakG: hi,
@@ -5444,7 +5453,7 @@ const ji = [
   right: Math.max(e[0], t[0], i[0]),
   top: Math.max(e[1], t[1], i[1])
 }), Hi = (e, t) => e.left <= t.right && e.right >= t.left && e.bottom <= t.top && e.top >= t.bottom, Qi = (e, t) => e[0] * t[0] + e[1] * t[1] + e[2] * t[2];
-function Ji(e) {
+function Xi(e) {
   const t = /* @__PURE__ */ new Map(), i = [], n = [];
   for (let a = 0; a < e.positions.length; a += 3) {
     const l = [e.positions[a], e.positions[a + 1], e.positions[a + 2]], u = l.join(",");
@@ -5465,7 +5474,7 @@ function Ji(e) {
   }
   return { vertices: i, faces: s, edges: [...o.values()] };
 }
-function Xi(e, t, i, n) {
+function Ji(e, t, i, n) {
   const { a: s, b: o, c: a, det: l } = e, u = (g) => {
     const I = g[0] - s[0], U = g[1] - s[1], _ = (I * (a[1] - s[1]) - U * (a[0] - s[0])) / l, L = ((o[0] - s[0]) * U - (o[1] - s[1]) * I) / l;
     return [_, L, 1 - _ - L, s[2] + _ * (o[2] - s[2]) + L * (a[2] - s[2]) - g[2] - n];
@@ -5494,10 +5503,10 @@ function Yi(e, t, i, n) {
       return;
     }
     const C = V[1] - w[1], R = u / ae;
-    for (let X = g(w[0], u); X <= g(V[0], u); X++) {
-      const we = w[1] + C * Math.max(0, (X * R - w[0]) / A), fe = w[1] + C * Math.min(1, ((X + 1) * R - w[0]) / A);
+    for (let J = g(w[0], u); J <= g(V[0], u); J++) {
+      const we = w[1] + C * Math.max(0, (J * R - w[0]) / A), fe = w[1] + C * Math.min(1, ((J + 1) * R - w[0]) / A);
       for (let F = g(Math.min(we, fe), h); F <= g(Math.max(we, fe), h); F++)
-        z(F * ae + X);
+        z(F * ae + J);
     }
   };
   let _ = 0, L = 0;
@@ -5511,8 +5520,8 @@ function Yi(e, t, i, n) {
       if (Math.abs(C) < 1e-10)
         continue;
       const R = { a: w, b: V, c: A, det: C, box: Re(w, V, A), nearest: Math.max(w[2], V[2], A[2]) };
-      I(R.box, (X) => {
-        me(), S[X].push(R);
+      I(R.box, (J) => {
+        me(), S[J].push(R);
       });
     }
   const se = [];
@@ -5524,19 +5533,19 @@ function Yi(e, t, i, n) {
       const A = f[y][z.a], C = f[y][z.b], R = Math.hypot(C[0] - A[0], C[1] - A[1]);
       if (R < 1e-5)
         continue;
-      const X = Re(A, C), we = Math.min(A[2], C[2]) + p, fe = /* @__PURE__ */ new Set(), F = [];
-      let Xe = !1;
+      const J = Re(A, C), we = Math.min(A[2], C[2]) + p, fe = /* @__PURE__ */ new Set(), F = [];
+      let Je = !1;
       U(A, C, (P) => {
-        if (!Xe)
+        if (!Je)
           for (const K of S[P]) {
-            if (me(), K.nearest <= we || !Hi(X, K.box) || fe.has(K))
+            if (me(), K.nearest <= we || !Hi(J, K.box) || fe.has(K))
               continue;
             if (fe.add(K), ++L > Wi)
               throw je();
-            const te = Xi(K, A, C, p);
+            const te = Ji(K, A, C, p);
             if (te) {
               if (te[0] <= 1e-8 && te[1] >= 1 - 1e-8) {
-                F.splice(0, F.length, [0, 1]), Xe = !0;
+                F.splice(0, F.length, [0, 1]), Je = !0;
                 break;
               }
               F.push(te);
@@ -5568,8 +5577,8 @@ function $i(e) {
   for (const a of t)
     for (const l of [0, 1, 2])
       i[l] = Math.min(i[l], a.bounds.min[l]), n[l] = Math.max(n[l], a.bounds.max[l]);
-  const s = t.map(Ji);
-  return { views: ji.map((a) => Yi(s, a, i, n)), bodyIds: t.map((a) => a.id), sourceKey: e.sourceKey };
+  const s = t.map(Xi);
+  return { views: ji.map((a) => Yi(s, a, i, n)), origin: i, bodyIds: t.map((a) => a.id), sourceKey: e.sourceKey };
 }
 self.onmessage = (e) => {
   try {

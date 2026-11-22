@@ -158,6 +158,10 @@ try{
  const pathData=await preview(page).locator('.drawing-visible').getAttribute('d');
  assert.ok(pathData.split('M ').length>10);
  await dialog(page).getByLabel('Show hidden lines').uncheck();
+ await dialog(page).getByLabel('Show section A-A').check();
+ await dialog(page).getByLabel('Section position (mm)',{exact:true}).fill('spacing / 2');
+ await preview(page).getByText('World Y = 14 mm',{exact:true}).waitFor();
+ assert.ok(await preview(page).locator('.drawing-section').count()>0);
  await dialog(page).getByLabel('Include parts list').check();
  await dialog(page).getByLabel('Preview page').selectOption('1');
  await preview(page).getByText('Rear bracket',{exact:true}).waitFor();
@@ -168,6 +172,7 @@ try{
  const assemblyText=await readFile(await assemblyPdf.path(),'utf8');
  assert.ok(assemblyText.includes('<'+Buffer.from('Assembly overview','latin1').toString('hex')+'>'));
  assert.match(assemblyText,/\/Type \/Pages \/Count 2/);
+ assert.ok(assemblyText.includes('<'+Buffer.from('World Y = 14 mm','latin1').toString('hex')+'>'));
  assert.ok(assemblyText.includes('<'+Buffer.from('Rear bracket','latin1').toString('hex')+'>'));
  await dialog(page).getByRole('button',{name:'Save drawing sheet'}).tap();
  await dialog(page).waitFor({state:'hidden'});
@@ -188,7 +193,7 @@ try{
  await save.saveAs(project);
  const zip=await JSZip.loadAsync(await readFile(project));
  const saved=JSON.parse(await zip.file(CAD_PROJECT_PATH).async('text'));
- assert.equal(saved.version,22);
+ assert.equal(saved.version,23);
  assert.deepEqual(saved.drawings[0].section,{axis:'v',position:15,jog:{at:'spacing / 2 + 10 mm',position:16}});
  assert.equal(saved.drawings[0].annotations[0].from,'circle:first');
  assert.equal(saved.drawings[0].annotations[0].to,'circle:second');
@@ -206,6 +211,7 @@ try{
  assert.deepEqual(saved.drawings[2].source,{kind:'assembly'});
  assert.equal(saved.drawings[2].hiddenLines,false);
  assert.equal(saved.drawings[2].partsList,true);
+ assert.deepEqual(saved.drawings[2].section,{axis:'v',position:'spacing / 2'});
  await page.close();
 
  const restored=await open();
@@ -247,9 +253,11 @@ try{
  await preview(restored).getByText('Assembly · 2 bodies',{exact:true}).waitFor();
  assert.equal(await preview(restored).locator('.drawing-hidden').count(),0);
  assert.equal(await dialog(restored).getByLabel('Include parts list').isChecked(),true);
+ assert.equal(await dialog(restored).getByLabel('Section position (mm)',{exact:true}).inputValue(),'spacing / 2');
+ await preview(restored).getByText('World Y = 14 mm',{exact:true}).waitFor();
  await dialog(restored).getByLabel('Preview page').selectOption('1');
  await preview(restored).getByText('Rear bracket',{exact:true}).waitFor();
- console.log('PASS assembly parts lists, worker-backed assembly and linked sketch drawing sheets in Brickwright: touch controls, live parameters, linked offset sections, aligned and curved dimensions, single and numbered vector PDFs, and SB3 save and reopen');
+ console.log('PASS assembly sections, parts lists, worker-backed assembly and linked sketch drawing sheets in Brickwright: touch controls, live parameters, linked offset sections, aligned and curved dimensions, single and numbered vector PDFs, and SB3 save and reopen');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});

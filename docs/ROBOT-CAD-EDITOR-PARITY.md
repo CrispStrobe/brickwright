@@ -421,3 +421,8 @@ Select **Include parts list** on an assembly drawing to append numbered
 solid-body names as PDF pages. **Preview page** switches between the views
 and the list. SB3 keeps the option, and the list is regenerated from the
 current assembly.
+
+Enable **Show section A-A** on an assembly drawing and choose world X or Y
+for the cutting plane. Enter a coordinate or a named length expression.
+Preview and PDF show the cut line and separately hatched components, and
+the SB3 retains the plane.
