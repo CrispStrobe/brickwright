@@ -167,6 +167,23 @@ try{
  await preview(page).getByText('World Y = 14 / 8 mm',{exact:true}).waitFor();
  assert.equal((await preview(page).locator('.drawing-cut').getAttribute('d')).split('L').length,4);
  assert.ok(await preview(page).locator('.drawing-section').count()>0);
+ await dialog(page).getByText('Model edge dimensions',{exact:true}).tap();
+ await dialog(page).getByRole('button',{name:'Add edge dimension',exact:true}).tap();
+ await preview(page).scrollIntoViewIfNeeded();
+ const picks=await preview(page).evaluate(svg=>{
+  const segment=svg.querySelector('.drawing-visible').getAttribute('d').split('M ')[1];
+  const [x1,y1,x2,y2]=segment.trim().replace('L ','').split(/\s+/).map(Number);
+  const screen=(x,y)=>{
+   const point=new DOMPoint(x,y).matrixTransform(svg.getScreenCTM());
+   return {x:point.x,y:point.y};
+  };
+  return {edge:screen((x1+x2)/2,(y1+y2)/2),label:screen(80,92)};
+ });
+ await page.touchscreen.tap(picks.edge.x,picks.edge.y);
+ await preview(page).locator('.drawing-model-edge-marker').waitFor({state:'attached'});
+ await page.touchscreen.tap(picks.label.x,picks.label.y);
+ await preview(page).locator('.drawing-annotation').first().waitFor({state:'attached'});
+ assert.equal(await preview(page).locator('.drawing-annotation').count(),5);
  await dialog(page).getByLabel('Include parts list').check();
  await dialog(page).getByLabel('Preview page').selectOption('1');
  await preview(page).getByText('Rear bracket',{exact:true}).waitFor();
@@ -198,7 +215,7 @@ try{
  await save.saveAs(project);
  const zip=await JSZip.loadAsync(await readFile(project));
  const saved=JSON.parse(await zip.file(CAD_PROJECT_PATH).async('text'));
- assert.equal(saved.version,24);
+ assert.equal(saved.version,25);
  assert.deepEqual(saved.drawings[0].section,{axis:'v',position:15,jog:{at:'spacing / 2 + 10 mm',position:16}});
  assert.equal(saved.drawings[0].annotations[0].from,'circle:first');
  assert.equal(saved.drawings[0].annotations[0].to,'circle:second');
@@ -216,6 +233,8 @@ try{
  assert.deepEqual(saved.drawings[2].source,{kind:'assembly'});
  assert.equal(saved.drawings[2].hiddenLines,false);
  assert.equal(saved.drawings[2].partsList,true);
+ assert.equal(saved.drawings[2].edgeDimensions.length,1);
+ assert.ok(saved.roots.includes(saved.drawings[2].edgeDimensions[0].bodyId));
  assert.deepEqual(saved.drawings[2].section,{axis:'v',position:'spacing / 2',jog:{at:'spacing + 17 mm',position:8}});
  await page.close();
 
@@ -261,9 +280,10 @@ try{
  assert.equal(await dialog(restored).getByLabel('Section position (mm)',{exact:true}).inputValue(),'spacing / 2');
  assert.equal(await dialog(restored).getByLabel('Jog at (mm)').inputValue(),'spacing + 17 mm');
  await preview(restored).getByText('World Y = 14 / 8 mm',{exact:true}).waitFor();
+ assert.equal(await preview(restored).locator('.drawing-annotation').count(),5);
  await dialog(restored).getByLabel('Preview page').selectOption('1');
  await preview(restored).getByText('Rear bracket',{exact:true}).waitFor();
- console.log('PASS jogged assembly sections, parts lists, worker-backed assembly and linked sketch drawing sheets in Brickwright: touch controls, live parameters, linked offset sections, aligned and curved dimensions, single and numbered vector PDFs, and SB3 save and reopen');
+ console.log('PASS model-edge dimensions, jogged assembly sections, parts lists, worker-backed assembly and linked sketch drawing sheets in Brickwright: touch controls, live parameters, linked offset sections, aligned and curved dimensions, single and numbered vector PDFs, and SB3 save and reopen');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});

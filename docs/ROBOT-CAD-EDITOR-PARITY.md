@@ -268,6 +268,13 @@ optional codec, with STEP import tracked separately for supplier components.
 The first cross-host acceptance model is a TT motor mounting plate with a
 driving hole-spacing dimension and a 1:1 drilling template.
 
+On an assembly drawing, open **Model edge dimensions**, choose **Add edge
+dimension**, tap a visible edge in an orthographic view, and tap the sheet to
+place its projected length. The reference follows body placement when the edge
+is still visible in that view. If an edit removes or obscures it, reselect the
+edge or remove the dimension before exporting. Edge dimensions save with the
+project and export in the vector PDF.
+
 The embedded editor shares sketch UX and design history with standalone CAD.
 The host owns the compact File and History controls, project title, file pickers
 and native menus. Check compact/expanded layout, keyboard and touch access,
