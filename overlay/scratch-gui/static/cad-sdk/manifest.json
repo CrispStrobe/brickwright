@@ -2,7 +2,7 @@
   "format": "brickwright-cad-sdk",
   "version": 1,
   "repository": "https://github.com/CrispStrobe/brickwright-cad",
-  "commit": "9c84b013f1cc003a86edbd2e2c563f3e4be1aaf9",
+  "commit": "83db13171588501e48c12bbdafa9a07437fe7433",
   "dirty": false,
   "entry": "sdk.js",
   "wasm": "cad-assets/manifold.wasm",
@@ -15,8 +15,8 @@
     "assets/simulation.worker-DXvAhTjN.js": "7a89e5df43c050f79f33043391a07db43b96619360eab604b73e7727060db758",
     "cad-assets/manifold.wasm": "73e3b419ad31294f6b1cc478173944e50efc4a34bfdeeff0107bdfc12975f11c",
     "model-library-cache-DiMFGzp9.js": "75dc4ad7999b4571b227f1c675ca00af698fcc886dc73e98dd4c0eb2604e2b20",
-    "model-library-local-DJoH8QJK.js": "3c0e0522177d7ed5a0856c0c96d52e8c8e98da5494ecb98513a0c296fa9db10c",
-    "sdk-xOV5nY7t.js": "cd4e4371cee23aaf666ba0fbdd3171fb9da902fe2773945811c605faa9fc8135",
-    "sdk.js": "142fa0c57782219eefdf12a75a5d3da77010809776d149fda27c3b36cc2a7048"
+    "model-library-local-CKbm_oie.js": "abd81266511b83b511247c12f5a5398f12de19b631ded99520d593f5fa1cd3e5",
+    "sdk-CFcGlh7J.js": "597bc9b17dc9072948d5e500c5c617376d5b72c0d49b3c71b21de3dd0492fb61",
+    "sdk.js": "0a891331e74bf8e79dd3abf47fa8847d0ad5319416e848c7a0b172d9c8217d08"
   }
 }

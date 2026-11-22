@@ -53124,13 +53124,13 @@ CIRCLE 10, 15, 2`, N.append($, F2("small", f("One loop per line. Separate outlin
       Y1.addEventListener("change", g1);
     for (const Y1 of [X, Z])
       Y1.addEventListener("change", H);
-    H();
+    if (H(), h)
+      for (const Y1 of _.querySelectorAll("input, select, textarea"))
+        Y1.disabled = !0;
     const w1 = S("Extrusion distance (mm)", v?.kind === "extrusion" ? v.distance : 10), y1 = F2("input");
     y1.type = "checkbox", y1.checked = v?.kind === "extrusion" ? v.symmetric : !1, y1.setAttribute("aria-label", f("Symmetric extrusion"));
     const D1 = F2("label", f("Symmetric extrusion"));
-    if (D1.className = "sketch-toggle", D1.prepend(y1), _.append(D1), w1.parentElement.hidden = D1.hidden = m, h)
-      for (const Y1 of _.querySelectorAll("input, select, textarea"))
-        Y1.disabled = !0;
+    D1.className = "sketch-toggle", D1.prepend(y1), _.append(D1), w1.parentElement.hidden = D1.hidden = m;
     const L1 = S("Sweep angle (deg)", v?.kind === "revolution" ? v.angle : 360), t1 = F2("input");
     t1.type = "checkbox", t1.checked = v?.kind !== "revolution" || v.axisOffset === void 0;
     const D = F2("label", f("Use left edge of profile"));
@@ -55203,7 +55203,7 @@ function bR(i, e) {
 }
 let Ys;
 async function gR() {
-  const [{ createBundledModelLibrary: i }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-DJoH8QJK.js"), import("./model-library-cache-DiMFGzp9.js")]);
+  const [{ createBundledModelLibrary: i }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-CKbm_oie.js"), import("./model-library-cache-DiMFGzp9.js")]);
   return Ys ?? (Ys = i()), { ...Ys, cache: e() };
 }
 function kR(i, e) {
