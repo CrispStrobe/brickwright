@@ -994,6 +994,14 @@ const F6 = {
   "Enter one finite bulge per outline point.": "Gib pro Konturpunkt einen endlichen Wölbungswert ein.",
   "Rounded outline exceeds the curve size or detail limit.": "Die gerundete Kontur überschreitet die Größen- oder Detailgrenze.",
   "For an arc, add its bulge as a third value. Use 1 for a semicircle, or -1 to curve in the opposite direction.": "Für einen Bogen gib die Wölbung als dritten Wert ein. Verwende 1 für einen Halbkreis oder -1 für die Gegenrichtung.",
+  "PDF template export requires an original sketch extrusion.": "Für die PDF-Schablone wird eine ursprüngliche Skizzenextrusion benötigt.",
+  "This sketch is too large for a full-size A4 drilling template.": "Diese Skizze ist zu groß für eine A4-Bohrschablone in Originalgröße.",
+  "Drilling template": "Bohrschablone",
+  "{0} sketch plane · {1} × {2} mm": "Skizzenebene {0} · {1} × {2} mm",
+  "Print at actual size (100%).": "In Originalgröße (100 %) drucken.",
+  "50 mm scale check": "50 mm Maßstabskontrolle",
+  "Export drilling template (PDF)": "Bohrschablone exportieren (PDF)",
+  "Download an A4 sketch-plane template with hole centers at 1:1 scale.": "Eine A4-Schablone der Skizzenebene mit Lochmitten im Maßstab 1:1 herunterladen.",
   "Region loops (mm)": "Profilkonturen (mm)",
   "One loop per line. Separate outline points with | and add an optional bulge for arcs. For circles type CIRCLE X, Y, radius. Circle values can use named dimensions.": "Eine Kontur pro Zeile. Trenne Konturpunkte mit | und ergänze optional einen Wölbungswert für Bögen. Gib Kreise als CIRCLE X, Y, Radius ein. Kreiswerte können benannte Maße verwenden.",
   "A region supports up to 16 loops.": "Ein Flächenprofil unterstützt bis zu 16 Konturen.",
@@ -10023,7 +10031,7 @@ async function O8(A, g, I, C = {}) {
     }
   if ([...I.values()].reduce((u, R) => u + R.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = C.J ?? await (Z5 ?? (Z5 = import("./jolt-physics.wasm-compat-BC5e5bZQ.js").then((u) => u.default()))), Q = new i.JoltSettings();
+  const i = C.J ?? await (Z5 ?? (Z5 = import("./jolt-physics.wasm-compat-Cw7pLC1G.js").then((u) => u.default()))), Q = new i.JoltSettings();
   Q.mMaxBodies = 512, Q.mMaxBodyPairs = Math.max(1024, e.length * e.length), Q.mMaxContactConstraints = 8192;
   const s = new i.ObjectLayerPairFilterTable(2);
   s.EnableCollision(0, 1), s.EnableCollision(1, 1);

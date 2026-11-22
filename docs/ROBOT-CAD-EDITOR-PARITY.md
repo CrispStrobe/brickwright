@@ -286,9 +286,14 @@ convert to millimetres. A unitless
 file requires explicit opt-in to millimetres. The import and subsequent edits
 use the shared retained sketch model and history. Region circle centers and
 radii can use named dimensions, and DXF export retains entity layer names and signed polyline bulges.
-Visual point and curve editing, standalone ARC entities, layer filtering, linked drawings,
+Visual point and curve editing, standalone ARC entities, layer filtering, linked drawing sheets,
 DWG and STEP remain open.
+
+**Properties → Export drilling template (PDF)** produces a full-size A4
+vector template in the local sketch plane. It evaluates the current cutout
+centers and sizes and includes a 50 mm print reference.
 
 Run \`node scripts/verify-cad-dxf-region-browser.mjs <app-url>\` against a running
 build to check the embedded workflow in Playwright. The optional second and
 third arguments accept an independent DXF fixture and save the exported DXF.
+A fourth argument saves the PDF copy.

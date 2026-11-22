@@ -2,7 +2,7 @@
 import {chromium} from 'playwright';
 import {copyFile, readFile} from 'node:fs/promises';
 import assert from 'node:assert/strict';
-const [url = 'http://127.0.0.1:8165/', input, output] = process.argv.slice(2);
+const [url = 'http://127.0.0.1:8165/', input, output, pdfOutput] = process.argv.slice(2);
 const fixture = ['0','SECTION','2','HEADER','9','$ACADVER','1','AC1021','9','$INSUNITS','70',4,'0','ENDSEC',
  '0','SECTION','2','ENTITIES','0','CIRCLE','8','Bohrungen Ä','10',10,'20',15,'40',2,
  '0','LWPOLYLINE','8','Cut perimeter','90',4,'70',1,'10',0,'20',0,'10',40,'20',0,'10',40,'20',30,'10',0,'20',30,
@@ -11,7 +11,12 @@ const browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_CHROM
 try {
  const page=await browser.newPage({viewport:{width:1024,height:768},hasTouch:true,acceptDownloads:true,serviceWorkers:'block'});
  page.setDefaultTimeout(60000);
- await page.addInitScript(()=>{localStorage.setItem('bw-starter-v1-complete','1');localStorage.setItem('bw-cad-enabled','1');});
+ await page.addInitScript(()=>{
+  localStorage.setItem('bw-starter-v1-complete','1');
+  localStorage.setItem('bw-cad-enabled','1');
+  // Exercise downloads in Playwright without handing the file to the OS share UI.
+  Object.defineProperty(navigator,'canShare',{configurable:true,value:()=>false});
+ });
  await page.goto(url);
  await page.getByRole('tab',{name:'CAD',exact:true}).tap();
  await page.waitForFunction(()=>window.__bwCad?.editor);
@@ -69,6 +74,17 @@ try {
  assert.match(exported,/8\r\nBohrungen Ä\r\n100\r\nAcDbCircle\r\n10\r\n34\r\n20\r\n15\r\n30\r\n0\r\n40\r\n3/);
  assert.match(exported,/8\r\nCut perimeter\r\n100\r\nAcDbPolyline/);
  if(output)await copyFile(path,output);
+ const [pdfDownload]=await Promise.all([
+  page.waitForEvent('download'), cad.getByRole('button',{name:'Export drilling template (PDF)'}).tap()
+ ]);
+ const pdfPath=await pdfDownload.path();
+ assert.ok(pdfPath, 'Expected a local PDF download');
+ const pdf=await readFile(pdfPath,'utf8');
+ assert.match(pdf,/^%PDF-1\.6/);
+ assert.match(pdf,/15 16 m 65 16 l S/);
+ assert.match(pdf,/\n91 [\d.]+ m 91 [\d.]+ l S/);
+ assert.match(pdf,/\n119 [\d.]+ m 119 [\d.]+ l S/);
+ if(pdfOutput)await copyFile(pdfPath,pdfOutput);
  await cad.getByRole('button',{name:'Edit sketch & extrusion'}).tap();
  assert.equal(await loops.inputValue(),edited);
  await dialog.getByRole('button',{name:'Close sketch'}).tap();
@@ -77,5 +93,5 @@ try {
  assert.equal(await page.evaluate(()=>window.__bwCad.editor.session.state.document.parametric.parameters.spacing.expression),'20');
  await undo.tap();
  assert.equal(await rootCount(),0);
- console.log('PASS embedded CAD tablet viewport: third-party DXF, holes in preview, invalid edit, retained layers, named hole spacing, 1:1 export, reopen, Undo');
+ console.log('PASS embedded CAD tablet viewport: third-party DXF, holes in preview, invalid edit, retained layers, named hole spacing, 1:1 DXF and PDF exports, reopen, Undo');
 } finally {await browser.close();}
