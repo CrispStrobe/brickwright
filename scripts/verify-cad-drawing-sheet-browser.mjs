@@ -167,6 +167,11 @@ try{
  await preview(page).getByText('World Y = 14 / 8 mm',{exact:true}).waitFor();
  assert.equal((await preview(page).locator('.drawing-cut').getAttribute('d')).split('L').length,4);
  assert.ok(await preview(page).locator('.drawing-section').count()>0);
+ await dialog(page).getByRole('button',{name:'Add jog',exact:true}).tap();
+ await dialog(page).getByLabel('Jog 2 at (mm)',{exact:true}).fill('spacing + 27 mm');
+ await dialog(page).getByLabel('Position after jog 2 (mm)',{exact:true}).fill('spacing / 2');
+ await preview(page).getByText('World Y = 14 / 8 / 14 mm',{exact:true}).waitFor();
+ assert.equal((await preview(page).locator('.drawing-cut').getAttribute('d')).split('L').length,6);
  await dialog(page).getByText('Model edge dimensions',{exact:true}).tap();
  await dialog(page).getByRole('button',{name:'Add edge dimension',exact:true}).tap();
  await preview(page).scrollIntoViewIfNeeded();
@@ -194,7 +199,7 @@ try{
  const assemblyText=await readFile(await assemblyPdf.path(),'utf8');
  assert.ok(assemblyText.includes('<'+Buffer.from('Assembly overview','latin1').toString('hex')+'>'));
  assert.match(assemblyText,/\/Type \/Pages \/Count 2/);
- assert.ok(assemblyText.includes('<'+Buffer.from('World Y = 14 / 8 mm','latin1').toString('hex')+'>'));
+ assert.ok(assemblyText.includes('<'+Buffer.from('World Y = 14 / 8 / 14 mm','latin1').toString('hex')+'>'));
  assert.ok(assemblyText.includes('<'+Buffer.from('Rear bracket','latin1').toString('hex')+'>'));
  await dialog(page).getByRole('button',{name:'Save drawing sheet'}).tap();
  await dialog(page).waitFor({state:'hidden'});
@@ -215,7 +220,7 @@ try{
  await save.saveAs(project);
  const zip=await JSZip.loadAsync(await readFile(project));
  const saved=JSON.parse(await zip.file(CAD_PROJECT_PATH).async('text'));
- assert.equal(saved.version,25);
+ assert.equal(saved.version,26);
  assert.deepEqual(saved.drawings[0].section,{axis:'v',position:15,jog:{at:'spacing / 2 + 10 mm',position:16}});
  assert.equal(saved.drawings[0].annotations[0].from,'circle:first');
  assert.equal(saved.drawings[0].annotations[0].to,'circle:second');
@@ -235,7 +240,10 @@ try{
  assert.equal(saved.drawings[2].partsList,true);
  assert.equal(saved.drawings[2].edgeDimensions.length,1);
  assert.ok(saved.roots.includes(saved.drawings[2].edgeDimensions[0].bodyId));
- assert.deepEqual(saved.drawings[2].section,{axis:'v',position:'spacing / 2',jog:{at:'spacing + 17 mm',position:8}});
+ assert.deepEqual(saved.drawings[2].section,{
+  axis:'v',position:'spacing / 2',jog:{at:'spacing + 17 mm',position:8},
+  additionalJogs:[{at:'spacing + 27 mm',position:'spacing / 2'}]
+ });
  await page.close();
 
  const restored=await open();
@@ -279,11 +287,13 @@ try{
  assert.equal(await dialog(restored).getByLabel('Include parts list').isChecked(),true);
  assert.equal(await dialog(restored).getByLabel('Section position (mm)',{exact:true}).inputValue(),'spacing / 2');
  assert.equal(await dialog(restored).getByLabel('Jog at (mm)').inputValue(),'spacing + 17 mm');
- await preview(restored).getByText('World Y = 14 / 8 mm',{exact:true}).waitFor();
+ assert.equal(await dialog(restored).getByLabel('Jog 2 at (mm)',{exact:true}).inputValue(),'spacing + 27 mm');
+ assert.equal(await dialog(restored).getByLabel('Position after jog 2 (mm)',{exact:true}).inputValue(),'spacing / 2');
+ await preview(restored).getByText('World Y = 14 / 8 / 14 mm',{exact:true}).waitFor();
  assert.equal(await preview(restored).locator('.drawing-annotation').count(),5);
  await dialog(restored).getByLabel('Preview page').selectOption('1');
  await preview(restored).getByText('Rear bracket',{exact:true}).waitFor();
- console.log('PASS model-edge dimensions, jogged assembly sections, parts lists, worker-backed assembly and linked sketch drawing sheets in Brickwright: touch controls, live parameters, linked offset sections, aligned and curved dimensions, single and numbered vector PDFs, and SB3 save and reopen');
+ console.log('PASS model-edge dimensions, multi-jog assembly sections, parts lists, worker-backed assembly and linked sketch drawing sheets in Brickwright: touch controls, live parameters, linked offset sections, aligned and curved dimensions, single and numbered vector PDFs, and SB3 save and reopen');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});

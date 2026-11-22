@@ -33,7 +33,7 @@ const Gt = {
   "Choose light or dark mode": "Hellen oder dunklen Modus wählen",
   "Loading models…": "Modelle werden geladen…",
   "Original source files": "Originale Quelldateien",
-  "Model source uses project version 6 through 25": "Modellquelltext verwendet Projektversion 6 bis 25",
+  "Model source uses project version 6 through 26": "Modellquelltext verwendet Projektversion 6 bis 26",
   "Unknown material preset": "Unbekannte Materialvorlage",
   "Initial velocity requires project version 8": "Anfangsgeschwindigkeit erfordert Projektversion 8",
   "Invalid initial body velocity": "Ungültige Anfangsgeschwindigkeit",
@@ -1199,6 +1199,16 @@ const Gt = {
   "Drawing sheet": "Zeichnungsblatt",
   "Enter a section position in millimetres.": "Gib eine Schnittposition in Millimetern ein.",
   "Section position (mm)": "Schnittposition (mm)",
+  "Add jog": "Versatz hinzufügen",
+  "Jog {0} at (mm)": "Versatz {0} bei (mm)",
+  "Position after jog {0} (mm)": "Position nach Versatz {0} (mm)",
+  "Remove jog {0}": "Versatz {0} entfernen",
+  "Enter the coordinate and cut position for jog {0}.": "Gib die Koordinate und Schnittposition für Versatz {0} ein.",
+  "Enter jog coordinates along {0} in increasing order.": "Gib die Versatzkoordinaten entlang {0} in aufsteigender Reihenfolge ein.",
+  "Use at most {0} jogs in an assembly section.": "Verwende höchstens {0} Versätze in einem Baugruppenschnitt.",
+  "Enter jog coordinates in increasing order.": "Gib die Versatzkoordinaten in aufsteigender Reihenfolge ein.",
+  "Choose different positions for section legs {0} and {1}.": "Wähle verschiedene Positionen für die Schnittabschnitte {0} und {1}.",
+  "Section leg {0} misses part material.": "Schnittabschnitt {0} verläuft außerhalb des Bauteilmaterials.",
   "Offset section": "Versetzter Schnitt",
   "Offset section A-A": "Versetzter Schnitt A-A",
   "Second section position (mm)": "Zweite Schnittposition (mm)",
@@ -2224,10 +2234,10 @@ var oi = [509, 0, 227, 0, 150, 4, 294, 9, 1368, 2, 2, 1, 6, 3, 41, 2, 5, 0, 166,
   6: "enum",
   strict: "implements interface let package private protected public static yield",
   strictBind: "eval arguments"
-}, Le = "break case catch continue debugger default do else finally for function if return switch throw try var while with null true false instanceof typeof void delete new in this", ui = {
-  5: Le,
-  "5module": Le + " export import",
-  6: Le + " const class extends export import super"
+}, Re = "break case catch continue debugger default do else finally for function if return switch throw try var while with null true false instanceof typeof void delete new in this", ui = {
+  5: Re,
+  "5module": Re + " export import",
+  6: Re + " const class extends export import super"
 }, ut = /^in(stanceof)?$/, hi = new RegExp("[" + lt + "]"), ci = new RegExp("[" + lt + li + "]");
 function Fe(e, t) {
   for (var i = 65536, n = 0; n < t.length; n += 2) {
@@ -2250,16 +2260,16 @@ var x = function(t, i) {
 function j(e, t) {
   return new x(e, { beforeExpr: !0, binop: t });
 }
-var G = { beforeExpr: !0 }, R = { startsExpr: !0 }, Ze = {};
+var G = { beforeExpr: !0 }, L = { startsExpr: !0 }, Ze = {};
 function v(e, t) {
   return t === void 0 && (t = {}), t.keyword = e, Ze[e] = new x(e, t);
 }
 var r = {
-  num: new x("num", R),
-  regexp: new x("regexp", R),
-  string: new x("string", R),
-  name: new x("name", R),
-  privateId: new x("privateId", R),
+  num: new x("num", L),
+  regexp: new x("regexp", L),
+  string: new x("string", L),
+  name: new x("name", L),
+  privateId: new x("privateId", L),
   eof: new x("eof"),
   // Punctuation token types.
   bracketL: new x("[", { beforeExpr: !0, startsExpr: !0 }),
@@ -2278,7 +2288,7 @@ var r = {
   template: new x("template"),
   invalidTemplate: new x("invalidTemplate"),
   ellipsis: new x("...", G),
-  backQuote: new x("`", R),
+  backQuote: new x("`", L),
   dollarBraceL: new x("${", { beforeExpr: !0, startsExpr: !0 }),
   // Operators. These carry several kinds of properties to help the
   // parser use them properly (the presence of these properties is
@@ -2322,7 +2332,7 @@ var r = {
   _else: v("else", G),
   _finally: v("finally"),
   _for: v("for", { isLoop: !0 }),
-  _function: v("function", R),
+  _function: v("function", L),
   _if: v("if"),
   _return: v("return", G),
   _switch: v("switch"),
@@ -2333,15 +2343,15 @@ var r = {
   _while: v("while", { isLoop: !0 }),
   _with: v("with"),
   _new: v("new", { beforeExpr: !0, startsExpr: !0 }),
-  _this: v("this", R),
-  _super: v("super", R),
-  _class: v("class", R),
+  _this: v("this", L),
+  _super: v("super", L),
+  _class: v("class", L),
   _extends: v("extends", G),
   _export: v("export"),
-  _import: v("import", R),
-  _null: v("null", R),
-  _true: v("true", R),
-  _false: v("false", R),
+  _import: v("import", L),
+  _null: v("null", L),
+  _true: v("true", L),
+  _false: v("false", L),
   _in: v("in", { beforeExpr: !0, binop: 7 }),
   _instanceof: v("instanceof", { beforeExpr: !0, binop: 7 }),
   _typeof: v("typeof", { beforeExpr: !0, prefix: !0, startsExpr: !0 }),
@@ -3609,8 +3619,8 @@ m.parseSubscript = function(e, t, i, n, s, o, a) {
     _.callee = e, _.arguments = K, l && (_.optional = u), e = this.finishNode(_, "CallExpression");
   } else if (this.type === r.backQuote) {
     (u || o) && this.raise(this.start, "Optional chaining cannot appear in the tag of tagged template expressions");
-    var L = this.startNodeAt(t, i);
-    L.tag = e, L.quasi = this.parseTemplate({ isTagged: !0 }), e = this.finishNode(L, "TaggedTemplateExpression");
+    var R = this.startNodeAt(t, i);
+    R.tag = e, R.quasi = this.parseTemplate({ isTagged: !0 }), e = this.finishNode(R, "TaggedTemplateExpression");
   }
   return e;
 };
@@ -3727,8 +3737,8 @@ m.parseParenAndDistinguishExpression = function(e, t) {
   } else
     s = this.parseParenExpression();
   if (this.options.preserveParens) {
-    var L = this.startNodeAt(i, n);
-    return L.expression = s, this.finishNode(L, "ParenthesizedExpression");
+    var R = this.startNodeAt(i, n);
+    return R.expression = s, this.finishNode(R, "ParenthesizedExpression");
   } else
     return s;
 };
@@ -4019,8 +4029,8 @@ function Ti(e) {
   };
   t.nonBinary.Script_Extensions = t.nonBinary.Script, t.nonBinary.gc = t.nonBinary.General_Category, t.nonBinary.sc = t.nonBinary.Script, t.nonBinary.scx = t.nonBinary.Script_Extensions;
 }
-for (var Re = 0, st = [9, 10, 11, 12, 13, 14]; Re < st.length; Re += 1) {
-  var Vi = st[Re];
+for (var Le = 0, st = [9, 10, 11, 12, 13, 14]; Le < st.length; Le += 1) {
+  var Vi = st[Le];
   Ti(Vi);
 }
 var c = T.prototype, Ce = function(t, i) {
@@ -4383,9 +4393,9 @@ function _i(e) {
 }
 c.regexp_eatRegExpIdentifierPart = function(e) {
   var t = e.pos, i = this.options.ecmaVersion >= 11, n = e.current(i);
-  return e.advance(i), n === 92 && this.regexp_eatRegExpUnicodeEscapeSequence(e, i) && (n = e.lastIntValue), Li(n) ? (e.lastIntValue = n, !0) : (e.pos = t, !1);
+  return e.advance(i), n === 92 && this.regexp_eatRegExpUnicodeEscapeSequence(e, i) && (n = e.lastIntValue), Ri(n) ? (e.lastIntValue = n, !0) : (e.pos = t, !1);
 };
-function Li(e) {
+function Ri(e) {
   return re(e, !0) || e === 36 || e === 95 || e === 8204 || e === 8205;
 }
 c.regexp_eatAtomEscape = function(e) {
@@ -4438,9 +4448,9 @@ c.regexp_eatControlEscape = function(e) {
 };
 c.regexp_eatControlLetter = function(e) {
   var t = e.current();
-  return Lt(t) ? (e.lastIntValue = t % 32, e.advance(), !0) : !1;
+  return Rt(t) ? (e.lastIntValue = t % 32, e.advance(), !0) : !1;
 };
-function Lt(e) {
+function Rt(e) {
   return e >= 65 && e <= 90 || e >= 97 && e <= 122;
 }
 c.regexp_eatRegExpUnicodeEscapeSequence = function(e, t) {
@@ -4475,13 +4485,13 @@ c.regexp_eatRegExpUnicodeEscapeSequence = function(e, t) {
     ) && this.regexp_eatHexDigits(e) && e.eat(
       125
       /* } */
-    ) && Ri(e.lastIntValue))
+    ) && Li(e.lastIntValue))
       return !0;
     n && e.raise("Invalid unicode escape"), e.pos = i;
   }
   return !1;
 };
-function Ri(e) {
+function Li(e) {
   return e >= 0 && e <= 1114111;
 }
 c.regexp_eatIdentityEscape = function(e) {
@@ -4504,7 +4514,7 @@ c.regexp_eatDecimalEscape = function(e) {
   }
   return !1;
 };
-var Rt = 0, ee = 1, Z = 2;
+var Lt = 0, ee = 1, Z = 2;
 c.regexp_eatCharacterClassEscape = function(e) {
   var t = e.current();
   if (Ni(t))
@@ -4523,7 +4533,7 @@ c.regexp_eatCharacterClassEscape = function(e) {
       return i && n === Z && e.raise("Invalid property name"), n;
     e.raise("Invalid property name");
   }
-  return Rt;
+  return Lt;
 };
 function Ni(e) {
   return e === 100 || e === 68 || e === 115 || e === 83 || e === 119 || e === 87;
@@ -4544,7 +4554,7 @@ c.regexp_eatUnicodePropertyValueExpression = function(e) {
     var s = e.lastStringValue;
     return this.regexp_validateUnicodePropertyNameOrValue(e, s);
   }
-  return Rt;
+  return Lt;
 };
 c.regexp_validateUnicodePropertyNameAndValue = function(e, t, i) {
   me(e.unicodeProperties.nonBinary, t) || e.raise("Invalid property name"), e.unicodeProperties.nonBinary[t].test(i) || e.raise("Invalid property value");
@@ -4563,7 +4573,7 @@ c.regexp_eatUnicodePropertyName = function(e) {
   return e.lastStringValue !== "";
 };
 function Nt(e) {
-  return Lt(e) || e === 95;
+  return Rt(e) || e === 95;
 }
 c.regexp_eatUnicodePropertyValue = function(e) {
   var t = 0;
@@ -5468,7 +5478,7 @@ function Yi(e) {
   }
   const s = [], o = /* @__PURE__ */ new Map();
   for (let a = 0; a < e.indices.length; a += 3) {
-    const l = n[e.indices[a]], u = n[e.indices[a + 1]], h = n[e.indices[a + 2]], p = i[l], f = i[u], w = i[h], [g, I, K] = f.map((S, E) => S - p[E]), [_, L, ge] = w.map((S, E) => S - p[E]), ae = [I * ge - K * L, K * _ - g * ge, g * L - I * _], oe = Math.hypot(...ae);
+    const l = n[e.indices[a]], u = n[e.indices[a + 1]], h = n[e.indices[a + 2]], p = i[l], f = i[u], w = i[h], [g, I, K] = f.map((S, E) => S - p[E]), [_, R, ge] = w.map((S, E) => S - p[E]), ae = [I * ge - K * R, K * _ - g * ge, g * R - I * _], oe = Math.hypot(...ae);
     if (oe <= 1e-12)
       continue;
     const A = [ae[0] / oe, ae[1] / oe, ae[2] / oe];
@@ -5482,8 +5492,8 @@ function Yi(e) {
 }
 function $i(e, t, i, n) {
   const { a: s, b: o, c: a, det: l } = e, u = (g) => {
-    const I = g[0] - s[0], K = g[1] - s[1], _ = (I * (a[1] - s[1]) - K * (a[0] - s[0])) / l, L = ((o[0] - s[0]) * K - (o[1] - s[1]) * I) / l;
-    return [_, L, 1 - _ - L, s[2] + _ * (o[2] - s[2]) + L * (a[2] - s[2]) - g[2] - n];
+    const I = g[0] - s[0], K = g[1] - s[1], _ = (I * (a[1] - s[1]) - K * (a[0] - s[0])) / l, R = ((o[0] - s[0]) * K - (o[1] - s[1]) * I) / l;
+    return [_, R, 1 - _ - R, s[2] + _ * (o[2] - s[2]) + R * (a[2] - s[2]) - g[2] - n];
   }, h = u(t), p = u(i);
   let f = 0, w = 1;
   for (let g = 0; g < h.length; g++) {
@@ -5515,7 +5525,7 @@ function en(e, t, i, n) {
         E(O * le + J);
     }
   };
-  let _ = 0, L = 0;
+  let _ = 0, R = 0;
   const ge = () => {
     if (++_ > qi)
       throw Ge();
@@ -5546,7 +5556,7 @@ function en(e, t, i, n) {
           for (const F of w[P]) {
             if (ge(), F.nearest <= Se || !Xi(J, F.box) || be.has(F))
               continue;
-            if (be.add(F), ++L > Hi)
+            if (be.add(F), ++R > Hi)
               throw Ge();
             const Y = $i(F, y, z, p);
             if (Y) {

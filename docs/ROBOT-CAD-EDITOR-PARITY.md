@@ -275,6 +275,12 @@ is still visible in that view. If an edit removes or obscures it, reselect the
 edge or remove the dimension before exporting. Edge dimensions save with the
 project and export in the vector PDF.
 
+For an assembly section that crosses several features, enable **Offset
+section** and choose **Add jog** after setting the first step. The world-axis
+coordinates must increase, and every leg must cross material. A sheet can have
+up to four jogs. The cut positions can use project parameters, are retained in
+the SB3, and appear in the vector PDF.
+
 The embedded editor shares sketch UX and design history with standalone CAD.
 The host owns the compact File and History controls, project title, file pickers
 and native menus. Check compact/expanded layout, keyboard and touch access,
