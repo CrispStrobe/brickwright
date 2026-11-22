@@ -280,13 +280,13 @@ and projection of an entire assembly belong to separate export workflows.
 
 **DXF import** is available under **Sketch & Extrude → Import DXF outline**.
 Import a single boundary with optional holes from text DXF circles and closed
-straight lightweight polylines. Edit the coordinates or radii before creating
+lightweight polylines, including curved segments. Edit the coordinates or radii before creating
 the extrusion. Declared inches, feet, millimetres, centimetres and metres
 convert to millimetres. A unitless
 file requires explicit opt-in to millimetres. The import and subsequent edits
 use the shared retained sketch model and history. Region circle centers and
-radii can use named dimensions, and DXF export retains entity layer names.
-Visual point and curve editing, arcs, bulges, layer filtering, linked drawings,
+radii can use named dimensions, and DXF export retains entity layer names and signed polyline bulges.
+Visual point and curve editing, standalone ARC entities, layer filtering, linked drawings,
 DWG and STEP remain open.
 
 Run \`node scripts/verify-cad-dxf-region-browser.mjs <app-url>\` against a running
