@@ -330,3 +330,10 @@ exact offset. The result retains the source under **Inputs** and can be
 re-edited in Properties. Run
 `node scripts/verify-cad-mirror-browser.mjs <app-url>` to check the geometry,
 editing the retained source, and the SB3 round trip on the embedded editor.
+
+Use **Pattern** on a selected CAD body to make a row or a bolt circle. The
+count includes the original. **Edit pattern** changes the spacing or the
+circular sweep without replacing the output body. Editing the source under
+**Inputs** updates all instances. Run
+`node scripts/verify-cad-pattern-browser.mjs <app-url>` to check both modes,
+source editing and SB3 save and reopen in the embedded editor.

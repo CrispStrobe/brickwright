@@ -2,7 +2,7 @@
   "format": "brickwright-cad-sdk",
   "version": 1,
   "repository": "https://github.com/CrispStrobe/brickwright-cad",
-  "commit": "0d907b5e49a3abb19f65a367e12582a94bb07143",
+  "commit": "adfec4375bb77a93a97b49b80405b237771057d1",
   "dirty": false,
   "entry": "sdk.js",
   "wasm": "cad-assets/manifold.wasm",
@@ -10,13 +10,13 @@
     "LICENSE": "ed121de3496066a2ddc8c11b30b48142165ab84bdb066fee351392ecaccf36ad",
     "NOTICE.txt": "c75b43e86dd682f04d167b78e655bff1ea1e7edb2a8fb0c3f28fc50b51d9f6f9",
     "adafruit-preview-data-BWhkbkqw.js": "c37d14c1f115a63599555fd4193b2df1f9426a9b4cab8962282d6794ba6e11b6",
-    "assets/geometry.worker-Cvzcbuoh.js": "721817f7df833c73c43e20dfba4ef8203dbe2b27d2b7f9c6671fbf7ef3751690",
-    "assets/jolt-physics.wasm-compat-CQ3Tmcwc.js": "d399a2adef58d29f89d8da276e9672a4de751eac8a07cd52d77fc0cb0efdfffe",
-    "assets/simulation.worker-D9gwHa-g.js": "44418950452be69dbaaad7caedeaaf0676dd077b848cbad0499dfd2febb4828d",
+    "assets/geometry.worker-DOPB8FpB.js": "dbe156db12f8b2ed0f9ab19f665139c66b8cdf07bd79731ee2a5f64b05390552",
+    "assets/jolt-physics.wasm-compat-BqOuhYq3.js": "f6db0963d1748f9c9178e87146fee8ea668455586163867efd19b2afaed570c7",
+    "assets/simulation.worker-Kmt-KvaT.js": "9d7a437fcdcf79cfada8b7a2bda0625c52ce60e7c3bd6d1b9a5db9a4a08456b4",
     "cad-assets/manifold.wasm": "73e3b419ad31294f6b1cc478173944e50efc4a34bfdeeff0107bdfc12975f11c",
     "model-library-cache-DiMFGzp9.js": "75dc4ad7999b4571b227f1c675ca00af698fcc886dc73e98dd4c0eb2604e2b20",
-    "model-library-local-weh0vYk2.js": "c4ff58f784b29cfe43f2a7f814aed06f283b7a1bdb1cecc4aa414de6b834921b",
-    "sdk-DtZ1KGnq.js": "fff16ad775e5c0528617e933a568f2e2cc6aa1c5138089824504f40abf487486",
-    "sdk.js": "97697de475c20ca86783df9f670fa2fcb660147da8f481d481f156cb9151755d"
+    "model-library-local-Br9Leu8h.js": "fd9f2a1a82f4760710d59abcc95e47304f849036df4f4d5d90d440cab75b9930",
+    "sdk-TZapfCAa.js": "09ea4263515d2b635c3739c1a0b7a29f797445bff29c9140635af73ef1912375",
+    "sdk.js": "4b06731ec35fc958a0299672479debb794dabbcf1204a654ab5a575545259dd8"
   }
 }
