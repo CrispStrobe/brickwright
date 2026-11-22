@@ -393,3 +393,9 @@ cut. Set **Jog at** along the perpendicular sketch axis to switch between the
 cuts. The PDF shows the stepped cutting line and the combined hatched view.
 The SB3 retains the offsets and parameter expressions. Verify the workflow with
 `node scripts/verify-cad-drawing-sheet-browser.mjs <app-url>`.
+
+Horizontal and vertical drawing dimensions can reference actual outline
+vertices and polygonal hole vertices. The anchor picker lists their sketch
+coordinates and highlights the selected points. Moving one point in its row
+keeps the link. If a point is removed, choose a replacement anchor before
+exporting the drawing.

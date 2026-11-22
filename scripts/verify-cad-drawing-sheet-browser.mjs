@@ -90,6 +90,12 @@ try{
  assert.equal(await pick.getAttribute('aria-pressed'),'false');
  await dialog(page).getByRole('button',{name:'Add dimension',exact:true}).tap();
  assert.equal(await preview(page).locator('.drawing-annotation').count(),5);
+ await from.selectOption({label:'Outline 1, point 1 (0, 0)'});
+ await to.selectOption({label:'Outline 1, point 2 (40, 0)'});
+ assert.equal(await preview(page).locator('.drawing-vertex-marker').count(),2);
+ await dialog(page).getByLabel('Paper Y (mm)').fill('110');
+ await dialog(page).getByRole('button',{name:'Add dimension',exact:true}).tap();
+ assert.equal(await preview(page).locator('.drawing-annotation').count(),10);
  await dialog(page).getByRole('button',{name:'Save drawing sheet'}).tap();
  await dialog(page).waitFor({state:'hidden'});
 
@@ -137,11 +143,14 @@ try{
  await save.saveAs(project);
  const zip=await JSZip.loadAsync(await readFile(project));
  const saved=JSON.parse(await zip.file(CAD_PROJECT_PATH).async('text'));
- assert.equal(saved.version,17);
+ assert.equal(saved.version,18);
  assert.deepEqual(saved.drawings[0].section,{axis:'v',position:15,jog:{at:'spacing / 2 + 10 mm',position:16}});
  assert.equal(saved.drawings[0].annotations[0].from,'circle:first');
  assert.equal(saved.drawings[0].annotations[0].to,'circle:second');
  assert.equal(saved.drawings[0].source.featureId,initial.id);
+ const linkedOutline=saved.sketches[saved.drawings[0].source.sketchId].profile.loops[0];
+ assert.equal(saved.drawings[0].annotations[1].from,`vertex:plate:${linkedOutline.vertexIds[0]}`);
+ assert.equal(saved.drawings[0].annotations[1].to,`vertex:plate:${linkedOutline.vertexIds[1]}`);
  assert.equal(saved.drawings.length,2);
  assert.equal(saved.drawings[1].scale,'1:2');
  await page.close();
@@ -161,7 +170,10 @@ try{
  assert.equal(await preview(restored).locator('.drawing-hidden').count(),8);
  assert.equal(await preview(restored).locator('.drawing-section').count(),3);
  assert.match(await preview(restored).textContent(),/28 mm/);
- assert.equal(await preview(restored).locator('.drawing-annotation').count(),5);
+ assert.equal(await preview(restored).locator('.drawing-annotation').count(),10);
+ await dialog(restored).getByText('Drawing dimensions',{exact:true}).tap();
+ await dialog(restored).getByRole('button',{name:'Edit dimension 2',exact:true}).tap();
+ assert.equal(await preview(restored).locator('.drawing-vertex-marker').count(),2);
  assert.equal(await dialog(restored).getByLabel('Section position (mm)',{exact:true}).inputValue(),'15');
  assert.equal(await dialog(restored).getByLabel('Second section position (mm)').inputValue(),'16');
  assert.equal(await dialog(restored).getByLabel('Jog at (mm)').inputValue(),'spacing / 2 + 10 mm');
@@ -170,7 +182,7 @@ try{
  await restored.getByRole('button',{name:'Drawing: Motor plate overview',exact:true}).tap();
  assert.equal(await spacing(restored),14);
  assert.equal(await preview(restored).locator('.drawing-hidden').count(),0);
- console.log('PASS linked drawing sheets in Brickwright: touch controls, live parameters, linked offset section and dimensions, single and numbered vector PDFs, and SB3 save and reopen');
+ console.log('PASS linked drawing sheets in Brickwright: touch controls, live parameters, linked offset sections and vertex dimensions, single and numbered vector PDFs, and SB3 save and reopen');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});
