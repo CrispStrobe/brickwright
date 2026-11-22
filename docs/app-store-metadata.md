@@ -24,13 +24,14 @@ triggering, RC timing, debugging, controllers, and computer architecture. Lesson
 ask you to predict, build, run, observe, and explain in the live editor.
 
 The native app works offline, opens and saves .sb3 projects, and connects directly
-to supported LEGO SPIKE, Boost, WeDo, and Powered Up hubs over Bluetooth.
+to supported LEGO® SPIKE™, BOOST, WeDo, and Powered Up hubs over Bluetooth.
 
 Brickwright Lite is free and open source. It combines the last permissively
 licensed Scratch codebase with Brickwright's own editors, circuit engine,
 simulators, debuggers, lessons, device runtimes, and native shell. It is not a
-TurboWarp fork and is not affiliated with Scratch, MIT, LEGO, STC, Arduino, or
-Raspberry Pi.
+TurboWarp fork and is not affiliated with Scratch, MIT, the LEGO Group, STC,
+Arduino, or Raspberry Pi. LEGO®, SPIKE™ and Technic™ are trademarks of the LEGO
+Group, which does not sponsor, authorize or endorse Brickwright.
 
 ## TestFlight app description — de-DE
 
@@ -55,14 +56,16 @@ Steuerungen und Rechnerarchitektur. Jede Lektion verbindet Vorhersagen, Bauen,
 Ausführen, Beobachten und Erklären direkt im Editor.
 
 Die native App funktioniert offline, öffnet und speichert .sb3-Projekte und
-verbindet sich per Bluetooth direkt mit unterstützten LEGO SPIKE-, Boost-, WeDo-
-und Powered-Up-Hubs.
+verbindet sich per Bluetooth direkt mit unterstützten LEGO® SPIKE™-, BOOST-,
+WeDo- und Powered-Up-Hubs.
 
 Brickwright Lite ist kostenlos und quelloffen. Es verbindet die letzte frei
 lizenzierte Scratch-Codebasis mit Brickwrights eigenen Editoren, Schaltungs-
 engine, Simulatoren, Debuggern, Lernpfaden, Gerätelaufzeiten und nativer App-Hülle.
-Es ist kein TurboWarp-Fork und steht in keiner Verbindung zu Scratch, MIT, LEGO,
-STC, Arduino oder Raspberry Pi.
+Es ist kein TurboWarp-Fork und steht in keiner Verbindung zu Scratch, MIT, der
+LEGO Gruppe, STC, Arduino oder Raspberry Pi. LEGO®, SPIKE™ und Technic™ sind
+Marken der LEGO Gruppe, die Brickwright weder unterstützt noch autorisiert oder
+empfiehlt.
 
 ## App Store description — en-US
 
@@ -95,9 +98,9 @@ it. Begin with circuits and safe measurement, then progress through code,
 debugging, interactive controls, signals, and computer architecture. Every
 lesson asks you to make and test a prediction.
 
-CONNECT REAL LEGO HARDWARE
-Use the native Bluetooth connection with supported LEGO SPIKE, Boost, WeDo, and
-Powered Up hubs. Explore motors and sensors in the same environment as your
+CONNECT REAL LEGO® HARDWARE
+Use the native Bluetooth connection with supported LEGO® SPIKE™, BOOST, WeDo,
+and Powered Up hubs. Explore motors and sensors in the same environment as your
 blocks and code.
 
 NATIVE, OFFLINE, AND OPEN
@@ -107,10 +110,11 @@ It combines permissively licensed Scratch components with Brickwright's own
 editors, circuit engine, simulations, debuggers, lessons, device runtimes, and
 native shell. It is not a TurboWarp fork.
 
-Brickwright is not affiliated with or endorsed by Scratch, MIT, LEGO, STC,
-Arduino, or Raspberry Pi, nor by the makers of the circuit file formats it
-imports and exports (KiCad, EasyEDA, EAGLE, LTspice). All trademarks belong to
-their owners.
+Brickwright is not affiliated with or endorsed by Scratch, MIT, the LEGO Group,
+STC, Arduino, or Raspberry Pi, nor by the makers of the circuit file formats it
+imports and exports (KiCad, EasyEDA, EAGLE, LTspice). LEGO®, SPIKE™ and
+Technic™ are trademarks of the LEGO Group, which does not sponsor, authorize or
+endorse Brickwright. All other trademarks belong to their owners.
 
 ## App Store description — de-DE
 
@@ -144,9 +148,9 @@ Sie beginnen bei Stromkreisen und sicherer Messtechnik und führen weiter zu
 Code, Fehlersuche, interaktiven Steuerungen, Signalen und Rechnerarchitektur.
 Jede Lektion fordert dazu auf, eine Vorhersage praktisch zu prüfen.
 
-ECHTE LEGO-HARDWARE VERBINDEN
-Verbinde unterstützte LEGO SPIKE-, Boost-, WeDo- und Powered-Up-Hubs direkt per
-Bluetooth. Erkunde Motoren und Sensoren in derselben Umgebung wie Blöcke und
+ECHTE LEGO®-HARDWARE VERBINDEN
+Verbinde unterstützte LEGO® SPIKE™-, BOOST-, WeDo- und Powered-Up-Hubs direkt
+per Bluetooth. Erkunde Motoren und Sensoren in derselben Umgebung wie Blöcke und
 Code.
 
 NATIV, OFFLINE UND OFFEN
@@ -156,11 +160,12 @@ frei lizenzierte Scratch-Komponenten mit Brickwrights eigenen Editoren,
 Schaltungsengine, Simulationen, Debuggern, Lernpfaden, Gerätelaufzeiten und
 nativer App-Hülle. Es ist kein TurboWarp-Fork.
 
-Brickwright steht in keiner Verbindung zu Scratch, MIT, LEGO, STC, Arduino oder
-Raspberry Pi und wird von diesen nicht unterstützt, ebenso wenig von den
-Herstellern der Schaltungs-Dateiformate, die es importiert und exportiert
-(KiCad, EasyEDA, EAGLE, LTspice). Alle Marken gehören ihren jeweiligen
-Inhabern.
+Brickwright steht in keiner Verbindung zu Scratch, MIT, der LEGO Gruppe, STC,
+Arduino oder Raspberry Pi und wird von diesen nicht unterstützt, ebenso wenig
+von den Herstellern der Schaltungs-Dateiformate, die es importiert und
+exportiert (KiCad, EasyEDA, EAGLE, LTspice). LEGO®, SPIKE™ und Technic™ sind
+Marken der LEGO Gruppe, die Brickwright weder unterstützt noch autorisiert oder
+empfiehlt. Alle anderen Marken gehören ihren jeweiligen Inhabern.
 
 ## What to Test — 0.1.5 en-US
 

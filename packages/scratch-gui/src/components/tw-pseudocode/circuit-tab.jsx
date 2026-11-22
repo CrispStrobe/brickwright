@@ -126,7 +126,7 @@ const DEBUG_LIVE_REFRESH_MS = 250;
 // their selection too, so a controller/device face never covers a stale
 // debugger portal that still thinks the column belongs to it.
 const CIRCUIT_DOCKS = new Set(['top', 'right', 'off', 'solo']);
-const DEVICE_DOCKS = new Set(['controller', 'microbit', 'arcade', 'cpx', 'arduboy', 'makecode', 'spikearena']);
+const DEVICE_DOCKS = new Set(['controller', 'microbit', 'arcade', 'cpx', 'arduboy', 'makecode', 'spikearena', 'cad', 'robots']);
 
 class CircuitTab extends React.Component {
     constructor (props) {

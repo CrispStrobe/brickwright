@@ -11,7 +11,7 @@ take one without reading the session that built this.
 
 - Undo/redo for **every** operation, not only edits inside one editor. For
   example, deleting a sprite in the costume editor had no undo.
-- A Tinkercad-style history: go back 10 or 50 steps in any editor, from a dropdown
+- A step history: go back 10 or 50 steps in any editor, from a dropdown
   that names each step ("Blocks: Add", "Costumes: Remove", "Sounds: Change"…).
 - Autosave in every editor and of the whole project, with a menu setting for the
   autosave location.

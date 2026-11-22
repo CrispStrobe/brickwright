@@ -4,7 +4,7 @@ const BlockType = require('../../../extension-support/block-type');
 const Cast = require('../../../util/cast');
 const formatMessage = require('format-message');
 
-// CAD shapes: TinkerCAD-style modelling blocks for Brickwright CAD.
+// CAD shapes: nesting 3D modelling blocks for Brickwright CAD.
 //
 // A "build CAD model" C-block holds a model: shape blocks, the transform/group/hole
 // C-blocks below, and ordinary Scratch repeat/if/variables/operators. Running it

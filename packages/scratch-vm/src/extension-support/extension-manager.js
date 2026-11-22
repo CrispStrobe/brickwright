@@ -155,7 +155,7 @@ const lazyBuiltinExtensions = {
     // scripts/spike/bundled-upstream.mjs. Lazy: only a Robot Lab project needs them, and eager
     // they pushed the 8086 benchmark's initial JS over its budget (PR #1097).
     cadlab: () => import(/* webpackChunkName: "ext-cadlab" */ '../extensions/crispstrobe/cadlab/index.js'),
-    // CAD shapes: TinkerCAD-style modelling blocks compiled by Brickwright CAD (gui lib/bw-cad-blocks.js). Lazy, like cadlab.
+    // CAD shapes: nesting 3D modelling blocks compiled by Brickwright CAD (gui lib/bw-cad-blocks.js). Lazy, like cadlab.
     cadshapes: () => import(/* webpackChunkName: "ext-cadshapes" */ '../extensions/crispstrobe/cadshapes/index.js'),
     robotlab: () => import(/* webpackChunkName: "ext-robotlab" */ '../extensions/crispstrobe/robotlab/index.js'),
     planetemaths: () => import(/* webpackChunkName: "ext-planetemaths" */ '../extensions/crispstrobe/planetemaths/index.js'),

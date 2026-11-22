@@ -24,6 +24,9 @@ import arcadeIcon from './icon--arcade.svg';
 import cpxIcon from './icon--cpx.svg';
 import controllerIcon from './icon--controller.svg';
 import scratchStageIcon from './icon--scratch-stage.svg';
+import cadIcon from './icon--cad.svg';
+import robotsIcon from './icon--robots.svg';
+import {getCadEnabled, CAD_TOGGLE_EVENT} from '../../lib/bw-cad-preferences.js';
 
 import scratchLogo from '../menu-bar/scratch-logo.svg';
 import styles from './stage-header.css';
@@ -89,6 +92,16 @@ const messages = defineMessages({
         description: 'Button to show the controller panel with interactive widgets',
         id: 'gui.stageHeader.controllerPanel'
     },
+    cadView: {
+        defaultMessage: 'CAD model',
+        description: 'Button to show the CAD editor (the 3D model the CAD blocks build) in the right pane',
+        id: 'gui.stageHeader.cadView'
+    },
+    robotsView: {
+        defaultMessage: 'Robot Lab',
+        description: 'Button to show the Robot Lab (3D robot simulation) in the right pane',
+        id: 'gui.stageHeader.robotsView'
+    },
     scratchStage: {
         defaultMessage: 'Scratch Stage',
         description: 'Button to show the Scratch stage while coding',
@@ -111,6 +124,8 @@ const viewForDock = dock => {
     if (dock === 'arduboy') return 'arduboy';
     if (dock === 'makecode') return 'makecode';
     if (dock === 'controller') return 'controller';
+    if (dock === 'cad') return 'cad';
+    if (dock === 'robots') return 'robots';
     // 'top' and any other value default to scratch stage
     return 'scratch';
 };
@@ -142,6 +157,13 @@ const StageViewButtons = ({intl, vm}) => {
         .includes(appliedProjectDevice(vm.runtime)));
     const [deviceIsCpx, setDeviceIsCpx] = useState(() =>
         appliedProjectDevice(vm.runtime) === 'cpx');
+    // The CAD view needs a CAD build with the CAD Editor switched on.
+    const [cadOn, setCadOn] = useState(() => Boolean(process.env.BW_ENABLE_CAD) && getCadEnabled());
+    useEffect(() => {
+        const toggled = () => setCadOn(Boolean(process.env.BW_ENABLE_CAD) && getCadEnabled());
+        window.addEventListener(CAD_TOGGLE_EVENT, toggled);
+        return () => window.removeEventListener(CAD_TOGGLE_EVENT, toggled);
+    }, []);
     useEffect(() => {
         const sync = event => {
             const {key, value} = event.detail || {};
@@ -162,13 +184,7 @@ const StageViewButtons = ({intl, vm}) => {
         sync({detail: {key: 'bw-device-id', value: appliedProjectDevice(vm.runtime)}});
         return () => window.removeEventListener('bw-settings-change', sync);
     }, [vm]);
-    return (
-        <div
-            className={styles.stageSizeToggleGroup}
-            style={{position: 'relative', zIndex: 20}}
-        >
-            <ToggleButtons
-                buttons={[
+    const buttons = [
                     {
                         handleClick: () => { setCircuitView({fullWidth: true, dock: 'off'}); setView('circuit'); },
                         icon: circuitIcon,
@@ -226,6 +242,20 @@ const StageViewButtons = ({intl, vm}) => {
                         isSelected: view === 'controller',
                         title: intl.formatMessage(messages.controllerPanel)
                     },
+                    ...(cadOn ? [{
+                        handleClick: () => { setCircuitView({fullWidth: true, dock: 'cad'}); setView('cad'); },
+                        icon: cadIcon,
+                        iconClassName: styles.stageButtonIcon,
+                        isSelected: view === 'cad',
+                        title: intl.formatMessage(messages.cadView)
+                    }] : []),
+                    {
+                        handleClick: () => { setCircuitView({fullWidth: true, dock: 'robots'}); setView('robots'); },
+                        icon: robotsIcon,
+                        iconClassName: styles.stageButtonIcon,
+                        isSelected: view === 'robots',
+                        title: intl.formatMessage(messages.robotsView)
+                    },
                     {
                         handleClick: () => {
                             setCircuitView({fullWidth: false, dock: 'top'});
@@ -236,8 +266,52 @@ const StageViewButtons = ({intl, vm}) => {
                         isSelected: view === 'scratch',
                         title: intl.formatMessage(messages.scratchStage)
                     }
-                ]}
-            />
+];
+    // A narrow right pane cannot fit a button per view beside the green flag and the
+    // size controls: there the views are one dropdown, labelled with the current view.
+    const wrapper = React.useRef(null);
+    // Green flag + stop, the two stage sizes and full screen take about 230px.
+    const needed = 230 + buttons.length * 34;
+    const [compact, setCompact] = useState(false);
+    useEffect(() => {
+        const pane = wrapper.current && wrapper.current.closest('[data-right-pane]');
+        if (!pane || typeof ResizeObserver === 'undefined') return undefined;
+        let frame = 0;
+        // Measured after layout, outside the observer callback: switching between the
+        // buttons and the dropdown changes this row, never the pane's own width.
+        const measure = () => {
+            cancelAnimationFrame(frame);
+            frame = requestAnimationFrame(() => setCompact(pane.getBoundingClientRect().width < needed));
+        };
+        const observer = new ResizeObserver(measure);
+        observer.observe(pane);
+        measure();
+        return () => { cancelAnimationFrame(frame); observer.disconnect(); };
+    }, [needed]);
+    const current = buttons.find(button => button.isSelected) || buttons[buttons.length - 1];
+    return (
+        <div
+            className={styles.stageSizeToggleGroup}
+            ref={wrapper}
+            style={{position: 'relative', zIndex: 20}}
+        >
+            {compact ? (
+                <label style={{display: 'flex', alignItems: 'center', gap: 6, height: '2rem', padding: '0 6px',
+                    border: '1px solid hsla(0, 0%, 0%, 0.15)', borderRadius: '0.25rem', background: 'white'}}>
+                    <img alt="" draggable={false} src={current.icon} style={{width: 20, height: 20}} />
+                    <select
+                        aria-label={intl.locale && intl.locale.startsWith('de') ? 'Ansicht im rechten Bereich' : 'Right pane view'}
+                        data-testid="bw-right-pane-view"
+                        style={{border: 'none', background: 'transparent', font: 'inherit', fontSize: 13, maxWidth: 150}}
+                        value={buttons.indexOf(current)}
+                        onChange={event => buttons[Number(event.target.value)].handleClick()}
+                    >
+                        {buttons.map((button, index) => (
+                            <option key={button.title} value={index}>{button.title}</option>
+                        ))}
+                    </select>
+                </label>
+            ) : <ToggleButtons buttons={buttons} />}
         </div>
     );
 };

@@ -13,7 +13,9 @@ const COPY = {
         close: 'Not now',
         closeLabel: 'Close getting started',
         loading: 'Opening starter…',
-        cancelled: 'Your project was not changed.'
+        cancelled: 'Your project was not changed.',
+        trademarks: 'LEGO®, SPIKE™ and Technic™ are trademarks of the LEGO Group, which does not ' +
+            'sponsor, authorize or endorse Brickwright.'
     },
     de: {
         eyebrow: 'Willkommen bei Brickwright',
@@ -24,9 +26,15 @@ const COPY = {
         close: 'Nicht jetzt',
         closeLabel: 'Erste Schritte schließen',
         loading: 'Startprojekt wird geöffnet…',
-        cancelled: 'Dein Projekt wurde nicht verändert.'
+        cancelled: 'Dein Projekt wurde nicht verändert.',
+        trademarks: 'LEGO®, SPIKE™ und Technic™ sind Marken der LEGO Gruppe, die Brickwright weder ' +
+            'unterstützt noch autorisiert oder empfiehlt.'
     }
 };
+
+/** Cards whose surface this build or browser lacks are left out (the CAD card needs a CAD build). */
+export const availableJourneys = ({cadAvailable = false} = {}) =>
+    journeys.filter(journey => journey.requires !== 'cad' || cadAvailable);
 
 const localeKey = locale => (/^de/i.test(locale || '') ? 'de' : 'en');
 
@@ -67,7 +75,7 @@ JourneyCard.propTypes = {
     onChoose: PropTypes.func.isRequired
 };
 
-const StarterJourneys = ({busy, error, locale, onChoose, onClose}) => {
+const StarterJourneys = ({busy, cadAvailable, error, locale, onChoose, onClose}) => {
     const dialogRef = React.useRef(null);
     const lang = localeKey(locale);
     const text = COPY[lang];
@@ -133,7 +141,7 @@ const StarterJourneys = ({busy, error, locale, onChoose, onClose}) => {
                 <p className={styles.promise}>{text.intro}</p>
                 <p id="bw-starter-detail" className={styles.detail}>{text.detail}</p>
                 <div className={styles.cards}>
-                    {journeys.map(journey => (
+                    {availableJourneys({cadAvailable}).map(journey => (
                         <JourneyCard
                             busy={busy}
                             journey={journey}
@@ -159,6 +167,7 @@ const StarterJourneys = ({busy, error, locale, onChoose, onClose}) => {
                         {busy ? text.loading : (error === 'cancelled' ? text.cancelled : error)}
                     </span>
                 </div>
+                <p className={styles.trademarks}>{text.trademarks}</p>
             </section>
         </div>
     );
@@ -166,6 +175,7 @@ const StarterJourneys = ({busy, error, locale, onChoose, onClose}) => {
 
 StarterJourneys.propTypes = {
     busy: PropTypes.bool,
+    cadAvailable: PropTypes.bool,
     error: PropTypes.string,
     locale: PropTypes.string,
     onChoose: PropTypes.func.isRequired,

@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import omit from 'lodash.omit';
 import PropTypes from 'prop-types';
 import React from 'react';
+import ReactDOM from 'react-dom';
 import {clearControllerPanel, connectControllerBoard, serializeControllerPanel} from '../../lib/controller-inputs.js';
 import {defineMessages, FormattedMessage, injectIntl, intlShape} from 'react-intl';
 import {connect} from 'react-redux';
@@ -11,8 +12,9 @@ import {Tab, Tabs, TabList, TabPanel} from 'react-tabs';
 import CircuitTab from '../tw-pseudocode/circuit-tab.jsx';
 import {installCircuitCadBridge} from '../../lib/bw-cad-circuit/bridge.js';
 import {installCadProgramAPI, CAD_OPEN_EVENT} from '../../lib/bw-cad-program.js';
+import {setCircuitView} from '../../lib/bw-debug/debug-view.js';
 import {installCadShapesAPI} from '../../lib/bw-cad-blocks.js';
-import {getCadEnabled, CAD_TOGGLE_EVENT} from '../../lib/bw-cad-preferences.js';
+import {getCadEnabled, setCadEnabled as setCadPreference, CAD_TOGGLE_EVENT} from '../../lib/bw-cad-preferences.js';
 import {getFpgaEnabled, FPGA_TOGGLE_EVENT} from '../../lib/bw-fpga-preferences.js';
 import {pinsToValue} from '../../lib/bw-fpga/pin-value.js';
 // FpgaTab ships only in a build that carries it (BW_ENABLE_FPGA), and even then
@@ -167,6 +169,22 @@ const robotLabTabIndex = showFpgaTab => (showFpgaTab ? 6 : 5);
 const RobotLabTab = React.lazy(() =>
     import(/* webpackChunkName: "bw-robotlab-tab" */ '../tw-pseudocode/robot-lab-tab.jsx'));
 const ROBOT_LAB_OPEN_EVENT = 'bw-open-robot-lab';
+// A persistent element that holds one surface (CAD, Robot Lab) while it moves
+// between its tab and the right pane.
+const createSurfaceHost = name => {
+    if (typeof document === 'undefined') return null;
+    const host = document.createElement('div');
+    host.dataset.bwSurface = name;
+    host.style.cssText = 'display:flex;flex-direction:column;flex:1 1 auto;width:100%;height:100%;min-width:0;min-height:0';
+    return host;
+};
+const placeSurface = (host, slot) => {
+    if (!host || !slot || host.parentNode === slot) return;
+    slot.appendChild(host);
+    // 3D views size themselves from their container; tell them it changed.
+    window.dispatchEvent(new Event('resize'));
+};
+const SLOT_STYLE = {display: 'flex', flexDirection: 'column', flex: '1 1 auto', width: '100%', height: '100%', minWidth: 0, minHeight: 0};
 
 const GUIComponent = props => {
     React.useEffect(() => { document.documentElement.dataset.bwColorMode = props.theme === 'dark' ? 'dark' : 'light'; }, [props.theme]);
@@ -291,11 +309,6 @@ const GUIComponent = props => {
         const removeCoupling = installCircuitCadBridge(props.vm);
         return () => {removeCoupling();removeShapes();removeCad();};
     }, [props.vm]);
-    React.useEffect(() => {
-        const open = () => { if (showCad) { setCadWanted(true); props.onActivateTab(cadTabIndex); } };
-        window.addEventListener(CAD_OPEN_EVENT, open);
-        return () => window.removeEventListener(CAD_OPEN_EVENT, open);
-    }, [showCad, cadTabIndex, props.onActivateTab]);
     if (showCad && !cadWanted && !fpgaLayoutChanging && props.activeTabIndex === cadTabIndex) setCadWanted(true);
     React.useEffect(() => {
         if (!showCad && props.activeTabIndex === cadTabIndex) props.onActivateTab(robotLabIndex);
@@ -312,9 +325,29 @@ const GUIComponent = props => {
     const chooseStarter = React.useCallback(journey => {
         setStarterBusy(true);
         setStarterError('');
+        // Cards that open a surface rather than an example answer through the same
+        // result event as the circuit tab does for examples.
+        const report = detail => window.dispatchEvent(new CustomEvent('bw-starter-result',
+            {detail: {journeyId: journey.id, ...detail}}));
+        if (journey.action === 'robot-lab') {
+            setRobotLabWanted(true);
+            props.onActivateTab(robotLabIndex);
+            report({ok: true});
+            return;
+        }
+        if (process.env.BW_ENABLE_CAD && journey.action === 'cad-robot') {
+            setCadPreference(true);
+            setCadWanted(true);
+            props.onActivateTab(cadTabIndex);
+            import(/* webpackChunkName: "cad-robot-projects" */ '../../lib/bw-cad-robot-projects.js')
+                .then(({openCadRobotProject}) => openCadRobotProject(props.vm, journey.projectId, props.intl.locale))
+                .then(opened => report(opened ? {ok: true} : {cancelled: true}),
+                    error => report({error: (error && error.message) || String(error)}));
+            return;
+        }
         props.onActivateTab(journey.editorTab);
         window.dispatchEvent(new CustomEvent('bw-start-journey', {detail: journey}));
-    }, [props.onActivateTab]);
+    }, [props.onActivateTab, props.vm, props.intl, robotLabIndex, cadTabIndex]);
     React.useEffect(() => {
         const openLessonProject = event => {
             const lesson = event.detail || {};
@@ -376,7 +409,9 @@ const GUIComponent = props => {
             // The MakeCode simulator holds no program of its own across a
             // reload: restoring its dock would show an empty pane.
             if (dock === 'makecode' && !window.__bwMakeCodePending) return 'top';
-            if (!['top', 'right', 'controller', 'microbit', 'arcade', 'cpx', 'arduboy', 'makecode', 'spikearena'].includes(dock)) return 'top';
+            if (!['top', 'right', 'controller', 'microbit', 'arcade', 'cpx', 'arduboy', 'makecode', 'spikearena', 'cad', 'robots'].includes(dock)) return 'top';
+            // The CAD view restores only where the CAD Editor is built and switched on.
+            if (dock === 'cad' && !(process.env.BW_ENABLE_CAD && getCadEnabled())) return 'top';
             // The arena restores only for a SPIKE project.
             if (dock === 'spikearena' && props.vm?.runtime?.stc?.device !== 'spike') return 'top';
             // The Circuit Playground board restores only for a DEVICE CPX program.
@@ -411,7 +446,7 @@ const GUIComponent = props => {
                 // collapsed pane is indistinguishable from nothing loading
                 // (measured: the calculator's shipped layout, present in
                 // the DOM, invisible on screen).
-                if (detail.value === 'right' || detail.value === 'controller' || detail.value === 'microbit' || detail.value === 'arcade' || detail.value === 'makecode' || detail.value === 'spikearena') {
+                if (detail.value === 'right' || detail.value === 'controller' || detail.value === 'microbit' || detail.value === 'arcade' || detail.value === 'makecode' || detail.value === 'spikearena' || detail.value === 'cad' || detail.value === 'robots') {
                     setStagePaneVisible(true);
                     try { localStorage.setItem('bw-right-pane-hidden', '0'); } catch { /* private mode */ }
                 }
@@ -425,6 +460,47 @@ const GUIComponent = props => {
         window.addEventListener('bw-settings-change', sync);
         return () => window.removeEventListener('bw-settings-change', sync);
     }, []);
+
+    // ── CAD and Robot Lab in the right pane ───────────────────────────
+    // Each is ONE live instance (a WebGL view, a physics world, the shared hub):
+    // React renders it into a persistent host element, which is moved to its tab
+    // while that tab is open, else to the right pane when docked there. Moving the
+    // element keeps the editor, the camera and a running program; a second mount
+    // would fight the first for the session.
+    const cadHost = React.useMemo(() => createSurfaceHost('cad'), []);
+    const robotsHost = React.useMemo(() => createSurfaceHost('robots'), []);
+    const [cadTabSlot, setCadTabSlot] = React.useState(null);
+    const [cadPaneSlot, setCadPaneSlot] = React.useState(null);
+    const [robotsTabSlot, setRobotsTabSlot] = React.useState(null);
+    const [robotsPaneSlot, setRobotsPaneSlot] = React.useState(null);
+    const paneOpen = stagePaneVisible && !isCollapsed((props.paneLayout && props.paneLayout.right && props.paneLayout.right.size) || 'm');
+    const cadTabActive = showCad && props.activeTabIndex === cadTabIndex;
+    const cadInPane = Boolean(showCad) && dockMode === 'cad' && !cadTabActive;
+    const robotsTabActive = props.activeTabIndex === robotLabIndex;
+    const robotsInPane = dockMode === 'robots' && !robotsTabActive;
+    const cadVisible = cadTabActive || (cadInPane && paneOpen);
+    const robotsVisible = robotsTabActive || (robotsInPane && paneOpen);
+    if (cadInPane && !cadWanted) setCadWanted(true);
+    if (robotsInPane && !robotLabWanted) setRobotLabWanted(true);
+    React.useEffect(() => {
+        placeSurface(cadHost, cadInPane ? cadPaneSlot : cadTabSlot);
+    }, [cadHost, cadInPane, cadPaneSlot, cadTabSlot]);
+    React.useEffect(() => {
+        placeSurface(robotsHost, robotsInPane ? robotsPaneSlot : robotsTabSlot);
+    }, [robotsHost, robotsInPane, robotsPaneSlot, robotsTabSlot]);
+    // Blocks that need the CAD editor (CAD shapes, CAD program blocks) ask for it
+    // here. It opens beside the blocks, in the right pane, rather than taking the
+    // learner away from them; where it is already showing, nothing moves.
+    React.useEffect(() => {
+        const open = () => {
+            if (!showCad) return;
+            setCadWanted(true);
+            if (cadTabActive || (cadInPane && paneOpen)) return;
+            setCircuitView({fullWidth: true, dock: 'cad'});
+        };
+        window.addEventListener(CAD_OPEN_EVENT, open);
+        return () => window.removeEventListener(CAD_OPEN_EVENT, open);
+    }, [showCad, cadTabActive, cadInPane, paneOpen]);
 
     // ── Controller panel ──────────────────────────────────────────────
     const controllerPanelRef = React.useRef(null);
@@ -889,7 +965,8 @@ const GUIComponent = props => {
         // controller/micro:bit (which paint their own 100vw overlay), hide the
         // editor and let the right pane fill the window.
         const stageFullScreen = isFullScreen && dockMode !== 'controller' && dockMode !== 'microbit' &&
-            dockMode !== 'arcade' && dockMode !== 'cpx' && dockMode !== 'arduboy' && dockMode !== 'makecode';
+            dockMode !== 'arcade' && dockMode !== 'cpx' && dockMode !== 'arduboy' && dockMode !== 'makecode' &&
+            dockMode !== 'cad' && dockMode !== 'robots';
 
         return isPlayerOnly ? (
             <StageWrapper
@@ -937,6 +1014,7 @@ const GUIComponent = props => {
                 {starterOpen ? (
                     <StarterJourneys
                         busy={starterBusy}
+                        cadAvailable={Boolean(process.env.BW_ENABLE_CAD)}
                         error={starterError}
                         locale={intl.locale}
                         onChoose={chooseStarter}
@@ -1173,25 +1251,28 @@ const GUIComponent = props => {
                                     </TabPanel>
                                 ) : null}
                                 <TabPanel className={tabClassNames.tabPanel}>
-                                    {robotLabWanted ? (<EditorErrorBoundary name="Robots">
-                                        <React.Suspense fallback={<div data-testid="bw-robot-lab-tab" data-state="loading" />}>
-                                            <RobotLabTab
-                                                isVisible={activeTabIndex === robotLabIndex}
-                                                locale={intl.locale}
-                                                tabIndex={robotLabIndex}
-                                                vm={vm}
-                                            />
-                                        </React.Suspense></EditorErrorBoundary>
-                                    ) : <div data-testid="bw-robot-lab-tab" data-state="idle" />}
+                                    {/* The Robot Lab lives in robotsHost, placed here or in the right pane. */}
+                                    <div ref={setRobotsTabSlot} style={SLOT_STYLE} />
+                                    {robotLabWanted ? null : <div data-testid="bw-robot-lab-tab" data-state="idle" />}
                                 </TabPanel>
                                 {showCad ? <TabPanel className={tabClassNames.tabPanel}>
-                                    {cadWanted ? <EditorErrorBoundary name="CAD">
-                                        <React.Suspense fallback={<div role="status">{intl.locale.startsWith('de') ? 'CAD wird geladen…' : 'Loading CAD…'}</div>}>
-                                            <CadTab vm={vm} isVisible={activeTabIndex === cadTabIndex} locale={intl.locale} theme={theme} onEditProgram={()=>props.onActivateTab(CODE_TAB_INDEX)} onOpenCircuit={()=>props.onActivateTab(4)} />
-                                        </React.Suspense>
-                                    </EditorErrorBoundary> : null}
+                                    <div ref={setCadTabSlot} style={SLOT_STYLE} />
                                 </TabPanel> : null}
                             </Tabs>
+                            {robotLabWanted && robotsHost ? ReactDOM.createPortal(<EditorErrorBoundary name="Robots">
+                                <React.Suspense fallback={<div data-testid="bw-robot-lab-tab" data-state="loading" />}>
+                                    <RobotLabTab
+                                        isVisible={robotsVisible}
+                                        locale={intl.locale}
+                                        tabIndex={robotLabIndex}
+                                        vm={vm}
+                                    />
+                                </React.Suspense></EditorErrorBoundary>, robotsHost) : null}
+                            {showCad && cadWanted && cadHost ? ReactDOM.createPortal(<EditorErrorBoundary name="CAD">
+                                <React.Suspense fallback={<div role="status">{intl.locale.startsWith('de') ? 'CAD wird geladen…' : 'Loading CAD…'}</div>}>
+                                    <CadTab vm={vm} isVisible={cadVisible} docked={cadInPane} locale={intl.locale} theme={theme} onEditProgram={()=>props.onActivateTab(CODE_TAB_INDEX)} onOpenCircuit={()=>props.onActivateTab(4)} />
+                                </React.Suspense>
+                            </EditorErrorBoundary>, cadHost) : null}
                             <button
                                 type="button"
                                 data-right-pane-toggle="true"
@@ -1248,7 +1329,7 @@ const GUIComponent = props => {
                                 toggle buttons) stays reachable in every mode.
                                 In controller mode the stage canvas is hidden
                                 so the panel owns the full column. */}
-                            <div style={dockMode === 'controller' || dockMode === 'arcade' || dockMode === 'cpx' || dockMode === 'arduboy' || dockMode === 'makecode' || dockMode === 'spikearena' ? {maxHeight: 44, overflow: 'hidden', flexShrink: 0, borderBottom: '3px solid #475569', background: '#cbd5e1', boxShadow: '0 3px 6px rgba(0,0,0,0.22)', position: 'relative', zIndex: 5, boxSizing: 'border-box'} : undefined}>
+                            <div style={dockMode === 'controller' || dockMode === 'arcade' || dockMode === 'cpx' || dockMode === 'arduboy' || dockMode === 'makecode' || dockMode === 'spikearena' || dockMode === 'cad' || dockMode === 'robots' ? {maxHeight: 44, overflow: 'hidden', flexShrink: 0, borderBottom: '3px solid #475569', background: '#cbd5e1', boxShadow: '0 3px 6px rgba(0,0,0,0.22)', position: 'relative', zIndex: 5, boxSizing: 'border-box'} : undefined}>
                                 <EditorErrorBoundary name="Stage"><StageWrapper
                                     isFullScreen={isFullScreen}
                                     isRendererSupported={isRendererSupported}
@@ -1262,7 +1343,19 @@ const GUIComponent = props => {
                                     <GameTouchControls gameKey={gameControlKey} vm={vm} />
                                 </React.Suspense>
                             ) : null}
-                            {dockMode === 'microbit' ? (
+                            {dockMode === 'cad' || dockMode === 'robots' ? (
+                                <div data-bw-stage-dock={dockMode} key={dockMode}
+                                    ref={dockMode === 'cad' ? setCadPaneSlot : setRobotsPaneSlot}
+                                    style={dockFullScreenStyle || {position: 'relative', flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', background: '#fff'}}>
+                                    {(dockMode === 'cad' ? (cadTabActive || !showCad) : robotsTabActive) ? (
+                                        <p role="status" style={{margin: 'auto', padding: 24, maxWidth: 320, textAlign: 'center', color: '#64748b', fontSize: 13}}>
+                                            {dockMode === 'cad' && !showCad ?
+                                                (intl.locale.startsWith('de') ? 'Schalte den CAD-Editor unter Einstellungen → Arbeitsbereich ein.' : 'Turn on the CAD Editor in Settings → Workspace.') :
+                                                (intl.locale.startsWith('de') ? 'Wird gerade in seinem Tab angezeigt. Wechsle zu den Blöcken, um es hier zu sehen.' : 'Showing in its own tab right now. Switch back to the blocks to see it here.')}
+                                        </p>
+                                    ) : null}
+                                </div>
+                            ) : dockMode === 'microbit' ? (
                                 <React.Suspense fallback={
                                     <div style={{padding: 24, color: '#64748b'}}>{/^de/i.test(navigator.language) ? 'micro:bit-Simulator wird geladen…' : 'Loading micro:bit simulator…'}</div>
                                 }>

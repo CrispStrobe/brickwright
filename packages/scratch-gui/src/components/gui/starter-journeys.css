@@ -192,6 +192,13 @@
     .card { min-height: 164px; }
 }
 
+.trademarks {
+    margin: 16px 0 0;
+    color: #6b7a90;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .card { transition: none; }
 }

@@ -29,12 +29,29 @@ const witnessesOf = text => {
     return rows.map(m => ({path: m[1], bytes: Number(m[2]), sha256: m[3]}));
 };
 
-test('V10 Circuit UI pin equals the canonical vendor pin in producer and reader', () => {
+// Since "Separate live GUI pins from sealed finite inventory identities" the
+// producer and reader are sealed finite-v10 consumers (test/i80386-hdd-gui-actual
+// pins their bytes): a pin move must not relabel them. So they agree with each
+// other and carry the canonical pin or the earlier pin they were sealed at
+// (HISTORICAL_X86_F10_CUI in test/pin-move-chain.test.mjs), and their witnesses
+// are re-measured against the install only while that is today's pin.
+const SEALED_F10_CUI = '6b4d70290d7ebd088ad32b525f99eb02af475533';
+const sealedCui = () => {
+    const [producer, reader] = SOURCES.map(file => pinsOf(read(file))['bw-circuit-ui']);
+    assert.equal(producer, reader, 'producer and reader carry one V10 Circuit UI pin');
+    return producer;
+};
+
+test('V10 Circuit UI pin is the canonical pin, or the pin the sealed V10 consumers were measured at', () => {
     const canonical = JSON.parse(read('vendor-pins.json'))['bw-circuit-ui'];
-    for (const file of SOURCES) assert.equal(pinsOf(read(file))['bw-circuit-ui'], canonical, file);
+    assert.ok([canonical, SEALED_F10_CUI].includes(sealedCui()), 'an unreviewed V10 Circuit UI pin');
 });
 
-test('V10 Circuit UI witnesses equal the installed bytes of the current pin', () => {
+test('V10 Circuit UI witnesses equal the installed bytes of the current pin', t => {
+    if (sealedCui() !== JSON.parse(read('vendor-pins.json'))['bw-circuit-ui']) {
+        t.skip('the V10 consumers are sealed at an earlier Circuit UI pin; their witnesses describe that install');
+        return;
+    }
     const installed = JSON.parse(read('node_modules/bw-circuit-ui/package.json'));
     assert.ok(installed.name, 'bw-circuit-ui is installed');
     const tables = SOURCES.map(file => witnessesOf(read(file)));

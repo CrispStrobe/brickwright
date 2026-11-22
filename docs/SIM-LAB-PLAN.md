@@ -3,7 +3,7 @@
 Status: **S1 done** (§0). Created 2026-09-02.
 Owner of record: unclaimed — claim individual tasks in `LANES.md` per its protocol.
 
-A Tinkercad-Sim-Lab-style mode for LEGO Technic: build a model from parts in the
+A simulation lab for LEGO® Technic: build a model from parts in the
 browser, attach the hubs/motors/sensors we already have extensions for (SPIKE
 Prime, Boost, Powered Up, WeDo 2.0, EV3), press the green flag, and watch the
 program drive the simulated machine — motors spin gear trains, driving bases

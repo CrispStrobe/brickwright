@@ -45,7 +45,7 @@ const pickFile = (accept, signal) => new Promise((resolve, reject) => {
     input.click();
 });
 
-const CadTab = ({vm, isVisible, locale, theme, onEditProgram, onOpenCircuit}) => {
+const CadTab = ({vm, isVisible, docked, locale, theme, onEditProgram, onOpenCircuit}) => {
     const colorMode = theme === 'dark' ? 'dark' : 'light';
     const mode = React.useRef(colorMode);
     mode.current = colorMode;
@@ -53,6 +53,10 @@ const CadTab = ({vm, isVisible, locale, theme, onEditProgram, onOpenCircuit}) =>
     const editor = React.useRef(null);
     const visible = React.useRef(isVisible);
     visible.current = isVisible;
+    // Docked beside the blocks, the editor shows the model but does not take the
+    // keyboard or the Undo menu from the workspace the learner is typing in.
+    const owns = React.useRef(isVisible && !docked);
+    owns.current = isVisible && !docked;
     const [error, setError] = React.useState('');
     const [storageWarning, setStorageWarning] = React.useState(false);
     const [retry, setRetry] = React.useState(0);
@@ -60,9 +64,12 @@ const CadTab = ({vm, isVisible, locale, theme, onEditProgram, onOpenCircuit}) =>
     React.useEffect(() => {
         let stopped = false, removeUndo, removeMenus, sdk, mountedGeneration;
         const fileSelection = new AbortController();
-        const fail = error => { if (!stopped) setError(String(error.message || error)); };
+        // Messages name their feature by its internal id ("feature <uuid>: …"): show the rest.
+        const fail = error => { if (!stopped) setError(String(error.message || error).replace(/^feature [0-9a-f-]{36}: /i, '')); };
         const persist = doc => {
             if (stopped || mountedGeneration !== getCadProjectGeneration()) return;
+            // An edit replaces whatever went wrong before; a new failure reports itself again.
+            setError('');
             const text = sdk.serializeDocument(doc);
             retainedText = text;
             setLiveCadText(text);
@@ -122,7 +129,7 @@ const CadTab = ({vm, isVisible, locale, theme, onEditProgram, onOpenCircuit}) =>
             editor.current = mounted;
             setToolbarHost(controls);window.dispatchEvent(new Event('bw-project-ribbon-changed'));
             removeMenus=registerEditorMenuActions('cad',()=>{
-                if(!visible.current)return null;
+                if(!owns.current)return null;
                 const de=locale.startsWith('de'),label=(en,ger)=>de?ger:en;
                 const action=(title,command,enabled=true)=>({label:title,location:'file',enabled,run:()=>{mounted.executeCommand(command).catch(fail);}});
                 return {
@@ -152,7 +159,7 @@ const CadTab = ({vm, isVisible, locale, theme, onEditProgram, onOpenCircuit}) =>
                 label: 'CAD', depth:()=>({undo:retainedSession.history?.past.length||0,redo:retainedSession.history?.future.length||0}),steps:()=>retainedSession.history, canUndo: () => retainedSession.state.canUndo, canRedo: () => retainedSession.state.canRedo,
                 undo: () => retainedSession.undo(), redo: () => retainedSession.redo()
             });
-            if (visible.current) { activateUndoSurface('cad'); mounted.focus(); }
+            if (owns.current) { activateUndoSurface('cad'); mounted.focus(); }
             // Same diagnostic boundary as __bwSimLab, for focused browser checks.
             window.__bwCad = {editor: mounted, sdk};
             window.dispatchEvent(new CustomEvent(CAD_READY_EVENT));
@@ -170,17 +177,21 @@ const CadTab = ({vm, isVisible, locale, theme, onEditProgram, onOpenCircuit}) =>
     }, [locale, retry]);
     React.useEffect(() => { if (editor.current) editor.current.setColorMode(colorMode); }, [colorMode]);
     React.useEffect(() => {
-        if (isVisible && editor.current) { activateUndoSurface('cad'); editor.current.focus(); }
+        if (isVisible && !docked && editor.current) { activateUndoSurface('cad'); editor.current.focus(); }
         notifyEditorMenuActions();window.dispatchEvent(new Event('bw-project-ribbon-changed'));
-    }, [isVisible]);
+    }, [isVisible, docked]);
     return <div data-testid="bw-cad-tab" style={{position:'relative',width: '100%', height: '100%', flex: 1, minWidth: 0, minHeight: 350, display: 'flex', flexDirection: 'column'}}>
         <CadCircuitPanel vm={vm} locale={locale} colorMode={colorMode} isVisible={isVisible} toolbarHost={toolbarHost} onEditProgram={onEditProgram} onOpenCircuit={onOpenCircuit} />
         {storageWarning ? <div role="status" style={{position:'absolute',bottom:30,left:10,zIndex:20,maxWidth:320,padding:8,borderRadius:6,background:colorMode==='dark'?'#152432':'#fff',color:colorMode==='dark'?'#edf3fa':'#1c3042',fontSize:12}}>{locale.startsWith('de')
             ? 'Nur für diese Sitzung gespeichert. Speichere das Projekt als Datei.'
             : 'Saved for this session. Save the project to a file to keep it.'}</div> : null}
-        {error ? <div role="alert">{error} <button onClick={() => setRetry(value => value + 1)}>
-            {locale.startsWith('de') ? 'Erneut versuchen' : 'Retry'}
-        </button></div> : null}
+        {error ? <div role="alert" style={{position:'absolute',top:56,left:'50%',transform:'translateX(-50%)',zIndex:30,display:'flex',alignItems:'center',gap:10,maxWidth:'90%',padding:'8px 12px',borderRadius:8,border:'1px solid #f3b4b4',background:colorMode==='dark'?'#3a1f22':'#fff5f5',color:colorMode==='dark'?'#ffd7d7':'#9b1c1c',fontSize:13,boxShadow:'0 4px 14px rgba(0,0,0,.15)'}}>
+            {error}
+            <button type="button" style={{border:'1px solid currentColor',background:'transparent',color:'inherit',borderRadius:6,padding:'2px 8px',cursor:'pointer'}} onClick={() => setRetry(value => value + 1)}>
+                {locale.startsWith('de') ? 'Erneut versuchen' : 'Retry'}
+            </button>
+            <button type="button" aria-label={locale.startsWith('de') ? 'Schließen' : 'Dismiss'} style={{border:'none',background:'transparent',color:'inherit',fontSize:16,cursor:'pointer'}} onClick={() => setError('')}>{'×'}</button>
+        </div> : null}
         <div ref={host} style={{width: '100%', flex: 1, minWidth: 0, minHeight: 350}} />
     </div>;
 };
@@ -188,6 +199,7 @@ CadTab.propTypes = {
     vm: PropTypes.object.isRequired,
     theme: PropTypes.string,
     isVisible: PropTypes.bool.isRequired,
+    docked: PropTypes.bool,
     locale: PropTypes.string.isRequired,
     onEditProgram:PropTypes.func,
     onOpenCircuit:PropTypes.func

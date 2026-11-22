@@ -1,4 +1,4 @@
-// The shared history behind the menu bar's Undo / Redo / History, Tinkercad-style.
+// The shared history behind the menu bar's Undo / Redo / History.
 // Loaded after the first paint (lib/bw-project-safety.js) and installed into
 // the small first-load core, lib/global-undo.js.
 //

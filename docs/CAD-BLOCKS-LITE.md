@@ -1,8 +1,7 @@
 # CAD shapes: modelling with blocks and pseudocode
 
 Enable **Settings → Workspace → CAD Editor**, then add the **CAD shapes**
-extension. The blocks follow TinkerCAD's Codeblocks palette, with three
-differences: the model stays parametric, transforms wrap what they act on, and the
+extension. The model stays parametric, transforms wrap what they act on, and the
 same program is readable as pseudocode.
 
 ```text
@@ -39,10 +38,10 @@ lazily when needed.
   millimetres and centred on their own origin.
 - **C-blocks**: move, rotate, scale, mirror, color, group, hole, intersect, hull,
   and count with. Each wraps the shapes it acts on; there is no hidden selection.
-  `hole` works like TinkerCAD's hole shapes: it cuts every solid of its group, or
+  `hole` cuts every solid of its group, or
   of the model, also through moves, loops and ifs. `color` paints what it wraps
   (picked colour; the innermost colour wins); a group is one solid, so it takes
-  one colour, as TinkerCAD's Group does.
+  one colour.
 - **Scratch blocks inside a model**: `repeat`, `if`/`if else`, `set`/`change`
   variable, the arithmetic, comparison and logic operators, `round`, the maths
   functions, and `pick random`. Random values are fixed per block, so a model is

@@ -113,8 +113,9 @@ const L10N = {
         thanksTexts: 'Licence texts (offline):',
         notices: 'Full third-party notices',
         affil: 'Affiliation',
-        affilText: 'Not affiliated with or endorsed by Scratch / MIT, LEGO, STC, Arduino, or ' +
-            'Raspberry Pi. Trademarks belong to their owners.',
+        affilText: 'Not affiliated with or endorsed by Scratch / MIT, the LEGO Group, STC, Arduino, or ' +
+            'Raspberry Pi. LEGO®, SPIKE™, Technic™ and MINDSTORMS® are trademarks of the LEGO Group, ' +
+            'which does not sponsor, authorize or endorse Brickwright. Other trademarks belong to their owners.',
         toolchain: 'Compile service',
         toolchainLoading: 'asking the service...',
         toolchainDown: 'service not reachable right now — compiling will say why'
@@ -170,8 +171,9 @@ const L10N = {
             'den letzten BSD-Scratch-Stack sowie eigene Editoren und Engines; es ist kein TurboWarp-Fork.',
         notices: 'Vollstandige Third-Party-Hinweise',
         affil: 'Zugehorigkeit',
-        affilText: 'Nicht verbunden mit oder unterstutzt von Scratch / MIT, LEGO, STC, Arduino oder ' +
-            'Raspberry Pi. Marken gehoren ihren Eigentumern.',
+        affilText: 'Nicht verbunden mit oder unterstutzt von Scratch / MIT, der LEGO Gruppe, STC, Arduino oder ' +
+            'Raspberry Pi. LEGO®, SPIKE™, Technic™ und MINDSTORMS® sind Marken der LEGO Gruppe, die ' +
+            'Brickwright weder unterstutzt noch autorisiert oder empfiehlt. Andere Marken gehoren ihren Eigentumern.',
         toolchain: 'Compile-Dienst',
         toolchainLoading: 'frage den Dienst...',
         toolchainDown: 'Dienst gerade nicht erreichbar — beim Kompilieren steht warum'

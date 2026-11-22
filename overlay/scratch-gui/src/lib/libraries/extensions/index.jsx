@@ -100,15 +100,15 @@ export default [
         name: browserLocale().toLowerCase().startsWith('de') ? 'CAD-Modelle' : 'CAD models', extensionId: 'cadlab', iconURL: 'static/extension-posters/cad-models.svg',
         insetIconURL: 'static/extension-posters/cad-models.svg',
         description: browserLocale().toLowerCase().startsWith('de')
-            ? 'CAD-Motoren antreiben, um Grad drehen und Drehgeber lesen. Aktiviere CAD Editor unter Einstellungen → Arbeitsbereich.'
-            : 'Drive CAD hinge motors, turn by degrees and read encoders. Enable CAD Editor in Settings → Workspace.',
+            ? 'CAD-Motoren antreiben, um Grad drehen und Drehgeber lesen. Das CAD-Modell erscheint neben den Blöcken.'
+            : 'Drive CAD hinge motors, turn by degrees and read encoders. The CAD model shows beside your blocks.',
         featured: true
     }, {
         name: browserLocale().toLowerCase().startsWith('de') ? 'CAD-Formen' : 'CAD shapes', extensionId: 'cadshapes', iconURL: 'static/extension-posters/cad-models.svg',
         insetIconURL: 'static/extension-posters/cad-models.svg',
         description: browserLocale().toLowerCase().startsWith('de')
-            ? 'Baue 3D-Modelle mit Blöcken wie in TinkerCAD – parametrisch, mit Export nach OpenSCAD und JSCAD.'
-            : 'Build 3D models from blocks, TinkerCAD-style – parametric, with OpenSCAD and JSCAD export.',
+            ? 'Baue 3D-Modelle mit Blöcken. Das Modell erscheint neben den Blöcken und aktualisiert sich bei jeder Änderung; Export nach OpenSCAD und JSCAD.'
+            : 'Build 3D models from blocks. The model shows beside your blocks and updates as you edit; exports to OpenSCAD and JSCAD.',
         featured: true
     }] : []),
     {
