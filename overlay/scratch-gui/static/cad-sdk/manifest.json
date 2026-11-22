@@ -2,7 +2,7 @@
   "format": "brickwright-cad-sdk",
   "version": 1,
   "repository": "https://github.com/CrispStrobe/brickwright-cad",
-  "commit": "009b678d46d890d2f2af454ae01e912868e1efbc",
+  "commit": "4a7197e4057dd28c5da2faa3b70c60b0f3a08352",
   "dirty": false,
   "entry": "sdk.js",
   "wasm": "cad-assets/manifold.wasm",
@@ -10,13 +10,13 @@
     "LICENSE": "ed121de3496066a2ddc8c11b30b48142165ab84bdb066fee351392ecaccf36ad",
     "NOTICE.txt": "c75b43e86dd682f04d167b78e655bff1ea1e7edb2a8fb0c3f28fc50b51d9f6f9",
     "adafruit-preview-data-BWhkbkqw.js": "c37d14c1f115a63599555fd4193b2df1f9426a9b4cab8962282d6794ba6e11b6",
-    "assets/geometry.worker-LyqmNXj_.js": "5f88f22c4a32158b3fae6b957b27d2622eeabe7a8e387bf63bccf94149722ccb",
-    "assets/jolt-physics.wasm-compat-ghXlQvcg.js": "2544870c21c3938282fc1e38342834d8a5f3444f0a55faea76d0d21a9612024b",
-    "assets/simulation.worker-BYGXh3Yo.js": "5735c48098d1cd647b85c1fee6b108461eb75908ac4831843c6b0758627ff3c5",
+    "assets/geometry.worker-D84JvYax.js": "568e23616a9288ee0d4e66872863be63a59121983e3ae3f930012103a80347e6",
+    "assets/jolt-physics.wasm-compat-B-iSd3Zy.js": "0547de9a93c22c83874b21406a8d048810d209e09bccc4e24545ec60f4733514",
+    "assets/simulation.worker-CoxozVZI.js": "ab1a3a5611fd384959c7f6026a64a45323ec7b566dae5e1701563756579ca75c",
     "cad-assets/manifold.wasm": "73e3b419ad31294f6b1cc478173944e50efc4a34bfdeeff0107bdfc12975f11c",
     "model-library-cache-DiMFGzp9.js": "75dc4ad7999b4571b227f1c675ca00af698fcc886dc73e98dd4c0eb2604e2b20",
-    "model-library-local-BzRAvgR3.js": "bb1d81d142c057dfa2be89166a59b1f8d31a314fde505326e71fe061a1e595ad",
-    "sdk-DJergj3Y.js": "3de1a8f3e0039c28ebe05d14ce8d6c5cc6a4924af17ccfec800f583271eaf55b",
-    "sdk.js": "df0b43187deadfb2a1133db82af044042a9c4b03f46d2283815b07ee9ee96959"
+    "model-library-local-CychACzv.js": "f466052ee4dea662e57d9bcf1eaefa9fe4d0841040cb0bfe141a50982dee5656",
+    "sdk-7fgJ83p3.js": "f534ae69651ebfcde5c587f392aaf203c51fb4ef66ebe7e787211fb8df7cf29e",
+    "sdk.js": "46ddc7e0485a2fc115b8d85839b8cc0519495ee652a0d7a4ebfd5d3e2e2db142"
   }
 }

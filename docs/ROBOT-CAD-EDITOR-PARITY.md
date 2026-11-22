@@ -350,3 +350,9 @@ near the contact point. The exact contact coordinates and neighboring arcs
 are retained in the sketch. Run
 `node scripts/verify-cad-tangent-browser.mjs <app-url>` for the touch and SB3
 round trip check.
+
+Under **Offset profile** in the sketch dialog, enter a signed distance and
+apply it to the draft. Positive grows the outer boundary and shrinks holes.
+Rectangles, full circles and straight-edged outlines retain their editable
+form. Run `node scripts/verify-cad-offset-browser.mjs <app-url>` for the
+embedded touch and SB3 round trip.
