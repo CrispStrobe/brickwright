@@ -57,7 +57,7 @@ try{
  await dialog(page).getByLabel('Sheet title').fill('Motor plate drawing');
  assert.equal(await spacing(page),20);
  await dialog(page).getByRole('checkbox',{name:'Show section A-A'}).check();
- const cut=dialog(page).getByLabel('Section position (mm)');
+ const cut=dialog(page).getByLabel('Section position (mm)',{exact:true});
  assert.equal(await cut.inputValue(),'15');
  const axis=dialog(page).getByLabel('Section axis',{exact:true});
  await axis.selectOption('u');
@@ -69,6 +69,11 @@ try{
  assert.match(await dialog(page).getByRole('status',{name:'Drawing status'}).textContent(),/misses the part/);
  await cut.fill('15');
  assert.equal(await preview(page).locator('.drawing-section').count(),3);
+ await dialog(page).getByRole('checkbox',{name:'Offset section',exact:true}).check();
+ await dialog(page).getByLabel('Second section position (mm)').fill('16');
+ await dialog(page).getByLabel('Jog at (mm)').fill('spacing / 2 + 10 mm');
+ assert.match(await preview(page).textContent(),/Offset section A-A/);
+ assert.equal((await preview(page).locator('.drawing-cut').getAttribute('d')).split('L').length,4);
  await dialog(page).getByText('Drawing dimensions',{exact:true}).tap();
  const from=dialog(page).getByLabel('First dimension anchor');
  const to=dialog(page).getByLabel('Second dimension anchor');
@@ -107,6 +112,7 @@ try{
  assert.match(text,/229 14 m 279 14 l/);
  assert.match(text,/\[1\.4 0\.9\] 0 d/);
  assert.match(text,/\[3\.5 1 0\.7 1\] 0 d/);
+ assert.ok(text.includes(Buffer.from('Offset section A-A','latin1').toString('hex')));
  if(pdfOutput)await pdf.saveAs(pdfOutput);
  await dialog(page).getByRole('button',{name:'Close drawing'}).tap();
  await make.tap();
@@ -131,8 +137,8 @@ try{
  await save.saveAs(project);
  const zip=await JSZip.loadAsync(await readFile(project));
  const saved=JSON.parse(await zip.file(CAD_PROJECT_PATH).async('text'));
- assert.equal(saved.version,11);
- assert.deepEqual(saved.drawings[0].section,{axis:'v',position:15});
+ assert.equal(saved.version,17);
+ assert.deepEqual(saved.drawings[0].section,{axis:'v',position:15,jog:{at:'spacing / 2 + 10 mm',position:16}});
  assert.equal(saved.drawings[0].annotations[0].from,'circle:first');
  assert.equal(saved.drawings[0].annotations[0].to,'circle:second');
  assert.equal(saved.drawings[0].source.featureId,initial.id);
@@ -156,12 +162,15 @@ try{
  assert.equal(await preview(restored).locator('.drawing-section').count(),3);
  assert.match(await preview(restored).textContent(),/28 mm/);
  assert.equal(await preview(restored).locator('.drawing-annotation').count(),5);
- assert.equal(await dialog(restored).getByLabel('Section position (mm)').inputValue(),'15');
+ assert.equal(await dialog(restored).getByLabel('Section position (mm)',{exact:true}).inputValue(),'15');
+ assert.equal(await dialog(restored).getByLabel('Second section position (mm)').inputValue(),'16');
+ assert.equal(await dialog(restored).getByLabel('Jog at (mm)').inputValue(),'spacing / 2 + 10 mm');
+ assert.match(await preview(restored).textContent(),/Offset section A-A/);
  await dialog(restored).getByRole('button',{name:'Close drawing'}).tap();
  await restored.getByRole('button',{name:'Drawing: Motor plate overview',exact:true}).tap();
  assert.equal(await spacing(restored),14);
  assert.equal(await preview(restored).locator('.drawing-hidden').count(),0);
- console.log('PASS linked drawing sheets in Brickwright: touch controls, live parameters, linked section and dimensions, single and numbered vector PDFs, and SB3 save and reopen');
+ console.log('PASS linked drawing sheets in Brickwright: touch controls, live parameters, linked offset section and dimensions, single and numbered vector PDFs, and SB3 save and reopen');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});

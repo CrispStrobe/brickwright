@@ -387,3 +387,9 @@ Trimming keeps locks on surviving vertices. Closing into an outline uses the
 current point positions. Run
 `node scripts/verify-cad-path-lock-browser.mjs <app-url>` to verify touch editing
 and reopening a body-free SB3 with its lock expressions.
+
+**Drawing sheet → Show section A-A → Offset section** adds a second parallel
+cut. Set **Jog at** along the perpendicular sketch axis to switch between the
+cuts. The PDF shows the stepped cutting line and the combined hatched view.
+The SB3 retains the offsets and parameter expressions. Verify the workflow with
+`node scripts/verify-cad-drawing-sheet-browser.mjs <app-url>`.
