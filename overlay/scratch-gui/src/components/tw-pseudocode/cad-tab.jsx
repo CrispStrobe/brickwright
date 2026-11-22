@@ -182,7 +182,7 @@ const CadTab = ({vm, isVisible, docked, locale, theme, onEditProgram, onOpenCirc
     }, [isVisible, docked]);
     return <div data-testid="bw-cad-tab" style={{position:'relative',width: '100%', height: '100%', flex: 1, minWidth: 0, minHeight: 350, display: 'flex', flexDirection: 'column'}}>
         <CadCircuitPanel vm={vm} locale={locale} colorMode={colorMode} isVisible={isVisible} toolbarHost={toolbarHost} onEditProgram={onEditProgram} onOpenCircuit={onOpenCircuit} />
-        {storageWarning ? <div role="status" style={{position:'absolute',bottom:30,left:10,zIndex:20,maxWidth:320,padding:8,borderRadius:6,background:colorMode==='dark'?'#152432':'#fff',color:colorMode==='dark'?'#edf3fa':'#1c3042',fontSize:12}}>{locale.startsWith('de')
+        {storageWarning ? <div role="status" style={{position:'absolute',bottom:30,left:10,zIndex:20,pointerEvents:'none',maxWidth:320,padding:8,borderRadius:6,background:colorMode==='dark'?'#152432':'#fff',color:colorMode==='dark'?'#edf3fa':'#1c3042',fontSize:12}}>{locale.startsWith('de')
             ? 'Nur für diese Sitzung gespeichert. Speichere das Projekt als Datei.'
             : 'Saved for this session. Save the project to a file to keep it.'}</div> : null}
         {error ? <div role="alert" style={{position:'absolute',top:56,left:'50%',transform:'translateX(-50%)',zIndex:30,display:'flex',alignItems:'center',gap:10,maxWidth:'90%',padding:'8px 12px',borderRadius:8,border:'1px solid #f3b4b4',background:colorMode==='dark'?'#3a1f22':'#fff5f5',color:colorMode==='dark'?'#ffd7d7':'#9b1c1c',fontSize:13,boxShadow:'0 4px 14px rgba(0,0,0,.15)'}}>
