@@ -337,3 +337,9 @@ circular sweep without replacing the output body. Editing the source under
 **Inputs** updates all instances. Run
 `node scripts/verify-cad-pattern-browser.mjs <app-url>` to check both modes,
 source editing and SB3 save and reopen in the embedded editor.
+
+Use **Command palette** or Ctrl/⌘+Shift+P with focus in CAD to search for
+modeling tools by name or task. For instance, **bolt circle** finds the
+Pattern command once a body is selected. Ctrl/⌘+K still opens shape search.
+Run `node scripts/verify-cad-command-palette-browser.mjs <app-url>` to
+check command dispatch by touch and keyboard in the embedded editor.
