@@ -1,7 +1,7 @@
-var qg = Object.defineProperty;
-var Bg = (A, g, I) => g in A ? qg(A, g, { enumerable: !0, configurable: !0, writable: !0, value: I }) : A[g] = I;
-var jA = (A, g, I) => Bg(A, typeof g != "symbol" ? g + "" : g, I);
-const Qg = {
+var Bg = Object.defineProperty;
+var Qg = (A, g, I) => g in A ? Bg(A, g, { enumerable: !0, configurable: !0, writable: !0, value: I }) : A[g] = I;
+var jA = (A, g, I) => Qg(A, typeof g != "symbol" ? g + "" : g, I);
+const Eg = {
   "Aiming yaw servo": "Servo für die horizontale Ausrichtung",
   "Swivel spreader servo": "Drehservo für die Lasttraverse",
   "Purchased Feather controller clearance": "Bauraum für den gekauften Feather-Controller",
@@ -36,7 +36,7 @@ const Qg = {
   "Choose light or dark mode": "Hellen oder dunklen Modus wählen",
   "Loading models…": "Modelle werden geladen…",
   "Original source files": "Originale Quelldateien",
-  "Model source uses project version 6 through 21": "Modellquelltext verwendet Projektversion 6 bis 21",
+  "Model source uses project version 6 through 22": "Modellquelltext verwendet Projektversion 6 bis 22",
   "Unknown material preset": "Unbekannte Materialvorlage",
   "Initial velocity requires project version 8": "Anfangsgeschwindigkeit erfordert Projektversion 8",
   "Invalid initial body velocity": "Ungültige Anfangsgeschwindigkeit",
@@ -182,7 +182,7 @@ const Qg = {
   "Preview position Z (mm)": "Vorschauposition Z (mm)",
   "Expand simulation controls": "Simulationssteuerung ausklappen",
   "Minimize simulation controls": "Simulationssteuerung minimieren"
-}, Eg = {
+}, og = {
   "Expected a finite number": "Eine endliche Zahl wird erwartet",
   "Text construction budget exceeded": "Budget für die Texterstellung überschritten",
   "Source assertion failed: {0}": "Zusicherung im Quelltext fehlgeschlagen: {0}",
@@ -257,7 +257,7 @@ const Qg = {
   "Expanded include tokens exceed the existing 8192-token limit": "Die erweiterten Includes überschreiten die Grenze von 8192 Tokens",
   "Drag a thumbnail onto the grid or a face.": "Vorschaubild auf das Raster oder eine Fläche ziehen.",
   "Drag onto a face, or tap a shape then its destination.": "Auf eine Fläche ziehen oder erst die Form und dann das Ziel antippen."
-}, og = {
+}, lg = {
   "This source draft belongs to another project": "Dieser Quelltextentwurf gehört zu einem anderen Projekt",
   "Both GUI and source changed the same value in “{0}”. Resolve it before merging.": "Oberfläche und Quelltext haben denselben Wert in „{0}“ geändert. Lösen Sie den Konflikt vor dem Zusammenführen.",
   "Merge GUI changes": "Oberflächenänderungen zusammenführen",
@@ -322,7 +322,7 @@ const Qg = {
   "Model preview ready. No history entry was created.": "Modellvorschau bereit. Es wurde kein Verlaufseintrag erstellt.",
   "Read the current design source with stable object IDs and the current history revision.": "Aktuellen Modellquelltext mit stabilen Objektkennungen und der aktuellen Verlaufsrevision lesen.",
   "Preflight and apply a complete declarative design edit as one saved history step.": "Eine vollständige deklarative Modelländerung prüfen und als einen gespeicherten Verlaufsschritt anwenden."
-}, lg = {
+}, tg = {
   "Model type": "Modelltyp",
   "All models": "Alle Modelle",
   "Preview unavailable": "Keine Vorschau verfügbar",
@@ -387,7 +387,7 @@ const Qg = {
   "Inserted with provenance. File could not be cached for offline reuse.": "Mit Herkunftsnachweis eingefügt. Die Datei konnte nicht zur Offline-Nutzung zwischengespeichert werden.",
   "Model inserted with provenance; viewport refresh failed. Close this panel to inspect the editor status.": "Modell mit Herkunftsnachweis eingefügt; die Ansicht konnte nicht aktualisiert werden. Dieses Fenster schließen und den Editorstatus prüfen.",
   "Catalogue exceeds 4 MiB": "Katalog überschreitet 4 MiB"
-}, tg = {
+}, ng = {
   "Drive width (mm)": "Antriebsbreite (mm)",
   Cube: "Würfel",
   "Edge length (mm)": "Kantenlänge (mm)",
@@ -525,7 +525,7 @@ const Qg = {
   "Cylinder rounding must be smaller than its radius and half its height": "Die Zylinderabrundung muss kleiner als der Radius und die halbe Höhe sein",
   "Elliptical sector needs at least one angular segment": "Der elliptische Sektor benötigt mindestens ein Winkelsegment",
   "Negative elliptical angles are not supported": "Negative elliptische Winkel werden nicht unterstützt"
-}, ng = {
+}, ag = {
   "Unknown code example": "Unbekanntes Codebeispiel",
   "Code examples": "Codebeispiele",
   "Load example": "Beispiel laden",
@@ -642,7 +642,7 @@ const Qg = {
   "Only whole-output JSCAD colours are retained in conversion metadata; face colours are not converted.": "Nur JSCAD-Farben für vollständige Ausgaben bleiben in den Konvertierungsmetadaten erhalten; Farben einzelner Flächen werden nicht konvertiert.",
   "Camera controls": "Kamerasteuerung",
   "Pinch to zoom. Tinkercad: scroll to zoom, Shift-scroll to pan, Alt-scroll to orbit. Fusion: two-finger swipe to pan, Shift-swipe to orbit. Right-drag orbits; Shift-right-drag, middle-drag or Space-left-drag pans.": "Zum Zoomen zwei Finger zusammen- oder auseinanderziehen. Tinkercad: Scrollen zoomt, Umschalt-Scrollen verschiebt, Alt-Scrollen dreht die Ansicht. Fusion: Wischen mit zwei Fingern verschiebt, Umschalt-Wischen dreht. Ziehen mit rechts dreht; Umschalt-rechts, Mitteltaste oder Leertaste-links verschiebt die Ansicht."
-}, ag = {
+}, sg = {
   "The project changed while opening. Try again.": "Das Projekt wurde während des Öffnens geändert. Versuchen Sie es erneut.",
   "Imported 1 project.": "1 Projekt importiert.",
   "1 iteration · {0}": "1 Version · {0}",
@@ -704,7 +704,7 @@ const Qg = {
   "Paste objects": "Objekte einfügen",
   "Restore coded project": "Codeprojekt wiederherstellen",
   "Restored iteration {0}": "Version {0} wiederhergestellt"
-}, sg = {
+}, rg = {
   "Project actions": "Projektaktionen",
   "New project": "Neues Projekt",
   "Open project": "Projekt öffnen",
@@ -825,7 +825,7 @@ const Qg = {
   "Based on nominal threaded length; end runouts are trimmed": "Bezogen auf die Nenngewindelänge; die Ausläufe an den Enden werden beschnitten",
   "Apply thread redesign": "Gewindeauslegung anwenden",
   "Rebuild a resized screw at a chosen pitch or turns per start, resetting its local scale as one saved edit.": "Eine skalierte Schraube mit gewählter Steigung oder Windungszahl pro Gang als einen gespeicherten Schritt neu aufbauen und ihre lokale Skalierung zurücksetzen."
-}, rg = {
+}, Dg = {
   "Point locks": "Fixierte Punkte",
   "Path point": "Pfadpunkt",
   "Point {0}": "Punkt {0}",
@@ -1246,6 +1246,13 @@ const Qg = {
   "Invalid outline vertex identities.": "Ungültige Kennungen für Konturpunkte.",
   "Outline {0}, point {1} ({2})": "Kontur {0}, Punkt {1} ({2})",
   "Outline point {0} ({1})": "Konturpunkt {0} ({1})",
+  "Include parts list": "Stückliste hinzufügen",
+  "Parts list": "Stückliste",
+  "Parts list {0} of {1}": "Stückliste {0} von {1}",
+  "Preview page": "Vorschauseite",
+  "Drawing views": "Zeichnungsansichten",
+  Item: "Position",
+  "Body name": "Körpername",
   "Create assembly drawing": "Baugruppenzeichnung erstellen",
   "Assembly · 1 body": "Baugruppe · 1 Körper",
   "Assembly · {0} bodies": "Baugruppe · {0} Körper",
@@ -1641,7 +1648,7 @@ Benannte Formen verwenden let; ein abschließendes return erzeugt einen starren 
   "Open shape library as dialog": "Formenbibliothek als Dialog öffnen",
   "Dimension expressions": "Maßausdrücke",
   "Drag to change dimensions": "Ziehen zum Ändern der Maße"
-}, Dg = {
+}, hg = {
   "At most 64 boolean operands": "Höchstens 64 boolesche Operanden sind erlaubt",
   "Boolean operations need at least two shapes": "Boolesche Operationen benötigen mindestens zwei Formen",
   "Brickwright archive exceeds 64 MiB": "Das Brickwright-Archiv überschreitet 64 MiB",
@@ -1862,7 +1869,7 @@ Benannte Formen verwenden let; ein abschließendes return erzeugt einen starren 
   "{0}: {1}. Import a closed, consistently oriented solid mesh.": "{0}: {1}. Importiere ein geschlossenes, einheitlich orientiertes Körpernetz.",
   "“{0}” is driven; edit its expression or detach its binding first": "„{0}“ wird gesteuert; bearbeite zuerst den Ausdruck oder löse die Bindung",
   "“{0}” is not available on {1}": "„{0}“ ist bei {1} nicht verfügbar"
-}, hg = {
+}, cg = {
   "{0} {1}: {2}": "{0} {1}: {2}",
   "3D workplane": "3D-Arbeitsebene",
   "View cube": "Ansichtswürfel",
@@ -1891,7 +1898,7 @@ Benannte Formen verwenden let; ein abschließendes return erzeugt einen starren 
   "Geometry worker failed": "Die Geometrieberechnung ist fehlgeschlagen.",
   "Editor was disposed": "Der Editor wurde geschlossen",
   "Geometry exceeded 30 seconds. Simplify the edit or Undo.": "Die Geometrieberechnung dauert länger als 30 Sekunden. Vereinfachen Sie die Änderung oder machen Sie sie rückgängig."
-}, cg = {
+}, mg = {
   "Recorded library sources require STL with attribution. 3MF attribution export is not supported.": "Aufgezeichnete Bibliotheksquellen erfordern STL mit Quellenangaben. Ein 3MF-Export mit Quellenangaben wird nicht unterstützt.",
   "STL and attribution exceed 64 MiB; no export was delivered.": "STL und Quellenangaben überschreiten 64 MiB; es wurde kein Export ausgegeben.",
   "Describe changes since insertion accurately, including when unchanged.": "Beschreiben Sie Änderungen seit dem Einfügen zutreffend, auch bei unverändertem Modell.",
@@ -1957,7 +1964,7 @@ Benannte Formen verwenden let; ein abschließendes return erzeugt einen starren 
 node apps/mcp/server.mjs [--project /absolute/path/project.bcad] [--locale en|de]
 Erstelle zuerst den Workspace. Oberfläche und MCP verwenden denselben begrenzten CAD-Script-Compiler.
 `
-}, mg = {
+}, wg = {
   "— move / rotate / scale": "— verschieben / drehen / skalieren",
   "— fit the view": "— Ansicht einpassen",
   "— undo": "— rückgängig",
@@ -2063,7 +2070,7 @@ Erstelle zuerst den Workspace. Oberfläche und MCP verwenden denselben begrenzte
   "Library file recovery/save failed: {0}": "Wiederherstellen/Speichern der Bibliotheksdatei fehlgeschlagen: {0}",
   ". Your saved data has not been overwritten.": ". Ihre gespeicherten Daten wurden nicht überschrieben.",
   ". WebGL 2 and WebAssembly are required.": ". WebGL 2 und WebAssembly werden benötigt."
-}, wg = {
+}, dg = {
   "Original files; units and orientation have not been verified. STEP, Fusion and other formats are available as source files. These files have not been screened for insertion or collision.": "Originaldateien: Einheiten und Ausrichtung sind nicht geprüft. STEP, Fusion und weitere Formate stehen als Quelldateien bereit. Zum Einfügen wird die Geometrie gesondert geprüft.",
   "Original file": "Originaldatei",
   "Upstream original": "Original beim Urheber",
@@ -2087,7 +2094,7 @@ Erstelle zuerst den Workspace. Oberfläche und MCP verwenden denselben begrenzte
   "STL inserted with provenance; viewport refresh failed.": "STL mit Herkunftsnachweis eingefügt. Die Ansicht konnte nicht aktualisiert werden.",
   "The model changed while loading. Retry insertion.": "Das Modell wurde während des Ladens geändert. Füge es erneut ein.",
   "Adafruit · Original files": "Adafruit · Originaldateien"
-}, dg = {
+}, ug = {
   Robots: "Roboter",
   "Scout TT rover": "Scout-TT-Rover",
   "Scout PLA print layout": "Scout-PLA-Druckanordnung",
@@ -2151,7 +2158,7 @@ Erstelle zuerst den Workspace. Oberfläche und MCP verwenden denselben begrenzte
   "Start simulation first": "Starte zuerst die Simulation",
   "Motor speed must be between -720 and 720 degrees per second": "Die Drehzahl muss zwischen -720 und 720 Grad pro Sekunde liegen",
   "Invalid hinge motor command": "Ungültiger Motorbefehl für das Drehgelenk"
-}, ug = {
+}, yg = {
   "A block program can have at most 64 parameters": "Ein Blockprogramm kann höchstens 64 Parameter haben",
   "A loop step cannot be zero": "Die Schrittweite einer Schleife darf nicht null sein",
   "Blocks are nested too deeply": "Die Blöcke sind zu tief verschachtelt",
@@ -2192,31 +2199,33 @@ Erstelle zuerst den Workspace. Oberfläche und MCP verwenden denselben begrenzte
   "Compile a block/pseudocode modelling program (JSON, format brickwright-cad-blocks) to parametric CAD Script, OpenSCAD or JSCAD without changing the model. Pass CAD Script output to cad_create_code_object.": "Kompiliert ein Block-/Pseudocode-Modellprogramm (JSON, Format brickwright-cad-blocks) in parametrisches CAD Script, OpenSCAD oder JSCAD, ohne das Modell zu ändern. Übergib die CAD-Script-Ausgabe an cad_create_code_object."
 };
 let q5 = "en";
-function yg(A) {
+function Mg(A) {
   return q5 = A.toLowerCase().split(/[-_]/)[0] === "de" ? "de" : "en", q5;
 }
 function t(A, ...g) {
-  const I = typeof A == "string" ? A : A.reduce((e, q, B) => e + (B ? `{${B - 1}}` : "") + q, ""), C = q5 === "de" ? ug[I] ?? Qg[I] ?? wg[I] ?? dg[I] ?? Eg[I] ?? og[I] ?? tg[I] ?? lg[I] ?? ng[I] ?? rg[I] ?? Dg[I] ?? mg[I] ?? hg[I] ?? cg[I] ?? sg[I] ?? ag[I] ?? I : I;
+  const I = typeof A == "string" ? A : A.reduce((e, q, B) => e + (B ? `{${B - 1}}` : "") + q, ""), C = q5 === "de" ? yg[I] ?? Eg[I] ?? dg[I] ?? ug[I] ?? og[I] ?? lg[I] ?? ng[I] ?? tg[I] ?? ag[I] ?? Dg[I] ?? hg[I] ?? wg[I] ?? cg[I] ?? mg[I] ?? rg[I] ?? sg[I] ?? I : I;
   return typeof A == "string" ? C : C.replace(/\{(\d+)\}/g, (e, q) => String(g[Number(q)]));
 }
-const Mg = ["1:5", "1:2", "1:1", "2:1", "5:1"], xg = 24, N2 = (A) => !!A && typeof A == "object" && !Array.isArray(A), _1 = (A) => typeof A == "string" && /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,95}$/.test(A) && !["constructor", "prototype", "__proto__"].includes(A), u4 = (A) => typeof A == "string" && /^vertex:[a-zA-Z0-9_-]{1,96}:[a-zA-Z0-9_-]{1,96}$/.test(A) && A.split(":").slice(1).every(_1), Ng = (A) => typeof A == "string" && /^arc:[a-zA-Z0-9_-]{1,96}:[a-zA-Z0-9_-]{1,96}:[a-zA-Z0-9_-]{1,96}$/.test(A) && A.split(":").slice(1).every(_1), B5 = (A) => A.startsWith("circle:") && _1(A.slice(7)), j5 = (A) => typeof A == "string" && (/^bounds:(sw|se|nw|ne)$/.test(A) || B5(A) || u4(A));
-function kg(A, g) {
+const xg = ["1:5", "1:2", "1:1", "2:1", "5:1"], Ng = 24, N2 = (A) => !!A && typeof A == "object" && !Array.isArray(A), _1 = (A) => typeof A == "string" && /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,95}$/.test(A) && !["constructor", "prototype", "__proto__"].includes(A), y4 = (A) => typeof A == "string" && /^vertex:[a-zA-Z0-9_-]{1,96}:[a-zA-Z0-9_-]{1,96}$/.test(A) && A.split(":").slice(1).every(_1), kg = (A) => typeof A == "string" && /^arc:[a-zA-Z0-9_-]{1,96}:[a-zA-Z0-9_-]{1,96}:[a-zA-Z0-9_-]{1,96}$/.test(A) && A.split(":").slice(1).every(_1), B5 = (A) => A.startsWith("circle:") && _1(A.slice(7)), j5 = (A) => typeof A == "string" && (/^bounds:(sw|se|nw|ne)$/.test(A) || B5(A) || y4(A));
+function Sg(A, g) {
   return Number.isFinite(A) && Number.isFinite(g) && A >= 10 && A <= 265 && g >= 28 && g <= 176;
 }
 const v3 = (A) => typeof A == "number" ? Number.isFinite(A) && Math.abs(A) <= 1e5 : typeof A == "string" && !!A.trim() && A.length <= 160 && !/[\u0000-\u001f]/.test(A);
-function Sg(A) {
+function Kg(A) {
   if (A.drawings === void 0)
     return;
   const g = /* @__PURE__ */ new Set(), I = () => new Error(t("Invalid drawing sheets in this CAD project."));
   if (A.version < 9 || !Array.isArray(A.drawings) || A.drawings.length > 64)
     throw I();
   for (const C of A.drawings) {
-    if (!N2(C) || !_1(C.id) || g.has(C.id) || typeof C.title != "string" || !C.title.trim() || C.title.length > 80 || /[\u0000-\u001f]/.test(C.title) || !Mg.includes(C.scale) || typeof C.hiddenLines != "boolean" || !N2(C.source))
+    if (!N2(C) || !_1(C.id) || g.has(C.id) || typeof C.title != "string" || !C.title.trim() || C.title.length > 80 || /[\u0000-\u001f]/.test(C.title) || !xg.includes(C.scale) || typeof C.hiddenLines != "boolean" || !N2(C.source))
       throw I();
-    if (Kg(C.source)) {
+    if (W5(C.source)) {
       if (A.version < 21 || C.section !== void 0 || C.annotations !== void 0)
         throw I();
     } else if (Object.hasOwn(C.source, "kind") || !_1(C.source.featureId) || !_1(C.source.sketchId) || !_1(C.source.profileId))
+      throw I();
+    if (C.partsList !== void 0 && (A.version < 22 || !W5(C.source) || typeof C.partsList != "boolean"))
       throw I();
     if (C.section !== void 0) {
       if (A.version < 10 || !N2(C.section) || !["u", "v"].includes(String(C.section.axis)) || !v3(C.section.position))
@@ -2226,14 +2235,14 @@ function Sg(A) {
         throw I();
     }
     if (C.annotations !== void 0) {
-      if (A.version < 11 || !Array.isArray(C.annotations) || C.annotations.length > xg)
+      if (A.version < 11 || !Array.isArray(C.annotations) || C.annotations.length > Ng)
         throw I();
       const e = /* @__PURE__ */ new Set();
       for (const q of C.annotations) {
-        if (!N2(q) || !_1(q.id) || e.has(q.id) || !_1(q.sketchId) || typeof q.from != "string" || !Array.isArray(q.at) || q.at.length !== 2 || !kg(q.at[0], q.at[1]) || q.kind === "aligned" && A.version < 19 || A.version < 18 && [q.from, q.to].some(u4))
+        if (!N2(q) || !_1(q.id) || e.has(q.id) || !_1(q.sketchId) || typeof q.from != "string" || !Array.isArray(q.at) || q.at.length !== 2 || !Sg(q.at[0], q.at[1]) || q.kind === "aligned" && A.version < 19 || A.version < 18 && [q.from, q.to].some(y4))
           throw I();
         if (q.kind === "radius" || q.kind === "arc-length") {
-          const B = Ng(q.from) || q.kind === "radius" && B5(q.from);
+          const B = kg(q.from) || q.kind === "radius" && B5(q.from);
           if (A.version < 20 || !B || q.to !== void 0)
             throw I();
         } else if (q.kind === "diameter") {
@@ -2247,7 +2256,7 @@ function Sg(A) {
     g.add(C.id);
   }
 }
-function Kg(A) {
+function W5(A) {
   return N2(A) && A.kind === "assembly";
 }
 function Q5(A) {
@@ -2279,7 +2288,7 @@ const Rg = () => ({ gravity: [0, 0, -9.81], ground: !0, groundFriction: 0.4, gro
 function fg(A) {
   return A.version >= 8 && A.simulation ? A.simulation : Rg();
 }
-const E5 = (A, g, I) => typeof A == "number" && Number.isFinite(A) && A >= g && A <= I, W5 = (A, g = 1e6) => Array.isArray(A) && A.length === 3 && A.every((I) => E5(I, -g, g));
+const E5 = (A, g, I) => typeof A == "number" && Number.isFinite(A) && A >= g && A <= I, Z5 = (A, g = 1e6) => Array.isArray(A) && A.length === 3 && A.every((I) => E5(I, -g, g));
 function Fg(A) {
   if (A.version < 8)
     return;
@@ -2288,16 +2297,16 @@ function Fg(A) {
   };
   if (A.simulation !== void 0) {
     const I = A.simulation;
-    (!I || !W5(I.gravity, 1e3) || typeof I.ground != "boolean" || !E5(I.groundFriction, 0, 2) || !E5(I.groundRestitution, 0, 1) || I.fixBase !== void 0 && typeof I.fixBase != "boolean" || I.selfCollisions !== void 0 && typeof I.selfCollisions != "boolean") && g();
+    (!I || !Z5(I.gravity, 1e3) || typeof I.ground != "boolean" || !E5(I.groundFriction, 0, 2) || !E5(I.groundRestitution, 0, 1) || I.fixBase !== void 0 && typeof I.fixBase != "boolean" || I.selfCollisions !== void 0 && typeof I.selfCollisions != "boolean") && g();
   }
   if (A.tracers !== void 0) {
     (!Array.isArray(A.tracers) || A.tracers.length > 32) && g();
     const I = /* @__PURE__ */ new Set();
     for (const C of A.tracers)
-      (!C || typeof C.id != "string" || !/^[a-zA-Z0-9_-]{1,96}$/.test(C.id) || I.has(C.id) || !A.roots.includes(C.bodyId) || A.nodes[C.bodyId].reference || A.nodes[C.bodyId].role === "hole" || !W5(C.point) || !/^#[a-f0-9]{6}$/i.test(C.color)) && g(), I.add(C.id);
+      (!C || typeof C.id != "string" || !/^[a-zA-Z0-9_-]{1,96}$/.test(C.id) || I.has(C.id) || !A.roots.includes(C.bodyId) || A.nodes[C.bodyId].reference || A.nodes[C.bodyId].role === "hole" || !Z5(C.point) || !/^#[a-f0-9]{6}$/i.test(C.color)) && g(), I.add(C.id);
   }
 }
-const _2 = (A) => !!A && typeof A == "object" && !Array.isArray(A), g2 = (A, g) => _2(A) && Object.keys(A).length === g.split(" ").length && g.split(" ").every((I) => Object.hasOwn(A, I)), h2 = (A, g) => Array.isArray(A) ? Array.isArray(g) && A.length === g.length && A.every((I, C) => h2(I, g[C])) : _2(A) ? _2(g) && Object.keys(A).length === Object.keys(g).length && Object.keys(A).every((I) => Object.hasOwn(g, I) && h2(A[I], g[I])) : A === g, y4 = (A) => typeof A == "number" && Number.isFinite(A) && A >= 0, e3 = (A) => y4(A) && A > 0, Ug = (A) => typeof A == "string" && /^[a-f0-9]{64}$/.test(A), Z5 = (A) => Array.isArray(A) && A.length === 3 && A.every((g) => typeof g == "number" && Number.isFinite(g));
+const _2 = (A) => !!A && typeof A == "object" && !Array.isArray(A), g2 = (A, g) => _2(A) && Object.keys(A).length === g.split(" ").length && g.split(" ").every((I) => Object.hasOwn(A, I)), h2 = (A, g) => Array.isArray(A) ? Array.isArray(g) && A.length === g.length && A.every((I, C) => h2(I, g[C])) : _2(A) ? _2(g) && Object.keys(A).length === Object.keys(g).length && Object.keys(A).every((I) => Object.hasOwn(g, I) && h2(A[I], g[I])) : A === g, M4 = (A) => typeof A == "number" && Number.isFinite(A) && A >= 0, e3 = (A) => M4(A) && A > 0, Ug = (A) => typeof A == "string" && /^[a-f0-9]{64}$/.test(A), z5 = (A) => Array.isArray(A) && A.length === 3 && A.every((g) => typeof g == "number" && Number.isFinite(g));
 function Yg(A, g) {
   if (!g2(A, "format version selectedFile quality evidence") || A.format !== "brickwright-library-collision-report" || A.version !== 1)
     return !1;
@@ -2311,7 +2320,7 @@ function Yg(A, g) {
   if (!h2(C.quality, i) || !h2(C.policy, e.screeningPolicy) || !["parseable", "closedPositiveVolume", "withinSizeLimits", "withinTriangleLimits"].every((a) => e[a] === !0) || !Array.isArray(C.diagnostics) || C.diagnostics.length > 100 || !C.diagnostics.every((a) => typeof a == "string" && a.length <= 4096 && !/[\u0000-\u001f]/.test(a)))
     return !1;
   const Q = C.policy;
-  if (!_2(Q) || Q.maxAnalysisBytes !== 16777216 || Q.maxAnalysisTriangles !== 83333 || I.bytes > Q.maxAnalysisBytes || Q.maxTriangles > Q.maxAnalysisTriangles || !Number.isSafeInteger(C.triangles) || C.triangles < 1 || C.triangles > Q.maxTriangles || !g2(C.boundsMm, "min max") || !Z5(C.boundsMm.min) || !Z5(C.boundsMm.max) || !C.boundsMm.max.every((a, D) => a >= C.boundsMm.min[D] && a - C.boundsMm.min[D] <= Q.maxExtentMm) || !e3(C.signedVolumeMm3))
+  if (!_2(Q) || Q.maxAnalysisBytes !== 16777216 || Q.maxAnalysisTriangles !== 83333 || I.bytes > Q.maxAnalysisBytes || Q.maxTriangles > Q.maxAnalysisTriangles || !Number.isSafeInteger(C.triangles) || C.triangles < 1 || C.triangles > Q.maxTriangles || !g2(C.boundsMm, "min max") || !z5(C.boundsMm.min) || !z5(C.boundsMm.max) || !C.boundsMm.max.every((a, D) => a >= C.boundsMm.min[D] && a - C.boundsMm.min[D] <= Q.maxExtentMm) || !e3(C.signedVolumeMm3))
     return !1;
   const s = A.evidence;
   if (!g2(s, "fileSha256 checkedOn toMillimetresZUp engine engineVersion qualifierVersion qualified scope geometrySha256 sourceVolumeMm3 hulls certificate nativeCheck") || s.fileSha256 !== I.sha256 || s.checkedOn !== C.checkedOn || !h2(s.toMillimetresZUp, Q.toMillimetresZUp) || s.engine !== "Jolt" || !["1.1.0-bw.9", "1.1.0-bw.10"].includes(s.engineVersion) || s.qualifierVersion !== "brickwright-library-collision/1" || s.qualified !== !0 || s.scope !== "rigid-collision-preview" || !Ug(s.geometrySha256) || !e3(s.sourceVolumeMm3))
@@ -2320,7 +2329,7 @@ function Yg(A, g) {
   if (!(g2(E, "sourceSHA256 algorithm strategy maxHulls missingVolumeMm3 extraVolumeMm3 relativeError boundsErrorMm tolerance") || g2(E, "sourceSHA256 algorithm strategy maxHulls missingVolumeMm3 extraVolumeMm3 numericalResidualVolumeMm3 relativeError boundsErrorMm tolerance")) || E.sourceSHA256 !== s.geometrySha256 || E.algorithm !== "manifold-compound/v1" || E.strategy !== "bsp" || !Number.isSafeInteger(E.maxHulls) || E.maxHulls < 1 || E.maxHulls > 2048 || !Number.isSafeInteger(s.hulls) || s.hulls < 1 || s.hulls > E.maxHulls)
     return !1;
   const r = E.tolerance;
-  if (!g2(r, "volumeFraction boundsMm") || !e3(r.volumeFraction) || r.volumeFraction > 0.1 || !e3(r.boundsMm) || r.boundsMm > 1 || ![E.missingVolumeMm3, E.extraVolumeMm3, E.relativeError, E.boundsErrorMm, E.numericalResidualVolumeMm3 ?? 0].every(y4) || E.relativeError > r.volumeFraction || E.boundsErrorMm > r.boundsMm)
+  if (!g2(r, "volumeFraction boundsMm") || !e3(r.volumeFraction) || r.volumeFraction > 0.1 || !e3(r.boundsMm) || r.boundsMm > 1 || ![E.missingVolumeMm3, E.extraVolumeMm3, E.relativeError, E.boundsErrorMm, E.numericalResidualVolumeMm3 ?? 0].every(M4) || E.relativeError > r.volumeFraction || E.boundsErrorMm > r.boundsMm)
     return !1;
   const n = (E.missingVolumeMm3 + E.extraVolumeMm3 + (E.numericalResidualVolumeMm3 ?? 0)) / s.sourceVolumeMm3;
   return !Number.isFinite(n) || Math.abs(n - E.relativeError) > Number.EPSILON * 16 * Math.max(1, n, E.relativeError) || e.physics && (e.physics.qualified !== !0 || e.physics.engine !== s.engine || e.physics.engineVersion !== s.engineVersion || e.physics.qualifierVersion !== s.qualifierVersion) ? !1 : h2(s.nativeCheck, { build: "debug", ground: !1, steps: 1, stepSeconds: 5e-3 });
@@ -2337,7 +2346,7 @@ const Jg = [
 function Lg(A) {
   return bg.includes(A);
 }
-const M1 = (A) => !!A && typeof A == "object" && !Array.isArray(A), u1 = (A, g = 4096) => typeof A == "string" && A.trim().length > 0 && A.length <= g && !/[\u0000-\u001f]/.test(A), M4 = (A) => typeof A == "string" && /^[a-f0-9]{64}$/.test(A), K2 = (A) => {
+const M1 = (A) => !!A && typeof A == "object" && !Array.isArray(A), u1 = (A, g = 4096) => typeof A == "string" && A.trim().length > 0 && A.length <= g && !/[\u0000-\u001f]/.test(A), x4 = (A) => typeof A == "string" && /^[a-f0-9]{64}$/.test(A), K2 = (A) => {
   if (!u1(A, 8192))
     return !1;
   try {
@@ -2346,12 +2355,12 @@ const M1 = (A) => !!A && typeof A == "object" && !Array.isArray(A), u1 = (A, g =
   } catch {
     return !1;
   }
-}, x4 = (A) => {
+}, N4 = (A) => {
   if (typeof A != "string" || !/^\d{4}-\d{2}-\d{2}$/.test(A))
     return !1;
   const g = new Date(A);
   return Number.isFinite(g.getTime()) && g.toISOString().slice(0, 10) === A;
-}, k1 = (A, g) => Object.keys(A).every((I) => g.split(" ").includes(I)), Hg = (A) => typeof A == "string" && A.length <= 512 && /^(?:sources|meshes|evidence)\/(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_-]+\.[A-Za-z0-9._-]+$/.test(A), D2 = (A) => M1(A) && k1(A, "url path format sha256 bytes") && (Object.hasOwn(A, "url") && !Object.hasOwn(A, "path") && K2(A.url) || Object.hasOwn(A, "path") && !Object.hasOwn(A, "url") && Hg(A.path)) && u1(A.format, 80) && /^[a-zA-Z0-9][a-zA-Z0-9.+_-]*$/.test(A.format) && M4(A.sha256) && Number.isSafeInteger(A.bytes) && A.bytes > 0, z5 = (A) => M1(A) && k1(A, "spdx scope attribution evidenceUrl capturedOn review reviewer") && Jg.includes(A.spdx) && A.scope === "asset" && A.review === "accepted" && u1(A.reviewer, 240) && u1(A.attribution) && K2(A.evidenceUrl) && x4(A.capturedOn), vg = (A) => M1(A) && k1(A, "repositoryUrl commit") && K2(A.repositoryUrl) && typeof A.commit == "string" && /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(A.commit), X5 = (A, g = "openscad") => typeof A == "string" && A.length <= 512 && (g === "ldraw" ? /^(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_-]+\.dat$/ : /^(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_-]+\.scad$/).test(A);
+}, k1 = (A, g) => Object.keys(A).every((I) => g.split(" ").includes(I)), Hg = (A) => typeof A == "string" && A.length <= 512 && /^(?:sources|meshes|evidence)\/(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_-]+\.[A-Za-z0-9._-]+$/.test(A), D2 = (A) => M1(A) && k1(A, "url path format sha256 bytes") && (Object.hasOwn(A, "url") && !Object.hasOwn(A, "path") && K2(A.url) || Object.hasOwn(A, "path") && !Object.hasOwn(A, "url") && Hg(A.path)) && u1(A.format, 80) && /^[a-zA-Z0-9][a-zA-Z0-9.+_-]*$/.test(A.format) && x4(A.sha256) && Number.isSafeInteger(A.bytes) && A.bytes > 0, X5 = (A) => M1(A) && k1(A, "spdx scope attribution evidenceUrl capturedOn review reviewer") && Jg.includes(A.spdx) && A.scope === "asset" && A.review === "accepted" && u1(A.reviewer, 240) && u1(A.attribution) && K2(A.evidenceUrl) && N4(A.capturedOn), vg = (A) => M1(A) && k1(A, "repositoryUrl commit") && K2(A.repositoryUrl) && typeof A.commit == "string" && /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(A.commit), $5 = (A, g = "openscad") => typeof A == "string" && A.length <= 512 && (g === "ldraw" ? /^(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_-]+\.dat$/ : /^(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_-]+\.scad$/).test(A);
 function _g(A) {
   if (!Array.isArray(A) || A.length !== 16 || !A.every((C) => typeof C == "number" && Number.isFinite(C)) || A[3] !== 0 || A[7] !== 0 || A[11] !== 0 || A[15] !== 1)
     return !1;
@@ -2381,15 +2390,15 @@ function Vg(A) {
       (!M1(Q) || !k1(Q, "repositoryUrl commit") || !K2(Q.repositoryUrl) || typeof Q.commit != "string" || !/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(Q.commit)) && q("Source revision requires an HTTPS repository URL and full lowercase Git commit hash.");
     }
     const B = C.licence;
-    if (z5(B) || q("An allowlisted exact content licence, asset grant, attribution and reviewed evidence are required."), D2(C.original) || q("Invalid original file identity."), C.sourceBundle !== void 0) {
+    if (X5(B) || q("An allowlisted exact content licence, asset grant, attribution and reviewed evidence are required."), D2(C.original) || q("Invalid original file identity."), C.sourceBundle !== void 0) {
       const Q = C.sourceBundle, s = M1(Q) && Q.format === "brickwright-ldraw-bundle" ? "ldraw" : "openscad";
-      if (!M1(Q) || !k1(Q, "format version rootPath dependencies") || !["brickwright-openscad-bundle", "brickwright-ldraw-bundle"].includes(String(Q.format)) || Q.version !== 1 || !X5(Q.rootPath, s) || !Array.isArray(Q.dependencies) || !Q.dependencies.length || Q.dependencies.length > 31 || !D2(C.original) || !C.original.path || C.original.format !== s || C.editableSource !== void 0)
+      if (!M1(Q) || !k1(Q, "format version rootPath dependencies") || !["brickwright-openscad-bundle", "brickwright-ldraw-bundle"].includes(String(Q.format)) || Q.version !== 1 || !$5(Q.rootPath, s) || !Array.isArray(Q.dependencies) || !Q.dependencies.length || Q.dependencies.length > 31 || !D2(C.original) || !C.original.path || C.original.format !== s || C.editableSource !== void 0)
         q("Invalid local source bundle (maximum 32 original files).");
       else {
         const E = /* @__PURE__ */ new Set([Q.rootPath]), r = /* @__PURE__ */ new Set([C.original.path]);
         let n = C.original.bytes;
         for (const a of Q.dependencies) {
-          if (!M1(a) || !k1(a, "path file author sourceUrl sourceRevision licence") || !X5(a.path, s) || E.has(a.path) || !D2(a.file) || !a.file.path || a.file.format !== s || r.has(a.file.path) || !u1(a.author, 1e3) || !K2(a.sourceUrl) || !vg(a.sourceRevision) || !z5(a.licence)) {
+          if (!M1(a) || !k1(a, "path file author sourceUrl sourceRevision licence") || !$5(a.path, s) || E.has(a.path) || !D2(a.file) || !a.file.path || a.file.format !== s || r.has(a.file.path) || !u1(a.author, 1e3) || !K2(a.sourceUrl) || !vg(a.sourceRevision) || !X5(a.licence)) {
             q("Every source dependency requires a distinct local original, pinned revision and reviewed grant.");
             continue;
           }
@@ -2413,7 +2422,7 @@ function Vg(A) {
     }
     if (C.quality !== void 0) {
       const Q = C.quality;
-      if (!M1(Q) || !k1(Q, "fileSha256 toolVersion checkedOn parseable closedPositiveVolume withinSizeLimits withinTriangleLimits screeningPolicy physics collisionReport") || !M4(Q.fileSha256) || !u1(Q.toolVersion, 240) || !x4(Q.checkedOn) || !["parseable", "closedPositiveVolume", "withinSizeLimits", "withinTriangleLimits"].every((s) => typeof Q[s] == "boolean"))
+      if (!M1(Q) || !k1(Q, "fileSha256 toolVersion checkedOn parseable closedPositiveVolume withinSizeLimits withinTriangleLimits screeningPolicy physics collisionReport") || !x4(Q.fileSha256) || !u1(Q.toolVersion, 240) || !N4(Q.checkedOn) || !["parseable", "closedPositiveVolume", "withinSizeLimits", "withinTriangleLimits"].every((s) => typeof Q[s] == "boolean"))
         q("Invalid quality evidence.");
       else {
         const s = [C.original, ...Array.isArray(C.derivatives) ? C.derivatives : []];
@@ -2461,13 +2470,13 @@ function jg(A) {
     i.provenance !== void 0 && ((!Array.isArray(i.provenance) || !i.provenance.length || i.provenance.length > 1e3 || new Set(i.provenance).size !== i.provenance.length || !i.provenance.every((Q) => typeof Q == "string" && q.has(Q))) && g("invalid node source references"), i.provenance.forEach((Q) => B.add(Q)));
   B.size !== q.size && g("unreferenced source record");
 }
-function N4(A) {
+function k4(A) {
   if (A.version < 5 || !A.provenance)
     return;
   const g = new Set(Object.values(A.nodes).flatMap((I) => I.provenance ?? []));
   A.provenance = { version: 1, records: A.provenance.records.filter((I) => g.has(I.id)) };
 }
-var Wg = [509, 0, 227, 0, 150, 4, 294, 9, 1368, 2, 2, 1, 6, 3, 41, 2, 5, 0, 166, 1, 574, 3, 9, 9, 7, 9, 32, 4, 318, 1, 78, 5, 71, 10, 50, 3, 123, 2, 54, 14, 32, 10, 3, 1, 11, 3, 46, 10, 8, 0, 46, 9, 7, 2, 37, 13, 2, 9, 6, 1, 45, 0, 13, 2, 49, 13, 9, 3, 2, 11, 83, 11, 7, 0, 3, 0, 158, 11, 6, 9, 7, 3, 56, 1, 2, 6, 3, 1, 3, 2, 10, 0, 11, 1, 3, 6, 4, 4, 68, 8, 2, 0, 3, 0, 2, 3, 2, 4, 2, 0, 15, 1, 83, 17, 10, 9, 5, 0, 82, 19, 13, 9, 214, 6, 3, 8, 28, 1, 83, 16, 16, 9, 82, 12, 9, 9, 7, 19, 58, 14, 5, 9, 243, 14, 166, 9, 71, 5, 2, 1, 3, 3, 2, 0, 2, 1, 13, 9, 120, 6, 3, 6, 4, 0, 29, 9, 41, 6, 2, 3, 9, 0, 10, 10, 47, 15, 199, 7, 137, 9, 54, 7, 2, 7, 17, 9, 57, 21, 2, 13, 123, 5, 4, 0, 2, 1, 2, 6, 2, 0, 9, 9, 49, 4, 2, 1, 2, 4, 9, 9, 55, 9, 266, 3, 10, 1, 2, 0, 49, 6, 4, 4, 14, 10, 5350, 0, 7, 14, 11465, 27, 2343, 9, 87, 9, 39, 4, 60, 6, 26, 9, 535, 9, 470, 0, 2, 54, 8, 3, 82, 0, 12, 1, 19628, 1, 4178, 9, 519, 45, 3, 22, 543, 4, 4, 5, 9, 7, 3, 6, 31, 3, 149, 2, 1418, 49, 513, 54, 5, 49, 9, 0, 15, 0, 23, 4, 2, 14, 1361, 6, 2, 16, 3, 6, 2, 1, 2, 4, 101, 0, 161, 6, 10, 9, 357, 0, 62, 13, 499, 13, 245, 1, 2, 9, 233, 0, 3, 0, 8, 1, 6, 0, 475, 6, 110, 6, 6, 9, 4759, 9, 787719, 239], k4 = [0, 11, 2, 25, 2, 18, 2, 1, 2, 14, 3, 13, 35, 122, 70, 52, 268, 28, 4, 48, 48, 31, 14, 29, 6, 37, 11, 29, 3, 35, 5, 7, 2, 4, 43, 157, 19, 35, 5, 35, 5, 39, 9, 51, 13, 10, 2, 14, 2, 6, 2, 1, 2, 10, 2, 14, 2, 6, 2, 1, 4, 51, 13, 310, 10, 21, 11, 7, 25, 5, 2, 41, 2, 8, 70, 5, 3, 0, 2, 43, 2, 1, 4, 0, 3, 22, 11, 22, 10, 30, 66, 18, 2, 1, 11, 21, 11, 25, 7, 25, 39, 55, 7, 1, 65, 0, 16, 3, 2, 2, 2, 28, 43, 28, 4, 28, 36, 7, 2, 27, 28, 53, 11, 21, 11, 18, 14, 17, 111, 72, 56, 50, 14, 50, 14, 35, 39, 27, 10, 22, 251, 41, 7, 1, 17, 5, 57, 28, 11, 0, 9, 21, 43, 17, 47, 20, 28, 22, 13, 52, 58, 1, 3, 0, 14, 44, 33, 24, 27, 35, 30, 0, 3, 0, 9, 34, 4, 0, 13, 47, 15, 3, 22, 0, 2, 0, 36, 17, 2, 24, 20, 1, 64, 6, 2, 0, 2, 3, 2, 14, 2, 9, 8, 46, 39, 7, 3, 1, 3, 21, 2, 6, 2, 1, 2, 4, 4, 0, 19, 0, 13, 4, 31, 9, 2, 0, 3, 0, 2, 37, 2, 0, 26, 0, 2, 0, 45, 52, 19, 3, 21, 2, 31, 47, 21, 1, 2, 0, 185, 46, 42, 3, 37, 47, 21, 0, 60, 42, 14, 0, 72, 26, 38, 6, 186, 43, 117, 63, 32, 7, 3, 0, 3, 7, 2, 1, 2, 23, 16, 0, 2, 0, 95, 7, 3, 38, 17, 0, 2, 0, 29, 0, 11, 39, 8, 0, 22, 0, 12, 45, 20, 0, 19, 72, 200, 32, 32, 8, 2, 36, 18, 0, 50, 29, 113, 6, 2, 1, 2, 37, 22, 0, 26, 5, 2, 1, 2, 31, 15, 0, 24, 43, 261, 18, 16, 0, 2, 12, 2, 33, 125, 0, 80, 921, 103, 110, 18, 195, 2637, 96, 16, 1071, 18, 5, 26, 3994, 6, 582, 6842, 29, 1763, 568, 8, 30, 18, 78, 18, 29, 19, 47, 17, 3, 32, 20, 6, 18, 433, 44, 212, 63, 33, 24, 3, 24, 45, 74, 6, 0, 67, 12, 65, 1, 2, 0, 15, 4, 10, 7381, 42, 31, 98, 114, 8702, 3, 2, 6, 2, 1, 2, 290, 16, 0, 30, 2, 3, 0, 15, 3, 9, 395, 2309, 106, 6, 12, 4, 8, 8, 9, 5991, 84, 2, 70, 2, 1, 3, 0, 3, 1, 3, 3, 2, 11, 2, 0, 2, 6, 2, 64, 2, 3, 3, 7, 2, 6, 2, 27, 2, 3, 2, 4, 2, 0, 4, 6, 2, 339, 3, 24, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 7, 1845, 30, 7, 5, 262, 61, 147, 44, 11, 6, 17, 0, 322, 29, 19, 43, 485, 27, 229, 29, 3, 0, 208, 30, 2, 2, 2, 1, 2, 6, 3, 4, 10, 1, 225, 6, 2, 3, 2, 1, 2, 14, 2, 196, 60, 67, 8, 0, 1205, 3, 2, 26, 2, 1, 2, 0, 3, 0, 2, 9, 2, 3, 2, 0, 2, 0, 7, 0, 5, 0, 2, 0, 2, 0, 2, 2, 2, 1, 2, 0, 3, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 1, 2, 0, 3, 3, 2, 6, 2, 3, 2, 3, 2, 0, 2, 9, 2, 16, 6, 2, 2, 4, 2, 16, 4421, 42719, 33, 4381, 3, 5773, 3, 7472, 16, 621, 2467, 541, 1507, 4938, 6, 8489], Zg = "‌‍·̀-ͯ·҃-֑҇-ׇֽֿׁׂׅׄؐ-ًؚ-٩ٰۖ-ۜ۟-۪ۤۧۨ-ۭ۰-۹ܑܰ-݊ަ-ް߀-߉߫-߽߳ࠖ-࠙ࠛ-ࠣࠥ-ࠧࠩ-࡙࠭-࡛ࢗ-࢟࣊-ࣣ࣡-ःऺ-़ा-ॏ॑-ॗॢॣ०-९ঁ-ঃ়া-ৄেৈো-্ৗৢৣ০-৯৾ਁ-ਃ਼ਾ-ੂੇੈੋ-੍ੑ੦-ੱੵઁ-ઃ઼ા-ૅે-ૉો-્ૢૣ૦-૯ૺ-૿ଁ-ଃ଼ା-ୄେୈୋ-୍୕-ୗୢୣ୦-୯ஂா-ூெ-ைொ-்ௗ௦-௯ఀ-ఄ఼ా-ౄె-ైొ-్ౕౖౢౣ౦-౯ಁ-ಃ಼ಾ-ೄೆ-ೈೊ-್ೕೖೢೣ೦-೯ೳഀ-ഃ഻഼ാ-ൄെ-ൈൊ-്ൗൢൣ൦-൯ඁ-ඃ්ා-ුූෘ-ෟ෦-෯ෲෳัิ-ฺ็-๎๐-๙ັິ-ຼ່-໎໐-໙༘༙༠-༩༹༵༷༾༿ཱ-྄྆྇ྍ-ྗྙ-ྼ࿆ါ-ှ၀-၉ၖ-ၙၞ-ၠၢ-ၤၧ-ၭၱ-ၴႂ-ႍႏ-ႝ፝-፟፩-፱ᜒ-᜕ᜲ-᜴ᝒᝓᝲᝳ឴-៓៝០-៩᠋-᠍᠏-᠙ᢩᤠ-ᤫᤰ-᤻᥆-᥏᧐-᧚ᨗ-ᨛᩕ-ᩞ᩠-᩿᩼-᪉᪐-᪙᪰-᪽ᪿ-᫝᫠-᫫ᬀ-ᬄ᬴-᭄᭐-᭙᭫-᭳ᮀ-ᮂᮡ-ᮭ᮰-᮹᯦-᯳ᰤ-᰷᱀-᱉᱐-᱙᳐-᳔᳒-᳨᳭᳴᳷-᳹᷀-᷿‌‍‿⁀⁔⃐-⃥⃜⃡-⃰⳯-⵿⳱ⷠ-〪ⷿ-゙゚〯・꘠-꘩꙯ꙴ-꙽ꚞꚟ꛰꛱ꠂ꠆ꠋꠣ-ꠧ꠬ꢀꢁꢴ-ꣅ꣐-꣙꣠-꣱ꣿ-꤉ꤦ-꤭ꥇ-꥓ꦀ-ꦃ꦳-꧀꧐-꧙ꧥ꧰-꧹ꨩ-ꨶꩃꩌꩍ꩐-꩙ꩻ-ꩽꪰꪲ-ꪴꪷꪸꪾ꪿꫁ꫫ-ꫯꫵ꫶ꯣ-ꯪ꯬꯭꯰-꯹ﬞ︀-️︠-︯︳︴﹍-﹏０-９＿･", S4 = "ªµºÀ-ÖØ-öø-ˁˆ-ˑˠ-ˤˬˮͰ-ʹͶͷͺ-ͽͿΆΈ-ΊΌΎ-ΡΣ-ϵϷ-ҁҊ-ԯԱ-Ֆՙՠ-ֈא-תׯ-ײؠ-يٮٯٱ-ۓەۥۦۮۯۺ-ۼۿܐܒ-ܯݍ-ޥޱߊ-ߪߴߵߺࠀ-ࠕࠚࠤࠨࡀ-ࡘࡠ-ࡪࡰ-ࢇࢉ-࢏ࢠ-ࣉऄ-हऽॐक़-ॡॱ-ঀঅ-ঌএঐও-নপ-রলশ-হঽৎড়ঢ়য়-ৡৰৱৼਅ-ਊਏਐਓ-ਨਪ-ਰਲਲ਼ਵਸ਼ਸਹਖ਼-ੜਫ਼ੲ-ੴઅ-ઍએ-ઑઓ-નપ-રલળવ-હઽૐૠૡૹଅ-ଌଏଐଓ-ନପ-ରଲଳଵ-ହଽଡ଼ଢ଼ୟ-ୡୱஃஅ-ஊஎ-ஐஒ-கஙசஜஞடணதந-பம-ஹௐఅ-ఌఎ-ఐఒ-నప-హఽౘ-ౚ౜ౝౠౡಀಅ-ಌಎ-ಐಒ-ನಪ-ಳವ-ಹಽ೜-ೞೠೡೱೲഄ-ഌഎ-ഐഒ-ഺഽൎൔ-ൖൟ-ൡൺ-ൿඅ-ඖක-නඳ-රලව-ෆก-ะาำเ-ๆກຂຄຆ-ຊຌ-ຣລວ-ະາຳຽເ-ໄໆໜ-ໟༀཀ-ཇཉ-ཬྈ-ྌက-ဪဿၐ-ၕၚ-ၝၡၥၦၮ-ၰၵ-ႁႎႠ-ჅჇჍა-ჺჼ-ቈቊ-ቍቐ-ቖቘቚ-ቝበ-ኈኊ-ኍነ-ኰኲ-ኵኸ-ኾዀዂ-ዅወ-ዖዘ-ጐጒ-ጕጘ-ፚᎀ-ᎏᎠ-Ᏽᏸ-ᏽᐁ-ᙬᙯ-ᙿᚁ-ᚚᚠ-ᛪᛮ-ᛸᜀ-ᜑᜟ-ᜱᝀ-ᝑᝠ-ᝬᝮ-ᝰក-ឳៗៜᠠ-ᡸᢀ-ᢨᢪᢰ-ᣵᤀ-ᤞᥐ-ᥭᥰ-ᥴᦀ-ᦫᦰ-ᧉᨀ-ᨖᨠ-ᩔᪧᬅ-ᬳᭅ-ᭌᮃ-ᮠᮮᮯᮺ-ᯥᰀ-ᰣᱍ-ᱏᱚ-ᱽᲀ-ᲊᲐ-ᲺᲽ-Ჿᳩ-ᳬᳮ-ᳳᳵᳶᳺᴀ-ᶿḀ-ἕἘ-Ἕἠ-ὅὈ-Ὅὐ-ὗὙὛὝὟ-ώᾀ-ᾴᾶ-ᾼιῂ-ῄῆ-ῌῐ-ΐῖ-Ίῠ-Ῥῲ-ῴῶ-ῼⁱⁿₐ-ₜℂℇℊ-ℓℕ℘-ℝℤΩℨK-ℹℼ-ℿⅅ-ⅉⅎⅠ-ↈⰀ-ⳤⳫ-ⳮⳲⳳⴀ-ⴥⴧⴭⴰ-ⵧⵯⶀ-ⶖⶠ-ⶦⶨ-ⶮⶰ-ⶶⶸ-ⶾⷀ-ⷆⷈ-ⷎⷐ-ⷖⷘ-ⷞ々-〇〡-〩〱-〵〸-〼ぁ-ゖ゛-ゟァ-ヺー-ヿㄅ-ㄯㄱ-ㆎㆠ-ㆿㇰ-ㇿ㐀-䶿一-ꒌꓐ-ꓽꔀ-ꘌꘐ-ꘟꘪꘫꙀ-ꙮꙿ-ꚝꚠ-ꛯꜗ-ꜟꜢ-ꞈꞋ-Ƛ꟱-ꠁꠃ-ꠅꠇ-ꠊꠌ-ꠢꡀ-ꡳꢂ-ꢳꣲ-ꣷꣻꣽꣾꤊ-ꤥꤰ-ꥆꥠ-ꥼꦄ-ꦲꧏꧠ-ꧤꧦ-ꧯꧺ-ꧾꨀ-ꨨꩀ-ꩂꩄ-ꩋꩠ-ꩶꩺꩾ-ꪯꪱꪵꪶꪹ-ꪽꫀꫂꫛ-ꫝꫠ-ꫪꫲ-ꫴꬁ-ꬆꬉ-ꬎꬑ-ꬖꬠ-ꬦꬨ-ꬮꬰ-ꭚꭜ-ꭩꭰ-ꯢ가-힣ힰ-ퟆퟋ-ퟻ豈-舘並-龎ﬀ-ﬆﬓ-ﬗיִײַ-ﬨשׁ-זּטּ-לּמּנּסּףּפּצּ-ﮱﯓ-ﴽﵐ-ﶏﶒ-ﷇﷰ-ﷻﹰ-ﹴﹶ-ﻼＡ-Ｚａ-ｚｦ-ﾾￂ-ￇￊ-ￏￒ-ￗￚ-ￜ", V3 = {
+var Wg = [509, 0, 227, 0, 150, 4, 294, 9, 1368, 2, 2, 1, 6, 3, 41, 2, 5, 0, 166, 1, 574, 3, 9, 9, 7, 9, 32, 4, 318, 1, 78, 5, 71, 10, 50, 3, 123, 2, 54, 14, 32, 10, 3, 1, 11, 3, 46, 10, 8, 0, 46, 9, 7, 2, 37, 13, 2, 9, 6, 1, 45, 0, 13, 2, 49, 13, 9, 3, 2, 11, 83, 11, 7, 0, 3, 0, 158, 11, 6, 9, 7, 3, 56, 1, 2, 6, 3, 1, 3, 2, 10, 0, 11, 1, 3, 6, 4, 4, 68, 8, 2, 0, 3, 0, 2, 3, 2, 4, 2, 0, 15, 1, 83, 17, 10, 9, 5, 0, 82, 19, 13, 9, 214, 6, 3, 8, 28, 1, 83, 16, 16, 9, 82, 12, 9, 9, 7, 19, 58, 14, 5, 9, 243, 14, 166, 9, 71, 5, 2, 1, 3, 3, 2, 0, 2, 1, 13, 9, 120, 6, 3, 6, 4, 0, 29, 9, 41, 6, 2, 3, 9, 0, 10, 10, 47, 15, 199, 7, 137, 9, 54, 7, 2, 7, 17, 9, 57, 21, 2, 13, 123, 5, 4, 0, 2, 1, 2, 6, 2, 0, 9, 9, 49, 4, 2, 1, 2, 4, 9, 9, 55, 9, 266, 3, 10, 1, 2, 0, 49, 6, 4, 4, 14, 10, 5350, 0, 7, 14, 11465, 27, 2343, 9, 87, 9, 39, 4, 60, 6, 26, 9, 535, 9, 470, 0, 2, 54, 8, 3, 82, 0, 12, 1, 19628, 1, 4178, 9, 519, 45, 3, 22, 543, 4, 4, 5, 9, 7, 3, 6, 31, 3, 149, 2, 1418, 49, 513, 54, 5, 49, 9, 0, 15, 0, 23, 4, 2, 14, 1361, 6, 2, 16, 3, 6, 2, 1, 2, 4, 101, 0, 161, 6, 10, 9, 357, 0, 62, 13, 499, 13, 245, 1, 2, 9, 233, 0, 3, 0, 8, 1, 6, 0, 475, 6, 110, 6, 6, 9, 4759, 9, 787719, 239], S4 = [0, 11, 2, 25, 2, 18, 2, 1, 2, 14, 3, 13, 35, 122, 70, 52, 268, 28, 4, 48, 48, 31, 14, 29, 6, 37, 11, 29, 3, 35, 5, 7, 2, 4, 43, 157, 19, 35, 5, 35, 5, 39, 9, 51, 13, 10, 2, 14, 2, 6, 2, 1, 2, 10, 2, 14, 2, 6, 2, 1, 4, 51, 13, 310, 10, 21, 11, 7, 25, 5, 2, 41, 2, 8, 70, 5, 3, 0, 2, 43, 2, 1, 4, 0, 3, 22, 11, 22, 10, 30, 66, 18, 2, 1, 11, 21, 11, 25, 7, 25, 39, 55, 7, 1, 65, 0, 16, 3, 2, 2, 2, 28, 43, 28, 4, 28, 36, 7, 2, 27, 28, 53, 11, 21, 11, 18, 14, 17, 111, 72, 56, 50, 14, 50, 14, 35, 39, 27, 10, 22, 251, 41, 7, 1, 17, 5, 57, 28, 11, 0, 9, 21, 43, 17, 47, 20, 28, 22, 13, 52, 58, 1, 3, 0, 14, 44, 33, 24, 27, 35, 30, 0, 3, 0, 9, 34, 4, 0, 13, 47, 15, 3, 22, 0, 2, 0, 36, 17, 2, 24, 20, 1, 64, 6, 2, 0, 2, 3, 2, 14, 2, 9, 8, 46, 39, 7, 3, 1, 3, 21, 2, 6, 2, 1, 2, 4, 4, 0, 19, 0, 13, 4, 31, 9, 2, 0, 3, 0, 2, 37, 2, 0, 26, 0, 2, 0, 45, 52, 19, 3, 21, 2, 31, 47, 21, 1, 2, 0, 185, 46, 42, 3, 37, 47, 21, 0, 60, 42, 14, 0, 72, 26, 38, 6, 186, 43, 117, 63, 32, 7, 3, 0, 3, 7, 2, 1, 2, 23, 16, 0, 2, 0, 95, 7, 3, 38, 17, 0, 2, 0, 29, 0, 11, 39, 8, 0, 22, 0, 12, 45, 20, 0, 19, 72, 200, 32, 32, 8, 2, 36, 18, 0, 50, 29, 113, 6, 2, 1, 2, 37, 22, 0, 26, 5, 2, 1, 2, 31, 15, 0, 24, 43, 261, 18, 16, 0, 2, 12, 2, 33, 125, 0, 80, 921, 103, 110, 18, 195, 2637, 96, 16, 1071, 18, 5, 26, 3994, 6, 582, 6842, 29, 1763, 568, 8, 30, 18, 78, 18, 29, 19, 47, 17, 3, 32, 20, 6, 18, 433, 44, 212, 63, 33, 24, 3, 24, 45, 74, 6, 0, 67, 12, 65, 1, 2, 0, 15, 4, 10, 7381, 42, 31, 98, 114, 8702, 3, 2, 6, 2, 1, 2, 290, 16, 0, 30, 2, 3, 0, 15, 3, 9, 395, 2309, 106, 6, 12, 4, 8, 8, 9, 5991, 84, 2, 70, 2, 1, 3, 0, 3, 1, 3, 3, 2, 11, 2, 0, 2, 6, 2, 64, 2, 3, 3, 7, 2, 6, 2, 27, 2, 3, 2, 4, 2, 0, 4, 6, 2, 339, 3, 24, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 7, 1845, 30, 7, 5, 262, 61, 147, 44, 11, 6, 17, 0, 322, 29, 19, 43, 485, 27, 229, 29, 3, 0, 208, 30, 2, 2, 2, 1, 2, 6, 3, 4, 10, 1, 225, 6, 2, 3, 2, 1, 2, 14, 2, 196, 60, 67, 8, 0, 1205, 3, 2, 26, 2, 1, 2, 0, 3, 0, 2, 9, 2, 3, 2, 0, 2, 0, 7, 0, 5, 0, 2, 0, 2, 0, 2, 2, 2, 1, 2, 0, 3, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 1, 2, 0, 3, 3, 2, 6, 2, 3, 2, 3, 2, 0, 2, 9, 2, 16, 6, 2, 2, 4, 2, 16, 4421, 42719, 33, 4381, 3, 5773, 3, 7472, 16, 621, 2467, 541, 1507, 4938, 6, 8489], Zg = "‌‍·̀-ͯ·҃-֑҇-ׇֽֿׁׂׅׄؐ-ًؚ-٩ٰۖ-ۜ۟-۪ۤۧۨ-ۭ۰-۹ܑܰ-݊ަ-ް߀-߉߫-߽߳ࠖ-࠙ࠛ-ࠣࠥ-ࠧࠩ-࡙࠭-࡛ࢗ-࢟࣊-ࣣ࣡-ःऺ-़ा-ॏ॑-ॗॢॣ०-९ঁ-ঃ়া-ৄেৈো-্ৗৢৣ০-৯৾ਁ-ਃ਼ਾ-ੂੇੈੋ-੍ੑ੦-ੱੵઁ-ઃ઼ા-ૅે-ૉો-્ૢૣ૦-૯ૺ-૿ଁ-ଃ଼ା-ୄେୈୋ-୍୕-ୗୢୣ୦-୯ஂா-ூெ-ைொ-்ௗ௦-௯ఀ-ఄ఼ా-ౄె-ైొ-్ౕౖౢౣ౦-౯ಁ-ಃ಼ಾ-ೄೆ-ೈೊ-್ೕೖೢೣ೦-೯ೳഀ-ഃ഻഼ാ-ൄെ-ൈൊ-്ൗൢൣ൦-൯ඁ-ඃ්ා-ුූෘ-ෟ෦-෯ෲෳัิ-ฺ็-๎๐-๙ັິ-ຼ່-໎໐-໙༘༙༠-༩༹༵༷༾༿ཱ-྄྆྇ྍ-ྗྙ-ྼ࿆ါ-ှ၀-၉ၖ-ၙၞ-ၠၢ-ၤၧ-ၭၱ-ၴႂ-ႍႏ-ႝ፝-፟፩-፱ᜒ-᜕ᜲ-᜴ᝒᝓᝲᝳ឴-៓៝០-៩᠋-᠍᠏-᠙ᢩᤠ-ᤫᤰ-᤻᥆-᥏᧐-᧚ᨗ-ᨛᩕ-ᩞ᩠-᩿᩼-᪉᪐-᪙᪰-᪽ᪿ-᫝᫠-᫫ᬀ-ᬄ᬴-᭄᭐-᭙᭫-᭳ᮀ-ᮂᮡ-ᮭ᮰-᮹᯦-᯳ᰤ-᰷᱀-᱉᱐-᱙᳐-᳔᳒-᳨᳭᳴᳷-᳹᷀-᷿‌‍‿⁀⁔⃐-⃥⃜⃡-⃰⳯-⵿⳱ⷠ-〪ⷿ-゙゚〯・꘠-꘩꙯ꙴ-꙽ꚞꚟ꛰꛱ꠂ꠆ꠋꠣ-ꠧ꠬ꢀꢁꢴ-ꣅ꣐-꣙꣠-꣱ꣿ-꤉ꤦ-꤭ꥇ-꥓ꦀ-ꦃ꦳-꧀꧐-꧙ꧥ꧰-꧹ꨩ-ꨶꩃꩌꩍ꩐-꩙ꩻ-ꩽꪰꪲ-ꪴꪷꪸꪾ꪿꫁ꫫ-ꫯꫵ꫶ꯣ-ꯪ꯬꯭꯰-꯹ﬞ︀-️︠-︯︳︴﹍-﹏０-９＿･", K4 = "ªµºÀ-ÖØ-öø-ˁˆ-ˑˠ-ˤˬˮͰ-ʹͶͷͺ-ͽͿΆΈ-ΊΌΎ-ΡΣ-ϵϷ-ҁҊ-ԯԱ-Ֆՙՠ-ֈא-תׯ-ײؠ-يٮٯٱ-ۓەۥۦۮۯۺ-ۼۿܐܒ-ܯݍ-ޥޱߊ-ߪߴߵߺࠀ-ࠕࠚࠤࠨࡀ-ࡘࡠ-ࡪࡰ-ࢇࢉ-࢏ࢠ-ࣉऄ-हऽॐक़-ॡॱ-ঀঅ-ঌএঐও-নপ-রলশ-হঽৎড়ঢ়য়-ৡৰৱৼਅ-ਊਏਐਓ-ਨਪ-ਰਲਲ਼ਵਸ਼ਸਹਖ਼-ੜਫ਼ੲ-ੴઅ-ઍએ-ઑઓ-નપ-રલળવ-હઽૐૠૡૹଅ-ଌଏଐଓ-ନପ-ରଲଳଵ-ହଽଡ଼ଢ଼ୟ-ୡୱஃஅ-ஊஎ-ஐஒ-கஙசஜஞடணதந-பம-ஹௐఅ-ఌఎ-ఐఒ-నప-హఽౘ-ౚ౜ౝౠౡಀಅ-ಌಎ-ಐಒ-ನಪ-ಳವ-ಹಽ೜-ೞೠೡೱೲഄ-ഌഎ-ഐഒ-ഺഽൎൔ-ൖൟ-ൡൺ-ൿඅ-ඖක-නඳ-රලව-ෆก-ะาำเ-ๆກຂຄຆ-ຊຌ-ຣລວ-ະາຳຽເ-ໄໆໜ-ໟༀཀ-ཇཉ-ཬྈ-ྌက-ဪဿၐ-ၕၚ-ၝၡၥၦၮ-ၰၵ-ႁႎႠ-ჅჇჍა-ჺჼ-ቈቊ-ቍቐ-ቖቘቚ-ቝበ-ኈኊ-ኍነ-ኰኲ-ኵኸ-ኾዀዂ-ዅወ-ዖዘ-ጐጒ-ጕጘ-ፚᎀ-ᎏᎠ-Ᏽᏸ-ᏽᐁ-ᙬᙯ-ᙿᚁ-ᚚᚠ-ᛪᛮ-ᛸᜀ-ᜑᜟ-ᜱᝀ-ᝑᝠ-ᝬᝮ-ᝰក-ឳៗៜᠠ-ᡸᢀ-ᢨᢪᢰ-ᣵᤀ-ᤞᥐ-ᥭᥰ-ᥴᦀ-ᦫᦰ-ᧉᨀ-ᨖᨠ-ᩔᪧᬅ-ᬳᭅ-ᭌᮃ-ᮠᮮᮯᮺ-ᯥᰀ-ᰣᱍ-ᱏᱚ-ᱽᲀ-ᲊᲐ-ᲺᲽ-Ჿᳩ-ᳬᳮ-ᳳᳵᳶᳺᴀ-ᶿḀ-ἕἘ-Ἕἠ-ὅὈ-Ὅὐ-ὗὙὛὝὟ-ώᾀ-ᾴᾶ-ᾼιῂ-ῄῆ-ῌῐ-ΐῖ-Ίῠ-Ῥῲ-ῴῶ-ῼⁱⁿₐ-ₜℂℇℊ-ℓℕ℘-ℝℤΩℨK-ℹℼ-ℿⅅ-ⅉⅎⅠ-ↈⰀ-ⳤⳫ-ⳮⳲⳳⴀ-ⴥⴧⴭⴰ-ⵧⵯⶀ-ⶖⶠ-ⶦⶨ-ⶮⶰ-ⶶⶸ-ⶾⷀ-ⷆⷈ-ⷎⷐ-ⷖⷘ-ⷞ々-〇〡-〩〱-〵〸-〼ぁ-ゖ゛-ゟァ-ヺー-ヿㄅ-ㄯㄱ-ㆎㆠ-ㆿㇰ-ㇿ㐀-䶿一-ꒌꓐ-ꓽꔀ-ꘌꘐ-ꘟꘪꘫꙀ-ꙮꙿ-ꚝꚠ-ꛯꜗ-ꜟꜢ-ꞈꞋ-Ƛ꟱-ꠁꠃ-ꠅꠇ-ꠊꠌ-ꠢꡀ-ꡳꢂ-ꢳꣲ-ꣷꣻꣽꣾꤊ-ꤥꤰ-ꥆꥠ-ꥼꦄ-ꦲꧏꧠ-ꧤꧦ-ꧯꧺ-ꧾꨀ-ꨨꩀ-ꩂꩄ-ꩋꩠ-ꩶꩺꩾ-ꪯꪱꪵꪶꪹ-ꪽꫀꫂꫛ-ꫝꫠ-ꫪꫲ-ꫴꬁ-ꬆꬉ-ꬎꬑ-ꬖꬠ-ꬦꬨ-ꬮꬰ-ꭚꭜ-ꭩꭰ-ꯢ가-힣ힰ-ퟆퟋ-ퟻ豈-舘並-龎ﬀ-ﬆﬓ-ﬗיִײַ-ﬨשׁ-זּטּ-לּמּנּסּףּפּצּ-ﮱﯓ-ﴽﵐ-ﶏﶒ-ﷇﷰ-ﷻﹰ-ﹴﹶ-ﻼＡ-Ｚａ-ｚｦ-ﾾￂ-ￇￊ-ￏￒ-ￗￚ-ￜ", V3 = {
   3: "abstract boolean byte char class double enum export extends final float goto implements import int interface long native package private protected public short static super synchronized throws transient volatile",
   5: "class enum extends super const export import",
   6: "enum",
@@ -2477,7 +2486,7 @@ var Wg = [509, 0, 227, 0, 150, 4, 294, 9, 1368, 2, 2, 1, 6, 3, 41, 2, 5, 0, 166,
   5: T3,
   "5module": T3 + " export import",
   6: T3 + " const class extends export import super"
-}, K4 = /^in(stanceof)?$/, Xg = new RegExp("[" + S4 + "]"), $g = new RegExp("[" + S4 + Zg + "]");
+}, G4 = /^in(stanceof)?$/, Xg = new RegExp("[" + K4 + "]"), $g = new RegExp("[" + K4 + Zg + "]");
 function o5(A, g) {
   for (var I = 65536, C = 0; C < g.length; C += 2) {
     if (I += g[C], I > A)
@@ -2488,10 +2497,10 @@ function o5(A, g) {
   return !1;
 }
 function V1(A, g) {
-  return A < 65 ? A === 36 : A < 91 ? !0 : A < 97 ? A === 95 : A < 123 ? !0 : A <= 65535 ? A >= 170 && Xg.test(String.fromCharCode(A)) : g === !1 ? !1 : o5(A, k4);
+  return A < 65 ? A === 36 : A < 91 ? !0 : A < 97 ? A === 95 : A < 123 ? !0 : A <= 65535 ? A >= 170 && Xg.test(String.fromCharCode(A)) : g === !1 ? !1 : o5(A, S4);
 }
 function E2(A, g) {
-  return A < 48 ? A === 36 : A < 58 ? !0 : A < 65 ? !1 : A < 91 ? !0 : A < 97 ? A === 95 : A < 123 ? !0 : A <= 65535 ? A >= 170 && $g.test(String.fromCharCode(A)) : g === !1 ? !1 : o5(A, k4) || o5(A, Wg);
+  return A < 48 ? A === 36 : A < 58 ? !0 : A < 65 ? !1 : A < 91 ? !0 : A < 97 ? A === 95 : A < 123 ? !0 : A <= 65535 ? A >= 170 && $g.test(String.fromCharCode(A)) : g === !1 ? !1 : o5(A, S4) || o5(A, Wg);
 }
 var PA = function(g, I) {
   I === void 0 && (I = {}), this.label = g, this.keyword = I.keyword, this.beforeExpr = !!I.beforeExpr, this.startsExpr = !!I.startsExpr, this.isLoop = !!I.isLoop, this.isAssign = !!I.isAssign, this.prefix = !!I.prefix, this.postfix = !!I.postfix, this.binop = I.binop || null, this.updateContext = null;
@@ -2600,7 +2609,7 @@ var h = {
 function G2(A) {
   return A === 10 || A === 13 || A === 8232 || A === 8233;
 }
-function G4(A, g, I) {
+function p4(A, g, I) {
   I === void 0 && (I = A.length);
   for (var C = g; C < I; C++) {
     var e = A.charCodeAt(C);
@@ -2609,13 +2618,13 @@ function G4(A, g, I) {
   }
   return -1;
 }
-var p4 = /[\u1680\u2000-\u200a\u202f\u205f\u3000\ufeff]/, n1 = /(?:\s|\/\/.*|\/\*[^]*?\*\/)*/g, R4 = Object.prototype, gI = R4.hasOwnProperty, II = R4.toString, p2 = Object.hasOwn || (function(A, g) {
+var R4 = /[\u1680\u2000-\u200a\u202f\u205f\u3000\ufeff]/, n1 = /(?:\s|\/\/.*|\/\*[^]*?\*\/)*/g, f4 = Object.prototype, gI = f4.hasOwnProperty, II = f4.toString, p2 = Object.hasOwn || (function(A, g) {
   return gI.call(A, g);
-}), $5 = Array.isArray || (function(A) {
+}), A4 = Array.isArray || (function(A) {
   return II.call(A) === "[object Array]";
-}), A4 = /* @__PURE__ */ Object.create(null);
+}), g4 = /* @__PURE__ */ Object.create(null);
 function i2(A) {
-  return A4[A] || (A4[A] = new RegExp("^(?:" + A.replace(/ /g, "|") + ")$"));
+  return g4[A] || (g4[A] = new RegExp("^(?:" + A.replace(/ /g, "|") + ")$"));
 }
 function j1(A) {
   return A <= 65535 ? String.fromCharCode(A) : (A -= 65536, String.fromCharCode((A >> 10) + 55296, (A & 1023) + 56320));
@@ -2629,9 +2638,9 @@ P2.prototype.offset = function(g) {
 var y3 = function(g, I, C) {
   this.start = I, this.end = C, g.sourceFile !== null && (this.source = g.sourceFile);
 };
-function f4(A, g) {
+function F4(A, g) {
   for (var I = 1, C = 0; ; ) {
-    var e = G4(A, C, g);
+    var e = p4(A, C, g);
     if (e < 0)
       return new P2(I, g - C);
     ++I, C = e;
@@ -2736,19 +2745,19 @@ var l5 = {
   // When enabled, parenthesized expressions are represented by
   // (non-standard) ParenthesizedExpression nodes
   preserveParens: !1
-}, g4 = !1;
+}, I4 = !1;
 function eI(A) {
   var g = {};
   for (var I in l5)
     g[I] = A && p2(A, I) ? A[I] : l5[I];
-  if (g.ecmaVersion === "latest" ? g.ecmaVersion = 1e8 : g.ecmaVersion == null ? (!g4 && typeof console == "object" && console.warn && (g4 = !0, console.warn(`Since Acorn 8.0.0, options.ecmaVersion is required.
-Defaulting to 2020, but this will stop working in the future.`)), g.ecmaVersion = 11) : g.ecmaVersion >= 2015 && (g.ecmaVersion -= 2009), g.allowReserved == null && (g.allowReserved = g.ecmaVersion < 5), (!A || A.allowHashBang == null) && (g.allowHashBang = g.ecmaVersion >= 14), $5(g.onToken)) {
+  if (g.ecmaVersion === "latest" ? g.ecmaVersion = 1e8 : g.ecmaVersion == null ? (!I4 && typeof console == "object" && console.warn && (I4 = !0, console.warn(`Since Acorn 8.0.0, options.ecmaVersion is required.
+Defaulting to 2020, but this will stop working in the future.`)), g.ecmaVersion = 11) : g.ecmaVersion >= 2015 && (g.ecmaVersion -= 2009), g.allowReserved == null && (g.allowReserved = g.ecmaVersion < 5), (!A || A.allowHashBang == null) && (g.allowHashBang = g.ecmaVersion >= 14), A4(g.onToken)) {
     var C = g.onToken;
     g.onToken = function(e) {
       return C.push(e);
     };
   }
-  if ($5(g.onComment) && (g.onComment = iI(g, g.onComment)), g.sourceType === "commonjs" && g.allowAwaitOutsideFunction)
+  if (A4(g.onComment) && (g.onComment = iI(g, g.onComment)), g.sourceType === "commonjs" && g.allowAwaitOutsideFunction)
     throw new Error("Cannot use allowAwaitOutsideFunction with sourceType: commonjs");
   return g;
 }
@@ -2763,11 +2772,11 @@ function iI(A, g) {
     A.locations && (Q.loc = new y3(this, B, i)), A.ranges && (Q.range = [e, q]), g.push(Q);
   };
 }
-var m2 = 1, u2 = 2, m5 = 4, F4 = 8, w5 = 16, U4 = 32, M3 = 64, Y4 = 128, y2 = 256, W2 = 512, J4 = 1024, x3 = m2 | u2 | y2;
+var m2 = 1, u2 = 2, m5 = 4, U4 = 8, w5 = 16, Y4 = 32, M3 = 64, J4 = 128, y2 = 256, W2 = 512, b4 = 1024, x3 = m2 | u2 | y2;
 function d5(A, g) {
-  return u2 | (A ? m5 : 0) | (g ? F4 : 0);
+  return u2 | (A ? m5 : 0) | (g ? U4 : 0);
 }
-var s3 = 0, u5 = 1, z1 = 2, b4 = 3, L4 = 4, H4 = 5, l1 = function(g, I, C) {
+var s3 = 0, u5 = 1, z1 = 2, L4 = 3, H4 = 4, v4 = 5, l1 = function(g, I, C) {
   this.options = g = eI(g), this.sourceFile = g.sourceFile, this.keywords = i2(zg[g.ecmaVersion >= 6 ? 6 : g.sourceType === "module" ? "5module" : 5]);
   var e = "";
   g.allowReserved !== !0 && (e = V3[g.ecmaVersion >= 6 ? 6 : g.ecmaVersion === 5 ? 5 : 3], g.sourceType === "module" && (e += " await")), this.reservedWords = i2(e);
@@ -2787,7 +2796,7 @@ G1.inFunction.get = function() {
   return (this.currentVarScope().flags & u2) > 0;
 };
 G1.inGenerator.get = function() {
-  return (this.currentVarScope().flags & F4) > 0;
+  return (this.currentVarScope().flags & U4) > 0;
 };
 G1.inAsync.get = function() {
   return (this.currentVarScope().flags & m5) > 0;
@@ -2810,7 +2819,7 @@ G1.allowSuper.get = function() {
   return (g & M3) > 0 || this.options.allowSuperOutsideMethod;
 };
 G1.allowDirectSuper.get = function() {
-  return (this.currentThisScope().flags & Y4) > 0;
+  return (this.currentThisScope().flags & J4) > 0;
 };
 G1.treatFunctionsAsVar.get = function() {
   return this.treatFunctionsAsVarInScope(this.currentScope());
@@ -2825,7 +2834,7 @@ G1.allowNewDotTarget.get = function() {
 };
 G1.allowUsing.get = function() {
   var A = this.currentScope(), g = A.flags;
-  return !(g & J4 || !this.inModule && g & m2);
+  return !(g & b4 || !this.inModule && g & m2);
 };
 G1.inClassStaticBlock.get = function() {
   return (this.currentVarScope().flags & y2) > 0;
@@ -2964,7 +2973,7 @@ dA.isLet = function(A) {
     if (C === 92)
       return !0;
     var q = this.input.slice(e, I);
-    if (!K4.test(q))
+    if (!G4.test(q))
       return !0;
   }
   return !1;
@@ -3002,7 +3011,7 @@ dA.isUsingKeyword = function(A, g) {
   if (i === 92)
     return !0;
   var s = this.input.slice(Q, C);
-  if (K4.test(s))
+  if (G4.test(s))
     return !1;
   if (g && !A && s === "of") {
     n1.lastIndex = C;
@@ -3127,7 +3136,7 @@ dA.parseReturnStatement = function(A) {
   return this.allowReturn || this.raise(this.start, "'return' outside of function"), this.next(), this.eat(h.semi) || this.insertSemicolon() ? A.argument = null : (A.argument = this.parseExpression(), this.semicolon()), this.finishNode(A, "ReturnStatement");
 };
 dA.parseSwitchStatement = function(A) {
-  this.next(), A.discriminant = this.parseParenExpression(), A.cases = [], this.expect(h.braceL), this.labels.push(BI), this.enterScope(J4);
+  this.next(), A.discriminant = this.parseParenExpression(), A.cases = [], this.expect(h.braceL), this.labels.push(BI), this.enterScope(b4);
   for (var g, I = !1; this.type !== h.braceR; )
     if (this.type === h._case || this.type === h._default) {
       var C = this.type === h._case;
@@ -3142,7 +3151,7 @@ dA.parseThrowStatement = function(A) {
 var QI = [];
 dA.parseCatchClauseParam = function() {
   var A = this.parseBindingAtom(), g = A.type === "Identifier";
-  return this.enterScope(g ? U4 : 0), this.checkLValPattern(A, g ? L4 : z1), this.expect(h.parenR), A;
+  return this.enterScope(g ? Y4 : 0), this.checkLValPattern(A, g ? H4 : z1), this.expect(h.parenR), A;
 };
 dA.parseTryStatement = function(A) {
   if (this.next(), A.block = this.parseBlock(), A.handler = null, this.type === h._catch) {
@@ -3208,9 +3217,9 @@ dA.parseVar = function(A, g, I, C) {
 dA.parseVarId = function(A, g) {
   A.id = g === "using" || g === "await using" ? this.parseIdent() : this.parseBindingAtom(), this.checkLValPattern(A.id, g === "var" ? u5 : z1, !1);
 };
-var L2 = 1, t5 = 2, v4 = 4;
+var L2 = 1, t5 = 2, _4 = 4;
 dA.parseFunction = function(A, g, I, C, e) {
-  this.initFunction(A), (this.options.ecmaVersion >= 9 || this.options.ecmaVersion >= 6 && !C) && (this.type === h.star && g & t5 && this.unexpected(), A.generator = this.eat(h.star)), this.options.ecmaVersion >= 8 && (A.async = !!C), g & L2 && (A.id = g & v4 && this.type !== h.name ? null : this.parseIdent(), A.id && !(g & t5) && this.checkLValSimple(A.id, this.strict || A.generator || A.async ? this.treatFunctionsAsVar ? u5 : z1 : b4));
+  this.initFunction(A), (this.options.ecmaVersion >= 9 || this.options.ecmaVersion >= 6 && !C) && (this.type === h.star && g & t5 && this.unexpected(), A.generator = this.eat(h.star)), this.options.ecmaVersion >= 8 && (A.async = !!C), g & L2 && (A.id = g & _4 && this.type !== h.name ? null : this.parseIdent(), A.id && !(g & t5) && this.checkLValSimple(A.id, this.strict || A.generator || A.async ? this.treatFunctionsAsVar ? u5 : z1 : L4));
   var q = this.yieldPos, B = this.awaitPos, i = this.awaitIdentPos;
   return this.yieldPos = 0, this.awaitPos = 0, this.awaitIdentPos = 0, this.enterScope(d5(A.async, A.generator)), g & L2 || (A.id = this.type === h.name ? this.parseIdent() : null), this.parseFunctionParams(A), this.parseFunctionBody(A, I, !1, e), this.yieldPos = q, this.awaitPos = B, this.awaitIdentPos = i, this.finishNode(A, g & L2 ? "FunctionDeclaration" : "FunctionExpression");
 };
@@ -3329,7 +3338,7 @@ dA.parseExportDefaultDeclaration = function() {
   var A;
   if (this.type === h._function || (A = this.isAsyncFunction())) {
     var g = this.startNode();
-    return this.next(), A && this.next(), this.parseFunction(g, L2 | v4, !1, A);
+    return this.next(), A && this.next(), this.parseFunction(g, L2 | _4, !1, A);
   } else if (this.type === h._class) {
     var I = this.startNode();
     return this.parseClass(I, "nullableID");
@@ -3560,7 +3569,7 @@ p1.checkLValSimple = function(A, g, I) {
   var C = g !== s3;
   switch (A.type) {
     case "Identifier":
-      this.strict && this.reservedWordsStrictBind.test(A.name) && this.raiseRecoverable(A.start, (C ? "Binding " : "Assigning to ") + A.name + " in strict mode"), C && (g === z1 && A.name === "let" && this.raiseRecoverable(A.start, "let is disallowed as a lexically bound name"), I && (p2(I, A.name) && this.raiseRecoverable(A.start, "Argument name clash"), I[A.name] = !0), g !== H4 && this.declareName(A.name, g, A.start));
+      this.strict && this.reservedWordsStrictBind.test(A.name) && this.raiseRecoverable(A.start, (C ? "Binding " : "Assigning to ") + A.name + " in strict mode"), C && (g === z1 && A.name === "let" && this.raiseRecoverable(A.start, "let is disallowed as a lexically bound name"), I && (p2(I, A.name) && this.raiseRecoverable(A.start, "Argument name clash"), I[A.name] = !0), g !== v4 && this.declareName(A.name, g, A.start));
       break;
     case "ChainExpression":
       this.raiseRecoverable(A.start, "Optional chaining cannot appear in left-hand side");
@@ -3789,7 +3798,7 @@ pA.parseMaybeUnary = function(A, g, I, C) {
     B = this.parseAwait(C), g = !0;
   else if (this.type.prefix) {
     var i = this.startNode(), Q = this.type === h.incDec;
-    i.operator = this.value, i.prefix = !0, this.next(), i.argument = this.parseMaybeUnary(null, !0, Q, C), this.checkExpressionErrors(A, !0), Q ? this.checkLValSimple(i.argument) : this.strict && i.operator === "delete" && _4(i.argument) ? this.raiseRecoverable(i.start, "Deleting local variable in strict mode") : i.operator === "delete" && n5(i.argument) ? this.raiseRecoverable(i.start, "Private fields can not be deleted") : g = !0, B = this.finishNode(i, Q ? "UpdateExpression" : "UnaryExpression");
+    i.operator = this.value, i.prefix = !0, this.next(), i.argument = this.parseMaybeUnary(null, !0, Q, C), this.checkExpressionErrors(A, !0), Q ? this.checkLValSimple(i.argument) : this.strict && i.operator === "delete" && P4(i.argument) ? this.raiseRecoverable(i.start, "Deleting local variable in strict mode") : i.operator === "delete" && n5(i.argument) ? this.raiseRecoverable(i.start, "Private fields can not be deleted") : g = !0, B = this.finishNode(i, Q ? "UpdateExpression" : "UnaryExpression");
   } else if (!g && this.type === h.privateId)
     (C || this.privateNameStack.length === 0) && this.options.checkPrivateFields && this.unexpected(), B = this.parsePrivateIdent(), this.type !== h._in && this.unexpected();
   else {
@@ -3808,8 +3817,8 @@ pA.parseMaybeUnary = function(A, g, I, C) {
   else
     return B;
 };
-function _4(A) {
-  return A.type === "Identifier" || A.type === "ParenthesizedExpression" && _4(A.expression);
+function P4(A) {
+  return A.type === "Identifier" || A.type === "ParenthesizedExpression" && P4(A.expression);
 }
 function n5(A) {
   return A.type === "MemberExpression" && A.property.type === "PrivateIdentifier" || A.type === "ChainExpression" && n5(A.expression) || A.type === "ParenthesizedExpression" && n5(A.expression);
@@ -4072,7 +4081,7 @@ pA.initFunction = function(A) {
 };
 pA.parseMethod = function(A, g, I) {
   var C = this.startNode(), e = this.yieldPos, q = this.awaitPos, B = this.awaitIdentPos;
-  return this.initFunction(C), this.options.ecmaVersion >= 6 && (C.generator = A), this.options.ecmaVersion >= 8 && (C.async = !!g), this.yieldPos = 0, this.awaitPos = 0, this.awaitIdentPos = 0, this.enterScope(d5(g, C.generator) | M3 | (I ? Y4 : 0)), this.expect(h.parenL), C.params = this.parseBindingList(h.parenR, !1, this.options.ecmaVersion >= 8), this.checkYieldAwaitInDefaultParams(), this.parseFunctionBody(C, !1, !0, !1), this.yieldPos = e, this.awaitPos = q, this.awaitIdentPos = B, this.finishNode(C, "FunctionExpression");
+  return this.initFunction(C), this.options.ecmaVersion >= 6 && (C.generator = A), this.options.ecmaVersion >= 8 && (C.async = !!g), this.yieldPos = 0, this.awaitPos = 0, this.awaitIdentPos = 0, this.enterScope(d5(g, C.generator) | M3 | (I ? J4 : 0)), this.expect(h.parenL), C.params = this.parseBindingList(h.parenR, !1, this.options.ecmaVersion >= 8), this.checkYieldAwaitInDefaultParams(), this.parseFunctionBody(C, !1, !0, !1), this.yieldPos = e, this.awaitPos = q, this.awaitIdentPos = B, this.finishNode(C, "FunctionExpression");
 };
 pA.parseArrowExpression = function(A, g, I, C) {
   var e = this.yieldPos, q = this.awaitPos, B = this.awaitIdentPos;
@@ -4086,7 +4095,7 @@ pA.parseFunctionBody = function(A, g, I, C) {
     var i = this.options.ecmaVersion >= 7 && !this.isSimpleParamList(A.params);
     (!q || i) && (B = this.strictDirective(this.end), B && i && this.raiseRecoverable(A.start, "Illegal 'use strict' directive in function with non-simple parameter list"));
     var Q = this.labels;
-    this.labels = [], B && (this.strict = !0), this.checkParams(A, !q && !B && !g && !I && this.isSimpleParamList(A.params)), this.strict && A.id && this.checkLValSimple(A.id, H4), A.body = this.parseBlock(!1, void 0, B && !q), A.expression = !1, this.adaptDirectivePrologue(A.body.body), this.labels = Q;
+    this.labels = [], B && (this.strict = !0), this.checkParams(A, !q && !B && !g && !I && this.isSimpleParamList(A.params)), this.strict && A.id && this.checkLValSimple(A.id, v4), A.body = this.parseBlock(!1, void 0, B && !q), A.expression = !1, this.adaptDirectivePrologue(A.body.body), this.labels = Q;
   }
   this.exitScope();
 };
@@ -4146,7 +4155,7 @@ pA.parseAwait = function(A) {
 };
 var D3 = l1.prototype;
 D3.raise = function(A, g) {
-  var I = f4(this.input, A);
+  var I = F4(this.input, A);
   g += " (" + I.line + ":" + I.column + ")", this.sourceFile && (g += " in " + this.sourceFile);
   var C = new SyntaxError(g);
   throw C.pos = A, C.loc = I, C.raisedAt = this.pos, C;
@@ -4173,16 +4182,16 @@ o2.declareName = function(A, g, I) {
   if (g === z1) {
     var e = this.currentScope();
     C = e.lexical.indexOf(A) > -1 || e.functions.indexOf(A) > -1 || e.var.indexOf(A) > -1, e.lexical.push(A), this.inModule && e.flags & m2 && delete this.undefinedExports[A];
-  } else if (g === L4) {
+  } else if (g === H4) {
     var q = this.currentScope();
     q.lexical.push(A);
-  } else if (g === b4) {
+  } else if (g === L4) {
     var B = this.currentScope();
     this.treatFunctionsAsVar ? C = B.lexical.indexOf(A) > -1 : C = B.lexical.indexOf(A) > -1 || B.var.indexOf(A) > -1, B.functions.push(A);
   } else
     for (var i = this.scopeStack.length - 1; i >= 0; --i) {
       var Q = this.scopeStack[i];
-      if (Q.lexical.indexOf(A) > -1 && !(Q.flags & U4 && Q.lexical[0] === A) || !this.treatFunctionsAsVarInScope(Q) && Q.functions.indexOf(A) > -1) {
+      if (Q.lexical.indexOf(A) > -1 && !(Q.flags & Y4 && Q.lexical[0] === A) || !this.treatFunctionsAsVarInScope(Q) && Q.functions.indexOf(A) > -1) {
         C = !0;
         break;
       }
@@ -4220,14 +4229,14 @@ Z2.startNode = function() {
 Z2.startNodeAt = function(A, g) {
   return new k3(this, A, g);
 };
-function P4(A, g, I, C) {
+function V4(A, g, I, C) {
   return A.type = g, A.end = I, this.options.locations && (A.loc.end = C), this.options.ranges && (A.range[1] = I), A;
 }
 Z2.finishNode = function(A, g) {
-  return P4.call(this, A, g, this.lastTokEnd, this.lastTokEndLoc);
+  return V4.call(this, A, g, this.lastTokEnd, this.lastTokEndLoc);
 };
 Z2.finishNodeAt = function(A, g, I, C) {
-  return P4.call(this, A, g, I, C);
+  return V4.call(this, A, g, I, C);
 };
 Z2.copyNode = function(A) {
   var g = new k3(this, A.start, this.startLoc);
@@ -4235,12 +4244,12 @@ Z2.copyNode = function(A) {
     g[I] = A[I];
   return g;
 };
-var tI = "Berf Beria_Erfe Gara Garay Gukh Gurung_Khema Hrkt Katakana_Or_Hiragana Kawi Kirat_Rai Krai Nag_Mundari Nagm Ol_Onal Onao Sidetic Sidt Sunu Sunuwar Tai_Yo Tayo Todhri Todr Tolong_Siki Tols Tulu_Tigalari Tutg Unknown Zzzz", V4 = "ASCII ASCII_Hex_Digit AHex Alphabetic Alpha Any Assigned Bidi_Control Bidi_C Bidi_Mirrored Bidi_M Case_Ignorable CI Cased Changes_When_Casefolded CWCF Changes_When_Casemapped CWCM Changes_When_Lowercased CWL Changes_When_NFKC_Casefolded CWKCF Changes_When_Titlecased CWT Changes_When_Uppercased CWU Dash Default_Ignorable_Code_Point DI Deprecated Dep Diacritic Dia Emoji Emoji_Component Emoji_Modifier Emoji_Modifier_Base Emoji_Presentation Extender Ext Grapheme_Base Gr_Base Grapheme_Extend Gr_Ext Hex_Digit Hex IDS_Binary_Operator IDSB IDS_Trinary_Operator IDST ID_Continue IDC ID_Start IDS Ideographic Ideo Join_Control Join_C Logical_Order_Exception LOE Lowercase Lower Math Noncharacter_Code_Point NChar Pattern_Syntax Pat_Syn Pattern_White_Space Pat_WS Quotation_Mark QMark Radical Regional_Indicator RI Sentence_Terminal STerm Soft_Dotted SD Terminal_Punctuation Term Unified_Ideograph UIdeo Uppercase Upper Variation_Selector VS White_Space space XID_Continue XIDC XID_Start XIDS", T4 = V4 + " Extended_Pictographic", O4 = T4, j4 = O4 + " EBase EComp EMod EPres ExtPict", W4 = j4, nI = W4, aI = {
-  9: V4,
-  10: T4,
-  11: O4,
-  12: j4,
-  13: W4,
+var tI = "Berf Beria_Erfe Gara Garay Gukh Gurung_Khema Hrkt Katakana_Or_Hiragana Kawi Kirat_Rai Krai Nag_Mundari Nagm Ol_Onal Onao Sidetic Sidt Sunu Sunuwar Tai_Yo Tayo Todhri Todr Tolong_Siki Tols Tulu_Tigalari Tutg Unknown Zzzz", T4 = "ASCII ASCII_Hex_Digit AHex Alphabetic Alpha Any Assigned Bidi_Control Bidi_C Bidi_Mirrored Bidi_M Case_Ignorable CI Cased Changes_When_Casefolded CWCF Changes_When_Casemapped CWCM Changes_When_Lowercased CWL Changes_When_NFKC_Casefolded CWKCF Changes_When_Titlecased CWT Changes_When_Uppercased CWU Dash Default_Ignorable_Code_Point DI Deprecated Dep Diacritic Dia Emoji Emoji_Component Emoji_Modifier Emoji_Modifier_Base Emoji_Presentation Extender Ext Grapheme_Base Gr_Base Grapheme_Extend Gr_Ext Hex_Digit Hex IDS_Binary_Operator IDSB IDS_Trinary_Operator IDST ID_Continue IDC ID_Start IDS Ideographic Ideo Join_Control Join_C Logical_Order_Exception LOE Lowercase Lower Math Noncharacter_Code_Point NChar Pattern_Syntax Pat_Syn Pattern_White_Space Pat_WS Quotation_Mark QMark Radical Regional_Indicator RI Sentence_Terminal STerm Soft_Dotted SD Terminal_Punctuation Term Unified_Ideograph UIdeo Uppercase Upper Variation_Selector VS White_Space space XID_Continue XIDC XID_Start XIDS", O4 = T4 + " Extended_Pictographic", j4 = O4, W4 = j4 + " EBase EComp EMod EPres ExtPict", Z4 = W4, nI = Z4, aI = {
+  9: T4,
+  10: O4,
+  11: j4,
+  12: W4,
+  13: Z4,
   14: nI
 }, sI = "Basic_Emoji Emoji_Keycap_Sequence RGI_Emoji_Modifier_Sequence RGI_Emoji_Flag_Sequence RGI_Emoji_Tag_Sequence RGI_Emoji_ZWJ_Sequence RGI_Emoji", rI = {
   9: "",
@@ -4249,27 +4258,27 @@ var tI = "Berf Beria_Erfe Gara Garay Gukh Gurung_Khema Hrkt Katakana_Or_Hiragana
   12: "",
   13: "",
   14: sI
-}, I4 = "Cased_Letter LC Close_Punctuation Pe Connector_Punctuation Pc Control Cc cntrl Currency_Symbol Sc Dash_Punctuation Pd Decimal_Number Nd digit Enclosing_Mark Me Final_Punctuation Pf Format Cf Initial_Punctuation Pi Letter L Letter_Number Nl Line_Separator Zl Lowercase_Letter Ll Mark M Combining_Mark Math_Symbol Sm Modifier_Letter Lm Modifier_Symbol Sk Nonspacing_Mark Mn Number N Open_Punctuation Ps Other C Other_Letter Lo Other_Number No Other_Punctuation Po Other_Symbol So Paragraph_Separator Zp Private_Use Co Punctuation P punct Separator Z Space_Separator Zs Spacing_Mark Mc Surrogate Cs Symbol S Titlecase_Letter Lt Unassigned Cn Uppercase_Letter Lu", Z4 = "Adlam Adlm Ahom Anatolian_Hieroglyphs Hluw Arabic Arab Armenian Armn Avestan Avst Balinese Bali Bamum Bamu Bassa_Vah Bass Batak Batk Bengali Beng Bhaiksuki Bhks Bopomofo Bopo Brahmi Brah Braille Brai Buginese Bugi Buhid Buhd Canadian_Aboriginal Cans Carian Cari Caucasian_Albanian Aghb Chakma Cakm Cham Cham Cherokee Cher Common Zyyy Coptic Copt Qaac Cuneiform Xsux Cypriot Cprt Cyrillic Cyrl Deseret Dsrt Devanagari Deva Duployan Dupl Egyptian_Hieroglyphs Egyp Elbasan Elba Ethiopic Ethi Georgian Geor Glagolitic Glag Gothic Goth Grantha Gran Greek Grek Gujarati Gujr Gurmukhi Guru Han Hani Hangul Hang Hanunoo Hano Hatran Hatr Hebrew Hebr Hiragana Hira Imperial_Aramaic Armi Inherited Zinh Qaai Inscriptional_Pahlavi Phli Inscriptional_Parthian Prti Javanese Java Kaithi Kthi Kannada Knda Katakana Kana Kayah_Li Kali Kharoshthi Khar Khmer Khmr Khojki Khoj Khudawadi Sind Lao Laoo Latin Latn Lepcha Lepc Limbu Limb Linear_A Lina Linear_B Linb Lisu Lisu Lycian Lyci Lydian Lydi Mahajani Mahj Malayalam Mlym Mandaic Mand Manichaean Mani Marchen Marc Masaram_Gondi Gonm Meetei_Mayek Mtei Mende_Kikakui Mend Meroitic_Cursive Merc Meroitic_Hieroglyphs Mero Miao Plrd Modi Mongolian Mong Mro Mroo Multani Mult Myanmar Mymr Nabataean Nbat New_Tai_Lue Talu Newa Newa Nko Nkoo Nushu Nshu Ogham Ogam Ol_Chiki Olck Old_Hungarian Hung Old_Italic Ital Old_North_Arabian Narb Old_Permic Perm Old_Persian Xpeo Old_South_Arabian Sarb Old_Turkic Orkh Oriya Orya Osage Osge Osmanya Osma Pahawh_Hmong Hmng Palmyrene Palm Pau_Cin_Hau Pauc Phags_Pa Phag Phoenician Phnx Psalter_Pahlavi Phlp Rejang Rjng Runic Runr Samaritan Samr Saurashtra Saur Sharada Shrd Shavian Shaw Siddham Sidd SignWriting Sgnw Sinhala Sinh Sora_Sompeng Sora Soyombo Soyo Sundanese Sund Syloti_Nagri Sylo Syriac Syrc Tagalog Tglg Tagbanwa Tagb Tai_Le Tale Tai_Tham Lana Tai_Viet Tavt Takri Takr Tamil Taml Tangut Tang Telugu Telu Thaana Thaa Thai Thai Tibetan Tibt Tifinagh Tfng Tirhuta Tirh Ugaritic Ugar Vai Vaii Warang_Citi Wara Yi Yiii Zanabazar_Square Zanb", z4 = Z4 + " Dogra Dogr Gunjala_Gondi Gong Hanifi_Rohingya Rohg Makasar Maka Medefaidrin Medf Old_Sogdian Sogo Sogdian Sogd", X4 = z4 + " Elymaic Elym Nandinagari Nand Nyiakeng_Puachue_Hmong Hmnp Wancho Wcho", $4 = X4 + " Chorasmian Chrs Diak Dives_Akuru Khitan_Small_Script Kits Yezi Yezidi", A0 = $4 + " Cypro_Minoan Cpmn Old_Uyghur Ougr Tangsa Tnsa Toto Vithkuqi Vith", DI = A0 + " " + tI, hI = {
-  9: Z4,
-  10: z4,
-  11: X4,
-  12: $4,
-  13: A0,
+}, C4 = "Cased_Letter LC Close_Punctuation Pe Connector_Punctuation Pc Control Cc cntrl Currency_Symbol Sc Dash_Punctuation Pd Decimal_Number Nd digit Enclosing_Mark Me Final_Punctuation Pf Format Cf Initial_Punctuation Pi Letter L Letter_Number Nl Line_Separator Zl Lowercase_Letter Ll Mark M Combining_Mark Math_Symbol Sm Modifier_Letter Lm Modifier_Symbol Sk Nonspacing_Mark Mn Number N Open_Punctuation Ps Other C Other_Letter Lo Other_Number No Other_Punctuation Po Other_Symbol So Paragraph_Separator Zp Private_Use Co Punctuation P punct Separator Z Space_Separator Zs Spacing_Mark Mc Surrogate Cs Symbol S Titlecase_Letter Lt Unassigned Cn Uppercase_Letter Lu", z4 = "Adlam Adlm Ahom Anatolian_Hieroglyphs Hluw Arabic Arab Armenian Armn Avestan Avst Balinese Bali Bamum Bamu Bassa_Vah Bass Batak Batk Bengali Beng Bhaiksuki Bhks Bopomofo Bopo Brahmi Brah Braille Brai Buginese Bugi Buhid Buhd Canadian_Aboriginal Cans Carian Cari Caucasian_Albanian Aghb Chakma Cakm Cham Cham Cherokee Cher Common Zyyy Coptic Copt Qaac Cuneiform Xsux Cypriot Cprt Cyrillic Cyrl Deseret Dsrt Devanagari Deva Duployan Dupl Egyptian_Hieroglyphs Egyp Elbasan Elba Ethiopic Ethi Georgian Geor Glagolitic Glag Gothic Goth Grantha Gran Greek Grek Gujarati Gujr Gurmukhi Guru Han Hani Hangul Hang Hanunoo Hano Hatran Hatr Hebrew Hebr Hiragana Hira Imperial_Aramaic Armi Inherited Zinh Qaai Inscriptional_Pahlavi Phli Inscriptional_Parthian Prti Javanese Java Kaithi Kthi Kannada Knda Katakana Kana Kayah_Li Kali Kharoshthi Khar Khmer Khmr Khojki Khoj Khudawadi Sind Lao Laoo Latin Latn Lepcha Lepc Limbu Limb Linear_A Lina Linear_B Linb Lisu Lisu Lycian Lyci Lydian Lydi Mahajani Mahj Malayalam Mlym Mandaic Mand Manichaean Mani Marchen Marc Masaram_Gondi Gonm Meetei_Mayek Mtei Mende_Kikakui Mend Meroitic_Cursive Merc Meroitic_Hieroglyphs Mero Miao Plrd Modi Mongolian Mong Mro Mroo Multani Mult Myanmar Mymr Nabataean Nbat New_Tai_Lue Talu Newa Newa Nko Nkoo Nushu Nshu Ogham Ogam Ol_Chiki Olck Old_Hungarian Hung Old_Italic Ital Old_North_Arabian Narb Old_Permic Perm Old_Persian Xpeo Old_South_Arabian Sarb Old_Turkic Orkh Oriya Orya Osage Osge Osmanya Osma Pahawh_Hmong Hmng Palmyrene Palm Pau_Cin_Hau Pauc Phags_Pa Phag Phoenician Phnx Psalter_Pahlavi Phlp Rejang Rjng Runic Runr Samaritan Samr Saurashtra Saur Sharada Shrd Shavian Shaw Siddham Sidd SignWriting Sgnw Sinhala Sinh Sora_Sompeng Sora Soyombo Soyo Sundanese Sund Syloti_Nagri Sylo Syriac Syrc Tagalog Tglg Tagbanwa Tagb Tai_Le Tale Tai_Tham Lana Tai_Viet Tavt Takri Takr Tamil Taml Tangut Tang Telugu Telu Thaana Thaa Thai Thai Tibetan Tibt Tifinagh Tfng Tirhuta Tirh Ugaritic Ugar Vai Vaii Warang_Citi Wara Yi Yiii Zanabazar_Square Zanb", X4 = z4 + " Dogra Dogr Gunjala_Gondi Gong Hanifi_Rohingya Rohg Makasar Maka Medefaidrin Medf Old_Sogdian Sogo Sogdian Sogd", $4 = X4 + " Elymaic Elym Nandinagari Nand Nyiakeng_Puachue_Hmong Hmnp Wancho Wcho", A0 = $4 + " Chorasmian Chrs Diak Dives_Akuru Khitan_Small_Script Kits Yezi Yezidi", g0 = A0 + " Cypro_Minoan Cpmn Old_Uyghur Ougr Tangsa Tnsa Toto Vithkuqi Vith", DI = g0 + " " + tI, hI = {
+  9: z4,
+  10: X4,
+  11: $4,
+  12: A0,
+  13: g0,
   14: DI
-}, g0 = {};
+}, I0 = {};
 function cI(A) {
-  var g = g0[A] = {
-    binary: i2(aI[A] + " " + I4),
+  var g = I0[A] = {
+    binary: i2(aI[A] + " " + C4),
     binaryOfStrings: i2(rI[A]),
     nonBinary: {
-      General_Category: i2(I4),
+      General_Category: i2(C4),
       Script: i2(hI[A])
     }
   };
   g.nonBinary.Script_Extensions = g.nonBinary.Script, g.nonBinary.gc = g.nonBinary.General_Category, g.nonBinary.sc = g.nonBinary.Script, g.nonBinary.scx = g.nonBinary.Script_Extensions;
 }
-for (var O3 = 0, C4 = [9, 10, 11, 12, 13, 14]; O3 < C4.length; O3 += 1) {
-  var mI = C4[O3];
+for (var O3 = 0, e4 = [9, 10, 11, 12, 13, 14]; O3 < e4.length; O3 += 1) {
+  var mI = e4[O3];
   cI(mI);
 }
 var mA = l1.prototype, h3 = function(g, I) {
@@ -4286,7 +4295,7 @@ h3.prototype.sibling = function() {
   return new h3(this.parent, this.base);
 };
 var T1 = function(g) {
-  this.parser = g, this.validFlags = "gim" + (g.options.ecmaVersion >= 6 ? "uy" : "") + (g.options.ecmaVersion >= 9 ? "s" : "") + (g.options.ecmaVersion >= 13 ? "d" : "") + (g.options.ecmaVersion >= 15 ? "v" : ""), this.unicodeProperties = g0[g.options.ecmaVersion >= 14 ? 14 : g.options.ecmaVersion], this.source = "", this.flags = "", this.start = 0, this.switchU = !1, this.switchV = !1, this.switchN = !1, this.pos = 0, this.lastIntValue = 0, this.lastStringValue = "", this.lastAssertionIsQuantifiable = !1, this.numCapturingParens = 0, this.maxBackReference = 0, this.groupNames = /* @__PURE__ */ Object.create(null), this.backReferenceNames = [], this.branchID = null;
+  this.parser = g, this.validFlags = "gim" + (g.options.ecmaVersion >= 6 ? "uy" : "") + (g.options.ecmaVersion >= 9 ? "s" : "") + (g.options.ecmaVersion >= 13 ? "d" : "") + (g.options.ecmaVersion >= 15 ? "v" : ""), this.unicodeProperties = I0[g.options.ecmaVersion >= 14 ? 14 : g.options.ecmaVersion], this.source = "", this.flags = "", this.start = 0, this.switchU = !1, this.switchV = !1, this.switchN = !1, this.pos = 0, this.lastIntValue = 0, this.lastStringValue = "", this.lastAssertionIsQuantifiable = !1, this.numCapturingParens = 0, this.maxBackReference = 0, this.groupNames = /* @__PURE__ */ Object.create(null), this.backReferenceNames = [], this.branchID = null;
 };
 T1.prototype.reset = function(g, I, C) {
   var e = C.indexOf("v") !== -1, q = C.indexOf("u") !== -1;
@@ -4569,13 +4578,13 @@ mA.regexp_eatInvalidBracedQuantifier = function(A) {
 };
 mA.regexp_eatSyntaxCharacter = function(A) {
   var g = A.current();
-  return I0(g) ? (A.lastIntValue = g, A.advance(), !0) : !1;
+  return C0(g) ? (A.lastIntValue = g, A.advance(), !0) : !1;
 };
-function I0(A) {
+function C0(A) {
   return A === 36 || A >= 40 && A <= 43 || A === 46 || A === 63 || A >= 91 && A <= 94 || A >= 123 && A <= 125;
 }
 mA.regexp_eatPatternCharacters = function(A) {
-  for (var g = A.pos, I = 0; (I = A.current()) !== -1 && !I0(I); )
+  for (var g = A.pos, I = 0; (I = A.current()) !== -1 && !C0(I); )
     A.advance();
   return A.pos !== g;
 };
@@ -4687,9 +4696,9 @@ mA.regexp_eatControlEscape = function(A) {
 };
 mA.regexp_eatControlLetter = function(A) {
   var g = A.current();
-  return C0(g) ? (A.lastIntValue = g % 32, A.advance(), !0) : !1;
+  return e0(g) ? (A.lastIntValue = g % 32, A.advance(), !0) : !1;
 };
-function C0(A) {
+function e0(A) {
   return A >= 65 && A <= 90 || A >= 97 && A <= 122;
 }
 mA.regexp_eatRegExpUnicodeEscapeSequence = function(A, g) {
@@ -4753,7 +4762,7 @@ mA.regexp_eatDecimalEscape = function(A) {
   }
   return !1;
 };
-var e0 = 0, W1 = 1, K1 = 2;
+var i0 = 0, W1 = 1, K1 = 2;
 mA.regexp_eatCharacterClassEscape = function(A) {
   var g = A.current();
   if (xI(g))
@@ -4772,7 +4781,7 @@ mA.regexp_eatCharacterClassEscape = function(A) {
       return I && C === K1 && A.raise("Invalid property name"), C;
     A.raise("Invalid property name");
   }
-  return e0;
+  return i0;
 };
 function xI(A) {
   return A === 100 || A === 68 || A === 115 || A === 83 || A === 119 || A === 87;
@@ -4793,7 +4802,7 @@ mA.regexp_eatUnicodePropertyValueExpression = function(A) {
     var e = A.lastStringValue;
     return this.regexp_validateUnicodePropertyNameOrValue(A, e);
   }
-  return e0;
+  return i0;
 };
 mA.regexp_validateUnicodePropertyNameAndValue = function(A, g, I) {
   p2(A.unicodeProperties.nonBinary, g) || A.raise("Invalid property name"), A.unicodeProperties.nonBinary[g].test(I) || A.raise("Invalid property value");
@@ -4807,12 +4816,12 @@ mA.regexp_validateUnicodePropertyNameOrValue = function(A, g) {
 };
 mA.regexp_eatUnicodePropertyName = function(A) {
   var g = 0;
-  for (A.lastStringValue = ""; i0(g = A.current()); )
+  for (A.lastStringValue = ""; q0(g = A.current()); )
     A.lastStringValue += j1(g), A.advance();
   return A.lastStringValue !== "";
 };
-function i0(A) {
-  return C0(A) || A === 95;
+function q0(A) {
+  return e0(A) || A === 95;
 }
 mA.regexp_eatUnicodePropertyValue = function(A) {
   var g = 0;
@@ -4821,7 +4830,7 @@ mA.regexp_eatUnicodePropertyValue = function(A) {
   return A.lastStringValue !== "";
 };
 function NI(A) {
-  return i0(A) || S3(A);
+  return q0(A) || S3(A);
 }
 mA.regexp_eatLoneUnicodePropertyNameOrValue = function(A) {
   return this.regexp_eatUnicodePropertyValue(A);
@@ -4867,7 +4876,7 @@ mA.regexp_eatClassAtom = function(A) {
       return !0;
     if (A.switchU) {
       var I = A.current();
-      (I === 99 || Q0(I)) && A.raise("Invalid class escape"), A.raise("Invalid escape");
+      (I === 99 || E0(I)) && A.raise("Invalid class escape"), A.raise("Invalid escape");
     }
     A.pos = g;
   }
@@ -5062,14 +5071,14 @@ function S3(A) {
 }
 mA.regexp_eatHexDigits = function(A) {
   var g = A.pos, I = 0;
-  for (A.lastIntValue = 0; q0(I = A.current()); )
-    A.lastIntValue = 16 * A.lastIntValue + B0(I), A.advance();
+  for (A.lastIntValue = 0; B0(I = A.current()); )
+    A.lastIntValue = 16 * A.lastIntValue + Q0(I), A.advance();
   return A.pos !== g;
 };
-function q0(A) {
+function B0(A) {
   return A >= 48 && A <= 57 || A >= 65 && A <= 70 || A >= 97 && A <= 102;
 }
-function B0(A) {
+function Q0(A) {
   return A >= 65 && A <= 70 ? 10 + (A - 65) : A >= 97 && A <= 102 ? 10 + (A - 97) : A - 48;
 }
 mA.regexp_eatLegacyOctalEscapeSequence = function(A) {
@@ -5086,9 +5095,9 @@ mA.regexp_eatLegacyOctalEscapeSequence = function(A) {
 };
 mA.regexp_eatOctalDigit = function(A) {
   var g = A.current();
-  return Q0(g) ? (A.lastIntValue = g - 48, A.advance(), !0) : (A.lastIntValue = 0, !1);
+  return E0(g) ? (A.lastIntValue = g - 48, A.advance(), !0) : (A.lastIntValue = 0, !1);
 };
-function Q0(A) {
+function E0(A) {
   return A >= 48 && A <= 55;
 }
 mA.regexp_eatFixedHexDigits = function(A, g) {
@@ -5096,9 +5105,9 @@ mA.regexp_eatFixedHexDigits = function(A, g) {
   A.lastIntValue = 0;
   for (var C = 0; C < g; ++C) {
     var e = A.current();
-    if (!q0(e))
+    if (!B0(e))
       return A.pos = I, !1;
-    A.lastIntValue = 16 * A.lastIntValue + B0(e), A.advance();
+    A.lastIntValue = 16 * A.lastIntValue + Q0(e), A.advance();
   }
   return !0;
 };
@@ -5147,7 +5156,7 @@ bA.fullCharCodeAtPos = function() {
 bA.skipBlockComment = function() {
   var A = this.options.onComment && this.curPosition(), g = this.pos, I = this.input.indexOf("*/", this.pos += 2);
   if (I === -1 && this.raise(this.pos - 2, "Unterminated comment"), this.pos = I + 2, this.options.locations)
-    for (var C = void 0, e = g; (C = G4(this.input, e, this.pos)) > -1; )
+    for (var C = void 0, e = g; (C = p4(this.input, e, this.pos)) > -1; )
       ++this.curLine, e = this.lineStart = C;
   this.options.onComment && this.options.onComment(
     !0,
@@ -5198,7 +5207,7 @@ bA.skipSpace = function() {
         }
         break;
       default:
-        if (A > 8 && A < 14 || A >= 5760 && p4.test(String.fromCharCode(A)))
+        if (A > 8 && A < 14 || A >= 5760 && R4.test(String.fromCharCode(A)))
           ++this.pos;
         else
           break A;
@@ -5416,14 +5425,14 @@ bA.readInt = function(A, g, I) {
 function GI(A, g) {
   return g ? parseInt(A, 8) : parseFloat(A.replace(/_/g, ""));
 }
-function E0(A) {
+function o0(A) {
   return typeof BigInt != "function" ? null : BigInt(A.replace(/_/g, ""));
 }
 bA.readRadixNumber = function(A) {
   var g = this.pos;
   this.pos += 2;
   var I = this.readInt(A);
-  return I == null && this.raise(this.start + 2, "Expected number in radix " + A), this.options.ecmaVersion >= 11 && this.input.charCodeAt(this.pos) === 110 ? (I = E0(this.input.slice(g, this.pos)), ++this.pos) : V1(this.fullCharCodeAtPos()) && this.raise(this.pos, "Identifier directly after number"), this.finishToken(h.num, I);
+  return I == null && this.raise(this.start + 2, "Expected number in radix " + A), this.options.ecmaVersion >= 11 && this.input.charCodeAt(this.pos) === 110 ? (I = o0(this.input.slice(g, this.pos)), ++this.pos) : V1(this.fullCharCodeAtPos()) && this.raise(this.pos, "Identifier directly after number"), this.finishToken(h.num, I);
 };
 bA.readNumber = function(A) {
   var g = this.pos;
@@ -5432,7 +5441,7 @@ bA.readNumber = function(A) {
   I && this.strict && this.raise(g, "Invalid number");
   var C = this.input.charCodeAt(this.pos);
   if (!I && !A && this.options.ecmaVersion >= 11 && C === 110) {
-    var e = E0(this.input.slice(g, this.pos));
+    var e = o0(this.input.slice(g, this.pos));
     return ++this.pos, V1(this.fullCharCodeAtPos()) && this.raise(this.pos, "Identifier directly after number"), this.finishToken(h.num, e);
   }
   I && /[89]/.test(this.input.slice(g, this.pos)) && (I = !1), C === 46 && !I && (++this.pos, this.readInt(10), C = this.input.charCodeAt(this.pos)), (C === 69 || C === 101) && !I && (C = this.input.charCodeAt(++this.pos), (C === 43 || C === 45) && ++this.pos, this.readInt(10) === null && this.raise(g, "Invalid number")), V1(this.fullCharCodeAtPos()) && this.raise(this.pos, "Identifier directly after number");
@@ -5459,13 +5468,13 @@ bA.readString = function(A) {
   }
   return g += this.input.slice(I, this.pos++), this.finishToken(h.string, g);
 };
-var o0 = {};
+var l0 = {};
 bA.tryReadTemplateToken = function() {
   this.inTemplateElement = !0;
   try {
     this.readTmplToken();
   } catch (A) {
-    if (A === o0)
+    if (A === l0)
       this.readInvalidTemplateToken();
     else
       throw A;
@@ -5474,7 +5483,7 @@ bA.tryReadTemplateToken = function() {
 };
 bA.invalidStringToken = function(A, g) {
   if (this.inTemplateElement && this.options.ecmaVersion >= 9)
-    throw o0;
+    throw l0;
   this.raise(A, g);
 };
 bA.readTmplToken = function() {
@@ -5616,7 +5625,7 @@ l1.acorn = {
   defaultOptions: l5,
   Position: P2,
   SourceLocation: y3,
-  getLineInfo: f4,
+  getLineInfo: F4,
   Node: k3,
   TokenType: PA,
   tokTypes: h,
@@ -5629,20 +5638,20 @@ l1.acorn = {
   isNewLine: G2,
   lineBreak: y1,
   lineBreakG: AI,
-  nonASCIIwhitespace: p4
+  nonASCIIwhitespace: R4
 };
 function RI(A, g) {
   return l1.parse(A, g);
 }
-const l0 = 256, e4 = 1024;
+const t0 = 256, i4 = 1024;
 function f2(A) {
   return Array.isArray(A) && A.length === 2 && A.every((g) => typeof g == "number" && Number.isFinite(g) && Math.abs(g) <= 1e5);
 }
-const S2 = (A, g, I) => (g[0] - A[0]) * (I[1] - A[1]) - (g[1] - A[1]) * (I[0] - A[0]), i3 = (A, g, I) => A[0] >= Math.min(g[0], I[0]) && A[0] <= Math.max(g[0], I[0]) && A[1] >= Math.min(g[1], I[1]) && A[1] <= Math.max(g[1], I[1]), t0 = (A, g, I, C) => {
+const S2 = (A, g, I) => (g[0] - A[0]) * (I[1] - A[1]) - (g[1] - A[1]) * (I[0] - A[0]), i3 = (A, g, I) => A[0] >= Math.min(g[0], I[0]) && A[0] <= Math.max(g[0], I[0]) && A[1] >= Math.min(g[1], I[1]) && A[1] <= Math.max(g[1], I[1]), n0 = (A, g, I, C) => {
   const e = S2(A, g, I), q = S2(A, g, C), B = S2(I, C, A), i = S2(I, C, g);
   return e * q < 0 && B * i < 0 || e === 0 && i3(I, A, g) || q === 0 && i3(C, A, g) || B === 0 && i3(A, I, C) || i === 0 && i3(g, I, C);
 };
-function i4(A) {
+function q4(A) {
   const g = () => new Error(t("Outline edges must form one closed loop without crossings or overlaps."));
   let I = 0;
   for (let C = 0; C < A.length; C++) {
@@ -5651,7 +5660,7 @@ function i4(A) {
       throw g();
     I += S2(A[0], e, q);
     for (let i = C + 2; i < A.length; i++)
-      if (!(C === 0 && i === A.length - 1) && t0(e, q, A[i], A[(i + 1) % A.length]))
+      if (!(C === 0 && i === A.length - 1) && n0(e, q, A[i], A[(i + 1) % A.length]))
         throw g();
   }
   if (Math.abs(I) < 2e-4)
@@ -5667,25 +5676,25 @@ function x5(A, g, I) {
 }
 function N5(A, g) {
   const I = g !== void 0;
-  if (!Array.isArray(A) || A.length < (I ? 2 : 3) || A.length > l0 || !A.every(f2))
+  if (!Array.isArray(A) || A.length < (I ? 2 : 3) || A.length > t0 || !A.every(f2))
     throw new Error(t("An outline needs 3–256 finite points within 100000 mm of the sketch origin."));
   if (!I)
-    return i4(A);
+    return q4(A);
   if (!Array.isArray(g) || g.length !== A.length || !g.every((C) => typeof C == "number" && Number.isFinite(C) && Math.abs(C) <= 1e4))
     throw new Error(t("Enter one finite bulge per outline point."));
-  return i4(n0(A, g, !0));
+  return q4(a0(A, g, !0));
 }
 function fI(A, g) {
-  if (!Array.isArray(A) || A.length < 2 || A.length > l0 || !A.every(f2))
+  if (!Array.isArray(A) || A.length < 2 || A.length > t0 || !A.every(f2))
     throw new Error(t("An open path needs 2–256 finite points within 100000 mm of the sketch origin."));
   const I = A[0], C = A.at(-1);
   if (Math.hypot(C[0] - I[0], C[1] - I[1]) < 1e-5)
     throw new Error(t("An open path needs distinct start and end points."));
   if (g !== void 0 && (!Array.isArray(g) || g.length !== A.length || g.at(-1) !== 0 || !g.every((e) => typeof e == "number" && Number.isFinite(e) && Math.abs(e) <= 1e4)))
     throw new Error(t("Enter one finite bulge per path edge. The last point has no outgoing edge."));
-  return n0(A, g ?? A.map(() => 0), !1);
+  return a0(A, g ?? A.map(() => 0), !1);
 }
-function n0(A, g, I) {
+function a0(A, g, I) {
   const C = [], e = I ? A.length : A.length - 1, q = 0.025, B = () => new Error(t("Rounded outline exceeds the curve size or detail limit."));
   for (let i = 0; i < e; i++) {
     const Q = A[i], s = A[(i + 1) % A.length], E = g[i], r = s[0] - Q[0], n = s[1] - Q[1], a = Math.hypot(r, n);
@@ -5697,7 +5706,7 @@ function n0(A, g, I) {
     if (!D)
       throw B();
     const { center: [x, N], radius: u, start: p, sweep: m } = D, f = Math.min(Math.PI / 32, 4 * Math.asin(Math.sqrt(Math.min(1, q / (2 * u))))), K = Math.max(2, Math.ceil(Math.abs(m) / f));
-    if (C.length + K - 1 > e4)
+    if (C.length + K - 1 > i4)
       throw B();
     for (let d = 1; d < K; d++) {
       const b = p + m * d / K, J = [x + u * Math.cos(b), N + u * Math.sin(b)];
@@ -5706,11 +5715,11 @@ function n0(A, g, I) {
       C.push(J);
     }
   }
-  if (I || C.push(A.at(-1)), C.length < (I ? 3 : 2) || C.length > e4)
+  if (I || C.push(A.at(-1)), C.length < (I ? 3 : 2) || C.length > i4)
     throw B();
   return C;
 }
-function a0(A) {
+function s0(A) {
   return typeof A == "string" && A.length > 0 && A.length <= 255 && A === A.trim() && !/[\u0000-\u001f\u007f<>/\\":;?*|=]/.test(A);
 }
 const FI = 16, UI = 1024, L1 = () => new Error(t("A region needs one outside boundary and separate holes that do not touch or cross.")), H2 = (A) => A.map((g, I) => [g, A[(I + 1) % A.length]]);
@@ -5740,7 +5749,7 @@ function j3(A, g) {
     });
   }
   const I = H2(A.points), C = H2(g.points);
-  return I.some(([e, q]) => C.some(([B, i]) => t0(e, q, B, i)));
+  return I.some(([e, q]) => C.some(([B, i]) => n0(e, q, B, i)));
 }
 function q3(A, g) {
   const [I, C] = g.points[0];
@@ -5754,7 +5763,7 @@ function bI(A, g = (I) => typeof I == "number" ? I : NaN) {
   const e = A.map((i) => {
     if (!i || typeof i.id != "string" || !/^[a-zA-Z0-9_-]{1,96}$/.test(i.id) || I.has(i.id))
       throw L1();
-    if (i.dxfLayer !== void 0 && !a0(i.dxfLayer))
+    if (i.dxfLayer !== void 0 && !s0(i.dxfLayer))
       throw new Error(t("Invalid DXF layer name."));
     I.add(i.id);
     let Q, s, E;
@@ -5855,12 +5864,12 @@ function MA(A) {
 function e2(A) {
   return (!Number.isInteger(A.length) || !Number.isInteger(A.angle) || !Number.isFinite(A.value) || Math.abs(A.value) > 1e9 || Math.abs(A.length) > 8 || Math.abs(A.angle) > 8) && MA(t("result is outside the supported range")), A;
 }
-function s0(A, g) {
+function r0(A, g) {
   A.boolean && g !== "scalar" && MA(t("boolean cannot supply a dimensional value"));
   const [I, C] = LI(g);
   return A.length === 0 && A.angle === 0 ? { ...A, length: I, angle: C } : ((A.length !== I || A.angle !== C) && MA(t`expression must produce ${g}`), A);
 }
-function q4(A, g) {
+function B4(A, g) {
   const C = ["isNumber", "isBoolean", "formatLengthSCAD", "formatLength", "sin", "cos", "tan", "asin", "acos", "atan", "sqrt", "abs", "floor", "ceil", "round", "exp", "ln", "log"].includes(A) ? 1 : ["atan2", "pow"].includes(A) ? 2 : A === "rangeCount" ? 3 : ["randomValue", "rangeAt"].includes(A) ? 4 : ["min", "max"].includes(A) ? -1 : 0;
   if (!C)
     return MA(t`unknown mathematical function “${A}”`);
@@ -6067,7 +6076,7 @@ function q2(A, g, I = {}) {
             if (s.set(u, e(p + W * f)), a.args.length === 6 && !q(n(a.args[4])))
               continue;
             const P = n(a.args.at(-1));
-            J = q4(a.name === "minRange" ? "min" : "max", J ? [J, P] : [P]);
+            J = B4(a.name === "minRange" ? "min" : "max", J ? [J, P] : [P]);
           }
           return J || MA(t("Range reduction contains no values")), J;
         } finally {
@@ -6106,7 +6115,7 @@ function q2(A, g, I = {}) {
         const u = n(a.args[0]);
         return (u.boolean || u.length || u.angle || !Number.isInteger(u.value) || u.value < 0 || u.value >= a.args.length - 1) && MA(t("List index is outside the available values")), n(a.args[u.value + 1]);
       }
-      return q4(a.name, a.args.map(n));
+      return B4(a.name, a.args.map(n));
     }
     if (a.kind === "conditional")
       return n(q(n(a.test)) ? a.yes : a.no);
@@ -6136,7 +6145,7 @@ function S5(A, g = {}) {
       return e[i];
     Object.hasOwn(A.parameters, i) || MA(t`unknown parameter “${i}”`), q.has(i) && MA(t`dependency cycle at “${i}”`), q.add(i);
     const Q = A.parameters[i];
-    return e[i] = s0(q2(Q.expression, B), Q.unit), q.delete(i), e[i];
+    return e[i] = r0(q2(Q.expression, B), Q.unit), q.delete(i), e[i];
   }
   return I.forEach(([i]) => B(i)), e;
 }
@@ -6155,7 +6164,7 @@ function _I(A) {
   return [...A.kind === "box" ? w3(A) ? ["width"] : ["width", "depth", "height"] : A.kind === "cylinder" ? ["radius", "height"] : A.kind === "sphere" ? ["radius"] : [], ...Object.keys(V2).filter((I) => !w3(A) || !["scaleY", "scaleZ"].includes(I))];
 }
 const PI = (A) => A.startsWith("rotation") ? "deg" : A.startsWith("scale") ? "scalar" : "mm";
-function r0(A, g) {
+function D0(A, g) {
   if (_I(A).includes(g) || MA(t`“${g}” is not available on ${A.name}`), Object.hasOwn(V2, g)) {
     const [I, C] = V2[g];
     return A.transform[I][C];
@@ -6168,7 +6177,7 @@ function VI(A, g, I) {
     w3(A) && C === "scale" ? A.transform.scale = [I, I, I] : A.transform[C][e] = I;
   } else A.kind === "box" ? w3(A) ? (A.size = [I, I, I], A.generator = { ...A.generator, values: { edge: I } }) : A.size[["width", "depth", "height"].indexOf(g)] = I : A.kind === "cylinder" && g === "height" ? A.height = I : (A.kind === "cylinder" || A.kind === "sphere") && (A.radius = I);
 }
-function D0(A) {
+function h0(A) {
   const g = A.parametric;
   if (g === void 0)
     return [];
@@ -6186,20 +6195,20 @@ function D0(A) {
   }), g.bindings.map((B) => {
     (!o3(B) || typeof B.nodeId != "string" || !Object.hasOwn(A.nodes, B.nodeId) || typeof B.property != "string" || typeof B.expression != "string") && MA(t("invalid binding"));
     const i = A.nodes[B.nodeId];
-    r0(i, B.property), e.has(i.id) && MA(t("detach joints before driving this body or its operands"));
+    D0(i, B.property), e.has(i.id) && MA(t("detach joints before driving this body or its operands"));
     const Q = i.id + ":" + B.property;
     C.has(Q) && MA(t("a property may have only one driving expression")), C.add(Q);
-    const s = s0(q2(B.expression, (E) => (Object.hasOwn(I, E) || MA(t`unknown parameter “${E}”`), I[E])), PI(B.property));
+    const s = r0(q2(B.expression, (E) => (Object.hasOwn(I, E) || MA(t`unknown parameter “${E}”`), I[E])), PI(B.property));
     return { binding: B, value: s.value };
   });
 }
 function TI(A) {
-  for (const { binding: g, value: I } of D0(A))
+  for (const { binding: g, value: I } of h0(A))
     VI(A.nodes[g.nodeId], g.property, I);
 }
 function OI(A) {
-  for (const { binding: g, value: I } of D0(A)) {
-    const C = r0(A.nodes[g.nodeId], g.property);
+  for (const { binding: g, value: I } of h0(A)) {
+    const C = D0(A.nodes[g.nodeId], g.property);
     Math.abs(C - I) > 1e-9 * Math.max(1, Math.abs(I)) && MA(t("stored geometry is stale relative to its driving expressions"));
   }
 }
@@ -6207,7 +6216,7 @@ function jI(A, g) {
   const I = { axis: A.axis, count: g(A.count) };
   return A.mode === "linear" ? { ...I, mode: "linear", spacing: g(A.spacing) } : { ...I, mode: "circular", center: [g(A.center[0]), g(A.center[1])], sweep: g(A.sweep) };
 }
-function h0(A, g) {
+function c0(A, g) {
   try {
     const I = A.pattern;
     if (!T2(I) || !["linear", "circular"].includes(I.mode) || !["X", "Y", "Z"].includes(I.axis))
@@ -6236,7 +6245,7 @@ function h0(A, g) {
     throw new Z1({ source: "feature", id: A.id, message: I instanceof Error ? I.message : String(I) });
   }
 }
-function c0(A, g) {
+function m0(A, g) {
   try {
     const I = ["YZ", "XZ", "XY"].indexOf(A.plane);
     if (I < 0)
@@ -6300,7 +6309,7 @@ function O2(A, g) {
     if (!T2(A) || A.version !== 1 || !m3(A.id) || typeof A.name != "string" || !A.name.trim() || A.name.length > 160 || /[\u0000-\u001f]/.test(A.name) || !["XY", "XZ", "YZ"].includes(A.plane) || !T2(A.profile) || !m3(A.profile.id))
       throw new Error(t("Invalid sketch schema"));
     const I = A.profile;
-    if ((I.kind === "outline" || I.kind === "circle" || I.kind === "path") && I.dxfLayer !== void 0 && !a0(I.dxfLayer))
+    if ((I.kind === "outline" || I.kind === "circle" || I.kind === "path") && I.dxfLayer !== void 0 && !s0(I.dxfLayer))
       throw new Error(t("Invalid DXF layer name."));
     if (I.kind === "region")
       return bI(I.loops, (C) => F1(C, g));
@@ -6326,7 +6335,7 @@ function O2(A, g) {
     throw new Z1({ source: "sketch", id: A?.id ?? "unknown", message: I instanceof Error ? I.message : String(I) });
   }
 }
-function m0(A, g) {
+function w0(A, g) {
   try {
     if (A.featureVersion !== 1)
       throw new Error(t("Unsupported extrusion definition version"));
@@ -6341,7 +6350,7 @@ function m0(A, g) {
     throw I instanceof Z1 ? I : new Z1({ source: "feature", id: A.id, message: I instanceof Error ? I.message : String(I) });
   }
 }
-function w0(A, g) {
+function d0(A, g) {
   try {
     if (A.featureVersion !== 1 || typeof A.sketchId != "string" || !Object.hasOwn(g.sketches ?? {}, A.sketchId))
       throw new Error(t("Revolution requires an existing sketch"));
@@ -6381,18 +6390,18 @@ function ZI(A) {
     if (g.kind === "extrusion") {
       if (A.version < 3)
         throw new Error(t("Extrusion features require document version 3"));
-      m0(g, A);
+      w0(g, A);
     } else if (g.kind === "mirror")
-      c0(g, A);
+      m0(g, A);
     else if (g.kind === "pattern")
-      h0(g, A);
+      c0(g, A);
     else if (g.kind === "revolution") {
       if (A.version < 12)
         throw new Error(t("Revolution features require document version 12"));
-      w0(g, A);
+      d0(g, A);
     }
 }
-function d0(A) {
+function u0(A) {
   const g = A.peek(), I = g === "formatText" || g === "formatSCAD", C = [];
   if (I && (A.take(), A.expect("("), A.peek() === ")"))
     return A.take(), { parts: C, scad: g === "formatSCAD" };
@@ -6413,7 +6422,7 @@ function d0(A) {
   } while (A.peek() !== ")");
   return I && A.expect(")"), { parts: C, scad: g === "formatSCAD" };
 }
-const u0 = (A, g) => A.parts.map((I) => typeof I == "string" ? I : g(I, A.scad)).join(""), zI = { sans: { 0: [2, 32], 1: [8, 8], 2: [9, 22], 3: [7, 40], 4: [17, 8], 5: [8, 28], 6: [4, 50], 7: [8, 0], 8: [4, 58], 9: [4, 48], ǻ: [18, 64], Á: [18, 16], ĥ: [17, 24], Κ: [14, 0], "»": [16, 0], "∆": [11, 4], ў: [13, 36], ţ: [18, 22], "«": [16, 0], í: [10, 8], ņ: [15, 20], µ: [12, 13], ỳ: [15, 28], Ι: [13, 0], Ύ: [15, 8], ѕ: [3, 40], Ш: [13, 0], M: [17, 6], Ψ: [17, 18], ũ: [13, 34], ŭ: [13, 30], "―": [5, 0], "{": [9, 24], "¼": [29, 12], Ḿ: [22, 14], ι: [5, 14], Ĳ: [18, 12], Ê: [19, 12], Ά: [18, 16], ")": [3, 14], ε: [7, 40], э: [6, 26], ш: [13, 0], Я: [13, 14], a: [11, 32], Ę: [16, 13], Z: [11, 0], " ": [0, 0], k: [16, 0], Ù: [12, 22], Ů: [9, 38], "¢": [9, 22], В: [13, 30], І: [13, 0], ē: [11, 28], β: [10, 42], "≠": [21, 0], "‼": [12, 32], "¥": [24, 0], Ĥ: [19, 12], U: [7, 14], Ñ: [16, 28], F: [11, 0], ϑ: [6, 58], Ќ: [17, 8], å: [13, 56], Ϋ: [12, 18], ō: [7, 24], "”": [8, 16], ö: [4, 42], ć: [8, 30], þ: [11, 31], "]": [9, 0], А: [13, 8], "′": [5, 0], Ы: [15, 14], ẁ: [22, 32], ĭ: [8, 16], R: [13, 14], Ż: [12, 10], ħ: [19, 12], õ: [5, 44], "˙": [1, 10], ê: [12, 40], "″": [10, 0], "„": [8, 16], ч: [9, 13], δ: [3, 54], Â: [19, 20], Į: [16, 13], ω: [7, 42], Ţ: [14, 8], "´": [5, 8], Ĉ: [9, 38], И: [13, 8], Љ: [12, 34], р: [10, 31], Ω: [9, 32], т: [9, 0], П: [9, 0], Ö: [4, 50], z: [11, 0], "™": [25, 8], Θ: [7, 32], Ř: [19, 26], Ň: [19, 20], É: [18, 8], и: [13, 0], "³": [6, 32], "[": [9, 0], ζ: [6, 37], "∏": [9, 0], Έ: [18, 8], Ρ: [10, 14], ğ: [11, 84], ª: [10, 28], ї: [7, 18], T: [9, 0], š: [9, 52], є: [6, 22], Þ: [12, 14], j: [6, 22], Σ: [13, 0], ϒ: [8, 22], ℓ: [8, 41], ĉ: [9, 34], ī: [10, 0], О: [2, 32], ξ: [11, 47], Ď: [14, 26], "&": [9, 62], G: [7, 30], ΰ: [12, 48], "`": [5, 8], ŏ: [5, 40], ý: [15, 28], º: [2, 24], "∞": [3, 52], ź: [16, 8], я: [13, 14], Ё: [15, 18], ń: [15, 20], " ": [0, 0], Г: [7, 0], Ь: [10, 14], "¤": [14, 32], Ĝ: [13, 42], p: [10, 31], Ю: [9, 32], ο: [2, 24], S: [3, 38], "/": [5, 0], Ŧ: [17, 0], ђ: [19, 24], y: [10, 20], Π: [9, 0], "‗": [10, 0], "–": [5, 0], ë: [8, 46], б: [4, 46], ƒ: [13, 24], у: [10, 20], J: [5, 12], ŷ: [16, 32], ŕ: [13, 20], ώ: [12, 50], "˘": [3, 16], D: [8, 14], ł: [13, 0], ĺ: [10, 8], ц: [13, 0], Л: [7, 20], $: [15, 40], w: [17, 24], о: [2, 24], Д: [16, 12], Ç: [8, 42], Ŝ: [9, 50], C: [3, 26], Ḁ: [15, 32], Ĵ: [11, 24], È: [18, 8], ﬁ: [19, 22], X: [13, 0], ô: [8, 36], Ė: [14, 10], г: [7, 0], Ŀ: [8, 10], х: [13, 0], ŋ: [10, 24], Ч: [9, 10], ü: [12, 32], ь: [10, 14], Ÿ: [12, 18], "€": [15, 31], в: [13, 26], Η: [13, 0], С: [3, 26], ß: [5, 58], њ: [18, 14], Ű: [17, 30], c: [3, 22], "¶": [9, 9], Ή: [18, 8], Ὅ: [9, 52], γ: [9, 16], "­": [5, 0], ":": [2, 32], ś: [8, 48], " ": [0, 0], У: [9, 20], "¾": [27, 38], Ί: [18, 8], ŉ: [14, 20], Ģ: [12, 38], m: [14, 24], Е: [13, 0], ž: [17, 12], á: [16, 40], "×": [13, 0], п: [9, 0], Ǻ: [19, 36], K: [14, 0], "¨": [2, 18], Y: [10, 0], E: [13, 0], Ô: [8, 44], Є: [6, 26], Ï: [15, 18], ġ: [9, 78], έ: [12, 48], " ": [0, 0], ϋ: [7, 38], й: [16, 16], b: [9, 31], ύ: [10, 28], ﬂ: [18, 12], ф: [11, 26], Ŋ: [13, 18], Ũ: [10, 34], Щ: [17, 0], L: [7, 0], ď: [15, 39], Ο: [2, 32], Ĭ: [16, 16], ŧ: [21, 14], À: [18, 16], Ϊ: [15, 18], ḁ: [13, 56], "½": [21, 24], "'": [5, 0], ĳ: [12, 32], Р: [10, 14], "˛": [3, 13], Ć: [8, 34], Т: [9, 0], "£": [16, 20], ů: [12, 38], Ō: [7, 32], а: [11, 32], Ğ: [10, 46], v: [9, 8], Ї: [15, 18], û: [16, 26], Ź: [16, 8], "ˉ": [5, 0], Ĺ: [12, 8], "₤": [24, 20], Č: [9, 38], x: [13, 0], è: [11, 36], Ń: [18, 16], ḿ: [19, 32], μ: [12, 13], ".": [1, 16], "‘": [4, 8], π: [14, 8], l: [5, 0], Ъ: [12, 14], " ": [0, 0], Ś: [8, 46], Ü: [9, 32], à: [16, 40], η: [10, 12], ó: [7, 32], "¦": [10, 0], Ő: [12, 48], Ž: [17, 12], е: [6, 28], Î: [19, 12], e: [6, 28], ό: [7, 32], Ĕ: [16, 16], ļ: [10, 8], " ": [0, 0], Ѓ: [12, 8], ò: [7, 32], ﬄ: [31, 24], "^": [8, 0], ⁿ: [10, 8], к: [12, 0], "￼": [108, 39], ū: [15, 14], "ˆ": [6, 12], Ẅ: [16, 40], č: [9, 34], "’": [4, 8], Ν: [13, 8], "-": [5, 0], Q: [3, 38], ј: [6, 22], ě: [12, 40], œ: [7, 44], "#": [34, 0], Џ: [13, 0], Å: [15, 32], ș: [8, 48], "¸": [5, 16], "=": [10, 0], ρ: [7, 25], Ћ: [15, 6], ú: [15, 22], "˚": [2, 24], д: [16, 8], "¯": [5, 0], u: [10, 14], З: [7, 40], Α: [13, 8], "⅝": [17, 74], é: [11, 36], Ş: [8, 54], B: [13, 30], "…": [3, 46], H: [13, 0], î: [11, 12], ν: [7, 12], Ό: [7, 40], "−": [5, 0], "⅜": [15, 84], ǰ: [11, 24], ā: [16, 32], ĵ: [11, 24], Ĩ: [16, 20], "*": [16, 0], ă: [14, 48], Χ: [13, 0], "†": [13, 0], "°": [2, 32], Ξ: [15, 0], Ķ: [19, 8], ŵ: [23, 36], "΄": [5, 8], ǽ: [17, 62], Β: [13, 30], Ļ: [12, 8], Õ: [5, 52], "№": [20, 32], χ: [13, 21], ί: [10, 22], Ζ: [11, 0], Ľ: [12, 8], ť: [18, 22], o: [2, 24], Ѕ: [3, 38], "�": [11, 28], d: [10, 31], ",": [4, 8], '"': [10, 0], ľ: [10, 8], ė: [7, 38], Í: [18, 8], Ú: [12, 22], " ": [0, 0], Ŷ: [16, 12], Ý: [15, 8], ŝ: [9, 52], " ": [0, 0], ą: [14, 45], "​": [0, 0], ã: [14, 52], æ: [12, 54], ĩ: [8, 20], "~": [3, 26], ŀ: [6, 10], Ċ: [4, 36], "¡": [6, 16], ẅ: [19, 42], К: [12, 0], Γ: [7, 0], P: [10, 14], "%": [9, 44], ϖ: [13, 38], _: [5, 0], ñ: [13, 32], Ŕ: [18, 22], "‚": [4, 8], "⅞": [17, 52], Æ: [22, 0], "₣": [19, 0], Ū: [12, 14], ы: [15, 14], ѓ: [12, 8], Œ: [14, 23], "΅": [7, 28], Ą: [16, 21], Њ: [18, 14], "›": [8, 0], ћ: [19, 12], "<": [8, 0], "¬": [7, 0], t: [13, 14], Ц: [13, 0], ù: [15, 22], ï: [7, 18], Ф: [19, 36], Ò: [7, 40], I: [13, 0], "˝": [10, 16], "·": [1, 16], "¿": [6, 44], ſ: [5, 12], Ђ: [15, 18], ű: [20, 30], Ǽ: [27, 8], φ: [8, 38], ";": [5, 24], Ș: [8, 46], Ġ: [8, 40], n: [10, 12], ά: [13, 50], ϊ: [7, 32], "\uFEFF": [0, 0], ģ: [13, 76], "∂": [3, 54], κ: [14, 3], "‡": [23, 0], ň: [16, 24], "√": [10, 0], ę: [9, 41], į: [9, 23], Τ: [9, 0], "≈": [6, 52], ΐ: [12, 42], ĸ: [14, 3], g: [8, 68], ǿ: [16, 34], "²": [8, 18], Ã: [16, 28], Ј: [5, 12], "©": [5, 68], "≥": [13, 0], Ă: [16, 24], ґ: [9, 0], ÿ: [12, 38], Ł: [15, 0], " ": [0, 0], "∫": [5, 24], "\\": [5, 0], Ì: [18, 8], ъ: [12, 14], ς: [3, 38], Ē: [18, 0], "!": [6, 16], ç: [8, 38], Й: [16, 24], Б: [12, 14], đ: [18, 31], ċ: [4, 32], Ā: [18, 8], Ẃ: [19, 30], ø: [11, 26], â: [17, 44], "}": [9, 26], Δ: [11, 4], "‰": [11, 66], Ä: [15, 26], ř: [14, 24], "—": [5, 0], N: [13, 8], "⁄": [5, 0], М: [17, 6], Ó: [7, 40], "˜": [3, 20], " ": [0, 0], "ˇ": [6, 12], ų: [13, 27], Ў: [12, 36], Ŭ: [10, 30], ĝ: [14, 80], Ω: [9, 32], s: [3, 40], "?": [6, 44], Ņ: [18, 16], Ī: [18, 0], Μ: [17, 6], "•": [1, 16], н: [13, 0], "(": [3, 14], "◊": [12, 0], α: [8, 42], Ħ: [26, 0], м: [14, 16], з: [7, 40], Ґ: [9, 0], Û: [13, 26], і: [6, 10], V: [8, 4], Ŗ: [18, 22], "@": [6, 80], ʼ: [4, 8], "℅": [10, 51], i: [6, 10], ќ: [17, 8], "≤": [13, 0], ё: [8, 46], υ: [5, 20], ĕ: [9, 44], ﬃ: [32, 34], ż: [12, 10], Э: [6, 24], ő: [12, 40], Ŏ: [5, 48], ю: [9, 24], İ: [14, 10], Ě: [19, 12], "‹": [8, 0], ķ: [21, 8], ì: [10, 8], "±": [18, 0], "|": [5, 0], "§": [5, 68], џ: [13, 0], љ: [12, 25], q: [10, 31], "˳": [2, 24], ή: [15, 20], Ж: [19, 0], "®": [15, 54], Н: [13, 0], Ε: [13, 0], "₧": [23, 26], л: [7, 11], σ: [6, 30], θ: [5, 30], " ": [0, 0], "∑": [13, 0], Ώ: [14, 40], ẃ: [22, 32], "+": [13, 0], Ë: [15, 18], Š: [9, 50], " ": [0, 0], ð: [10, 38], щ: [17, 0], "℮": [8, 34], Φ: [19, 36], ş: [8, 56], " ": [0, 0], ı: [5, 0], ä: [13, 50], "¹": [8, 6], W: [14, 22], λ: [10, 28], ">": [8, 0], τ: [10, 16], Ų: [10, 27], Ŵ: [20, 34], "‛": [4, 8], Ð: [16, 14], Λ: [8, 4], "·": [1, 16], Х: [13, 0], Υ: [10, 0], r: [8, 12], ж: [19, 0], Ø: [11, 30], Ỳ: [15, 8], "÷": [7, 32], с: [3, 22], h: [11, 12], f: [13, 12], "“": [8, 16], A: [13, 8], O: [2, 32], Đ: [16, 14], Ǿ: [16, 38], "⅛": [17, 58], Ẁ: [19, 30], Ť: [15, 12], ψ: [11, 24], ŗ: [13, 20] }, serif: { 0: [2, 32], 1: [10, 18], 2: [9, 32], 3: [4, 58], 4: [20, 18], 5: [9, 36], 6: [2, 46], 7: [10, 1], 8: [3, 62], 9: [3, 48], ǻ: [19, 82], Á: [26, 29], ĥ: [24, 44], Κ: [25, 32], "»": [16, 0], "∆": [11, 4], ў: [21, 48], ţ: [16, 22], "«": [16, 0], í: [16, 20], ņ: [23, 38], µ: [11, 36], ỳ: [23, 40], Ι: [13, 16], Ύ: [27, 40], ѕ: [1, 52], Ш: [29, 32], M: [26, 24], Ψ: [27, 44], ũ: [19, 52], ŭ: [19, 40], "―": [5, 0], "{": [13, 22], "¼": [37, 24], Ḿ: [31, 32], ι: [5, 12], Ĳ: [24, 32], Ê: [27, 28], Ά: [26, 29], ")": [3, 16], ε: [2, 58], э: [4, 33], ш: [29, 32], Я: [21, 34], a: [12, 42], Ę: [24, 38], Z: [15, 8], " ": [0, 0], k: [23, 29], Ù: [20, 40], Ů: [17, 64], "¢": [11, 30], В: [17, 36], І: [13, 16], ē: [10, 30], β: [7, 51], "≠": [21, 0], "‼": [12, 32], "¥": [36, 32], Ĥ: [35, 44], U: [15, 32], Ñ: [24, 44], F: [19, 16], ϑ: [8, 58], Ќ: [24, 66], å: [14, 74], Ϋ: [24, 60], ō: [7, 28], "”": [4, 36], ö: [4, 56], ć: [6, 40], þ: [15, 50], "]": [9, 8], А: [21, 21], "′": [5, 0], Ы: [29, 44], ẁ: [30, 38], ĭ: [14, 24], R: [21, 32], Ż: [16, 24], ħ: [26, 32], õ: [5, 52], "˙": [1, 16], ê: [11, 42], "″": [10, 0], "„": [4, 36], ч: [21, 38], δ: [2, 56], Â: [27, 33], Į: [16, 38], ω: [4, 60], Ţ: [22, 22], "´": [5, 8], Ĉ: [7, 50], И: [29, 32], Љ: [17, 54], р: [15, 49], Ω: [15, 36], т: [17, 16], П: [21, 24], Ö: [4, 60], z: [15, 8], "™": [41, 32], Θ: [15, 44], Ř: [27, 48], Ň: [27, 36], É: [26, 24], и: [29, 32], "³": [5, 46], "[": [9, 8], ζ: [3, 48], "∏": [21, 24], Έ: [26, 24], Ρ: [16, 28], ğ: [8, 106], ª: [11, 38], ї: [13, 40], T: [17, 16], š: [7, 68], є: [4, 34], Þ: [20, 30], j: [10, 28], Σ: [18, 8], ϒ: [11, 52], ℓ: [8, 40], ĉ: [7, 44], ī: [16, 12], О: [2, 32], ξ: [4, 78], Ď: [18, 38], "&": [14, 68], G: [8, 40], ΰ: [13, 60], "`": [5, 8], ŏ: [5, 40], ý: [23, 40], º: [2, 18], "∞": [3, 50], ź: [20, 16], я: [20, 36], Ё: [23, 44], ń: [23, 40], " ": [0, 0], Г: [15, 16], Ь: [16, 28], "¤": [14, 32], Ĝ: [14, 52], p: [15, 49], Ю: [17, 48], ο: [2, 28], S: [1, 50], "/": [5, 0], Ŧ: [25, 16], ђ: [26, 36], y: [18, 32], Π: [21, 24], "‗": [10, 0], "–": [5, 0], ë: [7, 58], б: [4, 44], ƒ: [12, 30], у: [18, 32], J: [11, 16], ŷ: [24, 44], ŕ: [18, 38], ώ: [9, 68], "˘": [3, 12], D: [12, 22], ł: [19, 12], ĺ: [16, 20], ц: [23, 28], Л: [14, 42], $: [15, 46], w: [25, 30], о: [2, 28], Д: [18, 30], Ç: [6, 52], Ŝ: [7, 62], C: [1, 38], Ḁ: [23, 53], Ĵ: [17, 28], È: [26, 24], ﬁ: [22, 34], X: [29, 37], ô: [8, 40], Ė: [22, 32], г: [15, 16], Ŀ: [16, 32], х: [29, 33], ŋ: [18, 36], Ч: [21, 36], ü: [18, 56], ь: [16, 26], Ÿ: [24, 60], "€": [15, 40], в: [17, 36], Η: [29, 32], С: [1, 38], ß: [11, 60], њ: [32, 42], Ű: [25, 52], c: [1, 32], "¶": [16, 20], Ή: [34, 40], Ὅ: [9, 52], γ: [2, 48], "­": [5, 0], ":": [2, 32], ś: [6, 60], " ": [0, 0], У: [18, 32], "¾": [30, 58], Ί: [18, 24], ŉ: [20, 50], Ģ: [13, 46], m: [24, 52], Е: [21, 16], ž: [21, 24], á: [17, 50], "×": [13, 0], п: [21, 24], Ǻ: [26, 56], K: [25, 32], "¨": [2, 28], Y: [22, 32], E: [21, 16], Ô: [8, 44], Є: [4, 38], Ï: [15, 44], ġ: [6, 110], έ: [7, 66], " ": [0, 0], ϋ: [8, 60], й: [32, 48], b: [13, 43], ύ: [11, 40], ﬂ: [24, 32], ф: [17, 40], Ŋ: [24, 28], Ũ: [18, 56], Щ: [30, 34], L: [15, 16], ď: [18, 47], Ο: [2, 32], Ĭ: [16, 28], ŧ: [19, 16], À: [26, 29], Ϊ: [15, 44], ḁ: [14, 74], "½": [26, 38], "'": [5, 0], ĳ: [22, 56], Р: [16, 28], "˛": [3, 22], Ć: [6, 46], Т: [17, 16], "£": [12, 54], ů: [18, 60], Ō: [7, 32], а: [12, 42], Ğ: [11, 52], v: [17, 24], Ї: [15, 44], û: [22, 40], Ź: [20, 16], "ˉ": [5, 0], Ĺ: [20, 24], "₤": [20, 54], Č: [7, 54], x: [29, 33], è: [10, 38], Ń: [26, 28], ḿ: [29, 60], μ: [11, 36], ".": [1, 16], "‘": [2, 18], π: [12, 36], l: [11, 12], Ъ: [18, 28], " ": [0, 0], Ś: [6, 58], Ü: [17, 60], à: [17, 50], η: [9, 28], ó: [7, 36], "¦": [10, 0], Ő: [12, 52], Ž: [21, 24], е: [5, 30], Î: [19, 28], e: [5, 30], ό: [7, 36], Ĕ: [24, 28], ļ: [16, 18], " ": [0, 0], Ѓ: [20, 24], ò: [7, 36], ﬄ: [35, 58], "^": [8, 0], ⁿ: [18, 28], к: [19, 56], "￼": [118, 59], ū: [21, 28], "ˆ": [6, 12], Ẅ: [24, 54], č: [7, 48], "’": [2, 18], Ν: [21, 20], "-": [5, 0], Q: [5, 40], ј: [10, 28], ě: [11, 46], œ: [7, 53], "#": [34, 0], Џ: [23, 32], Å: [23, 53], ș: [6, 58], "¸": [5, 14], "=": [10, 0], ρ: [6, 30], Ћ: [25, 40], ú: [21, 36], "˚": [2, 32], д: [20, 30], "¯": [5, 0], u: [16, 28], З: [5, 54], Α: [21, 21], "⅝": [17, 86], é: [10, 38], Ş: [6, 64], B: [17, 36], "…": [3, 48], H: [29, 32], î: [17, 24], ν: [3, 34], Ό: [7, 40], "−": [5, 0], "⅜": [13, 100], ǰ: [15, 28], ā: [17, 42], ĵ: [15, 24], Ĩ: [16, 40], "*": [19, 0], ă: [15, 54], Χ: [29, 37], "†": [13, 6], "°": [2, 32], Ξ: [31, 28], Ķ: [30, 38], ŵ: [31, 42], "΄": [5, 8], ǽ: [17, 71], Β: [17, 36], Ļ: [20, 22], Õ: [5, 56], "№": [28, 38], χ: [13, 28], ί: [10, 20], Ζ: [15, 8], Ľ: [20, 22], ť: [16, 22], o: [2, 28], Ѕ: [1, 50], "�": [10, 44], d: [13, 41], ",": [2, 18], '"': [10, 0], ľ: [16, 18], ė: [6, 46], Í: [18, 24], Ú: [20, 40], " ": [0, 0], Ŷ: [28, 44], Ý: [27, 40], ŝ: [7, 64], " ": [0, 0], ą: [15, 64], "​": [0, 0], ã: [15, 66], æ: [12, 63], ĩ: [14, 36], "~": [3, 28], ŀ: [12, 28], Ċ: [2, 54], "¡": [6, 16], ẅ: [27, 58], К: [19, 58], Γ: [15, 16], P: [16, 28], "%": [9, 64], ϖ: [9, 68], _: [5, 0], ñ: [21, 56], Ŕ: [26, 40], "‚": [2, 18], "⅞": [18, 56], Æ: [33, 22], "₣": [27, 16], Ū: [20, 32], ы: [29, 42], ѓ: [20, 24], Œ: [18, 36], "΅": [7, 28], Ą: [24, 43], Њ: [32, 44], "›": [8, 0], ћ: [26, 32], "<": [8, 0], "¬": [7, 0], t: [11, 16], Ц: [22, 28], ù: [21, 36], ï: [13, 40], Ф: [27, 52], Ò: [7, 40], I: [13, 16], "˝": [10, 20], "·": [1, 16], "¿": [5, 44], ſ: [8, 24], Ђ: [21, 40], ű: [26, 48], Ǽ: [38, 30], φ: [11, 28], ";": [3, 34], Ș: [6, 56], Ġ: [9, 56], n: [18, 32], ά: [15, 48], ϊ: [7, 40], "\uFEFF": [0, 0], ģ: [10, 100], "∂": [3, 56], κ: [15, 29], "‡": [23, 12], ň: [24, 48], "√": [10, 0], ę: [8, 52], į: [15, 50], Τ: [17, 16], "≈": [6, 56], ΐ: [12, 40], ĸ: [23, 29], g: [5, 94], ǿ: [16, 34], "²": [9, 26], Ã: [24, 45], Ј: [11, 16], "©": [3, 84], "≥": [13, 0], Ă: [24, 33], ґ: [15, 16], ÿ: [20, 60], Ł: [23, 16], " ": [0, 0], "∫": [1, 49], "\\": [5, 0], Ì: [18, 24], ъ: [18, 26], ς: [2, 42], Ē: [26, 16], "!": [6, 16], ç: [6, 46], Й: [32, 48], Б: [18, 28], đ: [21, 39], ċ: [2, 48], Ā: [26, 21], Ẃ: [27, 34], ø: [11, 26], â: [18, 54], "}": [13, 22], Δ: [11, 4], "‰": [11, 96], Ä: [23, 49], ř: [19, 46], "—": [5, 0], N: [21, 20], "⁄": [5, 0], М: [26, 24], Ó: [7, 40], "˜": [3, 24], " ": [0, 0], "ˇ": [6, 16], ų: [19, 50], Ў: [21, 48], Ŭ: [18, 44], ĝ: [11, 106], Ω: [15, 36], s: [1, 52], "?": [5, 44], Ņ: [26, 26], Ī: [18, 16], Μ: [26, 24], "•": [1, 16], н: [29, 32], "(": [3, 16], "◊": [12, 0], α: [10, 40], Ħ: [42, 32], м: [28, 24], з: [5, 45], Ґ: [15, 16], Û: [21, 44], і: [12, 28], V: [16, 20], Ŗ: [26, 38], "@": [8, 83], ʼ: [2, 18], "℅": [8, 54], i: [12, 28], ќ: [24, 64], "≤": [13, 0], ё: [7, 58], υ: [6, 32], ĕ: [8, 42], ﬃ: [33, 60], ż: [16, 24], Э: [4, 36], ő: [12, 48], Ŏ: [5, 44], ю: [17, 44], İ: [14, 32], Ě: [27, 32], "‹": [8, 0], ķ: [28, 35], ì: [16, 20], "±": [18, 0], "|": [5, 0], "§": [2, 76], џ: [23, 32], љ: [17, 50], q: [15, 45], "˳": [2, 32], ή: [14, 36], Ж: [25, 100], "®": [22, 77], Н: [29, 32], Ε: [21, 16], "₧": [27, 42], л: [14, 40], σ: [6, 30], θ: [5, 32], " ": [0, 0], "∑": [18, 8], Ώ: [20, 44], ẃ: [30, 38], "+": [13, 0], Ë: [23, 44], Š: [7, 66], " ": [0, 0], ð: [9, 36], щ: [31, 36], "℮": [8, 34], Φ: [27, 52], ş: [6, 66], " ": [0, 0], ı: [11, 12], ä: [14, 70], "¹": [12, 12], W: [22, 26], λ: [9, 32], ">": [8, 0], τ: [7, 26], Ų: [18, 54], Ŵ: [28, 38], "‛": [2, 18], Ð: [20, 24], Λ: [16, 19], "·": [1, 16], Х: [29, 37], Υ: [22, 32], r: [13, 30], ж: [25, 96], Ø: [11, 30], Ỳ: [27, 40], "÷": [7, 30], с: [1, 32], h: [18, 32], f: [16, 28], "“": [4, 36], A: [21, 21], O: [2, 32], Đ: [20, 24], Ǿ: [16, 38], "⅛": [20, 66], Ẁ: [27, 34], Ť: [23, 32], ψ: [12, 30], ŗ: [18, 36] }, mono: { 0: [2, 14], 1: [8, 2], 2: [9, 10], 3: [7, 17], 4: [17, 2], 5: [8, 10], 6: [4, 20], 7: [8, 0], 8: [4, 25], 9: [4, 20], ǻ: [18, 32], Á: [18, 4], ĥ: [18, 9], Κ: [14, 0], "»": [16, 0], "∆": [11, 2], ў: [13, 14], ţ: [18, 7], "«": [16, 0], í: [16, 2], ņ: [15, 7], µ: [12, 6], ỳ: [15, 10], Ι: [13, 0], Ύ: [16, 3], ѕ: [3, 18], Ш: [13, 0], M: [17, 2], Ψ: [17, 8], ũ: [13, 13], ŭ: [13, 11], "―": [5, 0], "{": [9, 10], "¼": [29, 4], Ḿ: [22, 4], ι: [5, 4], Ĳ: [10, 4], Ê: [20, 5], Ά: [19, 5], ")": [3, 4], ε: [7, 14], э: [6, 10], ш: [13, 0], Я: [13, 5], a: [11, 15], Ę: [16, 7], Z: [11, 0], " ": [0, 0], k: [16, 0], Ù: [12, 7], Ů: [9, 20], "¢": [9, 8], В: [13, 13], І: [13, 0], ē: [11, 11], β: [10, 19], "≠": [21, 0], "‼": [12, 8], "¥": [24, 0], Ĥ: [20, 5], U: [7, 5], Ñ: [16, 10], F: [11, 0], ϑ: [6, 58], Ќ: [17, 2], å: [13, 30], Ϋ: [12, 8], ō: [7, 12], "”": [8, 4], ö: [4, 20], ć: [8, 12], þ: [11, 13], "]": [9, 0], А: [13, 2], "′": [5, 0], Ы: [15, 6], ẁ: [24, 6], ĭ: [14, 6], R: [13, 6], Ż: [12, 4], ħ: [19, 6], õ: [5, 20], "˙": [1, 4], ê: [13, 16], "″": [10, 0], "„": [8, 4], ч: [9, 5], δ: [3, 20], Â: [20, 7], Į: [16, 7], ω: [7, 14], Ţ: [14, 3], "´": [5, 2], Ĉ: [10, 17], И: [14, 2], Љ: [13, 14], р: [10, 13], Ω: [9, 10], т: [9, 0], П: [9, 0], Ö: [4, 20], z: [11, 0], "™": [26, 1], Θ: [7, 12], Ř: [20, 11], Ň: [20, 7], É: [18, 2], и: [13, 0], "³": [6, 14], "[": [9, 0], ζ: [6, 15], "∏": [9, 0], Έ: [19, 3], Ρ: [10, 6], ğ: [11, 34], ª: [10, 13], ї: [13, 8], T: [9, 0], š: [10, 23], є: [6, 10], Þ: [12, 6], j: [8, 10], Σ: [13, 0], ϒ: [8, 20], ℓ: [8, 16], ĉ: [10, 15], ī: [16, 0], О: [2, 12], ξ: [11, 22], Ď: [15, 11], "&": [9, 24], G: [7, 11], ΰ: [12, 19], "`": [5, 2], ŏ: [5, 18], ý: [15, 10], º: [2, 12], "∞": [3, 24], ź: [16, 2], я: [13, 5], Ё: [15, 8], ń: [15, 6], " ": [0, 0], Г: [7, 0], Ь: [10, 6], "¤": [14, 16], Ĝ: [14, 16], p: [10, 13], Ю: [9, 16], ο: [2, 12], S: [3, 18], "/": [5, 0], Ŧ: [17, 0], ђ: [19, 9], y: [10, 8], Π: [9, 0], "‗": [10, 0], "–": [5, 0], ë: [8, 19], б: [4, 20], ƒ: [13, 12], у: [10, 8], J: [5, 6], ŷ: [17, 13], ŕ: [13, 8], ώ: [13, 17], "˘": [3, 6], D: [8, 6], ł: [19, 0], ĺ: [16, 2], ц: [13, 0], Л: [7, 6], $: [15, 16], w: [19, 4], о: [2, 12], Д: [16, 4], Ç: [8, 18], Ŝ: [10, 23], C: [3, 12], Ḁ: [15, 26], Ĵ: [12, 11], È: [18, 2], ﬁ: [19, 11], X: [13, 0], ô: [9, 17], Ė: [14, 4], г: [7, 0], Ŀ: [8, 4], х: [13, 0], ŋ: [10, 8], Ч: [9, 5], ü: [12, 13], ь: [10, 5], Ÿ: [12, 8], "€": [19, 12], в: [13, 11], Η: [13, 0], С: [3, 12], ß: [5, 23], њ: [18, 5], Ű: [17, 9], c: [3, 10], "¶": [9, 4], Ή: [19, 3], Ὅ: [9, 32], γ: [9, 4], "­": [5, 0], ":": [2, 8], ś: [8, 20], " ": [0, 0], У: [10, 9], "¾": [27, 16], Ί: [19, 3], ŉ: [14, 7], Ģ: [12, 14], m: [14, 12], Е: [13, 0], ž: [18, 5], á: [16, 17], "×": [13, 0], п: [9, 0], Ǻ: [20, 19], K: [14, 0], "¨": [2, 8], Y: [10, 0], E: [13, 0], Ô: [9, 17], Є: [6, 11], Ï: [15, 8], ġ: [9, 32], έ: [13, 17], " ": [0, 0], ϋ: [7, 16], й: [16, 6], b: [9, 13], ύ: [11, 11], ﬂ: [18, 6], ф: [11, 8], Ŋ: [13, 7], Ũ: [10, 13], Щ: [17, 0], L: [7, 0], ď: [16, 16], Ο: [2, 12], Ĭ: [16, 6], ŧ: [21, 4], À: [18, 4], Ϊ: [15, 8], ḁ: [13, 39], "½": [21, 11], "'": [5, 0], ĳ: [14, 15], Р: [10, 6], "˛": [3, 7], Ć: [8, 14], Т: [9, 0], "£": [16, 7], ů: [12, 20], Ō: [7, 12], а: [11, 15], Ğ: [10, 17], v: [9, 2], Ї: [15, 8], û: [17, 10], Ź: [16, 2], "ˉ": [5, 0], Ĺ: [12, 2], "₤": [24, 7], Č: [10, 17], x: [13, 0], è: [11, 13], Ń: [18, 4], ḿ: [19, 14], μ: [12, 6], ".": [1, 4], "‘": [4, 2], π: [14, 4], l: [11, 0], Ъ: [12, 7], " ": [0, 0], Ś: [8, 20], Ü: [9, 13], à: [16, 17], η: [10, 4], ó: [7, 14], "¦": [10, 0], Ő: [12, 16], Ž: [18, 5], е: [6, 11], Î: [20, 5], e: [6, 11], ό: [8, 15], Ĕ: [16, 6], ļ: [16, 3], " ": [0, 0], Ѓ: [12, 2], ò: [7, 14], ﬄ: [24, 22], "^": [8, 0], ⁿ: [10, 6], к: [12, 0], "￼": [92, 50], ū: [15, 5], "ˆ": [7, 5], Ẅ: [16, 15], č: [10, 15], "’": [4, 2], Ν: [13, 2], "-": [5, 0], Q: [3, 14], ј: [8, 10], ě: [13, 16], œ: [7, 22], "#": [34, 0], Џ: [13, 0], Å: [15, 17], ș: [8, 21], "¸": [5, 6], "=": [10, 0], ρ: [7, 14], Ћ: [15, 3], ú: [15, 7], "˚": [2, 15], д: [16, 2], "¯": [5, 0], u: [10, 5], З: [7, 18], Α: [13, 2], "⅝": [17, 30], é: [11, 13], Ş: [8, 24], B: [13, 13], "…": [3, 12], H: [13, 0], î: [18, 5], ν: [7, 5], Ό: [8, 15], "−": [5, 0], "⅜": [15, 34], ǰ: [14, 11], ā: [16, 15], ĵ: [14, 11], Ĩ: [16, 8], "*": [16, 0], ă: [14, 21], Χ: [13, 0], "†": [13, 0], "°": [2, 16], Ξ: [15, 0], Ķ: [19, 3], ŵ: [26, 9], "΄": [6, 3], ǽ: [17, 27], Β: [13, 13], Ļ: [12, 3], Õ: [5, 20], "№": [20, 17], χ: [13, 11], ί: [11, 7], Ζ: [11, 0], Ľ: [13, 3], ť: [19, 7], o: [2, 12], Ѕ: [3, 18], "�": [11, 38], d: [10, 13], ",": [4, 2], '"': [10, 0], ľ: [17, 3], ė: [7, 15], Í: [18, 2], Ú: [12, 7], " ": [0, 0], Ŷ: [17, 5], Ý: [15, 2], ŝ: [10, 23], " ": [0, 0], ą: [14, 22], "​": [0, 0], ã: [14, 23], æ: [12, 25], ĩ: [14, 8], "~": [3, 8], ŀ: [12, 4], Ċ: [4, 16], "¡": [6, 4], ẅ: [21, 12], К: [12, 0], Γ: [7, 0], P: [10, 6], "%": [9, 24], ϖ: [13, 42], _: [5, 0], ñ: [13, 12], Ŕ: [18, 8], "‚": [4, 2], "⅞": [17, 20], Æ: [22, 0], "₣": [19, 0], Ū: [12, 5], ы: [15, 5], ѓ: [12, 2], Œ: [15, 8], "΅": [7, 11], Ą: [16, 9], Њ: [18, 7], "›": [8, 0], ћ: [19, 6], "<": [8, 0], "¬": [7, 0], t: [13, 4], Ц: [13, 0], ù: [15, 7], ï: [13, 8], Ф: [19, 16], Ò: [7, 14], I: [13, 0], "˝": [10, 4], "·": [1, 4], "¿": [6, 18], ſ: [5, 6], Ђ: [15, 8], ű: [20, 9], Ǽ: [27, 2], φ: [8, 13], ";": [5, 6], Ș: [8, 21], Ġ: [8, 15], n: [10, 4], ά: [14, 21], ϊ: [7, 12], "\uFEFF": [0, 0], ģ: [13, 31], "∂": [4, 18], κ: [16, 0], "‡": [23, 0], ň: [17, 9], "√": [10, 0], ę: [9, 18], į: [15, 12], Τ: [9, 0], "≈": [6, 16], ΐ: [12, 15], ĸ: [16, 0], g: [8, 28], ǿ: [16, 18], "²": [8, 9], Ã: [16, 10], Ј: [5, 6], "©": [5, 27], "≥": [13, 0], Ă: [16, 8], ґ: [9, 0], ÿ: [12, 16], Ł: [15, 0], " ": [0, 0], "∫": [5, 9], "\\": [5, 0], Ì: [18, 2], ъ: [12, 5], ς: [3, 12], Ē: [18, 0], "!": [6, 4], ç: [8, 16], Й: [17, 8], Б: [12, 6], đ: [18, 13], ċ: [4, 14], Ā: [18, 2], Ẃ: [19, 9], ø: [11, 16], â: [18, 20], "}": [9, 10], Δ: [11, 2], "‰": [11, 42], Ä: [15, 10], ř: [15, 11], "—": [5, 0], N: [13, 2], "⁄": [5, 0], М: [17, 2], Ó: [7, 14], "˜": [3, 8], " ": [0, 0], "ˇ": [7, 5], ų: [13, 12], Ў: [13, 15], Ŭ: [10, 11], ĝ: [15, 33], Ω: [9, 10], s: [3, 18], "?": [6, 18], Ņ: [18, 5], Ī: [18, 0], Μ: [17, 2], "•": [1, 6], н: [13, 0], "(": [3, 4], "◊": [12, 0], α: [8, 18], Ħ: [26, 0], м: [14, 6], з: [7, 15], Ґ: [9, 0], Û: [14, 10], і: [12, 5], V: [8, 2], Ŗ: [18, 9], "@": [7, 31], ʼ: [4, 2], "℅": [10, 22], i: [12, 5], ќ: [21, 2], "≤": [13, 0], ё: [8, 19], υ: [5, 8], ĕ: [9, 17], ﬃ: [23, 23], ż: [12, 4], Э: [6, 11], ő: [12, 16], Ŏ: [5, 18], ю: [9, 13], İ: [14, 4], Ě: [20, 5], "‹": [8, 0], ķ: [21, 3], ì: [16, 2], "±": [18, 0], "|": [5, 0], "§": [5, 28], џ: [13, 0], љ: [12, 13], q: [10, 13], "˳": [2, 24], ή: [16, 7], Ж: [19, 0], "®": [15, 21], Н: [13, 0], Ε: [13, 0], "₧": [23, 9], л: [7, 6], σ: [6, 13], θ: [5, 15], " ": [0, 0], "∑": [13, 0], Ώ: [15, 13], ẃ: [24, 6], "+": [13, 0], Ë: [15, 8], Š: [10, 23], " ": [0, 0], ð: [10, 17], щ: [17, 0], "℮": [9, 12], Φ: [19, 16], ş: [8, 24], " ": [0, 0], ı: [11, 0], ä: [13, 23], "¹": [8, 2], W: [14, 7], λ: [10, 13], ">": [8, 0], τ: [10, 4], Ų: [10, 12], Ŵ: [21, 12], "‛": [4, 2], Ð: [16, 6], Λ: [8, 2], "·": [1, 4], Х: [13, 0], Υ: [10, 0], r: [8, 6], ж: [19, 0], Ø: [11, 14], Ỳ: [15, 2], "÷": [7, 8], с: [3, 10], h: [11, 4], f: [13, 6], "“": [8, 4], A: [13, 2], O: [2, 12], Đ: [16, 6], Ǿ: [16, 16], "⅛": [17, 22], Ẁ: [19, 9], Ť: [16, 5], ψ: [11, 7], ŗ: [13, 9] } };
+const y0 = (A, g) => A.parts.map((I) => typeof I == "string" ? I : g(I, A.scad)).join(""), zI = { sans: { 0: [2, 32], 1: [8, 8], 2: [9, 22], 3: [7, 40], 4: [17, 8], 5: [8, 28], 6: [4, 50], 7: [8, 0], 8: [4, 58], 9: [4, 48], ǻ: [18, 64], Á: [18, 16], ĥ: [17, 24], Κ: [14, 0], "»": [16, 0], "∆": [11, 4], ў: [13, 36], ţ: [18, 22], "«": [16, 0], í: [10, 8], ņ: [15, 20], µ: [12, 13], ỳ: [15, 28], Ι: [13, 0], Ύ: [15, 8], ѕ: [3, 40], Ш: [13, 0], M: [17, 6], Ψ: [17, 18], ũ: [13, 34], ŭ: [13, 30], "―": [5, 0], "{": [9, 24], "¼": [29, 12], Ḿ: [22, 14], ι: [5, 14], Ĳ: [18, 12], Ê: [19, 12], Ά: [18, 16], ")": [3, 14], ε: [7, 40], э: [6, 26], ш: [13, 0], Я: [13, 14], a: [11, 32], Ę: [16, 13], Z: [11, 0], " ": [0, 0], k: [16, 0], Ù: [12, 22], Ů: [9, 38], "¢": [9, 22], В: [13, 30], І: [13, 0], ē: [11, 28], β: [10, 42], "≠": [21, 0], "‼": [12, 32], "¥": [24, 0], Ĥ: [19, 12], U: [7, 14], Ñ: [16, 28], F: [11, 0], ϑ: [6, 58], Ќ: [17, 8], å: [13, 56], Ϋ: [12, 18], ō: [7, 24], "”": [8, 16], ö: [4, 42], ć: [8, 30], þ: [11, 31], "]": [9, 0], А: [13, 8], "′": [5, 0], Ы: [15, 14], ẁ: [22, 32], ĭ: [8, 16], R: [13, 14], Ż: [12, 10], ħ: [19, 12], õ: [5, 44], "˙": [1, 10], ê: [12, 40], "″": [10, 0], "„": [8, 16], ч: [9, 13], δ: [3, 54], Â: [19, 20], Į: [16, 13], ω: [7, 42], Ţ: [14, 8], "´": [5, 8], Ĉ: [9, 38], И: [13, 8], Љ: [12, 34], р: [10, 31], Ω: [9, 32], т: [9, 0], П: [9, 0], Ö: [4, 50], z: [11, 0], "™": [25, 8], Θ: [7, 32], Ř: [19, 26], Ň: [19, 20], É: [18, 8], и: [13, 0], "³": [6, 32], "[": [9, 0], ζ: [6, 37], "∏": [9, 0], Έ: [18, 8], Ρ: [10, 14], ğ: [11, 84], ª: [10, 28], ї: [7, 18], T: [9, 0], š: [9, 52], є: [6, 22], Þ: [12, 14], j: [6, 22], Σ: [13, 0], ϒ: [8, 22], ℓ: [8, 41], ĉ: [9, 34], ī: [10, 0], О: [2, 32], ξ: [11, 47], Ď: [14, 26], "&": [9, 62], G: [7, 30], ΰ: [12, 48], "`": [5, 8], ŏ: [5, 40], ý: [15, 28], º: [2, 24], "∞": [3, 52], ź: [16, 8], я: [13, 14], Ё: [15, 18], ń: [15, 20], " ": [0, 0], Г: [7, 0], Ь: [10, 14], "¤": [14, 32], Ĝ: [13, 42], p: [10, 31], Ю: [9, 32], ο: [2, 24], S: [3, 38], "/": [5, 0], Ŧ: [17, 0], ђ: [19, 24], y: [10, 20], Π: [9, 0], "‗": [10, 0], "–": [5, 0], ë: [8, 46], б: [4, 46], ƒ: [13, 24], у: [10, 20], J: [5, 12], ŷ: [16, 32], ŕ: [13, 20], ώ: [12, 50], "˘": [3, 16], D: [8, 14], ł: [13, 0], ĺ: [10, 8], ц: [13, 0], Л: [7, 20], $: [15, 40], w: [17, 24], о: [2, 24], Д: [16, 12], Ç: [8, 42], Ŝ: [9, 50], C: [3, 26], Ḁ: [15, 32], Ĵ: [11, 24], È: [18, 8], ﬁ: [19, 22], X: [13, 0], ô: [8, 36], Ė: [14, 10], г: [7, 0], Ŀ: [8, 10], х: [13, 0], ŋ: [10, 24], Ч: [9, 10], ü: [12, 32], ь: [10, 14], Ÿ: [12, 18], "€": [15, 31], в: [13, 26], Η: [13, 0], С: [3, 26], ß: [5, 58], њ: [18, 14], Ű: [17, 30], c: [3, 22], "¶": [9, 9], Ή: [18, 8], Ὅ: [9, 52], γ: [9, 16], "­": [5, 0], ":": [2, 32], ś: [8, 48], " ": [0, 0], У: [9, 20], "¾": [27, 38], Ί: [18, 8], ŉ: [14, 20], Ģ: [12, 38], m: [14, 24], Е: [13, 0], ž: [17, 12], á: [16, 40], "×": [13, 0], п: [9, 0], Ǻ: [19, 36], K: [14, 0], "¨": [2, 18], Y: [10, 0], E: [13, 0], Ô: [8, 44], Є: [6, 26], Ï: [15, 18], ġ: [9, 78], έ: [12, 48], " ": [0, 0], ϋ: [7, 38], й: [16, 16], b: [9, 31], ύ: [10, 28], ﬂ: [18, 12], ф: [11, 26], Ŋ: [13, 18], Ũ: [10, 34], Щ: [17, 0], L: [7, 0], ď: [15, 39], Ο: [2, 32], Ĭ: [16, 16], ŧ: [21, 14], À: [18, 16], Ϊ: [15, 18], ḁ: [13, 56], "½": [21, 24], "'": [5, 0], ĳ: [12, 32], Р: [10, 14], "˛": [3, 13], Ć: [8, 34], Т: [9, 0], "£": [16, 20], ů: [12, 38], Ō: [7, 32], а: [11, 32], Ğ: [10, 46], v: [9, 8], Ї: [15, 18], û: [16, 26], Ź: [16, 8], "ˉ": [5, 0], Ĺ: [12, 8], "₤": [24, 20], Č: [9, 38], x: [13, 0], è: [11, 36], Ń: [18, 16], ḿ: [19, 32], μ: [12, 13], ".": [1, 16], "‘": [4, 8], π: [14, 8], l: [5, 0], Ъ: [12, 14], " ": [0, 0], Ś: [8, 46], Ü: [9, 32], à: [16, 40], η: [10, 12], ó: [7, 32], "¦": [10, 0], Ő: [12, 48], Ž: [17, 12], е: [6, 28], Î: [19, 12], e: [6, 28], ό: [7, 32], Ĕ: [16, 16], ļ: [10, 8], " ": [0, 0], Ѓ: [12, 8], ò: [7, 32], ﬄ: [31, 24], "^": [8, 0], ⁿ: [10, 8], к: [12, 0], "￼": [108, 39], ū: [15, 14], "ˆ": [6, 12], Ẅ: [16, 40], č: [9, 34], "’": [4, 8], Ν: [13, 8], "-": [5, 0], Q: [3, 38], ј: [6, 22], ě: [12, 40], œ: [7, 44], "#": [34, 0], Џ: [13, 0], Å: [15, 32], ș: [8, 48], "¸": [5, 16], "=": [10, 0], ρ: [7, 25], Ћ: [15, 6], ú: [15, 22], "˚": [2, 24], д: [16, 8], "¯": [5, 0], u: [10, 14], З: [7, 40], Α: [13, 8], "⅝": [17, 74], é: [11, 36], Ş: [8, 54], B: [13, 30], "…": [3, 46], H: [13, 0], î: [11, 12], ν: [7, 12], Ό: [7, 40], "−": [5, 0], "⅜": [15, 84], ǰ: [11, 24], ā: [16, 32], ĵ: [11, 24], Ĩ: [16, 20], "*": [16, 0], ă: [14, 48], Χ: [13, 0], "†": [13, 0], "°": [2, 32], Ξ: [15, 0], Ķ: [19, 8], ŵ: [23, 36], "΄": [5, 8], ǽ: [17, 62], Β: [13, 30], Ļ: [12, 8], Õ: [5, 52], "№": [20, 32], χ: [13, 21], ί: [10, 22], Ζ: [11, 0], Ľ: [12, 8], ť: [18, 22], o: [2, 24], Ѕ: [3, 38], "�": [11, 28], d: [10, 31], ",": [4, 8], '"': [10, 0], ľ: [10, 8], ė: [7, 38], Í: [18, 8], Ú: [12, 22], " ": [0, 0], Ŷ: [16, 12], Ý: [15, 8], ŝ: [9, 52], " ": [0, 0], ą: [14, 45], "​": [0, 0], ã: [14, 52], æ: [12, 54], ĩ: [8, 20], "~": [3, 26], ŀ: [6, 10], Ċ: [4, 36], "¡": [6, 16], ẅ: [19, 42], К: [12, 0], Γ: [7, 0], P: [10, 14], "%": [9, 44], ϖ: [13, 38], _: [5, 0], ñ: [13, 32], Ŕ: [18, 22], "‚": [4, 8], "⅞": [17, 52], Æ: [22, 0], "₣": [19, 0], Ū: [12, 14], ы: [15, 14], ѓ: [12, 8], Œ: [14, 23], "΅": [7, 28], Ą: [16, 21], Њ: [18, 14], "›": [8, 0], ћ: [19, 12], "<": [8, 0], "¬": [7, 0], t: [13, 14], Ц: [13, 0], ù: [15, 22], ï: [7, 18], Ф: [19, 36], Ò: [7, 40], I: [13, 0], "˝": [10, 16], "·": [1, 16], "¿": [6, 44], ſ: [5, 12], Ђ: [15, 18], ű: [20, 30], Ǽ: [27, 8], φ: [8, 38], ";": [5, 24], Ș: [8, 46], Ġ: [8, 40], n: [10, 12], ά: [13, 50], ϊ: [7, 32], "\uFEFF": [0, 0], ģ: [13, 76], "∂": [3, 54], κ: [14, 3], "‡": [23, 0], ň: [16, 24], "√": [10, 0], ę: [9, 41], į: [9, 23], Τ: [9, 0], "≈": [6, 52], ΐ: [12, 42], ĸ: [14, 3], g: [8, 68], ǿ: [16, 34], "²": [8, 18], Ã: [16, 28], Ј: [5, 12], "©": [5, 68], "≥": [13, 0], Ă: [16, 24], ґ: [9, 0], ÿ: [12, 38], Ł: [15, 0], " ": [0, 0], "∫": [5, 24], "\\": [5, 0], Ì: [18, 8], ъ: [12, 14], ς: [3, 38], Ē: [18, 0], "!": [6, 16], ç: [8, 38], Й: [16, 24], Б: [12, 14], đ: [18, 31], ċ: [4, 32], Ā: [18, 8], Ẃ: [19, 30], ø: [11, 26], â: [17, 44], "}": [9, 26], Δ: [11, 4], "‰": [11, 66], Ä: [15, 26], ř: [14, 24], "—": [5, 0], N: [13, 8], "⁄": [5, 0], М: [17, 6], Ó: [7, 40], "˜": [3, 20], " ": [0, 0], "ˇ": [6, 12], ų: [13, 27], Ў: [12, 36], Ŭ: [10, 30], ĝ: [14, 80], Ω: [9, 32], s: [3, 40], "?": [6, 44], Ņ: [18, 16], Ī: [18, 0], Μ: [17, 6], "•": [1, 16], н: [13, 0], "(": [3, 14], "◊": [12, 0], α: [8, 42], Ħ: [26, 0], м: [14, 16], з: [7, 40], Ґ: [9, 0], Û: [13, 26], і: [6, 10], V: [8, 4], Ŗ: [18, 22], "@": [6, 80], ʼ: [4, 8], "℅": [10, 51], i: [6, 10], ќ: [17, 8], "≤": [13, 0], ё: [8, 46], υ: [5, 20], ĕ: [9, 44], ﬃ: [32, 34], ż: [12, 10], Э: [6, 24], ő: [12, 40], Ŏ: [5, 48], ю: [9, 24], İ: [14, 10], Ě: [19, 12], "‹": [8, 0], ķ: [21, 8], ì: [10, 8], "±": [18, 0], "|": [5, 0], "§": [5, 68], џ: [13, 0], љ: [12, 25], q: [10, 31], "˳": [2, 24], ή: [15, 20], Ж: [19, 0], "®": [15, 54], Н: [13, 0], Ε: [13, 0], "₧": [23, 26], л: [7, 11], σ: [6, 30], θ: [5, 30], " ": [0, 0], "∑": [13, 0], Ώ: [14, 40], ẃ: [22, 32], "+": [13, 0], Ë: [15, 18], Š: [9, 50], " ": [0, 0], ð: [10, 38], щ: [17, 0], "℮": [8, 34], Φ: [19, 36], ş: [8, 56], " ": [0, 0], ı: [5, 0], ä: [13, 50], "¹": [8, 6], W: [14, 22], λ: [10, 28], ">": [8, 0], τ: [10, 16], Ų: [10, 27], Ŵ: [20, 34], "‛": [4, 8], Ð: [16, 14], Λ: [8, 4], "·": [1, 16], Х: [13, 0], Υ: [10, 0], r: [8, 12], ж: [19, 0], Ø: [11, 30], Ỳ: [15, 8], "÷": [7, 32], с: [3, 22], h: [11, 12], f: [13, 12], "“": [8, 16], A: [13, 8], O: [2, 32], Đ: [16, 14], Ǿ: [16, 38], "⅛": [17, 58], Ẁ: [19, 30], Ť: [15, 12], ψ: [11, 24], ŗ: [13, 20] }, serif: { 0: [2, 32], 1: [10, 18], 2: [9, 32], 3: [4, 58], 4: [20, 18], 5: [9, 36], 6: [2, 46], 7: [10, 1], 8: [3, 62], 9: [3, 48], ǻ: [19, 82], Á: [26, 29], ĥ: [24, 44], Κ: [25, 32], "»": [16, 0], "∆": [11, 4], ў: [21, 48], ţ: [16, 22], "«": [16, 0], í: [16, 20], ņ: [23, 38], µ: [11, 36], ỳ: [23, 40], Ι: [13, 16], Ύ: [27, 40], ѕ: [1, 52], Ш: [29, 32], M: [26, 24], Ψ: [27, 44], ũ: [19, 52], ŭ: [19, 40], "―": [5, 0], "{": [13, 22], "¼": [37, 24], Ḿ: [31, 32], ι: [5, 12], Ĳ: [24, 32], Ê: [27, 28], Ά: [26, 29], ")": [3, 16], ε: [2, 58], э: [4, 33], ш: [29, 32], Я: [21, 34], a: [12, 42], Ę: [24, 38], Z: [15, 8], " ": [0, 0], k: [23, 29], Ù: [20, 40], Ů: [17, 64], "¢": [11, 30], В: [17, 36], І: [13, 16], ē: [10, 30], β: [7, 51], "≠": [21, 0], "‼": [12, 32], "¥": [36, 32], Ĥ: [35, 44], U: [15, 32], Ñ: [24, 44], F: [19, 16], ϑ: [8, 58], Ќ: [24, 66], å: [14, 74], Ϋ: [24, 60], ō: [7, 28], "”": [4, 36], ö: [4, 56], ć: [6, 40], þ: [15, 50], "]": [9, 8], А: [21, 21], "′": [5, 0], Ы: [29, 44], ẁ: [30, 38], ĭ: [14, 24], R: [21, 32], Ż: [16, 24], ħ: [26, 32], õ: [5, 52], "˙": [1, 16], ê: [11, 42], "″": [10, 0], "„": [4, 36], ч: [21, 38], δ: [2, 56], Â: [27, 33], Į: [16, 38], ω: [4, 60], Ţ: [22, 22], "´": [5, 8], Ĉ: [7, 50], И: [29, 32], Љ: [17, 54], р: [15, 49], Ω: [15, 36], т: [17, 16], П: [21, 24], Ö: [4, 60], z: [15, 8], "™": [41, 32], Θ: [15, 44], Ř: [27, 48], Ň: [27, 36], É: [26, 24], и: [29, 32], "³": [5, 46], "[": [9, 8], ζ: [3, 48], "∏": [21, 24], Έ: [26, 24], Ρ: [16, 28], ğ: [8, 106], ª: [11, 38], ї: [13, 40], T: [17, 16], š: [7, 68], є: [4, 34], Þ: [20, 30], j: [10, 28], Σ: [18, 8], ϒ: [11, 52], ℓ: [8, 40], ĉ: [7, 44], ī: [16, 12], О: [2, 32], ξ: [4, 78], Ď: [18, 38], "&": [14, 68], G: [8, 40], ΰ: [13, 60], "`": [5, 8], ŏ: [5, 40], ý: [23, 40], º: [2, 18], "∞": [3, 50], ź: [20, 16], я: [20, 36], Ё: [23, 44], ń: [23, 40], " ": [0, 0], Г: [15, 16], Ь: [16, 28], "¤": [14, 32], Ĝ: [14, 52], p: [15, 49], Ю: [17, 48], ο: [2, 28], S: [1, 50], "/": [5, 0], Ŧ: [25, 16], ђ: [26, 36], y: [18, 32], Π: [21, 24], "‗": [10, 0], "–": [5, 0], ë: [7, 58], б: [4, 44], ƒ: [12, 30], у: [18, 32], J: [11, 16], ŷ: [24, 44], ŕ: [18, 38], ώ: [9, 68], "˘": [3, 12], D: [12, 22], ł: [19, 12], ĺ: [16, 20], ц: [23, 28], Л: [14, 42], $: [15, 46], w: [25, 30], о: [2, 28], Д: [18, 30], Ç: [6, 52], Ŝ: [7, 62], C: [1, 38], Ḁ: [23, 53], Ĵ: [17, 28], È: [26, 24], ﬁ: [22, 34], X: [29, 37], ô: [8, 40], Ė: [22, 32], г: [15, 16], Ŀ: [16, 32], х: [29, 33], ŋ: [18, 36], Ч: [21, 36], ü: [18, 56], ь: [16, 26], Ÿ: [24, 60], "€": [15, 40], в: [17, 36], Η: [29, 32], С: [1, 38], ß: [11, 60], њ: [32, 42], Ű: [25, 52], c: [1, 32], "¶": [16, 20], Ή: [34, 40], Ὅ: [9, 52], γ: [2, 48], "­": [5, 0], ":": [2, 32], ś: [6, 60], " ": [0, 0], У: [18, 32], "¾": [30, 58], Ί: [18, 24], ŉ: [20, 50], Ģ: [13, 46], m: [24, 52], Е: [21, 16], ž: [21, 24], á: [17, 50], "×": [13, 0], п: [21, 24], Ǻ: [26, 56], K: [25, 32], "¨": [2, 28], Y: [22, 32], E: [21, 16], Ô: [8, 44], Є: [4, 38], Ï: [15, 44], ġ: [6, 110], έ: [7, 66], " ": [0, 0], ϋ: [8, 60], й: [32, 48], b: [13, 43], ύ: [11, 40], ﬂ: [24, 32], ф: [17, 40], Ŋ: [24, 28], Ũ: [18, 56], Щ: [30, 34], L: [15, 16], ď: [18, 47], Ο: [2, 32], Ĭ: [16, 28], ŧ: [19, 16], À: [26, 29], Ϊ: [15, 44], ḁ: [14, 74], "½": [26, 38], "'": [5, 0], ĳ: [22, 56], Р: [16, 28], "˛": [3, 22], Ć: [6, 46], Т: [17, 16], "£": [12, 54], ů: [18, 60], Ō: [7, 32], а: [12, 42], Ğ: [11, 52], v: [17, 24], Ї: [15, 44], û: [22, 40], Ź: [20, 16], "ˉ": [5, 0], Ĺ: [20, 24], "₤": [20, 54], Č: [7, 54], x: [29, 33], è: [10, 38], Ń: [26, 28], ḿ: [29, 60], μ: [11, 36], ".": [1, 16], "‘": [2, 18], π: [12, 36], l: [11, 12], Ъ: [18, 28], " ": [0, 0], Ś: [6, 58], Ü: [17, 60], à: [17, 50], η: [9, 28], ó: [7, 36], "¦": [10, 0], Ő: [12, 52], Ž: [21, 24], е: [5, 30], Î: [19, 28], e: [5, 30], ό: [7, 36], Ĕ: [24, 28], ļ: [16, 18], " ": [0, 0], Ѓ: [20, 24], ò: [7, 36], ﬄ: [35, 58], "^": [8, 0], ⁿ: [18, 28], к: [19, 56], "￼": [118, 59], ū: [21, 28], "ˆ": [6, 12], Ẅ: [24, 54], č: [7, 48], "’": [2, 18], Ν: [21, 20], "-": [5, 0], Q: [5, 40], ј: [10, 28], ě: [11, 46], œ: [7, 53], "#": [34, 0], Џ: [23, 32], Å: [23, 53], ș: [6, 58], "¸": [5, 14], "=": [10, 0], ρ: [6, 30], Ћ: [25, 40], ú: [21, 36], "˚": [2, 32], д: [20, 30], "¯": [5, 0], u: [16, 28], З: [5, 54], Α: [21, 21], "⅝": [17, 86], é: [10, 38], Ş: [6, 64], B: [17, 36], "…": [3, 48], H: [29, 32], î: [17, 24], ν: [3, 34], Ό: [7, 40], "−": [5, 0], "⅜": [13, 100], ǰ: [15, 28], ā: [17, 42], ĵ: [15, 24], Ĩ: [16, 40], "*": [19, 0], ă: [15, 54], Χ: [29, 37], "†": [13, 6], "°": [2, 32], Ξ: [31, 28], Ķ: [30, 38], ŵ: [31, 42], "΄": [5, 8], ǽ: [17, 71], Β: [17, 36], Ļ: [20, 22], Õ: [5, 56], "№": [28, 38], χ: [13, 28], ί: [10, 20], Ζ: [15, 8], Ľ: [20, 22], ť: [16, 22], o: [2, 28], Ѕ: [1, 50], "�": [10, 44], d: [13, 41], ",": [2, 18], '"': [10, 0], ľ: [16, 18], ė: [6, 46], Í: [18, 24], Ú: [20, 40], " ": [0, 0], Ŷ: [28, 44], Ý: [27, 40], ŝ: [7, 64], " ": [0, 0], ą: [15, 64], "​": [0, 0], ã: [15, 66], æ: [12, 63], ĩ: [14, 36], "~": [3, 28], ŀ: [12, 28], Ċ: [2, 54], "¡": [6, 16], ẅ: [27, 58], К: [19, 58], Γ: [15, 16], P: [16, 28], "%": [9, 64], ϖ: [9, 68], _: [5, 0], ñ: [21, 56], Ŕ: [26, 40], "‚": [2, 18], "⅞": [18, 56], Æ: [33, 22], "₣": [27, 16], Ū: [20, 32], ы: [29, 42], ѓ: [20, 24], Œ: [18, 36], "΅": [7, 28], Ą: [24, 43], Њ: [32, 44], "›": [8, 0], ћ: [26, 32], "<": [8, 0], "¬": [7, 0], t: [11, 16], Ц: [22, 28], ù: [21, 36], ï: [13, 40], Ф: [27, 52], Ò: [7, 40], I: [13, 16], "˝": [10, 20], "·": [1, 16], "¿": [5, 44], ſ: [8, 24], Ђ: [21, 40], ű: [26, 48], Ǽ: [38, 30], φ: [11, 28], ";": [3, 34], Ș: [6, 56], Ġ: [9, 56], n: [18, 32], ά: [15, 48], ϊ: [7, 40], "\uFEFF": [0, 0], ģ: [10, 100], "∂": [3, 56], κ: [15, 29], "‡": [23, 12], ň: [24, 48], "√": [10, 0], ę: [8, 52], į: [15, 50], Τ: [17, 16], "≈": [6, 56], ΐ: [12, 40], ĸ: [23, 29], g: [5, 94], ǿ: [16, 34], "²": [9, 26], Ã: [24, 45], Ј: [11, 16], "©": [3, 84], "≥": [13, 0], Ă: [24, 33], ґ: [15, 16], ÿ: [20, 60], Ł: [23, 16], " ": [0, 0], "∫": [1, 49], "\\": [5, 0], Ì: [18, 24], ъ: [18, 26], ς: [2, 42], Ē: [26, 16], "!": [6, 16], ç: [6, 46], Й: [32, 48], Б: [18, 28], đ: [21, 39], ċ: [2, 48], Ā: [26, 21], Ẃ: [27, 34], ø: [11, 26], â: [18, 54], "}": [13, 22], Δ: [11, 4], "‰": [11, 96], Ä: [23, 49], ř: [19, 46], "—": [5, 0], N: [21, 20], "⁄": [5, 0], М: [26, 24], Ó: [7, 40], "˜": [3, 24], " ": [0, 0], "ˇ": [6, 16], ų: [19, 50], Ў: [21, 48], Ŭ: [18, 44], ĝ: [11, 106], Ω: [15, 36], s: [1, 52], "?": [5, 44], Ņ: [26, 26], Ī: [18, 16], Μ: [26, 24], "•": [1, 16], н: [29, 32], "(": [3, 16], "◊": [12, 0], α: [10, 40], Ħ: [42, 32], м: [28, 24], з: [5, 45], Ґ: [15, 16], Û: [21, 44], і: [12, 28], V: [16, 20], Ŗ: [26, 38], "@": [8, 83], ʼ: [2, 18], "℅": [8, 54], i: [12, 28], ќ: [24, 64], "≤": [13, 0], ё: [7, 58], υ: [6, 32], ĕ: [8, 42], ﬃ: [33, 60], ż: [16, 24], Э: [4, 36], ő: [12, 48], Ŏ: [5, 44], ю: [17, 44], İ: [14, 32], Ě: [27, 32], "‹": [8, 0], ķ: [28, 35], ì: [16, 20], "±": [18, 0], "|": [5, 0], "§": [2, 76], џ: [23, 32], љ: [17, 50], q: [15, 45], "˳": [2, 32], ή: [14, 36], Ж: [25, 100], "®": [22, 77], Н: [29, 32], Ε: [21, 16], "₧": [27, 42], л: [14, 40], σ: [6, 30], θ: [5, 32], " ": [0, 0], "∑": [18, 8], Ώ: [20, 44], ẃ: [30, 38], "+": [13, 0], Ë: [23, 44], Š: [7, 66], " ": [0, 0], ð: [9, 36], щ: [31, 36], "℮": [8, 34], Φ: [27, 52], ş: [6, 66], " ": [0, 0], ı: [11, 12], ä: [14, 70], "¹": [12, 12], W: [22, 26], λ: [9, 32], ">": [8, 0], τ: [7, 26], Ų: [18, 54], Ŵ: [28, 38], "‛": [2, 18], Ð: [20, 24], Λ: [16, 19], "·": [1, 16], Х: [29, 37], Υ: [22, 32], r: [13, 30], ж: [25, 96], Ø: [11, 30], Ỳ: [27, 40], "÷": [7, 30], с: [1, 32], h: [18, 32], f: [16, 28], "“": [4, 36], A: [21, 21], O: [2, 32], Đ: [20, 24], Ǿ: [16, 38], "⅛": [20, 66], Ẁ: [27, 34], Ť: [23, 32], ψ: [12, 30], ŗ: [18, 36] }, mono: { 0: [2, 14], 1: [8, 2], 2: [9, 10], 3: [7, 17], 4: [17, 2], 5: [8, 10], 6: [4, 20], 7: [8, 0], 8: [4, 25], 9: [4, 20], ǻ: [18, 32], Á: [18, 4], ĥ: [18, 9], Κ: [14, 0], "»": [16, 0], "∆": [11, 2], ў: [13, 14], ţ: [18, 7], "«": [16, 0], í: [16, 2], ņ: [15, 7], µ: [12, 6], ỳ: [15, 10], Ι: [13, 0], Ύ: [16, 3], ѕ: [3, 18], Ш: [13, 0], M: [17, 2], Ψ: [17, 8], ũ: [13, 13], ŭ: [13, 11], "―": [5, 0], "{": [9, 10], "¼": [29, 4], Ḿ: [22, 4], ι: [5, 4], Ĳ: [10, 4], Ê: [20, 5], Ά: [19, 5], ")": [3, 4], ε: [7, 14], э: [6, 10], ш: [13, 0], Я: [13, 5], a: [11, 15], Ę: [16, 7], Z: [11, 0], " ": [0, 0], k: [16, 0], Ù: [12, 7], Ů: [9, 20], "¢": [9, 8], В: [13, 13], І: [13, 0], ē: [11, 11], β: [10, 19], "≠": [21, 0], "‼": [12, 8], "¥": [24, 0], Ĥ: [20, 5], U: [7, 5], Ñ: [16, 10], F: [11, 0], ϑ: [6, 58], Ќ: [17, 2], å: [13, 30], Ϋ: [12, 8], ō: [7, 12], "”": [8, 4], ö: [4, 20], ć: [8, 12], þ: [11, 13], "]": [9, 0], А: [13, 2], "′": [5, 0], Ы: [15, 6], ẁ: [24, 6], ĭ: [14, 6], R: [13, 6], Ż: [12, 4], ħ: [19, 6], õ: [5, 20], "˙": [1, 4], ê: [13, 16], "″": [10, 0], "„": [8, 4], ч: [9, 5], δ: [3, 20], Â: [20, 7], Į: [16, 7], ω: [7, 14], Ţ: [14, 3], "´": [5, 2], Ĉ: [10, 17], И: [14, 2], Љ: [13, 14], р: [10, 13], Ω: [9, 10], т: [9, 0], П: [9, 0], Ö: [4, 20], z: [11, 0], "™": [26, 1], Θ: [7, 12], Ř: [20, 11], Ň: [20, 7], É: [18, 2], и: [13, 0], "³": [6, 14], "[": [9, 0], ζ: [6, 15], "∏": [9, 0], Έ: [19, 3], Ρ: [10, 6], ğ: [11, 34], ª: [10, 13], ї: [13, 8], T: [9, 0], š: [10, 23], є: [6, 10], Þ: [12, 6], j: [8, 10], Σ: [13, 0], ϒ: [8, 20], ℓ: [8, 16], ĉ: [10, 15], ī: [16, 0], О: [2, 12], ξ: [11, 22], Ď: [15, 11], "&": [9, 24], G: [7, 11], ΰ: [12, 19], "`": [5, 2], ŏ: [5, 18], ý: [15, 10], º: [2, 12], "∞": [3, 24], ź: [16, 2], я: [13, 5], Ё: [15, 8], ń: [15, 6], " ": [0, 0], Г: [7, 0], Ь: [10, 6], "¤": [14, 16], Ĝ: [14, 16], p: [10, 13], Ю: [9, 16], ο: [2, 12], S: [3, 18], "/": [5, 0], Ŧ: [17, 0], ђ: [19, 9], y: [10, 8], Π: [9, 0], "‗": [10, 0], "–": [5, 0], ë: [8, 19], б: [4, 20], ƒ: [13, 12], у: [10, 8], J: [5, 6], ŷ: [17, 13], ŕ: [13, 8], ώ: [13, 17], "˘": [3, 6], D: [8, 6], ł: [19, 0], ĺ: [16, 2], ц: [13, 0], Л: [7, 6], $: [15, 16], w: [19, 4], о: [2, 12], Д: [16, 4], Ç: [8, 18], Ŝ: [10, 23], C: [3, 12], Ḁ: [15, 26], Ĵ: [12, 11], È: [18, 2], ﬁ: [19, 11], X: [13, 0], ô: [9, 17], Ė: [14, 4], г: [7, 0], Ŀ: [8, 4], х: [13, 0], ŋ: [10, 8], Ч: [9, 5], ü: [12, 13], ь: [10, 5], Ÿ: [12, 8], "€": [19, 12], в: [13, 11], Η: [13, 0], С: [3, 12], ß: [5, 23], њ: [18, 5], Ű: [17, 9], c: [3, 10], "¶": [9, 4], Ή: [19, 3], Ὅ: [9, 32], γ: [9, 4], "­": [5, 0], ":": [2, 8], ś: [8, 20], " ": [0, 0], У: [10, 9], "¾": [27, 16], Ί: [19, 3], ŉ: [14, 7], Ģ: [12, 14], m: [14, 12], Е: [13, 0], ž: [18, 5], á: [16, 17], "×": [13, 0], п: [9, 0], Ǻ: [20, 19], K: [14, 0], "¨": [2, 8], Y: [10, 0], E: [13, 0], Ô: [9, 17], Є: [6, 11], Ï: [15, 8], ġ: [9, 32], έ: [13, 17], " ": [0, 0], ϋ: [7, 16], й: [16, 6], b: [9, 13], ύ: [11, 11], ﬂ: [18, 6], ф: [11, 8], Ŋ: [13, 7], Ũ: [10, 13], Щ: [17, 0], L: [7, 0], ď: [16, 16], Ο: [2, 12], Ĭ: [16, 6], ŧ: [21, 4], À: [18, 4], Ϊ: [15, 8], ḁ: [13, 39], "½": [21, 11], "'": [5, 0], ĳ: [14, 15], Р: [10, 6], "˛": [3, 7], Ć: [8, 14], Т: [9, 0], "£": [16, 7], ů: [12, 20], Ō: [7, 12], а: [11, 15], Ğ: [10, 17], v: [9, 2], Ї: [15, 8], û: [17, 10], Ź: [16, 2], "ˉ": [5, 0], Ĺ: [12, 2], "₤": [24, 7], Č: [10, 17], x: [13, 0], è: [11, 13], Ń: [18, 4], ḿ: [19, 14], μ: [12, 6], ".": [1, 4], "‘": [4, 2], π: [14, 4], l: [11, 0], Ъ: [12, 7], " ": [0, 0], Ś: [8, 20], Ü: [9, 13], à: [16, 17], η: [10, 4], ó: [7, 14], "¦": [10, 0], Ő: [12, 16], Ž: [18, 5], е: [6, 11], Î: [20, 5], e: [6, 11], ό: [8, 15], Ĕ: [16, 6], ļ: [16, 3], " ": [0, 0], Ѓ: [12, 2], ò: [7, 14], ﬄ: [24, 22], "^": [8, 0], ⁿ: [10, 6], к: [12, 0], "￼": [92, 50], ū: [15, 5], "ˆ": [7, 5], Ẅ: [16, 15], č: [10, 15], "’": [4, 2], Ν: [13, 2], "-": [5, 0], Q: [3, 14], ј: [8, 10], ě: [13, 16], œ: [7, 22], "#": [34, 0], Џ: [13, 0], Å: [15, 17], ș: [8, 21], "¸": [5, 6], "=": [10, 0], ρ: [7, 14], Ћ: [15, 3], ú: [15, 7], "˚": [2, 15], д: [16, 2], "¯": [5, 0], u: [10, 5], З: [7, 18], Α: [13, 2], "⅝": [17, 30], é: [11, 13], Ş: [8, 24], B: [13, 13], "…": [3, 12], H: [13, 0], î: [18, 5], ν: [7, 5], Ό: [8, 15], "−": [5, 0], "⅜": [15, 34], ǰ: [14, 11], ā: [16, 15], ĵ: [14, 11], Ĩ: [16, 8], "*": [16, 0], ă: [14, 21], Χ: [13, 0], "†": [13, 0], "°": [2, 16], Ξ: [15, 0], Ķ: [19, 3], ŵ: [26, 9], "΄": [6, 3], ǽ: [17, 27], Β: [13, 13], Ļ: [12, 3], Õ: [5, 20], "№": [20, 17], χ: [13, 11], ί: [11, 7], Ζ: [11, 0], Ľ: [13, 3], ť: [19, 7], o: [2, 12], Ѕ: [3, 18], "�": [11, 38], d: [10, 13], ",": [4, 2], '"': [10, 0], ľ: [17, 3], ė: [7, 15], Í: [18, 2], Ú: [12, 7], " ": [0, 0], Ŷ: [17, 5], Ý: [15, 2], ŝ: [10, 23], " ": [0, 0], ą: [14, 22], "​": [0, 0], ã: [14, 23], æ: [12, 25], ĩ: [14, 8], "~": [3, 8], ŀ: [12, 4], Ċ: [4, 16], "¡": [6, 4], ẅ: [21, 12], К: [12, 0], Γ: [7, 0], P: [10, 6], "%": [9, 24], ϖ: [13, 42], _: [5, 0], ñ: [13, 12], Ŕ: [18, 8], "‚": [4, 2], "⅞": [17, 20], Æ: [22, 0], "₣": [19, 0], Ū: [12, 5], ы: [15, 5], ѓ: [12, 2], Œ: [15, 8], "΅": [7, 11], Ą: [16, 9], Њ: [18, 7], "›": [8, 0], ћ: [19, 6], "<": [8, 0], "¬": [7, 0], t: [13, 4], Ц: [13, 0], ù: [15, 7], ï: [13, 8], Ф: [19, 16], Ò: [7, 14], I: [13, 0], "˝": [10, 4], "·": [1, 4], "¿": [6, 18], ſ: [5, 6], Ђ: [15, 8], ű: [20, 9], Ǽ: [27, 2], φ: [8, 13], ";": [5, 6], Ș: [8, 21], Ġ: [8, 15], n: [10, 4], ά: [14, 21], ϊ: [7, 12], "\uFEFF": [0, 0], ģ: [13, 31], "∂": [4, 18], κ: [16, 0], "‡": [23, 0], ň: [17, 9], "√": [10, 0], ę: [9, 18], į: [15, 12], Τ: [9, 0], "≈": [6, 16], ΐ: [12, 15], ĸ: [16, 0], g: [8, 28], ǿ: [16, 18], "²": [8, 9], Ã: [16, 10], Ј: [5, 6], "©": [5, 27], "≥": [13, 0], Ă: [16, 8], ґ: [9, 0], ÿ: [12, 16], Ł: [15, 0], " ": [0, 0], "∫": [5, 9], "\\": [5, 0], Ì: [18, 2], ъ: [12, 5], ς: [3, 12], Ē: [18, 0], "!": [6, 4], ç: [8, 16], Й: [17, 8], Б: [12, 6], đ: [18, 13], ċ: [4, 14], Ā: [18, 2], Ẃ: [19, 9], ø: [11, 16], â: [18, 20], "}": [9, 10], Δ: [11, 2], "‰": [11, 42], Ä: [15, 10], ř: [15, 11], "—": [5, 0], N: [13, 2], "⁄": [5, 0], М: [17, 2], Ó: [7, 14], "˜": [3, 8], " ": [0, 0], "ˇ": [7, 5], ų: [13, 12], Ў: [13, 15], Ŭ: [10, 11], ĝ: [15, 33], Ω: [9, 10], s: [3, 18], "?": [6, 18], Ņ: [18, 5], Ī: [18, 0], Μ: [17, 2], "•": [1, 6], н: [13, 0], "(": [3, 4], "◊": [12, 0], α: [8, 18], Ħ: [26, 0], м: [14, 6], з: [7, 15], Ґ: [9, 0], Û: [14, 10], і: [12, 5], V: [8, 2], Ŗ: [18, 9], "@": [7, 31], ʼ: [4, 2], "℅": [10, 22], i: [12, 5], ќ: [21, 2], "≤": [13, 0], ё: [8, 19], υ: [5, 8], ĕ: [9, 17], ﬃ: [23, 23], ż: [12, 4], Э: [6, 11], ő: [12, 16], Ŏ: [5, 18], ю: [9, 13], İ: [14, 4], Ě: [20, 5], "‹": [8, 0], ķ: [21, 3], ì: [16, 2], "±": [18, 0], "|": [5, 0], "§": [5, 28], џ: [13, 0], љ: [12, 13], q: [10, 13], "˳": [2, 24], ή: [16, 7], Ж: [19, 0], "®": [15, 21], Н: [13, 0], Ε: [13, 0], "₧": [23, 9], л: [7, 6], σ: [6, 13], θ: [5, 15], " ": [0, 0], "∑": [13, 0], Ώ: [15, 13], ẃ: [24, 6], "+": [13, 0], Ë: [15, 8], Š: [10, 23], " ": [0, 0], ð: [10, 17], щ: [17, 0], "℮": [9, 12], Φ: [19, 16], ş: [8, 24], " ": [0, 0], ı: [11, 0], ä: [13, 23], "¹": [8, 2], W: [14, 7], λ: [10, 13], ">": [8, 0], τ: [10, 4], Ų: [10, 12], Ŵ: [21, 12], "‛": [4, 2], Ð: [16, 6], Λ: [8, 2], "·": [1, 4], Х: [13, 0], Υ: [10, 0], r: [8, 6], ж: [19, 0], Ø: [11, 14], Ỳ: [15, 2], "÷": [7, 8], с: [3, 10], h: [11, 4], f: [13, 6], "“": [8, 4], A: [13, 2], O: [2, 12], Đ: [16, 6], Ǿ: [16, 16], "⅛": [17, 22], Ẁ: [19, 9], Ť: [16, 5], ψ: [11, 7], ŗ: [13, 9] } };
 function XI(A, g, I) {
   return [...g].reduce((C, e) => {
     const [q, B] = zI[A]?.[e] ?? [128, 128];
@@ -6501,7 +6510,7 @@ function H1(A, g = 0) {
     for (; A.peek() === ","; )
       A.expect(","), C.scalars.push(A.scalar([",", ")"])), C.scalars.length > 3 && A.fail(t("Unexpected profile arguments"), C.at);
   } else if (C.name === "assert2d")
-    C.scalars.push(A.scalar([","])), A.expect(","), (A.peek()?.startsWith('"') || A.peek() === "formatText" || A.peek() === "formatSCAD") && (C.message = d0(A), A.expect(",")), C.profiles.push(H1(A, g + 1));
+    C.scalars.push(A.scalar([","])), A.expect(","), (A.peek()?.startsWith('"') || A.peek() === "formatText" || A.peek() === "formatSCAD") && (C.message = u0(A), A.expect(",")), C.profiles.push(H1(A, g + 1));
   else if (C.name === "choose2d")
     C.scalars.push(A.scalar([","])), A.expect(","), C.profiles.push(H1(A, g + 1)), A.expect(","), C.profiles.push(H1(A, g + 1));
   else if (C.name === "forRange2d" || C.name === "forValues2d") {
@@ -6558,7 +6567,7 @@ function k2(A, g, I, C, e, q) {
   }
   if (A.name === "assert2d") {
     if (!g(A.scalars[0], "scalar", -1e9, 1e9, !1, !0)) {
-      const E = A.message ? u0(A.message, q ?? ((r) => String(g(r, "scalar", -1e9, 1e9, !1, !0)))) : void 0;
+      const E = A.message ? y0(A.message, q ?? ((r) => String(g(r, "scalar", -1e9, 1e9, !1, !0)))) : void 0;
       I(E ? t`Source assertion failed: ${E}` : t("Source assertion failed"), A.at);
     }
     return k2(A.profiles[0], g, I, C, e, q);
@@ -6789,8 +6798,8 @@ class S1 extends Error {
     this.offset = C, this.code = q, this.detail = I, this.name = "CadCodeError", this.line = i.length, this.column = i.at(-1).length + 1;
   }
 }
-const E1 = Object.freeze({ sourceBytes: 32768, tokens: 8192, statements: 256, depth: 32, expandedNodes: 4096, estimatedFaces: 2e5, repeat: 64 }), B4 = (A) => /^[A-Za-z][A-Za-z0-9_]{0,39}$/.test(A) && !["constructor", "prototype", "__proto__"].includes(A), Q4 = (A) => !!A && typeof A == "object" && !Array.isArray(A) && [Object.prototype, null].includes(Object.getPrototypeOf(A));
-function y0(A) {
+const E1 = Object.freeze({ sourceBytes: 32768, tokens: 8192, statements: 256, depth: 32, expandedNodes: 4096, estimatedFaces: 2e5, repeat: 64 }), Q4 = (A) => /^[A-Za-z][A-Za-z0-9_]{0,39}$/.test(A) && !["constructor", "prototype", "__proto__"].includes(A), E4 = (A) => !!A && typeof A == "object" && !Array.isArray(A) && [Object.prototype, null].includes(Object.getPrototypeOf(A));
+function M0(A) {
   try {
     return C8(A);
   } catch (g) {
@@ -6803,7 +6812,7 @@ function C8(A) {
   }, C = (w, iA = 0) => {
     throw new S1(w, iA, typeof g == "string" ? g : "", "resource-limit");
   };
-  (!Q4(A) || A.version !== 1 || A.language !== "brickwright-cad-script" || typeof g != "string" || !Q4(A.parameters) || Object.keys(A).some((w) => !["version", "language", "source", "parameters"].includes(w))) && I(t("Unsupported code program schema")), new TextEncoder().encode(g).length > E1.sourceBytes && C(t("Source exceeds 32 KiB"));
+  (!E4(A) || A.version !== 1 || A.language !== "brickwright-cad-script" || typeof g != "string" || !E4(A.parameters) || Object.keys(A).some((w) => !["version", "language", "source", "parameters"].includes(w))) && I(t("Unsupported code program schema")), new TextEncoder().encode(g).length > E1.sourceBytes && C(t("Source exceeds 32 KiB"));
   const e = [];
   let q = 0;
   for (; q < g.length; ) {
@@ -6844,7 +6853,7 @@ function C8(A) {
     return w || I(t("Unexpected end of source"), g.length), w;
   }, E = (w) => (i() !== w && I(t`Expected “${w}”`, Q()), s()), r = () => {
     const w = s();
-    return B4(w.text) || I(t("Expected a name"), w.at), w.text;
+    return Q4(w.text) || I(t("Expected a name"), w.at), w.text;
   };
   function n(w) {
     const iA = Q(), T = [];
@@ -6870,14 +6879,14 @@ function C8(A) {
   function D(w = 0) {
     w > E1.depth && C(t("Shape nesting exceeds 32"), Q());
     const iA = s();
-    if (B4(iA.text) || I(t("Expected a shape function or named shape"), iA.at), i() !== "(")
+    if (Q4(iA.text) || I(t("Expected a shape function or named shape"), iA.at), i() !== "(")
       return { kind: "reference", name: iA.text, at: iA.at };
     E("(");
     const T = { kind: "call", name: iA.text, at: iA.at, scalars: [], shapes: [] };
     if (T.name !== "empty") if (T.name === "assertShape")
       T.scalars.push(n([","])), E(","), T.shapes.push(D(w + 1));
     else if (T.name === "assertCode")
-      T.scalars.push(n([","])), E(","), (i()?.startsWith('"') || i() === "formatText" || i() === "formatSCAD") && (T.message = d0({ peek: i, take: s, expect: E, scalar: n, fail: I, limited: C }), E(",")), T.shapes.push(D(w + 1));
+      T.scalars.push(n([","])), E(","), (i()?.startsWith('"') || i() === "formatText" || i() === "formatSCAD") && (T.message = u0({ peek: i, take: s, expect: E, scalar: n, fail: I, limited: C }), E(",")), T.shapes.push(D(w + 1));
     else if (T.name === "choose")
       T.scalars.push(n([","])), E(","), T.shapes.push(D(w + 1)), E(","), T.shapes.push(D(w + 1));
     else if (T.name === "forRange" || T.name === "forValues") {
@@ -7056,7 +7065,7 @@ function C8(A) {
       return QA(1), V(w.scalars[0], "scalar", -1e9, 1e9, !1, !0) || I(t("Assertion failed"), w.at), NA(w.shapes[0], iA + 1);
     if (w.name === "assertCode") {
       if (!V(w.scalars[0], "scalar", -1e9, 1e9, !1, !0)) {
-        const z = w.message ? u0(w.message, (qA, aA) => {
+        const z = w.message ? y0(w.message, (qA, aA) => {
           const rA = q2(qA.text, lA);
           return rA.boolean ? String(rA.value !== 0) : aA ? c3(rA.value) : String(rA.value);
         }) : void 0;
@@ -7275,7 +7284,7 @@ function C8(A) {
   return { shape: XA, parameters: x, values: Object.fromEntries(Object.keys(x).map((w) => [w, J[w]])), expandedNodes: s1, estimatedFaces: r1 };
 }
 const W3 = ["rounded-box", "capsule", "tube", "washer", "cone", "frustum", "polygon", "ellipse", "wedge", "pyramid", "round-roof", "torus"], Z3 = ["counterbore", "countersink", "port", "boss", "rib"], z3 = ["curved-cone", "hemisphere", "paraboloid", "vase", "teardrop", "finishing-washer"], X3 = ["bent-tube", "loft", "dovetail"], e8 = [["flat", "Flat end"], ["chamfer", "Chamfered end"], ["cone", "Cone point"], ["dog", "Dog point"], ["cup", "Cup point"], ["oval", "Rounded point"], ["gimlet", "Threaded gimlet point"]];
-function E4(A) {
+function o4(A) {
   const g = A.values, I = A.tipLength ?? Math.min(g.length / 3, (g.diameter + 2 * g.threadDepth) / 2, g.pitch * 2);
   return { style: A.tipStyle ?? "flat", length: I, diameter: A.tipDiameter ?? g.diameter * 0.6, depth: A.cupDepth ?? I * 0.4 };
 }
@@ -7283,7 +7292,7 @@ function i8(A) {
   const g = (B, i, Q, s, E, r = 0.1) => ({ key: B, label: i, value: Q, min: s, max: E, step: r }), I = (B) => g("width", "Width (mm)", B, 0.1, 500), C = (B) => g("depth", "Depth (mm)", B, 0.1, 500), e = (B) => g("height", "Height (mm)", B, 0.1, 500), q = () => g("segments", "Radial segments", 64, 16, 128, 1);
   return A === "rounded-box" ? [I(30), C(24), e(20), g("radius", "Corner radius (mm)", 3, 0, 200), g("detail", "Corner detail", 4, 2, 8, 1)] : A === "capsule" ? [g("length", "Overall length (mm)", 40, 0.1, 500), I(20), e(20), g("segments", "Curve segments", 24, 8, 64, 1)] : A === "tube" || A === "washer" ? [g("outerDiameter", "Outer diameter (mm)", 30, 0.2, 500), g("wallThickness", "Wall thickness (mm)", A === "tube" ? 5 : 8, 0.05, 200), e(A === "tube" ? 25 : 4), q()] : A === "cone" ? [g("diameter", "Base diameter (mm)", 26, 0.1, 500), e(30), q()] : A === "frustum" ? [g("bottomDiameter", "Bottom diameter (mm)", 30, 0.1, 500), g("topDiameter", "Top diameter (mm)", 14, 0.1, 500), e(25), q()] : A === "polygon" ? [g("diameter", "Circumdiameter (mm)", 28, 0.1, 500), e(25), g("sides", "Sides", 6, 3, 32, 1)] : A === "ellipse" ? [I(36), C(19.2), e(20), q()] : A === "wedge" ? [I(30), C(30), e(25)] : A === "pyramid" ? [I(30), C(30), e(28)] : A === "round-roof" ? [I(30), g("length", "Roof length (mm)", 30, 0.1, 500), e(15), g("segments", "Curve segments", 32, 8, 64, 1)] : A === "torus" ? [g("majorRadius", "Ring centre radius (mm)", 15, 0.2, 250), g("tubeRadius", "Ring tube radius (mm)", 5, 0.05, 100), q(), g("tubeSegments", "Cross-section segments", 24, 8, 32, 1)] : A === "counterbore" || A === "countersink" ? [g("boreDiameter", "Nominal bore diameter (mm)", 6, 0.1, 200), g("recessDiameter", "Recess diameter (mm)", 12, 0.2, 300), g("shaftLength", "Bore length (mm)", 20, 0.1, 500), ...A === "counterbore" ? [g("recessDepth", "Recess depth (mm)", 6, 0.1, 100)] : [g("seatAngle", "Seat angle (°)", 90, 30, 150, 1), g("rimHeight", "Recess rim height (mm)", 2, 0, 100)], g("clearance", "Diametral clearance (mm)", 0, 0, 5), q()] : A === "port" ? [g("length", "Overall length (mm)", 30, 0.1, 500), I(10), e(20), g("segments", "Curve segments", 32, 8, 64, 1)] : A === "boss" ? [g("outerDiameter", "Outer diameter (mm)", 14, 0.2, 200), g("boreDiameter", "Bore diameter (mm)", 6, 0.1, 199), e(20), g("ribReach", "Rib reach (mm)", 5.5, 0, 100), g("ribThickness", "Rib thickness (mm)", 2, 0.1, 50), g("ribHeight", "Rib height (mm)", 5, 0.1, 200), q()] : A === "rib" ? [g("length", "Rib length (mm)", 25, 0.1, 500), e(25), g("thickness", "Thickness (mm)", 3, 0.1, 100)] : A === "curved-cone" ? [g("diameter", "Base diameter (mm)", 26, 0.2, 500), e(30), g("exponent", "Taper exponent", 2, 0.5, 4, 0.1), g("profileSegments", "Profile segments", 16, 8, 96, 1), q()] : A === "hemisphere" ? [g("radius", "Radius (mm)", 15, 0.1, 250), g("profileSegments", "Profile segments", 16, 8, 96, 1), q()] : A === "paraboloid" ? [g("diameter", "Base diameter (mm)", 26, 0.2, 500), e(26), g("profileSegments", "Profile segments", 24, 8, 96, 1), q()] : A === "vase" ? [g("baseDiameter", "Base diameter (mm)", 20, 1, 300), g("bodyDiameter", "Body diameter (mm)", 30, 1, 300), g("mouthDiameter", "Mouth diameter (mm)", 16, 1, 300), e(32), g("bellyHeight", "Belly height (mm)", 12, 0.1, 499), g("wallThickness", "Wall thickness (mm)", 2, 0.1, 100), g("baseThickness", "Base thickness (mm)", 2, 0.1, 100), g("profileSegments", "Profile segments", 32, 8, 64, 1), q()] : A === "teardrop" ? [g("radius", "Arch radius (mm)", 8, 0.1, 100), g("apexHeight", "Apex height above centre (mm)", 12, 0.2, 250), g("length", "Cut length (mm)", 25, 0.1, 500), g("segments", "Curve segments", 32, 8, 64, 1)] : A === "finishing-washer" ? [g("outerDiameter", "Outer diameter (mm)", 18, 0.2, 300), g("boreDiameter", "Bore diameter (mm)", 6, 0.1, 200), g("seatDiameter", "Seat diameter (mm)", 14, 0.2, 299), e(5), g("seatAngle", "Seat angle (°)", 90, 30, 150, 1), g("edgeChamfer", "Rim chamfer (mm)", 1, 0, 50), q()] : A === "bent-tube" ? [g("bendRadius", "Bend radius (mm)", 20, 0.2, 300), g("outerDiameter", "Outer diameter (mm)", 10, 0.2, 200), g("wallThickness", "Wall thickness (mm)", 2, 0.05, 80), g("bendAngle", "Bend angle (°)", 90, 5, 180, 1), g("arcSegments", "Bend segments", 32, 4, 64, 1), g("segments", "Cross-section segments", 32, 16, 64, 1)] : A === "loft" ? [g("baseWidth", "Base width (mm)", 30, 0.2, 500), g("baseDepth", "Base depth (mm)", 30, 0.2, 500), g("topDiameter", "Top diameter (mm)", 16, 0.2, 500), e(25), g("wallThickness", "Wall thickness (mm)", 0, 0, 100), g("profileSegments", "Profile segments", 8, 1, 32, 1), q()] : A === "dovetail" ? [g("baseWidth", "Narrow width (mm)", 16, 0.2, 500), g("topWidth", "Wide width (mm)", 24, 0.2, 500), e(8), g("length", "Slide length (mm)", 30, 0.2, 500), g("clearance", "Profile clearance (mm)", 0, 0, 5)] : A === "ruler" ? [g("length", "Ruler length (mm)", 100, 10, 500), g("width", "Ruler width (mm)", 10, 6, 30), g("thickness", "Ruler thickness (mm)", 1, 0.5, 5)] : A === "cube" ? [g("edge", "Edge length (mm)", 30, 0.01, 1e5)] : ["screw", "thread", "nut"].includes(A) ? [g("diameter", "Core diameter (mm)", 10, 2, 80), g("length", A === "nut" ? "Nut height (mm)" : "Thread length (mm)", A === "nut" ? 8 : 20, 1, 200), g("pitch", "Thread pitch (mm)", 2, 0.5, 10), g("threadDepth", "Thread depth (mm)", 1, 0.2, 5), g("starts", "Thread starts", 1, 1, 2, 1), g("hand", "Handedness", 1, -1, 1, 2), ...A === "screw" ? [g("headDiameter", "Head diameter (mm)", 18, 3, 120), g("headHeight", "Head height (mm)", 5, 1, 30), g("slotWidth", "Drive slot width (mm)", 2, 0.5, 80)] : A === "nut" ? [g("clearance", "Radial clearance (mm)", 0.25, 0.05, 1)] : []] : A === "text" || A === "name-tag" ? [g("textHeight", "Text height (mm)", 9, 3, 40), g("textDepth", "Raised text depth (mm)", 2, 0.5, 8), ...A === "name-tag" ? [g("baseThickness", "Base thickness (mm)", 3, 1, 10), g("cornerRadius", "Corner radius (mm)", 3, 0.5, 8), g("padding", "Text padding (mm)", 4, 2, 12), g("holeRadius", "Hanging hole radius (mm)", 2, 1, 5)] : []] : A === "heart" ? [g("width", "Heart width (mm)", 34, 5, 150), g("height", "Heart height (mm)", 32, 5, 150), g("thickness", "Thickness (mm)", 5, 1, 30), g("roundness", "Lobe roundness", 1, 0.6, 1.4, 0.05), g("cleft", "Cleft height (mm)", 10, 2, 15, 0.5), g("bend", "Bend angle (°)", 0, -90, 90, 5)] : [];
 }
-function M0(A) {
+function x0(A) {
   const g = A;
   if (!g || ![1, 2].includes(g.version) || ![...W3, ...Z3, ...z3, ...X3, "ruler", "cube", "screw", "thread", "nut", "heart", "text", "name-tag"].includes(g.preset) || !g.values || typeof g.values != "object" || Array.isArray(g.values))
     throw new Error(t("Invalid shape generator"));
@@ -7294,7 +7303,7 @@ function M0(A) {
   if ([g.tipStyle, g.tipLength, g.tipDiameter, g.cupDepth].some((C) => C !== void 0)) {
     if (g.version !== 2 || g.preset !== "screw" || !e8.some(([q]) => q === g.tipStyle))
       throw new Error(t("Invalid screw point parameters"));
-    const C = E4(g), e = g.values.diameter + 2 * g.values.threadDepth;
+    const C = o4(g), e = g.values.diameter + 2 * g.values.threadDepth;
     if (!Number.isFinite(C.length) || C.length < 0.05 || C.length >= g.values.length * 0.9 || !Number.isFinite(C.diameter) || C.diameter <= 0 || C.diameter >= e || C.style === "dog" && C.diameter > g.values.diameter || !Number.isFinite(C.depth) || C.depth <= 0 || C.style === "cup" && C.depth >= C.length * 0.85)
       throw new Error(t("Invalid screw point parameters"));
   }
@@ -7351,7 +7360,7 @@ function M0(A) {
     if (g.preset === "screw" && g.headStyle !== "headless" && (C.headDiameter <= C.diameter + 2 * C.threadDepth || C.slotWidth >= C.headDiameter * 0.7))
       throw new Error(t("The screw head must exceed the thread diameter, and its slot must fit inside the head"));
     if (g.preset === "screw" && g.version === 2) {
-      const q = g.headStyle === "headless" ? C.length - (g.tipStyle && g.tipStyle !== "flat" ? E4(g).length : 0) : g.headStyle === "countersunk" ? (C.headDiameter / 2 - C.diameter / 2 - C.threadDepth) / Math.tan(g.headAngle * Math.PI / 360) : C.headHeight;
+      const q = g.headStyle === "headless" ? C.length - (g.tipStyle && g.tipStyle !== "flat" ? o4(g).length : 0) : g.headStyle === "countersunk" ? (C.headDiameter / 2 - C.diameter / 2 - C.threadDepth) / Math.tan(g.headAngle * Math.PI / 360) : C.headHeight;
       if (g.driveStyle !== "none" && g.driveDepth > q * 0.85 || (C.threadDepth + (g.rootOverlap ?? 0.3)) * Math.tan(g.threadAngle * Math.PI / 360) * 2 > C.pitch * 0.95)
         throw new Error(t("Drive depth or thread flank angle leaves insufficient material"));
     }
@@ -7372,7 +7381,7 @@ class B2 {
     this.id = g;
   }
 }
-const x0 = { width: ["size", "0"], depth: ["size", "1"], height: ["height"], radius: ["radius"], positionX: ["transform", "position", "0"], positionY: ["transform", "position", "1"], positionZ: ["transform", "position", "2"], rotationX: ["transform", "rotation", "0"], rotationY: ["transform", "rotation", "1"], rotationZ: ["transform", "rotation", "2"], scaleX: ["transform", "scale", "0"], scaleY: ["transform", "scale", "1"], scaleZ: ["transform", "scale", "2"] }, N0 = (A, g) => A.kind === "box" && g === "height" ? ["size", "2"] : x0[g], t3 = (A) => JSON.parse(JSON.stringify(A)), k0 = (A, g) => {
+const N0 = { width: ["size", "0"], depth: ["size", "1"], height: ["height"], radius: ["radius"], positionX: ["transform", "position", "0"], positionY: ["transform", "position", "1"], positionZ: ["transform", "position", "2"], rotationX: ["transform", "rotation", "0"], rotationY: ["transform", "rotation", "1"], rotationZ: ["transform", "rotation", "2"], scaleX: ["transform", "scale", "0"], scaleY: ["transform", "scale", "1"], scaleZ: ["transform", "scale", "2"] }, k0 = (A, g) => A.kind === "box" && g === "height" ? ["size", "2"] : N0[g], t3 = (A) => JSON.parse(JSON.stringify(A)), S0 = (A, g) => {
   if (A === g)
     return !0;
   if (A instanceof o1 || g instanceof o1)
@@ -7382,9 +7391,9 @@ const x0 = { width: ["size", "0"], depth: ["size", "1"], height: ["height"], rad
   if (!A || !g || typeof A != "object" || typeof g != "object" || Array.isArray(A) !== Array.isArray(g))
     return !1;
   const I = Object.keys(A).filter((e) => A[e] !== void 0), C = Object.keys(g).filter((e) => g[e] !== void 0);
-  return I.length === C.length && I.every((e) => Object.hasOwn(g, e) && k0(A[e], g[e]));
+  return I.length === C.length && I.every((e) => Object.hasOwn(g, e) && S0(A[e], g[e]));
 };
-function S0(A, g, I) {
+function K0(A, g, I) {
   let C = A;
   for (const e of g.slice(0, -1))
     C = C[e];
@@ -7398,7 +7407,7 @@ function q8(A, g) {
   }
   return A;
 }
-const B8 = (A) => A.kind === "boolean" ? "combine" : A.kind, K0 = ["size", "radius", "height", "segments", "operation", "inputs", "positions", "indices", "program", "sketchId", "featureVersion", "distance", "symmetric", "angle", "axisOffset", "source", "plane", "offset", "pattern"];
+const B8 = (A) => A.kind === "boolean" ? "combine" : A.kind, G0 = ["size", "radius", "height", "segments", "operation", "inputs", "positions", "indices", "program", "sketchId", "featureVersion", "distance", "symmetric", "angle", "axisOffset", "source", "plane", "offset", "pattern"];
 function Q8(A) {
   const g = /* @__PURE__ */ new Map();
   for (const I of Object.values(A.nodes)) {
@@ -7415,7 +7424,7 @@ function Q8(A) {
   }
   return g;
 }
-const o4 = (A) => ({ ...A, transform: structuredClone(A.transform), ...A.kind === "box" ? { size: [...A.size] } : {}, ...A.kind === "boolean" ? { inputs: [...A.inputs] } : {} });
+const l4 = (A) => ({ ...A, transform: structuredClone(A.transform), ...A.kind === "box" ? { size: [...A.size] } : {}, ...A.kind === "boolean" ? { inputs: [...A.inputs] } : {} });
 function E8(A) {
   const g = A;
   let I = { ...g };
@@ -7438,14 +7447,14 @@ function E8(A) {
     let Q = { ...i };
     delete Q.id, delete Q.kind, i.kind === "mesh" && (delete Q.positions, delete Q.indices), i.kind === "code" && delete Q.program, Q = t3(Q);
     for (const E of g.parametric?.bindings ?? [])
-      E.nodeId === B && S0(Q, N0(i, E.property), new o1(E.expression));
+      E.nodeId === B && K0(Q, k0(i, E.property), new o1(E.expression));
     if (i.kind === "extrusion" && typeof i.distance == "string" && (Q.distance = new o1(i.distance)), i.kind === "pattern" && (Q.pattern = jI(i.pattern, (E) => typeof E == "string" ? new o1(E) : E)), i.kind === "mirror" && typeof i.offset == "string" && (Q.offset = new o1(i.offset)), i.kind === "revolution")
       for (const E of ["angle", "axisOffset"]) {
         const r = i[E];
         typeof r == "string" && (Q[E] = new o1(r));
       }
     if (C.has(B)) {
-      for (const E of [...K0, "generator"])
+      for (const E of [...G0, "generator"])
         delete Q[E];
       q.push({ key: `node:${B}`, kind: "generated", args: [B, Q, i.generator] });
       continue;
@@ -7519,7 +7528,7 @@ function l8(A, g, I = {}) {
   const C = o8(A), e = (n, a) => {
     throw new S1(n, a?.node.start ?? 0, A);
   }, q = C.find((n) => n.key === "project");
-  (q.args.length !== 1 || !q.args[0] || typeof q.args[0] != "object" || Array.isArray(q.args[0])) && e(t("Invalid project declaration"), q), [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21].includes(q.args[0].version) || e(t("Model source uses project version 6 through 21"), q);
+  (q.args.length !== 1 || !q.args[0] || typeof q.args[0] != "object" || Array.isArray(q.args[0])) && e(t("Invalid project declaration"), q), [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22].includes(q.args[0].version) || e(t("Model source uses project version 6 through 22"), q);
   const B = { ...q.args[0], nodes: /* @__PURE__ */ Object.create(null), roots: [], modelSource: { version: 1, language: "brickwright-design", source: A } };
   B.id !== g.id && e(t("Keep the current project identity in model source"), q), delete B.provenance, delete B.sketches, delete B.joints;
   const i = new Set(C.filter((n) => n.key.startsWith("node:")).map((n) => n.args[0])), Q = [], s = Object.assign(/* @__PURE__ */ Object.create(null), B.parametric?.parameters ?? {});
@@ -7551,8 +7560,8 @@ function l8(A, g, I = {}) {
     (Object.hasOwn(x, "id") || Object.hasOwn(x, "kind")) && e(t("Identity and kind belong to the design call"), n);
     let N;
     if (a === "generated") {
-      (D.length !== 3 || "generator" in x || K0.some((b) => Object.hasOwn(x, b))) && e(t("Generator recipes belong to the generated call"), n);
-      const u = D[2] === null ? void 0 : M0(D[2]);
+      (D.length !== 3 || "generator" in x || G0.some((b) => Object.hasOwn(x, b))) && e(t("Generator recipes belong to the generated call"), n);
+      const u = D[2] === null ? void 0 : x0(D[2]);
       let p = Object.hasOwn(g.nodes, D[0]) ? g.nodes[D[0]] : void 0, m = g;
       p || ((!u || !I.regenerate) && e(t("Generator source edits need the shape reconstruction callback"), n), m = K3(I.regenerate(u, x.name ?? u.preset)), (m.roots.length !== 1 || m.joints?.length || m.parametric || m.sketches || m.provenance) && e(t("Expected one generated body"), n), p = m.nodes[m.roots[0]]);
       const f = p.id, K = /* @__PURE__ */ new Set(), d = (b) => {
@@ -7569,9 +7578,9 @@ function l8(A, g, I = {}) {
             u && e(t("Edit generated construction through its recipe, or detach the generator"), n);
             continue;
           }
-          Object.hasOwn(B.nodes, b) && e(t("Generated construction has conflicting identifiers"), n), B.nodes[b] = o4(m.nodes[b]);
+          Object.hasOwn(B.nodes, b) && e(t("Generated construction has conflicting identifiers"), n), B.nodes[b] = l4(m.nodes[b]);
         }
-      N = { ...o4(p), ...x, id: D[0] }, u ? N.generator = u : delete N.generator;
+      N = { ...l4(p), ...x, id: D[0] }, u ? N.generator = u : delete N.generator;
     } else
       N = { name: a === "combine" ? "Combination" : a[0].toUpperCase() + a.slice(1), color: "#eea52b", transform: s8(), ...x, id: D[0], kind: a === "combine" ? "boolean" : a };
     if (a === "code")
@@ -7584,9 +7593,9 @@ function l8(A, g, I = {}) {
       N.positions = u.positions, N.indices = u.indices, g.version >= 5 && u.provenance?.length && (N.provenance = [.../* @__PURE__ */ new Set([...N.provenance ?? [], ...u.provenance])]);
     } else a !== "generated" && D.length !== 2 && e(t("Unexpected design call arguments"), n);
     (a === "cylinder" || a === "sphere") && (N.segments ?? (N.segments = 48));
-    for (const [u, p] of Object.entries(x0)) {
-      const m = N0(N, u), f = q8(N, m);
-      f instanceof o1 && (Q.push({ nodeId: N.id, property: u, expression: f.expression }), S0(N, m, (u.startsWith("scale"), 1)), E = !0);
+    for (const [u, p] of Object.entries(N0)) {
+      const m = k0(N, u), f = q8(N, m);
+      f instanceof o1 && (Q.push({ nodeId: N.id, property: u, expression: f.expression }), K0(N, m, (u.startsWith("scale"), 1)), E = !0);
     }
     if (N.kind === "extrusion" && N.distance instanceof o1 && (N.distance = N.distance.expression), N.kind === "pattern" && N.pattern && typeof N.pattern == "object") {
       const u = (m) => m instanceof o1 ? m.expression : m, p = N.pattern;
@@ -7605,7 +7614,7 @@ function l8(A, g, I = {}) {
   };
   for (const n of Object.values(B.nodes))
     r(n.kind === "mesh" ? { ...n, positions: void 0, indices: void 0 } : n);
-  return r(B.sketches), r(B.joints), r(Object.fromEntries(Object.entries(B).filter(([n]) => !["nodes", "sketches", "joints", "modelSource"].includes(n)))), TI(B), N4(B), B;
+  return r(B.sketches), r(B.joints), r(Object.fromEntries(Object.entries(B).filter(([n]) => !["nodes", "sketches", "joints", "modelSource"].includes(n)))), TI(B), k4(B), B;
 }
 function t8(A) {
   if (A.version < 6)
@@ -7616,7 +7625,7 @@ function t8(A) {
   if (!g || typeof g != "object" || g.version !== 1 || g.language !== "brickwright-design" || typeof g.source != "string")
     throw new Error(t("Unsupported model source format"));
   const I = l8(g.source, A), C = (e) => Object.fromEntries(E8(e).map((q) => [q.key, { kind: q.kind, args: q.args }]));
-  if (!k0(C(I), C(A)))
+  if (!S0(C(I), C(A)))
     throw new Error(t("Model source is stale relative to the design"));
 }
 const b2 = () => ({ version: 1, motion: "dynamic", densityKgM3: 1050, friction: 0.4, restitution: 0.05, intent: "rigid" });
@@ -7679,15 +7688,15 @@ function K5(A) {
 function I1(A) {
   throw new Error(t`Invalid CAD project: ${A}`);
 }
-const Q3 = (A) => !!A && typeof A == "object" && !Array.isArray(A), C2 = (A, g = -1e6, I = 1e6) => typeof A == "number" && Number.isFinite(A) && A >= g && A <= I, l4 = (A, g = 160) => typeof A == "string" && A.trim().length > 0 && A.length <= g && !/[\u0000-\u001f]/.test(A), x2 = (A) => typeof A == "string" && /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,95}$/.test(A) && !["constructor", "prototype", "__proto__"].includes(A), Y2 = (A, g = -1e6, I = 1e6) => Array.isArray(A) && A.length === 3 && A.every((C) => C2(C, g, I));
+const Q3 = (A) => !!A && typeof A == "object" && !Array.isArray(A), C2 = (A, g = -1e6, I = 1e6) => typeof A == "number" && Number.isFinite(A) && A >= g && A <= I, t4 = (A, g = 160) => typeof A == "string" && A.trim().length > 0 && A.length <= g && !/[\u0000-\u001f]/.test(A), x2 = (A) => typeof A == "string" && /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,95}$/.test(A) && !["constructor", "prototype", "__proto__"].includes(A), Y2 = (A, g = -1e6, I = 1e6) => Array.isArray(A) && A.length === 3 && A.every((C) => C2(C, g, I));
 function D8(A) {
-  (!Q3(A) || A.format !== "brickwright-cad" || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21].includes(A.version) || A.units !== "mm") && I1(t("unsupported format, version or units")), (!x2(A.id) || !l4(A.title) || !Q3(A.nodes) || !Array.isArray(A.roots)) && I1(t("missing document identity, nodes or roots"));
+  (!Q3(A) || A.format !== "brickwright-cad" || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22].includes(A.version) || A.units !== "mm") && I1(t("unsupported format, version or units")), (!x2(A.id) || !t4(A.title) || !Q3(A.nodes) || !Array.isArray(A.roots)) && I1(t("missing document identity, nodes or roots"));
   const g = A.nodes, I = Object.entries(g);
   (I.length > 2e3 || A.roots.length > 2e3) && I1(t("too many objects (maximum 2000)"));
   for (const [s, E] of I) {
-    (!x2(s) || !Q3(E) || E.id !== s || !l4(E.name) || typeof E.color != "string" || !/^#[0-9a-fA-F]{6}$/.test(E.color)) && I1(t`bad node ${s}`), E.role !== void 0 && (A.version < 7 || !["solid", "hole"].includes(String(E.role)) || E.reference === !0) && I1(t("Invalid solid/hole role")), E.useHoleRoles !== void 0 && (A.version < 7 || E.kind !== "boolean" || E.operation !== "union" || E.useHoleRoles !== !0) && I1(t("Invalid solid/hole combination"));
+    (!x2(s) || !Q3(E) || E.id !== s || !t4(E.name) || typeof E.color != "string" || !/^#[0-9a-fA-F]{6}$/.test(E.color)) && I1(t`bad node ${s}`), E.role !== void 0 && (A.version < 7 || !["solid", "hole"].includes(String(E.role)) || E.reference === !0) && I1(t("Invalid solid/hole role")), E.useHoleRoles !== void 0 && (A.version < 7 || E.kind !== "boolean" || E.operation !== "union" || E.useHoleRoles !== !0) && I1(t("Invalid solid/hole combination"));
     const r = E.transform;
-    if (E.generator !== void 0 && (A.version === 1 && I1(t("shape recipes require version 2 or later")), M0(E.generator)), (!Q3(r) || !Y2(r.position) || !Y2(r.rotation, -36e4, 36e4) || !Y2(r.scale, 1e-3, 1e3)) && I1(t`bad transform on ${s}`), E.generator?.preset === "cube") {
+    if (E.generator !== void 0 && (A.version === 1 && I1(t("shape recipes require version 2 or later")), x0(E.generator)), (!Q3(r) || !Y2(r.position) || !Y2(r.rotation, -36e4, 36e4) || !Y2(r.scale, 1e-3, 1e3)) && I1(t`bad transform on ${s}`), E.generator?.preset === "cube") {
       const n = E.size, a = E.generator.values.edge;
       (E.kind !== "box" || !Y2(n, 0.01, 1e5) || n.some((D) => D !== a) || r.scale.some((D) => D !== r.scale[0])) && I1(t("Cube edges are linked; use a Box for independent dimensions"));
     }
@@ -7702,7 +7711,7 @@ function D8(A) {
         (!C2(E.radius, 0.01, 5e4) || !Number.isInteger(E.segments) || !C2(E.segments, 12, 256)) && I1(t`bad sphere on ${s}`);
         break;
       case "code":
-        A.version < 4 && I1(t("code objects require version 4")), y0(E.program);
+        A.version < 4 && I1(t("code objects require version 4")), M0(E.program);
         break;
       case "extrusion":
       case "revolution":
@@ -7740,7 +7749,7 @@ function D8(A) {
     const E = g[s];
     w2(E).forEach(Q);
   };
-  return A.roots.forEach(Q), i.size !== I.length && I1(t("orphaned nodes")), jg(A), n8(A), Fg(A), OI(A), ZI(A), Sg(A), t8(A), A;
+  return A.roots.forEach(Q), i.size !== I.length && I1(t("orphaned nodes")), jg(A), n8(A), Fg(A), OI(A), ZI(A), Kg(A), t8(A), A;
 }
 function K3(A) {
   return structuredClone(D8(A));
@@ -7754,20 +7763,20 @@ function w8(A, g, I, C) {
   const e = c8(I), q = m8(I);
   A.setUint32(g, C ? q : e, C), A.setUint32(g + 4, C ? e : q, C);
 }
-function t4(A) {
+function n4(A) {
   return A instanceof Uint8Array || ArrayBuffer.isView(A) && A.constructor.name === "Uint8Array" && "BYTES_PER_ELEMENT" in A && A.BYTES_PER_ELEMENT === 1;
 }
 const d8 = (A) => A ? `"${A}" ` : "";
-function G0(A, g, I = "") {
-  if (t4(A) && g === void 0)
+function p0(A, g, I = "") {
+  if (n4(A) && g === void 0)
     return A;
-  const C = t4(A), e = "", q = C ? `length=${A.length}` : `type=${typeof A}`, B = d8(I) + "expected Uint8Array" + e + ", got " + q;
+  const C = n4(A), e = "", q = C ? `length=${A.length}` : `type=${typeof A}`, B = d8(I) + "expected Uint8Array" + e + ", got " + q;
   throw C ? new RangeError(B) : new TypeError(B);
 }
 const u8 = (A, g) => {
   if (A === null || typeof A != "object" || Array.isArray(A))
     throw new TypeError((g === "object" ? "" : `"${g}" `) + "expected object, got type=" + typeof A);
-}, n4 = (A, g) => {
+}, a4 = (A, g) => {
   u8(A, g);
   const I = Object.getPrototypeOf(A);
   if (I !== Object.prototype && I !== null)
@@ -7775,19 +7784,19 @@ const u8 = (A, g) => {
   if (Object.hasOwn(A, "__proto__"))
     throw new TypeError(`"${g}.__proto__" is not allowed`);
 };
-function a4(A, g = !0) {
+function s4(A, g = !0) {
   if (A.destroyed)
     throw new Error("hash was destroyed");
   if (g && A.finished)
     throw new Error("digest() was already called");
 }
 function y8(A, g) {
-  G0(A, void 0, "output");
+  p0(A, void 0, "output");
   const I = g.outputLen;
   if (!(A.length >= I))
     throw new RangeError('"output" expected length >= ' + I);
 }
-function s4(...A) {
+function r4(...A) {
   for (let g = 0; g < A.length; g++)
     A[g].fill(0);
 }
@@ -7798,7 +7807,7 @@ function Y1(A, g) {
   return A << 32 - g | A >>> g;
 }
 function M8(A, g, I = "opts") {
-  return n4(A, "defaults"), g !== void 0 && n4(g, I), Object.assign(/* @__PURE__ */ Object.create(null), A, g);
+  return a4(A, "defaults"), g !== void 0 && a4(g, I), Object.assign(/* @__PURE__ */ Object.create(null), A, g);
 }
 function x8(A, g = {}) {
   if (typeof A != "function")
@@ -7835,7 +7844,7 @@ class K8 {
     this.blockLen = g, this.outputLen = I, this.padOffset = C, this.isLE = e, this.buffer = new Uint8Array(g), this.view = $3(this.buffer);
   }
   update(g) {
-    a4(this), G0(g);
+    s4(this), p0(g);
     const { view: I, buffer: C, blockLen: e } = this, q = g.length;
     let B = !1;
     for (let i = 0; i < q; ) {
@@ -7852,7 +7861,7 @@ class K8 {
     return this.length += g.length, B && this.roundClean(), this;
   }
   digestInto(g) {
-    a4(this), y8(g, this), this.finished = !0;
+    s4(this), y8(g, this), this.finished = !0;
     const { buffer: I, view: C, blockLen: e, isLE: q } = this;
     let { pos: B } = this;
     I[B++] = 128, I.fill(0, B), this.padOffset > e - B && (this.process(C, 0), I.fill(0)), w8(C, e - 8, this.length * 8, q), this.process(C, 0), this.roundClean();
@@ -7994,10 +8003,10 @@ class R8 extends K8 {
     e = e + this.A | 0, q = q + this.B | 0, B = B + this.C | 0, i = i + this.D | 0, Q = Q + this.E | 0, s = s + this.F | 0, E = E + this.G | 0, r = r + this.H | 0, this.set(e, q, B, i, Q, s, E, r);
   }
   roundClean() {
-    s4(I2);
+    r4(I2);
   }
   destroy() {
-    this.destroyed = !0, this.set(0, 0, 0, 0, 0, 0, 0, 0), s4(this.buffer);
+    this.destroyed = !0, this.set(0, 0, 0, 0, 0, 0, 0, 0), r4(this.buffer);
   }
 }
 class f8 extends R8 {
@@ -8005,20 +8014,20 @@ class f8 extends R8 {
     super(32, G8);
   }
 }
-const r4 = /* @__PURE__ */ x8(
+const D4 = /* @__PURE__ */ x8(
   () => new f8(),
   /* @__PURE__ */ N8(1)
 );
-async function p0(A) {
+async function R0(A) {
   let g;
   if (globalThis.crypto?.subtle)
     try {
       g = new Uint8Array(await crypto.subtle.digest("SHA-256", A));
     } catch {
-      g = r4(A);
+      g = D4(A);
     }
   else
-    g = r4(A);
+    g = D4(A);
   return Array.from(g, (I) => I.toString(16).padStart(2, "0")).join("");
 }
 const vA = (A, g, I, C, e) => ({ id: A, title: { en: g, de: I }, group: C, source: e.replace(/;\s*/g, `;
@@ -8739,12 +8748,12 @@ async function u9(A = {}) {
     return w(l, c);
   }
   function T() {
-    var o = { a: Cg };
+    var o = { a: eg };
     return o;
   }
   async function QA() {
     function o(U, Y) {
-      return r2 = U.exports, r2 = eg(r2), Ig(r2), uA(), r2;
+      return r2 = U.exports, r2 = ig(r2), Cg(r2), uA(), r2;
     }
     function l(U) {
       return o(U.instance);
@@ -9038,12 +9047,12 @@ async function u9(A = {}) {
     }
   }, l2 = (o, l, c) => {
     I.hasOwnProperty(o) ? ((c === void 0 || I[o].overloadTable !== void 0 && I[o].overloadTable[c] !== void 0) && AA(`Cannot register public name '${o}' twice`), X2(I, o, o), I[o].overloadTable.hasOwnProperty(c) && AA(`Cannot register multiple overloads of a function with the same number of arguments (${c})!`), I[o].overloadTable[c] = l) : (I[o] = l, I[o].argCount = c);
-  }, Y0 = 48, J0 = 57, b0 = (o) => {
+  }, J0 = 48, b0 = 57, L0 = (o) => {
     o = o.replace(/[^a-zA-Z0-9_]/g, "$");
     var l = o.charCodeAt(0);
-    return l >= Y0 && l <= J0 ? `_${o}` : o;
+    return l >= J0 && l <= b0 ? `_${o}` : o;
   };
-  function L0(o, l, c, y, S, U, Y, H) {
+  function H0(o, l, c, y, S, U, Y, H) {
     this.name = o, this.constructor = l, this.instancePrototype = c, this.rawDestructor = y, this.baseClass = S, this.getActualType = U, this.upcast = Y, this.downcast = H, this.pureVirtualFunctions = [];
   }
   var G3 = (o, l, c) => {
@@ -9056,14 +9065,14 @@ async function u9(A = {}) {
     var l = typeof o;
     return l === "object" || l === "array" || l === "function" ? o.toString() : "" + o;
   };
-  function H0(o, l) {
+  function v0(o, l) {
     if (l === null)
       return this.isReference && AA(`null is not a valid ${this.name}`), 0;
     l.$$ || AA(`Cannot pass "${p3(l)}" as a ${this.name}`), l.$$.ptr || AA(`Cannot pass deleted object as a pointer of type ${this.name}`);
     var c = l.$$.ptrType.registeredClass, y = G3(l.$$.ptr, c, this.registeredClass);
     return y;
   }
-  function v0(o, l) {
+  function _0(o, l) {
     var c;
     if (l === null)
       return this.isReference && AA(`null is not a valid ${this.name}`), this.isSmartPointer ? (c = this.rawConstructor(), o !== null && o.push(this.rawDestructor, c), c) : 0;
@@ -9090,7 +9099,7 @@ async function u9(A = {}) {
       }
     return c;
   }
-  function _0(o, l) {
+  function P0(o, l) {
     if (l === null)
       return this.isReference && AA(`null is not a valid ${this.name}`), 0;
     l.$$ || AA(`Cannot pass "${p3(l)}" as a ${this.name}`), l.$$.ptr || AA(`Cannot pass deleted object as a pointer of type ${this.name}`), l.$$.ptrType.isConst && AA(`Cannot convert argument of type ${l.$$.ptrType.name} to parameter type ${this.name}`);
@@ -9104,20 +9113,20 @@ async function u9(A = {}) {
       return null;
     var y = f5(o, l, c.baseClass);
     return y === null ? null : c.downcast(y);
-  }, P0 = {}, V0 = (o, l) => {
+  }, V0 = {}, T0 = (o, l) => {
     for (l === void 0 && AA("ptr should not be undefined"); o.baseClass; )
       l = o.upcast(l), o = o.baseClass;
     return l;
-  }, T0 = (o, l) => (l = V0(o, l), P0[l]), $2 = (o, l) => {
+  }, O0 = (o, l) => (l = T0(o, l), V0[l]), $2 = (o, l) => {
     (!l.ptrType || !l.ptr) && j("makeClassHandle requires ptr and ptrType");
     var c = !!l.smartPtrType, y = !!l.smartPtr;
     return c !== y && j("Both smartPtrType and smartPtr must be specified"), l.count = { value: 1 }, O1(Object.create(o, { $$: { value: l, writable: !0 } }));
   };
-  function O0(o) {
+  function j0(o) {
     var l = this.getPointee(o);
     if (!l)
       return this.destructor(o), null;
-    var c = T0(this.registeredClass, l);
+    var c = O0(this.registeredClass, l);
     if (c !== void 0) {
       if (c.$$.count.value === 0)
         return c.$$.ptr = l, c.$$.smartPtr = o, c.clone();
@@ -9135,36 +9144,36 @@ async function u9(A = {}) {
     var X = f5(l, this.registeredClass, H.registeredClass);
     return X === null ? S.call(this) : this.isSmartPointer ? $2(H.registeredClass.instancePrototype, { ptrType: H, ptr: X, smartPtrType: this, smartPtr: o }) : $2(H.registeredClass.instancePrototype, { ptrType: H, ptr: X });
   }
-  var j0 = () => {
+  var W0 = () => {
     Object.assign(A3.prototype, { getPointee(o) {
       return this.rawGetPointee && (o = this.rawGetPointee(o)), o;
     }, destructor(o) {
       this.rawDestructor?.(o);
-    }, readValueFromPointer: G, fromWireType: O0 });
+    }, readValueFromPointer: G, fromWireType: j0 });
   };
   function A3(o, l, c, y, S, U, Y, H, X, IA, BA) {
-    this.name = o, this.registeredClass = l, this.isReference = c, this.isConst = y, this.isSmartPointer = S, this.pointeeType = U, this.sharingPolicy = Y, this.rawGetPointee = H, this.rawConstructor = X, this.rawShare = IA, this.rawDestructor = BA, !S && l.baseClass === void 0 ? y ? (this.toWireType = H0, this.destructorFunction = null) : (this.toWireType = _0, this.destructorFunction = null) : this.toWireType = v0;
+    this.name = o, this.registeredClass = l, this.isReference = c, this.isConst = y, this.isSmartPointer = S, this.pointeeType = U, this.sharingPolicy = Y, this.rawGetPointee = H, this.rawConstructor = X, this.rawShare = IA, this.rawDestructor = BA, !S && l.baseClass === void 0 ? y ? (this.toWireType = v0, this.destructorFunction = null) : (this.toWireType = P0, this.destructorFunction = null) : this.toWireType = _0;
   }
   var F5 = (o, l, c) => {
     I.hasOwnProperty(o) || j("Replacing nonexistent public symbol"), I[o].overloadTable !== void 0 && c !== void 0 ? I[o].overloadTable[c] = l : (I[o] = l, I[o].argCount = c);
-  }, g3 = (o) => F2.get(o), W0 = (o, l, c = [], y = !1) => {
+  }, g3 = (o) => F2.get(o), Z0 = (o, l, c = [], y = !1) => {
     var S = g3(l), U = S(...c);
     function Y(H) {
       return o[0] == "p" ? H >>> 0 : H;
     }
     return Y(U);
-  }, Z0 = (o, l, c = !1) => (...y) => W0(o, l, y, c), R1 = (o, l, c = !1) => {
+  }, z0 = (o, l, c = !1) => (...y) => Z0(o, l, y, c), R1 = (o, l, c = !1) => {
     o = gA(o);
     function y() {
       if (o.includes("p"))
-        return Z0(o, l, c);
+        return z0(o, l, c);
       var U = g3(l);
       return U;
     }
     var S = y();
     return typeof S != "function" && AA(`unknown function pointer with signature ${o}: ${l}`), S;
   };
-  class z0 extends Error {
+  class X0 extends Error {
   }
   var U5 = (o) => {
     var l = O5(o), c = gA(l);
@@ -9180,11 +9189,11 @@ async function u9(A = {}) {
         c.push(U), y[U] = !0;
       }
     }
-    throw l.forEach(S), new z0(`${o}: ` + c.map(U5).join([", "]));
+    throw l.forEach(S), new X0(`${o}: ` + c.map(U5).join([", "]));
   };
-  function X0(o, l, c, y, S, U, Y, H, X, IA, BA, oA, nA) {
+  function $0(o, l, c, y, S, U, Y, H, X, IA, BA, oA, nA) {
     o >>>= 0, l >>>= 0, c >>>= 0, y >>>= 0, S >>>= 0, U >>>= 0, Y >>>= 0, H >>>= 0, X >>>= 0, IA >>>= 0, BA >>>= 0, oA >>>= 0, nA >>>= 0, BA = gA(BA), U = R1(S, U), H && (H = R1(Y, H)), IA && (IA = R1(X, IA)), nA = R1(oA, nA);
-    var wA = b0(BA);
+    var wA = L0(BA);
     l2(wA, function() {
       I3(`Cannot construct ${BA} due to unbound types`, [y]);
     }), EA([o, l, c], y ? [y] : [], (yA) => {
@@ -9203,7 +9212,7 @@ async function u9(A = {}) {
         return OA.apply(this, A1);
       }), R = Object.create(fA, { constructor: { value: k } });
       k.prototype = R;
-      var O = new L0(BA, k, R, nA, SA, U, H, IA);
+      var O = new H0(BA, k, R, nA, SA, U, H, IA);
       O.baseClass && ((LA = O.baseClass).__derivedClasses ?? (LA.__derivedClasses = []), O.baseClass.__derivedClasses.push(O));
       var $ = new A3(BA, O, !0, !1, !1), hA = new A3(BA + "*", O, !1, !1, !1), GA = new A3(BA + " const*", O, !1, !0, !1);
       return M2[o] = { pointerType: hA, constPointerType: GA }, F5(wA, k), [$, hA, GA];
@@ -9214,13 +9223,13 @@ async function u9(A = {}) {
       c.push(W[l + y * 4 >>> 2 >>> 0]);
     return c;
   };
-  function $0(o) {
+  function A6(o) {
     for (var l = 1; l < o.length; ++l)
       if (o[l] !== null && o[l].destructorFunction === void 0)
         return !0;
     return !1;
   }
-  var A6 = { ftf: function(l, c, y, S, U, Y, H) {
+  var g6 = { ftf: function(l, c, y, S, U, Y, H) {
     return function() {
       var X = y(S), IA = Y(X);
       return IA;
@@ -9366,7 +9375,7 @@ async function u9(A = {}) {
       y(S);
     };
   } };
-  function g6(o, l, c, y) {
+  function I6(o, l, c, y) {
     const S = [l ? "t" : "f", c ? "t" : "f", y ? "t" : "f"];
     for (let U = l ? 1 : 2; U < o.length; ++U) {
       const Y = o[U];
@@ -9378,17 +9387,17 @@ async function u9(A = {}) {
   function f3(o, l, c, y, S, U) {
     var Y = l.length;
     Y < 2 && AA("argTypes array size mismatch! Must at least get return value and 'this' types!");
-    for (var H = l[1] !== null && c !== null, X = $0(l), IA = !l[0].isVoid, BA = l[0], oA = l[1], nA = [o, AA, y, S, M, BA.fromWireType.bind(BA), oA?.toWireType.bind(oA)], wA = 2; wA < Y; ++wA) {
+    for (var H = l[1] !== null && c !== null, X = A6(l), IA = !l[0].isVoid, BA = l[0], oA = l[1], nA = [o, AA, y, S, M, BA.fromWireType.bind(BA), oA?.toWireType.bind(oA)], wA = 2; wA < Y; ++wA) {
       var yA = l[wA];
       nA.push(yA.toWireType.bind(yA));
     }
     if (!X)
       for (var wA = H ? 1 : 2; wA < l.length; ++wA)
         l[wA].destructorFunction !== null && nA.push(l[wA].destructorFunction);
-    var SA = g6(l, H, IA, U), fA = A6[SA](...nA);
+    var SA = I6(l, H, IA, U), fA = g6[SA](...nA);
     return e1(o, fA);
   }
-  var I6 = function(o, l, c, y, S, U) {
+  var C6 = function(o, l, c, y, S, U) {
     o >>>= 0, c >>>= 0, y >>>= 0, S >>>= 0, U >>>= 0;
     var Y = R3(l, c);
     S = R1(y, S), EA([], [o], (H) => {
@@ -9404,7 +9413,7 @@ async function u9(A = {}) {
     o = o.trim();
     const l = o.indexOf("(");
     return l === -1 ? o : o.slice(0, l);
-  }, C6 = function(o, l, c, y, S, U, Y, H, X, IA) {
+  }, e6 = function(o, l, c, y, S, U, Y, H, X, IA) {
     o >>>= 0, l >>>= 0, y >>>= 0, S >>>= 0, U >>>= 0, Y >>>= 0;
     var BA = R3(c, y);
     l = gA(l), l = Y5(l), U = R1(S, U, X), EA([], [o], (oA) => {
@@ -9443,7 +9452,7 @@ async function u9(A = {}) {
     var l = Q1.toValue(o);
     return F3(o), l;
   }, toWireType: (o, l) => Q1.toHandle(l), readValueFromPointer: G, destructorFunction: null };
-  function e6(o) {
+  function i6(o) {
     return o >>>= 0, tA(o, b5);
   }
   var U3 = (o, l, c) => {
@@ -9470,12 +9479,12 @@ async function u9(A = {}) {
         throw new TypeError(`invalid integer width (${l}): ${o}`);
     }
   };
-  function i6(o) {
+  function q6(o) {
     return o === 0 ? "object" : o === 1 ? "number" : "string";
   }
-  function q6(o, l, c, y, S) {
+  function B6(o, l, c, y, S) {
     o >>>= 0, l >>>= 0, c >>>= 0, l = gA(l);
-    const U = i6(S);
+    const U = q6(S);
     switch (U) {
       case "object": {
         let IA = function() {
@@ -9505,7 +9514,7 @@ async function u9(A = {}) {
     var c = L[o];
     return c === void 0 && AA(`${l} has unknown type ${U5(o)}`), c;
   };
-  function B6(o, l, c) {
+  function Q6(o, l, c) {
     o >>>= 0, l >>>= 0;
     var y = L5(o, "enum");
     switch (l = gA(l), y.valueType) {
@@ -9525,7 +9534,7 @@ async function u9(A = {}) {
       }
     }
   }
-  var Q6 = (o, l) => {
+  var E6 = (o, l) => {
     switch (l) {
       case 4:
         return function(c) {
@@ -9538,10 +9547,10 @@ async function u9(A = {}) {
       default:
         throw new TypeError(`invalid float width (${l}): ${o}`);
     }
-  }, E6 = function(o, l, c) {
-    o >>>= 0, l >>>= 0, c >>>= 0, l = gA(l), tA(o, { name: l, fromWireType: (y) => y, toWireType: (y, S) => S, readValueFromPointer: Q6(l, c), destructorFunction: null });
+  }, o6 = function(o, l, c) {
+    o >>>= 0, l >>>= 0, c >>>= 0, l = gA(l), tA(o, { name: l, fromWireType: (y) => y, toWireType: (y, S) => S, readValueFromPointer: E6(l, c), destructorFunction: null });
   };
-  function o6(o, l, c, y, S, U, Y, H) {
+  function l6(o, l, c, y, S, U, Y, H) {
     o >>>= 0, c >>>= 0, y >>>= 0, S >>>= 0, U >>>= 0;
     var X = R3(l, c);
     o = gA(o), o = Y5(o), S = R1(y, S, Y), l2(o, function() {
@@ -9551,7 +9560,7 @@ async function u9(A = {}) {
       return F5(o, f3(o, BA, null, S, U, Y), l - 1), [];
     });
   }
-  var l6 = function(o, l, c, y, S) {
+  var t6 = function(o, l, c, y, S) {
     o >>>= 0, l >>>= 0, c >>>= 0, l = gA(l);
     const U = y === 0;
     let Y = (X) => X;
@@ -9560,7 +9569,7 @@ async function u9(A = {}) {
       Y = (X) => X << H >>> H, S = Y(S);
     }
     tA(o, { name: l, fromWireType: Y, toWireType: (X, IA) => IA, readValueFromPointer: DA(l, c, y !== 0), destructorFunction: null });
-  }, t6 = (o, l, c) => {
+  }, n6 = (o, l, c) => {
     const y = (S, U) => {
       let Y = 0;
       return { next() {
@@ -9576,13 +9585,13 @@ async function u9(A = {}) {
       const S = this[l]();
       return y(S, (U) => this[c](U));
     });
-  }, n6 = function(o, l, c, y) {
+  }, a6 = function(o, l, c, y) {
     o >>>= 0, l >>>= 0, c >>>= 0, y >>>= 0, c = gA(c), y = gA(y), EA([], [o, l], (S) => {
       const U = S[0];
-      return t6(U.registeredClass.instancePrototype, c, y), [];
+      return n6(U.registeredClass.instancePrototype, c, y), [];
     });
   };
-  function a6(o, l, c) {
+  function s6(o, l, c) {
     o >>>= 0, c >>>= 0;
     var y = [Int8Array, Uint8Array, Int16Array, Uint16Array, Int32Array, Uint32Array, Float32Array, Float64Array, BigInt64Array, BigUint64Array], S = y[l];
     function U(Y) {
@@ -9591,11 +9600,11 @@ async function u9(A = {}) {
     }
     c = gA(c), tA(o, { name: c, fromWireType: U, readValueFromPointer: U }, { ignoreDuplicateRegistrations: !0 });
   }
-  var s6 = Object.assign({ optional: !0 }, b5);
-  function r6(o, l) {
-    o >>>= 0, tA(o, s6);
+  var r6 = Object.assign({ optional: !0 }, b5);
+  function D6(o, l) {
+    o >>>= 0, tA(o, r6);
   }
-  var D6 = (o, l, c, y) => {
+  var h6 = (o, l, c, y) => {
     if (c >>>= 0, !(y > 0)) return 0;
     for (var S = c, U = c + y - 1, Y = 0; Y < o.length; ++Y) {
       var H = o.codePointAt(Y);
@@ -9614,7 +9623,7 @@ async function u9(A = {}) {
       }
     }
     return l[c >>> 0] = 0, c - S;
-  }, h6 = (o, l, c) => D6(o, K, l, c), c6 = (o) => {
+  }, c6 = (o, l, c) => h6(o, K, l, c), m6 = (o) => {
     for (var l = 0, c = 0; c < o.length; ++c) {
       var y = o.charCodeAt(c);
       y <= 127 ? l++ : y <= 2047 ? l += 2 : y >= 55296 && y <= 57343 ? (l += 4, ++c) : l += 3;
@@ -9625,7 +9634,7 @@ async function u9(A = {}) {
     if (y) return S;
     for (; o[l] && !(l >= S); ) ++l;
     return l;
-  }, m6 = (o, l = 0, c, y) => {
+  }, w6 = (o, l = 0, c, y) => {
     l >>>= 0;
     var S = v5(o, l, c, y);
     if (S - l > 16 && o.buffer && H5)
@@ -9650,22 +9659,22 @@ async function u9(A = {}) {
       }
     }
     return U;
-  }, w6 = (o, l, c) => (o >>>= 0, o ? m6(K, o, l, c) : "");
-  function d6(o, l) {
+  }, d6 = (o, l, c) => (o >>>= 0, o ? w6(K, o, l, c) : "");
+  function u6(o, l) {
     o >>>= 0, l >>>= 0, l = gA(l), tA(o, { name: l, fromWireType(c) {
       var y = W[c >>> 2 >>> 0], S = c + 4, U;
-      return U = w6(S, y, !0), $1(c), U;
+      return U = d6(S, y, !0), $1(c), U;
     }, toWireType(c, y) {
       y instanceof ArrayBuffer && (y = new Uint8Array(y));
       var S, U = typeof y == "string";
-      U || ArrayBuffer.isView(y) && y.BYTES_PER_ELEMENT == 1 || AA("Cannot pass non-string to std::string"), U ? S = c6(y) : S = y.length;
+      U || ArrayBuffer.isView(y) && y.BYTES_PER_ELEMENT == 1 || AA("Cannot pass non-string to std::string"), U ? S = m6(y) : S = y.length;
       var Y = L3(4 + S + 1), H = Y + 4;
-      return W[Y >>> 2 >>> 0] = S, U ? h6(y, H, S + 1) : K.set(y, H >>> 0), c !== null && c.push($1, Y), Y;
+      return W[Y >>> 2 >>> 0] = S, U ? c6(y, H, S + 1) : K.set(y, H >>> 0), c !== null && c.push($1, Y), Y;
     }, readValueFromPointer: G, destructorFunction(c) {
       $1(c);
     } });
   }
-  var _5 = globalThis.TextDecoder ? new TextDecoder("utf-16le") : void 0, u6 = (o, l, c) => {
+  var _5 = globalThis.TextDecoder ? new TextDecoder("utf-16le") : void 0, y6 = (o, l, c) => {
     var y = o >>> 1, S = v5(b, y, l / 2, c);
     if (S - y > 16 && _5) return _5.decode(b.subarray(y >>> 0, S >>> 0));
     for (var U = "", Y = y; Y < S; ++Y) {
@@ -9673,7 +9682,7 @@ async function u9(A = {}) {
       U += String.fromCharCode(H);
     }
     return U;
-  }, y6 = (o, l, c) => {
+  }, M6 = (o, l, c) => {
     if (c ?? (c = 2147483647), c < 2) return 0;
     c -= 2;
     for (var y = l, S = c < o.length * 2 ? c / 2 : o.length, U = 0; U < S; ++U) {
@@ -9681,31 +9690,31 @@ async function u9(A = {}) {
       d[l >>> 1 >>> 0] = Y, l += 2;
     }
     return d[l >>> 1 >>> 0] = 0, l - y;
-  }, M6 = (o) => o.length * 2, x6 = (o, l, c) => {
+  }, x6 = (o) => o.length * 2, N6 = (o, l, c) => {
     for (var y = "", S = o >>> 2, U = 0; !(U >= l / 4); U++) {
       var Y = W[S + U >>> 0];
       if (!Y && !c) break;
       y += String.fromCodePoint(Y);
     }
     return y;
-  }, N6 = (o, l, c) => {
+  }, k6 = (o, l, c) => {
     if (l >>>= 0, c ?? (c = 2147483647), c < 4) return 0;
     for (var y = l, S = y + c - 4, U = 0; U < o.length; ++U) {
       var Y = o.codePointAt(U);
       if (Y > 65535 && U++, J[l >>> 2 >>> 0] = Y, l += 4, l + 4 > S) break;
     }
     return J[l >>> 2 >>> 0] = 0, l - y;
-  }, k6 = (o) => {
+  }, S6 = (o) => {
     for (var l = 0, c = 0; c < o.length; ++c) {
       var y = o.codePointAt(c);
       y > 65535 && c++, l += 4;
     }
     return l;
   };
-  function S6(o, l, c) {
+  function K6(o, l, c) {
     o >>>= 0, l >>>= 0, c >>>= 0, c = gA(c);
     var y, S, U;
-    l === 2 ? (y = u6, S = y6, U = M6) : (y = x6, S = N6, U = k6), tA(o, { name: c, fromWireType: (Y) => {
+    l === 2 ? (y = y6, S = M6, U = x6) : (y = N6, S = k6, U = S6), tA(o, { name: c, fromWireType: (Y) => {
       var H = W[Y >>> 2 >>> 0], X = y(Y + 4, H * l, !0);
       return $1(Y), X;
     }, toWireType: (Y, H) => {
@@ -9716,36 +9725,36 @@ async function u9(A = {}) {
       $1(Y);
     } });
   }
-  function K6(o, l, c, y, S, U) {
+  function G6(o, l, c, y, S, U) {
     o >>>= 0, l >>>= 0, c >>>= 0, y >>>= 0, S >>>= 0, U >>>= 0, ZA[o] = { name: gA(l), rawConstructor: R1(c, y), rawDestructor: R1(S, U), fields: [] };
   }
-  function G6(o, l, c, y, S, U, Y, H, X, IA) {
+  function p6(o, l, c, y, S, U, Y, H, X, IA) {
     o >>>= 0, l >>>= 0, c >>>= 0, y >>>= 0, S >>>= 0, U >>>= 0, Y >>>= 0, H >>>= 0, X >>>= 0, IA >>>= 0, ZA[o].fields.push({ fieldName: gA(l), getterReturnType: c, getter: R1(y, S), getterContext: U, setterArgumentType: Y, setter: R1(H, X), setterContext: IA });
   }
-  var p6 = function(o, l) {
+  var R6 = function(o, l) {
     o >>>= 0, l >>>= 0, l = gA(l), tA(o, { isVoid: !0, name: l, fromWireType: () => {
     }, toWireType: (c, y) => {
     } });
   };
-  function R6(o, l) {
+  function f6(o, l) {
     o >>>= 0, l >>>= 0, o = Q1.toValue(o), l = Q1.toValue(l), o.set(l);
   }
-  var Y3 = [], f6 = (o) => {
+  var Y3 = [], F6 = (o) => {
     var l = Y3.length;
     return Y3.push(o), l;
-  }, F6 = (o, l) => {
+  }, U6 = (o, l) => {
     for (var c = new Array(o), y = 0; y < o; ++y)
       c[y] = L5(W[l + y * 4 >>> 2 >>> 0], `parameter ${y}`);
     return c;
-  }, U6 = (o, l, c) => {
+  }, Y6 = (o, l, c) => {
     var y = [], S = o(y, c);
     return y.length && (W[l >>> 2 >>> 0] = Q1.toHandle(y)), S;
-  }, Y6 = {}, P5 = (o) => {
-    var l = Y6[o];
+  }, J6 = {}, P5 = (o) => {
+    var l = J6[o];
     return l === void 0 ? gA(o) : l;
-  }, J6 = function(o, l, c) {
+  }, b6 = function(o, l, c) {
     l >>>= 0;
-    var y = 8, [S, ...U] = F6(o, l), Y = S.toWireType.bind(S), H = U.map((oA) => oA.readValueFromPointer.bind(oA));
+    var y = 8, [S, ...U] = U6(o, l), Y = S.toWireType.bind(S), H = U.map((oA) => oA.readValueFromPointer.bind(oA));
     o--;
     var X = new Array(o), IA = (oA, nA, wA, yA) => {
       for (var SA = 0, fA = 0; fA < o; ++fA)
@@ -9765,104 +9774,104 @@ async function u9(A = {}) {
           k = Q1.toValue(oA)[P5(nA)](...X);
           break;
       }
-      return U6(Y, wA, k);
+      return Y6(Y, wA, k);
     }, BA = `methodCaller<(${U.map((oA) => oA.name)}) => ${S.name}>`;
-    return f6(e1(BA, IA));
+    return F6(e1(BA, IA));
   };
-  function b6(o, l) {
+  function L6(o, l) {
     return o >>>= 0, l >>>= 0, o = Q1.toValue(o), l = Q1.toValue(l), o == l;
   }
-  function L6(o, l) {
+  function H6(o, l) {
     return o >>>= 0, l >>>= 0, o = Q1.toValue(o), l = Q1.toValue(l), Q1.toHandle(o[l]);
   }
-  function H6(o) {
+  function v6(o) {
     o >>>= 0, o > 9 && (t2[o + 1] += 1);
   }
-  function v6(o, l, c, y, S) {
+  function _6(o, l, c, y, S) {
     return o >>>= 0, l >>>= 0, c >>>= 0, y >>>= 0, S >>>= 0, Y3[o](l, c, y, S);
   }
-  function _6(o) {
+  function P6(o) {
     return o >>>= 0, Q1.toHandle(P5(o));
   }
-  function P6() {
+  function V6() {
     return Q1.toHandle({});
   }
-  function V6(o) {
+  function T6(o) {
     o >>>= 0;
     var l = Q1.toValue(o);
     M(l), F3(o);
   }
-  function T6(o, l, c) {
+  function O6(o, l, c) {
     o >>>= 0, l >>>= 0, c >>>= 0, o = Q1.toValue(o), l = Q1.toValue(l), c = Q1.toValue(c), o[l] = c;
   }
-  var O6 = () => 4294901760, j6 = (o, l) => Math.ceil(o / l) * l, W6 = (o) => {
+  var j6 = () => 4294901760, W6 = (o, l) => Math.ceil(o / l) * l, Z6 = (o) => {
     var l = C3.buffer.byteLength, c = (o - l + 65535) / 65536 | 0;
     try {
       return C3.grow(c), uA(), 1;
     } catch {
     }
   };
-  function Z6(o) {
+  function z6(o) {
     o >>>= 0;
-    var l = K.length, c = O6();
+    var l = K.length, c = j6();
     if (o > c)
       return !1;
     for (var y = 1; y <= 4; y *= 2) {
       var S = l * (1 + 0.2 / y);
       S = Math.min(S, o + 100663296);
-      var U = Math.min(c, j6(Math.max(o, S), 65536)), Y = W6(U);
+      var U = Math.min(c, W6(Math.max(o, S), 65536)), Y = Z6(U);
       if (Y)
         return !0;
     }
     return !1;
   }
-  var z6 = (o, l) => {
+  var X6 = (o, l) => {
     if (n2)
       for (var c = o; c < o + l; c++) {
         var y = g3(c);
         y && n2.set(y, c);
       }
-  }, n2, X6 = (o) => (n2 || (n2 = /* @__PURE__ */ new WeakMap(), z6(0, F2.length)), n2.get(o) || 0), J3 = [], $6 = () => J3.length ? J3.pop() : F2.grow(1), b3 = (o, l) => F2.set(o, l), V5 = (o) => {
+  }, n2, $6 = (o) => (n2 || (n2 = /* @__PURE__ */ new WeakMap(), X6(0, F2.length)), n2.get(o) || 0), J3 = [], Ag = () => J3.length ? J3.pop() : F2.grow(1), b3 = (o, l) => F2.set(o, l), V5 = (o) => {
     const l = o.length;
     return [l % 128 | 128, l >> 7, ...o];
-  }, Ag = { i: 127, p: 127, j: 126, f: 125, d: 124, e: 111 }, T5 = (o) => V5(Array.from(o, (l) => {
-    var c = Ag[l];
+  }, gg = { i: 127, p: 127, j: 126, f: 125, d: 124, e: 111 }, T5 = (o) => V5(Array.from(o, (l) => {
+    var c = gg[l];
     return c;
-  })), gg = (o, l) => {
+  })), Ig = (o, l) => {
     var c = Uint8Array.of(0, 97, 115, 109, 1, 0, 0, 0, 1, ...V5([1, 96, ...T5(l.slice(1)), ...T5(l[0] === "v" ? "" : l[0])]), 2, 7, 1, 1, 101, 1, 102, 0, 0, 7, 5, 1, 1, 102, 0, 0), y = new WebAssembly.Module(c), S = new WebAssembly.Instance(y, { e: { f: o } }), U = S.exports.f;
     return U;
   }, a2 = (o, l) => {
-    var c = X6(o);
+    var c = $6(o);
     if (c)
       return c;
-    var y = $6();
+    var y = Ag();
     try {
       b3(y, o);
     } catch (U) {
       if (!(U instanceof TypeError))
         throw U;
-      var S = gg(o, l);
+      var S = Ig(o, l);
       b3(y, S);
     }
     return n2.set(o, y), y;
   }, s2 = (o) => {
     n2.delete(g3(o)), b3(o, null), J3.push(o);
   };
-  if (z2(), j0(), I.noExitRuntime && I.noExitRuntime, I.print && I.print, I.printErr && (D = I.printErr), I.wasmBinary && (x = I.wasmBinary), I.arguments && I.arguments, I.thisProgram && I.thisProgram, I.preInit)
+  if (z2(), W0(), I.noExitRuntime && I.noExitRuntime, I.print && I.print, I.printErr && (D = I.printErr), I.wasmBinary && (x = I.wasmBinary), I.arguments && I.arguments, I.thisProgram && I.thisProgram, I.preInit)
     for (typeof I.preInit == "function" && (I.preInit = [I.preInit]); I.preInit.length > 0; )
       I.preInit.shift()();
   I.addFunction = a2, I.removeFunction = s2;
   var O5, L3, $1, C3, F2;
-  function Ig(o) {
+  function Cg(o) {
     O5 = o.K, L3 = o.M, $1 = o.N, C3 = o.I, F2 = o.L;
   }
-  var Cg = { l: YA, C: _A, q: eA, z: JA, G: zA, j: X0, i: I6, a: C6, E: e6, x: q6, d: B6, y: E6, c: o6, p: l6, m: n6, h: a6, n: r6, F: d6, w: S6, r: K6, k: G6, H: p6, u: R6, g: J6, b: F3, o: b6, B: L6, t: H6, f: v6, s: _6, A: P6, e: V6, v: T6, D: Z6 };
-  function eg(o) {
+  var eg = { l: YA, C: _A, q: eA, z: JA, G: zA, j: $0, i: C6, a: e6, E: i6, x: B6, d: Q6, y: o6, c: l6, p: t6, m: a6, h: s6, n: D6, F: u6, w: K6, r: G6, k: p6, H: R6, u: f6, g: b6, b: F3, o: L6, B: H6, t: v6, f: _6, s: P6, A: V6, e: T6, v: O6, D: z6 };
+  function ig(o) {
     o = Object.assign({}, o);
     var l = (y) => (S) => y(S) >>> 0, c = (y) => () => y() >>> 0;
     return o.K = l(o.K), o.M = l(o.M), o._emscripten_stack_alloc = l(o._emscripten_stack_alloc), o.emscripten_stack_get_current = c(o.emscripten_stack_get_current), o;
   }
-  function ig() {
+  function qg() {
     NA();
     function o() {
       I.calledRun = !0, !N && (RA(), p?.(I), I.onRuntimeInitialized?.(), KA());
@@ -9872,7 +9881,7 @@ async function u9(A = {}) {
     }, 1)) : o();
   }
   var r2;
-  return r2 = await QA(), ig(), CA ? g = I : g = new Promise((o, l) => {
+  return r2 = await QA(), qg(), CA ? g = I : g = new Promise((o, l) => {
     p = o, m = l;
   }), g;
 }
@@ -10096,7 +10105,7 @@ function y9(A, g = (I) => I) {
   };
 }
 const Q2 = 1e-7, A5 = 2 * Math.PI, h1 = (A, g) => [A[0] - g[0], A[1] - g[1]], P1 = (A, g) => [A[0] + g[0], A[1] + g[1]], m1 = ([A, g], I) => [A * I, g * I], d3 = (A, g) => A[0] * g[0] + A[1] * g[1], d2 = (A, g) => A[0] * g[1] - A[1] * g[0], n3 = ([A, g]) => [-g, A], j2 = (A) => Math.hypot(...A), a3 = () => new Error(t("This curved offset collapses an edge or changes the outline topology. Try a smaller distance."));
-function D4(A, g) {
+function h4(A, g) {
   const I = A[0];
   return A.reduce((C, e, q) => {
     const B = A[(q + 1) % A.length], i = x5(e, B, g[q]);
@@ -10125,7 +10134,7 @@ function M9(A, g, I, C) {
     arc: { center: q, radius: s, sweep: i }
   };
 }
-function h4(A, g) {
+function c4(A, g) {
   const I = h1(g.center, A.a), C = d3(I, A.tangentA), e = d2(A.tangentA, I), q = Math.abs(e);
   if (q > g.radius + Q2)
     return [];
@@ -10143,13 +10152,13 @@ function N9(A, g) {
   if (A.arc && g.arc)
     return x9(A.arc, g.arc);
   if (A.arc)
-    return h4(g, A.arc);
+    return c4(g, A.arc);
   if (g.arc)
-    return h4(A, g.arc);
+    return c4(A, g.arc);
   const I = d2(A.tangentA, g.tangentA);
   return Math.abs(I) < Q2 ? [] : [P1(A.a, m1(A.tangentA, d2(h1(g.a, A.a), g.tangentA) / I))];
 }
-function c4(A, g) {
+function m4(A, g) {
   if (j2(h1(g, A.a)) <= Q2)
     return 0;
   if (j2(h1(g, A.b)) <= Q2)
@@ -10160,7 +10169,7 @@ function c4(A, g) {
   return (Math.atan2(d2(e, q), d3(e, q)) * Math.sign(C) % A5 + A5) % A5 / Math.abs(C);
 }
 function k9(A, g, I) {
-  const C = D4(A, g), e = Math.sign(C), q = I * e, B = A.map((n, a) => M9(n, A[(a + 1) % A.length], g[a], q)), i = B.map((n) => ({ point: n.a, parameter: 0 })), Q = B.map((n) => ({ point: n.b, parameter: 1 })), s = B.map((n, a) => {
+  const C = h4(A, g), e = Math.sign(C), q = I * e, B = A.map((n, a) => M9(n, A[(a + 1) % A.length], g[a], q)), i = B.map((n) => ({ point: n.a, parameter: 0 })), Q = B.map((n) => ({ point: n.b, parameter: 1 })), s = B.map((n, a) => {
     const D = (a + 1) % B.length, x = B[D];
     if (j2(h1(n.b, x.a)) <= Q2)
       return i[D].point = Q[a].point = m1(P1(n.b, x.a), 0.5), 0;
@@ -10168,7 +10177,7 @@ function k9(A, g, I) {
     if (N * q > 0)
       return Math.tan(N / 4);
     const p = N9(n, x).map((m) => {
-      const f = c4(n, m), K = c4(x, m);
+      const f = m4(n, m), K = m4(x, m);
       return { point: m, u: f, v: K, removed: (1 - f) * n.length + K * x.length };
     }).filter(({ u: m, v: f }) => m >= 0 && m <= 1 && f >= 0 && f <= 1).sort((m, f) => m.removed - f.removed)[0];
     if (!p)
@@ -10181,7 +10190,7 @@ function k9(A, g, I) {
       throw a3();
     E.points.push(i[n].point), E.bulges.push(a.arc ? Math.tan(a.arc.sweep * D / 4) : 0), s[n] && (E.points.push(Q[n].point), E.bulges.push(s[n]));
   }
-  const r = D4(E.points, E.bulges);
+  const r = h4(E.points, E.bulges);
   if (Math.sign(r) !== e || (Math.abs(r) - Math.abs(C)) * I <= 0)
     throw a3();
   return E;
@@ -10242,8 +10251,8 @@ async function K9(A = {}) {
   const C = /* @__PURE__ */ new WeakMap(), e = (q) => (C.set(q, { positions: new Float64Array(q.positions), indices: new Uint32Array(q.indices) }), q);
   return {
     evaluate: (q) => {
-      const B = { value: !1 }, i = m4(I, q, !1, B);
-      return B.value ? m4(I, q, !0) : i;
+      const B = { value: !1 }, i = w4(I, q, !1, B);
+      return B.value ? w4(I, q, !0) : i;
     },
     partitionConvex: (q, B = 2048) => r5(I, q.positions, q.indices, B).map(e),
     isConvexPiece(q) {
@@ -10279,7 +10288,7 @@ function G9(A) {
   }
   return !1;
 }
-function m4(A, g, I = !1, C) {
+function w4(A, g, I = !1, C) {
   let e = !1;
   const q = K3(g), B = /* @__PURE__ */ new Map(), i = /* @__PURE__ */ new Set(), Q = (m) => (i.add(m), m), s = /* @__PURE__ */ new Set(), E = /* @__PURE__ */ new WeakMap(), r = (m) => (s.add(m), m), n = (m, f) => {
     if (!m.numVert() || !f.numVert())
@@ -10445,18 +10454,18 @@ function m4(A, g, I = !1, C) {
           d = Q(A.Manifold.sphere(K.radius, K.segments));
           break;
         case "code":
-          if (d = u(y0(K.program).shape), d.isEmpty() || d.volume() <= 1e-8)
+          if (d = u(M0(K.program).shape), d.isEmpty() || d.volume() <= 1e-8)
             throw new Error(t("Code produces no printable solid"));
           if (d.numTri() > 2e5)
             throw new v1(t("Evaluated solid exceeds 200000 faces"));
           break;
         case "extrusion": {
-          const _ = m0(K, q);
+          const _ = w0(K, q);
           d = Q(A.Manifold.extrude([_.contour, ..._.holes ?? []], _.distance)), _.start && (d = Q(d.translate([0, 0, _.start]))), _.plane === "XZ" ? d = Q(d.rotate([90, 0, 0])) : _.plane === "YZ" && (d = Q(d.rotate([90, 0, 90])));
           break;
         }
         case "revolution": {
-          const { contour: _, holes: lA, plane: V, angle: CA, axisOffset: uA } = w0(K, q), NA = [_, ...lA ?? []].map((RA) => RA.map(([KA, UA]) => {
+          const { contour: _, holes: lA, plane: V, angle: CA, axisOffset: uA } = d0(K, q), NA = [_, ...lA ?? []].map((RA) => RA.map(([KA, UA]) => {
             const XA = KA - uA;
             return [Math.abs(XA) < 1e-8 ? 0 : XA, UA];
           }));
@@ -10466,7 +10475,7 @@ function m4(A, g, I = !1, C) {
           break;
         }
         case "mirror": {
-          const { axis: _, offset: lA } = c0(K, q), V = [0, 0, 0];
+          const { axis: _, offset: lA } = m0(K, q), V = [0, 0, 0];
           if (V[_] = 1, d = Q(p(K.source).mirror(V)), lA) {
             const CA = [0, 0, 0];
             CA[_] = 2 * lA, d = Q(d.translate(CA));
@@ -10474,7 +10483,7 @@ function m4(A, g, I = !1, C) {
           break;
         }
         case "pattern": {
-          const _ = h0(K, q), lA = p(K.source);
+          const _ = c0(K, q), lA = p(K.source);
           if (lA.numTri() * _.count > 5e5)
             throw new v1(t("Pattern exceeds the 500000 input face limit"));
           const V = [lA];
@@ -10573,22 +10582,22 @@ function R9(A, g) {
     throw new Error(t("Invalid solid inertia"));
   return { massKg: i, volumeM3: C, centerM: B.map((E, r) => E + I[r]), inertiaKgM2: s };
 }
-const R0 = /* @__PURE__ */ new WeakMap();
-async function f0(A) {
+const f0 = /* @__PURE__ */ new WeakMap();
+async function F0(A) {
   const g = new Uint8Array(4 + A.reduce((e, q) => e + 8 + q.positions.byteLength + q.indices.byteLength, 0)), I = new DataView(g.buffer);
   I.setUint32(0, A.length, !0);
   let C = 4;
   for (const e of A)
     I.setUint32(C, e.positions.length, !0), I.setUint32(C + 4, e.indices.length, !0), C += 8, g.set(new Uint8Array(e.positions.buffer, e.positions.byteOffset, e.positions.byteLength), C), C += e.positions.byteLength, g.set(new Uint8Array(e.indices.buffer, e.indices.byteOffset, e.indices.byteLength), C), C += e.indices.byteLength;
-  return p0(g);
+  return R0(g);
 }
 async function f9(A) {
-  const g = R0.get(A);
-  return g !== void 0 && g === await f0(A.hulls);
+  const g = f0.get(A);
+  return g !== void 0 && g === await F0(A.hulls);
 }
-async function F0(A) {
+async function U0(A) {
   const g = new Uint8Array(A.positions.byteLength + A.indices.byteLength);
-  return g.set(new Uint8Array(A.positions.buffer, A.positions.byteOffset, A.positions.byteLength)), g.set(new Uint8Array(A.indices.buffer, A.indices.byteOffset, A.indices.byteLength), A.positions.byteLength), p0(g);
+  return g.set(new Uint8Array(A.positions.buffer, A.positions.byteOffset, A.positions.byteLength)), g.set(new Uint8Array(A.indices.buffer, A.indices.byteOffset, A.indices.byteLength), A.positions.byteLength), R0(g);
 }
 async function g5(A, g, I = {}) {
   if (A.reference || A.hole)
@@ -10614,11 +10623,11 @@ async function g5(A, g, I = {}) {
   const { missingVolumeMm3: s, extraVolumeMm3: E, numericalResidualVolumeMm3: r } = i, n = (s + E + r) / A.volume;
   if (!Number.isFinite(n) || n > e.volumeFraction || Q > e.boundsMm)
     throw new Error(t`${A.name}: collision approximation rejected (${(n * 100).toFixed(2)}% volume difference, ${Q.toFixed(3)} mm bounds error). Supply a qualified collision assembly.`);
-  const a = { hulls: B, certificate: { sourceSHA256: await F0(A), algorithm: "manifold-compound/v1", strategy: I.candidates ? "supplied" : "bsp", maxHulls: C, missingVolumeMm3: s, extraVolumeMm3: E, numericalResidualVolumeMm3: r, relativeError: n, boundsErrorMm: Q, tolerance: e } };
+  const a = { hulls: B, certificate: { sourceSHA256: await U0(A), algorithm: "manifold-compound/v1", strategy: I.candidates ? "supplied" : "bsp", maxHulls: C, missingVolumeMm3: s, extraVolumeMm3: E, numericalResidualVolumeMm3: r, relativeError: n, boundsErrorMm: Q, tolerance: e } };
   Object.freeze(e), Object.freeze(a.certificate);
   for (const D of B)
     Object.freeze(D);
-  return Object.freeze(B), Object.freeze(a), R0.set(a, await f0(B)), a;
+  return Object.freeze(B), Object.freeze(a), f0.set(a, await F0(B)), a;
 }
 const I5 = (A, g, I) => (g[0] - A[0]) * (I[1] - A[1]) - (g[1] - A[1]) * (I[0] - A[0]);
 function F9(A, g, I, C, e) {
@@ -10700,7 +10709,7 @@ function Y9(A, g, I, C, e, q = 0.25, B = 2e6) {
         }
   return !0;
 }
-let w4;
+let d4;
 const J1 = (A, g) => {
   let [I, C, e] = A;
   for (let q = 0; q < 3; q++) {
@@ -10720,7 +10729,7 @@ async function J9(A, g, I, C = {}) {
     throw new Error(t("Simulation budget is 256 bodies"));
   for (const M of B) {
     const G = I.get(M.id);
-    if (!G || !await f9(G) || G.certificate.sourceSHA256 !== await F0(M) || G.certificate.relativeError > G.certificate.tolerance.volumeFraction || G.certificate.boundsErrorMm > G.certificate.tolerance.boundsMm || !G.hulls.length || G.hulls.length > 2048)
+    if (!G || !await f9(G) || G.certificate.sourceSHA256 !== await U0(M) || G.certificate.relativeError > G.certificate.tolerance.volumeFraction || G.certificate.boundsErrorMm > G.certificate.tolerance.boundsMm || !G.hulls.length || G.hulls.length > 2048)
       throw new Error(t`${M.name}: qualified collision geometry is missing or stale`);
   }
   if (C.mode !== "rigid-preview")
@@ -10731,7 +10740,7 @@ async function J9(A, g, I, C = {}) {
     }
   if ([...I.values()].reduce((M, G) => M + G.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = C.J ?? await (w4 ?? (w4 = import("./jolt-physics.wasm-compat-DOd2zyOD.js").then((M) => M.default()))), Q = new i.JoltSettings();
+  const i = C.J ?? await (d4 ?? (d4 = import("./jolt-physics.wasm-compat-CaPRtw7y.js").then((M) => M.default()))), Q = new i.JoltSettings();
   Q.mMaxBodies = 512, Q.mMaxBodyPairs = Math.max(1024, B.length * B.length), Q.mMaxContactConstraints = 8192;
   const s = new i.ObjectLayerPairFilterTable(2);
   s.EnableCollision(0, 1), s.EnableCollision(1, 1);
@@ -11392,7 +11401,7 @@ async function v9(A, g, I) {
       };
       p(r);
       const m = { ...C, nodes: u, roots: [r], joints: void 0, parametric: C.parametric ? { ...C.parametric, bindings: C.parametric.bindings.filter((f) => Object.hasOwn(u, f.nodeId)) } : void 0 };
-      N4(m), m.version >= 8 && m.tracers && (m.tracers = m.tracers.filter((f) => f.bodyId === r)), a = I.evaluate(m).bodies[0], q.set(r, a);
+      k4(m), m.version >= 8 && m.tracers && (m.tracers = m.tracers.filter((f) => f.bodyId === r)), a = I.evaluate(m).bodies[0], q.set(r, a);
     }
     if (!n.length)
       return a;
@@ -11579,7 +11588,7 @@ async function v9(A, g, I) {
     }
   return e;
 }
-let d4, $A, a1;
+let u4, $A, a1;
 const b1 = /* @__PURE__ */ new Map(), D5 = /* @__PURE__ */ new Map(), u3 = {}, h5 = {}, G5 = {}, v2 = {}, p5 = {}, C5 = () => {
   for (const A of a1.joints ?? [])
     if (A.kind === "hinge") {
@@ -11602,15 +11611,15 @@ const i5 = (A) => {
   for (const I of A)
     g[I.id] = $A.bodyRay(I.bodyId, I.originMm, I.direction, I.rangeMm);
   R5 = g;
-}, U0 = () => ({ time: $A.time, angles: { ...u3 }, speeds: { ...G5 }, linearPositions: { ...v2 }, linearSpeeds: { ...p5 }, distances: { ...R5 } }), _9 = () => ({ ...U0(), poses: a1.roots.filter((A) => !a1.nodes[A].reference && a1.nodes[A].role !== "hole").map((A) => ({ id: A, ...$A.pose(A) })).concat([...D5].map(([A, g]) => ({ id: A, ...$A.pose(A), ...g }))) });
+}, Y0 = () => ({ time: $A.time, angles: { ...u3 }, speeds: { ...G5 }, linearPositions: { ...v2 }, linearSpeeds: { ...p5 }, distances: { ...R5 } }), _9 = () => ({ ...Y0(), poses: a1.roots.filter((A) => !a1.nodes[A].reference && a1.nodes[A].role !== "hole").map((A) => ({ id: A, ...$A.pose(A) })).concat([...D5].map(([A, g]) => ({ id: A, ...$A.pose(A), ...g }))) });
 self.onmessage = async (A) => {
   const g = A.data;
   try {
     if (g.op === "start") {
-      $A?.dispose(), $A = void 0, yg(g.locale), a1 = structuredClone(g.document);
+      $A?.dispose(), $A = void 0, Mg(g.locale), a1 = structuredClone(g.document);
       const I = a1.roots.find((B) => !a1.nodes[B].reference && a1.nodes[B].role !== "hole");
       g.fixBase && I && (a1.nodes[I].physics = { ...a1.nodes[I].physics ?? b2(), motion: "static" });
-      const C = await (d4 ?? (d4 = K9({ wasmURL: g.wasmURL }))), e = C.evaluate(a1), q = await v9(a1, e, C);
+      const C = await (u4 ?? (u4 = K9({ wasmURL: g.wasmURL }))), e = C.evaluate(a1), q = await v9(a1, e, C);
       b1.clear(), D5.clear(), R5 = {}, $A = await J9(a1, e, q, { mode: g.rigidPreview ? "rigid-preview" : "mechanism" });
       for (const B of [u3, h5, G5, v2, p5])
         for (const i of Object.keys(B))
@@ -11661,7 +11670,7 @@ self.onmessage = async (A) => {
         for (const [I, C] of b1)
           C === "hinge" ? $A.stopHingeMotor(I) : $A.stopSliderMotor(I);
     }
-    self.postMessage({ request: g.request, frame: g.op === "actuator-step" && g.telemetryOnly === !0 ? U0() : _9() });
+    self.postMessage({ request: g.request, frame: g.op === "actuator-step" && g.telemetryOnly === !0 ? Y0() : _9() });
   } catch (I) {
     self.postMessage({ request: g.request, error: I instanceof Error ? I.message : String(I) });
   }

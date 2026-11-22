@@ -416,3 +416,8 @@ and sketch sheets can be saved together in an SB3 and exported as a numbered
 PDF set. Use a smaller scale to fit larger assemblies on A4. A dedicated
 worker computes the projection, and preview and PDF export reuse it while
 the evaluated solids stay the same.
+
+Select **Include parts list** on an assembly drawing to append numbered
+solid-body names as PDF pages. **Preview page** switches between the views
+and the list. SB3 keeps the option, and the list is regenerated from the
+current assembly.

@@ -145,7 +145,7 @@ try{
  await dialog(page).waitFor({state:'hidden'});
  await page.evaluate(()=>{
   window.__bwCad.editor.session.add({kind:'box',size:[20,30,12]},
-   {transform:{position:[55,8,3],rotation:[0,0,20],scale:[1,1,1]}});
+   {name:'Rear bracket',transform:{position:[55,8,3],rotation:[0,0,20],scale:[1,1,1]}});
  });
  await waitGeometry(page);
  const drawingWorkers=[];
@@ -158,21 +158,26 @@ try{
  const pathData=await preview(page).locator('.drawing-visible').getAttribute('d');
  assert.ok(pathData.split('M ').length>10);
  await dialog(page).getByLabel('Show hidden lines').uncheck();
+ await dialog(page).getByLabel('Include parts list').check();
+ await dialog(page).getByLabel('Preview page').selectOption('1');
+ await preview(page).getByText('Rear bracket',{exact:true}).waitFor();
  const [assemblyPdf]=await Promise.all([
   page.waitForEvent('download'),
   dialog(page).getByRole('button',{name:'Export drawing PDF'}).tap()
  ]);
  const assemblyText=await readFile(await assemblyPdf.path(),'utf8');
  assert.ok(assemblyText.includes('<'+Buffer.from('Assembly overview','latin1').toString('hex')+'>'));
+ assert.match(assemblyText,/\/Type \/Pages \/Count 2/);
+ assert.ok(assemblyText.includes('<'+Buffer.from('Rear bracket','latin1').toString('hex')+'>'));
  await dialog(page).getByRole('button',{name:'Save drawing sheet'}).tap();
  await dialog(page).waitFor({state:'hidden'});
  const [set]=await Promise.all([
   page.waitForEvent('download'),page.getByRole('button',{name:'Export drawing set (PDF)'}).tap()
  ]);
  const setText=await readFile(await set.path(),'utf8');
- assert.match(setText,/\/Type \/Pages \/Count 3/);
- assert.ok(setText.includes(Buffer.from('Sheet 1 of 3','latin1').toString('hex')));
- assert.ok(setText.includes(Buffer.from('Sheet 3 of 3','latin1').toString('hex')));
+ assert.match(setText,/\/Type \/Pages \/Count 4/);
+ assert.ok(setText.includes(Buffer.from('Sheet 1 of 4','latin1').toString('hex')));
+ assert.ok(setText.includes(Buffer.from('Sheet 4 of 4','latin1').toString('hex')));
  assert.equal(drawingWorkers.length,1,'preview and drawing-set PDF share the assembly projection');
  if(setOutput)await set.saveAs(setOutput);
  await file(page).tap();
@@ -183,7 +188,7 @@ try{
  await save.saveAs(project);
  const zip=await JSZip.loadAsync(await readFile(project));
  const saved=JSON.parse(await zip.file(CAD_PROJECT_PATH).async('text'));
- assert.equal(saved.version,21);
+ assert.equal(saved.version,22);
  assert.deepEqual(saved.drawings[0].section,{axis:'v',position:15,jog:{at:'spacing / 2 + 10 mm',position:16}});
  assert.equal(saved.drawings[0].annotations[0].from,'circle:first');
  assert.equal(saved.drawings[0].annotations[0].to,'circle:second');
@@ -200,6 +205,7 @@ try{
  assert.equal(saved.drawings[1].scale,'1:2');
  assert.deepEqual(saved.drawings[2].source,{kind:'assembly'});
  assert.equal(saved.drawings[2].hiddenLines,false);
+ assert.equal(saved.drawings[2].partsList,true);
  await page.close();
 
  const restored=await open();
@@ -240,7 +246,10 @@ try{
  await restored.getByRole('button',{name:'Drawing: Assembly overview',exact:true}).tap();
  await preview(restored).getByText('Assembly · 2 bodies',{exact:true}).waitFor();
  assert.equal(await preview(restored).locator('.drawing-hidden').count(),0);
- console.log('PASS worker-backed assembly and linked sketch drawing sheets in Brickwright: touch controls, live parameters, linked offset sections, aligned and curved dimensions, single and numbered vector PDFs, and SB3 save and reopen');
+ assert.equal(await dialog(restored).getByLabel('Include parts list').isChecked(),true);
+ await dialog(restored).getByLabel('Preview page').selectOption('1');
+ await preview(restored).getByText('Rear bracket',{exact:true}).waitFor();
+ console.log('PASS assembly parts lists, worker-backed assembly and linked sketch drawing sheets in Brickwright: touch controls, live parameters, linked offset sections, aligned and curved dimensions, single and numbered vector PDFs, and SB3 save and reopen');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});

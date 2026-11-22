@@ -33,7 +33,7 @@ const Ut = {
   "Choose light or dark mode": "Hellen oder dunklen Modus wählen",
   "Loading models…": "Modelle werden geladen…",
   "Original source files": "Originale Quelldateien",
-  "Model source uses project version 6 through 21": "Modellquelltext verwendet Projektversion 6 bis 21",
+  "Model source uses project version 6 through 22": "Modellquelltext verwendet Projektversion 6 bis 22",
   "Unknown material preset": "Unbekannte Materialvorlage",
   "Initial velocity requires project version 8": "Anfangsgeschwindigkeit erfordert Projektversion 8",
   "Invalid initial body velocity": "Ungültige Anfangsgeschwindigkeit",
@@ -1243,6 +1243,13 @@ const Ut = {
   "Invalid outline vertex identities.": "Ungültige Kennungen für Konturpunkte.",
   "Outline {0}, point {1} ({2})": "Kontur {0}, Punkt {1} ({2})",
   "Outline point {0} ({1})": "Konturpunkt {0} ({1})",
+  "Include parts list": "Stückliste hinzufügen",
+  "Parts list": "Stückliste",
+  "Parts list {0} of {1}": "Stückliste {0} von {1}",
+  "Preview page": "Vorschauseite",
+  "Drawing views": "Zeichnungsansichten",
+  Item: "Position",
+  "Body name": "Körpername",
   "Create assembly drawing": "Baugruppenzeichnung erstellen",
   "Assembly · 1 body": "Baugruppe · 1 Körper",
   "Assembly · {0} bodies": "Baugruppe · {0} Körper",
@@ -2355,7 +2362,7 @@ var pi = /(?:[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\u
 ve.prototype.offset = function(t) {
   return new ve(this.line, this.column + t);
 };
-var De = function(t, i, n) {
+var Ce = function(t, i, n) {
   this.start = i, this.end = n, t.sourceFile !== null && (this.source = t.sourceFile);
 };
 function ct(e, t) {
@@ -2489,7 +2496,7 @@ function fi(e, t) {
       start: s,
       end: o
     };
-    e.locations && (u.loc = new De(this, a, l)), e.ranges && (u.range = [s, o]), t.push(u);
+    e.locations && (u.loc = new Ce(this, a, l)), e.ranges && (u.range = [s, o]), t.push(u);
   };
 }
 var oe = 1, le = 2, Ze = 4, dt = 8, We = 16, pt = 32, Ee = 64, mt = 128, ue = 256, ke = 512, ft = 1024, ze = oe | le | ue;
@@ -3338,7 +3345,7 @@ q.checkLValInnerPattern = function(e, t, i) {
 };
 var H = function(t, i, n, s, o) {
   this.token = t, this.isExpr = !!i, this.preserveSpace = !!n, this.override = s, this.generator = !!o;
-}, C = {
+}, D = {
   b_stat: new H("{", !1),
   b_expr: new H("{", !0),
   b_tmpl: new H("${", !1),
@@ -3353,14 +3360,14 @@ var H = function(t, i, n, s, o) {
   f_gen: new H("function", !1, !1, null, !0)
 }, pe = T.prototype;
 pe.initialContext = function() {
-  return [C.b_stat];
+  return [D.b_stat];
 };
 pe.curContext = function() {
   return this.context[this.context.length - 1];
 };
 pe.braceIsBlock = function(e) {
   var t = this.curContext();
-  return t === C.f_expr || t === C.f_stat ? !0 : e === r.colon && (t === C.b_stat || t === C.b_expr) ? !t.isExpr : e === r._return || e === r.name && this.exprAllowed ? O.test(this.input.slice(this.lastTokEnd, this.start)) : e === r._else || e === r.semi || e === r.eof || e === r.parenR || e === r.arrow ? !0 : e === r.braceL ? t === C.b_stat : e === r._var || e === r._const || e === r.name ? !1 : !this.exprAllowed;
+  return t === D.f_expr || t === D.f_stat ? !0 : e === r.colon && (t === D.b_stat || t === D.b_expr) ? !t.isExpr : e === r._return || e === r.name && this.exprAllowed ? O.test(this.input.slice(this.lastTokEnd, this.start)) : e === r._else || e === r.semi || e === r.eof || e === r.parenR || e === r.arrow ? !0 : e === r.braceL ? t === D.b_stat : e === r._var || e === r._const || e === r.name ? !1 : !this.exprAllowed;
 };
 pe.inGeneratorContext = function() {
   for (var e = this.context.length - 1; e >= 1; e--) {
@@ -3383,33 +3390,33 @@ r.parenR.updateContext = r.braceR.updateContext = function() {
     return;
   }
   var e = this.context.pop();
-  e === C.b_stat && this.curContext().token === "function" && (e = this.context.pop()), this.exprAllowed = !e.isExpr;
+  e === D.b_stat && this.curContext().token === "function" && (e = this.context.pop()), this.exprAllowed = !e.isExpr;
 };
 r.braceL.updateContext = function(e) {
-  this.context.push(this.braceIsBlock(e) ? C.b_stat : C.b_expr), this.exprAllowed = !0;
+  this.context.push(this.braceIsBlock(e) ? D.b_stat : D.b_expr), this.exprAllowed = !0;
 };
 r.dollarBraceL.updateContext = function() {
-  this.context.push(C.b_tmpl), this.exprAllowed = !0;
+  this.context.push(D.b_tmpl), this.exprAllowed = !0;
 };
 r.parenL.updateContext = function(e) {
   var t = e === r._if || e === r._for || e === r._with || e === r._while;
-  this.context.push(t ? C.p_stat : C.p_expr), this.exprAllowed = !0;
+  this.context.push(t ? D.p_stat : D.p_expr), this.exprAllowed = !0;
 };
 r.incDec.updateContext = function() {
 };
 r._function.updateContext = r._class.updateContext = function(e) {
-  e.beforeExpr && e !== r._else && !(e === r.semi && this.curContext() !== C.p_stat) && !(e === r._return && O.test(this.input.slice(this.lastTokEnd, this.start))) && !((e === r.colon || e === r.braceL) && this.curContext() === C.b_stat) ? this.context.push(C.f_expr) : this.context.push(C.f_stat), this.exprAllowed = !1;
+  e.beforeExpr && e !== r._else && !(e === r.semi && this.curContext() !== D.p_stat) && !(e === r._return && O.test(this.input.slice(this.lastTokEnd, this.start))) && !((e === r.colon || e === r.braceL) && this.curContext() === D.b_stat) ? this.context.push(D.f_expr) : this.context.push(D.f_stat), this.exprAllowed = !1;
 };
 r.colon.updateContext = function() {
   this.curContext().token === "function" && this.context.pop(), this.exprAllowed = !0;
 };
 r.backQuote.updateContext = function() {
-  this.curContext() === C.q_tmpl ? this.context.pop() : this.context.push(C.q_tmpl), this.exprAllowed = !1;
+  this.curContext() === D.q_tmpl ? this.context.pop() : this.context.push(D.q_tmpl), this.exprAllowed = !1;
 };
 r.star.updateContext = function(e) {
   if (e === r._function) {
     var t = this.context.length - 1;
-    this.context[t] === C.f_expr ? this.context[t] = C.f_expr_gen : this.context[t] = C.f_gen;
+    this.context[t] === D.f_expr ? this.context[t] = D.f_expr_gen : this.context[t] = D.f_gen;
   }
   this.exprAllowed = !0;
 };
@@ -3603,7 +3610,7 @@ m.parseExprAtom = function(e, t, i) {
     case r.name:
       var o = this.start, a = this.startLoc, l = this.containsEsc, u = this.parseIdent(!1);
       if (this.options.ecmaVersion >= 8 && !l && u.name === "async" && !this.canInsertSemicolon() && this.eat(r._function))
-        return this.overrideContext(C.f_expr), this.parseFunction(this.startNodeAt(o, a), 0, !1, !0, t);
+        return this.overrideContext(D.f_expr), this.parseFunction(this.startNodeAt(o, a), 0, !1, !0, t);
       if (s && !this.canInsertSemicolon()) {
         if (this.eat(r.arrow))
           return this.parseArrowExpression(this.startNodeAt(o, a), [u], !1, t);
@@ -3627,7 +3634,7 @@ m.parseExprAtom = function(e, t, i) {
     case r.bracketL:
       return n = this.startNode(), this.next(), n.elements = this.parseExprList(r.bracketR, !0, !0, e), this.finishNode(n, "ArrayExpression");
     case r.braceL:
-      return this.overrideContext(C.b_expr), this.parseObj(!1, e);
+      return this.overrideContext(D.b_expr), this.parseObj(!1, e);
     case r._function:
       return n = this.startNode(), this.next(), this.parseFunction(n, 0);
     case r._class:
@@ -3941,7 +3948,7 @@ re.currentThisScope = function() {
   }
 };
 var Be = function(t, i, n) {
-  this.type = "", this.start = i, this.end = 0, t.options.locations && (this.loc = new De(t, n)), t.options.directSourceFile && (this.sourceFile = t.options.directSourceFile), t.options.ranges && (this.range = [i, 0]);
+  this.type = "", this.start = i, this.end = 0, t.options.locations && (this.loc = new Ce(t, n)), t.options.directSourceFile && (this.sourceFile = t.options.directSourceFile), t.options.ranges && (this.range = [i, 0]);
 }, xe = T.prototype;
 xe.startNode = function() {
   return new Be(this, this.start, this.startLoc);
@@ -3964,20 +3971,20 @@ xe.copyNode = function(e) {
     t[i] = e[i];
   return t;
 };
-var Si = "Berf Beria_Erfe Gara Garay Gukh Gurung_Khema Hrkt Katakana_Or_Hiragana Kawi Kirat_Rai Krai Nag_Mundari Nagm Ol_Onal Onao Sidetic Sidt Sunu Sunuwar Tai_Yo Tayo Todhri Todr Tolong_Siki Tols Tulu_Tigalari Tutg Unknown Zzzz", St = "ASCII ASCII_Hex_Digit AHex Alphabetic Alpha Any Assigned Bidi_Control Bidi_C Bidi_Mirrored Bidi_M Case_Ignorable CI Cased Changes_When_Casefolded CWCF Changes_When_Casemapped CWCM Changes_When_Lowercased CWL Changes_When_NFKC_Casefolded CWKCF Changes_When_Titlecased CWT Changes_When_Uppercased CWU Dash Default_Ignorable_Code_Point DI Deprecated Dep Diacritic Dia Emoji Emoji_Component Emoji_Modifier Emoji_Modifier_Base Emoji_Presentation Extender Ext Grapheme_Base Gr_Base Grapheme_Extend Gr_Ext Hex_Digit Hex IDS_Binary_Operator IDSB IDS_Trinary_Operator IDST ID_Continue IDC ID_Start IDS Ideographic Ideo Join_Control Join_C Logical_Order_Exception LOE Lowercase Lower Math Noncharacter_Code_Point NChar Pattern_Syntax Pat_Syn Pattern_White_Space Pat_WS Quotation_Mark QMark Radical Regional_Indicator RI Sentence_Terminal STerm Soft_Dotted SD Terminal_Punctuation Term Unified_Ideograph UIdeo Uppercase Upper Variation_Selector VS White_Space space XID_Continue XIDC XID_Start XIDS", yt = St + " Extended_Pictographic", At = yt, Ct = At + " EBase EComp EMod EPres ExtPict", Dt = Ct, yi = Dt, Ai = {
+var Si = "Berf Beria_Erfe Gara Garay Gukh Gurung_Khema Hrkt Katakana_Or_Hiragana Kawi Kirat_Rai Krai Nag_Mundari Nagm Ol_Onal Onao Sidetic Sidt Sunu Sunuwar Tai_Yo Tayo Todhri Todr Tolong_Siki Tols Tulu_Tigalari Tutg Unknown Zzzz", St = "ASCII ASCII_Hex_Digit AHex Alphabetic Alpha Any Assigned Bidi_Control Bidi_C Bidi_Mirrored Bidi_M Case_Ignorable CI Cased Changes_When_Casefolded CWCF Changes_When_Casemapped CWCM Changes_When_Lowercased CWL Changes_When_NFKC_Casefolded CWKCF Changes_When_Titlecased CWT Changes_When_Uppercased CWU Dash Default_Ignorable_Code_Point DI Deprecated Dep Diacritic Dia Emoji Emoji_Component Emoji_Modifier Emoji_Modifier_Base Emoji_Presentation Extender Ext Grapheme_Base Gr_Base Grapheme_Extend Gr_Ext Hex_Digit Hex IDS_Binary_Operator IDSB IDS_Trinary_Operator IDST ID_Continue IDC ID_Start IDS Ideographic Ideo Join_Control Join_C Logical_Order_Exception LOE Lowercase Lower Math Noncharacter_Code_Point NChar Pattern_Syntax Pat_Syn Pattern_White_Space Pat_WS Quotation_Mark QMark Radical Regional_Indicator RI Sentence_Terminal STerm Soft_Dotted SD Terminal_Punctuation Term Unified_Ideograph UIdeo Uppercase Upper Variation_Selector VS White_Space space XID_Continue XIDC XID_Start XIDS", yt = St + " Extended_Pictographic", At = yt, Dt = At + " EBase EComp EMod EPres ExtPict", Ct = Dt, yi = Ct, Ai = {
   9: St,
   10: yt,
   11: At,
-  12: Ct,
-  13: Dt,
+  12: Dt,
+  13: Ct,
   14: yi
-}, Ci = "Basic_Emoji Emoji_Keycap_Sequence RGI_Emoji_Modifier_Sequence RGI_Emoji_Flag_Sequence RGI_Emoji_Tag_Sequence RGI_Emoji_ZWJ_Sequence RGI_Emoji", Di = {
+}, Di = "Basic_Emoji Emoji_Keycap_Sequence RGI_Emoji_Modifier_Sequence RGI_Emoji_Flag_Sequence RGI_Emoji_Tag_Sequence RGI_Emoji_ZWJ_Sequence RGI_Emoji", Ci = {
   9: "",
   10: "",
   11: "",
   12: "",
   13: "",
-  14: Ci
+  14: Di
 }, it = "Cased_Letter LC Close_Punctuation Pe Connector_Punctuation Pc Control Cc cntrl Currency_Symbol Sc Dash_Punctuation Pd Decimal_Number Nd digit Enclosing_Mark Me Final_Punctuation Pf Format Cf Initial_Punctuation Pi Letter L Letter_Number Nl Line_Separator Zl Lowercase_Letter Ll Mark M Combining_Mark Math_Symbol Sm Modifier_Letter Lm Modifier_Symbol Sk Nonspacing_Mark Mn Number N Open_Punctuation Ps Other C Other_Letter Lo Other_Number No Other_Punctuation Po Other_Symbol So Paragraph_Separator Zp Private_Use Co Punctuation P punct Separator Z Space_Separator Zs Spacing_Mark Mc Surrogate Cs Symbol S Titlecase_Letter Lt Unassigned Cn Uppercase_Letter Lu", Et = "Adlam Adlm Ahom Anatolian_Hieroglyphs Hluw Arabic Arab Armenian Armn Avestan Avst Balinese Bali Bamum Bamu Bassa_Vah Bass Batak Batk Bengali Beng Bhaiksuki Bhks Bopomofo Bopo Brahmi Brah Braille Brai Buginese Bugi Buhid Buhd Canadian_Aboriginal Cans Carian Cari Caucasian_Albanian Aghb Chakma Cakm Cham Cham Cherokee Cher Common Zyyy Coptic Copt Qaac Cuneiform Xsux Cypriot Cprt Cyrillic Cyrl Deseret Dsrt Devanagari Deva Duployan Dupl Egyptian_Hieroglyphs Egyp Elbasan Elba Ethiopic Ethi Georgian Geor Glagolitic Glag Gothic Goth Grantha Gran Greek Grek Gujarati Gujr Gurmukhi Guru Han Hani Hangul Hang Hanunoo Hano Hatran Hatr Hebrew Hebr Hiragana Hira Imperial_Aramaic Armi Inherited Zinh Qaai Inscriptional_Pahlavi Phli Inscriptional_Parthian Prti Javanese Java Kaithi Kthi Kannada Knda Katakana Kana Kayah_Li Kali Kharoshthi Khar Khmer Khmr Khojki Khoj Khudawadi Sind Lao Laoo Latin Latn Lepcha Lepc Limbu Limb Linear_A Lina Linear_B Linb Lisu Lisu Lycian Lyci Lydian Lydi Mahajani Mahj Malayalam Mlym Mandaic Mand Manichaean Mani Marchen Marc Masaram_Gondi Gonm Meetei_Mayek Mtei Mende_Kikakui Mend Meroitic_Cursive Merc Meroitic_Hieroglyphs Mero Miao Plrd Modi Mongolian Mong Mro Mroo Multani Mult Myanmar Mymr Nabataean Nbat New_Tai_Lue Talu Newa Newa Nko Nkoo Nushu Nshu Ogham Ogam Ol_Chiki Olck Old_Hungarian Hung Old_Italic Ital Old_North_Arabian Narb Old_Permic Perm Old_Persian Xpeo Old_South_Arabian Sarb Old_Turkic Orkh Oriya Orya Osage Osge Osmanya Osma Pahawh_Hmong Hmng Palmyrene Palm Pau_Cin_Hau Pauc Phags_Pa Phag Phoenician Phnx Psalter_Pahlavi Phlp Rejang Rjng Runic Runr Samaritan Samr Saurashtra Saur Sharada Shrd Shavian Shaw Siddham Sidd SignWriting Sgnw Sinhala Sinh Sora_Sompeng Sora Soyombo Soyo Sundanese Sund Syloti_Nagri Sylo Syriac Syrc Tagalog Tglg Tagbanwa Tagb Tai_Le Tale Tai_Tham Lana Tai_Viet Tavt Takri Takr Tamil Taml Tangut Tang Telugu Telu Thaana Thaa Thai Thai Tibetan Tibt Tifinagh Tfng Tirhuta Tirh Ugaritic Ugar Vai Vaii Warang_Citi Wara Yi Yiii Zanabazar_Square Zanb", zt = Et + " Dogra Dogr Gunjala_Gondi Gong Hanifi_Rohingya Rohg Makasar Maka Medefaidrin Medf Old_Sogdian Sogo Sogdian Sogd", Pt = zt + " Elymaic Elym Nandinagari Nand Nyiakeng_Puachue_Hmong Hmnp Wancho Wcho", Bt = Pt + " Chorasmian Chrs Diak Dives_Akuru Khitan_Small_Script Kits Yezi Yezidi", Tt = Bt + " Cypro_Minoan Cpmn Old_Uyghur Ougr Tangsa Tnsa Toto Vithkuqi Vith", Ei = Tt + " " + Si, zi = {
   9: Et,
   10: zt,
@@ -3989,7 +3996,7 @@ var Si = "Berf Beria_Erfe Gara Garay Gukh Gurung_Khema Hrkt Katakana_Or_Hiragana
 function Pi(e) {
   var t = Vt[e] = {
     binary: ie(Ai[e] + " " + it),
-    binaryOfStrings: ie(Di[e]),
+    binaryOfStrings: ie(Ci[e]),
     nonBinary: {
       General_Category: ie(it),
       Script: ie(zi[e])
@@ -4001,18 +4008,18 @@ for (var Le = 0, nt = [9, 10, 11, 12, 13, 14]; Le < nt.length; Le += 1) {
   var Bi = nt[Le];
   Pi(Bi);
 }
-var c = T.prototype, Ce = function(t, i) {
+var c = T.prototype, De = function(t, i) {
   this.parent = t, this.base = i || this;
 };
-Ce.prototype.separatedFrom = function(t) {
+De.prototype.separatedFrom = function(t) {
   for (var i = this; i; i = i.parent)
     for (var n = t; n; n = n.parent)
       if (i.base === n.base && i !== n)
         return !0;
   return !1;
 };
-Ce.prototype.sibling = function() {
-  return new Ce(this.parent, this.base);
+De.prototype.sibling = function() {
+  return new De(this.parent, this.base);
 };
 var J = function(t) {
   this.parser = t, this.validFlags = "gim" + (t.options.ecmaVersion >= 6 ? "uy" : "") + (t.options.ecmaVersion >= 9 ? "s" : "") + (t.options.ecmaVersion >= 13 ? "d" : "") + (t.options.ecmaVersion >= 15 ? "v" : ""), this.unicodeProperties = Vt[t.options.ecmaVersion >= 14 ? 14 : t.options.ecmaVersion], this.source = "", this.flags = "", this.start = 0, this.switchU = !1, this.switchV = !1, this.switchN = !1, this.pos = 0, this.lastIntValue = 0, this.lastStringValue = "", this.lastAssertionIsQuantifiable = !1, this.numCapturingParens = 0, this.maxBackReference = 0, this.groupNames = /* @__PURE__ */ Object.create(null), this.backReferenceNames = [], this.branchID = null;
@@ -4098,7 +4105,7 @@ c.regexp_pattern = function(e) {
 };
 c.regexp_disjunction = function(e) {
   var t = this.options.ecmaVersion >= 16;
-  for (t && (e.branchID = new Ce(e.branchID, null)), this.regexp_alternative(e); e.eat(
+  for (t && (e.branchID = new De(e.branchID, null)), this.regexp_alternative(e); e.eat(
     124
     /* | */
   ); )
@@ -4832,7 +4839,7 @@ c.regexp_eatFixedHexDigits = function(e, t) {
   return !0;
 };
 var Je = function(t) {
-  this.type = t.type, this.value = t.value, this.start = t.start, this.end = t.end, t.options.locations && (this.loc = new De(t, t.startLoc, t.endLoc)), t.options.ranges && (this.range = [t.start, t.end]);
+  this.type = t.type, this.value = t.value, this.start = t.start, this.end = t.end, t.options.locations && (this.loc = new Ce(t, t.startLoc, t.endLoc)), t.options.ranges && (this.range = [t.start, t.end]);
 }, b = T.prototype;
 b.next = function(e) {
   !e && this.type.keyword && this.containsEsc && this.raiseRecoverable(this.start, "Escape sequence in keyword " + this.type.keyword), this.options.onToken && this.options.onToken(new Je(this)), this.lastTokEnd = this.end, this.lastTokStart = this.start, this.lastTokEndLoc = this.endLoc, this.lastTokStartLoc = this.startLoc, this.nextToken();
@@ -5344,14 +5351,14 @@ T.acorn = {
   version: Ui,
   defaultOptions: Fe,
   Position: ve,
-  SourceLocation: De,
+  SourceLocation: Ce,
   getLineInfo: ct,
   Node: Be,
   TokenType: x,
   tokTypes: r,
   keywordTypes: Ge,
   TokContext: H,
-  tokContexts: C,
+  tokContexts: D,
   isIdentifierChar: ne,
   isIdentifierStart: Q,
   Token: Je,
@@ -5452,8 +5459,8 @@ function Ji(e) {
     const E = [se[0] / y, se[1] / y, se[2] / y];
     s.push({ a: l, b: u, c: h });
     for (const [z, w] of [[l, u], [u, h], [h, l]]) {
-      const V = Math.min(z, w), A = Math.max(z, w), D = V * i.length + A, R = o.get(D);
-      R ? R.normals.push(E) : o.set(D, { a: V, b: A, normals: [E] });
+      const V = Math.min(z, w), A = Math.max(z, w), C = V * i.length + A, R = o.get(C);
+      R ? R.normals.push(E) : o.set(C, { a: V, b: A, normals: [E] });
     }
   }
   return { vertices: i, faces: s, edges: [...o.values()] };
@@ -5477,18 +5484,18 @@ function Xi(e, t, i, n) {
 function Yi(e, t, i, n) {
   const { horizontal: s, vertical: o, depth: a, near: l } = t, u = n[s] - i[s], h = n[o] - i[o], p = Math.max(1e-6, Math.min(2e-3, (n[a] - i[a]) * 1e-6)), f = e.map((y) => y.vertices.map((E) => [E[s] - i[s], E[o] - i[o], E[a] * l])), S = Array.from({ length: ae * ae }, () => []), g = (y, E) => Math.min(ae - 1, Math.max(0, Math.floor(y / E * ae))), I = (y, E) => {
     const z = g(y.left, u), w = g(y.right, u), V = g(y.bottom, h), A = g(y.top, h);
-    for (let D = V; D <= A; D++)
+    for (let C = V; C <= A; C++)
       for (let R = z; R <= w; R++)
-        E(D * ae + R);
+        E(C * ae + R);
   }, U = (y, E, z) => {
     const [w, V] = y[0] <= E[0] ? [y, E] : [E, y], A = V[0] - w[0];
     if (A < 1e-10) {
       I(Re(y, E), z);
       return;
     }
-    const D = V[1] - w[1], R = u / ae;
+    const C = V[1] - w[1], R = u / ae;
     for (let X = g(w[0], u); X <= g(V[0], u); X++) {
-      const we = w[1] + D * Math.max(0, (X * R - w[0]) / A), fe = w[1] + D * Math.min(1, ((X + 1) * R - w[0]) / A);
+      const we = w[1] + C * Math.max(0, (X * R - w[0]) / A), fe = w[1] + C * Math.min(1, ((X + 1) * R - w[0]) / A);
       for (let F = g(Math.min(we, fe), h); F <= g(Math.max(we, fe), h); F++)
         z(F * ae + X);
     }
@@ -5500,10 +5507,10 @@ function Yi(e, t, i, n) {
   };
   for (const [y, E] of e.entries())
     for (const z of E.faces) {
-      const [w, V, A] = [f[y][z.a], f[y][z.b], f[y][z.c]], D = (V[0] - w[0]) * (A[1] - w[1]) - (V[1] - w[1]) * (A[0] - w[0]);
-      if (Math.abs(D) < 1e-10)
+      const [w, V, A] = [f[y][z.a], f[y][z.b], f[y][z.c]], C = (V[0] - w[0]) * (A[1] - w[1]) - (V[1] - w[1]) * (A[0] - w[0]);
+      if (Math.abs(C) < 1e-10)
         continue;
-      const R = { a: w, b: V, c: A, det: D, box: Re(w, V, A), nearest: Math.max(w[2], V[2], A[2]) };
+      const R = { a: w, b: V, c: A, det: C, box: Re(w, V, A), nearest: Math.max(w[2], V[2], A[2]) };
       I(R.box, (X) => {
         me(), S[X].push(R);
       });
@@ -5514,19 +5521,19 @@ function Yi(e, t, i, n) {
       const [w, ...V] = z.normals;
       if (V.length && !V.some((P) => Qi(w, P) < qi || w[a] * l > 1e-8 != P[a] * l > 1e-8))
         continue;
-      const A = f[y][z.a], D = f[y][z.b], R = Math.hypot(D[0] - A[0], D[1] - A[1]);
+      const A = f[y][z.a], C = f[y][z.b], R = Math.hypot(C[0] - A[0], C[1] - A[1]);
       if (R < 1e-5)
         continue;
-      const X = Re(A, D), we = Math.min(A[2], D[2]) + p, fe = /* @__PURE__ */ new Set(), F = [];
+      const X = Re(A, C), we = Math.min(A[2], C[2]) + p, fe = /* @__PURE__ */ new Set(), F = [];
       let Xe = !1;
-      U(A, D, (P) => {
+      U(A, C, (P) => {
         if (!Xe)
           for (const K of S[P]) {
             if (me(), K.nearest <= we || !Hi(X, K.box) || fe.has(K))
               continue;
             if (fe.add(K), ++L > Wi)
               throw je();
-            const te = Xi(K, A, D, p);
+            const te = Xi(K, A, C, p);
             if (te) {
               if (te[0] <= 1e-8 && te[1] >= 1 - 1e-8) {
                 F.splice(0, F.length, [0, 1]), Xe = !0;
@@ -5536,7 +5543,7 @@ function Yi(e, t, i, n) {
             }
           }
       }), F.sort((P, K) => P[0] - K[0]);
-      const Ye = (P) => [A[0] + (D[0] - A[0]) * P, A[1] + (D[1] - A[1]) * P], Ve = (P, K, te) => {
+      const Ye = (P) => [A[0] + (C[0] - A[0]) * P, A[1] + (C[1] - A[1]) * P], Ve = (P, K, te) => {
         (K - P) * R > 1e-5 && se.push(...Ye(P), ...Ye(K), te ? 1 : 0);
       };
       let Me = 0;
@@ -5562,7 +5569,7 @@ function $i(e) {
     for (const l of [0, 1, 2])
       i[l] = Math.min(i[l], a.bounds.min[l]), n[l] = Math.max(n[l], a.bounds.max[l]);
   const s = t.map(Ji);
-  return { views: ji.map((a) => Yi(s, a, i, n)), count: t.length, sourceKey: e.sourceKey };
+  return { views: ji.map((a) => Yi(s, a, i, n)), bodyIds: t.map((a) => a.id), sourceKey: e.sourceKey };
 }
 self.onmessage = (e) => {
   try {
