@@ -291,8 +291,8 @@ relative offsets such as `@40, 0`. For exact placement, choose up to two sketche
 on the same plane as snap references. The preview highlights endpoints,
 midpoints, centers and intersections. Turn on **Edit edge curves** to drag
 an edge midpoint and set its curvature while keeping the endpoints fixed.
-Persistent constraints, open DXF contours, layer filtering, linked drawing sheets,
-DWG and STEP remain open.
+Persistent constraints, open DXF contours, layer filtering, DWG and STEP
+remain open.
 
 **Properties → Export drilling template (PDF)** produces a full-size A4
 vector template in the local sketch plane. It evaluates the current cutout
@@ -315,3 +315,12 @@ circle centers, or to dimension a circle diameter. Run
 `node scripts/verify-cad-drawing-sheet-browser.mjs <app-url>` to test the
 embedded workflow. Optional second and third arguments save the single-sheet
 and multi-sheet PDFs.
+
+**Revolve** in the CAD toolbar creates a solid from a new sketch. Use
+**Revolve this sketch** in extrusion Properties to reuse an existing profile.
+The dialog shows the sweep and its dashed axis. Choose **Edit sketch &
+revolution** in Properties to change the sweep, axis or shared profile. A
+shared profile edit updates both the revolution and the extrusion. These
+features are stored in the CAD sidecar when saving a Brickwright SB3 project.
+Run `node scripts/verify-cad-revolution-browser.mjs <app-url>` to test creating,
+editing and reopening a linked revolution through the embedded editor.
