@@ -965,6 +965,10 @@ const F6 = {
   "About sketching and extrusion": "Hilfe zum Skizzieren und Extrudieren",
   "Extrusion adds thickness perpendicular to the plane. Symmetric divides that thickness equally on both sides.": "Beim Extrudieren entsteht eine Dicke senkrecht zur Ebene. Symmetrisch verteilt die Dicke gleichmäßig auf beide Seiten.",
   "Create builds a solid. To change the sketch later, select the solid and choose Edit sketch & extrusion in Properties.": "Erstellen erzeugt einen Körper. Zum späteren Ändern wähle den Körper und dann Skizze und Extrusion bearbeiten in den Eigenschaften.",
+  "Outline point restored.": "Konturpunkt wiederhergestellt.",
+  "Drag outline point": "Konturpunkt ziehen",
+  "Start with X, Y. Use @dX, dY to enter a point relative to the previous one.": "Beginne mit X, Y. Verwende @dX, dY für einen Punkt relativ zum vorherigen.",
+  "Enter the first point as absolute X, Y coordinates.": "Gib den ersten Punkt in absoluten X-, Y-Koordinaten ein.",
   "Drag the white handles or type exact dimensions.": "Ziehe an den weißen Griffen oder gib genaue Maße ein.",
   "Export sketch as DXF": "Skizze als DXF exportieren",
   "DXF export requires an original sketch extrusion.": "Der DXF-Export benötigt eine eigene Skizzenextrusion.",
@@ -10031,7 +10035,7 @@ async function O8(A, g, I, C = {}) {
     }
   if ([...I.values()].reduce((u, R) => u + R.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = C.J ?? await (Z5 ?? (Z5 = import("./jolt-physics.wasm-compat-Cw7pLC1G.js").then((u) => u.default()))), Q = new i.JoltSettings();
+  const i = C.J ?? await (Z5 ?? (Z5 = import("./jolt-physics.wasm-compat-NfLucFcA.js").then((u) => u.default()))), Q = new i.JoltSettings();
   Q.mMaxBodies = 512, Q.mMaxBodyPairs = Math.max(1024, e.length * e.length), Q.mMaxContactConstraints = 8192;
   const s = new i.ObjectLayerPairFilterTable(2);
   s.EnableCollision(0, 1), s.EnableCollision(1, 1);

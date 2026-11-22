@@ -41,6 +41,25 @@ try {
  const loops=dialog.getByLabel('Region loops (mm)');
  await loops.waitFor({state:'visible'});
  const original=await loops.inputValue();
+ const vertex=dialog.locator('[data-resize="vertex"][data-loop="1"][data-vertex="2"]');
+ const cdp=await page.context().newCDPSession(page);
+ const dragVertex=async dx=>{
+  const [start,end]=await vertex.evaluate((handle,dx)=>{
+   const x=handle.cx.baseVal.value,y=handle.cy.baseVal.value,matrix=handle.getScreenCTM();
+   return [x,x+dx].map(x=>{
+    const point=new DOMPoint(x,y).matrixTransform(matrix);
+    return {x:point.x,y:point.y};
+   });
+  },dx);
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[start]});
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[end]});
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+ };
+ await dragVertex(4);
+ assert.match(await loops.inputValue(),/44, 30/);
+ await dragVertex(-4);
+ assert.equal(await loops.inputValue(),original);
+ await cdp.detach();
  assert.match(original,/^CIRCLE 10, 15, 2\n.*\nCIRCLE 30, 15, 3$/);
  assert.equal((await dialog.locator('.sketch-top').getAttribute('d')).match(/M /g).length,3);
  const rootCount=()=>page.evaluate(()=>window.__bwCad.editor.session.state.document.roots.length);
@@ -93,5 +112,5 @@ try {
  assert.equal(await page.evaluate(()=>window.__bwCad.editor.session.state.document.parametric.parameters.spacing.expression),'20');
  await undo.tap();
  assert.equal(await rootCount(),0);
- console.log('PASS embedded CAD tablet viewport: third-party DXF, holes in preview, invalid edit, retained layers, named hole spacing, 1:1 DXF and PDF exports, reopen, Undo');
+ console.log('PASS embedded CAD tablet viewport: third-party DXF, holes in preview, touch-dragged vertex, invalid edit, retained layers, named hole spacing, 1:1 DXF and PDF exports, reopen, Undo');
 } finally {await browser.close();}
