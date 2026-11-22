@@ -2,7 +2,7 @@
   "format": "brickwright-cad-sdk",
   "version": 1,
   "repository": "https://github.com/CrispStrobe/brickwright-cad",
-  "commit": "1e09957fd8cfa33447acdc55152e4eb2e6f637ff",
+  "commit": "9c84b013f1cc003a86edbd2e2c563f3e4be1aaf9",
   "dirty": false,
   "entry": "sdk.js",
   "wasm": "cad-assets/manifold.wasm",
@@ -10,13 +10,13 @@
     "LICENSE": "ed121de3496066a2ddc8c11b30b48142165ab84bdb066fee351392ecaccf36ad",
     "NOTICE.txt": "c75b43e86dd682f04d167b78e655bff1ea1e7edb2a8fb0c3f28fc50b51d9f6f9",
     "adafruit-preview-data-BWhkbkqw.js": "c37d14c1f115a63599555fd4193b2df1f9426a9b4cab8962282d6794ba6e11b6",
-    "assets/geometry.worker-CyLZBnH_.js": "3e63601bab3f960bd4e2e746b74607735119b06f931c5af22cb2cb80b032d5af",
-    "assets/jolt-physics.wasm-compat-B4qYZ0LL.js": "540f8fcc5f73a2d4fcdc7f7213755254189fd920f27ff1b99950d19451b74987",
-    "assets/simulation.worker-BQ4qRmQq.js": "661472bc2649afb3d2396adfac952df3669fc4e0789f8e47885c189543006079",
+    "assets/geometry.worker-xqwt6gAV.js": "2e7e0f3937ce47f445754b359317f793c06fe000a90be01f2fc9001407795d92",
+    "assets/jolt-physics.wasm-compat-BUWEIBaT.js": "151a9190ecb8992b1c90dcd82c1780a03e18395e1003954f09beae28bddf7cd9",
+    "assets/simulation.worker-DXvAhTjN.js": "7a89e5df43c050f79f33043391a07db43b96619360eab604b73e7727060db758",
     "cad-assets/manifold.wasm": "73e3b419ad31294f6b1cc478173944e50efc4a34bfdeeff0107bdfc12975f11c",
     "model-library-cache-DiMFGzp9.js": "75dc4ad7999b4571b227f1c675ca00af698fcc886dc73e98dd4c0eb2604e2b20",
-    "model-library-local-IXluIJbc.js": "cdc829cc9776bcee8e6c0128c00f85128b9961d804fdbaf8a6297ff0a123827d",
-    "sdk-uFClTEUx.js": "21f4785cc69bfe5c740ee0a6f47e7c1de5ef3716fe803e7117c60e6a3a6caa9e",
-    "sdk.js": "c23c13630ee0d74c8ca0d25f1a42e43d93c8f3b52ddb0faccb33f2741db125cf"
+    "model-library-local-DJoH8QJK.js": "3c0e0522177d7ed5a0856c0c96d52e8c8e98da5494ecb98513a0c296fa9db10c",
+    "sdk-xOV5nY7t.js": "cd4e4371cee23aaf666ba0fbdd3171fb9da902fe2773945811c605faa9fc8135",
+    "sdk.js": "142fa0c57782219eefdf12a75a5d3da77010809776d149fda27c3b36cc2a7048"
   }
 }

@@ -368,3 +368,9 @@ It keeps the arc centers, adjusts their radii, adds round joins at separating
 edges and trims inside corners. Run
 `node scripts/verify-cad-curved-offset-browser.mjs <app-url>` to verify the
 curves through touch editing and an SB3 round trip.
+
+Use **Sketch path** to save a line-and-arc guide without making a CAD body.
+Open it from **Objects → Sketches** to trim it while it is open or close it
+into an outline. The CAD sidecar retains paths even in a project with zero
+bodies. Run `node scripts/verify-cad-sketch-path-browser.mjs <app-url>` for
+the touch, SB3 round trip and extrusion checks.
