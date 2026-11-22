@@ -56,6 +56,13 @@ try{
  await make.tap();
  await dialog(page).getByLabel('Sheet title').fill('Motor plate drawing');
  assert.equal(await spacing(page),20);
+ await dialog(page).getByRole('checkbox',{name:'Show section A-A'}).check();
+ const cut=dialog(page).getByLabel('Section position (mm)');
+ assert.equal(await cut.inputValue(),'15');
+ await cut.fill('50');
+ assert.match(await dialog(page).getByRole('status',{name:'Drawing status'}).textContent(),/misses the part/);
+ await cut.fill('15');
+ assert.equal(await preview(page).locator('.drawing-section').count(),3);
  await dialog(page).getByRole('button',{name:'Save drawing sheet'}).tap();
  await dialog(page).waitFor({state:'hidden'});
 
@@ -76,6 +83,7 @@ try{
  assert.match(text,/\/MediaBox \[0 0 841\.88976 595\.27559\]/);
  assert.match(text,/229 14 m 279 14 l/);
  assert.match(text,/\[1\.4 0\.9\] 0 d/);
+ assert.match(text,/\[3\.5 1 0\.7 1\] 0 d/);
  if(pdfOutput)await pdf.saveAs(pdfOutput);
  await dialog(page).getByRole('button',{name:'Close drawing'}).tap();
  await make.tap();
@@ -100,7 +108,8 @@ try{
  await save.saveAs(project);
  const zip=await JSZip.loadAsync(await readFile(project));
  const saved=JSON.parse(await zip.file(CAD_PROJECT_PATH).async('text'));
- assert.equal(saved.version,9);
+ assert.equal(saved.version,10);
+ assert.deepEqual(saved.drawings[0].section,{axis:'v',position:15});
  assert.equal(saved.drawings[0].source.featureId,initial.id);
  assert.equal(saved.drawings.length,2);
  assert.equal(saved.drawings[1].scale,'1:2');
@@ -119,11 +128,13 @@ try{
  await showSheet(restored);
  assert.equal(await spacing(restored),28);
  assert.equal(await preview(restored).locator('.drawing-hidden').count(),8);
+ assert.equal(await preview(restored).locator('.drawing-section').count(),3);
+ assert.equal(await dialog(restored).getByLabel('Section position (mm)').inputValue(),'15');
  await dialog(restored).getByRole('button',{name:'Close drawing'}).tap();
  await restored.getByRole('button',{name:'Drawing: Motor plate overview',exact:true}).tap();
  assert.equal(await spacing(restored),14);
  assert.equal(await preview(restored).locator('.drawing-hidden').count(),0);
- console.log('PASS linked drawing sheets in Brickwright: touch controls, live parameters, single and numbered vector PDFs, and SB3 save and reopen');
+ console.log('PASS linked drawing sheets in Brickwright: touch controls, live parameters, linked section, single and numbered vector PDFs, and SB3 save and reopen');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});

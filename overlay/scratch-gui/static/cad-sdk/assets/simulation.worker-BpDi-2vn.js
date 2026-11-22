@@ -36,7 +36,7 @@ const Y6 = {
   "Choose light or dark mode": "Hellen oder dunklen Modus wählen",
   "Loading models…": "Modelle werden geladen…",
   "Original source files": "Originale Quelldateien",
-  "Model source uses project version 6 through 9": "Modellquelltext verwendet Projektversion 6 bis 9",
+  "Model source uses project version 6 through 10": "Modellquelltext verwendet Projektversion 6 bis 10",
   "Unknown material preset": "Unbekannte Materialvorlage",
   "Initial velocity requires project version 8": "Anfangsgeschwindigkeit erfordert Projektversion 8",
   "Invalid initial body velocity": "Ungültige Anfangsgeschwindigkeit",
@@ -1034,6 +1034,15 @@ const Y6 = {
   "Drawing source": "Zeichnungsquelle",
   "Sheet title": "Blatttitel",
   "Drawing sheet": "Zeichnungsblatt",
+  "Enter a section position in millimetres.": "Gib eine Schnittposition in Millimetern ein.",
+  "Section position (mm)": "Schnittposition (mm)",
+  "Section axis": "Schnittachse",
+  "Show section A-A": "Schnitt A-A anzeigen",
+  "Sketch Y": "Skizze Y",
+  "Sketch X": "Skizze X",
+  "Section A-A": "Schnitt A-A",
+  "The section plane misses the part. Move the section position.": "Die Schnittebene trifft das Teil nicht. Verschiebe die Schnittposition.",
+  "Section position is outside the sketch coordinate range.": "Die Schnittposition liegt außerhalb des Skizzenkoordinatenbereichs.",
   "Drawing preview": "Zeichnungsvorschau",
   "{0} × Ø{1} mm": "{0} × Ø{1} mm",
   "Scale {0} · mm · A4": "Maßstab {0} · mm · A4",
@@ -1959,15 +1968,15 @@ Erstelle zuerst den Workspace. Oberfläche und MCP verwenden denselben begrenzte
   "The block program is not valid JSON": "Das Blockprogramm ist kein gültiges JSON",
   "Compile a block/pseudocode modelling program (JSON, format brickwright-cad-blocks) to parametric CAD Script, OpenSCAD or JSCAD without changing the model. Pass CAD Script output to cad_create_code_object.": "Kompiliert ein Block-/Pseudocode-Modellprogramm (JSON, Format brickwright-cad-blocks) in parametrisches CAD Script, OpenSCAD oder JSCAD, ohne das Modell zu ändern. Übergib die CAD-Script-Ausgabe an cad_create_code_object."
 };
-let v3 = "en";
+let P3 = "en";
 function $6(A) {
-  return v3 = A.toLowerCase().split(/[-_]/)[0] === "de" ? "de" : "en", v3;
+  return P3 = A.toLowerCase().split(/[-_]/)[0] === "de" ? "de" : "en", P3;
 }
 function t(A, ...g) {
-  const I = typeof A == "string" ? A : A.reduce((q, B, e) => q + (e ? `{${e - 1}}` : "") + B, ""), C = v3 === "de" ? X6[I] ?? Y6[I] ?? Z6[I] ?? z6[I] ?? J6[I] ?? b6[I] ?? H6[I] ?? L6[I] ?? _6[I] ?? V6[I] ?? T6[I] ?? W6[I] ?? O6[I] ?? j6[I] ?? P6[I] ?? v6[I] ?? I : I;
+  const I = typeof A == "string" ? A : A.reduce((q, B, e) => q + (e ? `{${e - 1}}` : "") + B, ""), C = P3 === "de" ? X6[I] ?? Y6[I] ?? Z6[I] ?? z6[I] ?? J6[I] ?? b6[I] ?? H6[I] ?? L6[I] ?? _6[I] ?? V6[I] ?? T6[I] ?? W6[I] ?? O6[I] ?? j6[I] ?? P6[I] ?? v6[I] ?? I : I;
   return typeof A == "string" ? C : C.replace(/\{(\d+)\}/g, (q, B) => String(g[Number(B)]));
 }
-const Ag = ["1:5", "1:2", "1:1", "2:1", "5:1"], k5 = (A) => !!A && typeof A == "object" && !Array.isArray(A), P2 = (A) => typeof A == "string" && /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,95}$/.test(A) && !["constructor", "prototype", "__proto__"].includes(A);
+const Ag = ["1:5", "1:2", "1:1", "2:1", "5:1"], x3 = (A) => !!A && typeof A == "object" && !Array.isArray(A), P2 = (A) => typeof A == "string" && /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,95}$/.test(A) && !["constructor", "prototype", "__proto__"].includes(A);
 function gg(A) {
   if (A.drawings === void 0)
     return;
@@ -1975,8 +1984,18 @@ function gg(A) {
   if (A.version < 9 || !Array.isArray(A.drawings) || A.drawings.length > 64)
     throw I();
   for (const C of A.drawings) {
-    if (!k5(C) || !P2(C.id) || g.has(C.id) || typeof C.title != "string" || !C.title.trim() || C.title.length > 80 || /[\u0000-\u001f]/.test(C.title) || !Ag.includes(C.scale) || typeof C.hiddenLines != "boolean" || !k5(C.source) || !P2(C.source.featureId) || !P2(C.source.sketchId) || !P2(C.source.profileId))
+    if (!x3(C) || !P2(C.id) || g.has(C.id) || typeof C.title != "string" || !C.title.trim() || C.title.length > 80 || /[\u0000-\u001f]/.test(C.title) || !Ag.includes(C.scale) || typeof C.hiddenLines != "boolean" || !x3(C.source) || !P2(C.source.featureId) || !P2(C.source.sketchId) || !P2(C.source.profileId))
       throw I();
+    if (C.section !== void 0) {
+      if (A.version < 10 || !x3(C.section) || !["u", "v"].includes(String(C.section.axis)))
+        throw I();
+      const q = C.section.position;
+      if (typeof q == "number") {
+        if (!Number.isFinite(q) || Math.abs(q) > 1e5)
+          throw I();
+      } else if (typeof q != "string" || !q.trim() || q.length > 160 || /[\u0000-\u001f]/.test(q))
+        throw I();
+    }
     g.add(C.id);
   }
 }
@@ -1984,7 +2003,7 @@ const Ig = () => ({ gravity: [0, 0, -9.81], ground: !0, groundFriction: 0.4, gro
 function Cg(A) {
   return A.version >= 8 && A.simulation ? A.simulation : Ig();
 }
-const P3 = (A, g, I) => typeof A == "number" && Number.isFinite(A) && A >= g && A <= I, K5 = (A, g = 1e6) => Array.isArray(A) && A.length === 3 && A.every((I) => P3(I, -g, g));
+const V3 = (A, g, I) => typeof A == "number" && Number.isFinite(A) && A >= g && A <= I, K5 = (A, g = 1e6) => Array.isArray(A) && A.length === 3 && A.every((I) => V3(I, -g, g));
 function qg(A) {
   if (A.version < 8)
     return;
@@ -1993,7 +2012,7 @@ function qg(A) {
   };
   if (A.simulation !== void 0) {
     const I = A.simulation;
-    (!I || !K5(I.gravity, 1e3) || typeof I.ground != "boolean" || !P3(I.groundFriction, 0, 2) || !P3(I.groundRestitution, 0, 1) || I.fixBase !== void 0 && typeof I.fixBase != "boolean" || I.selfCollisions !== void 0 && typeof I.selfCollisions != "boolean") && g();
+    (!I || !K5(I.gravity, 1e3) || typeof I.ground != "boolean" || !V3(I.groundFriction, 0, 2) || !V3(I.groundRestitution, 0, 1) || I.fixBase !== void 0 && typeof I.fixBase != "boolean" || I.selfCollisions !== void 0 && typeof I.selfCollisions != "boolean") && g();
   }
   if (A.tracers !== void 0) {
     (!Array.isArray(A.tracers) || A.tracers.length > 32) && g();
@@ -2002,12 +2021,12 @@ function qg(A) {
       (!C || typeof C.id != "string" || !/^[a-zA-Z0-9_-]{1,96}$/.test(C.id) || I.has(C.id) || !A.roots.includes(C.bodyId) || A.nodes[C.bodyId].reference || A.nodes[C.bodyId].role === "hole" || !K5(C.point) || !/^#[a-f0-9]{6}$/i.test(C.color)) && g(), I.add(C.id);
   }
 }
-const S2 = (A) => !!A && typeof A == "object" && !Array.isArray(A), W1 = (A, g) => S2(A) && Object.keys(A).length === g.split(" ").length && g.split(" ").every((I) => Object.hasOwn(A, I)), l2 = (A, g) => Array.isArray(A) ? Array.isArray(g) && A.length === g.length && A.every((I, C) => l2(I, g[C])) : S2(A) ? S2(g) && Object.keys(A).length === Object.keys(g).length && Object.keys(A).every((I) => Object.hasOwn(g, I) && l2(A[I], g[I])) : A === g, A4 = (A) => typeof A == "number" && Number.isFinite(A) && A >= 0, V2 = (A) => A4(A) && A > 0, ig = (A) => typeof A == "string" && /^[a-f0-9]{64}$/.test(A), G5 = (A) => Array.isArray(A) && A.length === 3 && A.every((g) => typeof g == "number" && Number.isFinite(g));
+const G2 = (A) => !!A && typeof A == "object" && !Array.isArray(A), W1 = (A, g) => G2(A) && Object.keys(A).length === g.split(" ").length && g.split(" ").every((I) => Object.hasOwn(A, I)), l2 = (A, g) => Array.isArray(A) ? Array.isArray(g) && A.length === g.length && A.every((I, C) => l2(I, g[C])) : G2(A) ? G2(g) && Object.keys(A).length === Object.keys(g).length && Object.keys(A).every((I) => Object.hasOwn(g, I) && l2(A[I], g[I])) : A === g, A4 = (A) => typeof A == "number" && Number.isFinite(A) && A >= 0, V2 = (A) => A4(A) && A > 0, ig = (A) => typeof A == "string" && /^[a-f0-9]{64}$/.test(A), S5 = (A) => Array.isArray(A) && A.length === 3 && A.every((g) => typeof g == "number" && Number.isFinite(g));
 function eg(A, g) {
   if (!W1(A, "format version selectedFile quality evidence") || A.format !== "brickwright-library-collision-report" || A.version !== 1)
     return !1;
   const I = A.selectedFile;
-  if (!S2(I) || I.format !== "stl" || ![g.original, ...g.derivatives].some((n) => l2(n, I)))
+  if (!G2(I) || I.format !== "stl" || ![g.original, ...g.derivatives].some((n) => l2(n, I)))
     return !1;
   const C = A.quality, q = g.quality;
   if (!q || !W1(C, "fileSha256 toolVersion checkedOn policy checks diagnostics triangles boundsMm signedVolumeMm3 quality") || C.fileSha256 !== I.sha256 || C.toolVersion !== "brickwright-stl-quality/1" || C.checkedOn !== q.checkedOn || C.toolVersion !== q.toolVersion || C.fileSha256 !== q.fileSha256 || !W1(C.checks, "parseable closedPositiveVolume withinSizeLimits withinTriangleLimits") || !Object.values(C.checks).every((n) => n === "pass"))
@@ -2016,7 +2035,7 @@ function eg(A, g) {
   if (!l2(C.quality, i) || !l2(C.policy, q.screeningPolicy) || !["parseable", "closedPositiveVolume", "withinSizeLimits", "withinTriangleLimits"].every((n) => q[n] === !0) || !Array.isArray(C.diagnostics) || C.diagnostics.length > 100 || !C.diagnostics.every((n) => typeof n == "string" && n.length <= 4096 && !/[\u0000-\u001f]/.test(n)))
     return !1;
   const Q = C.policy;
-  if (!S2(Q) || Q.maxAnalysisBytes !== 16777216 || Q.maxAnalysisTriangles !== 83333 || I.bytes > Q.maxAnalysisBytes || Q.maxTriangles > Q.maxAnalysisTriangles || !Number.isSafeInteger(C.triangles) || C.triangles < 1 || C.triangles > Q.maxTriangles || !W1(C.boundsMm, "min max") || !G5(C.boundsMm.min) || !G5(C.boundsMm.max) || !C.boundsMm.max.every((n, h) => n >= C.boundsMm.min[h] && n - C.boundsMm.min[h] <= Q.maxExtentMm) || !V2(C.signedVolumeMm3))
+  if (!G2(Q) || Q.maxAnalysisBytes !== 16777216 || Q.maxAnalysisTriangles !== 83333 || I.bytes > Q.maxAnalysisBytes || Q.maxTriangles > Q.maxAnalysisTriangles || !Number.isSafeInteger(C.triangles) || C.triangles < 1 || C.triangles > Q.maxTriangles || !W1(C.boundsMm, "min max") || !S5(C.boundsMm.min) || !S5(C.boundsMm.max) || !C.boundsMm.max.every((n, h) => n >= C.boundsMm.min[h] && n - C.boundsMm.min[h] <= Q.maxExtentMm) || !V2(C.signedVolumeMm3))
     return !1;
   const s = A.evidence;
   if (!W1(s, "fileSha256 checkedOn toMillimetresZUp engine engineVersion qualifierVersion qualified scope geometrySha256 sourceVolumeMm3 hulls certificate nativeCheck") || s.fileSha256 !== I.sha256 || s.checkedOn !== C.checkedOn || !l2(s.toMillimetresZUp, Q.toMillimetresZUp) || s.engine !== "Jolt" || !["1.1.0-bw.9", "1.1.0-bw.10"].includes(s.engineVersion) || s.qualifierVersion !== "brickwright-library-collision/1" || s.qualified !== !0 || s.scope !== "rigid-collision-preview" || !ig(s.geometrySha256) || !V2(s.sourceVolumeMm3))
@@ -2056,7 +2075,7 @@ const d1 = (A) => !!A && typeof A == "object" && !Array.isArray(A), m1 = (A, g =
     return !1;
   const g = new Date(A);
   return Number.isFinite(g.getTime()) && g.toISOString().slice(0, 10) === A;
-}, N1 = (A, g) => Object.keys(A).every((I) => g.split(" ").includes(I)), lg = (A) => typeof A == "string" && A.length <= 512 && /^(?:sources|meshes|evidence)\/(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_-]+\.[A-Za-z0-9._-]+$/.test(A), E2 = (A) => d1(A) && N1(A, "url path format sha256 bytes") && (Object.hasOwn(A, "url") && !Object.hasOwn(A, "path") && c2(A.url) || Object.hasOwn(A, "path") && !Object.hasOwn(A, "url") && lg(A.path)) && m1(A.format, 80) && /^[a-zA-Z0-9][a-zA-Z0-9.+_-]*$/.test(A.format) && g4(A.sha256) && Number.isSafeInteger(A.bytes) && A.bytes > 0, S5 = (A) => d1(A) && N1(A, "spdx scope attribution evidenceUrl capturedOn review reviewer") && Bg.includes(A.spdx) && A.scope === "asset" && A.review === "accepted" && m1(A.reviewer, 240) && m1(A.attribution) && c2(A.evidenceUrl) && I4(A.capturedOn), og = (A) => d1(A) && N1(A, "repositoryUrl commit") && c2(A.repositoryUrl) && typeof A.commit == "string" && /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(A.commit), R5 = (A, g = "openscad") => typeof A == "string" && A.length <= 512 && (g === "ldraw" ? /^(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_-]+\.dat$/ : /^(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_-]+\.scad$/).test(A);
+}, N1 = (A, g) => Object.keys(A).every((I) => g.split(" ").includes(I)), lg = (A) => typeof A == "string" && A.length <= 512 && /^(?:sources|meshes|evidence)\/(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_-]+\.[A-Za-z0-9._-]+$/.test(A), E2 = (A) => d1(A) && N1(A, "url path format sha256 bytes") && (Object.hasOwn(A, "url") && !Object.hasOwn(A, "path") && c2(A.url) || Object.hasOwn(A, "path") && !Object.hasOwn(A, "url") && lg(A.path)) && m1(A.format, 80) && /^[a-zA-Z0-9][a-zA-Z0-9.+_-]*$/.test(A.format) && g4(A.sha256) && Number.isSafeInteger(A.bytes) && A.bytes > 0, G5 = (A) => d1(A) && N1(A, "spdx scope attribution evidenceUrl capturedOn review reviewer") && Bg.includes(A.spdx) && A.scope === "asset" && A.review === "accepted" && m1(A.reviewer, 240) && m1(A.attribution) && c2(A.evidenceUrl) && I4(A.capturedOn), og = (A) => d1(A) && N1(A, "repositoryUrl commit") && c2(A.repositoryUrl) && typeof A.commit == "string" && /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(A.commit), R5 = (A, g = "openscad") => typeof A == "string" && A.length <= 512 && (g === "ldraw" ? /^(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_-]+\.dat$/ : /^(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_-]+\.scad$/).test(A);
 function tg(A) {
   if (!Array.isArray(A) || A.length !== 16 || !A.every((C) => typeof C == "number" && Number.isFinite(C)) || A[3] !== 0 || A[7] !== 0 || A[11] !== 0 || A[15] !== 1)
     return !1;
@@ -2086,7 +2105,7 @@ function ng(A) {
       (!d1(Q) || !N1(Q, "repositoryUrl commit") || !c2(Q.repositoryUrl) || typeof Q.commit != "string" || !/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(Q.commit)) && B("Source revision requires an HTTPS repository URL and full lowercase Git commit hash.");
     }
     const e = C.licence;
-    if (S5(e) || B("An allowlisted exact content licence, asset grant, attribution and reviewed evidence are required."), E2(C.original) || B("Invalid original file identity."), C.sourceBundle !== void 0) {
+    if (G5(e) || B("An allowlisted exact content licence, asset grant, attribution and reviewed evidence are required."), E2(C.original) || B("Invalid original file identity."), C.sourceBundle !== void 0) {
       const Q = C.sourceBundle, s = d1(Q) && Q.format === "brickwright-ldraw-bundle" ? "ldraw" : "openscad";
       if (!d1(Q) || !N1(Q, "format version rootPath dependencies") || !["brickwright-openscad-bundle", "brickwright-ldraw-bundle"].includes(String(Q.format)) || Q.version !== 1 || !R5(Q.rootPath, s) || !Array.isArray(Q.dependencies) || !Q.dependencies.length || Q.dependencies.length > 31 || !E2(C.original) || !C.original.path || C.original.format !== s || C.editableSource !== void 0)
         B("Invalid local source bundle (maximum 32 original files).");
@@ -2094,7 +2113,7 @@ function ng(A) {
         const l = /* @__PURE__ */ new Set([Q.rootPath]), r = /* @__PURE__ */ new Set([C.original.path]);
         let a = C.original.bytes;
         for (const n of Q.dependencies) {
-          if (!d1(n) || !N1(n, "path file author sourceUrl sourceRevision licence") || !R5(n.path, s) || l.has(n.path) || !E2(n.file) || !n.file.path || n.file.format !== s || r.has(n.file.path) || !m1(n.author, 1e3) || !c2(n.sourceUrl) || !og(n.sourceRevision) || !S5(n.licence)) {
+          if (!d1(n) || !N1(n, "path file author sourceUrl sourceRevision licence") || !R5(n.path, s) || l.has(n.path) || !E2(n.file) || !n.file.path || n.file.format !== s || r.has(n.file.path) || !m1(n.author, 1e3) || !c2(n.sourceUrl) || !og(n.sourceRevision) || !G5(n.licence)) {
             B("Every source dependency requires a distinct local original, pinned revision and reviewed grant.");
             continue;
           }
@@ -2140,7 +2159,7 @@ function ng(A) {
     return { valid: !1, errors: ["Catalogue must contain serializable metadata."] };
   }
 }
-const x3 = (A) => !!A && typeof A == "object" && !Array.isArray(A), k3 = (A, g) => Object.keys(A).every((I) => g.split(" ").includes(I)), sg = (A) => typeof A == "string" && /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,95}$/.test(A) && !["constructor", "prototype", "__proto__"].includes(A), rg = (A, g) => A.url === g.url && A.path === g.path && A.format === g.format && A.sha256 === g.sha256 && A.bytes === g.bytes;
+const k3 = (A) => !!A && typeof A == "object" && !Array.isArray(A), K3 = (A, g) => Object.keys(A).every((I) => g.split(" ").includes(I)), sg = (A) => typeof A == "string" && /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,95}$/.test(A) && !["constructor", "prototype", "__proto__"].includes(A), rg = (A, g) => A.url === g.url && A.path === g.path && A.format === g.format && A.sha256 === g.sha256 && A.bytes === g.bytes;
 function Dg(A) {
   function g(i) {
     throw new Error(`Invalid CAD project provenance: ${i}`);
@@ -2152,14 +2171,14 @@ function Dg(A) {
     C.some((i) => i.provenance !== void 0) && g("missing source records");
     return;
   }
-  (!x3(I) || !k3(I, "version records") || I.version !== 1 || !Array.isArray(I.records) || I.records.length > 1e3) && g("unsupported metadata version or records");
+  (!k3(I) || !K3(I, "version records") || I.version !== 1 || !Array.isArray(I.records) || I.records.length > 1e3) && g("unsupported metadata version or records");
   const q = I.records, B = /* @__PURE__ */ new Set();
   for (const i of q) {
-    (!x3(i) || !k3(i, "id asset selectedFile modificationNotes") || !sg(i.id) || B.has(i.id)) && g("invalid or duplicate record identity"), B.add(i.id), (typeof i.modificationNotes != "string" || !i.modificationNotes.trim() || i.modificationNotes.length > 4096 || /[\u0000-\u001f]/.test(i.modificationNotes)) && g("explicit modification notes required");
+    (!k3(i) || !K3(i, "id asset selectedFile modificationNotes") || !sg(i.id) || B.has(i.id)) && g("invalid or duplicate record identity"), B.add(i.id), (typeof i.modificationNotes != "string" || !i.modificationNotes.trim() || i.modificationNotes.length > 4096 || /[\u0000-\u001f]/.test(i.modificationNotes)) && g("explicit modification notes required");
     const Q = ag({ format: "brickwright-model-library", version: 1, assets: [i.asset] });
     Q.valid || g(Q.errors.join(" "));
     const s = Q.catalogue.assets[0];
-    (!x3(i.selectedFile) || !k3(i.selectedFile, "url path format sha256 bytes") || ![s.original, s.editableSource, ...s.derivatives].some((l) => l && rg(l, i.selectedFile))) && g("selected file must exactly identify a retained asset file");
+    (!k3(i.selectedFile) || !K3(i.selectedFile, "url path format sha256 bytes") || ![s.original, s.editableSource, ...s.derivatives].some((l) => l && rg(l, i.selectedFile))) && g("selected file must exactly identify a retained asset file");
   }
   const e = /* @__PURE__ */ new Set();
   for (const i of C)
@@ -2172,7 +2191,7 @@ function C4(A) {
   const g = new Set(Object.values(A.nodes).flatMap((I) => I.provenance ?? []));
   A.provenance = { version: 1, records: A.provenance.records.filter((I) => g.has(I.id)) };
 }
-var hg = [509, 0, 227, 0, 150, 4, 294, 9, 1368, 2, 2, 1, 6, 3, 41, 2, 5, 0, 166, 1, 574, 3, 9, 9, 7, 9, 32, 4, 318, 1, 78, 5, 71, 10, 50, 3, 123, 2, 54, 14, 32, 10, 3, 1, 11, 3, 46, 10, 8, 0, 46, 9, 7, 2, 37, 13, 2, 9, 6, 1, 45, 0, 13, 2, 49, 13, 9, 3, 2, 11, 83, 11, 7, 0, 3, 0, 158, 11, 6, 9, 7, 3, 56, 1, 2, 6, 3, 1, 3, 2, 10, 0, 11, 1, 3, 6, 4, 4, 68, 8, 2, 0, 3, 0, 2, 3, 2, 4, 2, 0, 15, 1, 83, 17, 10, 9, 5, 0, 82, 19, 13, 9, 214, 6, 3, 8, 28, 1, 83, 16, 16, 9, 82, 12, 9, 9, 7, 19, 58, 14, 5, 9, 243, 14, 166, 9, 71, 5, 2, 1, 3, 3, 2, 0, 2, 1, 13, 9, 120, 6, 3, 6, 4, 0, 29, 9, 41, 6, 2, 3, 9, 0, 10, 10, 47, 15, 199, 7, 137, 9, 54, 7, 2, 7, 17, 9, 57, 21, 2, 13, 123, 5, 4, 0, 2, 1, 2, 6, 2, 0, 9, 9, 49, 4, 2, 1, 2, 4, 9, 9, 55, 9, 266, 3, 10, 1, 2, 0, 49, 6, 4, 4, 14, 10, 5350, 0, 7, 14, 11465, 27, 2343, 9, 87, 9, 39, 4, 60, 6, 26, 9, 535, 9, 470, 0, 2, 54, 8, 3, 82, 0, 12, 1, 19628, 1, 4178, 9, 519, 45, 3, 22, 543, 4, 4, 5, 9, 7, 3, 6, 31, 3, 149, 2, 1418, 49, 513, 54, 5, 49, 9, 0, 15, 0, 23, 4, 2, 14, 1361, 6, 2, 16, 3, 6, 2, 1, 2, 4, 101, 0, 161, 6, 10, 9, 357, 0, 62, 13, 499, 13, 245, 1, 2, 9, 233, 0, 3, 0, 8, 1, 6, 0, 475, 6, 110, 6, 6, 9, 4759, 9, 787719, 239], q4 = [0, 11, 2, 25, 2, 18, 2, 1, 2, 14, 3, 13, 35, 122, 70, 52, 268, 28, 4, 48, 48, 31, 14, 29, 6, 37, 11, 29, 3, 35, 5, 7, 2, 4, 43, 157, 19, 35, 5, 35, 5, 39, 9, 51, 13, 10, 2, 14, 2, 6, 2, 1, 2, 10, 2, 14, 2, 6, 2, 1, 4, 51, 13, 310, 10, 21, 11, 7, 25, 5, 2, 41, 2, 8, 70, 5, 3, 0, 2, 43, 2, 1, 4, 0, 3, 22, 11, 22, 10, 30, 66, 18, 2, 1, 11, 21, 11, 25, 7, 25, 39, 55, 7, 1, 65, 0, 16, 3, 2, 2, 2, 28, 43, 28, 4, 28, 36, 7, 2, 27, 28, 53, 11, 21, 11, 18, 14, 17, 111, 72, 56, 50, 14, 50, 14, 35, 39, 27, 10, 22, 251, 41, 7, 1, 17, 5, 57, 28, 11, 0, 9, 21, 43, 17, 47, 20, 28, 22, 13, 52, 58, 1, 3, 0, 14, 44, 33, 24, 27, 35, 30, 0, 3, 0, 9, 34, 4, 0, 13, 47, 15, 3, 22, 0, 2, 0, 36, 17, 2, 24, 20, 1, 64, 6, 2, 0, 2, 3, 2, 14, 2, 9, 8, 46, 39, 7, 3, 1, 3, 21, 2, 6, 2, 1, 2, 4, 4, 0, 19, 0, 13, 4, 31, 9, 2, 0, 3, 0, 2, 37, 2, 0, 26, 0, 2, 0, 45, 52, 19, 3, 21, 2, 31, 47, 21, 1, 2, 0, 185, 46, 42, 3, 37, 47, 21, 0, 60, 42, 14, 0, 72, 26, 38, 6, 186, 43, 117, 63, 32, 7, 3, 0, 3, 7, 2, 1, 2, 23, 16, 0, 2, 0, 95, 7, 3, 38, 17, 0, 2, 0, 29, 0, 11, 39, 8, 0, 22, 0, 12, 45, 20, 0, 19, 72, 200, 32, 32, 8, 2, 36, 18, 0, 50, 29, 113, 6, 2, 1, 2, 37, 22, 0, 26, 5, 2, 1, 2, 31, 15, 0, 24, 43, 261, 18, 16, 0, 2, 12, 2, 33, 125, 0, 80, 921, 103, 110, 18, 195, 2637, 96, 16, 1071, 18, 5, 26, 3994, 6, 582, 6842, 29, 1763, 568, 8, 30, 18, 78, 18, 29, 19, 47, 17, 3, 32, 20, 6, 18, 433, 44, 212, 63, 33, 24, 3, 24, 45, 74, 6, 0, 67, 12, 65, 1, 2, 0, 15, 4, 10, 7381, 42, 31, 98, 114, 8702, 3, 2, 6, 2, 1, 2, 290, 16, 0, 30, 2, 3, 0, 15, 3, 9, 395, 2309, 106, 6, 12, 4, 8, 8, 9, 5991, 84, 2, 70, 2, 1, 3, 0, 3, 1, 3, 3, 2, 11, 2, 0, 2, 6, 2, 64, 2, 3, 3, 7, 2, 6, 2, 27, 2, 3, 2, 4, 2, 0, 4, 6, 2, 339, 3, 24, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 7, 1845, 30, 7, 5, 262, 61, 147, 44, 11, 6, 17, 0, 322, 29, 19, 43, 485, 27, 229, 29, 3, 0, 208, 30, 2, 2, 2, 1, 2, 6, 3, 4, 10, 1, 225, 6, 2, 3, 2, 1, 2, 14, 2, 196, 60, 67, 8, 0, 1205, 3, 2, 26, 2, 1, 2, 0, 3, 0, 2, 9, 2, 3, 2, 0, 2, 0, 7, 0, 5, 0, 2, 0, 2, 0, 2, 2, 2, 1, 2, 0, 3, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 1, 2, 0, 3, 3, 2, 6, 2, 3, 2, 3, 2, 0, 2, 9, 2, 16, 6, 2, 2, 4, 2, 16, 4421, 42719, 33, 4381, 3, 5773, 3, 7472, 16, 621, 2467, 541, 1507, 4938, 6, 8489], cg = "‌‍·̀-ͯ·҃-֑҇-ׇֽֿׁׂׅׄؐ-ًؚ-٩ٰۖ-ۜ۟-۪ۤۧۨ-ۭ۰-۹ܑܰ-݊ަ-ް߀-߉߫-߽߳ࠖ-࠙ࠛ-ࠣࠥ-ࠧࠩ-࡙࠭-࡛ࢗ-࢟࣊-ࣣ࣡-ःऺ-़ा-ॏ॑-ॗॢॣ०-९ঁ-ঃ়া-ৄেৈো-্ৗৢৣ০-৯৾ਁ-ਃ਼ਾ-ੂੇੈੋ-੍ੑ੦-ੱੵઁ-ઃ઼ા-ૅે-ૉો-્ૢૣ૦-૯ૺ-૿ଁ-ଃ଼ା-ୄେୈୋ-୍୕-ୗୢୣ୦-୯ஂா-ூெ-ைொ-்ௗ௦-௯ఀ-ఄ఼ా-ౄె-ైొ-్ౕౖౢౣ౦-౯ಁ-ಃ಼ಾ-ೄೆ-ೈೊ-್ೕೖೢೣ೦-೯ೳഀ-ഃ഻഼ാ-ൄെ-ൈൊ-്ൗൢൣ൦-൯ඁ-ඃ්ා-ුූෘ-ෟ෦-෯ෲෳัิ-ฺ็-๎๐-๙ັິ-ຼ່-໎໐-໙༘༙༠-༩༹༵༷༾༿ཱ-྄྆྇ྍ-ྗྙ-ྼ࿆ါ-ှ၀-၉ၖ-ၙၞ-ၠၢ-ၤၧ-ၭၱ-ၴႂ-ႍႏ-ႝ፝-፟፩-፱ᜒ-᜕ᜲ-᜴ᝒᝓᝲᝳ឴-៓៝០-៩᠋-᠍᠏-᠙ᢩᤠ-ᤫᤰ-᤻᥆-᥏᧐-᧚ᨗ-ᨛᩕ-ᩞ᩠-᩿᩼-᪉᪐-᪙᪰-᪽ᪿ-᫝᫠-᫫ᬀ-ᬄ᬴-᭄᭐-᭙᭫-᭳ᮀ-ᮂᮡ-ᮭ᮰-᮹᯦-᯳ᰤ-᰷᱀-᱉᱐-᱙᳐-᳔᳒-᳨᳭᳴᳷-᳹᷀-᷿‌‍‿⁀⁔⃐-⃥⃜⃡-⃰⳯-⵿⳱ⷠ-〪ⷿ-゙゚〯・꘠-꘩꙯ꙴ-꙽ꚞꚟ꛰꛱ꠂ꠆ꠋꠣ-ꠧ꠬ꢀꢁꢴ-ꣅ꣐-꣙꣠-꣱ꣿ-꤉ꤦ-꤭ꥇ-꥓ꦀ-ꦃ꦳-꧀꧐-꧙ꧥ꧰-꧹ꨩ-ꨶꩃꩌꩍ꩐-꩙ꩻ-ꩽꪰꪲ-ꪴꪷꪸꪾ꪿꫁ꫫ-ꫯꫵ꫶ꯣ-ꯪ꯬꯭꯰-꯹ﬞ︀-️︠-︯︳︴﹍-﹏０-９＿･", i4 = "ªµºÀ-ÖØ-öø-ˁˆ-ˑˠ-ˤˬˮͰ-ʹͶͷͺ-ͽͿΆΈ-ΊΌΎ-ΡΣ-ϵϷ-ҁҊ-ԯԱ-Ֆՙՠ-ֈא-תׯ-ײؠ-يٮٯٱ-ۓەۥۦۮۯۺ-ۼۿܐܒ-ܯݍ-ޥޱߊ-ߪߴߵߺࠀ-ࠕࠚࠤࠨࡀ-ࡘࡠ-ࡪࡰ-ࢇࢉ-࢏ࢠ-ࣉऄ-हऽॐक़-ॡॱ-ঀঅ-ঌএঐও-নপ-রলশ-হঽৎড়ঢ়য়-ৡৰৱৼਅ-ਊਏਐਓ-ਨਪ-ਰਲਲ਼ਵਸ਼ਸਹਖ਼-ੜਫ਼ੲ-ੴઅ-ઍએ-ઑઓ-નપ-રલળવ-હઽૐૠૡૹଅ-ଌଏଐଓ-ନପ-ରଲଳଵ-ହଽଡ଼ଢ଼ୟ-ୡୱஃஅ-ஊஎ-ஐஒ-கஙசஜஞடணதந-பம-ஹௐఅ-ఌఎ-ఐఒ-నప-హఽౘ-ౚ౜ౝౠౡಀಅ-ಌಎ-ಐಒ-ನಪ-ಳವ-ಹಽ೜-ೞೠೡೱೲഄ-ഌഎ-ഐഒ-ഺഽൎൔ-ൖൟ-ൡൺ-ൿඅ-ඖක-නඳ-රලව-ෆก-ะาำเ-ๆກຂຄຆ-ຊຌ-ຣລວ-ະາຳຽເ-ໄໆໜ-ໟༀཀ-ཇཉ-ཬྈ-ྌက-ဪဿၐ-ၕၚ-ၝၡၥၦၮ-ၰၵ-ႁႎႠ-ჅჇჍა-ჺჼ-ቈቊ-ቍቐ-ቖቘቚ-ቝበ-ኈኊ-ኍነ-ኰኲ-ኵኸ-ኾዀዂ-ዅወ-ዖዘ-ጐጒ-ጕጘ-ፚᎀ-ᎏᎠ-Ᏽᏸ-ᏽᐁ-ᙬᙯ-ᙿᚁ-ᚚᚠ-ᛪᛮ-ᛸᜀ-ᜑᜟ-ᜱᝀ-ᝑᝠ-ᝬᝮ-ᝰក-ឳៗៜᠠ-ᡸᢀ-ᢨᢪᢰ-ᣵᤀ-ᤞᥐ-ᥭᥰ-ᥴᦀ-ᦫᦰ-ᧉᨀ-ᨖᨠ-ᩔᪧᬅ-ᬳᭅ-ᭌᮃ-ᮠᮮᮯᮺ-ᯥᰀ-ᰣᱍ-ᱏᱚ-ᱽᲀ-ᲊᲐ-ᲺᲽ-Ჿᳩ-ᳬᳮ-ᳳᳵᳶᳺᴀ-ᶿḀ-ἕἘ-Ἕἠ-ὅὈ-Ὅὐ-ὗὙὛὝὟ-ώᾀ-ᾴᾶ-ᾼιῂ-ῄῆ-ῌῐ-ΐῖ-Ίῠ-Ῥῲ-ῴῶ-ῼⁱⁿₐ-ₜℂℇℊ-ℓℕ℘-ℝℤΩℨK-ℹℼ-ℿⅅ-ⅉⅎⅠ-ↈⰀ-ⳤⳫ-ⳮⳲⳳⴀ-ⴥⴧⴭⴰ-ⵧⵯⶀ-ⶖⶠ-ⶦⶨ-ⶮⶰ-ⶶⶸ-ⶾⷀ-ⷆⷈ-ⷎⷐ-ⷖⷘ-ⷞ々-〇〡-〩〱-〵〸-〼ぁ-ゖ゛-ゟァ-ヺー-ヿㄅ-ㄯㄱ-ㆎㆠ-ㆿㇰ-ㇿ㐀-䶿一-ꒌꓐ-ꓽꔀ-ꘌꘐ-ꘟꘪꘫꙀ-ꙮꙿ-ꚝꚠ-ꛯꜗ-ꜟꜢ-ꞈꞋ-Ƛ꟱-ꠁꠃ-ꠅꠇ-ꠊꠌ-ꠢꡀ-ꡳꢂ-ꢳꣲ-ꣷꣻꣽꣾꤊ-ꤥꤰ-ꥆꥠ-ꥼꦄ-ꦲꧏꧠ-ꧤꧦ-ꧯꧺ-ꧾꨀ-ꨨꩀ-ꩂꩄ-ꩋꩠ-ꩶꩺꩾ-ꪯꪱꪵꪶꪹ-ꪽꫀꫂꫛ-ꫝꫠ-ꫪꫲ-ꫴꬁ-ꬆꬉ-ꬎꬑ-ꬖꬠ-ꬦꬨ-ꬮꬰ-ꭚꭜ-ꭩꭰ-ꯢ가-힣ힰ-ퟆퟋ-ퟻ豈-舘並-龎ﬀ-ﬆﬓ-ﬗיִײַ-ﬨשׁ-זּטּ-לּמּנּסּףּפּצּ-ﮱﯓ-ﴽﵐ-ﶏﶒ-ﷇﷰ-ﷻﹰ-ﹴﹶ-ﻼＡ-Ｚａ-ｚｦ-ﾾￂ-ￇￊ-ￏￒ-ￗￚ-ￜ", K3 = {
+var hg = [509, 0, 227, 0, 150, 4, 294, 9, 1368, 2, 2, 1, 6, 3, 41, 2, 5, 0, 166, 1, 574, 3, 9, 9, 7, 9, 32, 4, 318, 1, 78, 5, 71, 10, 50, 3, 123, 2, 54, 14, 32, 10, 3, 1, 11, 3, 46, 10, 8, 0, 46, 9, 7, 2, 37, 13, 2, 9, 6, 1, 45, 0, 13, 2, 49, 13, 9, 3, 2, 11, 83, 11, 7, 0, 3, 0, 158, 11, 6, 9, 7, 3, 56, 1, 2, 6, 3, 1, 3, 2, 10, 0, 11, 1, 3, 6, 4, 4, 68, 8, 2, 0, 3, 0, 2, 3, 2, 4, 2, 0, 15, 1, 83, 17, 10, 9, 5, 0, 82, 19, 13, 9, 214, 6, 3, 8, 28, 1, 83, 16, 16, 9, 82, 12, 9, 9, 7, 19, 58, 14, 5, 9, 243, 14, 166, 9, 71, 5, 2, 1, 3, 3, 2, 0, 2, 1, 13, 9, 120, 6, 3, 6, 4, 0, 29, 9, 41, 6, 2, 3, 9, 0, 10, 10, 47, 15, 199, 7, 137, 9, 54, 7, 2, 7, 17, 9, 57, 21, 2, 13, 123, 5, 4, 0, 2, 1, 2, 6, 2, 0, 9, 9, 49, 4, 2, 1, 2, 4, 9, 9, 55, 9, 266, 3, 10, 1, 2, 0, 49, 6, 4, 4, 14, 10, 5350, 0, 7, 14, 11465, 27, 2343, 9, 87, 9, 39, 4, 60, 6, 26, 9, 535, 9, 470, 0, 2, 54, 8, 3, 82, 0, 12, 1, 19628, 1, 4178, 9, 519, 45, 3, 22, 543, 4, 4, 5, 9, 7, 3, 6, 31, 3, 149, 2, 1418, 49, 513, 54, 5, 49, 9, 0, 15, 0, 23, 4, 2, 14, 1361, 6, 2, 16, 3, 6, 2, 1, 2, 4, 101, 0, 161, 6, 10, 9, 357, 0, 62, 13, 499, 13, 245, 1, 2, 9, 233, 0, 3, 0, 8, 1, 6, 0, 475, 6, 110, 6, 6, 9, 4759, 9, 787719, 239], q4 = [0, 11, 2, 25, 2, 18, 2, 1, 2, 14, 3, 13, 35, 122, 70, 52, 268, 28, 4, 48, 48, 31, 14, 29, 6, 37, 11, 29, 3, 35, 5, 7, 2, 4, 43, 157, 19, 35, 5, 35, 5, 39, 9, 51, 13, 10, 2, 14, 2, 6, 2, 1, 2, 10, 2, 14, 2, 6, 2, 1, 4, 51, 13, 310, 10, 21, 11, 7, 25, 5, 2, 41, 2, 8, 70, 5, 3, 0, 2, 43, 2, 1, 4, 0, 3, 22, 11, 22, 10, 30, 66, 18, 2, 1, 11, 21, 11, 25, 7, 25, 39, 55, 7, 1, 65, 0, 16, 3, 2, 2, 2, 28, 43, 28, 4, 28, 36, 7, 2, 27, 28, 53, 11, 21, 11, 18, 14, 17, 111, 72, 56, 50, 14, 50, 14, 35, 39, 27, 10, 22, 251, 41, 7, 1, 17, 5, 57, 28, 11, 0, 9, 21, 43, 17, 47, 20, 28, 22, 13, 52, 58, 1, 3, 0, 14, 44, 33, 24, 27, 35, 30, 0, 3, 0, 9, 34, 4, 0, 13, 47, 15, 3, 22, 0, 2, 0, 36, 17, 2, 24, 20, 1, 64, 6, 2, 0, 2, 3, 2, 14, 2, 9, 8, 46, 39, 7, 3, 1, 3, 21, 2, 6, 2, 1, 2, 4, 4, 0, 19, 0, 13, 4, 31, 9, 2, 0, 3, 0, 2, 37, 2, 0, 26, 0, 2, 0, 45, 52, 19, 3, 21, 2, 31, 47, 21, 1, 2, 0, 185, 46, 42, 3, 37, 47, 21, 0, 60, 42, 14, 0, 72, 26, 38, 6, 186, 43, 117, 63, 32, 7, 3, 0, 3, 7, 2, 1, 2, 23, 16, 0, 2, 0, 95, 7, 3, 38, 17, 0, 2, 0, 29, 0, 11, 39, 8, 0, 22, 0, 12, 45, 20, 0, 19, 72, 200, 32, 32, 8, 2, 36, 18, 0, 50, 29, 113, 6, 2, 1, 2, 37, 22, 0, 26, 5, 2, 1, 2, 31, 15, 0, 24, 43, 261, 18, 16, 0, 2, 12, 2, 33, 125, 0, 80, 921, 103, 110, 18, 195, 2637, 96, 16, 1071, 18, 5, 26, 3994, 6, 582, 6842, 29, 1763, 568, 8, 30, 18, 78, 18, 29, 19, 47, 17, 3, 32, 20, 6, 18, 433, 44, 212, 63, 33, 24, 3, 24, 45, 74, 6, 0, 67, 12, 65, 1, 2, 0, 15, 4, 10, 7381, 42, 31, 98, 114, 8702, 3, 2, 6, 2, 1, 2, 290, 16, 0, 30, 2, 3, 0, 15, 3, 9, 395, 2309, 106, 6, 12, 4, 8, 8, 9, 5991, 84, 2, 70, 2, 1, 3, 0, 3, 1, 3, 3, 2, 11, 2, 0, 2, 6, 2, 64, 2, 3, 3, 7, 2, 6, 2, 27, 2, 3, 2, 4, 2, 0, 4, 6, 2, 339, 3, 24, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 7, 1845, 30, 7, 5, 262, 61, 147, 44, 11, 6, 17, 0, 322, 29, 19, 43, 485, 27, 229, 29, 3, 0, 208, 30, 2, 2, 2, 1, 2, 6, 3, 4, 10, 1, 225, 6, 2, 3, 2, 1, 2, 14, 2, 196, 60, 67, 8, 0, 1205, 3, 2, 26, 2, 1, 2, 0, 3, 0, 2, 9, 2, 3, 2, 0, 2, 0, 7, 0, 5, 0, 2, 0, 2, 0, 2, 2, 2, 1, 2, 0, 3, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 1, 2, 0, 3, 3, 2, 6, 2, 3, 2, 3, 2, 0, 2, 9, 2, 16, 6, 2, 2, 4, 2, 16, 4421, 42719, 33, 4381, 3, 5773, 3, 7472, 16, 621, 2467, 541, 1507, 4938, 6, 8489], cg = "‌‍·̀-ͯ·҃-֑҇-ׇֽֿׁׂׅׄؐ-ًؚ-٩ٰۖ-ۜ۟-۪ۤۧۨ-ۭ۰-۹ܑܰ-݊ަ-ް߀-߉߫-߽߳ࠖ-࠙ࠛ-ࠣࠥ-ࠧࠩ-࡙࠭-࡛ࢗ-࢟࣊-ࣣ࣡-ःऺ-़ा-ॏ॑-ॗॢॣ०-९ঁ-ঃ়া-ৄেৈো-্ৗৢৣ০-৯৾ਁ-ਃ਼ਾ-ੂੇੈੋ-੍ੑ੦-ੱੵઁ-ઃ઼ા-ૅે-ૉો-્ૢૣ૦-૯ૺ-૿ଁ-ଃ଼ା-ୄେୈୋ-୍୕-ୗୢୣ୦-୯ஂா-ூெ-ைொ-்ௗ௦-௯ఀ-ఄ఼ా-ౄె-ైొ-్ౕౖౢౣ౦-౯ಁ-ಃ಼ಾ-ೄೆ-ೈೊ-್ೕೖೢೣ೦-೯ೳഀ-ഃ഻഼ാ-ൄെ-ൈൊ-്ൗൢൣ൦-൯ඁ-ඃ්ා-ුූෘ-ෟ෦-෯ෲෳัิ-ฺ็-๎๐-๙ັິ-ຼ່-໎໐-໙༘༙༠-༩༹༵༷༾༿ཱ-྄྆྇ྍ-ྗྙ-ྼ࿆ါ-ှ၀-၉ၖ-ၙၞ-ၠၢ-ၤၧ-ၭၱ-ၴႂ-ႍႏ-ႝ፝-፟፩-፱ᜒ-᜕ᜲ-᜴ᝒᝓᝲᝳ឴-៓៝០-៩᠋-᠍᠏-᠙ᢩᤠ-ᤫᤰ-᤻᥆-᥏᧐-᧚ᨗ-ᨛᩕ-ᩞ᩠-᩿᩼-᪉᪐-᪙᪰-᪽ᪿ-᫝᫠-᫫ᬀ-ᬄ᬴-᭄᭐-᭙᭫-᭳ᮀ-ᮂᮡ-ᮭ᮰-᮹᯦-᯳ᰤ-᰷᱀-᱉᱐-᱙᳐-᳔᳒-᳨᳭᳴᳷-᳹᷀-᷿‌‍‿⁀⁔⃐-⃥⃜⃡-⃰⳯-⵿⳱ⷠ-〪ⷿ-゙゚〯・꘠-꘩꙯ꙴ-꙽ꚞꚟ꛰꛱ꠂ꠆ꠋꠣ-ꠧ꠬ꢀꢁꢴ-ꣅ꣐-꣙꣠-꣱ꣿ-꤉ꤦ-꤭ꥇ-꥓ꦀ-ꦃ꦳-꧀꧐-꧙ꧥ꧰-꧹ꨩ-ꨶꩃꩌꩍ꩐-꩙ꩻ-ꩽꪰꪲ-ꪴꪷꪸꪾ꪿꫁ꫫ-ꫯꫵ꫶ꯣ-ꯪ꯬꯭꯰-꯹ﬞ︀-️︠-︯︳︴﹍-﹏０-９＿･", i4 = "ªµºÀ-ÖØ-öø-ˁˆ-ˑˠ-ˤˬˮͰ-ʹͶͷͺ-ͽͿΆΈ-ΊΌΎ-ΡΣ-ϵϷ-ҁҊ-ԯԱ-Ֆՙՠ-ֈא-תׯ-ײؠ-يٮٯٱ-ۓەۥۦۮۯۺ-ۼۿܐܒ-ܯݍ-ޥޱߊ-ߪߴߵߺࠀ-ࠕࠚࠤࠨࡀ-ࡘࡠ-ࡪࡰ-ࢇࢉ-࢏ࢠ-ࣉऄ-हऽॐक़-ॡॱ-ঀঅ-ঌএঐও-নপ-রলশ-হঽৎড়ঢ়য়-ৡৰৱৼਅ-ਊਏਐਓ-ਨਪ-ਰਲਲ਼ਵਸ਼ਸਹਖ਼-ੜਫ਼ੲ-ੴઅ-ઍએ-ઑઓ-નપ-રલળવ-હઽૐૠૡૹଅ-ଌଏଐଓ-ନପ-ରଲଳଵ-ହଽଡ଼ଢ଼ୟ-ୡୱஃஅ-ஊஎ-ஐஒ-கஙசஜஞடணதந-பம-ஹௐఅ-ఌఎ-ఐఒ-నప-హఽౘ-ౚ౜ౝౠౡಀಅ-ಌಎ-ಐಒ-ನಪ-ಳವ-ಹಽ೜-ೞೠೡೱೲഄ-ഌഎ-ഐഒ-ഺഽൎൔ-ൖൟ-ൡൺ-ൿඅ-ඖක-නඳ-රලව-ෆก-ะาำเ-ๆກຂຄຆ-ຊຌ-ຣລວ-ະາຳຽເ-ໄໆໜ-ໟༀཀ-ཇཉ-ཬྈ-ྌက-ဪဿၐ-ၕၚ-ၝၡၥၦၮ-ၰၵ-ႁႎႠ-ჅჇჍა-ჺჼ-ቈቊ-ቍቐ-ቖቘቚ-ቝበ-ኈኊ-ኍነ-ኰኲ-ኵኸ-ኾዀዂ-ዅወ-ዖዘ-ጐጒ-ጕጘ-ፚᎀ-ᎏᎠ-Ᏽᏸ-ᏽᐁ-ᙬᙯ-ᙿᚁ-ᚚᚠ-ᛪᛮ-ᛸᜀ-ᜑᜟ-ᜱᝀ-ᝑᝠ-ᝬᝮ-ᝰក-ឳៗៜᠠ-ᡸᢀ-ᢨᢪᢰ-ᣵᤀ-ᤞᥐ-ᥭᥰ-ᥴᦀ-ᦫᦰ-ᧉᨀ-ᨖᨠ-ᩔᪧᬅ-ᬳᭅ-ᭌᮃ-ᮠᮮᮯᮺ-ᯥᰀ-ᰣᱍ-ᱏᱚ-ᱽᲀ-ᲊᲐ-ᲺᲽ-Ჿᳩ-ᳬᳮ-ᳳᳵᳶᳺᴀ-ᶿḀ-ἕἘ-Ἕἠ-ὅὈ-Ὅὐ-ὗὙὛὝὟ-ώᾀ-ᾴᾶ-ᾼιῂ-ῄῆ-ῌῐ-ΐῖ-Ίῠ-Ῥῲ-ῴῶ-ῼⁱⁿₐ-ₜℂℇℊ-ℓℕ℘-ℝℤΩℨK-ℹℼ-ℿⅅ-ⅉⅎⅠ-ↈⰀ-ⳤⳫ-ⳮⳲⳳⴀ-ⴥⴧⴭⴰ-ⵧⵯⶀ-ⶖⶠ-ⶦⶨ-ⶮⶰ-ⶶⶸ-ⶾⷀ-ⷆⷈ-ⷎⷐ-ⷖⷘ-ⷞ々-〇〡-〩〱-〵〸-〼ぁ-ゖ゛-ゟァ-ヺー-ヿㄅ-ㄯㄱ-ㆎㆠ-ㆿㇰ-ㇿ㐀-䶿一-ꒌꓐ-ꓽꔀ-ꘌꘐ-ꘟꘪꘫꙀ-ꙮꙿ-ꚝꚠ-ꛯꜗ-ꜟꜢ-ꞈꞋ-Ƛ꟱-ꠁꠃ-ꠅꠇ-ꠊꠌ-ꠢꡀ-ꡳꢂ-ꢳꣲ-ꣷꣻꣽꣾꤊ-ꤥꤰ-ꥆꥠ-ꥼꦄ-ꦲꧏꧠ-ꧤꧦ-ꧯꧺ-ꧾꨀ-ꨨꩀ-ꩂꩄ-ꩋꩠ-ꩶꩺꩾ-ꪯꪱꪵꪶꪹ-ꪽꫀꫂꫛ-ꫝꫠ-ꫪꫲ-ꫴꬁ-ꬆꬉ-ꬎꬑ-ꬖꬠ-ꬦꬨ-ꬮꬰ-ꭚꭜ-ꭩꭰ-ꯢ가-힣ힰ-ퟆퟋ-ퟻ豈-舘並-龎ﬀ-ﬆﬓ-ﬗיִײַ-ﬨשׁ-זּטּ-לּמּנּסּףּפּצּ-ﮱﯓ-ﴽﵐ-ﶏﶒ-ﷇﷰ-ﷻﹰ-ﹴﹶ-ﻼＡ-Ｚａ-ｚｦ-ﾾￂ-ￇￊ-ￏￒ-ￗￚ-ￜ", S3 = {
   3: "abstract boolean byte char class double enum export extends final float goto implements import int interface long native package private protected public short static super synchronized throws transient volatile",
   5: "class enum extends super const export import",
   6: "enum",
@@ -2183,7 +2202,7 @@ var hg = [509, 0, 227, 0, 150, 4, 294, 9, 1368, 2, 2, 1, 6, 3, 41, 2, 5, 0, 166,
   "5module": G3 + " export import",
   6: G3 + " const class extends export import super"
 }, e4 = /^in(stanceof)?$/, wg = new RegExp("[" + i4 + "]"), dg = new RegExp("[" + i4 + cg + "]");
-function V3(A, g) {
+function T3(A, g) {
   for (var I = 65536, C = 0; C < g.length; C += 2) {
     if (I += g[C], I > A)
       return !1;
@@ -2193,10 +2212,10 @@ function V3(A, g) {
   return !1;
 }
 function b1(A, g) {
-  return A < 65 ? A === 36 : A < 91 ? !0 : A < 97 ? A === 95 : A < 123 ? !0 : A <= 65535 ? A >= 170 && wg.test(String.fromCharCode(A)) : g === !1 ? !1 : V3(A, q4);
+  return A < 65 ? A === 36 : A < 91 ? !0 : A < 97 ? A === 95 : A < 123 ? !0 : A <= 65535 ? A >= 170 && wg.test(String.fromCharCode(A)) : g === !1 ? !1 : T3(A, q4);
 }
 function g2(A, g) {
-  return A < 48 ? A === 36 : A < 58 ? !0 : A < 65 ? !1 : A < 91 ? !0 : A < 97 ? A === 95 : A < 123 ? !0 : A <= 65535 ? A >= 170 && dg.test(String.fromCharCode(A)) : g === !1 ? !1 : V3(A, q4) || V3(A, hg);
+  return A < 48 ? A === 36 : A < 58 ? !0 : A < 65 ? !1 : A < 91 ? !0 : A < 97 ? A === 95 : A < 123 ? !0 : A <= 65535 ? A >= 170 && dg.test(String.fromCharCode(A)) : g === !1 ? !1 : T3(A, q4) || T3(A, hg);
 }
 var PA = function(g, I) {
   I === void 0 && (I = {}), this.label = g, this.keyword = I.keyword, this.beforeExpr = !!I.beforeExpr, this.startsExpr = !!I.startsExpr, this.isLoop = !!I.isLoop, this.isAssign = !!I.isAssign, this.prefix = !!I.prefix, this.postfix = !!I.postfix, this.binop = I.binop || null, this.updateContext = null;
@@ -2204,9 +2223,9 @@ var PA = function(g, I) {
 function y1(A, g) {
   return new PA(A, { beforeExpr: !0, binop: g });
 }
-var M1 = { beforeExpr: !0 }, c1 = { startsExpr: !0 }, I5 = {};
+var M1 = { beforeExpr: !0 }, c1 = { startsExpr: !0 }, C5 = {};
 function LA(A, g) {
-  return g === void 0 && (g = {}), g.keyword = A, I5[A] = new PA(A, g);
+  return g === void 0 && (g = {}), g.keyword = A, C5[A] = new PA(A, g);
 }
 var D = {
   num: new PA("num", c1),
@@ -2342,7 +2361,7 @@ function l4(A, g) {
     ++I, C = q;
   }
 }
-var T3 = {
+var O3 = {
   // `ecmaVersion` indicates the ECMAScript version to parse. Must be
   // either 3, 5, 6 (or 2015), 7 (2016), 8 (2017), 9 (2018), 10
   // (2019), 11 (2020), 12 (2021), 13 (2022), 14 (2023), or `"latest"`
@@ -2444,8 +2463,8 @@ var T3 = {
 }, F5 = !1;
 function xg(A) {
   var g = {};
-  for (var I in T3)
-    g[I] = A && w2(A, I) ? A[I] : T3[I];
+  for (var I in O3)
+    g[I] = A && w2(A, I) ? A[I] : O3[I];
   if (g.ecmaVersion === "latest" ? g.ecmaVersion = 1e8 : g.ecmaVersion == null ? (!F5 && typeof console == "object" && console.warn && (F5 = !0, console.warn(`Since Acorn 8.0.0, options.ecmaVersion is required.
 Defaulting to 2020, but this will stop working in the future.`)), g.ecmaVersion = 11) : g.ecmaVersion >= 2015 && (g.ecmaVersion -= 2009), g.allowReserved == null && (g.allowReserved = g.ecmaVersion < 5), (!A || A.allowHashBang == null) && (g.allowHashBang = g.ecmaVersion >= 14), p5(g.onToken)) {
     var C = g.onToken;
@@ -2468,16 +2487,16 @@ function kg(A, g) {
     A.locations && (Q.loc = new E3(this, e, i)), A.ranges && (Q.range = [q, B]), g.push(Q);
   };
 }
-var a2 = 1, n2 = 2, C5 = 4, o4 = 8, q5 = 16, t4 = 32, l3 = 64, a4 = 128, s2 = 256, F2 = 512, n4 = 1024, o3 = a2 | n2 | s2;
-function i5(A, g) {
-  return n2 | (A ? C5 : 0) | (g ? o4 : 0);
+var a2 = 1, n2 = 2, q5 = 4, o4 = 8, i5 = 16, t4 = 32, l3 = 64, a4 = 128, s2 = 256, F2 = 512, n4 = 1024, o3 = a2 | n2 | s2;
+function e5(A, g) {
+  return n2 | (A ? q5 : 0) | (g ? o4 : 0);
 }
-var g3 = 0, e5 = 1, V1 = 2, s4 = 3, r4 = 4, D4 = 5, l1 = function(g, I, C) {
+var g3 = 0, B5 = 1, V1 = 2, s4 = 3, r4 = 4, D4 = 5, l1 = function(g, I, C) {
   this.options = g = xg(g), this.sourceFile = g.sourceFile, this.keywords = $1(mg[g.ecmaVersion >= 6 ? 6 : g.sourceType === "module" ? "5module" : 5]);
   var q = "";
-  g.allowReserved !== !0 && (q = K3[g.ecmaVersion >= 6 ? 6 : g.ecmaVersion === 5 ? 5 : 3], g.sourceType === "module" && (q += " await")), this.reservedWords = $1(q);
-  var B = (q ? q + " " : "") + K3.strict;
-  this.reservedWordsStrict = $1(B), this.reservedWordsStrictBind = $1(B + " " + K3.strictBind), this.input = String(I), this.containsEsc = !1, C ? (this.pos = C, this.lineStart = this.input.lastIndexOf(`
+  g.allowReserved !== !0 && (q = S3[g.ecmaVersion >= 6 ? 6 : g.ecmaVersion === 5 ? 5 : 3], g.sourceType === "module" && (q += " await")), this.reservedWords = $1(q);
+  var B = (q ? q + " " : "") + S3.strict;
+  this.reservedWordsStrict = $1(B), this.reservedWordsStrictBind = $1(B + " " + S3.strictBind), this.input = String(I), this.containsEsc = !1, C ? (this.pos = C, this.lineStart = this.input.lastIndexOf(`
 `, C - 1) + 1, this.curLine = this.input.slice(0, this.lineStart).split(w1).length) : (this.pos = this.lineStart = 0, this.curLine = 1), this.type = D.eof, this.value = null, this.start = this.end = this.pos, this.startLoc = this.endLoc = this.curPosition(), this.lastTokEndLoc = this.lastTokStartLoc = null, this.lastTokStart = this.lastTokEnd = this.pos, this.context = this.initialContext(), this.exprAllowed = !0, this.inModule = g.sourceType === "module", this.strict = this.inModule || g.strict === !0 || this.strictDirective(this.pos), this.potentialArrowAt = -1, this.potentialArrowInForAwait = !1, this.yieldPos = this.awaitPos = this.awaitIdentPos = 0, this.labels = [], this.undefinedExports = /* @__PURE__ */ Object.create(null), this.pos === 0 && g.allowHashBang && this.input.slice(0, 2) === "#!" && this.skipLineComment(2), this.scopeStack = [], this.enterScope(
     this.options.sourceType === "commonjs" ? n2 : a2
   ), this.regexpState = null, this.privateNameStack = [];
@@ -2495,7 +2514,7 @@ K1.inGenerator.get = function() {
   return (this.currentVarScope().flags & o4) > 0;
 };
 K1.inAsync.get = function() {
-  return (this.currentVarScope().flags & C5) > 0;
+  return (this.currentVarScope().flags & q5) > 0;
 };
 K1.canAwait.get = function() {
   for (var A = this.scopeStack.length - 1; A >= 0; A--) {
@@ -2503,7 +2522,7 @@ K1.canAwait.get = function() {
     if (I & (s2 | F2))
       return !1;
     if (I & n2)
-      return (I & C5) > 0;
+      return (I & q5) > 0;
   }
   return this.inModule && this.options.ecmaVersion >= 13 || this.options.allowAwaitOutsideFunction;
 };
@@ -2523,7 +2542,7 @@ K1.treatFunctionsAsVar.get = function() {
 K1.allowNewDotTarget.get = function() {
   for (var A = this.scopeStack.length - 1; A >= 0; A--) {
     var g = this.scopeStack[A], I = g.flags;
-    if (I & (s2 | F2) || I & n2 && !(I & q5))
+    if (I & (s2 | F2) || I & n2 && !(I & i5))
       return !0;
   }
   return !1;
@@ -2649,7 +2668,7 @@ dA.parseTopLevel = function(A) {
     }
   return this.adaptDirectivePrologue(A.body), this.next(), A.sourceType = this.options.sourceType === "commonjs" ? "script" : this.options.sourceType, this.finishNode(A, "Program");
 };
-var B5 = { kind: "loop" }, Gg = { kind: "switch" };
+var Q5 = { kind: "loop" }, Sg = { kind: "switch" };
 dA.isLet = function(A) {
   if (this.options.ecmaVersion < 6 || !this.isContextual("let"))
     return !1;
@@ -2799,12 +2818,12 @@ dA.parseDebuggerStatement = function(A) {
   return this.next(), this.semicolon(), this.finishNode(A, "DebuggerStatement");
 };
 dA.parseDoStatement = function(A) {
-  return this.next(), this.labels.push(B5), A.body = this.parseStatement("do"), this.labels.pop(), this.expect(D._while), A.test = this.parseParenExpression(), this.options.ecmaVersion >= 6 ? this.eat(D.semi) : this.semicolon(), this.finishNode(A, "DoWhileStatement");
+  return this.next(), this.labels.push(Q5), A.body = this.parseStatement("do"), this.labels.pop(), this.expect(D._while), A.test = this.parseParenExpression(), this.options.ecmaVersion >= 6 ? this.eat(D.semi) : this.semicolon(), this.finishNode(A, "DoWhileStatement");
 };
 dA.parseForStatement = function(A) {
   this.next();
   var g = this.options.ecmaVersion >= 9 && this.canAwait && this.eatContextual("await") ? this.lastTokStart : -1;
-  if (this.labels.push(B5), this.enterScope(0), this.expect(D.parenL), this.type === D.semi)
+  if (this.labels.push(Q5), this.enterScope(0), this.expect(D.parenL), this.type === D.semi)
     return g > -1 && this.unexpected(g), this.parseFor(A, null);
   var I = this.isLet();
   if (this.type === D._var || this.type === D._const || I) {
@@ -2823,7 +2842,7 @@ dA.parseForAfterInit = function(A, g, I) {
   return (this.type === D._in || this.options.ecmaVersion >= 6 && this.isContextual("of")) && g.declarations.length === 1 ? (this.type === D._in ? ((g.kind === "using" || g.kind === "await using") && !g.declarations[0].init && this.raise(this.start, "Using declaration is not allowed in for-in loops"), this.options.ecmaVersion >= 9 && I > -1 && this.unexpected(I)) : this.options.ecmaVersion >= 9 && (A.await = I > -1), this.parseForIn(A, g)) : (I > -1 && this.unexpected(I), this.parseFor(A, g));
 };
 dA.parseFunctionStatement = function(A, g, I) {
-  return this.next(), this.parseFunction(A, k2 | (I ? 0 : O3), !1, g);
+  return this.next(), this.parseFunction(A, k2 | (I ? 0 : j3), !1, g);
 };
 dA.parseIfStatement = function(A) {
   return this.next(), A.test = this.parseParenExpression(), A.consequent = this.parseStatement("if"), A.alternate = this.eat(D._else) ? this.parseStatement("if") : null, this.finishNode(A, "IfStatement");
@@ -2832,7 +2851,7 @@ dA.parseReturnStatement = function(A) {
   return this.allowReturn || this.raise(this.start, "'return' outside of function"), this.next(), this.eat(D.semi) || this.insertSemicolon() ? A.argument = null : (A.argument = this.parseExpression(), this.semicolon()), this.finishNode(A, "ReturnStatement");
 };
 dA.parseSwitchStatement = function(A) {
-  this.next(), A.discriminant = this.parseParenExpression(), A.cases = [], this.expect(D.braceL), this.labels.push(Gg), this.enterScope(n4);
+  this.next(), A.discriminant = this.parseParenExpression(), A.cases = [], this.expect(D.braceL), this.labels.push(Sg), this.enterScope(n4);
   for (var g, I = !1; this.type !== D.braceR; )
     if (this.type === D._case || this.type === D._default) {
       var C = this.type === D._case;
@@ -2844,7 +2863,7 @@ dA.parseSwitchStatement = function(A) {
 dA.parseThrowStatement = function(A) {
   return this.next(), w1.test(this.input.slice(this.lastTokEnd, this.start)) && this.raise(this.lastTokEnd, "Illegal newline after throw"), A.argument = this.parseExpression(), this.semicolon(), this.finishNode(A, "ThrowStatement");
 };
-var Sg = [];
+var Gg = [];
 dA.parseCatchClauseParam = function() {
   var A = this.parseBindingAtom(), g = A.type === "Identifier";
   return this.enterScope(g ? t4 : 0), this.checkLValPattern(A, g ? r4 : V1), this.expect(D.parenR), A;
@@ -2860,7 +2879,7 @@ dA.parseVarStatement = function(A, g, I) {
   return this.next(), this.parseVar(A, !1, g, I), this.semicolon(), this.finishNode(A, "VariableDeclaration");
 };
 dA.parseWhileStatement = function(A) {
-  return this.next(), A.test = this.parseParenExpression(), this.labels.push(B5), A.body = this.parseStatement("while"), this.labels.pop(), this.finishNode(A, "WhileStatement");
+  return this.next(), A.test = this.parseParenExpression(), this.labels.push(Q5), A.body = this.parseStatement("while"), this.labels.pop(), this.finishNode(A, "WhileStatement");
 };
 dA.parseWithStatement = function(A) {
   return this.strict && this.raise(this.start, "'with' in strict mode"), this.next(), A.object = this.parseParenExpression(), A.body = this.parseStatement("with"), this.finishNode(A, "WithStatement");
@@ -2911,13 +2930,13 @@ dA.parseVar = function(A, g, I, C) {
   return A;
 };
 dA.parseVarId = function(A, g) {
-  A.id = g === "using" || g === "await using" ? this.parseIdent() : this.parseBindingAtom(), this.checkLValPattern(A.id, g === "var" ? e5 : V1, !1);
+  A.id = g === "using" || g === "await using" ? this.parseIdent() : this.parseBindingAtom(), this.checkLValPattern(A.id, g === "var" ? B5 : V1, !1);
 };
-var k2 = 1, O3 = 2, h4 = 4;
+var k2 = 1, j3 = 2, h4 = 4;
 dA.parseFunction = function(A, g, I, C, q) {
-  this.initFunction(A), (this.options.ecmaVersion >= 9 || this.options.ecmaVersion >= 6 && !C) && (this.type === D.star && g & O3 && this.unexpected(), A.generator = this.eat(D.star)), this.options.ecmaVersion >= 8 && (A.async = !!C), g & k2 && (A.id = g & h4 && this.type !== D.name ? null : this.parseIdent(), A.id && !(g & O3) && this.checkLValSimple(A.id, this.strict || A.generator || A.async ? this.treatFunctionsAsVar ? e5 : V1 : s4));
+  this.initFunction(A), (this.options.ecmaVersion >= 9 || this.options.ecmaVersion >= 6 && !C) && (this.type === D.star && g & j3 && this.unexpected(), A.generator = this.eat(D.star)), this.options.ecmaVersion >= 8 && (A.async = !!C), g & k2 && (A.id = g & h4 && this.type !== D.name ? null : this.parseIdent(), A.id && !(g & j3) && this.checkLValSimple(A.id, this.strict || A.generator || A.async ? this.treatFunctionsAsVar ? B5 : V1 : s4));
   var B = this.yieldPos, e = this.awaitPos, i = this.awaitIdentPos;
-  return this.yieldPos = 0, this.awaitPos = 0, this.awaitIdentPos = 0, this.enterScope(i5(A.async, A.generator)), g & k2 || (A.id = this.type === D.name ? this.parseIdent() : null), this.parseFunctionParams(A), this.parseFunctionBody(A, I, !1, q), this.yieldPos = B, this.awaitPos = e, this.awaitIdentPos = i, this.finishNode(A, g & k2 ? "FunctionDeclaration" : "FunctionExpression");
+  return this.yieldPos = 0, this.awaitPos = 0, this.awaitIdentPos = 0, this.enterScope(e5(A.async, A.generator)), g & k2 || (A.id = this.type === D.name ? this.parseIdent() : null), this.parseFunctionParams(A), this.parseFunctionBody(A, I, !1, q), this.yieldPos = B, this.awaitPos = e, this.awaitIdentPos = i, this.finishNode(A, g & k2 ? "FunctionDeclaration" : "FunctionExpression");
 };
 dA.parseFunctionParams = function(A) {
   this.expect(D.parenL), A.params = this.parseBindingList(D.parenR, !1, this.options.ecmaVersion >= 8), this.checkYieldAwaitInDefaultParams();
@@ -3092,7 +3111,7 @@ dA.parseExportSpecifiers = function(A) {
   return g;
 };
 dA.parseImport = function(A) {
-  return this.next(), this.type === D.string ? (A.specifiers = Sg, A.source = this.parseExprAtom()) : (A.specifiers = this.parseImportSpecifiers(), this.expectContextual("from"), A.source = this.type === D.string ? this.parseExprAtom() : this.unexpected()), this.options.ecmaVersion >= 16 && (A.attributes = this.parseWithClause()), this.semicolon(), this.finishNode(A, "ImportDeclaration");
+  return this.next(), this.type === D.string ? (A.specifiers = Gg, A.source = this.parseExprAtom()) : (A.specifiers = this.parseImportSpecifiers(), this.expectContextual("from"), A.source = this.type === D.string ? this.parseExprAtom() : this.unexpected()), this.options.ecmaVersion >= 16 && (A.attributes = this.parseWithClause()), this.semicolon(), this.finishNode(A, "ImportDeclaration");
 };
 dA.parseImportSpecifier = function() {
   var A = this.startNode();
@@ -3155,8 +3174,8 @@ dA.isDirectiveCandidate = function(A) {
   return this.options.ecmaVersion >= 5 && A.type === "ExpressionStatement" && A.expression.type === "Literal" && typeof A.expression.value == "string" && // Reject parenthesized strings.
   (this.input[A.start] === '"' || this.input[A.start] === "'");
 };
-var G1 = l1.prototype;
-G1.toAssignable = function(A, g, I) {
+var S1 = l1.prototype;
+S1.toAssignable = function(A, g, I) {
   if (this.options.ecmaVersion >= 6 && A)
     switch (A.type) {
       case "Identifier":
@@ -3201,7 +3220,7 @@ G1.toAssignable = function(A, g, I) {
   else I && this.checkPatternErrors(I, !0);
   return A;
 };
-G1.toAssignableList = function(A, g) {
+S1.toAssignableList = function(A, g) {
   for (var I = A.length, C = 0; C < I; C++) {
     var q = A[C];
     q && this.toAssignable(q, g);
@@ -3212,15 +3231,15 @@ G1.toAssignableList = function(A, g) {
   }
   return A;
 };
-G1.parseSpread = function(A) {
+S1.parseSpread = function(A) {
   var g = this.startNode();
   return this.next(), g.argument = this.parseMaybeAssign(!1, A), this.finishNode(g, "SpreadElement");
 };
-G1.parseRestBinding = function() {
+S1.parseRestBinding = function() {
   var A = this.startNode();
   return this.next(), this.options.ecmaVersion === 6 && this.type !== D.name && this.unexpected(), A.argument = this.parseBindingAtom(), this.finishNode(A, "RestElement");
 };
-G1.parseBindingAtom = function() {
+S1.parseBindingAtom = function() {
   if (this.options.ecmaVersion >= 6)
     switch (this.type) {
       case D.bracketL:
@@ -3231,7 +3250,7 @@ G1.parseBindingAtom = function() {
     }
   return this.parseIdent();
 };
-G1.parseBindingList = function(A, g, I, C) {
+S1.parseBindingList = function(A, g, I, C) {
   for (var q = [], B = !0; !this.eat(A); )
     if (B ? B = !1 : this.expect(D.comma), g && this.type === D.comma)
       q.push(null);
@@ -3247,20 +3266,20 @@ G1.parseBindingList = function(A, g, I, C) {
     }
   return q;
 };
-G1.parseAssignableListItem = function(A) {
+S1.parseAssignableListItem = function(A) {
   var g = this.parseMaybeDefault(this.start, this.startLoc);
   return this.parseBindingListItem(g), g;
 };
-G1.parseBindingListItem = function(A) {
+S1.parseBindingListItem = function(A) {
   return A;
 };
-G1.parseMaybeDefault = function(A, g, I) {
+S1.parseMaybeDefault = function(A, g, I) {
   if (I = I || this.parseBindingAtom(), this.options.ecmaVersion < 6 || !this.eat(D.eq))
     return I;
   var C = this.startNodeAt(A, g);
   return C.left = I, C.right = this.parseMaybeAssign(), this.finishNode(C, "AssignmentPattern");
 };
-G1.checkLValSimple = function(A, g, I) {
+S1.checkLValSimple = function(A, g, I) {
   g === void 0 && (g = g3);
   var C = g !== g3;
   switch (A.type) {
@@ -3279,7 +3298,7 @@ G1.checkLValSimple = function(A, g, I) {
       this.raise(A.start, (C ? "Binding" : "Assigning to") + " rvalue");
   }
 };
-G1.checkLValPattern = function(A, g, I) {
+S1.checkLValPattern = function(A, g, I) {
   switch (g === void 0 && (g = g3), A.type) {
     case "ObjectPattern":
       for (var C = 0, q = A.properties; C < q.length; C += 1) {
@@ -3297,7 +3316,7 @@ G1.checkLValPattern = function(A, g, I) {
       this.checkLValSimple(A, g, I);
   }
 };
-G1.checkLValInnerPattern = function(A, g, I) {
+S1.checkLValInnerPattern = function(A, g, I) {
   switch (g === void 0 && (g = g3), A.type) {
     case "Property":
       this.checkLValInnerPattern(A.value, g, I);
@@ -3393,8 +3412,8 @@ D.name.updateContext = function(A) {
   var g = !1;
   this.options.ecmaVersion >= 6 && A !== D.dot && (this.value === "of" && !this.exprAllowed || this.value === "yield" && this.inGeneratorContext()) && (g = !0), this.exprAllowed = g;
 };
-var GA = l1.prototype;
-GA.checkPropClash = function(A, g, I) {
+var SA = l1.prototype;
+SA.checkPropClash = function(A, g, I) {
   if (!(this.options.ecmaVersion >= 9 && A.type === "SpreadElement") && !(this.options.ecmaVersion >= 6 && (A.computed || A.method || A.shorthand))) {
     var C = A.key, q;
     switch (C.type) {
@@ -3426,7 +3445,7 @@ GA.checkPropClash = function(A, g, I) {
     e[B] = !0;
   }
 };
-GA.parseExpression = function(A, g) {
+SA.parseExpression = function(A, g) {
   var I = this;
   return this.catchStackOverflow(function() {
     var C = I.start, q = I.startLoc, B = I.parseMaybeAssign(A, g);
@@ -3439,7 +3458,7 @@ GA.parseExpression = function(A, g) {
     return B;
   });
 };
-GA.parseMaybeAssign = function(A, g, I) {
+SA.parseMaybeAssign = function(A, g, I) {
   if (this.isContextual("yield")) {
     if (this.inGenerator)
       return this.parseYield(A);
@@ -3457,7 +3476,7 @@ GA.parseMaybeAssign = function(A, g, I) {
     C && this.checkExpressionErrors(g, !0);
   return q > -1 && (g.parenthesizedAssign = q), B > -1 && (g.trailingComma = B), s;
 };
-GA.parseMaybeConditional = function(A, g) {
+SA.parseMaybeConditional = function(A, g) {
   var I = this.start, C = this.startLoc, q = this.parseExprOps(A, g);
   if (this.checkExpressionErrors(g))
     return q;
@@ -3467,11 +3486,11 @@ GA.parseMaybeConditional = function(A, g) {
   }
   return q;
 };
-GA.parseExprOps = function(A, g) {
+SA.parseExprOps = function(A, g) {
   var I = this.start, C = this.startLoc, q = this.parseMaybeUnary(g, !1, !1, A);
   return this.checkExpressionErrors(g) || q.start === I && q.type === "ArrowFunctionExpression" ? q : this.parseExprOp(q, I, C, -1, A);
 };
-GA.parseExprOp = function(A, g, I, C, q) {
+SA.parseExprOp = function(A, g, I, C, q) {
   var B = this.type.binop;
   if (B != null && (!q || this.type !== D._in) && B > C) {
     var e = this.type === D.logicalOR || this.type === D.logicalAND, i = this.type === D.coalesce;
@@ -3483,18 +3502,18 @@ GA.parseExprOp = function(A, g, I, C, q) {
   }
   return A;
 };
-GA.buildBinary = function(A, g, I, C, q, B) {
+SA.buildBinary = function(A, g, I, C, q, B) {
   C.type === "PrivateIdentifier" && this.raise(C.start, "Private identifier can only be left side of binary expression");
   var e = this.startNodeAt(A, g);
   return e.left = I, e.operator = q, e.right = C, this.finishNode(e, B ? "LogicalExpression" : "BinaryExpression");
 };
-GA.parseMaybeUnary = function(A, g, I, C) {
+SA.parseMaybeUnary = function(A, g, I, C) {
   var q = this.start, B = this.startLoc, e;
   if (this.isContextual("await") && this.canAwait)
     e = this.parseAwait(C), g = !0;
   else if (this.type.prefix) {
     var i = this.startNode(), Q = this.type === D.incDec;
-    i.operator = this.value, i.prefix = !0, this.next(), i.argument = this.parseMaybeUnary(null, !0, Q, C), this.checkExpressionErrors(A, !0), Q ? this.checkLValSimple(i.argument) : this.strict && i.operator === "delete" && c4(i.argument) ? this.raiseRecoverable(i.start, "Deleting local variable in strict mode") : i.operator === "delete" && j3(i.argument) ? this.raiseRecoverable(i.start, "Private fields can not be deleted") : g = !0, e = this.finishNode(i, Q ? "UpdateExpression" : "UnaryExpression");
+    i.operator = this.value, i.prefix = !0, this.next(), i.argument = this.parseMaybeUnary(null, !0, Q, C), this.checkExpressionErrors(A, !0), Q ? this.checkLValSimple(i.argument) : this.strict && i.operator === "delete" && c4(i.argument) ? this.raiseRecoverable(i.start, "Deleting local variable in strict mode") : i.operator === "delete" && W3(i.argument) ? this.raiseRecoverable(i.start, "Private fields can not be deleted") : g = !0, e = this.finishNode(i, Q ? "UpdateExpression" : "UnaryExpression");
   } else if (!g && this.type === D.privateId)
     (C || this.privateNameStack.length === 0) && this.options.checkPrivateFields && this.unexpected(), e = this.parsePrivateIdent(), this.type !== D._in && this.unexpected();
   else {
@@ -3516,17 +3535,17 @@ GA.parseMaybeUnary = function(A, g, I, C) {
 function c4(A) {
   return A.type === "Identifier" || A.type === "ParenthesizedExpression" && c4(A.expression);
 }
-function j3(A) {
-  return A.type === "MemberExpression" && A.property.type === "PrivateIdentifier" || A.type === "ChainExpression" && j3(A.expression) || A.type === "ParenthesizedExpression" && j3(A.expression);
+function W3(A) {
+  return A.type === "MemberExpression" && A.property.type === "PrivateIdentifier" || A.type === "ChainExpression" && W3(A.expression) || A.type === "ParenthesizedExpression" && W3(A.expression);
 }
-GA.parseExprSubscripts = function(A, g) {
+SA.parseExprSubscripts = function(A, g) {
   var I = this.start, C = this.startLoc, q = this.parseExprAtom(A, g);
   if (q.type === "ArrowFunctionExpression" && this.input.slice(this.lastTokStart, this.lastTokEnd) !== ")")
     return q;
   var B = this.parseSubscripts(q, I, C, !1, g);
   return A && B.type === "MemberExpression" && (A.parenthesizedAssign >= B.start && (A.parenthesizedAssign = -1), A.parenthesizedBind >= B.start && (A.parenthesizedBind = -1), A.trailingComma >= B.start && (A.trailingComma = -1)), B;
 };
-GA.parseSubscripts = function(A, g, I, C, q) {
+SA.parseSubscripts = function(A, g, I, C, q) {
   for (var B = this.options.ecmaVersion >= 8 && A.type === "Identifier" && A.name === "async" && this.lastTokEnd === A.end && !this.canInsertSemicolon() && A.end - A.start === 5 && this.potentialArrowAt === A.start, e = !1; ; ) {
     var i = this.parseSubscript(A, g, I, C, B, e, q);
     if (i.optional && (e = !0), i === A || i.type === "ArrowFunctionExpression") {
@@ -3539,13 +3558,13 @@ GA.parseSubscripts = function(A, g, I, C, q) {
     A = i;
   }
 };
-GA.shouldParseAsyncArrow = function() {
+SA.shouldParseAsyncArrow = function() {
   return !this.canInsertSemicolon() && this.eat(D.arrow);
 };
-GA.parseSubscriptAsyncArrow = function(A, g, I, C) {
+SA.parseSubscriptAsyncArrow = function(A, g, I, C) {
   return this.parseArrowExpression(this.startNodeAt(A, g), I, !0, C);
 };
-GA.parseSubscript = function(A, g, I, C, q, B, e) {
+SA.parseSubscript = function(A, g, I, C, q, B, e) {
   var i = this.options.ecmaVersion >= 11, Q = i && this.eat(D.questionDot);
   C && Q && this.raise(this.lastTokStart, "Optional chaining cannot appear in the callee of new expressions");
   var s = this.eat(D.bracketL);
@@ -3568,7 +3587,7 @@ GA.parseSubscript = function(A, g, I, C, q, B, e) {
   }
   return A;
 };
-GA.parseExprAtom = function(A, g, I) {
+SA.parseExprAtom = function(A, g, I) {
   this.type === D.slash && this.readRegexp();
   var C, q = this.potentialArrowAt === this.start;
   switch (this.type) {
@@ -3618,10 +3637,10 @@ GA.parseExprAtom = function(A, g, I) {
       return this.parseExprAtomDefault();
   }
 };
-GA.parseExprAtomDefault = function() {
+SA.parseExprAtomDefault = function() {
   this.unexpected();
 };
-GA.parseExprImport = function(A) {
+SA.parseExprImport = function(A) {
   var g = this.startNode();
   if (this.containsEsc && this.raiseRecoverable(this.start, "Escape sequence in keyword import"), this.next(), this.type === D.parenL && !A)
     return this.parseDynamicImport(g);
@@ -3631,7 +3650,7 @@ GA.parseExprImport = function(A) {
   } else
     this.unexpected();
 };
-GA.parseDynamicImport = function(A) {
+SA.parseDynamicImport = function(A) {
   if (this.next(), A.source = this.parseMaybeAssign(), this.options.ecmaVersion >= 16)
     this.eat(D.parenR) ? A.options = null : (this.expect(D.comma), this.afterTrailingComma(D.parenR) ? A.options = null : (A.options = this.parseMaybeAssign(), this.eat(D.parenR) || (this.expect(D.comma), this.afterTrailingComma(D.parenR) || this.unexpected())));
   else if (!this.eat(D.parenR)) {
@@ -3640,24 +3659,24 @@ GA.parseDynamicImport = function(A) {
   }
   return this.finishNode(A, "ImportExpression");
 };
-GA.parseImportMeta = function(A) {
+SA.parseImportMeta = function(A) {
   this.next();
   var g = this.containsEsc;
   return A.property = this.parseIdent(!0), A.property.name !== "meta" && this.raiseRecoverable(A.property.start, "The only valid meta property for import is 'import.meta'"), g && this.raiseRecoverable(A.start, "'import.meta' must not contain escaped characters"), this.options.sourceType !== "module" && !this.options.allowImportExportEverywhere && this.raiseRecoverable(A.start, "Cannot use 'import.meta' outside a module"), this.finishNode(A, "MetaProperty");
 };
-GA.parseLiteral = function(A) {
+SA.parseLiteral = function(A) {
   var g = this.startNode();
   return g.value = A, g.raw = this.input.slice(this.start, this.end), g.raw.charCodeAt(g.raw.length - 1) === 110 && (g.bigint = g.value != null ? g.value.toString() : g.raw.slice(0, -1).replace(/_/g, "")), this.next(), this.finishNode(g, "Literal");
 };
-GA.parseParenExpression = function() {
+SA.parseParenExpression = function() {
   this.expect(D.parenL);
   var A = this.parseExpression();
   return this.expect(D.parenR), A;
 };
-GA.shouldParseArrow = function(A) {
+SA.shouldParseArrow = function(A) {
   return !this.canInsertSemicolon();
 };
-GA.parseParenAndDistinguishExpression = function(A, g) {
+SA.parseParenAndDistinguishExpression = function(A, g) {
   var I = this.start, C = this.startLoc, q, B = this.options.ecmaVersion >= 8;
   if (this.options.ecmaVersion >= 6) {
     this.next();
@@ -3686,14 +3705,14 @@ GA.parseParenAndDistinguishExpression = function(A, g) {
   } else
     return q;
 };
-GA.parseParenItem = function(A) {
+SA.parseParenItem = function(A) {
   return A;
 };
-GA.parseParenArrowList = function(A, g, I, C) {
+SA.parseParenArrowList = function(A, g, I, C) {
   return this.parseArrowExpression(this.startNodeAt(A, g), I, !1, C);
 };
 var pg = [];
-GA.parseNew = function() {
+SA.parseNew = function() {
   this.containsEsc && this.raiseRecoverable(this.start, "Escape sequence in keyword new");
   var A = this.startNode();
   if (this.next(), this.options.ecmaVersion >= 6 && this.type === D.dot) {
@@ -3705,7 +3724,7 @@ GA.parseNew = function() {
   var C = this.start, q = this.startLoc;
   return A.callee = this.parseSubscripts(this.parseExprAtom(null, !1, !0), C, q, !0, !1), A.callee.type === "Super" && this.raiseRecoverable(C, "Invalid use of 'super'"), this.eat(D.parenL) ? A.arguments = this.parseExprList(D.parenR, this.options.ecmaVersion >= 8, !1) : A.arguments = pg, this.finishNode(A, "NewExpression");
 };
-GA.parseTemplateElement = function(A) {
+SA.parseTemplateElement = function(A) {
   var g = A.isTagged, I = this.startNode();
   return this.type === D.invalidTemplate ? (g || this.raiseRecoverable(this.start, "Bad escape sequence in untagged template literal"), I.value = {
     raw: this.value.replace(/\r\n?/g, `
@@ -3717,7 +3736,7 @@ GA.parseTemplateElement = function(A) {
     cooked: this.value
   }, this.next(), I.tail = this.type === D.backQuote, this.finishNode(I, "TemplateElement");
 };
-GA.parseTemplate = function(A) {
+SA.parseTemplate = function(A) {
   A === void 0 && (A = {});
   var g = A.isTagged;
   g === void 0 && (g = !1);
@@ -3728,10 +3747,10 @@ GA.parseTemplate = function(A) {
     this.type === D.eof && this.raise(this.pos, "Unterminated template literal"), this.expect(D.dollarBraceL), I.expressions.push(this.parseExpression()), this.expect(D.braceR), I.quasis.push(C = this.parseTemplateElement({ isTagged: g }));
   return this.next(), this.finishNode(I, "TemplateLiteral");
 };
-GA.isAsyncProp = function(A) {
+SA.isAsyncProp = function(A) {
   return !A.computed && A.key.type === "Identifier" && A.key.name === "async" && (this.type === D.name || this.type === D.num || this.type === D.string || this.type === D.bracketL || this.type.keyword || this.options.ecmaVersion >= 9 && this.type === D.star) && !w1.test(this.input.slice(this.lastTokEnd, this.start));
 };
-GA.parseObj = function(A, g) {
+SA.parseObj = function(A, g) {
   var I = this.startNode(), C = !0, q = {};
   for (I.properties = [], this.next(); !this.eat(D.braceR); ) {
     if (C)
@@ -3743,7 +3762,7 @@ GA.parseObj = function(A, g) {
   }
   return this.finishNode(I, A ? "ObjectPattern" : "ObjectExpression");
 };
-GA.parseProperty = function(A, g) {
+SA.parseProperty = function(A, g) {
   var I = this.startNode(), C, q, B, e;
   if (this.options.ecmaVersion >= 9 && this.eat(D.ellipsis))
     return A ? (I.argument = this.parseIdent(!1), this.type === D.comma && this.raiseRecoverable(this.start, "Comma is not permitted after the rest element"), this.finishNode(I, "RestElement")) : (I.argument = this.parseMaybeAssign(!1, g), this.type === D.comma && g && g.trailingComma < 0 && (g.trailingComma = this.start), this.finishNode(I, "SpreadElement"));
@@ -3751,7 +3770,7 @@ GA.parseProperty = function(A, g) {
   var i = this.containsEsc;
   return this.parsePropertyName(I), !A && !i && this.options.ecmaVersion >= 8 && !C && this.isAsyncProp(I) ? (q = !0, C = this.options.ecmaVersion >= 9 && this.eat(D.star), this.parsePropertyName(I)) : q = !1, this.parsePropertyValue(I, A, C, q, B, e, g, i), this.finishNode(I, "Property");
 };
-GA.parseGetterSetter = function(A) {
+SA.parseGetterSetter = function(A) {
   var g = A.key.name;
   this.parsePropertyName(A), A.value = this.parseMethod(!1), A.kind = g;
   var I = A.kind === "get" ? 0 : 1;
@@ -3761,10 +3780,10 @@ GA.parseGetterSetter = function(A) {
   } else
     A.kind === "set" && A.value.params[0].type === "RestElement" && this.raiseRecoverable(A.value.params[0].start, "Setter cannot use rest params");
 };
-GA.parsePropertyValue = function(A, g, I, C, q, B, e, i) {
+SA.parsePropertyValue = function(A, g, I, C, q, B, e, i) {
   (I || C) && this.type === D.colon && this.unexpected(), this.eat(D.colon) ? (A.value = g ? this.parseMaybeDefault(this.start, this.startLoc) : this.parseMaybeAssign(!1, e), A.kind = "init") : this.options.ecmaVersion >= 6 && this.type === D.parenL ? (g && this.unexpected(), A.method = !0, A.value = this.parseMethod(I, C), A.kind = "init") : !g && !i && this.options.ecmaVersion >= 5 && !A.computed && A.key.type === "Identifier" && (A.key.name === "get" || A.key.name === "set") && this.type !== D.comma && this.type !== D.braceR && this.type !== D.eq ? ((I || C) && this.unexpected(), this.parseGetterSetter(A)) : this.options.ecmaVersion >= 6 && !A.computed && A.key.type === "Identifier" ? ((I || C) && this.unexpected(), this.checkUnreserved(A.key), A.key.name === "await" && !this.awaitIdentPos && (this.awaitIdentPos = q), g ? A.value = this.parseMaybeDefault(q, B, this.copyNode(A.key)) : this.type === D.eq && e ? (e.shorthandAssign < 0 && (e.shorthandAssign = this.start), A.value = this.parseMaybeDefault(q, B, this.copyNode(A.key))) : A.value = this.copyNode(A.key), A.kind = "init", A.shorthand = !0) : this.unexpected();
 };
-GA.parsePropertyName = function(A) {
+SA.parsePropertyName = function(A) {
   if (this.options.ecmaVersion >= 6) {
     if (this.eat(D.bracketL))
       return A.computed = !0, A.key = this.parseMaybeAssign(), this.expect(D.bracketR), A.key;
@@ -3772,18 +3791,18 @@ GA.parsePropertyName = function(A) {
   }
   return A.key = this.type === D.num || this.type === D.string ? this.parseExprAtom() : this.parseIdent(this.options.allowReserved !== "never");
 };
-GA.initFunction = function(A) {
+SA.initFunction = function(A) {
   A.id = null, this.options.ecmaVersion >= 6 && (A.generator = A.expression = !1), this.options.ecmaVersion >= 8 && (A.async = !1);
 };
-GA.parseMethod = function(A, g, I) {
+SA.parseMethod = function(A, g, I) {
   var C = this.startNode(), q = this.yieldPos, B = this.awaitPos, e = this.awaitIdentPos;
-  return this.initFunction(C), this.options.ecmaVersion >= 6 && (C.generator = A), this.options.ecmaVersion >= 8 && (C.async = !!g), this.yieldPos = 0, this.awaitPos = 0, this.awaitIdentPos = 0, this.enterScope(i5(g, C.generator) | l3 | (I ? a4 : 0)), this.expect(D.parenL), C.params = this.parseBindingList(D.parenR, !1, this.options.ecmaVersion >= 8), this.checkYieldAwaitInDefaultParams(), this.parseFunctionBody(C, !1, !0, !1), this.yieldPos = q, this.awaitPos = B, this.awaitIdentPos = e, this.finishNode(C, "FunctionExpression");
+  return this.initFunction(C), this.options.ecmaVersion >= 6 && (C.generator = A), this.options.ecmaVersion >= 8 && (C.async = !!g), this.yieldPos = 0, this.awaitPos = 0, this.awaitIdentPos = 0, this.enterScope(e5(g, C.generator) | l3 | (I ? a4 : 0)), this.expect(D.parenL), C.params = this.parseBindingList(D.parenR, !1, this.options.ecmaVersion >= 8), this.checkYieldAwaitInDefaultParams(), this.parseFunctionBody(C, !1, !0, !1), this.yieldPos = q, this.awaitPos = B, this.awaitIdentPos = e, this.finishNode(C, "FunctionExpression");
 };
-GA.parseArrowExpression = function(A, g, I, C) {
+SA.parseArrowExpression = function(A, g, I, C) {
   var q = this.yieldPos, B = this.awaitPos, e = this.awaitIdentPos;
-  return this.enterScope(i5(I, !1) | q5), this.initFunction(A), this.options.ecmaVersion >= 8 && (A.async = !!I), this.yieldPos = 0, this.awaitPos = 0, this.awaitIdentPos = 0, A.params = this.toAssignableList(g, !0), this.parseFunctionBody(A, !0, !1, C), this.yieldPos = q, this.awaitPos = B, this.awaitIdentPos = e, this.finishNode(A, "ArrowFunctionExpression");
+  return this.enterScope(e5(I, !1) | i5), this.initFunction(A), this.options.ecmaVersion >= 8 && (A.async = !!I), this.yieldPos = 0, this.awaitPos = 0, this.awaitIdentPos = 0, A.params = this.toAssignableList(g, !0), this.parseFunctionBody(A, !0, !1, C), this.yieldPos = q, this.awaitPos = B, this.awaitIdentPos = e, this.finishNode(A, "ArrowFunctionExpression");
 };
-GA.parseFunctionBody = function(A, g, I, C) {
+SA.parseFunctionBody = function(A, g, I, C) {
   var q = g && this.type !== D.braceL, B = this.strict, e = !1;
   if (q)
     A.body = this.parseMaybeAssign(C), A.expression = !0, this.checkParams(A, !1);
@@ -3795,7 +3814,7 @@ GA.parseFunctionBody = function(A, g, I, C) {
   }
   this.exitScope();
 };
-GA.isSimpleParamList = function(A) {
+SA.isSimpleParamList = function(A) {
   for (var g = 0, I = A; g < I.length; g += 1) {
     var C = I[g];
     if (C.type !== "Identifier")
@@ -3803,13 +3822,13 @@ GA.isSimpleParamList = function(A) {
   }
   return !0;
 };
-GA.checkParams = function(A, g) {
+SA.checkParams = function(A, g) {
   for (var I = /* @__PURE__ */ Object.create(null), C = 0, q = A.params; C < q.length; C += 1) {
     var B = q[C];
-    this.checkLValInnerPattern(B, e5, g ? null : I);
+    this.checkLValInnerPattern(B, B5, g ? null : I);
   }
 };
-GA.parseExprList = function(A, g, I, C) {
+SA.parseExprList = function(A, g, I, C) {
   for (var q = [], B = !0; !this.eat(A); ) {
     if (B)
       B = !1;
@@ -3820,31 +3839,31 @@ GA.parseExprList = function(A, g, I, C) {
   }
   return q;
 };
-GA.checkUnreserved = function(A) {
+SA.checkUnreserved = function(A) {
   var g = A.start, I = A.end, C = A.name;
   if (this.inGenerator && C === "yield" && this.raiseRecoverable(g, "Cannot use 'yield' as identifier inside a generator"), this.inAsync && C === "await" && this.raiseRecoverable(g, "Cannot use 'await' as identifier inside an async function"), !(this.currentThisScope().flags & o3) && C === "arguments" && this.raiseRecoverable(g, "Cannot use 'arguments' in class field initializer"), this.inClassStaticBlock && (C === "arguments" || C === "await") && this.raise(g, "Cannot use " + C + " in class static initialization block"), this.keywords.test(C) && this.raise(g, "Unexpected keyword '" + C + "'"), !(this.options.ecmaVersion < 6 && this.input.slice(g, I).indexOf("\\") !== -1)) {
     var q = this.strict ? this.reservedWordsStrict : this.reservedWords;
     q.test(C) && (!this.inAsync && C === "await" && this.raiseRecoverable(g, "Cannot use keyword 'await' outside an async function"), this.raiseRecoverable(g, "The keyword '" + C + "' is reserved"));
   }
 };
-GA.parseIdent = function(A) {
+SA.parseIdent = function(A) {
   var g = this.parseIdentNode();
   return this.next(!!A), this.finishNode(g, "Identifier"), A || (this.checkUnreserved(g), g.name === "await" && !this.awaitIdentPos && (this.awaitIdentPos = g.start)), g;
 };
-GA.parseIdentNode = function() {
+SA.parseIdentNode = function() {
   var A = this.startNode();
   return this.type === D.name ? A.name = this.value : this.type.keyword ? (A.name = this.type.keyword, (A.name === "class" || A.name === "function") && (this.lastTokEnd !== this.lastTokStart + 1 || this.input.charCodeAt(this.lastTokStart) !== 46) && this.context.pop(), this.type = D.name) : this.unexpected(), A;
 };
-GA.parsePrivateIdent = function() {
+SA.parsePrivateIdent = function() {
   var A = this.startNode();
   return this.type === D.privateId ? A.name = this.value : this.unexpected(), this.next(), this.finishNode(A, "PrivateIdentifier"), this.options.checkPrivateFields && (this.privateNameStack.length === 0 ? this.raise(A.start, "Private field '#" + A.name + "' must be declared in an enclosing class") : this.privateNameStack[this.privateNameStack.length - 1].used.push(A)), A;
 };
-GA.parseYield = function(A) {
+SA.parseYield = function(A) {
   this.yieldPos || (this.yieldPos = this.start);
   var g = this.startNode();
   return this.next(), this.type === D.semi || this.canInsertSemicolon() || this.type !== D.star && !this.type.startsExpr ? (g.delegate = !1, g.argument = null) : (g.delegate = this.eat(D.star), g.argument = this.parseMaybeAssign(A)), this.finishNode(g, "YieldExpression");
 };
-GA.parseAwait = function(A) {
+SA.parseAwait = function(A) {
   this.awaitPos || (this.awaitPos = this.start);
   var g = this.startNode();
   return this.next(), g.argument = this.parseMaybeUnary(null, !0, !1, A), this.finishNode(g, "AwaitExpression");
@@ -3912,7 +3931,7 @@ I2.currentVarScope = function() {
 I2.currentThisScope = function() {
   for (var A = this.scopeStack.length - 1; ; A--) {
     var g = this.scopeStack[A];
-    if (g.flags & (o3 | F2 | s2) && !(g.flags & q5))
+    if (g.flags & (o3 | F2 | s2) && !(g.flags & i5))
       return g;
   }
 };
@@ -3954,16 +3973,16 @@ var Fg = "Berf Beria_Erfe Gara Garay Gukh Gurung_Khema Hrkt Katakana_Or_Hiragana
   12: "",
   13: "",
   14: Jg
-}, U5 = "Cased_Letter LC Close_Punctuation Pe Connector_Punctuation Pc Control Cc cntrl Currency_Symbol Sc Dash_Punctuation Pd Decimal_Number Nd digit Enclosing_Mark Me Final_Punctuation Pf Format Cf Initial_Punctuation Pi Letter L Letter_Number Nl Line_Separator Zl Lowercase_Letter Ll Mark M Combining_Mark Math_Symbol Sm Modifier_Letter Lm Modifier_Symbol Sk Nonspacing_Mark Mn Number N Open_Punctuation Ps Other C Other_Letter Lo Other_Number No Other_Punctuation Po Other_Symbol So Paragraph_Separator Zp Private_Use Co Punctuation P punct Separator Z Space_Separator Zs Spacing_Mark Mc Surrogate Cs Symbol S Titlecase_Letter Lt Unassigned Cn Uppercase_Letter Lu", N4 = "Adlam Adlm Ahom Anatolian_Hieroglyphs Hluw Arabic Arab Armenian Armn Avestan Avst Balinese Bali Bamum Bamu Bassa_Vah Bass Batak Batk Bengali Beng Bhaiksuki Bhks Bopomofo Bopo Brahmi Brah Braille Brai Buginese Bugi Buhid Buhd Canadian_Aboriginal Cans Carian Cari Caucasian_Albanian Aghb Chakma Cakm Cham Cham Cherokee Cher Common Zyyy Coptic Copt Qaac Cuneiform Xsux Cypriot Cprt Cyrillic Cyrl Deseret Dsrt Devanagari Deva Duployan Dupl Egyptian_Hieroglyphs Egyp Elbasan Elba Ethiopic Ethi Georgian Geor Glagolitic Glag Gothic Goth Grantha Gran Greek Grek Gujarati Gujr Gurmukhi Guru Han Hani Hangul Hang Hanunoo Hano Hatran Hatr Hebrew Hebr Hiragana Hira Imperial_Aramaic Armi Inherited Zinh Qaai Inscriptional_Pahlavi Phli Inscriptional_Parthian Prti Javanese Java Kaithi Kthi Kannada Knda Katakana Kana Kayah_Li Kali Kharoshthi Khar Khmer Khmr Khojki Khoj Khudawadi Sind Lao Laoo Latin Latn Lepcha Lepc Limbu Limb Linear_A Lina Linear_B Linb Lisu Lisu Lycian Lyci Lydian Lydi Mahajani Mahj Malayalam Mlym Mandaic Mand Manichaean Mani Marchen Marc Masaram_Gondi Gonm Meetei_Mayek Mtei Mende_Kikakui Mend Meroitic_Cursive Merc Meroitic_Hieroglyphs Mero Miao Plrd Modi Mongolian Mong Mro Mroo Multani Mult Myanmar Mymr Nabataean Nbat New_Tai_Lue Talu Newa Newa Nko Nkoo Nushu Nshu Ogham Ogam Ol_Chiki Olck Old_Hungarian Hung Old_Italic Ital Old_North_Arabian Narb Old_Permic Perm Old_Persian Xpeo Old_South_Arabian Sarb Old_Turkic Orkh Oriya Orya Osage Osge Osmanya Osma Pahawh_Hmong Hmng Palmyrene Palm Pau_Cin_Hau Pauc Phags_Pa Phag Phoenician Phnx Psalter_Pahlavi Phlp Rejang Rjng Runic Runr Samaritan Samr Saurashtra Saur Sharada Shrd Shavian Shaw Siddham Sidd SignWriting Sgnw Sinhala Sinh Sora_Sompeng Sora Soyombo Soyo Sundanese Sund Syloti_Nagri Sylo Syriac Syrc Tagalog Tglg Tagbanwa Tagb Tai_Le Tale Tai_Tham Lana Tai_Viet Tavt Takri Takr Tamil Taml Tangut Tang Telugu Telu Thaana Thaa Thai Thai Tibetan Tibt Tifinagh Tfng Tirhuta Tirh Ugaritic Ugar Vai Vaii Warang_Citi Wara Yi Yiii Zanabazar_Square Zanb", x4 = N4 + " Dogra Dogr Gunjala_Gondi Gong Hanifi_Rohingya Rohg Makasar Maka Medefaidrin Medf Old_Sogdian Sogo Sogdian Sogd", k4 = x4 + " Elymaic Elym Nandinagari Nand Nyiakeng_Puachue_Hmong Hmnp Wancho Wcho", K4 = k4 + " Chorasmian Chrs Diak Dives_Akuru Khitan_Small_Script Kits Yezi Yezidi", G4 = K4 + " Cypro_Minoan Cpmn Old_Uyghur Ougr Tangsa Tnsa Toto Vithkuqi Vith", Lg = G4 + " " + Fg, Hg = {
+}, U5 = "Cased_Letter LC Close_Punctuation Pe Connector_Punctuation Pc Control Cc cntrl Currency_Symbol Sc Dash_Punctuation Pd Decimal_Number Nd digit Enclosing_Mark Me Final_Punctuation Pf Format Cf Initial_Punctuation Pi Letter L Letter_Number Nl Line_Separator Zl Lowercase_Letter Ll Mark M Combining_Mark Math_Symbol Sm Modifier_Letter Lm Modifier_Symbol Sk Nonspacing_Mark Mn Number N Open_Punctuation Ps Other C Other_Letter Lo Other_Number No Other_Punctuation Po Other_Symbol So Paragraph_Separator Zp Private_Use Co Punctuation P punct Separator Z Space_Separator Zs Spacing_Mark Mc Surrogate Cs Symbol S Titlecase_Letter Lt Unassigned Cn Uppercase_Letter Lu", N4 = "Adlam Adlm Ahom Anatolian_Hieroglyphs Hluw Arabic Arab Armenian Armn Avestan Avst Balinese Bali Bamum Bamu Bassa_Vah Bass Batak Batk Bengali Beng Bhaiksuki Bhks Bopomofo Bopo Brahmi Brah Braille Brai Buginese Bugi Buhid Buhd Canadian_Aboriginal Cans Carian Cari Caucasian_Albanian Aghb Chakma Cakm Cham Cham Cherokee Cher Common Zyyy Coptic Copt Qaac Cuneiform Xsux Cypriot Cprt Cyrillic Cyrl Deseret Dsrt Devanagari Deva Duployan Dupl Egyptian_Hieroglyphs Egyp Elbasan Elba Ethiopic Ethi Georgian Geor Glagolitic Glag Gothic Goth Grantha Gran Greek Grek Gujarati Gujr Gurmukhi Guru Han Hani Hangul Hang Hanunoo Hano Hatran Hatr Hebrew Hebr Hiragana Hira Imperial_Aramaic Armi Inherited Zinh Qaai Inscriptional_Pahlavi Phli Inscriptional_Parthian Prti Javanese Java Kaithi Kthi Kannada Knda Katakana Kana Kayah_Li Kali Kharoshthi Khar Khmer Khmr Khojki Khoj Khudawadi Sind Lao Laoo Latin Latn Lepcha Lepc Limbu Limb Linear_A Lina Linear_B Linb Lisu Lisu Lycian Lyci Lydian Lydi Mahajani Mahj Malayalam Mlym Mandaic Mand Manichaean Mani Marchen Marc Masaram_Gondi Gonm Meetei_Mayek Mtei Mende_Kikakui Mend Meroitic_Cursive Merc Meroitic_Hieroglyphs Mero Miao Plrd Modi Mongolian Mong Mro Mroo Multani Mult Myanmar Mymr Nabataean Nbat New_Tai_Lue Talu Newa Newa Nko Nkoo Nushu Nshu Ogham Ogam Ol_Chiki Olck Old_Hungarian Hung Old_Italic Ital Old_North_Arabian Narb Old_Permic Perm Old_Persian Xpeo Old_South_Arabian Sarb Old_Turkic Orkh Oriya Orya Osage Osge Osmanya Osma Pahawh_Hmong Hmng Palmyrene Palm Pau_Cin_Hau Pauc Phags_Pa Phag Phoenician Phnx Psalter_Pahlavi Phlp Rejang Rjng Runic Runr Samaritan Samr Saurashtra Saur Sharada Shrd Shavian Shaw Siddham Sidd SignWriting Sgnw Sinhala Sinh Sora_Sompeng Sora Soyombo Soyo Sundanese Sund Syloti_Nagri Sylo Syriac Syrc Tagalog Tglg Tagbanwa Tagb Tai_Le Tale Tai_Tham Lana Tai_Viet Tavt Takri Takr Tamil Taml Tangut Tang Telugu Telu Thaana Thaa Thai Thai Tibetan Tibt Tifinagh Tfng Tirhuta Tirh Ugaritic Ugar Vai Vaii Warang_Citi Wara Yi Yiii Zanabazar_Square Zanb", x4 = N4 + " Dogra Dogr Gunjala_Gondi Gong Hanifi_Rohingya Rohg Makasar Maka Medefaidrin Medf Old_Sogdian Sogo Sogdian Sogd", k4 = x4 + " Elymaic Elym Nandinagari Nand Nyiakeng_Puachue_Hmong Hmnp Wancho Wcho", K4 = k4 + " Chorasmian Chrs Diak Dives_Akuru Khitan_Small_Script Kits Yezi Yezidi", S4 = K4 + " Cypro_Minoan Cpmn Old_Uyghur Ougr Tangsa Tnsa Toto Vithkuqi Vith", Lg = S4 + " " + Fg, Hg = {
   9: N4,
   10: x4,
   11: k4,
   12: K4,
-  13: G4,
+  13: S4,
   14: Lg
-}, S4 = {};
+}, G4 = {};
 function _g(A) {
-  var g = S4[A] = {
+  var g = G4[A] = {
     binary: $1(Yg[A] + " " + U5),
     binaryOfStrings: $1(bg[A]),
     nonBinary: {
@@ -3973,8 +3992,8 @@ function _g(A) {
   };
   g.nonBinary.Script_Extensions = g.nonBinary.Script, g.nonBinary.gc = g.nonBinary.General_Category, g.nonBinary.sc = g.nonBinary.Script, g.nonBinary.scx = g.nonBinary.Script_Extensions;
 }
-for (var S3 = 0, Y5 = [9, 10, 11, 12, 13, 14]; S3 < Y5.length; S3 += 1) {
-  var vg = Y5[S3];
+for (var R3 = 0, Y5 = [9, 10, 11, 12, 13, 14]; R3 < Y5.length; R3 += 1) {
+  var vg = Y5[R3];
   _g(vg);
 }
 var mA = l1.prototype, q3 = function(g, I) {
@@ -3991,7 +4010,7 @@ q3.prototype.sibling = function() {
   return new q3(this.parent, this.base);
 };
 var L1 = function(g) {
-  this.parser = g, this.validFlags = "gim" + (g.options.ecmaVersion >= 6 ? "uy" : "") + (g.options.ecmaVersion >= 9 ? "s" : "") + (g.options.ecmaVersion >= 13 ? "d" : "") + (g.options.ecmaVersion >= 15 ? "v" : ""), this.unicodeProperties = S4[g.options.ecmaVersion >= 14 ? 14 : g.options.ecmaVersion], this.source = "", this.flags = "", this.start = 0, this.switchU = !1, this.switchV = !1, this.switchN = !1, this.pos = 0, this.lastIntValue = 0, this.lastStringValue = "", this.lastAssertionIsQuantifiable = !1, this.numCapturingParens = 0, this.maxBackReference = 0, this.groupNames = /* @__PURE__ */ Object.create(null), this.backReferenceNames = [], this.branchID = null;
+  this.parser = g, this.validFlags = "gim" + (g.options.ecmaVersion >= 6 ? "uy" : "") + (g.options.ecmaVersion >= 9 ? "s" : "") + (g.options.ecmaVersion >= 13 ? "d" : "") + (g.options.ecmaVersion >= 15 ? "v" : ""), this.unicodeProperties = G4[g.options.ecmaVersion >= 14 ? 14 : g.options.ecmaVersion], this.source = "", this.flags = "", this.start = 0, this.switchU = !1, this.switchV = !1, this.switchN = !1, this.pos = 0, this.lastIntValue = 0, this.lastStringValue = "", this.lastAssertionIsQuantifiable = !1, this.numCapturingParens = 0, this.maxBackReference = 0, this.groupNames = /* @__PURE__ */ Object.create(null), this.backReferenceNames = [], this.branchID = null;
 };
 L1.prototype.reset = function(g, I, C) {
   var q = C.indexOf("v") !== -1, B = C.indexOf("u") !== -1;
@@ -4807,14 +4826,14 @@ mA.regexp_eatFixedHexDigits = function(A, g) {
   }
   return !0;
 };
-var Q5 = function(g) {
+var E5 = function(g) {
   this.type = g.type, this.value = g.value, this.start = g.start, this.end = g.end, g.options.locations && (this.loc = new E3(g, g.startLoc, g.endLoc)), g.options.ranges && (this.range = [g.start, g.end]);
 }, JA = l1.prototype;
 JA.next = function(A) {
-  !A && this.type.keyword && this.containsEsc && this.raiseRecoverable(this.start, "Escape sequence in keyword " + this.type.keyword), this.options.onToken && this.options.onToken(new Q5(this)), this.lastTokEnd = this.end, this.lastTokStart = this.start, this.lastTokEndLoc = this.endLoc, this.lastTokStartLoc = this.startLoc, this.nextToken();
+  !A && this.type.keyword && this.containsEsc && this.raiseRecoverable(this.start, "Escape sequence in keyword " + this.type.keyword), this.options.onToken && this.options.onToken(new E5(this)), this.lastTokEnd = this.end, this.lastTokStart = this.start, this.lastTokEndLoc = this.endLoc, this.lastTokStartLoc = this.startLoc, this.nextToken();
 };
 JA.getToken = function() {
-  return this.next(), new Q5(this);
+  return this.next(), new E5(this);
 };
 typeof Symbol < "u" && (JA[Symbol.iterator] = function() {
   var A = this;
@@ -5312,25 +5331,25 @@ JA.readWord1 = function() {
 };
 JA.readWord = function() {
   var A = this.readWord1(), g = D.name;
-  return this.keywords.test(A) && (g = I5[A]), this.finishToken(g, A);
+  return this.keywords.test(A) && (g = C5[A]), this.finishToken(g, A);
 };
 var gI = "8.17.0";
 l1.acorn = {
   Parser: l1,
   version: gI,
-  defaultOptions: T3,
+  defaultOptions: O3,
   Position: R2,
   SourceLocation: E3,
   getLineInfo: l4,
   Node: a3,
   TokenType: PA,
   tokTypes: D,
-  keywordTypes: I5,
+  keywordTypes: C5,
   TokContext: R1,
   tokContexts: g1,
   isIdentifierChar: g2,
   isIdentifierStart: b1,
-  Token: Q5,
+  Token: E5,
   isNewLine: m2,
   lineBreak: w1,
   lineBreakG: ug,
@@ -5375,7 +5394,7 @@ const z2 = {
   deg: { value: 1, length: 0, angle: 1 },
   rad: { value: 180 / Math.PI, length: 0, angle: 1 }
 }, CI = (A) => A === "mm" ? [1, 0] : A === "deg" ? [0, 1] : [0, 0], X2 = (A) => !!A && typeof A == "object" && !Array.isArray(A), qI = (A) => /^[A-Za-z][A-Za-z0-9_]{0,39}$/.test(A) && !Object.hasOwn(z2, A) && !["constructor", "prototype", "__proto__"].includes(A);
-class E5 extends Error {
+class l5 extends Error {
   constructor(I) {
     super(I);
     jA(this, "code", "resource-limit");
@@ -5383,7 +5402,7 @@ class E5 extends Error {
   }
 }
 function o2(A) {
-  throw new E5(t`Parameters: ${A}`);
+  throw new l5(t`Parameters: ${A}`);
 }
 function yA(A) {
   throw new Error(t`Parameters: ${A}`);
@@ -5594,12 +5613,12 @@ function t2(A, g, I = {}) {
         const y = n.args[0].name, [m, p, K] = n.args.slice(1, 4).map((T) => {
           const v = a(T);
           return (v.boolean || v.length || v.angle) && yA(t("function requires a dimensionless argument")), v.value;
-        }), k = (p - m) / K, S = K === 0 ? 0 : Math.max(0, Math.floor(k + 4 * Number.EPSILON * Math.max(1, Math.abs(k))) + 1);
-        (!K || !Number.isSafeInteger(S)) && yA(t("Invalid range reduction")), S > 256 && o2(t("Range reduction exceeds 256 values"));
+        }), k = (p - m) / K, G = K === 0 ? 0 : Math.max(0, Math.floor(k + 4 * Number.EPSILON * Math.max(1, Math.abs(k))) + 1);
+        (!K || !Number.isSafeInteger(G)) && yA(t("Invalid range reduction")), G > 256 && o2(t("Range reduction exceeds 256 values"));
         const _ = s.get(y);
         let J;
         try {
-          for (let T = 0; T < S; T++) {
+          for (let T = 0; T < G; T++) {
             if (s.set(y, q(m + T * K)), n.args.length === 6 && !B(a(n.args[4])))
               continue;
             const v = a(n.args.at(-1));
@@ -5616,7 +5635,7 @@ function t2(A, g, I = {}) {
         const m = n.args[0].name, [p, K, k] = n.args.slice(1, 4).map((sA) => {
           const O = a(sA);
           return (O.boolean || O.length || O.angle) && yA(t("function requires a dimensionless argument")), O.value;
-        }), S = (K - p) / k, _ = k === 0 ? 0 : Math.max(0, Math.floor(S + 4 * Number.EPSILON * Math.max(1, Math.abs(S))) + 1);
+        }), G = (K - p) / k, _ = k === 0 ? 0 : Math.max(0, Math.floor(G + 4 * Number.EPSILON * Math.max(1, Math.abs(G))) + 1);
         (!k || !Number.isSafeInteger(_) || _ > 256) && yA(t("Range reduction exceeds 256 values"));
         const J = n.name === "filterAt" ? a(n.args[5]) : void 0;
         J && (J.boolean || J.length || J.angle || !Number.isInteger(J.value) || J.value < 0) && yA(t("List index is outside the available values"));
@@ -5977,7 +5996,7 @@ function D2(A, g, I, C, q, B) {
           if (M === 0 && m === a.length - 1)
             continue;
           const p = a[m], K = a[(m + 1) % a.length];
-          [0, 1].every((S) => Math.max(Math.min(N[S], y[S]), Math.min(p[S], K[S])) <= Math.min(Math.max(N[S], y[S]), Math.max(p[S], K[S])) + 1e-9) && n(N, y, p) * n(N, y, K) <= 1e-10 && n(p, K, N) * n(p, K, y) <= 1e-10 && I(t("Extrusion profile intersects itself"), A.at);
+          [0, 1].every((G) => Math.max(Math.min(N[G], y[G]), Math.min(p[G], K[G])) <= Math.min(Math.max(N[G], y[G]), Math.max(p[G], K[G])) + 1e-9) && n(N, y, p) * n(N, y, K) <= 1e-10 && n(p, K, N) * n(p, K, y) <= 1e-10 && I(t("Extrusion profile intersects itself"), A.at);
         }
       }
       Math.abs(h) < 1e-8 && I(t("Extrusion profile has zero area"), A.at);
@@ -5998,7 +6017,7 @@ function D2(A, g, I, C, q, B) {
   const s = { kind: A.name === "move2d" ? "move" : "scale", vector: [e(0, A.name === "move2d" ? "mm" : "scalar", -1e5), e(1, A.name === "move2d" ? "mm" : "scalar", -1e5)], profile: Q[0] };
   return s.kind === "scale" && s.vector.includes(0) ? { kind: "empty" } : s;
 }
-function W3(A) {
+function Z3(A) {
   if (A.kind === "empty")
     return { nodes: 1, vertices: 0 };
   if (A.kind === "text")
@@ -6010,21 +6029,21 @@ function W3(A) {
   if (A.kind === "polygon")
     return { nodes: 1, vertices: A.contours.reduce((g, I) => g + I.length, 0) };
   if ("profile" in A) {
-    const g = W3(A.profile);
+    const g = Z3(A.profile);
     return { ...g, nodes: g.nodes + 1, vertices: A.kind === "offset" ? g.vertices * (A.round ? Math.max(1, A.segments / 4) : 1) : g.vertices };
   }
   return A.profiles.reduce((g, I) => {
-    const C = W3(I);
+    const C = Z3(I);
     return { nodes: g.nodes + C.nodes, vertices: g.vertices + C.vertices };
   }, { nodes: 1, vertices: 0 });
 }
-function Z3(A) {
+function z3(A) {
   if ("profiles" in A) {
-    let g = A.profiles.map(Z3);
+    let g = A.profiles.map(z3);
     return A.kind === "intersect" && g.some((I) => I.kind === "empty") || A.kind === "subtract" && g[0]?.kind === "empty" || A.kind === "minkowski" && g.some((I) => I.kind === "empty") ? { kind: "empty" } : (g = g.filter((I) => I.kind !== "empty"), A.kind === "union" && (g = g.flatMap((I) => I.kind === "union" ? I.profiles : [I])), g.length ? g.length === 1 && A.kind !== "hull" ? g[0] : { ...A, profiles: g } : { kind: "empty" });
   }
   if ("profile" in A) {
-    const g = Z3(A.profile);
+    const g = z3(A.profile);
     return g.kind === "empty" || A.kind === "rotate" && A.angle === 0 || (A.kind === "move" || A.kind === "scale") && A.vector.every((I) => I === (A.kind === "scale" ? 1 : 0)) ? g : { ...A, profile: g };
   }
   return A;
@@ -6109,8 +6128,8 @@ function rI(A, g, I, C, q = 0, B = 360, e) {
       const k = l.length;
       return l.push([0, 0, m]), { ids: Array(a).fill(k), center: k, tip: !0 };
     }
-    const p = Array.from({ length: a }, (k, S) => {
-      const _ = Q && q === 0 ? S * 2 * Math.PI / s : i.start + S * i.span / s, J = l.length;
+    const p = Array.from({ length: a }, (k, G) => {
+      const _ = Q && q === 0 ? G * 2 * Math.PI / s : i.start + G * i.span / s, J = l.length;
       return l.push([y[0] * Math.cos(_), y[1] * Math.sin(_), m]), J;
     }), K = l.length;
     return l.push([0, 0, m]), { ids: p, center: K, tip: !1 };
@@ -6118,8 +6137,8 @@ function rI(A, g, I, C, q = 0, B = 360, e) {
     y !== m && m !== p && y !== p && r.push([y, m, p]);
   };
   for (let y = 0; y < s; y++) {
-    const m = Q ? (y + 1) % s : y + 1, p = h.ids[y], K = h.ids[m], k = M.ids[y], S = M.ids[m];
-    h.tip || (N(h.center, K, p), N(p, K, k)), M.tip || (N(M.center, k, S), N(k, K, S));
+    const m = Q ? (y + 1) % s : y + 1, p = h.ids[y], K = h.ids[m], k = M.ids[y], G = M.ids[m];
+    h.tip || (N(h.center, K, p), N(p, K, k)), M.tip || (N(M.center, k, G), N(k, K, G));
   }
   return Q || (N(h.center, h.ids[0], M.center), N(h.ids[0], M.ids[0], M.center), N(h.center, M.center, h.ids[s]), N(h.ids[s], M.center, M.ids[s])), { points: l, faces: r };
 }
@@ -6141,7 +6160,7 @@ function O4(A) {
   try {
     return DI(A);
   } catch (g) {
-    throw g instanceof E5 ? new x1(g.message, 0, A?.source ?? "", "resource-limit") : g;
+    throw g instanceof l5 ? new x1(g.message, 0, A?.source ?? "", "resource-limit") : g;
   }
 }
 function DI(A) {
@@ -6321,22 +6340,22 @@ function DI(A) {
   const k = structuredClone({ ...M, ...N });
   for (const [w, qA] of Object.entries(A.parameters))
     Object.hasOwn(M, w) || I(t`Unknown parameter override “${w}”`), (typeof qA != "string" || !qA.trim()) && I(t`Invalid override for “${w}”`), k[w].expression = qA;
-  let S = /* @__PURE__ */ new Map(), _ = 0;
+  let G = /* @__PURE__ */ new Map(), _ = 0;
   const J = /* @__PURE__ */ Object.create(null), T = /* @__PURE__ */ new WeakMap(), v = /* @__PURE__ */ new Set();
   let IA = 0;
   function sA(w, qA) {
     if (qA?.has(w))
       return qA.get(w);
-    if (S.has(w))
-      return S.get(w);
+    if (G.has(w))
+      return G.get(w);
     if (Object.hasOwn(J, w))
       return J[w];
     const P = k[w];
     if (!P)
       throw new Error(t`Unknown parameter “${w}”`);
     ++IA > 65536 && C(t("Code evaluation budget exceeded"), y.get(w)), v.has(w) && I(t`dependency cycle at “${w}”`, y.get(w)), v.size >= 32 && C(t("Dependency depth exceeds 32"), y.get(w));
-    let BA = T.get(S);
-    BA || (BA = /* @__PURE__ */ new Map(), T.set(S, BA));
+    let BA = T.get(G);
+    BA || (BA = /* @__PURE__ */ new Map(), T.set(G, BA));
     const MA = w + "|" + (qA?.size ? JSON.stringify([...qA]) : ""), VA = BA.get(MA);
     if (VA)
       return VA;
@@ -6377,7 +6396,7 @@ function DI(A) {
     } catch (pA) {
       if (pA instanceof x1)
         throw pA;
-      return pA instanceof E5 && C(pA.message, w.at), I(pA instanceof Error ? pA.message : String(pA), w.at);
+      return pA instanceof l5 && C(pA.message, w.at), I(pA instanceof Error ? pA.message : String(pA), w.at);
     }
   }
   const EA = /* @__PURE__ */ new WeakMap(), FA = /* @__PURE__ */ new Set();
@@ -6385,8 +6404,8 @@ function DI(A) {
     if (++_ > 16384)
       throw new x1(t("Code evaluation budget exceeded"), w.at, g, "resource-limit");
     if (qA > 32 && C(t("Dependency depth exceeds 32"), w.at), w.kind === "reference") {
-      let Z = EA.get(S);
-      if (Z || (Z = /* @__PURE__ */ new Map(), EA.set(S, Z)), Z.has(w.name))
+      let Z = EA.get(G);
+      if (Z || (Z = /* @__PURE__ */ new Map(), EA.set(G, Z)), Z.has(w.name))
         return Z.get(w.name);
       FA.has(w.name) && I(t`Shape dependency cycle at “${w.name}”`, w.at);
       const iA = m.get(w.name);
@@ -6425,12 +6444,12 @@ function DI(A) {
         Z = Array.from({ length: u }, (R, F) => rA + F * vA);
       } else
         Z = w.scalars.map((rA) => O(rA, "scalar", -1e6, 1e6));
-      const iA = [], aA = S;
+      const iA = [], aA = G;
       try {
         for (const rA of Z)
-          S = new Map(aA), S.set(w.variable, { value: rA, length: 0, angle: 0 }), iA.push(kA(w.shapes[0], qA + 1));
+          G = new Map(aA), G.set(w.variable, { value: rA, length: 0, angle: 0 }), iA.push(kA(w.shapes[0], qA + 1));
       } finally {
-        S = aA;
+        G = aA;
       }
       return iA.length === 0 ? { kind: "empty" } : iA.length === 1 ? iA[0] : { kind: "union", shapes: iA };
     }
@@ -6438,12 +6457,12 @@ function DI(A) {
       const Z = D2(w.profile, O, I, () => {
         ++_ > 16384 && C(t("Code evaluation budget exceeded"), w.at);
       }, (iA, aA, rA) => {
-        const UA = S;
-        S = new Map(UA), S.set(iA, { value: aA, length: 0, angle: 0 });
+        const UA = G;
+        G = new Map(UA), G.set(iA, { value: aA, length: 0, angle: 0 });
         try {
           return rA();
         } finally {
-          S = UA;
+          G = UA;
         }
       }, (iA, aA) => {
         const rA = t2(iA.text, sA);
@@ -6557,14 +6576,14 @@ function DI(A) {
     const pA = w.name === "scale" ? "scalar" : w.name === "rotate" ? "deg" : "mm", i1 = w.vector.map((Z) => O(Z, pA, w.name === "scale" ? -1e3 : w.name === "rotate" ? -36e4 : -1e6, w.name === "scale" ? 1e3 : w.name === "rotate" ? 36e4 : 1e6)), e1 = kA(w.shapes[0], qA + 1);
     return w.name === "scale" && i1.includes(0) ? { kind: "empty" } : w.name === "repeat" ? { kind: "repeat", count: O(w.scalars[0], "scalar", 1, E1.repeat, !0), step: i1, shape: e1 } : { kind: w.name, vector: i1, shape: e1 };
   }
-  const fA = /* @__PURE__ */ new Set(), SA = /* @__PURE__ */ new Set();
+  const fA = /* @__PURE__ */ new Set(), GA = /* @__PURE__ */ new Set();
   function _A(w, qA = 0) {
     if (qA > 32 && C(t("Dependency depth exceeds 32"), w.at), w.kind === "reference") {
       if (fA.has(w.name))
         return;
-      SA.has(w.name) && I(t`Shape dependency cycle at “${w.name}”`, w.at);
+      GA.has(w.name) && I(t`Shape dependency cycle at “${w.name}”`, w.at);
       const P = m.get(w.name);
-      P || I(t`Unknown shape “${w.name}”`, w.at), SA.add(w.name), _A(P, qA + 1), SA.delete(w.name), fA.add(w.name);
+      P || I(t`Unknown shape “${w.name}”`, w.at), GA.add(w.name), _A(P, qA + 1), GA.delete(w.name), fA.add(w.name);
     } else if (w.name === "choose") {
       let P;
       try {
@@ -6593,7 +6612,7 @@ function DI(A) {
       else if (w.kind === "extrude")
         s1 += 4 * w.points.length * qA;
       else if (w.kind === "profile-extrude" || w.kind === "revolve") {
-        const BA = W3(w.profile);
+        const BA = Z3(w.profile);
         n1 += BA.nodes * qA, n1 > E1.expandedNodes && C(t`Expanded shape budget exceeds ${E1.expandedNodes} nodes`), s1 += 2 * BA.vertices * (w.kind === "revolve" ? w.segments + 1 : w.steps + 1) * qA;
       } else "shapes" in w ? w.shapes.forEach((BA) => r1(BA, qA, P + 1)) : r1(w.shape, qA * (w.kind === "repeat" ? w.count : 1), P + 1);
       s1 > E1.estimatedFaces && C(t("Estimated mesh budget exceeds 200000 faces"));
@@ -6610,7 +6629,7 @@ function DI(A) {
         return P.kind === "intersect" && BA.some((MA) => MA.kind === "empty") || P.kind === "subtract" && BA[0]?.kind === "empty" || P.kind === "minkowski" && BA.some((MA) => MA.kind === "empty") ? { kind: "empty" } : (BA = BA.filter((MA) => MA.kind !== "empty"), P.kind === "union" && (BA = BA.flatMap((MA) => MA.kind === "union" ? MA.shapes : [MA])), BA.length ? BA.length === 1 && P.kind !== "hull" ? BA[0] : { ...P, shapes: BA } : { kind: "empty" });
       }
       if ("profile" in P)
-        return { ...P, profile: Z3(P.profile) };
+        return { ...P, profile: z3(P.profile) };
       if ("shape" in P) {
         const BA = qA(P.shape);
         return BA.kind === "empty" || (P.kind === "move" || P.kind === "rotate" || P.kind === "scale") && P.vector.every((MA) => MA === (P.kind === "scale" ? 1 : 0)) ? BA : { ...P, shape: BA };
@@ -6621,7 +6640,7 @@ function DI(A) {
   }
   return { shape: C1, parameters: M, values: Object.fromEntries(Object.keys(M).map((w) => [w, J[w]])), expandedNodes: n1, estimatedFaces: s1 };
 }
-const R3 = ["rounded-box", "capsule", "tube", "washer", "cone", "frustum", "polygon", "ellipse", "wedge", "pyramid", "round-roof", "torus"], p3 = ["counterbore", "countersink", "port", "boss", "rib"], f3 = ["curved-cone", "hemisphere", "paraboloid", "vase", "teardrop", "finishing-washer"], F3 = ["bent-tube", "loft", "dovetail"], hI = [["flat", "Flat end"], ["chamfer", "Chamfered end"], ["cone", "Cone point"], ["dog", "Dog point"], ["cup", "Cup point"], ["oval", "Rounded point"], ["gimlet", "Threaded gimlet point"]];
+const p3 = ["rounded-box", "capsule", "tube", "washer", "cone", "frustum", "polygon", "ellipse", "wedge", "pyramid", "round-roof", "torus"], f3 = ["counterbore", "countersink", "port", "boss", "rib"], F3 = ["curved-cone", "hemisphere", "paraboloid", "vase", "teardrop", "finishing-washer"], U3 = ["bent-tube", "loft", "dovetail"], hI = [["flat", "Flat end"], ["chamfer", "Chamfered end"], ["cone", "Cone point"], ["dog", "Dog point"], ["cup", "Cup point"], ["oval", "Rounded point"], ["gimlet", "Threaded gimlet point"]];
 function H5(A) {
   const g = A.values, I = A.tipLength ?? Math.min(g.length / 3, (g.diameter + 2 * g.threadDepth) / 2, g.pitch * 2);
   return { style: A.tipStyle ?? "flat", length: I, diameter: A.tipDiameter ?? g.diameter * 0.6, depth: A.cupDepth ?? I * 0.4 };
@@ -6632,9 +6651,9 @@ function cI(A) {
 }
 function j4(A) {
   const g = A;
-  if (!g || ![1, 2].includes(g.version) || ![...R3, ...p3, ...f3, ...F3, "ruler", "cube", "screw", "thread", "nut", "heart", "text", "name-tag"].includes(g.preset) || !g.values || typeof g.values != "object" || Array.isArray(g.values))
+  if (!g || ![1, 2].includes(g.version) || ![...p3, ...f3, ...F3, ...U3, "ruler", "cube", "screw", "thread", "nut", "heart", "text", "name-tag"].includes(g.preset) || !g.values || typeof g.values != "object" || Array.isArray(g.values))
     throw new Error(t("Invalid shape generator"));
-  if ([...R3, ...p3, ...f3, ...F3, "cube", "ruler"].includes(g.preset) && g.version !== 2)
+  if ([...p3, ...f3, ...F3, ...U3, "cube", "ruler"].includes(g.preset) && g.version !== 2)
     throw new Error(t("Invalid shape generator"));
   if ((g.version === 2 && g.preset === "screw" || g.headStyle !== void 0 || g.driveStyle !== void 0 || g.driveDepth !== void 0 || g.headAngle !== void 0 || g.threadAngle !== void 0 || g.orientation !== void 0) && (g.version !== 2 || g.preset !== "screw" || !["cylindrical", "hex", "countersunk", "pan", "headless"].includes(g.headStyle ?? "") || !["slot", "cross", "hex", "none"].includes(g.driveStyle ?? "") || !Number.isFinite(g.driveDepth) || g.driveDepth <= 0 || !Number.isFinite(g.headAngle) || g.headAngle < 60 || g.headAngle > 120 || !Number.isFinite(g.threadAngle) || g.threadAngle < 40 || g.threadAngle > 80 || g.orientation !== void 0 && !["head-up", "legacy"].includes(g.orientation)))
     throw new Error(t("Invalid screw head, drive or thread profile"));
@@ -6652,7 +6671,7 @@ function j4(A) {
   const I = cI(g.preset);
   if (Object.keys(g.values).length !== I.length || I.some((C) => !Object.hasOwn(g.values, C.key) || !Number.isFinite(g.values[C.key]) || g.values[C.key] < C.min || g.values[C.key] > C.max))
     throw new Error(t("Shape parameters exceed their supported range"));
-  if ([...R3, ...p3, ...f3, ...F3].includes(g.preset)) {
+  if ([...p3, ...f3, ...F3, ...U3].includes(g.preset)) {
     const C = g.values;
     if (["segments", "tubeSegments", "detail", "sides", "profileSegments", "arcSegments"].some((q) => C[q] !== void 0 && !Number.isInteger(C[q])))
       throw new Error(t("Surface detail and side counts must be whole numbers"));
@@ -6861,7 +6880,7 @@ function MI(A, g, I = {}) {
   const C = yI(A), q = (a, n) => {
     throw new x1(a, n?.node.start ?? 0, A);
   }, B = C.find((a) => a.key === "project");
-  (B.args.length !== 1 || !B.args[0] || typeof B.args[0] != "object" || Array.isArray(B.args[0])) && q(t("Invalid project declaration"), B), [6, 7, 8, 9].includes(B.args[0].version) || q(t("Model source uses project version 6 through 9"), B);
+  (B.args.length !== 1 || !B.args[0] || typeof B.args[0] != "object" || Array.isArray(B.args[0])) && q(t("Invalid project declaration"), B), [6, 7, 8, 9, 10].includes(B.args[0].version) || q(t("Model source uses project version 6 through 10"), B);
   const e = { ...B.args[0], nodes: /* @__PURE__ */ Object.create(null), roots: [], modelSource: { version: 1, language: "brickwright-design", source: A } };
   e.id !== g.id && q(t("Keep the current project identity in model source"), B), delete e.provenance, delete e.sketches, delete e.joints;
   const i = new Set(C.filter((a) => a.key.startsWith("node:")).map((a) => a.args[0])), Q = [], s = Object.assign(/* @__PURE__ */ Object.create(null), e.parametric?.parameters ?? {});
@@ -6897,14 +6916,14 @@ function MI(A, g, I = {}) {
       const y = h[2] === null ? void 0 : j4(h[2]);
       let m = Object.hasOwn(g.nodes, h[0]) ? g.nodes[h[0]] : void 0, p = g;
       m || ((!y || !I.regenerate) && q(t("Generator source edits need the shape reconstruction callback"), a), p = s3(I.regenerate(y, M.name ?? y.preset)), (p.roots.length !== 1 || p.joints?.length || p.parametric || p.sketches || p.provenance) && q(t("Expected one generated body"), a), m = p.nodes[p.roots[0]]);
-      const K = m.id, k = /* @__PURE__ */ new Set(), S = (_) => {
+      const K = m.id, k = /* @__PURE__ */ new Set(), G = (_) => {
         if (k.has(_))
           return;
         k.add(_);
         const J = p.nodes[_];
-        J?.kind === "boolean" && J.inputs.forEach(S);
+        J?.kind === "boolean" && J.inputs.forEach(G);
       };
-      S(K);
+      G(K);
       for (const _ of k)
         if (_ !== K) {
           if (i.has(_)) {
@@ -7007,7 +7026,7 @@ function g0(A, g) {
     if (C.length + K - 1 > v5)
       throw B();
     for (let k = 1; k < K; k++) {
-      const S = y + m * k / K, _ = [h + N * Math.cos(S), M + N * Math.sin(S)];
+      const G = y + m * k / K, _ = [h + N * Math.cos(G), M + N * Math.sin(G)];
       if (!e3(_))
         throw B();
       C.push(_);
@@ -7020,8 +7039,8 @@ function g0(A, g) {
 function I0(A) {
   return typeof A == "string" && A.length > 0 && A.length <= 255 && A === A.trim() && !/[\u0000-\u001f\u007f<>/\\":;?*|=]/.test(A);
 }
-const KI = 16, GI = 1024, J1 = () => new Error(t("A region needs one outside boundary and separate holes that do not touch or cross.")), K2 = (A) => A.map((g, I) => [g, A[(I + 1) % A.length]]);
-function SI([A, g], I) {
+const KI = 16, SI = 1024, J1 = () => new Error(t("A region needs one outside boundary and separate holes that do not touch or cross.")), K2 = (A) => A.map((g, I) => [g, A[(I + 1) % A.length]]);
+function GI([A, g], I) {
   let C = !1;
   for (const [[q, B], [e, i]] of K2(I))
     B > g != i > g && A < q + (g - B) * (e - q) / (i - B) && (C = !C);
@@ -7031,7 +7050,7 @@ function RI([A, g], [I, C], [q, B]) {
   const e = q - I, i = B - C, Q = Math.max(0, Math.min(1, ((A - I) * e + (g - C) * i) / (e * e + i * i)));
   return (A - I - Q * e) ** 2 + (g - C - Q * i) ** 2;
 }
-function U3(A, g) {
+function Y3(A, g) {
   if (A.loop.kind === "circle" && g.loop.kind === "circle") {
     const q = Math.hypot(A.loop.center[0] - g.loop.center[0], A.loop.center[1] - g.loop.center[1]);
     return q <= A.loop.radius + g.loop.radius && q >= Math.abs(A.loop.radius - g.loop.radius);
@@ -7051,7 +7070,7 @@ function U3(A, g) {
 }
 function j2(A, g) {
   const [I, C] = g.points[0];
-  return A.loop.kind === "circle" ? Math.hypot(I - A.loop.center[0], C - A.loop.center[1]) < A.loop.radius : SI(g.points[0], A.points);
+  return A.loop.kind === "circle" ? Math.hypot(I - A.loop.center[0], C - A.loop.center[1]) < A.loop.radius : GI(g.points[0], A.points);
 }
 function pI(A, g = (I) => typeof I == "number" ? I : NaN) {
   if (!Array.isArray(A) || A.length < 2 || A.length > KI)
@@ -7083,16 +7102,16 @@ function pI(A, g = (I) => typeof I == "number" ? I : NaN) {
       s = K2(Q).reduce((n, [[h, M], [N, y]]) => n + (h - r) * (y - a) - (M - a) * (N - r), 0) / 2;
     } else
       throw J1();
-    if (C += Q.length, C > GI)
+    if (C += Q.length, C > SI)
       throw J1();
     return { loop: l, points: Q, area: s };
   }), [B, ...e] = q.sort((i, Q) => Q.area - i.area);
   for (let i = 0; i < e.length; i++) {
     const Q = e[i];
-    if (U3(B, Q) || !j2(B, Q))
+    if (Y3(B, Q) || !j2(B, Q))
       throw J1();
     for (const s of e.slice(0, i))
-      if (U3(s, Q) || j2(s, Q) || j2(Q, s))
+      if (Y3(s, Q) || j2(s, Q) || j2(Q, s))
         throw J1();
   }
   if (B.loop.kind === "circle") {
@@ -7100,7 +7119,7 @@ function pI(A, g = (I) => typeof I == "number" ? I : NaN) {
       ...s,
       loop: { kind: "outline", id: s.loop.id, points: s.points }
     }), Q = i(B);
-    if (e.map(i).some((s) => U3(Q, s) || !j2(Q, s)))
+    if (e.map(i).some((s) => Y3(Q, s) || !j2(Q, s)))
       throw J1();
   }
   return {
@@ -7118,7 +7137,7 @@ class f2 extends Error {
     this.diagnostic = I, this.name = "FeatureEvaluationError", this.code = I.code;
   }
 }
-const z3 = (A) => typeof A == "string" && /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,95}$/.test(A) && !["constructor", "prototype", "__proto__"].includes(A), X3 = (A) => !!A && typeof A == "object" && !Array.isArray(A);
+const X3 = (A) => typeof A == "string" && /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,95}$/.test(A) && !["constructor", "prototype", "__proto__"].includes(A), $3 = (A) => !!A && typeof A == "object" && !Array.isArray(A);
 function C0(A, g, I = "mm") {
   if (typeof A == "number") {
     if (!Number.isFinite(A) || Math.abs(A) > 1e6)
@@ -7144,7 +7163,7 @@ function A3(A, g) {
 }
 function q0(A, g) {
   try {
-    if (!X3(A) || A.version !== 1 || !z3(A.id) || typeof A.name != "string" || !A.name.trim() || A.name.length > 160 || /[\u0000-\u001f]/.test(A.name) || !["XY", "XZ", "YZ"].includes(A.plane) || !X3(A.profile) || !z3(A.profile.id))
+    if (!$3(A) || A.version !== 1 || !X3(A.id) || typeof A.name != "string" || !A.name.trim() || A.name.length > 160 || /[\u0000-\u001f]/.test(A.name) || !["XY", "XZ", "YZ"].includes(A.plane) || !$3(A.profile) || !X3(A.profile.id))
       throw new Error(t("Invalid sketch schema"));
     const I = A.profile;
     if ((I.kind === "outline" || I.kind === "circle") && I.dxfLayer !== void 0 && !I0(I.dxfLayer))
@@ -7185,10 +7204,10 @@ function i0(A, g) {
 }
 function fI(A) {
   if (A.sketches !== void 0) {
-    if (A.version < 3 || !X3(A.sketches) || Object.keys(A.sketches).length > 256)
+    if (A.version < 3 || !$3(A.sketches) || Object.keys(A.sketches).length > 256)
       throw new Error(t("Sketches require document version 3 and at most 256 sketches"));
     for (const [g, I] of Object.entries(A.sketches)) {
-      if (!z3(g) || I.id !== g)
+      if (!X3(g) || I.id !== g)
         throw new Error(t("Invalid sketch identity"));
       q0(I, A);
     }
@@ -7230,7 +7249,7 @@ function FI(A) {
     (!e || typeof e.id != "string" || !/^[a-zA-Z0-9_-]{1,96}$/.test(e.id) || q.has(e.id) || !["hinge", "fixed", "slider", "pivot"].includes(e.kind) || ["slider", "pivot"].includes(e.kind) && A.version < 8 || e.bodyA === e.bodyB || ![e.bodyA, e.bodyB].every((i) => A.roots.includes(i) && !A.nodes[i].reference && A.nodes[i].role !== "hole") || ![e.anchorA, e.anchorB, e.axisA, e.axisB].every(I) || Math.abs(Math.hypot(...e.axisA) - 1) > 1e-5 || Math.abs(Math.hypot(...e.axisB) - 1) > 1e-5 || e.limits !== void 0 && (!Array.isArray(e.limits) || e.limits.length !== 2 || !["hinge", "slider"].includes(e.kind) || !e.limits.every((i) => g(i, e.kind === "slider" ? -1e5 : -Math.PI * 2, e.kind === "slider" ? 1e5 : Math.PI * 2)) || e.limits[0] > e.limits[1])) && C(t("bad joint")), e.collideConnected !== void 0 && typeof e.collideConnected != "boolean" && C(t("Invalid connected-link collision setting")), e.coneAngle !== void 0 && (e.kind !== "pivot" || !g(e.coneAngle, 0, Math.PI)) && C(t("Invalid pivot cone angle")), q.add(e.id), e.control !== void 0 && ((!["hinge", "slider"].includes(e.kind) || !e.control || typeof e.control.port != "string" || !/^[A-Z][A-Z0-9_-]{0,15}$/.test(e.control.port) || B.has(e.control.port)) && C(t("Invalid or duplicate CAD motor port")), B.add(e.control.port));
 }
 const B3 = (A) => A.kind === "box" && A.generator?.preset === "cube", UI = () => ({ position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] });
-function l5(A) {
+function o5(A) {
   const g = JSON.stringify([A.id, A.roots, A.sketches, A.parametric, Object.entries(A.nodes).map(([q, B]) => {
     const { physics: e, ...i } = B;
     return A.version >= 5 && delete i.provenance, [q, i];
@@ -7245,7 +7264,7 @@ function q1(A) {
 }
 const W2 = (A) => !!A && typeof A == "object" && !Array.isArray(A), z1 = (A, g = -1e6, I = 1e6) => typeof A == "number" && Number.isFinite(A) && A >= g && A <= I, V5 = (A, g = 160) => typeof A == "string" && A.trim().length > 0 && A.length <= g && !/[\u0000-\u001f]/.test(A), Z2 = (A) => typeof A == "string" && /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,95}$/.test(A) && !["constructor", "prototype", "__proto__"].includes(A), M2 = (A, g = -1e6, I = 1e6) => Array.isArray(A) && A.length === 3 && A.every((C) => z1(C, g, I));
 function YI(A) {
-  (!W2(A) || A.format !== "brickwright-cad" || ![1, 2, 3, 4, 5, 6, 7, 8, 9].includes(A.version) || A.units !== "mm") && q1(t("unsupported format, version or units")), (!Z2(A.id) || !V5(A.title) || !W2(A.nodes) || !Array.isArray(A.roots)) && q1(t("missing document identity, nodes or roots"));
+  (!W2(A) || A.format !== "brickwright-cad" || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10].includes(A.version) || A.units !== "mm") && q1(t("unsupported format, version or units")), (!Z2(A.id) || !V5(A.title) || !W2(A.nodes) || !Array.isArray(A.roots)) && q1(t("missing document identity, nodes or roots"));
   const g = A.nodes, I = Object.entries(g);
   (I.length > 2e3 || A.roots.length > 2e3) && q1(t("too many objects (maximum 2000)"));
   for (const [s, l] of I) {
@@ -7344,7 +7363,7 @@ function W5(...A) {
   for (let g = 0; g < A.length; g++)
     A[g].fill(0);
 }
-function Y3(A) {
+function J3(A) {
   return new DataView(A.buffer, A.byteOffset, A.byteLength);
 }
 function f1(A, g) {
@@ -7385,7 +7404,7 @@ class WI {
     jA(this, "length", 0);
     jA(this, "pos", 0);
     jA(this, "destroyed", !1);
-    this.blockLen = g, this.outputLen = I, this.padOffset = C, this.isLE = q, this.buffer = new Uint8Array(g), this.view = Y3(this.buffer);
+    this.blockLen = g, this.outputLen = I, this.padOffset = C, this.isLE = q, this.buffer = new Uint8Array(g), this.view = J3(this.buffer);
   }
   update(g) {
     j5(this), e0(g);
@@ -7394,7 +7413,7 @@ class WI {
     for (let i = 0; i < B; ) {
       const Q = Math.min(q - this.pos, B - i);
       if (Q === q) {
-        const s = Y3(g);
+        const s = J3(g);
         for (; q <= B - i; i += q)
           this.process(s, i);
         e = !0;
@@ -7409,7 +7428,7 @@ class WI {
     const { buffer: I, view: C, blockLen: q, isLE: B } = this;
     let { pos: e } = this;
     I[e++] = 128, I.fill(0, e), this.padOffset > q - e && (this.process(C, 0), I.fill(0)), LI(C, q - 8, this.length * 8, B), this.process(C, 0), this.roundClean();
-    const i = g === I ? C : Y3(g), Q = this.outputLen, s = Q / 4, l = this.get();
+    const i = g === I ? C : J3(g), Q = this.outputLen, s = Q / 4, l = this.get();
     if (Q % 4 || s > l.length)
       throw new Error("invalid outputLen");
     for (let r = 0; r < s; r++)
@@ -7672,8 +7691,8 @@ function A8(A, g) {
       for (let m = y + 2; m < r.length; m++) {
         if (y === 0 && m === r.length - 1)
           continue;
-        const p = r[y], K = r[(y + 1) % r.length], k = r[m], S = r[(m + 1) % r.length];
-        if ([0, 1].every((J) => Math.max(Math.min(p[J], K[J]), Math.min(k[J], S[J])) <= Math.min(Math.max(p[J], K[J]), Math.max(k[J], S[J])) + Q * 1e-10) && a(p, K, k) * a(p, K, S) <= M * M && a(k, S, p) * a(k, S, K) <= M * M)
+        const p = r[y], K = r[(y + 1) % r.length], k = r[m], G = r[(m + 1) % r.length];
+        if ([0, 1].every((J) => Math.max(Math.min(p[J], K[J]), Math.min(k[J], G[J])) <= Math.min(Math.max(p[J], K[J]), Math.max(k[J], G[J])) + Q * 1e-10) && a(p, K, k) * a(p, K, G) <= M * M && a(k, G, p) * a(k, G, K) <= M * M)
           throw new Error(t("Polyhedron face intersects itself"));
       }
     const N = C.map((y, m) => m);
@@ -7735,7 +7754,7 @@ var N8 = {
   lineHeight: y8,
   underlineThickness: M8
 };
-const x8 = /* @__PURE__ */ JSON.parse('{"0":{"x_min":100,"x_max":734,"ha":834,"o":"m 415 -14 q 180 117 260 -14 q 100 496 100 248 q 415 1007 100 1007 q 653 875 573 1007 q 734 496 734 744 q 415 -14 734 -14 m 415 91 q 561 186 514 91 q 608 497 608 281 q 561 806 608 711 q 415 901 514 901 q 271 807 317 901 q 225 497 225 712 q 271 186 225 281 q 415 91 317 91 "},"1":{"x_min":153,"x_max":514.375,"ha":834,"o":"m 514 0 l 395 0 l 395 619 q 400 864 395 702 q 318 788 373 835 l 218 706 l 153 789 l 412 992 l 514 992 l 514 0 "},"2":{"x_min":107,"x_max":726,"ha":834,"o":"m 726 0 l 107 0 l 107 105 l 344 364 q 519 579 477 508 q 561 736 561 650 q 518 856 561 812 q 401 900 475 900 q 185 808 293 900 l 116 889 q 403 1006 246 1006 q 610 934 534 1006 q 687 740 687 862 q 646 575 687 660 q 449 320 606 490 l 258 118 l 258 112 l 726 112 l 726 0 "},"3":{"x_min":89,"x_max":716,"ha":834,"o":"m 471 521 l 471 517 q 716 281 716 485 q 622 64 716 143 q 351 -14 528 -14 q 89 39 187 -14 l 89 154 q 349 91 214 91 q 590 285 590 91 q 331 458 590 458 l 241 458 l 241 564 l 331 564 q 499 615 440 564 q 559 751 559 666 q 513 860 559 820 q 389 900 467 900 q 155 819 268 900 l 93 904 q 388 1006 219 1006 q 606 938 528 1006 q 685 759 685 871 q 629 602 685 665 q 471 521 574 539 "},"4":{"x_min":41,"x_max":764.453125,"ha":834,"o":"m 764 222 l 620 222 l 620 0 l 500 0 l 500 222 l 41 222 l 41 330 l 492 997 l 620 997 l 620 335 l 764 335 l 764 222 m 500 335 l 500 576 q 509 869 500 695 l 503 869 q 442 747 478 800 l 162 335 l 500 335 "},"5":{"x_min":117,"x_max":716,"ha":834,"o":"m 117 39 l 117 156 q 361 91 214 91 q 590 303 590 91 q 356 502 590 502 q 199 485 295 502 l 138 524 l 175 992 l 643 992 l 643 879 l 282 879 l 256 594 q 397 608 328 608 q 628 530 540 608 q 716 317 716 452 q 622 72 716 158 q 358 -14 528 -14 q 117 39 206 -14 "},"6":{"x_min":104,"x_max":730,"ha":834,"o":"m 655 993 l 655 888 q 542 900 606 900 q 315 806 391 900 q 232 505 238 711 l 240 505 q 448 621 304 621 q 655 540 580 621 q 730 319 730 459 q 648 75 730 164 q 428 -14 566 -14 q 192 100 280 -14 q 104 423 104 214 q 538 1006 104 1006 q 655 993 608 1006 m 610 320 q 564 471 610 418 q 431 524 517 524 q 287 469 345 524 q 229 343 229 414 q 284 165 229 240 q 427 91 339 91 q 562 150 513 91 q 610 320 610 210 "},"7":{"x_min":97,"x_max":735,"ha":834,"o":"m 227 0 l 608 879 l 97 879 l 97 992 l 735 992 l 735 893 l 358 0 l 227 0 "},"8":{"x_min":106,"x_max":728,"ha":834,"o":"m 517 526 q 728 258 728 417 q 642 60 728 135 q 416 -14 557 -14 q 188 56 270 -14 q 106 253 106 126 q 297 520 106 428 q 138 770 138 619 q 216 943 138 879 q 416 1007 295 1007 q 618 942 541 1007 q 696 768 696 878 q 517 526 696 613 m 417 576 q 576 762 576 645 q 533 866 576 830 q 415 901 490 901 q 300 866 342 901 q 257 762 257 830 q 291 660 257 702 q 417 576 324 618 m 399 473 q 225 253 225 391 q 413 91 225 91 q 557 135 506 91 q 608 258 608 179 q 565 366 608 319 q 420 463 522 413 l 399 473 "},"9":{"x_min":104,"x_max":730,"ha":834,"o":"m 179 -1 l 179 104 q 291 82 224 82 q 518 178 442 82 q 601 483 595 274 l 593 483 q 385 368 528 368 q 178 448 253 368 q 104 670 104 528 q 185 916 104 826 q 405 1006 267 1006 q 642 889 555 1006 q 730 568 730 773 q 295 -14 730 -14 q 179 -1 224 -14 m 223 670 q 269 518 223 571 q 402 464 316 464 q 546 520 488 464 q 604 646 604 576 q 550 825 604 749 q 406 900 496 900 q 271 841 319 900 q 223 670 223 782 "},"ǻ":{"x_min":92,"x_max":696,"ha":834,"o":"m 606 0 l 580 99 l 575 99 q 468 10 523 35 q 327 -14 413 -14 q 154 44 217 -14 q 92 207 92 102 q 436 442 92 431 l 573 447 l 573 494 q 409 655 573 655 q 187 599 309 655 l 144 692 q 404 758 277 758 q 627 699 558 758 q 696 509 696 640 l 696 0 l 606 0 m 572 362 l 462 357 q 274 315 330 352 q 219 204 219 279 q 354 82 219 82 q 513 138 454 82 q 572 294 572 194 l 572 362 m 414 842 q 304 881 345 842 q 263 988 263 920 q 304 1094 263 1055 q 414 1134 345 1134 q 526 1093 482 1134 q 570 989 570 1053 q 526 882 570 922 q 414 842 483 842 m 416 1064 q 359 1044 381 1064 q 337 988 337 1024 q 416 911 337 911 q 473 931 451 911 q 495 988 495 951 q 473 1044 495 1024 q 416 1064 451 1064 m 347 1185 q 465 1389 411 1275 l 614 1389 l 614 1374 q 429 1167 537 1257 l 347 1167 l 347 1185 "},"Á":{"x_min":22,"x_max":812,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 m 353 1089 q 471 1293 417 1179 l 620 1293 l 620 1278 q 435 1071 543 1161 l 353 1071 l 353 1089 "},"ĥ":{"x_min":109,"x_max":725,"ha":834,"o":"m 601 0 l 601 479 q 440 655 601 655 q 232 385 232 655 l 232 0 l 109 0 l 109 1055 l 232 1055 l 232 741 l 227 644 l 233 644 q 461 758 303 758 q 725 486 725 758 l 725 0 l 601 0 m 652 1109 l 569 1109 q 426 1234 512 1146 q 283 1109 336 1142 l 202 1109 l 202 1127 q 242 1172 218 1146 q 361 1331 336 1277 l 492 1331 q 611 1172 517 1277 l 652 1127 l 652 1109 "},"Κ":{"x_min":143,"x_max":813.25,"ha":834,"o":"m 813 0 l 669 0 l 364 473 l 269 396 l 269 0 l 143 0 l 143 992 l 269 992 l 269 496 l 351 609 l 659 992 l 801 992 l 447 559 l 813 0 "},"»":{"x_min":134,"x_max":699,"ha":834,"o":"m 699 356 l 489 78 l 410 130 l 571 366 l 410 602 l 489 655 l 699 374 l 699 356 m 423 356 l 212 78 l 134 130 l 295 366 l 134 602 l 212 655 l 423 374 l 423 356 "},"∆":{"x_min":50,"x_max":784,"ha":834,"o":"m 50 76 l 353 992 l 479 992 l 784 75 l 784 0 l 50 0 l 50 76 m 478 625 q 415 856 438 749 q 355 629 384 720 l 185 111 l 646 111 l 478 625 "},"ў":{"x_min":56,"x_max":777,"ha":834,"o":"m 56 745 l 183 745 l 361 301 q 421 104 416 162 l 425 104 q 486 302 441 180 l 648 745 l 777 745 l 454 -97 q 348 -274 409 -215 q 181 -334 288 -334 q 68 -322 123 -334 l 68 -224 q 160 -231 110 -231 q 261 -203 225 -231 q 326 -108 298 -176 l 365 -7 l 56 745 m 684 1058 q 419 842 670 842 q 229 892 287 842 q 164 1058 170 942 l 280 1058 q 314 959 286 988 q 424 930 343 930 q 567 1058 555 930 l 684 1058 "},"ţ":{"x_min":95,"x_max":696,"ha":834,"o":"m 692 101 l 692 7 q 521 -14 603 -14 q 276 218 276 -14 l 276 648 l 95 648 l 95 715 l 276 749 l 328 943 l 399 943 l 399 745 l 696 745 l 696 648 l 399 648 l 399 219 q 529 88 399 88 q 692 101 592 88 m 332 -288 q 389 -85 374 -193 l 510 -85 l 510 -98 q 477 -182 510 -113 q 399 -307 444 -251 l 332 -307 l 332 -288 "},"«":{"x_min":134,"x_max":699,"ha":834,"o":"m 134 374 l 343 655 l 423 602 l 261 366 l 423 130 l 343 78 l 134 356 l 134 374 m 410 374 l 619 655 l 699 602 l 537 366 l 699 130 l 619 78 l 410 356 l 410 374 "},"í":{"x_min":133.6875,"x_max":729.171875,"ha":834,"o":"m 367 648 l 184 662 l 184 745 l 490 745 l 490 96 l 729 83 l 729 0 l 133 0 l 133 83 l 367 96 l 367 648 m 360 860 q 478 1064 424 950 l 627 1064 l 627 1049 q 442 842 550 932 l 360 842 l 360 860 "},"ņ":{"x_min":109,"x_max":725,"ha":834,"o":"m 601 0 l 601 479 q 440 655 601 655 q 232 385 232 655 l 232 0 l 109 0 l 109 745 l 208 745 l 227 644 l 233 644 q 461 758 303 758 q 725 486 725 758 l 725 0 l 601 0 m 309 -288 q 366 -85 351 -193 l 487 -85 l 487 -98 q 454 -182 487 -113 q 376 -307 421 -251 l 309 -307 l 309 -288 "},"µ":{"x_min":122,"x_max":712,"ha":834,"o":"m 245 264 q 393 88 245 88 q 541 150 494 88 q 588 357 588 211 l 588 745 l 712 745 l 712 0 l 612 0 l 593 99 l 587 99 q 386 -14 521 -14 q 241 45 291 -14 q 245 -117 245 -58 l 245 -334 l 122 -334 l 122 745 l 245 745 l 245 264 "},"ỳ":{"x_min":56,"x_max":777,"ha":834,"o":"m 56 745 l 183 745 l 361 301 q 421 104 416 162 l 425 104 q 486 302 441 180 l 648 745 l 777 745 l 454 -97 q 348 -274 409 -215 q 181 -334 288 -334 q 68 -322 123 -334 l 68 -224 q 160 -231 110 -231 q 261 -203 225 -231 q 326 -108 298 -176 l 365 -7 l 56 745 m 480 842 l 397 842 q 213 1049 285 938 l 213 1064 l 361 1064 q 480 860 420 943 l 480 842 "},"Ι":{"x_min":152.921875,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 "},"Ύ":{"x_min":-160,"x_max":809,"ha":834,"o":"m 415 490 l 672 992 l 809 992 l 479 386 l 479 0 l 353 0 l 353 379 l 23 992 l 160 992 l 415 490 m -160 789 l -137 861 q -108 993 -115 938 l 22 993 l 22 978 q -11 897 22 967 q -86 771 -44 827 l -160 771 l -160 789 "},"ѕ":{"x_min":138,"x_max":696,"ha":834,"o":"m 138 32 l 138 145 q 388 88 268 88 q 575 196 575 88 q 542 264 575 235 q 388 336 508 292 q 190 444 231 395 q 149 560 149 493 q 224 705 149 652 q 433 758 300 758 q 684 707 568 758 l 643 606 q 428 655 520 655 q 269 565 269 655 q 303 499 269 523 q 460 430 337 474 q 649 327 602 378 q 696 203 696 277 q 616 44 696 102 q 392 -14 537 -14 q 138 32 224 -14 "},"Ш":{"x_min":82,"x_max":753,"ha":834,"o":"m 753 0 l 82 0 l 82 992 l 208 992 l 208 111 l 354 111 l 354 992 l 480 992 l 480 111 l 626 111 l 626 992 l 753 992 l 753 0 "},"M":{"x_min":77,"x_max":757,"ha":834,"o":"m 361 0 l 173 868 l 167 868 q 180 592 180 687 l 180 0 l 77 0 l 77 992 l 244 992 l 412 183 l 416 183 l 586 992 l 757 992 l 757 0 l 653 0 l 653 601 q 663 866 653 670 l 657 866 l 466 0 l 361 0 "},"Ψ":{"x_min":39,"x_max":797,"ha":834,"o":"m 797 667 q 720 387 797 472 q 494 303 644 303 l 483 303 l 483 0 l 357 0 l 357 303 l 346 303 q 115 388 192 303 q 39 664 39 473 l 39 992 l 165 992 l 165 667 q 208 460 165 511 q 346 410 252 410 l 357 410 l 357 992 l 483 992 l 483 410 l 493 410 q 628 459 585 410 q 670 664 670 508 l 670 992 l 797 992 l 797 667 "},"ũ":{"x_min":109,"x_max":725,"ha":834,"o":"m 625 0 l 607 99 l 600 99 q 373 -14 529 -14 q 109 258 109 -14 l 109 745 l 232 745 l 232 264 q 392 88 232 88 q 551 151 501 88 q 601 357 601 214 l 601 745 l 725 745 l 725 0 l 625 0 m 245 841 l 174 841 q 317 1021 190 1021 q 426 982 356 1021 q 518 944 495 944 q 590 1022 573 944 l 662 1022 q 519 843 643 843 q 412 881 480 843 q 317 919 344 919 q 245 841 262 919 "},"ŭ":{"x_min":109,"x_max":725,"ha":834,"o":"m 625 0 l 607 99 l 600 99 q 373 -14 529 -14 q 109 258 109 -14 l 109 745 l 232 745 l 232 264 q 392 88 232 88 q 551 151 501 88 q 601 357 601 214 l 601 745 l 725 745 l 725 0 l 625 0 m 621 1030 q 560 892 614 943 q 414 842 506 842 q 213 1030 224 842 l 287 1030 q 319 960 292 977 q 416 943 346 943 q 546 1030 539 943 l 621 1030 "},"―":{"x_min":-4,"x_max":838,"ha":834,"o":"m -4 315 l -4 429 l 838 429 l 838 315 l -4 315 "},"{":{"x_min":153,"x_max":679,"ha":834,"o":"m 505 -10 q 543 -91 505 -65 q 679 -118 581 -116 l 679 -220 q 382 -19 382 -215 l 382 208 q 153 337 382 337 l 153 439 q 382 567 382 439 l 382 793 q 679 992 382 987 l 679 890 q 543 863 581 888 q 505 783 505 838 l 505 559 q 347 391 505 419 l 347 383 q 505 214 505 355 l 505 -10 "},"¼":{"x_min":15,"x_max":823.71875,"ha":834,"o":"m 163 990 l 257 990 l 257 456 l 156 456 l 156 771 q 162 906 156 817 q 111 862 134 876 l 64 828 l 15 887 l 163 990 m 717 992 l 222 0 l 115 0 l 609 992 l 717 992 m 823 117 l 766 117 l 766 0 l 665 0 l 665 117 l 411 117 l 411 184 l 666 539 l 766 539 l 766 195 l 823 195 l 823 117 m 665 195 l 665 314 q 669 430 665 369 q 614 341 641 381 l 509 195 l 665 195 "},"Ḿ":{"x_min":77,"x_max":757,"ha":834,"o":"m 361 0 l 173 868 l 167 868 q 180 592 180 687 l 180 0 l 77 0 l 77 992 l 244 992 l 412 183 l 416 183 l 586 992 l 757 992 l 757 0 l 653 0 l 653 601 q 663 866 653 670 l 657 866 l 466 0 l 361 0 m 352 1091 q 470 1295 416 1181 l 619 1295 l 619 1280 q 434 1073 542 1163 l 352 1073 l 352 1091 "},"ι":{"x_min":290,"x_max":690,"ha":834,"o":"m 413 745 l 413 220 q 544 88 413 88 q 690 101 621 88 l 690 7 q 536 -14 626 -14 q 290 219 290 -14 l 290 745 l 413 745 "},"Ĳ":{"x_min":106,"x_max":719,"ha":834,"o":"m 106 0 l 106 992 l 232 992 l 232 0 l 106 0 m 334 15 l 334 125 q 460 93 397 93 q 592 286 592 93 l 592 992 l 719 992 l 719 295 q 471 -14 719 -14 q 334 15 380 -14 "},"Ê":{"x_min":147,"x_max":719,"ha":834,"o":"m 719 0 l 147 0 l 147 992 l 719 992 l 719 880 l 273 880 l 273 574 l 693 574 l 693 462 l 273 462 l 273 111 l 719 111 l 719 0 m 666 1071 l 583 1071 q 440 1196 526 1108 q 297 1071 350 1104 l 216 1071 l 216 1089 q 256 1134 232 1108 q 375 1293 350 1239 l 506 1293 q 625 1134 531 1239 l 666 1089 l 666 1071 "},"Ά":{"x_min":22,"x_max":812,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 m 25 789 l 47 861 q 76 993 69 938 l 207 993 l 207 978 q 173 897 207 967 q 98 771 140 827 l 25 771 l 25 789 "},")":{"x_min":201,"x_max":634,"ha":834,"o":"m 331 -220 l 202 -220 q 506 386 506 31 q 201 992 506 737 l 331 992 q 634 384 634 747 q 331 -220 634 18 "},"ε":{"x_min":136,"x_max":700.703125,"ha":834,"o":"m 570 439 l 570 336 l 462 336 q 259 210 259 336 q 450 88 259 88 q 698 145 583 88 l 698 36 q 441 -14 606 -14 q 217 43 298 -14 q 136 203 136 100 q 297 385 136 334 l 297 392 q 160 561 160 437 q 236 705 160 652 q 440 758 312 758 q 700 706 587 758 l 658 606 q 446 655 550 655 q 283 551 283 655 q 467 439 283 439 l 570 439 "},"э":{"x_min":124.9375,"x_max":720,"ha":834,"o":"m 129 27 l 129 135 q 343 93 239 93 q 592 326 580 93 l 228 326 l 228 434 l 591 434 q 344 650 572 650 q 166 610 271 650 l 124 717 q 350 758 228 758 q 625 658 531 758 q 720 367 720 559 q 622 85 720 184 q 346 -14 525 -14 q 129 27 219 -14 "},"ш":{"x_min":85,"x_max":751,"ha":834,"o":"m 470 102 l 645 102 l 645 745 l 751 745 l 751 0 l 85 0 l 85 745 l 190 745 l 190 102 l 365 102 l 365 745 l 470 745 l 470 102 "},"Я":{"x_min":38.75,"x_max":707,"ha":834,"o":"m 414 409 l 187 0 l 38 0 l 297 443 q 113 720 113 510 q 454 992 113 992 l 707 992 l 707 0 l 580 0 l 580 409 l 414 409 m 580 884 l 454 884 q 246 710 246 884 q 301 567 246 617 q 460 517 356 517 l 580 517 l 580 884 "},"a":{"x_min":92,"x_max":696,"ha":834,"o":"m 606 0 l 580 99 l 575 99 q 468 10 523 35 q 327 -14 413 -14 q 154 44 217 -14 q 92 207 92 102 q 436 442 92 431 l 573 447 l 573 494 q 409 655 573 655 q 187 599 309 655 l 144 692 q 404 758 277 758 q 627 699 558 758 q 696 509 696 640 l 696 0 l 606 0 m 572 362 l 462 357 q 274 315 330 352 q 219 204 219 279 q 354 82 219 82 q 513 138 454 82 q 572 294 572 194 l 572 362 "},"Ę":{"x_min":147,"x_max":719,"ha":834,"o":"m 719 0 l 147 0 l 147 992 l 719 992 l 719 880 l 273 880 l 273 574 l 693 574 l 693 462 l 273 462 l 273 111 l 719 111 l 719 0 m 692 -217 l 692 -293 q 586 -309 642 -309 q 462 -271 505 -309 q 420 -171 420 -234 q 544 0 420 -73 l 636 0 q 517 -162 517 -85 q 606 -227 517 -227 q 692 -217 652 -227 "},"Z":{"x_min":69,"x_max":763,"ha":834,"o":"m 763 0 l 69 0 l 69 97 l 607 880 l 83 880 l 83 992 l 749 992 l 749 895 l 210 111 l 763 111 l 763 0 "}," ":{"x_min":0,"x_max":0,"ha":834},"k":{"x_min":146,"x_max":789,"ha":834,"o":"m 261 375 l 352 478 l 619 745 l 770 745 l 435 422 l 789 0 l 644 0 l 356 341 l 269 286 l 269 0 l 146 0 l 146 1055 l 269 1055 l 269 571 l 258 375 l 261 375 "},"Ù":{"x_min":85,"x_max":749,"ha":834,"o":"m 749 993 l 749 349 q 663 79 749 173 q 412 -14 578 -14 q 85 352 85 -14 l 85 991 l 211 991 l 211 359 q 419 97 211 97 q 622 361 619 97 l 622 993 l 749 993 m 504 1071 l 421 1071 q 237 1278 309 1167 l 237 1293 l 385 1293 q 504 1089 444 1172 l 504 1071 "},"Ů":{"x_min":85,"x_max":749,"ha":834,"o":"m 749 993 l 749 349 q 663 79 749 173 q 412 -14 578 -14 q 85 352 85 -14 l 85 991 l 211 991 l 211 359 q 419 97 211 97 q 622 361 619 97 l 622 993 l 749 993 m 415 1071 q 305 1110 346 1071 q 264 1217 264 1149 q 305 1323 264 1284 q 415 1363 346 1363 q 527 1322 483 1363 q 571 1218 571 1282 q 527 1111 571 1151 q 415 1071 484 1071 m 417 1293 q 360 1273 382 1293 q 338 1217 338 1253 q 417 1140 338 1140 q 474 1160 452 1140 q 496 1217 496 1180 q 474 1273 496 1253 q 417 1293 452 1293 "},"¢":{"x_min":117,"x_max":719.890625,"ha":834,"o":"m 531 894 q 719 854 627 892 l 677 747 q 496 786 576 786 q 244 505 244 786 q 489 229 244 229 q 707 271 593 229 l 707 163 q 531 122 635 124 l 531 -14 l 411 -14 l 411 126 q 117 503 117 172 q 411 889 117 838 l 411 1006 l 531 1006 l 531 894 "},"В":{"x_min":92,"x_max":772,"ha":834,"o":"m 92 992 l 390 992 q 660 932 576 992 q 744 740 744 873 q 690 596 744 653 q 546 526 637 538 l 546 519 q 772 287 772 482 q 685 76 772 153 q 449 0 598 0 l 92 0 l 92 992 m 218 572 l 409 572 q 562 609 514 572 q 610 732 610 646 q 558 848 610 813 q 395 884 507 884 l 218 884 l 218 572 m 218 464 l 218 107 l 426 107 q 638 292 638 107 q 418 464 638 464 l 218 464 "},"І":{"x_min":152.921875,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 "},"ē":{"x_min":90,"x_max":744,"ha":834,"o":"m 744 346 l 217 346 q 451 93 222 93 q 703 145 584 93 l 703 36 q 456 -14 590 -14 q 189 87 289 -14 q 90 366 90 188 q 182 652 90 547 q 428 758 274 758 q 658 666 572 758 q 744 423 744 575 l 744 346 m 220 449 l 616 449 q 428 655 616 655 q 220 449 238 655 m 235 943 l 626 943 l 626 842 l 235 842 l 235 943 "},"β":{"x_min":107,"x_max":749,"ha":834,"o":"m 490 562 l 490 558 q 749 280 749 525 q 665 63 749 141 q 436 -14 582 -14 q 230 28 309 -14 l 230 -334 l 107 -334 l 107 743 q 187 979 107 896 q 409 1063 268 1063 q 623 991 543 1063 q 704 796 704 920 q 649 642 704 704 q 490 562 594 580 m 230 141 q 426 88 322 88 q 625 290 625 88 q 561 445 625 389 q 388 501 496 501 l 325 501 l 325 604 l 372 604 q 522 654 467 604 q 576 791 576 705 q 531 915 576 871 q 408 960 485 960 q 230 736 230 960 l 230 141 "},"≠":{"x_min":103,"x_max":730,"ha":834,"o":"m 271 300 l 103 300 l 103 401 l 318 401 l 401 577 l 103 577 l 103 679 l 448 679 l 539 870 l 632 830 l 560 679 l 730 679 l 730 577 l 513 577 l 430 401 l 730 401 l 730 300 l 382 300 l 294 111 l 202 150 l 271 300 "},"‼":{"x_min":173,"x_max":659.265625,"ha":834,"o":"m 615 280 l 533 280 l 498 992 l 649 992 l 615 280 m 573 168 q 659 74 659 168 q 573 -20 659 -20 q 487 74 487 -20 q 573 168 487 168 m 301 280 l 219 280 l 184 992 l 335 992 l 301 280 m 259 168 q 345 74 345 168 q 259 -20 345 -20 q 173 74 173 -20 q 259 168 173 168 "},"¥":{"x_min":54,"x_max":779,"ha":834,"o":"m 415 490 l 649 992 l 779 992 l 517 471 l 681 471 l 681 378 l 475 378 l 475 270 l 681 270 l 681 178 l 475 178 l 475 0 l 356 0 l 356 178 l 152 178 l 152 270 l 356 270 l 356 378 l 152 378 l 152 471 l 310 471 l 54 992 l 184 992 l 415 490 "},"Ĥ":{"x_min":92,"x_max":742,"ha":834,"o":"m 742 0 l 615 0 l 615 462 l 218 462 l 218 0 l 92 0 l 92 992 l 218 992 l 218 574 l 615 574 l 615 992 l 742 992 l 742 0 m 642 1071 l 559 1071 q 416 1196 502 1108 q 273 1071 326 1104 l 192 1071 l 192 1089 q 232 1134 208 1108 q 351 1293 326 1239 l 482 1293 q 601 1134 507 1239 l 642 1089 l 642 1071 "},"U":{"x_min":85,"x_max":749,"ha":834,"o":"m 749 993 l 749 349 q 663 79 749 173 q 412 -14 578 -14 q 85 352 85 -14 l 85 991 l 211 991 l 211 359 q 419 97 211 97 q 622 361 619 97 l 622 993 l 749 993 "},"Ñ":{"x_min":92,"x_max":741,"ha":834,"o":"m 741 0 l 596 0 l 201 821 l 196 821 q 208 538 208 633 l 208 0 l 92 0 l 92 992 l 236 992 l 629 174 l 633 174 q 624 449 624 380 l 624 992 l 741 992 l 741 0 m 246 1070 l 175 1070 q 318 1250 191 1250 q 427 1211 357 1250 q 519 1173 496 1173 q 591 1251 574 1173 l 663 1251 q 520 1072 644 1072 q 413 1110 481 1072 q 318 1148 345 1148 q 246 1070 263 1148 "},"F":{"x_min":165,"x_max":736,"ha":834,"o":"m 291 0 l 165 0 l 165 992 l 736 992 l 736 880 l 291 880 l 291 531 l 710 531 l 710 419 l 291 419 l 291 0 "},"ϑ":{"x_min":7.125,"x_max":815.203125,"ha":834,"o":"m 594 662 q 565 794 585 736 q 520 892 546 852 q 463 953 494 932 q 399 974 432 974 q 318 943 348 974 q 289 864 289 913 q 305 789 289 825 q 356 725 320 753 q 451 680 392 697 q 594 662 509 662 m 722 573 q 724 538 723 558 q 725 497 725 518 q 703 295 725 388 q 637 133 681 201 q 527 25 594 64 q 372 -14 461 -14 q 247 4 297 -14 q 169 55 198 23 q 128 130 140 87 q 117 219 117 172 q 120 278 117 247 q 127 340 123 310 q 134 396 131 370 q 137 438 137 421 q 127 479 137 468 q 95 491 117 491 q 61 485 79 491 q 32 474 43 480 l 7 559 q 66 579 32 570 q 136 588 100 588 q 193 578 169 588 q 231 551 216 568 q 252 511 245 534 q 258 461 258 488 q 255 408 258 437 q 248 347 251 379 q 241 283 244 316 q 237 219 237 250 q 244 165 237 191 q 268 122 252 140 q 311 93 284 104 q 377 82 338 82 q 545 187 489 82 q 601 501 601 292 q 600 538 601 516 q 598 573 600 559 q 398 599 480 574 q 265 665 316 625 q 191 757 214 705 q 169 864 169 809 q 182 947 169 909 q 222 1012 195 984 q 293 1055 250 1040 q 396 1071 336 1071 q 521 1042 466 1071 q 615 960 576 1013 q 680 832 655 907 q 718 662 706 756 l 815 662 l 815 573 l 722 573 "},"Ќ":{"x_min":143,"x_max":813.25,"ha":834,"o":"m 813 0 l 664 0 l 269 502 l 269 0 l 143 0 l 143 992 l 269 992 l 269 511 l 654 992 l 794 992 l 409 515 l 813 0 m 390 1089 q 508 1293 454 1179 l 657 1293 l 657 1278 q 472 1071 580 1161 l 390 1071 l 390 1089 "},"å":{"x_min":92,"x_max":696,"ha":834,"o":"m 606 0 l 580 99 l 575 99 q 468 10 523 35 q 327 -14 413 -14 q 154 44 217 -14 q 92 207 92 102 q 436 442 92 431 l 573 447 l 573 494 q 409 655 573 655 q 187 599 309 655 l 144 692 q 404 758 277 758 q 627 699 558 758 q 696 509 696 640 l 696 0 l 606 0 m 572 362 l 462 357 q 274 315 330 352 q 219 204 219 279 q 354 82 219 82 q 513 138 454 82 q 572 294 572 194 l 572 362 m 413 842 q 303 881 344 842 q 262 988 262 920 q 303 1094 262 1055 q 413 1134 344 1134 q 525 1093 481 1134 q 569 989 569 1053 q 525 882 569 922 q 413 842 482 842 m 415 1064 q 358 1044 380 1064 q 336 988 336 1024 q 415 911 336 911 q 472 931 450 911 q 494 988 494 951 q 472 1044 494 1024 q 415 1064 450 1064 "},"Ϋ":{"x_min":23,"x_max":809,"ha":834,"o":"m 415 490 l 672 992 l 809 992 l 479 386 l 479 0 l 353 0 l 353 379 l 23 992 l 160 992 l 415 490 m 290 1244 q 355 1174 355 1244 q 290 1105 355 1105 q 225 1174 225 1105 q 290 1244 225 1244 m 544 1244 q 610 1174 610 1244 q 544 1105 610 1105 q 479 1174 479 1105 q 544 1244 479 1244 "},"ō":{"x_min":78,"x_max":755,"ha":834,"o":"m 414 -14 q 172 91 267 -14 q 78 373 78 196 q 170 654 78 551 q 418 758 262 758 q 660 652 566 758 q 755 373 755 547 q 661 89 755 193 q 414 -14 568 -14 m 416 88 q 627 373 627 88 q 415 655 627 655 q 205 373 205 655 q 416 88 205 88 m 221 943 l 612 943 l 612 842 l 221 842 l 221 943 "},"”":{"x_min":158,"x_max":674,"ha":834,"o":"m 375 992 l 385 977 q 265 652 347 832 l 158 652 q 224 992 200 832 l 375 992 m 664 992 l 674 977 q 554 652 636 832 l 447 652 q 513 992 489 832 l 664 992 "},"ö":{"x_min":78,"x_max":755,"ha":834,"o":"m 414 -14 q 172 91 267 -14 q 78 373 78 196 q 170 654 78 551 q 418 758 262 758 q 660 652 566 758 q 755 373 755 547 q 661 89 755 193 q 414 -14 568 -14 m 416 88 q 627 373 627 88 q 415 655 627 655 q 205 373 205 655 q 416 88 205 88 m 285 1015 q 350 945 350 1015 q 285 876 350 876 q 220 945 220 876 q 285 1015 220 1015 m 539 1015 q 605 945 605 1015 q 539 876 605 876 q 474 945 474 876 q 539 1015 474 1015 "},"ć":{"x_min":117,"x_max":720,"ha":834,"o":"m 720 717 l 677 610 q 496 650 576 650 q 244 369 244 650 q 489 93 244 93 q 707 135 595 93 l 707 27 q 483 -14 616 -14 q 213 84 309 -14 q 117 367 117 183 q 215 658 117 558 q 492 758 313 758 q 720 717 612 758 m 392 860 q 510 1064 456 950 l 659 1064 l 659 1049 q 474 842 582 932 l 392 842 l 392 860 "},"þ":{"x_min":107,"x_max":741,"ha":834,"o":"m 230 644 q 449 758 305 758 q 663 656 585 758 q 741 373 741 555 q 662 88 741 190 q 449 -14 584 -14 q 230 93 308 -14 l 222 93 q 230 -16 230 6 l 230 -334 l 107 -334 l 107 1055 l 230 1055 l 230 744 l 225 644 l 230 644 m 230 401 l 230 373 q 277 153 230 219 q 428 88 325 88 q 613 374 613 88 q 427 655 613 655 q 278 595 323 655 q 230 401 233 536 "},"]":{"x_min":196,"x_max":555,"ha":834,"o":"m 196 -118 l 431 -118 l 431 890 l 196 890 l 196 992 l 555 992 l 555 -220 l 196 -220 l 196 -118 "},"А":{"x_min":22,"x_max":812,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 "},"′":{"x_min":336,"x_max":496.734375,"ha":834,"o":"m 496 992 l 468 634 l 363 634 l 336 992 l 496 992 "},"Ы":{"x_min":65,"x_max":769,"ha":834,"o":"m 65 0 l 65 992 l 191 992 l 191 574 l 221 574 q 573 290 573 574 q 484 74 573 149 q 226 0 395 0 l 65 0 m 191 107 l 240 107 q 456 290 456 107 q 401 421 456 380 q 221 462 347 462 l 191 462 l 191 107 m 652 0 l 652 992 l 769 992 l 769 0 l 652 0 "},"ẁ":{"x_min":-3,"x_max":836,"ha":834,"o":"m 551 0 l 462 404 l 416 628 l 411 628 l 367 401 l 276 0 l 148 0 l -3 745 l 106 745 l 173 376 q 212 109 196 250 l 216 109 q 262 352 237 235 l 352 745 l 483 745 l 569 352 q 614 109 598 220 l 619 109 q 659 376 640 274 l 728 745 l 836 745 l 683 0 l 551 0 m 473 842 l 390 842 q 206 1049 278 938 l 206 1064 l 354 1064 q 473 860 413 943 l 473 842 "},"ĭ":{"x_min":133.6875,"x_max":729.171875,"ha":834,"o":"m 367 648 l 184 662 l 184 745 l 490 745 l 490 96 l 729 83 l 729 0 l 133 0 l 133 83 l 367 96 l 367 648 m 639 1030 q 578 892 632 943 q 432 842 524 842 q 231 1030 242 842 l 305 1030 q 337 960 310 977 q 434 943 364 943 q 564 1030 557 943 l 639 1030 "},"R":{"x_min":126,"x_max":794.25,"ha":834,"o":"m 252 409 l 252 0 l 126 0 l 126 992 l 368 992 q 721 710 721 992 q 524 443 721 515 l 794 0 l 645 0 l 407 409 l 252 409 m 252 517 l 362 517 q 532 561 478 517 q 587 704 587 606 q 533 842 587 800 q 359 884 479 884 l 252 884 l 252 517 "},"Ż":{"x_min":69,"x_max":763,"ha":834,"o":"m 763 0 l 69 0 l 69 97 l 607 880 l 83 880 l 83 992 l 749 992 l 749 895 l 210 111 l 763 111 l 763 0 m 434 1252 q 499 1174 499 1252 q 434 1097 499 1097 q 369 1174 369 1097 q 434 1252 369 1252 "},"ħ":{"x_min":3.203125,"x_max":725,"ha":834,"o":"m 601 0 l 601 451 q 441 627 601 627 q 282 564 332 627 q 232 357 232 500 l 232 0 l 109 0 l 109 843 l 3 843 l 3 932 l 109 932 l 109 1055 l 233 1055 l 233 932 l 516 932 l 516 843 l 232 843 l 232 715 l 225 616 l 232 616 q 466 730 305 730 q 660 665 596 730 q 725 458 725 600 l 725 0 l 601 0 "},"õ":{"x_min":78,"x_max":755,"ha":834,"o":"m 414 -14 q 172 91 267 -14 q 78 373 78 196 q 170 654 78 551 q 418 758 262 758 q 660 652 566 758 q 755 373 755 547 q 661 89 755 193 q 414 -14 568 -14 m 416 88 q 627 373 627 88 q 415 655 627 655 q 205 373 205 655 q 416 88 205 88 m 244 841 l 173 841 q 316 1021 189 1021 q 425 982 355 1021 q 517 944 494 944 q 589 1022 572 944 l 661 1022 q 518 843 642 843 q 411 881 479 843 q 316 919 343 919 q 244 841 261 919 "},"˙":{"x_min":359.25,"x_max":489.46875,"ha":834,"o":"m 424 1023 q 489 945 489 1023 q 424 868 489 868 q 359 945 359 868 q 424 1023 359 1023 "},"ê":{"x_min":90,"x_max":744,"ha":834,"o":"m 744 346 l 217 346 q 451 93 222 93 q 703 145 584 93 l 703 36 q 456 -14 590 -14 q 189 87 289 -14 q 90 366 90 188 q 182 652 90 547 q 428 758 274 758 q 658 666 572 758 q 744 423 744 575 l 744 346 m 220 449 l 616 449 q 428 655 616 655 q 220 449 238 655 m 653 842 l 570 842 q 427 967 513 879 q 284 842 337 875 l 203 842 l 203 860 q 243 905 219 879 q 362 1064 337 1010 l 493 1064 q 612 905 518 1010 l 653 860 l 653 842 "},"″":{"x_min":193,"x_max":640.734375,"ha":834,"o":"m 353 992 l 325 634 l 220 634 l 193 992 l 353 992 m 640 992 l 612 634 l 507 634 l 480 992 l 640 992 "},"„":{"x_min":166,"x_max":667,"ha":834,"o":"m 367 161 l 378 145 q 258 -179 340 1 l 166 -179 q 217 161 202 18 l 367 161 m 656 161 l 667 145 q 547 -179 632 12 l 455 -179 q 506 161 491 18 l 656 161 "},"ч":{"x_min":103,"x_max":720,"ha":834,"o":"m 226 745 l 226 466 q 365 348 226 348 q 596 426 481 348 l 596 745 l 720 745 l 720 0 l 596 0 l 596 331 q 337 246 473 246 q 166 305 229 246 q 103 458 103 364 l 103 745 l 226 745 "},"δ":{"x_min":92,"x_max":742,"ha":834,"o":"m 378 636 q 206 872 206 734 q 267 1012 206 962 q 437 1063 329 1063 q 704 989 572 1063 l 654 890 q 434 960 541 960 q 355 936 384 960 q 326 868 326 911 q 354 791 326 825 q 499 689 383 756 q 742 337 742 549 q 654 78 742 170 q 413 -14 566 -14 q 180 69 269 -14 q 92 296 92 153 q 378 636 92 549 m 464 579 q 219 294 219 511 q 271 145 219 202 q 412 88 323 88 q 614 325 614 88 q 464 579 614 491 "},"Â":{"x_min":22,"x_max":812,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 m 642 1071 l 559 1071 q 416 1196 502 1108 q 273 1071 326 1104 l 192 1071 l 192 1089 q 232 1134 208 1108 q 351 1293 326 1239 l 482 1293 q 601 1134 507 1239 l 642 1089 l 642 1071 "},"Į":{"x_min":152.921875,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 m 558 -217 l 558 -293 q 452 -309 508 -309 q 328 -271 371 -309 q 286 -171 286 -234 q 410 0 286 -73 l 502 0 q 383 -162 383 -85 q 472 -227 383 -227 q 558 -217 518 -227 "},"ω":{"x_min":61,"x_max":774,"ha":834,"o":"m 132 745 l 244 745 q 166 360 166 567 q 266 88 166 88 q 341 136 314 88 q 368 270 368 184 l 368 478 l 473 478 l 473 270 q 501 135 473 182 q 572 88 528 88 q 668 360 668 88 q 590 745 668 568 l 702 745 q 774 360 774 569 q 579 -14 774 -14 q 424 106 458 -14 l 417 106 q 258 -14 382 -14 q 61 360 61 -14 q 132 745 61 565 "},"Ţ":{"x_min":69,"x_max":762,"ha":834,"o":"m 479 0 l 353 0 l 353 880 l 69 880 l 69 992 l 762 992 l 762 880 l 479 880 l 479 0 m 304 -288 q 361 -85 346 -193 l 482 -85 l 482 -98 q 449 -182 482 -113 q 371 -307 416 -251 l 304 -307 l 304 -288 "},"´":{"x_min":284,"x_max":551,"ha":834,"o":"m 284 860 q 402 1064 348 950 l 551 1064 l 551 1049 q 366 842 474 932 l 284 842 l 284 860 "},"Ĉ":{"x_min":87,"x_max":801,"ha":834,"o":"m 763 136 l 763 26 q 519 -14 663 -14 q 198 119 309 -14 q 87 497 87 252 q 208 868 87 731 q 540 1006 330 1006 q 801 947 690 1006 l 747 841 q 540 894 643 894 q 307 787 394 894 q 220 496 220 679 q 302 199 220 301 q 540 97 383 97 q 763 136 629 97 m 751 1071 l 668 1071 q 525 1196 611 1108 q 382 1071 435 1104 l 301 1071 l 301 1089 q 341 1134 317 1108 q 460 1293 435 1239 l 591 1293 q 710 1134 616 1239 l 751 1089 l 751 1071 "},"И":{"x_min":93,"x_max":742,"ha":834,"o":"m 93 992 l 209 992 l 209 449 q 204 276 209 352 l 200 174 l 204 174 l 597 992 l 742 992 l 742 0 l 625 0 l 625 538 q 637 821 625 633 l 632 821 l 237 0 l 93 0 l 93 992 "},"Љ":{"x_min":0,"x_max":820,"ha":834,"o":"m 256 880 l 242 508 q 185 52 228 119 q 65 -14 142 -14 q 0 -1 27 -14 l 0 96 q 46 82 21 82 q 88 106 70 82 q 114 193 106 130 q 137 551 123 256 q 153 992 150 846 l 504 992 l 504 574 l 529 574 q 820 290 820 574 q 742 74 820 149 q 518 0 665 0 l 378 0 l 378 880 l 256 880 m 504 107 l 532 107 q 703 290 703 107 q 659 421 703 381 q 516 462 615 462 l 504 462 l 504 107 "},"р":{"x_min":107,"x_max":741,"ha":834,"o":"m 230 93 l 222 93 q 230 -16 230 6 l 230 -334 l 107 -334 l 107 745 l 206 745 l 225 644 l 230 644 q 449 758 305 758 q 663 656 585 758 q 741 373 741 555 q 662 88 741 190 q 449 -14 584 -14 q 230 93 308 -14 m 230 401 l 230 373 q 277 153 230 219 q 428 88 325 88 q 613 374 613 88 q 427 655 613 655 q 278 595 323 655 q 230 401 233 536 "},"Ω":{"x_min":49.859375,"x_max":786.140625,"ha":834,"o":"m 367 99 l 367 0 l 49 0 l 49 111 l 230 111 q 58 559 58 270 q 153 889 58 771 q 417 1007 248 1007 q 682 889 587 1007 q 778 559 778 771 q 604 111 778 268 l 786 111 l 786 0 l 468 0 l 468 99 q 644 556 644 256 q 417 895 644 895 q 191 556 191 895 q 367 99 191 256 "},"т":{"x_min":82,"x_max":749,"ha":834,"o":"m 749 642 l 477 642 l 477 0 l 354 0 l 354 642 l 82 642 l 82 745 l 749 745 l 749 642 "},"П":{"x_min":92,"x_max":742,"ha":834,"o":"m 742 0 l 615 0 l 615 880 l 218 880 l 218 0 l 92 0 l 92 992 l 742 992 l 742 0 "},"Ö":{"x_min":57,"x_max":778,"ha":834,"o":"m 417 -14 q 57 498 57 -14 q 419 1007 57 1007 q 685 874 592 1007 q 778 496 778 741 q 684 118 778 251 q 417 -14 590 -14 m 417 97 q 589 195 535 97 q 644 497 644 293 q 589 799 644 702 q 419 895 533 895 q 190 497 190 895 q 417 97 190 97 m 290 1244 q 355 1174 355 1244 q 290 1105 355 1105 q 225 1174 225 1105 q 290 1244 225 1244 m 544 1244 q 610 1174 610 1244 q 544 1105 610 1105 q 479 1174 479 1105 q 544 1244 479 1244 "},"z":{"x_min":123,"x_max":709,"ha":834,"o":"m 709 0 l 123 0 l 123 88 l 572 648 l 145 648 l 145 745 l 697 745 l 697 641 l 256 96 l 709 96 l 709 0 "},"™":{"x_min":-0.375,"x_max":801,"ha":834,"o":"m 205 503 l 119 503 l 119 918 l 0 918 l 0 992 l 326 992 l 326 918 l 205 918 l 205 503 m 542 503 l 444 875 l 436 875 l 443 753 l 443 503 l 357 503 l 357 992 l 486 992 l 579 629 l 679 992 l 801 992 l 801 503 l 714 503 l 714 734 q 721 875 714 793 l 713 875 l 609 503 l 542 503 "},"Θ":{"x_min":57,"x_max":778,"ha":834,"o":"m 417 -14 q 57 498 57 -14 q 419 1007 57 1007 q 685 874 592 1007 q 778 496 778 741 q 684 118 778 251 q 417 -14 590 -14 m 417 97 q 589 195 535 97 q 644 497 644 293 q 589 799 644 702 q 419 895 533 895 q 190 497 190 895 q 417 97 190 97 m 278 560 l 557 560 l 557 452 l 278 452 l 278 560 "},"Ř":{"x_min":126,"x_max":794.25,"ha":834,"o":"m 252 409 l 252 0 l 126 0 l 126 992 l 368 992 q 721 710 721 992 q 524 443 721 515 l 794 0 l 645 0 l 407 409 l 252 409 m 252 517 l 362 517 q 532 561 478 517 q 587 704 587 606 q 533 842 587 800 q 359 884 479 884 l 252 884 l 252 517 m 622 1274 q 581 1229 605 1255 q 462 1071 486 1122 l 331 1071 q 212 1229 307 1122 l 172 1274 l 172 1293 l 253 1293 q 396 1166 309 1256 q 539 1293 479 1253 l 622 1293 l 622 1274 "},"Ň":{"x_min":92,"x_max":741,"ha":834,"o":"m 741 0 l 596 0 l 201 821 l 196 821 q 208 538 208 633 l 208 0 l 92 0 l 92 992 l 236 992 l 629 174 l 633 174 q 624 449 624 380 l 624 992 l 741 992 l 741 0 m 640 1274 q 599 1229 623 1255 q 480 1071 504 1122 l 349 1071 q 230 1229 325 1122 l 190 1274 l 190 1293 l 271 1293 q 414 1166 327 1256 q 557 1293 497 1253 l 640 1293 l 640 1274 "},"É":{"x_min":147,"x_max":719,"ha":834,"o":"m 719 0 l 147 0 l 147 992 l 719 992 l 719 880 l 273 880 l 273 574 l 693 574 l 693 462 l 273 462 l 273 111 l 719 111 l 719 0 m 326 1089 q 444 1293 390 1179 l 593 1293 l 593 1278 q 408 1071 516 1161 l 326 1071 l 326 1089 "},"и":{"x_min":109,"x_max":725,"ha":834,"o":"m 229 745 l 229 291 l 220 120 l 562 745 l 725 745 l 725 0 l 604 0 l 604 439 l 611 622 l 271 0 l 109 0 l 109 745 l 229 745 "},"³":{"x_min":232,"x_max":574,"ha":834,"o":"m 454 738 q 574 611 574 711 q 523 487 574 531 q 377 444 472 444 q 232 477 289 444 l 232 562 q 370 522 307 522 q 472 614 472 522 q 371 699 472 699 l 322 699 l 322 768 l 369 768 q 454 851 454 768 q 388 924 454 924 q 278 880 339 924 l 233 938 q 394 1002 308 1002 q 512 965 468 1002 q 556 865 556 928 q 454 738 556 771 "},"[":{"x_min":279,"x_max":638,"ha":834,"o":"m 638 -220 l 279 -220 l 279 992 l 638 992 l 638 890 l 402 890 l 402 -118 l 638 -118 l 638 -220 "},"ζ":{"x_min":110,"x_max":724,"ha":834,"o":"m 151 1055 l 720 1055 l 720 960 q 344 631 451 765 q 237 323 237 497 q 293 175 237 219 q 505 105 350 132 q 672 51 621 85 q 724 -58 724 16 q 641 -272 724 -159 l 526 -272 q 603 -95 603 -162 q 568 -35 603 -57 q 403 6 534 -12 q 180 106 250 30 q 110 318 110 181 q 219 642 110 492 q 583 960 328 793 q 344 952 437 952 l 151 952 l 151 1055 "},"∏":{"x_min":106,"x_max":755,"ha":834,"o":"m 628 -334 l 628 880 l 232 880 l 232 -334 l 106 -334 l 106 992 l 755 992 l 755 -334 l 628 -334 "},"Έ":{"x_min":-76,"x_max":719,"ha":834,"o":"m 719 0 l 147 0 l 147 992 l 719 992 l 719 880 l 273 880 l 273 574 l 693 574 l 693 462 l 273 462 l 273 111 l 719 111 l 719 0 m -76 789 l -53 861 q -24 993 -31 938 l 106 993 l 106 978 q 72 897 106 967 q -2 771 39 827 l -76 771 l -76 789 "},"Ρ":{"x_min":119,"x_max":742,"ha":834,"o":"m 245 385 l 245 0 l 119 0 l 119 992 l 393 992 q 742 701 742 992 q 647 468 742 552 q 374 385 553 385 l 245 385 m 245 493 l 359 493 q 550 541 493 493 q 608 694 608 590 q 380 884 608 884 l 245 884 l 245 493 "},"ğ":{"x_min":70,"x_max":763.84375,"ha":834,"o":"m 763 745 l 763 668 l 630 650 q 675 506 675 592 q 602 333 675 397 q 401 269 530 269 q 343 273 364 269 q 275 182 275 234 q 384 125 275 125 l 511 125 q 691 72 629 125 q 754 -77 754 20 q 371 -334 754 -334 q 146 -278 223 -334 q 70 -123 70 -223 q 232 61 70 22 q 167 165 167 93 q 257 293 167 240 q 162 376 197 318 q 128 502 128 434 q 200 691 128 625 q 405 758 272 758 q 507 745 464 758 l 763 745 m 402 353 q 554 508 554 353 q 401 669 554 669 q 248 506 248 669 q 402 353 248 353 m 469 17 l 342 17 q 186 -118 186 17 q 370 -237 186 -237 q 637 -84 637 -237 q 603 -3 637 -24 q 469 17 569 17 m 612 1030 q 551 892 605 943 q 405 842 497 842 q 204 1030 215 842 l 278 1030 q 310 960 283 977 q 407 943 337 943 q 537 1030 530 943 l 612 1030 "},"ª":{"x_min":187,"x_max":616,"ha":834,"o":"m 539 541 l 516 622 q 336 532 446 532 q 187 671 187 532 q 244 784 187 749 q 430 823 301 819 l 514 827 l 514 833 q 412 925 514 925 q 247 889 336 925 l 219 963 q 418 1003 313 1003 q 616 841 616 1003 l 616 541 l 539 541 m 446 757 q 329 738 369 755 q 288 670 288 720 q 358 610 288 610 q 472 646 429 610 q 514 745 514 683 l 514 758 l 446 757 "},"ї":{"x_min":133.6875,"x_max":729.171875,"ha":834,"o":"m 367 648 l 184 662 l 184 745 l 490 745 l 490 96 l 729 83 l 729 0 l 133 0 l 133 83 l 367 96 l 367 648 m 289 1015 q 354 945 354 1015 q 289 876 354 876 q 224 945 224 876 q 289 1015 224 1015 m 543 1015 q 609 945 609 1015 q 543 876 609 876 q 478 945 478 876 q 543 1015 478 1015 "},"T":{"x_min":69,"x_max":762,"ha":834,"o":"m 479 0 l 353 0 l 353 880 l 69 880 l 69 992 l 762 992 l 762 880 l 479 880 l 479 0 "},"š":{"x_min":138,"x_max":696,"ha":834,"o":"m 138 32 l 138 145 q 388 88 268 88 q 575 196 575 88 q 542 264 575 235 q 388 336 508 292 q 190 444 231 395 q 149 560 149 493 q 224 705 149 652 q 433 758 300 758 q 684 707 568 758 l 643 606 q 428 655 520 655 q 269 565 269 655 q 303 499 269 523 q 460 430 337 474 q 649 327 602 378 q 696 203 696 277 q 616 44 696 102 q 392 -14 537 -14 q 138 32 224 -14 m 649 1045 q 608 1000 632 1026 q 489 842 513 893 l 358 842 q 239 1000 334 893 l 199 1045 l 199 1064 l 280 1064 q 423 937 336 1027 q 566 1064 506 1024 l 649 1064 l 649 1045 "},"є":{"x_min":117,"x_max":719.890625,"ha":834,"o":"m 719 717 l 677 610 q 500 650 576 650 q 245 434 266 650 l 609 434 l 609 326 l 244 326 q 494 93 258 93 q 707 135 597 93 l 707 27 q 490 -14 616 -14 q 213 85 310 -14 q 117 367 117 184 q 215 658 117 559 q 496 758 314 758 q 719 717 616 758 "},"Þ":{"x_min":119,"x_max":742,"ha":834,"o":"m 245 215 l 245 0 l 119 0 l 119 992 l 245 992 l 245 821 l 393 821 q 742 530 742 821 q 647 298 742 381 q 374 215 553 215 l 245 215 m 245 322 l 359 322 q 550 371 493 322 q 608 524 608 420 q 380 713 608 713 l 245 713 l 245 322 "},"j":{"x_min":92,"x_max":580,"ha":834,"o":"m 504 1051 q 577 973 577 1051 q 504 896 577 896 q 432 973 432 896 q 504 1051 432 1051 m 92 -310 l 92 -205 q 288 -231 182 -231 q 412 -192 367 -231 q 456 -85 456 -154 l 456 648 l 171 662 l 171 745 l 580 745 l 580 -79 q 503 -267 580 -201 q 286 -334 426 -334 q 92 -310 175 -334 "},"Σ":{"x_min":89,"x_max":744,"ha":834,"o":"m 89 0 l 89 103 l 370 519 l 97 892 l 97 992 l 703 992 l 703 880 l 241 880 l 505 520 l 228 111 l 744 111 l 744 0 l 89 0 "},"ϒ":{"x_min":21,"x_max":818.3125,"ha":834,"o":"m 414 496 q 456 603 431 546 q 508 715 482 660 q 559 815 535 769 q 600 892 584 862 q 631 940 615 919 q 665 974 646 960 q 705 994 683 987 q 754 1000 726 1000 q 792 997 777 1000 q 818 989 806 994 l 818 890 q 798 894 810 892 q 779 896 787 896 q 739 880 760 896 q 694 823 718 864 q 670 781 686 809 q 635 715 654 753 q 593 634 615 678 q 549 544 570 591 q 509 453 528 498 q 477 367 490 407 l 477 0 l 351 0 l 351 379 l 21 992 l 158 992 l 414 496 "},"ℓ":{"x_min":154,"x_max":678,"ha":834,"o":"m 584 225 l 678 225 q 483 -14 665 -14 q 337 49 389 -14 q 285 232 285 112 l 285 393 q 154 354 226 372 l 154 429 q 285 469 202 442 l 285 803 q 331 952 285 898 q 468 1006 377 1006 q 585 950 542 1006 q 628 804 628 895 q 404 443 628 567 l 404 235 q 491 82 404 82 q 584 225 578 82 m 404 524 q 534 798 534 605 q 469 925 534 925 q 420 897 436 925 q 404 798 404 870 l 404 524 "},"ĉ":{"x_min":117,"x_max":720,"ha":834,"o":"m 720 717 l 677 610 q 496 650 576 650 q 244 369 244 650 q 489 93 244 93 q 707 135 595 93 l 707 27 q 483 -14 616 -14 q 213 84 309 -14 q 117 367 117 183 q 215 658 117 558 q 492 758 313 758 q 720 717 612 758 m 699 842 l 616 842 q 473 967 559 879 q 330 842 383 875 l 249 842 l 249 860 q 289 905 265 879 q 408 1064 383 1010 l 539 1064 q 658 905 564 1010 l 699 860 l 699 842 "},"ī":{"x_min":133.6875,"x_max":729.171875,"ha":834,"o":"m 367 648 l 184 662 l 184 745 l 490 745 l 490 96 l 729 83 l 729 0 l 133 0 l 133 83 l 367 96 l 367 648 m 221 943 l 612 943 l 612 842 l 221 842 l 221 943 "},"О":{"x_min":57,"x_max":778,"ha":834,"o":"m 417 -14 q 57 498 57 -14 q 419 1007 57 1007 q 685 874 592 1007 q 778 496 778 741 q 684 118 778 251 q 417 -14 590 -14 m 417 97 q 589 195 535 97 q 644 497 644 293 q 589 799 644 702 q 419 895 533 895 q 190 497 190 895 q 417 97 190 97 "},"ξ":{"x_min":117,"x_max":724,"ha":834,"o":"m 668 601 l 668 512 l 531 512 q 318 456 391 512 q 244 298 244 400 q 270 200 244 236 q 343 145 296 164 q 511 104 390 126 q 672 50 621 84 q 724 -58 724 16 q 638 -272 724 -159 l 521 -272 q 603 -94 603 -162 q 570 -36 603 -58 q 410 5 536 -14 q 117 286 117 51 q 168 449 117 377 q 308 550 219 521 l 308 558 q 163 747 163 598 q 213 875 163 824 q 390 960 264 926 q 200 952 270 952 l 158 952 l 158 1055 l 677 1055 l 677 952 l 630 952 q 383 898 483 952 q 283 748 283 843 q 345 636 283 671 q 539 601 407 601 l 668 601 "},"Ď":{"x_min":92,"x_max":778,"ha":834,"o":"m 92 0 l 92 992 l 323 992 q 658 863 538 992 q 778 505 778 735 q 653 130 778 260 q 296 0 529 0 l 92 0 m 218 884 l 218 107 l 283 107 q 644 501 644 107 q 309 884 644 884 l 218 884 m 637 1274 q 596 1229 620 1255 q 477 1071 501 1122 l 346 1071 q 227 1229 322 1122 l 187 1274 l 187 1293 l 268 1293 q 411 1166 324 1256 q 554 1293 494 1253 l 637 1293 l 637 1274 "},"&":{"x_min":41,"x_max":833,"ha":834,"o":"m 410 525 l 600 290 q 671 470 648 371 l 795 470 q 674 197 759 311 l 833 0 l 685 0 l 596 112 q 316 -14 478 -14 q 114 58 188 -14 q 41 258 41 131 q 84 413 41 347 q 243 548 127 479 q 133 790 133 678 q 197 948 133 890 q 384 1007 262 1007 q 562 948 499 1007 q 625 789 625 890 q 410 525 625 652 m 346 607 q 468 701 435 661 q 501 792 501 741 q 468 873 501 842 q 381 904 435 904 q 289 874 322 904 q 256 789 256 844 q 346 607 256 709 m 528 194 l 308 466 q 168 261 168 382 q 214 141 168 189 q 323 93 260 93 q 528 194 433 93 "},"G":{"x_min":79,"x_max":742,"ha":834,"o":"m 455 524 l 742 524 l 742 36 q 456 -14 609 -14 q 179 121 279 -14 q 79 497 79 256 q 188 870 79 735 q 491 1006 298 1006 q 726 947 621 1006 l 677 837 q 487 894 578 894 q 285 789 357 894 q 212 496 212 683 q 479 97 212 97 q 615 116 544 97 l 615 412 l 455 412 l 455 524 "},"ΰ":{"x_min":109,"x_max":735,"ha":834,"o":"m 109 745 l 232 745 l 232 345 q 418 88 232 88 q 565 167 520 88 q 611 412 611 245 q 568 745 611 573 l 691 745 q 735 406 735 578 q 657 88 735 191 q 414 -14 579 -14 q 109 337 109 -14 l 109 745 m 359 959 q 412 1164 388 1054 l 561 1164 l 561 1150 q 414 942 497 1039 l 359 942 l 359 959 m 265 1015 q 331 945 331 1015 q 312 894 331 912 q 265 876 293 876 q 201 945 201 876 q 265 1015 201 1015 m 562 1015 q 628 945 628 1015 q 562 876 628 876 q 497 945 497 876 q 562 1015 497 1015 "},"`":{"x_min":284,"x_max":551,"ha":834,"o":"m 551 842 l 468 842 q 284 1049 356 938 l 284 1064 l 432 1064 q 551 860 491 943 l 551 842 "},"ŏ":{"x_min":78,"x_max":755,"ha":834,"o":"m 414 -14 q 172 91 267 -14 q 78 373 78 196 q 170 654 78 551 q 418 758 262 758 q 660 652 566 758 q 755 373 755 547 q 661 89 755 193 q 414 -14 568 -14 m 416 88 q 627 373 627 88 q 415 655 627 655 q 205 373 205 655 q 416 88 205 88 m 621 1030 q 560 892 614 943 q 414 842 506 842 q 213 1030 224 842 l 287 1030 q 319 960 292 977 q 416 943 346 943 q 546 1030 539 943 l 621 1030 "},"ý":{"x_min":56,"x_max":777,"ha":834,"o":"m 56 745 l 183 745 l 361 301 q 421 104 416 162 l 425 104 q 486 302 441 180 l 648 745 l 777 745 l 454 -97 q 348 -274 409 -215 q 181 -334 288 -334 q 68 -322 123 -334 l 68 -224 q 160 -231 110 -231 q 261 -203 225 -231 q 326 -108 298 -176 l 365 -7 l 56 745 m 335 860 q 453 1064 399 950 l 602 1064 l 602 1049 q 417 842 525 932 l 335 842 l 335 860 "},"º":{"x_min":191,"x_max":643,"ha":834,"o":"m 415 532 q 254 595 317 532 q 191 768 191 658 q 251 940 191 878 q 418 1003 312 1003 q 579 940 516 1003 q 643 768 643 877 q 580 594 643 656 q 415 532 518 532 m 417 613 q 541 769 541 613 q 417 921 541 921 q 292 769 292 921 q 417 613 292 613 "},"∞":{"x_min":47,"x_max":785,"ha":834,"o":"m 411 421 q 228 277 332 277 q 97 335 147 277 q 47 490 47 394 q 97 642 47 581 q 228 704 147 704 q 413 555 340 704 q 604 699 492 699 q 735 641 685 699 q 785 486 785 583 q 733 334 785 397 q 604 272 681 272 q 411 421 488 272 m 365 490 q 238 611 310 611 q 168 576 195 611 q 141 489 141 540 q 168 403 141 436 q 239 369 195 369 q 365 490 308 369 m 461 486 q 592 365 519 365 q 663 400 636 365 q 690 487 690 436 q 661 573 690 539 q 590 607 633 607 q 461 486 520 607 "},"ź":{"x_min":123,"x_max":709,"ha":834,"o":"m 709 0 l 123 0 l 123 88 l 572 648 l 145 648 l 145 745 l 697 745 l 697 641 l 256 96 l 709 96 l 709 0 m 336 860 q 454 1064 400 950 l 603 1064 l 603 1049 q 418 842 526 932 l 336 842 l 336 860 "},"я":{"x_min":77.75,"x_max":702,"ha":834,"o":"m 212 0 l 77 0 l 275 315 q 117 527 117 360 q 186 686 117 628 q 372 745 255 745 l 702 745 l 702 0 l 578 0 l 578 295 l 385 295 l 212 0 m 578 398 l 578 642 l 381 642 q 240 525 240 642 q 399 398 240 398 l 578 398 "},"Ё":{"x_min":147,"x_max":719,"ha":834,"o":"m 719 0 l 147 0 l 147 992 l 719 992 l 719 880 l 273 880 l 273 574 l 693 574 l 693 462 l 273 462 l 273 111 l 719 111 l 719 0 m 306 1244 q 371 1174 371 1244 q 306 1105 371 1105 q 241 1174 241 1105 q 306 1244 241 1244 m 560 1244 q 626 1174 626 1244 q 560 1105 626 1105 q 495 1174 495 1105 q 560 1244 495 1244 "},"ń":{"x_min":109,"x_max":725,"ha":834,"o":"m 601 0 l 601 479 q 440 655 601 655 q 232 385 232 655 l 232 0 l 109 0 l 109 745 l 208 745 l 227 644 l 233 644 q 461 758 303 758 q 725 486 725 758 l 725 0 l 601 0 m 359 860 q 477 1064 423 950 l 626 1064 l 626 1049 q 441 842 549 932 l 359 842 l 359 860 "}," ":{"x_min":0,"x_max":0,"ha":834},"Г":{"x_min":158,"x_max":719,"ha":834,"o":"m 719 992 l 719 880 l 284 880 l 284 0 l 158 0 l 158 992 l 719 992 "},"Ь":{"x_min":119,"x_max":742,"ha":834,"o":"m 119 0 l 119 992 l 245 992 l 245 574 l 374 574 q 742 290 742 574 q 652 74 742 149 q 393 0 563 0 l 119 0 m 245 107 l 380 107 q 608 290 608 107 q 550 421 608 380 q 359 462 493 462 l 245 462 l 245 107 "},"¤":{"x_min":118.59375,"x_max":716.0625,"ha":834,"o":"m 206 634 l 118 721 l 185 788 l 271 700 q 416 747 339 747 q 561 700 494 747 l 648 788 l 716 723 l 628 635 q 674 489 674 567 q 628 343 674 408 l 714 257 l 648 192 l 561 278 q 416 234 494 234 q 271 280 336 234 l 185 193 l 119 259 l 206 345 q 162 489 162 409 q 206 634 162 567 m 416 326 q 531 374 483 326 q 579 489 579 421 q 531 605 579 557 q 416 654 483 654 q 303 606 350 654 q 256 489 256 558 q 303 374 256 421 q 416 326 350 326 "},"Ĝ":{"x_min":79,"x_max":742,"ha":834,"o":"m 455 524 l 742 524 l 742 36 q 456 -14 609 -14 q 179 121 279 -14 q 79 497 79 256 q 188 870 79 735 q 491 1006 298 1006 q 726 947 621 1006 l 677 837 q 487 894 578 894 q 285 789 357 894 q 212 496 212 683 q 479 97 212 97 q 615 116 544 97 l 615 412 l 455 412 l 455 524 m 696 1071 l 613 1071 q 470 1196 556 1108 q 327 1071 380 1104 l 246 1071 l 246 1089 q 286 1134 262 1108 q 405 1293 380 1239 l 536 1293 q 655 1134 561 1239 l 696 1089 l 696 1071 "},"p":{"x_min":107,"x_max":741,"ha":834,"o":"m 230 93 l 222 93 q 230 -16 230 6 l 230 -334 l 107 -334 l 107 745 l 206 745 l 225 644 l 230 644 q 449 758 305 758 q 663 656 585 758 q 741 373 741 555 q 662 88 741 190 q 449 -14 584 -14 q 230 93 308 -14 m 230 401 l 230 373 q 277 153 230 219 q 428 88 325 88 q 613 374 613 88 q 427 655 613 655 q 278 595 323 655 q 230 401 233 536 "},"Ю":{"x_min":66,"x_max":787,"ha":834,"o":"m 273 462 l 192 462 l 192 0 l 66 0 l 66 992 l 192 992 l 192 574 l 276 574 q 348 908 288 810 q 532 1007 407 1007 q 724 887 662 1007 q 787 496 787 767 q 724 106 787 227 q 530 -14 661 -14 q 340 92 401 -14 q 273 462 279 199 m 530 97 q 637 176 604 97 q 670 497 670 255 q 636 818 670 741 q 530 895 603 895 q 422 815 455 895 q 389 497 389 735 q 422 179 389 261 q 530 97 454 97 "},"ο":{"x_min":78,"x_max":755,"ha":834,"o":"m 414 -14 q 172 91 267 -14 q 78 373 78 196 q 170 654 78 551 q 418 758 262 758 q 660 652 566 758 q 755 373 755 547 q 661 89 755 193 q 414 -14 568 -14 m 416 88 q 627 373 627 88 q 415 655 627 655 q 205 373 205 655 q 416 88 205 88 "},"S":{"x_min":96,"x_max":738,"ha":834,"o":"m 96 32 l 96 152 q 375 93 238 93 q 611 258 611 93 q 564 366 611 328 q 371 456 516 404 q 170 575 231 506 q 109 754 109 644 q 196 939 109 872 q 435 1006 283 1006 q 718 953 591 1006 l 674 841 q 432 894 544 894 q 235 752 235 894 q 279 641 235 683 q 461 551 323 599 q 682 428 626 491 q 738 264 738 364 q 644 60 738 134 q 376 -14 550 -14 q 96 32 197 -14 "},"/":{"x_min":143,"x_max":690,"ha":834,"o":"m 690 992 l 263 0 l 143 0 l 569 992 l 690 992 "},"Ŧ":{"x_min":69,"x_max":762,"ha":834,"o":"m 353 556 l 353 880 l 69 880 l 69 992 l 762 992 l 762 880 l 479 880 l 479 556 l 679 556 l 679 448 l 479 448 l 479 0 l 353 0 l 353 448 l 151 448 l 151 556 l 353 556 "},"ђ":{"x_min":3.203125,"x_max":725,"ha":834,"o":"m 438 -317 l 438 -216 q 515 -231 474 -231 q 601 -115 601 -231 l 601 451 q 441 627 601 627 q 282 564 332 627 q 232 357 232 500 l 232 0 l 109 0 l 109 843 l 3 843 l 3 932 l 109 932 l 109 1055 l 232 1055 l 232 932 l 489 932 l 489 843 l 232 843 l 232 715 l 227 616 l 233 616 q 460 730 305 730 q 725 458 725 730 l 725 -107 q 528 -334 725 -334 q 438 -317 473 -334 "},"y":{"x_min":56,"x_max":777,"ha":834,"o":"m 56 745 l 183 745 l 361 301 q 421 104 416 162 l 425 104 q 486 302 441 180 l 648 745 l 777 745 l 454 -97 q 348 -274 409 -215 q 181 -334 288 -334 q 68 -322 123 -334 l 68 -224 q 160 -231 110 -231 q 261 -203 225 -231 q 326 -108 298 -176 l 365 -7 l 56 745 "},"Π":{"x_min":92,"x_max":742,"ha":834,"o":"m 742 0 l 615 0 l 615 880 l 218 880 l 218 0 l 92 0 l 92 992 l 742 992 l 742 0 "},"‗":{"x_min":-14,"x_max":848,"ha":834,"o":"m 848 -125 l -14 -125 l -14 -31 l 848 -31 l 848 -125 m 848 -314 l -14 -314 l -14 -219 l 848 -219 l 848 -314 "},"–":{"x_min":125,"x_max":709,"ha":834,"o":"m 125 315 l 125 429 l 709 429 l 709 315 l 125 315 "},"ë":{"x_min":90,"x_max":744,"ha":834,"o":"m 744 346 l 217 346 q 451 93 222 93 q 703 145 584 93 l 703 36 q 456 -14 590 -14 q 189 87 289 -14 q 90 366 90 188 q 182 652 90 547 q 428 758 274 758 q 658 666 572 758 q 744 423 744 575 l 744 346 m 220 449 l 616 449 q 428 655 616 655 q 220 449 238 655 m 301 1015 q 366 945 366 1015 q 301 876 366 876 q 236 945 236 876 q 301 1015 236 1015 m 555 1015 q 621 945 621 1015 q 555 876 621 876 q 490 945 490 876 q 555 1015 490 1015 "},"б":{"x_min":97,"x_max":735,"ha":834,"o":"m 705 1065 l 728 956 q 388 889 458 911 q 275 793 318 867 q 227 578 232 720 l 235 578 q 463 693 314 693 q 662 603 590 693 q 735 359 735 514 q 650 84 735 182 q 415 -14 565 -14 q 181 108 266 -14 q 97 446 97 230 q 118 687 97 590 q 174 845 139 785 q 256 940 209 904 q 371 996 303 976 q 705 1065 440 1015 m 224 444 q 425 88 224 88 q 607 343 607 88 q 443 590 607 590 q 317 547 377 590 q 224 444 256 504 "},"ƒ":{"x_min":146,"x_max":689,"ha":834,"o":"m 454 564 l 454 -85 q 402 -274 454 -214 q 228 -334 350 -334 q 146 -323 193 -334 l 146 -220 q 223 -228 185 -228 q 307 -194 286 -228 q 329 -84 329 -160 l 329 564 l 197 564 l 197 617 l 329 665 l 329 757 q 381 946 329 886 q 554 1006 433 1006 q 689 980 620 1006 l 657 885 q 559 900 603 900 q 475 866 497 900 q 454 757 454 832 l 454 661 l 620 661 l 620 564 l 454 564 "},"у":{"x_min":56,"x_max":777,"ha":834,"o":"m 56 745 l 183 745 l 361 301 q 421 104 416 162 l 425 104 q 486 302 441 180 l 648 745 l 777 745 l 454 -97 q 348 -274 409 -215 q 181 -334 288 -334 q 68 -322 123 -334 l 68 -224 q 160 -231 110 -231 q 261 -203 225 -231 q 326 -108 298 -176 l 365 -7 l 56 745 "},"J":{"x_min":93,"x_max":664,"ha":834,"o":"m 93 26 l 93 138 q 302 97 202 97 q 474 151 411 97 q 537 304 537 205 l 537 992 l 664 992 l 664 305 q 568 72 664 159 q 312 -14 473 -14 q 93 26 165 -14 "},"ŷ":{"x_min":56,"x_max":777,"ha":834,"o":"m 56 745 l 183 745 l 361 301 q 421 104 416 162 l 425 104 q 486 302 441 180 l 648 745 l 777 745 l 454 -97 q 348 -274 409 -215 q 181 -334 288 -334 q 68 -322 123 -334 l 68 -224 q 160 -231 110 -231 q 261 -203 225 -231 q 326 -108 298 -176 l 365 -7 l 56 745 m 644 842 l 561 842 q 418 967 504 879 q 275 842 328 875 l 194 842 l 194 860 q 234 905 210 879 q 353 1064 328 1010 l 484 1064 q 603 905 509 1010 l 644 860 l 644 842 "},"ŕ":{"x_min":179,"x_max":719,"ha":834,"o":"m 719 727 l 685 614 q 533 650 602 650 q 362 586 422 650 q 302 404 302 523 l 302 0 l 179 0 l 179 745 l 279 745 l 294 608 l 299 608 q 410 723 351 688 q 555 758 469 758 q 719 727 636 758 m 346 860 q 464 1064 410 950 l 613 1064 l 613 1049 q 428 842 536 932 l 346 842 l 346 860 "},"ώ":{"x_min":61,"x_max":774,"ha":834,"o":"m 132 745 l 244 745 q 166 360 166 567 q 266 88 166 88 q 341 136 314 88 q 368 270 368 184 l 368 478 l 473 478 l 473 270 q 501 135 473 182 q 572 88 528 88 q 668 360 668 88 q 590 745 668 568 l 702 745 q 774 360 774 569 q 579 -14 774 -14 q 424 106 458 -14 l 417 106 q 258 -14 382 -14 q 61 360 61 -14 q 132 745 61 565 m 360 860 l 382 932 q 411 1064 404 1009 l 542 1064 l 542 1049 q 508 968 542 1038 q 433 842 475 898 l 360 842 l 360 860 "},"˘":{"x_min":213,"x_max":621,"ha":834,"o":"m 621 1030 q 560 892 614 943 q 414 842 506 842 q 213 1030 224 842 l 287 1030 q 319 960 292 977 q 416 943 346 943 q 546 1030 539 943 l 621 1030 "},"D":{"x_min":92,"x_max":778,"ha":834,"o":"m 92 0 l 92 992 l 323 992 q 658 863 538 992 q 778 505 778 735 q 653 130 778 260 q 296 0 529 0 l 92 0 m 218 884 l 218 107 l 283 107 q 644 501 644 107 q 309 884 644 884 l 218 884 "},"ł":{"x_min":127.6875,"x_max":723.171875,"ha":834,"o":"m 361 401 l 265 339 l 212 421 l 361 518 l 361 958 l 179 972 l 179 1055 l 484 1055 l 484 599 l 595 672 l 648 589 l 484 482 l 484 96 l 723 83 l 723 0 l 127 0 l 127 83 l 361 96 l 361 401 "},"ĺ":{"x_min":127.6875,"x_max":723.171875,"ha":834,"o":"m 361 958 l 179 972 l 179 1055 l 484 1055 l 484 96 l 723 83 l 723 0 l 127 0 l 127 83 l 361 96 l 361 958 m 336 1128 q 454 1332 400 1218 l 603 1332 l 603 1317 q 418 1110 526 1200 l 336 1110 l 336 1128 "},"ц":{"x_min":103,"x_max":801,"ha":834,"o":"m 801 -258 l 677 -258 l 677 0 l 103 0 l 103 745 l 226 745 l 226 102 l 568 102 l 568 745 l 692 745 l 692 102 l 801 102 l 801 -258 "},"Л":{"x_min":3,"x_max":742,"ha":834,"o":"m 742 0 l 615 0 l 615 880 l 435 880 q 288 100 351 217 q 100 -16 225 -16 q 3 0 50 -16 l 3 102 q 79 91 41 91 q 186 213 148 91 q 309 992 223 335 l 742 992 l 742 0 "},"$":{"x_min":123,"x_max":709,"ha":834,"o":"m 464 75 l 464 -81 l 371 -81 l 371 69 q 123 116 216 69 l 123 233 q 371 174 256 174 l 371 465 q 187 563 240 508 q 135 712 135 619 q 197 860 135 801 q 371 932 259 918 l 371 1054 l 464 1054 l 464 934 q 692 881 591 928 l 647 783 q 464 829 552 823 l 464 545 q 654 445 599 499 q 709 302 709 390 q 464 75 709 112 m 371 579 l 371 826 q 254 711 254 807 q 281 629 254 658 q 371 579 309 600 m 464 430 l 464 180 q 589 302 589 199 q 464 430 589 388 "},"w":{"x_min":-3,"x_max":836,"ha":834,"o":"m 551 0 l 462 404 l 416 628 l 411 628 l 367 401 l 276 0 l 148 0 l -3 745 l 106 745 l 173 376 q 212 109 196 250 l 216 109 q 262 352 237 235 l 352 745 l 483 745 l 569 352 q 614 109 598 220 l 619 109 q 659 376 640 274 l 728 745 l 836 745 l 683 0 l 551 0 "},"о":{"x_min":78,"x_max":755,"ha":834,"o":"m 414 -14 q 172 91 267 -14 q 78 373 78 196 q 170 654 78 551 q 418 758 262 758 q 660 652 566 758 q 755 373 755 547 q 661 89 755 193 q 414 -14 568 -14 m 416 88 q 627 373 627 88 q 415 655 627 655 q 205 373 205 655 q 416 88 205 88 "},"Д":{"x_min":4,"x_max":828,"ha":834,"o":"m 828 -261 l 711 -261 l 711 0 l 120 0 l 120 -261 l 4 -261 l 4 111 l 81 111 q 227 514 168 271 q 294 992 285 758 l 696 992 l 696 111 l 828 111 l 828 -261 m 569 111 l 569 880 l 420 880 q 349 474 407 699 q 214 111 291 249 l 569 111 "},"Ç":{"x_min":87,"x_max":801,"ha":834,"o":"m 763 136 l 763 26 q 519 -14 663 -14 q 198 119 309 -14 q 87 497 87 252 q 208 868 87 731 q 540 1006 330 1006 q 801 947 690 1006 l 747 841 q 540 894 643 894 q 307 787 394 894 q 220 496 220 679 q 302 199 220 301 q 540 97 383 97 q 763 136 629 97 m 345 -327 l 345 -254 q 398 -258 367 -258 q 500 -196 500 -258 q 384 -119 500 -146 l 446 0 l 526 0 l 488 -78 q 598 -194 598 -103 q 400 -334 598 -334 q 345 -327 377 -334 "},"Ŝ":{"x_min":96,"x_max":738,"ha":834,"o":"m 96 32 l 96 152 q 375 93 238 93 q 611 258 611 93 q 564 366 611 328 q 371 456 516 404 q 170 575 231 506 q 109 754 109 644 q 196 939 109 872 q 435 1006 283 1006 q 718 953 591 1006 l 674 841 q 432 894 544 894 q 235 752 235 894 q 279 641 235 683 q 461 551 323 599 q 682 428 626 491 q 738 264 738 364 q 644 60 738 134 q 376 -14 550 -14 q 96 32 197 -14 m 656 1071 l 573 1071 q 430 1196 516 1108 q 287 1071 340 1104 l 206 1071 l 206 1089 q 246 1134 222 1108 q 365 1293 340 1239 l 496 1293 q 615 1134 521 1239 l 656 1089 l 656 1071 "},"C":{"x_min":87,"x_max":801,"ha":834,"o":"m 763 136 l 763 26 q 519 -14 663 -14 q 198 119 309 -14 q 87 497 87 252 q 208 868 87 731 q 540 1006 330 1006 q 801 947 690 1006 l 747 841 q 540 894 643 894 q 307 787 394 894 q 220 496 220 679 q 302 199 220 301 q 540 97 383 97 q 763 136 629 97 "},"Ḁ":{"x_min":22,"x_max":812,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 m 571 -229 q 559 -291 571 -264 q 526 -338 547 -319 q 476 -367 505 -357 q 415 -377 448 -377 q 353 -367 381 -377 q 305 -338 325 -357 q 274 -292 285 -319 q 264 -231 264 -265 q 274 -169 264 -196 q 305 -123 285 -142 q 353 -94 325 -104 q 415 -85 381 -85 q 476 -94 447 -85 q 525 -123 504 -104 q 558 -168 546 -142 q 571 -229 571 -195 m 496 -231 q 474 -174 496 -194 q 417 -154 452 -154 q 360 -174 382 -154 q 338 -231 338 -194 q 358 -287 338 -267 q 417 -307 378 -307 q 474 -287 452 -307 q 496 -231 496 -267 "},"Ĵ":{"x_min":93,"x_max":825,"ha":834,"o":"m 93 26 l 93 138 q 302 97 202 97 q 474 151 411 97 q 537 304 537 205 l 537 992 l 664 992 l 664 305 q 568 72 664 159 q 312 -14 473 -14 q 93 26 165 -14 m 825 1071 l 742 1071 q 599 1196 685 1108 q 456 1071 509 1104 l 375 1071 l 375 1089 q 415 1134 391 1108 q 534 1293 509 1239 l 665 1293 q 784 1134 690 1239 l 825 1089 l 825 1071 "},"È":{"x_min":147,"x_max":719,"ha":834,"o":"m 719 0 l 147 0 l 147 992 l 719 992 l 719 880 l 273 880 l 273 574 l 693 574 l 693 462 l 273 462 l 273 111 l 719 111 l 719 0 m 502 1071 l 419 1071 q 235 1278 307 1167 l 235 1293 l 383 1293 q 502 1089 442 1172 l 502 1071 "},"ﬁ":{"x_min":33,"x_max":723.84375,"ha":834,"o":"m 456 656 l 288 656 l 288 0 l 165 0 l 165 656 l 33 656 l 33 704 l 165 749 l 165 814 q 216 1002 165 942 q 389 1063 268 1063 q 523 1037 455 1063 l 491 942 q 394 960 438 960 q 310 926 331 960 q 288 815 288 892 l 288 745 l 456 745 l 456 656 m 652 1024 q 723 946 723 1024 q 702 888 723 907 q 652 869 681 869 q 580 946 580 869 q 652 1024 580 1024 m 713 0 l 589 0 l 589 745 l 713 745 l 713 0 "},"X":{"x_min":36,"x_max":797,"ha":834,"o":"m 797 0 l 653 0 l 412 430 l 164 0 l 36 0 l 343 518 l 57 992 l 191 992 l 416 612 l 643 992 l 773 992 l 486 522 l 797 0 "},"ô":{"x_min":78,"x_max":755,"ha":834,"o":"m 414 -14 q 172 91 267 -14 q 78 373 78 196 q 170 654 78 551 q 418 758 262 758 q 660 652 566 758 q 755 373 755 547 q 661 89 755 193 q 414 -14 568 -14 m 416 88 q 627 373 627 88 q 415 655 627 655 q 205 373 205 655 q 416 88 205 88 m 639 842 l 556 842 q 413 967 499 879 q 270 842 323 875 l 189 842 l 189 860 q 229 905 205 879 q 348 1064 323 1010 l 479 1064 q 598 905 504 1010 l 639 860 l 639 842 "},"Ė":{"x_min":147,"x_max":719,"ha":834,"o":"m 719 0 l 147 0 l 147 992 l 719 992 l 719 880 l 273 880 l 273 574 l 693 574 l 693 462 l 273 462 l 273 111 l 719 111 l 719 0 m 447 1233 q 512 1155 512 1233 q 447 1078 512 1078 q 382 1155 382 1078 q 447 1233 382 1233 "},"г":{"x_min":197,"x_max":704,"ha":834,"o":"m 704 642 l 320 642 l 320 0 l 197 0 l 197 745 l 704 745 l 704 642 "},"Ŀ":{"x_min":158,"x_max":716,"ha":834,"o":"m 158 0 l 158 992 l 284 992 l 284 111 l 716 111 l 716 0 l 158 0 m 587 603 q 652 525 652 603 q 587 448 652 448 q 522 525 522 448 q 587 603 522 603 "},"х":{"x_min":65,"x_max":767,"ha":834,"o":"m 346 382 l 79 745 l 219 745 l 416 466 l 614 745 l 754 745 l 486 382 l 767 0 l 627 0 l 416 295 l 205 0 l 65 0 l 346 382 "},"ŋ":{"x_min":109,"x_max":725,"ha":834,"o":"m 232 0 l 109 0 l 109 745 l 208 745 l 227 644 l 233 644 q 461 758 303 758 q 725 486 725 758 l 725 -107 q 528 -334 725 -334 q 438 -317 473 -334 l 438 -216 q 515 -231 474 -231 q 601 -116 601 -231 l 601 479 q 440 655 601 655 q 232 385 232 655 l 232 0 "},"Ч":{"x_min":92,"x_max":742,"ha":834,"o":"m 742 0 l 615 0 l 615 406 q 349 345 461 345 q 92 596 92 345 l 92 992 l 218 992 l 218 612 q 253 490 218 524 q 362 456 288 456 q 615 510 466 456 l 615 992 l 742 992 l 742 0 "},"ü":{"x_min":109,"x_max":725,"ha":834,"o":"m 625 0 l 607 99 l 600 99 q 373 -14 529 -14 q 109 258 109 -14 l 109 745 l 232 745 l 232 264 q 392 88 232 88 q 551 151 501 88 q 601 357 601 214 l 601 745 l 725 745 l 725 0 l 625 0 m 290 1015 q 355 945 355 1015 q 290 876 355 876 q 225 945 225 876 q 290 1015 225 1015 m 544 1015 q 610 945 610 1015 q 544 876 610 876 q 479 945 479 876 q 544 1015 479 1015 "},"ь":{"x_min":147,"x_max":741,"ha":834,"o":"m 270 439 l 458 439 q 741 227 741 439 q 455 0 741 0 l 147 0 l 147 745 l 270 745 l 270 439 m 270 336 l 270 102 l 447 102 q 620 219 620 102 q 580 308 620 280 q 444 336 539 336 l 270 336 "},"Ÿ":{"x_min":23,"x_max":809,"ha":834,"o":"m 415 490 l 672 992 l 809 992 l 479 386 l 479 0 l 353 0 l 353 379 l 23 992 l 160 992 l 415 490 m 290 1244 q 355 1174 355 1244 q 290 1105 355 1105 q 225 1174 225 1105 q 290 1244 225 1244 m 544 1244 q 610 1174 610 1244 q 544 1105 610 1105 q 479 1174 479 1105 q 544 1244 479 1244 "},"€":{"x_min":65,"x_max":766.875,"ha":834,"o":"m 302 634 l 593 634 l 593 541 l 292 541 q 291 521 292 530 l 291 504 l 291 462 q 292 433 291 448 l 552 433 l 552 341 l 304 341 q 553 97 354 97 q 735 136 645 97 l 735 26 q 543 -14 652 -14 q 175 341 239 -14 l 65 341 l 65 433 l 165 433 l 163 459 l 165 541 l 65 541 l 65 634 l 173 634 q 295 908 199 811 q 539 1006 390 1006 q 766 943 669 1006 l 713 844 q 549 894 631 894 q 392 827 458 894 q 302 634 327 759 "},"в":{"x_min":119,"x_max":752,"ha":834,"o":"m 572 395 l 572 390 q 752 215 752 366 q 680 57 752 114 q 466 0 608 0 l 119 0 l 119 745 l 465 745 q 728 557 728 745 q 572 395 728 423 m 242 642 l 242 439 l 440 439 q 568 463 530 439 q 607 545 607 488 q 460 642 607 642 l 242 642 m 242 336 l 242 102 l 458 102 q 631 224 631 102 q 587 312 631 287 q 455 336 542 336 l 242 336 "},"Η":{"x_min":92,"x_max":742,"ha":834,"o":"m 742 0 l 615 0 l 615 462 l 218 462 l 218 0 l 92 0 l 92 992 l 218 992 l 218 574 l 615 574 l 615 992 l 742 992 l 742 0 "},"С":{"x_min":87,"x_max":801,"ha":834,"o":"m 763 136 l 763 26 q 519 -14 663 -14 q 198 119 309 -14 q 87 497 87 252 q 208 868 87 731 q 540 1006 330 1006 q 801 947 690 1006 l 747 841 q 540 894 643 894 q 307 787 394 894 q 220 496 220 679 q 302 199 220 301 q 540 97 383 97 q 763 136 629 97 "},"ß":{"x_min":111,"x_max":781,"ha":834,"o":"m 325 32 l 325 145 q 513 88 422 88 q 657 205 657 88 q 626 294 657 260 q 528 370 595 329 q 410 465 444 423 q 376 565 376 506 q 465 716 376 644 q 554 849 554 788 q 399 960 554 960 q 234 814 234 960 l 234 0 l 111 0 l 111 814 q 398 1063 111 1063 q 604 1009 530 1063 q 678 854 678 955 q 587 685 678 765 q 513 614 530 635 q 497 570 497 593 q 516 524 497 544 q 619 448 536 503 q 749 331 717 384 q 781 211 781 278 q 713 44 781 102 q 521 -14 645 -14 q 325 32 397 -14 "},"њ":{"x_min":72,"x_max":812,"ha":834,"o":"m 177 745 l 177 437 l 386 437 l 386 745 l 491 745 l 491 439 l 526 439 q 812 228 812 439 q 527 0 812 0 l 386 0 l 386 334 l 177 334 l 177 0 l 72 0 l 72 745 l 177 745 m 491 337 l 491 102 l 529 102 q 706 220 706 102 q 665 309 706 281 q 527 337 624 337 l 491 337 "},"Ű":{"x_min":85,"x_max":749,"ha":834,"o":"m 749 993 l 749 349 q 663 79 749 173 q 412 -14 578 -14 q 85 352 85 -14 l 85 991 l 211 991 l 211 359 q 419 97 211 97 q 622 361 619 97 l 622 993 l 749 993 m 219 1089 q 322 1293 274 1179 l 471 1293 l 471 1278 q 286 1071 395 1161 l 219 1071 l 219 1089 m 464 1089 q 568 1293 516 1169 l 717 1293 l 717 1278 q 532 1071 641 1161 l 464 1071 l 464 1089 "},"c":{"x_min":117,"x_max":720,"ha":834,"o":"m 720 717 l 677 610 q 496 650 576 650 q 244 369 244 650 q 489 93 244 93 q 707 135 595 93 l 707 27 q 483 -14 616 -14 q 213 84 309 -14 q 117 367 117 183 q 215 658 117 558 q 492 758 313 758 q 720 717 612 758 "},"¶":{"x_min":45,"x_max":732,"ha":834,"o":"m 732 -176 l 649 -176 l 649 947 l 510 947 l 510 -176 l 428 -176 l 428 379 q 329 367 386 367 q 45 706 45 367 q 118 968 45 882 q 350 1055 192 1055 l 732 1055 l 732 -176 "},"Ή":{"x_min":-104,"x_max":742,"ha":834,"o":"m 742 0 l 615 0 l 615 462 l 218 462 l 218 0 l 92 0 l 92 992 l 218 992 l 218 574 l 615 574 l 615 992 l 742 992 l 742 0 m -104 789 l -81 861 q -52 993 -59 938 l 78 993 l 78 978 q 44 897 78 967 q -30 771 11 827 l -104 771 l -104 789 "},"Ὅ":{"x_min":-211,"x_max":876,"ha":834,"o":"m 515 -14 q 155 498 155 -14 q 517 1007 155 1007 q 783 874 690 1007 q 876 496 876 741 q 782 118 876 251 q 515 -14 688 -14 m 515 97 q 687 195 633 97 q 742 497 742 293 q 687 799 742 702 q 517 895 631 895 q 288 497 288 895 q 515 97 288 97 m -211 851 q -170 942 -211 904 q -47 1003 -129 981 l -47 951 q -107 920 -87 936 q -126 889 -126 905 q -115 870 -126 876 q -93 858 -105 864 q -70 844 -80 853 q -60 816 -60 835 q -76 778 -60 791 q -125 765 -93 765 q -187 788 -164 765 q -211 851 -211 812 m -2 787 q 13 833 5 807 q 30 885 22 858 q 46 939 38 911 q 58 991 53 966 l 199 991 l 199 977 q 170 929 186 955 q 135 876 154 903 q 95 822 116 849 q 53 770 74 795 l -2 770 l -2 787 "},"γ":{"x_min":56,"x_max":777,"ha":834,"o":"m 501 42 q 424 -334 424 -147 l 297 -334 q 365 8 297 -193 l 56 745 l 186 745 l 350 343 q 422 126 398 225 l 426 126 q 493 326 444 196 l 648 745 l 777 745 l 501 42 "},"­":{"x_min":193,"x_max":641,"ha":834,"o":"m 193 315 l 193 429 l 641 429 l 641 315 l 193 315 "},":":{"x_min":330,"x_max":502,"ha":834,"o":"m 416 764 q 502 669 502 764 q 416 575 502 575 q 330 669 330 575 q 416 764 330 764 m 416 169 q 502 74 502 169 q 416 -20 502 -20 q 330 74 330 -20 q 416 169 330 169 "},"ś":{"x_min":138,"x_max":696,"ha":834,"o":"m 138 32 l 138 145 q 388 88 268 88 q 575 196 575 88 q 542 264 575 235 q 388 336 508 292 q 190 444 231 395 q 149 560 149 493 q 224 705 149 652 q 433 758 300 758 q 684 707 568 758 l 643 606 q 428 655 520 655 q 269 565 269 655 q 303 499 269 523 q 460 430 337 474 q 649 327 602 378 q 696 203 696 277 q 616 44 696 102 q 392 -14 537 -14 q 138 32 224 -14 m 347 860 q 465 1064 411 950 l 614 1064 l 614 1049 q 429 842 537 932 l 347 842 l 347 860 "}," ":{"x_min":0,"x_max":0,"ha":834},"У":{"x_min":18,"x_max":814,"ha":834,"o":"m 814 992 l 523 289 q 431 109 471 166 q 329 18 390 51 q 183 -14 269 -14 q 63 6 113 -14 l 63 131 q 184 97 120 97 q 299 132 258 97 q 377 250 341 167 l 18 992 l 156 992 l 416 440 q 429 408 424 423 q 441 377 435 391 l 442 377 l 469 451 l 681 992 l 814 992 "},"¾":{"x_min":14,"x_max":838.71875,"ha":834,"o":"m 236 738 q 356 611 356 711 q 305 487 356 531 q 159 444 254 444 q 14 477 71 444 l 14 562 q 152 522 89 522 q 254 614 254 522 q 153 699 254 699 l 104 699 l 104 768 l 151 768 q 236 851 236 768 q 170 924 236 924 q 60 880 121 924 l 15 938 q 176 1002 90 1002 q 294 965 250 1002 q 338 865 338 928 q 236 738 338 771 m 753 992 l 258 0 l 151 0 l 645 992 l 753 992 m 838 117 l 781 117 l 781 0 l 680 0 l 680 117 l 426 117 l 426 184 l 681 539 l 781 539 l 781 195 l 838 195 l 838 117 m 680 195 l 680 314 q 684 430 680 369 q 629 341 656 381 l 524 195 l 680 195 "},"Ί":{"x_min":-62,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 m -62 789 l -39 861 q -10 993 -17 938 l 120 993 l 120 978 q 86 897 120 967 q 11 771 53 827 l -62 771 l -62 789 "},"ŉ":{"x_min":-11,"x_max":767,"ha":834,"o":"m 191 992 l 201 977 q 81 652 167 843 l -11 652 q 56 992 29 816 l 191 992 m 643 0 l 643 479 q 494 655 643 655 q 301 385 301 655 l 301 0 l 178 0 l 178 745 l 278 745 l 296 644 l 302 644 q 390 727 331 696 q 518 758 448 758 q 767 486 767 758 l 767 0 l 643 0 "},"Ģ":{"x_min":79,"x_max":742,"ha":834,"o":"m 455 524 l 742 524 l 742 36 q 456 -14 609 -14 q 179 121 279 -14 q 79 497 79 256 q 188 870 79 735 q 491 1006 298 1006 q 726 947 621 1006 l 677 837 q 487 894 578 894 q 285 789 357 894 q 212 496 212 683 q 479 97 212 97 q 615 116 544 97 l 615 412 l 455 412 l 455 524 m 366 -288 q 423 -85 408 -193 l 544 -85 l 544 -98 q 511 -182 544 -113 q 433 -307 478 -251 l 366 -307 l 366 -288 "},"m":{"x_min":62,"x_max":773,"ha":834,"o":"m 649 0 l 649 479 q 633 616 649 578 q 579 655 617 655 q 503 599 527 655 q 479 410 479 543 l 479 0 l 356 0 l 356 479 q 280 655 356 655 q 207 601 229 655 q 185 385 185 547 l 185 0 l 62 0 l 62 745 l 159 745 l 180 644 l 186 644 q 320 758 231 758 q 461 634 428 758 l 465 634 q 611 758 516 758 q 734 695 696 758 q 773 486 773 632 l 773 0 l 649 0 "},"Е":{"x_min":147,"x_max":719,"ha":834,"o":"m 719 0 l 147 0 l 147 992 l 719 992 l 719 880 l 273 880 l 273 574 l 693 574 l 693 462 l 273 462 l 273 111 l 719 111 l 719 0 "},"ž":{"x_min":123,"x_max":709,"ha":834,"o":"m 709 0 l 123 0 l 123 88 l 572 648 l 145 648 l 145 745 l 697 745 l 697 641 l 256 96 l 709 96 l 709 0 m 650 1045 q 609 1000 633 1026 q 490 842 514 893 l 359 842 q 240 1000 335 893 l 200 1045 l 200 1064 l 281 1064 q 424 937 337 1027 q 567 1064 507 1024 l 650 1064 l 650 1045 "},"á":{"x_min":92,"x_max":696,"ha":834,"o":"m 606 0 l 580 99 l 575 99 q 468 10 523 35 q 327 -14 413 -14 q 154 44 217 -14 q 92 207 92 102 q 436 442 92 431 l 573 447 l 573 494 q 409 655 573 655 q 187 599 309 655 l 144 692 q 404 758 277 758 q 627 699 558 758 q 696 509 696 640 l 696 0 l 606 0 m 572 362 l 462 357 q 274 315 330 352 q 219 204 219 279 q 354 82 219 82 q 513 138 454 82 q 572 294 572 194 l 572 362 m 341 860 q 459 1064 405 950 l 608 1064 l 608 1049 q 423 842 531 932 l 341 842 l 341 860 "},"×":{"x_min":129.28125,"x_max":704.421875,"ha":834,"o":"m 344 490 l 129 706 l 200 778 l 415 562 l 633 778 l 704 708 l 486 490 l 703 273 l 633 204 l 415 419 l 200 205 l 131 275 l 344 490 "},"п":{"x_min":109,"x_max":725,"ha":834,"o":"m 232 0 l 109 0 l 109 745 l 725 745 l 725 0 l 601 0 l 601 642 l 232 642 l 232 0 "},"Ǻ":{"x_min":22,"x_max":812,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 m 414 927 q 304 966 345 927 q 263 1073 263 1005 q 304 1179 263 1140 q 414 1219 345 1219 q 526 1178 482 1219 q 570 1074 570 1138 q 526 967 570 1007 q 414 927 483 927 m 416 1149 q 359 1129 381 1149 q 337 1073 337 1109 q 416 996 337 996 q 473 1016 451 996 q 495 1073 495 1036 q 473 1129 495 1109 q 416 1149 451 1149 m 332 1263 q 450 1467 396 1353 l 599 1467 l 599 1452 q 414 1245 522 1335 l 332 1245 l 332 1263 "},"K":{"x_min":143,"x_max":813.25,"ha":834,"o":"m 813 0 l 669 0 l 364 473 l 269 396 l 269 0 l 143 0 l 143 992 l 269 992 l 269 496 l 351 609 l 659 992 l 801 992 l 447 559 l 813 0 "},"¨":{"x_min":224,"x_max":609,"ha":834,"o":"m 289 1015 q 354 945 354 1015 q 289 876 354 876 q 224 945 224 876 q 289 1015 224 1015 m 543 1015 q 609 945 609 1015 q 543 876 609 876 q 478 945 478 876 q 543 1015 478 1015 "},"Y":{"x_min":23,"x_max":809,"ha":834,"o":"m 415 490 l 672 992 l 809 992 l 479 386 l 479 0 l 353 0 l 353 379 l 23 992 l 160 992 l 415 490 "},"E":{"x_min":147,"x_max":719,"ha":834,"o":"m 719 0 l 147 0 l 147 992 l 719 992 l 719 880 l 273 880 l 273 574 l 693 574 l 693 462 l 273 462 l 273 111 l 719 111 l 719 0 "},"Ô":{"x_min":57,"x_max":778,"ha":834,"o":"m 417 -14 q 57 498 57 -14 q 419 1007 57 1007 q 685 874 592 1007 q 778 496 778 741 q 684 118 778 251 q 417 -14 590 -14 m 417 97 q 589 195 535 97 q 644 497 644 293 q 589 799 644 702 q 419 895 533 895 q 190 497 190 895 q 417 97 190 97 m 642 1071 l 559 1071 q 416 1196 502 1108 q 273 1071 326 1104 l 192 1071 l 192 1089 q 232 1134 208 1108 q 351 1293 326 1239 l 482 1293 q 601 1134 507 1239 l 642 1089 l 642 1071 "},"Є":{"x_min":87,"x_max":801,"ha":834,"o":"m 224 574 l 652 574 l 652 462 l 220 462 q 540 97 236 97 q 763 135 629 97 l 763 26 q 519 -14 663 -14 q 198 119 309 -14 q 87 497 87 252 q 208 868 87 731 q 540 1006 330 1006 q 801 947 690 1006 l 747 841 q 540 894 643 894 q 327 810 412 894 q 224 574 243 725 "},"Ï":{"x_min":152.921875,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 m 290 1244 q 355 1174 355 1244 q 290 1105 355 1105 q 225 1174 225 1105 q 290 1244 225 1244 m 544 1244 q 610 1174 610 1244 q 544 1105 610 1105 q 479 1174 479 1105 q 544 1244 479 1244 "},"ġ":{"x_min":70,"x_max":763.84375,"ha":834,"o":"m 763 745 l 763 668 l 630 650 q 675 506 675 592 q 602 333 675 397 q 401 269 530 269 q 343 273 364 269 q 275 182 275 234 q 384 125 275 125 l 511 125 q 691 72 629 125 q 754 -77 754 20 q 371 -334 754 -334 q 146 -278 223 -334 q 70 -123 70 -223 q 232 61 70 22 q 167 165 167 93 q 257 293 167 240 q 162 376 197 318 q 128 502 128 434 q 200 691 128 625 q 405 758 272 758 q 507 745 464 758 l 763 745 m 402 353 q 554 508 554 353 q 401 669 554 669 q 248 506 248 669 q 402 353 248 353 m 469 17 l 342 17 q 186 -118 186 17 q 370 -237 186 -237 q 637 -84 637 -237 q 603 -3 637 -24 q 469 17 569 17 m 422 1023 q 487 945 487 1023 q 422 868 487 868 q 357 945 357 868 q 422 1023 357 1023 "},"έ":{"x_min":136,"x_max":700.703125,"ha":834,"o":"m 570 439 l 570 336 l 462 336 q 259 210 259 336 q 450 88 259 88 q 698 145 583 88 l 698 36 q 441 -14 606 -14 q 217 43 298 -14 q 136 203 136 100 q 297 385 136 334 l 297 392 q 160 561 160 437 q 236 705 160 652 q 440 758 312 758 q 700 706 587 758 l 658 606 q 446 655 550 655 q 283 551 283 655 q 467 439 283 439 l 570 439 m 391 860 l 413 932 q 442 1064 435 1009 l 573 1064 l 573 1049 q 539 968 573 1038 q 464 842 506 898 l 391 842 l 391 860 "}," ":{"x_min":0,"x_max":0,"ha":834},"ϋ":{"x_min":109,"x_max":735,"ha":834,"o":"m 109 745 l 232 745 l 232 345 q 418 88 232 88 q 565 167 520 88 q 611 412 611 245 q 568 745 611 573 l 691 745 q 735 406 735 578 q 657 88 735 191 q 414 -14 579 -14 q 109 337 109 -14 l 109 745 m 289 1015 q 354 945 354 1015 q 289 876 354 876 q 224 945 224 876 q 289 1015 224 1015 m 543 1015 q 609 945 609 1015 q 543 876 609 876 q 478 945 478 876 q 543 1015 478 1015 "},"й":{"x_min":109,"x_max":725,"ha":834,"o":"m 229 745 l 229 291 l 220 120 l 562 745 l 725 745 l 725 0 l 604 0 l 604 439 l 611 622 l 271 0 l 109 0 l 109 745 l 229 745 m 702 1058 q 437 842 688 842 q 247 892 305 842 q 182 1058 188 942 l 298 1058 q 332 959 304 988 q 442 930 361 930 q 585 1058 573 930 l 702 1058 "},"b":{"x_min":107,"x_max":741,"ha":834,"o":"m 230 93 l 222 93 l 197 0 l 107 0 l 107 1055 l 230 1055 l 230 800 q 225 646 230 745 l 230 646 q 449 758 303 758 q 663 656 585 758 q 741 373 741 555 q 662 88 741 190 q 449 -14 584 -14 q 230 93 308 -14 m 230 373 q 277 153 230 219 q 428 88 325 88 q 613 374 613 88 q 427 655 613 655 q 276 591 321 655 q 230 373 230 528 "},"ύ":{"x_min":109,"x_max":735,"ha":834,"o":"m 109 745 l 232 745 l 232 345 q 418 88 232 88 q 565 167 520 88 q 611 412 611 245 q 568 745 611 573 l 691 745 q 735 406 735 578 q 657 88 735 191 q 414 -14 579 -14 q 109 337 109 -14 l 109 745 m 352 860 l 374 932 q 403 1064 396 1009 l 534 1064 l 534 1049 q 500 968 534 1038 q 425 842 467 898 l 352 842 l 352 860 "},"ﬂ":{"x_min":33,"x_max":713,"ha":834,"o":"m 456 656 l 288 656 l 288 0 l 165 0 l 165 656 l 33 656 l 33 704 l 165 749 l 165 814 q 216 1002 165 942 q 389 1063 268 1063 q 523 1037 455 1063 l 491 942 q 394 960 438 960 q 310 926 331 960 q 288 815 288 892 l 288 745 l 456 745 l 456 656 m 713 0 l 589 0 l 589 1055 l 713 1055 l 713 0 "},"ф":{"x_min":50,"x_max":782,"ha":834,"o":"m 473 756 q 782 373 782 722 q 473 -11 782 17 l 473 -334 l 368 -334 l 368 -11 q 50 373 50 19 q 368 756 50 728 l 368 1055 l 473 1055 l 473 756 m 368 91 l 368 653 q 155 373 155 633 q 368 91 155 111 m 473 652 l 473 91 q 676 373 676 113 q 473 652 676 629 "},"Ŋ":{"x_min":92,"x_max":741,"ha":834,"o":"m 201 821 l 196 821 q 208 538 208 633 l 208 0 l 92 0 l 92 992 l 236 992 l 629 226 l 636 226 q 624 500 624 412 l 624 992 l 741 992 l 741 13 q 673 -192 741 -120 q 478 -264 605 -264 q 373 -247 415 -264 l 373 -139 q 480 -152 425 -152 q 624 0 624 -152 l 201 821 "},"Ũ":{"x_min":85,"x_max":749,"ha":834,"o":"m 749 993 l 749 349 q 663 79 749 173 q 412 -14 578 -14 q 85 352 85 -14 l 85 991 l 211 991 l 211 359 q 419 97 211 97 q 622 361 619 97 l 622 993 l 749 993 m 248 1070 l 177 1070 q 320 1250 193 1250 q 429 1211 359 1250 q 521 1173 498 1173 q 593 1251 576 1173 l 665 1251 q 522 1072 646 1072 q 415 1110 483 1072 q 320 1148 347 1148 q 248 1070 265 1148 "},"Щ":{"x_min":41,"x_max":834,"ha":834,"o":"m 713 111 l 834 111 l 834 -261 l 717 -261 l 717 0 l 41 0 l 41 992 l 167 992 l 167 111 l 321 111 l 321 992 l 447 992 l 447 111 l 586 111 l 586 992 l 713 992 l 713 111 "},"L":{"x_min":158,"x_max":716,"ha":834,"o":"m 158 0 l 158 992 l 284 992 l 284 111 l 716 111 l 716 0 l 158 0 "},"ď":{"x_min":54,"x_max":892,"ha":834,"o":"m 569 99 l 564 99 q 345 -14 487 -14 q 131 87 209 -14 q 54 370 54 188 q 132 655 54 553 q 345 758 210 758 q 564 649 485 758 l 572 649 q 564 759 564 736 l 564 1055 l 688 1055 l 688 0 l 588 0 l 569 99 m 564 342 l 564 370 q 517 590 564 524 q 366 655 469 655 q 181 369 181 655 q 367 88 181 88 q 516 148 471 88 q 564 342 561 208 m 729 850 l 746 923 q 770 1055 764 1002 l 892 1055 l 892 1041 q 863 964 892 1031 q 793 833 835 897 l 729 833 l 729 850 "},"Ο":{"x_min":57,"x_max":778,"ha":834,"o":"m 417 -14 q 57 498 57 -14 q 419 1007 57 1007 q 685 874 592 1007 q 778 496 778 741 q 684 118 778 251 q 417 -14 590 -14 m 417 97 q 589 195 535 97 q 644 497 644 293 q 589 799 644 702 q 419 895 533 895 q 190 497 190 895 q 417 97 190 97 "},"Ĭ":{"x_min":152.921875,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 m 621 1259 q 560 1121 614 1172 q 414 1071 506 1071 q 213 1259 224 1071 l 287 1259 q 319 1189 292 1206 q 416 1172 346 1172 q 546 1259 539 1172 l 621 1259 "},"ŧ":{"x_min":95,"x_max":696,"ha":834,"o":"m 692 101 l 692 7 q 521 -14 603 -14 q 276 217 276 -14 l 276 387 l 166 387 l 166 484 l 276 484 l 276 648 l 95 648 l 95 715 l 276 749 l 328 943 l 399 943 l 399 745 l 696 745 l 696 648 l 399 648 l 399 484 l 607 484 l 607 387 l 399 387 l 399 218 q 529 88 399 88 q 692 101 592 88 "},"À":{"x_min":22,"x_max":812,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 m 499 1071 l 416 1071 q 232 1278 304 1167 l 232 1293 l 380 1293 q 499 1089 439 1172 l 499 1071 "},"Ϊ":{"x_min":152.921875,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 m 290 1244 q 355 1174 355 1244 q 290 1105 355 1105 q 225 1174 225 1105 q 290 1244 225 1244 m 544 1244 q 610 1174 610 1244 q 544 1105 610 1105 q 479 1174 479 1105 q 544 1244 479 1244 "},"ḁ":{"x_min":92,"x_max":696,"ha":834,"o":"m 606 0 l 580 99 l 575 99 q 468 10 523 35 q 327 -14 413 -14 q 154 44 217 -14 q 92 207 92 102 q 436 442 92 431 l 573 447 l 573 494 q 409 655 573 655 q 187 599 309 655 l 144 692 q 404 758 277 758 q 627 699 558 758 q 696 509 696 640 l 696 0 l 606 0 m 572 362 l 462 357 q 274 315 330 352 q 219 204 219 279 q 354 82 219 82 q 513 138 454 82 q 572 294 572 194 l 572 362 m 567 -229 q 555 -291 567 -264 q 522 -338 543 -319 q 472 -367 501 -357 q 411 -377 444 -377 q 349 -367 377 -377 q 301 -338 321 -357 q 270 -292 281 -319 q 260 -231 260 -265 q 270 -169 260 -196 q 301 -123 281 -142 q 349 -94 321 -104 q 411 -85 377 -85 q 472 -94 443 -85 q 521 -123 500 -104 q 554 -168 542 -142 q 567 -229 567 -195 m 492 -231 q 470 -174 492 -194 q 413 -154 448 -154 q 356 -174 378 -154 q 334 -231 334 -194 q 354 -287 334 -267 q 413 -307 374 -307 q 470 -287 448 -307 q 492 -231 492 -267 "},"½":{"x_min":2,"x_max":831,"ha":834,"o":"m 150 990 l 244 990 l 244 456 l 143 456 l 143 771 q 149 906 143 817 q 98 862 121 876 l 51 828 l 2 887 l 150 990 m 673 992 l 178 0 l 71 0 l 565 992 l 673 992 m 831 1 l 471 1 l 471 70 l 595 205 q 689 319 668 285 q 709 392 709 353 q 635 469 709 469 q 526 418 581 469 l 475 477 q 643 547 554 547 q 766 506 722 547 q 811 395 811 465 q 787 304 811 350 q 676 171 763 258 l 584 79 l 831 79 l 831 1 "},"\'":{"x_min":336,"x_max":496.734375,"ha":834,"o":"m 496 992 l 468 634 l 363 634 l 336 992 l 496 992 "},"ĳ":{"x_min":127.828125,"x_max":704,"ha":834,"o":"m 200 1051 q 272 973 272 1051 q 250 915 272 934 q 200 896 229 896 q 127 973 127 896 q 200 1051 127 1051 m 629 1051 q 701 973 701 1051 q 679 915 701 934 q 629 896 658 896 q 556 973 556 896 q 629 1051 556 1051 m 138 745 l 261 745 l 261 0 l 138 0 l 138 745 m 341 -310 l 341 -205 q 469 -231 400 -231 q 580 -85 580 -231 l 580 648 l 435 662 l 435 745 l 704 745 l 704 -79 q 646 -268 704 -203 q 486 -334 588 -334 q 341 -310 403 -334 "},"Р":{"x_min":119,"x_max":742,"ha":834,"o":"m 245 385 l 245 0 l 119 0 l 119 992 l 393 992 q 742 701 742 992 q 647 468 742 552 q 374 385 553 385 l 245 385 m 245 493 l 359 493 q 550 541 493 493 q 608 694 608 590 q 380 884 608 884 l 245 884 l 245 493 "},"˛":{"x_min":281,"x_max":553,"ha":834,"o":"m 553 -217 l 553 -293 q 447 -309 503 -309 q 323 -271 366 -309 q 281 -171 281 -234 q 405 0 281 -73 l 497 0 q 378 -162 378 -85 q 467 -227 378 -227 q 553 -217 513 -227 "},"Ć":{"x_min":87,"x_max":801,"ha":834,"o":"m 763 136 l 763 26 q 519 -14 663 -14 q 198 119 309 -14 q 87 497 87 252 q 208 868 87 731 q 540 1006 330 1006 q 801 947 690 1006 l 747 841 q 540 894 643 894 q 307 787 394 894 q 220 496 220 679 q 302 199 220 301 q 540 97 383 97 q 763 136 629 97 m 448 1089 q 566 1293 512 1179 l 715 1293 l 715 1278 q 530 1071 638 1161 l 448 1071 l 448 1089 "},"Т":{"x_min":69,"x_max":762,"ha":834,"o":"m 479 0 l 353 0 l 353 880 l 69 880 l 69 992 l 762 992 l 762 880 l 479 880 l 479 0 "},"£":{"x_min":81,"x_max":753,"ha":834,"o":"m 721 949 l 676 852 q 492 898 581 898 q 342 732 342 898 l 342 534 l 596 534 l 596 437 l 342 437 l 342 295 q 247 112 342 164 l 753 112 l 753 0 l 81 0 l 81 104 q 217 294 217 137 l 217 437 l 82 437 l 82 534 l 217 534 l 217 753 q 290 935 217 867 q 486 1004 364 1004 q 721 949 616 1004 "},"ů":{"x_min":109,"x_max":725,"ha":834,"o":"m 625 0 l 607 99 l 600 99 q 373 -14 529 -14 q 109 258 109 -14 l 109 745 l 232 745 l 232 264 q 392 88 232 88 q 551 151 501 88 q 601 357 601 214 l 601 745 l 725 745 l 725 0 l 625 0 m 412 842 q 302 881 343 842 q 261 988 261 920 q 302 1094 261 1055 q 412 1134 343 1134 q 524 1093 480 1134 q 568 989 568 1053 q 524 882 568 922 q 412 842 481 842 m 414 1064 q 357 1044 379 1064 q 335 988 335 1024 q 414 911 335 911 q 471 931 449 911 q 493 988 493 951 q 471 1044 493 1024 q 414 1064 449 1064 "},"Ō":{"x_min":57,"x_max":778,"ha":834,"o":"m 417 -14 q 57 498 57 -14 q 419 1007 57 1007 q 685 874 592 1007 q 778 496 778 741 q 684 118 778 251 q 417 -14 590 -14 m 417 97 q 589 195 535 97 q 644 497 644 293 q 589 799 644 702 q 419 895 533 895 q 190 497 190 895 q 417 97 190 97 m 224 1172 l 615 1172 l 615 1071 l 224 1071 l 224 1172 "},"а":{"x_min":92,"x_max":696,"ha":834,"o":"m 606 0 l 580 99 l 575 99 q 468 10 523 35 q 327 -14 413 -14 q 154 44 217 -14 q 92 207 92 102 q 436 442 92 431 l 573 447 l 573 494 q 409 655 573 655 q 187 599 309 655 l 144 692 q 404 758 277 758 q 627 699 558 758 q 696 509 696 640 l 696 0 l 606 0 m 572 362 l 462 357 q 274 315 330 352 q 219 204 219 279 q 354 82 219 82 q 513 138 454 82 q 572 294 572 194 l 572 362 "},"Ğ":{"x_min":79,"x_max":742,"ha":834,"o":"m 455 524 l 742 524 l 742 36 q 456 -14 609 -14 q 179 121 279 -14 q 79 497 79 256 q 188 870 79 735 q 491 1006 298 1006 q 726 947 621 1006 l 677 837 q 487 894 578 894 q 285 789 357 894 q 212 496 212 683 q 479 97 212 97 q 615 116 544 97 l 615 412 l 455 412 l 455 524 m 687 1259 q 626 1121 680 1172 q 480 1071 572 1071 q 279 1259 290 1071 l 353 1259 q 385 1189 358 1206 q 482 1172 412 1172 q 612 1259 605 1172 l 687 1259 "},"v":{"x_min":56,"x_max":777,"ha":834,"o":"m 338 0 l 56 745 l 183 745 l 346 302 q 414 82 403 145 l 418 82 q 486 302 422 111 l 648 745 l 777 745 l 494 0 l 338 0 "},"Ї":{"x_min":152.921875,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 m 290 1244 q 355 1174 355 1244 q 290 1105 355 1105 q 225 1174 225 1105 q 290 1244 225 1244 m 544 1244 q 610 1174 610 1244 q 544 1105 610 1105 q 479 1174 479 1105 q 544 1244 479 1244 "},"û":{"x_min":109,"x_max":725,"ha":834,"o":"m 625 0 l 607 99 l 600 99 q 373 -14 529 -14 q 109 258 109 -14 l 109 745 l 232 745 l 232 264 q 392 88 232 88 q 551 151 501 88 q 601 357 601 214 l 601 745 l 725 745 l 725 0 l 625 0 m 648 842 l 565 842 q 422 967 508 879 q 279 842 332 875 l 198 842 l 198 860 q 238 905 214 879 q 357 1064 332 1010 l 488 1064 q 607 905 513 1010 l 648 860 l 648 842 "},"Ź":{"x_min":69,"x_max":763,"ha":834,"o":"m 763 0 l 69 0 l 69 97 l 607 880 l 83 880 l 83 992 l 749 992 l 749 895 l 210 111 l 763 111 l 763 0 m 322 1089 q 440 1293 386 1179 l 589 1293 l 589 1278 q 404 1071 512 1161 l 322 1071 l 322 1089 "},"ˉ":{"x_min":221,"x_max":612,"ha":834,"o":"m 221 943 l 612 943 l 612 842 l 221 842 l 221 943 "},"Ĺ":{"x_min":158,"x_max":716,"ha":834,"o":"m 158 0 l 158 992 l 284 992 l 284 111 l 716 111 l 716 0 l 158 0 m 179 1089 q 297 1293 243 1179 l 446 1293 l 446 1278 q 261 1071 369 1161 l 179 1071 l 179 1089 "},"₤":{"x_min":81,"x_max":753,"ha":834,"o":"m 721 949 l 676 852 q 492 898 581 898 q 342 733 342 898 l 342 604 l 596 604 l 596 507 l 342 507 l 342 407 l 596 407 l 596 311 l 342 311 l 342 298 q 245 112 342 165 l 753 112 l 753 0 l 81 0 l 81 104 q 217 296 217 137 l 217 311 l 82 311 l 82 407 l 217 407 l 217 507 l 82 507 l 82 604 l 217 604 l 217 753 q 290 935 217 867 q 486 1004 364 1004 q 721 949 616 1004 "},"Č":{"x_min":87,"x_max":801,"ha":834,"o":"m 763 136 l 763 26 q 519 -14 663 -14 q 198 119 309 -14 q 87 497 87 252 q 208 868 87 731 q 540 1006 330 1006 q 801 947 690 1006 l 747 841 q 540 894 643 894 q 307 787 394 894 q 220 496 220 679 q 302 199 220 301 q 540 97 383 97 q 763 136 629 97 m 747 1274 q 706 1229 730 1255 q 587 1071 611 1122 l 456 1071 q 337 1229 432 1122 l 297 1274 l 297 1293 l 378 1293 q 521 1166 434 1256 q 664 1293 604 1253 l 747 1293 l 747 1274 "},"x":{"x_min":65,"x_max":767,"ha":834,"o":"m 346 382 l 79 745 l 219 745 l 416 466 l 614 745 l 754 745 l 486 382 l 767 0 l 627 0 l 416 295 l 205 0 l 65 0 l 346 382 "},"è":{"x_min":90,"x_max":744,"ha":834,"o":"m 744 346 l 217 346 q 451 93 222 93 q 703 145 584 93 l 703 36 q 456 -14 590 -14 q 189 87 289 -14 q 90 366 90 188 q 182 652 90 547 q 428 758 274 758 q 658 666 572 758 q 744 423 744 575 l 744 346 m 220 449 l 616 449 q 428 655 616 655 q 220 449 238 655 m 521 842 l 438 842 q 254 1049 326 938 l 254 1064 l 402 1064 q 521 860 461 943 l 521 842 "},"Ń":{"x_min":92,"x_max":741,"ha":834,"o":"m 741 0 l 596 0 l 201 821 l 196 821 q 208 538 208 633 l 208 0 l 92 0 l 92 992 l 236 992 l 629 174 l 633 174 q 624 449 624 380 l 624 992 l 741 992 l 741 0 m 350 1089 q 468 1293 414 1179 l 617 1293 l 617 1278 q 432 1071 540 1161 l 350 1071 l 350 1089 "},"ḿ":{"x_min":62,"x_max":773,"ha":834,"o":"m 649 0 l 649 479 q 633 616 649 578 q 579 655 617 655 q 503 599 527 655 q 479 410 479 543 l 479 0 l 356 0 l 356 479 q 280 655 356 655 q 207 601 229 655 q 185 385 185 547 l 185 0 l 62 0 l 62 745 l 159 745 l 180 644 l 186 644 q 320 758 231 758 q 461 634 428 758 l 465 634 q 611 758 516 758 q 734 695 696 758 q 773 486 773 632 l 773 0 l 649 0 m 370 860 q 488 1064 434 950 l 637 1064 l 637 1049 q 452 842 560 932 l 370 842 l 370 860 "},"μ":{"x_min":109,"x_max":725,"ha":834,"o":"m 232 264 q 393 88 232 88 q 551 151 502 88 q 601 357 601 214 l 601 745 l 725 745 l 725 0 l 625 0 l 607 99 l 600 99 q 396 -14 534 -14 q 228 45 279 -14 q 232 -117 232 -58 l 232 -334 l 109 -334 l 109 745 l 232 745 l 232 264 "},".":{"x_min":314,"x_max":520,"ha":834,"o":"m 416 204 q 520 91 520 204 q 416 -21 520 -21 q 314 91 314 -21 q 416 204 314 204 "},"‘":{"x_min":303,"x_max":530,"ha":834,"o":"m 313 652 l 303 666 q 423 992 339 806 l 530 992 q 463 652 488 818 l 313 652 "},"π":{"x_min":9.4375,"x_max":823.421875,"ha":834,"o":"m 803 101 l 803 3 q 710 -14 767 -14 q 557 164 557 -14 l 557 642 l 283 642 l 283 0 l 160 0 l 160 642 l 9 642 l 9 691 l 103 745 l 823 745 l 823 642 l 681 642 l 681 173 q 742 88 681 88 q 803 101 773 88 "},"l":{"x_min":127.6875,"x_max":723.171875,"ha":834,"o":"m 361 958 l 179 972 l 179 1055 l 484 1055 l 484 96 l 723 83 l 723 0 l 127 0 l 127 83 l 361 96 l 361 958 "},"Ъ":{"x_min":18,"x_max":774,"ha":834,"o":"m 220 0 l 220 880 l 18 880 l 18 992 l 346 992 l 346 574 l 392 574 q 675 500 576 574 q 774 290 774 426 q 679 76 774 153 q 410 0 585 0 l 220 0 m 346 107 l 412 107 q 640 290 640 107 q 582 421 640 379 q 392 462 524 462 l 346 462 l 346 107 "}," ":{"x_min":0,"x_max":0,"ha":834},"Ś":{"x_min":96,"x_max":738,"ha":834,"o":"m 96 32 l 96 152 q 375 93 238 93 q 611 258 611 93 q 564 366 611 328 q 371 456 516 404 q 170 575 231 506 q 109 754 109 644 q 196 939 109 872 q 435 1006 283 1006 q 718 953 591 1006 l 674 841 q 432 894 544 894 q 235 752 235 894 q 279 641 235 683 q 461 551 323 599 q 682 428 626 491 q 738 264 738 364 q 644 60 738 134 q 376 -14 550 -14 q 96 32 197 -14 m 349 1089 q 467 1293 413 1179 l 616 1293 l 616 1278 q 431 1071 539 1161 l 349 1071 l 349 1089 "},"Ü":{"x_min":85,"x_max":749,"ha":834,"o":"m 749 993 l 749 349 q 663 79 749 173 q 412 -14 578 -14 q 85 352 85 -14 l 85 991 l 211 991 l 211 359 q 419 97 211 97 q 622 361 619 97 l 622 993 l 749 993 m 290 1244 q 355 1174 355 1244 q 290 1105 355 1105 q 225 1174 225 1105 q 290 1244 225 1244 m 544 1244 q 610 1174 610 1244 q 544 1105 610 1105 q 479 1174 479 1105 q 544 1244 479 1244 "},"à":{"x_min":92,"x_max":696,"ha":834,"o":"m 606 0 l 580 99 l 575 99 q 468 10 523 35 q 327 -14 413 -14 q 154 44 217 -14 q 92 207 92 102 q 436 442 92 431 l 573 447 l 573 494 q 409 655 573 655 q 187 599 309 655 l 144 692 q 404 758 277 758 q 627 699 558 758 q 696 509 696 640 l 696 0 l 606 0 m 572 362 l 462 357 q 274 315 330 352 q 219 204 219 279 q 354 82 219 82 q 513 138 454 82 q 572 294 572 194 l 572 362 m 493 842 l 410 842 q 226 1049 298 938 l 226 1064 l 374 1064 q 493 860 433 943 l 493 842 "},"η":{"x_min":109,"x_max":725,"ha":834,"o":"m 601 -334 l 601 479 q 440 655 601 655 q 232 385 232 655 l 232 0 l 109 0 l 109 745 l 208 745 l 227 644 l 233 644 q 461 758 302 758 q 725 486 725 758 l 725 -334 l 601 -334 "},"ó":{"x_min":78,"x_max":755,"ha":834,"o":"m 414 -14 q 172 91 267 -14 q 78 373 78 196 q 170 654 78 551 q 418 758 262 758 q 660 652 566 758 q 755 373 755 547 q 661 89 755 193 q 414 -14 568 -14 m 416 88 q 627 373 627 88 q 415 655 627 655 q 205 373 205 655 q 416 88 205 88 m 338 860 q 456 1064 402 950 l 605 1064 l 605 1049 q 420 842 528 932 l 338 842 l 338 860 "},"¦":{"x_min":366,"x_max":467.734375,"ha":834,"o":"m 366 1055 l 467 1055 l 467 526 l 366 526 l 366 1055 m 366 196 l 467 196 l 467 -334 l 366 -334 l 366 196 "},"Ő":{"x_min":57,"x_max":778,"ha":834,"o":"m 417 -14 q 57 498 57 -14 q 419 1007 57 1007 q 685 874 592 1007 q 778 496 778 741 q 684 118 778 251 q 417 -14 590 -14 m 417 97 q 589 195 535 97 q 644 497 644 293 q 589 799 644 702 q 419 895 533 895 q 190 497 190 895 q 417 97 190 97 m 222 1089 q 325 1293 277 1179 l 474 1293 l 474 1278 q 289 1071 398 1161 l 222 1071 l 222 1089 m 467 1089 q 571 1293 519 1169 l 720 1293 l 720 1278 q 535 1071 644 1161 l 467 1071 l 467 1089 "},"Ž":{"x_min":69,"x_max":763,"ha":834,"o":"m 763 0 l 69 0 l 69 97 l 607 880 l 83 880 l 83 992 l 749 992 l 749 895 l 210 111 l 763 111 l 763 0 m 641 1274 q 600 1229 624 1255 q 481 1071 505 1122 l 350 1071 q 231 1229 326 1122 l 191 1274 l 191 1293 l 272 1293 q 415 1166 328 1256 q 558 1293 498 1253 l 641 1293 l 641 1274 "},"е":{"x_min":90,"x_max":744,"ha":834,"o":"m 744 346 l 217 346 q 451 93 222 93 q 703 145 584 93 l 703 36 q 456 -14 590 -14 q 189 87 289 -14 q 90 366 90 188 q 182 652 90 547 q 428 758 274 758 q 658 666 572 758 q 744 423 744 575 l 744 346 m 220 449 l 616 449 q 428 655 616 655 q 220 449 238 655 "},"Î":{"x_min":152.921875,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 m 642 1071 l 559 1071 q 416 1196 502 1108 q 273 1071 326 1104 l 192 1071 l 192 1089 q 232 1134 208 1108 q 351 1293 326 1239 l 482 1293 q 601 1134 507 1239 l 642 1089 l 642 1071 "},"e":{"x_min":90,"x_max":744,"ha":834,"o":"m 744 346 l 217 346 q 451 93 222 93 q 703 145 584 93 l 703 36 q 456 -14 590 -14 q 189 87 289 -14 q 90 366 90 188 q 182 652 90 547 q 428 758 274 758 q 658 666 572 758 q 744 423 744 575 l 744 346 m 220 449 l 616 449 q 428 655 616 655 q 220 449 238 655 "},"ό":{"x_min":78,"x_max":755,"ha":834,"o":"m 414 -14 q 172 91 267 -14 q 78 373 78 196 q 170 654 78 551 q 418 758 262 758 q 660 652 566 758 q 755 373 755 547 q 661 89 755 193 q 414 -14 568 -14 m 416 88 q 627 373 627 88 q 415 655 627 655 q 205 373 205 655 q 416 88 205 88 m 375 860 l 397 932 q 426 1064 419 1009 l 557 1064 l 557 1049 q 523 968 557 1038 q 448 842 490 898 l 375 842 l 375 860 "},"Ĕ":{"x_min":147,"x_max":719,"ha":834,"o":"m 719 0 l 147 0 l 147 992 l 719 992 l 719 880 l 273 880 l 273 574 l 693 574 l 693 462 l 273 462 l 273 111 l 719 111 l 719 0 m 641 1259 q 580 1121 634 1172 q 434 1071 526 1071 q 233 1259 244 1071 l 307 1259 q 339 1189 312 1206 q 436 1172 366 1172 q 566 1259 559 1172 l 641 1259 "},"ļ":{"x_min":127.6875,"x_max":723.171875,"ha":834,"o":"m 361 958 l 179 972 l 179 1055 l 484 1055 l 484 96 l 723 83 l 723 0 l 127 0 l 127 83 l 361 96 l 361 958 m 313 -288 q 370 -85 355 -193 l 491 -85 l 491 -98 q 458 -182 491 -113 q 380 -307 425 -251 l 313 -307 l 313 -288 "}," ":{"x_min":0,"x_max":0,"ha":834},"Ѓ":{"x_min":158,"x_max":719,"ha":834,"o":"m 719 992 l 719 880 l 284 880 l 284 0 l 158 0 l 158 992 l 719 992 m 345 1089 q 463 1293 409 1179 l 612 1293 l 612 1278 q 427 1071 535 1161 l 345 1071 l 345 1089 "},"ò":{"x_min":78,"x_max":755,"ha":834,"o":"m 414 -14 q 172 91 267 -14 q 78 373 78 196 q 170 654 78 551 q 418 758 262 758 q 660 652 566 758 q 755 373 755 547 q 661 89 755 193 q 414 -14 568 -14 m 416 88 q 627 373 627 88 q 415 655 627 655 q 205 373 205 655 q 416 88 205 88 m 524 842 l 441 842 q 257 1049 329 938 l 257 1064 l 405 1064 q 524 860 464 943 l 524 842 "},"ﬄ":{"x_min":45.1875,"x_max":723.234375,"ha":834,"o":"m 570 660 l 474 660 l 474 0 l 364 0 l 364 660 l 224 660 l 224 0 l 113 0 l 113 660 l 45 660 l 45 703 l 113 745 l 113 800 q 126 920 113 872 q 166 996 140 968 q 230 1036 192 1025 q 317 1048 268 1048 q 380 1041 350 1048 q 433 1025 410 1033 q 493 1053 458 1044 q 570 1063 528 1063 q 634 1055 603 1063 l 723 1055 l 723 0 l 612 0 l 612 961 q 592 965 602 963 q 573 966 582 966 q 529 958 547 966 q 498 933 510 951 q 480 887 486 916 q 474 814 474 857 l 474 745 l 570 745 l 570 660 m 224 745 l 364 745 l 364 813 q 380 943 364 890 q 351 949 366 947 q 320 952 335 952 q 278 945 296 952 q 248 920 260 937 q 230 873 236 902 q 224 801 224 844 l 224 745 "},"^":{"x_min":75,"x_max":759,"ha":834,"o":"m 75 372 l 363 999 l 432 999 l 759 372 l 649 372 l 399 870 l 182 372 l 75 372 "},"ⁿ":{"x_min":215,"x_max":618,"ha":834,"o":"m 516 541 l 516 820 q 431 921 516 921 q 340 885 364 921 q 316 769 316 849 l 316 541 l 215 541 l 215 992 l 300 992 l 312 920 l 318 920 q 457 1003 364 1003 q 575 958 532 1003 q 618 833 618 914 l 618 541 l 516 541 "},"к":{"x_min":146,"x_max":797,"ha":834,"o":"m 620 745 l 771 745 l 413 387 l 797 0 l 639 0 l 269 377 l 269 0 l 146 0 l 146 745 l 269 745 l 269 383 l 620 745 "},"￼":{"x_min":37,"x_max":796,"ha":834,"o":"m 456 734 q 447 668 456 697 q 421 616 439 638 q 377 582 403 594 q 314 571 350 571 q 250 582 277 571 q 206 616 223 594 q 180 668 188 638 q 172 734 172 697 q 180 802 172 772 q 206 853 188 832 q 250 887 223 875 q 314 899 277 899 q 377 887 350 899 q 421 853 403 875 q 447 802 439 832 q 456 734 456 772 m 363 539 l 456 539 q 545 521 515 539 q 575 458 575 503 q 562 413 575 431 q 526 390 550 395 l 526 387 q 549 380 538 385 q 567 367 559 375 q 580 346 575 359 q 585 314 585 333 q 555 245 585 269 q 475 221 525 221 l 363 221 l 363 539 m 514 185 l 694 185 l 694 132 l 645 132 l 645 -31 q 615 -111 645 -85 q 539 -137 586 -137 q 503 -135 518 -137 q 481 -131 489 -133 l 481 -75 q 502 -78 489 -77 q 531 -80 515 -80 q 564 -70 551 -80 q 578 -32 578 -60 l 578 132 l 514 132 l 514 185 m 239 734 q 257 656 239 684 q 314 627 275 627 q 370 656 352 627 q 387 734 387 684 q 370 813 387 785 q 314 842 352 842 q 257 813 275 842 q 239 734 239 785 m 37 823 l 37 1030 l 242 1030 l 242 954 l 112 954 l 112 823 l 37 823 m 37 -260 l 37 -54 l 112 -54 l 112 -186 l 242 -186 l 242 -260 l 37 -260 m 589 954 l 589 1030 l 796 1030 l 796 823 l 722 823 l 722 954 l 589 954 m 589 -260 l 589 -186 l 722 -186 l 722 -54 l 796 -54 l 796 -260 l 589 -260 m 112 291 l 37 291 l 37 476 l 112 476 l 112 291 m 324 954 l 324 1030 l 508 1030 l 508 954 l 324 954 m 112 26 l 37 26 l 37 210 l 112 210 l 112 26 m 112 558 l 37 558 l 37 742 l 112 742 l 112 558 m 796 291 l 722 291 l 722 476 l 796 476 l 796 291 m 796 26 l 722 26 l 722 210 l 796 210 l 796 26 m 796 558 l 722 558 l 722 742 l 796 742 l 796 558 m 324 -260 l 324 -186 l 508 -186 l 508 -260 l 324 -260 m 429 359 l 429 276 l 469 276 q 505 288 495 276 q 515 320 515 299 q 505 348 515 337 q 466 359 495 359 l 429 359 m 429 414 l 464 414 q 499 423 489 414 q 509 449 509 432 q 497 475 509 467 q 461 483 486 483 l 429 483 l 429 414 "},"ū":{"x_min":109,"x_max":725,"ha":834,"o":"m 625 0 l 607 99 l 600 99 q 373 -14 529 -14 q 109 258 109 -14 l 109 745 l 232 745 l 232 264 q 392 88 232 88 q 551 151 501 88 q 601 357 601 214 l 601 745 l 725 745 l 725 0 l 625 0 m 222 943 l 613 943 l 613 842 l 222 842 l 222 943 "},"ˆ":{"x_min":192,"x_max":642,"ha":834,"o":"m 642 842 l 559 842 q 416 967 502 879 q 273 842 326 875 l 192 842 l 192 860 q 232 905 208 879 q 351 1064 326 1010 l 482 1064 q 601 905 507 1010 l 642 860 l 642 842 "},"Ẅ":{"x_min":1,"x_max":833,"ha":834,"o":"m 358 684 l 478 684 l 577 330 q 626 122 618 181 q 670 542 627 158 l 717 992 l 833 992 l 706 0 l 577 0 l 462 393 q 418 584 435 487 q 373 392 396 467 l 267 0 l 139 0 l 1 992 l 116 992 l 176 542 q 203 285 191 422 q 215 122 215 148 q 262 333 231 224 l 358 684 m 292 1244 q 357 1174 357 1244 q 292 1105 357 1105 q 227 1174 227 1105 q 292 1244 227 1244 m 546 1244 q 612 1174 612 1244 q 546 1105 612 1105 q 481 1174 481 1105 q 546 1244 481 1244 "},"č":{"x_min":117,"x_max":720,"ha":834,"o":"m 720 717 l 677 610 q 496 650 576 650 q 244 369 244 650 q 489 93 244 93 q 707 135 595 93 l 707 27 q 483 -14 616 -14 q 213 84 309 -14 q 117 367 117 183 q 215 658 117 558 q 492 758 313 758 q 720 717 612 758 m 705 1045 q 664 1000 688 1026 q 545 842 569 893 l 414 842 q 295 1000 390 893 l 255 1045 l 255 1064 l 336 1064 q 479 937 392 1027 q 622 1064 562 1024 l 705 1064 l 705 1045 "},"’":{"x_min":303,"x_max":530,"ha":834,"o":"m 520 992 l 530 977 q 410 652 492 832 l 303 652 q 369 992 345 832 l 520 992 "},"Ν":{"x_min":92,"x_max":741,"ha":834,"o":"m 741 0 l 596 0 l 201 821 l 196 821 q 208 538 208 633 l 208 0 l 92 0 l 92 992 l 236 992 l 629 174 l 633 174 q 624 449 624 380 l 624 992 l 741 992 l 741 0 "},"-":{"x_min":193,"x_max":641,"ha":834,"o":"m 193 315 l 193 429 l 641 429 l 641 315 l 193 315 "},"Q":{"x_min":57,"x_max":778,"ha":834,"o":"m 584 26 q 774 -184 642 -95 l 691 -281 q 469 -9 531 -165 q 417 -14 444 -14 q 57 498 57 -14 q 419 1007 57 1007 q 685 874 592 1007 q 778 496 778 741 q 584 26 778 139 m 417 97 q 589 195 535 97 q 644 497 644 293 q 589 799 644 702 q 419 895 533 895 q 190 497 190 895 q 417 97 190 97 "},"ј":{"x_min":92,"x_max":580,"ha":834,"o":"m 504 1051 q 577 973 577 1051 q 504 896 577 896 q 432 973 432 896 q 504 1051 432 1051 m 92 -310 l 92 -205 q 288 -231 182 -231 q 412 -192 367 -231 q 456 -85 456 -154 l 456 648 l 171 662 l 171 745 l 580 745 l 580 -79 q 503 -267 580 -201 q 286 -334 426 -334 q 92 -310 175 -334 "},"ě":{"x_min":90,"x_max":744,"ha":834,"o":"m 744 346 l 217 346 q 451 93 222 93 q 703 145 584 93 l 703 36 q 456 -14 590 -14 q 189 87 289 -14 q 90 366 90 188 q 182 652 90 547 q 428 758 274 758 q 658 666 572 758 q 744 423 744 575 l 744 346 m 220 449 l 616 449 q 428 655 616 655 q 220 449 238 655 m 659 1045 q 618 1000 642 1026 q 499 842 523 893 l 368 842 q 249 1000 344 893 l 209 1045 l 209 1064 l 290 1064 q 433 937 346 1027 q 576 1064 516 1024 l 659 1064 l 659 1045 "},"œ":{"x_min":39,"x_max":797,"ha":834,"o":"m 445 135 q 263 -14 385 -14 q 101 90 163 -14 q 39 373 39 194 q 99 656 39 555 q 264 758 159 758 q 442 610 381 758 q 605 758 499 758 q 745 667 693 758 q 797 423 797 576 l 797 346 l 506 346 q 631 93 508 93 q 765 145 702 93 l 765 35 q 620 -14 702 -14 q 513 26 561 -14 q 445 135 465 66 m 273 88 q 383 366 383 88 q 272 655 383 655 q 187 585 213 655 q 162 373 162 515 q 188 159 162 230 q 273 88 213 88 m 676 449 q 596 655 676 655 q 507 449 515 655 l 676 449 "},"#":{"x_min":31,"x_max":803,"ha":834,"o":"m 635 606 l 592 383 l 754 383 l 754 290 l 574 290 l 519 0 l 418 0 l 475 290 l 276 290 l 219 0 l 125 0 l 177 290 l 31 290 l 31 383 l 195 383 l 239 606 l 83 606 l 83 699 l 256 699 l 311 992 l 413 992 l 357 699 l 557 699 l 615 992 l 710 992 l 653 699 l 803 699 l 803 606 l 635 606 m 294 383 l 494 383 l 538 606 l 339 606 l 294 383 "},"Џ":{"x_min":92,"x_max":742,"ha":834,"o":"m 742 0 l 482 0 l 482 -261 l 356 -261 l 356 0 l 92 0 l 92 992 l 218 992 l 218 111 l 615 111 l 615 992 l 742 992 l 742 0 "},"Å":{"x_min":22,"x_max":812,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 m 414 927 q 304 966 345 927 q 263 1073 263 1005 q 304 1179 263 1140 q 414 1219 345 1219 q 526 1178 482 1219 q 570 1074 570 1138 q 526 967 570 1007 q 414 927 483 927 m 416 1149 q 359 1129 381 1149 q 337 1073 337 1109 q 416 996 337 996 q 473 1016 451 996 q 495 1073 495 1036 q 473 1129 495 1109 q 416 1149 451 1149 "},"ș":{"x_min":138,"x_max":696,"ha":834,"o":"m 138 32 l 138 145 q 388 88 268 88 q 575 196 575 88 q 542 264 575 235 q 388 336 508 292 q 190 444 231 395 q 149 560 149 493 q 224 705 149 652 q 433 758 300 758 q 684 707 568 758 l 643 606 q 428 655 520 655 q 269 565 269 655 q 303 499 269 523 q 460 430 337 474 q 649 327 602 378 q 696 203 696 277 q 616 44 696 102 q 392 -14 537 -14 q 138 32 224 -14 m 309 -288 q 366 -85 351 -193 l 487 -85 l 487 -98 q 454 -182 487 -113 q 376 -307 421 -251 l 309 -307 l 309 -288 "},"¸":{"x_min":291,"x_max":544,"ha":834,"o":"m 291 -327 l 291 -254 q 344 -258 313 -258 q 446 -196 446 -258 q 330 -119 446 -146 l 392 0 l 472 0 l 434 -78 q 544 -194 544 -103 q 346 -334 544 -334 q 291 -327 323 -334 "},"=":{"x_min":103,"x_max":730,"ha":834,"o":"m 103 577 l 103 679 l 730 679 l 730 577 l 103 577 m 103 300 l 103 401 l 730 401 l 730 300 l 103 300 "},"ρ":{"x_min":107,"x_max":735,"ha":834,"o":"m 230 47 l 226 47 q 230 -136 230 -70 l 230 -334 l 107 -334 l 107 373 q 192 654 107 551 q 426 758 278 758 q 650 653 566 758 q 735 373 735 549 q 651 88 735 190 q 421 -14 567 -14 q 230 47 307 -14 m 230 156 q 422 88 306 88 q 564 159 520 88 q 607 373 607 231 q 563 585 607 515 q 421 655 519 655 q 230 386 230 655 l 230 156 "},"Ћ":{"x_min":16,"x_max":791,"ha":834,"o":"m 345 609 l 524 609 q 721 543 651 609 q 791 357 791 477 l 791 0 l 664 0 l 664 340 q 510 497 664 497 l 345 497 l 345 0 l 219 0 l 219 880 l 16 880 l 16 992 l 587 992 l 587 880 l 345 880 l 345 609 "},"ú":{"x_min":109,"x_max":725,"ha":834,"o":"m 625 0 l 607 99 l 600 99 q 373 -14 529 -14 q 109 258 109 -14 l 109 745 l 232 745 l 232 264 q 392 88 232 88 q 551 151 501 88 q 601 357 601 214 l 601 745 l 725 745 l 725 0 l 625 0 m 339 860 q 457 1064 403 950 l 606 1064 l 606 1049 q 421 842 529 932 l 339 842 l 339 860 "},"˚":{"x_min":263,"x_max":570,"ha":834,"o":"m 414 842 q 304 881 345 842 q 263 988 263 920 q 304 1094 263 1055 q 414 1134 345 1134 q 526 1093 482 1134 q 570 989 570 1053 q 526 882 570 922 q 414 842 483 842 m 416 1064 q 359 1044 381 1064 q 337 988 337 1024 q 416 911 337 911 q 473 931 451 911 q 495 988 495 951 q 473 1044 495 1024 q 416 1064 451 1064 "},"д":{"x_min":22,"x_max":765,"ha":834,"o":"m 765 -258 l 644 -258 l 644 0 l 145 0 l 145 -258 l 22 -258 l 22 102 l 80 102 q 261 745 258 367 l 663 745 l 663 102 l 765 102 l 765 -258 m 539 102 l 539 648 l 369 648 q 210 102 345 321 l 539 102 "},"¯":{"x_min":-14,"x_max":847,"ha":834,"o":"m 847 1055 l -14 1055 l -14 1149 l 847 1149 l 847 1055 "},"u":{"x_min":109,"x_max":725,"ha":834,"o":"m 625 0 l 607 99 l 600 99 q 373 -14 529 -14 q 109 258 109 -14 l 109 745 l 232 745 l 232 264 q 392 88 232 88 q 551 151 501 88 q 601 357 601 214 l 601 745 l 725 745 l 725 0 l 625 0 "},"З":{"x_min":94,"x_max":727,"ha":834,"o":"m 476 521 l 476 517 q 662 440 597 501 q 727 281 727 378 q 630 64 727 143 q 356 -14 534 -14 q 94 39 192 -14 l 94 154 q 353 93 218 93 q 593 281 593 93 q 326 457 593 457 l 198 457 l 198 565 l 317 565 q 507 614 439 565 q 575 747 575 664 q 528 857 575 816 q 400 898 480 898 q 161 819 274 898 l 98 904 q 407 1006 229 1006 q 629 938 549 1006 q 709 759 709 871 q 648 602 709 666 q 476 521 587 539 "},"Α":{"x_min":22,"x_max":812,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 "},"⅝":{"x_min":16,"x_max":832,"ha":834,"o":"m 16 478 l 16 566 q 149 524 81 524 q 253 624 253 524 q 146 723 253 723 q 66 708 113 723 l 27 735 l 48 992 l 317 992 l 317 914 l 121 914 l 110 787 q 175 792 134 792 q 305 747 255 792 q 355 629 355 703 q 304 494 355 542 q 154 446 253 446 q 16 478 70 446 m 705 992 l 210 0 l 103 0 l 597 992 l 705 992 m 720 287 q 832 147 832 230 q 780 35 832 77 q 644 -7 728 -7 q 502 33 552 -7 q 453 143 453 73 q 546 281 453 231 q 470 412 470 335 q 518 511 470 474 q 643 549 567 549 q 766 512 718 549 q 814 412 814 475 q 720 287 814 334 m 645 321 q 712 413 712 355 q 641 480 712 480 q 571 413 571 480 q 645 321 571 357 m 630 247 q 554 142 554 203 q 641 61 554 61 q 730 142 730 61 q 639 243 730 203 l 630 247 "},"é":{"x_min":90,"x_max":744,"ha":834,"o":"m 744 346 l 217 346 q 451 93 222 93 q 703 145 584 93 l 703 36 q 456 -14 590 -14 q 189 87 289 -14 q 90 366 90 188 q 182 652 90 547 q 428 758 274 758 q 658 666 572 758 q 744 423 744 575 l 744 346 m 220 449 l 616 449 q 428 655 616 655 q 220 449 238 655 m 339 860 q 457 1064 403 950 l 606 1064 l 606 1049 q 421 842 529 932 l 339 842 l 339 860 "},"Ş":{"x_min":96,"x_max":738,"ha":834,"o":"m 96 32 l 96 152 q 375 93 238 93 q 611 258 611 93 q 564 366 611 328 q 371 456 516 404 q 170 575 231 506 q 109 754 109 644 q 196 939 109 872 q 435 1006 283 1006 q 718 953 591 1006 l 674 841 q 432 894 544 894 q 235 752 235 894 q 279 641 235 683 q 461 551 323 599 q 682 428 626 491 q 738 264 738 364 q 644 60 738 134 q 376 -14 550 -14 q 96 32 197 -14 m 277 -327 l 277 -254 q 330 -258 299 -258 q 432 -196 432 -258 q 316 -119 432 -146 l 378 0 l 458 0 l 420 -78 q 530 -194 530 -103 q 332 -334 530 -334 q 277 -327 309 -334 "},"B":{"x_min":92,"x_max":772,"ha":834,"o":"m 92 992 l 390 992 q 660 932 576 992 q 744 740 744 873 q 690 596 744 653 q 546 526 637 538 l 546 519 q 772 287 772 482 q 685 76 772 153 q 449 0 598 0 l 92 0 l 92 992 m 218 572 l 409 572 q 562 609 514 572 q 610 732 610 646 q 558 848 610 813 q 395 884 507 884 l 218 884 l 218 572 m 218 464 l 218 107 l 426 107 q 638 292 638 107 q 418 464 638 464 l 218 464 "},"…":{"x_min":53,"x_max":780.265625,"ha":834,"o":"m 139 168 q 225 74 225 168 q 139 -20 225 -20 q 53 74 53 -20 q 139 168 53 168 m 416 168 q 502 74 502 168 q 416 -20 502 -20 q 330 74 330 -20 q 416 168 330 168 m 694 168 q 780 74 780 168 q 694 -20 780 -20 q 608 74 608 -20 q 694 168 608 168 "},"H":{"x_min":92,"x_max":742,"ha":834,"o":"m 742 0 l 615 0 l 615 462 l 218 462 l 218 0 l 92 0 l 92 992 l 218 992 l 218 574 l 615 574 l 615 992 l 742 992 l 742 0 "},"î":{"x_min":133.6875,"x_max":729.171875,"ha":834,"o":"m 367 648 l 184 662 l 184 745 l 490 745 l 490 96 l 729 83 l 729 0 l 133 0 l 133 83 l 367 96 l 367 648 m 642 842 l 559 842 q 416 967 502 879 q 273 842 326 875 l 192 842 l 192 860 q 232 905 208 879 q 351 1064 326 1010 l 482 1064 q 601 905 507 1010 l 642 860 l 642 842 "},"ν":{"x_min":40.75,"x_max":745,"ha":834,"o":"m 40 745 l 168 745 l 320 347 q 402 104 395 151 l 406 104 q 567 354 513 215 q 621 745 621 493 l 745 745 q 676 331 745 497 q 455 0 608 164 l 328 0 l 40 745 "},"Ό":{"x_min":-89,"x_max":778,"ha":834,"o":"m 417 -14 q 57 498 57 -14 q 419 1007 57 1007 q 685 874 592 1007 q 778 496 778 741 q 684 118 778 251 q 417 -14 590 -14 m 417 97 q 589 195 535 97 q 644 497 644 293 q 589 799 644 702 q 419 895 533 895 q 190 497 190 895 q 417 97 190 97 m -89 789 l -66 861 q -37 993 -44 938 l 93 993 l 93 978 q 59 897 93 967 q -15 771 26 827 l -89 771 l -89 789 "},"−":{"x_min":103,"x_max":730,"ha":834,"o":"m 103 439 l 103 541 l 730 541 l 730 439 l 103 439 "},"⅜":{"x_min":8,"x_max":832,"ha":834,"o":"m 230 738 q 350 611 350 711 q 299 487 350 531 q 153 444 248 444 q 8 477 65 444 l 8 562 q 146 522 83 522 q 248 614 248 522 q 147 699 248 699 l 98 699 l 98 768 l 145 768 q 230 851 230 768 q 164 924 230 924 q 54 880 115 924 l 9 938 q 170 1002 84 1002 q 288 965 244 1002 q 332 865 332 928 q 230 738 332 771 m 705 992 l 210 0 l 103 0 l 597 992 l 705 992 m 720 287 q 832 147 832 230 q 780 35 832 77 q 644 -7 728 -7 q 502 33 552 -7 q 453 143 453 73 q 546 281 453 231 q 470 412 470 335 q 518 511 470 474 q 643 549 567 549 q 766 512 718 549 q 814 412 814 475 q 720 287 814 334 m 645 321 q 712 413 712 355 q 641 480 712 480 q 571 413 571 480 q 645 321 571 357 m 630 247 q 554 142 554 203 q 641 61 554 61 q 730 142 730 61 q 639 243 730 203 l 630 247 "},"ǰ":{"x_min":92,"x_max":637,"ha":834,"o":"m 92 -310 l 92 -205 q 288 -231 182 -231 q 412 -192 367 -231 q 456 -85 456 -154 l 456 648 l 171 662 l 171 745 l 580 745 l 580 -79 q 503 -267 580 -201 q 286 -334 426 -334 q 92 -310 175 -334 m 637 1045 q 596 1000 620 1026 q 477 842 501 893 l 346 842 q 227 1000 322 893 l 187 1045 l 187 1064 l 268 1064 q 411 937 324 1027 q 554 1064 494 1024 l 637 1064 l 637 1045 "},"ā":{"x_min":92,"x_max":696,"ha":834,"o":"m 606 0 l 580 99 l 575 99 q 468 10 523 35 q 327 -14 413 -14 q 154 44 217 -14 q 92 207 92 102 q 436 442 92 431 l 573 447 l 573 494 q 409 655 573 655 q 187 599 309 655 l 144 692 q 404 758 277 758 q 627 699 558 758 q 696 509 696 640 l 696 0 l 606 0 m 572 362 l 462 357 q 274 315 330 352 q 219 204 219 279 q 354 82 219 82 q 513 138 454 82 q 572 294 572 194 l 572 362 m 215 943 l 606 943 l 606 842 l 215 842 l 215 943 "},"ĵ":{"x_min":92,"x_max":656,"ha":834,"o":"m 656 842 l 573 842 q 430 967 516 879 q 287 842 340 875 l 206 842 l 206 860 q 246 905 222 879 q 365 1064 340 1010 l 496 1064 q 615 905 521 1010 l 656 860 l 656 842 m 92 -310 l 92 -205 q 288 -231 182 -231 q 412 -192 367 -231 q 456 -85 456 -154 l 456 648 l 171 662 l 171 745 l 580 745 l 580 -79 q 503 -267 580 -201 q 286 -334 426 -334 q 92 -310 175 -334 "},"Ĩ":{"x_min":152.921875,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 m 243 1070 l 172 1070 q 315 1250 188 1250 q 424 1211 354 1250 q 516 1173 493 1173 q 588 1251 571 1173 l 660 1251 q 517 1072 641 1072 q 410 1110 478 1072 q 315 1148 342 1148 q 243 1070 260 1148 "},"*":{"x_min":90.34375,"x_max":743.46875,"ha":834,"o":"m 485 1055 l 455 788 l 725 863 l 743 733 l 486 714 l 653 493 l 531 428 l 412 670 l 306 428 l 180 493 l 344 714 l 90 733 l 110 863 l 375 788 l 346 1055 l 485 1055 "},"ă":{"x_min":92,"x_max":696,"ha":834,"o":"m 606 0 l 580 99 l 575 99 q 468 10 523 35 q 327 -14 413 -14 q 154 44 217 -14 q 92 207 92 102 q 436 442 92 431 l 573 447 l 573 494 q 409 655 573 655 q 187 599 309 655 l 144 692 q 404 758 277 758 q 627 699 558 758 q 696 509 696 640 l 696 0 l 606 0 m 572 362 l 462 357 q 274 315 330 352 q 219 204 219 279 q 354 82 219 82 q 513 138 454 82 q 572 294 572 194 l 572 362 m 613 1030 q 552 892 606 943 q 406 842 498 842 q 205 1030 216 842 l 279 1030 q 311 960 284 977 q 408 943 338 943 q 538 1030 531 943 l 613 1030 "},"Χ":{"x_min":36,"x_max":797,"ha":834,"o":"m 797 0 l 653 0 l 412 430 l 164 0 l 36 0 l 343 518 l 57 992 l 191 992 l 416 612 l 643 992 l 773 992 l 486 522 l 797 0 "},"†":{"x_min":163.375,"x_max":671.359375,"ha":834,"o":"m 671 670 l 446 691 l 484 0 l 337 0 l 374 691 l 163 670 l 163 793 l 374 772 l 337 1055 l 484 1055 l 446 772 l 671 793 l 671 670 "},"°":{"x_min":203,"x_max":631,"ha":834,"o":"m 416 1006 q 567 942 504 1006 q 631 791 631 879 q 567 641 631 703 q 416 579 504 579 q 265 641 327 579 q 203 791 203 704 q 265 942 203 879 q 416 1006 328 1006 m 416 661 q 500 699 465 661 q 536 790 536 737 q 500 884 536 845 q 416 923 464 923 q 332 884 367 923 q 297 790 297 845 q 332 699 297 737 q 416 661 367 661 "},"Ξ":{"x_min":75,"x_max":757,"ha":834,"o":"m 103 992 l 729 992 l 729 880 l 103 880 l 103 992 m 158 574 l 674 574 l 674 462 l 158 462 l 158 574 m 757 111 l 757 0 l 75 0 l 75 111 l 757 111 "},"Ķ":{"x_min":143,"x_max":813.25,"ha":834,"o":"m 813 0 l 669 0 l 364 473 l 269 396 l 269 0 l 143 0 l 143 992 l 269 992 l 269 496 l 351 609 l 659 992 l 801 992 l 447 559 l 813 0 m 347 -288 q 404 -85 389 -193 l 525 -85 l 525 -98 q 492 -182 525 -113 q 414 -307 459 -251 l 347 -307 l 347 -288 "},"ŵ":{"x_min":-3,"x_max":836,"ha":834,"o":"m 551 0 l 462 404 l 416 628 l 411 628 l 367 401 l 276 0 l 148 0 l -3 745 l 106 745 l 173 376 q 212 109 196 250 l 216 109 q 262 352 237 235 l 352 745 l 483 745 l 569 352 q 614 109 598 220 l 619 109 q 659 376 640 274 l 728 745 l 836 745 l 683 0 l 551 0 m 640 842 l 557 842 q 414 967 500 879 q 271 842 324 875 l 190 842 l 190 860 q 230 905 206 879 q 349 1064 324 1010 l 480 1064 q 599 905 505 1010 l 640 860 l 640 842 "},"΄":{"x_min":326,"x_max":508,"ha":834,"o":"m 326 860 l 348 932 q 377 1064 370 1009 l 508 1064 l 508 1049 q 474 968 508 1038 q 399 842 441 898 l 326 842 l 326 860 "},"ǽ":{"x_min":31,"x_max":805,"ha":834,"o":"m 354 450 l 354 496 q 260 655 354 655 q 117 599 187 655 l 78 692 q 268 758 168 758 q 437 637 398 758 q 598 758 490 758 q 747 665 690 758 q 805 424 805 573 l 805 347 l 476 347 q 520 157 478 219 q 632 96 563 96 q 786 145 705 96 l 786 35 q 624 -14 714 -14 q 412 144 475 -14 q 206 -14 340 -14 q 79 44 127 -14 q 31 208 31 103 q 253 445 31 434 l 354 450 m 479 450 l 684 450 q 657 600 684 545 q 585 655 631 655 q 512 603 541 655 q 479 450 483 550 m 353 363 l 295 358 q 154 207 154 347 q 175 120 154 152 q 231 88 196 88 q 319 143 285 88 q 353 296 353 198 l 353 363 m 361 860 q 479 1064 425 950 l 628 1064 l 628 1049 q 443 842 551 932 l 361 842 l 361 860 "},"Β":{"x_min":92,"x_max":772,"ha":834,"o":"m 92 992 l 390 992 q 660 932 576 992 q 744 740 744 873 q 690 596 744 653 q 546 526 637 538 l 546 519 q 772 287 772 482 q 685 76 772 153 q 449 0 598 0 l 92 0 l 92 992 m 218 572 l 409 572 q 562 609 514 572 q 610 732 610 646 q 558 848 610 813 q 395 884 507 884 l 218 884 l 218 572 m 218 464 l 218 107 l 426 107 q 638 292 638 107 q 418 464 638 464 l 218 464 "},"Ļ":{"x_min":158,"x_max":716,"ha":834,"o":"m 158 0 l 158 992 l 284 992 l 284 111 l 716 111 l 716 0 l 158 0 m 333 -288 q 390 -85 375 -193 l 511 -85 l 511 -98 q 478 -182 511 -113 q 400 -307 445 -251 l 333 -307 l 333 -288 "},"Õ":{"x_min":57,"x_max":778,"ha":834,"o":"m 417 -14 q 57 498 57 -14 q 419 1007 57 1007 q 685 874 592 1007 q 778 496 778 741 q 684 118 778 251 q 417 -14 590 -14 m 417 97 q 589 195 535 97 q 644 497 644 293 q 589 799 644 702 q 419 895 533 895 q 190 497 190 895 q 417 97 190 97 m 249 1070 l 178 1070 q 321 1250 194 1250 q 430 1211 360 1250 q 522 1173 499 1173 q 594 1251 577 1173 l 666 1251 q 523 1072 647 1072 q 416 1110 484 1072 q 321 1148 348 1148 q 249 1070 266 1148 "},"№":{"x_min":17,"x_max":820,"ha":834,"o":"m 441 0 l 322 0 l 101 793 l 94 793 q 107 510 107 621 l 107 0 l 17 0 l 17 992 l 135 992 l 355 202 l 359 202 q 350 476 350 408 l 350 992 l 441 992 l 441 0 m 647 183 q 524 246 570 183 q 479 420 479 310 q 650 656 479 656 q 773 593 727 656 q 820 420 820 531 q 775 244 820 306 q 647 183 730 183 m 649 264 q 711 303 694 264 q 729 421 729 343 q 711 537 729 499 q 649 574 694 574 q 587 536 604 574 q 569 421 569 498 q 587 304 569 344 q 649 264 604 264 m 506 0 l 506 96 l 787 96 l 787 0 l 506 0 "},"χ":{"x_min":29,"x_max":791,"ha":834,"o":"m 432 342 l 644 745 l 765 745 l 480 218 l 607 -94 q 665 -201 638 -171 q 736 -231 693 -231 q 791 -226 766 -231 l 791 -321 q 710 -334 746 -334 q 595 -303 641 -334 q 501 -153 549 -273 l 402 102 l 161 -334 l 29 -334 l 351 229 l 229 530 q 125 644 183 644 q 83 638 106 644 l 83 735 q 170 747 119 747 q 263 710 225 747 q 337 578 300 673 l 432 342 "},"ί":{"x_min":290,"x_max":690,"ha":834,"o":"m 413 745 l 413 220 q 544 88 413 88 q 690 101 621 88 l 690 7 q 536 -14 626 -14 q 290 219 290 -14 l 290 745 l 413 745 m 319 860 l 341 932 q 370 1064 363 1009 l 501 1064 l 501 1049 q 467 968 501 1038 q 392 842 434 898 l 319 842 l 319 860 "},"Ζ":{"x_min":69,"x_max":763,"ha":834,"o":"m 763 0 l 69 0 l 69 97 l 607 880 l 83 880 l 83 992 l 749 992 l 749 895 l 210 111 l 763 111 l 763 0 "},"Ľ":{"x_min":158,"x_max":716,"ha":834,"o":"m 158 0 l 158 992 l 284 992 l 284 111 l 716 111 l 716 0 l 158 0 m 509 787 l 526 860 q 550 992 544 939 l 672 992 l 672 978 q 643 901 672 968 q 573 770 615 834 l 509 770 l 509 787 "},"ť":{"x_min":95,"x_max":706,"ha":834,"o":"m 692 101 l 692 7 q 521 -14 603 -14 q 276 218 276 -14 l 276 648 l 95 648 l 95 715 l 276 749 l 328 943 l 399 943 l 399 745 l 696 745 l 696 648 l 399 648 l 399 219 q 529 88 399 88 q 692 101 592 88 m 543 850 l 560 923 q 584 1055 578 1002 l 706 1055 l 706 1041 q 677 964 706 1031 q 607 833 649 897 l 543 833 l 543 850 "},"o":{"x_min":78,"x_max":755,"ha":834,"o":"m 414 -14 q 172 91 267 -14 q 78 373 78 196 q 170 654 78 551 q 418 758 262 758 q 660 652 566 758 q 755 373 755 547 q 661 89 755 193 q 414 -14 568 -14 m 416 88 q 627 373 627 88 q 415 655 627 655 q 205 373 205 655 q 416 88 205 88 "},"Ѕ":{"x_min":96,"x_max":738,"ha":834,"o":"m 96 32 l 96 152 q 375 93 238 93 q 611 258 611 93 q 564 366 611 328 q 371 456 516 404 q 170 575 231 506 q 109 754 109 644 q 196 939 109 872 q 435 1006 283 1006 q 718 953 591 1006 l 674 841 q 432 894 544 894 q 235 752 235 894 q 279 641 235 683 q 461 551 323 599 q 682 428 626 491 q 738 264 738 364 q 644 60 738 134 q 376 -14 550 -14 q 96 32 197 -14 "},"�":{"x_min":2.796875,"x_max":832.25,"ha":834,"o":"m 416 1055 l 832 419 l 416 -216 l 2 419 l 416 1055 m 453 261 l 453 290 q 455 317 453 305 q 464 340 458 328 q 483 362 471 351 q 514 389 495 374 q 556 431 538 412 q 585 472 574 451 q 603 517 597 493 q 610 572 610 541 q 558 702 610 656 q 415 749 506 749 q 367 744 391 749 q 318 731 342 739 q 273 711 295 722 q 232 687 251 700 l 276 579 q 348 614 314 600 q 413 628 383 628 q 466 610 449 628 q 483 563 483 592 q 480 532 483 546 q 468 506 476 518 q 447 481 460 494 q 415 453 434 469 q 379 416 394 434 q 355 381 365 399 q 342 342 346 362 q 338 298 338 322 l 338 261 l 453 261 m 324 94 q 346 30 324 50 q 402 11 368 11 q 430 15 416 11 q 455 30 444 20 q 472 56 466 40 q 479 94 479 72 q 472 133 479 117 q 455 159 466 149 q 430 173 444 169 q 402 177 416 177 q 346 158 368 177 q 324 94 324 139 "},"d":{"x_min":93,"x_max":727,"ha":834,"o":"m 608 99 l 603 99 q 384 -14 526 -14 q 170 87 248 -14 q 93 370 93 188 q 171 655 93 553 q 384 758 249 758 q 603 649 524 758 l 611 649 q 603 759 603 736 l 603 1055 l 727 1055 l 727 0 l 627 0 l 608 99 m 603 342 l 603 370 q 556 590 603 524 q 405 655 508 655 q 220 369 220 655 q 406 88 220 88 q 555 148 510 88 q 603 342 600 208 "},",":{"x_min":299,"x_max":534,"ha":834,"o":"m 523 178 l 534 161 q 402 -196 495 9 l 299 -196 q 373 178 349 23 l 523 178 "},"\\"":{"x_min":193,"x_max":640.734375,"ha":834,"o":"m 353 992 l 325 634 l 220 634 l 193 992 l 353 992 m 640 992 l 612 634 l 507 634 l 480 992 l 640 992 "},"ľ":{"x_min":127.6875,"x_max":750,"ha":834,"o":"m 361 958 l 179 972 l 179 1055 l 484 1055 l 484 96 l 723 83 l 723 0 l 127 0 l 127 83 l 361 96 l 361 958 m 587 850 l 604 923 q 628 1055 622 1002 l 750 1055 l 750 1041 q 721 964 750 1031 q 651 833 693 897 l 587 833 l 587 850 "},"ė":{"x_min":90,"x_max":744,"ha":834,"o":"m 744 346 l 217 346 q 451 93 222 93 q 703 145 584 93 l 703 36 q 456 -14 590 -14 q 189 87 289 -14 q 90 366 90 188 q 182 652 90 547 q 428 758 274 758 q 658 666 572 758 q 744 423 744 575 l 744 346 m 220 449 l 616 449 q 428 655 616 655 q 220 449 238 655 m 439 1023 q 504 945 504 1023 q 439 868 504 868 q 374 945 374 868 q 439 1023 374 1023 "},"Í":{"x_min":152.921875,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 m 364 1089 q 482 1293 428 1179 l 631 1293 l 631 1278 q 446 1071 554 1161 l 364 1071 l 364 1089 "},"Ú":{"x_min":85,"x_max":749,"ha":834,"o":"m 749 993 l 749 349 q 663 79 749 173 q 412 -14 578 -14 q 85 352 85 -14 l 85 991 l 211 991 l 211 359 q 419 97 211 97 q 622 361 619 97 l 622 993 l 749 993 m 335 1089 q 453 1293 399 1179 l 602 1293 l 602 1278 q 417 1071 525 1161 l 335 1071 l 335 1089 "}," ":{"x_min":0,"x_max":0,"ha":834},"Ŷ":{"x_min":23,"x_max":809,"ha":834,"o":"m 415 490 l 672 992 l 809 992 l 479 386 l 479 0 l 353 0 l 353 379 l 23 992 l 160 992 l 415 490 m 641 1071 l 558 1071 q 415 1196 501 1108 q 272 1071 325 1104 l 191 1071 l 191 1089 q 231 1134 207 1108 q 350 1293 325 1239 l 481 1293 q 600 1134 506 1239 l 641 1089 l 641 1071 "},"Ý":{"x_min":23,"x_max":809,"ha":834,"o":"m 415 490 l 672 992 l 809 992 l 479 386 l 479 0 l 353 0 l 353 379 l 23 992 l 160 992 l 415 490 m 335 1089 q 453 1293 399 1179 l 602 1293 l 602 1278 q 417 1071 525 1161 l 335 1071 l 335 1089 "},"ŝ":{"x_min":138,"x_max":696,"ha":834,"o":"m 138 32 l 138 145 q 388 88 268 88 q 575 196 575 88 q 542 264 575 235 q 388 336 508 292 q 190 444 231 395 q 149 560 149 493 q 224 705 149 652 q 433 758 300 758 q 684 707 568 758 l 643 606 q 428 655 520 655 q 269 565 269 655 q 303 499 269 523 q 460 430 337 474 q 649 327 602 378 q 696 203 696 277 q 616 44 696 102 q 392 -14 537 -14 q 138 32 224 -14 m 658 842 l 575 842 q 432 967 518 879 q 289 842 342 875 l 208 842 l 208 860 q 248 905 224 879 q 367 1064 342 1010 l 498 1064 q 617 905 523 1010 l 658 860 l 658 842 "}," ":{"x_min":0,"x_max":0,"ha":834},"ą":{"x_min":92,"x_max":751,"ha":834,"o":"m 606 0 l 580 99 l 575 99 q 468 10 523 35 q 327 -14 413 -14 q 154 44 217 -14 q 92 207 92 102 q 436 442 92 431 l 573 447 l 573 494 q 409 655 573 655 q 187 599 309 655 l 144 692 q 404 758 277 758 q 627 699 558 758 q 696 509 696 640 l 696 0 l 606 0 m 572 362 l 462 357 q 274 315 330 352 q 219 204 219 279 q 354 82 219 82 q 513 138 454 82 q 572 294 572 194 l 572 362 m 751 -217 l 751 -293 q 645 -309 701 -309 q 521 -271 564 -309 q 479 -171 479 -234 q 603 0 479 -73 l 695 0 q 576 -162 576 -85 q 665 -227 576 -227 q 751 -217 711 -227 "},"​":{"x_min":0,"x_max":0,"ha":834},"ã":{"x_min":92,"x_max":696,"ha":834,"o":"m 606 0 l 580 99 l 575 99 q 468 10 523 35 q 327 -14 413 -14 q 154 44 217 -14 q 92 207 92 102 q 436 442 92 431 l 573 447 l 573 494 q 409 655 573 655 q 187 599 309 655 l 144 692 q 404 758 277 758 q 627 699 558 758 q 696 509 696 640 l 696 0 l 606 0 m 572 362 l 462 357 q 274 315 330 352 q 219 204 219 279 q 354 82 219 82 q 513 138 454 82 q 572 294 572 194 l 572 362 m 250 841 l 179 841 q 322 1021 195 1021 q 431 982 361 1021 q 523 944 500 944 q 595 1022 578 944 l 667 1022 q 524 843 648 843 q 417 881 485 843 q 322 919 349 919 q 250 841 267 919 "},"æ":{"x_min":31,"x_max":805,"ha":834,"o":"m 354 450 l 354 496 q 260 655 354 655 q 117 599 187 655 l 78 692 q 268 758 168 758 q 437 637 398 758 q 598 758 490 758 q 747 665 690 758 q 805 424 805 573 l 805 347 l 476 347 q 520 157 478 219 q 632 96 563 96 q 786 145 705 96 l 786 35 q 624 -14 714 -14 q 412 144 475 -14 q 206 -14 340 -14 q 79 44 127 -14 q 31 208 31 103 q 253 445 31 434 l 354 450 m 479 450 l 684 450 q 657 600 684 545 q 585 655 631 655 q 512 603 541 655 q 479 450 483 550 m 353 363 l 295 358 q 154 207 154 347 q 175 120 154 152 q 231 88 196 88 q 319 143 285 88 q 353 296 353 198 l 353 363 "},"ĩ":{"x_min":133.6875,"x_max":729.171875,"ha":834,"o":"m 367 648 l 184 662 l 184 745 l 490 745 l 490 96 l 729 83 l 729 0 l 133 0 l 133 83 l 367 96 l 367 648 m 242 841 l 171 841 q 314 1021 187 1021 q 423 982 353 1021 q 515 944 492 944 q 587 1022 570 944 l 659 1022 q 516 843 640 843 q 409 881 477 843 q 314 919 341 919 q 242 841 259 919 "},"~":{"x_min":103,"x_max":730,"ha":834,"o":"m 103 397 l 103 507 q 270 581 170 581 q 439 538 338 581 q 575 500 527 500 q 730 582 649 500 l 730 472 q 561 399 662 399 q 393 441 493 399 q 257 479 304 479 q 103 397 183 479 "},"ŀ":{"x_min":127.6875,"x_max":731.46875,"ha":834,"o":"m 361 958 l 179 972 l 179 1055 l 484 1055 l 484 96 l 723 83 l 723 0 l 127 0 l 127 83 l 361 96 l 361 958 m 666 540 q 731 462 731 540 q 666 385 731 385 q 601 462 601 385 q 666 540 601 540 "},"Ċ":{"x_min":87,"x_max":801,"ha":834,"o":"m 763 136 l 763 26 q 519 -14 663 -14 q 198 119 309 -14 q 87 497 87 252 q 208 868 87 731 q 540 1006 330 1006 q 801 947 690 1006 l 747 841 q 540 894 643 894 q 307 787 394 894 q 220 496 220 679 q 302 199 220 301 q 540 97 383 97 q 763 136 629 97 m 534 1252 q 599 1174 599 1252 q 534 1097 599 1097 q 469 1174 469 1097 q 534 1252 469 1252 "},"¡":{"x_min":330,"x_max":502.265625,"ha":834,"o":"m 416 569 q 330 663 330 569 q 416 758 330 758 q 502 663 502 758 q 416 569 502 569 m 374 458 l 456 458 l 491 -253 l 340 -253 l 374 458 "},"ẅ":{"x_min":-3,"x_max":836,"ha":834,"o":"m 551 0 l 462 404 l 416 628 l 411 628 l 367 401 l 276 0 l 148 0 l -3 745 l 106 745 l 173 376 q 212 109 196 250 l 216 109 q 262 352 237 235 l 352 745 l 483 745 l 569 352 q 614 109 598 220 l 619 109 q 659 376 640 274 l 728 745 l 836 745 l 683 0 l 551 0 m 288 1015 q 353 945 353 1015 q 288 876 353 876 q 223 945 223 876 q 288 1015 223 1015 m 542 1015 q 608 945 608 1015 q 542 876 608 876 q 477 945 477 876 q 542 1015 477 1015 "},"К":{"x_min":143,"x_max":813.25,"ha":834,"o":"m 813 0 l 664 0 l 269 502 l 269 0 l 143 0 l 143 992 l 269 992 l 269 511 l 654 992 l 794 992 l 409 515 l 813 0 "},"Γ":{"x_min":158,"x_max":719,"ha":834,"o":"m 719 992 l 719 880 l 284 880 l 284 0 l 158 0 l 158 992 l 719 992 "},"P":{"x_min":119,"x_max":742,"ha":834,"o":"m 245 385 l 245 0 l 119 0 l 119 992 l 393 992 q 742 701 742 992 q 647 468 742 552 q 374 385 553 385 l 245 385 m 245 493 l 359 493 q 550 541 493 493 q 608 694 608 590 q 380 884 608 884 l 245 884 l 245 493 "},"%":{"x_min":0,"x_max":834,"ha":834,"o":"m 197 532 q 54 596 108 532 q 0 768 0 660 q 53 941 0 879 q 199 1003 107 1003 q 342 939 287 1003 q 397 768 397 876 q 343 595 397 658 q 197 532 290 532 m 199 613 q 293 769 293 613 q 199 921 293 921 q 103 769 103 921 q 199 613 103 613 m 717 992 l 222 0 l 115 0 l 609 992 l 717 992 m 634 -12 q 491 52 546 -12 q 437 224 437 116 q 490 397 437 335 q 636 459 544 459 q 779 395 724 459 q 834 224 834 332 q 780 51 834 114 q 634 -12 727 -12 m 636 69 q 730 225 730 69 q 636 377 730 377 q 540 225 540 377 q 636 69 540 69 "},"ϖ":{"x_min":12.15625,"x_max":816.71875,"ha":834,"o":"m 258 -14 q 167 9 204 -14 q 105 75 129 32 q 71 181 82 119 q 61 320 61 242 q 64 405 61 366 q 75 482 67 445 q 94 558 82 520 q 123 642 106 597 l 12 642 l 12 691 l 103 745 l 816 745 l 816 642 l 711 642 q 739 558 727 597 q 759 482 751 520 q 770 405 767 445 q 774 320 774 366 q 763 181 774 242 q 729 75 753 119 q 669 9 706 32 q 579 -14 632 -14 q 479 15 516 -14 q 424 106 442 45 l 417 106 q 361 15 399 45 q 258 -14 323 -14 m 668 320 q 664 401 668 362 q 653 478 661 440 q 632 556 645 516 q 604 642 620 596 l 230 642 q 201 556 213 596 q 181 478 189 516 q 170 401 173 440 q 166 320 166 362 q 172 214 166 258 q 190 142 178 170 q 221 101 203 114 q 266 88 240 88 q 311 102 292 88 q 343 140 330 116 q 361 198 355 165 q 368 270 368 231 l 368 408 l 473 408 l 473 270 q 501 135 473 182 q 572 88 528 88 q 614 101 596 88 q 645 142 632 114 q 662 214 657 170 q 668 320 668 258 "},"_":{"x_min":-11,"x_max":844,"ha":834,"o":"m 844 -219 l -11 -219 l -11 -125 l 844 -125 l 844 -219 "},"ñ":{"x_min":109,"x_max":725,"ha":834,"o":"m 601 0 l 601 479 q 440 655 601 655 q 232 385 232 655 l 232 0 l 109 0 l 109 745 l 208 745 l 227 644 l 233 644 q 461 758 303 758 q 725 486 725 758 l 725 0 l 601 0 m 248 841 l 177 841 q 320 1021 193 1021 q 429 982 359 1021 q 521 944 498 944 q 593 1022 576 944 l 665 1022 q 522 843 646 843 q 415 881 483 843 q 320 919 347 919 q 248 841 265 919 "},"Ŕ":{"x_min":126,"x_max":794.25,"ha":834,"o":"m 252 409 l 252 0 l 126 0 l 126 992 l 368 992 q 721 710 721 992 q 524 443 721 515 l 794 0 l 645 0 l 407 409 l 252 409 m 252 517 l 362 517 q 532 561 478 517 q 587 704 587 606 q 533 842 587 800 q 359 884 479 884 l 252 884 l 252 517 m 303 1089 q 421 1293 367 1179 l 570 1293 l 570 1278 q 385 1071 493 1161 l 303 1071 l 303 1089 "},"‚":{"x_min":310,"x_max":522,"ha":834,"o":"m 511 161 l 522 145 q 402 -179 484 1 l 310 -179 q 361 161 346 18 l 511 161 "},"⅞":{"x_min":19,"x_max":832,"ha":834,"o":"m 76 456 l 285 910 l 19 910 l 19 992 l 391 992 l 391 924 l 181 456 l 76 456 m 662 992 l 167 0 l 60 0 l 554 992 l 662 992 m 720 287 q 832 147 832 230 q 780 35 832 77 q 644 -7 728 -7 q 502 33 552 -7 q 453 143 453 73 q 546 281 453 231 q 470 412 470 335 q 518 511 470 474 q 643 549 567 549 q 766 512 718 549 q 814 412 814 475 q 720 287 814 334 m 645 321 q 712 413 712 355 q 641 480 712 480 q 571 413 571 480 q 645 321 571 357 m 630 247 q 554 142 554 203 q 641 61 554 61 q 730 142 730 61 q 639 243 730 203 l 630 247 "},"Æ":{"x_min":0,"x_max":821,"ha":834,"o":"m 821 0 l 378 0 l 378 307 l 181 307 l 116 0 l 0 0 l 229 992 l 821 992 l 821 880 l 504 880 l 504 574 l 795 574 l 795 462 l 504 462 l 504 111 l 821 111 l 821 0 m 206 419 l 378 419 l 378 880 l 305 880 l 206 419 "},"₣":{"x_min":88,"x_max":717,"ha":834,"o":"m 326 274 l 526 274 l 526 178 l 326 178 l 326 0 l 207 0 l 207 178 l 88 178 l 88 274 l 207 274 l 207 992 l 717 992 l 717 879 l 326 879 l 326 531 l 691 531 l 691 418 l 326 418 l 326 274 "},"Ū":{"x_min":85,"x_max":749,"ha":834,"o":"m 749 993 l 749 349 q 663 79 749 173 q 412 -14 578 -14 q 85 352 85 -14 l 85 991 l 211 991 l 211 359 q 419 97 211 97 q 622 361 619 97 l 622 993 l 749 993 m 221 1172 l 612 1172 l 612 1071 l 221 1071 l 221 1172 "},"ы":{"x_min":77,"x_max":756,"ha":834,"o":"m 182 439 l 275 439 q 562 227 562 439 q 275 0 562 0 l 77 0 l 77 745 l 182 745 l 182 439 m 182 336 l 182 102 l 279 102 q 456 219 456 102 q 415 308 456 280 q 276 336 373 336 l 182 336 m 756 0 l 650 0 l 650 745 l 756 745 l 756 0 "},"ѓ":{"x_min":197,"x_max":704,"ha":834,"o":"m 704 642 l 320 642 l 320 0 l 197 0 l 197 745 l 704 745 l 704 642 m 354 860 q 472 1064 418 950 l 621 1064 l 621 1049 q 436 842 544 932 l 354 842 l 354 860 "},"Œ":{"x_min":14,"x_max":833,"ha":834,"o":"m 833 0 l 443 0 l 410 -7 q 345 -14 376 -14 q 14 498 14 -14 q 361 1007 14 1007 q 465 992 417 1007 l 833 992 l 833 880 l 568 880 l 568 574 l 807 574 l 807 462 l 568 462 l 568 111 l 833 111 l 833 0 m 442 119 l 442 873 q 352 895 402 895 q 140 497 140 895 q 351 97 140 97 q 442 119 398 97 "},"΅":{"x_min":202,"x_max":629,"ha":834,"o":"m 360 959 q 413 1164 389 1054 l 562 1164 l 562 1150 q 415 942 498 1039 l 360 942 l 360 959 m 266 1015 q 332 945 332 1015 q 313 894 332 912 q 266 876 294 876 q 202 945 202 876 q 266 1015 202 1015 m 563 1015 q 629 945 629 1015 q 563 876 629 876 q 498 945 498 876 q 563 1015 498 1015 "},"Ą":{"x_min":22,"x_max":825,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 m 825 -217 l 825 -293 q 719 -309 775 -309 q 595 -271 638 -309 q 553 -171 553 -234 q 677 0 553 -73 l 769 0 q 650 -162 650 -85 q 739 -227 650 -227 q 825 -217 785 -227 "},"Њ":{"x_min":45,"x_max":814,"ha":834,"o":"m 373 0 l 373 462 l 171 462 l 171 0 l 45 0 l 45 992 l 171 992 l 171 574 l 373 574 l 373 992 l 499 992 l 499 574 l 524 574 q 740 501 666 574 q 814 290 814 428 q 736 74 814 149 q 513 0 659 0 l 373 0 m 499 107 l 527 107 q 697 290 697 107 q 653 421 697 381 q 511 462 609 462 l 499 462 l 499 107 "},"›":{"x_min":272,"x_max":561,"ha":834,"o":"m 561 356 l 351 78 l 272 130 l 433 366 l 272 602 l 351 655 l 561 374 l 561 356 "},"ћ":{"x_min":3.203125,"x_max":725,"ha":834,"o":"m 601 0 l 601 451 q 441 627 601 627 q 282 564 332 627 q 232 357 232 500 l 232 0 l 109 0 l 109 843 l 3 843 l 3 932 l 109 932 l 109 1055 l 233 1055 l 233 932 l 516 932 l 516 843 l 232 843 l 232 715 l 225 616 l 232 616 q 466 730 305 730 q 660 665 596 730 q 725 458 725 600 l 725 0 l 601 0 "},"<":{"x_min":103,"x_max":730,"ha":834,"o":"m 730 150 l 103 455 l 103 525 l 730 831 l 730 722 l 244 490 l 730 258 l 730 150 "},"¬":{"x_min":103,"x_max":730,"ha":834,"o":"m 730 541 l 730 178 l 628 178 l 628 439 l 103 439 l 103 541 l 730 541 "},"t":{"x_min":95,"x_max":696,"ha":834,"o":"m 692 101 l 692 7 q 521 -14 603 -14 q 276 218 276 -14 l 276 648 l 95 648 l 95 715 l 276 749 l 328 943 l 399 943 l 399 745 l 696 745 l 696 648 l 399 648 l 399 219 q 529 88 399 88 q 692 101 592 88 "},"Ц":{"x_min":92,"x_max":821,"ha":834,"o":"m 702 111 l 821 111 l 821 -261 l 704 -261 l 704 0 l 92 0 l 92 992 l 218 992 l 218 111 l 575 111 l 575 992 l 702 992 l 702 111 "},"ù":{"x_min":109,"x_max":725,"ha":834,"o":"m 625 0 l 607 99 l 600 99 q 373 -14 529 -14 q 109 258 109 -14 l 109 745 l 232 745 l 232 264 q 392 88 232 88 q 551 151 501 88 q 601 357 601 214 l 601 745 l 725 745 l 725 0 l 625 0 m 499 842 l 416 842 q 232 1049 304 938 l 232 1064 l 380 1064 q 499 860 439 943 l 499 842 "},"ï":{"x_min":133.6875,"x_max":729.171875,"ha":834,"o":"m 367 648 l 184 662 l 184 745 l 490 745 l 490 96 l 729 83 l 729 0 l 133 0 l 133 83 l 367 96 l 367 648 m 289 1015 q 354 945 354 1015 q 289 876 354 876 q 224 945 224 876 q 289 1015 224 1015 m 543 1015 q 609 945 609 1015 q 543 876 609 876 q 478 945 478 876 q 543 1015 478 1015 "},"Ф":{"x_min":18,"x_max":817,"ha":834,"o":"m 361 1006 l 487 1006 l 487 884 l 517 884 q 736 779 656 884 q 817 514 817 674 q 734 246 817 354 q 503 139 652 139 l 487 139 l 487 -14 l 361 -14 l 361 139 l 344 139 q 103 246 188 139 q 18 514 18 354 q 101 778 18 673 q 329 884 184 884 l 361 884 l 361 1006 m 487 246 l 491 246 q 638 319 585 246 q 690 517 690 391 q 642 705 690 634 q 507 776 594 776 l 487 776 l 487 246 m 361 776 l 340 776 q 195 705 247 776 q 144 517 144 634 q 200 319 144 391 q 357 246 256 246 l 361 246 l 361 776 "},"Ò":{"x_min":57,"x_max":778,"ha":834,"o":"m 417 -14 q 57 498 57 -14 q 419 1007 57 1007 q 685 874 592 1007 q 778 496 778 741 q 684 118 778 251 q 417 -14 590 -14 m 417 97 q 589 195 535 97 q 644 497 644 293 q 589 799 644 702 q 419 895 533 895 q 190 497 190 895 q 417 97 190 97 m 496 1071 l 413 1071 q 229 1278 301 1167 l 229 1293 l 377 1293 q 496 1089 436 1172 l 496 1071 "},"I":{"x_min":152.921875,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 "},"˝":{"x_min":168,"x_max":666,"ha":834,"o":"m 168 860 q 271 1064 223 950 l 420 1064 l 420 1049 q 235 842 344 932 l 168 842 l 168 860 m 413 860 q 517 1064 465 940 l 666 1064 l 666 1049 q 481 842 590 932 l 413 842 l 413 860 "},"·":{"x_min":330,"x_max":502,"ha":834,"o":"m 416 585 q 502 490 502 585 q 416 396 502 396 q 330 490 330 396 q 416 585 330 585 "},"¿":{"x_min":114,"x_max":716,"ha":834,"o":"m 461 569 q 375 663 375 569 q 461 758 375 758 q 547 663 547 758 q 461 569 547 569 m 520 458 l 520 432 q 490 301 520 352 q 381 194 460 251 q 265 89 294 128 q 237 -18 237 49 q 287 -120 237 -82 q 426 -159 337 -159 q 674 -97 547 -159 l 716 -195 q 429 -267 567 -267 q 198 -200 282 -267 q 114 -24 114 -134 q 150 122 114 66 q 285 252 187 179 q 389 347 367 311 q 412 445 412 384 l 412 458 l 520 458 "},"ſ":{"x_min":242,"x_max":691,"ha":834,"o":"m 691 1039 l 663 942 q 508 960 591 960 q 396 928 427 960 q 365 814 365 895 l 365 0 l 242 0 l 242 814 q 303 1002 242 942 q 505 1063 364 1063 q 691 1039 590 1063 "},"Ђ":{"x_min":16,"x_max":791,"ha":834,"o":"m 451 2 l 451 110 q 542 97 497 97 q 664 250 664 97 l 664 340 q 510 497 664 497 l 345 497 l 345 0 l 219 0 l 219 880 l 16 880 l 16 992 l 587 992 l 587 880 l 345 880 l 345 609 l 524 609 q 721 543 651 609 q 791 356 791 477 l 791 263 q 726 58 791 130 q 546 -14 662 -14 q 451 2 486 -14 "},"ű":{"x_min":109,"x_max":725,"ha":834,"o":"m 625 0 l 607 99 l 600 99 q 373 -14 529 -14 q 109 258 109 -14 l 109 745 l 232 745 l 232 264 q 392 88 232 88 q 551 151 501 88 q 601 357 601 214 l 601 745 l 725 745 l 725 0 l 625 0 m 222 860 q 325 1064 277 950 l 474 1064 l 474 1049 q 289 842 398 932 l 222 842 l 222 860 m 467 860 q 571 1064 519 940 l 720 1064 l 720 1049 q 535 842 644 932 l 467 842 l 467 860 "},"Ǽ":{"x_min":0,"x_max":821,"ha":834,"o":"m 821 0 l 378 0 l 378 307 l 181 307 l 116 0 l 0 0 l 229 992 l 821 992 l 821 880 l 504 880 l 504 574 l 795 574 l 795 462 l 504 462 l 504 111 l 821 111 l 821 0 m 206 419 l 378 419 l 378 880 l 305 880 l 206 419 m 428 1089 q 546 1293 492 1179 l 695 1293 l 695 1278 q 510 1071 618 1161 l 428 1071 l 428 1089 "},"φ":{"x_min":50,"x_max":784,"ha":834,"o":"m 352 -334 l 352 -12 q 50 371 50 4 q 188 750 50 583 l 268 688 q 179 531 202 601 q 155 371 155 462 q 352 90 155 112 l 352 500 q 544 758 352 758 q 720 658 656 758 q 784 387 784 558 q 697 102 784 208 q 457 -12 611 -2 l 457 -334 l 352 -334 m 457 90 q 663 386 663 110 q 544 655 663 655 q 457 501 457 655 l 457 90 "},";":{"x_min":278,"x_max":507,"ha":834,"o":"m 421 764 q 507 669 507 764 q 421 575 507 575 q 335 669 335 575 q 421 764 335 764 m 479 161 l 490 145 q 370 -179 455 12 l 278 -179 q 329 161 309 -6 l 479 161 "},"Ș":{"x_min":96,"x_max":738,"ha":834,"o":"m 96 32 l 96 152 q 375 93 238 93 q 611 258 611 93 q 564 366 611 328 q 371 456 516 404 q 170 575 231 506 q 109 754 109 644 q 196 939 109 872 q 435 1006 283 1006 q 718 953 591 1006 l 674 841 q 432 894 544 894 q 235 752 235 894 q 279 641 235 683 q 461 551 323 599 q 682 428 626 491 q 738 264 738 364 q 644 60 738 134 q 376 -14 550 -14 q 96 32 197 -14 m 328 -288 q 385 -85 370 -193 l 506 -85 l 506 -98 q 473 -182 506 -113 q 395 -307 440 -251 l 328 -307 l 328 -288 "},"Ġ":{"x_min":79,"x_max":742,"ha":834,"o":"m 455 524 l 742 524 l 742 36 q 456 -14 609 -14 q 179 121 279 -14 q 79 497 79 256 q 188 870 79 735 q 491 1006 298 1006 q 726 947 621 1006 l 677 837 q 487 894 578 894 q 285 789 357 894 q 212 496 212 683 q 479 97 212 97 q 615 116 544 97 l 615 412 l 455 412 l 455 524 m 497 1252 q 562 1174 562 1252 q 497 1097 562 1097 q 432 1174 432 1097 q 497 1252 432 1252 "},"n":{"x_min":109,"x_max":725,"ha":834,"o":"m 601 0 l 601 479 q 440 655 601 655 q 232 385 232 655 l 232 0 l 109 0 l 109 745 l 208 745 l 227 644 l 233 644 q 461 758 303 758 q 725 486 725 758 l 725 0 l 601 0 "},"ά":{"x_min":82,"x_max":799.671875,"ha":834,"o":"m 585 644 l 593 644 q 639 745 613 714 l 736 745 q 702 446 702 632 l 702 162 q 758 87 702 87 q 799 93 778 87 l 799 3 q 721 -14 764 -14 q 586 99 613 -14 l 578 99 q 365 -14 505 -14 q 157 86 233 -14 q 82 370 82 187 q 160 656 82 555 q 378 758 238 758 q 585 644 520 758 m 578 360 l 578 370 q 533 590 578 524 q 387 655 487 655 q 209 369 209 655 q 388 88 209 88 q 532 150 489 88 q 578 360 575 213 m 336 860 l 358 932 q 387 1064 380 1009 l 518 1064 l 518 1049 q 484 968 518 1038 q 409 842 451 898 l 336 842 l 336 860 "},"ϊ":{"x_min":175,"x_max":690,"ha":834,"o":"m 413 745 l 413 220 q 544 88 413 88 q 690 101 621 88 l 690 7 q 536 -14 626 -14 q 290 219 290 -14 l 290 745 l 413 745 m 240 1015 q 305 945 305 1015 q 240 876 305 876 q 175 945 175 876 q 240 1015 175 1015 m 494 1015 q 560 945 560 1015 q 494 876 560 876 q 429 945 429 876 q 494 1015 429 1015 "},"\uFEFF":{"x_min":0,"x_max":0,"ha":834},"ģ":{"x_min":70,"x_max":763.84375,"ha":834,"o":"m 763 745 l 763 668 l 630 650 q 675 506 675 592 q 602 333 675 397 q 401 269 530 269 q 343 273 364 269 q 275 182 275 234 q 384 125 275 125 l 511 125 q 691 72 629 125 q 754 -77 754 20 q 371 -334 754 -334 q 146 -278 223 -334 q 70 -123 70 -223 q 232 61 70 22 q 167 165 167 93 q 257 293 167 240 q 162 376 197 318 q 128 502 128 434 q 200 691 128 625 q 405 758 272 758 q 507 745 464 758 l 763 745 m 402 353 q 554 508 554 353 q 401 669 554 669 q 248 506 248 669 q 402 353 248 353 m 469 17 l 342 17 q 186 -118 186 17 q 370 -237 186 -237 q 637 -84 637 -237 q 603 -3 637 -24 q 469 17 569 17 m 537 1045 q 480 842 494 942 l 359 842 l 359 856 q 389 935 359 867 q 470 1064 420 1003 l 537 1064 l 537 1045 "},"∂":{"x_min":82,"x_max":751,"ha":834,"o":"m 628 582 l 630 609 q 591 816 636 733 q 441 899 545 899 q 266 841 352 899 l 266 959 q 457 1002 356 1002 q 751 633 751 1002 q 636 177 751 369 q 327 -14 522 -14 q 82 254 82 -14 q 175 554 82 423 q 436 685 269 685 q 628 582 561 685 m 606 459 q 548 552 591 516 q 453 588 504 588 q 276 479 343 588 q 209 248 209 371 q 337 88 209 88 q 505 192 431 88 q 606 459 580 295 "},"κ":{"x_min":146,"x_max":789,"ha":834,"o":"m 258 344 l 351 457 l 625 745 l 770 745 l 434 398 l 789 0 l 644 0 l 354 318 l 266 262 l 266 0 l 146 0 l 146 745 l 266 745 l 266 547 l 255 344 l 258 344 "},"‡":{"x_min":155.125,"x_max":677.359375,"ha":834,"o":"m 452 336 l 677 357 l 677 235 l 452 256 l 490 0 l 343 0 l 380 256 l 155 235 l 155 357 l 380 336 l 348 532 l 380 718 l 155 697 l 155 820 l 380 799 l 343 1055 l 490 1055 l 452 799 l 677 820 l 677 697 l 452 718 l 484 532 l 452 336 "},"ň":{"x_min":109,"x_max":725,"ha":834,"o":"m 601 0 l 601 479 q 440 655 601 655 q 232 385 232 655 l 232 0 l 109 0 l 109 745 l 208 745 l 227 644 l 233 644 q 461 758 303 758 q 725 486 725 758 l 725 0 l 601 0 m 650 1045 q 609 1000 633 1026 q 490 842 514 893 l 359 842 q 240 1000 335 893 l 200 1045 l 200 1064 l 281 1064 q 424 937 337 1027 q 567 1064 507 1024 l 650 1064 l 650 1045 "},"√":{"x_min":16,"x_max":818,"ha":834,"o":"m 415 -10 l 325 -10 l 138 522 l 16 522 l 16 615 l 216 615 l 372 165 l 719 1150 l 818 1150 l 415 -10 "},"ę":{"x_min":90,"x_max":744,"ha":834,"o":"m 744 346 l 217 346 q 451 93 222 93 q 703 145 584 93 l 703 36 q 456 -14 590 -14 q 189 87 289 -14 q 90 366 90 188 q 182 652 90 547 q 428 758 274 758 q 658 666 572 758 q 744 423 744 575 l 744 346 m 220 449 l 616 449 q 428 655 616 655 q 220 449 238 655 m 707 -196 l 707 -272 q 601 -288 657 -288 q 477 -250 520 -288 q 435 -150 435 -213 q 559 21 435 -52 l 651 21 q 532 -141 532 -64 q 621 -206 532 -206 q 707 -196 667 -206 "},"į":{"x_min":133.6875,"x_max":729.171875,"ha":834,"o":"m 429 1051 q 501 973 501 1051 q 479 915 501 934 q 429 896 458 896 q 356 973 356 896 q 429 1051 356 1051 m 367 648 l 184 662 l 184 745 l 490 745 l 490 96 l 729 83 l 729 0 l 133 0 l 133 83 l 367 96 l 367 648 m 570 -217 l 570 -293 q 464 -309 520 -309 q 340 -271 383 -309 q 298 -171 298 -234 q 422 0 298 -73 l 514 0 q 395 -162 395 -85 q 484 -227 395 -227 q 570 -217 530 -227 "},"Τ":{"x_min":69,"x_max":762,"ha":834,"o":"m 479 0 l 353 0 l 353 880 l 69 880 l 69 992 l 762 992 l 762 880 l 479 880 l 479 0 "},"≈":{"x_min":103,"x_max":730,"ha":834,"o":"m 103 533 l 103 643 q 270 718 169 718 q 439 674 337 718 q 575 637 525 637 q 730 719 649 637 l 730 609 q 561 536 664 536 q 393 578 493 536 q 257 616 306 616 q 103 533 181 616 m 103 256 l 103 366 q 270 440 170 440 q 439 397 338 440 q 575 359 527 359 q 730 441 649 359 l 730 331 q 561 258 662 258 q 393 300 493 258 q 257 338 304 338 q 103 256 183 338 "},"ΐ":{"x_min":164,"x_max":690,"ha":834,"o":"m 413 745 l 413 220 q 544 88 413 88 q 690 101 621 88 l 690 7 q 536 -14 626 -14 q 290 219 290 -14 l 290 745 l 413 745 m 322 959 q 375 1164 351 1054 l 524 1164 l 524 1150 q 377 942 460 1039 l 322 942 l 322 959 m 228 1015 q 294 945 294 1015 q 275 894 294 912 q 228 876 256 876 q 164 945 164 876 q 228 1015 164 1015 m 525 1015 q 591 945 591 1015 q 525 876 591 876 q 460 945 460 876 q 525 1015 460 1015 "},"ĸ":{"x_min":146,"x_max":789,"ha":834,"o":"m 258 344 l 351 457 l 625 745 l 770 745 l 434 398 l 789 0 l 644 0 l 354 318 l 266 262 l 266 0 l 146 0 l 146 745 l 266 745 l 266 547 l 255 344 l 258 344 "},"g":{"x_min":70,"x_max":763.84375,"ha":834,"o":"m 763 745 l 763 668 l 630 650 q 675 506 675 592 q 602 333 675 397 q 401 269 530 269 q 343 273 364 269 q 275 182 275 234 q 384 125 275 125 l 511 125 q 691 72 629 125 q 754 -77 754 20 q 371 -334 754 -334 q 146 -278 223 -334 q 70 -123 70 -223 q 232 61 70 22 q 167 165 167 93 q 257 293 167 240 q 162 376 197 318 q 128 502 128 434 q 200 691 128 625 q 405 758 272 758 q 507 745 464 758 l 763 745 m 402 353 q 554 508 554 353 q 401 669 554 669 q 248 506 248 669 q 402 353 248 353 m 469 17 l 342 17 q 186 -118 186 17 q 370 -237 186 -237 q 637 -84 637 -237 q 603 -3 637 -24 q 469 17 569 17 "},"ǿ":{"x_min":78,"x_max":755,"ha":834,"o":"m 255 21 l 204 -58 l 115 -1 l 172 87 q 78 373 78 194 q 168 655 78 553 q 418 758 258 758 q 578 719 505 758 l 630 800 l 719 743 l 661 654 q 755 373 755 548 q 663 87 755 189 q 414 -14 572 -14 q 255 21 326 -14 m 241 186 l 517 631 q 411 655 472 655 q 253 585 302 655 q 205 373 205 515 q 241 186 205 251 m 592 553 l 316 110 q 421 88 358 88 q 579 159 531 88 q 627 373 627 231 q 592 553 627 484 m 338 860 q 456 1064 402 950 l 605 1064 l 605 1049 q 420 842 528 932 l 338 842 l 338 860 "},"²":{"x_min":236,"x_max":596,"ha":834,"o":"m 596 456 l 236 456 l 236 525 l 360 660 q 454 774 433 740 q 474 847 474 808 q 400 924 474 924 q 291 873 346 924 l 240 932 q 408 1002 319 1002 q 531 961 487 1002 q 576 850 576 920 q 552 759 576 805 q 441 626 528 713 l 349 534 l 596 534 l 596 456 "},"Ã":{"x_min":22,"x_max":812,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 m 243 1070 l 172 1070 q 315 1250 188 1250 q 424 1211 354 1250 q 516 1173 493 1173 q 588 1251 571 1173 l 660 1251 q 517 1072 641 1072 q 410 1110 478 1072 q 315 1148 342 1148 q 243 1070 260 1148 "},"Ј":{"x_min":93,"x_max":664,"ha":834,"o":"m 93 26 l 93 138 q 302 97 202 97 q 474 151 411 97 q 537 304 537 205 l 537 992 l 664 992 l 664 305 q 568 72 664 159 q 312 -14 473 -14 q 93 26 165 -14 "},"©":{"x_min":4,"x_max":830,"ha":834,"o":"m 416 1006 q 720 867 610 1006 q 830 495 830 729 q 720 123 830 261 q 416 -14 610 -14 q 113 124 222 -14 q 4 495 4 262 q 112 867 4 728 q 416 1006 221 1006 m 416 59 q 667 175 579 59 q 756 496 756 291 q 667 816 756 700 q 416 932 579 932 q 165 816 253 932 q 77 496 77 700 q 165 175 77 291 q 416 59 253 59 m 593 307 l 593 218 q 442 185 520 185 q 239 268 310 185 q 168 497 168 352 q 242 722 168 639 q 447 806 317 806 q 619 763 533 806 l 578 677 q 446 713 503 713 q 320 655 364 713 q 276 495 276 598 q 446 277 276 277 q 593 307 510 277 "},"≥":{"x_min":103,"x_max":730,"ha":834,"o":"m 103 258 l 588 490 l 103 722 l 103 831 l 730 525 l 730 455 l 103 150 l 103 258 m 103 0 l 103 101 l 730 101 l 730 0 l 103 0 "},"Ă":{"x_min":22,"x_max":812,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 m 619 1259 q 558 1121 612 1172 q 412 1071 504 1071 q 211 1259 222 1071 l 285 1259 q 317 1189 290 1206 q 414 1172 344 1172 q 544 1259 537 1172 l 619 1259 "},"ґ":{"x_min":197,"x_max":691,"ha":834,"o":"m 691 656 l 320 656 l 320 0 l 197 0 l 197 745 l 567 745 l 567 961 l 691 961 l 691 656 "},"ÿ":{"x_min":56,"x_max":777,"ha":834,"o":"m 56 745 l 183 745 l 361 301 q 421 104 416 162 l 425 104 q 486 302 441 180 l 648 745 l 777 745 l 454 -97 q 348 -274 409 -215 q 181 -334 288 -334 q 68 -322 123 -334 l 68 -224 q 160 -231 110 -231 q 261 -203 225 -231 q 326 -108 298 -176 l 365 -7 l 56 745 m 295 1015 q 360 945 360 1015 q 295 876 360 876 q 230 945 230 876 q 295 1015 230 1015 m 549 1015 q 615 945 615 1015 q 549 876 615 876 q 484 945 484 876 q 549 1015 484 1015 "},"Ł":{"x_min":49,"x_max":741,"ha":834,"o":"m 183 0 l 183 334 l 98 281 l 49 365 l 183 450 l 183 992 l 309 992 l 309 530 l 512 659 l 566 574 l 309 413 l 309 111 l 741 111 l 741 0 l 183 0 "}," ":{"x_min":0,"x_max":0,"ha":834},"∫":{"x_min":160.25,"x_max":656.703125,"ha":834,"o":"m 656 1042 l 656 943 q 579 962 618 962 q 462 803 462 962 l 462 -92 q 405 -272 462 -211 q 245 -334 348 -334 q 160 -321 195 -334 l 160 -221 q 238 -241 200 -241 q 361 -82 361 -241 l 361 814 q 572 1055 361 1055 q 656 1042 629 1055 "},"\\\\":{"x_min":143,"x_max":690,"ha":834,"o":"m 263 992 l 690 0 l 569 0 l 143 992 l 263 992 "},"Ì":{"x_min":152.921875,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 m 478 1071 l 395 1071 q 211 1278 283 1167 l 211 1293 l 359 1293 q 478 1089 418 1172 l 478 1071 "},"ъ":{"x_min":29,"x_max":784,"ha":834,"o":"m 402 439 l 505 439 q 784 227 784 439 q 501 0 784 0 l 279 0 l 279 642 l 29 642 l 29 745 l 402 745 l 402 439 m 402 336 l 402 102 l 499 102 q 678 219 678 102 q 636 308 678 280 q 496 336 594 336 l 402 336 "},"ς":{"x_min":117,"x_max":723,"ha":834,"o":"m 638 -272 l 525 -272 q 602 -94 602 -161 q 557 -33 602 -53 q 404 5 513 -13 q 117 349 117 53 q 501 758 117 758 q 720 717 613 758 l 678 610 q 493 650 570 650 q 244 351 244 650 q 297 179 244 224 q 480 109 349 133 q 723 -61 723 65 q 638 -272 723 -156 "},"Ē":{"x_min":147,"x_max":719,"ha":834,"o":"m 719 0 l 147 0 l 147 992 l 719 992 l 719 880 l 273 880 l 273 574 l 693 574 l 693 462 l 273 462 l 273 111 l 719 111 l 719 0 m 228 1172 l 619 1172 l 619 1071 l 228 1071 l 228 1172 "},"!":{"x_min":330,"x_max":502.265625,"ha":834,"o":"m 458 280 l 376 280 l 341 992 l 492 992 l 458 280 m 416 168 q 502 74 502 168 q 416 -20 502 -20 q 330 74 330 -20 q 416 168 330 168 "},"ç":{"x_min":117,"x_max":720,"ha":834,"o":"m 720 717 l 677 610 q 496 650 576 650 q 244 369 244 650 q 489 93 244 93 q 707 135 595 93 l 707 27 q 483 -14 616 -14 q 213 84 309 -14 q 117 367 117 183 q 215 658 117 558 q 492 758 313 758 q 720 717 612 758 m 324 -327 l 324 -254 q 377 -258 346 -258 q 479 -196 479 -258 q 363 -119 479 -146 l 425 0 l 505 0 l 467 -78 q 577 -194 577 -103 q 379 -334 577 -334 q 324 -327 356 -334 "},"Й":{"x_min":93,"x_max":742,"ha":834,"o":"m 93 992 l 209 992 l 209 449 q 204 276 209 352 l 200 174 l 204 174 l 597 992 l 742 992 l 742 0 l 625 0 l 625 538 q 637 821 625 633 l 632 821 l 237 0 l 93 0 l 93 992 m 677 1287 q 412 1071 663 1071 q 222 1121 280 1071 q 157 1287 163 1171 l 273 1287 q 307 1188 279 1217 q 417 1159 336 1159 q 560 1287 548 1159 l 677 1287 "},"Б":{"x_min":92,"x_max":770,"ha":834,"o":"m 92 0 l 92 992 l 710 992 l 710 880 l 218 880 l 218 574 l 402 574 q 770 290 770 574 q 680 74 770 149 q 421 0 591 0 l 92 0 m 218 107 l 408 107 q 636 290 636 107 q 578 421 636 380 q 387 462 521 462 l 218 462 l 218 107 "},"đ":{"x_min":93,"x_max":832.796875,"ha":834,"o":"m 608 99 l 603 99 q 384 -14 526 -14 q 170 83 248 -14 q 93 356 93 181 q 171 631 93 532 q 384 730 249 730 q 603 622 526 730 l 611 622 q 603 733 603 709 l 603 843 l 346 843 l 346 932 l 603 932 l 603 1055 l 727 1055 l 727 932 l 832 932 l 832 843 l 727 843 l 727 0 l 627 0 l 608 99 m 603 329 l 603 356 q 556 565 603 502 q 405 627 508 627 q 220 354 220 627 q 406 88 220 88 q 555 144 509 88 q 603 329 600 200 "},"ċ":{"x_min":117,"x_max":720,"ha":834,"o":"m 720 717 l 677 610 q 496 650 576 650 q 244 369 244 650 q 489 93 244 93 q 707 135 595 93 l 707 27 q 483 -14 616 -14 q 213 84 309 -14 q 117 367 117 183 q 215 658 117 558 q 492 758 313 758 q 720 717 612 758 m 480 1023 q 545 945 545 1023 q 480 868 545 868 q 415 945 415 868 q 480 1023 415 1023 "},"Ā":{"x_min":22,"x_max":812,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 m 221 1172 l 612 1172 l 612 1071 l 221 1071 l 221 1172 "},"Ẃ":{"x_min":1,"x_max":833,"ha":834,"o":"m 358 684 l 478 684 l 577 330 q 626 122 618 181 q 670 542 627 158 l 717 992 l 833 992 l 706 0 l 577 0 l 462 393 q 418 584 435 487 q 373 392 396 467 l 267 0 l 139 0 l 1 992 l 116 992 l 176 542 q 203 285 191 422 q 215 122 215 148 q 262 333 231 224 l 358 684 m 339 1089 q 457 1293 403 1179 l 606 1293 l 606 1278 q 421 1071 529 1161 l 339 1071 l 339 1089 "},"ø":{"x_min":78,"x_max":755,"ha":834,"o":"m 255 21 l 204 -58 l 115 -1 l 172 87 q 78 373 78 194 q 168 655 78 553 q 418 758 258 758 q 578 719 505 758 l 630 800 l 719 743 l 661 654 q 755 373 755 548 q 663 87 755 189 q 414 -14 572 -14 q 255 21 326 -14 m 241 186 l 517 631 q 411 655 472 655 q 253 585 302 655 q 205 373 205 515 q 241 186 205 251 m 592 553 l 316 110 q 421 88 358 88 q 579 159 531 88 q 627 373 627 231 q 592 553 627 484 "},"â":{"x_min":92,"x_max":696,"ha":834,"o":"m 606 0 l 580 99 l 575 99 q 468 10 523 35 q 327 -14 413 -14 q 154 44 217 -14 q 92 207 92 102 q 436 442 92 431 l 573 447 l 573 494 q 409 655 573 655 q 187 599 309 655 l 144 692 q 404 758 277 758 q 627 699 558 758 q 696 509 696 640 l 696 0 l 606 0 m 572 362 l 462 357 q 274 315 330 352 q 219 204 219 279 q 354 82 219 82 q 513 138 454 82 q 572 294 572 194 l 572 362 m 648 842 l 565 842 q 422 967 508 879 q 279 842 332 875 l 198 842 l 198 860 q 238 905 214 879 q 357 1064 332 1010 l 488 1064 q 607 905 513 1010 l 648 860 l 648 842 "},"}":{"x_min":154,"x_max":681,"ha":834,"o":"m 328 214 q 486 383 328 355 l 486 391 q 328 559 328 419 l 328 783 q 290 863 328 838 q 154 890 251 889 l 154 992 q 452 793 452 987 l 452 567 q 681 439 452 439 l 681 337 q 452 208 452 337 l 452 -19 q 154 -220 452 -215 l 154 -118 q 290 -91 251 -117 q 328 -10 328 -65 l 328 214 "},"Δ":{"x_min":46,"x_max":786,"ha":834,"o":"m 786 83 l 786 0 l 46 0 l 46 89 l 351 992 l 477 992 l 786 83 m 413 852 q 353 626 378 701 l 181 111 l 646 111 l 475 622 q 413 852 440 727 "},"‰":{"x_min":3,"x_max":820,"ha":834,"o":"m 176 583 q 56 638 99 583 q 14 793 14 693 q 179 1004 14 1004 q 298 949 255 1004 q 342 793 342 894 q 176 583 342 583 m 178 664 q 226 696 214 664 q 238 794 238 728 q 224 895 238 868 q 178 922 211 922 q 131 894 144 922 q 117 794 117 865 q 130 696 117 728 q 178 664 142 664 m 505 572 l 30 378 l 3 444 l 477 640 l 505 572 m 294 0 q 174 55 216 0 q 132 210 132 110 q 297 421 132 421 q 416 366 373 421 q 460 210 460 311 q 294 0 460 0 m 296 81 q 344 113 332 81 q 356 211 356 145 q 342 312 356 285 q 296 339 329 339 q 249 311 262 339 q 235 211 235 283 q 248 113 235 145 q 296 81 260 81 m 654 0 q 534 55 576 0 q 492 210 492 110 q 657 421 492 421 q 776 366 733 421 q 820 210 820 311 q 654 0 820 0 m 656 81 q 704 113 692 81 q 716 211 716 145 q 703 311 716 284 q 656 339 691 339 q 609 311 622 339 q 595 211 595 283 q 608 113 595 145 q 656 81 620 81 "},"Ä":{"x_min":22,"x_max":812,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 m 289 1244 q 354 1174 354 1244 q 289 1105 354 1105 q 224 1174 224 1105 q 289 1244 224 1244 m 543 1244 q 609 1174 609 1244 q 543 1105 609 1105 q 478 1174 478 1105 q 543 1244 478 1244 "},"ř":{"x_min":179,"x_max":719,"ha":834,"o":"m 719 727 l 685 614 q 533 650 602 650 q 362 586 422 650 q 302 404 302 523 l 302 0 l 179 0 l 179 745 l 279 745 l 294 608 l 299 608 q 410 723 351 688 q 555 758 469 758 q 719 727 636 758 m 651 1045 q 610 1000 634 1026 q 491 842 515 893 l 360 842 q 241 1000 336 893 l 201 1045 l 201 1064 l 282 1064 q 425 937 338 1027 q 568 1064 508 1024 l 651 1064 l 651 1045 "},"—":{"x_min":-4,"x_max":838,"ha":834,"o":"m -4 315 l -4 429 l 838 429 l 838 315 l -4 315 "},"N":{"x_min":92,"x_max":741,"ha":834,"o":"m 741 0 l 596 0 l 201 821 l 196 821 q 208 538 208 633 l 208 0 l 92 0 l 92 992 l 236 992 l 629 174 l 633 174 q 624 449 624 380 l 624 992 l 741 992 l 741 0 "},"⁄":{"x_min":115,"x_max":717,"ha":834,"o":"m 717 992 l 222 0 l 115 0 l 609 992 l 717 992 "},"М":{"x_min":77,"x_max":757,"ha":834,"o":"m 361 0 l 173 868 l 167 868 q 180 592 180 687 l 180 0 l 77 0 l 77 992 l 244 992 l 412 183 l 416 183 l 586 992 l 757 992 l 757 0 l 653 0 l 653 601 q 663 866 653 670 l 657 866 l 466 0 l 361 0 "},"Ó":{"x_min":57,"x_max":778,"ha":834,"o":"m 417 -14 q 57 498 57 -14 q 419 1007 57 1007 q 685 874 592 1007 q 778 496 778 741 q 684 118 778 251 q 417 -14 590 -14 m 417 97 q 589 195 535 97 q 644 497 644 293 q 589 799 644 702 q 419 895 533 895 q 190 497 190 895 q 417 97 190 97 m 345 1089 q 463 1293 409 1179 l 612 1293 l 612 1278 q 427 1071 535 1161 l 345 1071 l 345 1089 "},"˜":{"x_min":172,"x_max":660,"ha":834,"o":"m 243 841 l 172 841 q 315 1021 188 1021 q 424 982 354 1021 q 516 944 493 944 q 588 1022 571 944 l 660 1022 q 517 843 641 843 q 410 881 478 843 q 315 919 342 919 q 243 841 260 919 "}," ":{"x_min":0,"x_max":0,"ha":834},"ˇ":{"x_min":192,"x_max":642,"ha":834,"o":"m 642 1045 q 601 1000 625 1026 q 482 842 506 893 l 351 842 q 232 1000 327 893 l 192 1045 l 192 1064 l 273 1064 q 416 937 329 1027 q 559 1064 499 1024 l 642 1064 l 642 1045 "},"ų":{"x_min":109,"x_max":764,"ha":834,"o":"m 625 0 l 607 99 l 600 99 q 373 -14 529 -14 q 109 258 109 -14 l 109 745 l 232 745 l 232 264 q 392 88 232 88 q 551 151 501 88 q 601 357 601 214 l 601 745 l 725 745 l 725 0 l 625 0 m 764 -217 l 764 -293 q 658 -309 714 -309 q 534 -271 577 -309 q 492 -171 492 -234 q 616 0 492 -73 l 708 0 q 589 -162 589 -85 q 678 -227 589 -227 q 764 -217 724 -227 "},"Ў":{"x_min":18,"x_max":814,"ha":834,"o":"m 814 992 l 523 289 q 431 109 471 166 q 329 18 390 51 q 183 -14 269 -14 q 63 6 113 -14 l 63 131 q 184 97 120 97 q 299 132 258 97 q 377 250 341 167 l 18 992 l 156 992 l 416 440 q 429 408 424 423 q 441 377 435 391 l 442 377 l 469 451 l 681 992 l 814 992 m 680 1287 q 415 1071 666 1071 q 225 1121 283 1071 q 160 1287 166 1171 l 276 1287 q 310 1188 282 1217 q 420 1159 339 1159 q 563 1287 551 1159 l 680 1287 "},"Ŭ":{"x_min":85,"x_max":749,"ha":834,"o":"m 749 993 l 749 349 q 663 79 749 173 q 412 -14 578 -14 q 85 352 85 -14 l 85 991 l 211 991 l 211 359 q 419 97 211 97 q 622 361 619 97 l 622 993 l 749 993 m 621 1259 q 560 1121 614 1172 q 414 1071 506 1071 q 213 1259 224 1071 l 287 1259 q 319 1189 292 1206 q 416 1172 346 1172 q 546 1259 539 1172 l 621 1259 "},"ĝ":{"x_min":70,"x_max":763.84375,"ha":834,"o":"m 763 745 l 763 668 l 630 650 q 675 506 675 592 q 602 333 675 397 q 401 269 530 269 q 343 273 364 269 q 275 182 275 234 q 384 125 275 125 l 511 125 q 691 72 629 125 q 754 -77 754 20 q 371 -334 754 -334 q 146 -278 223 -334 q 70 -123 70 -223 q 232 61 70 22 q 167 165 167 93 q 257 293 167 240 q 162 376 197 318 q 128 502 128 434 q 200 691 128 625 q 405 758 272 758 q 507 745 464 758 l 763 745 m 402 353 q 554 508 554 353 q 401 669 554 669 q 248 506 248 669 q 402 353 248 353 m 469 17 l 342 17 q 186 -118 186 17 q 370 -237 186 -237 q 637 -84 637 -237 q 603 -3 637 -24 q 469 17 569 17 m 637 842 l 554 842 q 411 967 497 879 q 268 842 321 875 l 187 842 l 187 860 q 227 905 203 879 q 346 1064 321 1010 l 477 1064 q 596 905 502 1010 l 637 860 l 637 842 "},"Ω":{"x_min":49.859375,"x_max":786.140625,"ha":834,"o":"m 367 99 l 367 0 l 49 0 l 49 111 l 230 111 q 58 559 58 270 q 153 889 58 771 q 417 1007 248 1007 q 682 889 587 1007 q 778 559 778 771 q 604 111 778 268 l 786 111 l 786 0 l 468 0 l 468 99 q 644 556 644 256 q 417 895 644 895 q 191 556 191 895 q 367 99 191 256 "},"s":{"x_min":138,"x_max":696,"ha":834,"o":"m 138 32 l 138 145 q 388 88 268 88 q 575 196 575 88 q 542 264 575 235 q 388 336 508 292 q 190 444 231 395 q 149 560 149 493 q 224 705 149 652 q 433 758 300 758 q 684 707 568 758 l 643 606 q 428 655 520 655 q 269 565 269 655 q 303 499 269 523 q 460 430 337 474 q 649 327 602 378 q 696 203 696 277 q 616 44 696 102 q 392 -14 537 -14 q 138 32 224 -14 "},"?":{"x_min":114,"x_max":719,"ha":834,"o":"m 313 280 l 313 305 q 344 437 313 386 q 452 544 375 488 q 567 649 539 610 q 595 756 595 688 q 545 858 595 819 q 406 898 495 898 q 157 836 289 898 l 114 940 q 403 1006 255 1006 q 633 939 548 1006 q 719 762 719 873 q 682 615 719 671 q 547 485 645 559 q 444 390 467 426 q 421 292 421 353 l 421 280 l 313 280 m 373 168 q 459 74 459 168 q 373 -20 459 -20 q 287 74 287 -20 q 373 168 287 168 "},"Ņ":{"x_min":92,"x_max":741,"ha":834,"o":"m 741 0 l 596 0 l 201 821 l 196 821 q 208 538 208 633 l 208 0 l 92 0 l 92 992 l 236 992 l 629 174 l 633 174 q 624 449 624 380 l 624 992 l 741 992 l 741 0 m 295 -288 q 352 -85 337 -193 l 473 -85 l 473 -98 q 440 -182 473 -113 q 362 -307 407 -251 l 295 -307 l 295 -288 "},"Ī":{"x_min":152.921875,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 m 222 1172 l 613 1172 l 613 1071 l 222 1071 l 222 1172 "},"Μ":{"x_min":77,"x_max":757,"ha":834,"o":"m 361 0 l 173 868 l 167 868 q 180 592 180 687 l 180 0 l 77 0 l 77 992 l 244 992 l 412 183 l 416 183 l 586 992 l 757 992 l 757 0 l 653 0 l 653 601 q 663 866 653 670 l 657 866 l 466 0 l 361 0 "},"•":{"x_min":258,"x_max":577,"ha":834,"o":"m 417 685 q 577 507 577 685 q 533 374 577 420 q 417 329 490 329 q 299 374 341 329 q 258 507 258 419 q 417 685 258 685 "},"н":{"x_min":109,"x_max":725,"ha":834,"o":"m 232 745 l 232 436 l 601 436 l 601 745 l 725 745 l 725 0 l 601 0 l 601 333 l 232 333 l 232 0 l 109 0 l 109 745 l 232 745 "},"(":{"x_min":200,"x_max":633,"ha":834,"o":"m 502 992 l 633 992 q 327 386 327 736 q 631 -220 327 32 l 502 -220 q 200 384 200 19 q 502 992 200 745 "},"◊":{"x_min":85,"x_max":749,"ha":834,"o":"m 749 499 l 441 0 l 390 0 l 85 498 l 390 1000 l 441 1000 l 749 499 m 624 499 l 416 846 l 209 499 l 416 151 l 624 499 "},"α":{"x_min":82,"x_max":799.671875,"ha":834,"o":"m 585 644 l 593 644 q 639 745 613 714 l 736 745 q 702 446 702 632 l 702 162 q 758 87 702 87 q 799 93 778 87 l 799 3 q 721 -14 764 -14 q 586 99 613 -14 l 578 99 q 365 -14 505 -14 q 157 86 233 -14 q 82 370 82 187 q 160 656 82 555 q 378 758 238 758 q 585 644 520 758 m 578 360 l 578 370 q 533 590 578 524 q 387 655 487 655 q 209 369 209 655 q 388 88 209 88 q 532 150 489 88 q 578 360 575 213 "},"Ħ":{"x_min":0.4375,"x_max":833.5625,"ha":834,"o":"m 92 827 l 92 992 l 218 992 l 218 827 l 615 827 l 615 992 l 742 992 l 742 827 l 833 827 l 833 719 l 742 719 l 742 0 l 615 0 l 615 462 l 218 462 l 218 0 l 92 0 l 92 719 l 0 719 l 0 827 l 92 827 m 615 574 l 615 719 l 218 719 l 218 574 l 615 574 "},"м":{"x_min":78,"x_max":756,"ha":834,"o":"m 756 0 l 650 0 l 650 608 q 628 522 644 590 q 604 439 613 464 l 462 0 l 371 0 l 229 439 q 183 608 223 456 l 183 0 l 78 0 l 78 745 l 224 745 l 367 299 q 416 118 384 247 q 451 247 419 126 q 465 297 458 274 l 612 745 l 756 745 l 756 0 "},"з":{"x_min":136.296875,"x_max":700,"ha":834,"o":"m 342 439 q 506 465 457 439 q 555 551 555 492 q 386 655 555 655 q 178 606 296 655 l 136 706 q 387 758 244 758 q 601 707 526 758 q 676 562 676 657 q 545 398 676 436 l 545 390 q 700 205 700 346 q 618 44 700 102 q 384 -14 536 -14 q 139 32 225 -14 l 139 145 q 387 88 261 88 q 579 210 579 88 q 367 336 579 336 l 266 336 l 266 439 l 342 439 "},"Ґ":{"x_min":158,"x_max":711,"ha":834,"o":"m 594 992 l 594 1196 l 711 1196 l 711 880 l 284 880 l 284 0 l 158 0 l 158 992 l 594 992 "},"Û":{"x_min":85,"x_max":749,"ha":834,"o":"m 749 993 l 749 349 q 663 79 749 173 q 412 -14 578 -14 q 85 352 85 -14 l 85 991 l 211 991 l 211 359 q 419 97 211 97 q 622 361 619 97 l 622 993 l 749 993 m 642 1071 l 559 1071 q 416 1196 502 1108 q 273 1071 326 1104 l 192 1071 l 192 1089 q 232 1134 208 1108 q 351 1293 326 1239 l 482 1293 q 601 1134 507 1239 l 642 1089 l 642 1071 "},"і":{"x_min":133.6875,"x_max":729.171875,"ha":834,"o":"m 429 1051 q 501 973 501 1051 q 479 915 501 934 q 429 896 458 896 q 356 973 356 896 q 429 1051 356 1051 m 367 648 l 184 662 l 184 745 l 490 745 l 490 96 l 729 83 l 729 0 l 133 0 l 133 83 l 367 96 l 367 648 "},"V":{"x_min":22,"x_max":812,"ha":834,"o":"m 677 992 l 812 992 l 479 0 l 353 0 l 22 992 l 154 992 l 355 363 q 415 136 383 276 q 478 367 436 234 l 677 992 "},"Ŗ":{"x_min":126,"x_max":794.25,"ha":834,"o":"m 252 409 l 252 0 l 126 0 l 126 992 l 368 992 q 721 710 721 992 q 524 443 721 515 l 794 0 l 645 0 l 407 409 l 252 409 m 252 517 l 362 517 q 532 561 478 517 q 587 704 587 606 q 533 842 587 800 q 359 884 479 884 l 252 884 l 252 517 m 326 -288 q 383 -85 368 -193 l 504 -85 l 504 -98 q 471 -182 504 -113 q 393 -307 438 -251 l 326 -307 l 326 -288 "},"@":{"x_min":21,"x_max":813,"ha":834,"o":"m 537 272 l 535 272 q 380 150 485 150 q 253 220 300 150 q 206 411 206 291 q 271 637 206 551 q 444 723 337 723 q 618 691 537 723 l 603 409 q 602 362 602 383 l 602 357 q 650 238 602 238 q 718 497 718 238 q 642 792 718 685 q 440 899 567 899 q 201 769 287 899 q 115 412 115 639 q 203 85 115 200 q 453 -30 291 -30 q 687 22 575 -30 l 687 -67 q 449 -123 580 -123 q 134 17 247 -123 q 21 408 21 157 q 134 834 21 677 q 443 992 247 992 q 712 859 611 992 q 813 496 813 726 q 768 244 813 339 q 646 150 724 150 q 537 272 557 150 m 503 620 q 435 634 468 634 q 345 571 377 634 q 314 408 314 508 q 398 238 314 238 q 493 449 484 238 l 503 620 "},"ʼ":{"x_min":303,"x_max":530,"ha":834,"o":"m 520 992 l 530 977 q 410 652 492 832 l 303 652 q 369 992 345 832 l 520 992 "},"℅":{"x_min":5,"x_max":830,"ha":834,"o":"m 360 973 l 339 901 q 240 917 285 917 q 108 764 108 917 q 237 615 108 615 q 354 631 305 615 l 354 559 q 230 534 303 534 q 64 593 124 534 q 5 763 5 652 q 66 939 5 879 q 237 999 127 999 q 360 973 304 999 m 707 992 l 212 0 l 106 0 l 600 992 l 707 992 m 622 -5 q 475 57 533 -5 q 418 227 418 120 q 474 397 418 336 q 625 459 530 459 q 772 395 714 459 q 830 227 830 332 q 774 57 830 119 q 622 -5 718 -5 m 624 76 q 726 227 726 76 q 624 377 726 377 q 521 227 521 377 q 624 76 521 76 "},"i":{"x_min":133.6875,"x_max":729.171875,"ha":834,"o":"m 429 1051 q 501 973 501 1051 q 479 915 501 934 q 429 896 458 896 q 356 973 356 896 q 429 1051 356 1051 m 367 648 l 184 662 l 184 745 l 490 745 l 490 96 l 729 83 l 729 0 l 133 0 l 133 83 l 367 96 l 367 648 "},"ќ":{"x_min":146,"x_max":789,"ha":834,"o":"m 258 344 l 351 457 l 625 745 l 770 745 l 434 398 l 789 0 l 644 0 l 354 318 l 266 262 l 266 0 l 146 0 l 146 745 l 266 745 l 266 547 l 255 344 l 258 344 m 344 860 q 462 1064 408 950 l 611 1064 l 611 1049 q 426 842 534 932 l 344 842 l 344 860 "},"≤":{"x_min":103,"x_max":730,"ha":834,"o":"m 730 150 l 103 455 l 103 525 l 730 831 l 730 722 l 244 490 l 730 258 l 730 150 m 103 0 l 103 101 l 730 101 l 730 0 l 103 0 "},"ё":{"x_min":90,"x_max":744,"ha":834,"o":"m 744 346 l 217 346 q 451 93 222 93 q 703 145 584 93 l 703 36 q 456 -14 590 -14 q 189 87 289 -14 q 90 366 90 188 q 182 652 90 547 q 428 758 274 758 q 658 666 572 758 q 744 423 744 575 l 744 346 m 220 449 l 616 449 q 428 655 616 655 q 220 449 238 655 m 301 1015 q 366 945 366 1015 q 301 876 366 876 q 236 945 236 876 q 301 1015 236 1015 m 555 1015 q 621 945 621 1015 q 555 876 621 876 q 490 945 490 876 q 555 1015 490 1015 "},"υ":{"x_min":109,"x_max":735,"ha":834,"o":"m 109 745 l 232 745 l 232 345 q 418 88 232 88 q 565 167 520 88 q 611 412 611 245 q 568 745 611 573 l 691 745 q 735 406 735 578 q 657 88 735 191 q 414 -14 579 -14 q 109 337 109 -14 l 109 745 "},"ĕ":{"x_min":90,"x_max":744,"ha":834,"o":"m 744 346 l 217 346 q 451 93 222 93 q 703 145 584 93 l 703 36 q 456 -14 590 -14 q 189 87 289 -14 q 90 366 90 188 q 182 652 90 547 q 428 758 274 758 q 658 666 572 758 q 744 423 744 575 l 744 346 m 220 449 l 616 449 q 428 655 616 655 q 220 449 238 655 m 631 1030 q 570 892 624 943 q 424 842 516 842 q 223 1030 234 842 l 297 1030 q 329 960 302 977 q 426 943 356 943 q 556 1030 549 943 l 631 1030 "},"ﬃ":{"x_min":45.1875,"x_max":723.234375,"ha":834,"o":"m 723 0 l 612 0 l 612 660 l 474 660 l 474 0 l 364 0 l 364 660 l 224 660 l 224 0 l 113 0 l 113 660 l 45 660 l 45 703 l 113 745 l 113 800 q 126 920 113 872 q 166 996 140 968 q 230 1036 192 1025 q 317 1048 268 1048 q 380 1041 350 1048 q 433 1025 410 1033 q 493 1053 458 1044 q 570 1063 528 1063 q 636 1055 605 1063 q 692 1037 667 1047 l 664 947 q 621 960 645 954 q 573 966 598 966 q 529 958 547 966 q 498 933 510 951 q 480 887 486 916 q 474 814 474 857 l 474 745 l 723 745 l 723 0 m 224 745 l 364 745 l 364 813 q 380 943 364 890 q 351 949 366 947 q 320 952 336 952 q 278 945 296 952 q 248 920 260 937 q 230 873 236 902 q 224 801 224 844 l 224 745 "},"ż":{"x_min":123,"x_max":709,"ha":834,"o":"m 709 0 l 123 0 l 123 88 l 572 648 l 145 648 l 145 745 l 697 745 l 697 641 l 256 96 l 709 96 l 709 0 m 434 1023 q 499 945 499 1023 q 434 868 499 868 q 369 945 369 868 q 434 1023 369 1023 "},"Э":{"x_min":46.15625,"x_max":747,"ha":834,"o":"m 98 841 l 46 947 q 306 1006 155 1006 q 629 874 512 1006 q 747 513 747 742 q 630 123 747 260 q 300 -14 514 -14 q 57 26 156 -14 l 57 135 q 280 97 191 97 q 613 462 602 97 l 185 462 l 185 574 l 610 574 q 517 809 597 724 q 306 894 436 894 q 98 841 203 894 "},"ő":{"x_min":78,"x_max":755,"ha":834,"o":"m 414 -14 q 172 91 267 -14 q 78 373 78 196 q 170 654 78 551 q 418 758 262 758 q 660 652 566 758 q 755 373 755 547 q 661 89 755 193 q 414 -14 568 -14 m 416 88 q 627 373 627 88 q 415 655 627 655 q 205 373 205 655 q 416 88 205 88 m 223 860 q 326 1064 278 950 l 475 1064 l 475 1049 q 290 842 399 932 l 223 842 l 223 860 m 468 860 q 572 1064 520 940 l 721 1064 l 721 1049 q 536 842 645 932 l 468 842 l 468 860 "},"Ŏ":{"x_min":57,"x_max":778,"ha":834,"o":"m 417 -14 q 57 498 57 -14 q 419 1007 57 1007 q 685 874 592 1007 q 778 496 778 741 q 684 118 778 251 q 417 -14 590 -14 m 417 97 q 589 195 535 97 q 644 497 644 293 q 589 799 644 702 q 419 895 533 895 q 190 497 190 895 q 417 97 190 97 m 620 1259 q 559 1121 613 1172 q 413 1071 505 1071 q 212 1259 223 1071 l 286 1259 q 318 1189 291 1206 q 415 1172 345 1172 q 545 1259 538 1172 l 620 1259 "},"ю":{"x_min":83,"x_max":791,"ha":834,"o":"m 294 333 l 188 333 l 188 0 l 83 0 l 83 745 l 188 745 l 188 436 l 296 436 q 545 758 319 758 q 726 657 661 758 q 791 373 791 557 q 541 -14 791 -14 q 294 333 313 -14 m 544 88 q 651 154 618 88 q 685 373 685 220 q 652 588 685 521 q 543 655 619 655 q 435 590 468 655 q 401 373 401 525 q 435 155 401 223 q 544 88 468 88 "},"İ":{"x_min":152.921875,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 m 423 1252 q 488 1174 488 1252 q 423 1097 488 1097 q 358 1174 358 1097 q 423 1252 358 1252 "},"Ě":{"x_min":147,"x_max":719,"ha":834,"o":"m 719 0 l 147 0 l 147 992 l 719 992 l 719 880 l 273 880 l 273 574 l 693 574 l 693 462 l 273 462 l 273 111 l 719 111 l 719 0 m 666 1274 q 625 1229 649 1255 q 506 1071 530 1122 l 375 1071 q 256 1229 351 1122 l 216 1274 l 216 1293 l 297 1293 q 440 1166 353 1256 q 583 1293 523 1253 l 666 1293 l 666 1274 "},"‹":{"x_min":272,"x_max":561,"ha":834,"o":"m 272 374 l 482 655 l 561 602 l 399 366 l 561 130 l 482 78 l 272 356 l 272 374 "},"ķ":{"x_min":146,"x_max":789,"ha":834,"o":"m 261 375 l 352 478 l 619 745 l 770 745 l 435 422 l 789 0 l 644 0 l 356 341 l 269 286 l 269 0 l 146 0 l 146 1055 l 269 1055 l 269 571 l 258 375 l 261 375 m 329 -288 q 386 -85 371 -193 l 507 -85 l 507 -98 q 474 -182 507 -113 q 396 -307 441 -251 l 329 -307 l 329 -288 "},"ì":{"x_min":133.6875,"x_max":729.171875,"ha":834,"o":"m 367 648 l 184 662 l 184 745 l 490 745 l 490 96 l 729 83 l 729 0 l 133 0 l 133 83 l 367 96 l 367 648 m 493 842 l 410 842 q 226 1049 298 938 l 226 1064 l 374 1064 q 493 860 433 943 l 493 842 "},"±":{"x_min":103.53125,"x_max":730.203125,"ha":834,"o":"m 366 439 l 103 439 l 103 541 l 366 541 l 366 804 l 467 804 l 467 541 l 730 541 l 730 439 l 467 439 l 467 178 l 366 178 l 366 439 m 103 0 l 103 101 l 730 101 l 730 0 l 103 0 "},"|":{"x_min":366,"x_max":467.734375,"ha":834,"o":"m 366 1055 l 467 1055 l 467 -334 l 366 -334 l 366 1055 "},"§":{"x_min":165.140625,"x_max":669,"ha":834,"o":"m 285 724 q 176 884 176 778 q 246 1014 176 965 q 435 1063 317 1063 q 656 1014 545 1063 l 618 919 q 432 966 513 966 q 296 886 296 966 q 330 823 296 850 q 462 756 363 797 q 619 661 569 714 q 669 532 669 609 q 570 349 669 409 q 669 196 669 295 q 593 47 669 102 q 384 -7 518 -7 q 165 37 246 -7 l 165 144 q 384 89 281 89 q 548 185 548 89 q 519 251 548 224 q 386 320 489 278 q 214 428 252 377 q 176 549 176 478 q 285 724 176 670 m 484 389 q 563 514 563 440 q 513 612 563 575 q 371 682 462 650 q 281 564 281 650 q 320 478 281 514 q 460 399 358 442 l 484 389 "},"џ":{"x_min":109,"x_max":725,"ha":834,"o":"m 232 102 l 601 102 l 601 745 l 725 745 l 725 0 l 484 0 l 484 -258 l 361 -258 l 361 0 l 109 0 l 109 745 l 232 745 l 232 102 "},"љ":{"x_min":0,"x_max":801,"ha":834,"o":"m 498 437 l 531 437 q 801 226 801 437 q 516 0 801 0 l 375 0 l 375 642 l 248 642 q 207 191 225 319 q 159 26 190 62 q 62 -10 127 -10 q 0 -1 20 -10 l 0 86 q 33 78 14 78 q 77 107 61 78 q 109 266 94 136 q 149 745 125 397 l 498 745 l 498 437 m 498 334 l 498 102 l 533 102 q 695 218 695 102 q 657 306 695 279 q 530 334 620 334 l 498 334 "},"q":{"x_min":93,"x_max":727,"ha":834,"o":"m 603 644 l 608 644 l 627 745 l 727 745 l 727 -334 l 603 -334 l 603 -16 q 611 99 603 11 l 603 99 q 384 -14 526 -14 q 170 87 248 -14 q 93 370 93 188 q 171 655 93 553 q 384 758 249 758 q 603 644 525 758 m 603 342 l 603 370 q 556 590 603 524 q 405 655 508 655 q 220 369 220 655 q 406 88 220 88 q 555 148 510 88 q 603 342 600 208 "},"˳":{"x_min":262,"x_max":569,"ha":834,"o":"m 569 -229 q 557 -291 569 -264 q 524 -338 545 -319 q 474 -367 503 -357 q 413 -377 446 -377 q 351 -367 379 -377 q 303 -338 323 -357 q 272 -292 283 -319 q 262 -231 262 -265 q 272 -169 262 -196 q 303 -123 283 -142 q 351 -94 323 -104 q 413 -85 379 -85 q 474 -94 445 -85 q 523 -123 502 -104 q 556 -168 544 -142 q 569 -229 569 -195 m 494 -231 q 472 -174 494 -194 q 415 -154 450 -154 q 358 -174 380 -154 q 336 -231 336 -194 q 356 -287 336 -267 q 415 -307 376 -307 q 472 -287 450 -307 q 494 -231 494 -267 "},"ή":{"x_min":109,"x_max":725,"ha":834,"o":"m 601 -334 l 601 479 q 440 655 601 655 q 232 385 232 655 l 232 0 l 109 0 l 109 745 l 208 745 l 227 644 l 233 644 q 461 758 302 758 q 725 486 725 758 l 725 -334 l 601 -334 m 380 860 l 402 932 q 431 1064 424 1009 l 562 1064 l 562 1049 q 528 968 562 1038 q 453 842 495 898 l 380 842 l 380 860 "},"Ж":{"x_min":-0.25,"x_max":834.25,"ha":834,"o":"m 253 511 l 7 992 l 128 992 l 366 511 l 366 992 l 492 992 l 492 511 l 703 992 l 824 992 l 603 511 l 834 0 l 708 0 l 492 502 l 492 0 l 366 0 l 366 502 l 123 0 l 0 0 l 253 511 "},"®":{"x_min":4,"x_max":830,"ha":834,"o":"m 416 1006 q 720 867 610 1006 q 830 495 830 729 q 720 123 830 261 q 416 -14 610 -14 q 113 124 222 -14 q 4 495 4 262 q 112 867 4 728 q 416 1006 221 1006 m 416 59 q 667 175 579 59 q 756 496 756 291 q 667 816 756 700 q 416 932 579 932 q 165 816 253 932 q 77 496 77 700 q 165 175 77 291 q 416 59 253 59 m 508 461 l 668 194 l 548 194 l 407 432 l 344 432 l 344 194 l 236 194 l 236 799 l 395 799 q 616 619 616 799 q 508 461 616 508 m 344 524 l 393 524 q 507 618 507 524 q 479 687 507 667 q 390 706 450 706 l 344 706 l 344 524 "},"Н":{"x_min":92,"x_max":742,"ha":834,"o":"m 742 0 l 615 0 l 615 462 l 218 462 l 218 0 l 92 0 l 92 992 l 218 992 l 218 574 l 615 574 l 615 992 l 742 992 l 742 0 "},"Ε":{"x_min":147,"x_max":719,"ha":834,"o":"m 719 0 l 147 0 l 147 992 l 719 992 l 719 880 l 273 880 l 273 574 l 693 574 l 693 462 l 273 462 l 273 111 l 719 111 l 719 0 "},"₧":{"x_min":56,"x_max":808,"ha":834,"o":"m 182 388 l 182 0 l 56 0 l 56 992 l 199 992 q 515 702 515 992 q 438 470 515 553 q 209 388 361 388 l 182 388 m 182 485 l 207 485 q 389 690 389 485 q 222 884 389 884 l 182 884 l 182 485 m 808 92 l 808 7 q 699 -14 766 -14 q 554 172 554 -14 l 554 407 l 476 407 l 476 466 l 554 501 l 594 647 l 648 647 l 648 504 l 790 504 l 790 407 l 648 407 l 648 181 q 724 82 648 82 q 808 92 766 82 "},"л":{"x_min":21,"x_max":706,"ha":834,"o":"m 706 0 l 582 0 l 582 642 l 351 642 q 266 148 326 306 q 83 -10 205 -10 q 21 -1 41 -10 l 21 86 q 54 78 35 78 q 175 241 129 78 q 246 745 221 403 l 706 745 l 706 0 "},"σ":{"x_min":87,"x_max":796.359375,"ha":834,"o":"m 796 745 l 796 642 l 615 642 q 736 342 736 509 q 648 84 736 182 q 409 -14 561 -14 q 173 83 259 -14 q 87 355 87 180 q 463 745 87 745 l 796 745 m 503 642 l 463 642 q 271 576 328 642 q 214 356 214 509 q 266 159 214 230 q 414 88 318 88 q 558 153 509 88 q 608 337 608 218 q 503 642 608 520 "},"θ":{"x_min":100,"x_max":734,"ha":834,"o":"m 415 -14 q 180 115 260 -14 q 100 494 100 245 q 177 875 100 751 q 415 1000 254 1000 q 653 870 572 1000 q 734 494 734 741 q 415 -14 734 -14 m 223 547 l 606 547 q 556 810 601 723 q 413 897 511 897 q 274 812 319 897 q 223 547 228 727 m 606 458 l 223 458 q 272 177 227 267 q 413 88 317 88 q 556 176 510 88 q 606 458 602 264 "}," ":{"x_min":0,"x_max":0,"ha":834},"∑":{"x_min":50,"x_max":793,"ha":834,"o":"m 50 -334 l 50 -256 l 446 364 l 60 914 l 60 992 l 748 992 l 748 880 l 237 880 l 596 365 l 219 -222 l 793 -222 l 793 -334 l 50 -334 "},"Ώ":{"x_min":-91,"x_max":786.140625,"ha":834,"o":"m 367 99 l 367 0 l 49 0 l 49 111 l 230 111 q 58 559 58 270 q 153 889 58 771 q 417 1007 248 1007 q 682 889 587 1007 q 778 559 778 771 q 604 111 778 268 l 786 111 l 786 0 l 468 0 l 468 99 q 644 556 644 256 q 417 895 644 895 q 191 556 191 895 q 367 99 191 256 m -91 789 l -68 861 q -39 993 -46 938 l 91 993 l 91 978 q 57 897 91 967 q -17 771 24 827 l -91 771 l -91 789 "},"ẃ":{"x_min":-3,"x_max":836,"ha":834,"o":"m 551 0 l 462 404 l 416 628 l 411 628 l 367 401 l 276 0 l 148 0 l -3 745 l 106 745 l 173 376 q 212 109 196 250 l 216 109 q 262 352 237 235 l 352 745 l 483 745 l 569 352 q 614 109 598 220 l 619 109 q 659 376 640 274 l 728 745 l 836 745 l 683 0 l 551 0 m 354 860 q 472 1064 418 950 l 621 1064 l 621 1049 q 436 842 544 932 l 354 842 l 354 860 "},"+":{"x_min":103.53125,"x_max":730.203125,"ha":834,"o":"m 366 439 l 103 439 l 103 541 l 366 541 l 366 804 l 467 804 l 467 541 l 730 541 l 730 439 l 467 439 l 467 178 l 366 178 l 366 439 "},"Ë":{"x_min":147,"x_max":719,"ha":834,"o":"m 719 0 l 147 0 l 147 992 l 719 992 l 719 880 l 273 880 l 273 574 l 693 574 l 693 462 l 273 462 l 273 111 l 719 111 l 719 0 m 306 1244 q 371 1174 371 1244 q 306 1105 371 1105 q 241 1174 241 1105 q 306 1244 241 1244 m 560 1244 q 626 1174 626 1244 q 560 1105 626 1105 q 495 1174 495 1105 q 560 1244 495 1244 "},"Š":{"x_min":96,"x_max":738,"ha":834,"o":"m 96 32 l 96 152 q 375 93 238 93 q 611 258 611 93 q 564 366 611 328 q 371 456 516 404 q 170 575 231 506 q 109 754 109 644 q 196 939 109 872 q 435 1006 283 1006 q 718 953 591 1006 l 674 841 q 432 894 544 894 q 235 752 235 894 q 279 641 235 683 q 461 551 323 599 q 682 428 626 491 q 738 264 738 364 q 644 60 738 134 q 376 -14 550 -14 q 96 32 197 -14 m 663 1274 q 622 1229 646 1255 q 503 1071 527 1122 l 372 1071 q 253 1229 348 1122 l 213 1274 l 213 1293 l 294 1293 q 437 1166 350 1256 q 580 1293 520 1253 l 663 1293 l 663 1274 "}," ":{"x_min":0,"x_max":0,"ha":834},"ð":{"x_min":92,"x_max":742,"ha":834,"o":"m 603 575 l 609 578 q 443 845 569 733 l 270 742 l 221 819 l 368 907 q 251 981 297 955 l 298 1065 q 465 964 395 1017 l 618 1058 l 669 981 l 537 902 q 742 388 742 705 q 654 93 742 200 q 415 -14 567 -14 q 181 76 270 -14 q 92 323 92 167 q 173 569 92 481 q 400 658 255 658 q 603 575 543 658 m 415 555 q 219 317 219 555 q 416 88 219 88 q 568 155 522 88 q 614 355 614 222 q 561 498 614 442 q 415 555 508 555 "},"щ":{"x_min":74,"x_max":820,"ha":834,"o":"m 459 102 l 634 102 l 634 745 l 740 745 l 740 102 l 820 102 l 820 -258 l 714 -258 l 714 0 l 74 0 l 74 745 l 179 745 l 179 102 l 354 102 l 354 745 l 459 745 l 459 102 "},"℮":{"x_min":56,"x_max":776,"ha":834,"o":"m 776 359 l 214 359 l 214 117 q 415 33 297 33 q 684 193 588 33 l 732 165 q 592 17 666 59 q 415 -24 518 -24 q 154 85 252 -24 q 56 359 56 195 q 160 639 56 536 q 415 743 264 743 q 674 637 572 743 q 776 362 776 532 l 776 359 m 618 417 l 618 604 q 414 685 536 685 q 214 606 298 685 l 214 417 l 618 417 "},"Φ":{"x_min":18,"x_max":817,"ha":834,"o":"m 361 1006 l 487 1006 l 487 884 l 517 884 q 736 779 656 884 q 817 514 817 674 q 734 246 817 354 q 503 139 652 139 l 487 139 l 487 -14 l 361 -14 l 361 139 l 344 139 q 103 246 188 139 q 18 514 18 354 q 101 778 18 673 q 329 884 184 884 l 361 884 l 361 1006 m 487 246 l 491 246 q 638 319 585 246 q 690 517 690 391 q 642 705 690 634 q 507 776 594 776 l 487 776 l 487 246 m 361 776 l 340 776 q 195 705 247 776 q 144 517 144 634 q 200 319 144 391 q 357 246 256 246 l 361 246 l 361 776 "},"ş":{"x_min":138,"x_max":696,"ha":834,"o":"m 138 32 l 138 145 q 388 88 268 88 q 575 196 575 88 q 542 264 575 235 q 388 336 508 292 q 190 444 231 395 q 149 560 149 493 q 224 705 149 652 q 433 758 300 758 q 684 707 568 758 l 643 606 q 428 655 520 655 q 269 565 269 655 q 303 499 269 523 q 460 430 337 474 q 649 327 602 378 q 696 203 696 277 q 616 44 696 102 q 392 -14 537 -14 q 138 32 224 -14 m 285 -327 l 285 -254 q 338 -258 307 -258 q 440 -196 440 -258 q 324 -119 440 -146 l 386 0 l 466 0 l 428 -78 q 538 -194 538 -103 q 340 -334 538 -334 q 285 -327 317 -334 "}," ":{"x_min":0,"x_max":0,"ha":834},"ı":{"x_min":133.6875,"x_max":729.171875,"ha":834,"o":"m 367 648 l 184 662 l 184 745 l 490 745 l 490 96 l 729 83 l 729 0 l 133 0 l 133 83 l 367 96 l 367 648 "},"ä":{"x_min":92,"x_max":696,"ha":834,"o":"m 606 0 l 580 99 l 575 99 q 468 10 523 35 q 327 -14 413 -14 q 154 44 217 -14 q 92 207 92 102 q 436 442 92 431 l 573 447 l 573 494 q 409 655 573 655 q 187 599 309 655 l 144 692 q 404 758 277 758 q 627 699 558 758 q 696 509 696 640 l 696 0 l 606 0 m 572 362 l 462 357 q 274 315 330 352 q 219 204 219 279 q 354 82 219 82 q 513 138 454 82 q 572 294 572 194 l 572 362 m 297 1015 q 362 945 362 1015 q 297 876 362 876 q 232 945 232 876 q 297 1015 232 1015 m 551 1015 q 617 945 617 1015 q 551 876 617 876 q 486 945 486 876 q 551 1015 486 1015 "},"¹":{"x_min":249,"x_max":491.734375,"ha":834,"o":"m 397 990 l 491 990 l 491 456 l 390 456 l 390 771 q 396 906 390 817 q 345 862 368 876 l 298 828 l 249 887 l 397 990 "},"W":{"x_min":1,"x_max":833,"ha":834,"o":"m 358 684 l 478 684 l 577 330 q 626 122 618 181 q 670 542 627 158 l 717 992 l 833 992 l 706 0 l 577 0 l 462 393 q 418 584 435 487 q 373 392 396 467 l 267 0 l 139 0 l 1 992 l 116 992 l 176 542 q 203 285 191 422 q 215 122 215 148 q 262 333 231 224 l 358 684 "},"λ":{"x_min":41,"x_max":803.484375,"ha":834,"o":"m 41 0 l 383 734 l 347 842 q 294 937 324 912 q 216 961 265 961 q 145 953 178 961 l 145 1052 q 231 1064 189 1064 q 376 1018 328 1064 q 472 829 424 972 l 693 163 q 762 88 718 88 q 803 93 782 88 l 803 3 q 725 -14 769 -14 q 640 13 669 -14 q 591 99 610 40 l 500 383 q 436 611 453 528 l 432 611 q 351 393 407 517 l 169 0 l 41 0 "},">":{"x_min":103,"x_max":730,"ha":834,"o":"m 103 258 l 588 490 l 103 722 l 103 831 l 730 525 l 730 455 l 103 150 l 103 258 "},"τ":{"x_min":72.328125,"x_max":733.859375,"ha":834,"o":"m 733 745 l 733 642 l 411 642 l 411 230 q 553 84 411 84 q 683 97 625 84 l 683 5 q 533 -18 625 -18 q 288 216 288 -18 l 288 642 l 72 642 l 72 691 l 163 745 l 733 745 "},"Ų":{"x_min":85,"x_max":749,"ha":834,"o":"m 749 993 l 749 349 q 663 79 749 173 q 412 -14 578 -14 q 85 352 85 -14 l 85 991 l 211 991 l 211 359 q 419 97 211 97 q 622 361 619 97 l 622 993 l 749 993 m 572 -217 l 572 -293 q 466 -309 522 -309 q 342 -271 385 -309 q 300 -171 300 -234 q 424 0 300 -73 l 516 0 q 397 -162 397 -85 q 486 -227 397 -227 q 572 -217 532 -227 "},"Ŵ":{"x_min":1,"x_max":833,"ha":834,"o":"m 358 684 l 478 684 l 577 330 q 626 122 618 181 q 670 542 627 158 l 717 992 l 833 992 l 706 0 l 577 0 l 462 393 q 418 584 435 487 q 373 392 396 467 l 267 0 l 139 0 l 1 992 l 116 992 l 176 542 q 203 285 191 422 q 215 122 215 148 q 262 333 231 224 l 358 684 m 644 1071 l 561 1071 q 418 1196 504 1108 q 275 1071 328 1104 l 194 1071 l 194 1089 q 234 1134 210 1108 q 353 1293 328 1239 l 484 1293 q 603 1134 509 1239 l 644 1089 l 644 1071 "},"‛":{"x_min":303,"x_max":530,"ha":834,"o":"m 463 992 q 530 652 490 816 l 423 652 q 303 977 339 837 l 313 992 l 463 992 "},"Ð":{"x_min":0,"x_max":778,"ha":834,"o":"m 92 0 l 92 445 l 0 445 l 0 557 l 92 557 l 92 992 l 323 992 q 658 863 538 992 q 778 505 778 735 q 653 130 778 260 q 296 0 529 0 l 92 0 m 218 884 l 218 557 l 476 557 l 476 445 l 218 445 l 218 107 l 283 107 q 644 501 644 107 q 309 884 644 884 l 218 884 "},"Λ":{"x_min":22,"x_max":811,"ha":834,"o":"m 811 0 l 676 0 l 478 625 q 415 856 435 760 q 355 629 384 720 l 154 0 l 22 0 l 352 992 l 479 992 l 811 0 "},"·":{"x_min":330,"x_max":502,"ha":834,"o":"m 416 585 q 502 490 502 585 q 416 396 502 396 q 330 490 330 396 q 416 585 330 585 "},"Х":{"x_min":36,"x_max":797,"ha":834,"o":"m 797 0 l 653 0 l 412 430 l 164 0 l 36 0 l 343 518 l 57 992 l 191 992 l 416 612 l 643 992 l 773 992 l 486 522 l 797 0 "},"Υ":{"x_min":23,"x_max":809,"ha":834,"o":"m 415 490 l 672 992 l 809 992 l 479 386 l 479 0 l 353 0 l 353 379 l 23 992 l 160 992 l 415 490 "},"r":{"x_min":179,"x_max":719,"ha":834,"o":"m 719 727 l 685 614 q 533 650 602 650 q 362 586 422 650 q 302 404 302 523 l 302 0 l 179 0 l 179 745 l 279 745 l 294 608 l 299 608 q 410 723 351 688 q 555 758 469 758 q 719 727 636 758 "},"ж":{"x_min":-1.25,"x_max":835.25,"ha":834,"o":"m 363 383 l 363 745 l 486 745 l 486 383 l 709 745 l 835 745 l 600 383 l 833 0 l 701 0 l 486 377 l 486 0 l 363 0 l 363 377 l 133 0 l 0 0 l 250 383 l -1 745 l 123 745 l 363 383 "},"Ø":{"x_min":54.296875,"x_max":784.78125,"ha":834,"o":"m 209 49 l 147 -51 l 54 0 l 136 134 q 57 498 57 259 q 419 1007 57 1007 q 629 935 545 1007 l 691 1038 l 784 985 l 700 849 q 778 496 778 722 q 684 118 778 251 q 417 -14 590 -14 q 209 49 289 -14 m 216 265 l 565 832 q 419 895 511 895 q 190 497 190 895 q 216 265 190 353 m 620 719 l 273 155 q 417 97 327 97 q 589 195 535 97 q 644 497 644 293 q 620 719 644 638 "},"Ỳ":{"x_min":23,"x_max":809,"ha":834,"o":"m 415 490 l 672 992 l 809 992 l 479 386 l 479 0 l 353 0 l 353 379 l 23 992 l 160 992 l 415 490 m 473 1071 l 390 1071 q 206 1278 278 1167 l 206 1293 l 354 1293 q 473 1089 413 1172 l 473 1071 "},"÷":{"x_min":103,"x_max":729,"ha":834,"o":"m 415 812 q 493 727 493 812 q 415 642 493 642 q 338 727 338 642 q 415 812 338 812 m 103 439 l 103 541 l 729 541 l 729 439 l 103 439 m 415 338 q 493 253 493 338 q 415 169 493 169 q 338 253 338 169 q 415 338 338 338 "},"с":{"x_min":117,"x_max":720,"ha":834,"o":"m 720 717 l 677 610 q 496 650 576 650 q 244 369 244 650 q 489 93 244 93 q 707 135 595 93 l 707 27 q 483 -14 616 -14 q 213 84 309 -14 q 117 367 117 183 q 215 658 117 558 q 492 758 313 758 q 720 717 612 758 "},"h":{"x_min":109,"x_max":725,"ha":834,"o":"m 601 0 l 601 479 q 440 655 601 655 q 232 385 232 655 l 232 0 l 109 0 l 109 1055 l 232 1055 l 232 741 l 227 644 l 233 644 q 461 758 303 758 q 725 486 725 758 l 725 0 l 601 0 "},"f":{"x_min":106,"x_max":756,"ha":834,"o":"m 708 648 l 444 648 l 444 0 l 321 0 l 321 648 l 106 648 l 106 726 l 321 749 l 321 814 q 382 1004 321 945 q 584 1063 443 1063 q 756 1039 672 1063 l 728 942 q 587 960 657 960 q 474 926 504 960 q 444 815 444 893 l 444 745 l 708 745 l 708 648 "},"“":{"x_min":158,"x_max":674,"ha":834,"o":"m 457 652 l 447 666 q 567 992 483 806 l 674 992 q 607 652 632 818 l 457 652 m 168 652 l 158 666 q 278 992 194 806 l 385 992 q 318 652 343 818 l 168 652 "},"A":{"x_min":22,"x_max":812,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 "},"O":{"x_min":57,"x_max":778,"ha":834,"o":"m 417 -14 q 57 498 57 -14 q 419 1007 57 1007 q 685 874 592 1007 q 778 496 778 741 q 684 118 778 251 q 417 -14 590 -14 m 417 97 q 589 195 535 97 q 644 497 644 293 q 589 799 644 702 q 419 895 533 895 q 190 497 190 895 q 417 97 190 97 "},"Đ":{"x_min":0,"x_max":778,"ha":834,"o":"m 92 0 l 92 445 l 0 445 l 0 557 l 92 557 l 92 992 l 323 992 q 658 863 538 992 q 778 505 778 735 q 653 130 778 260 q 296 0 529 0 l 92 0 m 218 884 l 218 557 l 476 557 l 476 445 l 218 445 l 218 107 l 283 107 q 644 501 644 107 q 309 884 644 884 l 218 884 "},"Ǿ":{"x_min":54.296875,"x_max":784.78125,"ha":834,"o":"m 209 49 l 147 -51 l 54 0 l 136 134 q 57 498 57 259 q 419 1007 57 1007 q 629 935 545 1007 l 691 1038 l 784 985 l 700 849 q 778 496 778 722 q 684 118 778 251 q 417 -14 590 -14 q 209 49 289 -14 m 216 265 l 565 832 q 419 895 511 895 q 190 497 190 895 q 216 265 190 353 m 620 719 l 273 155 q 417 97 327 97 q 589 195 535 97 q 644 497 644 293 q 620 719 644 638 m 322 1089 q 440 1293 386 1179 l 589 1293 l 589 1278 q 404 1071 512 1161 l 322 1071 l 322 1089 "},"⅛":{"x_min":12,"x_max":818,"ha":834,"o":"m 160 990 l 254 990 l 254 456 l 153 456 l 153 771 q 159 906 153 817 q 108 862 131 876 l 61 828 l 12 887 l 160 990 m 679 992 l 184 0 l 77 0 l 571 992 l 679 992 m 706 287 q 818 147 818 230 q 766 35 818 77 q 630 -7 714 -7 q 488 33 538 -7 q 439 143 439 73 q 532 281 439 231 q 456 412 456 335 q 504 511 456 474 q 629 549 553 549 q 752 512 704 549 q 800 412 800 475 q 706 287 800 334 m 631 321 q 698 413 698 355 q 627 480 698 480 q 557 413 557 480 q 631 321 557 357 m 616 247 q 540 142 540 203 q 627 61 540 61 q 716 142 716 61 q 625 243 716 203 l 616 247 "},"Ẁ":{"x_min":1,"x_max":833,"ha":834,"o":"m 358 684 l 478 684 l 577 330 q 626 122 618 181 q 670 542 627 158 l 717 992 l 833 992 l 706 0 l 577 0 l 462 393 q 418 584 435 487 q 373 392 396 467 l 267 0 l 139 0 l 1 992 l 116 992 l 176 542 q 203 285 191 422 q 215 122 215 148 q 262 333 231 224 l 358 684 m 496 1071 l 413 1071 q 229 1278 301 1167 l 229 1293 l 377 1293 q 496 1089 436 1172 l 496 1071 "},"Ť":{"x_min":69,"x_max":762,"ha":834,"o":"m 479 0 l 353 0 l 353 880 l 69 880 l 69 992 l 762 992 l 762 880 l 479 880 l 479 0 m 641 1274 q 600 1229 624 1255 q 481 1071 505 1122 l 350 1071 q 231 1229 326 1122 l 191 1274 l 191 1293 l 272 1293 q 415 1166 328 1256 q 558 1293 498 1253 l 641 1293 l 641 1274 "},"ψ":{"x_min":54,"x_max":784,"ha":834,"o":"m 459 1054 l 459 91 q 663 386 663 110 q 624 745 663 556 l 741 745 q 784 390 784 557 q 459 -12 784 5 l 459 -334 l 354 -334 l 354 -12 q 125 85 196 -6 q 54 376 54 176 l 54 745 l 174 745 l 174 386 q 354 90 174 101 l 354 1054 l 459 1054 "},"ŗ":{"x_min":128,"x_max":719,"ha":834,"o":"m 719 727 l 685 614 q 533 650 602 650 q 362 586 422 650 q 302 404 302 523 l 302 0 l 179 0 l 179 745 l 279 745 l 294 608 l 299 608 q 410 723 351 688 q 555 758 469 758 q 719 727 636 758 m 128 -288 q 185 -85 170 -193 l 306 -85 l 306 -98 q 273 -182 306 -113 q 195 -307 240 -251 l 128 -307 l 128 -288 "}}'), k8 = "normal", K8 = 1290, G8 = -154, S8 = "normal", R8 = { yMin: -377, xMin: -211, yMax: 1467, xMax: 892 }, p8 = 1e3, f8 = { postscript_name: "DroidSansMono", version_string: "Version 1.00 build 107", vendor_url: "http://www.ascendercorp.com/", full_font_name: "Droid Sans Mono", font_family_name: "Droid Sans Mono", copyright: "Digitized data copyright © 2006, Google Corporation.", description: "Droid Sans is a humanist sans serif typeface designed for user interfaces and electronic communication.", trademark: "Droid is a trademark of Google and may be registered in certain jurisdictions.", designer: "", designer_url: "http://www.ascendercorp.com/typedesigners.html", unique_font_identifier: "Ascender - Droid Sans Mono", license_url: "http://ascendercorp.com/eula10.html", license_description: `This font software is the valuable property of Ascender Corporation and/or its suppliers and its use by you is covered under the terms of a license agreement. This font software is licensed to you by Ascender Corporation for your personal or business use on up to five personal computers. You may not use this font software on more than five personal computers unless you have obtained a license from Ascender to do so. Except as specifically permitted by the license, you may not copy this font software.
+const x8 = /* @__PURE__ */ JSON.parse('{"0":{"x_min":100,"x_max":734,"ha":834,"o":"m 415 -14 q 180 117 260 -14 q 100 496 100 248 q 415 1007 100 1007 q 653 875 573 1007 q 734 496 734 744 q 415 -14 734 -14 m 415 91 q 561 186 514 91 q 608 497 608 281 q 561 806 608 711 q 415 901 514 901 q 271 807 317 901 q 225 497 225 712 q 271 186 225 281 q 415 91 317 91 "},"1":{"x_min":153,"x_max":514.375,"ha":834,"o":"m 514 0 l 395 0 l 395 619 q 400 864 395 702 q 318 788 373 835 l 218 706 l 153 789 l 412 992 l 514 992 l 514 0 "},"2":{"x_min":107,"x_max":726,"ha":834,"o":"m 726 0 l 107 0 l 107 105 l 344 364 q 519 579 477 508 q 561 736 561 650 q 518 856 561 812 q 401 900 475 900 q 185 808 293 900 l 116 889 q 403 1006 246 1006 q 610 934 534 1006 q 687 740 687 862 q 646 575 687 660 q 449 320 606 490 l 258 118 l 258 112 l 726 112 l 726 0 "},"3":{"x_min":89,"x_max":716,"ha":834,"o":"m 471 521 l 471 517 q 716 281 716 485 q 622 64 716 143 q 351 -14 528 -14 q 89 39 187 -14 l 89 154 q 349 91 214 91 q 590 285 590 91 q 331 458 590 458 l 241 458 l 241 564 l 331 564 q 499 615 440 564 q 559 751 559 666 q 513 860 559 820 q 389 900 467 900 q 155 819 268 900 l 93 904 q 388 1006 219 1006 q 606 938 528 1006 q 685 759 685 871 q 629 602 685 665 q 471 521 574 539 "},"4":{"x_min":41,"x_max":764.453125,"ha":834,"o":"m 764 222 l 620 222 l 620 0 l 500 0 l 500 222 l 41 222 l 41 330 l 492 997 l 620 997 l 620 335 l 764 335 l 764 222 m 500 335 l 500 576 q 509 869 500 695 l 503 869 q 442 747 478 800 l 162 335 l 500 335 "},"5":{"x_min":117,"x_max":716,"ha":834,"o":"m 117 39 l 117 156 q 361 91 214 91 q 590 303 590 91 q 356 502 590 502 q 199 485 295 502 l 138 524 l 175 992 l 643 992 l 643 879 l 282 879 l 256 594 q 397 608 328 608 q 628 530 540 608 q 716 317 716 452 q 622 72 716 158 q 358 -14 528 -14 q 117 39 206 -14 "},"6":{"x_min":104,"x_max":730,"ha":834,"o":"m 655 993 l 655 888 q 542 900 606 900 q 315 806 391 900 q 232 505 238 711 l 240 505 q 448 621 304 621 q 655 540 580 621 q 730 319 730 459 q 648 75 730 164 q 428 -14 566 -14 q 192 100 280 -14 q 104 423 104 214 q 538 1006 104 1006 q 655 993 608 1006 m 610 320 q 564 471 610 418 q 431 524 517 524 q 287 469 345 524 q 229 343 229 414 q 284 165 229 240 q 427 91 339 91 q 562 150 513 91 q 610 320 610 210 "},"7":{"x_min":97,"x_max":735,"ha":834,"o":"m 227 0 l 608 879 l 97 879 l 97 992 l 735 992 l 735 893 l 358 0 l 227 0 "},"8":{"x_min":106,"x_max":728,"ha":834,"o":"m 517 526 q 728 258 728 417 q 642 60 728 135 q 416 -14 557 -14 q 188 56 270 -14 q 106 253 106 126 q 297 520 106 428 q 138 770 138 619 q 216 943 138 879 q 416 1007 295 1007 q 618 942 541 1007 q 696 768 696 878 q 517 526 696 613 m 417 576 q 576 762 576 645 q 533 866 576 830 q 415 901 490 901 q 300 866 342 901 q 257 762 257 830 q 291 660 257 702 q 417 576 324 618 m 399 473 q 225 253 225 391 q 413 91 225 91 q 557 135 506 91 q 608 258 608 179 q 565 366 608 319 q 420 463 522 413 l 399 473 "},"9":{"x_min":104,"x_max":730,"ha":834,"o":"m 179 -1 l 179 104 q 291 82 224 82 q 518 178 442 82 q 601 483 595 274 l 593 483 q 385 368 528 368 q 178 448 253 368 q 104 670 104 528 q 185 916 104 826 q 405 1006 267 1006 q 642 889 555 1006 q 730 568 730 773 q 295 -14 730 -14 q 179 -1 224 -14 m 223 670 q 269 518 223 571 q 402 464 316 464 q 546 520 488 464 q 604 646 604 576 q 550 825 604 749 q 406 900 496 900 q 271 841 319 900 q 223 670 223 782 "},"ǻ":{"x_min":92,"x_max":696,"ha":834,"o":"m 606 0 l 580 99 l 575 99 q 468 10 523 35 q 327 -14 413 -14 q 154 44 217 -14 q 92 207 92 102 q 436 442 92 431 l 573 447 l 573 494 q 409 655 573 655 q 187 599 309 655 l 144 692 q 404 758 277 758 q 627 699 558 758 q 696 509 696 640 l 696 0 l 606 0 m 572 362 l 462 357 q 274 315 330 352 q 219 204 219 279 q 354 82 219 82 q 513 138 454 82 q 572 294 572 194 l 572 362 m 414 842 q 304 881 345 842 q 263 988 263 920 q 304 1094 263 1055 q 414 1134 345 1134 q 526 1093 482 1134 q 570 989 570 1053 q 526 882 570 922 q 414 842 483 842 m 416 1064 q 359 1044 381 1064 q 337 988 337 1024 q 416 911 337 911 q 473 931 451 911 q 495 988 495 951 q 473 1044 495 1024 q 416 1064 451 1064 m 347 1185 q 465 1389 411 1275 l 614 1389 l 614 1374 q 429 1167 537 1257 l 347 1167 l 347 1185 "},"Á":{"x_min":22,"x_max":812,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 m 353 1089 q 471 1293 417 1179 l 620 1293 l 620 1278 q 435 1071 543 1161 l 353 1071 l 353 1089 "},"ĥ":{"x_min":109,"x_max":725,"ha":834,"o":"m 601 0 l 601 479 q 440 655 601 655 q 232 385 232 655 l 232 0 l 109 0 l 109 1055 l 232 1055 l 232 741 l 227 644 l 233 644 q 461 758 303 758 q 725 486 725 758 l 725 0 l 601 0 m 652 1109 l 569 1109 q 426 1234 512 1146 q 283 1109 336 1142 l 202 1109 l 202 1127 q 242 1172 218 1146 q 361 1331 336 1277 l 492 1331 q 611 1172 517 1277 l 652 1127 l 652 1109 "},"Κ":{"x_min":143,"x_max":813.25,"ha":834,"o":"m 813 0 l 669 0 l 364 473 l 269 396 l 269 0 l 143 0 l 143 992 l 269 992 l 269 496 l 351 609 l 659 992 l 801 992 l 447 559 l 813 0 "},"»":{"x_min":134,"x_max":699,"ha":834,"o":"m 699 356 l 489 78 l 410 130 l 571 366 l 410 602 l 489 655 l 699 374 l 699 356 m 423 356 l 212 78 l 134 130 l 295 366 l 134 602 l 212 655 l 423 374 l 423 356 "},"∆":{"x_min":50,"x_max":784,"ha":834,"o":"m 50 76 l 353 992 l 479 992 l 784 75 l 784 0 l 50 0 l 50 76 m 478 625 q 415 856 438 749 q 355 629 384 720 l 185 111 l 646 111 l 478 625 "},"ў":{"x_min":56,"x_max":777,"ha":834,"o":"m 56 745 l 183 745 l 361 301 q 421 104 416 162 l 425 104 q 486 302 441 180 l 648 745 l 777 745 l 454 -97 q 348 -274 409 -215 q 181 -334 288 -334 q 68 -322 123 -334 l 68 -224 q 160 -231 110 -231 q 261 -203 225 -231 q 326 -108 298 -176 l 365 -7 l 56 745 m 684 1058 q 419 842 670 842 q 229 892 287 842 q 164 1058 170 942 l 280 1058 q 314 959 286 988 q 424 930 343 930 q 567 1058 555 930 l 684 1058 "},"ţ":{"x_min":95,"x_max":696,"ha":834,"o":"m 692 101 l 692 7 q 521 -14 603 -14 q 276 218 276 -14 l 276 648 l 95 648 l 95 715 l 276 749 l 328 943 l 399 943 l 399 745 l 696 745 l 696 648 l 399 648 l 399 219 q 529 88 399 88 q 692 101 592 88 m 332 -288 q 389 -85 374 -193 l 510 -85 l 510 -98 q 477 -182 510 -113 q 399 -307 444 -251 l 332 -307 l 332 -288 "},"«":{"x_min":134,"x_max":699,"ha":834,"o":"m 134 374 l 343 655 l 423 602 l 261 366 l 423 130 l 343 78 l 134 356 l 134 374 m 410 374 l 619 655 l 699 602 l 537 366 l 699 130 l 619 78 l 410 356 l 410 374 "},"í":{"x_min":133.6875,"x_max":729.171875,"ha":834,"o":"m 367 648 l 184 662 l 184 745 l 490 745 l 490 96 l 729 83 l 729 0 l 133 0 l 133 83 l 367 96 l 367 648 m 360 860 q 478 1064 424 950 l 627 1064 l 627 1049 q 442 842 550 932 l 360 842 l 360 860 "},"ņ":{"x_min":109,"x_max":725,"ha":834,"o":"m 601 0 l 601 479 q 440 655 601 655 q 232 385 232 655 l 232 0 l 109 0 l 109 745 l 208 745 l 227 644 l 233 644 q 461 758 303 758 q 725 486 725 758 l 725 0 l 601 0 m 309 -288 q 366 -85 351 -193 l 487 -85 l 487 -98 q 454 -182 487 -113 q 376 -307 421 -251 l 309 -307 l 309 -288 "},"µ":{"x_min":122,"x_max":712,"ha":834,"o":"m 245 264 q 393 88 245 88 q 541 150 494 88 q 588 357 588 211 l 588 745 l 712 745 l 712 0 l 612 0 l 593 99 l 587 99 q 386 -14 521 -14 q 241 45 291 -14 q 245 -117 245 -58 l 245 -334 l 122 -334 l 122 745 l 245 745 l 245 264 "},"ỳ":{"x_min":56,"x_max":777,"ha":834,"o":"m 56 745 l 183 745 l 361 301 q 421 104 416 162 l 425 104 q 486 302 441 180 l 648 745 l 777 745 l 454 -97 q 348 -274 409 -215 q 181 -334 288 -334 q 68 -322 123 -334 l 68 -224 q 160 -231 110 -231 q 261 -203 225 -231 q 326 -108 298 -176 l 365 -7 l 56 745 m 480 842 l 397 842 q 213 1049 285 938 l 213 1064 l 361 1064 q 480 860 420 943 l 480 842 "},"Ι":{"x_min":152.921875,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 "},"Ύ":{"x_min":-160,"x_max":809,"ha":834,"o":"m 415 490 l 672 992 l 809 992 l 479 386 l 479 0 l 353 0 l 353 379 l 23 992 l 160 992 l 415 490 m -160 789 l -137 861 q -108 993 -115 938 l 22 993 l 22 978 q -11 897 22 967 q -86 771 -44 827 l -160 771 l -160 789 "},"ѕ":{"x_min":138,"x_max":696,"ha":834,"o":"m 138 32 l 138 145 q 388 88 268 88 q 575 196 575 88 q 542 264 575 235 q 388 336 508 292 q 190 444 231 395 q 149 560 149 493 q 224 705 149 652 q 433 758 300 758 q 684 707 568 758 l 643 606 q 428 655 520 655 q 269 565 269 655 q 303 499 269 523 q 460 430 337 474 q 649 327 602 378 q 696 203 696 277 q 616 44 696 102 q 392 -14 537 -14 q 138 32 224 -14 "},"Ш":{"x_min":82,"x_max":753,"ha":834,"o":"m 753 0 l 82 0 l 82 992 l 208 992 l 208 111 l 354 111 l 354 992 l 480 992 l 480 111 l 626 111 l 626 992 l 753 992 l 753 0 "},"M":{"x_min":77,"x_max":757,"ha":834,"o":"m 361 0 l 173 868 l 167 868 q 180 592 180 687 l 180 0 l 77 0 l 77 992 l 244 992 l 412 183 l 416 183 l 586 992 l 757 992 l 757 0 l 653 0 l 653 601 q 663 866 653 670 l 657 866 l 466 0 l 361 0 "},"Ψ":{"x_min":39,"x_max":797,"ha":834,"o":"m 797 667 q 720 387 797 472 q 494 303 644 303 l 483 303 l 483 0 l 357 0 l 357 303 l 346 303 q 115 388 192 303 q 39 664 39 473 l 39 992 l 165 992 l 165 667 q 208 460 165 511 q 346 410 252 410 l 357 410 l 357 992 l 483 992 l 483 410 l 493 410 q 628 459 585 410 q 670 664 670 508 l 670 992 l 797 992 l 797 667 "},"ũ":{"x_min":109,"x_max":725,"ha":834,"o":"m 625 0 l 607 99 l 600 99 q 373 -14 529 -14 q 109 258 109 -14 l 109 745 l 232 745 l 232 264 q 392 88 232 88 q 551 151 501 88 q 601 357 601 214 l 601 745 l 725 745 l 725 0 l 625 0 m 245 841 l 174 841 q 317 1021 190 1021 q 426 982 356 1021 q 518 944 495 944 q 590 1022 573 944 l 662 1022 q 519 843 643 843 q 412 881 480 843 q 317 919 344 919 q 245 841 262 919 "},"ŭ":{"x_min":109,"x_max":725,"ha":834,"o":"m 625 0 l 607 99 l 600 99 q 373 -14 529 -14 q 109 258 109 -14 l 109 745 l 232 745 l 232 264 q 392 88 232 88 q 551 151 501 88 q 601 357 601 214 l 601 745 l 725 745 l 725 0 l 625 0 m 621 1030 q 560 892 614 943 q 414 842 506 842 q 213 1030 224 842 l 287 1030 q 319 960 292 977 q 416 943 346 943 q 546 1030 539 943 l 621 1030 "},"―":{"x_min":-4,"x_max":838,"ha":834,"o":"m -4 315 l -4 429 l 838 429 l 838 315 l -4 315 "},"{":{"x_min":153,"x_max":679,"ha":834,"o":"m 505 -10 q 543 -91 505 -65 q 679 -118 581 -116 l 679 -220 q 382 -19 382 -215 l 382 208 q 153 337 382 337 l 153 439 q 382 567 382 439 l 382 793 q 679 992 382 987 l 679 890 q 543 863 581 888 q 505 783 505 838 l 505 559 q 347 391 505 419 l 347 383 q 505 214 505 355 l 505 -10 "},"¼":{"x_min":15,"x_max":823.71875,"ha":834,"o":"m 163 990 l 257 990 l 257 456 l 156 456 l 156 771 q 162 906 156 817 q 111 862 134 876 l 64 828 l 15 887 l 163 990 m 717 992 l 222 0 l 115 0 l 609 992 l 717 992 m 823 117 l 766 117 l 766 0 l 665 0 l 665 117 l 411 117 l 411 184 l 666 539 l 766 539 l 766 195 l 823 195 l 823 117 m 665 195 l 665 314 q 669 430 665 369 q 614 341 641 381 l 509 195 l 665 195 "},"Ḿ":{"x_min":77,"x_max":757,"ha":834,"o":"m 361 0 l 173 868 l 167 868 q 180 592 180 687 l 180 0 l 77 0 l 77 992 l 244 992 l 412 183 l 416 183 l 586 992 l 757 992 l 757 0 l 653 0 l 653 601 q 663 866 653 670 l 657 866 l 466 0 l 361 0 m 352 1091 q 470 1295 416 1181 l 619 1295 l 619 1280 q 434 1073 542 1163 l 352 1073 l 352 1091 "},"ι":{"x_min":290,"x_max":690,"ha":834,"o":"m 413 745 l 413 220 q 544 88 413 88 q 690 101 621 88 l 690 7 q 536 -14 626 -14 q 290 219 290 -14 l 290 745 l 413 745 "},"Ĳ":{"x_min":106,"x_max":719,"ha":834,"o":"m 106 0 l 106 992 l 232 992 l 232 0 l 106 0 m 334 15 l 334 125 q 460 93 397 93 q 592 286 592 93 l 592 992 l 719 992 l 719 295 q 471 -14 719 -14 q 334 15 380 -14 "},"Ê":{"x_min":147,"x_max":719,"ha":834,"o":"m 719 0 l 147 0 l 147 992 l 719 992 l 719 880 l 273 880 l 273 574 l 693 574 l 693 462 l 273 462 l 273 111 l 719 111 l 719 0 m 666 1071 l 583 1071 q 440 1196 526 1108 q 297 1071 350 1104 l 216 1071 l 216 1089 q 256 1134 232 1108 q 375 1293 350 1239 l 506 1293 q 625 1134 531 1239 l 666 1089 l 666 1071 "},"Ά":{"x_min":22,"x_max":812,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 m 25 789 l 47 861 q 76 993 69 938 l 207 993 l 207 978 q 173 897 207 967 q 98 771 140 827 l 25 771 l 25 789 "},")":{"x_min":201,"x_max":634,"ha":834,"o":"m 331 -220 l 202 -220 q 506 386 506 31 q 201 992 506 737 l 331 992 q 634 384 634 747 q 331 -220 634 18 "},"ε":{"x_min":136,"x_max":700.703125,"ha":834,"o":"m 570 439 l 570 336 l 462 336 q 259 210 259 336 q 450 88 259 88 q 698 145 583 88 l 698 36 q 441 -14 606 -14 q 217 43 298 -14 q 136 203 136 100 q 297 385 136 334 l 297 392 q 160 561 160 437 q 236 705 160 652 q 440 758 312 758 q 700 706 587 758 l 658 606 q 446 655 550 655 q 283 551 283 655 q 467 439 283 439 l 570 439 "},"э":{"x_min":124.9375,"x_max":720,"ha":834,"o":"m 129 27 l 129 135 q 343 93 239 93 q 592 326 580 93 l 228 326 l 228 434 l 591 434 q 344 650 572 650 q 166 610 271 650 l 124 717 q 350 758 228 758 q 625 658 531 758 q 720 367 720 559 q 622 85 720 184 q 346 -14 525 -14 q 129 27 219 -14 "},"ш":{"x_min":85,"x_max":751,"ha":834,"o":"m 470 102 l 645 102 l 645 745 l 751 745 l 751 0 l 85 0 l 85 745 l 190 745 l 190 102 l 365 102 l 365 745 l 470 745 l 470 102 "},"Я":{"x_min":38.75,"x_max":707,"ha":834,"o":"m 414 409 l 187 0 l 38 0 l 297 443 q 113 720 113 510 q 454 992 113 992 l 707 992 l 707 0 l 580 0 l 580 409 l 414 409 m 580 884 l 454 884 q 246 710 246 884 q 301 567 246 617 q 460 517 356 517 l 580 517 l 580 884 "},"a":{"x_min":92,"x_max":696,"ha":834,"o":"m 606 0 l 580 99 l 575 99 q 468 10 523 35 q 327 -14 413 -14 q 154 44 217 -14 q 92 207 92 102 q 436 442 92 431 l 573 447 l 573 494 q 409 655 573 655 q 187 599 309 655 l 144 692 q 404 758 277 758 q 627 699 558 758 q 696 509 696 640 l 696 0 l 606 0 m 572 362 l 462 357 q 274 315 330 352 q 219 204 219 279 q 354 82 219 82 q 513 138 454 82 q 572 294 572 194 l 572 362 "},"Ę":{"x_min":147,"x_max":719,"ha":834,"o":"m 719 0 l 147 0 l 147 992 l 719 992 l 719 880 l 273 880 l 273 574 l 693 574 l 693 462 l 273 462 l 273 111 l 719 111 l 719 0 m 692 -217 l 692 -293 q 586 -309 642 -309 q 462 -271 505 -309 q 420 -171 420 -234 q 544 0 420 -73 l 636 0 q 517 -162 517 -85 q 606 -227 517 -227 q 692 -217 652 -227 "},"Z":{"x_min":69,"x_max":763,"ha":834,"o":"m 763 0 l 69 0 l 69 97 l 607 880 l 83 880 l 83 992 l 749 992 l 749 895 l 210 111 l 763 111 l 763 0 "}," ":{"x_min":0,"x_max":0,"ha":834},"k":{"x_min":146,"x_max":789,"ha":834,"o":"m 261 375 l 352 478 l 619 745 l 770 745 l 435 422 l 789 0 l 644 0 l 356 341 l 269 286 l 269 0 l 146 0 l 146 1055 l 269 1055 l 269 571 l 258 375 l 261 375 "},"Ù":{"x_min":85,"x_max":749,"ha":834,"o":"m 749 993 l 749 349 q 663 79 749 173 q 412 -14 578 -14 q 85 352 85 -14 l 85 991 l 211 991 l 211 359 q 419 97 211 97 q 622 361 619 97 l 622 993 l 749 993 m 504 1071 l 421 1071 q 237 1278 309 1167 l 237 1293 l 385 1293 q 504 1089 444 1172 l 504 1071 "},"Ů":{"x_min":85,"x_max":749,"ha":834,"o":"m 749 993 l 749 349 q 663 79 749 173 q 412 -14 578 -14 q 85 352 85 -14 l 85 991 l 211 991 l 211 359 q 419 97 211 97 q 622 361 619 97 l 622 993 l 749 993 m 415 1071 q 305 1110 346 1071 q 264 1217 264 1149 q 305 1323 264 1284 q 415 1363 346 1363 q 527 1322 483 1363 q 571 1218 571 1282 q 527 1111 571 1151 q 415 1071 484 1071 m 417 1293 q 360 1273 382 1293 q 338 1217 338 1253 q 417 1140 338 1140 q 474 1160 452 1140 q 496 1217 496 1180 q 474 1273 496 1253 q 417 1293 452 1293 "},"¢":{"x_min":117,"x_max":719.890625,"ha":834,"o":"m 531 894 q 719 854 627 892 l 677 747 q 496 786 576 786 q 244 505 244 786 q 489 229 244 229 q 707 271 593 229 l 707 163 q 531 122 635 124 l 531 -14 l 411 -14 l 411 126 q 117 503 117 172 q 411 889 117 838 l 411 1006 l 531 1006 l 531 894 "},"В":{"x_min":92,"x_max":772,"ha":834,"o":"m 92 992 l 390 992 q 660 932 576 992 q 744 740 744 873 q 690 596 744 653 q 546 526 637 538 l 546 519 q 772 287 772 482 q 685 76 772 153 q 449 0 598 0 l 92 0 l 92 992 m 218 572 l 409 572 q 562 609 514 572 q 610 732 610 646 q 558 848 610 813 q 395 884 507 884 l 218 884 l 218 572 m 218 464 l 218 107 l 426 107 q 638 292 638 107 q 418 464 638 464 l 218 464 "},"І":{"x_min":152.921875,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 "},"ē":{"x_min":90,"x_max":744,"ha":834,"o":"m 744 346 l 217 346 q 451 93 222 93 q 703 145 584 93 l 703 36 q 456 -14 590 -14 q 189 87 289 -14 q 90 366 90 188 q 182 652 90 547 q 428 758 274 758 q 658 666 572 758 q 744 423 744 575 l 744 346 m 220 449 l 616 449 q 428 655 616 655 q 220 449 238 655 m 235 943 l 626 943 l 626 842 l 235 842 l 235 943 "},"β":{"x_min":107,"x_max":749,"ha":834,"o":"m 490 562 l 490 558 q 749 280 749 525 q 665 63 749 141 q 436 -14 582 -14 q 230 28 309 -14 l 230 -334 l 107 -334 l 107 743 q 187 979 107 896 q 409 1063 268 1063 q 623 991 543 1063 q 704 796 704 920 q 649 642 704 704 q 490 562 594 580 m 230 141 q 426 88 322 88 q 625 290 625 88 q 561 445 625 389 q 388 501 496 501 l 325 501 l 325 604 l 372 604 q 522 654 467 604 q 576 791 576 705 q 531 915 576 871 q 408 960 485 960 q 230 736 230 960 l 230 141 "},"≠":{"x_min":103,"x_max":730,"ha":834,"o":"m 271 300 l 103 300 l 103 401 l 318 401 l 401 577 l 103 577 l 103 679 l 448 679 l 539 870 l 632 830 l 560 679 l 730 679 l 730 577 l 513 577 l 430 401 l 730 401 l 730 300 l 382 300 l 294 111 l 202 150 l 271 300 "},"‼":{"x_min":173,"x_max":659.265625,"ha":834,"o":"m 615 280 l 533 280 l 498 992 l 649 992 l 615 280 m 573 168 q 659 74 659 168 q 573 -20 659 -20 q 487 74 487 -20 q 573 168 487 168 m 301 280 l 219 280 l 184 992 l 335 992 l 301 280 m 259 168 q 345 74 345 168 q 259 -20 345 -20 q 173 74 173 -20 q 259 168 173 168 "},"¥":{"x_min":54,"x_max":779,"ha":834,"o":"m 415 490 l 649 992 l 779 992 l 517 471 l 681 471 l 681 378 l 475 378 l 475 270 l 681 270 l 681 178 l 475 178 l 475 0 l 356 0 l 356 178 l 152 178 l 152 270 l 356 270 l 356 378 l 152 378 l 152 471 l 310 471 l 54 992 l 184 992 l 415 490 "},"Ĥ":{"x_min":92,"x_max":742,"ha":834,"o":"m 742 0 l 615 0 l 615 462 l 218 462 l 218 0 l 92 0 l 92 992 l 218 992 l 218 574 l 615 574 l 615 992 l 742 992 l 742 0 m 642 1071 l 559 1071 q 416 1196 502 1108 q 273 1071 326 1104 l 192 1071 l 192 1089 q 232 1134 208 1108 q 351 1293 326 1239 l 482 1293 q 601 1134 507 1239 l 642 1089 l 642 1071 "},"U":{"x_min":85,"x_max":749,"ha":834,"o":"m 749 993 l 749 349 q 663 79 749 173 q 412 -14 578 -14 q 85 352 85 -14 l 85 991 l 211 991 l 211 359 q 419 97 211 97 q 622 361 619 97 l 622 993 l 749 993 "},"Ñ":{"x_min":92,"x_max":741,"ha":834,"o":"m 741 0 l 596 0 l 201 821 l 196 821 q 208 538 208 633 l 208 0 l 92 0 l 92 992 l 236 992 l 629 174 l 633 174 q 624 449 624 380 l 624 992 l 741 992 l 741 0 m 246 1070 l 175 1070 q 318 1250 191 1250 q 427 1211 357 1250 q 519 1173 496 1173 q 591 1251 574 1173 l 663 1251 q 520 1072 644 1072 q 413 1110 481 1072 q 318 1148 345 1148 q 246 1070 263 1148 "},"F":{"x_min":165,"x_max":736,"ha":834,"o":"m 291 0 l 165 0 l 165 992 l 736 992 l 736 880 l 291 880 l 291 531 l 710 531 l 710 419 l 291 419 l 291 0 "},"ϑ":{"x_min":7.125,"x_max":815.203125,"ha":834,"o":"m 594 662 q 565 794 585 736 q 520 892 546 852 q 463 953 494 932 q 399 974 432 974 q 318 943 348 974 q 289 864 289 913 q 305 789 289 825 q 356 725 320 753 q 451 680 392 697 q 594 662 509 662 m 722 573 q 724 538 723 558 q 725 497 725 518 q 703 295 725 388 q 637 133 681 201 q 527 25 594 64 q 372 -14 461 -14 q 247 4 297 -14 q 169 55 198 23 q 128 130 140 87 q 117 219 117 172 q 120 278 117 247 q 127 340 123 310 q 134 396 131 370 q 137 438 137 421 q 127 479 137 468 q 95 491 117 491 q 61 485 79 491 q 32 474 43 480 l 7 559 q 66 579 32 570 q 136 588 100 588 q 193 578 169 588 q 231 551 216 568 q 252 511 245 534 q 258 461 258 488 q 255 408 258 437 q 248 347 251 379 q 241 283 244 316 q 237 219 237 250 q 244 165 237 191 q 268 122 252 140 q 311 93 284 104 q 377 82 338 82 q 545 187 489 82 q 601 501 601 292 q 600 538 601 516 q 598 573 600 559 q 398 599 480 574 q 265 665 316 625 q 191 757 214 705 q 169 864 169 809 q 182 947 169 909 q 222 1012 195 984 q 293 1055 250 1040 q 396 1071 336 1071 q 521 1042 466 1071 q 615 960 576 1013 q 680 832 655 907 q 718 662 706 756 l 815 662 l 815 573 l 722 573 "},"Ќ":{"x_min":143,"x_max":813.25,"ha":834,"o":"m 813 0 l 664 0 l 269 502 l 269 0 l 143 0 l 143 992 l 269 992 l 269 511 l 654 992 l 794 992 l 409 515 l 813 0 m 390 1089 q 508 1293 454 1179 l 657 1293 l 657 1278 q 472 1071 580 1161 l 390 1071 l 390 1089 "},"å":{"x_min":92,"x_max":696,"ha":834,"o":"m 606 0 l 580 99 l 575 99 q 468 10 523 35 q 327 -14 413 -14 q 154 44 217 -14 q 92 207 92 102 q 436 442 92 431 l 573 447 l 573 494 q 409 655 573 655 q 187 599 309 655 l 144 692 q 404 758 277 758 q 627 699 558 758 q 696 509 696 640 l 696 0 l 606 0 m 572 362 l 462 357 q 274 315 330 352 q 219 204 219 279 q 354 82 219 82 q 513 138 454 82 q 572 294 572 194 l 572 362 m 413 842 q 303 881 344 842 q 262 988 262 920 q 303 1094 262 1055 q 413 1134 344 1134 q 525 1093 481 1134 q 569 989 569 1053 q 525 882 569 922 q 413 842 482 842 m 415 1064 q 358 1044 380 1064 q 336 988 336 1024 q 415 911 336 911 q 472 931 450 911 q 494 988 494 951 q 472 1044 494 1024 q 415 1064 450 1064 "},"Ϋ":{"x_min":23,"x_max":809,"ha":834,"o":"m 415 490 l 672 992 l 809 992 l 479 386 l 479 0 l 353 0 l 353 379 l 23 992 l 160 992 l 415 490 m 290 1244 q 355 1174 355 1244 q 290 1105 355 1105 q 225 1174 225 1105 q 290 1244 225 1244 m 544 1244 q 610 1174 610 1244 q 544 1105 610 1105 q 479 1174 479 1105 q 544 1244 479 1244 "},"ō":{"x_min":78,"x_max":755,"ha":834,"o":"m 414 -14 q 172 91 267 -14 q 78 373 78 196 q 170 654 78 551 q 418 758 262 758 q 660 652 566 758 q 755 373 755 547 q 661 89 755 193 q 414 -14 568 -14 m 416 88 q 627 373 627 88 q 415 655 627 655 q 205 373 205 655 q 416 88 205 88 m 221 943 l 612 943 l 612 842 l 221 842 l 221 943 "},"”":{"x_min":158,"x_max":674,"ha":834,"o":"m 375 992 l 385 977 q 265 652 347 832 l 158 652 q 224 992 200 832 l 375 992 m 664 992 l 674 977 q 554 652 636 832 l 447 652 q 513 992 489 832 l 664 992 "},"ö":{"x_min":78,"x_max":755,"ha":834,"o":"m 414 -14 q 172 91 267 -14 q 78 373 78 196 q 170 654 78 551 q 418 758 262 758 q 660 652 566 758 q 755 373 755 547 q 661 89 755 193 q 414 -14 568 -14 m 416 88 q 627 373 627 88 q 415 655 627 655 q 205 373 205 655 q 416 88 205 88 m 285 1015 q 350 945 350 1015 q 285 876 350 876 q 220 945 220 876 q 285 1015 220 1015 m 539 1015 q 605 945 605 1015 q 539 876 605 876 q 474 945 474 876 q 539 1015 474 1015 "},"ć":{"x_min":117,"x_max":720,"ha":834,"o":"m 720 717 l 677 610 q 496 650 576 650 q 244 369 244 650 q 489 93 244 93 q 707 135 595 93 l 707 27 q 483 -14 616 -14 q 213 84 309 -14 q 117 367 117 183 q 215 658 117 558 q 492 758 313 758 q 720 717 612 758 m 392 860 q 510 1064 456 950 l 659 1064 l 659 1049 q 474 842 582 932 l 392 842 l 392 860 "},"þ":{"x_min":107,"x_max":741,"ha":834,"o":"m 230 644 q 449 758 305 758 q 663 656 585 758 q 741 373 741 555 q 662 88 741 190 q 449 -14 584 -14 q 230 93 308 -14 l 222 93 q 230 -16 230 6 l 230 -334 l 107 -334 l 107 1055 l 230 1055 l 230 744 l 225 644 l 230 644 m 230 401 l 230 373 q 277 153 230 219 q 428 88 325 88 q 613 374 613 88 q 427 655 613 655 q 278 595 323 655 q 230 401 233 536 "},"]":{"x_min":196,"x_max":555,"ha":834,"o":"m 196 -118 l 431 -118 l 431 890 l 196 890 l 196 992 l 555 992 l 555 -220 l 196 -220 l 196 -118 "},"А":{"x_min":22,"x_max":812,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 "},"′":{"x_min":336,"x_max":496.734375,"ha":834,"o":"m 496 992 l 468 634 l 363 634 l 336 992 l 496 992 "},"Ы":{"x_min":65,"x_max":769,"ha":834,"o":"m 65 0 l 65 992 l 191 992 l 191 574 l 221 574 q 573 290 573 574 q 484 74 573 149 q 226 0 395 0 l 65 0 m 191 107 l 240 107 q 456 290 456 107 q 401 421 456 380 q 221 462 347 462 l 191 462 l 191 107 m 652 0 l 652 992 l 769 992 l 769 0 l 652 0 "},"ẁ":{"x_min":-3,"x_max":836,"ha":834,"o":"m 551 0 l 462 404 l 416 628 l 411 628 l 367 401 l 276 0 l 148 0 l -3 745 l 106 745 l 173 376 q 212 109 196 250 l 216 109 q 262 352 237 235 l 352 745 l 483 745 l 569 352 q 614 109 598 220 l 619 109 q 659 376 640 274 l 728 745 l 836 745 l 683 0 l 551 0 m 473 842 l 390 842 q 206 1049 278 938 l 206 1064 l 354 1064 q 473 860 413 943 l 473 842 "},"ĭ":{"x_min":133.6875,"x_max":729.171875,"ha":834,"o":"m 367 648 l 184 662 l 184 745 l 490 745 l 490 96 l 729 83 l 729 0 l 133 0 l 133 83 l 367 96 l 367 648 m 639 1030 q 578 892 632 943 q 432 842 524 842 q 231 1030 242 842 l 305 1030 q 337 960 310 977 q 434 943 364 943 q 564 1030 557 943 l 639 1030 "},"R":{"x_min":126,"x_max":794.25,"ha":834,"o":"m 252 409 l 252 0 l 126 0 l 126 992 l 368 992 q 721 710 721 992 q 524 443 721 515 l 794 0 l 645 0 l 407 409 l 252 409 m 252 517 l 362 517 q 532 561 478 517 q 587 704 587 606 q 533 842 587 800 q 359 884 479 884 l 252 884 l 252 517 "},"Ż":{"x_min":69,"x_max":763,"ha":834,"o":"m 763 0 l 69 0 l 69 97 l 607 880 l 83 880 l 83 992 l 749 992 l 749 895 l 210 111 l 763 111 l 763 0 m 434 1252 q 499 1174 499 1252 q 434 1097 499 1097 q 369 1174 369 1097 q 434 1252 369 1252 "},"ħ":{"x_min":3.203125,"x_max":725,"ha":834,"o":"m 601 0 l 601 451 q 441 627 601 627 q 282 564 332 627 q 232 357 232 500 l 232 0 l 109 0 l 109 843 l 3 843 l 3 932 l 109 932 l 109 1055 l 233 1055 l 233 932 l 516 932 l 516 843 l 232 843 l 232 715 l 225 616 l 232 616 q 466 730 305 730 q 660 665 596 730 q 725 458 725 600 l 725 0 l 601 0 "},"õ":{"x_min":78,"x_max":755,"ha":834,"o":"m 414 -14 q 172 91 267 -14 q 78 373 78 196 q 170 654 78 551 q 418 758 262 758 q 660 652 566 758 q 755 373 755 547 q 661 89 755 193 q 414 -14 568 -14 m 416 88 q 627 373 627 88 q 415 655 627 655 q 205 373 205 655 q 416 88 205 88 m 244 841 l 173 841 q 316 1021 189 1021 q 425 982 355 1021 q 517 944 494 944 q 589 1022 572 944 l 661 1022 q 518 843 642 843 q 411 881 479 843 q 316 919 343 919 q 244 841 261 919 "},"˙":{"x_min":359.25,"x_max":489.46875,"ha":834,"o":"m 424 1023 q 489 945 489 1023 q 424 868 489 868 q 359 945 359 868 q 424 1023 359 1023 "},"ê":{"x_min":90,"x_max":744,"ha":834,"o":"m 744 346 l 217 346 q 451 93 222 93 q 703 145 584 93 l 703 36 q 456 -14 590 -14 q 189 87 289 -14 q 90 366 90 188 q 182 652 90 547 q 428 758 274 758 q 658 666 572 758 q 744 423 744 575 l 744 346 m 220 449 l 616 449 q 428 655 616 655 q 220 449 238 655 m 653 842 l 570 842 q 427 967 513 879 q 284 842 337 875 l 203 842 l 203 860 q 243 905 219 879 q 362 1064 337 1010 l 493 1064 q 612 905 518 1010 l 653 860 l 653 842 "},"″":{"x_min":193,"x_max":640.734375,"ha":834,"o":"m 353 992 l 325 634 l 220 634 l 193 992 l 353 992 m 640 992 l 612 634 l 507 634 l 480 992 l 640 992 "},"„":{"x_min":166,"x_max":667,"ha":834,"o":"m 367 161 l 378 145 q 258 -179 340 1 l 166 -179 q 217 161 202 18 l 367 161 m 656 161 l 667 145 q 547 -179 632 12 l 455 -179 q 506 161 491 18 l 656 161 "},"ч":{"x_min":103,"x_max":720,"ha":834,"o":"m 226 745 l 226 466 q 365 348 226 348 q 596 426 481 348 l 596 745 l 720 745 l 720 0 l 596 0 l 596 331 q 337 246 473 246 q 166 305 229 246 q 103 458 103 364 l 103 745 l 226 745 "},"δ":{"x_min":92,"x_max":742,"ha":834,"o":"m 378 636 q 206 872 206 734 q 267 1012 206 962 q 437 1063 329 1063 q 704 989 572 1063 l 654 890 q 434 960 541 960 q 355 936 384 960 q 326 868 326 911 q 354 791 326 825 q 499 689 383 756 q 742 337 742 549 q 654 78 742 170 q 413 -14 566 -14 q 180 69 269 -14 q 92 296 92 153 q 378 636 92 549 m 464 579 q 219 294 219 511 q 271 145 219 202 q 412 88 323 88 q 614 325 614 88 q 464 579 614 491 "},"Â":{"x_min":22,"x_max":812,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 m 642 1071 l 559 1071 q 416 1196 502 1108 q 273 1071 326 1104 l 192 1071 l 192 1089 q 232 1134 208 1108 q 351 1293 326 1239 l 482 1293 q 601 1134 507 1239 l 642 1089 l 642 1071 "},"Į":{"x_min":152.921875,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 m 558 -217 l 558 -293 q 452 -309 508 -309 q 328 -271 371 -309 q 286 -171 286 -234 q 410 0 286 -73 l 502 0 q 383 -162 383 -85 q 472 -227 383 -227 q 558 -217 518 -227 "},"ω":{"x_min":61,"x_max":774,"ha":834,"o":"m 132 745 l 244 745 q 166 360 166 567 q 266 88 166 88 q 341 136 314 88 q 368 270 368 184 l 368 478 l 473 478 l 473 270 q 501 135 473 182 q 572 88 528 88 q 668 360 668 88 q 590 745 668 568 l 702 745 q 774 360 774 569 q 579 -14 774 -14 q 424 106 458 -14 l 417 106 q 258 -14 382 -14 q 61 360 61 -14 q 132 745 61 565 "},"Ţ":{"x_min":69,"x_max":762,"ha":834,"o":"m 479 0 l 353 0 l 353 880 l 69 880 l 69 992 l 762 992 l 762 880 l 479 880 l 479 0 m 304 -288 q 361 -85 346 -193 l 482 -85 l 482 -98 q 449 -182 482 -113 q 371 -307 416 -251 l 304 -307 l 304 -288 "},"´":{"x_min":284,"x_max":551,"ha":834,"o":"m 284 860 q 402 1064 348 950 l 551 1064 l 551 1049 q 366 842 474 932 l 284 842 l 284 860 "},"Ĉ":{"x_min":87,"x_max":801,"ha":834,"o":"m 763 136 l 763 26 q 519 -14 663 -14 q 198 119 309 -14 q 87 497 87 252 q 208 868 87 731 q 540 1006 330 1006 q 801 947 690 1006 l 747 841 q 540 894 643 894 q 307 787 394 894 q 220 496 220 679 q 302 199 220 301 q 540 97 383 97 q 763 136 629 97 m 751 1071 l 668 1071 q 525 1196 611 1108 q 382 1071 435 1104 l 301 1071 l 301 1089 q 341 1134 317 1108 q 460 1293 435 1239 l 591 1293 q 710 1134 616 1239 l 751 1089 l 751 1071 "},"И":{"x_min":93,"x_max":742,"ha":834,"o":"m 93 992 l 209 992 l 209 449 q 204 276 209 352 l 200 174 l 204 174 l 597 992 l 742 992 l 742 0 l 625 0 l 625 538 q 637 821 625 633 l 632 821 l 237 0 l 93 0 l 93 992 "},"Љ":{"x_min":0,"x_max":820,"ha":834,"o":"m 256 880 l 242 508 q 185 52 228 119 q 65 -14 142 -14 q 0 -1 27 -14 l 0 96 q 46 82 21 82 q 88 106 70 82 q 114 193 106 130 q 137 551 123 256 q 153 992 150 846 l 504 992 l 504 574 l 529 574 q 820 290 820 574 q 742 74 820 149 q 518 0 665 0 l 378 0 l 378 880 l 256 880 m 504 107 l 532 107 q 703 290 703 107 q 659 421 703 381 q 516 462 615 462 l 504 462 l 504 107 "},"р":{"x_min":107,"x_max":741,"ha":834,"o":"m 230 93 l 222 93 q 230 -16 230 6 l 230 -334 l 107 -334 l 107 745 l 206 745 l 225 644 l 230 644 q 449 758 305 758 q 663 656 585 758 q 741 373 741 555 q 662 88 741 190 q 449 -14 584 -14 q 230 93 308 -14 m 230 401 l 230 373 q 277 153 230 219 q 428 88 325 88 q 613 374 613 88 q 427 655 613 655 q 278 595 323 655 q 230 401 233 536 "},"Ω":{"x_min":49.859375,"x_max":786.140625,"ha":834,"o":"m 367 99 l 367 0 l 49 0 l 49 111 l 230 111 q 58 559 58 270 q 153 889 58 771 q 417 1007 248 1007 q 682 889 587 1007 q 778 559 778 771 q 604 111 778 268 l 786 111 l 786 0 l 468 0 l 468 99 q 644 556 644 256 q 417 895 644 895 q 191 556 191 895 q 367 99 191 256 "},"т":{"x_min":82,"x_max":749,"ha":834,"o":"m 749 642 l 477 642 l 477 0 l 354 0 l 354 642 l 82 642 l 82 745 l 749 745 l 749 642 "},"П":{"x_min":92,"x_max":742,"ha":834,"o":"m 742 0 l 615 0 l 615 880 l 218 880 l 218 0 l 92 0 l 92 992 l 742 992 l 742 0 "},"Ö":{"x_min":57,"x_max":778,"ha":834,"o":"m 417 -14 q 57 498 57 -14 q 419 1007 57 1007 q 685 874 592 1007 q 778 496 778 741 q 684 118 778 251 q 417 -14 590 -14 m 417 97 q 589 195 535 97 q 644 497 644 293 q 589 799 644 702 q 419 895 533 895 q 190 497 190 895 q 417 97 190 97 m 290 1244 q 355 1174 355 1244 q 290 1105 355 1105 q 225 1174 225 1105 q 290 1244 225 1244 m 544 1244 q 610 1174 610 1244 q 544 1105 610 1105 q 479 1174 479 1105 q 544 1244 479 1244 "},"z":{"x_min":123,"x_max":709,"ha":834,"o":"m 709 0 l 123 0 l 123 88 l 572 648 l 145 648 l 145 745 l 697 745 l 697 641 l 256 96 l 709 96 l 709 0 "},"™":{"x_min":-0.375,"x_max":801,"ha":834,"o":"m 205 503 l 119 503 l 119 918 l 0 918 l 0 992 l 326 992 l 326 918 l 205 918 l 205 503 m 542 503 l 444 875 l 436 875 l 443 753 l 443 503 l 357 503 l 357 992 l 486 992 l 579 629 l 679 992 l 801 992 l 801 503 l 714 503 l 714 734 q 721 875 714 793 l 713 875 l 609 503 l 542 503 "},"Θ":{"x_min":57,"x_max":778,"ha":834,"o":"m 417 -14 q 57 498 57 -14 q 419 1007 57 1007 q 685 874 592 1007 q 778 496 778 741 q 684 118 778 251 q 417 -14 590 -14 m 417 97 q 589 195 535 97 q 644 497 644 293 q 589 799 644 702 q 419 895 533 895 q 190 497 190 895 q 417 97 190 97 m 278 560 l 557 560 l 557 452 l 278 452 l 278 560 "},"Ř":{"x_min":126,"x_max":794.25,"ha":834,"o":"m 252 409 l 252 0 l 126 0 l 126 992 l 368 992 q 721 710 721 992 q 524 443 721 515 l 794 0 l 645 0 l 407 409 l 252 409 m 252 517 l 362 517 q 532 561 478 517 q 587 704 587 606 q 533 842 587 800 q 359 884 479 884 l 252 884 l 252 517 m 622 1274 q 581 1229 605 1255 q 462 1071 486 1122 l 331 1071 q 212 1229 307 1122 l 172 1274 l 172 1293 l 253 1293 q 396 1166 309 1256 q 539 1293 479 1253 l 622 1293 l 622 1274 "},"Ň":{"x_min":92,"x_max":741,"ha":834,"o":"m 741 0 l 596 0 l 201 821 l 196 821 q 208 538 208 633 l 208 0 l 92 0 l 92 992 l 236 992 l 629 174 l 633 174 q 624 449 624 380 l 624 992 l 741 992 l 741 0 m 640 1274 q 599 1229 623 1255 q 480 1071 504 1122 l 349 1071 q 230 1229 325 1122 l 190 1274 l 190 1293 l 271 1293 q 414 1166 327 1256 q 557 1293 497 1253 l 640 1293 l 640 1274 "},"É":{"x_min":147,"x_max":719,"ha":834,"o":"m 719 0 l 147 0 l 147 992 l 719 992 l 719 880 l 273 880 l 273 574 l 693 574 l 693 462 l 273 462 l 273 111 l 719 111 l 719 0 m 326 1089 q 444 1293 390 1179 l 593 1293 l 593 1278 q 408 1071 516 1161 l 326 1071 l 326 1089 "},"и":{"x_min":109,"x_max":725,"ha":834,"o":"m 229 745 l 229 291 l 220 120 l 562 745 l 725 745 l 725 0 l 604 0 l 604 439 l 611 622 l 271 0 l 109 0 l 109 745 l 229 745 "},"³":{"x_min":232,"x_max":574,"ha":834,"o":"m 454 738 q 574 611 574 711 q 523 487 574 531 q 377 444 472 444 q 232 477 289 444 l 232 562 q 370 522 307 522 q 472 614 472 522 q 371 699 472 699 l 322 699 l 322 768 l 369 768 q 454 851 454 768 q 388 924 454 924 q 278 880 339 924 l 233 938 q 394 1002 308 1002 q 512 965 468 1002 q 556 865 556 928 q 454 738 556 771 "},"[":{"x_min":279,"x_max":638,"ha":834,"o":"m 638 -220 l 279 -220 l 279 992 l 638 992 l 638 890 l 402 890 l 402 -118 l 638 -118 l 638 -220 "},"ζ":{"x_min":110,"x_max":724,"ha":834,"o":"m 151 1055 l 720 1055 l 720 960 q 344 631 451 765 q 237 323 237 497 q 293 175 237 219 q 505 105 350 132 q 672 51 621 85 q 724 -58 724 16 q 641 -272 724 -159 l 526 -272 q 603 -95 603 -162 q 568 -35 603 -57 q 403 6 534 -12 q 180 106 250 30 q 110 318 110 181 q 219 642 110 492 q 583 960 328 793 q 344 952 437 952 l 151 952 l 151 1055 "},"∏":{"x_min":106,"x_max":755,"ha":834,"o":"m 628 -334 l 628 880 l 232 880 l 232 -334 l 106 -334 l 106 992 l 755 992 l 755 -334 l 628 -334 "},"Έ":{"x_min":-76,"x_max":719,"ha":834,"o":"m 719 0 l 147 0 l 147 992 l 719 992 l 719 880 l 273 880 l 273 574 l 693 574 l 693 462 l 273 462 l 273 111 l 719 111 l 719 0 m -76 789 l -53 861 q -24 993 -31 938 l 106 993 l 106 978 q 72 897 106 967 q -2 771 39 827 l -76 771 l -76 789 "},"Ρ":{"x_min":119,"x_max":742,"ha":834,"o":"m 245 385 l 245 0 l 119 0 l 119 992 l 393 992 q 742 701 742 992 q 647 468 742 552 q 374 385 553 385 l 245 385 m 245 493 l 359 493 q 550 541 493 493 q 608 694 608 590 q 380 884 608 884 l 245 884 l 245 493 "},"ğ":{"x_min":70,"x_max":763.84375,"ha":834,"o":"m 763 745 l 763 668 l 630 650 q 675 506 675 592 q 602 333 675 397 q 401 269 530 269 q 343 273 364 269 q 275 182 275 234 q 384 125 275 125 l 511 125 q 691 72 629 125 q 754 -77 754 20 q 371 -334 754 -334 q 146 -278 223 -334 q 70 -123 70 -223 q 232 61 70 22 q 167 165 167 93 q 257 293 167 240 q 162 376 197 318 q 128 502 128 434 q 200 691 128 625 q 405 758 272 758 q 507 745 464 758 l 763 745 m 402 353 q 554 508 554 353 q 401 669 554 669 q 248 506 248 669 q 402 353 248 353 m 469 17 l 342 17 q 186 -118 186 17 q 370 -237 186 -237 q 637 -84 637 -237 q 603 -3 637 -24 q 469 17 569 17 m 612 1030 q 551 892 605 943 q 405 842 497 842 q 204 1030 215 842 l 278 1030 q 310 960 283 977 q 407 943 337 943 q 537 1030 530 943 l 612 1030 "},"ª":{"x_min":187,"x_max":616,"ha":834,"o":"m 539 541 l 516 622 q 336 532 446 532 q 187 671 187 532 q 244 784 187 749 q 430 823 301 819 l 514 827 l 514 833 q 412 925 514 925 q 247 889 336 925 l 219 963 q 418 1003 313 1003 q 616 841 616 1003 l 616 541 l 539 541 m 446 757 q 329 738 369 755 q 288 670 288 720 q 358 610 288 610 q 472 646 429 610 q 514 745 514 683 l 514 758 l 446 757 "},"ї":{"x_min":133.6875,"x_max":729.171875,"ha":834,"o":"m 367 648 l 184 662 l 184 745 l 490 745 l 490 96 l 729 83 l 729 0 l 133 0 l 133 83 l 367 96 l 367 648 m 289 1015 q 354 945 354 1015 q 289 876 354 876 q 224 945 224 876 q 289 1015 224 1015 m 543 1015 q 609 945 609 1015 q 543 876 609 876 q 478 945 478 876 q 543 1015 478 1015 "},"T":{"x_min":69,"x_max":762,"ha":834,"o":"m 479 0 l 353 0 l 353 880 l 69 880 l 69 992 l 762 992 l 762 880 l 479 880 l 479 0 "},"š":{"x_min":138,"x_max":696,"ha":834,"o":"m 138 32 l 138 145 q 388 88 268 88 q 575 196 575 88 q 542 264 575 235 q 388 336 508 292 q 190 444 231 395 q 149 560 149 493 q 224 705 149 652 q 433 758 300 758 q 684 707 568 758 l 643 606 q 428 655 520 655 q 269 565 269 655 q 303 499 269 523 q 460 430 337 474 q 649 327 602 378 q 696 203 696 277 q 616 44 696 102 q 392 -14 537 -14 q 138 32 224 -14 m 649 1045 q 608 1000 632 1026 q 489 842 513 893 l 358 842 q 239 1000 334 893 l 199 1045 l 199 1064 l 280 1064 q 423 937 336 1027 q 566 1064 506 1024 l 649 1064 l 649 1045 "},"є":{"x_min":117,"x_max":719.890625,"ha":834,"o":"m 719 717 l 677 610 q 500 650 576 650 q 245 434 266 650 l 609 434 l 609 326 l 244 326 q 494 93 258 93 q 707 135 597 93 l 707 27 q 490 -14 616 -14 q 213 85 310 -14 q 117 367 117 184 q 215 658 117 559 q 496 758 314 758 q 719 717 616 758 "},"Þ":{"x_min":119,"x_max":742,"ha":834,"o":"m 245 215 l 245 0 l 119 0 l 119 992 l 245 992 l 245 821 l 393 821 q 742 530 742 821 q 647 298 742 381 q 374 215 553 215 l 245 215 m 245 322 l 359 322 q 550 371 493 322 q 608 524 608 420 q 380 713 608 713 l 245 713 l 245 322 "},"j":{"x_min":92,"x_max":580,"ha":834,"o":"m 504 1051 q 577 973 577 1051 q 504 896 577 896 q 432 973 432 896 q 504 1051 432 1051 m 92 -310 l 92 -205 q 288 -231 182 -231 q 412 -192 367 -231 q 456 -85 456 -154 l 456 648 l 171 662 l 171 745 l 580 745 l 580 -79 q 503 -267 580 -201 q 286 -334 426 -334 q 92 -310 175 -334 "},"Σ":{"x_min":89,"x_max":744,"ha":834,"o":"m 89 0 l 89 103 l 370 519 l 97 892 l 97 992 l 703 992 l 703 880 l 241 880 l 505 520 l 228 111 l 744 111 l 744 0 l 89 0 "},"ϒ":{"x_min":21,"x_max":818.3125,"ha":834,"o":"m 414 496 q 456 603 431 546 q 508 715 482 660 q 559 815 535 769 q 600 892 584 862 q 631 940 615 919 q 665 974 646 960 q 705 994 683 987 q 754 1000 726 1000 q 792 997 777 1000 q 818 989 806 994 l 818 890 q 798 894 810 892 q 779 896 787 896 q 739 880 760 896 q 694 823 718 864 q 670 781 686 809 q 635 715 654 753 q 593 634 615 678 q 549 544 570 591 q 509 453 528 498 q 477 367 490 407 l 477 0 l 351 0 l 351 379 l 21 992 l 158 992 l 414 496 "},"ℓ":{"x_min":154,"x_max":678,"ha":834,"o":"m 584 225 l 678 225 q 483 -14 665 -14 q 337 49 389 -14 q 285 232 285 112 l 285 393 q 154 354 226 372 l 154 429 q 285 469 202 442 l 285 803 q 331 952 285 898 q 468 1006 377 1006 q 585 950 542 1006 q 628 804 628 895 q 404 443 628 567 l 404 235 q 491 82 404 82 q 584 225 578 82 m 404 524 q 534 798 534 605 q 469 925 534 925 q 420 897 436 925 q 404 798 404 870 l 404 524 "},"ĉ":{"x_min":117,"x_max":720,"ha":834,"o":"m 720 717 l 677 610 q 496 650 576 650 q 244 369 244 650 q 489 93 244 93 q 707 135 595 93 l 707 27 q 483 -14 616 -14 q 213 84 309 -14 q 117 367 117 183 q 215 658 117 558 q 492 758 313 758 q 720 717 612 758 m 699 842 l 616 842 q 473 967 559 879 q 330 842 383 875 l 249 842 l 249 860 q 289 905 265 879 q 408 1064 383 1010 l 539 1064 q 658 905 564 1010 l 699 860 l 699 842 "},"ī":{"x_min":133.6875,"x_max":729.171875,"ha":834,"o":"m 367 648 l 184 662 l 184 745 l 490 745 l 490 96 l 729 83 l 729 0 l 133 0 l 133 83 l 367 96 l 367 648 m 221 943 l 612 943 l 612 842 l 221 842 l 221 943 "},"О":{"x_min":57,"x_max":778,"ha":834,"o":"m 417 -14 q 57 498 57 -14 q 419 1007 57 1007 q 685 874 592 1007 q 778 496 778 741 q 684 118 778 251 q 417 -14 590 -14 m 417 97 q 589 195 535 97 q 644 497 644 293 q 589 799 644 702 q 419 895 533 895 q 190 497 190 895 q 417 97 190 97 "},"ξ":{"x_min":117,"x_max":724,"ha":834,"o":"m 668 601 l 668 512 l 531 512 q 318 456 391 512 q 244 298 244 400 q 270 200 244 236 q 343 145 296 164 q 511 104 390 126 q 672 50 621 84 q 724 -58 724 16 q 638 -272 724 -159 l 521 -272 q 603 -94 603 -162 q 570 -36 603 -58 q 410 5 536 -14 q 117 286 117 51 q 168 449 117 377 q 308 550 219 521 l 308 558 q 163 747 163 598 q 213 875 163 824 q 390 960 264 926 q 200 952 270 952 l 158 952 l 158 1055 l 677 1055 l 677 952 l 630 952 q 383 898 483 952 q 283 748 283 843 q 345 636 283 671 q 539 601 407 601 l 668 601 "},"Ď":{"x_min":92,"x_max":778,"ha":834,"o":"m 92 0 l 92 992 l 323 992 q 658 863 538 992 q 778 505 778 735 q 653 130 778 260 q 296 0 529 0 l 92 0 m 218 884 l 218 107 l 283 107 q 644 501 644 107 q 309 884 644 884 l 218 884 m 637 1274 q 596 1229 620 1255 q 477 1071 501 1122 l 346 1071 q 227 1229 322 1122 l 187 1274 l 187 1293 l 268 1293 q 411 1166 324 1256 q 554 1293 494 1253 l 637 1293 l 637 1274 "},"&":{"x_min":41,"x_max":833,"ha":834,"o":"m 410 525 l 600 290 q 671 470 648 371 l 795 470 q 674 197 759 311 l 833 0 l 685 0 l 596 112 q 316 -14 478 -14 q 114 58 188 -14 q 41 258 41 131 q 84 413 41 347 q 243 548 127 479 q 133 790 133 678 q 197 948 133 890 q 384 1007 262 1007 q 562 948 499 1007 q 625 789 625 890 q 410 525 625 652 m 346 607 q 468 701 435 661 q 501 792 501 741 q 468 873 501 842 q 381 904 435 904 q 289 874 322 904 q 256 789 256 844 q 346 607 256 709 m 528 194 l 308 466 q 168 261 168 382 q 214 141 168 189 q 323 93 260 93 q 528 194 433 93 "},"G":{"x_min":79,"x_max":742,"ha":834,"o":"m 455 524 l 742 524 l 742 36 q 456 -14 609 -14 q 179 121 279 -14 q 79 497 79 256 q 188 870 79 735 q 491 1006 298 1006 q 726 947 621 1006 l 677 837 q 487 894 578 894 q 285 789 357 894 q 212 496 212 683 q 479 97 212 97 q 615 116 544 97 l 615 412 l 455 412 l 455 524 "},"ΰ":{"x_min":109,"x_max":735,"ha":834,"o":"m 109 745 l 232 745 l 232 345 q 418 88 232 88 q 565 167 520 88 q 611 412 611 245 q 568 745 611 573 l 691 745 q 735 406 735 578 q 657 88 735 191 q 414 -14 579 -14 q 109 337 109 -14 l 109 745 m 359 959 q 412 1164 388 1054 l 561 1164 l 561 1150 q 414 942 497 1039 l 359 942 l 359 959 m 265 1015 q 331 945 331 1015 q 312 894 331 912 q 265 876 293 876 q 201 945 201 876 q 265 1015 201 1015 m 562 1015 q 628 945 628 1015 q 562 876 628 876 q 497 945 497 876 q 562 1015 497 1015 "},"`":{"x_min":284,"x_max":551,"ha":834,"o":"m 551 842 l 468 842 q 284 1049 356 938 l 284 1064 l 432 1064 q 551 860 491 943 l 551 842 "},"ŏ":{"x_min":78,"x_max":755,"ha":834,"o":"m 414 -14 q 172 91 267 -14 q 78 373 78 196 q 170 654 78 551 q 418 758 262 758 q 660 652 566 758 q 755 373 755 547 q 661 89 755 193 q 414 -14 568 -14 m 416 88 q 627 373 627 88 q 415 655 627 655 q 205 373 205 655 q 416 88 205 88 m 621 1030 q 560 892 614 943 q 414 842 506 842 q 213 1030 224 842 l 287 1030 q 319 960 292 977 q 416 943 346 943 q 546 1030 539 943 l 621 1030 "},"ý":{"x_min":56,"x_max":777,"ha":834,"o":"m 56 745 l 183 745 l 361 301 q 421 104 416 162 l 425 104 q 486 302 441 180 l 648 745 l 777 745 l 454 -97 q 348 -274 409 -215 q 181 -334 288 -334 q 68 -322 123 -334 l 68 -224 q 160 -231 110 -231 q 261 -203 225 -231 q 326 -108 298 -176 l 365 -7 l 56 745 m 335 860 q 453 1064 399 950 l 602 1064 l 602 1049 q 417 842 525 932 l 335 842 l 335 860 "},"º":{"x_min":191,"x_max":643,"ha":834,"o":"m 415 532 q 254 595 317 532 q 191 768 191 658 q 251 940 191 878 q 418 1003 312 1003 q 579 940 516 1003 q 643 768 643 877 q 580 594 643 656 q 415 532 518 532 m 417 613 q 541 769 541 613 q 417 921 541 921 q 292 769 292 921 q 417 613 292 613 "},"∞":{"x_min":47,"x_max":785,"ha":834,"o":"m 411 421 q 228 277 332 277 q 97 335 147 277 q 47 490 47 394 q 97 642 47 581 q 228 704 147 704 q 413 555 340 704 q 604 699 492 699 q 735 641 685 699 q 785 486 785 583 q 733 334 785 397 q 604 272 681 272 q 411 421 488 272 m 365 490 q 238 611 310 611 q 168 576 195 611 q 141 489 141 540 q 168 403 141 436 q 239 369 195 369 q 365 490 308 369 m 461 486 q 592 365 519 365 q 663 400 636 365 q 690 487 690 436 q 661 573 690 539 q 590 607 633 607 q 461 486 520 607 "},"ź":{"x_min":123,"x_max":709,"ha":834,"o":"m 709 0 l 123 0 l 123 88 l 572 648 l 145 648 l 145 745 l 697 745 l 697 641 l 256 96 l 709 96 l 709 0 m 336 860 q 454 1064 400 950 l 603 1064 l 603 1049 q 418 842 526 932 l 336 842 l 336 860 "},"я":{"x_min":77.75,"x_max":702,"ha":834,"o":"m 212 0 l 77 0 l 275 315 q 117 527 117 360 q 186 686 117 628 q 372 745 255 745 l 702 745 l 702 0 l 578 0 l 578 295 l 385 295 l 212 0 m 578 398 l 578 642 l 381 642 q 240 525 240 642 q 399 398 240 398 l 578 398 "},"Ё":{"x_min":147,"x_max":719,"ha":834,"o":"m 719 0 l 147 0 l 147 992 l 719 992 l 719 880 l 273 880 l 273 574 l 693 574 l 693 462 l 273 462 l 273 111 l 719 111 l 719 0 m 306 1244 q 371 1174 371 1244 q 306 1105 371 1105 q 241 1174 241 1105 q 306 1244 241 1244 m 560 1244 q 626 1174 626 1244 q 560 1105 626 1105 q 495 1174 495 1105 q 560 1244 495 1244 "},"ń":{"x_min":109,"x_max":725,"ha":834,"o":"m 601 0 l 601 479 q 440 655 601 655 q 232 385 232 655 l 232 0 l 109 0 l 109 745 l 208 745 l 227 644 l 233 644 q 461 758 303 758 q 725 486 725 758 l 725 0 l 601 0 m 359 860 q 477 1064 423 950 l 626 1064 l 626 1049 q 441 842 549 932 l 359 842 l 359 860 "}," ":{"x_min":0,"x_max":0,"ha":834},"Г":{"x_min":158,"x_max":719,"ha":834,"o":"m 719 992 l 719 880 l 284 880 l 284 0 l 158 0 l 158 992 l 719 992 "},"Ь":{"x_min":119,"x_max":742,"ha":834,"o":"m 119 0 l 119 992 l 245 992 l 245 574 l 374 574 q 742 290 742 574 q 652 74 742 149 q 393 0 563 0 l 119 0 m 245 107 l 380 107 q 608 290 608 107 q 550 421 608 380 q 359 462 493 462 l 245 462 l 245 107 "},"¤":{"x_min":118.59375,"x_max":716.0625,"ha":834,"o":"m 206 634 l 118 721 l 185 788 l 271 700 q 416 747 339 747 q 561 700 494 747 l 648 788 l 716 723 l 628 635 q 674 489 674 567 q 628 343 674 408 l 714 257 l 648 192 l 561 278 q 416 234 494 234 q 271 280 336 234 l 185 193 l 119 259 l 206 345 q 162 489 162 409 q 206 634 162 567 m 416 326 q 531 374 483 326 q 579 489 579 421 q 531 605 579 557 q 416 654 483 654 q 303 606 350 654 q 256 489 256 558 q 303 374 256 421 q 416 326 350 326 "},"Ĝ":{"x_min":79,"x_max":742,"ha":834,"o":"m 455 524 l 742 524 l 742 36 q 456 -14 609 -14 q 179 121 279 -14 q 79 497 79 256 q 188 870 79 735 q 491 1006 298 1006 q 726 947 621 1006 l 677 837 q 487 894 578 894 q 285 789 357 894 q 212 496 212 683 q 479 97 212 97 q 615 116 544 97 l 615 412 l 455 412 l 455 524 m 696 1071 l 613 1071 q 470 1196 556 1108 q 327 1071 380 1104 l 246 1071 l 246 1089 q 286 1134 262 1108 q 405 1293 380 1239 l 536 1293 q 655 1134 561 1239 l 696 1089 l 696 1071 "},"p":{"x_min":107,"x_max":741,"ha":834,"o":"m 230 93 l 222 93 q 230 -16 230 6 l 230 -334 l 107 -334 l 107 745 l 206 745 l 225 644 l 230 644 q 449 758 305 758 q 663 656 585 758 q 741 373 741 555 q 662 88 741 190 q 449 -14 584 -14 q 230 93 308 -14 m 230 401 l 230 373 q 277 153 230 219 q 428 88 325 88 q 613 374 613 88 q 427 655 613 655 q 278 595 323 655 q 230 401 233 536 "},"Ю":{"x_min":66,"x_max":787,"ha":834,"o":"m 273 462 l 192 462 l 192 0 l 66 0 l 66 992 l 192 992 l 192 574 l 276 574 q 348 908 288 810 q 532 1007 407 1007 q 724 887 662 1007 q 787 496 787 767 q 724 106 787 227 q 530 -14 661 -14 q 340 92 401 -14 q 273 462 279 199 m 530 97 q 637 176 604 97 q 670 497 670 255 q 636 818 670 741 q 530 895 603 895 q 422 815 455 895 q 389 497 389 735 q 422 179 389 261 q 530 97 454 97 "},"ο":{"x_min":78,"x_max":755,"ha":834,"o":"m 414 -14 q 172 91 267 -14 q 78 373 78 196 q 170 654 78 551 q 418 758 262 758 q 660 652 566 758 q 755 373 755 547 q 661 89 755 193 q 414 -14 568 -14 m 416 88 q 627 373 627 88 q 415 655 627 655 q 205 373 205 655 q 416 88 205 88 "},"S":{"x_min":96,"x_max":738,"ha":834,"o":"m 96 32 l 96 152 q 375 93 238 93 q 611 258 611 93 q 564 366 611 328 q 371 456 516 404 q 170 575 231 506 q 109 754 109 644 q 196 939 109 872 q 435 1006 283 1006 q 718 953 591 1006 l 674 841 q 432 894 544 894 q 235 752 235 894 q 279 641 235 683 q 461 551 323 599 q 682 428 626 491 q 738 264 738 364 q 644 60 738 134 q 376 -14 550 -14 q 96 32 197 -14 "},"/":{"x_min":143,"x_max":690,"ha":834,"o":"m 690 992 l 263 0 l 143 0 l 569 992 l 690 992 "},"Ŧ":{"x_min":69,"x_max":762,"ha":834,"o":"m 353 556 l 353 880 l 69 880 l 69 992 l 762 992 l 762 880 l 479 880 l 479 556 l 679 556 l 679 448 l 479 448 l 479 0 l 353 0 l 353 448 l 151 448 l 151 556 l 353 556 "},"ђ":{"x_min":3.203125,"x_max":725,"ha":834,"o":"m 438 -317 l 438 -216 q 515 -231 474 -231 q 601 -115 601 -231 l 601 451 q 441 627 601 627 q 282 564 332 627 q 232 357 232 500 l 232 0 l 109 0 l 109 843 l 3 843 l 3 932 l 109 932 l 109 1055 l 232 1055 l 232 932 l 489 932 l 489 843 l 232 843 l 232 715 l 227 616 l 233 616 q 460 730 305 730 q 725 458 725 730 l 725 -107 q 528 -334 725 -334 q 438 -317 473 -334 "},"y":{"x_min":56,"x_max":777,"ha":834,"o":"m 56 745 l 183 745 l 361 301 q 421 104 416 162 l 425 104 q 486 302 441 180 l 648 745 l 777 745 l 454 -97 q 348 -274 409 -215 q 181 -334 288 -334 q 68 -322 123 -334 l 68 -224 q 160 -231 110 -231 q 261 -203 225 -231 q 326 -108 298 -176 l 365 -7 l 56 745 "},"Π":{"x_min":92,"x_max":742,"ha":834,"o":"m 742 0 l 615 0 l 615 880 l 218 880 l 218 0 l 92 0 l 92 992 l 742 992 l 742 0 "},"‗":{"x_min":-14,"x_max":848,"ha":834,"o":"m 848 -125 l -14 -125 l -14 -31 l 848 -31 l 848 -125 m 848 -314 l -14 -314 l -14 -219 l 848 -219 l 848 -314 "},"–":{"x_min":125,"x_max":709,"ha":834,"o":"m 125 315 l 125 429 l 709 429 l 709 315 l 125 315 "},"ë":{"x_min":90,"x_max":744,"ha":834,"o":"m 744 346 l 217 346 q 451 93 222 93 q 703 145 584 93 l 703 36 q 456 -14 590 -14 q 189 87 289 -14 q 90 366 90 188 q 182 652 90 547 q 428 758 274 758 q 658 666 572 758 q 744 423 744 575 l 744 346 m 220 449 l 616 449 q 428 655 616 655 q 220 449 238 655 m 301 1015 q 366 945 366 1015 q 301 876 366 876 q 236 945 236 876 q 301 1015 236 1015 m 555 1015 q 621 945 621 1015 q 555 876 621 876 q 490 945 490 876 q 555 1015 490 1015 "},"б":{"x_min":97,"x_max":735,"ha":834,"o":"m 705 1065 l 728 956 q 388 889 458 911 q 275 793 318 867 q 227 578 232 720 l 235 578 q 463 693 314 693 q 662 603 590 693 q 735 359 735 514 q 650 84 735 182 q 415 -14 565 -14 q 181 108 266 -14 q 97 446 97 230 q 118 687 97 590 q 174 845 139 785 q 256 940 209 904 q 371 996 303 976 q 705 1065 440 1015 m 224 444 q 425 88 224 88 q 607 343 607 88 q 443 590 607 590 q 317 547 377 590 q 224 444 256 504 "},"ƒ":{"x_min":146,"x_max":689,"ha":834,"o":"m 454 564 l 454 -85 q 402 -274 454 -214 q 228 -334 350 -334 q 146 -323 193 -334 l 146 -220 q 223 -228 185 -228 q 307 -194 286 -228 q 329 -84 329 -160 l 329 564 l 197 564 l 197 617 l 329 665 l 329 757 q 381 946 329 886 q 554 1006 433 1006 q 689 980 620 1006 l 657 885 q 559 900 603 900 q 475 866 497 900 q 454 757 454 832 l 454 661 l 620 661 l 620 564 l 454 564 "},"у":{"x_min":56,"x_max":777,"ha":834,"o":"m 56 745 l 183 745 l 361 301 q 421 104 416 162 l 425 104 q 486 302 441 180 l 648 745 l 777 745 l 454 -97 q 348 -274 409 -215 q 181 -334 288 -334 q 68 -322 123 -334 l 68 -224 q 160 -231 110 -231 q 261 -203 225 -231 q 326 -108 298 -176 l 365 -7 l 56 745 "},"J":{"x_min":93,"x_max":664,"ha":834,"o":"m 93 26 l 93 138 q 302 97 202 97 q 474 151 411 97 q 537 304 537 205 l 537 992 l 664 992 l 664 305 q 568 72 664 159 q 312 -14 473 -14 q 93 26 165 -14 "},"ŷ":{"x_min":56,"x_max":777,"ha":834,"o":"m 56 745 l 183 745 l 361 301 q 421 104 416 162 l 425 104 q 486 302 441 180 l 648 745 l 777 745 l 454 -97 q 348 -274 409 -215 q 181 -334 288 -334 q 68 -322 123 -334 l 68 -224 q 160 -231 110 -231 q 261 -203 225 -231 q 326 -108 298 -176 l 365 -7 l 56 745 m 644 842 l 561 842 q 418 967 504 879 q 275 842 328 875 l 194 842 l 194 860 q 234 905 210 879 q 353 1064 328 1010 l 484 1064 q 603 905 509 1010 l 644 860 l 644 842 "},"ŕ":{"x_min":179,"x_max":719,"ha":834,"o":"m 719 727 l 685 614 q 533 650 602 650 q 362 586 422 650 q 302 404 302 523 l 302 0 l 179 0 l 179 745 l 279 745 l 294 608 l 299 608 q 410 723 351 688 q 555 758 469 758 q 719 727 636 758 m 346 860 q 464 1064 410 950 l 613 1064 l 613 1049 q 428 842 536 932 l 346 842 l 346 860 "},"ώ":{"x_min":61,"x_max":774,"ha":834,"o":"m 132 745 l 244 745 q 166 360 166 567 q 266 88 166 88 q 341 136 314 88 q 368 270 368 184 l 368 478 l 473 478 l 473 270 q 501 135 473 182 q 572 88 528 88 q 668 360 668 88 q 590 745 668 568 l 702 745 q 774 360 774 569 q 579 -14 774 -14 q 424 106 458 -14 l 417 106 q 258 -14 382 -14 q 61 360 61 -14 q 132 745 61 565 m 360 860 l 382 932 q 411 1064 404 1009 l 542 1064 l 542 1049 q 508 968 542 1038 q 433 842 475 898 l 360 842 l 360 860 "},"˘":{"x_min":213,"x_max":621,"ha":834,"o":"m 621 1030 q 560 892 614 943 q 414 842 506 842 q 213 1030 224 842 l 287 1030 q 319 960 292 977 q 416 943 346 943 q 546 1030 539 943 l 621 1030 "},"D":{"x_min":92,"x_max":778,"ha":834,"o":"m 92 0 l 92 992 l 323 992 q 658 863 538 992 q 778 505 778 735 q 653 130 778 260 q 296 0 529 0 l 92 0 m 218 884 l 218 107 l 283 107 q 644 501 644 107 q 309 884 644 884 l 218 884 "},"ł":{"x_min":127.6875,"x_max":723.171875,"ha":834,"o":"m 361 401 l 265 339 l 212 421 l 361 518 l 361 958 l 179 972 l 179 1055 l 484 1055 l 484 599 l 595 672 l 648 589 l 484 482 l 484 96 l 723 83 l 723 0 l 127 0 l 127 83 l 361 96 l 361 401 "},"ĺ":{"x_min":127.6875,"x_max":723.171875,"ha":834,"o":"m 361 958 l 179 972 l 179 1055 l 484 1055 l 484 96 l 723 83 l 723 0 l 127 0 l 127 83 l 361 96 l 361 958 m 336 1128 q 454 1332 400 1218 l 603 1332 l 603 1317 q 418 1110 526 1200 l 336 1110 l 336 1128 "},"ц":{"x_min":103,"x_max":801,"ha":834,"o":"m 801 -258 l 677 -258 l 677 0 l 103 0 l 103 745 l 226 745 l 226 102 l 568 102 l 568 745 l 692 745 l 692 102 l 801 102 l 801 -258 "},"Л":{"x_min":3,"x_max":742,"ha":834,"o":"m 742 0 l 615 0 l 615 880 l 435 880 q 288 100 351 217 q 100 -16 225 -16 q 3 0 50 -16 l 3 102 q 79 91 41 91 q 186 213 148 91 q 309 992 223 335 l 742 992 l 742 0 "},"$":{"x_min":123,"x_max":709,"ha":834,"o":"m 464 75 l 464 -81 l 371 -81 l 371 69 q 123 116 216 69 l 123 233 q 371 174 256 174 l 371 465 q 187 563 240 508 q 135 712 135 619 q 197 860 135 801 q 371 932 259 918 l 371 1054 l 464 1054 l 464 934 q 692 881 591 928 l 647 783 q 464 829 552 823 l 464 545 q 654 445 599 499 q 709 302 709 390 q 464 75 709 112 m 371 579 l 371 826 q 254 711 254 807 q 281 629 254 658 q 371 579 309 600 m 464 430 l 464 180 q 589 302 589 199 q 464 430 589 388 "},"w":{"x_min":-3,"x_max":836,"ha":834,"o":"m 551 0 l 462 404 l 416 628 l 411 628 l 367 401 l 276 0 l 148 0 l -3 745 l 106 745 l 173 376 q 212 109 196 250 l 216 109 q 262 352 237 235 l 352 745 l 483 745 l 569 352 q 614 109 598 220 l 619 109 q 659 376 640 274 l 728 745 l 836 745 l 683 0 l 551 0 "},"о":{"x_min":78,"x_max":755,"ha":834,"o":"m 414 -14 q 172 91 267 -14 q 78 373 78 196 q 170 654 78 551 q 418 758 262 758 q 660 652 566 758 q 755 373 755 547 q 661 89 755 193 q 414 -14 568 -14 m 416 88 q 627 373 627 88 q 415 655 627 655 q 205 373 205 655 q 416 88 205 88 "},"Д":{"x_min":4,"x_max":828,"ha":834,"o":"m 828 -261 l 711 -261 l 711 0 l 120 0 l 120 -261 l 4 -261 l 4 111 l 81 111 q 227 514 168 271 q 294 992 285 758 l 696 992 l 696 111 l 828 111 l 828 -261 m 569 111 l 569 880 l 420 880 q 349 474 407 699 q 214 111 291 249 l 569 111 "},"Ç":{"x_min":87,"x_max":801,"ha":834,"o":"m 763 136 l 763 26 q 519 -14 663 -14 q 198 119 309 -14 q 87 497 87 252 q 208 868 87 731 q 540 1006 330 1006 q 801 947 690 1006 l 747 841 q 540 894 643 894 q 307 787 394 894 q 220 496 220 679 q 302 199 220 301 q 540 97 383 97 q 763 136 629 97 m 345 -327 l 345 -254 q 398 -258 367 -258 q 500 -196 500 -258 q 384 -119 500 -146 l 446 0 l 526 0 l 488 -78 q 598 -194 598 -103 q 400 -334 598 -334 q 345 -327 377 -334 "},"Ŝ":{"x_min":96,"x_max":738,"ha":834,"o":"m 96 32 l 96 152 q 375 93 238 93 q 611 258 611 93 q 564 366 611 328 q 371 456 516 404 q 170 575 231 506 q 109 754 109 644 q 196 939 109 872 q 435 1006 283 1006 q 718 953 591 1006 l 674 841 q 432 894 544 894 q 235 752 235 894 q 279 641 235 683 q 461 551 323 599 q 682 428 626 491 q 738 264 738 364 q 644 60 738 134 q 376 -14 550 -14 q 96 32 197 -14 m 656 1071 l 573 1071 q 430 1196 516 1108 q 287 1071 340 1104 l 206 1071 l 206 1089 q 246 1134 222 1108 q 365 1293 340 1239 l 496 1293 q 615 1134 521 1239 l 656 1089 l 656 1071 "},"C":{"x_min":87,"x_max":801,"ha":834,"o":"m 763 136 l 763 26 q 519 -14 663 -14 q 198 119 309 -14 q 87 497 87 252 q 208 868 87 731 q 540 1006 330 1006 q 801 947 690 1006 l 747 841 q 540 894 643 894 q 307 787 394 894 q 220 496 220 679 q 302 199 220 301 q 540 97 383 97 q 763 136 629 97 "},"Ḁ":{"x_min":22,"x_max":812,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 m 571 -229 q 559 -291 571 -264 q 526 -338 547 -319 q 476 -367 505 -357 q 415 -377 448 -377 q 353 -367 381 -377 q 305 -338 325 -357 q 274 -292 285 -319 q 264 -231 264 -265 q 274 -169 264 -196 q 305 -123 285 -142 q 353 -94 325 -104 q 415 -85 381 -85 q 476 -94 447 -85 q 525 -123 504 -104 q 558 -168 546 -142 q 571 -229 571 -195 m 496 -231 q 474 -174 496 -194 q 417 -154 452 -154 q 360 -174 382 -154 q 338 -231 338 -194 q 358 -287 338 -267 q 417 -307 378 -307 q 474 -287 452 -307 q 496 -231 496 -267 "},"Ĵ":{"x_min":93,"x_max":825,"ha":834,"o":"m 93 26 l 93 138 q 302 97 202 97 q 474 151 411 97 q 537 304 537 205 l 537 992 l 664 992 l 664 305 q 568 72 664 159 q 312 -14 473 -14 q 93 26 165 -14 m 825 1071 l 742 1071 q 599 1196 685 1108 q 456 1071 509 1104 l 375 1071 l 375 1089 q 415 1134 391 1108 q 534 1293 509 1239 l 665 1293 q 784 1134 690 1239 l 825 1089 l 825 1071 "},"È":{"x_min":147,"x_max":719,"ha":834,"o":"m 719 0 l 147 0 l 147 992 l 719 992 l 719 880 l 273 880 l 273 574 l 693 574 l 693 462 l 273 462 l 273 111 l 719 111 l 719 0 m 502 1071 l 419 1071 q 235 1278 307 1167 l 235 1293 l 383 1293 q 502 1089 442 1172 l 502 1071 "},"ﬁ":{"x_min":33,"x_max":723.84375,"ha":834,"o":"m 456 656 l 288 656 l 288 0 l 165 0 l 165 656 l 33 656 l 33 704 l 165 749 l 165 814 q 216 1002 165 942 q 389 1063 268 1063 q 523 1037 455 1063 l 491 942 q 394 960 438 960 q 310 926 331 960 q 288 815 288 892 l 288 745 l 456 745 l 456 656 m 652 1024 q 723 946 723 1024 q 702 888 723 907 q 652 869 681 869 q 580 946 580 869 q 652 1024 580 1024 m 713 0 l 589 0 l 589 745 l 713 745 l 713 0 "},"X":{"x_min":36,"x_max":797,"ha":834,"o":"m 797 0 l 653 0 l 412 430 l 164 0 l 36 0 l 343 518 l 57 992 l 191 992 l 416 612 l 643 992 l 773 992 l 486 522 l 797 0 "},"ô":{"x_min":78,"x_max":755,"ha":834,"o":"m 414 -14 q 172 91 267 -14 q 78 373 78 196 q 170 654 78 551 q 418 758 262 758 q 660 652 566 758 q 755 373 755 547 q 661 89 755 193 q 414 -14 568 -14 m 416 88 q 627 373 627 88 q 415 655 627 655 q 205 373 205 655 q 416 88 205 88 m 639 842 l 556 842 q 413 967 499 879 q 270 842 323 875 l 189 842 l 189 860 q 229 905 205 879 q 348 1064 323 1010 l 479 1064 q 598 905 504 1010 l 639 860 l 639 842 "},"Ė":{"x_min":147,"x_max":719,"ha":834,"o":"m 719 0 l 147 0 l 147 992 l 719 992 l 719 880 l 273 880 l 273 574 l 693 574 l 693 462 l 273 462 l 273 111 l 719 111 l 719 0 m 447 1233 q 512 1155 512 1233 q 447 1078 512 1078 q 382 1155 382 1078 q 447 1233 382 1233 "},"г":{"x_min":197,"x_max":704,"ha":834,"o":"m 704 642 l 320 642 l 320 0 l 197 0 l 197 745 l 704 745 l 704 642 "},"Ŀ":{"x_min":158,"x_max":716,"ha":834,"o":"m 158 0 l 158 992 l 284 992 l 284 111 l 716 111 l 716 0 l 158 0 m 587 603 q 652 525 652 603 q 587 448 652 448 q 522 525 522 448 q 587 603 522 603 "},"х":{"x_min":65,"x_max":767,"ha":834,"o":"m 346 382 l 79 745 l 219 745 l 416 466 l 614 745 l 754 745 l 486 382 l 767 0 l 627 0 l 416 295 l 205 0 l 65 0 l 346 382 "},"ŋ":{"x_min":109,"x_max":725,"ha":834,"o":"m 232 0 l 109 0 l 109 745 l 208 745 l 227 644 l 233 644 q 461 758 303 758 q 725 486 725 758 l 725 -107 q 528 -334 725 -334 q 438 -317 473 -334 l 438 -216 q 515 -231 474 -231 q 601 -116 601 -231 l 601 479 q 440 655 601 655 q 232 385 232 655 l 232 0 "},"Ч":{"x_min":92,"x_max":742,"ha":834,"o":"m 742 0 l 615 0 l 615 406 q 349 345 461 345 q 92 596 92 345 l 92 992 l 218 992 l 218 612 q 253 490 218 524 q 362 456 288 456 q 615 510 466 456 l 615 992 l 742 992 l 742 0 "},"ü":{"x_min":109,"x_max":725,"ha":834,"o":"m 625 0 l 607 99 l 600 99 q 373 -14 529 -14 q 109 258 109 -14 l 109 745 l 232 745 l 232 264 q 392 88 232 88 q 551 151 501 88 q 601 357 601 214 l 601 745 l 725 745 l 725 0 l 625 0 m 290 1015 q 355 945 355 1015 q 290 876 355 876 q 225 945 225 876 q 290 1015 225 1015 m 544 1015 q 610 945 610 1015 q 544 876 610 876 q 479 945 479 876 q 544 1015 479 1015 "},"ь":{"x_min":147,"x_max":741,"ha":834,"o":"m 270 439 l 458 439 q 741 227 741 439 q 455 0 741 0 l 147 0 l 147 745 l 270 745 l 270 439 m 270 336 l 270 102 l 447 102 q 620 219 620 102 q 580 308 620 280 q 444 336 539 336 l 270 336 "},"Ÿ":{"x_min":23,"x_max":809,"ha":834,"o":"m 415 490 l 672 992 l 809 992 l 479 386 l 479 0 l 353 0 l 353 379 l 23 992 l 160 992 l 415 490 m 290 1244 q 355 1174 355 1244 q 290 1105 355 1105 q 225 1174 225 1105 q 290 1244 225 1244 m 544 1244 q 610 1174 610 1244 q 544 1105 610 1105 q 479 1174 479 1105 q 544 1244 479 1244 "},"€":{"x_min":65,"x_max":766.875,"ha":834,"o":"m 302 634 l 593 634 l 593 541 l 292 541 q 291 521 292 530 l 291 504 l 291 462 q 292 433 291 448 l 552 433 l 552 341 l 304 341 q 553 97 354 97 q 735 136 645 97 l 735 26 q 543 -14 652 -14 q 175 341 239 -14 l 65 341 l 65 433 l 165 433 l 163 459 l 165 541 l 65 541 l 65 634 l 173 634 q 295 908 199 811 q 539 1006 390 1006 q 766 943 669 1006 l 713 844 q 549 894 631 894 q 392 827 458 894 q 302 634 327 759 "},"в":{"x_min":119,"x_max":752,"ha":834,"o":"m 572 395 l 572 390 q 752 215 752 366 q 680 57 752 114 q 466 0 608 0 l 119 0 l 119 745 l 465 745 q 728 557 728 745 q 572 395 728 423 m 242 642 l 242 439 l 440 439 q 568 463 530 439 q 607 545 607 488 q 460 642 607 642 l 242 642 m 242 336 l 242 102 l 458 102 q 631 224 631 102 q 587 312 631 287 q 455 336 542 336 l 242 336 "},"Η":{"x_min":92,"x_max":742,"ha":834,"o":"m 742 0 l 615 0 l 615 462 l 218 462 l 218 0 l 92 0 l 92 992 l 218 992 l 218 574 l 615 574 l 615 992 l 742 992 l 742 0 "},"С":{"x_min":87,"x_max":801,"ha":834,"o":"m 763 136 l 763 26 q 519 -14 663 -14 q 198 119 309 -14 q 87 497 87 252 q 208 868 87 731 q 540 1006 330 1006 q 801 947 690 1006 l 747 841 q 540 894 643 894 q 307 787 394 894 q 220 496 220 679 q 302 199 220 301 q 540 97 383 97 q 763 136 629 97 "},"ß":{"x_min":111,"x_max":781,"ha":834,"o":"m 325 32 l 325 145 q 513 88 422 88 q 657 205 657 88 q 626 294 657 260 q 528 370 595 329 q 410 465 444 423 q 376 565 376 506 q 465 716 376 644 q 554 849 554 788 q 399 960 554 960 q 234 814 234 960 l 234 0 l 111 0 l 111 814 q 398 1063 111 1063 q 604 1009 530 1063 q 678 854 678 955 q 587 685 678 765 q 513 614 530 635 q 497 570 497 593 q 516 524 497 544 q 619 448 536 503 q 749 331 717 384 q 781 211 781 278 q 713 44 781 102 q 521 -14 645 -14 q 325 32 397 -14 "},"њ":{"x_min":72,"x_max":812,"ha":834,"o":"m 177 745 l 177 437 l 386 437 l 386 745 l 491 745 l 491 439 l 526 439 q 812 228 812 439 q 527 0 812 0 l 386 0 l 386 334 l 177 334 l 177 0 l 72 0 l 72 745 l 177 745 m 491 337 l 491 102 l 529 102 q 706 220 706 102 q 665 309 706 281 q 527 337 624 337 l 491 337 "},"Ű":{"x_min":85,"x_max":749,"ha":834,"o":"m 749 993 l 749 349 q 663 79 749 173 q 412 -14 578 -14 q 85 352 85 -14 l 85 991 l 211 991 l 211 359 q 419 97 211 97 q 622 361 619 97 l 622 993 l 749 993 m 219 1089 q 322 1293 274 1179 l 471 1293 l 471 1278 q 286 1071 395 1161 l 219 1071 l 219 1089 m 464 1089 q 568 1293 516 1169 l 717 1293 l 717 1278 q 532 1071 641 1161 l 464 1071 l 464 1089 "},"c":{"x_min":117,"x_max":720,"ha":834,"o":"m 720 717 l 677 610 q 496 650 576 650 q 244 369 244 650 q 489 93 244 93 q 707 135 595 93 l 707 27 q 483 -14 616 -14 q 213 84 309 -14 q 117 367 117 183 q 215 658 117 558 q 492 758 313 758 q 720 717 612 758 "},"¶":{"x_min":45,"x_max":732,"ha":834,"o":"m 732 -176 l 649 -176 l 649 947 l 510 947 l 510 -176 l 428 -176 l 428 379 q 329 367 386 367 q 45 706 45 367 q 118 968 45 882 q 350 1055 192 1055 l 732 1055 l 732 -176 "},"Ή":{"x_min":-104,"x_max":742,"ha":834,"o":"m 742 0 l 615 0 l 615 462 l 218 462 l 218 0 l 92 0 l 92 992 l 218 992 l 218 574 l 615 574 l 615 992 l 742 992 l 742 0 m -104 789 l -81 861 q -52 993 -59 938 l 78 993 l 78 978 q 44 897 78 967 q -30 771 11 827 l -104 771 l -104 789 "},"Ὅ":{"x_min":-211,"x_max":876,"ha":834,"o":"m 515 -14 q 155 498 155 -14 q 517 1007 155 1007 q 783 874 690 1007 q 876 496 876 741 q 782 118 876 251 q 515 -14 688 -14 m 515 97 q 687 195 633 97 q 742 497 742 293 q 687 799 742 702 q 517 895 631 895 q 288 497 288 895 q 515 97 288 97 m -211 851 q -170 942 -211 904 q -47 1003 -129 981 l -47 951 q -107 920 -87 936 q -126 889 -126 905 q -115 870 -126 876 q -93 858 -105 864 q -70 844 -80 853 q -60 816 -60 835 q -76 778 -60 791 q -125 765 -93 765 q -187 788 -164 765 q -211 851 -211 812 m -2 787 q 13 833 5 807 q 30 885 22 858 q 46 939 38 911 q 58 991 53 966 l 199 991 l 199 977 q 170 929 186 955 q 135 876 154 903 q 95 822 116 849 q 53 770 74 795 l -2 770 l -2 787 "},"γ":{"x_min":56,"x_max":777,"ha":834,"o":"m 501 42 q 424 -334 424 -147 l 297 -334 q 365 8 297 -193 l 56 745 l 186 745 l 350 343 q 422 126 398 225 l 426 126 q 493 326 444 196 l 648 745 l 777 745 l 501 42 "},"­":{"x_min":193,"x_max":641,"ha":834,"o":"m 193 315 l 193 429 l 641 429 l 641 315 l 193 315 "},":":{"x_min":330,"x_max":502,"ha":834,"o":"m 416 764 q 502 669 502 764 q 416 575 502 575 q 330 669 330 575 q 416 764 330 764 m 416 169 q 502 74 502 169 q 416 -20 502 -20 q 330 74 330 -20 q 416 169 330 169 "},"ś":{"x_min":138,"x_max":696,"ha":834,"o":"m 138 32 l 138 145 q 388 88 268 88 q 575 196 575 88 q 542 264 575 235 q 388 336 508 292 q 190 444 231 395 q 149 560 149 493 q 224 705 149 652 q 433 758 300 758 q 684 707 568 758 l 643 606 q 428 655 520 655 q 269 565 269 655 q 303 499 269 523 q 460 430 337 474 q 649 327 602 378 q 696 203 696 277 q 616 44 696 102 q 392 -14 537 -14 q 138 32 224 -14 m 347 860 q 465 1064 411 950 l 614 1064 l 614 1049 q 429 842 537 932 l 347 842 l 347 860 "}," ":{"x_min":0,"x_max":0,"ha":834},"У":{"x_min":18,"x_max":814,"ha":834,"o":"m 814 992 l 523 289 q 431 109 471 166 q 329 18 390 51 q 183 -14 269 -14 q 63 6 113 -14 l 63 131 q 184 97 120 97 q 299 132 258 97 q 377 250 341 167 l 18 992 l 156 992 l 416 440 q 429 408 424 423 q 441 377 435 391 l 442 377 l 469 451 l 681 992 l 814 992 "},"¾":{"x_min":14,"x_max":838.71875,"ha":834,"o":"m 236 738 q 356 611 356 711 q 305 487 356 531 q 159 444 254 444 q 14 477 71 444 l 14 562 q 152 522 89 522 q 254 614 254 522 q 153 699 254 699 l 104 699 l 104 768 l 151 768 q 236 851 236 768 q 170 924 236 924 q 60 880 121 924 l 15 938 q 176 1002 90 1002 q 294 965 250 1002 q 338 865 338 928 q 236 738 338 771 m 753 992 l 258 0 l 151 0 l 645 992 l 753 992 m 838 117 l 781 117 l 781 0 l 680 0 l 680 117 l 426 117 l 426 184 l 681 539 l 781 539 l 781 195 l 838 195 l 838 117 m 680 195 l 680 314 q 684 430 680 369 q 629 341 656 381 l 524 195 l 680 195 "},"Ί":{"x_min":-62,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 m -62 789 l -39 861 q -10 993 -17 938 l 120 993 l 120 978 q 86 897 120 967 q 11 771 53 827 l -62 771 l -62 789 "},"ŉ":{"x_min":-11,"x_max":767,"ha":834,"o":"m 191 992 l 201 977 q 81 652 167 843 l -11 652 q 56 992 29 816 l 191 992 m 643 0 l 643 479 q 494 655 643 655 q 301 385 301 655 l 301 0 l 178 0 l 178 745 l 278 745 l 296 644 l 302 644 q 390 727 331 696 q 518 758 448 758 q 767 486 767 758 l 767 0 l 643 0 "},"Ģ":{"x_min":79,"x_max":742,"ha":834,"o":"m 455 524 l 742 524 l 742 36 q 456 -14 609 -14 q 179 121 279 -14 q 79 497 79 256 q 188 870 79 735 q 491 1006 298 1006 q 726 947 621 1006 l 677 837 q 487 894 578 894 q 285 789 357 894 q 212 496 212 683 q 479 97 212 97 q 615 116 544 97 l 615 412 l 455 412 l 455 524 m 366 -288 q 423 -85 408 -193 l 544 -85 l 544 -98 q 511 -182 544 -113 q 433 -307 478 -251 l 366 -307 l 366 -288 "},"m":{"x_min":62,"x_max":773,"ha":834,"o":"m 649 0 l 649 479 q 633 616 649 578 q 579 655 617 655 q 503 599 527 655 q 479 410 479 543 l 479 0 l 356 0 l 356 479 q 280 655 356 655 q 207 601 229 655 q 185 385 185 547 l 185 0 l 62 0 l 62 745 l 159 745 l 180 644 l 186 644 q 320 758 231 758 q 461 634 428 758 l 465 634 q 611 758 516 758 q 734 695 696 758 q 773 486 773 632 l 773 0 l 649 0 "},"Е":{"x_min":147,"x_max":719,"ha":834,"o":"m 719 0 l 147 0 l 147 992 l 719 992 l 719 880 l 273 880 l 273 574 l 693 574 l 693 462 l 273 462 l 273 111 l 719 111 l 719 0 "},"ž":{"x_min":123,"x_max":709,"ha":834,"o":"m 709 0 l 123 0 l 123 88 l 572 648 l 145 648 l 145 745 l 697 745 l 697 641 l 256 96 l 709 96 l 709 0 m 650 1045 q 609 1000 633 1026 q 490 842 514 893 l 359 842 q 240 1000 335 893 l 200 1045 l 200 1064 l 281 1064 q 424 937 337 1027 q 567 1064 507 1024 l 650 1064 l 650 1045 "},"á":{"x_min":92,"x_max":696,"ha":834,"o":"m 606 0 l 580 99 l 575 99 q 468 10 523 35 q 327 -14 413 -14 q 154 44 217 -14 q 92 207 92 102 q 436 442 92 431 l 573 447 l 573 494 q 409 655 573 655 q 187 599 309 655 l 144 692 q 404 758 277 758 q 627 699 558 758 q 696 509 696 640 l 696 0 l 606 0 m 572 362 l 462 357 q 274 315 330 352 q 219 204 219 279 q 354 82 219 82 q 513 138 454 82 q 572 294 572 194 l 572 362 m 341 860 q 459 1064 405 950 l 608 1064 l 608 1049 q 423 842 531 932 l 341 842 l 341 860 "},"×":{"x_min":129.28125,"x_max":704.421875,"ha":834,"o":"m 344 490 l 129 706 l 200 778 l 415 562 l 633 778 l 704 708 l 486 490 l 703 273 l 633 204 l 415 419 l 200 205 l 131 275 l 344 490 "},"п":{"x_min":109,"x_max":725,"ha":834,"o":"m 232 0 l 109 0 l 109 745 l 725 745 l 725 0 l 601 0 l 601 642 l 232 642 l 232 0 "},"Ǻ":{"x_min":22,"x_max":812,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 m 414 927 q 304 966 345 927 q 263 1073 263 1005 q 304 1179 263 1140 q 414 1219 345 1219 q 526 1178 482 1219 q 570 1074 570 1138 q 526 967 570 1007 q 414 927 483 927 m 416 1149 q 359 1129 381 1149 q 337 1073 337 1109 q 416 996 337 996 q 473 1016 451 996 q 495 1073 495 1036 q 473 1129 495 1109 q 416 1149 451 1149 m 332 1263 q 450 1467 396 1353 l 599 1467 l 599 1452 q 414 1245 522 1335 l 332 1245 l 332 1263 "},"K":{"x_min":143,"x_max":813.25,"ha":834,"o":"m 813 0 l 669 0 l 364 473 l 269 396 l 269 0 l 143 0 l 143 992 l 269 992 l 269 496 l 351 609 l 659 992 l 801 992 l 447 559 l 813 0 "},"¨":{"x_min":224,"x_max":609,"ha":834,"o":"m 289 1015 q 354 945 354 1015 q 289 876 354 876 q 224 945 224 876 q 289 1015 224 1015 m 543 1015 q 609 945 609 1015 q 543 876 609 876 q 478 945 478 876 q 543 1015 478 1015 "},"Y":{"x_min":23,"x_max":809,"ha":834,"o":"m 415 490 l 672 992 l 809 992 l 479 386 l 479 0 l 353 0 l 353 379 l 23 992 l 160 992 l 415 490 "},"E":{"x_min":147,"x_max":719,"ha":834,"o":"m 719 0 l 147 0 l 147 992 l 719 992 l 719 880 l 273 880 l 273 574 l 693 574 l 693 462 l 273 462 l 273 111 l 719 111 l 719 0 "},"Ô":{"x_min":57,"x_max":778,"ha":834,"o":"m 417 -14 q 57 498 57 -14 q 419 1007 57 1007 q 685 874 592 1007 q 778 496 778 741 q 684 118 778 251 q 417 -14 590 -14 m 417 97 q 589 195 535 97 q 644 497 644 293 q 589 799 644 702 q 419 895 533 895 q 190 497 190 895 q 417 97 190 97 m 642 1071 l 559 1071 q 416 1196 502 1108 q 273 1071 326 1104 l 192 1071 l 192 1089 q 232 1134 208 1108 q 351 1293 326 1239 l 482 1293 q 601 1134 507 1239 l 642 1089 l 642 1071 "},"Є":{"x_min":87,"x_max":801,"ha":834,"o":"m 224 574 l 652 574 l 652 462 l 220 462 q 540 97 236 97 q 763 135 629 97 l 763 26 q 519 -14 663 -14 q 198 119 309 -14 q 87 497 87 252 q 208 868 87 731 q 540 1006 330 1006 q 801 947 690 1006 l 747 841 q 540 894 643 894 q 327 810 412 894 q 224 574 243 725 "},"Ï":{"x_min":152.921875,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 m 290 1244 q 355 1174 355 1244 q 290 1105 355 1105 q 225 1174 225 1105 q 290 1244 225 1244 m 544 1244 q 610 1174 610 1244 q 544 1105 610 1105 q 479 1174 479 1105 q 544 1244 479 1244 "},"ġ":{"x_min":70,"x_max":763.84375,"ha":834,"o":"m 763 745 l 763 668 l 630 650 q 675 506 675 592 q 602 333 675 397 q 401 269 530 269 q 343 273 364 269 q 275 182 275 234 q 384 125 275 125 l 511 125 q 691 72 629 125 q 754 -77 754 20 q 371 -334 754 -334 q 146 -278 223 -334 q 70 -123 70 -223 q 232 61 70 22 q 167 165 167 93 q 257 293 167 240 q 162 376 197 318 q 128 502 128 434 q 200 691 128 625 q 405 758 272 758 q 507 745 464 758 l 763 745 m 402 353 q 554 508 554 353 q 401 669 554 669 q 248 506 248 669 q 402 353 248 353 m 469 17 l 342 17 q 186 -118 186 17 q 370 -237 186 -237 q 637 -84 637 -237 q 603 -3 637 -24 q 469 17 569 17 m 422 1023 q 487 945 487 1023 q 422 868 487 868 q 357 945 357 868 q 422 1023 357 1023 "},"έ":{"x_min":136,"x_max":700.703125,"ha":834,"o":"m 570 439 l 570 336 l 462 336 q 259 210 259 336 q 450 88 259 88 q 698 145 583 88 l 698 36 q 441 -14 606 -14 q 217 43 298 -14 q 136 203 136 100 q 297 385 136 334 l 297 392 q 160 561 160 437 q 236 705 160 652 q 440 758 312 758 q 700 706 587 758 l 658 606 q 446 655 550 655 q 283 551 283 655 q 467 439 283 439 l 570 439 m 391 860 l 413 932 q 442 1064 435 1009 l 573 1064 l 573 1049 q 539 968 573 1038 q 464 842 506 898 l 391 842 l 391 860 "}," ":{"x_min":0,"x_max":0,"ha":834},"ϋ":{"x_min":109,"x_max":735,"ha":834,"o":"m 109 745 l 232 745 l 232 345 q 418 88 232 88 q 565 167 520 88 q 611 412 611 245 q 568 745 611 573 l 691 745 q 735 406 735 578 q 657 88 735 191 q 414 -14 579 -14 q 109 337 109 -14 l 109 745 m 289 1015 q 354 945 354 1015 q 289 876 354 876 q 224 945 224 876 q 289 1015 224 1015 m 543 1015 q 609 945 609 1015 q 543 876 609 876 q 478 945 478 876 q 543 1015 478 1015 "},"й":{"x_min":109,"x_max":725,"ha":834,"o":"m 229 745 l 229 291 l 220 120 l 562 745 l 725 745 l 725 0 l 604 0 l 604 439 l 611 622 l 271 0 l 109 0 l 109 745 l 229 745 m 702 1058 q 437 842 688 842 q 247 892 305 842 q 182 1058 188 942 l 298 1058 q 332 959 304 988 q 442 930 361 930 q 585 1058 573 930 l 702 1058 "},"b":{"x_min":107,"x_max":741,"ha":834,"o":"m 230 93 l 222 93 l 197 0 l 107 0 l 107 1055 l 230 1055 l 230 800 q 225 646 230 745 l 230 646 q 449 758 303 758 q 663 656 585 758 q 741 373 741 555 q 662 88 741 190 q 449 -14 584 -14 q 230 93 308 -14 m 230 373 q 277 153 230 219 q 428 88 325 88 q 613 374 613 88 q 427 655 613 655 q 276 591 321 655 q 230 373 230 528 "},"ύ":{"x_min":109,"x_max":735,"ha":834,"o":"m 109 745 l 232 745 l 232 345 q 418 88 232 88 q 565 167 520 88 q 611 412 611 245 q 568 745 611 573 l 691 745 q 735 406 735 578 q 657 88 735 191 q 414 -14 579 -14 q 109 337 109 -14 l 109 745 m 352 860 l 374 932 q 403 1064 396 1009 l 534 1064 l 534 1049 q 500 968 534 1038 q 425 842 467 898 l 352 842 l 352 860 "},"ﬂ":{"x_min":33,"x_max":713,"ha":834,"o":"m 456 656 l 288 656 l 288 0 l 165 0 l 165 656 l 33 656 l 33 704 l 165 749 l 165 814 q 216 1002 165 942 q 389 1063 268 1063 q 523 1037 455 1063 l 491 942 q 394 960 438 960 q 310 926 331 960 q 288 815 288 892 l 288 745 l 456 745 l 456 656 m 713 0 l 589 0 l 589 1055 l 713 1055 l 713 0 "},"ф":{"x_min":50,"x_max":782,"ha":834,"o":"m 473 756 q 782 373 782 722 q 473 -11 782 17 l 473 -334 l 368 -334 l 368 -11 q 50 373 50 19 q 368 756 50 728 l 368 1055 l 473 1055 l 473 756 m 368 91 l 368 653 q 155 373 155 633 q 368 91 155 111 m 473 652 l 473 91 q 676 373 676 113 q 473 652 676 629 "},"Ŋ":{"x_min":92,"x_max":741,"ha":834,"o":"m 201 821 l 196 821 q 208 538 208 633 l 208 0 l 92 0 l 92 992 l 236 992 l 629 226 l 636 226 q 624 500 624 412 l 624 992 l 741 992 l 741 13 q 673 -192 741 -120 q 478 -264 605 -264 q 373 -247 415 -264 l 373 -139 q 480 -152 425 -152 q 624 0 624 -152 l 201 821 "},"Ũ":{"x_min":85,"x_max":749,"ha":834,"o":"m 749 993 l 749 349 q 663 79 749 173 q 412 -14 578 -14 q 85 352 85 -14 l 85 991 l 211 991 l 211 359 q 419 97 211 97 q 622 361 619 97 l 622 993 l 749 993 m 248 1070 l 177 1070 q 320 1250 193 1250 q 429 1211 359 1250 q 521 1173 498 1173 q 593 1251 576 1173 l 665 1251 q 522 1072 646 1072 q 415 1110 483 1072 q 320 1148 347 1148 q 248 1070 265 1148 "},"Щ":{"x_min":41,"x_max":834,"ha":834,"o":"m 713 111 l 834 111 l 834 -261 l 717 -261 l 717 0 l 41 0 l 41 992 l 167 992 l 167 111 l 321 111 l 321 992 l 447 992 l 447 111 l 586 111 l 586 992 l 713 992 l 713 111 "},"L":{"x_min":158,"x_max":716,"ha":834,"o":"m 158 0 l 158 992 l 284 992 l 284 111 l 716 111 l 716 0 l 158 0 "},"ď":{"x_min":54,"x_max":892,"ha":834,"o":"m 569 99 l 564 99 q 345 -14 487 -14 q 131 87 209 -14 q 54 370 54 188 q 132 655 54 553 q 345 758 210 758 q 564 649 485 758 l 572 649 q 564 759 564 736 l 564 1055 l 688 1055 l 688 0 l 588 0 l 569 99 m 564 342 l 564 370 q 517 590 564 524 q 366 655 469 655 q 181 369 181 655 q 367 88 181 88 q 516 148 471 88 q 564 342 561 208 m 729 850 l 746 923 q 770 1055 764 1002 l 892 1055 l 892 1041 q 863 964 892 1031 q 793 833 835 897 l 729 833 l 729 850 "},"Ο":{"x_min":57,"x_max":778,"ha":834,"o":"m 417 -14 q 57 498 57 -14 q 419 1007 57 1007 q 685 874 592 1007 q 778 496 778 741 q 684 118 778 251 q 417 -14 590 -14 m 417 97 q 589 195 535 97 q 644 497 644 293 q 589 799 644 702 q 419 895 533 895 q 190 497 190 895 q 417 97 190 97 "},"Ĭ":{"x_min":152.921875,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 m 621 1259 q 560 1121 614 1172 q 414 1071 506 1071 q 213 1259 224 1071 l 287 1259 q 319 1189 292 1206 q 416 1172 346 1172 q 546 1259 539 1172 l 621 1259 "},"ŧ":{"x_min":95,"x_max":696,"ha":834,"o":"m 692 101 l 692 7 q 521 -14 603 -14 q 276 217 276 -14 l 276 387 l 166 387 l 166 484 l 276 484 l 276 648 l 95 648 l 95 715 l 276 749 l 328 943 l 399 943 l 399 745 l 696 745 l 696 648 l 399 648 l 399 484 l 607 484 l 607 387 l 399 387 l 399 218 q 529 88 399 88 q 692 101 592 88 "},"À":{"x_min":22,"x_max":812,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 m 499 1071 l 416 1071 q 232 1278 304 1167 l 232 1293 l 380 1293 q 499 1089 439 1172 l 499 1071 "},"Ϊ":{"x_min":152.921875,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 m 290 1244 q 355 1174 355 1244 q 290 1105 355 1105 q 225 1174 225 1105 q 290 1244 225 1244 m 544 1244 q 610 1174 610 1244 q 544 1105 610 1105 q 479 1174 479 1105 q 544 1244 479 1244 "},"ḁ":{"x_min":92,"x_max":696,"ha":834,"o":"m 606 0 l 580 99 l 575 99 q 468 10 523 35 q 327 -14 413 -14 q 154 44 217 -14 q 92 207 92 102 q 436 442 92 431 l 573 447 l 573 494 q 409 655 573 655 q 187 599 309 655 l 144 692 q 404 758 277 758 q 627 699 558 758 q 696 509 696 640 l 696 0 l 606 0 m 572 362 l 462 357 q 274 315 330 352 q 219 204 219 279 q 354 82 219 82 q 513 138 454 82 q 572 294 572 194 l 572 362 m 567 -229 q 555 -291 567 -264 q 522 -338 543 -319 q 472 -367 501 -357 q 411 -377 444 -377 q 349 -367 377 -377 q 301 -338 321 -357 q 270 -292 281 -319 q 260 -231 260 -265 q 270 -169 260 -196 q 301 -123 281 -142 q 349 -94 321 -104 q 411 -85 377 -85 q 472 -94 443 -85 q 521 -123 500 -104 q 554 -168 542 -142 q 567 -229 567 -195 m 492 -231 q 470 -174 492 -194 q 413 -154 448 -154 q 356 -174 378 -154 q 334 -231 334 -194 q 354 -287 334 -267 q 413 -307 374 -307 q 470 -287 448 -307 q 492 -231 492 -267 "},"½":{"x_min":2,"x_max":831,"ha":834,"o":"m 150 990 l 244 990 l 244 456 l 143 456 l 143 771 q 149 906 143 817 q 98 862 121 876 l 51 828 l 2 887 l 150 990 m 673 992 l 178 0 l 71 0 l 565 992 l 673 992 m 831 1 l 471 1 l 471 70 l 595 205 q 689 319 668 285 q 709 392 709 353 q 635 469 709 469 q 526 418 581 469 l 475 477 q 643 547 554 547 q 766 506 722 547 q 811 395 811 465 q 787 304 811 350 q 676 171 763 258 l 584 79 l 831 79 l 831 1 "},"\'":{"x_min":336,"x_max":496.734375,"ha":834,"o":"m 496 992 l 468 634 l 363 634 l 336 992 l 496 992 "},"ĳ":{"x_min":127.828125,"x_max":704,"ha":834,"o":"m 200 1051 q 272 973 272 1051 q 250 915 272 934 q 200 896 229 896 q 127 973 127 896 q 200 1051 127 1051 m 629 1051 q 701 973 701 1051 q 679 915 701 934 q 629 896 658 896 q 556 973 556 896 q 629 1051 556 1051 m 138 745 l 261 745 l 261 0 l 138 0 l 138 745 m 341 -310 l 341 -205 q 469 -231 400 -231 q 580 -85 580 -231 l 580 648 l 435 662 l 435 745 l 704 745 l 704 -79 q 646 -268 704 -203 q 486 -334 588 -334 q 341 -310 403 -334 "},"Р":{"x_min":119,"x_max":742,"ha":834,"o":"m 245 385 l 245 0 l 119 0 l 119 992 l 393 992 q 742 701 742 992 q 647 468 742 552 q 374 385 553 385 l 245 385 m 245 493 l 359 493 q 550 541 493 493 q 608 694 608 590 q 380 884 608 884 l 245 884 l 245 493 "},"˛":{"x_min":281,"x_max":553,"ha":834,"o":"m 553 -217 l 553 -293 q 447 -309 503 -309 q 323 -271 366 -309 q 281 -171 281 -234 q 405 0 281 -73 l 497 0 q 378 -162 378 -85 q 467 -227 378 -227 q 553 -217 513 -227 "},"Ć":{"x_min":87,"x_max":801,"ha":834,"o":"m 763 136 l 763 26 q 519 -14 663 -14 q 198 119 309 -14 q 87 497 87 252 q 208 868 87 731 q 540 1006 330 1006 q 801 947 690 1006 l 747 841 q 540 894 643 894 q 307 787 394 894 q 220 496 220 679 q 302 199 220 301 q 540 97 383 97 q 763 136 629 97 m 448 1089 q 566 1293 512 1179 l 715 1293 l 715 1278 q 530 1071 638 1161 l 448 1071 l 448 1089 "},"Т":{"x_min":69,"x_max":762,"ha":834,"o":"m 479 0 l 353 0 l 353 880 l 69 880 l 69 992 l 762 992 l 762 880 l 479 880 l 479 0 "},"£":{"x_min":81,"x_max":753,"ha":834,"o":"m 721 949 l 676 852 q 492 898 581 898 q 342 732 342 898 l 342 534 l 596 534 l 596 437 l 342 437 l 342 295 q 247 112 342 164 l 753 112 l 753 0 l 81 0 l 81 104 q 217 294 217 137 l 217 437 l 82 437 l 82 534 l 217 534 l 217 753 q 290 935 217 867 q 486 1004 364 1004 q 721 949 616 1004 "},"ů":{"x_min":109,"x_max":725,"ha":834,"o":"m 625 0 l 607 99 l 600 99 q 373 -14 529 -14 q 109 258 109 -14 l 109 745 l 232 745 l 232 264 q 392 88 232 88 q 551 151 501 88 q 601 357 601 214 l 601 745 l 725 745 l 725 0 l 625 0 m 412 842 q 302 881 343 842 q 261 988 261 920 q 302 1094 261 1055 q 412 1134 343 1134 q 524 1093 480 1134 q 568 989 568 1053 q 524 882 568 922 q 412 842 481 842 m 414 1064 q 357 1044 379 1064 q 335 988 335 1024 q 414 911 335 911 q 471 931 449 911 q 493 988 493 951 q 471 1044 493 1024 q 414 1064 449 1064 "},"Ō":{"x_min":57,"x_max":778,"ha":834,"o":"m 417 -14 q 57 498 57 -14 q 419 1007 57 1007 q 685 874 592 1007 q 778 496 778 741 q 684 118 778 251 q 417 -14 590 -14 m 417 97 q 589 195 535 97 q 644 497 644 293 q 589 799 644 702 q 419 895 533 895 q 190 497 190 895 q 417 97 190 97 m 224 1172 l 615 1172 l 615 1071 l 224 1071 l 224 1172 "},"а":{"x_min":92,"x_max":696,"ha":834,"o":"m 606 0 l 580 99 l 575 99 q 468 10 523 35 q 327 -14 413 -14 q 154 44 217 -14 q 92 207 92 102 q 436 442 92 431 l 573 447 l 573 494 q 409 655 573 655 q 187 599 309 655 l 144 692 q 404 758 277 758 q 627 699 558 758 q 696 509 696 640 l 696 0 l 606 0 m 572 362 l 462 357 q 274 315 330 352 q 219 204 219 279 q 354 82 219 82 q 513 138 454 82 q 572 294 572 194 l 572 362 "},"Ğ":{"x_min":79,"x_max":742,"ha":834,"o":"m 455 524 l 742 524 l 742 36 q 456 -14 609 -14 q 179 121 279 -14 q 79 497 79 256 q 188 870 79 735 q 491 1006 298 1006 q 726 947 621 1006 l 677 837 q 487 894 578 894 q 285 789 357 894 q 212 496 212 683 q 479 97 212 97 q 615 116 544 97 l 615 412 l 455 412 l 455 524 m 687 1259 q 626 1121 680 1172 q 480 1071 572 1071 q 279 1259 290 1071 l 353 1259 q 385 1189 358 1206 q 482 1172 412 1172 q 612 1259 605 1172 l 687 1259 "},"v":{"x_min":56,"x_max":777,"ha":834,"o":"m 338 0 l 56 745 l 183 745 l 346 302 q 414 82 403 145 l 418 82 q 486 302 422 111 l 648 745 l 777 745 l 494 0 l 338 0 "},"Ї":{"x_min":152.921875,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 m 290 1244 q 355 1174 355 1244 q 290 1105 355 1105 q 225 1174 225 1105 q 290 1244 225 1244 m 544 1244 q 610 1174 610 1244 q 544 1105 610 1105 q 479 1174 479 1105 q 544 1244 479 1244 "},"û":{"x_min":109,"x_max":725,"ha":834,"o":"m 625 0 l 607 99 l 600 99 q 373 -14 529 -14 q 109 258 109 -14 l 109 745 l 232 745 l 232 264 q 392 88 232 88 q 551 151 501 88 q 601 357 601 214 l 601 745 l 725 745 l 725 0 l 625 0 m 648 842 l 565 842 q 422 967 508 879 q 279 842 332 875 l 198 842 l 198 860 q 238 905 214 879 q 357 1064 332 1010 l 488 1064 q 607 905 513 1010 l 648 860 l 648 842 "},"Ź":{"x_min":69,"x_max":763,"ha":834,"o":"m 763 0 l 69 0 l 69 97 l 607 880 l 83 880 l 83 992 l 749 992 l 749 895 l 210 111 l 763 111 l 763 0 m 322 1089 q 440 1293 386 1179 l 589 1293 l 589 1278 q 404 1071 512 1161 l 322 1071 l 322 1089 "},"ˉ":{"x_min":221,"x_max":612,"ha":834,"o":"m 221 943 l 612 943 l 612 842 l 221 842 l 221 943 "},"Ĺ":{"x_min":158,"x_max":716,"ha":834,"o":"m 158 0 l 158 992 l 284 992 l 284 111 l 716 111 l 716 0 l 158 0 m 179 1089 q 297 1293 243 1179 l 446 1293 l 446 1278 q 261 1071 369 1161 l 179 1071 l 179 1089 "},"₤":{"x_min":81,"x_max":753,"ha":834,"o":"m 721 949 l 676 852 q 492 898 581 898 q 342 733 342 898 l 342 604 l 596 604 l 596 507 l 342 507 l 342 407 l 596 407 l 596 311 l 342 311 l 342 298 q 245 112 342 165 l 753 112 l 753 0 l 81 0 l 81 104 q 217 296 217 137 l 217 311 l 82 311 l 82 407 l 217 407 l 217 507 l 82 507 l 82 604 l 217 604 l 217 753 q 290 935 217 867 q 486 1004 364 1004 q 721 949 616 1004 "},"Č":{"x_min":87,"x_max":801,"ha":834,"o":"m 763 136 l 763 26 q 519 -14 663 -14 q 198 119 309 -14 q 87 497 87 252 q 208 868 87 731 q 540 1006 330 1006 q 801 947 690 1006 l 747 841 q 540 894 643 894 q 307 787 394 894 q 220 496 220 679 q 302 199 220 301 q 540 97 383 97 q 763 136 629 97 m 747 1274 q 706 1229 730 1255 q 587 1071 611 1122 l 456 1071 q 337 1229 432 1122 l 297 1274 l 297 1293 l 378 1293 q 521 1166 434 1256 q 664 1293 604 1253 l 747 1293 l 747 1274 "},"x":{"x_min":65,"x_max":767,"ha":834,"o":"m 346 382 l 79 745 l 219 745 l 416 466 l 614 745 l 754 745 l 486 382 l 767 0 l 627 0 l 416 295 l 205 0 l 65 0 l 346 382 "},"è":{"x_min":90,"x_max":744,"ha":834,"o":"m 744 346 l 217 346 q 451 93 222 93 q 703 145 584 93 l 703 36 q 456 -14 590 -14 q 189 87 289 -14 q 90 366 90 188 q 182 652 90 547 q 428 758 274 758 q 658 666 572 758 q 744 423 744 575 l 744 346 m 220 449 l 616 449 q 428 655 616 655 q 220 449 238 655 m 521 842 l 438 842 q 254 1049 326 938 l 254 1064 l 402 1064 q 521 860 461 943 l 521 842 "},"Ń":{"x_min":92,"x_max":741,"ha":834,"o":"m 741 0 l 596 0 l 201 821 l 196 821 q 208 538 208 633 l 208 0 l 92 0 l 92 992 l 236 992 l 629 174 l 633 174 q 624 449 624 380 l 624 992 l 741 992 l 741 0 m 350 1089 q 468 1293 414 1179 l 617 1293 l 617 1278 q 432 1071 540 1161 l 350 1071 l 350 1089 "},"ḿ":{"x_min":62,"x_max":773,"ha":834,"o":"m 649 0 l 649 479 q 633 616 649 578 q 579 655 617 655 q 503 599 527 655 q 479 410 479 543 l 479 0 l 356 0 l 356 479 q 280 655 356 655 q 207 601 229 655 q 185 385 185 547 l 185 0 l 62 0 l 62 745 l 159 745 l 180 644 l 186 644 q 320 758 231 758 q 461 634 428 758 l 465 634 q 611 758 516 758 q 734 695 696 758 q 773 486 773 632 l 773 0 l 649 0 m 370 860 q 488 1064 434 950 l 637 1064 l 637 1049 q 452 842 560 932 l 370 842 l 370 860 "},"μ":{"x_min":109,"x_max":725,"ha":834,"o":"m 232 264 q 393 88 232 88 q 551 151 502 88 q 601 357 601 214 l 601 745 l 725 745 l 725 0 l 625 0 l 607 99 l 600 99 q 396 -14 534 -14 q 228 45 279 -14 q 232 -117 232 -58 l 232 -334 l 109 -334 l 109 745 l 232 745 l 232 264 "},".":{"x_min":314,"x_max":520,"ha":834,"o":"m 416 204 q 520 91 520 204 q 416 -21 520 -21 q 314 91 314 -21 q 416 204 314 204 "},"‘":{"x_min":303,"x_max":530,"ha":834,"o":"m 313 652 l 303 666 q 423 992 339 806 l 530 992 q 463 652 488 818 l 313 652 "},"π":{"x_min":9.4375,"x_max":823.421875,"ha":834,"o":"m 803 101 l 803 3 q 710 -14 767 -14 q 557 164 557 -14 l 557 642 l 283 642 l 283 0 l 160 0 l 160 642 l 9 642 l 9 691 l 103 745 l 823 745 l 823 642 l 681 642 l 681 173 q 742 88 681 88 q 803 101 773 88 "},"l":{"x_min":127.6875,"x_max":723.171875,"ha":834,"o":"m 361 958 l 179 972 l 179 1055 l 484 1055 l 484 96 l 723 83 l 723 0 l 127 0 l 127 83 l 361 96 l 361 958 "},"Ъ":{"x_min":18,"x_max":774,"ha":834,"o":"m 220 0 l 220 880 l 18 880 l 18 992 l 346 992 l 346 574 l 392 574 q 675 500 576 574 q 774 290 774 426 q 679 76 774 153 q 410 0 585 0 l 220 0 m 346 107 l 412 107 q 640 290 640 107 q 582 421 640 379 q 392 462 524 462 l 346 462 l 346 107 "}," ":{"x_min":0,"x_max":0,"ha":834},"Ś":{"x_min":96,"x_max":738,"ha":834,"o":"m 96 32 l 96 152 q 375 93 238 93 q 611 258 611 93 q 564 366 611 328 q 371 456 516 404 q 170 575 231 506 q 109 754 109 644 q 196 939 109 872 q 435 1006 283 1006 q 718 953 591 1006 l 674 841 q 432 894 544 894 q 235 752 235 894 q 279 641 235 683 q 461 551 323 599 q 682 428 626 491 q 738 264 738 364 q 644 60 738 134 q 376 -14 550 -14 q 96 32 197 -14 m 349 1089 q 467 1293 413 1179 l 616 1293 l 616 1278 q 431 1071 539 1161 l 349 1071 l 349 1089 "},"Ü":{"x_min":85,"x_max":749,"ha":834,"o":"m 749 993 l 749 349 q 663 79 749 173 q 412 -14 578 -14 q 85 352 85 -14 l 85 991 l 211 991 l 211 359 q 419 97 211 97 q 622 361 619 97 l 622 993 l 749 993 m 290 1244 q 355 1174 355 1244 q 290 1105 355 1105 q 225 1174 225 1105 q 290 1244 225 1244 m 544 1244 q 610 1174 610 1244 q 544 1105 610 1105 q 479 1174 479 1105 q 544 1244 479 1244 "},"à":{"x_min":92,"x_max":696,"ha":834,"o":"m 606 0 l 580 99 l 575 99 q 468 10 523 35 q 327 -14 413 -14 q 154 44 217 -14 q 92 207 92 102 q 436 442 92 431 l 573 447 l 573 494 q 409 655 573 655 q 187 599 309 655 l 144 692 q 404 758 277 758 q 627 699 558 758 q 696 509 696 640 l 696 0 l 606 0 m 572 362 l 462 357 q 274 315 330 352 q 219 204 219 279 q 354 82 219 82 q 513 138 454 82 q 572 294 572 194 l 572 362 m 493 842 l 410 842 q 226 1049 298 938 l 226 1064 l 374 1064 q 493 860 433 943 l 493 842 "},"η":{"x_min":109,"x_max":725,"ha":834,"o":"m 601 -334 l 601 479 q 440 655 601 655 q 232 385 232 655 l 232 0 l 109 0 l 109 745 l 208 745 l 227 644 l 233 644 q 461 758 302 758 q 725 486 725 758 l 725 -334 l 601 -334 "},"ó":{"x_min":78,"x_max":755,"ha":834,"o":"m 414 -14 q 172 91 267 -14 q 78 373 78 196 q 170 654 78 551 q 418 758 262 758 q 660 652 566 758 q 755 373 755 547 q 661 89 755 193 q 414 -14 568 -14 m 416 88 q 627 373 627 88 q 415 655 627 655 q 205 373 205 655 q 416 88 205 88 m 338 860 q 456 1064 402 950 l 605 1064 l 605 1049 q 420 842 528 932 l 338 842 l 338 860 "},"¦":{"x_min":366,"x_max":467.734375,"ha":834,"o":"m 366 1055 l 467 1055 l 467 526 l 366 526 l 366 1055 m 366 196 l 467 196 l 467 -334 l 366 -334 l 366 196 "},"Ő":{"x_min":57,"x_max":778,"ha":834,"o":"m 417 -14 q 57 498 57 -14 q 419 1007 57 1007 q 685 874 592 1007 q 778 496 778 741 q 684 118 778 251 q 417 -14 590 -14 m 417 97 q 589 195 535 97 q 644 497 644 293 q 589 799 644 702 q 419 895 533 895 q 190 497 190 895 q 417 97 190 97 m 222 1089 q 325 1293 277 1179 l 474 1293 l 474 1278 q 289 1071 398 1161 l 222 1071 l 222 1089 m 467 1089 q 571 1293 519 1169 l 720 1293 l 720 1278 q 535 1071 644 1161 l 467 1071 l 467 1089 "},"Ž":{"x_min":69,"x_max":763,"ha":834,"o":"m 763 0 l 69 0 l 69 97 l 607 880 l 83 880 l 83 992 l 749 992 l 749 895 l 210 111 l 763 111 l 763 0 m 641 1274 q 600 1229 624 1255 q 481 1071 505 1122 l 350 1071 q 231 1229 326 1122 l 191 1274 l 191 1293 l 272 1293 q 415 1166 328 1256 q 558 1293 498 1253 l 641 1293 l 641 1274 "},"е":{"x_min":90,"x_max":744,"ha":834,"o":"m 744 346 l 217 346 q 451 93 222 93 q 703 145 584 93 l 703 36 q 456 -14 590 -14 q 189 87 289 -14 q 90 366 90 188 q 182 652 90 547 q 428 758 274 758 q 658 666 572 758 q 744 423 744 575 l 744 346 m 220 449 l 616 449 q 428 655 616 655 q 220 449 238 655 "},"Î":{"x_min":152.921875,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 m 642 1071 l 559 1071 q 416 1196 502 1108 q 273 1071 326 1104 l 192 1071 l 192 1089 q 232 1134 208 1108 q 351 1293 326 1239 l 482 1293 q 601 1134 507 1239 l 642 1089 l 642 1071 "},"e":{"x_min":90,"x_max":744,"ha":834,"o":"m 744 346 l 217 346 q 451 93 222 93 q 703 145 584 93 l 703 36 q 456 -14 590 -14 q 189 87 289 -14 q 90 366 90 188 q 182 652 90 547 q 428 758 274 758 q 658 666 572 758 q 744 423 744 575 l 744 346 m 220 449 l 616 449 q 428 655 616 655 q 220 449 238 655 "},"ό":{"x_min":78,"x_max":755,"ha":834,"o":"m 414 -14 q 172 91 267 -14 q 78 373 78 196 q 170 654 78 551 q 418 758 262 758 q 660 652 566 758 q 755 373 755 547 q 661 89 755 193 q 414 -14 568 -14 m 416 88 q 627 373 627 88 q 415 655 627 655 q 205 373 205 655 q 416 88 205 88 m 375 860 l 397 932 q 426 1064 419 1009 l 557 1064 l 557 1049 q 523 968 557 1038 q 448 842 490 898 l 375 842 l 375 860 "},"Ĕ":{"x_min":147,"x_max":719,"ha":834,"o":"m 719 0 l 147 0 l 147 992 l 719 992 l 719 880 l 273 880 l 273 574 l 693 574 l 693 462 l 273 462 l 273 111 l 719 111 l 719 0 m 641 1259 q 580 1121 634 1172 q 434 1071 526 1071 q 233 1259 244 1071 l 307 1259 q 339 1189 312 1206 q 436 1172 366 1172 q 566 1259 559 1172 l 641 1259 "},"ļ":{"x_min":127.6875,"x_max":723.171875,"ha":834,"o":"m 361 958 l 179 972 l 179 1055 l 484 1055 l 484 96 l 723 83 l 723 0 l 127 0 l 127 83 l 361 96 l 361 958 m 313 -288 q 370 -85 355 -193 l 491 -85 l 491 -98 q 458 -182 491 -113 q 380 -307 425 -251 l 313 -307 l 313 -288 "}," ":{"x_min":0,"x_max":0,"ha":834},"Ѓ":{"x_min":158,"x_max":719,"ha":834,"o":"m 719 992 l 719 880 l 284 880 l 284 0 l 158 0 l 158 992 l 719 992 m 345 1089 q 463 1293 409 1179 l 612 1293 l 612 1278 q 427 1071 535 1161 l 345 1071 l 345 1089 "},"ò":{"x_min":78,"x_max":755,"ha":834,"o":"m 414 -14 q 172 91 267 -14 q 78 373 78 196 q 170 654 78 551 q 418 758 262 758 q 660 652 566 758 q 755 373 755 547 q 661 89 755 193 q 414 -14 568 -14 m 416 88 q 627 373 627 88 q 415 655 627 655 q 205 373 205 655 q 416 88 205 88 m 524 842 l 441 842 q 257 1049 329 938 l 257 1064 l 405 1064 q 524 860 464 943 l 524 842 "},"ﬄ":{"x_min":45.1875,"x_max":723.234375,"ha":834,"o":"m 570 660 l 474 660 l 474 0 l 364 0 l 364 660 l 224 660 l 224 0 l 113 0 l 113 660 l 45 660 l 45 703 l 113 745 l 113 800 q 126 920 113 872 q 166 996 140 968 q 230 1036 192 1025 q 317 1048 268 1048 q 380 1041 350 1048 q 433 1025 410 1033 q 493 1053 458 1044 q 570 1063 528 1063 q 634 1055 603 1063 l 723 1055 l 723 0 l 612 0 l 612 961 q 592 965 602 963 q 573 966 582 966 q 529 958 547 966 q 498 933 510 951 q 480 887 486 916 q 474 814 474 857 l 474 745 l 570 745 l 570 660 m 224 745 l 364 745 l 364 813 q 380 943 364 890 q 351 949 366 947 q 320 952 335 952 q 278 945 296 952 q 248 920 260 937 q 230 873 236 902 q 224 801 224 844 l 224 745 "},"^":{"x_min":75,"x_max":759,"ha":834,"o":"m 75 372 l 363 999 l 432 999 l 759 372 l 649 372 l 399 870 l 182 372 l 75 372 "},"ⁿ":{"x_min":215,"x_max":618,"ha":834,"o":"m 516 541 l 516 820 q 431 921 516 921 q 340 885 364 921 q 316 769 316 849 l 316 541 l 215 541 l 215 992 l 300 992 l 312 920 l 318 920 q 457 1003 364 1003 q 575 958 532 1003 q 618 833 618 914 l 618 541 l 516 541 "},"к":{"x_min":146,"x_max":797,"ha":834,"o":"m 620 745 l 771 745 l 413 387 l 797 0 l 639 0 l 269 377 l 269 0 l 146 0 l 146 745 l 269 745 l 269 383 l 620 745 "},"￼":{"x_min":37,"x_max":796,"ha":834,"o":"m 456 734 q 447 668 456 697 q 421 616 439 638 q 377 582 403 594 q 314 571 350 571 q 250 582 277 571 q 206 616 223 594 q 180 668 188 638 q 172 734 172 697 q 180 802 172 772 q 206 853 188 832 q 250 887 223 875 q 314 899 277 899 q 377 887 350 899 q 421 853 403 875 q 447 802 439 832 q 456 734 456 772 m 363 539 l 456 539 q 545 521 515 539 q 575 458 575 503 q 562 413 575 431 q 526 390 550 395 l 526 387 q 549 380 538 385 q 567 367 559 375 q 580 346 575 359 q 585 314 585 333 q 555 245 585 269 q 475 221 525 221 l 363 221 l 363 539 m 514 185 l 694 185 l 694 132 l 645 132 l 645 -31 q 615 -111 645 -85 q 539 -137 586 -137 q 503 -135 518 -137 q 481 -131 489 -133 l 481 -75 q 502 -78 489 -77 q 531 -80 515 -80 q 564 -70 551 -80 q 578 -32 578 -60 l 578 132 l 514 132 l 514 185 m 239 734 q 257 656 239 684 q 314 627 275 627 q 370 656 352 627 q 387 734 387 684 q 370 813 387 785 q 314 842 352 842 q 257 813 275 842 q 239 734 239 785 m 37 823 l 37 1030 l 242 1030 l 242 954 l 112 954 l 112 823 l 37 823 m 37 -260 l 37 -54 l 112 -54 l 112 -186 l 242 -186 l 242 -260 l 37 -260 m 589 954 l 589 1030 l 796 1030 l 796 823 l 722 823 l 722 954 l 589 954 m 589 -260 l 589 -186 l 722 -186 l 722 -54 l 796 -54 l 796 -260 l 589 -260 m 112 291 l 37 291 l 37 476 l 112 476 l 112 291 m 324 954 l 324 1030 l 508 1030 l 508 954 l 324 954 m 112 26 l 37 26 l 37 210 l 112 210 l 112 26 m 112 558 l 37 558 l 37 742 l 112 742 l 112 558 m 796 291 l 722 291 l 722 476 l 796 476 l 796 291 m 796 26 l 722 26 l 722 210 l 796 210 l 796 26 m 796 558 l 722 558 l 722 742 l 796 742 l 796 558 m 324 -260 l 324 -186 l 508 -186 l 508 -260 l 324 -260 m 429 359 l 429 276 l 469 276 q 505 288 495 276 q 515 320 515 299 q 505 348 515 337 q 466 359 495 359 l 429 359 m 429 414 l 464 414 q 499 423 489 414 q 509 449 509 432 q 497 475 509 467 q 461 483 486 483 l 429 483 l 429 414 "},"ū":{"x_min":109,"x_max":725,"ha":834,"o":"m 625 0 l 607 99 l 600 99 q 373 -14 529 -14 q 109 258 109 -14 l 109 745 l 232 745 l 232 264 q 392 88 232 88 q 551 151 501 88 q 601 357 601 214 l 601 745 l 725 745 l 725 0 l 625 0 m 222 943 l 613 943 l 613 842 l 222 842 l 222 943 "},"ˆ":{"x_min":192,"x_max":642,"ha":834,"o":"m 642 842 l 559 842 q 416 967 502 879 q 273 842 326 875 l 192 842 l 192 860 q 232 905 208 879 q 351 1064 326 1010 l 482 1064 q 601 905 507 1010 l 642 860 l 642 842 "},"Ẅ":{"x_min":1,"x_max":833,"ha":834,"o":"m 358 684 l 478 684 l 577 330 q 626 122 618 181 q 670 542 627 158 l 717 992 l 833 992 l 706 0 l 577 0 l 462 393 q 418 584 435 487 q 373 392 396 467 l 267 0 l 139 0 l 1 992 l 116 992 l 176 542 q 203 285 191 422 q 215 122 215 148 q 262 333 231 224 l 358 684 m 292 1244 q 357 1174 357 1244 q 292 1105 357 1105 q 227 1174 227 1105 q 292 1244 227 1244 m 546 1244 q 612 1174 612 1244 q 546 1105 612 1105 q 481 1174 481 1105 q 546 1244 481 1244 "},"č":{"x_min":117,"x_max":720,"ha":834,"o":"m 720 717 l 677 610 q 496 650 576 650 q 244 369 244 650 q 489 93 244 93 q 707 135 595 93 l 707 27 q 483 -14 616 -14 q 213 84 309 -14 q 117 367 117 183 q 215 658 117 558 q 492 758 313 758 q 720 717 612 758 m 705 1045 q 664 1000 688 1026 q 545 842 569 893 l 414 842 q 295 1000 390 893 l 255 1045 l 255 1064 l 336 1064 q 479 937 392 1027 q 622 1064 562 1024 l 705 1064 l 705 1045 "},"’":{"x_min":303,"x_max":530,"ha":834,"o":"m 520 992 l 530 977 q 410 652 492 832 l 303 652 q 369 992 345 832 l 520 992 "},"Ν":{"x_min":92,"x_max":741,"ha":834,"o":"m 741 0 l 596 0 l 201 821 l 196 821 q 208 538 208 633 l 208 0 l 92 0 l 92 992 l 236 992 l 629 174 l 633 174 q 624 449 624 380 l 624 992 l 741 992 l 741 0 "},"-":{"x_min":193,"x_max":641,"ha":834,"o":"m 193 315 l 193 429 l 641 429 l 641 315 l 193 315 "},"Q":{"x_min":57,"x_max":778,"ha":834,"o":"m 584 26 q 774 -184 642 -95 l 691 -281 q 469 -9 531 -165 q 417 -14 444 -14 q 57 498 57 -14 q 419 1007 57 1007 q 685 874 592 1007 q 778 496 778 741 q 584 26 778 139 m 417 97 q 589 195 535 97 q 644 497 644 293 q 589 799 644 702 q 419 895 533 895 q 190 497 190 895 q 417 97 190 97 "},"ј":{"x_min":92,"x_max":580,"ha":834,"o":"m 504 1051 q 577 973 577 1051 q 504 896 577 896 q 432 973 432 896 q 504 1051 432 1051 m 92 -310 l 92 -205 q 288 -231 182 -231 q 412 -192 367 -231 q 456 -85 456 -154 l 456 648 l 171 662 l 171 745 l 580 745 l 580 -79 q 503 -267 580 -201 q 286 -334 426 -334 q 92 -310 175 -334 "},"ě":{"x_min":90,"x_max":744,"ha":834,"o":"m 744 346 l 217 346 q 451 93 222 93 q 703 145 584 93 l 703 36 q 456 -14 590 -14 q 189 87 289 -14 q 90 366 90 188 q 182 652 90 547 q 428 758 274 758 q 658 666 572 758 q 744 423 744 575 l 744 346 m 220 449 l 616 449 q 428 655 616 655 q 220 449 238 655 m 659 1045 q 618 1000 642 1026 q 499 842 523 893 l 368 842 q 249 1000 344 893 l 209 1045 l 209 1064 l 290 1064 q 433 937 346 1027 q 576 1064 516 1024 l 659 1064 l 659 1045 "},"œ":{"x_min":39,"x_max":797,"ha":834,"o":"m 445 135 q 263 -14 385 -14 q 101 90 163 -14 q 39 373 39 194 q 99 656 39 555 q 264 758 159 758 q 442 610 381 758 q 605 758 499 758 q 745 667 693 758 q 797 423 797 576 l 797 346 l 506 346 q 631 93 508 93 q 765 145 702 93 l 765 35 q 620 -14 702 -14 q 513 26 561 -14 q 445 135 465 66 m 273 88 q 383 366 383 88 q 272 655 383 655 q 187 585 213 655 q 162 373 162 515 q 188 159 162 230 q 273 88 213 88 m 676 449 q 596 655 676 655 q 507 449 515 655 l 676 449 "},"#":{"x_min":31,"x_max":803,"ha":834,"o":"m 635 606 l 592 383 l 754 383 l 754 290 l 574 290 l 519 0 l 418 0 l 475 290 l 276 290 l 219 0 l 125 0 l 177 290 l 31 290 l 31 383 l 195 383 l 239 606 l 83 606 l 83 699 l 256 699 l 311 992 l 413 992 l 357 699 l 557 699 l 615 992 l 710 992 l 653 699 l 803 699 l 803 606 l 635 606 m 294 383 l 494 383 l 538 606 l 339 606 l 294 383 "},"Џ":{"x_min":92,"x_max":742,"ha":834,"o":"m 742 0 l 482 0 l 482 -261 l 356 -261 l 356 0 l 92 0 l 92 992 l 218 992 l 218 111 l 615 111 l 615 992 l 742 992 l 742 0 "},"Å":{"x_min":22,"x_max":812,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 m 414 927 q 304 966 345 927 q 263 1073 263 1005 q 304 1179 263 1140 q 414 1219 345 1219 q 526 1178 482 1219 q 570 1074 570 1138 q 526 967 570 1007 q 414 927 483 927 m 416 1149 q 359 1129 381 1149 q 337 1073 337 1109 q 416 996 337 996 q 473 1016 451 996 q 495 1073 495 1036 q 473 1129 495 1109 q 416 1149 451 1149 "},"ș":{"x_min":138,"x_max":696,"ha":834,"o":"m 138 32 l 138 145 q 388 88 268 88 q 575 196 575 88 q 542 264 575 235 q 388 336 508 292 q 190 444 231 395 q 149 560 149 493 q 224 705 149 652 q 433 758 300 758 q 684 707 568 758 l 643 606 q 428 655 520 655 q 269 565 269 655 q 303 499 269 523 q 460 430 337 474 q 649 327 602 378 q 696 203 696 277 q 616 44 696 102 q 392 -14 537 -14 q 138 32 224 -14 m 309 -288 q 366 -85 351 -193 l 487 -85 l 487 -98 q 454 -182 487 -113 q 376 -307 421 -251 l 309 -307 l 309 -288 "},"¸":{"x_min":291,"x_max":544,"ha":834,"o":"m 291 -327 l 291 -254 q 344 -258 313 -258 q 446 -196 446 -258 q 330 -119 446 -146 l 392 0 l 472 0 l 434 -78 q 544 -194 544 -103 q 346 -334 544 -334 q 291 -327 323 -334 "},"=":{"x_min":103,"x_max":730,"ha":834,"o":"m 103 577 l 103 679 l 730 679 l 730 577 l 103 577 m 103 300 l 103 401 l 730 401 l 730 300 l 103 300 "},"ρ":{"x_min":107,"x_max":735,"ha":834,"o":"m 230 47 l 226 47 q 230 -136 230 -70 l 230 -334 l 107 -334 l 107 373 q 192 654 107 551 q 426 758 278 758 q 650 653 566 758 q 735 373 735 549 q 651 88 735 190 q 421 -14 567 -14 q 230 47 307 -14 m 230 156 q 422 88 306 88 q 564 159 520 88 q 607 373 607 231 q 563 585 607 515 q 421 655 519 655 q 230 386 230 655 l 230 156 "},"Ћ":{"x_min":16,"x_max":791,"ha":834,"o":"m 345 609 l 524 609 q 721 543 651 609 q 791 357 791 477 l 791 0 l 664 0 l 664 340 q 510 497 664 497 l 345 497 l 345 0 l 219 0 l 219 880 l 16 880 l 16 992 l 587 992 l 587 880 l 345 880 l 345 609 "},"ú":{"x_min":109,"x_max":725,"ha":834,"o":"m 625 0 l 607 99 l 600 99 q 373 -14 529 -14 q 109 258 109 -14 l 109 745 l 232 745 l 232 264 q 392 88 232 88 q 551 151 501 88 q 601 357 601 214 l 601 745 l 725 745 l 725 0 l 625 0 m 339 860 q 457 1064 403 950 l 606 1064 l 606 1049 q 421 842 529 932 l 339 842 l 339 860 "},"˚":{"x_min":263,"x_max":570,"ha":834,"o":"m 414 842 q 304 881 345 842 q 263 988 263 920 q 304 1094 263 1055 q 414 1134 345 1134 q 526 1093 482 1134 q 570 989 570 1053 q 526 882 570 922 q 414 842 483 842 m 416 1064 q 359 1044 381 1064 q 337 988 337 1024 q 416 911 337 911 q 473 931 451 911 q 495 988 495 951 q 473 1044 495 1024 q 416 1064 451 1064 "},"д":{"x_min":22,"x_max":765,"ha":834,"o":"m 765 -258 l 644 -258 l 644 0 l 145 0 l 145 -258 l 22 -258 l 22 102 l 80 102 q 261 745 258 367 l 663 745 l 663 102 l 765 102 l 765 -258 m 539 102 l 539 648 l 369 648 q 210 102 345 321 l 539 102 "},"¯":{"x_min":-14,"x_max":847,"ha":834,"o":"m 847 1055 l -14 1055 l -14 1149 l 847 1149 l 847 1055 "},"u":{"x_min":109,"x_max":725,"ha":834,"o":"m 625 0 l 607 99 l 600 99 q 373 -14 529 -14 q 109 258 109 -14 l 109 745 l 232 745 l 232 264 q 392 88 232 88 q 551 151 501 88 q 601 357 601 214 l 601 745 l 725 745 l 725 0 l 625 0 "},"З":{"x_min":94,"x_max":727,"ha":834,"o":"m 476 521 l 476 517 q 662 440 597 501 q 727 281 727 378 q 630 64 727 143 q 356 -14 534 -14 q 94 39 192 -14 l 94 154 q 353 93 218 93 q 593 281 593 93 q 326 457 593 457 l 198 457 l 198 565 l 317 565 q 507 614 439 565 q 575 747 575 664 q 528 857 575 816 q 400 898 480 898 q 161 819 274 898 l 98 904 q 407 1006 229 1006 q 629 938 549 1006 q 709 759 709 871 q 648 602 709 666 q 476 521 587 539 "},"Α":{"x_min":22,"x_max":812,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 "},"⅝":{"x_min":16,"x_max":832,"ha":834,"o":"m 16 478 l 16 566 q 149 524 81 524 q 253 624 253 524 q 146 723 253 723 q 66 708 113 723 l 27 735 l 48 992 l 317 992 l 317 914 l 121 914 l 110 787 q 175 792 134 792 q 305 747 255 792 q 355 629 355 703 q 304 494 355 542 q 154 446 253 446 q 16 478 70 446 m 705 992 l 210 0 l 103 0 l 597 992 l 705 992 m 720 287 q 832 147 832 230 q 780 35 832 77 q 644 -7 728 -7 q 502 33 552 -7 q 453 143 453 73 q 546 281 453 231 q 470 412 470 335 q 518 511 470 474 q 643 549 567 549 q 766 512 718 549 q 814 412 814 475 q 720 287 814 334 m 645 321 q 712 413 712 355 q 641 480 712 480 q 571 413 571 480 q 645 321 571 357 m 630 247 q 554 142 554 203 q 641 61 554 61 q 730 142 730 61 q 639 243 730 203 l 630 247 "},"é":{"x_min":90,"x_max":744,"ha":834,"o":"m 744 346 l 217 346 q 451 93 222 93 q 703 145 584 93 l 703 36 q 456 -14 590 -14 q 189 87 289 -14 q 90 366 90 188 q 182 652 90 547 q 428 758 274 758 q 658 666 572 758 q 744 423 744 575 l 744 346 m 220 449 l 616 449 q 428 655 616 655 q 220 449 238 655 m 339 860 q 457 1064 403 950 l 606 1064 l 606 1049 q 421 842 529 932 l 339 842 l 339 860 "},"Ş":{"x_min":96,"x_max":738,"ha":834,"o":"m 96 32 l 96 152 q 375 93 238 93 q 611 258 611 93 q 564 366 611 328 q 371 456 516 404 q 170 575 231 506 q 109 754 109 644 q 196 939 109 872 q 435 1006 283 1006 q 718 953 591 1006 l 674 841 q 432 894 544 894 q 235 752 235 894 q 279 641 235 683 q 461 551 323 599 q 682 428 626 491 q 738 264 738 364 q 644 60 738 134 q 376 -14 550 -14 q 96 32 197 -14 m 277 -327 l 277 -254 q 330 -258 299 -258 q 432 -196 432 -258 q 316 -119 432 -146 l 378 0 l 458 0 l 420 -78 q 530 -194 530 -103 q 332 -334 530 -334 q 277 -327 309 -334 "},"B":{"x_min":92,"x_max":772,"ha":834,"o":"m 92 992 l 390 992 q 660 932 576 992 q 744 740 744 873 q 690 596 744 653 q 546 526 637 538 l 546 519 q 772 287 772 482 q 685 76 772 153 q 449 0 598 0 l 92 0 l 92 992 m 218 572 l 409 572 q 562 609 514 572 q 610 732 610 646 q 558 848 610 813 q 395 884 507 884 l 218 884 l 218 572 m 218 464 l 218 107 l 426 107 q 638 292 638 107 q 418 464 638 464 l 218 464 "},"…":{"x_min":53,"x_max":780.265625,"ha":834,"o":"m 139 168 q 225 74 225 168 q 139 -20 225 -20 q 53 74 53 -20 q 139 168 53 168 m 416 168 q 502 74 502 168 q 416 -20 502 -20 q 330 74 330 -20 q 416 168 330 168 m 694 168 q 780 74 780 168 q 694 -20 780 -20 q 608 74 608 -20 q 694 168 608 168 "},"H":{"x_min":92,"x_max":742,"ha":834,"o":"m 742 0 l 615 0 l 615 462 l 218 462 l 218 0 l 92 0 l 92 992 l 218 992 l 218 574 l 615 574 l 615 992 l 742 992 l 742 0 "},"î":{"x_min":133.6875,"x_max":729.171875,"ha":834,"o":"m 367 648 l 184 662 l 184 745 l 490 745 l 490 96 l 729 83 l 729 0 l 133 0 l 133 83 l 367 96 l 367 648 m 642 842 l 559 842 q 416 967 502 879 q 273 842 326 875 l 192 842 l 192 860 q 232 905 208 879 q 351 1064 326 1010 l 482 1064 q 601 905 507 1010 l 642 860 l 642 842 "},"ν":{"x_min":40.75,"x_max":745,"ha":834,"o":"m 40 745 l 168 745 l 320 347 q 402 104 395 151 l 406 104 q 567 354 513 215 q 621 745 621 493 l 745 745 q 676 331 745 497 q 455 0 608 164 l 328 0 l 40 745 "},"Ό":{"x_min":-89,"x_max":778,"ha":834,"o":"m 417 -14 q 57 498 57 -14 q 419 1007 57 1007 q 685 874 592 1007 q 778 496 778 741 q 684 118 778 251 q 417 -14 590 -14 m 417 97 q 589 195 535 97 q 644 497 644 293 q 589 799 644 702 q 419 895 533 895 q 190 497 190 895 q 417 97 190 97 m -89 789 l -66 861 q -37 993 -44 938 l 93 993 l 93 978 q 59 897 93 967 q -15 771 26 827 l -89 771 l -89 789 "},"−":{"x_min":103,"x_max":730,"ha":834,"o":"m 103 439 l 103 541 l 730 541 l 730 439 l 103 439 "},"⅜":{"x_min":8,"x_max":832,"ha":834,"o":"m 230 738 q 350 611 350 711 q 299 487 350 531 q 153 444 248 444 q 8 477 65 444 l 8 562 q 146 522 83 522 q 248 614 248 522 q 147 699 248 699 l 98 699 l 98 768 l 145 768 q 230 851 230 768 q 164 924 230 924 q 54 880 115 924 l 9 938 q 170 1002 84 1002 q 288 965 244 1002 q 332 865 332 928 q 230 738 332 771 m 705 992 l 210 0 l 103 0 l 597 992 l 705 992 m 720 287 q 832 147 832 230 q 780 35 832 77 q 644 -7 728 -7 q 502 33 552 -7 q 453 143 453 73 q 546 281 453 231 q 470 412 470 335 q 518 511 470 474 q 643 549 567 549 q 766 512 718 549 q 814 412 814 475 q 720 287 814 334 m 645 321 q 712 413 712 355 q 641 480 712 480 q 571 413 571 480 q 645 321 571 357 m 630 247 q 554 142 554 203 q 641 61 554 61 q 730 142 730 61 q 639 243 730 203 l 630 247 "},"ǰ":{"x_min":92,"x_max":637,"ha":834,"o":"m 92 -310 l 92 -205 q 288 -231 182 -231 q 412 -192 367 -231 q 456 -85 456 -154 l 456 648 l 171 662 l 171 745 l 580 745 l 580 -79 q 503 -267 580 -201 q 286 -334 426 -334 q 92 -310 175 -334 m 637 1045 q 596 1000 620 1026 q 477 842 501 893 l 346 842 q 227 1000 322 893 l 187 1045 l 187 1064 l 268 1064 q 411 937 324 1027 q 554 1064 494 1024 l 637 1064 l 637 1045 "},"ā":{"x_min":92,"x_max":696,"ha":834,"o":"m 606 0 l 580 99 l 575 99 q 468 10 523 35 q 327 -14 413 -14 q 154 44 217 -14 q 92 207 92 102 q 436 442 92 431 l 573 447 l 573 494 q 409 655 573 655 q 187 599 309 655 l 144 692 q 404 758 277 758 q 627 699 558 758 q 696 509 696 640 l 696 0 l 606 0 m 572 362 l 462 357 q 274 315 330 352 q 219 204 219 279 q 354 82 219 82 q 513 138 454 82 q 572 294 572 194 l 572 362 m 215 943 l 606 943 l 606 842 l 215 842 l 215 943 "},"ĵ":{"x_min":92,"x_max":656,"ha":834,"o":"m 656 842 l 573 842 q 430 967 516 879 q 287 842 340 875 l 206 842 l 206 860 q 246 905 222 879 q 365 1064 340 1010 l 496 1064 q 615 905 521 1010 l 656 860 l 656 842 m 92 -310 l 92 -205 q 288 -231 182 -231 q 412 -192 367 -231 q 456 -85 456 -154 l 456 648 l 171 662 l 171 745 l 580 745 l 580 -79 q 503 -267 580 -201 q 286 -334 426 -334 q 92 -310 175 -334 "},"Ĩ":{"x_min":152.921875,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 m 243 1070 l 172 1070 q 315 1250 188 1250 q 424 1211 354 1250 q 516 1173 493 1173 q 588 1251 571 1173 l 660 1251 q 517 1072 641 1072 q 410 1110 478 1072 q 315 1148 342 1148 q 243 1070 260 1148 "},"*":{"x_min":90.34375,"x_max":743.46875,"ha":834,"o":"m 485 1055 l 455 788 l 725 863 l 743 733 l 486 714 l 653 493 l 531 428 l 412 670 l 306 428 l 180 493 l 344 714 l 90 733 l 110 863 l 375 788 l 346 1055 l 485 1055 "},"ă":{"x_min":92,"x_max":696,"ha":834,"o":"m 606 0 l 580 99 l 575 99 q 468 10 523 35 q 327 -14 413 -14 q 154 44 217 -14 q 92 207 92 102 q 436 442 92 431 l 573 447 l 573 494 q 409 655 573 655 q 187 599 309 655 l 144 692 q 404 758 277 758 q 627 699 558 758 q 696 509 696 640 l 696 0 l 606 0 m 572 362 l 462 357 q 274 315 330 352 q 219 204 219 279 q 354 82 219 82 q 513 138 454 82 q 572 294 572 194 l 572 362 m 613 1030 q 552 892 606 943 q 406 842 498 842 q 205 1030 216 842 l 279 1030 q 311 960 284 977 q 408 943 338 943 q 538 1030 531 943 l 613 1030 "},"Χ":{"x_min":36,"x_max":797,"ha":834,"o":"m 797 0 l 653 0 l 412 430 l 164 0 l 36 0 l 343 518 l 57 992 l 191 992 l 416 612 l 643 992 l 773 992 l 486 522 l 797 0 "},"†":{"x_min":163.375,"x_max":671.359375,"ha":834,"o":"m 671 670 l 446 691 l 484 0 l 337 0 l 374 691 l 163 670 l 163 793 l 374 772 l 337 1055 l 484 1055 l 446 772 l 671 793 l 671 670 "},"°":{"x_min":203,"x_max":631,"ha":834,"o":"m 416 1006 q 567 942 504 1006 q 631 791 631 879 q 567 641 631 703 q 416 579 504 579 q 265 641 327 579 q 203 791 203 704 q 265 942 203 879 q 416 1006 328 1006 m 416 661 q 500 699 465 661 q 536 790 536 737 q 500 884 536 845 q 416 923 464 923 q 332 884 367 923 q 297 790 297 845 q 332 699 297 737 q 416 661 367 661 "},"Ξ":{"x_min":75,"x_max":757,"ha":834,"o":"m 103 992 l 729 992 l 729 880 l 103 880 l 103 992 m 158 574 l 674 574 l 674 462 l 158 462 l 158 574 m 757 111 l 757 0 l 75 0 l 75 111 l 757 111 "},"Ķ":{"x_min":143,"x_max":813.25,"ha":834,"o":"m 813 0 l 669 0 l 364 473 l 269 396 l 269 0 l 143 0 l 143 992 l 269 992 l 269 496 l 351 609 l 659 992 l 801 992 l 447 559 l 813 0 m 347 -288 q 404 -85 389 -193 l 525 -85 l 525 -98 q 492 -182 525 -113 q 414 -307 459 -251 l 347 -307 l 347 -288 "},"ŵ":{"x_min":-3,"x_max":836,"ha":834,"o":"m 551 0 l 462 404 l 416 628 l 411 628 l 367 401 l 276 0 l 148 0 l -3 745 l 106 745 l 173 376 q 212 109 196 250 l 216 109 q 262 352 237 235 l 352 745 l 483 745 l 569 352 q 614 109 598 220 l 619 109 q 659 376 640 274 l 728 745 l 836 745 l 683 0 l 551 0 m 640 842 l 557 842 q 414 967 500 879 q 271 842 324 875 l 190 842 l 190 860 q 230 905 206 879 q 349 1064 324 1010 l 480 1064 q 599 905 505 1010 l 640 860 l 640 842 "},"΄":{"x_min":326,"x_max":508,"ha":834,"o":"m 326 860 l 348 932 q 377 1064 370 1009 l 508 1064 l 508 1049 q 474 968 508 1038 q 399 842 441 898 l 326 842 l 326 860 "},"ǽ":{"x_min":31,"x_max":805,"ha":834,"o":"m 354 450 l 354 496 q 260 655 354 655 q 117 599 187 655 l 78 692 q 268 758 168 758 q 437 637 398 758 q 598 758 490 758 q 747 665 690 758 q 805 424 805 573 l 805 347 l 476 347 q 520 157 478 219 q 632 96 563 96 q 786 145 705 96 l 786 35 q 624 -14 714 -14 q 412 144 475 -14 q 206 -14 340 -14 q 79 44 127 -14 q 31 208 31 103 q 253 445 31 434 l 354 450 m 479 450 l 684 450 q 657 600 684 545 q 585 655 631 655 q 512 603 541 655 q 479 450 483 550 m 353 363 l 295 358 q 154 207 154 347 q 175 120 154 152 q 231 88 196 88 q 319 143 285 88 q 353 296 353 198 l 353 363 m 361 860 q 479 1064 425 950 l 628 1064 l 628 1049 q 443 842 551 932 l 361 842 l 361 860 "},"Β":{"x_min":92,"x_max":772,"ha":834,"o":"m 92 992 l 390 992 q 660 932 576 992 q 744 740 744 873 q 690 596 744 653 q 546 526 637 538 l 546 519 q 772 287 772 482 q 685 76 772 153 q 449 0 598 0 l 92 0 l 92 992 m 218 572 l 409 572 q 562 609 514 572 q 610 732 610 646 q 558 848 610 813 q 395 884 507 884 l 218 884 l 218 572 m 218 464 l 218 107 l 426 107 q 638 292 638 107 q 418 464 638 464 l 218 464 "},"Ļ":{"x_min":158,"x_max":716,"ha":834,"o":"m 158 0 l 158 992 l 284 992 l 284 111 l 716 111 l 716 0 l 158 0 m 333 -288 q 390 -85 375 -193 l 511 -85 l 511 -98 q 478 -182 511 -113 q 400 -307 445 -251 l 333 -307 l 333 -288 "},"Õ":{"x_min":57,"x_max":778,"ha":834,"o":"m 417 -14 q 57 498 57 -14 q 419 1007 57 1007 q 685 874 592 1007 q 778 496 778 741 q 684 118 778 251 q 417 -14 590 -14 m 417 97 q 589 195 535 97 q 644 497 644 293 q 589 799 644 702 q 419 895 533 895 q 190 497 190 895 q 417 97 190 97 m 249 1070 l 178 1070 q 321 1250 194 1250 q 430 1211 360 1250 q 522 1173 499 1173 q 594 1251 577 1173 l 666 1251 q 523 1072 647 1072 q 416 1110 484 1072 q 321 1148 348 1148 q 249 1070 266 1148 "},"№":{"x_min":17,"x_max":820,"ha":834,"o":"m 441 0 l 322 0 l 101 793 l 94 793 q 107 510 107 621 l 107 0 l 17 0 l 17 992 l 135 992 l 355 202 l 359 202 q 350 476 350 408 l 350 992 l 441 992 l 441 0 m 647 183 q 524 246 570 183 q 479 420 479 310 q 650 656 479 656 q 773 593 727 656 q 820 420 820 531 q 775 244 820 306 q 647 183 730 183 m 649 264 q 711 303 694 264 q 729 421 729 343 q 711 537 729 499 q 649 574 694 574 q 587 536 604 574 q 569 421 569 498 q 587 304 569 344 q 649 264 604 264 m 506 0 l 506 96 l 787 96 l 787 0 l 506 0 "},"χ":{"x_min":29,"x_max":791,"ha":834,"o":"m 432 342 l 644 745 l 765 745 l 480 218 l 607 -94 q 665 -201 638 -171 q 736 -231 693 -231 q 791 -226 766 -231 l 791 -321 q 710 -334 746 -334 q 595 -303 641 -334 q 501 -153 549 -273 l 402 102 l 161 -334 l 29 -334 l 351 229 l 229 530 q 125 644 183 644 q 83 638 106 644 l 83 735 q 170 747 119 747 q 263 710 225 747 q 337 578 300 673 l 432 342 "},"ί":{"x_min":290,"x_max":690,"ha":834,"o":"m 413 745 l 413 220 q 544 88 413 88 q 690 101 621 88 l 690 7 q 536 -14 626 -14 q 290 219 290 -14 l 290 745 l 413 745 m 319 860 l 341 932 q 370 1064 363 1009 l 501 1064 l 501 1049 q 467 968 501 1038 q 392 842 434 898 l 319 842 l 319 860 "},"Ζ":{"x_min":69,"x_max":763,"ha":834,"o":"m 763 0 l 69 0 l 69 97 l 607 880 l 83 880 l 83 992 l 749 992 l 749 895 l 210 111 l 763 111 l 763 0 "},"Ľ":{"x_min":158,"x_max":716,"ha":834,"o":"m 158 0 l 158 992 l 284 992 l 284 111 l 716 111 l 716 0 l 158 0 m 509 787 l 526 860 q 550 992 544 939 l 672 992 l 672 978 q 643 901 672 968 q 573 770 615 834 l 509 770 l 509 787 "},"ť":{"x_min":95,"x_max":706,"ha":834,"o":"m 692 101 l 692 7 q 521 -14 603 -14 q 276 218 276 -14 l 276 648 l 95 648 l 95 715 l 276 749 l 328 943 l 399 943 l 399 745 l 696 745 l 696 648 l 399 648 l 399 219 q 529 88 399 88 q 692 101 592 88 m 543 850 l 560 923 q 584 1055 578 1002 l 706 1055 l 706 1041 q 677 964 706 1031 q 607 833 649 897 l 543 833 l 543 850 "},"o":{"x_min":78,"x_max":755,"ha":834,"o":"m 414 -14 q 172 91 267 -14 q 78 373 78 196 q 170 654 78 551 q 418 758 262 758 q 660 652 566 758 q 755 373 755 547 q 661 89 755 193 q 414 -14 568 -14 m 416 88 q 627 373 627 88 q 415 655 627 655 q 205 373 205 655 q 416 88 205 88 "},"Ѕ":{"x_min":96,"x_max":738,"ha":834,"o":"m 96 32 l 96 152 q 375 93 238 93 q 611 258 611 93 q 564 366 611 328 q 371 456 516 404 q 170 575 231 506 q 109 754 109 644 q 196 939 109 872 q 435 1006 283 1006 q 718 953 591 1006 l 674 841 q 432 894 544 894 q 235 752 235 894 q 279 641 235 683 q 461 551 323 599 q 682 428 626 491 q 738 264 738 364 q 644 60 738 134 q 376 -14 550 -14 q 96 32 197 -14 "},"�":{"x_min":2.796875,"x_max":832.25,"ha":834,"o":"m 416 1055 l 832 419 l 416 -216 l 2 419 l 416 1055 m 453 261 l 453 290 q 455 317 453 305 q 464 340 458 328 q 483 362 471 351 q 514 389 495 374 q 556 431 538 412 q 585 472 574 451 q 603 517 597 493 q 610 572 610 541 q 558 702 610 656 q 415 749 506 749 q 367 744 391 749 q 318 731 342 739 q 273 711 295 722 q 232 687 251 700 l 276 579 q 348 614 314 600 q 413 628 383 628 q 466 610 449 628 q 483 563 483 592 q 480 532 483 546 q 468 506 476 518 q 447 481 460 494 q 415 453 434 469 q 379 416 394 434 q 355 381 365 399 q 342 342 346 362 q 338 298 338 322 l 338 261 l 453 261 m 324 94 q 346 30 324 50 q 402 11 368 11 q 430 15 416 11 q 455 30 444 20 q 472 56 466 40 q 479 94 479 72 q 472 133 479 117 q 455 159 466 149 q 430 173 444 169 q 402 177 416 177 q 346 158 368 177 q 324 94 324 139 "},"d":{"x_min":93,"x_max":727,"ha":834,"o":"m 608 99 l 603 99 q 384 -14 526 -14 q 170 87 248 -14 q 93 370 93 188 q 171 655 93 553 q 384 758 249 758 q 603 649 524 758 l 611 649 q 603 759 603 736 l 603 1055 l 727 1055 l 727 0 l 627 0 l 608 99 m 603 342 l 603 370 q 556 590 603 524 q 405 655 508 655 q 220 369 220 655 q 406 88 220 88 q 555 148 510 88 q 603 342 600 208 "},",":{"x_min":299,"x_max":534,"ha":834,"o":"m 523 178 l 534 161 q 402 -196 495 9 l 299 -196 q 373 178 349 23 l 523 178 "},"\\"":{"x_min":193,"x_max":640.734375,"ha":834,"o":"m 353 992 l 325 634 l 220 634 l 193 992 l 353 992 m 640 992 l 612 634 l 507 634 l 480 992 l 640 992 "},"ľ":{"x_min":127.6875,"x_max":750,"ha":834,"o":"m 361 958 l 179 972 l 179 1055 l 484 1055 l 484 96 l 723 83 l 723 0 l 127 0 l 127 83 l 361 96 l 361 958 m 587 850 l 604 923 q 628 1055 622 1002 l 750 1055 l 750 1041 q 721 964 750 1031 q 651 833 693 897 l 587 833 l 587 850 "},"ė":{"x_min":90,"x_max":744,"ha":834,"o":"m 744 346 l 217 346 q 451 93 222 93 q 703 145 584 93 l 703 36 q 456 -14 590 -14 q 189 87 289 -14 q 90 366 90 188 q 182 652 90 547 q 428 758 274 758 q 658 666 572 758 q 744 423 744 575 l 744 346 m 220 449 l 616 449 q 428 655 616 655 q 220 449 238 655 m 439 1023 q 504 945 504 1023 q 439 868 504 868 q 374 945 374 868 q 439 1023 374 1023 "},"Í":{"x_min":152.921875,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 m 364 1089 q 482 1293 428 1179 l 631 1293 l 631 1278 q 446 1071 554 1161 l 364 1071 l 364 1089 "},"Ú":{"x_min":85,"x_max":749,"ha":834,"o":"m 749 993 l 749 349 q 663 79 749 173 q 412 -14 578 -14 q 85 352 85 -14 l 85 991 l 211 991 l 211 359 q 419 97 211 97 q 622 361 619 97 l 622 993 l 749 993 m 335 1089 q 453 1293 399 1179 l 602 1293 l 602 1278 q 417 1071 525 1161 l 335 1071 l 335 1089 "}," ":{"x_min":0,"x_max":0,"ha":834},"Ŷ":{"x_min":23,"x_max":809,"ha":834,"o":"m 415 490 l 672 992 l 809 992 l 479 386 l 479 0 l 353 0 l 353 379 l 23 992 l 160 992 l 415 490 m 641 1071 l 558 1071 q 415 1196 501 1108 q 272 1071 325 1104 l 191 1071 l 191 1089 q 231 1134 207 1108 q 350 1293 325 1239 l 481 1293 q 600 1134 506 1239 l 641 1089 l 641 1071 "},"Ý":{"x_min":23,"x_max":809,"ha":834,"o":"m 415 490 l 672 992 l 809 992 l 479 386 l 479 0 l 353 0 l 353 379 l 23 992 l 160 992 l 415 490 m 335 1089 q 453 1293 399 1179 l 602 1293 l 602 1278 q 417 1071 525 1161 l 335 1071 l 335 1089 "},"ŝ":{"x_min":138,"x_max":696,"ha":834,"o":"m 138 32 l 138 145 q 388 88 268 88 q 575 196 575 88 q 542 264 575 235 q 388 336 508 292 q 190 444 231 395 q 149 560 149 493 q 224 705 149 652 q 433 758 300 758 q 684 707 568 758 l 643 606 q 428 655 520 655 q 269 565 269 655 q 303 499 269 523 q 460 430 337 474 q 649 327 602 378 q 696 203 696 277 q 616 44 696 102 q 392 -14 537 -14 q 138 32 224 -14 m 658 842 l 575 842 q 432 967 518 879 q 289 842 342 875 l 208 842 l 208 860 q 248 905 224 879 q 367 1064 342 1010 l 498 1064 q 617 905 523 1010 l 658 860 l 658 842 "}," ":{"x_min":0,"x_max":0,"ha":834},"ą":{"x_min":92,"x_max":751,"ha":834,"o":"m 606 0 l 580 99 l 575 99 q 468 10 523 35 q 327 -14 413 -14 q 154 44 217 -14 q 92 207 92 102 q 436 442 92 431 l 573 447 l 573 494 q 409 655 573 655 q 187 599 309 655 l 144 692 q 404 758 277 758 q 627 699 558 758 q 696 509 696 640 l 696 0 l 606 0 m 572 362 l 462 357 q 274 315 330 352 q 219 204 219 279 q 354 82 219 82 q 513 138 454 82 q 572 294 572 194 l 572 362 m 751 -217 l 751 -293 q 645 -309 701 -309 q 521 -271 564 -309 q 479 -171 479 -234 q 603 0 479 -73 l 695 0 q 576 -162 576 -85 q 665 -227 576 -227 q 751 -217 711 -227 "},"​":{"x_min":0,"x_max":0,"ha":834},"ã":{"x_min":92,"x_max":696,"ha":834,"o":"m 606 0 l 580 99 l 575 99 q 468 10 523 35 q 327 -14 413 -14 q 154 44 217 -14 q 92 207 92 102 q 436 442 92 431 l 573 447 l 573 494 q 409 655 573 655 q 187 599 309 655 l 144 692 q 404 758 277 758 q 627 699 558 758 q 696 509 696 640 l 696 0 l 606 0 m 572 362 l 462 357 q 274 315 330 352 q 219 204 219 279 q 354 82 219 82 q 513 138 454 82 q 572 294 572 194 l 572 362 m 250 841 l 179 841 q 322 1021 195 1021 q 431 982 361 1021 q 523 944 500 944 q 595 1022 578 944 l 667 1022 q 524 843 648 843 q 417 881 485 843 q 322 919 349 919 q 250 841 267 919 "},"æ":{"x_min":31,"x_max":805,"ha":834,"o":"m 354 450 l 354 496 q 260 655 354 655 q 117 599 187 655 l 78 692 q 268 758 168 758 q 437 637 398 758 q 598 758 490 758 q 747 665 690 758 q 805 424 805 573 l 805 347 l 476 347 q 520 157 478 219 q 632 96 563 96 q 786 145 705 96 l 786 35 q 624 -14 714 -14 q 412 144 475 -14 q 206 -14 340 -14 q 79 44 127 -14 q 31 208 31 103 q 253 445 31 434 l 354 450 m 479 450 l 684 450 q 657 600 684 545 q 585 655 631 655 q 512 603 541 655 q 479 450 483 550 m 353 363 l 295 358 q 154 207 154 347 q 175 120 154 152 q 231 88 196 88 q 319 143 285 88 q 353 296 353 198 l 353 363 "},"ĩ":{"x_min":133.6875,"x_max":729.171875,"ha":834,"o":"m 367 648 l 184 662 l 184 745 l 490 745 l 490 96 l 729 83 l 729 0 l 133 0 l 133 83 l 367 96 l 367 648 m 242 841 l 171 841 q 314 1021 187 1021 q 423 982 353 1021 q 515 944 492 944 q 587 1022 570 944 l 659 1022 q 516 843 640 843 q 409 881 477 843 q 314 919 341 919 q 242 841 259 919 "},"~":{"x_min":103,"x_max":730,"ha":834,"o":"m 103 397 l 103 507 q 270 581 170 581 q 439 538 338 581 q 575 500 527 500 q 730 582 649 500 l 730 472 q 561 399 662 399 q 393 441 493 399 q 257 479 304 479 q 103 397 183 479 "},"ŀ":{"x_min":127.6875,"x_max":731.46875,"ha":834,"o":"m 361 958 l 179 972 l 179 1055 l 484 1055 l 484 96 l 723 83 l 723 0 l 127 0 l 127 83 l 361 96 l 361 958 m 666 540 q 731 462 731 540 q 666 385 731 385 q 601 462 601 385 q 666 540 601 540 "},"Ċ":{"x_min":87,"x_max":801,"ha":834,"o":"m 763 136 l 763 26 q 519 -14 663 -14 q 198 119 309 -14 q 87 497 87 252 q 208 868 87 731 q 540 1006 330 1006 q 801 947 690 1006 l 747 841 q 540 894 643 894 q 307 787 394 894 q 220 496 220 679 q 302 199 220 301 q 540 97 383 97 q 763 136 629 97 m 534 1252 q 599 1174 599 1252 q 534 1097 599 1097 q 469 1174 469 1097 q 534 1252 469 1252 "},"¡":{"x_min":330,"x_max":502.265625,"ha":834,"o":"m 416 569 q 330 663 330 569 q 416 758 330 758 q 502 663 502 758 q 416 569 502 569 m 374 458 l 456 458 l 491 -253 l 340 -253 l 374 458 "},"ẅ":{"x_min":-3,"x_max":836,"ha":834,"o":"m 551 0 l 462 404 l 416 628 l 411 628 l 367 401 l 276 0 l 148 0 l -3 745 l 106 745 l 173 376 q 212 109 196 250 l 216 109 q 262 352 237 235 l 352 745 l 483 745 l 569 352 q 614 109 598 220 l 619 109 q 659 376 640 274 l 728 745 l 836 745 l 683 0 l 551 0 m 288 1015 q 353 945 353 1015 q 288 876 353 876 q 223 945 223 876 q 288 1015 223 1015 m 542 1015 q 608 945 608 1015 q 542 876 608 876 q 477 945 477 876 q 542 1015 477 1015 "},"К":{"x_min":143,"x_max":813.25,"ha":834,"o":"m 813 0 l 664 0 l 269 502 l 269 0 l 143 0 l 143 992 l 269 992 l 269 511 l 654 992 l 794 992 l 409 515 l 813 0 "},"Γ":{"x_min":158,"x_max":719,"ha":834,"o":"m 719 992 l 719 880 l 284 880 l 284 0 l 158 0 l 158 992 l 719 992 "},"P":{"x_min":119,"x_max":742,"ha":834,"o":"m 245 385 l 245 0 l 119 0 l 119 992 l 393 992 q 742 701 742 992 q 647 468 742 552 q 374 385 553 385 l 245 385 m 245 493 l 359 493 q 550 541 493 493 q 608 694 608 590 q 380 884 608 884 l 245 884 l 245 493 "},"%":{"x_min":0,"x_max":834,"ha":834,"o":"m 197 532 q 54 596 108 532 q 0 768 0 660 q 53 941 0 879 q 199 1003 107 1003 q 342 939 287 1003 q 397 768 397 876 q 343 595 397 658 q 197 532 290 532 m 199 613 q 293 769 293 613 q 199 921 293 921 q 103 769 103 921 q 199 613 103 613 m 717 992 l 222 0 l 115 0 l 609 992 l 717 992 m 634 -12 q 491 52 546 -12 q 437 224 437 116 q 490 397 437 335 q 636 459 544 459 q 779 395 724 459 q 834 224 834 332 q 780 51 834 114 q 634 -12 727 -12 m 636 69 q 730 225 730 69 q 636 377 730 377 q 540 225 540 377 q 636 69 540 69 "},"ϖ":{"x_min":12.15625,"x_max":816.71875,"ha":834,"o":"m 258 -14 q 167 9 204 -14 q 105 75 129 32 q 71 181 82 119 q 61 320 61 242 q 64 405 61 366 q 75 482 67 445 q 94 558 82 520 q 123 642 106 597 l 12 642 l 12 691 l 103 745 l 816 745 l 816 642 l 711 642 q 739 558 727 597 q 759 482 751 520 q 770 405 767 445 q 774 320 774 366 q 763 181 774 242 q 729 75 753 119 q 669 9 706 32 q 579 -14 632 -14 q 479 15 516 -14 q 424 106 442 45 l 417 106 q 361 15 399 45 q 258 -14 323 -14 m 668 320 q 664 401 668 362 q 653 478 661 440 q 632 556 645 516 q 604 642 620 596 l 230 642 q 201 556 213 596 q 181 478 189 516 q 170 401 173 440 q 166 320 166 362 q 172 214 166 258 q 190 142 178 170 q 221 101 203 114 q 266 88 240 88 q 311 102 292 88 q 343 140 330 116 q 361 198 355 165 q 368 270 368 231 l 368 408 l 473 408 l 473 270 q 501 135 473 182 q 572 88 528 88 q 614 101 596 88 q 645 142 632 114 q 662 214 657 170 q 668 320 668 258 "},"_":{"x_min":-11,"x_max":844,"ha":834,"o":"m 844 -219 l -11 -219 l -11 -125 l 844 -125 l 844 -219 "},"ñ":{"x_min":109,"x_max":725,"ha":834,"o":"m 601 0 l 601 479 q 440 655 601 655 q 232 385 232 655 l 232 0 l 109 0 l 109 745 l 208 745 l 227 644 l 233 644 q 461 758 303 758 q 725 486 725 758 l 725 0 l 601 0 m 248 841 l 177 841 q 320 1021 193 1021 q 429 982 359 1021 q 521 944 498 944 q 593 1022 576 944 l 665 1022 q 522 843 646 843 q 415 881 483 843 q 320 919 347 919 q 248 841 265 919 "},"Ŕ":{"x_min":126,"x_max":794.25,"ha":834,"o":"m 252 409 l 252 0 l 126 0 l 126 992 l 368 992 q 721 710 721 992 q 524 443 721 515 l 794 0 l 645 0 l 407 409 l 252 409 m 252 517 l 362 517 q 532 561 478 517 q 587 704 587 606 q 533 842 587 800 q 359 884 479 884 l 252 884 l 252 517 m 303 1089 q 421 1293 367 1179 l 570 1293 l 570 1278 q 385 1071 493 1161 l 303 1071 l 303 1089 "},"‚":{"x_min":310,"x_max":522,"ha":834,"o":"m 511 161 l 522 145 q 402 -179 484 1 l 310 -179 q 361 161 346 18 l 511 161 "},"⅞":{"x_min":19,"x_max":832,"ha":834,"o":"m 76 456 l 285 910 l 19 910 l 19 992 l 391 992 l 391 924 l 181 456 l 76 456 m 662 992 l 167 0 l 60 0 l 554 992 l 662 992 m 720 287 q 832 147 832 230 q 780 35 832 77 q 644 -7 728 -7 q 502 33 552 -7 q 453 143 453 73 q 546 281 453 231 q 470 412 470 335 q 518 511 470 474 q 643 549 567 549 q 766 512 718 549 q 814 412 814 475 q 720 287 814 334 m 645 321 q 712 413 712 355 q 641 480 712 480 q 571 413 571 480 q 645 321 571 357 m 630 247 q 554 142 554 203 q 641 61 554 61 q 730 142 730 61 q 639 243 730 203 l 630 247 "},"Æ":{"x_min":0,"x_max":821,"ha":834,"o":"m 821 0 l 378 0 l 378 307 l 181 307 l 116 0 l 0 0 l 229 992 l 821 992 l 821 880 l 504 880 l 504 574 l 795 574 l 795 462 l 504 462 l 504 111 l 821 111 l 821 0 m 206 419 l 378 419 l 378 880 l 305 880 l 206 419 "},"₣":{"x_min":88,"x_max":717,"ha":834,"o":"m 326 274 l 526 274 l 526 178 l 326 178 l 326 0 l 207 0 l 207 178 l 88 178 l 88 274 l 207 274 l 207 992 l 717 992 l 717 879 l 326 879 l 326 531 l 691 531 l 691 418 l 326 418 l 326 274 "},"Ū":{"x_min":85,"x_max":749,"ha":834,"o":"m 749 993 l 749 349 q 663 79 749 173 q 412 -14 578 -14 q 85 352 85 -14 l 85 991 l 211 991 l 211 359 q 419 97 211 97 q 622 361 619 97 l 622 993 l 749 993 m 221 1172 l 612 1172 l 612 1071 l 221 1071 l 221 1172 "},"ы":{"x_min":77,"x_max":756,"ha":834,"o":"m 182 439 l 275 439 q 562 227 562 439 q 275 0 562 0 l 77 0 l 77 745 l 182 745 l 182 439 m 182 336 l 182 102 l 279 102 q 456 219 456 102 q 415 308 456 280 q 276 336 373 336 l 182 336 m 756 0 l 650 0 l 650 745 l 756 745 l 756 0 "},"ѓ":{"x_min":197,"x_max":704,"ha":834,"o":"m 704 642 l 320 642 l 320 0 l 197 0 l 197 745 l 704 745 l 704 642 m 354 860 q 472 1064 418 950 l 621 1064 l 621 1049 q 436 842 544 932 l 354 842 l 354 860 "},"Œ":{"x_min":14,"x_max":833,"ha":834,"o":"m 833 0 l 443 0 l 410 -7 q 345 -14 376 -14 q 14 498 14 -14 q 361 1007 14 1007 q 465 992 417 1007 l 833 992 l 833 880 l 568 880 l 568 574 l 807 574 l 807 462 l 568 462 l 568 111 l 833 111 l 833 0 m 442 119 l 442 873 q 352 895 402 895 q 140 497 140 895 q 351 97 140 97 q 442 119 398 97 "},"΅":{"x_min":202,"x_max":629,"ha":834,"o":"m 360 959 q 413 1164 389 1054 l 562 1164 l 562 1150 q 415 942 498 1039 l 360 942 l 360 959 m 266 1015 q 332 945 332 1015 q 313 894 332 912 q 266 876 294 876 q 202 945 202 876 q 266 1015 202 1015 m 563 1015 q 629 945 629 1015 q 563 876 629 876 q 498 945 498 876 q 563 1015 498 1015 "},"Ą":{"x_min":22,"x_max":825,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 m 825 -217 l 825 -293 q 719 -309 775 -309 q 595 -271 638 -309 q 553 -171 553 -234 q 677 0 553 -73 l 769 0 q 650 -162 650 -85 q 739 -227 650 -227 q 825 -217 785 -227 "},"Њ":{"x_min":45,"x_max":814,"ha":834,"o":"m 373 0 l 373 462 l 171 462 l 171 0 l 45 0 l 45 992 l 171 992 l 171 574 l 373 574 l 373 992 l 499 992 l 499 574 l 524 574 q 740 501 666 574 q 814 290 814 428 q 736 74 814 149 q 513 0 659 0 l 373 0 m 499 107 l 527 107 q 697 290 697 107 q 653 421 697 381 q 511 462 609 462 l 499 462 l 499 107 "},"›":{"x_min":272,"x_max":561,"ha":834,"o":"m 561 356 l 351 78 l 272 130 l 433 366 l 272 602 l 351 655 l 561 374 l 561 356 "},"ћ":{"x_min":3.203125,"x_max":725,"ha":834,"o":"m 601 0 l 601 451 q 441 627 601 627 q 282 564 332 627 q 232 357 232 500 l 232 0 l 109 0 l 109 843 l 3 843 l 3 932 l 109 932 l 109 1055 l 233 1055 l 233 932 l 516 932 l 516 843 l 232 843 l 232 715 l 225 616 l 232 616 q 466 730 305 730 q 660 665 596 730 q 725 458 725 600 l 725 0 l 601 0 "},"<":{"x_min":103,"x_max":730,"ha":834,"o":"m 730 150 l 103 455 l 103 525 l 730 831 l 730 722 l 244 490 l 730 258 l 730 150 "},"¬":{"x_min":103,"x_max":730,"ha":834,"o":"m 730 541 l 730 178 l 628 178 l 628 439 l 103 439 l 103 541 l 730 541 "},"t":{"x_min":95,"x_max":696,"ha":834,"o":"m 692 101 l 692 7 q 521 -14 603 -14 q 276 218 276 -14 l 276 648 l 95 648 l 95 715 l 276 749 l 328 943 l 399 943 l 399 745 l 696 745 l 696 648 l 399 648 l 399 219 q 529 88 399 88 q 692 101 592 88 "},"Ц":{"x_min":92,"x_max":821,"ha":834,"o":"m 702 111 l 821 111 l 821 -261 l 704 -261 l 704 0 l 92 0 l 92 992 l 218 992 l 218 111 l 575 111 l 575 992 l 702 992 l 702 111 "},"ù":{"x_min":109,"x_max":725,"ha":834,"o":"m 625 0 l 607 99 l 600 99 q 373 -14 529 -14 q 109 258 109 -14 l 109 745 l 232 745 l 232 264 q 392 88 232 88 q 551 151 501 88 q 601 357 601 214 l 601 745 l 725 745 l 725 0 l 625 0 m 499 842 l 416 842 q 232 1049 304 938 l 232 1064 l 380 1064 q 499 860 439 943 l 499 842 "},"ï":{"x_min":133.6875,"x_max":729.171875,"ha":834,"o":"m 367 648 l 184 662 l 184 745 l 490 745 l 490 96 l 729 83 l 729 0 l 133 0 l 133 83 l 367 96 l 367 648 m 289 1015 q 354 945 354 1015 q 289 876 354 876 q 224 945 224 876 q 289 1015 224 1015 m 543 1015 q 609 945 609 1015 q 543 876 609 876 q 478 945 478 876 q 543 1015 478 1015 "},"Ф":{"x_min":18,"x_max":817,"ha":834,"o":"m 361 1006 l 487 1006 l 487 884 l 517 884 q 736 779 656 884 q 817 514 817 674 q 734 246 817 354 q 503 139 652 139 l 487 139 l 487 -14 l 361 -14 l 361 139 l 344 139 q 103 246 188 139 q 18 514 18 354 q 101 778 18 673 q 329 884 184 884 l 361 884 l 361 1006 m 487 246 l 491 246 q 638 319 585 246 q 690 517 690 391 q 642 705 690 634 q 507 776 594 776 l 487 776 l 487 246 m 361 776 l 340 776 q 195 705 247 776 q 144 517 144 634 q 200 319 144 391 q 357 246 256 246 l 361 246 l 361 776 "},"Ò":{"x_min":57,"x_max":778,"ha":834,"o":"m 417 -14 q 57 498 57 -14 q 419 1007 57 1007 q 685 874 592 1007 q 778 496 778 741 q 684 118 778 251 q 417 -14 590 -14 m 417 97 q 589 195 535 97 q 644 497 644 293 q 589 799 644 702 q 419 895 533 895 q 190 497 190 895 q 417 97 190 97 m 496 1071 l 413 1071 q 229 1278 301 1167 l 229 1293 l 377 1293 q 496 1089 436 1172 l 496 1071 "},"I":{"x_min":152.921875,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 "},"˝":{"x_min":168,"x_max":666,"ha":834,"o":"m 168 860 q 271 1064 223 950 l 420 1064 l 420 1049 q 235 842 344 932 l 168 842 l 168 860 m 413 860 q 517 1064 465 940 l 666 1064 l 666 1049 q 481 842 590 932 l 413 842 l 413 860 "},"·":{"x_min":330,"x_max":502,"ha":834,"o":"m 416 585 q 502 490 502 585 q 416 396 502 396 q 330 490 330 396 q 416 585 330 585 "},"¿":{"x_min":114,"x_max":716,"ha":834,"o":"m 461 569 q 375 663 375 569 q 461 758 375 758 q 547 663 547 758 q 461 569 547 569 m 520 458 l 520 432 q 490 301 520 352 q 381 194 460 251 q 265 89 294 128 q 237 -18 237 49 q 287 -120 237 -82 q 426 -159 337 -159 q 674 -97 547 -159 l 716 -195 q 429 -267 567 -267 q 198 -200 282 -267 q 114 -24 114 -134 q 150 122 114 66 q 285 252 187 179 q 389 347 367 311 q 412 445 412 384 l 412 458 l 520 458 "},"ſ":{"x_min":242,"x_max":691,"ha":834,"o":"m 691 1039 l 663 942 q 508 960 591 960 q 396 928 427 960 q 365 814 365 895 l 365 0 l 242 0 l 242 814 q 303 1002 242 942 q 505 1063 364 1063 q 691 1039 590 1063 "},"Ђ":{"x_min":16,"x_max":791,"ha":834,"o":"m 451 2 l 451 110 q 542 97 497 97 q 664 250 664 97 l 664 340 q 510 497 664 497 l 345 497 l 345 0 l 219 0 l 219 880 l 16 880 l 16 992 l 587 992 l 587 880 l 345 880 l 345 609 l 524 609 q 721 543 651 609 q 791 356 791 477 l 791 263 q 726 58 791 130 q 546 -14 662 -14 q 451 2 486 -14 "},"ű":{"x_min":109,"x_max":725,"ha":834,"o":"m 625 0 l 607 99 l 600 99 q 373 -14 529 -14 q 109 258 109 -14 l 109 745 l 232 745 l 232 264 q 392 88 232 88 q 551 151 501 88 q 601 357 601 214 l 601 745 l 725 745 l 725 0 l 625 0 m 222 860 q 325 1064 277 950 l 474 1064 l 474 1049 q 289 842 398 932 l 222 842 l 222 860 m 467 860 q 571 1064 519 940 l 720 1064 l 720 1049 q 535 842 644 932 l 467 842 l 467 860 "},"Ǽ":{"x_min":0,"x_max":821,"ha":834,"o":"m 821 0 l 378 0 l 378 307 l 181 307 l 116 0 l 0 0 l 229 992 l 821 992 l 821 880 l 504 880 l 504 574 l 795 574 l 795 462 l 504 462 l 504 111 l 821 111 l 821 0 m 206 419 l 378 419 l 378 880 l 305 880 l 206 419 m 428 1089 q 546 1293 492 1179 l 695 1293 l 695 1278 q 510 1071 618 1161 l 428 1071 l 428 1089 "},"φ":{"x_min":50,"x_max":784,"ha":834,"o":"m 352 -334 l 352 -12 q 50 371 50 4 q 188 750 50 583 l 268 688 q 179 531 202 601 q 155 371 155 462 q 352 90 155 112 l 352 500 q 544 758 352 758 q 720 658 656 758 q 784 387 784 558 q 697 102 784 208 q 457 -12 611 -2 l 457 -334 l 352 -334 m 457 90 q 663 386 663 110 q 544 655 663 655 q 457 501 457 655 l 457 90 "},";":{"x_min":278,"x_max":507,"ha":834,"o":"m 421 764 q 507 669 507 764 q 421 575 507 575 q 335 669 335 575 q 421 764 335 764 m 479 161 l 490 145 q 370 -179 455 12 l 278 -179 q 329 161 309 -6 l 479 161 "},"Ș":{"x_min":96,"x_max":738,"ha":834,"o":"m 96 32 l 96 152 q 375 93 238 93 q 611 258 611 93 q 564 366 611 328 q 371 456 516 404 q 170 575 231 506 q 109 754 109 644 q 196 939 109 872 q 435 1006 283 1006 q 718 953 591 1006 l 674 841 q 432 894 544 894 q 235 752 235 894 q 279 641 235 683 q 461 551 323 599 q 682 428 626 491 q 738 264 738 364 q 644 60 738 134 q 376 -14 550 -14 q 96 32 197 -14 m 328 -288 q 385 -85 370 -193 l 506 -85 l 506 -98 q 473 -182 506 -113 q 395 -307 440 -251 l 328 -307 l 328 -288 "},"Ġ":{"x_min":79,"x_max":742,"ha":834,"o":"m 455 524 l 742 524 l 742 36 q 456 -14 609 -14 q 179 121 279 -14 q 79 497 79 256 q 188 870 79 735 q 491 1006 298 1006 q 726 947 621 1006 l 677 837 q 487 894 578 894 q 285 789 357 894 q 212 496 212 683 q 479 97 212 97 q 615 116 544 97 l 615 412 l 455 412 l 455 524 m 497 1252 q 562 1174 562 1252 q 497 1097 562 1097 q 432 1174 432 1097 q 497 1252 432 1252 "},"n":{"x_min":109,"x_max":725,"ha":834,"o":"m 601 0 l 601 479 q 440 655 601 655 q 232 385 232 655 l 232 0 l 109 0 l 109 745 l 208 745 l 227 644 l 233 644 q 461 758 303 758 q 725 486 725 758 l 725 0 l 601 0 "},"ά":{"x_min":82,"x_max":799.671875,"ha":834,"o":"m 585 644 l 593 644 q 639 745 613 714 l 736 745 q 702 446 702 632 l 702 162 q 758 87 702 87 q 799 93 778 87 l 799 3 q 721 -14 764 -14 q 586 99 613 -14 l 578 99 q 365 -14 505 -14 q 157 86 233 -14 q 82 370 82 187 q 160 656 82 555 q 378 758 238 758 q 585 644 520 758 m 578 360 l 578 370 q 533 590 578 524 q 387 655 487 655 q 209 369 209 655 q 388 88 209 88 q 532 150 489 88 q 578 360 575 213 m 336 860 l 358 932 q 387 1064 380 1009 l 518 1064 l 518 1049 q 484 968 518 1038 q 409 842 451 898 l 336 842 l 336 860 "},"ϊ":{"x_min":175,"x_max":690,"ha":834,"o":"m 413 745 l 413 220 q 544 88 413 88 q 690 101 621 88 l 690 7 q 536 -14 626 -14 q 290 219 290 -14 l 290 745 l 413 745 m 240 1015 q 305 945 305 1015 q 240 876 305 876 q 175 945 175 876 q 240 1015 175 1015 m 494 1015 q 560 945 560 1015 q 494 876 560 876 q 429 945 429 876 q 494 1015 429 1015 "},"\uFEFF":{"x_min":0,"x_max":0,"ha":834},"ģ":{"x_min":70,"x_max":763.84375,"ha":834,"o":"m 763 745 l 763 668 l 630 650 q 675 506 675 592 q 602 333 675 397 q 401 269 530 269 q 343 273 364 269 q 275 182 275 234 q 384 125 275 125 l 511 125 q 691 72 629 125 q 754 -77 754 20 q 371 -334 754 -334 q 146 -278 223 -334 q 70 -123 70 -223 q 232 61 70 22 q 167 165 167 93 q 257 293 167 240 q 162 376 197 318 q 128 502 128 434 q 200 691 128 625 q 405 758 272 758 q 507 745 464 758 l 763 745 m 402 353 q 554 508 554 353 q 401 669 554 669 q 248 506 248 669 q 402 353 248 353 m 469 17 l 342 17 q 186 -118 186 17 q 370 -237 186 -237 q 637 -84 637 -237 q 603 -3 637 -24 q 469 17 569 17 m 537 1045 q 480 842 494 942 l 359 842 l 359 856 q 389 935 359 867 q 470 1064 420 1003 l 537 1064 l 537 1045 "},"∂":{"x_min":82,"x_max":751,"ha":834,"o":"m 628 582 l 630 609 q 591 816 636 733 q 441 899 545 899 q 266 841 352 899 l 266 959 q 457 1002 356 1002 q 751 633 751 1002 q 636 177 751 369 q 327 -14 522 -14 q 82 254 82 -14 q 175 554 82 423 q 436 685 269 685 q 628 582 561 685 m 606 459 q 548 552 591 516 q 453 588 504 588 q 276 479 343 588 q 209 248 209 371 q 337 88 209 88 q 505 192 431 88 q 606 459 580 295 "},"κ":{"x_min":146,"x_max":789,"ha":834,"o":"m 258 344 l 351 457 l 625 745 l 770 745 l 434 398 l 789 0 l 644 0 l 354 318 l 266 262 l 266 0 l 146 0 l 146 745 l 266 745 l 266 547 l 255 344 l 258 344 "},"‡":{"x_min":155.125,"x_max":677.359375,"ha":834,"o":"m 452 336 l 677 357 l 677 235 l 452 256 l 490 0 l 343 0 l 380 256 l 155 235 l 155 357 l 380 336 l 348 532 l 380 718 l 155 697 l 155 820 l 380 799 l 343 1055 l 490 1055 l 452 799 l 677 820 l 677 697 l 452 718 l 484 532 l 452 336 "},"ň":{"x_min":109,"x_max":725,"ha":834,"o":"m 601 0 l 601 479 q 440 655 601 655 q 232 385 232 655 l 232 0 l 109 0 l 109 745 l 208 745 l 227 644 l 233 644 q 461 758 303 758 q 725 486 725 758 l 725 0 l 601 0 m 650 1045 q 609 1000 633 1026 q 490 842 514 893 l 359 842 q 240 1000 335 893 l 200 1045 l 200 1064 l 281 1064 q 424 937 337 1027 q 567 1064 507 1024 l 650 1064 l 650 1045 "},"√":{"x_min":16,"x_max":818,"ha":834,"o":"m 415 -10 l 325 -10 l 138 522 l 16 522 l 16 615 l 216 615 l 372 165 l 719 1150 l 818 1150 l 415 -10 "},"ę":{"x_min":90,"x_max":744,"ha":834,"o":"m 744 346 l 217 346 q 451 93 222 93 q 703 145 584 93 l 703 36 q 456 -14 590 -14 q 189 87 289 -14 q 90 366 90 188 q 182 652 90 547 q 428 758 274 758 q 658 666 572 758 q 744 423 744 575 l 744 346 m 220 449 l 616 449 q 428 655 616 655 q 220 449 238 655 m 707 -196 l 707 -272 q 601 -288 657 -288 q 477 -250 520 -288 q 435 -150 435 -213 q 559 21 435 -52 l 651 21 q 532 -141 532 -64 q 621 -206 532 -206 q 707 -196 667 -206 "},"į":{"x_min":133.6875,"x_max":729.171875,"ha":834,"o":"m 429 1051 q 501 973 501 1051 q 479 915 501 934 q 429 896 458 896 q 356 973 356 896 q 429 1051 356 1051 m 367 648 l 184 662 l 184 745 l 490 745 l 490 96 l 729 83 l 729 0 l 133 0 l 133 83 l 367 96 l 367 648 m 570 -217 l 570 -293 q 464 -309 520 -309 q 340 -271 383 -309 q 298 -171 298 -234 q 422 0 298 -73 l 514 0 q 395 -162 395 -85 q 484 -227 395 -227 q 570 -217 530 -227 "},"Τ":{"x_min":69,"x_max":762,"ha":834,"o":"m 479 0 l 353 0 l 353 880 l 69 880 l 69 992 l 762 992 l 762 880 l 479 880 l 479 0 "},"≈":{"x_min":103,"x_max":730,"ha":834,"o":"m 103 533 l 103 643 q 270 718 169 718 q 439 674 337 718 q 575 637 525 637 q 730 719 649 637 l 730 609 q 561 536 664 536 q 393 578 493 536 q 257 616 306 616 q 103 533 181 616 m 103 256 l 103 366 q 270 440 170 440 q 439 397 338 440 q 575 359 527 359 q 730 441 649 359 l 730 331 q 561 258 662 258 q 393 300 493 258 q 257 338 304 338 q 103 256 183 338 "},"ΐ":{"x_min":164,"x_max":690,"ha":834,"o":"m 413 745 l 413 220 q 544 88 413 88 q 690 101 621 88 l 690 7 q 536 -14 626 -14 q 290 219 290 -14 l 290 745 l 413 745 m 322 959 q 375 1164 351 1054 l 524 1164 l 524 1150 q 377 942 460 1039 l 322 942 l 322 959 m 228 1015 q 294 945 294 1015 q 275 894 294 912 q 228 876 256 876 q 164 945 164 876 q 228 1015 164 1015 m 525 1015 q 591 945 591 1015 q 525 876 591 876 q 460 945 460 876 q 525 1015 460 1015 "},"ĸ":{"x_min":146,"x_max":789,"ha":834,"o":"m 258 344 l 351 457 l 625 745 l 770 745 l 434 398 l 789 0 l 644 0 l 354 318 l 266 262 l 266 0 l 146 0 l 146 745 l 266 745 l 266 547 l 255 344 l 258 344 "},"g":{"x_min":70,"x_max":763.84375,"ha":834,"o":"m 763 745 l 763 668 l 630 650 q 675 506 675 592 q 602 333 675 397 q 401 269 530 269 q 343 273 364 269 q 275 182 275 234 q 384 125 275 125 l 511 125 q 691 72 629 125 q 754 -77 754 20 q 371 -334 754 -334 q 146 -278 223 -334 q 70 -123 70 -223 q 232 61 70 22 q 167 165 167 93 q 257 293 167 240 q 162 376 197 318 q 128 502 128 434 q 200 691 128 625 q 405 758 272 758 q 507 745 464 758 l 763 745 m 402 353 q 554 508 554 353 q 401 669 554 669 q 248 506 248 669 q 402 353 248 353 m 469 17 l 342 17 q 186 -118 186 17 q 370 -237 186 -237 q 637 -84 637 -237 q 603 -3 637 -24 q 469 17 569 17 "},"ǿ":{"x_min":78,"x_max":755,"ha":834,"o":"m 255 21 l 204 -58 l 115 -1 l 172 87 q 78 373 78 194 q 168 655 78 553 q 418 758 258 758 q 578 719 505 758 l 630 800 l 719 743 l 661 654 q 755 373 755 548 q 663 87 755 189 q 414 -14 572 -14 q 255 21 326 -14 m 241 186 l 517 631 q 411 655 472 655 q 253 585 302 655 q 205 373 205 515 q 241 186 205 251 m 592 553 l 316 110 q 421 88 358 88 q 579 159 531 88 q 627 373 627 231 q 592 553 627 484 m 338 860 q 456 1064 402 950 l 605 1064 l 605 1049 q 420 842 528 932 l 338 842 l 338 860 "},"²":{"x_min":236,"x_max":596,"ha":834,"o":"m 596 456 l 236 456 l 236 525 l 360 660 q 454 774 433 740 q 474 847 474 808 q 400 924 474 924 q 291 873 346 924 l 240 932 q 408 1002 319 1002 q 531 961 487 1002 q 576 850 576 920 q 552 759 576 805 q 441 626 528 713 l 349 534 l 596 534 l 596 456 "},"Ã":{"x_min":22,"x_max":812,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 m 243 1070 l 172 1070 q 315 1250 188 1250 q 424 1211 354 1250 q 516 1173 493 1173 q 588 1251 571 1173 l 660 1251 q 517 1072 641 1072 q 410 1110 478 1072 q 315 1148 342 1148 q 243 1070 260 1148 "},"Ј":{"x_min":93,"x_max":664,"ha":834,"o":"m 93 26 l 93 138 q 302 97 202 97 q 474 151 411 97 q 537 304 537 205 l 537 992 l 664 992 l 664 305 q 568 72 664 159 q 312 -14 473 -14 q 93 26 165 -14 "},"©":{"x_min":4,"x_max":830,"ha":834,"o":"m 416 1006 q 720 867 610 1006 q 830 495 830 729 q 720 123 830 261 q 416 -14 610 -14 q 113 124 222 -14 q 4 495 4 262 q 112 867 4 728 q 416 1006 221 1006 m 416 59 q 667 175 579 59 q 756 496 756 291 q 667 816 756 700 q 416 932 579 932 q 165 816 253 932 q 77 496 77 700 q 165 175 77 291 q 416 59 253 59 m 593 307 l 593 218 q 442 185 520 185 q 239 268 310 185 q 168 497 168 352 q 242 722 168 639 q 447 806 317 806 q 619 763 533 806 l 578 677 q 446 713 503 713 q 320 655 364 713 q 276 495 276 598 q 446 277 276 277 q 593 307 510 277 "},"≥":{"x_min":103,"x_max":730,"ha":834,"o":"m 103 258 l 588 490 l 103 722 l 103 831 l 730 525 l 730 455 l 103 150 l 103 258 m 103 0 l 103 101 l 730 101 l 730 0 l 103 0 "},"Ă":{"x_min":22,"x_max":812,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 m 619 1259 q 558 1121 612 1172 q 412 1071 504 1071 q 211 1259 222 1071 l 285 1259 q 317 1189 290 1206 q 414 1172 344 1172 q 544 1259 537 1172 l 619 1259 "},"ґ":{"x_min":197,"x_max":691,"ha":834,"o":"m 691 656 l 320 656 l 320 0 l 197 0 l 197 745 l 567 745 l 567 961 l 691 961 l 691 656 "},"ÿ":{"x_min":56,"x_max":777,"ha":834,"o":"m 56 745 l 183 745 l 361 301 q 421 104 416 162 l 425 104 q 486 302 441 180 l 648 745 l 777 745 l 454 -97 q 348 -274 409 -215 q 181 -334 288 -334 q 68 -322 123 -334 l 68 -224 q 160 -231 110 -231 q 261 -203 225 -231 q 326 -108 298 -176 l 365 -7 l 56 745 m 295 1015 q 360 945 360 1015 q 295 876 360 876 q 230 945 230 876 q 295 1015 230 1015 m 549 1015 q 615 945 615 1015 q 549 876 615 876 q 484 945 484 876 q 549 1015 484 1015 "},"Ł":{"x_min":49,"x_max":741,"ha":834,"o":"m 183 0 l 183 334 l 98 281 l 49 365 l 183 450 l 183 992 l 309 992 l 309 530 l 512 659 l 566 574 l 309 413 l 309 111 l 741 111 l 741 0 l 183 0 "}," ":{"x_min":0,"x_max":0,"ha":834},"∫":{"x_min":160.25,"x_max":656.703125,"ha":834,"o":"m 656 1042 l 656 943 q 579 962 618 962 q 462 803 462 962 l 462 -92 q 405 -272 462 -211 q 245 -334 348 -334 q 160 -321 195 -334 l 160 -221 q 238 -241 200 -241 q 361 -82 361 -241 l 361 814 q 572 1055 361 1055 q 656 1042 629 1055 "},"\\\\":{"x_min":143,"x_max":690,"ha":834,"o":"m 263 992 l 690 0 l 569 0 l 143 992 l 263 992 "},"Ì":{"x_min":152.921875,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 m 478 1071 l 395 1071 q 211 1278 283 1167 l 211 1293 l 359 1293 q 478 1089 418 1172 l 478 1071 "},"ъ":{"x_min":29,"x_max":784,"ha":834,"o":"m 402 439 l 505 439 q 784 227 784 439 q 501 0 784 0 l 279 0 l 279 642 l 29 642 l 29 745 l 402 745 l 402 439 m 402 336 l 402 102 l 499 102 q 678 219 678 102 q 636 308 678 280 q 496 336 594 336 l 402 336 "},"ς":{"x_min":117,"x_max":723,"ha":834,"o":"m 638 -272 l 525 -272 q 602 -94 602 -161 q 557 -33 602 -53 q 404 5 513 -13 q 117 349 117 53 q 501 758 117 758 q 720 717 613 758 l 678 610 q 493 650 570 650 q 244 351 244 650 q 297 179 244 224 q 480 109 349 133 q 723 -61 723 65 q 638 -272 723 -156 "},"Ē":{"x_min":147,"x_max":719,"ha":834,"o":"m 719 0 l 147 0 l 147 992 l 719 992 l 719 880 l 273 880 l 273 574 l 693 574 l 693 462 l 273 462 l 273 111 l 719 111 l 719 0 m 228 1172 l 619 1172 l 619 1071 l 228 1071 l 228 1172 "},"!":{"x_min":330,"x_max":502.265625,"ha":834,"o":"m 458 280 l 376 280 l 341 992 l 492 992 l 458 280 m 416 168 q 502 74 502 168 q 416 -20 502 -20 q 330 74 330 -20 q 416 168 330 168 "},"ç":{"x_min":117,"x_max":720,"ha":834,"o":"m 720 717 l 677 610 q 496 650 576 650 q 244 369 244 650 q 489 93 244 93 q 707 135 595 93 l 707 27 q 483 -14 616 -14 q 213 84 309 -14 q 117 367 117 183 q 215 658 117 558 q 492 758 313 758 q 720 717 612 758 m 324 -327 l 324 -254 q 377 -258 346 -258 q 479 -196 479 -258 q 363 -119 479 -146 l 425 0 l 505 0 l 467 -78 q 577 -194 577 -103 q 379 -334 577 -334 q 324 -327 356 -334 "},"Й":{"x_min":93,"x_max":742,"ha":834,"o":"m 93 992 l 209 992 l 209 449 q 204 276 209 352 l 200 174 l 204 174 l 597 992 l 742 992 l 742 0 l 625 0 l 625 538 q 637 821 625 633 l 632 821 l 237 0 l 93 0 l 93 992 m 677 1287 q 412 1071 663 1071 q 222 1121 280 1071 q 157 1287 163 1171 l 273 1287 q 307 1188 279 1217 q 417 1159 336 1159 q 560 1287 548 1159 l 677 1287 "},"Б":{"x_min":92,"x_max":770,"ha":834,"o":"m 92 0 l 92 992 l 710 992 l 710 880 l 218 880 l 218 574 l 402 574 q 770 290 770 574 q 680 74 770 149 q 421 0 591 0 l 92 0 m 218 107 l 408 107 q 636 290 636 107 q 578 421 636 380 q 387 462 521 462 l 218 462 l 218 107 "},"đ":{"x_min":93,"x_max":832.796875,"ha":834,"o":"m 608 99 l 603 99 q 384 -14 526 -14 q 170 83 248 -14 q 93 356 93 181 q 171 631 93 532 q 384 730 249 730 q 603 622 526 730 l 611 622 q 603 733 603 709 l 603 843 l 346 843 l 346 932 l 603 932 l 603 1055 l 727 1055 l 727 932 l 832 932 l 832 843 l 727 843 l 727 0 l 627 0 l 608 99 m 603 329 l 603 356 q 556 565 603 502 q 405 627 508 627 q 220 354 220 627 q 406 88 220 88 q 555 144 509 88 q 603 329 600 200 "},"ċ":{"x_min":117,"x_max":720,"ha":834,"o":"m 720 717 l 677 610 q 496 650 576 650 q 244 369 244 650 q 489 93 244 93 q 707 135 595 93 l 707 27 q 483 -14 616 -14 q 213 84 309 -14 q 117 367 117 183 q 215 658 117 558 q 492 758 313 758 q 720 717 612 758 m 480 1023 q 545 945 545 1023 q 480 868 545 868 q 415 945 415 868 q 480 1023 415 1023 "},"Ā":{"x_min":22,"x_max":812,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 m 221 1172 l 612 1172 l 612 1071 l 221 1071 l 221 1172 "},"Ẃ":{"x_min":1,"x_max":833,"ha":834,"o":"m 358 684 l 478 684 l 577 330 q 626 122 618 181 q 670 542 627 158 l 717 992 l 833 992 l 706 0 l 577 0 l 462 393 q 418 584 435 487 q 373 392 396 467 l 267 0 l 139 0 l 1 992 l 116 992 l 176 542 q 203 285 191 422 q 215 122 215 148 q 262 333 231 224 l 358 684 m 339 1089 q 457 1293 403 1179 l 606 1293 l 606 1278 q 421 1071 529 1161 l 339 1071 l 339 1089 "},"ø":{"x_min":78,"x_max":755,"ha":834,"o":"m 255 21 l 204 -58 l 115 -1 l 172 87 q 78 373 78 194 q 168 655 78 553 q 418 758 258 758 q 578 719 505 758 l 630 800 l 719 743 l 661 654 q 755 373 755 548 q 663 87 755 189 q 414 -14 572 -14 q 255 21 326 -14 m 241 186 l 517 631 q 411 655 472 655 q 253 585 302 655 q 205 373 205 515 q 241 186 205 251 m 592 553 l 316 110 q 421 88 358 88 q 579 159 531 88 q 627 373 627 231 q 592 553 627 484 "},"â":{"x_min":92,"x_max":696,"ha":834,"o":"m 606 0 l 580 99 l 575 99 q 468 10 523 35 q 327 -14 413 -14 q 154 44 217 -14 q 92 207 92 102 q 436 442 92 431 l 573 447 l 573 494 q 409 655 573 655 q 187 599 309 655 l 144 692 q 404 758 277 758 q 627 699 558 758 q 696 509 696 640 l 696 0 l 606 0 m 572 362 l 462 357 q 274 315 330 352 q 219 204 219 279 q 354 82 219 82 q 513 138 454 82 q 572 294 572 194 l 572 362 m 648 842 l 565 842 q 422 967 508 879 q 279 842 332 875 l 198 842 l 198 860 q 238 905 214 879 q 357 1064 332 1010 l 488 1064 q 607 905 513 1010 l 648 860 l 648 842 "},"}":{"x_min":154,"x_max":681,"ha":834,"o":"m 328 214 q 486 383 328 355 l 486 391 q 328 559 328 419 l 328 783 q 290 863 328 838 q 154 890 251 889 l 154 992 q 452 793 452 987 l 452 567 q 681 439 452 439 l 681 337 q 452 208 452 337 l 452 -19 q 154 -220 452 -215 l 154 -118 q 290 -91 251 -117 q 328 -10 328 -65 l 328 214 "},"Δ":{"x_min":46,"x_max":786,"ha":834,"o":"m 786 83 l 786 0 l 46 0 l 46 89 l 351 992 l 477 992 l 786 83 m 413 852 q 353 626 378 701 l 181 111 l 646 111 l 475 622 q 413 852 440 727 "},"‰":{"x_min":3,"x_max":820,"ha":834,"o":"m 176 583 q 56 638 99 583 q 14 793 14 693 q 179 1004 14 1004 q 298 949 255 1004 q 342 793 342 894 q 176 583 342 583 m 178 664 q 226 696 214 664 q 238 794 238 728 q 224 895 238 868 q 178 922 211 922 q 131 894 144 922 q 117 794 117 865 q 130 696 117 728 q 178 664 142 664 m 505 572 l 30 378 l 3 444 l 477 640 l 505 572 m 294 0 q 174 55 216 0 q 132 210 132 110 q 297 421 132 421 q 416 366 373 421 q 460 210 460 311 q 294 0 460 0 m 296 81 q 344 113 332 81 q 356 211 356 145 q 342 312 356 285 q 296 339 329 339 q 249 311 262 339 q 235 211 235 283 q 248 113 235 145 q 296 81 260 81 m 654 0 q 534 55 576 0 q 492 210 492 110 q 657 421 492 421 q 776 366 733 421 q 820 210 820 311 q 654 0 820 0 m 656 81 q 704 113 692 81 q 716 211 716 145 q 703 311 716 284 q 656 339 691 339 q 609 311 622 339 q 595 211 595 283 q 608 113 595 145 q 656 81 620 81 "},"Ä":{"x_min":22,"x_max":812,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 m 289 1244 q 354 1174 354 1244 q 289 1105 354 1105 q 224 1174 224 1105 q 289 1244 224 1244 m 543 1244 q 609 1174 609 1244 q 543 1105 609 1105 q 478 1174 478 1105 q 543 1244 478 1244 "},"ř":{"x_min":179,"x_max":719,"ha":834,"o":"m 719 727 l 685 614 q 533 650 602 650 q 362 586 422 650 q 302 404 302 523 l 302 0 l 179 0 l 179 745 l 279 745 l 294 608 l 299 608 q 410 723 351 688 q 555 758 469 758 q 719 727 636 758 m 651 1045 q 610 1000 634 1026 q 491 842 515 893 l 360 842 q 241 1000 336 893 l 201 1045 l 201 1064 l 282 1064 q 425 937 338 1027 q 568 1064 508 1024 l 651 1064 l 651 1045 "},"—":{"x_min":-4,"x_max":838,"ha":834,"o":"m -4 315 l -4 429 l 838 429 l 838 315 l -4 315 "},"N":{"x_min":92,"x_max":741,"ha":834,"o":"m 741 0 l 596 0 l 201 821 l 196 821 q 208 538 208 633 l 208 0 l 92 0 l 92 992 l 236 992 l 629 174 l 633 174 q 624 449 624 380 l 624 992 l 741 992 l 741 0 "},"⁄":{"x_min":115,"x_max":717,"ha":834,"o":"m 717 992 l 222 0 l 115 0 l 609 992 l 717 992 "},"М":{"x_min":77,"x_max":757,"ha":834,"o":"m 361 0 l 173 868 l 167 868 q 180 592 180 687 l 180 0 l 77 0 l 77 992 l 244 992 l 412 183 l 416 183 l 586 992 l 757 992 l 757 0 l 653 0 l 653 601 q 663 866 653 670 l 657 866 l 466 0 l 361 0 "},"Ó":{"x_min":57,"x_max":778,"ha":834,"o":"m 417 -14 q 57 498 57 -14 q 419 1007 57 1007 q 685 874 592 1007 q 778 496 778 741 q 684 118 778 251 q 417 -14 590 -14 m 417 97 q 589 195 535 97 q 644 497 644 293 q 589 799 644 702 q 419 895 533 895 q 190 497 190 895 q 417 97 190 97 m 345 1089 q 463 1293 409 1179 l 612 1293 l 612 1278 q 427 1071 535 1161 l 345 1071 l 345 1089 "},"˜":{"x_min":172,"x_max":660,"ha":834,"o":"m 243 841 l 172 841 q 315 1021 188 1021 q 424 982 354 1021 q 516 944 493 944 q 588 1022 571 944 l 660 1022 q 517 843 641 843 q 410 881 478 843 q 315 919 342 919 q 243 841 260 919 "}," ":{"x_min":0,"x_max":0,"ha":834},"ˇ":{"x_min":192,"x_max":642,"ha":834,"o":"m 642 1045 q 601 1000 625 1026 q 482 842 506 893 l 351 842 q 232 1000 327 893 l 192 1045 l 192 1064 l 273 1064 q 416 937 329 1027 q 559 1064 499 1024 l 642 1064 l 642 1045 "},"ų":{"x_min":109,"x_max":764,"ha":834,"o":"m 625 0 l 607 99 l 600 99 q 373 -14 529 -14 q 109 258 109 -14 l 109 745 l 232 745 l 232 264 q 392 88 232 88 q 551 151 501 88 q 601 357 601 214 l 601 745 l 725 745 l 725 0 l 625 0 m 764 -217 l 764 -293 q 658 -309 714 -309 q 534 -271 577 -309 q 492 -171 492 -234 q 616 0 492 -73 l 708 0 q 589 -162 589 -85 q 678 -227 589 -227 q 764 -217 724 -227 "},"Ў":{"x_min":18,"x_max":814,"ha":834,"o":"m 814 992 l 523 289 q 431 109 471 166 q 329 18 390 51 q 183 -14 269 -14 q 63 6 113 -14 l 63 131 q 184 97 120 97 q 299 132 258 97 q 377 250 341 167 l 18 992 l 156 992 l 416 440 q 429 408 424 423 q 441 377 435 391 l 442 377 l 469 451 l 681 992 l 814 992 m 680 1287 q 415 1071 666 1071 q 225 1121 283 1071 q 160 1287 166 1171 l 276 1287 q 310 1188 282 1217 q 420 1159 339 1159 q 563 1287 551 1159 l 680 1287 "},"Ŭ":{"x_min":85,"x_max":749,"ha":834,"o":"m 749 993 l 749 349 q 663 79 749 173 q 412 -14 578 -14 q 85 352 85 -14 l 85 991 l 211 991 l 211 359 q 419 97 211 97 q 622 361 619 97 l 622 993 l 749 993 m 621 1259 q 560 1121 614 1172 q 414 1071 506 1071 q 213 1259 224 1071 l 287 1259 q 319 1189 292 1206 q 416 1172 346 1172 q 546 1259 539 1172 l 621 1259 "},"ĝ":{"x_min":70,"x_max":763.84375,"ha":834,"o":"m 763 745 l 763 668 l 630 650 q 675 506 675 592 q 602 333 675 397 q 401 269 530 269 q 343 273 364 269 q 275 182 275 234 q 384 125 275 125 l 511 125 q 691 72 629 125 q 754 -77 754 20 q 371 -334 754 -334 q 146 -278 223 -334 q 70 -123 70 -223 q 232 61 70 22 q 167 165 167 93 q 257 293 167 240 q 162 376 197 318 q 128 502 128 434 q 200 691 128 625 q 405 758 272 758 q 507 745 464 758 l 763 745 m 402 353 q 554 508 554 353 q 401 669 554 669 q 248 506 248 669 q 402 353 248 353 m 469 17 l 342 17 q 186 -118 186 17 q 370 -237 186 -237 q 637 -84 637 -237 q 603 -3 637 -24 q 469 17 569 17 m 637 842 l 554 842 q 411 967 497 879 q 268 842 321 875 l 187 842 l 187 860 q 227 905 203 879 q 346 1064 321 1010 l 477 1064 q 596 905 502 1010 l 637 860 l 637 842 "},"Ω":{"x_min":49.859375,"x_max":786.140625,"ha":834,"o":"m 367 99 l 367 0 l 49 0 l 49 111 l 230 111 q 58 559 58 270 q 153 889 58 771 q 417 1007 248 1007 q 682 889 587 1007 q 778 559 778 771 q 604 111 778 268 l 786 111 l 786 0 l 468 0 l 468 99 q 644 556 644 256 q 417 895 644 895 q 191 556 191 895 q 367 99 191 256 "},"s":{"x_min":138,"x_max":696,"ha":834,"o":"m 138 32 l 138 145 q 388 88 268 88 q 575 196 575 88 q 542 264 575 235 q 388 336 508 292 q 190 444 231 395 q 149 560 149 493 q 224 705 149 652 q 433 758 300 758 q 684 707 568 758 l 643 606 q 428 655 520 655 q 269 565 269 655 q 303 499 269 523 q 460 430 337 474 q 649 327 602 378 q 696 203 696 277 q 616 44 696 102 q 392 -14 537 -14 q 138 32 224 -14 "},"?":{"x_min":114,"x_max":719,"ha":834,"o":"m 313 280 l 313 305 q 344 437 313 386 q 452 544 375 488 q 567 649 539 610 q 595 756 595 688 q 545 858 595 819 q 406 898 495 898 q 157 836 289 898 l 114 940 q 403 1006 255 1006 q 633 939 548 1006 q 719 762 719 873 q 682 615 719 671 q 547 485 645 559 q 444 390 467 426 q 421 292 421 353 l 421 280 l 313 280 m 373 168 q 459 74 459 168 q 373 -20 459 -20 q 287 74 287 -20 q 373 168 287 168 "},"Ņ":{"x_min":92,"x_max":741,"ha":834,"o":"m 741 0 l 596 0 l 201 821 l 196 821 q 208 538 208 633 l 208 0 l 92 0 l 92 992 l 236 992 l 629 174 l 633 174 q 624 449 624 380 l 624 992 l 741 992 l 741 0 m 295 -288 q 352 -85 337 -193 l 473 -85 l 473 -98 q 440 -182 473 -113 q 362 -307 407 -251 l 295 -307 l 295 -288 "},"Ī":{"x_min":152.921875,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 m 222 1172 l 613 1172 l 613 1071 l 222 1071 l 222 1172 "},"Μ":{"x_min":77,"x_max":757,"ha":834,"o":"m 361 0 l 173 868 l 167 868 q 180 592 180 687 l 180 0 l 77 0 l 77 992 l 244 992 l 412 183 l 416 183 l 586 992 l 757 992 l 757 0 l 653 0 l 653 601 q 663 866 653 670 l 657 866 l 466 0 l 361 0 "},"•":{"x_min":258,"x_max":577,"ha":834,"o":"m 417 685 q 577 507 577 685 q 533 374 577 420 q 417 329 490 329 q 299 374 341 329 q 258 507 258 419 q 417 685 258 685 "},"н":{"x_min":109,"x_max":725,"ha":834,"o":"m 232 745 l 232 436 l 601 436 l 601 745 l 725 745 l 725 0 l 601 0 l 601 333 l 232 333 l 232 0 l 109 0 l 109 745 l 232 745 "},"(":{"x_min":200,"x_max":633,"ha":834,"o":"m 502 992 l 633 992 q 327 386 327 736 q 631 -220 327 32 l 502 -220 q 200 384 200 19 q 502 992 200 745 "},"◊":{"x_min":85,"x_max":749,"ha":834,"o":"m 749 499 l 441 0 l 390 0 l 85 498 l 390 1000 l 441 1000 l 749 499 m 624 499 l 416 846 l 209 499 l 416 151 l 624 499 "},"α":{"x_min":82,"x_max":799.671875,"ha":834,"o":"m 585 644 l 593 644 q 639 745 613 714 l 736 745 q 702 446 702 632 l 702 162 q 758 87 702 87 q 799 93 778 87 l 799 3 q 721 -14 764 -14 q 586 99 613 -14 l 578 99 q 365 -14 505 -14 q 157 86 233 -14 q 82 370 82 187 q 160 656 82 555 q 378 758 238 758 q 585 644 520 758 m 578 360 l 578 370 q 533 590 578 524 q 387 655 487 655 q 209 369 209 655 q 388 88 209 88 q 532 150 489 88 q 578 360 575 213 "},"Ħ":{"x_min":0.4375,"x_max":833.5625,"ha":834,"o":"m 92 827 l 92 992 l 218 992 l 218 827 l 615 827 l 615 992 l 742 992 l 742 827 l 833 827 l 833 719 l 742 719 l 742 0 l 615 0 l 615 462 l 218 462 l 218 0 l 92 0 l 92 719 l 0 719 l 0 827 l 92 827 m 615 574 l 615 719 l 218 719 l 218 574 l 615 574 "},"м":{"x_min":78,"x_max":756,"ha":834,"o":"m 756 0 l 650 0 l 650 608 q 628 522 644 590 q 604 439 613 464 l 462 0 l 371 0 l 229 439 q 183 608 223 456 l 183 0 l 78 0 l 78 745 l 224 745 l 367 299 q 416 118 384 247 q 451 247 419 126 q 465 297 458 274 l 612 745 l 756 745 l 756 0 "},"з":{"x_min":136.296875,"x_max":700,"ha":834,"o":"m 342 439 q 506 465 457 439 q 555 551 555 492 q 386 655 555 655 q 178 606 296 655 l 136 706 q 387 758 244 758 q 601 707 526 758 q 676 562 676 657 q 545 398 676 436 l 545 390 q 700 205 700 346 q 618 44 700 102 q 384 -14 536 -14 q 139 32 225 -14 l 139 145 q 387 88 261 88 q 579 210 579 88 q 367 336 579 336 l 266 336 l 266 439 l 342 439 "},"Ґ":{"x_min":158,"x_max":711,"ha":834,"o":"m 594 992 l 594 1196 l 711 1196 l 711 880 l 284 880 l 284 0 l 158 0 l 158 992 l 594 992 "},"Û":{"x_min":85,"x_max":749,"ha":834,"o":"m 749 993 l 749 349 q 663 79 749 173 q 412 -14 578 -14 q 85 352 85 -14 l 85 991 l 211 991 l 211 359 q 419 97 211 97 q 622 361 619 97 l 622 993 l 749 993 m 642 1071 l 559 1071 q 416 1196 502 1108 q 273 1071 326 1104 l 192 1071 l 192 1089 q 232 1134 208 1108 q 351 1293 326 1239 l 482 1293 q 601 1134 507 1239 l 642 1089 l 642 1071 "},"і":{"x_min":133.6875,"x_max":729.171875,"ha":834,"o":"m 429 1051 q 501 973 501 1051 q 479 915 501 934 q 429 896 458 896 q 356 973 356 896 q 429 1051 356 1051 m 367 648 l 184 662 l 184 745 l 490 745 l 490 96 l 729 83 l 729 0 l 133 0 l 133 83 l 367 96 l 367 648 "},"V":{"x_min":22,"x_max":812,"ha":834,"o":"m 677 992 l 812 992 l 479 0 l 353 0 l 22 992 l 154 992 l 355 363 q 415 136 383 276 q 478 367 436 234 l 677 992 "},"Ŗ":{"x_min":126,"x_max":794.25,"ha":834,"o":"m 252 409 l 252 0 l 126 0 l 126 992 l 368 992 q 721 710 721 992 q 524 443 721 515 l 794 0 l 645 0 l 407 409 l 252 409 m 252 517 l 362 517 q 532 561 478 517 q 587 704 587 606 q 533 842 587 800 q 359 884 479 884 l 252 884 l 252 517 m 326 -288 q 383 -85 368 -193 l 504 -85 l 504 -98 q 471 -182 504 -113 q 393 -307 438 -251 l 326 -307 l 326 -288 "},"@":{"x_min":21,"x_max":813,"ha":834,"o":"m 537 272 l 535 272 q 380 150 485 150 q 253 220 300 150 q 206 411 206 291 q 271 637 206 551 q 444 723 337 723 q 618 691 537 723 l 603 409 q 602 362 602 383 l 602 357 q 650 238 602 238 q 718 497 718 238 q 642 792 718 685 q 440 899 567 899 q 201 769 287 899 q 115 412 115 639 q 203 85 115 200 q 453 -30 291 -30 q 687 22 575 -30 l 687 -67 q 449 -123 580 -123 q 134 17 247 -123 q 21 408 21 157 q 134 834 21 677 q 443 992 247 992 q 712 859 611 992 q 813 496 813 726 q 768 244 813 339 q 646 150 724 150 q 537 272 557 150 m 503 620 q 435 634 468 634 q 345 571 377 634 q 314 408 314 508 q 398 238 314 238 q 493 449 484 238 l 503 620 "},"ʼ":{"x_min":303,"x_max":530,"ha":834,"o":"m 520 992 l 530 977 q 410 652 492 832 l 303 652 q 369 992 345 832 l 520 992 "},"℅":{"x_min":5,"x_max":830,"ha":834,"o":"m 360 973 l 339 901 q 240 917 285 917 q 108 764 108 917 q 237 615 108 615 q 354 631 305 615 l 354 559 q 230 534 303 534 q 64 593 124 534 q 5 763 5 652 q 66 939 5 879 q 237 999 127 999 q 360 973 304 999 m 707 992 l 212 0 l 106 0 l 600 992 l 707 992 m 622 -5 q 475 57 533 -5 q 418 227 418 120 q 474 397 418 336 q 625 459 530 459 q 772 395 714 459 q 830 227 830 332 q 774 57 830 119 q 622 -5 718 -5 m 624 76 q 726 227 726 76 q 624 377 726 377 q 521 227 521 377 q 624 76 521 76 "},"i":{"x_min":133.6875,"x_max":729.171875,"ha":834,"o":"m 429 1051 q 501 973 501 1051 q 479 915 501 934 q 429 896 458 896 q 356 973 356 896 q 429 1051 356 1051 m 367 648 l 184 662 l 184 745 l 490 745 l 490 96 l 729 83 l 729 0 l 133 0 l 133 83 l 367 96 l 367 648 "},"ќ":{"x_min":146,"x_max":789,"ha":834,"o":"m 258 344 l 351 457 l 625 745 l 770 745 l 434 398 l 789 0 l 644 0 l 354 318 l 266 262 l 266 0 l 146 0 l 146 745 l 266 745 l 266 547 l 255 344 l 258 344 m 344 860 q 462 1064 408 950 l 611 1064 l 611 1049 q 426 842 534 932 l 344 842 l 344 860 "},"≤":{"x_min":103,"x_max":730,"ha":834,"o":"m 730 150 l 103 455 l 103 525 l 730 831 l 730 722 l 244 490 l 730 258 l 730 150 m 103 0 l 103 101 l 730 101 l 730 0 l 103 0 "},"ё":{"x_min":90,"x_max":744,"ha":834,"o":"m 744 346 l 217 346 q 451 93 222 93 q 703 145 584 93 l 703 36 q 456 -14 590 -14 q 189 87 289 -14 q 90 366 90 188 q 182 652 90 547 q 428 758 274 758 q 658 666 572 758 q 744 423 744 575 l 744 346 m 220 449 l 616 449 q 428 655 616 655 q 220 449 238 655 m 301 1015 q 366 945 366 1015 q 301 876 366 876 q 236 945 236 876 q 301 1015 236 1015 m 555 1015 q 621 945 621 1015 q 555 876 621 876 q 490 945 490 876 q 555 1015 490 1015 "},"υ":{"x_min":109,"x_max":735,"ha":834,"o":"m 109 745 l 232 745 l 232 345 q 418 88 232 88 q 565 167 520 88 q 611 412 611 245 q 568 745 611 573 l 691 745 q 735 406 735 578 q 657 88 735 191 q 414 -14 579 -14 q 109 337 109 -14 l 109 745 "},"ĕ":{"x_min":90,"x_max":744,"ha":834,"o":"m 744 346 l 217 346 q 451 93 222 93 q 703 145 584 93 l 703 36 q 456 -14 590 -14 q 189 87 289 -14 q 90 366 90 188 q 182 652 90 547 q 428 758 274 758 q 658 666 572 758 q 744 423 744 575 l 744 346 m 220 449 l 616 449 q 428 655 616 655 q 220 449 238 655 m 631 1030 q 570 892 624 943 q 424 842 516 842 q 223 1030 234 842 l 297 1030 q 329 960 302 977 q 426 943 356 943 q 556 1030 549 943 l 631 1030 "},"ﬃ":{"x_min":45.1875,"x_max":723.234375,"ha":834,"o":"m 723 0 l 612 0 l 612 660 l 474 660 l 474 0 l 364 0 l 364 660 l 224 660 l 224 0 l 113 0 l 113 660 l 45 660 l 45 703 l 113 745 l 113 800 q 126 920 113 872 q 166 996 140 968 q 230 1036 192 1025 q 317 1048 268 1048 q 380 1041 350 1048 q 433 1025 410 1033 q 493 1053 458 1044 q 570 1063 528 1063 q 636 1055 605 1063 q 692 1037 667 1047 l 664 947 q 621 960 645 954 q 573 966 598 966 q 529 958 547 966 q 498 933 510 951 q 480 887 486 916 q 474 814 474 857 l 474 745 l 723 745 l 723 0 m 224 745 l 364 745 l 364 813 q 380 943 364 890 q 351 949 366 947 q 320 952 336 952 q 278 945 296 952 q 248 920 260 937 q 230 873 236 902 q 224 801 224 844 l 224 745 "},"ż":{"x_min":123,"x_max":709,"ha":834,"o":"m 709 0 l 123 0 l 123 88 l 572 648 l 145 648 l 145 745 l 697 745 l 697 641 l 256 96 l 709 96 l 709 0 m 434 1023 q 499 945 499 1023 q 434 868 499 868 q 369 945 369 868 q 434 1023 369 1023 "},"Э":{"x_min":46.15625,"x_max":747,"ha":834,"o":"m 98 841 l 46 947 q 306 1006 155 1006 q 629 874 512 1006 q 747 513 747 742 q 630 123 747 260 q 300 -14 514 -14 q 57 26 156 -14 l 57 135 q 280 97 191 97 q 613 462 602 97 l 185 462 l 185 574 l 610 574 q 517 809 597 724 q 306 894 436 894 q 98 841 203 894 "},"ő":{"x_min":78,"x_max":755,"ha":834,"o":"m 414 -14 q 172 91 267 -14 q 78 373 78 196 q 170 654 78 551 q 418 758 262 758 q 660 652 566 758 q 755 373 755 547 q 661 89 755 193 q 414 -14 568 -14 m 416 88 q 627 373 627 88 q 415 655 627 655 q 205 373 205 655 q 416 88 205 88 m 223 860 q 326 1064 278 950 l 475 1064 l 475 1049 q 290 842 399 932 l 223 842 l 223 860 m 468 860 q 572 1064 520 940 l 721 1064 l 721 1049 q 536 842 645 932 l 468 842 l 468 860 "},"Ŏ":{"x_min":57,"x_max":778,"ha":834,"o":"m 417 -14 q 57 498 57 -14 q 419 1007 57 1007 q 685 874 592 1007 q 778 496 778 741 q 684 118 778 251 q 417 -14 590 -14 m 417 97 q 589 195 535 97 q 644 497 644 293 q 589 799 644 702 q 419 895 533 895 q 190 497 190 895 q 417 97 190 97 m 620 1259 q 559 1121 613 1172 q 413 1071 505 1071 q 212 1259 223 1071 l 286 1259 q 318 1189 291 1206 q 415 1172 345 1172 q 545 1259 538 1172 l 620 1259 "},"ю":{"x_min":83,"x_max":791,"ha":834,"o":"m 294 333 l 188 333 l 188 0 l 83 0 l 83 745 l 188 745 l 188 436 l 296 436 q 545 758 319 758 q 726 657 661 758 q 791 373 791 557 q 541 -14 791 -14 q 294 333 313 -14 m 544 88 q 651 154 618 88 q 685 373 685 220 q 652 588 685 521 q 543 655 619 655 q 435 590 468 655 q 401 373 401 525 q 435 155 401 223 q 544 88 468 88 "},"İ":{"x_min":152.921875,"x_max":678.5625,"ha":834,"o":"m 678 0 l 152 0 l 152 83 l 353 96 l 353 895 l 152 908 l 152 992 l 678 992 l 678 908 l 479 895 l 479 96 l 678 83 l 678 0 m 423 1252 q 488 1174 488 1252 q 423 1097 488 1097 q 358 1174 358 1097 q 423 1252 358 1252 "},"Ě":{"x_min":147,"x_max":719,"ha":834,"o":"m 719 0 l 147 0 l 147 992 l 719 992 l 719 880 l 273 880 l 273 574 l 693 574 l 693 462 l 273 462 l 273 111 l 719 111 l 719 0 m 666 1274 q 625 1229 649 1255 q 506 1071 530 1122 l 375 1071 q 256 1229 351 1122 l 216 1274 l 216 1293 l 297 1293 q 440 1166 353 1256 q 583 1293 523 1253 l 666 1293 l 666 1274 "},"‹":{"x_min":272,"x_max":561,"ha":834,"o":"m 272 374 l 482 655 l 561 602 l 399 366 l 561 130 l 482 78 l 272 356 l 272 374 "},"ķ":{"x_min":146,"x_max":789,"ha":834,"o":"m 261 375 l 352 478 l 619 745 l 770 745 l 435 422 l 789 0 l 644 0 l 356 341 l 269 286 l 269 0 l 146 0 l 146 1055 l 269 1055 l 269 571 l 258 375 l 261 375 m 329 -288 q 386 -85 371 -193 l 507 -85 l 507 -98 q 474 -182 507 -113 q 396 -307 441 -251 l 329 -307 l 329 -288 "},"ì":{"x_min":133.6875,"x_max":729.171875,"ha":834,"o":"m 367 648 l 184 662 l 184 745 l 490 745 l 490 96 l 729 83 l 729 0 l 133 0 l 133 83 l 367 96 l 367 648 m 493 842 l 410 842 q 226 1049 298 938 l 226 1064 l 374 1064 q 493 860 433 943 l 493 842 "},"±":{"x_min":103.53125,"x_max":730.203125,"ha":834,"o":"m 366 439 l 103 439 l 103 541 l 366 541 l 366 804 l 467 804 l 467 541 l 730 541 l 730 439 l 467 439 l 467 178 l 366 178 l 366 439 m 103 0 l 103 101 l 730 101 l 730 0 l 103 0 "},"|":{"x_min":366,"x_max":467.734375,"ha":834,"o":"m 366 1055 l 467 1055 l 467 -334 l 366 -334 l 366 1055 "},"§":{"x_min":165.140625,"x_max":669,"ha":834,"o":"m 285 724 q 176 884 176 778 q 246 1014 176 965 q 435 1063 317 1063 q 656 1014 545 1063 l 618 919 q 432 966 513 966 q 296 886 296 966 q 330 823 296 850 q 462 756 363 797 q 619 661 569 714 q 669 532 669 609 q 570 349 669 409 q 669 196 669 295 q 593 47 669 102 q 384 -7 518 -7 q 165 37 246 -7 l 165 144 q 384 89 281 89 q 548 185 548 89 q 519 251 548 224 q 386 320 489 278 q 214 428 252 377 q 176 549 176 478 q 285 724 176 670 m 484 389 q 563 514 563 440 q 513 612 563 575 q 371 682 462 650 q 281 564 281 650 q 320 478 281 514 q 460 399 358 442 l 484 389 "},"џ":{"x_min":109,"x_max":725,"ha":834,"o":"m 232 102 l 601 102 l 601 745 l 725 745 l 725 0 l 484 0 l 484 -258 l 361 -258 l 361 0 l 109 0 l 109 745 l 232 745 l 232 102 "},"љ":{"x_min":0,"x_max":801,"ha":834,"o":"m 498 437 l 531 437 q 801 226 801 437 q 516 0 801 0 l 375 0 l 375 642 l 248 642 q 207 191 225 319 q 159 26 190 62 q 62 -10 127 -10 q 0 -1 20 -10 l 0 86 q 33 78 14 78 q 77 107 61 78 q 109 266 94 136 q 149 745 125 397 l 498 745 l 498 437 m 498 334 l 498 102 l 533 102 q 695 218 695 102 q 657 306 695 279 q 530 334 620 334 l 498 334 "},"q":{"x_min":93,"x_max":727,"ha":834,"o":"m 603 644 l 608 644 l 627 745 l 727 745 l 727 -334 l 603 -334 l 603 -16 q 611 99 603 11 l 603 99 q 384 -14 526 -14 q 170 87 248 -14 q 93 370 93 188 q 171 655 93 553 q 384 758 249 758 q 603 644 525 758 m 603 342 l 603 370 q 556 590 603 524 q 405 655 508 655 q 220 369 220 655 q 406 88 220 88 q 555 148 510 88 q 603 342 600 208 "},"˳":{"x_min":262,"x_max":569,"ha":834,"o":"m 569 -229 q 557 -291 569 -264 q 524 -338 545 -319 q 474 -367 503 -357 q 413 -377 446 -377 q 351 -367 379 -377 q 303 -338 323 -357 q 272 -292 283 -319 q 262 -231 262 -265 q 272 -169 262 -196 q 303 -123 283 -142 q 351 -94 323 -104 q 413 -85 379 -85 q 474 -94 445 -85 q 523 -123 502 -104 q 556 -168 544 -142 q 569 -229 569 -195 m 494 -231 q 472 -174 494 -194 q 415 -154 450 -154 q 358 -174 380 -154 q 336 -231 336 -194 q 356 -287 336 -267 q 415 -307 376 -307 q 472 -287 450 -307 q 494 -231 494 -267 "},"ή":{"x_min":109,"x_max":725,"ha":834,"o":"m 601 -334 l 601 479 q 440 655 601 655 q 232 385 232 655 l 232 0 l 109 0 l 109 745 l 208 745 l 227 644 l 233 644 q 461 758 302 758 q 725 486 725 758 l 725 -334 l 601 -334 m 380 860 l 402 932 q 431 1064 424 1009 l 562 1064 l 562 1049 q 528 968 562 1038 q 453 842 495 898 l 380 842 l 380 860 "},"Ж":{"x_min":-0.25,"x_max":834.25,"ha":834,"o":"m 253 511 l 7 992 l 128 992 l 366 511 l 366 992 l 492 992 l 492 511 l 703 992 l 824 992 l 603 511 l 834 0 l 708 0 l 492 502 l 492 0 l 366 0 l 366 502 l 123 0 l 0 0 l 253 511 "},"®":{"x_min":4,"x_max":830,"ha":834,"o":"m 416 1006 q 720 867 610 1006 q 830 495 830 729 q 720 123 830 261 q 416 -14 610 -14 q 113 124 222 -14 q 4 495 4 262 q 112 867 4 728 q 416 1006 221 1006 m 416 59 q 667 175 579 59 q 756 496 756 291 q 667 816 756 700 q 416 932 579 932 q 165 816 253 932 q 77 496 77 700 q 165 175 77 291 q 416 59 253 59 m 508 461 l 668 194 l 548 194 l 407 432 l 344 432 l 344 194 l 236 194 l 236 799 l 395 799 q 616 619 616 799 q 508 461 616 508 m 344 524 l 393 524 q 507 618 507 524 q 479 687 507 667 q 390 706 450 706 l 344 706 l 344 524 "},"Н":{"x_min":92,"x_max":742,"ha":834,"o":"m 742 0 l 615 0 l 615 462 l 218 462 l 218 0 l 92 0 l 92 992 l 218 992 l 218 574 l 615 574 l 615 992 l 742 992 l 742 0 "},"Ε":{"x_min":147,"x_max":719,"ha":834,"o":"m 719 0 l 147 0 l 147 992 l 719 992 l 719 880 l 273 880 l 273 574 l 693 574 l 693 462 l 273 462 l 273 111 l 719 111 l 719 0 "},"₧":{"x_min":56,"x_max":808,"ha":834,"o":"m 182 388 l 182 0 l 56 0 l 56 992 l 199 992 q 515 702 515 992 q 438 470 515 553 q 209 388 361 388 l 182 388 m 182 485 l 207 485 q 389 690 389 485 q 222 884 389 884 l 182 884 l 182 485 m 808 92 l 808 7 q 699 -14 766 -14 q 554 172 554 -14 l 554 407 l 476 407 l 476 466 l 554 501 l 594 647 l 648 647 l 648 504 l 790 504 l 790 407 l 648 407 l 648 181 q 724 82 648 82 q 808 92 766 82 "},"л":{"x_min":21,"x_max":706,"ha":834,"o":"m 706 0 l 582 0 l 582 642 l 351 642 q 266 148 326 306 q 83 -10 205 -10 q 21 -1 41 -10 l 21 86 q 54 78 35 78 q 175 241 129 78 q 246 745 221 403 l 706 745 l 706 0 "},"σ":{"x_min":87,"x_max":796.359375,"ha":834,"o":"m 796 745 l 796 642 l 615 642 q 736 342 736 509 q 648 84 736 182 q 409 -14 561 -14 q 173 83 259 -14 q 87 355 87 180 q 463 745 87 745 l 796 745 m 503 642 l 463 642 q 271 576 328 642 q 214 356 214 509 q 266 159 214 230 q 414 88 318 88 q 558 153 509 88 q 608 337 608 218 q 503 642 608 520 "},"θ":{"x_min":100,"x_max":734,"ha":834,"o":"m 415 -14 q 180 115 260 -14 q 100 494 100 245 q 177 875 100 751 q 415 1000 254 1000 q 653 870 572 1000 q 734 494 734 741 q 415 -14 734 -14 m 223 547 l 606 547 q 556 810 601 723 q 413 897 511 897 q 274 812 319 897 q 223 547 228 727 m 606 458 l 223 458 q 272 177 227 267 q 413 88 317 88 q 556 176 510 88 q 606 458 602 264 "}," ":{"x_min":0,"x_max":0,"ha":834},"∑":{"x_min":50,"x_max":793,"ha":834,"o":"m 50 -334 l 50 -256 l 446 364 l 60 914 l 60 992 l 748 992 l 748 880 l 237 880 l 596 365 l 219 -222 l 793 -222 l 793 -334 l 50 -334 "},"Ώ":{"x_min":-91,"x_max":786.140625,"ha":834,"o":"m 367 99 l 367 0 l 49 0 l 49 111 l 230 111 q 58 559 58 270 q 153 889 58 771 q 417 1007 248 1007 q 682 889 587 1007 q 778 559 778 771 q 604 111 778 268 l 786 111 l 786 0 l 468 0 l 468 99 q 644 556 644 256 q 417 895 644 895 q 191 556 191 895 q 367 99 191 256 m -91 789 l -68 861 q -39 993 -46 938 l 91 993 l 91 978 q 57 897 91 967 q -17 771 24 827 l -91 771 l -91 789 "},"ẃ":{"x_min":-3,"x_max":836,"ha":834,"o":"m 551 0 l 462 404 l 416 628 l 411 628 l 367 401 l 276 0 l 148 0 l -3 745 l 106 745 l 173 376 q 212 109 196 250 l 216 109 q 262 352 237 235 l 352 745 l 483 745 l 569 352 q 614 109 598 220 l 619 109 q 659 376 640 274 l 728 745 l 836 745 l 683 0 l 551 0 m 354 860 q 472 1064 418 950 l 621 1064 l 621 1049 q 436 842 544 932 l 354 842 l 354 860 "},"+":{"x_min":103.53125,"x_max":730.203125,"ha":834,"o":"m 366 439 l 103 439 l 103 541 l 366 541 l 366 804 l 467 804 l 467 541 l 730 541 l 730 439 l 467 439 l 467 178 l 366 178 l 366 439 "},"Ë":{"x_min":147,"x_max":719,"ha":834,"o":"m 719 0 l 147 0 l 147 992 l 719 992 l 719 880 l 273 880 l 273 574 l 693 574 l 693 462 l 273 462 l 273 111 l 719 111 l 719 0 m 306 1244 q 371 1174 371 1244 q 306 1105 371 1105 q 241 1174 241 1105 q 306 1244 241 1244 m 560 1244 q 626 1174 626 1244 q 560 1105 626 1105 q 495 1174 495 1105 q 560 1244 495 1244 "},"Š":{"x_min":96,"x_max":738,"ha":834,"o":"m 96 32 l 96 152 q 375 93 238 93 q 611 258 611 93 q 564 366 611 328 q 371 456 516 404 q 170 575 231 506 q 109 754 109 644 q 196 939 109 872 q 435 1006 283 1006 q 718 953 591 1006 l 674 841 q 432 894 544 894 q 235 752 235 894 q 279 641 235 683 q 461 551 323 599 q 682 428 626 491 q 738 264 738 364 q 644 60 738 134 q 376 -14 550 -14 q 96 32 197 -14 m 663 1274 q 622 1229 646 1255 q 503 1071 527 1122 l 372 1071 q 253 1229 348 1122 l 213 1274 l 213 1293 l 294 1293 q 437 1166 350 1256 q 580 1293 520 1253 l 663 1293 l 663 1274 "}," ":{"x_min":0,"x_max":0,"ha":834},"ð":{"x_min":92,"x_max":742,"ha":834,"o":"m 603 575 l 609 578 q 443 845 569 733 l 270 742 l 221 819 l 368 907 q 251 981 297 955 l 298 1065 q 465 964 395 1017 l 618 1058 l 669 981 l 537 902 q 742 388 742 705 q 654 93 742 200 q 415 -14 567 -14 q 181 76 270 -14 q 92 323 92 167 q 173 569 92 481 q 400 658 255 658 q 603 575 543 658 m 415 555 q 219 317 219 555 q 416 88 219 88 q 568 155 522 88 q 614 355 614 222 q 561 498 614 442 q 415 555 508 555 "},"щ":{"x_min":74,"x_max":820,"ha":834,"o":"m 459 102 l 634 102 l 634 745 l 740 745 l 740 102 l 820 102 l 820 -258 l 714 -258 l 714 0 l 74 0 l 74 745 l 179 745 l 179 102 l 354 102 l 354 745 l 459 745 l 459 102 "},"℮":{"x_min":56,"x_max":776,"ha":834,"o":"m 776 359 l 214 359 l 214 117 q 415 33 297 33 q 684 193 588 33 l 732 165 q 592 17 666 59 q 415 -24 518 -24 q 154 85 252 -24 q 56 359 56 195 q 160 639 56 536 q 415 743 264 743 q 674 637 572 743 q 776 362 776 532 l 776 359 m 618 417 l 618 604 q 414 685 536 685 q 214 606 298 685 l 214 417 l 618 417 "},"Φ":{"x_min":18,"x_max":817,"ha":834,"o":"m 361 1006 l 487 1006 l 487 884 l 517 884 q 736 779 656 884 q 817 514 817 674 q 734 246 817 354 q 503 139 652 139 l 487 139 l 487 -14 l 361 -14 l 361 139 l 344 139 q 103 246 188 139 q 18 514 18 354 q 101 778 18 673 q 329 884 184 884 l 361 884 l 361 1006 m 487 246 l 491 246 q 638 319 585 246 q 690 517 690 391 q 642 705 690 634 q 507 776 594 776 l 487 776 l 487 246 m 361 776 l 340 776 q 195 705 247 776 q 144 517 144 634 q 200 319 144 391 q 357 246 256 246 l 361 246 l 361 776 "},"ş":{"x_min":138,"x_max":696,"ha":834,"o":"m 138 32 l 138 145 q 388 88 268 88 q 575 196 575 88 q 542 264 575 235 q 388 336 508 292 q 190 444 231 395 q 149 560 149 493 q 224 705 149 652 q 433 758 300 758 q 684 707 568 758 l 643 606 q 428 655 520 655 q 269 565 269 655 q 303 499 269 523 q 460 430 337 474 q 649 327 602 378 q 696 203 696 277 q 616 44 696 102 q 392 -14 537 -14 q 138 32 224 -14 m 285 -327 l 285 -254 q 338 -258 307 -258 q 440 -196 440 -258 q 324 -119 440 -146 l 386 0 l 466 0 l 428 -78 q 538 -194 538 -103 q 340 -334 538 -334 q 285 -327 317 -334 "}," ":{"x_min":0,"x_max":0,"ha":834},"ı":{"x_min":133.6875,"x_max":729.171875,"ha":834,"o":"m 367 648 l 184 662 l 184 745 l 490 745 l 490 96 l 729 83 l 729 0 l 133 0 l 133 83 l 367 96 l 367 648 "},"ä":{"x_min":92,"x_max":696,"ha":834,"o":"m 606 0 l 580 99 l 575 99 q 468 10 523 35 q 327 -14 413 -14 q 154 44 217 -14 q 92 207 92 102 q 436 442 92 431 l 573 447 l 573 494 q 409 655 573 655 q 187 599 309 655 l 144 692 q 404 758 277 758 q 627 699 558 758 q 696 509 696 640 l 696 0 l 606 0 m 572 362 l 462 357 q 274 315 330 352 q 219 204 219 279 q 354 82 219 82 q 513 138 454 82 q 572 294 572 194 l 572 362 m 297 1015 q 362 945 362 1015 q 297 876 362 876 q 232 945 232 876 q 297 1015 232 1015 m 551 1015 q 617 945 617 1015 q 551 876 617 876 q 486 945 486 876 q 551 1015 486 1015 "},"¹":{"x_min":249,"x_max":491.734375,"ha":834,"o":"m 397 990 l 491 990 l 491 456 l 390 456 l 390 771 q 396 906 390 817 q 345 862 368 876 l 298 828 l 249 887 l 397 990 "},"W":{"x_min":1,"x_max":833,"ha":834,"o":"m 358 684 l 478 684 l 577 330 q 626 122 618 181 q 670 542 627 158 l 717 992 l 833 992 l 706 0 l 577 0 l 462 393 q 418 584 435 487 q 373 392 396 467 l 267 0 l 139 0 l 1 992 l 116 992 l 176 542 q 203 285 191 422 q 215 122 215 148 q 262 333 231 224 l 358 684 "},"λ":{"x_min":41,"x_max":803.484375,"ha":834,"o":"m 41 0 l 383 734 l 347 842 q 294 937 324 912 q 216 961 265 961 q 145 953 178 961 l 145 1052 q 231 1064 189 1064 q 376 1018 328 1064 q 472 829 424 972 l 693 163 q 762 88 718 88 q 803 93 782 88 l 803 3 q 725 -14 769 -14 q 640 13 669 -14 q 591 99 610 40 l 500 383 q 436 611 453 528 l 432 611 q 351 393 407 517 l 169 0 l 41 0 "},">":{"x_min":103,"x_max":730,"ha":834,"o":"m 103 258 l 588 490 l 103 722 l 103 831 l 730 525 l 730 455 l 103 150 l 103 258 "},"τ":{"x_min":72.328125,"x_max":733.859375,"ha":834,"o":"m 733 745 l 733 642 l 411 642 l 411 230 q 553 84 411 84 q 683 97 625 84 l 683 5 q 533 -18 625 -18 q 288 216 288 -18 l 288 642 l 72 642 l 72 691 l 163 745 l 733 745 "},"Ų":{"x_min":85,"x_max":749,"ha":834,"o":"m 749 993 l 749 349 q 663 79 749 173 q 412 -14 578 -14 q 85 352 85 -14 l 85 991 l 211 991 l 211 359 q 419 97 211 97 q 622 361 619 97 l 622 993 l 749 993 m 572 -217 l 572 -293 q 466 -309 522 -309 q 342 -271 385 -309 q 300 -171 300 -234 q 424 0 300 -73 l 516 0 q 397 -162 397 -85 q 486 -227 397 -227 q 572 -217 532 -227 "},"Ŵ":{"x_min":1,"x_max":833,"ha":834,"o":"m 358 684 l 478 684 l 577 330 q 626 122 618 181 q 670 542 627 158 l 717 992 l 833 992 l 706 0 l 577 0 l 462 393 q 418 584 435 487 q 373 392 396 467 l 267 0 l 139 0 l 1 992 l 116 992 l 176 542 q 203 285 191 422 q 215 122 215 148 q 262 333 231 224 l 358 684 m 644 1071 l 561 1071 q 418 1196 504 1108 q 275 1071 328 1104 l 194 1071 l 194 1089 q 234 1134 210 1108 q 353 1293 328 1239 l 484 1293 q 603 1134 509 1239 l 644 1089 l 644 1071 "},"‛":{"x_min":303,"x_max":530,"ha":834,"o":"m 463 992 q 530 652 490 816 l 423 652 q 303 977 339 837 l 313 992 l 463 992 "},"Ð":{"x_min":0,"x_max":778,"ha":834,"o":"m 92 0 l 92 445 l 0 445 l 0 557 l 92 557 l 92 992 l 323 992 q 658 863 538 992 q 778 505 778 735 q 653 130 778 260 q 296 0 529 0 l 92 0 m 218 884 l 218 557 l 476 557 l 476 445 l 218 445 l 218 107 l 283 107 q 644 501 644 107 q 309 884 644 884 l 218 884 "},"Λ":{"x_min":22,"x_max":811,"ha":834,"o":"m 811 0 l 676 0 l 478 625 q 415 856 435 760 q 355 629 384 720 l 154 0 l 22 0 l 352 992 l 479 992 l 811 0 "},"·":{"x_min":330,"x_max":502,"ha":834,"o":"m 416 585 q 502 490 502 585 q 416 396 502 396 q 330 490 330 396 q 416 585 330 585 "},"Х":{"x_min":36,"x_max":797,"ha":834,"o":"m 797 0 l 653 0 l 412 430 l 164 0 l 36 0 l 343 518 l 57 992 l 191 992 l 416 612 l 643 992 l 773 992 l 486 522 l 797 0 "},"Υ":{"x_min":23,"x_max":809,"ha":834,"o":"m 415 490 l 672 992 l 809 992 l 479 386 l 479 0 l 353 0 l 353 379 l 23 992 l 160 992 l 415 490 "},"r":{"x_min":179,"x_max":719,"ha":834,"o":"m 719 727 l 685 614 q 533 650 602 650 q 362 586 422 650 q 302 404 302 523 l 302 0 l 179 0 l 179 745 l 279 745 l 294 608 l 299 608 q 410 723 351 688 q 555 758 469 758 q 719 727 636 758 "},"ж":{"x_min":-1.25,"x_max":835.25,"ha":834,"o":"m 363 383 l 363 745 l 486 745 l 486 383 l 709 745 l 835 745 l 600 383 l 833 0 l 701 0 l 486 377 l 486 0 l 363 0 l 363 377 l 133 0 l 0 0 l 250 383 l -1 745 l 123 745 l 363 383 "},"Ø":{"x_min":54.296875,"x_max":784.78125,"ha":834,"o":"m 209 49 l 147 -51 l 54 0 l 136 134 q 57 498 57 259 q 419 1007 57 1007 q 629 935 545 1007 l 691 1038 l 784 985 l 700 849 q 778 496 778 722 q 684 118 778 251 q 417 -14 590 -14 q 209 49 289 -14 m 216 265 l 565 832 q 419 895 511 895 q 190 497 190 895 q 216 265 190 353 m 620 719 l 273 155 q 417 97 327 97 q 589 195 535 97 q 644 497 644 293 q 620 719 644 638 "},"Ỳ":{"x_min":23,"x_max":809,"ha":834,"o":"m 415 490 l 672 992 l 809 992 l 479 386 l 479 0 l 353 0 l 353 379 l 23 992 l 160 992 l 415 490 m 473 1071 l 390 1071 q 206 1278 278 1167 l 206 1293 l 354 1293 q 473 1089 413 1172 l 473 1071 "},"÷":{"x_min":103,"x_max":729,"ha":834,"o":"m 415 812 q 493 727 493 812 q 415 642 493 642 q 338 727 338 642 q 415 812 338 812 m 103 439 l 103 541 l 729 541 l 729 439 l 103 439 m 415 338 q 493 253 493 338 q 415 169 493 169 q 338 253 338 169 q 415 338 338 338 "},"с":{"x_min":117,"x_max":720,"ha":834,"o":"m 720 717 l 677 610 q 496 650 576 650 q 244 369 244 650 q 489 93 244 93 q 707 135 595 93 l 707 27 q 483 -14 616 -14 q 213 84 309 -14 q 117 367 117 183 q 215 658 117 558 q 492 758 313 758 q 720 717 612 758 "},"h":{"x_min":109,"x_max":725,"ha":834,"o":"m 601 0 l 601 479 q 440 655 601 655 q 232 385 232 655 l 232 0 l 109 0 l 109 1055 l 232 1055 l 232 741 l 227 644 l 233 644 q 461 758 303 758 q 725 486 725 758 l 725 0 l 601 0 "},"f":{"x_min":106,"x_max":756,"ha":834,"o":"m 708 648 l 444 648 l 444 0 l 321 0 l 321 648 l 106 648 l 106 726 l 321 749 l 321 814 q 382 1004 321 945 q 584 1063 443 1063 q 756 1039 672 1063 l 728 942 q 587 960 657 960 q 474 926 504 960 q 444 815 444 893 l 444 745 l 708 745 l 708 648 "},"“":{"x_min":158,"x_max":674,"ha":834,"o":"m 457 652 l 447 666 q 567 992 483 806 l 674 992 q 607 652 632 818 l 457 652 m 168 652 l 158 666 q 278 992 194 806 l 385 992 q 318 652 343 818 l 168 652 "},"A":{"x_min":22,"x_max":812,"ha":834,"o":"m 681 0 l 583 307 l 250 307 l 150 0 l 22 0 l 350 996 l 482 996 l 812 0 l 681 0 m 547 419 l 457 706 q 415 860 431 791 q 384 736 401 793 l 286 419 l 547 419 "},"O":{"x_min":57,"x_max":778,"ha":834,"o":"m 417 -14 q 57 498 57 -14 q 419 1007 57 1007 q 685 874 592 1007 q 778 496 778 741 q 684 118 778 251 q 417 -14 590 -14 m 417 97 q 589 195 535 97 q 644 497 644 293 q 589 799 644 702 q 419 895 533 895 q 190 497 190 895 q 417 97 190 97 "},"Đ":{"x_min":0,"x_max":778,"ha":834,"o":"m 92 0 l 92 445 l 0 445 l 0 557 l 92 557 l 92 992 l 323 992 q 658 863 538 992 q 778 505 778 735 q 653 130 778 260 q 296 0 529 0 l 92 0 m 218 884 l 218 557 l 476 557 l 476 445 l 218 445 l 218 107 l 283 107 q 644 501 644 107 q 309 884 644 884 l 218 884 "},"Ǿ":{"x_min":54.296875,"x_max":784.78125,"ha":834,"o":"m 209 49 l 147 -51 l 54 0 l 136 134 q 57 498 57 259 q 419 1007 57 1007 q 629 935 545 1007 l 691 1038 l 784 985 l 700 849 q 778 496 778 722 q 684 118 778 251 q 417 -14 590 -14 q 209 49 289 -14 m 216 265 l 565 832 q 419 895 511 895 q 190 497 190 895 q 216 265 190 353 m 620 719 l 273 155 q 417 97 327 97 q 589 195 535 97 q 644 497 644 293 q 620 719 644 638 m 322 1089 q 440 1293 386 1179 l 589 1293 l 589 1278 q 404 1071 512 1161 l 322 1071 l 322 1089 "},"⅛":{"x_min":12,"x_max":818,"ha":834,"o":"m 160 990 l 254 990 l 254 456 l 153 456 l 153 771 q 159 906 153 817 q 108 862 131 876 l 61 828 l 12 887 l 160 990 m 679 992 l 184 0 l 77 0 l 571 992 l 679 992 m 706 287 q 818 147 818 230 q 766 35 818 77 q 630 -7 714 -7 q 488 33 538 -7 q 439 143 439 73 q 532 281 439 231 q 456 412 456 335 q 504 511 456 474 q 629 549 553 549 q 752 512 704 549 q 800 412 800 475 q 706 287 800 334 m 631 321 q 698 413 698 355 q 627 480 698 480 q 557 413 557 480 q 631 321 557 357 m 616 247 q 540 142 540 203 q 627 61 540 61 q 716 142 716 61 q 625 243 716 203 l 616 247 "},"Ẁ":{"x_min":1,"x_max":833,"ha":834,"o":"m 358 684 l 478 684 l 577 330 q 626 122 618 181 q 670 542 627 158 l 717 992 l 833 992 l 706 0 l 577 0 l 462 393 q 418 584 435 487 q 373 392 396 467 l 267 0 l 139 0 l 1 992 l 116 992 l 176 542 q 203 285 191 422 q 215 122 215 148 q 262 333 231 224 l 358 684 m 496 1071 l 413 1071 q 229 1278 301 1167 l 229 1293 l 377 1293 q 496 1089 436 1172 l 496 1071 "},"Ť":{"x_min":69,"x_max":762,"ha":834,"o":"m 479 0 l 353 0 l 353 880 l 69 880 l 69 992 l 762 992 l 762 880 l 479 880 l 479 0 m 641 1274 q 600 1229 624 1255 q 481 1071 505 1122 l 350 1071 q 231 1229 326 1122 l 191 1274 l 191 1293 l 272 1293 q 415 1166 328 1256 q 558 1293 498 1253 l 641 1293 l 641 1274 "},"ψ":{"x_min":54,"x_max":784,"ha":834,"o":"m 459 1054 l 459 91 q 663 386 663 110 q 624 745 663 556 l 741 745 q 784 390 784 557 q 459 -12 784 5 l 459 -334 l 354 -334 l 354 -12 q 125 85 196 -6 q 54 376 54 176 l 54 745 l 174 745 l 174 386 q 354 90 174 101 l 354 1054 l 459 1054 "},"ŗ":{"x_min":128,"x_max":719,"ha":834,"o":"m 719 727 l 685 614 q 533 650 602 650 q 362 586 422 650 q 302 404 302 523 l 302 0 l 179 0 l 179 745 l 279 745 l 294 608 l 299 608 q 410 723 351 688 q 555 758 469 758 q 719 727 636 758 m 128 -288 q 185 -85 170 -193 l 306 -85 l 306 -98 q 273 -182 306 -113 q 195 -307 240 -251 l 128 -307 l 128 -288 "}}'), k8 = "normal", K8 = 1290, S8 = -154, G8 = "normal", R8 = { yMin: -377, xMin: -211, yMax: 1467, xMax: 892 }, p8 = 1e3, f8 = { postscript_name: "DroidSansMono", version_string: "Version 1.00 build 107", vendor_url: "http://www.ascendercorp.com/", full_font_name: "Droid Sans Mono", font_family_name: "Droid Sans Mono", copyright: "Digitized data copyright © 2006, Google Corporation.", description: "Droid Sans is a humanist sans serif typeface designed for user interfaces and electronic communication.", trademark: "Droid is a trademark of Google and may be registered in certain jurisdictions.", designer: "", designer_url: "http://www.ascendercorp.com/typedesigners.html", unique_font_identifier: "Ascender - Droid Sans Mono", license_url: "http://ascendercorp.com/eula10.html", license_description: `This font software is the valuable property of Ascender Corporation and/or its suppliers and its use by you is covered under the terms of a license agreement. This font software is licensed to you by Ascender Corporation for your personal or business use on up to five personal computers. You may not use this font software on more than five personal computers unless you have obtained a license from Ascender to do so. Except as specifically permitted by the license, you may not copy this font software.
 
 If you have any questions, please review the license agreement you received with this font software, and/or contact Ascender Corporation. 
 
@@ -7746,8 +7765,8 @@ var b8 = {
   glyphs: x8,
   cssFontWeight: k8,
   ascender: K8,
-  underlinePosition: G8,
-  cssFontStyle: S8,
+  underlinePosition: S8,
+  cssFontStyle: G8,
   boundingBox: R8,
   resolution: p8,
   original_font_information: f8,
@@ -7785,10 +7804,10 @@ function H8(A) {
       else if (K === "l")
         m(y());
       else if (K === "q" || K === "b") {
-        const k = y(), S = y(), _ = K === "b" ? y() : void 0, J = h;
+        const k = y(), G = y(), _ = K === "b" ? y() : void 0, J = h;
         for (let T = 1; T <= A.curveSteps; T++) {
           const v = T / A.curveSteps, IA = 1 - v;
-          m(K === "q" ? [IA * IA * J[0] + 2 * IA * v * S[0] + v * v * k[0], IA * IA * J[1] + 2 * IA * v * S[1] + v * v * k[1]] : [IA ** 3 * J[0] + 3 * IA * IA * v * S[0] + 3 * IA * v * v * _[0] + v ** 3 * k[0], IA ** 3 * J[1] + 3 * IA * IA * v * S[1] + 3 * IA * v * v * _[1] + v ** 3 * k[1]]);
+          m(K === "q" ? [IA * IA * J[0] + 2 * IA * v * G[0] + v * v * k[0], IA * IA * J[1] + 2 * IA * v * G[1] + v * v * k[1]] : [IA ** 3 * J[0] + 3 * IA * IA * v * G[0] + 3 * IA * v * v * _[0] + v ** 3 * k[0], IA ** 3 * J[1] + 3 * IA * IA * v * G[1] + 3 * IA * v * v * _[1] + v ** 3 * k[1]]);
         }
       } else
         throw new Error(t("Unsupported bundled font outline"));
@@ -7836,7 +7855,7 @@ async function _8(A = {}) {
     function d(x) {
       return x[0].length < 3 && (x = [x]), E(new I.Vector2_vec2(), x, (f) => E(new I.Vector_vec2(), f, (V) => V instanceof Array ? { x: V[0], y: V[1] } : V));
     }
-    function G(x) {
+    function S(x) {
       for (let f = 0; f < x.size(); f++) x.get(f).delete();
       x.delete();
     }
@@ -7858,7 +7877,7 @@ async function _8(A = {}) {
         return x;
       {
         const V = d(x), X = new gA(V, L(f));
-        return G(V), X;
+        return S(V), X;
       }
     }
     I.CrossSection.prototype.translate = function(...x) {
@@ -7955,10 +7974,10 @@ async function _8(A = {}) {
       return this._TrimByPlane(Y([x]), f);
     }, I.Manifold.prototype.slice = function(x = 0) {
       const f = this._Slice(x), V = new gA(f, L("Positive"));
-      return G(f), V;
+      return S(f), V;
     }, I.Manifold.prototype.project = function() {
       const x = this._Project(), f = new gA(x, L("Positive"));
-      return G(x), f;
+      return S(x), f;
     }, I.Manifold.prototype.rayCast = function(x, f) {
       const V = this._RayCast(Y([x]), Y([f])), X = o(V, (hA) => ({ faceID: hA.faceID, distance: hA.distance, position: ["x", "y", "z"].map((KA) => hA.position[KA]), normal: ["x", "y", "z"].map((KA) => hA.normal[KA]) }));
       return V.delete(), X;
@@ -8069,7 +8088,7 @@ async function _8(A = {}) {
       hA.name = this.name = "ManifoldError", this.message = hA.message, this.stack = hA.stack, this.code = f;
     }, I.ManifoldError.prototype = Object.create(Error.prototype, { constructor: { value: I.ManifoldError, writable: !0, configurable: !0 } }), I.CrossSection = function(x, f = "Positive") {
       const V = d(x), X = new gA(V, L(f));
-      return G(V), X;
+      return S(V), X;
     }, I.CrossSection.ofPolygons = function(x, f = "Positive") {
       return new I.CrossSection(x, f);
     }, I.CrossSection.square = function(...x) {
@@ -8182,7 +8201,7 @@ async function _8(A = {}) {
       return f.delete(), V;
     }, I.Manifold.prototype = Object.create(uA.prototype), Object.defineProperty(I.Manifold, Symbol.hasInstance, { get: () => (x) => x instanceof uA }), I.triangulate = function(x, f = -1, V = !0) {
       const X = d(x), hA = o(I._Triangulate(X, f, V), (KA) => [KA[0], KA[1], KA[2]]);
-      return G(X), hA;
+      return S(X), hA;
     };
   };
   var Q = import.meta.url, s = "";
@@ -8212,14 +8231,14 @@ async function _8(A = {}) {
     }), r = async (E) => {
       if (y(E))
         return new Promise((c, d) => {
-          var G = new XMLHttpRequest();
-          G.open("GET", E, !0), G.responseType = "arraybuffer", G.onload = () => {
-            if (G.status == 200 || G.status == 0 && G.response) {
-              c(G.response);
+          var S = new XMLHttpRequest();
+          S.open("GET", E, !0), S.responseType = "arraybuffer", S.onload = () => {
+            if (S.status == 200 || S.status == 0 && S.response) {
+              c(S.response);
               return;
             }
-            d(G.status);
-          }, G.onerror = d, G.send(null);
+            d(S.status);
+          }, S.onerror = d, S.send(null);
         });
       var o = await fetch(E, { credentials: "same-origin" });
       if (o.ok)
@@ -8228,10 +8247,10 @@ async function _8(A = {}) {
     };
   }
   console.log.bind(console);
-  var h = console.error.bind(console), M, N = !1, y = (E) => E.startsWith("file://"), m, p, K, k, S, _, J, T, v, IA, sA, O, EA = !1;
+  var h = console.error.bind(console), M, N = !1, y = (E) => E.startsWith("file://"), m, p, K, k, G, _, J, T, v, IA, sA, O, EA = !1;
   function FA() {
     var E = v2.buffer;
-    K = new Int8Array(E), S = new Int16Array(E), k = new Uint8Array(E), _ = new Uint16Array(E), J = new Int32Array(E), T = new Uint32Array(E), v = new Float32Array(E), IA = new Float64Array(E), sA = new BigInt64Array(E), O = new BigUint64Array(E);
+    K = new Int8Array(E), G = new Int16Array(E), k = new Uint8Array(E), _ = new Uint16Array(E), J = new Int32Array(E), T = new Uint32Array(E), v = new Float32Array(E), IA = new Float64Array(E), sA = new BigInt64Array(E), O = new BigUint64Array(E);
   }
   function kA() {
     if (I.preRun)
@@ -8242,7 +8261,7 @@ async function _8(A = {}) {
   function fA() {
     EA = !0, Q2.J();
   }
-  function SA() {
+  function GA() {
     if (I.postRun)
       for (typeof I.postRun == "function" && (I.postRun = [I.postRun]); I.postRun.length; )
         pA(I.postRun.shift());
@@ -8277,15 +8296,15 @@ async function _8(A = {}) {
     try {
       var c = await r1(E), d = await WebAssembly.instantiate(c, o);
       return d;
-    } catch (G) {
-      h(`failed to asynchronously prepare wasm: ${G}`), _A(G);
+    } catch (S) {
+      h(`failed to asynchronously prepare wasm: ${S}`), _A(S);
     }
   }
   async function qA(E, o, c) {
     if (!E && !y(o) && !B)
       try {
-        var d = fetch(o, { credentials: "same-origin" }), G = await WebAssembly.instantiateStreaming(d, c);
-        return G;
+        var d = fetch(o, { credentials: "same-origin" }), S = await WebAssembly.instantiateStreaming(d, c);
+        return S;
       } catch (U) {
         h(`wasm streaming compile failed: ${U}`), h("falling back to ArrayBuffer instantiation");
       }
@@ -8297,7 +8316,7 @@ async function _8(A = {}) {
   }
   async function BA() {
     function E(U, Y) {
-      return Q2 = U.exports, Q2 = p6(Q2), S6(Q2), FA(), Q2;
+      return Q2 = U.exports, Q2 = p6(Q2), G6(Q2), FA(), Q2;
     }
     function o(U) {
       return E(U.instance);
@@ -8310,8 +8329,8 @@ async function _8(A = {}) {
         });
       });
     C1 ?? (C1 = n1());
-    var d = await qA(M, C1, c), G = o(d);
-    return G;
+    var d = await qA(M, C1, c), S = o(d);
+    return S;
   }
   var MA = (E) => {
     for (; E.length > 0; )
@@ -8324,7 +8343,7 @@ async function _8(A = {}) {
       case "i8":
         return K[E >>> 0];
       case "i16":
-        return S[E >>> 1 >>> 0];
+        return G[E >>> 1 >>> 0];
       case "i32":
         return J[E >>> 2 >>> 0];
       case "i64":
@@ -8348,7 +8367,7 @@ async function _8(A = {}) {
         K[E >>> 0] = o;
         break;
       case "i16":
-        S[E >>> 1 >>> 0] = o;
+        G[E >>> 1 >>> 0] = o;
         break;
       case "i32":
         J[E >>> 2 >>> 0] = o;
@@ -8436,21 +8455,21 @@ async function _8(A = {}) {
       for (var gA = 0; gA < E.length; ++gA)
         oA(E[gA], z[gA]);
     }
-    var G = new Array(o.length), U = [], Y = 0;
+    var S = new Array(o.length), U = [], Y = 0;
     for (let [L, z] of o.entries())
-      b.hasOwnProperty(z) ? G[L] = b[z] : (U.push(z), F.hasOwnProperty(z) || (F[z] = []), F[z].push(() => {
-        G[L] = b[z], ++Y, Y === U.length && d(G);
+      b.hasOwnProperty(z) ? S[L] = b[z] : (U.push(z), F.hasOwnProperty(z) || (F[z] = []), F[z].push(() => {
+        S[L] = b[z], ++Y, Y === U.length && d(S);
       }));
-    U.length === 0 && d(G);
+    U.length === 0 && d(S);
   }, CA = function(E) {
     E >>>= 0;
     var o = ZA[E];
     delete ZA[E];
-    var c = o.rawConstructor, d = o.rawDestructor, G = o.fields, U = G.map((Y) => Y.getterReturnType).concat(G.map((Y) => Y.setterArgumentType));
+    var c = o.rawConstructor, d = o.rawDestructor, S = o.fields, U = S.map((Y) => Y.getterReturnType).concat(S.map((Y) => Y.setterArgumentType));
     QA([E], U, (Y) => {
       var L = {};
-      for (var [z, gA] of G.entries()) {
-        const eA = Y[z], lA = gA.getter, tA = gA.getterContext, wA = Y[z + G.length], uA = gA.setter, xA = gA.setterContext;
+      for (var [z, gA] of S.entries()) {
+        const eA = Y[z], lA = gA.getter, tA = gA.getterContext, wA = Y[z + S.length], uA = gA.setter, xA = gA.setterContext;
         L[gA.fieldName] = { read: (RA) => eA.fromWireType(lA(tA, RA)), write: (RA, x) => {
           var f = [];
           uA(xA, RA, wA.toWireType(f, x)), u(f);
@@ -8493,8 +8512,8 @@ async function _8(A = {}) {
       $(`Cannot register type '${d}' twice`);
     }
     if (b[E] = o, delete H[E], F.hasOwnProperty(E)) {
-      var G = F[E];
-      delete F[E], G.forEach((U) => U());
+      var S = F[E];
+      delete F[E], S.forEach((U) => U());
     }
   }
   function oA(E, o, c = {}) {
@@ -8505,7 +8524,7 @@ async function _8(A = {}) {
       case 1:
         return c ? (d) => K[d >>> 0] : (d) => k[d >>> 0];
       case 2:
-        return c ? (d) => S[d >>> 1 >>> 0] : (d) => _[d >>> 1 >>> 0];
+        return c ? (d) => G[d >>> 1 >>> 0] : (d) => _[d >>> 1 >>> 0];
       case 4:
         return c ? (d) => J[d >>> 2 >>> 0] : (d) => T[d >>> 2 >>> 0];
       case 8:
@@ -8513,23 +8532,23 @@ async function _8(A = {}) {
       default:
         throw new TypeError(`invalid integer width (${o}): ${E}`);
     }
-  }, YA = function(E, o, c, d, G) {
+  }, YA = function(E, o, c, d, S) {
     E >>>= 0, o >>>= 0, c >>>= 0, o = AA(o);
     const U = d === 0n;
     let Y = (L) => L;
     if (U) {
       const L = c * 8;
-      Y = (z) => BigInt.asUintN(L, z), G = Y(G);
+      Y = (z) => BigInt.asUintN(L, z), S = Y(S);
     }
     oA(E, { name: o, fromWireType: Y, toWireType: (L, z) => (typeof z == "number" && (z = BigInt(z)), z), readValueFromPointer: DA(o, c, !U), destructorFunction: null });
   };
   function zA(E, o, c, d) {
-    E >>>= 0, o >>>= 0, o = AA(o), oA(E, { name: o, fromWireType: function(G) {
-      return !!G;
-    }, toWireType: function(G, U) {
+    E >>>= 0, o >>>= 0, o = AA(o), oA(E, { name: o, fromWireType: function(S) {
+      return !!S;
+    }, toWireType: function(S, U) {
       return U ? c : d;
-    }, readValueFromPointer: function(G) {
-      return this.fromWireType(k[G >>> 0]);
+    }, readValueFromPointer: function(S) {
+      return this.fromWireType(k[S >>> 0]);
     }, destructorFunction: null });
   }
   var WA = (E) => ({ count: E.count, deleteScheduled: E.deleteScheduled, preservePointerOnDelete: E.preservePointerOnDelete, ptr: E.ptr, ptrType: E.ptrType, smartPtr: E.smartPtr, smartPtrType: E.smartPtrType }), o1 = (E) => {
@@ -8549,8 +8568,8 @@ async function _8(A = {}) {
   }), H1 = (o) => {
     var c = o.$$, d = !!c.smartPtr;
     if (d) {
-      var G = { $$: c };
-      NA.register(o, G, o);
+      var S = { $$: c };
+      NA.register(o, S, o);
     }
     return o;
   }, TA = (o) => NA.unregister(o), H1(E)) : (H1 = (o) => o, E), Y2 = () => {
@@ -8558,13 +8577,13 @@ async function _8(A = {}) {
     Object.assign(E, { isAliasOf(c) {
       if (!(this instanceof T1) || !(c instanceof T1))
         return !1;
-      var d = this.$$.ptrType.registeredClass, G = this.$$.ptr;
+      var d = this.$$.ptrType.registeredClass, S = this.$$.ptr;
       c.$$ = c.$$;
       for (var U = c.$$.ptrType.registeredClass, Y = c.$$.ptr; d.baseClass; )
-        G = d.upcast(G), d = d.baseClass;
+        S = d.upcast(S), d = d.baseClass;
       for (; U.baseClass; )
         Y = U.upcast(Y), U = U.baseClass;
-      return d === U && G === Y;
+      return d === U && S === Y;
     }, clone() {
       if (this.$$.ptr || o1(this), this.$$.preservePointerOnDelete)
         return this.$$.count.value += 1, this;
@@ -8585,8 +8604,8 @@ async function _8(A = {}) {
   var I1 = (E, o) => Object.defineProperty(o, "name", { value: E }), r2 = {}, J2 = (E, o, c) => {
     if (E[o].overloadTable === void 0) {
       var d = E[o];
-      E[o] = function(...G) {
-        return E[o].overloadTable.hasOwnProperty(G.length) || $(`Function '${c}' called with an invalid number of arguments (${G.length}) - expects one of (${E[o].overloadTable})!`), E[o].overloadTable[G.length].apply(this, G);
+      E[o] = function(...S) {
+        return E[o].overloadTable.hasOwnProperty(S.length) || $(`Function '${c}' called with an invalid number of arguments (${S.length}) - expects one of (${E[o].overloadTable})!`), E[o].overloadTable[S.length].apply(this, S);
       }, E[o].overloadTable = [], E[o].overloadTable[d.argCount] = d;
     }
   }, C2 = (E, o, c) => {
@@ -8596,8 +8615,8 @@ async function _8(A = {}) {
     var o = E.charCodeAt(0);
     return o >= t0 && o <= a0 ? `_${E}` : E;
   };
-  function s0(E, o, c, d, G, U, Y, L) {
-    this.name = E, this.constructor = o, this.instancePrototype = c, this.rawDestructor = d, this.baseClass = G, this.getActualType = U, this.upcast = Y, this.downcast = L, this.pureVirtualFunctions = [];
+  function s0(E, o, c, d, S, U, Y, L) {
+    this.name = E, this.constructor = o, this.instancePrototype = c, this.rawDestructor = d, this.baseClass = S, this.getActualType = U, this.upcast = Y, this.downcast = L, this.pureVirtualFunctions = [];
   }
   var r3 = (E, o, c) => {
     for (; o !== c; )
@@ -8634,8 +8653,8 @@ async function _8(A = {}) {
           if (o.$$.smartPtrType === this)
             c = o.$$.smartPtr;
           else {
-            var G = o.clone();
-            c = this.rawShare(c, Q1.toHandle(() => G.delete())), E !== null && E.push(this.rawDestructor, c);
+            var S = o.clone();
+            c = this.rawShare(c, Q1.toHandle(() => S.delete())), E !== null && E.push(this.rawDestructor, c);
           }
           break;
         default:
@@ -8650,12 +8669,12 @@ async function _8(A = {}) {
     var c = o.$$.ptrType.registeredClass, d = r3(o.$$.ptr, c, this.registeredClass);
     return d;
   }
-  var n5 = (E, o, c) => {
+  var s5 = (E, o, c) => {
     if (o === c)
       return E;
     if (c.baseClass === void 0)
       return null;
-    var d = n5(E, o, c.baseClass);
+    var d = s5(E, o, c.baseClass);
     return d === null ? null : c.downcast(d);
   }, c0 = {}, m0 = (E, o) => {
     for (o === void 0 && $("ptr should not be undefined"); E.baseClass; )
@@ -8677,16 +8696,16 @@ async function _8(A = {}) {
       var d = c.clone();
       return this.destructor(E), d;
     }
-    function G() {
+    function S() {
       return this.isSmartPointer ? b2(this.registeredClass.instancePrototype, { ptrType: this.pointeeType, ptr: o, smartPtrType: this, smartPtr: E }) : b2(this.registeredClass.instancePrototype, { ptrType: this, ptr: E });
     }
     var U = this.registeredClass.getActualType(o), Y = r2[U];
     if (!Y)
-      return G.call(this);
+      return S.call(this);
     var L;
     this.isConst ? L = Y.constPointerType : L = Y.pointerType;
-    var z = n5(o, this.registeredClass, L.registeredClass);
-    return z === null ? G.call(this) : this.isSmartPointer ? b2(L.registeredClass.instancePrototype, { ptrType: L, ptr: z, smartPtrType: this, smartPtr: E }) : b2(L.registeredClass.instancePrototype, { ptrType: L, ptr: z });
+    var z = s5(o, this.registeredClass, L.registeredClass);
+    return z === null ? S.call(this) : this.isSmartPointer ? b2(L.registeredClass.instancePrototype, { ptrType: L, ptr: z, smartPtrType: this, smartPtr: E }) : b2(L.registeredClass.instancePrototype, { ptrType: L, ptr: z });
   }
   var u0 = () => {
     Object.assign(L2.prototype, { getPointee(E) {
@@ -8695,18 +8714,18 @@ async function _8(A = {}) {
       this.rawDestructor?.(E);
     }, readValueFromPointer: R, fromWireType: d0 });
   };
-  function L2(E, o, c, d, G, U, Y, L, z, gA, eA) {
-    this.name = E, this.registeredClass = o, this.isReference = c, this.isConst = d, this.isSmartPointer = G, this.pointeeType = U, this.sharingPolicy = Y, this.rawGetPointee = L, this.rawConstructor = z, this.rawShare = gA, this.rawDestructor = eA, !G && o.baseClass === void 0 ? d ? (this.toWireType = r0, this.destructorFunction = null) : (this.toWireType = h0, this.destructorFunction = null) : this.toWireType = D0;
+  function L2(E, o, c, d, S, U, Y, L, z, gA, eA) {
+    this.name = E, this.registeredClass = o, this.isReference = c, this.isConst = d, this.isSmartPointer = S, this.pointeeType = U, this.sharingPolicy = Y, this.rawGetPointee = L, this.rawConstructor = z, this.rawShare = gA, this.rawDestructor = eA, !S && o.baseClass === void 0 ? d ? (this.toWireType = r0, this.destructorFunction = null) : (this.toWireType = h0, this.destructorFunction = null) : this.toWireType = D0;
   }
-  var s5 = (E, o, c) => {
+  var r5 = (E, o, c) => {
     I.hasOwnProperty(E) || j("Replacing nonexistent public symbol"), I[E].overloadTable !== void 0 && c !== void 0 ? I[E].overloadTable[c] = o : (I[E] = o, I[E].argCount = c);
   }, H2 = (E) => u2.get(E), y0 = (E, o, c = [], d = !1) => {
-    var G = H2(o), U = G(...c);
+    var S = H2(o), U = S(...c);
     function Y(L) {
       return E[0] == "p" ? L >>> 0 : L;
     }
     return Y(U);
-  }, M0 = (E, o, c = !1) => (...d) => y0(E, o, d, c), S1 = (E, o, c = !1) => {
+  }, M0 = (E, o, c = !1) => (...d) => y0(E, o, d, c), G1 = (E, o, c = !1) => {
     E = AA(E);
     function d() {
       if (E.includes("p"))
@@ -8714,29 +8733,29 @@ async function _8(A = {}) {
       var U = H2(o);
       return U;
     }
-    var G = d();
-    return typeof G != "function" && $(`unknown function pointer with signature ${E}: ${o}`), G;
+    var S = d();
+    return typeof S != "function" && $(`unknown function pointer with signature ${E}: ${o}`), S;
   };
   class N0 extends Error {
   }
-  var r5 = (E) => {
-    var o = x5(E), c = AA(o);
+  var D5 = (E) => {
+    var o = k5(E), c = AA(o);
     return O1(o), c;
   }, _2 = (E, o) => {
     var c = [], d = {};
-    function G(U) {
+    function S(U) {
       if (!d[U] && !b[U]) {
         if (H[U]) {
-          H[U].forEach(G);
+          H[U].forEach(S);
           return;
         }
         c.push(U), d[U] = !0;
       }
     }
-    throw o.forEach(G), new N0(`${E}: ` + c.map(r5).join([", "]));
+    throw o.forEach(S), new N0(`${E}: ` + c.map(D5).join([", "]));
   };
-  function x0(E, o, c, d, G, U, Y, L, z, gA, eA, lA, tA) {
-    E >>>= 0, o >>>= 0, c >>>= 0, d >>>= 0, G >>>= 0, U >>>= 0, Y >>>= 0, L >>>= 0, z >>>= 0, gA >>>= 0, eA >>>= 0, lA >>>= 0, tA >>>= 0, eA = AA(eA), U = S1(G, U), L && (L = S1(Y, L)), gA && (gA = S1(z, gA)), tA = S1(lA, tA);
+  function x0(E, o, c, d, S, U, Y, L, z, gA, eA, lA, tA) {
+    E >>>= 0, o >>>= 0, c >>>= 0, d >>>= 0, S >>>= 0, U >>>= 0, Y >>>= 0, L >>>= 0, z >>>= 0, gA >>>= 0, eA >>>= 0, lA >>>= 0, tA >>>= 0, eA = AA(eA), U = G1(S, U), L && (L = G1(Y, L)), gA && (gA = G1(z, gA)), tA = G1(lA, tA);
     var wA = n0(eA);
     C2(wA, function() {
       _2(`Cannot construct ${eA} due to unbound types`, [d]);
@@ -8759,7 +8778,7 @@ async function _8(A = {}) {
       var V = new s0(eA, x, f, tA, xA, U, L, gA);
       V.baseClass && ((bA = V.baseClass).__derivedClasses ?? (bA.__derivedClasses = []), V.baseClass.__derivedClasses.push(V));
       var X = new L2(eA, V, !0, !1, !1), hA = new L2(eA + "*", V, !1, !1, !1), KA = new L2(eA + " const*", V, !1, !0, !1);
-      return r2[E] = { pointerType: hA, constPointerType: KA }, s5(wA, x), [X, hA, KA];
+      return r2[E] = { pointerType: hA, constPointerType: KA }, r5(wA, x), [X, hA, KA];
     });
   }
   var h3 = (E, o) => {
@@ -8773,194 +8792,194 @@ async function _8(A = {}) {
         return !0;
     return !1;
   }
-  var K0 = { ftf: function(o, c, d, G, U, Y, L) {
+  var K0 = { ftf: function(o, c, d, S, U, Y, L) {
     return function() {
-      var z = d(G), gA = Y(z);
+      var z = d(S), gA = Y(z);
       return gA;
     };
-  }, tffn: function(o, c, d, G, U, Y, L) {
+  }, tffn: function(o, c, d, S, U, Y, L) {
     return function() {
       var z = L(null, this);
-      d(G, z);
+      d(S, z);
     };
-  }, ttfn: function(o, c, d, G, U, Y, L) {
+  }, ttfn: function(o, c, d, S, U, Y, L) {
     return function() {
-      var z = L(null, this), gA = d(G, z), eA = Y(gA);
+      var z = L(null, this), gA = d(S, z), eA = Y(gA);
       return eA;
     };
-  }, ttfnn: function(o, c, d, G, U, Y, L, z) {
+  }, ttfnn: function(o, c, d, S, U, Y, L, z) {
     return function(gA) {
-      var eA = L(null, this), lA = z(null, gA), tA = d(G, eA, lA), wA = Y(tA);
+      var eA = L(null, this), lA = z(null, gA), tA = d(S, eA, lA), wA = Y(tA);
       return wA;
     };
-  }, ttfnnn: function(o, c, d, G, U, Y, L, z, gA) {
+  }, ttfnnn: function(o, c, d, S, U, Y, L, z, gA) {
     return function(eA, lA) {
-      var tA = L(null, this), wA = z(null, eA), uA = gA(null, lA), xA = d(G, tA, wA, uA), RA = Y(xA);
+      var tA = L(null, this), wA = z(null, eA), uA = gA(null, lA), xA = d(S, tA, wA, uA), RA = Y(xA);
       return RA;
     };
-  }, ttfnntnnn: function(o, c, d, G, U, Y, L, z, gA, eA, lA, tA, wA) {
+  }, ttfnntnnn: function(o, c, d, S, U, Y, L, z, gA, eA, lA, tA, wA) {
     return function(uA, xA, RA, x, f) {
-      var V = L(null, this), X = z(null, uA), hA = gA(null, xA), KA = eA(null, RA), bA = lA(null, x), $A = tA(null, f), OA = d(G, V, X, hA, KA, bA, $A);
+      var V = L(null, this), X = z(null, uA), hA = gA(null, xA), KA = eA(null, RA), bA = lA(null, x), $A = tA(null, f), OA = d(S, V, X, hA, KA, bA, $A);
       wA(hA);
       var p1 = Y(OA);
       return p1;
     };
-  }, tffnt: function(o, c, d, G, U, Y, L, z, gA) {
+  }, tffnt: function(o, c, d, S, U, Y, L, z, gA) {
     return function(eA) {
       var lA = L(null, this), tA = z(null, eA);
-      d(G, lA, tA), gA(tA);
+      d(S, lA, tA), gA(tA);
     };
-  }, tffnnt: function(o, c, d, G, U, Y, L, z, gA, eA) {
+  }, tffnnt: function(o, c, d, S, U, Y, L, z, gA, eA) {
     return function(lA, tA) {
       var wA = L(null, this), uA = z(null, lA), xA = gA(null, tA);
-      d(G, wA, uA, xA), eA(xA);
+      d(S, wA, uA, xA), eA(xA);
     };
-  }, ttfnnt: function(o, c, d, G, U, Y, L, z, gA, eA) {
+  }, ttfnnt: function(o, c, d, S, U, Y, L, z, gA, eA) {
     return function(lA, tA) {
-      var wA = L(null, this), uA = z(null, lA), xA = gA(null, tA), RA = d(G, wA, uA, xA);
+      var wA = L(null, this), uA = z(null, lA), xA = gA(null, tA), RA = d(S, wA, uA, xA);
       eA(xA);
       var x = Y(RA);
       return x;
     };
-  }, tffnn: function(o, c, d, G, U, Y, L, z) {
+  }, tffnn: function(o, c, d, S, U, Y, L, z) {
     return function(gA) {
       var eA = L(null, this), lA = z(null, gA);
-      d(G, eA, lA);
+      d(S, eA, lA);
     };
-  }, tffnnn: function(o, c, d, G, U, Y, L, z, gA) {
+  }, tffnnn: function(o, c, d, S, U, Y, L, z, gA) {
     return function(eA, lA) {
       var tA = L(null, this), wA = z(null, eA), uA = gA(null, lA);
-      d(G, tA, wA, uA);
+      d(S, tA, wA, uA);
     };
-  }, ftfnn: function(o, c, d, G, U, Y, L, z, gA) {
+  }, ftfnn: function(o, c, d, S, U, Y, L, z, gA) {
     return function(eA, lA) {
-      var tA = z(null, eA), wA = gA(null, lA), uA = d(G, tA, wA), xA = Y(uA);
+      var tA = z(null, eA), wA = gA(null, lA), uA = d(S, tA, wA), xA = Y(uA);
       return xA;
     };
-  }, ttfnt: function(o, c, d, G, U, Y, L, z, gA) {
+  }, ttfnt: function(o, c, d, S, U, Y, L, z, gA) {
     return function(eA) {
-      var lA = L(null, this), tA = z(null, eA), wA = d(G, lA, tA);
+      var lA = L(null, this), tA = z(null, eA), wA = d(S, lA, tA);
       gA(tA);
       var uA = Y(wA);
       return uA;
     };
-  }, ttfnnnnn: function(o, c, d, G, U, Y, L, z, gA, eA, lA) {
+  }, ttfnnnnn: function(o, c, d, S, U, Y, L, z, gA, eA, lA) {
     return function(tA, wA, uA, xA) {
-      var RA = L(null, this), x = z(null, tA), f = gA(null, wA), V = eA(null, uA), X = lA(null, xA), hA = d(G, RA, x, f, V, X), KA = Y(hA);
+      var RA = L(null, this), x = z(null, tA), f = gA(null, wA), V = eA(null, uA), X = lA(null, xA), hA = d(S, RA, x, f, V, X), KA = Y(hA);
       return KA;
     };
-  }, ftftn: function(o, c, d, G, U, Y, L, z, gA, eA) {
+  }, ftftn: function(o, c, d, S, U, Y, L, z, gA, eA) {
     return function(lA, tA) {
-      var wA = z(null, lA), uA = gA(null, tA), xA = d(G, wA, uA);
+      var wA = z(null, lA), uA = gA(null, tA), xA = d(S, wA, uA);
       eA(wA);
       var RA = Y(xA);
       return RA;
     };
-  }, ftfn: function(o, c, d, G, U, Y, L, z) {
+  }, ftfn: function(o, c, d, S, U, Y, L, z) {
     return function(gA) {
-      var eA = z(null, gA), lA = d(G, eA), tA = Y(lA);
+      var eA = z(null, gA), lA = d(S, eA), tA = Y(lA);
       return tA;
     };
-  }, fffnn: function(o, c, d, G, U, Y, L, z, gA) {
+  }, fffnn: function(o, c, d, S, U, Y, L, z, gA) {
     return function(eA, lA) {
       var tA = z(null, eA), wA = gA(null, lA);
-      d(G, tA, wA);
+      d(S, tA, wA);
     };
-  }, ttfntn: function(o, c, d, G, U, Y, L, z, gA, eA) {
+  }, ttfntn: function(o, c, d, S, U, Y, L, z, gA, eA) {
     return function(lA, tA) {
-      var wA = L(null, this), uA = z(null, lA), xA = gA(null, tA), RA = d(G, wA, uA, xA);
+      var wA = L(null, this), uA = z(null, lA), xA = gA(null, tA), RA = d(S, wA, uA, xA);
       eA(uA);
       var x = Y(RA);
       return x;
     };
-  }, ttfnnnn: function(o, c, d, G, U, Y, L, z, gA, eA) {
+  }, ttfnnnn: function(o, c, d, S, U, Y, L, z, gA, eA) {
     return function(lA, tA, wA) {
-      var uA = L(null, this), xA = z(null, lA), RA = gA(null, tA), x = eA(null, wA), f = d(G, uA, xA, RA, x), V = Y(f);
+      var uA = L(null, this), xA = z(null, lA), RA = gA(null, tA), x = eA(null, wA), f = d(S, uA, xA, RA, x), V = Y(f);
       return V;
     };
-  }, ttfntt: function(o, c, d, G, U, Y, L, z, gA, eA, lA) {
+  }, ttfntt: function(o, c, d, S, U, Y, L, z, gA, eA, lA) {
     return function(tA, wA) {
-      var uA = L(null, this), xA = z(null, tA), RA = gA(null, wA), x = d(G, uA, xA, RA);
+      var uA = L(null, this), xA = z(null, tA), RA = gA(null, wA), x = d(S, uA, xA, RA);
       eA(xA), lA(RA);
       var f = Y(x);
       return f;
     };
-  }, ftfnnnnn: function(o, c, d, G, U, Y, L, z, gA, eA, lA, tA) {
+  }, ftfnnnnn: function(o, c, d, S, U, Y, L, z, gA, eA, lA, tA) {
     return function(wA, uA, xA, RA, x) {
-      var f = z(null, wA), V = gA(null, uA), X = eA(null, xA), hA = lA(null, RA), KA = tA(null, x), bA = d(G, f, V, X, hA, KA), $A = Y(bA);
+      var f = z(null, wA), V = gA(null, uA), X = eA(null, xA), hA = lA(null, RA), KA = tA(null, x), bA = d(S, f, V, X, hA, KA), $A = Y(bA);
       return $A;
     };
-  }, ftfnnnnt: function(o, c, d, G, U, Y, L, z, gA, eA, lA, tA, wA) {
+  }, ftfnnnnt: function(o, c, d, S, U, Y, L, z, gA, eA, lA, tA, wA) {
     return function(uA, xA, RA, x, f) {
-      var V = z(null, uA), X = gA(null, xA), hA = eA(null, RA), KA = lA(null, x), bA = tA(null, f), $A = d(G, V, X, hA, KA, bA);
+      var V = z(null, uA), X = gA(null, xA), hA = eA(null, RA), KA = lA(null, x), bA = tA(null, f), $A = d(S, V, X, hA, KA, bA);
       wA(bA);
       var OA = Y($A);
       return OA;
     };
-  }, ftfnnn: function(o, c, d, G, U, Y, L, z, gA, eA) {
+  }, ftfnnn: function(o, c, d, S, U, Y, L, z, gA, eA) {
     return function(lA, tA, wA) {
-      var uA = z(null, lA), xA = gA(null, tA), RA = eA(null, wA), x = d(G, uA, xA, RA), f = Y(x);
+      var uA = z(null, lA), xA = gA(null, tA), RA = eA(null, wA), x = d(S, uA, xA, RA), f = Y(x);
       return f;
     };
-  }, ftfntnnn: function(o, c, d, G, U, Y, L, z, gA, eA, lA, tA, wA) {
+  }, ftfntnnn: function(o, c, d, S, U, Y, L, z, gA, eA, lA, tA, wA) {
     return function(uA, xA, RA, x, f) {
-      var V = z(null, uA), X = gA(null, xA), hA = eA(null, RA), KA = lA(null, x), bA = tA(null, f), $A = d(G, V, X, hA, KA, bA);
+      var V = z(null, uA), X = gA(null, xA), hA = eA(null, RA), KA = lA(null, x), bA = tA(null, f), $A = d(S, V, X, hA, KA, bA);
       wA(X);
       var OA = Y($A);
       return OA;
     };
-  }, fffn: function(o, c, d, G, U, Y, L, z) {
+  }, fffn: function(o, c, d, S, U, Y, L, z) {
     return function(gA) {
       var eA = z(null, gA);
-      d(G, eA);
+      d(S, eA);
     };
-  }, fff: function(o, c, d, G, U, Y, L) {
+  }, fff: function(o, c, d, S, U, Y, L) {
     return function() {
-      d(G);
+      d(S);
     };
   } };
-  function G0(E, o, c, d) {
-    const G = [o ? "t" : "f", c ? "t" : "f", d ? "t" : "f"];
+  function S0(E, o, c, d) {
+    const S = [o ? "t" : "f", c ? "t" : "f", d ? "t" : "f"];
     for (let U = o ? 1 : 2; U < E.length; ++U) {
       const Y = E[U];
       let L = "";
-      Y.destructorFunction === void 0 ? L = "u" : Y.destructorFunction === null ? L = "n" : L = "t", G.push(L);
+      Y.destructorFunction === void 0 ? L = "u" : Y.destructorFunction === null ? L = "n" : L = "t", S.push(L);
     }
-    return G.join("");
+    return S.join("");
   }
-  function c3(E, o, c, d, G, U) {
+  function c3(E, o, c, d, S, U) {
     var Y = o.length;
     Y < 2 && $("argTypes array size mismatch! Must at least get return value and 'this' types!");
-    for (var L = o[1] !== null && c !== null, z = k0(o), gA = !o[0].isVoid, eA = o[0], lA = o[1], tA = [E, $, d, G, u, eA.fromWireType.bind(eA), lA?.toWireType.bind(lA)], wA = 2; wA < Y; ++wA) {
+    for (var L = o[1] !== null && c !== null, z = k0(o), gA = !o[0].isVoid, eA = o[0], lA = o[1], tA = [E, $, d, S, u, eA.fromWireType.bind(eA), lA?.toWireType.bind(lA)], wA = 2; wA < Y; ++wA) {
       var uA = o[wA];
       tA.push(uA.toWireType.bind(uA));
     }
     if (!z)
       for (var wA = L ? 1 : 2; wA < o.length; ++wA)
         o[wA].destructorFunction !== null && tA.push(o[wA].destructorFunction);
-    var xA = G0(o, L, gA, U), RA = K0[xA](...tA);
+    var xA = S0(o, L, gA, U), RA = K0[xA](...tA);
     return I1(E, RA);
   }
-  var S0 = function(E, o, c, d, G, U) {
-    E >>>= 0, c >>>= 0, d >>>= 0, G >>>= 0, U >>>= 0;
+  var G0 = function(E, o, c, d, S, U) {
+    E >>>= 0, c >>>= 0, d >>>= 0, S >>>= 0, U >>>= 0;
     var Y = h3(o, c);
-    G = S1(d, G), QA([], [E], (L) => {
+    S = G1(d, S), QA([], [E], (L) => {
       L = L[0];
       var z = `constructor ${L.name}`;
       if (L.registeredClass.constructor_body === void 0 && (L.registeredClass.constructor_body = []), L.registeredClass.constructor_body[o - 1] !== void 0)
         throw new cA(`Cannot register multiple constructors with identical number of parameters (${o - 1}) for class '${L.name}'! Overload resolution is currently only performed using the parameter count, not actual type info!`);
       return L.registeredClass.constructor_body[o - 1] = () => {
         _2(`Cannot construct ${L.name} due to unbound types`, Y);
-      }, QA([], Y, (gA) => (gA.splice(1, 0, null), L.registeredClass.constructor_body[o - 1] = c3(z, gA, null, G, U), [])), [];
+      }, QA([], Y, (gA) => (gA.splice(1, 0, null), L.registeredClass.constructor_body[o - 1] = c3(z, gA, null, S, U), [])), [];
     });
-  }, D5 = (E) => {
+  }, h5 = (E) => {
     E = E.trim();
     const o = E.indexOf("(");
     return o === -1 ? E : E.slice(0, o);
-  }, R0 = function(E, o, c, d, G, U, Y, L, z, gA) {
-    E >>>= 0, o >>>= 0, d >>>= 0, G >>>= 0, U >>>= 0, Y >>>= 0;
+  }, R0 = function(E, o, c, d, S, U, Y, L, z, gA) {
+    E >>>= 0, o >>>= 0, d >>>= 0, S >>>= 0, U >>>= 0, Y >>>= 0;
     var eA = h3(c, d);
-    o = AA(o), o = D5(o), U = S1(G, U, z), QA([], [E], (lA) => {
+    o = AA(o), o = h5(o), U = G1(S, U, z), QA([], [E], (lA) => {
       lA = lA[0];
       var tA = `${lA.name}.${o}`;
       o.startsWith("@@") && (o = Symbol[o.substring(2)]), L && lA.registeredClass.pureVirtualFunctions.push(o);
@@ -8973,9 +8992,9 @@ async function _8(A = {}) {
         return uA[o].overloadTable === void 0 ? (x.argCount = c - 2, uA[o] = x) : uA[o].overloadTable[c - 2] = x, [];
       }), [];
     });
-  }, h5 = [], q2 = [0, 1, , 1, null, 1, !0, 1, !1, 1];
+  }, c5 = [], q2 = [0, 1, , 1, null, 1, !0, 1, !1, 1];
   function m3(E) {
-    E >>>= 0, E > 9 && --q2[E + 1] === 0 && (q2[E] = void 0, h5.push(E));
+    E >>>= 0, E > 9 && --q2[E + 1] === 0 && (q2[E] = void 0, c5.push(E));
   }
   var Q1 = { toValue: (E) => (E || $(`Cannot use deleted val. handle = ${E}`), q2[E]), toHandle: (E) => {
     switch (E) {
@@ -8988,16 +9007,16 @@ async function _8(A = {}) {
       case !1:
         return 8;
       default: {
-        const o = h5.pop() || q2.length;
+        const o = c5.pop() || q2.length;
         return q2[o] = E, q2[o + 1] = 1, o;
       }
     }
-  } }, c5 = { name: "emscripten::val", fromWireType: (E) => {
+  } }, m5 = { name: "emscripten::val", fromWireType: (E) => {
     var o = Q1.toValue(E);
     return m3(E), o;
   }, toWireType: (E, o) => Q1.toHandle(o), readValueFromPointer: R, destructorFunction: null };
   function p0(E) {
-    return E >>>= 0, oA(E, c5);
+    return E >>>= 0, oA(E, m5);
   }
   var w3 = (E, o, c) => {
     switch (o) {
@@ -9009,7 +9028,7 @@ async function _8(A = {}) {
         };
       case 2:
         return c ? function(d) {
-          return this.fromWireType(S[d >>> 1 >>> 0]);
+          return this.fromWireType(G[d >>> 1 >>> 0]);
         } : function(d) {
           return this.fromWireType(_[d >>> 1 >>> 0]);
         };
@@ -9026,9 +9045,9 @@ async function _8(A = {}) {
   function f0(E) {
     return E === 0 ? "object" : E === 1 ? "number" : "string";
   }
-  function F0(E, o, c, d, G) {
+  function F0(E, o, c, d, S) {
     E >>>= 0, o >>>= 0, c >>>= 0, o = AA(o);
-    const U = f0(G);
+    const U = f0(S);
     switch (U) {
       case "object": {
         let gA = function() {
@@ -9054,18 +9073,18 @@ async function _8(A = {}) {
       }
     }
   }
-  var m5 = (E, o) => {
+  var w5 = (E, o) => {
     var c = b[E];
-    return c === void 0 && $(`${o} has unknown type ${r5(E)}`), c;
+    return c === void 0 && $(`${o} has unknown type ${D5(E)}`), c;
   };
   function U0(E, o, c) {
     E >>>= 0, o >>>= 0;
-    var d = m5(E, "enum");
+    var d = w5(E, "enum");
     switch (o = AA(o), d.valueType) {
       case "object": {
-        var G = d.constructor, U = Object.create(d.constructor.prototype, { value: { value: c }, constructor: { value: I1(`${d.name}_${o}`, function() {
+        var S = d.constructor, U = Object.create(d.constructor.prototype, { value: { value: c }, constructor: { value: I1(`${d.name}_${o}`, function() {
         }) } });
-        G.values[c] = U, G[o] = U;
+        S.values[c] = U, S[o] = U;
         break;
       }
       case "number": {
@@ -9092,32 +9111,32 @@ async function _8(A = {}) {
         throw new TypeError(`invalid float width (${o}): ${E}`);
     }
   }, J0 = function(E, o, c) {
-    E >>>= 0, o >>>= 0, c >>>= 0, o = AA(o), oA(E, { name: o, fromWireType: (d) => d, toWireType: (d, G) => G, readValueFromPointer: Y0(o, c), destructorFunction: null });
+    E >>>= 0, o >>>= 0, c >>>= 0, o = AA(o), oA(E, { name: o, fromWireType: (d) => d, toWireType: (d, S) => S, readValueFromPointer: Y0(o, c), destructorFunction: null });
   };
-  function b0(E, o, c, d, G, U, Y, L) {
-    E >>>= 0, c >>>= 0, d >>>= 0, G >>>= 0, U >>>= 0;
+  function b0(E, o, c, d, S, U, Y, L) {
+    E >>>= 0, c >>>= 0, d >>>= 0, S >>>= 0, U >>>= 0;
     var z = h3(o, c);
-    E = AA(E), E = D5(E), G = S1(d, G, Y), C2(E, function() {
+    E = AA(E), E = h5(E), S = G1(d, S, Y), C2(E, function() {
       _2(`Cannot call ${E} due to unbound types`, z);
     }, o - 1), QA([], z, (gA) => {
       var eA = [gA[0], null].concat(gA.slice(1));
-      return s5(E, c3(E, eA, null, G, U, Y), o - 1), [];
+      return r5(E, c3(E, eA, null, S, U, Y), o - 1), [];
     });
   }
-  var L0 = function(E, o, c, d, G) {
+  var L0 = function(E, o, c, d, S) {
     E >>>= 0, o >>>= 0, c >>>= 0, o = AA(o);
     const U = d === 0;
     let Y = (z) => z;
     if (U) {
       var L = 32 - 8 * c;
-      Y = (z) => z << L >>> L, G = Y(G);
+      Y = (z) => z << L >>> L, S = Y(S);
     }
     oA(E, { name: o, fromWireType: Y, toWireType: (z, gA) => gA, readValueFromPointer: DA(o, c, d !== 0), destructorFunction: null });
   }, H0 = (E, o, c) => {
-    const d = (G, U) => {
+    const d = (S, U) => {
       let Y = 0;
       return { next() {
-        if (Y >= G)
+        if (Y >= S)
           return { done: !0 };
         const L = Y;
         return Y++, { value: U(L), done: !1 };
@@ -9126,31 +9145,31 @@ async function _8(A = {}) {
       } };
     };
     E[Symbol.iterator] || (E[Symbol.iterator] = function() {
-      const G = this[o]();
-      return d(G, (U) => this[c](U));
+      const S = this[o]();
+      return d(S, (U) => this[c](U));
     });
   }, _0 = function(E, o, c, d) {
-    E >>>= 0, o >>>= 0, c >>>= 0, d >>>= 0, c = AA(c), d = AA(d), QA([], [E, o], (G) => {
-      const U = G[0];
+    E >>>= 0, o >>>= 0, c >>>= 0, d >>>= 0, c = AA(c), d = AA(d), QA([], [E, o], (S) => {
+      const U = S[0];
       return H0(U.registeredClass.instancePrototype, c, d), [];
     });
   };
   function v0(E, o, c) {
     E >>>= 0, c >>>= 0;
-    var d = [Int8Array, Uint8Array, Int16Array, Uint16Array, Int32Array, Uint32Array, Float32Array, Float64Array, BigInt64Array, BigUint64Array], G = d[o];
+    var d = [Int8Array, Uint8Array, Int16Array, Uint16Array, Int32Array, Uint32Array, Float32Array, Float64Array, BigInt64Array, BigUint64Array], S = d[o];
     function U(Y) {
       var L = T[Y >>> 2 >>> 0], z = T[Y + 4 >>> 2 >>> 0];
-      return new G(K.buffer, z, L);
+      return new S(K.buffer, z, L);
     }
     c = AA(c), oA(E, { name: c, fromWireType: U, readValueFromPointer: U }, { ignoreDuplicateRegistrations: !0 });
   }
-  var P0 = Object.assign({ optional: !0 }, c5);
+  var P0 = Object.assign({ optional: !0 }, m5);
   function V0(E, o) {
     E >>>= 0, oA(E, P0);
   }
   var T0 = (E, o, c, d) => {
     if (c >>>= 0, !(d > 0)) return 0;
-    for (var G = c, U = c + d - 1, Y = 0; Y < E.length; ++Y) {
+    for (var S = c, U = c + d - 1, Y = 0; Y < E.length; ++Y) {
       var L = E.codePointAt(Y);
       if (L <= 127) {
         if (c >= U) break;
@@ -9166,24 +9185,24 @@ async function _8(A = {}) {
         o[c++ >>> 0] = 240 | L >> 18, o[c++ >>> 0] = 128 | L >> 12 & 63, o[c++ >>> 0] = 128 | L >> 6 & 63, o[c++ >>> 0] = 128 | L & 63, Y++;
       }
     }
-    return o[c >>> 0] = 0, c - G;
+    return o[c >>> 0] = 0, c - S;
   }, O0 = (E, o, c) => T0(E, k, o, c), j0 = (E) => {
     for (var o = 0, c = 0; c < E.length; ++c) {
       var d = E.charCodeAt(c);
       d <= 127 ? o++ : d <= 2047 ? o += 2 : d >= 55296 && d <= 57343 ? (o += 4, ++c) : o += 3;
     }
     return o;
-  }, w5 = globalThis.TextDecoder && new TextDecoder(), d5 = (E, o, c, d) => {
-    var G = o + c;
-    if (d) return G;
-    for (; E[o] && !(o >= G); ) ++o;
+  }, d5 = globalThis.TextDecoder && new TextDecoder(), u5 = (E, o, c, d) => {
+    var S = o + c;
+    if (d) return S;
+    for (; E[o] && !(o >= S); ) ++o;
     return o;
   }, W0 = (E, o = 0, c, d) => {
     o >>>= 0;
-    var G = d5(E, o, c, d);
-    if (G - o > 16 && E.buffer && w5)
-      return w5.decode(E.subarray(o, G));
-    for (var U = ""; o < G; ) {
+    var S = u5(E, o, c, d);
+    if (S - o > 16 && E.buffer && d5)
+      return d5.decode(E.subarray(o, S));
+    for (var U = ""; o < S; ) {
       var Y = E[o++];
       if (!(Y & 128)) {
         U += String.fromCharCode(Y);
@@ -9206,22 +9225,22 @@ async function _8(A = {}) {
   }, Z0 = (E, o, c) => (E >>>= 0, E ? W0(k, E, o, c) : "");
   function z0(E, o) {
     E >>>= 0, o >>>= 0, o = AA(o), oA(E, { name: o, fromWireType(c) {
-      var d = T[c >>> 2 >>> 0], G = c + 4, U;
-      return U = Z0(G, d, !0), O1(c), U;
+      var d = T[c >>> 2 >>> 0], S = c + 4, U;
+      return U = Z0(S, d, !0), O1(c), U;
     }, toWireType(c, d) {
       d instanceof ArrayBuffer && (d = new Uint8Array(d));
-      var G, U = typeof d == "string";
-      U || ArrayBuffer.isView(d) && d.BYTES_PER_ELEMENT == 1 || $("Cannot pass non-string to std::string"), U ? G = j0(d) : G = d.length;
-      var Y = M3(4 + G + 1), L = Y + 4;
-      return T[Y >>> 2 >>> 0] = G, U ? O0(d, L, G + 1) : k.set(d, L >>> 0), c !== null && c.push(O1, Y), Y;
+      var S, U = typeof d == "string";
+      U || ArrayBuffer.isView(d) && d.BYTES_PER_ELEMENT == 1 || $("Cannot pass non-string to std::string"), U ? S = j0(d) : S = d.length;
+      var Y = M3(4 + S + 1), L = Y + 4;
+      return T[Y >>> 2 >>> 0] = S, U ? O0(d, L, S + 1) : k.set(d, L >>> 0), c !== null && c.push(O1, Y), Y;
     }, readValueFromPointer: R, destructorFunction(c) {
       O1(c);
     } });
   }
-  var u5 = globalThis.TextDecoder ? new TextDecoder("utf-16le") : void 0, X0 = (E, o, c) => {
-    var d = E >>> 1, G = d5(_, d, o / 2, c);
-    if (G - d > 16 && u5) return u5.decode(_.subarray(d >>> 0, G >>> 0));
-    for (var U = "", Y = d; Y < G; ++Y) {
+  var y5 = globalThis.TextDecoder ? new TextDecoder("utf-16le") : void 0, X0 = (E, o, c) => {
+    var d = E >>> 1, S = u5(_, d, o / 2, c);
+    if (S - d > 16 && y5) return y5.decode(_.subarray(d >>> 0, S >>> 0));
+    for (var U = "", Y = d; Y < S; ++Y) {
       var L = _[Y >>> 0];
       U += String.fromCharCode(L);
     }
@@ -9229,23 +9248,23 @@ async function _8(A = {}) {
   }, $0 = (E, o, c) => {
     if (c ?? (c = 2147483647), c < 2) return 0;
     c -= 2;
-    for (var d = o, G = c < E.length * 2 ? c / 2 : E.length, U = 0; U < G; ++U) {
+    for (var d = o, S = c < E.length * 2 ? c / 2 : E.length, U = 0; U < S; ++U) {
       var Y = E.charCodeAt(U);
-      S[o >>> 1 >>> 0] = Y, o += 2;
+      G[o >>> 1 >>> 0] = Y, o += 2;
     }
-    return S[o >>> 1 >>> 0] = 0, o - d;
+    return G[o >>> 1 >>> 0] = 0, o - d;
   }, A6 = (E) => E.length * 2, g6 = (E, o, c) => {
-    for (var d = "", G = E >>> 2, U = 0; !(U >= o / 4); U++) {
-      var Y = T[G + U >>> 0];
+    for (var d = "", S = E >>> 2, U = 0; !(U >= o / 4); U++) {
+      var Y = T[S + U >>> 0];
       if (!Y && !c) break;
       d += String.fromCodePoint(Y);
     }
     return d;
   }, I6 = (E, o, c) => {
     if (o >>>= 0, c ?? (c = 2147483647), c < 4) return 0;
-    for (var d = o, G = d + c - 4, U = 0; U < E.length; ++U) {
+    for (var d = o, S = d + c - 4, U = 0; U < E.length; ++U) {
       var Y = E.codePointAt(U);
-      if (Y > 65535 && U++, J[o >>> 2 >>> 0] = Y, o += 4, o + 4 > G) break;
+      if (Y > 65535 && U++, J[o >>> 2 >>> 0] = Y, o += 4, o + 4 > S) break;
     }
     return J[o >>> 2 >>> 0] = 0, o - d;
   }, C6 = (E) => {
@@ -9257,23 +9276,23 @@ async function _8(A = {}) {
   };
   function q6(E, o, c) {
     E >>>= 0, o >>>= 0, c >>>= 0, c = AA(c);
-    var d, G, U;
-    o === 2 ? (d = X0, G = $0, U = A6) : (d = g6, G = I6, U = C6), oA(E, { name: c, fromWireType: (Y) => {
+    var d, S, U;
+    o === 2 ? (d = X0, S = $0, U = A6) : (d = g6, S = I6, U = C6), oA(E, { name: c, fromWireType: (Y) => {
       var L = T[Y >>> 2 >>> 0], z = d(Y + 4, L * o, !0);
       return O1(Y), z;
     }, toWireType: (Y, L) => {
       typeof L != "string" && $(`Cannot pass non-string to C++ string type ${c}`);
       var z = U(L), gA = M3(4 + z + o);
-      return T[gA >>> 2 >>> 0] = z / o, G(L, gA + 4, z + o), Y !== null && Y.push(O1, gA), gA;
+      return T[gA >>> 2 >>> 0] = z / o, S(L, gA + 4, z + o), Y !== null && Y.push(O1, gA), gA;
     }, readValueFromPointer: R, destructorFunction(Y) {
       O1(Y);
     } });
   }
-  function i6(E, o, c, d, G, U) {
-    E >>>= 0, o >>>= 0, c >>>= 0, d >>>= 0, G >>>= 0, U >>>= 0, ZA[E] = { name: AA(o), rawConstructor: S1(c, d), rawDestructor: S1(G, U), fields: [] };
+  function i6(E, o, c, d, S, U) {
+    E >>>= 0, o >>>= 0, c >>>= 0, d >>>= 0, S >>>= 0, U >>>= 0, ZA[E] = { name: AA(o), rawConstructor: G1(c, d), rawDestructor: G1(S, U), fields: [] };
   }
-  function e6(E, o, c, d, G, U, Y, L, z, gA) {
-    E >>>= 0, o >>>= 0, c >>>= 0, d >>>= 0, G >>>= 0, U >>>= 0, Y >>>= 0, L >>>= 0, z >>>= 0, gA >>>= 0, ZA[E].fields.push({ fieldName: AA(o), getterReturnType: c, getter: S1(d, G), getterContext: U, setterArgumentType: Y, setter: S1(L, z), setterContext: gA });
+  function e6(E, o, c, d, S, U, Y, L, z, gA) {
+    E >>>= 0, o >>>= 0, c >>>= 0, d >>>= 0, S >>>= 0, U >>>= 0, Y >>>= 0, L >>>= 0, z >>>= 0, gA >>>= 0, ZA[E].fields.push({ fieldName: AA(o), getterReturnType: c, getter: G1(d, S), getterContext: U, setterArgumentType: Y, setter: G1(L, z), setterContext: gA });
   }
   var B6 = function(E, o) {
     E >>>= 0, o >>>= 0, o = AA(o), oA(E, { isVoid: !0, name: o, fromWireType: () => {
@@ -9288,17 +9307,17 @@ async function _8(A = {}) {
     return d3.push(E), o;
   }, l6 = (E, o) => {
     for (var c = new Array(E), d = 0; d < E; ++d)
-      c[d] = m5(T[o + d * 4 >>> 2 >>> 0], `parameter ${d}`);
+      c[d] = w5(T[o + d * 4 >>> 2 >>> 0], `parameter ${d}`);
     return c;
   }, o6 = (E, o, c) => {
-    var d = [], G = E(d, c);
-    return d.length && (T[o >>> 2 >>> 0] = Q1.toHandle(d)), G;
-  }, t6 = {}, y5 = (E) => {
+    var d = [], S = E(d, c);
+    return d.length && (T[o >>> 2 >>> 0] = Q1.toHandle(d)), S;
+  }, t6 = {}, M5 = (E) => {
     var o = t6[E];
     return o === void 0 ? AA(E) : o;
   }, a6 = function(E, o, c) {
     o >>>= 0;
-    var d = 8, [G, ...U] = l6(E, o), Y = G.toWireType.bind(G), L = U.map((lA) => lA.readValueFromPointer.bind(lA));
+    var d = 8, [S, ...U] = l6(E, o), Y = S.toWireType.bind(S), L = U.map((lA) => lA.readValueFromPointer.bind(lA));
     E--;
     var z = new Array(E), gA = (lA, tA, wA, uA) => {
       for (var xA = 0, RA = 0; RA < E; ++RA)
@@ -9315,11 +9334,11 @@ async function _8(A = {}) {
           x = z[0];
           break;
         case 1:
-          x = Q1.toValue(lA)[y5(tA)](...z);
+          x = Q1.toValue(lA)[M5(tA)](...z);
           break;
       }
       return o6(Y, wA, x);
-    }, eA = `methodCaller<(${U.map((lA) => lA.name)}) => ${G.name}>`;
+    }, eA = `methodCaller<(${U.map((lA) => lA.name)}) => ${S.name}>`;
     return E6(I1(eA, gA));
   };
   function n6(E, o) {
@@ -9331,11 +9350,11 @@ async function _8(A = {}) {
   function r6(E) {
     E >>>= 0, E > 9 && (q2[E + 1] += 1);
   }
-  function D6(E, o, c, d, G) {
-    return E >>>= 0, o >>>= 0, c >>>= 0, d >>>= 0, G >>>= 0, d3[E](o, c, d, G);
+  function D6(E, o, c, d, S) {
+    return E >>>= 0, o >>>= 0, c >>>= 0, d >>>= 0, S >>>= 0, d3[E](o, c, d, S);
   }
   function h6(E) {
-    return E >>>= 0, Q1.toHandle(y5(E));
+    return E >>>= 0, Q1.toHandle(M5(E));
   }
   function c6() {
     return Q1.toHandle({});
@@ -9361,9 +9380,9 @@ async function _8(A = {}) {
     if (E > c)
       return !1;
     for (var d = 1; d <= 4; d *= 2) {
-      var G = o * (1 + 0.2 / d);
-      G = Math.min(G, E + 100663296);
-      var U = Math.min(c, u6(Math.max(E, G), 65536)), Y = y6(U);
+      var S = o * (1 + 0.2 / d);
+      S = Math.min(S, E + 100663296);
+      var U = Math.min(c, u6(Math.max(E, S), 65536)), Y = y6(U);
       if (Y)
         return !0;
     }
@@ -9375,14 +9394,14 @@ async function _8(A = {}) {
         var d = H2(c);
         d && i2.set(d, c);
       }
-  }, i2, x6 = (E) => (i2 || (i2 = /* @__PURE__ */ new WeakMap(), N6(0, u2.length)), i2.get(E) || 0), u3 = [], k6 = () => u3.length ? u3.pop() : u2.grow(1), y3 = (E, o) => u2.set(E, o), M5 = (E) => {
+  }, i2, x6 = (E) => (i2 || (i2 = /* @__PURE__ */ new WeakMap(), N6(0, u2.length)), i2.get(E) || 0), u3 = [], k6 = () => u3.length ? u3.pop() : u2.grow(1), y3 = (E, o) => u2.set(E, o), N5 = (E) => {
     const o = E.length;
     return [o % 128 | 128, o >> 7, ...E];
-  }, K6 = { i: 127, p: 127, j: 126, f: 125, d: 124, e: 111 }, N5 = (E) => M5(Array.from(E, (o) => {
+  }, K6 = { i: 127, p: 127, j: 126, f: 125, d: 124, e: 111 }, x5 = (E) => N5(Array.from(E, (o) => {
     var c = K6[o];
     return c;
-  })), G6 = (E, o) => {
-    var c = Uint8Array.of(0, 97, 115, 109, 1, 0, 0, 0, 1, ...M5([1, 96, ...N5(o.slice(1)), ...N5(o[0] === "v" ? "" : o[0])]), 2, 7, 1, 1, 101, 1, 102, 0, 0, 7, 5, 1, 1, 102, 0, 0), d = new WebAssembly.Module(c), G = new WebAssembly.Instance(d, { e: { f: E } }), U = G.exports.f;
+  })), S6 = (E, o) => {
+    var c = Uint8Array.of(0, 97, 115, 109, 1, 0, 0, 0, 1, ...N5([1, 96, ...x5(o.slice(1)), ...x5(o[0] === "v" ? "" : o[0])]), 2, 7, 1, 1, 101, 1, 102, 0, 0, 7, 5, 1, 1, 102, 0, 0), d = new WebAssembly.Module(c), S = new WebAssembly.Instance(d, { e: { f: E } }), U = S.exports.f;
     return U;
   }, e2 = (E, o) => {
     var c = x6(E);
@@ -9394,8 +9413,8 @@ async function _8(A = {}) {
     } catch (U) {
       if (!(U instanceof TypeError))
         throw U;
-      var G = G6(E, o);
-      y3(d, G);
+      var S = S6(E, o);
+      y3(d, S);
     }
     return i2.set(E, d), d;
   }, B2 = (E) => {
@@ -9405,20 +9424,20 @@ async function _8(A = {}) {
     for (typeof I.preInit == "function" && (I.preInit = [I.preInit]); I.preInit.length > 0; )
       I.preInit.shift()();
   I.addFunction = e2, I.removeFunction = B2;
-  var x5, M3, O1, v2, u2;
-  function S6(E) {
-    x5 = E.K, M3 = E.M, O1 = E.N, v2 = E.I, u2 = E.L;
+  var k5, M3, O1, v2, u2;
+  function G6(E) {
+    k5 = E.K, M3 = E.M, O1 = E.N, v2 = E.I, u2 = E.L;
   }
-  var R6 = { l: UA, C: vA, q: CA, z: YA, G: zA, j: x0, i: S0, a: R0, E: p0, x: F0, d: U0, y: J0, c: b0, p: L0, m: _0, h: v0, n: V0, F: z0, w: q6, r: i6, k: e6, H: B6, u: Q6, g: a6, b: m3, o: n6, B: s6, t: r6, f: D6, s: h6, A: c6, e: m6, v: w6, D: M6 };
+  var R6 = { l: UA, C: vA, q: CA, z: YA, G: zA, j: x0, i: G0, a: R0, E: p0, x: F0, d: U0, y: J0, c: b0, p: L0, m: _0, h: v0, n: V0, F: z0, w: q6, r: i6, k: e6, H: B6, u: Q6, g: a6, b: m3, o: n6, B: s6, t: r6, f: D6, s: h6, A: c6, e: m6, v: w6, D: M6 };
   function p6(E) {
     E = Object.assign({}, E);
-    var o = (d) => (G) => d(G) >>> 0, c = (d) => () => d() >>> 0;
+    var o = (d) => (S) => d(S) >>> 0, c = (d) => () => d() >>> 0;
     return E.K = o(E.K), E.M = o(E.M), E._emscripten_stack_alloc = o(E._emscripten_stack_alloc), E.emscripten_stack_get_current = c(E.emscripten_stack_get_current), E;
   }
   function f6() {
     kA();
     function E() {
-      I.calledRun = !0, !N && (fA(), m?.(I), I.onRuntimeInitialized?.(), SA());
+      I.calledRun = !0, !N && (fA(), m?.(I), I.onRuntimeInitialized?.(), GA());
     }
     I.setStatus ? (I.setStatus("Running..."), setTimeout(() => {
       setTimeout(() => I.setStatus(""), 1), E();
@@ -9429,7 +9448,7 @@ async function _8(A = {}) {
     m = E, p = o;
   }), g;
 }
-function $3(A, g, I, C = 2048, q = 64) {
+function A5(A, g, I, C = 2048, q = 64) {
   if (!Number.isInteger(C) || C < 1 || C > 2048 || !Number.isInteger(q) || q < 4 || q > 64)
     throw new Error(t("Invalid convex partition budget"));
   const B = /* @__PURE__ */ new Set(), e = (i) => (B.add(i), i);
@@ -9449,23 +9468,23 @@ function $3(A, g, I, C = 2048, q = 64) {
         continue;
       const h = e(a.hull()), M = Math.max(0, h.volume() - n);
       if (M <= Math.max(1e-7, n * 1e-3) && h.numVert() <= q) {
-        const S = h.getMesh();
-        l.push({ positions: new Float64Array(Array.from({ length: S.numVert * 3 }, (_, J) => S.vertProperties[Math.floor(J / 3) * S.numProp + J % 3])), indices: new Uint32Array(S.triVerts) });
+        const G = h.getMesh();
+        l.push({ positions: new Float64Array(Array.from({ length: G.numVert * 3 }, (_, J) => G.vertProperties[Math.floor(J / 3) * G.numProp + J % 3])), indices: new Uint32Array(G.triVerts) });
         continue;
       }
-      const N = a.getMesh(), y = Array.from({ length: N.numVert }, (S, _) => [N.vertProperties[_ * N.numProp], N.vertProperties[_ * N.numProp + 1], N.vertProperties[_ * N.numProp + 2]]);
+      const N = a.getMesh(), y = Array.from({ length: N.numVert }, (G, _) => [N.vertProperties[_ * N.numProp], N.vertProperties[_ * N.numProp + 1], N.vertProperties[_ * N.numProp + 2]]);
       let m, p = -1 / 0;
       if (M > Math.max(1e-7, n * 1e-3)) {
-        const S = /* @__PURE__ */ new Map(), _ = (J) => J.map((T) => Math.round(T * 1e5)).join(",");
+        const G = /* @__PURE__ */ new Map(), _ = (J) => J.map((T) => Math.round(T * 1e5)).join(",");
         for (let J = 0; J < N.numTri; J++) {
-          const T = [0, 1, 2].map((SA) => y[N.triVerts[J * 3 + SA]]), [v, IA, sA] = T, O = IA.map((SA, _A) => SA - v[_A]), EA = sA.map((SA, _A) => SA - v[_A]), FA = [O[1] * EA[2] - O[2] * EA[1], O[2] * EA[0] - O[0] * EA[2], O[0] * EA[1] - O[1] * EA[0]], kA = Math.hypot(...FA);
+          const T = [0, 1, 2].map((GA) => y[N.triVerts[J * 3 + GA]]), [v, IA, sA] = T, O = IA.map((GA, _A) => GA - v[_A]), EA = sA.map((GA, _A) => GA - v[_A]), FA = [O[1] * EA[2] - O[2] * EA[1], O[2] * EA[0] - O[0] * EA[2], O[0] * EA[1] - O[1] * EA[0]], kA = Math.hypot(...FA);
           if (kA < 1e-12)
             continue;
-          const fA = FA.map((SA) => SA / kA);
-          for (let SA = 0; SA < 3; SA++) {
-            const _A = T[SA], C1 = T[(SA + 1) % 3], n1 = T[(SA + 2) % 3], s1 = [_(_A), _(C1)].sort(), r1 = s1.join("|"), w = S.get(r1);
+          const fA = FA.map((GA) => GA / kA);
+          for (let GA = 0; GA < 3; GA++) {
+            const _A = T[GA], C1 = T[(GA + 1) % 3], n1 = T[(GA + 2) % 3], s1 = [_(_A), _(C1)].sort(), r1 = s1.join("|"), w = G.get(r1);
             if (!w) {
-              S.set(r1, { a: _A, b: C1, normal: fA, third: n1 });
+              G.set(r1, { a: _A, b: C1, normal: fA, third: n1 });
               continue;
             }
             if (fA.reduce((iA, aA, rA) => iA + aA * (w.third[rA] - _A[rA]), 0) <= 1e-5)
@@ -9485,13 +9504,13 @@ function $3(A, g, I, C = 2048, q = 64) {
         }
       }
       if (!m) {
-        const S = a.boundingBox(), _ = S.max.map((v, IA) => v - S.min[IA]), J = _.indexOf(Math.max(..._)), T = [0, 0, 0];
-        T[J] = 1, m = { normal: T, offset: (S.max[J] + S.min[J]) / 2 };
+        const G = a.boundingBox(), _ = G.max.map((v, IA) => v - G.min[IA]), J = _.indexOf(Math.max(..._)), T = [0, 0, 0];
+        T[J] = 1, m = { normal: T, offset: (G.max[J] + G.min[J]) / 2 };
       }
       let [K, k] = a.splitByPlane(m.normal, m.offset).map(e);
       if (K.isEmpty() || k.isEmpty() || Math.max(K.volume(), k.volume()) > n * (1 - 1e-9)) {
-        const S = a.boundingBox(), _ = S.max.map((v, IA) => v - S.min[IA]), J = _.indexOf(Math.max(..._)), T = [0, 0, 0];
-        T[J] = 1, [K, k] = a.splitByPlane(T, (S.max[J] + S.min[J]) / 2).map(e);
+        const G = a.boundingBox(), _ = G.max.map((v, IA) => v - G.min[IA]), J = _.indexOf(Math.max(..._)), T = [0, 0, 0];
+        T[J] = 1, [K, k] = a.splitByPlane(T, (G.max[J] + G.min[J]) / 2).map(e);
       }
       if (K.isEmpty() || k.isEmpty() || Math.max(K.volume(), k.volume()) > n * (1 - 1e-9))
         throw new Error(t("Exact convex collision could not partition this feature robustly"));
@@ -9598,7 +9617,7 @@ function v8(A, g = (I) => I) {
           try {
             if (n = a.intersect(l), !n.isEmpty() && Math.abs(n.volume()) > 1e-5) {
               const h = C(n);
-              s.push(...$3(A, h.positions, h.indices, Math.max(1, i - s.length)).map(g));
+              s.push(...A5(A, h.positions, h.indices, Math.max(1, i - s.length)).map(g));
             }
           } finally {
             n?.delete(), a.delete();
@@ -9633,7 +9652,7 @@ function v8(A, g = (I) => I) {
           try {
             if (M = h.subtract(s), !M.isEmpty() && Math.abs(M.volume()) > 1e-5) {
               const N = C(M);
-              l.push(...$3(A, N.positions, N.indices, Math.max(1, i - l.length)).map(g));
+              l.push(...A5(A, N.positions, N.indices, Math.max(1, i - l.length)).map(g));
             }
           } finally {
             M?.delete(), h.delete();
@@ -9657,7 +9676,7 @@ async function P8(A = {}) {
       const e = { value: !1 }, i = z5(I, B, !1, e);
       return e.value ? z5(I, B, !0) : i;
     },
-    partitionConvex: (B, e = 2048) => $3(I, B.positions, B.indices, e).map(q),
+    partitionConvex: (B, e = 2048) => A5(I, B.positions, B.indices, e).map(q),
     isConvexPiece(B) {
       const e = C.get(B);
       return !!e && e.positions.length === B.positions.length && e.indices.length === B.indices.length && e.positions.every((i, Q) => i === B.positions[Q]) && e.indices.every((i, Q) => i === B.indices[Q]);
@@ -9696,26 +9715,26 @@ function z5(A, g, I = !1, C) {
     const K = (T) => {
       const v = T.toPolygons(), IA = v.flat(), sA = r(A.CrossSection.hull(v));
       return Math.abs(sA.area() - T.area()) <= Math.max(1e-9, Math.abs(T.area()) * 1e-10) ? [sA.toPolygons().flat()] : A.triangulate(v).map((O) => O.map((EA) => IA[EA]));
-    }, k = K(m), S = K(p), _ = k.reduce((T, v) => T + v.length, 0) * S.reduce((T, v) => T + v.length, 0);
-    if (k.length * S.length > 1e4 || _ > 25e4)
+    }, k = K(m), G = K(p), _ = k.reduce((T, v) => T + v.length, 0) * G.reduce((T, v) => T + v.length, 0);
+    if (k.length * G.length > 1e4 || _ > 25e4)
       throw new _1(t("Planar Minkowski operation exceeds the pair budget"));
     const J = [];
     for (const T of k)
-      for (const v of S) {
+      for (const v of G) {
         const IA = T.flatMap((sA) => v.map((O) => [sA[0] + O[0], sA[1] + O[1]]));
         J.push(r(A.CrossSection.hull([IA])));
       }
     return r(A.CrossSection.union(J));
   }, n = (m, p, K, k) => {
-    const S = m.map((J, T) => {
+    const G = m.map((J, T) => {
       if (!J)
         return 0;
       const v = k[T] - K[T];
       if (v < 1e-12)
         throw new Error(t("Cannot resize a degenerate solid"));
       return J / v;
-    }), _ = Math.max(...S) || 1;
-    return S.map((J, T) => m[T] ? J : p?.[T] ? _ : 1);
+    }), _ = Math.max(...G) || 1;
+    return G.map((J, T) => m[T] ? J : p?.[T] ? _ : 1);
   }, h = (m) => {
     const p = l.get(m);
     if (p)
@@ -9732,14 +9751,14 @@ function z5(A, g, I = !1, C) {
     else if (m.kind === "circle")
       K = r(A.CrossSection.circle(m.radius, m.segments));
     else if (m.kind === "resize") {
-      const k = h(m.profile), S = k.bounds();
-      K = k.numVert() ? r(k.scale(n(m.size, m.auto, S.min, S.max))) : k;
+      const k = h(m.profile), G = k.bounds();
+      K = k.numVert() ? r(k.scale(n(m.size, m.auto, G.min, G.max))) : k;
     } else if (m.kind === "offset") {
       const k = h(m.profile);
       if (!m.round)
-        for (const S of k.toPolygons())
-          for (let _ = 0; _ < S.length; _++) {
-            const J = S[_], T = S[(_ + S.length - 1) % S.length], v = S[(_ + 1) % S.length], IA = Math.hypot(T[0] - J[0], T[1] - J[1]) * Math.hypot(v[0] - J[0], v[1] - J[1]);
+        for (const G of k.toPolygons())
+          for (let _ = 0; _ < G.length; _++) {
+            const J = G[_], T = G[(_ + G.length - 1) % G.length], v = G[(_ + 1) % G.length], IA = Math.hypot(T[0] - J[0], T[1] - J[1]) * Math.hypot(v[0] - J[0], v[1] - J[1]);
             if (IA && Math.sqrt(Math.max(0, (1 - ((T[0] - J[0]) * (v[0] - J[0]) + (T[1] - J[1]) * (v[1] - J[1])) / IA) / 2)) < 1e-6)
               throw new _1(t("Offset corner exceeds the miter budget"));
           }
@@ -9782,8 +9801,8 @@ function z5(A, g, I = !1, C) {
       const k = h(m.profile);
       if (2 * k.numVert() * (m.segments + 1) > 2e5)
         throw new _1(t("Evaluated revolution exceeds 200000 faces"));
-      const S = k.bounds(), _ = k.numVert() > 0 && S.max[0] <= 0;
-      if (k.numVert() && S.min[0] < -1e-8 && !_)
+      const G = k.bounds(), _ = k.numVert() > 0 && G.max[0] <= 0;
+      if (k.numVert() && G.min[0] < -1e-8 && !_)
         throw new Error(t("Revolved profiles must stay on one side of the radial axis"));
       const J = _ ? r(k.scale([-1, 1])) : k, T = Math.abs(m.angle);
       K = Q(T ? J.revolve(Math.max(1, Math.ceil(m.segments * T / 360)), T) : A.Manifold.union([])), m.angle < 0 && (K = Q(K.mirror([0, 1, 0]))), _ && T !== 360 && (K = Q(K.rotate([0, 0, 180])));
@@ -9797,33 +9816,33 @@ function z5(A, g, I = !1, C) {
     } else if (m.kind === "mirror")
       K = Q(N(m.shape).mirror(m.vector));
     else if (m.kind === "axisRotate") {
-      const k = N(m.shape), S = Math.hypot(...m.vector), [_, J, T] = m.vector.map((EA) => EA / S), v = m.angle * Math.PI / 180, IA = Math.cos(v), sA = Math.sin(v), O = 1 - IA;
+      const k = N(m.shape), G = Math.hypot(...m.vector), [_, J, T] = m.vector.map((EA) => EA / G), v = m.angle * Math.PI / 180, IA = Math.cos(v), sA = Math.sin(v), O = 1 - IA;
       K = Q(k.transform([O * _ * _ + IA, O * _ * J + sA * T, O * _ * T - sA * J, 0, O * _ * J - sA * T, O * J * J + IA, O * J * T + sA * _, 0, O * _ * T + sA * J, O * J * T - sA * _, O * T * T + IA, 0, 0, 0, 0, 1]));
     } else if (m.kind === "resize") {
-      const k = N(m.shape), S = k.boundingBox();
-      K = k.numTri() ? Q(k.scale(n(m.vector, m.auto, S.min, S.max))) : k;
+      const k = N(m.shape), G = k.boundingBox();
+      K = k.numTri() ? Q(k.scale(n(m.vector, m.auto, G.min, G.max))) : k;
     } else if (m.kind === "minkowski") {
       const k = m.shapes.map(N);
       K = k[0];
-      for (const S of k.slice(1)) {
-        if (K.numTri() * S.numTri() > 25e5)
+      for (const G of k.slice(1)) {
+        if (K.numTri() * G.numTri() > 25e5)
           throw new _1(t("Minkowski operation exceeds the pair budget"));
-        if (K = Q(K.minkowskiSum(S)), K.numTri() > 2e5)
+        if (K = Q(K.minkowskiSum(G)), K.numTri() > 2e5)
           throw new _1(t("Evaluated solid exceeds 200000 faces"));
       }
     } else if ("shapes" in m) {
       const k = m.shapes.map(N);
       K = Q(m.kind === "hull" ? A.Manifold.hull(k) : m.kind === "union" ? A.Manifold.union(k) : m.kind === "subtract" ? A.Manifold.difference(k) : A.Manifold.intersection(k));
     } else if (m.kind === "repeat") {
-      const k = N(m.shape), S = Array.from({ length: m.count }, (_, J) => Q(k.translate(m.step.map((T) => T * J))));
-      K = Q(A.Manifold.union(S));
+      const k = N(m.shape), G = Array.from({ length: m.count }, (_, J) => Q(k.translate(m.step.map((T) => T * J))));
+      K = Q(A.Manifold.union(G));
     } else {
       const k = m.shape;
-      if (m.kind === "move" && k.kind === "box" && m.vector.every((S, _) => S === k.size[_] / 2))
+      if (m.kind === "move" && k.kind === "box" && m.vector.every((G, _) => G === k.size[_] / 2))
         K = Q(A.Manifold.cube(k.size, !1));
       else {
-        const S = m.kind === "move" && (k.kind === "cylinder" || k.kind === "frustum" && k.bottom === k.top) && m.vector[0] === 0 && m.vector[1] === 0 && m.vector[2] === k.height / 2;
-        if (S && (q = !0), I && S && (k.kind === "cylinder" || k.kind === "frustum")) {
+        const G = m.kind === "move" && (k.kind === "cylinder" || k.kind === "frustum" && k.bottom === k.top) && m.vector[0] === 0 && m.vector[1] === 0 && m.vector[2] === k.height / 2;
+        if (G && (q = !0), I && G && (k.kind === "cylinder" || k.kind === "frustum")) {
           const _ = k.kind === "cylinder" ? k.radius : k.bottom;
           K = Q(A.Manifold.cylinder(k.height, _, _, k.segments, !1));
         } else {
@@ -9877,26 +9896,26 @@ function z5(A, g, I = !1, C) {
           break;
         }
       }
-      const S = Q(k.scale(K.transform.scale)), _ = Q(S.rotate(K.transform.rotation)), J = Q(_.translate(K.transform.position)), T = J.status();
+      const G = Q(k.scale(K.transform.scale)), _ = Q(G.rotate(K.transform.rotation)), J = Q(_.translate(K.transform.position)), T = J.status();
       if (T !== "NoError")
         throw new Error(t`${K.name}: ${T}. Import a closed, consistently oriented solid mesh.`);
       if (J.volume() < -1e-8)
         throw new Error(t`${K.name}: reversed solid winding produces negative volume. Reorient the mesh faces before importing.`);
       return e.set(m, J), J;
-    } catch (S) {
-      throw S instanceof f2 ? S : new f2({ source: "feature", id: m, ...S && typeof S == "object" && "code" in S && typeof S.code == "string" ? { code: S.code } : {}, message: `${K.name}: ${S instanceof Error ? S.message : String(S)}` });
+    } catch (G) {
+      throw G instanceof f2 ? G : new f2({ source: "feature", id: m, ...G && typeof G == "object" && "code" in G && typeof G.code == "string" ? { code: G.code } : {}, message: `${K.name}: ${G instanceof Error ? G.message : String(G)}` });
     }
   };
   try {
     const m = B.roots.map((p) => {
-      const K = y(p), k = B.nodes[p], S = K.getMesh(), _ = new Float32Array(S.numVert * 3);
-      for (let T = 0; T < S.numVert; T++)
+      const K = y(p), k = B.nodes[p], G = K.getMesh(), _ = new Float32Array(G.numVert * 3);
+      for (let T = 0; T < G.numVert; T++)
         for (let v = 0; v < 3; v++)
-          _[T * 3 + v] = S.vertProperties[T * S.numProp + v];
+          _[T * 3 + v] = G.vertProperties[T * G.numProp + v];
       const J = K.boundingBox();
-      return { id: p, name: k.name, color: k.color, reference: k.reference, ...k.role === "hole" ? { hole: !0 } : {}, positions: _, indices: new Uint32Array(S.triVerts), volume: K.volume(), bounds: J };
+      return { id: p, name: k.name, color: k.color, reference: k.reference, ...k.role === "hole" ? { hole: !0 } : {}, positions: _, indices: new Uint32Array(G.triVerts), volume: K.volume(), bounds: J };
     });
-    return C && q && (C.value = m.some(V8)), { sourceKey: l5(B), bodies: m, volume: m.filter((p) => !p.reference && !p.hole).reduce((p, K) => p + K.volume, 0), triangles: m.filter((p) => !p.reference && !p.hole).reduce((p, K) => p + K.indices.length / 3, 0) };
+    return C && q && (C.value = m.some(V8)), { sourceKey: o5(B), bodies: m, volume: m.filter((p) => !p.reference && !p.hole).reduce((p, K) => p + K.volume, 0), triangles: m.filter((p) => !p.reference && !p.hole).reduce((p, K) => p + K.indices.length / 3, 0) };
   } finally {
     for (const m of [...i].reverse())
       m.delete();
@@ -9929,7 +9948,7 @@ function O8(A, g) {
     for (let N = 0; N < 3; N++) {
       q[N] += M * (a[N] + n[N] + h[N]) / 4;
       for (let y = 0; y < 3; y++) {
-        const m = r.reduce((k, S) => k + S[N] * S[y], 0), p = a[N] + n[N] + h[N], K = a[y] + n[y] + h[y];
+        const m = r.reduce((k, G) => k + G[N] * G[y], 0), p = a[N] + n[N] + h[N], K = a[y] + n[y] + h[y];
         B[N][y] += M * (m + p * K) / 20;
       }
     }
@@ -9958,7 +9977,7 @@ async function l0(A) {
   const g = new Uint8Array(A.positions.byteLength + A.indices.byteLength);
   return g.set(new Uint8Array(A.positions.buffer, A.positions.byteOffset, A.positions.byteLength)), g.set(new Uint8Array(A.indices.buffer, A.indices.byteOffset, A.indices.byteLength), A.positions.byteLength), B0(g);
 }
-async function J3(A, g, I = {}) {
+async function b3(A, g, I = {}) {
   if (A.reference || A.hole)
     throw new Error(t("Reference helpers are not physics bodies"));
   if (!Number.isFinite(A.volume) || A.volume <= 0 || !A.indices.length || A.indices.length > 15e5 || A.indices.length % 3 || A.positions.length % 3 || A.positions.length > 75e4 || Array.from(A.positions).some((h) => !Number.isFinite(h) || Math.abs(h) > 1e6) || Array.from(A.indices).some((h) => !Number.isInteger(h) || h < 0 || h >= A.positions.length / 3))
@@ -9988,7 +10007,7 @@ async function J3(A, g, I = {}) {
     Object.freeze(h);
   return Object.freeze(e), Object.freeze(n), Q0.set(n, await E0(e)), n;
 }
-const b3 = (A, g, I) => (g[0] - A[0]) * (I[1] - A[1]) - (g[1] - A[1]) * (I[0] - A[0]);
+const L3 = (A, g, I) => (g[0] - A[0]) * (I[1] - A[1]) - (g[1] - A[1]) * (I[0] - A[0]);
 function W8(A, g, I, C, q) {
   const B = Math.hypot(...g), e = Math.hypot(...C), i = Math.hypot(...A.map((Q, s) => Q - I[s]));
   return ![B, e, i, q].every(Number.isFinite) || B < 1e-9 || e < 1e-9 || q < 0 ? 1 / 0 : i + q * Math.hypot(...g.map((Q, s) => Q / B - C[s] / e));
@@ -10026,30 +10045,30 @@ function z8(A, g, I, C, q, B = 0.25, e = 2e6) {
     if (m)
       return m;
     let p = 1 / 0, K = -1 / 0, k = 0;
-    const S = [];
+    const G = [];
     for (let O = 0; O < y.positions.length; O += 3) {
-      const EA = [0, 1, 2].map((fA) => y.positions[O + fA] - I[fA]), FA = EA.reduce((fA, SA, _A) => fA + SA * s[_A], 0), kA = [EA.reduce((fA, SA, _A) => fA + SA * a[_A], 0), EA.reduce((fA, SA, _A) => fA + SA * h[_A], 0)];
-      p = Math.min(p, FA), K = Math.max(K, FA), k = Math.max(k, Math.hypot(...kA)), S.push(kA);
+      const EA = [0, 1, 2].map((fA) => y.positions[O + fA] - I[fA]), FA = EA.reduce((fA, GA, _A) => fA + GA * s[_A], 0), kA = [EA.reduce((fA, GA, _A) => fA + GA * a[_A], 0), EA.reduce((fA, GA, _A) => fA + GA * h[_A], 0)];
+      p = Math.min(p, FA), K = Math.max(K, FA), k = Math.max(k, Math.hypot(...kA)), G.push(kA);
     }
-    S.sort((O, EA) => O[0] - EA[0] || O[1] - EA[1]);
-    const _ = S.filter((O, EA) => !EA || O[0] !== S[EA - 1][0] || O[1] !== S[EA - 1][1]), J = [], T = [];
+    G.sort((O, EA) => O[0] - EA[0] || O[1] - EA[1]);
+    const _ = G.filter((O, EA) => !EA || O[0] !== G[EA - 1][0] || O[1] !== G[EA - 1][1]), J = [], T = [];
     for (const O of _) {
-      for (; J.length >= 2 && b3(J.at(-2), J.at(-1), O) <= 0; )
+      for (; J.length >= 2 && L3(J.at(-2), J.at(-1), O) <= 0; )
         J.pop();
       J.push(O);
     }
     for (const O of [..._].reverse()) {
-      for (; T.length >= 2 && b3(T.at(-2), T.at(-1), O) <= 0; )
+      for (; T.length >= 2 && L3(T.at(-2), T.at(-1), O) <= 0; )
         T.pop();
       T.push(O);
     }
     const v = _.length === 1 ? _ : [...J.slice(0, -1), ...T.slice(0, -1)];
     let IA = 1 / 0;
-    if (v.length >= 3 && v.every((O, EA) => b3(O, v[(EA + 1) % v.length], [0, 0]) >= -1e-10))
+    if (v.length >= 3 && v.every((O, EA) => L3(O, v[(EA + 1) % v.length], [0, 0]) >= -1e-10))
       IA = 0;
     else
       for (let O = 0; O < v.length; O++) {
-        const EA = v[O], FA = v[(O + 1) % v.length], kA = FA[0] - EA[0], fA = FA[1] - EA[1], SA = kA * kA + fA * fA, _A = SA ? Math.max(0, Math.min(1, -(EA[0] * kA + EA[1] * fA) / SA)) : 0;
+        const EA = v[O], FA = v[(O + 1) % v.length], kA = FA[0] - EA[0], fA = FA[1] - EA[1], GA = kA * kA + fA * fA, _A = GA ? Math.max(0, Math.min(1, -(EA[0] * kA + EA[1] * fA) / GA)) : 0;
         IA = Math.min(IA, Math.hypot(EA[0] + _A * kA, EA[1] + _A * fA));
       }
     const sA = { axialMin: p, axialMax: K, radialMin: IA, radialMax: k };
@@ -10061,8 +10080,8 @@ function z8(A, g, I, C, q, B = 0.25, e = 2e6) {
         for (const p of y.hulls) {
           const K = N(p);
           for (const k of m.hulls) {
-            const S = N(k);
-            if (!(K.axialMax + B <= S.axialMin || S.axialMax + B <= K.axialMin || K.radialMax + B <= S.radialMin || S.radialMax + B <= K.radialMin))
+            const G = N(k);
+            if (!(K.axialMax + B <= G.axialMin || G.axialMax + B <= K.axialMin || K.radialMax + B <= G.radialMin || G.radialMax + B <= K.radialMin))
               return !1;
           }
         }
@@ -10079,7 +10098,7 @@ const F1 = (A, g) => {
 };
 async function X8(A, g, I, C = {}) {
   const q = s3(A), B = Cg(q);
-  if (g.sourceKey !== l5(q))
+  if (g.sourceKey !== o5(q))
     throw new Error(t("Geometry is stale for this document"));
   const e = g.bodies.filter((u) => !u.reference && !u.hole);
   if (!e.length)
@@ -10099,7 +10118,7 @@ async function X8(A, g, I, C = {}) {
     }
   if ([...I.values()].reduce((u, R) => u + R.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = C.J ?? await (X5 ?? (X5 = import("./jolt-physics.wasm-compat-3KvVrRwV.js").then((u) => u.default()))), Q = new i.JoltSettings();
+  const i = C.J ?? await (X5 ?? (X5 = import("./jolt-physics.wasm-compat-TFJqcFDl.js").then((u) => u.default()))), Q = new i.JoltSettings();
   Q.mMaxBodies = 512, Q.mMaxBodyPairs = Math.max(1024, e.length * e.length), Q.mMaxContactConstraints = 8192;
   const s = new i.ObjectLayerPairFilterTable(2);
   s.EnableCollision(0, 1), s.EnableCollision(1, 1);
@@ -10116,7 +10135,7 @@ async function X8(A, g, I, C = {}) {
   const K = (u, R) => {
     const [F, b, H, W] = R, [j, QA, CA] = u, AA = 2 * (b * CA - H * QA), cA = 2 * (H * j - F * CA), $ = 2 * (F * QA - b * j);
     return [j + W * AA + b * $ - H * cA, QA + W * cA + H * AA - F * $, CA + W * $ + F * cA - b * AA];
-  }, k = [], S = /* @__PURE__ */ new Map(), _ = /* @__PURE__ */ new Map();
+  }, k = [], G = /* @__PURE__ */ new Map(), _ = /* @__PURE__ */ new Map();
   let J = !1, T = 0, v, IA;
   const sA = new Map(e.map((u) => [u.id, u.id])), O = (u) => {
     const R = sA.get(u);
@@ -10134,7 +10153,7 @@ async function X8(A, g, I, C = {}) {
   }
   const FA = new i.GroupFilterTable(Math.max(1, EA.size)), kA = /* @__PURE__ */ new Map(), fA = new Map(e.map((u, R) => [u.id, R]));
   [...EA.values()].forEach((u, R) => u.forEach((F) => kA.set(F.id, R)));
-  const SA = new Map(e.map((u) => [u.id, O8(u, (q.nodes[u.id].physics ?? x2()).densityKgM3)])), _A = new Map([...EA].map(([u, R]) => [u, T8(R.map((F) => SA.get(F.id)))])), C1 = (u, R) => u < R ? u + "\0" + R : R + "\0" + u;
+  const GA = new Map(e.map((u) => [u.id, O8(u, (q.nodes[u.id].physics ?? x2()).densityKgM3)])), _A = new Map([...EA].map(([u, R]) => [u, T8(R.map((F) => GA.get(F.id)))])), C1 = (u, R) => u < R ? u + "\0" + R : R + "\0" + u;
   for (const u of q.joints ?? [])
     (u.collideConnected === !1 || EA.get(O(u.bodyA)).length === 1 && EA.get(O(u.bodyB)).length === 1) && FA.DisableCollision(kA.get(u.bodyA), kA.get(u.bodyB));
   if (B.selfCollisions === !1) {
@@ -10196,13 +10215,13 @@ async function X8(A, g, I, C = {}) {
     const R = pA.get(u);
     B.selfCollisions !== !1 && FA.EnableCollision(kA.get(R.bodyA), kA.get(R.bodyB));
   }, e1 = (u) => {
-    const R = S.get(u);
+    const R = G.get(u);
     for (const [F, b] of pA)
-      (S.get(b.bodyA) === R || S.get(b.bodyB) === R) && i1(F);
+      (G.get(b.bodyA) === R || G.get(b.bodyB) === R) && i1(F);
   }, Z = () => {
     for (const u of VA) {
       const R = pA.get(u), F = (W, j, QA) => {
-        const CA = S.get(W), AA = CA.GetPosition(), cA = CA.GetRotation(), $ = [cA.GetX(), cA.GetY(), cA.GetZ(), cA.GetW()];
+        const CA = G.get(W), AA = CA.GetPosition(), cA = CA.GetRotation(), $ = [cA.GetX(), cA.GetY(), cA.GetZ(), cA.GetW()];
         return { anchor: K(j, $).map((nA, oA) => nA + 1e3 * [AA.GetX(), AA.GetY(), AA.GetZ()][oA]), axis: K(QA, $) };
       }, b = F(R.bodyA, R.anchorA, R.axisA), H = F(R.bodyB, R.anchorB, R.axisB);
       W8(b.anchor, b.axis, H.anchor, H.axis, R.radiusB) >= 0.249 && i1(u);
@@ -10229,7 +10248,7 @@ async function X8(A, g, I, C = {}) {
       const CA = M.CreateBody(QA);
       if (!CA)
         throw new Error(t("Jolt body allocation failed"));
-      M.AddBody(CA.GetID(), F === "static" ? i.EActivation_DontActivate : i.EActivation_Activate), k.push(CA), S.set(R, CA), H && m.set(R, H.massKg);
+      M.AddBody(CA.GetID(), F === "static" ? i.EActivation_DontActivate : i.EActivation_Activate), k.push(CA), G.set(R, CA), H && m.set(R, H.massKg);
     } finally {
       i.destroy(QA);
     }
@@ -10249,7 +10268,7 @@ async function X8(A, g, I, C = {}) {
       const u = new i.Vec3(2, 2, 5e-3), R = new i.BoxShape(u, 1e-4);
       i.destroy(u), iA(R, "ground", "static", { friction: B.groundFriction, restitution: B.groundRestitution });
       const F = new i.RVec3(0, 0, -5e-3);
-      M.SetPosition(S.get("ground").GetID(), F, i.EActivation_DontActivate), i.destroy(F);
+      M.SetPosition(G.get("ground").GetID(), F, i.EActivation_DontActivate), i.destroy(F);
     }
     for (const [u, R] of EA) {
       const F = q.nodes[R[0].id].physics ?? x2(), b = R.some((QA) => q.nodes[QA.id].physics?.motion === "static") ? "static" : "dynamic", H = _A.get(u), W = new i.StaticCompoundShapeSettings();
@@ -10280,13 +10299,13 @@ async function X8(A, g, I, C = {}) {
           throw new Error(j.GetError().c_str());
         const QA = j.Get(), CA = QA.GetCenterOfMass(), AA = new i.Vec3(H.centerM[0] - CA.GetX(), H.centerM[1] - CA.GetY(), H.centerM[2] - CA.GetZ()), cA = new i.OffsetCenterOfMassShape(QA, AA);
         i.destroy(AA), iA(cA, u, b, F, H);
-        const $ = S.get(u);
+        const $ = G.get(u);
         new Set(R.map((nA) => {
           const oA = q.nodes[nA.id].physics ?? x2();
           return oA.friction + ":" + oA.restitution;
         })).size > 1 && $.SetUseManifoldReduction(!1);
         for (const nA of R)
-          S.set(nA.id, $), m.set(nA.id, H.massKg);
+          G.set(nA.id, $), m.set(nA.id, H.massKg);
       } finally {
         j.Clear(), i.destroy(W);
       }
@@ -10295,14 +10314,14 @@ async function X8(A, g, I, C = {}) {
       IA = new i.PartPairSimShapeFilter();
       for (const H of e) {
         const W = fA.get(H.id) + 1;
-        IA.SetColliderPart(S.get(H.id).GetID(), W, W);
+        IA.SetColliderPart(G.get(H.id).GetID(), W, W);
       }
       const u = /* @__PURE__ */ new Set();
       for (const H of q.joints ?? []) {
         const W = O(H.bodyA), j = O(H.bodyB);
         if (W === j)
           continue;
-        const QA = C1(W, j), CA = S.get(W).GetID(), AA = S.get(j).GetID();
+        const QA = C1(W, j), CA = G.get(W).GetID(), AA = G.get(j).GetID();
         u.has(QA) || (IA.AddBodyPair(CA, AA, !1), u.add(QA)), IA.AddPartPair(CA, AA, fA.get(H.bodyA) + 1, fA.get(H.bodyB) + 1);
       }
       h.SetSimShapeFilter(IA);
@@ -10319,7 +10338,7 @@ async function X8(A, g, I, C = {}) {
       }, h.SetContactListener(v);
     }
     for (const u of q.joints ?? []) {
-      const R = S.get(u.bodyA), F = S.get(u.bodyB);
+      const R = G.get(u.bodyA), F = G.get(u.bodyB);
       if (!R || !F)
         throw new Error(t("Joint references a missing body"));
       const b = ($, nA, oA) => {
@@ -10346,13 +10365,13 @@ async function X8(A, g, I, C = {}) {
       cA.AddRef(), h.AddConstraint(cA), _.set(u.id, cA), QA.forEach(($) => i.destroy($)), i.destroy(j);
     }
     for (const [u, R] of EA) {
-      const F = S.get(u);
+      const F = G.get(u);
       if (F.IsStatic())
         continue;
       R.some((NA) => [...q.nodes[NA.id].physics?.initialVelocityMmS ?? [], ...q.nodes[NA.id].physics?.initialAngularVelocityDps ?? []].some((TA) => TA !== 0)) && e1(u);
       const b = _A.get(u), H = [0, 0, 0], W = [0, 0, 0];
       for (const NA of R) {
-        const TA = q.nodes[NA.id].physics, B1 = SA.get(NA.id), h1 = (TA?.initialVelocityMmS ?? [0, 0, 0]).map((I1) => I1 * 1e-3), H1 = (TA?.initialAngularVelocityDps ?? [0, 0, 0]).map((I1) => I1 * Math.PI / 180), Y2 = B1.centerM.map((I1, r2) => I1 - b.centerM[r2]), T1 = h1.map((I1) => I1 * B1.massKg);
+        const TA = q.nodes[NA.id].physics, B1 = GA.get(NA.id), h1 = (TA?.initialVelocityMmS ?? [0, 0, 0]).map((I1) => I1 * 1e-3), H1 = (TA?.initialAngularVelocityDps ?? [0, 0, 0]).map((I1) => I1 * Math.PI / 180), Y2 = B1.centerM.map((I1, r2) => I1 - b.centerM[r2]), T1 = h1.map((I1) => I1 * B1.massKg);
         for (let I1 = 0; I1 < 3; I1++)
           H[I1] += T1[I1], W[I1] += B1.inertiaKgM2[I1].reduce((r2, J2, C2) => r2 + J2 * H1[C2], 0) + Y2[(I1 + 1) % 3] * T1[(I1 + 2) % 3] - Y2[(I1 + 2) % 3] * T1[(I1 + 1) % 3];
       }
@@ -10364,7 +10383,7 @@ async function X8(A, g, I, C = {}) {
     throw aA(), u;
   }
   const rA = (u) => {
-    const R = S.get(u), F = SA.get(u);
+    const R = G.get(u), F = GA.get(u);
     if (!F) {
       const W = R.GetCenterOfMassPosition();
       return [W.GetX(), W.GetY(), W.GetZ()];
@@ -10374,11 +10393,11 @@ async function X8(A, g, I, C = {}) {
   };
   let UA = 0;
   function vA(u, R, F, b, H) {
-    if (J || S.has(u) || !/^preview-[a-zA-Z0-9_-]+$/.test(u) || UA >= 32 || !Number.isFinite(b) || b < 1 || b > 50 || [...R, ...F].length !== 6 || R.some((DA) => !Number.isFinite(DA) || Math.abs(DA) > 1e4) || F.some((DA) => !Number.isFinite(DA) || Math.abs(DA) > 1e4))
+    if (J || G.has(u) || !/^preview-[a-zA-Z0-9_-]+$/.test(u) || UA >= 32 || !Number.isFinite(b) || b < 1 || b > 50 || [...R, ...F].length !== 6 || R.some((DA) => !Number.isFinite(DA) || Math.abs(DA) > 1e4) || F.some((DA) => !Number.isFinite(DA) || Math.abs(DA) > 1e4))
       throw new Error(t("Invalid preview ball or preview budget exceeded"));
     const W = b * 1e-3, j = H === "sphere" ? 4 * Math.PI * W ** 3 / 3 : (2 * W) ** 3, QA = j * 1050, CA = H === "sphere" ? 0.4 * QA * W ** 2 : QA * (2 * W) ** 2 / 6, AA = H === "box" ? new i.Vec3(W, W, W) : void 0, cA = AA ? new i.BoxShape(AA, Math.min(1e-4, W / 10)) : new i.SphereShape(W);
     AA && i.destroy(AA), iA(cA, u, "dynamic", { friction: 0.4, restitution: 0.45 }, { massKg: QA, volumeM3: j, centerM: [0, 0, 0], inertiaKgM2: [[CA, 0, 0], [0, CA, 0], [0, 0, CA]] }), UA++;
-    const $ = S.get(u), nA = new i.RVec3(...R.map((DA) => DA * 1e-3)), oA = new i.Vec3(...F.map((DA) => DA * 1e-3));
+    const $ = G.get(u), nA = new i.RVec3(...R.map((DA) => DA * 1e-3)), oA = new i.Vec3(...F.map((DA) => DA * 1e-3));
     M.SetPosition($.GetID(), nA, i.EActivation_Activate), M.SetLinearVelocity($.GetID(), oA), i.destroy(nA), i.destroy(oA);
   }
   function ZA(u, R, F) {
@@ -10392,10 +10411,10 @@ async function X8(A, g, I, C = {}) {
       cA.ShouldCollide = () => !0;
       const $ = H(new i.DefaultBroadPhaseLayerFilter(cA, 0)), nA = H(new i.ObjectLayerFilterJS());
       nA.ShouldCollide = () => !0;
-      const oA = H(F ? new i.IgnoreSingleBodyFilter(S.get(F).GetID()) : new i.BodyFilter()), DA = H(new i.ShapeFilter());
+      const oA = H(F ? new i.IgnoreSingleBodyFilter(G.get(F).GetID()) : new i.BodyFilter()), DA = H(new i.ShapeFilter());
       if (h.GetNarrowPhaseQuery().CastRay(W, CA, AA, $, nA, oA, DA), !AA.HadHit())
         return null;
-      const YA = AA.mHit, zA = YA.mBodyID.GetIndexAndSequenceNumber(), WA = [...S].find(([, NA]) => NA.GetID().GetIndexAndSequenceNumber() === zA);
+      const YA = AA.mHit, zA = YA.mBodyID.GetIndexAndSequenceNumber(), WA = [...G].find(([, NA]) => NA.GetID().GetIndexAndSequenceNumber() === zA);
       return { bodyId: (WA ? e[WA[1].GetShape().GetSubShapeUserData(YA.mSubShapeID2) - 1] : void 0)?.id ?? WA?.[0], fraction: YA.mFraction };
     } finally {
       for (const W of b.reverse())
@@ -10404,7 +10423,7 @@ async function X8(A, g, I, C = {}) {
   }
   return {
     grabBody(u, R, F) {
-      const b = S.get(u);
+      const b = G.get(u);
       if (J || !b || b.IsStatic())
         throw new Error(t("Choose a dynamic body to drag"));
       if ([...R, ...F].length !== 6 || [...R, ...F].some((j) => !Number.isFinite(j) || Math.abs(j) > 1e4))
@@ -10432,7 +10451,7 @@ async function X8(A, g, I, C = {}) {
         throw new Error(t("Step must be a positive multiple of 1/200 s, at most 0.1 s"));
       for (let R = 0; R < Math.round(u * 200); R++) {
         if (Z(), p) {
-          const F = S.get(p.id), b = F.GetPosition(), H = F.GetRotation(), W = K(p.local, [H.GetX(), H.GetY(), H.GetZ(), H.GetW()]).map((nA, oA) => nA + [b.GetX(), b.GetY(), b.GetZ()][oA]), j = new i.RVec3(...W), QA = M.GetPointVelocity(F.GetID(), j), CA = [QA.GetX(), QA.GetY(), QA.GetZ()], AA = W.map((nA, oA) => 400 * (p.target[oA] * 1e-3 - nA) - 40 * CA[oA]), cA = Math.hypot(...AA), $ = new i.Vec3(...AA.map((nA) => nA * Math.min(1, 100 / Math.max(1e-9, cA)) * m.get(p.id)));
+          const F = G.get(p.id), b = F.GetPosition(), H = F.GetRotation(), W = K(p.local, [H.GetX(), H.GetY(), H.GetZ(), H.GetW()]).map((nA, oA) => nA + [b.GetX(), b.GetY(), b.GetZ()][oA]), j = new i.RVec3(...W), QA = M.GetPointVelocity(F.GetID(), j), CA = [QA.GetX(), QA.GetY(), QA.GetZ()], AA = W.map((nA, oA) => 400 * (p.target[oA] * 1e-3 - nA) - 40 * CA[oA]), cA = Math.hypot(...AA), $ = new i.Vec3(...AA.map((nA) => nA * Math.min(1, 100 / Math.max(1e-9, cA)) * m.get(p.id)));
           F.AddForce($, j), M.ActivateBody(F.GetID()), i.destroy($), i.destroy(j);
         }
         n.Step(1 / 200, 1), T += 1 / 200, Z();
@@ -10450,7 +10469,7 @@ async function X8(A, g, I, C = {}) {
     pose(u) {
       if (J)
         throw new Error(t("Physics world was disposed"));
-      const R = S.get(u);
+      const R = G.get(u);
       if (!R)
         throw new Error(t("Unknown physics body"));
       const F = R.GetPosition(), b = R.GetRotation();
@@ -10459,7 +10478,7 @@ async function X8(A, g, I, C = {}) {
     angularVelocity(u) {
       if (J)
         throw new Error(t("Physics world was disposed"));
-      const R = S.get(u);
+      const R = G.get(u);
       if (!R)
         throw new Error(t("Unknown physics body"));
       const F = R.GetAngularVelocity();
@@ -10468,7 +10487,7 @@ async function X8(A, g, I, C = {}) {
     setAngularVelocity(u, R) {
       if (J || !R.every(Number.isFinite))
         throw new Error(t("Invalid physics state or velocity"));
-      const F = S.get(u);
+      const F = G.get(u);
       if (!F)
         throw new Error(t("Unknown physics body"));
       if (F.IsStatic())
@@ -10480,7 +10499,7 @@ async function X8(A, g, I, C = {}) {
     geometryBoundsMm(u) {
       if (J)
         throw new Error(t("Physics world was disposed"));
-      const R = S.get(u), F = e.find((nA) => nA.id === u);
+      const R = G.get(u), F = e.find((nA) => nA.id === u);
       if (!R || !F)
         throw new Error(t("Unknown physics body"));
       const b = R.GetPosition(), H = R.GetRotation(), W = H.GetX(), j = H.GetY(), QA = H.GetZ(), CA = H.GetW(), AA = [b.GetX() * 1e3, b.GetY() * 1e3, b.GetZ() * 1e3], cA = [1 / 0, 1 / 0, 1 / 0], $ = [-1 / 0, -1 / 0, -1 / 0];
@@ -10496,7 +10515,7 @@ async function X8(A, g, I, C = {}) {
     boundsMm(u) {
       if (J)
         throw new Error(t("Physics world was disposed"));
-      const R = S.get(u);
+      const R = G.get(u);
       if (!R)
         throw new Error(t("Unknown physics body"));
       const F = I.get(u);
@@ -10520,7 +10539,7 @@ async function X8(A, g, I, C = {}) {
     },
     /** Sample an ideal single ray carried by a body, ignoring its complete rigid assembly. */
     bodyRay(u, R, F, b) {
-      const H = q.nodes[u], W = S.get(u);
+      const H = q.nodes[u], W = G.get(u);
       if (J || !H || !W || ![...R, ...F, b].every(Number.isFinite) || b <= 0 || b > 1e5 || Math.hypot(...F) < 1e-9)
         throw new Error(t("Invalid body sensor ray"));
       const j = W.GetRotation(), QA = [j.GetX(), j.GetY(), j.GetZ(), j.GetW()], CA = W.GetPosition(), AA = F1(R.map((zA, WA) => zA * H.transform.scale[WA]), H.transform.rotation).map((zA, WA) => zA + H.transform.position[WA]), cA = K(AA, QA), $ = cA.map((zA, WA) => zA + [CA.GetX(), CA.GetY(), CA.GetZ()][WA] * 1e3), nA = K(F1(F, H.transform.rotation), QA), oA = Math.hypot(...nA), DA = $.map((zA, WA) => zA + nA[WA] / oA * b), YA = ZA($, DA, u);
@@ -10529,7 +10548,7 @@ async function X8(A, g, I, C = {}) {
     linearVelocityMmS(u) {
       if (J)
         throw new Error(t("Physics world was disposed"));
-      const R = S.get(u);
+      const R = G.get(u);
       if (!R)
         throw new Error(t("Unknown physics body"));
       const F = new i.RVec3(...rA(u)), b = M.GetPointVelocity(R.GetID(), F), H = [b.GetX() * 1e3, b.GetY() * 1e3, b.GetZ() * 1e3];
@@ -10538,7 +10557,7 @@ async function X8(A, g, I, C = {}) {
     setLinearVelocity(u, R) {
       if (J || R.length !== 3 || R.some((CA) => !Number.isFinite(CA) || Math.abs(CA) > 1e4))
         throw new Error(t("Invalid initial body velocity"));
-      const F = S.get(u);
+      const F = G.get(u);
       if (!F)
         throw new Error(t("Unknown physics body"));
       if (F.IsStatic())
@@ -10550,7 +10569,7 @@ async function X8(A, g, I, C = {}) {
     applyImpulse(u, R, F) {
       if (J || R.length !== 3 || R.some((j) => !Number.isFinite(j) || Math.abs(j) > 100) || F && (F.length !== 3 || F.some((j) => !Number.isFinite(j) || Math.abs(j) > 1e6)))
         throw new Error(t("Invalid impulse"));
-      const b = S.get(u);
+      const b = G.get(u);
       if (!b)
         throw new Error(t("Unknown physics body"));
       if (b.IsStatic())
@@ -10575,7 +10594,7 @@ async function X8(A, g, I, C = {}) {
       const H = i.castObject(_.get(u), i.SliderConstraint), W = H.GetMotorSettings();
       W.mMinForceLimit = -F, W.mMaxForceLimit = F, H.SetTargetVelocity(R * 1e-3), H.SetMotorState(i.EMotorState_Velocity);
       for (const j of [b.bodyA, b.bodyB])
-        M.ActivateBody(S.get(j).GetID());
+        M.ActivateBody(G.get(j).GetID());
     },
     stopSliderMotor(u, R = "brake") {
       if (J)
@@ -10597,7 +10616,7 @@ async function X8(A, g, I, C = {}) {
       const F = q.joints?.find((oA) => oA.id === u);
       if (!F || !["hinge", "slider"].includes(F.kind))
         throw new Error(t("Choose a hinge or slider actuator"));
-      const b = S.get(F.bodyA), H = S.get(F.bodyB);
+      const b = G.get(F.bodyA), H = G.get(F.bodyB);
       if (b === H)
         throw new Error(t("Actuator bodies belong to the same rigid assembly"));
       const W = b.GetRotation(), j = [W.GetX(), W.GetY(), W.GetZ(), W.GetW()], QA = K(F1(F.axisA, q.nodes[F.bodyA].transform.rotation), j);
@@ -10624,7 +10643,7 @@ async function X8(A, g, I, C = {}) {
       const j = R - H.GetCurrentAngle(), QA = Math.max(-Math.PI * 5 / 3, Math.min(Math.PI * 5 / 3, j * 12));
       H.SetTargetAngularVelocity(QA), H.SetMotorState(i.EMotorState_Velocity);
       for (const CA of [b.bodyA, b.bodyB])
-        M.ActivateBody(S.get(CA).GetID());
+        M.ActivateBody(G.get(CA).GetID());
     },
     setHingeMotor(u, R, F) {
       if (J || !Number.isFinite(R) || Math.abs(R) > 20 || !Number.isFinite(F) || F <= 0 || F > 100)
@@ -10635,7 +10654,7 @@ async function X8(A, g, I, C = {}) {
       const H = i.castObject(_.get(u), i.HingeConstraint), W = H.GetMotorSettings();
       W.mMinTorqueLimit = -F, W.mMaxTorqueLimit = F, H.SetTargetAngularVelocity(R), H.SetMotorState(i.EMotorState_Velocity);
       for (const j of [b.bodyA, b.bodyB])
-        M.ActivateBody(S.get(j).GetID());
+        M.ActivateBody(G.get(j).GetID());
     },
     coastHingeMotor(u) {
       if (J)
@@ -10653,7 +10672,7 @@ async function X8(A, g, I, C = {}) {
       const F = i.castObject(_.get(u), i.HingeConstraint), b = F.GetMotorSettings();
       b.mMaxTorqueLimit > 100 && (b.mMaxTorqueLimit = 0.02, b.mMinTorqueLimit = -0.02), F.SetTargetAngularVelocity(0), F.SetMotorState(i.EMotorState_Velocity);
       for (const H of [R.bodyA, R.bodyB])
-        M.ActivateBody(S.get(H).GetID());
+        M.ActivateBody(G.get(H).GetID());
     },
     hingeAngle(u) {
       if (J)
@@ -10746,7 +10765,7 @@ function g9(A) {
 }
 async function I9(A, g, I) {
   const C = s3(A);
-  if (g.sourceKey !== l5(C))
+  if (g.sourceKey !== o5(C))
     throw new Error(t("Geometry is stale for collision preparation"));
   const q = /* @__PURE__ */ new Map(), B = /* @__PURE__ */ new Map(), e = (r, a) => a.reduceRight((n, h) => A9(n, h), r);
   function i(r, a) {
@@ -10791,9 +10810,9 @@ async function I9(A, g, I) {
     if (h.kind === "boolean" && h.operation === "subtract") {
       const N = [...a, h.transform], y = Q(h.inputs[0], N, n), m = h.inputs.slice(1).map((K) => i(K, N)), p = h.physics?.sourcePreset === "nut" ? I.collisionCSG.grid(Q(h.inputs[0], [], n)).map((K) => {
         const k = new Float64Array(K.positions.length);
-        for (let S = 0; S < k.length; S += 3) {
-          const _ = e([K.positions[S], K.positions[S + 1], K.positions[S + 2]], N);
-          k.set(_, S);
+        for (let G = 0; G < k.length; G += 3) {
+          const _ = e([K.positions[G], K.positions[G + 1], K.positions[G + 2]], N);
+          k.set(_, G);
         }
         return { ...K, positions: k };
       }) : y;
@@ -10805,9 +10824,9 @@ async function I9(A, g, I) {
         for (let p = 0; p < 32; p++) {
           const K = [];
           for (const k of [m, m + 0.5, m + 1])
-            for (const S of [p, p + 1])
+            for (const G of [p, p + 1])
               for (const _ of [3, 5])
-                K.push(e(N(k / 12 * Math.PI / 2, S / 32 * Math.PI * 2, _), [...a, h.transform]));
+                K.push(e(N(k / 12 * Math.PI / 2, G / 32 * Math.PI * 2, _), [...a, h.transform]));
           y.push(I.hullPoints(K));
         }
       return y;
@@ -10819,8 +10838,8 @@ async function I9(A, g, I) {
       }, p = [...a, h.transform], K = [], k = (J, T, v, IA) => {
         const sA = m(J, T, v), O = m(J, T + IA, v);
         return sA.map((EA, FA) => EA + 1e-4 * (O[FA] - EA));
-      }, S = Array.from({ length: y + 1 }, (J, T) => Array.from({ length: N }, (v, IA) => m(T, IA, 1))).flat().every((J) => Math.hypot(J[0], J[1]) < 1e-6), _ = Math.min(y, Math.floor((S ? 2047 : 2048) / N));
-      if (n && !S) {
+      }, G = Array.from({ length: y + 1 }, (J, T) => Array.from({ length: N }, (v, IA) => m(T, IA, 1))).flat().every((J) => Math.hypot(J[0], J[1]) < 1e-6), _ = Math.min(y, Math.floor((G ? 2047 : 2048) / N));
+      if (n && !G) {
         if (y * N > 2048)
           throw new Error(t("Section collision refinement exceeds its compound budget"));
         const J = [0, 1, 3, 0, 3, 2, 4, 6, 7, 4, 7, 5, 0, 4, 5, 0, 5, 1, 2, 3, 7, 2, 7, 6, 0, 2, 6, 0, 6, 4, 1, 5, 7, 1, 7, 3];
@@ -10829,13 +10848,13 @@ async function I9(A, g, I) {
             const IA = [];
             for (const FA of [0, 1])
               for (const kA of [T, T + 1])
-                for (const [fA, SA] of [[0, -1], [1, 1]])
-                  IA.push(e(k(kA, v + fA, FA, SA), p));
+                for (const [fA, GA] of [[0, -1], [1, 1]])
+                  IA.push(e(k(kA, v + fA, FA, GA), p));
             let sA = 0;
             const O = IA[0];
             for (let FA = 0; FA < J.length; FA += 3) {
-              const [kA, fA, SA] = J.slice(FA, FA + 3).map((_A) => IA[_A].map((C1, n1) => C1 - O[n1]));
-              sA += kA[0] * (fA[1] * SA[2] - fA[2] * SA[1]) + kA[1] * (fA[2] * SA[0] - fA[0] * SA[2]) + kA[2] * (fA[0] * SA[1] - fA[1] * SA[0]);
+              const [kA, fA, GA] = J.slice(FA, FA + 3).map((_A) => IA[_A].map((C1, n1) => C1 - O[n1]));
+              sA += kA[0] * (fA[1] * GA[2] - fA[2] * GA[1]) + kA[1] * (fA[2] * GA[0] - fA[0] * GA[2]) + kA[2] * (fA[0] * GA[1] - fA[1] * GA[0]);
             }
             const EA = new Uint32Array(J);
             if (sA < 0)
@@ -10854,7 +10873,7 @@ async function I9(A, g, I) {
               v.push(e(k(IA, T, sA, -1), p), e(k(IA, T + 1, sA, 1), p));
           K.push(I.hullPoints(v));
         }
-      if (S) {
+      if (G) {
         let J = 1 / 0;
         for (let v = 0; v <= y; v++)
           for (let IA = 0; IA < N; IA++) {
@@ -10872,30 +10891,30 @@ async function I9(A, g, I) {
     if (M && h.kind === "mesh") {
       if (M.kind === "tube-grid" && Math.ceil(M.segments / (M.stride ?? 1)) > 2048)
         throw new Error(t("Construction collision exceeds its compound budget"));
-      const N = M.stride ?? 1, y = M.sides + (M.seam === !1 ? 0 : 1), m = (k, S) => {
-        const _ = M.layout === "rows" ? k * y + S : S * (M.segments + 1) + k;
+      const N = M.stride ?? 1, y = M.sides + (M.seam === !1 ? 0 : 1), m = (k, G) => {
+        const _ = M.layout === "rows" ? k * y + G : G * (M.segments + 1) + k;
         return [h.positions[_ * 3], h.positions[_ * 3 + 1], h.positions[_ * 3 + 2]];
       }, p = [...a, h.transform], K = [];
       if (M.kind === "tube-grid")
         for (let k = 0; k < M.segments; k += N) {
-          const S = [];
+          const G = [];
           for (let _ = k; _ <= Math.min(M.segments, k + N); _++)
             for (let J = 0; J < M.sides; J++)
-              S.push(e(m(_, J), p));
-          K.push(I.hullPoints(S));
+              G.push(e(m(_, J), p));
+          K.push(I.hullPoints(G));
         }
       else {
         const k = Array.from({ length: M.sides + 1 }, (v, IA) => {
           const sA = m(0, IA);
           return [Math.hypot(sA[0], sA[1]), sA[2]];
-        }), S = Math.max(...k.map((v) => v[0])) + Math.max(...k.map((v) => v[1])) - Math.min(...k.map((v) => v[1])), _ = $8(k, Math.min(0.05, S * 1e-3)), J = g9(_.map((v) => k[v])).map((v) => v.map((IA) => _[IA])), T = Math.max(1, Math.ceil(M.segments * J.length / 2048));
+        }), G = Math.max(...k.map((v) => v[0])) + Math.max(...k.map((v) => v[1])) - Math.min(...k.map((v) => v[1])), _ = $8(k, Math.min(0.05, G * 1e-3)), J = g9(_.map((v) => k[v])).map((v) => v.map((IA) => _[IA])), T = Math.max(1, Math.ceil(M.segments * J.length / 2048));
         for (let v = 0; v < M.segments; v += T)
           for (const IA of J) {
             const sA = [];
             for (const [O, EA] of [[v, -1e-5], [Math.min(M.segments, v + T), 1e-5]])
               for (const FA of IA) {
-                const kA = m(O, FA), fA = Math.cos(EA), SA = Math.sin(EA);
-                sA.push(e([kA[0] * fA - kA[1] * SA, kA[0] * SA + kA[1] * fA, kA[2]], p));
+                const kA = m(O, FA), fA = Math.cos(EA), GA = Math.sin(EA);
+                sA.push(e([kA[0] * fA - kA[1] * GA, kA[0] * GA + kA[1] * fA, kA[2]], p));
               }
             K.push(I.hullPoints(sA));
           }
@@ -10904,12 +10923,12 @@ async function I9(A, g, I) {
         const k = Array.from({ length: M.sides + 1 }, (v, IA) => {
           const sA = m(0, IA);
           return [Math.hypot(sA[0], sA[1]), sA[2]];
-        }), S = k[0][1], _ = k.at(-1)[1], J = Math.max(...k.map((v) => v[1])), T = k.findIndex((v) => v[1] === J);
-        if (k[0][0] < 1e-6 && k.at(-1)[0] < 1e-6 && _ > S) {
+        }), G = k[0][1], _ = k.at(-1)[1], J = Math.max(...k.map((v) => v[1])), T = k.findIndex((v) => v[1] === J);
+        if (k[0][0] < 1e-6 && k.at(-1)[0] < 1e-6 && _ > G) {
           const v = k.slice(1, T + 1).filter((sA) => sA[1] <= _), IA = Math.min(...v.map((sA) => sA[0])) * Math.cos(Math.PI / M.segments);
           if (IA > 0 && Number.isFinite(IA)) {
             const sA = [];
-            for (const O of [S, _])
+            for (const O of [G, _])
               for (let EA = 0; EA < 32; EA++)
                 sA.push(e([IA * Math.cos(EA * Math.PI / 16), IA * Math.sin(EA * Math.PI / 16), O], p));
             K.push(I.hullPoints(sA));
@@ -10929,18 +10948,18 @@ async function I9(A, g, I) {
   };
   for (const r of g.bodies.filter((a) => !a.reference && !a.hole))
     try {
-      q.set(r.id, await J3(r, I, { candidates: Q(r.id, []) }));
+      q.set(r.id, await b3(r, I, { candidates: Q(r.id, []) }));
     } catch (a) {
       let n = a;
       if (l(r.id))
         try {
-          q.set(r.id, await J3(r, I, { candidates: Q(r.id, [], !0) }));
+          q.set(r.id, await b3(r, I, { candidates: Q(r.id, [], !0) }));
           continue;
         } catch (h) {
           n = new Error(`${a instanceof Error ? a.message : String(a)}; ${h instanceof Error ? h.message : String(h)}`);
         }
       try {
-        q.set(r.id, await J3(r, I));
+        q.set(r.id, await b3(r, I));
       } catch (h) {
         throw new Error(t`${r.name}: source construction failed (${n instanceof Error ? n.message : String(n)}); whole-mesh preparation also failed. ${h instanceof Error ? h.message : String(h)}`);
       }
@@ -10948,29 +10967,29 @@ async function I9(A, g, I) {
   return q;
 }
 let $5, XA, a1;
-const U1 = /* @__PURE__ */ new Map(), A5 = /* @__PURE__ */ new Map(), Q3 = {}, g5 = {}, o5 = {}, G2 = {}, t5 = {}, L3 = () => {
+const U1 = /* @__PURE__ */ new Map(), g5 = /* @__PURE__ */ new Map(), Q3 = {}, I5 = {}, t5 = {}, S2 = {}, a5 = {}, H3 = () => {
   for (const A of a1.joints ?? [])
     if (A.kind === "hinge") {
       const g = XA.hingeAngle(A.id) * 180 / Math.PI;
-      let I = g - (g5[A.id] ?? g);
-      I = ((I + 180) % 360 + 360) % 360 - 180, Q3[A.id] = (Q3[A.id] ?? 0) + I, o5[A.id] = I / 5e-3, g5[A.id] = g;
+      let I = g - (I5[A.id] ?? g);
+      I = ((I + 180) % 360 + 360) % 360 - 180, Q3[A.id] = (Q3[A.id] ?? 0) + I, t5[A.id] = I / 5e-3, I5[A.id] = g;
     }
-}, H3 = () => {
+}, _3 = () => {
   for (const A of a1.joints ?? [])
     if (A.kind === "slider") {
       const g = XA.sliderPosition(A.id);
-      t5[A.id] = G2[A.id] === void 0 ? 0 : (g - G2[A.id]) / 5e-3, G2[A.id] = g;
+      a5[A.id] = S2[A.id] === void 0 ? 0 : (g - S2[A.id]) / 5e-3, S2[A.id] = g;
     }
 };
-let a5 = {};
-const _3 = (A) => {
+let n5 = {};
+const v3 = (A) => {
   if (!Array.isArray(A) || A.length > 32 || new Set(A.map((I) => I.id)).size !== A.length || A.some((I) => !I || typeof I.id != "string" || I.id.length > 96 || !Array.isArray(I.originMm) || I.originMm.length !== 3 || !Array.isArray(I.direction) || I.direction.length !== 3 || !a1.nodes[I.bodyId]))
     throw new Error(t("Invalid body sensor ray"));
   const g = {};
   for (const I of A)
     g[I.id] = XA.bodyRay(I.bodyId, I.originMm, I.direction, I.rangeMm);
-  a5 = g;
-}, o0 = () => ({ time: XA.time, angles: { ...Q3 }, speeds: { ...o5 }, linearPositions: { ...G2 }, linearSpeeds: { ...t5 }, distances: { ...a5 } }), C9 = () => ({ ...o0(), poses: a1.roots.filter((A) => !a1.nodes[A].reference && a1.nodes[A].role !== "hole").map((A) => ({ id: A, ...XA.pose(A) })).concat([...A5].map(([A, g]) => ({ id: A, ...XA.pose(A), ...g }))) });
+  n5 = g;
+}, o0 = () => ({ time: XA.time, angles: { ...Q3 }, speeds: { ...t5 }, linearPositions: { ...S2 }, linearSpeeds: { ...a5 }, distances: { ...n5 } }), C9 = () => ({ ...o0(), poses: a1.roots.filter((A) => !a1.nodes[A].reference && a1.nodes[A].role !== "hole").map((A) => ({ id: A, ...XA.pose(A) })).concat([...g5].map(([A, g]) => ({ id: A, ...XA.pose(A), ...g }))) });
 self.onmessage = async (A) => {
   const g = A.data;
   try {
@@ -10979,11 +10998,11 @@ self.onmessage = async (A) => {
       const I = a1.roots.find((e) => !a1.nodes[e].reference && a1.nodes[e].role !== "hole");
       g.fixBase && I && (a1.nodes[I].physics = { ...a1.nodes[I].physics ?? x2(), motion: "static" });
       const C = await ($5 ?? ($5 = P8({ wasmURL: g.wasmURL }))), q = C.evaluate(a1), B = await I9(a1, q, C);
-      U1.clear(), A5.clear(), a5 = {}, XA = await X8(a1, q, B, { mode: g.rigidPreview ? "rigid-preview" : "mechanism" });
-      for (const e of [Q3, g5, o5, G2, t5])
+      U1.clear(), g5.clear(), n5 = {}, XA = await X8(a1, q, B, { mode: g.rigidPreview ? "rigid-preview" : "mechanism" });
+      for (const e of [Q3, I5, t5, S2, a5])
         for (const i of Object.keys(e))
           delete e[i];
-      L3(), H3();
+      H3(), _3();
     } else {
       if (!XA)
         throw new Error(t("Start simulation first"));
@@ -10991,11 +11010,11 @@ self.onmessage = async (A) => {
         if (!Number.isFinite(g.seconds) || g.seconds <= 0 || g.seconds > 0.05 || Math.abs(g.seconds * 200 - Math.round(g.seconds * 200)) > 1e-8)
           throw new Error(t("Invalid simulation step"));
         for (let I = 0; I < Math.round(g.seconds * 200); I++)
-          XA.step(5e-3), L3(), H3();
+          XA.step(5e-3), H3(), _3();
       } else if (g.op === "sense")
-        _3(g.rays);
+        v3(g.rays);
       else if (g.op === "actuator-step") {
-        if (g.rays && _3(g.rays), !Array.isArray(g.impulses) || g.impulses.length > 64 || new Set(g.impulses.map((C) => C.id)).size !== g.impulses.length || g.impulses.some((C) => !Number.isFinite(C.impulse) || Math.abs(C.impulse) > 1 || !a1.joints?.some((q) => q.id === C.id && ["hinge", "slider"].includes(q.kind))))
+        if (g.rays && v3(g.rays), !Array.isArray(g.impulses) || g.impulses.length > 64 || new Set(g.impulses.map((C) => C.id)).size !== g.impulses.length || g.impulses.some((C) => !Number.isFinite(C.impulse) || Math.abs(C.impulse) > 1 || !a1.joints?.some((q) => q.id === C.id && ["hinge", "slider"].includes(q.kind))))
           throw new Error(t("Invalid actuator impulse"));
         const I = g.servos ?? [];
         if (!Array.isArray(I) || I.length > 64 || new Set(I.map((C) => C.id)).size !== I.length || I.some((C) => g.impulses.some((q) => q.id === C.id) || !Number.isFinite(C.angleRad) || Math.abs(C.angleRad) > Math.PI * 2 || !Number.isFinite(C.torqueNm) || C.torqueNm <= 0 || C.torqueNm > 100 || !a1.joints?.some((q) => q.id === C.id && q.kind === "hinge")))
@@ -11004,7 +11023,7 @@ self.onmessage = async (A) => {
           C.enabled ? (XA.setHingeServo(C.id, C.angleRad, C.torqueNm), U1.set(C.id, "hinge")) : (XA.coastHingeMotor(C.id), U1.delete(C.id));
         for (const C of g.impulses)
           XA.applyJointImpulse(C.id, C.impulse);
-        XA.step(5e-3), L3(), H3(), g.rays && _3(g.rays);
+        XA.step(5e-3), H3(), _3(), g.rays && v3(g.rays);
       } else if (g.op === "motor") {
         if (!Number.isFinite(g.speedDps) || Math.abs(g.speedDps) > 720)
           throw new Error(t("Motor speed must be between -720 and 720 degrees per second"));
@@ -11022,7 +11041,7 @@ self.onmessage = async (A) => {
       else if (g.op === "release-grab")
         XA.releaseGrab();
       else if (g.op === "ball")
-        g.shape === "box" ? XA.spawnBox(g.id, g.positionMm, g.velocityMmS, g.radiusMm) : XA.spawnSphere(g.id, g.positionMm, g.velocityMmS, g.radiusMm), A5.set(g.id, { previewRadiusMm: g.radiusMm, previewShape: g.shape ?? "sphere" });
+        g.shape === "box" ? XA.spawnBox(g.id, g.positionMm, g.velocityMmS, g.radiusMm) : XA.spawnSphere(g.id, g.positionMm, g.velocityMmS, g.radiusMm), g5.set(g.id, { previewRadiusMm: g.radiusMm, previewShape: g.shape ?? "sphere" });
       else if (g.op === "impulse")
         XA.applyImpulse(g.id, g.impulseNs, g.pointMm);
       else if (g.op === "stop-motors")

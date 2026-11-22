@@ -2,7 +2,7 @@
   "format": "brickwright-cad-sdk",
   "version": 1,
   "repository": "https://github.com/CrispStrobe/brickwright-cad",
-  "commit": "fe6b77d75fb92c15e66cf987e2b6d0485cf9dc9d",
+  "commit": "40496623d84b79b747d3e7539dc4e66a67d9d910",
   "dirty": false,
   "entry": "sdk.js",
   "wasm": "cad-assets/manifold.wasm",
@@ -10,13 +10,13 @@
     "LICENSE": "ed121de3496066a2ddc8c11b30b48142165ab84bdb066fee351392ecaccf36ad",
     "NOTICE.txt": "c75b43e86dd682f04d167b78e655bff1ea1e7edb2a8fb0c3f28fc50b51d9f6f9",
     "adafruit-preview-data-BWhkbkqw.js": "c37d14c1f115a63599555fd4193b2df1f9426a9b4cab8962282d6794ba6e11b6",
-    "assets/geometry.worker-CmS44C3h.js": "5e49c73e95522c214a43526400952aab5a2c617f9d5d7b0ff8879fbf8a756057",
-    "assets/jolt-physics.wasm-compat-3KvVrRwV.js": "ba9570ab2447d3f4028af702ca8e0fa84afd34666a79db1f4ab0ed99afde0beb",
-    "assets/simulation.worker-cbUUa9RE.js": "942ab673847b1f082e78fcb2adc4ad2fa5254d544bc62f1e4b382910873b6b56",
+    "assets/geometry.worker-7VUzjzuz.js": "08c254b4b2be1223c5026a33eeb0e8e53853fd26a737275c89adfe0e98921b1a",
+    "assets/jolt-physics.wasm-compat-TFJqcFDl.js": "92f88c64e8955d9076916138e4597a7a21f7e2f882ac86ad645dc0b8a5b3ac10",
+    "assets/simulation.worker-BpDi-2vn.js": "7a1a9fe1bbad46e03ab42cfabab312a5727128115719b9cefa801f69fad90d49",
     "cad-assets/manifold.wasm": "73e3b419ad31294f6b1cc478173944e50efc4a34bfdeeff0107bdfc12975f11c",
     "model-library-cache-DiMFGzp9.js": "75dc4ad7999b4571b227f1c675ca00af698fcc886dc73e98dd4c0eb2604e2b20",
-    "model-library-local-bScFd72P.js": "458b21cfc192dd99b7b1fd75c1e6abfc3295687bce9cc53fec3301f81bcfbdd3",
-    "sdk-DS5-25cU.js": "26cb5657b00eab44ccebe4fad6363ae0ccabaf211de847f6bf50af5cf759e861",
-    "sdk.js": "ea673855a6ebddc608b155bbfeb85a3c7815bcd033baffd30997655887a7a98d"
+    "model-library-local-DnezKVNa.js": "157c9c43d183dc731846447f958f3ec619240c071557548726af0dc351bb7569",
+    "sdk-Bj9YTKTK.js": "0bb9f6be00d34f6b6ca43a012cb917dfbd1501e9115291e783beb2d4ae4eb3d3",
+    "sdk.js": "ba8bd79df945f1cd304a8c45b7dc27b950f467c7022d61889a63e5b008086f69"
   }
 }
