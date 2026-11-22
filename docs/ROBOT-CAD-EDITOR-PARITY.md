@@ -409,3 +409,8 @@ Changing the page scale preserves the measured value.
 dimension** measures the length along an arc's sweep. The link follows
 curvature edits and is stored with the drawing in the SB3. If the chosen
 edge becomes straight, the sheet marks the dimension for repair.
+
+Open **Objects → Drawings → Create assembly drawing** for top, front and
+right views of the evaluated solids in their design positions. The assembly
+and sketch sheets can be saved together in an SB3 and exported as a numbered
+PDF set. Use a smaller scale to fit larger assemblies on A4.

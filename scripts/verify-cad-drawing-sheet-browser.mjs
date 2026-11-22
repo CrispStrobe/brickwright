@@ -143,13 +143,34 @@ try{
  await dialog(page).getByLabel('Show hidden lines').uncheck();
  await dialog(page).getByRole('button',{name:'Save drawing sheet'}).tap();
  await dialog(page).waitFor({state:'hidden'});
+ await page.evaluate(()=>{
+  window.__bwCad.editor.session.add({kind:'box',size:[20,30,12]},
+   {transform:{position:[55,8,3],rotation:[0,0,20],scale:[1,1,1]}});
+ });
+ await waitGeometry(page);
+ const createAssembly=page.getByRole('button',{name:'Create assembly drawing',exact:true});
+ if(!await createAssembly.isVisible())await page.getByRole('button',{name:'Objects',exact:true}).tap();
+ await createAssembly.tap();
+ await dialog(page).getByLabel('Sheet title').fill('Assembly overview');
+ await preview(page).getByText('Assembly · 2 bodies',{exact:true}).waitFor();
+ const pathData=await preview(page).locator('.drawing-visible').getAttribute('d');
+ assert.ok(pathData.split('M ').length>10);
+ await dialog(page).getByLabel('Show hidden lines').uncheck();
+ const [assemblyPdf]=await Promise.all([
+  page.waitForEvent('download'),
+  dialog(page).getByRole('button',{name:'Export drawing PDF'}).tap()
+ ]);
+ const assemblyText=await readFile(await assemblyPdf.path(),'utf8');
+ assert.ok(assemblyText.includes('<'+Buffer.from('Assembly overview','latin1').toString('hex')+'>'));
+ await dialog(page).getByRole('button',{name:'Save drawing sheet'}).tap();
+ await dialog(page).waitFor({state:'hidden'});
  const [set]=await Promise.all([
   page.waitForEvent('download'),page.getByRole('button',{name:'Export drawing set (PDF)'}).tap()
  ]);
  const setText=await readFile(await set.path(),'utf8');
- assert.match(setText,/\/Type \/Pages \/Count 2/);
- assert.ok(setText.includes(Buffer.from('Sheet 1 of 2','latin1').toString('hex')));
- assert.ok(setText.includes(Buffer.from('Sheet 2 of 2','latin1').toString('hex')));
+ assert.match(setText,/\/Type \/Pages \/Count 3/);
+ assert.ok(setText.includes(Buffer.from('Sheet 1 of 3','latin1').toString('hex')));
+ assert.ok(setText.includes(Buffer.from('Sheet 3 of 3','latin1').toString('hex')));
  if(setOutput)await set.saveAs(setOutput);
  await file(page).tap();
  const [save]=await Promise.all([
@@ -159,7 +180,7 @@ try{
  await save.saveAs(project);
  const zip=await JSZip.loadAsync(await readFile(project));
  const saved=JSON.parse(await zip.file(CAD_PROJECT_PATH).async('text'));
- assert.equal(saved.version,20);
+ assert.equal(saved.version,21);
  assert.deepEqual(saved.drawings[0].section,{axis:'v',position:15,jog:{at:'spacing / 2 + 10 mm',position:16}});
  assert.equal(saved.drawings[0].annotations[0].from,'circle:first');
  assert.equal(saved.drawings[0].annotations[0].to,'circle:second');
@@ -172,8 +193,10 @@ try{
  assert.equal(arc.kind,'arc-length');
  assert.equal(arc.from,`arc:plate:${linkedOutline.vertexIds[2]}:${linkedOutline.vertexIds[3]}`);
  assert.equal(saved.drawings[0].annotations[2].from,arc.from);
- assert.equal(saved.drawings.length,2);
+ assert.equal(saved.drawings.length,3);
  assert.equal(saved.drawings[1].scale,'1:2');
+ assert.deepEqual(saved.drawings[2].source,{kind:'assembly'});
+ assert.equal(saved.drawings[2].hiddenLines,false);
  await page.close();
 
  const restored=await open();
@@ -210,7 +233,11 @@ try{
  await restored.getByRole('button',{name:'Drawing: Motor plate overview',exact:true}).tap();
  assert.equal(await spacing(restored),14);
  assert.equal(await preview(restored).locator('.drawing-hidden').count(),0);
- console.log('PASS linked drawing sheets in Brickwright: touch controls, live parameters, linked offset sections, aligned and curved dimensions, single and numbered vector PDFs, and SB3 save and reopen');
+ await dialog(restored).getByRole('button',{name:'Close drawing'}).tap();
+ await restored.getByRole('button',{name:'Drawing: Assembly overview',exact:true}).tap();
+ await preview(restored).getByText('Assembly · 2 bodies',{exact:true}).waitFor();
+ assert.equal(await preview(restored).locator('.drawing-hidden').count(),0);
+ console.log('PASS linked assembly and sketch drawing sheets in Brickwright: touch controls, live parameters, linked offset sections, aligned and curved dimensions, single and numbered vector PDFs, and SB3 save and reopen');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});
