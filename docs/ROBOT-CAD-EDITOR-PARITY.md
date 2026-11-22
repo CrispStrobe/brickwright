@@ -278,3 +278,11 @@ rectangle or circle extrusion. It exports the original profile in its local
 sketch plane at its evaluated dimensions in millimetres. Rectangles use a
 closed polyline and circles remain analytic circles. Body transforms, cuts
 and projection of an entire assembly belong to separate export workflows.
+
+**DXF import** is available under **Sketch & Extrude → Import DXF outline**.
+Import one text DXF circle or closed straight lightweight polyline, then edit
+its dimensions or coordinates before creating the extrusion. Declared inches,
+feet, millimetres, centimetres and metres convert to millimetres. A unitless
+file requires explicit opt-in to millimetres. The import and subsequent edits
+use the shared retained sketch model and history. Multiple loops, holes, arcs,
+bulges, and DWG remain on the drafting roadmap.
