@@ -291,8 +291,7 @@ relative offsets such as `@40, 0`. For exact placement, choose up to two sketche
 on the same plane as snap references. The preview highlights endpoints,
 midpoints, centers and intersections. Turn on **Edit edge curves** to drag
 an edge midpoint and set its curvature while keeping the endpoints fixed.
-Persistent constraints, open DXF contours, layer filtering, DWG and STEP
-remain open.
+Coupled sketch constraints, DXF layer filtering, DWG and STEP remain open.
 
 **Properties → Export drilling template (PDF)** produces a full-size A4
 vector template in the local sketch plane. It evaluates the current cutout
@@ -381,3 +380,10 @@ The path keeps its layer and editable arcs when exported, reimported or
 saved in an SB3. Run
 `node scripts/verify-cad-path-dxf-browser.mjs <app-url> [fixture.dxf] [export.dxf]`
 for the embedded round-trip check.
+
+**Sketch path → Point locks** retains fixed X/Y coordinates and project
+parameter expressions in the CAD sidecar. The preview highlights locked points.
+Trimming keeps locks on surviving vertices. Closing into an outline uses the
+current point positions. Run
+`node scripts/verify-cad-path-lock-browser.mjs <app-url>` to verify touch editing
+and reopening a body-free SB3 with its lock expressions.
