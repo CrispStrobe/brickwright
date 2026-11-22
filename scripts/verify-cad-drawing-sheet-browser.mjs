@@ -59,6 +59,12 @@ try{
  await dialog(page).getByRole('checkbox',{name:'Show section A-A'}).check();
  const cut=dialog(page).getByLabel('Section position (mm)');
  assert.equal(await cut.inputValue(),'15');
+ const axis=dialog(page).getByLabel('Section axis',{exact:true});
+ await axis.selectOption('u');
+ assert.equal(await cut.inputValue(),'20');
+ assert.equal(await preview(page).locator('.drawing-section').count(),1);
+ await axis.selectOption('v');
+ assert.equal(await cut.inputValue(),'15');
  await cut.fill('50');
  assert.match(await dialog(page).getByRole('status',{name:'Drawing status'}).textContent(),/misses the part/);
  await cut.fill('15');
