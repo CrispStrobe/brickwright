@@ -273,7 +273,10 @@ dimension**, tap a visible edge in an orthographic view, and tap the sheet to
 place its projected length. The reference follows body placement when the edge
 is still visible in that view. If an edit removes or obscures it, reselect the
 edge or remove the dimension before exporting. Edge dimensions save with the
-project and export in the vector PDF.
+project and export in the vector PDF. Choose **Radius dimension**, **Diameter
+dimension**, or **Arc length dimension** for a visible curve in a face-on view.
+These use the cylinder or retained sketch geometry and update when the
+authored radius or arc changes.
 
 For an assembly section that crosses several features, enable **Offset
 section** and choose **Add jog** after setting the first step. The world-axis

@@ -189,6 +189,21 @@ try{
  await page.touchscreen.tap(picks.label.x,picks.label.y);
  await preview(page).locator('.drawing-annotation').first().waitFor({state:'attached'});
  assert.equal(await preview(page).locator('.drawing-annotation').count(),5);
+ await dialog(page).getByLabel('Model edge dimension type',{exact:true}).selectOption('diameter');
+ await dialog(page).getByRole('button',{name:'Add edge dimension',exact:true}).tap();
+ await preview(page).scrollIntoViewIfNeeded();
+ const bore=await preview(page).evaluate(svg=>{
+  const screen=(x,y)=>{
+   const point=new DOMPoint(x,y).matrixTransform(svg.getScreenCTM());
+   return {x:point.x,y:point.y};
+  };
+  return {edge:screen(42.5,125),label:screen(90,111)};
+ });
+ await page.touchscreen.tap(bore.edge.x,bore.edge.y);
+ await preview(page).locator('.drawing-model-edge-marker').waitFor({state:'attached'});
+ await page.touchscreen.tap(bore.label.x,bore.label.y);
+ await preview(page).getByText('Ø6 mm',{exact:true}).waitFor();
+ assert.equal(await preview(page).locator('.drawing-annotation').count(),6);
  await dialog(page).getByLabel('Include parts list').check();
  await dialog(page).getByLabel('Preview page').selectOption('1');
  await preview(page).getByText('Rear bracket',{exact:true}).waitFor();
@@ -201,6 +216,7 @@ try{
  assert.match(assemblyText,/\/Type \/Pages \/Count 2/);
  assert.ok(assemblyText.includes('<'+Buffer.from('World Y = 14 / 8 / 14 mm','latin1').toString('hex')+'>'));
  assert.ok(assemblyText.includes('<'+Buffer.from('Rear bracket','latin1').toString('hex')+'>'));
+ assert.ok(assemblyText.includes('<'+Buffer.from('Ø6 mm','latin1').toString('hex')+'>'));
  await dialog(page).getByRole('button',{name:'Save drawing sheet'}).tap();
  await dialog(page).waitFor({state:'hidden'});
  const [set]=await Promise.all([
@@ -220,7 +236,7 @@ try{
  await save.saveAs(project);
  const zip=await JSZip.loadAsync(await readFile(project));
  const saved=JSON.parse(await zip.file(CAD_PROJECT_PATH).async('text'));
- assert.equal(saved.version,26);
+ assert.equal(saved.version,27);
  assert.deepEqual(saved.drawings[0].section,{axis:'v',position:15,jog:{at:'spacing / 2 + 10 mm',position:16}});
  assert.equal(saved.drawings[0].annotations[0].from,'circle:first');
  assert.equal(saved.drawings[0].annotations[0].to,'circle:second');
@@ -240,6 +256,9 @@ try{
  assert.equal(saved.drawings[2].partsList,true);
  assert.equal(saved.drawings[2].edgeDimensions.length,1);
  assert.ok(saved.roots.includes(saved.drawings[2].edgeDimensions[0].bodyId));
+ assert.equal(saved.drawings[2].curveDimensions.length,1);
+ assert.equal(saved.drawings[2].curveDimensions[0].kind,'diameter');
+ assert.equal(saved.drawings[2].curveDimensions[0].source.anchor,'circle:second');
  assert.deepEqual(saved.drawings[2].section,{
   axis:'v',position:'spacing / 2',jog:{at:'spacing + 17 mm',position:8},
   additionalJogs:[{at:'spacing + 27 mm',position:'spacing / 2'}]
@@ -290,10 +309,11 @@ try{
  assert.equal(await dialog(restored).getByLabel('Jog 2 at (mm)',{exact:true}).inputValue(),'spacing + 27 mm');
  assert.equal(await dialog(restored).getByLabel('Position after jog 2 (mm)',{exact:true}).inputValue(),'spacing / 2');
  await preview(restored).getByText('World Y = 14 / 8 / 14 mm',{exact:true}).waitFor();
- assert.equal(await preview(restored).locator('.drawing-annotation').count(),5);
+ await preview(restored).getByText('Ø6 mm',{exact:true}).waitFor();
+ assert.equal(await preview(restored).locator('.drawing-annotation').count(),6);
  await dialog(restored).getByLabel('Preview page').selectOption('1');
  await preview(restored).getByText('Rear bracket',{exact:true}).waitFor();
- console.log('PASS model-edge dimensions, multi-jog assembly sections, parts lists, worker-backed assembly and linked sketch drawing sheets in Brickwright: touch controls, live parameters, linked offset sections, aligned and curved dimensions, single and numbered vector PDFs, and SB3 save and reopen');
+ console.log('PASS straight and curved model-edge dimensions, multi-jog assembly sections, parts lists, worker-backed assembly and linked sketch drawing sheets in Brickwright: touch controls, live parameters, linked offset sections, aligned and curved dimensions, single and numbered vector PDFs, and SB3 save and reopen');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});

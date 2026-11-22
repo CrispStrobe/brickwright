@@ -2,7 +2,7 @@
   "format": "brickwright-cad-sdk",
   "version": 1,
   "repository": "https://github.com/CrispStrobe/brickwright-cad",
-  "commit": "901946b06124957ce06c5b33358de9e563dea6ba",
+  "commit": "39a7ee7253b1525d92ff640e1ae270c312d9682d",
   "dirty": false,
   "entry": "sdk.js",
   "wasm": "cad-assets/manifold.wasm",
@@ -10,14 +10,14 @@
     "LICENSE": "ed121de3496066a2ddc8c11b30b48142165ab84bdb066fee351392ecaccf36ad",
     "NOTICE.txt": "c75b43e86dd682f04d167b78e655bff1ea1e7edb2a8fb0c3f28fc50b51d9f6f9",
     "adafruit-preview-data-BWhkbkqw.js": "c37d14c1f115a63599555fd4193b2df1f9426a9b4cab8962282d6794ba6e11b6",
-    "assets/assembly-projection.worker-DnMLgZQ3.js": "c70ab90793ca2eaadcfb82307525d3d624fc3963673ef169f6e175237efa2772",
-    "assets/geometry.worker-_kryk4tK.js": "24f643862ceefa5e939c1ee2576194708fe4e7d5cbe2dd7adbffc778d1bd3d2a",
-    "assets/jolt-physics.wasm-compat-4CTn0-ii.js": "afadc4ac9effa34d2583a3e0a24ba52c5946c278f58bc2b895d8f1bded7651bc",
-    "assets/simulation.worker-H3Q1QRUq.js": "55740c25454916fe21653c89b7ae721bddfe52ef62c7c28aee072f59d67df5ba",
+    "assets/assembly-projection.worker-rIXXSHvF.js": "579cebf229f2ed8bffa56d7f77de05416f652bc6dff8e1044a43469d7c64183c",
+    "assets/geometry.worker-C5ATBUw5.js": "b734faf348dee3297c5473859326b0e861f25825d1a5ca2c1e29065062301980",
+    "assets/jolt-physics.wasm-compat-JFFVkDD-.js": "6f9e8b82bc22ce9cc79f95df760b9a3d3ca602040e16f3849dadc002baf806ca",
+    "assets/simulation.worker-B8svZjFL.js": "b9d1b7cab91464adef8f0b590997a38c1b0b9b01c787ee2978cec333624ab9db",
     "cad-assets/manifold.wasm": "73e3b419ad31294f6b1cc478173944e50efc4a34bfdeeff0107bdfc12975f11c",
     "model-library-cache-DiMFGzp9.js": "75dc4ad7999b4571b227f1c675ca00af698fcc886dc73e98dd4c0eb2604e2b20",
-    "model-library-local-BT1ZtrZk.js": "9e9727fcea17b2576d435e5f85210b710c63c2c62dbae90d014a44c17c2abf38",
-    "sdk-fVsi9Wz7.js": "eb65452c630512fd55ecf7936966c7d0e58ab7587685a3d0da619220b8901b83",
-    "sdk.js": "72700110f24c434ff3d9df6f31c393c14c7980cf9f9ff1912dd449c0ac016a44"
+    "model-library-local-C05gx06K.js": "d98f718940cd15814a763caa5df1fedaf87b9615a2081fd58c2fb96866bccd69",
+    "sdk-cP3YD8RY.js": "66c54742392140df8891c196bda06fee8b9b1057bac8a2aacf2761593b1cad88",
+    "sdk.js": "9f228871a5ac9005612ef1d80eb0521b73f5c12621c04a986d50d24369024fad"
   }
 }
