@@ -6,18 +6,18 @@ import path from 'node:path';
 
 export const CAD_SDK_ROOT = 'overlay/scratch-gui/static/cad-sdk';
 export const CAD_SDK_PRODUCER = 'scripts/sync-cad-sdk.mjs';
-export const APPROVED_CAD_MANIFEST_SHA256 = '6e3eb597bedc11c08e58a4c8e2359ca103fc1362fbbf81bd9a30e06063b327bf';
+export const APPROVED_CAD_MANIFEST_SHA256 = 'a64d73b157d3db79b2d95cc16ce6273406b8c993f5e1455b27c76d3632a61728';
 export const APPROVED_CAD_PRODUCER_SHA256 = '5d1f4ef4cef65b68306cd147237409bd6a77b485137be05b8f66b05dafdf0e7c';
 const SHA = /^[0-9a-f]{40}$/;
 const HASH = /^[0-9a-f]{64}$/;
 const CARRIER = /^model-library-local-[A-Za-z0-9_-]+\.js$/;
-export const APPROVED_CAD_COMMIT = '83db13171588501e48c12bbdafa9a07437fe7433';
-export const APPROVED_CAD_CARRIER = 'model-library-local-CKbm_oie.js';
-export const APPROVED_CAD_CARRIER_SHA256 = 'abd81266511b83b511247c12f5a5398f12de19b631ded99520d593f5fa1cd3e5';
+export const APPROVED_CAD_COMMIT = '41a6b60419212dee4cdb67bc1d3208825d62672e';
+export const APPROVED_CAD_CARRIER = 'model-library-local-D7V67wwU.js';
+export const APPROVED_CAD_CARRIER_SHA256 = 'e6a792d65cb42a3f57c74c203940256dc35fea8165ff1a6e5322113d84f1cfd7';
 
 export const APPROVED_CAD_CARRIERS = Object.freeze({
     [APPROVED_CAD_CARRIER]: APPROVED_CAD_CARRIER_SHA256,
-    'sdk-CFcGlh7J.js': '597bc9b17dc9072948d5e500c5c617376d5b72c0d49b3c71b21de3dd0492fb61'
+    'sdk-C1duG3-o.js': '9ab4d76fe8bfcb75c9ba37dd65dd219f2a693d5731ed3b439f3b3b10e9ae722b'
 });
 
 // Structural validation is not approval. Only the exact frozen carrier below

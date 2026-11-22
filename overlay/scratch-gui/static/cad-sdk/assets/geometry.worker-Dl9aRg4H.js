@@ -826,6 +826,14 @@ const y6 = {
   "Apply thread redesign": "Gewindeauslegung anwenden",
   "Rebuild a resized screw at a chosen pitch or turns per start, resetting its local scale as one saved edit.": "Eine skalierte Schraube mit gewählter Steigung oder Windungszahl pro Gang als einen gespeicherten Schritt neu aufbauen und ihre lokale Skalierung zurücksetzen."
 }, R6 = {
+  "DXF lines and arcs must join into one open path without branches or duplicate edges.": "DXF-Linien und -Bögen müssen einen offenen Pfad ohne Verzweigungen oder doppelte Kanten bilden.",
+  "Use the same DXF layer for every line and arc in an open path.": "Verwende für alle Linien und Bögen eines offenen Pfades dieselbe DXF-Ebene.",
+  "Choose a DXF with one open path.": "Wähle eine DXF-Datei mit einem offenen Pfad.",
+  "Use one open lightweight polyline or one connected chain of planar lines and arcs.": "Verwende eine offene leichte Polylinie oder eine zusammenhängende Kette aus ebenen Linien und Bögen.",
+  "Export path as DXF": "Pfad als DXF exportieren",
+  "DXF path": "DXF-Pfad",
+  "DXF layer: {0}": "DXF-Ebene: {0}",
+  "The path changed while reading DXF. Choose the file again.": "Der Pfad wurde beim Lesen der DXF-Datei geändert. Wähle die Datei erneut.",
   "An open path needs 2–256 finite points within 100000 mm of the sketch origin.": "Ein offener Pfad braucht 2 bis 256 endliche Punkte im Bereich von 100000 mm um den Skizzenursprung.",
   "An open path needs distinct start and end points.": "Ein offener Pfad braucht unterschiedliche Start- und Endpunkte.",
   "Enter one finite bulge per path edge. The last point has no outgoing edge.": "Gib pro Pfadkante eine endliche Bogenwölbung ein. Der letzte Punkt hat keine ausgehende Kante.",
@@ -6193,7 +6201,7 @@ function c2(A, g) {
     if (!Z2(A) || A.version !== 1 || !U3(A.id) || typeof A.name != "string" || !A.name.trim() || A.name.length > 160 || /[\u0000-\u001f]/.test(A.name) || !["XY", "XZ", "YZ"].includes(A.plane) || !Z2(A.profile) || !U3(A.profile.id))
       throw new Error(a("Invalid sketch schema"));
     const I = A.profile;
-    if ((I.kind === "outline" || I.kind === "circle") && I.dxfLayer !== void 0 && !x4(I.dxfLayer))
+    if ((I.kind === "outline" || I.kind === "circle" || I.kind === "path") && I.dxfLayer !== void 0 && !x4(I.dxfLayer))
       throw new Error(a("Invalid DXF layer name."));
     if (I.kind === "region")
       return Zg(I.loops, (C) => y1(C, g));

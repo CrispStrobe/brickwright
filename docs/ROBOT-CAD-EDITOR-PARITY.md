@@ -374,3 +374,10 @@ Open it from **Objects → Sketches** to trim it while it is open or close it
 into an outline. The CAD sidecar retains paths even in a project with zero
 bodies. Run `node scripts/verify-cad-sketch-path-browser.mjs <app-url>` for
 the touch, SB3 round trip and extrusion checks.
+
+Open **DXF path** in the sketch path editor to exchange a single planar open
+polyline or a connected LINE/ARC chain. File units convert to millimetres.
+The path keeps its layer and editable arcs when exported, reimported or
+saved in an SB3. Run
+`node scripts/verify-cad-path-dxf-browser.mjs <app-url> [fixture.dxf] [export.dxf]`
+for the embedded round-trip check.
