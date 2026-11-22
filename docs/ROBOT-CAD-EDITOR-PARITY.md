@@ -284,6 +284,11 @@ straight lightweight polylines. Edit the coordinates or radii before creating
 the extrusion. Declared inches, feet, millimetres, centimetres and metres
 convert to millimetres. A unitless
 file requires explicit opt-in to millimetres. The import and subsequent edits
-use the shared retained sketch model and history. Visual editing and dimensions
-for holes, arcs, bulges, layers, linked drawings, DWG and STEP remain on the
-drafting roadmap.
+use the shared retained sketch model and history. Region circle centers and
+radii can use named dimensions, and DXF export retains entity layer names.
+Visual point and curve editing, arcs, bulges, layer filtering, linked drawings,
+DWG and STEP remain open.
+
+Run \`node scripts/verify-cad-dxf-region-browser.mjs <app-url>\` against a running
+build to check the embedded workflow in Playwright. The optional second and
+third arguments accept an independent DXF fixture and save the exported DXF.
