@@ -120,7 +120,6 @@ try{
   await page.waitForFunction(()=>window.__bwCad?.editor);
   const cad=page.getByTestId('bw-cad-tab');
   // Exercise the shipping host, including the deferred catalogue and Redux preference.
-  await cad.getByLabel('File menu',{exact:true}).click();
   await cad.getByRole('button',{name:'Model library',exact:true}).click();
   const models=cad.getByRole('dialog',{name:'Model library',exact:true});
   await models.getByLabel('Model type',{exact:true}).selectOption('source');
