@@ -36,7 +36,7 @@ const x6 = {
   "Choose light or dark mode": "Hellen oder dunklen Modus wählen",
   "Loading models…": "Modelle werden geladen…",
   "Original source files": "Originale Quelldateien",
-  "Model source uses project version 6 through 18": "Modellquelltext verwendet Projektversion 6 bis 18",
+  "Model source uses project version 6 through 19": "Modellquelltext verwendet Projektversion 6 bis 19",
   "Unknown material preset": "Unbekannte Materialvorlage",
   "Initial velocity requires project version 8": "Anfangsgeschwindigkeit erfordert Projektversion 8",
   "Invalid initial body velocity": "Ungültige Anfangsgeschwindigkeit",
@@ -1234,6 +1234,8 @@ const x6 = {
   "Dimension type": "Maßtyp",
   "Diameter dimension": "Durchmessermaß",
   "Vertical dimension": "Vertikales Maß",
+  "Aligned dimension": "Ausgerichtetes Maß",
+  "Choose two anchors at different positions.": "Wähle zwei Bezugspunkte an unterschiedlichen Positionen.",
   "Horizontal dimension": "Horizontales Maß",
   "Invalid outline vertex identities.": "Ungültige Kennungen für Konturpunkte.",
   "Outline {0}, point {1} ({2})": "Kontur {0}, Punkt {1} ({2})",
@@ -2205,12 +2207,12 @@ function O6(A) {
         throw I();
       const q = /* @__PURE__ */ new Set();
       for (const i of C.annotations) {
-        if (!t2(i) || !M1(i.id) || q.has(i.id) || !M1(i.sketchId) || !h5(i.from) || !Array.isArray(i.at) || i.at.length !== 2 || !T6(i.at[0], i.at[1]) || A.version < 18 && [i.from, i.to].some(L5))
+        if (!t2(i) || !M1(i.id) || q.has(i.id) || !M1(i.sketchId) || !h5(i.from) || !Array.isArray(i.at) || i.at.length !== 2 || !T6(i.at[0], i.at[1]) || i.kind === "aligned" && A.version < 19 || A.version < 18 && [i.from, i.to].some(L5))
           throw I();
         if (i.kind === "diameter") {
           if (!i.from.startsWith("circle:") || i.to !== void 0)
             throw I();
-        } else if (!["linear-x", "linear-y"].includes(String(i.kind)) || !h5(i.to) || i.to === i.from)
+        } else if (!["linear-x", "linear-y", "aligned"].includes(String(i.kind)) || !h5(i.to) || i.to === i.from)
           throw I();
         q.add(i.id);
       }
@@ -7483,7 +7485,7 @@ function xI(A, g, I = {}) {
   const C = NI(A), q = (n, D) => {
     throw new B1(n, D?.node.start ?? 0, A);
   }, i = C.find((n) => n.key === "project");
-  (i.args.length !== 1 || !i.args[0] || typeof i.args[0] != "object" || Array.isArray(i.args[0])) && q(t("Invalid project declaration"), i), [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18].includes(i.args[0].version) || q(t("Model source uses project version 6 through 18"), i);
+  (i.args.length !== 1 || !i.args[0] || typeof i.args[0] != "object" || Array.isArray(i.args[0])) && q(t("Invalid project declaration"), i), [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19].includes(i.args[0].version) || q(t("Model source uses project version 6 through 19"), i);
   const e = { ...i.args[0], nodes: /* @__PURE__ */ Object.create(null), roots: [], modelSource: { version: 1, language: "brickwright-design", source: A } };
   e.id !== g.id && q(t("Keep the current project identity in model source"), i), delete e.provenance, delete e.sketches, delete e.joints;
   const o = new Set(C.filter((n) => n.key.startsWith("node:")).map((n) => n.args[0])), E = [], s = Object.assign(/* @__PURE__ */ Object.create(null), e.parametric?.parameters ?? {});
@@ -7644,7 +7646,7 @@ function RA(A) {
 }
 const b2 = (A) => !!A && typeof A == "object" && !Array.isArray(A), p1 = (A, g = -1e6, I = 1e6) => typeof A == "number" && Number.isFinite(A) && A >= g && A <= I, F5 = (A, g = 160) => typeof A == "string" && A.trim().length > 0 && A.length <= g && !/[\u0000-\u001f]/.test(A), A2 = (A) => typeof A == "string" && /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,95}$/.test(A) && !["constructor", "prototype", "__proto__"].includes(A), n2 = (A, g = -1e6, I = 1e6) => Array.isArray(A) && A.length === 3 && A.every((C) => p1(C, g, I));
 function fI(A) {
-  (!b2(A) || A.format !== "brickwright-cad" || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18].includes(A.version) || A.units !== "mm") && RA(t("unsupported format, version or units")), (!A2(A.id) || !F5(A.title) || !b2(A.nodes) || !Array.isArray(A.roots)) && RA(t("missing document identity, nodes or roots"));
+  (!b2(A) || A.format !== "brickwright-cad" || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19].includes(A.version) || A.units !== "mm") && RA(t("unsupported format, version or units")), (!A2(A.id) || !F5(A.title) || !b2(A.nodes) || !Array.isArray(A.roots)) && RA(t("missing document identity, nodes or roots"));
   const g = A.nodes, I = Object.entries(g);
   (I.length > 2e3 || A.roots.length > 2e3) && RA(t("too many objects (maximum 2000)"));
   for (const [s, l] of I) {

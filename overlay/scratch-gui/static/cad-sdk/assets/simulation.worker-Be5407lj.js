@@ -36,7 +36,7 @@ const Bg = {
   "Choose light or dark mode": "Hellen oder dunklen Modus wählen",
   "Loading models…": "Modelle werden geladen…",
   "Original source files": "Originale Quelldateien",
-  "Model source uses project version 6 through 18": "Modellquelltext verwendet Projektversion 6 bis 18",
+  "Model source uses project version 6 through 19": "Modellquelltext verwendet Projektversion 6 bis 19",
   "Unknown material preset": "Unbekannte Materialvorlage",
   "Initial velocity requires project version 8": "Anfangsgeschwindigkeit erfordert Projektversion 8",
   "Invalid initial body velocity": "Ungültige Anfangsgeschwindigkeit",
@@ -1234,6 +1234,8 @@ const Bg = {
   "Dimension type": "Maßtyp",
   "Diameter dimension": "Durchmessermaß",
   "Vertical dimension": "Vertikales Maß",
+  "Aligned dimension": "Ausgerichtetes Maß",
+  "Choose two anchors at different positions.": "Wähle zwei Bezugspunkte an unterschiedlichen Positionen.",
   "Horizontal dimension": "Horizontales Maß",
   "Invalid outline vertex identities.": "Ungültige Kennungen für Konturpunkte.",
   "Outline {0}, point {1} ({2})": "Kontur {0}, Punkt {1} ({2})",
@@ -2205,12 +2207,12 @@ function Ng(A) {
         throw I();
       const e = /* @__PURE__ */ new Set();
       for (const B of C.annotations) {
-        if (!F2(B) || !O1(B.id) || e.has(B.id) || !O1(B.sketchId) || !O5(B.from) || !Array.isArray(B.at) || B.at.length !== 2 || !xg(B.at[0], B.at[1]) || A.version < 18 && [B.from, B.to].some(d4))
+        if (!F2(B) || !O1(B.id) || e.has(B.id) || !O1(B.sketchId) || !O5(B.from) || !Array.isArray(B.at) || B.at.length !== 2 || !xg(B.at[0], B.at[1]) || B.kind === "aligned" && A.version < 19 || A.version < 18 && [B.from, B.to].some(d4))
           throw I();
         if (B.kind === "diameter") {
           if (!B.from.startsWith("circle:") || B.to !== void 0)
             throw I();
-        } else if (!["linear-x", "linear-y"].includes(String(B.kind)) || !O5(B.to) || B.to === B.from)
+        } else if (!["linear-x", "linear-y", "aligned"].includes(String(B.kind)) || !O5(B.to) || B.to === B.from)
           throw I();
         e.add(B.id);
       }
@@ -7487,7 +7489,7 @@ function Q8(A, g, I = {}) {
   const C = B8(A), e = (n, a) => {
     throw new S1(n, a?.node.start ?? 0, A);
   }, B = C.find((n) => n.key === "project");
-  (B.args.length !== 1 || !B.args[0] || typeof B.args[0] != "object" || Array.isArray(B.args[0])) && e(t("Invalid project declaration"), B), [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18].includes(B.args[0].version) || e(t("Model source uses project version 6 through 18"), B);
+  (B.args.length !== 1 || !B.args[0] || typeof B.args[0] != "object" || Array.isArray(B.args[0])) && e(t("Invalid project declaration"), B), [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19].includes(B.args[0].version) || e(t("Model source uses project version 6 through 19"), B);
   const q = { ...B.args[0], nodes: /* @__PURE__ */ Object.create(null), roots: [], modelSource: { version: 1, language: "brickwright-design", source: A } };
   q.id !== g.id && e(t("Keep the current project identity in model source"), B), delete q.provenance, delete q.sketches, delete q.joints;
   const i = new Set(C.filter((n) => n.key.startsWith("node:")).map((n) => n.args[0])), Q = [], s = Object.assign(/* @__PURE__ */ Object.create(null), q.parametric?.parameters ?? {});
@@ -7649,7 +7651,7 @@ function I1(A) {
 }
 const Q3 = (A) => !!A && typeof A == "object" && !Array.isArray(A), C2 = (A, g = -1e6, I = 1e6) => typeof A == "number" && Number.isFinite(A) && A >= g && A <= I, o4 = (A, g = 160) => typeof A == "string" && A.trim().length > 0 && A.length <= g && !/[\u0000-\u001f]/.test(A), x2 = (A) => typeof A == "string" && /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,95}$/.test(A) && !["constructor", "prototype", "__proto__"].includes(A), Y2 = (A, g = -1e6, I = 1e6) => Array.isArray(A) && A.length === 3 && A.every((C) => C2(C, g, I));
 function a8(A) {
-  (!Q3(A) || A.format !== "brickwright-cad" || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18].includes(A.version) || A.units !== "mm") && I1(t("unsupported format, version or units")), (!x2(A.id) || !o4(A.title) || !Q3(A.nodes) || !Array.isArray(A.roots)) && I1(t("missing document identity, nodes or roots"));
+  (!Q3(A) || A.format !== "brickwright-cad" || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19].includes(A.version) || A.units !== "mm") && I1(t("unsupported format, version or units")), (!x2(A.id) || !o4(A.title) || !Q3(A.nodes) || !Array.isArray(A.roots)) && I1(t("missing document identity, nodes or roots"));
   const g = A.nodes, I = Object.entries(g);
   (I.length > 2e3 || A.roots.length > 2e3) && I1(t("too many objects (maximum 2000)"));
   for (const [s, E] of I) {
@@ -10699,7 +10701,7 @@ async function F9(A, g, I, C = {}) {
     }
   if ([...I.values()].reduce((M, G) => M + G.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = C.J ?? await (m4 ?? (m4 = import("./jolt-physics.wasm-compat-SdFVuiPC.js").then((M) => M.default()))), Q = new i.JoltSettings();
+  const i = C.J ?? await (m4 ?? (m4 = import("./jolt-physics.wasm-compat-Cyc2bIn6.js").then((M) => M.default()))), Q = new i.JoltSettings();
   Q.mMaxBodies = 512, Q.mMaxBodyPairs = Math.max(1024, q.length * q.length), Q.mMaxContactConstraints = 8192;
   const s = new i.ObjectLayerPairFilterTable(2);
   s.EnableCollision(0, 1), s.EnableCollision(1, 1);

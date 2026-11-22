@@ -399,3 +399,8 @@ vertices and polygonal hole vertices. The anchor picker lists their sketch
 coordinates and highlights the selected points. Moving one point in its row
 keeps the link. If a point is removed, choose a replacement anchor before
 exporting the drawing.
+
+Choose **Aligned dimension** in the drawing sheet and select two anchors to
+label the straight-line distance between them. The dimension line runs parallel
+to the two points. Choose a slanted edge's endpoints for its true length.
+Changing the page scale preserves the measured value.
