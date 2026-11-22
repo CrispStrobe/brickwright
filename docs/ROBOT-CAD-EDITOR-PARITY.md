@@ -302,3 +302,11 @@ Run `node scripts/verify-cad-dxf-region-browser.mjs <app-url>` against a running
 build to check the embedded workflow in Playwright. The optional second and
 third arguments accept an independent DXF fixture and save the exported DXF.
 A fourth argument saves the PDF copy.
+
+**Properties → Create drawing sheet** links an A4 orthographic sheet to the
+selected extrusion. Save it to the **Drawings** section of the Objects browser.
+Updates to sketch dimensions and extrusion depth carry into the top, front and
+right views and their vector PDF. Project SB3 files retain the sheet and source
+link. With multiple saved sheets, **Export drawing set (PDF)** produces a
+numbered PDF. Run `node scripts/verify-cad-drawing-sheet-browser.mjs <app-url>` to
+test the embedded workflow. Optional second and third arguments save the single-sheet and multi-sheet PDFs.
