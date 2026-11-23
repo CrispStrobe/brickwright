@@ -6,7 +6,7 @@ const browser = await chromium.launch({
     executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || undefined,
     headless: true
 });
-const page = await browser.newPage({viewport: {width: 1280, height: 850}, locale: 'en-US', serviceWorkers: 'block'});
+const page = await browser.newPage({viewport: {width: 1600, height: 950}, locale: 'en-US', serviceWorkers: 'block'});
 page.setDefaultTimeout(90000);
 const tab = name => page.getByRole('tab', {name, exact: true});
 const help = page.getByTestId('bw-editor-help');
@@ -38,7 +38,9 @@ try {
         assert.equal(await help.evaluate(node => node === document.activeElement), true);
     }
     await tab('Blocks').click();
-    await page.getByTitle('Controller', {exact: true}).click();
+    const showRight = page.getByRole('button', {name: 'Show right panel'});
+    if (await showRight.isVisible()) await showRight.click();
+    await page.locator('button[title="Controller"]:visible').click();
     await page.getByTestId('bw-widgets-help').click();
     const widgets = page.getByTestId('bw-widgets-help-dialog');
     await widgets.getByText('Build a controller', {exact: true}).waitFor();
