@@ -116,7 +116,10 @@ const CadTab = ({vm, isVisible, docked, locale, theme, onEditProgram, onOpenCirc
             const mounted = sdk.mountCadEditor(host.current, {
                 session: retainedSession,
                 embedded:true, showDocumentTitle:false, toolbarContent:controls,
-                presetProjects:{ids:CAD_ROBOT_EXAMPLES.map(item=>item.id),open:async id=>{await openCadRobotProject(vm,id,locale);}},
+                presetProjects:{
+                    items:CAD_ROBOT_EXAMPLES.map(item=>({id:item.id,title:item.name,note:locale.startsWith('de')?item.simulationNoteDe:item.simulationNote})),
+                    open:id=>openCadRobotProject(vm,id,locale)
+                },
                 colorMode: mode.current,
                 cameraGestures: getCameraPreferences(),
                 wasmURL: cadAssetURL('cad-assets/manifold.wasm'),
@@ -140,18 +143,18 @@ const CadTab = ({vm, isVisible, docked, locale, theme, onEditProgram, onOpenCirc
                     cadSave:action(label('Save CAD design (.bcad)…','CAD-Modell speichern (.bcad)…'),'save'),
                     cadImport:action(label('Import STL or STEP into CAD…','STL oder STEP ins CAD importieren…'),'import'),
                     cadExport:action(label('Export CAD model…','CAD-Modell exportieren…'),'export',mounted.commandState.canExport),
+                    cadRobotProjects:action(label('Robot projects…','Roboterprojekte…'),'robot-projects'),
                     cadLibrary:action(label('Model library…','Modellbibliothek…'),'model-library'),
                     ...Object.fromEntries([
                         ['run','Run program','Programm starten','[data-testid="bw-cad-run"]'],
                         ['stop','Stop program','Programm stoppen','[aria-label="Stop program"], [aria-label="Programm stoppen"]'],
                         ['reset','Reset simulation','Simulation zurücksetzen','[aria-label="Reset simulation"], [aria-label="Simulation zurücksetzen"]'],
-                        ['examples','Robot examples…','Roboterbeispiele…','[aria-label="Robot examples"], [aria-label="Roboterbeispiele"]'],
                         ['controls','Robot controls…','Robotersteuerung…','[aria-label="Robot controls"], [aria-label="Robotersteuerung"]'],
                         ['program','Program & connections…','Programm und Verbindungen…','[data-testid="bw-cad-program-settings"]']
                     ].map(([name,en,ger,selector])=>['cad-'+name,{label:label(en,ger),location:'edit',submenu:label('Robot program','Roboterprogramm'),enabled:!!controls.querySelector(selector)&&!controls.querySelector(selector).disabled,run:()=>controls.querySelector(selector)?.click()}])),
                     ...Object.fromEntries([
                         ['cut','Cut objects','Objekte ausschneiden'],['copy','Copy objects','Objekte kopieren'],['paste','Paste objects','Objekte einfügen'],['duplicate','Duplicate objects','Objekte duplizieren'],['delete','Delete objects','Objekte löschen'],['select-all','Select all objects','Alle Objekte auswählen'],['deselect','Clear selection','Auswahl aufheben'],
-                        ['shapes','Shapes…','Formen…'],['sketch','Sketch & extrude…','Skizze und Extrusion…'],['sketch-path','Sketch path…','Skizzenpfad…'],['code','Code an object…','Objekt programmieren…'],['parameters','Model parameters…','Modellparameter…'],['model-source','Model source…','Modellquelltext…'],
+                        ['shapes','Shapes…','Formen…'],['sketch','Sketch…','Skizze…'],['sketch-path','Sketch path…','Skizzenpfad…'],['code','Code an object…','Objekt programmieren…'],['parameters','Model parameters…','Modellparameter…'],['model-source','Model source…','Modellquelltext…'],
                         ['select','Select tool','Auswahlwerkzeug'],['move','Move tool','Verschieben'],['rotate','Rotate tool','Drehen'],['scale','Scale tool','Skalieren'],['union','Union solids','Körper vereinigen'],['subtract','Subtract solids','Körper abziehen'],['intersect','Intersect solids','Körper schneiden'],
                         ['fit','Fit model in view','Modell einpassen'],['home','Home view','Startansicht'],['top','Top view','Ansicht von oben'],['front','Front view','Vorderansicht'],['right','Right view','Rechte Ansicht'],['objects','Toggle Objects panel','Objektliste umschalten'],['properties','Toggle Properties panel','Eigenschaften umschalten']
                     ].map(([command,en,ger])=>['cad-'+command,{...action(label(en,ger),command,['union','subtract','intersect'].includes(command)?mounted.commandState.canCombine:['cut','copy','duplicate','delete'].includes(command)?mounted.commandState.hasSelection:true),location:'edit',submenu:label('CAD tools','CAD-Werkzeuge')}]))

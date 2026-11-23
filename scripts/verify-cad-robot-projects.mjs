@@ -39,11 +39,18 @@ try{
   if((process.env.SKIP_ROBOTS||'').split(',').includes(item.id))continue;
   if(process.env.ONLY_ROBOT&&process.env.ONLY_ROBOT!==item.id)continue;console.log('Selecting',item.id);
   const panel=page.getByTestId('bw-cad-circuit-panel');if(await panel.isVisible())await panel.getByRole('button',{name:'Close program settings'}).click();
-  const viaExamples=process.env.PROOF_VIA_EXAMPLES==='1';let shapes,choice;
-  if(viaExamples){await page.getByRole('button',{name:'Robot examples',exact:true}).click();choice=panel.getByRole('button',{name:`Open ${item.name} project`,exact:true});}
-  else{await cad.getByRole('button',{name:'Shapes',exact:true}).click();shapes=cad.getByRole('dialog',{name:'Shape library',exact:true});await shapes.getByLabel('Search shapes',{exact:true}).fill(item.name);choice=shapes.getByRole('button',{name:/^Open .+ project$/});}
-  await choice.waitFor();
-  if(i===0){const before=await page.evaluate(()=>window.__bwCad.editor.session.serialize());cancelNext=true;await choice.click();assert.equal(await page.evaluate(()=>window.__bwCad.editor.session.serialize()),before,'cancelling project replacement preserves the design');if(!viaExamples){await cad.getByRole('button',{name:'Shapes',exact:true}).click();await shapes.getByLabel('Search shapes',{exact:true}).fill(item.name);}}
+  await cad.getByRole('button',{name:'Model library',exact:true}).click();
+  const library=cad.getByRole('dialog',{name:'Model library',exact:true});
+  await library.getByLabel('Model type',{exact:true}).selectOption('projects');
+  await library.getByLabel('Search models',{exact:true}).fill(item.name);
+  await library.getByRole('button',{name:`${item.name} Robot project · Includes code`,exact:true}).click();
+  const choice=library.getByRole('button',{name:`Open ${item.name} project`,exact:true});
+  if(i===0){
+   const before=await page.evaluate(()=>window.__bwCad.editor.session.serialize());
+   cancelNext=true;await choice.click();
+   await choice.click({trial:true});
+   assert.equal(await page.evaluate(()=>window.__bwCad.editor.session.serialize()),before,'cancelling project replacement preserves the design');
+  }
   await choice.click();console.log('Project choice returned',item.id);await page.waitForFunction(id=>window.__bwCad?.editor.session.state.document.id===id,item.id,{timeout:180000});await page.getByTestId('bw-cad-robot-controls').waitFor();console.log('Waiting for CAD geometry',item.id);await page.evaluate(()=>Promise.race([window.__bwCad.editor.whenIdle(),new Promise((_,reject)=>setTimeout(()=>reject(new Error('CAD geometry did not finish within 120 seconds')),120000))]));console.log('Geometry ready',item.id);
   const wireCount=Number(await page.locator('canvas[data-wire-count]').getAttribute('data-wire-count'));if(process.env.PROOF_WIRING==='1'){assert.ok(wireCount>0,`Missing visible harnesses for ${item.id}`);console.log('Visible harnesses',item.id,wireCount);}
   const state=await page.evaluate(()=>{const rt=window.__brickwrightStore.getState().scratchGui.vm.runtime;return{id:window.__bwCad.editor.session.state.document.id,widgets:rt.controllerPanel.getWidgets().map(w=>({name:w.name,value:w.state.value,min:w.config.min,max:w.config.max})),code:JSON.parse(localStorage.getItem('bw-code-autosave')),circuit:JSON.parse(localStorage.getItem('bw-circuit-autosave')),connections:JSON.parse(localStorage.getItem('bw-cad-circuit-bindings')||'null'),blocks:rt.targets.flatMap(t=>Object.values(t.blocks?._blocks||{})).map(b=>b.opcode)};});

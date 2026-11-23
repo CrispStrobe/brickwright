@@ -11,3 +11,24 @@
 
 .root{--cad-program-error:#b42318}.root[data-color-mode="dark"]{--cad-program-error:#ffd4cf}
 @media(max-width:1000px){.toolbar .problem{display:inline-flex;max-width:140px}}
+
+.statusGlyph { display: none; }
+:global([data-cad-ribbon-compact]) .toolbar button { padding-inline: 7px; }
+:global([data-cad-ribbon-compact]) .toolbar :global(.bw-compact-project-title),
+:global([data-cad-ribbon-compact]) .toolbar button .toolbarText { display: none; }
+:global([data-cad-ribbon-compact]) .toolbar .status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+}
+:global([data-cad-ribbon-compact]) .toolbar .status .toolbarText {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+:global([data-cad-ribbon-compact]) .toolbar .statusGlyph { display: inline; }
+:global([data-cad-ribbon-compact]) .toolbar output[data-active="true"] .statusGlyph { color: #189848; }

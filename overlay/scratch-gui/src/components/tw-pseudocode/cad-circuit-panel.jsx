@@ -3,7 +3,6 @@ import React from 'react';
 import {notifyEditorMenuActions} from '../../lib/editor-menu-actions.js';
 import ProjectTitleInput from '../menu-bar/project-title-input.jsx';
 import CadRobotControls from './cad-robot-controls.jsx';
-import {CAD_ROBOT_EXAMPLES} from '../../lib/bw-cad-robot-catalog.js';
 import {openCadRobotProject, ROBOT_PROJECT_OPENED} from '../../lib/bw-cad-robot-projects.js';
 import {createPortal} from 'react-dom';
 import PropTypes from 'prop-types';
@@ -40,7 +39,10 @@ export default function CadCircuitPanel({vm,locale,colorMode,isVisible,toolbarHo
     React.useEffect(()=>{
         if(!expanded)return undefined;
         closeButton.current?.focus();
-        const escape=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();close();}};
+        const escape=e=>{
+            if(e.key!=='Escape'||e.composedPath().some(node=>node instanceof HTMLDialogElement&&node.open))return;
+            e.preventDefault();e.stopPropagation();close();
+        };
         document.addEventListener('keydown',escape,true);return()=>document.removeEventListener('keydown',escape,true);
     },[expanded]);
     const current={...emptyConnections(catalog.documentId),...config};
@@ -76,15 +78,14 @@ export default function CadCircuitPanel({vm,locale,colorMode,isVisible,toolbarHo
             <button className={styles.run} data-testid="bw-cad-run" aria-label={text('Run program','Programm starten')} aria-busy={starting||status.phase==='preparing'||status.phase==='compiling'} disabled={active||!canRun} onClick={execute}>▶ {starting||status.phase==='preparing'?text('Preparing…','Wird vorbereitet…'):text('Run','Start')}</button>
             <button aria-label={text('Stop program','Programm stoppen')} title={text('Stop program','Programm stoppen')} disabled={!active} onClick={stop}>■</button>
             <button aria-label={text('Reset simulation','Simulation zurücksetzen')} title={text('Reset simulation','Simulation zurücksetzen')} onClick={reset}>↺</button>
-            <button ref={trigger} data-testid="bw-cad-program-settings" aria-label={text('Program & connections','Programm und Verbindungen')} aria-expanded={expanded} onClick={()=>openView('program')}><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5 2 12l6 7M16 5l6 7-6 7M14 3l-4 18" fill="none" stroke="currentColor" strokeWidth="2" /></svg>{text('Program','Programm')}{hasActuators?<span className={styles.count}>{current.drives.length+current.servos.length}</span>:null}</button>
-            <button aria-label={text('Robot examples','Roboterbeispiele')} onClick={()=>openView('examples')}>▤ {text('Examples','Beispiele')}</button>
-            <button aria-label={text('Robot controls','Robotersteuerung')} onClick={()=>openView('controls')}>☷ {text('Controls','Steuerung')}</button>
-            {problem?<button className={`${styles.status} ${styles.problem}`} title={problem} aria-label={`${text('Run problem','Startproblem')}: ${problem}`} onClick={()=>setExpanded(true)} style={{maxWidth:220,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',color:'var(--cad-program-error, #b42318)'}}>{problem}</button>:<output className={styles.status} aria-live="polite">{!coupledActive&&active?text('Running','Läuft'):phase}{active?` · ${(coupledActive?status.time:mechanical.time).toFixed(1)} s${Number.isFinite(status.realTimeFactor)?` · ${status.realTimeFactor.toFixed(2)}×`:''}`:''}</output>}
+            <button ref={trigger} data-testid="bw-cad-program-settings" aria-label={text('Program & connections','Programm und Verbindungen')} aria-expanded={expanded&&view==='program'} title={text('Program & connections','Programm und Verbindungen')} onClick={()=>openView('program')}><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5 2 12l6 7M16 5l6 7-6 7M14 3l-4 18" fill="none" stroke="currentColor" strokeWidth="2" /></svg><span className={styles.toolbarText}>{text('Program','Programm')}</span>{hasActuators?<span className={styles.count}>{current.drives.length+current.servos.length}</span>:null}</button>
+            <button aria-label={text('Robot controls','Robotersteuerung')} title={text('Robot controls','Robotersteuerung')} aria-expanded={expanded&&view==='controls'} onClick={()=>openView('controls')}><span aria-hidden="true">☷</span><span className={styles.toolbarText}>{text('Controls','Steuerung')}</span></button>
+            {problem?<button className={`${styles.status} ${styles.problem}`} title={problem} aria-label={`${text('Run problem','Startproblem')}: ${problem}`} onClick={()=>setExpanded(true)} style={{maxWidth:220,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',color:'var(--cad-program-error, #b42318)'}}><span className={styles.statusGlyph} aria-hidden="true">!</span><span className={styles.toolbarText}>{problem}</span></button>:<output className={styles.status} data-active={active} aria-live="polite" title={phase}><span className={styles.statusGlyph} aria-hidden="true">●</span><span className={styles.toolbarText}>{!coupledActive&&active?text('Running','Läuft'):phase}{active?` · ${(coupledActive?status.time:mechanical.time).toFixed(1)} s${Number.isFinite(status.realTimeFactor)?` · ${status.realTimeFactor.toFixed(2)}×`:''}`:''}</span></output>}
         </div>,toolbarHost)}
-        {expanded?<aside className={`${styles.root} ${styles.drawer}`} data-color-mode={colorMode} data-testid="bw-cad-circuit-panel" role="dialog" aria-label={view==='examples'?text('Robot examples','Roboterbeispiele'):view==='controls'?text('Robot controls','Robotersteuerung'):text('Program & connections','Programm und Verbindungen')}>
-            <header className={styles.header}><h2>{view==='examples'?text('Robot examples','Roboterbeispiele'):view==='controls'?text('Robot controls','Robotersteuerung'):text('Program & connections','Programm und Verbindungen')}</h2><button ref={closeButton} aria-label={text('Close program settings','Programmeinstellungen schließen')} onClick={close}>×</button></header>
+        {expanded?<aside className={`${styles.root} ${styles.drawer}`} data-color-mode={colorMode} data-testid="bw-cad-circuit-panel" role="dialog" aria-label={view==='controls'?text('Robot controls','Robotersteuerung'):text('Program & connections','Programm und Verbindungen')}>
+            <header className={styles.header}><h2>{view==='controls'?text('Robot controls','Robotersteuerung'):text('Program & connections','Programm und Verbindungen')}</h2><button ref={closeButton} aria-label={text('Close program settings','Programmeinstellungen schließen')} onClick={close}>×</button></header>
             {problem?<p role="alert" className={styles.error}>{problem}</p>:null}
-            {view==='examples'?<section><p>{text('Each example loads its model, Blocks/Code program, circuit, connections and Widgets.','Jedes Beispiel lädt Modell, Blöcke/Code-Programm, Schaltung, Verbindungen und Widgets.')}</p>{CAD_ROBOT_EXAMPLES.map(item=><button key={item.id} style={{display:'flex',width:'100%',margin:'10px 0',justifyContent:'flex-start'}} disabled={active} aria-label={`Open ${item.name} project`} onClick={()=>openExample(item.id)}>{item.name}{item.simulationNote?text(' · Experimental',' · Experimentell'):''}</button>)}</section>:view==='controls'?<CadRobotControls vm={vm} locale={locale} documentId={catalog.documentId}/>:<React.Fragment>
+            {view==='controls'?<CadRobotControls vm={vm} locale={locale} documentId={catalog.documentId}/>:<React.Fragment>
             <section className={styles.section}>
                 <h3>{text('1 · Choose a program','1 · Programm wählen')}</h3>
                 <p>{text('Runs the program from your Code tab.','Startet das Programm aus deinem Code-Tab.')}</p>

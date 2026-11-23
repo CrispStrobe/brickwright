@@ -1028,6 +1028,20 @@ const f6 = {
   "Close the sketch path before offsetting its profile.": "Schließe den Skizzenpfad vor dem Versetzen des Profils.",
   "The trim line must cross the open path.": "Die Schnittlinie muss den offenen Pfad kreuzen.",
   "This trim would leave separate paths. Choose a different line or side.": "Dieser Schnitt würde getrennte Pfade erzeugen. Wähle eine andere Linie oder Seite.",
+  "CAD models only": "Nur CAD-Modelle",
+  "Robot projects": "Roboterprojekte",
+  "Robot project · Includes code": "Roboterprojekt · Mit Code",
+  "Opening robot project…": "Roboterprojekt wird geöffnet…",
+  "Opens a complete project with its 3D model, program, circuit, and Widgets.": "Öffnet ein vollständiges Projekt mit 3D-Modell, Programm, Schaltung und Widgets.",
+  "Open {0} project": "Projekt {0} öffnen",
+  "Save sketch": "Skizze speichern",
+  "Draw outline in 2D": "Kontur in 2D zeichnen",
+  "2D outline drawing grid": "Zeichenraster für 2D-Konturen",
+  "Click or tap to add corners. Hold Shift for horizontal or vertical edges. Click the first point to close the outline.": "Klicke oder tippe, um Ecken hinzuzufügen. Umschalt zeichnet waagerechte oder senkrechte Kanten. Schließe die Kontur am ersten Punkt.",
+  "Undo point": "Punkt zurücknehmen",
+  "Close outline": "Kontur schließen",
+  "Cancel drawing": "Zeichnen abbrechen",
+  "Clear outline constraints before drawing a new outline.": "Lösche die Konturabhängigkeiten, bevor du eine neue Kontur zeichnest.",
   "More sketch tools": "Weitere Skizzenwerkzeuge",
   "Sketch path": "Skizzenpfad",
   path: "Pfad",
@@ -11380,7 +11394,7 @@ async function u7(A, g, I, e = {}) {
     }
   if ([...I.values()].reduce((x, G) => x + G.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = e.J ?? await (b4 ?? (b4 = import("./jolt-physics.wasm-compat-B_-M2i0e.js").then((x) => x.default()))), Q = new i.JoltSettings();
+  const i = e.J ?? await (b4 ?? (b4 = import("./jolt-physics.wasm-compat-kfA2YMKt.js").then((x) => x.default()))), Q = new i.JoltSettings();
   Q.mMaxBodies = 512, Q.mMaxBodyPairs = Math.max(1024, B.length * B.length), Q.mMaxContactConstraints = 8192;
   const s = new i.ObjectLayerPairFilterTable(2);
   s.EnableCollision(0, 1), s.EnableCollision(1, 1);
