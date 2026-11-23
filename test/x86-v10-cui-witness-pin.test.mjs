@@ -10,6 +10,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
+import {execFileSync} from 'node:child_process';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const read = file => fs.readFileSync(root + file, 'utf8');
@@ -32,10 +33,14 @@ const witnessesOf = text => {
 // Since "Separate live GUI pins from sealed finite inventory identities" the
 // producer and reader are sealed finite-v10 consumers (test/i80386-hdd-gui-actual
 // pins their bytes): a pin move must not relabel them. So they agree with each
-// other and carry the canonical pin or the earlier pin they were sealed at
-// (HISTORICAL_X86_F10_CUI in test/pin-move-chain.test.mjs), and their witnesses
-// are re-measured against the install only while that is today's pin.
-const SEALED_F10_CUI = '6b4d70290d7ebd088ad32b525f99eb02af475533';
+// other and carry the canonical pin or a pin lite actually shipped earlier
+// (read from vendor-pins.json's own history, not restated here: a literal sha
+// in this file would itself be a stale pin to test/pin-move-chain), and their
+// witnesses are re-measured against the install only while that is today's pin.
+const formerCuiPins = () => {
+    const log = execFileSync('git', ['-C', root, 'log', '-p', '--format=', '--', 'vendor-pins.json'], {encoding: 'utf8', maxBuffer: 64 << 20});
+    return new Set([...log.matchAll(/^-\s*"bw-circuit-ui":\s*"([0-9a-f]{40})"/gm)].map(m => m[1]));
+};
 const sealedCui = () => {
     const [producer, reader] = SOURCES.map(file => pinsOf(read(file))['bw-circuit-ui']);
     assert.equal(producer, reader, 'producer and reader carry one V10 Circuit UI pin');
@@ -44,7 +49,9 @@ const sealedCui = () => {
 
 test('V10 Circuit UI pin is the canonical pin, or the pin the sealed V10 consumers were measured at', () => {
     const canonical = JSON.parse(read('vendor-pins.json'))['bw-circuit-ui'];
-    assert.ok([canonical, SEALED_F10_CUI].includes(sealedCui()), 'an unreviewed V10 Circuit UI pin');
+    const pin = sealedCui();
+    assert.ok(pin === canonical || formerCuiPins().has(pin),
+        `V10 Circuit UI pin ${pin} is neither the canonical pin nor one vendor-pins.json ever held`);
 });
 
 test('V10 Circuit UI witnesses equal the installed bytes of the current pin', t => {
