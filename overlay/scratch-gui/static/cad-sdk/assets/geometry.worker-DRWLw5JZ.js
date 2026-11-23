@@ -1060,6 +1060,8 @@ const W6 = {
   "The artwork has no usable area.": "Die Grafik enthält keine verwendbare Fläche.",
   "Enter sketch coordinates from −100000 to 100000 mm.": "Gib Skizzenkoordinaten von −100000 bis 100000 mm ein.",
   "The placed profile extends beyond the sketch coordinate limits.": "Das platzierte Profil überschreitet die Koordinatengrenzen der Skizze.",
+  "Enter a span from 0.01 to 100000 mm.": "Gib eine Spannweite von 0,01 bis 100000 mm ein.",
+  "Enable curve approximation to preview Bézier and elliptical centerlines.": "Aktiviere die Kurvenannäherung für Bézier- und elliptische Mittellinien.",
   "Enter a width from 0.01 to 100000 mm.": "Gib eine Breite von 0,01 bis 100000 mm ein.",
   "Circle radius must be between 0.01 and 100000 mm.": "Der Kreisradius muss zwischen 0,01 und 100000 mm liegen.",
   "Remove styles, clipping, masks, or nested SVG before importing.": "Entferne Stile, Zuschnitte, Masken oder verschachtelte SVGs vor dem Import.",

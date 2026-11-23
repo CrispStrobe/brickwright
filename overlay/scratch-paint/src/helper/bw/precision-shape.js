@@ -84,6 +84,7 @@ export const insertPrecisionShape = draft => {
         shape = new paper.Path.Rectangle({rectangle: bounds, insert: false});
     }
     if (!geometry.points) shape.fillColor = DEFAULT_COLOR;
+    if (draft.kind === 'arc') shape.data.bwPrecisionArc = true;
     paper.project.deselectAll();
     layer.addChild(shape);
     shape.selected = true;

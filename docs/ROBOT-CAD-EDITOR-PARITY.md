@@ -518,13 +518,19 @@ is selected on the canvas. The existing Transform and node tools can edit
 it, and Undo and Redo treat each insertion as one artwork edit. Precision
 circles export as SVG circles while their paths still describe circles. The
 Chrome check measures shapes on the canvas, takes the circle through
-Undo, Redo and CAD import, and reopens the authored artwork from SB3.
+Undo, Redo and CAD import, and reopens the authored artwork from SB3. It
+also verifies that a drawn arc retains its circular segments in the reopened
+CAD Sketch path editor.
 
 **Line** uses start and end coordinates. **Circular arc** uses a center,
 radius, start angle, and signed sweep. Zero degrees points right and positive
 angles run clockwise. Both tools use an explicit stroke width in costume
-units. In **Send to CAD**, choose **Strokes**, and turn on **Approximate
-curves** for an arc.
+units. In **Send to CAD**, choose **Open paths** to keep the centerline as an
+editable sketch path. SVG circular arcs and newly authored precision arcs
+retain their bends as circular CAD segments. Turn on **Approximate curves**
+for general Bézier or elliptical centerlines. **Span** sets the longer side
+of the path’s bounds, including for vertical lines. Choose **Strokes** when
+you want a filled outline that follows the stroke thickness instead.
 
 Enable **CAD Editor** and **Costumes precision design** in **Settings → Workspace**.
 **Send to CAD** opens a preview of supported filled vector regions. Select one,

@@ -153,6 +153,26 @@ try {
     assert.ok(arcSketch.points.length > 12);
     assert.equal((await artwork()).assetId,authored.assetId);
     await handoff.getByRole('button',{name:'Close',exact:true}).click();
+    await page.getByTestId('bw-costume-precision').click();
+    await handoff.getByLabel('Profile source',{exact:true}).selectOption('centerline');
+    const pathChoice = handoff.getByLabel('Path',{exact:true});
+    assert.equal(await pathChoice.locator('option').count(),2);
+    const pathPreview = handoff.getByRole('img',{name:'Open path preview',exact:true}).locator('path');
+    assert.match(await pathPreview.getAttribute('d'),/^M .+ L .+$/);
+    assert.equal(await pathPreview.evaluate(node => getComputedStyle(node).fill),'none');
+    await pathChoice.selectOption({value:'1'});
+    await handoff.locator('path[d*=" A "]').waitFor();
+    assert.equal((await pathPreview.getAttribute('d')).split(' A ').length,5);
+    await handoff.getByLabel('Span (mm)',{exact:true}).fill('88');
+    await handoff.getByRole('button',{name:'Add editable sketch',exact:true}).click();
+    await handoff.getByText(/Sketch added to CAD/).waitFor();
+    const centerline = await page.evaluate(() => Object.values(window.__bwCad.editor.session.state.document.sketches).at(-1));
+    assert.equal(centerline.profile.kind,'path');
+    assert.equal(centerline.profile.points.length,5);
+    assert.equal(centerline.profile.bulges.at(-1),0);
+    assert.ok(centerline.profile.bulges.slice(0,-1).every(value => value > 0));
+    assert.equal((await artwork()).assetId,authored.assetId);
+    await handoff.getByRole('button',{name:'Close',exact:true}).click();
     await togglePrecision('0');
     await summary.waitFor({state:'detached'});
     assert.equal((await artwork()).assetId,authored.assetId);
@@ -162,7 +182,10 @@ try {
     await page.getByText('Save to your computer',{exact:true}).click();
     const file = await readFile(await (await download).path());
     const restored = await browser.newPage({viewport:{width:1520,height:960},locale:'en-US',serviceWorkers:'block'});
-    await restored.addInitScript(() => localStorage.setItem('bw-starter-v1-complete','1'));
+    await restored.addInitScript(() => {
+        localStorage.setItem('bw-starter-v1-complete','1');
+        localStorage.setItem('bw-cad-enabled','1');
+    });
     await restored.goto(process.argv[2] || 'http://127.0.0.1:8235/',{waitUntil:'commit'});
     await restored.getByText('File',{exact:true}).click();
     await restored.getByText('Load from your computer',{exact:true}).click();
@@ -175,7 +198,12 @@ try {
         const vm = window.__brickwrightStore?.getState().scratchGui.vm;
         return vm?.editingTarget.getCostumes().some(costume => costume.assetId === assetId);
     },authored.assetId);
-    console.log('PASS precise rectangles, circles, lines and arcs, undo/redo, CAD import, and SB3 reopen');
+    await restored.getByRole('tab',{name:'CAD',exact:true}).click();
+    await restored.getByRole('button',{name:`Sketch path: ${centerline.name}`,exact:true}).click();
+    await restored.getByRole('dialog',{name:'Sketch path',exact:true}).waitFor();
+    const savedPath = await restored.evaluate(id => window.__bwCad.editor.session.state.document.sketches[id].profile,centerline.id);
+    assert.deepEqual(savedPath,centerline.profile);
+    console.log('PASS precision drawing, undo/redo, native CAD centerlines and stroke outlines, and SB3 reopen');
 } catch (error) {
     await page.screenshot({path:'/tmp/bw-costume-precision-drawing-failure.png'}).catch(() => {});
     throw error;

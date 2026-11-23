@@ -168,6 +168,19 @@ try {
         }));
     });
     assert.deepEqual(repairedHole,[{loops:2,repairs:1}],'A hole uses the scale of its enclosing sketch');
+    const openProfiles = await reopened.evaluate(() => {
+        const {sdk} = window.__bwCad;
+        const svg = '<svg xmlns="http://www.w3.org/2000/svg">' +
+            '<path d="M0 0V40"/><path d="M30 0A10 10 0 1 1 40 10"/><path d="M45 0Q55 20 65 0"/></svg>';
+        const read = toleranceMm => sdk.readCostumeProfiles(svg,{widthMm:40,centerlineOnly:true,toleranceMm});
+        const exact = read(), approximated = read(.2);
+        return {exact:exact.profiles.map(profile => sdk.costumeSketchProfile(profile,40)),
+            issues:exact.issues,approximation:approximated.profiles.at(-1)?.centerline.points.length};
+    });
+    assert.deepEqual(openProfiles.exact[0].points,[[0,40],[0,0]]);
+    assert.equal(openProfiles.exact[1].bulges.filter(value => value !== 0).length,2);
+    assert.ok(openProfiles.issues.some(issue => issue.includes('Bézier')));
+    assert.ok(openProfiles.approximation > 4);
     await reopened.getByRole('tab',{name:'Costumes',exact:true}).click();
     await reopened.evaluate(() => {
         const vm = window.__brickwrightStore.getState().scratchGui.vm;

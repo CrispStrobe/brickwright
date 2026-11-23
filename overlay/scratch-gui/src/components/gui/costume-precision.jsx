@@ -64,7 +64,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
     const [saved, setSaved] = React.useState(false);
     const [approximate, setApproximate] = React.useState(false), [tolerance, setTolerance] = React.useState('0.2');
     const [closeGaps, setCloseGaps] = React.useState(false), [maxGap, setMaxGap] = React.useState('0.5');
-    const [strokeOnly, setStrokeOnly] = React.useState(false);
+    const [profileSource, setProfileSource] = React.useState('fill');
     const sending = React.useRef(false);
     const de = /^de/i.test(locale), text = (english, german) => de ? german : english;
     React.useEffect(() => {
@@ -93,21 +93,23 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
     const validWidth = Boolean(width.trim() && Number(width) >= .01 && Number(width) <= 100000);
     const validTolerance = Boolean(tolerance.trim() && Number(tolerance) >= .01 && Number(tolerance) <= 10);
     const validGap = Boolean(maxGap.trim() && Number(maxGap) >= .01 && Number(maxGap) <= 10);
-    const repairGaps = closeGaps && !strokeOnly;
+    const strokeOnly = profileSource === 'stroke', centerlineOnly = profileSource === 'centerline';
+    const repairGaps = closeGaps && profileSource === 'fill';
     const preview = React.useMemo(() => {
-        if (!snapshot || (!approximate && !repairGaps && !strokeOnly)) return snapshot;
+        if (!snapshot || (!approximate && !repairGaps && profileSource === 'fill')) return snapshot;
         if (!validWidth || (approximate && !validTolerance) || (repairGaps && !validGap)) return null;
         try {
             return snapshot.sdk.readCostumeProfiles(snapshot.source, {
                 widthMm: Number(width),
                 toleranceMm: approximate ? Number(tolerance) : undefined,
                 maxGapMm: repairGaps ? Number(maxGap) : undefined,
-                strokeOnly
+                strokeOnly, centerlineOnly
             });
         } catch (e) {
             return {issues: [e.message], profiles: [], strokes: false};
         }
-    }, [snapshot, approximate, repairGaps, strokeOnly, validWidth, validTolerance, validGap, width, tolerance, maxGap]);
+    }, [snapshot, approximate, repairGaps, profileSource, strokeOnly, centerlineOnly, validWidth, validTolerance, validGap,
+        width, tolerance, maxGap]);
     const costume = getCostume();
     if (!enabled || costume?.dataFormat !== 'svg') return null;
 
@@ -116,7 +118,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
         const request = new AbortController();
         active.current = request;
         setSnapshot(null); setError(''); setSaved(false); select(0); setWidth('40'); setPlane('XY'); setBusy(true);
-        setApproximate(false); setTolerance('0.2'); setCloseGaps(false); setMaxGap('0.5'); setStrokeOnly(false);
+        setApproximate(false); setTolerance('0.2'); setCloseGaps(false); setMaxGap('0.5'); setProfileSource('fill');
         setAnchor('lower-left'); setHorizontal('0'); setVertical('0');
         dialog.current.showModal();
         try {
@@ -138,7 +140,9 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
     };
     const regionIndex = selected < (preview?.profiles.length ?? 0) ? selected : 0;
     const profile = preview?.profiles[regionIndex];
-    const height = profile && Number(width) * (profile.size[1] / profile.size[0]);
+    const span = profile && (centerlineOnly ? Math.max(...profile.size) : profile.size[0]);
+    const displayedSize = profile?.size.map(value => Number((value / span * Number(width)).toFixed(3))).join(' × ');
+    const regionLabel = centerlineOnly ? text('Path', 'Pfad') : text('Region', 'Fläche');
     const placement = {anchor, position: [horizontal, vertical].map(value => value.trim() ? Number(value) : NaN)};
     const coordinateError = text('Enter sketch coordinates from −100000 to 100000 mm.',
         'Gib Skizzenkoordinaten von −100000 bis 100000 mm ein.');
@@ -150,7 +154,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
         try { snapshot.sdk.costumeProfileBounds(profile, Number(width), placement); }
         catch (e) { placementError = e.message; }
     }
-    const markerRadius = profile && Math.min(...profile.size) * 0.045;
+    const markerRadius = profile && (centerlineOnly ? Math.max(...profile.size) : Math.min(...profile.size)) * 0.045;
     const send = async () => {
         if (sending.current || !profile || !validWidth || placementError) return;
         sending.current = true;
@@ -187,37 +191,43 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
             </form>
             {error && <p role="alert">{error}</p>}
             {busy && <p role="status">{text('Working…', 'Wird verarbeitet…')}</p>}
-            {saved ? <p role="status">{text('Sketch added to CAD. Open Objects to edit or extrude it.',
-                'Skizze zu CAD hinzugefügt. Öffne Objekte zum Bearbeiten oder Extrudieren.')}</p> : <>
+            {saved ? <p role="status">{centerlineOnly ? text('Sketch added to CAD. Open Objects to edit the path.',
+                'Skizze zu CAD hinzugefügt. Öffne Objekte zum Bearbeiten des Pfads.') :
+                text('Sketch added to CAD. Open Objects to edit or extrude it.',
+                    'Skizze zu CAD hinzugefügt. Öffne Objekte zum Bearbeiten oder Extrudieren.')}</p> : <>
                 {preview?.issues.length > 0 && <ul>{preview.issues.map(issue => <li key={issue}>{issue}</li>)}</ul>}
-                {preview && !preview.profiles.length && !preview.issues.length && <p>{strokeOnly ?
+                {preview && !preview.profiles.length && !preview.issues.length && <p>{centerlineOnly ?
+                    text('No open paths found.', 'Keine offenen Pfade gefunden.') : strokeOnly ?
                     text('No visible strokes found.', 'Keine sichtbaren Linienzüge gefunden.') :
                     text('No filled closed regions found.', 'Keine gefüllten, geschlossenen Flächen gefunden.')}</p>}
                 {snapshot && <>
-                    {snapshot.strokes && <label>{text('Profile source', 'Profilquelle')}
-                        <select aria-label={text('Profile source', 'Profilquelle')} value={strokeOnly ? 'stroke' : 'fill'} disabled={busy} onChange={event => {
-                            setStrokeOnly(event.target.value === 'stroke'); select(0);
+                    {(snapshot.strokes || snapshot.centerlines) && <label>{text('Profile source', 'Profilquelle')}
+                        <select aria-label={text('Profile source', 'Profilquelle')} value={profileSource} disabled={busy} onChange={event => {
+                            setProfileSource(event.target.value); select(0);
                         }}>
                             <option value="fill">{text('Filled areas', 'Gefüllte Flächen')}</option>
-                            <option value="stroke">{text('Strokes', 'Linienzüge')}</option>
+                            {snapshot.strokes && <option value="stroke">{text('Strokes', 'Linienzüge')}</option>}
+                            {snapshot.centerlines && <option value="centerline">{text('Open paths', 'Offene Pfade')}</option>}
                         </select>
                     </label>}
                     {strokeOnly && <p>{text('Each stroke becomes a separate profile. Its thickness scales with the sketch.',
                         'Jeder Linienzug ergibt ein eigenes Profil. Seine Stärke skaliert mit der Skizze.')}</p>}
+                    {centerlineOnly && <p>{text('Open paths ignore stroke thickness. Span sets the larger of the width and height.',
+                        'Offene Pfade übernehmen keine Linienstärke. Die Spannweite legt die größere Ausdehnung fest.')}</p>}
                     <label className={layout.checkbox}>
                         <input type="checkbox" checked={approximate} disabled={busy} onChange={event => {
                             setApproximate(event.target.checked); select(0);
                         }} />
                         {text('Approximate curves', 'Kurven annähern')}
                     </label>
-                    {!strokeOnly && <label className={layout.checkbox}>
+                    {profileSource === 'fill' && <label className={layout.checkbox}>
                         <input type="checkbox" checked={closeGaps} disabled={busy} onChange={event => {
                             setCloseGaps(event.target.checked); select(0);
                         }} />
                         {text('Close small gaps', 'Kleine Lücken schließen')}
                     </label>}
                     <div className={layout.inputs}>
-                        <label>{text('Width (mm)', 'Breite (mm)')}
+                        <label>{centerlineOnly ? text('Span (mm)', 'Spannweite (mm)') : text('Width (mm)', 'Breite (mm)')}
                             <input type="number" min=".01" max="100000" step="any" value={width} disabled={busy}
                                 aria-invalid={!validWidth} onChange={event => setWidth(event.target.value)} />
                         </label>
@@ -232,7 +242,8 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
                     </div>
                     {approximate && <p>{text('Smaller tolerance follows the curve more closely and adds more vertices.',
                         'Eine kleinere Toleranz folgt der Kurve genauer und fügt mehr Eckpunkte hinzu.')}</p>}
-                    {!validWidth && <p role="status">{text('Enter a width from 0.01 to 100000 mm.',
+                    {!validWidth && <p role="status">{centerlineOnly ? text('Enter a span from 0.01 to 100000 mm.',
+                        'Gib eine Spannweite von 0,01 bis 100000 mm ein.') : text('Enter a width from 0.01 to 100000 mm.',
                         'Gib eine Breite von 0,01 bis 100000 mm ein.')}</p>}
                     {approximate && !validTolerance && <p role="status">{text('Enter a curve tolerance from 0.01 to 10 mm.',
                         'Gib eine Kurventoleranz von 0,01 bis 10 mm ein.')}</p>}
@@ -240,19 +251,22 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
                         'Gib eine maximale Lücke von 0,01 bis 10 mm ein.')}</p>}
                 </>}
                 {profile && <>
-                    <label>{text('Region', 'Fläche')}
-                        <select aria-label={text('Region', 'Fläche')} value={regionIndex} disabled={busy} onChange={event => select(Number(event.target.value))}>
+                    <label>{regionLabel}
+                        <select aria-label={regionLabel} value={regionIndex} disabled={busy} onChange={event => select(Number(event.target.value))}>
                             {preview.profiles.map((region, index) => <option key={index} value={index}>
-                                {index + 1} · {region.loops.length - 1} {text('holes', 'Löcher')}
+                                {index + 1}{!centerlineOnly && ` · ${region.loops.length - 1} ${text('holes', 'Löcher')}`}
                                 {region.approximated ? text(' · approximated', ' · angenähert') : ''}
                                 {region.gapRepair ? text(' · closed gap', ' · Lücke geschlossen') : ''}
                             </option>)}
                         </select>
                     </label>
-                    <svg role="img" aria-label={text('Closed profile preview', 'Vorschau der geschlossenen Fläche')}
+                    <svg role="img" aria-label={centerlineOnly ? text('Open path preview', 'Vorschau des offenen Pfads') :
+                        text('Closed profile preview', 'Vorschau der geschlossenen Fläche')}
                         viewBox={`${profile.origin[0] - markerRadius} ${-profile.origin[1] - profile.size[1] - markerRadius} ` +
                             `${profile.size[0] + 2 * markerRadius} ${profile.size[1] + 2 * markerRadius}`}>
-                        <path fillRule="evenodd" d={profile.loops.map(drawingPath).join(' ')} />
+                        {profile.centerline ? <path className={layout.centerline} d={profile.centerline.d}
+                            vectorEffect="non-scaling-stroke" /> :
+                            <path fillRule="evenodd" d={profile.loops.map(drawingPath).join(' ')} />}
                         {profile.gapRepair?.edges.map(([[ax, ay], [bx, by]], index) =>
                             <line key={index} className={layout.closingEdge} data-testid="bw-costume-closing-edge"
                                 x1={ax} y1={-ay} x2={bx} y2={-by} vectorEffect="non-scaling-stroke" />)}
@@ -266,8 +280,8 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
                             {['XY', 'XZ', 'YZ'].map(value => <option key={value}>{value}</option>)}
                         </select>
                     </label>
-                    {profile.approximated && <p>{text('The sketch will use the straight segments shown in the preview.',
-                        'Die Skizze verwendet die geraden Segmente aus der Vorschau.')}</p>}
+                    {profile.approximated && <p>{text('Approximated curves use the straight segments shown in the preview.',
+                        'Angenäherte Kurven verwenden die geraden Segmente aus der Vorschau.')}</p>}
                     {profile.gapRepair && <p>{text('Highlighted edges close gaps in the new sketch.',
                         'Die hervorgehobenen Kanten schließen Lücken in der neuen Skizze.')}</p>}
                     <details className={layout.placement}>
@@ -293,7 +307,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
                         </div>
                     </details>
                     {placementError && <p role="status">{placementError}</p>}
-                    {validWidth && <p>{`${Number(width)} × ${Number(height.toFixed(3))} mm`}
+                    {validWidth && <p>{`${displayedSize} mm`}
                         {!placementError && ` · ${anchorLabel} ${plane[0]} ${placement.position[0]}, ${plane[1]} ${placement.position[1]} mm`}</p>}
                     <button type="button" className={buttonClass} disabled={busy || !validWidth || Boolean(placementError)} onClick={send}>
                         {text('Add editable sketch', 'Bearbeitbare Skizze hinzufügen')}
