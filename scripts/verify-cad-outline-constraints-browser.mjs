@@ -302,19 +302,21 @@ try{
  await add('length',0,40,reopened);
  await add('vertical',1,undefined,reopened);
  await reopened.getByText('Outline constraints',{exact:true}).tap();
- const handle=reopened.locator('[data-resize="vertex"][data-vertex="2"]');
- await handle.scrollIntoViewIfNeeded();
- const [start,end]=await handle.evaluate(circle=>{
-  const x=circle.cx.baseVal.value,y=circle.cy.baseVal.value,matrix=circle.getScreenCTM();
-  return [new DOMPoint(x,y),new DOMPoint(x+8,y-6)].map(point=>{
-   const screen=point.matrixTransform(matrix);
-   return {x:screen.x,y:screen.y};
-  });
- });
  const touch=await restored.context().newCDPSession(restored);
- await touch.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[start]});
- await touch.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[end]});
- await reopened.locator('.sketch-snap-marker').waitFor();
+ async function startTouchDrag(handle,dx,dy){
+  await handle.scrollIntoViewIfNeeded();
+  const [start,end]=await handle.evaluate((circle,{dx,dy})=>{
+   const x=circle.cx.baseVal.value,y=circle.cy.baseVal.value,matrix=circle.getScreenCTM();
+   return [new DOMPoint(x,y),new DOMPoint(x+dx,y-dy)].map(point=>{
+    const screen=point.matrixTransform(matrix);
+    return {x:screen.x,y:screen.y};
+   });
+  },{dx,dy});
+  await touch.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[start]});
+  await touch.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[end]});
+  await reopened.locator('.sketch-snap-marker').waitFor();
+ }
+ await startTouchDrag(reopened.locator('[data-resize="vertex"][data-vertex="2"]'),8,6);
  assert.equal(await draftCoordinates.inputValue(),initial);
  await touch.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
  await reopened.getByRole('status',{name:'Sketch status'}).filter({hasText:'Outline solved'}).waitFor();
@@ -324,7 +326,29 @@ try{
  assert.ok(Math.abs(dragged[2][1]-26)<.5);
  assert.equal(await restored.evaluate(()=>window.__bwCad.editor.session.state.revision),dragRevision);
  await reopened.getByRole('button',{name:'Close sketch',exact:true}).tap();
- console.log('PASS constrained touch drag, region matches and anchors, arc tangency, SB3 reopen, and source propagation');
+ await restored.getByRole('button',{name:'Sketch',exact:true}).tap();
+ await reopened.getByLabel('Profile',{exact:true}).selectOption('region');
+ const regionRows=reopened.getByLabel('Region loops (mm)');
+ await regionRows.fill('0, 0 | 75, 0 | 75, 40 | 0, 40\n10, 10 | 22, 10 | 22, 20 | 10, 20\n40, 10 | 48, 10 | 48, 20 | 40, 20');
+ await reopened.getByText('Region edge matches',{exact:true}).tap();
+ await reopened.getByLabel('Edge reference loop',{exact:true}).selectOption({label:'Outline loop 2'});
+ await reopened.getByLabel('Edge target loop',{exact:true}).selectOption({label:'Outline loop 3'});
+ await reopened.getByRole('button',{name:'Add edge length match',exact:true}).tap();
+ await reopened.getByRole('status',{name:'Region edge match status'}).filter({hasText:'Region edge matches solved'}).waitFor();
+ await reopened.getByText('Region edge matches',{exact:true}).tap();
+ const beforeRegionDrag=await regionRows.inputValue();
+ await startTouchDrag(reopened.locator('[data-resize="vertex"][data-loop="1"][data-vertex="1"]'),6,0);
+ assert.equal(await regionRows.inputValue(),beforeRegionDrag);
+ await touch.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+ await reopened.getByRole('status',{name:'Sketch status'}).filter({hasText:'Outline solved'}).waitFor();
+ const [reference,dependent]=(await regionRows.inputValue()).split('\n').slice(1).map(row=>({
+  points:row.split('|').map(point=>point.split(',').map(Number))
+ }));
+ assert.ok(Math.abs(edgeLength(reference)-18)<.5);
+ assert.ok(Math.abs(edgeLength(reference)-edgeLength(dependent))<1e-6);
+ assert.equal(await restored.evaluate(()=>window.__bwCad.editor.session.state.revision),dragRevision);
+ await reopened.getByRole('button',{name:'Close sketch',exact:true}).tap();
+ console.log('PASS constrained outline and region touch drag, region anchors, arc tangency, SB3 reopen, and source propagation');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});
