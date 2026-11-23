@@ -4,24 +4,25 @@ import {chromium, firefox} from 'playwright';
 
 const engine = process.env.BW_ROBOT_BROWSER === 'firefox' ? firefox : chromium;
 const browser = await engine.launch(engine === chromium ? {executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH} : {});
-const stalled = process.env.BW_STALL_RENDER_FENCE === '1';
+const stallMode = process.env.BW_STALL_RENDER_FENCE;
 try {
     const page = await browser.newPage({viewport: {width: 1242, height: 758}, locale: 'en-US', serviceWorkers: 'block'});
     page.setDefaultTimeout(90000);
-    await page.addInitScript(stall => {
+    await page.addInitScript(mode => {
         localStorage.setItem('bw-starter-v1-complete', '1');
-        if (!stall) return;
+        if (mode !== '1' && mode !== 'late') return;
         const prototype = WebGL2RenderingContext.prototype;
         const original = prototype.getSyncParameter;
+        window.__bwStallRenderFence = mode === '1';
         window.__bwStalledRenderPolls = 0;
         prototype.getSyncParameter = function (fence, parameter) {
-            if (parameter === this.SYNC_STATUS && this.canvas.closest?.('[data-testid="bw-sim-lab-main"]')) {
+            if (window.__bwStallRenderFence && parameter === this.SYNC_STATUS && this.canvas.closest?.('[data-testid="bw-sim-lab-main"]')) {
                 window.__bwStalledRenderPolls++;
                 return this.UNSIGNALED;
             }
             return original.call(this, fence, parameter);
         };
-    }, stalled);
+    }, stallMode);
     await page.goto(process.argv[2] || 'http://127.0.0.1:8242/', {waitUntil: 'commit'});
     await page.getByRole('tab', {name: 'Robots', exact: true}).click();
     await page.waitForFunction(() => window.__bwSimLab?.status === 'ready');
@@ -43,12 +44,23 @@ try {
         time: window.__bwSimLab._pane.session.time
     }));
     console.log(`TwistSpan physics: ${JSON.stringify(physics)}`);
-    if (stalled) assert.ok(await page.evaluate(() => window.__bwStalledRenderPolls > 0));
-    await page.waitForFunction(previous => {
+    const expectRenderedMovement = previous => page.waitForFunction(start => {
         const point = window.__bwSimLab._pane.view.partScreenPoint('lower_tie_80');
-        return point && Math.hypot(point.x - previous.x, point.y - previous.y) > 2;
-    }, before, {timeout: 15000});
-    console.log(`PASS ${engine.name()}: TwistSpan motor, suspended beam and displayed mesh move${stalled ? ' with a stalled GPU fence' : ''}`);
+        return point && Math.hypot(point.x - start.x, point.y - start.y) > 2;
+    }, previous, {timeout: 25000});
+    await expectRenderedMovement(before);
+    if (stallMode === 'late') {
+        const atStall = await page.evaluate(() => {
+            window.__bwStallRenderFence = true;
+            return window.__bwSimLab._pane.view.partScreenPoint('lower_tie_80');
+        });
+        await page.waitForFunction(() => window.__bwStalledRenderPolls > 0);
+        await expectRenderedMovement(atStall);
+    }
+    if (stallMode === '1') assert.ok(await page.evaluate(() => window.__bwStalledRenderPolls > 0));
+    const scenario = stallMode === 'late' ? ' after a GPU fence stalls mid-run' :
+        stallMode === '1' ? ' with a stalled GPU fence' : '';
+    console.log(`PASS ${engine.name()}: TwistSpan motor, suspended beam and displayed mesh move${scenario}`);
 } finally {
     await browser.close();
 }
