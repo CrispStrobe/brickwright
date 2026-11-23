@@ -20,6 +20,12 @@ no "check with legal" licenses. See §7 for the full ledger.
 Status: **S1 done** (branch `lane/simlab-20261016`; see `LANES.md`, "Sim Lab S1").
 This section overrides the sections below where they disagree.
 
+In Robot Lab, **Run** on the starter driving base loads its bundled program
+when Code and Blocks are empty. If the workspace already contains code and
+there is no program for the selected motorized model, Run offers the
+matching example or opens the example gallery. Loading a matching example
+into an existing workspace is an explicit action.
+
 **S1 as built.**
 - `bw-sim/contracts.js`: PartMeta / PlacedModel / CompiledMechanism, frames,
   units, the signed gear-ratio convention, validators. Extensions over the

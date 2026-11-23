@@ -1,0 +1,11 @@
+DEVICE SPIKE
+
+# Drive forward, turn in place, then stop.
+WHEN flag clicked:
+  set movement motors A B
+  set movement speed 35
+  start moving steering 0
+  wait 2 seconds
+  start tank 25 -25
+  wait 1 seconds
+  stop movement

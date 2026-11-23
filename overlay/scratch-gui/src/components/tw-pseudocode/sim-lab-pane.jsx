@@ -83,6 +83,8 @@ const TEXT = {
         connectFailed: 'Could not connect the program to the virtual hub: {error}',
         noProgram: 'No SPIKE program is loaded yet, so nothing tells the motors to turn. Write one in the Code tab and press ⇦ To blocks (or build it with blocks), then press Run — or drive the robot with the arrows below.',
         example: 'Load example program', exampleOffer: 'Choose an example to load its model and program, then press Run.',
+        runNeedsProgram: 'No program for this robot.', runExample: 'Load example and run', runExamples: 'Choose an example',
+        replaceRunProgram: 'Loading the example replaces the code in the Code tab.',
         exampleLoaded: 'The example program is in the Code tab now. Press Run.',
         exampleGoal: {
             'line-follower.bw': 'The example program is in the Code tab now. Press Run and watch the robot follow the black line.',
@@ -201,6 +203,8 @@ const TEXT = {
         connectFailed: 'Das Programm konnte nicht mit dem virtuellen Hub verbunden werden: {error}',
         noProgram: 'Es ist noch kein SPIKE-Programm geladen, darum dreht sich kein Motor. Schreibe eins im Code-Tab und drücke ⇦ Zu Blöcken (oder baue es aus Blöcken), dann Start — oder fahre den Roboter mit den Pfeilen unten.',
         example: 'Beispielprogramm laden', exampleOffer: 'Wähle ein Beispiel, um Modell und Programm zu laden. Drücke dann Start.',
+        runNeedsProgram: 'Kein Programm für diesen Roboter.', runExample: 'Beispiel laden und starten', runExamples: 'Beispiel auswählen',
+        replaceRunProgram: 'Beim Laden des Beispiels wird der Code im Code-Tab ersetzt.',
         exampleLoaded: 'Das Beispielprogramm steht jetzt im Code-Tab. Drücke Start.',
         exampleGoal: {
             'line-follower.bw': 'Das Beispielprogramm steht jetzt im Code-Tab. Drücke Start und schau zu, wie der Roboter der schwarzen Linie folgt.',
@@ -389,7 +393,7 @@ class SimLabPane extends React.Component {
             mode: 'simulate', placing: null, selection: [], editorTick: 0, mat: null,
             buildStatus: {kind: 'idle'}, gizmoMode: 'move', grid: 10, recent: [], thumbTick: 0,
             showPorts: true, showMotion: false, blockers: [], portPicker: null, instructions: null, coarse: false,
-            controlsOpen: false, brickControlsOpen: false, connectionControlsOpen: false, manualOverride: false, programLoading: false,
+            controlsOpen: false, brickControlsOpen: false, connectionControlsOpen: false, manualOverride: false, programLoading: false, runNeedsProgram: false,
             connection: {bricks: [], routes: [], hubId: null, route: 'bluetooth', status: 'idle', message: ''},
             mixerOpen: (() => { try { return localStorage.getItem(MIXER_OPEN_KEY) === '1'; } catch { return false; } })(), mixer: {session: null, power: {}},
             // Simulate: sensor rays, the Readings panel, slow motion, and the replay position (null: live)
@@ -1390,10 +1394,13 @@ class SimLabPane extends React.Component {
      * Code tab, built into blocks as the arena's reference solutions are; the robot goes
      * onto the mat the program is written for.
      */
-    async loadExample () {
+    async loadExample ({onlyIfEmpty = false} = {}) {
         const request = this.programRequest = {};
         const entry = this.shippedModel();
-        if (!entry?.example) return;
+        if (!entry?.example) return false;
+        const matchesEntry = () => !this.disposed && this.programRequest === request && this.shippedModel() === entry;
+        const token = this.loadToken;
+        const current = () => matchesEntry() && this.loadToken === token;
         this.setState({programLoading: true});
         let code;
         try {
@@ -1401,10 +1408,14 @@ class SimLabPane extends React.Component {
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             code = await response.text();
         } catch (error) {
-            this.setState({programLoading: false, message: this.t('exampleFailed', {error: error.message})});
-            return;
+            if (current()) this.setState({programLoading: false, message: this.t('exampleFailed', {error: error.message})});
+            return false;
         }
-        if (this.disposed || this.programRequest !== request || this.shippedModel() !== entry) return;
+        if (!current()) return false;
+        if (onlyIfEmpty && !this.blankProgramWorkspace()) {
+            this.setState({programLoading: false, runNeedsProgram: true});
+            return false;
+        }
         if (this.state.status === 'running') this.pause();
         if (entry.example.endsWith('.nqc')) await this.loadRcxExample(code);
         else if (entry.example.endsWith('.blocks.json')) await this.loadBlocksExample(code);
@@ -1414,14 +1425,17 @@ class SimLabPane extends React.Component {
                     detail: {code, source: `sim-lab:${entry.file}`, onComplete: result => result.ok ? resolve() : reject(new Error(result.message))}
                 })));
             } catch (error) {
-                if (!this.disposed) this.setState({programLoading: false, message: this.t('exampleFailed', {error: error.message})});
-                return;
+                if (current()) this.setState({programLoading: false, message: this.t('exampleFailed', {error: error.message})});
+                return false;
             }
         }
-        if (this.disposed) return;
-        this.setState({programLoading: false});
-        this.setState({info: this.text.exampleGoal[entry.example] || this.withIntro(this.text.exampleLoaded)});
+        if (!current()) return false;
+        await new Promise(resolve => this.setState({
+            programLoading: false, info: this.text.exampleGoal[entry.example] || this.withIntro(this.text.exampleLoaded)
+        }, resolve));
+        if (!current()) return false;
         if (entry.mat && this.state.mat !== entry.mat) await this.setMat(entry.mat);
+        return matchesEntry();
     }
 
     /**
@@ -1472,7 +1486,7 @@ class SimLabPane extends React.Component {
         this.clearReplay();
         this.opened = {text, name};
         this.teardown({preserveProgram});
-        this.setState({status: 'loading', manualOverride: false, programLoading, message: '', issues: [], blockers: [], modelFile: name, shipped, simMs: 0, rtf: null, view3d: 'loading'});
+        this.setState({status: 'loading', manualOverride: false, programLoading, runNeedsProgram: false, message: '', issues: [], blockers: [], modelFile: name, shipped, simMs: 0, rtf: null, view3d: 'loading'});
         const {SimSession, fetchModelDrawing, createSimView3D, CATALOG} = this.lib;
         // The SPIKE firmware route (desktop): the emulated hub starts first; the scene then runs
         // in lockstep with it (lib/bw-sim/routes/renode-lockstep).
@@ -2123,6 +2137,57 @@ class SimLabPane extends React.Component {
     spikeLoaded () {
         const vm = this.props.vm;
         return Boolean(vm && vm.extensionManager && vm.extensionManager.isExtensionLoaded('spikeprime'));
+    }
+
+    hasRobotProgram () {
+        const hub = this.rcxHub();
+        if (hub) return hub.status !== 'empty';
+        const radio = this.radioHub();
+        const bt = this.btProfile();
+        const extensions = ['robotlab'];
+        if (this.spikeScene()) extensions.push('spikeprime');
+        if (bt) extensions.push(...(bt === 'ev3' ? ['ev3comprehensive', 'ev3'] : ['legonxt']));
+        if (radio) extensions.push(...(HUB_EXTENSIONS[radio.protocol] || []));
+        return (this.props.vm?.runtime?.targets || []).some(target =>
+            Object.values(target.blocks?._blocks || {}).some(block =>
+                extensions.some(extension => block.opcode?.startsWith(`${extension}_`))));
+    }
+
+    blankProgramWorkspace () {
+        const runtime = this.props.vm?.runtime;
+        if (!runtime || runtime.bwPseudocodeSource || runtime.targets.some(target => (target.blocks?.getScripts()?.length ?? 0))) return false;
+        try { return !localStorage.getItem('bw-code-autosave'); }
+        catch { return false; }
+    }
+
+    /** Toolbar Run can prepare the bundled example in an empty workspace. */
+    async runFromToolbar ({loadExample = false} = {}) {
+        if (!this.session || this.state.programLoading || this.toolbarStarting) return;
+        if (!loadExample && (this.session.lockstep || !this.api?.motors()?.length || this.hasRobotProgram() ||
+            this.connections && this.connections.snapshot().route !== 'bluetooth')) {
+            this.setState({runNeedsProgram: false});
+            await this.run();
+            return;
+        }
+        const entry = this.shippedModel();
+        if (!entry?.example || !loadExample && !this.blankProgramWorkspace()) {
+            this.setState({runNeedsProgram: true});
+            return;
+        }
+        const vm = this.props.vm;
+        this.toolbarStarting = true;
+        this.setState({runNeedsProgram: false, message: ''});
+        try {
+            if (await this.loadExample({onlyIfEmpty: !loadExample}) && !this.disposed && this.props.vm === vm && this.shippedModel() === entry) {
+                if (this.hasRobotProgram()) await this.run();
+                else this.setState({runNeedsProgram: true});
+            }
+        } catch (error) {
+            if (!this.disposed && this.props.vm === vm && this.shippedModel() === entry)
+                this.setState({programLoading: false, message: this.t('exampleFailed', {error: error.message})});
+        } finally {
+            this.toolbarStarting = false;
+        }
     }
 
     /** As the arena's Start: connect the spikeprime blocks to the shared virtual hub, then green flag. */
@@ -2958,7 +3023,7 @@ class SimLabPane extends React.Component {
             run: running ?
                 {id: 'pause', label: A.pause, icon: 'pause', words: narrow ? null : A.pause, style: s.stop, run: () => this.pause(), pri: 1, pin: true} :
                 {id: 'run', label: A.run, icon: 'run', words: narrow ? null : A.run, style: s.primary, pri: 1, pin: true,
-                    disabled: !this.session || busy || this.state.status === 'stopping', run: () => this.run()},
+                    disabled: !this.session || busy || this.state.status === 'stopping', run: () => this.runFromToolbar()},
             reset: {id: 'reset', label: A.reset, disabled: !this.session || busy, run: () => this.reset(), pri: 1, pin: true},
             'mode-move': {id: 'mode-move', label: A['mode-move'], pressed: this.state.gizmoMode === 'move', run: () => view?.setMode('move'), pri: 1, pin: true},
             'mode-rotate': {id: 'mode-rotate', label: A['mode-rotate'], pressed: this.state.gizmoMode === 'rotate', run: () => view?.setMode('rotate'), pri: 1, pin: true},
@@ -3457,6 +3522,20 @@ class SimLabPane extends React.Component {
                     onChange={e => this.openImported(e)} />
                 {build && this.editor && this.renderBuildRow()}
                 {message && <div role="alert" data-testid="bw-sim-lab-message" style={{fontSize: 12, color: '#b91c1c'}}>{message}</div>}
+                {simulate && this.state.runNeedsProgram && (
+                    <div role="status" data-testid="bw-sim-lab-run-needs-program"
+                        style={{display: 'flex', alignItems: 'center', gap: 8, padding: '4px 8px', fontSize: 12}}>
+                        <span>{this.text.runNeedsProgram}</span>
+                        {this.shippedModel()?.example ?
+                            <button type="button" style={button} title={this.text.replaceRunProgram}
+                                data-testid="bw-sim-lab-load-and-run" onClick={() => this.runFromToolbar({loadExample: true})}>
+                                {this.text.runExample}
+                            </button> :
+                            <button type="button" style={button} onClick={() => this.setState({examplesOpen: true})}>
+                                {this.text.runExamples}
+                            </button>}
+                    </div>
+                )}
                 {this.renderInfo()}
                 {this.renderBlockers()}
                 <div data-testid="bw-sim-lab-main" style={{display: 'flex', flex: '1 1 auto', minHeight: compact ? 220 : 240, minWidth: 0, position: 'relative'}}>

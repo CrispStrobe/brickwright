@@ -65,7 +65,8 @@ const RESONANCE_MANUAL_JOG = Object.freeze({
  * the mat it is meant for: the pane offers to load it into the Code tab.
  */
 export const MODELS = Object.freeze([
-    {file: 'driving-base.ldr', title: {en: 'SPIKE driving base — differential steering', de: 'SPIKE-Fahrbasis — Differenziallenkung'}},
+    {file: 'driving-base.ldr', title: {en: 'SPIKE driving base — differential steering', de: 'SPIKE-Fahrbasis — Differenziallenkung'},
+        example: 'driving-base.bw'},
     {file: 'line-follower.ldr', title: {en: 'Line follower — light-sensor feedback', de: 'Linienfolger — Regelung mit Lichtsensoren'},
         example: 'line-follower.bw', mat: 'line-oval'},
     {file: 'wall-stopper.ldr', title: {en: 'Wall stopper — distance-controlled braking', de: 'Wandstopper — Bremsen nach Abstand'},
