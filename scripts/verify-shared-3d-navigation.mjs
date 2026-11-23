@@ -83,7 +83,9 @@ const selectSetting = async (label, value) => {
     const trigger = page.getByTestId('bw-settings-menu-trigger');
     if (await trigger.getAttribute('aria-expanded') !== 'true') await trigger.click();
     const select = page.getByRole('combobox', {name: label, exact: true});
-    if (!await select.isVisible()) await page.getByText('3D navigation', {exact: true}).click();
+    if (!await select.isVisible()) {
+        await page.getByRole('menuitem', {name: '3D navigation', exact: true}).getByText('3D navigation', {exact: true}).click();
+    }
     await select.selectOption(value);
 };
 
