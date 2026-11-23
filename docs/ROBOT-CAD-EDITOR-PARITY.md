@@ -507,3 +507,16 @@ path is used for snapping and DXF export. The project SB3 retains expressions
 and vertex relationships. Removing a constraint keeps the endpoint at its
 current location. General constraint solving and closed-profile constraints
 remain on the drafting roadmap.
+
+### Vector costumes and backdrops
+
+Enable **CAD Editor** and **Costumes precision design** in **Settings → Workspace**.
+**Send to CAD** opens a preview of supported filled vector regions. Select one,
+enter its desired width in millimetres, choose a sketch plane, and add the
+editable sketch. Its lower-left bounds start at the sketch origin. The original
+costume remains editable in Costumes. Use **Objects** in CAD to open or extrude
+the sketch when ready.
+
+The handoff accepts explicitly closed straight outlines, full circles, and
+supported holes. It uses the fill and excludes stroke thickness. The preview
+shows diagnostics for open paths, unsupported curves, and crossing contours.

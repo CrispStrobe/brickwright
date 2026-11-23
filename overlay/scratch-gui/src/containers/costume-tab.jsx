@@ -5,6 +5,7 @@ import {defineMessages, intlShape, injectIntl} from 'react-intl';
 import VM from 'scratch-vm';
 
 import AssetPanel from '../components/asset-panel/asset-panel.jsx';
+import CostumePrecision from '../components/gui/costume-precision.jsx';
 import PaintEditorWrapper from './paint-editor-wrapper.jsx';
 
 // The palette pixel editor (Arcade-style sprites): loaded on first use only.
@@ -462,6 +463,11 @@ class CostumeTab extends React.Component {
                 >
                     {toolIcon('save')}<span className={styles.editorToolLabel}>
                         {saveFileLabel}</span></button>
+                {process.env.BW_ENABLE_CAD && mode === 'paint' ? <CostumePrecision
+                    getCostume={() => vm.editingTarget?.sprite?.costumes?.[this.state.selectedCostumeIndex]}
+                    locale={intl.locale}
+                    buttonClass={styles.editorToolButton}
+                /> : null}
                 <button
                     type="button"
                     data-testid={testId('bw-pixel-toggle')}

@@ -21,6 +21,7 @@ import {persistTheme} from '../../lib/themes/themePersistance';
 import {setTheme} from '../../reducers/theme.js';
 import {hardReload} from '../../lib/hard-reload.js';
 import {getCameraPreferences, setCameraPreference} from '../../lib/bw-camera-preferences.js';
+import {getCostumePrecision, setCostumePrecision} from '../../lib/bw-costume-precision.js';
 import {getCadEnabled, setCadEnabled} from '../../lib/bw-cad-preferences.js';
 import {getFpgaEnabled, setFpgaEnabled} from '../../lib/bw-fpga-preferences.js';
 import {getLegacySpikeVisible, setLegacySpikeVisible} from '../../lib/spike-legacy-debug.js';
@@ -141,6 +142,14 @@ const SettingsMenu = ({intl, canChangeLanguage, canChangeTheme, isRtl, onRequest
                                     {value: '0', label: t('gui.workspace.off', 'Off')},
                                     {value: '1', label: t('gui.workspace.on', 'On')}
                                 ], t('gui.workspace.cadHint', /^de/i.test(intl.locale) ? 'CAD-Tab zum Entwerfen von Körpern anzeigen' : 'Show the CAD tab to design solid models')) : null}
+                            {process.env.BW_ENABLE_CAD ? workspaceSelect(
+                                t('gui.workspace.costumePrecision', de ? 'Präzisionsdesign für Kostüme' : 'Costumes precision design'),
+                                getCostumePrecision() ? '1' : '0',
+                                value => { setCostumePrecision(value === '1'); onRequestClose(); }, [
+                                    {value: '0', label: t('gui.workspace.off', 'Off')},
+                                    {value: '1', label: t('gui.workspace.on', 'On')}
+                                ], t('gui.workspace.costumePrecisionHint', de ?
+                                    'Vektorflächen als bearbeitbare CAD-Skizzen übernehmen' : 'Send vector regions to CAD as editable sketches')) : null}
                             {workspaceSelect(t('gui.workspace.legacySpike', 'Legacy SPIKE extensions'), getLegacySpikeVisible() ? '1' : '0',
                                 value => { setLegacySpikeVisible(value === '1'); onRequestClose(); }, [
                                     {value: '0', label: t('gui.workspace.off', 'Off')},

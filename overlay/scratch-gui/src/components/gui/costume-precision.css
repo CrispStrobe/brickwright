@@ -1,0 +1,25 @@
+.dialog label { display: flex; flex-direction: column; gap: 3px; }
+.dialog input, .dialog select {
+    min-height: 32px;
+    max-width: 100%;
+    background: var(--bw-panel, white);
+    color: var(--bw-text, #172033);
+    border: 1px solid var(--bw-border, #9caec6);
+    border-radius: 4px;
+}
+.dialog svg {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    height: clamp(90px, 30vh, 260px);
+    margin: 12px 0;
+    padding: 12px;
+    background: var(--bw-surface, #edf5ff);
+    border-radius: 6px;
+    fill: #398fe0;
+}
+.inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
