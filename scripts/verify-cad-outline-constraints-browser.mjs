@@ -98,6 +98,25 @@ try{
  await sketch.waitFor({state:'hidden'});
  await page.evaluate(()=>window.__bwCad.editor.whenIdle());
 
+ await page.getByRole('button',{name:'Sketch',exact:true}).tap();
+ await sketch.getByLabel('Profile',{exact:true}).selectOption('region');
+ const loops=sketch.getByLabel('Region loops (mm)');
+ await loops.fill('200, 0 | 250, 0 | 250, 40 | 200, 40\n210, 10 | 220, 10 | 220, 20 | 210, 20');
+ await loops.blur();
+ await sketch.getByText('Region loop constraints',{exact:true}).tap();
+ await sketch.getByLabel('Constrained loop',{exact:true}).selectOption({label:'Outline loop 2'});
+ await sketch.locator('summary:visible').filter({hasText:/^Outline constraints$/}).tap();
+ await sketch.getByRole('combobox',{name:'Constraint',exact:true}).selectOption('length');
+ const cutoutLength=sketch.getByRole('textbox',{name:'Segment length (mm)',exact:true});
+ await cutoutLength.fill('reach / 4');
+ await cutoutLength.blur();
+ await sketch.getByRole('button',{name:'Add constraint',exact:true}).tap();
+ await solve.tap();
+ await sketch.getByRole('status',{name:'Outline constraint status'}).filter({hasText:'Outline solved'}).waitFor();
+ await sketch.getByRole('button',{name:'Create extrusion',exact:true}).tap();
+ await sketch.waitFor({state:'hidden'});
+ await page.evaluate(()=>window.__bwCad.editor.whenIdle());
+
  await file(page).tap();
  const [download]=await Promise.all([
   page.waitForEvent('download'),page.getByText('Save to your computer',{exact:true}).tap()
@@ -106,8 +125,8 @@ try{
  await download.saveAs(project);
  const zip=await JSZip.loadAsync(await readFile(project));
  const saved=JSON.parse(await zip.file(CAD_PROJECT_PATH).async('text'));
- assert.equal(saved.version,34);
- assert.equal(saved.roots.length,2);
+ assert.equal(saved.version,35);
+ assert.equal(saved.roots.length,3);
  const id=saved.nodes[saved.roots[0]].sketchId;
  const compoundId=saved.nodes[saved.roots[1]].sketchId;
  const compound=saved.sketches[compoundId].profile;
@@ -117,6 +136,11 @@ try{
  const firstEnd=Math.atan2(2,6)+2*Math.atan(compound.bulges[1]);
  const secondStart=Math.atan2(8,4)-2*Math.atan(compound.bulges[2]);
  assert.ok(Math.abs(firstEnd-secondStart)<1e-9);
+ const regionId=saved.nodes[saved.roots[2]].sketchId;
+ const storedRegion=saved.sketches[regionId].profile;
+ assert.equal(storedRegion.kind,'region');
+ const cutout=storedRegion.loops[1];
+ assert.deepEqual(cutout.relations,[{kind:'length',edge:cutout.vertexIds.slice(0,2),length:'reach / 4'}]);
  const profile=saved.sketches[id].profile;
  assert.deepEqual(rounded(profile.points),[[0,0],[40,0],[40,20],[0,20]]);
  assert.equal(profile.vertexIds.length,4);
@@ -142,6 +166,8 @@ try{
  const readProfile=()=>restored.evaluate(id=>window.__bwCad.editor.session.state.document.sketches[id].profile,id);
  assert.deepEqual(await readProfile(),profile);
  assert.deepEqual(await restored.evaluate(id=>window.__bwCad.editor.session.state.document.sketches[id].profile,compoundId),compound);
+ const readRegion=()=>restored.evaluate(id=>window.__bwCad.editor.session.state.document.sketches[id].profile,regionId);
+ assert.deepEqual(await readRegion(),storedRegion);
  const revision=await restored.evaluate(()=>window.__bwCad.editor.session.state.revision);
  await setReach(restored,'55');
  const solved=await readProfile();
@@ -149,6 +175,9 @@ try{
  assert.deepEqual(solved.vertexIds,profile.vertexIds);
  assert.deepEqual(solved.relations,profile.relations);
  requireRadius(solved,27.5);
+ const resizedCutout=(await readRegion()).loops[1];
+ assert.deepEqual(resizedCutout.vertexIds,cutout.vertexIds);
+ assert.ok(Math.abs(resizedCutout.points[1][0]-223.75)<1e-6);
  assert.equal(await restored.evaluate(()=>window.__bwCad.editor.session.state.revision),revision+1);
  await restored.getByRole('button',{name:'Command palette',exact:true}).tap();
  const palette=restored.getByRole('dialog',{name:'Command palette'});
@@ -199,7 +228,8 @@ try{
  assert.equal(Number(edited.relations[4].length),56);
  assert.equal(edited.relations.length,8);
  requireRadius(edited,29);
- console.log('PASS retained arc-to-arc and arc-to-line tangency, SB3 reopen, parameter and source solves, and editing saved constraints');
+ assert.ok(Math.abs((await readRegion()).loops[1].points[1][0]-224.5)<1e-6);
+ console.log('PASS constrained region cutout, arc tangency, SB3 reopen, parameter and source solves, and editing saved constraints');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});
