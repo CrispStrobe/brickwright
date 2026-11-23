@@ -54,7 +54,6 @@ const z6 = {
   "Invalid simulation settings or tracers": "Ungültige Simulationseinstellungen oder Bewegungsspuren",
   "Choose two physical bodies and a valid connector frame": "Zwei physische Körper und eine gültige Verbindungsachse wählen",
   "Material preset": "Materialvorlage",
-  "Illustrative material presets; edit properties for your parts.": "Beispielhafte Materialwerte; Eigenschaften für deine Teile anpassen.",
   "Ground plane": "Bodenebene",
   "Select two physical bodies": "Zwei physische Körper auswählen",
   "Limit travel": "Bewegungsweg begrenzen",

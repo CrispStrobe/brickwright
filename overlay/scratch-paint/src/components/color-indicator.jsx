@@ -33,6 +33,8 @@ const ColorIndicatorComponent = props => (
         >
             <Label text={props.label}>
                 <ColorButton
+                    label={props.label}
+                    disabled={props.disabled}
                     color={props.color}
                     color2={props.color2}
                     gradientType={props.gradientType}

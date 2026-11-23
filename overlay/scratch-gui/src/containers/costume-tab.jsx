@@ -221,10 +221,12 @@ class CostumeTab extends React.Component {
         }));
     }
     handleNewBlankCostume () {
-        const name = this.props.vm.editingTarget.isStage ?
+        if (!this.savePixelBeforeSwitch()) return;
+        const target = this.props.vm.editingTarget;
+        const name = target.isStage ?
             this.props.intl.formatMessage(messages.backdrop, {index: 1}) :
             this.props.intl.formatMessage(messages.costume, {index: 1});
-        this.handleNewCostume(emptyCostume(name));
+        this.handleNewCostume(emptyCostume(name), false, target.id);
     }
     handleSurpriseCostume () {
         // Brickwright: the manifests are a lazy chunk shared with the library modals.
@@ -352,6 +354,9 @@ class CostumeTab extends React.Component {
             details: costume.size ? this.formatCostumeDetails(costume.size, costume.bitmapResolution) : null,
             dragPayload: costume
         })) : [];
+        const de = intl.locale.startsWith('de');
+        const newLabel = vm.editingTarget.isStage ?
+            (de ? 'Neuer Hintergrund' : 'New Backdrop') : (de ? 'Neues Kostüm' : 'New Costume');
         const openFileLabel = editorT(intl.locale, 'open');
         const saveFileLabel = editorT(intl.locale, 'save');
         const editorLabel = editorT(intl.locale, this.state.pixelMode ? 'paint' : 'pixel');
@@ -366,6 +371,8 @@ class CostumeTab extends React.Component {
                     height="18"
                     rx="1"
                 /><path d="M9 3v18M15 3v18M3 9h18M3 15h18" /></>,
+                new: <><path d="M13 3H5v18h14V9l-6-6zM13 3v6h6M9 15h6m-3-3v6" /></>,
+                cad: <><path d="m12 3 9 5v9l-9 5-9-5V8l9-5zM3 8l9 5 9-5m-9 5v9" /></>,
                 paint: <><path d="M4 20l4.5-1 10-10-3.5-3.5-10 10L4 20z" /><path d="M13.5 7l3.5 3.5" /></>,
                 tilemap: <><rect
                     x="3"
@@ -417,6 +424,17 @@ class CostumeTab extends React.Component {
             const testId = base => (mode === 'paint' ? base : `${base}-${mode}`);
             return (
             <div className={styles.editorTools}>
+                <button type="button" data-testid={testId('bw-costume-new')} onClick={this.handleNewBlankCostume}
+                    className={styles.editorToolButton} aria-label={newLabel} title={newLabel}>
+                    {toolIcon('new')}<span className={styles.editorToolLabel}>{newLabel}</span>
+                </button>
+                {process.env.BW_ENABLE_CAD && mode === 'paint' ? <CostumePrecision
+                    getCostume={() => vm.editingTarget?.sprite?.costumes?.[this.state.selectedCostumeIndex]}
+                    locale={intl.locale}
+                    buttonClass={styles.editorToolButton}
+                    labelClass={styles.editorToolLabel}
+                    icon={toolIcon('cad')}
+                /> : null}
                 <select
                     data-testid={testId('bw-image-target')}
                     aria-label={intl.locale.startsWith('de') ? 'Bildziel wählen' : 'Choose image target'}
@@ -463,11 +481,6 @@ class CostumeTab extends React.Component {
                 >
                     {toolIcon('save')}<span className={styles.editorToolLabel}>
                         {saveFileLabel}</span></button>
-                {process.env.BW_ENABLE_CAD && mode === 'paint' ? <CostumePrecision
-                    getCostume={() => vm.editingTarget?.sprite?.costumes?.[this.state.selectedCostumeIndex]}
-                    locale={intl.locale}
-                    buttonClass={styles.editorToolButton}
-                /> : null}
                 <button
                     type="button"
                     data-testid={testId('bw-pixel-toggle')}

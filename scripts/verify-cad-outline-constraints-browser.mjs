@@ -315,6 +315,7 @@ try{
   await touch.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[start]});
   await touch.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[end]});
   await reopened.locator('.sketch-snap-marker').waitFor();
+  await reopened.locator('.sketch-live-outline').waitFor({state:'attached'});
  }
  await startTouchDrag(reopened.locator('[data-resize="vertex"][data-vertex="2"]'),8,6);
  assert.equal(await draftCoordinates.inputValue(),initial);
@@ -341,6 +342,7 @@ try{
  assert.equal(await regionRows.inputValue(),beforeRegionDrag);
  await touch.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
  await reopened.getByRole('status',{name:'Sketch status'}).filter({hasText:'Outline solved'}).waitFor();
+ assert.equal(await reopened.locator('.sketch-live-outline').count(),0);
  const [reference,dependent]=(await regionRows.inputValue()).split('\n').slice(1).map(row=>({
   points:row.split('|').map(point=>point.split(',').map(Number))
  }));
@@ -348,7 +350,7 @@ try{
  assert.ok(Math.abs(edgeLength(reference)-edgeLength(dependent))<1e-6);
  assert.equal(await restored.evaluate(()=>window.__bwCad.editor.session.state.revision),dragRevision);
  await reopened.getByRole('button',{name:'Close sketch',exact:true}).tap();
- console.log('PASS constrained outline and region touch drag, region anchors, arc tangency, SB3 reopen, and source propagation');
+ console.log('PASS live constrained outline and region touch previews, region anchors, arc tangency, SB3 reopen, and source propagation');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});

@@ -2,10 +2,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {CAD_OPEN_EVENT, CAD_READY_EVENT} from '../../lib/bw-cad-program.js';
-import {getCadEnabled} from '../../lib/bw-cad-preferences.js';
+import {CAD_TOGGLE_EVENT, getCadEnabled} from '../../lib/bw-cad-preferences.js';
 import {getCadProjectGeneration} from '../../lib/bw-cad-project.js';
 import {loadCadSDK} from '../../lib/bw-cad-sdk.js';
-import {getCostumePrecision, COSTUME_PRECISION_EVENT} from '../../lib/bw-costume-precision.js';
 import {getCostumeDocument, getCostumeSourceId, proposeCostumeSourceId, setCostumeSourceId} from '../../lib/bw-artwork-bundle.js';
 import styles from './editor-help.css';
 import layout from './costume-precision.css';
@@ -53,8 +52,8 @@ const drawingPath = loop => {
     return `M ${x - r} ${-y} a ${r} ${r} 0 1 0 ${2 * r} 0 a ${r} ${r} 0 1 0 ${-2 * r} 0 Z`;
 };
 
-export default function CostumePrecision ({getCostume, locale, buttonClass}) {
-    const [enabled, setEnabled] = React.useState(getCostumePrecision);
+export default function CostumePrecision ({getCostume, locale, buttonClass, icon, labelClass}) {
+    const [enabled, setEnabled] = React.useState(getCadEnabled);
     const dialog = React.useRef(null), button = React.useRef(null), active = React.useRef(null);
     const [snapshot, setSnapshot] = React.useState(null), [error, setError] = React.useState('');
     const [selected, select] = React.useState(0), [width, setWidth] = React.useState('40');
@@ -74,7 +73,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
     const de = /^de/i.test(locale), text = (english, german) => de ? german : english;
     React.useEffect(() => {
         const onPreference = () => {
-            const value = getCostumePrecision();
+            const value = getCadEnabled();
             if (!value) {
                 active.current?.abort();
                 dialog.current?.close();
@@ -87,11 +86,11 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
             event.stopImmediatePropagation();
             dialog.current.close();
         };
-        window.addEventListener(COSTUME_PRECISION_EVENT, onPreference);
+        window.addEventListener(CAD_TOGGLE_EVENT, onPreference);
         window.addEventListener('keydown', onEscape, true);
         return () => {
             active.current?.abort();
-            window.removeEventListener(COSTUME_PRECISION_EVENT, onPreference);
+            window.removeEventListener(CAD_TOGGLE_EVENT, onPreference);
             window.removeEventListener('keydown', onEscape, true);
         };
     }, []);
@@ -318,7 +317,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
     const title = text('Send to CAD', 'An CAD senden');
     return <>
         <button ref={button} type="button" className={buttonClass} data-testid="bw-costume-precision"
-            title={title} onClick={open}>{title}</button>
+            aria-label={title} title={title} onClick={open}>{icon}<span className={labelClass}>{title}</span></button>
         <dialog ref={dialog} className={`${styles.dialog} ${layout.dialog}`} aria-label={title}
             onClose={() => {
                 active.current?.abort();
@@ -532,5 +531,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
 CostumePrecision.propTypes = {
     getCostume: PropTypes.func.isRequired,
     locale: PropTypes.string.isRequired,
-    buttonClass: PropTypes.string.isRequired
+    buttonClass: PropTypes.string.isRequired,
+    icon: PropTypes.node.isRequired,
+    labelClass: PropTypes.string.isRequired
 };

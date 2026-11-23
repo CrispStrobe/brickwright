@@ -326,7 +326,6 @@ const T6 = {
   "Invalid simulation settings or tracers": "Ungültige Simulationseinstellungen oder Bewegungsspuren",
   "Choose two physical bodies and a valid connector frame": "Zwei physische Körper und eine gültige Verbindungsachse wählen",
   "Material preset": "Materialvorlage",
-  "Illustrative material presets; edit properties for your parts.": "Beispielhafte Materialwerte; Eigenschaften für deine Teile anpassen.",
   "Ground plane": "Bodenebene",
   "Select two physical bodies": "Zwei physische Körper auswählen",
   "Limit travel": "Bewegungsweg begrenzen",
@@ -11441,7 +11440,7 @@ async function M7(A, g, I, e = {}) {
     }
   if ([...I.values()].reduce((x, G) => x + G.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = e.J ?? await (b4 ?? (b4 = import("./jolt-physics.wasm-compat-D0gvRXcx.js").then((x) => x.default()))), Q = new i.JoltSettings();
+  const i = e.J ?? await (b4 ?? (b4 = import("./jolt-physics.wasm-compat-Bv3lRy8q.js").then((x) => x.default()))), Q = new i.JoltSettings();
   Q.mMaxBodies = 512, Q.mMaxBodyPairs = Math.max(1024, B.length * B.length), Q.mMaxContactConstraints = 8192;
   const s = new i.ObjectLayerPairFilterTable(2);
   s.EnableCollision(0, 1), s.EnableCollision(1, 1);

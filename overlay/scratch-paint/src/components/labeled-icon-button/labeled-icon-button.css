@@ -9,7 +9,8 @@ $border-radius: 0.25rem;
     padding: .25rem .325rem;
     outline: none;
     border-radius: $border-radius;
-    min-width: 3rem;
+    min-width: 44px;
+    min-height: 44px;
     font-size: 0.85rem;
     text-align: center;
 }
@@ -22,20 +23,13 @@ $border-radius: 0.25rem;
 }
 
 .edit-field-title {
-    display: block;
+    display: none;
     margin-top: .125rem;
     font-size: .625rem;
 }
 
-@media only screen and (max-width: 900px) {
-    .mod-edit-field,
-    :global(html[data-bw-touch]) .mod-edit-field {
-        min-width: 44px;
-        min-height: 44px;
-        padding: 0;
-    }
-
+@container bw-paint (min-width: 1500px) {
     .edit-field-title {
-        display: none;
+        display: block;
     }
 }

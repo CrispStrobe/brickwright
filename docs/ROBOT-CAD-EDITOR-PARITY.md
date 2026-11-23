@@ -348,10 +348,10 @@ then choose **Solve outline** and apply the changes. Changes in **Parameters**,
 **Design inputs**, or **Model source** automatically solve affected outlines
 and save them in one Undo step. If the new dimensions conflict, the previous
 parameters and shapes stay in place. Segment lengths measure vertex to vertex.
-Drag a free vertex in a constrained outline or a region cutout and release
-to solve toward the marked point. The solver anchors the first vertex and
-reapplies region positions and matched edge lengths. An invalid change
-leaves the draft intact. Create or Apply commits the solved draft.
+Drag a free vertex in a constrained outline or region cutout to preview the
+solved shape in blue. The solver anchors the first vertex and reapplies
+region positions and matched edge lengths. Release validates the move before
+updating the draft. Create or Apply commits it to the project.
 
 Choose **Arc radius** for an existing curved segment and enter a dimension or
 named parameter. It preserves the side and sweep through the solved endpoints.
@@ -559,7 +559,11 @@ region links use CAD document version 40 and artwork bundle version 9. The
 live check reorders a costume and its regions, edits the linked region, then
 verifies the selection after SB3 reopen and with a duplicate source ID.
 
-Enable **CAD Editor** and **Costumes precision design** in **Settings → Workspace**.
+Enable **CAD Editor** in **Settings → Workspace** for the **Send to CAD**
+cube icon in the vector artwork toolbar. **Costumes precision design**
+independently enables numeric drawing tools in Properties. Use **New Costume**
+or **New Backdrop** at the start of the toolbar to add blank artwork. Compact
+toolbars use icon buttons with hover labels.
 **Send to CAD** opens a preview of supported filled vector regions. Select one,
 enter its desired width in millimetres, choose a sketch plane, and add the
 editable sketch. **Placement** optionally sets the lower-left corner or center
