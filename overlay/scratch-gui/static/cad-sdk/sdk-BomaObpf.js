@@ -57280,7 +57280,7 @@ function bB(i, e) {
   a.setAttribute("aria-label", "CAD editor");
   const r = q2("div", "toolbar");
   if (r.setAttribute("role", "toolbar"), r.setAttribute("aria-label", "Model tools"), e.embedded && (a.classList.add("embedded"), o.textContent += `
-.editor.embedded .design-bar{grid-template-columns:minmax(76px,130px) minmax(0,1fr) auto}.editor.embedded .project-actions,.editor.embedded .units-label{display:none}.editor.embedded .toolbar{overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap}.editor.embedded .toolbar>slot{order:-2}`), e.toolbarContent) {
+.editor.embedded .design-bar{grid-template-columns:minmax(76px,130px) minmax(0,1fr) auto}.editor.embedded .project-actions,.editor.embedded .units-label{display:none}.editor.embedded .toolbar{max-width:calc(100vw - 24px);overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap}.editor.embedded .toolbar>slot{order:-2}`), e.toolbarContent) {
     const H = document.createElement("slot");
     H.name = "host-toolbar-controls", H.style.display = "inline-flex", H.style.flexShrink = "0", e.toolbarContent.slot = H.name, i.append(e.toolbarContent), r.append(H);
   }
@@ -58565,7 +58565,7 @@ function bB(i, e) {
 }
 let aa;
 async function gB() {
-  const [{ createBundledModelLibrary: i }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-uquPrtC0.js"), import("./model-library-cache-DiMFGzp9.js")]);
+  const [{ createBundledModelLibrary: i }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-CnKQlUpQ.js"), import("./model-library-cache-DiMFGzp9.js")]);
   return aa ?? (aa = i()), { ...aa, cache: e() };
 }
 function kB(i, e) {
