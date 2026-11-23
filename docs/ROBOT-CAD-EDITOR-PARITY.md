@@ -354,8 +354,10 @@ Choose **Arc tangent to line** to keep the curve tangent to an adjoining
 straight segment. A radius or a second tangent must agree with that curve.
 Choose **Arc tangent to arc** when the adjoining reference is another arc.
 Select the arc to adjust first. In a region, open **Region loop constraints**
-to edit the relations for an individual boundary or cutout. Relations between
-separate loops and exact STEP editing remain open.
+to edit the relations for an individual boundary or cutout. **Region loop
+positions** accepts named X/Y offsets between the first vertices of two
+outlines and translates the target as a whole. General edge relations across
+loops and exact STEP editing remain open.
 
 **Properties → Export drilling template (PDF)** produces a full-size A4
 vector template in the local sketch plane. It evaluates the current cutout

@@ -128,6 +128,12 @@ try{
  await addConstraint.tap();
  await solve.tap();
  await loopStatus.filter({hasText:'Outline solved'}).waitFor();
+ await sketch.getByText('Region loop positions',{exact:true}).tap();
+ const xOffset=sketch.getByLabel('X offset (mm)',{exact:true});
+ await xOffset.fill('reach / 4 + 1 mm');
+ await xOffset.blur();
+ await sketch.getByRole('button',{name:'Add loop position',exact:true}).tap();
+ assert.ok((await loops.inputValue()).includes('\n211, 10'));
  await sketch.getByRole('button',{name:'Create extrusion',exact:true}).tap();
  await sketch.waitFor({state:'hidden'});
  await page.evaluate(()=>window.__bwCad.editor.whenIdle());
@@ -140,7 +146,7 @@ try{
  await download.saveAs(project);
  const zip=await JSZip.loadAsync(await readFile(project));
  const saved=JSON.parse(await zip.file(CAD_PROJECT_PATH).async('text'));
- assert.equal(saved.version,35);
+ assert.equal(saved.version,36);
  assert.equal(saved.roots.length,3);
  const id=saved.nodes[saved.roots[0]].sketchId;
  const compoundId=saved.nodes[saved.roots[1]].sketchId;
@@ -157,6 +163,7 @@ try{
  const cutout=storedRegion.loops[1];
  assert.equal(storedRegion.loops[0].relations[0].length,'reach + 10 mm');
  assert.deepEqual(cutout.relations,[{kind:'length',edge:cutout.vertexIds.slice(0,2),length:'reach / 4'}]);
+ assert.deepEqual(storedRegion.placements,[{reference:storedRegion.loops[0].id,target:cutout.id,offset:['reach / 4 + 1 mm',10]}]);
  const profile=saved.sketches[id].profile;
  assert.deepEqual(rounded(profile.points),[[0,0],[40,0],[40,20],[0,20]]);
  assert.equal(profile.vertexIds.length,4);
@@ -193,7 +200,8 @@ try{
  requireRadius(solved,27.5);
  const resizedCutout=(await readRegion()).loops[1];
  assert.deepEqual(resizedCutout.vertexIds,cutout.vertexIds);
- assert.ok(Math.abs(resizedCutout.points[1][0]-223.75)<1e-6);
+ assert.ok(Math.abs(resizedCutout.points[0][0]-214.75)<1e-6);
+ assert.ok(Math.abs(resizedCutout.points[1][0]-228.5)<1e-6);
  assert.equal(await restored.evaluate(()=>window.__bwCad.editor.session.state.revision),revision+1);
  await restored.getByRole('button',{name:'Command palette',exact:true}).tap();
  const palette=restored.getByRole('dialog',{name:'Command palette'});
@@ -245,8 +253,8 @@ try{
  assert.equal(Number(edited.relations[4].length),56);
  assert.equal(edited.relations.length,8);
  requireRadius(edited,29);
- assert.ok(Math.abs((await readRegion()).loops[1].points[1][0]-224.5)<1e-6);
- console.log('PASS constrained region loops, arc tangency, SB3 reopen, and a source edit that expands the boundary and circular cutout together');
+ assert.ok(Math.abs((await readRegion()).loops[1].points[1][0]-230)<1e-6);
+ console.log('PASS region loop positions, arc tangency, SB3 reopen, and one source edit that expands the boundary and positions the cutout');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});
