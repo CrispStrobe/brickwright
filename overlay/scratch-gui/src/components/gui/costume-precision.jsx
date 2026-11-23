@@ -6,7 +6,7 @@ import {getCadEnabled} from '../../lib/bw-cad-preferences.js';
 import {getCadProjectGeneration} from '../../lib/bw-cad-project.js';
 import {loadCadSDK} from '../../lib/bw-cad-sdk.js';
 import {getCostumePrecision, COSTUME_PRECISION_EVENT} from '../../lib/bw-costume-precision.js';
-import {getCostumeDocument} from '../../lib/bw-artwork-bundle.js';
+import {getCostumeDocument, getCostumeSourceId, proposeCostumeSourceId, setCostumeSourceId} from '../../lib/bw-artwork-bundle.js';
 import styles from './editor-help.css';
 import layout from './costume-precision.css';
 
@@ -64,6 +64,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
     const [saved, setSaved] = React.useState(false);
     const [refresh, setRefresh] = React.useState(null), [updateId, setUpdateId] = React.useState('');
     const [review, setReview] = React.useState(null);
+    const [linkArtwork, setLinkArtwork] = React.useState(false);
     const [approximate, setApproximate] = React.useState(false), [tolerance, setTolerance] = React.useState('0.2');
     const [closeGaps, setCloseGaps] = React.useState(false), [maxGap, setMaxGap] = React.useState('0.5');
     const [profileSource, setProfileSource] = React.useState('fill');
@@ -114,7 +115,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
         width, tolerance, maxGap]);
     React.useEffect(() => {
         setReview(null);
-    }, [selected, width, plane, anchor, horizontal, vertical, profileSource, approximate, tolerance, closeGaps, maxGap, updateId]);
+    }, [selected, width, plane, anchor, horizontal, vertical, profileSource, approximate, tolerance, closeGaps, maxGap, updateId, linkArtwork]);
     const costume = getCostume();
     if (!enabled || costume?.dataFormat !== 'svg') return null;
 
@@ -125,7 +126,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
         setSnapshot(null); setError(''); setSaved(false); select(0); setWidth('40'); setPlane('XY'); setBusy(true);
         setApproximate(false); setTolerance('0.2'); setCloseGaps(false); setMaxGap('0.5'); setProfileSource('fill');
         setAnchor('lower-left'); setHorizontal('0'); setVertical('0');
-        setRefresh(null); setUpdateId(''); setReview(null);
+        setRefresh(null); setUpdateId(''); setReview(null); setLinkArtwork(false);
         dialog.current.showModal();
         try {
             if (!getCadEnabled()) throw new Error(text('Enable CAD Editor in Settings → Workspace first.',
@@ -171,6 +172,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
         }
     };
     const selectTarget = target => {
+        setLinkArtwork(false);
         setUpdateId(target.id);
         setPlane(target.plane);
         setAnchor('lower-left');
@@ -186,9 +188,13 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
             const editor = await readyCad(signal);
             if (signal.aborted) return;
             assertArtworkCurrent();
-            const entries = editor.artworkSketchTargets(profileType);
+            const sourceId = getCostumeSourceId(snapshot.costume);
+            const entries = editor.artworkSketchTargets(profileType).filter(entry =>
+                !entry.artworkSourceId || entry.artworkSourceId === sourceId);
+            const linked = entries.filter(entry => entry.artworkSourceId === sourceId && sourceId);
             setRefresh({editor, entries, kind: profileType, revision: editor.session.state.revision});
             setUpdateId('');
+            if (linked.length === 1) selectTarget(linked[0]);
         } catch (e) {
             if (!signal.aborted) setError(e.message);
         } finally {
@@ -207,8 +213,13 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
                 throw new Error(text('The CAD design changed. Choose the target sketch again.',
                     'Der CAD-Entwurf wurde geändert. Wähle die Zielskizze erneut.'));
             const shape = snapshot.sdk.costumeSketchProfile(profile, Number(width), placement);
-            const result = await refresh.editor.previewArtworkSketchRefresh(updateId, shape);
-            if (!signal.aborted) { assertArtworkCurrent(); setReview(result); }
+            const priorSourceId = getCostumeSourceId(snapshot.costume);
+            const sourceId = linkArtwork ? proposeCostumeSourceId(snapshot.costume) : priorSourceId;
+            const result = await refresh.editor.previewArtworkSketchRefresh(updateId, shape, {sourceId, link: linkArtwork});
+            if (!signal.aborted) {
+                assertArtworkCurrent();
+                setReview({...result, newSourceId: linkArtwork && !priorSourceId ? sourceId : undefined});
+            }
         } catch (e) {
             if (!signal.aborted) setError(e.message);
         } finally {
@@ -220,7 +231,11 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
         if (!review || !matchingTarget || active.current?.signal.aborted) return;
         try {
             assertArtworkCurrent();
+            if (review.newSourceId && getCostumeSourceId(snapshot.costume))
+                throw new Error(text('The artwork link changed. Preview the update again.',
+                    'Die Grafikverknüpfung wurde geändert. Öffne die Vorschau erneut.'));
             review.apply();
+            if (review.newSourceId) setCostumeSourceId(snapshot.costume, review.newSourceId);
             setSaved(true); setError('');
         } catch (e) {
             setReview(null); setError(e.message);
@@ -237,7 +252,9 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
             if (signal.aborted) return;
             assertArtworkCurrent();
             const name = String(costume.name || 'Artwork').trim().slice(0, 80) || 'Artwork';
-            editor.session.addSketch(shape, {name, plane});
+            const sourceId = linkArtwork ? proposeCostumeSourceId(snapshot.costume) : undefined;
+            editor.session.addSketch(shape, {name, plane, artworkSourceId: sourceId});
+            if (sourceId) setCostumeSourceId(snapshot.costume, sourceId);
             setSaved(true);
         } catch (e) {
             if (!signal.aborted) setError(e.message);
@@ -385,13 +402,19 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
                                 }}>
                                 <option value="" disabled>{text('Choose a sketch', 'Skizze auswählen')}</option>
                                 {refresh.entries.map((entry, index) => <option key={entry.id} value={entry.id}>
-                                    {`${index + 1}. ${entry.name} (${entry.plane})`}
+                                    {`${index + 1}. ${entry.name} (${entry.plane})`}{entry.artworkSourceId ?
+                                        text(' · linked', ' · verknüpft') : ''}
                                 </option>)}
                             </select>
                         </label>
                         {(!refresh.entries.length || refresh.kind !== profileType) && <p>{text(
                             'Choose a compatible profile and open the target list again.',
                             'Wähle ein kompatibles Profil und öffne die Zielliste erneut.')}</p>}
+                        {matchingTarget && !matchingTarget.artworkSourceId && <label className={layout.checkbox}>
+                            <input type="checkbox" checked={linkArtwork} disabled={busy}
+                                onChange={event => setLinkArtwork(event.target.checked)} />
+                            {text('Link to this costume or backdrop', 'Mit diesem Kostüm oder Bühnenbild verknüpfen')}
+                        </label>}
                         {review && <div className={layout.review}>
                             <h3>{text('Review sketch update', 'Skizzenaktualisierung prüfen')}</h3>
                             <svg role="img" aria-label={text('Current and proposed sketch', 'Aktuelle und vorgeschlagene Skizze')}
@@ -408,7 +431,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
                         </div>}
                         <div className={layout.updateActions}>
                             <button type="button" className={buttonClass} disabled={busy}
-                                onClick={() => { setRefresh(null); setReview(null); setError(''); }}>
+                                onClick={() => { setRefresh(null); setReview(null); setLinkArtwork(false); setError(''); }}>
                                 {text('Cancel update', 'Aktualisierung abbrechen')}
                             </button>
                             <button type="button" className={buttonClass} disabled={busy || !matchingTarget || !validWidth || Boolean(placementError)}
@@ -416,14 +439,21 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
                                 {review ? text('Apply sketch update', 'Skizze aktualisieren') : text('Preview update', 'Vorschau aktualisieren')}
                             </button>
                         </div>
-                    </> : <div className={layout.updateActions}>
-                        <button type="button" className={buttonClass} disabled={busy || !validWidth || Boolean(placementError)} onClick={send}>
-                            {text('Add editable sketch', 'Bearbeitbare Skizze hinzufügen')}
-                        </button>
-                        <button type="button" className={buttonClass} disabled={busy} onClick={chooseUpdate}>
-                            {text('Update an existing sketch…', 'Vorhandene Skizze aktualisieren…')}
-                        </button>
-                    </div>}
+                    </> : <>
+                        <label className={layout.checkbox}>
+                            <input type="checkbox" checked={linkArtwork} disabled={busy}
+                                onChange={event => setLinkArtwork(event.target.checked)} />
+                            {text('Link to this costume or backdrop', 'Mit diesem Kostüm oder Bühnenbild verknüpfen')}
+                        </label>
+                        <div className={layout.updateActions}>
+                            <button type="button" className={buttonClass} disabled={busy || !validWidth || Boolean(placementError)} onClick={send}>
+                                {text('Add editable sketch', 'Bearbeitbare Skizze hinzufügen')}
+                            </button>
+                            <button type="button" className={buttonClass} disabled={busy} onClick={chooseUpdate}>
+                                {text('Update an existing sketch…', 'Vorhandene Skizze aktualisieren…')}
+                            </button>
+                        </div>
+                    </>}
                 </>}
             </>}
         </dialog>

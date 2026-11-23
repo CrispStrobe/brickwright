@@ -542,6 +542,15 @@ dimensions require a new import. The Chrome check changes the source artwork,
 previews and cancels without changing the extrusion, then applies, undoes,
 redoes, and reopens the update from SB3.
 
+Enable **Link to this costume or backdrop** when adding a sketch or confirming
+an update to an unlinked sketch. On **Update an existing sketch**, a single
+matching linked sketch is selected for you. The source is independent of
+names and positions in the costume list and survives SB3 reopen. Duplicating
+a costume gives the copy no link. Review and Apply remain explicit. Linked
+projects use CAD document version 39 and artwork bundle version 9. The live
+check renames and reorders a costume, edits it, then reopens the project and
+verifies that the original sketch is still selected for review.
+
 Enable **CAD Editor** and **Costumes precision design** in **Settings → Workspace**.
 **Send to CAD** opens a preview of supported filled vector regions. Select one,
 enter its desired width in millimetres, choose a sketch plane, and add the

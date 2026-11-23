@@ -36,7 +36,7 @@ const f6 = {
   "Choose light or dark mode": "Hellen oder dunklen Modus wählen",
   "Loading models…": "Modelle werden geladen…",
   "Original source files": "Originale Quelldateien",
-  "Model source uses project version 6 through 38": "Modellquelltext verwendet Projektversion 6 bis 38",
+  "Model source uses project version 6 through 39": "Modellquelltext verwendet Projektversion 6 bis 39",
   "Unknown material preset": "Unbekannte Materialvorlage",
   "Initial velocity requires project version 8": "Anfangsgeschwindigkeit erfordert Projektversion 8",
   "Invalid initial body velocity": "Ungültige Anfangsgeschwindigkeit",
@@ -1060,6 +1060,8 @@ const f6 = {
   "The artwork has no usable area.": "Die Grafik enthält keine verwendbare Fläche.",
   "Enter sketch coordinates from −100000 to 100000 mm.": "Gib Skizzenkoordinaten von −100000 bis 100000 mm ein.",
   "Choose an artwork profile of the same sketch type.": "Wähle ein Grafikprofil desselben Skizzentyps.",
+  "Invalid sketch artwork link": "Ungültige Verknüpfung zwischen Skizze und Grafik",
+  "This sketch is linked to different artwork.": "Diese Skizze ist mit einer anderen Grafik verknüpft.",
   "This sketch has constraints. Add the artwork as a new sketch.": "Diese Skizze hat Abhängigkeiten. Füge die Grafik als neue Skizze hinzu.",
   "The number of outline and hole loops must match.": "Die Anzahl der Außen- und Innenkonturen muss übereinstimmen.",
   "The CAD design changed. Preview the sketch update again.": "Der CAD-Entwurf wurde geändert. Öffne die Vorschau der Aktualisierung erneut.",
@@ -6942,6 +6944,8 @@ function S8(A) {
     for (const [g, I] of Object.entries(A.sketches)) {
       if (!d3(g) || I.id !== g)
         throw new Error(t("Invalid sketch identity"));
+      if (I.artworkSourceId !== void 0 && (A.version < 39 || typeof I.artworkSourceId != "string" || !/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(I.artworkSourceId)))
+        throw new Error(t("Invalid sketch artwork link"));
       if (I.profile?.kind === "path") {
         if (A.version < 15)
           throw new Error(t("Open sketch paths require document version 15"));
@@ -8122,7 +8126,7 @@ function T8(A, g, I = {}) {
   const e = V8(A), C = (n, a) => {
     throw new G1(n, a?.node.start ?? 0, A);
   }, q = e.find((n) => n.key === "project");
-  (q.args.length !== 1 || !q.args[0] || typeof q.args[0] != "object" || Array.isArray(q.args[0])) && C(t("Invalid project declaration"), q), [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38].includes(q.args[0].version) || C(t("Model source uses project version 6 through 38"), q);
+  (q.args.length !== 1 || !q.args[0] || typeof q.args[0] != "object" || Array.isArray(q.args[0])) && C(t("Invalid project declaration"), q), [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39].includes(q.args[0].version) || C(t("Model source uses project version 6 through 39"), q);
   const B = { ...q.args[0], nodes: /* @__PURE__ */ Object.create(null), roots: [], modelSource: { version: 1, language: "brickwright-design", source: A } };
   B.id !== g.id && C(t("Keep the current project identity in model source"), q), delete B.provenance, delete B.sketches, delete B.joints;
   const i = new Set(e.filter((n) => n.key.startsWith("node:")).map((n) => n.args[0])), Q = [], s = Object.assign(/* @__PURE__ */ Object.create(null), B.parametric?.parameters ?? {});
@@ -8284,7 +8288,7 @@ function I1(A) {
 }
 const E3 = (A) => !!A && typeof A == "object" && !Array.isArray(A), i2 = (A, g = -1e6, I = 1e6) => typeof A == "number" && Number.isFinite(A) && A >= g && A <= I, N4 = (A, g = 160) => typeof A == "string" && A.trim().length > 0 && A.length <= g && !/[\u0000-\u001f]/.test(A), N2 = (A) => typeof A == "string" && /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,95}$/.test(A) && !["constructor", "prototype", "__proto__"].includes(A), J2 = (A, g = -1e6, I = 1e6) => Array.isArray(A) && A.length === 3 && A.every((e) => i2(e, g, I));
 function X8(A) {
-  (!E3(A) || A.format !== "brickwright-cad" || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38].includes(A.version) || A.units !== "mm") && I1(t("unsupported format, version or units")), (!N2(A.id) || !N4(A.title) || !E3(A.nodes) || !Array.isArray(A.roots)) && I1(t("missing document identity, nodes or roots"));
+  (!E3(A) || A.format !== "brickwright-cad" || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39].includes(A.version) || A.units !== "mm") && I1(t("unsupported format, version or units")), (!N2(A.id) || !N4(A.title) || !E3(A.nodes) || !Array.isArray(A.roots)) && I1(t("missing document identity, nodes or roots"));
   const g = A.nodes, I = Object.entries(g);
   (I.length > 2e3 || A.roots.length > 2e3) && I1(t("too many objects (maximum 2000)"));
   for (const [s, o] of I) {
@@ -11426,7 +11430,7 @@ async function u7(A, g, I, e = {}) {
     }
   if ([...I.values()].reduce((x, G) => x + G.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = e.J ?? await (b4 ?? (b4 = import("./jolt-physics.wasm-compat-02mdxHUO.js").then((x) => x.default()))), Q = new i.JoltSettings();
+  const i = e.J ?? await (b4 ?? (b4 = import("./jolt-physics.wasm-compat-BdEEUlcj.js").then((x) => x.default()))), Q = new i.JoltSettings();
   Q.mMaxBodies = 512, Q.mMaxBodyPairs = Math.max(1024, B.length * B.length), Q.mMaxContactConstraints = 8192;
   const s = new i.ObjectLayerPairFilterTable(2);
   s.EnableCollision(0, 1), s.EnableCollision(1, 1);

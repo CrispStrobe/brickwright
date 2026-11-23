@@ -36,7 +36,7 @@ const W6 = {
   "Choose light or dark mode": "Hellen oder dunklen Modus wählen",
   "Loading models…": "Modelle werden geladen…",
   "Original source files": "Originale Quelldateien",
-  "Model source uses project version 6 through 38": "Modellquelltext verwendet Projektversion 6 bis 38",
+  "Model source uses project version 6 through 39": "Modellquelltext verwendet Projektversion 6 bis 39",
   "Unknown material preset": "Unbekannte Materialvorlage",
   "Initial velocity requires project version 8": "Anfangsgeschwindigkeit erfordert Projektversion 8",
   "Invalid initial body velocity": "Ungültige Anfangsgeschwindigkeit",
@@ -1060,6 +1060,8 @@ const W6 = {
   "The artwork has no usable area.": "Die Grafik enthält keine verwendbare Fläche.",
   "Enter sketch coordinates from −100000 to 100000 mm.": "Gib Skizzenkoordinaten von −100000 bis 100000 mm ein.",
   "Choose an artwork profile of the same sketch type.": "Wähle ein Grafikprofil desselben Skizzentyps.",
+  "Invalid sketch artwork link": "Ungültige Verknüpfung zwischen Skizze und Grafik",
+  "This sketch is linked to different artwork.": "Diese Skizze ist mit einer anderen Grafik verknüpft.",
   "This sketch has constraints. Add the artwork as a new sketch.": "Diese Skizze hat Abhängigkeiten. Füge die Grafik als neue Skizze hinzu.",
   "The number of outline and hole loops must match.": "Die Anzahl der Außen- und Innenkonturen muss übereinstimmen.",
   "The CAD design changed. Preview the sketch update again.": "Der CAD-Entwurf wurde geändert. Öffne die Vorschau der Aktualisierung erneut.",
@@ -6938,6 +6940,8 @@ function zI(A) {
     for (const [g, I] of Object.entries(A.sketches)) {
       if (!$2(g) || I.id !== g)
         throw new Error(n("Invalid sketch identity"));
+      if (I.artworkSourceId !== void 0 && (A.version < 39 || typeof I.artworkSourceId != "string" || !/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(I.artworkSourceId)))
+        throw new Error(n("Invalid sketch artwork link"));
       if (I.profile?.kind === "path") {
         if (A.version < 15)
           throw new Error(n("Open sketch paths require document version 15"));
@@ -8118,7 +8122,7 @@ function o8(A, g, I = {}) {
   const C = l8(A), e = (a, r) => {
     throw new o1(a, r?.node.start ?? 0, A);
   }, i = C.find((a) => a.key === "project");
-  (i.args.length !== 1 || !i.args[0] || typeof i.args[0] != "object" || Array.isArray(i.args[0])) && e(n("Invalid project declaration"), i), [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38].includes(i.args[0].version) || e(n("Model source uses project version 6 through 38"), i);
+  (i.args.length !== 1 || !i.args[0] || typeof i.args[0] != "object" || Array.isArray(i.args[0])) && e(n("Invalid project declaration"), i), [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39].includes(i.args[0].version) || e(n("Model source uses project version 6 through 39"), i);
   const q = { ...i.args[0], nodes: /* @__PURE__ */ Object.create(null), roots: [], modelSource: { version: 1, language: "brickwright-design", source: A } };
   q.id !== g.id && e(n("Keep the current project identity in model source"), i), delete q.provenance, delete q.sketches, delete q.joints;
   const l = new Set(C.filter((a) => a.key.startsWith("node:")).map((a) => a.args[0])), Q = [], t = Object.assign(/* @__PURE__ */ Object.create(null), q.parametric?.parameters ?? {});
@@ -8279,7 +8283,7 @@ function RA(A) {
 }
 const H2 = (A) => !!A && typeof A == "object" && !Array.isArray(A), F1 = (A, g = -1e6, I = 1e6) => typeof A == "number" && Number.isFinite(A) && A >= g && A <= I, $5 = (A, g = 160) => typeof A == "string" && A.trim().length > 0 && A.length <= g && !/[\u0000-\u001f]/.test(A), I2 = (A) => typeof A == "string" && /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,95}$/.test(A) && !["constructor", "prototype", "__proto__"].includes(A), s2 = (A, g = -1e6, I = 1e6) => Array.isArray(A) && A.length === 3 && A.every((C) => F1(C, g, I));
 function h8(A) {
-  (!H2(A) || A.format !== "brickwright-cad" || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38].includes(A.version) || A.units !== "mm") && RA(n("unsupported format, version or units")), (!I2(A.id) || !$5(A.title) || !H2(A.nodes) || !Array.isArray(A.roots)) && RA(n("missing document identity, nodes or roots"));
+  (!H2(A) || A.format !== "brickwright-cad" || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39].includes(A.version) || A.units !== "mm") && RA(n("unsupported format, version or units")), (!I2(A.id) || !$5(A.title) || !H2(A.nodes) || !Array.isArray(A.roots)) && RA(n("missing document identity, nodes or roots"));
   const g = A.nodes, I = Object.entries(g);
   (I.length > 2e3 || A.roots.length > 2e3) && RA(n("too many objects (maximum 2000)"));
   for (const [t, B] of I) {

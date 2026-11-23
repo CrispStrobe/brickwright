@@ -19,11 +19,11 @@ const createPage = async () => {
 };
 const page = await createPage();
 let activePage = page;
-const changeArtwork = height => page.evaluate(value => {
+const changeArtwork = (height,index=0) => page.evaluate(({height,index}) => {
     const vm = window.__brickwrightStore.getState().scratchGui.vm;
-    vm.updateSvg(0,`<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><path d="M0 0H40V${value}H0Z"/></svg>`,0,0);
-    return vm.editingTarget.getCostumes()[0].assetId;
-},height);
+    vm.updateSvg(index,`<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><path d="M0 0H40V${height}H0Z"/></svg>`,0,0);
+    return vm.editingTarget.getCostumes()[index].assetId;
+},{height,index});
 const model = target => target.evaluate(async () => {
     const {editor} = window.__bwCad;
     const body = (await editor.whenIdle()).bodies[0];
@@ -44,6 +44,9 @@ try {
     await dialog.getByText('Placement',{exact:true}).click();
     await dialog.getByLabel('Y (mm)',{exact:true}).fill('10');
     await dialog.getByLabel('Z (mm)',{exact:true}).fill('-20');
+    const link = dialog.getByRole('checkbox',{name:'Link to this costume or backdrop',exact:true});
+    assert.equal(await link.isChecked(),false);
+    await link.check();
     await dialog.getByRole('button',{name:'Add editable sketch',exact:true}).click();
     await dialog.getByText(/Sketch added to CAD/).waitFor();
     await close();
@@ -54,16 +57,30 @@ try {
     await extrusion.getByRole('button',{name:'Create extrusion',exact:true}).click();
     await extrusion.waitFor({state:'hidden'});
     const before = await model(page);
+    assert.match(before.sketch.artworkSourceId,/^[0-9a-f-]{36}$/);
     assert.equal(Math.round(before.volume),8000);
     assert.deepEqual(bounds(before.bounds),[[0,10,-20],[10,50,0]]);
 
     await page.getByRole('tab',{name:'Costumes',exact:true}).click();
-    const updatedAsset = await changeArtwork(30);
+    await page.evaluate(() => {
+        const vm = window.__brickwrightStore.getState().scratchGui.vm;
+        vm.renameCostume(0,'Linked source');
+        vm.reorderCostume(vm.editingTarget.id,0,1);
+    });
+    const updatedAsset = await changeArtwork(30,1);
+    await page.getByText('Linked source',{exact:true}).filter({visible:true}).first().click();
+    await page.waitForFunction(() => {
+        const vm = window.__brickwrightStore.getState().scratchGui.vm;
+        return vm.editingTarget.getCostumes()[vm.editingTarget.currentCostume]?.name === 'Linked source';
+    });
     assert.deepEqual(await model(page),before);
     await open();
+    await dialog.getByText(/40 × 30 mm/).waitFor();
     const review = async () => {
         await dialog.getByRole('button',{name:'Update an existing sketch…',exact:true}).click();
-        await dialog.getByLabel('Target sketch',{exact:true}).selectOption({value:before.sketch.id});
+        const target = dialog.getByLabel('Target sketch',{exact:true});
+        await target.locator('option:checked',{hasText:'linked'}).waitFor({state:'attached'});
+        assert.equal(await target.inputValue(),before.sketch.id);
         assert.equal(await dialog.getByLabel('Sketch plane',{exact:true}).inputValue(),'YZ');
         assert.equal(await dialog.getByLabel('Sketch plane',{exact:true}).isDisabled(),true);
         await dialog.getByRole('button',{name:'Preview update',exact:true}).click();
@@ -114,7 +131,21 @@ try {
     assert.deepEqual(restored.sketch,after.sketch);
     assert.equal(restored.root,after.root);
     assert.deepEqual(bounds(restored.bounds),bounds(after.bounds));
-    console.log('PASS explicit sketch refresh, unchanged preview and cancel, stable extrusion, Undo/Redo, and SB3 reopen');
+    await reopened.getByRole('tab',{name:'Costumes',exact:true}).click();
+    await reopened.getByText('Linked source',{exact:true}).filter({visible:true}).first().click();
+    await reopened.waitForFunction(() => {
+        const vm = window.__brickwrightStore.getState().scratchGui.vm;
+        return vm.editingTarget.getCostumes()[vm.editingTarget.currentCostume]?.name === 'Linked source';
+    });
+    await reopened.getByTestId('bw-costume-precision').click();
+    const reopenedDialog = reopened.getByRole('dialog',{name:'Send to CAD',exact:true});
+    await reopenedDialog.getByRole('button',{name:'Update an existing sketch…',exact:true}).click();
+    const reopenedTarget = reopenedDialog.getByLabel('Target sketch',{exact:true});
+    await reopenedTarget.locator('option:checked',{hasText:'linked'}).waitFor({state:'attached'});
+    assert.equal(await reopenedTarget.inputValue(),after.sketch.id);
+    await reopenedDialog.getByRole('button',{name:'Cancel update',exact:true}).click();
+    assert.equal(Math.round((await model(reopened)).volume),12000);
+    console.log('PASS persistent costume link, rename/reorder, explicit refresh, Undo/Redo, and SB3 reopen');
 } catch (error) {
     await activePage.screenshot({path:'/tmp/bw-costume-refresh-failure.png'}).catch(() => {});
     throw error;

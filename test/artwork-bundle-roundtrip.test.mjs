@@ -210,3 +210,36 @@ test('duplicating a costume retains an independent editable source', async () =>
     artwork.resetCostumeDocument(costume);
     assert.deepEqual(artwork.getCostumeDocument(duplicate), document);
 });
+
+test('artwork links follow the costume through edits and save/reopen without transferring to a duplicate', async () => {
+    const {vm, costume, project, svg, id} = await fixture();
+    vm.runtime.targets[0].sprite.name = 'Stage';
+    const sourceId = artwork.newAnimationResourceId();
+    artwork.setCostumeSourceId(costume, sourceId);
+    costume.name = 'Renamed';
+    const other = {...costume, name: 'Duplicate'};
+    artwork.copyCostumeDocument(costume, other, vm);
+    artwork.resetCostumeDocument(costume, vm);
+    vm.runtime.targets[0].sprite.costumes = [other,costume];
+    project.targets[0].costumes = [{...other},{...costume}];
+    const zip = new JSZip();
+    zip.file(id,svg);
+    zip.file('project.json',JSON.stringify(project));
+    await artwork.writeArtworkToZip(zip,vm);
+    const payload = JSON.parse(await zip.file(artwork.ARTWORK_PATH).async('text'));
+    assert.equal(payload.version,9);
+    assert.deepEqual(payload.costumes.map(record => record.sourceId),[undefined,sourceId]);
+    const saved = await zip.generateAsync({type:'uint8array'});
+    const inspection = await artwork.inspectArtwork(saved);
+    const reopened = {runtime:{targets:[{isOriginal:true,sprite:{name:'Stage',costumes:[{...other},{...costume}]}}]}};
+    artwork.applyArtwork(inspection,reopened);
+    const [copy, original] = reopened.runtime.targets[0].sprite.costumes;
+    assert.equal(artwork.getCostumeSourceId(copy),undefined);
+    assert.equal(artwork.getCostumeSourceId(original),sourceId);
+
+    payload.costumes[0].sourceId = sourceId;
+    zip.file(artwork.ARTWORK_PATH,JSON.stringify(payload));
+    const ambiguous = await artwork.inspectArtwork(await zip.generateAsync({type:'uint8array'}));
+    assert.equal(ambiguous.outcome,'loaded');
+    assert.ok(ambiguous.records.every(record => record.sourceId === undefined));
+});

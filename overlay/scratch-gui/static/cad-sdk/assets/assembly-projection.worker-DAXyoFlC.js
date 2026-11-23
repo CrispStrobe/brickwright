@@ -1,4 +1,4 @@
-const Gt = {
+const jt = {
   "Aiming yaw servo": "Servo für die horizontale Ausrichtung",
   "Swivel spreader servo": "Drehservo für die Lasttraverse",
   "Purchased Feather controller clearance": "Bauraum für den gekauften Feather-Controller",
@@ -33,7 +33,7 @@ const Gt = {
   "Choose light or dark mode": "Hellen oder dunklen Modus wählen",
   "Loading models…": "Modelle werden geladen…",
   "Original source files": "Originale Quelldateien",
-  "Model source uses project version 6 through 38": "Modellquelltext verwendet Projektversion 6 bis 38",
+  "Model source uses project version 6 through 39": "Modellquelltext verwendet Projektversion 6 bis 39",
   "Unknown material preset": "Unbekannte Materialvorlage",
   "Initial velocity requires project version 8": "Anfangsgeschwindigkeit erfordert Projektversion 8",
   "Invalid initial body velocity": "Ungültige Anfangsgeschwindigkeit",
@@ -1057,6 +1057,8 @@ const Gt = {
   "The artwork has no usable area.": "Die Grafik enthält keine verwendbare Fläche.",
   "Enter sketch coordinates from −100000 to 100000 mm.": "Gib Skizzenkoordinaten von −100000 bis 100000 mm ein.",
   "Choose an artwork profile of the same sketch type.": "Wähle ein Grafikprofil desselben Skizzentyps.",
+  "Invalid sketch artwork link": "Ungültige Verknüpfung zwischen Skizze und Grafik",
+  "This sketch is linked to different artwork.": "Diese Skizze ist mit einer anderen Grafik verknüpft.",
   "This sketch has constraints. Add the artwork as a new sketch.": "Diese Skizze hat Abhängigkeiten. Füge die Grafik als neue Skizze hinzu.",
   "The number of outline and hole loops must match.": "Die Anzahl der Außen- und Innenkonturen muss übereinstimmen.",
   "The CAD design changed. Preview the sketch update again.": "Der CAD-Entwurf wurde geändert. Öffne die Vorschau der Aktualisierung erneut.",
@@ -2464,7 +2466,7 @@ function ai(e) {
   return Fe = e.toLowerCase().split(/[-_]/)[0] === "de" ? "de" : "en", Fe;
 }
 function at(e, ...t) {
-  const i = typeof e == "string" ? e : e.reduce((s, o, a) => s + (a ? `{${a - 1}}` : "") + o, ""), n = Fe === "de" ? si[i] ?? Gt[i] ?? ni[i] ?? ri[i] ?? Wt[i] ?? Zt[i] ?? Ht[i] ?? qt[i] ?? Xt[i] ?? Yt[i] ?? $t[i] ?? ii[i] ?? ei[i] ?? ti[i] ?? Jt[i] ?? Qt[i] ?? i : i;
+  const i = typeof e == "string" ? e : e.reduce((s, o, a) => s + (a ? `{${a - 1}}` : "") + o, ""), n = Fe === "de" ? si[i] ?? jt[i] ?? ni[i] ?? ri[i] ?? Wt[i] ?? Zt[i] ?? Ht[i] ?? qt[i] ?? Xt[i] ?? Yt[i] ?? $t[i] ?? ii[i] ?? ei[i] ?? ti[i] ?? Jt[i] ?? Qt[i] ?? i : i;
   return typeof e == "string" ? n : n.replace(/\{(\d+)\}/g, (s, o) => String(t[Number(o)]));
 }
 var oi = [509, 0, 227, 0, 150, 4, 294, 9, 1368, 2, 2, 1, 6, 3, 41, 2, 5, 0, 166, 1, 574, 3, 9, 9, 7, 9, 32, 4, 318, 1, 78, 5, 71, 10, 50, 3, 123, 2, 54, 14, 32, 10, 3, 1, 11, 3, 46, 10, 8, 0, 46, 9, 7, 2, 37, 13, 2, 9, 6, 1, 45, 0, 13, 2, 49, 13, 9, 3, 2, 11, 83, 11, 7, 0, 3, 0, 158, 11, 6, 9, 7, 3, 56, 1, 2, 6, 3, 1, 3, 2, 10, 0, 11, 1, 3, 6, 4, 4, 68, 8, 2, 0, 3, 0, 2, 3, 2, 4, 2, 0, 15, 1, 83, 17, 10, 9, 5, 0, 82, 19, 13, 9, 214, 6, 3, 8, 28, 1, 83, 16, 16, 9, 82, 12, 9, 9, 7, 19, 58, 14, 5, 9, 243, 14, 166, 9, 71, 5, 2, 1, 3, 3, 2, 0, 2, 1, 13, 9, 120, 6, 3, 6, 4, 0, 29, 9, 41, 6, 2, 3, 9, 0, 10, 10, 47, 15, 199, 7, 137, 9, 54, 7, 2, 7, 17, 9, 57, 21, 2, 13, 123, 5, 4, 0, 2, 1, 2, 6, 2, 0, 9, 9, 49, 4, 2, 1, 2, 4, 9, 9, 55, 9, 266, 3, 10, 1, 2, 0, 49, 6, 4, 4, 14, 10, 5350, 0, 7, 14, 11465, 27, 2343, 9, 87, 9, 39, 4, 60, 6, 26, 9, 535, 9, 470, 0, 2, 54, 8, 3, 82, 0, 12, 1, 19628, 1, 4178, 9, 519, 45, 3, 22, 543, 4, 4, 5, 9, 7, 3, 6, 31, 3, 149, 2, 1418, 49, 513, 54, 5, 49, 9, 0, 15, 0, 23, 4, 2, 14, 1361, 6, 2, 16, 3, 6, 2, 1, 2, 4, 101, 0, 161, 6, 10, 9, 357, 0, 62, 13, 499, 13, 245, 1, 2, 9, 233, 0, 3, 0, 8, 1, 6, 0, 475, 6, 110, 6, 6, 9, 4759, 9, 787719, 239], ot = [0, 11, 2, 25, 2, 18, 2, 1, 2, 14, 3, 13, 35, 122, 70, 52, 268, 28, 4, 48, 48, 31, 14, 29, 6, 37, 11, 29, 3, 35, 5, 7, 2, 4, 43, 157, 19, 35, 5, 35, 5, 39, 9, 51, 13, 10, 2, 14, 2, 6, 2, 1, 2, 10, 2, 14, 2, 6, 2, 1, 4, 51, 13, 310, 10, 21, 11, 7, 25, 5, 2, 41, 2, 8, 70, 5, 3, 0, 2, 43, 2, 1, 4, 0, 3, 22, 11, 22, 10, 30, 66, 18, 2, 1, 11, 21, 11, 25, 7, 25, 39, 55, 7, 1, 65, 0, 16, 3, 2, 2, 2, 28, 43, 28, 4, 28, 36, 7, 2, 27, 28, 53, 11, 21, 11, 18, 14, 17, 111, 72, 56, 50, 14, 50, 14, 35, 39, 27, 10, 22, 251, 41, 7, 1, 17, 5, 57, 28, 11, 0, 9, 21, 43, 17, 47, 20, 28, 22, 13, 52, 58, 1, 3, 0, 14, 44, 33, 24, 27, 35, 30, 0, 3, 0, 9, 34, 4, 0, 13, 47, 15, 3, 22, 0, 2, 0, 36, 17, 2, 24, 20, 1, 64, 6, 2, 0, 2, 3, 2, 14, 2, 9, 8, 46, 39, 7, 3, 1, 3, 21, 2, 6, 2, 1, 2, 4, 4, 0, 19, 0, 13, 4, 31, 9, 2, 0, 3, 0, 2, 37, 2, 0, 26, 0, 2, 0, 45, 52, 19, 3, 21, 2, 31, 47, 21, 1, 2, 0, 185, 46, 42, 3, 37, 47, 21, 0, 60, 42, 14, 0, 72, 26, 38, 6, 186, 43, 117, 63, 32, 7, 3, 0, 3, 7, 2, 1, 2, 23, 16, 0, 2, 0, 95, 7, 3, 38, 17, 0, 2, 0, 29, 0, 11, 39, 8, 0, 22, 0, 12, 45, 20, 0, 19, 72, 200, 32, 32, 8, 2, 36, 18, 0, 50, 29, 113, 6, 2, 1, 2, 37, 22, 0, 26, 5, 2, 1, 2, 31, 15, 0, 24, 43, 261, 18, 16, 0, 2, 12, 2, 33, 125, 0, 80, 921, 103, 110, 18, 195, 2637, 96, 16, 1071, 18, 5, 26, 3994, 6, 582, 6842, 29, 1763, 568, 8, 30, 18, 78, 18, 29, 19, 47, 17, 3, 32, 20, 6, 18, 433, 44, 212, 63, 33, 24, 3, 24, 45, 74, 6, 0, 67, 12, 65, 1, 2, 0, 15, 4, 10, 7381, 42, 31, 98, 114, 8702, 3, 2, 6, 2, 1, 2, 290, 16, 0, 30, 2, 3, 0, 15, 3, 9, 395, 2309, 106, 6, 12, 4, 8, 8, 9, 5991, 84, 2, 70, 2, 1, 3, 0, 3, 1, 3, 3, 2, 11, 2, 0, 2, 6, 2, 64, 2, 3, 3, 7, 2, 6, 2, 27, 2, 3, 2, 4, 2, 0, 4, 6, 2, 339, 3, 24, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 7, 1845, 30, 7, 5, 262, 61, 147, 44, 11, 6, 17, 0, 322, 29, 19, 43, 485, 27, 229, 29, 3, 0, 208, 30, 2, 2, 2, 1, 2, 6, 3, 4, 10, 1, 225, 6, 2, 3, 2, 1, 2, 14, 2, 196, 60, 67, 8, 0, 1205, 3, 2, 26, 2, 1, 2, 0, 3, 0, 2, 9, 2, 3, 2, 0, 2, 0, 7, 0, 5, 0, 2, 0, 2, 0, 2, 2, 2, 1, 2, 0, 3, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 1, 2, 0, 3, 3, 2, 6, 2, 3, 2, 3, 2, 0, 2, 9, 2, 16, 6, 2, 2, 4, 2, 16, 4421, 42719, 33, 4381, 3, 5773, 3, 7472, 16, 621, 2467, 541, 1507, 4938, 6, 8489], li = "‌‍·̀-ͯ·҃-֑҇-ׇֽֿׁׂׅׄؐ-ًؚ-٩ٰۖ-ۜ۟-۪ۤۧۨ-ۭ۰-۹ܑܰ-݊ަ-ް߀-߉߫-߽߳ࠖ-࠙ࠛ-ࠣࠥ-ࠧࠩ-࡙࠭-࡛ࢗ-࢟࣊-ࣣ࣡-ःऺ-़ा-ॏ॑-ॗॢॣ०-९ঁ-ঃ়া-ৄেৈো-্ৗৢৣ০-৯৾ਁ-ਃ਼ਾ-ੂੇੈੋ-੍ੑ੦-ੱੵઁ-ઃ઼ા-ૅે-ૉો-્ૢૣ૦-૯ૺ-૿ଁ-ଃ଼ା-ୄେୈୋ-୍୕-ୗୢୣ୦-୯ஂா-ூெ-ைொ-்ௗ௦-௯ఀ-ఄ఼ా-ౄె-ైొ-్ౕౖౢౣ౦-౯ಁ-ಃ಼ಾ-ೄೆ-ೈೊ-್ೕೖೢೣ೦-೯ೳഀ-ഃ഻഼ാ-ൄെ-ൈൊ-്ൗൢൣ൦-൯ඁ-ඃ්ා-ුූෘ-ෟ෦-෯ෲෳัิ-ฺ็-๎๐-๙ັິ-ຼ່-໎໐-໙༘༙༠-༩༹༵༷༾༿ཱ-྄྆྇ྍ-ྗྙ-ྼ࿆ါ-ှ၀-၉ၖ-ၙၞ-ၠၢ-ၤၧ-ၭၱ-ၴႂ-ႍႏ-ႝ፝-፟፩-፱ᜒ-᜕ᜲ-᜴ᝒᝓᝲᝳ឴-៓៝០-៩᠋-᠍᠏-᠙ᢩᤠ-ᤫᤰ-᤻᥆-᥏᧐-᧚ᨗ-ᨛᩕ-ᩞ᩠-᩿᩼-᪉᪐-᪙᪰-᪽ᪿ-᫝᫠-᫫ᬀ-ᬄ᬴-᭄᭐-᭙᭫-᭳ᮀ-ᮂᮡ-ᮭ᮰-᮹᯦-᯳ᰤ-᰷᱀-᱉᱐-᱙᳐-᳔᳒-᳨᳭᳴᳷-᳹᷀-᷿‌‍‿⁀⁔⃐-⃥⃜⃡-⃰⳯-⵿⳱ⷠ-〪ⷿ-゙゚〯・꘠-꘩꙯ꙴ-꙽ꚞꚟ꛰꛱ꠂ꠆ꠋꠣ-ꠧ꠬ꢀꢁꢴ-ꣅ꣐-꣙꣠-꣱ꣿ-꤉ꤦ-꤭ꥇ-꥓ꦀ-ꦃ꦳-꧀꧐-꧙ꧥ꧰-꧹ꨩ-ꨶꩃꩌꩍ꩐-꩙ꩻ-ꩽꪰꪲ-ꪴꪷꪸꪾ꪿꫁ꫫ-ꫯꫵ꫶ꯣ-ꯪ꯬꯭꯰-꯹ﬞ︀-️︠-︯︳︴﹍-﹏０-９＿･", lt = "ªµºÀ-ÖØ-öø-ˁˆ-ˑˠ-ˤˬˮͰ-ʹͶͷͺ-ͽͿΆΈ-ΊΌΎ-ΡΣ-ϵϷ-ҁҊ-ԯԱ-Ֆՙՠ-ֈא-תׯ-ײؠ-يٮٯٱ-ۓەۥۦۮۯۺ-ۼۿܐܒ-ܯݍ-ޥޱߊ-ߪߴߵߺࠀ-ࠕࠚࠤࠨࡀ-ࡘࡠ-ࡪࡰ-ࢇࢉ-࢏ࢠ-ࣉऄ-हऽॐक़-ॡॱ-ঀঅ-ঌএঐও-নপ-রলশ-হঽৎড়ঢ়য়-ৡৰৱৼਅ-ਊਏਐਓ-ਨਪ-ਰਲਲ਼ਵਸ਼ਸਹਖ਼-ੜਫ਼ੲ-ੴઅ-ઍએ-ઑઓ-નપ-રલળવ-હઽૐૠૡૹଅ-ଌଏଐଓ-ନପ-ରଲଳଵ-ହଽଡ଼ଢ଼ୟ-ୡୱஃஅ-ஊஎ-ஐஒ-கஙசஜஞடணதந-பம-ஹௐఅ-ఌఎ-ఐఒ-నప-హఽౘ-ౚ౜ౝౠౡಀಅ-ಌಎ-ಐಒ-ನಪ-ಳವ-ಹಽ೜-ೞೠೡೱೲഄ-ഌഎ-ഐഒ-ഺഽൎൔ-ൖൟ-ൡൺ-ൿඅ-ඖක-නඳ-රලව-ෆก-ะาำเ-ๆກຂຄຆ-ຊຌ-ຣລວ-ະາຳຽເ-ໄໆໜ-ໟༀཀ-ཇཉ-ཬྈ-ྌက-ဪဿၐ-ၕၚ-ၝၡၥၦၮ-ၰၵ-ႁႎႠ-ჅჇჍა-ჺჼ-ቈቊ-ቍቐ-ቖቘቚ-ቝበ-ኈኊ-ኍነ-ኰኲ-ኵኸ-ኾዀዂ-ዅወ-ዖዘ-ጐጒ-ጕጘ-ፚᎀ-ᎏᎠ-Ᏽᏸ-ᏽᐁ-ᙬᙯ-ᙿᚁ-ᚚᚠ-ᛪᛮ-ᛸᜀ-ᜑᜟ-ᜱᝀ-ᝑᝠ-ᝬᝮ-ᝰក-ឳៗៜᠠ-ᡸᢀ-ᢨᢪᢰ-ᣵᤀ-ᤞᥐ-ᥭᥰ-ᥴᦀ-ᦫᦰ-ᧉᨀ-ᨖᨠ-ᩔᪧᬅ-ᬳᭅ-ᭌᮃ-ᮠᮮᮯᮺ-ᯥᰀ-ᰣᱍ-ᱏᱚ-ᱽᲀ-ᲊᲐ-ᲺᲽ-Ჿᳩ-ᳬᳮ-ᳳᳵᳶᳺᴀ-ᶿḀ-ἕἘ-Ἕἠ-ὅὈ-Ὅὐ-ὗὙὛὝὟ-ώᾀ-ᾴᾶ-ᾼιῂ-ῄῆ-ῌῐ-ΐῖ-Ίῠ-Ῥῲ-ῴῶ-ῼⁱⁿₐ-ₜℂℇℊ-ℓℕ℘-ℝℤΩℨK-ℹℼ-ℿⅅ-ⅉⅎⅠ-ↈⰀ-ⳤⳫ-ⳮⳲⳳⴀ-ⴥⴧⴭⴰ-ⵧⵯⶀ-ⶖⶠ-ⶦⶨ-ⶮⶰ-ⶶⶸ-ⶾⷀ-ⷆⷈ-ⷎⷐ-ⷖⷘ-ⷞ々-〇〡-〩〱-〵〸-〼ぁ-ゖ゛-ゟァ-ヺー-ヿㄅ-ㄯㄱ-ㆎㆠ-ㆿㇰ-ㇿ㐀-䶿一-ꒌꓐ-ꓽꔀ-ꘌꘐ-ꘟꘪꘫꙀ-ꙮꙿ-ꚝꚠ-ꛯꜗ-ꜟꜢ-ꞈꞋ-Ƛ꟱-ꠁꠃ-ꠅꠇ-ꠊꠌ-ꠢꡀ-ꡳꢂ-ꢳꣲ-ꣷꣻꣽꣾꤊ-ꤥꤰ-ꥆꥠ-ꥼꦄ-ꦲꧏꧠ-ꧤꧦ-ꧯꧺ-ꧾꨀ-ꨨꩀ-ꩂꩄ-ꩋꩠ-ꩶꩺꩾ-ꪯꪱꪵꪶꪹ-ꪽꫀꫂꫛ-ꫝꫠ-ꫪꫲ-ꫴꬁ-ꬆꬉ-ꬎꬑ-ꬖꬠ-ꬦꬨ-ꬮꬰ-ꭚꭜ-ꭩꭰ-ꯢ가-힣ힰ-ퟆퟋ-ퟻ豈-舘並-龎ﬀ-ﬆﬓ-ﬗיִײַ-ﬨשׁ-זּטּ-לּמּנּסּףּפּצּ-ﮱﯓ-ﴽﵐ-ﶏﶒ-ﷇﷰ-ﷻﹰ-ﹴﹶ-ﻼＡ-Ｚａ-ｚｦ-ﾾￂ-ￇￊ-ￏￒ-ￗￚ-ￜ", Ie = {
@@ -2496,10 +2498,10 @@ function re(e, t) {
 var w = function(t, i) {
   i === void 0 && (i = {}), this.label = t, this.keyword = i.keyword, this.beforeExpr = !!i.beforeExpr, this.startsExpr = !!i.startsExpr, this.isLoop = !!i.isLoop, this.isAssign = !!i.isAssign, this.prefix = !!i.prefix, this.postfix = !!i.postfix, this.binop = i.binop || null, this.updateContext = null;
 };
-function j(e, t) {
+function G(e, t) {
   return new w(e, { beforeExpr: !0, binop: t });
 }
-var G = { beforeExpr: !0 }, _ = { startsExpr: !0 }, We = {};
+var j = { beforeExpr: !0 }, _ = { startsExpr: !0 }, We = {};
 function v(e, t) {
   return t === void 0 && (t = {}), t.keyword = e, We[e] = new w(e, t);
 }
@@ -2517,16 +2519,16 @@ var r = {
   braceR: new w("}"),
   parenL: new w("(", { beforeExpr: !0, startsExpr: !0 }),
   parenR: new w(")"),
-  comma: new w(",", G),
-  semi: new w(";", G),
-  colon: new w(":", G),
+  comma: new w(",", j),
+  semi: new w(";", j),
+  colon: new w(":", j),
   dot: new w("."),
-  question: new w("?", G),
+  question: new w("?", j),
   questionDot: new w("?."),
-  arrow: new w("=>", G),
+  arrow: new w("=>", j),
   template: new w("template"),
   invalidTemplate: new w("invalidTemplate"),
-  ellipsis: new w("...", G),
+  ellipsis: new w("...", j),
   backQuote: new w("`", _),
   dollarBraceL: new w("${", { beforeExpr: !0, startsExpr: !0 }),
   // Operators. These carry several kinds of properties to help the
@@ -2546,36 +2548,36 @@ var r = {
   assign: new w("_=", { beforeExpr: !0, isAssign: !0 }),
   incDec: new w("++/--", { prefix: !0, postfix: !0, startsExpr: !0 }),
   prefix: new w("!/~", { beforeExpr: !0, prefix: !0, startsExpr: !0 }),
-  logicalOR: j("||", 1),
-  logicalAND: j("&&", 2),
-  bitwiseOR: j("|", 3),
-  bitwiseXOR: j("^", 4),
-  bitwiseAND: j("&", 5),
-  equality: j("==/!=/===/!==", 6),
-  relational: j("</>/<=/>=", 7),
-  bitShift: j("<</>>/>>>", 8),
+  logicalOR: G("||", 1),
+  logicalAND: G("&&", 2),
+  bitwiseOR: G("|", 3),
+  bitwiseXOR: G("^", 4),
+  bitwiseAND: G("&", 5),
+  equality: G("==/!=/===/!==", 6),
+  relational: G("</>/<=/>=", 7),
+  bitShift: G("<</>>/>>>", 8),
   plusMin: new w("+/-", { beforeExpr: !0, binop: 9, prefix: !0, startsExpr: !0 }),
-  modulo: j("%", 10),
-  star: j("*", 10),
-  slash: j("/", 10),
+  modulo: G("%", 10),
+  star: G("*", 10),
+  slash: G("/", 10),
   starstar: new w("**", { beforeExpr: !0 }),
-  coalesce: j("??", 1),
+  coalesce: G("??", 1),
   // Keyword token types.
   _break: v("break"),
-  _case: v("case", G),
+  _case: v("case", j),
   _catch: v("catch"),
   _continue: v("continue"),
   _debugger: v("debugger"),
-  _default: v("default", G),
+  _default: v("default", j),
   _do: v("do", { isLoop: !0, beforeExpr: !0 }),
-  _else: v("else", G),
+  _else: v("else", j),
   _finally: v("finally"),
   _for: v("for", { isLoop: !0 }),
   _function: v("function", _),
   _if: v("if"),
-  _return: v("return", G),
+  _return: v("return", j),
   _switch: v("switch"),
-  _throw: v("throw", G),
+  _throw: v("throw", j),
   _try: v("try"),
   _var: v("var"),
   _const: v("const"),
@@ -2585,7 +2587,7 @@ var r = {
   _this: v("this", _),
   _super: v("super", _),
   _class: v("class", _),
-  _extends: v("extends", G),
+  _extends: v("extends", j),
   _export: v("export"),
   _import: v("import", _),
   _null: v("null", _),
@@ -3789,7 +3791,7 @@ m.parseMaybeUnary = function(e, t, i, n) {
     a = this.parseAwait(n), t = !0;
   else if (this.type.prefix) {
     var l = this.startNode(), u = this.type === r.incDec;
-    l.operator = this.value, l.prefix = !0, this.next(), l.argument = this.parseMaybeUnary(null, !0, u, n), this.checkExpressionErrors(e, !0), u ? this.checkLValSimple(l.argument) : this.strict && l.operator === "delete" && St(l.argument) ? this.raiseRecoverable(l.start, "Deleting local variable in strict mode") : l.operator === "delete" && je(l.argument) ? this.raiseRecoverable(l.start, "Private fields can not be deleted") : t = !0, a = this.finishNode(l, u ? "UpdateExpression" : "UnaryExpression");
+    l.operator = this.value, l.prefix = !0, this.next(), l.argument = this.parseMaybeUnary(null, !0, u, n), this.checkExpressionErrors(e, !0), u ? this.checkLValSimple(l.argument) : this.strict && l.operator === "delete" && St(l.argument) ? this.raiseRecoverable(l.start, "Deleting local variable in strict mode") : l.operator === "delete" && Ge(l.argument) ? this.raiseRecoverable(l.start, "Private fields can not be deleted") : t = !0, a = this.finishNode(l, u ? "UpdateExpression" : "UnaryExpression");
   } else if (!t && this.type === r.privateId)
     (n || this.privateNameStack.length === 0) && this.options.checkPrivateFields && this.unexpected(), a = this.parsePrivateIdent(), this.type !== r._in && this.unexpected();
   else {
@@ -3811,8 +3813,8 @@ m.parseMaybeUnary = function(e, t, i, n) {
 function St(e) {
   return e.type === "Identifier" || e.type === "ParenthesizedExpression" && St(e.expression);
 }
-function je(e) {
-  return e.type === "MemberExpression" && e.property.type === "PrivateIdentifier" || e.type === "ChainExpression" && je(e.expression) || e.type === "ParenthesizedExpression" && je(e.expression);
+function Ge(e) {
+  return e.type === "MemberExpression" && e.property.type === "PrivateIdentifier" || e.type === "ChainExpression" && Ge(e.expression) || e.type === "ParenthesizedExpression" && Ge(e.expression);
 }
 m.parseExprSubscripts = function(e, t) {
   var i = this.start, n = this.startLoc, s = this.parseExprAtom(e, t);
@@ -5413,7 +5415,7 @@ b.readInt = function(e, t, i) {
   }
   return n && l === 95 && this.raiseRecoverable(this.pos - 1, "Numeric separator is not allowed at the last of digits"), this.pos === o || t != null && this.pos - o !== t ? null : a;
 };
-function ji(e, t) {
+function Gi(e, t) {
   return t ? parseInt(e, 8) : parseFloat(e.replace(/_/g, ""));
 }
 function Ut(e) {
@@ -5436,7 +5438,7 @@ b.readNumber = function(e) {
     return ++this.pos, X(this.fullCharCodeAtPos()) && this.raise(this.pos, "Identifier directly after number"), this.finishToken(r.num, s);
   }
   i && /[89]/.test(this.input.slice(t, this.pos)) && (i = !1), n === 46 && !i && (++this.pos, this.readInt(10), n = this.input.charCodeAt(this.pos)), (n === 69 || n === 101) && !i && (n = this.input.charCodeAt(++this.pos), (n === 43 || n === 45) && ++this.pos, this.readInt(10) === null && this.raise(t, "Invalid number")), X(this.fullCharCodeAtPos()) && this.raise(this.pos, "Identifier directly after number");
-  var o = ji(this.input.slice(t, this.pos), i);
+  var o = Gi(this.input.slice(t, this.pos), i);
   return this.finishToken(r.num, o);
 };
 b.readCodePoint = function() {
@@ -5459,13 +5461,13 @@ b.readString = function(e) {
   }
   return t += this.input.slice(i, this.pos++), this.finishToken(r.string, t);
 };
-var jt = {};
+var Gt = {};
 b.tryReadTemplateToken = function() {
   this.inTemplateElement = !0;
   try {
     this.readTmplToken();
   } catch (e) {
-    if (e === jt)
+    if (e === Gt)
       this.readInvalidTemplateToken();
     else
       throw e;
@@ -5474,7 +5476,7 @@ b.tryReadTemplateToken = function() {
 };
 b.invalidStringToken = function(e, t) {
   if (this.inTemplateElement && this.options.ecmaVersion >= 9)
-    throw jt;
+    throw Gt;
   this.raise(e, t);
 };
 b.readTmplToken = function() {
@@ -5609,10 +5611,10 @@ b.readWord = function() {
   var e = this.readWord1(), t = r.name;
   return this.keywords.test(e) && (t = We[e]), this.finishToken(t, e);
 };
-var Gi = "8.17.0";
+var ji = "8.17.0";
 B.acorn = {
   Parser: B,
-  version: Gi,
+  version: ji,
   defaultOptions: Oe,
   Position: ke,
   SourceLocation: ze,
@@ -5702,7 +5704,7 @@ const Wi = [
   { view: "Top view", horizontal: 0, vertical: 1, depth: 2, near: 1 },
   { view: "Front view", horizontal: 0, vertical: 2, depth: 1, near: -1 },
   { view: "Right view", horizontal: 1, vertical: 2, depth: 0, near: 1 }
-], le = 48, Zi = 1e5, qi = 16e6, Hi = 25e5, Xi = Math.cos(Math.PI / 6), Ge = () => new Error(at("This assembly exceeds the drawing detail limit. Use a simpler representation.")), Ke = (e, t, i = t) => ({
+], le = 48, Zi = 1e5, qi = 16e6, Hi = 25e5, Xi = Math.cos(Math.PI / 6), je = () => new Error(at("This assembly exceeds the drawing detail limit. Use a simpler representation.")), Ke = (e, t, i = t) => ({
   left: Math.min(e[0], t[0], i[0]),
   bottom: Math.min(e[1], t[1], i[1]),
   right: Math.max(e[0], t[0], i[0]),
@@ -5767,7 +5769,7 @@ function en(e, t, i, n) {
   let I = 0, L = 0;
   const fe = () => {
     if (++I > qi)
-      throw Ge();
+      throw je();
   };
   for (const [D, S] of e.entries())
     for (const z of S.faces) {
@@ -5796,7 +5798,7 @@ function en(e, t, i, n) {
             if (fe(), N.nearest <= Se || !Qi(J, N.box) || be.has(N))
               continue;
             if (be.add(N), ++L > Hi)
-              throw Ge();
+              throw je();
             const Y = $i(N, y, E, p);
             if (Y) {
               if (Y[0] <= 1e-8 && Y[1] >= 1 - 1e-8) {
@@ -5830,7 +5832,7 @@ function tn(e) {
   if (!t.length)
     throw new Error(at("Add a solid body to draw the assembly."));
   if (t.reduce((a, l) => a + l.indices.length / 3, 0) > Zi)
-    throw Ge();
+    throw je();
   const i = [1 / 0, 1 / 0, 1 / 0], n = [-1 / 0, -1 / 0, -1 / 0];
   for (const a of t)
     for (const l of [0, 1, 2])
