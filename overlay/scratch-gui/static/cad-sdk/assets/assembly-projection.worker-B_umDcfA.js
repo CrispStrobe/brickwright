@@ -33,7 +33,7 @@ const Gt = {
   "Choose light or dark mode": "Hellen oder dunklen Modus wählen",
   "Loading models…": "Modelle werden geladen…",
   "Original source files": "Originale Quelldateien",
-  "Model source uses project version 6 through 28": "Modellquelltext verwendet Projektversion 6 bis 28",
+  "Model source uses project version 6 through 29": "Modellquelltext verwendet Projektversion 6 bis 29",
   "Unknown material preset": "Unbekannte Materialvorlage",
   "Initial velocity requires project version 8": "Anfangsgeschwindigkeit erfordert Projektversion 8",
   "Invalid initial body velocity": "Ungültige Anfangsgeschwindigkeit",
@@ -823,6 +823,10 @@ const Gt = {
   "Apply thread redesign": "Gewindeauslegung anwenden",
   "Rebuild a resized screw at a chosen pitch or turns per start, resetting its local scale as one saved edit.": "Eine skalierte Schraube mit gewählter Steigung oder Windungszahl pro Gang als einen gespeicherten Schritt neu aufbauen und ihre lokale Skalierung zurücksetzen."
 }, Yt = {
+  "Drawn by": "Gezeichnet von",
+  Revision: "Revision",
+  "Drawing number": "Zeichnungsnummer",
+  "Title block": "Schriftfeld",
   "Point locks": "Fixierte Punkte",
   "Invalid path segment constraints. Each constraint must link consecutive points.": "Ungültige Pfadabschnittsbedingungen. Jede Bedingung muss aufeinanderfolgende Punkte verbinden.",
   "A point can have only one driver. Remove its lock or its other segment constraint.": "Ein Punkt kann nur von einer Bedingung gesteuert werden. Löse die Fixierung oder die andere Abschnittsbedingung.",

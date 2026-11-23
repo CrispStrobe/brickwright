@@ -37,6 +37,18 @@ async function showSheet(page){
  await sheet(page).tap();
 }
 const file=page=>page.getByTestId('bw-file-menu-trigger');
+const plateBlock={number:'MP-012',revision:'B',drawnBy:'A. Müller'};
+const assemblyBlock={number:'ASM-012',revision:'C.1',drawnBy:'CAD lab'};
+const titleBlockLabels={number:'Drawing number',revision:'Revision',drawnBy:'Drawn by'};
+const pdfLabel=value=>'<'+Buffer.from(value,'latin1').toString('hex')+'>';
+async function enterTitleBlock(page,fields){
+ await dialog(page).getByText('Title block',{exact:true}).tap();
+ for(const [key,value] of Object.entries(fields)){
+  await dialog(page).getByLabel(titleBlockLabels[key],{exact:true}).fill(value);
+ }
+ await preview(page).getByText(fields.number,{exact:true}).waitFor();
+}
+
 
 try{
  const page=await open();
@@ -55,6 +67,7 @@ try{
  if(!await make.isVisible())await page.getByRole('button',{name:'Properties',exact:true}).tap();
  await make.tap();
  await dialog(page).getByLabel('Sheet title').fill('Motor plate drawing');
+ await enterTitleBlock(page,plateBlock);
  assert.equal(await spacing(page),20);
  await dialog(page).getByRole('checkbox',{name:'Show section A-A'}).check();
  const cut=dialog(page).getByLabel('Section position (mm)',{exact:true});
@@ -135,6 +148,7 @@ try{
  assert.match(text,/\[3\.5 1 0\.7 1\] 0 d/);
  assert.ok(text.includes(Buffer.from('Offset section A-A','latin1').toString('hex')));
  assert.ok(text.includes('<'+Buffer.from('Arc length 46.365 mm','latin1').toString('hex')+'>'));
+ for(const value of Object.values(plateBlock))assert.ok(text.includes(pdfLabel(value)));
  if(pdfOutput)await pdf.saveAs(pdfOutput);
  await dialog(page).getByRole('button',{name:'Close drawing'}).tap();
  await make.tap();
@@ -155,6 +169,7 @@ try{
  await createAssembly.tap();
  await dialog(page).getByLabel('Sheet title').fill('Assembly overview');
  await preview(page).getByText('Assembly · 2 bodies',{exact:true}).waitFor();
+ await enterTitleBlock(page,assemblyBlock);
  const pathData=await preview(page).locator('.drawing-visible').getAttribute('d');
  assert.ok(pathData.split('M ').length>10);
  await dialog(page).getByLabel('Show hidden lines').uncheck();
@@ -212,6 +227,7 @@ try{
   dialog(page).getByRole('button',{name:'Export drawing PDF'}).tap()
  ]);
  const assemblyText=await readFile(await assemblyPdf.path(),'utf8');
+ assert.equal(assemblyText.split(pdfLabel(assemblyBlock.number)).length,3);
  assert.ok(assemblyText.includes('<'+Buffer.from('Assembly overview','latin1').toString('hex')+'>'));
  assert.match(assemblyText,/\/Type \/Pages \/Count 2/);
  assert.ok(assemblyText.includes('<'+Buffer.from('World Y = 14 / 8 / 14 mm','latin1').toString('hex')+'>'));
@@ -236,7 +252,10 @@ try{
  await save.saveAs(project);
  const zip=await JSZip.loadAsync(await readFile(project));
  const saved=JSON.parse(await zip.file(CAD_PROJECT_PATH).async('text'));
- assert.equal(saved.version,27);
+ assert.equal(saved.version,29);
+ assert.deepEqual(saved.drawings[0].titleBlock,plateBlock);
+ assert.equal(saved.drawings[1].titleBlock,undefined);
+ assert.deepEqual(saved.drawings[2].titleBlock,assemblyBlock);
  assert.deepEqual(saved.drawings[0].section,{axis:'v',position:15,jog:{at:'spacing / 2 + 10 mm',position:16}});
  assert.equal(saved.drawings[0].annotations[0].from,'circle:first');
  assert.equal(saved.drawings[0].annotations[0].to,'circle:second');
@@ -276,6 +295,10 @@ try{
  await restored.waitForFunction(project=>window.__bwCad?.editor.session.state.document.id===project,initial.project);
  await waitGeometry(restored);
  await showSheet(restored);
+ await dialog(restored).getByText('Title block',{exact:true}).tap();
+ for(const [key,value] of Object.entries(plateBlock)){
+  assert.equal(await dialog(restored).getByLabel(titleBlockLabels[key],{exact:true}).inputValue(),value);
+ }
  assert.equal(await spacing(restored),28);
  assert.equal(await preview(restored).locator('.drawing-hidden').count(),8);
  assert.equal(await preview(restored).locator('.drawing-section').count(),3);
@@ -313,7 +336,8 @@ try{
  assert.equal(await preview(restored).locator('.drawing-annotation').count(),6);
  await dialog(restored).getByLabel('Preview page').selectOption('1');
  await preview(restored).getByText('Rear bracket',{exact:true}).waitFor();
- console.log('PASS straight and curved model-edge dimensions, multi-jog assembly sections, parts lists, worker-backed assembly and linked sketch drawing sheets in Brickwright: touch controls, live parameters, linked offset sections, aligned and curved dimensions, single and numbered vector PDFs, and SB3 save and reopen');
+ await preview(restored).getByText(assemblyBlock.number,{exact:true}).waitFor();
+ console.log('PASS drawing title blocks, straight and curved model-edge dimensions, multi-jog assembly sections, parts lists, worker-backed assembly and linked sketch drawing sheets in Brickwright: touch controls, live parameters, linked offset sections, aligned and curved dimensions, single and numbered vector PDFs, and SB3 save and reopen');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});

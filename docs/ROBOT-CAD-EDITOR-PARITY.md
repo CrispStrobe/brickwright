@@ -284,6 +284,11 @@ coordinates must increase, and every leg must cross material. A sheet can have
 up to four jogs. The cut positions can use project parameters, are retained in
 the SB3, and appear in the vector PDF.
 
+Open **Title block** on a part or assembly drawing to add its drawing number,
+revision, and drafter. The fields travel with the SB3 and appear in the vector
+PDF, including assembly parts-list pages. Clear all fields to use the standard
+footer. The 50 mm print scale check stays in place.
+
 The embedded editor shares sketch UX and design history with standalone CAD.
 The host owns the compact File and History controls, project title, file pickers
 and native menus. Check compact/expanded layout, keyboard and touch access,
