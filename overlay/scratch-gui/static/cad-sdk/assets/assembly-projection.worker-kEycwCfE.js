@@ -33,7 +33,7 @@ const Gt = {
   "Choose light or dark mode": "Hellen oder dunklen Modus wählen",
   "Loading models…": "Modelle werden geladen…",
   "Original source files": "Originale Quelldateien",
-  "Model source uses project version 6 through 30": "Modellquelltext verwendet Projektversion 6 bis 30",
+  "Model source uses project version 6 through 31": "Modellquelltext verwendet Projektversion 6 bis 31",
   "Unknown material preset": "Unbekannte Materialvorlage",
   "Initial velocity requires project version 8": "Anfangsgeschwindigkeit erfordert Projektversion 8",
   "Invalid initial body velocity": "Ungültige Anfangsgeschwindigkeit",
@@ -823,6 +823,19 @@ const Gt = {
   "Apply thread redesign": "Gewindeauslegung anwenden",
   "Rebuild a resized screw at a chosen pitch or turns per start, resetting its local scale as one saved edit.": "Eine skalierte Schraube mit gewählter Steigung oder Windungszahl pro Gang als einen gespeicherten Schritt neu aufbauen und ihre lokale Skalierung zurücksetzen."
 }, Yt = {
+  "Solve the outline to use the current dimensions.": "Löse die Kontur, um die aktuellen Maße zu übernehmen.",
+  "Invalid outline constraint definitions.": "Ungültige Konturbedingungen.",
+  "Outline constraints are available on single outlines.": "Konturbedingungen sind für einzelne Konturen verfügbar.",
+  "Outline constraints require document version 31": "Konturbedingungen erfordern Dokumentversion 31",
+  "Point 1 stays fixed. Lengths measure from vertex to vertex. Save keeps the constraints and solved points.": "Punkt 1 bleibt fest. Längen werden zwischen Eckpunkten gemessen. Beim Speichern bleiben die Bedingungen und gelösten Punkte erhalten.",
+  "Cancel constraint edit": "Bearbeitung der Bedingung abbrechen",
+  "Clear constraints": "Bedingungen löschen",
+  "Restore the original point count or clear the outline constraints.": "Stelle die ursprüngliche Punktzahl wieder her oder lösche die Konturbedingungen.",
+  "Edit constraint {0}": "Bedingung {0} bearbeiten",
+  "Update constraint": "Bedingung aktualisieren",
+  "Solve the outline before saving its constraints.": "Löse die Kontur, bevor du ihre Bedingungen speicherst.",
+  "Clear outline constraints before trimming or offsetting.": "Lösche die Konturbedingungen vor dem Trimmen oder Versetzen.",
+  "Clear outline constraints before importing another profile.": "Lösche die Konturbedingungen, bevor du ein anderes Profil importierst.",
   "Outline constraints": "Konturbedingungen",
   "Point 1 stays fixed. Solve updates the draft points. Save the sketch to keep the resulting shape.": "Punkt 1 bleibt fest. Das Lösen aktualisiert die Entwurfspunkte. Speichere die Skizze, um die Form zu übernehmen.",
   "Constrained segment": "Segment für Bedingung",
@@ -2469,7 +2482,7 @@ function ht(e, t, i) {
   }
   return -1;
 }
-var dt = /[\u1680\u2000-\u200a\u202f\u205f\u3000\ufeff]/, T = /(?:\s|\/\/.*|\/\*[^]*?\*\/)*/g, ct = Object.prototype, pi = ct.hasOwnProperty, mi = ct.toString, me = Object.hasOwn || (function(e, t) {
+var dt = /[\u1680\u2000-\u200a\u202f\u205f\u3000\ufeff]/, B = /(?:\s|\/\/.*|\/\*[^]*?\*\/)*/g, ct = Object.prototype, pi = ct.hasOwnProperty, mi = ct.toString, me = Object.hasOwn || (function(e, t) {
   return pi.call(e, t);
 }), tt = Array.isArray || (function(e) {
   return mi.call(e) === "[object Array]";
@@ -2627,7 +2640,7 @@ var ue = 1, he = 2, Ze = 4, mt = 8, qe = 16, ft = 32, ze = 64, gt = 128, de = 25
 function He(e, t) {
   return he | (e ? Ze : 0) | (t ? mt : 0);
 }
-var ye = 0, Xe = 1, te = 2, vt = 3, kt = 4, wt = 5, B = function(t, i, n) {
+var ye = 0, Xe = 1, te = 2, vt = 3, kt = 4, wt = 5, T = function(t, i, n) {
   this.options = t = gi(t), this.sourceFile = t.sourceFile, this.keywords = ne(ui[t.ecmaVersion >= 6 ? 6 : t.sourceType === "module" ? "5module" : 5]);
   var s = "";
   t.allowReserved !== !0 && (s = _e[t.ecmaVersion >= 6 ? 6 : t.ecmaVersion === 5 ? 5 : 3], t.sourceType === "module" && (s += " await")), this.reservedWords = ne(s);
@@ -2637,7 +2650,7 @@ var ye = 0, Xe = 1, te = 2, vt = 3, kt = 4, wt = 5, B = function(t, i, n) {
     this.options.sourceType === "commonjs" ? he : ue
   ), this.regexpState = null, this.privateNameStack = [];
 }, Z = { inFunction: { configurable: !0 }, inGenerator: { configurable: !0 }, inAsync: { configurable: !0 }, canAwait: { configurable: !0 }, allowReturn: { configurable: !0 }, allowSuper: { configurable: !0 }, allowDirectSuper: { configurable: !0 }, treatFunctionsAsVar: { configurable: !0 }, allowNewDotTarget: { configurable: !0 }, allowUsing: { configurable: !0 }, inClassStaticBlock: { configurable: !0 } };
-B.prototype.parse = function() {
+T.prototype.parse = function() {
   var t = this, i = this.options.program || this.startNode();
   return this.nextToken(), this.catchStackOverflow(function() {
     return t.parseTopLevel(i);
@@ -2690,38 +2703,38 @@ Z.allowUsing.get = function() {
 Z.inClassStaticBlock.get = function() {
   return (this.currentVarScope().flags & de) > 0;
 };
-B.extend = function() {
+T.extend = function() {
   for (var t = [], i = arguments.length; i--; ) t[i] = arguments[i];
   for (var n = this, s = 0; s < t.length; s++)
     n = t[s](n);
   return n;
 };
-B.parse = function(t, i) {
+T.parse = function(t, i) {
   return new this(i, t).parse();
 };
-B.parseExpressionAt = function(t, i, n) {
+T.parseExpressionAt = function(t, i, n) {
   var s = new this(n, t, i);
   return s.nextToken(), s.parseExpression();
 };
-B.tokenizer = function(t, i) {
+T.tokenizer = function(t, i) {
   return new this(i, t);
 };
-Object.defineProperties(B.prototype, Z);
-var M = B.prototype, vi = /^(?:'((?:\\[^]|[^'\\])*?)'|"((?:\\[^]|[^"\\])*?)")/;
+Object.defineProperties(T.prototype, Z);
+var M = T.prototype, vi = /^(?:'((?:\\[^]|[^'\\])*?)'|"((?:\\[^]|[^"\\])*?)")/;
 M.strictDirective = function(e) {
   if (this.options.ecmaVersion < 5)
     return !1;
   for (; ; ) {
-    T.lastIndex = e, e += T.exec(this.input)[0].length;
+    B.lastIndex = e, e += B.exec(this.input)[0].length;
     var t = vi.exec(this.input.slice(e));
     if (!t)
       return !1;
     if ((t[1] || t[2]) === "use strict") {
-      T.lastIndex = e + t[0].length;
-      var i = T.exec(this.input), n = i.index + i[0].length, s = this.input.charAt(n);
+      B.lastIndex = e + t[0].length;
+      var i = B.exec(this.input), n = i.index + i[0].length, s = this.input.charAt(n);
       return s === ";" || s === "}" || F.test(i[0]) && !(/[(`.[+\-/*%<>=,?^&]/.test(s) || s === "!" && this.input.charAt(n + 1) === "=");
     }
-    e += t[0].length, T.lastIndex = e, e += T.exec(this.input)[0].length, this.input[e] === ";" && e++;
+    e += t[0].length, B.lastIndex = e, e += B.exec(this.input)[0].length, this.input[e] === ";" && e++;
   }
 };
 M.eat = function(e) {
@@ -2766,7 +2779,7 @@ M.expect = function(e) {
 M.unexpected = function(e) {
   this.raise(e ?? this.start, "Unexpected token");
 };
-var Te = function() {
+var Be = function() {
   this.shorthandAssign = this.trailingComma = this.parenthesizedAssign = this.parenthesizedBind = this.doubleProto = -1;
 };
 M.checkPatternErrors = function(e, t) {
@@ -2790,7 +2803,7 @@ M.checkYieldAwaitInDefaultParams = function() {
 M.isSimpleAssignTarget = function(e) {
   return e.type === "ParenthesizedExpression" ? this.isSimpleAssignTarget(e.expression) : e.type === "Identifier" || e.type === "MemberExpression";
 };
-var c = B.prototype;
+var c = T.prototype;
 c.parseTopLevel = function(e) {
   var t = /* @__PURE__ */ Object.create(null);
   for (e.body || (e.body = []); this.type !== r.eof; ) {
@@ -2808,8 +2821,8 @@ var Qe = { kind: "loop" }, ki = { kind: "switch" };
 c.isLet = function(e) {
   if (this.options.ecmaVersion < 6 || !this.isContextual("let"))
     return !1;
-  T.lastIndex = this.pos;
-  var t = T.exec(this.input), i = this.pos + t[0].length, n = this.fullCharCodeAt(i);
+  B.lastIndex = this.pos;
+  var t = B.exec(this.input), i = this.pos + t[0].length, n = this.fullCharCodeAt(i);
   if (n === 91 || n === 92)
     return !0;
   if (e)
@@ -2832,23 +2845,23 @@ c.isLet = function(e) {
 c.isAsyncFunction = function() {
   if (this.options.ecmaVersion < 8 || !this.isContextual("async"))
     return !1;
-  T.lastIndex = this.pos;
-  var e = T.exec(this.input), t = this.pos + e[0].length, i;
+  B.lastIndex = this.pos;
+  var e = B.exec(this.input), t = this.pos + e[0].length, i;
   return !F.test(this.input.slice(this.pos, t)) && this.input.slice(t, t + 8) === "function" && (t + 8 === this.input.length || !(re(i = this.fullCharCodeAt(t + 8)) || i === 92));
 };
 c.isUsingKeyword = function(e, t) {
   if (this.options.ecmaVersion < 17 || !this.isContextual(e ? "await" : "using"))
     return !1;
-  T.lastIndex = this.pos;
-  var i = T.exec(this.input), n = this.pos + i[0].length;
+  B.lastIndex = this.pos;
+  var i = B.exec(this.input), n = this.pos + i[0].length;
   if (F.test(this.input.slice(this.pos, n)))
     return !1;
   if (e) {
     var s = n + 5, o;
     if (this.input.slice(n, s) !== "using" || s === this.input.length || re(o = this.fullCharCodeAt(s)) || o === 92)
       return !1;
-    T.lastIndex = s;
-    var a = T.exec(this.input);
+    B.lastIndex = s;
+    var a = B.exec(this.input);
     if (n = s + a[0].length, a && F.test(this.input.slice(s, n)))
       return !1;
   }
@@ -2865,8 +2878,8 @@ c.isUsingKeyword = function(e, t) {
   if (ut.test(h))
     return !1;
   if (t && !e && h === "of") {
-    T.lastIndex = n;
-    var p = T.exec(this.input);
+    B.lastIndex = n;
+    var p = B.exec(this.input);
     if (n = n + p[0].length, this.input.charCodeAt(n) !== 61 || // Check for ==, === and => operators
     (l = this.input.charCodeAt(n + 1)) === 61 || l === 62)
       return !1;
@@ -2919,8 +2932,8 @@ c.parseStatement = function(e, t, i) {
     case r._export:
     case r._import:
       if (this.options.ecmaVersion > 10 && n === r._import) {
-        T.lastIndex = this.pos;
-        var a = T.exec(this.input), l = this.pos + a[0].length, u = this.input.charCodeAt(l);
+        B.lastIndex = this.pos;
+        var a = B.exec(this.input), l = this.pos + a[0].length, u = this.input.charCodeAt(l);
         if (u === 40 || u === 46)
           return this.parseExpressionStatement(s, this.parseExpression());
       }
@@ -2971,7 +2984,7 @@ c.parseForStatement = function(e) {
     var u = this.startNode();
     return this.next(), l === "await using" && (this.canAwait || this.raise(this.start, "Await using cannot appear outside of async function"), this.next()), this.parseVar(u, !0, l), this.finishNode(u, "VariableDeclaration"), this.parseForAfterInit(e, u, t);
   }
-  var h = this.containsEsc, p = new Te(), f = this.start, x = t > -1 ? this.parseExprSubscripts(p, "await") : this.parseExpression(!0, p);
+  var h = this.containsEsc, p = new Be(), f = this.start, x = t > -1 ? this.parseExprSubscripts(p, "await") : this.parseExpression(!0, p);
   return this.type === r._in || (a = this.options.ecmaVersion >= 6 && this.isContextual("of")) ? (t > -1 ? (this.type === r._in && this.unexpected(t), e.await = !0) : a && this.options.ecmaVersion >= 8 && (x.start === f && !h && x.type === "Identifier" && x.name === "async" ? this.unexpected() : this.options.ecmaVersion >= 9 && (e.await = !1)), o && a && this.raise(x.start, "The left-hand side of a for-of loop may not start with 'let'."), this.toAssignable(x, !1, p), this.checkLValPattern(x), this.parseForIn(e, x)) : (this.checkExpressionErrors(p, !0), t > -1 && this.unexpected(t), this.parseFor(e, x));
 };
 c.parseForAfterInit = function(e, t, i) {
@@ -3310,7 +3323,7 @@ c.isDirectiveCandidate = function(e) {
   return this.options.ecmaVersion >= 5 && e.type === "ExpressionStatement" && e.expression.type === "Literal" && typeof e.expression.value == "string" && // Reject parenthesized strings.
   (this.input[e.start] === '"' || this.input[e.start] === "'");
 };
-var q = B.prototype;
+var q = T.prototype;
 q.toAssignable = function(e, t, i) {
   if (this.options.ecmaVersion >= 6 && e)
     switch (e.type) {
@@ -3482,7 +3495,7 @@ var H = function(t, i, n, s, o) {
   f_expr: new H("function", !0),
   f_expr_gen: new H("function", !0, !1, null, !0),
   f_gen: new H("function", !1, !1, null, !0)
-}, fe = B.prototype;
+}, fe = T.prototype;
 fe.initialContext = function() {
   return [A.b_stat];
 };
@@ -3548,7 +3561,7 @@ r.name.updateContext = function(e) {
   var t = !1;
   this.options.ecmaVersion >= 6 && e !== r.dot && (this.value === "of" && !this.exprAllowed || this.value === "yield" && this.inGeneratorContext()) && (t = !0), this.exprAllowed = t;
 };
-var m = B.prototype;
+var m = T.prototype;
 m.checkPropClash = function(e, t, i) {
   if (!(this.options.ecmaVersion >= 9 && e.type === "SpreadElement") && !(this.options.ecmaVersion >= 6 && (e.computed || e.method || e.shorthand))) {
     var n = e.key, s;
@@ -3601,7 +3614,7 @@ m.parseMaybeAssign = function(e, t, i) {
     this.exprAllowed = !1;
   }
   var n = !1, s = -1, o = -1, a = -1;
-  t ? (s = t.parenthesizedAssign, o = t.trailingComma, a = t.doubleProto, t.parenthesizedAssign = t.trailingComma = -1) : (t = new Te(), n = !0);
+  t ? (s = t.parenthesizedAssign, o = t.trailingComma, a = t.doubleProto, t.parenthesizedAssign = t.trailingComma = -1) : (t = new Be(), n = !0);
   var l = this.start, u = this.startLoc;
   (this.type === r.parenL || this.type === r.name) && (this.potentialArrowAt = this.start, this.potentialArrowInForAwait = e === "await");
   var h = this.parseMaybeConditional(e, t);
@@ -3708,7 +3721,7 @@ m.parseSubscript = function(e, t, i, n, s, o, a) {
     var p = this.startNodeAt(t, i);
     p.object = e, h ? (p.property = this.parseExpression(), this.expect(r.bracketR)) : this.type === r.privateId && e.type !== "Super" ? p.property = this.parsePrivateIdent() : p.property = this.parseIdent(this.options.allowReserved !== "never"), p.computed = !!h, l && (p.optional = u), e = this.finishNode(p, "MemberExpression");
   } else if (!n && this.eat(r.parenL)) {
-    var f = new Te(), x = this.yieldPos, g = this.awaitPos, I = this.awaitIdentPos;
+    var f = new Be(), x = this.yieldPos, g = this.awaitPos, I = this.awaitIdentPos;
     this.yieldPos = 0, this.awaitPos = 0, this.awaitIdentPos = 0;
     var K = this.parseExprList(r.parenR, this.options.ecmaVersion >= 8, !1, f);
     if (s && !u && this.shouldParseAsyncArrow())
@@ -3816,7 +3829,7 @@ m.parseParenAndDistinguishExpression = function(e, t) {
   var i = this.start, n = this.startLoc, s, o = this.options.ecmaVersion >= 8;
   if (this.options.ecmaVersion >= 6) {
     this.next();
-    var a = this.start, l = this.startLoc, u = [], h = !0, p = !1, f = new Te(), x = this.yieldPos, g = this.awaitPos, I;
+    var a = this.start, l = this.startLoc, u = [], h = !0, p = !1, f = new Be(), x = this.yieldPos, g = this.awaitPos, I;
     for (this.yieldPos = 0, this.awaitPos = 0; this.type !== r.parenR; )
       if (h ? h = !1 : this.expect(r.comma), o && this.afterTrailingComma(r.parenR, !0)) {
         p = !0;
@@ -4004,7 +4017,7 @@ m.parseAwait = function(e) {
   var t = this.startNode();
   return this.next(), t.argument = this.parseMaybeUnary(null, !0, !1, e), this.finishNode(t, "AwaitExpression");
 };
-var Ae = B.prototype;
+var Ae = T.prototype;
 Ae.raise = function(e, t) {
   var i = pt(this.input, e);
   t += " (" + i.line + ":" + i.column + ")", this.sourceFile && (t += " in " + this.sourceFile);
@@ -4016,7 +4029,7 @@ Ae.curPosition = function() {
   if (this.options.locations)
     return new ke(this.curLine, this.pos - this.lineStart);
 };
-var se = B.prototype, yi = function(t) {
+var se = T.prototype, yi = function(t) {
   this.flags = t, this.var = [], this.lexical = [], this.functions = [];
 };
 se.enterScope = function(e) {
@@ -4071,14 +4084,14 @@ se.currentThisScope = function() {
       return t;
   }
 };
-var Be = function(t, i, n) {
+var Te = function(t, i, n) {
   this.type = "", this.start = i, this.end = 0, t.options.locations && (this.loc = new Ee(t, n)), t.options.directSourceFile && (this.sourceFile = t.options.directSourceFile), t.options.ranges && (this.range = [i, 0]);
-}, xe = B.prototype;
+}, xe = T.prototype;
 xe.startNode = function() {
-  return new Be(this, this.start, this.startLoc);
+  return new Te(this, this.start, this.startLoc);
 };
 xe.startNodeAt = function(e, t) {
-  return new Be(this, e, t);
+  return new Te(this, e, t);
 };
 function yt(e, t, i, n) {
   return e.type = t, e.end = i, this.options.locations && (e.loc.end = n), this.options.ranges && (e.range[1] = i), e;
@@ -4090,7 +4103,7 @@ xe.finishNodeAt = function(e, t, i, n) {
   return yt.call(this, e, t, i, n);
 };
 xe.copyNode = function(e) {
-  var t = new Be(this, e.start, this.startLoc);
+  var t = new Te(this, e.start, this.startLoc);
   for (var i in e)
     t[i] = e[i];
   return t;
@@ -4109,30 +4122,30 @@ var Di = "Berf Beria_Erfe Gara Garay Gukh Gurung_Khema Hrkt Katakana_Or_Hiragana
   12: "",
   13: "",
   14: Ei
-}, rt = "Cased_Letter LC Close_Punctuation Pe Connector_Punctuation Pc Control Cc cntrl Currency_Symbol Sc Dash_Punctuation Pd Decimal_Number Nd digit Enclosing_Mark Me Final_Punctuation Pf Format Cf Initial_Punctuation Pi Letter L Letter_Number Nl Line_Separator Zl Lowercase_Letter Ll Mark M Combining_Mark Math_Symbol Sm Modifier_Letter Lm Modifier_Symbol Sk Nonspacing_Mark Mn Number N Open_Punctuation Ps Other C Other_Letter Lo Other_Number No Other_Punctuation Po Other_Symbol So Paragraph_Separator Zp Private_Use Co Punctuation P punct Separator Z Space_Separator Zs Spacing_Mark Mc Surrogate Cs Symbol S Titlecase_Letter Lt Unassigned Cn Uppercase_Letter Lu", Pt = "Adlam Adlm Ahom Anatolian_Hieroglyphs Hluw Arabic Arab Armenian Armn Avestan Avst Balinese Bali Bamum Bamu Bassa_Vah Bass Batak Batk Bengali Beng Bhaiksuki Bhks Bopomofo Bopo Brahmi Brah Braille Brai Buginese Bugi Buhid Buhd Canadian_Aboriginal Cans Carian Cari Caucasian_Albanian Aghb Chakma Cakm Cham Cham Cherokee Cher Common Zyyy Coptic Copt Qaac Cuneiform Xsux Cypriot Cprt Cyrillic Cyrl Deseret Dsrt Devanagari Deva Duployan Dupl Egyptian_Hieroglyphs Egyp Elbasan Elba Ethiopic Ethi Georgian Geor Glagolitic Glag Gothic Goth Grantha Gran Greek Grek Gujarati Gujr Gurmukhi Guru Han Hani Hangul Hang Hanunoo Hano Hatran Hatr Hebrew Hebr Hiragana Hira Imperial_Aramaic Armi Inherited Zinh Qaai Inscriptional_Pahlavi Phli Inscriptional_Parthian Prti Javanese Java Kaithi Kthi Kannada Knda Katakana Kana Kayah_Li Kali Kharoshthi Khar Khmer Khmr Khojki Khoj Khudawadi Sind Lao Laoo Latin Latn Lepcha Lepc Limbu Limb Linear_A Lina Linear_B Linb Lisu Lisu Lycian Lyci Lydian Lydi Mahajani Mahj Malayalam Mlym Mandaic Mand Manichaean Mani Marchen Marc Masaram_Gondi Gonm Meetei_Mayek Mtei Mende_Kikakui Mend Meroitic_Cursive Merc Meroitic_Hieroglyphs Mero Miao Plrd Modi Mongolian Mong Mro Mroo Multani Mult Myanmar Mymr Nabataean Nbat New_Tai_Lue Talu Newa Newa Nko Nkoo Nushu Nshu Ogham Ogam Ol_Chiki Olck Old_Hungarian Hung Old_Italic Ital Old_North_Arabian Narb Old_Permic Perm Old_Persian Xpeo Old_South_Arabian Sarb Old_Turkic Orkh Oriya Orya Osage Osge Osmanya Osma Pahawh_Hmong Hmng Palmyrene Palm Pau_Cin_Hau Pauc Phags_Pa Phag Phoenician Phnx Psalter_Pahlavi Phlp Rejang Rjng Runic Runr Samaritan Samr Saurashtra Saur Sharada Shrd Shavian Shaw Siddham Sidd SignWriting Sgnw Sinhala Sinh Sora_Sompeng Sora Soyombo Soyo Sundanese Sund Syloti_Nagri Sylo Syriac Syrc Tagalog Tglg Tagbanwa Tagb Tai_Le Tale Tai_Tham Lana Tai_Viet Tavt Takri Takr Tamil Taml Tangut Tang Telugu Telu Thaana Thaa Thai Thai Tibetan Tibt Tifinagh Tfng Tirhuta Tirh Ugaritic Ugar Vai Vaii Warang_Citi Wara Yi Yiii Zanabazar_Square Zanb", Tt = Pt + " Dogra Dogr Gunjala_Gondi Gong Hanifi_Rohingya Rohg Makasar Maka Medefaidrin Medf Old_Sogdian Sogo Sogdian Sogd", Bt = Tt + " Elymaic Elym Nandinagari Nand Nyiakeng_Puachue_Hmong Hmnp Wancho Wcho", Vt = Bt + " Chorasmian Chrs Diak Dives_Akuru Khitan_Small_Script Kits Yezi Yezidi", Mt = Vt + " Cypro_Minoan Cpmn Old_Uyghur Ougr Tangsa Tnsa Toto Vithkuqi Vith", Pi = Mt + " " + Di, Ti = {
+}, rt = "Cased_Letter LC Close_Punctuation Pe Connector_Punctuation Pc Control Cc cntrl Currency_Symbol Sc Dash_Punctuation Pd Decimal_Number Nd digit Enclosing_Mark Me Final_Punctuation Pf Format Cf Initial_Punctuation Pi Letter L Letter_Number Nl Line_Separator Zl Lowercase_Letter Ll Mark M Combining_Mark Math_Symbol Sm Modifier_Letter Lm Modifier_Symbol Sk Nonspacing_Mark Mn Number N Open_Punctuation Ps Other C Other_Letter Lo Other_Number No Other_Punctuation Po Other_Symbol So Paragraph_Separator Zp Private_Use Co Punctuation P punct Separator Z Space_Separator Zs Spacing_Mark Mc Surrogate Cs Symbol S Titlecase_Letter Lt Unassigned Cn Uppercase_Letter Lu", Pt = "Adlam Adlm Ahom Anatolian_Hieroglyphs Hluw Arabic Arab Armenian Armn Avestan Avst Balinese Bali Bamum Bamu Bassa_Vah Bass Batak Batk Bengali Beng Bhaiksuki Bhks Bopomofo Bopo Brahmi Brah Braille Brai Buginese Bugi Buhid Buhd Canadian_Aboriginal Cans Carian Cari Caucasian_Albanian Aghb Chakma Cakm Cham Cham Cherokee Cher Common Zyyy Coptic Copt Qaac Cuneiform Xsux Cypriot Cprt Cyrillic Cyrl Deseret Dsrt Devanagari Deva Duployan Dupl Egyptian_Hieroglyphs Egyp Elbasan Elba Ethiopic Ethi Georgian Geor Glagolitic Glag Gothic Goth Grantha Gran Greek Grek Gujarati Gujr Gurmukhi Guru Han Hani Hangul Hang Hanunoo Hano Hatran Hatr Hebrew Hebr Hiragana Hira Imperial_Aramaic Armi Inherited Zinh Qaai Inscriptional_Pahlavi Phli Inscriptional_Parthian Prti Javanese Java Kaithi Kthi Kannada Knda Katakana Kana Kayah_Li Kali Kharoshthi Khar Khmer Khmr Khojki Khoj Khudawadi Sind Lao Laoo Latin Latn Lepcha Lepc Limbu Limb Linear_A Lina Linear_B Linb Lisu Lisu Lycian Lyci Lydian Lydi Mahajani Mahj Malayalam Mlym Mandaic Mand Manichaean Mani Marchen Marc Masaram_Gondi Gonm Meetei_Mayek Mtei Mende_Kikakui Mend Meroitic_Cursive Merc Meroitic_Hieroglyphs Mero Miao Plrd Modi Mongolian Mong Mro Mroo Multani Mult Myanmar Mymr Nabataean Nbat New_Tai_Lue Talu Newa Newa Nko Nkoo Nushu Nshu Ogham Ogam Ol_Chiki Olck Old_Hungarian Hung Old_Italic Ital Old_North_Arabian Narb Old_Permic Perm Old_Persian Xpeo Old_South_Arabian Sarb Old_Turkic Orkh Oriya Orya Osage Osge Osmanya Osma Pahawh_Hmong Hmng Palmyrene Palm Pau_Cin_Hau Pauc Phags_Pa Phag Phoenician Phnx Psalter_Pahlavi Phlp Rejang Rjng Runic Runr Samaritan Samr Saurashtra Saur Sharada Shrd Shavian Shaw Siddham Sidd SignWriting Sgnw Sinhala Sinh Sora_Sompeng Sora Soyombo Soyo Sundanese Sund Syloti_Nagri Sylo Syriac Syrc Tagalog Tglg Tagbanwa Tagb Tai_Le Tale Tai_Tham Lana Tai_Viet Tavt Takri Takr Tamil Taml Tangut Tang Telugu Telu Thaana Thaa Thai Thai Tibetan Tibt Tifinagh Tfng Tirhuta Tirh Ugaritic Ugar Vai Vaii Warang_Citi Wara Yi Yiii Zanabazar_Square Zanb", Bt = Pt + " Dogra Dogr Gunjala_Gondi Gong Hanifi_Rohingya Rohg Makasar Maka Medefaidrin Medf Old_Sogdian Sogo Sogdian Sogd", Tt = Bt + " Elymaic Elym Nandinagari Nand Nyiakeng_Puachue_Hmong Hmnp Wancho Wcho", Vt = Tt + " Chorasmian Chrs Diak Dives_Akuru Khitan_Small_Script Kits Yezi Yezidi", Mt = Vt + " Cypro_Minoan Cpmn Old_Uyghur Ougr Tangsa Tnsa Toto Vithkuqi Vith", Pi = Mt + " " + Di, Bi = {
   9: Pt,
-  10: Tt,
-  11: Bt,
+  10: Bt,
+  11: Tt,
   12: Vt,
   13: Mt,
   14: Pi
 }, It = {};
-function Bi(e) {
+function Ti(e) {
   var t = It[e] = {
     binary: ne(Ci[e] + " " + rt),
     binaryOfStrings: ne(zi[e]),
     nonBinary: {
       General_Category: ne(rt),
-      Script: ne(Ti[e])
+      Script: ne(Bi[e])
     }
   };
   t.nonBinary.Script_Extensions = t.nonBinary.Script, t.nonBinary.gc = t.nonBinary.General_Category, t.nonBinary.sc = t.nonBinary.Script, t.nonBinary.scx = t.nonBinary.Script_Extensions;
 }
 for (var Re = 0, st = [9, 10, 11, 12, 13, 14]; Re < st.length; Re += 1) {
   var Vi = st[Re];
-  Bi(Vi);
+  Ti(Vi);
 }
-var d = B.prototype, Ce = function(t, i) {
+var d = T.prototype, Ce = function(t, i) {
   this.parent = t, this.base = i || this;
 };
 Ce.prototype.separatedFrom = function(t) {
@@ -4964,7 +4977,7 @@ d.regexp_eatFixedHexDigits = function(e, t) {
 };
 var Je = function(t) {
   this.type = t.type, this.value = t.value, this.start = t.start, this.end = t.end, t.options.locations && (this.loc = new Ee(t, t.startLoc, t.endLoc)), t.options.ranges && (this.range = [t.start, t.end]);
-}, b = B.prototype;
+}, b = T.prototype;
 b.next = function(e) {
   !e && this.type.keyword && this.containsEsc && this.raiseRecoverable(this.start, "Escape sequence in keyword " + this.type.keyword), this.options.onToken && this.options.onToken(new Je(this)), this.lastTokEnd = this.end, this.lastTokStart = this.start, this.lastTokEndLoc = this.endLoc, this.lastTokStartLoc = this.startLoc, this.nextToken();
 };
@@ -5470,14 +5483,14 @@ b.readWord = function() {
   return this.keywords.test(e) && (t = We[e]), this.finishToken(t, e);
 };
 var Gi = "8.17.0";
-B.acorn = {
-  Parser: B,
+T.acorn = {
+  Parser: T,
   version: Gi,
   defaultOptions: Ke,
   Position: ke,
   SourceLocation: Ee,
   getLineInfo: pt,
-  Node: Be,
+  Node: Te,
   TokenType: w,
   tokTypes: r,
   keywordTypes: We,

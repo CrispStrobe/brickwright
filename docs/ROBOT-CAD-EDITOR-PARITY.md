@@ -342,8 +342,12 @@ an edge midpoint and set its curvature while keeping the endpoints fixed.
 For a closed polygon in **Sketch & Extrude**, open **Outline constraints**
 and choose **Solve outline** after defining the required segment relations.
 The shared CAD worker checks and previews the resulting shape. Create or
-Apply saves the resulting sketch coordinates in one undoable edit. Persistent
-coupled constraints and exact STEP editing remain open.
+Apply saves the coordinates, segment relations and length expressions in
+one undoable edit. Open **Edit sketch & extrusion** to edit saved relations,
+then choose **Solve outline** and apply the changes. After changing a model
+parameter used by a relation, use the same steps to update the sketch.
+Segment lengths measure vertex to vertex. Automatic re-solving after
+parameter changes, curve-specific constraints and exact STEP editing remain open.
 
 **Properties → Export drilling template (PDF)** produces a full-size A4
 vector template in the local sketch plane. It evaluates the current cutout

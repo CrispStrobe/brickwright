@@ -71,9 +71,14 @@ try{
  await download.saveAs(project);
  const zip=await JSZip.loadAsync(await readFile(project));
  const saved=JSON.parse(await zip.file(CAD_PROJECT_PATH).async('text'));
+ assert.equal(saved.version,31);
  assert.equal(saved.roots.length,1);
  const id=saved.nodes[saved.roots[0]].sketchId;
- assert.deepEqual(saved.sketches[id].profile.points,[[0,0],[40,0],[40,20],[0,20]]);
+ const profile=saved.sketches[id].profile;
+ assert.deepEqual(profile.points,[[0,0],[40,0],[40,20],[0,20]]);
+ assert.equal(profile.vertexIds.length,4);
+ assert.equal(profile.relations.length,7);
+ assert.equal(profile.relations[4].length,'80 mm / 2');
  await page.close();
 
  const restored=await open();
@@ -86,8 +91,29 @@ try{
  await tab(restored).tap();
  await restored.waitForFunction(id=>window.__bwCad?.editor.session.state.document.id===id,saved.id);
  await restored.evaluate(()=>window.__bwCad.editor.whenIdle());
- assert.deepEqual(await restored.evaluate(id=>window.__bwCad.editor.session.state.document.sketches[id].profile,id),saved.sketches[id].profile);
- console.log('PASS dart_csp outline solve, conflict rejection, solved geometry and Brickwright SB3 reopen');
+ const readProfile=()=>restored.evaluate(id=>window.__bwCad.editor.session.state.document.sketches[id].profile,id);
+ assert.deepEqual(await readProfile(),profile);
+ const object=restored.getByTestId('object-name');
+ if(!await object.isVisible())await restored.getByRole('button',{name:'Objects',exact:true}).tap();
+ await object.tap();
+ const edit=restored.getByRole('button',{name:'Edit sketch & extrusion',exact:true});
+ if(!await edit.isVisible())await restored.getByRole('button',{name:'Properties',exact:true}).tap();
+ await edit.tap();
+ const reopened=restored.getByRole('dialog',{name:'Sketch and extrusion'});
+ await reopened.getByRole('button',{name:'Edit constraint 5',exact:true}).tap();
+ const dimension=reopened.getByLabel('Segment length (mm)');
+ assert.equal(await dimension.inputValue(),'80 mm / 2');
+ await dimension.fill('60');
+ await reopened.getByRole('button',{name:'Update constraint',exact:true}).tap();
+ await reopened.getByRole('button',{name:'Solve outline',exact:true}).tap();
+ await reopened.getByText('Outline solved. Fully constrained.',{exact:true}).waitFor();
+ await reopened.getByRole('button',{name:'Apply sketch changes',exact:true}).tap();
+ await reopened.waitFor({state:'hidden'});
+ const edited=await readProfile();
+ assert.deepEqual(edited.points.map(point=>point.map(value=>Math.round(value*1e6)/1e6)),[[0,0],[60,0],[60,20],[0,20]]);
+ assert.deepEqual(edited.vertexIds,profile.vertexIds);
+ assert.equal(Number(edited.relations[4].length),60);
+ console.log('PASS outline solve, conflict rejection, SB3 reopen, and editing a saved constraint');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});
