@@ -123,7 +123,7 @@ const CadTab = ({vm, isVisible, docked, locale, theme, onEditProgram, onOpenCirc
                 onSimulationInterrupt: () => window.dispatchEvent(new CustomEvent('bw-cad-simulation-interrupt')),
                 onExport: file => download(file.name, new Blob([file.bytes], {type: file.mime})),
                 saveProject: () => download('design.bcad', new Blob([retainedSession.serialize()], {type: 'application/json'})),
-                requestOpen: () => requestFile('.bcad,.json,.stl'), requestImport: () => requestFile('.stl'),
+                requestOpen: () => requestFile('.bcad,.json,.stl,.step,.stp'), requestImport: () => requestFile('.stl,.step,.stp'),
                 onError: fail
             });
             editor.current = mounted;
@@ -136,7 +136,7 @@ const CadTab = ({vm, isVisible, docked, locale, theme, onEditProgram, onOpenCirc
                     cadNew:action(label('New CAD design…','Neues CAD-Modell…'),'new'),
                     cadOpen:action(label('Open CAD design…','CAD-Modell öffnen…'),'open'),
                     cadSave:action(label('Save CAD design (.bcad)…','CAD-Modell speichern (.bcad)…'),'save'),
-                    cadImport:action(label('Import STL into CAD…','STL ins CAD importieren…'),'import'),
+                    cadImport:action(label('Import STL or STEP into CAD…','STL oder STEP ins CAD importieren…'),'import'),
                     cadExport:action(label('Export CAD model…','CAD-Modell exportieren…'),'export',mounted.commandState.canExport),
                     cadLibrary:action(label('Model library…','Modellbibliothek…'),'model-library'),
                     ...Object.fromEntries([
