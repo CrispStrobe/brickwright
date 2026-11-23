@@ -14,6 +14,7 @@ export const cameraPointerIntent = (event, preset, spaceHeld = false, secondaryD
         // Robots reserves Ctrl for connected selection and Alt for part tools.
         return !robot && (event.altKey || event.ctrlKey) ? 'orbit' : undefined;
     }
+    if (event.button === 1 && secondaryDrag) return event.shiftKey ? 'orbit' : 'pan';
     if (event.button === 1) return robot ? (preset === 'studio' ? 'pan' : 'orbit') :
         (preset === 'fusion' && event.shiftKey ? 'orbit' : 'pan');
     if (event.button === 2 && secondaryDrag) {
