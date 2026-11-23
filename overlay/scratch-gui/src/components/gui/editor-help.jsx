@@ -107,6 +107,19 @@ const actions = {
 
 const EditorHelp = ({editor, label, locale, inTabList = false}) => {
     const dialog = useRef(null);
+    const trigger = useRef(null);
+    React.useEffect(() => {
+        const closeOnEscape = event => {
+            if (event.key !== 'Escape' || !dialog.current?.open) return;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            dialog.current.close();
+        };
+        // The drawing workspace also owns Escape. Give the open help dialog
+        // first use of it while focus is in the dialog.
+        window.addEventListener('keydown', closeOnEscape, true);
+        return () => window.removeEventListener('keydown', closeOnEscape, true);
+    }, []);
     const [camera, setCamera] = React.useState(getCameraPreferences);
     const de = /^de/i.test(locale);
     const language = de ? 'de' : 'en';
@@ -119,14 +132,15 @@ const EditorHelp = ({editor, label, locale, inTabList = false}) => {
     const testId = inTabList ? 'bw-editor-help' : 'bw-widgets-help';
     return (
         <Slot className={styles.slot} role={inTabList ? 'presentation' : undefined}>
-            <button className={styles.trigger} type="button" aria-label={title} aria-haspopup="dialog"
+            <button ref={trigger} className={styles.trigger} type="button" aria-label={title} aria-haspopup="dialog"
                 title={title} data-testid={testId} onClick={() => {
                     setCamera(getCameraPreferences());
                     dialog.current.showModal();
                 }}>
                 <span aria-hidden="true">?</span>
             </button>
-            <dialog ref={dialog} className={styles.dialog} aria-label={title} data-testid={`${testId}-dialog`}>
+            <dialog ref={dialog} className={styles.dialog} aria-label={title} data-testid={`${testId}-dialog`}
+                onClose={() => trigger.current?.focus({preventScroll: true})}>
                 <form method="dialog" className={styles.header}>
                     <h2>{title}</h2>
                     <button type="submit" autoFocus>{de ? 'Schließen' : 'Close'}</button>
