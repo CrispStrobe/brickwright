@@ -28,7 +28,11 @@ async function open(){
 const file=page=>page.getByTestId('bw-file-menu-trigger');
 
 const input=Buffer.from([
- '0','SECTION','2','HEADER','9','$INSUNITS','70',1,'0','ENDSEC','0','SECTION','2','ENTITIES',
+ '0','SECTION','2','HEADER','9','$INSUNITS','70',1,'0','ENDSEC',
+ '0','SECTION','2','TABLES','0','TABLE','2','LTYPE',
+ '0','LTYPE','2','Guide dash','73',2,'49',.5,'74',0,'49',-.25,'74',0,'0','ENDTAB',
+ '0','TABLE','2','LAYER','0','LAYER','2','Guides','62',-5,'6','Guide dash','370',25,'290',0,'0','ENDTAB','0','ENDSEC',
+ '0','SECTION','2','ENTITIES',
  '0','LINE','8','Guides','10',0,'20',2,'11',0,'21',1,
  '0','ARC','8','Guides','10',0,'20',0,'40',1,'50',0,'51',90,
  '0','LINE','8','Construction','10',2,'20',2,'11',3,'21',3,'0','ENDSEC','0','EOF'
@@ -64,6 +68,10 @@ try{
  assert.match(text,/\$INSUNITS\r\n70\r\n4/);
  assert.match(text,/90\r\n3\r\n70\r\n0/);
  assert.doesNotMatch(text,/Construction/);
+ if(!fixture){
+  assert.match(text,/62\r\n-5\r\n6\r\nGuide dash\r\n290\r\n0\r\n370\r\n25/);
+  assert.match(text,/49\r\n12.7\r\n74\r\n0\r\n49\r\n-6.35/);
+ }
 
  await fileInput.setInputFiles({name:'Verified guide.dxf',mimeType:'application/dxf',buffer:Buffer.from(text)});
  await fileInput.and(path.locator('input:enabled')).waitFor({state:'visible'});
@@ -80,9 +88,12 @@ try{
  const sketch=Object.values(saved.sketches)[0];
  assert.equal(sketch.name,'Verified guide');
  assert.equal(sketch.profile.dxfLayer,'Guides');
+ if(!fixture)assert.deepEqual(sketch.profile.dxfLayerStyle,{
+  color:-5,plot:false,lineweight:25,linetype:{name:'Guide dash',pattern:[12.7,-6.35]}
+ });
  assert.deepEqual(sketch.profile.bulges,[0,-Math.tan(Math.PI/8),0]);
  assert.deepEqual(saved.roots,[]);
- console.log('PASS Brickwright touch DXF path layer filtering, import, export, reimport and SB3 layer retention');
+ console.log('PASS Brickwright touch DXF path layer filtering, import, export, reimport and SB3 layer style retention');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});

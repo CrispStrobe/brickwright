@@ -4,6 +4,9 @@ import {copyFile, readFile} from 'node:fs/promises';
 import assert from 'node:assert/strict';
 const [url = 'http://127.0.0.1:8165/', input, output, pdfOutput] = process.argv.slice(2);
 const fixture = ['0','SECTION','2','HEADER','9','$ACADVER','1','AC1021','9','$INSUNITS','70',4,'0','ENDSEC',
+ '0','SECTION','2','TABLES','0','TABLE','2','LAYER',
+ '0','LAYER','2','Cut perimeter','70',4,'62',5,'420',16711935,'370',35,
+ '0','LAYER','2','Bohrungen Ä','70',0,'62',1,'290',0,'0','ENDTAB','0','ENDSEC',
  '0','SECTION','2','ENTITIES','0','CIRCLE','8','Bohrungen Ä','10',10,'20',15,'40',2,
  '0','LWPOLYLINE','8','Cut perimeter','90',4,'70',1,'10',0,'20',0,'10',40,'20',0,'10',40,'20',30,'10',0,'20',30,
  '0','CIRCLE','8','Bohrungen Ä','10',30,'20',15,'40',3,
@@ -89,6 +92,9 @@ try {
  assert.equal(profile.kind,'region');
  assert.deepEqual(profile.loops.map(({id,kind,radius})=>[id,kind,radius]),[['dxf-loop-1','circle',4],['dxf-loop-2','outline',undefined],['dxf-loop-3','circle',3]]);
  assert.deepEqual(profile.loops.map(loop=>loop.dxfLayer),['Bohrungen Ä','Cut perimeter','Bohrungen Ä']);
+ if(!input)assert.deepEqual(profile.loops.map(loop=>loop.dxfLayerStyle),[
+  {color:1,plot:false},{color:5,trueColor:16711935,flags:4,lineweight:35},{color:1,plot:false}
+ ]);
  await openParameters.tap();
  await expression.fill('28');
  await applyParameters.tap();
@@ -105,6 +111,11 @@ try {
  assert.match(exported,/8\r\nBohrungen Ä\r\n100\r\nAcDbCircle\r\n10\r\n34\r\n20\r\n15\r\n30\r\n0\r\n40\r\n3/);
  assert.match(exported,/8\r\nCut perimeter\r\n100\r\nAcDbPolyline/);
  assert.doesNotMatch(exported,/Fabrication notes|Annotations/);
+ if(!input){
+  assert.match(exported,/2\r\nCut perimeter\r\n70\r\n4\r\n62\r\n5/);
+  assert.match(exported,/420\r\n16711935\r\n370\r\n35/);
+  assert.match(exported,/2\r\nBohrungen Ä\r\n70\r\n0\r\n62\r\n1\r\n6\r\nCONTINUOUS\r\n290\r\n0/);
+ }
  if(output)await copyFile(path,output);
  const [pdfDownload]=await Promise.all([
   page.waitForEvent('download'), cad.getByRole('button',{name:'Export drilling template (PDF)'}).tap()
@@ -164,5 +175,5 @@ try {
  assert.deepEqual(curve,[.5,0,0,0]);
  await undo.tap();
  assert.equal(await rootCount(),0);
- console.log('PASS embedded CAD tablet viewport: third-party DXF with layer filtering, holes in preview, touch-dragged vertex, invalid edit, retained layers, named hole spacing, 1:1 DXF and PDF exports, reference intersection snap, touching and curving an edge, reopen, Undo');
+ console.log('PASS embedded CAD tablet viewport: third-party DXF with layer filtering, holes in preview, touch-dragged vertex, invalid edit, retained layer styles, named hole spacing, 1:1 DXF and PDF exports, reference intersection snap, touching and curving an edge, reopen, Undo');
 } finally {await browser.close();}
