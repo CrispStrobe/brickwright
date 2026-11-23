@@ -311,7 +311,10 @@ to isolate a guide from other geometry. Region circle centers and
 radii can use named dimensions. DXF export retains entity layer names and
 signed polyline bulges. Layer colors, on/off and freeze/lock flags, plotting,
 lineweight and simple dash patterns survive sketch edits, SB3 reopen and DXF
-re-export. Dash lengths convert to millimetres alongside the geometry.
+re-export. Dash lengths convert to millimetres alongside the geometry. Polyline widths
+also convert to millimetres and can be edited as the fourth and fifth
+values of a vertex row after its bulge. Sketch previews and solids follow
+the centerline. Export retains the width of each outgoing segment.
 Polygon vertices can be dragged in the preview. The coordinates also accept
 relative offsets such as `@40, 0`. For exact placement, choose up to two sketches
 on the same plane as snap references. The preview highlights endpoints,

@@ -33,8 +33,10 @@ const input=Buffer.from([
  '0','LTYPE','2','Guide dash','73',2,'49',.5,'74',0,'49',-.25,'74',0,'0','ENDTAB',
  '0','TABLE','2','LAYER','0','LAYER','2','Guides','62',-5,'6','Guide dash','370',25,'290',0,'0','ENDTAB','0','ENDSEC',
  '0','SECTION','2','ENTITIES',
- '0','LINE','8','Guides','10',0,'20',4.4,'30',9.2,'11',0,'21',5.2,'31',8.6,
- '0','ARC','8','Guides','10',0,'20',0,'30',10,'40',1,'50',0,'51',90,'210',0,'220',.6,'230',.8,
+ '0','LWPOLYLINE','8','Guides','90',3,'70',0,'38',10,'210',0,'220',.6,'230',.8,
+ '10',0,'20',2,'40',.1,'41',.2,
+ '10',0,'20',1,'40',.2,'41',.1,'42',-Math.tan(Math.PI/8),
+ '10',1,'20',0,
  '0','LINE','8','Construction','10',2,'20',2,'11',3,'21',3,
  '0','LINE','8','Guides','410','Sheet 1','10',50,'20',50,'11',55,'21',55,
  '0','ENDSEC','0','EOF'
@@ -61,13 +63,19 @@ try{
  await importedLayer.waitFor({state:'visible'});
  const points=path.getByLabel('Path points X, Y (mm)');
  const expected=[ [0,50.8], [0,25.4,-Math.tan(Math.PI/8)], [25.4,0] ];
- const readPoints=async()=>(await points.inputValue()).split('\n').map(row=>row.split(',').map(Number));
+ const readRows=async()=>(await points.inputValue()).split('\n').map(row=>row.split(',').map(Number));
  async function verifyPoints(){
-  const actual=await readPoints();
+  const rows=await readRows();
+  const actual=rows.map(([x,y,bulge])=>bulge?[x,y,bulge]:[x,y]);
   assert.deepEqual(actual.map(row=>row.length),expected.map(row=>row.length));
   for(const [i,row] of actual.entries())for(const [j,value] of row.entries())assert.ok(Math.abs(value-expected[i][j])<1e-9);
  }
  await verifyPoints();
+ if(!fixture){
+  const rows=await readRows();
+  assert.deepEqual(rows.map(row=>row.slice(3)),[[2.54,5.08],[5.08,2.54],[]]);
+  await points.fill((await points.inputValue()).replace('0, 50.8, 0, 2.54, 5.08','0, 50.8, 0, 3, 5.08'));
+ }
  const [exported]=await Promise.all([
   page.waitForEvent('download'),path.getByRole('button',{name:'Export path as DXF'}).tap()
  ]);
@@ -80,6 +88,7 @@ try{
  if(!fixture){
   assert.match(text,/62\r\n-5\r\n6\r\nGuide dash\r\n290\r\n0\r\n370\r\n25/);
   assert.match(text,/49\r\n12.7\r\n74\r\n0\r\n49\r\n-6.35/);
+  assert.match(text,/40\r\n3\r\n41\r\n5.08/);
  }
 
  await fileInput.setInputFiles({name:'Verified guide.dxf',mimeType:'application/dxf',buffer:Buffer.from(text)});
@@ -97,12 +106,13 @@ try{
  const sketch=Object.values(saved.sketches)[0];
  assert.equal(sketch.name,'Verified guide');
  assert.equal(sketch.profile.dxfLayer,'Guides');
+ if(!fixture)assert.deepEqual(sketch.profile.dxfWidths,[[3,5.08],[5.08,2.54],[0,0]]);
  if(!fixture)assert.deepEqual(sketch.profile.dxfLayerStyle,{
   color:-5,plot:false,lineweight:25,linetype:{name:'Guide dash',pattern:[12.7,-6.35]}
  });
  assert.deepEqual(sketch.profile.bulges,[0,-Math.tan(Math.PI/8),0]);
  assert.deepEqual(saved.roots,[]);
- console.log('PASS Brickwright touch tilted DXF path model-space and layer filtering, import, export, reimport and SB3 layer style retention');
+ console.log('PASS Brickwright touch tilted DXF path model-space and layer filtering, import, export, reimport and SB3 layer style and width retention');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});
