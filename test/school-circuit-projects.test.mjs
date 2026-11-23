@@ -61,12 +61,22 @@ test('AA people/dog split currents at the shared arm and parallel legs',()=>{
  assert.ok(Math.abs(current(c,'R1')-current(c,'R2'))<1e-9);
  assert.ok(Math.abs(current(c,'R13')-current(c,'R11')-current(c,'R12'))<1e-9);
  assert.ok(Math.abs(current(c,'R14')-current(c,'R15'))<1e-9);
- // Engine knee: vf=2 V at 20 mA, rd=10 Ω gives 1.8 V threshold.
- assert.ok(Math.abs(current(c,'R5')-(4.5-1.8)/(470+220+110+10))<1e-8);
- // Independent linear-network solution for the declared LED knee + 10 Ω slope.
- const ux=(4.5/220+1.8/340+1.9/312.5)/(1/220+1/340+1/312.5);
- assert.ok(Math.abs(current(c,'R8')-(ux-1.8)/340)<1e-8);
- assert.ok(Math.abs(current(c,'R10')-(ux-1.9)/312.5)<1e-8);
+ // bw-board round 3 (a685b22) solves LEDs on the exponential junction: the
+ // class default n = 1.8 and series rs = 10 Ω (parts-library classDefaults),
+ // with Is chosen so the total drop is the LED's vf at its rated 20 mA. The
+ // old knee model (1.8 V threshold + 10 Ω) is replaced by an independent
+ // solve of that law. The +10 Ω in the denominators below is that rs.
+ const vt=0.02585,nVt=1.8*vt,rs=10;
+ const isOf=vf=>0.02/(Math.exp((vf-0.02*rs)/nVt)-1);
+ const vj=(i,vf)=>nVt*Math.log(i/isOf(vf)+1);
+ // Current through LED(vf) in series with R (rs included) driven by V.
+ const led=(V,R,vf)=>{let lo=0,hi=V/R;for(let k=0;k<200;k++){const m=(lo+hi)/2;(m*(R+rs)+vj(m,vf)>V)?hi=m:lo=m;}return (lo+hi)/2;};
+ assert.ok(Math.abs(current(c,'R5')-led(4.5,470+220+110,2))<1e-7);
+ // The shared node ux balances 4.5 V through 220 Ω against two LED legs.
+ let lo=0,hi=4.5;for(let k=0;k<200;k++){const ux=(lo+hi)/2;((4.5-ux)/220>led(ux,330,2)+led(ux,302.5,2.1))?lo=ux:hi=ux;}
+ const ux=(lo+hi)/2;
+ assert.ok(Math.abs(current(c,'R8')-led(ux,330,2))<1e-7);
+ assert.ok(Math.abs(current(c,'R10')-led(ux,302.5,2.1))<1e-7);
 });
 
 test('open outside arm has zero measured current (requires supplier PR662)',()=>{
