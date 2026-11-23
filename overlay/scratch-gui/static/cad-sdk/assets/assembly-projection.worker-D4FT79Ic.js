@@ -823,6 +823,11 @@ const Gt = {
   "Apply thread redesign": "Gewindeauslegung anwenden",
   "Rebuild a resized screw at a chosen pitch or turns per start, resetting its local scale as one saved edit.": "Eine skalierte Schraube mit gewählter Steigung oder Windungszahl pro Gang als einen gespeicherten Schritt neu aufbauen und ihre lokale Skalierung zurücksetzen."
 }, Yt = {
+  "DWG export requires an original sketch extrusion.": "Für den DWG-Export ist eine ursprüngliche Skizzenextrusion erforderlich.",
+  "Could not export the sketch as DWG.": "Die Skizze konnte nicht als DWG exportiert werden.",
+  "DWG export took too long. Try a simpler sketch.": "Der DWG-Export hat zu lange gedauert. Versuche es mit einer einfacheren Skizze.",
+  "Export sketch as DWG": "Skizze als DWG exportieren",
+  "Export path as DWG": "Pfad als DWG exportieren",
   "Choose DWG file": "DWG-Datei auswählen",
   "Choose a DWG file up to 1 MB.": "Wähle eine DWG-Datei bis 1 MB.",
   "DWG layers": "DWG-Ebenen",
@@ -2273,12 +2278,12 @@ Erstelle zuerst den Workspace. Oberfläche und MCP verwenden denselben begrenzte
   "The block program is not valid JSON": "Das Blockprogramm ist kein gültiges JSON",
   "Compile a block/pseudocode modelling program (JSON, format brickwright-cad-blocks) to parametric CAD Script, OpenSCAD or JSCAD without changing the model. Pass CAD Script output to cad_create_code_object.": "Kompiliert ein Block-/Pseudocode-Modellprogramm (JSON, Format brickwright-cad-blocks) in parametrisches CAD Script, OpenSCAD oder JSCAD, ohne das Modell zu ändern. Übergib die CAD-Script-Ausgabe an cad_create_code_object."
 };
-let Fe = "en";
+let Ne = "en";
 function ai(e) {
-  return Fe = e.toLowerCase().split(/[-_]/)[0] === "de" ? "de" : "en", Fe;
+  return Ne = e.toLowerCase().split(/[-_]/)[0] === "de" ? "de" : "en", Ne;
 }
 function at(e, ...t) {
-  const i = typeof e == "string" ? e : e.reduce((s, o, a) => s + (a ? `{${a - 1}}` : "") + o, ""), n = Fe === "de" ? si[i] ?? Gt[i] ?? ni[i] ?? ri[i] ?? Wt[i] ?? Zt[i] ?? Ht[i] ?? qt[i] ?? Xt[i] ?? Yt[i] ?? $t[i] ?? ii[i] ?? ei[i] ?? ti[i] ?? Jt[i] ?? Qt[i] ?? i : i;
+  const i = typeof e == "string" ? e : e.reduce((s, o, a) => s + (a ? `{${a - 1}}` : "") + o, ""), n = Ne === "de" ? si[i] ?? Gt[i] ?? ni[i] ?? ri[i] ?? Wt[i] ?? Zt[i] ?? Ht[i] ?? qt[i] ?? Xt[i] ?? Yt[i] ?? $t[i] ?? ii[i] ?? ei[i] ?? ti[i] ?? Jt[i] ?? Qt[i] ?? i : i;
   return typeof e == "string" ? n : n.replace(/\{(\d+)\}/g, (s, o) => String(t[Number(o)]));
 }
 var oi = [509, 0, 227, 0, 150, 4, 294, 9, 1368, 2, 2, 1, 6, 3, 41, 2, 5, 0, 166, 1, 574, 3, 9, 9, 7, 9, 32, 4, 318, 1, 78, 5, 71, 10, 50, 3, 123, 2, 54, 14, 32, 10, 3, 1, 11, 3, 46, 10, 8, 0, 46, 9, 7, 2, 37, 13, 2, 9, 6, 1, 45, 0, 13, 2, 49, 13, 9, 3, 2, 11, 83, 11, 7, 0, 3, 0, 158, 11, 6, 9, 7, 3, 56, 1, 2, 6, 3, 1, 3, 2, 10, 0, 11, 1, 3, 6, 4, 4, 68, 8, 2, 0, 3, 0, 2, 3, 2, 4, 2, 0, 15, 1, 83, 17, 10, 9, 5, 0, 82, 19, 13, 9, 214, 6, 3, 8, 28, 1, 83, 16, 16, 9, 82, 12, 9, 9, 7, 19, 58, 14, 5, 9, 243, 14, 166, 9, 71, 5, 2, 1, 3, 3, 2, 0, 2, 1, 13, 9, 120, 6, 3, 6, 4, 0, 29, 9, 41, 6, 2, 3, 9, 0, 10, 10, 47, 15, 199, 7, 137, 9, 54, 7, 2, 7, 17, 9, 57, 21, 2, 13, 123, 5, 4, 0, 2, 1, 2, 6, 2, 0, 9, 9, 49, 4, 2, 1, 2, 4, 9, 9, 55, 9, 266, 3, 10, 1, 2, 0, 49, 6, 4, 4, 14, 10, 5350, 0, 7, 14, 11465, 27, 2343, 9, 87, 9, 39, 4, 60, 6, 26, 9, 535, 9, 470, 0, 2, 54, 8, 3, 82, 0, 12, 1, 19628, 1, 4178, 9, 519, 45, 3, 22, 543, 4, 4, 5, 9, 7, 3, 6, 31, 3, 149, 2, 1418, 49, 513, 54, 5, 49, 9, 0, 15, 0, 23, 4, 2, 14, 1361, 6, 2, 16, 3, 6, 2, 1, 2, 4, 101, 0, 161, 6, 10, 9, 357, 0, 62, 13, 499, 13, 245, 1, 2, 9, 233, 0, 3, 0, 8, 1, 6, 0, 475, 6, 110, 6, 6, 9, 4759, 9, 787719, 239], ot = [0, 11, 2, 25, 2, 18, 2, 1, 2, 14, 3, 13, 35, 122, 70, 52, 268, 28, 4, 48, 48, 31, 14, 29, 6, 37, 11, 29, 3, 35, 5, 7, 2, 4, 43, 157, 19, 35, 5, 35, 5, 39, 9, 51, 13, 10, 2, 14, 2, 6, 2, 1, 2, 10, 2, 14, 2, 6, 2, 1, 4, 51, 13, 310, 10, 21, 11, 7, 25, 5, 2, 41, 2, 8, 70, 5, 3, 0, 2, 43, 2, 1, 4, 0, 3, 22, 11, 22, 10, 30, 66, 18, 2, 1, 11, 21, 11, 25, 7, 25, 39, 55, 7, 1, 65, 0, 16, 3, 2, 2, 2, 28, 43, 28, 4, 28, 36, 7, 2, 27, 28, 53, 11, 21, 11, 18, 14, 17, 111, 72, 56, 50, 14, 50, 14, 35, 39, 27, 10, 22, 251, 41, 7, 1, 17, 5, 57, 28, 11, 0, 9, 21, 43, 17, 47, 20, 28, 22, 13, 52, 58, 1, 3, 0, 14, 44, 33, 24, 27, 35, 30, 0, 3, 0, 9, 34, 4, 0, 13, 47, 15, 3, 22, 0, 2, 0, 36, 17, 2, 24, 20, 1, 64, 6, 2, 0, 2, 3, 2, 14, 2, 9, 8, 46, 39, 7, 3, 1, 3, 21, 2, 6, 2, 1, 2, 4, 4, 0, 19, 0, 13, 4, 31, 9, 2, 0, 3, 0, 2, 37, 2, 0, 26, 0, 2, 0, 45, 52, 19, 3, 21, 2, 31, 47, 21, 1, 2, 0, 185, 46, 42, 3, 37, 47, 21, 0, 60, 42, 14, 0, 72, 26, 38, 6, 186, 43, 117, 63, 32, 7, 3, 0, 3, 7, 2, 1, 2, 23, 16, 0, 2, 0, 95, 7, 3, 38, 17, 0, 2, 0, 29, 0, 11, 39, 8, 0, 22, 0, 12, 45, 20, 0, 19, 72, 200, 32, 32, 8, 2, 36, 18, 0, 50, 29, 113, 6, 2, 1, 2, 37, 22, 0, 26, 5, 2, 1, 2, 31, 15, 0, 24, 43, 261, 18, 16, 0, 2, 12, 2, 33, 125, 0, 80, 921, 103, 110, 18, 195, 2637, 96, 16, 1071, 18, 5, 26, 3994, 6, 582, 6842, 29, 1763, 568, 8, 30, 18, 78, 18, 29, 19, 47, 17, 3, 32, 20, 6, 18, 433, 44, 212, 63, 33, 24, 3, 24, 45, 74, 6, 0, 67, 12, 65, 1, 2, 0, 15, 4, 10, 7381, 42, 31, 98, 114, 8702, 3, 2, 6, 2, 1, 2, 290, 16, 0, 30, 2, 3, 0, 15, 3, 9, 395, 2309, 106, 6, 12, 4, 8, 8, 9, 5991, 84, 2, 70, 2, 1, 3, 0, 3, 1, 3, 3, 2, 11, 2, 0, 2, 6, 2, 64, 2, 3, 3, 7, 2, 6, 2, 27, 2, 3, 2, 4, 2, 0, 4, 6, 2, 339, 3, 24, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 7, 1845, 30, 7, 5, 262, 61, 147, 44, 11, 6, 17, 0, 322, 29, 19, 43, 485, 27, 229, 29, 3, 0, 208, 30, 2, 2, 2, 1, 2, 6, 3, 4, 10, 1, 225, 6, 2, 3, 2, 1, 2, 14, 2, 196, 60, 67, 8, 0, 1205, 3, 2, 26, 2, 1, 2, 0, 3, 0, 2, 9, 2, 3, 2, 0, 2, 0, 7, 0, 5, 0, 2, 0, 2, 0, 2, 2, 2, 1, 2, 0, 3, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 1, 2, 0, 3, 3, 2, 6, 2, 3, 2, 3, 2, 0, 2, 9, 2, 16, 6, 2, 2, 4, 2, 16, 4421, 42719, 33, 4381, 3, 5773, 3, 7472, 16, 621, 2467, 541, 1507, 4938, 6, 8489], li = "‌‍·̀-ͯ·҃-֑҇-ׇֽֿׁׂׅׄؐ-ًؚ-٩ٰۖ-ۜ۟-۪ۤۧۨ-ۭ۰-۹ܑܰ-݊ަ-ް߀-߉߫-߽߳ࠖ-࠙ࠛ-ࠣࠥ-ࠧࠩ-࡙࠭-࡛ࢗ-࢟࣊-ࣣ࣡-ःऺ-़ा-ॏ॑-ॗॢॣ०-९ঁ-ঃ়া-ৄেৈো-্ৗৢৣ০-৯৾ਁ-ਃ਼ਾ-ੂੇੈੋ-੍ੑ੦-ੱੵઁ-ઃ઼ા-ૅે-ૉો-્ૢૣ૦-૯ૺ-૿ଁ-ଃ଼ା-ୄେୈୋ-୍୕-ୗୢୣ୦-୯ஂா-ூெ-ைொ-்ௗ௦-௯ఀ-ఄ఼ా-ౄె-ైొ-్ౕౖౢౣ౦-౯ಁ-ಃ಼ಾ-ೄೆ-ೈೊ-್ೕೖೢೣ೦-೯ೳഀ-ഃ഻഼ാ-ൄെ-ൈൊ-്ൗൢൣ൦-൯ඁ-ඃ්ා-ුූෘ-ෟ෦-෯ෲෳัิ-ฺ็-๎๐-๙ັິ-ຼ່-໎໐-໙༘༙༠-༩༹༵༷༾༿ཱ-྄྆྇ྍ-ྗྙ-ྼ࿆ါ-ှ၀-၉ၖ-ၙၞ-ၠၢ-ၤၧ-ၭၱ-ၴႂ-ႍႏ-ႝ፝-፟፩-፱ᜒ-᜕ᜲ-᜴ᝒᝓᝲᝳ឴-៓៝០-៩᠋-᠍᠏-᠙ᢩᤠ-ᤫᤰ-᤻᥆-᥏᧐-᧚ᨗ-ᨛᩕ-ᩞ᩠-᩿᩼-᪉᪐-᪙᪰-᪽ᪿ-᫝᫠-᫫ᬀ-ᬄ᬴-᭄᭐-᭙᭫-᭳ᮀ-ᮂᮡ-ᮭ᮰-᮹᯦-᯳ᰤ-᰷᱀-᱉᱐-᱙᳐-᳔᳒-᳨᳭᳴᳷-᳹᷀-᷿‌‍‿⁀⁔⃐-⃥⃜⃡-⃰⳯-⵿⳱ⷠ-〪ⷿ-゙゚〯・꘠-꘩꙯ꙴ-꙽ꚞꚟ꛰꛱ꠂ꠆ꠋꠣ-ꠧ꠬ꢀꢁꢴ-ꣅ꣐-꣙꣠-꣱ꣿ-꤉ꤦ-꤭ꥇ-꥓ꦀ-ꦃ꦳-꧀꧐-꧙ꧥ꧰-꧹ꨩ-ꨶꩃꩌꩍ꩐-꩙ꩻ-ꩽꪰꪲ-ꪴꪷꪸꪾ꪿꫁ꫫ-ꫯꫵ꫶ꯣ-ꯪ꯬꯭꯰-꯹ﬞ︀-️︠-︯︳︴﹍-﹏０-９＿･", lt = "ªµºÀ-ÖØ-öø-ˁˆ-ˑˠ-ˤˬˮͰ-ʹͶͷͺ-ͽͿΆΈ-ΊΌΎ-ΡΣ-ϵϷ-ҁҊ-ԯԱ-Ֆՙՠ-ֈא-תׯ-ײؠ-يٮٯٱ-ۓەۥۦۮۯۺ-ۼۿܐܒ-ܯݍ-ޥޱߊ-ߪߴߵߺࠀ-ࠕࠚࠤࠨࡀ-ࡘࡠ-ࡪࡰ-ࢇࢉ-࢏ࢠ-ࣉऄ-हऽॐक़-ॡॱ-ঀঅ-ঌএঐও-নপ-রলশ-হঽৎড়ঢ়য়-ৡৰৱৼਅ-ਊਏਐਓ-ਨਪ-ਰਲਲ਼ਵਸ਼ਸਹਖ਼-ੜਫ਼ੲ-ੴઅ-ઍએ-ઑઓ-નપ-રલળવ-હઽૐૠૡૹଅ-ଌଏଐଓ-ନପ-ରଲଳଵ-ହଽଡ଼ଢ଼ୟ-ୡୱஃஅ-ஊஎ-ஐஒ-கஙசஜஞடணதந-பம-ஹௐఅ-ఌఎ-ఐఒ-నప-హఽౘ-ౚ౜ౝౠౡಀಅ-ಌಎ-ಐಒ-ನಪ-ಳವ-ಹಽ೜-ೞೠೡೱೲഄ-ഌഎ-ഐഒ-ഺഽൎൔ-ൖൟ-ൡൺ-ൿඅ-ඖක-නඳ-රලව-ෆก-ะาำเ-ๆກຂຄຆ-ຊຌ-ຣລວ-ະາຳຽເ-ໄໆໜ-ໟༀཀ-ཇཉ-ཬྈ-ྌက-ဪဿၐ-ၕၚ-ၝၡၥၦၮ-ၰၵ-ႁႎႠ-ჅჇჍა-ჺჼ-ቈቊ-ቍቐ-ቖቘቚ-ቝበ-ኈኊ-ኍነ-ኰኲ-ኵኸ-ኾዀዂ-ዅወ-ዖዘ-ጐጒ-ጕጘ-ፚᎀ-ᎏᎠ-Ᏽᏸ-ᏽᐁ-ᙬᙯ-ᙿᚁ-ᚚᚠ-ᛪᛮ-ᛸᜀ-ᜑᜟ-ᜱᝀ-ᝑᝠ-ᝬᝮ-ᝰក-ឳៗៜᠠ-ᡸᢀ-ᢨᢪᢰ-ᣵᤀ-ᤞᥐ-ᥭᥰ-ᥴᦀ-ᦫᦰ-ᧉᨀ-ᨖᨠ-ᩔᪧᬅ-ᬳᭅ-ᭌᮃ-ᮠᮮᮯᮺ-ᯥᰀ-ᰣᱍ-ᱏᱚ-ᱽᲀ-ᲊᲐ-ᲺᲽ-Ჿᳩ-ᳬᳮ-ᳳᳵᳶᳺᴀ-ᶿḀ-ἕἘ-Ἕἠ-ὅὈ-Ὅὐ-ὗὙὛὝὟ-ώᾀ-ᾴᾶ-ᾼιῂ-ῄῆ-ῌῐ-ΐῖ-Ίῠ-Ῥῲ-ῴῶ-ῼⁱⁿₐ-ₜℂℇℊ-ℓℕ℘-ℝℤΩℨK-ℹℼ-ℿⅅ-ⅉⅎⅠ-ↈⰀ-ⳤⳫ-ⳮⳲⳳⴀ-ⴥⴧⴭⴰ-ⵧⵯⶀ-ⶖⶠ-ⶦⶨ-ⶮⶰ-ⶶⶸ-ⶾⷀ-ⷆⷈ-ⷎⷐ-ⷖⷘ-ⷞ々-〇〡-〩〱-〵〸-〼ぁ-ゖ゛-ゟァ-ヺー-ヿㄅ-ㄯㄱ-ㆎㆠ-ㆿㇰ-ㇿ㐀-䶿一-ꒌꓐ-ꓽꔀ-ꘌꘐ-ꘟꘪꘫꙀ-ꙮꙿ-ꚝꚠ-ꛯꜗ-ꜟꜢ-ꞈꞋ-Ƛ꟱-ꠁꠃ-ꠅꠇ-ꠊꠌ-ꠢꡀ-ꡳꢂ-ꢳꣲ-ꣷꣻꣽꣾꤊ-ꤥꤰ-ꥆꥠ-ꥼꦄ-ꦲꧏꧠ-ꧤꧦ-ꧯꧺ-ꧾꨀ-ꨨꩀ-ꩂꩄ-ꩋꩠ-ꩶꩺꩾ-ꪯꪱꪵꪶꪹ-ꪽꫀꫂꫛ-ꫝꫠ-ꫪꫲ-ꫴꬁ-ꬆꬉ-ꬎꬑ-ꬖꬠ-ꬦꬨ-ꬮꬰ-ꭚꭜ-ꭩꭰ-ꯢ가-힣ힰ-ퟆퟋ-ퟻ豈-舘並-龎ﬀ-ﬆﬓ-ﬗיִײַ-ﬨשׁ-זּטּ-לּמּנּסּףּפּצּ-ﮱﯓ-ﴽﵐ-ﶏﶒ-ﷇﷰ-ﷻﹰ-ﹴﹶ-ﻼＡ-Ｚａ-ｚｦ-ﾾￂ-ￇￊ-ￏￒ-ￗￚ-ￜ", _e = {
@@ -2307,42 +2312,42 @@ function X(e, t) {
 function re(e, t) {
   return e < 48 ? e === 36 : e < 58 ? !0 : e < 65 ? !1 : e < 91 ? !0 : e < 97 ? e === 95 : e < 123 ? !0 : e <= 65535 ? e >= 170 && di.test(String.fromCharCode(e)) : t === !1 ? !1 : Oe(e, ot) || Oe(e, oi);
 }
-var w = function(t, i) {
+var x = function(t, i) {
   i === void 0 && (i = {}), this.label = t, this.keyword = i.keyword, this.beforeExpr = !!i.beforeExpr, this.startsExpr = !!i.startsExpr, this.isLoop = !!i.isLoop, this.isAssign = !!i.isAssign, this.prefix = !!i.prefix, this.postfix = !!i.postfix, this.binop = i.binop || null, this.updateContext = null;
 };
 function j(e, t) {
-  return new w(e, { beforeExpr: !0, binop: t });
+  return new x(e, { beforeExpr: !0, binop: t });
 }
 var G = { beforeExpr: !0 }, L = { startsExpr: !0 }, We = {};
 function v(e, t) {
-  return t === void 0 && (t = {}), t.keyword = e, We[e] = new w(e, t);
+  return t === void 0 && (t = {}), t.keyword = e, We[e] = new x(e, t);
 }
 var r = {
-  num: new w("num", L),
-  regexp: new w("regexp", L),
-  string: new w("string", L),
-  name: new w("name", L),
-  privateId: new w("privateId", L),
-  eof: new w("eof"),
+  num: new x("num", L),
+  regexp: new x("regexp", L),
+  string: new x("string", L),
+  name: new x("name", L),
+  privateId: new x("privateId", L),
+  eof: new x("eof"),
   // Punctuation token types.
-  bracketL: new w("[", { beforeExpr: !0, startsExpr: !0 }),
-  bracketR: new w("]"),
-  braceL: new w("{", { beforeExpr: !0, startsExpr: !0 }),
-  braceR: new w("}"),
-  parenL: new w("(", { beforeExpr: !0, startsExpr: !0 }),
-  parenR: new w(")"),
-  comma: new w(",", G),
-  semi: new w(";", G),
-  colon: new w(":", G),
-  dot: new w("."),
-  question: new w("?", G),
-  questionDot: new w("?."),
-  arrow: new w("=>", G),
-  template: new w("template"),
-  invalidTemplate: new w("invalidTemplate"),
-  ellipsis: new w("...", G),
-  backQuote: new w("`", L),
-  dollarBraceL: new w("${", { beforeExpr: !0, startsExpr: !0 }),
+  bracketL: new x("[", { beforeExpr: !0, startsExpr: !0 }),
+  bracketR: new x("]"),
+  braceL: new x("{", { beforeExpr: !0, startsExpr: !0 }),
+  braceR: new x("}"),
+  parenL: new x("(", { beforeExpr: !0, startsExpr: !0 }),
+  parenR: new x(")"),
+  comma: new x(",", G),
+  semi: new x(";", G),
+  colon: new x(":", G),
+  dot: new x("."),
+  question: new x("?", G),
+  questionDot: new x("?."),
+  arrow: new x("=>", G),
+  template: new x("template"),
+  invalidTemplate: new x("invalidTemplate"),
+  ellipsis: new x("...", G),
+  backQuote: new x("`", L),
+  dollarBraceL: new x("${", { beforeExpr: !0, startsExpr: !0 }),
   // Operators. These carry several kinds of properties to help the
   // parser use them properly (the presence of these properties is
   // what categorizes them as operators).
@@ -2356,10 +2361,10 @@ var r = {
   // `isAssign` marks all of `=`, `+=`, `-=` etcetera, which act as
   // binary operators with a very low precedence, that should result
   // in AssignmentExpression nodes.
-  eq: new w("=", { beforeExpr: !0, isAssign: !0 }),
-  assign: new w("_=", { beforeExpr: !0, isAssign: !0 }),
-  incDec: new w("++/--", { prefix: !0, postfix: !0, startsExpr: !0 }),
-  prefix: new w("!/~", { beforeExpr: !0, prefix: !0, startsExpr: !0 }),
+  eq: new x("=", { beforeExpr: !0, isAssign: !0 }),
+  assign: new x("_=", { beforeExpr: !0, isAssign: !0 }),
+  incDec: new x("++/--", { prefix: !0, postfix: !0, startsExpr: !0 }),
+  prefix: new x("!/~", { beforeExpr: !0, prefix: !0, startsExpr: !0 }),
   logicalOR: j("||", 1),
   logicalAND: j("&&", 2),
   bitwiseOR: j("|", 3),
@@ -2368,11 +2373,11 @@ var r = {
   equality: j("==/!=/===/!==", 6),
   relational: j("</>/<=/>=", 7),
   bitShift: j("<</>>/>>>", 8),
-  plusMin: new w("+/-", { beforeExpr: !0, binop: 9, prefix: !0, startsExpr: !0 }),
+  plusMin: new x("+/-", { beforeExpr: !0, binop: 9, prefix: !0, startsExpr: !0 }),
   modulo: j("%", 10),
   star: j("*", 10),
   slash: j("/", 10),
-  starstar: new w("**", { beforeExpr: !0 }),
+  starstar: new x("**", { beforeExpr: !0 }),
   coalesce: j("??", 1),
   // Keyword token types.
   _break: v("break"),
@@ -2410,7 +2415,7 @@ var r = {
   _typeof: v("typeof", { beforeExpr: !0, prefix: !0, startsExpr: !0 }),
   _void: v("void", { beforeExpr: !0, prefix: !0, startsExpr: !0 }),
   _delete: v("delete", { beforeExpr: !0, prefix: !0, startsExpr: !0 })
-}, N = /\r\n?|\n|\u2028|\u2029/, ci = new RegExp(N.source, "g");
+}, F = /\r\n?|\n|\u2028|\u2029/, ci = new RegExp(F.source, "g");
 function pe(e) {
   return e === 10 || e === 13 || e === 8232 || e === 8233;
 }
@@ -2577,17 +2582,17 @@ function bi(e, t) {
     e.locations && (u.loc = new Ee(this, a, l)), e.ranges && (u.range = [s, o]), t.push(u);
   };
 }
-var ue = 1, he = 2, Ze = 4, mt = 8, qe = 16, ft = 32, ze = 64, gt = 128, de = 256, we = 512, bt = 1024, Pe = ue | he | de;
+var ue = 1, he = 2, Ze = 4, mt = 8, qe = 16, ft = 32, ze = 64, gt = 128, de = 256, xe = 512, bt = 1024, Pe = ue | he | de;
 function He(e, t) {
   return he | (e ? Ze : 0) | (t ? mt : 0);
 }
-var ye = 0, Xe = 1, te = 2, vt = 3, kt = 4, wt = 5, T = function(t, i, n) {
+var ye = 0, Xe = 1, te = 2, vt = 3, kt = 4, xt = 5, T = function(t, i, n) {
   this.options = t = gi(t), this.sourceFile = t.sourceFile, this.keywords = ne(ui[t.ecmaVersion >= 6 ? 6 : t.sourceType === "module" ? "5module" : 5]);
   var s = "";
   t.allowReserved !== !0 && (s = _e[t.ecmaVersion >= 6 ? 6 : t.ecmaVersion === 5 ? 5 : 3], t.sourceType === "module" && (s += " await")), this.reservedWords = ne(s);
   var o = (s ? s + " " : "") + _e.strict;
   this.reservedWordsStrict = ne(o), this.reservedWordsStrictBind = ne(o + " " + _e.strictBind), this.input = String(i), this.containsEsc = !1, n ? (this.pos = n, this.lineStart = this.input.lastIndexOf(`
-`, n - 1) + 1, this.curLine = this.input.slice(0, this.lineStart).split(N).length) : (this.pos = this.lineStart = 0, this.curLine = 1), this.type = r.eof, this.value = null, this.start = this.end = this.pos, this.startLoc = this.endLoc = this.curPosition(), this.lastTokEndLoc = this.lastTokStartLoc = null, this.lastTokStart = this.lastTokEnd = this.pos, this.context = this.initialContext(), this.exprAllowed = !0, this.inModule = t.sourceType === "module", this.strict = this.inModule || t.strict === !0 || this.strictDirective(this.pos), this.potentialArrowAt = -1, this.potentialArrowInForAwait = !1, this.yieldPos = this.awaitPos = this.awaitIdentPos = 0, this.labels = [], this.undefinedExports = /* @__PURE__ */ Object.create(null), this.pos === 0 && t.allowHashBang && this.input.slice(0, 2) === "#!" && this.skipLineComment(2), this.scopeStack = [], this.enterScope(
+`, n - 1) + 1, this.curLine = this.input.slice(0, this.lineStart).split(F).length) : (this.pos = this.lineStart = 0, this.curLine = 1), this.type = r.eof, this.value = null, this.start = this.end = this.pos, this.startLoc = this.endLoc = this.curPosition(), this.lastTokEndLoc = this.lastTokStartLoc = null, this.lastTokStart = this.lastTokEnd = this.pos, this.context = this.initialContext(), this.exprAllowed = !0, this.inModule = t.sourceType === "module", this.strict = this.inModule || t.strict === !0 || this.strictDirective(this.pos), this.potentialArrowAt = -1, this.potentialArrowInForAwait = !1, this.yieldPos = this.awaitPos = this.awaitIdentPos = 0, this.labels = [], this.undefinedExports = /* @__PURE__ */ Object.create(null), this.pos === 0 && t.allowHashBang && this.input.slice(0, 2) === "#!" && this.skipLineComment(2), this.scopeStack = [], this.enterScope(
     this.options.sourceType === "commonjs" ? he : ue
   ), this.regexpState = null, this.privateNameStack = [];
 }, Z = { inFunction: { configurable: !0 }, inGenerator: { configurable: !0 }, inAsync: { configurable: !0 }, canAwait: { configurable: !0 }, allowReturn: { configurable: !0 }, allowSuper: { configurable: !0 }, allowDirectSuper: { configurable: !0 }, treatFunctionsAsVar: { configurable: !0 }, allowNewDotTarget: { configurable: !0 }, allowUsing: { configurable: !0 }, inClassStaticBlock: { configurable: !0 } };
@@ -2609,7 +2614,7 @@ Z.inAsync.get = function() {
 Z.canAwait.get = function() {
   for (var e = this.scopeStack.length - 1; e >= 0; e--) {
     var t = this.scopeStack[e], i = t.flags;
-    if (i & (de | we))
+    if (i & (de | xe))
       return !1;
     if (i & he)
       return (i & Ze) > 0;
@@ -2632,7 +2637,7 @@ Z.treatFunctionsAsVar.get = function() {
 Z.allowNewDotTarget.get = function() {
   for (var e = this.scopeStack.length - 1; e >= 0; e--) {
     var t = this.scopeStack[e], i = t.flags;
-    if (i & (de | we) || i & he && !(i & qe))
+    if (i & (de | xe) || i & he && !(i & qe))
       return !0;
   }
   return !1;
@@ -2673,7 +2678,7 @@ M.strictDirective = function(e) {
     if ((t[1] || t[2]) === "use strict") {
       B.lastIndex = e + t[0].length;
       var i = B.exec(this.input), n = i.index + i[0].length, s = this.input.charAt(n);
-      return s === ";" || s === "}" || N.test(i[0]) && !(/[(`.[+\-/*%<>=,?^&]/.test(s) || s === "!" && this.input.charAt(n + 1) === "=");
+      return s === ";" || s === "}" || F.test(i[0]) && !(/[(`.[+\-/*%<>=,?^&]/.test(s) || s === "!" && this.input.charAt(n + 1) === "=");
     }
     e += t[0].length, B.lastIndex = e, e += B.exec(this.input)[0].length, this.input[e] === ";" && e++;
   }
@@ -2701,7 +2706,7 @@ M.expectContextual = function(e) {
   this.eatContextual(e) || this.unexpected();
 };
 M.canInsertSemicolon = function() {
-  return this.type === r.eof || this.type === r.braceR || N.test(this.input.slice(this.lastTokEnd, this.start));
+  return this.type === r.eof || this.type === r.braceR || F.test(this.input.slice(this.lastTokEnd, this.start));
 };
 M.insertSemicolon = function() {
   if (this.canInsertSemicolon())
@@ -2788,14 +2793,14 @@ c.isAsyncFunction = function() {
     return !1;
   B.lastIndex = this.pos;
   var e = B.exec(this.input), t = this.pos + e[0].length, i;
-  return !N.test(this.input.slice(this.pos, t)) && this.input.slice(t, t + 8) === "function" && (t + 8 === this.input.length || !(re(i = this.fullCharCodeAt(t + 8)) || i === 92));
+  return !F.test(this.input.slice(this.pos, t)) && this.input.slice(t, t + 8) === "function" && (t + 8 === this.input.length || !(re(i = this.fullCharCodeAt(t + 8)) || i === 92));
 };
 c.isUsingKeyword = function(e, t) {
   if (this.options.ecmaVersion < 17 || !this.isContextual(e ? "await" : "using"))
     return !1;
   B.lastIndex = this.pos;
   var i = B.exec(this.input), n = this.pos + i[0].length;
-  if (N.test(this.input.slice(this.pos, n)))
+  if (F.test(this.input.slice(this.pos, n)))
     return !1;
   if (e) {
     var s = n + 5, o;
@@ -2803,7 +2808,7 @@ c.isUsingKeyword = function(e, t) {
       return !1;
     B.lastIndex = s;
     var a = B.exec(this.input);
-    if (n = s + a[0].length, a && N.test(this.input.slice(s, n)))
+    if (n = s + a[0].length, a && F.test(this.input.slice(s, n)))
       return !1;
   }
   var l = this.fullCharCodeAt(n);
@@ -2925,8 +2930,8 @@ c.parseForStatement = function(e) {
     var u = this.startNode();
     return this.next(), l === "await using" && (this.canAwait || this.raise(this.start, "Await using cannot appear outside of async function"), this.next()), this.parseVar(u, !0, l), this.finishNode(u, "VariableDeclaration"), this.parseForAfterInit(e, u, t);
   }
-  var h = this.containsEsc, p = new Be(), f = this.start, x = t > -1 ? this.parseExprSubscripts(p, "await") : this.parseExpression(!0, p);
-  return this.type === r._in || (a = this.options.ecmaVersion >= 6 && this.isContextual("of")) ? (t > -1 ? (this.type === r._in && this.unexpected(t), e.await = !0) : a && this.options.ecmaVersion >= 8 && (x.start === f && !h && x.type === "Identifier" && x.name === "async" ? this.unexpected() : this.options.ecmaVersion >= 9 && (e.await = !1)), o && a && this.raise(x.start, "The left-hand side of a for-of loop may not start with 'let'."), this.toAssignable(x, !1, p), this.checkLValPattern(x), this.parseForIn(e, x)) : (this.checkExpressionErrors(p, !0), t > -1 && this.unexpected(t), this.parseFor(e, x));
+  var h = this.containsEsc, p = new Be(), f = this.start, w = t > -1 ? this.parseExprSubscripts(p, "await") : this.parseExpression(!0, p);
+  return this.type === r._in || (a = this.options.ecmaVersion >= 6 && this.isContextual("of")) ? (t > -1 ? (this.type === r._in && this.unexpected(t), e.await = !0) : a && this.options.ecmaVersion >= 8 && (w.start === f && !h && w.type === "Identifier" && w.name === "async" ? this.unexpected() : this.options.ecmaVersion >= 9 && (e.await = !1)), o && a && this.raise(w.start, "The left-hand side of a for-of loop may not start with 'let'."), this.toAssignable(w, !1, p), this.checkLValPattern(w), this.parseForIn(e, w)) : (this.checkExpressionErrors(p, !0), t > -1 && this.unexpected(t), this.parseFor(e, w));
 };
 c.parseForAfterInit = function(e, t, i) {
   return (this.type === r._in || this.options.ecmaVersion >= 6 && this.isContextual("of")) && t.declarations.length === 1 ? (this.type === r._in ? ((t.kind === "using" || t.kind === "await using") && !t.declarations[0].init && this.raise(this.start, "Using declaration is not allowed in for-in loops"), this.options.ecmaVersion >= 9 && i > -1 && this.unexpected(i)) : this.options.ecmaVersion >= 9 && (e.await = i > -1), this.parseForIn(e, t)) : (i > -1 && this.unexpected(i), this.parseFor(e, t));
@@ -2951,9 +2956,9 @@ c.parseSwitchStatement = function(e) {
   return this.exitScope(), t && this.finishNode(t, "SwitchCase"), this.next(), this.labels.pop(), this.finishNode(e, "SwitchStatement");
 };
 c.parseThrowStatement = function(e) {
-  return this.next(), N.test(this.input.slice(this.lastTokEnd, this.start)) && this.raise(this.lastTokEnd, "Illegal newline after throw"), e.argument = this.parseExpression(), this.semicolon(), this.finishNode(e, "ThrowStatement");
+  return this.next(), F.test(this.input.slice(this.lastTokEnd, this.start)) && this.raise(this.lastTokEnd, "Illegal newline after throw"), e.argument = this.parseExpression(), this.semicolon(), this.finishNode(e, "ThrowStatement");
 };
-var wi = [];
+var xi = [];
 c.parseCatchClauseParam = function() {
   var e = this.parseBindingAtom(), t = e.type === "Identifier";
   return this.enterScope(t ? ft : 0), this.checkLValPattern(e, t ? kt : te), this.expect(r.parenR), e;
@@ -3022,9 +3027,9 @@ c.parseVar = function(e, t, i, n) {
 c.parseVarId = function(e, t) {
   e.id = t === "using" || t === "await using" ? this.parseIdent() : this.parseBindingAtom(), this.checkLValPattern(e.id, t === "var" ? Xe : te, !1);
 };
-var ve = 1, Ue = 2, xt = 4;
+var ve = 1, Ue = 2, wt = 4;
 c.parseFunction = function(e, t, i, n, s) {
-  this.initFunction(e), (this.options.ecmaVersion >= 9 || this.options.ecmaVersion >= 6 && !n) && (this.type === r.star && t & Ue && this.unexpected(), e.generator = this.eat(r.star)), this.options.ecmaVersion >= 8 && (e.async = !!n), t & ve && (e.id = t & xt && this.type !== r.name ? null : this.parseIdent(), e.id && !(t & Ue) && this.checkLValSimple(e.id, this.strict || e.generator || e.async ? this.treatFunctionsAsVar ? Xe : te : vt));
+  this.initFunction(e), (this.options.ecmaVersion >= 9 || this.options.ecmaVersion >= 6 && !n) && (this.type === r.star && t & Ue && this.unexpected(), e.generator = this.eat(r.star)), this.options.ecmaVersion >= 8 && (e.async = !!n), t & ve && (e.id = t & wt && this.type !== r.name ? null : this.parseIdent(), e.id && !(t & Ue) && this.checkLValSimple(e.id, this.strict || e.generator || e.async ? this.treatFunctionsAsVar ? Xe : te : vt));
   var o = this.yieldPos, a = this.awaitPos, l = this.awaitIdentPos;
   return this.yieldPos = 0, this.awaitPos = 0, this.awaitIdentPos = 0, this.enterScope(He(e.async, e.generator)), t & ve || (e.id = this.type === r.name ? this.parseIdent() : null), this.parseFunctionParams(e), this.parseFunctionBody(e, i, !1, s), this.yieldPos = o, this.awaitPos = a, this.awaitIdentPos = l, this.finishNode(e, t & ve ? "FunctionDeclaration" : "FunctionExpression");
 };
@@ -3038,7 +3043,7 @@ c.parseClass = function(e, t) {
   var n = this.enterClassBody(), s = this.startNode(), o = !1;
   for (s.body = [], this.expect(r.braceL); this.type !== r.braceR; ) {
     var a = this.parseClassElement(e.superClass !== null);
-    a && (s.body.push(a), a.type === "MethodDefinition" && a.kind === "constructor" ? (o && this.raiseRecoverable(a.start, "Duplicate constructor in the same class"), o = !0) : a.key && a.key.type === "PrivateIdentifier" && xi(n, a) && this.raiseRecoverable(a.key.start, "Identifier '#" + a.key.name + "' has already been declared"));
+    a && (s.body.push(a), a.type === "MethodDefinition" && a.kind === "constructor" ? (o && this.raiseRecoverable(a.start, "Duplicate constructor in the same class"), o = !0) : a.key && a.key.type === "PrivateIdentifier" && wi(n, a) && this.raiseRecoverable(a.key.start, "Identifier '#" + a.key.name + "' has already been declared"));
   }
   return this.strict = i, this.next(), e.body = this.finishNode(s, "ClassBody"), this.exitClassBody(), this.finishNode(e, t ? "ClassDeclaration" : "ClassExpression");
 };
@@ -3056,7 +3061,7 @@ c.parseClassElement = function(e) {
     (this.eatContextual("get") || this.eatContextual("set")) && (this.isClassElementNameStart() ? a = u : n = u);
   }
   if (n ? (i.computed = !1, i.key = this.startNodeAt(this.lastTokStart, this.lastTokStartLoc), i.key.name = n, this.finishNode(i.key, "Identifier")) : this.parseClassElementName(i), t < 13 || this.type === r.parenL || a !== "method" || s || o) {
-    var h = !i.static && Ae(i, "constructor"), p = h && e;
+    var h = !i.static && De(i, "constructor"), p = h && e;
     h && a !== "method" && this.raise(i.key.start, "Constructor can't have get/set modifier"), i.kind = h ? "constructor" : a, this.parseClassMethod(i, s, o, p);
   } else
     this.parseClassField(i);
@@ -3070,12 +3075,12 @@ c.parseClassElementName = function(e) {
 };
 c.parseClassMethod = function(e, t, i, n) {
   var s = e.key;
-  e.kind === "constructor" ? (t && this.raise(s.start, "Constructor can't be a generator"), i && this.raise(s.start, "Constructor can't be an async method")) : e.static && Ae(e, "prototype") && this.raise(s.start, "Classes may not have a static property named prototype");
+  e.kind === "constructor" ? (t && this.raise(s.start, "Constructor can't be a generator"), i && this.raise(s.start, "Constructor can't be an async method")) : e.static && De(e, "prototype") && this.raise(s.start, "Classes may not have a static property named prototype");
   var o = e.value = this.parseMethod(t, i, n);
   return e.kind === "get" && o.params.length !== 0 && this.raiseRecoverable(o.start, "getter should have no params"), e.kind === "set" && o.params.length !== 1 && this.raiseRecoverable(o.start, "setter should have exactly one param"), e.kind === "set" && o.params[0].type === "RestElement" && this.raiseRecoverable(o.params[0].start, "Setter cannot use rest params"), this.finishNode(e, "MethodDefinition");
 };
 c.parseClassField = function(e) {
-  return Ae(e, "constructor") ? this.raise(e.key.start, "Classes can't have a field named 'constructor'") : e.static && Ae(e, "prototype") && this.raise(e.key.start, "Classes can't have a static field named 'prototype'"), this.eat(r.eq) ? (this.enterScope(we | ze), e.value = this.parseMaybeAssign(), this.exitScope()) : e.value = null, this.semicolon(), this.finishNode(e, "PropertyDefinition");
+  return De(e, "constructor") ? this.raise(e.key.start, "Classes can't have a field named 'constructor'") : e.static && De(e, "prototype") && this.raise(e.key.start, "Classes can't have a static field named 'prototype'"), this.eat(r.eq) ? (this.enterScope(xe | ze), e.value = this.parseMaybeAssign(), this.exitScope()) : e.value = null, this.semicolon(), this.finishNode(e, "PropertyDefinition");
 };
 c.parseClassStaticBlock = function(e) {
   e.body = [];
@@ -3104,11 +3109,11 @@ c.exitClassBody = function() {
       me(t, a.name) || (s ? s.used.push(a) : this.raiseRecoverable(a.start, "Private field '#" + a.name + "' must be declared in an enclosing class"));
     }
 };
-function xi(e, t) {
+function wi(e, t) {
   var i = t.key.name, n = e[i], s = "true";
   return t.type === "MethodDefinition" && (t.kind === "get" || t.kind === "set") && (s = (t.static ? "s" : "i") + t.kind), n === "iget" && s === "iset" || n === "iset" && s === "iget" || n === "sget" && s === "sset" || n === "sset" && s === "sget" ? (e[i] = "true", !1) : n ? !0 : (e[i] = s, !1);
 }
-function Ae(e, t) {
+function De(e, t) {
   var i = e.computed, n = e.key;
   return !i && (n.type === "Identifier" && n.name === t || n.type === "Literal" && n.value === t);
 }
@@ -3143,7 +3148,7 @@ c.parseExportDefaultDeclaration = function() {
   var e;
   if (this.type === r._function || (e = this.isAsyncFunction())) {
     var t = this.startNode();
-    return this.next(), e && this.next(), this.parseFunction(t, ve | xt, !1, e);
+    return this.next(), e && this.next(), this.parseFunction(t, ve | wt, !1, e);
   } else if (this.type === r._class) {
     var i = this.startNode();
     return this.parseClass(i, "nullableID");
@@ -3201,7 +3206,7 @@ c.parseExportSpecifiers = function(e) {
   return t;
 };
 c.parseImport = function(e) {
-  return this.next(), this.type === r.string ? (e.specifiers = wi, e.source = this.parseExprAtom()) : (e.specifiers = this.parseImportSpecifiers(), this.expectContextual("from"), e.source = this.type === r.string ? this.parseExprAtom() : this.unexpected()), this.options.ecmaVersion >= 16 && (e.attributes = this.parseWithClause()), this.semicolon(), this.finishNode(e, "ImportDeclaration");
+  return this.next(), this.type === r.string ? (e.specifiers = xi, e.source = this.parseExprAtom()) : (e.specifiers = this.parseImportSpecifiers(), this.expectContextual("from"), e.source = this.type === r.string ? this.parseExprAtom() : this.unexpected()), this.options.ecmaVersion >= 16 && (e.attributes = this.parseWithClause()), this.semicolon(), this.finishNode(e, "ImportDeclaration");
 };
 c.parseImportSpecifier = function() {
   var e = this.startNode();
@@ -3374,7 +3379,7 @@ q.checkLValSimple = function(e, t, i) {
   var n = t !== ye;
   switch (e.type) {
     case "Identifier":
-      this.strict && this.reservedWordsStrictBind.test(e.name) && this.raiseRecoverable(e.start, (n ? "Binding " : "Assigning to ") + e.name + " in strict mode"), n && (t === te && e.name === "let" && this.raiseRecoverable(e.start, "let is disallowed as a lexically bound name"), i && (me(i, e.name) && this.raiseRecoverable(e.start, "Argument name clash"), i[e.name] = !0), t !== wt && this.declareName(e.name, t, e.start));
+      this.strict && this.reservedWordsStrictBind.test(e.name) && this.raiseRecoverable(e.start, (n ? "Binding " : "Assigning to ") + e.name + " in strict mode"), n && (t === te && e.name === "let" && this.raiseRecoverable(e.start, "let is disallowed as a lexically bound name"), i && (me(i, e.name) && this.raiseRecoverable(e.start, "Argument name clash"), i[e.name] = !0), t !== xt && this.declareName(e.name, t, e.start));
       break;
     case "ChainExpression":
       this.raiseRecoverable(e.start, "Optional chaining cannot appear in left-hand side");
@@ -3423,7 +3428,7 @@ q.checkLValInnerPattern = function(e, t, i) {
 };
 var H = function(t, i, n, s, o) {
   this.token = t, this.isExpr = !!i, this.preserveSpace = !!n, this.override = s, this.generator = !!o;
-}, D = {
+}, A = {
   b_stat: new H("{", !1),
   b_expr: new H("{", !0),
   b_tmpl: new H("${", !1),
@@ -3438,14 +3443,14 @@ var H = function(t, i, n, s, o) {
   f_gen: new H("function", !1, !1, null, !0)
 }, fe = T.prototype;
 fe.initialContext = function() {
-  return [D.b_stat];
+  return [A.b_stat];
 };
 fe.curContext = function() {
   return this.context[this.context.length - 1];
 };
 fe.braceIsBlock = function(e) {
   var t = this.curContext();
-  return t === D.f_expr || t === D.f_stat ? !0 : e === r.colon && (t === D.b_stat || t === D.b_expr) ? !t.isExpr : e === r._return || e === r.name && this.exprAllowed ? N.test(this.input.slice(this.lastTokEnd, this.start)) : e === r._else || e === r.semi || e === r.eof || e === r.parenR || e === r.arrow ? !0 : e === r.braceL ? t === D.b_stat : e === r._var || e === r._const || e === r.name ? !1 : !this.exprAllowed;
+  return t === A.f_expr || t === A.f_stat ? !0 : e === r.colon && (t === A.b_stat || t === A.b_expr) ? !t.isExpr : e === r._return || e === r.name && this.exprAllowed ? F.test(this.input.slice(this.lastTokEnd, this.start)) : e === r._else || e === r.semi || e === r.eof || e === r.parenR || e === r.arrow ? !0 : e === r.braceL ? t === A.b_stat : e === r._var || e === r._const || e === r.name ? !1 : !this.exprAllowed;
 };
 fe.inGeneratorContext = function() {
   for (var e = this.context.length - 1; e >= 1; e--) {
@@ -3468,33 +3473,33 @@ r.parenR.updateContext = r.braceR.updateContext = function() {
     return;
   }
   var e = this.context.pop();
-  e === D.b_stat && this.curContext().token === "function" && (e = this.context.pop()), this.exprAllowed = !e.isExpr;
+  e === A.b_stat && this.curContext().token === "function" && (e = this.context.pop()), this.exprAllowed = !e.isExpr;
 };
 r.braceL.updateContext = function(e) {
-  this.context.push(this.braceIsBlock(e) ? D.b_stat : D.b_expr), this.exprAllowed = !0;
+  this.context.push(this.braceIsBlock(e) ? A.b_stat : A.b_expr), this.exprAllowed = !0;
 };
 r.dollarBraceL.updateContext = function() {
-  this.context.push(D.b_tmpl), this.exprAllowed = !0;
+  this.context.push(A.b_tmpl), this.exprAllowed = !0;
 };
 r.parenL.updateContext = function(e) {
   var t = e === r._if || e === r._for || e === r._with || e === r._while;
-  this.context.push(t ? D.p_stat : D.p_expr), this.exprAllowed = !0;
+  this.context.push(t ? A.p_stat : A.p_expr), this.exprAllowed = !0;
 };
 r.incDec.updateContext = function() {
 };
 r._function.updateContext = r._class.updateContext = function(e) {
-  e.beforeExpr && e !== r._else && !(e === r.semi && this.curContext() !== D.p_stat) && !(e === r._return && N.test(this.input.slice(this.lastTokEnd, this.start))) && !((e === r.colon || e === r.braceL) && this.curContext() === D.b_stat) ? this.context.push(D.f_expr) : this.context.push(D.f_stat), this.exprAllowed = !1;
+  e.beforeExpr && e !== r._else && !(e === r.semi && this.curContext() !== A.p_stat) && !(e === r._return && F.test(this.input.slice(this.lastTokEnd, this.start))) && !((e === r.colon || e === r.braceL) && this.curContext() === A.b_stat) ? this.context.push(A.f_expr) : this.context.push(A.f_stat), this.exprAllowed = !1;
 };
 r.colon.updateContext = function() {
   this.curContext().token === "function" && this.context.pop(), this.exprAllowed = !0;
 };
 r.backQuote.updateContext = function() {
-  this.curContext() === D.q_tmpl ? this.context.pop() : this.context.push(D.q_tmpl), this.exprAllowed = !1;
+  this.curContext() === A.q_tmpl ? this.context.pop() : this.context.push(A.q_tmpl), this.exprAllowed = !1;
 };
 r.star.updateContext = function(e) {
   if (e === r._function) {
     var t = this.context.length - 1;
-    this.context[t] === D.f_expr ? this.context[t] = D.f_expr_gen : this.context[t] = D.f_gen;
+    this.context[t] === A.f_expr ? this.context[t] = A.f_expr_gen : this.context[t] = A.f_gen;
   }
   this.exprAllowed = !0;
 };
@@ -3587,8 +3592,8 @@ m.parseExprOp = function(e, t, i, n, s) {
     l && (o = r.logicalAND.binop);
     var u = this.value;
     this.next();
-    var h = this.start, p = this.startLoc, f = this.parseExprOp(this.parseMaybeUnary(null, !1, !1, s), h, p, o, s), x = this.buildBinary(t, i, e, f, u, a || l);
-    return (a && this.type === r.coalesce || l && (this.type === r.logicalOR || this.type === r.logicalAND)) && this.raiseRecoverable(this.start, "Logical expressions and coalesce expressions cannot be mixed. Wrap either by parentheses"), this.parseExprOp(x, t, i, n, s);
+    var h = this.start, p = this.startLoc, f = this.parseExprOp(this.parseMaybeUnary(null, !1, !1, s), h, p, o, s), w = this.buildBinary(t, i, e, f, u, a || l);
+    return (a && this.type === r.coalesce || l && (this.type === r.logicalOR || this.type === r.logicalAND)) && this.raiseRecoverable(this.start, "Logical expressions and coalesce expressions cannot be mixed. Wrap either by parentheses"), this.parseExprOp(w, t, i, n, s);
   }
   return e;
 };
@@ -3662,12 +3667,12 @@ m.parseSubscript = function(e, t, i, n, s, o, a) {
     var p = this.startNodeAt(t, i);
     p.object = e, h ? (p.property = this.parseExpression(), this.expect(r.bracketR)) : this.type === r.privateId && e.type !== "Super" ? p.property = this.parsePrivateIdent() : p.property = this.parseIdent(this.options.allowReserved !== "never"), p.computed = !!h, l && (p.optional = u), e = this.finishNode(p, "MemberExpression");
   } else if (!n && this.eat(r.parenL)) {
-    var f = new Be(), x = this.yieldPos, g = this.awaitPos, I = this.awaitIdentPos;
+    var f = new Be(), w = this.yieldPos, g = this.awaitPos, I = this.awaitIdentPos;
     this.yieldPos = 0, this.awaitPos = 0, this.awaitIdentPos = 0;
     var K = this.parseExprList(r.parenR, this.options.ecmaVersion >= 8, !1, f);
     if (s && !u && this.shouldParseAsyncArrow())
-      return this.checkPatternErrors(f, !1), this.checkYieldAwaitInDefaultParams(), this.awaitIdentPos > 0 && this.raise(this.awaitIdentPos, "Cannot use 'await' as identifier inside an async function"), this.yieldPos = x, this.awaitPos = g, this.awaitIdentPos = I, this.parseSubscriptAsyncArrow(t, i, K, a);
-    this.checkExpressionErrors(f, !0), this.yieldPos = x || this.yieldPos, this.awaitPos = g || this.awaitPos, this.awaitIdentPos = I || this.awaitIdentPos;
+      return this.checkPatternErrors(f, !1), this.checkYieldAwaitInDefaultParams(), this.awaitIdentPos > 0 && this.raise(this.awaitIdentPos, "Cannot use 'await' as identifier inside an async function"), this.yieldPos = w, this.awaitPos = g, this.awaitIdentPos = I, this.parseSubscriptAsyncArrow(t, i, K, a);
+    this.checkExpressionErrors(f, !0), this.yieldPos = w || this.yieldPos, this.awaitPos = g || this.awaitPos, this.awaitIdentPos = I || this.awaitIdentPos;
     var _ = this.startNodeAt(t, i);
     _.callee = e, _.arguments = K, l && (_.optional = u), e = this.finishNode(_, "CallExpression");
   } else if (this.type === r.backQuote) {
@@ -3688,7 +3693,7 @@ m.parseExprAtom = function(e, t, i) {
     case r.name:
       var o = this.start, a = this.startLoc, l = this.containsEsc, u = this.parseIdent(!1);
       if (this.options.ecmaVersion >= 8 && !l && u.name === "async" && !this.canInsertSemicolon() && this.eat(r._function))
-        return this.overrideContext(D.f_expr), this.parseFunction(this.startNodeAt(o, a), 0, !1, !0, t);
+        return this.overrideContext(A.f_expr), this.parseFunction(this.startNodeAt(o, a), 0, !1, !0, t);
       if (s && !this.canInsertSemicolon()) {
         if (this.eat(r.arrow))
           return this.parseArrowExpression(this.startNodeAt(o, a), [u], !1, t);
@@ -3712,7 +3717,7 @@ m.parseExprAtom = function(e, t, i) {
     case r.bracketL:
       return n = this.startNode(), this.next(), n.elements = this.parseExprList(r.bracketR, !0, !0, e), this.finishNode(n, "ArrayExpression");
     case r.braceL:
-      return this.overrideContext(D.b_expr), this.parseObj(!1, e);
+      return this.overrideContext(A.b_expr), this.parseObj(!1, e);
     case r._function:
       return n = this.startNode(), this.next(), this.parseFunction(n, 0);
     case r._class:
@@ -3770,7 +3775,7 @@ m.parseParenAndDistinguishExpression = function(e, t) {
   var i = this.start, n = this.startLoc, s, o = this.options.ecmaVersion >= 8;
   if (this.options.ecmaVersion >= 6) {
     this.next();
-    var a = this.start, l = this.startLoc, u = [], h = !0, p = !1, f = new Be(), x = this.yieldPos, g = this.awaitPos, I;
+    var a = this.start, l = this.startLoc, u = [], h = !0, p = !1, f = new Be(), w = this.yieldPos, g = this.awaitPos, I;
     for (this.yieldPos = 0, this.awaitPos = 0; this.type !== r.parenR; )
       if (h ? h = !1 : this.expect(r.comma), o && this.afterTrailingComma(r.parenR, !0)) {
         p = !0;
@@ -3785,8 +3790,8 @@ m.parseParenAndDistinguishExpression = function(e, t) {
         u.push(this.parseMaybeAssign(!1, f, this.parseParenItem));
     var K = this.lastTokEnd, _ = this.lastTokEndLoc;
     if (this.expect(r.parenR), e && this.shouldParseArrow(u) && this.eat(r.arrow))
-      return this.checkPatternErrors(f, !1), this.checkYieldAwaitInDefaultParams(), this.yieldPos = x, this.awaitPos = g, this.parseParenArrowList(i, n, u, t);
-    (!u.length || p) && this.unexpected(this.lastTokStart), I && this.unexpected(I), this.checkExpressionErrors(f, !0), this.yieldPos = x || this.yieldPos, this.awaitPos = g || this.awaitPos, u.length > 1 ? (s = this.startNodeAt(a, l), s.expressions = u, this.finishNodeAt(s, "SequenceExpression", K, _)) : s = u[0];
+      return this.checkPatternErrors(f, !1), this.checkYieldAwaitInDefaultParams(), this.yieldPos = w, this.awaitPos = g, this.parseParenArrowList(i, n, u, t);
+    (!u.length || p) && this.unexpected(this.lastTokStart), I && this.unexpected(I), this.checkExpressionErrors(f, !0), this.yieldPos = w || this.yieldPos, this.awaitPos = g || this.awaitPos, u.length > 1 ? (s = this.startNodeAt(a, l), s.expressions = u, this.finishNodeAt(s, "SequenceExpression", K, _)) : s = u[0];
   } else
     s = this.parseParenExpression();
   if (this.options.preserveParens) {
@@ -3838,7 +3843,7 @@ m.parseTemplate = function(e) {
   return this.next(), this.finishNode(i, "TemplateLiteral");
 };
 m.isAsyncProp = function(e) {
-  return !e.computed && e.key.type === "Identifier" && e.key.name === "async" && (this.type === r.name || this.type === r.num || this.type === r.string || this.type === r.bracketL || this.type.keyword || this.options.ecmaVersion >= 9 && this.type === r.star) && !N.test(this.input.slice(this.lastTokEnd, this.start));
+  return !e.computed && e.key.type === "Identifier" && e.key.name === "async" && (this.type === r.name || this.type === r.num || this.type === r.string || this.type === r.bracketL || this.type.keyword || this.options.ecmaVersion >= 9 && this.type === r.star) && !F.test(this.input.slice(this.lastTokEnd, this.start));
 };
 m.parseObj = function(e, t) {
   var i = this.startNode(), n = !0, s = {};
@@ -3900,7 +3905,7 @@ m.parseFunctionBody = function(e, t, i, n) {
     var l = this.options.ecmaVersion >= 7 && !this.isSimpleParamList(e.params);
     (!o || l) && (a = this.strictDirective(this.end), a && l && this.raiseRecoverable(e.start, "Illegal 'use strict' directive in function with non-simple parameter list"));
     var u = this.labels;
-    this.labels = [], a && (this.strict = !0), this.checkParams(e, !o && !a && !t && !i && this.isSimpleParamList(e.params)), this.strict && e.id && this.checkLValSimple(e.id, wt), e.body = this.parseBlock(!1, void 0, a && !o), e.expression = !1, this.adaptDirectivePrologue(e.body.body), this.labels = u;
+    this.labels = [], a && (this.strict = !0), this.checkParams(e, !o && !a && !t && !i && this.isSimpleParamList(e.params)), this.strict && e.id && this.checkLValSimple(e.id, xt), e.body = this.parseBlock(!1, void 0, a && !o), e.expression = !1, this.adaptDirectivePrologue(e.body.body), this.labels = u;
   }
   this.exitScope();
 };
@@ -3958,15 +3963,15 @@ m.parseAwait = function(e) {
   var t = this.startNode();
   return this.next(), t.argument = this.parseMaybeUnary(null, !0, !1, e), this.finishNode(t, "AwaitExpression");
 };
-var De = T.prototype;
-De.raise = function(e, t) {
+var Ae = T.prototype;
+Ae.raise = function(e, t) {
   var i = pt(this.input, e);
   t += " (" + i.line + ":" + i.column + ")", this.sourceFile && (t += " in " + this.sourceFile);
   var n = new SyntaxError(t);
   throw n.pos = e, n.loc = i, n.raisedAt = this.pos, n;
 };
-De.raiseRecoverable = De.raise;
-De.curPosition = function() {
+Ae.raiseRecoverable = Ae.raise;
+Ae.curPosition = function() {
   if (this.options.locations)
     return new ke(this.curLine, this.pos - this.lineStart);
 };
@@ -4014,48 +4019,48 @@ se.currentScope = function() {
 se.currentVarScope = function() {
   for (var e = this.scopeStack.length - 1; ; e--) {
     var t = this.scopeStack[e];
-    if (t.flags & (Pe | we | de))
+    if (t.flags & (Pe | xe | de))
       return t;
   }
 };
 se.currentThisScope = function() {
   for (var e = this.scopeStack.length - 1; ; e--) {
     var t = this.scopeStack[e];
-    if (t.flags & (Pe | we | de) && !(t.flags & qe))
+    if (t.flags & (Pe | xe | de) && !(t.flags & qe))
       return t;
   }
 };
 var Te = function(t, i, n) {
   this.type = "", this.start = i, this.end = 0, t.options.locations && (this.loc = new Ee(t, n)), t.options.directSourceFile && (this.sourceFile = t.options.directSourceFile), t.options.ranges && (this.range = [i, 0]);
-}, xe = T.prototype;
-xe.startNode = function() {
+}, we = T.prototype;
+we.startNode = function() {
   return new Te(this, this.start, this.startLoc);
 };
-xe.startNodeAt = function(e, t) {
+we.startNodeAt = function(e, t) {
   return new Te(this, e, t);
 };
 function yt(e, t, i, n) {
   return e.type = t, e.end = i, this.options.locations && (e.loc.end = n), this.options.ranges && (e.range[1] = i), e;
 }
-xe.finishNode = function(e, t) {
+we.finishNode = function(e, t) {
   return yt.call(this, e, t, this.lastTokEnd, this.lastTokEndLoc);
 };
-xe.finishNodeAt = function(e, t, i, n) {
+we.finishNodeAt = function(e, t, i, n) {
   return yt.call(this, e, t, i, n);
 };
-xe.copyNode = function(e) {
+we.copyNode = function(e) {
   var t = new Te(this, e.start, this.startLoc);
   for (var i in e)
     t[i] = e[i];
   return t;
 };
-var Ai = "Berf Beria_Erfe Gara Garay Gukh Gurung_Khema Hrkt Katakana_Or_Hiragana Kawi Kirat_Rai Krai Nag_Mundari Nagm Ol_Onal Onao Sidetic Sidt Sunu Sunuwar Tai_Yo Tayo Todhri Todr Tolong_Siki Tols Tulu_Tigalari Tutg Unknown Zzzz", At = "ASCII ASCII_Hex_Digit AHex Alphabetic Alpha Any Assigned Bidi_Control Bidi_C Bidi_Mirrored Bidi_M Case_Ignorable CI Cased Changes_When_Casefolded CWCF Changes_When_Casemapped CWCM Changes_When_Lowercased CWL Changes_When_NFKC_Casefolded CWKCF Changes_When_Titlecased CWT Changes_When_Uppercased CWU Dash Default_Ignorable_Code_Point DI Deprecated Dep Diacritic Dia Emoji Emoji_Component Emoji_Modifier Emoji_Modifier_Base Emoji_Presentation Extender Ext Grapheme_Base Gr_Base Grapheme_Extend Gr_Ext Hex_Digit Hex IDS_Binary_Operator IDSB IDS_Trinary_Operator IDST ID_Continue IDC ID_Start IDS Ideographic Ideo Join_Control Join_C Logical_Order_Exception LOE Lowercase Lower Math Noncharacter_Code_Point NChar Pattern_Syntax Pat_Syn Pattern_White_Space Pat_WS Quotation_Mark QMark Radical Regional_Indicator RI Sentence_Terminal STerm Soft_Dotted SD Terminal_Punctuation Term Unified_Ideograph UIdeo Uppercase Upper Variation_Selector VS White_Space space XID_Continue XIDC XID_Start XIDS", Dt = At + " Extended_Pictographic", Ct = Dt, Et = Ct + " EBase EComp EMod EPres ExtPict", zt = Et, Di = zt, Ci = {
-  9: At,
-  10: Dt,
+var Di = "Berf Beria_Erfe Gara Garay Gukh Gurung_Khema Hrkt Katakana_Or_Hiragana Kawi Kirat_Rai Krai Nag_Mundari Nagm Ol_Onal Onao Sidetic Sidt Sunu Sunuwar Tai_Yo Tayo Todhri Todr Tolong_Siki Tols Tulu_Tigalari Tutg Unknown Zzzz", Dt = "ASCII ASCII_Hex_Digit AHex Alphabetic Alpha Any Assigned Bidi_Control Bidi_C Bidi_Mirrored Bidi_M Case_Ignorable CI Cased Changes_When_Casefolded CWCF Changes_When_Casemapped CWCM Changes_When_Lowercased CWL Changes_When_NFKC_Casefolded CWKCF Changes_When_Titlecased CWT Changes_When_Uppercased CWU Dash Default_Ignorable_Code_Point DI Deprecated Dep Diacritic Dia Emoji Emoji_Component Emoji_Modifier Emoji_Modifier_Base Emoji_Presentation Extender Ext Grapheme_Base Gr_Base Grapheme_Extend Gr_Ext Hex_Digit Hex IDS_Binary_Operator IDSB IDS_Trinary_Operator IDST ID_Continue IDC ID_Start IDS Ideographic Ideo Join_Control Join_C Logical_Order_Exception LOE Lowercase Lower Math Noncharacter_Code_Point NChar Pattern_Syntax Pat_Syn Pattern_White_Space Pat_WS Quotation_Mark QMark Radical Regional_Indicator RI Sentence_Terminal STerm Soft_Dotted SD Terminal_Punctuation Term Unified_Ideograph UIdeo Uppercase Upper Variation_Selector VS White_Space space XID_Continue XIDC XID_Start XIDS", At = Dt + " Extended_Pictographic", Ct = At, Et = Ct + " EBase EComp EMod EPres ExtPict", zt = Et, Ai = zt, Ci = {
+  9: Dt,
+  10: At,
   11: Ct,
   12: Et,
   13: zt,
-  14: Di
+  14: Ai
 }, Ei = "Basic_Emoji Emoji_Keycap_Sequence RGI_Emoji_Modifier_Sequence RGI_Emoji_Flag_Sequence RGI_Emoji_Tag_Sequence RGI_Emoji_ZWJ_Sequence RGI_Emoji", zi = {
   9: "",
   10: "",
@@ -4063,7 +4068,7 @@ var Ai = "Berf Beria_Erfe Gara Garay Gukh Gurung_Khema Hrkt Katakana_Or_Hiragana
   12: "",
   13: "",
   14: Ei
-}, rt = "Cased_Letter LC Close_Punctuation Pe Connector_Punctuation Pc Control Cc cntrl Currency_Symbol Sc Dash_Punctuation Pd Decimal_Number Nd digit Enclosing_Mark Me Final_Punctuation Pf Format Cf Initial_Punctuation Pi Letter L Letter_Number Nl Line_Separator Zl Lowercase_Letter Ll Mark M Combining_Mark Math_Symbol Sm Modifier_Letter Lm Modifier_Symbol Sk Nonspacing_Mark Mn Number N Open_Punctuation Ps Other C Other_Letter Lo Other_Number No Other_Punctuation Po Other_Symbol So Paragraph_Separator Zp Private_Use Co Punctuation P punct Separator Z Space_Separator Zs Spacing_Mark Mc Surrogate Cs Symbol S Titlecase_Letter Lt Unassigned Cn Uppercase_Letter Lu", Pt = "Adlam Adlm Ahom Anatolian_Hieroglyphs Hluw Arabic Arab Armenian Armn Avestan Avst Balinese Bali Bamum Bamu Bassa_Vah Bass Batak Batk Bengali Beng Bhaiksuki Bhks Bopomofo Bopo Brahmi Brah Braille Brai Buginese Bugi Buhid Buhd Canadian_Aboriginal Cans Carian Cari Caucasian_Albanian Aghb Chakma Cakm Cham Cham Cherokee Cher Common Zyyy Coptic Copt Qaac Cuneiform Xsux Cypriot Cprt Cyrillic Cyrl Deseret Dsrt Devanagari Deva Duployan Dupl Egyptian_Hieroglyphs Egyp Elbasan Elba Ethiopic Ethi Georgian Geor Glagolitic Glag Gothic Goth Grantha Gran Greek Grek Gujarati Gujr Gurmukhi Guru Han Hani Hangul Hang Hanunoo Hano Hatran Hatr Hebrew Hebr Hiragana Hira Imperial_Aramaic Armi Inherited Zinh Qaai Inscriptional_Pahlavi Phli Inscriptional_Parthian Prti Javanese Java Kaithi Kthi Kannada Knda Katakana Kana Kayah_Li Kali Kharoshthi Khar Khmer Khmr Khojki Khoj Khudawadi Sind Lao Laoo Latin Latn Lepcha Lepc Limbu Limb Linear_A Lina Linear_B Linb Lisu Lisu Lycian Lyci Lydian Lydi Mahajani Mahj Malayalam Mlym Mandaic Mand Manichaean Mani Marchen Marc Masaram_Gondi Gonm Meetei_Mayek Mtei Mende_Kikakui Mend Meroitic_Cursive Merc Meroitic_Hieroglyphs Mero Miao Plrd Modi Mongolian Mong Mro Mroo Multani Mult Myanmar Mymr Nabataean Nbat New_Tai_Lue Talu Newa Newa Nko Nkoo Nushu Nshu Ogham Ogam Ol_Chiki Olck Old_Hungarian Hung Old_Italic Ital Old_North_Arabian Narb Old_Permic Perm Old_Persian Xpeo Old_South_Arabian Sarb Old_Turkic Orkh Oriya Orya Osage Osge Osmanya Osma Pahawh_Hmong Hmng Palmyrene Palm Pau_Cin_Hau Pauc Phags_Pa Phag Phoenician Phnx Psalter_Pahlavi Phlp Rejang Rjng Runic Runr Samaritan Samr Saurashtra Saur Sharada Shrd Shavian Shaw Siddham Sidd SignWriting Sgnw Sinhala Sinh Sora_Sompeng Sora Soyombo Soyo Sundanese Sund Syloti_Nagri Sylo Syriac Syrc Tagalog Tglg Tagbanwa Tagb Tai_Le Tale Tai_Tham Lana Tai_Viet Tavt Takri Takr Tamil Taml Tangut Tang Telugu Telu Thaana Thaa Thai Thai Tibetan Tibt Tifinagh Tfng Tirhuta Tirh Ugaritic Ugar Vai Vaii Warang_Citi Wara Yi Yiii Zanabazar_Square Zanb", Bt = Pt + " Dogra Dogr Gunjala_Gondi Gong Hanifi_Rohingya Rohg Makasar Maka Medefaidrin Medf Old_Sogdian Sogo Sogdian Sogd", Tt = Bt + " Elymaic Elym Nandinagari Nand Nyiakeng_Puachue_Hmong Hmnp Wancho Wcho", Vt = Tt + " Chorasmian Chrs Diak Dives_Akuru Khitan_Small_Script Kits Yezi Yezidi", Mt = Vt + " Cypro_Minoan Cpmn Old_Uyghur Ougr Tangsa Tnsa Toto Vithkuqi Vith", Pi = Mt + " " + Ai, Bi = {
+}, rt = "Cased_Letter LC Close_Punctuation Pe Connector_Punctuation Pc Control Cc cntrl Currency_Symbol Sc Dash_Punctuation Pd Decimal_Number Nd digit Enclosing_Mark Me Final_Punctuation Pf Format Cf Initial_Punctuation Pi Letter L Letter_Number Nl Line_Separator Zl Lowercase_Letter Ll Mark M Combining_Mark Math_Symbol Sm Modifier_Letter Lm Modifier_Symbol Sk Nonspacing_Mark Mn Number N Open_Punctuation Ps Other C Other_Letter Lo Other_Number No Other_Punctuation Po Other_Symbol So Paragraph_Separator Zp Private_Use Co Punctuation P punct Separator Z Space_Separator Zs Spacing_Mark Mc Surrogate Cs Symbol S Titlecase_Letter Lt Unassigned Cn Uppercase_Letter Lu", Pt = "Adlam Adlm Ahom Anatolian_Hieroglyphs Hluw Arabic Arab Armenian Armn Avestan Avst Balinese Bali Bamum Bamu Bassa_Vah Bass Batak Batk Bengali Beng Bhaiksuki Bhks Bopomofo Bopo Brahmi Brah Braille Brai Buginese Bugi Buhid Buhd Canadian_Aboriginal Cans Carian Cari Caucasian_Albanian Aghb Chakma Cakm Cham Cham Cherokee Cher Common Zyyy Coptic Copt Qaac Cuneiform Xsux Cypriot Cprt Cyrillic Cyrl Deseret Dsrt Devanagari Deva Duployan Dupl Egyptian_Hieroglyphs Egyp Elbasan Elba Ethiopic Ethi Georgian Geor Glagolitic Glag Gothic Goth Grantha Gran Greek Grek Gujarati Gujr Gurmukhi Guru Han Hani Hangul Hang Hanunoo Hano Hatran Hatr Hebrew Hebr Hiragana Hira Imperial_Aramaic Armi Inherited Zinh Qaai Inscriptional_Pahlavi Phli Inscriptional_Parthian Prti Javanese Java Kaithi Kthi Kannada Knda Katakana Kana Kayah_Li Kali Kharoshthi Khar Khmer Khmr Khojki Khoj Khudawadi Sind Lao Laoo Latin Latn Lepcha Lepc Limbu Limb Linear_A Lina Linear_B Linb Lisu Lisu Lycian Lyci Lydian Lydi Mahajani Mahj Malayalam Mlym Mandaic Mand Manichaean Mani Marchen Marc Masaram_Gondi Gonm Meetei_Mayek Mtei Mende_Kikakui Mend Meroitic_Cursive Merc Meroitic_Hieroglyphs Mero Miao Plrd Modi Mongolian Mong Mro Mroo Multani Mult Myanmar Mymr Nabataean Nbat New_Tai_Lue Talu Newa Newa Nko Nkoo Nushu Nshu Ogham Ogam Ol_Chiki Olck Old_Hungarian Hung Old_Italic Ital Old_North_Arabian Narb Old_Permic Perm Old_Persian Xpeo Old_South_Arabian Sarb Old_Turkic Orkh Oriya Orya Osage Osge Osmanya Osma Pahawh_Hmong Hmng Palmyrene Palm Pau_Cin_Hau Pauc Phags_Pa Phag Phoenician Phnx Psalter_Pahlavi Phlp Rejang Rjng Runic Runr Samaritan Samr Saurashtra Saur Sharada Shrd Shavian Shaw Siddham Sidd SignWriting Sgnw Sinhala Sinh Sora_Sompeng Sora Soyombo Soyo Sundanese Sund Syloti_Nagri Sylo Syriac Syrc Tagalog Tglg Tagbanwa Tagb Tai_Le Tale Tai_Tham Lana Tai_Viet Tavt Takri Takr Tamil Taml Tangut Tang Telugu Telu Thaana Thaa Thai Thai Tibetan Tibt Tifinagh Tfng Tirhuta Tirh Ugaritic Ugar Vai Vaii Warang_Citi Wara Yi Yiii Zanabazar_Square Zanb", Bt = Pt + " Dogra Dogr Gunjala_Gondi Gong Hanifi_Rohingya Rohg Makasar Maka Medefaidrin Medf Old_Sogdian Sogo Sogdian Sogd", Tt = Bt + " Elymaic Elym Nandinagari Nand Nyiakeng_Puachue_Hmong Hmnp Wancho Wcho", Vt = Tt + " Chorasmian Chrs Diak Dives_Akuru Khitan_Small_Script Kits Yezi Yezidi", Mt = Vt + " Cypro_Minoan Cpmn Old_Uyghur Ougr Tangsa Tnsa Toto Vithkuqi Vith", Pi = Mt + " " + Di, Bi = {
   9: Pt,
   10: Bt,
   11: Tt,
@@ -4570,7 +4575,7 @@ d.regexp_eatDecimalEscape = function(e) {
 var Lt = 0, ee = 1, W = 2;
 d.regexp_eatCharacterClassEscape = function(e) {
   var t = e.current();
-  if (Ni(t))
+  if (Fi(t))
     return e.lastIntValue = -1, e.advance(), ee;
   var i = !1;
   if (e.switchU && this.options.ecmaVersion >= 9 && ((i = t === 80) || t === 112)) {
@@ -4588,7 +4593,7 @@ d.regexp_eatCharacterClassEscape = function(e) {
   }
   return Lt;
 };
-function Ni(e) {
+function Fi(e) {
   return e === 100 || e === 68 || e === 115 || e === 83 || e === 119 || e === 87;
 }
 d.regexp_eatUnicodePropertyValueExpression = function(e) {
@@ -4621,21 +4626,21 @@ d.regexp_validateUnicodePropertyNameOrValue = function(e, t) {
 };
 d.regexp_eatUnicodePropertyName = function(e) {
   var t = 0;
-  for (e.lastStringValue = ""; Nt(t = e.current()); )
+  for (e.lastStringValue = ""; Ft(t = e.current()); )
     e.lastStringValue += $(t), e.advance();
   return e.lastStringValue !== "";
 };
-function Nt(e) {
+function Ft(e) {
   return Rt(e) || e === 95;
 }
 d.regexp_eatUnicodePropertyValue = function(e) {
   var t = 0;
-  for (e.lastStringValue = ""; Fi(t = e.current()); )
+  for (e.lastStringValue = ""; Ni(t = e.current()); )
     e.lastStringValue += $(t), e.advance();
   return e.lastStringValue !== "";
 };
-function Fi(e) {
-  return Nt(e) || Ve(e);
+function Ni(e) {
+  return Ft(e) || Ve(e);
 }
 d.regexp_eatLoneUnicodePropertyNameOrValue = function(e) {
   return this.regexp_eatUnicodePropertyValue(e);
@@ -4876,11 +4881,11 @@ function Ve(e) {
 }
 d.regexp_eatHexDigits = function(e) {
   var t = e.pos, i = 0;
-  for (e.lastIntValue = 0; Ft(i = e.current()); )
+  for (e.lastIntValue = 0; Nt(i = e.current()); )
     e.lastIntValue = 16 * e.lastIntValue + Ot(i), e.advance();
   return e.pos !== t;
 };
-function Ft(e) {
+function Nt(e) {
   return e >= 48 && e <= 57 || e >= 65 && e <= 70 || e >= 97 && e <= 102;
 }
 function Ot(e) {
@@ -4910,7 +4915,7 @@ d.regexp_eatFixedHexDigits = function(e, t) {
   e.lastIntValue = 0;
   for (var n = 0; n < t; ++n) {
     var s = e.current();
-    if (!Ft(s))
+    if (!Nt(s))
       return e.pos = i, !1;
     e.lastIntValue = 16 * e.lastIntValue + Ot(s), e.advance();
   }
@@ -5057,7 +5062,7 @@ b.readToken_caret = function() {
 };
 b.readToken_plus_min = function(e) {
   var t = this.input.charCodeAt(this.pos + 1);
-  return t === e ? t === 45 && !this.inModule && this.input.charCodeAt(this.pos + 2) === 62 && (this.lastTokEnd === 0 || N.test(this.input.slice(this.lastTokEnd, this.pos))) ? (this.skipLineComment(3), this.skipSpace(), this.nextToken()) : this.finishOp(r.incDec, 2) : t === 61 ? this.finishOp(r.assign, 2) : this.finishOp(r.plusMin, 1);
+  return t === e ? t === 45 && !this.inModule && this.input.charCodeAt(this.pos + 2) === 62 && (this.lastTokEnd === 0 || F.test(this.input.slice(this.lastTokEnd, this.pos))) ? (this.skipLineComment(3), this.skipSpace(), this.nextToken()) : this.finishOp(r.incDec, 2) : t === 61 ? this.finishOp(r.assign, 2) : this.finishOp(r.plusMin, 1);
 };
 b.readToken_lt_gt = function(e) {
   var t = this.input.charCodeAt(this.pos + 1), i = 1;
@@ -5188,7 +5193,7 @@ b.readRegexp = function() {
   for (var e, t, i = this.pos; ; ) {
     this.pos >= this.input.length && this.raise(i, "Unterminated regular expression");
     var n = this.input.charAt(this.pos);
-    if (N.test(n) && this.raise(i, "Unterminated regular expression"), e)
+    if (F.test(n) && this.raise(i, "Unterminated regular expression"), e)
       e = !1;
     else {
       if (n === "[")
@@ -5432,16 +5437,16 @@ T.acorn = {
   SourceLocation: Ee,
   getLineInfo: pt,
   Node: Te,
-  TokenType: w,
+  TokenType: x,
   tokTypes: r,
   keywordTypes: We,
   TokContext: H,
-  tokContexts: D,
+  tokContexts: A,
   isIdentifierChar: re,
   isIdentifierStart: X,
   Token: Je,
   isNewLine: pe,
-  lineBreak: N,
+  lineBreak: F,
   lineBreakG: ci,
   nonASCIIwhitespace: dt
 };
@@ -5516,7 +5521,7 @@ const Wi = [
   { view: "Top view", horizontal: 0, vertical: 1, depth: 2, near: 1 },
   { view: "Front view", horizontal: 0, vertical: 2, depth: 1, near: -1 },
   { view: "Right view", horizontal: 1, vertical: 2, depth: 0, near: 1 }
-], le = 48, Zi = 1e5, qi = 16e6, Hi = 25e5, Xi = Math.cos(Math.PI / 6), Ge = () => new Error(at("This assembly exceeds the drawing detail limit. Use a simpler representation.")), Ne = (e, t, i = t) => ({
+], le = 48, Zi = 1e5, qi = 16e6, Hi = 25e5, Xi = Math.cos(Math.PI / 6), Ge = () => new Error(at("This assembly exceeds the drawing detail limit. Use a simpler representation.")), Fe = (e, t, i = t) => ({
   left: Math.min(e[0], t[0], i[0]),
   bottom: Math.min(e[1], t[1], i[1]),
   right: Math.max(e[0], t[0], i[0]),
@@ -5531,14 +5536,14 @@ function Yi(e) {
   }
   const s = [], o = /* @__PURE__ */ new Map();
   for (let a = 0; a < e.indices.length; a += 3) {
-    const l = n[e.indices[a]], u = n[e.indices[a + 1]], h = n[e.indices[a + 2]], p = i[l], f = i[u], x = i[h], [g, I, K] = f.map((S, E) => S - p[E]), [_, R, ge] = x.map((S, E) => S - p[E]), ae = [I * ge - K * R, K * _ - g * ge, g * R - I * _], oe = Math.hypot(...ae);
+    const l = n[e.indices[a]], u = n[e.indices[a + 1]], h = n[e.indices[a + 2]], p = i[l], f = i[u], w = i[h], [g, I, K] = f.map((S, E) => S - p[E]), [_, R, ge] = w.map((S, E) => S - p[E]), ae = [I * ge - K * R, K * _ - g * ge, g * R - I * _], oe = Math.hypot(...ae);
     if (oe <= 1e-12)
       continue;
-    const A = [ae[0] / oe, ae[1] / oe, ae[2] / oe];
+    const D = [ae[0] / oe, ae[1] / oe, ae[2] / oe];
     s.push({ a: l, b: u, c: h });
     for (const [S, E] of [[l, u], [u, h], [h, l]]) {
       const C = Math.min(S, E), V = Math.max(S, E), y = C * i.length + V, z = o.get(y);
-      z ? z.normals.push(A) : o.set(y, { a: C, b: V, normals: [A] });
+      z ? z.normals.push(D) : o.set(y, { a: C, b: V, normals: [D] });
     }
   }
   return { vertices: i, faces: s, edges: [...o.values()] };
@@ -5548,34 +5553,34 @@ function $i(e, t, i, n) {
     const I = g[0] - s[0], K = g[1] - s[1], _ = (I * (a[1] - s[1]) - K * (a[0] - s[0])) / l, R = ((o[0] - s[0]) * K - (o[1] - s[1]) * I) / l;
     return [_, R, 1 - _ - R, s[2] + _ * (o[2] - s[2]) + R * (a[2] - s[2]) - g[2] - n];
   }, h = u(t), p = u(i);
-  let f = 0, x = 1;
+  let f = 0, w = 1;
   for (let g = 0; g < h.length; g++) {
     if (h[g] <= 0 && p[g] <= 0) {
       if (g === 3 || h[g] < -1e-10 || p[g] < -1e-10)
         return;
       continue;
     }
-    h[g] < 0 ? f = Math.max(f, h[g] / (h[g] - p[g])) : p[g] < 0 && (x = Math.min(x, h[g] / (h[g] - p[g])));
+    h[g] < 0 ? f = Math.max(f, h[g] / (h[g] - p[g])) : p[g] < 0 && (w = Math.min(w, h[g] / (h[g] - p[g])));
   }
-  return x - f > 1e-8 ? [f, x] : void 0;
+  return w - f > 1e-8 ? [f, w] : void 0;
 }
 function en(e, t, i, n) {
-  const { horizontal: s, vertical: o, depth: a, near: l } = t, u = n[s] - i[s], h = n[o] - i[o], p = Math.max(1e-6, Math.min(2e-3, (n[a] - i[a]) * 1e-6)), f = e.map((A) => A.vertices.map((S) => [S[s] - i[s], S[o] - i[o], S[a] * l])), x = Array.from({ length: le * le }, () => []), g = (A, S) => Math.min(le - 1, Math.max(0, Math.floor(A / S * le))), I = (A, S) => {
-    const E = g(A.left, u), C = g(A.right, u), V = g(A.bottom, h), y = g(A.top, h);
+  const { horizontal: s, vertical: o, depth: a, near: l } = t, u = n[s] - i[s], h = n[o] - i[o], p = Math.max(1e-6, Math.min(2e-3, (n[a] - i[a]) * 1e-6)), f = e.map((D) => D.vertices.map((S) => [S[s] - i[s], S[o] - i[o], S[a] * l])), w = Array.from({ length: le * le }, () => []), g = (D, S) => Math.min(le - 1, Math.max(0, Math.floor(D / S * le))), I = (D, S) => {
+    const E = g(D.left, u), C = g(D.right, u), V = g(D.bottom, h), y = g(D.top, h);
     for (let z = V; z <= y; z++)
       for (let U = E; U <= C; U++)
         S(z * le + U);
-  }, K = (A, S, E) => {
-    const [C, V] = A[0] <= S[0] ? [A, S] : [S, A], y = V[0] - C[0];
+  }, K = (D, S, E) => {
+    const [C, V] = D[0] <= S[0] ? [D, S] : [S, D], y = V[0] - C[0];
     if (y < 1e-10) {
-      I(Ne(A, S), E);
+      I(Fe(D, S), E);
       return;
     }
     const z = V[1] - C[1], U = u / le;
     for (let J = g(C[0], u); J <= g(V[0], u); J++) {
       const Se = C[1] + z * Math.max(0, (J * U - C[0]) / y), be = C[1] + z * Math.min(1, ((J + 1) * U - C[0]) / y);
-      for (let F = g(Math.min(Se, be), h); F <= g(Math.max(Se, be), h); F++)
-        E(F * le + J);
+      for (let N = g(Math.min(Se, be), h); N <= g(Math.max(Se, be), h); N++)
+        E(N * le + J);
     }
   };
   let _ = 0, R = 0;
@@ -5583,30 +5588,30 @@ function en(e, t, i, n) {
     if (++_ > qi)
       throw Ge();
   };
-  for (const [A, S] of e.entries())
+  for (const [D, S] of e.entries())
     for (const E of S.faces) {
-      const [C, V, y] = [f[A][E.a], f[A][E.b], f[A][E.c]], z = (V[0] - C[0]) * (y[1] - C[1]) - (V[1] - C[1]) * (y[0] - C[0]);
+      const [C, V, y] = [f[D][E.a], f[D][E.b], f[D][E.c]], z = (V[0] - C[0]) * (y[1] - C[1]) - (V[1] - C[1]) * (y[0] - C[0]);
       if (Math.abs(z) < 1e-10)
         continue;
-      const U = { a: C, b: V, c: y, det: z, box: Ne(C, V, y), nearest: Math.max(C[2], V[2], y[2]) };
+      const U = { a: C, b: V, c: y, det: z, box: Fe(C, V, y), nearest: Math.max(C[2], V[2], y[2]) };
       I(U.box, (J) => {
-        ge(), x[J].push(U);
+        ge(), w[J].push(U);
       });
     }
   const ae = [], oe = [];
-  for (const [A, S] of e.entries())
+  for (const [D, S] of e.entries())
     for (const E of S.edges) {
       const [C, ...V] = E.normals;
       if (V.length && !V.some((P) => Ji(C, P) < Xi || C[a] * l > 1e-8 != P[a] * l > 1e-8))
         continue;
-      const y = f[A][E.a], z = f[A][E.b], U = Math.hypot(z[0] - y[0], z[1] - y[1]);
+      const y = f[D][E.a], z = f[D][E.b], U = Math.hypot(z[0] - y[0], z[1] - y[1]);
       if (U < 1e-5)
         continue;
-      const J = Ne(y, z), Se = Math.min(y[2], z[2]) + p, be = /* @__PURE__ */ new Set(), F = [];
+      const J = Fe(y, z), Se = Math.min(y[2], z[2]) + p, be = /* @__PURE__ */ new Set(), N = [];
       let Ye = !1;
       K(y, z, (P) => {
         if (!Ye)
-          for (const O of x[P]) {
+          for (const O of w[P]) {
             if (ge(), O.nearest <= Se || !Qi(J, O.box) || be.has(O))
               continue;
             if (be.add(O), ++R > Hi)
@@ -5614,25 +5619,25 @@ function en(e, t, i, n) {
             const Y = $i(O, y, z, p);
             if (Y) {
               if (Y[0] <= 1e-8 && Y[1] >= 1 - 1e-8) {
-                F.splice(0, F.length, [0, 1]), Ye = !0;
+                N.splice(0, N.length, [0, 1]), Ye = !0;
                 break;
               }
-              F.push(Y);
+              N.push(Y);
             }
           }
-      }), F.sort((P, O) => P[0] - O[0]);
+      }), N.sort((P, O) => P[0] - O[0]);
       const $e = (P) => [y[0] + (z[0] - y[0]) * P, y[1] + (z[1] - y[1]) * P], Me = (P, O, Y) => {
         if ((O - P) * U <= 1e-5)
           return;
         const ie = $e(P), et = $e(O);
-        ae.push(...ie, ...et, Y ? 1 : 0), Y || oe.push(A, ...S.vertices[E.a], ...S.vertices[E.b], ...ie, ...et);
+        ae.push(...ie, ...et, Y ? 1 : 0), Y || oe.push(D, ...S.vertices[E.a], ...S.vertices[E.b], ...ie, ...et);
       };
       let Ie = 0;
-      for (let P = 0; P < F.length; P++) {
-        const [O, Y] = F[P];
+      for (let P = 0; P < N.length; P++) {
+        const [O, Y] = N[P];
         let ie = Y;
-        for (; P + 1 < F.length && F[P + 1][0] <= ie + 1e-8; )
-          ie = Math.max(ie, F[++P][1]);
+        for (; P + 1 < N.length && N[P + 1][0] <= ie + 1e-8; )
+          ie = Math.max(ie, N[++P][1]);
         Me(Ie, O, !1), Me(O, ie, !0), Ie = ie;
       }
       Me(Ie, 1, !1);

@@ -7,8 +7,8 @@ import JSZip from 'jszip';
 import {chromium} from 'playwright';
 import {CAD_PROJECT_PATH} from '../overlay/scratch-gui/src/lib/bw-cad-project.js';
 
-const [url,fixture]=process.argv.slice(2);
-if(!url||!fixture)throw Error('Usage: node scripts/verify-cad-dwg-browser.mjs <app-url> <inch plate.dwg>');
+const [url,fixture,output]=process.argv.slice(2);
+if(!url||!fixture)throw Error('Usage: node scripts/verify-cad-dwg-browser.mjs <app-url> <inch plate.dwg> [exported.dwg]');
 const dir=await mkdtemp(join(tmpdir(),'bw-dwg-project-'));
 const browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
 const tab=page=>page.getByRole('tab',{name:'CAD',exact:true});
@@ -45,6 +45,20 @@ try{
  await sketch.waitFor({state:'hidden'});
  await page.evaluate(()=>window.__bwCad.editor.whenIdle());
 
+ const exportDwg=page.getByRole('button',{name:'Export sketch as DWG',exact:true});
+ if(!await exportDwg.isVisible())await page.getByRole('button',{name:'Properties',exact:true}).tap();
+ const [dwg]=await Promise.all([page.waitForEvent('download'),exportDwg.tap()]);
+ const bytes=await readFile(await dwg.path());
+ assert.equal(bytes.subarray(0,6).toString(),'AC1032');
+ if(output)await dwg.saveAs(output);
+ await page.getByRole('button',{name:'Sketch',exact:true}).tap();
+ await sketch.getByText('Import DXF or DWG outline',{exact:true}).tap();
+ await sketch.getByLabel('Choose DWG file',{exact:true}).setInputFiles({name:'Round trip.dwg',mimeType:'image/vnd.dwg',buffer:bytes});
+ await coordinates.waitFor({state:'visible'});
+ assert.match(await coordinates.inputValue(),/50\.8, 25\.4/);
+ assert.match(await coordinates.inputValue(),/0, 0, 0\.25, 2\.54, 5\.08/);
+ await sketch.getByRole('button',{name:'Close sketch',exact:true}).tap();
+
  await file(page).tap();
  const [save]=await Promise.all([
   page.waitForEvent('download'),page.getByText('Save to your computer',{exact:true}).tap()
@@ -80,7 +94,7 @@ try{
  if(!await edit.isVisible())await restored.getByRole('button',{name:'Properties',exact:true}).tap();
  await edit.tap();
  assert.match(await restored.getByLabel('Outline points X, Y (mm)',{exact:true}).inputValue(),/50\.8, 25\.4/);
- console.log('PASS DWG worker, layer selection, inch scale, editable geometry and Brickwright SB3 save and reopen');
+ console.log('PASS DWG import, binary export and reimport, layer selection, inch scale, editable geometry and Brickwright SB3 save and reopen');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});

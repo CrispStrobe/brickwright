@@ -826,6 +826,11 @@ const H6 = {
   "Apply thread redesign": "Gewindeauslegung anwenden",
   "Rebuild a resized screw at a chosen pitch or turns per start, resetting its local scale as one saved edit.": "Eine skalierte Schraube mit gewählter Steigung oder Windungszahl pro Gang als einen gespeicherten Schritt neu aufbauen und ihre lokale Skalierung zurücksetzen."
 }, W6 = {
+  "DWG export requires an original sketch extrusion.": "Für den DWG-Export ist eine ursprüngliche Skizzenextrusion erforderlich.",
+  "Could not export the sketch as DWG.": "Die Skizze konnte nicht als DWG exportiert werden.",
+  "DWG export took too long. Try a simpler sketch.": "Der DWG-Export hat zu lange gedauert. Versuche es mit einer einfacheren Skizze.",
+  "Export sketch as DWG": "Skizze als DWG exportieren",
+  "Export path as DWG": "Pfad als DWG exportieren",
   "Choose DWG file": "DWG-Datei auswählen",
   "Choose a DWG file up to 1 MB.": "Wähle eine DWG-Datei bis 1 MB.",
   "DWG layers": "DWG-Ebenen",

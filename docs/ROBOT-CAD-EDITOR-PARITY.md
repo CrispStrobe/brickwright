@@ -266,8 +266,13 @@ linked drawings/PDF, expose visual modeling commands, then extend file exchange.
 DXF is the first fabrication exchange format. For a 2D DWG, open the same
 import controls and choose **Choose DWG file**. The CAD worker decodes it
 locally and uses the sketch layer and unit controls. Imported profiles and
-paths remain editable and save in the SB3. DXF export is available for the
-result. DWG export and STEP supplier-part import remain on the roadmap.
+paths remain editable and save in the SB3. Choose **Export sketch as DWG**
+in extrusion Properties or **Export path as DWG** in the path editor for
+AutoCAD 2018 DWG at 1:1 in millimetres. DXF export is also available. Full-sheet
+DWG exchange and STEP supplier-part import remain on the roadmap.
+LibreDWG 0.14 read the exported outline and path with the expected dimensions,
+layers, bulges and widths. Its verbose check flagged the 2018 container's section
+and class metadata. Wider DWG application compatibility still needs testing.
 The first cross-host acceptance model is a TT motor mounting plate with a
 driving hole-spacing dimension and a 1:1 drilling template.
 
@@ -328,7 +333,7 @@ relative offsets such as `@40, 0`. For exact placement, choose up to two sketche
 on the same plane as snap references. The preview highlights endpoints,
 midpoints, centers and intersections. Turn on **Edit edge curves** to drag
 an edge midpoint and set its curvature while keeping the endpoints fixed.
-Coupled sketch constraints, DWG and STEP remain open.
+General coupled sketch constraints and STEP import remain open.
 
 **Properties → Export drilling template (PDF)** produces a full-size A4
 vector template in the local sketch plane. It evaluates the current cutout

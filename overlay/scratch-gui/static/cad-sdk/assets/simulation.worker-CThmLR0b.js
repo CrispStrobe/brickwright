@@ -826,6 +826,11 @@ const wg = {
   "Apply thread redesign": "Gewindeauslegung anwenden",
   "Rebuild a resized screw at a chosen pitch or turns per start, resetting its local scale as one saved edit.": "Eine skalierte Schraube mit gewählter Steigung oder Windungszahl pro Gang als einen gespeicherten Schritt neu aufbauen und ihre lokale Skalierung zurücksetzen."
 }, Sg = {
+  "DWG export requires an original sketch extrusion.": "Für den DWG-Export ist eine ursprüngliche Skizzenextrusion erforderlich.",
+  "Could not export the sketch as DWG.": "Die Skizze konnte nicht als DWG exportiert werden.",
+  "DWG export took too long. Try a simpler sketch.": "Der DWG-Export hat zu lange gedauert. Versuche es mit einer einfacheren Skizze.",
+  "Export sketch as DWG": "Skizze als DWG exportieren",
+  "Export path as DWG": "Pfad als DWG exportieren",
   "Choose DWG file": "DWG-Datei auswählen",
   "Choose a DWG file up to 1 MB.": "Wähle eine DWG-Datei bis 1 MB.",
   "DWG layers": "DWG-Ebenen",
@@ -10970,7 +10975,7 @@ async function I7(A, g, I, C = {}) {
     }
   if ([...I.values()].reduce((x, p) => x + p.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = C.J ?? await (G4 ?? (G4 = import("./jolt-physics.wasm-compat-BvrEwWE7.js").then((x) => x.default()))), Q = new i.JoltSettings();
+  const i = C.J ?? await (G4 ?? (G4 = import("./jolt-physics.wasm-compat-CUUPBO3n.js").then((x) => x.default()))), Q = new i.JoltSettings();
   Q.mMaxBodies = 512, Q.mMaxBodyPairs = Math.max(1024, B.length * B.length), Q.mMaxContactConstraints = 8192;
   const s = new i.ObjectLayerPairFilterTable(2);
   s.EnableCollision(0, 1), s.EnableCollision(1, 1);
