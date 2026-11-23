@@ -33,7 +33,7 @@ const Gt = {
   "Choose light or dark mode": "Hellen oder dunklen Modus wählen",
   "Loading models…": "Modelle werden geladen…",
   "Original source files": "Originale Quelldateien",
-  "Model source uses project version 6 through 33": "Modellquelltext verwendet Projektversion 6 bis 33",
+  "Model source uses project version 6 through 34": "Modellquelltext verwendet Projektversion 6 bis 34",
   "Unknown material preset": "Unbekannte Materialvorlage",
   "Initial velocity requires project version 8": "Anfangsgeschwindigkeit erfordert Projektversion 8",
   "Invalid initial body velocity": "Ungültige Anfangsgeschwindigkeit",
@@ -823,6 +823,11 @@ const Gt = {
   "Apply thread redesign": "Gewindeauslegung anwenden",
   "Rebuild a resized screw at a chosen pitch or turns per start, resetting its local scale as one saved edit.": "Eine skalierte Schraube mit gewählter Steigung oder Windungszahl pro Gang als einen gespeicherten Schritt neu aufbauen und ihre lokale Skalierung zurücksetzen."
 }, Yt = {
+  "Arc-to-arc tangency requires document version 34": "Tangentiale Bogenübergänge erfordern Dokumentversion 34",
+  "Arc tangency cannot contain a cycle. Keep one arc as the reference.": "Bogenabhängigkeiten dürfen keinen Kreis bilden. Behalte einen Bogen als Referenz.",
+  "Choose an adjoining arc as the tangent reference.": "Wähle einen angrenzenden Bogen als Tangentenreferenz.",
+  "Arc tangent to arc": "Bogen tangential zum Bogen",
+  "The first arc follows the adjoining reference arc.": "Der erste Bogen folgt dem angrenzenden Referenzbogen.",
   "Arc tangency requires document version 33": "Bogentangentialität erfordert Dokumentversion 33",
   "Choose an adjoining straight segment for tangency.": "Wähle ein angrenzendes gerades Segment für die Tangente.",
   "This join cannot form a curved tangent arc. Adjust the adjoining segments.": "An diesem Übergang kann kein Tangentialbogen entstehen. Passe die angrenzenden Segmente an.",

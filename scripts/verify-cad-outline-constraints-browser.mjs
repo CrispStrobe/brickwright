@@ -86,6 +86,18 @@ try{
  await sketch.waitFor({state:'hidden'});
  await page.evaluate(()=>window.__bwCad.editor.whenIdle());
 
+ await page.getByRole('button',{name:'Sketch',exact:true}).tap();
+ await sketch.getByLabel('Profile',{exact:true}).selectOption('outline');
+ await coordinates.fill('100, 0\n110, 0, 0.16\n116, 2, 0.15\n120, 10\n120, 20\n100, 20');
+ await coordinates.blur();
+ await sketch.getByText('Outline constraints',{exact:true}).tap();
+ await add('arc-tangent',2,1);
+ await solve.tap();
+ await sketch.getByText('Outline solved.',{exact:true}).waitFor();
+ await sketch.getByRole('button',{name:'Create extrusion',exact:true}).tap();
+ await sketch.waitFor({state:'hidden'});
+ await page.evaluate(()=>window.__bwCad.editor.whenIdle());
+
  await file(page).tap();
  const [download]=await Promise.all([
   page.waitForEvent('download'),page.getByText('Save to your computer',{exact:true}).tap()
@@ -94,9 +106,17 @@ try{
  await download.saveAs(project);
  const zip=await JSZip.loadAsync(await readFile(project));
  const saved=JSON.parse(await zip.file(CAD_PROJECT_PATH).async('text'));
- assert.equal(saved.version,33);
- assert.equal(saved.roots.length,1);
+ assert.equal(saved.version,34);
+ assert.equal(saved.roots.length,2);
  const id=saved.nodes[saved.roots[0]].sketchId;
+ const compoundId=saved.nodes[saved.roots[1]].sketchId;
+ const compound=saved.sketches[compoundId].profile;
+ const [,first,shared,last]=compound.vertexIds;
+ assert.deepEqual(compound.relations,[{kind:'arc-tangent',edge:[shared,last],other:[first,shared]}]);
+ assert.equal(compound.bulges[1],.16);
+ const firstEnd=Math.atan2(2,6)+2*Math.atan(compound.bulges[1]);
+ const secondStart=Math.atan2(8,4)-2*Math.atan(compound.bulges[2]);
+ assert.ok(Math.abs(firstEnd-secondStart)<1e-9);
  const profile=saved.sketches[id].profile;
  assert.deepEqual(rounded(profile.points),[[0,0],[40,0],[40,20],[0,20]]);
  assert.equal(profile.vertexIds.length,4);
@@ -121,6 +141,7 @@ try{
  await restored.evaluate(()=>window.__bwCad.editor.whenIdle());
  const readProfile=()=>restored.evaluate(id=>window.__bwCad.editor.session.state.document.sketches[id].profile,id);
  assert.deepEqual(await readProfile(),profile);
+ assert.deepEqual(await restored.evaluate(id=>window.__bwCad.editor.session.state.document.sketches[id].profile,compoundId),compound);
  const revision=await restored.evaluate(()=>window.__bwCad.editor.session.state.revision);
  await setReach(restored,'55');
  const solved=await readProfile();
@@ -155,7 +176,7 @@ try{
  assert.match(await draft.inputValue(),/Keep this rover sketch note/);
  assert.equal(await restored.evaluate(()=>window.__bwCad.editor.session.state.revision),revision+2);
  await source.getByRole('button',{name:'Close model source',exact:true}).tap();
- const object=restored.getByTestId('object-name');
+ const object=restored.getByTestId('object-name').first();
  if(!await object.isVisible())await restored.getByRole('button',{name:'Objects',exact:true}).tap();
  await object.tap();
  const edit=restored.getByRole('button',{name:'Edit sketch & extrusion',exact:true});
@@ -178,7 +199,7 @@ try{
  assert.equal(Number(edited.relations[4].length),56);
  assert.equal(edited.relations.length,8);
  requireRadius(edited,29);
- console.log('PASS retained arc tangency and radius, SB3 reopen, parameter and source solves, and editing saved constraints');
+ console.log('PASS retained arc-to-arc and arc-to-line tangency, SB3 reopen, parameter and source solves, and editing saved constraints');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});

@@ -36,7 +36,7 @@ const H6 = {
   "Choose light or dark mode": "Hellen oder dunklen Modus wählen",
   "Loading models…": "Modelle werden geladen…",
   "Original source files": "Originale Quelldateien",
-  "Model source uses project version 6 through 33": "Modellquelltext verwendet Projektversion 6 bis 33",
+  "Model source uses project version 6 through 34": "Modellquelltext verwendet Projektversion 6 bis 34",
   "Unknown material preset": "Unbekannte Materialvorlage",
   "Initial velocity requires project version 8": "Anfangsgeschwindigkeit erfordert Projektversion 8",
   "Invalid initial body velocity": "Ungültige Anfangsgeschwindigkeit",
@@ -826,6 +826,11 @@ const H6 = {
   "Apply thread redesign": "Gewindeauslegung anwenden",
   "Rebuild a resized screw at a chosen pitch or turns per start, resetting its local scale as one saved edit.": "Eine skalierte Schraube mit gewählter Steigung oder Windungszahl pro Gang als einen gespeicherten Schritt neu aufbauen und ihre lokale Skalierung zurücksetzen."
 }, W6 = {
+  "Arc-to-arc tangency requires document version 34": "Tangentiale Bogenübergänge erfordern Dokumentversion 34",
+  "Arc tangency cannot contain a cycle. Keep one arc as the reference.": "Bogenabhängigkeiten dürfen keinen Kreis bilden. Behalte einen Bogen als Referenz.",
+  "Choose an adjoining arc as the tangent reference.": "Wähle einen angrenzenden Bogen als Tangentenreferenz.",
+  "Arc tangent to arc": "Bogen tangential zum Bogen",
+  "The first arc follows the adjoining reference arc.": "Der erste Bogen folgt dem angrenzenden Referenzbogen.",
   "Arc tangency requires document version 33": "Bogentangentialität erfordert Dokumentversion 33",
   "Choose an adjoining straight segment for tangency.": "Wähle ein angrenzendes gerades Segment für die Tangente.",
   "This join cannot form a curved tangent arc. Adjust the adjoining segments.": "An diesem Übergang kann kein Tangentialbogen entstehen. Passe die angrenzenden Segmente an.",
@@ -5969,10 +5974,11 @@ function rI(A, g) {
           throw new Error(t("An arc can have only one driving radius."));
         return E.add(n), { kind: D.kind, edge: n, radius: s(D.radius), sweep: D.sweep };
       }
-      case "tangent": {
+      case "tangent":
+      case "arc-tangent": {
         const a = B(D.other), u = `${n}:${a}`;
         if (!sI(n, a, I.length))
-          throw new Error(t("Choose an adjoining straight segment for tangency."));
+          throw new Error(t(D.kind === "tangent" ? "Choose an adjoining straight segment for tangency." : "Choose an adjoining arc as the tangent reference."));
         if (o.has(u))
           throw new Error(t("This tangent is already defined."));
         return o.add(u), { kind: D.kind, edge: n, other: a };
@@ -6706,6 +6712,8 @@ function YI(A) {
           throw new Error(t("Driving arc radii require document version 32"));
         if (A.version < 33 && C.some((e) => e.kind === "tangent"))
           throw new Error(t("Arc tangency requires document version 33"));
+        if (A.version < 34 && C.some((e) => e.kind === "arc-tangent"))
+          throw new Error(t("Arc-to-arc tangency requires document version 34"));
       }
     }
   }
@@ -7851,7 +7859,7 @@ function XI(A, g, I = {}) {
   const C = ZI(A), e = (n, a) => {
     throw new l1(n, a?.node.start ?? 0, A);
   }, i = C.find((n) => n.key === "project");
-  (i.args.length !== 1 || !i.args[0] || typeof i.args[0] != "object" || Array.isArray(i.args[0])) && e(t("Invalid project declaration"), i), [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33].includes(i.args[0].version) || e(t("Model source uses project version 6 through 33"), i);
+  (i.args.length !== 1 || !i.args[0] || typeof i.args[0] != "object" || Array.isArray(i.args[0])) && e(t("Invalid project declaration"), i), [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34].includes(i.args[0].version) || e(t("Model source uses project version 6 through 34"), i);
   const q = { ...i.args[0], nodes: /* @__PURE__ */ Object.create(null), roots: [], modelSource: { version: 1, language: "brickwright-design", source: A } };
   q.id !== g.id && e(t("Keep the current project identity in model source"), i), delete q.provenance, delete q.sketches, delete q.joints;
   const E = new Set(C.filter((n) => n.key.startsWith("node:")).map((n) => n.args[0])), o = [], s = Object.assign(/* @__PURE__ */ Object.create(null), q.parametric?.parameters ?? {});
@@ -8012,7 +8020,7 @@ function RA(A) {
 }
 const H2 = (A) => !!A && typeof A == "object" && !Array.isArray(A), f1 = (A, g = -1e6, I = 1e6) => typeof A == "number" && Number.isFinite(A) && A >= g && A <= I, T5 = (A, g = 160) => typeof A == "string" && A.trim().length > 0 && A.length <= g && !/[\u0000-\u001f]/.test(A), I2 = (A) => typeof A == "string" && /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,95}$/.test(A) && !["constructor", "prototype", "__proto__"].includes(A), r2 = (A, g = -1e6, I = 1e6) => Array.isArray(A) && A.length === 3 && A.every((C) => f1(C, g, I));
 function i8(A) {
-  (!H2(A) || A.format !== "brickwright-cad" || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33].includes(A.version) || A.units !== "mm") && RA(t("unsupported format, version or units")), (!I2(A.id) || !T5(A.title) || !H2(A.nodes) || !Array.isArray(A.roots)) && RA(t("missing document identity, nodes or roots"));
+  (!H2(A) || A.format !== "brickwright-cad" || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34].includes(A.version) || A.units !== "mm") && RA(t("unsupported format, version or units")), (!I2(A.id) || !T5(A.title) || !H2(A.nodes) || !Array.isArray(A.roots)) && RA(t("missing document identity, nodes or roots"));
   const g = A.nodes, I = Object.entries(g);
   (I.length > 2e3 || A.roots.length > 2e3) && RA(t("too many objects (maximum 2000)"));
   for (const [s, B] of I) {
