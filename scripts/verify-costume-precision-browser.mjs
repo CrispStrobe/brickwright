@@ -227,7 +227,49 @@ try {
     assert.equal(repaired.assetId,openArtwork);
     assert.equal(repaired.profile.kind,'outline');
     assert.deepEqual(repaired.profile.points.map(([x,y]) => [x,y]).sort(),[[0,0],[0,19],[0,20],[20,0],[20,20]].sort());
-    console.log('PASS exact and approximated profiles, highlighted gap repair at model scale, crossing rejection, extrusion, and SB3 round-trip');
+    await curves.getByRole('button',{name:'Close',exact:true}).click();
+    const strokedArtwork = await reopened.evaluate(() => {
+        const vm = window.__brickwrightStore.getState().scratchGui.vm;
+        vm.updateSvg(0,'<svg xmlns="http://www.w3.org/2000/svg" width="160" height="110">' +
+            '<g transform="translate(8 10) scale(2)" fill="none" stroke="#523b82" stroke-width="4">' +
+            '<path d="M0 0H20"/><path d="M28 2H48V22H28Z"/><circle cx="63" cy="12" r="8"/>' +
+            '<path d="M0 30Q10 36 20 30" stroke-linecap="round"/>' +
+            '<path d="M0 46H20" stroke-dasharray="2 2"/>' +
+            '<path d="M36 32H56" transform="scale(1.5 1)"/></g></svg>',0,0);
+        return vm.editingTarget.getCostumes()[0].assetId;
+    });
+    await reopened.getByTestId('bw-costume-precision').click();
+    const source = curves.getByLabel('Profile source',{exact:true});
+    await source.waitFor();
+    assert.equal(await source.inputValue(),'fill');
+    assert.equal(await apply.count(),0);
+    await source.selectOption('stroke');
+    await curves.getByText('Use a solid stroke with an absolute width and normal scaling.',{exact:true}).waitFor();
+    await curves.getByText('Stroke expansion needs a uniform scale without shear.',{exact:true}).waitFor();
+    await curves.getByText('Enable curve approximation to preview curved strokes.',{exact:true}).waitFor();
+    const strokeRegion = curves.getByLabel('Region',{exact:true});
+    assert.equal(await strokeRegion.locator('option').count(),3);
+    await curves.getByText(/40 × 8 mm/).waitFor();
+    await strokeRegion.selectOption('1');
+    assert.match(await outline.getAttribute('d'),/Z M /,'A closed rectangular stroke previews an interior hole');
+    await strokeRegion.selectOption('2');
+    assert.match(await outline.getAttribute('d'),/a 20 20 .*Z M .* a 12 12 /,'A circular stroke keeps two circle profiles');
+    await curves.getByRole('checkbox',{name:'Approximate curves',exact:true}).check();
+    assert.equal(await strokeRegion.locator('option').count(),4);
+    await strokeRegion.selectOption('3');
+    assert.ok((await outline.getAttribute('d')).split(' L ').length>8);
+    await strokeRegion.selectOption('0');
+    await apply.click();
+    await curves.getByText(/Sketch added to CAD/).waitFor();
+    const expanded = await reopened.evaluate(() => {
+        const vm = window.__brickwrightStore.getState().scratchGui.vm;
+        const sketches = Object.values(window.__bwCad.editor.session.state.document.sketches);
+        return {profile:sketches.at(-1).profile,assetId:vm.editingTarget.getCostumes()[0].assetId};
+    });
+    assert.equal(expanded.assetId,strokedArtwork);
+    assert.equal(expanded.profile.kind,'outline');
+    assert.deepEqual(expanded.profile.points.sort(),[[0,0],[0,8],[40,0],[40,8]].sort());
+    console.log('PASS exact and approximated profiles, gap repair, stroke expansion, extrusion, and SB3 round-trip');
 } catch (error) {
     await activePage.screenshot({path:'/tmp/bw-costume-precision-failure.png'}).catch(() => {});
     throw error;

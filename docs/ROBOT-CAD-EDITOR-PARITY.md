@@ -527,6 +527,12 @@ set a maximum gap of 0.01 to 10 mm at the selected width. The preview marks
 each straight closing edge before import. A repair joins only the endpoints
 of the same path and leaves the source artwork alone.
 
+For artwork with visible strokes, choose **Profile source → Strokes**. Each
+subpath becomes an outline of its stroke, using the drawn thickness, cap and
+join style. Closed strokes can retain a hole. Enable **Approximate curves**
+for curved centerlines. Use solid strokes with an absolute width and uniform
+scaling. Stroke thickness scales with the profile width.
+
 The local Chrome check exercises the default-off setting and lazy SDK load,
 then imports a 60 × 30 mm region with a 9 × 12 mm hole onto the YZ plane.
 It extrudes the sketch 10 mm and verifies the 16,920 mm³ solid before and after
@@ -536,3 +542,5 @@ compares the even-odd and nonzero fill rules, converts transformed Bézier
 and elliptical contours, and matches the saved vertices to the preview. It
 also verifies the highlighted closing edge, rejects a crossing outline and
 an oversized gap, and imports the repair without changing the costume asset.
+Stroke coverage checks inherited thickness under uniform scaling, rectangular
+and circular holes, curved strokes, and the resulting editable outline.

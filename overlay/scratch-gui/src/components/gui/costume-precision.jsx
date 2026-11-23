@@ -62,6 +62,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
     const [saved, setSaved] = React.useState(false);
     const [approximate, setApproximate] = React.useState(false), [tolerance, setTolerance] = React.useState('0.2');
     const [closeGaps, setCloseGaps] = React.useState(false), [maxGap, setMaxGap] = React.useState('0.5');
+    const [strokeOnly, setStrokeOnly] = React.useState(false);
     const sending = React.useRef(false);
     const de = /^de/i.test(locale), text = (english, german) => de ? german : english;
     React.useEffect(() => {
@@ -90,19 +91,21 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
     const validWidth = Boolean(width.trim() && Number(width) >= .01 && Number(width) <= 100000);
     const validTolerance = Boolean(tolerance.trim() && Number(tolerance) >= .01 && Number(tolerance) <= 10);
     const validGap = Boolean(maxGap.trim() && Number(maxGap) >= .01 && Number(maxGap) <= 10);
+    const repairGaps = closeGaps && !strokeOnly;
     const preview = React.useMemo(() => {
-        if (!snapshot || (!approximate && !closeGaps)) return snapshot;
-        if (!validWidth || (approximate && !validTolerance) || (closeGaps && !validGap)) return null;
+        if (!snapshot || (!approximate && !repairGaps && !strokeOnly)) return snapshot;
+        if (!validWidth || (approximate && !validTolerance) || (repairGaps && !validGap)) return null;
         try {
             return snapshot.sdk.readCostumeProfiles(snapshot.source, {
                 widthMm: Number(width),
                 toleranceMm: approximate ? Number(tolerance) : undefined,
-                maxGapMm: closeGaps ? Number(maxGap) : undefined
+                maxGapMm: repairGaps ? Number(maxGap) : undefined,
+                strokeOnly
             });
         } catch (e) {
             return {issues: [e.message], profiles: [], strokes: false};
         }
-    }, [snapshot, approximate, closeGaps, validWidth, validTolerance, validGap, width, tolerance, maxGap]);
+    }, [snapshot, approximate, repairGaps, strokeOnly, validWidth, validTolerance, validGap, width, tolerance, maxGap]);
     const costume = getCostume();
     if (!enabled || costume?.dataFormat !== 'svg') return null;
 
@@ -111,7 +114,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
         const request = new AbortController();
         active.current = request;
         setSnapshot(null); setError(''); setSaved(false); select(0); setWidth('40'); setPlane('XY'); setBusy(true);
-        setApproximate(false); setTolerance('0.2'); setCloseGaps(false); setMaxGap('0.5');
+        setApproximate(false); setTolerance('0.2'); setCloseGaps(false); setMaxGap('0.5'); setStrokeOnly(false);
         dialog.current.showModal();
         try {
             if (!getCadEnabled()) throw new Error(text('Enable CAD Editor in Settings → Workspace first.',
@@ -123,8 +126,6 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
             if (request.signal.aborted) return;
             sdk.setLocale(locale);
             const result = sdk.readCostumeProfiles(source);
-            if (!result.profiles.length && !result.issues.length) setError(text('No filled closed regions found.',
-                'Keine gefüllten, geschlossenen Flächen gefunden.'));
             setSnapshot({...result, costume, source, generation, sdk});
         } catch (e) {
             if (!request.signal.aborted) setError(e.message);
@@ -174,21 +175,32 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
             {saved ? <p role="status">{text('Sketch added to CAD. Open Objects to edit or extrude it.',
                 'Skizze zu CAD hinzugefügt. Öffne Objekte zum Bearbeiten oder Extrudieren.')}</p> : <>
                 {preview?.issues.length > 0 && <ul>{preview.issues.map(issue => <li key={issue}>{issue}</li>)}</ul>}
-                {preview?.strokes && <p>{text('The preview includes the fill. Stroke thickness is ignored.',
-                    'Die Vorschau zeigt die Füllung. Die Konturstärke wird ignoriert.')}</p>}
+                {preview && !preview.profiles.length && !preview.issues.length && <p>{strokeOnly ?
+                    text('No visible strokes found.', 'Keine sichtbaren Linienzüge gefunden.') :
+                    text('No filled closed regions found.', 'Keine gefüllten, geschlossenen Flächen gefunden.')}</p>}
                 {snapshot && <>
+                    {snapshot.strokes && <label>{text('Profile source', 'Profilquelle')}
+                        <select aria-label={text('Profile source', 'Profilquelle')} value={strokeOnly ? 'stroke' : 'fill'} disabled={busy} onChange={event => {
+                            setStrokeOnly(event.target.value === 'stroke'); select(0);
+                        }}>
+                            <option value="fill">{text('Filled areas', 'Gefüllte Flächen')}</option>
+                            <option value="stroke">{text('Strokes', 'Linienzüge')}</option>
+                        </select>
+                    </label>}
+                    {strokeOnly && <p>{text('Each stroke becomes a separate profile. Its thickness scales with the sketch.',
+                        'Jeder Linienzug ergibt ein eigenes Profil. Seine Stärke skaliert mit der Skizze.')}</p>}
                     <label className={layout.checkbox}>
                         <input type="checkbox" checked={approximate} disabled={busy} onChange={event => {
                             setApproximate(event.target.checked); select(0);
                         }} />
                         {text('Approximate curves', 'Kurven annähern')}
                     </label>
-                    <label className={layout.checkbox}>
+                    {!strokeOnly && <label className={layout.checkbox}>
                         <input type="checkbox" checked={closeGaps} disabled={busy} onChange={event => {
                             setCloseGaps(event.target.checked); select(0);
                         }} />
                         {text('Close small gaps', 'Kleine Lücken schließen')}
-                    </label>
+                    </label>}
                     <div className={layout.inputs}>
                         <label>{text('Width (mm)', 'Breite (mm)')}
                             <input type="number" min=".01" max="100000" step="any" value={width} disabled={busy}
@@ -198,7 +210,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
                             <input type="number" min=".01" max="10" step="any" value={tolerance} disabled={busy}
                                 aria-invalid={!validTolerance} onChange={event => setTolerance(event.target.value)} />
                         </label>}
-                        {closeGaps && <label>{text('Maximum gap (mm)', 'Maximale Lücke (mm)')}
+                        {repairGaps && <label>{text('Maximum gap (mm)', 'Maximale Lücke (mm)')}
                             <input type="number" min=".01" max="10" step="any" value={maxGap} disabled={busy}
                                 aria-invalid={!validGap} onChange={event => setMaxGap(event.target.value)} />
                         </label>}
@@ -209,7 +221,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
                         'Gib eine Breite von 0,01 bis 100000 mm ein.')}</p>}
                     {approximate && !validTolerance && <p role="status">{text('Enter a curve tolerance from 0.01 to 10 mm.',
                         'Gib eine Kurventoleranz von 0,01 bis 10 mm ein.')}</p>}
-                    {closeGaps && !validGap && <p role="status">{text('Enter a maximum gap from 0.01 to 10 mm.',
+                    {repairGaps && !validGap && <p role="status">{text('Enter a maximum gap from 0.01 to 10 mm.',
                         'Gib eine maximale Lücke von 0,01 bis 10 mm ein.')}</p>}
                 </>}
                 {profile && <>
