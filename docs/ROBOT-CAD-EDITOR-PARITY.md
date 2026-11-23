@@ -302,7 +302,9 @@ convert to millimetres. A unitless
 file requires explicit opt-in to millimetres. The import and subsequent edits
 use the shared retained sketch model and history. For a file with multiple
 layers, check the perimeter and any hole layers you need, then choose
-**Import selected layers**. The Sketch path importer uses the same picker
+**Import selected layers**. The importer skips paper-space layout entities
+before listing model-space layers, even when a sheet object shares a layer
+with the part. The Sketch path importer uses the same picker
 to isolate a guide from other geometry. Region circle centers and
 radii can use named dimensions. DXF export retains entity layer names and
 signed polyline bulges. Layer colors, on/off and freeze/lock flags, plotting,

@@ -10,7 +10,10 @@ const fixture = ['0','SECTION','2','HEADER','9','$ACADVER','1','AC1021','9','$IN
  '0','SECTION','2','ENTITIES','0','CIRCLE','8','Bohrungen Ä','10',10,'20',15,'40',2,
  '0','LWPOLYLINE','8','Cut perimeter','90',4,'70',1,'10',0,'20',0,'10',40,'20',0,'10',40,'20',30,'10',0,'20',30,
  '0','CIRCLE','8','Bohrungen Ä','10',30,'20',15,'40',3,
- '0','TEXT','8','Annotations','1','Fabrication notes','0','ENDSEC','0','EOF'].join('\n');
+ '0','TEXT','8','Annotations','1','Fabrication notes',
+ '0','CIRCLE','8','Bohrungen Ä','67',1,'10',110,'20',130,'40',15,
+ '0','TEXT','8','Paper sheet','410','Sheet 1','1','Title block',
+ '0','ENDSEC','0','EOF'].join('\n');
 const browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
 try {
  const page=await browser.newPage({viewport:{width:1024,height:768},hasTouch:true,acceptDownloads:true,serviceWorkers:'block'});
@@ -46,6 +49,8 @@ try {
  const importLayers=dialog.getByRole('button',{name:'Import selected layers',exact:true});
  if(!input){
   const layers=dialog.getByRole('group',{name:'DXF layers',exact:true});
+  await dialog.getByText('Paper-space layout entities were skipped.',{exact:true}).waitFor();
+  assert.equal(await layers.getByRole('checkbox',{name:'Paper sheet',exact:true}).count(),0);
   await layers.getByRole('checkbox',{name:'Annotations',exact:true}).tap();
   assert.ok(await layers.getByRole('checkbox',{name:'Bohrungen Ä',exact:true}).isChecked());
   assert.ok(await layers.getByRole('checkbox',{name:'Cut perimeter',exact:true}).isChecked());
@@ -175,5 +180,5 @@ try {
  assert.deepEqual(curve,[.5,0,0,0]);
  await undo.tap();
  assert.equal(await rootCount(),0);
- console.log('PASS embedded CAD tablet viewport: third-party DXF with layer filtering, holes in preview, touch-dragged vertex, invalid edit, retained layer styles, named hole spacing, 1:1 DXF and PDF exports, reference intersection snap, touching and curving an edge, reopen, Undo');
+ console.log('PASS embedded CAD tablet viewport: third-party DXF with model-space and layer filtering, holes in preview, touch-dragged vertex, invalid edit, retained layer styles, named hole spacing, 1:1 DXF and PDF exports, reference intersection snap, touching and curving an edge, reopen, Undo');
 } finally {await browser.close();}

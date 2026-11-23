@@ -1160,6 +1160,8 @@ const hg = {
   "An outline needs 3–256 finite points within 100000 mm of the sketch origin.": "Ein Umriss benötigt 3–256 endliche Punkte im Koordinatenbereich bis 100000 mm.",
   "Outline edges must form one closed loop without crossings or overlaps.": "Die Kanten müssen einen geschlossenen Umriss ohne Kreuzungen oder Überlappungen bilden.",
   "Circle center must be within 100000 mm of the sketch origin.": "Die Koordinaten des Kreismittelpunkts dürfen höchstens 100000 mm vom Ursprung abweichen.",
+  "Paper-space layout entities were skipped.": "Objekte aus dem Papierbereich wurden übersprungen.",
+  "This DXF has no model-space entities to import.": "Diese DXF-Datei enthält keine Objekte im Modellbereich zum Importieren.",
   "DXF layers": "DXF-Ebenen",
   "Import selected layers": "Ausgewählte Ebenen importieren",
   "Select all layers": "Alle Ebenen auswählen",
@@ -10878,7 +10880,7 @@ async function z9(A, g, I, C = {}) {
     }
   if ([...I.values()].reduce((M, p) => M + p.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = C.J ?? await (S4 ?? (S4 = import("./jolt-physics.wasm-compat-sdYGZgW5.js").then((M) => M.default()))), Q = new i.JoltSettings();
+  const i = C.J ?? await (S4 ?? (S4 = import("./jolt-physics.wasm-compat-BEWfWrSb.js").then((M) => M.default()))), Q = new i.JoltSettings();
   Q.mMaxBodies = 512, Q.mMaxBodyPairs = Math.max(1024, B.length * B.length), Q.mMaxContactConstraints = 8192;
   const s = new i.ObjectLayerPairFilterTable(2);
   s.EnableCollision(0, 1), s.EnableCollision(1, 1);

@@ -2,7 +2,7 @@
   "format": "brickwright-cad-sdk",
   "version": 1,
   "repository": "https://github.com/CrispStrobe/brickwright-cad",
-  "commit": "bb898bc4149c9bc9639d6130f8e6f288e47f5c01",
+  "commit": "8f24bad7982df09c47b593f9df40841ebdce552e",
   "dirty": false,
   "entry": "sdk.js",
   "wasm": "cad-assets/manifold.wasm",
@@ -10,14 +10,14 @@
     "LICENSE": "ed121de3496066a2ddc8c11b30b48142165ab84bdb066fee351392ecaccf36ad",
     "NOTICE.txt": "c75b43e86dd682f04d167b78e655bff1ea1e7edb2a8fb0c3f28fc50b51d9f6f9",
     "adafruit-preview-data-BWhkbkqw.js": "c37d14c1f115a63599555fd4193b2df1f9426a9b4cab8962282d6794ba6e11b6",
-    "assets/assembly-projection.worker-CXK7uP6g.js": "fa5e4e0e966c4c2bfac3227023d9c16c1b90cb2095603e67bafe17799346931b",
-    "assets/geometry.worker-C-Ni-n1Z.js": "38dfca54a2e0374b70c70896360d5d10c764afb8b4512174af497eb40b26756b",
-    "assets/jolt-physics.wasm-compat-sdYGZgW5.js": "16aa964c569dd61282e976ebf105b88a02f4af9c438fb69b00ac9d46a6e7b15f",
-    "assets/simulation.worker-C5hGiXl4.js": "43cab5220e75341cfd4ccb3d1a945679fcf964cec56b5eefb4d016a14da1a354",
+    "assets/assembly-projection.worker-DqtQWHjZ.js": "be3bfdbd57ba0df529a086affb8a89c8dc33844d5d3e5f219499f20cd43d49f6",
+    "assets/geometry.worker-D8e5Il3x.js": "203fd946cd164b6af46dd13eeb8a0ab04bd02eaaf62f16e2ea1c097e3ea714bd",
+    "assets/jolt-physics.wasm-compat-BEWfWrSb.js": "e77c204cc97e0537718670cb08740f2dcf301a8aa5fe85c09c60fe4542d5ffb6",
+    "assets/simulation.worker-C2yWKof2.js": "f39ba4380225779f6ebea79c2b5e81cc2be5d98c417804307f2767f37e4d975b",
     "cad-assets/manifold.wasm": "73e3b419ad31294f6b1cc478173944e50efc4a34bfdeeff0107bdfc12975f11c",
     "model-library-cache-DiMFGzp9.js": "75dc4ad7999b4571b227f1c675ca00af698fcc886dc73e98dd4c0eb2604e2b20",
-    "model-library-local-22p5ETS6.js": "59c1ace3a0a63dcb83ec5ae3259032e9ec13bb467a18e8017f79d9d13f227cc9",
-    "sdk-CRzTfaDZ.js": "8cf09c78cdb28634ad4d7582a4cec0e0e3b5edd2b441e82992afcb3601cae936",
-    "sdk.js": "e15c26ca09956c1cdab155124bef96e687c928fab706fde36d76f9bdcb3d572d"
+    "model-library-local-5w1Zw-tj.js": "7eac3bea44e5572b154ba663177ca01e946551780cdf5d7bf25fdef2435d744b",
+    "sdk-D5GKlypi.js": "4eb3e4bef9f03c39276a2749bdbeba8e60491250278c7a8f98994709c2468ee0",
+    "sdk.js": "b5472faabbbe730b11ab738804b58a10d02dde96b24bd32aa6182d1ad6e0851b"
   }
 }

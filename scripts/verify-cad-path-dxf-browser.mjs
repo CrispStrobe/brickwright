@@ -35,7 +35,9 @@ const input=Buffer.from([
  '0','SECTION','2','ENTITIES',
  '0','LINE','8','Guides','10',0,'20',2,'11',0,'21',1,
  '0','ARC','8','Guides','10',0,'20',0,'40',1,'50',0,'51',90,
- '0','LINE','8','Construction','10',2,'20',2,'11',3,'21',3,'0','ENDSEC','0','EOF'
+ '0','LINE','8','Construction','10',2,'20',2,'11',3,'21',3,
+ '0','LINE','8','Guides','410','Sheet 1','10',50,'20',50,'11',55,'21',55,
+ '0','ENDSEC','0','EOF'
 ].join('\n'));
 
 try{
@@ -48,6 +50,7 @@ try{
  const importedLayer=path.getByText('DXF layer: Guides',{exact:true});
  const importLayers=path.getByRole('button',{name:'Import selected layers',exact:true});
  if(!fixture){
+  await path.getByText('Paper-space layout entities were skipped.',{exact:true}).waitFor();
   await path.getByRole('checkbox',{name:'Construction',exact:true}).tap();
   await importLayers.tap();
  }else{
@@ -93,7 +96,7 @@ try{
  });
  assert.deepEqual(sketch.profile.bulges,[0,-Math.tan(Math.PI/8),0]);
  assert.deepEqual(saved.roots,[]);
- console.log('PASS Brickwright touch DXF path layer filtering, import, export, reimport and SB3 layer style retention');
+ console.log('PASS Brickwright touch DXF path model-space and layer filtering, import, export, reimport and SB3 layer style retention');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});

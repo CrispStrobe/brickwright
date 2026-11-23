@@ -1160,6 +1160,8 @@ const J6 = {
   "An outline needs 3–256 finite points within 100000 mm of the sketch origin.": "Ein Umriss benötigt 3–256 endliche Punkte im Koordinatenbereich bis 100000 mm.",
   "Outline edges must form one closed loop without crossings or overlaps.": "Die Kanten müssen einen geschlossenen Umriss ohne Kreuzungen oder Überlappungen bilden.",
   "Circle center must be within 100000 mm of the sketch origin.": "Die Koordinaten des Kreismittelpunkts dürfen höchstens 100000 mm vom Ursprung abweichen.",
+  "Paper-space layout entities were skipped.": "Objekte aus dem Papierbereich wurden übersprungen.",
+  "This DXF has no model-space entities to import.": "Diese DXF-Datei enthält keine Objekte im Modellbereich zum Importieren.",
   "DXF layers": "DXF-Ebenen",
   "Import selected layers": "Ausgewählte Ebenen importieren",
   "Select all layers": "Alle Ebenen auswählen",
