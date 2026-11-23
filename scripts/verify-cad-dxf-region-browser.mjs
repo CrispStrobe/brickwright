@@ -56,6 +56,7 @@ try {
  const vertex=dialog.locator('[data-resize="vertex"][data-loop="1"][data-vertex="2"]');
  const cdp=await page.context().newCDPSession(page);
  const moveTouch=async(handle,dx,dy=0,release=true)=>{
+  await handle.scrollIntoViewIfNeeded();
   const [start,end]=await handle.evaluate((handle,[dx,dy])=>{
    const x=handle.cx.baseVal.value,y=handle.cy.baseVal.value,matrix=handle.getScreenCTM();
    return [[x,y],[x+dx,y-dy]].map(([x,y])=>{
@@ -163,5 +164,5 @@ try {
  assert.deepEqual(curve,[.5,0,0,0]);
  await undo.tap();
  assert.equal(await rootCount(),0);
- console.log('PASS embedded CAD tablet viewport: third-party DXF, holes in preview, touch-dragged vertex, invalid edit, retained layers, named hole spacing, 1:1 DXF and PDF exports, reference intersection snap, touching and curving an edge, reopen, Undo');
+ console.log('PASS embedded CAD tablet viewport: third-party DXF with layer filtering, holes in preview, touch-dragged vertex, invalid edit, retained layers, named hole spacing, 1:1 DXF and PDF exports, reference intersection snap, touching and curving an edge, reopen, Undo');
 } finally {await browser.close();}
