@@ -206,7 +206,7 @@ test('production build version derives from exact PR head, not ambient merge com
  assert.match(workflow,/GITHUB_SHA="\$BW_EXPECTED_HEAD" NODE_ENV=production/);
  assert.match(workflow,/assert\.equal\(manifest\.commit,process\.env\.BW_EXPECTED_HEAD\.slice\(0,7\)/);
  assert.match(workflow,/cmp overlay\/scratch-gui\/webpack\.config\.js packages\/scratch-gui\/webpack\.config\.js/);
- const pin='aab8059a15ce4ce89751f6bd56936b103ec23f43';
+ const pin='0ec68b3de0b8dd788475143ff4dcb28887c03a69';
  const selectedPins=source=>[
   source.match(/repository: CrispStrobe\/bw-circuit-ui\n\s*ref: ([0-9a-f]{40})/)?.[1],
   source.match(/test "\$\(git -C circuit-ui rev-parse HEAD\)" = ([0-9a-f]{40})/)?.[1],
