@@ -1,4 +1,4 @@
-import { v, p as S } from "./sdk-Celjifir.js";
+import { v, p as S } from "./sdk-C9PGegd-.js";
 function l(c) {
   if (!c || typeof c != "object")
     throw new Error("Invalid local model library manifest.");

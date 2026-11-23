@@ -128,7 +128,54 @@ try {
     },draft.id);
     const savedVolume = await reopened.evaluate(async () => (await window.__bwCad.editor.whenIdle()).bodies[0]?.volume);
     assert.ok(Math.abs(savedVolume - 16920) < .1, `Reopened extrusion volume ${savedVolume} mm³`);
-    console.log('PASS default-off Costumes, lazy SDK, region preview, scaled editable CAD sketch, extrusion volume, and SB3 save/reopen');
+    const fillRules = await reopened.evaluate(() => {
+        const {sdk} = window.__bwCad;
+        const outer = 'M0 0H40V40H0Z', middle = 'M8 8H32V32H8Z';
+        const inner = 'M14 14V26H26V14Z';
+        const parse = rule => sdk.readCostumeProfiles('<svg xmlns="http://www.w3.org/2000/svg">' +
+            `<path fill-rule="${rule}" d="${outer} ${middle} ${inner}"/></svg>`).profiles.map(profile => profile.loops.length);
+        return [parse('nonzero'),parse('evenodd')];
+    });
+    assert.deepEqual(fillRules,[[1],[2,1]],'Nonzero ignores boundaries inside a still-filled region; even-odd retains an island');
+    await reopened.getByRole('tab',{name:'Costumes',exact:true}).click();
+    await reopened.evaluate(() => {
+        const vm = window.__brickwrightStore.getState().scratchGui.vm;
+        const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="70">' +
+            '<path fill-rule="evenodd" transform="translate(10 15) scale(1.1 .8)" ' +
+            'd="M0 20Q0 0 25 0C45 0 50 10 50 20Q50 40 25 40Q0 40 0 20Z ' +
+            'M15 20A10 5 0 1 1 35 20A10 5 0 1 1 15 20Z"/></svg>';
+        vm.updateSvg(0,svg,0,0);
+    });
+    await reopened.getByTestId('bw-settings-menu-trigger').click();
+    await reopened.getByRole('menuitem',{name:'Workspace',exact:true}).getByText('Workspace',{exact:true}).click();
+    await reopened.getByRole('combobox',{name:'Costumes precision design',exact:true}).selectOption('1');
+    await reopened.getByTestId('bw-costume-precision').click();
+    const curves = reopened.getByRole('dialog',{name:'Send to CAD',exact:true});
+    await curves.getByText('Enable curve approximation to preview filled curves.',{exact:true}).waitFor();
+    const apply = curves.getByRole('button',{name:'Add editable sketch',exact:true});
+    assert.equal(await apply.count(),0);
+    await curves.getByRole('checkbox',{name:'Approximate curves',exact:true}).check();
+    const tolerance = curves.getByLabel('Curve tolerance (mm)',{exact:true});
+    await tolerance.fill('0');
+    await curves.getByText('Enter a curve tolerance from 0.01 to 10 mm.',{exact:true}).waitFor();
+    assert.equal(await apply.count(),0);
+    const outline = curves.getByRole('img',{name:'Closed profile preview'}).locator('path');
+    await tolerance.fill('1');
+    const coarse = await outline.getAttribute('d');
+    await tolerance.fill('0.05');
+    const fine = await outline.getAttribute('d');
+    assert.ok(fine.split(' L ').length > coarse.split(' L ').length);
+    assert.match(fine,/Z M /,'Preview has outer contour and hole');
+    await apply.click();
+    await curves.getByText(/Sketch added to CAD/).waitFor();
+    const added = await reopened.evaluate(id => Object.values(window.__bwCad.editor.session.state.document.sketches)
+        .find(value => value.id !== id),draft.id);
+    assert.equal(added.profile.kind,'region');
+    assert.equal(added.profile.loops.length,2);
+    assert.ok(added.profile.loops.every(loop => loop.kind === 'outline'));
+    assert.equal(added.profile.loops.reduce((count,loop) => count + loop.points.length,0),
+        fine.split(' L ').length + 1,'Saved sketch uses the preview vertices');
+    console.log('PASS exact and approximated Costumes profiles, tolerance preview, editable geometry, extrusion, and SB3 round-trip');
 } catch (error) {
     await activePage.screenshot({path:'/tmp/bw-costume-precision-failure.png'}).catch(() => {});
     throw error;

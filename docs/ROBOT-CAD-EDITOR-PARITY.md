@@ -519,10 +519,15 @@ the sketch when ready.
 
 The handoff accepts explicitly closed straight outlines, full circles, and
 supported holes. It uses the fill and excludes stroke thickness. The preview
-shows diagnostics for open paths, unsupported curves, and crossing contours.
+shows diagnostics for open paths and crossing contours. Enable **Approximate
+curves** for closed Bézier and elliptical contours. Set a tolerance from
+0.01 to 10 mm and review the straight segments before adding the sketch. Full
+circles keep their editable centre and radius.
 
 The local Chrome check exercises the default-off setting and lazy SDK load,
 then imports a 60 × 30 mm region with a 9 × 12 mm hole onto the YZ plane.
 It extrudes the sketch 10 mm and verifies the 16,920 mm³ solid before and after
 saving and reopening the SB3 in a fresh browser context. It checks the original
-costume's asset ID both before saving and after reopening.
+costume's asset ID both before saving and after reopening. The same check
+compares the even-odd and nonzero fill rules, converts transformed Bézier
+and elliptical contours, and matches the saved vertices to the preview.

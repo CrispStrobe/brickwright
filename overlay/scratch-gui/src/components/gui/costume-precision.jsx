@@ -60,6 +60,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
     const [selected, select] = React.useState(0), [width, setWidth] = React.useState('40');
     const [plane, setPlane] = React.useState('XY'), [busy, setBusy] = React.useState(false);
     const [saved, setSaved] = React.useState(false);
+    const [approximate, setApproximate] = React.useState(false), [tolerance, setTolerance] = React.useState('0.2');
     const sending = React.useRef(false);
     const de = /^de/i.test(locale), text = (english, german) => de ? german : english;
     React.useEffect(() => {
@@ -85,6 +86,18 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
             window.removeEventListener('keydown', onEscape, true);
         };
     }, []);
+    const validWidth = Boolean(width.trim() && Number(width) >= .01 && Number(width) <= 100000);
+    const validTolerance = Boolean(tolerance.trim() && Number(tolerance) >= .01 && Number(tolerance) <= 10);
+    const preview = React.useMemo(() => {
+        if (!snapshot || !approximate) return snapshot;
+        if (!validWidth || !validTolerance) return null;
+        try {
+            return snapshot.sdk.readCostumeProfiles(snapshot.source,
+                {widthMm: Number(width), toleranceMm: Number(tolerance)});
+        } catch (e) {
+            return {issues: [e.message], profiles: [], strokes: false};
+        }
+    }, [snapshot, approximate, validWidth, validTolerance, width, tolerance]);
     const costume = getCostume();
     if (!enabled || costume?.dataFormat !== 'svg') return null;
 
@@ -93,6 +106,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
         const request = new AbortController();
         active.current = request;
         setSnapshot(null); setError(''); setSaved(false); select(0); setWidth('40'); setPlane('XY'); setBusy(true);
+        setApproximate(false); setTolerance('0.2');
         dialog.current.showModal();
         try {
             if (!getCadEnabled()) throw new Error(text('Enable CAD Editor in Settings → Workspace first.',
@@ -113,9 +127,9 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
             if (!request.signal.aborted) setBusy(false);
         }
     };
-    const profile = snapshot?.profiles[selected];
+    const regionIndex = selected < (preview?.profiles.length ?? 0) ? selected : 0;
+    const profile = preview?.profiles[regionIndex];
     const height = profile && Number(width) * profile.size[1] / profile.size[0];
-    const validWidth = Boolean(width.trim() && Number(width) >= .01 && Number(width) <= 100000 && Number.isFinite(height));
     const send = async () => {
         if (sending.current || !profile || !validWidth) return;
         sending.current = true;
@@ -154,14 +168,39 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
             {busy && <p role="status">{text('Working…', 'Wird verarbeitet…')}</p>}
             {saved ? <p role="status">{text('Sketch added to CAD. Open Objects to edit or extrude it.',
                 'Skizze zu CAD hinzugefügt. Öffne Objekte zum Bearbeiten oder Extrudieren.')}</p> : <>
-                {snapshot?.issues.length > 0 && <ul>{snapshot.issues.map(issue => <li key={issue}>{issue}</li>)}</ul>}
-                {snapshot?.strokes && <p>{text('The preview includes the fill. Stroke thickness is ignored.',
+                {preview?.issues.length > 0 && <ul>{preview.issues.map(issue => <li key={issue}>{issue}</li>)}</ul>}
+                {preview?.strokes && <p>{text('The preview includes the fill. Stroke thickness is ignored.',
                     'Die Vorschau zeigt die Füllung. Die Konturstärke wird ignoriert.')}</p>}
+                {snapshot && <>
+                    <label className={layout.checkbox}>
+                        <input type="checkbox" checked={approximate} disabled={busy} onChange={event => {
+                            setApproximate(event.target.checked); select(0);
+                        }} />
+                        {text('Approximate curves', 'Kurven annähern')}
+                    </label>
+                    <div className={layout.inputs}>
+                        <label>{text('Width (mm)', 'Breite (mm)')}
+                            <input type="number" min=".01" max="100000" step="any" value={width} disabled={busy}
+                                aria-invalid={!validWidth} onChange={event => setWidth(event.target.value)} />
+                        </label>
+                        {approximate && <label>{text('Curve tolerance (mm)', 'Kurventoleranz (mm)')}
+                            <input type="number" min=".01" max="10" step="any" value={tolerance} disabled={busy}
+                                aria-invalid={!validTolerance} onChange={event => setTolerance(event.target.value)} />
+                        </label>}
+                    </div>
+                    {approximate && <p>{text('Smaller tolerance follows the curve more closely and adds more vertices.',
+                        'Eine kleinere Toleranz folgt der Kurve genauer und fügt mehr Eckpunkte hinzu.')}</p>}
+                    {!validWidth && <p role="status">{text('Enter a width from 0.01 to 100000 mm.',
+                        'Gib eine Breite von 0,01 bis 100000 mm ein.')}</p>}
+                    {approximate && !validTolerance && <p role="status">{text('Enter a curve tolerance from 0.01 to 10 mm.',
+                        'Gib eine Kurventoleranz von 0,01 bis 10 mm ein.')}</p>}
+                </>}
                 {profile && <>
                     <label>{text('Region', 'Fläche')}
-                        <select aria-label={text('Region', 'Fläche')} value={selected} onChange={event => select(Number(event.target.value))}>
-                            {snapshot.profiles.map((region, index) => <option key={index} value={index}>
+                        <select aria-label={text('Region', 'Fläche')} value={regionIndex} disabled={busy} onChange={event => select(Number(event.target.value))}>
+                            {preview.profiles.map((region, index) => <option key={index} value={index}>
                                 {index + 1} · {region.loops.length - 1} {text('holes', 'Löcher')}
+                                {region.approximated ? text(' · approximated', ' · angenähert') : ''}
                             </option>)}
                         </select>
                     </label>
@@ -169,17 +208,13 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
                         viewBox={`${profile.origin[0]} ${-profile.origin[1] - profile.size[1]} ${profile.size.join(' ')}`}>
                         <path fillRule="evenodd" d={profile.loops.map(drawingPath).join(' ')} />
                     </svg>
-                    <div className={layout.inputs}>
-                        <label>{text('Width (mm)', 'Breite (mm)')}
-                            <input type="number" min=".01" max="100000" step="any" value={width}
-                                onChange={event => setWidth(event.target.value)} />
-                        </label>
-                        <label>{text('Sketch plane', 'Skizzenebene')}
-                            <select aria-label={text('Sketch plane', 'Skizzenebene')} value={plane} onChange={event => setPlane(event.target.value)}>
-                                {['XY', 'XZ', 'YZ'].map(value => <option key={value}>{value}</option>)}
-                            </select>
-                        </label>
-                    </div>
+                    <label>{text('Sketch plane', 'Skizzenebene')}
+                        <select aria-label={text('Sketch plane', 'Skizzenebene')} value={plane} disabled={busy} onChange={event => setPlane(event.target.value)}>
+                            {['XY', 'XZ', 'YZ'].map(value => <option key={value}>{value}</option>)}
+                        </select>
+                    </label>
+                    {profile.approximated && <p>{text('The sketch will use the straight segments shown in the preview.',
+                        'Die Skizze verwendet die geraden Segmente aus der Vorschau.')}</p>}
                     <p>{validWidth && `${Number(width)} × ${Number(height.toFixed(3))} mm · `}{text('Lower-left corner at the sketch origin.',
                         'Die linke untere Ecke liegt am Skizzenursprung.')}</p>
                     <button type="button" className={buttonClass} disabled={busy || !validWidth} onClick={send}>

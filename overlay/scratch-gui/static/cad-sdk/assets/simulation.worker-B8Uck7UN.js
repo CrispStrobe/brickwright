@@ -1042,7 +1042,10 @@ const f6 = {
   "Close outline": "Kontur schließen",
   "Cancel drawing": "Zeichnen abbrechen",
   "Clear outline constraints before drawing a new outline.": "Lösche die Konturabhängigkeiten, bevor du eine neue Kontur zeichnest.",
-  "Curves other than full circles are not supported yet.": "Kurven außer Vollkreisen werden noch nicht unterstützt.",
+  "Enable curve approximation to preview filled curves.": "Aktiviere die Kurvenannäherung, um gefüllte Kurven in der Vorschau anzuzeigen.",
+  "This SVG curve cannot be approximated.": "Diese SVG-Kurve lässt sich nicht annähern.",
+  "Increase the curve tolerance to stay within 256 vertices per outline.": "Erhöhe die Kurventoleranz, damit jede Kontur höchstens 256 Eckpunkte hat.",
+  "Enter a curve tolerance from 0.01 to 10 mm.": "Gib eine Kurventoleranz von 0,01 bis 10 mm ein.",
   "This outline has too many vertices.": "Diese Kontur hat zu viele Eckpunkte.",
   "Close the path in Costumes before importing it.": "Schließe den Pfad in Kostüme, bevor du ihn importierst.",
   "The outline contains disconnected edges.": "Die Kontur enthält getrennte Kanten.",
@@ -11406,7 +11409,7 @@ async function u7(A, g, I, e = {}) {
     }
   if ([...I.values()].reduce((x, G) => x + G.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = e.J ?? await (b4 ?? (b4 = import("./jolt-physics.wasm-compat-Bzbvr0CO.js").then((x) => x.default()))), Q = new i.JoltSettings();
+  const i = e.J ?? await (b4 ?? (b4 = import("./jolt-physics.wasm-compat-DhUeJt3P.js").then((x) => x.default()))), Q = new i.JoltSettings();
   Q.mMaxBodies = 512, Q.mMaxBodyPairs = Math.max(1024, B.length * B.length), Q.mMaxContactConstraints = 8192;
   const s = new i.ObjectLayerPairFilterTable(2);
   s.EnableCollision(0, 1), s.EnableCollision(1, 1);
