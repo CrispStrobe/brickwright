@@ -826,6 +826,36 @@ const wg = {
   "Apply thread redesign": "Gewindeauslegung anwenden",
   "Rebuild a resized screw at a chosen pitch or turns per start, resetting its local scale as one saved edit.": "Eine skalierte Schraube mit gewählter Steigung oder Windungszahl pro Gang als einen gespeicherten Schritt neu aufbauen und ihre lokale Skalierung zurücksetzen."
 }, Sg = {
+  "Outline constraints": "Konturbedingungen",
+  "Point 1 stays fixed. Solve updates the draft points. Save the sketch to keep the resulting shape.": "Punkt 1 bleibt fest. Das Lösen aktualisiert die Entwurfspunkte. Speichere die Skizze, um die Form zu übernehmen.",
+  "Constrained segment": "Segment für Bedingung",
+  "Second segment": "Zweites Segment",
+  "Segment length (mm)": "Segmentlänge (mm)",
+  "Add constraint": "Bedingung hinzufügen",
+  "Solve outline": "Kontur lösen",
+  "Outline constraint status": "Status der Konturbedingungen",
+  "Remove constraint {0}": "Bedingung {0} entfernen",
+  "The number of points changed. Add the outline constraints again.": "Die Anzahl der Punkte hat sich geändert. Füge die Konturbedingungen erneut hinzu.",
+  "Choose two different segments.": "Wähle zwei unterschiedliche Segmente.",
+  "Solving outline…": "Kontur wird gelöst…",
+  "The sketch changed during the solve. Solve the outline again.": "Die Skizze wurde während des Lösens geändert. Löse die Kontur erneut.",
+  "Outline solved.": "Kontur gelöst.",
+  "Outline solved. Fully constrained.": "Kontur gelöst. Vollständig bestimmt.",
+  "Outline solved. Degrees of freedom: {0}.": "Kontur gelöst. Freiheitsgrade: {0}.",
+  "Select an outline first.": "Wähle zuerst eine Kontur aus.",
+  "Could not solve these outline constraints. Check dimensions and segment choices.": "Die Konturbedingungen konnten nicht gelöst werden. Prüfe Maße und Segmentauswahl.",
+  "The solver returned invalid outline points.": "Der Löser hat ungültige Konturpunkte zurückgegeben.",
+  "The solved outline did not meet every constraint.": "Die gelöste Kontur erfüllt nicht alle Bedingungen.",
+  "The outline solve took too long. Try fewer constraints.": "Das Lösen der Kontur hat zu lange gedauert. Versuche es mit weniger Bedingungen.",
+  "Could not load the outline constraint solver.": "Der Löser für Konturbedingungen konnte nicht geladen werden.",
+  Parallel: "Parallel",
+  Perpendicular: "Senkrecht",
+  "Equal lengths": "Gleiche Längen",
+  Constraint: "Bedingung",
+  Length: "Länge",
+  Horizontal: "Horizontal",
+  Vertical: "Vertikal",
+  Remove: "Entfernen",
   "Surface meshes require a reference body and document version 30": "Oberflächennetze erfordern einen Referenzkörper und Dokumentversion 30.",
   "Open CAD project or geometry": "CAD-Projekt oder Geometrie öffnen",
   "Import STL or STEP geometry": "STL- oder STEP-Geometrie importieren",
@@ -11019,7 +11049,7 @@ async function i7(A, g, I, C = {}) {
     }
   if ([...I.values()].reduce((x, f) => x + f.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = C.J ?? await (p4 ?? (p4 = import("./jolt-physics.wasm-compat-DQvyE4ey.js").then((x) => x.default()))), Q = new i.JoltSettings();
+  const i = C.J ?? await (p4 ?? (p4 = import("./jolt-physics.wasm-compat-nh_leMoX.js").then((x) => x.default()))), Q = new i.JoltSettings();
   Q.mMaxBodies = 512, Q.mMaxBodyPairs = Math.max(1024, B.length * B.length), Q.mMaxContactConstraints = 8192;
   const s = new i.ObjectLayerPairFilterTable(2);
   s.EnableCollision(0, 1), s.EnableCollision(1, 1);

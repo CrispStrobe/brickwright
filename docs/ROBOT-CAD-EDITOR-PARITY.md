@@ -339,7 +339,11 @@ relative offsets such as `@40, 0`. For exact placement, choose up to two sketche
 on the same plane as snap references. The preview highlights endpoints,
 midpoints, centers and intersections. Turn on **Edit edge curves** to drag
 an edge midpoint and set its curvature while keeping the endpoints fixed.
-General coupled sketch constraints and exact STEP editing remain open.
+For a closed polygon in **Sketch & Extrude**, open **Outline constraints**
+and choose **Solve outline** after defining the required segment relations.
+The shared CAD worker checks and previews the resulting shape. Create or
+Apply saves the resulting sketch coordinates in one undoable edit. Persistent
+coupled constraints and exact STEP editing remain open.
 
 **Properties → Export drilling template (PDF)** produces a full-size A4
 vector template in the local sketch plane. It evaluates the current cutout
