@@ -7,9 +7,9 @@ const fixture = ['0','SECTION','2','HEADER','9','$ACADVER','1','AC1021','9','$IN
  '0','SECTION','2','TABLES','0','TABLE','2','LAYER',
  '0','LAYER','2','Cut perimeter','70',4,'62',5,'420',16711935,'370',35,
  '0','LAYER','2','Bohrungen Ä','70',0,'62',1,'290',0,'0','ENDTAB','0','ENDSEC',
- '0','SECTION','2','ENTITIES','0','CIRCLE','8','Bohrungen Ä','10',10,'20',15,'40',2,
- '0','LWPOLYLINE','8','Cut perimeter','90',4,'70',1,'10',0,'20',0,'10',40,'20',0,'10',40,'20',30,'10',0,'20',30,
- '0','CIRCLE','8','Bohrungen Ä','10',30,'20',15,'40',3,
+ '0','SECTION','2','ENTITIES','0','CIRCLE','8','Bohrungen Ä','10',10,'20',15,'40',2,'30',10,'210',0,'220',.6,'230',.8,
+ '0','LWPOLYLINE','8','Cut perimeter','90',4,'70',1,'10',0,'20',0,'10',40,'20',0,'10',40,'20',30,'10',0,'20',30,'38',10,'210',0,'220',.6,'230',.8,
+ '0','CIRCLE','8','Bohrungen Ä','10',30,'20',15,'40',3,'30',10,'210',0,'220',.6,'230',.8,
  '0','TEXT','8','Annotations','1','Fabrication notes',
  '0','CIRCLE','8','Bohrungen Ä','67',1,'10',110,'20',130,'40',15,
  '0','TEXT','8','Paper sheet','410','Sheet 1','1','Title block',
@@ -55,6 +55,7 @@ try {
   assert.ok(await layers.getByRole('checkbox',{name:'Bohrungen Ä',exact:true}).isChecked());
   assert.ok(await layers.getByRole('checkbox',{name:'Cut perimeter',exact:true}).isChecked());
   await importLayers.tap();
+  await dialog.getByText('The source plane was unfolded into the selected sketch plane at actual size.',{exact:true}).waitFor();
  }else{
   await Promise.race([loops.waitFor({state:'visible'}),importLayers.waitFor({state:'visible'})]);
   if(await importLayers.isVisible())await importLayers.tap();
@@ -180,5 +181,5 @@ try {
  assert.deepEqual(curve,[.5,0,0,0]);
  await undo.tap();
  assert.equal(await rootCount(),0);
- console.log('PASS embedded CAD tablet viewport: third-party DXF with model-space and layer filtering, holes in preview, touch-dragged vertex, invalid edit, retained layer styles, named hole spacing, 1:1 DXF and PDF exports, reference intersection snap, touching and curving an edge, reopen, Undo');
+ console.log('PASS embedded CAD tablet viewport: tilted DXF with model-space and layer filtering, holes in preview, touch-dragged vertex, invalid edit, retained layer styles, named hole spacing, 1:1 DXF and PDF exports, reference intersection snap, touching and curving an edge, reopen, Undo');
 } finally {await browser.close();}

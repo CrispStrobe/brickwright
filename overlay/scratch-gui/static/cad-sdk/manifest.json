@@ -2,7 +2,7 @@
   "format": "brickwright-cad-sdk",
   "version": 1,
   "repository": "https://github.com/CrispStrobe/brickwright-cad",
-  "commit": "8f24bad7982df09c47b593f9df40841ebdce552e",
+  "commit": "44a77b9e5b4f5ea3b422cfaa5fd4c21c4be937f2",
   "dirty": false,
   "entry": "sdk.js",
   "wasm": "cad-assets/manifold.wasm",
@@ -10,14 +10,14 @@
     "LICENSE": "ed121de3496066a2ddc8c11b30b48142165ab84bdb066fee351392ecaccf36ad",
     "NOTICE.txt": "c75b43e86dd682f04d167b78e655bff1ea1e7edb2a8fb0c3f28fc50b51d9f6f9",
     "adafruit-preview-data-BWhkbkqw.js": "c37d14c1f115a63599555fd4193b2df1f9426a9b4cab8962282d6794ba6e11b6",
-    "assets/assembly-projection.worker-DqtQWHjZ.js": "be3bfdbd57ba0df529a086affb8a89c8dc33844d5d3e5f219499f20cd43d49f6",
-    "assets/geometry.worker-D8e5Il3x.js": "203fd946cd164b6af46dd13eeb8a0ab04bd02eaaf62f16e2ea1c097e3ea714bd",
-    "assets/jolt-physics.wasm-compat-BEWfWrSb.js": "e77c204cc97e0537718670cb08740f2dcf301a8aa5fe85c09c60fe4542d5ffb6",
-    "assets/simulation.worker-C2yWKof2.js": "f39ba4380225779f6ebea79c2b5e81cc2be5d98c417804307f2767f37e4d975b",
+    "assets/assembly-projection.worker-i-mpEApS.js": "def11870864a0f46f1a0ff70a6bf45b0c0bb46c189012d4b39117ee7900f037d",
+    "assets/geometry.worker-EuRaDWTV.js": "8be93f62413cd216610939874584105e0b988b64cd4d20e17723210a77070972",
+    "assets/jolt-physics.wasm-compat-Bnlt3vyU.js": "4cff02f9b7bea4da86569bda073eefd758302a35731309670f5845831e072171",
+    "assets/simulation.worker-C7BVJFdl.js": "8e77be059aecd7194938a9564a63b5746d63f2934a324ebfa22709cde0895c9e",
     "cad-assets/manifold.wasm": "73e3b419ad31294f6b1cc478173944e50efc4a34bfdeeff0107bdfc12975f11c",
     "model-library-cache-DiMFGzp9.js": "75dc4ad7999b4571b227f1c675ca00af698fcc886dc73e98dd4c0eb2604e2b20",
-    "model-library-local-5w1Zw-tj.js": "7eac3bea44e5572b154ba663177ca01e946551780cdf5d7bf25fdef2435d744b",
-    "sdk-D5GKlypi.js": "4eb3e4bef9f03c39276a2749bdbeba8e60491250278c7a8f98994709c2468ee0",
-    "sdk.js": "b5472faabbbe730b11ab738804b58a10d02dde96b24bd32aa6182d1ad6e0851b"
+    "model-library-local-B2Adpynt.js": "23795e5a524abcb7fece2d5ed922caec42594a89e6cfea2dfe8a5a6d606a7037",
+    "sdk-CLcfU9fL.js": "c05b9bfce01183a5794e2accec0fafde070951d777cc6c85670a1b319728c297",
+    "sdk.js": "1c2b059b71ba2761c13b884a58e5fe2a9d758b34539976ebd2639eef95f9fe4f"
   }
 }

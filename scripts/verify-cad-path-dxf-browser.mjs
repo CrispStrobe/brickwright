@@ -33,8 +33,8 @@ const input=Buffer.from([
  '0','LTYPE','2','Guide dash','73',2,'49',.5,'74',0,'49',-.25,'74',0,'0','ENDTAB',
  '0','TABLE','2','LAYER','0','LAYER','2','Guides','62',-5,'6','Guide dash','370',25,'290',0,'0','ENDTAB','0','ENDSEC',
  '0','SECTION','2','ENTITIES',
- '0','LINE','8','Guides','10',0,'20',2,'11',0,'21',1,
- '0','ARC','8','Guides','10',0,'20',0,'40',1,'50',0,'51',90,
+ '0','LINE','8','Guides','10',0,'20',4.4,'30',9.2,'11',0,'21',5.2,'31',8.6,
+ '0','ARC','8','Guides','10',0,'20',0,'30',10,'40',1,'50',0,'51',90,'210',0,'220',.6,'230',.8,
  '0','LINE','8','Construction','10',2,'20',2,'11',3,'21',3,
  '0','LINE','8','Guides','410','Sheet 1','10',50,'20',50,'11',55,'21',55,
  '0','ENDSEC','0','EOF'
@@ -53,6 +53,7 @@ try{
   await path.getByText('Paper-space layout entities were skipped.',{exact:true}).waitFor();
   await path.getByRole('checkbox',{name:'Construction',exact:true}).tap();
   await importLayers.tap();
+  await path.getByText('The source plane was unfolded into the selected sketch plane at actual size.',{exact:true}).waitFor();
  }else{
   await Promise.race([importedLayer.waitFor({state:'visible'}),importLayers.waitFor({state:'visible'})]);
   if(await importLayers.isVisible())await importLayers.tap();
@@ -61,7 +62,12 @@ try{
  const points=path.getByLabel('Path points X, Y (mm)');
  const expected=[ [0,50.8], [0,25.4,-Math.tan(Math.PI/8)], [25.4,0] ];
  const readPoints=async()=>(await points.inputValue()).split('\n').map(row=>row.split(',').map(Number));
- assert.deepEqual(await readPoints(),expected);
+ async function verifyPoints(){
+  const actual=await readPoints();
+  assert.deepEqual(actual.map(row=>row.length),expected.map(row=>row.length));
+  for(const [i,row] of actual.entries())for(const [j,value] of row.entries())assert.ok(Math.abs(value-expected[i][j])<1e-9);
+ }
+ await verifyPoints();
  const [exported]=await Promise.all([
   page.waitForEvent('download'),path.getByRole('button',{name:'Export path as DXF'}).tap()
  ]);
@@ -79,7 +85,7 @@ try{
  await fileInput.setInputFiles({name:'Verified guide.dxf',mimeType:'application/dxf',buffer:Buffer.from(text)});
  await fileInput.and(path.locator('input:enabled')).waitFor({state:'visible'});
  assert.equal(await path.getByLabel('Sketch name').inputValue(),'Verified guide');
- assert.deepEqual(await readPoints(),expected);
+ await verifyPoints();
  await path.getByRole('button',{name:'Save path',exact:true}).tap();
  await path.waitFor({state:'hidden'});
  await page.evaluate(()=>window.__bwCad.editor.whenIdle());
@@ -96,7 +102,7 @@ try{
  });
  assert.deepEqual(sketch.profile.bulges,[0,-Math.tan(Math.PI/8),0]);
  assert.deepEqual(saved.roots,[]);
- console.log('PASS Brickwright touch DXF path model-space and layer filtering, import, export, reimport and SB3 layer style retention');
+ console.log('PASS Brickwright touch tilted DXF path model-space and layer filtering, import, export, reimport and SB3 layer style retention');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});
