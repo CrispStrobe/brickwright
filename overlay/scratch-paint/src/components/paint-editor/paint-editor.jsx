@@ -369,6 +369,7 @@ const PaintEditorComponent = props => {
                 <BwGridLayer key="grid" />,
                 canvasOnly ? null : <BwPropertiesPanel
                     key="properties"
+                    precisionDrawing={props.precisionDrawing}
                     onUpdateImage={props.onUpdateImage}
                 />
             ] : null}
@@ -381,6 +382,7 @@ PaintEditorComponent.propTypes = {
     onEditorMenuActions: PropTypes.func,
     editorMenuOwner: PropTypes.string,
     editorTools: PropTypes.node,
+    precisionDrawing: PropTypes.bool,
     artworkDocument: PropTypes.object,
     canRedo: PropTypes.func.isRequired,
     canUndo: PropTypes.func.isRequired,

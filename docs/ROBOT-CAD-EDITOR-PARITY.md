@@ -510,6 +510,16 @@ remain on the drafting roadmap.
 
 ### Vector costumes and backdrops
 
+With **Costumes precision design** enabled, open **Properties → Precision
+drawing** in the vector painter. Create a rectangle from width and height, or
+a circle from its diameter. Enter its center in costume units, measured from
+the center of the drawing area with X to the right and Y down. The new shape
+is selected on the canvas. The existing Transform and node tools can edit
+it, and Undo and Redo treat each insertion as one artwork edit. Precision
+circles export as SVG circles while their paths still describe circles. The
+Chrome check measures both shapes on the canvas, takes the circle through
+Undo, Redo and CAD import, and reopens the authored artwork from SB3.
+
 Enable **CAD Editor** and **Costumes precision design** in **Settings → Workspace**.
 **Send to CAD** opens a preview of supported filled vector regions. Select one,
 enter its desired width in millimetres, choose a sketch plane, and add the

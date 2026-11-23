@@ -296,3 +296,16 @@
     background: $looks-secondary;
     border-color: $looks-secondary;
 }
+
+.precision-summary { cursor: pointer; font-weight: bold; }
+.precision-form { display: grid; gap: 0.35rem; margin-top: 0.5rem; }
+.precision-form p { margin: 0; }
+.precision-form .field { flex-direction: column; align-items: flex-start; }
+.precision-form select, .precision-form button {
+    max-width: 100%;
+    min-height: 1.75rem;
+    color: $text-primary;
+    border: 1px solid $form-border;
+    border-radius: $form-radius;
+    background: var(--bw-panel, white);
+}

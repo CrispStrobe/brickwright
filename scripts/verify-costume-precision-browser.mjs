@@ -153,6 +153,12 @@ try {
         return [parse('nonzero'),parse('evenodd')];
     });
     assert.deepEqual(fillRules,[[1],[2,1]],'Nonzero ignores boundaries inside a still-filled region; even-odd retains an island');
+    await reopened.evaluate(() => {
+        const svg = '<svg xmlns="http://www.w3.org/2000/svg"><path style="mix-blend-mode: multiply" d="M0 0H5V5H0Z"/></svg>';
+        try { window.__bwCad.sdk.readCostumeProfiles(svg); }
+        catch (error) { if (error.message === 'The SVG uses unsupported styling.') return; throw error; }
+        throw Error('Artwork with a non-neutral blend mode was accepted');
+    });
     const repairedHole = await reopened.evaluate(() => {
         const {sdk} = window.__bwCad;
         const source = '<svg xmlns="http://www.w3.org/2000/svg">' +

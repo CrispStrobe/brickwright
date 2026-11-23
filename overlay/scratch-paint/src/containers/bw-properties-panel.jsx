@@ -18,6 +18,7 @@ import {
     toggleSmartGuides,
     toggleSnapToGrid
 } from '../reducers/bw-grid';
+import {changeMode} from '../reducers/modes';
 import {togglePanel} from '../reducers/bw-panel';
 import {setSelectedItems} from '../reducers/selected-items';
 
@@ -25,17 +26,15 @@ import {alignSelection, AlignTo, distributeSelection} from '../helper/bw/align';
 import {getOpacityPercent, setOpacityPercent} from '../helper/bw/appearance';
 import {applyBoolean, getOperands} from '../helper/bw/booleans';
 import {MirrorAbout, mirrorDuplicate} from '../helper/bw/symmetry';
+import {ART_BOARD_UNITS_PER_COSTUME_UNIT, insertPrecisionShape} from '../helper/bw/precision-shape';
 import {getTransform, rotateBy, setPosition, setRotation, setSize} from '../helper/bw/transform';
 import {getSelectedLeafItems, getSelectedRootItems} from '../helper/selection';
-import {ART_BOARD_WIDTH, SVG_ART_BOARD_WIDTH} from '../helper/view';
 
 import BwPropertiesPanelComponent from '../components/bw-properties-panel/bw-properties-panel.jsx';
 
 // paper's art board is twice the size of the exported costume. The panel talks in COSTUME units,
 // because those are the numbers the costume, the stage and every other part of Scratch use — a
 // 480-wide costume reading as "960" here would be nothing but a trap.
-const ART_BOARD_UNITS_PER_COSTUME_UNIT = ART_BOARD_WIDTH / SVG_ART_BOARD_WIDTH;
-
 const toCostumeUnits = value => Math.round((value / ART_BOARD_UNITS_PER_COSTUME_UNIT) * 100) / 100;
 const toArtBoardUnits = value => value * ART_BOARD_UNITS_PER_COSTUME_UNIT;
 
@@ -71,6 +70,7 @@ class BwPropertiesPanel extends React.Component {
             'handleChangeX',
             'handleChangeY',
             'handleDistribute',
+            'handleInsertPrecisionShape',
             'handleMirror',
             'handleRotateClockwise',
             'handleRotateCounterClockwise',
@@ -106,6 +106,11 @@ class BwPropertiesPanel extends React.Component {
         if (!changed) return;
         this.props.setSelectedItems();
         this.props.onUpdateImage();
+    }
+    handleInsertPrecisionShape (draft) {
+        if (!this.props.readyForDraft || this.props.mode !== Modes.SELECT || !insertPrecisionShape(draft)) return false;
+        this.commitStructural(true);
+        return true;
     }
     handleChangeX (value) {
         this.commit(setPosition(toArtBoardUnits(value), null));
@@ -195,6 +200,10 @@ class BwPropertiesPanel extends React.Component {
                 onChangeHeight={this.handleChangeHeight}
                 onChangeOpacity={this.handleChangeOpacity}
                 opacityPercent={getOpacityPercent()}
+                precisionDrawing={this.props.precisionDrawing}
+                readyForDraft={this.props.readyForDraft}
+                onInsertPrecisionShape={this.handleInsertPrecisionShape}
+                onSelectMode={this.props.onSelectMode}
                 onChangeMirrorAbout={mirrorAbout => this.setState({mirrorAbout})}
                 onChangeRotation={this.handleChangeRotation}
                 onChangeShapeParam={this.handleChangeShapeParam}
@@ -222,6 +231,9 @@ BwPropertiesPanel.propTypes = {
     mode: PropTypes.oneOf(Object.keys(Modes)).isRequired,
     onChangeGridSize: PropTypes.func.isRequired,
     onChangeShapeParam: PropTypes.func.isRequired,
+    precisionDrawing: PropTypes.bool,
+    readyForDraft: PropTypes.bool.isRequired,
+    onSelectMode: PropTypes.func.isRequired,
     onToggleGrid: PropTypes.func.isRequired,
     onTogglePanel: PropTypes.func.isRequired,
     onToggleSmartGuides: PropTypes.func.isRequired,
@@ -236,6 +248,8 @@ BwPropertiesPanel.propTypes = {
 };
 
 const mapStateToProps = state => ({
+    // A new costume gets its first snapshot after Paper finishes the import.
+    readyForDraft: state.scratchPaint.undo.pointer >= 0,
     grid: state.scratchPaint.bwGrid,
     mode: state.scratchPaint.mode,
     selectedItems: state.scratchPaint.selectedItems,
@@ -243,6 +257,7 @@ const mapStateToProps = state => ({
     visible: state.scratchPaint.bwPanel.visible
 });
 const mapDispatchToProps = dispatch => ({
+    onSelectMode: () => dispatch(changeMode(Modes.SELECT)),
     onChangeGridSize: size => {
         dispatch(changeGridSize(size));
     },

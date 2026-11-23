@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import BufferedInputHOC from '../forms/buffered-input-hoc.jsx';
+import BwPrecisionDrawing from './bw-precision-drawing.jsx';
 import BwObjectsPanel from '../../containers/bw-objects-panel.jsx';
 import Input from '../forms/input.jsx';
 import Modes from '../../lib/modes';
@@ -219,6 +220,13 @@ const BwPropertiesPanel = props => {
                     <BwObjectsPanel onUpdateImage={props.onUpdateImage} />
                 </div>
 
+                {props.precisionDrawing && <BwPrecisionDrawing
+                    locale={locale}
+                    ready={props.readyForDraft}
+                    selecting={mode === Modes.SELECT}
+                    onInsert={props.onInsertPrecisionShape}
+                    onSelectMode={props.onSelectMode}
+                />}
                 <Section title={t('transform')}>
                     {hasSelection ? null :
                         <div className={styles.hint}>{t('nothingSelected')}</div>}
@@ -468,6 +476,10 @@ BwPropertiesPanel.propTypes = {
     mirrorAbout: PropTypes.oneOf(Object.keys(MirrorAbout).map(key => MirrorAbout[key])).isRequired,
     mode: PropTypes.oneOf(Object.keys(Modes)).isRequired,
     onAlign: PropTypes.func.isRequired,
+    onInsertPrecisionShape: PropTypes.func.isRequired,
+    onSelectMode: PropTypes.func.isRequired,
+    precisionDrawing: PropTypes.bool,
+    readyForDraft: PropTypes.bool.isRequired,
     opacityPercent: PropTypes.number,
     onBoolean: PropTypes.func.isRequired,
     onChangeAlignTo: PropTypes.func.isRequired,

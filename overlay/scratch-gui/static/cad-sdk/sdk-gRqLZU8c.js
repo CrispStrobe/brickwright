@@ -57518,7 +57518,7 @@ function JB(i, e) {
     if (l.hasAttribute("class") || l.hasAttribute("clip-path") || l.hasAttribute("mask") || l.hasAttribute("filter") || l.localName === "svg" && l !== n.documentElement)
       throw new Error(f("Remove styles, clipping, masks, or nested SVG before importing."));
     const d = (l.getAttribute("style") || "").split(";").filter((h) => h.trim()).map((h) => h.split(":").map((b) => b.trim()));
-    if (d.some(([h, b]) => !IB.has(h) || !b || b.includes("!important")))
+    if (d.some(([h, b]) => h === "mix-blend-mode" ? b !== "normal" : !IB.has(h) || !b || b.includes("!important")))
       throw new Error(f("The SVG uses unsupported styling."));
     const p = new Map(d.map(([h, b]) => [h, b])), u = (h) => p.get(h) ?? l.getAttribute(h);
     if (u("visibility") === "hidden" || u("display") === "none" || u("opacity") === "0") {
@@ -58864,7 +58864,7 @@ function $B(i, e) {
 }
 let ma;
 async function HB() {
-  const [{ createBundledModelLibrary: i }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-DfNwKxv6.js"), import("./model-library-cache-DiMFGzp9.js")]);
+  const [{ createBundledModelLibrary: i }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-psSWCB9k.js"), import("./model-library-cache-DiMFGzp9.js")]);
   return ma ?? (ma = i()), { ...ma, cache: e() };
 }
 function QB(i, e) {
