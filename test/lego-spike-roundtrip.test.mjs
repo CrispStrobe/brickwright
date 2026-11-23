@@ -351,9 +351,10 @@ test('vendored SPIKE compiler emits a canonical executable round-trip artifact',
     // -> e248ce71 (2026-11-23): 88 lab-* gallery examples and their benches (#186-#189);
     // `git diff e1e126ae e248ce71 -- src/` is empty, so the SPIKE emitter is unchanged. Re-run every assertion.
     // -> fc0e1c94 (2026-11-23): pot-knob layout fixes in four lab benches (#190); `src/` unchanged again.
+    // -> 01e1280 (2026-11-23): five radio lab examples, every lab bench re-laid out and re-measured (#191); `src/` unchanged again.
     // Keep the exact supplier identity gate and every SPIKE artifact assertion below.
     assert.equal(JSON.parse(readFileSync(new URL('../vendor-pins.json', import.meta.url)))['sb3-creator'],
-        'fc0e1c94feba8a4c360f80461c3d25fcbbe4e766');
+        '01e1280652a95a147a24b00cf72a7dfbc04702d9');
 
     const creator = new SB3Creator();
     creator.parse(PROGRAM);
