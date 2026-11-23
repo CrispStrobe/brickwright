@@ -348,6 +348,10 @@ then choose **Solve outline** and apply the changes. Changes in **Parameters**,
 **Design inputs**, or **Model source** automatically solve affected outlines
 and save them in one Undo step. If the new dimensions conflict, the previous
 parameters and shapes stay in place. Segment lengths measure vertex to vertex.
+Drag a free vertex in a single closed outline and release to solve toward
+the marked point. Point 1 stays fixed. Existing dimensions still drive the
+shape. Create or Apply commits the solved draft.
+
 Choose **Arc radius** for an existing curved segment and enter a dimension or
 named parameter. It preserves the side and sweep through the solved endpoints.
 Choose **Arc tangent to line** to keep the curve tangent to an adjoining

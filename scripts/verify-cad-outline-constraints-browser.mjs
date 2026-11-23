@@ -58,13 +58,13 @@ try{
  const coordinates=sketch.getByLabel('Outline points X, Y (mm)');
  await coordinates.fill('0, 0, 0.25\n38, 3\n35, 22\n2, 20');
  await sketch.getByText('Outline constraints',{exact:true}).tap();
- async function add(kind,edge,value){
-  await sketch.getByLabel('Constraint',{exact:true}).selectOption(kind);
-  await sketch.getByLabel('Constrained segment').selectOption(String(edge));
-  if(kind==='length')await sketch.getByLabel('Segment length (mm)').fill(String(value));
-  else if(kind==='radius')await sketch.getByLabel('Arc radius (mm)').fill(String(value));
-  else if(value!==undefined)await sketch.getByLabel('Second segment').selectOption(String(value));
-  await sketch.getByRole('button',{name:'Add constraint',exact:true}).tap();
+ async function add(kind,edge,value,dialog=sketch){
+  await dialog.getByLabel('Constraint',{exact:true}).selectOption(kind);
+  await dialog.getByLabel('Constrained segment').selectOption(String(edge));
+  if(kind==='length')await dialog.getByLabel('Segment length (mm)').fill(String(value));
+  else if(kind==='radius')await dialog.getByLabel('Arc radius (mm)').fill(String(value));
+  else if(value!==undefined)await dialog.getByLabel('Second segment').selectOption(String(value));
+  await dialog.getByRole('button',{name:'Add constraint',exact:true}).tap();
  }
  for(const args of [
   ['horizontal',0],['vertical',1],['parallel',0,2],['perpendicular',2,3],
@@ -291,7 +291,40 @@ try{
  requireRadius(edited,29);
  assert.ok(Math.abs((await readRegion()).loops[1].points[1][0]-230)<1e-6);
  assert.ok(Math.abs(edgeLength((await readMatchedRegion()).loops[2])-14.5)<1e-6);
- console.log('PASS region edge length matches and anchors, arc tangency, SB3 reopen, and parameter and source propagation');
+ const dragRevision=await restored.evaluate(()=>window.__bwCad.editor.session.state.revision);
+ await restored.getByRole('button',{name:'Sketch',exact:true}).tap();
+ await reopened.getByLabel('Profile',{exact:true}).selectOption('outline');
+ const draftCoordinates=reopened.getByLabel('Outline points X, Y (mm)');
+ const initial='0, 0\n40, 0\n40, 20\n0, 20';
+ await draftCoordinates.fill(initial);
+ await reopened.getByText('Outline constraints',{exact:true}).tap();
+ await add('horizontal',0,undefined,reopened);
+ await add('length',0,40,reopened);
+ await add('vertical',1,undefined,reopened);
+ await reopened.getByText('Outline constraints',{exact:true}).tap();
+ const handle=reopened.locator('[data-resize="vertex"][data-vertex="2"]');
+ await handle.scrollIntoViewIfNeeded();
+ const [start,end]=await handle.evaluate(circle=>{
+  const x=circle.cx.baseVal.value,y=circle.cy.baseVal.value,matrix=circle.getScreenCTM();
+  return [new DOMPoint(x,y),new DOMPoint(x+8,y-6)].map(point=>{
+   const screen=point.matrixTransform(matrix);
+   return {x:screen.x,y:screen.y};
+  });
+ });
+ const touch=await restored.context().newCDPSession(restored);
+ await touch.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[start]});
+ await touch.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[end]});
+ await reopened.locator('.sketch-snap-marker').waitFor();
+ assert.equal(await draftCoordinates.inputValue(),initial);
+ await touch.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+ await reopened.getByRole('status',{name:'Sketch status'}).filter({hasText:'Outline solved'}).waitFor();
+ const dragged=rounded((await draftCoordinates.inputValue()).split('\n').map(row=>row.split(',').map(Number)));
+ assert.deepEqual(dragged.slice(0,2),[[0,0],[40,0]]);
+ assert.equal(dragged[2][0],40);
+ assert.ok(Math.abs(dragged[2][1]-26)<.5);
+ assert.equal(await restored.evaluate(()=>window.__bwCad.editor.session.state.revision),dragRevision);
+ await reopened.getByRole('button',{name:'Close sketch',exact:true}).tap();
+ console.log('PASS constrained touch drag, region matches and anchors, arc tangency, SB3 reopen, and source propagation');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});

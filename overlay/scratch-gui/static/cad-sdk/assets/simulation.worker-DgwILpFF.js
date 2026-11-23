@@ -1210,6 +1210,7 @@ const T6 = {
   "Remove constraint {0}": "Bedingung {0} entfernen",
   "The number of points changed. Add the outline constraints again.": "Die Anzahl der Punkte hat sich geändert. Füge die Konturbedingungen erneut hinzu.",
   "Choose two different segments.": "Wähle zwei unterschiedliche Segmente.",
+  "The drag target is outside the sketch coordinate limits.": "Das Ziehziel liegt außerhalb der Skizzenkoordinaten.",
   "Solving outline…": "Kontur wird gelöst…",
   "The sketch changed during the solve. Solve the outline again.": "Die Skizze wurde während des Lösens geändert. Löse die Kontur erneut.",
   "Outline solved.": "Kontur gelöst.",
@@ -11440,7 +11441,7 @@ async function M7(A, g, I, e = {}) {
     }
   if ([...I.values()].reduce((x, G) => x + G.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = e.J ?? await (b4 ?? (b4 = import("./jolt-physics.wasm-compat-B18CmtC_.js").then((x) => x.default()))), Q = new i.JoltSettings();
+  const i = e.J ?? await (b4 ?? (b4 = import("./jolt-physics.wasm-compat-D0gvRXcx.js").then((x) => x.default()))), Q = new i.JoltSettings();
   Q.mMaxBodies = 512, Q.mMaxBodyPairs = Math.max(1024, B.length * B.length), Q.mMaxContactConstraints = 8192;
   const s = new i.ObjectLayerPairFilterTable(2);
   s.EnableCollision(0, 1), s.EnableCollision(1, 1);
