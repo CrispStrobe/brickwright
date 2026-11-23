@@ -344,11 +344,11 @@ and choose **Solve outline** after defining the required segment relations.
 The shared CAD worker checks and previews the resulting shape. Create or
 Apply saves the coordinates, segment relations and length expressions in
 one undoable edit. Open **Edit sketch & extrusion** to edit saved relations,
-then choose **Solve outline** and apply the changes. Changes in **Parameters**
-or **Design inputs** automatically solve affected outlines and save them in
-one Undo step. If the new dimensions conflict, the previous parameters and
-shapes stay in place. Segment lengths measure vertex to vertex. Curve-specific
-constraints and exact STEP editing remain open.
+then choose **Solve outline** and apply the changes. Changes in **Parameters**,
+**Design inputs**, or **Model source** automatically solve affected outlines
+and save them in one Undo step. If the new dimensions conflict, the previous
+parameters and shapes stay in place. Segment lengths measure vertex to vertex.
+Curve-specific constraints and exact STEP editing remain open.
 
 **Properties → Export drilling template (PDF)** produces a full-size A4
 vector template in the local sketch plane. It evaluates the current cutout
