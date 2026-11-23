@@ -33,7 +33,7 @@ const Gt = {
   "Choose light or dark mode": "Hellen oder dunklen Modus wählen",
   "Loading models…": "Modelle werden geladen…",
   "Original source files": "Originale Quelldateien",
-  "Model source uses project version 6 through 32": "Modellquelltext verwendet Projektversion 6 bis 32",
+  "Model source uses project version 6 through 33": "Modellquelltext verwendet Projektversion 6 bis 33",
   "Unknown material preset": "Unbekannte Materialvorlage",
   "Initial velocity requires project version 8": "Anfangsgeschwindigkeit erfordert Projektversion 8",
   "Invalid initial body velocity": "Ungültige Anfangsgeschwindigkeit",
@@ -823,6 +823,14 @@ const Gt = {
   "Apply thread redesign": "Gewindeauslegung anwenden",
   "Rebuild a resized screw at a chosen pitch or turns per start, resetting its local scale as one saved edit.": "Eine skalierte Schraube mit gewählter Steigung oder Windungszahl pro Gang als einen gespeicherten Schritt neu aufbauen und ihre lokale Skalierung zurücksetzen."
 }, Yt = {
+  "Arc tangency requires document version 33": "Bogentangentialität erfordert Dokumentversion 33",
+  "Choose an adjoining straight segment for tangency.": "Wähle ein angrenzendes gerades Segment für die Tangente.",
+  "This join cannot form a curved tangent arc. Adjust the adjoining segments.": "An diesem Übergang kann kein Tangentialbogen entstehen. Passe die angrenzenden Segmente an.",
+  "The arc radius or the other tangent conflicts with this tangent.": "Der Bogenradius oder die andere Tangente widerspricht dieser Tangente.",
+  "This tangent is already defined.": "Diese Tangente ist bereits festgelegt.",
+  "Arc tangent to line": "Bogen tangential zur Geraden",
+  "Choose the arc first, then an adjoining straight segment.": "Wähle zuerst den Bogen und dann ein angrenzendes gerades Segment.",
+  "Curve the first segment before adding tangency.": "Krümme das erste Segment, bevor du eine Tangente hinzufügst.",
   "Driving arc radii require document version 32": "Festgelegte Bogenradien erfordern Dokumentversion 32",
   "The arc radius must be at least half its chord length.": "Der Bogenradius muss mindestens halb so groß wie die Sehnenlänge sein.",
   "An arc can have only one driving radius.": "Ein Bogen kann nur einen festgelegten Radius haben.",
@@ -2512,7 +2520,7 @@ var fi = /(?:[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\u
 ke.prototype.offset = function(t) {
   return new ke(this.line, this.column + t);
 };
-var Ee = function(t, i, n) {
+var ze = function(t, i, n) {
   this.start = i, this.end = n, t.sourceFile !== null && (this.source = t.sourceFile);
 };
 function pt(e, t) {
@@ -2646,10 +2654,10 @@ function bi(e, t) {
       start: s,
       end: o
     };
-    e.locations && (u.loc = new Ee(this, a, l)), e.ranges && (u.range = [s, o]), t.push(u);
+    e.locations && (u.loc = new ze(this, a, l)), e.ranges && (u.range = [s, o]), t.push(u);
   };
 }
-var ue = 1, he = 2, Ze = 4, mt = 8, qe = 16, ft = 32, ze = 64, gt = 128, de = 256, we = 512, bt = 1024, Pe = ue | he | de;
+var ue = 1, he = 2, Ze = 4, mt = 8, qe = 16, ft = 32, Ee = 64, gt = 128, de = 256, we = 512, bt = 1024, Pe = ue | he | de;
 function He(e, t) {
   return he | (e ? Ze : 0) | (t ? mt : 0);
 }
@@ -2693,7 +2701,7 @@ Z.allowReturn.get = function() {
 };
 Z.allowSuper.get = function() {
   var e = this.currentThisScope(), t = e.flags;
-  return (t & ze) > 0 || this.options.allowSuperOutsideMethod;
+  return (t & Ee) > 0 || this.options.allowSuperOutsideMethod;
 };
 Z.allowDirectSuper.get = function() {
   return (this.currentThisScope().flags & gt) > 0;
@@ -3147,12 +3155,12 @@ c.parseClassMethod = function(e, t, i, n) {
   return e.kind === "get" && o.params.length !== 0 && this.raiseRecoverable(o.start, "getter should have no params"), e.kind === "set" && o.params.length !== 1 && this.raiseRecoverable(o.start, "setter should have exactly one param"), e.kind === "set" && o.params[0].type === "RestElement" && this.raiseRecoverable(o.params[0].start, "Setter cannot use rest params"), this.finishNode(e, "MethodDefinition");
 };
 c.parseClassField = function(e) {
-  return De(e, "constructor") ? this.raise(e.key.start, "Classes can't have a field named 'constructor'") : e.static && De(e, "prototype") && this.raise(e.key.start, "Classes can't have a static field named 'prototype'"), this.eat(r.eq) ? (this.enterScope(we | ze), e.value = this.parseMaybeAssign(), this.exitScope()) : e.value = null, this.semicolon(), this.finishNode(e, "PropertyDefinition");
+  return De(e, "constructor") ? this.raise(e.key.start, "Classes can't have a field named 'constructor'") : e.static && De(e, "prototype") && this.raise(e.key.start, "Classes can't have a static field named 'prototype'"), this.eat(r.eq) ? (this.enterScope(we | Ee), e.value = this.parseMaybeAssign(), this.exitScope()) : e.value = null, this.semicolon(), this.finishNode(e, "PropertyDefinition");
 };
 c.parseClassStaticBlock = function(e) {
   e.body = [];
   var t = this.labels;
-  for (this.labels = [], this.enterScope(de | ze); this.type !== r.braceR; ) {
+  for (this.labels = [], this.enterScope(de | Ee); this.type !== r.braceR; ) {
     var i = this.parseStatement(null);
     e.body.push(i);
   }
@@ -3958,7 +3966,7 @@ m.initFunction = function(e) {
 };
 m.parseMethod = function(e, t, i) {
   var n = this.startNode(), s = this.yieldPos, o = this.awaitPos, a = this.awaitIdentPos;
-  return this.initFunction(n), this.options.ecmaVersion >= 6 && (n.generator = e), this.options.ecmaVersion >= 8 && (n.async = !!t), this.yieldPos = 0, this.awaitPos = 0, this.awaitIdentPos = 0, this.enterScope(He(t, n.generator) | ze | (i ? gt : 0)), this.expect(r.parenL), n.params = this.parseBindingList(r.parenR, !1, this.options.ecmaVersion >= 8), this.checkYieldAwaitInDefaultParams(), this.parseFunctionBody(n, !1, !0, !1), this.yieldPos = s, this.awaitPos = o, this.awaitIdentPos = a, this.finishNode(n, "FunctionExpression");
+  return this.initFunction(n), this.options.ecmaVersion >= 6 && (n.generator = e), this.options.ecmaVersion >= 8 && (n.async = !!t), this.yieldPos = 0, this.awaitPos = 0, this.awaitIdentPos = 0, this.enterScope(He(t, n.generator) | Ee | (i ? gt : 0)), this.expect(r.parenL), n.params = this.parseBindingList(r.parenR, !1, this.options.ecmaVersion >= 8), this.checkYieldAwaitInDefaultParams(), this.parseFunctionBody(n, !1, !0, !1), this.yieldPos = s, this.awaitPos = o, this.awaitIdentPos = a, this.finishNode(n, "FunctionExpression");
 };
 m.parseArrowExpression = function(e, t, i, n) {
   var s = this.yieldPos, o = this.awaitPos, a = this.awaitIdentPos;
@@ -4098,7 +4106,7 @@ se.currentThisScope = function() {
   }
 };
 var Te = function(t, i, n) {
-  this.type = "", this.start = i, this.end = 0, t.options.locations && (this.loc = new Ee(t, n)), t.options.directSourceFile && (this.sourceFile = t.options.directSourceFile), t.options.ranges && (this.range = [i, 0]);
+  this.type = "", this.start = i, this.end = 0, t.options.locations && (this.loc = new ze(t, n)), t.options.directSourceFile && (this.sourceFile = t.options.directSourceFile), t.options.ranges && (this.range = [i, 0]);
 }, xe = T.prototype;
 xe.startNode = function() {
   return new Te(this, this.start, this.startLoc);
@@ -4121,20 +4129,20 @@ xe.copyNode = function(e) {
     t[i] = e[i];
   return t;
 };
-var Di = "Berf Beria_Erfe Gara Garay Gukh Gurung_Khema Hrkt Katakana_Or_Hiragana Kawi Kirat_Rai Krai Nag_Mundari Nagm Ol_Onal Onao Sidetic Sidt Sunu Sunuwar Tai_Yo Tayo Todhri Todr Tolong_Siki Tols Tulu_Tigalari Tutg Unknown Zzzz", Dt = "ASCII ASCII_Hex_Digit AHex Alphabetic Alpha Any Assigned Bidi_Control Bidi_C Bidi_Mirrored Bidi_M Case_Ignorable CI Cased Changes_When_Casefolded CWCF Changes_When_Casemapped CWCM Changes_When_Lowercased CWL Changes_When_NFKC_Casefolded CWKCF Changes_When_Titlecased CWT Changes_When_Uppercased CWU Dash Default_Ignorable_Code_Point DI Deprecated Dep Diacritic Dia Emoji Emoji_Component Emoji_Modifier Emoji_Modifier_Base Emoji_Presentation Extender Ext Grapheme_Base Gr_Base Grapheme_Extend Gr_Ext Hex_Digit Hex IDS_Binary_Operator IDSB IDS_Trinary_Operator IDST ID_Continue IDC ID_Start IDS Ideographic Ideo Join_Control Join_C Logical_Order_Exception LOE Lowercase Lower Math Noncharacter_Code_Point NChar Pattern_Syntax Pat_Syn Pattern_White_Space Pat_WS Quotation_Mark QMark Radical Regional_Indicator RI Sentence_Terminal STerm Soft_Dotted SD Terminal_Punctuation Term Unified_Ideograph UIdeo Uppercase Upper Variation_Selector VS White_Space space XID_Continue XIDC XID_Start XIDS", At = Dt + " Extended_Pictographic", Ct = At, Et = Ct + " EBase EComp EMod EPres ExtPict", zt = Et, Ai = zt, Ci = {
+var Di = "Berf Beria_Erfe Gara Garay Gukh Gurung_Khema Hrkt Katakana_Or_Hiragana Kawi Kirat_Rai Krai Nag_Mundari Nagm Ol_Onal Onao Sidetic Sidt Sunu Sunuwar Tai_Yo Tayo Todhri Todr Tolong_Siki Tols Tulu_Tigalari Tutg Unknown Zzzz", Dt = "ASCII ASCII_Hex_Digit AHex Alphabetic Alpha Any Assigned Bidi_Control Bidi_C Bidi_Mirrored Bidi_M Case_Ignorable CI Cased Changes_When_Casefolded CWCF Changes_When_Casemapped CWCM Changes_When_Lowercased CWL Changes_When_NFKC_Casefolded CWKCF Changes_When_Titlecased CWT Changes_When_Uppercased CWU Dash Default_Ignorable_Code_Point DI Deprecated Dep Diacritic Dia Emoji Emoji_Component Emoji_Modifier Emoji_Modifier_Base Emoji_Presentation Extender Ext Grapheme_Base Gr_Base Grapheme_Extend Gr_Ext Hex_Digit Hex IDS_Binary_Operator IDSB IDS_Trinary_Operator IDST ID_Continue IDC ID_Start IDS Ideographic Ideo Join_Control Join_C Logical_Order_Exception LOE Lowercase Lower Math Noncharacter_Code_Point NChar Pattern_Syntax Pat_Syn Pattern_White_Space Pat_WS Quotation_Mark QMark Radical Regional_Indicator RI Sentence_Terminal STerm Soft_Dotted SD Terminal_Punctuation Term Unified_Ideograph UIdeo Uppercase Upper Variation_Selector VS White_Space space XID_Continue XIDC XID_Start XIDS", At = Dt + " Extended_Pictographic", Ct = At, zt = Ct + " EBase EComp EMod EPres ExtPict", Et = zt, Ai = Et, Ci = {
   9: Dt,
   10: At,
   11: Ct,
-  12: Et,
-  13: zt,
+  12: zt,
+  13: Et,
   14: Ai
-}, Ei = "Basic_Emoji Emoji_Keycap_Sequence RGI_Emoji_Modifier_Sequence RGI_Emoji_Flag_Sequence RGI_Emoji_Tag_Sequence RGI_Emoji_ZWJ_Sequence RGI_Emoji", zi = {
+}, zi = "Basic_Emoji Emoji_Keycap_Sequence RGI_Emoji_Modifier_Sequence RGI_Emoji_Flag_Sequence RGI_Emoji_Tag_Sequence RGI_Emoji_ZWJ_Sequence RGI_Emoji", Ei = {
   9: "",
   10: "",
   11: "",
   12: "",
   13: "",
-  14: Ei
+  14: zi
 }, rt = "Cased_Letter LC Close_Punctuation Pe Connector_Punctuation Pc Control Cc cntrl Currency_Symbol Sc Dash_Punctuation Pd Decimal_Number Nd digit Enclosing_Mark Me Final_Punctuation Pf Format Cf Initial_Punctuation Pi Letter L Letter_Number Nl Line_Separator Zl Lowercase_Letter Ll Mark M Combining_Mark Math_Symbol Sm Modifier_Letter Lm Modifier_Symbol Sk Nonspacing_Mark Mn Number N Open_Punctuation Ps Other C Other_Letter Lo Other_Number No Other_Punctuation Po Other_Symbol So Paragraph_Separator Zp Private_Use Co Punctuation P punct Separator Z Space_Separator Zs Spacing_Mark Mc Surrogate Cs Symbol S Titlecase_Letter Lt Unassigned Cn Uppercase_Letter Lu", Pt = "Adlam Adlm Ahom Anatolian_Hieroglyphs Hluw Arabic Arab Armenian Armn Avestan Avst Balinese Bali Bamum Bamu Bassa_Vah Bass Batak Batk Bengali Beng Bhaiksuki Bhks Bopomofo Bopo Brahmi Brah Braille Brai Buginese Bugi Buhid Buhd Canadian_Aboriginal Cans Carian Cari Caucasian_Albanian Aghb Chakma Cakm Cham Cham Cherokee Cher Common Zyyy Coptic Copt Qaac Cuneiform Xsux Cypriot Cprt Cyrillic Cyrl Deseret Dsrt Devanagari Deva Duployan Dupl Egyptian_Hieroglyphs Egyp Elbasan Elba Ethiopic Ethi Georgian Geor Glagolitic Glag Gothic Goth Grantha Gran Greek Grek Gujarati Gujr Gurmukhi Guru Han Hani Hangul Hang Hanunoo Hano Hatran Hatr Hebrew Hebr Hiragana Hira Imperial_Aramaic Armi Inherited Zinh Qaai Inscriptional_Pahlavi Phli Inscriptional_Parthian Prti Javanese Java Kaithi Kthi Kannada Knda Katakana Kana Kayah_Li Kali Kharoshthi Khar Khmer Khmr Khojki Khoj Khudawadi Sind Lao Laoo Latin Latn Lepcha Lepc Limbu Limb Linear_A Lina Linear_B Linb Lisu Lisu Lycian Lyci Lydian Lydi Mahajani Mahj Malayalam Mlym Mandaic Mand Manichaean Mani Marchen Marc Masaram_Gondi Gonm Meetei_Mayek Mtei Mende_Kikakui Mend Meroitic_Cursive Merc Meroitic_Hieroglyphs Mero Miao Plrd Modi Mongolian Mong Mro Mroo Multani Mult Myanmar Mymr Nabataean Nbat New_Tai_Lue Talu Newa Newa Nko Nkoo Nushu Nshu Ogham Ogam Ol_Chiki Olck Old_Hungarian Hung Old_Italic Ital Old_North_Arabian Narb Old_Permic Perm Old_Persian Xpeo Old_South_Arabian Sarb Old_Turkic Orkh Oriya Orya Osage Osge Osmanya Osma Pahawh_Hmong Hmng Palmyrene Palm Pau_Cin_Hau Pauc Phags_Pa Phag Phoenician Phnx Psalter_Pahlavi Phlp Rejang Rjng Runic Runr Samaritan Samr Saurashtra Saur Sharada Shrd Shavian Shaw Siddham Sidd SignWriting Sgnw Sinhala Sinh Sora_Sompeng Sora Soyombo Soyo Sundanese Sund Syloti_Nagri Sylo Syriac Syrc Tagalog Tglg Tagbanwa Tagb Tai_Le Tale Tai_Tham Lana Tai_Viet Tavt Takri Takr Tamil Taml Tangut Tang Telugu Telu Thaana Thaa Thai Thai Tibetan Tibt Tifinagh Tfng Tirhuta Tirh Ugaritic Ugar Vai Vaii Warang_Citi Wara Yi Yiii Zanabazar_Square Zanb", Bt = Pt + " Dogra Dogr Gunjala_Gondi Gong Hanifi_Rohingya Rohg Makasar Maka Medefaidrin Medf Old_Sogdian Sogo Sogdian Sogd", Tt = Bt + " Elymaic Elym Nandinagari Nand Nyiakeng_Puachue_Hmong Hmnp Wancho Wcho", Vt = Tt + " Chorasmian Chrs Diak Dives_Akuru Khitan_Small_Script Kits Yezi Yezidi", Mt = Vt + " Cypro_Minoan Cpmn Old_Uyghur Ougr Tangsa Tnsa Toto Vithkuqi Vith", Pi = Mt + " " + Di, Bi = {
   9: Pt,
   10: Bt,
@@ -4146,7 +4154,7 @@ var Di = "Berf Beria_Erfe Gara Garay Gukh Gurung_Khema Hrkt Katakana_Or_Hiragana
 function Ti(e) {
   var t = It[e] = {
     binary: ne(Ci[e] + " " + rt),
-    binaryOfStrings: ne(zi[e]),
+    binaryOfStrings: ne(Ei[e]),
     nonBinary: {
       General_Category: ne(rt),
       Script: ne(Bi[e])
@@ -4989,7 +4997,7 @@ d.regexp_eatFixedHexDigits = function(e, t) {
   return !0;
 };
 var Je = function(t) {
-  this.type = t.type, this.value = t.value, this.start = t.start, this.end = t.end, t.options.locations && (this.loc = new Ee(t, t.startLoc, t.endLoc)), t.options.ranges && (this.range = [t.start, t.end]);
+  this.type = t.type, this.value = t.value, this.start = t.start, this.end = t.end, t.options.locations && (this.loc = new ze(t, t.startLoc, t.endLoc)), t.options.ranges && (this.range = [t.start, t.end]);
 }, b = T.prototype;
 b.next = function(e) {
   !e && this.type.keyword && this.containsEsc && this.raiseRecoverable(this.start, "Escape sequence in keyword " + this.type.keyword), this.options.onToken && this.options.onToken(new Je(this)), this.lastTokEnd = this.end, this.lastTokStart = this.start, this.lastTokEndLoc = this.endLoc, this.lastTokStartLoc = this.startLoc, this.nextToken();
@@ -5501,7 +5509,7 @@ T.acorn = {
   version: Gi,
   defaultOptions: Ke,
   Position: ke,
-  SourceLocation: Ee,
+  SourceLocation: ze,
   getLineInfo: pt,
   Node: Te,
   TokenType: w,
@@ -5603,14 +5611,14 @@ function Yi(e) {
   }
   const s = [], o = /* @__PURE__ */ new Map();
   for (let a = 0; a < e.indices.length; a += 3) {
-    const l = n[e.indices[a]], u = n[e.indices[a + 1]], h = n[e.indices[a + 2]], p = i[l], f = i[u], x = i[h], [g, I, K] = f.map((S, E) => S - p[E]), [_, L, ge] = x.map((S, E) => S - p[E]), ae = [I * ge - K * L, K * _ - g * ge, g * L - I * _], oe = Math.hypot(...ae);
+    const l = n[e.indices[a]], u = n[e.indices[a + 1]], h = n[e.indices[a + 2]], p = i[l], f = i[u], x = i[h], [g, I, K] = f.map((S, z) => S - p[z]), [_, L, ge] = x.map((S, z) => S - p[z]), ae = [I * ge - K * L, K * _ - g * ge, g * L - I * _], oe = Math.hypot(...ae);
     if (oe <= 1e-12)
       continue;
     const D = [ae[0] / oe, ae[1] / oe, ae[2] / oe];
     s.push({ a: l, b: u, c: h });
-    for (const [S, E] of [[l, u], [u, h], [h, l]]) {
-      const C = Math.min(S, E), V = Math.max(S, E), y = C * i.length + V, z = o.get(y);
-      z ? z.normals.push(D) : o.set(y, { a: C, b: V, normals: [D] });
+    for (const [S, z] of [[l, u], [u, h], [h, l]]) {
+      const C = Math.min(S, z), V = Math.max(S, z), y = C * i.length + V, E = o.get(y);
+      E ? E.normals.push(D) : o.set(y, { a: C, b: V, normals: [D] });
     }
   }
   return { vertices: i, faces: s, edges: [...o.values()] };
@@ -5633,21 +5641,21 @@ function $i(e, t, i, n) {
 }
 function en(e, t, i, n) {
   const { horizontal: s, vertical: o, depth: a, near: l } = t, u = n[s] - i[s], h = n[o] - i[o], p = Math.max(1e-6, Math.min(2e-3, (n[a] - i[a]) * 1e-6)), f = e.map((D) => D.vertices.map((S) => [S[s] - i[s], S[o] - i[o], S[a] * l])), x = Array.from({ length: le * le }, () => []), g = (D, S) => Math.min(le - 1, Math.max(0, Math.floor(D / S * le))), I = (D, S) => {
-    const E = g(D.left, u), C = g(D.right, u), V = g(D.bottom, h), y = g(D.top, h);
-    for (let z = V; z <= y; z++)
-      for (let U = E; U <= C; U++)
-        S(z * le + U);
-  }, K = (D, S, E) => {
+    const z = g(D.left, u), C = g(D.right, u), V = g(D.bottom, h), y = g(D.top, h);
+    for (let E = V; E <= y; E++)
+      for (let U = z; U <= C; U++)
+        S(E * le + U);
+  }, K = (D, S, z) => {
     const [C, V] = D[0] <= S[0] ? [D, S] : [S, D], y = V[0] - C[0];
     if (y < 1e-10) {
-      I(Fe(D, S), E);
+      I(Fe(D, S), z);
       return;
     }
-    const z = V[1] - C[1], U = u / le;
+    const E = V[1] - C[1], U = u / le;
     for (let J = g(C[0], u); J <= g(V[0], u); J++) {
-      const Se = C[1] + z * Math.max(0, (J * U - C[0]) / y), be = C[1] + z * Math.min(1, ((J + 1) * U - C[0]) / y);
+      const Se = C[1] + E * Math.max(0, (J * U - C[0]) / y), be = C[1] + E * Math.min(1, ((J + 1) * U - C[0]) / y);
       for (let N = g(Math.min(Se, be), h); N <= g(Math.max(Se, be), h); N++)
-        E(N * le + J);
+        z(N * le + J);
     }
   };
   let _ = 0, L = 0;
@@ -5656,34 +5664,34 @@ function en(e, t, i, n) {
       throw Ge();
   };
   for (const [D, S] of e.entries())
-    for (const E of S.faces) {
-      const [C, V, y] = [f[D][E.a], f[D][E.b], f[D][E.c]], z = (V[0] - C[0]) * (y[1] - C[1]) - (V[1] - C[1]) * (y[0] - C[0]);
-      if (Math.abs(z) < 1e-10)
+    for (const z of S.faces) {
+      const [C, V, y] = [f[D][z.a], f[D][z.b], f[D][z.c]], E = (V[0] - C[0]) * (y[1] - C[1]) - (V[1] - C[1]) * (y[0] - C[0]);
+      if (Math.abs(E) < 1e-10)
         continue;
-      const U = { a: C, b: V, c: y, det: z, box: Fe(C, V, y), nearest: Math.max(C[2], V[2], y[2]) };
+      const U = { a: C, b: V, c: y, det: E, box: Fe(C, V, y), nearest: Math.max(C[2], V[2], y[2]) };
       I(U.box, (J) => {
         ge(), x[J].push(U);
       });
     }
   const ae = [], oe = [];
   for (const [D, S] of e.entries())
-    for (const E of S.edges) {
-      const [C, ...V] = E.normals;
+    for (const z of S.edges) {
+      const [C, ...V] = z.normals;
       if (V.length && !V.some((P) => Ji(C, P) < Xi || C[a] * l > 1e-8 != P[a] * l > 1e-8))
         continue;
-      const y = f[D][E.a], z = f[D][E.b], U = Math.hypot(z[0] - y[0], z[1] - y[1]);
+      const y = f[D][z.a], E = f[D][z.b], U = Math.hypot(E[0] - y[0], E[1] - y[1]);
       if (U < 1e-5)
         continue;
-      const J = Fe(y, z), Se = Math.min(y[2], z[2]) + p, be = /* @__PURE__ */ new Set(), N = [];
+      const J = Fe(y, E), Se = Math.min(y[2], E[2]) + p, be = /* @__PURE__ */ new Set(), N = [];
       let Ye = !1;
-      K(y, z, (P) => {
+      K(y, E, (P) => {
         if (!Ye)
           for (const O of x[P]) {
             if (ge(), O.nearest <= Se || !Qi(J, O.box) || be.has(O))
               continue;
             if (be.add(O), ++L > Hi)
               throw Ge();
-            const Y = $i(O, y, z, p);
+            const Y = $i(O, y, E, p);
             if (Y) {
               if (Y[0] <= 1e-8 && Y[1] >= 1 - 1e-8) {
                 N.splice(0, N.length, [0, 1]), Ye = !0;
@@ -5693,11 +5701,11 @@ function en(e, t, i, n) {
             }
           }
       }), N.sort((P, O) => P[0] - O[0]);
-      const $e = (P) => [y[0] + (z[0] - y[0]) * P, y[1] + (z[1] - y[1]) * P], Me = (P, O, Y) => {
+      const $e = (P) => [y[0] + (E[0] - y[0]) * P, y[1] + (E[1] - y[1]) * P], Me = (P, O, Y) => {
         if ((O - P) * U <= 1e-5)
           return;
         const ie = $e(P), et = $e(O);
-        ae.push(...ie, ...et, Y ? 1 : 0), Y || oe.push(D, ...S.vertices[E.a], ...S.vertices[E.b], ...ie, ...et);
+        ae.push(...ie, ...et, Y ? 1 : 0), Y || oe.push(D, ...S.vertices[z.a], ...S.vertices[z.b], ...ie, ...et);
       };
       let Ie = 0;
       for (let P = 0; P < N.length; P++) {

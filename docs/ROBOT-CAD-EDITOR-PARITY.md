@@ -350,7 +350,9 @@ and save them in one Undo step. If the new dimensions conflict, the previous
 parameters and shapes stay in place. Segment lengths measure vertex to vertex.
 Choose **Arc radius** for an existing curved segment and enter a dimension or
 named parameter. It preserves the side and sweep through the solved endpoints.
-Arc tangency, region constraints and exact STEP editing remain open.
+Choose **Arc tangent to line** to keep the curve tangent to an adjoining
+straight segment. A radius or a second tangent must agree with that curve.
+Arc-to-arc tangency, region constraints and exact STEP editing remain open.
 
 **Properties → Export drilling template (PDF)** produces a full-size A4
 vector template in the local sketch plane. It evaluates the current cutout
