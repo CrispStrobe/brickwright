@@ -56,7 +56,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           repository: CrispStrobe/bw-board
-          ref: e339fcbfe9626bb24a5e8b54f48ad00feb458453
+          ref: a685b220f208dba88522962669e6c7fc2094981c
           path: admitted-sources/bw-board
           persist-credentials: false
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
