@@ -40,6 +40,15 @@ try{
  const marker=dialog.locator('.sketch-path-locked');
  await marker.waitFor();
  assert.equal(await marker.getAttribute('cx'),'20');
+ await dialog.getByText('Segment constraints',{exact:true}).tap();
+ await dialog.getByRole('combobox',{name:'Path segment'}).selectOption('1');
+ await dialog.getByLabel('Endpoint distance (mm)').fill('30 / 2');
+ await dialog.getByLabel('Direction (deg)').fill('90');
+ await dialog.getByRole('button',{name:'Constrain segment',exact:true}).tap();
+ const driven=dialog.locator('[data-driven]');
+ await driven.waitFor();
+ assert.equal(await driven.getAttribute('cx'),'20');
+ assert.equal(await driven.getAttribute('cy'),'-20');
  await dialog.getByRole('button',{name:'Save path',exact:true}).tap();
  await dialog.waitFor({state:'hidden'});
  await page.evaluate(()=>window.__bwCad.editor.whenIdle());
@@ -50,10 +59,13 @@ try{
  await save.saveAs(project);
  const zip=await JSZip.loadAsync(await readFile(project));
  const saved=JSON.parse(await zip.file(CAD_PROJECT_PATH).async('text'));
- assert.equal(saved.version,16);
+ assert.equal(saved.version,28);
  assert.deepEqual(saved.roots,[]);
  const id=Object.keys(saved.sketches)[0],profile=saved.sketches[id].profile;
  assert.deepEqual(profile.anchors,[{vertexId:profile.vertexIds[1],x:'40 / 2',y:5}]);
+ assert.deepEqual(profile.segmentConstraints,[
+  {from:profile.vertexIds[1],to:profile.vertexIds[2],distance:'30 / 2',direction:90}
+ ]);
  await page.close();
 
  const restored=await open();
@@ -74,9 +86,15 @@ try{
  assert.equal(await reopened.locator('.sketch-path-locked').getAttribute('cy'),'-5');
  await reopened.getByRole('button',{name:'Unlock point',exact:true}).tap();
  assert.equal(await reopened.getByLabel('Path points X, Y (mm)').inputValue(),'0, 0\n20, 5\n30, 20');
+ await reopened.getByText('Segment constraints',{exact:true}).tap();
+ await reopened.getByRole('combobox',{name:'Path segment'}).selectOption('1');
+ assert.equal(await reopened.getByLabel('Endpoint distance (mm)').inputValue(),'30 / 2');
+ assert.equal(await reopened.locator('[data-driven]').getAttribute('cy'),'-20');
+ await reopened.getByRole('button',{name:'Remove segment constraint',exact:true}).tap();
+ assert.equal(await reopened.getByLabel('Path points X, Y (mm)').inputValue(),'0, 0\n20, 5\n20, 20');
  await reopened.getByRole('button',{name:'Save path',exact:true}).tap();
  await reopened.waitFor({state:'hidden'});
- console.log('PASS Brickwright touch point lock, body-free SB3 round trip and unlock');
+ console.log('PASS Brickwright touch point lock and segment constraint, body-free SB3 round trip and removal');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});

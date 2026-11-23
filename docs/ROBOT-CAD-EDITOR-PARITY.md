@@ -459,3 +459,13 @@ the SB3 retains the plane.
 Assembly sections also support a single jog. Turn on **Offset section**,
 enter the second parallel cut and select where to switch between the two
 along the perpendicular world axis. Both cuts can use named dimensions.
+
+
+**Sketch path → Segment constraints** retains an endpoint distance and direction
+on an open path. Select a segment and enter the distance in millimetres and its
+direction in degrees counterclockwise from sketch +X. Project parameters can
+drive both values. Each endpoint can drive the following segment. The evaluated
+path is used for snapping and DXF export. The project SB3 retains expressions
+and vertex relationships. Removing a constraint keeps the endpoint at its
+current location. General constraint solving and closed-profile constraints
+remain on the drafting roadmap.
