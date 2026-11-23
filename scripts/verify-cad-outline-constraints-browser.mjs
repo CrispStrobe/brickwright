@@ -129,6 +129,8 @@ try{
  await solve.tap();
  await loopStatus.filter({hasText:'Outline solved'}).waitFor();
  await sketch.getByText('Region loop positions',{exact:true}).tap();
+ await sketch.getByLabel('Reference loop',{exact:true}).selectOption({label:'Outline loop 1'});
+ await sketch.getByLabel('Positioned loop',{exact:true}).selectOption({label:'Outline loop 2'});
  const xOffset=sketch.getByLabel('X offset (mm)',{exact:true});
  await xOffset.fill('reach / 4 + 1 mm');
  await xOffset.blur();
