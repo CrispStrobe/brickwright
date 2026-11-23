@@ -233,7 +233,10 @@ test('every shipped circuit resolves every wire endpoint into a real electrical 
     for (const suffix of ['2aa', '2nimh', '3aa-220', '3nimh']) {
         assert.ok(files.includes(`school-led-people-dog-${suffix}/circuit.json`), suffix);
     }
-    assert.equal(files.length, 1516, 'the gate must cover the complete vendored corpus');
+    // 1516 -> 1604 on 2026-11-23 (sb3-creator e1e126ae -> e248ce71, #186-#189): +88,
+    // one circuit.json for each new lab-* example. None removed.
+    assert.ok(files.includes('lab-airflow-sensor/circuit.json') && files.includes('lab-beats/circuit.json'), 'lab-* cohort');
+    assert.equal(files.length, 1604, 'the gate must cover the complete vendored corpus');
     assert.deepEqual(failures, []);
 });
 
