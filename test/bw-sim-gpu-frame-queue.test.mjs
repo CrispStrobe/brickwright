@@ -4,15 +4,16 @@ import {readFileSync} from 'node:fs';
 import {createGpuFrameQueue} from '../overlay/scratch-gui/src/lib/bw-sim/view/gpu-frame-queue.js';
 function context() {
     let next=0;
-    return {SYNC_STATUS:1,SIGNALED:2,SYNC_GPU_COMMANDS_COMPLETE:3,signaled:false,lost:false,deleted:[],
+    return {SYNC_STATUS:1,SIGNALED:2,UNSIGNALED:0,SYNC_GPU_COMMANDS_COMPLETE:3,signaled:false,lost:false,deleted:[],flushed:0,
+        flush(){this.flushed++;},
         fenceSync(){return ++next;},deleteSync(f){this.deleted.push(f);},
         getSyncParameter(){return this.signaled?2:0;},isContextLost(){return this.lost;}};
 }
 const source=readFileSync(new URL('../overlay/scratch-gui/src/lib/bw-sim/view/sim-view3d.js',import.meta.url),'utf8');
 const renderMethod=source.slice(source.indexOf('    const render = (snapshot'),source.indexOf('    const dispose = () =>',source.indexOf('    const render = (snapshot')));
 const resizeMethod=source.slice(source.indexOf('    const resize = ('),source.indexOf('    // Follow the chassis',source.indexOf('    const resize = (')));
-function view(gl,{onDemand=false,changed=()=>true}={}) {
-    const queue=createGpuFrameQueue(gl),drawn=[],overlays=[];let pose=null,shown=true;
+function view(gl,{onDemand=false,changed=()=>true,now}={}) {
+    const queue=createGpuFrameQueue(gl,now),drawn=[],overlays=[];let pose=null,shown=true;
     const noop=()=>{};
     const dimensions={clientWidth:100,clientHeight:100},sizes=[],browserWindow={devicePixelRatio:1};
     let width=100,height=100,ratio=1,presented=null;
@@ -91,4 +92,37 @@ test('lost contexts discard handles without invalid deletion; WebGL without fenc
     assert.equal(q.busy(),false);q.dispose();assert.deepEqual(gl.deleted,[]);
     const legacy=context();delete legacy.fenceSync;const v=view(legacy);
     v.render({pose:1});v.render({pose:2});assert.deepEqual(v.drawn,[1,2]);assert.equal(v.queue.pending,0);
+});
+
+test('a stalled fence releases the newest pose and keeps fallback frames paced', () => {
+    let time=0;
+    const gl=context(),v=view(gl,{now:()=>time});
+    v.render({pose:1});
+    assert.equal(gl.flushed,1,'submit the fence to the driver');
+    time=500;
+    v.render({pose:2});
+    assert.deepEqual(v.drawn,[1]);
+    time=751;
+    v.render({pose:3});
+    assert.deepEqual(v.drawn,[1,3]);
+    assert.deepEqual(gl.deleted,[1]);
+    assert.equal(v.queue.pending,0);
+    time=800;
+    v.render({pose:4});
+    time=851;
+    v.render({pose:5});
+    assert.deepEqual(v.drawn,[1,3,5]);
+    assert.equal(gl.flushed,1,'a driver with a stuck fence does not get another');
+});
+
+test('a driver that refuses a fence still presents future poses', () => {
+    let time=0;
+    const gl=context();
+    gl.fenceSync=()=>null;
+    const v=view(gl,{now:()=>time});
+    v.render({pose:1});
+    time=40;v.render({pose:2});
+    time=140;v.render({pose:3});
+    assert.deepEqual(v.drawn,[1,3]);
+    assert.deepEqual(gl.deleted,[]);
 });
