@@ -826,6 +826,15 @@ const H6 = {
   "Apply thread redesign": "Gewindeauslegung anwenden",
   "Rebuild a resized screw at a chosen pitch or turns per start, resetting its local scale as one saved edit.": "Eine skalierte Schraube mit gewählter Steigung oder Windungszahl pro Gang als einen gespeicherten Schritt neu aufbauen und ihre lokale Skalierung zurücksetzen."
 }, W6 = {
+  "Choose DWG file": "DWG-Datei auswählen",
+  "Choose a DWG file up to 1 MB.": "Wähle eine DWG-Datei bis 1 MB.",
+  "DWG layers": "DWG-Ebenen",
+  "This DWG could not be decoded as a supported 2D drawing.": "Diese DWG-Datei konnte nicht als unterstützte 2D-Zeichnung gelesen werden.",
+  "DWG import took too long. Try a smaller 2D drawing.": "Der DWG-Import hat zu lange gedauert. Versuche es mit einer kleineren 2D-Zeichnung.",
+  "The sketch changed while reading DWG. Choose the file again.": "Die Skizze wurde beim Lesen der DWG-Datei geändert. Wähle die Datei erneut aus.",
+  "Import DXF or DWG outline": "DXF- oder DWG-Kontur importieren",
+  "DXF or DWG path": "DXF- oder DWG-Pfad",
+  "DXF and DWG import accept closed outlines and circles. Loops inside an outer boundary become holes.": "Der DXF- und DWG-Import unterstützt geschlossene Konturen und Kreise. Schleifen innerhalb einer Außenkontur werden zu Löchern.",
   "Drawn by": "Gezeichnet von",
   Revision: "Revision",
   "Drawing number": "Zeichnungsnummer",

@@ -2,22 +2,23 @@
   "format": "brickwright-cad-sdk",
   "version": 1,
   "repository": "https://github.com/CrispStrobe/brickwright-cad",
-  "commit": "187f2f852a3bd73befac1c262e68625a1b744608",
+  "commit": "698c2ed49704527b2b05808b34eb06d3c260c529",
   "dirty": false,
   "entry": "sdk.js",
   "wasm": "cad-assets/manifold.wasm",
   "files": {
     "LICENSE": "ed121de3496066a2ddc8c11b30b48142165ab84bdb066fee351392ecaccf36ad",
-    "NOTICE.txt": "c75b43e86dd682f04d167b78e655bff1ea1e7edb2a8fb0c3f28fc50b51d9f6f9",
+    "NOTICE.txt": "c6f028b90188c8e46eaba80d730b71f63816cf30952334843ba4bcc25a117eca",
     "adafruit-preview-data-BWhkbkqw.js": "c37d14c1f115a63599555fd4193b2df1f9426a9b4cab8962282d6794ba6e11b6",
-    "assets/assembly-projection.worker-B_umDcfA.js": "c9cafc59309f471b0c72bc4d4bad33b71b2c97b344528df19f767090e011d72a",
-    "assets/geometry.worker-B6VoAbyQ.js": "62d737d4820ee311e6c159e50584687eebfc1621075a82b6c4df345a4fe389c1",
-    "assets/jolt-physics.wasm-compat-WtehPO6K.js": "0d889709cebc5daf0fe0f3b8fbb752d254b02cfcb7f924a6d2c343b8498a8423",
-    "assets/simulation.worker-BqPlBqGI.js": "8637828786c9207d5c9412a7bbfde2bbe707c9fc8b9cac980a74138e146274dc",
+    "assets/assembly-projection.worker-CTUeA8Bu.js": "735c5c9fbc8a3fd5dffbf34693b0befed15d57073de2fbc8fb2278fabca9609b",
+    "assets/geometry.worker-jRH9sKbM.js": "56f085f88b647e5ac5528afa42300da0ebd8019886c20ba644a1367d394391a1",
+    "assets/jolt-physics.wasm-compat-BvrEwWE7.js": "de497fea3100e7649ae60a1d96a98b797788000eb34540ad42ab595e7d71c352",
+    "assets/simulation.worker-C-T6AOeL.js": "69c876326898ce9be5a1582ca9117d9e781c37c280ff40731dde7fb92af7fccd",
+    "assets/sketch-dwg.worker-C6QkXT0E.js": "5816b2f65bb0dac776c1649e2cfb80402f57066c76c3600ef6e09ecdc9321213",
     "cad-assets/manifold.wasm": "73e3b419ad31294f6b1cc478173944e50efc4a34bfdeeff0107bdfc12975f11c",
     "model-library-cache-DiMFGzp9.js": "75dc4ad7999b4571b227f1c675ca00af698fcc886dc73e98dd4c0eb2604e2b20",
-    "model-library-local-COWlytcC.js": "3ada05c8604bfcf0087006f83aef1bb39c152d6d13e292327eb2c6a687dcc455",
-    "sdk-9l8J-XNy.js": "8b1b19650ffbc229aac1694aab5a2b06899d926c3662f97cedf43a1446808e67",
-    "sdk.js": "4d220f58ccea94bee264a332bc09f858cd2d8c19fa63de29e9f55efd222bf387"
+    "model-library-local-nq1CDWa5.js": "2973d59ddcb50378689dee40348658c4b4603dca95b9385d8b8698776b99b40f",
+    "sdk-Czdt0geA.js": "114a60d277411762b37ca7b38a76097f8741794c8b00830081b1523c8f922c3e",
+    "sdk.js": "854f617d63191855c917101a3a20a5bf8da95b4e347528759d77f856bd44a5df"
   }
 }

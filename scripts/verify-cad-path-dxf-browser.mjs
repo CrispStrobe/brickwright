@@ -46,7 +46,7 @@ try{
  const page=await open();
  await page.getByRole('button',{name:'Sketch path',exact:true}).tap();
  const path=page.getByRole('dialog',{name:'Sketch path',exact:true});
- await path.getByText('DXF path',{exact:true}).tap();
+ await path.getByText('DXF or DWG path',{exact:true}).tap();
  const fileInput=path.getByLabel('Choose DXF file');
  await fileInput.setInputFiles(fixture||{name:'inch guide.dxf',mimeType:'application/dxf',buffer:input});
  const importedLayer=path.getByText('DXF layer: Guides',{exact:true});

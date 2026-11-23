@@ -263,8 +263,11 @@ Local qualification: 35 head/point render combinations and the form/Undo flow pa
 The [shared CAD drafting roadmap](https://github.com/CrispStrobe/brickwright-cad/blob/main/docs/DRAFTING-ROADMAP.md)
 sets the order: improve Sketch & Extrude, add precise retained sketches, produce
 linked drawings/PDF, expose visual modeling commands, then extend file exchange.
-DXF is the first fabrication exchange format. DWG follows through a reviewed
-optional codec, with STEP import tracked separately for supplier components.
+DXF is the first fabrication exchange format. For a 2D DWG, open the same
+import controls and choose **Choose DWG file**. The CAD worker decodes it
+locally and uses the sketch layer and unit controls. Imported profiles and
+paths remain editable and save in the SB3. DXF export is available for the
+result. DWG export and STEP supplier-part import remain on the roadmap.
 The first cross-host acceptance model is a TT motor mounting plate with a
 driving hole-spacing dimension and a 1:1 drilling template.
 
@@ -299,7 +302,7 @@ extrusion in its local sketch plane at 1:1 scale in millimetres. Outlines use
 closed polylines and circles remain analytic circles. Body transforms, cuts
 and projection of an entire assembly belong to separate export workflows.
 
-**DXF import** is available under **Sketch & Extrude → Import DXF outline**.
+**DXF import** is available under **Sketch & Extrude → Import DXF or DWG outline**.
 Import a single boundary with optional holes from text DXF circles, closed
 lightweight polylines, or closed chains of native 2D lines and arcs. Edit the coordinates or radii before creating
 the extrusion. Declared inches, feet, millimetres, centimetres and metres

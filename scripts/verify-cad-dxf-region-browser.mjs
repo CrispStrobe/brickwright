@@ -41,7 +41,7 @@ try {
  await closeParameters.tap();
  await cad.getByRole('button',{name:'Sketch',exact:true}).tap();
  const dialog=cad.getByRole('dialog',{name:'Sketch and extrusion'});
- await dialog.getByText('Import DXF outline',{exact:true}).tap();
+ await dialog.getByText('Import DXF or DWG outline',{exact:true}).tap();
  await dialog.getByLabel('Choose DXF file').setInputFiles(input || {
   name:'Motor plate.dxf', mimeType:'application/dxf', buffer:Buffer.from(fixture)
  });

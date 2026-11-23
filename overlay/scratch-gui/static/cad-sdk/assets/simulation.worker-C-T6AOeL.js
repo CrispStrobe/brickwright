@@ -826,6 +826,15 @@ const wg = {
   "Apply thread redesign": "Gewindeauslegung anwenden",
   "Rebuild a resized screw at a chosen pitch or turns per start, resetting its local scale as one saved edit.": "Eine skalierte Schraube mit gewählter Steigung oder Windungszahl pro Gang als einen gespeicherten Schritt neu aufbauen und ihre lokale Skalierung zurücksetzen."
 }, Sg = {
+  "Choose DWG file": "DWG-Datei auswählen",
+  "Choose a DWG file up to 1 MB.": "Wähle eine DWG-Datei bis 1 MB.",
+  "DWG layers": "DWG-Ebenen",
+  "This DWG could not be decoded as a supported 2D drawing.": "Diese DWG-Datei konnte nicht als unterstützte 2D-Zeichnung gelesen werden.",
+  "DWG import took too long. Try a smaller 2D drawing.": "Der DWG-Import hat zu lange gedauert. Versuche es mit einer kleineren 2D-Zeichnung.",
+  "The sketch changed while reading DWG. Choose the file again.": "Die Skizze wurde beim Lesen der DWG-Datei geändert. Wähle die Datei erneut aus.",
+  "Import DXF or DWG outline": "DXF- oder DWG-Kontur importieren",
+  "DXF or DWG path": "DXF- oder DWG-Pfad",
+  "DXF and DWG import accept closed outlines and circles. Loops inside an outer boundary become holes.": "Der DXF- und DWG-Import unterstützt geschlossene Konturen und Kreise. Schleifen innerhalb einer Außenkontur werden zu Löchern.",
   "Drawn by": "Gezeichnet von",
   Revision: "Revision",
   "Drawing number": "Zeichnungsnummer",
@@ -10961,7 +10970,7 @@ async function I7(A, g, I, C = {}) {
     }
   if ([...I.values()].reduce((x, p) => x + p.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = C.J ?? await (G4 ?? (G4 = import("./jolt-physics.wasm-compat-WtehPO6K.js").then((x) => x.default()))), Q = new i.JoltSettings();
+  const i = C.J ?? await (G4 ?? (G4 = import("./jolt-physics.wasm-compat-BvrEwWE7.js").then((x) => x.default()))), Q = new i.JoltSettings();
   Q.mMaxBodies = 512, Q.mMaxBodyPairs = Math.max(1024, B.length * B.length), Q.mMaxContactConstraints = 8192;
   const s = new i.ObjectLayerPairFilterTable(2);
   s.EnableCollision(0, 1), s.EnableCollision(1, 1);
