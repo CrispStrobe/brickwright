@@ -236,7 +236,12 @@ test('every shipped circuit resolves every wire endpoint into a real electrical 
     // 1516 -> 1604 on 2026-11-23 (sb3-creator e1e126ae -> e248ce71, #186-#189): +88,
     // one circuit.json for each new lab-* example. None removed.
     assert.ok(files.includes('lab-airflow-sensor/circuit.json') && files.includes('lab-beats/circuit.json'), 'lab-* cohort');
-    assert.equal(files.length, 1604, 'the gate must cover the complete vendored corpus');
+    // 1604 -> 1609 on 2026-11-23 (sb3-creator fc0e1c94 -> 01e1280, #191): +5, the
+    // radio benches lab-crystal-set, lab-one-transistor-radio, lab-radio-loudspeaker,
+    // lab-radio-whistle and lab-reflex-radio. None removed.
+    for (const id of ['lab-crystal-set', 'lab-one-transistor-radio', 'lab-radio-loudspeaker',
+        'lab-radio-whistle', 'lab-reflex-radio']) assert.ok(files.includes(id + '/circuit.json'), id);
+    assert.equal(files.length, 1609, 'the gate must cover the complete vendored corpus');
     assert.deepEqual(failures, []);
 });
 

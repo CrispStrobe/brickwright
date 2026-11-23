@@ -8,7 +8,7 @@ import {pathToFileURL} from 'node:url';
 import {loadCircuitModel} from '../scripts/lib/polarity-oracle.mjs';
 
 const root=path.resolve(import.meta.dirname,'..');
-const boardPin='e339fcbfe9626bb24a5e8b54f48ad00feb458453';
+const boardPin='a685b220f208dba88522962669e6c7fc2094981c';
 const packageSpec=`github:CrispStrobe/bw-board#${boardPin}`;
 const fixture=JSON.parse(readFileSync(path.join(root,'test/fixtures/adp7118-fixed-regulator.json'),'utf8'));
 const terminals=['vout_1','vout_2','sense_adj','gnd','en','ss','vin_7','vin_8'];
@@ -99,15 +99,22 @@ async function installedCircuit(R,C){
 test('limiter adoption selects the exact pinned installed package rather than a board override',()=>{
     const pins=JSON.parse(readFileSync(path.join(root,'vendor-pins.json'),'utf8'));
     assert.equal(pins['bw-board'],boardPin);
-    assert.equal(pins['bw-circuit-ui'],'0ec68b3de0b8dd788475143ff4dcb28887c03a69');
+    assert.equal(pins['bw-circuit-ui'],'540423d00e0e8b5c48c0c12fab0120204faba7cc');
     const pkg=JSON.parse(readFileSync(path.join(root,'package.json'),'utf8'));
     assert.equal(pkg.devDependencies['bw-board'],packageSpec);
     const lock=JSON.parse(readFileSync(path.join(root,'package-lock.json'),'utf8'));
     assert.ok(lock.packages['node_modules/bw-board'].resolved.endsWith(`#${boardPin}`));
 });
 
+// bw-board ROUND 3 (a685b22): the default profile (interactive-v2) scales its
+// step-doubling estimate by the Richardson factor 1/(2^p - 1), so its steps
+// spend the stated tolerance instead of a third of it. The interactive
+// overload sample tolerance 1e-4 -> 2e-4 (measured 1.45e-4 near 3.4 V, where the
+// profile's own local scale is 1e-6 + 1e-4*3.4 = 3.4e-4) and inrush 5e-6 -> 2e-5
+// (measured 1.4e-5 at 4.27 V), as in bw-board's own adp7118 test. The
+// precision-v1 rows keep their recorded tolerances.
 for(const [R,C,sampleTolerance,meanTolerance,precision,inputR=4] of [
-    [10,2.2e-6,1e-4,3e-5,false],[500,22e-6,5e-6,1e-5,false],
+    [10,2.2e-6,2e-4,3e-5,false],[500,22e-6,2e-5,1e-5,false],
     [10,2.2e-6,5e-7,1e-6,true],[500,22e-6,5e-7,1e-6,true],
     // Ideal-supply linear startup exposed the old endpoint-only meter mean.
     [500,2.2e-6,5e-7,1e-6,true,0],
@@ -276,7 +283,7 @@ test('installed Circuit uses coherent accepted-step currents and preserves parti
             for(let i=1;i<=120;i++){
                 partitioned.board.advanceTo(BigInt(i)*10000n);
                 const {output}=observations(partitioned.board);
-                near(output,expected.voltage(i*1e-5),R===10?1.2e-4:5e-6,'installed partitioned analytic output');
+                near(output,expected.voltage(i*1e-5),R===10?2e-4:5e-6,'installed partitioned analytic output');
             }
             near(observations(big.board).output,observations(partitioned.board).output,1e-7,'installed large versus partitioned');
             assert.equal(big.board.transientAnalysisStatus().accuracyMet,true);
