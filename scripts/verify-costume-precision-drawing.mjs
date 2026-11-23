@@ -24,6 +24,11 @@ const selectedBounds = () => page.evaluate(() => {
     const bounds = items[0]?.bounds;
     return {count:items.length,kind:items[0]?.className,box:bounds && [bounds.x,bounds.y,bounds.width,bounds.height]};
 });
+const selectedStroke = () => page.evaluate(() => {
+    const shape = window.__brickwrightStore.getState().scratchPaint.selectedItems[0];
+    return {closed:shape.closed,stroke:shape.strokeWidth,cap:shape.strokeCap,
+        points:shape.segments.map(segment => [segment.point.x,segment.point.y]),hasCurves:shape.hasHandles()};
+});
 const artwork = () => page.evaluate(() => {
     const vm = window.__brickwrightStore.getState().scratchGui.vm;
     const costume = vm.editingTarget.getCostumes()[vm.editingTarget.currentCostume];
@@ -89,6 +94,31 @@ try {
     await workspace.getByRole('button',{name:'Redo',exact:true}).click();
     await waitForCircles(1);
     assert.deepEqual((await artwork()).circles,[12.5]);
+    await page.getByLabel('Shape',{exact:true}).selectOption('line');
+    await page.getByLabel('Start X',{exact:true}).fill('-20');
+    await page.getByLabel('Start Y',{exact:true}).fill('-10');
+    await page.getByLabel('End X',{exact:true}).fill('40');
+    await page.getByLabel('End Y',{exact:true}).fill('10');
+    await page.getByLabel('Stroke width',{exact:true}).fill('4');
+    await add.click();
+    assert.deepEqual(await selectedStroke(),{closed:false,stroke:8,cap:'round',points:[[440,340],[560,380]],hasCurves:false});
+
+    await page.getByLabel('Shape',{exact:true}).selectOption('arc');
+    await page.getByLabel('Center X',{exact:true}).fill('80');
+    await page.getByLabel('Center Y',{exact:true}).fill('-30');
+    await page.getByLabel('Radius',{exact:true}).fill('22');
+    await page.getByLabel('Start angle (°)',{exact:true}).fill('30');
+    await page.getByLabel('Sweep (°)',{exact:true}).fill('360');
+    assert.equal(await add.isDisabled(),true);
+    await page.getByLabel('Sweep (°)',{exact:true}).fill('-225');
+    await page.getByLabel('Stroke width',{exact:true}).fill('2');
+    await add.click();
+    const arc = await selectedStroke();
+    assert.equal(arc.closed,false);
+    assert.equal(arc.stroke,4);
+    assert.equal(arc.hasCurves,true);
+    assert.deepEqual(arc.points.map(point => point.map(value => Number(value.toFixed(3)))),
+        [[678.105,322],[684,300],[640,256],[596,300],[597.499,311.388]]);
     assert.equal(sdkRequests.length,0,'Drawing does not load the CAD SDK');
 
     const authored = await artwork();
@@ -107,6 +137,20 @@ try {
     const profile = await page.evaluate(() => Object.values(window.__bwCad.editor.session.state.document.sketches)[0].profile);
     assert.equal(profile.kind,'circle');
     assert.equal(profile.radius,20);
+    assert.equal((await artwork()).assetId,authored.assetId);
+    await handoff.getByRole('button',{name:'Close',exact:true}).click();
+    await page.getByTestId('bw-costume-precision').click();
+    await handoff.getByLabel('Profile source',{exact:true}).selectOption('stroke');
+    await handoff.getByText('Enable curve approximation to preview curved strokes.',{exact:true}).waitFor();
+    assert.equal(await region.locator('option').count(),1);
+    await handoff.getByRole('checkbox',{name:'Approximate curves',exact:true}).check();
+    assert.equal(await region.locator('option').count(),2);
+    await region.selectOption('1');
+    await handoff.getByRole('button',{name:'Add editable sketch',exact:true}).click();
+    await handoff.getByText(/Sketch added to CAD/).waitFor();
+    const arcSketch = await page.evaluate(() => Object.values(window.__bwCad.editor.session.state.document.sketches).at(-1).profile);
+    assert.equal(arcSketch.kind,'outline');
+    assert.ok(arcSketch.points.length > 12);
     assert.equal((await artwork()).assetId,authored.assetId);
     await handoff.getByRole('button',{name:'Close',exact:true}).click();
     await togglePrecision('0');
@@ -131,7 +175,7 @@ try {
         const vm = window.__brickwrightStore?.getState().scratchGui.vm;
         return vm?.editingTarget.getCostumes().some(costume => costume.assetId === assetId);
     },authored.assetId);
-    console.log('PASS optional precise rectangles and circles, numeric bounds, undo/redo, analytic CAD import, and SB3 reopen');
+    console.log('PASS precise rectangles, circles, lines and arcs, undo/redo, CAD import, and SB3 reopen');
 } catch (error) {
     await page.screenshot({path:'/tmp/bw-costume-precision-drawing-failure.png'}).catch(() => {});
     throw error;

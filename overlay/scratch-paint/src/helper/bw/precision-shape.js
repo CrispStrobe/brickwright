@@ -5,26 +5,85 @@ import {ART_BOARD_WIDTH, SVG_ART_BOARD_WIDTH, CENTER, MAX_WORKSPACE_BOUNDS} from
 
 export const ART_BOARD_UNITS_PER_COSTUME_UNIT = ART_BOARD_WIDTH / SVG_ART_BOARD_WIDTH;
 
-/** Convert exact costume units to the same center-based coordinates used by Transform. */
-export const precisionShapeBounds = ({kind, x, y, width, height}) => {
+const toRadians = degrees => degrees * Math.PI / 180;
+const toCanvas = ([x, y]) => new paper.Point(CENTER.x + x * ART_BOARD_UNITS_PER_COSTUME_UNIT,
+    CENTER.y + y * ART_BOARD_UNITS_PER_COSTUME_UNIT);
+
+const strokeGeometry = draft => {
+    const {kind, x, y, stroke} = draft;
+    if (![x, y, stroke].every(Number.isFinite) || stroke < .01) return null;
+    if (kind === 'line') {
+        const {endX, endY} = draft;
+        if (![endX, endY].every(Number.isFinite) || Math.hypot(endX - x, endY - y) < .01) return null;
+        return {points: [[x, y], [endX, endY]], stroke};
+    }
+    const {radius, startAngle, sweep} = draft;
+    if (![radius, startAngle, sweep].every(Number.isFinite) || radius < .01 || Math.abs(sweep) < .01 ||
+        Math.abs(sweep) >= 360 || radius * toRadians(Math.abs(sweep)) < .01) return null;
+    const start = startAngle % 360;
+    const end = start + sweep;
+    const low = Math.min(start, end), high = Math.max(start, end);
+    const quarters = [];
+    for (let angle = (Math.floor(low / 90) + 1) * 90; angle < high; angle += 90) {
+        if (angle - low > 1e-9 && high - angle > 1e-9) quarters.push(angle);
+    }
+    const angles = [start, ...(sweep > 0 ? quarters : quarters.reverse()), end].map(toRadians);
+    const points = angles.map(angle => [x + radius * Math.cos(angle), y + radius * Math.sin(angle)]);
+    return {points, angles, radius, stroke};
+};
+
+const precisionGeometry = draft => {
+    const {kind, x, y, width, height} = draft;
+    const units = ART_BOARD_UNITS_PER_COSTUME_UNIT;
+    if (kind === 'line' || kind === 'arc') {
+        const geometry = strokeGeometry(draft);
+        if (!geometry) return null;
+        const xs = geometry.points.map(point => point[0]), ys = geometry.points.map(point => point[1]);
+        const left = Math.min(...xs), top = Math.min(...ys), half = geometry.stroke / 2;
+        const bounds = new paper.Rectangle(CENTER.x + (left - half) * units, CENTER.y + (top - half) * units,
+            (Math.max(...xs) - left + geometry.stroke) * units, (Math.max(...ys) - top + geometry.stroke) * units);
+        return MAX_WORKSPACE_BOUNDS.contains(bounds) ? {...geometry, bounds} : null;
+    }
     if (kind !== 'rectangle' && kind !== 'circle') return null;
     const h = kind === 'circle' ? width : height;
     if (![x, y, width, h].every(Number.isFinite) || width < .01 || h < .01) return null;
-    const units = ART_BOARD_UNITS_PER_COSTUME_UNIT;
     const bounds = new paper.Rectangle(CENTER.x + (x - width / 2) * units,
         CENTER.y + (y - h / 2) * units, width * units, h * units);
-    return MAX_WORKSPACE_BOUNDS.contains(bounds) ? bounds : null;
+    return MAX_WORKSPACE_BOUNDS.contains(bounds) ? {bounds} : null;
+};
+
+/** Convert exact costume units to the same center-based coordinates used by Transform. */
+export const precisionShapeBounds = draft => precisionGeometry(draft)?.bounds ?? null;
+
+const createStroke = geometry => {
+    const {points, angles, stroke, radius} = geometry;
+    const units = ART_BOARD_UNITS_PER_COSTUME_UNIT;
+    const segments = angles ? angles.map((angle, index) => {
+        // Cubic sub-arcs end at each quadrant, keeping their axis extrema exact.
+        const tangent = new paper.Point(-Math.sin(angle), Math.cos(angle));
+        const handle = delta => tangent.multiply((4 / 3) * Math.tan(delta / 4) * radius * units);
+        return new paper.Segment(toCanvas(points[index]), handle((angles[index - 1] ?? angle) - angle),
+            handle((angles[index + 1] ?? angle) - angle));
+    }) : points.map(toCanvas);
+    return new paper.Path({segments, insert: false, strokeColor: DEFAULT_COLOR, strokeWidth: stroke * units,
+        strokeCap: 'round'});
 };
 
 export const insertPrecisionShape = draft => {
     const layer = paper.project?.activeLayer;
-    const bounds = precisionShapeBounds(draft);
-    if (!layer?.data?.isPaintingLayer || !bounds) return false;
-    const shape = draft.kind === 'circle' ?
-        new paper.Path.Circle({center: bounds.center, radius: bounds.width / 2, insert: false}) :
-        new paper.Path.Rectangle({rectangle: bounds, insert: false});
-    shape.fillColor = DEFAULT_COLOR;
-    if (draft.kind === 'circle') shape.data.bwPrecisionCircle = true;
+    const geometry = precisionGeometry(draft);
+    if (!layer?.data?.isPaintingLayer || !geometry) return false;
+    const {bounds} = geometry;
+    let shape;
+    if (geometry.points) {
+        shape = createStroke(geometry);
+    } else if (draft.kind === 'circle') {
+        shape = new paper.Path.Circle({center: bounds.center, radius: bounds.width / 2, insert: false});
+        shape.data.bwPrecisionCircle = true;
+    } else {
+        shape = new paper.Path.Rectangle({rectangle: bounds, insert: false});
+    }
+    if (!geometry.points) shape.fillColor = DEFAULT_COLOR;
     paper.project.deselectAll();
     layer.addChild(shape);
     shape.selected = true;

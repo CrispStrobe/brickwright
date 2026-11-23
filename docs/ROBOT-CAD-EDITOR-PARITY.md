@@ -517,8 +517,14 @@ the center of the drawing area with X to the right and Y down. The new shape
 is selected on the canvas. The existing Transform and node tools can edit
 it, and Undo and Redo treat each insertion as one artwork edit. Precision
 circles export as SVG circles while their paths still describe circles. The
-Chrome check measures both shapes on the canvas, takes the circle through
+Chrome check measures shapes on the canvas, takes the circle through
 Undo, Redo and CAD import, and reopens the authored artwork from SB3.
+
+**Line** uses start and end coordinates. **Circular arc** uses a center,
+radius, start angle, and signed sweep. Zero degrees points right and positive
+angles run clockwise. Both tools use an explicit stroke width in costume
+units. In **Send to CAD**, choose **Strokes**, and turn on **Approximate
+curves** for an arc.
 
 Enable **CAD Editor** and **Costumes precision design** in **Settings → Workspace**.
 **Send to CAD** opens a preview of supported filled vector regions. Select one,

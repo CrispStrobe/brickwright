@@ -33,3 +33,27 @@ test('bad sizes, unsupported shapes, and off-canvas placements are rejected',()=
     }
     assert.ok(bounds({...draft,x:330}));
 });
+
+test('line bounds include the stroke and reject coincident endpoints',()=>{
+    const draft = {kind:'line',x:-20,y:-10,endX:40,endY:10,stroke:4};
+    assert.deepEqual({...bounds(draft)},{x:436,y:336,width:128,height:48});
+    assert.equal(bounds({...draft,endX:-20,endY:-10}),null);
+    assert.equal(bounds({...draft,stroke:0}),null);
+});
+
+test('a major counterclockwise arc includes the extrema it crosses',()=>{
+    const draft = {kind:'arc',x:10,y:-20,radius:25,startAngle:45,sweep:-225,stroke:4};
+    const arc = bounds(draft);
+    assert.deepEqual([arc.x,arc.y,arc.width],[446,266,108]);
+    assert.ok(Math.abs(arc.height - (25 + 25 * Math.SQRT1_2 + 4) * 2) < 1e-10);
+    const clockwise = bounds({...draft,sweep:90});
+    assert.ok(clockwise.y > arc.y);
+    assert.ok(Math.abs(clockwise.height - (25 * (1 - Math.SQRT1_2) + 4) * 2) < 1e-10);
+});
+
+test('arcs reject whole turns, vanishing lengths, and visible strokes beyond the workspace',()=>{
+    const draft = {kind:'arc',x:0,y:0,radius:40,startAngle:0,sweep:90,stroke:2};
+    for (const patch of [{sweep:0},{sweep:360},{sweep:-360},{radius:.01,sweep:.01},{x:319,stroke:4}]) {
+        assert.equal(bounds({...draft,...patch}),null);
+    }
+});
