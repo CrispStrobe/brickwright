@@ -1,13 +1,24 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
 
 const browser = await chromium.launch({
     executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || undefined,
     headless: true
 });
-const page = await browser.newPage({viewport:{width:1520,height:960},locale:'en-US',serviceWorkers:'block'});
-page.setDefaultTimeout(90000);
+const appUrl = process.argv[2] || 'http://127.0.0.1:8230/';
+const newWorkspace = async () => {
+    const workspace = await browser.newPage({viewport:{width:1520,height:960},locale:'en-US',serviceWorkers:'block'});
+    workspace.setDefaultTimeout(90000);
+    await workspace.addInitScript(() => {
+        localStorage.setItem('bw-starter-v1-complete', '1');
+        localStorage.setItem('bw-cad-enabled', '1');
+    });
+    return workspace;
+};
+const page = await newWorkspace();
+let activePage = page;
 const sdkRequests = [];
 page.on('request', request => {
     if (request.url().includes('/static/cad-sdk/')) sdkRequests.push(request.url());
@@ -18,12 +29,8 @@ const sketch = () => page.evaluate(() => {
     const document = editor.session.state.document;
     return {sketches:Object.values(document.sketches || {}),roots:document.roots};
 });
-await page.addInitScript(() => {
-    localStorage.setItem('bw-starter-v1-complete', '1');
-    localStorage.setItem('bw-cad-enabled', '1');
-});
 try {
-    await page.goto(process.argv[2] || 'http://127.0.0.1:8230/', {waitUntil:'commit'});
+    await page.goto(appUrl, {waitUntil:'commit'});
     await page.getByRole('tab', {name:'Costumes',exact:true}).click();
     await page.getByTestId('bw-costume-export').waitFor();
     const trigger = page.getByTestId('bw-costume-precision');
@@ -97,9 +104,33 @@ try {
     }
     await preference.selectOption('0');
     await trigger.waitFor({state:'detached'});
-    console.log('PASS default-off Costumes, lazy SDK, region preview and selection, scaled editable CAD sketch, preserved artwork, and extrusion');
+    await page.getByText('File',{exact:true}).click();
+    const download = page.waitForEvent('download');
+    await page.getByText('Save to your computer',{exact:true}).click();
+    const file = await readFile(await (await download).path());
+
+    const reopened = await newWorkspace();
+    activePage = reopened;
+    await reopened.goto(appUrl,{waitUntil:'commit'});
+    await reopened.getByText('File',{exact:true}).click();
+    await reopened.getByText('Load from your computer',{exact:true}).click();
+    await reopened.locator('body > input[type="file"][accept*=".sb3"]').setInputFiles({
+        name:'costume-cad.sb3',mimeType:'application/x.scratch.sb3',buffer:file
+    });
+    await reopened.waitForFunction(assetId => {
+        const vm = window.__brickwrightStore?.getState().scratchGui.vm;
+        return vm?.runtime.targets.some(target => target.sprite.costumes.some(costume => costume.assetId === assetId));
+    },original);
+    await reopened.getByRole('tab',{name:'CAD',exact:true}).click();
+    await reopened.waitForFunction(sketchId => {
+        const document = window.__bwCad?.editor.session.state.document;
+        return document?.roots.length === 1 && document.sketches?.[sketchId]?.profile.kind === 'region';
+    },draft.id);
+    const savedVolume = await reopened.evaluate(async () => (await window.__bwCad.editor.whenIdle()).bodies[0]?.volume);
+    assert.ok(Math.abs(savedVolume - 16920) < .1, `Reopened extrusion volume ${savedVolume} mm³`);
+    console.log('PASS default-off Costumes, lazy SDK, region preview, scaled editable CAD sketch, extrusion volume, and SB3 save/reopen');
 } catch (error) {
-    await page.screenshot({path:'/tmp/bw-costume-precision-failure.png'}).catch(() => {});
+    await activePage.screenshot({path:'/tmp/bw-costume-precision-failure.png'}).catch(() => {});
     throw error;
 } finally {
     await browser.close();
