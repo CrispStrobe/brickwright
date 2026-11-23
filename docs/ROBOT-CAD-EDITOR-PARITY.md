@@ -348,7 +348,9 @@ then choose **Solve outline** and apply the changes. Changes in **Parameters**,
 **Design inputs**, or **Model source** automatically solve affected outlines
 and save them in one Undo step. If the new dimensions conflict, the previous
 parameters and shapes stay in place. Segment lengths measure vertex to vertex.
-Curve-specific constraints and exact STEP editing remain open.
+Choose **Arc radius** for an existing curved segment and enter a dimension or
+named parameter. It preserves the side and sweep through the solved endpoints.
+Arc tangency, region constraints and exact STEP editing remain open.
 
 **Properties → Export drilling template (PDF)** produces a full-size A4
 vector template in the local sketch plane. It evaluates the current cutout

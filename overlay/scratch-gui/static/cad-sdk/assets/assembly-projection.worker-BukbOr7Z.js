@@ -33,7 +33,7 @@ const Gt = {
   "Choose light or dark mode": "Hellen oder dunklen Modus wählen",
   "Loading models…": "Modelle werden geladen…",
   "Original source files": "Originale Quelldateien",
-  "Model source uses project version 6 through 31": "Modellquelltext verwendet Projektversion 6 bis 31",
+  "Model source uses project version 6 through 32": "Modellquelltext verwendet Projektversion 6 bis 32",
   "Unknown material preset": "Unbekannte Materialvorlage",
   "Initial velocity requires project version 8": "Anfangsgeschwindigkeit erfordert Projektversion 8",
   "Invalid initial body velocity": "Ungültige Anfangsgeschwindigkeit",
@@ -823,6 +823,13 @@ const Gt = {
   "Apply thread redesign": "Gewindeauslegung anwenden",
   "Rebuild a resized screw at a chosen pitch or turns per start, resetting its local scale as one saved edit.": "Eine skalierte Schraube mit gewählter Steigung oder Windungszahl pro Gang als einen gespeicherten Schritt neu aufbauen und ihre lokale Skalierung zurücksetzen."
 }, Yt = {
+  "Driving arc radii require document version 32": "Festgelegte Bogenradien erfordern Dokumentversion 32",
+  "The arc radius must be at least half its chord length.": "Der Bogenradius muss mindestens halb so groß wie die Sehnenlänge sein.",
+  "An arc can have only one driving radius.": "Ein Bogen kann nur einen festgelegten Radius haben.",
+  "Arc radius": "Bogenradius",
+  "Arc radius (mm)": "Bogenradius (mm)",
+  "Choose an existing arc. Solving keeps the side and sweep branch of that arc.": "Wähle einen vorhandenen Bogen. Beim Lösen bleiben Seite und Bogenart erhalten.",
+  "Curve the segment before adding a driving radius.": "Krümme das Segment, bevor du einen Radius festlegst.",
   "This source edit requires solving its outline constraints.": "Für diese Quelltextänderung müssen die Konturbedingungen gelöst werden.",
   "Checking model source…": "Modellquelltext wird geprüft…",
   "This parameter edit requires solving its outline constraints.": "Für diese Parameteränderung müssen die Konturbedingungen gelöst werden.",

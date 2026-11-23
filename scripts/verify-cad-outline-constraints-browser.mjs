@@ -14,6 +14,12 @@ const browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_CHROM
 const tab=page=>page.getByRole('tab',{name:'CAD',exact:true});
 const file=page=>page.getByTestId('bw-file-menu-trigger');
 const rounded=points=>points.map(point=>point.map(value=>Math.round(value*1e6)/1e6+0));
+function requireRadius(profile,radius){
+ const [a,b]=profile.points,bulge=profile.bulges[0];
+ const chord=Math.hypot(b[0]-a[0],b[1]-a[1]);
+ assert.ok(bulge>0&&bulge<1);
+ assert.ok(Math.abs(chord*(bulge+1/bulge)/4-radius)<1e-6);
+}
 async function setReach(page,expression,{create=false}={}){
  await page.getByRole('button',{name:'Parameters',exact:true}).tap();
  const parameters=page.getByRole('dialog',{name:'Model parameters'});
@@ -50,30 +56,31 @@ try{
  const sketch=page.getByRole('dialog',{name:'Sketch and extrusion'});
  await sketch.getByLabel('Profile',{exact:true}).selectOption('outline');
  const coordinates=sketch.getByLabel('Outline points X, Y (mm)');
- await coordinates.fill('0, 0\n38, 3\n35, 22\n2, 20');
+ await coordinates.fill('0, 0, 0.25\n38, 3\n35, 22\n2, 20');
  await sketch.getByText('Outline constraints',{exact:true}).tap();
  async function add(kind,edge,value){
   await sketch.getByLabel('Constraint',{exact:true}).selectOption(kind);
   await sketch.getByLabel('Constrained segment').selectOption(String(edge));
   if(kind==='length')await sketch.getByLabel('Segment length (mm)').fill(String(value));
+  else if(kind==='radius')await sketch.getByLabel('Arc radius (mm)').fill(String(value));
   else if(value!==undefined)await sketch.getByLabel('Second segment').selectOption(String(value));
   await sketch.getByRole('button',{name:'Add constraint',exact:true}).tap();
  }
  for(const args of [
   ['horizontal',0],['vertical',1],['parallel',0,2],['perpendicular',2,3],
-  ['length',0,'reach'],['equal',0,2],['length',1,20]
+  ['length',0,'reach'],['equal',0,2],['length',1,20],['radius',0,'reach']
  ])await add(...args);
  const solve=sketch.getByRole('button',{name:'Solve outline',exact:true});
  await solve.tap();
  await sketch.getByText('Outline solved. Fully constrained.',{exact:true}).waitFor();
  assert.ok(workers.some(url=>url.includes('outline-constraints.worker')));
- const expected='0, 0\n40, 0\n40, 20\n0, 20';
- assert.equal(await coordinates.inputValue(),expected);
+ const expected=await coordinates.inputValue();
+ assert.deepEqual(rounded(expected.split('\n').map(row=>row.split(',').slice(0,2).map(Number))),[[0,0],[40,0],[40,20],[0,20]]);
  await add('length',0,45);
  await solve.tap();
  await sketch.getByText('Could not solve these outline constraints. Check dimensions and segment choices.',{exact:true}).waitFor();
  assert.equal(await coordinates.inputValue(),expected);
- await sketch.getByRole('button',{name:'Remove constraint 8',exact:true}).tap();
+ await sketch.getByRole('button',{name:'Remove constraint 9',exact:true}).tap();
  assert.equal(await page.evaluate(()=>window.__bwCad.editor.session.state.document.roots.length),0);
  await sketch.getByRole('button',{name:'Create extrusion',exact:true}).tap();
  await sketch.waitFor({state:'hidden'});
@@ -87,14 +94,16 @@ try{
  await download.saveAs(project);
  const zip=await JSZip.loadAsync(await readFile(project));
  const saved=JSON.parse(await zip.file(CAD_PROJECT_PATH).async('text'));
- assert.equal(saved.version,31);
+ assert.equal(saved.version,32);
  assert.equal(saved.roots.length,1);
  const id=saved.nodes[saved.roots[0]].sketchId;
  const profile=saved.sketches[id].profile;
- assert.deepEqual(profile.points,[[0,0],[40,0],[40,20],[0,20]]);
+ assert.deepEqual(rounded(profile.points),[[0,0],[40,0],[40,20],[0,20]]);
  assert.equal(profile.vertexIds.length,4);
- assert.equal(profile.relations.length,7);
+ assert.equal(profile.relations.length,8);
  assert.equal(profile.relations[4].length,'reach');
+ assert.equal(profile.relations[7].radius,'reach');
+ requireRadius(profile,40);
  await page.close();
 
  const restored=await open();
@@ -115,6 +124,7 @@ try{
  assert.deepEqual(rounded(solved.points),[[0,0],[55,0],[55,20],[0,20]]);
  assert.deepEqual(solved.vertexIds,profile.vertexIds);
  assert.deepEqual(solved.relations,profile.relations);
+ requireRadius(solved,55);
  assert.equal(await restored.evaluate(()=>window.__bwCad.editor.session.state.revision),revision+1);
  await restored.getByRole('button',{name:'Command palette',exact:true}).tap();
  const palette=restored.getByRole('dialog',{name:'Command palette'});
@@ -138,6 +148,7 @@ try{
  const fromSource=await readProfile();
  assert.deepEqual(rounded(fromSource.points),[[0,0],[58,0],[58,20],[0,20]]);
  assert.deepEqual(fromSource.vertexIds,profile.vertexIds);
+ requireRadius(fromSource,58);
  assert.match(await draft.inputValue(),/Keep this rover sketch note/);
  assert.equal(await restored.evaluate(()=>window.__bwCad.editor.session.state.revision),revision+2);
  await source.getByRole('button',{name:'Close model source',exact:true}).tap();
@@ -161,7 +172,8 @@ try{
  assert.deepEqual(rounded(edited.points),[[0,0],[60,0],[60,20],[0,20]]);
  assert.deepEqual(edited.vertexIds,profile.vertexIds);
  assert.equal(Number(edited.relations[4].length),60);
- console.log('PASS outline solve, conflict rejection, SB3 reopen, parameter and source solves, and editing a saved constraint');
+ requireRadius(edited,58);
+ console.log('PASS outline and radius solve, conflict rejection, SB3 reopen, parameter and source solves, and editing a saved constraint');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});
