@@ -80,6 +80,7 @@ try {
     await page.getByRole('tab',{name:'CAD',exact:true}).click();
     await page.getByRole('button',{name:`Extrude sketch: ${draft.name}`,exact:true}).click();
     const extrusion = page.getByRole('dialog',{name:'Sketch and extrusion'});
+    await extrusion.getByLabel('Extrusion distance (mm)',{exact:true}).fill('10');
     await extrusion.getByRole('button',{name:'Create extrusion',exact:true}).click();
     await extrusion.waitFor({state:'hidden'});
     const body = await page.evaluate(async () => {
@@ -87,7 +88,8 @@ try {
         const result = await editor.whenIdle();
         return result.bodies[0]?.volume;
     });
-    assert.ok(body>0,String(body));
+    // A 60 × 30 mm profile with a 9 × 12 mm hole, extruded 10 mm.
+    assert.ok(Math.abs(body - 16920) < .1, `Extrusion volume ${body} mm³`);
     await page.getByRole('tab', {name:'Costumes',exact:true}).click();
     await settings.click();
     if (!await preference.isVisible()) {
