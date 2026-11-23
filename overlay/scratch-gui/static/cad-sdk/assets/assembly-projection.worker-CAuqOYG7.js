@@ -1044,6 +1044,8 @@ const Gt = {
   "Increase the curve tolerance to stay within 256 vertices per outline.": "Erhöhe die Kurventoleranz, damit jede Kontur höchstens 256 Eckpunkte hat.",
   "Enter a curve tolerance from 0.01 to 10 mm.": "Gib eine Kurventoleranz von 0,01 bis 10 mm ein.",
   "This outline has too many vertices.": "Diese Kontur hat zu viele Eckpunkte.",
+  "This outline gap exceeds the maximum at the selected width.": "Die Lücke in dieser Kontur ist bei der gewählten Breite zu groß.",
+  "Enter a maximum gap from 0.01 to 10 mm.": "Gib eine maximale Lücke von 0,01 bis 10 mm ein.",
   "Close the path in Costumes before importing it.": "Schließe den Pfad in Kostüme, bevor du ihn importierst.",
   "The outline contains disconnected edges.": "Die Kontur enthält getrennte Kanten.",
   "The artwork has no usable area.": "Die Grafik enthält keine verwendbare Fläche.",

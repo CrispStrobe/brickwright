@@ -137,6 +137,15 @@ try {
         return [parse('nonzero'),parse('evenodd')];
     });
     assert.deepEqual(fillRules,[[1],[2,1]],'Nonzero ignores boundaries inside a still-filled region; even-odd retains an island');
+    const repairedHole = await reopened.evaluate(() => {
+        const {sdk} = window.__bwCad;
+        const source = '<svg xmlns="http://www.w3.org/2000/svg">' +
+            '<path fill-rule="evenodd" d="M0 0H40V40H0Z M10 11V20H20V10H10"/></svg>';
+        return sdk.readCostumeProfiles(source,{widthMm:40,maxGapMm:1}).profiles.map(profile => ({
+            loops: profile.loops.length, repairs: profile.gapRepair?.edges.length
+        }));
+    });
+    assert.deepEqual(repairedHole,[{loops:2,repairs:1}],'A hole uses the scale of its enclosing sketch');
     await reopened.getByRole('tab',{name:'Costumes',exact:true}).click();
     await reopened.evaluate(() => {
         const vm = window.__brickwrightStore.getState().scratchGui.vm;
@@ -175,7 +184,50 @@ try {
     assert.ok(added.profile.loops.every(loop => loop.kind === 'outline'));
     assert.equal(added.profile.loops.reduce((count,loop) => count + loop.points.length,0),
         fine.split(' L ').length + 1,'Saved sketch uses the preview vertices');
-    console.log('PASS exact and approximated Costumes profiles, tolerance preview, editable geometry, extrusion, and SB3 round-trip');
+    await curves.getByRole('button',{name:'Close',exact:true}).click();
+    const openArtwork = await reopened.evaluate(() => {
+        const vm = window.__brickwrightStore.getState().scratchGui.vm;
+        vm.updateSvg(0,'<svg xmlns="http://www.w3.org/2000/svg" width="60" height="24">' +
+            '<path d="M0 1V20H20V0H0"/><path d="M30 1L50 20L30 20L50 0L30 0"/></svg>',0,0);
+        return vm.editingTarget.getCostumes()[0].assetId;
+    });
+    await reopened.getByTestId('bw-costume-precision').click();
+    await curves.getByText('Close the path in Costumes before importing it.',{exact:true}).waitFor();
+    assert.equal(await apply.count(),0);
+    const gaps = curves.getByRole('checkbox',{name:'Close small gaps',exact:true});
+    assert.equal(await gaps.isChecked(),false);
+    await gaps.check();
+    const gapLimit = curves.getByLabel('Maximum gap (mm)',{exact:true});
+    const gapWidth = curves.getByLabel('Width (mm)',{exact:true});
+    const gapWarning = curves.getByText('This outline gap exceeds the maximum at the selected width.',{exact:true});
+    await gapWarning.waitFor();
+    assert.equal(await apply.count(),0);
+    await gapLimit.fill('1');
+    await gapWidth.fill('20');
+    await curves.getByText('Outline edges must form one closed loop without crossings or overlaps.',{exact:true}).waitFor();
+    const closingEdge = curves.getByTestId('bw-costume-closing-edge');
+    await closingEdge.waitFor({state:'attached'});
+    assert.equal(await closingEdge.count(),1);
+    assert.equal(await closingEdge.evaluate(edge => getComputedStyle(edge).stroke),'rgb(155, 47, 0)');
+    assert.deepEqual(await closingEdge.evaluate(edge => ['x1','y1','x2','y2'].map(key => Number(edge.getAttribute(key)))),[0,0,0,1]);
+    await gapWidth.fill('40');
+    await gapWarning.waitFor();
+    assert.equal(await closingEdge.count(),0);
+    await gapWidth.fill('20');
+    await gaps.uncheck();
+    assert.equal(await apply.count(),0);
+    await gaps.check();
+    await apply.click();
+    await curves.getByText(/Sketch added to CAD/).waitFor();
+    const repaired = await reopened.evaluate(ids => {
+        const vm = window.__brickwrightStore.getState().scratchGui.vm;
+        const sketch = Object.values(window.__bwCad.editor.session.state.document.sketches).find(value => !ids.includes(value.id));
+        return {profile: sketch.profile, assetId: vm.editingTarget.getCostumes()[0].assetId};
+    },[draft.id,added.id]);
+    assert.equal(repaired.assetId,openArtwork);
+    assert.equal(repaired.profile.kind,'outline');
+    assert.deepEqual(repaired.profile.points.map(([x,y]) => [x,y]).sort(),[[0,0],[0,19],[0,20],[20,0],[20,20]].sort());
+    console.log('PASS exact and approximated profiles, highlighted gap repair at model scale, crossing rejection, extrusion, and SB3 round-trip');
 } catch (error) {
     await activePage.screenshot({path:'/tmp/bw-costume-precision-failure.png'}).catch(() => {});
     throw error;

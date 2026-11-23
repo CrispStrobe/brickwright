@@ -522,7 +522,10 @@ supported holes. It uses the fill and excludes stroke thickness. The preview
 shows diagnostics for open paths and crossing contours. Enable **Approximate
 curves** for closed Bézier and elliptical contours. Set a tolerance from
 0.01 to 10 mm and review the straight segments before adding the sketch. Full
-circles keep their editable centre and radius.
+circles keep their editable centre and radius. **Close small gaps** lets you
+set a maximum gap of 0.01 to 10 mm at the selected width. The preview marks
+each straight closing edge before import. A repair joins only the endpoints
+of the same path and leaves the source artwork alone.
 
 The local Chrome check exercises the default-off setting and lazy SDK load,
 then imports a 60 × 30 mm region with a 9 × 12 mm hole onto the YZ plane.
@@ -530,4 +533,6 @@ It extrudes the sketch 10 mm and verifies the 16,920 mm³ solid before and after
 saving and reopening the SB3 in a fresh browser context. It checks the original
 costume's asset ID both before saving and after reopening. The same check
 compares the even-odd and nonzero fill rules, converts transformed Bézier
-and elliptical contours, and matches the saved vertices to the preview.
+and elliptical contours, and matches the saved vertices to the preview. It
+also verifies the highlighted closing edge, rejects a crossing outline and
+an oversized gap, and imports the repair without changing the costume asset.

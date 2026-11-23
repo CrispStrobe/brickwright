@@ -1047,6 +1047,8 @@ const f6 = {
   "Increase the curve tolerance to stay within 256 vertices per outline.": "Erhöhe die Kurventoleranz, damit jede Kontur höchstens 256 Eckpunkte hat.",
   "Enter a curve tolerance from 0.01 to 10 mm.": "Gib eine Kurventoleranz von 0,01 bis 10 mm ein.",
   "This outline has too many vertices.": "Diese Kontur hat zu viele Eckpunkte.",
+  "This outline gap exceeds the maximum at the selected width.": "Die Lücke in dieser Kontur ist bei der gewählten Breite zu groß.",
+  "Enter a maximum gap from 0.01 to 10 mm.": "Gib eine maximale Lücke von 0,01 bis 10 mm ein.",
   "Close the path in Costumes before importing it.": "Schließe den Pfad in Kostüme, bevor du ihn importierst.",
   "The outline contains disconnected edges.": "Die Kontur enthält getrennte Kanten.",
   "The artwork has no usable area.": "Die Grafik enthält keine verwendbare Fläche.",
@@ -11409,7 +11411,7 @@ async function u7(A, g, I, e = {}) {
     }
   if ([...I.values()].reduce((x, G) => x + G.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = e.J ?? await (b4 ?? (b4 = import("./jolt-physics.wasm-compat-DhUeJt3P.js").then((x) => x.default()))), Q = new i.JoltSettings();
+  const i = e.J ?? await (b4 ?? (b4 = import("./jolt-physics.wasm-compat-D9OOgY73.js").then((x) => x.default()))), Q = new i.JoltSettings();
   Q.mMaxBodies = 512, Q.mMaxBodyPairs = Math.max(1024, B.length * B.length), Q.mMaxContactConstraints = 8192;
   const s = new i.ObjectLayerPairFilterTable(2);
   s.EnableCollision(0, 1), s.EnableCollision(1, 1);
