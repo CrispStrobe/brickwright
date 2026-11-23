@@ -78,7 +78,8 @@
 // F·R·F with F = diag(1, -1, -1).
 
 import {transformPreviewMetrics} from './transform-preview.js';
-import {cameraPointerIntent} from '../../editor-interaction/camera-pointer.js';
+import {CAMERA_PREFERENCES_EVENT, getCameraPreferences} from '../../bw-camera-preferences.js';
+import {cameraPointerIntent, cameraTrackpadWheel} from '../../editor-interaction/camera-pointer.js';
 import {selectionRectangle, projectedBoxIntersects} from '../../editor-interaction/box-selection.js';
 
 import {
@@ -88,8 +89,8 @@ import {
 } from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {
-    BUILD_POLAR, CAMERA_ANIMATION_MS, VIEW_DIRECTIONS, applyCameraAction, cameraKeyAction, configureOrbitControls, easeOut, orbitAboutPivot, MOUSE_PRESETS,
-    viewCubeDirection, wheelIntent, wheelZoomFactor, zoomAbout
+    BUILD_POLAR, CAMERA_ANIMATION_MS, VIEW_DIRECTIONS, applyCameraAction, cameraKeyAction, configureOrbitControls, easeOut, orbitAboutPivot,
+    viewCubeDirection, wheelZoomFactor, zoomAbout
 } from '../view/camera-nav.js';
 import {TransformControls} from 'three/addons/controls/TransformControls.js';
 import {LDU_M, lduToWorld} from '../contracts.js';
@@ -260,8 +261,9 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
     let idleLit = null; // nothing in hand: the connector lit under the pointer
     let litList = []; // what is lit now: [{partId, connectorId, active, tone}]
     let ghostTone = null; // 'free' | 'snap' | 'blocked' | null
-    let wheelMode = 'auto'; // 'auto' | 'mouse' | 'trackpad' (camera-nav.js wheelIntent)
-    let mousePreset = 'brickwright'; // camera-nav.js MOUSE_PRESETS
+    let cameraGestures = getCameraPreferences();
+    const updateCameraGestures = event => { cameraGestures = event.detail; };
+    window.addEventListener(CAMERA_PREFERENCES_EVENT, updateCameraGestures);
     let lastAnnounced = null;
     // Studio's view state (not the model): hidden parts, the group being edited, the picking tool.
     const hidden = new Set();
@@ -799,8 +801,7 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
     // The wheel is this view's (onWheel, registered before three's controls so they never see it).
     canvas.addEventListener('wheel', event => onWheel(event), {passive: false});
     const controls = new OrbitControls(camera, canvas);
-    // view/camera-nav.js, as in Simulate: the right drag pans (three's controls). Orbiting is this view's own
-    // (about the point under the pointer: middle drag, one finger, a trackpad's scroll).
+    // Build owns camera gestures so drags can keep the geometry under the pointer stable.
     configureOrbitControls(controls, MOUSE);
     controls.enableRotate = false;
     controls.enableZoom = false;
@@ -2229,25 +2230,72 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
         return ray.at(distance, new Vector3()).toArray();
     };
     let wheelOrbit = null; // a trackpad's scroll: its pivot, kept while the scrolling goes on
-    /** The wheel and the trackpad (camera-nav.js wheelIntent): zoom to the pointer, orbit, or pan. */
-    const onWheel = event => {
-        event.preventDefault();
-        event.stopImmediatePropagation(); // three's OrbitControls never zooms here: this does, to the point under the pointer
+    const zoomInput = (event, factor) => {
+        const distance = camera.position.distanceTo(controls.target);
+        const wanted = Math.min(controls.maxDistance, Math.max(Math.max(0.01, controls.minDistance), distance * factor));
+        applyCamera(zoomAbout({position: camera.position.toArray(), target: controls.target.toArray(),
+            point: zoomPointAt(event), factor: wanted / distance}));
+    };
+    const navigateWheel = event => {
+        if (gesture || paletteDrag?.dragging) return;
+        const action = cameraTrackpadWheel(event, cameraGestures.trackpadSlide, canvas.clientHeight);
+        if (!action) return;
         stopCameraAnimation();
-        const intent = wheelIntent(event, wheelMode);
-        if (intent === 'zoom') {
-            const d = camera.position.distanceTo(controls.target);
-            const wanted = Math.min(controls.maxDistance, Math.max(Math.max(0.01, controls.minDistance), d * wheelZoomFactor(event)));
-            applyCamera(zoomAbout({position: camera.position.toArray(), target: controls.target.toArray(), point: zoomPointAt(event), factor: wanted / d}));
-        } else if (intent === 'orbit') {
+        if (action.kind === 'zoom') {
+            zoomInput(event, wheelZoomFactor({deltaY: action.dy, ctrlKey: event.ctrlKey}));
+        } else if (action.kind === 'orbit') {
             if (!wheelOrbit || event.timeStamp > wheelOrbit.until) wheelOrbit = {pivot: orbitStart(event).pivot};
             wheelOrbit.until = event.timeStamp + 300;
-            orbitBy(-event.deltaX, -event.deltaY, wheelOrbit.pivot);
+            orbitBy(-action.dx, -action.dy, wheelOrbit.pivot);
         } else {
-            panBy(-(event.deltaX || event.deltaY), event.deltaX ? -event.deltaY : 0);
+            panBy(-action.dx, -action.dy);
         }
         cameraTouched = true;
     };
+    const onWheel = event => {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        navigateWheel(event);
+    };
+    const onNativeCameraInput = event => {
+        const data = event.detail;
+        if (!data || !Number.isFinite(data.x) || !Number.isFinite(data.y) ||
+            document.elementFromPoint(data.x, data.y) !== canvas) return;
+        const input = {...data, clientX: data.x, clientY: data.y, timeStamp: event.timeStamp};
+        if (data.kind === 'wheel') {
+            data.handled = true;
+            navigateWheel(input);
+        } else if (data.kind === 'zoom' && Number.isFinite(data.factor) && data.factor > 0) {
+            data.handled = true;
+            if (gesture || paletteDrag?.dragging) return;
+            stopCameraAnimation();
+            zoomInput(input, 1 / data.factor);
+            cameraTouched = true;
+        }
+    };
+    window.addEventListener('brickwright-camera-input', onNativeCameraInput);
+
+    // Desktop Safari can emit GestureEvent for a trackpad pinch. Touchscreens
+    // already use the pointer tracker below.
+    const safariPinch = ['gesturestart', 'gesturechange', 'gestureend'];
+    let pinchScale = 1;
+    const onSafariPinch = event => {
+        event.preventDefault();
+        if (event.type !== 'gesturechange') {
+            pinchScale = 1;
+            return;
+        }
+        if (!Number.isFinite(event.scale) || event.scale <= 0) return;
+        if (!gesture && !paletteDrag?.dragging) {
+            stopCameraAnimation();
+            zoomInput(event, pinchScale / event.scale);
+            cameraTouched = true;
+        }
+        pinchScale = event.scale;
+    };
+    if (!navigator.maxTouchPoints) {
+        for (const type of safariPinch) canvas.addEventListener(type, onSafariPinch, {passive: false});
+    }
     const modelBox = ids => {
         const box = new Box3();
         if (!ids) for (const mesh of meshes.values()) box.expandByObject(mesh);
@@ -2297,9 +2345,10 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
             gesture = null;
             return;
         }
-        const cameraIntent = cameraPointerIntent(event, mousePreset, spaceHeld);
-        if (event.button === 0 && cameraIntent === 'pan' && !tool && !pickMode) {
-            gesture = {kind: 'cameraPan', x: event.clientX, y: event.clientY, pointerId: event.pointerId};
+        const cameraIntent = cameraPointerIntent(event, 'studio', spaceHeld, cameraGestures.secondaryDrag);
+        if (cameraIntent === 'pan' && (event.button !== 0 || (!tool && !pickMode))) {
+            gesture = {kind: 'cameraPan', x: event.clientX, y: event.clientY, startX: event.clientX,
+                startY: event.clientY, moved: false, pointerId: event.pointerId, button: event.button};
             controls.enabled = false;
             transform.enabled = false;
             canvas.setPointerCapture(event.pointerId);
@@ -2309,13 +2358,12 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
             return;
         }
         if (event.button !== 0 && cameraIntent === 'orbit') {
-            // Middle drag (right drag in the Studio preset): orbit about the point under the pointer.
             gesture = {x: event.clientX, y: event.clientY, pointerId: event.pointerId, kind: 'orbit', orbit: orbitStart(event), button: event.button};
             canvas.setPointerCapture(event.pointerId);
+            event.preventDefault();
+            event.stopImmediatePropagation();
             return;
         }
-        // The right button pans (OrbitControls) or orbits (above); a right click without a drag puts down what is in hand.
-        if (event.button === 2) { gesture = {x: event.clientX, y: event.clientY, pointerId: event.pointerId, kind: 'right'}; return; }
         if (event.button !== 0) { gesture = null; return; }
         if (pickMode) { gesture = {x: event.clientX, y: event.clientY, pointerId: event.pointerId, kind: 'pick'}; return; }
         // The gizmo gets the press when the pointer is on one of its handles (on a
@@ -2404,8 +2452,12 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
         if (event.pointerType === 'mouse') lastTouch = false;
         readModifiers(event);
         if (gesture?.kind === 'cameraPan') {
-            panBy(event.clientX - gesture.x, event.clientY - gesture.y);
-            gesture.x = event.clientX; gesture.y = event.clientY;
+            const moved = Math.hypot(event.clientX - gesture.startX, event.clientY - gesture.startY);
+            if (!gesture.moved && moved > CLICK_PX) gesture.moved = true;
+            if (gesture.moved) {
+                panBy(event.clientX - gesture.x, event.clientY - gesture.y);
+                gesture.x = event.clientX; gesture.y = event.clientY;
+            }
             event.preventDefault(); event.stopImmediatePropagation();
             return;
         }
@@ -2606,7 +2658,14 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
         boxDiv.style.display = 'none';
         if (!g) return;
         try { canvas.releasePointerCapture(event.pointerId); } catch { /* not captured */ }
-        if (g.kind === 'cameraPan') { setCursor(''); return; }
+        if (g.kind === 'cameraPan') {
+            if (event.type === 'pointerup' && !g.moved && g.button === 2 && tool) {
+                setTool(null);
+                status({kind: 'idle'});
+            }
+            setCursor('');
+            return;
+        }
         if (g.orbit) endOrbit();
         if (event.type === 'pointercancel') {
             preview = null;
@@ -2619,7 +2678,7 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
             return;
         }
         const click = travelled(event, g) <= CLICK_PX;
-        if ((g.kind === 'right' || (g.kind === 'orbit' && g.button === 2)) && click) {
+        if (g.kind === 'orbit' && g.button === 2 && click) {
             if (tool) { setTool(null); status({kind: 'idle'}); }
             return;
         }
@@ -2836,10 +2895,7 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
         controls.update();
         cameraTouched = true;
     };
-    const onContextMenu = event => {
-        // A long press is a selection gesture here, not the browser's menu.
-        if (lastTouch) event.preventDefault();
-    };
+    const onContextMenu = event => event.preventDefault();
 
     /** Esc (or its button): a drag in progress is called off, else the placing tool ends, else the selection is cleared. */
     const escape = () => {
@@ -3115,6 +3171,8 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
         disposed = true;
         cancelPointer();
         window.removeEventListener('blur', cancelPointer);
+        window.removeEventListener(CAMERA_PREFERENCES_EVENT, updateCameraGestures);
+        window.removeEventListener('brickwright-camera-input', onNativeCameraInput);
         window.removeEventListener('keyup', releaseSpace);
         canvas.removeEventListener('blur', cancelPointer);
         canvas.removeEventListener('lostpointercapture', lostCapture);
@@ -3127,6 +3185,7 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
         canvas.removeEventListener('pointercancel', onUp);
         canvas.removeEventListener('pointerleave', onLeave);
         canvas.removeEventListener('contextmenu', onContextMenu);
+        for (const type of safariPinch) canvas.removeEventListener(type, onSafariPinch);
         canvas.removeEventListener('keydown', onKey);
         stopLongPress();
         tracker.reset();
@@ -3200,16 +3259,6 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
         ropeSelection, removeRopesOfSelection, hoseSelection, removeHosesOfSelection,
         /** The hinge tool: the next hinge (N), and a turn of the selection on it (±15° is [ ]). */
         nextHinge, turnOnHinge,
-        /** How a scroll is read: 'auto' (wheel or trackpad, guessed), 'mouse' (zoom), 'trackpad' (orbit). */
-        setWheelMode (next) { if (['auto', 'mouse', 'trackpad'].includes(next)) wheelMode = next; },
-        /** The mouse preset (camera-nav.js MOUSE_PRESETS): 'brickwright' (right drag pans) or 'studio' (right drag orbits). */
-        setMousePreset (next) {
-            if (!MOUSE_PRESETS[next]) return;
-            mousePreset = next;
-            configureOrbitControls(controls, MOUSE, next);
-        },
-        get mousePreset () { return mousePreset; },
-        get wheelMode () { return wheelMode; },
         /** For the browser gate (docs/ROBOT-LAB-UX.md §5): what is lit, the candidate pose, the ghost's tone, the view cube. */
         debug: {
             highlights: () => litList.map(h => ({partId: h.partId, connectorId: h.connectorId, active: h.active})),

@@ -356,8 +356,9 @@ Choose **Arc tangent to arc** when the adjoining reference is another arc.
 Select the arc to adjust first. In a region, open **Region loop constraints**
 to edit the relations for an individual boundary or cutout. **Region loop
 positions** accepts named X/Y offsets between first vertices or selected edge
-midpoints and translates the target as a whole. General edge relations across
-loops and exact STEP editing remain open.
+midpoints and translates the target as a whole. **Region edge matches**
+drives a straight edge from the length of a reference edge on another loop.
+Other cross-loop edge relations and exact STEP editing remain open.
 
 **Properties → Export drilling template (PDF)** produces a full-size A4
 vector template in the local sketch plane. It evaluates the current cutout

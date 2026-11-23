@@ -22,6 +22,7 @@
 // stored one. While the pane is not mounted the key simply keeps what the
 // project load put there, so nothing is lost and nothing is pending.
 
+import {CAMERA_PREFERENCES_EVENT, getCameraPreferences, setCameraPreference} from '../../lib/bw-camera-preferences.js';
 import React from 'react';
 import SimLabNotice from './sim-lab-notice.jsx';
 import paneStyles from './sim-lab-pane.css';
@@ -356,8 +357,7 @@ const NARROW_BELOW_PX = 420;
 const DOCK_PROPERTIES_PX = 1280;
 /** What is hidden in Build stays hidden for the browser session (view state, not the model). */
 const HIDDEN_STORAGE_KEY = 'bw-sim-lab-hidden';
-/** How Build's 3D view reads a scroll (camera-nav.js wheelIntent), kept in this browser. */
-const WHEEL_STORAGE_KEY = 'bw-sim-lab-wheel-mode';
+/** The legacy mouse preset remains available to existing Simulate sessions. */
 const MOUSE_PRESET_KEY = 'bw-sim-lab-mouse-preset';
 /** Set once the coach marks were put away on this device (sim-lab-coach.jsx). */
 const COACH_KEY = 'bw-sim-lab-coach-done';
@@ -398,7 +398,7 @@ class SimLabPane extends React.Component {
             paneWidth: 0, menu: null, drawer: false, paletteDragging: false, infoOpen: false, route: 'scratch',
             paletteOpen: true, paletteShare: null, propsShare: null, propsDocked: true,
             hidden: [], editGroup: null, pick: null, measurement: null, placeColor: null, propsOpen: false, shortcuts: false,
-            hold: null, announce: '', wheelMode: this.storedWheelMode(), mousePreset: this.storedMousePreset(), coach: null};
+            hold: null, announce: '', cameraGestures: getCameraPreferences(), coach: null};
         this.root = React.createRef();
         this.viewWrap = React.createRef();
         this.box = React.createRef();
@@ -482,7 +482,10 @@ class SimLabPane extends React.Component {
         return this.text[key].replace(/\{(\w+)\}/g, (_, k) => String(values[k] ?? ''));
     }
 
+    onCameraPreferences = event => this.setState({cameraGestures: event.detail});
+
     async componentDidMount () {
+        window.addEventListener(CAMERA_PREFERENCES_EVENT, this.onCameraPreferences);
         this._menuMounted = true;
         this.unregisterMenu = registerEditorMenuActions('robots', () => this.editorMenuActions());
         this.onProgramStart = () => { if (this.state.manualOverride) this.setManualOverride(false); };
@@ -853,6 +856,7 @@ class SimLabPane extends React.Component {
     }
 
     componentWillUnmount () {
+        window.removeEventListener(CAMERA_PREFERENCES_EVENT, this.onCameraPreferences);
         this._menuMounted = false;
         if (this.unregisterMenu) this.unregisterMenu();
         this.props.vm?.runtime?.removeListener('PROJECT_RUN_START', this.onProgramStart);
@@ -960,8 +964,6 @@ class SimLabPane extends React.Component {
                 transformPreviewLabel: m => fillText(this.text.st.transformPreview, {x: this.decimal(m.deltaMm[0]), y: this.decimal(m.deltaMm[1]), z: this.decimal(m.deltaMm[2]), deg: this.decimal(m.angleDegrees), distance: this.decimal(m.distanceMm)}),
                 viewCubeLabels: this.etext.connect.cube});
             this.editView.setGrid(this.state.grid);
-            this.editView.setWheelMode(this.state.wheelMode);
-            this.editView.setMousePreset(this.state.mousePreset);
             this.colors = colors;
             const palette = this.lib.colorPalette(colors);
             this.palette = {...palette, byCode: new Map([...palette.common, ...palette.more].map(c => [c.code, c]))};
@@ -1569,7 +1571,7 @@ class SimLabPane extends React.Component {
                     }
                 });
             }
-            this.view.setMousePreset(this.state.mousePreset);
+            this.view.setMousePreset(this.storedMousePreset());
             this.view.canvas.setAttribute('aria-label', this.t('canvasLabel'));
             this.view.setPorts(insight.ports.map(item => ({...item, label: this.portLabelText(item)})));
             this.view.setMotion({joints: insight.joints, gears: insight.gears, tints: insight.tints.bodies});
@@ -2659,36 +2661,12 @@ class SimLabPane extends React.Component {
         return c ? c.type : null;
     }
 
-    /** How the 3D view reads a scroll ('auto', 'mouse', 'trackpad'), kept in this browser. */
-    storedWheelMode () {
-        try {
-            const v = localStorage.getItem(WHEEL_STORAGE_KEY);
-            return ['auto', 'mouse', 'trackpad'].includes(v) ? v : 'auto';
-        } catch {
-            return 'auto';
-        }
-    }
-
     storedMousePreset () {
         try {
             return localStorage.getItem(MOUSE_PRESET_KEY) === 'studio' ? 'studio' : 'brickwright';
         } catch {
             return 'brickwright';
         }
-    }
-
-    /** The mouse preset for both views (camera-nav.js MOUSE_PRESETS), kept on this device. */
-    setMousePreset (mousePreset) {
-        this.setState({mousePreset});
-        this.editView?.setMousePreset(mousePreset);
-        this.view?.setMousePreset(mousePreset);
-        try { localStorage.setItem(MOUSE_PRESET_KEY, mousePreset); } catch { /* private window: this session only */ }
-    }
-
-    setWheelMode (wheelMode) {
-        this.setState({wheelMode});
-        this.editView?.setWheelMode(wheelMode);
-        try { localStorage.setItem(WHEEL_STORAGE_KEY, wheelMode); } catch { /* private window: this session only */ }
     }
 
     /**
@@ -3552,8 +3530,7 @@ class SimLabPane extends React.Component {
                 {simulate && this.state.controlsOpen && !this.state.programLoading && this.session && !this.session.lockstep && this.renderMixer(button,
                     !this.api?.brickButtons()?.length ? null : this.renderBrickButtons())}
                 {build && this.state.shortcuts && (
-                    <SimLabShortcuts T={this.etext} wheelMode={this.state.wheelMode} onWheelMode={mode => this.setWheelMode(mode)}
-                        mousePreset={this.state.mousePreset} onMousePreset={preset => this.setMousePreset(preset)}
+                    <SimLabShortcuts T={this.etext} cameraGestures={this.state.cameraGestures} onCameraPreference={setCameraPreference} locale={this.locale}
                         onCoach={() => this.setState({shortcuts: false, coach: 0})} onClose={() => {
                         this.setState({shortcuts: false});
                         this.editView?.canvas.focus();

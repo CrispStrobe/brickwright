@@ -354,27 +354,29 @@ const checks = async (page, {shotsDir, shots}) => {
     out.announce = said;
     await page.keyboard.press('ControlOrMeta+z');
 
-    // T11. A middle drag over Q on the beam: Q stays within 2 px.
+    // T11. A Shift+middle drag over Q on the beam: Q stays within 2 px.
     await page.keyboard.press('Escape');
     const Q = topFace(h.h2);
     const q11 = await screenAt(page, Q);
     await page.mouse.move(q11[0], q11[1]);
+    await page.keyboard.down('Shift');
     await page.mouse.down({button: 'middle'});
     await page.mouse.move(q11[0] + 200, q11[1] + 40, {steps: 20});
     await page.mouse.up({button: 'middle'});
+    await page.keyboard.up('Shift');
     const q11b = await screenAt(page, Q);
     assert.ok(dist(q11, q11b) <= 2, `Q stayed under the pointer's start: ${q11} → ${q11b}`);
     out.orbitDriftPx = dist(q11, q11b);
-    // T11b. The Studio / LDD mouse (the shortcut sheet's "Mouse buttons"): a right drag orbits about Q, a middle drag
-    // slides the view; a right click without a drag puts down the part in hand. Then back to the Brickwright mouse.
-    const mousePreset = async value => {
+    // T11b. The shared secondary-drag setting: a right drag orbits about Q, a middle drag
+    // slides the view; a right click without a drag puts down the part in hand. Then choose secondary drag to pan.
+    const secondaryDrag = async value => {
         await canvas.focus();
         await page.keyboard.press('?');
         await page.getByTestId('bw-sim-lab-mouse-preset').selectOption(value);
         await page.getByTestId('bw-sim-lab-shortcuts-close').click();
-        await page.waitForFunction(v => window.__bwSimLab.editView.mousePreset === v, value);
+
     };
-    await mousePreset('studio');
+    await secondaryDrag('orbit');
     const q11c = await screenAt(page, Q);
     const c11 = await camera(page);
     await page.mouse.move(q11c[0], q11c[1]);
@@ -383,20 +385,20 @@ const checks = async (page, {shotsDir, shots}) => {
     await page.mouse.up({button: 'right'});
     const q11d = await screenAt(page, Q);
     const c11b = await camera(page);
-    assert.ok(dist(q11c, q11d) <= 2 && dist(c11.position, c11b.position) > 1e-3, `Studio: a right drag orbits about Q: ${q11c} → ${q11d}`);
+    assert.ok(dist(q11c, q11d) <= 2 && dist(c11.position, c11b.position) > 1e-3, `shared navigation: a right drag orbits about Q: ${q11c} → ${q11d}`);
     await page.mouse.move(q11d[0], q11d[1]);
     await page.mouse.down({button: 'middle'});
     await page.mouse.move(q11d[0] + 120, q11d[1], {steps: 12});
     await page.mouse.up({button: 'middle'});
     const c11c = await camera(page);
     assert.ok(dist(c11b.target, c11c.target) > 1e-3 && Math.abs(c11c.distance - c11b.distance) < c11b.distance * 0.01,
-        'Studio: a middle drag slides the view (the target moves, the distance stays)');
+        'shared navigation: a middle drag slides the view (the target moves, the distance stays)');
     await arm(page, '2780.dat');
     await page.mouse.move(q11d[0], q11d[1] + 60);
     await page.mouse.click(q11d[0], q11d[1] + 60, {button: 'right'});
     await page.waitForFunction(() => !window.__bwSimLab._pane.state.placing);
     assert.equal(await count(page), n16, 'a right click puts the part down, placing nothing');
-    await mousePreset('brickwright');
+    await secondaryDrag('pan');
     // T12. The wheel, and a pinch (Ctrl+wheel), at q over the beam: the point there stays within 2 px.
     await tool(page, 'view-home');
     await frames(page);
@@ -413,12 +415,14 @@ const checks = async (page, {shotsDir, shots}) => {
         assert.deepEqual(await parts(page), n12, 'no part moves');
         out[pinch ? 'pinchDriftPx' : 'wheelDriftPx'] = dist(q12, q12b);
     }
-    // T15. A trackpad's scroll (pixel deltas, small, no Ctrl) orbits; the distance stays within 1%.
+    // T15. A trackpad slide pans, keeping the viewing direction and distance.
     const c15 = await camera(page);
     for (let i = 0; i < 10; i++) await page.mouse.wheel(6, 3);
     await frames(page);
     const c15b = await camera(page);
-    assert.ok(dist(c15.position, c15b.position) > 1e-3, 'a trackpad scroll orbits');
+    assert.ok(dist(c15.target, c15b.target) > 1e-3, 'a trackpad slide pans');
+    assert.ok(dist(c15.position.map((v, i) => v - c15.target[i]), c15b.position.map((v, i) => v - c15b.target[i])) < 1e-5,
+        'a trackpad pan preserves the viewing direction');
     assert.ok(Math.abs(c15b.distance - c15.distance) < c15.distance * 0.01, 'and keeps the distance');
     // T13. Down with the arrow keys: Build passes 100°.
     await tool(page, 'view-home');

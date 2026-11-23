@@ -6,6 +6,7 @@ import {readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import JSZip from 'jszip';
+import * as cameraPreferences from '../overlay/scratch-gui/src/lib/bw-camera-preferences.js';
 import * as project from '../overlay/scratch-gui/src/lib/bw-cad-project.js';
 import * as sdk from '../overlay/scratch-gui/static/cad-sdk/sdk.js';
 import {attachBrickwrightState, inspectBrickwrightState, applyBrickwrightInspection,
@@ -49,6 +50,7 @@ async function fixture ({text = documentText('First project'), loadSDK} = {}) {
     project.setLiveCadText(undefined);
     const hostedSDK = {...sdk, mountCadEditor: (host, options) => {
         const editor = {session: options.session, options, disposed: false, focus () {}, setColorMode () {},
+            setCameraGestures (gestures) { this.cameraGestures = gestures; },
             dispose () { this.disposed = true; unsubscribe(); }};
         let revision = options.session.state.revision;
         const unsubscribe = options.session.subscribe(state => {
@@ -68,6 +70,7 @@ async function fixture ({text = documentText('First project'), loadSDK} = {}) {
         if (name.endsWith('/bw-cad-program.js')) return {CAD_READY_EVENT: 'bw-cad-ready'};
         if (name.endsWith('/download-blob.js')) return {__esModule: true, default: () => {}};
         if (name.endsWith('/bw-cad-sdk.js')) return {loadCadSDK: () => loadSDK ? loadSDK(hostedSDK) : Promise.resolve(hostedSDK), cadAssetURL: path => path};
+        if (name.endsWith('/bw-camera-preferences.js')) return cameraPreferences;
         if (name.endsWith('/bw-cad-project.js')) return project;
         if (name.endsWith('/editor-menu-actions.js')) return {notifyEditorMenuActions () {},
             registerEditorMenuActions: () => () => {}};
@@ -267,5 +270,26 @@ test('a project replacement during SDK loading mounts only the latest document',
         await flush(() => loading.resolve(f.hostedSDK));
         assert.equal(f.editors.length, 1);
         assert.equal(f.current().session.state.document.title, 'Latest project');
+    } finally { await f.close(); }
+});
+
+
+test('the embedded editor applies navigation changes without replacing the document or editor', async () => {
+    const f = await fixture();
+    try {
+        const editor = f.current();
+        assert.deepEqual(editor.options.cameraGestures, {trackpadSlide: 'pan', secondaryDrag: 'orbit'});
+        editor.session.add({kind: 'box', size: [10, 20, 30]});
+        const revision = editor.session.state.revision;
+        const gestures = {trackpadSlide: 'orbit', secondaryDrag: 'pan'};
+        window.dispatchEvent(new CustomEvent(cameraPreferences.CAMERA_PREFERENCES_EVENT, {detail: gestures}));
+        assert.equal(f.current(), editor);
+        assert.equal(editor.session.state.revision, revision);
+        assert.deepEqual(editor.cameraGestures, gestures);
+        await f.unmount();
+        window.dispatchEvent(new CustomEvent(cameraPreferences.CAMERA_PREFERENCES_EVENT, {
+            detail: {trackpadSlide: 'zoom', secondaryDrag: 'orbit'}
+        }));
+        assert.deepEqual(editor.cameraGestures, gestures);
     } finally { await f.close(); }
 });

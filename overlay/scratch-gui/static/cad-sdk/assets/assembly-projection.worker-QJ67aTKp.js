@@ -33,7 +33,7 @@ const Gt = {
   "Choose light or dark mode": "Hellen oder dunklen Modus wählen",
   "Loading models…": "Modelle werden geladen…",
   "Original source files": "Originale Quelldateien",
-  "Model source uses project version 6 through 37": "Modellquelltext verwendet Projektversion 6 bis 37",
+  "Model source uses project version 6 through 38": "Modellquelltext verwendet Projektversion 6 bis 38",
   "Unknown material preset": "Unbekannte Materialvorlage",
   "Initial velocity requires project version 8": "Anfangsgeschwindigkeit erfordert Projektversion 8",
   "Invalid initial body velocity": "Ungültige Anfangsgeschwindigkeit",
@@ -823,6 +823,29 @@ const Gt = {
   "Apply thread redesign": "Gewindeauslegung anwenden",
   "Rebuild a resized screw at a chosen pitch or turns per start, resetting its local scale as one saved edit.": "Eine skalierte Schraube mit gewählter Steigung oder Windungszahl pro Gang als einen gespeicherten Schritt neu aufbauen und ihre lokale Skalierung zurücksetzen."
 }, Yt = {
+  "An edge length match refers to a missing edge.": "Eine Kantenlängenbeziehung verweist auf eine fehlende Kante.",
+  "Match lengths between straight edges.": "Gleiche die Längen gerader Kanten ab.",
+  "Invalid region edge length match.": "Ungültige Kantenlängenbeziehung in der Region.",
+  "A straight edge can have only one region length reference.": "Eine gerade Kante kann nur eine Längenreferenz in der Region haben.",
+  "Region edge length matches cannot contain a cycle.": "Kantenlängenbeziehungen in Regionen dürfen keine zyklischen Abhängigkeiten enthalten.",
+  "Region length matches can move outlines with 3–32 points.": "Kantenlängenbeziehungen können Konturen mit 3–32 Punkten verändern.",
+  "Too many outline constraints to solve this region match.": "Zu viele Konturbedingungen zum Lösen dieser Kantenlängenbeziehung.",
+  "Region edge length matches require document version 38": "Kantenlängenbeziehungen in Regionen erfordern Dokumentversion 38",
+  "Solve region edge matches before saving.": "Löse die Kantenlängenbeziehungen der Region vor dem Speichern.",
+  "Region edge matches": "Kantenlängen in Regionen abgleichen",
+  "Edge reference loop": "Kontur der Referenzkante",
+  "Reference length edge": "Referenzkante für die Länge",
+  "Edge target loop": "Kontur der Zielkante",
+  "Target length edge": "Zielkante für die Länge",
+  "Add edge length match": "Kantenlängenbeziehung hinzufügen",
+  "Solve region edge matches": "Kantenlängenbeziehungen der Region lösen",
+  "Region edge match status": "Status der Kantenlängenbeziehungen",
+  "Edge {0}": "Kante {0}",
+  "{0} · Edge {1}": "{0} · Kante {1}",
+  "Remove edge match {0}": "Kantenlängenbeziehung {0} entfernen",
+  "Missing edge": "Fehlende Kante",
+  "Solving region edge matches…": "Kantenlängenbeziehungen der Region werden gelöst…",
+  "Region edge matches solved.": "Kantenlängenbeziehungen der Region gelöst.",
   "A region position refers to a missing edge. Restore the edge or remove its position.": "Eine Regionsposition verweist auf eine fehlende Kante. Stelle die Kante wieder her oder entferne ihre Position.",
   "Region edge anchors require document version 37": "Regionskantenanker erfordern Dokumentversion 37",
   "Set X and Y offsets between a first vertex or edge midpoint on each loop.": "Lege den X- und Y-Abstand zwischen dem ersten Eckpunkt oder einer Kantenmitte jeder Kontur fest.",
@@ -2389,26 +2412,26 @@ Erstelle zuerst den Workspace. Oberfläche und MCP verwenden denselben begrenzte
   "The block program is not valid JSON": "Das Blockprogramm ist kein gültiges JSON",
   "Compile a block/pseudocode modelling program (JSON, format brickwright-cad-blocks) to parametric CAD Script, OpenSCAD or JSCAD without changing the model. Pass CAD Script output to cad_create_code_object.": "Kompiliert ein Block-/Pseudocode-Modellprogramm (JSON, Format brickwright-cad-blocks) in parametrisches CAD Script, OpenSCAD oder JSCAD, ohne das Modell zu ändern. Übergib die CAD-Script-Ausgabe an cad_create_code_object."
 };
-let Ne = "en";
+let Fe = "en";
 function ai(e) {
-  return Ne = e.toLowerCase().split(/[-_]/)[0] === "de" ? "de" : "en", Ne;
+  return Fe = e.toLowerCase().split(/[-_]/)[0] === "de" ? "de" : "en", Fe;
 }
 function at(e, ...t) {
-  const i = typeof e == "string" ? e : e.reduce((s, o, a) => s + (a ? `{${a - 1}}` : "") + o, ""), n = Ne === "de" ? si[i] ?? Gt[i] ?? ni[i] ?? ri[i] ?? Wt[i] ?? Zt[i] ?? Ht[i] ?? qt[i] ?? Xt[i] ?? Yt[i] ?? $t[i] ?? ii[i] ?? ei[i] ?? ti[i] ?? Jt[i] ?? Qt[i] ?? i : i;
+  const i = typeof e == "string" ? e : e.reduce((s, o, a) => s + (a ? `{${a - 1}}` : "") + o, ""), n = Fe === "de" ? si[i] ?? Gt[i] ?? ni[i] ?? ri[i] ?? Wt[i] ?? Zt[i] ?? Ht[i] ?? qt[i] ?? Xt[i] ?? Yt[i] ?? $t[i] ?? ii[i] ?? ei[i] ?? ti[i] ?? Jt[i] ?? Qt[i] ?? i : i;
   return typeof e == "string" ? n : n.replace(/\{(\d+)\}/g, (s, o) => String(t[Number(o)]));
 }
-var oi = [509, 0, 227, 0, 150, 4, 294, 9, 1368, 2, 2, 1, 6, 3, 41, 2, 5, 0, 166, 1, 574, 3, 9, 9, 7, 9, 32, 4, 318, 1, 78, 5, 71, 10, 50, 3, 123, 2, 54, 14, 32, 10, 3, 1, 11, 3, 46, 10, 8, 0, 46, 9, 7, 2, 37, 13, 2, 9, 6, 1, 45, 0, 13, 2, 49, 13, 9, 3, 2, 11, 83, 11, 7, 0, 3, 0, 158, 11, 6, 9, 7, 3, 56, 1, 2, 6, 3, 1, 3, 2, 10, 0, 11, 1, 3, 6, 4, 4, 68, 8, 2, 0, 3, 0, 2, 3, 2, 4, 2, 0, 15, 1, 83, 17, 10, 9, 5, 0, 82, 19, 13, 9, 214, 6, 3, 8, 28, 1, 83, 16, 16, 9, 82, 12, 9, 9, 7, 19, 58, 14, 5, 9, 243, 14, 166, 9, 71, 5, 2, 1, 3, 3, 2, 0, 2, 1, 13, 9, 120, 6, 3, 6, 4, 0, 29, 9, 41, 6, 2, 3, 9, 0, 10, 10, 47, 15, 199, 7, 137, 9, 54, 7, 2, 7, 17, 9, 57, 21, 2, 13, 123, 5, 4, 0, 2, 1, 2, 6, 2, 0, 9, 9, 49, 4, 2, 1, 2, 4, 9, 9, 55, 9, 266, 3, 10, 1, 2, 0, 49, 6, 4, 4, 14, 10, 5350, 0, 7, 14, 11465, 27, 2343, 9, 87, 9, 39, 4, 60, 6, 26, 9, 535, 9, 470, 0, 2, 54, 8, 3, 82, 0, 12, 1, 19628, 1, 4178, 9, 519, 45, 3, 22, 543, 4, 4, 5, 9, 7, 3, 6, 31, 3, 149, 2, 1418, 49, 513, 54, 5, 49, 9, 0, 15, 0, 23, 4, 2, 14, 1361, 6, 2, 16, 3, 6, 2, 1, 2, 4, 101, 0, 161, 6, 10, 9, 357, 0, 62, 13, 499, 13, 245, 1, 2, 9, 233, 0, 3, 0, 8, 1, 6, 0, 475, 6, 110, 6, 6, 9, 4759, 9, 787719, 239], ot = [0, 11, 2, 25, 2, 18, 2, 1, 2, 14, 3, 13, 35, 122, 70, 52, 268, 28, 4, 48, 48, 31, 14, 29, 6, 37, 11, 29, 3, 35, 5, 7, 2, 4, 43, 157, 19, 35, 5, 35, 5, 39, 9, 51, 13, 10, 2, 14, 2, 6, 2, 1, 2, 10, 2, 14, 2, 6, 2, 1, 4, 51, 13, 310, 10, 21, 11, 7, 25, 5, 2, 41, 2, 8, 70, 5, 3, 0, 2, 43, 2, 1, 4, 0, 3, 22, 11, 22, 10, 30, 66, 18, 2, 1, 11, 21, 11, 25, 7, 25, 39, 55, 7, 1, 65, 0, 16, 3, 2, 2, 2, 28, 43, 28, 4, 28, 36, 7, 2, 27, 28, 53, 11, 21, 11, 18, 14, 17, 111, 72, 56, 50, 14, 50, 14, 35, 39, 27, 10, 22, 251, 41, 7, 1, 17, 5, 57, 28, 11, 0, 9, 21, 43, 17, 47, 20, 28, 22, 13, 52, 58, 1, 3, 0, 14, 44, 33, 24, 27, 35, 30, 0, 3, 0, 9, 34, 4, 0, 13, 47, 15, 3, 22, 0, 2, 0, 36, 17, 2, 24, 20, 1, 64, 6, 2, 0, 2, 3, 2, 14, 2, 9, 8, 46, 39, 7, 3, 1, 3, 21, 2, 6, 2, 1, 2, 4, 4, 0, 19, 0, 13, 4, 31, 9, 2, 0, 3, 0, 2, 37, 2, 0, 26, 0, 2, 0, 45, 52, 19, 3, 21, 2, 31, 47, 21, 1, 2, 0, 185, 46, 42, 3, 37, 47, 21, 0, 60, 42, 14, 0, 72, 26, 38, 6, 186, 43, 117, 63, 32, 7, 3, 0, 3, 7, 2, 1, 2, 23, 16, 0, 2, 0, 95, 7, 3, 38, 17, 0, 2, 0, 29, 0, 11, 39, 8, 0, 22, 0, 12, 45, 20, 0, 19, 72, 200, 32, 32, 8, 2, 36, 18, 0, 50, 29, 113, 6, 2, 1, 2, 37, 22, 0, 26, 5, 2, 1, 2, 31, 15, 0, 24, 43, 261, 18, 16, 0, 2, 12, 2, 33, 125, 0, 80, 921, 103, 110, 18, 195, 2637, 96, 16, 1071, 18, 5, 26, 3994, 6, 582, 6842, 29, 1763, 568, 8, 30, 18, 78, 18, 29, 19, 47, 17, 3, 32, 20, 6, 18, 433, 44, 212, 63, 33, 24, 3, 24, 45, 74, 6, 0, 67, 12, 65, 1, 2, 0, 15, 4, 10, 7381, 42, 31, 98, 114, 8702, 3, 2, 6, 2, 1, 2, 290, 16, 0, 30, 2, 3, 0, 15, 3, 9, 395, 2309, 106, 6, 12, 4, 8, 8, 9, 5991, 84, 2, 70, 2, 1, 3, 0, 3, 1, 3, 3, 2, 11, 2, 0, 2, 6, 2, 64, 2, 3, 3, 7, 2, 6, 2, 27, 2, 3, 2, 4, 2, 0, 4, 6, 2, 339, 3, 24, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 7, 1845, 30, 7, 5, 262, 61, 147, 44, 11, 6, 17, 0, 322, 29, 19, 43, 485, 27, 229, 29, 3, 0, 208, 30, 2, 2, 2, 1, 2, 6, 3, 4, 10, 1, 225, 6, 2, 3, 2, 1, 2, 14, 2, 196, 60, 67, 8, 0, 1205, 3, 2, 26, 2, 1, 2, 0, 3, 0, 2, 9, 2, 3, 2, 0, 2, 0, 7, 0, 5, 0, 2, 0, 2, 0, 2, 2, 2, 1, 2, 0, 3, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 1, 2, 0, 3, 3, 2, 6, 2, 3, 2, 3, 2, 0, 2, 9, 2, 16, 6, 2, 2, 4, 2, 16, 4421, 42719, 33, 4381, 3, 5773, 3, 7472, 16, 621, 2467, 541, 1507, 4938, 6, 8489], li = "‌‍·̀-ͯ·҃-֑҇-ׇֽֿׁׂׅׄؐ-ًؚ-٩ٰۖ-ۜ۟-۪ۤۧۨ-ۭ۰-۹ܑܰ-݊ަ-ް߀-߉߫-߽߳ࠖ-࠙ࠛ-ࠣࠥ-ࠧࠩ-࡙࠭-࡛ࢗ-࢟࣊-ࣣ࣡-ःऺ-़ा-ॏ॑-ॗॢॣ०-९ঁ-ঃ়া-ৄেৈো-্ৗৢৣ০-৯৾ਁ-ਃ਼ਾ-ੂੇੈੋ-੍ੑ੦-ੱੵઁ-ઃ઼ા-ૅે-ૉો-્ૢૣ૦-૯ૺ-૿ଁ-ଃ଼ା-ୄେୈୋ-୍୕-ୗୢୣ୦-୯ஂா-ூெ-ைொ-்ௗ௦-௯ఀ-ఄ఼ా-ౄె-ైొ-్ౕౖౢౣ౦-౯ಁ-ಃ಼ಾ-ೄೆ-ೈೊ-್ೕೖೢೣ೦-೯ೳഀ-ഃ഻഼ാ-ൄെ-ൈൊ-്ൗൢൣ൦-൯ඁ-ඃ්ා-ුූෘ-ෟ෦-෯ෲෳัิ-ฺ็-๎๐-๙ັິ-ຼ່-໎໐-໙༘༙༠-༩༹༵༷༾༿ཱ-྄྆྇ྍ-ྗྙ-ྼ࿆ါ-ှ၀-၉ၖ-ၙၞ-ၠၢ-ၤၧ-ၭၱ-ၴႂ-ႍႏ-ႝ፝-፟፩-፱ᜒ-᜕ᜲ-᜴ᝒᝓᝲᝳ឴-៓៝០-៩᠋-᠍᠏-᠙ᢩᤠ-ᤫᤰ-᤻᥆-᥏᧐-᧚ᨗ-ᨛᩕ-ᩞ᩠-᩿᩼-᪉᪐-᪙᪰-᪽ᪿ-᫝᫠-᫫ᬀ-ᬄ᬴-᭄᭐-᭙᭫-᭳ᮀ-ᮂᮡ-ᮭ᮰-᮹᯦-᯳ᰤ-᰷᱀-᱉᱐-᱙᳐-᳔᳒-᳨᳭᳴᳷-᳹᷀-᷿‌‍‿⁀⁔⃐-⃥⃜⃡-⃰⳯-⵿⳱ⷠ-〪ⷿ-゙゚〯・꘠-꘩꙯ꙴ-꙽ꚞꚟ꛰꛱ꠂ꠆ꠋꠣ-ꠧ꠬ꢀꢁꢴ-ꣅ꣐-꣙꣠-꣱ꣿ-꤉ꤦ-꤭ꥇ-꥓ꦀ-ꦃ꦳-꧀꧐-꧙ꧥ꧰-꧹ꨩ-ꨶꩃꩌꩍ꩐-꩙ꩻ-ꩽꪰꪲ-ꪴꪷꪸꪾ꪿꫁ꫫ-ꫯꫵ꫶ꯣ-ꯪ꯬꯭꯰-꯹ﬞ︀-️︠-︯︳︴﹍-﹏０-９＿･", lt = "ªµºÀ-ÖØ-öø-ˁˆ-ˑˠ-ˤˬˮͰ-ʹͶͷͺ-ͽͿΆΈ-ΊΌΎ-ΡΣ-ϵϷ-ҁҊ-ԯԱ-Ֆՙՠ-ֈא-תׯ-ײؠ-يٮٯٱ-ۓەۥۦۮۯۺ-ۼۿܐܒ-ܯݍ-ޥޱߊ-ߪߴߵߺࠀ-ࠕࠚࠤࠨࡀ-ࡘࡠ-ࡪࡰ-ࢇࢉ-࢏ࢠ-ࣉऄ-हऽॐक़-ॡॱ-ঀঅ-ঌএঐও-নপ-রলশ-হঽৎড়ঢ়য়-ৡৰৱৼਅ-ਊਏਐਓ-ਨਪ-ਰਲਲ਼ਵਸ਼ਸਹਖ਼-ੜਫ਼ੲ-ੴઅ-ઍએ-ઑઓ-નપ-રલળવ-હઽૐૠૡૹଅ-ଌଏଐଓ-ନପ-ରଲଳଵ-ହଽଡ଼ଢ଼ୟ-ୡୱஃஅ-ஊஎ-ஐஒ-கஙசஜஞடணதந-பம-ஹௐఅ-ఌఎ-ఐఒ-నప-హఽౘ-ౚ౜ౝౠౡಀಅ-ಌಎ-ಐಒ-ನಪ-ಳವ-ಹಽ೜-ೞೠೡೱೲഄ-ഌഎ-ഐഒ-ഺഽൎൔ-ൖൟ-ൡൺ-ൿඅ-ඖක-නඳ-රලව-ෆก-ะาำเ-ๆກຂຄຆ-ຊຌ-ຣລວ-ະາຳຽເ-ໄໆໜ-ໟༀཀ-ཇཉ-ཬྈ-ྌက-ဪဿၐ-ၕၚ-ၝၡၥၦၮ-ၰၵ-ႁႎႠ-ჅჇჍა-ჺჼ-ቈቊ-ቍቐ-ቖቘቚ-ቝበ-ኈኊ-ኍነ-ኰኲ-ኵኸ-ኾዀዂ-ዅወ-ዖዘ-ጐጒ-ጕጘ-ፚᎀ-ᎏᎠ-Ᏽᏸ-ᏽᐁ-ᙬᙯ-ᙿᚁ-ᚚᚠ-ᛪᛮ-ᛸᜀ-ᜑᜟ-ᜱᝀ-ᝑᝠ-ᝬᝮ-ᝰក-ឳៗៜᠠ-ᡸᢀ-ᢨᢪᢰ-ᣵᤀ-ᤞᥐ-ᥭᥰ-ᥴᦀ-ᦫᦰ-ᧉᨀ-ᨖᨠ-ᩔᪧᬅ-ᬳᭅ-ᭌᮃ-ᮠᮮᮯᮺ-ᯥᰀ-ᰣᱍ-ᱏᱚ-ᱽᲀ-ᲊᲐ-ᲺᲽ-Ჿᳩ-ᳬᳮ-ᳳᳵᳶᳺᴀ-ᶿḀ-ἕἘ-Ἕἠ-ὅὈ-Ὅὐ-ὗὙὛὝὟ-ώᾀ-ᾴᾶ-ᾼιῂ-ῄῆ-ῌῐ-ΐῖ-Ίῠ-Ῥῲ-ῴῶ-ῼⁱⁿₐ-ₜℂℇℊ-ℓℕ℘-ℝℤΩℨK-ℹℼ-ℿⅅ-ⅉⅎⅠ-ↈⰀ-ⳤⳫ-ⳮⳲⳳⴀ-ⴥⴧⴭⴰ-ⵧⵯⶀ-ⶖⶠ-ⶦⶨ-ⶮⶰ-ⶶⶸ-ⶾⷀ-ⷆⷈ-ⷎⷐ-ⷖⷘ-ⷞ々-〇〡-〩〱-〵〸-〼ぁ-ゖ゛-ゟァ-ヺー-ヿㄅ-ㄯㄱ-ㆎㆠ-ㆿㇰ-ㇿ㐀-䶿一-ꒌꓐ-ꓽꔀ-ꘌꘐ-ꘟꘪꘫꙀ-ꙮꙿ-ꚝꚠ-ꛯꜗ-ꜟꜢ-ꞈꞋ-Ƛ꟱-ꠁꠃ-ꠅꠇ-ꠊꠌ-ꠢꡀ-ꡳꢂ-ꢳꣲ-ꣷꣻꣽꣾꤊ-ꤥꤰ-ꥆꥠ-ꥼꦄ-ꦲꧏꧠ-ꧤꧦ-ꧯꧺ-ꧾꨀ-ꨨꩀ-ꩂꩄ-ꩋꩠ-ꩶꩺꩾ-ꪯꪱꪵꪶꪹ-ꪽꫀꫂꫛ-ꫝꫠ-ꫪꫲ-ꫴꬁ-ꬆꬉ-ꬎꬑ-ꬖꬠ-ꬦꬨ-ꬮꬰ-ꭚꭜ-ꭩꭰ-ꯢ가-힣ힰ-ퟆퟋ-ퟻ豈-舘並-龎ﬀ-ﬆﬓ-ﬗיִײַ-ﬨשׁ-זּטּ-לּמּנּסּףּפּצּ-ﮱﯓ-ﴽﵐ-ﶏﶒ-ﷇﷰ-ﷻﹰ-ﹴﹶ-ﻼＡ-Ｚａ-ｚｦ-ﾾￂ-ￇￊ-ￏￒ-ￗￚ-ￜ", Re = {
+var oi = [509, 0, 227, 0, 150, 4, 294, 9, 1368, 2, 2, 1, 6, 3, 41, 2, 5, 0, 166, 1, 574, 3, 9, 9, 7, 9, 32, 4, 318, 1, 78, 5, 71, 10, 50, 3, 123, 2, 54, 14, 32, 10, 3, 1, 11, 3, 46, 10, 8, 0, 46, 9, 7, 2, 37, 13, 2, 9, 6, 1, 45, 0, 13, 2, 49, 13, 9, 3, 2, 11, 83, 11, 7, 0, 3, 0, 158, 11, 6, 9, 7, 3, 56, 1, 2, 6, 3, 1, 3, 2, 10, 0, 11, 1, 3, 6, 4, 4, 68, 8, 2, 0, 3, 0, 2, 3, 2, 4, 2, 0, 15, 1, 83, 17, 10, 9, 5, 0, 82, 19, 13, 9, 214, 6, 3, 8, 28, 1, 83, 16, 16, 9, 82, 12, 9, 9, 7, 19, 58, 14, 5, 9, 243, 14, 166, 9, 71, 5, 2, 1, 3, 3, 2, 0, 2, 1, 13, 9, 120, 6, 3, 6, 4, 0, 29, 9, 41, 6, 2, 3, 9, 0, 10, 10, 47, 15, 199, 7, 137, 9, 54, 7, 2, 7, 17, 9, 57, 21, 2, 13, 123, 5, 4, 0, 2, 1, 2, 6, 2, 0, 9, 9, 49, 4, 2, 1, 2, 4, 9, 9, 55, 9, 266, 3, 10, 1, 2, 0, 49, 6, 4, 4, 14, 10, 5350, 0, 7, 14, 11465, 27, 2343, 9, 87, 9, 39, 4, 60, 6, 26, 9, 535, 9, 470, 0, 2, 54, 8, 3, 82, 0, 12, 1, 19628, 1, 4178, 9, 519, 45, 3, 22, 543, 4, 4, 5, 9, 7, 3, 6, 31, 3, 149, 2, 1418, 49, 513, 54, 5, 49, 9, 0, 15, 0, 23, 4, 2, 14, 1361, 6, 2, 16, 3, 6, 2, 1, 2, 4, 101, 0, 161, 6, 10, 9, 357, 0, 62, 13, 499, 13, 245, 1, 2, 9, 233, 0, 3, 0, 8, 1, 6, 0, 475, 6, 110, 6, 6, 9, 4759, 9, 787719, 239], ot = [0, 11, 2, 25, 2, 18, 2, 1, 2, 14, 3, 13, 35, 122, 70, 52, 268, 28, 4, 48, 48, 31, 14, 29, 6, 37, 11, 29, 3, 35, 5, 7, 2, 4, 43, 157, 19, 35, 5, 35, 5, 39, 9, 51, 13, 10, 2, 14, 2, 6, 2, 1, 2, 10, 2, 14, 2, 6, 2, 1, 4, 51, 13, 310, 10, 21, 11, 7, 25, 5, 2, 41, 2, 8, 70, 5, 3, 0, 2, 43, 2, 1, 4, 0, 3, 22, 11, 22, 10, 30, 66, 18, 2, 1, 11, 21, 11, 25, 7, 25, 39, 55, 7, 1, 65, 0, 16, 3, 2, 2, 2, 28, 43, 28, 4, 28, 36, 7, 2, 27, 28, 53, 11, 21, 11, 18, 14, 17, 111, 72, 56, 50, 14, 50, 14, 35, 39, 27, 10, 22, 251, 41, 7, 1, 17, 5, 57, 28, 11, 0, 9, 21, 43, 17, 47, 20, 28, 22, 13, 52, 58, 1, 3, 0, 14, 44, 33, 24, 27, 35, 30, 0, 3, 0, 9, 34, 4, 0, 13, 47, 15, 3, 22, 0, 2, 0, 36, 17, 2, 24, 20, 1, 64, 6, 2, 0, 2, 3, 2, 14, 2, 9, 8, 46, 39, 7, 3, 1, 3, 21, 2, 6, 2, 1, 2, 4, 4, 0, 19, 0, 13, 4, 31, 9, 2, 0, 3, 0, 2, 37, 2, 0, 26, 0, 2, 0, 45, 52, 19, 3, 21, 2, 31, 47, 21, 1, 2, 0, 185, 46, 42, 3, 37, 47, 21, 0, 60, 42, 14, 0, 72, 26, 38, 6, 186, 43, 117, 63, 32, 7, 3, 0, 3, 7, 2, 1, 2, 23, 16, 0, 2, 0, 95, 7, 3, 38, 17, 0, 2, 0, 29, 0, 11, 39, 8, 0, 22, 0, 12, 45, 20, 0, 19, 72, 200, 32, 32, 8, 2, 36, 18, 0, 50, 29, 113, 6, 2, 1, 2, 37, 22, 0, 26, 5, 2, 1, 2, 31, 15, 0, 24, 43, 261, 18, 16, 0, 2, 12, 2, 33, 125, 0, 80, 921, 103, 110, 18, 195, 2637, 96, 16, 1071, 18, 5, 26, 3994, 6, 582, 6842, 29, 1763, 568, 8, 30, 18, 78, 18, 29, 19, 47, 17, 3, 32, 20, 6, 18, 433, 44, 212, 63, 33, 24, 3, 24, 45, 74, 6, 0, 67, 12, 65, 1, 2, 0, 15, 4, 10, 7381, 42, 31, 98, 114, 8702, 3, 2, 6, 2, 1, 2, 290, 16, 0, 30, 2, 3, 0, 15, 3, 9, 395, 2309, 106, 6, 12, 4, 8, 8, 9, 5991, 84, 2, 70, 2, 1, 3, 0, 3, 1, 3, 3, 2, 11, 2, 0, 2, 6, 2, 64, 2, 3, 3, 7, 2, 6, 2, 27, 2, 3, 2, 4, 2, 0, 4, 6, 2, 339, 3, 24, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 7, 1845, 30, 7, 5, 262, 61, 147, 44, 11, 6, 17, 0, 322, 29, 19, 43, 485, 27, 229, 29, 3, 0, 208, 30, 2, 2, 2, 1, 2, 6, 3, 4, 10, 1, 225, 6, 2, 3, 2, 1, 2, 14, 2, 196, 60, 67, 8, 0, 1205, 3, 2, 26, 2, 1, 2, 0, 3, 0, 2, 9, 2, 3, 2, 0, 2, 0, 7, 0, 5, 0, 2, 0, 2, 0, 2, 2, 2, 1, 2, 0, 3, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 1, 2, 0, 3, 3, 2, 6, 2, 3, 2, 3, 2, 0, 2, 9, 2, 16, 6, 2, 2, 4, 2, 16, 4421, 42719, 33, 4381, 3, 5773, 3, 7472, 16, 621, 2467, 541, 1507, 4938, 6, 8489], li = "‌‍·̀-ͯ·҃-֑҇-ׇֽֿׁׂׅׄؐ-ًؚ-٩ٰۖ-ۜ۟-۪ۤۧۨ-ۭ۰-۹ܑܰ-݊ަ-ް߀-߉߫-߽߳ࠖ-࠙ࠛ-ࠣࠥ-ࠧࠩ-࡙࠭-࡛ࢗ-࢟࣊-ࣣ࣡-ःऺ-़ा-ॏ॑-ॗॢॣ०-९ঁ-ঃ়া-ৄেৈো-্ৗৢৣ০-৯৾ਁ-ਃ਼ਾ-ੂੇੈੋ-੍ੑ੦-ੱੵઁ-ઃ઼ા-ૅે-ૉો-્ૢૣ૦-૯ૺ-૿ଁ-ଃ଼ା-ୄେୈୋ-୍୕-ୗୢୣ୦-୯ஂா-ூெ-ைொ-்ௗ௦-௯ఀ-ఄ఼ా-ౄె-ైొ-్ౕౖౢౣ౦-౯ಁ-ಃ಼ಾ-ೄೆ-ೈೊ-್ೕೖೢೣ೦-೯ೳഀ-ഃ഻഼ാ-ൄെ-ൈൊ-്ൗൢൣ൦-൯ඁ-ඃ්ා-ුූෘ-ෟ෦-෯ෲෳัิ-ฺ็-๎๐-๙ັິ-ຼ່-໎໐-໙༘༙༠-༩༹༵༷༾༿ཱ-྄྆྇ྍ-ྗྙ-ྼ࿆ါ-ှ၀-၉ၖ-ၙၞ-ၠၢ-ၤၧ-ၭၱ-ၴႂ-ႍႏ-ႝ፝-፟፩-፱ᜒ-᜕ᜲ-᜴ᝒᝓᝲᝳ឴-៓៝០-៩᠋-᠍᠏-᠙ᢩᤠ-ᤫᤰ-᤻᥆-᥏᧐-᧚ᨗ-ᨛᩕ-ᩞ᩠-᩿᩼-᪉᪐-᪙᪰-᪽ᪿ-᫝᫠-᫫ᬀ-ᬄ᬴-᭄᭐-᭙᭫-᭳ᮀ-ᮂᮡ-ᮭ᮰-᮹᯦-᯳ᰤ-᰷᱀-᱉᱐-᱙᳐-᳔᳒-᳨᳭᳴᳷-᳹᷀-᷿‌‍‿⁀⁔⃐-⃥⃜⃡-⃰⳯-⵿⳱ⷠ-〪ⷿ-゙゚〯・꘠-꘩꙯ꙴ-꙽ꚞꚟ꛰꛱ꠂ꠆ꠋꠣ-ꠧ꠬ꢀꢁꢴ-ꣅ꣐-꣙꣠-꣱ꣿ-꤉ꤦ-꤭ꥇ-꥓ꦀ-ꦃ꦳-꧀꧐-꧙ꧥ꧰-꧹ꨩ-ꨶꩃꩌꩍ꩐-꩙ꩻ-ꩽꪰꪲ-ꪴꪷꪸꪾ꪿꫁ꫫ-ꫯꫵ꫶ꯣ-ꯪ꯬꯭꯰-꯹ﬞ︀-️︠-︯︳︴﹍-﹏０-９＿･", lt = "ªµºÀ-ÖØ-öø-ˁˆ-ˑˠ-ˤˬˮͰ-ʹͶͷͺ-ͽͿΆΈ-ΊΌΎ-ΡΣ-ϵϷ-ҁҊ-ԯԱ-Ֆՙՠ-ֈא-תׯ-ײؠ-يٮٯٱ-ۓەۥۦۮۯۺ-ۼۿܐܒ-ܯݍ-ޥޱߊ-ߪߴߵߺࠀ-ࠕࠚࠤࠨࡀ-ࡘࡠ-ࡪࡰ-ࢇࢉ-࢏ࢠ-ࣉऄ-हऽॐक़-ॡॱ-ঀঅ-ঌএঐও-নপ-রলশ-হঽৎড়ঢ়য়-ৡৰৱৼਅ-ਊਏਐਓ-ਨਪ-ਰਲਲ਼ਵਸ਼ਸਹਖ਼-ੜਫ਼ੲ-ੴઅ-ઍએ-ઑઓ-નપ-રલળવ-હઽૐૠૡૹଅ-ଌଏଐଓ-ନପ-ରଲଳଵ-ହଽଡ଼ଢ଼ୟ-ୡୱஃஅ-ஊஎ-ஐஒ-கஙசஜஞடணதந-பம-ஹௐఅ-ఌఎ-ఐఒ-నప-హఽౘ-ౚ౜ౝౠౡಀಅ-ಌಎ-ಐಒ-ನಪ-ಳವ-ಹಽ೜-ೞೠೡೱೲഄ-ഌഎ-ഐഒ-ഺഽൎൔ-ൖൟ-ൡൺ-ൿඅ-ඖක-නඳ-රලව-ෆก-ะาำเ-ๆກຂຄຆ-ຊຌ-ຣລວ-ະາຳຽເ-ໄໆໜ-ໟༀཀ-ཇཉ-ཬྈ-ྌက-ဪဿၐ-ၕၚ-ၝၡၥၦၮ-ၰၵ-ႁႎႠ-ჅჇჍა-ჺჼ-ቈቊ-ቍቐ-ቖቘቚ-ቝበ-ኈኊ-ኍነ-ኰኲ-ኵኸ-ኾዀዂ-ዅወ-ዖዘ-ጐጒ-ጕጘ-ፚᎀ-ᎏᎠ-Ᏽᏸ-ᏽᐁ-ᙬᙯ-ᙿᚁ-ᚚᚠ-ᛪᛮ-ᛸᜀ-ᜑᜟ-ᜱᝀ-ᝑᝠ-ᝬᝮ-ᝰក-ឳៗៜᠠ-ᡸᢀ-ᢨᢪᢰ-ᣵᤀ-ᤞᥐ-ᥭᥰ-ᥴᦀ-ᦫᦰ-ᧉᨀ-ᨖᨠ-ᩔᪧᬅ-ᬳᭅ-ᭌᮃ-ᮠᮮᮯᮺ-ᯥᰀ-ᰣᱍ-ᱏᱚ-ᱽᲀ-ᲊᲐ-ᲺᲽ-Ჿᳩ-ᳬᳮ-ᳳᳵᳶᳺᴀ-ᶿḀ-ἕἘ-Ἕἠ-ὅὈ-Ὅὐ-ὗὙὛὝὟ-ώᾀ-ᾴᾶ-ᾼιῂ-ῄῆ-ῌῐ-ΐῖ-Ίῠ-Ῥῲ-ῴῶ-ῼⁱⁿₐ-ₜℂℇℊ-ℓℕ℘-ℝℤΩℨK-ℹℼ-ℿⅅ-ⅉⅎⅠ-ↈⰀ-ⳤⳫ-ⳮⳲⳳⴀ-ⴥⴧⴭⴰ-ⵧⵯⶀ-ⶖⶠ-ⶦⶨ-ⶮⶰ-ⶶⶸ-ⶾⷀ-ⷆⷈ-ⷎⷐ-ⷖⷘ-ⷞ々-〇〡-〩〱-〵〸-〼ぁ-ゖ゛-ゟァ-ヺー-ヿㄅ-ㄯㄱ-ㆎㆠ-ㆿㇰ-ㇿ㐀-䶿一-ꒌꓐ-ꓽꔀ-ꘌꘐ-ꘟꘪꘫꙀ-ꙮꙿ-ꚝꚠ-ꛯꜗ-ꜟꜢ-ꞈꞋ-Ƛ꟱-ꠁꠃ-ꠅꠇ-ꠊꠌ-ꠢꡀ-ꡳꢂ-ꢳꣲ-ꣷꣻꣽꣾꤊ-ꤥꤰ-ꥆꥠ-ꥼꦄ-ꦲꧏꧠ-ꧤꧦ-ꧯꧺ-ꧾꨀ-ꨨꩀ-ꩂꩄ-ꩋꩠ-ꩶꩺꩾ-ꪯꪱꪵꪶꪹ-ꪽꫀꫂꫛ-ꫝꫠ-ꫪꫲ-ꫴꬁ-ꬆꬉ-ꬎꬑ-ꬖꬠ-ꬦꬨ-ꬮꬰ-ꭚꭜ-ꭩꭰ-ꯢ가-힣ힰ-ퟆퟋ-ퟻ豈-舘並-龎ﬀ-ﬆﬓ-ﬗיִײַ-ﬨשׁ-זּטּ-לּמּנּסּףּפּצּ-ﮱﯓ-ﴽﵐ-ﶏﶒ-ﷇﷰ-ﷻﹰ-ﹴﹶ-ﻼＡ-Ｚａ-ｚｦ-ﾾￂ-ￇￊ-ￏￒ-ￗￚ-ￜ", Ie = {
   3: "abstract boolean byte char class double enum export extends final float goto implements import int interface long native package private protected public short static super synchronized throws transient volatile",
   5: "class enum extends super const export import",
   6: "enum",
   strict: "implements interface let package private protected public static yield",
   strictBind: "eval arguments"
-}, _e = "break case catch continue debugger default do else finally for function if return switch throw try var while with null true false instanceof typeof void delete new in this", ui = {
-  5: _e,
-  "5module": _e + " export import",
-  6: _e + " const class extends export import super"
+}, Le = "break case catch continue debugger default do else finally for function if return switch throw try var while with null true false instanceof typeof void delete new in this", ui = {
+  5: Le,
+  "5module": Le + " export import",
+  6: Le + " const class extends export import super"
 }, ut = /^in(stanceof)?$/, hi = new RegExp("[" + lt + "]"), di = new RegExp("[" + lt + li + "]");
-function Oe(e, t) {
+function Ne(e, t) {
   for (var i = 65536, n = 0; n < t.length; n += 2) {
     if (i += t[n], i > e)
       return !1;
@@ -2418,10 +2441,10 @@ function Oe(e, t) {
   return !1;
 }
 function X(e, t) {
-  return e < 65 ? e === 36 : e < 91 ? !0 : e < 97 ? e === 95 : e < 123 ? !0 : e <= 65535 ? e >= 170 && hi.test(String.fromCharCode(e)) : t === !1 ? !1 : Oe(e, ot);
+  return e < 65 ? e === 36 : e < 91 ? !0 : e < 97 ? e === 95 : e < 123 ? !0 : e <= 65535 ? e >= 170 && hi.test(String.fromCharCode(e)) : t === !1 ? !1 : Ne(e, ot);
 }
 function re(e, t) {
-  return e < 48 ? e === 36 : e < 58 ? !0 : e < 65 ? !1 : e < 91 ? !0 : e < 97 ? e === 95 : e < 123 ? !0 : e <= 65535 ? e >= 170 && di.test(String.fromCharCode(e)) : t === !1 ? !1 : Oe(e, ot) || Oe(e, oi);
+  return e < 48 ? e === 36 : e < 58 ? !0 : e < 65 ? !1 : e < 91 ? !0 : e < 97 ? e === 95 : e < 123 ? !0 : e <= 65535 ? e >= 170 && di.test(String.fromCharCode(e)) : t === !1 ? !1 : Ne(e, ot) || Ne(e, oi);
 }
 var w = function(t, i) {
   i === void 0 && (i = {}), this.label = t, this.keyword = i.keyword, this.beforeExpr = !!i.beforeExpr, this.startsExpr = !!i.startsExpr, this.isLoop = !!i.isLoop, this.isAssign = !!i.isAssign, this.prefix = !!i.prefix, this.postfix = !!i.postfix, this.binop = i.binop || null, this.updateContext = null;
@@ -2429,16 +2452,16 @@ var w = function(t, i) {
 function j(e, t) {
   return new w(e, { beforeExpr: !0, binop: t });
 }
-var G = { beforeExpr: !0 }, L = { startsExpr: !0 }, We = {};
+var G = { beforeExpr: !0 }, _ = { startsExpr: !0 }, We = {};
 function v(e, t) {
   return t === void 0 && (t = {}), t.keyword = e, We[e] = new w(e, t);
 }
 var r = {
-  num: new w("num", L),
-  regexp: new w("regexp", L),
-  string: new w("string", L),
-  name: new w("name", L),
-  privateId: new w("privateId", L),
+  num: new w("num", _),
+  regexp: new w("regexp", _),
+  string: new w("string", _),
+  name: new w("name", _),
+  privateId: new w("privateId", _),
   eof: new w("eof"),
   // Punctuation token types.
   bracketL: new w("[", { beforeExpr: !0, startsExpr: !0 }),
@@ -2457,7 +2480,7 @@ var r = {
   template: new w("template"),
   invalidTemplate: new w("invalidTemplate"),
   ellipsis: new w("...", G),
-  backQuote: new w("`", L),
+  backQuote: new w("`", _),
   dollarBraceL: new w("${", { beforeExpr: !0, startsExpr: !0 }),
   // Operators. These carry several kinds of properties to help the
   // parser use them properly (the presence of these properties is
@@ -2501,7 +2524,7 @@ var r = {
   _else: v("else", G),
   _finally: v("finally"),
   _for: v("for", { isLoop: !0 }),
-  _function: v("function", L),
+  _function: v("function", _),
   _if: v("if"),
   _return: v("return", G),
   _switch: v("switch"),
@@ -2512,21 +2535,21 @@ var r = {
   _while: v("while", { isLoop: !0 }),
   _with: v("with"),
   _new: v("new", { beforeExpr: !0, startsExpr: !0 }),
-  _this: v("this", L),
-  _super: v("super", L),
-  _class: v("class", L),
+  _this: v("this", _),
+  _super: v("super", _),
+  _class: v("class", _),
   _extends: v("extends", G),
   _export: v("export"),
-  _import: v("import", L),
-  _null: v("null", L),
-  _true: v("true", L),
-  _false: v("false", L),
+  _import: v("import", _),
+  _null: v("null", _),
+  _true: v("true", _),
+  _false: v("false", _),
   _in: v("in", { beforeExpr: !0, binop: 7 }),
   _instanceof: v("instanceof", { beforeExpr: !0, binop: 7 }),
   _typeof: v("typeof", { beforeExpr: !0, prefix: !0, startsExpr: !0 }),
   _void: v("void", { beforeExpr: !0, prefix: !0, startsExpr: !0 }),
   _delete: v("delete", { beforeExpr: !0, prefix: !0, startsExpr: !0 })
-}, F = /\r\n?|\n|\u2028|\u2029/, ci = new RegExp(F.source, "g");
+}, K = /\r\n?|\n|\u2028|\u2029/, ci = new RegExp(K.source, "g");
 function pe(e) {
   return e === 10 || e === 13 || e === 8232 || e === 8233;
 }
@@ -2567,7 +2590,7 @@ function pt(e, t) {
     ++i, n = s;
   }
 }
-var Ke = {
+var Oe = {
   // `ecmaVersion` indicates the ECMAScript version to parse. Must be
   // either 3, 5, 6 (or 2015), 7 (2016), 8 (2017), 9 (2018), 10
   // (2019), 11 (2020), 12 (2021), 13 (2022), 14 (2023), or `"latest"`
@@ -2669,8 +2692,8 @@ var Ke = {
 }, nt = !1;
 function fi(e) {
   var t = {};
-  for (var i in Ke)
-    t[i] = e && me(e, i) ? e[i] : Ke[i];
+  for (var i in Oe)
+    t[i] = e && me(e, i) ? e[i] : Oe[i];
   if (t.ecmaVersion === "latest" ? t.ecmaVersion = 1e8 : t.ecmaVersion == null ? (!nt && typeof console == "object" && console.warn && (nt = !0, console.warn(`Since Acorn 8.0.0, options.ecmaVersion is required.
 Defaulting to 2020, but this will stop working in the future.`)), t.ecmaVersion = 11) : t.ecmaVersion >= 2015 && (t.ecmaVersion -= 2009), t.allowReserved == null && (t.allowReserved = t.ecmaVersion < 5), (!e || e.allowHashBang == null) && (t.allowHashBang = t.ecmaVersion >= 14), tt(t.onToken)) {
     var n = t.onToken;
@@ -2700,10 +2723,10 @@ function He(e, t) {
 var ye = 0, Xe = 1, te = 2, vt = 3, kt = 4, wt = 5, T = function(t, i, n) {
   this.options = t = fi(t), this.sourceFile = t.sourceFile, this.keywords = ne(ui[t.ecmaVersion >= 6 ? 6 : t.sourceType === "module" ? "5module" : 5]);
   var s = "";
-  t.allowReserved !== !0 && (s = Re[t.ecmaVersion >= 6 ? 6 : t.ecmaVersion === 5 ? 5 : 3], t.sourceType === "module" && (s += " await")), this.reservedWords = ne(s);
-  var o = (s ? s + " " : "") + Re.strict;
-  this.reservedWordsStrict = ne(o), this.reservedWordsStrictBind = ne(o + " " + Re.strictBind), this.input = String(i), this.containsEsc = !1, n ? (this.pos = n, this.lineStart = this.input.lastIndexOf(`
-`, n - 1) + 1, this.curLine = this.input.slice(0, this.lineStart).split(F).length) : (this.pos = this.lineStart = 0, this.curLine = 1), this.type = r.eof, this.value = null, this.start = this.end = this.pos, this.startLoc = this.endLoc = this.curPosition(), this.lastTokEndLoc = this.lastTokStartLoc = null, this.lastTokStart = this.lastTokEnd = this.pos, this.context = this.initialContext(), this.exprAllowed = !0, this.inModule = t.sourceType === "module", this.strict = this.inModule || t.strict === !0 || this.strictDirective(this.pos), this.potentialArrowAt = -1, this.potentialArrowInForAwait = !1, this.yieldPos = this.awaitPos = this.awaitIdentPos = 0, this.labels = [], this.undefinedExports = /* @__PURE__ */ Object.create(null), this.pos === 0 && t.allowHashBang && this.input.slice(0, 2) === "#!" && this.skipLineComment(2), this.scopeStack = [], this.enterScope(
+  t.allowReserved !== !0 && (s = Ie[t.ecmaVersion >= 6 ? 6 : t.ecmaVersion === 5 ? 5 : 3], t.sourceType === "module" && (s += " await")), this.reservedWords = ne(s);
+  var o = (s ? s + " " : "") + Ie.strict;
+  this.reservedWordsStrict = ne(o), this.reservedWordsStrictBind = ne(o + " " + Ie.strictBind), this.input = String(i), this.containsEsc = !1, n ? (this.pos = n, this.lineStart = this.input.lastIndexOf(`
+`, n - 1) + 1, this.curLine = this.input.slice(0, this.lineStart).split(K).length) : (this.pos = this.lineStart = 0, this.curLine = 1), this.type = r.eof, this.value = null, this.start = this.end = this.pos, this.startLoc = this.endLoc = this.curPosition(), this.lastTokEndLoc = this.lastTokStartLoc = null, this.lastTokStart = this.lastTokEnd = this.pos, this.context = this.initialContext(), this.exprAllowed = !0, this.inModule = t.sourceType === "module", this.strict = this.inModule || t.strict === !0 || this.strictDirective(this.pos), this.potentialArrowAt = -1, this.potentialArrowInForAwait = !1, this.yieldPos = this.awaitPos = this.awaitIdentPos = 0, this.labels = [], this.undefinedExports = /* @__PURE__ */ Object.create(null), this.pos === 0 && t.allowHashBang && this.input.slice(0, 2) === "#!" && this.skipLineComment(2), this.scopeStack = [], this.enterScope(
     this.options.sourceType === "commonjs" ? he : ue
   ), this.regexpState = null, this.privateNameStack = [];
 }, Z = { inFunction: { configurable: !0 }, inGenerator: { configurable: !0 }, inAsync: { configurable: !0 }, canAwait: { configurable: !0 }, allowReturn: { configurable: !0 }, allowSuper: { configurable: !0 }, allowDirectSuper: { configurable: !0 }, treatFunctionsAsVar: { configurable: !0 }, allowNewDotTarget: { configurable: !0 }, allowUsing: { configurable: !0 }, inClassStaticBlock: { configurable: !0 } };
@@ -2789,7 +2812,7 @@ M.strictDirective = function(e) {
     if ((t[1] || t[2]) === "use strict") {
       B.lastIndex = e + t[0].length;
       var i = B.exec(this.input), n = i.index + i[0].length, s = this.input.charAt(n);
-      return s === ";" || s === "}" || F.test(i[0]) && !(/[(`.[+\-/*%<>=,?^&]/.test(s) || s === "!" && this.input.charAt(n + 1) === "=");
+      return s === ";" || s === "}" || K.test(i[0]) && !(/[(`.[+\-/*%<>=,?^&]/.test(s) || s === "!" && this.input.charAt(n + 1) === "=");
     }
     e += t[0].length, B.lastIndex = e, e += B.exec(this.input)[0].length, this.input[e] === ";" && e++;
   }
@@ -2817,7 +2840,7 @@ M.expectContextual = function(e) {
   this.eatContextual(e) || this.unexpected();
 };
 M.canInsertSemicolon = function() {
-  return this.type === r.eof || this.type === r.braceR || F.test(this.input.slice(this.lastTokEnd, this.start));
+  return this.type === r.eof || this.type === r.braceR || K.test(this.input.slice(this.lastTokEnd, this.start));
 };
 M.insertSemicolon = function() {
   if (this.canInsertSemicolon())
@@ -2904,14 +2927,14 @@ c.isAsyncFunction = function() {
     return !1;
   B.lastIndex = this.pos;
   var e = B.exec(this.input), t = this.pos + e[0].length, i;
-  return !F.test(this.input.slice(this.pos, t)) && this.input.slice(t, t + 8) === "function" && (t + 8 === this.input.length || !(re(i = this.fullCharCodeAt(t + 8)) || i === 92));
+  return !K.test(this.input.slice(this.pos, t)) && this.input.slice(t, t + 8) === "function" && (t + 8 === this.input.length || !(re(i = this.fullCharCodeAt(t + 8)) || i === 92));
 };
 c.isUsingKeyword = function(e, t) {
   if (this.options.ecmaVersion < 17 || !this.isContextual(e ? "await" : "using"))
     return !1;
   B.lastIndex = this.pos;
   var i = B.exec(this.input), n = this.pos + i[0].length;
-  if (F.test(this.input.slice(this.pos, n)))
+  if (K.test(this.input.slice(this.pos, n)))
     return !1;
   if (e) {
     var s = n + 5, o;
@@ -2919,7 +2942,7 @@ c.isUsingKeyword = function(e, t) {
       return !1;
     B.lastIndex = s;
     var a = B.exec(this.input);
-    if (n = s + a[0].length, a && F.test(this.input.slice(s, n)))
+    if (n = s + a[0].length, a && K.test(this.input.slice(s, n)))
       return !1;
   }
   var l = this.fullCharCodeAt(n);
@@ -3067,7 +3090,7 @@ c.parseSwitchStatement = function(e) {
   return this.exitScope(), t && this.finishNode(t, "SwitchCase"), this.next(), this.labels.pop(), this.finishNode(e, "SwitchStatement");
 };
 c.parseThrowStatement = function(e) {
-  return this.next(), F.test(this.input.slice(this.lastTokEnd, this.start)) && this.raise(this.lastTokEnd, "Illegal newline after throw"), e.argument = this.parseExpression(), this.semicolon(), this.finishNode(e, "ThrowStatement");
+  return this.next(), K.test(this.input.slice(this.lastTokEnd, this.start)) && this.raise(this.lastTokEnd, "Illegal newline after throw"), e.argument = this.parseExpression(), this.semicolon(), this.finishNode(e, "ThrowStatement");
 };
 var wi = [];
 c.parseCatchClauseParam = function() {
@@ -3561,7 +3584,7 @@ ge.curContext = function() {
 };
 ge.braceIsBlock = function(e) {
   var t = this.curContext();
-  return t === A.f_expr || t === A.f_stat ? !0 : e === r.colon && (t === A.b_stat || t === A.b_expr) ? !t.isExpr : e === r._return || e === r.name && this.exprAllowed ? F.test(this.input.slice(this.lastTokEnd, this.start)) : e === r._else || e === r.semi || e === r.eof || e === r.parenR || e === r.arrow ? !0 : e === r.braceL ? t === A.b_stat : e === r._var || e === r._const || e === r.name ? !1 : !this.exprAllowed;
+  return t === A.f_expr || t === A.f_stat ? !0 : e === r.colon && (t === A.b_stat || t === A.b_expr) ? !t.isExpr : e === r._return || e === r.name && this.exprAllowed ? K.test(this.input.slice(this.lastTokEnd, this.start)) : e === r._else || e === r.semi || e === r.eof || e === r.parenR || e === r.arrow ? !0 : e === r.braceL ? t === A.b_stat : e === r._var || e === r._const || e === r.name ? !1 : !this.exprAllowed;
 };
 ge.inGeneratorContext = function() {
   for (var e = this.context.length - 1; e >= 1; e--) {
@@ -3599,7 +3622,7 @@ r.parenL.updateContext = function(e) {
 r.incDec.updateContext = function() {
 };
 r._function.updateContext = r._class.updateContext = function(e) {
-  e.beforeExpr && e !== r._else && !(e === r.semi && this.curContext() !== A.p_stat) && !(e === r._return && F.test(this.input.slice(this.lastTokEnd, this.start))) && !((e === r.colon || e === r.braceL) && this.curContext() === A.b_stat) ? this.context.push(A.f_expr) : this.context.push(A.f_stat), this.exprAllowed = !1;
+  e.beforeExpr && e !== r._else && !(e === r.semi && this.curContext() !== A.p_stat) && !(e === r._return && K.test(this.input.slice(this.lastTokEnd, this.start))) && !((e === r.colon || e === r.braceL) && this.curContext() === A.b_stat) ? this.context.push(A.f_expr) : this.context.push(A.f_stat), this.exprAllowed = !1;
 };
 r.colon.updateContext = function() {
   this.curContext().token === "function" && this.context.pop(), this.exprAllowed = !0;
@@ -3778,18 +3801,18 @@ m.parseSubscript = function(e, t, i, n, s, o, a) {
     var p = this.startNodeAt(t, i);
     p.object = e, h ? (p.property = this.parseExpression(), this.expect(r.bracketR)) : this.type === r.privateId && e.type !== "Super" ? p.property = this.parsePrivateIdent() : p.property = this.parseIdent(this.options.allowReserved !== "never"), p.computed = !!h, l && (p.optional = u), e = this.finishNode(p, "MemberExpression");
   } else if (!n && this.eat(r.parenL)) {
-    var g = new Be(), x = this.yieldPos, f = this.awaitPos, I = this.awaitIdentPos;
+    var g = new Be(), x = this.yieldPos, f = this.awaitPos, R = this.awaitIdentPos;
     this.yieldPos = 0, this.awaitPos = 0, this.awaitIdentPos = 0;
-    var K = this.parseExprList(r.parenR, this.options.ecmaVersion >= 8, !1, g);
+    var O = this.parseExprList(r.parenR, this.options.ecmaVersion >= 8, !1, g);
     if (s && !u && this.shouldParseAsyncArrow())
-      return this.checkPatternErrors(g, !1), this.checkYieldAwaitInDefaultParams(), this.awaitIdentPos > 0 && this.raise(this.awaitIdentPos, "Cannot use 'await' as identifier inside an async function"), this.yieldPos = x, this.awaitPos = f, this.awaitIdentPos = I, this.parseSubscriptAsyncArrow(t, i, K, a);
-    this.checkExpressionErrors(g, !0), this.yieldPos = x || this.yieldPos, this.awaitPos = f || this.awaitPos, this.awaitIdentPos = I || this.awaitIdentPos;
-    var R = this.startNodeAt(t, i);
-    R.callee = e, R.arguments = K, l && (R.optional = u), e = this.finishNode(R, "CallExpression");
+      return this.checkPatternErrors(g, !1), this.checkYieldAwaitInDefaultParams(), this.awaitIdentPos > 0 && this.raise(this.awaitIdentPos, "Cannot use 'await' as identifier inside an async function"), this.yieldPos = x, this.awaitPos = f, this.awaitIdentPos = R, this.parseSubscriptAsyncArrow(t, i, O, a);
+    this.checkExpressionErrors(g, !0), this.yieldPos = x || this.yieldPos, this.awaitPos = f || this.awaitPos, this.awaitIdentPos = R || this.awaitIdentPos;
+    var I = this.startNodeAt(t, i);
+    I.callee = e, I.arguments = O, l && (I.optional = u), e = this.finishNode(I, "CallExpression");
   } else if (this.type === r.backQuote) {
     (u || o) && this.raise(this.start, "Optional chaining cannot appear in the tag of tagged template expressions");
-    var _ = this.startNodeAt(t, i);
-    _.tag = e, _.quasi = this.parseTemplate({ isTagged: !0 }), e = this.finishNode(_, "TaggedTemplateExpression");
+    var L = this.startNodeAt(t, i);
+    L.tag = e, L.quasi = this.parseTemplate({ isTagged: !0 }), e = this.finishNode(L, "TaggedTemplateExpression");
   }
   return e;
 };
@@ -3886,28 +3909,28 @@ m.parseParenAndDistinguishExpression = function(e, t) {
   var i = this.start, n = this.startLoc, s, o = this.options.ecmaVersion >= 8;
   if (this.options.ecmaVersion >= 6) {
     this.next();
-    var a = this.start, l = this.startLoc, u = [], h = !0, p = !1, g = new Be(), x = this.yieldPos, f = this.awaitPos, I;
+    var a = this.start, l = this.startLoc, u = [], h = !0, p = !1, g = new Be(), x = this.yieldPos, f = this.awaitPos, R;
     for (this.yieldPos = 0, this.awaitPos = 0; this.type !== r.parenR; )
       if (h ? h = !1 : this.expect(r.comma), o && this.afterTrailingComma(r.parenR, !0)) {
         p = !0;
         break;
       } else if (this.type === r.ellipsis) {
-        I = this.start, u.push(this.parseParenItem(this.parseRestBinding())), this.type === r.comma && this.raiseRecoverable(
+        R = this.start, u.push(this.parseParenItem(this.parseRestBinding())), this.type === r.comma && this.raiseRecoverable(
           this.start,
           "Comma is not permitted after the rest element"
         );
         break;
       } else
         u.push(this.parseMaybeAssign(!1, g, this.parseParenItem));
-    var K = this.lastTokEnd, R = this.lastTokEndLoc;
+    var O = this.lastTokEnd, I = this.lastTokEndLoc;
     if (this.expect(r.parenR), e && this.shouldParseArrow(u) && this.eat(r.arrow))
       return this.checkPatternErrors(g, !1), this.checkYieldAwaitInDefaultParams(), this.yieldPos = x, this.awaitPos = f, this.parseParenArrowList(i, n, u, t);
-    (!u.length || p) && this.unexpected(this.lastTokStart), I && this.unexpected(I), this.checkExpressionErrors(g, !0), this.yieldPos = x || this.yieldPos, this.awaitPos = f || this.awaitPos, u.length > 1 ? (s = this.startNodeAt(a, l), s.expressions = u, this.finishNodeAt(s, "SequenceExpression", K, R)) : s = u[0];
+    (!u.length || p) && this.unexpected(this.lastTokStart), R && this.unexpected(R), this.checkExpressionErrors(g, !0), this.yieldPos = x || this.yieldPos, this.awaitPos = f || this.awaitPos, u.length > 1 ? (s = this.startNodeAt(a, l), s.expressions = u, this.finishNodeAt(s, "SequenceExpression", O, I)) : s = u[0];
   } else
     s = this.parseParenExpression();
   if (this.options.preserveParens) {
-    var _ = this.startNodeAt(i, n);
-    return _.expression = s, this.finishNode(_, "ParenthesizedExpression");
+    var L = this.startNodeAt(i, n);
+    return L.expression = s, this.finishNode(L, "ParenthesizedExpression");
   } else
     return s;
 };
@@ -3954,7 +3977,7 @@ m.parseTemplate = function(e) {
   return this.next(), this.finishNode(i, "TemplateLiteral");
 };
 m.isAsyncProp = function(e) {
-  return !e.computed && e.key.type === "Identifier" && e.key.name === "async" && (this.type === r.name || this.type === r.num || this.type === r.string || this.type === r.bracketL || this.type.keyword || this.options.ecmaVersion >= 9 && this.type === r.star) && !F.test(this.input.slice(this.lastTokEnd, this.start));
+  return !e.computed && e.key.type === "Identifier" && e.key.name === "async" && (this.type === r.name || this.type === r.num || this.type === r.string || this.type === r.bracketL || this.type.keyword || this.options.ecmaVersion >= 9 && this.type === r.star) && !K.test(this.input.slice(this.lastTokEnd, this.start));
 };
 m.parseObj = function(e, t) {
   var i = this.startNode(), n = !0, s = {};
@@ -4186,9 +4209,9 @@ var Di = "Berf Beria_Erfe Gara Garay Gukh Gurung_Khema Hrkt Katakana_Or_Hiragana
   12: Vt,
   13: Mt,
   14: Pi
-}, It = {};
+}, Rt = {};
 function Ti(e) {
-  var t = It[e] = {
+  var t = Rt[e] = {
     binary: ne(Ci[e] + " " + rt),
     binaryOfStrings: ne(Ei[e]),
     nonBinary: {
@@ -4198,8 +4221,8 @@ function Ti(e) {
   };
   t.nonBinary.Script_Extensions = t.nonBinary.Script, t.nonBinary.gc = t.nonBinary.General_Category, t.nonBinary.sc = t.nonBinary.Script, t.nonBinary.scx = t.nonBinary.Script_Extensions;
 }
-for (var Le = 0, st = [9, 10, 11, 12, 13, 14]; Le < st.length; Le += 1) {
-  var Vi = st[Le];
+for (var _e = 0, st = [9, 10, 11, 12, 13, 14]; _e < st.length; _e += 1) {
+  var Vi = st[_e];
   Ti(Vi);
 }
 var d = T.prototype, Ce = function(t, i) {
@@ -4216,7 +4239,7 @@ Ce.prototype.sibling = function() {
   return new Ce(this.parent, this.base);
 };
 var Q = function(t) {
-  this.parser = t, this.validFlags = "gim" + (t.options.ecmaVersion >= 6 ? "uy" : "") + (t.options.ecmaVersion >= 9 ? "s" : "") + (t.options.ecmaVersion >= 13 ? "d" : "") + (t.options.ecmaVersion >= 15 ? "v" : ""), this.unicodeProperties = It[t.options.ecmaVersion >= 14 ? 14 : t.options.ecmaVersion], this.source = "", this.flags = "", this.start = 0, this.switchU = !1, this.switchV = !1, this.switchN = !1, this.pos = 0, this.lastIntValue = 0, this.lastStringValue = "", this.lastAssertionIsQuantifiable = !1, this.numCapturingParens = 0, this.maxBackReference = 0, this.groupNames = /* @__PURE__ */ Object.create(null), this.backReferenceNames = [], this.branchID = null;
+  this.parser = t, this.validFlags = "gim" + (t.options.ecmaVersion >= 6 ? "uy" : "") + (t.options.ecmaVersion >= 9 ? "s" : "") + (t.options.ecmaVersion >= 13 ? "d" : "") + (t.options.ecmaVersion >= 15 ? "v" : ""), this.unicodeProperties = Rt[t.options.ecmaVersion >= 14 ? 14 : t.options.ecmaVersion], this.source = "", this.flags = "", this.start = 0, this.switchU = !1, this.switchV = !1, this.switchN = !1, this.pos = 0, this.lastIntValue = 0, this.lastStringValue = "", this.lastAssertionIsQuantifiable = !1, this.numCapturingParens = 0, this.maxBackReference = 0, this.groupNames = /* @__PURE__ */ Object.create(null), this.backReferenceNames = [], this.branchID = null;
 };
 Q.prototype.reset = function(t, i, n) {
   var s = n.indexOf("v") !== -1, o = n.indexOf("u") !== -1;
@@ -4481,11 +4504,11 @@ d.regexp_eatCapturingGroup = function(e) {
   return !1;
 };
 d.regexp_eatModifiers = function(e) {
-  for (var t = "", i = 0; (i = e.current()) !== -1 && Ii(i); )
+  for (var t = "", i = 0; (i = e.current()) !== -1 && Ri(i); )
     t += $(i), e.advance();
   return t;
 };
-function Ii(e) {
+function Ri(e) {
   return e === 105 || e === 109 || e === 115;
 }
 d.regexp_eatExtendedAtom = function(e) {
@@ -4499,13 +4522,13 @@ d.regexp_eatInvalidBracedQuantifier = function(e) {
 };
 d.regexp_eatSyntaxCharacter = function(e) {
   var t = e.current();
-  return Rt(t) ? (e.lastIntValue = t, e.advance(), !0) : !1;
+  return It(t) ? (e.lastIntValue = t, e.advance(), !0) : !1;
 };
-function Rt(e) {
+function It(e) {
   return e === 36 || e >= 40 && e <= 43 || e === 46 || e === 63 || e >= 91 && e <= 94 || e >= 123 && e <= 125;
 }
 d.regexp_eatPatternCharacters = function(e) {
-  for (var t = e.pos, i = 0; (i = e.current()) !== -1 && !Rt(i); )
+  for (var t = e.pos, i = 0; (i = e.current()) !== -1 && !It(i); )
     e.advance();
   return e.pos !== t;
 };
@@ -4555,16 +4578,16 @@ d.regexp_eatRegExpIdentifierName = function(e) {
 };
 d.regexp_eatRegExpIdentifierStart = function(e) {
   var t = e.pos, i = this.options.ecmaVersion >= 11, n = e.current(i);
-  return e.advance(i), n === 92 && this.regexp_eatRegExpUnicodeEscapeSequence(e, i) && (n = e.lastIntValue), Ri(n) ? (e.lastIntValue = n, !0) : (e.pos = t, !1);
+  return e.advance(i), n === 92 && this.regexp_eatRegExpUnicodeEscapeSequence(e, i) && (n = e.lastIntValue), Ii(n) ? (e.lastIntValue = n, !0) : (e.pos = t, !1);
 };
-function Ri(e) {
+function Ii(e) {
   return X(e, !0) || e === 36 || e === 95;
 }
 d.regexp_eatRegExpIdentifierPart = function(e) {
   var t = e.pos, i = this.options.ecmaVersion >= 11, n = e.current(i);
-  return e.advance(i), n === 92 && this.regexp_eatRegExpUnicodeEscapeSequence(e, i) && (n = e.lastIntValue), _i(n) ? (e.lastIntValue = n, !0) : (e.pos = t, !1);
+  return e.advance(i), n === 92 && this.regexp_eatRegExpUnicodeEscapeSequence(e, i) && (n = e.lastIntValue), Li(n) ? (e.lastIntValue = n, !0) : (e.pos = t, !1);
 };
-function _i(e) {
+function Li(e) {
   return re(e, !0) || e === 36 || e === 95 || e === 8204 || e === 8205;
 }
 d.regexp_eatAtomEscape = function(e) {
@@ -4617,9 +4640,9 @@ d.regexp_eatControlEscape = function(e) {
 };
 d.regexp_eatControlLetter = function(e) {
   var t = e.current();
-  return _t(t) ? (e.lastIntValue = t % 32, e.advance(), !0) : !1;
+  return Lt(t) ? (e.lastIntValue = t % 32, e.advance(), !0) : !1;
 };
-function _t(e) {
+function Lt(e) {
   return e >= 65 && e <= 90 || e >= 97 && e <= 122;
 }
 d.regexp_eatRegExpUnicodeEscapeSequence = function(e, t) {
@@ -4654,13 +4677,13 @@ d.regexp_eatRegExpUnicodeEscapeSequence = function(e, t) {
     ) && this.regexp_eatHexDigits(e) && e.eat(
       125
       /* } */
-    ) && Li(e.lastIntValue))
+    ) && _i(e.lastIntValue))
       return !0;
     n && e.raise("Invalid unicode escape"), e.pos = i;
   }
   return !1;
 };
-function Li(e) {
+function _i(e) {
   return e >= 0 && e <= 1114111;
 }
 d.regexp_eatIdentityEscape = function(e) {
@@ -4683,10 +4706,10 @@ d.regexp_eatDecimalEscape = function(e) {
   }
   return !1;
 };
-var Lt = 0, ee = 1, W = 2;
+var _t = 0, ee = 1, W = 2;
 d.regexp_eatCharacterClassEscape = function(e) {
   var t = e.current();
-  if (Fi(t))
+  if (Ki(t))
     return e.lastIntValue = -1, e.advance(), ee;
   var i = !1;
   if (e.switchU && this.options.ecmaVersion >= 9 && ((i = t === 80) || t === 112)) {
@@ -4702,9 +4725,9 @@ d.regexp_eatCharacterClassEscape = function(e) {
       return i && n === W && e.raise("Invalid property name"), n;
     e.raise("Invalid property name");
   }
-  return Lt;
+  return _t;
 };
-function Fi(e) {
+function Ki(e) {
   return e === 100 || e === 68 || e === 115 || e === 83 || e === 119 || e === 87;
 }
 d.regexp_eatUnicodePropertyValueExpression = function(e) {
@@ -4723,7 +4746,7 @@ d.regexp_eatUnicodePropertyValueExpression = function(e) {
     var s = e.lastStringValue;
     return this.regexp_validateUnicodePropertyNameOrValue(e, s);
   }
-  return Lt;
+  return _t;
 };
 d.regexp_validateUnicodePropertyNameAndValue = function(e, t, i) {
   me(e.unicodeProperties.nonBinary, t) || e.raise("Invalid property name"), e.unicodeProperties.nonBinary[t].test(i) || e.raise("Invalid property value");
@@ -4737,21 +4760,21 @@ d.regexp_validateUnicodePropertyNameOrValue = function(e, t) {
 };
 d.regexp_eatUnicodePropertyName = function(e) {
   var t = 0;
-  for (e.lastStringValue = ""; Ft(t = e.current()); )
+  for (e.lastStringValue = ""; Kt(t = e.current()); )
     e.lastStringValue += $(t), e.advance();
   return e.lastStringValue !== "";
 };
-function Ft(e) {
-  return _t(e) || e === 95;
+function Kt(e) {
+  return Lt(e) || e === 95;
 }
 d.regexp_eatUnicodePropertyValue = function(e) {
   var t = 0;
-  for (e.lastStringValue = ""; Ni(t = e.current()); )
+  for (e.lastStringValue = ""; Fi(t = e.current()); )
     e.lastStringValue += $(t), e.advance();
   return e.lastStringValue !== "";
 };
-function Ni(e) {
-  return Ft(e) || Ve(e);
+function Fi(e) {
+  return Kt(e) || Ve(e);
 }
 d.regexp_eatLoneUnicodePropertyNameOrValue = function(e) {
   return this.regexp_eatUnicodePropertyValue(e);
@@ -4797,7 +4820,7 @@ d.regexp_eatClassAtom = function(e) {
       return !0;
     if (e.switchU) {
       var i = e.current();
-      (i === 99 || Kt(i)) && e.raise("Invalid class escape"), e.raise("Invalid escape");
+      (i === 99 || Ot(i)) && e.raise("Invalid class escape"), e.raise("Invalid escape");
     }
     e.pos = t;
   }
@@ -4950,12 +4973,12 @@ d.regexp_eatClassSetCharacter = function(e) {
       /* b */
     ) ? (e.lastIntValue = 8, !0) : (e.pos = t, !1);
   var i = e.current();
-  return i < 0 || i === e.lookahead() && Oi(i) || Ki(i) ? !1 : (e.advance(), e.lastIntValue = i, !0);
+  return i < 0 || i === e.lookahead() && Ni(i) || Oi(i) ? !1 : (e.advance(), e.lastIntValue = i, !0);
 };
-function Oi(e) {
+function Ni(e) {
   return e === 33 || e >= 35 && e <= 38 || e >= 42 && e <= 44 || e === 46 || e >= 58 && e <= 64 || e === 94 || e === 96 || e === 126;
 }
-function Ki(e) {
+function Oi(e) {
   return e === 40 || e === 41 || e === 45 || e === 47 || e >= 91 && e <= 93 || e >= 123 && e <= 125;
 }
 d.regexp_eatClassSetReservedPunctuator = function(e) {
@@ -4992,14 +5015,14 @@ function Ve(e) {
 }
 d.regexp_eatHexDigits = function(e) {
   var t = e.pos, i = 0;
-  for (e.lastIntValue = 0; Nt(i = e.current()); )
-    e.lastIntValue = 16 * e.lastIntValue + Ot(i), e.advance();
+  for (e.lastIntValue = 0; Ft(i = e.current()); )
+    e.lastIntValue = 16 * e.lastIntValue + Nt(i), e.advance();
   return e.pos !== t;
 };
-function Nt(e) {
+function Ft(e) {
   return e >= 48 && e <= 57 || e >= 65 && e <= 70 || e >= 97 && e <= 102;
 }
-function Ot(e) {
+function Nt(e) {
   return e >= 65 && e <= 70 ? 10 + (e - 65) : e >= 97 && e <= 102 ? 10 + (e - 97) : e - 48;
 }
 d.regexp_eatLegacyOctalEscapeSequence = function(e) {
@@ -5016,9 +5039,9 @@ d.regexp_eatLegacyOctalEscapeSequence = function(e) {
 };
 d.regexp_eatOctalDigit = function(e) {
   var t = e.current();
-  return Kt(t) ? (e.lastIntValue = t - 48, e.advance(), !0) : (e.lastIntValue = 0, !1);
+  return Ot(t) ? (e.lastIntValue = t - 48, e.advance(), !0) : (e.lastIntValue = 0, !1);
 };
-function Kt(e) {
+function Ot(e) {
   return e >= 48 && e <= 55;
 }
 d.regexp_eatFixedHexDigits = function(e, t) {
@@ -5026,9 +5049,9 @@ d.regexp_eatFixedHexDigits = function(e, t) {
   e.lastIntValue = 0;
   for (var n = 0; n < t; ++n) {
     var s = e.current();
-    if (!Nt(s))
+    if (!Ft(s))
       return e.pos = i, !1;
-    e.lastIntValue = 16 * e.lastIntValue + Ot(s), e.advance();
+    e.lastIntValue = 16 * e.lastIntValue + Nt(s), e.advance();
   }
   return !0;
 };
@@ -5173,7 +5196,7 @@ b.readToken_caret = function() {
 };
 b.readToken_plus_min = function(e) {
   var t = this.input.charCodeAt(this.pos + 1);
-  return t === e ? t === 45 && !this.inModule && this.input.charCodeAt(this.pos + 2) === 62 && (this.lastTokEnd === 0 || F.test(this.input.slice(this.lastTokEnd, this.pos))) ? (this.skipLineComment(3), this.skipSpace(), this.nextToken()) : this.finishOp(r.incDec, 2) : t === 61 ? this.finishOp(r.assign, 2) : this.finishOp(r.plusMin, 1);
+  return t === e ? t === 45 && !this.inModule && this.input.charCodeAt(this.pos + 2) === 62 && (this.lastTokEnd === 0 || K.test(this.input.slice(this.lastTokEnd, this.pos))) ? (this.skipLineComment(3), this.skipSpace(), this.nextToken()) : this.finishOp(r.incDec, 2) : t === 61 ? this.finishOp(r.assign, 2) : this.finishOp(r.plusMin, 1);
 };
 b.readToken_lt_gt = function(e) {
   var t = this.input.charCodeAt(this.pos + 1), i = 1;
@@ -5304,7 +5327,7 @@ b.readRegexp = function() {
   for (var e, t, i = this.pos; ; ) {
     this.pos >= this.input.length && this.raise(i, "Unterminated regular expression");
     var n = this.input.charAt(this.pos);
-    if (F.test(n) && this.raise(i, "Unterminated regular expression"), e)
+    if (K.test(n) && this.raise(i, "Unterminated regular expression"), e)
       e = !1;
     else {
       if (n === "[")
@@ -5543,7 +5566,7 @@ var Gi = "8.17.0";
 T.acorn = {
   Parser: T,
   version: Gi,
-  defaultOptions: Ke,
+  defaultOptions: Oe,
   Position: ke,
   SourceLocation: ze,
   getLineInfo: pt,
@@ -5557,7 +5580,7 @@ T.acorn = {
   isIdentifierStart: X,
   Token: Je,
   isNewLine: pe,
-  lineBreak: F,
+  lineBreak: K,
   lineBreakG: ci,
   nonASCIIwhitespace: dt
 };
@@ -5632,7 +5655,7 @@ const Wi = [
   { view: "Top view", horizontal: 0, vertical: 1, depth: 2, near: 1 },
   { view: "Front view", horizontal: 0, vertical: 2, depth: 1, near: -1 },
   { view: "Right view", horizontal: 1, vertical: 2, depth: 0, near: 1 }
-], le = 48, Zi = 1e5, qi = 16e6, Hi = 25e5, Xi = Math.cos(Math.PI / 6), Ge = () => new Error(at("This assembly exceeds the drawing detail limit. Use a simpler representation.")), Fe = (e, t, i = t) => ({
+], le = 48, Zi = 1e5, qi = 16e6, Hi = 25e5, Xi = Math.cos(Math.PI / 6), Ge = () => new Error(at("This assembly exceeds the drawing detail limit. Use a simpler representation.")), Ke = (e, t, i = t) => ({
   left: Math.min(e[0], t[0], i[0]),
   bottom: Math.min(e[1], t[1], i[1]),
   right: Math.max(e[0], t[0], i[0]),
@@ -5647,7 +5670,7 @@ function Yi(e) {
   }
   const s = [], o = /* @__PURE__ */ new Map();
   for (let a = 0; a < e.indices.length; a += 3) {
-    const l = n[e.indices[a]], u = n[e.indices[a + 1]], h = n[e.indices[a + 2]], p = i[l], g = i[u], x = i[h], [f, I, K] = g.map((S, z) => S - p[z]), [R, _, fe] = x.map((S, z) => S - p[z]), ae = [I * fe - K * _, K * R - f * fe, f * _ - I * R], oe = Math.hypot(...ae);
+    const l = n[e.indices[a]], u = n[e.indices[a + 1]], h = n[e.indices[a + 2]], p = i[l], g = i[u], x = i[h], [f, R, O] = g.map((S, z) => S - p[z]), [I, L, fe] = x.map((S, z) => S - p[z]), ae = [R * fe - O * L, O * I - f * fe, f * L - R * I], oe = Math.hypot(...ae);
     if (oe <= 1e-12)
       continue;
     const D = [ae[0] / oe, ae[1] / oe, ae[2] / oe];
@@ -5661,8 +5684,8 @@ function Yi(e) {
 }
 function $i(e, t, i, n) {
   const { a: s, b: o, c: a, det: l } = e, u = (f) => {
-    const I = f[0] - s[0], K = f[1] - s[1], R = (I * (a[1] - s[1]) - K * (a[0] - s[0])) / l, _ = ((o[0] - s[0]) * K - (o[1] - s[1]) * I) / l;
-    return [R, _, 1 - R - _, s[2] + R * (o[2] - s[2]) + _ * (a[2] - s[2]) - f[2] - n];
+    const R = f[0] - s[0], O = f[1] - s[1], I = (R * (a[1] - s[1]) - O * (a[0] - s[0])) / l, L = ((o[0] - s[0]) * O - (o[1] - s[1]) * R) / l;
+    return [I, L, 1 - I - L, s[2] + I * (o[2] - s[2]) + L * (a[2] - s[2]) - f[2] - n];
   }, h = u(t), p = u(i);
   let g = 0, x = 1;
   for (let f = 0; f < h.length; f++) {
@@ -5676,27 +5699,27 @@ function $i(e, t, i, n) {
   return x - g > 1e-8 ? [g, x] : void 0;
 }
 function en(e, t, i, n) {
-  const { horizontal: s, vertical: o, depth: a, near: l } = t, u = n[s] - i[s], h = n[o] - i[o], p = Math.max(1e-6, Math.min(2e-3, (n[a] - i[a]) * 1e-6)), g = e.map((D) => D.vertices.map((S) => [S[s] - i[s], S[o] - i[o], S[a] * l])), x = Array.from({ length: le * le }, () => []), f = (D, S) => Math.min(le - 1, Math.max(0, Math.floor(D / S * le))), I = (D, S) => {
+  const { horizontal: s, vertical: o, depth: a, near: l } = t, u = n[s] - i[s], h = n[o] - i[o], p = Math.max(1e-6, Math.min(2e-3, (n[a] - i[a]) * 1e-6)), g = e.map((D) => D.vertices.map((S) => [S[s] - i[s], S[o] - i[o], S[a] * l])), x = Array.from({ length: le * le }, () => []), f = (D, S) => Math.min(le - 1, Math.max(0, Math.floor(D / S * le))), R = (D, S) => {
     const z = f(D.left, u), C = f(D.right, u), V = f(D.bottom, h), y = f(D.top, h);
     for (let E = V; E <= y; E++)
       for (let U = z; U <= C; U++)
         S(E * le + U);
-  }, K = (D, S, z) => {
+  }, O = (D, S, z) => {
     const [C, V] = D[0] <= S[0] ? [D, S] : [S, D], y = V[0] - C[0];
     if (y < 1e-10) {
-      I(Fe(D, S), z);
+      R(Ke(D, S), z);
       return;
     }
     const E = V[1] - C[1], U = u / le;
     for (let J = f(C[0], u); J <= f(V[0], u); J++) {
       const Se = C[1] + E * Math.max(0, (J * U - C[0]) / y), be = C[1] + E * Math.min(1, ((J + 1) * U - C[0]) / y);
-      for (let N = f(Math.min(Se, be), h); N <= f(Math.max(Se, be), h); N++)
-        z(N * le + J);
+      for (let F = f(Math.min(Se, be), h); F <= f(Math.max(Se, be), h); F++)
+        z(F * le + J);
     }
   };
-  let R = 0, _ = 0;
+  let I = 0, L = 0;
   const fe = () => {
-    if (++R > qi)
+    if (++I > qi)
       throw Ge();
   };
   for (const [D, S] of e.entries())
@@ -5704,8 +5727,8 @@ function en(e, t, i, n) {
       const [C, V, y] = [g[D][z.a], g[D][z.b], g[D][z.c]], E = (V[0] - C[0]) * (y[1] - C[1]) - (V[1] - C[1]) * (y[0] - C[0]);
       if (Math.abs(E) < 1e-10)
         continue;
-      const U = { a: C, b: V, c: y, det: E, box: Fe(C, V, y), nearest: Math.max(C[2], V[2], y[2]) };
-      I(U.box, (J) => {
+      const U = { a: C, b: V, c: y, det: E, box: Ke(C, V, y), nearest: Math.max(C[2], V[2], y[2]) };
+      R(U.box, (J) => {
         fe(), x[J].push(U);
       });
     }
@@ -5718,40 +5741,40 @@ function en(e, t, i, n) {
       const y = g[D][z.a], E = g[D][z.b], U = Math.hypot(E[0] - y[0], E[1] - y[1]);
       if (U < 1e-5)
         continue;
-      const J = Fe(y, E), Se = Math.min(y[2], E[2]) + p, be = /* @__PURE__ */ new Set(), N = [];
+      const J = Ke(y, E), Se = Math.min(y[2], E[2]) + p, be = /* @__PURE__ */ new Set(), F = [];
       let Ye = !1;
-      K(y, E, (P) => {
+      O(y, E, (P) => {
         if (!Ye)
-          for (const O of x[P]) {
-            if (fe(), O.nearest <= Se || !Qi(J, O.box) || be.has(O))
+          for (const N of x[P]) {
+            if (fe(), N.nearest <= Se || !Qi(J, N.box) || be.has(N))
               continue;
-            if (be.add(O), ++_ > Hi)
+            if (be.add(N), ++L > Hi)
               throw Ge();
-            const Y = $i(O, y, E, p);
+            const Y = $i(N, y, E, p);
             if (Y) {
               if (Y[0] <= 1e-8 && Y[1] >= 1 - 1e-8) {
-                N.splice(0, N.length, [0, 1]), Ye = !0;
+                F.splice(0, F.length, [0, 1]), Ye = !0;
                 break;
               }
-              N.push(Y);
+              F.push(Y);
             }
           }
-      }), N.sort((P, O) => P[0] - O[0]);
-      const $e = (P) => [y[0] + (E[0] - y[0]) * P, y[1] + (E[1] - y[1]) * P], Me = (P, O, Y) => {
-        if ((O - P) * U <= 1e-5)
+      }), F.sort((P, N) => P[0] - N[0]);
+      const $e = (P) => [y[0] + (E[0] - y[0]) * P, y[1] + (E[1] - y[1]) * P], Me = (P, N, Y) => {
+        if ((N - P) * U <= 1e-5)
           return;
-        const ie = $e(P), et = $e(O);
+        const ie = $e(P), et = $e(N);
         ae.push(...ie, ...et, Y ? 1 : 0), Y || oe.push(D, ...S.vertices[z.a], ...S.vertices[z.b], ...ie, ...et);
       };
-      let Ie = 0;
-      for (let P = 0; P < N.length; P++) {
-        const [O, Y] = N[P];
+      let Re = 0;
+      for (let P = 0; P < F.length; P++) {
+        const [N, Y] = F[P];
         let ie = Y;
-        for (; P + 1 < N.length && N[P + 1][0] <= ie + 1e-8; )
-          ie = Math.max(ie, N[++P][1]);
-        Me(Ie, O, !1), Me(O, ie, !0), Ie = ie;
+        for (; P + 1 < F.length && F[P + 1][0] <= ie + 1e-8; )
+          ie = Math.max(ie, F[++P][1]);
+        Me(Re, N, !1), Me(N, ie, !0), Re = ie;
       }
-      Me(Ie, 1, !1);
+      Me(Re, 1, !1);
     }
   return { view: t.view, width: u, height: h, segments: Float64Array.from(ae), edgePicks: Float64Array.from(oe) };
 }

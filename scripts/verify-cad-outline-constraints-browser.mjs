@@ -142,6 +142,28 @@ try{
  await sketch.waitFor({state:'hidden'});
  await page.evaluate(()=>window.__bwCad.editor.whenIdle());
 
+ await page.getByRole('button',{name:'Sketch',exact:true}).tap();
+ await sketch.getByLabel('Profile',{exact:true}).selectOption('region');
+ await loops.fill('310, 0 | 385, 0 | 385, 40 | 310, 40\n320, 10 | 330, 10 | 330, 20 | 320, 20\n350, 10 | 358, 10 | 358, 20 | 350, 20');
+ await loops.blur();
+ await sketch.getByText('Region loop constraints',{exact:true}).tap();
+ await loopPicker.selectOption({label:'Outline loop 2'});
+ await sketch.locator('summary:visible').filter({hasText:/^Outline constraints$/}).tap();
+ await kind.selectOption('length');
+ await loopLength.fill('reach / 4');
+ await loopLength.blur();
+ await addConstraint.tap();
+ await solve.tap();
+ await loopStatus.filter({hasText:'Outline solved'}).waitFor();
+ await sketch.getByText('Region edge matches',{exact:true}).tap();
+ await sketch.getByLabel('Edge reference loop',{exact:true}).selectOption({label:'Outline loop 2'});
+ await sketch.getByLabel('Edge target loop',{exact:true}).selectOption({label:'Outline loop 3'});
+ await sketch.getByRole('button',{name:'Add edge length match',exact:true}).tap();
+ await sketch.getByRole('status',{name:'Region edge match status'}).filter({hasText:'Region edge matches solved'}).waitFor();
+ await sketch.getByRole('button',{name:'Create extrusion',exact:true}).tap();
+ await sketch.waitFor({state:'hidden'});
+ await page.evaluate(()=>window.__bwCad.editor.whenIdle());
+
  await file(page).tap();
  const [download]=await Promise.all([
   page.waitForEvent('download'),page.getByText('Save to your computer',{exact:true}).tap()
@@ -150,8 +172,8 @@ try{
  await download.saveAs(project);
  const zip=await JSZip.loadAsync(await readFile(project));
  const saved=JSON.parse(await zip.file(CAD_PROJECT_PATH).async('text'));
- assert.equal(saved.version,37);
- assert.equal(saved.roots.length,3);
+ assert.equal(saved.version,38);
+ assert.equal(saved.roots.length,4);
  const id=saved.nodes[saved.roots[0]].sketchId;
  const compoundId=saved.nodes[saved.roots[1]].sketchId;
  const compound=saved.sketches[compoundId].profile;
@@ -169,6 +191,12 @@ try{
  assert.deepEqual(cutout.relations,[{kind:'length',edge:cutout.vertexIds.slice(0,2),length:'reach / 4'}]);
  assert.deepEqual(storedRegion.placements,[{reference:storedRegion.loops[0].id,target:cutout.id,
   referenceEdge:storedRegion.loops[0].vertexIds.slice(0,2),offset:[offsetExpression,10]}]);
+ const matchId=saved.nodes[saved.roots[3]].sketchId;
+ const matchedRegion=saved.sketches[matchId].profile;
+ assert.deepEqual(matchedRegion.edgeMatches,[{reference:matchedRegion.loops[1].id,referenceEdge:matchedRegion.loops[1].vertexIds.slice(0,2),
+  target:matchedRegion.loops[2].id,targetEdge:matchedRegion.loops[2].vertexIds.slice(0,2)}]);
+ const edgeLength=loop=>Math.hypot(loop.points[1][0]-loop.points[0][0],loop.points[1][1]-loop.points[0][1]);
+ assert.ok(Math.abs(edgeLength(matchedRegion.loops[2])-10)<1e-6);
  const profile=saved.sketches[id].profile;
  assert.deepEqual(rounded(profile.points),[[0,0],[40,0],[40,20],[0,20]]);
  assert.equal(profile.vertexIds.length,4);
@@ -195,7 +223,9 @@ try{
  assert.deepEqual(await readProfile(),profile);
  assert.deepEqual(await restored.evaluate(id=>window.__bwCad.editor.session.state.document.sketches[id].profile,compoundId),compound);
  const readRegion=()=>restored.evaluate(id=>window.__bwCad.editor.session.state.document.sketches[id].profile,regionId);
+ const readMatchedRegion=()=>restored.evaluate(id=>window.__bwCad.editor.session.state.document.sketches[id].profile,matchId);
  assert.deepEqual(await readRegion(),storedRegion);
+ assert.deepEqual(await readMatchedRegion(),matchedRegion);
  const revision=await restored.evaluate(()=>window.__bwCad.editor.session.state.revision);
  await setReach(restored,'55');
  const solved=await readProfile();
@@ -207,6 +237,7 @@ try{
  assert.deepEqual(resizedCutout.vertexIds,cutout.vertexIds);
  assert.ok(Math.abs(resizedCutout.points[0][0]-214.75)<1e-6);
  assert.ok(Math.abs(resizedCutout.points[1][0]-228.5)<1e-6);
+ assert.ok(Math.abs(edgeLength((await readMatchedRegion()).loops[2])-13.75)<1e-6);
  assert.equal(await restored.evaluate(()=>window.__bwCad.editor.session.state.revision),revision+1);
  await restored.getByRole('button',{name:'Command palette',exact:true}).tap();
  const palette=restored.getByRole('dialog',{name:'Command palette'});
@@ -259,7 +290,8 @@ try{
  assert.equal(edited.relations.length,8);
  requireRadius(edited,29);
  assert.ok(Math.abs((await readRegion()).loops[1].points[1][0]-230)<1e-6);
- console.log('PASS region edge anchors, arc tangency, SB3 reopen, and one source edit that expands the boundary and positions the cutout');
+ assert.ok(Math.abs(edgeLength((await readMatchedRegion()).loops[2])-14.5)<1e-6);
+ console.log('PASS region edge length matches and anchors, arc tangency, SB3 reopen, and parameter and source propagation');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});

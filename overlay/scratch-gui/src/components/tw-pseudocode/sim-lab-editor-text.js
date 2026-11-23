@@ -25,7 +25,7 @@ export const EDITOR_TEXT = {
         coach: [
             {title: 'Build from the parts list', body: 'Drag a part from the list on the left into the view. Near another part it snaps to a hole, a pin or a stud: green means it fits.'},
             {title: 'Holes first', body: 'Click a part, then one of its lit holes: now pick a part in the list and it goes right into that hole.'},
-            {title: 'Turn and look', body: 'R turns the part in hand, [ and ] turn a part 15° on its pin. Drag empty space to select with a box; middle-drag turns the view. Press ? for every control.'}
+            {title: 'Turn and look', body: 'R turns the part in hand, [ and ] turn a part 15° on its pin. Drag empty space to select with a box. By default, right-drag turns the view. Press ? for every control.'}
         ],
         hinge: 'On its hinge', minus15: '−15°', plus15: '+15°', nextHinge: 'Next hinge (N)',
         pen: 'Draws on the floor (a pen)', penHelp: 'In Simulate this part draws a line wherever it touches the floor: build a plotter or a drawing robot',
@@ -51,10 +51,10 @@ export const EDITOR_TEXT = {
                 ['Shift+click', 'add or remove a part'], ['Drag empty space', 'select with a box; Shift adds parts'],
                 ['Drag a part', 'move it (it rests on what is under it; magnets snap)'],
                 ['Double click', 'centre the view there (on a grouped part: edit inside the group)'],
-                ['Middle drag', 'turn the view about the point under the pointer'],
+                ['Middle drag', 'pan the view. Hold Shift to orbit'],
                 ['Space+drag (no part in hand)', 'slide the view'],
-                ['Right drag', 'slide the view (Studio mouse: turn it)'], ['Ctrl+drag a pin or axle', 'slide it along its hole'], ['Wheel', 'zoom toward the pointer'],
-                ['Trackpad: two fingers / Shift / pinch', 'turn the view / slide it / zoom'],
+                ['Secondary-button drag', 'orbit by default. Shift switches between orbit and pan'], ['Ctrl+drag a pin or axle', 'slide it along its hole'], ['Wheel', 'zoom toward the pointer'],
+                ['Trackpad: two-finger slide / pinch', 'pan by default / zoom. Hold Shift to orbit'],
                 ['Click a selected part\'s lit hole, then a palette part', 'the part goes into that hole'], ['Ctrl+click', 'select everything connected'],
                 ['View cube', 'click a face, edge or corner to look from there']
             ]],
@@ -98,10 +98,6 @@ export const EDITOR_TEXT = {
             faces: {top: 'from the top', bottom: 'from below', front: 'from the front', back: 'from the back', left: 'from the left', right: 'from the right'},
             touchPlace: 'Place', touchTurn: 'Turn', touchCancel: 'Cancel', touchControls: 'The part in hand',
             cube: {top: 'Top', bottom: 'Bottom', front: 'Front', back: 'Back', left: 'Left', right: 'Right'},
-            wheel: 'Scrolling in the 3D view', wheelAuto: 'Guess: a mouse wheel zooms, a trackpad turns the view',
-            wheelMouse: 'Always zoom (mouse wheel)', wheelTrackpad: 'Trackpad: scrolling turns the view, pinch zooms',
-            mouse: 'Mouse buttons', mouseBrickwright: 'Right drag moves the view, middle drag turns it',
-            mouseStudio: 'Like Studio and LDD: right drag turns the view, middle drag moves it',
             selectConnected: 'Select connected (Ctrl+click)',
             st: {
                 released: 'Released from {target}', targetPinned: 'Target: {target} {connector} {hole}. Now pick a part in the palette (Esc clears).',
@@ -188,7 +184,7 @@ export const EDITOR_TEXT = {
         coach: [
             {title: 'Aus der Teileliste bauen', body: 'Zieh ein Teil aus der Liste links in die Ansicht. Nahe an einem anderen Teil rastet es an einem Loch, Pin oder Noppen ein: Grün heißt, es passt.'},
             {title: 'Erst das Loch', body: 'Klick ein Teil an, dann eines seiner leuchtenden Löcher: Wähl jetzt ein Teil in der Liste, und es kommt genau in dieses Loch.'},
-            {title: 'Drehen und schauen', body: 'R dreht das Teil in der Hand, [ und ] drehen ein Teil um 15° auf seinem Pin. Zieh auf freier Fläche einen Auswahlrahmen; die mittlere Maustaste dreht die Ansicht. ? zeigt alle Tasten.'}
+            {title: 'Drehen und schauen', body: 'R dreht das Teil in der Hand, [ und ] drehen ein Teil um 15° auf seinem Pin. Zieh auf freier Fläche einen Auswahlrahmen. Standardmäßig dreht die rechte Maustaste die Ansicht. ? zeigt alle Tasten.'}
         ],
         hinge: 'Im Gelenk', minus15: '−15°', plus15: '+15°', nextHinge: 'Nächstes Gelenk (N)',
         pen: 'Malt auf den Boden (ein Stift)', penHelp: 'In der Simulation zieht dieses Teil eine Linie, wo es den Boden berührt: Bau einen Plotter oder einen Malroboter',
@@ -214,10 +210,10 @@ export const EDITOR_TEXT = {
                 ['Umschalt+Klick', 'ein Teil dazu nehmen oder weglassen'], ['Leere Fläche ziehen', 'mit einem Rahmen auswählen; Umschalt nimmt Teile dazu'],
                 ['Teil ziehen', 'verschieben (es liegt auf dem, was darunter ist; Magnete rasten ein)'],
                 ['Doppelklick', 'Ansicht dorthin zentrieren (auf einem Gruppenteil: in der Gruppe bearbeiten)'],
-                ['Mittlere Taste ziehen', 'Ansicht um den Punkt unter dem Mauszeiger drehen'],
+                ['Mittlere Taste ziehen', 'Ansicht verschieben. Mit Umschalt drehen'],
                 ['Leertaste+Ziehen (kein Teil in der Hand)', 'Ansicht schieben'],
-                ['Rechts ziehen', 'Ansicht schieben (Studio-Maus: drehen)'], ['Strg+Ziehen an Pin oder Achse', 'im Loch entlang schieben'], ['Mausrad', 'zum Mauszeiger hin zoomen'],
-                ['Trackpad: zwei Finger / Umschalt / Zusammenziehen', 'Ansicht drehen / schieben / zoomen'],
+                ['Mit Sekundärklick ziehen', 'Standardmäßig drehen. Umschalt wechselt zwischen Drehen und Verschieben'], ['Strg+Ziehen an Pin oder Achse', 'im Loch entlang schieben'], ['Mausrad', 'zum Mauszeiger hin zoomen'],
+                ['Trackpad: zwei Finger bewegen / zusammenziehen', 'Standardmäßig verschieben / zoomen. Mit Umschalt drehen'],
                 ['Leuchtendes Loch eines ausgewählten Teils anklicken, dann ein Teil', 'das Teil kommt in dieses Loch'], ['Strg+Klick', 'alles Verbundene auswählen'],
                 ['Ansichtswürfel', 'Fläche, Kante oder Ecke anklicken: von dort aus ansehen']
             ]],
@@ -260,10 +256,6 @@ export const EDITOR_TEXT = {
             faces: {top: 'von oben', bottom: 'von unten', front: 'von vorne', back: 'von hinten', left: 'von links', right: 'von rechts'},
             touchPlace: 'Setzen', touchTurn: 'Drehen', touchCancel: 'Abbrechen', touchControls: 'Das Teil in der Hand',
             cube: {top: 'Oben', bottom: 'Unten', front: 'Vorne', back: 'Hinten', left: 'Links', right: 'Rechts'},
-            wheel: 'Scrollen in der 3D-Ansicht', wheelAuto: 'Raten: Mausrad zoomt, Trackpad dreht die Ansicht',
-            wheelMouse: 'Immer zoomen (Mausrad)', wheelTrackpad: 'Trackpad: Scrollen dreht die Ansicht, Zusammenziehen zoomt',
-            mouse: 'Maustasten', mouseBrickwright: 'Rechts ziehen verschiebt die Ansicht, Mitte ziehen dreht sie',
-            mouseStudio: 'Wie Studio und LDD: Rechts ziehen dreht die Ansicht, Mitte ziehen verschiebt sie',
             selectConnected: 'Verbundene wählen (Strg+Klick)',
             st: {
                 released: 'Von {target} gelöst', targetPinned: 'Ziel: {target} {connector} {hole}. Jetzt ein Teil in der Teileliste wählen (Esc löscht).',

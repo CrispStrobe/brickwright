@@ -6,6 +6,7 @@ import CadCircuitPanel from './cad-circuit-panel.jsx';
 import PropTypes from 'prop-types';
 import {CAD_READY_EVENT} from '../../lib/bw-cad-program.js';
 import download from '../../lib/download-blob.js';
+import {CAMERA_PREFERENCES_EVENT, getCameraPreferences} from '../../lib/bw-camera-preferences.js';
 import {loadCadSDK, cadAssetURL} from '../../lib/bw-cad-sdk.js';
 import {CAD_STORAGE_KEY, readCadText, setLiveCadText, getCadProjectGeneration} from '../../lib/bw-cad-project.js';
 import {registerUndoSurface, activateUndoSurface, notifyUndoState} from '../../lib/global-undo.js';
@@ -117,6 +118,7 @@ const CadTab = ({vm, isVisible, docked, locale, theme, onEditProgram, onOpenCirc
                 embedded:true, showDocumentTitle:false, toolbarContent:controls,
                 presetProjects:{ids:CAD_ROBOT_EXAMPLES.map(item=>item.id),open:async id=>{await openCadRobotProject(vm,id,locale);}},
                 colorMode: mode.current,
+                cameraGestures: getCameraPreferences(),
                 wasmURL: cadAssetURL('cad-assets/manifold.wasm'),
                 onDocumentChange: persist,
                 onCommandStateChange: () => {notifyUndoState();notifyEditorMenuActions();},
@@ -175,6 +177,11 @@ const CadTab = ({vm, isVisible, docked, locale, theme, onEditProgram, onOpenCirc
             delete window.__bwCad;
         };
     }, [locale, retry]);
+    React.useEffect(() => {
+        const update = event => editor.current?.setCameraGestures(event.detail);
+        window.addEventListener(CAMERA_PREFERENCES_EVENT, update);
+        return () => window.removeEventListener(CAMERA_PREFERENCES_EVENT, update);
+    }, []);
     React.useEffect(() => { if (editor.current) editor.current.setColorMode(colorMode); }, [colorMode]);
     React.useEffect(() => {
         if (isVisible && !docked && editor.current) { activateUndoSurface('cad'); editor.current.focus(); }

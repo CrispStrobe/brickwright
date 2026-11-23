@@ -163,12 +163,12 @@ This is cursor-driven. A new pure export, `snapAtPointer(model, catalog, held, r
 - **Orbit pivot,** fixed when the gesture starts. This is a design choice, not one documented by LEGO editors.
   - The pivot is the 3D point under the pointer. Without one, it is the selection centre; without a selection, the model centre.
   - The camera and its target turn together about the pivot, so nothing jumps. A dot marks the pivot during the drag.
-- **Mouse (Build):** left-drag on empty space draws a selection rectangle; intersecting part bounds select, including whole groups. Shift adds to the selection (Shift+click toggles). Middle-drag orbits, right-drag pans, and the wheel zooms to the cursor. Studio keeps right-drag orbit and middle-drag pan. Touch keeps one-finger orbit and long-press then drag to add with a box. Escape, pointer cancellation and window blur cancel the rectangle.
-  - P3, built (§14): an "LDD/Studio" preset where right-drag orbits and middle-drag pans.
+- **Mouse (Build):** left-drag on empty space draws a selection rectangle; intersecting part bounds select, including whole groups. Shift adds to the selection (Shift+click toggles). Middle-drag pans, secondary drag orbits by default, and the wheel zooms to the cursor. Shift switches between orbit and pan. Touch keeps one-finger orbit and long-press then drag to add with a box. Escape, pointer cancellation and window blur cancel the rectangle.
 - **Trackpad:**
-  - A pinch (`ctrlKey` wheel) zooms to the cursor.
-  - A two-finger scroll orbits; Shift+scroll pans.
-  - Tell a wheel from a trackpad by `deltaMode === LINE` or integer deltas ≥ 100, and offer a setting to override the guess.
+  - A pinch zooms to the cursor in Build. The browser or the macOS bridge reports the pinch.
+  - A two-finger slide pans by default. Shift+slide orbits. Settings → 3D navigation shares the slide and secondary-drag mappings with CAD. Pinch always zooms.
+  - The macOS bridge identifies precise scrolling directly. In browsers the editors infer it from pixel deltas.
+- The shared defaults combine Fusion's trackpad pan and pinch with Tinkercad's secondary-drag orbit. Existing explicit Robots choices carry over to the shared setting. See [Autodesk Fusion navigation](https://files.upskill-dev.autodesk.com/public/introduction-to-cad-learn-fusion-360-in-90-minutes/211004_SBS_M4-01_Navigation-and-display-settings.pdf) and [Autodesk Tinkercad shortcuts](https://assets.ctfassets.net/jl5ii4oqrdmc/24W19aTK6wTT0YydFO3xZd/9df8d24a57cc102505ef57908a6bd60a/Tinkercad_keyboard_shortcuts_2_up.pdf).
 - **Build polar range:** 5°–175°, so you can look under parts. Simulate keeps π/2.
 - **Double-click:**
   - On an ungrouped part: the target animates to the clicked point (300 ms ease-out) at the same distance.
@@ -255,7 +255,7 @@ This is cursor-driven. A new pure export, `snapAtPointer(model, catalog, held, r
 | T12 | P1 | Pinch (`ctrlKey` wheel) or wheel at pixel q over the beam. | The world point under q stays within 2 px of q, and no part moves. |
 | T13 | P1 | Orbit downwards with the arrow keys. | Build passes a 100° polar angle. Simulate stops at 90°. |
 | T14 | P1 | Double-click an ungrouped part at Q. | Within 400 ms the target is Q (≤ 0.5 LDU) at the same distance. With reduced motion, on the next frame. |
-| T15 | P1 | Trackpad scroll (`deltaMode` 0, small deltas, no ctrl). | The camera orbits, and its distance changes by less than 1%. |
+| T15 | P1 | Trackpad scroll (`deltaMode` 0, small deltas, no ctrl). | The camera pans without changing its viewing direction or distance. |
 | T16 | P2 | Keyboard only: Tab to the pin tile, Enter, Tab to "hole 3", Enter. | The model matches T2, and the aria-live text contained "hole 3". |
 
 ## 6. Honesty notes

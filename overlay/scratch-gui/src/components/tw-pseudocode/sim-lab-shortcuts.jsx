@@ -7,7 +7,11 @@
 
 import React from 'react';
 
-const SimLabShortcuts = ({T, onClose, wheelMode = 'auto', onWheelMode = null, mousePreset = 'brickwright', onMousePreset = null, onCoach = null}) => {
+const SimLabShortcuts = ({T, onClose, cameraGestures, onCameraPreference, locale, onCoach = null}) => {
+    const de = /^de/i.test(locale);
+    const pan = de ? 'Verschieben' : 'Pan';
+    const orbit = de ? 'Drehen' : 'Orbit';
+    const zoom = de ? 'Zoomen' : 'Zoom';
     const closeRef = React.useRef(null);
     React.useEffect(() => { closeRef.current?.focus(); }, []);
     return (
@@ -27,24 +31,24 @@ const SimLabShortcuts = ({T, onClose, wheelMode = 'auto', onWheelMode = null, mo
                     <button ref={closeRef} type="button" data-testid="bw-sim-lab-shortcuts-close" onClick={onClose}
                         style={{padding: '4px 10px', borderRadius: 6, border: '1px solid #94a3b8', background: '#fff', cursor: 'pointer'}}>{T.close}</button>
                 </div>
-                {onWheelMode && T.connect && (
+                {onCameraPreference && cameraGestures && (
                     <label style={{display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 8}}>
-                        <strong>{T.connect.wheel}</strong>
-                        <select data-testid="bw-sim-lab-wheel-mode" value={wheelMode} onChange={e => onWheelMode(e.target.value)}
+                        <strong>{de ? 'Zwei Finger bewegen' : 'Two-finger slide'}</strong>
+                        <select data-testid="bw-sim-lab-wheel-mode" value={cameraGestures.trackpadSlide} onChange={e => onCameraPreference('trackpadSlide', e.target.value)}
                             style={{font: 'inherit', fontSize: 12, padding: '2px 4px'}}>
-                            <option value="auto">{T.connect.wheelAuto}</option>
-                            <option value="mouse">{T.connect.wheelMouse}</option>
-                            <option value="trackpad">{T.connect.wheelTrackpad}</option>
+                            <option value="pan">{pan}</option>
+                            <option value="orbit">{orbit}</option>
+                            <option value="zoom">{zoom}</option>
                         </select>
                     </label>
                 )}
-                {onMousePreset && T.connect && (
+                {onCameraPreference && cameraGestures && (
                     <label style={{display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 8}}>
-                        <strong>{T.connect.mouse}</strong>
-                        <select data-testid="bw-sim-lab-mouse-preset" value={mousePreset} onChange={e => onMousePreset(e.target.value)}
+                        <strong>{de ? 'Mit Sekundärklick ziehen' : 'Secondary-button drag'}</strong>
+                        <select data-testid="bw-sim-lab-mouse-preset" value={cameraGestures.secondaryDrag} onChange={e => onCameraPreference('secondaryDrag', e.target.value)}
                             style={{font: 'inherit', fontSize: 12, padding: '2px 4px'}}>
-                            <option value="brickwright">{T.connect.mouseBrickwright}</option>
-                            <option value="studio">{T.connect.mouseStudio}</option>
+                            <option value="orbit">{orbit}</option>
+                            <option value="pan">{pan}</option>
                         </select>
                     </label>
                 )}
