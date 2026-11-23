@@ -59,6 +59,8 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
     const [snapshot, setSnapshot] = React.useState(null), [error, setError] = React.useState('');
     const [selected, select] = React.useState(0), [width, setWidth] = React.useState('40');
     const [plane, setPlane] = React.useState('XY'), [busy, setBusy] = React.useState(false);
+    const [anchor, setAnchor] = React.useState('lower-left');
+    const [horizontal, setHorizontal] = React.useState('0'), [vertical, setVertical] = React.useState('0');
     const [saved, setSaved] = React.useState(false);
     const [approximate, setApproximate] = React.useState(false), [tolerance, setTolerance] = React.useState('0.2');
     const [closeGaps, setCloseGaps] = React.useState(false), [maxGap, setMaxGap] = React.useState('0.5');
@@ -115,6 +117,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
         active.current = request;
         setSnapshot(null); setError(''); setSaved(false); select(0); setWidth('40'); setPlane('XY'); setBusy(true);
         setApproximate(false); setTolerance('0.2'); setCloseGaps(false); setMaxGap('0.5'); setStrokeOnly(false);
+        setAnchor('lower-left'); setHorizontal('0'); setVertical('0');
         dialog.current.showModal();
         try {
             if (!getCadEnabled()) throw new Error(text('Enable CAD Editor in Settings → Workspace first.',
@@ -135,14 +138,26 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
     };
     const regionIndex = selected < (preview?.profiles.length ?? 0) ? selected : 0;
     const profile = preview?.profiles[regionIndex];
-    const height = profile && Number(width) * profile.size[1] / profile.size[0];
+    const height = profile && Number(width) * (profile.size[1] / profile.size[0]);
+    const placement = {anchor, position: [horizontal, vertical].map(value => value.trim() ? Number(value) : NaN)};
+    const coordinateError = text('Enter sketch coordinates from −100000 to 100000 mm.',
+        'Gib Skizzenkoordinaten von −100000 bis 100000 mm ein.');
+    const validCoordinate = value => Number.isFinite(value) && Math.abs(value) <= 100000;
+    const hasPlacement = anchor === 'center' || placement.position.some(value => value !== 0);
+    const anchorLabel = anchor === 'center' ? text('Center', 'Mittelpunkt') : text('Lower-left corner', 'Linke untere Ecke');
+    let placementError = placement.position.every(validCoordinate) ? '' : coordinateError;
+    if (profile && validWidth && !placementError) {
+        try { snapshot.sdk.costumeProfileBounds(profile, Number(width), placement); }
+        catch (e) { placementError = e.message; }
+    }
+    const markerRadius = profile && Math.min(...profile.size) * 0.045;
     const send = async () => {
-        if (sending.current || !profile || !validWidth) return;
+        if (sending.current || !profile || !validWidth || placementError) return;
         sending.current = true;
         const {signal} = active.current;
         setBusy(true); setError('');
         try {
-            const shape = snapshot.sdk.costumeSketchProfile(profile, Number(width));
+            const shape = snapshot.sdk.costumeSketchProfile(profile, Number(width), placement);
             const editor = await readyCad(signal);
             if (signal.aborted) return;
             if (!getCadEnabled() || getCadProjectGeneration() !== snapshot.generation ||
@@ -235,11 +250,16 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
                         </select>
                     </label>
                     <svg role="img" aria-label={text('Closed profile preview', 'Vorschau der geschlossenen Fläche')}
-                        viewBox={`${profile.origin[0]} ${-profile.origin[1] - profile.size[1]} ${profile.size.join(' ')}`}>
+                        viewBox={`${profile.origin[0] - markerRadius} ${-profile.origin[1] - profile.size[1] - markerRadius} ` +
+                            `${profile.size[0] + 2 * markerRadius} ${profile.size[1] + 2 * markerRadius}`}>
                         <path fillRule="evenodd" d={profile.loops.map(drawingPath).join(' ')} />
                         {profile.gapRepair?.edges.map(([[ax, ay], [bx, by]], index) =>
                             <line key={index} className={layout.closingEdge} data-testid="bw-costume-closing-edge"
                                 x1={ax} y1={-ay} x2={bx} y2={-by} vectorEffect="non-scaling-stroke" />)}
+                        {hasPlacement && <circle className={layout.anchorMarker} data-testid="bw-costume-placement-marker"
+                            cx={profile.origin[0] + (anchor === 'center' ? profile.size[0] / 2 : 0)}
+                            cy={-profile.origin[1] - (anchor === 'center' ? profile.size[1] / 2 : 0)}
+                            r={markerRadius * 0.75} vectorEffect="non-scaling-stroke" />}
                     </svg>
                     <label>{text('Sketch plane', 'Skizzenebene')}
                         <select aria-label={text('Sketch plane', 'Skizzenebene')} value={plane} disabled={busy} onChange={event => setPlane(event.target.value)}>
@@ -250,9 +270,32 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
                         'Die Skizze verwendet die geraden Segmente aus der Vorschau.')}</p>}
                     {profile.gapRepair && <p>{text('Highlighted edges close gaps in the new sketch.',
                         'Die hervorgehobenen Kanten schließen Lücken in der neuen Skizze.')}</p>}
-                    <p>{validWidth && `${Number(width)} × ${Number(height.toFixed(3))} mm · `}{text('Lower-left corner at the sketch origin.',
-                        'Die linke untere Ecke liegt am Skizzenursprung.')}</p>
-                    <button type="button" className={buttonClass} disabled={busy || !validWidth} onClick={send}>
+                    <details className={layout.placement}>
+                        <summary>{text('Placement', 'Platzierung')}</summary>
+                        <label>{text('Anchor', 'Anker')}
+                            <select aria-label={text('Anchor', 'Anker')} value={anchor} disabled={busy}
+                                onChange={event => setAnchor(event.target.value)}>
+                                <option value="lower-left">{text('Lower-left corner', 'Linke untere Ecke')}</option>
+                                <option value="center">{text('Center', 'Mittelpunkt')}</option>
+                            </select>
+                        </label>
+                        <div className={layout.inputs}>
+                            <label>{`${plane[0]} (mm)`}
+                                <input type="number" min="-100000" max="100000" step="any" value={horizontal} disabled={busy}
+                                    aria-invalid={!validCoordinate(placement.position[0])}
+                                    onChange={event => setHorizontal(event.target.value)} />
+                            </label>
+                            <label>{`${plane[1]} (mm)`}
+                                <input type="number" min="-100000" max="100000" step="any" value={vertical} disabled={busy}
+                                    aria-invalid={!validCoordinate(placement.position[1])}
+                                    onChange={event => setVertical(event.target.value)} />
+                            </label>
+                        </div>
+                    </details>
+                    {placementError && <p role="status">{placementError}</p>}
+                    {validWidth && <p>{`${Number(width)} × ${Number(height.toFixed(3))} mm`}
+                        {!placementError && ` · ${anchorLabel} ${plane[0]} ${placement.position[0]}, ${plane[1]} ${placement.position[1]} mm`}</p>}
+                    <button type="button" className={buttonClass} disabled={busy || !validWidth || Boolean(placementError)} onClick={send}>
                         {text('Add editable sketch', 'Bearbeitbare Skizze hinzufügen')}
                     </button>
                 </>}

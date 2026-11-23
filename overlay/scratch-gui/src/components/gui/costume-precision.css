@@ -27,3 +27,8 @@
 .dialog label.checkbox { flex-direction: row; align-items: center; gap: 8px; }
 
 .closingEdge { stroke: #9b2f00; stroke-width: 3px; stroke-linecap: round; }
+
+.placement { margin-top: 10px; }
+.placement summary { cursor: pointer; }
+.placement[open] summary { margin-bottom: 8px; }
+.anchorMarker { fill: white; stroke: #392497; stroke-width: 2px; }

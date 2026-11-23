@@ -69,7 +69,20 @@ try {
     await dialog.getByLabel('Width (mm)',{exact:true}).fill('60');
     await dialog.getByLabel('Sketch plane',{exact:true}).selectOption('YZ');
     await dialog.getByText(/60 × 30 mm/).waitFor();
-    await dialog.getByRole('button',{name:'Add editable sketch',exact:true}).click();
+    await dialog.getByText('Placement',{exact:true}).click();
+    await dialog.getByLabel('Anchor',{exact:true}).selectOption('center');
+    const coordinateY = dialog.getByLabel('Y (mm)',{exact:true});
+    const coordinateZ = dialog.getByLabel('Z (mm)',{exact:true});
+    const addSketch = dialog.getByRole('button',{name:'Add editable sketch',exact:true});
+    await coordinateY.fill('99990');
+    await dialog.getByText('The placed profile extends beyond the sketch coordinate limits.',{exact:true}).waitFor();
+    assert.equal(await addSketch.isDisabled(),true);
+    await coordinateY.fill('12.5');
+    await coordinateZ.fill('-7.25');
+    await dialog.getByText(/Center Y 12.5, Z -7.25 mm/).waitFor();
+    const marker = dialog.getByTestId('bw-costume-placement-marker');
+    assert.deepEqual(await marker.evaluate(node => ['cx','cy'].map(axis => Number(node.getAttribute(axis)))),[30,22]);
+    await addSketch.click();
     await dialog.getByText(/Sketch added to CAD/).waitFor();
     assert.equal(await page.evaluate(() =>
         window.__brickwrightStore.getState().scratchGui.vm.editingTarget.getCostumes()[0].assetId),original);
@@ -81,8 +94,8 @@ try {
     assert.equal(draft.plane,'YZ');
     assert.equal(draft.profile.kind,'region');
     assert.equal(draft.profile.loops.length,2);
-    assert.deepEqual(draft.profile.loops[0].points.map(([x,y]) => [Math.round(x),Math.round(y)]).sort(),
-        [[0,0],[0,30],[60,0],[60,30]].sort());
+    assert.deepEqual(draft.profile.loops[0].points.sort(),
+        [[-17.5,-22.25],[-17.5,7.75],[42.5,-22.25],[42.5,7.75]].sort());
     await dialog.getByRole('button',{name:'Close',exact:true}).click();
     await page.getByRole('tab',{name:'CAD',exact:true}).click();
     await page.getByRole('button',{name:`Extrude sketch: ${draft.name}`,exact:true}).click();
@@ -93,10 +106,12 @@ try {
     const body = await page.evaluate(async () => {
         const {editor} = window.__bwCad;
         const result = await editor.whenIdle();
-        return result.bodies[0]?.volume;
+        return result.bodies[0];
     });
     // A 60 × 30 mm profile with a 9 × 12 mm hole, extruded 10 mm.
-    assert.ok(Math.abs(body - 16920) < .1, `Extrusion volume ${body} mm³`);
+    assert.ok(Math.abs(body.volume - 16920) < .1, `Extrusion volume ${body.volume} mm³`);
+    const roundBounds = bounds => [bounds.min,bounds.max].map(point => point.map(value => Number(value.toFixed(2)) || 0));
+    assert.deepEqual(roundBounds(body.bounds),[[0,-17.5,-22.25],[10,42.5,7.75]]);
     await page.getByRole('tab', {name:'Costumes',exact:true}).click();
     await settings.click();
     if (!await preference.isVisible()) {
@@ -126,8 +141,9 @@ try {
         const document = window.__bwCad?.editor.session.state.document;
         return document?.roots.length === 1 && document.sketches?.[sketchId]?.profile.kind === 'region';
     },draft.id);
-    const savedVolume = await reopened.evaluate(async () => (await window.__bwCad.editor.whenIdle()).bodies[0]?.volume);
-    assert.ok(Math.abs(savedVolume - 16920) < .1, `Reopened extrusion volume ${savedVolume} mm³`);
+    const savedBody = await reopened.evaluate(async () => (await window.__bwCad.editor.whenIdle()).bodies[0]);
+    assert.ok(Math.abs(savedBody.volume - 16920) < .1, `Reopened extrusion volume ${savedBody.volume} mm³`);
+    assert.deepEqual(roundBounds(savedBody.bounds),roundBounds(body.bounds));
     const fillRules = await reopened.evaluate(() => {
         const {sdk} = window.__bwCad;
         const outer = 'M0 0H40V40H0Z', middle = 'M8 8H32V32H8Z';
@@ -269,7 +285,7 @@ try {
     assert.equal(expanded.assetId,strokedArtwork);
     assert.equal(expanded.profile.kind,'outline');
     assert.deepEqual(expanded.profile.points.sort(),[[0,0],[0,8],[40,0],[40,8]].sort());
-    console.log('PASS exact and approximated profiles, gap repair, stroke expansion, extrusion, and SB3 round-trip');
+    console.log('PASS precise sketch placement, exact and approximated profiles, gap repair, stroke expansion, extrusion, and SB3 round-trip');
 } catch (error) {
     await activePage.screenshot({path:'/tmp/bw-costume-precision-failure.png'}).catch(() => {});
     throw error;

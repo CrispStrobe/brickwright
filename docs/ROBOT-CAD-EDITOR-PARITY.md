@@ -513,8 +513,9 @@ remain on the drafting roadmap.
 Enable **CAD Editor** and **Costumes precision design** in **Settings → Workspace**.
 **Send to CAD** opens a preview of supported filled vector regions. Select one,
 enter its desired width in millimetres, choose a sketch plane, and add the
-editable sketch. Its lower-left bounds start at the sketch origin. The original
-costume remains editable in Costumes. Use **Objects** in CAD to open or extrude
+editable sketch. **Placement** optionally sets the lower-left corner or center
+at exact coordinates on the selected plane. By default, the lower-left corner
+starts at the sketch origin. The original costume remains editable in Costumes. Use **Objects** in CAD to open or extrude
 the sketch when ready.
 
 The handoff accepts explicitly closed straight outlines, full circles, and
@@ -535,8 +536,9 @@ scaling. Stroke thickness scales with the profile width.
 
 The local Chrome check exercises the default-off setting and lazy SDK load,
 then imports a 60 × 30 mm region with a 9 × 12 mm hole onto the YZ plane.
-It extrudes the sketch 10 mm and verifies the 16,920 mm³ solid before and after
-saving and reopening the SB3 in a fresh browser context. It checks the original
+It sets the center to Y 12.5, Z −7.25 mm, extrudes the sketch 10 mm,
+and verifies the 3D bounds and 16,920 mm³ volume both before saving and after
+reopening the SB3 in a fresh browser context. It checks the original
 costume's asset ID both before saving and after reopening. The same check
 compares the even-odd and nonzero fill rules, converts transformed Bézier
 and elliptical contours, and matches the saved vertices to the preview. It

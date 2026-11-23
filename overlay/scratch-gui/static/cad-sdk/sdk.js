@@ -1,19 +1,20 @@
-import { B as e, C as o, a as r, c as l, b as c, d as t, e as d, f as i, g as m, l as p, m as B, h as C, r as k, s as n, i as u, j as S } from "./sdk-eCCW_01T.js";
+import { B as e, C as o, a as r, c as l, b as c, d as t, e as d, f as i, g as m, h as B, l as p, m as u, i as C, r as k, s as n, j as S, k as f } from "./sdk-BjLzxxQy.js";
 export {
   e as BLOCK_SHAPES,
   o as CadBlocksError,
   r as applyBlocksModel,
   l as compileBlocksToCadScript,
-  c as costumeSketchProfile,
-  t as createCadSession,
-  d as createDocument,
-  i as exportBlocksJSCAD,
-  m as exportBlocksOpenSCAD,
+  c as costumeProfileBounds,
+  t as costumeSketchProfile,
+  d as createCadSession,
+  i as createDocument,
+  m as exportBlocksJSCAD,
+  B as exportBlocksOpenSCAD,
   p as loadBundledModelLibrary,
-  B as mountCadEditor,
+  u as mountCadEditor,
   C as parseDocument,
   k as readCostumeProfiles,
   n as serializeDocument,
-  u as setLocale,
-  S as validateBlocksProgram
+  S as setLocale,
+  f as validateBlocksProgram
 };
