@@ -348,9 +348,11 @@ test('vendored SPIKE compiler emits a canonical executable round-trip artifact',
     // parseBodyHeader, the Python `with` and JS `() => { … }` readers. `git diff 7befb941 e1e126ae -- src/`
     // is sb3Creator.js (one inert branch), pythonToPseudocode.js and javascriptToPseudocode.js only; the
     // SPIKE emitter (spike3Python.js, spikeprimeDialect.js) is unchanged. Re-run every assertion.
+    // -> e248ce71 (2026-11-23): 88 lab-* gallery examples and their benches (#186-#189);
+    // `git diff e1e126ae e248ce71 -- src/` is empty, so the SPIKE emitter is unchanged. Re-run every assertion.
     // Keep the exact supplier identity gate and every SPIKE artifact assertion below.
     assert.equal(JSON.parse(readFileSync(new URL('../vendor-pins.json', import.meta.url)))['sb3-creator'],
-        'e1e126ae8374f6cbbf8219dde1c89c057610149f');
+        'e248ce71a44f723db0d785e82b6c7f387030e1a6');
 
     const creator = new SB3Creator();
     creator.parse(PROGRAM);
