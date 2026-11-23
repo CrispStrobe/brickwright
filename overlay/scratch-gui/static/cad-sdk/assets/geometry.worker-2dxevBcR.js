@@ -826,6 +826,10 @@ const H6 = {
   "Apply thread redesign": "Gewindeauslegung anwenden",
   "Rebuild a resized screw at a chosen pitch or turns per start, resetting its local scale as one saved edit.": "Eine skalierte Schraube mit gewählter Steigung oder Windungszahl pro Gang als einen gespeicherten Schritt neu aufbauen und ihre lokale Skalierung zurücksetzen."
 }, W6 = {
+  "This parameter edit requires solving its outline constraints.": "Für diese Parameteränderung müssen die Konturbedingungen gelöst werden.",
+  "The model changed while solving outline constraints. Apply again.": "Das Modell wurde beim Lösen der Konturbedingungen geändert. Wende die Änderung erneut an.",
+  "Outline “{0}”: {1}": "Kontur „{0}“: {1}",
+  "Applying parameters…": "Parameter werden übernommen…",
   "Solve the outline to use the current dimensions.": "Löse die Kontur, um die aktuellen Maße zu übernehmen.",
   "Invalid outline constraint definitions.": "Ungültige Konturbedingungen.",
   "Outline constraints are available on single outlines.": "Konturbedingungen sind für einzelne Konturen verfügbar.",
@@ -5820,13 +5824,98 @@ HA.acorn = {
 function EI(A, g) {
   return HA.parse(A, g);
 }
-const lI = 32, oI = 48;
-function tI(A, g) {
+const J4 = 256, J5 = 1024;
+function Z1(A) {
+  return Array.isArray(A) && A.length === 2 && A.every((g) => typeof g == "number" && Number.isFinite(g) && Math.abs(g) <= 1e5);
+}
+const e2 = (A, g, I) => (g[0] - A[0]) * (I[1] - A[1]) - (g[1] - A[1]) * (I[0] - A[0]), J2 = (A, g, I) => A[0] >= Math.min(g[0], I[0]) && A[0] <= Math.max(g[0], I[0]) && A[1] >= Math.min(g[1], I[1]) && A[1] <= Math.max(g[1], I[1]), b4 = (A, g, I, C) => {
+  const e = e2(A, g, I), i = e2(A, g, C), q = e2(I, C, A), l = e2(I, C, g);
+  return e * i < 0 && q * l < 0 || e === 0 && J2(I, A, g) || i === 0 && J2(C, A, g) || q === 0 && J2(A, I, C) || l === 0 && J2(g, I, C);
+};
+function b5(A) {
+  const g = () => new Error(t("Outline edges must form one closed loop without crossings or overlaps."));
+  let I = 0;
+  for (let C = 0; C < A.length; C++) {
+    const e = A[C], i = A[(C + 1) % A.length], q = A[(C + 2) % A.length];
+    if (Math.hypot(i[0] - e[0], i[1] - e[1]) < 1e-5 || e2(e, i, q) === 0 && (e[0] - i[0]) * (q[0] - i[0]) + (e[1] - i[1]) * (q[1] - i[1]) > 0)
+      throw g();
+    I += e2(A[0], e, i);
+    for (let l = C + 2; l < A.length; l++)
+      if (!(C === 0 && l === A.length - 1) && b4(e, i, A[l], A[(l + 1) % A.length]))
+        throw g();
+  }
+  if (Math.abs(I) < 2e-4)
+    throw g();
+  return I < 0 ? [...A].reverse() : A;
+}
+function g5(A, g, I) {
+  if (!I)
+    return;
+  const C = g[0] - A[0], e = g[1] - A[1], i = (1 / I - I) / 4, q = [(A[0] + g[0]) / 2 - e * i, (A[1] + g[1]) / 2 + C * i], l = Math.hypot(C, e) * (Math.abs(I) + 1 / Math.abs(I)) / 4;
+  if (!(!Number.isFinite(l) || !q.every(Number.isFinite)))
+    return { center: q, radius: l, start: Math.atan2(A[1] - q[1], A[0] - q[0]), sweep: 4 * Math.atan(I) };
+}
+function lI(A, g, I, C) {
+  const i = Math.hypot(g[0] - A[0], g[1] - A[1]);
+  if (!I || i * Math.abs(I) < 0.025 * 2 && Math.abs(4 * Math.atan(I)) < Math.PI / 32 && C > 2)
+    return;
+  const q = g5(A, g, I);
+  if (!q)
+    throw new Error(t("Rounded outline exceeds the curve size or detail limit."));
+  const l = Math.min(Math.PI / 32, 4 * Math.asin(Math.sqrt(Math.min(1, 0.025 / (2 * q.radius)))));
+  return { ...q, segments: Math.max(2, Math.ceil(Math.abs(q.sweep) / l)) };
+}
+function I5(A, g) {
+  const I = g !== void 0;
+  if (!Array.isArray(A) || A.length < (I ? 2 : 3) || A.length > J4 || !A.every(Z1))
+    throw new Error(t("An outline needs 3–256 finite points within 100000 mm of the sketch origin."));
+  if (!I)
+    return b5(A);
+  if (!Array.isArray(g) || g.length !== A.length || !g.every((C) => typeof C == "number" && Number.isFinite(C) && Math.abs(C) <= 1e4))
+    throw new Error(t("Enter one finite bulge per outline point."));
+  return b5(L4(A, g, !0));
+}
+function oI(A, g) {
+  if (!Array.isArray(A) || A.length < 2 || A.length > J4 || !A.every(Z1))
+    throw new Error(t("An open path needs 2–256 finite points within 100000 mm of the sketch origin."));
+  const I = A[0], C = A.at(-1);
+  if (Math.hypot(C[0] - I[0], C[1] - I[1]) < 1e-5)
+    throw new Error(t("An open path needs distinct start and end points."));
+  if (g !== void 0 && (!Array.isArray(g) || g.length !== A.length || g.at(-1) !== 0 || !g.every((e) => typeof e == "number" && Number.isFinite(e) && Math.abs(e) <= 1e4)))
+    throw new Error(t("Enter one finite bulge per path edge. The last point has no outgoing edge."));
+  return L4(A, g ?? A.map(() => 0), !1);
+}
+function L4(A, g, I) {
+  const C = [], e = I ? A.length : A.length - 1, i = () => new Error(t("Rounded outline exceeds the curve size or detail limit."));
+  for (let q = 0; q < e; q++) {
+    const l = A[q], Q = A[(q + 1) % A.length], a = g[q], B = Q[0] - l[0], h = Q[1] - l[1];
+    if (Math.hypot(B, h) < 1e-5)
+      throw new Error(t(I ? "Outline edges must form one closed loop without crossings or overlaps." : "Consecutive path points must be distinct."));
+    C.push(l);
+    const n = lI(l, Q, a, A.length);
+    if (!n)
+      continue;
+    const { center: [u, k], radius: x, start: y, sweep: p, segments: w } = n;
+    if (C.length + w - 1 > J5)
+      throw i();
+    for (let F = 1; F < w; F++) {
+      const S = y + p * F / w, N = [u + x * Math.cos(S), k + x * Math.sin(S)];
+      if (!Z1(N))
+        throw i();
+      C.push(N);
+    }
+  }
+  if (I || C.push(A.at(-1)), C.length < (I ? 3 : 2) || C.length > J5)
+    throw i();
+  return C;
+}
+const tI = 32, nI = 48;
+function aI(A, g) {
   const { points: I, vertexIds: C, relations: e } = A;
   if (e === void 0)
     return [];
   const i = () => new Error(t("Invalid outline constraint definitions."));
-  if (I.length < 3 || I.length > lI || !Array.isArray(C) || C.length !== I.length || !Array.isArray(e) || !e.length || e.length > oI)
+  if (I.length < 3 || I.length > tI || !Array.isArray(C) || C.length !== I.length || !Array.isArray(e) || !e.length || e.length > nI)
     throw i();
   const q = new Map(C.map((Q, a) => [Q, a])), l = (Q) => {
     if (!Array.isArray(Q) || Q.length !== 2 || Q.some((B) => typeof B != "string"))
@@ -5864,91 +5953,6 @@ function tI(A, g) {
         throw i();
     }
   });
-}
-const J4 = 256, J5 = 1024;
-function Z1(A) {
-  return Array.isArray(A) && A.length === 2 && A.every((g) => typeof g == "number" && Number.isFinite(g) && Math.abs(g) <= 1e5);
-}
-const e2 = (A, g, I) => (g[0] - A[0]) * (I[1] - A[1]) - (g[1] - A[1]) * (I[0] - A[0]), J2 = (A, g, I) => A[0] >= Math.min(g[0], I[0]) && A[0] <= Math.max(g[0], I[0]) && A[1] >= Math.min(g[1], I[1]) && A[1] <= Math.max(g[1], I[1]), b4 = (A, g, I, C) => {
-  const e = e2(A, g, I), i = e2(A, g, C), q = e2(I, C, A), l = e2(I, C, g);
-  return e * i < 0 && q * l < 0 || e === 0 && J2(I, A, g) || i === 0 && J2(C, A, g) || q === 0 && J2(A, I, C) || l === 0 && J2(g, I, C);
-};
-function b5(A) {
-  const g = () => new Error(t("Outline edges must form one closed loop without crossings or overlaps."));
-  let I = 0;
-  for (let C = 0; C < A.length; C++) {
-    const e = A[C], i = A[(C + 1) % A.length], q = A[(C + 2) % A.length];
-    if (Math.hypot(i[0] - e[0], i[1] - e[1]) < 1e-5 || e2(e, i, q) === 0 && (e[0] - i[0]) * (q[0] - i[0]) + (e[1] - i[1]) * (q[1] - i[1]) > 0)
-      throw g();
-    I += e2(A[0], e, i);
-    for (let l = C + 2; l < A.length; l++)
-      if (!(C === 0 && l === A.length - 1) && b4(e, i, A[l], A[(l + 1) % A.length]))
-        throw g();
-  }
-  if (Math.abs(I) < 2e-4)
-    throw g();
-  return I < 0 ? [...A].reverse() : A;
-}
-function g5(A, g, I) {
-  if (!I)
-    return;
-  const C = g[0] - A[0], e = g[1] - A[1], i = (1 / I - I) / 4, q = [(A[0] + g[0]) / 2 - e * i, (A[1] + g[1]) / 2 + C * i], l = Math.hypot(C, e) * (Math.abs(I) + 1 / Math.abs(I)) / 4;
-  if (!(!Number.isFinite(l) || !q.every(Number.isFinite)))
-    return { center: q, radius: l, start: Math.atan2(A[1] - q[1], A[0] - q[0]), sweep: 4 * Math.atan(I) };
-}
-function nI(A, g, I, C) {
-  const i = Math.hypot(g[0] - A[0], g[1] - A[1]);
-  if (!I || i * Math.abs(I) < 0.025 * 2 && Math.abs(4 * Math.atan(I)) < Math.PI / 32 && C > 2)
-    return;
-  const q = g5(A, g, I);
-  if (!q)
-    throw new Error(t("Rounded outline exceeds the curve size or detail limit."));
-  const l = Math.min(Math.PI / 32, 4 * Math.asin(Math.sqrt(Math.min(1, 0.025 / (2 * q.radius)))));
-  return { ...q, segments: Math.max(2, Math.ceil(Math.abs(q.sweep) / l)) };
-}
-function I5(A, g) {
-  const I = g !== void 0;
-  if (!Array.isArray(A) || A.length < (I ? 2 : 3) || A.length > J4 || !A.every(Z1))
-    throw new Error(t("An outline needs 3–256 finite points within 100000 mm of the sketch origin."));
-  if (!I)
-    return b5(A);
-  if (!Array.isArray(g) || g.length !== A.length || !g.every((C) => typeof C == "number" && Number.isFinite(C) && Math.abs(C) <= 1e4))
-    throw new Error(t("Enter one finite bulge per outline point."));
-  return b5(L4(A, g, !0));
-}
-function aI(A, g) {
-  if (!Array.isArray(A) || A.length < 2 || A.length > J4 || !A.every(Z1))
-    throw new Error(t("An open path needs 2–256 finite points within 100000 mm of the sketch origin."));
-  const I = A[0], C = A.at(-1);
-  if (Math.hypot(C[0] - I[0], C[1] - I[1]) < 1e-5)
-    throw new Error(t("An open path needs distinct start and end points."));
-  if (g !== void 0 && (!Array.isArray(g) || g.length !== A.length || g.at(-1) !== 0 || !g.every((e) => typeof e == "number" && Number.isFinite(e) && Math.abs(e) <= 1e4)))
-    throw new Error(t("Enter one finite bulge per path edge. The last point has no outgoing edge."));
-  return L4(A, g ?? A.map(() => 0), !1);
-}
-function L4(A, g, I) {
-  const C = [], e = I ? A.length : A.length - 1, i = () => new Error(t("Rounded outline exceeds the curve size or detail limit."));
-  for (let q = 0; q < e; q++) {
-    const l = A[q], Q = A[(q + 1) % A.length], a = g[q], B = Q[0] - l[0], h = Q[1] - l[1];
-    if (Math.hypot(B, h) < 1e-5)
-      throw new Error(t(I ? "Outline edges must form one closed loop without crossings or overlaps." : "Consecutive path points must be distinct."));
-    C.push(l);
-    const n = nI(l, Q, a, A.length);
-    if (!n)
-      continue;
-    const { center: [u, k], radius: x, start: y, sweep: p, segments: w } = n;
-    if (C.length + w - 1 > J5)
-      throw i();
-    for (let F = 1; F < w; F++) {
-      const S = y + p * F / w, N = [u + x * Math.cos(S), k + x * Math.sin(S)];
-      if (!Z1(N))
-        throw i();
-      C.push(N);
-    }
-  }
-  if (I || C.push(A.at(-1)), C.length < (I ? 3 : 2) || C.length > J5)
-    throw i();
-  return C;
 }
 function H4(A) {
   return typeof A == "string" && A.length > 0 && A.length <= 255 && A === A.trim() && !/[\u0000-\u001f\u007f<>/\\":;?*|=]/.test(A);
@@ -6591,7 +6595,7 @@ function y2(A, g) {
       return { contour: [[-C, -e], [C, -e], [C, e], [-C, e]], edgeIds: ["bottom", "right", "top", "left"].map((i) => `${I.id}:${i}`) };
     }
     if ((I.kind === "outline" || I.kind === "path") && P4(I, I.kind === "outline"), I.kind === "path")
-      return { contour: aI(fI(I, g), I.bulges), edgeIds: I.points.slice(0, -1).map((C, e) => `${I.id}:edge-${e}`) };
+      return { contour: oI(fI(I, g), I.bulges), edgeIds: I.points.slice(0, -1).map((C, e) => `${I.id}:edge-${e}`) };
     if (I.kind === "outline")
       return { contour: I5(I.points, I.bulges), edgeIds: I.points.map((e, i) => `${I.id}:edge-${i}`) };
     if (I.kind === "circle") {
@@ -6661,7 +6665,7 @@ function FI(A) {
       if (y2(I, A), qg(I.profile, A.version), I.profile.kind === "outline" && I.profile.relations !== void 0) {
         if (A.version < 31)
           throw new Error(t("Outline constraints require document version 31"));
-        tI(I.profile, (C) => C1(C, A));
+        aI(I.profile, (C) => C1(C, A));
       }
     }
   }

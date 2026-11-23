@@ -823,6 +823,10 @@ const Gt = {
   "Apply thread redesign": "Gewindeauslegung anwenden",
   "Rebuild a resized screw at a chosen pitch or turns per start, resetting its local scale as one saved edit.": "Eine skalierte Schraube mit gewählter Steigung oder Windungszahl pro Gang als einen gespeicherten Schritt neu aufbauen und ihre lokale Skalierung zurücksetzen."
 }, Yt = {
+  "This parameter edit requires solving its outline constraints.": "Für diese Parameteränderung müssen die Konturbedingungen gelöst werden.",
+  "The model changed while solving outline constraints. Apply again.": "Das Modell wurde beim Lösen der Konturbedingungen geändert. Wende die Änderung erneut an.",
+  "Outline “{0}”: {1}": "Kontur „{0}“: {1}",
+  "Applying parameters…": "Parameter werden übernommen…",
   "Solve the outline to use the current dimensions.": "Löse die Kontur, um die aktuellen Maße zu übernehmen.",
   "Invalid outline constraint definitions.": "Ungültige Konturbedingungen.",
   "Outline constraints are available on single outlines.": "Konturbedingungen sind für einzelne Konturen verfügbar.",

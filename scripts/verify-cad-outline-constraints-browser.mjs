@@ -13,6 +13,21 @@ const dir=await mkdtemp(join(tmpdir(),'bw-outline-constraints-'));
 const browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
 const tab=page=>page.getByRole('tab',{name:'CAD',exact:true});
 const file=page=>page.getByTestId('bw-file-menu-trigger');
+const rounded=points=>points.map(point=>point.map(value=>Math.round(value*1e6)/1e6+0));
+async function setReach(page,expression,{create=false}={}){
+ await page.getByRole('button',{name:'Parameters',exact:true}).tap();
+ const parameters=page.getByRole('dialog',{name:'Model parameters'});
+ if(create){
+  await parameters.getByRole('button',{name:'Add parameter',exact:true}).tap();
+  await parameters.getByLabel('Parameter name',{exact:true}).fill('reach');
+ }
+ const input=parameters.getByLabel('Parameter expression',{exact:true});
+ await input.fill(expression);
+ await input.blur();
+ await parameters.getByRole('button',{name:'Apply parameters',exact:true}).tap();
+ await parameters.getByRole('status',{name:'Parameter status'}).filter({hasText:'Parameters applied'}).waitFor();
+ await parameters.getByRole('button',{name:'Close parameters',exact:true}).tap();
+}
 async function open(){
  const page=await browser.newPage({viewport:{width:1024,height:768},hasTouch:true,acceptDownloads:true,serviceWorkers:'block'});
  page.setDefaultTimeout(60000);
@@ -30,6 +45,7 @@ async function open(){
 try{
  const page=await open(),workers=[];
  page.on('worker',worker=>workers.push(worker.url()));
+ await setReach(page,'40',{create:true});
  await page.getByRole('button',{name:'Sketch',exact:true}).tap();
  const sketch=page.getByRole('dialog',{name:'Sketch and extrusion'});
  await sketch.getByLabel('Profile',{exact:true}).selectOption('outline');
@@ -45,7 +61,7 @@ try{
  }
  for(const args of [
   ['horizontal',0],['vertical',1],['parallel',0,2],['perpendicular',2,3],
-  ['length',0,'80 mm / 2'],['equal',0,2],['length',1,20]
+  ['length',0,'reach'],['equal',0,2],['length',1,20]
  ])await add(...args);
  const solve=sketch.getByRole('button',{name:'Solve outline',exact:true});
  await solve.tap();
@@ -78,7 +94,7 @@ try{
  assert.deepEqual(profile.points,[[0,0],[40,0],[40,20],[0,20]]);
  assert.equal(profile.vertexIds.length,4);
  assert.equal(profile.relations.length,7);
- assert.equal(profile.relations[4].length,'80 mm / 2');
+ assert.equal(profile.relations[4].length,'reach');
  await page.close();
 
  const restored=await open();
@@ -93,6 +109,13 @@ try{
  await restored.evaluate(()=>window.__bwCad.editor.whenIdle());
  const readProfile=()=>restored.evaluate(id=>window.__bwCad.editor.session.state.document.sketches[id].profile,id);
  assert.deepEqual(await readProfile(),profile);
+ const revision=await restored.evaluate(()=>window.__bwCad.editor.session.state.revision);
+ await setReach(restored,'55');
+ const solved=await readProfile();
+ assert.deepEqual(rounded(solved.points),[[0,0],[55,0],[55,20],[0,20]]);
+ assert.deepEqual(solved.vertexIds,profile.vertexIds);
+ assert.deepEqual(solved.relations,profile.relations);
+ assert.equal(await restored.evaluate(()=>window.__bwCad.editor.session.state.revision),revision+1);
  const object=restored.getByTestId('object-name');
  if(!await object.isVisible())await restored.getByRole('button',{name:'Objects',exact:true}).tap();
  await object.tap();
@@ -102,7 +125,7 @@ try{
  const reopened=restored.getByRole('dialog',{name:'Sketch and extrusion'});
  await reopened.getByRole('button',{name:'Edit constraint 5',exact:true}).tap();
  const dimension=reopened.getByLabel('Segment length (mm)');
- assert.equal(await dimension.inputValue(),'80 mm / 2');
+ assert.equal(await dimension.inputValue(),'reach');
  await dimension.fill('60');
  await reopened.getByRole('button',{name:'Update constraint',exact:true}).tap();
  await reopened.getByRole('button',{name:'Solve outline',exact:true}).tap();
@@ -110,10 +133,10 @@ try{
  await reopened.getByRole('button',{name:'Apply sketch changes',exact:true}).tap();
  await reopened.waitFor({state:'hidden'});
  const edited=await readProfile();
- assert.deepEqual(edited.points.map(point=>point.map(value=>Math.round(value*1e6)/1e6)),[[0,0],[60,0],[60,20],[0,20]]);
+ assert.deepEqual(rounded(edited.points),[[0,0],[60,0],[60,20],[0,20]]);
  assert.deepEqual(edited.vertexIds,profile.vertexIds);
  assert.equal(Number(edited.relations[4].length),60);
- console.log('PASS outline solve, conflict rejection, SB3 reopen, and editing a saved constraint');
+ console.log('PASS outline solve, conflict rejection, SB3 reopen, automatic parameter solve, and editing a saved constraint');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});
