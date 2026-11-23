@@ -34,7 +34,7 @@ try {
     await page.getByRole('tab', {name:'Costumes',exact:true}).click();
     await page.getByTestId('bw-costume-export').waitFor();
     const trigger = page.getByTestId('bw-costume-precision');
-    assert.equal(await trigger.count(),0);
+    await trigger.waitFor();
     assert.equal(sdkRequests.length,0);
     const original = await page.evaluate(() => {
         const vm = window.__brickwrightStore.getState().scratchGui.vm;
@@ -118,7 +118,7 @@ try {
         await page.getByRole('menuitem',{name:'Workspace',exact:true}).getByText('Workspace',{exact:true}).click();
     }
     await preference.selectOption('0');
-    await trigger.waitFor({state:'detached'});
+    await trigger.waitFor();
     await page.getByText('File',{exact:true}).click();
     const download = page.waitForEvent('download');
     await page.getByText('Save to your computer',{exact:true}).click();
