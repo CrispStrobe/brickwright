@@ -140,6 +140,10 @@ export default function CostumePrecision ({getCostume, locale, buttonClass, icon
             if (request.signal.aborted) return;
             sdk.setLocale(locale);
             const result = sdk.readCostumeProfiles(source);
+            if (result.needsCurveApproximation) {
+                setApproximate(true);
+                select(null);
+            }
             setSnapshot({...result, costume, source, generation, sdk});
         } catch (e) {
             if (!request.signal.aborted) setError(e.message);
@@ -147,8 +151,16 @@ export default function CostumePrecision ({getCostume, locale, buttonClass, icon
             if (!request.signal.aborted) setBusy(false);
         }
     };
-    const regionIndex = selected < (preview?.profiles.length ?? 0) ? selected : 0;
-    const profile = preview?.profiles[regionIndex];
+    const candidates = preview?.profiles ?? [];
+    const area = item => item.size[0] * item.size[1];
+    const regionIndex = selected === null ?
+        candidates.reduce((best, item, index) => (area(item) > area(candidates[best]) ? index : best), 0) :
+        selected < candidates.length ? selected : 0;
+    const profile = candidates[regionIndex];
+    const artworkPreview = snapshot && <figure>
+        <figcaption>{text('Original artwork', 'Originalgrafik')}</figcaption>
+        <img alt={text('Original artwork', 'Originalgrafik')} src={`data:image/svg+xml,${encodeURIComponent(snapshot.source)}`} />
+    </figure>;
     const span = profile && (centerlineOnly ? Math.max(...profile.size) : profile.size[0]);
     const displayedSize = profile?.size.map(value => Number((value / span * Number(width)).toFixed(3))).join(' × ');
     const regionLabel = centerlineOnly ? text('Path', 'Pfad') : text('Region', 'Fläche');
@@ -339,7 +351,12 @@ export default function CostumePrecision ({getCostume, locale, buttonClass, icon
                     {text('Preview extrusion', 'Extrusionsvorschau')}
                 </button>}
             </> : <>
-                {preview?.issues.length > 0 && <ul>{preview.issues.map(issue => <li key={issue}>{issue}</li>)}</ul>}
+                {preview?.issues.length > 0 && (profile ?
+                    <details>
+                        <summary>{text('Skipped artwork', 'Übersprungene Grafikteile')}</summary>
+                        <ul>{preview.issues.map(issue => <li key={issue}>{issue}</li>)}</ul>
+                    </details> :
+                    <ul>{preview.issues.map(issue => <li key={issue}>{issue}</li>)}</ul>)}
                 {preview && !preview.profiles.length && !preview.issues.length && <p>{centerlineOnly ?
                     text('No open paths found.', 'Keine offenen Pfade gefunden.') : strokeOnly ?
                     text('No visible strokes found.', 'Keine sichtbaren Linienzüge gefunden.') :
@@ -354,10 +371,6 @@ export default function CostumePrecision ({getCostume, locale, buttonClass, icon
                             {snapshot.centerlines && <option value="centerline">{text('Open paths', 'Offene Pfade')}</option>}
                         </select>
                     </label>}
-                    {strokeOnly && <p>{text('Each stroke becomes a separate profile. Its thickness scales with the sketch.',
-                        'Jeder Linienzug ergibt ein eigenes Profil. Seine Stärke skaliert mit der Skizze.')}</p>}
-                    {centerlineOnly && <p>{text('Open paths ignore stroke thickness. Span sets the larger of the width and height.',
-                        'Offene Pfade übernehmen keine Linienstärke. Die Spannweite legt die größere Ausdehnung fest.')}</p>}
                     <label className={layout.checkbox}>
                         <input type="checkbox" checked={approximate} disabled={busy} onChange={event => {
                             setApproximate(event.target.checked); select(0); conversionChanged();
@@ -384,8 +397,6 @@ export default function CostumePrecision ({getCostume, locale, buttonClass, icon
                                 aria-invalid={!validGap} onChange={event => { setMaxGap(event.target.value); conversionChanged(); }} />
                         </label>}
                     </div>
-                    {approximate && <p>{text('Smaller tolerance follows the curve more closely and adds more vertices.',
-                        'Eine kleinere Toleranz folgt der Kurve genauer und fügt mehr Eckpunkte hinzu.')}</p>}
                     {!validWidth && <p role="status">{centerlineOnly ? text('Enter a span from 0.01 to 100000 mm.',
                         'Gib eine Spannweite von 0,01 bis 100000 mm ein.') : text('Enter a width from 0.01 to 100000 mm.',
                         'Gib eine Breite von 0,01 bis 100000 mm ein.')}</p>}
@@ -394,6 +405,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass, icon
                     {repairGaps && !validGap && <p role="status">{text('Enter a maximum gap from 0.01 to 10 mm.',
                         'Gib eine maximale Lücke von 0,01 bis 10 mm ein.')}</p>}
                 </>}
+                {!profile && artworkPreview && <div className={layout.comparison}>{artworkPreview}</div>}
                 {profile && <>
                     <label>{regionLabel}
                         <select aria-label={regionLabel} value={needsRegionChoice ? '' : regionIndex} disabled={busy}
@@ -408,21 +420,30 @@ export default function CostumePrecision ({getCostume, locale, buttonClass, icon
                             </option>)}
                         </select>
                     </label>
-                    <svg role="img" aria-label={centerlineOnly ? text('Open path preview', 'Vorschau des offenen Pfads') :
-                        text('Closed profile preview', 'Vorschau der geschlossenen Fläche')}
-                        viewBox={`${profile.origin[0] - markerRadius} ${-profile.origin[1] - profile.size[1] - markerRadius} ` +
-                            `${profile.size[0] + 2 * markerRadius} ${profile.size[1] + 2 * markerRadius}`}>
-                        {profile.centerline ? <path className={layout.centerline} d={profile.centerline.d}
-                            vectorEffect="non-scaling-stroke" /> :
-                            <path fillRule="evenodd" d={profile.loops.map(drawingPath).join(' ')} />}
-                        {profile.gapRepair?.edges.map(([[ax, ay], [bx, by]], index) =>
-                            <line key={index} className={layout.closingEdge} data-testid="bw-costume-closing-edge"
-                                x1={ax} y1={-ay} x2={bx} y2={-by} vectorEffect="non-scaling-stroke" />)}
-                        {hasPlacement && <circle className={layout.anchorMarker} data-testid="bw-costume-placement-marker"
-                            cx={profile.origin[0] + (anchor === 'center' ? profile.size[0] / 2 : 0)}
-                            cy={-profile.origin[1] - (anchor === 'center' ? profile.size[1] / 2 : 0)}
-                            r={markerRadius * 0.75} vectorEffect="non-scaling-stroke" />}
-                    </svg>
+                    <div className={layout.comparison}>
+                        {artworkPreview}
+                        <figure>
+                            <figcaption>{text('Selected CAD profile', 'Ausgewähltes CAD-Profil')}</figcaption>
+                            <svg role="img" aria-label={centerlineOnly ? text('Open path preview', 'Vorschau des offenen Pfads') :
+                                text('Closed profile preview', 'Vorschau der geschlossenen Fläche')}
+                                viewBox={`${profile.origin[0] - markerRadius} ${-profile.origin[1] - profile.size[1] - markerRadius} ` +
+                                    `${profile.size[0] + 2 * markerRadius} ${profile.size[1] + 2 * markerRadius}`}>
+                                {profile.centerline ? <path className={layout.centerline} d={profile.centerline.d}
+                                    vectorEffect="non-scaling-stroke" /> :
+                                    <path fillRule="evenodd" d={profile.loops.map(drawingPath).join(' ')} />}
+                                {profile.gapRepair?.edges.map(([[ax, ay], [bx, by]], index) =>
+                                    <line key={index} className={layout.closingEdge} data-testid="bw-costume-closing-edge"
+                                        x1={ax} y1={-ay} x2={bx} y2={-by} vectorEffect="non-scaling-stroke" />)}
+                                {hasPlacement && <circle className={layout.anchorMarker} data-testid="bw-costume-placement-marker"
+                                    cx={profile.origin[0] + (anchor === 'center' ? profile.size[0] / 2 : 0)}
+                                    cy={-profile.origin[1] - (anchor === 'center' ? profile.size[1] / 2 : 0)}
+                                    r={markerRadius * 0.75} vectorEffect="non-scaling-stroke" />}
+                            </svg>
+                        </figure>
+                    </div>
+                    {candidates.length > 1 && <p className={layout.selectionNote}>{text(
+                        'Only the selected profile is sent to CAD.',
+                        'Nur das ausgewählte Profil wird an CAD gesendet.')}</p>}
                     <label>{text('Sketch plane', 'Skizzenebene')}
                         <select aria-label={text('Sketch plane', 'Skizzenebene')} value={plane} disabled={busy || Boolean(matchingTarget)} onChange={event => setPlane(event.target.value)}>
                             {['XY', 'XZ', 'YZ'].map(value => <option key={value}>{value}</option>)}

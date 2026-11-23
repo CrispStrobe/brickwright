@@ -141,7 +141,7 @@ try {
     await handoff.getByRole('button',{name:'Close',exact:true}).click();
     await page.getByTestId('bw-costume-precision').click();
     await handoff.getByLabel('Profile source',{exact:true}).selectOption('stroke');
-    await handoff.getByText('Enable curve approximation to preview curved strokes.',{exact:true}).waitFor();
+    await handoff.getByText('Enable curve approximation to preview curved strokes.',{exact:true}).waitFor({state:'attached'});
     assert.equal(await region.locator('option').count(),1);
     await handoff.getByRole('checkbox',{name:'Approximate curves',exact:true}).check();
     assert.equal(await region.locator('option').count(),2);

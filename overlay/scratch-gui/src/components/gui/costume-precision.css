@@ -40,3 +40,25 @@
 .review path { fill: none; stroke-width: 2px; }
 .before { stroke: var(--bw-text, #172033); stroke-dasharray: 4 4; opacity: 0.72; }
 .after { stroke: #145fa1; }
+
+.comparison {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.comparison figure { margin: 0; min-width: 0; }
+.comparison figcaption { font-size: .85em; font-weight: 600; margin-bottom: 4px; }
+.comparison img, .comparison svg {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    height: clamp(84px, 24vh, 170px);
+    object-fit: contain;
+    padding: 8px;
+    margin: 0;
+    background: var(--bw-surface, #edf5ff);
+    border-radius: 6px;
+}
+.selectionNote { margin: 0 0 8px; font-size: .85em; }

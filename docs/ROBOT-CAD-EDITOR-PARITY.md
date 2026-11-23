@@ -560,7 +560,10 @@ live check reorders a costume and its regions, edits the linked region, then
 verifies the selection after SB3 reopen and with a duplicate source ID.
 
 Enable **CAD Editor** in **Settings → Workspace** for the **Send to CAD**
-cube icon in the vector artwork toolbar. **Costumes precision design**
+cube icon in the vector artwork toolbar. Compare the original artwork with
+the selected CAD profile. For curved fills, the initial preview uses a
+0.2 mm tolerance when needed. Local gradient colors stay in the original
+artwork while the selected contour becomes an editable sketch. **Costumes precision design**
 independently enables numeric drawing tools in Properties. Use **New Costume**
 or **New Backdrop** at the start of the toolbar to add blank artwork. Compact
 toolbars use icon buttons with hover labels.
