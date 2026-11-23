@@ -559,7 +559,10 @@ Enable **CAD Editor** and **Costumes precision design** in **Settings → Worksp
 enter its desired width in millimetres, choose a sketch plane, and add the
 editable sketch. **Placement** optionally sets the lower-left corner or center
 at exact coordinates on the selected plane. By default, the lower-left corner
-starts at the sketch origin. The original costume remains editable in Costumes. Use **Objects** in CAD to open or extrude
+starts at the sketch origin. The original costume remains editable in Costumes.
+After saving a closed sketch, use **Preview extrusion** to open CAD with that
+profile. **Create extrusion** adds the solid in a separate Undo step.
+You can also use **Objects** in CAD to open or extrude
 the sketch when ready.
 
 The handoff accepts explicitly closed straight outlines, full circles, and

@@ -50,11 +50,18 @@ try {
     await link.check();
     await dialog.getByRole('button',{name:'Add editable sketch',exact:true}).click();
     await dialog.getByText(/Sketch added to CAD/).waitFor();
-    await close();
-    await page.getByRole('tab',{name:'CAD',exact:true}).click();
     const seed = await model(page);
-    await page.getByRole('button',{name:`Extrude sketch: ${seed.sketch.name}`,exact:true}).click();
     const extrusion = page.getByRole('dialog',{name:'Sketch and extrusion'});
+    await dialog.getByRole('button',{name:'Preview extrusion',exact:true}).click();
+    await dialog.waitFor({state:'hidden'});
+    await extrusion.waitFor();
+    assert.equal(await extrusion.getByLabel('Sketch name',{exact:true}).inputValue(),seed.sketch.name);
+    assert.deepEqual(await model(page),seed);
+    await extrusion.getByRole('button',{name:'Close sketch',exact:true}).click();
+    await extrusion.waitFor({state:'hidden'});
+    assert.deepEqual(await model(page),seed);
+    await page.getByRole('tab',{name:'CAD',exact:true}).click();
+    await page.getByRole('button',{name:`Extrude sketch: ${seed.sketch.name}`,exact:true}).click();
     await extrusion.getByRole('button',{name:'Create extrusion',exact:true}).click();
     await extrusion.waitFor({state:'hidden'});
     const before = await model(page);
@@ -163,7 +170,7 @@ try {
     await preview.click();
     await reopenedDialog.getByRole('img',{name:'Current and proposed sketch',exact:true}).waitFor();
     assert.equal(Math.round((await model(reopened)).volume),12000);
-    console.log('PASS persistent region link, rename/reorder, explicit refresh, Undo/Redo, SB3 reopen, and duplicate-ID review');
+    console.log('PASS direct extrusion preview, persistent region link, rename/reorder, explicit refresh, Undo/Redo, SB3 reopen, and duplicate-ID review');
 } catch (error) {
     await activePage.screenshot({path:'/tmp/bw-costume-refresh-failure.png'}).catch(() => {});
     throw error;

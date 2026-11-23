@@ -69,7 +69,8 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
     const [approximate, setApproximate] = React.useState(false), [tolerance, setTolerance] = React.useState('0.2');
     const [closeGaps, setCloseGaps] = React.useState(false), [maxGap, setMaxGap] = React.useState('0.5');
     const [profileSource, setProfileSource] = React.useState('fill');
-    const sending = React.useRef(false);
+    const [createdSketch, setCreatedSketch] = React.useState(null);
+    const sending = React.useRef(false), openingExtrusion = React.useRef(false);
     const de = /^de/i.test(locale), text = (english, german) => de ? german : english;
     React.useEffect(() => {
         const onPreference = () => {
@@ -124,6 +125,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
         active.current?.abort();
         const request = new AbortController();
         active.current = request;
+        setCreatedSketch(null);
         setSnapshot(null); setError(''); setSaved(false); select(0); setWidth('40'); setPlane('XY'); setBusy(true);
         setApproximate(false); setTolerance('0.2'); setCloseGaps(false); setMaxGap('0.5'); setProfileSource('fill');
         setAnchor('lower-left'); setHorizontal('0'); setVertical('0');
@@ -287,9 +289,10 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
             assertArtworkCurrent();
             const name = String(costume.name || 'Artwork').trim().slice(0, 80) || 'Artwork';
             const sourceId = linkArtwork ? proposeCostumeSourceId(snapshot.costume) : undefined;
-            editor.session.addSketch(shape, {name, plane, artworkSourceId: sourceId,
+            const id = editor.session.addSketch(shape, {name, plane, artworkSourceId: sourceId,
                 artworkProfile: sourceId ? profile.artworkProfile : undefined});
             if (sourceId) setCostumeSourceId(snapshot.costume, sourceId);
+            if (shape.kind !== 'path') setCreatedSketch({editor, id});
             setSaved(true);
         } catch (e) {
             if (!signal.aborted) setError(e.message);
@@ -298,22 +301,45 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
             if (!signal.aborted) setBusy(false);
         }
     };
+    const previewExtrusion = () => {
+        try {
+            const {editor, id} = createdSketch;
+            if (!getCadEnabled() || getCadProjectGeneration() !== snapshot.generation || window.__bwCad?.editor !== editor)
+                throw new Error(text('The CAD design changed. Open the sketch from Objects.',
+                    'Der CAD-Entwurf wurde geändert. Öffne die Skizze über Objekte.'));
+            openingExtrusion.current = true;
+            editor.openSketchExtrusion(id);
+            dialog.current.close();
+        } catch (e) {
+            openingExtrusion.current = false;
+            setError(e.message);
+        }
+    };
     const title = text('Send to CAD', 'An CAD senden');
     return <>
         <button ref={button} type="button" className={buttonClass} data-testid="bw-costume-precision"
             title={title} onClick={open}>{title}</button>
         <dialog ref={dialog} className={`${styles.dialog} ${layout.dialog}`} aria-label={title}
-            onClose={() => { active.current?.abort(); button.current?.focus({preventScroll: true}); }}>
+            onClose={() => {
+                active.current?.abort();
+                if (!openingExtrusion.current) button.current?.focus({preventScroll: true});
+                openingExtrusion.current = false;
+            }}>
             <form method="dialog" className={styles.header}>
                 <h2>{title}</h2>
                 <button type="submit" autoFocus>{text('Close', 'Schließen')}</button>
             </form>
             {error && <p role="alert">{error}</p>}
             {busy && <p role="status">{text('Working…', 'Wird verarbeitet…')}</p>}
-            {saved ? <p role="status">{refresh ? text('CAD sketch updated.', 'CAD-Skizze aktualisiert.') : centerlineOnly ? text('Sketch added to CAD. Open Objects to edit the path.',
+            {saved ? <>
+                <p role="status">{refresh ? text('CAD sketch updated.', 'CAD-Skizze aktualisiert.') : centerlineOnly ? text('Sketch added to CAD. Open Objects to edit the path.',
                 'Skizze zu CAD hinzugefügt. Öffne Objekte zum Bearbeiten des Pfads.') :
                 text('Sketch added to CAD. Open Objects to edit or extrude it.',
-                    'Skizze zu CAD hinzugefügt. Öffne Objekte zum Bearbeiten oder Extrudieren.')}</p> : <>
+                    'Skizze zu CAD hinzugefügt. Öffne Objekte zum Bearbeiten oder Extrudieren.')}</p>
+                {createdSketch && <button type="button" className={buttonClass} onClick={previewExtrusion}>
+                    {text('Preview extrusion', 'Extrusionsvorschau')}
+                </button>}
+            </> : <>
                 {preview?.issues.length > 0 && <ul>{preview.issues.map(issue => <li key={issue}>{issue}</li>)}</ul>}
                 {preview && !preview.profiles.length && !preview.issues.length && <p>{centerlineOnly ?
                     text('No open paths found.', 'Keine offenen Pfade gefunden.') : strokeOnly ?

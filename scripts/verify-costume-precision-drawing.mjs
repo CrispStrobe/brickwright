@@ -169,6 +169,7 @@ try {
     await handoff.getByText(/Sketch added to CAD/).waitFor();
     const centerline = await page.evaluate(() => Object.values(window.__bwCad.editor.session.state.document.sketches).at(-1));
     assert.equal(centerline.profile.kind,'path');
+    assert.equal(await handoff.getByRole('button',{name:'Preview extrusion',exact:true}).count(),0);
     assert.match(centerline.artworkProfile.sourceKey,/^paper:[0-9a-f-]{36}$/);
     assert.equal(centerline.profile.points.length,5);
     assert.equal(centerline.profile.bulges.at(-1),0);

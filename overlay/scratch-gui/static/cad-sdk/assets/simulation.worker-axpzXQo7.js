@@ -1340,6 +1340,7 @@ const T6 = {
   "The artwork has no usable area.": "Die Grafik enthält keine verwendbare Fläche.",
   "Enter sketch coordinates from −100000 to 100000 mm.": "Gib Skizzenkoordinaten von −100000 bis 100000 mm ein.",
   "Choose an artwork profile of the same sketch type.": "Wähle ein Grafikprofil desselben Skizzentyps.",
+  "Choose a closed sketch to extrude": "Wähle eine geschlossene Skizze zum Extrudieren",
   "Invalid sketch artwork link": "Ungültige Verknüpfung zwischen Skizze und Grafik",
   "This sketch is linked to different artwork.": "Diese Skizze ist mit einer anderen Grafik verknüpft.",
   "This sketch has constraints. Add the artwork as a new sketch.": "Diese Skizze hat Abhängigkeiten. Füge die Grafik als neue Skizze hinzu.",
@@ -11439,7 +11440,7 @@ async function M7(A, g, I, e = {}) {
     }
   if ([...I.values()].reduce((x, G) => x + G.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = e.J ?? await (b4 ?? (b4 = import("./jolt-physics.wasm-compat-BMV9vvHN.js").then((x) => x.default()))), Q = new i.JoltSettings();
+  const i = e.J ?? await (b4 ?? (b4 = import("./jolt-physics.wasm-compat-B18CmtC_.js").then((x) => x.default()))), Q = new i.JoltSettings();
   Q.mMaxBodies = 512, Q.mMaxBodyPairs = Math.max(1024, B.length * B.length), Q.mMaxContactConstraints = 8192;
   const s = new i.ObjectLayerPairFilterTable(2);
   s.EnableCollision(0, 1), s.EnableCollision(1, 1);

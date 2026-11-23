@@ -1068,6 +1068,7 @@ const z6 = {
   "The artwork has no usable area.": "Die Grafik enthält keine verwendbare Fläche.",
   "Enter sketch coordinates from −100000 to 100000 mm.": "Gib Skizzenkoordinaten von −100000 bis 100000 mm ein.",
   "Choose an artwork profile of the same sketch type.": "Wähle ein Grafikprofil desselben Skizzentyps.",
+  "Choose a closed sketch to extrude": "Wähle eine geschlossene Skizze zum Extrudieren",
   "Invalid sketch artwork link": "Ungültige Verknüpfung zwischen Skizze und Grafik",
   "This sketch is linked to different artwork.": "Diese Skizze ist mit einer anderen Grafik verknüpft.",
   "This sketch has constraints. Add the artwork as a new sketch.": "Diese Skizze hat Abhängigkeiten. Füge die Grafik als neue Skizze hinzu.",

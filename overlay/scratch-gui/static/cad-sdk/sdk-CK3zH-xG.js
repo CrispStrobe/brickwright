@@ -1340,6 +1340,7 @@ const Bg = {
   "The artwork has no usable area.": "Die Grafik enthält keine verwendbare Fläche.",
   "Enter sketch coordinates from −100000 to 100000 mm.": "Gib Skizzenkoordinaten von −100000 bis 100000 mm ein.",
   "Choose an artwork profile of the same sketch type.": "Wähle ein Grafikprofil desselben Skizzentyps.",
+  "Choose a closed sketch to extrude": "Wähle eine geschlossene Skizze zum Extrudieren",
   "Invalid sketch artwork link": "Ungültige Verknüpfung zwischen Skizze und Grafik",
   "This sketch is linked to different artwork.": "Diese Skizze ist mit einer anderen Grafik verknüpft.",
   "This sketch has constraints. Add the artwork as a new sketch.": "Diese Skizze hat Abhängigkeiten. Füge die Grafik als neue Skizze hinzu.",
@@ -8389,14 +8390,14 @@ function _y(t) {
     const o1 = N.name === "scale" ? "scalar" : N.name === "rotate" ? "deg" : "mm", b1 = N.vector.map((I) => D(I, o1, N.name === "scale" ? -1e3 : N.name === "rotate" ? -36e4 : -1e6, N.name === "scale" ? 1e3 : N.name === "rotate" ? 36e4 : 1e6)), T1 = V(N.shapes[0], Z + 1);
     return N.name === "scale" && b1.includes(0) ? { kind: "empty" } : N.name === "repeat" ? { kind: "repeat", count: D(N.scalars[0], "scalar", 1, a3.repeat, !0), step: b1, shape: T1 } : { kind: N.name, vector: b1, shape: T1 };
   }
-  const $ = /* @__PURE__ */ new Set(), K = /* @__PURE__ */ new Set();
+  const H = /* @__PURE__ */ new Set(), K = /* @__PURE__ */ new Set();
   function Q(N, Z = 0) {
     if (Z > 32 && n(f("Dependency depth exceeds 32"), N.at), N.kind === "reference") {
-      if ($.has(N.name))
+      if (H.has(N.name))
         return;
       K.has(N.name) && i(f`Shape dependency cycle at “${N.name}”`, N.at);
       const P = w.get(N.name);
-      P || i(f`Unknown shape “${N.name}”`, N.at), K.add(N.name), Q(P, Z + 1), K.delete(N.name), $.add(N.name);
+      P || i(f`Unknown shape “${N.name}”`, N.at), K.add(N.name), Q(P, Z + 1), K.delete(N.name), H.add(N.name);
     } else if (N.name === "choose") {
       let P;
       try {
@@ -9407,9 +9408,9 @@ function b5(t = d0()) {
   async function m(S, x, y, k, A) {
     g(A, k);
     const C = /* @__PURE__ */ new Map();
-    for (const { sketch: D, profile: z, request: j, curves: V, chordsSatisfied: $ } of Ks(S, x))
+    for (const { sketch: D, profile: z, request: j, curves: V, chordsSatisfied: H } of Ks(S, x))
       try {
-        const K = $ ? z.points : await y(structuredClone(j), k);
+        const K = H ? z.points : await y(structuredClone(j), k);
         if (g(A, k), !jt(j, K))
           throw new Error(f("The solved outline did not meet every constraint."));
         const Q = Es(K, z.bulges, V), J = { ...z, points: structuredClone(K), ...Q ? { bulges: Q } : {} }, l1 = C.get(D.id) ?? D.profile;
@@ -9423,7 +9424,7 @@ function b5(t = d0()) {
       const z = C.get(D.id) ?? D.profile;
       if (!(z?.kind !== "region" || z.edgeMatches === void 0))
         try {
-          const j = await qh(z, (V) => x0(V, x), async (V, $) => (g(A, $), y(V, $)), k);
+          const j = await qh(z, (V) => x0(V, x), async (V, H) => (g(A, H), y(V, H)), k);
           g(A, k), j !== z && C.set(D.id, j);
         } catch (j) {
           g(A, k);
@@ -9451,23 +9452,23 @@ function b5(t = d0()) {
       if (C.kind === "boolean" && C.inputs.some((D) => y.nodes[D]?.reference))
         throw new Error(f("Reference helpers cannot be combined into printable solids"));
     const k = [], A = (C) => {
-      const { name: D, color: z, transform: j, physics: V, provenance: $, generator: K, ...Q } = C;
+      const { name: D, color: z, transform: j, physics: V, provenance: H, generator: K, ...Q } = C;
       return Q;
     };
     for (const [C, D] of Object.entries(e.nodes)) {
       const z = y.nodes[C];
       if (!D.generator || !z?.generator)
         continue;
-      const j = /* @__PURE__ */ new Set(), V = ($) => {
-        if (j.has($))
+      const j = /* @__PURE__ */ new Set(), V = (H) => {
+        if (j.has(H))
           return;
-        j.add($);
-        const K = e.nodes[$];
+        j.add(H);
+        const K = e.nodes[H];
         c3(K).forEach(V);
       };
       V(C);
-      for (const $ of j)
-        if ($ !== C && !c4(e.nodes[$], y.nodes[$]))
+      for (const H of j)
+        if (H !== C && !c4(e.nodes[H], y.nodes[H]))
           throw new Error(f("Edit generated construction through its recipe, or detach the generator"));
       if (!c4(A(D), A(z)))
         throw new Error(f("Edit generated construction through its recipe, or detach the generator"));
@@ -9532,8 +9533,8 @@ function b5(t = d0()) {
       Pr(D);
       const z = await m(C, D, y, k, A);
       g(A, k);
-      for (const [V, $] of z)
-        D.sketches[V] = { ...D.sketches[V], profile: $ };
+      for (const [V, H] of z)
+        D.sketches[V] = { ...D.sketches[V], profile: H };
       const j = Xs(D);
       ln(D);
       for (const V of /* @__PURE__ */ new Set([...z.keys(), ...j]))
@@ -9611,7 +9612,7 @@ function b5(t = d0()) {
           for (const f1 of V)
             f1.from = l1.get(f1.from) ?? f1.from, f1.to && (f1.to = l1.get(f1.to) ?? f1.to);
         }
-        const $ = /* @__PURE__ */ new Map();
+        const H = /* @__PURE__ */ new Map();
         for (const l1 of Array.isArray(z.curveDimensions) ? z.curveDimensions : []) {
           const f1 = l1?.source;
           if (!f1 || f1 === "cylinder" || !Cn(f1.anchor))
@@ -9619,8 +9620,8 @@ function b5(t = d0()) {
           const M1 = wt(k, { ...f1, featureId: l1.bodyId });
           if (!M1)
             continue;
-          let N = $.get(f1.sketchId);
-          N || (N = Hc(M1.sketch.profile, U2), $.set(f1.sketchId, N)), f1.anchor = N.get(f1.anchor) ?? f1.anchor;
+          let N = H.get(f1.sketchId);
+          N || (N = Hc(M1.sketch.profile, U2), H.set(f1.sketchId, N)), f1.anchor = N.get(f1.anchor) ?? f1.anchor;
         }
         const K = z.annotations?.some((l1) => l1.kind === "aligned"), Q = z.annotations?.some((l1) => l1.kind === "radius" || l1.kind === "arc-length"), J = z.titleBlock !== void 0 ? 29 : A ? z.curveDimensions !== void 0 ? 27 : z.section?.additionalJogs !== void 0 ? 26 : z.edgeDimensions !== void 0 ? 25 : z.section?.jog !== void 0 ? 24 : z.section !== void 0 ? 23 : z.partsList === void 0 ? 21 : 22 : Q ? 20 : K ? 19 : j.length ? 18 : z.section?.jog !== void 0 ? 17 : z.annotations !== void 0 ? 11 : z.section ? 10 : 9;
         k.version < J && (k.version = J), k.drawings = x ? D.map((l1) => l1.id === y ? z : l1) : [...D, z];
@@ -9701,10 +9702,10 @@ function b5(t = d0()) {
           const l1 = Qt(J);
           l1.id = V.get(Q), l1.kind === "boolean" && (l1.inputs = l1.inputs.map((f1) => V.get(f1))), (l1.kind === "mirror" || l1.kind === "pattern") && (l1.source = V.get(l1.source)), A.nodes[l1.id] = l1;
         }
-        const $ = A.version >= 5 ? [...new Set([...D].flatMap((Q) => e.nodes[Q]?.provenance ?? []))] : [];
+        const H = A.version >= 5 ? [...new Set([...D].flatMap((Q) => e.nodes[Q]?.provenance ?? []))] : [];
         A.version < 5 && Object.hasOwn(C, "provenance") && (A.nodes[S].provenance = structuredClone(C.provenance));
         const K = A.nodes[S];
-        return $.length && (K.provenance = $), K.name = C.name, K.color = C.color, C.role && (K.role = C.role), K.transform = structuredClone(C.transform), y.resetScale && (K.transform.scale = [1, 1, 1]), C.physics && K.physics && (K.physics = { ...K.physics, densityKgM3: C.physics.densityKgM3, friction: C.physics.friction, restitution: C.physics.restitution, motion: C.physics.motion }), A.version === 1 && (A.version = 2), ht(A), [S];
+        return H.length && (K.provenance = H), K.name = C.name, K.color = C.color, C.role && (K.role = C.role), K.transform = structuredClone(C.transform), y.resetScale && (K.transform.scale = [1, 1, 1]), C.physics && K.physics && (K.physics = { ...K.physics, densityKgM3: C.physics.densityKgM3, friction: C.physics.friction, restitution: C.physics.restitution, motion: C.physics.motion }), A.version === 1 && (A.version = 2), ht(A), [S];
       });
     },
     addCode(S, x = "Code object", y = {}) {
@@ -9824,24 +9825,24 @@ function b5(t = d0()) {
         throw new Error(f("Enable parameter namespace merging when inserting a parametric model"));
       h(y.label ?? "Add shape", (C) => {
         Math.max(C.version, k.version) >= 5 && (h7(C), h7(k)), k.version >= 8 && C.version < 8 && f7(C), !C.roots.length && C.simulation === void 0 && k.version >= 8 && k.simulation && (C.simulation = structuredClone(k.simulation)), C.version = Math.max(C.version, k.version);
-        const D = new Map((k.version >= 5 ? k.provenance?.records ?? [] : []).map(($) => [$.id, U2()]));
-        k.version >= 5 && k.provenance && (C.provenance = { version: 1, records: [...C.provenance?.records ?? [], ...k.provenance.records.map(($) => ({ ...structuredClone($), id: D.get($.id) }))] });
-        const z = new Map(Object.keys(k.sketches ?? {}).map(($) => [$, U2()]));
-        for (const [$, K] of Object.entries(k.sketches ?? {})) {
+        const D = new Map((k.version >= 5 ? k.provenance?.records ?? [] : []).map((H) => [H.id, U2()]));
+        k.version >= 5 && k.provenance && (C.provenance = { version: 1, records: [...C.provenance?.records ?? [], ...k.provenance.records.map((H) => ({ ...structuredClone(H), id: D.get(H.id) }))] });
+        const z = new Map(Object.keys(k.sketches ?? {}).map((H) => [H, U2()]));
+        for (const [H, K] of Object.entries(k.sketches ?? {})) {
           C.sketches ?? (C.sketches = {});
           const Q = structuredClone(K);
-          Q.id = z.get($), Q.profile.id = U2(), delete Q.artworkSourceId, delete Q.artworkProfile, C.sketches[Q.id] = Q;
+          Q.id = z.get(H), Q.profile.id = U2(), delete Q.artworkSourceId, delete Q.artworkProfile, C.sketches[Q.id] = Q;
         }
-        const j = new Set(C.roots.map(($) => C.nodes[$].name));
-        for (const [$, K] of Object.entries(k.nodes)) {
+        const j = new Set(C.roots.map((H) => C.nodes[H].name));
+        for (const [H, K] of Object.entries(k.nodes)) {
           const Q = Qt(K);
-          k.version >= 5 && Q.provenance && (Q.provenance = Q.provenance.map((J) => D.get(J))), Q.id = A.get($), re(Q) && (Q.sketchId = z.get(Q.sketchId)), Q.kind === "boolean" && (Q.inputs = Q.inputs.map((J) => A.get(J))), (Q.kind === "mirror" || Q.kind === "pattern") && (Q.source = A.get(Q.source)), k.roots.includes($) && (Q.transform.position = Q.transform.position.map((J, l1) => J + x[l1])), C.nodes[Q.id] = Q;
+          k.version >= 5 && Q.provenance && (Q.provenance = Q.provenance.map((J) => D.get(J))), Q.id = A.get(H), re(Q) && (Q.sketchId = z.get(Q.sketchId)), Q.kind === "boolean" && (Q.inputs = Q.inputs.map((J) => A.get(J))), (Q.kind === "mirror" || Q.kind === "pattern") && (Q.source = A.get(Q.source)), k.roots.includes(H) && (Q.transform.position = Q.transform.position.map((J, l1) => J + x[l1])), C.nodes[Q.id] = Q;
         }
-        const V = k.roots.map(($) => A.get($));
+        const V = k.roots.map((H) => A.get(H));
         C.roots.push(...V);
-        for (const $ of V)
-          C.nodes[$].name = G9(C.nodes[$].name, j), j.add(C.nodes[$].name);
-        return y.mergeParameters && zy(C, k, A, x, z), k.version >= 8 && k.tracers?.length && (C.version < 8 && f7(C), C.tracers = [...C.tracers ?? [], ...k.tracers.map(($) => ({ ...structuredClone($), id: U2(), bodyId: A.get($.bodyId) }))]), k.joints?.length && (C.joints = [...C.joints ?? [], ...dd(k.joints, A, C.joints ?? [])]), V;
+        for (const H of V)
+          C.nodes[H].name = G9(C.nodes[H].name, j), j.add(C.nodes[H].name);
+        return y.mergeParameters && zy(C, k, A, x, z), k.version >= 8 && k.tracers?.length && (C.version < 8 && f7(C), C.tracers = [...C.tracers ?? [], ...k.tracers.map((H) => ({ ...structuredClone(H), id: U2(), bodyId: A.get(H.bodyId) }))]), k.joints?.length && (C.joints = [...C.joints ?? [], ...dd(k.joints, A, C.joints ?? [])]), V;
       });
     },
     add(S, x = {}) {
@@ -9899,13 +9900,13 @@ function b5(t = d0()) {
           throw new Error(f("Reference helpers cannot be combined into printable solids"));
         if (A.joints?.some((Q) => y.includes(Q.bodyA) || y.includes(Q.bodyB)))
           throw new Error(f("Detach the selected bodies’ joints before combining them"));
-        const C = S === "union" ? y.filter((Q) => A.nodes[Q].role === "hole") : [], D = y.filter((Q) => !C.includes(Q)), z = C.length > 0, j = D.length ? D : y, V = j[0], $ = A.nodes[V].physics ?? c0();
+        const C = S === "union" ? y.filter((Q) => A.nodes[Q].role === "hole") : [], D = y.filter((Q) => !C.includes(Q)), z = C.length > 0, j = D.length ? D : y, V = j[0], H = A.nodes[V].physics ?? c0();
         if (j.some((Q) => {
           const J = A.nodes[Q].physics ?? c0();
-          return J.densityKgM3 !== $.densityKgM3 || J.friction !== $.friction || J.restitution !== $.restitution || J.motion !== $.motion;
+          return J.densityKgM3 !== H.densityKgM3 || J.friction !== H.friction || J.restitution !== H.restitution || J.motion !== H.motion;
         }))
           throw new Error(f("Combined solids must share density, contact material and motion type. Keep different materials as separate bodies."));
-        A.nodes[k] = { id: k, kind: "boolean", operation: S, inputs: y, ...z ? { useHoleRoles: !0, ...D.length ? {} : { role: "hole" } } : {}, name: S[0].toUpperCase() + S.slice(1), color: A.nodes[V].color, transform: G2(), physics: { ...$, intent: "rigid", parameters: void 0, sourcePreset: void 0, collisionHint: void 0 } }, z && (A.version = Math.max(A.version, 7));
+        A.nodes[k] = { id: k, kind: "boolean", operation: S, inputs: y, ...z ? { useHoleRoles: !0, ...D.length ? {} : { role: "hole" } } : {}, name: S[0].toUpperCase() + S.slice(1), color: A.nodes[V].color, transform: G2(), physics: { ...H, intent: "rigid", parameters: void 0, sourcePreset: void 0, collisionHint: void 0 } }, z && (A.version = Math.max(A.version, 7));
         const K = Math.min(...y.map((Q) => A.roots.indexOf(Q)));
         return A.roots = A.roots.filter((Q) => !y.includes(Q)), A.roots.splice(K, 0, k), [k];
       }), k;
@@ -9948,8 +9949,8 @@ function b5(t = d0()) {
               l1.sketchId = f1;
             }
             return x.nodes[J] = l1, J;
-          }, $ = V(z), K = x.nodes[$];
-          K.name = G9(K.name.replace(/(?: copy| Kopie)(?: \d+)?$/, "") + f(" copy"), new Set(x.roots.map((Q) => x.nodes[Q].name))), K.transform.position[0] += 10, x.roots.push($), A.push($);
+          }, H = V(z), K = x.nodes[H];
+          K.name = G9(K.name.replace(/(?: copy| Kopie)(?: \d+)?$/, "") + f(" copy"), new Set(x.roots.map((Q) => x.nodes[Q].name))), K.transform.position[0] += 10, x.roots.push(H), A.push(H);
           for (const [Q, J] of j)
             D.set(Q, J);
           x.parametric && x.parametric.bindings.push(...k.filter((Q) => j.has(Q.nodeId)).map((Q) => ({ ...Q, nodeId: j.get(Q.nodeId), expression: Q.nodeId === z && Q.property === "positionX" ? Ny(Q.expression, x.parametric, 10) : Q.expression })));
@@ -10357,7 +10358,7 @@ function wl(t, e = []) {
   const x = /* @__PURE__ */ new Map(), y = /* @__PURE__ */ new WeakMap(), k = /* @__PURE__ */ new WeakMap(), A = /* @__PURE__ */ new Map();
   let C = /* @__PURE__ */ new Map();
   const D = /* @__PURE__ */ new Set();
-  let z = /* @__PURE__ */ new Map(), j = /* @__PURE__ */ new Map(), V = 0, $, K = 0;
+  let z = /* @__PURE__ */ new Map(), j = /* @__PURE__ */ new Map(), V = 0, H, K = 0;
   const Q = /* @__PURE__ */ new WeakSet(), J = /* @__PURE__ */ new WeakMap();
   let l1 = 0;
   const f1 = /* @__PURE__ */ new WeakMap();
@@ -10537,7 +10538,7 @@ function wl(t, e = []) {
         if (L === "*" && (G.some(Array.isArray) || e1.some(Array.isArray))) {
           const y1 = G.every(Array.isArray) ? G : [G], g1 = e1.every(Array.isArray) ? e1 : e1.map((D1) => [D1]);
           (!y1.every((D1) => Array.isArray(D1) && D1.length === g1.length) || !g1.length || !g1.every((D1) => Array.isArray(D1) && D1.length === g1[0].length)) && I("matrix dimensions");
-          const v1 = y1.map((D1) => g1[0].map((H1, e2) => D1.reduce((H, w1, R1) => E1("+", H, E1("*", w1, g1[R1][e2])), "0")));
+          const v1 = y1.map((D1) => g1[0].map((H1, e2) => D1.reduce(($, w1, R1) => E1("+", $, E1("*", w1, g1[R1][e2])), "0")));
           return G.every(Array.isArray) ? e1.every(Array.isArray) ? v1 : v1.map((D1) => D1[0]) : v1[0];
         }
         return G.length !== e1.length && I("vector dimension mismatch"), L === "*" ? G.map((y1, g1) => Z1(E1("*", y1, e1[g1]))).reduce((y1, g1) => m1(`(${y1}) + (${g1})`), "0") : (["+", "-"].includes(L) || I("vector operator " + L), G.map((y1, g1) => E1(L, y1, e1[g1])));
@@ -10606,9 +10607,9 @@ function wl(t, e = []) {
       return m1(`rangeAt(${L.start},${L.end},${L.step},${Z1(G)})`);
     if (L instanceof I3) {
       if (L.body instanceof I0 && L.input instanceof L3) {
-        const { yes: H1, no: e2, condition: H } = L.body, w1 = Array.isArray(H1) && H1.length === 1 && Array.isArray(e2) && e2.length === 0, R1 = Array.isArray(e2) && e2.length === 1 && Array.isArray(H1) && H1.length === 0;
+        const { yes: H1, no: e2, condition: $ } = L.body, w1 = Array.isArray(H1) && H1.length === 1 && Array.isArray(e2) && e2.length === 0, R1 = Array.isArray(e2) && e2.length === 1 && Array.isArray(H1) && H1.length === 0;
         if (w1 || R1) {
-          const F1 = m1(`filterAt(${L.variable},${L.input.start},${L.input.end},${L.input.step},${w1 ? H : `!(${H})`},${Z1(G)})`);
+          const F1 = m1(`filterAt(${L.variable},${L.input.start},${L.input.end},${L.input.step},${w1 ? $ : `!(${$})`},${Z1(G)})`);
           return _1((w1 ? H1 : e2)[0], L.variable, F1);
         }
       }
@@ -10743,17 +10744,17 @@ function wl(t, e = []) {
       return G.forEach((g1) => y1(g1)), C1.every((g1) => g1 instanceof f0) ? new f0(C1.map((g1) => g1.text).join("")) : new i9(C1);
     }
     if (L === "rands" && (G.length === 3 || G.length === 4) && (x1(G[2]) ?? 65) <= 64 && G.every((C1) => typeof C1 == "string" && x1(C1) !== void 0)) {
-      (G.length < 3 || G.length > 4 || G.some((H) => typeof H != "string" || H === "true" || H === "false")) && I("rands requires three or four constant numeric arguments");
+      (G.length < 3 || G.length > 4 || G.some(($) => typeof $ != "string" || $ === "true" || $ === "false")) && I("rands requires three or four constant numeric arguments");
       const C1 = G.map(x1);
-      C1.some((H) => H === void 0 || !Number.isFinite(H)) && I("rands arguments must be finite and independent of parameters");
+      C1.some(($) => $ === void 0 || !Number.isFinite($)) && I("rands arguments must be finite and independent of parameters");
       const [y1, g1, v1, D1] = C1;
       (y1 > g1 || !Number.isFinite(g1 - y1) || !Number.isSafeInteger(v1) || v1 < 0) && I("rands range and integer count"), v1 > 64 && P(f("Loop exceeds 64 values")), r1(v1), b("scad.random.sequence", f("Random samples use Brickwright’s generator and are fixed in the imported snapshot."));
       let H1;
-      D1 === void 0 ? (b("scad.random.sequence", f("Unseeded random calls use a source-derived stream for reproducible imports.")), H1 = $ ?? t1(t)) : H1 = t1(String(D1));
+      D1 === void 0 ? (b("scad.random.sequence", f("Unseeded random calls use a source-derived stream for reproducible imports.")), H1 = H ?? t1(t)) : H1 = t1(String(D1));
       const e2 = [];
-      for (let H = 0; H < v1; H++)
+      for (let $ = 0; $ < v1; $++)
         H1 = T(H1), e2.push(String(y1 + (g1 - y1) * (H1 / 4294967296)));
-      return D1 === void 0 && ($ = H1, K += v1), e2;
+      return D1 === void 0 && (H = H1, K += v1), e2;
     }
     if (L === "rands") {
       (G.length < 3 || G.length > 4) && I("rands arguments");
@@ -10782,7 +10783,7 @@ function wl(t, e = []) {
       const D1 = y1 instanceof f0 ? [...y1.text].map((w1) => new f0(w1)) : Array.isArray(y1) ? y1 : I("search table"), H1 = typeof C1 == "string", e2 = C1 instanceof f0 ? [...C1.text].map((w1) => new f0(w1)) : Array.isArray(C1) ? C1 : [C1];
       if (C1 === "true" || C1 === "false")
         return new a0();
-      const H = e2.map((w1) => {
+      const $ = e2.map((w1) => {
         const R1 = [];
         for (let F1 = 0; F1 < D1.length; F1++) {
           const c2 = D1[F1], q2 = Array.isArray(c2) ? c2[v1] : c2, d2 = E1("==", w1, q2 ?? new a0()), N2 = x1(d2);
@@ -10791,7 +10792,7 @@ function wl(t, e = []) {
         }
         return R1;
       });
-      return H1 ? H[0] : g1 === 1 ? C1 instanceof f0 ? H.flat() : H.map((w1) => w1[0] ?? []) : H;
+      return H1 ? $[0] : g1 === 1 ? C1 instanceof f0 ? $.flat() : $.map((w1) => w1[0] ?? []) : $;
     }
     if (L === "lookup") {
       (G.length !== 2 || !Array.isArray(G[1]) || G[1].length < 1 || !G[1].every((g1) => Array.isArray(g1) && g1.length === 2 && x1(g1[0]) !== void 0)) && I("lookup table");
@@ -10799,8 +10800,8 @@ function wl(t, e = []) {
       C1.some((g1, v1) => v1 > 0 && x1(g1[0]) === x1(C1[v1 - 1][0])) && I("duplicate lookup key");
       let y1 = C1.at(-1)[1];
       for (let g1 = C1.length - 2; g1 >= 0; g1--) {
-        const [v1, D1] = C1[g1], [H1, e2] = C1[g1 + 1], H = E1("+", D1, E1("*", E1("/", E1("-", G[0], v1), E1("-", H1, v1)), E1("-", e2, D1)));
-        y1 = q1(E1("<=", G[0], H1), H, y1);
+        const [v1, D1] = C1[g1], [H1, e2] = C1[g1 + 1], $ = E1("+", D1, E1("*", E1("/", E1("-", G[0], v1), E1("-", H1, v1)), E1("-", e2, D1)));
+        y1 = q1(E1("<=", G[0], H1), $, y1);
       }
       return q1(E1("<=", G[0], C1[0][0]), C1[0][1], y1);
     }
@@ -10987,9 +10988,9 @@ function wl(t, e = []) {
             if (o1() === ":") {
               b1();
               const e2 = h2(L + 1, [":"]);
-              let H = Z1(H1), w1 = Z1(e2), R1 = "1";
-              o1() === ":" ? (b1(), R1 = Z1(e2), w1 = Z1(h2(L + 1))) : (H = Z1(O1("min", [H1, e2])), w1 = Z1(O1("max", [H1, e2]))), T1("]");
-              for (const F1 of [H, w1, R1]) {
+              let $ = Z1(H1), w1 = Z1(e2), R1 = "1";
+              o1() === ":" ? (b1(), R1 = Z1(e2), w1 = Z1(h2(L + 1))) : ($ = Z1(O1("min", [H1, e2])), w1 = Z1(O1("max", [H1, e2]))), T1("]");
+              for (const F1 of [$, w1, R1]) {
                 (F1 === "true" || F1 === "false") && Z(f("Expected a numeric OpenSCAD argument"));
                 let c2 = !1;
                 try {
@@ -11000,7 +11001,7 @@ function wl(t, e = []) {
                   c2 || Z(f("Expected a numeric OpenSCAD argument"));
                 }
               }
-              x1(R1) === 0 && Z(f("Range step must be nonzero")), v1 = new L3(H, w1, R1);
+              x1(R1) === 0 && Z(f("Range step must be nonzero")), v1 = new L3($, w1, R1);
             } else {
               const e2 = [[H1]];
               for (; o1() === "," && (b1(), o1() !== "]"); )
@@ -11033,8 +11034,8 @@ function wl(t, e = []) {
             b1();
           }
           T1(")"), v1 = h2(L + 1, G);
-          const H = q0(e2);
-          H && (v1 = F0(H, v1));
+          const $ = q0(e2);
+          $ && (v1 = F0($, v1));
         } finally {
           C = D1;
         }
@@ -11052,12 +11053,12 @@ function wl(t, e = []) {
         if (D1[g1]) {
           const H1 = g0(g1, i[s - 1].at), e2 = D1[g1];
           H1.allowed(e2, e2.length);
-          const H = [];
+          const $ = [];
           for (let w1 = 0; w1 < e2.length; w1++) {
             const R1 = H1.use(e2[w1], w1);
-            R1 !== void 0 ? H[w1] = R1 : g1 === "search" && w1 >= 2 ? H[w1] = w1 === 2 ? "1" : "0" : (w1 < e2.length - 1 || g1 === "lookup") && I(g1 + " arguments");
+            R1 !== void 0 ? $[w1] = R1 : g1 === "search" && w1 >= 2 ? $[w1] = w1 === 2 ? "1" : "0" : (w1 < e2.length - 1 || g1 === "lookup") && I(g1 + " arguments");
           }
-          v1 = O1(g1, H);
+          v1 = O1(g1, $);
         } else {
           b1();
           const H1 = [];
@@ -11281,8 +11282,8 @@ function wl(t, e = []) {
           const D1 = s;
           let H1 = 0;
           for (; o1() !== ";" || H1; ) {
-            const H = b1().text;
-            (H === "(" || H === "[") && H1++, (H === ")" || H === "]") && H1--, (H1 < 0 || H1 > 32) && P(f("Expression nesting exceeds 32")), (H === "{" || H === "}" || s > e1) && I("library variable expression", v1.at);
+            const $ = b1().text;
+            ($ === "(" || $ === "[") && H1++, ($ === ")" || $ === "]") && H1--, (H1 < 0 || H1 > 32) && P(f("Expression nesting exceeds 32")), ($ === "{" || $ === "}" || s > e1) && I("library variable expression", v1.at);
           }
           const e2 = s;
           T1(";"), D1 === e2 && Z(f("Expected a complete dimensional expression"), v1.at), W1.set(v1.text, new ti(D1, e2, W1, void 0, z, j));
@@ -11351,10 +11352,10 @@ function wl(t, e = []) {
     j = new Map(j), v1 && v.add(j);
     let D1 = 0, H1 = 0, e2 = 0;
     for (; s < i.length; ) {
-      const H = o1();
-      if (H === "}" && D1 === 0)
+      const $ = o1();
+      if ($ === "}" && D1 === 0)
         break;
-      if (D1 === 0 && H1 === 0 && e2 === 0 && (H === "module" || H === "function")) {
+      if (D1 === 0 && H1 === 0 && e2 === 0 && ($ === "module" || $ === "function")) {
         const w1 = s;
         a2(y1), g1.set(w1, s);
         continue;
@@ -11372,11 +11373,11 @@ function wl(t, e = []) {
         T1(";"), F1 === q2 && Z(f("Expected a complete dimensional expression"), R1.at), y1.set(R1.text, new ti(F1, q2, y1, k1, z, j)), g1.set(w1, s), ++o > 4096 && P(f("OpenSCAD construction limit exceeded"));
         continue;
       }
-      H === "{" && D1++, H === "}" && D1--, H === "(" && H1++, H === ")" && H1--, H === "[" && e2++, H === "]" && e2--, b1();
+      $ === "{" && D1++, $ === "}" && D1--, $ === "(" && H1++, $ === ")" && H1--, $ === "[" && e2++, $ === "]" && e2--, b1();
     }
     s = a1, C = y1;
     try {
-      const H = [];
+      const $ = [];
       for (; o1() !== "}"; ) {
         o1() || Z(f("Unclosed OpenSCAD block"));
         const w1 = g1.get(s);
@@ -11384,9 +11385,9 @@ function wl(t, e = []) {
           s = w1;
           continue;
         }
-        H.push(e1 ? f2(L + 1) : C2(L + 1));
+        $.push(e1 ? f2(L + 1) : C2(L + 1));
       }
-      return T1("}"), H;
+      return T1("}"), $;
     } finally {
       C = k1, z = W1, j = C1;
     }
@@ -11500,18 +11501,18 @@ function wl(t, e = []) {
     C = D1, z = G.moduleScope, j = G.functionScope;
     try {
       for (let e2 = 0; e2 < G.parameters.length; e2++) {
-        const H = G.parameters[e2];
-        let w1 = e1.use(H.name, e2);
-        if (w1 === void 0 && H.start !== void 0) {
-          s = H.start, C = new Map([...G.scope ?? [], ...v1]);
+        const $ = G.parameters[e2];
+        let w1 = e1.use($.name, e2);
+        if (w1 === void 0 && $.start !== void 0) {
+          s = $.start, C = new Map([...G.scope ?? [], ...v1]);
           try {
             w1 = h2();
           } finally {
             C = D1;
           }
-          s !== H.end && I(`${L} default expression`);
+          s !== $.end && I(`${L} default expression`);
         }
-        w1 === void 0 && (w1 = new a0()), D1.set(H.name, w1);
+        w1 === void 0 && (w1 = new a0()), D1.set($.name, w1);
       }
       s = G.start;
       const H1 = k1();
@@ -11544,7 +11545,7 @@ function wl(t, e = []) {
       if (g1 !== void 0)
         return g1;
       const D1 = U3("function", a1, k1, e1.at, () => {
-        const H1 = h2(), e2 = q0([...a1.parameters.map((H) => O(H.name)), ...k1.positional, ...k1.named.values()]);
+        const H1 = h2(), e2 = q0([...a1.parameters.map(($) => O($.name)), ...k1.positional, ...k1.named.values()]);
         return e2 ? F0(e2, H1) : H1;
       });
       return K !== v1 ? Q.add(a1) : !Q.has(a1) && l1 < 2048 && (y1.set(C1, D1), J.set(a1, y1), l1++), D1;
@@ -11585,10 +11586,10 @@ function wl(t, e = []) {
         while (J3.has(D1));
         J3.add(D1);
         let H1, e2 = [];
-        const H = h2();
-        H instanceof L3 ? H1 = [H.start, H.end, H.step] : H instanceof I3 || H instanceof S3 ? (H1 = ["0", `(${Z1(N1(H))})-1`, "1"], a1.set(v1.text, U1(H, D1))) : e2 = Array.isArray(H) ? H : H instanceof a0 ? [] : [H];
+        const $ = h2();
+        $ instanceof L3 ? H1 = [$.start, $.end, $.step] : $ instanceof I3 || $ instanceof S3 ? (H1 = ["0", `(${Z1(N1($))})-1`, "1"], a1.set(v1.text, U1($, D1))) : e2 = Array.isArray($) ? $ : $ instanceof a0 ? [] : [$];
         const w1 = a1.get(v1.text);
-        if (k1.push({ variable: v1.text, generated: D1, range: H1, items: e2, ...H instanceof I3 || H instanceof S3 ? { mapped: w1 } : {} }), a1.set(v1.text, H instanceof I3 || H instanceof S3 ? w1 : D1), k1.length > 8 && P(f("OpenSCAD construction limit exceeded")), o1() !== ",")
+        if (k1.push({ variable: v1.text, generated: D1, range: H1, items: e2, ...$ instanceof I3 || $ instanceof S3 ? { mapped: w1 } : {} }), a1.set(v1.text, $ instanceof I3 || $ instanceof S3 ? w1 : D1), k1.length > 8 && P(f("OpenSCAD construction limit exceeded")), o1() !== ",")
           break;
         b1();
       }
@@ -11745,7 +11746,7 @@ function wl(t, e = []) {
     const H1 = L.use("index", 0);
     if (H1 === void 0)
       return a1 ? `union2d(${D1.join(",")})` : P2(D1);
-    const e2 = Array.isArray(H1) ? H1 : [H1], H = e2.map((w1) => {
+    const e2 = Array.isArray(H1) ? H1 : [H1], $ = e2.map((w1) => {
       const R1 = Z1(w1), F1 = x1(R1);
       if (F1 !== void 0)
         return Number.isInteger(F1) && F1 >= 0 && F1 < D1.length ? D1[F1] : a1 ? "union2d()" : "empty()";
@@ -11754,7 +11755,7 @@ function wl(t, e = []) {
         c2 = `choose${a1 ? "2d" : ""}((${R1}) == ${q2}, ${D1[q2]}, ${c2})`;
       return c2;
     });
-    return a1 ? `union2d(${H.join(",")})` : P2(H);
+    return a1 ? `union2d(${$.join(",")})` : P2($);
   }
   function G1(L, G) {
     const e1 = C;
@@ -11901,7 +11902,7 @@ function wl(t, e = []) {
           return `affine2d(${Z1(Z2[0])},${Z1(Z2[1])},0,${Z1(Z2[2])},${Z1(Z2[3])},0,${H1()})`;
         }
         typeof v1 != "string" && I("profile rotation angle", e1.at);
-        const H = P1(e2), w1 = Z1(O1("norm", [H])), R1 = H.map((w3) => E1("/", w3, w1)), [F1, c2, q2] = R1, d2 = O1("cos", [v1]), N2 = O1("sin", [v1]), H0 = E1("-", "1", d2), A0 = [E1("+", E1("*", H0, E1("*", F1, F1)), d2), E1("-", E1("*", H0, E1("*", F1, c2)), E1("*", N2, q2)), E1("+", E1("*", H0, E1("*", F1, c2)), E1("*", N2, q2)), E1("+", E1("*", H0, E1("*", c2, c2)), d2)];
+        const $ = P1(e2), w1 = Z1(O1("norm", [$])), R1 = $.map((w3) => E1("/", w3, w1)), [F1, c2, q2] = R1, d2 = O1("cos", [v1]), N2 = O1("sin", [v1]), H0 = E1("-", "1", d2), A0 = [E1("+", E1("*", H0, E1("*", F1, F1)), d2), E1("-", E1("*", H0, E1("*", F1, c2)), E1("*", N2, q2)), E1("+", E1("*", H0, E1("*", F1, c2)), E1("*", N2, q2)), E1("+", E1("*", H0, E1("*", c2, c2)), d2)];
         return x1(w1) === 0 && I("zero rotation axis", e1.at), `affine2d(${Z1(A0[0])},${Z1(A0[1])},0,${Z1(A0[2])},${Z1(A0[3])},0,${H1()})`;
       } else if (typeof v1 == "string" && a1 === "scale")
         D1 = [v1, v1];
@@ -11918,11 +11919,11 @@ function wl(t, e = []) {
       const e2 = (w1, R1) => {
         const F1 = k1.get(w1) ?? new f0(R1);
         return F1 instanceof f0 || I("text alignment", e1.at), JSON.stringify(F1.text);
-      }, H = (w1, R1) => {
+      }, $ = (w1, R1) => {
         if (w1 instanceof I0)
-          return `choose2d(${w1.condition}, ${H(w1.yes, R1)}, ${H(w1.no, R1)})`;
+          return `choose2d(${w1.condition}, ${$(w1.yes, R1)}, ${$(w1.no, R1)})`;
         if (R1 instanceof I0)
-          return `choose2d(${R1.condition}, ${H(w1, R1.yes)}, ${H(w1, R1.no)})`;
+          return `choose2d(${R1.condition}, ${$(w1, R1.yes)}, ${$(w1, R1.no)})`;
         if (w1 instanceof a0)
           return "union2d()";
         if (!(w1 instanceof f0) && !(w1 instanceof i9) || !(R1 instanceof f0))
@@ -11930,11 +11931,11 @@ function wl(t, e = []) {
         const F1 = R1.text.toLowerCase(), c2 = F1.includes("mono") ? "mono" : F1.includes("serif") ? "serif" : "sans";
         return `text2d(${w1 instanceof i9 ? "formatSCAD(" + w1.parts.map((q2) => q2 instanceof f0 ? JSON.stringify(q2.text) : q2).join(",") + ")" : JSON.stringify(w1.text)}, ${Z1(C1("size", 1, "10"))}, ${JSON.stringify(c2)}, ${e2("halign", "left")}, ${e2("valign", "baseline")}, ${Z1(k1.get("spacing"), "1")}, 8)`;
       };
-      return H(v1, D1);
+      return $(v1, D1);
     }
     if (a1 === "polygon") {
       y1(["points", "paths", "convexity"], 3);
-      const v1 = C1("points", 0), D1 = C1("paths", 1), H1 = (e2, H) => e2 instanceof I0 ? `choose2d(${e2.condition}, ${H1(e2.yes, H)}, ${H1(e2.no, H)})` : H instanceof I0 ? `choose2d(${H.condition}, ${H1(e2, H.yes)}, ${H1(e2, H.no)})` : e2 instanceof a0 || Array.isArray(e2) && e2.length < 3 ? (b("scad.polygon.empty-input", f("Undefined or empty polygon inputs contribute no geometry.")), "union2d()") : e2 instanceof I3 || e2 instanceof S3 ? `polygonGenerated2d(${$1(e2)}${Array.isArray(H) ? ", [" + H.map((w1) => "[" + w1.map((R1) => Z1(R1)).join(",") + "]").join(",") + "]" : ""})` : !Array.isArray(e2) || !e2.every((w1) => Array.isArray(w1) && w1.length === 2) ? Z(f("Expected an OpenSCAD polygon point list"), e1.at) : (H !== void 0 && !(H instanceof a0) && (!Array.isArray(H) || !H.every((w1) => Array.isArray(w1))) && I("polygon paths", e1.at), `polygon2d([${e2.map((w1) => "[" + w1.map((R1) => Z1(R1)).join(",") + "]").join(",")}]${Array.isArray(H) ? ", [" + H.map((w1) => "[" + w1.map((R1) => Z1(R1)).join(",") + "]").join(",") + "]" : ""})`);
+      const v1 = C1("points", 0), D1 = C1("paths", 1), H1 = (e2, $) => e2 instanceof I0 ? `choose2d(${e2.condition}, ${H1(e2.yes, $)}, ${H1(e2.no, $)})` : $ instanceof I0 ? `choose2d(${$.condition}, ${H1(e2, $.yes)}, ${H1(e2, $.no)})` : e2 instanceof a0 || Array.isArray(e2) && e2.length < 3 ? (b("scad.polygon.empty-input", f("Undefined or empty polygon inputs contribute no geometry.")), "union2d()") : e2 instanceof I3 || e2 instanceof S3 ? `polygonGenerated2d(${$1(e2)}${Array.isArray($) ? ", [" + $.map((w1) => "[" + w1.map((R1) => Z1(R1)).join(",") + "]").join(",") + "]" : ""})` : !Array.isArray(e2) || !e2.every((w1) => Array.isArray(w1) && w1.length === 2) ? Z(f("Expected an OpenSCAD polygon point list"), e1.at) : ($ !== void 0 && !($ instanceof a0) && (!Array.isArray($) || !$.every((w1) => Array.isArray(w1))) && I("polygon paths", e1.at), `polygon2d([${e2.map((w1) => "[" + w1.map((R1) => Z1(R1)).join(",") + "]").join(",")}]${Array.isArray($) ? ", [" + $.map((w1) => "[" + w1.map((R1) => Z1(R1)).join(",") + "]").join(",") + "]" : ""})`);
       return H1(v1, D1);
     }
     if (a1 === "square") {
@@ -11976,23 +11977,23 @@ function wl(t, e = []) {
       return b("scad.preview.highlight", f("Preview highlights are omitted; rendered geometry is retained.")), C2(L + 1);
     if (e1 === "!") {
       E = !0;
-      const H = C2(L + 1);
-      return p.push(H), H;
+      const $ = C2(L + 1);
+      return p.push($), $;
     }
     if (e1 === "assert")
       return g2(L);
     if (e1 === "let" || e1 === "assign")
       return y3(e1, L);
     if ((e1 === "child" || e1 === "children") && !z.has(e1)) {
-      const H = g0(e1, G.at);
-      return S = q0([...H.positional, ...H.named.values()]), T1(";"), J1(H, G.at, L);
+      const $ = g0(e1, G.at);
+      return S = q0([...$.positional, ...$.named.values()]), T1(";"), J1($, G.at, L);
     }
     if (e1 === "echo") {
       T1("(");
-      let H = 1;
-      for (; H; ) {
+      let $ = 1;
+      for (; $; ) {
         const w1 = b1().text;
-        w1 === "assert" && I("assertion inside omitted echo"), w1 === "(" && H++, w1 === ")" && H--;
+        w1 === "assert" && I("assertion inside omitted echo"), w1 === "(" && $++, w1 === ")" && $--;
       }
       return b("scad.console.echo", f("Echo console output is omitted from the converted model.")), o1() === ";" ? (b1(), "empty()") : C2(L + 1);
     }
@@ -12000,11 +12001,11 @@ function wl(t, e = []) {
       return Q3(L);
     if (e1 === "if") {
       T1("(");
-      const H = L1(h2());
+      const $ = L1(h2());
       T1(")");
-      const w1 = x1(H);
+      const w1 = x1($);
       let R1 = "empty()", F1 = "empty()";
-      return w1 === 0 ? S0() : R1 = o1() === "{" ? e0(L + 1) : C2(L + 1), o1() === "else" && (b1(), w1 !== void 0 && w1 !== 0 ? S0() : F1 = o1() === "{" ? e0(L + 1) : C2(L + 1)), w1 !== void 0 ? w1 ? R1 : F1 : `choose(${H}, ${R1}, ${F1})`;
+      return w1 === 0 ? S0() : R1 = o1() === "{" ? e0(L + 1) : C2(L + 1), o1() === "else" && (b1(), w1 !== void 0 && w1 !== 0 ? S0() : F1 = o1() === "{" ? e0(L + 1) : C2(L + 1)), w1 !== void 0 ? w1 ? R1 : F1 : `choose(${$}, ${R1}, ${F1})`;
     }
     if (e1 === ";")
       return "empty()";
@@ -12019,36 +12020,36 @@ function wl(t, e = []) {
     if (e1 === "color" || e1 === "render") {
       if (C1(e1 === "color" ? ["c", "alpha"] : ["convexity"], e1 === "color" ? 2 : 1), e1 === "color") {
         h1(W1("c", 0), G.at);
-        const H = W1("alpha", 1);
-        if (H !== void 0) {
-          const w1 = x1(H);
+        const $ = W1("alpha", 1);
+        if ($ !== void 0) {
+          const w1 = x1($);
           (w1 === void 0 || w1 < 0 || w1 > 1) && I("constant color alpha", G.at);
         }
         b("scad.appearance.colours", f("Source colours and transparency are not retained; solid geometry is preserved."));
       }
       return G1(a1, () => o1() === "{" ? e0(L + 1) : C2(L + 1));
     }
-    const g1 = (H, w1) => {
-      const R1 = D3(H);
+    const g1 = ($, w1) => {
+      const R1 = D3($);
       return R1 === "true" ? "0" : R1 === "false" ? `(${w1}) / 2` : `(${R1}) ? 0 : (${w1}) / 2`;
-    }, v1 = (H = "1") => $0(a1, H);
+    }, v1 = ($ = "1") => $0(a1, $);
     if (["union", "difference", "intersection", "hull", "minkowski"].includes(e1)) {
       C1([], 0);
-      const H = [];
-      return o1() === "{" ? H.push(...w2(L)) : H.push(C2(L + 1)), H.length ? H.length === 1 && e1 !== "hull" ? H[0] : `${e1 === "hull" || e1 === "minkowski" ? e1 : e1 === "difference" ? "subtract" : e1 === "intersection" ? "intersect" : "union"}(${H.join(", ")})` : "empty()";
+      const $ = [];
+      return o1() === "{" ? $.push(...w2(L)) : $.push(C2(L + 1)), $.length ? $.length === 1 && e1 !== "hull" ? $[0] : `${e1 === "hull" || e1 === "minkowski" ? e1 : e1 === "difference" ? "subtract" : e1 === "intersection" ? "intersect" : "union"}(${$.join(", ")})` : "empty()";
     }
     if (e1 === "resize") {
       C1(["newsize", "auto"], 2);
-      const H = W1("newsize", 0), w1 = P1(Array.isArray(H) && H.length > 0 && H.length < 3 ? [...H, ...Array(3 - H.length).fill("0")] : H), R1 = W1("auto", 1, "false"), F1 = Q0(R1, 3);
+      const $ = W1("newsize", 0), w1 = P1(Array.isArray($) && $.length > 0 && $.length < 3 ? [...$, ...Array(3 - $.length).fill("0")] : $), R1 = W1("auto", 1, "false"), F1 = Q0(R1, 3);
       return `resize([${w1.join(", ")}], ${F1.every((c2) => c2 === "false") ? "" : `[${F1.join(", ")}], `}${o1() === "{" ? e0(L + 1) : C2(L + 1)})`;
     }
     if (["translate", "rotate", "scale", "mirror"].includes(e1)) {
       C1(e1 === "rotate" ? ["a", "v"] : ["v"], e1 === "rotate" ? 2 : 1);
-      let H = W1(e1 === "rotate" ? "a" : "v", 0, e1 === "mirror" ? ["1", "0", "0"] : void 0);
-      if ((e1 === "rotate" || e1 === "mirror") && Array.isArray(H) && H.length === 2 && (H = [...H, "0"]), e1 === "rotate" && typeof H == "string" && W1("v", 1) !== void 0)
-        return `axisRotate([${P1(W1("v", 1)).join(", ")}], ${H}, ${G1(a1, () => o1() === "{" ? e0(L + 1) : C2(L + 1))})`;
-      let w1 = e1 === "translate" && Array.isArray(H) && H.length === 2 ? [...H.map((F1) => Z1(F1)), "0"] : e1 === "rotate" && typeof H == "string" ? ["0", "0", H] : P1(H, e1 === "scale");
-      e1 === "translate" && Array.isArray(H) && H.length === 2 && (c = !0, w1 = [...H.map((F1) => Z1(F1)), "0"]);
+      let $ = W1(e1 === "rotate" ? "a" : "v", 0, e1 === "mirror" ? ["1", "0", "0"] : void 0);
+      if ((e1 === "rotate" || e1 === "mirror") && Array.isArray($) && $.length === 2 && ($ = [...$, "0"]), e1 === "rotate" && typeof $ == "string" && W1("v", 1) !== void 0)
+        return `axisRotate([${P1(W1("v", 1)).join(", ")}], ${$}, ${G1(a1, () => o1() === "{" ? e0(L + 1) : C2(L + 1))})`;
+      let w1 = e1 === "translate" && Array.isArray($) && $.length === 2 ? [...$.map((F1) => Z1(F1)), "0"] : e1 === "rotate" && typeof $ == "string" ? ["0", "0", $] : P1($, e1 === "scale");
+      e1 === "translate" && Array.isArray($) && $.length === 2 && (c = !0, w1 = [...$.map((F1) => Z1(F1)), "0"]);
       const R1 = G1(a1, () => o1() === "{" ? e0(L) : C2(L + 1));
       return `${e1 === "translate" ? "move" : e1}([${w1.join(", ")}], ${R1})`;
     }
@@ -12056,34 +12057,34 @@ function wl(t, e = []) {
       return C1(["angle", "convexity", "$fn"], 0), `revolve(${G1(a1, () => f2(L + 1))}, ${Z1(a1.get("angle"), "360")}, ${v1()})`;
     if (e1 === "linear_extrude") {
       a1.has("v") && I("linear_extrude direction vector", G.at), C1(["height", "center", "convexity", "twist", "slices", "scale", "$fn"], 6);
-      const H = Z1(W1("height", 0, "1")), w1 = Z1(W1("twist", 3), "0"), R1 = W1("scale", 5) ?? "1", F1 = typeof R1 == "string" ? [R1, R1] : R1;
+      const $ = Z1(W1("height", 0, "1")), w1 = Z1(W1("twist", 3), "0"), R1 = W1("scale", 5) ?? "1", F1 = typeof R1 == "string" ? [R1, R1] : R1;
       (!Array.isArray(F1) || F1.length !== 2 || !F1.every((w3) => typeof w3 == "string")) && I("linear_extrude scale", G.at);
       const c2 = W1("slices", 4), q2 = c2 === void 0 ? void 0 : x1(c2);
       q2 !== void 0 && Math.floor(q2) < 1 && (x1(w1) !== 0 || F1.some((w3) => x1(w3) !== 1)) && I("automatic slices for twisted/tapered extrusion", G.at);
-      const d2 = Z1(c2, w1 === "0" ? "1" : Z1(a1.get("$fn") ?? O("$fn"), r)), N2 = c2 === void 0 ? d2 : m1(`((${w1})==0 && (${F1[0]})==1 && (${F1[1]})==1) ? max(1,floor(${d2})) : floor(${d2})`), H0 = W0(`extrudeProfile(${H}, ${G1(a1, () => f2(L + 1))}, -(${w1}), ${N2}, ${F1.join(", ")})`, [H]), A0 = D3(W1("center", 1));
-      return A0 === "false" ? H0 : `move([0, 0, (${A0}) ? -(${H}) / 2 : 0], ${H0})`;
+      const d2 = Z1(c2, w1 === "0" ? "1" : Z1(a1.get("$fn") ?? O("$fn"), r)), N2 = c2 === void 0 ? d2 : m1(`((${w1})==0 && (${F1[0]})==1 && (${F1[1]})==1) ? max(1,floor(${d2})) : floor(${d2})`), H0 = W0(`extrudeProfile(${$}, ${G1(a1, () => f2(L + 1))}, -(${w1}), ${N2}, ${F1.join(", ")})`, [$]), A0 = D3(W1("center", 1));
+      return A0 === "false" ? H0 : `move([0, 0, (${A0}) ? -(${$}) / 2 : 0], ${H0})`;
     }
     if (T1(";"), e1 === "polyhedron") {
       C1(["points", "faces", "triangles", "convexity"], 2);
-      const H = W1("points", 0), w1 = W1("faces", 1) ?? a1.get("triangles");
-      (!Array.isArray(H) || !Array.isArray(w1) || !H.every((F1) => Array.isArray(F1) && F1.length === 3) || !w1.every((F1) => Array.isArray(F1) && F1.length >= 3)) && I("polyhedron points/faces", G.at);
+      const $ = W1("points", 0), w1 = W1("faces", 1) ?? a1.get("triangles");
+      (!Array.isArray($) || !Array.isArray(w1) || !$.every((F1) => Array.isArray(F1) && F1.length === 3) || !w1.every((F1) => Array.isArray(F1) && F1.length >= 3)) && I("polyhedron points/faces", G.at);
       const R1 = (F1, c2 = !1) => "[" + F1.map((q2) => "[" + (c2 ? [...q2].reverse() : q2).map((d2) => Z1(d2)).join(",") + "]").join(",") + "]";
-      return `polyhedron(${R1(H)}, ${R1(w1, !0)})`;
+      return `polyhedron(${R1($)}, ${R1(w1, !0)})`;
     }
     if (e1 === "cube") {
       if (C1(["size", "center"], 2), Array.isArray(W1("size", 0)) && W1("size", 0).length === 0)
         return "empty()";
-      const H = P1(W1("size", 0, "1"), !0), w1 = W0(`box(${H.join(", ")})`, H), R1 = W1("center", 1);
-      return R1 === "true" ? w1 : `move([${H.map((F1) => g1(R1, F1)).join(", ")}], ${w1})`;
+      const $ = P1(W1("size", 0, "1"), !0), w1 = W0(`box(${$.join(", ")})`, $), R1 = W1("center", 1);
+      return R1 === "true" ? w1 : `move([${$.map((F1) => g1(R1, F1)).join(", ")}], ${w1})`;
     }
     if (e1 === "sphere") {
       C1(["r", "d", "center", "$fn", "$fa", "$fs"], 1), a1.has("d") && (a1.has("r") || k1.length) && I("sphere: both radius and diameter", G.at);
-      const H = a1.has("d") ? `(${Z1(a1.get("d"))}) / 2` : Z1(W1("r", 0, "1"));
-      return W0(`sphere(${H}, ${v1(H)})`, [H]);
+      const $ = a1.has("d") ? `(${Z1(a1.get("d"))}) / 2` : Z1(W1("r", 0, "1"));
+      return W0(`sphere(${$}, ${v1($)})`, [$]);
     }
-    if (["r1", "r2", "d1", "d2"].some((H) => a1.has(H)) || k1.length > 2) {
+    if (["r1", "r2", "d1", "d2"].some(($) => a1.has($)) || k1.length > 2) {
       C1(["h", "r", "d", "r1", "r2", "d1", "d2", "center", "$fn", "$fa", "$fs"], 4), (a1.has("r1") && a1.has("d1") || a1.has("r2") && a1.has("d2") || k1[1] !== void 0 && a1.has("d1") || k1[2] !== void 0 && a1.has("d2")) && I("cylinder: duplicate taper radius", G.at);
-      const H = a1.has("r") ? Z1(a1.get("r")) : a1.has("d") ? `(${Z1(a1.get("d"))}) / 2` : "1", w1 = Z1(W1("h", 0, "1")), R1 = a1.has("d1") ? `(${Z1(a1.get("d1"))}) / 2` : Z1(W1("r1", 1, H)), F1 = a1.has("d2") ? `(${Z1(a1.get("d2"))}) / 2` : Z1(W1("r2", 2, H)), c2 = W0(`frustum(${R1}, ${F1}, ${w1}, ${v1("max(" + R1 + ", " + F1 + ")")})`, [w1, "max(" + R1 + ", " + F1 + ")"]);
+      const $ = a1.has("r") ? Z1(a1.get("r")) : a1.has("d") ? `(${Z1(a1.get("d"))}) / 2` : "1", w1 = Z1(W1("h", 0, "1")), R1 = a1.has("d1") ? `(${Z1(a1.get("d1"))}) / 2` : Z1(W1("r1", 1, $)), F1 = a1.has("d2") ? `(${Z1(a1.get("d2"))}) / 2` : Z1(W1("r2", 2, $)), c2 = W0(`frustum(${R1}, ${F1}, ${w1}, ${v1("max(" + R1 + ", " + F1 + ")")})`, [w1, "max(" + R1 + ", " + F1 + ")"]);
       return `move([0, 0, ${g1(W1("center", 3), w1)}], ${c2})`;
     }
     C1(["h", "r", "d", "center", "$fn", "$fa", "$fs"], 2), a1.has("d") && (a1.has("r") || k1[1] !== void 0) && I("cylinder: both radius and diameter", G.at);
@@ -12500,7 +12501,7 @@ function Vh(t, e = {}, i = {}) {
     }
     l("assignment target", I);
   }
-  function $(I, R, O) {
+  function H(I, R, O) {
     if (["===", "=="].includes(I))
       return R === O;
     if (["!==", "!="].includes(I))
@@ -12569,7 +12570,7 @@ function Vh(t, e = {}, i = {}) {
         return o = I.start, l1(O, s1);
       }
       case "BinaryExpression":
-        return $(I.operator, K(I.left, R), K(I.right, R));
+        return H(I.operator, K(I.left, R), K(I.right, R));
       case "LogicalExpression": {
         const O = K(I.left, R);
         return I.operator === "&&" ? O && K(I.right, R) : I.operator === "||" ? O || K(I.right, R) : O ?? K(I.right, R);
@@ -12581,7 +12582,7 @@ function Vh(t, e = {}, i = {}) {
         return I.operator === "!" ? !O : I.operator === "-" ? q(-q(O)) : I.operator === "+" ? q(O) : l(I.operator, I);
       }
       case "AssignmentExpression": {
-        const O = I.operator === "=" ? K(I.right, R) : $(I.operator.slice(0, -1), K(I.left, R), K(I.right, R));
+        const O = I.operator === "=" ? K(I.right, R) : H(I.operator.slice(0, -1), K(I.left, R), K(I.right, R));
         return V(I.left, O, R), O;
       }
       case "UpdateExpression": {
@@ -13190,12 +13191,12 @@ async function iw(t) {
         const z = _.indexOf(">", D + 1);
         z < 0 && _3("Unclosed include path", m, A, _);
         const j = _.slice(D + 1, z);
-        let V = Gn(j, m.split("/").slice(0, -1), m, A, _), $;
+        let V = Gn(j, m.split("/").slice(0, -1), m, A, _), H;
         if (!i.has(V) && !j.split("/").includes("..")) {
           const Q = Gn(j, [], m, A, _);
-          i.has(Q) && (V = Q, $ = "bundle-root");
+          i.has(Q) && (V = Q, H = "bundle-root");
         }
-        i.has(V) || _3(f`Included source file is missing: ${V}`, m, A, _), o.length >= B6.includes && _3("Include occurrences exceed the existing token budget", m, A, _, "resource-limit"), o.push(Object.freeze({ ...$ ? { resolution: $ } : {}, ...C === "use" ? { kind: "use" } : {}, fromPath: m, path: V, sourceOffset: A, ...tw(v.lines, A), depth: q + 1 })), p(_.slice(M, A), m, M), p(`
+        i.has(V) || _3(f`Included source file is missing: ${V}`, m, A, _), o.length >= B6.includes && _3("Include occurrences exceed the existing token budget", m, A, _, "resource-limit"), o.push(Object.freeze({ ...H ? { resolution: H } : {}, ...C === "use" ? { kind: "use" } : {}, fromPath: m, path: V, sourceOffset: A, ...tw(v.lines, A), depth: q + 1 })), p(_.slice(M, A), m, M), p(`
 `, m, A);
         const K = { start: l, end: l };
         C === "use" && a.push(K), u(V, q + 1, w && S === 0 && x), K.end = l, p(`
@@ -14347,9 +14348,9 @@ function tm(t, e, i, n, s) {
     const x = X7(_, E, M);
     let y, k;
     if (x) {
-      const { center: D, radius: z, start: j, sweep: V } = x, $ = d(D);
-      if (y = [], Math.abs($) <= z) {
-        const J = [D[0] + l * $, D[1] - c * $], l1 = Math.sqrt((z - Math.abs($)) * (z + Math.abs($)));
+      const { center: D, radius: z, start: j, sweep: V } = x, H = d(D);
+      if (y = [], Math.abs(H) <= z) {
+        const J = [D[0] + l * H, D[1] - c * H], l1 = Math.sqrt((z - Math.abs(H)) * (z + Math.abs(H)));
         y = [-l1, l1].map((f1) => {
           const M1 = Math.atan2(J[1] + l * f1 - D[1], J[0] + c * f1 - D[0]);
           return (Math.sign(V) * (M1 - j) % Js + Js) % Js / Math.abs(V);
@@ -14397,10 +14398,10 @@ function tm(t, e, i, n, s) {
       throw new Error(f("This trim would leave separate paths. Choose a different line or side."));
     const { points: k, bulges: A, dxfWidths: C } = b(y);
     if (w = { ...q, points: k, ...C ? { dxfWidths: C } : {} }, q.vertexIds) {
-      const { vertexIds: D } = q, z = k.map((K) => D[E.get(K) ?? -1] ?? U2()), j = new Map(z.map((K, Q) => [K, Q])), V = q.anchors?.filter((K) => j.has(K.vertexId)) ?? [], $ = q.segmentConstraints?.filter(({ from: K, to: Q }) => j.has(K) && j.get(Q) === j.get(K) + 1) ?? [];
-      if (V.length ? w.anchors = V : delete w.anchors, $.length ? w.segmentConstraints = $ : delete w.segmentConstraints, V.length || $.length) {
+      const { vertexIds: D } = q, z = k.map((K) => D[E.get(K) ?? -1] ?? U2()), j = new Map(z.map((K, Q) => [K, Q])), V = q.anchors?.filter((K) => j.has(K.vertexId)) ?? [], H = q.segmentConstraints?.filter(({ from: K, to: Q }) => j.has(K) && j.get(Q) === j.get(K) + 1) ?? [];
+      if (V.length ? w.anchors = V : delete w.anchors, H.length ? w.segmentConstraints = H : delete w.segmentConstraints, V.length || H.length) {
         w.vertexIds = z;
-        const K = /* @__PURE__ */ new Set([...V.map((Q) => Q.vertexId), ...$.map((Q) => Q.to)]);
+        const K = /* @__PURE__ */ new Set([...V.map((Q) => Q.vertexId), ...H.map((Q) => Q.to)]);
         w.points = k.map((Q, J) => K.has(z[J]) ? q.points[E.get(Q)] : Q);
       } else
         delete w.vertexIds;
@@ -18528,8 +18529,8 @@ const gs = class gs {
    * @return {Matrix4} A reference to this matrix.
    */
   multiplyMatrices(e, i) {
-    const n = e.elements, s = i.elements, o = this.elements, r = n[0], a = n[4], c = n[8], l = n[12], d = n[1], p = n[5], u = n[9], h = n[13], b = n[2], g = n[6], m = n[10], q = n[14], w = n[3], v = n[7], _ = n[11], E = n[15], M = s[0], S = s[4], x = s[8], y = s[12], k = s[1], A = s[5], C = s[9], D = s[13], z = s[2], j = s[6], V = s[10], $ = s[14], K = s[3], Q = s[7], J = s[11], l1 = s[15];
-    return o[0] = r * M + a * k + c * z + l * K, o[4] = r * S + a * A + c * j + l * Q, o[8] = r * x + a * C + c * V + l * J, o[12] = r * y + a * D + c * $ + l * l1, o[1] = d * M + p * k + u * z + h * K, o[5] = d * S + p * A + u * j + h * Q, o[9] = d * x + p * C + u * V + h * J, o[13] = d * y + p * D + u * $ + h * l1, o[2] = b * M + g * k + m * z + q * K, o[6] = b * S + g * A + m * j + q * Q, o[10] = b * x + g * C + m * V + q * J, o[14] = b * y + g * D + m * $ + q * l1, o[3] = w * M + v * k + _ * z + E * K, o[7] = w * S + v * A + _ * j + E * Q, o[11] = w * x + v * C + _ * V + E * J, o[15] = w * y + v * D + _ * $ + E * l1, this;
+    const n = e.elements, s = i.elements, o = this.elements, r = n[0], a = n[4], c = n[8], l = n[12], d = n[1], p = n[5], u = n[9], h = n[13], b = n[2], g = n[6], m = n[10], q = n[14], w = n[3], v = n[7], _ = n[11], E = n[15], M = s[0], S = s[4], x = s[8], y = s[12], k = s[1], A = s[5], C = s[9], D = s[13], z = s[2], j = s[6], V = s[10], H = s[14], K = s[3], Q = s[7], J = s[11], l1 = s[15];
+    return o[0] = r * M + a * k + c * z + l * K, o[4] = r * S + a * A + c * j + l * Q, o[8] = r * x + a * C + c * V + l * J, o[12] = r * y + a * D + c * H + l * l1, o[1] = d * M + p * k + u * z + h * K, o[5] = d * S + p * A + u * j + h * Q, o[9] = d * x + p * C + u * V + h * J, o[13] = d * y + p * D + u * H + h * l1, o[2] = b * M + g * k + m * z + q * K, o[6] = b * S + g * A + m * j + q * Q, o[10] = b * x + g * C + m * V + q * J, o[14] = b * y + g * D + m * H + q * l1, o[3] = w * M + v * k + _ * z + E * K, o[7] = w * S + v * A + _ * j + E * Q, o[11] = w * x + v * C + _ * V + E * J, o[15] = w * y + v * D + _ * H + E * l1, this;
   }
   /**
    * Multiplies every component of the matrix by the given scalar.
@@ -24204,13 +24205,13 @@ class S1 extends v0 {
     b("z", "y", "x", -1, -1, n, i, e, r, o, 0), b("z", "y", "x", 1, -1, n, i, -e, r, o, 1), b("x", "z", "y", 1, 1, e, n, i, s, r, 2), b("x", "z", "y", 1, -1, e, n, -i, s, r, 3), b("x", "y", "z", 1, -1, e, i, n, s, o, 4), b("x", "y", "z", -1, -1, e, i, -n, s, o, 5), this.setIndex(c), this.setAttribute("position", new J2(l, 3)), this.setAttribute("normal", new J2(d, 3)), this.setAttribute("uv", new J2(p, 2));
     function b(g, m, q, w, v, _, E, M, S, x, y) {
       const k = _ / S, A = E / x, C = _ / 2, D = E / 2, z = M / 2, j = S + 1, V = x + 1;
-      let $ = 0, K = 0;
+      let H = 0, K = 0;
       const Q = new i1();
       for (let J = 0; J < V; J++) {
         const l1 = J * A - D;
         for (let f1 = 0; f1 < j; f1++) {
           const M1 = f1 * k - C;
-          Q[g] = M1 * w, Q[m] = l1 * v, Q[q] = z, l.push(Q.x, Q.y, Q.z), Q[g] = 0, Q[m] = 0, Q[q] = M > 0 ? 1 : -1, d.push(Q.x, Q.y, Q.z), p.push(f1 / S), p.push(1 - J / x), $ += 1;
+          Q[g] = M1 * w, Q[m] = l1 * v, Q[q] = z, l.push(Q.x, Q.y, Q.z), Q[g] = 0, Q[m] = 0, Q[q] = M > 0 ? 1 : -1, d.push(Q.x, Q.y, Q.z), p.push(f1 / S), p.push(1 - J / x), H += 1;
         }
       }
       for (let J = 0; J < x; J++)
@@ -24218,7 +24219,7 @@ class S1 extends v0 {
           const f1 = u + l1 + j * J, M1 = u + l1 + j * (J + 1), N = u + (l1 + 1) + j * (J + 1), Z = u + (l1 + 1) + j * J;
           c.push(f1, M1, Z), c.push(M1, N, Z), K += 6;
         }
-      a.addGroup(h, K, y), h += K, u += $;
+      a.addGroup(h, K, y), h += K, u += H;
     }
   }
   copy(e) {
@@ -25969,7 +25970,7 @@ class g5 extends v0 {
       function V(R, O, s1) {
         return O || R0("ExtrudeGeometry: vec does not exist"), R.clone().addScaledVector(O, s1);
       }
-      const $ = k.length;
+      const H = k.length;
       function K(R, O, s1) {
         let Y, X, F;
         const U = R.x - O.x, m1 = R.y - O.y, x1 = s1.x - R.x, L1 = s1.y - R.y, q1 = U * U + m1 * m1, E1 = U * L1 - m1 * x1;
@@ -26023,12 +26024,12 @@ class g5 extends v0 {
         M1 = X9.triangulateShape(R, O);
       }
       const N = M1.length, Z = b + g;
-      for (let R = 0; R < $; R++) {
+      for (let R = 0; R < H; R++) {
         const O = u ? V(k[R], f1[R], Z) : k[R];
         _ ? (S.copy(E.normals[0]).multiplyScalar(O.x), M.copy(E.binormals[0]).multiplyScalar(O.y), x.copy(v[0]).add(S).add(M), r1(x.x, x.y, x.z)) : r1(O.x, O.y, 0);
       }
       for (let R = 1; R <= d; R++)
-        for (let O = 0; O < $; O++) {
+        for (let O = 0; O < H; O++) {
           const s1 = u ? V(k[O], f1[O], Z) : k[O];
           _ ? (S.copy(E.normals[R]).multiplyScalar(s1.x), M.copy(E.binormals[R]).multiplyScalar(s1.y), x.copy(v[R]).add(S).add(M), r1(x.x, x.y, x.z)) : r1(s1.x, s1.y, p / d * R);
         }
@@ -26051,12 +26052,12 @@ class g5 extends v0 {
       function P() {
         const R = s.length / 3;
         if (u) {
-          let O = 0, s1 = $ * O;
+          let O = 0, s1 = H * O;
           for (let Y = 0; Y < N; Y++) {
             const X = M1[Y];
             o1(X[2] + s1, X[1] + s1, X[0] + s1);
           }
-          O = d + m * 2, s1 = $ * O;
+          O = d + m * 2, s1 = H * O;
           for (let Y = 0; Y < N; Y++) {
             const X = M1[Y];
             o1(X[0] + s1, X[1] + s1, X[2] + s1);
@@ -26068,7 +26069,7 @@ class g5 extends v0 {
           }
           for (let O = 0; O < N; O++) {
             const s1 = M1[O];
-            o1(s1[0] + $ * d, s1[1] + $ * d, s1[2] + $ * d);
+            o1(s1[0] + H * d, s1[1] + H * d, s1[2] + H * d);
           }
         }
         n.addGroup(R, s.length / 3 - R, 0);
@@ -26090,7 +26091,7 @@ class g5 extends v0 {
           let X = s1 - 1;
           X < 0 && (X = R.length - 1);
           for (let F = 0, U = d + m * 2; F < U; F++) {
-            const m1 = $ * F, x1 = $ * (F + 1), L1 = O + Y + m1, q1 = O + X + m1, E1 = O + X + x1, t1 = O + Y + x1;
+            const m1 = H * F, x1 = H * (F + 1), L1 = O + Y + m1, q1 = O + X + m1, E1 = O + X + x1, t1 = O + Y + x1;
             b1(L1, q1, E1, t1);
           }
         }
@@ -33256,8 +33257,8 @@ function IM(t, e) {
   let o = s, r = !1;
   function a(A, C, D, z, j) {
     let V = !1;
-    const $ = p(A, z, D, C);
-    o !== $ && (o = $, l(o.object)), V = h(A, z, D, j), V && b(A, z, D, j), j !== null && e.update(j, t.ELEMENT_ARRAY_BUFFER), (V || r) && (r = !1, _(A, C, D, z), j !== null && t.bindBuffer(t.ELEMENT_ARRAY_BUFFER, e.get(j).buffer));
+    const H = p(A, z, D, C);
+    o !== H && (o = H, l(o.object)), V = h(A, z, D, j), V && b(A, z, D, j), j !== null && e.update(j, t.ELEMENT_ARRAY_BUFFER), (V || r) && (r = !1, _(A, C, D, z), j !== null && t.bindBuffer(t.ELEMENT_ARRAY_BUFFER, e.get(j).buffer));
   }
   function c() {
     return t.createVertexArray();
@@ -33272,9 +33273,9 @@ function IM(t, e) {
     const j = z.wireframe === !0;
     let V = n[C.id];
     V === void 0 && (V = {}, n[C.id] = V);
-    const $ = A.isInstancedMesh === !0 ? A.id : 0;
-    let K = V[$];
-    K === void 0 && (K = {}, V[$] = K);
+    const H = A.isInstancedMesh === !0 ? A.id : 0;
+    let K = V[H];
+    K === void 0 && (K = {}, V[H] = K);
     let Q = K[D.id];
     Q === void 0 && (Q = {}, K[D.id] = Q);
     let J = Q[j];
@@ -33299,29 +33300,29 @@ function IM(t, e) {
   }
   function h(A, C, D, z) {
     const j = o.attributes, V = C.attributes;
-    let $ = 0;
+    let H = 0;
     const K = D.getAttributes();
     for (const Q in K)
       if (K[Q].location >= 0) {
         const l1 = j[Q];
         let f1 = V[Q];
         if (f1 === void 0 && (Q === "instanceMatrix" && A.instanceMatrix && (f1 = A.instanceMatrix), Q === "instanceColor" && A.instanceColor && (f1 = A.instanceColor)), l1 === void 0 || l1.attribute !== f1 || f1 && l1.data !== f1.data) return !0;
-        $++;
+        H++;
       }
-    return o.attributesNum !== $ || o.index !== z;
+    return o.attributesNum !== H || o.index !== z;
   }
   function b(A, C, D, z) {
     const j = {}, V = C.attributes;
-    let $ = 0;
+    let H = 0;
     const K = D.getAttributes();
     for (const Q in K)
       if (K[Q].location >= 0) {
         let l1 = V[Q];
         l1 === void 0 && (Q === "instanceMatrix" && A.instanceMatrix && (l1 = A.instanceMatrix), Q === "instanceColor" && A.instanceColor && (l1 = A.instanceColor));
         const f1 = {};
-        f1.attribute = l1, l1 && l1.data && (f1.data = l1.data), j[Q] = f1, $++;
+        f1.attribute = l1, l1 && l1.data && (f1.data = l1.data), j[Q] = f1, H++;
       }
-    o.attributes = j, o.attributesNum = $, o.index = z;
+    o.attributes = j, o.attributesNum = H, o.index = z;
   }
   function g() {
     const A = o.newAttributes;
@@ -33340,12 +33341,12 @@ function IM(t, e) {
     for (let D = 0, z = C.length; D < z; D++)
       C[D] !== A[D] && (t.disableVertexAttribArray(D), C[D] = 0);
   }
-  function v(A, C, D, z, j, V, $) {
-    $ === !0 ? t.vertexAttribIPointer(A, C, D, j, V) : t.vertexAttribPointer(A, C, D, z, j, V);
+  function v(A, C, D, z, j, V, H) {
+    H === !0 ? t.vertexAttribIPointer(A, C, D, j, V) : t.vertexAttribPointer(A, C, D, z, j, V);
   }
   function _(A, C, D, z) {
     g();
-    const j = z.attributes, V = D.getAttributes(), $ = C.defaultAttributeValues;
+    const j = z.attributes, V = D.getAttributes(), H = C.defaultAttributeValues;
     for (const K in V) {
       const Q = V[K];
       if (Q.location >= 0) {
@@ -33394,8 +33395,8 @@ function IM(t, e) {
                 B
               );
           }
-        } else if ($ !== void 0) {
-          const l1 = $[K];
+        } else if (H !== void 0) {
+          const l1 = H[K];
           if (l1 !== void 0)
             switch (l1.length) {
               case 2:
@@ -33423,8 +33424,8 @@ function IM(t, e) {
         const z = C[D];
         for (const j in z) {
           const V = z[j];
-          for (const $ in V)
-            d(V[$].object), delete V[$];
+          for (const H in V)
+            d(V[H].object), delete V[H];
           delete z[j];
         }
       }
@@ -33438,8 +33439,8 @@ function IM(t, e) {
       const z = C[D];
       for (const j in z) {
         const V = z[j];
-        for (const $ in V)
-          d(V[$].object), delete V[$];
+        for (const H in V)
+          d(V[H].object), delete V[H];
         delete z[j];
       }
     }
@@ -33452,8 +33453,8 @@ function IM(t, e) {
         const j = D[z];
         if (j[A.id] === void 0) continue;
         const V = j[A.id];
-        for (const $ in V)
-          d(V[$].object), delete V[$];
+        for (const H in V)
+          d(V[H].object), delete V[H];
         delete j[A.id];
       }
     }
@@ -33463,9 +33464,9 @@ function IM(t, e) {
       const D = n[C], z = A.isInstancedMesh === !0 ? A.id : 0, j = D[z];
       if (j !== void 0) {
         for (const V in j) {
-          const $ = j[V];
-          for (const K in $)
-            d($[K].object), delete $[K];
+          const H = j[V];
+          for (const K in H)
+            d(H[K].object), delete H[K];
           delete j[V];
         }
         delete D[z], Object.keys(D).length === 0 && delete n[C];
@@ -35720,7 +35721,7 @@ function hE(t, e, i, n) {
   s.attachShader(g, E), s.attachShader(g, M), i.index0AttributeName !== void 0 ? s.bindAttribLocation(g, 0, i.index0AttributeName) : i.morphTargets === !0 && s.bindAttribLocation(g, 0, "position"), s.linkProgram(g);
   function S(A) {
     if (t.debug.checkShaderErrors) {
-      const C = s.getProgramInfoLog(g) || "", D = s.getShaderInfoLog(E) || "", z = s.getShaderInfoLog(M) || "", j = C.trim(), V = D.trim(), $ = z.trim();
+      const C = s.getProgramInfoLog(g) || "", D = s.getShaderInfoLog(E) || "", z = s.getShaderInfoLog(M) || "", j = C.trim(), V = D.trim(), H = z.trim();
       let K = !0, Q = !0;
       if (s.getProgramParameter(g, s.LINK_STATUS) === !1)
         if (K = !1, typeof t.debug.onShaderError == "function")
@@ -35738,7 +35739,7 @@ Program Info Log: ` + j + `
 ` + l1
           );
         }
-      else j !== "" ? i0("WebGLProgram: Program Info Log:", j) : (V === "" || $ === "") && (Q = !1);
+      else j !== "" ? i0("WebGLProgram: Program Info Log:", j) : (V === "" || H === "") && (Q = !1);
       Q && (A.diagnostics = {
         runnable: K,
         programLog: j,
@@ -35747,7 +35748,7 @@ Program Info Log: ` + j + `
           prefix: m
         },
         fragmentShader: {
-          log: $,
+          log: H,
           prefix: q
         }
       });
@@ -35836,7 +35837,7 @@ function xE(t, e, i, n, s, o) {
     return c.add(x), x === 0 ? "uv" : `uv${x}`;
   }
   function g(x, y, k, A, C, D) {
-    const z = A.fog, j = C.geometry, V = x.isMeshStandardMaterial || x.isMeshLambertMaterial || x.isMeshPhongMaterial ? A.environment : null, $ = x.isMeshStandardMaterial || x.isMeshLambertMaterial && !x.envMap || x.isMeshPhongMaterial && !x.envMap, K = e.get(x.envMap || V, $), Q = K && K.mapping === Ps ? K.image.height : null, J = h[x.type];
+    const z = A.fog, j = C.geometry, V = x.isMeshStandardMaterial || x.isMeshLambertMaterial || x.isMeshPhongMaterial ? A.environment : null, H = x.isMeshStandardMaterial || x.isMeshLambertMaterial && !x.envMap || x.isMeshPhongMaterial && !x.envMap, K = e.get(x.envMap || V, H), Q = K && K.mapping === Ps ? K.image.height : null, J = h[x.type];
     x.precision !== null && (u = n.getMaxPrecision(x.precision), u !== x.precision && i0("WebGLProgram.getParameters:", x.precision, "not supported, using", u, "instead."));
     const l1 = j.morphAttributes.position || j.morphAttributes.normal || j.morphAttributes.color, f1 = l1 !== void 0 ? l1.length : 0;
     let M1 = 0;
@@ -36293,17 +36294,17 @@ function AE(t) {
       } else if (A.isDirectionalLight) {
         const V = e.get(A);
         if (V.color.copy(A.color).multiplyScalar(A.intensity), A.castShadow) {
-          const $ = A.shadow, K = i.get(A);
-          K.shadowIntensity = $.intensity, K.shadowBias = $.bias, K.shadowNormalBias = $.normalBias, K.shadowRadius = $.radius, K.shadowMapSize = $.mapSize, n.directionalShadow[h] = K, n.directionalShadowMap[h] = j, n.directionalShadowMatrix[h] = A.shadow.matrix, w++;
+          const H = A.shadow, K = i.get(A);
+          K.shadowIntensity = H.intensity, K.shadowBias = H.bias, K.shadowNormalBias = H.normalBias, K.shadowRadius = H.radius, K.shadowMapSize = H.mapSize, n.directionalShadow[h] = K, n.directionalShadowMap[h] = j, n.directionalShadowMatrix[h] = A.shadow.matrix, w++;
         }
         n.directional[h] = V, h++;
       } else if (A.isSpotLight) {
         const V = e.get(A);
         V.position.setFromMatrixPosition(A.matrixWorld), V.color.copy(C).multiplyScalar(D), V.distance = z, V.coneCos = Math.cos(A.angle), V.penumbraCos = Math.cos(A.angle * (1 - A.penumbra)), V.decay = A.decay, n.spot[g] = V;
-        const $ = A.shadow;
-        if (A.map && (n.spotLightMap[E] = A.map, E++, $.updateMatrices(A), A.castShadow && M++), n.spotLightMatrix[g] = $.matrix, A.castShadow) {
+        const H = A.shadow;
+        if (A.map && (n.spotLightMap[E] = A.map, E++, H.updateMatrices(A), A.castShadow && M++), n.spotLightMatrix[g] = H.matrix, A.castShadow) {
           const K = i.get(A);
-          K.shadowIntensity = $.intensity, K.shadowBias = $.bias, K.shadowNormalBias = $.normalBias, K.shadowRadius = $.radius, K.shadowMapSize = $.mapSize, n.spotShadow[g] = K, n.spotShadowMap[g] = j, _++;
+          K.shadowIntensity = H.intensity, K.shadowBias = H.bias, K.shadowNormalBias = H.normalBias, K.shadowRadius = H.radius, K.shadowMapSize = H.mapSize, n.spotShadow[g] = K, n.spotShadowMap[g] = j, _++;
         }
         g++;
       } else if (A.isRectAreaLight) {
@@ -36312,8 +36313,8 @@ function AE(t) {
       } else if (A.isPointLight) {
         const V = e.get(A);
         if (V.color.copy(A.color).multiplyScalar(A.intensity), V.distance = A.distance, V.decay = A.decay, A.castShadow) {
-          const $ = A.shadow, K = i.get(A);
-          K.shadowIntensity = $.intensity, K.shadowBias = $.bias, K.shadowNormalBias = $.normalBias, K.shadowRadius = $.radius, K.shadowMapSize = $.mapSize, K.shadowCameraNear = $.camera.near, K.shadowCameraFar = $.camera.far, n.pointShadow[b] = K, n.pointShadowMap[b] = j, n.pointShadowMatrix[b] = A.shadow.matrix, v++;
+          const H = A.shadow, K = i.get(A);
+          K.shadowIntensity = H.intensity, K.shadowBias = H.bias, K.shadowNormalBias = H.normalBias, K.shadowRadius = H.radius, K.shadowMapSize = H.mapSize, K.shadowCameraNear = H.camera.near, K.shadowCameraFar = H.camera.far, n.pointShadow[b] = K, n.pointShadowMap[b] = j, n.pointShadowMatrix[b] = A.shadow.matrix, v++;
         }
         n.point[b] = V, b++;
       } else if (A.isHemisphereLight) {
@@ -36486,40 +36487,40 @@ function RE(t, e, i) {
       z.material && (Array.isArray(z.material) ? z.material.forEach((j) => j.needsUpdate = !0) : z.material.needsUpdate = !0);
     });
     for (let z = 0, j = M.length; z < j; z++) {
-      const V = M[z], $ = V.shadow;
-      if ($ === void 0) {
+      const V = M[z], H = V.shadow;
+      if (H === void 0) {
         i0("WebGLShadowMap:", V, "has no shadow.");
         continue;
       }
-      if ($.autoUpdate === !1 && $.needsUpdate === !1) continue;
-      s.copy($.mapSize);
-      const K = $.getFrameExtents();
-      s.multiply(K), o.copy($.mapSize), (s.x > d || s.y > d) && (s.x > d && (o.x = Math.floor(d / K.x), s.x = o.x * K.x, $.mapSize.x = o.x), s.y > d && (o.y = Math.floor(d / K.y), s.y = o.y * K.y, $.mapSize.y = o.y));
+      if (H.autoUpdate === !1 && H.needsUpdate === !1) continue;
+      s.copy(H.mapSize);
+      const K = H.getFrameExtents();
+      s.multiply(K), o.copy(H.mapSize), (s.x > d || s.y > d) && (s.x > d && (o.x = Math.floor(d / K.x), s.x = o.x * K.x, H.mapSize.x = o.x), s.y > d && (o.y = Math.floor(d / K.y), s.y = o.y * K.y, H.mapSize.y = o.y));
       const Q = t.state.buffers.depth.getReversed();
-      if ($.camera._reversedDepth = Q, $.map === null || D === !0) {
-        if ($.map !== null && ($.map.depthTexture !== null && ($.map.depthTexture.dispose(), $.map.depthTexture = null), $.map.dispose()), this.type === et) {
+      if (H.camera._reversedDepth = Q, H.map === null || D === !0) {
+        if (H.map !== null && (H.map.depthTexture !== null && (H.map.depthTexture.dispose(), H.map.depthTexture = null), H.map.dispose()), this.type === et) {
           if (V.isPointLight) {
             i0("WebGLShadowMap: VSM shadow maps are not supported for PointLights. Use PCF or BasicShadowMap instead.");
             continue;
           }
-          $.map = new x9(s.x, s.y, {
+          H.map = new x9(s.x, s.y, {
             format: j7,
             type: i6,
             minFilter: p4,
             magFilter: p4,
             generateMipmaps: !1
-          }), $.map.texture.name = V.name + ".shadowMap", $.map.depthTexture = new ue(s.x, s.y, h9), $.map.depthTexture.name = V.name + ".shadowMapDepth", $.map.depthTexture.format = n6, $.map.depthTexture.compareFunction = null, $.map.depthTexture.minFilter = i4, $.map.depthTexture.magFilter = i4;
+          }), H.map.texture.name = V.name + ".shadowMap", H.map.depthTexture = new ue(s.x, s.y, h9), H.map.depthTexture.name = V.name + ".shadowMapDepth", H.map.depthTexture.format = n6, H.map.depthTexture.compareFunction = null, H.map.depthTexture.minFilter = i4, H.map.depthTexture.magFilter = i4;
         } else
-          V.isPointLight ? ($.map = new zm(s.x), $.map.depthTexture = new Kv(s.x, M9)) : ($.map = new x9(s.x, s.y), $.map.depthTexture = new ue(s.x, s.y, M9)), $.map.depthTexture.name = V.name + ".shadowMap", $.map.depthTexture.format = n6, this.type === pn ? ($.map.depthTexture.compareFunction = Q ? Dl : Tl, $.map.depthTexture.minFilter = p4, $.map.depthTexture.magFilter = p4) : ($.map.depthTexture.compareFunction = null, $.map.depthTexture.minFilter = i4, $.map.depthTexture.magFilter = i4);
-        $.camera.updateProjectionMatrix();
+          V.isPointLight ? (H.map = new zm(s.x), H.map.depthTexture = new Kv(s.x, M9)) : (H.map = new x9(s.x, s.y), H.map.depthTexture = new ue(s.x, s.y, M9)), H.map.depthTexture.name = V.name + ".shadowMap", H.map.depthTexture.format = n6, this.type === pn ? (H.map.depthTexture.compareFunction = Q ? Dl : Tl, H.map.depthTexture.minFilter = p4, H.map.depthTexture.magFilter = p4) : (H.map.depthTexture.compareFunction = null, H.map.depthTexture.minFilter = i4, H.map.depthTexture.magFilter = i4);
+        H.camera.updateProjectionMatrix();
       }
-      const J = $.map.isWebGLCubeRenderTarget ? 6 : 1;
+      const J = H.map.isWebGLCubeRenderTarget ? 6 : 1;
       for (let l1 = 0; l1 < J; l1++) {
-        if ($.map.isWebGLCubeRenderTarget)
-          t.setRenderTarget($.map, l1), t.clear();
+        if (H.map.isWebGLCubeRenderTarget)
+          t.setRenderTarget(H.map, l1), t.clear();
         else {
-          l1 === 0 && (t.setRenderTarget($.map), t.clear());
-          const f1 = $.getViewport(l1);
+          l1 === 0 && (t.setRenderTarget(H.map), t.clear());
+          const f1 = H.getViewport(l1);
           r.set(
             o.x * f1.x,
             o.y * f1.y,
@@ -36528,13 +36529,13 @@ function RE(t, e, i) {
           ), C.viewport(r);
         }
         if (V.isPointLight) {
-          const f1 = $.camera, M1 = $.matrix, N = V.distance || f1.far;
-          N !== f1.far && (f1.far = N, f1.updateProjectionMatrix()), Ie.setFromMatrixPosition(V.matrixWorld), f1.position.copy(Ie), Oo.copy(f1.position), Oo.add(TE[l1]), f1.up.copy(DE[l1]), f1.lookAt(Oo), f1.updateMatrixWorld(), M1.makeTranslation(-Ie.x, -Ie.y, -Ie.z), Fp.multiplyMatrices(f1.projectionMatrix, f1.matrixWorldInverse), $._frustum.setFromProjectionMatrix(Fp, f1.coordinateSystem, f1.reversedDepth);
+          const f1 = H.camera, M1 = H.matrix, N = V.distance || f1.far;
+          N !== f1.far && (f1.far = N, f1.updateProjectionMatrix()), Ie.setFromMatrixPosition(V.matrixWorld), f1.position.copy(Ie), Oo.copy(f1.position), Oo.add(TE[l1]), f1.up.copy(DE[l1]), f1.lookAt(Oo), f1.updateMatrixWorld(), M1.makeTranslation(-Ie.x, -Ie.y, -Ie.z), Fp.multiplyMatrices(f1.projectionMatrix, f1.matrixWorldInverse), H._frustum.setFromProjectionMatrix(Fp, f1.coordinateSystem, f1.reversedDepth);
         } else
-          $.updateMatrices(V);
-        n = $.getFrustum(), _(S, x, $.camera, V, this.type);
+          H.updateMatrices(V);
+        n = H.getFrustum(), _(S, x, H.camera, V, this.type);
       }
-      $.isPointLightShadow !== !0 && this.type === et && w($, x), $.needsUpdate = !1;
+      H.isPointLightShadow !== !0 && this.type === et && w(H, x), H.needsUpdate = !1;
     }
     q = this.type, m.needsUpdate = !1, t.setRenderTarget(y, k, A);
   };
@@ -36570,7 +36571,7 @@ function RE(t, e, i) {
       const D = e.update(M), z = M.material;
       if (Array.isArray(z)) {
         const j = D.groups;
-        for (let V = 0, $ = j.length; V < $; V++) {
+        for (let V = 0, H = j.length; V < H; V++) {
           const K = j[V], Q = z[K.materialIndex];
           if (Q && Q.visible) {
             const J = v(M, Q, y, k);
@@ -36708,9 +36709,9 @@ function LE(t, e) {
   const o = new i(), r = new n(), a = new s(), c = /* @__PURE__ */ new WeakMap(), l = /* @__PURE__ */ new WeakMap();
   let d = {}, p = {}, u = {}, h = /* @__PURE__ */ new WeakMap(), b = [], g = null, m = !1, q = null, w = null, v = null, _ = null, E = null, M = null, S = null, x = new n0(0, 0, 0), y = 0, k = !1, A = null, C = null, D = null, z = null, j = null;
   const V = t.getParameter(t.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
-  let $ = !1, K = 0;
+  let H = !1, K = 0;
   const Q = t.getParameter(t.VERSION);
-  Q.indexOf("WebGL") !== -1 ? (K = parseFloat(/^WebGL (\d)/.exec(Q)[1]), $ = K >= 1) : Q.indexOf("OpenGL ES") !== -1 && (K = parseFloat(/^OpenGL ES (\d)/.exec(Q)[1]), $ = K >= 2);
+  Q.indexOf("WebGL") !== -1 ? (K = parseFloat(/^WebGL (\d)/.exec(Q)[1]), H = K >= 1) : Q.indexOf("OpenGL ES") !== -1 && (K = parseFloat(/^OpenGL ES (\d)/.exec(Q)[1]), H = K >= 2);
   let J = null, l1 = {};
   const f1 = t.getParameter(t.SCISSOR_BOX), M1 = t.getParameter(t.VIEWPORT), N = new k3().fromArray(f1), Z = new k3().fromArray(M1);
   function P(P1, u2, I1, a2) {
@@ -36834,7 +36835,7 @@ function LE(t, e) {
     P1 !== _w ? (d1(t.CULL_FACE), P1 !== C && (P1 === xd ? t.cullFace(t.BACK) : P1 === kw ? t.cullFace(t.FRONT) : t.cullFace(t.FRONT_AND_BACK))) : r1(t.CULL_FACE), C = P1;
   }
   function F(P1) {
-    P1 !== D && ($ && t.lineWidth(P1), D = P1);
+    P1 !== D && (H && t.lineWidth(P1), D = P1);
   }
   function U(P1, u2, I1) {
     P1 ? (d1(t.POLYGON_OFFSET_FILL), (z !== u2 || j !== I1) && (z = u2, j = I1, r.getReversed() && (u2 = -u2), t.polygonOffset(u2, I1))) : r1(t.POLYGON_OFFSET_FILL);
@@ -37109,7 +37110,7 @@ function IE(t, e, i, n, s, o, r) {
     const t1 = C;
     return t1 >= s.maxTextures && i0("WebGLTextures: Trying to use " + t1 + " texture units while this GPU supports only " + s.maxTextures), C += 1, t1;
   }
-  function $(t1) {
+  function H(t1) {
     const T = [];
     return T.push(t1.wrapS), T.push(t1.wrapT), T.push(t1.wrapR || 0), T.push(t1.magFilter), T.push(t1.minFilter), T.push(t1.anisotropy), T.push(t1.internalFormat), T.push(t1.format), T.push(t1.type), T.push(t1.generateMipmaps), T.push(t1.premultiplyAlpha), T.push(t1.flipY), T.push(t1.unpackAlignment), T.push(t1.colorSpace), T.join();
   }
@@ -37188,7 +37189,7 @@ function IE(t, e, i, n, s, o, r) {
     const c1 = T.source;
     let _1 = h.get(c1);
     _1 === void 0 && (_1 = {}, h.set(c1, _1));
-    const N1 = $(T);
+    const N1 = H(T);
     if (N1 !== t1.__cacheKey) {
       _1[N1] === void 0 && (_1[N1] = {
         texture: t.createTexture(),
@@ -37832,7 +37833,7 @@ class zE extends G6 {
       d1 !== void 0 && (d1.update(P.inputSource, P.frame, l || r), d1.dispatchEvent({ type: P.type, data: P.inputSource }));
     }
     function V() {
-      s.removeEventListener("select", j), s.removeEventListener("selectstart", j), s.removeEventListener("selectend", j), s.removeEventListener("squeeze", j), s.removeEventListener("squeezestart", j), s.removeEventListener("squeezeend", j), s.removeEventListener("end", V), s.removeEventListener("inputsourceschange", $);
+      s.removeEventListener("select", j), s.removeEventListener("selectstart", j), s.removeEventListener("selectend", j), s.removeEventListener("squeeze", j), s.removeEventListener("squeezestart", j), s.removeEventListener("squeezeend", j), s.removeEventListener("end", V), s.removeEventListener("inputsourceschange", H);
       for (let P = 0; P < E.length; P++) {
         const B = M[P];
         B !== null && (M[P] = null, E[P].disconnect(B));
@@ -37860,7 +37861,7 @@ class zE extends G6 {
       return s;
     }, this.setSession = async function(P) {
       if (s = P, s !== null) {
-        if (v = e.getRenderTarget(), s.addEventListener("select", j), s.addEventListener("selectstart", j), s.addEventListener("selectend", j), s.addEventListener("squeeze", j), s.addEventListener("squeezestart", j), s.addEventListener("squeezeend", j), s.addEventListener("end", V), s.addEventListener("inputsourceschange", $), w.xrCompatible !== !0 && await i.makeXRCompatible(), x = e.getPixelRatio(), e.getSize(S), g && "createProjectionLayer" in XRWebGLBinding.prototype) {
+        if (v = e.getRenderTarget(), s.addEventListener("select", j), s.addEventListener("selectstart", j), s.addEventListener("selectend", j), s.addEventListener("squeeze", j), s.addEventListener("squeezestart", j), s.addEventListener("squeezeend", j), s.addEventListener("end", V), s.addEventListener("inputsourceschange", H), w.xrCompatible !== !0 && await i.makeXRCompatible(), x = e.getPixelRatio(), e.getSize(S), g && "createProjectionLayer" in XRWebGLBinding.prototype) {
           let d1 = null, r1 = null, o1 = null;
           w.depth && (o1 = w.stencil ? i.DEPTH24_STENCIL8 : i.DEPTH_COMPONENT24, d1 = w.stencil ? A7 : n6, r1 = w.stencil ? Et : M9);
           const b1 = {
@@ -37911,7 +37912,7 @@ class zE extends G6 {
     }, this.getDepthTexture = function() {
       return m.getDepthTexture();
     };
-    function $(P) {
+    function H(P) {
       for (let B = 0; B < P.removed.length; B++) {
         const d1 = P.removed[B], r1 = M.indexOf(d1);
         r1 >= 0 && (M[r1] = null, E[r1].disconnect(d1));
@@ -38124,8 +38125,8 @@ function VE(t, e, i, n) {
           const C = A.__offset, D = Array.isArray(A.value) ? A.value : [A.value];
           let z = 0;
           for (let j = 0; j < D.length; j++) {
-            const V = D[j], $ = g(V);
-            typeof V == "number" || typeof V == "boolean" ? (A.__data[0] = V, t.bufferSubData(t.UNIFORM_BUFFER, C + z, A.__data)) : V.isMatrix3 ? (A.__data[0] = V.elements[0], A.__data[1] = V.elements[1], A.__data[2] = V.elements[2], A.__data[3] = 0, A.__data[4] = V.elements[3], A.__data[5] = V.elements[4], A.__data[6] = V.elements[5], A.__data[7] = 0, A.__data[8] = V.elements[6], A.__data[9] = V.elements[7], A.__data[10] = V.elements[8], A.__data[11] = 0) : ArrayBuffer.isView(V) ? A.__data.set(new V.constructor(V.buffer, V.byteOffset, A.__data.length)) : (V.toArray(A.__data, z), z += $.storage / Float32Array.BYTES_PER_ELEMENT);
+            const V = D[j], H = g(V);
+            typeof V == "number" || typeof V == "boolean" ? (A.__data[0] = V, t.bufferSubData(t.UNIFORM_BUFFER, C + z, A.__data)) : V.isMatrix3 ? (A.__data[0] = V.elements[0], A.__data[1] = V.elements[1], A.__data[2] = V.elements[2], A.__data[3] = 0, A.__data[4] = V.elements[3], A.__data[5] = V.elements[4], A.__data[6] = V.elements[5], A.__data[7] = 0, A.__data[8] = V.elements[6], A.__data[9] = V.elements[7], A.__data[10] = V.elements[8], A.__data[11] = 0) : ArrayBuffer.isView(V) ? A.__data.set(new V.constructor(V.buffer, V.byteOffset, A.__data.length)) : (V.toArray(A.__data, z), z += H.storage / Float32Array.BYTES_PER_ELEMENT);
           }
           t.bufferSubData(t.UNIFORM_BUFFER, C, A.__data);
         }
@@ -38160,8 +38161,8 @@ function VE(t, e, i, n) {
       for (let k = 0, A = y.length; k < A; k++) {
         const C = y[k], D = Array.isArray(C.value) ? C.value : [C.value];
         for (let z = 0, j = D.length; z < j; z++) {
-          const V = D[z], $ = g(V), K = _ % E, Q = K % $.boundary, J = K + Q;
-          _ += Q, J !== 0 && E - J < $.storage && (_ += E - J), C.__data = new Float32Array($.storage / Float32Array.BYTES_PER_ELEMENT), C.__offset = _, _ += $.storage;
+          const V = D[z], H = g(V), K = _ % E, Q = K % H.boundary, J = K + Q;
+          _ += Q, J !== 0 && E - J < H.storage && (_ += E - J), C.__data = new Float32Array(H.storage / Float32Array.BYTES_PER_ELEMENT), C.__offset = _, _ += H.storage;
         }
       }
     }
@@ -38771,7 +38772,7 @@ class GE {
     const k = this;
     let A = !1, C = null;
     this._outputColorSpace = S4;
-    let D = 0, z = 0, j = null, V = -1, $ = null;
+    let D = 0, z = 0, j = null, V = -1, H = null;
     const K = new k3(), Q = new k3();
     let J = null;
     const l1 = new n0(0);
@@ -39049,7 +39050,7 @@ class GE {
         } else
           $1.length > 0 && T3(K1, $1, p1, V1), X && t2.render(p1), U3(E, p1, V1);
       }
-      j !== null && z === 0 && (T.updateMultisampleRenderTarget(j), T.updateRenderTargetMipmap(j)), G1 && y.end(k), p1.isScene === !0 && p1.onAfterRender(k, p1, V1), u2.resetDefaultState(), V = -1, $ = null, x.pop(), x.length > 0 ? (M = x[x.length - 1], T.setTextureUnits(M.state.textureUnits), T1 === !0 && o2.setGlobalState(k.clippingPlanes, M.state.camera)) : M = null, S.pop(), S.length > 0 ? E = S[S.length - 1] : E = null, C !== null && C.renderEnd();
+      j !== null && z === 0 && (T.updateMultisampleRenderTarget(j), T.updateRenderTargetMipmap(j)), G1 && y.end(k), p1.isScene === !0 && p1.onAfterRender(k, p1, V1), u2.resetDefaultState(), V = -1, H = null, x.pop(), x.length > 0 ? (M = x[x.length - 1], T.setTextureUnits(M.state.textureUnits), T1 === !0 && o2.setGlobalState(k.clippingPlanes, M.state.camera)) : M = null, S.pop(), S.length > 0 ? E = S[S.length - 1] : E = null, C !== null && C.renderEnd();
     };
     function F0(p1, V1, J1, G1) {
       if (p1.visible === !1) return;
@@ -39179,8 +39180,8 @@ class GE {
       let C2 = b9;
       G1.toneMapped && (j === null || j.isXRRenderTarget === !0) && (C2 = k.toneMapping);
       const u0 = J1.morphAttributes.position || J1.morphAttributes.normal || J1.morphAttributes.color, T0 = u0 !== void 0 ? u0.length : 0, A2 = t1.get(G1), n1 = M.state.lights;
-      if (T1 === !0 && (I === !0 || p1 !== $)) {
-        const $2 = p1 === $ && G1.id === V;
+      if (T1 === !0 && (I === !0 || p1 !== H)) {
+        const $2 = p1 === H && G1.id === V;
         o2.setState(G1, p1, $2);
       }
       let j1 = !1;
@@ -39193,14 +39194,14 @@ class GE {
         const $2 = W0(M.state.lightProbeGridArray, h1);
         A2.lightProbeGrid !== $2 && (A2.lightProbeGrid = $2, p2 = !0);
       }
-      if (Y1 || $ !== p1) {
+      if (Y1 || H !== p1) {
         q1.buffers.depth.getReversed() && p1.reversedDepth !== !0 && (p1._reversedDepth = !0, p1.updateProjectionMatrix()), _2.setValue(U, "projectionMatrix", p1.projectionMatrix), _2.setValue(U, "viewMatrix", p1.matrixWorldInverse);
         const t0 = _2.map.cameraPosition;
         t0 !== void 0 && t0.setValue(U, O.setFromMatrixPosition(p1.matrixWorld)), L1.logarithmicDepthBuffer && _2.setValue(
           U,
           "logDepthBufFC",
           2 / (Math.log(p1.far + 1) / Math.LN2)
-        ), (G1.isMeshPhongMaterial || G1.isMeshToonMaterial || G1.isMeshLambertMaterial || G1.isMeshBasicMaterial || G1.isMeshStandardMaterial || G1.isShaderMaterial) && _2.setValue(U, "isOrthographic", p1.isOrthographicCamera === !0), $ !== p1 && ($ = p1, p2 = !0, x2 = !0);
+        ), (G1.isMeshPhongMaterial || G1.isMeshToonMaterial || G1.isMeshLambertMaterial || G1.isMeshBasicMaterial || G1.isMeshStandardMaterial || G1.isShaderMaterial) && _2.setValue(U, "isOrthographic", p1.isOrthographicCamera === !0), H !== p1 && (H = p1, p2 = !0, x2 = !0);
       }
       if (A2.needsLights && (n1.state.directionalShadowMap.length > 0 && _2.setValue(U, "directionalShadowMap", n1.state.directionalShadowMap, T), n1.state.spotShadowMap.length > 0 && _2.setValue(U, "spotShadowMap", n1.state.spotShadowMap, T), n1.state.pointShadowMap.length > 0 && _2.setValue(U, "pointShadowMap", n1.state.pointShadowMap, T)), h1.isSkinnedMesh) {
         _2.setOptional(U, h1, "bindMatrix"), _2.setOptional(U, h1, "bindMatrixInverse");
@@ -39533,7 +39534,7 @@ return subtract(` + (p.length ? "union(" + [u, ...p].join(",") + ")" : u) + ",un
 function XE() {
   const t = new Worker(new URL(
     /* @vite-ignore */
-    "" + new URL("assets/simulation.worker-B4sDGnm1.js", import.meta.url).href,
+    "" + new URL("assets/simulation.worker-axpzXQo7.js", import.meta.url).href,
     import.meta.url
   ), { type: "module" });
   let e = 0, i = !1;
@@ -39645,8 +39646,8 @@ function YE(t, e, i, n, s, o) {
     T ? (k.record(t.state.document, T), y.record(T)) : k.clear(), s(T);
   }, V = () => {
     u || n();
-  }, $ = (T) => (t.state.document.joints ?? []).filter((W) => W.kind === T).map((W) => ({ port: W.control?.port ?? W.id, id: W.id, name: t.state.document.nodes[W.bodyB].name })), K = () => $("hinge"), Q = () => $("slider"), J = (T, W = "hinge") => {
-    const c1 = $(W), _1 = c1.find((U1) => U1.id === T) ?? c1.find((U1) => U1.port === T.toUpperCase());
+  }, H = (T) => (t.state.document.joints ?? []).filter((W) => W.kind === T).map((W) => ({ port: W.control?.port ?? W.id, id: W.id, name: t.state.document.nodes[W.bodyB].name })), K = () => H("hinge"), Q = () => H("slider"), J = (T, W = "hinge") => {
+    const c1 = H(W), _1 = c1.find((U1) => U1.id === T) ?? c1.find((U1) => U1.port === T.toUpperCase());
     if (_1)
       return _1;
     const N1 = c1.filter((U1) => U1.name === T);
@@ -40124,19 +40125,19 @@ function JE(t, e, i, n) {
   z.disabled = !n;
   const j = document.createElement("label"), V = document.createElement("input");
   V.type = "checkbox", j.append(V, document.createTextNode(f("Limit travel"))), M.append(j);
-  const $ = r(M, "Lower travel limit", -180), K = r(M, "Upper travel limit", 180), Q = r(M, "Cone half-angle (degrees)", 45), J = document.createElement("p");
+  const H = r(M, "Lower travel limit", -180), K = r(M, "Upper travel limit", 180), Q = r(M, "Cone half-angle (degrees)", 45), J = document.createElement("p");
   M.append(J);
   const l1 = () => {
     const R = S.value === "slider";
-    J.textContent = f(R ? "Slider limits use millimetres." : "Axle limits use degrees."), V.disabled = !["hinge", "slider"].includes(S.value), $.disabled = K.disabled = V.disabled || !V.checked, Q.disabled = S.value !== "pivot";
+    J.textContent = f(R ? "Slider limits use millimetres." : "Axle limits use degrees."), V.disabled = !["hinge", "slider"].includes(S.value), H.disabled = K.disabled = V.disabled || !V.checked, Q.disabled = S.value !== "pivot";
   };
   S.onchange = () => {
-    $.value = S.value === "slider" ? "-50" : "-180", K.value = S.value === "slider" ? "50" : "180", l1();
+    H.value = S.value === "slider" ? "-50" : "-180", K.value = S.value === "slider" ? "50" : "180", l1();
   }, V.onchange = l1, l1(), a(M, "Add connector", () => {
     const R = {};
     if (V.checked && ["hinge", "slider"].includes(S.value)) {
       const O = S.value === "hinge" ? Math.PI / 180 : 1;
-      R.limits = [Number($.value) * O, Number(K.value) * O];
+      R.limits = [Number(H.value) * O, Number(K.value) * O];
     }
     S.value === "pivot" && (R.coneAngle = Number(Q.value) * Math.PI / 180), e.addJoint(S.value, x.value, y.value, d(k), d(A), R);
   });
@@ -40354,8 +40355,8 @@ function eC(t, e, i, n, s, o = {}) {
   r.append(C);
   const D = u("Play recorded motion", () => P.replayPlaying ? P.pauseReplay() : P.playReplay(), C), z = u("Previous recorded frame", () => P.previousFrame(), C), j = u("Return to latest state", () => P.live(), C), V = document.createElement("small");
   V.textContent = f("Replay shows recorded poses. Run resumes from the latest simulation state."), r.append(V);
-  const $ = document.createElement("output");
-  $.setAttribute("aria-label", f("Simulation time")), $.setAttribute("aria-live", "off"), $.value = "0.000 s", r.append($);
+  const H = document.createElement("output");
+  H.setAttribute("aria-label", f("Simulation time")), H.setAttribute("aria-live", "off"), H.value = "0.000 s", r.append(H);
   const K = (T, W) => {
     const c1 = document.createElement("label"), _1 = document.createElement("input");
     return _1.type = "checkbox", c1.append(_1, document.createTextNode(f(T))), _1.onchange = () => {
@@ -40375,11 +40376,11 @@ function eC(t, e, i, n, s, o = {}) {
   N.setAttribute("role", "status"), r.append(N);
   const Z = /* @__PURE__ */ new Map(), P = YE(e, i, n, x1, (T) => {
     if (s(T?.poses ?? null), o.traces?.(P.tracePaths()), T) {
-      r.dataset.time = String(T.time), $.value = `${T.time.toFixed(3)} s`;
+      r.dataset.time = String(T.time), H.value = `${T.time.toFixed(3)} s`;
       for (const [W, c1] of Z)
         c1.position.value = c1.kind === "hinge" ? `${(T.angles[W] ?? 0).toFixed(1)}°` : `${(T.linearPositions[W] ?? 0).toFixed(2)} mm`;
     } else {
-      delete r.dataset.time, $.value = "0.000 s";
+      delete r.dataset.time, H.value = "0.000 s";
       for (const W of Z.values())
         W.position.value = W.kind === "hinge" ? "0.0°" : "0.00 mm";
     }
@@ -40860,9 +40861,9 @@ var $C = /* @__PURE__ */ xt($7, 9, 0), HC = /* @__PURE__ */ xt(rs, 5, 0), Ym = f
   var D = l + 5 << 3, z = Fe(s, $7) + Fe(o, rs) + r, j = Fe(s, u) + Fe(o, g) + r + 14 + 3 * C + Fe(S, k) + 2 * S[16] + 3 * S[17] + 7 * S[18];
   if (c >= 0 && D <= z && D <= j)
     return Qm(e, d, t.subarray(c, c + l));
-  var V, $, K, Q;
+  var V, H, K, Q;
   if (B9(e, d, 1 + (j < z)), d += 2, j < z) {
-    V = xt(u, h, 0), $ = u, K = xt(g, m, 0), Q = g;
+    V = xt(u, h, 0), H = u, K = xt(g, m, 0), Q = g;
     var J = xt(k, A, 0);
     B9(e, d, v - 257), B9(e, d + 5, M - 1), B9(e, d + 10, C - 4), d += 14;
     for (var x = 0; x < C; ++x)
@@ -40874,18 +40875,18 @@ var $C = /* @__PURE__ */ xt($7, 9, 0), HC = /* @__PURE__ */ xt(rs, 5, 0), Ym = f
         B9(e, d, J[N]), d += k[N], N > 15 && (B9(e, d, M1[x] >> 5 & 127), d += M1[x] >> 12);
       }
   } else
-    V = $C, $ = $7, K = HC, Q = rs;
+    V = $C, H = $7, K = HC, Q = rs;
   for (var x = 0; x < a; ++x) {
     var Z = n[x];
     if (Z > 255) {
       var N = Z >> 18 & 31;
-      Be(e, d, V[N + 257]), d += $[N + 257], N > 7 && (B9(e, d, Z >> 23 & 31), d += Gl[N]);
+      Be(e, d, V[N + 257]), d += H[N + 257], N > 7 && (B9(e, d, Z >> 23 & 31), d += Gl[N]);
       var P = Z & 31;
       Be(e, d, K[P]), d += Q[P], P > 3 && (Be(e, d, Z >> 5 & 8191), d += Wl[P]);
     } else
-      Be(e, d, V[Z]), d += $[Z];
+      Be(e, d, V[Z]), d += H[Z];
   }
-  return Be(e, d, V[256]), d + $[256];
+  return Be(e, d, V[256]), d + H[256];
 }, WC = /* @__PURE__ */ new Hl([65540, 131080, 131088, 131104, 262176, 1048704, 1048832, 2114560, 2117632]), eq = /* @__PURE__ */ new E4(0), XC = function(t, e, i, n, s, o) {
   var r = o.z || t.length, a = new E4(n + r + 5 * (1 + Math.ceil(r / 7e3)) + s), c = a.subarray(n, a.length - s), l = o.l, d = (o.r || 0) & 7;
   if (e) {
@@ -40898,10 +40899,10 @@ var $C = /* @__PURE__ */ xt($7, 9, 0), HC = /* @__PURE__ */ xt(rs, 5, 0), Ym = f
         var V = r - y;
         if ((S > 7e3 || k > 24576) && (V > 423 || !l)) {
           d = Vp(t, c, 0, _, E, M, x, k, C, y - C, d), k = S = x = 0, C = y;
-          for (var $ = 0; $ < 286; ++$)
-            E[$] = 0;
-          for (var $ = 0; $ < 30; ++$)
-            M[$] = 0;
+          for (var H = 0; H < 286; ++H)
+            E[H] = 0;
+          for (var H = 0; H < 30; ++H)
+            M[H] = 0;
         }
         var K = 2, Q = 0, J = h, l1 = z - j & 32767;
         if (V > 2 && D == v(y - l1))
@@ -40912,8 +40913,8 @@ var $C = /* @__PURE__ */ xt($7, 9, 0), HC = /* @__PURE__ */ xt(rs, 5, 0), Ym = f
               if (Z > K) {
                 if (K = Z, Q = l1, Z > f1)
                   break;
-                for (var P = Math.min(l1, Z - 2), B = 0, $ = 0; $ < P; ++$) {
-                  var d1 = y - l1 + $ & 32767, r1 = g[d1], o1 = d1 - r1 & 32767;
+                for (var P = Math.min(l1, Z - 2), B = 0, H = 0; H < P; ++H) {
+                  var d1 = y - l1 + H & 32767, r1 = g[d1], o1 = d1 - r1 & 32767;
                   o1 > B && (B = o1, j = d1);
                 }
               }
@@ -41194,8 +41195,8 @@ async function cq(t, e) {
       const k = v[y], A = v[(y + 1) % 3], C = v[(y + 2) % 3], D = k < A ? `${k},${A}` : `${A},${k}`, z = g.get(D) ?? { count: 0, direction: 0 };
       z.count++, z.direction += k < A ? 1 : -1, g.set(D, z);
       for (const [j, V] of [[A, C], [C, A]]) {
-        const $ = m[k].get(j) ?? [];
-        $.push(V), m[k].set(j, $);
+        const H = m[k].get(j) ?? [];
+        H.push(V), m[k].set(j, H);
       }
     }
   }
@@ -41553,14 +41554,14 @@ function pP(t, e, i, n, s, o, r) {
   j.type = "button", j.setAttribute("aria-label", f("Open catalogue JSON")), j.title = f("Open catalogue JSON");
   const V = y2("input");
   V.type = "file", V.accept = ".json,application/json", V.hidden = !0, V.setAttribute("aria-label", f("Catalogue file")), j.onclick = () => V.click(), C.append(D, z, j, V);
-  const $ = y2("div");
-  $.className = "model-library-layout";
+  const H = y2("div");
+  H.className = "model-library-layout";
   const K = y2("div");
   K.className = "model-library-list", K.setAttribute("aria-label", f("Catalogue models"));
   const Q = y2("section");
-  Q.className = "model-library-details", $.append(K, Q);
+  Q.className = "model-library-details", H.append(K, Q);
   const J = y2("p");
-  J.className = "model-library-status", J.setAttribute("role", "status"), J.setAttribute("aria-label", f("Model library status")), J.textContent = c, x.append(y, C, $, J), t.append(x), x.addEventListener("keydown", (F) => F.stopPropagation()), x.addEventListener("cancel", () => M?.abort());
+  J.className = "model-library-status", J.setAttribute("role", "status"), J.setAttribute("aria-label", f("Model library status")), J.textContent = c, x.append(y, C, H, J), t.append(x), x.addEventListener("keydown", (F) => F.stopPropagation()), x.addEventListener("cancel", () => M?.abort());
   const l1 = (F) => {
     J.textContent = F instanceof Error ? F.message : String(F);
   }, f1 = (F, U) => {
@@ -41995,7 +41996,7 @@ function hP(t, e) {
     o.clear();
   }, a = () => i || (i = e ? e() : new Worker(new URL(
     /* @vite-ignore */
-    "" + new URL("assets/geometry.worker-BZxOC2Xn.js", import.meta.url).href,
+    "" + new URL("assets/geometry.worker-DI2KXGuv.js", import.meta.url).href,
     import.meta.url
   ), { type: "module" }), i.onmessage = (l) => {
     const d = l.data, p = o.get(d.request);
@@ -42485,7 +42486,7 @@ function kP(t, e) {
       }
     }
     if (g.length && Math.abs(n.q.w) < 1 - 1e-12) {
-      const m = ["X", "Y", "Z"].map((z, j) => g.find((V) => V.property === `rotation${z}`)?.expression ?? `${d.rotation[j]} deg`), [q, w, v] = m.map((z) => `(${z})`), _ = `sin(${q})`, E = `cos(${q})`, M = `sin(${w})`, S = `cos(${w})`, x = `sin(${v})`, y = `cos(${v})`, k = [[`${y}*${S}`, `${y}*${M}*${_}-${x}*${E}`, `${y}*${M}*${E}+${x}*${_}`], [`${x}*${S}`, `${x}*${M}*${_}+${y}*${E}`, `${x}*${M}*${E}-${y}*${_}`], [`-${M}`, `${S}*${_}`, `${S}*${E}`]], A = (z, j) => k.map((V, $) => Math.abs(o[$ * 3 + z]) < 1e-12 ? "" : `(${o[$ * 3 + z]})*(${V[j]})`).filter(Boolean).join("+") || "0", C = `abs(${A(2, 0)})<0.9999999`, D = [`(${C})?atan2(${A(2, 1)},${A(2, 2)}):0`, `asin(max(-1,min(1,-(${A(2, 0)}))))`, `(${C})?atan2(${A(1, 0)},${A(0, 0)}):atan2(-(${A(0, 1)}),${A(1, 1)})`];
+      const m = ["X", "Y", "Z"].map((z, j) => g.find((V) => V.property === `rotation${z}`)?.expression ?? `${d.rotation[j]} deg`), [q, w, v] = m.map((z) => `(${z})`), _ = `sin(${q})`, E = `cos(${q})`, M = `sin(${w})`, S = `cos(${w})`, x = `sin(${v})`, y = `cos(${v})`, k = [[`${y}*${S}`, `${y}*${M}*${_}-${x}*${E}`, `${y}*${M}*${E}+${x}*${_}`], [`${x}*${S}`, `${x}*${M}*${_}+${y}*${E}`, `${x}*${M}*${E}-${y}*${_}`], [`-${M}`, `${S}*${_}`, `${S}*${E}`]], A = (z, j) => k.map((V, H) => Math.abs(o[H * 3 + z]) < 1e-12 ? "" : `(${o[H * 3 + z]})*(${V[j]})`).filter(Boolean).join("+") || "0", C = `abs(${A(2, 0)})<0.9999999`, D = [`(${C})?atan2(${A(2, 1)},${A(2, 2)}):0`, `asin(max(-1,min(1,-(${A(2, 0)}))))`, `(${C})?atan2(${A(1, 0)},${A(0, 0)}):atan2(-(${A(0, 1)}),${A(1, 1)})`];
       for (const z of g)
         a.splice(a.indexOf(z), 1);
       D.forEach((z, j) => {
@@ -42575,10 +42576,10 @@ function Kp(t, e, i, n, s, o, r = () => !1, a = () => !0, c = "placement") {
   function V(K) {
     return _ = K, j(), E;
   }
-  function $() {
+  function H() {
     m = q = !1, _ = void 0, E = null, l.visible = p.visible = u.visible = !1, A(), M = "", delete i.dataset[b()], delete i.dataset[b("Target")], delete i.dataset[b("Point")], delete i.dataset[b("Normal")];
   }
-  return { begin: C, setGeometry: D, move: V, refresh: j, end: $, setRole(K) {
+  return { begin: C, setGeometry: D, move: V, refresh: j, end: H, setRole(K) {
     w = K;
     for (const [Q, J] of k.entries()) {
       const l1 = J;
@@ -42591,7 +42592,7 @@ function Kp(t, e, i, n, s, o, r = () => !1, a = () => !0, c = "placement") {
   }, get pose() {
     return E;
   }, dispose() {
-    $(), t.remove(l, p, u), p.geometry !== g && p.geometry.dispose(), g.dispose(), d.dispose(), u.dispose();
+    H(), t.remove(l, p, u), p.geometry !== g && p.geometry.dispose(), g.dispose(), d.dispose(), u.dispose();
   } };
 }
 function MP(t, e, i, n) {
@@ -43448,8 +43449,8 @@ class KP extends x3 {
     const w = new X2(75e-4, 75e-4, 0.5, 3);
     w.translate(0, 0.25, 0);
     function v(j, V) {
-      const $ = new D6(j, 75e-4, 3, 64, V * Math.PI * 2);
-      return $.rotateY(Math.PI / 2), $.rotateX(Math.PI / 2), $;
+      const H = new D6(j, 75e-4, 3, 64, V * Math.PI * 2);
+      return H.rotateY(Math.PI / 2), H.rotateX(Math.PI / 2), H;
     }
     function _() {
       const j = new v0();
@@ -43629,10 +43630,10 @@ class KP extends x3 {
     };
     function z(j) {
       const V = new x3();
-      for (const $ in j)
-        for (let K = j[$].length; K--; ) {
-          const Q = j[$][K][0].clone(), J = j[$][K][1], l1 = j[$][K][2], f1 = j[$][K][3], M1 = j[$][K][4];
-          Q.name = $, Q.tag = M1, J && Q.position.set(J[0], J[1], J[2]), l1 && Q.rotation.set(l1[0], l1[1], l1[2]), f1 && Q.scale.set(f1[0], f1[1], f1[2]), Q.updateMatrix();
+      for (const H in j)
+        for (let K = j[H].length; K--; ) {
+          const Q = j[H][K][0].clone(), J = j[H][K][1], l1 = j[H][K][2], f1 = j[H][K][3], M1 = j[H][K][4];
+          Q.name = H, Q.tag = M1, J && Q.position.set(J[0], J[1], J[2]), l1 && Q.rotation.set(l1[0], l1[1], l1[2]), f1 && Q.scale.set(f1[0], f1[1], f1[2]), Q.updateMatrix();
           const N = Q.geometry.clone();
           N.applyMatrix4(Q.matrix), Q.geometry = N, Q.renderOrder = 1 / 0, Q.position.set(0, 0, 0), Q.rotation.set(0, 0, 0), Q.scale.set(1, 1, 1), V.add(Q);
         }
@@ -44271,10 +44272,10 @@ function UT(t, e) {
           return;
         j.normalize();
       }
-      const V = new _4().setFromNormalAndCoplanarPoint(j, D), $ = e.ray(y.clientX, y.clientY).intersectPlane(V, new i1());
-      if ($)
+      const V = new _4().setFromNormalAndCoplanarPoint(j, D), H = e.ray(y.clientX, y.clientY).intersectPlane(V, new i1());
+      if (H)
         try {
-          e.begin(), u = { id: y.pointerId, button: S, frame: k, signs: A, plane: V, start: $, precision: Kl([0, 0, 0]) }, S.setPointerCapture(y.pointerId), i.dataset.dragging = "true", delete i.dataset.valid, x(y);
+          e.begin(), u = { id: y.pointerId, button: S, frame: k, signs: A, plane: V, start: H, precision: Kl([0, 0, 0]) }, S.setPointerCapture(y.pointerId), i.dataset.dragging = "true", delete i.dataset.valid, x(y);
         } catch (K) {
           e.error(K);
         }
@@ -44342,23 +44343,23 @@ function UT(t, e) {
     if (h = M, i.hidden = !M, !M)
       return;
     l.setAttribute("aria-pressed", String(r || M.uniformOnly)), l.disabled = M.uniformOnly, d.setAttribute("aria-pressed", String(a));
-    const S = e.project(new i1(...M.center)), x = Array.from({ length: 8 }, (V, $) => e.project(b(M, M.size.map((K, Q) => ($ & 1 << Q ? 1 : -1) * K / 2))));
+    const S = e.project(new i1(...M.center)), x = Array.from({ length: 8 }, (V, H) => e.project(b(M, M.size.map((K, Q) => (H & 1 << Q ? 1 : -1) * K / 2))));
     let y = 0;
     for (let V = 0; V < 8; V++)
-      for (let $ = 0; $ < 3; $++)
-        if (!(V & 1 << $)) {
-          const K = x[V], Q = x[V | 1 << $], J = w[y++];
+      for (let H = 0; H < 3; H++)
+        if (!(V & 1 << H)) {
+          const K = x[V], Q = x[V | 1 << H], J = w[y++];
           J.setAttribute("x1", String(K[0])), J.setAttribute("y1", String(K[1])), J.setAttribute("x2", String(Q[0])), J.setAttribute("y2", String(Q[1]));
         }
     const k = e.camera().getWorldDirection(new i1()), A = (V) => Math.abs(k.dot(new i1(V === 0 ? 1 : 0, V === 1 ? 1 : 0, V === 2 ? 1 : 0).applyQuaternion(M.rotation))) < 0.995;
-    g.forEach((V, $) => {
-      const K = p[$].signs, Q = e.project(b(M, M.size.map((l1, f1) => K[f1] ? K[f1] * l1 / 2 : f1 === 2 ? -l1 / 2 : 0))), J = (K.filter(Boolean).length > 1 || A(K.findIndex(Boolean))) && Q[2] >= -1 && Q[2] <= 1 && Q[0] > 8 && Q[0] < t.clientWidth - 8 && Q[1] > 8 && Q[1] < t.clientHeight - 44;
+    g.forEach((V, H) => {
+      const K = p[H].signs, Q = e.project(b(M, M.size.map((l1, f1) => K[f1] ? K[f1] * l1 / 2 : f1 === 2 ? -l1 / 2 : 0))), J = (K.filter(Boolean).length > 1 || A(K.findIndex(Boolean))) && Q[2] >= -1 && Q[2] <= 1 && Q[0] > 8 && Q[0] < t.clientWidth - 8 && Q[1] > 8 && Q[1] < t.clientHeight - 44;
       V.hidden = !J, V.style.left = `${Q[0]}px`, V.style.top = `${Q[1]}px`;
     });
     const C = { left: Math.min(...x.map((V) => V[0])), right: Math.max(...x.map((V) => V[0])), top: Math.min(...x.map((V) => V[1])), bottom: Math.max(...x.map((V) => V[1])) }, D = Math.max(4, Math.min(t.clientWidth - 74, C.right - 70)), z = Math.max(4, C.top - 42);
     o.style.left = `${D}px`, o.style.top = `${z}px`;
     const j = [{ left: D, top: z, right: D + 64, bottom: z + 28 }];
-    q.forEach(({ input: V, line: $ }, K) => {
+    q.forEach(({ input: V, line: H }, K) => {
       V.readOnly = !!u, (V.getRootNode().activeElement !== V || u) && (V.value = String(Number(M.size[K].toFixed(5))));
       const Q = Math.max(36, Math.min(82, V.value.length * 7 + 12));
       V.style.width = `${Q}px`;
@@ -44370,7 +44371,7 @@ function UT(t, e) {
         const B = e.project(b(M, Z)), d1 = e.project(b(M, P));
         return { a: Z, p: B, q: d1, score: Math.hypot((B[0] + d1[0]) / 2 - S[0], (B[1] + d1[1]) / 2 - S[1]) };
       }).filter((M1) => K === 2 || M1.a[2] < 0).sort((M1, N) => N.score - M1.score), f1 = A(K) ? gP(l1, C, { width: t.clientWidth, height: t.clientHeight }, j, Q) : void 0;
-      V.hidden = !f1, $.style.display = f1 ? "" : "none", f1 && (j.push(f1.rect), V.style.left = `${f1.x}px`, V.style.top = `${f1.y}px`, $.setAttribute("x1", String(f1.p[0])), $.setAttribute("y1", String(f1.p[1])), $.setAttribute("x2", String(f1.q[0])), $.setAttribute("y2", String(f1.q[1])));
+      V.hidden = !f1, H.style.display = f1 ? "" : "none", f1 && (j.push(f1.rect), V.style.left = `${f1.x}px`, V.style.top = `${f1.y}px`, H.setAttribute("x1", String(f1.p[0])), H.setAttribute("y1", String(f1.p[1])), H.setAttribute("x2", String(f1.q[0])), H.setAttribute("y2", String(f1.q[1])));
     });
   }
   const _ = (M) => {
@@ -44449,12 +44450,12 @@ function jT(t, e, i, n) {
   S.isFine = () => C || D, S.setTranslationSnap(1), S.setRotationSnap(15 * s7), S.setScaleSnap(null);
   let z = !1, j = /* @__PURE__ */ new Map();
   const V = /* @__PURE__ */ new Map();
-  let $, K = !1, Q;
+  let H, K = !1, Q;
   function J() {
     if (!Q)
       return;
     const n1 = Q;
-    Q = void 0, n1.pending !== void 0 && cancelAnimationFrame(n1.pending), d.enabled = n1.orbit, l.hasPointerCapture(n1.pointerId) && l.releasePointerCapture(n1.pointerId), $?.(null);
+    Q = void 0, n1.pending !== void 0 && cancelAnimationFrame(n1.pending), d.enabled = n1.orbit, l.hasPointerCapture(n1.pointerId) && l.releasePointerCapture(n1.pointerId), H?.(null);
   }
   function l1() {
     for (const n1 of V.values())
@@ -44632,9 +44633,9 @@ function jT(t, e, i, n) {
           for (const H1 of [1, -1]) {
             const e2 = p2.clone();
             e2.setComponent(k1, e2.getComponent(k1) + H1 * D1 * Math.max(8, e1.getComponent(k1) * 0.65));
-            const H = x2(e2);
-            if (b0(H, k1)) {
-              W1 = H, C1 = !0;
+            const $ = x2(e2);
+            if (b0($, k1)) {
+              W1 = $, C1 = !0;
               break;
             }
           }
@@ -44655,8 +44656,8 @@ function jT(t, e, i, n) {
             return;
           const e2 = H1.geometry.getAttribute("position");
           if (e2)
-            for (let H = 0; H < e2.count; H++) {
-              const w1 = x2(new i1().fromBufferAttribute(e2, H).applyMatrix4(H1.matrixWorld)), R1 = w1[0] - _2[0], F1 = w1[1] - _2[1];
+            for (let $ = 0; $ < e2.count; $++) {
+              const w1 = x2(new i1().fromBufferAttribute(e2, $).applyMatrix4(H1.matrixWorld)), R1 = w1[0] - _2[0], F1 = w1[1] - _2[1];
               if (!b0(w1, W1))
                 continue;
               const c2 = L1 === "rotate" ? R1 * a1[W1][0] + F1 * a1[W1][1] : Math.hypot(R1, F1) + (R1 * a1[W1][0] + F1 * a1[W1][1]) * 0.01;
@@ -44895,7 +44896,7 @@ function jT(t, e, i, n) {
       return;
     }
     if (z) {
-      if (K && $ && n1.button === 0) {
+      if (K && H && n1.button === 0) {
         if (Q) {
           J();
           return;
@@ -44907,7 +44908,7 @@ function jT(t, e, i, n) {
           if (e.state.document.nodes[Y1]?.physics?.motion === "static")
             return;
           const p2 = n2.point.toArray();
-          Q = { pointerId: n1.pointerId, bodyId: Y1, point: p2, target: p2, plane: new _4().setFromNormalAndCoplanarPoint(a.getWorldDirection(new i1()), n2.point), orbit: d.enabled }, d.enabled = !1, l.setPointerCapture(n1.pointerId), $({ bodyId: Y1, point: p2, target: p2 }), n1.preventDefault(), n1.stopImmediatePropagation();
+          Q = { pointerId: n1.pointerId, bodyId: Y1, point: p2, target: p2, plane: new _4().setFromNormalAndCoplanarPoint(a.getWorldDirection(new i1()), n2.point), orbit: d.enabled }, d.enabled = !1, l.setPointerCapture(n1.pointerId), H({ bodyId: Y1, point: p2, target: p2 }), n1.preventDefault(), n1.stopImmediatePropagation();
         }
       }
       return;
@@ -44946,7 +44947,7 @@ function jT(t, e, i, n) {
       N0(n1);
       const j1 = o1.ray.intersectPlane(Q.plane, new i1());
       j1 && (Q.target = j1.toArray(), Q.pending === void 0 && (Q.pending = requestAnimationFrame(() => {
-        Q && (Q.pending = void 0, $?.({ bodyId: Q.bodyId, point: Q.point, target: Q.target }));
+        Q && (Q.pending = void 0, H?.({ bodyId: Q.bodyId, point: Q.point, target: Q.target }));
       }))), n1.preventDefault(), n1.stopImmediatePropagation();
       return;
     }
@@ -45150,7 +45151,7 @@ function jT(t, e, i, n) {
   }), A1(), w2(), {
     setConnectorHandlesVisible: z3.setVisible,
     setSimulationDrag(n1) {
-      $ = n1;
+      H = n1;
     },
     setSimulationDragEnabled(n1) {
       K = n1, n1 || J();
@@ -50590,7 +50591,7 @@ class It extends Vl {
               case "rotate":
                 if (I.length >= 1) {
                   let R = 0, O = 0, s1 = 0;
-                  R = I[0] * Math.PI / 180, I.length >= 3 && (O = I[1], s1 = I[2]), V.makeTranslation(-O, -s1), $.makeRotation(R), K.multiplyMatrices($, V), V.makeTranslation(O, s1), P.multiplyMatrices(V, K);
+                  R = I[0] * Math.PI / 180, I.length >= 3 && (O = I[1], s1 = I[2]), V.makeTranslation(-O, -s1), H.makeRotation(R), K.multiplyMatrices(H, V), V.makeTranslation(O, s1), P.multiplyMatrices(V, K);
                 }
                 break;
               case "scale":
@@ -50661,7 +50662,7 @@ class It extends Vl {
           0,
           0,
           1
-        ), U = V.copy(F).invert(), L1 = $.copy(U).transpose().multiply(U).elements, q1 = A(L1[0], L1[1], L1[4]), E1 = Math.sqrt(q1.rt1), t1 = Math.sqrt(q1.rt2);
+        ), U = V.copy(F).invert(), L1 = H.copy(U).transpose().multiply(U).elements, q1 = A(L1[0], L1[1], L1[4]), E1 = Math.sqrt(q1.rt1), t1 = Math.sqrt(q1.rt2);
         if (o1.xRadius = 1 / E1, o1.yRadius = 1 / t1, o1.aRotation = Math.atan2(q1.sn, q1.cs), !((o1.aEndAngle - o1.aStartAngle) % (2 * Math.PI) < Number.EPSILON)) {
           const W = V.set(
             E1,
@@ -50673,7 +50674,7 @@ class It extends Vl {
             0,
             0,
             1
-          ), c1 = $.set(
+          ), c1 = H.set(
             q1.cs,
             q1.sn,
             0,
@@ -50728,7 +50729,7 @@ class It extends Vl {
       const T1 = N + P, I = N - P, R = Math.sqrt(I * I + 4 * Z * Z);
       return T1 > 0 ? (B = 0.5 * (T1 + R), b1 = 1 / B, d1 = N * b1 * P - Z * b1 * Z) : T1 < 0 ? d1 = 0.5 * (T1 - R) : (B = 0.5 * R, d1 = -0.5 * R), I > 0 ? r1 = I + R : r1 = I - R, Math.abs(r1) > 2 * Math.abs(Z) ? (b1 = -2 * Z / r1, o1 = 1 / Math.sqrt(1 + b1 * b1), r1 = b1 * o1) : Math.abs(Z) === 0 ? (r1 = 1, o1 = 0) : (b1 = -0.5 * r1 / Z, r1 = 1 / Math.sqrt(1 + b1 * b1), o1 = b1 * r1), I > 0 && (b1 = r1, r1 = -o1, o1 = b1), { rt1: B, rt2: d1, cs: r1, sn: o1 };
     }
-    const C = [], D = {}, z = [], j = new r0(), V = new r0(), $ = new r0(), K = new r0(), Q = new l2(), J = new i1(), l1 = new r0(), f1 = new DOMParser().parseFromString(e, "image/svg+xml");
+    const C = [], D = {}, z = [], j = new r0(), V = new r0(), H = new r0(), K = new r0(), Q = new l2(), J = new i1(), l1 = new r0(), f1 = new DOMParser().parseFromString(e, "image/svg+xml");
     return n(f1.documentElement, {
       fill: "#000",
       fillOpacity: 1,
@@ -50765,11 +50766,11 @@ class It extends Vl {
       if (A === 0 && D === 0) {
         for (let V = 0; V < 2; V++)
           if (r(V === 0 ? q : w, g, m), s.loc == n.ORIGIN) {
-            const $ = V === 0 ? q : w;
-            return { x: $.x, y: $.y, t: s.t };
+            const H = V === 0 ? q : w;
+            return { x: H.x, y: H.y, t: s.t };
           } else if (s.loc == n.BETWEEN) {
-            const $ = +(v + s.t * (_ - v)).toPrecision(10), K = +(S + s.t * (x - S)).toPrecision(10);
-            return { x: $, y: K, t: s.t };
+            const H = +(v + s.t * (_ - v)).toPrecision(10), K = +(S + s.t * (x - S)).toPrecision(10);
+            return { x: H, y: K, t: s.t };
           }
         return null;
       } else {
@@ -50778,8 +50779,8 @@ class It extends Vl {
             const Q = K === 0 ? q : w;
             return { x: Q.x, y: Q.y, t: s.t };
           }
-        const V = +(v + z * (_ - v)).toPrecision(10), $ = +(S + z * (x - S)).toPrecision(10);
-        return { x: V, y: $, t: z };
+        const V = +(v + z * (_ - v)).toPrecision(10), H = +(S + z * (x - S)).toPrecision(10);
+        return { x: V, y: H, t: z };
       }
     }
     function r(g, m, q) {
@@ -50939,12 +50940,12 @@ class It extends Vl {
     const A = e[0].equals(e[k - 1]);
     let C, D = e[0], z;
     const j = i.strokeWidth / 2, V = 1 / (k - 1);
-    let $ = 0, K, Q, J, l1, f1 = !1, M1 = 0, N = c * 3, Z = c * 2;
+    let H = 0, K, Q, J, l1, f1 = !1, M1 = 0, N = c * 3, Z = c * 2;
     P(e[0], e[1], l).multiplyScalar(j), m.copy(e[0]).sub(l), q.copy(e[0]).add(l), w.copy(m), v.copy(q);
     for (let R = 1; R < k; R++) {
       C = e[R], R === k - 1 ? A ? z = e[1] : z = void 0 : z = e[R + 1];
       const O = l;
-      if (P(D, C, O), p.copy(O).multiplyScalar(j), _.copy(C).sub(p), E.copy(C).add(p), K = $ + V, Q = !1, z !== void 0) {
+      if (P(D, C, O), p.copy(O).multiplyScalar(j), _.copy(C).sub(p), E.copy(C).add(p), K = H + V, Q = !1, z !== void 0) {
         P(C, z, d), p.copy(d).multiplyScalar(j), M.copy(C).sub(p), S.copy(C).add(p), J = !0, p.subVectors(z, D), O.dot(p) < 0 && (J = !1), R === 1 && (f1 = J), p.subVectors(z, C), p.normalize();
         const s1 = Math.abs(O.dot(p));
         if (s1 > Number.EPSILON) {
@@ -50969,14 +50970,14 @@ class It extends Vl {
                 } else
                   b1(J, Q), J ? (b.subVectors(y, _).multiplyScalar(m1).add(_), g.subVectors(y, M).multiplyScalar(m1).add(M), B(_, K, 0), B(b, K, 0), B(C, K, 0.5), B(C, K, 0.5), B(b, K, 0), B(g, K, 0), B(C, K, 0.5), B(g, K, 0), B(M, K, 0)) : (b.subVectors(y, E).multiplyScalar(m1).add(E), g.subVectors(y, S).multiplyScalar(m1).add(S), B(E, K, 1), B(b, K, 1), B(C, K, 0.5), B(C, K, 0.5), B(b, K, 1), B(g, K, 1), B(C, K, 0.5), B(g, K, 1), B(S, K, 1));
               else
-                Q ? (J ? (B(q, $, 1), B(m, $, 0), B(y, K, 0), B(q, $, 1), B(y, K, 0), B(x, K, 1)) : (B(q, $, 1), B(m, $, 0), B(y, K, 1), B(m, $, 0), B(x, K, 0), B(y, K, 1)), J ? M.copy(y) : S.copy(y)) : J ? (B(_, K, 0), B(y, K, 0), B(C, K, 0.5), B(C, K, 0.5), B(y, K, 0), B(M, K, 0)) : (B(E, K, 1), B(y, K, 1), B(C, K, 0.5), B(C, K, 0.5), B(y, K, 1), B(S, K, 1)), l1 = !0;
+                Q ? (J ? (B(q, H, 1), B(m, H, 0), B(y, K, 0), B(q, H, 1), B(y, K, 0), B(x, K, 1)) : (B(q, H, 1), B(m, H, 0), B(y, K, 1), B(m, H, 0), B(x, K, 0), B(y, K, 1)), J ? M.copy(y) : S.copy(y)) : J ? (B(_, K, 0), B(y, K, 0), B(C, K, 0.5), B(C, K, 0.5), B(y, K, 0), B(M, K, 0)) : (B(E, K, 1), B(y, K, 1), B(C, K, 0.5), B(C, K, 0.5), B(y, K, 1), B(S, K, 1)), l1 = !0;
               break;
           }
         } else
           r1();
       } else
         r1();
-      !A && R === k - 1 && T1(e[0], w, v, J, !0, $), $ = K, D = C, m.copy(M), q.copy(S);
+      !A && R === k - 1 && T1(e[0], w, v, J, !0, H), H = K, D = C, m.copy(M), q.copy(S);
     }
     if (!A)
       T1(C, _, E, J, !1, K);
@@ -51001,13 +51002,13 @@ class It extends Vl {
       B(p, Y, X), B(s1, Y, X), B(R, Y, 0.5);
     }
     function r1() {
-      B(q, $, 1), B(m, $, 0), B(_, K, 0), B(q, $, 1), B(_, K, 0), B(E, K, 1);
+      B(q, H, 1), B(m, H, 0), B(_, K, 0), B(q, H, 1), B(_, K, 0), B(E, K, 1);
     }
     function o1(R, O, s1) {
-      O ? R ? (B(q, $, 1), B(m, $, 0), B(_, K, 0), B(q, $, 1), B(_, K, 0), B(x, K, 1), B(_, s1, 0), B(M, s1, 0), B(x, s1, 0.5)) : (B(q, $, 1), B(m, $, 0), B(E, K, 1), B(m, $, 0), B(x, K, 0), B(E, K, 1), B(E, s1, 1), B(x, s1, 0), B(S, s1, 1)) : R ? (B(_, s1, 0), B(M, s1, 0), B(C, s1, 0.5)) : (B(E, s1, 1), B(S, s1, 0), B(C, s1, 0.5));
+      O ? R ? (B(q, H, 1), B(m, H, 0), B(_, K, 0), B(q, H, 1), B(_, K, 0), B(x, K, 1), B(_, s1, 0), B(M, s1, 0), B(x, s1, 0.5)) : (B(q, H, 1), B(m, H, 0), B(E, K, 1), B(m, H, 0), B(x, K, 0), B(E, K, 1), B(E, s1, 1), B(x, s1, 0), B(S, s1, 1)) : R ? (B(_, s1, 0), B(M, s1, 0), B(C, s1, 0.5)) : (B(E, s1, 1), B(S, s1, 0), B(C, s1, 0.5));
     }
     function b1(R, O) {
-      O && (R ? (B(q, $, 1), B(m, $, 0), B(_, K, 0), B(q, $, 1), B(_, K, 0), B(x, K, 1), B(_, $, 0), B(C, K, 0.5), B(x, K, 1), B(C, K, 0.5), B(M, $, 0), B(x, K, 1)) : (B(q, $, 1), B(m, $, 0), B(E, K, 1), B(m, $, 0), B(x, K, 0), B(E, K, 1), B(E, $, 1), B(x, K, 0), B(C, K, 0.5), B(C, K, 0.5), B(x, K, 0), B(S, $, 1)));
+      O && (R ? (B(q, H, 1), B(m, H, 0), B(_, K, 0), B(q, H, 1), B(_, K, 0), B(x, K, 1), B(_, H, 0), B(C, K, 0.5), B(x, K, 1), B(C, K, 0.5), B(M, H, 0), B(x, K, 1)) : (B(q, H, 1), B(m, H, 0), B(E, K, 1), B(m, H, 0), B(x, K, 0), B(E, K, 1), B(E, H, 1), B(x, K, 0), B(C, K, 0.5), B(C, K, 0.5), B(x, K, 0), B(S, H, 1)));
     }
     function T1(R, O, s1, Y, X, F) {
       switch (i.strokeLineCap) {
@@ -51166,30 +51167,30 @@ const Z9 = function(t, e) {
   }, v = function(S, x) {
     let y = 0, k = 0, A = 0;
     const C = new Array(x.length), D = new Array(x.length);
-    for (let $ = 0; $ < x.length; $ += 1) {
-      const K = x[$].dataCount, Q = x[$].totalCount - K;
-      k = Math.max(k, K), A = Math.max(A, Q), C[$] = new Array(K);
-      for (let M1 = 0; M1 < C[$].length; M1 += 1)
-        C[$][M1] = 255 & S.getBuffer()[M1 + y];
+    for (let H = 0; H < x.length; H += 1) {
+      const K = x[H].dataCount, Q = x[H].totalCount - K;
+      k = Math.max(k, K), A = Math.max(A, Q), C[H] = new Array(K);
+      for (let M1 = 0; M1 < C[H].length; M1 += 1)
+        C[H][M1] = 255 & S.getBuffer()[M1 + y];
       y += K;
-      const J = w6.getErrorCorrectPolynomial(Q), f1 = Bt(C[$], J.getLength() - 1).mod(J);
-      D[$] = new Array(J.getLength() - 1);
-      for (let M1 = 0; M1 < D[$].length; M1 += 1) {
-        const N = M1 + f1.getLength() - D[$].length;
-        D[$][M1] = N >= 0 ? f1.getAt(N) : 0;
+      const J = w6.getErrorCorrectPolynomial(Q), f1 = Bt(C[H], J.getLength() - 1).mod(J);
+      D[H] = new Array(J.getLength() - 1);
+      for (let M1 = 0; M1 < D[H].length; M1 += 1) {
+        const N = M1 + f1.getLength() - D[H].length;
+        D[H][M1] = N >= 0 ? f1.getAt(N) : 0;
       }
     }
     let z = 0;
-    for (let $ = 0; $ < x.length; $ += 1)
-      z += x[$].totalCount;
+    for (let H = 0; H < x.length; H += 1)
+      z += x[H].totalCount;
     const j = new Array(z);
     let V = 0;
-    for (let $ = 0; $ < k; $ += 1)
+    for (let H = 0; H < k; H += 1)
       for (let K = 0; K < x.length; K += 1)
-        $ < C[K].length && (j[V] = C[K][$], V += 1);
-    for (let $ = 0; $ < A; $ += 1)
+        H < C[K].length && (j[V] = C[K][H], V += 1);
+    for (let H = 0; H < A; H += 1)
       for (let K = 0; K < x.length; K += 1)
-        $ < D[K].length && (j[V] = D[K][$], V += 1);
+        H < D[K].length && (j[V] = D[K][H], V += 1);
     return j;
   }, _ = function(S, x, y) {
     const k = Hu.getRSBlocks(S, x), A = Gu();
@@ -51267,11 +51268,11 @@ const Z9 = function(t, e) {
     let A = {};
     typeof arguments[0] == "object" && (A = arguments[0], S = A.cellSize, x = A.margin, y = A.alt, k = A.title), S = S || 2, x = typeof x > "u" ? S * 4 : x, y = typeof y == "string" ? { text: y } : y || {}, y.text = y.text || null, y.id = y.text ? y.id || "qrcode-description" : null, k = typeof k == "string" ? { text: k } : k || {}, k.text = k.text || null, k.id = k.text ? k.id || "qrcode-title" : null;
     const C = d.getModuleCount() * S + x * 2;
-    let D, z, j, V, $ = "", K;
-    for (K = "l" + S + ",0 0," + S + " -" + S + ",0 0,-" + S + "z ", $ += '<svg version="1.1" xmlns="http://www.w3.org/2000/svg"', $ += A.scalable ? "" : ' width="' + C + 'px" height="' + C + 'px"', $ += ' viewBox="0 0 ' + C + " " + C + '" ', $ += ' preserveAspectRatio="xMinYMin meet"', $ += k.text || y.text ? ' role="img" aria-labelledby="' + E([k.id, y.id].join(" ").trim()) + '"' : "", $ += ">", $ += k.text ? '<title id="' + E(k.id) + '">' + E(k.text) + "</title>" : "", $ += y.text ? '<description id="' + E(y.id) + '">' + E(y.text) + "</description>" : "", $ += '<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>', $ += '<path d="', j = 0; j < d.getModuleCount(); j += 1)
+    let D, z, j, V, H = "", K;
+    for (K = "l" + S + ",0 0," + S + " -" + S + ",0 0,-" + S + "z ", H += '<svg version="1.1" xmlns="http://www.w3.org/2000/svg"', H += A.scalable ? "" : ' width="' + C + 'px" height="' + C + 'px"', H += ' viewBox="0 0 ' + C + " " + C + '" ', H += ' preserveAspectRatio="xMinYMin meet"', H += k.text || y.text ? ' role="img" aria-labelledby="' + E([k.id, y.id].join(" ").trim()) + '"' : "", H += ">", H += k.text ? '<title id="' + E(k.id) + '">' + E(k.text) + "</title>" : "", H += y.text ? '<description id="' + E(y.id) + '">' + E(y.text) + "</description>" : "", H += '<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>', H += '<path d="', j = 0; j < d.getModuleCount(); j += 1)
       for (V = j * S + x, D = 0; D < d.getModuleCount(); D += 1)
-        d.isDark(j, D) && (z = D * S + x, $ += "M" + z + "," + V + K);
-    return $ += '" stroke="transparent" fill="black"/>', $ += "</svg>", $;
+        d.isDark(j, D) && (z = D * S + x, H += "M" + z + "," + V + K);
+    return H += '" stroke="transparent" fill="black"/>', H += "</svg>", H;
   }, d.createDataURL = function(S, x) {
     S = S || 2, x = typeof x > "u" ? S * 4 : x;
     const y = d.getModuleCount() * S + x * 2, k = x, A = y - x;
@@ -51315,7 +51316,7 @@ const Z9 = function(t, e) {
     S = typeof S > "u" ? 2 : S;
     const y = d.getModuleCount() * 1 + S * 2, k = S, A = y - S;
     let C, D, z, j, V;
-    const $ = {
+    const H = {
       "██": "█",
       "█ ": "▀",
       " █": "▄",
@@ -51329,7 +51330,7 @@ const Z9 = function(t, e) {
     let Q = "";
     for (C = 0; C < y; C += 2) {
       for (z = Math.floor((C - k) / 1), j = Math.floor((C + 1 - k) / 1), D = 0; D < y; D += 1)
-        V = "█", k <= D && D < A && k <= C && C < A && d.isDark(z, Math.floor((D - k) / 1)) && (V = " "), k <= D && D < A && k <= C + 1 && C + 1 < A && d.isDark(j, Math.floor((D - k) / 1)) ? V += " " : V += "█", Q += S < 1 && C + 1 >= A ? K[V] : $[V];
+        V = "█", k <= D && D < A && k <= C && C < A && d.isDark(z, Math.floor((D - k) / 1)) && (V = " "), k <= D && D < A && k <= C + 1 && C + 1 < A && d.isDark(j, Math.floor((D - k) / 1)) ? V += " " : V += "█", Q += S < 1 && C + 1 >= A ? K[V] : H[V];
       Q += `
 `;
     }
@@ -51341,11 +51342,11 @@ const Z9 = function(t, e) {
     S -= 1, x = typeof x > "u" ? S * 2 : x;
     const y = d.getModuleCount() * S + x * 2, k = x, A = y - x;
     let C, D, z, j;
-    const V = Array(S + 1).join("██"), $ = Array(S + 1).join("  ");
+    const V = Array(S + 1).join("██"), H = Array(S + 1).join("  ");
     let K = "", Q = "";
     for (C = 0; C < y; C += 1) {
       for (z = Math.floor((C - k) / S), Q = "", D = 0; D < y; D += 1)
-        j = 1, k <= D && D < A && k <= C && C < A && d.isDark(z, Math.floor((D - k) / S)) && (j = 0), Q += j ? V : $;
+        j = 1, k <= D && D < A && k <= C && C < A && d.isDark(z, Math.floor((D - k) / S)) && (j = 0), Q += j ? V : H;
       for (z = 0; z < S; z += 1)
         K += Q + `
 `;
@@ -52943,7 +52944,7 @@ function vI(t, e, i, n, s, o = {}) {
   const j = (P) => ({ clientX: P.clientX, clientY: P.clientY, shiftKey: P.shiftKey, altKey: P.altKey });
   e.setAttribute("aria-haspopup", "dialog"), e.setAttribute("aria-expanded", "false");
   let V;
-  function $(P = !0) {
+  function H(P = !0) {
     E.open = !1, f1(), o.placement?.cancel(), V?.disconnect(), r.hidden = !0, e.setAttribute("aria-expanded", "false"), P && e.focus({ preventScroll: !0 });
   }
   function K() {
@@ -52985,7 +52986,7 @@ function vI(t, e, i, n, s, o = {}) {
             }
             C = !0, v.querySelectorAll("button").forEach((F) => F.disabled = !0), _.textContent = f`Building ${f(R.name)}…`;
             try {
-              await i(R, b.value, y, w.value), _.textContent = f`Added ${f(R.name)}.`, A || (u.value = "", $());
+              await i(R, b.value, y, w.value), _.textContent = f`Added ${f(R.name)}.`, A || (u.value = "", H());
             } catch (F) {
               _.textContent = F instanceof Error ? F.message : String(F), n(F);
             } finally {
@@ -53009,7 +53010,7 @@ function vI(t, e, i, n, s, o = {}) {
     K(), r.hidden = !1, e.setAttribute("aria-expanded", "true"), P ? u.focus({ preventScroll: !0 }) : r.focus({ preventScroll: !0 });
   }
   const J = (P) => {
-    E.open && !P.composedPath().includes(E) && (E.open = !1), !r.hidden && !A && !P.composedPath().includes(r) && !P.composedPath().includes(e) && $(!1);
+    E.open && !P.composedPath().includes(E) && (E.open = !1), !r.hidden && !A && !P.composedPath().includes(r) && !P.composedPath().includes(e) && H(!1);
   };
   t.getRootNode().addEventListener("pointerdown", J), r.addEventListener("keydown", (P) => {
     if (P.key === "Escape") {
@@ -53017,7 +53018,7 @@ function vI(t, e, i, n, s, o = {}) {
         E.open = !1;
         return;
       }
-      f1(), o.placement?.cancel(), A || $();
+      f1(), o.placement?.cancel(), A || H();
     } else P.key === "ArrowDown" && P.target === u && (P.preventDefault(), v.querySelector("button:not(:disabled)")?.focus());
   });
   function l1(P, B = !0) {
@@ -53048,7 +53049,7 @@ function vI(t, e, i, n, s, o = {}) {
     if (D = void 0, B.card.hasPointerCapture(B.id) && B.card.releasePointerCapture(B.id), r.classList.remove("dragging"), !!B.active) {
       z = !0, C = !0;
       try {
-        await o.placement.drop(j(P)) ? (_.textContent = f`Added ${f(B.preset.name)}.`, A || $(!1)) : _.textContent = f("Drag a shape onto the workplane or a face.");
+        await o.placement.drop(j(P)) ? (_.textContent = f`Added ${f(B.preset.name)}.`, A || H(!1)) : _.textContent = f("Drag a shape onto the workplane or a face.");
       } catch (d1) {
         n(d1);
       } finally {
@@ -53058,10 +53059,10 @@ function vI(t, e, i, n, s, o = {}) {
   }, Z = (P) => {
     D?.id === P.pointerId && f1();
   };
-  return window.addEventListener("pointermove", M1, !0), window.addEventListener("pointerup", N, !0), window.addEventListener("pointercancel", Z, !0), window.addEventListener("blur", f1), u.addEventListener("input", K), p.addEventListener("click", () => $()), d.addEventListener("click", () => l1(A ? "popover" : "docked")), l1(o.layout ?? "popover", !1), A && Q(!1), { open: Q, placed(P) {
+  return window.addEventListener("pointermove", M1, !0), window.addEventListener("pointerup", N, !0), window.addEventListener("pointercancel", Z, !0), window.addEventListener("blur", f1), u.addEventListener("input", K), p.addEventListener("click", () => H()), d.addEventListener("click", () => l1(A ? "popover" : "docked")), l1(o.layout ?? "popover", !1), A && Q(!1), { open: Q, placed(P) {
     _.textContent = f`Added ${P}.`;
   }, toggle() {
-    r.hidden ? Q() : $();
+    r.hidden ? Q() : H();
   }, get layout() {
     return A ? "docked" : "popover";
   }, setLayout(P) {
@@ -53149,8 +53150,8 @@ function _I(t, e, i, n, s) {
       try {
         let V = ld(u.value, j[0]);
         if (!V)
-          for (const $ of Object.values(i.state.document.nodes)) {
-            if (!$.generator)
+          for (const H of Object.values(i.state.document.nodes)) {
+            if (!H.generator)
               continue;
             const K = /* @__PURE__ */ new Set(), Q = (J) => {
               if (J === j[0])
@@ -53161,16 +53162,16 @@ function _I(t, e, i, n, s) {
               const l1 = i.state.document.nodes[J];
               return c3(l1).some(Q);
             };
-            if (Q($.id)) {
-              V = ld(u.value, $.id);
+            if (Q(H.id)) {
+              V = ld(u.value, H.id);
               break;
             }
           }
         if (V) {
           u.setSelectionRange(...V);
-          const $ = u.value.slice(0, V[0]).split(`
+          const H = u.value.slice(0, V[0]).split(`
 `).length - 1;
-          u.scrollTop = Math.max(0, $ * parseFloat(getComputedStyle(u).lineHeight) - u.clientHeight / 3);
+          u.scrollTop = Math.max(0, H * parseFloat(getComputedStyle(u).lineHeight) - u.clientHeight / 3);
         }
       } catch {
       }
@@ -53182,16 +53183,16 @@ function _I(t, e, i, n, s) {
       i.state.revision !== _ && (b.textContent = f("The design changed while editing source. Reload or merge your draft."));
       return;
     }
-    const V = u.selectionStart, $ = u.selectionEnd;
-    u.value = i.modelSource, v = u.value, u.setSelectionRange(Math.min(V, u.value.length), Math.min($, u.value.length)), _ = i.state.revision, E = !1, b.textContent = f("Source and GUI are synchronized."), A();
+    const V = u.selectionStart, H = u.selectionEnd;
+    u.value = i.modelSource, v = u.value, u.setSelectionRange(Math.min(V, u.value.length), Math.min(H, u.value.length)), _ = i.state.revision, E = !1, b.textContent = f("Source and GUI are synchronized."), A();
   }
   const D = i.subscribe((j) => {
     if (!o.hidden) {
       if (j.revision !== _)
         try {
           C();
-        } catch ($) {
-          b.textContent = $ instanceof Error ? $.message : String($);
+        } catch (H) {
+          b.textContent = H instanceof Error ? H.message : String(H);
         }
       const V = j.selection.join(",");
       V !== S && (S = V, A());
@@ -53213,11 +53214,11 @@ function _I(t, e, i, n, s) {
   async function z(j, V = !1) {
     if (x)
       return;
-    const $ = new AbortController(), K = u.value, Q = V ? i.state.revision : _;
-    x = $, g.disabled = w.disabled = q.disabled = !0, b.textContent = f("Checking model source…");
+    const H = new AbortController(), K = u.value, Q = V ? i.state.revision : _;
+    x = H, g.disabled = w.disabled = q.disabled = !0, b.textContent = f("Checking model source…");
     try {
-      const J = V ? Py(v, K, i.modelSource) : K, l1 = await i.prepareModelSourceWithOutlineSolve(J, { expectedRevision: Q, regenerate: s }, Ns, $.signal);
-      if ($.signal.aborted || (V || await n(l1.document), $.signal.aborted))
+      const J = V ? Py(v, K, i.modelSource) : K, l1 = await i.prepareModelSourceWithOutlineSolve(J, { expectedRevision: Q, regenerate: s }, Ns, H.signal);
+      if (H.signal.aborted || (V || await n(l1.document), H.signal.aborted))
         return;
       if (i.state.revision !== Q)
         throw new Error(f("The design changed while editing source. Reload or merge your draft."));
@@ -53231,9 +53232,9 @@ function _I(t, e, i, n, s) {
       } else
         b.textContent = f("Model preview ready. No history entry was created.");
     } catch (J) {
-      $.signal.aborted || (b.textContent = J instanceof Error ? J.message : String(J));
+      H.signal.aborted || (b.textContent = J instanceof Error ? J.message : String(J));
     } finally {
-      x === $ && y();
+      x === H && y();
     }
   }
   return g.onclick = () => {
@@ -53315,8 +53316,8 @@ Named shapes use let; one final return produces one rigid body.
       const R = Vy(z.value);
       S.value = R.source, C([]), b = {}, l || (M.value = Lr.find((O) => O.id === z.value).title[yt()]), o1(), M1.hidden = !0, Z.textContent = f("Example loaded. Preview or apply to check its geometry.");
     }, D.append(z, j);
-    const $ = y0("div"), K = y0("button", f("Import source…")), Q = y0("input"), J = y0("select"), l1 = y0("button", f("Export source…"));
-    $.className = "code-interchange", Q.type = "file", Q.accept = ".cadcode,.scad,.jscad,.js", Q.hidden = !0, Q.setAttribute("aria-label", f("Import CAD source")), J.setAttribute("aria-label", f("Source export format"));
+    const H = y0("div"), K = y0("button", f("Import source…")), Q = y0("input"), J = y0("select"), l1 = y0("button", f("Export source…"));
+    H.className = "code-interchange", Q.type = "file", Q.accept = ".cadcode,.scad,.jscad,.js", Q.hidden = !0, Q.setAttribute("aria-label", f("Import CAD source")), J.setAttribute("aria-label", f("Source export format"));
     for (const [R, O] of [["cadcode", "CAD Script (editable)"], ["scad", "OpenSCAD (evaluated snapshot)"], ["jscad", "JSCAD (evaluated snapshot)"]]) {
       const s1 = y0("option", f(O));
       s1.value = R, J.append(s1);
@@ -53341,7 +53342,7 @@ Named shapes use let; one final return produces one rigid body.
       } catch (R) {
         Z.textContent = R instanceof Error ? R.message : String(R);
       }
-    }, $.append(K, Q, J, l1);
+    }, H.append(K, Q, J, l1);
     const f1 = y0("div");
     f1.className = "code-parameters";
     const M1 = y0("img");
@@ -53409,7 +53410,7 @@ Named shapes use let; one final return produces one rigid body.
       Z.textContent = f("Source changed. Preview or apply to rebuild.");
     }, S.onkeydown = (R) => {
       R.key === "Tab" && (R.preventDefault(), S.setRangeText("  ", S.selectionStart, S.selectionEnd, "end"), S.dispatchEvent(new Event("input"))), R.key === "Enter" && (R.metaKey || R.ctrlKey) && (R.preventDefault(), T1(!1));
-    }, _.append(M, D, $, S, y, x), E.append(M1, N, f1, d1), v.append(_, E);
+    }, _.append(M, D, H, S, y, x), E.append(M1, N, f1, d1), v.append(_, E);
     const I = y0("footer");
     I.append(Z, P, B), r.append(m, v, I);
     try {
@@ -53737,11 +53738,11 @@ function II(t, e, i) {
         const { center: y, radius: k, segments: A, source: C, arc: D } = x, z = D?.start ?? 0, j = D?.sweep ?? Math.PI * 2, V = Array.from({ length: A + 1 }, (Q, J) => {
           const l1 = z + j * J / A;
           return b([y[0] + k * Math.cos(l1), y[1] + k * Math.sin(l1)], M);
-        }), $ = V.slice(1).flatMap((Q, J) => S(V[J], Q));
-        if (!$.length)
+        }), H = V.slice(1).flatMap((Q, J) => S(V[J], Q));
+        if (!H.length)
           continue;
         const K = { id: "curve", label: "", point: i(q, b(y, M)), radius: k * w.scale };
-        D && (K.arc = { start: w.angle(D.start), sweep: D.sweep * w.handedness }), s.push({ bodyId: o, view: q, source: C, anchor: K, visible: $ });
+        D && (K.arc = { start: w.angle(D.start), sweep: D.sweep * w.handedness }), s.push({ bodyId: o, view: q, source: C, anchor: K, visible: H });
       }
     }
   }
@@ -53850,15 +53851,15 @@ function jI(t, e, i, n, s, o) {
   let k = 0;
   for (const [A, C] of i.bodies.entries()) {
     const D = C.loops.map((K) => K.map(([Q, J]) => [o + (Q - d[c]) * t.factor, s + (J - d[2]) * t.factor])), z = A % 2 ? -1 : 1, j = ([K, Q]) => K - z * Q;
-    let V = 1 / 0, $ = -1 / 0;
+    let V = 1 / 0, H = -1 / 0;
     for (const K of D) {
       t.paths.push({ stroke: "section", points: K, closed: !0 });
       for (const Q of K) {
         const J = j(Q);
-        V = Math.min(V, J), $ = Math.max($, J);
+        V = Math.min(V, J), H = Math.max(H, J);
       }
     }
-    for (let K = Math.ceil(V / 3) * 3; K < $; K += 3) {
+    for (let K = Math.ceil(V / 3) * 3; K < H; K += 3) {
       const Q = [];
       for (const J of D)
         for (const [l1, f1] of J.entries()) {
@@ -53962,9 +53963,9 @@ function YI(t, e, i, n) {
       if (C < 1e-5)
         continue;
       const D = pr(k, A), z = Math.min(k[2], A[2]) + d, j = /* @__PURE__ */ new Set(), V = [];
-      let $ = !1;
+      let H = !1;
       g(k, A, (l1) => {
-        if (!$)
+        if (!H)
           for (const f1 of u[l1]) {
             if (w(), f1.nearest <= z || !WI(D, f1.box) || j.has(f1))
               continue;
@@ -53973,7 +53974,7 @@ function YI(t, e, i, n) {
             const M1 = ZI(f1, k, A, d);
             if (M1) {
               if (M1[0] <= 1e-8 && M1[1] >= 1 - 1e-8) {
-                V.splice(0, V.length, [0, 1]), $ = !0;
+                V.splice(0, V.length, [0, 1]), H = !0;
                 break;
               }
               V.push(M1);
@@ -54222,11 +54223,11 @@ function nB(t, e, i) {
         E1 === "hidden" && !e.hiddenLines || X(F === B ? [[q1, I.bottom], [q1, I.top]] : [[I.left, q1], [I.right, q1]], E1);
     }
     return { view: P, width: R, height: O, limits: I, drawings: s1, circles: Y, faceOn: T1, project: b1 };
-  }), [k, A, C] = y, D = 26, z = 48, j = 24, V = D + A.width * x + j, $ = z + A.height * x + j;
-  if (V + C.width * x > 282 || $ + k.height * x > 170)
+  }), [k, A, C] = y, D = 26, z = 48, j = 24, V = D + A.width * x + j, H = z + A.height * x + j;
+  if (V + C.width * x > 282 || H + k.height * x > 170)
     throw new Error(f("This drawing does not fit on A4 at this scale. Choose a smaller scale."));
   const K = [], Q = [], J = [], l1 = [], f1 = (P, B, d1) => K.push({ stroke: P, points: B, closed: d1 }), M1 = (P, B, d1, r1 = 3) => Q.push({ x: P, y: B, text: d1, size: r1 });
-  for (const [P, B, d1] of [[k, D, $], [A, D, z], [C, V, z]]) {
+  for (const [P, B, d1] of [[k, D, H], [A, D, z], [C, V, z]]) {
     const { limits: r1, width: o1, height: b1 } = P, T1 = o1 * x, I = b1 * x;
     for (const s1 of P.drawings)
       f1(s1.stroke, s1.points.map(([Y, X]) => [B + (Y - r1.left) * x, d1 + (X - r1.bottom) * x]), s1.closed);
@@ -54285,19 +54286,19 @@ function nB(t, e, i) {
   }
   if (m) {
     const { material: P, axis: B, cut: d1, jog: r1 } = m, o1 = P[0][0], b1 = P.at(-1)[1], T1 = d * x, I = (b1 - o1) * x;
-    if (V + I > 282 || $ + T1 > 166)
+    if (V + I > 282 || H + T1 > 166)
       throw new Error(f("This drawing does not fit on A4 at this scale. Choose a smaller scale."));
     for (const [O, s1] of P) {
-      const Y = V + (O - o1) * x, X = $, F = (s1 - O) * x;
+      const Y = V + (O - o1) * x, X = H, F = (s1 - O) * x;
       f1("section", Ga(Y, X, F, T1), !0);
       for (let U = Math.floor((Y - T1) / 3) * 3; U < Y + F; U += 3) {
         const m1 = Math.max(Y, U), x1 = Math.min(Y + F, U + T1);
         x1 - m1 > 1e-6 && f1("hatch", [[m1, X + m1 - U], [x1, X + x1 - U]]);
       }
     }
-    M1(V, $ + T1 + 4, f(r1 ? "Offset section A-A" : "Section A-A"), 3.5);
+    M1(V, H + T1 + 4, f(r1 ? "Offset section A-A" : "Section A-A"), 3.5);
     const R = f(B === 0 ? "Sketch X" : "Sketch Y");
-    M1(V, $ + T1 + 9, R + " = " + Ze(d1) + (r1 ? " / " + Ze(r1.position) : "") + " mm", 2.8);
+    M1(V, H + T1 + 9, R + " = " + Ze(d1) + (r1 ? " / " + Ze(r1.position) : "") + " mm", 2.8);
   }
   Ac({ paths: K, texts: Q }, e.title, f`Sketch extrusion · ${o.name}`, { scale: e.scale, titleBlock: e.titleBlock });
   const N = /* @__PURE__ */ new Map();
@@ -54409,7 +54410,7 @@ function rB(t, e) {
 }
 const aB = () => new Worker(new URL(
   /* @vite-ignore */
-  "" + new URL("assets/assembly-projection.worker-BwY2fcOm.js", import.meta.url).href,
+  "" + new URL("assets/assembly-projection.worker-DCC7HrjD.js", import.meta.url).href,
   import.meta.url
 ), { type: "module" });
 function lB(t = aB) {
@@ -54498,9 +54499,9 @@ function cB(t, e, i, n, s, o, r, a, c) {
         i.textContent = _(V);
         return;
       }
-      const $ = "edge" in m ? m.edge : m.curve, K = "edge" in m ? [m.edge.visible] : m.curve.visible, Q = document.createElementNS(k.namespaceURI, "path");
+      const H = "edge" in m ? m.edge : m.curve, K = "edge" in m ? [m.edge.visible] : m.curve.visible, Q = document.createElementNS(k.namespaceURI, "path");
       Q.setAttribute("class", "drawing-model-edge-marker"), Q.setAttribute("d", K.map((l1) => l1.map(([f1, M1], N) => (N ? "L " : "M ") + f1 + " " + (y.height - M1)).join(" ")).join(" ")), k.append(Q);
-      const J = o().nodes[$.bodyId].name;
+      const J = o().nodes[H.bodyId].name;
       i.textContent = V === "aligned" ? f`Selected edge on ${J}. Pick where to place its projected length.` : f`Selected curve on ${J}. Pick where to place its dimension.`;
       return;
     }
@@ -54513,8 +54514,8 @@ function cB(t, e, i, n, s, o, r, a, c) {
     if ("edge" in m)
       M(n, zI(m.edge, o(), z, j));
     else {
-      const { bodyId: V, view: $, source: K } = m.curve;
-      M(s, { id: j, bodyId: V, view: $, source: K, at: z, kind: m.kind });
+      const { bodyId: V, view: H, source: K } = m.curve;
+      M(s, { id: j, bodyId: V, view: H, source: K, at: z, kind: m.kind });
     }
     v(), c();
   });
@@ -54527,14 +54528,14 @@ function cB(t, e, i, n, s, o, r, a, c) {
       A.disabled = !y(A.value);
     !y(w()) && y("aligned") && (h.value = "aligned"), u.hidden = !x?.assemblyCurves?.length && !s.length, d.disabled = !y(w()) || n.length + s.length >= ct, p.replaceChildren();
     const k = (A, C, D, z) => {
-      const j = document.createElement("li"), V = document.createElement("button"), $ = document.createElement("button");
-      if (V.textContent = C === "aligned" ? f`Edit edge dimension ${D + 1}` : f`Edit curve dimension ${D + 1} · ${b[C]}`, V.disabled = !y(C), V.onclick = () => E(C, A.id), $.textContent = "×", $.setAttribute("aria-label", f`Remove edge dimension ${D + 1}`), $.onclick = () => {
+      const j = document.createElement("li"), V = document.createElement("button"), H = document.createElement("button");
+      if (V.textContent = C === "aligned" ? f`Edit edge dimension ${D + 1}` : f`Edit curve dimension ${D + 1} · ${b[C]}`, V.disabled = !y(C), V.onclick = () => E(C, A.id), H.textContent = "×", H.setAttribute("aria-label", f`Remove edge dimension ${D + 1}`), H.onclick = () => {
         z(), c();
       }, x?.annotationIssues.includes(A.id)) {
         const K = document.createElement("small");
         K.textContent = f("Anchor unavailable"), j.append(K);
       }
-      j.append(V, $), p.append(j);
+      j.append(V, H), p.append(j);
     };
     n.forEach((A, C) => k(A, "aligned", C, () => n.splice(C, 1))), s.forEach((A, C) => k(A, A.kind, n.length + C, () => s.splice(C, 1))), i.textContent = x?.annotationIssues.length ? f("Repair or remove unavailable drawing dimensions before exporting.") : "";
   }
@@ -54676,8 +54677,8 @@ function pB(t, e, i, n) {
       z.maxLength = j.maxLength = 160, z.value = String(l?.section?.jog?.position ?? ""), j.value = String(l?.section?.jog?.at ?? ""), v("Offset section", D), v("Second section position (mm)", z), v("Jog at (mm)", j);
       const V = s0("small");
       w.append(V);
-      const $ = s0("div"), K = s0("button", f("Add jog"));
-      $.className = "drawing-jog-list";
+      const H = s0("div"), K = s0("button", f("Add jog"));
+      H.className = "drawing-jog-list";
       const Q = [], J = () => {
         for (const [I1, a2] of Q.entries()) {
           const i2 = I1 + 2, X1 = (b2, M2) => {
@@ -54688,14 +54689,14 @@ function pB(t, e, i, n) {
         K.disabled = Q.length >= hf - 1;
       }, l1 = (I1) => {
         const a2 = s0("div"), i2 = s0("input"), X1 = s0("input"), b2 = s0("button");
-        i2.maxLength = X1.maxLength = 160, i2.value = String(I1?.at ?? ""), X1.value = String(I1?.position ?? ""), v("Jog at (mm)", i2, a2), v("Section position (mm)", X1, a2), a2.append(b2), $.append(a2);
+        i2.maxLength = X1.maxLength = 160, i2.value = String(I1?.at ?? ""), X1.value = String(I1?.position ?? ""), v("Jog at (mm)", i2, a2), v("Section position (mm)", X1, a2), a2.append(b2), H.append(a2);
         const M2 = { at: i2, position: X1, remove: b2 };
         return Q.push(M2), i2.oninput = X1.oninput = () => P1(), b2.onclick = () => {
           Q.splice(Q.indexOf(M2), 1), a2.remove(), J(), P1(), K.focus();
         }, J(), i2;
       };
       if (p) {
-        w.append($, K);
+        w.append(H, K);
         for (const I1 of l?.section?.additionalJogs ?? [])
           l1(I1);
         K.onclick = () => {
@@ -54858,7 +54859,7 @@ function pB(t, e, i, n) {
       }, P1 = () => {
         u2?.reset(), A.parentElement.hidden = C.parentElement.hidden = !k.checked, D.parentElement.hidden = !k.checked, z.parentElement.hidden = j.parentElement.hidden = V.hidden = !k.checked || !D.checked;
         const I1 = p ? A.value === "u" ? f("World Y") : f("World X") : A.value === "u" ? f("Sketch Y") : f("Sketch X");
-        $.hidden = K.hidden = !k.checked || !D.checked, V.textContent = Q.length ? f`Enter jog coordinates along ${I1} in increasing order.` : f`The jog switches to the second cut at this coordinate along ${I1}.`, X.replaceChildren(), A1 = void 0, O1 = [], F.textContent = "", u2?.refresh(), y.disabled = !0, m1.disabled = x1.disabled = !0;
+        H.hidden = K.hidden = !k.checked || !D.checked, V.textContent = Q.length ? f`Enter jog coordinates along ${I1} in increasing order.` : f`The jog switches to the second cut at this coordinate along ${I1}.`, X.replaceChildren(), A1 = void 0, O1 = [], F.textContent = "", u2?.refresh(), y.disabled = !0, m1.disabled = x1.disabled = !0;
         const a2 = ++T, i2 = e.state.document, X1 = (M2, L2) => {
           if (L2 && (_1 = L2, k.disabled = !1, c1 && !M2.section && N1()), O1 = Jb(i2, M2, L2), A1 = O1[0], p) {
             const P2 = Number(y.value);
@@ -55455,11 +55456,11 @@ function cf(t, e, i, n, s) {
     const j = z.some((J) => J.some(Boolean));
     if (A && j)
       throw new Error(f("Use either a constant DXF width or per-segment widths in the same polyline."));
-    const V = A ? z.map((J, l1) => o || l1 < z.length - 1 ? [A, A] : J) : z, $ = A || j ? { dxfWidths: V } : {};
+    const V = A ? z.map((J, l1) => o || l1 < z.length - 1 ? [A, A] : J) : z, H = A || j ? { dxfWidths: V } : {};
     if (!o) {
       D[D.length - 1] = 0;
       const J = D.some(Boolean) ? D : void 0;
-      Ms(C, J), p.push({ kind: "path", id: "dxf-profile", points: C, ...J ? { bulges: J } : {}, ...$, ...w });
+      Ms(C, J), p.push({ kind: "path", id: "dxf-profile", points: C, ...J ? { bulges: J } : {}, ...H, ...w });
       continue;
     }
     const K = D.some(Boolean) ? D : void 0, Q = Ut(C, K);
@@ -55468,7 +55469,7 @@ function cf(t, e, i, n, s) {
       kind: "outline",
       points: K || A || j ? C : Q,
       ...K ? { bulges: K } : {},
-      ...$,
+      ...H,
       ...w
     });
   }
@@ -55552,12 +55553,12 @@ function og(t, e) {
       const V = k ? await A.arrayBuffer() : void 0;
       if (!e.active())
         return;
-      const $ = V ? await EI(V, D.signal) : await A.text();
+      const H = V ? await EI(V, D.signal) : await A.text();
       if (!e.active())
         return;
       if (e.checkCurrent(), C !== e.revision())
         throw new Error(f(k ? "The sketch changed while reading DWG. Choose the file again." : "The sketch changed while reading DXF. Choose the file again."));
-      q = PB($), v = A.name.replace(/\.(dxf|dwg)$/i, "").replace(/[\u0000-\u001f]/g, "").trim().slice(0, 160), r.textContent = A.name, m.textContent = f(k ? "DWG layers" : "DXF layers"), d.hidden = !q.skippedPaperSpace, q.layers.length > 1 && (w = q.layers.map((K) => {
+      q = PB(H), v = A.name.replace(/\.(dxf|dwg)$/i, "").replace(/[\u0000-\u001f]/g, "").trim().slice(0, 160), r.textContent = A.name, m.textContent = f(k ? "DWG layers" : "DXF layers"), d.hidden = !q.skippedPaperSpace, q.layers.length > 1 && (w = q.layers.map((K) => {
         const Q = q4("label", K), J = q4("input");
         return Q.className = "sketch-toggle", J.type = "checkbox", J.checked = !0, J.onchange = M, Q.prepend(J), h.append(Q), { name: K, input: J };
       }), u.hidden = g.hidden = !1);
@@ -55706,11 +55707,11 @@ function rg(t, e, i) {
       return M1.append(C3("span", [P, B, d1].filter(Boolean).join(" · ")), N, Z), N.type = Z.type = "button", N.setAttribute("aria-label", f`Edit constraint ${f1 + 1}`), Z.setAttribute("aria-label", f`Remove constraint ${f1 + 1}`), N.onclick = () => {
         A = f1, s.value = l1.kind, o.value = String(l1.edge), r.value = String(l1.other), a.value = c.value = l1.expression, j(), s.focus();
       }, Z.onclick = () => {
-        D.splice(f1, 1), A = void 0, _.textContent = "", $(), V(), i.changed?.();
+        D.splice(f1, 1), A = void 0, _.textContent = "", H(), V(), i.changed?.();
       }, M1;
     })), j();
   }
-  function $() {
+  function H() {
     if (n.hidden = !i.visible(), n.hidden)
       return;
     let l1;
@@ -55741,7 +55742,7 @@ function rg(t, e, i) {
   q.onclick = () => {
     A = void 0, j();
   }, w.onclick = () => {
-    D.length = 0, A = void 0, _.textContent = "", $(), V(), i.changed?.();
+    D.length = 0, A = void 0, _.textContent = "", H(), V(), i.changed?.();
   };
   function K() {
     const l1 = M, f1 = (N) => [l1[N], l1[(N + 1) % l1.length]], M1 = D.map(({ kind: N, edge: Z, other: P, expression: B, sweep: d1 }) => N === "length" ? { kind: N, edge: f1(Z), length: B } : N === "radius" ? { kind: N, edge: f1(Z), radius: B, sweep: d1 } : N === "horizontal" || N === "vertical" ? { kind: N, edge: f1(Z) } : { kind: N, edge: f1(Z), other: f1(P) });
@@ -55819,7 +55820,7 @@ function rg(t, e, i) {
     } finally {
       e.removeEventListener("close", M1), x = !1, i.active() && (i.pending(!1), j());
     }
-  }, { refresh: $, forSave: J, get pending() {
+  }, { refresh: H, forSave: J, get pending() {
     return x;
   }, get hasConstraints() {
     return D.length > 0;
@@ -55940,11 +55941,11 @@ function LB(t, e) {
   i.open = b.length > 0;
   const v = f("Restore the original region loops or remove their positions."), _ = (D) => f`Outline loop ${q.findIndex((z) => z.id === D) + 1}`, E = () => g !== void 0 && h(q) !== g, M = (D) => D.value ? JSON.parse(D.value) : void 0, S = (D) => q.find((z) => z.id === D && z.kind === "outline");
   function x(D, z) {
-    const j = S(D.value), V = j?.kind === "outline" ? j.vertexIds ?? [] : [], $ = JSON.stringify([D.value, V]);
-    if (z.dataset.loopKey === $)
+    const j = S(D.value), V = j?.kind === "outline" ? j.vertexIds ?? [] : [], H = JSON.stringify([D.value, V]);
+    if (z.dataset.loopKey === H)
       return;
     const K = z.value;
-    z.replaceChildren(new Option(f("First vertex"), ""), ...V.map((Q, J) => new Option(f`Edge ${J + 1} midpoint`, JSON.stringify([Q, V[(J + 1) % V.length]])))), Array.from(z.options).some((Q) => Q.value === K) && (z.value = K), z.dataset.loopKey = $;
+    z.replaceChildren(new Option(f("First vertex"), ""), ...V.map((Q, J) => new Option(f`Edge ${J + 1} midpoint`, JSON.stringify([Q, V[(J + 1) % V.length]])))), Array.from(z.options).some((Q) => Q.value === K) && (z.value = K), z.dataset.loopKey = H;
   }
   function y() {
     x(n, o), x(s, r);
@@ -55958,10 +55959,10 @@ function LB(t, e) {
   }
   function A() {
     l.textContent = f(m === void 0 ? "Add loop position" : "Update loop position"), l.disabled = E() || s.options.length < 2, d.hidden = m === void 0, p.replaceChildren(...b.map((D, z) => {
-      const j = Z3("li"), V = Z3("button", f("Edit")), $ = Z3("button", f("Remove"));
-      return V.type = $.type = "button", V.disabled = E(), V.setAttribute("aria-label", f`Edit loop position ${z + 1}`), $.setAttribute("aria-label", f`Remove loop position ${z + 1}`), j.append(Z3("span", `${_(D.target)} ← ${_(D.reference)} · ${D.offset.join(", ")}`), V, $), V.onclick = () => {
+      const j = Z3("li"), V = Z3("button", f("Edit")), H = Z3("button", f("Remove"));
+      return V.type = H.type = "button", V.disabled = E(), V.setAttribute("aria-label", f`Edit loop position ${z + 1}`), H.setAttribute("aria-label", f`Remove loop position ${z + 1}`), j.append(Z3("span", `${_(D.target)} ← ${_(D.reference)} · ${D.offset.join(", ")}`), V, H), V.onclick = () => {
         m = z, n.value = D.reference, s.value = D.target, y(), o.value = D.referenceEdge ? JSON.stringify(D.referenceEdge) : "", r.value = D.targetEdge ? JSON.stringify(D.targetEdge) : "", [a.value, c.value] = D.offset.map(String), A();
-      }, $.onclick = () => {
+      }, H.onclick = () => {
         e.available() && (b = b.filter((K, Q) => Q !== z), b.length || (g = void 0), m = void 0, u.textContent = E() ? v : "", e.changed());
       }, j;
     }));
@@ -55978,8 +55979,8 @@ function LB(t, e) {
     if (z) {
       const j = q.filter((V) => V.kind === "outline");
       for (const V of [n, s]) {
-        const $ = V.value;
-        V.replaceChildren(...j.map((K) => new Option(_(K.id), K.id))), j.some((K) => K.id === $) ? V.value = $ : V === s && j[1] && (V.value = j[1].id);
+        const H = V.value;
+        V.replaceChildren(...j.map((K) => new Option(_(K.id), K.id))), j.some((K) => K.id === H) ? V.value = H : V === s && j[1] && (V.value = j[1].id);
       }
       s.value === n.value && j.length > 1 && (s.value = j.find((V) => V.id !== n.value).id), w = D;
     }
@@ -56190,8 +56191,8 @@ function BB(t, e, i, n, s, o = () => 1) {
     }, S.insertBefore(C, M);
     const j = k("Profile", ["rectangle", "circle", "outline", "region"], _?.profile.kind ?? "rectangle");
     j.disabled = !!_;
-    const V = k("Sketch plane", ["XY", "XZ", "YZ"], _?.plane ?? "XY"), $ = _?.profile, K = y("Sketch width (mm)", $?.kind === "rectangle" ? $.width : 40), Q = y("Sketch depth (mm)", $?.kind === "rectangle" ? $.depth : 30), J = y("Sketch radius (mm)", $?.kind === "circle" ? $.radius : 10), l1 = y("Circle center X, Y (mm)", $?.kind === "circle" && $.center ? $.center.join(", ") : "0, 0"), f1 = O2("label", f("Outline points X, Y (mm)")), M1 = O2("textarea");
-    M1.setAttribute("aria-label", f("Outline points X, Y (mm)")), M1.rows = 4, M1.spellcheck = !1, M1.value = $?.kind === "outline" ? X5($.points, $.bulges, $.dxfWidths).join(`
+    const V = k("Sketch plane", ["XY", "XZ", "YZ"], _?.plane ?? "XY"), H = _?.profile, K = y("Sketch width (mm)", H?.kind === "rectangle" ? H.width : 40), Q = y("Sketch depth (mm)", H?.kind === "rectangle" ? H.depth : 30), J = y("Sketch radius (mm)", H?.kind === "circle" ? H.radius : 10), l1 = y("Circle center X, Y (mm)", H?.kind === "circle" && H.center ? H.center.join(", ") : "0, 0"), f1 = O2("label", f("Outline points X, Y (mm)")), M1 = O2("textarea");
+    M1.setAttribute("aria-label", f("Outline points X, Y (mm)")), M1.rows = 4, M1.spellcheck = !1, M1.value = H?.kind === "outline" ? X5(H.points, H.bulges, H.dxfWidths).join(`
 `) : `0, 0
 40, 0
 30, 30
@@ -56200,7 +56201,7 @@ function BB(t, e, i, n, s, o = () => 1) {
     P.setAttribute("aria-label", f("Region loops (mm)")), P.rows = 5, P.spellcheck = !1, P.maxLength = 65536;
     const B = (h1) => h1.map((z1) => z1.kind === "circle" ? "CIRCLE " + [...z1.center, z1.radius].join(", ") : X5(z1.points, z1.bulges, z1.dxfWidths).join(" | ")).join(`
 `);
-    let d1 = z6($?.kind === "outline" || $?.kind === "circle" ? $ : void 0), r1 = $?.kind === "region" ? $.loops : [];
+    let d1 = z6(H?.kind === "outline" || H?.kind === "circle" ? H : void 0), r1 = H?.kind === "region" ? H.loops : [];
     const o1 = /* @__PURE__ */ new Map(), b1 = (h1, z1, K1) => {
       if (z1 > u4)
         return;
@@ -56334,9 +56335,9 @@ CIRCLE 10, 15, 2`, Z.append(P, O2("small", f("One loop per line. Separate outlin
         kind: "circle",
         id: h1,
         radius: $4(J.value),
-        segments: $?.kind === "circle" ? $.segments : 64,
+        segments: H?.kind === "circle" ? H.segments : 64,
         ...d1,
-        ...$?.kind === "circle" && $.center || z1.some(Boolean) ? { center: z1 } : {}
+        ...H?.kind === "circle" && H.center || z1.some(Boolean) ? { center: z1 } : {}
       };
     }
     const b2 = (h1 = !1, z1, K1 = $0.edgeMatches) => {
@@ -56426,11 +56427,11 @@ CIRCLE 10, 15, 2`, Z.append(P, O2("small", f("One loop per line. Separate outlin
         }
         if (Q1.open && !Q1.hidden && t2.value && h2.value)
           try {
-            const [y1, g1] = n1(L6(t2.value)), [v1, D1] = n1(L6(h2.value)), H1 = v1 - y1, e2 = D1 - g1, H = Math.hypot(H1, e2);
-            if (H > 0) {
-              const w1 = Math.hypot(b0, C0) + Math.hypot(y1 - $2, g1 - t0) + H, R1 = document.createElementNS(p2, "line");
-              R1.setAttribute("x1", String(y1 - H1 / H * w1)), R1.setAttribute("y1", String(g1 - e2 / H * w1)), R1.setAttribute("x2", String(y1 + H1 / H * w1)), R1.setAttribute("y2", String(g1 + e2 / H * w1)), R1.setAttribute("class", "sketch-reference sketch-trim-line"), x2.append(R1);
-              const F1 = v2.value === "left" ? 1 : -1, c2 = H1 / H, q2 = e2 / H, d2 = [(y1 + v1) / 2, (g1 + D1) / 2], N2 = [d2[0] + F1 * q2 * D2 * 0.11, d2[1] - F1 * c2 * D2 * 0.11], H0 = [d2[0] + F1 * q2 * D2 * 0.065, d2[1] - F1 * c2 * D2 * 0.065], A0 = document.createElementNS(p2, "path");
+            const [y1, g1] = n1(L6(t2.value)), [v1, D1] = n1(L6(h2.value)), H1 = v1 - y1, e2 = D1 - g1, $ = Math.hypot(H1, e2);
+            if ($ > 0) {
+              const w1 = Math.hypot(b0, C0) + Math.hypot(y1 - $2, g1 - t0) + $, R1 = document.createElementNS(p2, "line");
+              R1.setAttribute("x1", String(y1 - H1 / $ * w1)), R1.setAttribute("y1", String(g1 - e2 / $ * w1)), R1.setAttribute("x2", String(y1 + H1 / $ * w1)), R1.setAttribute("y2", String(g1 + e2 / $ * w1)), R1.setAttribute("class", "sketch-reference sketch-trim-line"), x2.append(R1);
+              const F1 = v2.value === "left" ? 1 : -1, c2 = H1 / $, q2 = e2 / $, d2 = [(y1 + v1) / 2, (g1 + D1) / 2], N2 = [d2[0] + F1 * q2 * D2 * 0.11, d2[1] - F1 * c2 * D2 * 0.11], H0 = [d2[0] + F1 * q2 * D2 * 0.065, d2[1] - F1 * c2 * D2 * 0.065], A0 = document.createElementNS(p2, "path");
               A0.setAttribute("d", `M ${d2.join(" ")} L ${N2.join(" ")} M ${H0[0] - c2 * D2 * 0.025} ${H0[1] - q2 * D2 * 0.025} L ${N2.join(" ")} L ${H0[0] + c2 * D2 * 0.025} ${H0[1] + q2 * D2 * 0.025}`), A0.setAttribute("class", "sketch-reference sketch-trim-side"), x2.append(A0);
             }
           } catch {
@@ -56446,8 +56447,8 @@ CIRCLE 10, 15, 2`, Z.append(P, O2("small", f("One loop per line. Separate outlin
           H1.setAttribute("cx", String(y1)), H1.setAttribute("cy", String(g1)), H1.setAttribute("r", String(D2 * 0.065)), H1.setAttribute("fill", "transparent"), H1.dataset.resize = v1, H1.style.cursor = v1 === "vertex" || v1 === "curve" ? "move" : v1 === "depth" ? "nesw-resize" : "nwse-resize", D1 && (H1.dataset.loop = String(D1.loop), H1.dataset[v1 === "curve" ? "edge" : "vertex"] = String(D1.index));
           const e2 = document.createElementNS(p2, "title");
           e2.textContent = f(v1 === "curve" ? "Drag edge curve" : v1 === "vertex" ? "Drag outline point" : "Drag to change dimensions"), H1.append(e2);
-          const H = document.createElementNS(p2, "circle");
-          H.setAttribute("cx", String(y1)), H.setAttribute("cy", String(g1)), H.setAttribute("r", String(D2 * 0.023)), H.classList.add("sketch-handle"), v1 === "curve" && H.classList.add("sketch-curve-handle"), x2.append(H, H1);
+          const $ = document.createElementNS(p2, "circle");
+          $.setAttribute("cx", String(y1)), $.setAttribute("cy", String(g1)), $.setAttribute("r", String(D2 * 0.023)), $.classList.add("sketch-handle"), v1 === "curve" && $.classList.add("sketch-curve-handle"), x2.append($, H1);
         }, e1 = (y1) => y1.trim() !== "" && Number.isFinite(Number(y1)), a1 = h1.sketch.profile, k1 = a1.kind === "outline" || a1.kind === "region";
         if (a1.kind === "circle" ? e1(J.value) : a1.kind === "rectangle" && e1(K.value) && e1(Q.value)) {
           const y1 = a1.kind === "circle" ? -(Math.min(...r2) + Math.max(...r2)) / 2 : -Math.min(...r2);
@@ -56460,14 +56461,14 @@ CIRCLE 10, 15, 2`, Z.append(P, O2("small", f("One loop per line. Separate outlin
         }
         const C1 = (y1, g1) => {
           const { points: v1, bulges: D1 } = y1, H1 = a1.kind === "region" && a1.placements?.some((e2) => e2.target === y1.id && !e2.targetEdge);
-          v1.forEach((e2, H) => {
-            if (H === 0 && H1)
+          v1.forEach((e2, $) => {
+            if ($ === 0 && H1)
               return;
             const [w1, R1] = n1(e2);
-            G(w1, R1, "vertex", { loop: g1, index: H });
-          }), I.checked && v1.forEach((e2, H) => {
-            const w1 = v1[(H + 1) % v1.length], [R1, F1] = n1(dl(e2, w1, D1?.[H] ?? 0));
-            G(R1, F1, "curve", { loop: g1, index: H });
+            G(w1, R1, "vertex", { loop: g1, index: $ });
+          }), I.checked && v1.forEach((e2, $) => {
+            const w1 = v1[($ + 1) % v1.length], [R1, F1] = n1(dl(e2, w1, D1?.[$] ?? 0));
+            G(R1, F1, "curve", { loop: g1, index: $ });
           });
         };
         if (a1.kind === "outline" && C1(a1, 0), a1.kind === "region" && a1.loops.forEach((y1, g1) => {
@@ -56475,8 +56476,8 @@ CIRCLE 10, 15, 2`, Z.append(P, O2("small", f("One loop per line. Separate outlin
         }), e0 = a1, w2?.target) {
           const [y1, g1] = n1(w2.target.point);
           if (w2.target.kind === "Tangent") {
-            const [H1, e2] = n1(w2.target.anchor), H = document.createElementNS(p2, "line");
-            H.setAttribute("x1", String(H1)), H.setAttribute("y1", String(e2)), H.setAttribute("x2", String(y1)), H.setAttribute("y2", String(g1)), H.setAttribute("class", "sketch-reference sketch-tangent-guide"), x2.append(H);
+            const [H1, e2] = n1(w2.target.anchor), $ = document.createElementNS(p2, "line");
+            $.setAttribute("x1", String(H1)), $.setAttribute("y1", String(e2)), $.setAttribute("x2", String(y1)), $.setAttribute("y2", String(g1)), $.setAttribute("class", "sketch-reference sketch-tangent-guide"), x2.append($);
           }
           const v1 = document.createElementNS(p2, "circle");
           v1.setAttribute("cx", String(y1)), v1.setAttribute("cy", String(g1)), v1.setAttribute("r", String(D2 * 0.04)), v1.setAttribute("class", "sketch-snap-marker"), x2.append(v1);
@@ -56569,7 +56570,7 @@ CIRCLE 10, 15, 2`, Z.append(P, O2("small", f("One loop per line. Separate outlin
     }, S0 = (h1) => {
       N0.disabled = h1 || u || !g0 || !!w2;
     }, W0 = rg(x, r, {
-      initial: $?.kind === "outline" ? $ : void 0,
+      initial: H?.kind === "outline" ? H : void 0,
       visible: () => !w && j.value === "outline",
       active: m3,
       available: J3,
@@ -56609,7 +56610,7 @@ CIRCLE 10, 15, 2`, Z.append(P, O2("small", f("One loop per line. Separate outlin
         P2({ ...K1, sketch: { ...K1.sketch, profile: r2 } }), i2(r2), U3();
       }
     }), Q0 = LB(x, {
-      initial: $?.kind === "region" ? $.placements ?? [] : [],
+      initial: H?.kind === "region" ? H.placements ?? [] : [],
       initialLoops: r1,
       visible: () => !w && j.value === "region",
       available: () => J3() && !T3(),
@@ -56624,7 +56625,7 @@ CIRCLE 10, 15, 2`, Z.append(P, O2("small", f("One loop per line. Separate outlin
         P2(z1), i2(z1.sketch.profile);
       }
     }), $0 = IB(x, r, {
-      initial: $?.kind === "region" ? $.edgeMatches ?? [] : [],
+      initial: H?.kind === "region" ? H.edgeMatches ?? [] : [],
       visible: () => !w && j.value === "region",
       available: () => C4() && !W0.pending && !D3.pending,
       active: m3,
@@ -56838,8 +56839,8 @@ function FB(t, e, i, n) {
     _.append(y);
     const V = h0("details");
     V.className = "sketch-expressions";
-    const $ = h0("select"), K = h0("input"), Q = h0("input"), J = h0("button", f("Constrain segment")), l1 = h0("button", f("Remove segment constraint"));
-    V.append(h0("summary", f("Segment constraints")), h0("p", f("The first point drives the next. Set endpoint distance and direction from sketch +X, counterclockwise. Both fields accept parameters. Remove the constraints before inserting, removing, or reordering point rows.")), l4(f("Path segment"), $).label, l4(f("Endpoint distance (mm)"), K).label, l4(f("Direction (deg)"), Q).label, J, l1), _.append(V, j);
+    const H = h0("select"), K = h0("input"), Q = h0("input"), J = h0("button", f("Constrain segment")), l1 = h0("button", f("Remove segment constraint"));
+    V.append(h0("summary", f("Segment constraints")), h0("p", f("The first point drives the next. Set endpoint distance and direction from sketch +X, counterclockwise. Both fields accept parameters. Remove the constraints before inserting, removing, or reordering point rows.")), l4(f("Path segment"), H).label, l4(f("Endpoint distance (mm)"), K).label, l4(f("Direction (deg)"), Q).label, J, l1), _.append(V, j);
     const f1 = h0("details");
     f1.className = "sketch-expressions";
     const M1 = h0("input"), N = h0("input"), Z = h0("select");
@@ -56894,9 +56895,9 @@ function FB(t, e, i, n) {
       } catch {
       }
     }
-    const x1 = () => m?.find((W) => W.to === b?.[$.selectedIndex + 1]);
+    const x1 = () => m?.find((W) => W.to === b?.[H.selectedIndex + 1]);
     function L1() {
-      const W = $.selectedIndex, c1 = x1();
+      const W = H.selectedIndex, c1 = x1();
       if (l1.disabled = !c1, J.textContent = f(c1 ? "Update segment constraint" : "Constrain segment"), J.disabled = !0, K.value = c1 === void 0 ? "" : String(c1.distance), Q.value = c1 === void 0 ? "" : String(c1.direction), !(W < 0))
         try {
           const _1 = f9(X().profile, a), N1 = _1[W], U1 = _1[W + 1];
@@ -56919,11 +56920,11 @@ function FB(t, e, i, n) {
         const A1 = U1 + 1;
         return new Option(g?.some((O1) => O1.vertexId === b?.[U1]) ? f`Point ${A1} (locked)` : f`Point ${A1}`, String(U1));
       })), k.selectedIndex = Math.max(0, Math.min(W, c1 - 1)), m1();
-      const _1 = $.selectedIndex;
-      $.replaceChildren(...Array.from({ length: Math.max(0, c1 - 1) }, (N1, U1) => {
+      const _1 = H.selectedIndex;
+      H.replaceChildren(...Array.from({ length: Math.max(0, c1 - 1) }, (N1, U1) => {
         const A1 = m?.some((O1) => O1.to === b?.[U1 + 1]);
         return new Option(A1 ? f`Segment ${U1 + 1}–${U1 + 2} (constrained)` : f`Segment ${U1 + 1}–${U1 + 2}`, String(U1));
-      })), $.selectedIndex = c1 > 1 ? Math.max(0, Math.min(_1, c1 - 2)) : -1, L1();
+      })), H.selectedIndex = c1 > 1 ? Math.max(0, Math.min(_1, c1 - 2)) : -1, L1();
       try {
         const N1 = X();
         if (x.hidden = !N1.profile.dxfWidths, b && b.length !== N1.profile.points.length)
@@ -56951,7 +56952,7 @@ function FB(t, e, i, n) {
         return;
       }
       if (W.target instanceof Node && V.contains(W.target)) {
-        W.target === $ && L1();
+        W.target === H && L1();
         return;
       }
       q1();
@@ -56977,7 +56978,7 @@ function FB(t, e, i, n) {
       g = _1?.length ? _1 : void 0, !g && !m && (b = void 0), h++, q1();
     }, J.onclick = () => {
       try {
-        const W = X(), c1 = $.selectedIndex, _1 = b ?? W.profile.points.map(() => U2()), N1 = _1[c1], U1 = _1[c1 + 1], A1 = K.value.trim(), O1 = Q.value.trim();
+        const W = X(), c1 = H.selectedIndex, _1 = b ?? W.profile.points.map(() => U2()), N1 = _1[c1], U1 = _1[c1 + 1], A1 = K.value.trim(), O1 = Q.value.trim();
         if (!N1 || !U1 || !A1 || !O1)
           throw new Error(f("Enter both endpoint distance and direction."));
         const s2 = [
@@ -56993,7 +56994,7 @@ function FB(t, e, i, n) {
       if (!W)
         return;
       try {
-        const { profile: _1 } = X(), N1 = $.selectedIndex + 1;
+        const { profile: _1 } = X(), N1 = H.selectedIndex + 1;
         _1.points[N1] = f9(_1, a)[N1], S.value = X5(_1.points, _1.bulges, _1.dxfWidths).join(`
 `);
       } catch {
@@ -57330,8 +57331,8 @@ function VB(t, e) {
       const C = q3("select");
       C.setAttribute("aria-label", f("Driven object"));
       for (const V of Object.values(c.nodes)) {
-        const $ = q3("option", c.roots.includes(V.id) ? V.name : f`${V.name} · operand`);
-        $.value = V.id, C.append($);
+        const H = q3("option", c.roots.includes(V.id) ? V.name : f`${V.name} · operand`);
+        H.value = V.id, C.append(H);
       }
       x && c.nodes[x] && (C.value = x);
       const D = q3("select");
@@ -57340,9 +57341,9 @@ function VB(t, e) {
         D.replaceChildren();
         const V = c.nodes[C.value];
         if (V)
-          for (const $ of gh(V)) {
-            const K = q3("option", f(ag[$]));
-            K.value = $, D.append(K);
+          for (const H of gh(V)) {
+            const K = q3("option", f(ag[H]));
+            K.value = H, D.append(K);
           }
       };
       C.onchange = z, z(), Array.from(D.options).some((V) => V.value === y) && (D.value = y);
@@ -57830,15 +57831,15 @@ function dF(t, e) {
   const a = m2("div", "toolbar");
   if (a.setAttribute("role", "toolbar"), a.setAttribute("aria-label", "Model tools"), e.embedded && (r.classList.add("embedded"), o.textContent += `
 .editor.embedded .design-bar{grid-template-columns:minmax(76px,130px) minmax(0,1fr) auto}.editor.embedded .project-actions,.editor.embedded .units-label{display:none}.editor.embedded .toolbar{max-width:calc(100vw - 24px);overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap}.editor.embedded .toolbar>slot{order:-2}`), e.toolbarContent) {
-    const H = document.createElement("slot");
-    H.name = "host-toolbar-controls", H.style.display = "inline-flex", H.style.flexShrink = "0", e.toolbarContent.slot = H.name, t.append(e.toolbarContent), a.append(H);
+    const $ = document.createElement("slot");
+    $.name = "host-toolbar-controls", $.style.display = "inline-flex", $.style.flexShrink = "0", e.toolbarContent.slot = $.name, t.append(e.toolbarContent), a.append($);
   }
   const c = e.headerContent?.querySelector("#iterations"), l = e.headerContent?.querySelector("#library"), d = m2("div", "main"), p = m2("aside", "panel tree"), u = m2("div", "viewport"), h = m2("aside", "panel inspector");
   let b = { shapesFirst: !0, split: 50 };
-  const g = (H) => {
-    if (typeof H.shapesFirst != "boolean" || !Number.isFinite(H.split) || H.split < 20 || H.split > 80)
+  const g = ($) => {
+    if (typeof $.shapesFirst != "boolean" || !Number.isFinite($.split) || $.split < 20 || $.split > 80)
       throw new Error(f("Choose a pane split between 20 and 80 percent"));
-    b = { ...H }, d.dataset.shapesFirst = String(H.shapesFirst), d.style.setProperty("--right-pane-split", `${H.split}%`);
+    b = { ...$ }, d.dataset.shapesFirst = String($.shapesFirst), d.style.setProperty("--right-pane-split", `${$.split}%`);
   };
   g(e.rightPane ?? b);
   const m = m2("div", "status"), q = m2("span");
@@ -57846,30 +57847,30 @@ function dF(t, e) {
   const w = m2("span", "stats");
   m.append(q, w);
   const v = m2("div", "design-bar"), _ = m2("input");
-  _.setAttribute("aria-label", "Design title"), _.addEventListener("keydown", (H) => {
-    H.key === "Enter" ? _.blur() : H.key === "Escape" && (_.value = i.state.document.title, _.blur());
+  _.setAttribute("aria-label", "Design title"), _.addEventListener("keydown", ($) => {
+    $.key === "Enter" ? _.blur() : $.key === "Escape" && (_.value = i.state.document.title, _.blur());
   }), _.addEventListener("change", () => K(() => i.rename(_.value))), v.append(_, m2("span", "units-label", f("mm · Z up"))), e.showDocumentTitle === !1 && (_.hidden = !0, v.style.gridTemplateColumns = "minmax(0,1fr) auto"), d.append(p, u, h), v.append(a), r.append(v, d, m), s.append(o, r);
   const E = new AbortController();
   let M = !1, S = -1, x = null, y = !1, k = -1, A = "", C = "", D = "select", z = 1;
   const j = /* @__PURE__ */ new Set();
   let V = "";
-  function $(H) {
-    const w1 = H instanceof Error ? H : new Error(String(H));
+  function H($) {
+    const w1 = $ instanceof Error ? $ : new Error(String($));
     V = w1.message, q.textContent = w1.message, M || e.onError?.(w1);
   }
-  const K = (H) => {
+  const K = ($) => {
     try {
-      const w1 = H();
-      w1 instanceof Promise && w1.catch($);
+      const w1 = $();
+      w1 instanceof Promise && w1.catch(H);
     } catch (w1) {
-      $(w1);
+      H(w1);
     }
   }, Q = hP(new URL(e.wasmURL, document.baseURI).href, e.createWorker);
   let J, l1 = !!e.appearance;
   try {
-    J = jT(u, i, $, e.appearance), !e.appearance && e.colorMode === "light" && J.setAppearance({ background: "#e7eef7", baseplate: "#cdd9e8" }), J.setNavigation(e.navigationPreset ?? "tinkercad"), e.cameraGestures && J.setCameraGestures(e.cameraGestures), J.setResizeControls(e.resizeControls ?? "dimensions"), J.setGridDisplay(e.gridDisplay ?? "snap"), J.setSurfaceSnap(e.surfaceSnap ?? !0);
-  } catch (H) {
-    throw Q.dispose(), s.replaceChildren(), n && i.dispose(), H;
+    J = jT(u, i, H, e.appearance), !e.appearance && e.colorMode === "light" && J.setAppearance({ background: "#e7eef7", baseplate: "#cdd9e8" }), J.setNavigation(e.navigationPreset ?? "tinkercad"), e.cameraGestures && J.setCameraGestures(e.cameraGestures), J.setResizeControls(e.resizeControls ?? "dimensions"), J.setGridDisplay(e.gridDisplay ?? "snap"), J.setSurfaceSnap(e.surfaceSnap ?? !0);
+  } catch ($) {
+    throw Q.dispose(), s.replaceChildren(), n && i.dispose(), $;
   }
   const f1 = m2("div", "empty");
   f1.append(m2("strong", "", f("Your next idea starts here.")), document.createTextNode(f("Pick a shape above. Set its dimensions in Properties. Drag to orbit; pinch to zoom."))), u.append(f1);
@@ -57879,20 +57880,20 @@ function dF(t, e) {
   N.hidden = !0, N.setAttribute("role", "alert"), u.append(N);
   let Z = a;
   const P = [];
-  function B(H, w1 = "") {
-    if (["File", "Edit", "Combine", "More sketch tools"].includes(H)) {
-      const c2 = m2("details", `command-menu ${w1}`), q2 = m2("summary", "", `${f(H)} ▾`);
-      if (q2.setAttribute("aria-label", H === "More sketch tools" ? f(H) : f`${f(H)} menu`), H !== "File") {
-        if (q2.textContent = "", H === "More sketch tools")
+  function B($, w1 = "") {
+    if (["File", "Edit", "Combine", "More sketch tools"].includes($)) {
+      const c2 = m2("details", `command-menu ${w1}`), q2 = m2("summary", "", `${f($)} ▾`);
+      if (q2.setAttribute("aria-label", $ === "More sketch tools" ? f($) : f`${f($)} menu`), $ !== "File") {
+        if (q2.textContent = "", $ === "More sketch tools")
           q2.append(m2("span", "", "▾"));
         else {
-          const N2 = Z5(H === "Combine" ? "Union" : "Edit");
+          const N2 = Z5($ === "Combine" ? "Union" : "Edit");
           N2 && q2.append(N2);
         }
-        q2.title = f(H);
+        q2.title = f($);
       }
       const d2 = m2("div", "command-popup");
-      c2.append(q2, d2), a.append(c2), c2.hidden = H === "File" && (e.nativeMenus === !0 || e.embedded === !0), Z = d2, P.push(c2), c2.addEventListener("toggle", () => {
+      c2.append(q2, d2), a.append(c2), c2.hidden = $ === "File" && (e.nativeMenus === !0 || e.embedded === !0), Z = d2, P.push(c2), c2.addEventListener("toggle", () => {
         c2.open && (P.forEach((N2) => {
           N2 !== c2 && (N2.open = !1);
         }), d1(c2));
@@ -57902,46 +57903,46 @@ function dF(t, e) {
       return;
     }
     const R1 = m2("div", `tool-group ${w1}`);
-    R1.setAttribute("role", "group"), R1.setAttribute("aria-label", f(H));
+    R1.setAttribute("role", "group"), R1.setAttribute("aria-label", f($));
     const F1 = m2("div", "group-tools");
     R1.append(F1), a.append(R1), Z = F1;
   }
-  function d1(H) {
-    const w1 = H.querySelector("summary").getBoundingClientRect(), R1 = H.querySelector(".command-popup");
+  function d1($) {
+    const w1 = $.querySelector("summary").getBoundingClientRect(), R1 = $.querySelector(".command-popup");
     Object.assign(R1.style, { left: "0px", right: "auto", top: "0px" });
     const F1 = R1.getBoundingClientRect(), c2 = Math.max(8, Math.min(w1.left, document.documentElement.clientWidth - F1.width - 8)), q2 = w1.bottom + 4, d2 = document.documentElement.clientHeight, N2 = q2 + F1.height > d2 - 8 && w1.top - F1.height - 4 >= 8 ? w1.top - F1.height - 4 : q2;
     R1.style.left = `${c2 - F1.left}px`, R1.style.top = `${N2 - F1.top}px`, R1.style.maxHeight = `${Math.max(40, d2 - N2 - 8)}px`, R1.style.overflowY = "auto";
   }
-  a.addEventListener("scroll", () => P.forEach((H) => {
-    H.open && d1(H);
+  a.addEventListener("scroll", () => P.forEach(($) => {
+    $.open && d1($);
   }), { passive: !0 });
-  function r1(H, w1, R1 = Z, F1 = "", c2 = !0) {
-    const q2 = m2("button", F1), d2 = Z5(H);
+  function r1($, w1, R1 = Z, F1 = "", c2 = !0) {
+    const q2 = m2("button", F1), d2 = Z5($);
     d2 && q2.append(d2);
-    const N2 = c2 ? f(H) : H;
+    const N2 = c2 ? f($) : $;
     return q2.append(m2("span", "", N2)), q2.type = "button", q2.title = N2, q2.setAttribute("aria-label", N2), q2.addEventListener("click", () => K(w1)), R1.append(q2), q2;
   }
-  function o1(H, w1) {
-    const R1 = getComputedStyle(H).display !== "none";
-    H.classList.toggle("closed", R1), H.classList.toggle("open", !R1), w1.setAttribute("aria-pressed", String(!R1));
+  function o1($, w1) {
+    const R1 = getComputedStyle($).display !== "none";
+    $.classList.toggle("closed", R1), $.classList.toggle("open", !R1), w1.setAttribute("aria-pressed", String(!R1));
   }
-  const b1 = eC(u, i, e.wasmURL, a1, (H) => J.setSimulationPoses(H), { connectorHandles: (H) => J.setConnectorHandlesVisible(H), dragEnabled: (H) => J.setSimulationDragEnabled(H), pickPoint: (H) => J.pickPoint(H), traces: (H) => J.setSimulationTraces(H), canvas: J.canvas, onExport: e.onExport, onInterrupt: e.onSimulationInterrupt });
-  J.setSimulationDrag((H) => {
-    (H ? b1.dragBody(H.bodyId, H.point, H.target) : b1.releaseDrag()).catch((w1) => {
+  const b1 = eC(u, i, e.wasmURL, a1, ($) => J.setSimulationPoses($), { connectorHandles: ($) => J.setConnectorHandlesVisible($), dragEnabled: ($) => J.setSimulationDragEnabled($), pickPoint: ($) => J.pickPoint($), traces: ($) => J.setSimulationTraces($), canvas: J.canvas, onExport: e.onExport, onInterrupt: e.onSimulationInterrupt });
+  J.setSimulationDrag(($) => {
+    ($ ? b1.dragBody($.bodyId, $.point, $.target) : b1.releaseDrag()).catch((w1) => {
       J.cancelSimulationDrag(), e.onError?.(w1);
     });
   }), e.embedded || r1("Simulate", () => b1.open(), a, "compact-icon");
   const T1 = r1("Objects", () => o1(p, T1), m, "panel-toggle objects-toggle");
   T1.title = f("Show objects");
-  const I = r1("Properties", () => o1(h, I), m, "panel-toggle properties-toggle"), R = pP(r, i, (H) => Q.evaluate(H), e.modelLibrary, async () => {
+  const I = r1("Properties", () => o1(h, I), m, "panel-toggle properties-toggle"), R = pP(r, i, ($) => Q.evaluate($), e.modelLibrary, async () => {
     await a1(), J.frame();
   }, e.onExport, e.presetProjects && {
     open: e.presetProjects.open,
-    items: e.presetProjects.items.map((H) => {
-      const w1 = Ft.find((R1) => R1.id === H.id);
-      return { ...H, preview: H.preview ?? (w1 ? () => jb(w1) : void 0) };
+    items: e.presetProjects.items.map(($) => {
+      const w1 = Ft.find((R1) => R1.id === $.id);
+      return { ...$, preview: $.preview ?? (w1 ? () => jb(w1) : void 0) };
     })
-  }), O = VB(r, i), s1 = BB(r, i, (H) => Q.evaluate(H), Q.offsetSketch, async () => {
+  }), O = VB(r, i), s1 = BB(r, i, ($) => Q.evaluate($), Q.offsetSketch, async () => {
     await a1(), J.frame();
   }, () => z);
   r1("Sketch", () => s1.open(), a, "compact-icon").title = f("Create a dimensioned sketch and extrusion"), B("More sketch tools", "sketch-tools");
@@ -57949,22 +57950,22 @@ function dF(t, e) {
     getComputedStyle(p).display === "none" && o1(p, T1);
   }, e.onExport);
   r1("Sketch path", () => Y.open()).title = f("Create an open line and arc path"), r1("Revolve", () => s1.openRevolution()).title = f("Revolve a sketch around an axis");
-  const X = NB(r, i, (H) => Q.evaluate(H), async () => {
+  const X = NB(r, i, ($) => Q.evaluate($), async () => {
     await a1(), J.frame();
   }), F = () => {
-    const [H] = i.state.selection;
+    const [$] = i.state.selection;
     if (i.state.selection.length !== 1)
       throw new Error(f("Select one top-level body to mirror"));
-    X.open(H);
-  }, U = OB(r, i, (H) => Q.evaluate(H), async () => {
+    X.open($);
+  }, U = OB(r, i, ($) => Q.evaluate($), async () => {
     await a1(), J.frame();
   }), m1 = () => {
-    const [H] = i.state.selection;
+    const [$] = i.state.selection;
     if (i.state.selection.length !== 1)
       throw new Error(f("Select one top-level body to pattern"));
-    U.open(H);
+    U.open($);
   }, x1 = jB(r, () => {
-    const H = i.state.selection, w1 = H.length === 1 ? i.state.document.nodes[H[0]] : void 0;
+    const $ = i.state.selection, w1 = $.length === 1 ? i.state.document.nodes[$[0]] : void 0;
     return {
       ...C0(),
       canWrapBody: !q0.disabled,
@@ -57972,12 +57973,12 @@ function dF(t, e) {
       canEditMirror: w1?.kind === "mirror" && !y,
       canEditPattern: w1?.kind === "pattern" && !y
     };
-  }, (H) => K(() => H1(H))), L1 = r1("Command palette", () => {
+  }, ($) => K(() => H1($))), L1 = r1("Command palette", () => {
     L1.focus({ preventScroll: !0 }), x1.open();
   }, a, "compact-icon");
   L1.title = f("Command palette (Ctrl/⌘+Shift+P)"), L1.setAttribute("aria-keyshortcuts", "Control+Shift+P Meta+Shift+P");
   const q1 = lB(), E1 = /* @__PURE__ */ new WeakMap();
-  async function t1(H) {
+  async function t1($) {
     const w1 = i.state.document, R1 = () => !M && i.state.document === w1, F1 = await a1();
     if (!R1())
       return;
@@ -57985,7 +57986,7 @@ function dF(t, e) {
     if (!R1())
       return;
     const q2 = [];
-    for (const d2 of H)
+    for (const d2 of $)
       if (!(!F4(d2.source) || !d2.section))
         try {
           const N2 = Zb(w1, d2.section), H0 = Ka(N2);
@@ -58006,18 +58007,18 @@ function dF(t, e) {
         }
     return { ...c2, sections: q2 };
   }
-  const T = pB(r, i, t1, e.onExport), W = _I(r, m, i, (H) => Q.evaluate(H), (H, w1) => Ki(H.preset, w1, { recipe: H })), c1 = kI(r, i, (H) => Q.evaluate(H), async () => {
+  const T = pB(r, i, t1, e.onExport), W = _I(r, m, i, ($) => Q.evaluate($), ($, w1) => Ki($.preset, w1, { recipe: $ })), c1 = kI(r, i, ($) => Q.evaluate($), async () => {
     await a1(), J.frame();
   }, e.onExport, () => K(() => W.open()));
   r1("Code", () => c1.open(i.state.selection.length === 1 && i.state.document.nodes[i.state.selection[0]]?.kind === "code" ? i.state.selection[0] : void 0), a, "compact-icon").title = f("Code an object");
   const _1 = r1("Parameters", () => O.open(), a, "compact-icon");
   _1.title = f("Model parameters and formulas"), e.headerContent && (e.headerContent.classList.add("host-actions"), v.append(e.headerContent)), B("Shapes", "shapes-tools");
   const N1 = r1("Shapes", () => v2.toggle(), Z, "shape-library-toggle"), U1 = /* @__PURE__ */ new Map(), A1 = /* @__PURE__ */ new Map();
-  function O1(H, w1, R1, F1) {
-    const c2 = ["text", "name-tag", "icon-tag", "qr"].includes(H.id), q2 = JSON.stringify([H.id, c2 ? w1 : "", c2 ? R1 : "", c2 ? F1 : ""]);
+  function O1($, w1, R1, F1) {
+    const c2 = ["text", "name-tag", "icon-tag", "qr"].includes($.id), q2 = JSON.stringify([$.id, c2 ? w1 : "", c2 ? R1 : "", c2 ? F1 : ""]);
     let d2 = A1.get(q2);
     if (!d2) {
-      const N2 = Ki(H.id, w1, { svg: R1, font: F1 });
+      const N2 = Ki($.id, w1, { svg: R1, font: F1 });
       d2 = Q.evaluate(N2).then((H0) => ({ document: N2, geometry: H0 })), A1.set(q2, d2), A1.size > 80 && A1.delete(A1.keys().next().value), d2.catch(() => {
         A1.get(q2) === d2 && A1.delete(q2);
       });
@@ -58026,37 +58027,37 @@ function dF(t, e) {
   }
   let s2;
   function o2() {
-    const H = s2;
-    H && (s2 = void 0, J.cancelPlacement(), i.state.document.id === H.projectId && i.state.revision === H.revision && !i.state.selection.length && i.select(H.selection));
+    const $ = s2;
+    $ && (s2 = void 0, J.cancelPlacement(), i.state.document.id === $.projectId && i.state.revision === $.revision && !i.state.selection.length && i.select($.selection));
   }
-  function Q1(H, w1, R1, F1, c2) {
+  function Q1($, w1, R1, F1, c2) {
     o2();
     try {
-      const q2 = O1(H, w1, R1, F1), d2 = { name: f(H.name), projectId: i.state.document.id, revision: i.state.revision, selection: [...i.state.selection], ready: Promise.all([q2, a1()]).then(([N2]) => N2), point: c2, dropping: !1, role: "solid" };
+      const q2 = O1($, w1, R1, F1), d2 = { name: f($.name), projectId: i.state.document.id, revision: i.state.revision, selection: [...i.state.selection], ready: Promise.all([q2, a1()]).then(([N2]) => N2), point: c2, dropping: !1, role: "solid" };
       s2 = d2, J.beginPlacement(), i.select([]), c2 && J.movePlacement(c2), d2.ready.then(({ geometry: N2 }) => {
         s2 !== d2 || M || (J.setPlacementGeometry(N2), d2.point && J.movePlacement(d2.point));
       }).catch((N2) => {
-        s2 === d2 && (o2(), $(N2));
+        s2 === d2 && (o2(), H(N2));
       });
     } catch (q2) {
-      $(q2);
+      H(q2);
     }
   }
-  function t2(H) {
-    s2 && (s2.point = H, J.movePlacement(H));
+  function t2($) {
+    s2 && (s2.point = $, J.movePlacement($));
   }
-  async function h2(H) {
+  async function h2($) {
     const w1 = s2;
     if (!w1 || w1.dropping)
       return !1;
-    w1.dropping = !0, w1.point = H;
+    w1.dropping = !0, w1.point = $;
     try {
       const R1 = await w1.ready;
       if (M || s2 !== w1)
         return !1;
       if (i.state.document.id !== w1.projectId || i.state.revision !== w1.revision)
         return o2(), !1;
-      const F1 = J.movePlacement(H);
+      const F1 = J.movePlacement($);
       if (!F1)
         return o2(), !1;
       const c2 = kP(R1.document, F1);
@@ -58070,52 +58071,52 @@ function dF(t, e) {
       throw s2 === w1 && o2(), R1;
     }
   }
-  J.setPlacementHandlers((H) => {
-    h2(H).catch($);
+  J.setPlacementHandlers(($) => {
+    h2($).catch(H);
   }, o2);
-  const v2 = vI(d, N1, async (H, w1, R1, F1) => {
-    const c2 = i.state.document.id, q2 = !i.state.document.roots.length, { document: d2, geometry: N2 } = await O1(H, w1, R1, F1);
+  const v2 = vI(d, N1, async ($, w1, R1, F1) => {
+    const c2 = i.state.document.id, q2 = !i.state.document.roots.length, { document: d2, geometry: N2 } = await O1($, w1, R1, F1);
     if (M)
       return;
     if (i.state.document.id !== c2)
       throw new Error(f("Shape insertion was canceled because a different model was opened"));
     const H0 = Math.min(...N2.bodies.map((A0) => A0.bounds.min[2]));
     i.insert(d2, [i.state.document.roots.length * 12, 0, -H0], { mergeParameters: !0 }), await a1(), q2 && J.frame();
-  }, $, (H) => {
-    let w1 = U1.get(H.id);
-    return w1 || (w1 = O1(H, "ABC").then((R1) => Vb(R1.geometry.bodies)), U1.set(H.id, w1)), w1;
-  }, { excludedIds: e.presetProjects?.items.map((H) => H.id), layout: e.shapeBrowserLayout, onLayoutChange: e.onShapeBrowserLayoutChange, placement: { begin: Q1, move: t2, drop: h2, cancel: o2 } });
+  }, H, ($) => {
+    let w1 = U1.get($.id);
+    return w1 || (w1 = O1($, "ABC").then((R1) => Vb(R1.geometry.bodies)), U1.set($.id, w1)), w1;
+  }, { excludedIds: e.presetProjects?.items.map(($) => $.id), layout: e.shapeBrowserLayout, onLayoutChange: e.onShapeBrowserLayoutChange, placement: { begin: Q1, move: t2, drop: h2, cancel: o2 } });
   B("Combine");
-  const Z1 = ["union", "subtract", "intersect"].map((H) => {
-    const w1 = r1(H[0].toUpperCase() + H.slice(1), () => i.combine(H));
-    return w1.title = f(H === "subtract" ? "First selected body is the base. Later selected bodies cut it." : H === "union" ? "Union solids and subtract holes" : "Intersect"), w1;
+  const Z1 = ["union", "subtract", "intersect"].map(($) => {
+    const w1 = r1($[0].toUpperCase() + $.slice(1), () => i.combine($));
+    return w1.title = f($ === "subtract" ? "First selected body is the base. Later selected bodies cut it." : $ === "union" ? "Union solids and subtract holes" : "Intersect"), w1;
   });
   B("Transform");
-  const P1 = ["select", "translate", "rotate", "scale"].map((H, w1) => {
-    const R1 = r1(["Select", "Move", "Rotate", "Scale"][w1], () => p2(H));
+  const P1 = ["select", "translate", "rotate", "scale"].map(($, w1) => {
+    const R1 = r1(["Select", "Move", "Rotate", "Scale"][w1], () => p2($));
     return R1.title = f(["Select and drag (V / Esc)", "Move (W)", "Rotate (E)", "Scale (R)"][w1]), R1;
   }), u2 = r1("Drop to workplane", () => J.dropSelection()), I1 = r1("Snap to surfaces", () => a2(!J.surfaceSnap), a, "compact-icon");
   I1.title = f("Snap to surfaces (C) · Alt-drag temporarily bypasses"), I1.setAttribute("aria-pressed", String(J.surfaceSnap)), I1.classList.toggle("active", J.surfaceSnap);
-  function a2(H) {
-    J.setSurfaceSnap(H), I1.setAttribute("aria-pressed", String(H)), I1.classList.toggle("active", H), e.onSurfaceSnapChange?.(H);
+  function a2($) {
+    J.setSurfaceSnap($), I1.setAttribute("aria-pressed", String($)), I1.classList.toggle("active", $), e.onSurfaceSnapChange?.($);
   }
-  const i2 = xP(u, i, $, (H) => {
-    b2.checked = H, J.setReadoutVisible(H), e.onTransformReadoutChange?.(H);
+  const i2 = xP(u, i, H, ($) => {
+    b2.checked = $, J.setReadoutVisible($), e.onTransformReadoutChange?.($);
   }), X1 = m2("label", "numbers-toggle", "XYZ");
   X1.title = f("Show axis values in Move/Rotate and while dragging");
   const b2 = m2("input");
-  b2.type = "checkbox", b2.setAttribute("aria-label", f("Show on-canvas parameters")), b2.onchange = () => i2.setVisible(b2.checked), X1.prepend(b2), i2.setVisible(e.showTransformReadout ?? !1), J.setTransformPreviewListener((H) => {
-    if (i2.update(H), H.bounds)
+  b2.type = "checkbox", b2.setAttribute("aria-label", f("Show on-canvas parameters")), b2.onchange = () => i2.setVisible(b2.checked), X1.prepend(b2), i2.setVisible(e.showTransformReadout ?? !1), J.setTransformPreviewListener(($) => {
+    if (i2.update($), $.bounds)
       for (const [R1, F1] of ["X", "Y", "Z"].entries()) {
         const c2 = h.querySelector(`[data-size-axis=${F1}]`);
-        c2 && (c2.value = String(Number((H.bounds.max[R1] - H.bounds.min[R1]).toFixed(3))));
+        c2 && (c2.value = String(Number(($.bounds.max[R1] - $.bounds.min[R1]).toFixed(3))));
       }
-    const w1 = H.poses[0]?.transform;
+    const w1 = $.poses[0]?.transform;
     if (w1)
       for (const [R1, F1] of [["position", "Position"], ["rotation", "Rotation"], ["scale", "Scale"]])
         for (const [c2, q2] of ["X", "Y", "Z"].entries()) {
           const d2 = Array.from(h.querySelectorAll("input")).find((N2) => N2.getAttribute("aria-label") === `${f(F1)} ${q2}`);
-          d2 && (d2.readOnly = H.dragging, (s.activeElement !== d2 || H.dragging) && (d2.value = String(Number(w1[R1][c2].toFixed(5)))));
+          d2 && (d2.readOnly = $.dragging, (s.activeElement !== d2 || $.dragging) && (d2.value = String(Number(w1[R1][c2].toFixed(5)))));
         }
   });
   const M2 = m2("div", "plane-bar");
@@ -58124,9 +58125,9 @@ function dF(t, e) {
   L2.title = f("Snap Grid");
   const P2 = m2("select");
   P2.setAttribute("aria-label", f("Grid spacing")), P2.title = f("Snap Grid");
-  for (const H of [0, 0.1, 1, 5, 10]) {
-    const w1 = m2("option", "", H === 0 ? f("Off") : `${H} mm`);
-    w1.value = String(H), P2.append(w1);
+  for (const $ of [0, 0.1, 1, 5, 10]) {
+    const w1 = m2("option", "", $ === 0 ? f("Off") : `${$} mm`);
+    w1.value = String($), P2.append(w1);
   }
   P2.value = "1", P2.addEventListener("change", () => {
     z = Number(P2.value), J.setGrid(z);
@@ -58143,14 +58144,14 @@ function dF(t, e) {
   r1("Paste", () => D1());
   const U3 = r1("Duplicate", () => H1("duplicate")), T3 = r1("Delete", () => H1("delete")), m3 = m2("div", "context-actions");
   m3.setAttribute("role", "group"), m3.setAttribute("aria-label", f("Selection actions")), a.append(m3);
-  for (const [H, w1] of [["Copy", "copy"], ["Duplicate", "duplicate"], ["Delete", "delete"]])
-    r1(H, () => H1(w1), m3, "compact-icon");
+  for (const [$, w1] of [["Copy", "copy"], ["Duplicate", "duplicate"], ["Delete", "delete"]])
+    r1($, () => H1(w1), m3, "compact-icon");
   const C4 = () => {
-    const H = [...a.children].filter((R1) => R1 !== m3).reduce((R1, F1) => R1 + F1.getBoundingClientRect().width, 0), w1 = parseFloat(getComputedStyle(a).gap) || 0;
-    m3.dataset.room = String(a.clientWidth >= H + 112 + w1 * a.children.length);
+    const $ = [...a.children].filter((R1) => R1 !== m3).reduce((R1, F1) => R1 + F1.getBoundingClientRect().width, 0), w1 = parseFloat(getComputedStyle(a).gap) || 0;
+    m3.dataset.room = String(a.clientWidth >= $ + 112 + w1 * a.children.length);
   }, J3 = () => {
-    const H = e.toolbarContent;
-    H && (H.removeAttribute("data-cad-ribbon-compact"), H.toggleAttribute("data-cad-ribbon-compact", a.scrollWidth > a.clientWidth + 1)), C4(), P.forEach((w1) => {
+    const $ = e.toolbarContent;
+    $ && ($.removeAttribute("data-cad-ribbon-compact"), $.toggleAttribute("data-cad-ribbon-compact", a.scrollWidth > a.clientWidth + 1)), C4(), P.forEach((w1) => {
       w1.open && d1(w1);
     });
   }, Q3 = new ResizeObserver(J3);
@@ -58165,25 +58166,25 @@ function dF(t, e) {
   W0.type = "file", W0.setAttribute("aria-label", f("Open CAD project or geometry")), W0.hidden = !0, r.append(W0);
   async function D3() {
     if (e.requestOpen) {
-      const H = await e.requestOpen();
-      H && await W1(H.name, H.bytes);
+      const $ = await e.requestOpen();
+      $ && await W1($.name, $.bytes);
     } else
       W0.click();
   }
   r1("Open", D3), W0.accept = ".bcad,.bcadhistory,.json,.stl,.step,.stp", W0.addEventListener("change", () => {
-    const H = W0.files?.[0];
-    W0.value = "", H && K(async () => {
-      if (H.size > 64 * 1024 * 1024)
+    const $ = W0.files?.[0];
+    W0.value = "", $ && K(async () => {
+      if ($.size > 64 * 1024 * 1024)
         throw new Error(f("Project exceeds 64 MiB"));
-      await W1(H.name, new Uint8Array(await H.arrayBuffer()));
+      await W1($.name, new Uint8Array(await $.arrayBuffer()));
     });
   });
   const Q0 = r1("Save project", () => e2("bcad"), Z, "primary");
   Q0.disabled = !e.onExport && !e.saveProject;
   const $0 = m2("div", "project-actions");
   $0.setAttribute("role", "group"), $0.setAttribute("aria-label", f("Project actions")), $0.hidden = e.embedded === !0;
-  const y3 = (H, w1, R1) => {
-    const F1 = r1(H, R1, $0, "project-action");
+  const y3 = ($, w1, R1) => {
+    const F1 = r1($, R1, $0, "project-action");
     return F1.setAttribute("aria-label", f(w1)), F1.title = f(w1), F1;
   };
   y3("New", "New project", S0), y3("Open", "Open project", D3);
@@ -58191,17 +58192,17 @@ function dF(t, e) {
   N0.disabled = Q0.disabled, N0.title = f("Save a portable project file, including history. Your working project autosaves."), v.insertBefore($0, a);
   const p3 = m2("input");
   p3.type = "file", p3.accept = ".stl,.step,.stp", p3.hidden = !0, p3.setAttribute("aria-label", f("Import STL or STEP geometry")), r.append(p3), p3.onchange = () => {
-    const H = p3.files?.[0];
-    p3.value = "", H && K(async () => {
-      if (H.size > 16 * 1024 * 1024)
+    const $ = p3.files?.[0];
+    p3.value = "", $ && K(async () => {
+      if ($.size > 16 * 1024 * 1024)
         throw new Error(f("Geometry file exceeds 16 MiB"));
-      await C1(H.name, new Uint8Array(await H.arrayBuffer()));
+      await C1($.name, new Uint8Array(await $.arrayBuffer()));
     });
   };
   async function p1() {
     if (e.requestImport) {
-      const H = await e.requestImport();
-      H && await C1(H.name, H.bytes);
+      const $ = await e.requestImport();
+      $ && await C1($.name, $.bytes);
     } else
       p3.click();
   }
@@ -58210,9 +58211,9 @@ function dF(t, e) {
   V1.setAttribute("aria-label", f("Export model")), V1.append(m2("h2", "", f("Export model")));
   const J1 = m2("select");
   J1.setAttribute("aria-label", f("Export format"));
-  for (const [H, w1] of [["stl", "STL · triangle mesh"], ["3mf", "3MF · packaged mesh"]]) {
+  for (const [$, w1] of [["stl", "STL · triangle mesh"], ["3mf", "3MF · packaged mesh"]]) {
     const R1 = m2("option", "", f(w1));
-    R1.value = H, J1.append(R1);
+    R1.value = $, J1.append(R1);
   }
   V1.append(J1);
   const G1 = m2("p", "", f("Recorded sources export as one ZIP containing STL and attribution JSON. Distribute both files together and retain any separately required licence texts and notices.")), h1 = m2("label", "", f("Changes since insertion")), z1 = m2("textarea");
@@ -58224,8 +58225,8 @@ function dF(t, e) {
     z1.value = "", r2 = !1, g2 = i.state.revision, B2(), V1.showModal();
   }
   function B2() {
-    const H = yl(i.state.document);
-    G1.hidden = h1.hidden = K1.hidden = !H, z1.required = H;
+    const $ = yl(i.state.document);
+    G1.hidden = h1.hidden = K1.hidden = !$, z1.required = $;
   }
   const S2 = m2("footer");
   r1("Cancel export", () => {
@@ -58248,7 +58249,7 @@ function dF(t, e) {
       }
     }
   }, S2, "primary");
-  V1.append(S2), V1.addEventListener("keydown", (H) => H.stopPropagation()), r.append(V1);
+  V1.append(S2), V1.addEventListener("keydown", ($) => $.stopPropagation()), r.append(V1);
   const W2 = r1("Export…", f2);
   W2.disabled = !0;
   const C2 = m2("div", "view-actions");
@@ -58270,25 +58271,25 @@ function dF(t, e) {
   n2.setAttribute("aria-pressed", "false");
   const Y1 = m2("select");
   Y1.setAttribute("aria-label", "View direction");
-  for (const H of ["iso", "top", "front", "right", "back", "left", "bottom"]) {
-    const w1 = m2("option", "", f(H === "iso" ? "3D view" : `${H[0].toUpperCase()}${H.slice(1)} view`));
-    w1.value = H, Y1.append(w1);
+  for (const $ of ["iso", "top", "front", "right", "back", "left", "bottom"]) {
+    const w1 = m2("option", "", f($ === "iso" ? "3D view" : `${$[0].toUpperCase()}${$.slice(1)} view`));
+    w1.value = $, Y1.append(w1);
   }
-  Y1.addEventListener("change", () => J.setView(Y1.value)), M2.prepend(Y1), J.setViewListener((H) => {
-    Y1.value = H;
+  Y1.addEventListener("change", () => J.setView(Y1.value)), M2.prepend(Y1), J.setViewListener(($) => {
+    Y1.value = $;
   });
-  function p2(H) {
-    D = H, J.setMode(D), P1.forEach((w1, R1) => w1.setAttribute("aria-pressed", String(["select", "translate", "rotate", "scale"][R1] === D))), r.dataset.mode = D, (D === "rotate" || D === "scale") && (h.classList.remove("closed"), h.classList.add("open")), $2();
+  function p2($) {
+    D = $, J.setMode(D), P1.forEach((w1, R1) => w1.setAttribute("aria-pressed", String(["select", "translate", "rotate", "scale"][R1] === D))), r.dataset.mode = D, (D === "rotate" || D === "scale") && (h.classList.remove("closed"), h.classList.add("open")), $2();
   }
   p2("select");
   const x2 = /* @__PURE__ */ new Set();
   let _2 = "";
   function D2() {
     p.replaceChildren();
-    const H = m2("div", "browser-content"), w1 = m2("div", "panel-header");
+    const $ = m2("div", "browser-content"), w1 = m2("div", "panel-header");
     if (w1.append(m2("h2", "", f("Objects"))), r1("Close objects", () => {
       p.classList.remove("open"), p.classList.add("closed"), T1.setAttribute("aria-pressed", "false");
-    }, w1), p.append(w1, H), c) {
+    }, w1), p.append(w1, $), c) {
       const o0 = m2("div", "browser-history");
       o0.append(m2("span", "", f("History")), c), p.append(o0);
     }
@@ -58302,7 +58303,7 @@ function dF(t, e) {
       return v3.append(B1), R3.append(v3), v3.addEventListener("toggle", () => {
         v3.isConnected && (v3.open ? (x2.add(o0), x2.delete(`closed:${o0}`)) : (x2.delete(o0), x2.add(`closed:${o0}`)));
       }), v3;
-    }, q2 = c2("bodies", f`Bodies · ${F1.roots.length}`, H, !0), d2 = /* @__PURE__ */ new Map(), N2 = /* @__PURE__ */ new Map();
+    }, q2 = c2("bodies", f`Bodies · ${F1.roots.length}`, $, !0), d2 = /* @__PURE__ */ new Map(), N2 = /* @__PURE__ */ new Map();
     F1.roots.forEach((o0) => N2.set(F1.nodes[o0].name, (N2.get(F1.nodes[o0].name) ?? 0) + 1));
     const H0 = (o0, i3, R3 = !1) => {
       const l0 = F1.nodes[o0], v3 = m2("div", "node"), B1 = m2("div", "node-row");
@@ -58342,7 +58343,7 @@ function dF(t, e) {
     F1.roots.forEach((o0) => H0(o0, q2));
     const A0 = Object.values(F1.sketches ?? {});
     if (A0.length) {
-      const o0 = c2("sketches", f`Sketches · ${A0.length}`, H, !0);
+      const o0 = c2("sketches", f`Sketches · ${A0.length}`, $, !0);
       for (const i3 of A0) {
         if (i3.profile.kind === "path") {
           r1(f`Sketch path: ${i3.name}`, () => Y.open(i3.id), o0);
@@ -58354,7 +58355,7 @@ function dF(t, e) {
     }
     const w3 = el(F1);
     if (w3 || F1.drawings?.length) {
-      const o0 = F1.drawings ?? [], i3 = c2("drawings", f`Drawings · ${o0.length}`, H, !0);
+      const o0 = F1.drawings ?? [], i3 = c2("drawings", f`Drawings · ${o0.length}`, $, !0);
       w3 && r1("Create assembly drawing", () => T.open({ assembly: !0 }), i3), e.onExport && o0.length > 1 && r1("Export drawing set (PDF)", async () => {
         const R3 = i.state.document, l0 = o0.some((B1) => F4(B1.source)), v3 = l0 ? await t1(o0) : void 0;
         if (!M) {
@@ -58368,16 +58369,16 @@ function dF(t, e) {
     }
     const v5 = Object.entries(F1.parametric?.parameters ?? {});
     if (v5.length) {
-      const o0 = c2("parameters", f`Parameters · ${v5.length}`, H);
+      const o0 = c2("parameters", f`Parameters · ${v5.length}`, $);
       r1("Edit model parameters", () => O.open(), o0);
       for (const [i3, R3] of v5) {
         const l0 = m2("div", "browser-value");
         l0.append(m2("span", "", i3), m2("span", "", R3.expression)), o0.append(l0);
       }
     }
-    F1.roots.length || H.append(m2("p", "hint", f("No objects yet. Start with a box.")));
+    F1.roots.length || $.append(m2("p", "hint", f("No objects yet. Start with a box.")));
   }
-  function k2(H, w1, R1, F1, c2 = "number", q2 = "1") {
+  function k2($, w1, R1, F1, c2 = "number", q2 = "1") {
     const d2 = m2("label", "field");
     d2.append(m2("span", "field-name", f(w1)));
     const N2 = m2("input");
@@ -58387,14 +58388,14 @@ function dF(t, e) {
         const A0 = N2.closest(".shape-parameters")?.querySelector(`[aria-label="${f("Apply shape parameters")}"]`);
         N2.blur(), A0?.click(), J.canvas.focus({ preventScroll: !0 });
       }
-    }), d2.append(N2), H.append(d2), N2;
+    }), d2.append(N2), $.append(d2), N2;
   }
   function $2() {
     h.replaceChildren();
-    const H = m2("div", "panel-header");
-    if (H.append(m2("h2", "", f("Properties"))), r1("Close properties", () => {
+    const $ = m2("div", "panel-header");
+    if ($.append(m2("h2", "", f("Properties"))), r1("Close properties", () => {
       h.classList.remove("open"), h.classList.add("closed"), I.setAttribute("aria-pressed", "false");
-    }, H), h.append(H), Xm(i.state.document)) {
+    }, $), h.append($), Xm(i.state.document)) {
       const B1 = r1("Add controller and power", () => {
         if (b1.state.state !== "idle")
           throw new Error(f("Stop simulation before adding electronics."));
@@ -58467,7 +58468,7 @@ function dF(t, e) {
       } finally {
         D0.dispose();
       }
-    }, $), A0 && !q5(d2)) {
+    }, H), A0 && !q5(d2)) {
       const B1 = structuredClone(A0), H2 = !d2.generator && ["text", "name-tag"].includes(A0.preset);
       H2 && (B1.text = "");
       const z2 = m2("div", "shape-parameters");
@@ -58709,14 +58710,14 @@ function dF(t, e) {
   async function t0() {
     if (!(y || M || S === i.state.revision)) {
       for (y = !0, M1.hidden = !1, t.dataset.state = "building"; !M && S !== i.state.revision; ) {
-        const { document: H, revision: w1 } = i.state;
+        const { document: $, revision: w1 } = i.state;
         try {
-          const R1 = await Q.evaluate(H);
+          const R1 = await Q.evaluate($);
           if (M)
             break;
           if (w1 !== i.state.revision)
             continue;
-          x = R1, S = w1, C = "", N.hidden = !0, J.update(R1), f1.hidden = !!H.roots.length, w.textContent = H.roots.length === 1 ? f`${H.roots.length} body · ${R1.triangles.toLocaleString()} triangles · ${R1.volume.toLocaleString(void 0, { maximumFractionDigits: 1 })} mm³` : f`${H.roots.length} bodies · ${R1.triangles.toLocaleString()} triangles · ${R1.volume.toLocaleString(void 0, { maximumFractionDigits: 1 })} mm³`, q.textContent = V || (H.roots.length ? "Ready · mm · Z up" : "Add a solid to begin"), t.dataset.state = "ready", t.dataset.triangles = String(R1.triangles);
+          x = R1, S = w1, C = "", N.hidden = !0, J.update(R1), f1.hidden = !!$.roots.length, w.textContent = $.roots.length === 1 ? f`${$.roots.length} body · ${R1.triangles.toLocaleString()} triangles · ${R1.volume.toLocaleString(void 0, { maximumFractionDigits: 1 })} mm³` : f`${$.roots.length} bodies · ${R1.triangles.toLocaleString()} triangles · ${R1.volume.toLocaleString(void 0, { maximumFractionDigits: 1 })} mm³`, q.textContent = V || ($.roots.length ? "Ready · mm · Z up" : "Add a solid to begin"), t.dataset.state = "ready", t.dataset.triangles = String(R1.triangles);
           for (const F1 of j)
             F1.resolve(R1);
           j.clear();
@@ -58725,7 +58726,7 @@ function dF(t, e) {
             break;
           if (w1 !== i.state.revision)
             continue;
-          S = w1, x = null, C = R1 instanceof Error ? R1.message : String(R1), N.textContent = f`${C} Showing the previous geometry. Fix the edit or Undo.`, N.hidden = !1, t.dataset.state = "error", $(R1);
+          S = w1, x = null, C = R1 instanceof Error ? R1.message : String(R1), N.textContent = f`${C} Showing the previous geometry. Fix the edit or Undo.`, N.hidden = !1, t.dataset.state = "error", H(R1);
           for (const F1 of j)
             F1.reject(new Error(C));
           j.clear();
@@ -58735,41 +58736,41 @@ function dF(t, e) {
     }
   }
   function b0() {
-    const H = i.state, w1 = H.selection.filter((R1) => H.document.roots.includes(R1));
-    g0.disabled = !H.canUndo, K0.disabled = !H.canRedo, U3.disabled = T3.disabled = !w1.length, z0.disabled = F0.disabled = !w1.length, u2.disabled = !w1.length || y || S !== H.revision || !x, q0.disabled = z3.disabled = y || H.selection.length !== 1 || w1.length !== 1 || !!H.document.nodes[w1[0]]?.reference, Z1.forEach((R1) => {
+    const $ = i.state, w1 = $.selection.filter((R1) => $.document.roots.includes(R1));
+    g0.disabled = !$.canUndo, K0.disabled = !$.canRedo, U3.disabled = T3.disabled = !w1.length, z0.disabled = F0.disabled = !w1.length, u2.disabled = !w1.length || y || S !== $.revision || !x, q0.disabled = z3.disabled = y || $.selection.length !== 1 || w1.length !== 1 || !!$.document.nodes[w1[0]]?.reference, Z1.forEach((R1) => {
       R1.disabled = w1.length < 2;
-    }), C4(), m3.hidden = !H.selection.some((R1) => H.document.roots.includes(R1));
+    }), C4(), m3.hidden = !$.selection.some((R1) => $.document.roots.includes(R1));
     for (const R1 of m3.querySelectorAll("button"))
       R1.disabled = y;
-    B2(), W2.disabled = T2.disabled = $1 || !e.onExport || y || !x || !x.triangles || S !== H.revision, x1.refresh(), K(() => e.onCommandStateChange?.(C0()));
+    B2(), W2.disabled = T2.disabled = $1 || !e.onExport || y || !x || !x.triangles || S !== $.revision, x1.refresh(), K(() => e.onCommandStateChange?.(C0()));
   }
   function C0() {
-    const H = i.state, w1 = H.selection.filter((R1) => H.document.roots.includes(R1));
-    return { canUndo: H.canUndo, canRedo: H.canRedo, hasSelection: !!H.selection.length, canDelete: !!w1.length, canCombine: w1.length >= 2, canExport: !!e.onExport && !$1 && !y && !!x?.triangles && S === H.revision, hasBodies: !!H.document.roots.length, ready: !y && S === H.revision && !!x };
+    const $ = i.state, w1 = $.selection.filter((R1) => $.document.roots.includes(R1));
+    return { canUndo: $.canUndo, canRedo: $.canRedo, hasSelection: !!$.selection.length, canDelete: !!w1.length, canCombine: w1.length >= 2, canExport: !!e.onExport && !$1 && !y && !!x?.triangles && S === $.revision, hasBodies: !!$.document.roots.length, ready: !y && S === $.revision && !!x };
   }
-  const L = i.subscribe((H) => {
-    if (s2 && (H.document.id !== s2.projectId || H.revision !== s2.revision) && o2(), M)
+  const L = i.subscribe(($) => {
+    if (s2 && ($.document.id !== s2.projectId || $.revision !== s2.revision) && o2(), M)
       return;
-    H.revision !== k ? (k = H.revision, V = "", D2(), $2(), b0(), K(() => e.onDocumentChange?.(H.document, H.revision)), t0()) : (D2(), $2());
-    const w1 = JSON.stringify(H.selection);
-    w1 !== A && (A = w1, J.setSelection(H.selection), K(() => e.onSelectionChange?.(H.selection))), b0();
-  }), G = (H) => {
-    const w1 = H.composedPath().some((q2) => q2 instanceof HTMLInputElement || q2 instanceof HTMLTextAreaElement || q2 instanceof HTMLSelectElement), R1 = H.ctrlKey || H.metaKey, F1 = H.key.toLowerCase();
+    $.revision !== k ? (k = $.revision, V = "", D2(), $2(), b0(), K(() => e.onDocumentChange?.($.document, $.revision)), t0()) : (D2(), $2());
+    const w1 = JSON.stringify($.selection);
+    w1 !== A && (A = w1, J.setSelection($.selection), K(() => e.onSelectionChange?.($.selection))), b0();
+  }), G = ($) => {
+    const w1 = $.composedPath().some((q2) => q2 instanceof HTMLInputElement || q2 instanceof HTMLTextAreaElement || q2 instanceof HTMLSelectElement), R1 = $.ctrlKey || $.metaKey, F1 = $.key.toLowerCase();
     let c2;
-    if (R1 && H.shiftKey && F1 === "p" && !H.altKey) {
-      H.preventDefault(), H.stopPropagation(), x1.open();
+    if (R1 && $.shiftKey && F1 === "p" && !$.altKey) {
+      $.preventDefault(), $.stopPropagation(), x1.open();
       return;
     }
     if (!(w1 && F1 !== "escape" && !(R1 && F1 === "s"))) {
-      if (w1 && (F1 === "escape" || R1 && F1 === "s") && H.composedPath()[0].blur(), s2 && !R1 && ["h", "s"].includes(F1)) {
-        s2.role = F1 === "h" ? "hole" : "solid", J.setPlacementRole(s2.role), H.preventDefault(), H.stopPropagation();
+      if (w1 && (F1 === "escape" || R1 && F1 === "s") && $.composedPath()[0].blur(), s2 && !R1 && ["h", "s"].includes(F1)) {
+        s2.role = F1 === "h" ? "hole" : "solid", J.setPlacementRole(s2.role), $.preventDefault(), $.stopPropagation();
         return;
       }
       if (s2 && (F1 === "delete" || F1 === "backspace")) {
-        o2(), H.preventDefault(), H.stopPropagation();
+        o2(), $.preventDefault(), $.stopPropagation();
         return;
       }
-      R1 && F1 === "z" ? c2 = () => H.shiftKey ? i.redo() : i.undo() : R1 && F1 === "y" ? c2 = () => i.redo() : R1 && F1 === "s" ? c2 = () => e2("bcad") : R1 && F1 === "a" ? c2 = () => i.select(i.state.document.roots) : R1 && F1 === "g" ? c2 = () => H.shiftKey ? i.separate(i.state.selection[0]) : i.combine("union") : !R1 && F1 === "h" && i.state.selection.length ? c2 = () => i.setRole("hole") : !R1 && F1 === "s" && i.state.selection.length ? c2 = () => i.setRole("solid") : !R1 && F1 === "c" ? c2 = () => a2(!J.surfaceSnap) : !R1 && F1 === "d" ? c2 = () => J.dropSelection() : R1 && F1 === "d" ? c2 = () => i.duplicate() : R1 && F1 === "c" ? c2 = () => v1() : R1 && F1 === "x" ? c2 = () => v1(!0) : R1 && F1 === "v" ? c2 = () => D1() : R1 && F1 === "k" || !R1 && H.shiftKey && F1 === "a" ? c2 = () => v2.open(!0) : F1 === "delete" || F1 === "backspace" ? c2 = () => i.remove() : F1 === "escape" ? c2 = () => {
+      R1 && F1 === "z" ? c2 = () => $.shiftKey ? i.redo() : i.undo() : R1 && F1 === "y" ? c2 = () => i.redo() : R1 && F1 === "s" ? c2 = () => e2("bcad") : R1 && F1 === "a" ? c2 = () => i.select(i.state.document.roots) : R1 && F1 === "g" ? c2 = () => $.shiftKey ? i.separate(i.state.selection[0]) : i.combine("union") : !R1 && F1 === "h" && i.state.selection.length ? c2 = () => i.setRole("hole") : !R1 && F1 === "s" && i.state.selection.length ? c2 = () => i.setRole("solid") : !R1 && F1 === "c" ? c2 = () => a2(!J.surfaceSnap) : !R1 && F1 === "d" ? c2 = () => J.dropSelection() : R1 && F1 === "d" ? c2 = () => i.duplicate() : R1 && F1 === "c" ? c2 = () => v1() : R1 && F1 === "x" ? c2 = () => v1(!0) : R1 && F1 === "v" ? c2 = () => D1() : R1 && F1 === "k" || !R1 && $.shiftKey && F1 === "a" ? c2 = () => v2.open(!0) : F1 === "delete" || F1 === "backspace" ? c2 = () => i.remove() : F1 === "escape" ? c2 = () => {
         const q2 = P.find((N2) => N2.open);
         if (q2) {
           q2.open = !1, q2.querySelector("summary")?.focus();
@@ -58777,28 +58778,28 @@ function dF(t, e) {
         }
         const d2 = J.interacting;
         o2(), J.cancelTransform(), P.forEach((N2) => N2.open = !1), !d2 && (D !== "select" ? p2("select") : i.select([]));
-      } : F1 === "v" ? c2 = () => p2("select") : !R1 && F1 === "f" ? c2 = () => J.frame(void 0, !H.shiftKey) : !R1 && F1 === "o" ? c2 = () => T0.click() : !R1 && H.code === "NumpadDecimal" ? c2 = () => J.frame(void 0, !0) : !R1 && ["Numpad1", "Numpad3", "Numpad7"].includes(H.code) ? c2 = () => J.setView(H.code === "Numpad1" ? "front" : H.code === "Numpad3" ? "right" : "top") : !R1 && H.code === "Numpad5" ? c2 = () => T0.click() : !R1 && F1 === "home" ? c2 = () => J.frame() : !R1 && ["+", "=", "-", "_"].includes(F1) ? c2 = () => J.zoom(F1 === "-" || F1 === "_" ? 1 / 1.2 : 1.2) : !R1 && /^[1-6]$/.test(F1) ? c2 = () => {
-        J.setView(["front", "right", "top", "back", "left", "bottom"][Number(F1) - 1]), H.shiftKey && J.frame(void 0, !0);
+      } : F1 === "v" ? c2 = () => p2("select") : !R1 && F1 === "f" ? c2 = () => J.frame(void 0, !$.shiftKey) : !R1 && F1 === "o" ? c2 = () => T0.click() : !R1 && $.code === "NumpadDecimal" ? c2 = () => J.frame(void 0, !0) : !R1 && ["Numpad1", "Numpad3", "Numpad7"].includes($.code) ? c2 = () => J.setView($.code === "Numpad1" ? "front" : $.code === "Numpad3" ? "right" : "top") : !R1 && $.code === "Numpad5" ? c2 = () => T0.click() : !R1 && F1 === "home" ? c2 = () => J.frame() : !R1 && ["+", "=", "-", "_"].includes(F1) ? c2 = () => J.zoom(F1 === "-" || F1 === "_" ? 1 / 1.2 : 1.2) : !R1 && /^[1-6]$/.test(F1) ? c2 = () => {
+        J.setView(["front", "right", "top", "back", "left", "bottom"][Number(F1) - 1]), $.shiftKey && J.frame(void 0, !0);
       } : F1.startsWith("arrow") && !i.state.selection.length ? c2 = () => R1 ? J.pan(F1 === "arrowleft" ? -30 : F1 === "arrowright" ? 30 : 0, F1 === "arrowup" ? -30 : F1 === "arrowdown" ? 30 : 0) : J.orbit(F1 === "arrowleft" ? -Math.PI / 6 / 5e-3 : F1 === "arrowright" ? Math.PI / 6 / 5e-3 : 0, F1 === "arrowup" ? -Math.PI / 6 / 5e-3 : F1 === "arrowdown" ? Math.PI / 6 / 5e-3 : 0) : F1 === "w" ? c2 = () => p2("translate") : F1 === "e" ? c2 = () => p2("rotate") : F1 === "r" ? c2 = () => p2("scale") : F1.startsWith("arrow") && i.state.selection.length && (c2 = () => {
-        const q2 = H.shiftKey || J.fine, d2 = (z || 0.1) / (q2 ? 10 : 1);
-        J.nudge(F1 === "arrowleft" ? -d2 : F1 === "arrowright" ? d2 : 0, F1 === "arrowup" && !H.altKey ? d2 : F1 === "arrowdown" && !H.altKey ? -d2 : 0, H.altKey ? F1 === "arrowup" ? d2 : F1 === "arrowdown" ? -d2 : 0 : 0, q2);
-      }), c2 && (H.preventDefault(), H.stopPropagation(), K(c2));
+        const q2 = $.shiftKey || J.fine, d2 = (z || 0.1) / (q2 ? 10 : 1);
+        J.nudge(F1 === "arrowleft" ? -d2 : F1 === "arrowright" ? d2 : 0, F1 === "arrowup" && !$.altKey ? d2 : F1 === "arrowdown" && !$.altKey ? -d2 : 0, $.altKey ? F1 === "arrowup" ? d2 : F1 === "arrowdown" ? -d2 : 0 : 0, q2);
+      }), c2 && ($.preventDefault(), $.stopPropagation(), K(c2));
     }
   };
   r.addEventListener("keydown", G);
-  const e1 = (H) => {
-    const w1 = H.composedPath();
+  const e1 = ($) => {
+    const w1 = $.composedPath();
     for (const R1 of P)
       R1.open && !w1.includes(R1) && (R1.open = !1);
   };
   document.addEventListener("pointerdown", e1, !0), document.addEventListener("focusin", e1, !0);
   function a1() {
-    return M ? Promise.reject(new Error(f("Editor was disposed"))) : !y && S === i.state.revision ? x ? Promise.resolve(x) : Promise.reject(new Error(C)) : new Promise((H, w1) => {
-      j.add({ resolve: H, reject: w1 });
+    return M ? Promise.reject(new Error(f("Editor was disposed"))) : !y && S === i.state.revision ? x ? Promise.resolve(x) : Promise.reject(new Error(C)) : new Promise(($, w1) => {
+      j.add({ resolve: $, reject: w1 });
     });
   }
-  async function k1(H, w1) {
-    const R1 = /\.(stl|step|stp)$/i.exec(H)?.[1].toLowerCase(), F1 = d0(H.replace(/\.(stl|step|stp)$/i, ""));
+  async function k1($, w1) {
+    const R1 = /\.(stl|step|stp)$/i.exec($)?.[1].toLowerCase(), F1 = d0($.replace(/\.(stl|step|stp)$/i, ""));
     if (R1 === "stl") {
       const c2 = U2();
       F1.nodes[c2] = { ...sq(w1), id: c2, kind: "mesh", name: F1.title, color: "#eea52b", transform: G2() }, F1.roots = [c2];
@@ -58824,16 +58825,16 @@ function dF(t, e) {
       throw new Error(f("Geometry import accepts STL and STEP files."));
     return F1;
   }
-  async function W1(H, w1) {
-    const R1 = i.state.revision, F1 = /\.(stl|step|stp)$/i.test(H) ? await k1(H, w1) : e.decodeProject ? await e.decodeProject(w1) : zh(new TextDecoder().decode(w1));
+  async function W1($, w1) {
+    const R1 = i.state.revision, F1 = /\.(stl|step|stp)$/i.test($) ? await k1($, w1) : e.decodeProject ? await e.decodeProject(w1) : zh(new TextDecoder().decode(w1));
     if (await Q.evaluate(F1), !M) {
       if (i.state.revision !== R1)
         throw new Error(f("The model changed while opening the file. Try opening it again."));
       i.load(F1), await a1(), J.frame(), J.canvas.focus({ preventScroll: !0 });
     }
   }
-  async function C1(H, w1) {
-    const R1 = i.state.revision, F1 = await k1(H, w1), c2 = await Q.evaluate(F1);
+  async function C1($, w1) {
+    const R1 = i.state.revision, F1 = await k1($, w1), c2 = await Q.evaluate(F1);
     if (M)
       return;
     if (i.state.revision !== R1)
@@ -58842,7 +58843,7 @@ function dF(t, e) {
     i.insert(F1, [i.state.document.roots.length * 12, 0, -q2], { label: "Import geometry" }), await a1(), J.frame();
   }
   let y1 = "", g1 = 0;
-  async function v1(H = !1) {
+  async function v1($ = !1) {
     const w1 = i.state.revision, R1 = [...i.state.selection], F1 = i.fragment(R1);
     xl(F1);
     const c2 = JSON.stringify({ format: "brickwright-cad-clipboard", version: 1, document: F1 });
@@ -58852,15 +58853,15 @@ function dF(t, e) {
       await navigator.clipboard.writeText(c2);
     else
       throw new Error(f("Clipboard access is unavailable in this host"));
-    if (H) {
+    if ($) {
       if (i.state.revision !== w1)
         throw new Error(f("The model changed: objects were copied, but cutting was canceled"));
       i.remove(R1, "Cut objects");
     }
-    J.canvas.focus({ preventScroll: !0 }), q.textContent = H ? "Cut objects" : "Copied objects";
+    J.canvas.focus({ preventScroll: !0 }), q.textContent = $ ? "Cut objects" : "Copied objects";
   }
   async function D1() {
-    const H = i.state.revision, w1 = e.readClipboard ? await e.readClipboard() : navigator.clipboard?.readText ? await navigator.clipboard.readText() : null;
+    const $ = i.state.revision, w1 = e.readClipboard ? await e.readClipboard() : navigator.clipboard?.readText ? await navigator.clipboard.readText() : null;
     if (!w1 || new TextEncoder().encode(w1).length > 16 * 1024 * 1024)
       throw new Error(f("Clipboard does not contain a supported CAD selection"));
     let R1;
@@ -58874,13 +58875,13 @@ function dF(t, e) {
       throw new Error(f("Clipboard does not contain CAD objects"));
     const c2 = N4(F1.document);
     if (await Q.evaluate(c2), !M) {
-      if (i.state.revision !== H)
+      if (i.state.revision !== $)
         throw new Error(f("The model changed while pasting. Try pasting again."));
       g1 = w1 === y1 ? g1 + 1 : 1, y1 = w1, i.insert(c2, [10 * g1, 0, 0], { mergeParameters: !0, label: "Paste objects" }), await a1(), J.canvas.focus({ preventScroll: !0 }), J.frame();
     }
   }
-  async function H1(H) {
-    switch (H) {
+  async function H1($) {
+    switch ($) {
       case "new":
         await S0();
         break;
@@ -58949,7 +58950,7 @@ function dF(t, e) {
       case "back":
       case "left":
       case "bottom":
-        J.setView(H);
+        J.setView($);
         break;
       case "projection":
         T0.click();
@@ -59014,22 +59015,22 @@ function dF(t, e) {
       case "union":
       case "subtract":
       case "intersect":
-        i.combine(H);
+        i.combine($);
         break;
       default:
         throw new Error(f("Unknown editor command"));
     }
-    ["open", "import", "save", "export", "parameters", "shapes", "code", "sketch", "sketch-path", "revolve", "mirror", "pattern", "edit-mirror", "edit-pattern", "model-library", "robot-projects", "command-palette"].includes(H) || J.canvas.focus({ preventScroll: !0 });
+    ["open", "import", "save", "export", "parameters", "shapes", "code", "sketch", "sketch-path", "revolve", "mirror", "pattern", "edit-mirror", "edit-pattern", "model-library", "robot-projects", "command-palette"].includes($) || J.canvas.focus({ preventScroll: !0 });
   }
-  async function e2(H, w1, R1 = () => {
+  async function e2($, w1, R1 = () => {
   }) {
-    if (H === "bcad" && e.saveProject) {
+    if ($ === "bcad" && e.saveProject) {
       await e.saveProject();
       return;
     }
     if (!e.onExport)
       throw new Error(f("This host has not provided file export"));
-    if (H === "bcad") {
+    if ($ === "bcad") {
       const d2 = i.state.document.title.replace(/[\\/:*?"<>|\u0000-\u001f]/g, "-").trim() || "design";
       await e.onExport({ name: `${d2}.bcad`, bytes: new TextEncoder().encode(i.serialize()), mime: "application/vnd.brickwright.cad+json" });
       return;
@@ -59039,14 +59040,14 @@ function dF(t, e) {
         throw new Error(f("Editor was disposed"));
       if (R1(), i.state.revision !== F1)
         throw new Error(f("The model changed while exporting. Export again from the current model."));
-    }, q2 = await rP(i.state.document, H, () => a1(), c2, w1);
+    }, q2 = await rP(i.state.document, $, () => a1(), c2, w1);
     c2(), await e.onExport(q2);
   }
   return D2(), $2(), k = i.state.revision, A = JSON.stringify(i.state.selection), J.setSelection(i.state.selection), t0(), b0(), {
-    setColorMode(H) {
-      if (!["light", "dark"].includes(H))
+    setColorMode($) {
+      if (!["light", "dark"].includes($))
         throw new Error(f("Choose light or dark mode"));
-      t.dataset.cadColorMode = H, l1 || J.setAppearance(H === "light" ? { background: "#e7eef7", baseplate: "#cdd9e8" } : { background: "#111e29", baseplate: "#233644" });
+      t.dataset.cadColorMode = $, l1 || J.setAppearance($ === "light" ? { background: "#e7eef7", baseplate: "#cdd9e8" } : { background: "#111e29", baseplate: "#233644" });
     },
     get colorMode() {
       return t.dataset.cadColorMode;
@@ -59075,12 +59076,12 @@ function dF(t, e) {
     get resizeControls() {
       return J.resizeControls;
     },
-    setShapeBrowserLayout: (H) => v2.setLayout(H),
+    setShapeBrowserLayout: ($) => v2.setLayout($),
     get shapeBrowserLayout() {
       return v2.layout;
     },
-    setAppearance(H) {
-      J.setAppearance(H), l1 = !0;
+    setAppearance($) {
+      J.setAppearance($), l1 = !0;
     },
     get appearance() {
       return J.appearance;
@@ -59090,14 +59091,24 @@ function dF(t, e) {
     },
     export: e2,
     frame: J.frame,
-    artworkSketchTargets(H) {
-      return qP(i.state.document, H);
+    openSketchExtrusion($) {
+      if (M)
+        throw new Error(f("Editor was disposed"));
+      const w1 = i.state.document.sketches?.[$];
+      if (!w1)
+        throw new Error(f("Sketch does not exist"));
+      if (w1.profile.kind === "path")
+        throw new Error(f("Choose a closed sketch to extrude"));
+      s1.openExtrusion($);
     },
-    previewArtworkSketchRefresh(H, w1, R1) {
-      return bP(i, (F1) => Q.evaluate(F1), H, w1, () => !M, R1);
+    artworkSketchTargets($) {
+      return qP(i.state.document, $);
     },
-    setTransformReadoutVisible(H) {
-      i2.setVisible(H);
+    previewArtworkSketchRefresh($, w1, R1) {
+      return bP(i, (F1) => Q.evaluate(F1), $, w1, () => !M, R1);
+    },
+    setTransformReadoutVisible($) {
+      i2.setVisible($);
     },
     get transformReadoutVisible() {
       return i2.visible;
@@ -59105,14 +59116,14 @@ function dF(t, e) {
     focus() {
       b1.refresh(), J.canvas.focus();
     },
-    setStatus(H) {
-      M || (q.textContent = H);
+    setStatus($) {
+      M || (q.textContent = $);
     },
     dispose() {
       if (!M) {
         o2(), b1.dispose(), M = !0, E.abort(), Q3.disconnect(), L(), document.removeEventListener("pointerdown", e1, !0), document.removeEventListener("focusin", e1, !0), r.removeEventListener("keydown", G), v2.dispose(), R.dispose(), O.dispose(), s1.dispose(), Y.dispose(), X.dispose(), U.dispose(), x1.dispose(), T.dispose(), q1.dispose(), c1.dispose(), W.dispose(), i2.dispose(), J.dispose(), Q.dispose();
-        for (const H of j)
-          H.reject(new Error(f("Editor was disposed")));
+        for (const $ of j)
+          $.reject(new Error(f("Editor was disposed")));
         j.clear(), n && i.dispose(), s.replaceChildren(), e.toolbarContent?.remove(), t.removeAttribute("data-state"), t.removeAttribute("data-triangles");
       }
     }
@@ -59120,7 +59131,7 @@ function dF(t, e) {
 }
 let xr;
 async function pF() {
-  const [{ createBundledModelLibrary: t }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-D5QB9Gpu.js"), import("./model-library-cache-DiMFGzp9.js")]);
+  const [{ createBundledModelLibrary: t }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-P5tlDvja.js"), import("./model-library-cache-DiMFGzp9.js")]);
   return xr ?? (xr = t()), { ...xr, cache: e() };
 }
 function yF(t, e) {
