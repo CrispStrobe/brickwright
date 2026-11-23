@@ -106,7 +106,7 @@ const HISTORICAL_X86_CUI_V5_V7 = '91d8434a79d373cef2837c137ab356356f1a3b44';
 const HISTORICAL_X86_V8_CUI = '1bc233c9297e03abb9b7eb603e045b4e92b0bb40';
 const CURRENT_X86_CUI = 'a5860b9cf6cb0e7f652130ce987d51dc42651b8b';
 // CURRENT_X86_CUI retains the F9 epoch meaning; only these F10 values are live.
-const LIVE_X86_CUI = '540423d00e0e8b5c48c0c12fab0120204faba7cc';
+const LIVE_X86_CUI = 'df78c460214fd729f1ce7ce341c826fc203431f0';
 // The CUI the consumed, whole-file-sealed F10 controllers were shipped at. Like
 // HISTORICAL_X86_F10_SB3, it stays in their exact F10 map field after the live
 // pin moves on (to LIVE_X86_CUI); no other position may carry it.
