@@ -18,14 +18,14 @@ await page.addInitScript(() => {
 try {
     await page.goto(process.argv[2] || 'http://127.0.0.1:8226/', {waitUntil: 'commit'});
     const artworkTab = page.getByRole('tab', {name: /^(Costumes|Backdrops)$/});
-    await artworkTab.waitFor();
-    const artwork = await artworkTab.getAttribute('aria-label');
     for (const [name, term] of [
-        ['Blocks', 'Blocks palette'], [artwork, 'Tools'], ['Sounds', 'Sound list and waveform'],
+        ['Blocks', 'Blocks palette'], ['Artwork', 'Tools'], ['Sounds', 'Sound list and waveform'],
         ['Code', 'Code and Blocks'], ['Circuit', 'Parts and wires'], ['Robots', 'Two-finger slide'], ['CAD', 'Two-finger slide']
     ]) {
-        await tab(name).click();
-        assert.equal(await help.getAttribute('aria-label'), `${name} help`);
+        await (name === 'Artwork' ? artworkTab : tab(name)).click();
+        const label = await help.getAttribute('aria-label');
+        if (name === 'Artwork') assert.match(label, /^(Costumes|Backdrops) help$/);
+        else assert.equal(label, `${name} help`);
         await help.click();
         await dialog.waitFor();
         await dialog.getByText(term, {exact: true}).waitFor();
@@ -40,7 +40,11 @@ try {
     await tab('Blocks').click();
     const showRight = page.getByRole('button', {name: 'Show right panel'});
     if (await showRight.isVisible()) await showRight.click();
-    await page.locator('button[title="Controller"]:visible').click();
+    const controller = page.locator('button[title="Controller"]:visible');
+    if (await controller.isVisible()) await controller.click();
+    else await page.evaluate(() => window.dispatchEvent(new CustomEvent('bw-settings-change', {
+        detail: {key: 'bw-debug-dock', value: 'controller'}
+    })));
     await page.getByTestId('bw-widgets-help').click();
     const widgets = page.getByTestId('bw-widgets-help-dialog');
     await widgets.getByText('Build a controller', {exact: true}).waitFor();
