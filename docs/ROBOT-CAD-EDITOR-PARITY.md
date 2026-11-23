@@ -355,8 +355,8 @@ straight segment. A radius or a second tangent must agree with that curve.
 Choose **Arc tangent to arc** when the adjoining reference is another arc.
 Select the arc to adjust first. In a region, open **Region loop constraints**
 to edit the relations for an individual boundary or cutout. **Region loop
-positions** accepts named X/Y offsets between the first vertices of two
-outlines and translates the target as a whole. General edge relations across
+positions** accepts named X/Y offsets between first vertices or selected edge
+midpoints and translates the target as a whole. General edge relations across
 loops and exact STEP editing remain open.
 
 **Properties → Export drilling template (PDF)** produces a full-size A4
