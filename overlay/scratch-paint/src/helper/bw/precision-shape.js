@@ -85,6 +85,8 @@ export const insertPrecisionShape = draft => {
     }
     if (!geometry.points) shape.fillColor = DEFAULT_COLOR;
     if (draft.kind === 'arc') shape.data.bwPrecisionArc = true;
+    const sourceId = globalThis.crypto?.randomUUID?.();
+    if (sourceId) shape.data.bwPrecisionShapeId = sourceId;
     paper.project.deselectAll();
     layer.addChild(shape);
     shape.selected = true;

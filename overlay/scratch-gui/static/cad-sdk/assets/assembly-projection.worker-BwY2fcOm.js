@@ -33,7 +33,7 @@ const jt = {
   "Choose light or dark mode": "Hellen oder dunklen Modus wählen",
   "Loading models…": "Modelle werden geladen…",
   "Original source files": "Originale Quelldateien",
-  "Model source uses project version 6 through 39": "Modellquelltext verwendet Projektversion 6 bis 39",
+  "Model source uses project version 6 through 40": "Modellquelltext verwendet Projektversion 6 bis 40",
   "Unknown material preset": "Unbekannte Materialvorlage",
   "Initial velocity requires project version 8": "Anfangsgeschwindigkeit erfordert Projektversion 8",
   "Invalid initial body velocity": "Ungültige Anfangsgeschwindigkeit",

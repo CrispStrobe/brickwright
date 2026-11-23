@@ -1,4 +1,4 @@
-import { B as e, C as o, a as r, c as l, b as c, d as t, e as d, f as i, g as m, h as B, l as p, m as u, i as C, r as k, s as n, j as S, k as f } from "./sdk-D3OaUvRW.js";
+import { B as e, C as o, a as r, c as l, b as c, d as t, e as d, f as i, g as m, h as u, l as B, m as C, i as n, j as p, r as k, s as S, k as f, n as P } from "./sdk-DKRehc5Q.js";
 export {
   e as BLOCK_SHAPES,
   o as CadBlocksError,
@@ -9,12 +9,13 @@ export {
   d as createCadSession,
   i as createDocument,
   m as exportBlocksJSCAD,
-  B as exportBlocksOpenSCAD,
-  p as loadBundledModelLibrary,
-  u as mountCadEditor,
-  C as parseDocument,
+  u as exportBlocksOpenSCAD,
+  B as loadBundledModelLibrary,
+  C as matchCostumeProfile,
+  n as mountCadEditor,
+  p as parseDocument,
   k as readCostumeProfiles,
-  n as serializeDocument,
-  S as setLocale,
-  f as validateBlocksProgram
+  S as serializeDocument,
+  f as setLocale,
+  P as validateBlocksProgram
 };

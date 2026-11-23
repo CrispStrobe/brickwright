@@ -63,6 +63,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
     const [horizontal, setHorizontal] = React.useState('0'), [vertical, setVertical] = React.useState('0');
     const [saved, setSaved] = React.useState(false);
     const [refresh, setRefresh] = React.useState(null), [updateId, setUpdateId] = React.useState('');
+    const [needsRegionChoice, requireRegionChoice] = React.useState(false);
     const [review, setReview] = React.useState(null);
     const [linkArtwork, setLinkArtwork] = React.useState(false);
     const [approximate, setApproximate] = React.useState(false), [tolerance, setTolerance] = React.useState('0.2');
@@ -115,7 +116,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
         width, tolerance, maxGap]);
     React.useEffect(() => {
         setReview(null);
-    }, [selected, width, plane, anchor, horizontal, vertical, profileSource, approximate, tolerance, closeGaps, maxGap, updateId, linkArtwork]);
+    }, [selected, width, plane, anchor, horizontal, vertical, profileSource, approximate, tolerance, closeGaps, maxGap, updateId, linkArtwork, needsRegionChoice]);
     const costume = getCostume();
     if (!enabled || costume?.dataFormat !== 'svg') return null;
 
@@ -126,7 +127,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
         setSnapshot(null); setError(''); setSaved(false); select(0); setWidth('40'); setPlane('XY'); setBusy(true);
         setApproximate(false); setTolerance('0.2'); setCloseGaps(false); setMaxGap('0.5'); setProfileSource('fill');
         setAnchor('lower-left'); setHorizontal('0'); setVertical('0');
-        setRefresh(null); setUpdateId(''); setReview(null); setLinkArtwork(false);
+        setRefresh(null); setUpdateId(''); setReview(null); setLinkArtwork(false); requireRegionChoice(false);
         dialog.current.showModal();
         try {
             if (!getCadEnabled()) throw new Error(text('Enable CAD Editor in Settings → Workspace first.',
@@ -162,8 +163,13 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
         catch (e) { placementError = e.message; }
     }
     const markerRadius = profile && (centerlineOnly ? Math.max(...profile.size) : Math.min(...profile.size)) * 0.045;
-    const profileType = profile?.centerline ? 'path' : profile?.loops.length === 1 ? profile.loops[0].kind : 'region';
-    const matchingTarget = refresh?.kind === profileType && refresh.entries.find(entry => entry.id === updateId);
+    const profileType = profile?.centerline ? 'path' : profile?.loops.length === 1 ? profile.loops[0].kind :
+        profile ? 'region' : undefined;
+    const target = refresh?.entries.find(entry => entry.id === updateId);
+    const matchingTarget = target?.kind === profileType && target;
+    const conversionChanged = () => {
+        if (target?.artworkSourceId) requireRegionChoice(true);
+    };
     const assertArtworkCurrent = () => {
         if (!getCadEnabled() || getCadProjectGeneration() !== snapshot.generation ||
             getCostume() !== snapshot.costume || readSvg(snapshot.costume) !== snapshot.source) {
@@ -171,16 +177,41 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
                 'Das Projekt oder die Grafik wurde geändert. Öffne die Vorschau erneut.'));
         }
     };
-    const selectTarget = target => {
+    const selectTarget = entry => {
         setLinkArtwork(false);
-        setUpdateId(target.id);
-        setPlane(target.plane);
+        setUpdateId(entry.id);
+        setPlane(entry.plane);
         setAnchor('lower-left');
-        setHorizontal(String(target.min[0])); setVertical(String(target.min[1]));
-        setWidth(String(centerlineOnly ? Math.max(...target.size) : target.size[0]));
+        const clean = value => Number(value.toPrecision(12));
+        setHorizontal(String(clean(entry.min[0]))); setVertical(String(clean(entry.min[1])));
+        const widthMm = clean(entry.kind === 'path' ? Math.max(...entry.size) : entry.size[0]);
+        setWidth(String(widthMm));
+        requireRegionChoice(Boolean(entry.artworkSourceId));
+        const savedProfile = entry.artworkProfile;
+        if (!savedProfile) return;
+
+        const {mode, toleranceMm, maxGapMm} = savedProfile;
+        setProfileSource(mode);
+        setApproximate(toleranceMm !== undefined);
+        setTolerance(String(toleranceMm ?? .2));
+        setCloseGaps(maxGapMm !== undefined);
+        setMaxGap(String(maxGapMm ?? .5));
+        select(0);
+        try {
+            const {profiles} = snapshot.sdk.readCostumeProfiles(snapshot.source, {
+                widthMm, toleranceMm, maxGapMm, strokeOnly: mode === 'stroke', centerlineOnly: mode === 'centerline'
+            });
+            const index = snapshot.sdk.matchCostumeProfile(profiles, savedProfile);
+            if (index !== undefined) {
+                select(index);
+                requireRegionChoice(false);
+            }
+        } catch {
+            // The conversion panel displays invalid settings or unusable source geometry.
+        }
     };
     const chooseUpdate = async () => {
-        if (!profile || sending.current) return;
+        if (sending.current) return;
         sending.current = true;
         const {signal} = active.current;
         setBusy(true); setError(''); setReview(null);
@@ -189,11 +220,12 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
             if (signal.aborted) return;
             assertArtworkCurrent();
             const sourceId = getCostumeSourceId(snapshot.costume);
-            const entries = editor.artworkSketchTargets(profileType).filter(entry =>
-                !entry.artworkSourceId || entry.artworkSourceId === sourceId);
-            const linked = entries.filter(entry => entry.artworkSourceId === sourceId && sourceId);
-            setRefresh({editor, entries, kind: profileType, revision: editor.session.state.revision});
+            const entries = editor.artworkSketchTargets().filter(entry => entry.artworkSourceId ?
+                entry.artworkSourceId === sourceId : entry.kind === profileType);
+            const linked = entries.filter(entry => entry.artworkSourceId);
+            setRefresh({editor, entries, revision: editor.session.state.revision});
             setUpdateId('');
+            requireRegionChoice(false);
             if (linked.length === 1) selectTarget(linked[0]);
         } catch (e) {
             if (!signal.aborted) setError(e.message);
@@ -203,7 +235,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
         }
     };
     const previewUpdate = async () => {
-        if (!matchingTarget || !validWidth || placementError || sending.current) return;
+        if (!matchingTarget || needsRegionChoice || !validWidth || placementError || sending.current) return;
         sending.current = true;
         const {signal} = active.current;
         setBusy(true); setError(''); setReview(null);
@@ -215,7 +247,9 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
             const shape = snapshot.sdk.costumeSketchProfile(profile, Number(width), placement);
             const priorSourceId = getCostumeSourceId(snapshot.costume);
             const sourceId = linkArtwork ? proposeCostumeSourceId(snapshot.costume) : priorSourceId;
-            const result = await refresh.editor.previewArtworkSketchRefresh(updateId, shape, {sourceId, link: linkArtwork});
+            const result = await refresh.editor.previewArtworkSketchRefresh(updateId, shape, {
+                sourceId, link: linkArtwork, profile: profile.artworkProfile
+            });
             if (!signal.aborted) {
                 assertArtworkCurrent();
                 setReview({...result, newSourceId: linkArtwork && !priorSourceId ? sourceId : undefined});
@@ -228,7 +262,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
         }
     };
     const applyUpdate = () => {
-        if (!review || !matchingTarget || active.current?.signal.aborted) return;
+        if (!review || !matchingTarget || needsRegionChoice || active.current?.signal.aborted) return;
         try {
             assertArtworkCurrent();
             if (review.newSourceId && getCostumeSourceId(snapshot.costume))
@@ -253,7 +287,8 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
             assertArtworkCurrent();
             const name = String(costume.name || 'Artwork').trim().slice(0, 80) || 'Artwork';
             const sourceId = linkArtwork ? proposeCostumeSourceId(snapshot.costume) : undefined;
-            editor.session.addSketch(shape, {name, plane, artworkSourceId: sourceId});
+            editor.session.addSketch(shape, {name, plane, artworkSourceId: sourceId,
+                artworkProfile: sourceId ? profile.artworkProfile : undefined});
             if (sourceId) setCostumeSourceId(snapshot.costume, sourceId);
             setSaved(true);
         } catch (e) {
@@ -287,7 +322,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
                 {snapshot && <>
                     {(snapshot.strokes || snapshot.centerlines) && <label>{text('Profile source', 'Profilquelle')}
                         <select aria-label={text('Profile source', 'Profilquelle')} value={profileSource} disabled={busy} onChange={event => {
-                            setProfileSource(event.target.value); select(0);
+                            setProfileSource(event.target.value); select(0); conversionChanged();
                         }}>
                             <option value="fill">{text('Filled areas', 'Gefüllte Flächen')}</option>
                             {snapshot.strokes && <option value="stroke">{text('Strokes', 'Linienzüge')}</option>}
@@ -300,28 +335,28 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
                         'Offene Pfade übernehmen keine Linienstärke. Die Spannweite legt die größere Ausdehnung fest.')}</p>}
                     <label className={layout.checkbox}>
                         <input type="checkbox" checked={approximate} disabled={busy} onChange={event => {
-                            setApproximate(event.target.checked); select(0);
+                            setApproximate(event.target.checked); select(0); conversionChanged();
                         }} />
                         {text('Approximate curves', 'Kurven annähern')}
                     </label>
                     {profileSource === 'fill' && <label className={layout.checkbox}>
                         <input type="checkbox" checked={closeGaps} disabled={busy} onChange={event => {
-                            setCloseGaps(event.target.checked); select(0);
+                            setCloseGaps(event.target.checked); select(0); conversionChanged();
                         }} />
                         {text('Close small gaps', 'Kleine Lücken schließen')}
                     </label>}
                     <div className={layout.inputs}>
                         <label>{centerlineOnly ? text('Span (mm)', 'Spannweite (mm)') : text('Width (mm)', 'Breite (mm)')}
                             <input type="number" min=".01" max="100000" step="any" value={width} disabled={busy}
-                                aria-invalid={!validWidth} onChange={event => setWidth(event.target.value)} />
+                                aria-invalid={!validWidth} onChange={event => { setWidth(event.target.value); conversionChanged(); }} />
                         </label>
                         {approximate && <label>{text('Curve tolerance (mm)', 'Kurventoleranz (mm)')}
                             <input type="number" min=".01" max="10" step="any" value={tolerance} disabled={busy}
-                                aria-invalid={!validTolerance} onChange={event => setTolerance(event.target.value)} />
+                                aria-invalid={!validTolerance} onChange={event => { setTolerance(event.target.value); conversionChanged(); }} />
                         </label>}
                         {repairGaps && <label>{text('Maximum gap (mm)', 'Maximale Lücke (mm)')}
                             <input type="number" min=".01" max="10" step="any" value={maxGap} disabled={busy}
-                                aria-invalid={!validGap} onChange={event => setMaxGap(event.target.value)} />
+                                aria-invalid={!validGap} onChange={event => { setMaxGap(event.target.value); conversionChanged(); }} />
                         </label>}
                     </div>
                     {approximate && <p>{text('Smaller tolerance follows the curve more closely and adds more vertices.',
@@ -336,7 +371,11 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
                 </>}
                 {profile && <>
                     <label>{regionLabel}
-                        <select aria-label={regionLabel} value={regionIndex} disabled={busy} onChange={event => select(Number(event.target.value))}>
+                        <select aria-label={regionLabel} value={needsRegionChoice ? '' : regionIndex} disabled={busy}
+                            onChange={event => { select(Number(event.target.value)); requireRegionChoice(false); }}>
+                            {needsRegionChoice && <option value="" disabled>
+                                {text('Choose the source region…', 'Quellfläche auswählen…')}
+                            </option>}
                             {preview.profiles.map((region, index) => <option key={index} value={index}>
                                 {index + 1}{!centerlineOnly && ` · ${region.loops.length - 1} ${text('holes', 'Löcher')}`}
                                 {region.approximated ? text(' · approximated', ' · angenähert') : ''}
@@ -393,67 +432,70 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
                     {placementError && <p role="status">{placementError}</p>}
                     {validWidth && <p>{`${displayedSize} mm`}
                         {!placementError && ` · ${anchorLabel} ${plane[0]} ${placement.position[0]}, ${plane[1]} ${placement.position[1]} mm`}</p>}
-                    {refresh ? <>
-                        <label>{text('Target sketch', 'Zielskizze')}
-                            <select aria-label={text('Target sketch', 'Zielskizze')} value={matchingTarget ? updateId : ''} disabled={busy || refresh.kind !== profileType}
-                                onChange={event => {
-                                    const target = refresh.entries.find(entry => entry.id === event.target.value);
-                                    if (target) selectTarget(target);
-                                }}>
-                                <option value="" disabled>{text('Choose a sketch', 'Skizze auswählen')}</option>
-                                {refresh.entries.map((entry, index) => <option key={entry.id} value={entry.id}>
-                                    {`${index + 1}. ${entry.name} (${entry.plane})`}{entry.artworkSourceId ?
-                                        text(' · linked', ' · verknüpft') : ''}
-                                </option>)}
-                            </select>
-                        </label>
-                        {(!refresh.entries.length || refresh.kind !== profileType) && <p>{text(
-                            'Choose a compatible profile and open the target list again.',
-                            'Wähle ein kompatibles Profil und öffne die Zielliste erneut.')}</p>}
-                        {matchingTarget && !matchingTarget.artworkSourceId && <label className={layout.checkbox}>
-                            <input type="checkbox" checked={linkArtwork} disabled={busy}
-                                onChange={event => setLinkArtwork(event.target.checked)} />
-                            {text('Link to this costume or backdrop', 'Mit diesem Kostüm oder Bühnenbild verknüpfen')}
-                        </label>}
-                        {review && <div className={layout.review}>
-                            <h3>{text('Review sketch update', 'Skizzenaktualisierung prüfen')}</h3>
-                            <svg role="img" aria-label={text('Current and proposed sketch', 'Aktuelle und vorgeschlagene Skizze')}
-                                viewBox={review.viewBox}>
-                                <path className={layout.before} d={review.before} vectorEffect="non-scaling-stroke" />
-                                <path className={layout.after} d={review.after} vectorEffect="non-scaling-stroke" />
-                            </svg>
-                            <p>{text('Dashed line shows the current sketch. Solid line shows the update.',
-                                'Gestrichelt ist die aktuelle Skizze, durchgezogen die Aktualisierung.')}</p>
-                            <p>{review.affectedBodies.length ? `${text('Affected solids', 'Betroffene Körper')} (${review.affectedBodies.length})` :
-                                text('This sketch has no dependent solids.', 'Von dieser Skizze hängen keine Körper ab.')}</p>
-                            {review.affectedBodies.length > 0 && <ul>{review.affectedBodies.map((name, index) =>
-                                <li key={index}>{name}</li>)}</ul>}
-                        </div>}
-                        <div className={layout.updateActions}>
-                            <button type="button" className={buttonClass} disabled={busy}
-                                onClick={() => { setRefresh(null); setReview(null); setLinkArtwork(false); setError(''); }}>
-                                {text('Cancel update', 'Aktualisierung abbrechen')}
-                            </button>
-                            <button type="button" className={buttonClass} disabled={busy || !matchingTarget || !validWidth || Boolean(placementError)}
-                                onClick={review ? applyUpdate : previewUpdate}>
-                                {review ? text('Apply sketch update', 'Skizze aktualisieren') : text('Preview update', 'Vorschau aktualisieren')}
-                            </button>
-                        </div>
-                    </> : <>
-                        <label className={layout.checkbox}>
-                            <input type="checkbox" checked={linkArtwork} disabled={busy}
-                                onChange={event => setLinkArtwork(event.target.checked)} />
-                            {text('Link to this costume or backdrop', 'Mit diesem Kostüm oder Bühnenbild verknüpfen')}
-                        </label>
-                        <div className={layout.updateActions}>
-                            <button type="button" className={buttonClass} disabled={busy || !validWidth || Boolean(placementError)} onClick={send}>
-                                {text('Add editable sketch', 'Bearbeitbare Skizze hinzufügen')}
-                            </button>
-                            <button type="button" className={buttonClass} disabled={busy} onClick={chooseUpdate}>
-                                {text('Update an existing sketch…', 'Vorhandene Skizze aktualisieren…')}
-                            </button>
-                        </div>
-                    </>}
+                </>}
+                {refresh ? <>
+                    <label>{text('Target sketch', 'Zielskizze')}
+                        <select aria-label={text('Target sketch', 'Zielskizze')} value={updateId} disabled={busy}
+                            onChange={event => {
+                                const target = refresh.entries.find(entry => entry.id === event.target.value);
+                                if (target) selectTarget(target);
+                            }}>
+                            <option value="" disabled>{text('Choose a sketch', 'Skizze auswählen')}</option>
+                            {refresh.entries.map((entry, index) => <option key={entry.id} value={entry.id}>
+                                {`${index + 1}. ${entry.name} (${entry.plane})`}{entry.artworkSourceId ?
+                                    text(' · linked', ' · verknüpft') : ''}
+                            </option>)}
+                        </select>
+                    </label>
+                    {needsRegionChoice && <p role="status">{text(
+                        'Choose the source region before previewing the update.',
+                        'Wähle die Quellfläche aus, bevor du die Aktualisierung prüfst.')}</p>}
+                    {(!refresh.entries.length || (target && !matchingTarget && !needsRegionChoice)) && <p>{text(
+                        'Choose a profile of the same sketch type.',
+                        'Wähle ein Profil desselben Skizzentyps.')}</p>}
+                    {matchingTarget && !matchingTarget.artworkSourceId && <label className={layout.checkbox}>
+                        <input type="checkbox" checked={linkArtwork} disabled={busy}
+                            onChange={event => setLinkArtwork(event.target.checked)} />
+                        {text('Link to this costume or backdrop', 'Mit diesem Kostüm oder Bühnenbild verknüpfen')}
+                    </label>}
+                    {review && <div className={layout.review}>
+                        <h3>{text('Review sketch update', 'Skizzenaktualisierung prüfen')}</h3>
+                        <svg role="img" aria-label={text('Current and proposed sketch', 'Aktuelle und vorgeschlagene Skizze')}
+                            viewBox={review.viewBox}>
+                            <path className={layout.before} d={review.before} vectorEffect="non-scaling-stroke" />
+                            <path className={layout.after} d={review.after} vectorEffect="non-scaling-stroke" />
+                        </svg>
+                        <p>{text('Dashed line shows the current sketch. Solid line shows the update.',
+                            'Gestrichelt ist die aktuelle Skizze, durchgezogen die Aktualisierung.')}</p>
+                        <p>{review.affectedBodies.length ? `${text('Affected solids', 'Betroffene Körper')} (${review.affectedBodies.length})` :
+                            text('This sketch has no dependent solids.', 'Von dieser Skizze hängen keine Körper ab.')}</p>
+                        {review.affectedBodies.length > 0 && <ul>{review.affectedBodies.map((name, index) =>
+                            <li key={index}>{name}</li>)}</ul>}
+                    </div>}
+                    <div className={layout.updateActions}>
+                        <button type="button" className={buttonClass} disabled={busy}
+                            onClick={() => { setRefresh(null); setReview(null); setLinkArtwork(false); requireRegionChoice(false); setError(''); }}>
+                            {text('Cancel update', 'Aktualisierung abbrechen')}
+                        </button>
+                        <button type="button" className={buttonClass} disabled={busy || !matchingTarget || needsRegionChoice || !validWidth || Boolean(placementError)}
+                            onClick={review ? applyUpdate : previewUpdate}>
+                            {review ? text('Apply sketch update', 'Skizze aktualisieren') : text('Preview update', 'Vorschau aktualisieren')}
+                        </button>
+                    </div>
+                </> : (profile || snapshot && getCostumeSourceId(snapshot.costume)) && <>
+                    {profile && <label className={layout.checkbox}>
+                        <input type="checkbox" checked={linkArtwork} disabled={busy}
+                            onChange={event => setLinkArtwork(event.target.checked)} />
+                        {text('Link to this costume or backdrop', 'Mit diesem Kostüm oder Bühnenbild verknüpfen')}
+                    </label>}
+                    <div className={layout.updateActions}>
+                        {profile && <button type="button" className={buttonClass} disabled={busy || !validWidth || Boolean(placementError)} onClick={send}>
+                            {text('Add editable sketch', 'Bearbeitbare Skizze hinzufügen')}
+                        </button>}
+                        <button type="button" className={buttonClass} disabled={busy} onClick={chooseUpdate}>
+                            {text('Update an existing sketch…', 'Vorhandene Skizze aktualisieren…')}
+                        </button>
+                    </div>
                 </>}
             </>}
         </dialog>

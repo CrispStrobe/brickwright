@@ -19,11 +19,12 @@ const createPage = async () => {
 };
 const page = await createPage();
 let activePage = page;
-const changeArtwork = (height,index=0) => page.evaluate(({height,index}) => {
+const changeArtwork = (height,index=0,options={},target=page) => target.evaluate(({height,index,reordered,duplicate}) => {
     const vm = window.__brickwrightStore.getState().scratchGui.vm;
-    vm.updateSvg(index,`<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><path d="M0 0H40V${height}H0Z"/></svg>`,0,0);
+    const other = reordered ? `<path id="${duplicate ? 'panel' : 'other'}" d="M46 0H54V12H46Z"/>` : '';
+    vm.updateSvg(index,`<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60">${other}<path id="panel" d="M0 0H40V${height}H0Z"/></svg>`,0,0);
     return vm.editingTarget.getCostumes()[index].assetId;
-},{height,index});
+},{height,index,...options});
 const model = target => target.evaluate(async () => {
     const {editor} = window.__bwCad;
     const body = (await editor.whenIdle()).bodies[0];
@@ -58,6 +59,7 @@ try {
     await extrusion.waitFor({state:'hidden'});
     const before = await model(page);
     assert.match(before.sketch.artworkSourceId,/^[0-9a-f-]{36}$/);
+    assert.equal(before.sketch.artworkProfile.sourceKey,'svg:panel');
     assert.equal(Math.round(before.volume),8000);
     assert.deepEqual(bounds(before.bounds),[[0,10,-20],[10,50,0]]);
 
@@ -67,7 +69,7 @@ try {
         vm.renameCostume(0,'Linked source');
         vm.reorderCostume(vm.editingTarget.id,0,1);
     });
-    const updatedAsset = await changeArtwork(30,1);
+    const updatedAsset = await changeArtwork(30,1,{reordered:true});
     await page.getByText('Linked source',{exact:true}).filter({visible:true}).first().click();
     await page.waitForFunction(() => {
         const vm = window.__brickwrightStore.getState().scratchGui.vm;
@@ -75,12 +77,15 @@ try {
     });
     assert.deepEqual(await model(page),before);
     await open();
-    await dialog.getByText(/40 × 30 mm/).waitFor();
+    await dialog.getByLabel('Region',{exact:true}).waitFor();
+    assert.equal(await dialog.getByLabel('Region',{exact:true}).inputValue(),'0');
     const review = async () => {
         await dialog.getByRole('button',{name:'Update an existing sketch…',exact:true}).click();
         const target = dialog.getByLabel('Target sketch',{exact:true});
         await target.locator('option:checked',{hasText:'linked'}).waitFor({state:'attached'});
         assert.equal(await target.inputValue(),before.sketch.id);
+        assert.equal(await dialog.getByLabel('Region',{exact:true}).inputValue(),'1');
+        await dialog.getByText(/40 × 30 mm/).waitFor();
         assert.equal(await dialog.getByLabel('Sketch plane',{exact:true}).inputValue(),'YZ');
         assert.equal(await dialog.getByLabel('Sketch plane',{exact:true}).isDisabled(),true);
         await dialog.getByRole('button',{name:'Preview update',exact:true}).click();
@@ -145,7 +150,20 @@ try {
     assert.equal(await reopenedTarget.inputValue(),after.sketch.id);
     await reopenedDialog.getByRole('button',{name:'Cancel update',exact:true}).click();
     assert.equal(Math.round((await model(reopened)).volume),12000);
-    console.log('PASS persistent costume link, rename/reorder, explicit refresh, Undo/Redo, and SB3 reopen');
+    await reopenedDialog.getByRole('button',{name:'Close',exact:true}).click();
+    await changeArtwork(34,1,{reordered:true,duplicate:true},reopened);
+    await reopened.getByTestId('bw-costume-precision').click();
+    await reopenedDialog.getByRole('button',{name:'Update an existing sketch…',exact:true}).click();
+    await reopenedDialog.getByText('Choose the source region before previewing the update.',{exact:true}).waitFor();
+    const region = reopenedDialog.getByLabel('Region',{exact:true});
+    assert.equal(await region.inputValue(),'');
+    const preview = reopenedDialog.getByRole('button',{name:'Preview update',exact:true});
+    assert.equal(await preview.isDisabled(),true);
+    await region.selectOption({value:'1'});
+    await preview.click();
+    await reopenedDialog.getByRole('img',{name:'Current and proposed sketch',exact:true}).waitFor();
+    assert.equal(Math.round((await model(reopened)).volume),12000);
+    console.log('PASS persistent region link, rename/reorder, explicit refresh, Undo/Redo, SB3 reopen, and duplicate-ID review');
 } catch (error) {
     await activePage.screenshot({path:'/tmp/bw-costume-refresh-failure.png'}).catch(() => {});
     throw error;

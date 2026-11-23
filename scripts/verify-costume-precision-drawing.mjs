@@ -164,14 +164,23 @@ try {
     await handoff.locator('path[d*=" A "]').waitFor();
     assert.equal((await pathPreview.getAttribute('d')).split(' A ').length,5);
     await handoff.getByLabel('Span (mm)',{exact:true}).fill('88');
+    await handoff.getByRole('checkbox',{name:'Link to this costume or backdrop',exact:true}).check();
     await handoff.getByRole('button',{name:'Add editable sketch',exact:true}).click();
     await handoff.getByText(/Sketch added to CAD/).waitFor();
     const centerline = await page.evaluate(() => Object.values(window.__bwCad.editor.session.state.document.sketches).at(-1));
     assert.equal(centerline.profile.kind,'path');
+    assert.match(centerline.artworkProfile.sourceKey,/^paper:[0-9a-f-]{36}$/);
     assert.equal(centerline.profile.points.length,5);
     assert.equal(centerline.profile.bulges.at(-1),0);
     assert.ok(centerline.profile.bulges.slice(0,-1).every(value => value > 0));
     assert.equal((await artwork()).assetId,authored.assetId);
+    await handoff.getByRole('button',{name:'Close',exact:true}).click();
+    await page.getByTestId('bw-costume-precision').click();
+    await handoff.getByRole('button',{name:'Update an existing sketch…',exact:true}).click();
+    await handoff.getByLabel('Target sketch',{exact:true}).locator('option:checked',{hasText:'linked'}).waitFor({state:'attached'});
+    assert.equal(await handoff.getByLabel('Profile source',{exact:true}).inputValue(),'centerline');
+    assert.equal(await pathChoice.inputValue(),'1');
+    assert.equal(await handoff.getByLabel('Span (mm)',{exact:true}).inputValue(),'88');
     await handoff.getByRole('button',{name:'Close',exact:true}).click();
     await togglePrecision('0');
     await summary.waitFor({state:'detached'});
@@ -201,8 +210,8 @@ try {
     await restored.getByRole('tab',{name:'CAD',exact:true}).click();
     await restored.getByRole('button',{name:`Sketch path: ${centerline.name}`,exact:true}).click();
     await restored.getByRole('dialog',{name:'Sketch path',exact:true}).waitFor();
-    const savedPath = await restored.evaluate(id => window.__bwCad.editor.session.state.document.sketches[id].profile,centerline.id);
-    assert.deepEqual(savedPath,centerline.profile);
+    const savedSketch = await restored.evaluate(id => window.__bwCad.editor.session.state.document.sketches[id],centerline.id);
+    assert.deepEqual(savedSketch,centerline);
     console.log('PASS precision drawing, undo/redo, native CAD centerlines and stroke outlines, and SB3 reopen');
 } catch (error) {
     await page.screenshot({path:'/tmp/bw-costume-precision-drawing-failure.png'}).catch(() => {});
