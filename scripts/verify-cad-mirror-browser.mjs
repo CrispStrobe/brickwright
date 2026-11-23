@@ -43,6 +43,7 @@ try{
  await sketch.waitFor({state:'hidden'});
  const source=await body(page);
  assert.deepEqual(source.bounds.min,[5,0,0]);
+ await page.locator('summary[aria-label="Edit menu"]').tap();
  await page.getByRole('button',{name:'Mirror',exact:true}).tap();
  const create=page.getByRole('dialog',{name:'Mirror body'});
  await create.getByLabel('Plane offset (mm)').fill('20');

@@ -506,3 +506,8 @@ The starting values from §6 were kept: every gate reading lies well inside them
   a pump stroke adding p_atm·A·L);
   `test/bw-sim-gearbox-program.test.mjs` runs the example (out 48 mm, back to 0); browser: editor
   gate step 7 (`--part=editor`), and the example run from the pane (`--part=examples`, 8d).
+
+The question-mark button beside the editor tabs opens help for the current
+workspace. Robots and CAD show the active two-finger and secondary-drag
+mappings. The Robots Build shortcut sheet still covers part placement and
+connections in detail.

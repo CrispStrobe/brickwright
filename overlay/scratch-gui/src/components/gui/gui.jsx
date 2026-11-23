@@ -9,6 +9,7 @@ import {defineMessages, FormattedMessage, injectIntl, intlShape} from 'react-int
 import {connect} from 'react-redux';
 import MediaQuery from 'react-responsive';
 import {Tab, Tabs, TabList, TabPanel} from 'react-tabs';
+import EditorHelp from './editor-help.jsx';
 import CircuitTab from '../tw-pseudocode/circuit-tab.jsx';
 import {installCircuitCadBridge} from '../../lib/bw-cad-circuit/bridge.js';
 import {installCadProgramAPI, CAD_OPEN_EVENT} from '../../lib/bw-cad-program.js';
@@ -944,6 +945,22 @@ const GUIComponent = props => {
         const middleSize = paneLayout?.middle?.size || 'l';
         const rightSize = paneLayout?.right?.size || 'm';
         const middleContent = paneLayout?.middle?.upper || 'blocks-canvas';
+        const helpEditor = [
+            middleContent === 'code' ? 'Code' : 'Blocks',
+            targetIsStage ? 'Backdrops' : 'Costumes',
+            'Sounds',
+            middleContent === 'code' ? 'Blocks' : 'Code',
+            'Circuit',
+            ...(showFpga ? ['FPGA'] : []),
+            'Robots',
+            ...(showCad ? ['CAD'] : [])
+        ][activeTabIndex] || 'Blocks';
+        const helpLabels = {
+            Blocks: ['blocksTab','Blocks'], Costumes: ['costumesTab','Costumes'], Backdrops: ['backdropsTab','Backdrops'],
+            Sounds: ['soundsTab','Sounds'], Code: ['codeTab','Code'], Circuit: ['circuitTab','Circuit'],
+            FPGA: ['fpgaTab','FPGA'], Robots: ['robotLabTab','Robots'], CAD: ['cadTab','CAD']
+        };
+        const [helpLabelId, helpLabelDefault] = helpLabels[helpEditor];
         const paneStyles = computePaneStyles(leftSize, middleSize, rightSize);
 
         // Full screen for the RIGHT-PANE docks (controller / micro:bit): make the
@@ -1122,6 +1139,8 @@ const GUIComponent = props => {
                             >
                                 <TabList className={tabClassNames.tabList} data-bw-editor-tabs="">
                                     <ChromeToggle className={chromeStyles.chromeToggle} hidden={stageFullScreen} />
+                                    <EditorHelp inTabList editor={helpEditor} locale={intl.locale}
+                                        label={intl.formatMessage({id: `gui.gui.${helpLabelId}`, defaultMessage: helpLabelDefault})} />
                                     <Tab className={tabClassNames.tab}
                                         title={intl.formatMessage({id: 'gui.gui.blocksTab', defaultMessage: 'Blocks'})}
                                         aria-label={intl.formatMessage({id: 'gui.gui.blocksTab', defaultMessage: 'Blocks'})}

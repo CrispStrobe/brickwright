@@ -45,6 +45,7 @@ try{
  const source=await body(page);
  assert.deepEqual(source.bounds.min,[12,0,0]);
 
+ await page.locator('summary[aria-label="Edit menu"]').tap();
  await page.getByRole('button',{name:'Pattern',exact:true}).tap();
  const create=page.getByRole('dialog',{name:'Pattern body'});
  await create.getByLabel('Total instances').fill('3');

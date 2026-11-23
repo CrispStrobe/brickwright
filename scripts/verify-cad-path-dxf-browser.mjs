@@ -44,6 +44,7 @@ const input=Buffer.from([
 
 try{
  const page=await open();
+ await page.locator('summary[aria-label="More sketch tools"]').tap();
  await page.getByRole('button',{name:'Sketch path',exact:true}).tap();
  const path=page.getByRole('dialog',{name:'Sketch path',exact:true});
  await path.getByText('DXF or DWG path',{exact:true}).tap();

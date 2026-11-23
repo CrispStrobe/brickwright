@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Exercise navigation and settings through the embedded editors' public UI.
 import assert from 'node:assert/strict';
-import {chromium} from 'playwright';
+import {chromium, firefox} from 'playwright';
 
-const browser = await chromium.launch({
+const engine = process.env.BW_NAV_BROWSER === 'firefox' ? firefox : chromium;
+const browser = await engine.launch({
     executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || undefined,
     headless: true
 });
+console.log(`Checking ${engine.name()} ${browser.version()}`);
 const page = await browser.newPage({viewport: {width: 1440, height: 1000}, locale: 'en-US', serviceWorkers: 'block'});
 page.setDefaultTimeout(90000);
 const errors = [];
@@ -55,6 +57,7 @@ const drag = async canvas => {
 const transition = async (canvas, makeInput, expected) => {
     const before = await position(canvas);
     await makeInput(canvas);
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)));
     const after = await position(canvas);
     const change = difference(direction(before), direction(after));
     const zoom = Math.abs(after.distance / before.distance - 1);

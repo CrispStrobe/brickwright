@@ -1025,6 +1025,7 @@ const Gt = {
   "Close the sketch path before offsetting its profile.": "Schließe den Skizzenpfad vor dem Versetzen des Profils.",
   "The trim line must cross the open path.": "Die Schnittlinie muss den offenen Pfad kreuzen.",
   "This trim would leave separate paths. Choose a different line or side.": "Dieser Schnitt würde getrennte Pfade erzeugen. Wähle eine andere Linie oder Seite.",
+  "More sketch tools": "Weitere Skizzenwerkzeuge",
   "Sketch path": "Skizzenpfad",
   path: "Pfad",
   "Close path editor": "Pfadeditor schließen",

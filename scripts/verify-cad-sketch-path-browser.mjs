@@ -29,6 +29,7 @@ const file=page=>page.getByTestId('bw-file-menu-trigger');
 
 try{
  const page=await open();
+ await page.locator('summary[aria-label="More sketch tools"]').tap();
  await page.getByRole('button',{name:'Sketch path',exact:true}).tap();
  const dialog=page.getByRole('dialog',{name:'Sketch path',exact:true});
  await dialog.getByLabel('Sketch name').fill('Open arc');

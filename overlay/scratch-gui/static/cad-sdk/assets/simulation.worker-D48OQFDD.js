@@ -1028,6 +1028,7 @@ const f6 = {
   "Close the sketch path before offsetting its profile.": "Schließe den Skizzenpfad vor dem Versetzen des Profils.",
   "The trim line must cross the open path.": "Die Schnittlinie muss den offenen Pfad kreuzen.",
   "This trim would leave separate paths. Choose a different line or side.": "Dieser Schnitt würde getrennte Pfade erzeugen. Wähle eine andere Linie oder Seite.",
+  "More sketch tools": "Weitere Skizzenwerkzeuge",
   "Sketch path": "Skizzenpfad",
   path: "Pfad",
   "Close path editor": "Pfadeditor schließen",
@@ -11379,7 +11380,7 @@ async function u7(A, g, I, e = {}) {
     }
   if ([...I.values()].reduce((x, G) => x + G.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = e.J ?? await (b4 ?? (b4 = import("./jolt-physics.wasm-compat-BgHJcZ2U.js").then((x) => x.default()))), Q = new i.JoltSettings();
+  const i = e.J ?? await (b4 ?? (b4 = import("./jolt-physics.wasm-compat-B_-M2i0e.js").then((x) => x.default()))), Q = new i.JoltSettings();
   Q.mMaxBodies = 512, Q.mMaxBodyPairs = Math.max(1024, B.length * B.length), Q.mMaxContactConstraints = 8192;
   const s = new i.ObjectLayerPairFilterTable(2);
   s.EnableCollision(0, 1), s.EnableCollision(1, 1);
