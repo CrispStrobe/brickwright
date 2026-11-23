@@ -2,7 +2,7 @@
   "format": "brickwright-cad-sdk",
   "version": 1,
   "repository": "https://github.com/CrispStrobe/brickwright-cad",
-  "commit": "5e3e551bf20d3bbd11feb84609dd7936b056b9ea",
+  "commit": "2796653bc47ca700ffd6867a7fef808d89749198",
   "dirty": false,
   "entry": "sdk.js",
   "wasm": "cad-assets/manifold.wasm",
@@ -11,17 +11,17 @@
     "NOTICE.txt": "f9f188b12174c9a13019588411919f205ec7fd951346161bd80f964b6d7616a7",
     "adafruit-preview-data-BWhkbkqw.js": "c37d14c1f115a63599555fd4193b2df1f9426a9b4cab8962282d6794ba6e11b6",
     "assets/assembly-projection.worker-CVTxQ0aC.js": "2a7cfba5a27b94fed4d5d2c0ea511c007964a969097b3d8b2a01415486a1cd74",
-    "assets/geometry.worker-tQuc4wyD.js": "b5985b004f9689523a5647d2654bf9551185d8498d0667ff88c79d49c29ae302",
-    "assets/jolt-physics.wasm-compat-LoSIKuC3.js": "721cd44471c3815a0d4d70f755696d14b21b4dcf6dc3a0f39d5c9c5fb20dfc27",
+    "assets/geometry.worker-DEfUjLjf.js": "753c96826d3cd7c2b2aaa0f7d4fdfe4e16321a283a6db1baf96f2f5dc6339326",
+    "assets/jolt-physics.wasm-compat-1GCYFS5Y.js": "3cf5f89b5303eea196c949984d663c5595fff558e2888b1b5d2380a2ee85485c",
     "assets/outline-constraints.worker-Dvh6l-4Y.js": "e135ab9ab0e264bf62f20a027c3a21cde3225860bae1ccb124215df48b8e9528",
-    "assets/simulation.worker-BmUFg1bY.js": "7e9b6bff4762959022fa563c84446fa205862d1f12fa6032314a1eb760f29563",
+    "assets/simulation.worker-Ds4rIVNy.js": "ab9e8c50627f59f05e8e9bc6e597f292d3568555daff4232c8ad7067b1b7b399",
     "assets/sketch-constraints.dart-qnZmeGSY.js": "c9fc8bbe2f07d7eec6b548252c0db33ba93e3d4a69c494d294a6f302c0743814",
     "assets/sketch-dwg.worker-BTFOHOzj.js": "7420237ccdf04d96b98acbe342b76820ffb6db774de4e3a2d8fbb7ab255ce1ac",
     "assets/step-import.worker-BXyahCPA.js": "c801ad85e2cd4ddcde0c54bfbcb45721b69e30f4aeb8f2ff76e76db75a73560b",
     "cad-assets/manifold.wasm": "73e3b419ad31294f6b1cc478173944e50efc4a34bfdeeff0107bdfc12975f11c",
     "model-library-cache-DiMFGzp9.js": "75dc4ad7999b4571b227f1c675ca00af698fcc886dc73e98dd4c0eb2604e2b20",
-    "model-library-local-DB7HYpso.js": "ecefb67b2c42fb102051f9dad0376b2d6e66bc2ad9c16cc9f84b55ee95a6ccbd",
-    "sdk-f2-CG7S-.js": "c605c941fae018f8df5e5895633c496e5f265dca016f8033b8232d1130f542f1",
-    "sdk.js": "15abc424bd19b841e1ae23f85e44300f24609a738d478f2b82c3a536a0a2cd0d"
+    "model-library-local-mJq4yU_O.js": "5758efeba466a1f7be2280b0c3fcba0139820da9a8060fdd5f1e3560895d6c87",
+    "sdk-Dl90bR2w.js": "33898deaa5ea96cf3923015ce4fd1fc8f66ae51b3e0788a316179a5642d589c4",
+    "sdk.js": "70f19b0a743fd0fecfd5a942c220dc7c6efb1b04f28c1a6d7a9a10dc1df32b6a"
   }
 }
