@@ -106,7 +106,7 @@ const HISTORICAL_X86_CUI_V5_V7 = '91d8434a79d373cef2837c137ab356356f1a3b44';
 const HISTORICAL_X86_V8_CUI = '1bc233c9297e03abb9b7eb603e045b4e92b0bb40';
 const CURRENT_X86_CUI = 'a5860b9cf6cb0e7f652130ce987d51dc42651b8b';
 // CURRENT_X86_CUI retains the F9 epoch meaning; only these F10 values are live.
-const LIVE_X86_CUI = '0ec68b3de0b8dd788475143ff4dcb28887c03a69';
+const LIVE_X86_CUI = '540423d00e0e8b5c48c0c12fab0120204faba7cc';
 // The CUI the consumed, whole-file-sealed F10 controllers were shipped at. Like
 // HISTORICAL_X86_F10_SB3, it stays in their exact F10 map field after the live
 // pin moves on (to LIVE_X86_CUI); no other position may carry it.
@@ -120,7 +120,7 @@ const HISTORICAL_X86_CURRENT_BOARD = '836867513c3e7fac420ddaa32c17e1c7b6d3e513';
 // the reviewed bodies (historicalSb3Spans) and this declaration may carry.
 const HISTORICAL_X86_SB3 = '1cbaeed325f5a890e43b78a4211acae8f801f2d2';
 // The live supplier identity follows the current pin, separate from consumed F10.
-const LIVE_X86_SB3 = 'fc0e1c94feba8a4c360f80461c3d25fcbbe4e766';
+const LIVE_X86_SB3 = '01e1280652a95a147a24b00cf72a7dfbc04702d9';
 // Consumed F10 controllers remain whole-file sealed at this shipped epoch.
 const HISTORICAL_X86_F10_SB3 = '8e53c1621a1b9eeb42e0565f987c4c47ab598961';
 const HISTORICAL_X86_FINITE_V7_PINS = "FINITE_V7_PINS = {'bw-board':'" + HISTORICAL_X86_CURRENT_BOARD + "','bw-circuit-ui':'" + HISTORICAL_X86_V8_CUI + "','sb3-creator':'" + HISTORICAL_X86_SB3 + "'}";
