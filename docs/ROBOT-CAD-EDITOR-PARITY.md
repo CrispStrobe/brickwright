@@ -300,14 +300,17 @@ lightweight polylines, or closed chains of native 2D lines and arcs. Edit the co
 the extrusion. Declared inches, feet, millimetres, centimetres and metres
 convert to millimetres. A unitless
 file requires explicit opt-in to millimetres. The import and subsequent edits
-use the shared retained sketch model and history. Region circle centers and
+use the shared retained sketch model and history. For a file with multiple
+layers, check the perimeter and any hole layers you need, then choose
+**Import selected layers**. The Sketch path importer uses the same picker
+to isolate a guide from other geometry. Region circle centers and
 radii can use named dimensions, and DXF export retains entity layer names and signed polyline bulges.
 Polygon vertices can be dragged in the preview. The coordinates also accept
 relative offsets such as `@40, 0`. For exact placement, choose up to two sketches
 on the same plane as snap references. The preview highlights endpoints,
 midpoints, centers and intersections. Turn on **Edit edge curves** to drag
 an edge midpoint and set its curvature while keeping the endpoints fixed.
-Coupled sketch constraints, DXF layer filtering, DWG and STEP remain open.
+Coupled sketch constraints, DWG and STEP remain open.
 
 **Properties → Export drilling template (PDF)** produces a full-size A4
 vector template in the local sketch plane. It evaluates the current cutout

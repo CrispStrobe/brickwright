@@ -522,7 +522,7 @@ const Gt = {
   "Cylinder rounding must be smaller than its radius and half its height": "Die Zylinderabrundung muss kleiner als der Radius und die halbe Höhe sein",
   "Elliptical sector needs at least one angular segment": "Der elliptische Sektor benötigt mindestens ein Winkelsegment",
   "Negative elliptical angles are not supported": "Negative elliptische Winkel werden nicht unterstützt"
-}, Qt = {
+}, Xt = {
   "Unknown code example": "Unbekanntes Codebeispiel",
   "Code examples": "Codebeispiele",
   "Load example": "Beispiel laden",
@@ -639,7 +639,7 @@ const Gt = {
   "Only whole-output JSCAD colours are retained in conversion metadata; face colours are not converted.": "Nur JSCAD-Farben für vollständige Ausgaben bleiben in den Konvertierungsmetadaten erhalten; Farben einzelner Flächen werden nicht konvertiert.",
   "Camera controls": "Kamerasteuerung",
   "Pinch to zoom. Tinkercad: scroll to zoom, Shift-scroll to pan, Alt-scroll to orbit. Fusion: two-finger swipe to pan, Shift-swipe to orbit. Right-drag orbits; Shift-right-drag, middle-drag or Space-left-drag pans.": "Zum Zoomen zwei Finger zusammen- oder auseinanderziehen. Tinkercad: Scrollen zoomt, Umschalt-Scrollen verschiebt, Alt-Scrollen dreht die Ansicht. Fusion: Wischen mit zwei Fingern verschiebt, Umschalt-Wischen dreht. Ziehen mit rechts dreht; Umschalt-rechts, Mitteltaste oder Leertaste-links verschiebt die Ansicht."
-}, Xt = {
+}, Qt = {
   "The project changed while opening. Try again.": "Das Projekt wurde während des Öffnens geändert. Versuchen Sie es erneut.",
   "Imported 1 project.": "1 Projekt importiert.",
   "1 iteration · {0}": "1 Version · {0}",
@@ -1157,6 +1157,13 @@ const Gt = {
   "An outline needs 3–256 finite points within 100000 mm of the sketch origin.": "Ein Umriss benötigt 3–256 endliche Punkte im Koordinatenbereich bis 100000 mm.",
   "Outline edges must form one closed loop without crossings or overlaps.": "Die Kanten müssen einen geschlossenen Umriss ohne Kreuzungen oder Überlappungen bilden.",
   "Circle center must be within 100000 mm of the sketch origin.": "Die Koordinaten des Kreismittelpunkts dürfen höchstens 100000 mm vom Ursprung abweichen.",
+  "DXF layers": "DXF-Ebenen",
+  "Import selected layers": "Ausgewählte Ebenen importieren",
+  "Select all layers": "Alle Ebenen auswählen",
+  "Deselect all layers": "Alle Ebenen abwählen",
+  "Select at least one DXF layer.": "Wähle mindestens eine DXF-Ebene aus.",
+  "Selected DXF layers are unavailable in this file.": "Die ausgewählten DXF-Ebenen sind in dieser Datei nicht verfügbar.",
+  "The sketch changed while reading DXF. Choose the file again.": "Die Skizze wurde während des Einlesens geändert. Wähle die Datei erneut aus.",
   "Import DXF outline": "DXF-Umriss importieren",
   "Assume millimetres if the file has no units": "Bei fehlender Einheit Millimeter verwenden",
   "Choose DXF file": "DXF-Datei auswählen",
@@ -1166,7 +1173,7 @@ const Gt = {
   "DXF import supports millimetres, centimetres, metres, inches and feet.": "Der DXF-Import unterstützt Millimeter, Zentimeter, Meter, Zoll und Fuß.",
   "The profile must produce a solid with positive volume.": "Das Profil muss einen Körper mit positivem Volumen ergeben.",
   outline: "Umriss",
-  "Use circles, closed lightweight polylines, or closed chains of 2D lines and arcs. Remove unsupported entities before importing.": "Verwende Kreise, geschlossene Polylinien oder geschlossene Ketten aus 2D-Linien und Bögen. Entferne nicht unterstützte Elemente vor dem Import.",
+  "Use circles, closed lightweight polylines, or closed chains of 2D lines and arcs. Exclude layers with unsupported entities or remove those entities before importing.": "Verwende Kreise, geschlossene Polylinien oder geschlossene Ketten aus 2D-Linien und Bögen. Schließe Ebenen mit nicht unterstützten Elementen aus oder entferne diese Elemente vor dem Import.",
   "DXF lines and arcs must join into closed loops without branches or duplicate edges.": "DXF-Linien und -Bögen müssen geschlossene Konturen ohne Verzweigungen oder doppelte Kanten bilden.",
   "Use the same DXF layer for every line and arc in a closed loop.": "Verwende für alle Linien und Bögen einer geschlossenen Kontur dieselbe DXF-Ebene.",
   "DXF import accepts closed outlines and circles. Loops inside an outer boundary become holes.": "Der DXF-Import akzeptiert geschlossene Umrisse und Kreise. Geschlossene Konturen innerhalb des Außenumrisses werden zu Löchern.",
@@ -2230,7 +2237,7 @@ function ai(e) {
   return Oe = e.toLowerCase().split(/[-_]/)[0] === "de" ? "de" : "en", Oe;
 }
 function at(e, ...t) {
-  const i = typeof e == "string" ? e : e.reduce((s, o, a) => s + (a ? `{${a - 1}}` : "") + o, ""), n = Oe === "de" ? si[i] ?? Gt[i] ?? ni[i] ?? ri[i] ?? Zt[i] ?? Wt[i] ?? Ht[i] ?? qt[i] ?? Qt[i] ?? Yt[i] ?? $t[i] ?? ii[i] ?? ei[i] ?? ti[i] ?? Jt[i] ?? Xt[i] ?? i : i;
+  const i = typeof e == "string" ? e : e.reduce((s, o, a) => s + (a ? `{${a - 1}}` : "") + o, ""), n = Oe === "de" ? si[i] ?? Gt[i] ?? ni[i] ?? ri[i] ?? Zt[i] ?? Wt[i] ?? Ht[i] ?? qt[i] ?? Xt[i] ?? Yt[i] ?? $t[i] ?? ii[i] ?? ei[i] ?? ti[i] ?? Jt[i] ?? Qt[i] ?? i : i;
   return typeof e == "string" ? n : n.replace(/\{(\d+)\}/g, (s, o) => String(t[Number(o)]));
 }
 var oi = [509, 0, 227, 0, 150, 4, 294, 9, 1368, 2, 2, 1, 6, 3, 41, 2, 5, 0, 166, 1, 574, 3, 9, 9, 7, 9, 32, 4, 318, 1, 78, 5, 71, 10, 50, 3, 123, 2, 54, 14, 32, 10, 3, 1, 11, 3, 46, 10, 8, 0, 46, 9, 7, 2, 37, 13, 2, 9, 6, 1, 45, 0, 13, 2, 49, 13, 9, 3, 2, 11, 83, 11, 7, 0, 3, 0, 158, 11, 6, 9, 7, 3, 56, 1, 2, 6, 3, 1, 3, 2, 10, 0, 11, 1, 3, 6, 4, 4, 68, 8, 2, 0, 3, 0, 2, 3, 2, 4, 2, 0, 15, 1, 83, 17, 10, 9, 5, 0, 82, 19, 13, 9, 214, 6, 3, 8, 28, 1, 83, 16, 16, 9, 82, 12, 9, 9, 7, 19, 58, 14, 5, 9, 243, 14, 166, 9, 71, 5, 2, 1, 3, 3, 2, 0, 2, 1, 13, 9, 120, 6, 3, 6, 4, 0, 29, 9, 41, 6, 2, 3, 9, 0, 10, 10, 47, 15, 199, 7, 137, 9, 54, 7, 2, 7, 17, 9, 57, 21, 2, 13, 123, 5, 4, 0, 2, 1, 2, 6, 2, 0, 9, 9, 49, 4, 2, 1, 2, 4, 9, 9, 55, 9, 266, 3, 10, 1, 2, 0, 49, 6, 4, 4, 14, 10, 5350, 0, 7, 14, 11465, 27, 2343, 9, 87, 9, 39, 4, 60, 6, 26, 9, 535, 9, 470, 0, 2, 54, 8, 3, 82, 0, 12, 1, 19628, 1, 4178, 9, 519, 45, 3, 22, 543, 4, 4, 5, 9, 7, 3, 6, 31, 3, 149, 2, 1418, 49, 513, 54, 5, 49, 9, 0, 15, 0, 23, 4, 2, 14, 1361, 6, 2, 16, 3, 6, 2, 1, 2, 4, 101, 0, 161, 6, 10, 9, 357, 0, 62, 13, 499, 13, 245, 1, 2, 9, 233, 0, 3, 0, 8, 1, 6, 0, 475, 6, 110, 6, 6, 9, 4759, 9, 787719, 239], ot = [0, 11, 2, 25, 2, 18, 2, 1, 2, 14, 3, 13, 35, 122, 70, 52, 268, 28, 4, 48, 48, 31, 14, 29, 6, 37, 11, 29, 3, 35, 5, 7, 2, 4, 43, 157, 19, 35, 5, 35, 5, 39, 9, 51, 13, 10, 2, 14, 2, 6, 2, 1, 2, 10, 2, 14, 2, 6, 2, 1, 4, 51, 13, 310, 10, 21, 11, 7, 25, 5, 2, 41, 2, 8, 70, 5, 3, 0, 2, 43, 2, 1, 4, 0, 3, 22, 11, 22, 10, 30, 66, 18, 2, 1, 11, 21, 11, 25, 7, 25, 39, 55, 7, 1, 65, 0, 16, 3, 2, 2, 2, 28, 43, 28, 4, 28, 36, 7, 2, 27, 28, 53, 11, 21, 11, 18, 14, 17, 111, 72, 56, 50, 14, 50, 14, 35, 39, 27, 10, 22, 251, 41, 7, 1, 17, 5, 57, 28, 11, 0, 9, 21, 43, 17, 47, 20, 28, 22, 13, 52, 58, 1, 3, 0, 14, 44, 33, 24, 27, 35, 30, 0, 3, 0, 9, 34, 4, 0, 13, 47, 15, 3, 22, 0, 2, 0, 36, 17, 2, 24, 20, 1, 64, 6, 2, 0, 2, 3, 2, 14, 2, 9, 8, 46, 39, 7, 3, 1, 3, 21, 2, 6, 2, 1, 2, 4, 4, 0, 19, 0, 13, 4, 31, 9, 2, 0, 3, 0, 2, 37, 2, 0, 26, 0, 2, 0, 45, 52, 19, 3, 21, 2, 31, 47, 21, 1, 2, 0, 185, 46, 42, 3, 37, 47, 21, 0, 60, 42, 14, 0, 72, 26, 38, 6, 186, 43, 117, 63, 32, 7, 3, 0, 3, 7, 2, 1, 2, 23, 16, 0, 2, 0, 95, 7, 3, 38, 17, 0, 2, 0, 29, 0, 11, 39, 8, 0, 22, 0, 12, 45, 20, 0, 19, 72, 200, 32, 32, 8, 2, 36, 18, 0, 50, 29, 113, 6, 2, 1, 2, 37, 22, 0, 26, 5, 2, 1, 2, 31, 15, 0, 24, 43, 261, 18, 16, 0, 2, 12, 2, 33, 125, 0, 80, 921, 103, 110, 18, 195, 2637, 96, 16, 1071, 18, 5, 26, 3994, 6, 582, 6842, 29, 1763, 568, 8, 30, 18, 78, 18, 29, 19, 47, 17, 3, 32, 20, 6, 18, 433, 44, 212, 63, 33, 24, 3, 24, 45, 74, 6, 0, 67, 12, 65, 1, 2, 0, 15, 4, 10, 7381, 42, 31, 98, 114, 8702, 3, 2, 6, 2, 1, 2, 290, 16, 0, 30, 2, 3, 0, 15, 3, 9, 395, 2309, 106, 6, 12, 4, 8, 8, 9, 5991, 84, 2, 70, 2, 1, 3, 0, 3, 1, 3, 3, 2, 11, 2, 0, 2, 6, 2, 64, 2, 3, 3, 7, 2, 6, 2, 27, 2, 3, 2, 4, 2, 0, 4, 6, 2, 339, 3, 24, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 7, 1845, 30, 7, 5, 262, 61, 147, 44, 11, 6, 17, 0, 322, 29, 19, 43, 485, 27, 229, 29, 3, 0, 208, 30, 2, 2, 2, 1, 2, 6, 3, 4, 10, 1, 225, 6, 2, 3, 2, 1, 2, 14, 2, 196, 60, 67, 8, 0, 1205, 3, 2, 26, 2, 1, 2, 0, 3, 0, 2, 9, 2, 3, 2, 0, 2, 0, 7, 0, 5, 0, 2, 0, 2, 0, 2, 2, 2, 1, 2, 0, 3, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 1, 2, 0, 3, 3, 2, 6, 2, 3, 2, 3, 2, 0, 2, 9, 2, 16, 6, 2, 2, 4, 2, 16, 4421, 42719, 33, 4381, 3, 5773, 3, 7472, 16, 621, 2467, 541, 1507, 4938, 6, 8489], li = "‌‍·̀-ͯ·҃-֑҇-ׇֽֿׁׂׅׄؐ-ًؚ-٩ٰۖ-ۜ۟-۪ۤۧۨ-ۭ۰-۹ܑܰ-݊ަ-ް߀-߉߫-߽߳ࠖ-࠙ࠛ-ࠣࠥ-ࠧࠩ-࡙࠭-࡛ࢗ-࢟࣊-ࣣ࣡-ःऺ-़ा-ॏ॑-ॗॢॣ०-९ঁ-ঃ়া-ৄেৈো-্ৗৢৣ০-৯৾ਁ-ਃ਼ਾ-ੂੇੈੋ-੍ੑ੦-ੱੵઁ-ઃ઼ા-ૅે-ૉો-્ૢૣ૦-૯ૺ-૿ଁ-ଃ଼ା-ୄେୈୋ-୍୕-ୗୢୣ୦-୯ஂா-ூெ-ைொ-்ௗ௦-௯ఀ-ఄ఼ా-ౄె-ైొ-్ౕౖౢౣ౦-౯ಁ-ಃ಼ಾ-ೄೆ-ೈೊ-್ೕೖೢೣ೦-೯ೳഀ-ഃ഻഼ാ-ൄെ-ൈൊ-്ൗൢൣ൦-൯ඁ-ඃ්ා-ුූෘ-ෟ෦-෯ෲෳัิ-ฺ็-๎๐-๙ັິ-ຼ່-໎໐-໙༘༙༠-༩༹༵༷༾༿ཱ-྄྆྇ྍ-ྗྙ-ྼ࿆ါ-ှ၀-၉ၖ-ၙၞ-ၠၢ-ၤၧ-ၭၱ-ၴႂ-ႍႏ-ႝ፝-፟፩-፱ᜒ-᜕ᜲ-᜴ᝒᝓᝲᝳ឴-៓៝០-៩᠋-᠍᠏-᠙ᢩᤠ-ᤫᤰ-᤻᥆-᥏᧐-᧚ᨗ-ᨛᩕ-ᩞ᩠-᩿᩼-᪉᪐-᪙᪰-᪽ᪿ-᫝᫠-᫫ᬀ-ᬄ᬴-᭄᭐-᭙᭫-᭳ᮀ-ᮂᮡ-ᮭ᮰-᮹᯦-᯳ᰤ-᰷᱀-᱉᱐-᱙᳐-᳔᳒-᳨᳭᳴᳷-᳹᷀-᷿‌‍‿⁀⁔⃐-⃥⃜⃡-⃰⳯-⵿⳱ⷠ-〪ⷿ-゙゚〯・꘠-꘩꙯ꙴ-꙽ꚞꚟ꛰꛱ꠂ꠆ꠋꠣ-ꠧ꠬ꢀꢁꢴ-ꣅ꣐-꣙꣠-꣱ꣿ-꤉ꤦ-꤭ꥇ-꥓ꦀ-ꦃ꦳-꧀꧐-꧙ꧥ꧰-꧹ꨩ-ꨶꩃꩌꩍ꩐-꩙ꩻ-ꩽꪰꪲ-ꪴꪷꪸꪾ꪿꫁ꫫ-ꫯꫵ꫶ꯣ-ꯪ꯬꯭꯰-꯹ﬞ︀-️︠-︯︳︴﹍-﹏０-９＿･", lt = "ªµºÀ-ÖØ-öø-ˁˆ-ˑˠ-ˤˬˮͰ-ʹͶͷͺ-ͽͿΆΈ-ΊΌΎ-ΡΣ-ϵϷ-ҁҊ-ԯԱ-Ֆՙՠ-ֈא-תׯ-ײؠ-يٮٯٱ-ۓەۥۦۮۯۺ-ۼۿܐܒ-ܯݍ-ޥޱߊ-ߪߴߵߺࠀ-ࠕࠚࠤࠨࡀ-ࡘࡠ-ࡪࡰ-ࢇࢉ-࢏ࢠ-ࣉऄ-हऽॐक़-ॡॱ-ঀঅ-ঌএঐও-নপ-রলশ-হঽৎড়ঢ়য়-ৡৰৱৼਅ-ਊਏਐਓ-ਨਪ-ਰਲਲ਼ਵਸ਼ਸਹਖ਼-ੜਫ਼ੲ-ੴઅ-ઍએ-ઑઓ-નપ-રલળવ-હઽૐૠૡૹଅ-ଌଏଐଓ-ନପ-ରଲଳଵ-ହଽଡ଼ଢ଼ୟ-ୡୱஃஅ-ஊஎ-ஐஒ-கஙசஜஞடணதந-பம-ஹௐఅ-ఌఎ-ఐఒ-నప-హఽౘ-ౚ౜ౝౠౡಀಅ-ಌಎ-ಐಒ-ನಪ-ಳವ-ಹಽ೜-ೞೠೡೱೲഄ-ഌഎ-ഐഒ-ഺഽൎൔ-ൖൟ-ൡൺ-ൿඅ-ඖක-නඳ-රලව-ෆก-ะาำเ-ๆກຂຄຆ-ຊຌ-ຣລວ-ະາຳຽເ-ໄໆໜ-ໟༀཀ-ཇཉ-ཬྈ-ྌက-ဪဿၐ-ၕၚ-ၝၡၥၦၮ-ၰၵ-ႁႎႠ-ჅჇჍა-ჺჼ-ቈቊ-ቍቐ-ቖቘቚ-ቝበ-ኈኊ-ኍነ-ኰኲ-ኵኸ-ኾዀዂ-ዅወ-ዖዘ-ጐጒ-ጕጘ-ፚᎀ-ᎏᎠ-Ᏽᏸ-ᏽᐁ-ᙬᙯ-ᙿᚁ-ᚚᚠ-ᛪᛮ-ᛸᜀ-ᜑᜟ-ᜱᝀ-ᝑᝠ-ᝬᝮ-ᝰក-ឳៗៜᠠ-ᡸᢀ-ᢨᢪᢰ-ᣵᤀ-ᤞᥐ-ᥭᥰ-ᥴᦀ-ᦫᦰ-ᧉᨀ-ᨖᨠ-ᩔᪧᬅ-ᬳᭅ-ᭌᮃ-ᮠᮮᮯᮺ-ᯥᰀ-ᰣᱍ-ᱏᱚ-ᱽᲀ-ᲊᲐ-ᲺᲽ-Ჿᳩ-ᳬᳮ-ᳳᳵᳶᳺᴀ-ᶿḀ-ἕἘ-Ἕἠ-ὅὈ-Ὅὐ-ὗὙὛὝὟ-ώᾀ-ᾴᾶ-ᾼιῂ-ῄῆ-ῌῐ-ΐῖ-Ίῠ-Ῥῲ-ῴῶ-ῼⁱⁿₐ-ₜℂℇℊ-ℓℕ℘-ℝℤΩℨK-ℹℼ-ℿⅅ-ⅉⅎⅠ-ↈⰀ-ⳤⳫ-ⳮⳲⳳⴀ-ⴥⴧⴭⴰ-ⵧⵯⶀ-ⶖⶠ-ⶦⶨ-ⶮⶰ-ⶶⶸ-ⶾⷀ-ⷆⷈ-ⷎⷐ-ⷖⷘ-ⷞ々-〇〡-〩〱-〵〸-〼ぁ-ゖ゛-ゟァ-ヺー-ヿㄅ-ㄯㄱ-ㆎㆠ-ㆿㇰ-ㇿ㐀-䶿一-ꒌꓐ-ꓽꔀ-ꘌꘐ-ꘟꘪꘫꙀ-ꙮꙿ-ꚝꚠ-ꛯꜗ-ꜟꜢ-ꞈꞋ-Ƛ꟱-ꠁꠃ-ꠅꠇ-ꠊꠌ-ꠢꡀ-ꡳꢂ-ꢳꣲ-ꣷꣻꣽꣾꤊ-ꤥꤰ-ꥆꥠ-ꥼꦄ-ꦲꧏꧠ-ꧤꧦ-ꧯꧺ-ꧾꨀ-ꨨꩀ-ꩂꩄ-ꩋꩠ-ꩶꩺꩾ-ꪯꪱꪵꪶꪹ-ꪽꫀꫂꫛ-ꫝꫠ-ꫪꫲ-ꫴꬁ-ꬆꬉ-ꬎꬑ-ꬖꬠ-ꬦꬨ-ꬮꬰ-ꭚꭜ-ꭩꭰ-ꯢ가-힣ힰ-ퟆퟋ-ퟻ豈-舘並-龎ﬀ-ﬆﬓ-ﬗיִײַ-ﬨשׁ-זּטּ-לּמּנּסּףּפּצּ-ﮱﯓ-ﴽﵐ-ﶏﶒ-ﷇﷰ-ﷻﹰ-ﹴﹶ-ﻼＡ-Ｚａ-ｚｦ-ﾾￂ-ￇￊ-ￏￒ-ￗￚ-ￜ", _e = {
@@ -2253,7 +2260,7 @@ function Fe(e, t) {
   }
   return !1;
 }
-function Q(e, t) {
+function X(e, t) {
   return e < 65 ? e === 36 : e < 91 ? !0 : e < 97 ? e === 95 : e < 123 ? !0 : e <= 65535 ? e >= 170 && hi.test(String.fromCharCode(e)) : t === !1 ? !1 : Fe(e, ot);
 }
 function re(e, t) {
@@ -2533,7 +2540,7 @@ var ue = 1, he = 2, We = 4, mt = 8, qe = 16, ft = 32, ze = 64, gt = 128, ce = 25
 function He(e, t) {
   return he | (e ? We : 0) | (t ? mt : 0);
 }
-var ye = 0, Qe = 1, te = 2, vt = 3, kt = 4, xt = 5, T = function(t, i, n) {
+var ye = 0, Xe = 1, te = 2, vt = 3, kt = 4, xt = 5, T = function(t, i, n) {
   this.options = t = gi(t), this.sourceFile = t.sourceFile, this.keywords = ne(ui[t.ecmaVersion >= 6 ? 6 : t.sourceType === "module" ? "5module" : 5]);
   var s = "";
   t.allowReserved !== !0 && (s = _e[t.ecmaVersion >= 6 ? 6 : t.ecmaVersion === 5 ? 5 : 3], t.sourceType === "module" && (s += " await")), this.reservedWords = ne(s);
@@ -2710,7 +2717,7 @@ d.parseTopLevel = function(e) {
     }
   return this.adaptDirectivePrologue(e.body), this.next(), e.sourceType = this.options.sourceType === "commonjs" ? "script" : this.options.sourceType, this.finishNode(e, "Program");
 };
-var Xe = { kind: "loop" }, ki = { kind: "switch" };
+var Qe = { kind: "loop" }, ki = { kind: "switch" };
 d.isLet = function(e) {
   if (this.options.ecmaVersion < 6 || !this.isContextual("let"))
     return !1;
@@ -2722,7 +2729,7 @@ d.isLet = function(e) {
     return !1;
   if (n === 123)
     return !0;
-  if (Q(n)) {
+  if (X(n)) {
     var s = i;
     do
       i += n <= 65535 ? 1 : 2;
@@ -2759,7 +2766,7 @@ d.isUsingKeyword = function(e, t) {
       return !1;
   }
   var l = this.fullCharCodeAt(n);
-  if (!Q(l) && l !== 92)
+  if (!X(l) && l !== 92)
     return !1;
   var u = n;
   do
@@ -2860,12 +2867,12 @@ d.parseDebuggerStatement = function(e) {
   return this.next(), this.semicolon(), this.finishNode(e, "DebuggerStatement");
 };
 d.parseDoStatement = function(e) {
-  return this.next(), this.labels.push(Xe), e.body = this.parseStatement("do"), this.labels.pop(), this.expect(r._while), e.test = this.parseParenExpression(), this.options.ecmaVersion >= 6 ? this.eat(r.semi) : this.semicolon(), this.finishNode(e, "DoWhileStatement");
+  return this.next(), this.labels.push(Qe), e.body = this.parseStatement("do"), this.labels.pop(), this.expect(r._while), e.test = this.parseParenExpression(), this.options.ecmaVersion >= 6 ? this.eat(r.semi) : this.semicolon(), this.finishNode(e, "DoWhileStatement");
 };
 d.parseForStatement = function(e) {
   this.next();
   var t = this.options.ecmaVersion >= 9 && this.canAwait && this.eatContextual("await") ? this.lastTokStart : -1;
-  if (this.labels.push(Xe), this.enterScope(0), this.expect(r.parenL), this.type === r.semi)
+  if (this.labels.push(Qe), this.enterScope(0), this.expect(r.parenL), this.type === r.semi)
     return t > -1 && this.unexpected(t), this.parseFor(e, null);
   var i = this.isLet();
   if (this.type === r._var || this.type === r._const || i) {
@@ -2921,7 +2928,7 @@ d.parseVarStatement = function(e, t, i) {
   return this.next(), this.parseVar(e, !1, t, i), this.semicolon(), this.finishNode(e, "VariableDeclaration");
 };
 d.parseWhileStatement = function(e) {
-  return this.next(), e.test = this.parseParenExpression(), this.labels.push(Xe), e.body = this.parseStatement("while"), this.labels.pop(), this.finishNode(e, "WhileStatement");
+  return this.next(), e.test = this.parseParenExpression(), this.labels.push(Qe), e.body = this.parseStatement("while"), this.labels.pop(), this.finishNode(e, "WhileStatement");
 };
 d.parseWithStatement = function(e) {
   return this.strict && this.raise(this.start, "'with' in strict mode"), this.next(), e.object = this.parseParenExpression(), e.body = this.parseStatement("with"), this.finishNode(e, "WithStatement");
@@ -2972,11 +2979,11 @@ d.parseVar = function(e, t, i, n) {
   return e;
 };
 d.parseVarId = function(e, t) {
-  e.id = t === "using" || t === "await using" ? this.parseIdent() : this.parseBindingAtom(), this.checkLValPattern(e.id, t === "var" ? Qe : te, !1);
+  e.id = t === "using" || t === "await using" ? this.parseIdent() : this.parseBindingAtom(), this.checkLValPattern(e.id, t === "var" ? Xe : te, !1);
 };
 var ve = 1, Ue = 2, wt = 4;
 d.parseFunction = function(e, t, i, n, s) {
-  this.initFunction(e), (this.options.ecmaVersion >= 9 || this.options.ecmaVersion >= 6 && !n) && (this.type === r.star && t & Ue && this.unexpected(), e.generator = this.eat(r.star)), this.options.ecmaVersion >= 8 && (e.async = !!n), t & ve && (e.id = t & wt && this.type !== r.name ? null : this.parseIdent(), e.id && !(t & Ue) && this.checkLValSimple(e.id, this.strict || e.generator || e.async ? this.treatFunctionsAsVar ? Qe : te : vt));
+  this.initFunction(e), (this.options.ecmaVersion >= 9 || this.options.ecmaVersion >= 6 && !n) && (this.type === r.star && t & Ue && this.unexpected(), e.generator = this.eat(r.star)), this.options.ecmaVersion >= 8 && (e.async = !!n), t & ve && (e.id = t & wt && this.type !== r.name ? null : this.parseIdent(), e.id && !(t & Ue) && this.checkLValSimple(e.id, this.strict || e.generator || e.async ? this.treatFunctionsAsVar ? Xe : te : vt));
   var o = this.yieldPos, a = this.awaitPos, l = this.awaitIdentPos;
   return this.yieldPos = 0, this.awaitPos = 0, this.awaitIdentPos = 0, this.enterScope(He(e.async, e.generator)), t & ve || (e.id = this.type === r.name ? this.parseIdent() : null), this.parseFunctionParams(e), this.parseFunctionBody(e, i, !1, s), this.yieldPos = o, this.awaitPos = a, this.awaitIdentPos = l, this.finishNode(e, t & ve ? "FunctionDeclaration" : "FunctionExpression");
 };
@@ -3867,7 +3874,7 @@ m.isSimpleParamList = function(e) {
 m.checkParams = function(e, t) {
   for (var i = /* @__PURE__ */ Object.create(null), n = 0, s = e.params; n < s.length; n += 1) {
     var o = s[n];
-    this.checkLValInnerPattern(o, Qe, t ? null : i);
+    this.checkLValInnerPattern(o, Xe, t ? null : i);
   }
 };
 m.parseExprList = function(e, t, i, n) {
@@ -4051,17 +4058,17 @@ Ce.prototype.separatedFrom = function(t) {
 Ce.prototype.sibling = function() {
   return new Ce(this.parent, this.base);
 };
-var X = function(t) {
+var Q = function(t) {
   this.parser = t, this.validFlags = "gim" + (t.options.ecmaVersion >= 6 ? "uy" : "") + (t.options.ecmaVersion >= 9 ? "s" : "") + (t.options.ecmaVersion >= 13 ? "d" : "") + (t.options.ecmaVersion >= 15 ? "v" : ""), this.unicodeProperties = It[t.options.ecmaVersion >= 14 ? 14 : t.options.ecmaVersion], this.source = "", this.flags = "", this.start = 0, this.switchU = !1, this.switchV = !1, this.switchN = !1, this.pos = 0, this.lastIntValue = 0, this.lastStringValue = "", this.lastAssertionIsQuantifiable = !1, this.numCapturingParens = 0, this.maxBackReference = 0, this.groupNames = /* @__PURE__ */ Object.create(null), this.backReferenceNames = [], this.branchID = null;
 };
-X.prototype.reset = function(t, i, n) {
+Q.prototype.reset = function(t, i, n) {
   var s = n.indexOf("v") !== -1, o = n.indexOf("u") !== -1;
   this.start = t | 0, this.source = i + "", this.flags = n, s && this.parser.options.ecmaVersion >= 15 ? (this.switchU = !0, this.switchV = !0, this.switchN = !0) : (this.switchU = o && this.parser.options.ecmaVersion >= 6, this.switchV = !1, this.switchN = o && this.parser.options.ecmaVersion >= 9);
 };
-X.prototype.raise = function(t) {
+Q.prototype.raise = function(t) {
   this.parser.raiseRecoverable(this.start, "Invalid regular expression: /" + this.source + "/: " + t);
 };
-X.prototype.at = function(t, i) {
+Q.prototype.at = function(t, i) {
   i === void 0 && (i = !1);
   var n = this.source, s = n.length;
   if (t >= s)
@@ -4072,7 +4079,7 @@ X.prototype.at = function(t, i) {
   var a = n.charCodeAt(t + 1);
   return a >= 56320 && a <= 57343 ? (o << 10) + a - 56613888 : o;
 };
-X.prototype.nextIndex = function(t, i) {
+Q.prototype.nextIndex = function(t, i) {
   i === void 0 && (i = !1);
   var n = this.source, s = n.length;
   if (t >= s)
@@ -4080,19 +4087,19 @@ X.prototype.nextIndex = function(t, i) {
   var o = n.charCodeAt(t), a;
   return !(i || this.switchU) || o <= 55295 || o >= 57344 || t + 1 >= s || (a = n.charCodeAt(t + 1)) < 56320 || a > 57343 ? t + 1 : t + 2;
 };
-X.prototype.current = function(t) {
+Q.prototype.current = function(t) {
   return t === void 0 && (t = !1), this.at(this.pos, t);
 };
-X.prototype.lookahead = function(t) {
+Q.prototype.lookahead = function(t) {
   return t === void 0 && (t = !1), this.at(this.nextIndex(this.pos, t), t);
 };
-X.prototype.advance = function(t) {
+Q.prototype.advance = function(t) {
   t === void 0 && (t = !1), this.pos = this.nextIndex(this.pos, t);
 };
-X.prototype.eat = function(t, i) {
+Q.prototype.eat = function(t, i) {
   return i === void 0 && (i = !1), this.current(i) === t ? (this.advance(i), !0) : !1;
 };
-X.prototype.eatChars = function(t, i) {
+Q.prototype.eatChars = function(t, i) {
   i === void 0 && (i = !1);
   for (var n = this.pos, s = 0, o = t; s < o.length; s += 1) {
     var a = o[s], l = this.at(n, i);
@@ -4394,7 +4401,7 @@ c.regexp_eatRegExpIdentifierStart = function(e) {
   return e.advance(i), n === 92 && this.regexp_eatRegExpUnicodeEscapeSequence(e, i) && (n = e.lastIntValue), _i(n) ? (e.lastIntValue = n, !0) : (e.pos = t, !1);
 };
 function _i(e) {
-  return Q(e, !0) || e === 36 || e === 95;
+  return X(e, !0) || e === 36 || e === 95;
 }
 c.regexp_eatRegExpIdentifierPart = function(e) {
   var t = e.pos, i = this.options.ecmaVersion >= 11, n = e.current(i);
@@ -4898,7 +4905,7 @@ b.nextToken = function() {
   this.readToken(this.fullCharCodeAtPos());
 };
 b.readToken = function(e) {
-  return Q(e, this.options.ecmaVersion >= 6) || e === 92 ? this.readWord() : this.getTokenFromCode(e);
+  return X(e, this.options.ecmaVersion >= 6) || e === 92 ? this.readWord() : this.getTokenFromCode(e);
 };
 b.fullCharCodeAt = function(e) {
   var t = this.input.charCodeAt(e);
@@ -5041,7 +5048,7 @@ b.readToken_question = function() {
 };
 b.readToken_numberSign = function() {
   var e = this.options.ecmaVersion, t = 35;
-  if (e >= 13 && (++this.pos, t = this.fullCharCodeAtPos(), Q(t, !0) || t === 92))
+  if (e >= 13 && (++this.pos, t = this.fullCharCodeAtPos(), X(t, !0) || t === 92))
     return this.finishToken(r.privateId, this.readWord1());
   this.raise(this.pos, "Unexpected character '" + $(t) + "'");
 };
@@ -5157,7 +5164,7 @@ b.readRegexp = function() {
   ++this.pos;
   var o = this.pos, a = this.readWord1();
   this.containsEsc && this.unexpected(o);
-  var l = this.regexpState || (this.regexpState = new X(this));
+  var l = this.regexpState || (this.regexpState = new Q(this));
   l.reset(i, s, a), this.validateRegExpFlags(l), this.validateRegExpPattern(l);
   var u = null;
   try {
@@ -5189,7 +5196,7 @@ b.readRadixNumber = function(e) {
   var t = this.pos;
   this.pos += 2;
   var i = this.readInt(e);
-  return i == null && this.raise(this.start + 2, "Expected number in radix " + e), this.options.ecmaVersion >= 11 && this.input.charCodeAt(this.pos) === 110 ? (i = Ut(this.input.slice(t, this.pos)), ++this.pos) : Q(this.fullCharCodeAtPos()) && this.raise(this.pos, "Identifier directly after number"), this.finishToken(r.num, i);
+  return i == null && this.raise(this.start + 2, "Expected number in radix " + e), this.options.ecmaVersion >= 11 && this.input.charCodeAt(this.pos) === 110 ? (i = Ut(this.input.slice(t, this.pos)), ++this.pos) : X(this.fullCharCodeAtPos()) && this.raise(this.pos, "Identifier directly after number"), this.finishToken(r.num, i);
 };
 b.readNumber = function(e) {
   var t = this.pos;
@@ -5199,9 +5206,9 @@ b.readNumber = function(e) {
   var n = this.input.charCodeAt(this.pos);
   if (!i && !e && this.options.ecmaVersion >= 11 && n === 110) {
     var s = Ut(this.input.slice(t, this.pos));
-    return ++this.pos, Q(this.fullCharCodeAtPos()) && this.raise(this.pos, "Identifier directly after number"), this.finishToken(r.num, s);
+    return ++this.pos, X(this.fullCharCodeAtPos()) && this.raise(this.pos, "Identifier directly after number"), this.finishToken(r.num, s);
   }
-  i && /[89]/.test(this.input.slice(t, this.pos)) && (i = !1), n === 46 && !i && (++this.pos, this.readInt(10), n = this.input.charCodeAt(this.pos)), (n === 69 || n === 101) && !i && (n = this.input.charCodeAt(++this.pos), (n === 43 || n === 45) && ++this.pos, this.readInt(10) === null && this.raise(t, "Invalid number")), Q(this.fullCharCodeAtPos()) && this.raise(this.pos, "Identifier directly after number");
+  i && /[89]/.test(this.input.slice(t, this.pos)) && (i = !1), n === 46 && !i && (++this.pos, this.readInt(10), n = this.input.charCodeAt(this.pos)), (n === 69 || n === 101) && !i && (n = this.input.charCodeAt(++this.pos), (n === 43 || n === 45) && ++this.pos, this.readInt(10) === null && this.raise(t, "Invalid number")), X(this.fullCharCodeAtPos()) && this.raise(this.pos, "Identifier directly after number");
   var o = ji(this.input.slice(t, this.pos), i);
   return this.finishToken(r.num, o);
 };
@@ -5364,7 +5371,7 @@ b.readWord1 = function() {
       var o = this.pos;
       this.input.charCodeAt(++this.pos) !== 117 && this.invalidStringToken(this.pos, "Expecting Unicode escape sequence \\uXXXX"), ++this.pos;
       var a = this.readCodePoint();
-      (t ? Q : re)(a, n) || this.invalidStringToken(o, "Invalid Unicode escape"), e += $(a), i = this.pos;
+      (t ? X : re)(a, n) || this.invalidStringToken(o, "Invalid Unicode escape"), e += $(a), i = this.pos;
     } else
       break;
     t = !1;
@@ -5390,7 +5397,7 @@ T.acorn = {
   TokContext: H,
   tokContexts: D,
   isIdentifierChar: re,
-  isIdentifierStart: Q,
+  isIdentifierStart: X,
   Token: Je,
   isNewLine: pe,
   lineBreak: N,
@@ -5468,12 +5475,12 @@ const Zi = [
   { view: "Top view", horizontal: 0, vertical: 1, depth: 2, near: 1 },
   { view: "Front view", horizontal: 0, vertical: 2, depth: 1, near: -1 },
   { view: "Right view", horizontal: 1, vertical: 2, depth: 0, near: 1 }
-], le = 48, Wi = 1e5, qi = 16e6, Hi = 25e5, Qi = Math.cos(Math.PI / 6), Ge = () => new Error(at("This assembly exceeds the drawing detail limit. Use a simpler representation.")), Ne = (e, t, i = t) => ({
+], le = 48, Wi = 1e5, qi = 16e6, Hi = 25e5, Xi = Math.cos(Math.PI / 6), Ge = () => new Error(at("This assembly exceeds the drawing detail limit. Use a simpler representation.")), Ne = (e, t, i = t) => ({
   left: Math.min(e[0], t[0], i[0]),
   bottom: Math.min(e[1], t[1], i[1]),
   right: Math.max(e[0], t[0], i[0]),
   top: Math.max(e[1], t[1], i[1])
-}), Xi = (e, t) => e.left <= t.right && e.right >= t.left && e.bottom <= t.top && e.top >= t.bottom, Ji = (e, t) => e[0] * t[0] + e[1] * t[1] + e[2] * t[2];
+}), Qi = (e, t) => e.left <= t.right && e.right >= t.left && e.bottom <= t.top && e.top >= t.bottom, Ji = (e, t) => e[0] * t[0] + e[1] * t[1] + e[2] * t[2];
 function Yi(e) {
   const t = /* @__PURE__ */ new Map(), i = [], n = [];
   for (let a = 0; a < e.positions.length; a += 3) {
@@ -5549,7 +5556,7 @@ function en(e, t, i, n) {
   for (const [A, S] of e.entries())
     for (const E of S.edges) {
       const [C, ...V] = E.normals;
-      if (V.length && !V.some((P) => Ji(C, P) < Qi || C[a] * l > 1e-8 != P[a] * l > 1e-8))
+      if (V.length && !V.some((P) => Ji(C, P) < Xi || C[a] * l > 1e-8 != P[a] * l > 1e-8))
         continue;
       const y = f[A][E.a], z = f[A][E.b], U = Math.hypot(z[0] - y[0], z[1] - y[1]);
       if (U < 1e-5)
@@ -5559,7 +5566,7 @@ function en(e, t, i, n) {
       K(y, z, (P) => {
         if (!Ye)
           for (const F of w[P]) {
-            if (ge(), F.nearest <= Se || !Xi(J, F.box) || be.has(F))
+            if (ge(), F.nearest <= Se || !Qi(J, F.box) || be.has(F))
               continue;
             if (be.add(F), ++R > Hi)
               throw Ge();

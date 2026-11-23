@@ -1160,6 +1160,13 @@ const sg = {
   "An outline needs 3–256 finite points within 100000 mm of the sketch origin.": "Ein Umriss benötigt 3–256 endliche Punkte im Koordinatenbereich bis 100000 mm.",
   "Outline edges must form one closed loop without crossings or overlaps.": "Die Kanten müssen einen geschlossenen Umriss ohne Kreuzungen oder Überlappungen bilden.",
   "Circle center must be within 100000 mm of the sketch origin.": "Die Koordinaten des Kreismittelpunkts dürfen höchstens 100000 mm vom Ursprung abweichen.",
+  "DXF layers": "DXF-Ebenen",
+  "Import selected layers": "Ausgewählte Ebenen importieren",
+  "Select all layers": "Alle Ebenen auswählen",
+  "Deselect all layers": "Alle Ebenen abwählen",
+  "Select at least one DXF layer.": "Wähle mindestens eine DXF-Ebene aus.",
+  "Selected DXF layers are unavailable in this file.": "Die ausgewählten DXF-Ebenen sind in dieser Datei nicht verfügbar.",
+  "The sketch changed while reading DXF. Choose the file again.": "Die Skizze wurde während des Einlesens geändert. Wähle die Datei erneut aus.",
   "Import DXF outline": "DXF-Umriss importieren",
   "Assume millimetres if the file has no units": "Bei fehlender Einheit Millimeter verwenden",
   "Choose DXF file": "DXF-Datei auswählen",
@@ -1169,7 +1176,7 @@ const sg = {
   "DXF import supports millimetres, centimetres, metres, inches and feet.": "Der DXF-Import unterstützt Millimeter, Zentimeter, Meter, Zoll und Fuß.",
   "The profile must produce a solid with positive volume.": "Das Profil muss einen Körper mit positivem Volumen ergeben.",
   outline: "Umriss",
-  "Use circles, closed lightweight polylines, or closed chains of 2D lines and arcs. Remove unsupported entities before importing.": "Verwende Kreise, geschlossene Polylinien oder geschlossene Ketten aus 2D-Linien und Bögen. Entferne nicht unterstützte Elemente vor dem Import.",
+  "Use circles, closed lightweight polylines, or closed chains of 2D lines and arcs. Exclude layers with unsupported entities or remove those entities before importing.": "Verwende Kreise, geschlossene Polylinien oder geschlossene Ketten aus 2D-Linien und Bögen. Schließe Ebenen mit nicht unterstützten Elementen aus oder entferne diese Elemente vor dem Import.",
   "DXF lines and arcs must join into closed loops without branches or duplicate edges.": "DXF-Linien und -Bögen müssen geschlossene Konturen ohne Verzweigungen oder doppelte Kanten bilden.",
   "Use the same DXF layer for every line and arc in a closed loop.": "Verwende für alle Linien und Bögen einer geschlossenen Kontur dieselbe DXF-Ebene.",
   "DXF import accepts closed outlines and circles. Loops inside an outer boundary become holes.": "Der DXF-Import akzeptiert geschlossene Umrisse und Kreise. Geschlossene Konturen innerhalb des Außenumrisses werden zu Löchern.",
@@ -2348,7 +2355,7 @@ function Yg(A) {
   return A.version >= 8 && A.simulation ? A.simulation : Ug();
 }
 const n5 = (A, g, I) => typeof A == "number" && Number.isFinite(A) && A >= g && A <= I, I4 = (A, g = 1e6) => Array.isArray(A) && A.length === 3 && A.every((I) => n5(I, -g, g));
-function Jg(A) {
+function bg(A) {
   if (A.version < 8)
     return;
   const g = () => {
@@ -2365,7 +2372,7 @@ function Jg(A) {
       (!C || typeof C.id != "string" || !/^[a-zA-Z0-9_-]{1,96}$/.test(C.id) || I.has(C.id) || !A.roots.includes(C.bodyId) || A.nodes[C.bodyId].reference || A.nodes[C.bodyId].role === "hole" || !I4(C.point) || !/^#[a-f0-9]{6}$/i.test(C.color)) && g(), I.add(C.id);
   }
 }
-const P2 = (A) => !!A && typeof A == "object" && !Array.isArray(A), I2 = (A, g) => P2(A) && Object.keys(A).length === g.split(" ").length && g.split(" ").every((I) => Object.hasOwn(A, I)), c2 = (A, g) => Array.isArray(A) ? Array.isArray(g) && A.length === g.length && A.every((I, C) => c2(I, g[C])) : P2(A) ? P2(g) && Object.keys(A).length === Object.keys(g).length && Object.keys(A).every((I) => Object.hasOwn(g, I) && c2(A[I], g[I])) : A === g, G4 = (A) => typeof A == "number" && Number.isFinite(A) && A >= 0, i3 = (A) => G4(A) && A > 0, bg = (A) => typeof A == "string" && /^[a-f0-9]{64}$/.test(A), C4 = (A) => Array.isArray(A) && A.length === 3 && A.every((g) => typeof g == "number" && Number.isFinite(g));
+const P2 = (A) => !!A && typeof A == "object" && !Array.isArray(A), I2 = (A, g) => P2(A) && Object.keys(A).length === g.split(" ").length && g.split(" ").every((I) => Object.hasOwn(A, I)), c2 = (A, g) => Array.isArray(A) ? Array.isArray(g) && A.length === g.length && A.every((I, C) => c2(I, g[C])) : P2(A) ? P2(g) && Object.keys(A).length === Object.keys(g).length && Object.keys(A).every((I) => Object.hasOwn(g, I) && c2(A[I], g[I])) : A === g, G4 = (A) => typeof A == "number" && Number.isFinite(A) && A >= 0, i3 = (A) => G4(A) && A > 0, Jg = (A) => typeof A == "string" && /^[a-f0-9]{64}$/.test(A), C4 = (A) => Array.isArray(A) && A.length === 3 && A.every((g) => typeof g == "number" && Number.isFinite(g));
 function Lg(A, g) {
   if (!I2(A, "format version selectedFile quality evidence") || A.format !== "brickwright-library-collision-report" || A.version !== 1)
     return !1;
@@ -2382,7 +2389,7 @@ function Lg(A, g) {
   if (!P2(Q) || Q.maxAnalysisBytes !== 16777216 || Q.maxAnalysisTriangles !== 83333 || I.bytes > Q.maxAnalysisBytes || Q.maxTriangles > Q.maxAnalysisTriangles || !Number.isSafeInteger(C.triangles) || C.triangles < 1 || C.triangles > Q.maxTriangles || !I2(C.boundsMm, "min max") || !C4(C.boundsMm.min) || !C4(C.boundsMm.max) || !C.boundsMm.max.every((a, D) => a >= C.boundsMm.min[D] && a - C.boundsMm.min[D] <= Q.maxExtentMm) || !i3(C.signedVolumeMm3))
     return !1;
   const s = A.evidence;
-  if (!I2(s, "fileSha256 checkedOn toMillimetresZUp engine engineVersion qualifierVersion qualified scope geometrySha256 sourceVolumeMm3 hulls certificate nativeCheck") || s.fileSha256 !== I.sha256 || s.checkedOn !== C.checkedOn || !c2(s.toMillimetresZUp, Q.toMillimetresZUp) || s.engine !== "Jolt" || !["1.1.0-bw.9", "1.1.0-bw.10"].includes(s.engineVersion) || s.qualifierVersion !== "brickwright-library-collision/1" || s.qualified !== !0 || s.scope !== "rigid-collision-preview" || !bg(s.geometrySha256) || !i3(s.sourceVolumeMm3))
+  if (!I2(s, "fileSha256 checkedOn toMillimetresZUp engine engineVersion qualifierVersion qualified scope geometrySha256 sourceVolumeMm3 hulls certificate nativeCheck") || s.fileSha256 !== I.sha256 || s.checkedOn !== C.checkedOn || !c2(s.toMillimetresZUp, Q.toMillimetresZUp) || s.engine !== "Jolt" || !["1.1.0-bw.9", "1.1.0-bw.10"].includes(s.engineVersion) || s.qualifierVersion !== "brickwright-library-collision/1" || s.qualified !== !0 || s.scope !== "rigid-collision-preview" || !Jg(s.geometrySha256) || !i3(s.sourceVolumeMm3))
     return !1;
   const E = s.certificate;
   if (!(I2(E, "sourceSHA256 algorithm strategy maxHulls missingVolumeMm3 extraVolumeMm3 relativeError boundsErrorMm tolerance") || I2(E, "sourceSHA256 algorithm strategy maxHulls missingVolumeMm3 extraVolumeMm3 numericalResidualVolumeMm3 relativeError boundsErrorMm tolerance")) || E.sourceSHA256 !== s.geometrySha256 || E.algorithm !== "manifold-compound/v1" || E.strategy !== "bsp" || !Number.isSafeInteger(E.maxHulls) || E.maxHulls < 1 || E.maxHulls > 2048 || !Number.isSafeInteger(s.hulls) || s.hulls < 1 || s.hulls > E.maxHulls)
@@ -2668,7 +2675,7 @@ var h = {
 function G2(A) {
   return A === 10 || A === 13 || A === 8232 || A === 8233;
 }
-function J4(A, g, I) {
+function b4(A, g, I) {
   I === void 0 && (I = A.length);
   for (var C = g; C < I; C++) {
     var e = A.charCodeAt(C);
@@ -2677,7 +2684,7 @@ function J4(A, g, I) {
   }
   return -1;
 }
-var b4 = /[\u1680\u2000-\u200a\u202f\u205f\u3000\ufeff]/, n1 = /(?:\s|\/\/.*|\/\*[^]*?\*\/)*/g, L4 = Object.prototype, eI = L4.hasOwnProperty, iI = L4.toString, p2 = Object.hasOwn || (function(A, g) {
+var J4 = /[\u1680\u2000-\u200a\u202f\u205f\u3000\ufeff]/, n1 = /(?:\s|\/\/.*|\/\*[^]*?\*\/)*/g, L4 = Object.prototype, eI = L4.hasOwnProperty, iI = L4.toString, p2 = Object.hasOwn || (function(A, g) {
   return eI.call(A, g);
 }), q4 = Array.isArray || (function(A) {
   return iI.call(A) === "[object Array]";
@@ -2699,7 +2706,7 @@ var x3 = function(g, I, C) {
 };
 function H4(A, g) {
   for (var I = 1, C = 0; ; ) {
-    var e = J4(A, C, g);
+    var e = b4(A, C, g);
     if (e < 0)
       return new V2(I, g - C);
     ++I, C = e;
@@ -5172,14 +5179,14 @@ mA.regexp_eatFixedHexDigits = function(A, g) {
 };
 var S5 = function(g) {
   this.type = g.type, this.value = g.value, this.start = g.start, this.end = g.end, g.options.locations && (this.loc = new x3(g, g.startLoc, g.endLoc)), g.options.ranges && (this.range = [g.start, g.end]);
-}, bA = l1.prototype;
-bA.next = function(A) {
+}, JA = l1.prototype;
+JA.next = function(A) {
   !A && this.type.keyword && this.containsEsc && this.raiseRecoverable(this.start, "Escape sequence in keyword " + this.type.keyword), this.options.onToken && this.options.onToken(new S5(this)), this.lastTokEnd = this.end, this.lastTokStart = this.start, this.lastTokEndLoc = this.endLoc, this.lastTokStartLoc = this.startLoc, this.nextToken();
 };
-bA.getToken = function() {
+JA.getToken = function() {
   return this.next(), new S5(this);
 };
-typeof Symbol < "u" && (bA[Symbol.iterator] = function() {
+typeof Symbol < "u" && (JA[Symbol.iterator] = function() {
   var A = this;
   return {
     next: function() {
@@ -5191,7 +5198,7 @@ typeof Symbol < "u" && (bA[Symbol.iterator] = function() {
     }
   };
 });
-bA.nextToken = function() {
+JA.nextToken = function() {
   var A = this.curContext();
   if ((!A || !A.preserveSpace) && this.skipSpace(), this.start = this.pos, this.options.locations && (this.startLoc = this.curPosition()), this.pos >= this.input.length)
     return this.finishToken(h.eof);
@@ -5199,23 +5206,23 @@ bA.nextToken = function() {
     return A.override(this);
   this.readToken(this.fullCharCodeAtPos());
 };
-bA.readToken = function(A) {
+JA.readToken = function(A) {
   return T1(A, this.options.ecmaVersion >= 6) || A === 92 ? this.readWord() : this.getTokenFromCode(A);
 };
-bA.fullCharCodeAt = function(A) {
+JA.fullCharCodeAt = function(A) {
   var g = this.input.charCodeAt(A);
   if (g <= 55295 || g >= 56320)
     return g;
   var I = this.input.charCodeAt(A + 1);
   return I <= 56319 || I >= 57344 ? g : (g << 10) + I - 56613888;
 };
-bA.fullCharCodeAtPos = function() {
+JA.fullCharCodeAtPos = function() {
   return this.fullCharCodeAt(this.pos);
 };
-bA.skipBlockComment = function() {
+JA.skipBlockComment = function() {
   var A = this.options.onComment && this.curPosition(), g = this.pos, I = this.input.indexOf("*/", this.pos += 2);
   if (I === -1 && this.raise(this.pos - 2, "Unterminated comment"), this.pos = I + 2, this.options.locations)
-    for (var C = void 0, e = g; (C = J4(this.input, e, this.pos)) > -1; )
+    for (var C = void 0, e = g; (C = b4(this.input, e, this.pos)) > -1; )
       ++this.curLine, e = this.lineStart = C;
   this.options.onComment && this.options.onComment(
     !0,
@@ -5226,7 +5233,7 @@ bA.skipBlockComment = function() {
     this.curPosition()
   );
 };
-bA.skipLineComment = function(A) {
+JA.skipLineComment = function(A) {
   for (var g = this.pos, I = this.options.onComment && this.curPosition(), C = this.input.charCodeAt(this.pos += A); this.pos < this.input.length && !G2(C); )
     C = this.input.charCodeAt(++this.pos);
   this.options.onComment && this.options.onComment(
@@ -5238,7 +5245,7 @@ bA.skipLineComment = function(A) {
     this.curPosition()
   );
 };
-bA.skipSpace = function() {
+JA.skipSpace = function() {
   A: for (; this.pos < this.input.length; ) {
     var A = this.input.charCodeAt(this.pos);
     switch (A) {
@@ -5266,34 +5273,34 @@ bA.skipSpace = function() {
         }
         break;
       default:
-        if (A > 8 && A < 14 || A >= 5760 && b4.test(String.fromCharCode(A)))
+        if (A > 8 && A < 14 || A >= 5760 && J4.test(String.fromCharCode(A)))
           ++this.pos;
         else
           break A;
     }
   }
 };
-bA.finishToken = function(A, g) {
+JA.finishToken = function(A, g) {
   this.end = this.pos, this.options.locations && (this.endLoc = this.curPosition());
   var I = this.type;
   this.type = A, this.value = g, this.updateContext(I);
 };
-bA.readToken_dot = function() {
+JA.readToken_dot = function() {
   var A = this.input.charCodeAt(this.pos + 1);
   if (A >= 48 && A <= 57)
     return this.readNumber(!0);
   var g = this.input.charCodeAt(this.pos + 2);
   return this.options.ecmaVersion >= 6 && A === 46 && g === 46 ? (this.pos += 3, this.finishToken(h.ellipsis)) : (++this.pos, this.finishToken(h.dot));
 };
-bA.readToken_slash = function() {
+JA.readToken_slash = function() {
   var A = this.input.charCodeAt(this.pos + 1);
   return this.exprAllowed ? (++this.pos, this.readRegexp()) : A === 61 ? this.finishOp(h.assign, 2) : this.finishOp(h.slash, 1);
 };
-bA.readToken_mult_modulo_exp = function(A) {
+JA.readToken_mult_modulo_exp = function(A) {
   var g = this.input.charCodeAt(this.pos + 1), I = 1, C = A === 42 ? h.star : h.modulo;
   return this.options.ecmaVersion >= 7 && A === 42 && g === 42 && (++I, C = h.starstar, g = this.input.charCodeAt(this.pos + 2)), g === 61 ? this.finishOp(h.assign, I + 1) : this.finishOp(C, I);
 };
-bA.readToken_pipe_amp = function(A) {
+JA.readToken_pipe_amp = function(A) {
   var g = this.input.charCodeAt(this.pos + 1);
   if (g === A) {
     if (this.options.ecmaVersion >= 12) {
@@ -5305,23 +5312,23 @@ bA.readToken_pipe_amp = function(A) {
   }
   return g === 61 ? this.finishOp(h.assign, 2) : this.finishOp(A === 124 ? h.bitwiseOR : h.bitwiseAND, 1);
 };
-bA.readToken_caret = function() {
+JA.readToken_caret = function() {
   var A = this.input.charCodeAt(this.pos + 1);
   return A === 61 ? this.finishOp(h.assign, 2) : this.finishOp(h.bitwiseXOR, 1);
 };
-bA.readToken_plus_min = function(A) {
+JA.readToken_plus_min = function(A) {
   var g = this.input.charCodeAt(this.pos + 1);
   return g === A ? g === 45 && !this.inModule && this.input.charCodeAt(this.pos + 2) === 62 && (this.lastTokEnd === 0 || M1.test(this.input.slice(this.lastTokEnd, this.pos))) ? (this.skipLineComment(3), this.skipSpace(), this.nextToken()) : this.finishOp(h.incDec, 2) : g === 61 ? this.finishOp(h.assign, 2) : this.finishOp(h.plusMin, 1);
 };
-bA.readToken_lt_gt = function(A) {
+JA.readToken_lt_gt = function(A) {
   var g = this.input.charCodeAt(this.pos + 1), I = 1;
   return g === A ? (I = A === 62 && this.input.charCodeAt(this.pos + 2) === 62 ? 3 : 2, this.input.charCodeAt(this.pos + I) === 61 ? this.finishOp(h.assign, I + 1) : this.finishOp(h.bitShift, I)) : g === 33 && A === 60 && !this.inModule && this.input.charCodeAt(this.pos + 2) === 45 && this.input.charCodeAt(this.pos + 3) === 45 ? (this.skipLineComment(4), this.skipSpace(), this.nextToken()) : (g === 61 && (I = 2), this.finishOp(h.relational, I));
 };
-bA.readToken_eq_excl = function(A) {
+JA.readToken_eq_excl = function(A) {
   var g = this.input.charCodeAt(this.pos + 1);
   return g === 61 ? this.finishOp(h.equality, this.input.charCodeAt(this.pos + 2) === 61 ? 3 : 2) : A === 61 && g === 62 && this.options.ecmaVersion >= 6 ? (this.pos += 2, this.finishToken(h.arrow)) : this.finishOp(A === 61 ? h.eq : h.prefix, 1);
 };
-bA.readToken_question = function() {
+JA.readToken_question = function() {
   var A = this.options.ecmaVersion;
   if (A >= 11) {
     var g = this.input.charCodeAt(this.pos + 1);
@@ -5341,13 +5348,13 @@ bA.readToken_question = function() {
   }
   return this.finishOp(h.question, 1);
 };
-bA.readToken_numberSign = function() {
+JA.readToken_numberSign = function() {
   var A = this.options.ecmaVersion, g = 35;
   if (A >= 13 && (++this.pos, g = this.fullCharCodeAtPos(), T1(g, !0) || g === 92))
     return this.finishToken(h.privateId, this.readWord1());
   this.raise(this.pos, "Unexpected character '" + W1(g) + "'");
 };
-bA.getTokenFromCode = function(A) {
+JA.getTokenFromCode = function(A) {
   switch (A) {
     // The interpretation of a dot depends on whether it is followed
     // by a digit or another two dots.
@@ -5434,11 +5441,11 @@ bA.getTokenFromCode = function(A) {
   }
   this.raise(this.pos, "Unexpected character '" + W1(A) + "'");
 };
-bA.finishOp = function(A, g) {
+JA.finishOp = function(A, g) {
   var I = this.input.slice(this.pos, this.pos + g);
   return this.pos += g, this.finishToken(A, I);
 };
-bA.readRegexp = function() {
+JA.readRegexp = function() {
   for (var A, g, I = this.pos; ; ) {
     this.pos >= this.input.length && this.raise(I, "Unterminated regular expression");
     var C = this.input.charAt(this.pos);
@@ -5468,7 +5475,7 @@ bA.readRegexp = function() {
   }
   return this.finishToken(h.regexp, { pattern: e, flags: B, value: Q });
 };
-bA.readInt = function(A, g, I) {
+JA.readInt = function(A, g, I) {
   for (var C = this.options.ecmaVersion >= 12 && g === void 0, e = I && this.input.charCodeAt(this.pos) === 48, q = this.pos, B = 0, i = 0, Q = 0, s = g ?? 1 / 0; Q < s; ++Q, ++this.pos) {
     var E = this.input.charCodeAt(this.pos), r = void 0;
     if (C && E === 95) {
@@ -5487,13 +5494,13 @@ function RI(A, g) {
 function r0(A) {
   return typeof BigInt != "function" ? null : BigInt(A.replace(/_/g, ""));
 }
-bA.readRadixNumber = function(A) {
+JA.readRadixNumber = function(A) {
   var g = this.pos;
   this.pos += 2;
   var I = this.readInt(A);
   return I == null && this.raise(this.start + 2, "Expected number in radix " + A), this.options.ecmaVersion >= 11 && this.input.charCodeAt(this.pos) === 110 ? (I = r0(this.input.slice(g, this.pos)), ++this.pos) : T1(this.fullCharCodeAtPos()) && this.raise(this.pos, "Identifier directly after number"), this.finishToken(h.num, I);
 };
-bA.readNumber = function(A) {
+JA.readNumber = function(A) {
   var g = this.pos;
   !A && this.readInt(10, void 0, !0) === null && this.raise(g, "Invalid number");
   var I = this.pos - g >= 2 && this.input.charCodeAt(g) === 48;
@@ -5507,7 +5514,7 @@ bA.readNumber = function(A) {
   var q = RI(this.input.slice(g, this.pos), I);
   return this.finishToken(h.num, q);
 };
-bA.readCodePoint = function() {
+JA.readCodePoint = function() {
   var A = this.input.charCodeAt(this.pos), g;
   if (A === 123) {
     this.options.ecmaVersion < 6 && this.unexpected();
@@ -5517,7 +5524,7 @@ bA.readCodePoint = function() {
     g = this.readHexChar(4);
   return g;
 };
-bA.readString = function(A) {
+JA.readString = function(A) {
   for (var g = "", I = ++this.pos; ; ) {
     this.pos >= this.input.length && this.raise(this.start, "Unterminated string constant");
     var C = this.input.charCodeAt(this.pos);
@@ -5528,7 +5535,7 @@ bA.readString = function(A) {
   return g += this.input.slice(I, this.pos++), this.finishToken(h.string, g);
 };
 var D0 = {};
-bA.tryReadTemplateToken = function() {
+JA.tryReadTemplateToken = function() {
   this.inTemplateElement = !0;
   try {
     this.readTmplToken();
@@ -5540,12 +5547,12 @@ bA.tryReadTemplateToken = function() {
   }
   this.inTemplateElement = !1;
 };
-bA.invalidStringToken = function(A, g) {
+JA.invalidStringToken = function(A, g) {
   if (this.inTemplateElement && this.options.ecmaVersion >= 9)
     throw D0;
   this.raise(A, g);
 };
-bA.readTmplToken = function() {
+JA.readTmplToken = function() {
   for (var A = "", g = this.pos; ; ) {
     this.pos >= this.input.length && this.raise(this.start, "Unterminated template");
     var I = this.input.charCodeAt(this.pos);
@@ -5570,7 +5577,7 @@ bA.readTmplToken = function() {
       ++this.pos;
   }
 };
-bA.readInvalidTemplateToken = function() {
+JA.readInvalidTemplateToken = function() {
   for (; this.pos < this.input.length; this.pos++)
     switch (this.input[this.pos]) {
       case "\\":
@@ -5595,7 +5602,7 @@ bA.readInvalidTemplateToken = function() {
     }
   this.raise(this.start, "Unterminated template");
 };
-bA.readEscapedChar = function(A) {
+JA.readEscapedChar = function(A) {
   var g = this.input.charCodeAt(++this.pos);
   switch (++this.pos, g) {
     case 110:
@@ -5651,11 +5658,11 @@ bA.readEscapedChar = function(A) {
       return G2(g) ? (this.options.locations && (this.lineStart = this.pos, ++this.curLine), "") : String.fromCharCode(g);
   }
 };
-bA.readHexChar = function(A) {
+JA.readHexChar = function(A) {
   var g = this.pos, I = this.readInt(16, A);
   return I === null && this.invalidStringToken(g, "Bad character escape sequence"), I;
 };
-bA.readWord1 = function() {
+JA.readWord1 = function() {
   this.containsEsc = !1;
   for (var A = "", g = !0, I = this.pos, C = this.options.ecmaVersion >= 6; this.pos < this.input.length; ) {
     var e = this.fullCharCodeAtPos();
@@ -5673,7 +5680,7 @@ bA.readWord1 = function() {
   }
   return A + this.input.slice(I, this.pos);
 };
-bA.readWord = function() {
+JA.readWord = function() {
   var A = this.readWord1(), g = h.name;
   return this.keywords.test(A) && (g = u5[A]), this.finishToken(g, A);
 };
@@ -5697,7 +5704,7 @@ l1.acorn = {
   isNewLine: G2,
   lineBreak: M1,
   lineBreakG: CI,
-  nonASCIIwhitespace: b4
+  nonASCIIwhitespace: J4
 };
 function UI(A, g) {
   return l1.parse(A, g);
@@ -5753,7 +5760,7 @@ function G5(A, g) {
     throw new Error(t("Enter one finite bulge per outline point."));
   return t4(m0(A, g, !0));
 }
-function JI(A, g) {
+function bI(A, g) {
   if (!Array.isArray(A) || A.length < 2 || A.length > h0 || !A.every(R2))
     throw new Error(t("An open path needs 2–256 finite points within 100000 mm of the sketch origin."));
   const I = A[0], C = A.at(-1);
@@ -5790,7 +5797,7 @@ function m0(A, g, I) {
 function w0(A) {
   return typeof A == "string" && A.length > 0 && A.length <= 255 && A === A.trim() && !/[\u0000-\u001f\u007f<>/\\":;?*|=]/.test(A);
 }
-const bI = 16, LI = 1024, v1 = () => new Error(t("A region needs one outside boundary and separate holes that do not touch or cross.")), v2 = (A) => A.map((g, I) => [g, A[(I + 1) % A.length]]);
+const JI = 16, LI = 1024, v1 = () => new Error(t("A region needs one outside boundary and separate holes that do not touch or cross.")), v2 = (A) => A.map((g, I) => [g, A[(I + 1) % A.length]]);
 function HI([A, g], I) {
   let C = !1;
   for (const [[e, q], [B, i]] of v2(I))
@@ -5824,7 +5831,7 @@ function B3(A, g) {
   return A.loop.kind === "circle" ? Math.hypot(I - A.loop.center[0], C - A.loop.center[1]) < A.loop.radius : HI(g.points[0], A.points);
 }
 function _I(A, g = (I) => typeof I == "number" ? I : NaN) {
-  if (!Array.isArray(A) || A.length < 2 || A.length > bI)
+  if (!Array.isArray(A) || A.length < 2 || A.length > JI)
     throw v1();
   const I = /* @__PURE__ */ new Set();
   let C = 0;
@@ -6137,18 +6144,18 @@ function B2(A, g, I = {}) {
           return (P.boolean || P.length || P.angle) && MA(t("function requires a dimensionless argument")), P.value;
         }), K = (c - G) / f, u = f === 0 ? 0 : Math.max(0, Math.floor(K + 4 * Number.EPSILON * Math.max(1, Math.abs(K))) + 1);
         (!f || !Number.isSafeInteger(u)) && MA(t("Invalid range reduction")), u > 256 && m2(t("Range reduction exceeds 256 values"));
-        const b = s.get(w);
-        let J;
+        const J = s.get(w);
+        let b;
         try {
           for (let W = 0; W < u; W++) {
             if (s.set(w, e(G + W * f)), a.args.length === 6 && !q(n(a.args[4])))
               continue;
             const P = n(a.args.at(-1));
-            J = n4(a.name === "minRange" ? "min" : "max", J ? [J, P] : [P]);
+            b = n4(a.name === "minRange" ? "min" : "max", b ? [b, P] : [P]);
           }
-          return J || MA(t("Range reduction contains no values")), J;
+          return b || MA(t("Range reduction contains no values")), b;
         } finally {
-          b ? s.set(w, b) : s.delete(w);
+          J ? s.set(w, J) : s.delete(w);
         }
       }
       if (a.name === "sumRange" || a.name === "filterAt") {
@@ -6157,23 +6164,23 @@ function B2(A, g, I = {}) {
         const G = a.args[0].name, [c, f, K] = a.args.slice(1, 4).map((lA) => {
           const V = n(lA);
           return (V.boolean || V.length || V.angle) && MA(t("function requires a dimensionless argument")), V.value;
-        }), u = (f - c) / K, b = K === 0 ? 0 : Math.max(0, Math.floor(u + 4 * Number.EPSILON * Math.max(1, Math.abs(u))) + 1);
-        (!K || !Number.isSafeInteger(b) || b > 256) && MA(t("Range reduction exceeds 256 values"));
-        const J = a.name === "filterAt" ? n(a.args[5]) : void 0;
-        J && (J.boolean || J.length || J.angle || !Number.isInteger(J.value) || J.value < 0) && MA(t("List index is outside the available values"));
+        }), u = (f - c) / K, J = K === 0 ? 0 : Math.max(0, Math.floor(u + 4 * Number.EPSILON * Math.max(1, Math.abs(u))) + 1);
+        (!K || !Number.isSafeInteger(J) || J > 256) && MA(t("Range reduction exceeds 256 values"));
+        const b = a.name === "filterAt" ? n(a.args[5]) : void 0;
+        b && (b.boolean || b.length || b.angle || !Number.isInteger(b.value) || b.value < 0) && MA(t("List index is outside the available values"));
         const W = s.get(G);
         let P = 0, _ = 0;
         try {
-          for (let lA = 0; lA < b; lA++) {
+          for (let lA = 0; lA < J; lA++) {
             const V = c + lA * K;
             s.set(G, e(V));
             const CA = n(a.args[4]);
             if (a.name === "sumRange")
               (CA.boolean || CA.length || CA.angle) && MA(t("function requires a dimensionless argument")), P += CA.value;
-            else if (q(CA) && _++ === J.value)
+            else if (q(CA) && _++ === b.value)
               return e(V);
           }
-          return J && MA(t("List index is outside the available values")), i2(e(P));
+          return b && MA(t("List index is outside the available values")), i2(e(P));
         } finally {
           W ? s.set(G, W) : s.delete(G);
         }
@@ -6386,7 +6393,7 @@ function j2(A, g) {
       return { contour: [[-C, -e], [C, -e], [C, e], [-C, e]], edgeIds: ["bottom", "right", "top", "left"].map((q) => `${I.id}:${q}`) };
     }
     if (I.kind === "path")
-      return { contour: JI($I(I, g), I.bulges), edgeIds: I.points.slice(0, -1).map((C, e) => `${I.id}:edge-${e}`) };
+      return { contour: bI($I(I, g), I.bulges), edgeIds: I.points.slice(0, -1).map((C, e) => `${I.id}:edge-${e}`) };
     if (I.kind === "outline")
       return { contour: G5(I.points, I.bulges), edgeIds: I.points.map((e, q) => `${I.id}:edge-${q}`) };
     if (I.kind === "circle") {
@@ -6497,7 +6504,7 @@ function I8(A, g, I) {
     return C + q + B * I;
   }, 0);
 }
-function b2(A, g = 0) {
+function J2(A, g = 0) {
   g > 32 && A.limited(t("Profile nesting exceeds 32"));
   const I = A.take(), C = { name: I.text, at: I.at, scalars: [], parts: [] };
   if (A.expect("("), C.name === "point")
@@ -6511,11 +6518,11 @@ function b2(A, g = 0) {
         A.expect(",");
       A.expect("]"), A.expect(",");
     }
-    C.parts.push(b2(A, g + 1));
+    C.parts.push(J2(A, g + 1));
   } else if (C.name === "pointChoose")
-    C.scalars.push(A.scalar([","])), A.expect(","), C.parts.push(b2(A, g + 1)), A.expect(","), C.parts.push(b2(A, g + 1));
+    C.scalars.push(A.scalar([","])), A.expect(","), C.parts.push(J2(A, g + 1)), A.expect(","), C.parts.push(J2(A, g + 1));
   else if (C.name === "pointConcat")
-    for (; A.peek() !== ")" && (C.parts.push(b2(A, g + 1)), C.parts.length > 256 && A.limited(t("Profile point budget exceeded"), C.at), A.peek() === ","); )
+    for (; A.peek() !== ")" && (C.parts.push(J2(A, g + 1)), C.parts.length > 256 && A.limited(t("Profile point budget exceeded"), C.at), A.peek() === ","); )
       A.expect(",");
   else
     A.fail(t("Invalid generated polygon sequence"), C.at);
@@ -6604,7 +6611,7 @@ function _1(A, g = 0) {
       C.scalars.push(A.scalar([","])), A.expect(",");
     C.profiles.push(_1(A, g + 1));
   } else if (C.name === "polygonGenerated2d")
-    C.sequence = b2(A), A.peek() === "," && (A.expect(","), C.paths = e());
+    C.sequence = J2(A), A.peek() === "," && (A.expect(","), C.paths = e());
   else if (C.name === "polygon2d")
     C.points = e(), A.peek() === "," && (A.expect(","), C.paths = e());
   else if (["circle2d", "rectangle2d"].includes(C.name))
@@ -6787,7 +6794,7 @@ function C8(A) {
         if (++B > 131072)
           throw new Error(t("Loft exceeds the section or vertex budget"));
         const f = E[c], K = E[(c + 1) % C];
-        [0, 1].every((b) => Math.max(Math.min(w[b], G[b]), Math.min(f[b], K[b])) <= Math.min(Math.max(w[b], G[b]), Math.max(f[b], K[b])) + r * 1e-10) && x(w, G, f) * x(w, G, K) <= n * n && x(f, K, w) * x(f, K, G) <= n * n && I();
+        [0, 1].every((J) => Math.max(Math.min(w[J], G[J]), Math.min(f[J], K[J])) <= Math.min(Math.max(w[J], G[J]), Math.max(f[J], K[J])) + r * 1e-10) && x(w, G, f) * x(w, G, K) <= n * n && x(f, K, w) * x(f, K, G) <= n * n && I();
       }
     }
   }
@@ -6840,8 +6847,8 @@ function q8(A, g, I, C, e = 0, q = 360, B) {
       return E.push([0, 0, G]), { ids: Array(n).fill(K), center: K, tip: !0 };
     }
     const c = Array.from({ length: n }, (K, u) => {
-      const b = Q && e === 0 ? u * 2 * Math.PI / s : i.start + u * i.span / s, J = E.length;
-      return E.push([w[0] * Math.cos(b), w[1] * Math.sin(b), G]), J;
+      const J = Q && e === 0 ? u * 2 * Math.PI / s : i.start + u * i.span / s, b = E.length;
+      return E.push([w[0] * Math.cos(J), w[1] * Math.sin(J), G]), b;
     }), f = E.length;
     return E.push([0, 0, G]), { ids: c, center: f, tip: !1 };
   }, D = a(A, -I / 2), x = a(g, I / 2), N = (w, G, c) => {
@@ -7051,16 +7058,16 @@ function B8(A) {
   const K = structuredClone({ ...x, ...N });
   for (const [d, iA] of Object.entries(A.parameters))
     Object.hasOwn(x, d) || I(t`Unknown parameter override “${d}”`), (typeof iA != "string" || !iA.trim()) && I(t`Invalid override for “${d}”`), K[d].expression = iA;
-  let u = /* @__PURE__ */ new Map(), b = 0;
-  const J = /* @__PURE__ */ Object.create(null), W = /* @__PURE__ */ new WeakMap(), P = /* @__PURE__ */ new Set();
+  let u = /* @__PURE__ */ new Map(), J = 0;
+  const b = /* @__PURE__ */ Object.create(null), W = /* @__PURE__ */ new WeakMap(), P = /* @__PURE__ */ new Set();
   let _ = 0;
   function lA(d, iA) {
     if (iA?.has(d))
       return iA.get(d);
     if (u.has(d))
       return u.get(d);
-    if (Object.hasOwn(J, d))
-      return J[d];
+    if (Object.hasOwn(b, d))
+      return b[d];
     const T = K[d];
     if (!T)
       throw new Error(t`Unknown parameter “${d}”`);
@@ -7080,7 +7087,7 @@ function B8(A) {
           throw new Error(t`Expected ${i1}`);
         q1 = { ...FA, length: z, angle: qA };
       }
-      return QA.size < 4096 && QA.set(xA, q1), Object.hasOwn(x, d) && (J[d] = q1), q1;
+      return QA.size < 4096 && QA.set(xA, q1), Object.hasOwn(x, d) && (b[d] = q1), q1;
     } finally {
       P.delete(d);
     }
@@ -7112,7 +7119,7 @@ function B8(A) {
   }
   const CA = /* @__PURE__ */ new WeakMap(), uA = /* @__PURE__ */ new Set();
   function NA(d, iA = 0) {
-    if (++b > 16384)
+    if (++J > 16384)
       throw new K1(t("Code evaluation budget exceeded"), d.at, g, "resource-limit");
     if (iA > 32 && C(t("Dependency depth exceeds 32"), d.at), d.kind === "reference") {
       let z = CA.get(u);
@@ -7166,7 +7173,7 @@ function B8(A) {
     }
     if (d.name === "extrudeProfile" || d.name === "revolve") {
       const z = k2(d.profile, V, I, () => {
-        ++b > 16384 && C(t("Code evaluation budget exceeded"), d.at);
+        ++J > 16384 && C(t("Code evaluation budget exceeded"), d.at);
       }, (qA, aA, rA) => {
         const YA = u;
         u = new Map(YA), u.set(qA, { value: aA, length: 0, angle: 0 });
@@ -7349,7 +7356,7 @@ function B8(A) {
     };
     XA = iA(XA), s1 = r1 = 0, D1(XA);
   }
-  return { shape: XA, parameters: x, values: Object.fromEntries(Object.keys(x).map((d) => [d, J[d]])), expandedNodes: s1, estimatedFaces: r1 };
+  return { shape: XA, parameters: x, values: Object.fromEntries(Object.keys(x).map((d) => [d, b[d]])), expandedNodes: s1, estimatedFaces: r1 };
 }
 const X3 = ["rounded-box", "capsule", "tube", "washer", "cone", "frustum", "polygon", "ellipse", "wedge", "pyramid", "round-roof", "torus"], $3 = ["counterbore", "countersink", "port", "boss", "rib"], A5 = ["curved-cone", "hemisphere", "paraboloid", "vase", "teardrop", "finishing-washer"], g5 = ["bent-tube", "loft", "dovetail"], Q8 = [["flat", "Flat end"], ["chamfer", "Chamfered end"], ["cone", "Cone point"], ["dog", "Dog point"], ["cup", "Cup point"], ["oval", "Rounded point"], ["gimlet", "Threaded gimlet point"]];
 function r4(A) {
@@ -7628,25 +7635,25 @@ function s8(A, g, I = {}) {
     (Object.hasOwn(x, "id") || Object.hasOwn(x, "kind")) && e(t("Identity and kind belong to the design call"), n);
     let N;
     if (a === "generated") {
-      (D.length !== 3 || "generator" in x || Y0.some((b) => Object.hasOwn(x, b))) && e(t("Generator recipes belong to the generated call"), n);
+      (D.length !== 3 || "generator" in x || Y0.some((J) => Object.hasOwn(x, J))) && e(t("Generator recipes belong to the generated call"), n);
       const w = D[2] === null ? void 0 : p0(D[2]);
       let G = Object.hasOwn(g.nodes, D[0]) ? g.nodes[D[0]] : void 0, c = g;
       G || ((!w || !I.regenerate) && e(t("Generator source edits need the shape reconstruction callback"), n), c = p3(I.regenerate(w, x.name ?? w.preset)), (c.roots.length !== 1 || c.joints?.length || c.parametric || c.sketches || c.provenance) && e(t("Expected one generated body"), n), G = c.nodes[c.roots[0]]);
-      const f = G.id, K = /* @__PURE__ */ new Set(), u = (b) => {
-        if (K.has(b))
+      const f = G.id, K = /* @__PURE__ */ new Set(), u = (J) => {
+        if (K.has(J))
           return;
-        K.add(b);
-        const J = c.nodes[b];
-        d2(J).forEach(u);
+        K.add(J);
+        const b = c.nodes[J];
+        d2(b).forEach(u);
       };
       u(f);
-      for (const b of K)
-        if (b !== f) {
-          if (i.has(b)) {
+      for (const J of K)
+        if (J !== f) {
+          if (i.has(J)) {
             w && e(t("Edit generated construction through its recipe, or detach the generator"), n);
             continue;
           }
-          Object.hasOwn(B.nodes, b) && e(t("Generated construction has conflicting identifiers"), n), B.nodes[b] = D4(c.nodes[b]);
+          Object.hasOwn(B.nodes, J) && e(t("Generated construction has conflicting identifiers"), n), B.nodes[J] = D4(c.nodes[J]);
         }
       N = { ...D4(G), ...x, id: D[0] }, w ? N.generator = w : delete N.generator;
     } else
@@ -7756,7 +7763,7 @@ function R5(A) {
 function I1(A) {
   throw new Error(t`Invalid CAD project: ${A}`);
 }
-const E3 = (A) => !!A && typeof A == "object" && !Array.isArray(A), e2 = (A, g = -1e6, I = 1e6) => typeof A == "number" && Number.isFinite(A) && A >= g && A <= I, h4 = (A, g = 160) => typeof A == "string" && A.trim().length > 0 && A.length <= g && !/[\u0000-\u001f]/.test(A), N2 = (A) => typeof A == "string" && /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,95}$/.test(A) && !["constructor", "prototype", "__proto__"].includes(A), J2 = (A, g = -1e6, I = 1e6) => Array.isArray(A) && A.length === 3 && A.every((C) => e2(C, g, I));
+const E3 = (A) => !!A && typeof A == "object" && !Array.isArray(A), e2 = (A, g = -1e6, I = 1e6) => typeof A == "number" && Number.isFinite(A) && A >= g && A <= I, h4 = (A, g = 160) => typeof A == "string" && A.trim().length > 0 && A.length <= g && !/[\u0000-\u001f]/.test(A), N2 = (A) => typeof A == "string" && /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,95}$/.test(A) && !["constructor", "prototype", "__proto__"].includes(A), b2 = (A, g = -1e6, I = 1e6) => Array.isArray(A) && A.length === 3 && A.every((C) => e2(C, g, I));
 function w8(A) {
   (!E3(A) || A.format !== "brickwright-cad" || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27].includes(A.version) || A.units !== "mm") && I1(t("unsupported format, version or units")), (!N2(A.id) || !h4(A.title) || !E3(A.nodes) || !Array.isArray(A.roots)) && I1(t("missing document identity, nodes or roots"));
   const g = A.nodes, I = Object.entries(g);
@@ -7764,13 +7771,13 @@ function w8(A) {
   for (const [s, E] of I) {
     (!N2(s) || !E3(E) || E.id !== s || !h4(E.name) || typeof E.color != "string" || !/^#[0-9a-fA-F]{6}$/.test(E.color)) && I1(t`bad node ${s}`), E.role !== void 0 && (A.version < 7 || !["solid", "hole"].includes(String(E.role)) || E.reference === !0) && I1(t("Invalid solid/hole role")), E.useHoleRoles !== void 0 && (A.version < 7 || E.kind !== "boolean" || E.operation !== "union" || E.useHoleRoles !== !0) && I1(t("Invalid solid/hole combination"));
     const r = E.transform;
-    if (E.generator !== void 0 && (A.version === 1 && I1(t("shape recipes require version 2 or later")), p0(E.generator)), (!E3(r) || !J2(r.position) || !J2(r.rotation, -36e4, 36e4) || !J2(r.scale, 1e-3, 1e3)) && I1(t`bad transform on ${s}`), E.generator?.preset === "cube") {
+    if (E.generator !== void 0 && (A.version === 1 && I1(t("shape recipes require version 2 or later")), p0(E.generator)), (!E3(r) || !b2(r.position) || !b2(r.rotation, -36e4, 36e4) || !b2(r.scale, 1e-3, 1e3)) && I1(t`bad transform on ${s}`), E.generator?.preset === "cube") {
       const n = E.size, a = E.generator.values.edge;
-      (E.kind !== "box" || !J2(n, 0.01, 1e5) || n.some((D) => D !== a) || r.scale.some((D) => D !== r.scale[0])) && I1(t("Cube edges are linked; use a Box for independent dimensions"));
+      (E.kind !== "box" || !b2(n, 0.01, 1e5) || n.some((D) => D !== a) || r.scale.some((D) => D !== r.scale[0])) && I1(t("Cube edges are linked; use a Box for independent dimensions"));
     }
     switch (E.kind) {
       case "box":
-        J2(E.size, 0.01, 1e5) || I1(t`bad box dimensions on ${s}`);
+        b2(E.size, 0.01, 1e5) || I1(t`bad box dimensions on ${s}`);
         break;
       case "cylinder":
         (!e2(E.radius, 0.01, 5e4) || !e2(E.height, 0.01, 1e5) || !Number.isInteger(E.segments) || !e2(E.segments, 12, 256)) && I1(t`bad cylinder on ${s}`);
@@ -7817,7 +7824,7 @@ function w8(A) {
     const E = g[s];
     d2(E).forEach(Q);
   };
-  return A.roots.forEach(Q), i.size !== I.length && I1(t("orphaned nodes")), zg(A), D8(A), Jg(A), zI(A), A8(A), fg(A), r8(A), A;
+  return A.roots.forEach(Q), i.size !== I.length && I1(t("orphaned nodes")), zg(A), D8(A), bg(A), zI(A), A8(A), fg(A), r8(A), A;
 }
 function p3(A) {
   return structuredClone(w8(A));
@@ -7835,7 +7842,7 @@ function c4(A) {
   return A instanceof Uint8Array || ArrayBuffer.isView(A) && A.constructor.name === "Uint8Array" && "BYTES_PER_ELEMENT" in A && A.BYTES_PER_ELEMENT === 1;
 }
 const x8 = (A) => A ? `"${A}" ` : "";
-function J0(A, g, I = "") {
+function b0(A, g, I = "") {
   if (c4(A) && g === void 0)
     return A;
   const C = c4(A), e = "", q = C ? `length=${A.length}` : `type=${typeof A}`, B = x8(I) + "expected Uint8Array" + e + ", got " + q;
@@ -7859,7 +7866,7 @@ function w4(A, g = !0) {
     throw new Error("digest() was already called");
 }
 function k8(A, g) {
-  J0(A, void 0, "output");
+  b0(A, void 0, "output");
   const I = g.outputLen;
   if (!(A.length >= I))
     throw new RangeError('"output" expected length >= ' + I);
@@ -7871,7 +7878,7 @@ function d4(...A) {
 function I5(A) {
   return new DataView(A.buffer, A.byteOffset, A.byteLength);
 }
-function b1(A, g) {
+function J1(A, g) {
   return A << 32 - g | A >>> g;
 }
 function S8(A, g, I = "opts") {
@@ -7912,7 +7919,7 @@ class R8 {
     this.blockLen = g, this.outputLen = I, this.padOffset = C, this.isLE = e, this.buffer = new Uint8Array(g), this.view = I5(this.buffer);
   }
   update(g) {
-    w4(this), J0(g);
+    w4(this), b0(g);
     const { view: I, buffer: C, blockLen: e } = this, q = g.length;
     let B = !1;
     for (let i = 0; i < q; ) {
@@ -8060,12 +8067,12 @@ class Y8 extends R8 {
     for (let n = 0; n < 16; n++, C += 4)
       C2[n] = I.getUint32(C, !1);
     for (let n = 16; n < 64; n++) {
-      const a = C2[n - 15], D = C2[n - 2], x = b1(a, 7) ^ b1(a, 18) ^ a >>> 3, N = b1(D, 17) ^ b1(D, 19) ^ D >>> 10;
+      const a = C2[n - 15], D = C2[n - 2], x = J1(a, 7) ^ J1(a, 18) ^ a >>> 3, N = J1(D, 17) ^ J1(D, 19) ^ D >>> 10;
       C2[n] = N + C2[n - 7] + x + C2[n - 16] | 0;
     }
     let { A: e, B: q, C: B, D: i, E: Q, F: s, G: E, H: r } = this;
     for (let n = 0; n < 64; n++) {
-      const a = b1(Q, 6) ^ b1(Q, 11) ^ b1(Q, 25), D = r + a + p8(Q, s, E) + U8[n] + C2[n] | 0, N = (b1(e, 2) ^ b1(e, 13) ^ b1(e, 22)) + f8(e, q, B) | 0;
+      const a = J1(Q, 6) ^ J1(Q, 11) ^ J1(Q, 25), D = r + a + p8(Q, s, E) + U8[n] + C2[n] | 0, N = (J1(e, 2) ^ J1(e, 13) ^ J1(e, 22)) + f8(e, q, B) | 0;
       r = E, E = s, s = Q, Q = i + D | 0, i = B, B = q, q = e, e = D + N | 0;
     }
     e = e + this.A | 0, q = q + this.B | 0, B = B + this.C | 0, i = i + this.D | 0, Q = Q + this.E | 0, s = s + this.F | 0, E = E + this.G | 0, r = r + this.H | 0, this.set(e, q, B, i, Q, s, E, r);
@@ -8077,16 +8084,16 @@ class Y8 extends R8 {
     this.destroyed = !0, this.set(0, 0, 0, 0, 0, 0, 0, 0), d4(this.buffer);
   }
 }
-class J8 extends Y8 {
+class b8 extends Y8 {
   constructor() {
     super(32, F8);
   }
 }
 const u4 = /* @__PURE__ */ K8(
-  () => new J8(),
+  () => new b8(),
   /* @__PURE__ */ G8(1)
 );
-async function b0(A) {
+async function J0(A) {
   let g;
   if (globalThis.crypto?.subtle)
     try {
@@ -8172,7 +8179,7 @@ class P1 extends Error {
     this.name = "GeometryResourceLimitError";
   }
 }
-function b8(A, g) {
+function J8(A, g) {
   const I = [];
   for (const C of g) {
     const e = [0, 0, 0];
@@ -8197,7 +8204,7 @@ function b8(A, g) {
         if (w === 0 && G === r.length - 1)
           continue;
         const c = r[w], f = r[(w + 1) % r.length], K = r[G], u = r[(G + 1) % r.length];
-        if ([0, 1].every((J) => Math.max(Math.min(c[J], f[J]), Math.min(K[J], u[J])) <= Math.min(Math.max(c[J], f[J]), Math.max(K[J], u[J])) + Q * 1e-10) && n(c, f, K) * n(c, f, u) <= x * x && n(K, u, c) * n(K, u, f) <= x * x)
+        if ([0, 1].every((b) => Math.max(Math.min(c[b], f[b]), Math.min(K[b], u[b])) <= Math.min(Math.max(c[b], f[b]), Math.max(K[b], u[b])) + Q * 1e-10) && n(c, f, K) * n(c, f, u) <= x * x && n(K, u, c) * n(K, u, f) <= x * x)
           throw new Error(t("Polyhedron face intersects itself"));
       }
     const N = C.map((w, G) => G);
@@ -8205,7 +8212,7 @@ function b8(A, g) {
       let w = !1;
       for (let G = 0; G < N.length; G++) {
         const c = N[(G + N.length - 1) % N.length], f = N[G], K = N[(G + 1) % N.length];
-        if (!(D * n(r[c], r[f], r[K]) <= x || N.some((b) => b !== c && b !== f && b !== K && D * n(r[c], r[f], r[b]) >= -x && D * n(r[f], r[K], r[b]) >= -x && D * n(r[K], r[c], r[b]) >= -x))) {
+        if (!(D * n(r[c], r[f], r[K]) <= x || N.some((J) => J !== c && J !== f && J !== K && D * n(r[c], r[f], r[J]) >= -x && D * n(r[f], r[K], r[J]) >= -x && D * n(r[K], r[c], r[J]) >= -x))) {
           I.push(C[c], C[f], C[K]), N.splice(G, 1), w = !0;
           break;
         }
@@ -8309,10 +8316,10 @@ function x9(A) {
       else if (f === "l")
         G(w());
       else if (f === "q" || f === "b") {
-        const K = w(), u = w(), b = f === "b" ? w() : void 0, J = D;
+        const K = w(), u = w(), J = f === "b" ? w() : void 0, b = D;
         for (let W = 1; W <= A.curveSteps; W++) {
           const P = W / A.curveSteps, _ = 1 - P;
-          G(f === "q" ? [_ * _ * J[0] + 2 * _ * P * u[0] + P * P * K[0], _ * _ * J[1] + 2 * _ * P * u[1] + P * P * K[1]] : [_ ** 3 * J[0] + 3 * _ * _ * P * u[0] + 3 * _ * P * P * b[0] + P ** 3 * K[0], _ ** 3 * J[1] + 3 * _ * _ * P * u[1] + 3 * _ * P * P * b[1] + P ** 3 * K[1]]);
+          G(f === "q" ? [_ * _ * b[0] + 2 * _ * P * u[0] + P * P * K[0], _ * _ * b[1] + 2 * _ * P * u[1] + P * P * K[1]] : [_ ** 3 * b[0] + 3 * _ * _ * P * u[0] + 3 * _ * P * P * J[0] + P ** 3 * K[0], _ ** 3 * b[1] + 3 * _ * _ * P * u[1] + 3 * _ * P * P * J[1] + P ** 3 * K[1]]);
         }
       } else
         throw new Error(t("Unsupported bundled font outline"));
@@ -8456,13 +8463,13 @@ async function N9(A = {}) {
         const OA = [];
         for (let g1 = 0; g1 < k; ++g1)
           OA[g1] = z(GA + 8 * g1, "double");
-        const J1 = [];
+        const b1 = [];
         for (let g1 = 0; g1 < 3; ++g1)
-          J1[g1] = z(LA + 8 * g1, "double");
+          b1[g1] = z(LA + 8 * g1, "double");
         const g2 = [];
         for (let g1 = 0; g1 < O; ++g1)
           g2[g1] = z(A1 + 8 * g1, "double");
-        R(OA, J1, g2);
+        R(OA, b1, g2);
         for (let g1 = 0; g1 < k; ++g1)
           qA(GA + 8 * g1, OA[g1], "double");
       }, "viii"), hA = this._SetProperties(k, $);
@@ -8502,8 +8509,8 @@ async function N9(A = {}) {
       return this._Simplify(k);
     };
     class oA {
-      constructor({ numProp: R = 3, triVerts: O = new Uint32Array(), vertProperties: $ = new Float32Array(), mergeFromVert: hA, mergeToVert: GA, runIndex: LA, runOriginalID: A1, faceID: OA, halfedgeTangent: J1, runTransform: g2, runFlags: g1, tolerance: _3 = 0 } = {}) {
-        this.numProp = R, this.triVerts = O, this.vertProperties = $, this.mergeFromVert = hA, this.mergeToVert = GA, this.runIndex = LA, this.runOriginalID = A1, this.faceID = OA, this.halfedgeTangent = J1, this.runTransform = g2, this.runFlags = g1, this.tolerance = _3;
+      constructor({ numProp: R = 3, triVerts: O = new Uint32Array(), vertProperties: $ = new Float32Array(), mergeFromVert: hA, mergeToVert: GA, runIndex: LA, runOriginalID: A1, faceID: OA, halfedgeTangent: b1, runTransform: g2, runFlags: g1, tolerance: _3 = 0 } = {}) {
+        this.numProp = R, this.triVerts = O, this.vertProperties = $, this.mergeFromVert = hA, this.mergeToVert = GA, this.runIndex = LA, this.runOriginalID = A1, this.faceID = OA, this.halfedgeTangent = b1, this.runTransform = g2, this.runFlags = g1, this.tolerance = _3;
       }
       get numTri() {
         return this.triVerts.length / 3;
@@ -8676,8 +8683,8 @@ async function N9(A = {}) {
     }
     I.Manifold.union = SA("Union"), I.Manifold.compose = I.Manifold.union, I.Manifold.difference = SA("Difference"), I.Manifold.intersection = SA("Intersection"), I.Manifold.levelSet = function(k, R, O, $ = 0, hA = -1) {
       const GA = { min: { x: R.min[0], y: R.min[1], z: R.min[2] }, max: { x: R.max[0], y: R.max[1], z: R.max[2] } }, LA = s2(function(OA) {
-        const J1 = z(OA, "double"), g2 = z(OA + 8, "double"), g1 = z(OA + 16, "double");
-        return k([J1, g2, g1]);
+        const b1 = z(OA, "double"), g2 = z(OA + 8, "double"), g1 = z(OA + 16, "double");
+        return k([b1, g2, g1]);
       }, "di"), A1 = I._LevelSet(LA, GA, O, $, hA);
       return r2(LA), A1;
     }, I.ExecutionContext.prototype.fromMesh = function(k) {
@@ -8689,8 +8696,8 @@ async function N9(A = {}) {
       return O.delete(), $;
     }, I.ExecutionContext.prototype.levelSet = function(k, R, O, $ = 0, hA = -1) {
       const GA = { min: { x: R.min[0], y: R.min[1], z: R.min[2] }, max: { x: R.max[0], y: R.max[1], z: R.max[2] } }, LA = s2(function(OA) {
-        const J1 = z(OA, "double"), g2 = z(OA + 8, "double"), g1 = z(OA + 16, "double");
-        return k([J1, g2, g1]);
+        const b1 = z(OA, "double"), g2 = z(OA + 8, "double"), g1 = z(OA + 16, "double");
+        return k([b1, g2, g1]);
       }, "di"), A1 = this._LevelSet(LA, GA, O, $, hA);
       return r2(LA), A1;
     };
@@ -8752,10 +8759,10 @@ async function N9(A = {}) {
     };
   }
   console.log.bind(console);
-  var D = console.error.bind(console), x, N = !1, w = (o) => o.startsWith("file://"), G, c, f, K, u, b, J, W, P, _, lA, V, CA = !1;
+  var D = console.error.bind(console), x, N = !1, w = (o) => o.startsWith("file://"), G, c, f, K, u, J, b, W, P, _, lA, V, CA = !1;
   function uA() {
     var o = e3.buffer;
-    f = new Int8Array(o), u = new Int16Array(o), K = new Uint8Array(o), b = new Uint16Array(o), J = new Int32Array(o), W = new Uint32Array(o), P = new Float32Array(o), _ = new Float64Array(o), lA = new BigInt64Array(o), V = new BigUint64Array(o);
+    f = new Int8Array(o), u = new Int16Array(o), K = new Uint8Array(o), J = new Uint16Array(o), b = new Int32Array(o), W = new Uint32Array(o), P = new Float32Array(o), _ = new Float64Array(o), lA = new BigInt64Array(o), V = new BigUint64Array(o);
   }
   function NA() {
     if (I.preRun)
@@ -8850,7 +8857,7 @@ async function N9(A = {}) {
       case "i16":
         return u[o >>> 1 >>> 0];
       case "i32":
-        return J[o >>> 2 >>> 0];
+        return b[o >>> 2 >>> 0];
       case "i64":
         return lA[o >>> 3 >>> 0];
       case "float":
@@ -8875,7 +8882,7 @@ async function N9(A = {}) {
         u[o >>> 1 >>> 0] = l;
         break;
       case "i32":
-        J[o >>> 2 >>> 0] = l;
+        b[o >>> 2 >>> 0] = l;
         break;
       case "i64":
         lA[o >>> 3 >>> 0] = BigInt(l);
@@ -9029,15 +9036,15 @@ async function N9(A = {}) {
       case 1:
         return m ? (y) => f[y >>> 0] : (y) => K[y >>> 0];
       case 2:
-        return m ? (y) => u[y >>> 1 >>> 0] : (y) => b[y >>> 1 >>> 0];
+        return m ? (y) => u[y >>> 1 >>> 0] : (y) => J[y >>> 1 >>> 0];
       case 4:
-        return m ? (y) => J[y >>> 2 >>> 0] : (y) => W[y >>> 2 >>> 0];
+        return m ? (y) => b[y >>> 2 >>> 0] : (y) => W[y >>> 2 >>> 0];
       case 8:
         return m ? (y) => lA[y >>> 3 >>> 0] : (y) => V[y >>> 3 >>> 0];
       default:
         throw new TypeError(`invalid integer width (${l}): ${o}`);
     }
-  }, JA = function(o, l, m, y, S) {
+  }, bA = function(o, l, m, y, S) {
     o >>>= 0, l >>>= 0, m >>>= 0, l = gA(l);
     const U = y === 0n;
     let Y = (H) => H;
@@ -9174,12 +9181,12 @@ async function N9(A = {}) {
     var m = l.$$.ptrType.registeredClass, y = f3(l.$$.ptr, m, this.registeredClass);
     return y;
   }
-  var J5 = (o, l, m) => {
+  var b5 = (o, l, m) => {
     if (l === m)
       return o;
     if (m.baseClass === void 0)
       return null;
-    var y = J5(o, l, m.baseClass);
+    var y = b5(o, l, m.baseClass);
     return y === null ? null : m.downcast(y);
   }, z0 = {}, X0 = (o, l) => {
     for (l === void 0 && AA("ptr should not be undefined"); o.baseClass; )
@@ -9209,7 +9216,7 @@ async function N9(A = {}) {
       return S.call(this);
     var H;
     this.isConst ? H = Y.constPointerType : H = Y.pointerType;
-    var X = J5(l, this.registeredClass, H.registeredClass);
+    var X = b5(l, this.registeredClass, H.registeredClass);
     return X === null ? S.call(this) : this.isSmartPointer ? A3(H.registeredClass.instancePrototype, { ptrType: H, ptr: X, smartPtrType: this, smartPtr: o }) : A3(H.registeredClass.instancePrototype, { ptrType: H, ptr: X });
   }
   var g6 = () => {
@@ -9222,7 +9229,7 @@ async function N9(A = {}) {
   function g3(o, l, m, y, S, U, Y, H, X, IA, BA) {
     this.name = o, this.registeredClass = l, this.isReference = m, this.isConst = y, this.isSmartPointer = S, this.pointeeType = U, this.sharingPolicy = Y, this.rawGetPointee = H, this.rawConstructor = X, this.rawShare = IA, this.rawDestructor = BA, !S && l.baseClass === void 0 ? y ? (this.toWireType = j0, this.destructorFunction = null) : (this.toWireType = Z0, this.destructorFunction = null) : this.toWireType = W0;
   }
-  var b5 = (o, l, m) => {
+  var J5 = (o, l, m) => {
     I.hasOwnProperty(o) || j("Replacing nonexistent public symbol"), I[o].overloadTable !== void 0 && m !== void 0 ? I[o].overloadTable[m] = l : (I[o] = l, I[o].argCount = m);
   }, I3 = (o) => F2.get(o), I6 = (o, l, m = [], y = !1) => {
     var S = I3(l), U = S(...m);
@@ -9283,7 +9290,7 @@ async function N9(A = {}) {
       var O = new O0(BA, k, R, nA, SA, U, H, IA);
       O.baseClass && ((LA = O.baseClass).__derivedClasses ?? (LA.__derivedClasses = []), O.baseClass.__derivedClasses.push(O));
       var $ = new g3(BA, O, !0, !1, !1), hA = new g3(BA + "*", O, !1, !1, !1), GA = new g3(BA + " const*", O, !1, !0, !1);
-      return x2[o] = { pointerType: hA, constPointerType: GA }, b5(wA, k), [$, hA, GA];
+      return x2[o] = { pointerType: hA, constPointerType: GA }, J5(wA, k), [$, hA, GA];
     });
   }
   var F3 = (o, l) => {
@@ -9326,8 +9333,8 @@ async function N9(A = {}) {
     return function(yA, SA, RA, k, R) {
       var O = H(null, this), $ = X(null, yA), hA = IA(null, SA), GA = BA(null, RA), LA = oA(null, k), A1 = nA(null, R), OA = y(S, O, $, hA, GA, LA, A1);
       wA(hA);
-      var J1 = Y(OA);
-      return J1;
+      var b1 = Y(OA);
+      return b1;
     };
   }, tffnt: function(l, m, y, S, U, Y, H, X, IA) {
     return function(BA) {
@@ -9523,7 +9530,7 @@ async function N9(A = {}) {
   function l6(o) {
     return o >>>= 0, tA(o, _5);
   }
-  var J3 = (o, l, m) => {
+  var b3 = (o, l, m) => {
     switch (l) {
       case 1:
         return m ? function(y) {
@@ -9535,11 +9542,11 @@ async function N9(A = {}) {
         return m ? function(y) {
           return this.fromWireType(u[y >>> 1 >>> 0]);
         } : function(y) {
-          return this.fromWireType(b[y >>> 1 >>> 0]);
+          return this.fromWireType(J[y >>> 1 >>> 0]);
         };
       case 4:
         return m ? function(y) {
-          return this.fromWireType(J[y >>> 2 >>> 0]);
+          return this.fromWireType(b[y >>> 2 >>> 0]);
         } : function(y) {
           return this.fromWireType(W[y >>> 2 >>> 0]);
         };
@@ -9559,12 +9566,12 @@ async function N9(A = {}) {
         };
         IA.values = {}, tA(o, { name: l, constructor: IA, valueType: U, fromWireType: function(BA) {
           return this.constructor.values[BA];
-        }, toWireType: (BA, oA) => oA.value, readValueFromPointer: J3(l, m, y), destructorFunction: null }), t2(l, IA);
+        }, toWireType: (BA, oA) => oA.value, readValueFromPointer: b3(l, m, y), destructorFunction: null }), t2(l, IA);
         break;
       }
       case "number": {
         var Y = {};
-        tA(o, { name: l, keysMap: Y, valueType: U, fromWireType: (IA) => IA, toWireType: (IA, BA) => BA, readValueFromPointer: J3(l, m, y), destructorFunction: null }), t2(l, Y), delete I[l].argCount;
+        tA(o, { name: l, keysMap: Y, valueType: U, fromWireType: (IA) => IA, toWireType: (IA, BA) => BA, readValueFromPointer: b3(l, m, y), destructorFunction: null }), t2(l, Y), delete I[l].argCount;
         break;
       }
       case "string": {
@@ -9573,7 +9580,7 @@ async function N9(A = {}) {
           return this.reverseMap[BA];
         }, toWireType: function(BA, oA) {
           return this.valuesMap[oA];
-        }, readValueFromPointer: J3(l, m, y), destructorFunction: null }), t2(l, Y), delete I[l].argCount;
+        }, readValueFromPointer: b3(l, m, y), destructorFunction: null }), t2(l, Y), delete I[l].argCount;
         break;
       }
     }
@@ -9625,7 +9632,7 @@ async function N9(A = {}) {
       C3(`Cannot call ${o} due to unbound types`, X);
     }, l - 1), EA([], X, (IA) => {
       var BA = [IA[0], null].concat(IA.slice(1));
-      return b5(o, U3(o, BA, null, S, U, Y), l - 1), [];
+      return J5(o, U3(o, BA, null, S, U, Y), l - 1), [];
     });
   }
   var h6 = function(o, l, m, y, S) {
@@ -9743,10 +9750,10 @@ async function N9(A = {}) {
     } });
   }
   var O5 = globalThis.TextDecoder ? new TextDecoder("utf-16le") : void 0, K6 = (o, l, m) => {
-    var y = o >>> 1, S = T5(b, y, l / 2, m);
-    if (S - y > 16 && O5) return O5.decode(b.subarray(y >>> 0, S >>> 0));
+    var y = o >>> 1, S = T5(J, y, l / 2, m);
+    if (S - y > 16 && O5) return O5.decode(J.subarray(y >>> 0, S >>> 0));
     for (var U = "", Y = y; Y < S; ++Y) {
-      var H = b[Y >>> 0];
+      var H = J[Y >>> 0];
       U += String.fromCharCode(H);
     }
     return U;
@@ -9769,9 +9776,9 @@ async function N9(A = {}) {
     if (l >>>= 0, m ?? (m = 2147483647), m < 4) return 0;
     for (var y = l, S = y + m - 4, U = 0; U < o.length; ++U) {
       var Y = o.codePointAt(U);
-      if (Y > 65535 && U++, J[l >>> 2 >>> 0] = Y, l += 4, l + 4 > S) break;
+      if (Y > 65535 && U++, b[l >>> 2 >>> 0] = Y, l += 4, l + 4 > S) break;
     }
-    return J[l >>> 2 >>> 0] = 0, l - y;
+    return b[l >>> 2 >>> 0] = 0, l - y;
   }, F6 = (o) => {
     for (var l = 0, m = 0; m < o.length; ++m) {
       var y = o.codePointAt(m);
@@ -9796,10 +9803,10 @@ async function N9(A = {}) {
   function Y6(o, l, m, y, S, U) {
     o >>>= 0, l >>>= 0, m >>>= 0, y >>>= 0, S >>>= 0, U >>>= 0, ZA[o] = { name: gA(l), rawConstructor: R1(m, y), rawDestructor: R1(S, U), fields: [] };
   }
-  function J6(o, l, m, y, S, U, Y, H, X, IA) {
+  function b6(o, l, m, y, S, U, Y, H, X, IA) {
     o >>>= 0, l >>>= 0, m >>>= 0, y >>>= 0, S >>>= 0, U >>>= 0, Y >>>= 0, H >>>= 0, X >>>= 0, IA >>>= 0, ZA[o].fields.push({ fieldName: gA(l), getterReturnType: m, getter: R1(y, S), getterContext: U, setterArgumentType: Y, setter: R1(H, X), setterContext: IA });
   }
-  var b6 = function(o, l) {
+  var J6 = function(o, l) {
     o >>>= 0, l >>>= 0, l = gA(l), tA(o, { isVoid: !0, name: l, fromWireType: () => {
     }, toWireType: (m, y) => {
     } });
@@ -9807,9 +9814,9 @@ async function N9(A = {}) {
   function L6(o, l) {
     o >>>= 0, l >>>= 0, o = Q1.toValue(o), l = Q1.toValue(l), o.set(l);
   }
-  var b3 = [], H6 = (o) => {
-    var l = b3.length;
-    return b3.push(o), l;
+  var J3 = [], H6 = (o) => {
+    var l = J3.length;
+    return J3.push(o), l;
   }, v6 = (o, l) => {
     for (var m = new Array(o), y = 0; y < o; ++y)
       m[y] = P5(W[l + y * 4 >>> 2 >>> 0], `parameter ${y}`);
@@ -9856,7 +9863,7 @@ async function N9(A = {}) {
     o >>>= 0, o > 9 && (n2[o + 1] += 1);
   }
   function W6(o, l, m, y, S) {
-    return o >>>= 0, l >>>= 0, m >>>= 0, y >>>= 0, S >>>= 0, b3[o](l, m, y, S);
+    return o >>>= 0, l >>>= 0, m >>>= 0, y >>>= 0, S >>>= 0, J3[o](l, m, y, S);
   }
   function Z6(o) {
     return o >>>= 0, Q1.toHandle(j5(o));
@@ -9933,7 +9940,7 @@ async function N9(A = {}) {
   function Eg(o) {
     z5 = o.K, v3 = o.M, A2 = o.N, e3 = o.I, F2 = o.L;
   }
-  var og = { l: YA, C: _A, q: eA, z: JA, G: zA, j: i6, i: E6, a: o6, E: l6, x: n6, d: a6, y: r6, c: D6, p: h6, m: m6, h: w6, n: u6, F: S6, w: U6, r: Y6, k: J6, H: b6, u: L6, g: V6, b: Y3, o: T6, B: O6, t: j6, f: W6, s: Z6, A: z6, e: X6, v: $6, D: Cg };
+  var og = { l: YA, C: _A, q: eA, z: bA, G: zA, j: i6, i: E6, a: o6, E: l6, x: n6, d: a6, y: r6, c: D6, p: h6, m: m6, h: w6, n: u6, F: S6, w: U6, r: Y6, k: b6, H: J6, u: L6, g: V6, b: Y3, o: T6, B: O6, t: j6, f: W6, s: Z6, A: z6, e: X6, v: $6, D: Cg };
   function lg(o) {
     o = Object.assign({}, o);
     var l = (y) => (S) => y(S) >>> 0, m = (y) => () => y() >>> 0;
@@ -9974,20 +9981,20 @@ function m5(A, g, I, C = 2048, e = 64) {
       const D = B(n.hull()), x = Math.max(0, D.volume() - a);
       if (x <= Math.max(1e-7, a * 1e-3) && D.numVert() <= e) {
         const u = D.getMesh();
-        E.push({ positions: new Float64Array(Array.from({ length: u.numVert * 3 }, (b, J) => u.vertProperties[Math.floor(J / 3) * u.numProp + J % 3])), indices: new Uint32Array(u.triVerts) });
+        E.push({ positions: new Float64Array(Array.from({ length: u.numVert * 3 }, (J, b) => u.vertProperties[Math.floor(b / 3) * u.numProp + b % 3])), indices: new Uint32Array(u.triVerts) });
         continue;
       }
-      const N = n.getMesh(), w = Array.from({ length: N.numVert }, (u, b) => [N.vertProperties[b * N.numProp], N.vertProperties[b * N.numProp + 1], N.vertProperties[b * N.numProp + 2]]);
+      const N = n.getMesh(), w = Array.from({ length: N.numVert }, (u, J) => [N.vertProperties[J * N.numProp], N.vertProperties[J * N.numProp + 1], N.vertProperties[J * N.numProp + 2]]);
       let G, c = -1 / 0;
       if (x > Math.max(1e-7, a * 1e-3)) {
-        const u = /* @__PURE__ */ new Map(), b = (J) => J.map((W) => Math.round(W * 1e5)).join(",");
-        for (let J = 0; J < N.numTri; J++) {
-          const W = [0, 1, 2].map((KA) => w[N.triVerts[J * 3 + KA]]), [P, _, lA] = W, V = _.map((KA, UA) => KA - P[UA]), CA = lA.map((KA, UA) => KA - P[UA]), uA = [V[1] * CA[2] - V[2] * CA[1], V[2] * CA[0] - V[0] * CA[2], V[0] * CA[1] - V[1] * CA[0]], NA = Math.hypot(...uA);
+        const u = /* @__PURE__ */ new Map(), J = (b) => b.map((W) => Math.round(W * 1e5)).join(",");
+        for (let b = 0; b < N.numTri; b++) {
+          const W = [0, 1, 2].map((KA) => w[N.triVerts[b * 3 + KA]]), [P, _, lA] = W, V = _.map((KA, UA) => KA - P[UA]), CA = lA.map((KA, UA) => KA - P[UA]), uA = [V[1] * CA[2] - V[2] * CA[1], V[2] * CA[0] - V[0] * CA[2], V[0] * CA[1] - V[1] * CA[0]], NA = Math.hypot(...uA);
           if (NA < 1e-12)
             continue;
           const fA = uA.map((KA) => KA / NA);
           for (let KA = 0; KA < 3; KA++) {
-            const UA = W[KA], XA = W[(KA + 1) % 3], s1 = W[(KA + 2) % 3], r1 = [b(UA), b(XA)].sort(), D1 = r1.join("|"), d = u.get(D1);
+            const UA = W[KA], XA = W[(KA + 1) % 3], s1 = W[(KA + 2) % 3], r1 = [J(UA), J(XA)].sort(), D1 = r1.join("|"), d = u.get(D1);
             if (!d) {
               u.set(D1, { a: UA, b: XA, normal: fA, third: s1 });
               continue;
@@ -10009,13 +10016,13 @@ function m5(A, g, I, C = 2048, e = 64) {
         }
       }
       if (!G) {
-        const u = n.boundingBox(), b = u.max.map((P, _) => P - u.min[_]), J = b.indexOf(Math.max(...b)), W = [0, 0, 0];
-        W[J] = 1, G = { normal: W, offset: (u.max[J] + u.min[J]) / 2 };
+        const u = n.boundingBox(), J = u.max.map((P, _) => P - u.min[_]), b = J.indexOf(Math.max(...J)), W = [0, 0, 0];
+        W[b] = 1, G = { normal: W, offset: (u.max[b] + u.min[b]) / 2 };
       }
       let [f, K] = n.splitByPlane(G.normal, G.offset).map(B);
       if (f.isEmpty() || K.isEmpty() || Math.max(f.volume(), K.volume()) > a * (1 - 1e-9)) {
-        const u = n.boundingBox(), b = u.max.map((P, _) => P - u.min[_]), J = b.indexOf(Math.max(...b)), W = [0, 0, 0];
-        W[J] = 1, [f, K] = n.splitByPlane(W, (u.max[J] + u.min[J]) / 2).map(B);
+        const u = n.boundingBox(), J = u.max.map((P, _) => P - u.min[_]), b = J.indexOf(Math.max(...J)), W = [0, 0, 0];
+        W[b] = 1, [f, K] = n.splitByPlane(W, (u.max[b] + u.min[b]) / 2).map(B);
       }
       if (f.isEmpty() || K.isEmpty() || Math.max(f.volume(), K.volume()) > a * (1 - 1e-9))
         throw new Error(t("Exact convex collision could not partition this feature robustly"));
@@ -10405,7 +10412,7 @@ async function Y9(A = {}) {
     }
   };
 }
-function J9(A) {
+function b9(A) {
   const g = /* @__PURE__ */ new Set();
   for (let I = 0; I < A.positions.length; I += 3) {
     const C = `${A.positions[I]},${A.positions[I + 1]},${A.positions[I + 2]}`;
@@ -10423,26 +10430,26 @@ function N4(A, g, I = !1, C) {
     const K = (P) => {
       const _ = P.toPolygons(), lA = _.flat(), V = r(A.CrossSection.hull(_));
       return Math.abs(V.area() - P.area()) <= Math.max(1e-9, Math.abs(P.area()) * 1e-10) ? [V.toPolygons().flat()] : A.triangulate(_).map((CA) => CA.map((uA) => lA[uA]));
-    }, u = K(c), b = K(f), J = u.reduce((P, _) => P + _.length, 0) * b.reduce((P, _) => P + _.length, 0);
-    if (u.length * b.length > 1e4 || J > 25e4)
+    }, u = K(c), J = K(f), b = u.reduce((P, _) => P + _.length, 0) * J.reduce((P, _) => P + _.length, 0);
+    if (u.length * J.length > 1e4 || b > 25e4)
       throw new P1(t("Planar Minkowski operation exceeds the pair budget"));
     const W = [];
     for (const P of u)
-      for (const _ of b) {
+      for (const _ of J) {
         const lA = P.flatMap((V) => _.map((CA) => [V[0] + CA[0], V[1] + CA[1]]));
         W.push(r(A.CrossSection.hull([lA])));
       }
     return r(A.CrossSection.union(W));
   }, a = (c, f, K, u) => {
-    const b = c.map((W, P) => {
+    const J = c.map((W, P) => {
       if (!W)
         return 0;
       const _ = u[P] - K[P];
       if (_ < 1e-12)
         throw new Error(t("Cannot resize a degenerate solid"));
       return W / _;
-    }), J = Math.max(...b) || 1;
-    return b.map((W, P) => c[P] ? W : f?.[P] ? J : 1);
+    }), b = Math.max(...J) || 1;
+    return J.map((W, P) => c[P] ? W : f?.[P] ? b : 1);
   }, D = (c) => {
     const f = E.get(c);
     if (f)
@@ -10459,14 +10466,14 @@ function N4(A, g, I = !1, C) {
     else if (c.kind === "circle")
       K = r(A.CrossSection.circle(c.radius, c.segments));
     else if (c.kind === "resize") {
-      const u = D(c.profile), b = u.bounds();
-      K = u.numVert() ? r(u.scale(a(c.size, c.auto, b.min, b.max))) : u;
+      const u = D(c.profile), J = u.bounds();
+      K = u.numVert() ? r(u.scale(a(c.size, c.auto, J.min, J.max))) : u;
     } else if (c.kind === "offset") {
       const u = D(c.profile);
       if (!c.round)
-        for (const b of u.toPolygons())
-          for (let J = 0; J < b.length; J++) {
-            const W = b[J], P = b[(J + b.length - 1) % b.length], _ = b[(J + 1) % b.length], lA = Math.hypot(P[0] - W[0], P[1] - W[1]) * Math.hypot(_[0] - W[0], _[1] - W[1]);
+        for (const J of u.toPolygons())
+          for (let b = 0; b < J.length; b++) {
+            const W = J[b], P = J[(b + J.length - 1) % J.length], _ = J[(b + 1) % J.length], lA = Math.hypot(P[0] - W[0], P[1] - W[1]) * Math.hypot(_[0] - W[0], _[1] - W[1]);
             if (lA && Math.sqrt(Math.max(0, (1 - ((P[0] - W[0]) * (_[0] - W[0]) + (P[1] - W[1]) * (_[1] - W[1])) / lA) / 2)) < 1e-6)
               throw new P1(t("Offset corner exceeds the miter budget"));
           }
@@ -10488,12 +10495,12 @@ function N4(A, g, I = !1, C) {
     const u = c.numVert();
     if (2 * u * (K + 1) > 2e5)
       throw new P1(t("Evaluated revolution exceeds 200000 faces"));
-    const b = c.bounds(), J = u > 0 && b.max[0] <= 0;
-    if (u && b.min[0] < -1e-8 && !J)
+    const J = c.bounds(), b = u > 0 && J.max[0] <= 0;
+    if (u && J.min[0] < -1e-8 && !b)
       throw new Error(t("Revolved profiles must stay on one side of the radial axis"));
-    const W = J ? r(c.scale([-1, 1])) : c, P = Math.abs(f);
+    const W = b ? r(c.scale([-1, 1])) : c, P = Math.abs(f);
     let _ = Q(P ? W.revolve(Math.max(1, Math.ceil(K * P / 360)), P) : A.Manifold.union([]));
-    return f < 0 && (_ = Q(_.mirror([0, 1, 0]))), J && P !== 360 && (_ = Q(_.rotate([0, 0, 180]))), _;
+    return f < 0 && (_ = Q(_.mirror([0, 1, 0]))), b && P !== 360 && (_ = Q(_.rotate([0, 0, 180]))), _;
   }, N = /* @__PURE__ */ new WeakMap(), w = (c) => {
     const f = N.get(c);
     if (f)
@@ -10502,7 +10509,7 @@ function N4(A, g, I = !1, C) {
     if (c.kind === "empty")
       K = Q(A.Manifold.union([]));
     else if (c.kind === "polyhedron") {
-      const u = new A.Mesh({ numProp: 3, vertProperties: new Float32Array(c.points.flat()), triVerts: new Uint32Array(b8(c.points, c.faces)) });
+      const u = new A.Mesh({ numProp: 3, vertProperties: new Float32Array(c.points.flat()), triVerts: new Uint32Array(J8(c.points, c.faces)) });
       u.merge(), K = Q(new A.Manifold(u));
     } else if (c.kind === "box")
       K = Q(A.Manifold.cube(c.size, !0));
@@ -10527,38 +10534,38 @@ function N4(A, g, I = !1, C) {
     } else if (c.kind === "mirror")
       K = Q(w(c.shape).mirror(c.vector));
     else if (c.kind === "axisRotate") {
-      const u = w(c.shape), b = Math.hypot(...c.vector), [J, W, P] = c.vector.map((uA) => uA / b), _ = c.angle * Math.PI / 180, lA = Math.cos(_), V = Math.sin(_), CA = 1 - lA;
-      K = Q(u.transform([CA * J * J + lA, CA * J * W + V * P, CA * J * P - V * W, 0, CA * J * W - V * P, CA * W * W + lA, CA * W * P + V * J, 0, CA * J * P + V * W, CA * W * P - V * J, CA * P * P + lA, 0, 0, 0, 0, 1]));
+      const u = w(c.shape), J = Math.hypot(...c.vector), [b, W, P] = c.vector.map((uA) => uA / J), _ = c.angle * Math.PI / 180, lA = Math.cos(_), V = Math.sin(_), CA = 1 - lA;
+      K = Q(u.transform([CA * b * b + lA, CA * b * W + V * P, CA * b * P - V * W, 0, CA * b * W - V * P, CA * W * W + lA, CA * W * P + V * b, 0, CA * b * P + V * W, CA * W * P - V * b, CA * P * P + lA, 0, 0, 0, 0, 1]));
     } else if (c.kind === "resize") {
-      const u = w(c.shape), b = u.boundingBox();
-      K = u.numTri() ? Q(u.scale(a(c.vector, c.auto, b.min, b.max))) : u;
+      const u = w(c.shape), J = u.boundingBox();
+      K = u.numTri() ? Q(u.scale(a(c.vector, c.auto, J.min, J.max))) : u;
     } else if (c.kind === "minkowski") {
       const u = c.shapes.map(w);
       K = u[0];
-      for (const b of u.slice(1)) {
-        if (K.numTri() * b.numTri() > 25e5)
+      for (const J of u.slice(1)) {
+        if (K.numTri() * J.numTri() > 25e5)
           throw new P1(t("Minkowski operation exceeds the pair budget"));
-        if (K = Q(K.minkowskiSum(b)), K.numTri() > 2e5)
+        if (K = Q(K.minkowskiSum(J)), K.numTri() > 2e5)
           throw new P1(t("Evaluated solid exceeds 200000 faces"));
       }
     } else if ("shapes" in c) {
       const u = c.shapes.map(w);
       K = Q(c.kind === "hull" ? A.Manifold.hull(u) : c.kind === "union" ? A.Manifold.union(u) : c.kind === "subtract" ? A.Manifold.difference(u) : A.Manifold.intersection(u));
     } else if (c.kind === "repeat") {
-      const u = w(c.shape), b = Array.from({ length: c.count }, (J, W) => Q(u.translate(c.step.map((P) => P * W))));
-      K = Q(A.Manifold.union(b));
+      const u = w(c.shape), J = Array.from({ length: c.count }, (b, W) => Q(u.translate(c.step.map((P) => P * W))));
+      K = Q(A.Manifold.union(J));
     } else {
       const u = c.shape;
-      if (c.kind === "move" && u.kind === "box" && c.vector.every((b, J) => b === u.size[J] / 2))
+      if (c.kind === "move" && u.kind === "box" && c.vector.every((J, b) => J === u.size[b] / 2))
         K = Q(A.Manifold.cube(u.size, !1));
       else {
-        const b = c.kind === "move" && (u.kind === "cylinder" || u.kind === "frustum" && u.bottom === u.top) && c.vector[0] === 0 && c.vector[1] === 0 && c.vector[2] === u.height / 2;
-        if (b && (e = !0), I && b && (u.kind === "cylinder" || u.kind === "frustum")) {
-          const J = u.kind === "cylinder" ? u.radius : u.bottom;
-          K = Q(A.Manifold.cylinder(u.height, J, J, u.segments, !1));
+        const J = c.kind === "move" && (u.kind === "cylinder" || u.kind === "frustum" && u.bottom === u.top) && c.vector[0] === 0 && c.vector[1] === 0 && c.vector[2] === u.height / 2;
+        if (J && (e = !0), I && J && (u.kind === "cylinder" || u.kind === "frustum")) {
+          const b = u.kind === "cylinder" ? u.radius : u.bottom;
+          K = Q(A.Manifold.cylinder(u.height, b, b, u.segments, !1));
         } else {
-          const J = w(u);
-          K = Q(c.kind === "move" ? J.translate(c.vector) : c.kind === "rotate" ? J.rotate(c.vector) : J.scale(c.vector));
+          const b = w(u);
+          K = Q(c.kind === "move" ? b.translate(c.vector) : c.kind === "rotate" ? b.rotate(c.vector) : b.scale(c.vector));
         }
       }
     }
@@ -10645,26 +10652,26 @@ function N4(A, g, I = !1, C) {
           break;
         }
       }
-      const b = Q(u.scale(K.transform.scale)), J = Q(b.rotate(K.transform.rotation)), W = Q(J.translate(K.transform.position)), P = W.status();
+      const J = Q(u.scale(K.transform.scale)), b = Q(J.rotate(K.transform.rotation)), W = Q(b.translate(K.transform.position)), P = W.status();
       if (P !== "NoError")
         throw new Error(t`${K.name}: ${P}. Import a closed, consistently oriented solid mesh.`);
       if (W.volume() < -1e-8)
         throw new Error(t`${K.name}: reversed solid winding produces negative volume. Reorient the mesh faces before importing.`);
       return B.set(c, W), W;
-    } catch (b) {
-      throw b instanceof z1 ? b : new z1({ source: "feature", id: c, ...b && typeof b == "object" && "code" in b && typeof b.code == "string" ? { code: b.code } : {}, message: `${K.name}: ${b instanceof Error ? b.message : String(b)}` });
+    } catch (J) {
+      throw J instanceof z1 ? J : new z1({ source: "feature", id: c, ...J && typeof J == "object" && "code" in J && typeof J.code == "string" ? { code: J.code } : {}, message: `${K.name}: ${J instanceof Error ? J.message : String(J)}` });
     }
   };
   try {
     const c = q.roots.map((f) => {
-      const K = G(f), u = q.nodes[f], b = K.getMesh(), J = new Float32Array(b.numVert * 3);
-      for (let P = 0; P < b.numVert; P++)
+      const K = G(f), u = q.nodes[f], J = K.getMesh(), b = new Float32Array(J.numVert * 3);
+      for (let P = 0; P < J.numVert; P++)
         for (let _ = 0; _ < 3; _++)
-          J[P * 3 + _] = b.vertProperties[P * b.numProp + _];
+          b[P * 3 + _] = J.vertProperties[P * J.numProp + _];
       const W = K.boundingBox();
-      return { id: f, name: u.name, color: u.color, reference: u.reference, ...u.role === "hole" ? { hole: !0 } : {}, positions: J, indices: new Uint32Array(b.triVerts), volume: K.volume(), bounds: W };
+      return { id: f, name: u.name, color: u.color, reference: u.reference, ...u.role === "hole" ? { hole: !0 } : {}, positions: b, indices: new Uint32Array(J.triVerts), volume: K.volume(), bounds: W };
     });
-    return C && e && (C.value = c.some(J9)), { sourceKey: R5(q), bodies: c, volume: c.filter((f) => !f.reference && !f.hole).reduce((f, K) => f + K.volume, 0), triangles: c.filter((f) => !f.reference && !f.hole).reduce((f, K) => f + K.indices.length / 3, 0) };
+    return C && e && (C.value = c.some(b9)), { sourceKey: R5(q), bodies: c, volume: c.filter((f) => !f.reference && !f.hole).reduce((f, K) => f + K.volume, 0), triangles: c.filter((f) => !f.reference && !f.hole).reduce((f, K) => f + K.indices.length / 3, 0) };
   } finally {
     for (const c of [...i].reverse())
       c.delete();
@@ -10672,7 +10679,7 @@ function N4(A, g, I = !1, C) {
       c.delete();
   }
 }
-function b9(A) {
+function J9(A) {
   const g = A.reduce((q, B) => q + B.massKg, 0), I = A.reduce((q, B) => q + B.volumeM3, 0);
   if (!A.length || !Number.isFinite(g) || g <= 0)
     throw new Error(t("Invalid solid inertia"));
@@ -10716,7 +10723,7 @@ async function H0(A) {
   let C = 4;
   for (const e of A)
     I.setUint32(C, e.positions.length, !0), I.setUint32(C + 4, e.indices.length, !0), C += 8, g.set(new Uint8Array(e.positions.buffer, e.positions.byteOffset, e.positions.byteLength), C), C += e.positions.byteLength, g.set(new Uint8Array(e.indices.buffer, e.indices.byteOffset, e.indices.byteLength), C), C += e.indices.byteLength;
-  return b0(g);
+  return J0(g);
 }
 async function H9(A) {
   const g = L0.get(A);
@@ -10724,7 +10731,7 @@ async function H9(A) {
 }
 async function v0(A) {
   const g = new Uint8Array(A.positions.byteLength + A.indices.byteLength);
-  return g.set(new Uint8Array(A.positions.buffer, A.positions.byteOffset, A.positions.byteLength)), g.set(new Uint8Array(A.indices.buffer, A.indices.byteOffset, A.indices.byteLength), A.positions.byteLength), b0(g);
+  return g.set(new Uint8Array(A.positions.buffer, A.positions.byteOffset, A.positions.byteLength)), g.set(new Uint8Array(A.indices.buffer, A.indices.byteOffset, A.indices.byteLength), A.positions.byteLength), J0(g);
 }
 async function e5(A, g, I = {}) {
   if (A.reference || A.hole)
@@ -10800,18 +10807,18 @@ function P9(A, g, I, C, e, q = 0.25, B = 2e6) {
       c = Math.min(c, uA), f = Math.max(f, uA), K = Math.max(K, Math.hypot(...NA)), u.push(NA);
     }
     u.sort((V, CA) => V[0] - CA[0] || V[1] - CA[1]);
-    const b = u.filter((V, CA) => !CA || V[0] !== u[CA - 1][0] || V[1] !== u[CA - 1][1]), J = [], W = [];
-    for (const V of b) {
-      for (; J.length >= 2 && i5(J.at(-2), J.at(-1), V) <= 0; )
-        J.pop();
-      J.push(V);
+    const J = u.filter((V, CA) => !CA || V[0] !== u[CA - 1][0] || V[1] !== u[CA - 1][1]), b = [], W = [];
+    for (const V of J) {
+      for (; b.length >= 2 && i5(b.at(-2), b.at(-1), V) <= 0; )
+        b.pop();
+      b.push(V);
     }
-    for (const V of [...b].reverse()) {
+    for (const V of [...J].reverse()) {
       for (; W.length >= 2 && i5(W.at(-2), W.at(-1), V) <= 0; )
         W.pop();
       W.push(V);
     }
-    const P = b.length === 1 ? b : [...J.slice(0, -1), ...W.slice(0, -1)];
+    const P = J.length === 1 ? J : [...b.slice(0, -1), ...W.slice(0, -1)];
     let _ = 1 / 0;
     if (P.length >= 3 && P.every((V, CA) => i5(V, P[(CA + 1) % P.length], [0, 0]) >= -1e-10))
       _ = 0;
@@ -10867,7 +10874,7 @@ async function V9(A, g, I, C = {}) {
     }
   if ([...I.values()].reduce((M, p) => M + p.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = C.J ?? await (k4 ?? (k4 = import("./jolt-physics.wasm-compat-JFFVkDD-.js").then((M) => M.default()))), Q = new i.JoltSettings();
+  const i = C.J ?? await (k4 ?? (k4 = import("./jolt-physics.wasm-compat-CYk6FiBm.js").then((M) => M.default()))), Q = new i.JoltSettings();
   Q.mMaxBodies = 512, Q.mMaxBodyPairs = Math.max(1024, B.length * B.length), Q.mMaxContactConstraints = 8192;
   const s = new i.ObjectLayerPairFilterTable(2);
   s.EnableCollision(0, 1), s.EnableCollision(1, 1);
@@ -10884,8 +10891,8 @@ async function V9(A, g, I, C = {}) {
   const f = (M, p) => {
     const [F, L, v, Z] = p, [j, EA, eA] = M, gA = 2 * (L * eA - v * EA), cA = 2 * (v * j - F * eA), AA = 2 * (F * EA - L * j);
     return [j + Z * gA + L * AA - v * cA, EA + Z * cA + v * gA - F * AA, eA + Z * AA + F * cA - L * gA];
-  }, K = [], u = /* @__PURE__ */ new Map(), b = /* @__PURE__ */ new Map();
-  let J = !1, W = 0, P, _;
+  }, K = [], u = /* @__PURE__ */ new Map(), J = /* @__PURE__ */ new Map();
+  let b = !1, W = 0, P, _;
   const lA = new Map(B.map((M) => [M.id, M.id])), V = (M) => {
     const p = lA.get(M);
     if (p === M)
@@ -10902,7 +10909,7 @@ async function V9(A, g, I, C = {}) {
   }
   const uA = new i.GroupFilterTable(Math.max(1, CA.size)), NA = /* @__PURE__ */ new Map(), fA = new Map(B.map((M, p) => [M.id, p]));
   [...CA.values()].forEach((M, p) => M.forEach((F) => NA.set(F.id, p)));
-  const KA = new Map(B.map((M) => [M.id, L9(M, (e.nodes[M.id].physics ?? L2()).densityKgM3)])), UA = new Map([...CA].map(([M, p]) => [M, b9(p.map((F) => KA.get(F.id)))])), XA = (M, p) => M < p ? M + "\0" + p : p + "\0" + M;
+  const KA = new Map(B.map((M) => [M.id, L9(M, (e.nodes[M.id].physics ?? L2()).densityKgM3)])), UA = new Map([...CA].map(([M, p]) => [M, J9(p.map((F) => KA.get(F.id)))])), XA = (M, p) => M < p ? M + "\0" + p : p + "\0" + M;
   for (const M of e.joints ?? [])
     (M.collideConnected === !1 || CA.get(V(M.bodyA)).length === 1 && CA.get(V(M.bodyB)).length === 1) && uA.DisableCollision(NA.get(M.bodyA), NA.get(M.bodyB));
   if (q.selfCollisions === !1) {
@@ -10936,7 +10943,7 @@ async function V9(A, g, I, C = {}) {
     T.add(p);
     const F = d.filter((v) => D1(v.bodyA) === p).length, L = Math.min(320, 80 * F);
     for (const v of e.joints ?? [])
-      D1(v.bodyA) === p && b.get(v.id)?.SetNumVelocityStepsOverride(L);
+      D1(v.bodyA) === p && J.get(v.id)?.SetNumVelocityStepsOverride(L);
   }, xA = new Set((e.joints ?? []).map((M) => XA(M.bodyA, M.bodyB))), VA = /* @__PURE__ */ new Set(), FA = /* @__PURE__ */ new Map();
   for (const M of e.joints ?? []) {
     if (M.kind !== "hinge" || M.collideConnected === !1)
@@ -10944,15 +10951,15 @@ async function V9(A, g, I, C = {}) {
     const p = V(M.bodyA), F = V(M.bodyB), L = XA(p, F);
     if (p === F || VA.has(L))
       continue;
-    const v = e.nodes[M.bodyA].transform, Z = e.nodes[M.bodyB].transform, j = L1(M.anchorA.map((DA, JA) => DA * v.scale[JA]), v.rotation).map((DA, JA) => DA + v.position[JA]), EA = L1(M.axisA, v.rotation), eA = L1(M.anchorB.map((DA, JA) => DA * Z.scale[JA]), Z.rotation).map((DA, JA) => DA + Z.position[JA]), gA = L1(M.axisB, Z.rotation), cA = (DA) => CA.get(DA).map((JA) => ({ id: JA.id, hulls: I.get(JA.id).hulls })), AA = cA(p), sA = cA(F);
+    const v = e.nodes[M.bodyA].transform, Z = e.nodes[M.bodyB].transform, j = L1(M.anchorA.map((DA, bA) => DA * v.scale[bA]), v.rotation).map((DA, bA) => DA + v.position[bA]), EA = L1(M.axisA, v.rotation), eA = L1(M.anchorB.map((DA, bA) => DA * Z.scale[bA]), Z.rotation).map((DA, bA) => DA + Z.position[bA]), gA = L1(M.axisB, Z.rotation), cA = (DA) => CA.get(DA).map((bA) => ({ id: bA.id, hulls: I.get(bA.id).hulls })), AA = cA(p), sA = cA(F);
     if (AA.length === 1 && sA.length === 1)
       continue;
     const tA = _9([...AA, ...sA].flatMap((DA) => DA.hulls), j, EA, eA, gA);
-    if (tA !== void 0 && P9(AA, sA, j, EA, (DA, JA) => xA.has(XA(DA, JA)), tA)) {
+    if (tA !== void 0 && P9(AA, sA, j, EA, (DA, bA) => xA.has(XA(DA, bA)), tA)) {
       uA.DisableCollision(NA.get(p), NA.get(F)), VA.add(L);
       let DA = 0;
-      for (const JA of sA)
-        for (const zA of JA.hulls)
+      for (const bA of sA)
+        for (const zA of bA.hulls)
           for (let WA = 0; WA < zA.positions.length; WA += 3)
             DA = Math.max(DA, Math.hypot(...eA.map((t1, kA) => t1 - zA.positions[WA + kA])));
       FA.set(L, { bodyA: p, bodyB: F, anchorA: j, anchorB: eA, axisA: EA, axisB: gA, radiusB: DA });
@@ -11003,9 +11010,9 @@ async function V9(A, g, I, C = {}) {
     }
   };
   function aA() {
-    if (!J) {
-      J = !0;
-      for (const M of b.values())
+    if (!b) {
+      b = !0;
+      for (const M of J.values())
         D.RemoveConstraint(M), M.Release();
       for (const M of K)
         x.RemoveBody(M.GetID()), x.DestroyBody(M.GetID());
@@ -11037,8 +11044,8 @@ async function V9(A, g, I, C = {}) {
             const TA = new i.Vec3((eA.positions[kA] - AA[0]) / sA[0], (eA.positions[kA + 1] - AA[1]) / sA[1], (eA.positions[kA + 2] - AA[2]) / sA[2]);
             DA.mPoints.push_back(TA), i.destroy(TA);
           }
-          const JA = new i.Vec3(sA[0] * 1e-3, sA[1] * 1e-3, sA[2] * 1e-3), zA = new i.ScaledShapeSettings(DA, JA);
-          i.destroy(JA);
+          const bA = new i.Vec3(sA[0] * 1e-3, sA[1] * 1e-3, sA[2] * 1e-3), zA = new i.ScaledShapeSettings(DA, bA);
+          i.destroy(bA);
           const WA = new i.Vec3(AA[0] * 1e-3, AA[1] * 1e-3, AA[2] * 1e-3), t1 = new i.Quat(0, 0, 0, 1);
           Z.AddShape(WA, t1, zA, fA.get(EA.id) + 1), i.destroy(WA), i.destroy(t1);
         }
@@ -11091,8 +11098,8 @@ async function V9(A, g, I, C = {}) {
       if (!p || !F)
         throw new Error(t("Joint references a missing body"));
       const L = (AA, sA, tA) => {
-        const DA = e.nodes[AA].transform, JA = L1(sA.map((B1, d1) => B1 * DA.scale[d1]), DA.rotation).map((B1, d1) => (B1 + DA.position[d1]) * 1e-3), zA = L1(tA, DA.rotation), WA = Math.abs(zA[0]) < 0.9 ? [1, 0, 0] : [0, 1, 0], t1 = zA.reduce((B1, d1, j1) => B1 + d1 * WA[j1], 0), kA = WA.map((B1, d1) => B1 - t1 * zA[d1]), TA = Math.hypot(...kA);
-        return { p: JA, z: zA, n: kA.map((B1) => B1 / TA) };
+        const DA = e.nodes[AA].transform, bA = L1(sA.map((B1, d1) => B1 * DA.scale[d1]), DA.rotation).map((B1, d1) => (B1 + DA.position[d1]) * 1e-3), zA = L1(tA, DA.rotation), WA = Math.abs(zA[0]) < 0.9 ? [1, 0, 0] : [0, 1, 0], t1 = zA.reduce((B1, d1, j1) => B1 + d1 * WA[j1], 0), kA = WA.map((B1, d1) => B1 - t1 * zA[d1]), TA = Math.hypot(...kA);
+        return { p: bA, z: zA, n: kA.map((B1) => B1 / TA) };
       }, v = L(M.bodyA, M.anchorA, M.axisA), Z = L(M.bodyB, M.anchorB, M.axisB);
       if (Math.hypot(...v.p.map((AA, sA) => AA - Z.p[sA])) > 1e-4 || Math.abs(v.z.reduce((AA, sA, tA) => AA + sA * Z.z[tA], 0) - 1) > 1e-4)
         throw new Error(t("Joint frames are misaligned after editing. Repair the assembly before simulating."));
@@ -11111,7 +11118,7 @@ async function V9(A, g, I, C = {}) {
       };
       M.kind === "pivot" ? (j.mPosition1 = eA(v.p), j.mPosition2 = eA(Z.p)) : (j.mPoint1 = eA(v.p), j.mPoint2 = eA(Z.p)), M.kind === "hinge" ? (j.mHingeAxis1 = gA(v.z), j.mHingeAxis2 = gA(Z.z), j.mNormalAxis1 = gA(v.n), j.mNormalAxis2 = gA(Z.n), M.limits && (j.mLimitsMin = M.limits[0], j.mLimitsMax = M.limits[1])) : M.kind === "slider" ? (j.mAutoDetectPoint = !1, j.mSliderAxis1 = gA(v.z), j.mSliderAxis2 = gA(Z.z), j.mNormalAxis1 = gA(v.n), j.mNormalAxis2 = gA(Z.n), M.limits && (j.mLimitsMin = M.limits[0] * 1e-3, j.mLimitsMax = M.limits[1] * 1e-3)) : M.kind === "pivot" ? (j.mTwistAxis1 = gA(v.z), j.mTwistAxis2 = gA(Z.z), j.mPlaneAxis1 = gA(v.n), j.mPlaneAxis2 = gA(Z.n), j.mSwingType = i.ESwingType_Cone, j.mNormalHalfConeAngle = M.coneAngle ?? Math.PI, j.mPlaneHalfConeAngle = M.coneAngle ?? Math.PI, j.mTwistMinAngle = -Math.PI, j.mTwistMaxAngle = Math.PI) : (j.mAutoDetectPoint = !1, j.mAxisX1 = gA(v.z), j.mAxisX2 = gA(Z.z), j.mAxisY1 = gA(v.n), j.mAxisY2 = gA(Z.n)), M.kind === "hinge" && VA.has(XA(V(M.bodyA), V(M.bodyB))) && (j.mNumPositionStepsOverride = 40);
       const cA = j.Create(p, F);
-      cA.AddRef(), D.AddConstraint(cA), b.set(M.id, cA), EA.forEach((AA) => i.destroy(AA)), i.destroy(j);
+      cA.AddRef(), D.AddConstraint(cA), J.set(M.id, cA), EA.forEach((AA) => i.destroy(AA)), i.destroy(j);
     }
     for (const [M, p] of CA) {
       const F = u.get(M);
@@ -11124,7 +11131,7 @@ async function V9(A, g, I, C = {}) {
         for (let e1 = 0; e1 < 3; e1++)
           v[e1] += $1[e1], Z[e1] += B1.inertiaKgM2[e1].reduce((x2, $2, t2) => x2 + $2 * j1[t2], 0) + X2[(e1 + 1) % 3] * $1[(e1 + 2) % 3] - X2[(e1 + 2) % 3] * $1[(e1 + 1) % 3];
       }
-      const [[j, EA, eA], [gA, cA, AA], [sA, tA, DA]] = L.inertiaKgM2, JA = j * (cA * DA - AA * tA) - EA * (gA * DA - AA * sA) + eA * (gA * tA - cA * sA), zA = [[cA * DA - AA * tA, eA * tA - EA * DA, EA * AA - eA * cA], [AA * sA - gA * DA, j * DA - eA * sA, eA * gA - j * AA], [gA * tA - cA * sA, EA * sA - j * tA, j * cA - EA * gA]], WA = new i.Vec3(...v.map((kA) => kA / L.massKg)), t1 = new i.Vec3(...zA.map((kA) => kA.reduce((TA, B1, d1) => TA + B1 * Z[d1], 0) / JA));
+      const [[j, EA, eA], [gA, cA, AA], [sA, tA, DA]] = L.inertiaKgM2, bA = j * (cA * DA - AA * tA) - EA * (gA * DA - AA * sA) + eA * (gA * tA - cA * sA), zA = [[cA * DA - AA * tA, eA * tA - EA * DA, EA * AA - eA * cA], [AA * sA - gA * DA, j * DA - eA * sA, eA * gA - j * AA], [gA * tA - cA * sA, EA * sA - j * tA, j * cA - EA * gA]], WA = new i.Vec3(...v.map((kA) => kA / L.massKg)), t1 = new i.Vec3(...zA.map((kA) => kA.reduce((TA, B1, d1) => TA + B1 * Z[d1], 0) / bA));
       x.SetLinearVelocity(F.GetID(), WA), x.SetAngularVelocity(F.GetID(), t1), i.destroy(WA), i.destroy(t1);
     }
     D.OptimizeBroadPhase();
@@ -11142,7 +11149,7 @@ async function V9(A, g, I, C = {}) {
   };
   let YA = 0;
   function _A(M, p, F, L, v) {
-    if (J || u.has(M) || !/^preview-[a-zA-Z0-9_-]+$/.test(M) || YA >= 32 || !Number.isFinite(L) || L < 1 || L > 50 || [...p, ...F].length !== 6 || p.some((DA) => !Number.isFinite(DA) || Math.abs(DA) > 1e4) || F.some((DA) => !Number.isFinite(DA) || Math.abs(DA) > 1e4))
+    if (b || u.has(M) || !/^preview-[a-zA-Z0-9_-]+$/.test(M) || YA >= 32 || !Number.isFinite(L) || L < 1 || L > 50 || [...p, ...F].length !== 6 || p.some((DA) => !Number.isFinite(DA) || Math.abs(DA) > 1e4) || F.some((DA) => !Number.isFinite(DA) || Math.abs(DA) > 1e4))
       throw new Error(t("Invalid preview ball or preview budget exceeded"));
     const Z = L * 1e-3, j = v === "sphere" ? 4 * Math.PI * Z ** 3 / 3 : (2 * Z) ** 3, EA = j * 1050, eA = v === "sphere" ? 0.4 * EA * Z ** 2 : EA * (2 * Z) ** 2 / 6, gA = v === "box" ? new i.Vec3(Z, Z, Z) : void 0, cA = gA ? new i.BoxShape(gA, Math.min(1e-4, Z / 10)) : new i.SphereShape(Z);
     gA && i.destroy(gA), qA(cA, M, "dynamic", { friction: 0.4, restitution: 0.45 }, { massKg: EA, volumeM3: j, centerM: [0, 0, 0], inertiaKgM2: [[eA, 0, 0], [0, eA, 0], [0, 0, eA]] }), YA++;
@@ -11150,7 +11157,7 @@ async function V9(A, g, I, C = {}) {
     x.SetPosition(AA.GetID(), sA, i.EActivation_Activate), x.SetLinearVelocity(AA.GetID(), tA), i.destroy(sA), i.destroy(tA);
   }
   function ZA(M, p, F) {
-    if (J || ![...M, ...p].every(Number.isFinite))
+    if (b || ![...M, ...p].every(Number.isFinite))
       throw new Error(t("Invalid physics state or ray"));
     const L = [], v = (Z) => (L.push(Z), Z);
     try {
@@ -11163,8 +11170,8 @@ async function V9(A, g, I, C = {}) {
       const tA = v(F ? new i.IgnoreSingleBodyFilter(u.get(F).GetID()) : new i.BodyFilter()), DA = v(new i.ShapeFilter());
       if (D.GetNarrowPhaseQuery().CastRay(Z, eA, gA, AA, sA, tA, DA), !gA.HadHit())
         return null;
-      const JA = gA.mHit, zA = JA.mBodyID.GetIndexAndSequenceNumber(), WA = [...u].find(([, kA]) => kA.GetID().GetIndexAndSequenceNumber() === zA);
-      return { bodyId: (WA ? B[WA[1].GetShape().GetSubShapeUserData(JA.mSubShapeID2) - 1] : void 0)?.id ?? WA?.[0], fraction: JA.mFraction };
+      const bA = gA.mHit, zA = bA.mBodyID.GetIndexAndSequenceNumber(), WA = [...u].find(([, kA]) => kA.GetID().GetIndexAndSequenceNumber() === zA);
+      return { bodyId: (WA ? B[WA[1].GetShape().GetSubShapeUserData(bA.mSubShapeID2) - 1] : void 0)?.id ?? WA?.[0], fraction: bA.mFraction };
     } finally {
       for (const Z of L.reverse())
         i.destroy(Z);
@@ -11173,7 +11180,7 @@ async function V9(A, g, I, C = {}) {
   return {
     grabBody(M, p, F) {
       const L = u.get(M);
-      if (J || !L || L.IsStatic())
+      if (b || !L || L.IsStatic())
         throw new Error(t("Choose a dynamic body to drag"));
       if ([...p, ...F].length !== 6 || [...p, ...F].some((j) => !Number.isFinite(j) || Math.abs(j) > 1e4))
         throw new Error(t("Invalid drag point"));
@@ -11194,7 +11201,7 @@ async function V9(A, g, I, C = {}) {
       _A(M, p, F, L, "box");
     },
     step(M = 1 / 200) {
-      if (J)
+      if (b)
         throw new Error(t("Physics world was disposed"));
       if (!Number.isFinite(M) || M <= 0 || M > 0.1 || Math.abs(M * 200 - Math.round(M * 200)) > 1e-8)
         throw new Error(t("Step must be a positive multiple of 1/200 s, at most 0.1 s"));
@@ -11216,7 +11223,7 @@ async function V9(A, g, I, C = {}) {
       return VA.size;
     },
     pose(M) {
-      if (J)
+      if (b)
         throw new Error(t("Physics world was disposed"));
       const p = u.get(M);
       if (!p)
@@ -11225,7 +11232,7 @@ async function V9(A, g, I, C = {}) {
       return { positionMm: [F.GetX() * 1e3, F.GetY() * 1e3, F.GetZ() * 1e3], quaternion: [L.GetX(), L.GetY(), L.GetZ(), L.GetW()] };
     },
     angularVelocity(M) {
-      if (J)
+      if (b)
         throw new Error(t("Physics world was disposed"));
       const p = u.get(M);
       if (!p)
@@ -11234,7 +11241,7 @@ async function V9(A, g, I, C = {}) {
       return [F.GetX(), F.GetY(), F.GetZ()];
     },
     setAngularVelocity(M, p) {
-      if (J || !p.every(Number.isFinite))
+      if (b || !p.every(Number.isFinite))
         throw new Error(t("Invalid physics state or velocity"));
       const F = u.get(M);
       if (!F)
@@ -11246,14 +11253,14 @@ async function V9(A, g, I, C = {}) {
       x.SetLinearVelocity(F.GetID(), eA), x.SetAngularVelocity(F.GetID(), gA), x.ActivateBody(F.GetID()), i.destroy(L), i.destroy(eA), i.destroy(gA);
     },
     geometryBoundsMm(M) {
-      if (J)
+      if (b)
         throw new Error(t("Physics world was disposed"));
       const p = u.get(M), F = B.find((sA) => sA.id === M);
       if (!p || !F)
         throw new Error(t("Unknown physics body"));
       const L = p.GetPosition(), v = p.GetRotation(), Z = v.GetX(), j = v.GetY(), EA = v.GetZ(), eA = v.GetW(), gA = [L.GetX() * 1e3, L.GetY() * 1e3, L.GetZ() * 1e3], cA = [1 / 0, 1 / 0, 1 / 0], AA = [-1 / 0, -1 / 0, -1 / 0];
       for (let sA = 0; sA < F.positions.length; sA += 3) {
-        const tA = F.positions[sA], DA = F.positions[sA + 1], JA = F.positions[sA + 2], zA = 2 * (j * JA - EA * DA), WA = 2 * (EA * tA - Z * JA), t1 = 2 * (Z * DA - j * tA), kA = [tA + eA * zA + j * t1 - EA * WA, DA + eA * WA + EA * zA - Z * t1, JA + eA * t1 + Z * WA - j * zA];
+        const tA = F.positions[sA], DA = F.positions[sA + 1], bA = F.positions[sA + 2], zA = 2 * (j * bA - EA * DA), WA = 2 * (EA * tA - Z * bA), t1 = 2 * (Z * DA - j * tA), kA = [tA + eA * zA + j * t1 - EA * WA, DA + eA * WA + EA * zA - Z * t1, bA + eA * t1 + Z * WA - j * zA];
         for (let TA = 0; TA < 3; TA++) {
           const B1 = kA[TA] + gA[TA];
           cA[TA] = Math.min(cA[TA], B1), AA[TA] = Math.max(AA[TA], B1);
@@ -11262,7 +11269,7 @@ async function V9(A, g, I, C = {}) {
       return { min: cA, max: AA };
     },
     boundsMm(M) {
-      if (J)
+      if (b)
         throw new Error(t("Physics world was disposed"));
       const p = u.get(M);
       if (!p)
@@ -11289,13 +11296,13 @@ async function V9(A, g, I, C = {}) {
     /** Sample an ideal single ray carried by a body, ignoring its complete rigid assembly. */
     bodyRay(M, p, F, L) {
       const v = e.nodes[M], Z = u.get(M);
-      if (J || !v || !Z || ![...p, ...F, L].every(Number.isFinite) || L <= 0 || L > 1e5 || Math.hypot(...F) < 1e-9)
+      if (b || !v || !Z || ![...p, ...F, L].every(Number.isFinite) || L <= 0 || L > 1e5 || Math.hypot(...F) < 1e-9)
         throw new Error(t("Invalid body sensor ray"));
-      const j = Z.GetRotation(), EA = [j.GetX(), j.GetY(), j.GetZ(), j.GetW()], eA = Z.GetPosition(), gA = L1(p.map((zA, WA) => zA * v.transform.scale[WA]), v.transform.rotation).map((zA, WA) => zA + v.transform.position[WA]), cA = f(gA, EA), AA = cA.map((zA, WA) => zA + [eA.GetX(), eA.GetY(), eA.GetZ()][WA] * 1e3), sA = f(L1(F, v.transform.rotation), EA), tA = Math.hypot(...sA), DA = AA.map((zA, WA) => zA + sA[WA] / tA * L), JA = ZA(AA, DA, M);
-      return JA ? JA.fraction * L : null;
+      const j = Z.GetRotation(), EA = [j.GetX(), j.GetY(), j.GetZ(), j.GetW()], eA = Z.GetPosition(), gA = L1(p.map((zA, WA) => zA * v.transform.scale[WA]), v.transform.rotation).map((zA, WA) => zA + v.transform.position[WA]), cA = f(gA, EA), AA = cA.map((zA, WA) => zA + [eA.GetX(), eA.GetY(), eA.GetZ()][WA] * 1e3), sA = f(L1(F, v.transform.rotation), EA), tA = Math.hypot(...sA), DA = AA.map((zA, WA) => zA + sA[WA] / tA * L), bA = ZA(AA, DA, M);
+      return bA ? bA.fraction * L : null;
     },
     linearVelocityMmS(M) {
-      if (J)
+      if (b)
         throw new Error(t("Physics world was disposed"));
       const p = u.get(M);
       if (!p)
@@ -11304,7 +11311,7 @@ async function V9(A, g, I, C = {}) {
       return i.destroy(F), v;
     },
     setLinearVelocity(M, p) {
-      if (J || p.length !== 3 || p.some((eA) => !Number.isFinite(eA) || Math.abs(eA) > 1e4))
+      if (b || p.length !== 3 || p.some((eA) => !Number.isFinite(eA) || Math.abs(eA) > 1e4))
         throw new Error(t("Invalid initial body velocity"));
       const F = u.get(M);
       if (!F)
@@ -11316,7 +11323,7 @@ async function V9(A, g, I, C = {}) {
       x.SetLinearVelocity(F.GetID(), EA), x.ActivateBody(F.GetID()), i.destroy(EA);
     },
     applyImpulse(M, p, F) {
-      if (J || p.length !== 3 || p.some((j) => !Number.isFinite(j) || Math.abs(j) > 100) || F && (F.length !== 3 || F.some((j) => !Number.isFinite(j) || Math.abs(j) > 1e6)))
+      if (b || p.length !== 3 || p.some((j) => !Number.isFinite(j) || Math.abs(j) > 100) || F && (F.length !== 3 || F.some((j) => !Number.isFinite(j) || Math.abs(j) > 1e6)))
         throw new Error(t("Invalid impulse"));
       const L = u.get(M);
       if (!L)
@@ -11328,29 +11335,29 @@ async function V9(A, g, I, C = {}) {
       L.AddImpulse(v, Z), i.destroy(Z), x.ActivateBody(L.GetID()), i.destroy(v);
     },
     sliderPosition(M) {
-      if (J)
+      if (b)
         throw new Error(t("Physics world was disposed"));
       if (e.joints?.find((p) => p.id === M)?.kind !== "slider")
         throw new Error(t("Unknown slider connector"));
-      return i.castObject(b.get(M), i.SliderConstraint).GetCurrentPosition() * 1e3;
+      return i.castObject(J.get(M), i.SliderConstraint).GetCurrentPosition() * 1e3;
     },
     setSliderMotor(M, p, F) {
-      if (J || !Number.isFinite(p) || Math.abs(p) > 1e3 || !Number.isFinite(F) || F <= 0 || F > 1e4)
+      if (b || !Number.isFinite(p) || Math.abs(p) > 1e3 || !Number.isFinite(F) || F <= 0 || F > 1e4)
         throw new Error(t("Invalid slider motor command"));
       const L = e.joints?.find((j) => j.id === M);
       if (L?.kind !== "slider")
         throw new Error(t("Unknown slider connector"));
-      const v = i.castObject(b.get(M), i.SliderConstraint), Z = v.GetMotorSettings();
+      const v = i.castObject(J.get(M), i.SliderConstraint), Z = v.GetMotorSettings();
       Z.mMinForceLimit = -F, Z.mMaxForceLimit = F, v.SetTargetVelocity(p * 1e-3), v.SetMotorState(i.EMotorState_Velocity);
       for (const j of [L.bodyA, L.bodyB])
         x.ActivateBody(u.get(j).GetID());
     },
     stopSliderMotor(M, p = "brake") {
-      if (J)
+      if (b)
         throw new Error(t("Physics world was disposed"));
       if (e.joints?.find((L) => L.id === M)?.kind !== "slider" || !["brake", "coast"].includes(p))
         throw new Error(t("Unknown slider connector"));
-      const F = i.castObject(b.get(M), i.SliderConstraint);
+      const F = i.castObject(J.get(M), i.SliderConstraint);
       if (p === "coast")
         F.SetMotorState(i.EMotorState_Off);
       else {
@@ -11360,7 +11367,7 @@ async function V9(A, g, I, C = {}) {
     },
     /** Internal actuator impulse: equal and opposite reactions, with the axis carried by body A. */
     applyJointImpulse(M, p) {
-      if (J || !Number.isFinite(p) || Math.abs(p) > 1)
+      if (b || !Number.isFinite(p) || Math.abs(p) > 1)
         throw new Error(t("Invalid actuator impulse"));
       const F = e.joints?.find((tA) => tA.id === M);
       if (!F || !["hinge", "slider"].includes(F.kind))
@@ -11370,24 +11377,24 @@ async function V9(A, g, I, C = {}) {
         throw new Error(t("Actuator bodies belong to the same rigid assembly"));
       const Z = L.GetRotation(), j = [Z.GetX(), Z.GetY(), Z.GetZ(), Z.GetW()], EA = f(L1(F.axisA, e.nodes[F.bodyA].transform.rotation), j);
       if (F.kind === "hinge") {
-        const tA = i.castObject(b.get(M), i.HingeConstraint);
+        const tA = i.castObject(J.get(M), i.HingeConstraint);
         tA.SetMotorState(i.EMotorState_Off), tA.SetNumVelocityStepsOverride(40), tA.SetNumPositionStepsOverride(80);
       } else
-        i.castObject(b.get(M), i.SliderConstraint).SetMotorState(i.EMotorState_Off);
+        i.castObject(J.get(M), i.SliderConstraint).SetMotorState(i.EMotorState_Off);
       const eA = e.nodes[F.bodyA].transform, gA = L.GetPosition(), cA = L1(F.anchorA.map((tA, DA) => tA * eA.scale[DA]), eA.rotation).map((tA, DA) => (tA + eA.position[DA]) * 1e-3), AA = f(cA, j), sA = new i.RVec3(...AA.map((tA, DA) => tA + [gA.GetX(), gA.GetY(), gA.GetZ()][DA]));
       for (const [tA, DA] of [[L, -1], [v, 1]]) {
         if (tA.IsStatic())
           continue;
-        const JA = new i.Vec3(...EA.map((zA) => zA * p * DA));
-        F.kind === "hinge" ? tA.AddAngularImpulse(JA) : tA.AddImpulse(JA, sA), x.ActivateBody(tA.GetID()), i.destroy(JA);
+        const bA = new i.Vec3(...EA.map((zA) => zA * p * DA));
+        F.kind === "hinge" ? tA.AddAngularImpulse(bA) : tA.AddImpulse(bA, sA), x.ActivateBody(tA.GetID()), i.destroy(bA);
       }
       i.destroy(sA);
     },
     /** Ideal torque-limited position servo, solved implicitly with both-body reaction. */
     setHingeServo(M, p, F) {
-      if (J || !Number.isFinite(p) || Math.abs(p) > Math.PI * 2 || !Number.isFinite(F) || F <= 0 || F > 100 || e.joints?.find((eA) => eA.id === M)?.kind !== "hinge")
+      if (b || !Number.isFinite(p) || Math.abs(p) > Math.PI * 2 || !Number.isFinite(F) || F <= 0 || F > 100 || e.joints?.find((eA) => eA.id === M)?.kind !== "hinge")
         throw new Error(t("Invalid position servo target"));
-      const L = e.joints.find((eA) => eA.id === M), v = i.castObject(b.get(M), i.HingeConstraint), Z = v.GetMotorSettings();
+      const L = e.joints.find((eA) => eA.id === M), v = i.castObject(J.get(M), i.HingeConstraint), Z = v.GetMotorSettings();
       QA(L.bodyA), Z.mMinTorqueLimit = -F, Z.mMaxTorqueLimit = F;
       const j = p - v.GetCurrentAngle(), EA = Math.max(-Math.PI * 5 / 3, Math.min(Math.PI * 5 / 3, j * 12));
       v.SetTargetAngularVelocity(EA), v.SetMotorState(i.EMotorState_Velocity);
@@ -11395,40 +11402,40 @@ async function V9(A, g, I, C = {}) {
         x.ActivateBody(u.get(eA).GetID());
     },
     setHingeMotor(M, p, F) {
-      if (J || !Number.isFinite(p) || Math.abs(p) > 20 || !Number.isFinite(F) || F <= 0 || F > 100)
+      if (b || !Number.isFinite(p) || Math.abs(p) > 20 || !Number.isFinite(F) || F <= 0 || F > 100)
         throw new Error(t("Invalid hinge motor command"));
       const L = e.joints?.find((j) => j.id === M);
       if (L?.kind !== "hinge")
         throw new Error(t("Unknown hinge joint"));
-      const v = i.castObject(b.get(M), i.HingeConstraint), Z = v.GetMotorSettings();
+      const v = i.castObject(J.get(M), i.HingeConstraint), Z = v.GetMotorSettings();
       Z.mMinTorqueLimit = -F, Z.mMaxTorqueLimit = F, v.SetTargetAngularVelocity(p), v.SetMotorState(i.EMotorState_Velocity);
       for (const j of [L.bodyA, L.bodyB])
         x.ActivateBody(u.get(j).GetID());
     },
     coastHingeMotor(M) {
-      if (J)
+      if (b)
         throw new Error(t("Physics world was disposed"));
       if (e.joints?.find((p) => p.id === M)?.kind !== "hinge")
         throw new Error(t("Unknown hinge joint"));
-      i.castObject(b.get(M), i.HingeConstraint).SetMotorState(i.EMotorState_Off);
+      i.castObject(J.get(M), i.HingeConstraint).SetMotorState(i.EMotorState_Off);
     },
     stopHingeMotor(M) {
-      if (J)
+      if (b)
         throw new Error(t("Physics world was disposed"));
       const p = e.joints?.find((v) => v.id === M);
       if (p?.kind !== "hinge")
         throw new Error(t("Unknown hinge joint"));
-      const F = i.castObject(b.get(M), i.HingeConstraint), L = F.GetMotorSettings();
+      const F = i.castObject(J.get(M), i.HingeConstraint), L = F.GetMotorSettings();
       L.mMaxTorqueLimit > 100 && (L.mMaxTorqueLimit = 0.02, L.mMinTorqueLimit = -0.02), F.SetTargetAngularVelocity(0), F.SetMotorState(i.EMotorState_Velocity);
       for (const v of [p.bodyA, p.bodyB])
         x.ActivateBody(u.get(v).GetID());
     },
     hingeAngle(M) {
-      if (J)
+      if (b)
         throw new Error(t("Physics world was disposed"));
       if (e.joints?.find((F) => F.id === M)?.kind !== "hinge")
         throw new Error(t("Unknown hinge joint"));
-      return i.castObject(b.get(M), i.HingeConstraint).GetCurrentAngle();
+      return i.castObject(J.get(M), i.HingeConstraint).GetCurrentAngle();
     },
     dispose: aA
   };
@@ -11560,8 +11567,8 @@ async function W9(A, g, I) {
       const N = [...n, D.transform], w = Q(D.inputs[0], N, a), G = D.inputs.slice(1).map((f) => i(f, N)), c = D.physics?.sourcePreset === "nut" ? I.collisionCSG.grid(Q(D.inputs[0], [], a)).map((f) => {
         const K = new Float64Array(f.positions.length);
         for (let u = 0; u < K.length; u += 3) {
-          const b = B([f.positions[u], f.positions[u + 1], f.positions[u + 2]], N);
-          K.set(b, u);
+          const J = B([f.positions[u], f.positions[u + 1], f.positions[u + 2]], N);
+          K.set(J, u);
         }
         return { ...f, positions: K };
       }) : w;
@@ -11574,24 +11581,24 @@ async function W9(A, g, I) {
           const f = [];
           for (const K of [G, G + 0.5, G + 1])
             for (const u of [c, c + 1])
-              for (const b of [3, 5])
-                f.push(B(N(K / 12 * Math.PI / 2, u / 32 * Math.PI * 2, b), [...n, D.transform]));
+              for (const J of [3, 5])
+                f.push(B(N(K / 12 * Math.PI / 2, u / 32 * Math.PI * 2, J), [...n, D.transform]));
           w.push(I.hullPoints(f));
         }
       return w;
     }
     if (x?.kind === "annular-grid" && D.kind === "mesh") {
-      const N = x.sides, w = x.segments, G = (J, W, P) => {
-        const _ = (J * 2 + P) * (N + 1) + (W + N) % N;
+      const N = x.sides, w = x.segments, G = (b, W, P) => {
+        const _ = (b * 2 + P) * (N + 1) + (W + N) % N;
         return [D.positions[_ * 3], D.positions[_ * 3 + 1], D.positions[_ * 3 + 2]];
-      }, c = [...n, D.transform], f = [], K = (J, W, P, _) => {
-        const lA = G(J, W, P), V = G(J, W + _, P);
+      }, c = [...n, D.transform], f = [], K = (b, W, P, _) => {
+        const lA = G(b, W, P), V = G(b, W + _, P);
         return lA.map((CA, uA) => CA + 1e-4 * (V[uA] - CA));
-      }, u = Array.from({ length: w + 1 }, (J, W) => Array.from({ length: N }, (P, _) => G(W, _, 1))).flat().every((J) => Math.hypot(J[0], J[1]) < 1e-6), b = Math.min(w, Math.floor((u ? 2047 : 2048) / N));
+      }, u = Array.from({ length: w + 1 }, (b, W) => Array.from({ length: N }, (P, _) => G(W, _, 1))).flat().every((b) => Math.hypot(b[0], b[1]) < 1e-6), J = Math.min(w, Math.floor((u ? 2047 : 2048) / N));
       if (a && !u) {
         if (w * N > 2048)
           throw new Error(t("Section collision refinement exceeds its compound budget"));
-        const J = [0, 1, 3, 0, 3, 2, 4, 6, 7, 4, 7, 5, 0, 4, 5, 0, 5, 1, 2, 3, 7, 2, 7, 6, 0, 2, 6, 0, 6, 4, 1, 5, 7, 1, 7, 3];
+        const b = [0, 1, 3, 0, 3, 2, 4, 6, 7, 4, 7, 5, 0, 4, 5, 0, 5, 1, 2, 3, 7, 2, 7, 6, 0, 2, 6, 0, 6, 4, 1, 5, 7, 1, 7, 3];
         for (let W = 0; W < w; W++)
           for (let P = 0; P < N; P++) {
             const _ = [];
@@ -11601,11 +11608,11 @@ async function W9(A, g, I) {
                   _.push(B(K(NA, P + fA, uA, KA), c));
             let lA = 0;
             const V = _[0];
-            for (let uA = 0; uA < J.length; uA += 3) {
-              const [NA, fA, KA] = J.slice(uA, uA + 3).map((UA) => _[UA].map((XA, s1) => XA - V[s1]));
+            for (let uA = 0; uA < b.length; uA += 3) {
+              const [NA, fA, KA] = b.slice(uA, uA + 3).map((UA) => _[UA].map((XA, s1) => XA - V[s1]));
               lA += NA[0] * (fA[1] * KA[2] - fA[2] * KA[1]) + NA[1] * (fA[2] * KA[0] - fA[0] * KA[2]) + NA[2] * (fA[0] * KA[1] - fA[1] * KA[0]);
             }
-            const CA = new Uint32Array(J);
+            const CA = new Uint32Array(b);
             if (lA < 0)
               for (let uA = 0; uA < CA.length; uA += 3)
                 [CA[uA + 1], CA[uA + 2]] = [CA[uA + 2], CA[uA + 1]];
@@ -11614,25 +11621,25 @@ async function W9(A, g, I) {
           }
         return f;
       }
-      for (let J = 0; J < b; J++)
+      for (let b = 0; b < J; b++)
         for (let W = 0; W < N; W++) {
           const P = [];
-          for (let _ = Math.floor(J * w / b); _ <= Math.floor((J + 1) * w / b); _++)
+          for (let _ = Math.floor(b * w / J); _ <= Math.floor((b + 1) * w / J); _++)
             for (const lA of [0, 1])
               P.push(B(K(_, W, lA, -1), c), B(K(_, W + 1, lA, 1), c));
           f.push(I.hullPoints(P));
         }
       if (u) {
-        let J = 1 / 0;
+        let b = 1 / 0;
         for (let P = 0; P <= w; P++)
           for (let _ = 0; _ < N; _++) {
             const lA = G(P, _, 0);
-            J = Math.min(J, Math.hypot(lA[0], lA[1]) * 0.5);
+            b = Math.min(b, Math.hypot(lA[0], lA[1]) * 0.5);
           }
         const W = [];
         for (const P of [G(0, 0, 1)[2], G(w, 0, 1)[2]])
           for (let _ = 0; _ < 32; _++)
-            W.push(B([J * Math.cos(_ * Math.PI / 16), J * Math.sin(_ * Math.PI / 16), P], c));
+            W.push(B([b * Math.cos(_ * Math.PI / 16), b * Math.sin(_ * Math.PI / 16), P], c));
         f.push(I.hullPoints(W));
       }
       return f;
@@ -11641,24 +11648,24 @@ async function W9(A, g, I) {
       if (x.kind === "tube-grid" && Math.ceil(x.segments / (x.stride ?? 1)) > 2048)
         throw new Error(t("Construction collision exceeds its compound budget"));
       const N = x.stride ?? 1, w = x.sides + (x.seam === !1 ? 0 : 1), G = (K, u) => {
-        const b = x.layout === "rows" ? K * w + u : u * (x.segments + 1) + K;
-        return [D.positions[b * 3], D.positions[b * 3 + 1], D.positions[b * 3 + 2]];
+        const J = x.layout === "rows" ? K * w + u : u * (x.segments + 1) + K;
+        return [D.positions[J * 3], D.positions[J * 3 + 1], D.positions[J * 3 + 2]];
       }, c = [...n, D.transform], f = [];
       if (x.kind === "tube-grid")
         for (let K = 0; K < x.segments; K += N) {
           const u = [];
-          for (let b = K; b <= Math.min(x.segments, K + N); b++)
-            for (let J = 0; J < x.sides; J++)
-              u.push(B(G(b, J), c));
+          for (let J = K; J <= Math.min(x.segments, K + N); J++)
+            for (let b = 0; b < x.sides; b++)
+              u.push(B(G(J, b), c));
           f.push(I.hullPoints(u));
         }
       else {
         const K = Array.from({ length: x.sides + 1 }, (P, _) => {
           const lA = G(0, _);
           return [Math.hypot(lA[0], lA[1]), lA[2]];
-        }), u = Math.max(...K.map((P) => P[0])) + Math.max(...K.map((P) => P[1])) - Math.min(...K.map((P) => P[1])), b = T9(K, Math.min(0.05, u * 1e-3)), J = j9(b.map((P) => K[P])).map((P) => P.map((_) => b[_])), W = Math.max(1, Math.ceil(x.segments * J.length / 2048));
+        }), u = Math.max(...K.map((P) => P[0])) + Math.max(...K.map((P) => P[1])) - Math.min(...K.map((P) => P[1])), J = T9(K, Math.min(0.05, u * 1e-3)), b = j9(J.map((P) => K[P])).map((P) => P.map((_) => J[_])), W = Math.max(1, Math.ceil(x.segments * b.length / 2048));
         for (let P = 0; P < x.segments; P += W)
-          for (const _ of J) {
+          for (const _ of b) {
             const lA = [];
             for (const [V, CA] of [[P, -1e-5], [Math.min(x.segments, P + W), 1e-5]])
               for (const uA of _) {
@@ -11672,12 +11679,12 @@ async function W9(A, g, I) {
         const K = Array.from({ length: x.sides + 1 }, (P, _) => {
           const lA = G(0, _);
           return [Math.hypot(lA[0], lA[1]), lA[2]];
-        }), u = K[0][1], b = K.at(-1)[1], J = Math.max(...K.map((P) => P[1])), W = K.findIndex((P) => P[1] === J);
-        if (K[0][0] < 1e-6 && K.at(-1)[0] < 1e-6 && b > u) {
-          const P = K.slice(1, W + 1).filter((lA) => lA[1] <= b), _ = Math.min(...P.map((lA) => lA[0])) * Math.cos(Math.PI / x.segments);
+        }), u = K[0][1], J = K.at(-1)[1], b = Math.max(...K.map((P) => P[1])), W = K.findIndex((P) => P[1] === b);
+        if (K[0][0] < 1e-6 && K.at(-1)[0] < 1e-6 && J > u) {
+          const P = K.slice(1, W + 1).filter((lA) => lA[1] <= J), _ = Math.min(...P.map((lA) => lA[0])) * Math.cos(Math.PI / x.segments);
           if (_ > 0 && Number.isFinite(_)) {
             const lA = [];
-            for (const V of [u, b])
+            for (const V of [u, J])
               for (let CA = 0; CA < 32; CA++)
                 lA.push(B([_ * Math.cos(CA * Math.PI / 16), _ * Math.sin(CA * Math.PI / 16), V], c));
             f.push(I.hullPoints(lA));

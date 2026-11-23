@@ -30,7 +30,8 @@ const file=page=>page.getByTestId('bw-file-menu-trigger');
 const input=Buffer.from([
  '0','SECTION','2','HEADER','9','$INSUNITS','70',1,'0','ENDSEC','0','SECTION','2','ENTITIES',
  '0','LINE','8','Guides','10',0,'20',2,'11',0,'21',1,
- '0','ARC','8','Guides','10',0,'20',0,'40',1,'50',0,'51',90,'0','ENDSEC','0','EOF'
+ '0','ARC','8','Guides','10',0,'20',0,'40',1,'50',0,'51',90,
+ '0','LINE','8','Construction','10',2,'20',2,'11',3,'21',3,'0','ENDSEC','0','EOF'
 ].join('\n'));
 
 try{
@@ -39,8 +40,17 @@ try{
  const path=page.getByRole('dialog',{name:'Sketch path',exact:true});
  await path.getByText('DXF path',{exact:true}).tap();
  const fileInput=path.getByLabel('Choose DXF file');
- await fileInput.setInputFiles(fixture??{name:'inch guide.dxf',mimeType:'application/dxf',buffer:input});
- await path.getByText('DXF layer: Guides',{exact:true}).waitFor({state:'visible'});
+ await fileInput.setInputFiles(fixture||{name:'inch guide.dxf',mimeType:'application/dxf',buffer:input});
+ const importedLayer=path.getByText('DXF layer: Guides',{exact:true});
+ const importLayers=path.getByRole('button',{name:'Import selected layers',exact:true});
+ if(!fixture){
+  await path.getByRole('checkbox',{name:'Construction',exact:true}).tap();
+  await importLayers.tap();
+ }else{
+  await Promise.race([importedLayer.waitFor({state:'visible'}),importLayers.waitFor({state:'visible'})]);
+  if(await importLayers.isVisible())await importLayers.tap();
+ }
+ await importedLayer.waitFor({state:'visible'});
  const points=path.getByLabel('Path points X, Y (mm)');
  const expected=[ [0,50.8], [0,25.4,-Math.tan(Math.PI/8)], [25.4,0] ];
  const readPoints=async()=>(await points.inputValue()).split('\n').map(row=>row.split(',').map(Number));
@@ -53,6 +63,7 @@ try{
  const text=await readFile(dxf,'utf8');
  assert.match(text,/\$INSUNITS\r\n70\r\n4/);
  assert.match(text,/90\r\n3\r\n70\r\n0/);
+ assert.doesNotMatch(text,/Construction/);
 
  await fileInput.setInputFiles({name:'Verified guide.dxf',mimeType:'application/dxf',buffer:Buffer.from(text)});
  await fileInput.and(path.locator('input:enabled')).waitFor({state:'visible'});
@@ -71,7 +82,7 @@ try{
  assert.equal(sketch.profile.dxfLayer,'Guides');
  assert.deepEqual(sketch.profile.bulges,[0,-Math.tan(Math.PI/8),0]);
  assert.deepEqual(saved.roots,[]);
- console.log('PASS Brickwright touch DXF path import, export, reimport and SB3 layer retention');
+ console.log('PASS Brickwright touch DXF path layer filtering, import, export, reimport and SB3 layer retention');
 }finally{
  await browser.close();
  await rm(dir,{recursive:true,force:true});

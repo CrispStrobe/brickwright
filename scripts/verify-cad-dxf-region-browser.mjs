@@ -6,7 +6,8 @@ const [url = 'http://127.0.0.1:8165/', input, output, pdfOutput] = process.argv.
 const fixture = ['0','SECTION','2','HEADER','9','$ACADVER','1','AC1021','9','$INSUNITS','70',4,'0','ENDSEC',
  '0','SECTION','2','ENTITIES','0','CIRCLE','8','Bohrungen Ä','10',10,'20',15,'40',2,
  '0','LWPOLYLINE','8','Cut perimeter','90',4,'70',1,'10',0,'20',0,'10',40,'20',0,'10',40,'20',30,'10',0,'20',30,
- '0','CIRCLE','8','Bohrungen Ä','10',30,'20',15,'40',3,'0','ENDSEC','0','EOF'].join('\n');
+ '0','CIRCLE','8','Bohrungen Ä','10',30,'20',15,'40',3,
+ '0','TEXT','8','Annotations','1','Fabrication notes','0','ENDSEC','0','EOF'].join('\n');
 const browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
 try {
  const page=await browser.newPage({viewport:{width:1024,height:768},hasTouch:true,acceptDownloads:true,serviceWorkers:'block'});
@@ -35,10 +36,21 @@ try {
  await cad.getByRole('button',{name:'Sketch',exact:true}).tap();
  const dialog=cad.getByRole('dialog',{name:'Sketch and extrusion'});
  await dialog.getByText('Import DXF outline',{exact:true}).tap();
- await dialog.getByLabel('Choose DXF file').setInputFiles(input ?? {
+ await dialog.getByLabel('Choose DXF file').setInputFiles(input || {
   name:'Motor plate.dxf', mimeType:'application/dxf', buffer:Buffer.from(fixture)
  });
  const loops=dialog.getByLabel('Region loops (mm)');
+ const importLayers=dialog.getByRole('button',{name:'Import selected layers',exact:true});
+ if(!input){
+  const layers=dialog.getByRole('group',{name:'DXF layers',exact:true});
+  await layers.getByRole('checkbox',{name:'Annotations',exact:true}).tap();
+  assert.ok(await layers.getByRole('checkbox',{name:'Bohrungen Ä',exact:true}).isChecked());
+  assert.ok(await layers.getByRole('checkbox',{name:'Cut perimeter',exact:true}).isChecked());
+  await importLayers.tap();
+ }else{
+  await Promise.race([loops.waitFor({state:'visible'}),importLayers.waitFor({state:'visible'})]);
+  if(await importLayers.isVisible())await importLayers.tap();
+ }
  await loops.waitFor({state:'visible'});
  const original=await loops.inputValue();
  const vertex=dialog.locator('[data-resize="vertex"][data-loop="1"][data-vertex="2"]');
@@ -91,6 +103,7 @@ try {
  assert.match(exported,/8\r\nBohrungen Ä\r\n100\r\nAcDbCircle\r\n10\r\n6\r\n20\r\n15\r\n30\r\n0\r\n40\r\n4/);
  assert.match(exported,/8\r\nBohrungen Ä\r\n100\r\nAcDbCircle\r\n10\r\n34\r\n20\r\n15\r\n30\r\n0\r\n40\r\n3/);
  assert.match(exported,/8\r\nCut perimeter\r\n100\r\nAcDbPolyline/);
+ assert.doesNotMatch(exported,/Fabrication notes|Annotations/);
  if(output)await copyFile(path,output);
  const [pdfDownload]=await Promise.all([
   page.waitForEvent('download'), cad.getByRole('button',{name:'Export drilling template (PDF)'}).tap()
