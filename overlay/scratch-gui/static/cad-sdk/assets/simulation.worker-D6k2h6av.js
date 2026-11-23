@@ -1059,6 +1059,11 @@ const f6 = {
   "The outline contains disconnected edges.": "Die Kontur enthält getrennte Kanten.",
   "The artwork has no usable area.": "Die Grafik enthält keine verwendbare Fläche.",
   "Enter sketch coordinates from −100000 to 100000 mm.": "Gib Skizzenkoordinaten von −100000 bis 100000 mm ein.",
+  "Choose an artwork profile of the same sketch type.": "Wähle ein Grafikprofil desselben Skizzentyps.",
+  "This sketch has constraints. Add the artwork as a new sketch.": "Diese Skizze hat Abhängigkeiten. Füge die Grafik als neue Skizze hinzu.",
+  "The number of outline and hole loops must match.": "Die Anzahl der Außen- und Innenkonturen muss übereinstimmen.",
+  "The CAD design changed. Preview the sketch update again.": "Der CAD-Entwurf wurde geändert. Öffne die Vorschau der Aktualisierung erneut.",
+  "This sketch has drawing dimensions. Add the artwork as a new sketch.": "Diese Skizze ist in einer Zeichnung bemaßt. Füge die Grafik als neue Skizze hinzu.",
   "The placed profile extends beyond the sketch coordinate limits.": "Das platzierte Profil überschreitet die Koordinatengrenzen der Skizze.",
   "Enter a span from 0.01 to 100000 mm.": "Gib eine Spannweite von 0,01 bis 100000 mm ein.",
   "Enable curve approximation to preview Bézier and elliptical centerlines.": "Aktiviere die Kurvenannäherung für Bézier- und elliptische Mittellinien.",
@@ -11421,7 +11426,7 @@ async function u7(A, g, I, e = {}) {
     }
   if ([...I.values()].reduce((x, G) => x + G.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = e.J ?? await (b4 ?? (b4 = import("./jolt-physics.wasm-compat-9WlCqVXV.js").then((x) => x.default()))), Q = new i.JoltSettings();
+  const i = e.J ?? await (b4 ?? (b4 = import("./jolt-physics.wasm-compat-02mdxHUO.js").then((x) => x.default()))), Q = new i.JoltSettings();
   Q.mMaxBodies = 512, Q.mMaxBodyPairs = Math.max(1024, B.length * B.length), Q.mMaxContactConstraints = 8192;
   const s = new i.ObjectLayerPairFilterTable(2);
   s.EnableCollision(0, 1), s.EnableCollision(1, 1);

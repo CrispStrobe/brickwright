@@ -62,6 +62,8 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
     const [anchor, setAnchor] = React.useState('lower-left');
     const [horizontal, setHorizontal] = React.useState('0'), [vertical, setVertical] = React.useState('0');
     const [saved, setSaved] = React.useState(false);
+    const [refresh, setRefresh] = React.useState(null), [updateId, setUpdateId] = React.useState('');
+    const [review, setReview] = React.useState(null);
     const [approximate, setApproximate] = React.useState(false), [tolerance, setTolerance] = React.useState('0.2');
     const [closeGaps, setCloseGaps] = React.useState(false), [maxGap, setMaxGap] = React.useState('0.5');
     const [profileSource, setProfileSource] = React.useState('fill');
@@ -110,6 +112,9 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
         }
     }, [snapshot, approximate, repairGaps, profileSource, strokeOnly, centerlineOnly, validWidth, validTolerance, validGap,
         width, tolerance, maxGap]);
+    React.useEffect(() => {
+        setReview(null);
+    }, [selected, width, plane, anchor, horizontal, vertical, profileSource, approximate, tolerance, closeGaps, maxGap, updateId]);
     const costume = getCostume();
     if (!enabled || costume?.dataFormat !== 'svg') return null;
 
@@ -120,6 +125,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
         setSnapshot(null); setError(''); setSaved(false); select(0); setWidth('40'); setPlane('XY'); setBusy(true);
         setApproximate(false); setTolerance('0.2'); setCloseGaps(false); setMaxGap('0.5'); setProfileSource('fill');
         setAnchor('lower-left'); setHorizontal('0'); setVertical('0');
+        setRefresh(null); setUpdateId(''); setReview(null);
         dialog.current.showModal();
         try {
             if (!getCadEnabled()) throw new Error(text('Enable CAD Editor in Settings → Workspace first.',
@@ -155,6 +161,71 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
         catch (e) { placementError = e.message; }
     }
     const markerRadius = profile && (centerlineOnly ? Math.max(...profile.size) : Math.min(...profile.size)) * 0.045;
+    const profileType = profile?.centerline ? 'path' : profile?.loops.length === 1 ? profile.loops[0].kind : 'region';
+    const matchingTarget = refresh?.kind === profileType && refresh.entries.find(entry => entry.id === updateId);
+    const assertArtworkCurrent = () => {
+        if (!getCadEnabled() || getCadProjectGeneration() !== snapshot.generation ||
+            getCostume() !== snapshot.costume || readSvg(snapshot.costume) !== snapshot.source) {
+            throw new Error(text('The project or artwork changed. Reopen the preview.',
+                'Das Projekt oder die Grafik wurde geändert. Öffne die Vorschau erneut.'));
+        }
+    };
+    const selectTarget = target => {
+        setUpdateId(target.id);
+        setPlane(target.plane);
+        setAnchor('lower-left');
+        setHorizontal(String(target.min[0])); setVertical(String(target.min[1]));
+        setWidth(String(centerlineOnly ? Math.max(...target.size) : target.size[0]));
+    };
+    const chooseUpdate = async () => {
+        if (!profile || sending.current) return;
+        sending.current = true;
+        const {signal} = active.current;
+        setBusy(true); setError(''); setReview(null);
+        try {
+            const editor = await readyCad(signal);
+            if (signal.aborted) return;
+            assertArtworkCurrent();
+            const entries = editor.artworkSketchTargets(profileType);
+            setRefresh({editor, entries, kind: profileType, revision: editor.session.state.revision});
+            setUpdateId('');
+        } catch (e) {
+            if (!signal.aborted) setError(e.message);
+        } finally {
+            sending.current = false;
+            if (!signal.aborted) setBusy(false);
+        }
+    };
+    const previewUpdate = async () => {
+        if (!matchingTarget || !validWidth || placementError || sending.current) return;
+        sending.current = true;
+        const {signal} = active.current;
+        setBusy(true); setError(''); setReview(null);
+        try {
+            assertArtworkCurrent();
+            if (window.__bwCad?.editor !== refresh.editor || refresh.revision !== refresh.editor.session.state.revision)
+                throw new Error(text('The CAD design changed. Choose the target sketch again.',
+                    'Der CAD-Entwurf wurde geändert. Wähle die Zielskizze erneut.'));
+            const shape = snapshot.sdk.costumeSketchProfile(profile, Number(width), placement);
+            const result = await refresh.editor.previewArtworkSketchRefresh(updateId, shape);
+            if (!signal.aborted) { assertArtworkCurrent(); setReview(result); }
+        } catch (e) {
+            if (!signal.aborted) setError(e.message);
+        } finally {
+            sending.current = false;
+            if (!signal.aborted) setBusy(false);
+        }
+    };
+    const applyUpdate = () => {
+        if (!review || !matchingTarget || active.current?.signal.aborted) return;
+        try {
+            assertArtworkCurrent();
+            review.apply();
+            setSaved(true); setError('');
+        } catch (e) {
+            setReview(null); setError(e.message);
+        }
+    };
     const send = async () => {
         if (sending.current || !profile || !validWidth || placementError) return;
         sending.current = true;
@@ -164,11 +235,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
             const shape = snapshot.sdk.costumeSketchProfile(profile, Number(width), placement);
             const editor = await readyCad(signal);
             if (signal.aborted) return;
-            if (!getCadEnabled() || getCadProjectGeneration() !== snapshot.generation ||
-                getCostume() !== snapshot.costume || readSvg(snapshot.costume) !== snapshot.source) {
-                throw new Error(text('The project or artwork changed. Reopen the preview.',
-                    'Das Projekt oder die Grafik wurde geändert. Öffne die Vorschau erneut.'));
-            }
+            assertArtworkCurrent();
             const name = String(costume.name || 'Artwork').trim().slice(0, 80) || 'Artwork';
             editor.session.addSketch(shape, {name, plane});
             setSaved(true);
@@ -191,7 +258,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
             </form>
             {error && <p role="alert">{error}</p>}
             {busy && <p role="status">{text('Working…', 'Wird verarbeitet…')}</p>}
-            {saved ? <p role="status">{centerlineOnly ? text('Sketch added to CAD. Open Objects to edit the path.',
+            {saved ? <p role="status">{refresh ? text('CAD sketch updated.', 'CAD-Skizze aktualisiert.') : centerlineOnly ? text('Sketch added to CAD. Open Objects to edit the path.',
                 'Skizze zu CAD hinzugefügt. Öffne Objekte zum Bearbeiten des Pfads.') :
                 text('Sketch added to CAD. Open Objects to edit or extrude it.',
                     'Skizze zu CAD hinzugefügt. Öffne Objekte zum Bearbeiten oder Extrudieren.')}</p> : <>
@@ -276,7 +343,7 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
                             r={markerRadius * 0.75} vectorEffect="non-scaling-stroke" />}
                     </svg>
                     <label>{text('Sketch plane', 'Skizzenebene')}
-                        <select aria-label={text('Sketch plane', 'Skizzenebene')} value={plane} disabled={busy} onChange={event => setPlane(event.target.value)}>
+                        <select aria-label={text('Sketch plane', 'Skizzenebene')} value={plane} disabled={busy || Boolean(matchingTarget)} onChange={event => setPlane(event.target.value)}>
                             {['XY', 'XZ', 'YZ'].map(value => <option key={value}>{value}</option>)}
                         </select>
                     </label>
@@ -309,9 +376,54 @@ export default function CostumePrecision ({getCostume, locale, buttonClass}) {
                     {placementError && <p role="status">{placementError}</p>}
                     {validWidth && <p>{`${displayedSize} mm`}
                         {!placementError && ` · ${anchorLabel} ${plane[0]} ${placement.position[0]}, ${plane[1]} ${placement.position[1]} mm`}</p>}
-                    <button type="button" className={buttonClass} disabled={busy || !validWidth || Boolean(placementError)} onClick={send}>
-                        {text('Add editable sketch', 'Bearbeitbare Skizze hinzufügen')}
-                    </button>
+                    {refresh ? <>
+                        <label>{text('Target sketch', 'Zielskizze')}
+                            <select aria-label={text('Target sketch', 'Zielskizze')} value={matchingTarget ? updateId : ''} disabled={busy || refresh.kind !== profileType}
+                                onChange={event => {
+                                    const target = refresh.entries.find(entry => entry.id === event.target.value);
+                                    if (target) selectTarget(target);
+                                }}>
+                                <option value="" disabled>{text('Choose a sketch', 'Skizze auswählen')}</option>
+                                {refresh.entries.map((entry, index) => <option key={entry.id} value={entry.id}>
+                                    {`${index + 1}. ${entry.name} (${entry.plane})`}
+                                </option>)}
+                            </select>
+                        </label>
+                        {(!refresh.entries.length || refresh.kind !== profileType) && <p>{text(
+                            'Choose a compatible profile and open the target list again.',
+                            'Wähle ein kompatibles Profil und öffne die Zielliste erneut.')}</p>}
+                        {review && <div className={layout.review}>
+                            <h3>{text('Review sketch update', 'Skizzenaktualisierung prüfen')}</h3>
+                            <svg role="img" aria-label={text('Current and proposed sketch', 'Aktuelle und vorgeschlagene Skizze')}
+                                viewBox={review.viewBox}>
+                                <path className={layout.before} d={review.before} vectorEffect="non-scaling-stroke" />
+                                <path className={layout.after} d={review.after} vectorEffect="non-scaling-stroke" />
+                            </svg>
+                            <p>{text('Dashed line shows the current sketch. Solid line shows the update.',
+                                'Gestrichelt ist die aktuelle Skizze, durchgezogen die Aktualisierung.')}</p>
+                            <p>{review.affectedBodies.length ? `${text('Affected solids', 'Betroffene Körper')} (${review.affectedBodies.length})` :
+                                text('This sketch has no dependent solids.', 'Von dieser Skizze hängen keine Körper ab.')}</p>
+                            {review.affectedBodies.length > 0 && <ul>{review.affectedBodies.map((name, index) =>
+                                <li key={index}>{name}</li>)}</ul>}
+                        </div>}
+                        <div className={layout.updateActions}>
+                            <button type="button" className={buttonClass} disabled={busy}
+                                onClick={() => { setRefresh(null); setReview(null); setError(''); }}>
+                                {text('Cancel update', 'Aktualisierung abbrechen')}
+                            </button>
+                            <button type="button" className={buttonClass} disabled={busy || !matchingTarget || !validWidth || Boolean(placementError)}
+                                onClick={review ? applyUpdate : previewUpdate}>
+                                {review ? text('Apply sketch update', 'Skizze aktualisieren') : text('Preview update', 'Vorschau aktualisieren')}
+                            </button>
+                        </div>
+                    </> : <div className={layout.updateActions}>
+                        <button type="button" className={buttonClass} disabled={busy || !validWidth || Boolean(placementError)} onClick={send}>
+                            {text('Add editable sketch', 'Bearbeitbare Skizze hinzufügen')}
+                        </button>
+                        <button type="button" className={buttonClass} disabled={busy} onClick={chooseUpdate}>
+                            {text('Update an existing sketch…', 'Vorhandene Skizze aktualisieren…')}
+                        </button>
+                    </div>}
                 </>}
             </>}
         </dialog>

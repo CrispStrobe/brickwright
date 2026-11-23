@@ -532,6 +532,16 @@ for general Bézier or elliptical centerlines. **Span** sets the longer side
 of the path’s bounds, including for vertical lines. Choose **Strokes** when
 you want a filled outline that follows the stroke thickness instead.
 
+Choose **Update an existing sketch** to refresh a compatible sketch from the
+selected artwork. Select the target, then **Preview update**. The overlay
+compares old and new on the same scale and identifies the dependent solids.
+Apply only after reviewing the change. The target keeps its sketch identity
+and plane. By default, the update uses its current span or width and starts
+at its lower-left corner. Constrained sketches and sketches with drawing
+dimensions require a new import. The Chrome check changes the source artwork,
+previews and cancels without changing the extrusion, then applies, undoes,
+redoes, and reopens the update from SB3.
+
 Enable **CAD Editor** and **Costumes precision design** in **Settings → Workspace**.
 **Send to CAD** opens a preview of supported filled vector regions. Select one,
 enter its desired width in millimetres, choose a sketch plane, and add the

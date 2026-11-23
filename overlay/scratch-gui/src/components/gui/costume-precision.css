@@ -34,3 +34,9 @@
 .anchorMarker { fill: white; stroke: #392497; stroke-width: 2px; }
 
 .centerline { fill: none; stroke: #1467a5; stroke-width: 3px; stroke-linecap: round; stroke-linejoin: round; }
+
+.updateActions { display: flex; gap: 8px; flex-wrap: wrap; }
+.review svg { height: clamp(80px, 25vh, 210px); }
+.review path { fill: none; stroke-width: 2px; }
+.before { stroke: var(--bw-text, #172033); stroke-dasharray: 4 4; opacity: 0.72; }
+.after { stroke: #145fa1; }
