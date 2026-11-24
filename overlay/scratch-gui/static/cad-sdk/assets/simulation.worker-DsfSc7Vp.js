@@ -647,6 +647,10 @@ const T6 = {
   "Search models": "Modelle suchen",
   "Open catalogue JSON": "Katalog-JSON öffnen",
   "Catalogue models": "Katalogmodelle",
+  "Model pages": "Modellseiten",
+  "Previous page": "Vorherige Seite",
+  "Next page": "Nächste Seite",
+  "{0}–{1} of {2} models": "{0}–{1} von {2} Modellen",
   "Model library status": "Status der Modellbibliothek",
   "No matching models.": "Keine passenden Modelle.",
   "No published catalogue is bundled. Open a reviewed remote catalogue JSON to browse models.": "Es ist kein veröffentlichter Katalog enthalten. Zum Durchsuchen eine geprüfte JSON-Datei mit Remote-Katalog öffnen.",
@@ -11440,7 +11444,7 @@ async function M7(A, g, I, e = {}) {
     }
   if ([...I.values()].reduce((x, G) => x + G.hulls.length, 0) > 4096)
     throw new Error(t("Simulation scene exceeds the 4096-convex-piece budget"));
-  const i = e.J ?? await (b4 ?? (b4 = import("./jolt-physics.wasm-compat-Bv3lRy8q.js").then((x) => x.default()))), Q = new i.JoltSettings();
+  const i = e.J ?? await (b4 ?? (b4 = import("./jolt-physics.wasm-compat-CynT8nNd.js").then((x) => x.default()))), Q = new i.JoltSettings();
   Q.mMaxBodies = 512, Q.mMaxBodyPairs = Math.max(1024, B.length * B.length), Q.mMaxContactConstraints = 8192;
   const s = new i.ObjectLayerPairFilterTable(2);
   s.EnableCollision(0, 1), s.EnableCollision(1, 1);

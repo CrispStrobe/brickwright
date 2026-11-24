@@ -41,14 +41,33 @@ try{
   const cad=page.getByTestId('bw-cad-tab');await cad.getByRole('button',{name:'Model library',exact:true}).click();
   const models=cad.getByRole('dialog',{name:'Model library',exact:true}),filter=models.getByLabel('Model type',{exact:true});
   const cards=models.locator('.model-library-card:has(.model-card-meta)');
-  await filter.selectOption('source');await wait(()=>document.querySelector('[data-testid="bw-cad-tab"] [data-state]')?.shadowRoot?.querySelectorAll('.model-library-card').length>=154);
-  const sources=await cards.count();assert.ok(sources>=154,'editable sources must remain available');
-  await filter.selectOption('');const thumbnails=await cards.evaluateAll(async entries=>{
-   const failures=[];await Promise.all(entries.map(async card=>{const source=card.querySelector('img')?.src;if(!source){failures.push(card.textContent);return;}try{const bitmap=new Image();bitmap.src=source;await bitmap.decode();if(!bitmap.naturalWidth||!bitmap.naturalHeight)failures.push(card.textContent);}catch{failures.push(card.textContent);}}));return{models:entries.length,failures};
-  });assert.ok(thumbnails.models>=302);assert.deepEqual(thumbnails.failures,[],'every curated thumbnail must decode');
+  const list=models.locator('.model-library-list');
+  const nextPage=models.getByRole('button',{name:'Next page',exact:true});
+  const visitPages=async visit=>{
+   for(;;){
+    await visit();
+    if(!await nextPage.isVisible()||await nextPage.isDisabled())return;
+    await nextPage.click();
+   }
+  };
+  await filter.selectOption('source');await wait(()=>Number(document.querySelector('[data-testid="bw-cad-tab"] [data-state]')?.shadowRoot?.querySelector('.model-library-list')?.getAttribute('data-model-count'))>=154);
+  const sources=Number(await list.getAttribute('data-model-count'));assert.ok(sources>=154,'editable sources must remain available');
+  await filter.selectOption('');
   const adafruit=models.locator('.model-library-card[data-archive-folder]');
-  await wait(()=>{const root=document.querySelector('[data-testid="bw-cad-tab"] [data-state]')?.shadowRoot;return root?.querySelectorAll('.model-library-card img[data-adafruit-preview][src^="data:image/png"]').length===482;});
-  const archiveImages=await adafruit.locator('img').evaluateAll(async entries=>{const failures=[];await Promise.all(entries.map(async image=>{try{const copy=new Image();copy.src=image.src;await copy.decode();if(copy.naturalWidth!==256||copy.naturalHeight!==192)failures.push(image.alt);}catch{failures.push(image.alt);}}));return{models:entries.length,failures};});assert.equal(archiveImages.models,482);assert.deepEqual(archiveImages.failures,[]);
+  let thumbnailCount=0,archiveImageCount=0;
+  const checkPreview=async(image,width,height)=>{
+   await image.scrollIntoViewIfNeeded();
+   await page.waitForFunction(node=>node.complete&&node.naturalWidth>0,await image.elementHandle());
+   if(width)assert.deepEqual(await image.evaluate(node=>[node.naturalWidth,node.naturalHeight]),[width,height]);
+  };
+  await visitPages(async()=>{
+   for(const card of await cards.all()){await checkPreview(card.locator('img'));thumbnailCount++;}
+   for(const image of await adafruit.locator('img[data-adafruit-preview]').all()){
+    await checkPreview(image,256,192);archiveImageCount++;
+   }
+  });
+  assert.ok(thumbnailCount>=302,'every curated thumbnail must decode');assert.equal(archiveImageCount,482);
+  const thumbnails={models:thumbnailCount,failures:[]},archiveImages={models:archiveImageCount,failures:[]};
   await models.getByLabel('Search models').fill('Adafruit');await adafruit.first().click();await page.screenshot({path:`${out}/${flavor}-adafruit.png`,animations:'disabled',timeout:10000});
   await models.getByLabel('Search models').fill('1602 CAP1188');await adafruit.first().click();assert.ok(await models.locator('.model-library-preview img[data-adafruit-preview]').isVisible());await models.getByLabel('Search models').fill('');
   let downloads=0;const downloaded=()=>downloads++;page.on('download',downloaded);
@@ -58,7 +77,9 @@ try{
   await wait(()=>window.__bwCad.editor.session.state.document.roots.length>window.__libraryInitialRoots);
   const source=await page.evaluate(()=>{const s=window.__bwCad.editor.session.state,n=s.document.nodes[s.selection[0]];return{kind:n.kind,source:n.program?.source,provenance:n.provenance?.length};});
   assert.equal(source.kind,'code');assert.ok(source.source?.length);assert.ok(source.provenance);
-  await page.evaluate(()=>window.__bwCad.editor.whenIdle());await filter.selectOption('mesh');const meshes=await cards.count();assert.ok(meshes>=148);
+  await page.evaluate(()=>window.__bwCad.editor.whenIdle());await filter.selectOption('mesh');
+  let meshes=0;await visitPages(async()=>{meshes+=await cards.count();});assert.ok(meshes>=148);
+  await filter.selectOption('source');await filter.selectOption('mesh');
   await cards.first().click();await models.getByRole('button',{name:'Insert selected STL',exact:true}).click();
   await wait(()=>window.__bwCad.editor.session.state.document.roots.length>=window.__libraryInitialRoots+2);
   const mesh=await page.evaluate(()=>{const s=window.__bwCad.editor.session.state,n=s.document.nodes[s.selection[0]];return{kind:n.kind,provenance:n.provenance?.length};});assert.equal(mesh.kind,'mesh');assert.ok(mesh.provenance);assert.equal(downloads,0,'insertion must not become a browser download');page.off('download',downloaded);

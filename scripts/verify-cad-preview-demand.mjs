@@ -24,10 +24,12 @@ try {
     const library = page.getByRole('dialog', {name: 'Model library', exact: true});
     await library.getByLabel('Model type', {exact: true}).selectOption('models');
     const cards = library.locator('.model-library-card');
-    const modelCount = await cards.count();
-    assert.ok(modelCount > 200);
-    const first = cards.locator('img[src*="/cad-sdk/previews/"]').first();
+    const first = library.locator('.model-library-card:has(.model-card-meta) img[src*="/cad-sdk/previews/"]').first();
     await first.waitFor();
+    const modelCount = Number(await library.locator('.model-library-list').getAttribute('data-model-count'));
+    assert.ok(modelCount > 200);
+    assert.equal(await cards.count(), 36);
+    const firstTitle = await cards.first().locator('strong').textContent();
     const start = await first.getAttribute('src');
     assert.match(start, /\/cad-sdk\/previews\/[a-f0-9]{64}\.png$/);
     assert.ok(await first.evaluate(image => image.decode().then(() => image.naturalWidth > 0)));
@@ -44,11 +46,20 @@ try {
     await library.getByLabel('Search models', {exact: true}).fill(title);
     assert.ok(await original.evaluate(node => node.isConnected), 'a card that still matches a search stays mounted');
     console.log('PASS selecting and narrowing the CAD library retains the matching card');
-    await library.getByLabel('Search models', {exact: true}).fill('Adafruit');
+    const search = library.getByLabel('Search models', {exact: true});
+    await search.fill('');
+    await library.getByRole('button', {name: 'Next page', exact: true}).click();
+    assert.equal(await cards.count(), 36);
+    assert.notEqual(await cards.first().locator('strong').textContent(), firstTitle);
+    await search.fill('5128 MacroPad');
     const archive = library.locator('.model-library-list img[data-adafruit-preview][src*="/cad-sdk/previews/"]').first();
     await archive.waitFor();
+    assert.match(await archive.getAttribute('data-adafruit-preview'), /5128 MacroPad/);
     assert.ok(await archive.evaluate(image => image.decode().then(() => image.naturalWidth === 256)));
-    console.log(`PASS embedded CAD: zero startup PNGs; ${visible} visible-model previews of ${modelCount} model cards; Adafruit preview decoded`);
+    await search.fill('');
+    assert.equal(await cards.first().locator('strong').textContent(), firstTitle);
+    assert.ok(await library.getByRole('button', {name: 'Previous page', exact: true}).isDisabled());
+    console.log(`PASS embedded CAD: 36 mounted cards of ${modelCount} models; ${visible} initial previews; later pages and archive search work`);
 } finally {
     await browser.close();
 }

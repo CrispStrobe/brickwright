@@ -125,7 +125,7 @@ try{
   await cad.getByRole('button',{name:'Model library',exact:true}).click();
   const models=cad.getByRole('dialog',{name:'Model library',exact:true});
   await models.getByLabel('Model type',{exact:true}).selectOption('source');
-  await page.waitForFunction(()=>document.querySelector('[data-testid="bw-cad-tab"] [data-state]')?.shadowRoot?.querySelectorAll('.model-library-card').length>130);
+  await page.waitForFunction(()=>Number(document.querySelector('[data-testid="bw-cad-tab"] [data-state]')?.shadowRoot?.querySelector('.model-library-list')?.getAttribute('data-model-count'))>130);
   await models.locator('.model-library-card').first().click();
   assert.ok(await models.locator('.model-library-preview img').isVisible());
   await models.getByRole('button',{name:'Close model library'}).click();
