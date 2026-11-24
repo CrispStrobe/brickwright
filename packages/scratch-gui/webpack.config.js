@@ -103,6 +103,28 @@ const buildManifest = `${JSON.stringify({
     distributionPolicy
 }, null, 2)}\n`;
 
+/**
+ * bw-circuit-ui loads each part kind's art lazily with
+ * `import(/* webpackChunkName: "part-art-[request]" *\/ ...)` (part-art-loader.js, pin 7f98562f):
+ * ~220 named chunks, and webpack's chunk-filename runtime in the FIRST LOAD carries an
+ * id->name entry for every named chunk (~9 KiB for these). Unnamed, they fall back to
+ * `chunks/[id].js` and need no entry. Nothing looks the art chunks up by name.
+ */
+class AnonymousPartArtChunksPlugin {
+    apply (compiler) {
+        compiler.hooks.thisCompilation.tap('AnonymousPartArtChunks', compilation => {
+            compilation.hooks.afterOptimizeChunks.tap('AnonymousPartArtChunks', chunks => {
+                for (const chunk of chunks) {
+                    if (typeof chunk.name === 'string' && chunk.name.startsWith('part-art-')) {
+                        compilation.namedChunks.delete(chunk.name);
+                        chunk.name = null;
+                    }
+                }
+            });
+        });
+    }
+}
+
 /** Emit generated build identity without pretending in-memory bytes are a CopyPlugin path. */
 class BuildManifestPlugin {
     apply (compiler) {
@@ -239,6 +261,7 @@ const baseConfig = new ScratchWebpackConfigBuilder(
     }))
     .addPlugin(new BuildManifestPlugin())
     .addPlugin(new PinnedCadSdkPlugin())
+    .addPlugin(new AnonymousPartArtChunksPlugin())
     .addPlugin(new CopyWebpackPlugin({
         patterns: [
             {

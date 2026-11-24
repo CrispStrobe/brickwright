@@ -3,10 +3,11 @@ import {createPortal} from 'react-dom';
 import {catalog, provenance, mediaCommit, fetchAssets, runNativeBenchmark} from '../../lib/bw-native-benchmarks/index.js';
 import styles from './i8086-lab.css';
 
-export default function NativeBenchmarks () {
+// settings-menu.jsx loads this panel lazily on the first open request and mounts it already open.
+export default function NativeBenchmarks ({initiallyOpen = false}) {
     const dialog = useRef(null);
     const active = useRef(null);
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(initiallyOpen);
     const [project, setProject] = useState('topbench');
     const [assets, setAssets] = useState(null);
     const [notice, setNotice] = useState('');
