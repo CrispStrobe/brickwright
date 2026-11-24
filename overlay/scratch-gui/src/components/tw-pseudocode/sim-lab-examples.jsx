@@ -5,6 +5,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import {MODEL_LESSONS} from '../../lib/bw-sim/model/example-catalog.js';
 import {EXPERIMENTAL_MODEL_DETAILS} from '../../lib/bw-sim/model/experimental-models.js';
 import {EXAMPLE_TOPICS, filterModelExamples, visibleExampleModels} from '../../lib/bw-sim/model/example-browser.js';
+import {galleryArtworkUrl, loadGalleryArtwork} from '../../lib/gallery-artwork.js';
 const EXAMPLE_DETAILS = Object.freeze({...MODEL_LESSONS, ...EXPERIMENTAL_MODEL_DETAILS});
 
 export const EXAMPLES_TEXT = {
@@ -30,12 +31,14 @@ const SimLabExamples = ({models, locale, selected, onChoose, onLesson, onClose})
     const [includeExperimental, setIncludeExperimental] = useState(false);
     const [pending, setPending] = useState(null);
     const [error, setError] = useState('');
+    const [artwork, setArtwork] = useState({});
     const search = useRef(null);
     const dialog = useRef(null);
     const mounted = useRef(true);
     useEffect(() => {
         mounted.current = true;
         search.current?.focus();
+        loadGalleryArtwork().then(manifest => { if (mounted.current) setArtwork(manifest.robots || {}); });
         return () => { mounted.current = false; };
     }, []);
     const choose = async (key, program) => {
@@ -87,10 +90,16 @@ const SimLabExamples = ({models, locale, selected, onChoose, onLesson, onClose})
                             const key = entry.id || entry.file;
                             const d = EXAMPLE_DETAILS[key];
                             const title = entry.title[lang] || entry.title.en;
+                            const artworkUrl = galleryArtworkUrl(artwork[entry.file]);
                             return (
                                 <article key={key} data-testid="bw-sim-example-card" data-model={key}
                                     style={{background: '#fff', border: `2px solid ${selected === key ? '#7c3aed' : '#e2e8f0'}`, borderRadius: 8, padding: 12,
                                         display: 'flex', flexDirection: 'column', minWidth: 0}}>
+                                    {artworkUrl && (
+                                        <img src={artworkUrl} alt="" width={384} height={240}
+                                            loading="lazy" decoding="async" data-testid="bw-sim-example-artwork"
+                                            style={{width: '100%', height: 'auto', borderRadius: 5, marginBottom: 8}} />
+                                    )}
                                     <h3 style={{fontSize: 15, margin: '0 0 6px'}}>{title}</h3>
                                     {entry.simulationChecked && <strong data-testid="bw-sim-example-checked" style={{fontSize: 12, color: '#166534', marginBottom: 6}}>
                                         {lang === 'de' ? 'Simulation geprüft' : 'Simulation checked'}
