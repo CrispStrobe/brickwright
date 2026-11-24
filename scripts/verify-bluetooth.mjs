@@ -78,7 +78,9 @@ await page.addInitScript(() => {
     // Settings click below.
     localStorage.setItem('bw-starter-v1-complete', '1');
     delete Navigator.prototype.bluetooth;
-    window.__TAURI__ = {core: {invoke: () => Promise.resolve()}, event: {listen: () => {}}};
+    // listen resolves to an unlisten function, as Tauri's does: the desktop menu bridge
+    // (lib/desktop-editor-menu.js, d9aa15eef) chains on it, and `() => {}` crashed the GUI.
+    window.__TAURI__ = {core: {invoke: () => Promise.resolve()}, event: {listen: () => Promise.resolve(() => {})}};
 });
 
 await page.goto(url, {waitUntil: 'domcontentloaded'});
@@ -97,6 +99,9 @@ check('requestDevice is callable',
 // carried "settings" in a class name, which stopped being the menu's trigger.
 const settingsButton = page.getByTestId('bw-settings-menu-trigger');
 let openedFromMenu = false;
+// The diagnostics global is installed before the GUI renders: wait for the menu bar too
+// (count() alone does not wait, and the trigger may not be mounted yet).
+await settingsButton.waitFor({state: 'visible', timeout: 60000}).catch(() => {});
 if (await settingsButton.count() > 0) {
     await settingsButton.click();
     const item = page.getByText('Connection diagnostics…', {exact: false}).first();
