@@ -35,7 +35,7 @@ Paging reuses the active CAD search results. A more specific query can search on
 
 The CAD library materializes bundled source and STL bytes during insertion. Browsing and availability checks use the catalog and exact bundled paths, and insertion can still use the bundled files offline.
 
-Catalog construction parses each source manifest once and reuses its records for licence attribution. The standalone editor keeps the normalized catalog when a different project is opened in the same app session.
+The build packs the nine curated manifests into one compact JSON payload. The browser parses that payload and the seed catalogue once each and reuses the manifest records for licence attribution. The standalone editor keeps the normalized catalog when a different project is opened in the same app session.
 
 The CAD editor mounts the Model Library on first open. The library code, Adafruit archive metadata and bundled catalogue run outside editor startup. The standalone service worker still caches the library scripts for offline use.
 

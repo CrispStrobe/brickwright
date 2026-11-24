@@ -2,7 +2,7 @@
   "format": "brickwright-cad-sdk",
   "version": 1,
   "repository": "https://github.com/CrispStrobe/brickwright-cad",
-  "commit": "a4f9c3af8504d8a6fd2baa50af27bfa3a31d0832",
+  "commit": "9bb85fb2f6d602acecc43000e99c93619f6a50ce",
   "dirty": false,
   "entry": "sdk.js",
   "wasm": "cad-assets/manifold.wasm",
@@ -20,8 +20,8 @@
     "assets/step-import.worker-BXyahCPA.js": "c801ad85e2cd4ddcde0c54bfbcb45721b69e30f4aeb8f2ff76e76db75a73560b",
     "cad-assets/manifold.wasm": "73e3b419ad31294f6b1cc478173944e50efc4a34bfdeeff0107bdfc12975f11c",
     "model-library-cache-DiMFGzp9.js": "75dc4ad7999b4571b227f1c675ca00af698fcc886dc73e98dd4c0eb2604e2b20",
-    "model-library-local-DnnzPxxa.js": "3d4f201cd48932dcb999408833fadc86cd3ba7d4a5eef8771b4260a23f5e7674",
-    "model-library-panel-BqITol2n.js": "c5ea702582872ce26bf2efe4b43f65c57d09a22f3acbd36d8c5032f26798e84d",
+    "model-library-local-CqP-5OVg.js": "906d6a1b8f19337c3a8e57b8068379c165da8c9d61164c42d9da3d41cec0f529",
+    "model-library-panel-BIcasTC4.js": "97035b25df692b5cd3aa8c40acd7f7f39a233847b471291e987e7a90f344fae7",
     "previews/0032bf7f999c3572c3411d1149c79066401db463c71ef6d754f08579ac423747.png": "0032bf7f999c3572c3411d1149c79066401db463c71ef6d754f08579ac423747",
     "previews/00923aa5ecc7ed2388365e7abffba7fd79cba2916e3e5d24066abd18ce158a1f.png": "00923aa5ecc7ed2388365e7abffba7fd79cba2916e3e5d24066abd18ce158a1f",
     "previews/00ba924719ee907a0ac919438cbc4a3776ba31d4d63def024419a73e0e750985.png": "00ba924719ee907a0ac919438cbc4a3776ba31d4d63def024419a73e0e750985",
@@ -835,7 +835,7 @@
     "previews/fe8d0d35d9d4a5a2118db14b8b01759048cb9c3e6b32303b4535713240f03324.png": "fe8d0d35d9d4a5a2118db14b8b01759048cb9c3e6b32303b4535713240f03324",
     "previews/fef03d55e4f8953fe85099bd749d404fb778289dc2ac836bf7e2ea88a201f44a.png": "fef03d55e4f8953fe85099bd749d404fb778289dc2ac836bf7e2ea88a201f44a",
     "previews/ff71a6a76b555a4ce21ab970e871ec28d1ce8f81af107d71cc396fa7df109efb.png": "ff71a6a76b555a4ce21ab970e871ec28d1ce8f81af107d71cc396fa7df109efb",
-    "sdk-BSOvHd1K.js": "f353af03220ab8894d2242137ca6c374aaeb132d77becab661d93716345f8e79",
-    "sdk.js": "514805b47545ce2bd88d9af75296b0565e2ea3007fdb87ab0d6a2b43f0265dac"
+    "sdk-LUUkC6dK.js": "767337629c178a62e8a248d8db44bbe2d91eb1ec3004bae40172056068d5a698",
+    "sdk.js": "b1aae61020b55fddd342d68ec962e58beb22c5253784311a9b52ba1cd00cfbcb"
   }
 }

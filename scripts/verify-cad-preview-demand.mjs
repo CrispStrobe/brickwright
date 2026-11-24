@@ -44,7 +44,7 @@ try {
         window.__cadLibraryManifestParses = {count: 0, characters: 0};
         JSON.parse = function (text, reviver) {
             const result = parse.call(this, text, reviver);
-            if (typeof text === 'string' && /^\s*\{\s*"format"\s*:\s*"brickwright-(?:local-(?:example|fixture)-library|model-library)"/.test(text)) {
+            if (typeof text === 'string' && /^\s*\[?\{\s*"format"\s*:\s*"brickwright-(?:local-(?:example|fixture)-library|model-library)"/.test(text)) {
                 window.__cadLibraryManifestParses.count++;
                 window.__cadLibraryManifestParses.characters += text.length;
             }
@@ -179,7 +179,8 @@ try {
     assert.deepEqual(await page.evaluate(() => window.__cadLibraryDecode), {files: 0, bytes: 0},
         'opening, searching and selecting in the gallery must not decode bundled STL geometry');
     const manifests = await page.evaluate(() => window.__cadLibraryManifestParses);
-    assert.equal(manifests.count, 10, 'each catalog manifest should be parsed once');
+    assert.equal(manifests.count, 2, 'the packed manifests and seed catalogue are each parsed once');
+    assert.ok(manifests.characters < 3000000, 'browser catalogue JSON stays under 3 million characters');
     console.log(`PASS cold CAD catalog: ${manifests.count} parses, ${manifests.characters} manifest characters`);
     await search.fill('10 mm geometric cube fixture');
     await library.getByRole('button', {name: /^10 mm geometric cube fixture · /}).click();
