@@ -114,6 +114,7 @@ on:
       - 'docs/PICO-KALUMA-BOOT.md'
       - 'docs/PEERS-SECURITY-REVIEW.md'
       - 'docs/RCX-FIRMWARE.md'
+      - 'docs/ROBOT-CAD-EDITOR-PARITY.md'
       - 'docs/ROBOT-LAB-ARCHITECTURE.md'
       - 'docs/ROBOT-LAB-VALIDATION.md'
       - 'docs/SPIKE-CONSOLIDATION.md'
