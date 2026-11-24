@@ -67,6 +67,7 @@ try {
         return vm?.editingTarget.getCostumes()[vm.editingTarget.currentCostume]?.name === 'precision-fixture';
     });
     await togglePrecision('1');
+    if (await showProperties.isVisible()) await showProperties.click();
     await summary.click();
     await page.getByLabel('Center X',{exact:true}).fill('12.5');
     await page.getByLabel('Center Y',{exact:true}).fill('-7.25');

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Complete GUI selection -> shared loader -> real VM, Widgets, Circuit and Jolt.
-import {chromium,webkit} from 'playwright';
+import {chromium,firefox,webkit} from 'playwright';
 import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {CAD_ROBOT_EXAMPLES} from '../overlay/scratch-gui/src/lib/bw-cad-robot-catalog.js';
@@ -19,15 +19,67 @@ function checkQuasarCycle(frame,samples){
    for(const f of samples)for(const p of f.poses){assert.ok(Math.abs(Math.hypot(...p.quaternion)-1)<.001,'rigid rotation must remain normalized');assert.ok(p.positionMm.every(v=>Number.isFinite(v)&&Math.abs(v)<300),'no body may be flung out of the mechanism');}
  return {indexed,firstDrop:center(firstDrop),landed:done,minRamMm:Math.min(...pressed.map(f=>f.linearPositions['ram-b'])),maxEjectMm:Math.max(...samples.map(f=>f.linearPositions['eject-c']))};
 }
-const browser=await (process.env.PROOF_BROWSER==='webkit'?webkit.launch({headless:true}):chromium.launch({headless:true,executablePath:process.env.BW_BROWSER_EXECUTABLE,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']}));
+// Probe input restoration on an isolated part so visual overlap never makes the test ambiguous.
+async function addDragProbe(page){
+ return page.evaluate(async()=>{
+  const {editor}=window.__bwCad,ready=await editor.whenIdle(),x=Math.min(...ready.bodies.map(body=>body.bounds.min[0]))-45;
+  const point=[x,0,10],id=editor.session.add({kind:'box',size:[20,20,20]},{transform:{position:point,rotation:[0,0,0],scale:[1,1,1]}});
+  await editor.whenIdle();await editor.executeCommand('top');editor.frame();editor.setSurfaceSnap(false);
+  return {id,point};
+ });
+}
+async function assertSelectAndDrag(page,probe){
+ const {PerspectiveCamera,Vector3}=await import('../packages/scratch-gui/node_modules/three/build/three.module.js');
+ const canvas=page.getByTestId('cad-canvas');
+ const rect=await canvas.boundingBox(),cameraPosition=JSON.parse(await canvas.getAttribute('data-camera-position')),target=JSON.parse(await canvas.getAttribute('data-camera-target'));
+ const camera=new PerspectiveCamera(42,rect.width/rect.height,.1,200000);
+ camera.up.set(0,0,1);camera.position.fromArray(cameraPosition);camera.lookAt(new Vector3(...target));camera.updateMatrixWorld();
+ const point=new Vector3(probe.point[0],probe.point[1],20).project(camera);
+ const x=rect.x+(point.x+1)*rect.width/2,y=rect.y+(1-point.y)*rect.height/2;
+ await page.mouse.click(x,y);
+ await page.waitForFunction(id=>window.__bwCad.editor.session.state.selection.includes(id),probe.id,{timeout:10000});
+ await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x+35,y+10,{steps:6});await page.mouse.up();
+ await page.waitForFunction(({id,point})=>window.__bwCad.editor.session.state.document.nodes[id].transform.position.some((v,i)=>Math.abs(v-point[i])>1),probe,{timeout:10000});
+ console.log('PASS Stop restores canvas selection and drag without a simulation reset');
+}
+const browserType={chromium,firefox,webkit}[process.env.PROOF_BROWSER||'chromium'];
+if(!browserType)throw new Error('Unsupported proof browser');
+const browser=await browserType.launch({headless:true,executablePath:process.env.BW_BROWSER_EXECUTABLE,
+ ...(browserType===chromium&&process.env.PROOF_SOFTWARE_GPU==='1'?{args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']}:{}),
+ ...(browserType===firefox?{firefoxUserPrefs:{'webgl.force-enabled':true}}:{})});
 const page=await browser.newPage({viewport:process.argv.includes('--ipad')?{width:1024,height:768}:{width:1440,height:1000},hasTouch:process.argv.includes('--ipad'),serviceWorkers:'block'}),errors=[],results=[];let cancelNext=false;
+if(process.env.PROOF_DIAGNOSTICS==='1'){
+ page.on('console',message=>{if(['error','warning'].includes(message.type()))console.log('Browser',message.text().slice(0,400));});
+ page.on('requestfailed',request=>console.log('Request failed',new URL(request.url()).pathname,request.failure()));
+}
 page.on('pageerror',e=>{errors.push(e.message);console.log('pageerror',e.message);});page.on('dialog',d=>{if(cancelNext){cancelNext=false;return d.dismiss();}return d.accept();});page.setDefaultTimeout(180000);
 await page.addInitScript(()=>{localStorage.setItem('bw-starter-v1-complete','1');localStorage.setItem('bw-cad-enabled','1');
+ document.addEventListener('click',event=>{
+  const times=window.__proofRunTimes;
+  if(times?.clicked==null&&times&&event.composedPath().some(node=>node?.dataset?.testid==='bw-cad-run'))times.clicked=performance.now();
+ },true);
+ for(const [event,key] of [['bw-circuit-ensure-ready','circuitRequested'],['bw-circuit-clock-owner','circuitOwnership'],['bw-board-ready','boardReady']]){
+  window.addEventListener(event,e=>{const times=window.__proofRunTimes;if(times?.clicked!=null&&times[key]==null&&(key!=='circuitOwnership'||e.detail?.board))times[key]=performance.now();});
+ }
  window.addEventListener('bw-cad-circuit-status',e=>{if(e.detail?.phase==='running'&&window.__proofRunTimes?.running==null&&window.__proofRunTimes)window.__proofRunTimes.running=performance.now();});
  window.__proofSamples=[];
- setInterval(()=>{const sim=window.__bwCad?.editor.simulation;if(sim?.state.state==='running'){const f=sim.snapshot();if(f.poses?.some(p=>p.id==='blank'))window.__proofSamples.push(f);}},50);
+ setInterval(()=>{
+  const sim=window.__bwCad?.editor.simulation,times=window.__proofRunTimes;
+  if(sim?.state.state!=='running'||!times||times.clicked==null)return;
+  const frame=sim.snapshot();
+  if(frame.poses?.some(p=>p.id==='blank'))window.__proofSamples.push(frame);
+  if(times.firstMotion==null&&frame.time>0&&(
+   Object.entries(frame.angles).some(([key,value])=>Math.abs(value-(times.initial.angles[key]??0))>.5)||
+   Object.entries(frame.linearPositions).some(([key,value])=>Math.abs(value-(times.initial.linearPositions[key]??0))>.2)
+  ))times.firstMotion=performance.now();
+ },30);
  window.__proofDraws={count:0,duplicate:0,frame:0,lastFrame:-1};
- const raf=()=>{window.__proofDraws.frame++;requestAnimationFrame(raf);};requestAnimationFrame(raf);
+ const raf=now=>{
+  window.__proofDraws.frame++;
+  const t=window.__proofRunTimes;
+  if(t?.clicked!=null){if(t.lastFrame!=null)t.frameGaps.push(now-t.lastFrame);t.lastFrame=now;}
+  requestAnimationFrame(raf);
+ };requestAnimationFrame(raf);
  for(const type of [window.WebGLRenderingContext,window.WebGL2RenderingContext]){if(!type)continue;const clear=type.prototype.clear;type.prototype.clear=function(...args){if(this.canvas?.dataset.testid==='cad-canvas'){const d=window.__proofDraws;d.count++;if(d.lastFrame===d.frame)d.duplicate++;d.lastFrame=d.frame;}return clear.apply(this,args);};}
 });
 const wait=fn=>page.waitForFunction(fn,null,{timeout:180000,polling:100});const out=process.env.PROOF_OUT||'artifacts/cad-robot-projects';await mkdir(out,{recursive:true});
@@ -35,7 +87,7 @@ try{
  await page.goto(process.env.PROOF_URL||'http://127.0.0.1:8141/',{waitUntil:'commit'});await wait(()=>window.__brickwrightStore?.getState().scratchGui.vm?.runtime?.cadCircuitSimulation);await page.getByRole('tab',{name:'CAD',exact:true}).click();await wait(()=>window.__bwCad?.editor);console.log('GUI CAD ready');
  const cad=page.getByTestId('bw-cad-tab');
  for(const [i,item]of CAD_ROBOT_EXAMPLES.entries()){
-  if(process.argv.includes('--ipad')&&i>0)break;
+  if(process.argv.includes('--ipad')&&!process.env.ONLY_ROBOT&&i>0)break;
   if((process.env.SKIP_ROBOTS||'').split(',').includes(item.id))continue;
   if(process.env.ONLY_ROBOT&&process.env.ONLY_ROBOT!==item.id)continue;console.log('Selecting',item.id);
   const panel=page.getByTestId('bw-cad-circuit-panel');if(await panel.isVisible())await panel.getByRole('button',{name:'Close program settings'}).click();
@@ -76,27 +128,53 @@ try{
   // Presets start inside travel (5389b9b17), but not every joint starts mid-travel: Hermes' hoist-b
   // (limits [-16, 0]) starts at its upper stop and its preset -25 lowers it, so a blanket +60 held it on the stop.
   if(process.env.PROOF_DEFAULT!=='1')for(const widget of state.widgets){const value=widget.min<0?(widget.value<0?-60:60):Math.min(widget.max,105);await page.getByTestId(`bw-cad-control-${widget.name}`).evaluate((input,value)=>{Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(input,String(value));input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}));},value);assert.equal(await page.evaluate(name=>window.__brickwrightStore.getState().scratchGui.vm.runtime.controllerPanel.getValue(name),widget.name),value);}
+  if(process.env.PROOF_PRIME_CIRCUIT==='1'){
+   await page.getByRole('tab',{name:'Circuit',exact:true}).click();
+   await wait(()=>window.__brickwrightStore.getState().scratchGui.vm.runtime.circuitBoard?.parts.some(p=>p.id==='uno'));
+   await page.getByRole('tab',{name:'CAD',exact:true}).click();
+   if(!await page.getByTestId('bw-cad-robot-controls').isVisible())await page.getByRole('button',{name:'Robot controls',exact:true}).click();
+  }
   await writeFile(`${out}/loaded-${item.id}.json`,JSON.stringify({id:item.id,widgets:state.widgets,blocks:true,code:true,circuit:true,connections:state.connections},null,2));
   if(process.env.PROOF_LOAD_ONLY==='1'){console.log('PASS full project load',item.id);continue;}
   if(process.env.PROOF_CONTROLS_CLOSED==='1')await page.getByTestId('bw-cad-circuit-panel').getByRole('button',{name:'Close program settings'}).click();
-  console.log('Widgets ready',item.id,process.env.PROOF_DEFAULT==='1'?'untouched defaults':'operated');const source=await page.evaluate(()=>{window.__proofSamples=[];window.__proofRunTimes={requested:performance.now(),running:null};Object.assign(window.__proofDraws,{count:0,duplicate:0,lastFrame:-1});window.__proofHeartbeat={last:performance.now(),max:0,ticks:0};window.__proofHeartbeatTimer=setInterval(()=>{const h=window.__proofHeartbeat,n=performance.now();h.max=Math.max(h.max,n-h.last);h.last=n;h.ticks++;},50);return window.__bwCad.editor.session.serialize();});await page.evaluate(value=>{window.__robotProofSeconds=value;},Number(process.env.PROOF_SIM_SECONDS||(item.id==='robot-quasar-press'?15:6)));const runStarted=performance.now();if(process.env.PROOF_BLUR_PREPARATION==='1')await page.evaluate(()=>{let attempts=0;const timer=setInterval(()=>{if(window.__bwCad.editor.simulation.state.state==='preparing')window.dispatchEvent(new Event('blur'));if(++attempts>40)clearInterval(timer);},25);});await page.getByTestId('bw-cad-run').click();console.log('Run pressed',item.id);
+  console.log('Widgets ready',item.id,process.env.PROOF_DEFAULT==='1'?'untouched defaults':'operated');const source=await page.evaluate(()=>{window.__proofSamples=[];const sim=window.__bwCad.editor.simulation,api=window.__brickwrightStore.getState().scratchGui.vm.runtime.cadSimulation;
+ const {angles,linearPositions}=sim.snapshot();
+ window.__proofRunTimes={requested:performance.now(),running:null,initial:{angles,linearPositions},frameGaps:[]};
+ if(!api.__proofTiming){
+  for(const key of ['reset','acquireExternalClock']){
+   const original=api[key];
+   api[key]=function(...args){
+    const times=window.__proofRunTimes;
+    if(times?.clicked==null)return original.apply(this,args);
+    times[key+'Start']=performance.now();
+    const result=original.apply(this,args),done=()=>{times[key+'End']=performance.now();};
+    if(result?.then)result.then(done,done);else done();
+    return result;
+   };
+  }
+  api.__proofTiming=true;
+ }Object.assign(window.__proofDraws,{count:0,duplicate:0,lastFrame:-1});window.__proofHeartbeat={last:performance.now(),max:0,ticks:0};window.__proofHeartbeatTimer=setInterval(()=>{const h=window.__proofHeartbeat,n=performance.now();h.max=Math.max(h.max,n-h.last);h.last=n;h.ticks++;},50);return window.__bwCad.editor.session.serialize();});await page.evaluate(value=>{window.__robotProofSeconds=value;},Number(process.env.PROOF_SIM_SECONDS||(item.id==='robot-quasar-press'?15:6)));const runStarted=performance.now();if(process.env.PROOF_BLUR_PREPARATION==='1')await page.evaluate(()=>{let attempts=0;const timer=setInterval(()=>{if(window.__bwCad.editor.simulation.state.state==='preparing')window.dispatchEvent(new Event('blur'));if(++attempts>40)clearInterval(timer);},25);});await page.getByTestId('bw-cad-run').click();console.log('Run pressed',item.id);
   if(item.id==='robot-quasar-press'&&process.env.PROOF_DEFAULT==='1'){
    await wait(()=>{const f=window.__bwCad.editor.simulation.snapshot();return f.angles['dial-a']>85&&f.linearPositions['ram-b']>0;});
    await page.screenshot({path:`${out}/quasar-indexed.png`});
    await wait(()=>window.__bwCad.editor.simulation.snapshot().linearPositions['ram-b'] < -3);
    await page.screenshot({path:`${out}/quasar-pressed.png`});
   }
-  if(process.env.PROOF_PROFILE==='1'&&process.env.PROOF_BROWSER!=='webkit'){
+  if(process.env.PROOF_PROFILE==='1'&&browserType===chromium){
    const cdp=await page.context().newCDPSession(page);await cdp.send('Profiler.enable');await cdp.send('Profiler.start');
    setTimeout(async()=>{try{const {profile}=await cdp.send('Profiler.stop');await writeFile(`${out}/cpu-${item.id}.json`,JSON.stringify(profile));console.log('CPU profile captured',item.id);}catch(error){console.log('Profiler:',error.message);}},15000);
   }
 await wait(()=>{const s=window.__brickwrightStore.getState().scratchGui.vm.runtime.cadCircuitSimulation.state();return s.phase==='error'||s.time>window.__robotProofSeconds;});
-  const after=await page.evaluate(()=>({state:window.__brickwrightStore.getState().scratchGui.vm.runtime.cadCircuitSimulation.state(),frame:window.__bwCad.editor.simulation.snapshot(),source:window.__bwCad.editor.session.serialize(),draws:{...window.__proofDraws},runTimes:{...window.__proofRunTimes,finished:performance.now()},boardParts:window.__brickwrightStore.getState().scratchGui.vm.runtime.circuitBoard.parts.map(p=>({id:p.id,kind:p.kind}))}));after.wallSeconds=(performance.now()-runStarted)/1000;after.averageRealTimeFactor=after.frame.time/after.wallSeconds;after.preparationSeconds=after.runTimes.running==null?null:(after.runTimes.running-after.runTimes.requested)/1000;after.runningRealTimeFactor=after.runTimes.running==null?null:after.frame.time/((after.runTimes.finished-after.runTimes.running)/1000);await writeFile(`${out}/debug-${item.id}.json`,JSON.stringify({state:after.state,frame:after.frame,draws:after.draws,wallSeconds:after.wallSeconds,averageRealTimeFactor:after.averageRealTimeFactor,preparationSeconds:after.preparationSeconds,runningRealTimeFactor:after.runningRealTimeFactor},null,2));assert.equal(after.state.phase,'running',after.state.error);assert.equal(after.source,source);if(process.env.PROOF_DRAW_BUDGET==='1')assert.ok(after.draws.duplicate<=5,`simulation must coalesce rendering, got ${after.draws.duplicate} duplicate scene draws`);
+  const after=await page.evaluate(()=>({state:window.__brickwrightStore.getState().scratchGui.vm.runtime.cadCircuitSimulation.state(),frame:window.__bwCad.editor.simulation.snapshot(),source:window.__bwCad.editor.session.serialize(),draws:{...window.__proofDraws},runTimes:{...window.__proofRunTimes,finished:performance.now()},boardParts:window.__brickwrightStore.getState().scratchGui.vm.runtime.circuitBoard?.parts.map(p=>({id:p.id,kind:p.kind}))??[]}));const {clicked,firstMotion,acquireExternalClockStart,acquireExternalClockEnd,frameGaps,...marks}=after.runTimes;
+  const sorted=frameGaps.sort((a,b)=>a-b);after.browserTiming={clickedToMotionMs:clicked!=null&&firstMotion!=null?firstMotion-clicked:null,mechanicalPreparationMs:acquireExternalClockStart!=null&&acquireExternalClockEnd!=null?acquireExternalClockEnd-acquireExternalClockStart:null,frameP95Ms:sorted[Math.floor(sorted.length*.95)]??null,frameMaxMs:sorted.at(-1)??null,marks};
+  delete after.runTimes.frameGaps;
+  after.wallSeconds=(performance.now()-runStarted)/1000;after.averageRealTimeFactor=after.frame.time/after.wallSeconds;after.preparationSeconds=after.runTimes.running==null?null:(after.runTimes.running-after.runTimes.requested)/1000;after.runningRealTimeFactor=after.runTimes.running==null?null:after.frame.time/((after.runTimes.finished-after.runTimes.running)/1000);await writeFile(`${out}/debug-${item.id}.json`,JSON.stringify({state:after.state,frame:after.frame,draws:after.draws,wallSeconds:after.wallSeconds,averageRealTimeFactor:after.averageRealTimeFactor,preparationSeconds:after.preparationSeconds,runningRealTimeFactor:after.runningRealTimeFactor,browserTiming:after.browserTiming},null,2));assert.equal(after.state.phase,'running',after.state.error);assert.equal(after.source,source);if(process.env.PROOF_DRAW_BUDGET==='1')assert.ok(after.draws.duplicate<=5,`simulation must coalesce rendering, got ${after.draws.duplicate} duplicate scene draws`);
   if(item.id==='robot-quasar-press'&&process.env.PROOF_DEFAULT==='1'){
    const samples=await page.evaluate(()=>window.__proofSamples);
    await writeFile(`${out}/quasar-cycle-frames.json`,JSON.stringify(samples));
    after.quasarCycle=checkQuasarCycle(after.frame,samples);
   }
+  assert.notEqual(after.browserTiming.clickedToMotionMs,null,'one Run click must produce measurable joint motion');
   if(item.id==='robot-atlas-forklift'&&process.env.PROOF_DEFAULT==='1')assert.ok(Math.abs(after.frame.angles['tilt-c']-15)<2,'Atlas must hold the commanded fork tilt under load');
   if(item.id==='robot-nova-loader'){const chassis=after.frame.poses.find(p=>p.id==='chassis');assert.ok(Math.hypot(chassis.positionMm[0],chassis.positionMm[1])>5,'Nova must translate across the floor, not only spin its wheels');}
   const motion=[...Object.values(after.frame.angles||{}),...Object.values(after.frame.linearPositions||{})];assert.ok(motion.some(v=>Math.abs(v)>1),`${item.name}: real joints must move from widget commands`);
@@ -106,6 +184,13 @@ await wait(()=>{const s=window.__brickwrightStore.getState().scratchGui.vm.runti
   await page.getByTestId('bw-cad-robot-controls').waitFor();
   await page.screenshot({path:`${out}/${item.file.replace('.sb3','')}${process.argv.includes('--ipad')?'-ipad':''}.png`,animations:'disabled'});await page.getByRole('button',{name:'Stop program',exact:true}).click();await page.getByRole('button',{name:'Reset simulation',exact:true}).click();
   if(process.env.PROOF_REPEAT==='1')for(let repeat=0;repeat<Number(process.env.PROOF_EXTRA_CYCLES||1);repeat++){
+   let probe=null;
+   if(process.env.PROOF_INTERACTION==='1'){
+    await page.getByRole('tab',{name:'Circuit',exact:true}).click();
+    await page.getByRole('tab',{name:'CAD',exact:true}).click();
+    if(!await page.getByTestId('bw-cad-robot-controls').isVisible())await page.getByRole('button',{name:'Robot controls',exact:true}).click();
+    probe=await addDragProbe(page);
+   }
    await page.evaluate(()=>{window.__proofSamples=[];});
    await page.getByTestId('bw-cad-run').click();await page.getByTestId('bw-cad-robot-controls').waitFor();
    await wait(()=>{const s=window.__brickwrightStore.getState().scratchGui.vm.runtime.cadCircuitSimulation.state();return s.phase==='error'||s.time>.5;});
@@ -120,7 +205,9 @@ await wait(()=>{const s=window.__brickwrightStore.getState().scratchGui.vm.runti
    await wait(()=>{const s=window.__brickwrightStore.getState().scratchGui.vm.runtime.cadCircuitSimulation.state();return s.phase==='error'||s.time>1.5;});
    assert.equal(await page.evaluate(()=>window.__brickwrightStore.getState().scratchGui.vm.runtime.cadCircuitSimulation.state().phase),'running');
    await page.getByTestId('bw-cad-robot-controls').waitFor();
-   await page.getByRole('button',{name:'Stop program',exact:true}).click();await page.getByRole('button',{name:'Reset simulation',exact:true}).click();
+   await page.getByRole('button',{name:'Stop program',exact:true}).click();
+   if(probe)await assertSelectAndDrag(page,probe);
+   await page.getByRole('button',{name:'Reset simulation',exact:true}).click();
   }
   after.heartbeat=await page.evaluate(()=>{clearInterval(window.__proofHeartbeatTimer);return window.__proofHeartbeat;});delete after.source;await writeFile(`${out}/passed-${item.id}${process.argv.includes('--ipad')?'-ipad':''}.json`,JSON.stringify({id:item.id,widgets:state.widgets,after},null,2));results.push({id:item.id,widgets:state.widgets,code:true,blocks:true,circuit:true,wireCount,hardware,after});await writeFile(`${out}/result${process.argv.includes('--ipad')?'-ipad':''}.json`,JSON.stringify({results,errors},null,2));console.log('PASS',item.name,'complete project; Widgets -> Circuit -> moving CAD joints; Stop/Reset');
  }
