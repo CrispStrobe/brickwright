@@ -3,7 +3,7 @@
     align-items: center;
     gap: 5px;
     margin-left: auto;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     min-width: 0;
 }
 
@@ -47,14 +47,18 @@
     flex: 0 0 auto;
 }
 
-@media (max-width: 900px) {
-    .editor-tools .editor-tool-button {
-        width: 44px;
-        padding: 0;
-    }
+.editor-tools .editor-tool-button {
+    min-width: 44px;
+    padding-inline: 6px;
+}
 
+.editor-tool-label {
+    display: none;
+}
+
+@container bw-paint (min-width: 1500px) {
     .editor-tool-label {
-        display: none;
+        display: inline;
     }
 }
 

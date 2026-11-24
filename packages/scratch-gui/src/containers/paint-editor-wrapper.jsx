@@ -4,6 +4,7 @@ import {FormattedMessage} from 'react-intl';
 import bindAll from 'lodash.bindall';
 import VM from 'scratch-vm';
 import {inlineSvgFonts} from 'scratch-svg-renderer';
+import {COSTUME_PRECISION_EVENT, getCostumePrecision} from '../lib/bw-costume-precision.js';
 import {getUndoState} from '../lib/global-undo.js';
 import {notifyEditorMenuActions, registerEditorMenuActions} from '../lib/editor-menu-actions.js';
 import {getCostumeDocument, resetCostumeDocument, setCostumeDocument, syncAnimationResources} from '../lib/bw-artwork-bundle';
@@ -50,23 +51,27 @@ class PaintEditorWrapper extends React.Component {
         super(props);
         bindAll(this, [
             'handleEditorMenuActions',
+            'handlePrecisionPreference',
             'editorMenuActions',
             'handleUpdateImage',
             'handleUpdateName',
             'loadEditor'
         ]);
-        this.state = {PaintEditor: null, loadError: null};
+        this.state = {PaintEditor: null, loadError: null,
+            precisionDrawing: Boolean(process.env.BW_ENABLE_CAD && getCostumePrecision())};
         this.mounted = false;
         this.menuChannels = new Map();
         this.loadGeneration = 0;
     }
     componentDidMount () {
         this.mounted = true;
+        if (process.env.BW_ENABLE_CAD) window.addEventListener(COSTUME_PRECISION_EVENT, this.handlePrecisionPreference);
         this.unregisterMenu = registerEditorMenuActions('costumes', this.editorMenuActions);
         this.loadEditor();
     }
     componentWillUnmount () {
         this.mounted = false;
+        if (process.env.BW_ENABLE_CAD) window.removeEventListener(COSTUME_PRECISION_EVENT, this.handlePrecisionPreference);
         this.menuChannels.clear();
         if (this.unregisterMenu) this.unregisterMenu();
         this.loadGeneration++;
@@ -76,6 +81,9 @@ class PaintEditorWrapper extends React.Component {
             prevProps.selectedCostumeIndex !== this.props.selectedCostumeIndex ||
             prevProps.getFileMenuActions !== this.props.getFileMenuActions ||
             prevState.PaintEditor !== this.state.PaintEditor || prevState.loadError !== this.state.loadError) notifyEditorMenuActions();
+    }
+    handlePrecisionPreference () {
+        this.setState({precisionDrawing: getCostumePrecision()});
     }
     handleEditorMenuActions (channel, getter, owner) {
         if (!this.mounted || !['paint', 'selection'].includes(channel) || typeof getter !== 'function' ||
@@ -145,6 +153,7 @@ class PaintEditorWrapper extends React.Component {
             this.props.imageId !== nextProps.imageId ||
             this.props.rtl !== nextProps.rtl ||
             this.props.name !== nextProps.name ||
+            this.state.precisionDrawing !== nextState.precisionDrawing ||
             this.state.PaintEditor !== nextState.PaintEditor ||
             this.state.loadError !== nextState.loadError;
     }
@@ -203,6 +212,7 @@ class PaintEditorWrapper extends React.Component {
                 {...componentProps}
                 onEditorMenuActions={this.handleEditorMenuActions}
                 editorMenuOwner={this.props.imageId}
+                precisionDrawing={this.state.precisionDrawing && isSelectedEditor === true}
                 artworkDocument={getCostumeDocument(vm.editingTarget.sprite.costumes[selectedCostumeIndex])}
                 image={vm.getCostume(selectedCostumeIndex)}
                 onUpdateImage={this.handleUpdateImage}

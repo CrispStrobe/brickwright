@@ -1,4 +1,7 @@
 .color-button {
+    border: none;
+    background: none;
+    padding: 0;
     height: 2rem;
     width: 3rem;
     display: flex;

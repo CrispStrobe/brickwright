@@ -366,6 +366,7 @@ class PaintEditor extends React.Component {
         return (
             <PaintEditorComponent
                 editorTools={this.props.editorTools}
+                precisionDrawing={this.props.precisionDrawing}
                 onEditorMenuActions={this.props.onEditorMenuActions}
                 editorMenuOwner={this.props.editorMenuOwner}
                 artworkDocument={this.props.artworkDocument}
@@ -406,6 +407,7 @@ PaintEditor.propTypes = {
     onEditorMenuActions: PropTypes.func,
     editorMenuOwner: PropTypes.string,
     editorTools: PropTypes.node,
+    precisionDrawing: PropTypes.bool,
     artworkDocument: PropTypes.object,
     changeColorToEyeDropper: PropTypes.func,
     changeMode: PropTypes.func.isRequired,

@@ -10,13 +10,31 @@ import {editablePixelSize, pixelDocumentWithinBudget} from './bw-makecode/pixel-
 
 const ARTWORK_PATH = 'brickwright/artwork/v1.json';
 const ARTWORK_FORMAT = 'brickwright-artwork';
-const ARTWORK_VERSION = 8;
+const ARTWORK_VERSION = 9;
 const MAX_ARTWORK_BYTES = 64 * 1024 * 1024;
 const MAX_DOCUMENT_BYTES = 16 * 1024 * 1024;
 
 let documents = new WeakMap();
+let costumeSourceIds = new WeakMap();
 let preservedFuture = null;
 const isObject = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+const validCostumeSourceId = value => typeof value === 'string' && /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(value);
+const getCostumeSourceId = costume => costume && costumeSourceIds.get(costume);
+const setCostumeSourceId = (costume, id) => {
+    const previous = getCostumeSourceId(costume);
+    if (!costume || !validCostumeSourceId(id) || (previous && previous !== id)) {
+        throw new Error('Artwork source identity changed');
+    }
+    costumeSourceIds.set(costume, id);
+};
+const proposeCostumeSourceId = costume => {
+    if (preservedFuture) throw new Error('This project uses a newer artwork format and cannot store new links here.');
+    return getCostumeSourceId(costume) || newAnimationResourceId();
+};
+const sourceIdentity = costume => {
+    const sourceId = getCostumeSourceId(costume);
+    return sourceId ? {sourceId} : {};
+};
 const byteLength = value => new TextEncoder().encode(value).byteLength;
 const assetName = costume => costume && (costume.asset?.assetId ?
     `${costume.asset.assetId}.${costume.dataFormat}` : costume.md5ext || costume.md5);
@@ -127,6 +145,7 @@ const validateDocument = (doc, maxBytes = MAX_DOCUMENT_BYTES) => {
 // Native timing and single-frame timelines require document5/bundle6; older
 // readers preserve this source as opaque future data instead of dropping frames.
 const artworkBundleVersion = records => Math.max(1, ...records.map(record => {
+    if (record.sourceId) return 9;
     const document = record.document;
     if (document.layers.some(layer => layer.content.kind === 'pixels' &&
         (layer.content.value.width > 160 || layer.content.value.height > 160))) return 8;
@@ -196,6 +215,7 @@ const getCostumeDocument = costume => {
 /** Preserve source across sprite Undo, whose ZIP roundtrip creates new costume objects. */
 const captureTargetArtwork = target => (target?.sprite?.costumes || []).map(costume => ({
     renderedMd5ext: assetName(costume),
+    ...sourceIdentity(costume),
     document: JSON.parse(JSON.stringify(getCostumeDocument(costume)))
 }));
 
@@ -211,7 +231,8 @@ const restoreTargetArtwork = (target, snapshots, vm, {renewResourceIds = false} 
         }
         const document = JSON.parse(JSON.stringify(snapshot.document));
         if (renewResourceIds && document.animation?.resource) document.animation.resource.id = newAnimationResourceId();
-        return {renderedMd5ext: snapshot.renderedMd5ext, document: validateDocument(document)};
+        return {renderedMd5ext: snapshot.renderedMd5ext, document: validateDocument(document),
+            ...(!renewResourceIds && validCostumeSourceId(snapshot.sourceId) ? {sourceId: snapshot.sourceId} : {})};
     });
     const previous = costumes.map(costume => documents.get(costume));
     costumes.forEach((costume, index) => documents.set(costume, restored[index]));
@@ -223,6 +244,10 @@ const restoreTargetArtwork = (target, snapshots, vm, {renewResourceIds = false} 
         });
         throw error;
     }
+    costumes.forEach((costume, index) => {
+        const id = restored[index].sourceId;
+        if (id) costumeSourceIds.set(costume, id);
+    });
 };
 
 /** Stable publication identity; independent of costume hashes, names and positions. */
@@ -288,6 +313,7 @@ const inspectArtwork = async input => {
         const libraryInfo = payload.libraries === undefined ? {} :
             (await import('./bw-asset-library.js')).inspectAssetLibraries(project, payload);
         const records = [];
+        const identityCounts = new Map();
         let inflatedLayerBytes = 0;
         for (const record of payload.costumes) {
             if (!isObject(record) || !Number.isInteger(record.targetIndex) ||
@@ -313,8 +339,13 @@ const inspectArtwork = async input => {
                     layer.content = {kind: 'data-uri', value: `data:image/png;base64,${await asset.async('base64')}`};
                 }
             }
+            if (payload.version >= 9 && validCostumeSourceId(record.sourceId)) {
+                identityCounts.set(record.sourceId, (identityCounts.get(record.sourceId) || 0) + 1);
+            } else delete record.sourceId;
             records.push(record);
         }
+        // Ambiguous bindings leave sketches intact and available as independent CAD geometry.
+        for (const record of records) if (identityCounts.get(record.sourceId) > 1) delete record.sourceId;
         return {outcome: 'loaded', records, ...libraryInfo};
     } catch (error) {
         return {outcome: 'invalid', records: [], reason: error.message};
@@ -329,6 +360,7 @@ const inspectArtwork = async input => {
  */
 const applyArtwork = (inspection, vm) => {
     documents = new WeakMap();
+    costumeSourceIds = new WeakMap();
     if (vm?.runtime) vm.runtime.bwArcadeAnimationResources = new Map();
     preservedFuture = inspection?.outcome === 'future' ?
         {raw: inspection.raw, signature: inspection.signature} : null;
@@ -341,6 +373,7 @@ const applyArtwork = (inspection, vm) => {
         const costume = targets[record.targetIndex]?.sprite?.costumes?.[record.costumeIndex];
         if (assetName(costume) !== record.renderedMd5ext) continue;
         documents.set(costume, {renderedMd5ext: record.renderedMd5ext, document: record.document});
+        if (record.sourceId) setCostumeSourceId(costume, record.sourceId);
         count++;
     }
     const resourceError = refreshAnimationResources(vm);
@@ -365,9 +398,10 @@ const writeArtworkToZip = async (zip, vm) => {
         const costumes = [];
         for (let targetIndex = 0; targetIndex < project.targets.length; targetIndex++) {
             const target = project.targets[targetIndex];
+            const liveTarget = targets[targetIndex];
             for (let costumeIndex = 0; costumeIndex < (target.costumes || []).length; costumeIndex++) {
                 const saved = target.costumes[costumeIndex];
-                const live = targets[targetIndex]?.sprite?.costumes?.[costumeIndex];
+                const live = liveTarget?.sprite?.costumes?.[costumeIndex];
                 if (!saved.md5ext || !zip.file(saved.md5ext)) continue;
                 const record = live && assetName(live) === saved.md5ext && documents.get(live);
                 const document = JSON.parse(JSON.stringify(record &&
@@ -386,6 +420,8 @@ const writeArtworkToZip = async (zip, vm) => {
                 costumes.push({targetIndex,
                     costumeIndex,
                     renderedMd5ext: saved.md5ext,
+                    ...(liveTarget?.sprite?.name === target.name && live?.name === saved.name &&
+                        assetName(live) === saved.md5ext ? sourceIdentity(live) : {}),
                     document: validateDocument(document)});
             }
         }
@@ -427,4 +463,4 @@ const attachArtwork = async (blob, vm) => {
 export {ARTWORK_PATH, ARTWORK_FORMAT, ARTWORK_VERSION, inspectArtwork, applyArtwork,
     attachArtwork, writeArtworkToZip, artworkBundleVersion, getCostumeDocument, setCostumeDocument,
     resetCostumeDocument, copyCostumeDocument, captureTargetArtwork, restoreTargetArtwork,
-    newAnimationResourceId, syncAnimationResources, validateDocument};
+    newAnimationResourceId, getCostumeSourceId, proposeCostumeSourceId, setCostumeSourceId, syncAnimationResources, validateDocument};
