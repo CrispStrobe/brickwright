@@ -14,13 +14,13 @@
     },
     {
       "name": "bw-circuit-ui",
-      "commit": "2243041deabc9bae4c72a55782f18b6e26c2d1cf",
+      "commit": "a82d70032f0173f0597e1ba1c02f507b9d474642",
       "license": "MPL-2.0",
       "licenseFile": "bw-circuit-ui.MPL-2.0.txt",
       "licenseSha256": "3f3d9e0024b1921b067d6f7f88deb4a60cbe7a78e76c64e3f1d7fc3b779b9d04",
-      "sourceTree": "https://github.com/CrispStrobe/bw-circuit-ui/tree/2243041deabc9bae4c72a55782f18b6e26c2d1cf",
-      "sourceArchive": "https://github.com/CrispStrobe/bw-circuit-ui/archive/2243041deabc9bae4c72a55782f18b6e26c2d1cf.tar.gz",
-      "upstreamLicense": "https://github.com/CrispStrobe/bw-circuit-ui/blob/2243041deabc9bae4c72a55782f18b6e26c2d1cf/LICENSE"
+      "sourceTree": "https://github.com/CrispStrobe/bw-circuit-ui/tree/a82d70032f0173f0597e1ba1c02f507b9d474642",
+      "sourceArchive": "https://github.com/CrispStrobe/bw-circuit-ui/archive/a82d70032f0173f0597e1ba1c02f507b9d474642.tar.gz",
+      "upstreamLicense": "https://github.com/CrispStrobe/bw-circuit-ui/blob/a82d70032f0173f0597e1ba1c02f507b9d474642/LICENSE"
     }
   ]
 }

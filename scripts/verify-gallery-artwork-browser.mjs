@@ -59,7 +59,27 @@ try {
     assert.equal(indexes.length, 2);
     assert.match(indexes[1], /^circuits\.[a-f0-9]{64}\.json$/);
     assert.deepEqual(circuitCatalogRequests, ['index.json']);
-    console.log(`PASS Circuit decoded covers on demand, with ${circuitRequests} initial requests for ${available.length} unique covers`);
+    console.log(`PASS Circuit decoded covers on demand, with ${circuitRequests} initial requests for ${available.length} unique covers on the page`);
+
+    const cards = page.locator('[data-examples-selector-content]:visible [data-example-id]');
+    const firstId = await cards.first().getAttribute('data-example-id');
+    assert.equal(await cards.count(), 32, 'Circuit mounts a single page of cards');
+    const pager = page.getByRole('group', {name: 'Example pages', exact: true}).first();
+    await pager.getByRole('button', {name: 'Next page', exact: true}).click();
+    assert.equal(await cards.count(), 32);
+    assert.notEqual(await cards.first().getAttribute('data-example-id'), firstId);
+    const search = page.getByPlaceholder(/^Search \d+ examples/).first();
+    await search.fill('lab-motorboat');
+    const lateExample = cards.and(page.locator('[data-example-id="lab-motorboat"]'));
+    assert.equal(await cards.count(), 1);
+    await waitForCover(lateExample.locator('img'));
+    await lateExample.getByText(/^Motor-boating:/).click();
+    await page.getByText(/^Open .Motor-boating:/).waitFor({state: 'visible'});
+    await page.getByRole('button', {name: 'Cancel', exact: true}).click();
+    await search.fill('');
+    assert.equal(await cards.first().getAttribute('data-example-id'), firstId);
+    assert.equal(await pager.getByRole('button', {name: 'Previous page', exact: true}).isDisabled(), true);
+    console.log('PASS Circuit pages keep 32 cards mounted, and search finds a late entry in the full catalog');
 
     await page.getByTestId('bw-circuit-panel-designer').first().click();
     await openInlineGallery.click();

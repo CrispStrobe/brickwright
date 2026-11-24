@@ -39,7 +39,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           repository: CrispStrobe/bw-circuit-ui
-          ref: 2243041deabc9bae4c72a55782f18b6e26c2d1cf
+          ref: a82d70032f0173f0597e1ba1c02f507b9d474642
           path: circuit-ui
           persist-credentials: false
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
@@ -54,7 +54,7 @@ jobs:
           mkdir "$evidence"
           test "$(git -C app rev-parse HEAD)" = "$BW_EXPECTED_HEAD"
           test "$(git -C board rev-parse HEAD)" = 489ca7c675a9af03cb066026ec59801b8ba3d0bb
-          test "$(git -C circuit-ui rev-parse HEAD)" = 2243041deabc9bae4c72a55782f18b6e26c2d1cf
+          test "$(git -C circuit-ui rev-parse HEAD)" = a82d70032f0173f0597e1ba1c02f507b9d474642
           test -z "$(git -C app status --porcelain)"
           test "$(node --version)" = v22.23.3
           cd app
@@ -134,7 +134,7 @@ jobs:
           assert.equal(source.probeHead,process.env.BW_EXPECTED_HEAD,'same-head probe');
           assert.equal(sha(readFileSync(join(evidence,'circuit-probe.mjs'))),source.generatedSha256);
           assert.equal(pins['bw-board'],'489ca7c675a9af03cb066026ec59801b8ba3d0bb');
-          assert.equal(pins['bw-circuit-ui'],'2243041deabc9bae4c72a55782f18b6e26c2d1cf');
+          assert.equal(pins['bw-circuit-ui'],'a82d70032f0173f0597e1ba1c02f507b9d474642');
           console.log(JSON.stringify({schema:'brickwright-lite.i80386-freedos-circuits-admission.v2',
             appHead:process.env.BW_EXPECTED_HEAD,buildManifestCommit:manifest.commit,
             probeHead:source.probeHead,probeSha256:source.generatedSha256,

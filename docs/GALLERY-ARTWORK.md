@@ -24,3 +24,5 @@ The app build derives a compact index for each editor from the manifest. Its URL
 Circuit's parts palette reserves space for each thumbnail and mounts it when its card first enters view. The palette and the board share the existing per-part artwork cache.
 
 Opening Circuit starts the bench. The Examples panel and the collapsed examples strip each load the catalog and artwork index on demand. The strip also loads the Codex curriculum, and starter journeys fetch only the catalog needed to open their project.
+
+Circuit Examples renders up to 32 cards per page. Search and filters cover the entire catalog and return to the first page when changed.
