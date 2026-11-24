@@ -1,5 +1,7 @@
 const path = require('path');
+const {readFileSync} = require('node:fs');
 const webpack = require('webpack');
+const {artworkDirectory, buildGalleryArtworkIndexes} = require('./gallery-artwork-index.cjs');
 
 // Plugins
 const CopyWebpackPlugin = require('copy-webpack-plugin');
@@ -102,6 +104,32 @@ const buildManifest = `${JSON.stringify({
     builtAt: buildTime,
     distributionPolicy
 }, null, 2)}\n`;
+
+const galleryManifest = path.resolve(__dirname, artworkDirectory, 'manifest.json');
+class GalleryArtworkIndexesPlugin {
+    apply (compiler) {
+        let indexes;
+        compiler.hooks.beforeCompile.tap('GalleryArtworkIndexes', () => {
+            indexes = buildGalleryArtworkIndexes(JSON.parse(readFileSync(galleryManifest, 'utf8')));
+        });
+        new webpack.DefinePlugin({
+            'process.env.BW_GALLERY_ARTWORK_INDEXES': webpack.DefinePlugin.runtimeValue(() =>
+                JSON.stringify(Object.fromEntries(Object.entries(indexes).map(([editor, index]) => [editor, index.path]))),
+            {fileDependencies: [galleryManifest]})
+        }).apply(compiler);
+        compiler.hooks.thisCompilation.tap('GalleryArtworkIndexes', compilation => {
+            compilation.fileDependencies.add(galleryManifest);
+            compilation.hooks.processAssets.tap({
+                name: 'GalleryArtworkIndexes',
+                stage: webpack.Compilation.PROCESS_ASSETS_STAGE_REPORT
+            }, () => {
+                for (const {path: filename, bytes} of Object.values(indexes)) {
+                    compilation.emitAsset(filename, new webpack.sources.RawSource(bytes), {immutable: true});
+                }
+            });
+        });
+    }
+}
 
 /**
  * bw-circuit-ui loads each part kind's art lazily with
@@ -267,6 +295,7 @@ const baseConfig = new ScratchWebpackConfigBuilder(
     }))
     .addPlugin(new BuildManifestPlugin())
     .addPlugin(new PinnedCadSdkPlugin())
+    .addPlugin(new GalleryArtworkIndexesPlugin())
     .addPlugin(new AnonymousPartArtChunksPlugin())
     .addPlugin(new CopyWebpackPlugin({
         patterns: [
@@ -402,7 +431,10 @@ const buildConfig = baseConfig.clone()
             {
                 from: 'static',
                 to: 'static',
-                globOptions: {ignore: process.env.BW_ENABLE_CAD === '1' ? [] : ['**/cad-sdk/**']},
+                globOptions: {ignore: [
+                    '**/gallery-artwork/manifest.json',
+                    ...(process.env.BW_ENABLE_CAD === '1' ? [] : ['**/cad-sdk/**'])
+                ]},
                 info: preserveProofAssetInfo
             },
             {

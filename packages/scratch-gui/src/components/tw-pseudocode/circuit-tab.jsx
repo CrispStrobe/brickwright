@@ -1346,6 +1346,8 @@ class CircuitTab extends React.Component {
     async loadExamples () {
         if (this.state.examples) return this.state.examples;
         if (this.examplesLoadingPromise) return this.examplesLoadingPromise;
+        const artwork = loadGalleryArtwork('circuits');
+        this.galleryArtworkRequest = artwork;
         this.examplesLoadingPromise = (async () => {
             try {
                 const res = await fetch('examples/index.json');
@@ -1354,11 +1356,9 @@ class CircuitTab extends React.Component {
                 const list = Array.isArray(data) ? data : (data.examples || []);
                 this._markReactUpdate('host:examples');
                 this.setState({examples: list});
-                const artwork = loadGalleryArtwork();
-                this.galleryArtworkRequest = artwork;
-                artwork.then(manifest => {
+                artwork.then(index => {
                     if (this.galleryArtworkRequest !== artwork) return;
-                    const decorated = circuitExamplesWithArtwork(list, manifest.circuits);
+                    const decorated = circuitExamplesWithArtwork(list, index);
                     if (decorated !== list) this.setState(state => state.examples === list ? {examples: decorated} : null);
                 });
                 return list;

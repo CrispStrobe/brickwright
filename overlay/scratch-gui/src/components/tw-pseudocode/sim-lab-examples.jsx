@@ -38,7 +38,7 @@ const SimLabExamples = ({models, locale, selected, onChoose, onLesson, onClose})
     useEffect(() => {
         mounted.current = true;
         search.current?.focus();
-        loadGalleryArtwork().then(manifest => { if (mounted.current) setArtwork(manifest.robots || {}); });
+        loadGalleryArtwork('robots').then(index => { if (mounted.current) setArtwork(index); });
         return () => { mounted.current = false; };
     }, []);
     const choose = async (key, program) => {

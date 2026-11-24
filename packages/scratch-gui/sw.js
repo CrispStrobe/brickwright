@@ -58,6 +58,7 @@ const PREVIEW_LIMIT = 512;
 const PREVIEW_MAX_BYTES = 256 * 1024;
 const PREVIEW_IMAGE = /\.(png|webp|avif|gif|jpe?g|svg)$/i;
 const VERSIONED_PREVIEW = /(?:\.|\/)[a-f0-9]{8,64}\.(png|webp|avif|gif|jpe?g|svg)$/i;
+const VERSIONED_GALLERY_INDEX = /\/static\/thumbnails\/gallery-artwork\/(robots|circuits)\.[a-f0-9]{64}\.json$/;
 let previewWrites = Promise.resolve();
 
 const rememberPreview = (cache, request, response) => {
@@ -186,7 +187,7 @@ self.addEventListener('fetch', event => {
         // A hashed asset can never change under its own name, so a hit is always correct — but
         // only if the hit is a USABLE response. A cached failure would otherwise be permanent,
         // because cache-first never revalidates it.
-        if (cached && cached.ok && HASHED.test(url.pathname)) return cached;
+        if (cached && cached.ok && (HASHED.test(url.pathname) || VERSIONED_GALLERY_INDEX.test(url.pathname))) return cached;
 
         // Must always settle to a Response. `respondWith` REJECTS the request if its promise
         // resolves to undefined, and the browser reports that as "a ServiceWorker intercepted

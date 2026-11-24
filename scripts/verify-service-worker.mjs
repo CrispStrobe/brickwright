@@ -126,6 +126,9 @@ const server = createServer((req, res) => {
         return send(200, 'image/svg+xml', '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="12"><rect width="24" height="12"/></svg>');
     }
     if (path === '/examples/index.json') return send(200, 'application/json', '{"live":true}');
+    if (/^\/static\/thumbnails\/gallery-artwork\/robots\.[a-f0-9]{64}\.json$/.test(path)) {
+        return send(200, 'application/json', '{"sample":"cover.png"}');
+    }
     send(404, 'text/plain', 'not found');
 });
 
@@ -335,18 +338,26 @@ SCENARIOS['library-previews-on-demand'] = async browser => {
     const context = await freshContext(browser);
     try {
         const page = await openControlled(context);
-        if (state.log.some(path => path.startsWith('/previews/'))) throw new Error('Thumbnails downloaded before demand');
+        if (state.log.some(path => path.startsWith('/previews/') || path.includes('/gallery-artwork/'))) {
+            throw new Error('Gallery assets downloaded before demand');
+        }
+        const index = `/static/thumbnails/gallery-artwork/robots.${'a'.repeat(64)}.json`;
         const first = `/previews/${'a'.repeat(64)}.svg`;
         const second = `/previews/${'b'.repeat(64)}.svg`;
+        const readIndex = () => page.evaluate(async path => (await (await fetch(path)).json()).sample, index);
         const decode = path => page.evaluate(async src => {
             const image = new Image();
             image.src = src;
             await image.decode();
             return image.naturalWidth;
         }, path);
+        if (await readIndex() !== 'cover.png') throw new Error('Gallery index was unavailable');
         if (await decode(first) !== 24) throw new Error('First visible thumbnail was unavailable');
         await page.waitForFunction(async path => (await (await caches.open('brickwright-library-previews-v1')).match(path))?.ok, first);
         await page.reload();
+        if (await readIndex() !== 'cover.png' || state.log.filter(path => path === index).length !== 1) {
+            throw new Error('Reopening the gallery downloaded its content-addressed index again');
+        }
         if (await decode(first) !== 24 || state.log.filter(path => path === first).length !== 1) {
             throw new Error('Reopening the thumbnail downloaded it again');
         }
@@ -354,6 +365,7 @@ SCENARIOS['library-previews-on-demand'] = async browser => {
             throw new Error('Different content hash was not loaded separately');
         }
         await context.setOffline(true);
+        if (await readIndex() !== 'cover.png') throw new Error('The previously visited gallery index was unavailable offline');
         if (await decode(first) !== 24) throw new Error('The previously visited thumbnail was unavailable offline');
     } finally {
         await context.close();

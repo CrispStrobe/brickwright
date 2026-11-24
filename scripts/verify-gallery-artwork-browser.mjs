@@ -9,14 +9,17 @@ try {
     page.setDefaultTimeout(120000);
     await page.addInitScript(() => localStorage.setItem('bw-starter-v1-complete', '1'));
     const images = new Set();
+    const indexes = [];
     page.on('request', request => {
         const path = new URL(request.url()).pathname;
         if (/\/gallery-artwork\/[a-f0-9]{64}\.(png|svg)$/.test(path)) images.add(path);
+        if (/\/gallery-artwork\/.*\.json$/.test(path)) indexes.push(path.split('/').at(-1));
     });
     await page.goto(process.argv[2] || 'http://127.0.0.1:8242/', {waitUntil: 'commit'});
     await openRobotLabTab(page);
     await page.waitForFunction(() => window.__bwSimLab?.status === 'ready');
     assert.equal(images.size, 0);
+    assert.deepEqual(indexes, []);
     await tool(page, 'examples');
     const robots = page.getByTestId('bw-sim-examples');
     const robot = robots.getByTestId('bw-sim-example-artwork').first();
@@ -25,6 +28,8 @@ try {
     assert.ok(await robot.evaluate(image => image.decode().then(() => image.naturalWidth > 0)));
     const robotCards = await robots.getByTestId('bw-sim-example-card').count();
     assert.ok(images.size > 0 && images.size < robotCards);
+    assert.equal(indexes.length, 1);
+    assert.match(indexes[0], /^robots\.[a-f0-9]{64}\.json$/);
     console.log(`PASS Robot Lab decoded its first cover with ${images.size} image requests for ${robotCards} cards`);
     await robots.getByRole('button', {name: 'Close examples', exact: true}).click();
 
@@ -45,6 +50,8 @@ try {
     assert.ok(distant, 'a cover well below the fold is still deferred');
     await waitForCover(page.locator(`img[data-example-artwork="${distant}"]:visible`).first());
     assert.ok(images.has(new URL(distant, page.url()).pathname));
+    assert.equal(indexes.length, 2);
+    assert.match(indexes[1], /^circuits\.[a-f0-9]{64}\.json$/);
     console.log(`PASS Circuit decoded covers on demand, with ${circuitRequests} initial requests for ${available.length} unique covers`);
 } finally {
     await browser.close();
