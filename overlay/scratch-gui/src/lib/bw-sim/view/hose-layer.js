@@ -5,35 +5,19 @@
 // Build draws the model's hoses; Simulate (createSimHoses) draws each from the bodies the two parts
 // ride on, every frame, so a hose follows a moving cylinder.
 
-import {CatmullRomCurve3, Group, Matrix4, Mesh, MeshStandardMaterial, TubeGeometry, Vector3} from 'three';
+import {CatmullRomCurve3, Matrix4, TubeGeometry, Vector3} from 'three';
 import {LDU_M, lduToWorld} from '../contracts.js';
 import {hoseCurve, placedPorts} from '../editor/hose-path.js';
+import {createTubeLayer} from './tube-layer.js';
 
 const HOSE_RADIUS_M = 0.0018;
 const HOSE_COLOR = 0x3c78c8;
 
-/** A group of hose meshes: draw([{id, points (LDU)}]) replaces them. */
-export const createHoseLayer = () => {
-    const group = new Group();
-    group.name = 'hoses';
-    const material = new MeshStandardMaterial({color: HOSE_COLOR, roughness: 0.6, metalness: 0});
-    const clear = () => { for (const m of [...group.children]) { group.remove(m); m.geometry.dispose(); } };
-    return {
-        group,
-        draw (hoses) {
-            clear();
-            for (const h of hoses) {
-                if (!h.points) continue;
-                const curve = new CatmullRomCurve3(h.points.map(p => new Vector3(...lduToWorld(p))), false, 'centripetal');
-                const mesh = new Mesh(new TubeGeometry(curve, 32, HOSE_RADIUS_M, 6, false), material);
-                mesh.name = `hose:${h.id}`;
-                group.add(mesh);
-            }
-        },
-        get count () { return group.children.length; },
-        dispose () { clear(); material.dispose(); group.removeFromParent(); }
-    };
-};
+/** A group of hose meshes whose points are in LDraw units. */
+export const createHoseLayer = () => createTubeLayer({
+    name: 'hoses', prefix: 'hose', color: HOSE_COLOR, roughness: 0.6, toWorld: lduToWorld,
+    geometryOf: points => new TubeGeometry(new CatmullRomCurve3(points, false, 'centripetal'), 32, HOSE_RADIUS_M, 6, false)
+});
 
 const worldToLdu = v => [v.x / LDU_M, -v.y / LDU_M, -v.z / LDU_M];
 
@@ -55,7 +39,7 @@ export const createSimHoses = ({model, mechanism, catalog, built}) => {
             const body = pl && bodyOf(pl.id);
             const g = body && built.bodyGroups.get(body.id);
             if (!port || !g) break;
-            g.updateMatrixWorld(true);
+            g.updateWorldMatrix(true, false);
             const inv = new Matrix4().copy(g.matrixWorld).invert();
             const at = new Vector3(...lduToWorld(port.at)).applyMatrix4(inv);
             const tip = new Vector3(...lduToWorld(port.at.map((v, i) => v + port.out[i]))).applyMatrix4(inv);
@@ -70,7 +54,7 @@ export const createSimHoses = ({model, mechanism, catalog, built}) => {
     const q = new Vector3();
     const update = () => layer.draw(hoses.map(h => {
         const [a, b] = h.ends.map(e => {
-            e.g.updateMatrixWorld(true);
+            e.g.updateWorldMatrix(true, false);
             const at = worldToLdu(p.copy(e.at).applyMatrix4(e.g.matrixWorld));
             const tip = worldToLdu(q.copy(e.tip).applyMatrix4(e.g.matrixWorld));
             return {at, out: tip.map((v, i) => v - at[i])};

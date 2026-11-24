@@ -6,34 +6,19 @@
 // ropes where they are; Simulate (createSimRopes) draws each from the bodies' points every frame,
 // so the hook swings and rises on it. A slack rope is drawn straight: the line, not its sag.
 
-import {CatmullRomCurve3, Group, Mesh, MeshStandardMaterial, TubeGeometry, Vector3} from 'three';
+import {CatmullRomCurve3, TubeGeometry, Vector3} from 'three';
 import {lduToWorld} from '../contracts.js';
+import {createTubeLayer} from './tube-layer.js';
 
 const ROPE_RADIUS_M = 0.0006;
 const ROPE_COLOR = 0x2b2b2b;
 
-/** A group of rope meshes: draw([{id, points (world metres)}]) replaces them. */
-export const createRopeLayer = () => {
-    const group = new Group();
-    group.name = 'ropes';
-    const material = new MeshStandardMaterial({color: ROPE_COLOR, roughness: 0.9, metalness: 0});
-    const clear = () => { for (const m of [...group.children]) { group.remove(m); m.geometry.dispose(); } };
-    return {
-        group,
-        draw (ropes) {
-            clear();
-            for (const r of ropes) {
-                if (!r.points || r.points.length < 2) continue;
-                const curve = new CatmullRomCurve3(r.points.map(p => new Vector3(...p)), false, 'catmullrom', 0);
-                const mesh = new Mesh(new TubeGeometry(curve, 8 * (r.points.length - 1), ROPE_RADIUS_M, 5, false), material);
-                mesh.name = `rope:${r.id}`;
-                group.add(mesh);
-            }
-        },
-        get count () { return group.children.length; },
-        dispose () { clear(); material.dispose(); group.removeFromParent(); }
-    };
-};
+/** A group of rope meshes whose points are in world metres. */
+export const createRopeLayer = () => createTubeLayer({
+    name: 'ropes', prefix: 'rope', color: ROPE_COLOR, roughness: 0.9, toWorld: point => point,
+    geometryOf: points => new TubeGeometry(new CatmullRomCurve3(points, false, 'catmullrom', 0),
+        8 * (points.length - 1), ROPE_RADIUS_M, 5, false)
+});
 
 /** Build: the model's ropes from their points (LDU). */
 export const ropesFromModel = (model, pointsOf) => (model.ropes || []).map(r => {
@@ -54,7 +39,7 @@ export const createSimRopes = ({mechanism, built}) => {
     const worldOf = p => {
         const g = built.bodyGroups.get(p.body);
         if (!g) return null;
-        g.updateMatrixWorld(true);
+        g.updateWorldMatrix(true, false);
         return v.set(...p.local).applyMatrix4(g.matrixWorld).toArray();
     };
     const update = () => layer.draw(ropes.map(c => {
