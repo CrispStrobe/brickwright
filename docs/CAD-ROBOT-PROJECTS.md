@@ -235,3 +235,11 @@ reported one, with equal poses and joint angles in a direct replay of
 the test inputs. The known assertion is separate from the actuator
 change. The fixed-assembly ground and loose-contact case passed when
 rerun with time for the loaded Mac to finish.
+
+The production SDK passed both full Chrome project runs on the MacBook,
+including untouched Widgets, moving joints, Stop and Reset. Sustained
+ratios were 0.216× for Scout and 0.205× for Atlas while the host was
+heavily loaded. These are functional checks and absolute observations.
+They cannot establish an end-to-end speedup against the earlier runs.
+The 1× real-time target remains open. All 94 targeted Lite robot and
+co-simulation tests and 20 provenance tests passed.
