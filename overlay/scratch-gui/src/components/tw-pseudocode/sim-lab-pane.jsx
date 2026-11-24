@@ -1591,14 +1591,23 @@ class SimLabPane extends React.Component {
             this.view.setMotion({joints: insight.joints, gears: insight.gears, tints: insight.tints.bodies});
             this.view.setOverlay({ports: this.state.showPorts, motion: this.state.showMotion});
             this.view.setSensors(this.sensorRays(), this.state.showSensors);
+            const noMeasurements = [];
+            let lastMeasurements = null;
             this.view.setMeasurements(() => {
-                if (this.state.replayAt !== null || !this.measurementReader) return [];
-                // Rendering must not advance the committed acceleration sample stream.
-                const saved = this.state.showMeasurements ? this.measurementRows : [];
-                const preview = this.state.measurementsOpen && this.measurementPreview && this.measurementPreviewReader ?
-                    this.measurementPreviewReader.read([this.measurementPreview]) : [];
-                return [...saved, ...preview].map(row => ({...row,
-                    label: row.label === row.kind ? measurementWords(this.locale).kinds[row.kind] : row.label}));
+                if (this.state.replayAt !== null || !this.measurementReader) return noMeasurements;
+                const saved = this.state.showMeasurements ? this.measurementRows : noMeasurements;
+                const preview = this.state.measurementsOpen ? this.measurementPreview : null;
+                if (!saved.length && !preview) return noMeasurements;
+                const previewTime = preview ? session.time : null;
+                const locale = this.locale;
+                if (lastMeasurements?.saved === saved && lastMeasurements.preview === preview &&
+                    lastMeasurements.previewTime === previewTime && lastMeasurements.locale === locale) return lastMeasurements.rows;
+                // The preview uses its own reader and samples at most once per accepted time and draft.
+                const draft = preview && this.measurementPreviewReader ? this.measurementPreviewReader.read([preview]) : noMeasurements;
+                const kinds = measurementWords(locale).kinds;
+                const rows = [...saved, ...draft].map(row => row.label === row.kind ? {...row, label: kinds[row.kind]} : row);
+                lastMeasurements = {saved, preview, previewTime, locale, rows};
+                return rows;
             });
             this.view.render(session.viewSnapshot());
         } catch (error) {

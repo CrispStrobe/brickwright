@@ -44,19 +44,33 @@ test('visible overlays keep committed samples updating when the measurement pane
 });
 
 test('overlay and draft render reads cannot advance the committed sampling stream', () => {
-    const start=source.indexOf('            this.view.setMeasurements(() => {');
+    const start=source.indexOf('            const noMeasurements = [];');
     const end=source.indexOf('\n            this.view.render(session.viewSnapshot());',start);
     assert.ok(start>=0&&end>start);
     let display;
-    const install=new Function('measurementWords',source.slice(start,end));
+    const install=new Function('measurementWords','session',source.slice(start,end));
+    const session={time:100};
+    let previewReads=0;
     const committed=[{kind:'speed',label:'speed',value:4}], pane={locale:'en',
         state:{replayAt:null,showMeasurements:true,measurementsOpen:true},measurements:[{kind:'acceleration'}],
         measurementRows:committed,measurementPreview:{kind:'distance'},
         measurementReader:{read(){throw Error('render advanced committed sample stream');}},
-        measurementPreviewReader:{read:()=>[{label:'preview',value:8}]},
+        measurementPreviewReader:{read:()=>[{label:'preview',value:8+(previewReads++)}]},
         view:{setMeasurements:callback=>{display=callback;}}};
-    install.call(pane,()=>({kinds:{speed:'Speed'}}));
-    for(let i=0;i<20;i++)assert.deepEqual(display().map(r=>r.value),[4,8]);
+    install.call(pane,()=>({kinds:{speed:pane.locale==='en'?'Speed':'Geschwindigkeit'}}),session);
+    const initial=display();
+    for(let i=0;i<20;i++)assert.equal(display(),initial);
+    assert.deepEqual(initial.map(r=>r.value),[4,8]);
+    assert.equal(previewReads,1);
+    session.time=200;
+    assert.deepEqual(display().map(r=>r.value),[4,9]);
+    pane.measurementPreview={kind:'distance'};
+    assert.deepEqual(display().map(r=>r.value),[4,10],'changing the draft updates it even while paused');
+    pane.state.measurementsOpen=false;
+    assert.deepEqual(display().map(r=>r.value),[4]);
+    pane.locale='de';
+    assert.equal(display()[0].label,'Geschwindigkeit');
     assert.equal(pane.measurementRows,committed);
     pane.state.replayAt=0;assert.deepEqual(display(),[]);
+    pane.state.replayAt=null;assert.equal(display()[0].label,'Geschwindigkeit');
 });

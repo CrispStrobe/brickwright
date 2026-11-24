@@ -1,18 +1,34 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright (c) 2026 Brickwright contributors
-import {Vector3} from 'three';
+import {Matrix4, Vector3} from 'three';
 import {measurementText} from './readings.js';
 import {placeMeasurementLabel} from './layout.js';
 
 const NS = 'http://www.w3.org/2000/svg';
+const setAttribute = (element, name, value) => {
+    if (element.getAttribute(name) !== value) element.setAttribute(name, value);
+};
 /** Separate from component/cable visibility. One SVG, no per-frame GPU resources. */
 export const createMeasurementOverlay = ({container}) => {
     const svg = document.createElementNS(NS, 'svg');
     svg.dataset.testid = 'bw-sim-lab-measurement-overlay';
     Object.assign(svg.style, {position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'hidden'});
     container.appendChild(svg);
-    let entries = new Map();
+    const entries = new Map();
+    const lastView = new Matrix4();
+    const lastProjection = new Matrix4();
+    let lastRows, lastWidth, lastHeight;
     const update = (rows, camera, width, height) => {
+        if (!rows.length && !entries.size) return;
+        // The pane replaces the rows on a read or edit. Camera and layout changes
+        // can still move existing labels independently of a new sample.
+        if (rows === lastRows && width === lastWidth && height === lastHeight &&
+            lastView.equals(camera.matrixWorldInverse) && lastProjection.equals(camera.projectionMatrix)) return;
+        lastRows = rows;
+        lastWidth = width;
+        lastHeight = height;
+        lastView.copy(camera.matrixWorldInverse);
+        lastProjection.copy(camera.projectionMatrix);
         const active = new Set();
         const occupied = [];
         for (const row of rows) {
@@ -47,13 +63,15 @@ export const createMeasurementOverlay = ({container}) => {
                         [b[0] - ux * 7 - uy * 4, b[1] - uy * 7 + ux * 4]);
                 }
             }
-            e.line.setAttribute('points', linePoints.map(p => p.join(',')).join(' '));
+            setAttribute(e.line, 'points', linePoints.map(p => p.join(',')).join(' '));
             const at = row.kind === 'distance' ? xy[0].map((v, i) => (v + xy[1][i]) / 2) : xy[Math.floor((xy.length - 1) / 2)];
             const label = `${row.label}: ${measurementText(row)}`;
             const [x, y] = placeMeasurementLabel(at, label, width, height, occupied);
-            e.text.setAttribute('x', String(x)); e.text.setAttribute('y', String(y));
-            e.text.textContent = label;
-            e.title.textContent = `${row.source}${row.vector ? row.kind === 'speed' ? '; vector × 0.1 s' : '; vector 20 mm/N' : ''}`;
+            setAttribute(e.text, 'x', String(x));
+            setAttribute(e.text, 'y', String(y));
+            if (e.text.textContent !== label) e.text.textContent = label;
+            const title = `${row.source}${row.vector ? row.kind === 'speed' ? '; vector × 0.1 s' : '; vector 20 mm/N' : ''}`;
+            if (e.title.textContent !== title) e.title.textContent = title;
         }
         for (const [id, e] of entries) if (!active.has(id)) {e.group.remove(); entries.delete(id);}
     };
