@@ -1,0 +1,196 @@
+{
+  "schema": 1,
+  "robots": {
+    "air-budget.ldr": {
+      "source": "air-budget.ldr",
+      "input": "e420b2d2fa96c1d9b9f48fa3fdd151f4711d86a3a704d7ab0177091ddf870245",
+      "renderer": "de5a8692608fddafe828c89819b07050f08784ab7bda7b1684e47a225ae93acc",
+      "artwork": "9243db5de7725a8684580adbc50ee66aa3591a520d9efbfd2124b5ae4649800c.png",
+      "bytes": 27165
+    },
+    "centrifugal-governor.ldr": {
+      "source": "centrifugal-governor.ldr",
+      "input": "54b534d0539d02bc996e9075c7909e931c9100254ee66707f2fcea1ac509040c",
+      "renderer": "de5a8692608fddafe828c89819b07050f08784ab7bda7b1684e47a225ae93acc",
+      "artwork": "4586447da4e62d9d035f2da57b3f05256a9915054f13fcadde6d645564d34373.png",
+      "bytes": 18161
+    },
+    "chain-drive.ldr": {
+      "source": "chain-drive.ldr",
+      "input": "01954e51f2c70f77a4769636a0dfb1ace4d558e4483848cf5bfc3950b60f9e7e",
+      "renderer": "de5a8692608fddafe828c89819b07050f08784ab7bda7b1684e47a225ae93acc",
+      "artwork": "189c91544b32db679c437c0f9b4f7730236a5b56d1bf1604d3713c5519c5371e.png",
+      "bytes": 25337
+    },
+    "colour-explorer.ldr": {
+      "source": "colour-explorer.ldr",
+      "input": "23b6f2a3cc6aebaf1b361c766eb8a64270c35d6288ea92eddac763ba472a979d",
+      "renderer": "de5a8692608fddafe828c89819b07050f08784ab7bda7b1684e47a225ae93acc",
+      "artwork": "e1303dabe3a781889100dcb5bab48107fb2a35e0fcb2d5430793b4b44c3878f9.png",
+      "bytes": 30978
+    },
+    "crane.ldr": {
+      "source": "crane.ldr",
+      "input": "4fa96055fb3e1fe399bd02e61b68bc6b47039e9d2c158a66c69910cf9caf9eb3",
+      "renderer": "de5a8692608fddafe828c89819b07050f08784ab7bda7b1684e47a225ae93acc",
+      "artwork": "b259efbcc9e3d7495cd551fe90b549c2d8abdefdc17eba8e464f7db5612b317d.png",
+      "bytes": 21086
+    },
+    "differential-car.ldr": {
+      "source": "differential-car.ldr",
+      "input": "1b3e4efa7ed09f187ce9a8a8fa4a41eab717ee1d669e8fe5be671a7b00111039",
+      "renderer": "de5a8692608fddafe828c89819b07050f08784ab7bda7b1684e47a225ae93acc",
+      "artwork": "d7b225d28426f6da2d882ad94bf991d6894a138e8ee6dd3c9a5579b2d3f9fffc.png",
+      "bytes": 32541
+    },
+    "differential.ldr": {
+      "source": "differential.ldr",
+      "input": "9e3d978b1d61cb69350962453627dbdd53d5eef30a980f9f7525656359b5a6d3",
+      "renderer": "de5a8692608fddafe828c89819b07050f08784ab7bda7b1684e47a225ae93acc",
+      "artwork": "8974c5fdb0147bcaf8773e5a9d65ef6ca75ff31a0ef23f9806adabb61ea8a8dc.png",
+      "bytes": 26398
+    },
+    "driving-base.ldr": {
+      "source": "driving-base.ldr",
+      "input": "e0f3f6faf8b8f5e4bce093b59548debf1c3071df0eddef534ab8b54f7d9be83c",
+      "renderer": "de5a8692608fddafe828c89819b07050f08784ab7bda7b1684e47a225ae93acc",
+      "artwork": "f33f893d05f5e2dc079e1ad044b3df5805f5fd7f94de97a17a737556a8ac1960.png",
+      "bytes": 30346
+    },
+    "forklift.ldr": {
+      "source": "forklift.ldr",
+      "input": "3ad9e7a890b35c0cfc9685ee67cad6b6d46def8329e7ee64ac1b42f3d4891c95",
+      "renderer": "de5a8692608fddafe828c89819b07050f08784ab7bda7b1684e47a225ae93acc",
+      "artwork": "530ebc4352ed662965f345a672997fcdd78b6bddbbd17e5de8f3488c29969371.png",
+      "bytes": 14646
+    },
+    "gearbox.ldr": {
+      "source": "gearbox.ldr",
+      "input": "51edfd49cc2244bffbdcb9926632d0c3055de3547bff2b97725e00d426ecfd55",
+      "renderer": "de5a8692608fddafe828c89819b07050f08784ab7bda7b1684e47a225ae93acc",
+      "artwork": "d2005900822c11ecabc3944b368a6ff61ccc5039a683ea729166c984c46b9f74.png",
+      "bytes": 20380
+    },
+    "line-follower.ldr": {
+      "source": "line-follower.ldr",
+      "input": "a31f10f6381e5fc5a29b5467b5eb65b8ffaa7ef2646be302ed8d56ffff43448d",
+      "renderer": "de5a8692608fddafe828c89819b07050f08784ab7bda7b1684e47a225ae93acc",
+      "artwork": "50780513706b1cd4dcd942fff6bfe413dddd8abf6bd132d9a5a1fc268cdc0022.png",
+      "bytes": 31006
+    },
+    "pneumatic-press.ldr": {
+      "source": "pneumatic-press.ldr",
+      "input": "20640d38b64a9582b8f947196879760180ea5c45ddf0d979af6a9126e4a65f44",
+      "renderer": "de5a8692608fddafe828c89819b07050f08784ab7bda7b1684e47a225ae93acc",
+      "artwork": "f68aff4590e03daeac43b90ce2fa02ecf2968d6c62112b14367ae8b71aaaf1b9.png",
+      "bytes": 13573
+    },
+    "sky-courier.ldr": {
+      "source": "sky-courier.ldr",
+      "input": "9f5856f15b36d82250ee9192cf06a600cf813b2721a296619d57c5cea49a71cc",
+      "renderer": "de5a8692608fddafe828c89819b07050f08784ab7bda7b1684e47a225ae93acc",
+      "artwork": "c5c86182e6e19308bcfc422217a0596bbf4883b53ee0bd71dece3f97501e6494.png",
+      "bytes": 27598
+    },
+    "twistspan.ldr": {
+      "source": "twistspan.ldr",
+      "input": "262a90d851b98868dfceec00a35bdeefc33c6e2c2f3b980b04c8b96b5c04b148",
+      "renderer": "de5a8692608fddafe828c89819b07050f08784ab7bda7b1684e47a225ae93acc",
+      "artwork": "10a12d4ac7334d87742350a84944e08d12a5cd3c43bc439ed72c9b7bb1452445.png",
+      "bytes": 24233
+    },
+    "wall-stopper.ldr": {
+      "source": "wall-stopper.ldr",
+      "input": "345f444e0d052266c3d462fa249917b8aa1efa27e83d4f3a833d67be40422c6c",
+      "renderer": "de5a8692608fddafe828c89819b07050f08784ab7bda7b1684e47a225ae93acc",
+      "artwork": "f89685d0748c73e9a444cabc5a8ab37019cf14f339a69cb98ef9f3ed9371f128.png",
+      "bytes": 29729
+    }
+  },
+  "circuits": {
+    "01-blink": {
+      "source": "01-blink/circuit.stc12c5a60s2.json",
+      "input": "0b462272e66fea05b2242481fe96ceebd31c8971cde84643cd5742bb5d5621be",
+      "renderer": "07608d931c45a450bd33eb349ada6b53318acd8add9e1bed7a60ae6db2028c72",
+      "artwork": "317a6f8da03839f7fa6fda80ee4498e44a2764af2d176a38c31560daa7383aa7.svg",
+      "bytes": 3653
+    },
+    "02-dimmer": {
+      "source": "02-dimmer/circuit.stc12c5a60s2.json",
+      "input": "7766245c1462597fa57fee2300855d66249a9e5bac506084d517a495932a4cf4",
+      "renderer": "07608d931c45a450bd33eb349ada6b53318acd8add9e1bed7a60ae6db2028c72",
+      "artwork": "96ab9331cd5634481934f4e7f3b02578b2bd88f823b86c87452c66fb9c421ca8.svg",
+      "bytes": 4727
+    },
+    "03-night-light": {
+      "source": "03-night-light/circuit.stc12c5a60s2.json",
+      "input": "cfb5783f3cef39c9b0eb7d2844df84fa456332992fff595c9194bd94eb3bb6f8",
+      "renderer": "07608d931c45a450bd33eb349ada6b53318acd8add9e1bed7a60ae6db2028c72",
+      "artwork": "fb967fbd23d5c1258042de240760a1caf61dc0c8c5c221c5e62521ed98e6fc7c.svg",
+      "bytes": 5719
+    },
+    "04-thermostat": {
+      "source": "04-thermostat/circuit.stc12c5a60s2.json",
+      "input": "ecd055f4df5bebd11e3cefb750e1dd0e0a62f29af3ec504800abd006b8f2a2dd",
+      "renderer": "07608d931c45a450bd33eb349ada6b53318acd8add9e1bed7a60ae6db2028c72",
+      "artwork": "e446e8f99a6b369701675cca6b8b5b7e27fa94d2f121bbddca3cca71f5dd982f.svg",
+      "bytes": 5734
+    },
+    "05-counter": {
+      "source": "05-counter/circuit.stc12c5a60s2.json",
+      "input": "2edc0a71ba6a0ab9f9149ba6825fe5c9b760eb79375343de9eaeab08c4311755",
+      "renderer": "07608d931c45a450bd33eb349ada6b53318acd8add9e1bed7a60ae6db2028c72",
+      "artwork": "908a7aaee24a2f6f560bd2a1d0b30fbe07b1f2c46ae1f12654872ff23a78ab65.svg",
+      "bytes": 5738
+    },
+    "06-active-low-high": {
+      "source": "06-active-low-high/circuit.json",
+      "input": "b7cd042a4d0ffc4a494c5895cba27b485b8877f48735f143dc8fe4b881727136",
+      "renderer": "07608d931c45a450bd33eb349ada6b53318acd8add9e1bed7a60ae6db2028c72",
+      "artwork": "506a342337b7e62c1b4e98d372fd8fb6472a2130de716ebc99abcf0346933b01.svg",
+      "bytes": 5510
+    },
+    "07-buzzer-siren": {
+      "source": "07-buzzer-siren/circuit.stc12c5a60s2.json",
+      "input": "2fe7e0e586a3fb80344f2090fa6d090f7e820ed02a9dc72a05881bd0a7cf4c45",
+      "renderer": "07608d931c45a450bd33eb349ada6b53318acd8add9e1bed7a60ae6db2028c72",
+      "artwork": "4dd066c6685691934f32e77800a0f724855b0ecf839543af60cc81c99c590631.svg",
+      "bytes": 3019
+    },
+    "08-led-chaser-595": {
+      "source": "08-led-chaser-595/circuit.stc12c5a60s2.json",
+      "input": "15040bbe8f573ac2a8c15c2c530da2653e9e60e6fe4ba6bd381febbb73d792ab",
+      "renderer": "07608d931c45a450bd33eb349ada6b53318acd8add9e1bed7a60ae6db2028c72",
+      "artwork": "073854cc6ad16b8336bc9be8b53a2114f15d693a3b64302ae297cb037ddd5fe5.svg",
+      "bytes": 21554
+    },
+    "09-relay-clicker": {
+      "source": "09-relay-clicker/circuit.stc12c5a60s2.json",
+      "input": "7c7d42efca47e0587f5283f405719ed21fca0053d8f15c78894a52d878c827f1",
+      "renderer": "07608d931c45a450bd33eb349ada6b53318acd8add9e1bed7a60ae6db2028c72",
+      "artwork": "150135e91815cc8b07f1693084271935cee700fd48641c875f8dd4d242fbee46.svg",
+      "bytes": 7509
+    },
+    "10-motor-speed": {
+      "source": "10-motor-speed/circuit.stc12c5a60s2.json",
+      "input": "97e1d13a9edbee1ad1c3f2cb5a4cf8fadb09d987f49c8d13f94241dccb889c7f",
+      "renderer": "07608d931c45a450bd33eb349ada6b53318acd8add9e1bed7a60ae6db2028c72",
+      "artwork": "b5d61cb9d8c4dfd2d0f024178dc8813308e396cb508d0ca5301092a52b75a6b1.svg",
+      "bytes": 6590
+    },
+    "11-toggle-button": {
+      "source": "11-toggle-button/circuit.stc12c5a60s2.json",
+      "input": "22ba8d293b2420dd6d8c85535969878677ce93f45ea8c0f17b698ba80bccffe8",
+      "renderer": "07608d931c45a450bd33eb349ada6b53318acd8add9e1bed7a60ae6db2028c72",
+      "artwork": "9d00a980ef969f18c0f86a62f745fa3317b7b1584f8ba63691e8f3fa1e8f3072.svg",
+      "bytes": 5732
+    },
+    "12-dual-blink": {
+      "source": "12-dual-blink/circuit.stc12c5a60s2.json",
+      "input": "e12bbbbf3185575f6abf19204a37858d683d6c2e1dea2167f9814215d1694875",
+      "renderer": "07608d931c45a450bd33eb349ada6b53318acd8add9e1bed7a60ae6db2028c72",
+      "artwork": "8d76a7071cc6c612ca71f7a1ba845a9aee5e9ff394a6b46fb909403bfe3ff397.svg",
+      "bytes": 5306
+    }
+  }
+}
