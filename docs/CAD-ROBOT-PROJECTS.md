@@ -169,3 +169,7 @@ These are Chrome samples under varying MacBook load. A separate paired
 native-worker benchmark for Scout measured 15.9 ms per scalar step and
 12.1 ms per SIMD step, with the same chassis endpoint and tire height.
 The strict 1× check still fails for both projects.
+
+Quasar completed the full cycle with SIMD and with the scalar fallback
+forced by blocking the SIMD asset. Firefox still exceeded its 60-second
+mechanical startup budget on Scout before first motion.
