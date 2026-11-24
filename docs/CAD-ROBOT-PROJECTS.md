@@ -243,3 +243,22 @@ heavily loaded. These are functional checks and absolute observations.
 They cannot establish an end-to-end speedup against the earlier runs.
 The 1× real-time target remains open. All 94 targeted Lite robot and
 co-simulation tests and 20 provenance tests passed.
+
+### Continuous collision detection profile
+
+A diagnostic on the shipped Scout and Atlas designs used 70 fixed 5 ms
+steps, with equal drive impulses followed by reversal. CPU time covers
+the native physics call and its immediate CAD wrapper. Scout's unchanged
+runs took 6.04–7.45 ms per step. Suppressing linear casts in the probe
+reduced that to 1.65 ms, and changed wheel angles and chassis motion.
+Atlas took 11.21–12.52 ms with its normal configuration. Suppressing
+casts moved it about 87 mm up by the end of the same probe. The cast
+threshold and solver iterations remain unchanged in the app.
+
+Jolt traverses each child of the moving compound when casting against a
+box. The candidate keeps that traversal's order, uses the target's local
+coordinates, and skips a child only when its swept bounds are disjoint
+from the box even after allowing for collision tolerance, the optional
+extra convex radius, and rounding. Its unit fixture checks that an
+otherwise-missed grazing child is still tested when the extra radius is
+set. [Jolt implementation](https://github.com/CrispStrobe/JoltPhysics/commit/64adfd7014109e7aaa38890d31882757c3835672)
