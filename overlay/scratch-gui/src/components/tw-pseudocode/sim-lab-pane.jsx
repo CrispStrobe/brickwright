@@ -57,6 +57,7 @@ import SimLabCoach from './sim-lab-coach.jsx';
 import SimLabMotorMixer, {MIXER_OPEN_KEY} from './sim-lab-motor-mixer.jsx';
 import {setMixerMotorPower, setMixerMotorJog, manualDriveAllowed} from './sim-lab-motor-control.js';
 import {createManualPolicyResolver} from './sim-lab-manual-policy.js';
+import {fetchBuildLDraw} from '../../lib/bw-sim/ldraw/build-pack.js';
 import manualPolicyIndex from './sim-lab-manual-policy.js?reference-index';
 import PaneDivider from '../gui/pane-divider.jsx';
 import {Icon, Popup, Separator, ToolButton, splitToolbar, toolStyles, tooltipOf} from './sim-lab-toolbar.jsx';
@@ -920,7 +921,7 @@ class SimLabPane extends React.Component {
 
     /** Build mode: the current model (or an empty one) in the editor. */
     async enterBuild () {
-        const {createEditor, createEditorView3D, createPartThumbnails, fetchLDrawClosure, fetchModelDrawing, parseLDConfig, CATALOG, DEFAULT_COLOR} = this.lib;
+        const {createEditor, createEditorView3D, createPartThumbnails, fetchModelDrawing, parseLDConfig, CATALOG, DEFAULT_COLOR} = this.lib;
         const model = this.session ? this.session.model : {version: 1, parts: []};
         this.pause();
         this.teardown();
@@ -935,7 +936,7 @@ class SimLabPane extends React.Component {
             return;
         }
         if (this.disposed) return;
-        if (!this.catalogFiles) this.catalogFiles = await fetchLDrawClosure([...CATALOG.keys()], {withConfig: true});
+        if (!this.catalogFiles) this.catalogFiles = await fetchBuildLDraw([...CATALOG.keys()]);
         if (this.disposed) return;
         let {read} = this.catalogFiles;
         // A model with decoration (a cable's segments) or parts of its own: those files too, its own first.

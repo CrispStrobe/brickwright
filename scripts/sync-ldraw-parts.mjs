@@ -185,6 +185,7 @@ export const check = () => {
 };
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
+    const {packRobotBuildLDraw} = await import('./pack-robot-build-ldraw.mjs');
     const args = process.argv.slice(2);
     const opt = name => {
         const i = args.indexOf(name);
@@ -196,6 +197,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
             console.error(`sync:ldraw:check — ${problems.length} problem(s):\n  ${problems.join('\n  ')}`);
             process.exit(1);
         }
+        packRobotBuildLDraw({check: true});
         console.log('sync:ldraw:check — vendored LDraw subset matches its lock and covers parts.json');
     } else {
         const from = opt('--from');
@@ -206,6 +208,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
             process.exit(2);
         }
         const lock = write(from, sum, date);
+        packRobotBuildLDraw();
         console.log(`sync:ldraw — vendored ${Object.keys(lock.files).length} files into ${relative(ROOT, DEST)}`);
     }
 }
