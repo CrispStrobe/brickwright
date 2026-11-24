@@ -24,7 +24,7 @@ const COPY = {
         source: 'CP1 source or decimal listing', load: 'Load cells', listing: 'Export listing',
         save: 'Save CP1 project', openSource: 'Open source',
         loaded: 'Loaded {count} cells. Select the teaching PC and use the keypad RUN key.',
-        sourceHint: 'Labels, ORG, EQU and DATA/DB are supported. 04.001 means opcode 4, operand 1.',
+        sourceHint: 'Labels, ORG, EQU and DATA/DB are supported. 04.001 means opcode 4, operand 1. Pause the CPU before loading cells.',
         address: 'Cell', opcode: 'Opcode', operand: 'Operand', line: 'Source line',
         previous: 'Previous cells', next: 'Next cells', write: 'Write cell',
         memoryHint: 'RAM cells are read from the machine snapshot. Pause the CPU before writing a cell.',
@@ -52,7 +52,7 @@ const COPY = {
         source: 'CP1-Quelle oder Dezimallisting', load: 'Zellen laden', listing: 'Listing exportieren',
         save: 'CP1-Projekt speichern', openSource: 'Quelle öffnen',
         loaded: '{count} Zellen geladen. Wähle den Lernprogramm-PC und drücke RUN auf der Tastatur.',
-        sourceHint: 'Labels, ORG, EQU und DATA/DB sind möglich. 04.001 bedeutet Befehl 4, Operand 1.',
+        sourceHint: 'Labels, ORG, EQU und DATA/DB sind möglich. 04.001 bedeutet Befehl 4, Operand 1. Pausiere die CPU vor dem Laden der Zellen.',
         address: 'Zelle', opcode: 'Befehl', operand: 'Operand', line: 'Quellzeile',
         previous: 'Vorherige Zellen', next: 'Nächste Zellen', write: 'Zelle schreiben',
         memoryHint: 'Die RAM-Zellen stammen aus dem Maschinenzustand. Pausiere die CPU vor dem Schreiben.',
@@ -140,6 +140,7 @@ class Cp1Panel extends React.Component {
             this.setState({snapshot: readCp1PanelSnapshot(this.props.machine)});
         }
         if (previous.running && !this.props.running) this._releaseAll();
+        if (previous.onKey && !this.props.onKey) this._releaseAll();
     }
 
     componentWillUnmount () {

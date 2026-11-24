@@ -3020,14 +3020,19 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         if (!bootMedia) throw new Error('Choose a 2048-byte CP1 firmware ROM in the CP1 panel first.');
         const {createDebugTarget, createDebugSession} =
             await import(/* webpackChunkName: "bw-board" */ 'bw-board');
-        const image = await resolveMediaImage(bootMedia);
-        if (image.bytes.length !== 2048) throw new Error('CP1 firmware must contain exactly 2048 bytes.');
+        // Every byte is a CPU opcode, including 0x3A. Never sniff raw CP1 ROM as Intel HEX text.
+        const bytes = bootMedia.bytes;
+        if (!(bytes instanceof Uint8Array) || bytes.length !== 2048) {
+            throw new Error('CP1 firmware must contain exactly 2048 raw bytes.');
+        }
         const db = designerBoard();
         if (db.board) board = db.board;
-        const options = {rom: image.bytes, expansion: machineConfig?.expansion === true,
+        const options = {rom: bytes, expansion: machineConfig?.expansion === true,
+            partId: machineConfig?.partId,
             clockHz: machineConfig?.clockHz || 6000000, ...(board ? {board} : {})};
         const result = await createDebugTarget('cp1', options);
         wireMachineBench(result, createDebugSession);
+        delete runner.sendSerial;
         setStatus('ready', `CP1 firmware loaded: ${bootMedia.name || 'user ROM'}`);
         return session;
     }
@@ -4079,18 +4084,27 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             return true;
         },
         cp1ReleaseKeys() { if (target?.kind === 'cp1') target.releaseKeys(); },
+        cp1InputMode: () => target?.adapter?.unloggedBoardInputs?.() ? 'circuit' : 'manual',
         cp1SetInput(port, value) {
             if (target?.kind !== 'cp1') return false;
+            if (target.adapter?.unloggedBoardInputs?.()) {
+                throw new Error('Use the attached circuit switches to drive CP1 inputs.');
+            }
             target.machine.setPortInput(port, value);
             emit();
             return true;
         },
         cp1LoadProgram(assembly) {
             if (target?.kind !== 'cp1') throw new Error('Load CP1 firmware before a program.');
-            if (!assembly?.ok || !(assembly.bytes instanceof Uint8Array)) throw new Error('Fix CP1 source errors before loading.');
+            if (assembly?.ok !== true || !(assembly.bytes instanceof Uint8Array) || !Array.isArray(assembly.words)) {
+                throw new Error('Fix CP1 source errors before loading.');
+            }
+            const bytes = assembly.bytes;
+            if (bytes.length !== target.machine.capacity * 2) {
+                throw new Error(`CP1 program image must contain exactly ${target.machine.capacity * 2} bytes for this machine.`);
+            }
             session.pause();
             target.releaseKeys();
-            const bytes = assembly.bytes;
             const cells = Array.from({length: bytes.length / 2}, (_, index) =>
                 ({opcode: bytes[index * 2], operand: bytes[index * 2 + 1]}));
             target.machine.loadProgram(cells, {clear: true});

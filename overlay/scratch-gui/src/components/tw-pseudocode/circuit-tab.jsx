@@ -1682,7 +1682,7 @@ class CircuitTab extends React.Component {
         // categorisation tag, not a file-presence gate: an example can be
         // kind:'circuit' (it is ABOUT a circuit) and still declare pins
         // that need loading. The gate must be the file, not the tag.
-        const hasProgram = !(opts && opts.circuitOnly) && !!(ex.files && ex.files.program);
+        const hasProgram = !(opts && opts.circuitOnly) && !ex.files?.cp1 && !!(ex.files && ex.files.program);
         if (hasProgram) {
             const msg = /^de/i.test(navigator.language)
                 ? `„${ex.id}" öffnen?\n\nDas ersetzt das aktuelle Projekt — seine Blöcke, Pins und sein Board. Nicht Gespeichertes geht verloren.`
@@ -1718,9 +1718,9 @@ class CircuitTab extends React.Component {
                 if (!sourceResponse.ok) throw new Error(`CP1 program: HTTP ${sourceResponse.status}`);
                 const source = await sourceResponse.text();
                 const part = data.parts.find(item => item.kind === 'kosmos-cp1');
-                const config = {expansion: part?.params?.expansion === true, clockHz: 6000000};
+                const config = {expansion: part?.params?.expansion === true, clockHz: 6000000, partId: part?.id};
                 const draft = {format: 'brickwright.cp1-workspace', version: 1,
-                    configuration: config, rom: null, source};
+                    configuration: {expansion: config.expansion, clockHz: config.clockHz}, rom: null, source};
                 // Persist before mounting the CP1 panel: DOM events alone can precede its listener.
                 localStorage.setItem('bw-cp1-workspace', JSON.stringify(draft));
                 if (this.props.vm?.runtime) this.props.vm.runtime.bwDeviceCore = 'cp1';

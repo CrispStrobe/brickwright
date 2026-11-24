@@ -24,6 +24,7 @@ import {remoteMachineImagesAllowed} from '../distribution-policy.js';
  *  its own kind, not yet a branch in lite's debug-runner — see the note on
  *  activateConfig). */
 const TARGET_KIND = Object.freeze({
+    cp1: 'cp1',
     i8086: 'i8086', i8088: 'i8086', i80186: 'i8086', i80286: 'i8086',
     i80386: 'i80386',
     z80: 'z80', zx48: 'z80', zx128: 'z80',

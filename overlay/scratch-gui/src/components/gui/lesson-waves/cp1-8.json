@@ -26,11 +26,11 @@
       "copy": {
         "en": {
           "title": "Three cells, one visible number",
-          "objective": "Encode a constant, a display request and a halt, then compare the real segment display with your prediction."
+          "objective": "Encode a constant, a display request and a repeat, then compare the real segment display with your prediction."
         },
         "de": {
           "title": "Drei Zellen, eine sichtbare Zahl",
-          "objective": "Codiere Konstante, Anzeigeanforderung und Halt und vergleiche die echte Segmentanzeige mit deiner Vorhersage."
+          "objective": "Codiere Konstante, Anzeigeanforderung und Wiederholung und vergleiche die echte Segmentanzeige mit deiner Vorhersage."
         }
       },
       "checkpoints": [
@@ -38,15 +38,15 @@
           "id": "predict",
           "copy": {
             "en": {
-              "action": "Predict the cells for AKO 42, ANZ and HLT. Explain why 04.042 contains two byte values.",
+              "action": "Predict the cells for AKO 42, ANZ and SPU display, where display labels cell 1. Explain why 04.042 contains two byte values.",
               "explain": "The first field is an opcode and the second is an operand; the dot separates them.",
-              "hint": "The expected pairs are [4,42], [2,0] and [1,0]. Export the listing and compare its fields, not a floating-point interpretation.",
+              "hint": "The expected pairs are [4,42], [2,0] and [9,1]. Export the listing and compare its fields. The third cell returns to ANZ to keep the result visible.",
               "manual": "I matched each source command to its two bytes"
             },
             "de": {
-              "action": "Sage die Zellen für AKO 42, ANZ und HLT voraus. Erkläre, weshalb 04.042 zwei Bytewerte enthält.",
+              "action": "Sage die Zellen für AKO 42, ANZ und SPU display voraus; display bezeichnet Zelle 1. Erkläre, weshalb 04.042 zwei Bytewerte enthält.",
               "explain": "Das erste Feld ist der Befehl, das zweite der Operand. Der Punkt trennt die Felder.",
-              "hint": "Erwartet werden [4,42], [2,0] und [1,0]. Exportiere das Listing und vergleiche seine Felder, ohne es als Kommazahl zu lesen.",
+              "hint": "Erwartet werden [4,42], [2,0] und [9,1]. Exportiere das Listing und vergleiche seine Felder. Die dritte Zelle springt zu ANZ zurück, damit das Ergebnis sichtbar bleibt.",
               "manual": "Ich habe jeden Quellbefehl seinen zwei Bytes zugeordnet"
             }
           }
@@ -55,15 +55,15 @@
           "id": "observe",
           "copy": {
             "en": {
-              "action": "Import your own compatible 2048-byte monitor ROM, load the cells, select teaching-program cell 0 with the monitor and use its RUN key. Compare the display with 42, then change the constant to 73 and repeat.",
+              "action": "Import your own compatible 2048-byte monitor ROM, load the cells, select teaching-program cell 0 with the monitor and use its RUN key. Compare the display with 42, stop with STP, then change the constant to 73 and repeat.",
               "explain": "The 8049 executes the monitor ROM, which reads the teaching cells and scans the physical display.",
-              "hint": "Run CPU advances the hardware; keypad RUN asks the monitor to start the teaching program. Read the actual six segment masks. Complete this check yourself after observing the result; no ROM is bundled.",
+              "hint": "Run CPU advances the hardware; keypad RUN starts the teaching program. Read the actual six segment masks and complete this check yourself; no ROM is bundled. In the tested 2716 ROM, HLT immediately after ANZ replaces the value with P003. The repeat avoids that monitor-message change.",
               "manual": "I observed both constants on the real segment display"
             },
             "de": {
-              "action": "Importiere ein eigenes kompatibles Monitor-ROM mit 2048 Bytes, lade die Zellen, wähle im Monitor Lernprogrammzelle 0 und drücke seine RUN-Taste. Vergleiche die Anzeige mit 42, ändere die Konstante auf 73 und wiederhole den Versuch.",
+              "action": "Importiere ein eigenes kompatibles Monitor-ROM mit 2048 Bytes, lade die Zellen, wähle im Monitor Lernprogrammzelle 0 und drücke seine RUN-Taste. Vergleiche die Anzeige mit 42, halte mit STP an, ändere die Konstante auf 73 und wiederhole den Versuch.",
               "explain": "Der 8049 führt das Monitor-ROM aus. Dieses liest die Lernprogrammzellen und steuert die physische Anzeige an.",
-              "hint": "CPU ausführen lässt die Hardware laufen; RUN auf der Tastatur startet das Lernprogramm über den Monitor. Lies die sechs tatsächlichen Segmentmasken ab. Bestätige den Schritt nach deiner Beobachtung selbst; ein ROM wird nicht mitgeliefert.",
+              "hint": "CPU ausführen lässt die Hardware laufen; RUN auf der Tastatur startet das Lernprogramm. Lies die sechs tatsächlichen Segmentmasken ab und bestätige selbst; ein ROM wird nicht mitgeliefert. Im geprüften 2716-ROM ersetzt HLT direkt nach ANZ den Wert durch P003. Die Wiederholung vermeidet diesen Wechsel zur Monitormeldung.",
               "manual": "Ich habe beide Konstanten auf der echten Segmentanzeige beobachtet"
             }
           }
@@ -174,13 +174,13 @@
             "en": {
               "action": "Before loading, predict which cell changes when VALUE moves from 42 to 73 and which cells stay the same.",
               "explain": "The assembler records source-to-cell correspondence; a source edit becomes machine data only when it is loaded.",
-              "hint": "Cell 0 keeps opcode 4 and changes its operand. The ANZ and HLT cells keep both bytes. A source-line annotation describes the editor mapping, not proof that RAM still matches it.",
+              "hint": "Cell 0 keeps opcode 4 and changes its operand. The ANZ and SPU cells keep both bytes. A source-line annotation describes the editor mapping, not proof that RAM still matches it.",
               "manual": "I predicted the exact changed byte"
             },
             "de": {
               "action": "Sage vor dem Laden voraus, welche Zelle sich bei VALUE von 42 auf 73 ändert und welche Zellen gleich bleiben.",
               "explain": "Der Assembler ordnet Quelle und Zellen einander zu. Eine Quelländerung wird erst beim Laden zu Maschinendaten.",
-              "hint": "Zelle 0 behält Befehl 4 und ändert den Operanden. ANZ und HLT behalten beide Bytes. Eine Quellzeilenangabe beschreibt die Editorzuordnung und beweist nicht, dass das RAM noch dazu passt.",
+              "hint": "Zelle 0 behält Befehl 4 und ändert den Operanden. ANZ und SPU behalten beide Bytes. Eine Quellzeilenangabe beschreibt die Editorzuordnung und beweist nicht, dass das RAM noch dazu passt.",
               "manual": "Ich habe das genau veränderte Byte vorausgesagt"
             }
           }
@@ -326,14 +326,14 @@
             "en": {
               "action": "Run the loop, compare P2.0 with the resistor-fed LED, then pause while the output is high. Record the stored level and the time between equivalent edges if a suitable trace is available.",
               "explain": "An output latch can hold its state while the CPU is paused. The requested waits contribute to loop time, alongside firmware work.",
-              "hint": "Two 200 ms requests contribute 400 ms, but do not report an exact measured period from that arithmetic. If no edge trace is available, record the visible alternating output and state the timing measurement is unavailable.",
-              "manual": "I observed alternating output and retained latch state"
+              "hint": "Two 200 ms requests contribute 400 ms, but do not report an exact measured period from that arithmetic. If no edge trace is available, record the visible logic-low/logic-high transitions and state the timing measurement is unavailable.",
+              "manual": "I observed logic-low/logic-high transitions and retained latch state"
             },
             "de": {
               "action": "Lass die Schleife laufen, vergleiche P2.0 mit der LED samt Vorwiderstand und pausiere bei hohem Ausgang. Notiere den gehaltenen Pegel und, sofern eine passende Spur verfügbar ist, den Abstand gleichartiger Flanken.",
               "explain": "Ein Ausgangsregister kann seinen Zustand bei pausierter CPU halten. Angeforderte Wartezeiten tragen neben der Firmwarearbeit zur Schleifendauer bei.",
-              "hint": "Zwei Anforderungen von 200 ms tragen 400 ms bei. Gib diese Rechnung nicht als exakt gemessene Periode aus. Ohne passende Flankenspur notierst du den sichtbaren Wechsel und kennzeichnest die Zeitmessung als nicht verfügbar.",
-              "manual": "Ich habe wechselnden Ausgang und gehaltenen Registerwert beobachtet"
+              "hint": "Zwei Anforderungen von 200 ms tragen 400 ms bei. Gib diese Rechnung nicht als exakt gemessene Periode aus. Ohne passende Flankenspur notierst du die sichtbaren Übergänge zwischen logisch niedrigem und hohem Pegel und kennzeichnest die Zeitmessung als nicht verfügbar.",
+              "manual": "Ich habe Übergänge zwischen logisch niedrigem und hohem Pegel sowie den gehaltenen Registerwert beobachtet"
             }
           }
         }

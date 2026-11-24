@@ -29,6 +29,15 @@ The fallback ROM event is `bw-machine-media-load` with detail
 `{kind: 'cp1', slotId: 'rom', bytes, name}`. It occurs only after the user chooses
 a local file. No default firmware image is packaged or downloaded.
 
+`cp1-host.jsx` supplies the panel's workspace and callbacks. Its draft updater
+keeps the latest source through asynchronous operations and preserves an edit in
+memory if browser storage refuses a write. ROM/configuration requests are queued;
+failed loaders reject back to the panel instead of producing a success message.
+Configuration changes retain the machine's circuit `partId`, while only
+expansion/clock settings enter the portable schema. When the runner reports
+`cp1InputMode() === 'circuit'`, the host omits manual port controls: physical
+switch wiring and the circuit sampler are the input authority.
+
 Expected snapshot fields are `display`, `ports`, `cells`, `cpu`, `expansion` and
 optional ROM metadata. `display.digits` contains six active-high segment masks,
 physical left to right, bits a/b/c/d/e/f/g/dp. The fixed separator arrives as the
@@ -92,3 +101,27 @@ metadata. The upstream assembler suite additionally checks exact example bytes,
 range/duplicate diagnostics, sparse listings and source-map round trips. Full
 React/browser and circuit proofs are separate integration gates and must not be
 inferred from passing parser or helper tests.
+
+The additional component gate uses an explicitly supplied test dependency
+registry and the independently authored engine checkout:
+
+```sh
+node scripts/verify-cp1-components.mjs --deps ../bw-circuit-ui/node_modules --board ../bw-board
+node scripts/verify-cp1-panel-browser.mjs --deps ../bw-circuit-ui/node_modules --board ../bw-board --executable /usr/bin/chromium
+```
+
+On 2026-11-24, the first command passed 13 checks with React 18.3.1 and Vite/Oxc:
+actual JSX/SSR rendering, raw masks, key lifetimes, load/ROM refusal feedback,
+real RAM writes, source preservation, storage refusal recovery, queued CP3/ROM
+operations and circuit input ownership. Event surfaces and effect scheduling are
+controlled test doubles, PropTypes uses a validator-only stub, and CSS uses the
+actual stylesheet's class names. This is a component/callback proof, not a full
+application or visual browser pass. The implementation uses React APIs available
+in React 16.8, but a separate React 16 runtime was not exercised here.
+
+The browser launch was blocked before page load by the execution sandbox:
+Chromium's process singleton could not create its socket (`Operation not
+permitted`). The sanctioned escalation request was automatically rejected because
+the policy disables sandbox approval. No browser pass or screenshots are claimed.
+The checked-in browser fixture uses an original synthetic 8049 ROM and reports a
+failure when browser launch is unavailable; it does not silently skip the gate.

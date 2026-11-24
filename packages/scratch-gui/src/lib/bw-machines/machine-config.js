@@ -18,6 +18,7 @@ export const EXECUTION_MODES = Object.freeze(['functional', 'wired', 'auto']);
  *  (machine-media.js `SLOTS`, debug-runner `selectDebugTargetKind`). Kept as a
  *  data list, not a hardcoded switch, so a new kind is one entry. */
 export const MACHINE_KINDS = Object.freeze([
+    'cp1',
     'i8086', 'i8088', 'i80186', 'i80286', 'i80386',
     'z80', 'zx48', 'zx128', 'eater6502', 'gpascal',
     // The RV32 machine. Its media-lab bundle is a Linux kernel (`kernel` slot)
@@ -38,6 +39,7 @@ const X86_KINDS = Object.freeze(['i8086', 'i8088', 'i80186', 'i80286', 'i80386']
 /** Default CPU variant for a kind, when a config does not state one. The
  *  variant strings match run-dos.mjs / the i8086 machine presets. */
 const DEFAULT_VARIANT = Object.freeze({
+    cp1: '8049',
     i8086: '8086', i8088: '8088', i80186: '80186', i80286: '80286', i80386: '80386',
     z80: 'z80', zx48: 'z80', zx128: 'z80', eater6502: '6502', gpascal: '6502',
     riscv32: 'rv32imac', rp2040js: 'cortex-m0plus'
