@@ -192,7 +192,7 @@ const panelCapabilities = exampleId => {
 
 export function loadCatalog() {
     const waves = ['electricity-1', 'measurement-2', 'languages-3', 'interactive-4',
-        'debugging-5', 'signals-6', 'machines-7'];
+        'debugging-5', 'signals-6', 'machines-7', 'cp1-8'];
     const lessons = [...readJson(path.join(GUI, 'lessons.json')).lessons];
     for (const wave of waves) {
         lessons.push(...readJson(path.join(GUI, 'lesson-waves', `${wave}.json`)).lessons);

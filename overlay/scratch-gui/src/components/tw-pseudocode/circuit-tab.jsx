@@ -1092,7 +1092,8 @@ class CircuitTab extends React.Component {
             // board/Circuit UI graph into the cold Code-tab journey even though
             // right/solo render only DebugPanel at that boundary.
             if (typeof ui.setExtractors === 'function') {
-                ui.setExtractors({extract6502Machine, extractZ80Machine, extract8086Machine});
+                ui.setExtractors({extract6502Machine, extractZ80Machine, extract8086Machine,
+                    extractCp1Machine: engine.extractCp1Machine});
             }
             // Kept so _applyToLiveCircuit can parse a restored bench without a
             // second import. Nothing else in this file needs the model class.
@@ -1123,6 +1124,7 @@ class CircuitTab extends React.Component {
             // engine object, so every deployed Build Machine answered "no
             // retro CPU found" with the W65C02 seated in plain sight.
             setEngine({BoardImpl: engine.BoardImpl, inferNetlist: engine.inferNetlist, checkWiring: engine.checkWiring,
+                extractCp1Machine: engine.extractCp1Machine,
                 hasDevice: engine.hasDevice, getDevice: getCircuitDevice, extract6502Machine, extractZ80Machine,
                 extract8086Machine,
                 // The sweep instrument (SweepPanel): Kennlinien + Bode run
@@ -1232,7 +1234,9 @@ class CircuitTab extends React.Component {
             const rt = this.props.vm && this.props.vm.runtime;
             if (rt && !rt.bwDeviceCore) {
                 const is8086 = (k) => k === 'i8086' || k === '8086' || k === 'i8088' || k === '8088';
-                if (circuit.parts.some(p => p.kind === 'z80')) {
+                if (circuit.parts.some(p => p.kind === 'kosmos-cp1')) {
+                    rt.bwDeviceCore = 'cp1';
+                } else if (circuit.parts.some(p => p.kind === 'z80')) {
                     rt.bwDeviceCore = 'z80';
                 } else if (circuit.parts.some(p => p.kind === 'w65c02')) {
                     rt.bwDeviceCore = 'w65c02';
@@ -1708,6 +1712,20 @@ class CircuitTab extends React.Component {
             if (!data || !Array.isArray(data.parts) ||
                 !(Array.isArray(data.wires) || Array.isArray(data.nets))) {
                 throw new Error('not a circuit (no parts with wires or nets)');
+            }
+            if (ex?.files?.cp1) {
+                const sourceResponse = await fetch(`examples/${ex.files.cp1}`);
+                if (!sourceResponse.ok) throw new Error(`CP1 program: HTTP ${sourceResponse.status}`);
+                const source = await sourceResponse.text();
+                const part = data.parts.find(item => item.kind === 'kosmos-cp1');
+                const config = {expansion: part?.params?.expansion === true, clockHz: 6000000};
+                const draft = {format: 'brickwright.cp1-workspace', version: 1,
+                    configuration: config, rom: null, source};
+                // Persist before mounting the CP1 panel: DOM events alone can precede its listener.
+                localStorage.setItem('bw-cp1-workspace', JSON.stringify(draft));
+                if (this.props.vm?.runtime) this.props.vm.runtime.bwDeviceCore = 'cp1';
+                window.dispatchEvent(new CustomEvent('bw-machine-extracted', {detail: {kind: 'cp1', config}}));
+                window.dispatchEvent(new CustomEvent('bw-cp1-source-load', {detail: {source, ...config}}));
             }
             // The program first: it calls vm.loadProject, which would otherwise
             // discard a circuit loaded a moment earlier. Its failure is not

@@ -479,6 +479,7 @@ export function boardTimeBase (board, target) {
  * (task B8: one board per run, one author per board).
  */
 export function runnerCompilesProjectBlocks ({selectedKind, bootMedia = null, userFirmware = null}) {
+    if (selectedKind === 'cp1') return false;
     if (selectedKind === 'z80' || selectedKind === 'eater6502' || selectedKind === 'riscv32') return false;
     if ((selectedKind === 'i8086' || selectedKind === 'i80386') && bootMedia) return false;
     // An rp2040 .uf2 media bundle boots prebuilt firmware from flash; it does
@@ -490,6 +491,7 @@ export function runnerCompilesProjectBlocks ({selectedKind, bootMedia = null, us
 export function selectDebugTargetKind(device, requested = 'emulator') {
     if (requested !== 'emulator') return requested;
     const normalized = String(device || '').toLowerCase();
+    if (['cp1', 'kosmos-cp1', '8049'].includes(normalized)) return 'cp1';
     if (['arduino-uno', 'arduino-nano', 'atmega328p', 'atmega168p'].includes(normalized)) return 'avr8js';
     if (['arduino-mega', 'atmega2560'].includes(normalized)) return 'atmega2560';
     // Chip-specific AVR kinds — the coarse avr8js kind is an ATmega328P
@@ -1602,6 +1604,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         if (selectedTargetKind === 'z80') {
             return attachZ80();
         }
+
+        if (selectedTargetKind === 'cp1') return attachCp1();
 
         if (selectedTargetKind === 'riscv32') {
             if (bootMedia && bootMedia.profile === 'linux') return attachRiscV32Linux();
@@ -3012,6 +3016,22 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
     // anything else. Otherwise the wired-extractor config boots the
     // user's own machine with the delivered image; with nothing at all,
     // the default remains Tali Forth 2 on py65mon.
+    async function attachCp1() {
+        if (!bootMedia) throw new Error('Choose a 2048-byte CP1 firmware ROM in the CP1 panel first.');
+        const {createDebugTarget, createDebugSession} =
+            await import(/* webpackChunkName: "bw-board" */ 'bw-board');
+        const image = await resolveMediaImage(bootMedia);
+        if (image.bytes.length !== 2048) throw new Error('CP1 firmware must contain exactly 2048 bytes.');
+        const db = designerBoard();
+        if (db.board) board = db.board;
+        const options = {rom: image.bytes, expansion: machineConfig?.expansion === true,
+            clockHz: machineConfig?.clockHz || 6000000, ...(board ? {board} : {})};
+        const result = await createDebugTarget('cp1', options);
+        wireMachineBench(result, createDebugSession);
+        setStatus('ready', `CP1 firmware loaded: ${bootMedia.name || 'user ROM'}`);
+        return session;
+    }
+
     async function attachEater6502() {
         const { createDebugTarget, createDebugSession } =
             await import(/* webpackChunkName: "bw-board" */ 'bw-board');
@@ -4052,6 +4072,46 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
     let replayBreakpointDispatcher;
     let selectedEventSeek;
     const runner = {
+        cp1Snapshot: () => target?.kind === 'cp1' ? target.snapshot() : null,
+        cp1Key(key, down) {
+            if (target?.kind !== 'cp1') return false;
+            target.setKey(key, down);
+            return true;
+        },
+        cp1ReleaseKeys() { if (target?.kind === 'cp1') target.releaseKeys(); },
+        cp1SetInput(port, value) {
+            if (target?.kind !== 'cp1') return false;
+            target.machine.setPortInput(port, value);
+            emit();
+            return true;
+        },
+        cp1LoadProgram(assembly) {
+            if (target?.kind !== 'cp1') throw new Error('Load CP1 firmware before a program.');
+            if (!assembly?.ok || !(assembly.bytes instanceof Uint8Array)) throw new Error('Fix CP1 source errors before loading.');
+            session.pause();
+            target.releaseKeys();
+            const bytes = assembly.bytes;
+            const cells = Array.from({length: bytes.length / 2}, (_, index) =>
+                ({opcode: bytes[index * 2], operand: bytes[index * 2 + 1]}));
+            target.machine.loadProgram(cells, {clear: true});
+            emit();
+            if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('bw-cp1-program-loaded',
+                {detail: {cells: assembly.words.length, expansion: target.machine.expansion}}));
+        },
+        cp1WriteCell(index, cell) {
+            if (target?.kind !== 'cp1') return false;
+            session.pause();
+            target.machine.writeCell(index, cell.opcode, cell.operand);
+            emit();
+            return true;
+        },
+        cp1Reset() {
+            if (target?.kind !== 'cp1') return false;
+            session.pause();
+            target.reset();
+            emit();
+            return true;
+        },
         /** Use this image instead of compiling the blocks. */
         setFirmware(fw) { userFirmware = fw || null; },
         // Compile the same blocks/pseudocode image without attaching another clock.
@@ -4106,7 +4166,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                     // riscv32 never compiles the project: its program is the
                     // Code tab's assembled image, a shipped RTOS image, or a
                     // booted Linux — all of which arrive as bootMedia.
-                    const built = (selectedKind === 'z80' || selectedKind === 'eater6502' ||
+                    const built = (selectedKind === 'cp1' || selectedKind === 'z80' || selectedKind === 'eater6502' ||
                         selectedKind === 'riscv32' ||
                         ((selectedKind === 'i8086' || selectedKind === 'i80386') && bootMedia) ||
                         (selectedKind === 'rp2040js' && bootMedia)) ? null
