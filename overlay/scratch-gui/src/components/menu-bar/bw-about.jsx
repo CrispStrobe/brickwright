@@ -254,7 +254,8 @@ LicenceGroup.propTypes = {
 class BwAbout extends React.Component {
     constructor (props) {
         super(props);
-        this.state = {open: false, copied: false, toolchain: null, groups: null, groupsError: false};
+        // initiallyOpen: settings-menu.jsx loads this dialog lazily on the first bw-open-about.
+        this.state = {open: Boolean(props.initiallyOpen), copied: false, toolchain: null, groups: null, groupsError: false};
         this.handleToggle = this.handleToggle.bind(this);
         this.handleClose = this.handleClose.bind(this);
         this.handleCopy = this.handleCopy.bind(this);
@@ -265,6 +266,7 @@ class BwAbout extends React.Component {
         document.addEventListener('keydown', this.handleKeyDown);
         this.openFromSettings = () => this.setState({open: true, copied: false});
         window.addEventListener('bw-open-about', this.openFromSettings);
+        if (this.state.open) this.loadGroups();
     }
     componentWillUnmount () {
         this.mounted = false;
@@ -487,7 +489,8 @@ class BwAbout extends React.Component {
 
 BwAbout.propTypes = {
     locale: PropTypes.string,
-    hideTrigger: PropTypes.bool
+    hideTrigger: PropTypes.bool,
+    initiallyOpen: PropTypes.bool
 };
 
 const mapStateToProps = state => ({

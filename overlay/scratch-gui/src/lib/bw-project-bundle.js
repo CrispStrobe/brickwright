@@ -1,5 +1,4 @@
-import {CONNECTIONS_KEY} from './bw-cad-circuit/connections.js';
-import {validateConnections} from './bw-cad-circuit/session.js';
+import {CONNECTIONS_KEY, validateConnections} from './bw-cad-circuit/connections.js';
 import {CAD_PROJECT_PATH, CAD_STORAGE_KEY, CAD_PROJECT_LIMIT, inspectCadText, readCadText, getLiveCadText, setLiveCadText, getCadProjectGeneration, setCadProjectGeneration} from './bw-cad-project.js';
 import {sandboxWorld, SANDBOX_STORAGE_KEY} from './spike-arena/arena-sandbox.js';
 import {simLabRecord, SIM_LAB_STORAGE_KEY, SIM_LAB_LIMIT} from './bw-sim/model/sim-lab-persist.js';

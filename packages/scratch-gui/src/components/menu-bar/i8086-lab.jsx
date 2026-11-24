@@ -17,10 +17,11 @@ const A11Y_L10N = {
 const at = makeT(A11Y_L10N);
 
 
-export default function I8086Lab () {
+// settings-menu.jsx loads this panel lazily on the first open request and mounts it already open.
+export default function I8086Lab ({initiallyOpen = false}) {
     const dialog = useRef(null);
     const active = useRef(null);
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(initiallyOpen);
     const [memoryMode, setMemoryMode] = useState(getI8086MemoryMode);
     const [executionMode, setExecutionMode] = useState(i8086Execution.getPreference);
     const [executionState, setExecutionState] = useState(i8086Execution.snapshot);
