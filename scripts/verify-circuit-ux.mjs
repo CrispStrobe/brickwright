@@ -752,7 +752,9 @@ try {
         await designer.getByRole('button', {name: /Pause simulation/i}).press('Enter');
         await designer.getByRole('button', {name: /Resume simulation/i}).waitFor();
         const scope = designer.locator('[data-scope-panel]');
-        if (!await scope.count()) await designer.getByRole('button', {name: /Scope/i}).first().click();
+        // The instrument toggle by its own label: /Scope/ alone first matched the palette's
+        // Oscilloscope part tile (a role=button), which armed a part instead of opening the scope.
+        if (!await scope.count()) await designer.getByRole('button', {name: /^▣ (Scope|Oszilloskop)$/}).click();
         await scope.waitFor();
         await scope.getByTestId('bw-scope-record').selectOption('100000');
         const signal = await scopePage.evaluate(() => window.__board.nets.find(n =>
@@ -1029,7 +1031,7 @@ try {
           await designer.getByRole('button',{name:/Pause simulation/i}).press('Enter');
           await designer.getByRole('button',{name:/Resume simulation/i}).waitFor();
           const scope=adcPage.locator('[data-scope-panel]');
-          if (!await scope.count()) await designer.getByRole('button',{name:/Scope/i}).first().click();
+          if (!await scope.count()) await designer.getByRole('button',{name:/^▣ (Scope|Oszilloskop)$/}).click(); // not the palette's Oscilloscope tile
           await scope.waitFor();
           // Start this finite imported bench at an actual fresh Board epoch. The
           // designer remains paused; the later reset/advance ABA stays below 5ms.

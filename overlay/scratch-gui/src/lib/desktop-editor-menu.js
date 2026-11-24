@@ -30,7 +30,8 @@ export function installDesktopEditorMenu(owner) {
         const snapshot=desktopMenuSnapshot(owner.resolveAssetMenuSurface()||owner._activeEditorSurface, owner.props?.intl?.locale),text=JSON.stringify(snapshot);if(text===last)return;last=text;
         tauri.core.invoke('update_editor_menu',{snapshot}).catch(error=>{last='';console.warn('Desktop menu update failed',error);});
     };
-    tauri.event.listen('bw-desktop-menu',event=>{if(!disposed)Promise.resolve(runDesktopMenuAction(event.payload,owner)).catch(error=>console.warn('Desktop menu action failed',error));}).then(off=>{if(disposed)off();else unlisten=off;});
+    // Promise.resolve: a host whose listen does not return a promise must not take the GUI down with it.
+    Promise.resolve(tauri.event.listen('bw-desktop-menu',event=>{if(!disposed)Promise.resolve(runDesktopMenuAction(event.payload,owner)).catch(error=>console.warn('Desktop menu action failed',error));})).then(off=>{if(typeof off!=='function')return;if(disposed)off();else unlisten=off;}).catch(error=>console.warn('Desktop menu listener failed',error));
     owner._refreshDesktopMenu=refresh;refresh();
     return()=>{disposed=true;unlisten?.();owner._refreshDesktopMenu=null;};
 }
