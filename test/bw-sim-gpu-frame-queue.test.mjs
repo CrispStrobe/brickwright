@@ -14,24 +14,24 @@ const renderMethod=source.slice(source.indexOf('    const render = (snapshot'),s
 const resizeMethod=source.slice(source.indexOf('    const resize = ('),source.indexOf('    // Follow the chassis',source.indexOf('    const resize = (')));
 const frameState=source.slice(source.indexOf('    let drawnBodies'),source.indexOf("    controls.addEventListener('change'"));
 function view(gl,{now}={}) {
-    const queue=createGpuFrameQueue(gl,now),drawn=[],overlays=[];let pose=null,shown=true;
+    const queue=createGpuFrameQueue(gl,now),drawn=[],overlays=[],matrixUpdates=[];let pose=null,shown=true;
     const noop=()=>{};
     const dimensions={clientWidth:100,clientHeight:100},sizes=[],browserWindow={devicePixelRatio:1};
     let width=100,height=100,ratio=1,presented=null;
     const renderer={getSize:()=>({x:width,y:height}),getPixelRatio:()=>ratio,
         setPixelRatio:r=>{ratio=r;presented=null;},
         setSize:(w,h)=>{width=w;height=h;presented=null;sizes.push([w,h]);},
-        render:()=>{drawn.push(pose);presented=pose;}};
+        render:scene=>{scene.updateMatrixWorld();drawn.push(pose);presented=pose;}};
     const camera={updateMatrixWorld:noop,updateProjectionMatrix:noop,matrixWorld:{elements:new Float64Array(16)}};
     const scope={gpuFrames:queue,container:dimensions,window:browserWindow,rays:{visible:false},renderer,
         Vector2:class{},Vector3:class{},applySnapshot:(_b,s)=>{pose=s.pose;},
-        built:{scene:{updateMatrixWorld:noop}},chainMotion:null,simBelts:null,pens:null,
+        built:{scene:{updateMatrixWorld:()=>matrixUpdates.push(pose)}},chainMotion:null,simBelts:null,pens:null,
         drawingPreview:null,simRopes:null,simHoses:null,followPartId:null,partCentre:noop,
         followFrame:null,massCentre:()=>null,modelBox:()=>({getCenter:()=>null}),
         camera,controls:{},updateSensors:noop,pulse:{tick:noop,count:0},insight:{update:noop},
         measurementRows:()=>shown?[{pose}]:[],measurementOverlay:{update:rows=>overlays.push(rows.map(r=>r.pose))}};
     const {render,resize}=new Function(...Object.keys(scope),`let dirty=true,followed=null;${resizeMethod}${frameState}${renderMethod}return {render,resize};`)(...Object.values(scope));
-    return{render:(snapshot,options)=>render({bodies:[snapshot.pose],...snapshot},options),resize,drawn,queue,overlays,dimensions,browserWindow,sizes,get presented(){return presented;},hideMeasurements:()=>{shown=false;}};
+    return{render:(snapshot,options)=>render({bodies:[snapshot.pose],...snapshot},options),resize,drawn,queue,overlays,matrixUpdates,dimensions,browserWindow,sizes,get presented(){return presented;},hideMeasurements:()=>{shown=false;}};
 }
 test('a pixel-ratio-only resize redraws an otherwise unchanged on-demand scene',()=>{
     const gl=context(),v=view(gl);
@@ -75,6 +75,7 @@ test('the actual Simulate render method coalesces a busy GPU to the latest physi
     gl.signaled=true;v.render({pose:40});
     assert.deepEqual(v.drawn,[0,40],'draw the latest pose when the GPU finishes');
     assert.deepEqual(v.overlays,[[0],[40]],'measurement labels advance with the newly drawn pose');
+    assert.deepEqual(v.matrixUpdates,[0,40],'only Three.js traverses the whole scene, once for each drawn pose');
 });
 test('an unchanged on-demand scene can hide measurement labels without another GPU submission',()=>{
     const gl=context(),v=view(gl);

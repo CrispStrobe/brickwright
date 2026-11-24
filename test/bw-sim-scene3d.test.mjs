@@ -350,3 +350,41 @@ test('cables attach at sockets instead of badge centres and leave both surfaces 
         layer.setPorts([]); assert.equal(scene.getObjectByName('bw-insight-cable'), undefined);
     } finally { layer.dispose(); globalThis.document = original; }
 });
+
+test('hidden motion guides do not evaluate anchors and redraw from current positions when shown', () => {
+    const original = globalThis.document;
+    globalThis.document = {createElement: () => ({style: {}, dataset: {}, appendChild () {}, remove () {}})};
+    const scene = new Group(), camera = new PerspectiveCamera();
+    const layer = createInsightLayer({container: {appendChild () {}}, scene});
+    try {
+        let anchorReads = 0;
+        const base = new Vector3(0, 0, -2);
+        const anchor = offset => () => {
+            anchorReads++;
+            return base.clone().add(new Vector3(offset, 0, 0));
+        };
+        layer.setMotion({
+            axes: [{from: anchor(0), to: anchor(1), motor: true}],
+            balls: [{at: anchor(1)}],
+            gears: [{from: anchor(1), to: anchor(2), text: '2:1'}]
+        });
+        for (let frame = 0; frame < 8; frame++) layer.update(camera, 100, 100);
+        assert.equal(anchorReads, 0);
+        assert.equal(layer.stats().axes, 0);
+        assert.equal(layer.stats().balls, 0);
+        assert.deepEqual(layer.stats().ratios, []);
+        layer.setVisible({motion: true});
+        base.x = 2;
+        layer.update(camera, 100, 100);
+        assert.equal(anchorReads, 7);
+        assert.equal(layer.stats().motorAxes, 1);
+        assert.equal(layer.stats().balls, 1);
+        assert.deepEqual(layer.stats().ratios, ['2:1']);
+        assert.equal(scene.getObjectByName('bw-insight-motor-axis').position.x, 2.5);
+        layer.setVisible({motion: false});
+        layer.update(camera, 100, 100);
+        assert.equal(anchorReads, 7);
+        assert.equal(layer.stats().axes, 0);
+        assert.deepEqual(layer.stats().ratios, []);
+    } finally { layer.dispose(); globalThis.document = original; }
+});

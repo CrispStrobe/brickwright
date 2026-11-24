@@ -16,6 +16,12 @@ try {
         const pane = window.__bwSimLab?._pane;
         return pane?.state.status === 'ready' && pane.view?.overlayStats().cables.length > 0;
     });
+    const axes = () => page.evaluate(() => window.__bwSimLab._pane.view.overlayStats().axes);
+    assert.equal(await axes(), 0);
+    await tool(page, 'show-motion');
+    await page.waitForFunction(() => window.__bwSimLab._pane.view.overlayStats().axes > 0);
+    await tool(page, 'show-motion');
+    await page.waitForFunction(() => window.__bwSimLab._pane.view.overlayStats().axes === 0);
     await tool(page, 'show-sensors');
     await page.waitForFunction(() => window.__bwSimLab._pane.view.sensorRays().length > 0);
     const result = await page.evaluate(() => {

@@ -70,6 +70,7 @@ export const createInsightLayer = ({container, scene, onPortClick = null}) => {
     const root = new Group();
     root.name = 'bw-insight';
     root.renderOrder = 30;
+    root.visible = false;
     scene.add(root);
     const dom = document.createElement('div');
     dom.dataset.testid = 'bw-sim-lab-insight-labels';
@@ -183,7 +184,7 @@ export const createInsightLayer = ({container, scene, onPortClick = null}) => {
             const el = document.createElement('span');
             el.textContent = g.text;
             el.dataset.testid = 'bw-sim-lab-gear-ratio';
-            badgeStyle(el, {border: '1px solid #6d28d9', background: '#ede9fe', color: '#5b21b6'});
+            badgeStyle(el, {border: '1px solid #6d28d9', background: '#ede9fe', color: '#5b21b6', display: 'none'});
             dom.appendChild(el);
             ratios.push({from: g.from, to: g.to, el});
         }
@@ -198,21 +199,31 @@ export const createInsightLayer = ({container, scene, onPortClick = null}) => {
     const dir = new Vector3();
     const cableSpan = new Vector3();
     const cableOrigin = new Vector3();
+    const projected = new Vector3();
     const place = (el, world, camera, w, h, lift) => {
-        const v = world.clone().project(camera);
-        if (v.z > 1 || v.z < -1) { el.style.display = 'none'; return; }
-        el.style.display = '';
+        const v = projected.copy(world).project(camera);
+        if (v.z > 1 || v.z < -1) {
+            if (el.style.display !== 'none') el.style.display = 'none';
+            return;
+        }
+        if (el.style.display) el.style.display = '';
         const x = (v.x + 1) / 2 * w;
         const y = (1 - v.y) / 2 * h;
-        el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, ${lift})`;
+        const transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, ${lift})`;
+        if (el.style.transform !== transform) el.style.transform = transform;
     };
 
-    /** Per frame, after the scene's matrices are current: rods follow their anchors, labels their points. */
-    const update = (camera, width, height) => {
+    /** Update the visible motion guides from their current anchors. */
+    const updateMotion = (camera, width, height) => {
+        const wasVisible = root.visible;
         root.visible = show.motion;
+        if (!show.motion) {
+            if (wasVisible) for (const ratio of ratios) ratio.el.style.display = 'none';
+            return;
+        }
         for (const r of rods) {
             const pa = r.from(); const pb = r.to();
-            const on = show.motion && pa && pb;
+            const on = pa && pb;
             r.mesh.visible = Boolean(on);
             if (r.head) r.head.visible = Boolean(on);
             if (!on) continue;
@@ -232,14 +243,18 @@ export const createInsightLayer = ({container, scene, onPortClick = null}) => {
         }
         for (const d of dots) {
             const p = d.at();
-            d.mesh.visible = Boolean(show.motion && p);
+            d.mesh.visible = Boolean(p);
             if (p) d.mesh.position.copy(p);
         }
         for (const r of ratios) {
             const pa = r.from(); const pb = r.to();
-            if (!show.motion || !pa || !pb) { r.el.style.display = 'none'; continue; }
+            if (!pa || !pb) { r.el.style.display = 'none'; continue; }
             place(r.el, a.copy(pa).add(pb).multiplyScalar(0.5), camera, width, height, '-50%');
         }
+    };
+
+    const update = (camera, width, height) => {
+        updateMotion(camera, width, height);
         cableRoot.visible = show.ports;
         for (const c of cables) {
             const pa = show.ports ? c.from() : null;
@@ -269,10 +284,10 @@ export const createInsightLayer = ({container, scene, onPortClick = null}) => {
     /** What is shown now (for tests and the browser gate). */
     const stats = () => ({
         ports: ports.filter(p => p.el.style.display !== 'none').length,
-        axes: rods.filter(r => r.head && r.mesh.visible).length,
-        motorAxes: rods.filter(r => r.head && r.mesh.visible && r.mesh.name === 'bw-insight-motor-axis').length,
-        balls: dots.filter(d => d.mesh.visible).length,
-        gears: rods.filter(r => !r.head && r.mesh.visible).length,
+        axes: root.visible ? rods.filter(r => r.head && r.mesh.visible).length : 0,
+        motorAxes: root.visible ? rods.filter(r => r.head && r.mesh.visible && r.mesh.name === 'bw-insight-motor-axis').length : 0,
+        balls: root.visible ? dots.filter(d => d.mesh.visible).length : 0,
+        gears: root.visible ? rods.filter(r => !r.head && r.mesh.visible).length : 0,
         ratios: ratios.filter(r => r.el.style.display !== 'none').map(r => r.el.textContent),
         cables: cables.filter(c => c.mesh.visible).map(c => c.mesh.userData.part),
         cableAttachments: cables.filter(c => c.mesh.visible && c.shape).map(c => ({id: c.mesh.userData.part,

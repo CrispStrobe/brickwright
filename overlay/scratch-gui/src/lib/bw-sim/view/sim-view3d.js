@@ -408,7 +408,8 @@ export const createSimView3D = ({container, model, mechanism, read, catalog = nu
         followed = centre;
         updateSensors();
         pulse.tick(performance.now());
-        built.scene.updateMatrixWorld();
+        // Overlay anchors update their own parent chain. Three updates the full
+        // scene once during render, including guides whose transforms just changed.
         camera.updateMatrixWorld();
         insight.update(camera, size.x, size.y);
         measurementOverlay.update(measurementRows ? measurementRows() : [], camera, size.x, size.y);
