@@ -16,7 +16,8 @@ const out='artifacts/circuit-cad';await mkdir(out,{recursive:true});
 const pulse=setInterval(()=>page.evaluate(()=>window.__brickwrightStore?.getState()?.scratchGui?.vm?.runtime?.cadCircuitSimulation?.state()).then(s=>console.log('progress',s?.phase,s?.time,s?.error)).catch(()=>{}),10000);
 try{
  await page.goto(url,{waitUntil:'commit'});
- await wait(()=>window.__brickwrightStore?.getState()?.scratchGui?.vm?.runtime);
+ // The CAD bridges (runtime.cadCircuitSimulation) install from a lazy chunk after first paint (lib/bw-cad-host.js).
+ await wait(()=>window.__brickwrightStore?.getState()?.scratchGui?.vm?.runtime?.cadCircuitSimulation);
  console.log('GUI ready');
  await page.getByRole('tab',{name:'CAD',exact:true}).click();await wait(()=>window.__bwCad?.editor);
  if(process.argv.includes('--presets')){
@@ -66,7 +67,7 @@ try{
  }
  const controls=page.getByTestId('bw-cad-program-toolbar'),settings=page.getByTestId('bw-cad-program-settings');
  const layout=()=>page.evaluate(()=>{const host=document.querySelector('[data-testid="bw-cad-tab"] [data-state]'),root=host.shadowRoot,b=root.querySelector('.viewport').getBoundingClientRect(),h=host.getBoundingClientRect(),bar=document.querySelector('[data-testid="bw-cad-program-toolbar"]').getBoundingClientRect();return{viewportTop:b.top,viewportHeight:b.height,header:b.top-h.top,controlsTop:bar.top,compact:document.body.classList.contains('bw-compact-chrome'),fileMenuVisible:[...root.querySelectorAll('summary')].some(s=>s.getAttribute('aria-label')==='File menu'&&s.getBoundingClientRect().height>0)};});
- const beforeSetup=await layout();assert.ok(beforeSetup.header<=64,JSON.stringify(beforeSetup));assert.equal(beforeSetup.compact,true);assert.equal(beforeSetup.fileMenuVisible,false);
+ const beforeSetup=await layout();assert.ok(beforeSetup.header<=64,JSON.stringify(beforeSetup));assert.equal(beforeSetup.compact,false,'opening CAD keeps the chosen chrome; since d9aa15eef it no longer forces the compact strip');assert.equal(beforeSetup.fileMenuVisible,false);
  await settings.click();const panel=page.getByTestId('bw-cad-circuit-panel');await panel.waitFor({state:'visible'});const afterSetup=await layout();assert.equal(afterSetup.viewportTop,beforeSetup.viewportTop);assert.equal(afterSetup.viewportHeight,beforeSetup.viewportHeight,'setup drawer must not consume a workspace row');
  await page.screenshot({path:`${out}/${flavor}-setup.png`,animations:'disabled',timeout:10000});
  await panel.getByRole('button',{name:'Close program settings'}).click();await panel.waitFor({state:'hidden'});

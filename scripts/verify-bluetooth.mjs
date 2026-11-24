@@ -93,15 +93,19 @@ check('requestDevice is callable',
 // The route a user actually takes. Dispatching the event directly (below) would
 // pass even if the menu item were never wired up, which is the kind of gap that
 // leaves a diagnostics tool nobody can reach.
-const settingsButton = page.locator('[class*="settings"]').first();
+// The trigger by its test id: `[class*="settings"]` matched whichever element first
+// carried "settings" in a class name, which stopped being the menu's trigger.
+const settingsButton = page.getByTestId('bw-settings-menu-trigger');
 let openedFromMenu = false;
 if (await settingsButton.count() > 0) {
     await settingsButton.click();
     const item = page.getByText('Connection diagnostics…', {exact: false}).first();
+    await item.waitFor({state: 'visible', timeout: 10000}).catch(() => {});
     if (await item.count() > 0) {
         await item.click();
-        openedFromMenu = await page.evaluate(() =>
-            (document.body.innerText || '').includes('Run Bluetooth self-test'));
+        openedFromMenu = await page.waitForFunction(() =>
+            (document.body.innerText || '').includes('Run Bluetooth self-test'), null, {timeout: 10000})
+            .then(() => true, () => false);
     }
 }
 check('Settings → Connection diagnostics opens the panel', openedFromMenu);

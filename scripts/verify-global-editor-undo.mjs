@@ -137,8 +137,15 @@ try {
     const last = await page.evaluate(() => Array.from(document.querySelectorAll('[data-testid="bw-history-list"] button'))
         .pop().getAttribute('data-testid'));
     if (await focused() !== last) throw new Error(`End focused ${await focused()}, not ${last}`);
+    // Since d9aa15eef the list is the whole workspace's (moveHistory 'workspace'), so the
+    // Code tab's undone edits from above are redo entries too, listed farthest first:
+    // Home goes to the top entry, and ArrowDown walks to the costume step (step-1).
+    const first = await page.evaluate(() => document.querySelector('[data-testid="bw-history-list"] button')
+        .getAttribute('data-testid'));
     await page.keyboard.press('Home');
-    if (await focused() !== 'bw-history-step-1') throw new Error(`Home focused ${await focused()}`);
+    if (await focused() !== first) throw new Error(`Home focused ${await focused()}, not ${first}`);
+    for (let i = 0; i < 20 && await focused() !== 'bw-history-step-1'; i++) await page.keyboard.press('ArrowDown');
+    if (await focused() !== 'bw-history-step-1') throw new Error(`ArrowDown stopped at ${await focused()}`);
     await page.keyboard.press('Enter');
     await page.waitForFunction(count => window.__brickwrightStore.getState().scratchGui.vm.editingTarget
         .sprite.costumes.length === count, costumes.length - 1);

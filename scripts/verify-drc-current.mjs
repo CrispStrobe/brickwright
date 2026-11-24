@@ -181,8 +181,12 @@ try {
     // eight of them are 232.727. Both figures below moved by exactly
     // 3.2/3.0 = 1.066667, which is the check that ONLY the knee moved: if any
     // other term had, the total and the per-part number would not share one factor.
+    // bw-board 74d42338 (pin a685b220, round 3: "Diodes and LEDs exponential by
+    // default") puts each LED on its Shockley curve instead of the knee: 28.9 mA a
+    // branch, 231.5 mA in all, reported as 231 mA (CI run 45318622606). Either model's
+    // total is accepted; the subject is a SUM past the 120 mA limit, not the LED model.
     check('bench 1 reports an aggregate current past the chip limit',
-        /Total circuit current is .*23[23] mA, exceeding the .*120 mA limit/.test(one.text),
+        /Total circuit current is .*23[123] mA, exceeding the .*120 mA limit/.test(one.text),
         one.text.slice(0, 200));
     check('bench 1 names the LEDs as the largest consumers',
         /led \(29 mA\)/.test(one.text));
