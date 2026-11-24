@@ -246,7 +246,11 @@ test('every shipped circuit resolves every wire endpoint into a real electrical 
     // and 8 radio. None removed.
     for (const id of ['lab-hum-finder', 'lab-thermocouple', 'lab-light-guide', 'lab-am-transmitter'])
         assert.ok(files.includes(id + '/circuit.json'), id);
-    assert.equal(files.length, 1647, 'the gate must cover the complete vendored corpus');
+    // 1647 -> 1646 on 2026-11-24 (sb3-creator cafdfb1 -> c048a55, #195): -1,
+    // lab-shortwave-regen withdrawn (read robustly it squegged instead of beating
+    // against its beacon). Nothing added.
+    assert.ok(!files.includes('lab-shortwave-regen/circuit.json'), 'lab-shortwave-regen withdrawn');
+    assert.equal(files.length, 1646, 'the gate must cover the complete vendored corpus');
     assert.deepEqual(failures, []);
 });
 

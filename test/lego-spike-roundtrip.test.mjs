@@ -354,9 +354,11 @@ test('vendored SPIKE compiler emits a canonical executable round-trip artifact',
     // -> 01e1280 (2026-11-23): five radio lab examples, every lab bench re-laid out and re-measured (#191); `src/` unchanged again.
     // -> 539a3d9 (2026-11-23): bw-circuit-ui df78c46 provenance re-stamp and the lab-meissner-am re-layout (#192); `src/` unchanged again.
     // -> cafdfb1 (2026-11-24): 38 round-4 lab benches (fields, transducers, optics, rf) and sibling pins bw-board 20c29a7 / bw-circuit-ui 6ea2239 (#193); `src/` unchanged again.
+    // -> c048a55 (2026-11-24): RF benches read robustly, lab-shortwave-regen withdrawn, sibling pins bw-board 5c83e54 / bw-circuit-ui 089ee40 (#195); `src/` unchanged again.
+    // -> de3c53c (2026-11-24): sibling pins bw-board 489ca7c / bw-circuit-ui 7f98562 (#196); `src/` unchanged again.
     // Keep the exact supplier identity gate and every SPIKE artifact assertion below.
     assert.equal(JSON.parse(readFileSync(new URL('../vendor-pins.json', import.meta.url)))['sb3-creator'],
-        'cafdfb1a673e38e0fee853bbd9dddfaef2286fe7');
+        'de3c53c83ba4df23478b35645b47ead76c43e2e6');
 
     const creator = new SB3Creator();
     creator.parse(PROGRAM);
