@@ -8,8 +8,7 @@ import extensionLibraryContent from '../lib/libraries/extensions/index.jsx';
 import {getLegacySpikeVisible, LEGACY_SPIKE_CHANGE_EVENT} from '../lib/spike-legacy-debug';
 import {remoteExtensionsAllowed} from '../lib/distribution-policy';
 import {confirmAsync, promptAsync} from '../lib/native-dialog';
-import {setCadEnabled} from '../lib/bw-cad-preferences.js';
-import {CAD_OPEN_EVENT} from '../lib/bw-cad-program.js';
+import {setCadEnabled, CAD_OPEN_EVENT} from '../lib/bw-cad-preferences.js';
 import {setCircuitView} from '../lib/bw-debug/debug-view.js';
 
 // Extensions whose blocks act on a 3D surface show that surface beside the blocks

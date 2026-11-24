@@ -84,14 +84,24 @@ const LAZY = [
     // a specifier that moves to a third file the initial chunk still pulls in
     // passes the text and fails here. Location only: some layouts DO request
     // these chunks at first paint, so "not preloaded" is the eager-script check.
+    // Since bw-circuit-ui's lazy per-kind part art (pin 7f98562f: one `part-art-*` chunk per
+    // kind, a require.context in the designer), webpack's splitChunks moves the package's code
+    // out of the named entry into an anonymous chunk that only the bw-circuit-ui request group
+    // loads (build of 61eb1cda9: bw-circuit-ui.js is 10 KiB — the art context map — and the
+    // DRC/board-canvas code sits in chunks/37071.*.js, 1.7 MiB, requested beside it). So these
+    // three markers are looked for in lazy JS, like bw-board's; the eager-script and preload
+    // checks are unchanged.
     {what: 'circuit DRC rules', marker: 'Check the address decode wiring on the breadboard.', chunk: 'bw-circuit-ui',
+        sharedLazy: true,
         why: 'the guarded load in overlay/scratch-gui/src/components/tw-pseudocode/circuit-tab.jsx (webpackChunkName "bw-circuit-ui")'},
     // The German words for those findings (bw-circuit-ui src/i18n/drc-de.js) come with the
     // designer as well; the first-load budget has no room for a translation table. ASCII-only
     // marker, so minification cannot escape it into a different spelling.
     {what: 'German DRC texts', marker: 'Bus-Extraktor fehlgeschlagen: ', chunk: 'bw-circuit-ui',
+        sharedLazy: true,
         why: 'the guarded load in circuit-tab.jsx (webpackChunkName "bw-circuit-ui"); drc-de.js is imported only by designer components'},
     {what: 'board canvas', marker: 'Could not recognise this file', chunk: 'bw-circuit-ui',
+        sharedLazy: true,
         why: 'the guarded load in circuit-tab.jsx (webpackChunkName "bw-circuit-ui")'},
     // The Circuit tab's panel switch and panel views (Robot Lab conventions): loaded with the
     // designer, never at boot (the tab is mounted from the start). The marker is the panel
