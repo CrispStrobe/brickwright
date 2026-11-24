@@ -269,3 +269,9 @@ project. Set `PROOF_JOLT_SIMD_MODULE=/absolute/path/to/module.js` only
 for the candidate run. The proof records its SHA-256 and checks that the
 simulation requested it and did not fall back to scalar. Leave the
 override unset to measure the pinned module.
+
+The focused C++ cast fixture passed when linked against the candidate's
+SIMD WASM library. It retained the two expected hit fractions, including
+the grazing hit with extra radius, and skipped the out-of-range child
+before dispatch. This is a collision-query unit check. The full robot
+throughput comparison is separate.
