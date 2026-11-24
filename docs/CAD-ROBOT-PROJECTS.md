@@ -202,3 +202,9 @@ mesh. It reduced the compound from 507 to 385 hulls per wheel and made
 preparation faster in one paired run. Native stepping showed no reliable
 gain, and the Scout motion qualification did not pass. The released
 wheel assets retain their existing candidates.
+
+On the published MacBook build, a reverse-order Atlas pair measured
+0.653× batched and 0.417× individual. Shaft feedback averaged 0.151 ms
+batched and 0.357 ms individual. Mechanical round-trip time varied
+between the runs, so these pairs establish a feedback-stage reduction
+with no reproducible end-to-end gain for Atlas.
