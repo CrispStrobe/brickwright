@@ -285,3 +285,23 @@ machine was heavily loaded and this is one paired run. A 600-child box
 cast probe also retained all hits across both paths, at 4.27–4.75 ms per
 cast for the original traversal and 0.51–0.53 ms with pruning. This
 microbenchmark measures the cast query alone.
+
+Atlas's matching process CPU measurements were 12.28 ms and 7.58 ms per
+step, with identical root and joint traces. The Chrome runs sent the
+same 120 actuator steps through the packaged simulation worker in both
+run orders. They used the shipped model assets and sampled full poses
+every sixth step. The worker loaded the candidate SIMD module with no
+scalar fallback. All returned frames matched exactly.
+
+| Robot | Pinned Chrome physics worker | Candidate Chrome physics worker |
+| --- | --- | --- |
+| Scout TT rover | 0.50–0.56× | 1.22–1.30× |
+| Atlas forklift | 0.61–0.64× | 0.88–1.15× |
+
+These rates cover the worker round trip with scripted impulses. The
+full target also includes the Circuit engine, Blocks VM, and viewport.
+The candidate's browser module SHA-256 is
+`7c526483f41fda404d56317ae77f3b0bbb030fcbf21a2cb34ac9e16621766742`.
+The reproducible native source pin is saved in the
+[JoltPhysics.js candidate](https://github.com/CrispStrobe/JoltPhysics.js/commit/fb4da98).
+The released SDK continues to use its existing qualified engine.
