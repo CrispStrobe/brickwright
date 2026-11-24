@@ -99,7 +99,7 @@ export const createInsightLayer = ({container, scene, onPortClick = null}) => {
     cableRoot.name = 'bw-insight-cables';
     scene.add(cableRoot);
     const cableMaterial = new MeshBasicMaterial({color: CABLE_COLOR});
-    let cables = []; // {from, to, mesh, at: [Vector3, Vector3]|null}
+    let cables = []; // {from, to, mesh, shape: {span, fromDirection, toDirection}|null}
     const clearCables = () => {
         for (const c of cables) { cableRoot.remove(c.mesh); c.mesh.geometry.dispose(); }
         cables = [];
@@ -145,7 +145,7 @@ export const createInsightLayer = ({container, scene, onPortClick = null}) => {
                 mesh.frustumCulled = false;
                 cableRoot.add(mesh);
                 cables.push({from: item.cableAnchor, to: item.hubAnchor,
-                    fromDirection: item.cableDirection, toDirection: item.hubDirection, mesh, at: null});
+                    fromDirection: item.cableDirection, toDirection: item.hubDirection, mesh, shape: null});
             }
         }
     };
@@ -196,6 +196,8 @@ export const createInsightLayer = ({container, scene, onPortClick = null}) => {
     const a = new Vector3();
     const b = new Vector3();
     const dir = new Vector3();
+    const cableSpan = new Vector3();
+    const cableOrigin = new Vector3();
     const place = (el, world, camera, w, h, lift) => {
         const v = world.clone().project(camera);
         if (v.z > 1 || v.z < -1) { el.style.display = 'none'; return; }
@@ -245,11 +247,17 @@ export const createInsightLayer = ({container, scene, onPortClick = null}) => {
             const da = pa && pb ? c.fromDirection() : null;
             const db = da ? c.toDirection() : null;
             c.mesh.visible = Boolean(pa && pb && da && db);
-            if (!pa || !pb || !da || !db || (c.at && [pa, pb, da, db].every((p, i) => c.at[i].distanceToSquared(p) < 1e-10))) continue;
-            // The ends moved: the cable is laid anew, arching over the middle.
-            c.at = [pa.clone(), pb.clone(), da.clone(), db.clone()];
+            if (!pa || !pb || !da || !db) continue;
+            // A rigid translation moves the mesh without changing the curve in
+            // local coordinates. A change in span or socket tangent reshapes it.
+            c.mesh.position.copy(pa);
+            cableSpan.subVectors(pb, pa);
+            const shape = c.shape;
+            if (shape && shape.span.distanceToSquared(cableSpan) < 1e-10 &&
+                shape.fromDirection.distanceToSquared(da) < 1e-10 && shape.toDirection.distanceToSquared(db) < 1e-10) continue;
+            c.shape = {span: cableSpan.clone(), fromDirection: da.clone(), toDirection: db.clone()};
             c.mesh.geometry.dispose();
-            c.mesh.geometry = new TubeGeometry(cableCurve(pa, pb, da, db), 32, CABLE_RADIUS, 6, false);
+            c.mesh.geometry = new TubeGeometry(cableCurve(cableOrigin, cableSpan, da, db), 32, CABLE_RADIUS, 6, false);
         }
         for (const p of ports) {
             const at = show.ports ? p.anchor() : null;
@@ -267,8 +275,9 @@ export const createInsightLayer = ({container, scene, onPortClick = null}) => {
         gears: rods.filter(r => !r.head && r.mesh.visible).length,
         ratios: ratios.filter(r => r.el.style.display !== 'none').map(r => r.el.textContent),
         cables: cables.filter(c => c.mesh.visible).map(c => c.mesh.userData.part),
-        cableAttachments: cables.filter(c => c.mesh.visible && c.at).map(c => ({id: c.mesh.userData.part,
-            from: c.at[0].toArray(), to: c.at[1].toArray(), fromDirection: c.at[2].toArray(), toDirection: c.at[3].toArray()}))
+        cableAttachments: cables.filter(c => c.mesh.visible && c.shape).map(c => ({id: c.mesh.userData.part,
+            from: c.mesh.position.toArray(), to: c.mesh.position.clone().add(c.shape.span).toArray(),
+            fromDirection: c.shape.fromDirection.toArray(), toDirection: c.shape.toDirection.toArray()}))
     });
 
     const dispose = () => {

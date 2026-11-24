@@ -6,7 +6,7 @@
 // view (lib/spike-arena/arena-view3d.js) and reached the same way, only through
 // the pane's dynamic import of bw-sim/sim-lab.js (chunk "bw-sim-lab").
 
-import {Box3, BufferGeometry, Color, Float32BufferAttribute, GridHelper, LineBasicMaterial, LineSegments, MOUSE, Mesh, MeshBasicMaterial,
+import {Box3, BufferGeometry, Color, DynamicDrawUsage, Float32BufferAttribute, GridHelper, LineBasicMaterial, LineSegments, MOUSE, Mesh, MeshBasicMaterial,
     PerspectiveCamera, Raycaster, Sphere, SphereGeometry, Vector2, Vector3, WebGLRenderer} from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {createMeasurementPicker} from '../measurements/picking.js';
@@ -265,45 +265,49 @@ export const createSimView3D = ({container, model, mechanism, read, catalog = nu
     built.scene.add(rays);
     const tipGeometry = new SphereGeometry(1, 12, 8);
     const tipMaterial = new MeshBasicMaterial({color: 0xdc2626, depthTest: false, transparent: true, opacity: 0.9});
-    let tips = [];
+    let rayPositions = null;
+    const rayFrom = new Vector3();
+    const rayTo = new Vector3();
     const updateSensors = () => {
         if (!rays.visible) return;
-        const points = [];
-        sensorItems.forEach((item, i) => {
-            const mesh = built.partMeshes.get(item.id);
-            if (!mesh) return;
-            const len = Math.max(1, item.lengthOf()) * LDU_M;
-            const origin = new Vector3(...lduToWorld(item.origin));
-            const direction = new Vector3(...dirToWorld(item.direction)).normalize();
-            const from = mesh.localToWorld(origin.clone());
-            const to = mesh.localToWorld(origin.clone().addScaledVector(direction, len));
-            points.push(...from.toArray(), ...to.toArray());
-            lastRays[i] = {from: from.toArray(), to: to.toArray()};
-            const tip = tips[i];
-            if (tip) {
-                tip.position.copy(to);
-                tip.scale.setScalar(3 * LDU_M); // a dot 6 LDU across
-            }
+        sensorItems.forEach(({mesh, origin, direction, lengthOf, tip}, i) => {
+            const len = Math.max(1, lengthOf()) * LDU_M;
+            mesh.updateWorldMatrix(true, false);
+            rayFrom.copy(origin).applyMatrix4(mesh.matrixWorld);
+            rayTo.copy(origin).addScaledVector(direction, len).applyMatrix4(mesh.matrixWorld);
+            rayPositions.setXYZ(i * 2, rayFrom.x, rayFrom.y, rayFrom.z);
+            rayPositions.setXYZ(i * 2 + 1, rayTo.x, rayTo.y, rayTo.z);
+            lastRays[i] = {from: rayFrom.toArray(), to: rayTo.toArray()};
+            tip.position.copy(rayTo);
         });
-        rays.geometry.setAttribute('position', new Float32BufferAttribute(points, 3));
-        rays.geometry.computeBoundingSphere();
+        rayPositions.needsUpdate = true;
     };
     /**
      * The sensors whose rays can be shown: items {id (the part in the model), origin, direction (part frame),
      * lengthOf: () => LDU}; `shown` turns the overlay on or off.
      */
     const setSensors = (items, shown) => {
-        sensorItems = items.filter(item => built.partMeshes.has(item.id));
+        for (const {tip} of sensorItems) built.scene.remove(tip);
         lastRays = [];
-        for (const tip of tips) built.scene.remove(tip);
-        tips = sensorItems.map(() => {
+        sensorItems = [];
+        for (const item of items) {
+            const mesh = built.partMeshes.get(item.id);
+            if (!mesh) continue;
             const tip = new Mesh(tipGeometry, tipMaterial);
             tip.renderOrder = 10;
+            tip.scale.setScalar(3 * LDU_M); // a dot 6 LDU across
+            tip.visible = Boolean(shown);
             built.scene.add(tip);
-            return tip;
-        });
+            sensorItems.push({mesh, tip, lengthOf: item.lengthOf, origin: new Vector3(...lduToWorld(item.origin)),
+                direction: new Vector3(...dirToWorld(item.direction)).normalize()});
+        }
+        if (rayPositions?.count !== sensorItems.length * 2) {
+            // Dispose while Three still knows which GPU buffer this geometry owns.
+            rays.geometry.dispose();
+            rayPositions = new Float32BufferAttribute(new Float32Array(sensorItems.length * 6), 3).setUsage(DynamicDrawUsage);
+            rays.geometry.setAttribute('position', rayPositions);
+        }
         rays.visible = Boolean(shown) && sensorItems.length > 0;
-        for (const tip of tips) tip.visible = rays.visible;
         dirty = true;
     };
 
