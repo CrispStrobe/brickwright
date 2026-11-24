@@ -154,3 +154,18 @@ A diagnostic Scout run with continuous collision detection disabled dropped
 the mean native step from 19.3 ms to 6.4 ms. The latter still exceeded the 5 ms
 combined budget before the circuit solve, and drive motion changed. The
 shipped path retains continuous collision detection.
+
+The pinned Jolt package also provides an optional SIMD build. The browser
+worker selects it after a Wasm feature check and falls back to the scalar
+build if it cannot load. The fixed timestep and the collision settings are
+shared across both builds.
+
+| Project | Sustained with SIMD | Mean mechanical round trip | First / repeat worker startup |
+| --- | ---: | ---: | ---: |
+| Scout | 0.249× | 18.2 ms | 11.39 / 0.92 s |
+| Atlas | 0.220× | 18.1 ms | 8.50 / 0.63 s |
+
+These are Chrome samples under varying MacBook load. A separate paired
+native-worker benchmark for Scout measured 15.9 ms per scalar step and
+12.1 ms per SIMD step, with the same chassis endpoint and tire height.
+The strict 1× check still fails for both projects.

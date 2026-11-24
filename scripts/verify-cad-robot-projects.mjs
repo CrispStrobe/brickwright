@@ -48,6 +48,8 @@ const browser=await browserType.launch({headless:true,executablePath:process.env
  ...(browserType===chromium&&process.env.PROOF_SOFTWARE_GPU==='1'?{args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']}:{}),
  ...(browserType===firefox?{firefoxUserPrefs:{'webgl.force-enabled':true}}:{})});
 const page=await browser.newPage({viewport:process.argv.includes('--ipad')?{width:1024,height:768}:{width:1440,height:1000},hasTouch:process.argv.includes('--ipad'),serviceWorkers:'block'}),errors=[],results=[];let cancelNext=false;
+if(process.env.PROOF_FORCE_SCALAR==='1')await page.route(/\/jolt-physics\.simd\.wasm-compat[^/]*\.js$/,route=>route.abort());
+
 if(process.env.PROOF_DIAGNOSTICS==='1'){
  page.on('console',message=>{if(['error','warning'].includes(message.type()))console.log('Browser',message.text().slice(0,400));});
  page.on('requestfailed',request=>console.log('Request failed',new URL(request.url()).pathname,request.failure()));
