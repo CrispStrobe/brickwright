@@ -118,7 +118,9 @@ exercise the supplied program and widget values. Set `PROOF_REPEAT=1` and
 
 `scripts/verify-costume-to-cad-workflow.mjs` exercises a precise Costumes
 rectangle, sends it to CAD, edits its outline constraints, drags a vertex,
-extrudes the saved profile, and checks the resulting binary STL. This flow
+extrudes the saved profile, and checks the resulting binary STL. Chrome
+downloaded the file. Playwright WebKit passed with `PROOF_EXPORT_MODE=share`,
+which checks the file sent to a simulated system share picker. This flow
 already uses the pinned `dart_csp` outline worker. Keep it for editable
 outlines. Compare the JavaScript and Wasm builds on larger coupled sketches,
 including residuals, cancellation, and pointer-to-display latency, before

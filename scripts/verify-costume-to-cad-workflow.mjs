@@ -4,14 +4,23 @@ import {readFile} from 'node:fs/promises';
 import {chromium, firefox, webkit} from 'playwright';
 
 const type = {chromium, firefox, webkit}[process.env.PROOF_BROWSER || 'chromium'];
+const expectShare = process.env.PROOF_EXPORT_MODE === 'share';
 const browser = await type.launch({executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
 try {
     const page = await browser.newPage({viewport: {width: 1520, height: 960}, locale: 'en-US', serviceWorkers: 'block'});
     page.setDefaultTimeout(90000);
-    await page.addInitScript(() => {
+    await page.addInitScript(share => {
         localStorage.setItem('bw-starter-v1-complete', '1');
         localStorage.setItem('bw-cad-enabled', '1');
-    });
+        if (share) {
+            // Headless browsers cannot inspect the system share picker.
+            Object.defineProperty(navigator, 'canShare', {value: data => data.files?.length === 1});
+            Object.defineProperty(navigator, 'share', {value: async ({files: [file]}) => {
+                const bytes = Array.from(new Uint8Array(await file.arrayBuffer()));
+                window.__proofSharedModel = {name: file.name, bytes};
+            }});
+        }
+    }, expectShare);
     await page.goto(process.argv[2] || 'http://127.0.0.1:8242/', {waitUntil: 'commit'});
     await page.getByRole('tab', {name: 'Costumes', exact: true}).click();
     const workspace = page.getByTestId('bw-paint-workspace');
@@ -100,15 +109,22 @@ try {
     await page.getByTestId('bw-file-menu-trigger').click();
     await page.getByText('Export CAD model…', {exact: true}).click();
     const exported = page.getByRole('dialog', {name: 'Export model', exact: true});
-    const download = page.waitForEvent('download');
+    const fileResult = expectShare
+        ? page.waitForFunction(() => window.__proofSharedModel).then(async handle => {
+            const {name, bytes} = await handle.jsonValue();
+            return {name, bytes: Buffer.from(bytes)};
+        })
+        : page.waitForEvent('download').then(async file => ({
+            name: file.suggestedFilename(),
+            bytes: await readFile(await file.path())
+        }));
     await exported.getByRole('button', {name: 'Export', exact: true}).click();
-    const file = await download;
-    assert.match(file.suggestedFilename(), /\.stl$/i);
-    const bytes = await readFile(await file.path());
+    const {name, bytes} = await fileResult;
+    assert.match(name, /\.stl$/i);
     const triangles = bytes.readUInt32LE(80);
     assert.ok(triangles > 0);
     assert.equal(bytes.length, 84 + triangles * 50);
-    console.log('PASS Costumes precision rectangle → editable dimensioned CAD outline → constrained drag → extrusion → binary STL');
+    console.log('PASS Costumes precision rectangle → editable dimensioned CAD outline → constrained drag → extrusion → binary STL', expectShare ? '(share payload)' : '(download)');
 } finally {
     await browser.close();
 }
