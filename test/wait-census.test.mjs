@@ -102,10 +102,30 @@ const censusJson = () => JSON.parse(execFileSync('node',
 // wait for the CONDITION it stands in for (waitForSelector / waitForFunction),
 // not to raise the number. If you genuinely added a gate, raise it here in the
 // same commit with the measurement, as the FPGA entry above does.
+//
+// RAISED 2026-11-24, `totalSleeps` 192 -> 198, for two browser gates ADDED
+// (the reason this ratchet accepts) and one sleep that waits for nothing to
+// happen. Main had been red on this since 2026-11-17; the 198 is the census
+// on CI run 45318622606, and the per-file delta from the last green tree
+// (6e8f065c6) to f91769963 is exactly these:
+//
+//   +2  verify-cad-fasteners.mjs (2f2a25f00): 20 ms between synthetic CDP
+//       touchMove steps, which IS the gesture's speed, and a 300 ms settle
+//   +5  verify-editor-trackpad.mjs (65463f90c): wheel/pinch/Stop settles
+//   +1  verify-native-benchmarks-browser.mjs (b48989314): 100 ms after Stop
+//       in which a stale completion must NOT arrive; there is no condition
+//       to wait for when the assertion is an absence over time
+//   -1  verify-editor.mjs (38046417d): replaced by a wait for search dismissal
+//   -1  _tmp-vdp-asm-probe.mjs (49c2bcc52): replaced by a readiness wait
+//
+// The CI-run ceilings below did not move (CI passed them). The two added
+// gates are manual/local (KNOWN_UNWIRED in test/gate-coverage.test.mjs);
+// whoever wires them should replace the trackpad settles with conditions
+// first, since that is when they would start costing CI time.
 const CEILING = {
     ciSleepMs: 120_180,     // 110 sleeps across the CI browser-gate scripts
     ciSleeps: 110,
-    totalSleeps: 192,       // 331,030 ms repository-wide
+    totalSleeps: 198,       // census of run 45318622606 (see the 2026-11-24 note)
     scratchFiles: 10        // _tmp- scripts that contain waits
 };
 

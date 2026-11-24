@@ -3,6 +3,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {execFile} from 'node:child_process';
+import {existsSync, readdirSync} from 'node:fs';
 import {mkdtemp, readFile, rm, symlink, writeFile} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import {tmpdir} from 'node:os';
@@ -77,6 +78,11 @@ const expectedEmitted = [
     'two-toggle-keys',
     'z80-pd-bench'
 ];
+const labProgramNames = () => {
+    const dir = join(root, 'overlay/scratch-gui/examples');
+    return readdirSync(dir).filter(name => name.startsWith('lab-') &&
+        existsSync(join(dir, name, 'program.bw'))).sort();
+};
 const namesOf = rows => rows.map(row => row.split(': ')[0]);
 const auditReach = (receipt, {compiled}) => {
     const s = receipt.summary;
@@ -107,7 +113,20 @@ const auditReach = (receipt, {compiled}) => {
     // arduino-02-tone-pitch-follower leaves retargetRefused for its adc+tone
     // choke and brings its literal wait back: waitLiteralPrograms +1.
     // Three new analog school sketches remain refused at MCU retarget; emitted sets stay fixed.
-    assert.equal(s.programs, 307);
+    // 307 -> 399 at the sb3-creator pin moves e248ce71 (8109d45ad, +50),
+    // 01e12806 (ca593fa3f, +5) and cafdfb1a (cc516deda, +38), less one at
+    // de3c53c8 (f906dba5c, lab-shortwave-regen dropped its program.bw): 92
+    // lab-* gallery programs, analog bench circuits with no hardware
+    // declarations. Every one is refused at retarget (retargetRefused
+    // 135 -> 227); no wait count, emit or compile moves.
+    assert.equal(s.programs, 399);
+    assert.equal(s.retargetRefused, 227);
+    const labPrograms = labProgramNames();
+    assert.equal(labPrograms.length, 92, 'the lab-* gallery program count moved');
+    const retargetRows = new Map(receipt.retarget.map(row => row.split(': ')));
+    for (const name of labPrograms) {
+        assert.equal(retargetRows.get(name), 'the source has no hardware declarations to retarget', name);
+    }
     for (const name of ["school-intercom-101455", "school-led-people-dog", "school-miniorgan-107056"]) assert.ok(namesOf(receipt.retarget).includes(name), name);
     // 122 -> 121 at sb3-creator fa96f5f5+ (task D5): 82-a2-led-row (a literal
     // `wait 150 ms`) names a LEDBANK8, which i8086 does not have; its LED line
@@ -195,7 +214,7 @@ const auditReach = (receipt, {compiled}) => {
     'every gallery program must land in exactly one outcome bucket');
 };
 
-test('the 307-program gallery records the wait/print gains and every emitted program compiles',
+test('the 399-program gallery records the wait/print gains and every emitted program compiles',
     {timeout: 300000}, async t => {
         const {stdout} = await execFileP(process.execPath, [
             '--import', guiScopeHook,
