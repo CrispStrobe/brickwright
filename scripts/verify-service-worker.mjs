@@ -122,6 +122,9 @@ const server = createServer((req, res) => {
     if (/^\/chunks\/poison\.[a-f0-9]+\.js$/.test(path)) {
         return send(200, 'text/javascript', 'window.__poison = "fresh";\n');
     }
+    if (/^\/previews\/[a-f0-9]{64}\.svg$/.test(path)) {
+        return send(200, 'image/svg+xml', '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="12"><rect width="24" height="12"/></svg>');
+    }
     if (path === '/examples/index.json') return send(200, 'application/json', '{"live":true}');
     send(404, 'text/plain', 'not found');
 });
@@ -328,6 +331,35 @@ const SCENARIOS = {
     }
 };
 
+SCENARIOS['library-previews-on-demand'] = async browser => {
+    const context = await freshContext(browser);
+    try {
+        const page = await openControlled(context);
+        if (state.log.some(path => path.startsWith('/previews/'))) throw new Error('Thumbnails downloaded before demand');
+        const first = `/previews/${'a'.repeat(64)}.svg`;
+        const second = `/previews/${'b'.repeat(64)}.svg`;
+        const decode = path => page.evaluate(async src => {
+            const image = new Image();
+            image.src = src;
+            await image.decode();
+            return image.naturalWidth;
+        }, path);
+        if (await decode(first) !== 24) throw new Error('First visible thumbnail was unavailable');
+        await page.waitForFunction(async path => (await (await caches.open('brickwright-library-previews-v1')).match(path))?.ok, first);
+        await page.reload();
+        if (await decode(first) !== 24 || state.log.filter(path => path === first).length !== 1) {
+            throw new Error('Reopening the thumbnail downloaded it again');
+        }
+        if (await decode(second) !== 24 || state.log.filter(path => path === second).length !== 1) {
+            throw new Error('Different content hash was not loaded separately');
+        }
+        await context.setOffline(true);
+        if (await decode(first) !== 24) throw new Error('The previously visited thumbnail was unavailable offline');
+    } finally {
+        await context.close();
+    }
+};
+
 // (e) is added below SCENARIOS' literal so (a)-(d) read in their original order.
 SCENARIOS['unhashed-chunk-after-deploy'] = async (browser) => {
     /** An unhashed lazy chunk (`chunks/[name].js`) keeps its URL across builds.
@@ -394,7 +426,7 @@ const MUTATIONS = [
         why: 'without the purge, renaming CACHE stops being a recovery: the poisoned ' +
             'caches simply accumulate beside the new one.',
         apply: (src) => src.replace(
-            'await Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)));',
+            'await Promise.all(keys.filter(k => k !== CACHE && k !== PREVIEW_CACHE && k !== RENDERED_PREVIEW_CACHE).map(k => caches.delete(k)));',
             'await Promise.all(keys.filter(() => false).map(k => caches.delete(k)));')
     },
     {
@@ -423,7 +455,7 @@ const shippedOnly = argv.includes('--shipped');
 
 async function run () {
     await new Promise((done) => server.listen(PORT, done));
-    const browser = await chromium.launch();
+    const browser = await chromium.launch({executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
     const failures = [];
     let ran = 0;
     try {

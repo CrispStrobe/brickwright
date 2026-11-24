@@ -6,8 +6,8 @@
 // its LDraw edge lines, from the front-right above (editor/palette.js
 // `thumbnailCamera` frames it). ONE offscreen WebGL renderer draws them all, a
 // part at a time, when the pane asks for it (an item scrolled into view or a
-// category opened); a picture is kept as a PNG data URL per part, so it is drawn
-// once per page however often the palette is re-rendered or Build is reopened.
+// category opened); a picture is kept per part, colour and size. Build also keeps
+// useful pictures across reloads of the same release.
 // Without WebGL `createPartThumbnails` returns null and the palette shows names.
 // The building instructions' "parts needed" callouts use the same pictures, each
 // in the colour the part has in the model (`render(part, color)`).
@@ -19,6 +19,7 @@ import {webglAvailable} from './sim-view3d.js';
 import {thumbnailCamera} from '../editor/palette.js';
 import {BANDS, BAND_RADIUS_LDU} from '../editor/belt-path.js';
 import {LDU_M} from '../contracts.js';
+import {readPartThumbnail, writePartThumbnail} from './part-thumbnail-cache.js';
 
 /** Marks the thumbnail renderer's canvas (and, for scripts/verify-boot-payload.mjs, this module's chunk). */
 export const THUMBNAIL_TESTID = 'bw-sim-part-thumbnails';
@@ -27,6 +28,10 @@ export const THUMBNAIL_PX = 128;
 
 /** Pictures already drawn, by part and colour: survive the renderer (a Build session) for the page's life. */
 const drawn = new Map();
+const remember = (key, image) => {
+    drawn.set(key, image);
+    if (drawn.size > 512) drawn.delete(drawn.keys().next().value);
+};
 
 /** Unstretched band thumbnail, drawn from the native diameter and section rather than external part geometry. */
 export const bandThumbnailGeometry = part => {
@@ -45,11 +50,12 @@ export const bandThumbnailGeometry = part => {
  * @param {Map} options.colors LDraw colours (parseLDConfig)
  * @param {number} options.color LDraw colour code the parts are drawn in unless a call names another
  * @param {number} [options.size] pixels per side
+ * @param {boolean} [options.persistent] store standard library thumbnails across reloads
  * @returns {{get: (part: string, color?: number) => string|null, has: (part: string, color?: number) => boolean,
- *            render: (part: string, color?: number) => string|null, dispose: () => void}|null}
+ *            render: (part: string, color?: number) => string|null, restore: (part: string, color?: number) => Promise<string|null>, dispose: () => void}|null}
  *          null when this browser has no WebGL 2
  */
-export const createPartThumbnails = ({read, colors, color, size = THUMBNAIL_PX}) => {
+export const createPartThumbnails = ({read, colors, color, size = THUMBNAIL_PX, persistent = false}) => {
     if (!webglAvailable()) return null;
     let renderer;
     try {
@@ -74,7 +80,15 @@ export const createPartThumbnails = ({read, colors, color, size = THUMBNAIL_PX})
         if (!lineSets.has(code)) lineSets.set(code, edgeMaterials(code, colors));
         return lineSets.get(code);
     };
-    const key = (part, code) => `${part}@${code}`;
+    const key = (part, code) => `${persistent ? 'library' : 'page'}:${size}:${part}@${code}`;
+    const storedKey = id => `${process.env.BW_VERSION}:${id}`;
+    const restore = async (part, code = color) => {
+        const id = key(part, code);
+        if (drawn.has(id)) return drawn.get(id);
+        const image = persistent ? await readPartThumbnail(storedKey(id)) : null;
+        if (image) remember(id, image);
+        return image;
+    };
 
     const render = (part, code = color) => {
         if (drawn.has(key(part, code))) return drawn.get(key(part, code));
@@ -105,9 +119,14 @@ export const createPartThumbnails = ({read, colors, color, size = THUMBNAIL_PX})
             scene.remove(mesh); // the geometry is part-geometry.js's cache: not disposed here
             if (ring) ring.dispose();
         } catch {
+            remember(key(part, code), null);
             url = null; // a part whose files are missing keeps its name only
         }
-        drawn.set(key(part, code), url);
+        if (url) {
+            const id = key(part, code);
+            remember(id, url);
+            if (persistent) writePartThumbnail(storedKey(id), url);
+        }
         return url;
     };
 
@@ -115,6 +134,7 @@ export const createPartThumbnails = ({read, colors, color, size = THUMBNAIL_PX})
         get: (part, code = color) => drawn.get(key(part, code)) ?? null,
         has: (part, code = color) => drawn.has(key(part, code)),
         render,
+        restore,
         dispose () {
             for (const m of faces) m.dispose();
             for (const lines of lineSets.values()) for (const m of [...lines.edges, ...lines.conditional]) m.dispose();

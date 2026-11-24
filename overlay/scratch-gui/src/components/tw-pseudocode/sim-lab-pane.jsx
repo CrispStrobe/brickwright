@@ -440,6 +440,7 @@ class SimLabPane extends React.Component {
         this.onOutsidePress = this.onOutsidePress.bind(this);
         /** Palette parts waiting for their picture (drawn a few per frame in `frame`). */
         this.thumbQueue = new Set();
+        this.thumbRestores = new Set();
         this.thumbs = null;
         this.last = null;
         /** The program clock (lib/bw-sim/sim-clock.js), made when the chunk is in; installed while running. */
@@ -914,6 +915,7 @@ class SimLabPane extends React.Component {
         if (this.thumbs) { try { this.thumbs.dispose(); } catch { /* a lost context may already be gone */ } }
         this.thumbs = null;
         this.thumbQueue.clear();
+        this.thumbRestores = new Set();
     }
 
     /** Build mode: the current model (or an empty one) in the editor. */
@@ -975,7 +977,9 @@ class SimLabPane extends React.Component {
             this.editView.setPlaceColor(this.state.placeColor ?? DEFAULT_COLOR);
             this.editView.setHidden(this.storedHidden());
             // Palette pictures: null without WebGL (the palette then shows names only).
-            this.thumbs = createPartThumbnails({read, colors, color: DEFAULT_COLOR});
+            this.thumbs = createPartThumbnails({
+                read: this.catalogFiles.read, colors, color: DEFAULT_COLOR, persistent: true
+            });
             this.editView.setOverlay({ports: this.state.showPorts, motion: this.state.showMotion});
             this.unsubscribeInsight = this.editor.subscribe(() => {
                 this.scheduleInsight();
@@ -2624,12 +2628,16 @@ class SimLabPane extends React.Component {
      */
     cataloguePreview (part) {
         const run = async () => {
-            if (!this.thumbs || !this.catalogFiles) return null;
+            const thumbs = this.thumbs;
+            if (!thumbs || !this.catalogFiles) return null;
+            const cached = await thumbs.restore(part);
+            if (this.thumbs !== thumbs || this.disposed) return null;
+            if (cached) return cached;
             await this.lib.ldrawCatalogue();
             const closure = await this.lib.fetchLDrawClosure([part]);
-            if (!closure.files.has(`parts/${part.toLowerCase()}`) || this.disposed || !this.thumbs) return null;
+            if (!closure.files.has(`parts/${part.toLowerCase()}`) || this.disposed || this.thumbs !== thumbs) return null;
             for (const [path, text] of closure.files) this.catalogFiles.files.set(path, text);
-            return this.thumbs.render(part) || null;
+            return thumbs.render(part) || null;
         };
         const queue = this.previewQueue || (this.previewQueue = {active: 0, waiting: []});
         return new Promise((resolve, reject) => {
@@ -2658,7 +2666,15 @@ class SimLabPane extends React.Component {
 
     /** A palette tile came into view: its picture is drawn in a coming frame. */
     requestThumb (part) {
-        if (this.thumbs && !this.thumbs.has(part)) this.thumbQueue.add(part);
+        const thumbs = this.thumbs;
+        const pending = this.thumbRestores;
+        if (!thumbs || thumbs.has(part) || pending.has(part) || this.thumbQueue.has(part)) return;
+        pending.add(part);
+        void thumbs.restore(part).then(image => {
+            if (this.disposed || this.thumbs !== thumbs) return;
+            if (image) this.setState(s => ({thumbTick: s.thumbTick + 1}));
+            else this.thumbQueue.add(part);
+        }).finally(() => pending.delete(part));
     }
 
     /** Draws waiting palette pictures for at most a few milliseconds per frame, so opening Build stays smooth. */

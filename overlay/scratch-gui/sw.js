@@ -52,6 +52,25 @@
 // something it should not — which is why the activate purge exists and why
 // `scripts/verify-service-worker.mjs` asserts it.
 const CACHE = 'brickwright-v5';
+const PREVIEW_CACHE = 'brickwright-library-previews-v1';
+const RENDERED_PREVIEW_CACHE = 'brickwright-rendered-thumbnails-v1';
+const PREVIEW_LIMIT = 512;
+const PREVIEW_MAX_BYTES = 256 * 1024;
+const PREVIEW_IMAGE = /\.(png|webp|avif|gif|jpe?g|svg)$/i;
+const VERSIONED_PREVIEW = /(?:\.|\/)[a-f0-9]{8,64}\.(png|webp|avif|gif|jpe?g|svg)$/i;
+let previewWrites = Promise.resolve();
+
+const rememberPreview = (cache, request, response) => {
+    previewWrites = previewWrites.catch(() => {}).then(async () => {
+        if (!response.ok || response.status !== 200 || !response.headers.get('content-type')?.startsWith('image/')) return;
+        const length = Number(response.headers.get('content-length'));
+        if (length > PREVIEW_MAX_BYTES || (!length && (await response.clone().blob()).size > PREVIEW_MAX_BYTES)) return;
+        await cache.put(request, response);
+        const keys = await cache.keys();
+        for (const old of keys.slice(0, Math.max(0, keys.length - PREVIEW_LIMIT))) await cache.delete(old);
+    });
+    return previewWrites.catch(() => {});
+};
 
 /** `gui.aeeed7e4.js`, `chunks/sb3-creator.8972d337850ada585ee3.js`, `static/…` */
 const HASHED = /\.[a-f0-9]{8,32}\.(js|css)$/;
@@ -99,7 +118,7 @@ self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', event => {
     event.waitUntil((async () => {
         const keys = await caches.keys();
-        await Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)));
+        await Promise.all(keys.filter(k => k !== CACHE && k !== PREVIEW_CACHE && k !== RENDERED_PREVIEW_CACHE).map(k => caches.delete(k)));
         await self.clients.claim();
     })());
 });
@@ -112,6 +131,27 @@ self.addEventListener('fetch', event => {
 
     const isDocument = req.mode === 'navigate' || req.destination === 'document' ||
         url.pathname.endsWith('/') || url.pathname.endsWith('/index.html');
+
+    // Gallery images are requested by visible cards. Content-addressed URLs
+    // can be reused directly, while mutable example art refreshes in the background.
+    const versionedPreview = VERSIONED_PREVIEW.test(url.pathname);
+    if (req.destination === 'image' && PREVIEW_IMAGE.test(url.pathname) &&
+        (versionedPreview || /\/(examples|previews|thumbnails)\//.test(url.pathname))) {
+        const cache = caches.open(PREVIEW_CACHE).catch(() => null);
+        const cached = cache.then(store => store?.match(req)).catch(() => null);
+        const network = cached.then(async hit => {
+            if (hit?.ok && versionedPreview) return {response: hit, store: null};
+            try {
+                return {response: await fetch(req), store: await cache};
+            } catch {
+                return {response: null, store: null};
+            }
+        });
+        event.waitUntil(network.then(({response, store}) => store && response ?
+            rememberPreview(store, req, response.clone()) : undefined));
+        event.respondWith(cached.then(async hit => hit?.ok ? hit : (await network).response || Response.error()));
+        return;
+    }
 
     // Example data is unhashed and edited often; a stale-first policy here
     // means a user keeps seeing last week's gallery until a background
