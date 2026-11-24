@@ -1,4 +1,4 @@
-import { v as Ae, s as Me, n as ge, c as ba, i as Ma, a as Pa, b as Ta, g as Ca, d as Aa, e as ca, t, p as Ba, f as Fa, h as Ea, j as Da, k as Ra, l as La, m as Ia } from "./sdk-DJGZkio-.js";
+import { v as Ae, s as Me, n as ge, c as ba, i as Ma, a as Pa, b as Ta, g as Ca, d as Aa, e as ca, t, p as Ba, f as Fa, h as Ea, j as Da, k as Ra, l as La, m as Ia } from "./sdk-8opInUYJ.js";
 async function ja(w, i) {
   if (!w.body)
     throw new Error("Model library response has no readable body.");
@@ -152,21 +152,21 @@ async function ia(w, i) {
   d.checks.parseable = "pass", d.triangles = y.length / 9, d.checks.withinTriangleLimits = d.triangles <= h ? "pass" : "fail";
   const p = [], l = /* @__PURE__ */ new Map(), B = [], R = [1 / 0, 1 / 0, 1 / 0], L = [-1 / 0, -1 / 0, -1 / 0];
   for (let c = 0; c < y.length; c += 3) {
-    const [o, I, E] = y.slice(c, c + 3), C = [0, 1, 2].map((S) => s[S] * o + s[S + 4] * I + s[S + 8] * E + s[S + 12]);
+    const [o, I, F] = y.slice(c, c + 3), C = [0, 1, 2].map((S) => s[S] * o + s[S + 4] * I + s[S + 8] * F + s[S + 12]);
     if (!C.every(Number.isFinite))
       return d.checks.withinSizeLimits = "fail", d.diagnostics.push("Conversion exceeds finite coordinate range."), d;
     for (let S = 0; S < 3; S++)
       R[S] = Math.min(R[S], C[S]), L[S] = Math.max(L[S], C[S]);
-    const x = C.join(",");
-    let P = l.get(x);
-    P === void 0 && (P = p.length, l.set(x, P), p.push(C)), c % 9 === 0 && B.push([]), B[B.length - 1].push(P);
+    const j = C.join(",");
+    let P = l.get(j);
+    P === void 0 && (P = p.length, l.set(j, P), p.push(C)), c % 9 === 0 && B.push([]), B[B.length - 1].push(P);
   }
   d.boundsMm = { min: R, max: L }, d.checks.withinSizeLimits = L.every((c, o) => c - R[o] <= k) ? "pass" : "fail";
   const N = /* @__PURE__ */ new Map(), H = p.map(() => /* @__PURE__ */ new Map());
   let $ = !0, _ = 0;
   for (const c of B) {
-    const [o, I, E] = c.map((P) => p[P].map((S, ee) => S - R[ee])), C = I.map((P, S) => P - o[S]), x = E.map((P, S) => P - o[S]);
-    Math.hypot(C[1] * x[2] - C[2] * x[1], C[2] * x[0] - C[0] * x[2], C[0] * x[1] - C[1] * x[0]) === 0 && ($ = !1), _ += (o[0] * (I[1] * E[2] - I[2] * E[1]) + o[1] * (I[2] * E[0] - I[0] * E[2]) + o[2] * (I[0] * E[1] - I[1] * E[0])) / 6;
+    const [o, I, F] = c.map((P) => p[P].map((S, ee) => S - R[ee])), C = I.map((P, S) => P - o[S]), j = F.map((P, S) => P - o[S]);
+    Math.hypot(C[1] * j[2] - C[2] * j[1], C[2] * j[0] - C[0] * j[2], C[0] * j[1] - C[1] * j[0]) === 0 && ($ = !1), _ += (o[0] * (I[1] * F[2] - I[2] * F[1]) + o[1] * (I[2] * F[0] - I[0] * F[2]) + o[2] * (I[0] * F[1] - I[1] * F[0])) / 6;
     for (let P = 0; P < 3; P++) {
       const S = c[P], ee = c[(P + 1) % 3], G = c[(P + 2) % 3], q = S < ee ? `${S},${ee}` : `${ee},${S}`, Q = N.get(q) ?? { count: 0, direction: 0 };
       Q.count++, Q.direction += S < ee ? 1 : -1, N.set(q, Q);
@@ -178,14 +178,14 @@ async function ia(w, i) {
   }
   [...N.values()].some((c) => c.count !== 2 || c.direction !== 0) && ($ = !1);
   for (const c of H) {
-    if ([...c.values()].some((E) => E.length !== 2)) {
+    if ([...c.values()].some((F) => F.length !== 2)) {
       $ = !1;
       break;
     }
     const o = /* @__PURE__ */ new Set(), I = [c.keys().next().value];
     for (; I.length; ) {
-      const E = I.pop();
-      o.has(E) || (o.add(E), I.push(...c.get(E)));
+      const F = I.pop();
+      o.has(F) || (o.add(F), I.push(...c.get(F)));
     }
     if (o.size !== c.size) {
       $ = !1;
@@ -239,24 +239,24 @@ async function Xe(w, i, s, u, h) {
   if (!Object.values(o.checks).every((G) => G === "pass"))
     throw new Error(`Selected STL failed fresh quality screening. ${o.diagnostics.join(" ")}`);
   k?.throwIfAborted();
-  const I = ra(c), E = [];
+  const I = ra(c), F = [];
   for (let G = 0; G < I.length; G += 3) {
     const [q, Q, X] = I.slice(G, G + 3);
     for (let ae = 0; ae < 3; ae++)
-      E.push(R[ae] * q + R[ae + 4] * Q + R[ae + 8] * X + R[ae + 12]);
+      F.push(R[ae] * q + R[ae + 4] * Q + R[ae + 8] * X + R[ae + 12]);
   }
-  const C = ge(), x = ge(), P = { format: "brickwright-cad", id: ge(), version: 5, title: d.title, units: "mm", roots: [C], nodes: {
+  const C = ge(), j = ge(), P = { format: "brickwright-cad", id: ge(), version: 5, title: d.title, units: "mm", roots: [C], nodes: {
     [C]: {
       id: C,
       kind: "mesh",
       name: d.title,
       color: "#eea52b",
       transform: ca(),
-      positions: E,
-      indices: Array.from({ length: E.length / 3 }, (G, q) => q),
-      provenance: [x]
+      positions: F,
+      indices: Array.from({ length: F.length / 3 }, (G, q) => q),
+      provenance: [j]
     }
-  }, provenance: { version: 1, records: [{ id: x, asset: d, selectedFile: p, modificationNotes: N }] } }, S = ba(g.document);
+  }, provenance: { version: 1, records: [{ id: j, asset: d, selectedFile: p, modificationNotes: N }] } }, S = ba(g.document);
   try {
     S.insert(P, [0, 0, 0], { label: "Insert library model" });
     const q = (await H(S.state.document)).bodies.find((Q) => Q.id === S.state.selection[0]);
@@ -303,16 +303,16 @@ async function ua(w, i, s, u, h) {
   if (o.length > 4096)
     throw new Error("Incorporation modification notes exceed the provenance limit after recording source conversion.");
   Aa(_);
-  const I = ge(), E = ge(), C = { format: "brickwright-cad", id: ge(), version: 5, title: p.title, units: "mm", roots: [I], nodes: {
-    [I]: { id: I, kind: "code", program: _, name: p.title, color: "#76b7ce", transform: ca(), provenance: [E] }
-  }, provenance: { version: 1, records: [{ id: E, asset: p, selectedFile: l, modificationNotes: o }] } }, x = ba(k.document);
+  const I = ge(), F = ge(), C = { format: "brickwright-cad", id: ge(), version: 5, title: p.title, units: "mm", roots: [I], nodes: {
+    [I]: { id: I, kind: "code", program: _, name: p.title, color: "#76b7ce", transform: ca(), provenance: [F] }
+  }, provenance: { version: 1, records: [{ id: F, asset: p, selectedFile: l, modificationNotes: o }] } }, j = ba(k.document);
   try {
-    x.insert(C, [0, 0, 0], { label: "Insert library source" }), g?.throwIfAborted();
-    const S = (await m(x.state.document)).bodies.find((ee) => ee.id === x.state.selection[0]);
+    j.insert(C, [0, 0, 0], { label: "Insert library source" }), g?.throwIfAborted();
+    const S = (await m(j.state.document)).bodies.find((ee) => ee.id === j.state.selection[0]);
     if (!S || !Number.isFinite(S.volume) || S.volume <= 0 || !S.indices.length || !S.positions.every(Number.isFinite))
       throw new Error("Selected source did not produce a finite positive-volume kernel body.");
   } finally {
-    x.dispose();
+    j.dispose();
   }
   if (g?.throwIfAborted(), w.state.document !== k.document || w.state.revision !== k.revision)
     throw new Error("Project changed during model library insertion; retry against the current revision.");
@@ -490,7 +490,7 @@ function Ga(w, i, s, u, h, k, g) {
   }));
   let L, N = !u?.load;
   const H = new Map([...u?.localFiles ?? []].map(([e, a]) => [e, a.slice()])), $ = (e) => H.has(e) || u?.bundledFiles?.has(e) === !0, _ = (e) => H.get(e) ?? u?.bundledFiles?.get(e);
-  let c = !1, o = !1, I, E, C, x;
+  let c = !1, o = !1, I, F, C, j;
   const P = n("dialog");
   P.className = "model-library-dialog", P.setAttribute("aria-label", t("Model library"));
   const S = n("header"), ee = n("h2", t("Model library")), G = n("button", "×");
@@ -555,7 +555,7 @@ function Ga(w, i, s, u, h, k, g) {
     if (!a.length)
       return !0;
     let b = qe.get(e);
-    return b === void 0 && (b = da(f(e)), qe.set(e, b)), a.every((F) => b.includes(F));
+    return b === void 0 && (b = da(f(e)), qe.set(e, b)), a.every((E) => b.includes(E));
   }
   const ha = (e) => `${e.title} ${e.author} ${e.licence.spdx}`, pa = (e) => `${e.name} Adafruit ${e.files.map((a) => a.path).join(" ")}`, la = (e) => `${e.title} ${e.note ?? ""}`;
   function ma(e) {
@@ -570,7 +570,7 @@ function Ga(w, i, s, u, h, k, g) {
     const e = X.value, a = da(Q.value).trim().split(/\s+/).filter(Boolean), f = a.join(" "), b = Ee?.catalogue === m && Ee.mode === e ? Ee : void 0;
     if (b?.query === f)
       return b.models;
-    const D = b?.terms.every((v) => a.some((j) => j.includes(v))) && b ? b.models : ma(e), T = a.length ? {
+    const D = b?.terms.every((v) => a.some((x) => x.includes(v))) && b ? b.models : ma(e), T = a.length ? {
       assets: D.assets.filter((v) => Oe(v, a, ha)),
       folders: D.folders.filter((v) => Oe(v, a, pa)),
       projects: D.projects.filter((v) => Oe(v, a, la))
@@ -578,7 +578,7 @@ function Ga(w, i, s, u, h, k, g) {
     return Ee = { catalogue: m, mode: e, query: f, terms: a, models: T }, T;
   }
   function se() {
-    const e = x ?? I ?? E, a = e ? ue.get(e) : void 0;
+    const e = j ?? I ?? F, a = e ? ue.get(e) : void 0;
     if (Ne !== a && (Ne?.setAttribute("aria-pressed", "false"), a?.setAttribute("aria-pressed", "true"), Ne = a), Ke !== o) {
       for (const f of ue.values())
         f.disabled = o;
@@ -615,32 +615,32 @@ function Ga(w, i, s, u, h, k, g) {
   function we() {
     const e = $e === m && He === u?.previews;
     e || he.clear();
-    const a = fe.scrollTop, { assets: f, folders: b, projects: F } = ya(), D = F.length + f.length + b.length;
+    const a = fe.scrollTop, { assets: f, folders: b, projects: E } = ya(), D = E.length + f.length + b.length;
     Pe = Math.max(1, Math.ceil(D / Ie)), ce = Math.min(ce, Pe - 1);
-    const T = ce * Ie, v = T + Ie, j = (r, M) => r.slice(Math.max(0, T - M), Math.max(0, v - M));
+    const T = ce * Ie, v = T + Ie, x = (r, M) => r.slice(Math.max(0, T - M), Math.max(0, v - M));
     fe.dataset.modelCount = String(D), ke.hidden = D === 0, pe.hidden = le.hidden = Pe === 1, D && (xe.textContent = t`${T + 1}–${Math.min(D, v)} of ${D} models`);
     const V = /* @__PURE__ */ new Map();
-    for (const r of j(F, 0)) {
+    for (const r of x(E, 0)) {
       let M = Ve(r);
       M || (M = Ue(() => {
-        x = r, I = void 0, E = void 0;
+        j = r, I = void 0, F = void 0;
       }), M.append(na(r), n("strong", r.title), n("small", t("Robot project · Includes code")))), V.set(r, M);
     }
-    for (const r of j(f, F.length)) {
+    for (const r of x(f, E.length)) {
       let M = He === u?.previews ? Ve(r) : void 0;
       if (!M) {
         M = Ue(() => {
-          x = void 0, I = r, E = void 0;
+          j = void 0, I = r, F = void 0;
         }), M.setAttribute("aria-label", `${r.title} · ${r.licence.spdx}`);
         const z = n("span");
         z.className = "model-card-meta", z.append(ze(r), n("small", ve(r) ? t("Editable source") : t("Mesh"))), M.append(Je(r), n("strong", r.title), z);
       }
       V.set(r, M);
     }
-    for (const r of j(b, F.length + f.length)) {
+    for (const r of x(b, E.length + f.length)) {
       let M = Ve(r);
       M || (M = Ue(() => {
-        x = void 0, I = void 0, E = r;
+        j = void 0, I = void 0, F = r;
       }), M.dataset.archiveFolder = r.name, M.append(Ze(r), n("strong", r.name), n("small", t("Adafruit · Original files")))), V.set(r, M);
     }
     for (const [r, M] of ue)
@@ -661,8 +661,8 @@ function Ga(w, i, s, u, h, k, g) {
     b.readOnly = !0, b.setAttribute("aria-label", t("Licence & attribution")), b.value = `${e.licence.attribution}
 
 ${u?.licenceTexts?.get(e.id) ?? u?.licenceTexts?.get(e.licence.spdx) ?? ""}`.trim(), f.append(b);
-    const F = n("nav");
-    F.append(Be(t("Original source"), e.sourceUrl), Be(t("Licence evidence"), e.licence.evidenceUrl)), f.append(F), J.append(f);
+    const E = n("nav");
+    E.append(Be(t("Original source"), e.sourceUrl), Be(t("Licence evidence"), e.licence.evidenceUrl)), f.append(E), J.append(f);
     const D = n("details");
     D.className = "model-library-technical", D.append(n("summary", t("Technical details")), a), J.append(D);
   }
@@ -718,12 +718,12 @@ ${u?.licenceTexts?.get(e.id) ?? u?.licenceTexts?.get(e.licence.spdx) ?? ""}`.tri
     }, J.append(a, n("h3", e.title), n("p", t("Opens a complete project with its 3D model, program, circuit, and Widgets."))), e.note && J.append(n("p", e.note)), J.append(f);
   }
   function Ce() {
-    if (ta(J), J.replaceChildren(), x) {
-      wa(x);
+    if (ta(J), J.replaceChildren(), j) {
+      wa(j);
       return;
     }
-    if (E) {
-      Sa(y, E);
+    if (F) {
+      Sa(y, F);
       return;
     }
     const e = I;
@@ -737,9 +737,9 @@ ${u?.licenceTexts?.get(e.id) ?? u?.licenceTexts?.get(e.licence.spdx) ?? ""}`.tri
     f.className = "model-library-meta", f.append(n("h3", e.title), ze(e)), J.append(a, f, n("small", e.author));
     const b = n("div");
     b.append(n("p", e.modificationNotes), n("p", e.conversion.unitAssumption));
-    const F = ve(e);
-    if (F) {
-      ga(e, F, b), _e(e, b);
+    const E = ve(e);
+    if (E) {
+      ga(e, E, b), _e(e, b);
       return;
     }
     const D = [{ file: e.original, selection: { assetId: e.id, file: "original" } }, ...e.derivatives.map((O, Z) => ({ file: O, selection: { assetId: e.id, file: { derivative: Z } } }))].filter((O) => O.file.format === "stl"), T = n("select");
@@ -747,7 +747,7 @@ ${u?.licenceTexts?.get(e.id) ?? u?.licenceTexts?.get(e.licence.spdx) ?? ""}`.tri
       const A = n("option", `STL · ${O.bytes.toLocaleString()} B`);
       A.value = String(Z), T.append(A);
     }), D.length > 1 ? J.append(T) : b.append(T);
-    const { label: v, notes: j } = ea(), V = n("label", t("Use cached files only")), r = n("input");
+    const { label: v, notes: x } = ea(), V = n("label", t("Use cached files only")), r = n("input");
     r.type = "checkbox", V.prepend(r), b.append(V);
     const M = n("pre"), z = n("div"), te = n("section");
     te.setAttribute("aria-label", t("Recorded collision evidence")), b.append(M, z, te);
@@ -770,8 +770,8 @@ ${O.file.url ?? O.file.path}` : "", z.replaceChildren(), O && Z?.fileSha256 === 
     }, be.onclick = async () => {
       if (be.disabled)
         return;
-      const O = D[Number(T.value)], Z = i.state, A = j.value.trim() || "Inserted without manual changes; recorded millimetres/Z-up conversion applied.", W = r.checked;
-      o = !0, C = new AbortController(), Y.disabled = Q.disabled = X.disabled = T.disabled = j.disabled = r.disabled = !0, de(), se(), U.textContent = t("Verifying selected model…");
+      const O = D[Number(T.value)], Z = i.state, A = x.value.trim() || "Inserted without manual changes; recorded millimetres/Z-up conversion applied.", W = r.checked;
+      o = !0, C = new AbortController(), Y.disabled = Q.disabled = X.disabled = T.disabled = x.disabled = r.disabled = !0, de(), se(), U.textContent = t("Verifying selected model…");
       try {
         const K = O.file.path ? _(O.file.path) : void 0, re = K ? { bytes: K.slice(), cached: !0 } : await va(m, O.selection, { cache: u?.cache ?? Wa, fetch: u?.fetch, offline: W, signal: C.signal, maxBytes: ie });
         if (c)
@@ -792,7 +792,7 @@ ${O.file.url ?? O.file.path}` : "", z.replaceChildren(), O && Z?.fileSha256 === 
       } catch (K) {
         c || me(K);
       } finally {
-        o = !1, C = void 0, Y.disabled = Q.disabled = X.disabled = T.disabled = j.disabled = r.disabled = !1, de(), se();
+        o = !1, C = void 0, Y.disabled = Q.disabled = X.disabled = T.disabled = x.disabled = r.disabled = !1, de(), se();
       }
     }, J.append(v, be, oe), _e(e, b), Qe(te, e, D[Number(T.value)]?.file), de();
   }
@@ -809,10 +809,10 @@ ${O.file.url ?? O.file.path}` : "", z.replaceChildren(), O && Z?.fileSha256 === 
       const K = n("option", `${A.path.split("/").pop()} · ${A.bytes.toLocaleString()} B`);
       K.value = String(W), b.append(K);
     });
-    const F = a.files.findIndex((A) => A.format === "stl");
-    F >= 0 && (b.value = String(F));
-    const D = Be(t("Upstream original"), `https://github.com/adafruit/Adafruit_CAD_Parts/blob/${e.upstreamCommit}/`), T = n("pre"), v = n("label", t("Use cached files only")), j = n("input");
-    j.type = "checkbox", v.prepend(j);
+    const E = a.files.findIndex((A) => A.format === "stl");
+    E >= 0 && (b.value = String(E));
+    const D = Be(t("Upstream original"), `https://github.com/adafruit/Adafruit_CAD_Parts/blob/${e.upstreamCommit}/`), T = n("pre"), v = n("label", t("Use cached files only")), x = n("input");
+    x.type = "checkbox", v.prepend(x);
     const V = n("label", t("STL source units")), r = n("select");
     r.setAttribute("aria-label", t("STL source units"));
     for (const [A, W] of [["", t("Choose units")], ["mm", t("Millimetres")], ["in", t("Inches")]]) {
@@ -847,9 +847,9 @@ Mirror commit: ${e.commit}`, D.href = `https://github.com/adafruit/Adafruit_CAD_
       r.value = z.value = "", de();
     }, r.onchange = z.onchange = de, oe.onclick = async () => {
       const A = a.files[Number(b.value)];
-      o = !0, C = new AbortController(), b.disabled = j.disabled = !0, de(), se(), U.textContent = t("Verifying original file…");
+      o = !0, C = new AbortController(), b.disabled = x.disabled = !0, de(), se(), U.textContent = t("Verifying original file…");
       try {
-        const W = await sa(e, A, p, u?.fetch, j.checked, C.signal);
+        const W = await sa(e, A, p, u?.fetch, x.checked, C.signal);
         if (c)
           return;
         const K = A.path.split("/").pop() ?? "original";
@@ -863,13 +863,13 @@ Mirror commit: ${e.commit}`, D.href = `https://github.com/adafruit/Adafruit_CAD_
       } catch (W) {
         c || me(W);
       } finally {
-        o = !1, C = void 0, b.disabled = j.disabled = !1, de(), se();
+        o = !1, C = void 0, b.disabled = x.disabled = !1, de(), se();
       }
     }, te.onclick = async () => {
       const A = a.files[Number(b.value)], W = i.state, K = r.value, re = z.value;
-      o = !0, C = new AbortController(), b.disabled = j.disabled = r.disabled = z.disabled = !0, de(), se(), U.textContent = t("Verifying and screening STL…");
+      o = !0, C = new AbortController(), b.disabled = x.disabled = r.disabled = z.disabled = !0, de(), se(), U.textContent = t("Verifying and screening STL…");
       try {
-        const ne = await sa(e, A, p, u?.fetch, j.checked, C.signal), Se = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10), Le = await Ua(e, a, A, ne, K, re, Se);
+        const ne = await sa(e, A, p, u?.fetch, x.checked, C.signal), Se = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10), Le = await Ua(e, a, A, ne, K, re, Se);
         if (c)
           throw new Error(t("Editor was disposed"));
         if (i.state.document !== W.document || i.state.revision !== W.revision)
@@ -883,28 +883,28 @@ Mirror commit: ${e.commit}`, D.href = `https://github.com/adafruit/Adafruit_CAD_
       } catch (ne) {
         c || me(ne);
       } finally {
-        o = !1, C = void 0, b.disabled = j.disabled = r.disabled = z.disabled = !1, de(), se();
+        o = !1, C = void 0, b.disabled = x.disabled = r.disabled = z.disabled = !1, de(), se();
       }
     };
     const O = n("details"), Z = n("summary", t("Original source files"));
     O.append(Z, D, oe, T), J.append(b, v, V, M, te, be, O), de();
   }
   function ga(e, a, f) {
-    const b = a.path, F = !!b && $(b), D = n("section");
+    const b = a.path, E = !!b && $(b), D = n("section");
     D.setAttribute("aria-label", t("Recorded collision evidence")), Qe(D, e, a), f.append(D, n("p", `${a.format} · ${a.bytes} B · ${a.path}`), n("pre", a.sha256)), a.format === "openscad" && f.append(n("p", t("OpenSCAD source is converted to editable CAD Script using the supported subset. The original artifact hash is retained."))), a.format === "jscad" && f.append(n("p", t("JSCAD is converted with default parameters to an editable CAD Script snapshot. Original JavaScript parameters and face colours are not retained; unsupported features are refused.")));
-    const T = e.sourceBundle?.dependencies.every((M) => $(M.file.path)) ?? !0, { label: v, notes: j } = ea(), V = n("button", t("Insert editable source"));
+    const T = e.sourceBundle?.dependencies.every((M) => $(M.file.path)) ?? !0, { label: v, notes: x } = ea(), V = n("button", t("Insert editable source"));
     V.type = "button", V.className = "primary library-insert";
     const r = () => {
-      V.disabled = o || !F || !T;
+      V.disabled = o || !E || !T;
     };
-    (!F || !T) && J.append(n("p", t("Editable source is not bundled in this host."))), V.onclick = async () => {
+    (!E || !T) && J.append(n("p", t("Editable source is not bundled in this host."))), V.onclick = async () => {
       if (!(V.disabled || !b)) {
-        o = !0, C = new AbortController(), Y.disabled = Q.disabled = X.disabled = j.disabled = !0, r(), se(), U.textContent = t("Verifying selected model…");
+        o = !0, C = new AbortController(), Y.disabled = Q.disabled = X.disabled = x.disabled = !0, r(), se(), U.textContent = t("Verifying selected model…");
         try {
           const M = _(b);
           if (!M)
             throw new Error(t("Editable source is not bundled in this host."));
-          await ua(i, m, { assetId: e.id, file: a === e.original ? "original" : "editableSource" }, M, { signal: C.signal, sourceFiles: { get: _ }, modificationNotes: j.value.trim() || "Inserted with default parameters; no manual changes.", evaluate: async (z) => {
+          await ua(i, m, { assetId: e.id, file: a === e.original ? "original" : "editableSource" }, M, { signal: C.signal, sourceFiles: { get: _ }, modificationNotes: x.value.trim() || "Inserted with default parameters; no manual changes.", evaluate: async (z) => {
             const te = await s(z);
             if (c)
               throw new Error(t("Editor was disposed"));
@@ -918,25 +918,25 @@ Mirror commit: ${e.commit}`, D.href = `https://github.com/adafruit/Adafruit_CAD_
         } catch (M) {
           c || me(M);
         } finally {
-          o = !1, C = void 0, Y.disabled = Q.disabled = X.disabled = j.disabled = !1, r(), se();
+          o = !1, C = void 0, Y.disabled = Q.disabled = X.disabled = x.disabled = !1, r(), se();
         }
       }
     }, J.append(v, V), r();
   }
   function Qe(e, a, f) {
     e.replaceChildren(), e.append(n("h4", t("Recorded collision evidence")));
-    const b = a.quality, F = b?.collisionReport;
-    if (e.append(n("p", t("Browsing and insertion do not run collision qualification."))), (F || b?.physics) && e.append(n("p", t("Serialized curator evidence only. Recorded metadata is not a reusable runtime collision proof or a certification of collision safety, printability or mechanical accuracy."))), !(F && f && F.selectedFile.sha256 === f.sha256 && F.selectedFile.bytes === f.bytes && F.selectedFile.format === f.format && F.selectedFile.url === f.url && F.selectedFile.path === f.path)) {
-      if (e.append(n("p", F ? t("A complete report is recorded for a different STL selection; it does not apply to this file.") : b?.physics ? t("Only a legacy physics summary is recorded. No complete collision report is available for this selection.") : t("No complete collision report is recorded for this selection."))), !F && b?.physics) {
+    const b = a.quality, E = b?.collisionReport;
+    if (e.append(n("p", t("Browsing and insertion do not run collision qualification."))), (E || b?.physics) && e.append(n("p", t("Serialized curator evidence only. Recorded metadata is not a reusable runtime collision proof or a certification of collision safety, printability or mechanical accuracy."))), !(E && f && E.selectedFile.sha256 === f.sha256 && E.selectedFile.bytes === f.bytes && E.selectedFile.format === f.format && E.selectedFile.url === f.url && E.selectedFile.path === f.path)) {
+      if (e.append(n("p", E ? t("A complete report is recorded for a different STL selection; it does not apply to this file.") : b?.physics ? t("Only a legacy physics summary is recorded. No complete collision report is available for this selection.") : t("No complete collision report is recorded for this selection."))), !E && b?.physics) {
         const r = b.physics;
         e.append(n("p", t`Legacy summary: ${r.engine} ${r.engineVersion}; ${r.qualifierVersion}; reported qualified: ${String(r.qualified)}.`));
       }
       return;
     }
-    const T = F.evidence, v = T.certificate, j = F.quality;
+    const T = E.evidence, v = T.certificate, x = E.quality;
     e.append(n("p", t("Runtime collisions require fresh immutable proofs. Changed bytes, conversion, geometry or toolchain require requalification.")));
     const V = n("details");
-    V.className = "model-library-collision-report", V.append(n("summary", t("Inspect complete recorded collision report"))), V.append(n("p", t`Report version ${F.version}; checked ${T.checkedOn}; scope: ${T.scope}.`), n("p", t`Engine: ${T.engine} ${T.engineVersion}; qualifier: ${T.qualifierVersion}; mesh checker: ${j.toolVersion}.`), n("p", t`Native check: ${T.nativeCheck.build} build; ${T.nativeCheck.steps} rigid step of ${T.nativeCheck.stepSeconds} s; no ground.`), n("p", t("No ground settling, cavity clearance, contacts, mechanisms, elasticity, printability or manufacturing accuracy were tested. Native capacity/error telemetry is unavailable.")), n("p", t`STL SHA-256: ${T.fileSha256}`), n("p", t`Converted geometry SHA-256: ${T.geometrySha256}`), n("p", t`Evaluated source volume: ${T.sourceVolumeMm3} mm³; hulls: ${T.hulls} / ${v.maxHulls}; algorithm: ${v.algorithm}; strategy: ${v.strategy}.`), n("p", t`Missing volume: ${v.missingVolumeMm3} mm³; extra volume: ${v.extraVolumeMm3} mm³; relative error: ${v.relativeError}; allowed volume fraction: ${v.tolerance.volumeFraction}.`), n("p", t`Bounds error: ${v.boundsErrorMm} mm; allowed bounds error: ${v.tolerance.boundsMm} mm.`), n("p", t`Screened mesh: ${j.triangles} triangles; signed volume: ${j.signedVolumeMm3} mm³; bounds min: ${j.boundsMm.min.join(", ")} mm; max: ${j.boundsMm.max.join(", ")} mm.`), n("p", t("The complete record below retains the exact file identity, conversion matrix, screening limits, checks, diagnostics, bindings and tolerances. Metadata consistency does not verify that the reported run occurred.")), n("pre", JSON.stringify(F, null, 2))), e.append(V);
+    V.className = "model-library-collision-report", V.append(n("summary", t("Inspect complete recorded collision report"))), V.append(n("p", t`Report version ${E.version}; checked ${T.checkedOn}; scope: ${T.scope}.`), n("p", t`Engine: ${T.engine} ${T.engineVersion}; qualifier: ${T.qualifierVersion}; mesh checker: ${x.toolVersion}.`), n("p", t`Native check: ${T.nativeCheck.build} build; ${T.nativeCheck.steps} rigid step of ${T.nativeCheck.stepSeconds} s; no ground.`), n("p", t("No ground settling, cavity clearance, contacts, mechanisms, elasticity, printability or manufacturing accuracy were tested. Native capacity/error telemetry is unavailable.")), n("p", t`STL SHA-256: ${T.fileSha256}`), n("p", t`Converted geometry SHA-256: ${T.geometrySha256}`), n("p", t`Evaluated source volume: ${T.sourceVolumeMm3} mm³; hulls: ${T.hulls} / ${v.maxHulls}; algorithm: ${v.algorithm}; strategy: ${v.strategy}.`), n("p", t`Missing volume: ${v.missingVolumeMm3} mm³; extra volume: ${v.extraVolumeMm3} mm³; relative error: ${v.relativeError}; allowed volume fraction: ${v.tolerance.volumeFraction}.`), n("p", t`Bounds error: ${v.boundsErrorMm} mm; allowed bounds error: ${v.tolerance.boundsMm} mm.`), n("p", t`Screened mesh: ${x.triangles} triangles; signed volume: ${x.signedVolumeMm3} mm³; bounds min: ${x.boundsMm.min.join(", ")} mm; max: ${x.boundsMm.max.join(", ")} mm.`), n("p", t("The complete record below retains the exact file identity, conversion matrix, screening limits, checks, diagnostics, bindings and tolerances. Metadata consistency does not verify that the reported run occurred.")), n("pre", JSON.stringify(E, null, 2))), e.append(V);
   }
   function fa() {
     N || X.value === "projects" || (o || (U.textContent = t("Loading models…")), L ?? (L = Promise.resolve().then(() => u.load()).then((e) => {
@@ -948,7 +948,7 @@ Mirror commit: ${e.commit}`, D.href = `https://github.com/adafruit/Adafruit_CAD_
       m = a.catalogue, u = { ...u, ...e }, H.clear();
       for (const [f, b] of e.localFiles ?? [])
         H.set(f, b.slice());
-      N = !0, X.value !== "projects" && (o || (U.textContent = ""), we(), o || Ce());
+      N = !0, X.value !== "projects" && (o || (U.textContent = ""), we(), !o && !F && !j && Ce());
     }).catch((e) => {
       !c && !N && !o && X.value !== "projects" && me(e);
     }).finally(() => {
@@ -958,7 +958,7 @@ Mirror commit: ${e.commit}`, D.href = `https://github.com/adafruit/Adafruit_CAD_
   return Q.oninput = () => {
     De(), we();
   }, X.onchange = () => {
-    De(), x = void 0, I = void 0, E = void 0, X.value === "projects" && !N && !o && (U.textContent = ""), we(), Ce(), fa();
+    De(), j = void 0, I = void 0, F = void 0, X.value === "projects" && !N && !o && (U.textContent = ""), we(), Ce(), fa();
   }, Y.onchange = async () => {
     const e = Y.files?.[0];
     if (Y.value = "", !(!e || o))
@@ -970,13 +970,13 @@ Mirror commit: ${e.commit}`, D.href = `https://github.com/adafruit/Adafruit_CAD_
           return;
         if (!a.valid)
           throw new Error(a.errors.join(" "));
-        m = a.catalogue, N = !0, De(), x = void 0, I = void 0, E = void 0, Q.value = X.value = "", U.textContent = "", we(), Ce();
+        m = a.catalogue, N = !0, De(), j = void 0, I = void 0, F = void 0, Q.value = X.value = "", U.textContent = "", we(), Ce();
       } catch (a) {
         c || me(a);
       }
   }, {
     open(e) {
-      c || P.open || (e && (De(), X.value = e, Q.value = "", x = void 0, I = void 0, E = void 0, !N && !o && (U.textContent = "")), we(), o || Ce(), P.showModal(), Q.focus(), fa());
+      c || P.open || (e && (De(), X.value = e, Q.value = "", j = void 0, I = void 0, F = void 0, !N && !o && (U.textContent = "")), we(), o || Ce(), P.showModal(), Q.focus(), fa());
     },
     dispose() {
       c = !0, C?.abort(), Te?.disconnect(), he.clear(), ue.clear(), P.remove();
