@@ -208,3 +208,23 @@ On the published MacBook build, a reverse-order Atlas pair measured
 batched and 0.357 ms individual. Mechanical round-trip time varied
 between the runs, so these pairs establish a feedback-stage reduction
 with no reproducible end-to-end gain for Atlas.
+
+### Reuse actuator geometry and impulse buffers
+
+Each CAD world now caches the authored axis and, for sliders, the point
+where force is applied. It transforms them with the current body pose
+on every tick. Hinge impulses only need the axis. Jolt impulse and
+position vectors are reused within the world and released on disposal.
+
+An alternating mixed hinge-and-slider CPU test applied 100,000 impulses
+per trial. The previous path used 13.1–14.4 µs per impulse, and the new
+path used 7.1–8.7 µs, with identical resulting velocities. This measures
+actuator preparation and application only. The native physics step
+still determines whether the models can reach 1×.
+
+A separate collision-filter experiment changed the Scout motion trace.
+The actuator change retains the original collision filters.
+
+Using the shipped Scout and Atlas SB3 models, the chassis poses and all
+actuated joint readings matched the comparison build exactly through 100
+steps for each model, including reversal and Atlas slider impulses.
