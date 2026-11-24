@@ -33,6 +33,17 @@ try {
     assert.ok(await first.evaluate(image => image.decode().then(() => image.naturalWidth > 0)));
     const visible = requested.size;
     assert.ok(visible > 0 && visible < 40, `expected viewport-only downloads; saw ${visible}`);
+    const card = first.locator('xpath=..');
+    const original = await card.elementHandle();
+    const title = await card.locator('strong').textContent();
+    await card.focus();
+    await card.press('Enter');
+    assert.ok(await original.evaluate(node => node.isConnected && node.getAttribute('aria-pressed') === 'true'),
+        'selection keeps the existing card and its thumbnail');
+    assert.ok(await original.evaluate(node => node.getRootNode().activeElement === node), 'selection keeps keyboard focus');
+    await library.getByLabel('Search models', {exact: true}).fill(title);
+    assert.ok(await original.evaluate(node => node.isConnected), 'a card that still matches a search stays mounted');
+    console.log('PASS selecting and narrowing the CAD library retains the matching card');
     await library.getByLabel('Search models', {exact: true}).fill('Adafruit');
     const archive = library.locator('.model-library-list img[data-adafruit-preview][src*="/cad-sdk/previews/"]').first();
     await archive.waitFor();
