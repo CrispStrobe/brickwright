@@ -61,6 +61,14 @@ await page.addInitScript(()=>{localStorage.setItem('bw-starter-v1-complete','1')
  for(const [event,key] of [['bw-circuit-ensure-ready','circuitRequested'],['bw-circuit-clock-owner','circuitOwnership'],['bw-board-ready','boardReady']]){
   window.addEventListener(event,e=>{const times=window.__proofRunTimes;if(times?.clicked!=null&&times[key]==null&&(key!=='circuitOwnership'||e.detail?.board))times[key]=performance.now();});
  }
+ window.addEventListener('bw-board-ready',()=>{
+  const times=window.__proofRunTimes;
+  if(times?.clicked==null)return;
+  const runtime=window.__brickwrightStore?.getState().scratchGui.vm?.runtime;
+  const ids=(runtime?.circuitBoard?.parts||[]).map(part=>part.id).join(',');
+  const history=times.boardHistory||=[];
+  if(history.at(-1)?.ids!==ids)history.push({ids,elapsedMs:performance.now()-times.clicked});
+ });
  window.addEventListener('bw-cad-circuit-status',e=>{if(e.detail?.phase==='running'&&window.__proofRunTimes?.running==null&&window.__proofRunTimes)window.__proofRunTimes.running=performance.now();});
  window.__proofSamples=[];
  setInterval(()=>{
@@ -168,7 +176,7 @@ await wait(()=>{const s=window.__brickwrightStore.getState().scratchGui.vm.runti
   const after=await page.evaluate(()=>({state:window.__brickwrightStore.getState().scratchGui.vm.runtime.cadCircuitSimulation.state(),frame:window.__bwCad.editor.simulation.snapshot(),source:window.__bwCad.editor.session.serialize(),draws:{...window.__proofDraws},runTimes:{...window.__proofRunTimes,finished:performance.now()},boardParts:window.__brickwrightStore.getState().scratchGui.vm.runtime.circuitBoard?.parts.map(p=>({id:p.id,kind:p.kind}))??[]}));const {clicked,firstMotion,acquireExternalClockStart,acquireExternalClockEnd,frameGaps,...marks}=after.runTimes;
   const sorted=frameGaps.sort((a,b)=>a-b);after.browserTiming={clickedToMotionMs:clicked!=null&&firstMotion!=null?firstMotion-clicked:null,mechanicalPreparationMs:acquireExternalClockStart!=null&&acquireExternalClockEnd!=null?acquireExternalClockEnd-acquireExternalClockStart:null,frameP95Ms:sorted[Math.floor(sorted.length*.95)]??null,frameMaxMs:sorted.at(-1)??null,marks};
   delete after.runTimes.frameGaps;
-  after.wallSeconds=(performance.now()-runStarted)/1000;after.averageRealTimeFactor=after.frame.time/after.wallSeconds;after.preparationSeconds=after.runTimes.running==null?null:(after.runTimes.running-after.runTimes.requested)/1000;after.runningRealTimeFactor=after.runTimes.running==null?null:after.frame.time/((after.runTimes.finished-after.runTimes.running)/1000);await writeFile(`${out}/debug-${item.id}.json`,JSON.stringify({state:after.state,frame:after.frame,draws:after.draws,wallSeconds:after.wallSeconds,averageRealTimeFactor:after.averageRealTimeFactor,preparationSeconds:after.preparationSeconds,runningRealTimeFactor:after.runningRealTimeFactor,browserTiming:after.browserTiming},null,2));assert.equal(after.state.phase,'running',after.state.error);assert.equal(after.source,source);if(process.env.PROOF_DRAW_BUDGET==='1')assert.ok(after.draws.duplicate<=5,`simulation must coalesce rendering, got ${after.draws.duplicate} duplicate scene draws`);
+  after.wallSeconds=(performance.now()-runStarted)/1000;after.averageRealTimeFactor=after.frame.time/after.wallSeconds;after.preparationSeconds=after.runTimes.running==null?null:(after.runTimes.running-after.runTimes.requested)/1000;after.runningRealTimeFactor=after.runTimes.running==null?null:after.frame.time/((after.runTimes.finished-after.runTimes.running)/1000);await writeFile(`${out}/debug-${item.id}.json`,JSON.stringify({state:after.state,frame:after.frame,draws:after.draws,wallSeconds:after.wallSeconds,averageRealTimeFactor:after.averageRealTimeFactor,preparationSeconds:after.preparationSeconds,runningRealTimeFactor:after.runningRealTimeFactor,browserTiming:after.browserTiming,boardParts:after.boardParts},null,2));assert.equal(after.state.phase,'running',after.state.error);assert.equal(after.source,source);if(process.env.PROOF_DRAW_BUDGET==='1')assert.ok(after.draws.duplicate<=5,`simulation must coalesce rendering, got ${after.draws.duplicate} duplicate scene draws`);
   if(item.id==='robot-quasar-press'&&process.env.PROOF_DEFAULT==='1'){
    const samples=await page.evaluate(()=>window.__proofSamples);
    await writeFile(`${out}/quasar-cycle-frames.json`,JSON.stringify(samples));

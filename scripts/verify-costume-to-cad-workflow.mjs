@@ -50,6 +50,10 @@ try {
     assert.ok(yDrag);
     await handoff.getByRole('button', {name: 'Preview extrusion', exact: true}).click();
     const sketch = page.getByRole('dialog', {name: 'Sketch and extrusion', exact: true});
+    await sketch.getByRole('button', {name: 'Create extrusion', exact: true}).waitFor();
+    await sketch.getByRole('button', {name: 'Close sketch', exact: true}).click();
+    await page.getByRole('tab', {name: 'CAD', exact: true}).click();
+    await page.getByRole('button', {name: `Edit sketch: ${draft.name}`, exact: true}).click();
     await sketch.getByText('Outline constraints', {exact: true}).click();
     const kind = sketch.getByLabel('Constraint', {exact: true});
     const edge = sketch.getByLabel('Constrained segment', {exact: true});
@@ -74,11 +78,14 @@ try {
     await page.mouse.down();
     await page.mouse.move(end.x, end.y, {steps: 5});
     await page.mouse.up();
-    await sketch.getByRole('status', {name: 'Sketch status'}).getByText(/Outline solved/).waitFor();
+    await sketch.getByRole('status', {name: 'Sketch status'}).filter({hasText: /Outline solved/}).waitFor();
     const solved = (await coordinates.inputValue()).split('\n').map(row => row.split(',').map(Number));
     assert.ok(Math.abs(solved[moved][1] - points[moved][1]) > 1, 'the drag moved the dimensioned outline');
     assert.ok(Math.abs(Math.abs(solved[horizontal][0] - solved[vertical][0]) - 60) < 1e-4);
     assert.ok(Math.abs(solved[vertical][0] - solved[moved][0]) < 1e-4);
+    await sketch.getByRole('button', {name: 'Save sketch', exact: true}).click();
+    await sketch.waitFor({state: 'hidden'});
+    await page.getByRole('button', {name: `Extrude sketch: ${draft.name}`, exact: true}).click();
     await sketch.getByLabel('Extrusion distance (mm)', {exact: true}).fill('10');
     await sketch.getByRole('button', {name: 'Create extrusion', exact: true}).click();
     await sketch.waitFor({state: 'hidden'});
@@ -89,8 +96,9 @@ try {
     });
     assert.ok(Math.abs(body.body.max[2] - body.body.min[2] - 10) < 1e-4);
     assert.equal(body.sketches[0].profile.relations.length, 3);
-    await page.getByText('File', {exact: true}).filter({visible: true}).click();
-    await page.getByText('Export CAD model…', {exact: true}).filter({visible: true}).click();
+    await page.getByTestId('cad-canvas').click({position: {x: 150, y: 50}});
+    await page.getByTestId('bw-file-menu-trigger').click();
+    await page.getByText('Export CAD model…', {exact: true}).click();
     const exported = page.getByRole('dialog', {name: 'Export model', exact: true});
     const download = page.waitForEvent('download');
     await exported.getByRole('button', {name: 'Export', exact: true}).click();
