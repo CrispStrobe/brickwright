@@ -22,3 +22,5 @@ Robot cover geometry is credited to [the LDraw Parts Library](https://library.ld
 The app build derives a compact index for each editor from the manifest. Its URL depends on the index contents, so a new app build can keep reusing the cached index when its covers stay the same. The browser loads one editor's index at a time and the cards request images near the viewport.
 
 Circuit's parts palette reserves space for each thumbnail and mounts it when its card first enters view. The palette and the board share the existing per-part artwork cache.
+
+Opening Circuit starts the bench. The Examples panel and the collapsed examples strip each load the catalog and artwork index on demand. The strip also loads the Codex curriculum, and starter journeys fetch only the catalog needed to open their project.

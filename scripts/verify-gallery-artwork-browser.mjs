@@ -10,10 +10,12 @@ try {
     await page.addInitScript(() => localStorage.setItem('bw-starter-v1-complete', '1'));
     const images = new Set();
     const indexes = [];
+    const circuitCatalogRequests = [];
     page.on('request', request => {
         const path = new URL(request.url()).pathname;
         if (/\/gallery-artwork\/[a-f0-9]{64}\.(png|svg)$/.test(path)) images.add(path);
         if (/\/gallery-artwork\/.*\.json$/.test(path)) indexes.push(path.split('/').at(-1));
+        if (/\/examples\/(index|curriculum)\.json$/.test(path)) circuitCatalogRequests.push(path.split('/').at(-1));
     });
     await page.goto(process.argv[2] || 'http://127.0.0.1:8242/', {waitUntil: 'commit'});
     await openRobotLabTab(page);
@@ -34,6 +36,10 @@ try {
     await robots.getByRole('button', {name: 'Close examples', exact: true}).click();
 
     await page.getByRole('tab', {name: 'Circuit', exact: true}).click();
+    const openInlineGallery = page.getByRole('button', {name: 'Expand Examples', exact: true}).first();
+    await openInlineGallery.waitFor({state: 'visible'});
+    assert.equal(indexes.length, 1, 'the Circuit bench does not load the artwork index');
+    assert.deepEqual(circuitCatalogRequests, []);
     await page.getByTestId('bw-circuit-panel-examples').first().click();
     const circuitCovers = page.locator('img[data-example-artwork]:visible');
     const circuit = circuitCovers.first();
@@ -52,7 +58,16 @@ try {
     assert.ok(images.has(new URL(distant, page.url()).pathname));
     assert.equal(indexes.length, 2);
     assert.match(indexes[1], /^circuits\.[a-f0-9]{64}\.json$/);
+    assert.deepEqual(circuitCatalogRequests, ['index.json']);
     console.log(`PASS Circuit decoded covers on demand, with ${circuitRequests} initial requests for ${available.length} unique covers`);
+
+    await page.getByTestId('bw-circuit-panel-designer').first().click();
+    await openInlineGallery.click();
+    await page.getByRole('button', {name: /Codex$/}).first().click();
+    await page.getByTestId('codex-browser').first().waitFor({state: 'visible'});
+    assert.deepEqual(circuitCatalogRequests, ['index.json', 'curriculum.json']);
+    assert.equal(indexes.length, 2, 'the two Circuit galleries share their artwork lookup');
+    console.log('PASS Circuit bench defers the gallery, and the inline gallery loads the Codex');
 } finally {
     await browser.close();
 }

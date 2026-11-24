@@ -461,8 +461,10 @@ try {
     check('selectors panel reopens from its persistent handle', await designer.locator('[data-selectors-panel]').count() === 1);
     }
     const examplesSelector = designer.locator('[data-examples-selector]').first();
-    check('Examples selector has an independent collapse affordance', await examplesSelector.count() === 1 && await examplesSelector.getByRole('button', {name: /^Collapse Examples/i}).count() === 1);
+    check('Examples selector starts collapsed with its own expand control', await examplesSelector.count() === 1 && await examplesSelector.getByRole('button', {name: /^Expand Examples/i}).count() === 1);
     if (await examplesSelector.count()) {
+        await examplesSelector.getByRole('button', {name: /^Expand Examples/i}).click({force: true});
+        await examplesSelector.locator('[data-examples-selector-content]').waitFor({state: 'visible'});
         await examplesSelector.getByRole('button', {name: /^Collapse Examples/i}).click({force: true});
         check('Examples selector actually collapses', await examplesSelector.getByRole('button', {name: /^Expand Examples/i}).count() === 1 && await examplesSelector.locator('[data-examples-selector-content]').count() === 0);
         await examplesSelector.getByRole('button', {name: /^Expand Examples/i}).click({force: true});

@@ -175,6 +175,7 @@ class CircuitTab extends React.Component {
         this.handleDesignerMenuActions = this.handleDesignerMenuActions.bind(this);
         this.loadExample = this.loadExample.bind(this);
         this.selectPanel = this.selectPanel.bind(this);
+        this.openInlineExamples = this.openInlineExamples.bind(this);
         this._boxRef = React.createRef();
         this._measureBox = this._measureBox.bind(this);
         this.handleDeclarationChange = this.handleDeclarationChange.bind(this);
@@ -280,8 +281,6 @@ class CircuitTab extends React.Component {
         if (this.props.isVisible) {
             activateUndoSurface('circuit');
             this.load();
-            this.loadExamples();
-            this.loadCurriculum();
         }
         window.addEventListener('resize', this._measureBox);
         // The File menu's four circuit actions (menu-bar.jsx) dispatch
@@ -618,8 +617,6 @@ class CircuitTab extends React.Component {
         this._measureBox();
         if (this.props.isVisible && !prevProps.isVisible) {
             this.load();
-            this.loadExamples();
-            this.loadCurriculum();
             // Re-entering Circuit is the final synchronization point: its
             // persistent debugger is now committed and visible. Re-deliver
             // the retained image so a handoff made while Code owned the tab
@@ -1330,24 +1327,10 @@ class CircuitTab extends React.Component {
         if (vm.runtime && vm.runtime.emit) vm.runtime.emit('PROJECT_CHANGED');
     }
 
-    /**
-     * The example gallery index, fetched once when the tab is first opened.
-     *
-     * It is a fetch rather than an import because the gallery is 53 examples of
-     * circuits, programs and expectations — data that has no business in the
-     * first-paint bundle for the many users who never open this tab. The tab is
-     * already lazy, so by the time this runs the user has asked for it.
-     *
-     * A missing index is reported, not swallowed into an empty list. An empty
-     * gallery and an unshipped one look identical on screen and mean completely
-     * different things — the first says "we have no examples", which would be a
-     * lie about work bw-cfront has done.
-     */
+    /** Load the example catalog for the gallery or a starter journey. */
     async loadExamples () {
         if (this.state.examples) return this.state.examples;
         if (this.examplesLoadingPromise) return this.examplesLoadingPromise;
-        const artwork = loadGalleryArtwork('circuits');
-        this.galleryArtworkRequest = artwork;
         this.examplesLoadingPromise = (async () => {
             try {
                 const res = await fetch('examples/index.json');
@@ -1355,26 +1338,41 @@ class CircuitTab extends React.Component {
                 const data = await res.json();
                 const list = Array.isArray(data) ? data : (data.examples || []);
                 this._markReactUpdate('host:examples');
-                this.setState({examples: list});
-                artwork.then(index => {
-                    if (this.galleryArtworkRequest !== artwork) return;
-                    const decorated = circuitExamplesWithArtwork(list, index);
-                    if (decorated !== list) this.setState(state => state.examples === list ? {examples: decorated} : null);
-                });
+                const previousError = this.examplesLoadError;
+                this.examplesLoadError = null;
+                this.setState(state => ({examples: list,
+                    examplesError: state.examplesError === previousError ? null : state.examplesError}));
                 return list;
             } catch (e) {
                 const message = pt(this.props.locale, 'examples.notVendored', {message: e.message});
                 this.examplesLoadError = message;
                 this.setState({examplesError: message});
-                // Existing visibility-triggered callers do not await this method.
-                // Resolve with null so a missing optional gallery cannot become an
-                // unhandled rejection; the starter path turns it into a visible error.
                 return null;
             } finally {
                 this.examplesLoadingPromise = null;
             }
         })();
         return this.examplesLoadingPromise;
+    }
+
+    loadExamplesGallery () {
+        const artwork = loadGalleryArtwork('circuits');
+        if (this.galleryArtworkRequest === artwork) return;
+        this.galleryArtworkRequest = artwork;
+        Promise.all([this.loadExamples(), artwork]).then(([list, index]) => {
+            if (this.galleryArtworkRequest !== artwork) return;
+            if (!list) {
+                this.galleryArtworkRequest = null;
+                return;
+            }
+            const decorated = circuitExamplesWithArtwork(list, index);
+            if (decorated !== list) this.setState(state => state.examples === list ? {examples: decorated} : null);
+        });
+    }
+
+    openInlineExamples () {
+        this.loadExamplesGallery();
+        this.loadCurriculum();
     }
 
     /**
@@ -2276,7 +2274,9 @@ class CircuitTab extends React.Component {
                     performanceProbe={this._performanceProbe}
                     stc={stc}
                     examples={this.state.examples || undefined}
+                    examplesError={this.state.examplesError}
                     curriculum={this.state.curriculum || undefined}
+                    onOpenExamples={this.openInlineExamples}
                     onLoadExample={this.loadExample}
                     board={this.state.board || undefined}
                     debugState={this.state.debugState || undefined}
@@ -2466,10 +2466,10 @@ class CircuitTab extends React.Component {
         for (const board of boards) applyBenchTemperature(board, c);
     }
 
-    /** Show one of the tab's panels; Examples fetches its gallery (and the Codex) on the way. */
+    /** Show one of the tab's panels and fetch the example catalog on demand. */
     selectPanel (panel) {
         this.setState({panel});
-        if (panel === 'examples') { this.loadExamples(); this.loadCurriculum(); }
+        if (panel === 'examples') this.loadExamplesGallery();
     }
 
     /**
