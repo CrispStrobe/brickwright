@@ -18,8 +18,8 @@ const outputVoltage = (circuit, channel) => {
 
 test('the pinned packages expose a truthful LM324 face and four live channels', async () => {
     const pins = JSON.parse(readFileSync(path.join(root, 'vendor-pins.json'), 'utf8'));
-    assert.equal(pins['bw-board'], '489ca7c675a9af03cb066026ec59801b8ba3d0bb');
-    assert.equal(pins['bw-circuit-ui'], 'a82d70032f0173f0597e1ba1c02f507b9d474642');
+    assert.equal(pins['bw-board'], '7e0bf8cf8beeb3329f0be550ae08fdd8de5d2099');
+    assert.equal(pins['bw-circuit-ui'], 'bc33e7d9140f9855d41944a5f9bfed2fa6191f28');
 
     const sidecar = JSON.parse(readFileSync(
         path.join(root, 'node_modules/bw-circuit-ui/src/parts-data/lm324.json'), 'utf8'));
@@ -29,9 +29,11 @@ test('the pinned packages expose a truthful LM324 face and four live channels', 
         '1_out', '1_neg', '1_pos', 'vcc', '2_pos', '2_neg', '2_out',
         '3_out', '3_neg', '3_pos', 'gnd', '4_pos', '4_neg', '4_out'
     ]);
-    assert.deepEqual(sidecar.footprint.leads['1_out'], {dRow: 0, dCol: 0});
-    assert.deepEqual(sidecar.footprint.leads['4_out'], {dRow: 5, dCol: 0});
-    assert.deepEqual(sidecar.footprint.leads.gnd, {dRow: 5, dCol: 3});
+    // bw-circuit-ui 04f8ce8 (#155, breadboard-pitch DIPs) seats the package pin-1 corner on
+    // the other breadboard row (datasheet top view): the leads' rows flip.
+    assert.deepEqual(sidecar.footprint.leads['1_out'], {dRow: 5, dCol: 0});
+    assert.deepEqual(sidecar.footprint.leads['4_out'], {dRow: 0, dCol: 0});
+    assert.deepEqual(sidecar.footprint.leads.gnd, {dRow: 0, dCol: 3});
 
     const {Circuit} = await loadCircuitModel(root);
     const circuit = Circuit.fromJSON(structuredClone(fixture));

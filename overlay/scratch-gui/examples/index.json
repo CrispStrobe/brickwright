@@ -10920,6 +10920,24 @@
   "devices": []
  },
  {
+  "id": "lab-shortwave-regen",
+  "title": {
+   "en": "Short wave and mixing: hearing Morse with your own oscillator",
+   "de": "Kurzwelle und Mischung: Morsezeichen mit dem eigenen Oszillator hören"
+  },
+  "kind": "circuit",
+  "category": "pure-circuit",
+  "difficulty": 4,
+  "files": {
+   "program": "lab-shortwave-regen/program.bw",
+   "circuit": "lab-shortwave-regen/circuit.json",
+   "expected": "lab-shortwave-regen/EXPECTED.md",
+   "intro": "lab-shortwave-regen/intro.md",
+   "introDE": "lab-shortwave-regen/intro.de.md"
+  },
+  "devices": []
+ },
+ {
   "id": "lab-am-transmitter",
   "title": {
    "en": "AM test transmitter and a receiver across the room",
@@ -10970,6 +10988,24 @@
    "expected": "lab-light-guide/EXPECTED.md",
    "intro": "lab-light-guide/intro.md",
    "introDE": "lab-light-guide/intro.de.md"
+  },
+  "devices": []
+ },
+ {
+  "id": "lab-fibre-lens",
+  "title": {
+   "en": "Focusing light into a light guide",
+   "de": "Licht in einen Lichtleiter bündeln"
+  },
+  "kind": "circuit",
+  "category": "pure-circuit",
+  "difficulty": 3,
+  "files": {
+   "program": "lab-fibre-lens/program.bw",
+   "circuit": "lab-fibre-lens/circuit.json",
+   "expected": "lab-fibre-lens/EXPECTED.md",
+   "intro": "lab-fibre-lens/intro.md",
+   "introDE": "lab-fibre-lens/intro.de.md"
   },
   "devices": []
  },
@@ -11484,6 +11520,42 @@
    "expected": "lab-motorboat/EXPECTED.md",
    "intro": "lab-motorboat/intro.md",
    "introDE": "lab-motorboat/intro.de.md"
+  },
+  "devices": []
+ },
+ {
+  "id": "lab-mosfet-regen",
+  "title": {
+   "en": "MOSFET regenerative receiver",
+   "de": "Rückkopplungsempfänger mit MOSFET"
+  },
+  "kind": "circuit",
+  "category": "pure-circuit",
+  "difficulty": 4,
+  "files": {
+   "program": "lab-mosfet-regen/program.bw",
+   "circuit": "lab-mosfet-regen/circuit.json",
+   "expected": "lab-mosfet-regen/EXPECTED.md",
+   "intro": "lab-mosfet-regen/intro.md",
+   "introDE": "lab-mosfet-regen/intro.de.md"
+  },
+  "devices": []
+ },
+ {
+  "id": "lab-broadcast-pickup",
+  "title": {
+   "en": "A bare wire picks up a radio station",
+   "de": "Ein blanker Draht empfängt einen Sender"
+  },
+  "kind": "circuit",
+  "category": "pure-circuit",
+  "difficulty": 3,
+  "files": {
+   "program": "lab-broadcast-pickup/program.bw",
+   "circuit": "lab-broadcast-pickup/circuit.json",
+   "expected": "lab-broadcast-pickup/EXPECTED.md",
+   "intro": "lab-broadcast-pickup/intro.md",
+   "introDE": "lab-broadcast-pickup/intro.de.md"
   },
   "devices": []
  }
