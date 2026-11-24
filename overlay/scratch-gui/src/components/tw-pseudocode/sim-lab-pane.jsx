@@ -1581,7 +1581,7 @@ class SimLabPane extends React.Component {
             if (runModel.drawings?.length || runModel.parts.some(part => part.pen)) {
                 this.unsubscribeDrawing = session.onAdvance(() => {
                     if (this.session === session && this.view && this.state.replayAt === null) {
-                        this.view.sampleDrawing(session.snapshot());
+                        this.view.sampleDrawing(session.viewSnapshot());
                     }
                 });
             }
@@ -1600,7 +1600,7 @@ class SimLabPane extends React.Component {
                 return [...saved, ...preview].map(row => ({...row,
                     label: row.label === row.kind ? measurementWords(this.locale).kinds[row.kind] : row.label}));
             });
-            this.view.render(session.snapshot());
+            this.view.render(session.viewSnapshot());
         } catch (error) {
             view3d = 'fallback';
             this.setState({message: this.t('noWebgl', {error: error.message})});
@@ -1748,7 +1748,7 @@ class SimLabPane extends React.Component {
         }
         if (this.challengeRun && this.state.status === 'running') this.judgeChallenge();
         const replayed = this.state.replayAt !== null && this.replay ? this.replay.frames[this.state.replayAt] : null;
-        if (this.view) this.view.render(replayed ? replayed.snapshot : this.session.snapshot());
+        if (this.view) this.view.render(replayed ? replayed.snapshot : this.session.viewSnapshot());
     }
 
     // ---- Simulate: slow motion, replay, readings, sensor rays --------------------------------
@@ -1767,8 +1767,9 @@ class SimLabPane extends React.Component {
         if (!this.replay) this.replay = {frames: []};
         const frames = this.replay.frames;
         if (frames.length && t - frames[frames.length - 1].t < REPLAY_STEP_MS) return;
-        const snap = this.session.snapshot();
-        frames.push({t, snapshot: {bodyIds: snap.bodyIds, bodies: Float32Array.from(snap.bodies)}});
+        const {bodyIds, bodies} = this.session.viewSnapshot();
+        // Future advances take a fresh snapshot. Replay can retain these pose buffers.
+        frames.push({t, snapshot: {bodyIds, bodies}});
         while (frames.length && t - frames[0].t > REPLAY_MS) frames.shift();
         if (this.state.replayAt !== null || frames.length % 15 === 0) this.setState({replayAt: null, replayFrames: frames.length});
     }

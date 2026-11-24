@@ -645,6 +645,7 @@ export class SimSession {
         }
         const hubs = this.hubs.map(({hub, body}) => ({hub, body}));
         this.time = 0;
+        this._viewSnapshot = null;
         this.listeners = new Set();
         this._observationRevision = 0;
         this._measurementObservation = null;
@@ -674,7 +675,10 @@ export class SimSession {
             if (this.lockstep) {
                 this.runner = new LockstepRunner({bridge: this.bridge, hubs: this.hubs.map(({hub}) => hub),
                     onAdvance: runner => { this.time = runner.stats.simulatedMs; this._advanced(); },
-                    onFail: error => { this.failed = error; }});
+                    onFail: error => {
+                        this.failed = error;
+                        this._viewSnapshot = null;
+                    }});
                 this.stats = this.runner.stats;
             }
         }
@@ -819,6 +823,7 @@ export class SimSession {
 
     _advanced () {
         if (this._disposed) return;
+        this._viewSnapshot = null;
         const observations = this._measurementCollector?.take();
         if (observations) this._acceptMeasurementObservations(observations);
         for (const fn of [...this.listeners]) {
@@ -940,6 +945,7 @@ export class SimSession {
 
     _fail (error) {
         this.failed = error;
+        this._viewSnapshot = null;
         this._inFlight = null;
         const waiting = this._idle || [];
         this._idle = [];
@@ -950,6 +956,12 @@ export class SimSession {
     /** The poses now; after a divergence on this thread, those of the last finite step. */
     snapshot () { return this.failed && this._good ? this._good : this.core.snapshot(); }
 
+    /** Read-only view data shared by drawing, display and replay. Each accepted advance replaces the cache. */
+    viewSnapshot () {
+        if (!this._viewSnapshot) this._viewSnapshot = this.snapshot();
+        return this._viewSnapshot;
+    }
+
     /** Lockstep scenes: simulated ms per wall ms lately (null before it is measured, or without lockstep). */
     get realTimeFactor () {
         return this.runner ? this.runner.realTimeFactor : null;
@@ -957,6 +969,7 @@ export class SimSession {
 
     dispose () {
         this._disposed = true;
+        this._viewSnapshot = null;
         this._measurementCollector?.detach();
         this._measurementObservation = null;
         this._lastMeasurementObservations = null;

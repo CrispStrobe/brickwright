@@ -32,18 +32,28 @@ try {
         return state?.shipped === 'twistspan.ldr' && state.status === 'ready' && !state.programLoading && state.view3d === 'webgl';
     });
     if (process.env.BW_CHECK_IDLE_RENDER === '1') {
-        const idleFrames = await page.evaluate(async () => {
-            const view = window.__bwSimLab._pane.view;
+        const idle = await page.evaluate(async () => {
+            const {session, view} = window.__bwSimLab._pane;
             const waitFrames = async count => {
                 for (let i = 0; i < count; i++) await new Promise(resolve => requestAnimationFrame(resolve));
             };
             await waitFrames(12);
             const before = view.renderStats().frames;
-            await waitFrames(12);
-            return view.renderStats().frames - before;
+            const snapshot = session.snapshot;
+            let snapshots = 0;
+            session.snapshot = function () {
+                snapshots++;
+                return snapshot.call(this);
+            };
+            try {
+                await waitFrames(12);
+                return {draws: view.renderStats().frames - before, snapshots};
+            } finally {
+                delete session.snapshot;
+            }
         });
-        console.log(`Idle TwistSpan draws over 12 animation frames: ${idleFrames}`);
-        assert.equal(idleFrames, 0);
+        console.log(`Idle TwistSpan over 12 animation frames: ${JSON.stringify(idle)}`);
+        assert.deepEqual(idle, {draws: 0, snapshots: 0});
         const beforeOrbit = await page.evaluate(() => window.__bwSimLab._pane.view.renderStats().frames);
         await page.getByTestId('bw-sim-lab-3d-canvas').press('ArrowRight');
         await page.waitForFunction(before => window.__bwSimLab._pane.view.renderStats().frames > before, beforeOrbit);
@@ -73,6 +83,18 @@ try {
         });
         await page.waitForFunction(() => window.__bwStalledRenderPolls > 0);
         await expectRenderedMovement(atStall);
+    }
+    if (process.env.BW_CHECK_REPLAY === '1') {
+        await page.getByTestId('bw-sim-lab-pause').click();
+        const slider = page.getByTestId('bw-sim-lab-replay-slider');
+        await slider.waitFor();
+        const paused = await page.evaluate(() => window.__bwSimLab._pane.view.partScreenPoint('lower_tie_80'));
+        await slider.fill('0');
+        await page.waitForFunction(() => window.__bwSimLab._pane.state.replayAt === 0);
+        await expectRenderedMovement(paused);
+        await page.getByTestId('bw-sim-lab-run').click();
+        await page.waitForFunction(() => window.__bwSimLab._pane.state.replayAt === null);
+        console.log('PASS: pausing, displaying the first recorded pose, and returning to the live run');
     }
     if (stallMode === '1') assert.ok(await page.evaluate(() => window.__bwStalledRenderPolls > 0));
     const scenario = stallMode === 'late' ? ' after a GPU fence stalls mid-run' :

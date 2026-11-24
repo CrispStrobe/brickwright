@@ -45,7 +45,7 @@ test('visible overlays keep committed samples updating when the measurement pane
 
 test('overlay and draft render reads cannot advance the committed sampling stream', () => {
     const start=source.indexOf('            this.view.setMeasurements(() => {');
-    const end=source.indexOf('\n            this.view.render(session.snapshot());',start);
+    const end=source.indexOf('\n            this.view.render(session.viewSnapshot());',start);
     assert.ok(start>=0&&end>start);
     let display;
     const install=new Function('measurementWords',source.slice(start,end));
