@@ -38,3 +38,5 @@ The CAD library materializes bundled source and STL bytes during insertion. Brow
 Catalog construction parses each source manifest once and reuses its records for licence attribution. The standalone editor keeps the normalized catalog when a different project is opened in the same app session.
 
 The CAD editor mounts the Model Library on first open. The library code, Adafruit archive metadata and bundled catalogue run outside editor startup. The standalone service worker still caches the library scripts for offline use.
+
+The Robot projects view loads project cards independently of the parts catalogue. Switching to a model filter loads the parts catalogue on demand.

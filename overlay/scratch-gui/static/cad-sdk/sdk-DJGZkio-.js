@@ -57230,7 +57230,7 @@ function YN(i, e) {
   async function O(V) {
     if (!k) {
       if (!D) {
-        const { mountModelLibraryPanel: g1 } = await import("./model-library-panel-8R78SXHP.js");
+        const { mountModelLibraryPanel: g1 } = await import("./model-library-panel-BpSuJ0X2.js");
         if (k)
           return;
         D ?? (D = g1(r, t, (S1) => J.evaluate(S1), e.modelLibrary, async () => {
@@ -58433,7 +58433,7 @@ function YN(i, e) {
 }
 let mr, tq;
 async function rx() {
-  const [{ createBundledModelLibraryOptions: i }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-C2dAkMXo.js"), import("./model-library-cache-DiMFGzp9.js")]);
+  const [{ createBundledModelLibraryOptions: i }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-MYT7m7Al.js"), import("./model-library-cache-DiMFGzp9.js")]);
   return mr ?? (mr = i()), { ...mr, cache: e() };
 }
 async function lz() {

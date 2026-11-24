@@ -52,9 +52,17 @@ try {
             return binary;
         };
     });
-    await page.getByRole('button', {name: 'Model library', exact: true}).click();
+    await page.evaluate(() => window.__bwCad.editor.executeCommand('robot-projects'));
     const library = page.getByRole('dialog', {name: 'Model library', exact: true});
-    await library.getByLabel('Model type', {exact: true}).selectOption('models');
+    const filter = library.getByLabel('Model type', {exact: true});
+    assert.equal(await filter.inputValue(), 'projects');
+    await library.getByRole('button', {name: /Scout TT rover.*Robot project/}).click();
+    await library.getByRole('button', {name: 'Open Scout TT rover project', exact: true}).waitFor();
+    assert.deepEqual([...libraryScripts].map(path => /model-library-(panel|local)-/.exec(path)[1]), ['panel'],
+        'robot projects do not request the parts catalogue');
+    assert.equal(await page.evaluate(() => window.__cadLibraryManifestParses.count), 0);
+    console.log('PASS CAD robot projects browse without requesting or parsing the parts catalogue');
+    await filter.selectOption('models');
     const cards = library.locator('.model-library-card');
     const first = library.locator('.model-library-card:has(.model-card-meta) img[src*="/cad-sdk/previews/"]').first();
     await first.waitFor();
