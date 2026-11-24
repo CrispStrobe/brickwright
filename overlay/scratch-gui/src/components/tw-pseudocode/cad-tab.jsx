@@ -143,6 +143,7 @@ const CadTab = ({vm, isVisible, docked, locale, theme, onEditProgram, onOpenCirc
                     cadSave:action(label('Save CAD design (.bcad)…','CAD-Modell speichern (.bcad)…'),'save'),
                     cadImport:action(label('Import STL or STEP into CAD…','STL oder STEP ins CAD importieren…'),'import'),
                     cadExport:action(label('Export CAD model…','CAD-Modell exportieren…'),'export',mounted.commandState.canExport),
+                    cadPrintability:action(label('Check printability…','Druckbarkeit prüfen…'),'printability',mounted.commandState.canExport),
                     cadRobotProjects:action(label('Robot projects…','Roboterprojekte…'),'robot-projects'),
                     cadLibrary:action(label('Model library…','Modellbibliothek…'),'model-library'),
                     ...Object.fromEntries([

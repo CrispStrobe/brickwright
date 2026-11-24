@@ -47244,7 +47244,7 @@ new TextEncoder();
 new Set(`
 param const let return scalar mm cm m in deg rad true false undef PI
 box cylinder frustum sphere hull empty choose forRange forValues union subtract intersect move rotate scale repeat mirror axisRotate resize affine polyhedron minkowski extrude extrudeProfile revolve assertCode
-rectangle2d circle2d polygon2d move2d rotate2d scale2d union2d subtract2d intersect2d hull2d text2d offset2d minkowski2d choose2d forRange2d forValues2d polygonGenerated2d pointRange pointValues pointConcat pointChoose sumRange filterAt formatSCAD formatText
+rectangle2d circle2d polygon2d move2d rotate2d scale2d union2d subtract2d intersect2d hull2d text2d offset2d minkowski2d choose2d forRange2d forValues2d polygonGenerated2d spurGear2d internalSpurGear2d pointRange pointValues pointConcat pointChoose sumRange filterAt formatSCAD formatText
 sin cos tan asin acos atan atan2 sqrt abs floor ceil round exp ln log pow min max norm cross len concat lookup str chr ord search version rands sign
 cube sphere polygon square circle text translate color offset linear_extrude rotate_extrude projection surface import render children module function include use each assert echo for if else intersection_for difference intersection
 break case catch class continue debugger default delete do export extends finally function import instanceof new null super switch this throw try typeof var void while with yield await enum implements interface package private protected public static of arguments eval undefined NaN Infinity Math require module exports main params
