@@ -33,7 +33,14 @@ export function judgeSky(r,{native=false}={}){
  assert.ok(Math.min(...all.map(s=>s.freeMm))>=80);assert.ok(Math.max(...rows.map(s=>Math.abs(s.tie[2])))<=2);
  const peak=key=>{const row=rows.reduce((a,b)=>b[key]>a[key]?b:a);return {value:row[key],stage:row.stage,time:row.t};};
  const bounds=Object.fromEntries(['gap','axis','tilt','baseTravel'].map(key=>[key,peak(key)]));
- assert.ok(max(rows,'gap')<=.5&&max(rows,'axis')<=1&&max(rows,'tilt')<=1&&max(rows,'baseTravel')<=2,`Sky: hinge closure and freestanding frame: ${JSON.stringify(bounds)}`);
+ // baseTravel 2 -> 2.5 mm on 2026-11-24, re-measured. The frame does not jump: it creeps along z at
+ // ~0.08 mm/s while one winch runs (left:move, right:move) and creeps back on the return, the
+ // motor-reaction walk the resting-creep notes describe. Its peak was 1.925 mm (left:settle) when
+ // the 2 mm bound was set; 155ef476d (2026-11-15) correctly replaced 64179's solid-window collider
+ // with four rails, which changes the two payload frames' mass distribution, and the same program
+ // now peaks at 2.356 mm (bit-identical locally and on CI run 45318622606). Restoring only the old
+ // 64179 colliders brings back 1.925; its connectors are not involved. Tilt, gap and axis are unchanged.
+ assert.ok(max(rows,'gap')<=.5&&max(rows,'axis')<=1&&max(rows,'tilt')<=1&&max(rows,'baseTravel')<=2.5,`Sky: hinge closure and freestanding frame: ${JSON.stringify(bounds)}`);
  const settled={};
  for(const [stage,target]of Object.entries({top:[0,-24,0],left:[-20,-12,0],right:[20,-12,0],home:[0,0,0]})){
   const samples=rows.filter(s=>s.stage===stage+':settle');assert.ok(samples.length);const end=samples.at(-1).t,window=samples.filter(s=>s.t>=end-500-1e-6);
