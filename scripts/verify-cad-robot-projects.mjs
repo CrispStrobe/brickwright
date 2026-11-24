@@ -69,7 +69,17 @@ await page.addInitScript(()=>{localStorage.setItem('bw-starter-v1-complete','1')
   const history=times.boardHistory||=[];
   if(history.at(-1)?.ids!==ids)history.push({ids,elapsedMs:performance.now()-times.clicked});
  });
- window.addEventListener('bw-cad-circuit-status',e=>{if(e.detail?.phase==='running'&&window.__proofRunTimes?.running==null&&window.__proofRunTimes)window.__proofRunTimes.running=performance.now();});
+ window.addEventListener('bw-cad-circuit-status',event=>{
+  const times=window.__proofRunTimes,status=event.detail;
+  if(!times||status?.phase!=='running')return;
+  const wall=performance.now();
+  times.running??=wall;
+  if(status.time>0){
+   const sample={wall,sim:status.time};
+   times.firstSimFrame??=sample;
+   times.lastSimFrame=sample;
+  }
+ });
  window.__proofSamples=[];
  setInterval(()=>{
   const sim=window.__bwCad?.editor.simulation,times=window.__proofRunTimes;
@@ -89,6 +99,45 @@ await page.addInitScript(()=>{localStorage.setItem('bw-starter-v1-complete','1')
   requestAnimationFrame(raf);
  };requestAnimationFrame(raf);
  for(const type of [window.WebGLRenderingContext,window.WebGL2RenderingContext]){if(!type)continue;const clear=type.prototype.clear;type.prototype.clear=function(...args){if(this.canvas?.dataset.testid==='cad-canvas'){const d=window.__proofDraws;d.count++;if(d.lastFrame===d.frame)d.duplicate++;d.lastFrame=d.frame;}return clear.apply(this,args);};}
+});
+if(process.env.PROOF_PHASES==='1')await page.addInitScript(()=>{
+ const timing=window.__phaseTiming={electrical:[],mechanical:[],startup:[],interval:[]};
+ const boards=new WeakSet();
+ window.addEventListener('bw-circuit-clock-owner',event=>{
+  const board=event.detail?.board;
+  if(!board||boards.has(board))return;
+  boards.add(board);
+  const advanceTo=board.advanceTo;
+  board.advanceTo=function(...args){
+   const start=performance.now();
+   try{return advanceTo.apply(this,args);}
+   finally{timing.electrical.push(performance.now()-start);}
+  };
+ });
+ const OriginalWorker=window.Worker;
+ window.Worker=class extends OriginalWorker{
+  constructor(url,options){
+   super(url,options);
+   if(!/simulation\.worker/.test(String(url)))return;
+   const post=this.postMessage,requests=new Map();
+   let previous;
+   this.postMessage=function(message,...rest){
+    if(message.op==='actuator-step'||message.op==='start'){
+     const now=performance.now();
+     if(message.op==='actuator-step'&&previous!==undefined)timing.interval.push(now-previous);
+     if(message.op==='actuator-step')previous=now;
+     requests.set(message.request,{start:now,bucket:message.op==='start'?'startup':'mechanical'});
+    }
+    return post.call(this,message,...rest);
+   };
+   this.addEventListener('message',event=>{
+    const request=requests.get(event.data?.request);
+    if(!request)return;
+    requests.delete(event.data.request);
+    timing[request.bucket].push(performance.now()-request.start);
+   });
+  }
+ };
 });
 const wait=fn=>page.waitForFunction(fn,null,{timeout:180000,polling:100});const out=process.env.PROOF_OUT||'artifacts/cad-robot-projects';await mkdir(out,{recursive:true});
 try{
@@ -177,6 +226,16 @@ await wait(()=>{const s=window.__brickwrightStore.getState().scratchGui.vm.runti
   const sorted=frameGaps.sort((a,b)=>a-b);after.browserTiming={clickedToMotionMs:clicked!=null&&firstMotion!=null?firstMotion-clicked:null,mechanicalPreparationMs:acquireExternalClockStart!=null&&acquireExternalClockEnd!=null?acquireExternalClockEnd-acquireExternalClockStart:null,frameP95Ms:sorted[Math.floor(sorted.length*.95)]??null,frameMaxMs:sorted.at(-1)??null,marks};
   delete after.runTimes.frameGaps;
   after.wallSeconds=(performance.now()-runStarted)/1000;after.averageRealTimeFactor=after.frame.time/after.wallSeconds;after.preparationSeconds=after.runTimes.running==null?null:(after.runTimes.running-after.runTimes.requested)/1000;after.runningRealTimeFactor=after.runTimes.running==null?null:after.frame.time/((after.runTimes.finished-after.runTimes.running)/1000);await writeFile(`${out}/debug-${item.id}.json`,JSON.stringify({state:after.state,frame:after.frame,draws:after.draws,wallSeconds:after.wallSeconds,averageRealTimeFactor:after.averageRealTimeFactor,preparationSeconds:after.preparationSeconds,runningRealTimeFactor:after.runningRealTimeFactor,browserTiming:after.browserTiming,boardParts:after.boardParts},null,2));assert.equal(after.state.phase,'running',after.state.error);assert.equal(after.source,source);if(process.env.PROOF_DRAW_BUDGET==='1')assert.ok(after.draws.duplicate<=5,`simulation must coalesce rendering, got ${after.draws.duplicate} duplicate scene draws`);
+  if(process.env.PROOF_PHASES==='1')await writeFile(`${out}/phases-${item.id}.json`,JSON.stringify(await page.evaluate(()=>window.__phaseTiming),null,2));
+  const {firstSimFrame,lastSimFrame}=after.runTimes;
+  if(firstSimFrame&&lastSimFrame.wall>firstSimFrame.wall){
+   after.sustainedRealTimeFactor=(lastSimFrame.sim-firstSimFrame.sim)*1000/(lastSimFrame.wall-firstSimFrame.wall);
+  }
+  if(process.env.PROOF_MIN_RTF!==undefined){
+   const minimum=Number(process.env.PROOF_MIN_RTF);
+   assert.ok(Number.isFinite(minimum)&&minimum>0,'PROOF_MIN_RTF must be a positive number');
+   assert.ok(after.sustainedRealTimeFactor>=minimum,`${item.name} sustained ${after.sustainedRealTimeFactor?.toFixed(3)}×, below ${minimum}×`);
+  }
   if(item.id==='robot-quasar-press'&&process.env.PROOF_DEFAULT==='1'){
    const samples=await page.evaluate(()=>window.__proofSamples);
    await writeFile(`${out}/quasar-cycle-frames.json`,JSON.stringify(samples));
