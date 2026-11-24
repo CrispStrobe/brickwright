@@ -23,6 +23,16 @@ try {
     await page.evaluate(() => {
         const decode = window.atob;
         window.__cadLibraryDecode = {files: 0, bytes: 0};
+        const parse = JSON.parse;
+        window.__cadLibraryManifestParses = {count: 0, characters: 0};
+        JSON.parse = function (text, reviver) {
+            const result = parse.call(this, text, reviver);
+            if (typeof text === 'string' && /^\s*\{\s*"format"\s*:\s*"brickwright-(?:local-(?:example|fixture)-library|model-library)"/.test(text)) {
+                window.__cadLibraryManifestParses.count++;
+                window.__cadLibraryManifestParses.characters += text.length;
+            }
+            return result;
+        };
         window.atob = value => {
             const binary = decode(value);
             if (binary.length >= 84 && (binary.length - 84) % 50 === 0) {
@@ -74,6 +84,9 @@ try {
     console.log(`PASS embedded CAD: 36 mounted cards of ${modelCount} models; ${visible} initial previews; later pages and archive search work`);
     assert.deepEqual(await page.evaluate(() => window.__cadLibraryDecode), {files: 0, bytes: 0},
         'opening, searching and selecting in the gallery must not decode bundled STL geometry');
+    const manifests = await page.evaluate(() => window.__cadLibraryManifestParses);
+    assert.equal(manifests.count, 10, 'each catalog manifest should be parsed once');
+    console.log(`PASS cold CAD catalog: ${manifests.count} parses, ${manifests.characters} manifest characters`);
     await search.fill('10 mm geometric cube fixture');
     await library.getByRole('button', {name: /^10 mm geometric cube fixture · /}).click();
     await page.context().setOffline(true);

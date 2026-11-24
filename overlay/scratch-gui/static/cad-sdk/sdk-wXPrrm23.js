@@ -59363,7 +59363,7 @@ function yF(t, e) {
 }
 let yr, hf;
 async function wg() {
-  const [{ createBundledModelLibraryOptions: t }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-BV5_deqZ.js"), import("./model-library-cache-DiMFGzp9.js")]);
+  const [{ createBundledModelLibraryOptions: t }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-C1dzjXTM.js"), import("./model-library-cache-DiMFGzp9.js")]);
   return yr ?? (yr = t()), { ...yr, cache: e() };
 }
 async function CF() {
