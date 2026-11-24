@@ -293,7 +293,9 @@ class MenuBar extends React.Component {
         // The Robot provider additionally requires the full tab's explicit
         // visibility, so an unshown arena dock cannot supply commands here.
         if (surface === 'robots') return surface;
-        if (surface === 'cad') return surface;
+        // The full CAD tab can open from Costumes while the global Undo surface
+        // still refers to the previous tab. The CAD provider checks visibility.
+        if (surface === 'cad' || editorMenuActionEnabled('cad', 'cadNew')) return 'cad';
         return null;
     }
     refreshAssetMenuItems () {
