@@ -61,16 +61,6 @@ const messages = defineMessages({
         description: 'Label for button that converts the paint editor to vector mode',
         id: 'paint.paintEditor.vector'
     },
-    bitmapShort: {
-        defaultMessage: 'Bitmap',
-        description: 'Short label of the button that converts the paint editor to bitmap mode, used when space is tight',
-        id: 'paint.paintEditor.bitmapShort'
-    },
-    vectorShort: {
-        defaultMessage: 'Vector',
-        description: 'Short label of the button that converts the paint editor to vector mode, used when space is tight',
-        id: 'paint.paintEditor.vectorShort'
-    },
     canvasOnly: {
         defaultMessage: 'Focus on canvas',
         description: 'Hide paint editor tools and panels to focus on the canvas',
@@ -90,8 +80,7 @@ const messages = defineMessages({
 
 const PaintEditorComponent = props => {
     const [canvasOnly, setCanvasOnly] = React.useState(false);
-    // The tool's own options (brush size, presets) are the first thing in the scrolling strip.
-    // Choosing a tool brings them back into view instead of leaving them scrolled off to the left.
+    // Reset the scrolling strip when the active tool changes its controls.
     const commandStrip = React.useRef(null);
     React.useEffect(() => {
         if (commandStrip.current) commandStrip.current.scrollLeft = 0;
@@ -147,6 +136,7 @@ const PaintEditorComponent = props => {
                         </InputGroup>
                     <div className={styles.commandStrip} ref={commandStrip} role="toolbar" data-testid="bw-paint-command-strip">
 
+                        <div className={styles.fileActions}>{props.editorTools}</div>
                         <FixedToolsContainer
                             canRedo={props.canRedo} canUndo={props.canUndo} name={props.name}
                             onRedo={props.onRedo} onUndo={props.onUndo}
@@ -160,7 +150,6 @@ const PaintEditorComponent = props => {
                             <BitmapSelectionControls />
                             <BitmapLayersControls onUpdateImage={props.onUpdateImage} />
                         </React.Fragment> : null}
-                        <div className={styles.fileActions}>{props.editorTools}</div>
                     </div>
                     {/* Zoom and canvas focus stay pinned at the end of the bar while the rest of it scrolls. */}
                     <div className={styles.viewActions} data-testid="bw-paint-view-actions">
@@ -177,11 +166,8 @@ const PaintEditorComponent = props => {
                                     draggable={false}
                                     src={bitmapIcon}
                                 />
-                                <span className={classNames(styles.buttonText, styles.convertLong)}>
+                                <span className={styles.buttonText}>
                                     {props.intl.formatMessage(isVector(props.format) ? messages.bitmap : messages.vector)}
-                                </span>
-                                <span aria-hidden="true" className={classNames(styles.buttonText, styles.convertShort)}>
-                                    {props.intl.formatMessage(isVector(props.format) ? messages.bitmapShort : messages.vectorShort)}
                                 </span>
                             </Button> : null
                         }
@@ -369,6 +355,7 @@ const PaintEditorComponent = props => {
                 <BwGridLayer key="grid" />,
                 canvasOnly ? null : <BwPropertiesPanel
                     key="properties"
+                    precisionDrawing={props.precisionDrawing}
                     onUpdateImage={props.onUpdateImage}
                 />
             ] : null}
@@ -381,6 +368,7 @@ PaintEditorComponent.propTypes = {
     onEditorMenuActions: PropTypes.func,
     editorMenuOwner: PropTypes.string,
     editorTools: PropTypes.node,
+    precisionDrawing: PropTypes.bool,
     artworkDocument: PropTypes.object,
     canRedo: PropTypes.func.isRequired,
     canUndo: PropTypes.func.isRequired,

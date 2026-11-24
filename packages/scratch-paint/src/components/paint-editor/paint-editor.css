@@ -2,6 +2,7 @@
 @import "../../css/units.css";
 
 .editor-container {
+    container: bw-paint / inline-size;
     width: 100%;
     min-width: 0;
     box-sizing: border-box;
@@ -336,12 +337,16 @@ $border-radius: 0.25rem;
     justify-content: center;
 }
 
-[dir="ltr"] .bitmap-button-icon {
-    margin-right: calc(2 * $grid-unit);
+.bitmap-button {
+    min-width: 44px;
+    min-height: 44px;
+    padding-inline: $grid-unit;
 }
 
-[dir="rtl"] .bitmap-button-icon {
-    margin-left: calc(2 * $grid-unit);
+@container bw-paint (min-width: 1500px) {
+    .bitmap-button {
+        gap: $grid-unit;
+    }
 }
 
 @media only screen and (max-width: $full-size-paint) {
@@ -438,19 +443,22 @@ $border-radius: 0.25rem;
     flex: 0 0 auto;
 }
 
-/* The Bitmap/Vector toggle is pinned beside zoom and focus. The full "Convert to ..." wording shows
-   while there is room; a narrow pane shows the target ("Bitmap" / "Vector"), the full wording stays
-   as its accessible name and tooltip. */
-.convert-short {
+/* Keep accessible names and tooltips available when the toolbar runs out of room. */
+.command-row [data-bw-paint-label] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.command-row .button-text {
     display: none;
 }
 
-@media only screen and (max-width: 1100px) {
-    .convert-long {
-        display: none;
-    }
-
-    .convert-short {
+@container bw-paint (min-width: 1500px) {
+    .command-row .button-text {
         display: inline;
     }
 }
