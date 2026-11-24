@@ -1427,6 +1427,7 @@ jobs:
           node scripts/verify-emitted-native-broker-proof.mjs packages/scratch-gui/build
           node scripts/package-upstream-notices.mjs --check --build-dir packages/scratch-gui/build
           node scripts/verify-built-cad-sdk.mjs packages/scratch-gui/build
+          node scripts/verify-built-cad-robot-projects.mjs packages/scratch-gui/build
 
       - name: Verify shipped CAD worker telemetry
         if: ${{ !cancelled() && steps.build_editor.outcome == 'success' }}
