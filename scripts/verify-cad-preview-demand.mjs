@@ -12,14 +12,18 @@ try {
         localStorage.setItem('bw-right-pane-hidden', '1');
     });
     const requested = new Set();
+    const libraryScripts = new Set();
     page.on('request', request => {
         const path = new URL(request.url()).pathname;
         if (path.includes('/cad-sdk/previews/')) requested.add(path);
+        if (/\/cad-sdk\/model-library-(?:panel|local)-[^/]+\.js$/.test(path)) libraryScripts.add(path);
     });
     await page.goto(process.argv[2] || 'http://127.0.0.1:8242/', {waitUntil: 'commit'});
     await page.getByRole('tab', {name: 'CAD', exact: true}).click();
     await page.waitForFunction(() => window.__bwCad?.editor);
     assert.equal(requested.size, 0);
+    assert.equal(await page.locator('.model-library-dialog').count(), 0, 'CAD startup leaves the library unmounted');
+    assert.equal(libraryScripts.size, 0, 'CAD startup makes no library script requests');
     await page.evaluate(() => {
         const decode = window.atob;
         window.__cadLibraryDecode = {files: 0, bytes: 0};
@@ -74,6 +78,9 @@ try {
     assert.ok(await original.evaluate(node => node.getRootNode().activeElement === node), 'selection keeps keyboard focus');
     await library.getByLabel('Search models', {exact: true}).fill(title);
     assert.ok(await original.evaluate(node => node.isConnected), 'a card that still matches a search stays mounted');
+    assert.equal(libraryScripts.size, 2, 'opening the library loads the panel and catalogue scripts');
+    assert.equal(await page.locator('.model-library-dialog').count(), 1);
+    console.log('PASS CAD startup defers the library panel and archive until first open');
     console.log('PASS selecting and narrowing the CAD library retains the matching card');
     const search = library.getByLabel('Search models', {exact: true});
     await search.fill('');

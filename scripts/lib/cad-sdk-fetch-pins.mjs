@@ -6,18 +6,19 @@ import path from 'node:path';
 
 export const CAD_SDK_ROOT = 'overlay/scratch-gui/static/cad-sdk';
 export const CAD_SDK_PRODUCER = 'scripts/sync-cad-sdk.mjs';
-export const APPROVED_CAD_MANIFEST_SHA256 = '8989851ed5e0e3c4e5b07f6c35e7bee75fdd0391cc973207242334916f2cc9c2';
+export const APPROVED_CAD_MANIFEST_SHA256 = 'de42c3b3d8c80f13653155262283a64bcefe301ad070026a5eb25ade3b2f12ba';
 export const APPROVED_CAD_PRODUCER_SHA256 = '5d1f4ef4cef65b68306cd147237409bd6a77b485137be05b8f66b05dafdf0e7c';
 const SHA = /^[0-9a-f]{40}$/;
 const HASH = /^[0-9a-f]{64}$/;
-const CARRIER = /^model-library-local-[A-Za-z0-9_-]+\.js$/;
-export const APPROVED_CAD_COMMIT = '696b60e7632eee3d1af9aceed98e0939001b1532';
-export const APPROVED_CAD_CARRIER = 'model-library-local-Dak3hdVz.js';
-export const APPROVED_CAD_CARRIER_SHA256 = '599c5e52441982da6bb1eb96e6b75da2d728bfe2c1542446c307db6c113e7318';
+const CARRIER = /^model-library-(?:local|panel)-[A-Za-z0-9_-]+\.js$/;
+export const APPROVED_CAD_COMMIT = 'cb1d38c554bc2fc0b65949f26941f3c0b23ac085';
+export const APPROVED_CAD_CARRIER = 'model-library-local-C2dAkMXo.js';
+export const APPROVED_CAD_CARRIER_SHA256 = 'f49930811c480c15f3451dccfeea682449a6c489ace0fb3037418f33e55d4918';
 
 export const APPROVED_CAD_CARRIERS = Object.freeze({
     [APPROVED_CAD_CARRIER]: APPROVED_CAD_CARRIER_SHA256,
-    'sdk-DBP84-9T.js': '0fe4011fe1d6f41fcd9dbfe2465fc68cdd081932d815c08a0c4ef75d6aa2b405'
+    'sdk-CEFfIDhH.js': 'f8486907cd50285fa497ea09af6e7e95135f89566efa357b0aead2912996a329',
+    'model-library-panel-8R78SXHP.js': '8ed2e691d5a481b4355ad4cc3385184373b3084f3741216e5dceb9227d69ca43'
 });
 
 // Structural validation is not approval. Only the exact frozen carrier below
@@ -67,7 +68,7 @@ export function cadSdkFetchPins(root, tracked, detectors) {
         return absolute;
     };
     const manifestBytes = readFileSync(inside('manifest.json'));
-    // Freeze the entire map, not only the two carriers: no adjusted payload hash
+    // Freeze the entire map, including all carriers: no adjusted payload hash
     // or additional manifest entry can borrow this admission.
     assert.equal(createHash('sha256').update(manifestBytes).digest('hex'), APPROVED_CAD_MANIFEST_SHA256, 'CAD SDK manifest needs exact approved bytes');
     const manifest = JSON.parse(manifestBytes);
