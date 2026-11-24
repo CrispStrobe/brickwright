@@ -350,39 +350,26 @@ export const createSimView3D = ({container, model, mechanism, read, catalog = nu
         return hit ? hit.object.name.replace(/#hub$/, '') : null;
     }});
 
-    // A big (instanced) model is drawn on demand: a frame where no body moved, the camera stayed,
-    // the size and the overlay are the same and nothing pulses is not drawn again — the pane's
-    // animation loop asks every frame, and redrawing thousands of unchanged parts would keep the
-    // page busy for nothing. Small models are drawn every frame, as always.
-    const onDemand = Boolean(built.instanced);
+    // The pane requests a frame on every animation tick. Only submit WebGL work
+    // when the scene changes, including while waiting for a worker snapshot.
     let dirty = true;
     const sampleDrawing = snapshot => {
         if (sampleDrawingSnapshot({built, pens, snapshot})) dirty = true;
     };
-    let lastBodies = null;
-    // Float64: the camera matrix is doubles, and a float32 copy differs from it in nearly every
-    // element, so "the camera moved" was true every frame and an idle big model was redrawn forever
-    // (seconds a frame on a software GPU, queueing up behind whatever comes next).
-    const lastCamera = new Float64Array(16);
-    const lastSize = new Vector2();
-    const changed = (snapshot, size) => {
-        let moved = false;
-        const bodies = snapshot && snapshot.bodies;
-        if (bodies && (!lastBodies || lastBodies.length !== bodies.length || bodies.some((v, i) => v !== lastBodies[i]))) {
-            lastBodies = Float64Array.from(bodies);
-            moved = true;
+    let drawnBodies = null;
+    let drawnTime;
+    // Three.js keeps the camera matrix in double precision.
+    const drawnCamera = new Float64Array(16);
+    const renderSize = new Vector2();
+    const changed = snapshot => {
+        const bodies = snapshot?.bodies;
+        if (bodies && (!drawnBodies || drawnBodies.length !== bodies.length || bodies.some((v, i) => v !== drawnBodies[i]))) {
+            return true;
         }
+        // Distance readings can change on a step without changing the visible poses.
+        if (rays.visible && snapshot?.t !== drawnTime) return true;
         camera.updateMatrixWorld();
-        const cam = camera.matrixWorld.elements;
-        if (cam.some((v, i) => v !== lastCamera[i])) {
-            lastCamera.set(cam);
-            moved = true;
-        }
-        if (!size.equals(lastSize)) {
-            lastSize.copy(size);
-            moved = true;
-        }
-        return moved || pulse.count > 0;
+        return pulse.count > 0 || camera.matrixWorld.elements.some((v, i) => v !== drawnCamera[i]);
     };
     controls.addEventListener('change', () => { dirty = true; });
 
@@ -394,13 +381,12 @@ export const createSimView3D = ({container, model, mechanism, read, catalog = nu
     const gpuFrames = createGpuFrameQueue(renderer.getContext());
     const render = (snapshot, {force = false} = {}) => {
         if (resize({defer: !force}) === null) return;
-        if (onDemand && !force && !dirty && !changed(snapshot, renderer.getSize(new Vector2()))) {
-            const size = renderer.getSize(new Vector2());
+        const size = renderer.getSize(renderSize);
+        if (!force && !dirty && !changed(snapshot)) {
             measurementOverlay.update(measurementRows ? measurementRows() : [], camera, size.x, size.y);
             return;
         }
-        if (!force && gpuFrames.busy()) { dirty = true; return; }
-        dirty = false;
+        if (!force && gpuFrames.busy()) return;
         if (snapshot) applySnapshot(built, snapshot);
         if (snapshot && chainMotion) chainMotion.update();
         if (snapshot && simBelts) simBelts.update();
@@ -409,9 +395,8 @@ export const createSimView3D = ({container, model, mechanism, read, catalog = nu
         if (snapshot && simRopes) simRopes.update();
         if (snapshot && simHoses) simHoses.update();
         const centre = (followPartId && partCentre(followPartId)()) || followFrame?.position.clone() || massCentre() || modelBox().getCenter(new Vector3());
-        if (followed && centre) {
-            const delta = centre.clone().sub(followed);
-            delta.y = 0;
+        if (followed && centre && (followed.x !== centre.x || followed.z !== centre.z)) {
+            const delta = new Vector3(centre.x - followed.x, 0, centre.z - followed.z);
             camera.position.add(delta);
             controls.target.add(delta);
             controls.update();
@@ -421,11 +406,17 @@ export const createSimView3D = ({container, model, mechanism, read, catalog = nu
         pulse.tick(performance.now());
         built.scene.updateMatrixWorld();
         camera.updateMatrixWorld();
-        const size = renderer.getSize(new Vector2());
         insight.update(camera, size.x, size.y);
         measurementOverlay.update(measurementRows ? measurementRows() : [], camera, size.x, size.y);
         renderer.render(built.scene, camera);
         gpuFrames.submitted();
+        if (snapshot?.bodies) {
+            if (drawnBodies?.length !== snapshot.bodies.length) drawnBodies = new Float64Array(snapshot.bodies.length);
+            drawnBodies.set(snapshot.bodies);
+        }
+        drawnTime = snapshot?.t;
+        drawnCamera.set(camera.matrixWorld.elements);
+        dirty = false;
     };
 
     const dispose = () => {
@@ -514,7 +505,7 @@ export const createSimView3D = ({container, model, mechanism, read, catalog = nu
             return {min: box.min.toArray(), max: box.max.toArray(), corners};
         },
         /** What the last frame cost: three's draw calls and triangles, GPU objects, and the instancing (scale gate). */
-        // `frames`: frames drawn so far (three counts each render), so a gate can see an idle big model is not redrawn.
+        // `frames`: frames drawn so far (three counts each render), so a gate can see whether an idle view is redrawn.
         renderStats: () => ({calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, lines: renderer.info.render.lines,
             frames: renderer.info.render.frame,
             geometries: renderer.info.memory.geometries, programs: renderer.info.programs?.length ?? null,

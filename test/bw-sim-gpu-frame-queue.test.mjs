@@ -12,7 +12,8 @@ function context() {
 const source=readFileSync(new URL('../overlay/scratch-gui/src/lib/bw-sim/view/sim-view3d.js',import.meta.url),'utf8');
 const renderMethod=source.slice(source.indexOf('    const render = (snapshot'),source.indexOf('    const dispose = () =>',source.indexOf('    const render = (snapshot')));
 const resizeMethod=source.slice(source.indexOf('    const resize = ('),source.indexOf('    // Follow the chassis',source.indexOf('    const resize = (')));
-function view(gl,{onDemand=false,changed=()=>true,now}={}) {
+const frameState=source.slice(source.indexOf('    let drawnBodies'),source.indexOf("    controls.addEventListener('change'"));
+function view(gl,{now}={}) {
     const queue=createGpuFrameQueue(gl,now),drawn=[],overlays=[];let pose=null,shown=true;
     const noop=()=>{};
     const dimensions={clientWidth:100,clientHeight:100},sizes=[],browserWindow={devicePixelRatio:1};
@@ -21,19 +22,19 @@ function view(gl,{onDemand=false,changed=()=>true,now}={}) {
         setPixelRatio:r=>{ratio=r;presented=null;},
         setSize:(w,h)=>{width=w;height=h;presented=null;sizes.push([w,h]);},
         render:()=>{drawn.push(pose);presented=pose;}};
-    const camera={updateMatrixWorld:noop,updateProjectionMatrix:noop};
-    const scope={gpuFrames:queue,container:dimensions,window:browserWindow,onDemand,changed,renderer,
+    const camera={updateMatrixWorld:noop,updateProjectionMatrix:noop,matrixWorld:{elements:new Float64Array(16)}};
+    const scope={gpuFrames:queue,container:dimensions,window:browserWindow,rays:{visible:false},renderer,
         Vector2:class{},Vector3:class{},applySnapshot:(_b,s)=>{pose=s.pose;},
         built:{scene:{updateMatrixWorld:noop}},chainMotion:null,simBelts:null,pens:null,
         drawingPreview:null,simRopes:null,simHoses:null,followPartId:null,partCentre:noop,
         followFrame:null,massCentre:()=>null,modelBox:()=>({getCenter:()=>null}),
-        camera,controls:{},updateSensors:noop,pulse:{tick:noop},insight:{update:noop},
+        camera,controls:{},updateSensors:noop,pulse:{tick:noop,count:0},insight:{update:noop},
         measurementRows:()=>shown?[{pose}]:[],measurementOverlay:{update:rows=>overlays.push(rows.map(r=>r.pose))}};
-    const {render,resize}=new Function(...Object.keys(scope),`let dirty=true,followed=null;${resizeMethod}${renderMethod}return {render,resize};`)(...Object.values(scope));
-    return{render,resize,drawn,queue,overlays,dimensions,browserWindow,sizes,get presented(){return presented;},hideMeasurements:()=>{shown=false;}};
+    const {render,resize}=new Function(...Object.keys(scope),`let dirty=true,followed=null;${resizeMethod}${frameState}${renderMethod}return {render,resize};`)(...Object.values(scope));
+    return{render:(snapshot,options)=>render({bodies:[snapshot.pose],...snapshot},options),resize,drawn,queue,overlays,dimensions,browserWindow,sizes,get presented(){return presented;},hideMeasurements:()=>{shown=false;}};
 }
 test('a pixel-ratio-only resize redraws an otherwise unchanged on-demand scene',()=>{
-    const gl=context(),v=view(gl,{onDemand:true,changed:()=>false});
+    const gl=context(),v=view(gl);
     v.render({pose:1});gl.signaled=true;
     v.browserWindow.devicePixelRatio=2;
     v.render({pose:1});
@@ -42,7 +43,7 @@ test('a pixel-ratio-only resize redraws an otherwise unchanged on-demand scene',
     assert.equal(v.presented,1);
 });
 test('the public resize API defers a busy buffer and keeps the following frame dirty',()=>{
-    const gl=context(),v=view(gl,{onDemand:true,changed:()=>false});
+    const gl=context(),v=view(gl);
     v.render({pose:1});v.browserWindow.devicePixelRatio=2;
     assert.equal(v.resize(),null,'external resize respects the pending frame');
     assert.equal(v.presented,1);
@@ -54,7 +55,7 @@ test('the public resize API defers a busy buffer and keeps the following frame d
     assert.equal(v.resize(),false,'an unchanged resize leaves the buffer intact');
 });
 test('a layout resize retains the displayed paused frame until the GPU admits its replacement',()=>{
-    const gl=context(),v=view(gl,{onDemand:true,changed:()=>false});
+    const gl=context(),v=view(gl);
     v.render({pose:1});
     v.dimensions.clientHeight=80;
     v.render({pose:2});v.render({pose:3});
@@ -76,10 +77,20 @@ test('the actual Simulate render method coalesces a busy GPU to the latest physi
     assert.deepEqual(v.overlays,[[0],[40]],'measurement labels advance with the newly drawn pose');
 });
 test('an unchanged on-demand scene can hide measurement labels without another GPU submission',()=>{
-    const gl=context(),v=view(gl,{onDemand:true,changed:()=>false});
+    const gl=context(),v=view(gl);
     v.render({pose:1});v.hideMeasurements();v.render({pose:1});
     assert.deepEqual(v.drawn,[1]);assert.deepEqual(v.overlays,[[1],[]]);
     assert.equal(v.queue.pending,1,'visibility changes do not create an extra frame fence');
+});
+test('idle draws are skipped and a pending pose can return to the drawn pose',()=>{
+    const gl=context(),v=view(gl);
+    v.render({pose:1});
+    v.render({pose:2}); // GPU still has pose 1 in flight.
+    gl.signaled=true;
+    v.render({pose:1});
+    assert.deepEqual(v.drawn,[1]);
+    v.render({pose:2});
+    assert.deepEqual(v.drawn,[1,2]);
 });
 test('forced captures retain one covering fence and release it on disposal',()=>{
     const gl=context(),v=view(gl);v.render({pose:0});v.dimensions.clientHeight=80;v.render({pose:1},{force:true});

@@ -31,6 +31,23 @@ try {
         const state = window.__bwSimLab?._pane.state;
         return state?.shipped === 'twistspan.ldr' && state.status === 'ready' && !state.programLoading && state.view3d === 'webgl';
     });
+    if (process.env.BW_CHECK_IDLE_RENDER === '1') {
+        const idleFrames = await page.evaluate(async () => {
+            const view = window.__bwSimLab._pane.view;
+            const waitFrames = async count => {
+                for (let i = 0; i < count; i++) await new Promise(resolve => requestAnimationFrame(resolve));
+            };
+            await waitFrames(12);
+            const before = view.renderStats().frames;
+            await waitFrames(12);
+            return view.renderStats().frames - before;
+        });
+        console.log(`Idle TwistSpan draws over 12 animation frames: ${idleFrames}`);
+        assert.equal(idleFrames, 0);
+        const beforeOrbit = await page.evaluate(() => window.__bwSimLab._pane.view.renderStats().frames);
+        await page.getByTestId('bw-sim-lab-3d-canvas').press('ArrowRight');
+        await page.waitForFunction(before => window.__bwSimLab._pane.view.renderStats().frames > before, beforeOrbit);
+    }
     const before = await page.evaluate(() => window.__bwSimLab._pane.view.partScreenPoint('lower_tie_80'));
     assert.ok(before && Number.isFinite(before.x));
     await page.getByTestId('bw-sim-lab-run').click();
