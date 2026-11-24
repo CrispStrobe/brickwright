@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 
 const browser = await chromium.launch({executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
+let releaseCatalogue;
+const catalogueReady = new Promise(resolve => { releaseCatalogue = resolve; });
 try {
     const page = await browser.newPage({viewport: {width: 1440, height: 900}, locale: 'en-US', serviceWorkers: 'block'});
     page.setDefaultTimeout(90000);
@@ -10,6 +12,10 @@ try {
         localStorage.setItem('bw-starter-v1-complete', '1');
         localStorage.setItem('bw-cad-enabled', '1');
         localStorage.setItem('bw-right-pane-hidden', '1');
+    });
+    await page.route('**/cad-sdk/model-library-local-*.js', async route => {
+        await catalogueReady;
+        await route.continue();
     });
     const requested = new Set();
     const libraryScripts = new Set();
@@ -63,6 +69,16 @@ try {
     assert.equal(await page.evaluate(() => window.__cadLibraryManifestParses.count), 0);
     console.log('PASS CAD robot projects browse without requesting or parsing the parts catalogue');
     await filter.selectOption('models');
+    const archiveCards = library.locator('[data-archive-folder]');
+    assert.equal(await archiveCards.count(), 0, 'opening the default grid does not render temporary archive cards');
+    assert.equal(requested.size, 0, 'the pending first page makes no thumbnail requests');
+    const search = library.getByLabel('Search models', {exact: true});
+    await search.fill('5128 MacroPad');
+    assert.equal(await archiveCards.count(), 1, 'explicit archive search works while the catalogue is pending');
+    await search.fill('');
+    assert.equal(await archiveCards.count(), 0, 'clearing the search restores the stable loading grid');
+    releaseCatalogue();
+    console.log('PASS the initial CAD grid avoids temporary archive cards; searching still finds them');
     const cards = library.locator('.model-library-card');
     const first = library.locator('.model-library-card:has(.model-card-meta) img[src*="/cad-sdk/previews/"]').first();
     await first.waitFor();
@@ -90,7 +106,6 @@ try {
     assert.equal(await page.locator('.model-library-dialog').count(), 1);
     console.log('PASS CAD startup defers the library panel and archive until first open');
     console.log('PASS selecting and narrowing the CAD library retains the matching card');
-    const search = library.getByLabel('Search models', {exact: true});
     await search.fill('');
     const forward = library.getByRole('button', {name: 'Next page', exact: true});
     const back = library.getByRole('button', {name: 'Previous page', exact: true});
@@ -144,6 +159,20 @@ try {
     await library.getByText(/Editable source inserted with provenance/).waitFor();
     await page.waitForFunction(() => window.__bwCad.editor.session.state.document.roots.length > 0);
     console.log('PASS bundled file decoding stays out of browsing and editable source still inserts offline');
+
+    const fallback = await browser.newPage({viewport: {width: 1440, height: 900}, locale: 'en-US', serviceWorkers: 'block'});
+    await fallback.addInitScript(() => {
+        localStorage.setItem('bw-starter-v1-complete', '1');
+        localStorage.setItem('bw-cad-enabled', '1');
+    });
+    await fallback.route('**/cad-sdk/model-library-local-*.js', route => route.abort());
+    await fallback.goto(page.url(), {waitUntil: 'commit'});
+    await fallback.getByRole('tab', {name: 'CAD', exact: true}).click();
+    await fallback.getByRole('button', {name: 'Model library', exact: true}).click();
+    await fallback.getByRole('dialog', {name: 'Model library', exact: true}).locator('[data-archive-folder]').first().waitFor();
+    assert.ok(await fallback.getByLabel('Model library status', {exact: true}).textContent());
+    console.log('PASS Adafruit cards are browsable when the parts catalogue request fails');
 } finally {
+    releaseCatalogue();
     await browser.close();
 }

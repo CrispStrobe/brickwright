@@ -40,3 +40,5 @@ Catalog construction parses each source manifest once and reuses its records for
 The CAD editor mounts the Model Library on first open. The library code, Adafruit archive metadata and bundled catalogue run outside editor startup. The standalone service worker still caches the library scripts for offline use.
 
 The Robot projects view loads project cards independently of the parts catalogue. Switching to a model filter loads the parts catalogue on demand.
+
+The initial CAD grid waits for the parts catalogue before showing the default Adafruit cards. Search can still find Adafruit parts while the catalogue loads.

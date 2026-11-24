@@ -1,4 +1,4 @@
-import { v as Ae, s as Me, n as ge, c as ba, i as Ma, a as Pa, b as Ta, g as Ca, d as Aa, e as ca, t, p as Ba, f as Fa, h as Ea, j as Da, k as Ra, l as La, m as Ia } from "./sdk-8opInUYJ.js";
+import { v as Be, s as Me, n as ge, c as ba, i as Ma, a as Pa, b as Ta, g as Ca, d as Aa, e as ca, t, p as Ba, f as Fa, h as Ea, j as Da, k as Ra, l as La, m as Ia } from "./sdk-3UNaqT39.js";
 async function ja(w, i) {
   if (!w.body)
     throw new Error("Model library response has no readable body.");
@@ -34,10 +34,10 @@ const xa = (w) => {
   }
 };
 async function va(w, i, s) {
-  const u = Ae(w);
+  const u = Be(w);
   if (!u.valid)
     throw new Error(`Invalid model library catalogue: ${u.errors.join(" ")}`);
-  const h = u.catalogue.assets.find((L) => L.id === i.assetId);
+  const h = u.catalogue.assets.find((R) => R.id === i.assetId);
   if (!h)
     throw new Error("Unknown model library asset.");
   const k = i.file, g = k === "original" ? h.original : k === "editableSource" ? h.editableSource : k && typeof k == "object" && Number.isInteger(k.derivative) && k.derivative >= 0 ? h.derivatives[k.derivative] : void 0;
@@ -49,7 +49,7 @@ async function va(w, i, s) {
   if (!Number.isSafeInteger(m) || m <= 0 || g.bytes > m)
     throw new Error("Model library file exceeds the configured byte limit.");
   s.signal?.throwIfAborted();
-  const d = async (L) => L.byteLength === g.bytes && await Me(L) === g.sha256;
+  const d = async (R) => R.byteLength === g.bytes && await Me(R) === g.sha256;
   let y;
   try {
     y = await s.cache.read(g.sha256, g.bytes);
@@ -71,21 +71,21 @@ async function va(w, i, s) {
   if (!l.ok || l.url && !xa(l.url))
     throw l.body?.cancel().catch(() => {
     }), new Error("Model library download failed or redirected to an unsafe URL.");
-  const B = await ja(l, g.bytes);
-  if (s.signal?.throwIfAborted(), !await d(B))
+  const E = await ja(l, g.bytes);
+  if (s.signal?.throwIfAborted(), !await d(E))
     throw new Error("Model library file size or SHA-256 mismatch.");
-  let R = !1;
+  let L = !1;
   try {
-    await s.cache.write(g.sha256, B.slice()), R = !0;
+    await s.cache.write(g.sha256, E.slice()), L = !0;
   } catch {
   }
-  return { bytes: B, source: "network", cached: R };
+  return { bytes: E, source: "network", cached: L };
 }
-const oa = "brickwright-stl-quality/1", ie = 16 * 1024 * 1024, ye = 83333, Ge = "[+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][+-]?\\d+)?", Na = new RegExp(`^(${Ge})\\s+(${Ge})\\s+(${Ge})$`);
+const oa = "brickwright-stl-quality/1", ie = 16 * 1024 * 1024, ke = 83333, Ge = "[+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][+-]?\\d+)?", Na = new RegExp(`^(${Ge})\\s+(${Ge})\\s+(${Ge})$`);
 function ra(w) {
   const i = new DataView(w.buffer, w.byteOffset, w.byteLength), s = w.length >= 84 ? i.getUint32(80, !0) : 0;
   if (s && w.length === 84 + s * 50) {
-    if (s > ye)
+    if (s > ke)
       throw new Error("Triangle analysis budget exceeded.");
     const d = [];
     for (let y = 0; y < s; y++)
@@ -105,13 +105,13 @@ function ra(w) {
     const y = h[k++] ?? "", p = d.exec(y), l = p && Na.exec(y.slice(p[0].length));
     if (!l)
       throw new Error("Invalid ASCII STL facet.");
-    const B = l.slice(1).map(Number);
-    if (!B.every(Number.isFinite))
+    const E = l.slice(1).map(Number);
+    if (!E.every(Number.isFinite))
       throw new Error("Non-finite STL data.");
-    return B;
+    return E;
   };
   for (; /^facet\b/i.test(h[k] ?? ""); ) {
-    if (g.length / 9 >= ye)
+    if (g.length / 9 >= ke)
       throw new Error("Triangle analysis budget exceeded.");
     if (m(/^facet\s+normal\s+/i), !/^outer\s+loop$/i.test(h[k++] ?? ""))
       throw new Error("Missing STL outer loop.");
@@ -125,10 +125,10 @@ function ra(w) {
   return g;
 }
 async function ia(w, i) {
-  const s = Array.from(i.toMillimetresZUp), u = i.checkedOn, h = i.maxTriangles ?? ye, k = i.maxExtentMm ?? 1e3, g = s[0] * (s[5] * s[10] - s[9] * s[6]) - s[4] * (s[1] * s[10] - s[9] * s[2]) + s[8] * (s[1] * s[6] - s[5] * s[2]);
+  const s = Array.from(i.toMillimetresZUp), u = i.checkedOn, h = i.maxTriangles ?? ke, k = i.maxExtentMm ?? 1e3, g = s[0] * (s[5] * s[10] - s[9] * s[6]) - s[4] * (s[1] * s[10] - s[9] * s[2]) + s[8] * (s[1] * s[6] - s[5] * s[2]);
   if (s.length !== 16 || !s.every(Number.isFinite) || s[3] !== 0 || s[7] !== 0 || s[11] !== 0 || s[15] !== 1 || !Number.isFinite(g) || g === 0)
     throw new Error("An invertible source-to-mm affine conversion is required.");
-  if (!Number.isSafeInteger(h) || h < 1 || h > ye || !Number.isFinite(k) || k <= 0)
+  if (!Number.isSafeInteger(h) || h < 1 || h > ke || !Number.isFinite(k) || k <= 0)
     throw new Error("Invalid mesh admission limits.");
   if (!/^\d{4}-\d{2}-\d{2}$/.test(u) || !Number.isFinite(Date.parse(u)) || new Date(u).toISOString().slice(0, 10) !== u)
     throw new Error("A valid quality capture date is required.");
@@ -138,61 +138,61 @@ async function ia(w, i) {
     fileSha256: await Me(m),
     toolVersion: oa,
     checkedOn: u,
-    policy: { maxTriangles: h, maxExtentMm: k, toMillimetresZUp: s, maxAnalysisBytes: ie, maxAnalysisTriangles: ye },
+    policy: { maxTriangles: h, maxExtentMm: k, toMillimetresZUp: s, maxAnalysisBytes: ie, maxAnalysisTriangles: ke },
     checks: { parseable: "unchecked", closedPositiveVolume: "unchecked", withinSizeLimits: "unchecked", withinTriangleLimits: "unchecked" },
     diagnostics: []
   };
   let y;
   try {
     y = ra(m);
-  } catch (c) {
-    const o = c instanceof Error ? c.message : "STL parse failed.";
+  } catch (b) {
+    const o = b instanceof Error ? b.message : "STL parse failed.";
     return o.includes("budget exceeded") ? d.checks.withinTriangleLimits = "fail" : d.checks.parseable = "fail", d.diagnostics.push(o), d;
   }
   d.checks.parseable = "pass", d.triangles = y.length / 9, d.checks.withinTriangleLimits = d.triangles <= h ? "pass" : "fail";
-  const p = [], l = /* @__PURE__ */ new Map(), B = [], R = [1 / 0, 1 / 0, 1 / 0], L = [-1 / 0, -1 / 0, -1 / 0];
-  for (let c = 0; c < y.length; c += 3) {
-    const [o, I, F] = y.slice(c, c + 3), C = [0, 1, 2].map((S) => s[S] * o + s[S + 4] * I + s[S + 8] * F + s[S + 12]);
-    if (!C.every(Number.isFinite))
+  const p = [], l = /* @__PURE__ */ new Map(), E = [], L = [1 / 0, 1 / 0, 1 / 0], R = [-1 / 0, -1 / 0, -1 / 0];
+  for (let b = 0; b < y.length; b += 3) {
+    const [o, j, D] = y.slice(b, b + 3), A = [0, 1, 2].map((S) => s[S] * o + s[S + 4] * j + s[S + 8] * D + s[S + 12]);
+    if (!A.every(Number.isFinite))
       return d.checks.withinSizeLimits = "fail", d.diagnostics.push("Conversion exceeds finite coordinate range."), d;
     for (let S = 0; S < 3; S++)
-      R[S] = Math.min(R[S], C[S]), L[S] = Math.max(L[S], C[S]);
-    const j = C.join(",");
-    let P = l.get(j);
-    P === void 0 && (P = p.length, l.set(j, P), p.push(C)), c % 9 === 0 && B.push([]), B[B.length - 1].push(P);
+      L[S] = Math.min(L[S], A[S]), R[S] = Math.max(R[S], A[S]);
+    const x = A.join(",");
+    let P = l.get(x);
+    P === void 0 && (P = p.length, l.set(x, P), p.push(A)), b % 9 === 0 && E.push([]), E[E.length - 1].push(P);
   }
-  d.boundsMm = { min: R, max: L }, d.checks.withinSizeLimits = L.every((c, o) => c - R[o] <= k) ? "pass" : "fail";
-  const N = /* @__PURE__ */ new Map(), H = p.map(() => /* @__PURE__ */ new Map());
+  d.boundsMm = { min: L, max: R }, d.checks.withinSizeLimits = R.every((b, o) => b - L[o] <= k) ? "pass" : "fail";
+  const I = /* @__PURE__ */ new Map(), v = p.map(() => /* @__PURE__ */ new Map());
   let $ = !0, _ = 0;
-  for (const c of B) {
-    const [o, I, F] = c.map((P) => p[P].map((S, ee) => S - R[ee])), C = I.map((P, S) => P - o[S]), j = F.map((P, S) => P - o[S]);
-    Math.hypot(C[1] * j[2] - C[2] * j[1], C[2] * j[0] - C[0] * j[2], C[0] * j[1] - C[1] * j[0]) === 0 && ($ = !1), _ += (o[0] * (I[1] * F[2] - I[2] * F[1]) + o[1] * (I[2] * F[0] - I[0] * F[2]) + o[2] * (I[0] * F[1] - I[1] * F[0])) / 6;
+  for (const b of E) {
+    const [o, j, D] = b.map((P) => p[P].map((S, ee) => S - L[ee])), A = j.map((P, S) => P - o[S]), x = D.map((P, S) => P - o[S]);
+    Math.hypot(A[1] * x[2] - A[2] * x[1], A[2] * x[0] - A[0] * x[2], A[0] * x[1] - A[1] * x[0]) === 0 && ($ = !1), _ += (o[0] * (j[1] * D[2] - j[2] * D[1]) + o[1] * (j[2] * D[0] - j[0] * D[2]) + o[2] * (j[0] * D[1] - j[1] * D[0])) / 6;
     for (let P = 0; P < 3; P++) {
-      const S = c[P], ee = c[(P + 1) % 3], G = c[(P + 2) % 3], q = S < ee ? `${S},${ee}` : `${ee},${S}`, Q = N.get(q) ?? { count: 0, direction: 0 };
-      Q.count++, Q.direction += S < ee ? 1 : -1, N.set(q, Q);
-      for (const [X, ae] of [[ee, G], [G, ee]]) {
-        const Y = H[S].get(X) ?? [];
-        Y.push(ae), H[S].set(X, Y);
+      const S = b[P], ee = b[(P + 1) % 3], X = b[(P + 2) % 3], q = S < ee ? `${S},${ee}` : `${ee},${S}`, W = I.get(q) ?? { count: 0, direction: 0 };
+      W.count++, W.direction += S < ee ? 1 : -1, I.set(q, W);
+      for (const [G, ae] of [[ee, X], [X, ee]]) {
+        const Y = v[S].get(G) ?? [];
+        Y.push(ae), v[S].set(G, Y);
       }
     }
   }
-  [...N.values()].some((c) => c.count !== 2 || c.direction !== 0) && ($ = !1);
-  for (const c of H) {
-    if ([...c.values()].some((F) => F.length !== 2)) {
+  [...I.values()].some((b) => b.count !== 2 || b.direction !== 0) && ($ = !1);
+  for (const b of v) {
+    if ([...b.values()].some((D) => D.length !== 2)) {
       $ = !1;
       break;
     }
-    const o = /* @__PURE__ */ new Set(), I = [c.keys().next().value];
-    for (; I.length; ) {
-      const F = I.pop();
-      o.has(F) || (o.add(F), I.push(...c.get(F)));
+    const o = /* @__PURE__ */ new Set(), j = [b.keys().next().value];
+    for (; j.length; ) {
+      const D = j.pop();
+      o.has(D) || (o.add(D), j.push(...b.get(D)));
     }
-    if (o.size !== c.size) {
+    if (o.size !== b.size) {
       $ = !1;
       break;
     }
   }
-  return d.signedVolumeMm3 = _, d.checks.closedPositiveVolume = $ && Number.isFinite(_) && _ > 0 ? "pass" : "fail", d.checks.closedPositiveVolume === "fail" && d.diagnostics.push("Mesh must have nondegenerate, consistently oriented closed manifold topology and positive signed volume."), Object.values(d.checks).every((c) => c !== "unchecked") && (d.quality = {
+  return d.signedVolumeMm3 = _, d.checks.closedPositiveVolume = $ && Number.isFinite(_) && _ > 0 ? "pass" : "fail", d.checks.closedPositiveVolume === "fail" && d.diagnostics.push("Mesh must have nondegenerate, consistently oriented closed manifold topology and positive signed volume."), Object.values(d.checks).every((b) => b !== "unchecked") && (d.quality = {
     fileSha256: d.fileSha256,
     toolVersion: d.toolVersion,
     checkedOn: d.checkedOn,
@@ -205,10 +205,10 @@ async function ia(w, i) {
 }
 async function Xe(w, i, s, u, h) {
   h.signal?.throwIfAborted();
-  const k = h.signal, g = w.state, m = Ae(i);
+  const k = h.signal, g = w.state, m = Be(i);
   if (!m.valid)
     throw new Error(`Invalid model library catalogue: ${m.errors.join(" ")}`);
-  const d = m.catalogue.assets.find((G) => G.id === s.assetId);
+  const d = m.catalogue.assets.find((X) => X.id === s.assetId);
   if (!d)
     throw new Error("Unknown model library asset.");
   const y = s.file, p = y === "original" ? d.original : y && typeof y == "object" && Number.isInteger(y.derivative) && y.derivative >= 0 ? d.derivatives[y.derivative] : void 0;
@@ -218,48 +218,48 @@ async function Xe(w, i, s, u, h) {
     throw new Error("STL exceeds the 16 MiB analysis budget.");
   if (u.byteLength !== p.bytes)
     throw new Error("Model library file size or SHA-256 mismatch.");
-  const l = d.quality, B = l?.screeningPolicy;
-  if (!l || l.fileSha256 !== p.sha256 || !l.parseable || !l.closedPositiveVolume || !l.withinSizeLimits || !l.withinTriangleLimits || !B)
+  const l = d.quality, E = l?.screeningPolicy;
+  if (!l || l.fileSha256 !== p.sha256 || !l.parseable || !l.closedPositiveVolume || !l.withinSizeLimits || !l.withinTriangleLimits || !E)
     throw new Error("Selected STL requires passing curated quality and a reproducible screening policy.");
-  if (u.byteLength > B.maxAnalysisBytes)
+  if (u.byteLength > E.maxAnalysisBytes)
     throw new Error("STL exceeds its curated analysis byte budget.");
-  const R = Array.from(h.toMillimetresZUp);
-  if (JSON.stringify(R) !== JSON.stringify(B.toMillimetresZUp))
+  const L = Array.from(h.toMillimetresZUp);
+  if (JSON.stringify(L) !== JSON.stringify(E.toMillimetresZUp))
     throw new Error("Selected STL conversion must match its curated screening policy.");
-  const L = h.checkedOn, N = h.modificationNotes, H = h.evaluate;
-  if (typeof N != "string" || !N.trim() || N.length > 4096 || /[\u0000-\u001f]/.test(N))
+  const R = h.checkedOn, I = h.modificationNotes, v = h.evaluate;
+  if (typeof I != "string" || !I.trim() || I.length > 4096 || /[\u0000-\u001f]/.test(I))
     throw new Error("Explicit incorporation modification notes are required.");
-  const $ = h.maxTriangles ?? Math.min(B.maxTriangles, B.maxAnalysisTriangles, ye), _ = h.maxExtentMm ?? B.maxExtentMm;
-  if ($ > B.maxTriangles || _ > B.maxExtentMm)
+  const $ = h.maxTriangles ?? Math.min(E.maxTriangles, E.maxAnalysisTriangles, ke), _ = h.maxExtentMm ?? E.maxExtentMm;
+  if ($ > E.maxTriangles || _ > E.maxExtentMm)
     throw new Error("Insertion limits cannot relax the curated screening policy.");
-  const c = new Uint8Array(u);
-  if (await Me(c) !== p.sha256)
+  const b = new Uint8Array(u);
+  if (await Me(b) !== p.sha256)
     throw new Error("Model library file size or SHA-256 mismatch.");
-  const o = await ia(c, { toMillimetresZUp: R, checkedOn: L, maxTriangles: $, maxExtentMm: _ });
-  if (!Object.values(o.checks).every((G) => G === "pass"))
+  const o = await ia(b, { toMillimetresZUp: L, checkedOn: R, maxTriangles: $, maxExtentMm: _ });
+  if (!Object.values(o.checks).every((X) => X === "pass"))
     throw new Error(`Selected STL failed fresh quality screening. ${o.diagnostics.join(" ")}`);
   k?.throwIfAborted();
-  const I = ra(c), F = [];
-  for (let G = 0; G < I.length; G += 3) {
-    const [q, Q, X] = I.slice(G, G + 3);
+  const j = ra(b), D = [];
+  for (let X = 0; X < j.length; X += 3) {
+    const [q, W, G] = j.slice(X, X + 3);
     for (let ae = 0; ae < 3; ae++)
-      F.push(R[ae] * q + R[ae + 4] * Q + R[ae + 8] * X + R[ae + 12]);
+      D.push(L[ae] * q + L[ae + 4] * W + L[ae + 8] * G + L[ae + 12]);
   }
-  const C = ge(), j = ge(), P = { format: "brickwright-cad", id: ge(), version: 5, title: d.title, units: "mm", roots: [C], nodes: {
-    [C]: {
-      id: C,
+  const A = ge(), x = ge(), P = { format: "brickwright-cad", id: ge(), version: 5, title: d.title, units: "mm", roots: [A], nodes: {
+    [A]: {
+      id: A,
       kind: "mesh",
       name: d.title,
       color: "#eea52b",
       transform: ca(),
-      positions: F,
-      indices: Array.from({ length: F.length / 3 }, (G, q) => q),
-      provenance: [j]
+      positions: D,
+      indices: Array.from({ length: D.length / 3 }, (X, q) => q),
+      provenance: [x]
     }
-  }, provenance: { version: 1, records: [{ id: j, asset: d, selectedFile: p, modificationNotes: N }] } }, S = ba(g.document);
+  }, provenance: { version: 1, records: [{ id: x, asset: d, selectedFile: p, modificationNotes: I }] } }, S = ba(g.document);
   try {
     S.insert(P, [0, 0, 0], { label: "Insert library model" });
-    const q = (await H(S.state.document)).bodies.find((Q) => Q.id === S.state.selection[0]);
+    const q = (await v(S.state.document)).bodies.find((W) => W.id === S.state.selection[0]);
     if (!q || !Number.isFinite(q.volume) || q.volume <= 0 || !q.indices.length || !q.positions.every(Number.isFinite))
       throw new Error("Selected STL did not produce a finite positive-volume kernel body.");
   } finally {
@@ -276,7 +276,7 @@ async function ua(w, i, s, u, h) {
   const k = w.state, g = h.signal, m = h.evaluate, d = h.modificationNotes;
   if (typeof d != "string" || !d.trim() || d.length > 4096 || /[\u0000-\u001f]/.test(d))
     throw new Error("Explicit incorporation modification notes are required.");
-  const y = Ae(i);
+  const y = Be(i);
   if (!y.valid)
     throw new Error(`Invalid model library catalogue: ${y.errors.join(" ")}`);
   const p = y.catalogue.assets.find((P) => P.id === s.assetId);
@@ -289,40 +289,40 @@ async function ua(w, i, s, u, h) {
     throw new Error("Source exceeds 32 KiB or file size mismatch.");
   if (JSON.stringify(p.conversion.toMillimetresZUp) !== JSON.stringify([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]) || p.conversion.sourceUnits !== "mm" || p.conversion.sourceUpAxis !== "Z")
     throw new Error("Editable source requires millimetres/Z-up identity conversion.");
-  const B = u.slice();
-  if (await Me(B) !== l.sha256)
+  const E = u.slice();
+  if (await Me(E) !== l.sha256)
     throw new Error("Model library file size or SHA-256 mismatch.");
-  const R = new TextDecoder("utf-8", { fatal: !0, ignoreBOM: !0 }).decode(B), L = l.format === "jscad" ? Ma(R) : void 0, N = p.sourceBundle, H = N?.dependencies.map((P) => {
+  const L = new TextDecoder("utf-8", { fatal: !0, ignoreBOM: !0 }).decode(E), R = l.format === "jscad" ? Ma(L) : void 0, I = p.sourceBundle, v = I?.dependencies.map((P) => {
     const S = h.sourceFiles?.get(P.file.path);
     if (!S || S.byteLength !== P.file.bytes)
       throw new Error("OpenSCAD dependency is not available offline or its size differs.");
     return { path: P.path, source: new TextDecoder("utf-8", { fatal: !0, ignoreBOM: !0 }).decode(S.slice()), sha256: P.file.sha256 };
-  }), $ = N ? await Pa({ version: 1, rootPath: N.rootPath, files: [{ path: N.rootPath, source: R, sha256: l.sha256 }, ...H] }) : void 0;
+  }), $ = I ? await Pa({ version: 1, rootPath: I.rootPath, files: [{ path: I.rootPath, source: L, sha256: l.sha256 }, ...v] }) : void 0;
   g?.throwIfAborted();
-  const _ = $ ? $.program : L ? L.program : l.format === "openscad" ? Ta(R) : { version: 1, language: "brickwright-cad-script", source: R, parameters: {} }, c = l.format === "openscad" ? Ca(_) : L?.warnings ?? [], o = d + (l.format === "openscad" ? " OpenSCAD translated to editable CAD Script by the supported subset importer." : L ? ` JSCAD converted by the bounded subset interpreter to an editable CAD Script evaluated snapshot with default parameters ${JSON.stringify(L.parameters)}. Original JavaScript parameter definitions are not retained in the code node; no collision qualification.` : "") + (c.length ? " " + c.join(" ") : "");
+  const _ = $ ? $.program : R ? R.program : l.format === "openscad" ? Ta(L) : { version: 1, language: "brickwright-cad-script", source: L, parameters: {} }, b = l.format === "openscad" ? Ca(_) : R?.warnings ?? [], o = d + (l.format === "openscad" ? " OpenSCAD translated to editable CAD Script by the supported subset importer." : R ? ` JSCAD converted by the bounded subset interpreter to an editable CAD Script evaluated snapshot with default parameters ${JSON.stringify(R.parameters)}. Original JavaScript parameter definitions are not retained in the code node; no collision qualification.` : "") + (b.length ? " " + b.join(" ") : "");
   if (o.length > 4096)
     throw new Error("Incorporation modification notes exceed the provenance limit after recording source conversion.");
   Aa(_);
-  const I = ge(), F = ge(), C = { format: "brickwright-cad", id: ge(), version: 5, title: p.title, units: "mm", roots: [I], nodes: {
-    [I]: { id: I, kind: "code", program: _, name: p.title, color: "#76b7ce", transform: ca(), provenance: [F] }
-  }, provenance: { version: 1, records: [{ id: F, asset: p, selectedFile: l, modificationNotes: o }] } }, j = ba(k.document);
+  const j = ge(), D = ge(), A = { format: "brickwright-cad", id: ge(), version: 5, title: p.title, units: "mm", roots: [j], nodes: {
+    [j]: { id: j, kind: "code", program: _, name: p.title, color: "#76b7ce", transform: ca(), provenance: [D] }
+  }, provenance: { version: 1, records: [{ id: D, asset: p, selectedFile: l, modificationNotes: o }] } }, x = ba(k.document);
   try {
-    j.insert(C, [0, 0, 0], { label: "Insert library source" }), g?.throwIfAborted();
-    const S = (await m(j.state.document)).bodies.find((ee) => ee.id === j.state.selection[0]);
+    x.insert(A, [0, 0, 0], { label: "Insert library source" }), g?.throwIfAborted();
+    const S = (await m(x.state.document)).bodies.find((ee) => ee.id === x.state.selection[0]);
     if (!S || !Number.isFinite(S.volume) || S.volume <= 0 || !S.indices.length || !S.positions.every(Number.isFinite))
       throw new Error("Selected source did not produce a finite positive-volume kernel body.");
   } finally {
-    j.dispose();
+    x.dispose();
   }
   if (g?.throwIfAborted(), w.state.document !== k.document || w.state.revision !== k.revision)
     throw new Error("Project changed during model library insertion; retry against the current revision.");
-  w.insert(C, [0, 0, 0], { label: "Insert library source" });
+  w.insert(A, [0, 0, 0], { label: "Insert library source" });
 }
 const Ha = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   MODEL_LIBRARY_MESH_CHECK_VERSION: oa,
   MODEL_LIBRARY_MESH_MAX_BYTES: ie,
-  MODEL_LIBRARY_MESH_MAX_TRIANGLES: ye,
+  MODEL_LIBRARY_MESH_MAX_TRIANGLES: ke,
   assemblyCutJogs: Fa,
   checkModelLibrarySTL: ia,
   export3MF: Ea,
@@ -334,11 +334,11 @@ const Ha = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   insertModelLibrarySource: ua
 }, Symbol.toStringTag, { value: "Module" }));
 async function sa(w, i, s, u = globalThis.fetch, h = !1, k) {
-  if (!w.folders.some((H) => H.files.includes(i)))
+  if (!w.folders.some((v) => v.files.includes(i)))
     throw new Error("Unknown archive file.");
   if (!Number.isSafeInteger(i.bytes) || i.bytes < 0 || i.bytes > 64 * 1024 * 1024 || !/^[a-f0-9]{64}$/.test(i.sha256))
     throw new Error("Invalid archive file identity.");
-  const g = async (H) => H.length === i.bytes && await Me(H) === i.sha256;
+  const g = async (v) => v.length === i.bytes && await Me(v) === i.sha256;
   let m;
   try {
     m = await s.read(i.sha256, i.bytes);
@@ -359,34 +359,34 @@ async function sa(w, i, s, u = globalThis.fetch, h = !1, k) {
   const p = await u(d, { credentials: "omit", mode: "cors", redirect: "error", cache: "no-store", signal: k });
   if (!p.ok || !p.body)
     throw new Error("Archive download failed.");
-  const l = p.body.getReader(), B = [];
-  let R = 0;
+  const l = p.body.getReader(), E = [];
+  let L = 0;
   try {
     for (; ; ) {
-      const { done: H, value: $ } = await l.read();
-      if (H)
+      const { done: v, value: $ } = await l.read();
+      if (v)
         break;
-      if (R += $.byteLength, R > i.bytes)
+      if (L += $.byteLength, L > i.bytes)
         throw new Error("Archive file exceeds declared size.");
-      B.push($);
+      E.push($);
     }
-  } catch (H) {
+  } catch (v) {
     throw l.cancel().catch(() => {
-    }), H;
+    }), v;
   } finally {
     l.releaseLock();
   }
-  const L = new Uint8Array(R);
-  let N = 0;
-  for (const H of B)
-    L.set(H, N), N += H.length;
-  if (k?.throwIfAborted(), !await g(L))
+  const R = new Uint8Array(L);
+  let I = 0;
+  for (const v of E)
+    R.set(v, I), I += v.length;
+  if (k?.throwIfAborted(), !await g(R))
     throw new Error("Archive file size or SHA-256 mismatch.");
   try {
-    await s.write(i.sha256, L.slice());
+    await s.write(i.sha256, R.slice());
   } catch {
   }
-  return L;
+  return R;
 }
 function Oa() {
   const w = (s) => `https://brickwright.invalid/model-library/sha256/${s}`, i = () => {
@@ -439,10 +439,10 @@ async function Ua(w, i, s, u, h, k, g) {
   if (!["mm", "in"].includes(h) || !["Y", "Z"].includes(k))
     throw new Error("Choose source units and up axis.");
   const y = h === "mm" ? 1 : 25.4, p = k === "Z" ? [y, 0, 0, 0, 0, y, 0, 0, 0, 0, y, 0, 0, 0, 0, 1] : [y, 0, 0, 0, 0, 0, y, 0, 0, -y, 0, 0, 0, 0, 0, 1], l = await m(u, { toMillimetresZUp: p, checkedOn: g });
-  if (!l.quality || !Object.values(l.checks).every((H) => H === "pass"))
+  if (!l.quality || !Object.values(l.checks).every((v) => v === "pass"))
     throw new Error(`STL failed quality screening. ${l.diagnostics.join(" ")}`);
-  const B = w.baseUrl + s.path.split("/").map(encodeURIComponent).join("/"), R = `User selected ${h} and ${k} up; STL does not establish its own units or orientation.`, L = `adafruit-${s.sha256.slice(0, 32)}`;
-  return { catalogue: { format: "brickwright-model-library", version: 1, assets: [{ id: L, version: w.upstreamCommit, title: i.name, author: "Adafruit Industries", sourceUrl: B, sourceRevision: { repositoryUrl: "https://github.com/adafruit/Adafruit_CAD_Parts", commit: w.upstreamCommit }, licence: { spdx: "MIT", scope: "asset", attribution: `Adafruit Industries. ${w.licence.replace(/\s+/g, " ").trim()}`, evidenceUrl: w.licenceUrl, capturedOn: "2026-11-15", review: "accepted", reviewer: "Adafruit root licence review" }, original: { url: B, format: "stl", sha256: s.sha256, bytes: s.bytes }, derivatives: [], modificationNotes: "Original Adafruit STL; screened on demand without repair.", conversion: { sourceUnits: h, unitAssumption: R, sourceUpAxis: k, toMillimetresZUp: p }, quality: l.quality }] }, id: L, matrix: p, assumption: R };
+  const E = w.baseUrl + s.path.split("/").map(encodeURIComponent).join("/"), L = `User selected ${h} and ${k} up; STL does not establish its own units or orientation.`, R = `adafruit-${s.sha256.slice(0, 32)}`;
+  return { catalogue: { format: "brickwright-model-library", version: 1, assets: [{ id: R, version: w.upstreamCommit, title: i.name, author: "Adafruit Industries", sourceUrl: E, sourceRevision: { repositoryUrl: "https://github.com/adafruit/Adafruit_CAD_Parts", commit: w.upstreamCommit }, licence: { spdx: "MIT", scope: "asset", attribution: `Adafruit Industries. ${w.licence.replace(/\s+/g, " ").trim()}`, evidenceUrl: w.licenceUrl, capturedOn: "2026-11-15", review: "accepted", reviewer: "Adafruit root licence review" }, original: { url: E, format: "stl", sha256: s.sha256, bytes: s.bytes }, derivatives: [], modificationNotes: "Original Adafruit STL; screened on demand without repair.", conversion: { sourceUnits: h, unitAssumption: L, sourceUpAxis: k, toMillimetresZUp: p }, quality: l.quality }] }, id: R, matrix: p, assumption: L };
 }
 const Va = { title: "Adafruit CAD Parts", commit: "fb6c7632c50e9a1d58ab57167d6d3f9f9365ae73", upstreamCommit: "9f2a89f3d5c3491886d58cb7fe83385417563cf4", baseUrl: "https://raw.githubusercontent.com/CrispStrobe/brickwright-media-lab/fb6c7632c50e9a1d58ab57167d6d3f9f9365ae73/projects/adafruit-cad-parts/original/", licence: `MIT License
 
@@ -476,55 +476,55 @@ SOFTWARE.
 function Ga(w, i, s, u, h, k, g) {
   let m = { format: "brickwright-model-library", version: 1, assets: [] }, d = "";
   if (u?.catalogue) {
-    const e = Ae(u.catalogue);
+    const e = Be(u.catalogue);
     e.valid ? m = e.catalogue : d = e.errors.join(" ");
   }
   const y = Va, p = u?.cache ?? Oa();
-  let l, B;
-  const R = () => B ?? (B = import("./_brickwright_adafruit-previews-kwPfFXiu.js").then(({ default: e }) => {
+  let l, E;
+  const L = () => E ?? (E = import("./_brickwright_adafruit-previews-kwPfFXiu.js").then(({ default: e }) => {
     if (e.upstreamCommit !== y.upstreamCommit || e.archiveCommit !== y.commit)
       throw new Error("Adafruit preview source revision mismatch");
     l = e.previews;
   }).finally(() => {
-    B = void 0;
+    E = void 0;
   }));
-  let L, N = !u?.load;
-  const H = new Map([...u?.localFiles ?? []].map(([e, a]) => [e, a.slice()])), $ = (e) => H.has(e) || u?.bundledFiles?.has(e) === !0, _ = (e) => H.get(e) ?? u?.bundledFiles?.get(e);
-  let c = !1, o = !1, I, F, C, j;
+  let R, I = !u?.load;
+  const v = new Map([...u?.localFiles ?? []].map(([e, a]) => [e, a.slice()])), $ = (e) => v.has(e) || u?.bundledFiles?.has(e) === !0, _ = (e) => v.get(e) ?? u?.bundledFiles?.get(e);
+  let b = !1, o = !1, j, D, A, x;
   const P = n("dialog");
   P.className = "model-library-dialog", P.setAttribute("aria-label", t("Model library"));
-  const S = n("header"), ee = n("h2", t("Model library")), G = n("button", "×");
-  G.type = "button", G.className = "library-close", G.setAttribute("aria-label", t("Close model library")), G.title = t("Close model library"), G.onclick = () => {
-    C?.abort(), P.close();
-  }, S.append(ee, G);
+  const S = n("header"), ee = n("h2", t("Model library")), X = n("button", "×");
+  X.type = "button", X.className = "library-close", X.setAttribute("aria-label", t("Close model library")), X.title = t("Close model library"), X.onclick = () => {
+    A?.abort(), P.close();
+  }, S.append(ee, X);
   const q = n("div");
   q.className = "model-library-tools";
-  const Q = n("input");
-  Q.type = "search", Q.setAttribute("aria-label", t("Search models")), Q.placeholder = t("Search models");
-  const X = n("select");
-  X.setAttribute("aria-label", t("Model type"));
+  const W = n("input");
+  W.type = "search", W.setAttribute("aria-label", t("Search models")), W.placeholder = t("Search models");
+  const G = n("select");
+  G.setAttribute("aria-label", t("Model type"));
   for (const [e, a] of [["", "All models"], ...g?.items.length ? [["models", "CAD models only"], ["projects", "Robot projects"]] : [], ["source", "Editable source"], ["mesh", "Mesh"]]) {
     const f = n("option", t(a));
-    f.value = e, X.append(f);
+    f.value = e, G.append(f);
   }
   const ae = n("button", "…");
   ae.type = "button", ae.setAttribute("aria-label", t("Open catalogue JSON")), ae.title = t("Open catalogue JSON");
   const Y = n("input");
-  Y.type = "file", Y.accept = ".json,application/json", Y.hidden = !0, Y.setAttribute("aria-label", t("Catalogue file")), ae.onclick = () => Y.click(), q.append(Q, X, ae, Y);
+  Y.type = "file", Y.accept = ".json,application/json", Y.hidden = !0, Y.setAttribute("aria-label", t("Catalogue file")), ae.onclick = () => Y.click(), q.append(W, G, ae, Y);
   const je = n("div");
   je.className = "model-library-layout";
   const fe = n("div");
   fe.className = "model-library-list", fe.setAttribute("aria-label", t("Catalogue models"));
   const J = n("section");
   J.className = "model-library-details", je.append(fe, J);
-  const ke = n("div"), pe = n("button", "‹"), le = n("button", "›"), xe = n("span");
+  const we = n("div"), pe = n("button", "‹"), le = n("button", "›"), xe = n("span");
   let ce = 0, Pe = 1;
-  ke.className = "model-library-pages", ke.setAttribute("role", "group"), ke.setAttribute("aria-label", t("Model pages")), pe.type = le.type = "button", pe.setAttribute("aria-label", t("Previous page")), pe.title = t("Previous page"), le.setAttribute("aria-label", t("Next page")), le.title = t("Next page"), xe.setAttribute("aria-live", "polite"), pe.onclick = () => Ye(ce - 1), le.onclick = () => Ye(ce + 1), ke.append(pe, xe, le);
+  we.className = "model-library-pages", we.setAttribute("role", "group"), we.setAttribute("aria-label", t("Model pages")), pe.type = le.type = "button", pe.setAttribute("aria-label", t("Previous page")), pe.title = t("Previous page"), le.setAttribute("aria-label", t("Next page")), le.title = t("Next page"), xe.setAttribute("aria-live", "polite"), pe.onclick = () => Ye(ce - 1), le.onclick = () => Ye(ce + 1), we.append(pe, xe, le);
   const U = n("p");
-  U.className = "model-library-status", U.setAttribute("role", "status"), U.setAttribute("aria-label", t("Model library status")), U.textContent = d, P.append(S, q, je, ke, U), w.append(P), P.addEventListener("keydown", (e) => e.stopPropagation()), P.addEventListener("cancel", () => C?.abort());
+  U.className = "model-library-status", U.setAttribute("role", "status"), U.setAttribute("aria-label", t("Model library status")), U.textContent = d, P.append(S, q, je, we, U), w.append(P), P.addEventListener("keydown", (e) => e.stopPropagation()), P.addEventListener("cancel", () => A?.abort());
   const me = (e) => {
     U.textContent = e instanceof Error ? e.message : String(e);
-  }, Be = (e, a) => {
+  }, Fe = (e, a) => {
     const f = n("a", e);
     return f.href = a, f.target = "_blank", f.rel = "noopener noreferrer", f;
   }, ve = (e) => [e.editableSource, e.original].find((a) => a?.path && ["cad-script", "openscad", "jscad"].includes(a.format));
@@ -544,41 +544,41 @@ function Ga(w, i, s, u, h, k, g) {
       const f = n("span", "≡");
       return f.className = "preview-unavailable", f.title = t("Original source files"), f;
     }
-    const a = We(e.name, () => l ? l[e.name] : R().then(() => l?.[e.name]));
+    const a = We(e.name, () => l ? l[e.name] : L().then(() => l?.[e.name]));
     return a.dataset.adafruitPreview = e.name, a;
   }
   let ue = /* @__PURE__ */ new Map();
   const he = /* @__PURE__ */ new Map();
   let Ne, Ke = !1, He = u?.previews, $e = m;
-  const Fe = n("p"), qe = /* @__PURE__ */ new WeakMap();
+  const Ee = n("p"), qe = /* @__PURE__ */ new WeakMap();
   function Oe(e, a, f) {
     if (!a.length)
       return !0;
-    let b = qe.get(e);
-    return b === void 0 && (b = da(f(e)), qe.set(e, b)), a.every((E) => b.includes(E));
+    let c = qe.get(e);
+    return c === void 0 && (c = da(f(e)), qe.set(e, c)), a.every((C) => c.includes(C));
   }
   const ha = (e) => `${e.title} ${e.author} ${e.licence.spdx}`, pa = (e) => `${e.name} Adafruit ${e.files.map((a) => a.path).join(" ")}`, la = (e) => `${e.title} ${e.note ?? ""}`;
-  function ma(e) {
+  function ma(e, a) {
     return {
-      assets: e === "projects" ? [] : m.assets.filter((a) => !e || e === "models" || e === "source" == !!ve(a)),
-      folders: ["source", "projects"].includes(e) ? [] : y.folders.filter((a) => e !== "mesh" || a.files.some((f) => f.format === "stl")),
+      assets: e === "projects" ? [] : m.assets.filter((f) => !e || e === "models" || e === "source" == !!ve(f)),
+      folders: !a || ["source", "projects"].includes(e) ? [] : y.folders.filter((f) => e !== "mesh" || f.files.some((c) => c.format === "stl")),
       projects: !e || e === "projects" ? g?.items ?? [] : []
     };
   }
-  let Ee;
+  let Te;
   function ya() {
-    const e = X.value, a = da(Q.value).trim().split(/\s+/).filter(Boolean), f = a.join(" "), b = Ee?.catalogue === m && Ee.mode === e ? Ee : void 0;
-    if (b?.query === f)
-      return b.models;
-    const D = b?.terms.every((v) => a.some((x) => x.includes(v))) && b ? b.models : ma(e), T = a.length ? {
-      assets: D.assets.filter((v) => Oe(v, a, ha)),
-      folders: D.folders.filter((v) => Oe(v, a, pa)),
-      projects: D.projects.filter((v) => Oe(v, a, la))
-    } : D;
-    return Ee = { catalogue: m, mode: e, query: f, terms: a, models: T }, T;
+    const e = G.value, a = da(W.value).trim().split(/\s+/).filter(Boolean), f = a.join(" "), c = I || !R || a.length > 0, C = Te?.catalogue === m && Te.mode === e && Te.includeArchive === c ? Te : void 0;
+    if (C?.query === f)
+      return C.models;
+    const T = C?.terms.every((B) => a.some((H) => H.includes(B))) && C ? C.models : ma(e, c), Q = a.length ? {
+      assets: T.assets.filter((B) => Oe(B, a, ha)),
+      folders: T.folders.filter((B) => Oe(B, a, pa)),
+      projects: T.projects.filter((B) => Oe(B, a, la))
+    } : T;
+    return Te = { catalogue: m, mode: e, includeArchive: c, query: f, terms: a, models: Q }, Q;
   }
   function se() {
-    const e = j ?? I ?? F, a = e ? ue.get(e) : void 0;
+    const e = x ?? j ?? D, a = e ? ue.get(e) : void 0;
     if (Ne !== a && (Ne?.setAttribute("aria-pressed", "false"), a?.setAttribute("aria-pressed", "true"), Ne = a), Ke !== o) {
       for (const f of ue.values())
         f.disabled = o;
@@ -587,7 +587,7 @@ function Ga(w, i, s, u, h, k, g) {
     pe.disabled = o || ce === 0, le.disabled = o || ce + 1 >= Pe;
   }
   function Ye(e) {
-    o || e < 0 || e >= Pe || (ce = e, fe.scrollTop = 0, we());
+    o || e < 0 || e >= Pe || (ce = e, fe.scrollTop = 0, ye());
   }
   function De() {
     ce = 0, fe.scrollTop = 0;
@@ -595,7 +595,7 @@ function Ga(w, i, s, u, h, k, g) {
   function Ue(e) {
     const a = n("button");
     return a.type = "button", a.className = "model-library-card", a.disabled = o, a.setAttribute("aria-pressed", "false"), a.onclick = () => {
-      o || (e(), se(), Ce());
+      o || (e(), se(), Ae());
     }, a;
   }
   function Ve(e) {
@@ -608,63 +608,63 @@ function Ga(w, i, s, u, h, k, g) {
   function ka(e, a) {
     const f = a.querySelector("img[data-library-preview]");
     if (!(f && (!f.complete || !f.naturalWidth)) && (he.set(e, a), he.size > Ie)) {
-      const b = he.keys().next();
-      b.done || he.delete(b.value);
+      const c = he.keys().next();
+      c.done || he.delete(c.value);
     }
   }
-  function we() {
+  function ye() {
     const e = $e === m && He === u?.previews;
     e || he.clear();
-    const a = fe.scrollTop, { assets: f, folders: b, projects: E } = ya(), D = E.length + f.length + b.length;
-    Pe = Math.max(1, Math.ceil(D / Ie)), ce = Math.min(ce, Pe - 1);
-    const T = ce * Ie, v = T + Ie, x = (r, M) => r.slice(Math.max(0, T - M), Math.max(0, v - M));
-    fe.dataset.modelCount = String(D), ke.hidden = D === 0, pe.hidden = le.hidden = Pe === 1, D && (xe.textContent = t`${T + 1}–${Math.min(D, v)} of ${D} models`);
-    const V = /* @__PURE__ */ new Map();
-    for (const r of x(E, 0)) {
+    const a = fe.scrollTop, { assets: f, folders: c, projects: C } = ya(), N = C.length + f.length + c.length;
+    Pe = Math.max(1, Math.ceil(N / Ie)), ce = Math.min(ce, Pe - 1);
+    const T = ce * Ie, Q = T + Ie, B = (r, M) => r.slice(Math.max(0, T - M), Math.max(0, Q - M));
+    fe.dataset.modelCount = String(N), we.hidden = N === 0, pe.hidden = le.hidden = Pe === 1, N && (xe.textContent = t`${T + 1}–${Math.min(N, Q)} of ${N} models`);
+    const H = /* @__PURE__ */ new Map();
+    for (const r of B(C, 0)) {
       let M = Ve(r);
       M || (M = Ue(() => {
-        j = r, I = void 0, F = void 0;
-      }), M.append(na(r), n("strong", r.title), n("small", t("Robot project · Includes code")))), V.set(r, M);
+        x = r, j = void 0, D = void 0;
+      }), M.append(na(r), n("strong", r.title), n("small", t("Robot project · Includes code")))), H.set(r, M);
     }
-    for (const r of x(f, E.length)) {
+    for (const r of B(f, C.length)) {
       let M = He === u?.previews ? Ve(r) : void 0;
       if (!M) {
         M = Ue(() => {
-          j = void 0, I = r, F = void 0;
+          x = void 0, j = r, D = void 0;
         }), M.setAttribute("aria-label", `${r.title} · ${r.licence.spdx}`);
         const z = n("span");
         z.className = "model-card-meta", z.append(ze(r), n("small", ve(r) ? t("Editable source") : t("Mesh"))), M.append(Je(r), n("strong", r.title), z);
       }
-      V.set(r, M);
+      H.set(r, M);
     }
-    for (const r of x(b, E.length + f.length)) {
+    for (const r of B(c, C.length + f.length)) {
       let M = Ve(r);
       M || (M = Ue(() => {
-        j = void 0, I = void 0, F = r;
-      }), M.dataset.archiveFolder = r.name, M.append(Ze(r), n("strong", r.name), n("small", t("Adafruit · Original files")))), V.set(r, M);
+        x = void 0, j = void 0, D = r;
+      }), M.dataset.archiveFolder = r.name, M.append(Ze(r), n("strong", r.name), n("small", t("Adafruit · Original files")))), H.set(r, M);
     }
     for (const [r, M] of ue)
-      V.get(r) !== M && (ta(M), M.remove(), e && ka(r, M));
-    if (ue = V, He = u?.previews, $e = m, ue.size) {
-      Fe.remove();
+      H.get(r) !== M && (ta(M), M.remove(), e && ka(r, M));
+    if (ue = H, He = u?.previews, $e = m, ue.size) {
+      Ee.remove();
       let r = fe.firstChild;
       for (const M of ue.values())
         M !== r && fe.insertBefore(M, r), r = M.nextSibling;
     } else
-      Fe.textContent = m.assets.length || y.folders.length || g?.items.length ? t("No matching models.") : t("No published catalogue is bundled. Open a reviewed remote catalogue JSON to browse models."), Fe.parentNode !== fe && fe.append(Fe);
+      Ee.textContent = !I && R && !W.value.trim() ? "" : m.assets.length || y.folders.length || g?.items.length ? t("No matching models.") : t("No published catalogue is bundled. Open a reviewed remote catalogue JSON to browse models."), Ee.parentNode !== fe && fe.append(Ee);
     se(), fe.scrollTop = a;
   }
   function _e(e, a) {
     const f = n("section");
     f.className = "model-library-licence", f.append(n("h4", t("Licence & attribution")));
-    const b = n("textarea");
-    b.readOnly = !0, b.setAttribute("aria-label", t("Licence & attribution")), b.value = `${e.licence.attribution}
+    const c = n("textarea");
+    c.readOnly = !0, c.setAttribute("aria-label", t("Licence & attribution")), c.value = `${e.licence.attribution}
 
-${u?.licenceTexts?.get(e.id) ?? u?.licenceTexts?.get(e.licence.spdx) ?? ""}`.trim(), f.append(b);
-    const E = n("nav");
-    E.append(Be(t("Original source"), e.sourceUrl), Be(t("Licence evidence"), e.licence.evidenceUrl)), f.append(E), J.append(f);
-    const D = n("details");
-    D.className = "model-library-technical", D.append(n("summary", t("Technical details")), a), J.append(D);
+${u?.licenceTexts?.get(e.id) ?? u?.licenceTexts?.get(e.licence.spdx) ?? ""}`.trim(), f.append(c);
+    const C = n("nav");
+    C.append(Fe(t("Original source"), e.sourceUrl), Fe(t("Licence evidence"), e.licence.evidenceUrl)), f.append(C), J.append(f);
+    const N = n("details");
+    N.className = "model-library-technical", N.append(n("summary", t("Technical details")), a), J.append(N);
   }
   function ea() {
     const e = n("label", t("Notes (optional)")), a = n("input");
@@ -672,24 +672,24 @@ ${u?.licenceTexts?.get(e.id) ?? u?.licenceTexts?.get(e.licence.spdx) ?? ""}`.tri
   }
   const Re = /* @__PURE__ */ new WeakMap(), aa = async (e) => {
     const a = Re.get(e);
-    if (Re.delete(e), !(!a || !e.isConnected || c))
+    if (Re.delete(e), !(!a || !e.isConnected || b))
       try {
         const f = await a();
-        f && e.isConnected && !c && (e.src = f);
+        f && e.isConnected && !b && (e.src = f);
       } catch {
-        e.isConnected && !c && (e.alt = t("Preview unavailable"));
+        e.isConnected && !b && (e.alt = t("Preview unavailable"));
       }
-  }, Te = typeof IntersectionObserver == "function" ? new IntersectionObserver((e) => {
+  }, Ce = typeof IntersectionObserver == "function" ? new IntersectionObserver((e) => {
     for (const a of e)
-      a.isIntersecting && (Te?.unobserve(a.target), aa(a.target));
+      a.isIntersecting && (Ce?.unobserve(a.target), aa(a.target));
   }, { rootMargin: "96px" }) : null;
   function ta(e) {
     for (const a of e.querySelectorAll("img[data-library-preview]"))
-      Te?.unobserve(a), Re.delete(a);
+      Ce?.unobserve(a), Re.delete(a);
   }
   function We(e, a) {
     const f = n("img");
-    return f.alt = e, f.decoding = "async", f.draggable = !1, f.dataset.libraryPreview = "", Re.set(f, a), Te ? Te.observe(f) : queueMicrotask(() => {
+    return f.alt = e, f.decoding = "async", f.draggable = !1, f.dataset.libraryPreview = "", Re.set(f, a), Ce ? Ce.observe(f) : queueMicrotask(() => {
       aa(f);
     }), f;
   }
@@ -708,25 +708,25 @@ ${u?.licenceTexts?.get(e.id) ?? u?.licenceTexts?.get(e.licence.spdx) ?? ""}`.tri
     f.type = "button", f.className = "primary", f.disabled = o, f.onclick = async () => {
       o = !0, se(), f.disabled = !0, U.textContent = t("Opening robot project…");
       try {
-        const b = await g.open(e.id);
-        !c && P.open && (b === !1 ? U.textContent = "" : P.close());
-      } catch (b) {
-        c || me(b);
+        const c = await g.open(e.id);
+        !b && P.open && (c === !1 ? U.textContent = "" : P.close());
+      } catch (c) {
+        b || me(c);
       } finally {
-        o = !1, c || (se(), f.disabled = !1);
+        o = !1, b || (se(), f.disabled = !1);
       }
     }, J.append(a, n("h3", e.title), n("p", t("Opens a complete project with its 3D model, program, circuit, and Widgets."))), e.note && J.append(n("p", e.note)), J.append(f);
   }
-  function Ce() {
-    if (ta(J), J.replaceChildren(), j) {
-      wa(j);
+  function Ae() {
+    if (ta(J), J.replaceChildren(), x) {
+      wa(x);
       return;
     }
-    if (F) {
-      Sa(y, F);
+    if (D) {
+      Sa(y, D);
       return;
     }
-    const e = I;
+    const e = j;
     if (!e) {
       J.append(n("p", t("Select a model to insert.")));
       return;
@@ -735,96 +735,96 @@ ${u?.licenceTexts?.get(e.id) ?? u?.licenceTexts?.get(e.licence.spdx) ?? ""}`.tri
     a.className = "model-library-preview", a.append(Je(e));
     const f = n("div");
     f.className = "model-library-meta", f.append(n("h3", e.title), ze(e)), J.append(a, f, n("small", e.author));
-    const b = n("div");
-    b.append(n("p", e.modificationNotes), n("p", e.conversion.unitAssumption));
-    const E = ve(e);
-    if (E) {
-      ga(e, E, b), _e(e, b);
+    const c = n("div");
+    c.append(n("p", e.modificationNotes), n("p", e.conversion.unitAssumption));
+    const C = ve(e);
+    if (C) {
+      ga(e, C, c), _e(e, c);
       return;
     }
-    const D = [{ file: e.original, selection: { assetId: e.id, file: "original" } }, ...e.derivatives.map((O, Z) => ({ file: O, selection: { assetId: e.id, file: { derivative: Z } } }))].filter((O) => O.file.format === "stl"), T = n("select");
-    T.setAttribute("aria-label", t("Selected library STL")), D.forEach(({ file: O }, Z) => {
-      const A = n("option", `STL · ${O.bytes.toLocaleString()} B`);
-      A.value = String(Z), T.append(A);
-    }), D.length > 1 ? J.append(T) : b.append(T);
-    const { label: v, notes: x } = ea(), V = n("label", t("Use cached files only")), r = n("input");
-    r.type = "checkbox", V.prepend(r), b.append(V);
+    const N = [{ file: e.original, selection: { assetId: e.id, file: "original" } }, ...e.derivatives.map((O, Z) => ({ file: O, selection: { assetId: e.id, file: { derivative: Z } } }))].filter((O) => O.file.format === "stl"), T = n("select");
+    T.setAttribute("aria-label", t("Selected library STL")), N.forEach(({ file: O }, Z) => {
+      const F = n("option", `STL · ${O.bytes.toLocaleString()} B`);
+      F.value = String(Z), T.append(F);
+    }), N.length > 1 ? J.append(T) : c.append(T);
+    const { label: Q, notes: B } = ea(), H = n("label", t("Use cached files only")), r = n("input");
+    r.type = "checkbox", H.prepend(r), c.append(H);
     const M = n("pre"), z = n("div"), te = n("section");
-    te.setAttribute("aria-label", t("Recorded collision evidence")), b.append(M, z, te);
+    te.setAttribute("aria-label", t("Recorded collision evidence")), c.append(M, z, te);
     const be = n("button", t("Insert selected STL"));
     be.type = "button", be.className = "primary library-insert";
     const oe = n("p");
     oe.className = "library-eligibility";
     function de() {
-      const O = D[Number(T.value)], Z = e.quality, A = !!O && (!O.file.path || $(O.file.path)) && O.file.bytes <= ie && !!Z?.screeningPolicy && O.file.bytes <= Z.screeningPolicy.maxAnalysisBytes && Z.fileSha256 === O.file.sha256 && Z.parseable && Z.closedPositiveVolume && Z.withinSizeLimits && Z.withinTriangleLimits;
-      if (be.disabled = o || !A, M.textContent = O ? `${O.file.sha256}
+      const O = N[Number(T.value)], Z = e.quality, F = !!O && (!O.file.path || $(O.file.path)) && O.file.bytes <= ie && !!Z?.screeningPolicy && O.file.bytes <= Z.screeningPolicy.maxAnalysisBytes && Z.fileSha256 === O.file.sha256 && Z.parseable && Z.closedPositiveVolume && Z.withinSizeLimits && Z.withinTriangleLimits;
+      if (be.disabled = o || !F, M.textContent = O ? `${O.file.sha256}
 ${O.file.url ?? O.file.path}` : "", z.replaceChildren(), O && Z?.fileSha256 === O.file.sha256 && Z.screeningPolicy) {
-        const W = Z.screeningPolicy;
-        z.append(n("h4", t("Selected STL conversion to millimetres, Z up")), n("pre", Array.from({ length: 4 }, (K, re) => Array.from({ length: 4 }, (ne, Se) => String(W.toMillimetresZUp[Se * 4 + re])).join("  ")).join(`
-`)), n("p", t`Curated limits: ${W.maxTriangles} triangles; ${W.maxExtentMm} mm span per axis; ${W.maxAnalysisBytes} analysis bytes. Translation is preserved; no centering or repair.`));
+        const V = Z.screeningPolicy;
+        z.append(n("h4", t("Selected STL conversion to millimetres, Z up")), n("pre", Array.from({ length: 4 }, (K, re) => Array.from({ length: 4 }, (ne, Se) => String(V.toMillimetresZUp[Se * 4 + re])).join("  ")).join(`
+`)), n("p", t`Curated limits: ${V.maxTriangles} triangles; ${V.maxExtentMm} mm span per axis; ${V.maxAnalysisBytes} analysis bytes. Translation is preserved; no centering or repair.`));
       }
-      oe.textContent = A ? "" : t("Insertion unavailable: select an STL with passing quality, a recorded conversion and at most 16 MiB.");
+      oe.textContent = F ? "" : t("Insertion unavailable: select an STL with passing quality, a recorded conversion and at most 16 MiB.");
     }
     T.onchange = () => {
-      Qe(te, e, D[Number(T.value)]?.file), de();
+      Qe(te, e, N[Number(T.value)]?.file), de();
     }, be.onclick = async () => {
       if (be.disabled)
         return;
-      const O = D[Number(T.value)], Z = i.state, A = x.value.trim() || "Inserted without manual changes; recorded millimetres/Z-up conversion applied.", W = r.checked;
-      o = !0, C = new AbortController(), Y.disabled = Q.disabled = X.disabled = T.disabled = x.disabled = r.disabled = !0, de(), se(), U.textContent = t("Verifying selected model…");
+      const O = N[Number(T.value)], Z = i.state, F = B.value.trim() || "Inserted without manual changes; recorded millimetres/Z-up conversion applied.", V = r.checked;
+      o = !0, A = new AbortController(), Y.disabled = W.disabled = G.disabled = T.disabled = B.disabled = r.disabled = !0, de(), se(), U.textContent = t("Verifying selected model…");
       try {
-        const K = O.file.path ? _(O.file.path) : void 0, re = K ? { bytes: K.slice(), cached: !0 } : await va(m, O.selection, { cache: u?.cache ?? Wa, fetch: u?.fetch, offline: W, signal: C.signal, maxBytes: ie });
-        if (c)
+        const K = O.file.path ? _(O.file.path) : void 0, re = K ? { bytes: K.slice(), cached: !0 } : await va(m, O.selection, { cache: u?.cache ?? Wa, fetch: u?.fetch, offline: V, signal: A.signal, maxBytes: ie });
+        if (b)
           throw new Error(t("Editor was disposed"));
         if (i.state.document !== Z.document || i.state.revision !== Z.revision)
           throw new Error(t("The model changed while loading this library file. Retry insertion."));
         await Xe(i, m, O.selection, re.bytes, { evaluate: async (ne) => {
           const Se = await s(ne);
-          if (c)
+          if (b)
             throw new Error(t("Editor was disposed"));
           return Se;
-        }, toMillimetresZUp: e.quality.screeningPolicy.toMillimetresZUp, checkedOn: (/* @__PURE__ */ new Date()).toISOString().slice(0, 10), modificationNotes: A, signal: C.signal }), U.textContent = re.cached ? t("Inserted with provenance. Verified file is cached for offline reuse.") : t("Inserted with provenance. File could not be cached for offline reuse.");
+        }, toMillimetresZUp: e.quality.screeningPolicy.toMillimetresZUp, checkedOn: (/* @__PURE__ */ new Date()).toISOString().slice(0, 10), modificationNotes: F, signal: A.signal }), U.textContent = re.cached ? t("Inserted with provenance. Verified file is cached for offline reuse.") : t("Inserted with provenance. File could not be cached for offline reuse.");
         try {
           await h();
         } catch {
-          c || (U.textContent = t("Model inserted with provenance; viewport refresh failed. Close this panel to inspect the editor status."));
+          b || (U.textContent = t("Model inserted with provenance; viewport refresh failed. Close this panel to inspect the editor status."));
         }
       } catch (K) {
-        c || me(K);
+        b || me(K);
       } finally {
-        o = !1, C = void 0, Y.disabled = Q.disabled = X.disabled = T.disabled = x.disabled = r.disabled = !1, de(), se();
+        o = !1, A = void 0, Y.disabled = W.disabled = G.disabled = T.disabled = B.disabled = r.disabled = !1, de(), se();
       }
-    }, J.append(v, be, oe), _e(e, b), Qe(te, e, D[Number(T.value)]?.file), de();
+    }, J.append(Q, be, oe), _e(e, c), Qe(te, e, N[Number(T.value)]?.file), de();
   }
   function Sa(e, a) {
     if (a.name !== "Adafruit archive files") {
-      const A = n("div");
-      A.className = "model-library-preview", A.append(Ze(a)), J.append(A);
+      const F = n("div");
+      F.className = "model-library-preview", F.append(Ze(a)), J.append(F);
     }
-    J.append(n("h3", a.name), n("p", "Adafruit Industries · MIT"), n("p", t("Original files; units and orientation have not been verified. STEP, Fusion and other formats are available as source files. These files have not been screened for insertion or collision.")), Be(t("Licence evidence"), e.licenceUrl));
+    J.append(n("h3", a.name), n("p", "Adafruit Industries · MIT"), n("p", t("Original files; units and orientation have not been verified. STEP, Fusion and other formats are available as source files. These files have not been screened for insertion or collision.")), Fe(t("Licence evidence"), e.licenceUrl));
     const f = n("textarea");
     f.readOnly = !0, f.setAttribute("aria-label", t("Licence & attribution")), f.value = e.licence, J.append(f);
-    const b = n("select");
-    b.setAttribute("aria-label", t("Original file")), a.files.forEach((A, W) => {
-      const K = n("option", `${A.path.split("/").pop()} · ${A.bytes.toLocaleString()} B`);
-      K.value = String(W), b.append(K);
+    const c = n("select");
+    c.setAttribute("aria-label", t("Original file")), a.files.forEach((F, V) => {
+      const K = n("option", `${F.path.split("/").pop()} · ${F.bytes.toLocaleString()} B`);
+      K.value = String(V), c.append(K);
     });
-    const E = a.files.findIndex((A) => A.format === "stl");
-    E >= 0 && (b.value = String(E));
-    const D = Be(t("Upstream original"), `https://github.com/adafruit/Adafruit_CAD_Parts/blob/${e.upstreamCommit}/`), T = n("pre"), v = n("label", t("Use cached files only")), x = n("input");
-    x.type = "checkbox", v.prepend(x);
-    const V = n("label", t("STL source units")), r = n("select");
+    const C = a.files.findIndex((F) => F.format === "stl");
+    C >= 0 && (c.value = String(C));
+    const N = Fe(t("Upstream original"), `https://github.com/adafruit/Adafruit_CAD_Parts/blob/${e.upstreamCommit}/`), T = n("pre"), Q = n("label", t("Use cached files only")), B = n("input");
+    B.type = "checkbox", Q.prepend(B);
+    const H = n("label", t("STL source units")), r = n("select");
     r.setAttribute("aria-label", t("STL source units"));
-    for (const [A, W] of [["", t("Choose units")], ["mm", t("Millimetres")], ["in", t("Inches")]]) {
-      const K = n("option", W);
-      K.value = A, r.append(K);
+    for (const [F, V] of [["", t("Choose units")], ["mm", t("Millimetres")], ["in", t("Inches")]]) {
+      const K = n("option", V);
+      K.value = F, r.append(K);
     }
-    V.append(r);
+    H.append(r);
     const M = n("label", t("STL source up axis")), z = n("select");
     z.setAttribute("aria-label", t("STL source up axis"));
-    for (const [A, W] of [["", t("Choose up axis")], ["Z", t("Z up")], ["Y", t("Y up")]]) {
-      const K = n("option", W);
-      K.value = A, z.append(K);
+    for (const [F, V] of [["", t("Choose up axis")], ["Z", t("Z up")], ["Y", t("Y up")]]) {
+      const K = n("option", V);
+      K.value = F, z.append(K);
     }
     M.append(z);
     const te = n("button", t("Screen and insert STL"));
@@ -834,131 +834,131 @@ ${O.file.url ?? O.file.path}` : "", z.replaceChildren(), O && Z?.fileSha256 === 
     const oe = n("button", t("Download verified original"));
     oe.type = "button", oe.className = "library-download";
     const de = () => {
-      const A = a.files[Number(b.value)];
-      T.textContent = `Format from filename: ${A.format}
-Units: ${A.units}
-SHA-256: ${A.sha256}
+      const F = a.files[Number(c.value)];
+      T.textContent = `Format from filename: ${F.format}
+Units: ${F.units}
+SHA-256: ${F.sha256}
 Upstream commit: ${e.upstreamCommit}
-Mirror commit: ${e.commit}`, D.href = `https://github.com/adafruit/Adafruit_CAD_Parts/blob/${e.upstreamCommit}/${A.path.split("/").map(encodeURIComponent).join("/")}`, oe.disabled = o;
-      const W = A.path.toLowerCase().endsWith(".stl");
-      V.hidden = M.hidden = te.hidden = !W, te.disabled = o || !W || !r.value || !z.value || A.bytes > ie, be.textContent = W ? A.bytes > ie ? t("STL exceeds the 16 MiB screening limit; original download remains available.") : !r.value || !z.value ? t("Choose source units and up axis to screen this STL.") : t("Insertion requires a passing geometry screen and does not qualify collisions.") : "";
+Mirror commit: ${e.commit}`, N.href = `https://github.com/adafruit/Adafruit_CAD_Parts/blob/${e.upstreamCommit}/${F.path.split("/").map(encodeURIComponent).join("/")}`, oe.disabled = o;
+      const V = F.path.toLowerCase().endsWith(".stl");
+      H.hidden = M.hidden = te.hidden = !V, te.disabled = o || !V || !r.value || !z.value || F.bytes > ie, be.textContent = V ? F.bytes > ie ? t("STL exceeds the 16 MiB screening limit; original download remains available.") : !r.value || !z.value ? t("Choose source units and up axis to screen this STL.") : t("Insertion requires a passing geometry screen and does not qualify collisions.") : "";
     };
-    b.onchange = () => {
+    c.onchange = () => {
       r.value = z.value = "", de();
     }, r.onchange = z.onchange = de, oe.onclick = async () => {
-      const A = a.files[Number(b.value)];
-      o = !0, C = new AbortController(), b.disabled = x.disabled = !0, de(), se(), U.textContent = t("Verifying original file…");
+      const F = a.files[Number(c.value)];
+      o = !0, A = new AbortController(), c.disabled = B.disabled = !0, de(), se(), U.textContent = t("Verifying original file…");
       try {
-        const W = await sa(e, A, p, u?.fetch, x.checked, C.signal);
-        if (c)
+        const V = await sa(e, F, p, u?.fetch, B.checked, A.signal);
+        if (b)
           return;
-        const K = A.path.split("/").pop() ?? "original";
+        const K = F.path.split("/").pop() ?? "original";
         if (k)
-          await k({ name: K, bytes: W, mime: "application/octet-stream" });
+          await k({ name: K, bytes: V, mime: "application/octet-stream" });
         else {
-          const re = URL.createObjectURL(new Blob([W.slice().buffer])), ne = document.createElement("a");
+          const re = URL.createObjectURL(new Blob([V.slice().buffer])), ne = document.createElement("a");
           ne.href = re, ne.download = K, document.body.append(ne), ne.click(), ne.remove(), setTimeout(() => URL.revokeObjectURL(re), 3e4);
         }
-        c || (U.textContent = t("Verified original downloaded."));
-      } catch (W) {
-        c || me(W);
+        b || (U.textContent = t("Verified original downloaded."));
+      } catch (V) {
+        b || me(V);
       } finally {
-        o = !1, C = void 0, b.disabled = x.disabled = !1, de(), se();
+        o = !1, A = void 0, c.disabled = B.disabled = !1, de(), se();
       }
     }, te.onclick = async () => {
-      const A = a.files[Number(b.value)], W = i.state, K = r.value, re = z.value;
-      o = !0, C = new AbortController(), b.disabled = x.disabled = r.disabled = z.disabled = !0, de(), se(), U.textContent = t("Verifying and screening STL…");
+      const F = a.files[Number(c.value)], V = i.state, K = r.value, re = z.value;
+      o = !0, A = new AbortController(), c.disabled = B.disabled = r.disabled = z.disabled = !0, de(), se(), U.textContent = t("Verifying and screening STL…");
       try {
-        const ne = await sa(e, A, p, u?.fetch, x.checked, C.signal), Se = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10), Le = await Ua(e, a, A, ne, K, re, Se);
-        if (c)
+        const ne = await sa(e, F, p, u?.fetch, B.checked, A.signal), Se = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10), Le = await Ua(e, a, F, ne, K, re, Se);
+        if (b)
           throw new Error(t("Editor was disposed"));
-        if (i.state.document !== W.document || i.state.revision !== W.revision)
+        if (i.state.document !== V.document || i.state.revision !== V.revision)
           throw new Error(t("The model changed while loading. Retry insertion."));
-        await Xe(i, Le.catalogue, { assetId: Le.id, file: "original" }, ne, { evaluate: s, toMillimetresZUp: Le.matrix, checkedOn: Se, modificationNotes: Le.assumption, signal: C.signal }), U.textContent = t("STL inserted with provenance and selected conversion.");
+        await Xe(i, Le.catalogue, { assetId: Le.id, file: "original" }, ne, { evaluate: s, toMillimetresZUp: Le.matrix, checkedOn: Se, modificationNotes: Le.assumption, signal: A.signal }), U.textContent = t("STL inserted with provenance and selected conversion.");
         try {
           await h();
         } catch {
-          c || (U.textContent = t("STL inserted with provenance; viewport refresh failed."));
+          b || (U.textContent = t("STL inserted with provenance; viewport refresh failed."));
         }
       } catch (ne) {
-        c || me(ne);
+        b || me(ne);
       } finally {
-        o = !1, C = void 0, b.disabled = x.disabled = r.disabled = z.disabled = !1, de(), se();
+        o = !1, A = void 0, c.disabled = B.disabled = r.disabled = z.disabled = !1, de(), se();
       }
     };
     const O = n("details"), Z = n("summary", t("Original source files"));
-    O.append(Z, D, oe, T), J.append(b, v, V, M, te, be, O), de();
+    O.append(Z, N, oe, T), J.append(c, Q, H, M, te, be, O), de();
   }
   function ga(e, a, f) {
-    const b = a.path, E = !!b && $(b), D = n("section");
-    D.setAttribute("aria-label", t("Recorded collision evidence")), Qe(D, e, a), f.append(D, n("p", `${a.format} · ${a.bytes} B · ${a.path}`), n("pre", a.sha256)), a.format === "openscad" && f.append(n("p", t("OpenSCAD source is converted to editable CAD Script using the supported subset. The original artifact hash is retained."))), a.format === "jscad" && f.append(n("p", t("JSCAD is converted with default parameters to an editable CAD Script snapshot. Original JavaScript parameters and face colours are not retained; unsupported features are refused.")));
-    const T = e.sourceBundle?.dependencies.every((M) => $(M.file.path)) ?? !0, { label: v, notes: x } = ea(), V = n("button", t("Insert editable source"));
-    V.type = "button", V.className = "primary library-insert";
+    const c = a.path, C = !!c && $(c), N = n("section");
+    N.setAttribute("aria-label", t("Recorded collision evidence")), Qe(N, e, a), f.append(N, n("p", `${a.format} · ${a.bytes} B · ${a.path}`), n("pre", a.sha256)), a.format === "openscad" && f.append(n("p", t("OpenSCAD source is converted to editable CAD Script using the supported subset. The original artifact hash is retained."))), a.format === "jscad" && f.append(n("p", t("JSCAD is converted with default parameters to an editable CAD Script snapshot. Original JavaScript parameters and face colours are not retained; unsupported features are refused.")));
+    const T = e.sourceBundle?.dependencies.every((M) => $(M.file.path)) ?? !0, { label: Q, notes: B } = ea(), H = n("button", t("Insert editable source"));
+    H.type = "button", H.className = "primary library-insert";
     const r = () => {
-      V.disabled = o || !E || !T;
+      H.disabled = o || !C || !T;
     };
-    (!E || !T) && J.append(n("p", t("Editable source is not bundled in this host."))), V.onclick = async () => {
-      if (!(V.disabled || !b)) {
-        o = !0, C = new AbortController(), Y.disabled = Q.disabled = X.disabled = x.disabled = !0, r(), se(), U.textContent = t("Verifying selected model…");
+    (!C || !T) && J.append(n("p", t("Editable source is not bundled in this host."))), H.onclick = async () => {
+      if (!(H.disabled || !c)) {
+        o = !0, A = new AbortController(), Y.disabled = W.disabled = G.disabled = B.disabled = !0, r(), se(), U.textContent = t("Verifying selected model…");
         try {
-          const M = _(b);
+          const M = _(c);
           if (!M)
             throw new Error(t("Editable source is not bundled in this host."));
-          await ua(i, m, { assetId: e.id, file: a === e.original ? "original" : "editableSource" }, M, { signal: C.signal, sourceFiles: { get: _ }, modificationNotes: x.value.trim() || "Inserted with default parameters; no manual changes.", evaluate: async (z) => {
+          await ua(i, m, { assetId: e.id, file: a === e.original ? "original" : "editableSource" }, M, { signal: A.signal, sourceFiles: { get: _ }, modificationNotes: B.value.trim() || "Inserted with default parameters; no manual changes.", evaluate: async (z) => {
             const te = await s(z);
-            if (c)
+            if (b)
               throw new Error(t("Editor was disposed"));
             return te;
           } }), U.textContent = t("Editable source inserted with provenance. Available offline.");
           try {
             await h();
           } catch {
-            c || (U.textContent = t("Model inserted with provenance; viewport refresh failed. Close this panel to inspect the editor status."));
+            b || (U.textContent = t("Model inserted with provenance; viewport refresh failed. Close this panel to inspect the editor status."));
           }
         } catch (M) {
-          c || me(M);
+          b || me(M);
         } finally {
-          o = !1, C = void 0, Y.disabled = Q.disabled = X.disabled = x.disabled = !1, r(), se();
+          o = !1, A = void 0, Y.disabled = W.disabled = G.disabled = B.disabled = !1, r(), se();
         }
       }
-    }, J.append(v, V), r();
+    }, J.append(Q, H), r();
   }
   function Qe(e, a, f) {
     e.replaceChildren(), e.append(n("h4", t("Recorded collision evidence")));
-    const b = a.quality, E = b?.collisionReport;
-    if (e.append(n("p", t("Browsing and insertion do not run collision qualification."))), (E || b?.physics) && e.append(n("p", t("Serialized curator evidence only. Recorded metadata is not a reusable runtime collision proof or a certification of collision safety, printability or mechanical accuracy."))), !(E && f && E.selectedFile.sha256 === f.sha256 && E.selectedFile.bytes === f.bytes && E.selectedFile.format === f.format && E.selectedFile.url === f.url && E.selectedFile.path === f.path)) {
-      if (e.append(n("p", E ? t("A complete report is recorded for a different STL selection; it does not apply to this file.") : b?.physics ? t("Only a legacy physics summary is recorded. No complete collision report is available for this selection.") : t("No complete collision report is recorded for this selection."))), !E && b?.physics) {
-        const r = b.physics;
+    const c = a.quality, C = c?.collisionReport;
+    if (e.append(n("p", t("Browsing and insertion do not run collision qualification."))), (C || c?.physics) && e.append(n("p", t("Serialized curator evidence only. Recorded metadata is not a reusable runtime collision proof or a certification of collision safety, printability or mechanical accuracy."))), !(C && f && C.selectedFile.sha256 === f.sha256 && C.selectedFile.bytes === f.bytes && C.selectedFile.format === f.format && C.selectedFile.url === f.url && C.selectedFile.path === f.path)) {
+      if (e.append(n("p", C ? t("A complete report is recorded for a different STL selection; it does not apply to this file.") : c?.physics ? t("Only a legacy physics summary is recorded. No complete collision report is available for this selection.") : t("No complete collision report is recorded for this selection."))), !C && c?.physics) {
+        const r = c.physics;
         e.append(n("p", t`Legacy summary: ${r.engine} ${r.engineVersion}; ${r.qualifierVersion}; reported qualified: ${String(r.qualified)}.`));
       }
       return;
     }
-    const T = E.evidence, v = T.certificate, x = E.quality;
+    const T = C.evidence, Q = T.certificate, B = C.quality;
     e.append(n("p", t("Runtime collisions require fresh immutable proofs. Changed bytes, conversion, geometry or toolchain require requalification.")));
-    const V = n("details");
-    V.className = "model-library-collision-report", V.append(n("summary", t("Inspect complete recorded collision report"))), V.append(n("p", t`Report version ${E.version}; checked ${T.checkedOn}; scope: ${T.scope}.`), n("p", t`Engine: ${T.engine} ${T.engineVersion}; qualifier: ${T.qualifierVersion}; mesh checker: ${x.toolVersion}.`), n("p", t`Native check: ${T.nativeCheck.build} build; ${T.nativeCheck.steps} rigid step of ${T.nativeCheck.stepSeconds} s; no ground.`), n("p", t("No ground settling, cavity clearance, contacts, mechanisms, elasticity, printability or manufacturing accuracy were tested. Native capacity/error telemetry is unavailable.")), n("p", t`STL SHA-256: ${T.fileSha256}`), n("p", t`Converted geometry SHA-256: ${T.geometrySha256}`), n("p", t`Evaluated source volume: ${T.sourceVolumeMm3} mm³; hulls: ${T.hulls} / ${v.maxHulls}; algorithm: ${v.algorithm}; strategy: ${v.strategy}.`), n("p", t`Missing volume: ${v.missingVolumeMm3} mm³; extra volume: ${v.extraVolumeMm3} mm³; relative error: ${v.relativeError}; allowed volume fraction: ${v.tolerance.volumeFraction}.`), n("p", t`Bounds error: ${v.boundsErrorMm} mm; allowed bounds error: ${v.tolerance.boundsMm} mm.`), n("p", t`Screened mesh: ${x.triangles} triangles; signed volume: ${x.signedVolumeMm3} mm³; bounds min: ${x.boundsMm.min.join(", ")} mm; max: ${x.boundsMm.max.join(", ")} mm.`), n("p", t("The complete record below retains the exact file identity, conversion matrix, screening limits, checks, diagnostics, bindings and tolerances. Metadata consistency does not verify that the reported run occurred.")), n("pre", JSON.stringify(E, null, 2))), e.append(V);
+    const H = n("details");
+    H.className = "model-library-collision-report", H.append(n("summary", t("Inspect complete recorded collision report"))), H.append(n("p", t`Report version ${C.version}; checked ${T.checkedOn}; scope: ${T.scope}.`), n("p", t`Engine: ${T.engine} ${T.engineVersion}; qualifier: ${T.qualifierVersion}; mesh checker: ${B.toolVersion}.`), n("p", t`Native check: ${T.nativeCheck.build} build; ${T.nativeCheck.steps} rigid step of ${T.nativeCheck.stepSeconds} s; no ground.`), n("p", t("No ground settling, cavity clearance, contacts, mechanisms, elasticity, printability or manufacturing accuracy were tested. Native capacity/error telemetry is unavailable.")), n("p", t`STL SHA-256: ${T.fileSha256}`), n("p", t`Converted geometry SHA-256: ${T.geometrySha256}`), n("p", t`Evaluated source volume: ${T.sourceVolumeMm3} mm³; hulls: ${T.hulls} / ${Q.maxHulls}; algorithm: ${Q.algorithm}; strategy: ${Q.strategy}.`), n("p", t`Missing volume: ${Q.missingVolumeMm3} mm³; extra volume: ${Q.extraVolumeMm3} mm³; relative error: ${Q.relativeError}; allowed volume fraction: ${Q.tolerance.volumeFraction}.`), n("p", t`Bounds error: ${Q.boundsErrorMm} mm; allowed bounds error: ${Q.tolerance.boundsMm} mm.`), n("p", t`Screened mesh: ${B.triangles} triangles; signed volume: ${B.signedVolumeMm3} mm³; bounds min: ${B.boundsMm.min.join(", ")} mm; max: ${B.boundsMm.max.join(", ")} mm.`), n("p", t("The complete record below retains the exact file identity, conversion matrix, screening limits, checks, diagnostics, bindings and tolerances. Metadata consistency does not verify that the reported run occurred.")), n("pre", JSON.stringify(C, null, 2))), e.append(H);
   }
   function fa() {
-    N || X.value === "projects" || (o || (U.textContent = t("Loading models…")), L ?? (L = Promise.resolve().then(() => u.load()).then((e) => {
-      if (c || N)
+    I || G.value === "projects" || (o || (U.textContent = t("Loading models…")), R ?? (R = Promise.resolve().then(() => u.load()).then((e) => {
+      if (b || I)
         return;
-      const a = Ae(e.catalogue);
+      const a = Be(e.catalogue);
       if (!a.valid)
         throw new Error(a.errors.join(" "));
-      m = a.catalogue, u = { ...u, ...e }, H.clear();
-      for (const [f, b] of e.localFiles ?? [])
-        H.set(f, b.slice());
-      N = !0, X.value !== "projects" && (o || (U.textContent = ""), we(), !o && !F && !j && Ce());
+      m = a.catalogue, u = { ...u, ...e }, v.clear();
+      for (const [f, c] of e.localFiles ?? [])
+        v.set(f, c.slice());
+      I = !0, G.value !== "projects" && (o || (U.textContent = ""), ye(), !o && !D && !x && Ae());
     }).catch((e) => {
-      !c && !N && !o && X.value !== "projects" && me(e);
+      !b && !I && !o && G.value !== "projects" && me(e);
     }).finally(() => {
-      L = void 0;
+      R = void 0, !b && !I && G.value !== "projects" && ye();
     })));
   }
-  return Q.oninput = () => {
-    De(), we();
-  }, X.onchange = () => {
-    De(), j = void 0, I = void 0, F = void 0, X.value === "projects" && !N && !o && (U.textContent = ""), we(), Ce(), fa();
+  return W.oninput = () => {
+    De(), ye();
+  }, G.onchange = () => {
+    De(), x = void 0, j = void 0, D = void 0, G.value === "projects" && !I && !o && (U.textContent = ""), fa(), ye(), Ae();
   }, Y.onchange = async () => {
     const e = Y.files?.[0];
     if (Y.value = "", !(!e || o))
@@ -966,20 +966,20 @@ Mirror commit: ${e.commit}`, D.href = `https://github.com/adafruit/Adafruit_CAD_
         if (e.size > 4 * 1024 * 1024)
           throw new Error(t("Catalogue exceeds 4 MiB"));
         const a = Ba(await e.text());
-        if (c || o)
+        if (b || o)
           return;
         if (!a.valid)
           throw new Error(a.errors.join(" "));
-        m = a.catalogue, N = !0, De(), j = void 0, I = void 0, F = void 0, Q.value = X.value = "", U.textContent = "", we(), Ce();
+        m = a.catalogue, I = !0, De(), x = void 0, j = void 0, D = void 0, W.value = G.value = "", U.textContent = "", ye(), Ae();
       } catch (a) {
-        c || me(a);
+        b || me(a);
       }
   }, {
     open(e) {
-      c || P.open || (e && (De(), X.value = e, Q.value = "", j = void 0, I = void 0, F = void 0, !N && !o && (U.textContent = "")), we(), o || Ce(), P.showModal(), Q.focus(), fa());
+      b || P.open || (e && (De(), G.value = e, W.value = "", x = void 0, j = void 0, D = void 0, !I && !o && (U.textContent = "")), fa(), ye(), o || Ae(), P.showModal(), W.focus());
     },
     dispose() {
-      c = !0, C?.abort(), Te?.disconnect(), he.clear(), ue.clear(), P.remove();
+      b = !0, A?.abort(), Ce?.disconnect(), he.clear(), ue.clear(), P.remove();
     }
   };
 }
