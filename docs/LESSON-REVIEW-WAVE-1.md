@@ -177,8 +177,9 @@ document gets updated with it.
 
 ### 6. The ammeter contradicts itself on a transistor terminal — FIXED 2026-08-24
 
-`38-npn-switch` switches correctly. Base 0.0050 → 0.6957 V, collector 4.4970 → 0.07829 V,
-LED branch 0 → 6.5036 mA, LED brightness 0 → 0.32518. The `test` checkpoint asked the
+`38-npn-switch` switches correctly. Base 0.0050 → 0.6957 V, collector 4.0146 → 0.07829 V,
+LED branch 0 → 6.6113 mA, LED brightness 0 → 0.33056 (re-measured 2026-11-24 on bw-board
+489ca7c6: exponential LEDs, 74d42338 — the released collector hangs on the LED's leakage). The `test` checkpoint asked the
 learner to "compare base voltage, **collector current**, and LED state" — and that middle
 reading is wrong. Taken through the real learner-facing path (`getMeterReading` in
 current mode, which is what the placeable meter part uses):

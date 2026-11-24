@@ -142,6 +142,14 @@ export const PROGRAMMABLE = Object.freeze([
     {id: 'switch', bus: 'gpio', verbs: ['button', 'pin']},
     {id: 'buzzer', bus: 'gpio', verbs: ['tone', 'pin']},
     {id: 'piezo', bus: 'gpio', verbs: ['tone', 'pin']},
+    // The voice-coil transducers (bw-board round 3/4): a pin's square wave
+    // sounds through them exactly as through a buzzer — board.js routes
+    // speaker and earphone to the same transducer tone path.
+    {id: 'speaker', bus: 'gpio', verbs: ['tone', 'pin']},
+    {id: 'earphone', bus: 'gpio', verbs: ['tone', 'pin']},
+    // Solved as an LED of the same id (optical-parts.js), and switched by a
+    // pin the same way; its light feeds an optical link.
+    {id: 'laser_diode', bus: 'gpio', verbs: ['pin']},
     // — named peripheral parts, each with a dedicated verb —
     {id: 'shift_register', bus: 'gpio', verbs: ['shiftOut']},
     {id: '74hc595', bus: 'gpio', verbs: ['shiftOut']},
@@ -244,9 +252,25 @@ export const REFUSED = Object.freeze({
         // The three-pin photoresistor module (bw-board #659): the same LDR
         // model as `ldr` plus a fixed load resistor, a passive divider driven
         // by its own 0..1 light control — profiled exactly as `ldr` is.
-        'light_sensor'
+        'light_sensor',
+        // Round 3/4 radio front end (bw-board #740, #743): antenna, earth and
+        // the tank/coil parts are passives a circuit tunes, not a program.
+        'antenna', 'earth', 'tuning_cap', 'varicap', 'ferrite_coil', 'vhf_coil', 'air_coil',
+        // Sources a learner builds rather than codes: fruit cells, a
+        // thermocouple's EMF, an electrolysis cell (profiled as solar_cell /
+        // ntc are — read at a pin or the ADC through the generic path).
+        'lemon_battery', 'potato_battery', 'thermocouple', 'electrolysis_cell',
+        // Solver-only expansion kinds (hidden parts the board adds for a
+        // placed one; registered, so catalogued): a speaker's voice coil, the
+        // room-field couplings, reverse breakdown, an LED's photocurrent, an
+        // optical receiver's photocurrent and the RF envelope detector.
+        '__voice_coil', 'field_contact', 'field_coupler', 'field_emf', 'field_inject',
+        'junction_breakdown', 'led_photocurrent', 'optical_rx', 'rf_detect'
     ],
-    instrument: ['voltmeter', 'ammeter', 'analog_meter', 'logic_probe'],
+    instrument: ['voltmeter', 'ammeter', 'analog_meter', 'logic_probe',
+        // Bench instruments: a field probe reads a room field, the generator
+        // and the scope are the measurement lessons' own tools.
+        'field_probe', 'function_gen', 'oscilloscope'],
     'analog-only': [
         'lm358', 'lm324', 'lm741', 'lm741_rail_return', 'ltspice_universal_opamp2', 'lt1001', 'lt1006', 'lt1007', 'lt1007_channel',
         'lt1678', 'lt1678_channel',
@@ -254,7 +278,10 @@ export const REFUSED = Object.freeze({
         'op747', 'op747_channel', 'ad8541', 'ad8541_channel', 'ad8602', 'ad8602_channel',
         'ada4522_1', 'ada4522_1_channel', 'lm393', 'lm339', 'lm3915', 'tip120', 'timer_555', 'timer_556',
         '555', '556', 'optocoupler', 'darlington_driver', 'tcs3200', 'msgeq7',
-        'spectrum_display', 'clock_display', 'opamp', 'npn', 'pnp', 'nmos', 'pmos'
+        'spectrum_display', 'clock_display', 'opamp', 'npn', 'pnp', 'nmos', 'pmos',
+        // The LM386 audio amplifier and the solver-only stages behind it and
+        // the LM358/LM324 macromodel (ground-sensing-opamp.js, lm386.js).
+        'lm386', 'lm386_stage', 'ground_sensing_opamp_stage'
     ],
     mechanical: [
         'dip_switch', 'dip_switch_dpst', 'dip_switch_spst', 'slide_switch',

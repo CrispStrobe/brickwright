@@ -218,6 +218,12 @@ Confirmed working, and worth recording because the lesson claims it: the
 ohmmeter returns `requires-power-off` while powered rather than inventing a
 value.
 
+> **Re-measured 2026-11-24** (bw-board `489ca7c6`; LEDs exponential by default
+> since `74d42338`): one LED alone reads 1663.8 Ω, the whole network 1803.0 Ω
+> (1981.8 Ω on the piecewise junction). Both numbers are set by the diode model
+> at the ohmmeter's test current, not by the resistors. The `measure` hint now
+> quotes "about 1.7 kΩ" and 1803 Ω, in both languages.
+
 ### 3. measurement-range-error taught a gain the bench did not deliver — FIXED 2026-08-29
 
 > **FIXED.** bw-board `999eb66` ("D18: the LM358 halts on the input error, not on
@@ -245,6 +251,15 @@ value.
 > where a single-supply op-amp runs out of headroom. The version-2 wording —
 > "report the disagreement rather than the datasheet number" — described a
 > defect that no longer exists, so it is version 3.
+>
+> **Re-measured 2026-11-24** (bw-board `489ca7c6`). `1d74deb1` (2026-11-23) made
+> the LM358 a finite-gain macromodel: 100 dB open-loop gain and 50 Ω output, per
+> the TI datasheet. The stage now realises the finite-gain formula
+> A0 / (1 + Rout/(Rf+Rg) + A0·β) = 46.4330 at every load below full travel
+> (measured 46.43296444 against 46.43296468), 0.046 % under the ideal 46.4545;
+> 92.83 mV out at 100 mA, 185.58 mV at 200 mA; saturation at 3.4983 V, realised
+> gain 35.683. The `test` hint names both the resistors' ×46.4545 and the
+> realised ×46.433 and says why they differ — a better point than "exact".
 >
 > The finding below is kept as recorded. It is why the engine was fixed.
 

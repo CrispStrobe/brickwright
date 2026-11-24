@@ -332,6 +332,29 @@ test('the vendored bw-board carries the fixes lite depends on', () => {
         'D19: the vendored solver still reports a flat 0 for a button terminal');
     assert.match(bwb('devices/i2c-parts.js'), /control\(part, state, verb, value\)/,
         'D17: the vendored char_lcd_i2c has no control handler');
-    assert.match(bwb('devices/dc-motor.js'), /branchCurrents\(part, state, read\)/,
+    // `branchCurrents(part, state, read)` gained a fourth parameter, tSeconds,
+    // in bw-board 93703dad (2026-11-23: the back-EMF is a ramp across the step,
+    // so the reported current reads the EMF at the solve's time). The reporting
+    // did not go away; the exact-signature probe went stale. Match the hook by
+    // name and its first three parameters, and hold the BEHAVIOUR below.
+    assert.match(bwb('devices/dc-motor.js'), /branchCurrents\(part, state, read\b/,
         'D19: the vendored dc_motor reports no terminal currents');
+});
+
+test('D19: a running dc_motor reports the current of the series loop it is in', async () => {
+    // pc26-motor-clamp: vsource -> sw1 -> l1 -> motor1 -> ground. One series
+    // loop, so the motor's terminals must carry exactly the switch's current,
+    // and it must not be zero while the switch is closed. Measured 0.8998 A at
+    // 10 ms on bw-board 489ca7c6 (9 V over the 10 Ω winding, back-EMF rising).
+    const {load} = await import('../scripts/lesson-bench.mjs');
+    const {board, circuit} = await load('pc26-motor-clamp');
+    circuit.setControl('sw1', 1);
+    board.advanceTo(10_000_000n);
+    const motor = board.branchCurrent('motor1', 'b');
+    const sw = board.branchCurrent('sw1', 'b');
+    assert.ok(Math.abs(motor) > 0.5, `the running motor reports ${motor} A — no terminal current`);
+    assert.ok(Math.abs(motor - sw) < 1e-6,
+        `motor1.b ${motor} A disagrees with sw1.b ${sw} A in the same series loop`);
+    assert.ok(Math.abs(board.branchCurrent('motor1', 'a') + motor) < 1e-9,
+        'what enters one motor terminal must leave the other');
 });

@@ -9,6 +9,10 @@
 // `built && enabled`; see gui.jsx.
 export const CAD_ENABLED_KEY = 'bw-cad-enabled';
 export const CAD_TOGGLE_EVENT = 'bw-cad-toggle';
+// Asked for / announced by the CAD tab. Here, not in bw-cad-program.js (which re-exports
+// them), so first-load code can name the events without pulling the CAD host bridges in.
+export const CAD_OPEN_EVENT = 'bw-open-cad';
+export const CAD_READY_EVENT = 'bw-cad-ready';
 
 let sessionValue;
 

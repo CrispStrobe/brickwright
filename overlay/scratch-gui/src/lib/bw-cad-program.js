@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
-import {getCadEnabled, CAD_TOGGLE_EVENT} from './bw-cad-preferences.js';
-export const CAD_OPEN_EVENT = 'bw-open-cad';
-export const CAD_READY_EVENT = 'bw-cad-ready';
+import {getCadEnabled, CAD_TOGGLE_EVENT, CAD_OPEN_EVENT, CAD_READY_EVENT} from './bw-cad-preferences.js';
+export {CAD_OPEN_EVENT, CAD_READY_EVENT};
 // A small host bridge. The SDK stays lazy, and the preference always stays opt-in.
 export function installCadProgramAPI (runtime) {
     let generation = 0, disposed = false, error = '';
