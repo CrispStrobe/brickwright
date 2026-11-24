@@ -3,8 +3,9 @@ import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 
 const browser = await chromium.launch({executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
-let releaseCatalogue;
+let releaseCatalogue, releaseThumbnail;
 const catalogueReady = new Promise(resolve => { releaseCatalogue = resolve; });
+const thumbnailReady = new Promise(resolve => { releaseThumbnail = resolve; });
 try {
     const page = await browser.newPage({viewport: {width: 1440, height: 900}, locale: 'en-US', serviceWorkers: 'block'});
     page.setDefaultTimeout(90000);
@@ -75,13 +76,45 @@ try {
     const search = library.getByLabel('Search models', {exact: true});
     await search.fill('5128 MacroPad');
     assert.equal(await archiveCards.count(), 1, 'explicit archive search works while the catalogue is pending');
+    await archiveCards.locator('img[src]').waitFor();
     await search.fill('');
     assert.equal(await archiveCards.count(), 0, 'clearing the search restores the stable loading grid');
+    let selectedThumbnail, thumbnailStarted;
+    const firstThumbnail = new Promise(resolve => { thumbnailStarted = resolve; });
+    let thumbnailRequests = 0;
+    await page.route('**/cad-sdk/previews/*.png', async route => {
+        const path = new URL(route.request().url()).pathname;
+        if (!selectedThumbnail) {
+            selectedThumbnail = path;
+            thumbnailStarted();
+        }
+        if (path === selectedThumbnail) {
+            thumbnailRequests++;
+            await thumbnailReady;
+        }
+        await route.continue();
+    });
     releaseCatalogue();
     console.log('PASS the initial CAD grid avoids temporary archive cards; searching still finds them');
     const cards = library.locator('.model-library-card');
     const first = library.locator('.model-library-card:has(.model-card-meta) img[src*="/cad-sdk/previews/"]').first();
     await first.waitFor();
+    const forward = library.getByRole('button', {name: 'Next page', exact: true});
+    const back = library.getByRole('button', {name: 'Previous page', exact: true});
+    await firstThumbnail;
+    const visible = requested.size;
+    assert.ok(visible > 0 && visible < 40, `expected viewport-only downloads; saw ${visible}`);
+    const pending = library.locator(`.model-library-list img[src$="${selectedThumbnail}"]`).first();
+    const pendingImage = await pending.elementHandle();
+    assert.ok(await pendingImage.evaluate(image => !image.complete), 'one thumbnail is still in flight');
+    await forward.click();
+    assert.equal(await pendingImage.evaluate(image => image.isConnected), false);
+    await back.click();
+    assert.ok(await pendingImage.evaluate(image => image.isConnected), 'returning keeps the in-flight thumbnail on its original card');
+    releaseThumbnail();
+    assert.ok(await pendingImage.evaluate(image => image.decode().then(() => image.naturalWidth > 0)));
+    assert.equal(thumbnailRequests, 1, 'revisiting a page does not restart its pending thumbnail request');
+    console.log('PASS paging away and back keeps one in-flight thumbnail request');
     const modelCount = Number(await library.locator('.model-library-list').getAttribute('data-model-count'));
     assert.ok(modelCount > 200);
     assert.equal(await cards.count(), 36);
@@ -89,8 +122,6 @@ try {
     const start = await first.getAttribute('src');
     assert.match(start, /\/cad-sdk\/previews\/[a-f0-9]{64}\.png$/);
     assert.ok(await first.evaluate(image => image.decode().then(() => image.naturalWidth > 0)));
-    const visible = requested.size;
-    assert.ok(visible > 0 && visible < 40, `expected viewport-only downloads; saw ${visible}`);
     const card = first.locator('xpath=..');
     const original = await card.elementHandle();
     const originalPreview = await first.elementHandle();
@@ -107,8 +138,6 @@ try {
     console.log('PASS CAD startup defers the library panel and archive until first open');
     console.log('PASS selecting and narrowing the CAD library retains the matching card');
     await search.fill('');
-    const forward = library.getByRole('button', {name: 'Next page', exact: true});
-    const back = library.getByRole('button', {name: 'Previous page', exact: true});
     await forward.click();
     assert.equal(await cards.count(), 36);
     assert.notEqual(await cards.first().locator('strong').textContent(), firstTitle);
@@ -173,6 +202,7 @@ try {
     assert.ok(await fallback.getByLabel('Model library status', {exact: true}).textContent());
     console.log('PASS Adafruit cards are browsable when the parts catalogue request fails');
 } finally {
+    releaseThumbnail();
     releaseCatalogue();
     await browser.close();
 }

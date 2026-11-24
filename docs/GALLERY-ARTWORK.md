@@ -29,7 +29,7 @@ Circuit Examples renders up to 32 cards per page and Robot Lab Examples renders 
 
 The CAD model library renders up to 36 cards per page. Search and model-type filters still cover the full catalog. Selection keeps the current page's cards and thumbnails mounted, and search reuses matching cards where possible.
 
-The CAD library retains up to 36 recently viewed cards with finished previews outside the grid. Returning to a page can reuse those cards immediately, and unfinished thumbnails wait for the viewport as usual.
+The CAD library retains up to 36 recently viewed cards with finished or in-flight previews outside the grid. Returning to a page reuses those cards and their image requests. Unseen and failed images wait for the viewport.
 
 Paging reuses the active CAD search results. A more specific query can search only the previous matches. Broader queries and type changes search the applicable catalog again.
 
