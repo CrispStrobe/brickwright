@@ -24,8 +24,9 @@ try {
     const library = page.getByRole('dialog', {name: 'Model library', exact: true});
     await library.getByLabel('Model type', {exact: true}).selectOption('models');
     const cards = library.locator('.model-library-card');
-    assert.ok(await cards.count() > 200);
-    const first = cards.locator('img').first();
+    const modelCount = await cards.count();
+    assert.ok(modelCount > 200);
+    const first = cards.locator('img[src*="/cad-sdk/previews/"]').first();
     await first.waitFor();
     const start = await first.getAttribute('src');
     assert.match(start, /\/cad-sdk\/previews\/[a-f0-9]{64}\.png$/);
@@ -33,10 +34,10 @@ try {
     const visible = requested.size;
     assert.ok(visible > 0 && visible < 40, `expected viewport-only downloads; saw ${visible}`);
     await library.getByLabel('Search models', {exact: true}).fill('Adafruit');
-    const archive = library.locator('.model-library-list img[data-adafruit-preview]').first();
+    const archive = library.locator('.model-library-list img[data-adafruit-preview][src*="/cad-sdk/previews/"]').first();
     await archive.waitFor();
     assert.ok(await archive.evaluate(image => image.decode().then(() => image.naturalWidth === 256)));
-    console.log(`PASS embedded CAD: zero startup PNGs; ${visible} visible-model previews of ${await cards.count()} filtered cards; Adafruit preview decoded`);
+    console.log(`PASS embedded CAD: zero startup PNGs; ${visible} visible-model previews of ${modelCount} model cards; Adafruit preview decoded`);
 } finally {
     await browser.close();
 }
