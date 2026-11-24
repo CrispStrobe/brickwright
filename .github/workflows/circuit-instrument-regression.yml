@@ -56,13 +56,13 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           repository: CrispStrobe/bw-board
-          ref: 489ca7c675a9af03cb066026ec59801b8ba3d0bb
+          ref: 7e0bf8cf8beeb3329f0be550ae08fdd8de5d2099
           path: admitted-sources/bw-board
           persist-credentials: false
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           repository: CrispStrobe/bw-circuit-ui
-          ref: a82d70032f0173f0597e1ba1c02f507b9d474642
+          ref: bc33e7d9140f9855d41944a5f9bfed2fa6191f28
           path: admitted-sources/bw-circuit-ui
           persist-credentials: false
       - name: Install locked consumer and independent oracle
