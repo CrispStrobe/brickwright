@@ -55,15 +55,15 @@
           "id": "observe",
           "copy": {
             "en": {
-              "action": "Import your own compatible 2048-byte monitor ROM, load the cells, select teaching-program cell 0 with the monitor and use its RUN key. Compare the display with 42, stop with STP, then change the constant to 73 and repeat.",
+              "action": "Import your own compatible 2048-byte monitor ROM. Use Run CPU until its ready display is stable, then Pause CPU and load the cells. Resume without resetting; on the CP1 keypad select cell 0 with PC and press RUN. Compare the display with 42. Stop with keypad STP, pause the CPU, change the constant to 73, and repeat the load/resume/PC 0/RUN sequence.",
               "explain": "The 8049 executes the monitor ROM, which reads the teaching cells and scans the physical display.",
-              "hint": "Run CPU advances the hardware; keypad RUN starts the teaching program. Read the actual six segment masks and complete this check yourself; no ROM is bundled. In the tested 2716 ROM, HLT immediately after ANZ replaces the value with P003. The repeat avoids that monitor-message change.",
+              "hint": "Let the monitor finish initialization before the first RAM load; resetting afterward can let its startup code overwrite the cells. Run CPU advances the hardware; keypad RUN starts the teaching program. Read the actual six segment masks and complete this check yourself; no ROM is bundled. In the tested 2716 ROM, HLT immediately after ANZ replaces the value with P003. The repeat avoids that monitor-message change.",
               "manual": "I observed both constants on the real segment display"
             },
             "de": {
-              "action": "Importiere ein eigenes kompatibles Monitor-ROM mit 2048 Bytes, lade die Zellen, wähle im Monitor Lernprogrammzelle 0 und drücke seine RUN-Taste. Vergleiche die Anzeige mit 42, halte mit STP an, ändere die Konstante auf 73 und wiederhole den Versuch.",
+              "action": "Importiere ein eigenes kompatibles Monitor-ROM mit 2048 Bytes. Lass die CPU mit „CPU ausführen“ bis zur stabilen Bereitschaftsanzeige laufen, pausiere sie und lade die Zellen. Setze ohne Zurücksetzen fort; wähle auf der CP1-Tastatur mit PC Zelle 0 und drücke RUN. Vergleiche die Anzeige mit 42. Halte mit STP an, pausiere die CPU, ändere die Konstante auf 73 und wiederhole Laden/Fortsetzen/PC 0/RUN.",
               "explain": "Der 8049 führt das Monitor-ROM aus. Dieses liest die Lernprogrammzellen und steuert die physische Anzeige an.",
-              "hint": "CPU ausführen lässt die Hardware laufen; RUN auf der Tastatur startet das Lernprogramm. Lies die sechs tatsächlichen Segmentmasken ab und bestätige selbst; ein ROM wird nicht mitgeliefert. Im geprüften 2716-ROM ersetzt HLT direkt nach ANZ den Wert durch P003. Die Wiederholung vermeidet diesen Wechsel zur Monitormeldung.",
+              "hint": "Lass den Monitor vor dem ersten RAM-Laden seine Initialisierung beenden. Zurücksetzen danach kann dazu führen, dass sein Startcode die Zellen überschreibt. „CPU ausführen“ lässt die Hardware laufen; RUN auf der Tastatur startet das Lernprogramm. Lies die sechs tatsächlichen Segmentmasken ab und bestätige selbst; ein ROM wird nicht mitgeliefert. Im geprüften 2716-ROM ersetzt HLT direkt nach ANZ den Wert durch P003. Die Wiederholung vermeidet diesen Wechsel zur Monitormeldung.",
               "manual": "Ich habe beide Konstanten auf der echten Segmentanzeige beobachtet"
             }
           }

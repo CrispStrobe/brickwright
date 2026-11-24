@@ -70,7 +70,7 @@
 .table {width: 100%; border-collapse: collapse; font: 12px/1.5 ui-monospace, monospace;}
 .table th, .table td {padding: 5px 8px; border-bottom: 1px solid var(--cp1-border); text-align: left; white-space: nowrap;}
 .table thead {font-family: system-ui, sans-serif;}
-.cellEditor {display: flex; align-items: end; flex-wrap: wrap; gap: 7px; margin-top: 12px;}
+.cellEditor {display: flex; align-items: flex-end; flex-wrap: wrap; gap: 7px; margin-top: 12px;}
 .cellEditor input {padding: 6px; width: 80px; min-height: 36px;}
 .portInputs fieldset {border: 1px solid var(--cp1-border); border-radius: 7px; margin: 8px 0;}
 .bitInputs {display: flex; gap: 14px; flex-wrap: wrap;}

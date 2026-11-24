@@ -2,6 +2,8 @@
 /**
  * CP1 component proof with an explicit dependency registry.
  * Example: node scripts/verify-cp1-components.mjs --deps ../bw-circuit-ui/node_modules --board ../bw-board
+ * Optional --compiler-deps supplies Vite/Oxc from another explicit registry;
+ * React and its server renderer always come from --deps.
  * Uses the real React server renderer and original 8049/8155 machine. Lifecycle
  * surfaces are controlled callback doubles; this is not a browser/visual pass.
  */
@@ -17,11 +19,13 @@ const depsArgument=option('--deps');
 const boardArgument=option('--board');
 if(!depsArgument||!boardArgument)throw Error('Pass explicit --deps <node_modules> and --board <bw-board checkout> paths.');
 const deps=path.resolve(root,depsArgument);
+const compilerDeps=path.resolve(root,option('--compiler-deps',depsArgument));
 const board=path.resolve(root,boardArgument);
 const requireDeps=createRequire(path.join(deps,'__cp1_components__.cjs'));
+const requireCompiler=createRequire(path.join(compilerDeps,'__cp1_compiler__.cjs'));
 const React=requireDeps('react');
 const {renderToStaticMarkup}=requireDeps('react-dom/server');
-const {transformWithOxc}=await import(pathToFileURL(requireDeps.resolve('vite')).href);
+const {transformWithOxc}=await import(pathToFileURL(requireCompiler.resolve('vite')).href);
 const {Cp1Machine}=await import(pathToFileURL(path.join(board,'src/cp1-machine.js')).href);
 const url=source=>`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`;
 const panelPath=path.join(root,'overlay/scratch-gui/src/components/tw-pseudocode/cp1-panel.jsx');

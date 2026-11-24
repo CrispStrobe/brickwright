@@ -107,17 +107,23 @@ registry and the independently authored engine checkout:
 
 ```sh
 node scripts/verify-cp1-components.mjs --deps ../bw-circuit-ui/node_modules --board ../bw-board
+node scripts/verify-cp1-components.mjs --deps packages/scratch-gui/node_modules --compiler-deps ../bw-circuit-ui/node_modules --board packages/scratch-gui/node_modules/bw-board
 node scripts/verify-cp1-panel-browser.mjs --deps ../bw-circuit-ui/node_modules --board ../bw-board --executable /usr/bin/chromium
 ```
 
-On 2026-11-24, the first command passed 13 checks with React 18.3.1 and Vite/Oxc:
+The optional `--compiler-deps` flag selects the Vite/Oxc registry and defaults to
+`--deps`. React and its server renderer always come from `--deps`.
+
+On 2026-11-24, both SSR commands passed the same 13 checks: first with React
+18.3.1, then with the GUI's actual React 16.14.0 and installed pinned `bw-board`.
+Vite/Oxc compiled the JSX in both runs. The checks cover
 actual JSX/SSR rendering, raw masks, key lifetimes, load/ROM refusal feedback,
 real RAM writes, source preservation, storage refusal recovery, queued CP3/ROM
 operations and circuit input ownership. Event surfaces and effect scheduling are
 controlled test doubles, PropTypes uses a validator-only stub, and CSS uses the
 actual stylesheet's class names. This is a component/callback proof, not a full
-application or visual browser pass. The implementation uses React APIs available
-in React 16.8, but a separate React 16 runtime was not exercised here.
+application or visual browser pass. React 16.14.0 compatibility is exercised by
+the second command within these stated boundaries.
 
 The browser launch was blocked before page load by the execution sandbox:
 Chromium's process singleton could not create its socket (`Operation not
