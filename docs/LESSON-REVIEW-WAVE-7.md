@@ -130,6 +130,11 @@ gives the quasi-mode reading beside it, and makes the contrast the point —
 same bit, same Boolean meaning, different electrical level, which is the
 lesson's own objective.
 
+> **Re-measured 2026-11-24** (bw-board `489ca7c6`; LEDs exponential since
+> `74d42338`): push-pull 0.0794 / 4.9206 V, both LEDs 0.1587; quasi P1.1 high
+> 1.7251 V, active-high LED 0.0076. The hint's quasi figure moved 1.93 -> 1.73 V
+> (EN/DE); the push-pull figures it quotes (0.08 / 4.92 V) still hold.
+
 ### 2. machines-gates-registers — the register was fed a constant zero — FIXED 2026-08-24
 
 The `trace` checkpoint asks the learner to "correlate data, clock, latch,
@@ -274,6 +279,10 @@ board's button reached nothing.
 > press 2       0.0000 V   released 0.0000 V
 > press 3       4.4643 V   press 4  0.0000 V
 > ```
+>
+> **Re-measured 2026-11-24:** Q sets to 4.4064 V (exponential LEDs, bw-board
+> `74d42338`; sb3-creator `9f50f601` re-derived EXPECTED.md to match). The hint
+> quotes 4.4064 V in both languages and the gate asserts that figure.
 >
 > The holding is the point: it is what distinguishes stored state from a button
 > the LED merely follows. 4.4643 V is hand-computed in the example's own

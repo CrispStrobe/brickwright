@@ -295,7 +295,12 @@ for (const file of roots.flatMap(r => walk(path.join(root, r)))) {
         .filter(m => !/^[\s\S]{0,180}?\.(?:click|fill|press|type|check|selectOption|count|evaluate|textContent|innerText|screenshot|boundingBox)\(/
             .test(text.slice(m.index + m[0].length)));
     if (appears.length) {
-        const provesAbsence = /state:\s*'(detached|hidden)'|toBeHidden\(|count\(\)\s*(?:===|!==)?\s*0|\.count\(\)\s*\)?\s*,\s*0|not\.toBeVisible/.test(text);
+        // `assert.equal(await x.isVisible(), false)` is an absence assertion in node:assert's
+        // spelling, the way `.count()), 0` is: two CAD gates (verify-cad-robot-projects: the
+        // robot controls are NOT shown while closed; verify-cad-fasteners: the head-height field
+        // is GONE for a countersunk head) assert exactly that and read as EVENT-AS-STATE without it.
+        // `isVisible(), true` is still an appearance and proves nothing gone.
+        const provesAbsence = /state:\s*'(detached|hidden)'|toBeHidden\(|count\(\)\s*(?:===|!==)?\s*0|\.count\(\)\s*\)?\s*,\s*0|not\.toBeVisible|\.isVisible\(\)\s*,\s*false\b/.test(text);
         if (!provesAbsence) {
             note(file, lineOf(text, appears[0].index), 'EVENT-AS-STATE',
                 `${appears.length} appearance assertion(s), none proving the thing is ever gone`);
