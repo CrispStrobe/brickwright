@@ -29,6 +29,8 @@ Circuit Examples renders up to 32 cards per page and Robot Lab Examples renders 
 
 The CAD model library renders up to 36 cards per page. Search and model-type filters still cover the full catalog. Selection keeps the current page's cards and thumbnails mounted, and search reuses matching cards where possible.
 
+The CAD library retains up to 36 recently viewed cards with finished previews outside the grid. Returning to a page can reuse those cards immediately, and unfinished thumbnails wait for the viewport as usual.
+
 The CAD library materializes bundled source and STL bytes during insertion. Browsing and availability checks use the catalog and exact bundled paths, and insertion can still use the bundled files offline.
 
 Catalog construction parses each source manifest once and reuses its records for licence attribution. The standalone editor keeps the normalized catalog when a different project is opened in the same app session.

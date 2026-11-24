@@ -59,6 +59,7 @@ try {
     assert.ok(visible > 0 && visible < 40, `expected viewport-only downloads; saw ${visible}`);
     const card = first.locator('xpath=..');
     const original = await card.elementHandle();
+    const originalPreview = await first.elementHandle();
     const title = await card.locator('strong').textContent();
     await card.focus();
     await card.press('Enter');
@@ -70,9 +71,20 @@ try {
     console.log('PASS selecting and narrowing the CAD library retains the matching card');
     const search = library.getByLabel('Search models', {exact: true});
     await search.fill('');
-    await library.getByRole('button', {name: 'Next page', exact: true}).click();
+    const forward = library.getByRole('button', {name: 'Next page', exact: true});
+    const back = library.getByRole('button', {name: 'Previous page', exact: true});
+    await forward.click();
     assert.equal(await cards.count(), 36);
     assert.notEqual(await cards.first().locator('strong').textContent(), firstTitle);
+    assert.equal(await original.evaluate(node => node.isConnected), false);
+    await back.click();
+    assert.equal(await cards.count(), 36);
+    assert.ok(await original.evaluate(node => node.isConnected && node.getAttribute('aria-pressed') === 'true'),
+        'returning to the prior page restores the loaded card and its selection');
+    assert.ok(await originalPreview.evaluate(image => image.isConnected && image.complete && image.naturalWidth > 0),
+        'returning to the prior page restores the decoded thumbnail');
+    console.log('PASS returning to a page reuses its loaded thumbnail and selected card');
+    await forward.click();
     await search.fill('5128 MacroPad');
     const archive = library.locator('.model-library-list img[data-adafruit-preview][src*="/cad-sdk/previews/"]').first();
     await archive.waitFor();
@@ -80,7 +92,7 @@ try {
     assert.ok(await archive.evaluate(image => image.decode().then(() => image.naturalWidth === 256)));
     await search.fill('');
     assert.equal(await cards.first().locator('strong').textContent(), firstTitle);
-    assert.ok(await library.getByRole('button', {name: 'Previous page', exact: true}).isDisabled());
+    assert.ok(await back.isDisabled());
     console.log(`PASS embedded CAD: 36 mounted cards of ${modelCount} models; ${visible} initial previews; later pages and archive search work`);
     assert.deepEqual(await page.evaluate(() => window.__cadLibraryDecode), {files: 0, bytes: 0},
         'opening, searching and selecting in the gallery must not decode bundled STL geometry');
