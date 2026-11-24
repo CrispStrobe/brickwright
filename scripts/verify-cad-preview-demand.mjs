@@ -20,6 +20,18 @@ try {
     await page.getByRole('tab', {name: 'CAD', exact: true}).click();
     await page.waitForFunction(() => window.__bwCad?.editor);
     assert.equal(requested.size, 0);
+    await page.evaluate(() => {
+        const decode = window.atob;
+        window.__cadLibraryDecode = {files: 0, bytes: 0};
+        window.atob = value => {
+            const binary = decode(value);
+            if (binary.length >= 84 && (binary.length - 84) % 50 === 0) {
+                window.__cadLibraryDecode.files++;
+                window.__cadLibraryDecode.bytes += binary.length;
+            }
+            return binary;
+        };
+    });
     await page.getByRole('button', {name: 'Model library', exact: true}).click();
     const library = page.getByRole('dialog', {name: 'Model library', exact: true});
     await library.getByLabel('Model type', {exact: true}).selectOption('models');
@@ -60,6 +72,15 @@ try {
     assert.equal(await cards.first().locator('strong').textContent(), firstTitle);
     assert.ok(await library.getByRole('button', {name: 'Previous page', exact: true}).isDisabled());
     console.log(`PASS embedded CAD: 36 mounted cards of ${modelCount} models; ${visible} initial previews; later pages and archive search work`);
+    assert.deepEqual(await page.evaluate(() => window.__cadLibraryDecode), {files: 0, bytes: 0},
+        'opening, searching and selecting in the gallery must not decode bundled STL geometry');
+    await search.fill('10 mm geometric cube fixture');
+    await library.getByRole('button', {name: /^10 mm geometric cube fixture · /}).click();
+    await page.context().setOffline(true);
+    await library.getByRole('button', {name: 'Insert editable source', exact: true}).click();
+    await library.getByText(/Editable source inserted with provenance/).waitFor();
+    await page.waitForFunction(() => window.__bwCad.editor.session.state.document.roots.length > 0);
+    console.log('PASS bundled file decoding stays out of browsing and editable source still inserts offline');
 } finally {
     await browser.close();
 }

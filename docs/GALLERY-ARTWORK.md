@@ -28,3 +28,5 @@ Opening Circuit starts the bench. The Examples panel and the collapsed examples 
 Circuit Examples renders up to 32 cards per page and Robot Lab Examples renders up to 24. Search and filters cover each editor's full catalog and return to the first page when changed.
 
 The CAD model library renders up to 36 cards per page. Search and model-type filters still cover the full catalog. Selection keeps the current page's cards and thumbnails mounted, and search reuses matching cards where possible.
+
+The CAD library materializes bundled source and STL bytes during insertion. Browsing and availability checks use the catalog and exact bundled paths, and insertion can still use the bundled files offline.
