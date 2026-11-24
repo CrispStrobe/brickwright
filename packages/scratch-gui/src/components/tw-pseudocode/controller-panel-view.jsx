@@ -3,6 +3,7 @@ import { ControllerPanel, WIDGET_TYPES, WIDGET_DEFAULTS } from 'bw-board/control
 import { bindPanelToBoard } from 'bw-board/controller-binding.js';
 import {clearControllerPanel, createWidgetButtonInputs, releaseMomentaryButtons,
     serializeControllerPanel} from '../../lib/controller-inputs.js';
+import EditorHelp from '../gui/editor-help.jsx';
 import MachineConsole from './machine-console.jsx';
 import {activateUndoSurface, notifyUndoState, registerUndoSurface} from '../../lib/global-undo.js';
 import SpikePortMonitor from './spike-port-monitor.jsx';
@@ -1781,6 +1782,7 @@ class ControllerPanelView extends React.Component {
                     <span style={{ fontWeight: 700, fontSize: 14, color: '#7C3AED' }}>
                         {t('title')}
                     </span>
+                    <EditorHelp editor="Widgets" label="Widgets" locale={this.props.locale} />
                     {/* ENTERING full screen from here, because there is no other way in
                         on a phone: the stage header that normally offers it is capped
                         to 44px in this dock mode, and a sweep of the pane on a phone

@@ -24,11 +24,15 @@ const colorToBackground = (color, color2, gradientType) => {
 };
 
 const ColorButtonComponent = props => (
-    <div
+    <button
+        aria-label={props.label}
+        title={props.label}
+        disabled={props.disabled}
+        type="button"
         className={styles.colorButton}
         onClick={props.onClick}
     >
-        <div
+        <span
             className={classNames(styles.colorButtonSwatch, {
                 [styles.outlineSwatch]: props.outline && !(props.color === MIXED)
             })}
@@ -38,23 +42,27 @@ const ColorButtonComponent = props => (
         >
             {props.color === null && (props.gradientType === GradientTypes.SOLID || props.color2 === null) ? (
                 <img
+                    alt=""
                     className={styles.swatchIcon}
                     draggable={false}
                     src={noFillIcon}
                 />
             ) : ((props.color === MIXED || (props.gradientType !== GradientTypes.SOLID && props.color2 === MIXED) ? (
                 <img
+                    alt=""
                     className={styles.swatchIcon}
                     draggable={false}
                     src={mixedFillIcon}
                 />
             ) : null))}
-        </div>
-        <div className={styles.colorButtonArrow}>▾</div>
-    </div>
+        </span>
+        <span aria-hidden="true" className={styles.colorButtonArrow}>▾</span>
+    </button>
 );
 
 ColorButtonComponent.propTypes = {
+    label: PropTypes.string,
+    disabled: PropTypes.bool,
     color: PropTypes.string,
     color2: PropTypes.string,
     gradientType: PropTypes.oneOf(Object.keys(GradientTypes)).isRequired,

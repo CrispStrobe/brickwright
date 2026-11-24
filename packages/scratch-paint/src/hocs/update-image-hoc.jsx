@@ -11,6 +11,7 @@ import {redrawSelectionBox, setSelectedItems} from '../reducers/selected-items';
 import {updateViewBounds} from '../reducers/view-bounds';
 
 import {getSelectedLeafItems} from '../helper/selection';
+import {exportPrecisionCircle} from '../helper/bw/precision-shape';
 import {rehideItems, revealHiddenItems} from '../helper/bw/objects';
 import {getRaster, hideGuideLayers, showGuideLayers} from '../helper/layer';
 import {getBitmapLayers, getCompositeBitmapRaster, getBitmapLayerDocument} from '../helper/bw/bitmap-layers';
@@ -164,6 +165,7 @@ const UpdateImageHOC = function (WrappedComponent) {
                 paper.project.exportSVG({
                     asString: true,
                     bounds: 'content',
+                    onExport: exportPrecisionCircle,
                     matrix: new paper.Matrix().translate(-bounds.x, -bounds.y)
                 }),
                 centerX,

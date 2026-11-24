@@ -17,6 +17,8 @@ import {DEFAULT_THEME, DARK_THEME, HIGH_CONTRAST_THEME, themeMap} from '../../li
 import {persistTheme} from '../../lib/themes/themePersistance';
 import {setTheme} from '../../reducers/theme.js';
 import {hardReload} from '../../lib/hard-reload.js';
+import {getCameraPreferences, setCameraPreference} from '../../lib/bw-camera-preferences.js';
+import {getCostumePrecision, setCostumePrecision} from '../../lib/bw-costume-precision.js';
 import {getCadEnabled, setCadEnabled} from '../../lib/bw-cad-preferences.js';
 import {getFpgaEnabled, setFpgaEnabled} from '../../lib/bw-fpga-preferences.js';
 import {getLegacySpikeVisible, setLegacySpikeVisible} from '../../lib/spike-legacy-debug.js';
@@ -53,6 +55,17 @@ const emit = (name, value) => {
 
 const SettingsMenu = ({intl, canChangeLanguage, canChangeTheme, isRtl, onRequestClose, onRequestOpen, settingsMenuOpen}) => {
     const t = (id, defaultMessage) => intl.formatMessage({id, defaultMessage});
+    const de = /^de/i.test(intl.locale);
+    const [cameraOpen, setCameraOpen] = useState(false);
+    const camera = getCameraPreferences();
+    const setCamera = (name, value) => {
+        setCameraPreference(name, value);
+        onRequestClose();
+    };
+    const cameraHeading = t('gui.camera.heading', de ? '3D-Navigation' : '3D navigation');
+    const pan = {value: 'pan', label: t('gui.camera.pan', de ? 'Verschieben' : 'Pan')};
+    const orbit = {value: 'orbit', label: t('gui.camera.orbit', de ? 'Drehen' : 'Orbit')};
+    const zoom = {value: 'zoom', label: t('gui.camera.zoom', de ? 'Zoomen' : 'Zoom')};
     const [workspaceOpen, setWorkspaceOpen] = useState(false);
     const [preferencesOpen, setPreferencesOpen] = useState(false);
     const current = key => {
@@ -152,11 +165,31 @@ const SettingsMenu = ({intl, canChangeLanguage, canChangeTheme, isRtl, onRequest
                                     {value: '0', label: t('gui.workspace.off', 'Off')},
                                     {value: '1', label: t('gui.workspace.on', 'On')}
                                 ], t('gui.workspace.cadHint', /^de/i.test(intl.locale) ? 'CAD-Tab zum Entwerfen von Körpern anzeigen' : 'Show the CAD tab to design solid models')) : null}
+                            {process.env.BW_ENABLE_CAD ? workspaceSelect(
+                                t('gui.workspace.costumePrecision', de ? 'Präzisionsdesign für Kostüme' : 'Costumes precision design'),
+                                getCostumePrecision() ? '1' : '0',
+                                value => { setCostumePrecision(value === '1'); onRequestClose(); }, [
+                                    {value: '0', label: t('gui.workspace.off', 'Off')},
+                                    {value: '1', label: t('gui.workspace.on', 'On')}
+                                ], t('gui.workspace.costumePrecisionHint', de ?
+                                    'Vektorflächen als bearbeitbare CAD-Skizzen übernehmen' : 'Send vector regions to CAD as editable sketches')) : null}
                             {workspaceSelect(t('gui.workspace.legacySpike', 'Legacy SPIKE extensions'), getLegacySpikeVisible() ? '1' : '0',
                                 value => { setLegacySpikeVisible(value === '1'); onRequestClose(); }, [
                                     {value: '0', label: t('gui.workspace.off', 'Off')},
                                     {value: '1', label: t('gui.workspace.showDebugging', 'Show for debugging')}
                                 ], t('gui.workspace.legacyHint', 'Show four archived SPIKE Prime drivers in the extension gallery for hardware diagnosis'))}
+                        </Submenu>
+                    </MenuItem>
+                    <MenuItem expanded={cameraOpen} ariaLabel={cameraHeading}>
+                        <div className={styles.groupRow} onClick={() => setCameraOpen(value => !value)}>
+                            <span>{cameraHeading}</span>
+                            <img className={styles.groupCaret} src={dropdownCaret} />
+                        </div>
+                        <Submenu place={isRtl ? 'left' : 'right'}>
+                            {workspaceSelect(t('gui.camera.trackpadSlide', de ? 'Zwei Finger bewegen' : 'Two-finger slide'),
+                                camera.trackpadSlide, value => setCamera('trackpadSlide', value), [pan, orbit, zoom])}
+                            {workspaceSelect(t('gui.camera.secondaryDrag', de ? 'Mit Sekundärklick ziehen' : 'Secondary-button drag'),
+                                camera.secondaryDrag, value => setCamera('secondaryDrag', value), [orbit, pan])}
                         </Submenu>
                     </MenuItem>
                 </MenuSection>

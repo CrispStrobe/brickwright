@@ -21,6 +21,8 @@ const LabeledIconButton = ({
 }) => (
     <Button
         className={classNames(className, styles.modEditField)}
+        aria-label={title}
+        title={title}
         onClick={onClick}
         {...props}
     >
