@@ -18,6 +18,7 @@ import {getIsAnyCreatingNewState} from '../../reducers/project-state';
 import {activateUndoSurface, getUndoState, notifyUndoState, registerUndoSurface} from '../../lib/global-undo.js';
 import {notifyEditorMenuActions, registerEditorMenuActions} from '../../lib/editor-menu-actions.js';
 import {confirmAsync} from '../../lib/native-dialog.js';
+import {circuitExamplesWithArtwork, loadGalleryArtwork} from '../../lib/gallery-artwork.js';
 import {applyBenchTemperature, clampBenchTemperature, loadBenchTemperature, saveBenchTemperature} from
     '../../lib/bench-temperature.js';
 
@@ -696,6 +697,7 @@ class CircuitTab extends React.Component {
     }
 
     componentWillUnmount () {
+        this.galleryArtworkRequest = null;
         window.removeEventListener('bw-circuit-clock-owner', this._couplingHandler);
         window.removeEventListener('bw-circuit-ensure-ready', this._couplingOpen);
         this.releaseEsp32S040Input();
@@ -1352,6 +1354,13 @@ class CircuitTab extends React.Component {
                 const list = Array.isArray(data) ? data : (data.examples || []);
                 this._markReactUpdate('host:examples');
                 this.setState({examples: list});
+                const artwork = loadGalleryArtwork();
+                this.galleryArtworkRequest = artwork;
+                artwork.then(manifest => {
+                    if (this.galleryArtworkRequest !== artwork) return;
+                    const decorated = circuitExamplesWithArtwork(list, manifest.circuits);
+                    if (decorated !== list) this.setState(state => state.examples === list ? {examples: decorated} : null);
+                });
                 return list;
             } catch (e) {
                 const message = pt(this.props.locale, 'examples.notVendored', {message: e.message});
