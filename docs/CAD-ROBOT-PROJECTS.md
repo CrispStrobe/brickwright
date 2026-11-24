@@ -173,3 +173,32 @@ The strict 1× check still fails for both projects.
 Quasar completed the full cycle with SIMD and with the scalar fallback
 forced by blocking the SIMD asset. Firefox still exceeded its 60-second
 mechanical startup budget on Scout before first motion.
+
+### Batch circuit feedback at each mechanical step
+
+Scout publishes two shaft readings and Atlas publishes three. Both now
+apply all readings from one 5 ms step before solving the circuit. Older
+Board packages still accept the individual readings. Input validation
+completes before any shaft changes.
+
+MacBook Chrome A/B with the same build and default controls:
+
+| Project | Mean shaft-feedback time per step, individual → batch | Sustained rate, individual → batch |
+| --- | ---: | ---: |
+| Scout | 0.211 → 0.149 ms | 0.616× → 0.638× |
+| Atlas | 0.269 → 0.170 ms | 0.624× → 0.551× |
+
+Use `PROOF_PHASES=1 PROOF_LEGACY_SHAFTS=1` to force individual feedback for
+comparison. The paired direct-Board benchmark used the same project circuits
+and 900 steps per run. It measured two or three feedback solves per step
+with individual updates, and one with batching. Accumulated motor impulses
+matched exactly in that benchmark. The full Atlas run did not show a
+sustained gain, and both strict 1× checks remain open. Mechanical round
+trips in the batched browser runs averaged 7.17 ms for Scout and 7.31 ms
+for Atlas.
+
+We also qualified a smaller Scout wheel compound against the full source
+mesh. It reduced the compound from 507 to 385 hulls per wheel and made
+preparation faster in one paired run. Native stepping showed no reliable
+gain, and the Scout motion qualification did not pass. The released
+wheel assets retain their existing candidates.
