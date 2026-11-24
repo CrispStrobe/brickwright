@@ -991,7 +991,9 @@ export const createEditorView3D = ({container, read, colors, catalog, editor,
             pose: {position: pose.position, rotation: pose.rotation}, radius: MAGNET_RADIUS})
             .filter(c => !samePose(c, placed));
         if (!found.length) return null;
-        return {...found[0], rotation: cleanRotation(found[0].rotation)};
+        // Tidied like every other committed pose (LDraw writes six decimals): the snap's frame maths
+        // otherwise leaves float noise in an axis the move did not touch (400.00000000000006 for 400).
+        return {...found[0], position: found[0].position.map(v => tidy(Math.round(v * 1e6) / 1e6)), rotation: cleanRotation(found[0].rotation)};
     };
 
     // ---- ghosts and magnet markers -------------------------------------------

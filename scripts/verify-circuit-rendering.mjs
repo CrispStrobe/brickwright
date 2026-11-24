@@ -307,9 +307,17 @@ try {
         startup.meanError < .0001 && Math.abs(startup.mean - startup.final) > .5 &&
         startup.accuracyMet === true, JSON.stringify(startup));
 
+    // ROUND 3 (bw-board #740, pin a685b220): the interactive step control's
+    // step-doubling estimate is Richardson-scaled by 1/(2^p - 1), so steps spend
+    // the stated tolerance instead of a third of it; bw-board 50d8cf37 widened its
+    // own RLC oracle for the same reason. Measured in CI run 45318622606: overload
+    // worst sample 1.45e-4 V (was 6.8e-5), partitioned 1.40e-4 (was 1.0e-4); inrush
+    // worst sample 1.38e-5 V (was 1.7e-6). The profile's local scale is
+    // 1e-6 + 1e-4*|v| per step (3.6e-4 V at 3.6 V), so the sample bounds become 2e-4 / 3e-5;
+    // the mean bounds, the inrush partition bound and the analytic transitions are unchanged.
     for (const [label, resistance, capacitance, sampleTolerance, meanTolerance] of [
-        ['overload', 10, 2.2e-6, 1e-4, 3e-5],
-        ['inrush', 500, 22e-6, 5e-6, 1e-5]
+        ['overload', 10, 2.2e-6, 2e-4, 3e-5],
+        ['inrush', 500, 22e-6, 3e-5, 1e-5]
     ]) {
         const limitedFixture = structuredClone(adp7118Fixture);
         limitedFixture.parts.find(part => part.id === 'u1').params = {
@@ -482,7 +490,7 @@ try {
             JSON.stringify(limited));
         check(`production browser ADP7118 ${label} separate partitioned probe preserves waveform, KCL and finite VIN delivery`,
             limited.accuracyMet === true && limited.endpointAgreement <= 1e-7 &&
-            limited.partitionMaxError < (label === 'overload' ? 1.2e-4 : 5e-6) &&
+            limited.partitionMaxError < (label === 'overload' ? 2e-4 : 5e-6) &&
             limited.maxCeilingError < 1e-8 && limited.maxKclError < 1e-9 && limited.maxSupplyError < 1e-9 &&
             limited.maxVinDropError < 1e-9,
             JSON.stringify(limited));

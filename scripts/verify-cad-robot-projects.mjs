@@ -32,7 +32,7 @@ await page.addInitScript(()=>{localStorage.setItem('bw-starter-v1-complete','1')
 });
 const wait=fn=>page.waitForFunction(fn,null,{timeout:180000,polling:100});const out=process.env.PROOF_OUT||'artifacts/cad-robot-projects';await mkdir(out,{recursive:true});
 try{
- await page.goto(process.env.PROOF_URL||'http://127.0.0.1:8141/',{waitUntil:'commit'});await wait(()=>window.__brickwrightStore?.getState().scratchGui.vm?.runtime);await page.getByRole('tab',{name:'CAD',exact:true}).click();await wait(()=>window.__bwCad?.editor);console.log('GUI CAD ready');
+ await page.goto(process.env.PROOF_URL||'http://127.0.0.1:8141/',{waitUntil:'commit'});await wait(()=>window.__brickwrightStore?.getState().scratchGui.vm?.runtime?.cadCircuitSimulation);await page.getByRole('tab',{name:'CAD',exact:true}).click();await wait(()=>window.__bwCad?.editor);console.log('GUI CAD ready');
  const cad=page.getByTestId('bw-cad-tab');
  for(const [i,item]of CAD_ROBOT_EXAMPLES.entries()){
   if(process.argv.includes('--ipad')&&i>0)break;
@@ -72,7 +72,10 @@ try{
    await cad.getByRole('button',{name:'Redo',exact:true}).click();await page.evaluate(()=>window.__bwCad.editor.whenIdle());assert.ok(await page.evaluate(()=>!!window.__bwCad.editor.session.state.document.nodes['electronics-controller']));assert.deepEqual(await sibling(),beforeSiblings);
    if(panelWasVisible)await page.getByTestId('bw-cad-program-settings').click();console.log('PASS integrated legacy Atlas hardware upgrade preserves all sibling editors and exact Undo/Redo');
   }
-  if(process.env.PROOF_DEFAULT!=='1')for(const widget of state.widgets){const value=widget.min<0?60:Math.min(widget.max,105);await page.getByTestId(`bw-cad-control-${widget.name}`).evaluate((input,value)=>{Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(input,String(value));input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}));},value);assert.equal(await page.evaluate(name=>window.__brickwrightStore.getState().scratchGui.vm.runtime.controllerPanel.getValue(name),widget.name),value);}
+  // Operated, not default: a signed widget is driven harder in the direction of the project's own preset.
+  // Presets start inside travel (5389b9b17), but not every joint starts mid-travel: Hermes' hoist-b
+  // (limits [-16, 0]) starts at its upper stop and its preset -25 lowers it, so a blanket +60 held it on the stop.
+  if(process.env.PROOF_DEFAULT!=='1')for(const widget of state.widgets){const value=widget.min<0?(widget.value<0?-60:60):Math.min(widget.max,105);await page.getByTestId(`bw-cad-control-${widget.name}`).evaluate((input,value)=>{Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(input,String(value));input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}));},value);assert.equal(await page.evaluate(name=>window.__brickwrightStore.getState().scratchGui.vm.runtime.controllerPanel.getValue(name),widget.name),value);}
   await writeFile(`${out}/loaded-${item.id}.json`,JSON.stringify({id:item.id,widgets:state.widgets,blocks:true,code:true,circuit:true,connections:state.connections},null,2));
   if(process.env.PROOF_LOAD_ONLY==='1'){console.log('PASS full project load',item.id);continue;}
   if(process.env.PROOF_CONTROLS_CLOSED==='1')await page.getByTestId('bw-cad-circuit-panel').getByRole('button',{name:'Close program settings'}).click();

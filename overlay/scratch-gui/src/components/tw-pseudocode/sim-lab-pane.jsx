@@ -3426,7 +3426,9 @@ class SimLabPane extends React.Component {
         const chip = {display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap', padding: '2px 8px', borderRadius: 999, fontSize: 12};
         const hint = this.buildStatusText();
         const lesson = this.renderLessonToggle();
-        if (!selection.length && !this.state.hidden.length && !this.state.editGroup && !lesson && (!st.kind || st.kind === 'idle')) return null;
+        // The row stays mounted (empty when idle; the idle hints live in Help since 155ef476d). Unmounting it
+        // when idle made the Build view jump 32 px each time hovering a part brought its name in, so a click
+        // aimed at a part landed beside it (sim-lab-editor-parity-gate: a click on a group member).
         const selectionText = sel ? TT.selectedOne.replace('{name}', this.partName(sel.part)) : TT.selectedMany.replace('{n}', selection.length);
         return (
             <div data-testid="bw-sim-lab-context" style={{display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, minHeight: 26, fontSize: 12}}>

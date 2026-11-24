@@ -222,11 +222,38 @@ try {
     const editorPane = page.locator('[data-editor-pane]');
     check('right pane remains mounted for optional Circuit Designer selection', await page.locator('[data-right-pane]').count() === 1);
 
-    const stageButton = page.getByRole('button', {name: 'Scratch Stage'});
+    // Since 68ec0be7c (CAD model and Robot Lab views beside the blocks) a right pane
+    // narrower than its buttons need shows the views as ONE dropdown
+    // (data-testid bw-right-pane-view, labelled with the current view) — this 1024 px
+    // page's 355 px pane does. A view control is the button when buttons show, else
+    // that dropdown's option: count / aria-pressed / click mean the same either way.
+    const paneViews = page.getByTestId('bw-right-pane-view');
+    const viewControl = (name, exact = false) => {
+        const button = page.getByRole('button', {name, exact});
+        const label = async () => {
+            const labels = await paneViews.locator('option').allTextContents();
+            return labels.find(text => (exact ? text === name : text.includes(name))) || null;
+        };
+        const compact = async () => await paneViews.count() === 1;
+        return {
+            count: async () => (await compact() ? (await label() ? 1 : 0) : button.count()),
+            getAttribute: async attribute => {
+                if (!(await compact())) return button.getAttribute(attribute);
+                if (attribute !== 'aria-pressed') return null;
+                const selected = await paneViews.evaluate(select => select.options[select.selectedIndex]?.textContent);
+                return String(selected === await label());
+            },
+            click: async options => {
+                if (!(await compact())) return button.click(options);
+                return paneViews.selectOption({label: await label()});
+            }
+        };
+    };
+    const stageButton = viewControl('Scratch Stage');
     // The "(only)" was dropped from this button's label (it was misleading — the
     // Selectors and Instruments panels can still blend into the Circuit view).
-    const circuitButton = page.getByRole('button', {name: 'Circuit Designer'});
-    const debuggerButton = page.getByRole('button', {name: 'Debugger', exact: true});
+    const circuitButton = viewControl('Circuit Designer');
+    const debuggerButton = viewControl('Debugger', true);
     check('stage-view buttons are present', await stageButton.count() === 1 && await circuitButton.count() === 1 && await debuggerButton.count() === 1);
     check('Scratch Stage is selected on a fresh editor', await stageButton.getAttribute('aria-pressed') === 'true');
     await circuitButton.click();
@@ -725,7 +752,9 @@ try {
         await designer.getByRole('button', {name: /Pause simulation/i}).press('Enter');
         await designer.getByRole('button', {name: /Resume simulation/i}).waitFor();
         const scope = designer.locator('[data-scope-panel]');
-        if (!await scope.count()) await designer.getByRole('button', {name: /Scope/i}).first().click();
+        // The instrument toggle by its own label: /Scope/ alone first matched the palette's
+        // Oscilloscope part tile (a role=button), which armed a part instead of opening the scope.
+        if (!await scope.count()) await designer.getByRole('button', {name: /^▣ (Scope|Oszilloskop)$/}).click();
         await scope.waitFor();
         await scope.getByTestId('bw-scope-record').selectOption('100000');
         const signal = await scopePage.evaluate(() => window.__board.nets.find(n =>
@@ -1002,7 +1031,7 @@ try {
           await designer.getByRole('button',{name:/Pause simulation/i}).press('Enter');
           await designer.getByRole('button',{name:/Resume simulation/i}).waitFor();
           const scope=adcPage.locator('[data-scope-panel]');
-          if (!await scope.count()) await designer.getByRole('button',{name:/Scope/i}).first().click();
+          if (!await scope.count()) await designer.getByRole('button',{name:/^▣ (Scope|Oszilloskop)$/}).click(); // not the palette's Oscilloscope tile
           await scope.waitFor();
           // Start this finite imported bench at an actual fresh Board epoch. The
           // designer remains paused; the later reset/advance ABA stays below 5ms.

@@ -118,6 +118,8 @@ try{
   trace('Opening CAD tab');
   await page.getByRole('tab',{name:'CAD',exact:true}).click();
   await page.waitForFunction(()=>window.__bwCad?.editor);
+  // The CAD bridges install from their own lazy chunk after first paint (lib/bw-cad-host.js).
+  await page.waitForFunction(()=>window.__bwCadProgramApi&&window.__brickwrightStore?.getState().scratchGui.vm.runtime.cadCircuitSimulation);
   const cad=page.getByTestId('bw-cad-tab');
   // Exercise the shipping host, including the deferred catalogue and Redux preference.
   await cad.getByRole('button',{name:'Model library',exact:true}).click();

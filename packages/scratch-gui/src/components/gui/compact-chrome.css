@@ -249,5 +249,6 @@
 :global([data-cad-color-mode="dark"] .bw-compact-file-menu) {--compact-menu-fg:#edf3fa;--compact-menu-bg:#203447;--compact-menu-border:#526d83;}
 :global(body.bw-compact-chrome .bw-compact-file-menu [data-bw-menu-trigger]),
 :global(body.bw-compact-chrome .bw-compact-file-menu [data-testid="bw-global-history"]) {color:var(--compact-menu-fg)!important;background:var(--compact-menu-bg)!important;border:1px solid var(--compact-menu-border)!important;border-radius:6px;}
+:global(body.bw-compact-chrome .bw-compact-file-menu [data-testid="bw-global-history"]) {min-width:44px;min-height:44px;}
 :global(.bw-compact-file-menu [data-bw-menu-trigger] img) {filter:brightness(.35);}
 :global([data-cad-color-mode="dark"] .bw-compact-file-menu [data-bw-menu-trigger] img) {filter:none;}

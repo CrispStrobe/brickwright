@@ -167,6 +167,12 @@ export const cadInteractions = async (page, beamId, {shotsDir}) => {
     console.log('PASS Build: a click on the floor places a part under the pointer and selects it');
 
     // Gizmo X arrow: the beam moves along x by a whole number of grid steps.
+    // Esc first: the placed part stays selected, and its gizmo (drawn over the parts) can reach
+    // over the first beam's top, so a click there would grab the gizmo, not select the beam
+    // (seen since 155ef476d/a5b2c016f: the y arrow covered the spot and the placed part stayed selected).
+    await canvas.focus();
+    await page.keyboard.press('Escape');
+    assert.deepEqual(await selectionOf(page), [], 'Esc clears the selection');
     const beamNow = await screenOf(page, beamId, ON_BEAM);
     await page.mouse.click(beamNow[0], beamNow[1]);
     assert.deepEqual(await selectionOf(page), [beamId]);

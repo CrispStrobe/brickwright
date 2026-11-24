@@ -78,7 +78,9 @@ await page.addInitScript(() => {
     // Settings click below.
     localStorage.setItem('bw-starter-v1-complete', '1');
     delete Navigator.prototype.bluetooth;
-    window.__TAURI__ = {core: {invoke: () => Promise.resolve()}, event: {listen: () => {}}};
+    // listen resolves to an unlisten function, as Tauri's does: the desktop menu bridge
+    // (lib/desktop-editor-menu.js, d9aa15eef) chains on it, and `() => {}` crashed the GUI.
+    window.__TAURI__ = {core: {invoke: () => Promise.resolve()}, event: {listen: () => Promise.resolve(() => {})}};
 });
 
 await page.goto(url, {waitUntil: 'domcontentloaded'});
@@ -93,15 +95,22 @@ check('requestDevice is callable',
 // The route a user actually takes. Dispatching the event directly (below) would
 // pass even if the menu item were never wired up, which is the kind of gap that
 // leaves a diagnostics tool nobody can reach.
-const settingsButton = page.locator('[class*="settings"]').first();
+// The trigger by its test id: `[class*="settings"]` matched whichever element first
+// carried "settings" in a class name, which stopped being the menu's trigger.
+const settingsButton = page.getByTestId('bw-settings-menu-trigger');
 let openedFromMenu = false;
+// The diagnostics global is installed before the GUI renders: wait for the menu bar too
+// (count() alone does not wait, and the trigger may not be mounted yet).
+await settingsButton.waitFor({state: 'visible', timeout: 60000}).catch(() => {});
 if (await settingsButton.count() > 0) {
     await settingsButton.click();
     const item = page.getByText('Connection diagnostics…', {exact: false}).first();
+    await item.waitFor({state: 'visible', timeout: 10000}).catch(() => {});
     if (await item.count() > 0) {
         await item.click();
-        openedFromMenu = await page.evaluate(() =>
-            (document.body.innerText || '').includes('Run Bluetooth self-test'));
+        openedFromMenu = await page.waitForFunction(() =>
+            (document.body.innerText || '').includes('Run Bluetooth self-test'), null, {timeout: 10000})
+            .then(() => true, () => false);
     }
 }
 check('Settings → Connection diagnostics opens the panel', openedFromMenu);
