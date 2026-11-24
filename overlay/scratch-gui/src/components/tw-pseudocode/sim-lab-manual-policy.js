@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright (c) 2026 Brickwright contributors
 // Manual UI policy follows unchanged saved structure, independently of gallery/program identity.
+import {sha256Text} from '../../lib/bw-sim/measurements/binding-digest.js';
 
 // The model writer stores geometry with six decimal places. Compare that same
 // representation so an unchanged save cannot drop finite controls. Physical
@@ -22,12 +23,13 @@ export const manualAssemblyKey = model => {
     return JSON.stringify(canonical(structure));
 };
 
-/**
- * One cached source per distinct policy-bearing file, loaded only inside the Robot Lab.
- * A failed fetch/parse is not cached: reopening retries. Failure is reported to the pane,
- * which must keep continuous manual controls unavailable until resolution succeeds.
- */
-export const createManualPolicyResolver = ({models, loadText, parseModel}) => {
+export const manualAssemblyDigest = model => {
+    const key = manualAssemblyKey(model);
+    return key ? sha256Text(key) : null;
+};
+
+/** Match only one of the bounded model structures indexed at build time. */
+export const createManualPolicyResolver = ({models, referenceDigests}) => {
     const policies = new Map();
     for (const entry of models) if (entry.manualJog !== undefined) {
         if (policies.has(entry.file) && JSON.stringify(canonical(policies.get(entry.file))) !== JSON.stringify(canonical(entry.manualJog))) {
@@ -35,24 +37,16 @@ export const createManualPolicyResolver = ({models, loadText, parseModel}) => {
         }
         policies.set(entry.file, entry.manualJog);
     }
-    const sources = new Map();
-    const reference = file => {
-        if (!sources.has(file)) {
-            const pending = Promise.resolve().then(() => loadText(file)).then(text => {
-                // No catalog loading: a reference's physical structure does not require part metadata.
-                const parsed = parseModel(text);
-                const key = parsed.refusals.length ? null : manualAssemblyKey(parsed.model);
-                if (!key) throw new Error(`Could not read manual policy reference ${file}`);
-                return key;
-            }).catch(error => { sources.delete(file); throw error; });
-            sources.set(file, pending);
+    const byDigest = new Map();
+    for (const [file, policy] of policies) {
+        const digest = referenceDigests[file];
+        if (typeof digest !== 'string' || !/^[0-9a-f]{64}$/.test(digest)) {
+            throw new Error(`Missing manual policy reference for ${file}`);
         }
-        return sources.get(file);
-    };
-    return async model => {
-        const key = manualAssemblyKey(model);
-        if (!key) return null;
-        for (const [file, policy] of policies) if (key === await reference(file)) return policy;
-        return null;
-    };
+        if (byDigest.has(digest) && JSON.stringify(canonical(byDigest.get(digest))) !== JSON.stringify(canonical(policy))) {
+            throw new Error(`Conflicting manual policies for assemblies matching ${file}`);
+        }
+        if (!byDigest.has(digest)) byDigest.set(digest, policy);
+    }
+    return model => byDigest.size ? byDigest.get(manualAssemblyDigest(model)) ?? null : null;
 };

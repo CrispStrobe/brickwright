@@ -57,6 +57,7 @@ import SimLabCoach from './sim-lab-coach.jsx';
 import SimLabMotorMixer, {MIXER_OPEN_KEY} from './sim-lab-motor-mixer.jsx';
 import {setMixerMotorPower, setMixerMotorJog, manualDriveAllowed} from './sim-lab-motor-control.js';
 import {createManualPolicyResolver} from './sim-lab-manual-policy.js';
+import manualPolicyIndex from './sim-lab-manual-policy.js?reference-index';
 import PaneDivider from '../gui/pane-divider.jsx';
 import {Icon, Popup, Separator, ToolButton, splitToolbar, toolStyles, tooltipOf} from './sim-lab-toolbar.jsx';
 import {TOOLBAR_TEXT} from './sim-lab-toolbar-text.js';
@@ -1369,16 +1370,11 @@ class SimLabPane extends React.Component {
             // Do not recognize an import after the parser refused additional geometry or malformed input.
             if (this.lib.parseModel(text).refusals.length) return {available: true, manualJog: null};
             if (!this.manualPolicyResolver) this.manualPolicyResolver = createManualPolicyResolver({
-                models: this.lib.MODELS, parseModel: this.lib.parseModel,
-                loadText: async file => {
-                    const response = await fetch(`${this.lib.MODELS_BASE}${file}`);
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    return response.text();
-                }
+                models: this.lib.MODELS, referenceDigests: manualPolicyIndex
             });
-            return {available: true, manualJog: await this.manualPolicyResolver(model)};
+            return {available: true, manualJog: this.manualPolicyResolver(model)};
         } catch {
-            // Unknown policy must not silently turn a failed reference fetch into continuous controls.
+            // Invalid policy data keeps continuous controls unavailable.
             return {available: false, manualJog: null};
         }
     }

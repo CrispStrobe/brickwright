@@ -164,6 +164,12 @@ const baseConfig = new ScratchWebpackConfigBuilder(
             }
         }
     })
+    // Resolve bounded Robot Lab controls from the built-in models at build time.
+    .addModuleRule({
+        test: /sim-lab-manual-policy\.js$/,
+        resourceQuery: /^\?reference-index$/,
+        use: path.resolve(__dirname, 'manual-policy-index-loader.js')
+    })
     // The Robot Lab part catalogue in two pieces (parts-subset-loader.js): `parts.json?core` in
     // the Sim Lab chunk, `parts.json?derived` in its own (src/lib/bw-sim/sim-lab.js loadFullCatalog).
     .addModuleRule({

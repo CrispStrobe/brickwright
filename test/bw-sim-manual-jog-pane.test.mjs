@@ -8,6 +8,7 @@ import {createRequire} from 'node:module';
 import {MODELS, catalogFrom, prepareModel} from '../overlay/scratch-gui/src/lib/bw-sim/sim-session.js';
 import {createRobotLabApi} from '../overlay/scratch-gui/src/lib/bw-sim/api/robot-lab-api.js';
 import {manualDriveAllowed, setMixerMotorJog, setMixerMotorPower} from '../overlay/scratch-gui/src/components/tw-pseudocode/sim-lab-motor-control.js';
+import {buildManualPolicyIndex} from '../overlay/scratch-gui/manual-policy-index.mjs';
 import {createManualPolicyResolver} from '../overlay/scratch-gui/src/components/tw-pseudocode/sim-lab-manual-policy.js';
 import {parseModel, serializeModel} from '../overlay/scratch-gui/src/lib/bw-sim/model/ldraw-model.js';
 
@@ -92,7 +93,7 @@ test('production pane resolves unchanged saved/imported assembly policy without 
     context.state.shipped = null;
     context.state.modelFile = 'my-model.ldr';
     context.shippedModel = () => null;
-    context.manualPolicyResolver = createManualPolicyResolver({models: MODELS, parseModel, loadText: async file => read('overlay/scratch-gui/static/sim-lab/models/'+file)});
+    context.manualPolicyResolver = createManualPolicyResolver({models: MODELS, referenceDigests: buildManualPolicyIndex(MODELS)});
     const result = await context.resolveManualControlPolicy(saved, savedText);
     assert.deepEqual(result, {available: true, manualJog: limits});
     context.manualPolicy = {session: context.session, ...result};
@@ -111,7 +112,7 @@ test('failed or obsolete policy resolution blocks continuous controls and overri
     const {context, calls} = pane();
     const source = read('overlay/scratch-gui/static/sim-lab/models/resonance-lab.ldr');
     context.lib = {parseModel};
-    context.manualPolicyResolver = async () => { throw new Error('reference unavailable'); };
+    context.manualPolicyResolver = () => { throw new Error('reference unavailable'); };
     context.manualPolicy = {session: context.session, ...await context.resolveManualControlPolicy(parseModel(source).model, source)};
     assert.equal(context.manualControlPolicy().available, false);
     context.setManualOverride(true);
