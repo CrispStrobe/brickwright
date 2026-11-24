@@ -275,3 +275,13 @@ SIMD WASM library. It retained the two expected hit fractions, including
 the grazing hit with extra radius, and skipped the out-of-range child
 before dispatch. This is a collision-query unit check. The full robot
 throughput comparison is separate.
+
+The locally built SIMD compatibility module passed the standard Jolt
+smoke checks. In the first shipped-model comparison, Scout used 17.06 ms
+per step with the pinned engine and 7.04 ms with the candidate, measured
+as process CPU time. All root poses, quaternions, and joint positions
+were identical over 120 ticks covering settle, drive, and reverse. The
+machine was heavily loaded and this is one paired run. A 600-child box
+cast probe also retained all hits across both paths, at 4.27–4.75 ms per
+cast for the original traversal and 0.51–0.53 ms with pruning. This
+microbenchmark measures the cast query alone.
