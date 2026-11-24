@@ -231,11 +231,6 @@ await wait(()=>{const s=window.__brickwrightStore.getState().scratchGui.vm.runti
   if(firstSimFrame&&lastSimFrame.wall>firstSimFrame.wall){
    after.sustainedRealTimeFactor=(lastSimFrame.sim-firstSimFrame.sim)*1000/(lastSimFrame.wall-firstSimFrame.wall);
   }
-  if(process.env.PROOF_MIN_RTF!==undefined){
-   const minimum=Number(process.env.PROOF_MIN_RTF);
-   assert.ok(Number.isFinite(minimum)&&minimum>0,'PROOF_MIN_RTF must be a positive number');
-   assert.ok(after.sustainedRealTimeFactor>=minimum,`${item.name} sustained ${after.sustainedRealTimeFactor?.toFixed(3)}×, below ${minimum}×`);
-  }
   if(item.id==='robot-quasar-press'&&process.env.PROOF_DEFAULT==='1'){
    const samples=await page.evaluate(()=>window.__proofSamples);
    await writeFile(`${out}/quasar-cycle-frames.json`,JSON.stringify(samples));
@@ -275,6 +270,16 @@ await wait(()=>{const s=window.__brickwrightStore.getState().scratchGui.vm.runti
    await page.getByRole('button',{name:'Stop program',exact:true}).click();
    if(probe)await assertSelectAndDrag(page,probe);
    await page.getByRole('button',{name:'Reset simulation',exact:true}).click();
+  }
+  if(process.env.PROOF_PHASES==='1'){
+   const timing=await page.evaluate(()=>window.__phaseTiming);
+   await writeFile(`${out}/phases-${item.id}${process.env.PROOF_REPEAT==='1'?'-with-restarts':''}.json`,JSON.stringify(timing,null,2));
+   console.log('Mechanical worker start timings (ms)',timing.startup);
+  }
+  if(process.env.PROOF_MIN_RTF!==undefined){
+   const minimum=Number(process.env.PROOF_MIN_RTF);
+   assert.ok(Number.isFinite(minimum)&&minimum>0,'PROOF_MIN_RTF must be a positive number');
+   assert.ok(after.sustainedRealTimeFactor>=minimum,`${item.name} sustained ${after.sustainedRealTimeFactor?.toFixed(3)}×, below ${minimum}×`);
   }
   after.heartbeat=await page.evaluate(()=>{clearInterval(window.__proofHeartbeatTimer);return window.__proofHeartbeat;});delete after.source;await writeFile(`${out}/passed-${item.id}${process.argv.includes('--ipad')?'-ipad':''}.json`,JSON.stringify({id:item.id,widgets:state.widgets,after},null,2));results.push({id:item.id,widgets:state.widgets,code:true,blocks:true,circuit:true,wireCount,hardware,after});await writeFile(`${out}/result${process.argv.includes('--ipad')?'-ipad':''}.json`,JSON.stringify({results,errors},null,2));console.log('PASS',item.name,'complete project; Widgets -> Circuit -> moving CAD joints; Stop/Reset');
  }

@@ -126,3 +126,31 @@ outlines. Compare the JavaScript and Wasm builds on larger coupled sketches,
 including residuals, cancellation, and pointer-to-display latency, before
 changing browser backends.
 [Upstream constraint benchmarks](https://github.com/CrispStrobe/brickwright-cad/blob/main/docs/CONSTRAINT-PERFORMANCE.md)
+
+## Sustained real-time target
+
+The MacBook browser target for Scout and Atlas is at least 1× sustained
+simulated time. Measure it between the first and last positive-time frames
+reported by the coupled session. The 200 Hz electrical-to-mechanical feedback
+loop gives every complete substep a 5 ms wall-clock budget.
+
+| Project | Chrome baseline | Mean mechanical round trip | Mean electrical advance |
+| --- | ---: | ---: | ---: |
+| Scout | 0.15× | 29.2 ms | 3.0 ms |
+| Atlas | 0.18× | 22.2 ms | 4.0 ms |
+
+Set `PROOF_PHASES=1 PROOF_MIN_RTF=1` when running
+`scripts/verify-cad-robot-projects.mjs` to record the phases and make the
+real-time target a test assertion. `PROOF_REPEAT=1` also checks a second
+Run after Stop/Reset with the same design.
+
+The CAD worker releases the active Jolt world on Stop and retains one
+qualified preparation for an unchanged design. The next Run creates a fresh
+world from those immutable colliders. An edit discards the cached preparation.
+This addresses restart latency. Sustained contact solving and cold startup
+remain open.
+
+A diagnostic Scout run with continuous collision detection disabled dropped
+the mean native step from 19.3 ms to 6.4 ms. The latter still exceeded the 5 ms
+combined budget before the circuit solve, and drive motion changed. The
+shipped path retains continuous collision detection.
