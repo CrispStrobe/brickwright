@@ -96,9 +96,16 @@ export async function createCoupledSession({board, mechanics, connections, firmw
         if (stopped || expected !== generation) return;
         frame = next;
         if (!compact) fullFrame = next;
-        for (const drive of config.drives) {
-            const rotor=sample(drive,frame); board.setMechanicalShaftState(drive.partId,rotor);
-            readouts.set(drive.partId,{...readouts.get(drive.partId),...rotor});
+        const updates = config.drives.map(drive => ({partId: drive.partId, ...sample(drive,frame)}));
+        if (updates.length > 1 && typeof board.setMechanicalShaftStates === 'function') {
+            board.setMechanicalShaftStates(updates);
+        } else {
+            for (const {partId, angleRad, velocityRadS} of updates) {
+                board.setMechanicalShaftState(partId,{angleRad,velocityRadS});
+            }
+        }
+        for (const {partId, angleRad, velocityRadS} of updates) {
+            readouts.set(partId,{...readouts.get(partId),angleRad,velocityRadS});
         }
         publish();
     }

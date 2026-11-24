@@ -102,19 +102,27 @@ await page.addInitScript(()=>{localStorage.setItem('bw-starter-v1-complete','1')
  };requestAnimationFrame(raf);
  for(const type of [window.WebGLRenderingContext,window.WebGL2RenderingContext]){if(!type)continue;const clear=type.prototype.clear;type.prototype.clear=function(...args){if(this.canvas?.dataset.testid==='cad-canvas'){const d=window.__proofDraws;d.count++;if(d.lastFrame===d.frame)d.duplicate++;d.lastFrame=d.frame;}return clear.apply(this,args);};}
 });
-if(process.env.PROOF_PHASES==='1')await page.addInitScript(()=>{
- const timing=window.__phaseTiming={electrical:[],mechanical:[],startup:[],interval:[]};
+if(process.env.PROOF_PHASES==='1')await page.addInitScript(legacyShafts=>{
+ const timing=window.__phaseTiming={electrical:[],shaftFeedback:[],mechanical:[],startup:[],interval:[]};
  const boards=new WeakSet();
  window.addEventListener('bw-circuit-clock-owner',event=>{
   const board=event.detail?.board;
   if(!board||boards.has(board))return;
   boards.add(board);
-  const advanceTo=board.advanceTo;
-  board.advanceTo=function(...args){
-   const start=performance.now();
-   try{return advanceTo.apply(this,args);}
-   finally{timing.electrical.push(performance.now()-start);}
-  };
+  if(legacyShafts)board.setMechanicalShaftStates=undefined;
+  for(const [method,bucket] of [
+   ['advanceTo','electrical'],
+   ['setMechanicalShaftState','shaftFeedback'],
+   ['setMechanicalShaftStates','shaftFeedback']
+  ]){
+   const original=board[method];
+   if(typeof original!=='function')continue;
+   board[method]=function(...args){
+    const start=performance.now();
+    try{return original.apply(this,args);}
+    finally{timing[bucket].push(performance.now()-start);}
+   };
+  }
  });
  const OriginalWorker=window.Worker;
  window.Worker=class extends OriginalWorker{
@@ -140,7 +148,7 @@ if(process.env.PROOF_PHASES==='1')await page.addInitScript(()=>{
    });
   }
  };
-});
+},process.env.PROOF_LEGACY_SHAFTS==='1');
 const wait=fn=>page.waitForFunction(fn,null,{timeout:180000,polling:100});const out=process.env.PROOF_OUT||'artifacts/cad-robot-projects';await mkdir(out,{recursive:true});
 try{
  await page.goto(process.env.PROOF_URL||'http://127.0.0.1:8141/',{waitUntil:'commit'});await wait(()=>window.__brickwrightStore?.getState().scratchGui.vm?.runtime?.cadCircuitSimulation);await page.getByRole('tab',{name:'CAD',exact:true}).click();await wait(()=>window.__bwCad?.editor);console.log('GUI CAD ready');

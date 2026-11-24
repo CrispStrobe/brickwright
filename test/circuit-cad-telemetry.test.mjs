@@ -50,8 +50,12 @@ function fixture(compact = true) {
 }
 
 test('200 Hz feedback is identical with 60 Hz full-pose presentation and legacy fallback', async () => {
-    const run = async compact => {
-        const f = fixture(compact), shown = [];
+    const run = async (compact, batch = false) => {
+        const f = fixture(compact), shown = [], updates = [];
+        if (batch) f.board.setMechanicalShaftStates = samples => {
+            updates.push(samples);
+            for (const {partId, ...sample} of samples) f.board.setMechanicalShaftState(partId,sample);
+        };
         const session = await createCoupledSession({...f, connections, onFrame: frame => shown.push(frame)});
         for (let i = 0; i < 60; i++) {session.tick(1000 / 60);await session.idle();}
         assert.equal(f.board.timeNs, 1000000000n);
@@ -60,7 +64,7 @@ test('200 Hz feedback is identical with 60 Hz full-pose presentation and legacy 
             assert.equal(frame.poses.length, 128);
             assert.equal(frame.poses[0].positionMm[0], frame.time * 10);
         }
-        return {f, shown, snapshot: session.snapshot(), readings: session.readings()};
+        return {f, shown, updates, snapshot: session.snapshot(), readings: session.readings()};
     };
     const old = await run(false), optimized = await run(true);
     assert.equal(old.f.counts.full, 200);
@@ -72,6 +76,12 @@ test('200 Hz feedback is identical with 60 Hz full-pose presentation and legacy 
     assert.deepEqual(optimized.readings, old.readings);
     for (const key of ['controls', 'states', 'servoSamples', 'sensorSamples']) assert.deepEqual(optimized.f[key], old.f[key], key);
     assert.ok(optimized.f.counts.bytes < old.f.counts.bytes * .35, JSON.stringify({old: old.f.counts, optimized: optimized.f.counts}));
+    const batched = await run(true,true);
+    assert.equal(batched.updates.length, 200);
+    assert.ok(batched.updates.every(samples => samples.length === 2));
+    assert.deepEqual(batched.f.states, optimized.f.states);
+    assert.deepEqual(batched.readings, optimized.readings);
+    assert.deepEqual(batched.snapshot, optimized.snapshot);
 });
 
 test('fractional program ticks preserve the mechanical remainder and always end with full poses', async () => {
