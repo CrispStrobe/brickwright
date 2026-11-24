@@ -228,3 +228,10 @@ The actuator change retains the original collision filters.
 Using the shipped Scout and Atlas SB3 models, the chassis poses and all
 actuated joint readings matched the comparison build exactly through 100
 steps for each model, including reversal and Atlas slider impulses.
+
+The separately authored Scout clearance test assumes two runtime
+separation proofs. Its original setup and the updated solver both
+reported one, with equal poses and joint angles in a direct replay of
+the test inputs. The known assertion is separate from the actuator
+change. The fixed-assembly ground and loose-contact case passed when
+rerun with time for the loaded Mac to finish.
