@@ -106,7 +106,9 @@ past the dial edge, and landing on the work surface. The repeated-run check
 changes tabs, checks that Run leaves Controls open, and selects and drags a
 CAD solid immediately after Stop. Firefox's Scout run reached the Circuit
 board and then exceeded the 60-second mechanical startup limit. Quasar
-completed the repeated-run check in Chrome and Firefox.
+completed the repeated-run check in Chrome and Firefox. One earlier
+Scout-to-Atlas transition timed out waiting for the Circuit board. The
+transition passed on retry and again with the updated Circuit dependencies.
 
 Use `scripts/verify-cad-robot-projects.mjs` with `PROOF_DEFAULT=1` to
 exercise the supplied program and widget values. Set `PROOF_REPEAT=1` and
