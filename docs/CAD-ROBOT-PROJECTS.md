@@ -81,3 +81,44 @@ Extended untouched-default runs, closed/open Controls cases, WebKit execution,
 and the next signed Mac application are still being qualified. Previous one-second
 motion receipts do not qualify this changed profile. Reopen an example from the
 new app to obtain its updated circuit and program; saved copies retain old data.
+
+## MacBook browser qualification, 2026-11-24
+
+The simulation worker now reuses the editor's evaluated geometry when its
+source key matches the design. It also starts from the document copy already
+provided by the worker message. The source-mesh collision qualification still
+runs before the simulation creates its mechanical world.
+
+These Chrome samples used the built web app on the MacBook. Click-to-motion
+ends at the first measured change in a joint. Running rate excludes preparation
+and reports simulated seconds per wall-clock second. Background load differed
+between runs, so the before/after samples cannot isolate the size of the gain.
+
+| Project | Click to motion | Mechanical preparation | Running rate | Frame interval p95 / max |
+| --- | ---: | ---: | ---: | ---: |
+| Scout TT rover | 13.67 s | 12.45 s | 0.18× | 16.7 / 333 ms |
+| Atlas forklift, earlier build | 11.20 s | 10.17 s | 0.14× | 16.8 / 517 ms |
+| Atlas forklift, updated build | 8.76 s | 7.71 s | 0.16× | 16.7 / 283 ms |
+| Quasar 3-axis rotary press | 1.96 s | 1.34 s | 0.91× | 16.8 / 167 ms |
+
+Quasar's browser check covers indexing, pressing against the blank, ejecting
+past the dial edge, and landing on the work surface. The repeated-run check
+changes tabs, checks that Run leaves Controls open, and selects and drags a
+CAD solid immediately after Stop. Firefox's Scout run reached the Circuit
+board and then exceeded the 60-second mechanical startup limit. Quasar
+completed the repeated-run check in Chrome and Firefox.
+
+Use `scripts/verify-cad-robot-projects.mjs` with `PROOF_DEFAULT=1` to
+exercise the supplied program and widget values. Set `PROOF_REPEAT=1` and
+`PROOF_INTERACTION=1` for the repeated-run check.
+
+## Editable outline handoff
+
+`scripts/verify-costume-to-cad-workflow.mjs` exercises a precise Costumes
+rectangle, sends it to CAD, edits its outline constraints, drags a vertex,
+extrudes the saved profile, and checks the resulting binary STL. Keep the
+current solver for this workflow. The upstream measurements support
+evaluating `dart_csp` behind the existing worker contract for larger coupled
+sketches. Compare both backends on the same live drags, including residuals,
+cancellation, and click-to-display latency, before changing the default.
+[Upstream constraint benchmarks](https://github.com/CrispStrobe/brickwright-cad/blob/main/docs/CONSTRAINT-PERFORMANCE.md)
