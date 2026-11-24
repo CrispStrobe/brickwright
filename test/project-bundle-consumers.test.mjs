@@ -13,6 +13,7 @@ const loader = read('../overlay/scratch-gui/src/lib/bw-project-load.js');
 const nativeBridge = read('../overlay/scratch-gui/src/lib/tauri-bridge.js');
 const code = read('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx');
 const circuit = read('../overlay/scratch-gui/src/components/tw-pseudocode/circuit-tab.jsx');
+const gui = read('../overlay/scratch-gui/src/components/gui/gui.jsx');
 
 describe('mounted project consumers obey replacement outcomes', () => {
     test('the project loader announces legacy, invalid and future outcomes, not only found bundles', () => {
@@ -86,7 +87,24 @@ describe('mounted project consumers obey replacement outcomes', () => {
             'replacement must still produce an empty bench');
         // Execute the actual mounted consumer rather than require an inline
         // spelling of its clearing loop. The helper also releases bound inputs.
-        const body = /this\._onBundleLoaded = event => \{([\s\S]*?)\n        \};/.exec(circuit);
+        //
+        // WHICH consumer moved: b15ff59f0 (2026-11-17) took Widgets restoration
+        // out of circuit-tab's `_onBundleLoaded` and gave it to gui.jsx, which
+        // stays mounted when the Circuit tab is hidden — circuit-tab now only
+        // restores the circuit. This subtest kept executing circuit-tab's body,
+        // which no longer touches the panel, so it went red for a deliberate
+        // move rather than a regression. It now executes the GUI's consumer:
+        // the bundle event routes `loaded`/`legacy` (and only those) into
+        // `onProjectLoad`, and that body is what clears and restores.
+        const circuitConsumer = /this\._onBundleLoaded = event => \{([\s\S]*?)\n        \};/.exec(circuit);
+        assert.ok(circuitConsumer, 'circuit-tab still consumes the bundle announcement');
+        assert.doesNotMatch(circuitConsumer[1], /controllerPanel|clearControllerPanel|bw-ctl-widgets/,
+            'circuit-tab restores Widgets again — two consumers would clear the panel twice');
+        assert.match(gui, /const onBundle=event=>\{if\(\['loaded','legacy'\]\.includes\(event\.detail\?\.outcome\)\)onProjectLoad\(\);\};/,
+            'the GUI no longer routes loaded/legacy bundle outcomes into its Widgets restore');
+        assert.match(gui, /window\.addEventListener\('bw-project-bundle-loaded',onBundle\)/,
+            'the GUI no longer listens for the bundle announcement');
+        const body = /const onProjectLoad = \(\) => \{([\s\S]*?)\n        \};/.exec(gui);
         assert.ok(body, 'mounted bundle consumer is present');
         for (const outcome of ['loaded', 'legacy']) {
             const panel = new ControllerPanel();
@@ -96,10 +114,11 @@ describe('mounted project consumers obey replacement outcomes', () => {
             const writes = [];
             const binding = bindPanelToBoard(panel, {setControl: (...args) => writes.push(args)});
             panel.setButtonInput('old-key', true);
-            const host = {props: {vm: {runtime: {controllerPanel: panel}}},
-                _markReactUpdate () {}, setState () {}, _applyToLiveCircuit () {}};
+            const props = {vm: {runtime: {controllerPanel: panel}}};
             const storage = {getItem: () => null, setItem () {}};
-            const apply = new Function('event', 'localStorage', 'clearControllerPanel', body[1]).bind(host);
+            const restore = new Function('props', 'localStorage', 'ControllerPanel', 'clearControllerPanel',
+                'controllerPanel', body[1]);
+            const apply = (event, store) => restore(props, store, ControllerPanel, clearControllerPanel, panel);
             try {
                 apply({detail: {outcome}}, storage, clearControllerPanel);
                 assert.deepEqual(panel.getWidgetNames(), [], 'an absent section removes old widgets');

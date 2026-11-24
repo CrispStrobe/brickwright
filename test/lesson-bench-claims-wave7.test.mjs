@@ -101,18 +101,25 @@ test('ADJUDICATED (was OPEN DEFECT): the active-high level depends on port mode,
             lowLed: board.ledBrightness('led_low'), highLed: board.ledBrightness('led_high')
         };
     };
+    // RE-DERIVED 2026-11-24 for bw-board 74d42338 (exponential LEDs by
+    // default): an LED on a pin conducts more at a given drive than the
+    // piecewise knee let it, so the push-pull pin carries a little more current
+    // (brightness 0.1546 -> 0.1587, its drop across the pin 0.0773 -> 0.0794 V),
+    // and the quasi pin's weak pull-up is pulled lower by the LED it cannot
+    // source (1.9284 -> 1.7251 V). Tolerances unchanged; the mode dependence —
+    // the thing this test adjudicates — is unchanged and slightly larger.
     const pushpull = await read('pushpull');
-    near(pushpull.low, 0.0773, 5e-4, 'P1.0 driven low, push-pull');
-    near(pushpull.high, 4.9227, 5e-4, 'P1.1 driven high, push-pull');
-    near(pushpull.lowLed, 0.1546, 5e-4, 'the active-low LED');
-    near(pushpull.highLed, 0.1546, 5e-4, 'the active-high LED, push-pull');
+    near(pushpull.low, 0.0794, 5e-4, 'P1.0 driven low, push-pull');
+    near(pushpull.high, 4.9206, 5e-4, 'P1.1 driven high, push-pull');
+    near(pushpull.lowLed, 0.1587, 5e-4, 'the active-low LED');
+    near(pushpull.highLed, 0.1587, 5e-4, 'the active-high LED, push-pull');
 
     // The 8051's default port mode is quasi-bidirectional: a weak pull-up that
     // cannot source an LED. Same pin, same "high", 2.8 V lower.
     const quasi = await read('quasi');
-    near(quasi.low, 0.0773, 5e-4, 'P1.0 driven low is the same in either mode');
-    near(quasi.high, 1.9284, 5e-4, 'P1.1 driven high, quasi-bidirectional');
-    near(quasi.highLed, 0.0066, 5e-4, 'and the active-high LED is essentially dark');
+    near(quasi.low, 0.0794, 5e-4, 'P1.0 driven low is the same in either mode');
+    near(quasi.high, 1.7251, 5e-4, 'P1.1 driven high, quasi-bidirectional');
+    near(quasi.highLed, 0.0076, 5e-4, 'and the active-high LED is essentially dark');
     assert.ok(quasi.highLed < pushpull.highLed / 20,
         'a quasi pin now sources the active-high LED as well as push-pull — the hardware ' +
         'premise of this lesson changed, re-measure Wave 7');
@@ -309,25 +316,24 @@ test('machines-clocks: the step button clocks state, and the state holds after t
             `press ${i + 1}: Q moved when the button was RELEASED — it is following, not storing`);
         seen.push(Number(q().toFixed(4)));
     }
-    // 4.4286 V, not the 4.4643 this read before 2026-09-13: the flip-flop drives
-    // 5 V behind 50 Ω into 220 Ω and a red LED, and the LED's knee moved from a
-    // flat 2.0 to vf − 0.020·rd = 1.8 under the datasheet convention, so more of
-    // the drop lands on the resistances. Toggle and hold are unchanged — this is
-    // a level, not a behaviour.
+    // 4.4064 V. The flip-flop drives 5 V behind R_OUT = 50 Ω into 220 Ω and a
+    // red LED. It read 4.4643 before the 2026-09-13 vf-convention correction,
+    // 4.4286 after it, and 4.4064 since bw-board 74d42338 made LEDs
+    // exponential: at 11.87 mA the red LED (vf 1.9 at 20 mA) drops less
+    // than its rated vf, so more of the 5 V lands on the resistances. Toggle
+    // and hold are unchanged — this is a level, not a behaviour.
     //
-    // THE SHIPPED LESSON STILL SAYS 4.4643. ttl-clock-module/intro.md,
-    // intro.de.md and EXPECTED.md all quote it, and that text is sb3-creator's,
-    // vendored here at its own pin. Reported with the corpus count; the `says`
-    // check below passes on its 'divide-by-two' alternative, so it does NOT
-    // catch the disagreement.
-    assert.deepEqual(seen, [4.4286, 0, 4.4286, 0],
+    // sb3-creator 9f50f601 re-derived EXPECTED.md for exponential LEDs, and
+    // the lesson's measure hint now quotes 4.4064 (EN/DE, checked below).
+    // ttl-clock-module/intro.md still says 4.4643; that text is sb3-creator's.
+    assert.deepEqual(seen, [4.4064, 0, 4.4064, 0],
         'four presses must toggle Q twice — a divide-by-two is also a frequency divider');
 
     // EXPECTED.md's claim is now the measured one.
     const expected = readFileSync(path.join(EXAMPLES, 'ttl-clock-module/EXPECTED.md'), 'utf8');
     assert.match(expected, /clocks a D flip-flop wired as a divide-by-two/,
         'ttl-clock-module/EXPECTED.md no longer describes the repaired bench');
-    assert.match(expected, /4\.4643/, 'and it must carry the voltage this test measures');
+    assert.match(expected, /4\.4064/, 'and it must carry the voltage this test measures');
     assert.ok(!/manual step button injects a single\s+pulse/.test(expected),
         'the old aspirational claim is back in EXPECTED.md');
 });
@@ -670,18 +676,13 @@ test('the Wave 7 revisions are present, EN and DE, at the content version this r
     // checkpoint was worded around — single-step and downstream transition — are
     // demands again instead of disclosures.
     says('machines-clocks', 'measure', 'action', /step button/i, /Schritt-Taster/i);
-    // THIS GATE CANNOT SEE THAT ITS NUMBER DIED. The alternation's branches are a
-    // CLAIM ('divide-by-two') and a RESTATEMENT of a measured value (4.4643), so
-    // the concept keeps it green while the figure goes false — which it has: the
-    // bench now reads 4.4286, and lego-ac's prose scan finds 4.4643 four times in
-    // ttl-clock-module's intro.md and EXPECTED.md, stale under the new engine.
-    // Lite scanned for this shape on 2026-09-13 (an alternation containing a
-    // decimal literal) and found exactly TWO: this one, and the aliasing hint
-    // below, whose 1.2207 Hz is NOT stale — a frequency the vf correction does
-    // not touch. Fixing this means the prose lane, since the text is
-    // sb3-creator's; the gate should then assert the quoted figure against the
-    // measured one instead of accepting either.
-    says('machines-clocks', 'measure', 'hint', /divide-by-two|4\.4643/, /Zweiteiler|4,4643/);
+    // The alternation that stood here (/divide-by-two|4\.4643/) could not see
+    // its number die: the concept kept it green while the bench moved to 4.4286
+    // and then 4.4064. As its own note asked, the gate now asserts the CLAIM and
+    // the quoted FIGURE separately, and the figure is the one the step-button
+    // test above measures (re-quoted 2026-11-24, exponential LEDs).
+    says('machines-clocks', 'measure', 'hint', /divide-by-two/, /Zweiteiler/);
+    says('machines-clocks', 'measure', 'hint', /4\.4064 V/, /4,4064 V/);
     says('machines-buses', 'trace', 'action', /instruction|per-cycle|cycle-level/i, /Befehl|Zyklus/i);
     says('machines-6502-execution', 'step', 'action', /load a program|preset/i, /Programm laden|Preset/i);
     says('machines-source-asm', 'trace', 'hint', /preset|hosted/i, /Preset|gehostet/i);

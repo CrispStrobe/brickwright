@@ -11,11 +11,8 @@ import MediaQuery from 'react-responsive';
 import {Tab, Tabs, TabList, TabPanel} from 'react-tabs';
 import EditorHelp from './editor-help.jsx';
 import CircuitTab from '../tw-pseudocode/circuit-tab.jsx';
-import {installCircuitCadBridge} from '../../lib/bw-cad-circuit/bridge.js';
-import {installCadProgramAPI, CAD_OPEN_EVENT} from '../../lib/bw-cad-program.js';
 import {setCircuitView} from '../../lib/bw-debug/debug-view.js';
-import {installCadShapesAPI} from '../../lib/bw-cad-blocks.js';
-import {getCadEnabled, setCadEnabled as setCadPreference, CAD_TOGGLE_EVENT} from '../../lib/bw-cad-preferences.js';
+import {getCadEnabled, setCadEnabled as setCadPreference, CAD_TOGGLE_EVENT, CAD_OPEN_EVENT} from '../../lib/bw-cad-preferences.js';
 import {getFpgaEnabled, FPGA_TOGGLE_EVENT} from '../../lib/bw-fpga-preferences.js';
 import {pinsToValue} from '../../lib/bw-fpga/pin-value.js';
 // FpgaTab ships only in a build that carries it (BW_ENABLE_FPGA), and even then
@@ -305,10 +302,12 @@ const GUIComponent = props => {
     const [cadWanted, setCadWanted] = React.useState(false);
     React.useEffect(() => {
         if (!process.env.BW_ENABLE_CAD || !props.vm?.runtime) return undefined;
-        const removeCad = installCadProgramAPI(props.vm.runtime);
-        const removeShapes = installCadShapesAPI(props.vm.runtime);
-        const removeCoupling = installCircuitCadBridge(props.vm);
-        return () => {removeCoupling();removeShapes();removeCad();};
+        // The CAD bridges arrive in their own chunk after the first paint (lib/bw-cad-host.js).
+        let disposed = false, remove = null;
+        import(/* webpackChunkName: "bw-cad-host" */ '../../lib/bw-cad-host.js')
+            .then(({installCadHost}) => { if (!disposed) remove = installCadHost(props.vm); })
+            .catch(error => console.warn('[brickwright] CAD host failed to load', error));
+        return () => {disposed = true; if (remove) remove();};
     }, [props.vm]);
     if (showCad && !cadWanted && !fpgaLayoutChanging && props.activeTabIndex === cadTabIndex) setCadWanted(true);
     React.useEffect(() => {

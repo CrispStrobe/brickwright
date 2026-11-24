@@ -27,7 +27,10 @@ test('boot payload accepts shared lazy engine bytes but rejects eager, absent an
             'about-apps': 'about-app-showcase', 'bw-project-safety': 'data-bw-error-notes', 'bw-history-panel': 'bw-autosave-confirm-restore',
             'bw-extension-menus': '"spikeprime_motorRunFor": {"PORT":"+MULTIPLE_PORT"}',
             'asset-library-index': '"name":"Abby"',
-            'bw-circuit-ui': 'Check the address decode wiring on the breadboard. Bus-Extraktor fehlgeschlagen:  Could not recognise this file',
+            // bw-circuit-ui since its lazy part art: the named entry holds the art map, the designer's
+            // code a shared anonymous lazy chunk requested beside it.
+            'bw-circuit-ui': 'part-art context map',
+            '37071.hash': 'Check the address decode wiring on the breadboard. Bus-Extraktor fehlgeschlagen:  Could not recognise this file',
             'bw-circuit-panels': 'bw-circuit-panel-header',
             'bw-board': 'entry', 'guided-lessons': 'optional', '8933.hash': marker,
             // The arena's 3D view: its own chunk, three in a shared lazy chunk, and the arena pane's chunk without either.

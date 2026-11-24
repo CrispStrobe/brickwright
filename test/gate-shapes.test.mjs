@@ -110,7 +110,16 @@ const BASELINE = {
     // fifth is a source assertion over build.yml, which needs no interpreter and
     // is right to keep passing. No arrangement of a missing or broken python
     // produces a green gate.
-    'AMBIENT-BINDING': 9,
+    //
+    // 9 -> 10 on 2026-11-24: test/x86-v10-cui-witness-pin.test.mjs (597f1a533)
+    // runs `git log -p -- vendor-pins.json` from PATH to learn which Circuit UI
+    // pins lite has ever shipped. The binding is to this repository's own
+    // history, not to a tool the build ships, and every way it can be wrong
+    // FAILS CLOSED, measured: a `git` on PATH that exits 127, no `git` on PATH
+    // at all, and a one-commit checkout of the same files (no `-` lines, so
+    // no former pins) each turn the pin test red, because the sealed V10 pin
+    // is not the canonical one and nothing else admits it.
+    'AMBIENT-BINDING': 10,
     // 12 -> 0 on 2026-09-02. The rule now ignores an appearance that is immediately followed by
     // a click/fill/count/evaluate — synchronisation before the real assertion, and the correct
     // way to write a browser gate. The five that survived that narrowing were each triaged at
@@ -131,6 +140,11 @@ const BASELINE = {
     // how the sleep census ended up 69 over its tree. It only bites someone
     // who ADDS a silent skip, which is the intent.
     'SILENT-SKIP': 1,
+    // 0 held on 2026-11-24 by recognising `assert.equal(await x.isVisible(), false)` as an
+    // absence proof (scripts/audit-gate-shapes.mjs): verify-cad-robot-projects.mjs (b15ff59f0)
+    // and verify-cad-fasteners.mjs (2f2a25f00) each assert something is NOT visible in that
+    // form, and their flagged `waitFor()`s are a re-render sync before a waitForFunction state
+    // check, not the gates' verdicts. Both had kept this test red since 2026-11-17/18.
     'EVENT-AS-STATE': 0,
     // Added 2026-09-02, from triaging EVENT-AS-STATE: an awaited precondition inside a try whose
     // catch is empty or comment-only. Four instances, all bounded by a downstream hard assertion
@@ -225,6 +239,12 @@ test('an appearance used to synchronise is not an appearance assertion', () => {
     // Standing alone, with nothing in the file proving the thing ever leaves, it is a suspect.
     // gate-shapes-allow
     assert.deepEqual(scan("await panel.waitFor({state: 'visible'});\nreport('done');"), ['EVENT-AS-STATE']);
+    // node:assert's spelling of absence counts as proving the thing leaves; asserting it is
+    // still visible does not.
+    // gate-shapes-allow
+    assert.deepEqual(scan("await panel.waitFor();\nreport('done');\nassert.equal(await panel.isVisible(), false);"), []);
+    // gate-shapes-allow
+    assert.deepEqual(scan("await panel.waitFor();\nreport('done');\nassert.equal(await panel.isVisible(), true);"), ['EVENT-AS-STATE']);
 });
 
 test('every rule still fires — all seven, from one fixture', () => {

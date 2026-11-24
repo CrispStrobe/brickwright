@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {existsSync, readdirSync} from 'node:fs';
 import {readFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -150,8 +151,20 @@ test('N2f production holds device 62 and mixed generation 62 without neutralisat
         for (const variant of Object.values(report.variants)) {
             for (const name of ["school-intercom-101455", "school-led-people-dog", "school-miniorgan-107056"]) assert.ok(variant.retargetRefused.includes(name), name);
         }
+        // 307 / 135 retarget-refused -> 399 / 227 at the sb3-creator pin moves
+        // e248ce71 (8109d45ad, +50), 01e12806 (ca593fa3f, +5) and cafdfb1a
+        // (cc516deda, +38), less one at de3c53c8 (f906dba5c,
+        // lab-shortwave-regen dropped its program.bw): 92 lab-* analog bench
+        // programs with no hardware declarations, refused at retarget in every
+        // lattice variant. Parsed, refused and generated counts are unchanged.
+        const labPrograms = readdirSync(examples).filter(name => name.startsWith('lab-') &&
+            existsSync(join(examples, name, 'program.bw')));
+        assert.equal(labPrograms.length, 92, 'the lab-* gallery program count moved');
+        for (const variant of Object.values(report.variants)) {
+            for (const name of labPrograms) assert.ok(variant.retargetRefused.includes(name), name);
+        }
         assert.deepEqual(report.variants.baseline.counts, {
-            programs: 307, retargetRefused: 135, parsed: 164, parseFailed: 8,
+            programs: 399, retargetRefused: 227, parsed: 164, parseFailed: 8,
             refused: 102, generatedHost: 0, generatedDevice: 62, generatedTotal: 62
         });
         assert.equal(report.variants.literalOnly.counts.generatedTotal, 62);

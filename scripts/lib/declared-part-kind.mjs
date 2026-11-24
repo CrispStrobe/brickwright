@@ -23,9 +23,12 @@
  */
 
 // Synonyms only — never a kind that already exists under its own name.
+// `speaker` left this table when bw-circuit-ui 7f98562f gained a real
+// `speaker` footprint (with bw-board's voice-coil speaker model): rule 1 now
+// derives it, so the entry was dead, and `spk` names that part, not a buzzer.
 export const NAME_SYNONYMS = {
     light: 'ldr', photo: 'ldr', lux: 'ldr', photocell: 'ldr',
-    buzz: 'buzzer', beep: 'buzzer', speaker: 'buzzer', spk: 'buzzer',
+    buzz: 'buzzer', beep: 'buzzer', spk: 'speaker',
     fan: 'dc_motor', pump: 'dc_motor',
     thermistor: 'ntc'
 };

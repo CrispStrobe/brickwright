@@ -48,6 +48,7 @@ The six stored families are the emitter's own `this._core` branch strings. `rp20
 | dht11 | one-wire | sensor |
 | dht22 | one-wire | sensor |
 | ds18b20 | one-wire | sensor |
+| earphone | gpio | tone, pin |
 | flame_sensor | gpio | sensor, pin |
 | flex_sensor | analog | adc, sensor |
 | force_sensor | analog | adc, sensor |
@@ -66,6 +67,7 @@ The six stored families are the emitter's own `this._core` branch strings. `rp20
 | joystick | analog | adc, sensor |
 | keypad_4x4 | gpio | keypad, matrixKeypad |
 | ky040 | gpio | sensor, pin |
+| laser_diode | gpio | pin |
 | led | gpio | pin |
 | led_7color | gpio | neopixel, pin |
 | led_cube | gpio | cube |
@@ -92,6 +94,7 @@ The six stored families are the emitter's own `this._core` branch strings. `rp20
 | soil_moisture | analog | adc, sensor |
 | solenoid | gpio | relay, pin |
 | sound_module | gpio | sensor, pin |
+| speaker | gpio | tone, pin |
 | ssd1306 | i2c | oled |
 | st7920 | spi | lcd |
 | stepper | gpio | motor |
@@ -106,11 +109,11 @@ The six stored families are the emitter's own `this._core` branch strings. `rp20
 
 By category (the closed `REASON` vocabulary). These carry no verbs.
 
-- **passive** (38): adp151, adp7118, ams1117_33, ams1117_50, battery, battery_9v, battery_aa, battery_coin, capacitor, crystal, diode, fuse, gnd, header, inductor, isource, ld1117v33, ldr, level_shifter4, light_bulb, light_sensor, lm7805, lm7809, lm7812, lt1763, ntc, osc_can, polarized_cap, potentiometer, resistor, rnet_sip, solar_cell, transformer, usb_a, vcc, vreg, vsource, zener
-- **instrument** (4): ammeter, analog_meter, logic_probe, voltmeter
+- **passive** (58): __voice_coil, adp151, adp7118, air_coil, ams1117_33, ams1117_50, antenna, battery, battery_9v, battery_aa, battery_coin, capacitor, crystal, diode, earth, electrolysis_cell, ferrite_coil, field_contact, field_coupler, field_emf, field_inject, fuse, gnd, header, inductor, isource, junction_breakdown, ld1117v33, ldr, led_photocurrent, lemon_battery, level_shifter4, light_bulb, light_sensor, lm7805, lm7809, lm7812, lt1763, ntc, optical_rx, osc_can, polarized_cap, potato_battery, potentiometer, resistor, rf_detect, rnet_sip, solar_cell, thermocouple, transformer, tuning_cap, usb_a, varicap, vcc, vhf_coil, vreg, vsource, zener
+- **instrument** (7): ammeter, analog_meter, field_probe, function_gen, logic_probe, oscilloscope, voltmeter
 - **host** (22): arduino_mega, arduino_nano, arduino_uno, attiny85, attiny88, attiny88_qfn32, calliopemini, circuit_playground_express, eater6502, esp32_4848s040, esp8266, i8086, i8088, mcu, microbit, microbit_breakout, pi_pico, pybadge, stc15_mcu, stm32f030, w65c02, z80
 - **dip-surface** (20): ay8912, i8251, i8253, i8254, i8255, i8259, i8284, isd1820, kd9561, m6532, mc6850, ns16c550, ps2, ps2mouse, simplevga_card, tms9918, um245r, um66t, w65c22, w65c51
-- **analog-only** (46): 555, 556, ad711, ad711_channel, ad8541, ad8541_channel, ad8602, ad8602_channel, ada4522_1, ada4522_1_channel, adtl082, adtl082_channel, clock_display, darlington_driver, lm324, lm339, lm358, lm3915, lm393, lm741, lm741_rail_return, lt1001, lt1006, lt1007, lt1007_channel, lt1014, lt1014_channel, lt1678, lt1678_channel, ltspice_universal_opamp2, msgeq7, nmos, npn, op07, op27, op747, op747_channel, opamp, optocoupler, pmos, pnp, spectrum_display, tcs3200, timer_555, timer_556, tip120
+- **analog-only** (49): 555, 556, ad711, ad711_channel, ad8541, ad8541_channel, ad8602, ad8602_channel, ada4522_1, ada4522_1_channel, adtl082, adtl082_channel, clock_display, darlington_driver, ground_sensing_opamp_stage, lm324, lm339, lm358, lm386, lm386_stage, lm3915, lm393, lm741, lm741_rail_return, lt1001, lt1006, lt1007, lt1007_channel, lt1014, lt1014_channel, lt1678, lt1678_channel, ltspice_universal_opamp2, msgeq7, nmos, npn, op07, op27, op747, op747_channel, opamp, optocoupler, pmos, pnp, spectrum_display, tcs3200, timer_555, timer_556, tip120
 - **mechanical** (5): dip_switch, dip_switch_dpst, dip_switch_spst, reed_switch, slide_switch
 - **logic** (60): 28c256, 62256, 74c922, 74hc00, 74hc02, 74hc04, 74hc08, 74hc10, 74hc11, 74hc125, 74hc132, 74hc138, 74hc14, 74hc165, 74hc20, 74hc21, 74hc244, 74hc245, 74hc27, 74hc283, 74hc32, 74hc34, 74hc373, 74hc374, 74hc4050, 74hc688, 74hc73, 74hc74, 74hc75, 74hc86, 74hc93, 74hc95, 74hct00, 74hct04, 74hct08, 74hct138, 74hct14, 74hct245, 74hct32, 74ls04, 74ls107, 74ls157, 74ls161, 74ls173, 74ls189, 74ls193, 74ls32, 74ls373, cd4093, cd4511, cd74hc4067, decade_counter, dff, gate_and, gate_nand, gate_nor, gate_not, gate_or, gate_xor, jkff
 - **bus-peripheral** (31): ads1115, apds9960, as5600, at24c02, at24c64, bh1750, bmp280, dfplayer_mini, ds1302, ds3231, eeprom, hc05, hx711, ina219, ir_receiver, max232, mcp3008, mcp4725, mpu6050, nrf24l01, pcf8574, pcf8591, rf433_rx, rf433_tx, sgp30, tcs34725, temp_sensor, veml7700, vl53l0x, xpt2046, ze08_ch2o

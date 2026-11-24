@@ -7,9 +7,6 @@ import locales from 'scratch-l10n';
 
 import MenuBarMenu from './menu-bar-menu.jsx';
 import {menuTriggerStyle, openMenuFromKeyboard} from '../../lib/menu-keyboard.js';
-import BwAbout from './bw-about.jsx';
-import I8086Lab from './i8086-lab.jsx';
-import NativeBenchmarks from './native-benchmarks.jsx';
 import {MenuItem, MenuSection, Submenu} from '../menu/menu.jsx';
 import menuBarStyles from './menu-bar.css';
 import styles from './settings-menu.css';
@@ -25,6 +22,32 @@ import {getCostumePrecision, setCostumePrecision} from '../../lib/bw-costume-pre
 import {getCadEnabled, setCadEnabled} from '../../lib/bw-cad-preferences.js';
 import {getFpgaEnabled, setFpgaEnabled} from '../../lib/bw-fpga-preferences.js';
 import {getLegacySpikeVisible, setLegacySpikeVisible} from '../../lib/spike-legacy-debug.js';
+
+// The About, 8086 diagnostics and native i80386 benchmark dialogs (and the benchmark engine
+// glue, ~55 KiB together) are fetched on the first request to open one, not with the first load
+// (P17 budget, scripts/lib/webpack-ownership.mjs). Until then only this listener is mounted;
+// the loaded panel mounts open and from then on listens for the event itself.
+const lazyDialog = (load, openEvent, props = {}) => {
+    const Panel = React.lazy(load);
+    const LazyDialog = () => {
+        const [wanted, setWanted] = React.useState(false);
+        React.useEffect(() => {
+            if (wanted) return undefined;
+            const want = () => setWanted(true);
+            window.addEventListener(openEvent, want);
+            return () => window.removeEventListener(openEvent, want);
+        }, [wanted]);
+        return wanted ? <React.Suspense fallback={null}><Panel {...props} initiallyOpen /></React.Suspense> : null;
+    };
+    return LazyDialog;
+};
+const BwAbout = lazyDialog(() => import(/* webpackChunkName: "bw-about" */ './bw-about.jsx'),
+    'bw-open-about', {hideTrigger: true});
+const I8086Lab = lazyDialog(() => import(/* webpackChunkName: "bw-i8086-lab" */ './i8086-lab.jsx'),
+    'bw-open-i8086-lab');
+const NativeBenchmarks = lazyDialog(
+    () => import(/* webpackChunkName: "bw-native-benchmarks" */ './native-benchmarks.jsx'),
+    'bw-open-native-benchmarks');
 
 const emit = (name, value) => {
     window.dispatchEvent(new CustomEvent(name, {detail: value}));
@@ -259,7 +282,7 @@ const SettingsMenu = ({intl, canChangeLanguage, canChangeTheme, isRtl, onRequest
                     </MenuItem>
                 </MenuSection>
             </MenuBarMenu>
-            <BwAbout hideTrigger />
+            <BwAbout />
             <I8086Lab />
             <NativeBenchmarks />
         </div>

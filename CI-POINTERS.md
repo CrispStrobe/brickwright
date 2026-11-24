@@ -16,6 +16,7 @@ brickwright-firmware-private at
 `audits/independent-spike/2026-10-01-runtime-retirement/main-validation/brickwright-retirement-main-full.tap`.
 The newer 39-test run above re-executed the relocated fixtures on this branch.
 
+- test/x86-v10-cui-witness-pin.test.mjs :: the V10 consumers are sealed at an earlier Circuit UI pin; their witnesses describe that install :: workflow .github/workflows/build.yml step 'Run unit tests' executed it (not skipped, ok) in green main run 43692847016 on 6e8f065c6, 2026-11-15, while bw-circuit-ui 6b4d7029 — the pin FINITE_V10_PINS is sealed at — was canonical. Since the 2026-11-22 move to aab8059a it skips by design: the producer and reader are sealed (their bytes are hash-pinned by test/i80386-hdd-gui-actual.test.mjs since 23bb8ef1f), so the witness table cannot drift, and the install it describes is no longer the one CI installs. It executes again only if a reviewed reseal moves FINITE_V10_PINS to the then-canonical pin. Pointer recorded 2026-11-24 main-build-green.
 - test/vendor-forward-packages.test.mjs :: BW_BOARD_DIR unset — actual forward BIOS CLI not exercised :: workflow .github/workflows/build.yml step 'Fetch the pinned bw-board tree for the pin-reader tests' supplies the exact engine input for the unit suite; also explicitly run against takeover app/7fbdfa9 checkout on qualification host 2026-09-12 codex-app-adoption-audit
 
 Every test CI skips must point at the ONE place it executes (plan T13). One line per file and
