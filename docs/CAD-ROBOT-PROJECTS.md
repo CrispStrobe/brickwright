@@ -305,3 +305,14 @@ The candidate's browser module SHA-256 is
 The reproducible native source pin is saved in the
 [JoltPhysics.js candidate](https://github.com/CrispStrobe/JoltPhysics.js/commit/fb4da98).
 The released SDK continues to use its existing qualified engine.
+
+A separate Chrome run loaded the actual shipped Circuit sidecars
+through the pinned Circuit model and Board engine, then applied the
+projects' default control values through the motor and servo APIs. The
+existing coupled session advanced the packaged CAD worker for 600
+fixed steps per run. Motion and electrical readouts matched exactly.
+Scout improved from 0.39× to 0.86×. Atlas improved from 0.40× to 0.52×.
+These runs include electrical integration and feedback. The Blocks VM
+and viewport were outside the harness. The 1× project target remains
+open. The old local GUI build was missing and its cold rebuild was
+stopped after the focused checks on the heavily loaded Mac.
