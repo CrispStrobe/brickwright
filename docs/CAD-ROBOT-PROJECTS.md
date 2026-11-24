@@ -262,3 +262,10 @@ from the box even after allowing for collision tolerance, the optional
 extra convex radius, and rounding. Its unit fixture checks that an
 otherwise-missed grazing child is still tested when the extra radius is
 set. [Jolt implementation](https://github.com/CrispStrobe/JoltPhysics/commit/64adfd7014109e7aaa38890d31882757c3835672)
+
+To compare a local self-contained SIMD WASM module against the shipped
+engine, run the same browser proof twice with an identical build and
+project. Set `PROOF_JOLT_SIMD_MODULE=/absolute/path/to/module.js` only
+for the candidate run. The proof records its SHA-256 and checks that the
+simulation requested it and did not fall back to scalar. Leave the
+override unset to measure the pinned module.
