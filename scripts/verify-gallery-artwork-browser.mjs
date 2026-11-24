@@ -23,16 +23,29 @@ try {
     await robot.scrollIntoViewIfNeeded();
     assert.equal(await robot.getAttribute('loading'), 'lazy');
     assert.ok(await robot.evaluate(image => image.decode().then(() => image.naturalWidth > 0)));
-    assert.ok(images.size > 0 && images.size < await robots.getByTestId('bw-sim-example-card').count());
+    const robotCards = await robots.getByTestId('bw-sim-example-card').count();
+    assert.ok(images.size > 0 && images.size < robotCards);
+    console.log(`PASS Robot Lab decoded its first cover with ${images.size} image requests for ${robotCards} cards`);
     await robots.getByRole('button', {name: 'Close examples', exact: true}).click();
 
     await page.getByRole('tab', {name: 'Circuit', exact: true}).click();
     await page.getByTestId('bw-circuit-panel-examples').first().click();
-    const circuit = page.locator('img[src*="/gallery-artwork/"][src$=".svg"]').first();
-    await circuit.scrollIntoViewIfNeeded();
+    const circuitCovers = page.locator('img[data-example-artwork]:visible');
+    const circuit = circuitCovers.first();
+    const waitForCover = async cover => {
+        await cover.scrollIntoViewIfNeeded();
+        await page.waitForFunction(image => image.complete && image.naturalWidth > 0, await cover.elementHandle());
+    };
+    await waitForCover(circuit);
     assert.equal(await circuit.getAttribute('loading'), 'lazy');
-    assert.ok(await circuit.evaluate(image => image.decode().then(() => image.naturalWidth > 0)));
-    console.log('PASS Chromium: Robot Lab and Circuit gallery artwork decoded after opening the galleries');
+    const circuitRequests = [...images].filter(path => path.endsWith('.svg')).length;
+    const available = await circuitCovers.evaluateAll(cards => [...new Set(cards.map(card => card.dataset.exampleArtwork))]);
+    assert.ok(circuitRequests > 0 && circuitRequests < 64 && available.length > circuitRequests);
+    const distant = available.findLast(url => !images.has(new URL(url, page.url()).pathname));
+    assert.ok(distant, 'a cover well below the fold is still deferred');
+    await waitForCover(page.locator(`img[data-example-artwork="${distant}"]:visible`).first());
+    assert.ok(images.has(new URL(distant, page.url()).pathname));
+    console.log(`PASS Circuit decoded covers on demand, with ${circuitRequests} initial requests for ${available.length} unique covers`);
 } finally {
     await browser.close();
 }
