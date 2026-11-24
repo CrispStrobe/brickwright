@@ -1,5 +1,5 @@
 /** Browser gate for the first-run chooser and its three real project paths. */
-import {mkdir} from 'node:fs/promises';
+import {mkdir, readFile} from 'node:fs/promises';
 import {join, resolve} from 'node:path';
 import {chromium} from 'playwright';
 
@@ -22,7 +22,17 @@ try {
     const dialog = page.getByTestId('bw-starter-dialog');
     await dialog.waitFor({timeout: 30000});
     check(await dialog.getAttribute('role') === 'dialog', 'first run opens an accessible dialog');
-    check(await page.locator('[data-starter-id]').count() === 3, 'three journeys are shown');
+    // The cards are starter-journeys.json's, less those whose surface the build lacks
+    // (availableJourneys: the CAD card needs a CAD build). 68ec0be7c added game, technic
+    // and cad-robot to the original three; a CAD build (BW_ENABLE_CAD=1) shows all six.
+    const journeys = JSON.parse(await readFile(
+        resolve('overlay/scratch-gui/src/components/gui/starter-journeys.json'), 'utf8'));
+    const shown = await page.locator('[data-starter-id]').evaluateAll(cards =>
+        cards.map(card => card.getAttribute('data-starter-id')));
+    const offered = journeys.filter(journey => journey.requires !== 'cad').map(journey => journey.id);
+    const offeredWithCad = journeys.map(journey => journey.id);
+    check(JSON.stringify(shown) === JSON.stringify(offered) || JSON.stringify(shown) === JSON.stringify(offeredWithCad),
+        `the journeys this build offers are shown (${shown.join(', ')})`);
 
     await page.getByRole('button', {name: 'Not now'}).click();
     await page.reload({waitUntil: 'domcontentloaded'});

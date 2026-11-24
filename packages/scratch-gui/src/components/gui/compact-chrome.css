@@ -211,5 +211,8 @@
 :global([data-cad-color-mode="dark"] .bw-compact-file-menu) {--compact-menu-fg:#edf3fa;--compact-menu-bg:#203447;--compact-menu-border:#526d83;}
 :global(body.bw-compact-chrome .bw-compact-file-menu [data-bw-menu-trigger]),
 :global(body.bw-compact-chrome .bw-compact-file-menu [data-testid="bw-global-history"]) {color:var(--compact-menu-fg)!important;background:var(--compact-menu-bg)!important;border:1px solid var(--compact-menu-border);border-radius:6px;min-height:36px;}
+/* The History button moved into the ribbon (d9aa15eef) kept the menu bar's 2.4rem (38.4px)
+   width; every ribbon control is a 44px touch target (scripts/lib/editor-touch-checks.mjs). */
+:global(body.bw-compact-chrome .bw-compact-file-menu [data-testid="bw-global-history"]) {min-width:44px;min-height:44px;}
 :global(.bw-compact-file-menu [data-bw-menu-trigger] img) {filter:brightness(.35);}
 :global([data-cad-color-mode="dark"] .bw-compact-file-menu [data-bw-menu-trigger] img) {filter:none;}

@@ -244,14 +244,15 @@ export const insightInteractions = async (page, {shotsDir}) => {
         await page.getByTestId('bw-sim-lab-port-pick-none').click();
         await page.waitForFunction(i => !window.__bwSimLab.editor.model.parts.find(p => p.id === i).port, id, {timeout: 5000});
     }
+    // "Before you press Run" is a Simulate warning: since 155ef476d the pane does not show it in
+    // Build (renderBlockers returns null there; Build lists the issue in its notes instead).
     const blockers = page.getByTestId('bw-sim-lab-blockers');
-    await blockers.waitFor({timeout: 5000});
-    assert.match(await blockers.textContent(), /Before you press Run:.*No motor is plugged into the hub/);
+    assert.equal(await blockers.count(), 0, 'no Run warning while building');
     await page.getByTestId('bw-sim-lab-mode-simulate').click();
     await page.waitForFunction(() => window.__bwSimLab.mode === 'simulate' && window.__bwSimLab.status === 'ready' &&
         window.__bwSimLab._pane.view?.overlayStats().ports === 2, null, {timeout: 60000});
     await blockers.waitFor({timeout: 5000});
-    assert.match(await blockers.textContent(), /No motor is plugged into the hub/);
+    assert.match(await blockers.textContent(), /Before you press Run:.*No motor is plugged into the hub/);
     assert.equal(await badge(page, 'motorL').textContent(), '?');
     assert.equal(await badge(page, 'motorR').textContent(), '?');
     const noMotor = blockers.getByTestId('bw-sim-lab-issue-no-motor');

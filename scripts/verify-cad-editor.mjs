@@ -118,10 +118,15 @@ try{
   trace('Opening CAD tab');
   await page.getByRole('tab',{name:'CAD',exact:true}).click();
   await page.waitForFunction(()=>window.__bwCad?.editor);
+  // The CAD bridges install from their own lazy chunk after first paint (lib/bw-cad-host.js).
+  await page.waitForFunction(()=>window.__bwCadProgramApi&&window.__brickwrightStore?.getState().scratchGui.vm.runtime.cadCircuitSimulation);
   const cad=page.getByTestId('bw-cad-tab');
   // Exercise the shipping host, including the deferred catalogue and Redux preference.
-  await cad.getByLabel('File menu',{exact:true}).click();
-  await cad.getByRole('button',{name:'Model library',exact:true}).click();
+  // Model library comes from the project File menu: the embedded CAD SDK hides its own File
+  // menu (embedded:true, since b89a2a68e) and CAD contributes its file actions to the host's
+  // File menu (d9aa15eef, docs/CAD-WORKSPACE-UX.md; verify-workspace-menus.mjs takes this route too).
+  await page.getByTestId('bw-file-menu-trigger').click();
+  await page.getByRole('menuitem',{name:'Model library…',exact:true}).click();
   const models=cad.getByRole('dialog',{name:'Model library',exact:true});
   await models.getByLabel('Model type',{exact:true}).selectOption('source');
   await page.waitForFunction(()=>document.querySelector('[data-testid="bw-cad-tab"] [data-state]')?.shadowRoot?.querySelectorAll('.model-library-card').length>130);
