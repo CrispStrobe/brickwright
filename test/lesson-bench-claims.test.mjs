@@ -45,6 +45,15 @@ const volts = (board, part, terminal) => {
 };
 const milliamps = (board, part, terminal) => board.branchCurrent(part, terminal) * 1000;
 
+// RE-DERIVED 2026-11-24 for bw-board 74d42338 (round 3, pinned since lite's
+// a685b220 move): diodes and LEDs are EXPONENTIAL (Shockley) by default. An
+// LED's `vf` stays the TOTAL drop at its rated 20 mA (junction + rs, with Is
+// solved to make that exact — mna.js shockleyParams), and below 20 mA the
+// drop falls by n·Vt·ln(20 mA / I) + rs·(20 mA − I). The old piecewise knee
+// (vf − 0.020·rd, a flat 1.8 V for the red LED) over-states the drop at the
+// few-mA currents these benches run, so every LED branch current here ROSE by
+// 0.5–5%. Red LED card: vf 2.0, n 1.8, rs 10 Ω (parts-library.js). Values are
+// the measured ones; tolerances are unchanged. Nothing was widened.
 const fresh = async id => {
     const {board, circuit, data} = await load(id);
     return {board, circuit, data};
@@ -79,11 +88,11 @@ test('electricity-polarity: the bench reverses a DIODE, and both LEDs face the s
     assert.ok(volts(board, 'd1', 'anode') > volts(board, 'd1', 'cathode'), 'd1 is forward');
     assert.ok(volts(board, 'd2', 'cathode') > volts(board, 'd2', 'anode'), 'd2 is reverse');
 
-    near(milliamps(board, 'r1', 'b'), 5.2267, 0.01, 'forward branch current');
+    near(milliamps(board, 'r1', 'b'), 5.4734, 0.01, 'forward branch current');
     near(milliamps(board, 'r2', 'b'), 0, 0.001, 'reverse branch current');
-    near(volts(board, 'd1', 'anode'), 2.5434, 0.01, 'V at d1 anode');
+    near(volts(board, 'd1', 'anode'), 2.4275, 0.01, 'V at d1 anode');
     near(volts(board, 'd2', 'cathode'), 5.0, 0.01, 'V at d2 cathode (blocked, sits at VCC)');
-    near(board.ledBrightness('led1'), 0.2613, 0.001, 'green LED brightness');
+    near(board.ledBrightness('led1'), 0.2737, 0.001, 'green LED brightness');
     near(board.ledBrightness('led2'), 0, 0.001, 'red LED brightness');
 });
 
@@ -121,37 +130,42 @@ test('negative control: truly reversing d1 extinguishes led1, turning d2 forward
 test('electricity-resistance: three branches are ordered and separable by eye', async () => {
     const {board} = await fresh('45-led-current-comparison');
     board.advanceTo(50n * MS);
-    near(milliamps(board, 'r1', 'b'), 13.9130, 0.01, '220 ohm branch');
-    near(milliamps(board, 'r2', 'b'), 6.6667, 0.01, '470 ohm branch');
-    near(milliamps(board, 'r3', 'b'), 3.1683, 0.01, '1k branch');
+    near(milliamps(board, 'r1', 'b'), 13.9854, 0.01, '220 ohm branch');
+    near(milliamps(board, 'r2', 'b'), 6.7717, 0.01, '470 ohm branch');
+    near(milliamps(board, 'r3', 'b'), 3.2520, 0.01, '1k branch');
     const b = ['led1', 'led2', 'led3'].map(id => board.ledBrightness(id));
     assert.ok(b[0] > b[1] && b[1] > b[2], `brightness must be monotone, got ${b}`);
     assert.ok(b[0] - b[2] > 0.4, 'the brightest and dimmest must be tellable apart');
 });
 
 // ── electricity-ohms-law → 34-ohms-law ──────────────────────────────────────
-test('electricity-ohms-law: the hand calculation is ~5.6% low, because a real LED drops less than its rated Vf', async () => {
+test('electricity-ohms-law: the hand calculation is ~8.4% low, because a real LED drops less than its rated Vf', async () => {
     const {board} = await fresh('34-ohms-law');
     board.advanceTo(50n * MS);
     const measured = milliamps(board, 'r1', 'b');
     const naive = (5 - 2) / 1000 * 1000;     // the lesson's I = (Vsupply - Vled) / R
-    // Hand oracle: I = (5 − 1.8) / (1000 + 10) = 3.16832 mA. The 1.8 is the
-    // KNEE — vf − 0.020·rd — under bw-board's datasheet vf convention, where
-    // `vf` is the drop at the rated 20 mA rather than a flat threshold.
-    near(measured, 3.1683, 0.01, 'branch current');
-    near(volts(board, 'r1', 'b'), 1.8317, 0.01, 'V at the LED anode');
+    // Hand oracle (exponential LED, red card vf 2.0 @ 20 mA, n 1.8, rs 10 Ω):
+    //   V_led = 2.0 + n·Vt·ln(I / 20 mA) + rs·(I − 20 mA)
+    //         = 2.0 + 0.04653·ln(3.252/20) + 10·(0.003252 − 0.020)
+    //         = 2.0 − 0.0845 − 0.1675 = 1.7480 V
+    //   I     = (5 − 1.7480) / 1000 = 3.2520 mA  — self-consistent.
+    // Was (5 − 1.8) / 1010 = 3.1683 mA under the piecewise knee (vf − 0.020·rd).
+    near(measured, 3.2520, 0.01, 'branch current');
+    near(volts(board, 'r1', 'b'), 1.7480, 0.01, 'V at the LED anode');
     // THE TEACHING POINT MOVED, AND IT MOVED TOWARDS THE TRUTH. This read
     // "differ by ~1%" while the solver shared the lesson's own simplification:
     // both put a flat 2.0 V across the LED, so of course they nearly agreed.
     // The engine now models the device, a real LED at 3 mA drops well under its
     // 20 mA rating, and the honest gap is 5.6% — the learner's estimate is LOW,
-    // which is the thing worth explaining.
+    // which is the thing worth explaining. With the exponential junction
+    // (bw-board 74d42338) the drop at 3 mA is lower still, and the gap is 8.4%:
+    // same sign, same explanation, a bigger number.
     //
     // CONSEQUENCE OUTSIDE THIS REPO: the shipped lesson states the old figures
     // (34-ohms-law/EXPECTED.md: "(5.0 - 2.0) / 1000 = 3.0 mA"). That text is
     // sb3-creator's and is now wrong for this bench. Reported with the count.
     const errorPct = Math.abs(measured - naive) / naive * 100;
-    near(errorPct, 5.61, 0.1, 'the gap the lesson has to explain');
+    near(errorPct, 8.40, 0.1, 'the gap the lesson has to explain');
     assert.ok(measured > naive, 'the measurement must exceed the naive estimate, not fall short');
 });
 
@@ -167,10 +181,10 @@ test('electricity-series-parallel: the supply carries all THREE branches, not ju
     // against the ngspice oracle). OUT of the supply terminal IS the current
     // the rail delivers, so this no longer negates. The magnitude is unchanged.
     const supply = milliamps(board, 'vcc1', 'vcc');
-    near(series, 3.3684, 0.01, 'series branch');
-    near(p1, 6.6667, 0.01, 'parallel branch 1');
-    near(p2, 6.6667, 0.01, 'parallel branch 2');
-    near(supply, 16.7018, 0.01, 'supply current');
+    near(series, 3.4544, 0.01, 'series branch');
+    near(p1, 6.7717, 0.01, 'parallel branch 1');
+    near(p2, 6.7717, 0.01, 'parallel branch 2');
+    near(supply, 16.9977, 0.01, 'supply current');
     near(supply, series + p1 + p2, 0.01, 'Isupply = Iseries + Ip1 + Ip2 (the v2 hint)');
     // The v1 hint said Isource = Ibranch1 + Ibranch2. It is false here by the
     // series branch, and there is no node on this bench where it holds.
@@ -192,7 +206,7 @@ test('electricity-button: the pull-up gives a defined level in both button state
 });
 
 // ── electricity-capacitor (already v2) → pc29-capacitor-discharge ───────────
-test('electricity-capacitor: charge and discharge are separate paths, and the tail flattens at Vf', async () => {
+test('electricity-capacitor: charge and discharge are separate paths, and the tail flattens far above 0 V', async () => {
     const {board, circuit} = await fresh('pc29-capacitor-discharge');
     let t = 10n * MS;
     board.advanceTo(t);
@@ -207,17 +221,26 @@ test('electricity-capacitor: charge and discharge are separate paths, and the ta
     // negative and its forward magnitude is the explicit negative of it.
     const first = -milliamps(board, 'led', 'anode');
     assert.ok(first > 2.5, `discharge starts with real LED current, got ${first} mA`);
-    board.advanceTo(t += 8000n * MS);
+    board.advanceTo(t += 4000n * MS);
+    const at4s = volts(board, 'cap', 'a');
+    board.advanceTo(t += 4000n * MS);
     // The revised lesson's teaching point: it does NOT decay to 0 V.
-    // The tail flattens at the LED's KNEE (vf − 0.020·rd = 1.8), not at its
-    // datasheet Vf. Those were the same number while the solver read vf as a flat
-    // threshold; under the corrected convention `vf` is the drop at the rated
-    // 20 mA and a nearly-dead capacitor is nowhere near that current. The lesson's
-    // teaching point — it does NOT decay to 0 V — is untouched.
     //
-    // pc29-capacitor-discharge/intro.md still says it "stops near 2 V"; that text
-    // is sb3-creator's and is now off by 0.22 V. Reported with the corpus count.
-    near(volts(board, 'cap', 'a'), 1.7784, 0.05, 'discharge tail flattens at the LED knee');
+    // THERE IS NO KNEE ANY MORE (bw-board 74d42338, exponential LEDs). Under
+    // the piecewise model the tail stopped dead at vf − 0.020·rd = 1.8 V
+    // (1.7784 measured). A real LED's current falls exponentially with its
+    // voltage instead of switching off, so the discharge never stops — it
+    // SLOWS: measured 1.6481 V at 4 s, 1.4879 V at 8 s, 1.4180 V at 16 s, with
+    // the LED carrying 17 µA at 8 s. Each doubling of the time takes off less
+    // than the one before, which is what "flattens" means for a real diode.
+    // The lesson's point — it does not decay to 0 V — holds, and the
+    // assertion below now checks the flattening itself, not just a level.
+    //
+    // pc29-capacitor-discharge/intro.md and EXPECTED.md still say it "stops
+    // near 2 V"; that text is sb3-creator's and is now off by ~0.5 V.
+    near(volts(board, 'cap', 'a'), 1.4879, 0.05, 'discharge tail at 8 s, far above 0 V');
+    assert.ok(at4s - volts(board, 'cap', 'a') < 0.25,
+        `the tail must be flattening: 4 s -> 8 s fell ${at4s - volts(board, 'cap', 'a')} V`);
 });
 
 // ── electricity-inductor → pc52-inductor-filter ─────────────────────────────
@@ -263,10 +286,13 @@ test('electricity-diode: reversing the source keeps load polarity and costs two 
 
     assert.deepEqual(pos.conducting, ['d1', 'd4'], '+9 V selects one diagonal');
     assert.deepEqual(neg.conducting, ['d2', 'd3'], '-9 V selects the other');
-    near(pos.out, 7.6168, 0.01, 'bridge output at +9 V');
+    near(pos.out, 7.7262, 0.01, 'bridge output at +9 V');
     near(neg.out, pos.out, 0.001, 'bridge output is unchanged by reversing the source');
     near(neg.load, pos.load, 0.001, 'load current is unchanged, and never reverses');
-    near(9 - pos.out, 1.3832, 0.01, 'the output is short of the source by exactly two forward drops');
+    // Two drops of the generic silicon diode card (vf 0.7 @ 20 mA, n 1.752,
+    // rs 0.568 Ω) at the 7.7 mA load current: 0.637 V each on the exponential
+    // junction (bw-board 74d42338), was 0.692 V on the piecewise knee.
+    near(9 - pos.out, 1.2738, 0.01, 'the output is short of the source by exactly two forward drops');
 });
 
 // ── electricity-transistor-switch → 38-npn-switch ───────────────────────────
@@ -280,12 +306,12 @@ test('electricity-transistor-switch: the switch really switches', async () => {
     board.advanceTo(t += 50n * MS);
     near(volts(board, 'q1', 'base'), 0.704, 0.01, 'base on');
     near(volts(board, 'q1', 'collector'), 0.07829, 0.002, 'collector on');
-    near(milliamps(board, 'r1', 'b'), 6.5036, 0.01, 'load branch on');
+    near(milliamps(board, 'r1', 'b'), 6.6113, 0.01, 'load branch on');
     // ledBrightness averages over a 20 ms window whose samples are recorded at
     // each advance boundary, so one 50 ms hop leaves the window holding the OLD
     // state and reads 0. Step it, the way the app's animation loop does.
     for (let i = 0; i < 4; i++) board.advanceTo(t += 10n * MS);
-    near(board.ledBrightness('led1'), 0.32518, 0.001, 'LED on (after the 20 ms window fills)');
+    near(board.ledBrightness('led1'), 0.33056, 0.001, 'LED on (after the 20 ms window fills)');
 });
 
 test('electricity-transistor-switch: every reading in the load loop agrees', async () => {
@@ -300,7 +326,12 @@ test('electricity-transistor-switch: every reading in the load loop agrees', asy
     const off = Circuit.fromJSON(structuredClone(raw));
     off.board.advanceTo(50n * MS);
     near(volts(off.board, 'q1', 'base'), 0.005, 0.002, 'base with the button released');
-    near(volts(off.board, 'q1', 'collector'), 4.497, 0.01, 'collector with the button released');
+    // 4.0146 V, was 4.497. With the transistor off the collector node hangs
+    // on the LED's LEAKAGE: the only path out of it is q1's cut-off junction.
+    // The piecewise LED dropped ~0.5 V there; the exponential one carries that
+    // sub-microamp current at ~1 V, as a real LED does. The switch claim (the
+    // collector is high, the LED dark) is unchanged.
+    near(volts(off.board, 'q1', 'collector'), 4.0146, 0.01, 'collector with the button released');
 
     const on = Circuit.fromJSON(structuredClone(raw));
     on.setControl('btn1', 1);
@@ -311,7 +342,7 @@ test('electricity-transistor-switch: every reading in the load loop agrees', asy
     // One series loop, therefore one current. This is the claim the lesson's
     // version 3 hint makes and the one that was false before the repair.
     const load = milliamps(on.board, 'r1', 'b');
-    near(load, 6.5036, 0.01, 'load resistor');
+    near(load, 6.6113, 0.01, 'load resistor');
     // Both of these terminals are ENTERED by the loop current, so under the
     // positive-OUT contract they read negative; the loop agreement is on their
     // forward magnitudes. r1.b is left as-is because the current leaves it.
@@ -385,7 +416,7 @@ test('starter-circuit-path: the loop is closed and the numbers are the ones a le
     board.advanceTo(50n * MS);
     near(volts(board, 'bat1', 'pos'), 9.0, 0.01, 'battery +');
     near(volts(board, 'bat1', 'neg'), 0.0, 0.01, 'battery -');
-    near(milliamps(board, 'r1', 'b'), 7.1252, 0.01, 'loop current');
+    near(milliamps(board, 'r1', 'b'), 7.1724, 0.01, 'loop current');
     assert.ok(board.ledBrightness('led1') > 0.3, 'the LED is lit');
 });
 

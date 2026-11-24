@@ -164,10 +164,15 @@ test('measurement-resistance: no bare parallel pair is exposed to the probes', a
     board.setPower(false);
     board.advanceTo(60n * MS);
     near(board.resistance(netId(board, 'r1', 'a'), netId(board, 'r1', 'b')), 470, 1, 'one resistor alone');
+    // Both LED-dominated readings moved with the junction model, not with the
+    // bench: bw-board 74d42338 made LEDs exponential by default, and an
+    // ohmmeter's answer across a diode is V/I at its test current. 1806 -> 1664 Ω
+    // for one LED, 1982 -> 1803 Ω rail to rail (both -8..-9%, past their bands). Tolerances unchanged; the lesson's measure
+    // hint was re-quoted with them.
     near(board.resistance(netId(board, 'led1', 'anode'), netId(board, 'led1', 'cathode')),
-        1806.2464, 60, 'one LED alone, under the 1 mA test current');
+        1663.7607, 60, 'one LED alone, under the 1 mA test current');
     near(board.resistance(netId(board, 'vcc1', 'vcc'), netId(board, 'gnd1', 'gnd')),
-        1981.8141, 40, 'the whole network, rail to rail');
+        1803.0017, 40, 'the whole network, rail to rail');
     // The v1 hint's 470||470 = 235 ohm is nowhere on this bench.
     assert.ok(Math.abs(board.resistance(netId(board, 'vcc1', 'vcc'), netId(board, 'gnd1', 'gnd')) - 235) > 100,
         'if 235 ohm ever appears here, the v1 hint was right and the review is wrong');
@@ -211,6 +216,18 @@ test('measurement-range-error: the volts divider is exactly the documented /4', 
 test('measurement-range-error: the amps stage delivers its documented gain, and saturates where the part does', async () => {
     const {board, circuit} = await load('76-multimeter');
     const documented = 1 + 100000 / 2200;   // 46.4545...
+    // RE-DERIVED 2026-11-24. bw-board 1d74deb1 (round 2, 2026-11-23) made the
+    // LM358 a finite-gain macromodel with the datasheet's 100 dB open-loop gain
+    // (TI SLOS068) and 50 Ω output resistance, so the stage realises the
+    // textbook FINITE-gain formula, 0.046% under the ideal — the same oracle
+    // bw-board's own analog-amps.test.mjs adopted. With u = A0·(v+ − v−), the
+    // output u − Rout·Vout·GL and v− = β·Vout, loaded only by its own feedback
+    // pair (the ADC pin is high-Z):
+    //   gain = A0 / (1 + Rout/(Rf + Rg) + A0·β)  = 46.43296468
+    // Measured 46.43296444 at every load: still hand arithmetic, still 1e-6,
+    // still input-independent, which was the D18 point.
+    const A0 = 1e5, ROUT = 50, RF = 100000, RG = 2200;
+    const realised = A0 / (1 + ROUT / (RF + RG) + A0 * RG / (RF + RG));
     let t = 0n;
     const gainAt = position => {
         circuit.setControl('load1', position);
@@ -225,25 +242,28 @@ test('measurement-range-error: the amps stage delivers its documented gain, and 
     // to ten figures, and it does NOT depend on the input any more.
     for (const position of [0.25, 0.5, 0.75, 0.9, 0.95]) {
         const {gain} = gainAt(position);
-        near(gain, documented, 1e-6, `closed-loop gain at load ${position}`);
+        near(gain, realised, 1e-6, `closed-loop gain at load ${position}`);
     }
     // The lesson's own numbers, which its `test` hint quotes.
-    near(gainAt(0.5).out * 1000, 92.87, 0.01, 'amplifier output at 100 mA, in mV');
-    near(gainAt(0.75).out * 1000, 185.67, 0.01, 'amplifier output at 200 mA, in mV');
-    // The last click of the pot is the exercise: x46.45 of 98.0 mV asks for
-    // 4.554 V, and analog-amps.js holds this part's top swing at vcc - 1.5.
+    near(gainAt(0.5).out * 1000, 92.83, 0.01, 'amplifier output at 100 mA, in mV');
+    near(gainAt(0.75).out * 1000, 185.58, 0.01, 'amplifier output at 200 mA, in mV');
+    // The last click of the pot is the exercise: x46.43 of 98.0 mV asks for
+    // 4.552 V, and the macromodel's smooth clamp holds the top swing about
+    // 1.5 V under the rail (ground-sensing-opamp.js, VCC − 1.5 V).
     const full = gainAt(1);
     near(full.shunt * 1000, 98.04, 0.01, 'shunt drop at full pot travel, in mV');
     assert.ok(full.shunt * documented > 4.5,
         'full travel should ask for more than the amplifier can swing');
-    near(full.out, 3.4966, 0.001, 'the saturated output, one swing below the 5 V rail');
-    near(full.gain, 35.6651, 0.001, 'and the realised gain there');
+    near(full.out, 3.4983, 0.001, 'the saturated output, one swing below the 5 V rail');
+    near(full.gain, 35.6831, 0.001, 'and the realised gain there');
     // The hints were re-worded when this became true, so the content version moves.
     assert.equal(lesson('measurement-range-error').version, 3,
         'the measurement-range-error hints changed, so its content version must move with it');
     for (const lang of ['en', 'de']) {
         const test_ = lesson('measurement-range-error').checkpoints.find(c => c.id === 'test');
         assert.ok(/46[.,]4545/.test(test_.copy[lang].hint),
+            `the ${lang} test hint must quote the resistors' arithmetic`);
+        assert.ok(/46[.,]433/.test(test_.copy[lang].hint),
             `the ${lang} test hint must quote the gain the bench now delivers`);
         assert.ok(!/46[.,]5 (predicts|93)|erreicht seine Verstärkung nicht/.test(test_.copy[lang].hint),
             `the ${lang} test hint still describes the defect that was fixed`);
@@ -434,15 +454,16 @@ test('OPEN DEFECT: the ohmmeter answers differently depending on which probe is 
     board.advanceTo(60n * MS);
     const hot = netId(board, 'vcc1', 'vcc');
     const gnd = netId(board, 'gnd1', 'gnd');
-    // 2181.8 +-40, and the tolerance is wide ON PURPOSE. Solving backwards,
-    // 470 + (470 + Rd)/3 = 2181.8 puts Rd at about 4.67 kohm per LED: this
-    // number is dominated by the LEDs' near-zero-bias resistance, not by the
-    // four 470 ohm resistors. It moved 2181.8 -> 2181.8 (0.45%) when the engine
-    // gained a C1 blend across the diode knee, which is exactly the term it
-    // depends on. A quantity set by an off-state diode model does not deserve
-    // a 0.2% pin; +-40 still fails if the network changes and no longer fires
-    // on a model refinement.
-    near(board.resistance(hot, gnd), 1981.8141, 40, 'probed hot-to-ground — the real path');
+    // 1803.0 +-40, and the tolerance is wide ON PURPOSE: this number is
+    // dominated by the LEDs' low-bias behaviour under the ohmmeter's test
+    // current, not by the four 470 ohm resistors. It has followed the junction
+    // model every time that moved — 2181.8 before the 2026-09-13 vf-convention
+    // correction (c100c32da), 1981.8 after it, 1803.0 since bw-board 74d42338
+    // made LEDs exponential
+    // (a real model change, -9%, not a refinement the band should absorb). A
+    // quantity set by the diode model does not deserve a 0.2% pin; +-40 still
+    // fails if the network changes.
+    near(board.resistance(hot, gnd), 1803.0017, 40, 'probed hot-to-ground — the real path');
     assert.ok(board.resistance(gnd, hot) > 1e6,
         'the ohmmeter has become symmetric. Re-measure, update ' +
         'docs/LESSON-REVIEW-WAVE-2.md and the measurement-resistance hint, then delete this test.');
