@@ -14,15 +14,17 @@ const terminals = ['offset_1', 'inn', 'inp', 'vneg', 'offset_5', 'out', 'vpos', 
 
 test('the exact installed packages expose and solve the physical LM741', async () => {
     const pins = JSON.parse(readFileSync(path.join(root, 'vendor-pins.json'), 'utf8'));
-    assert.equal(pins['bw-board'], '489ca7c675a9af03cb066026ec59801b8ba3d0bb');
-    assert.equal(pins['bw-circuit-ui'], 'a82d70032f0173f0597e1ba1c02f507b9d474642');
+    assert.equal(pins['bw-board'], '7e0bf8cf8beeb3329f0be550ae08fdd8de5d2099');
+    assert.equal(pins['bw-circuit-ui'], 'bc33e7d9140f9855d41944a5f9bfed2fa6191f28');
 
     const sidecar = JSON.parse(readFileSync(
         path.join(root, 'node_modules/bw-circuit-ui/src/parts-data/lm741.json'), 'utf8'));
     assert.equal(sidecar.kind, 'lm741');
     assert.deepEqual(sidecar.terminals.map(pin => pin.name), terminals);
-    assert.deepEqual(sidecar.footprint.leads.out, {dRow: 5, dCol: 2});
-    assert.deepEqual(sidecar.footprint.leads.vpos, {dRow: 5, dCol: 1});
+    // bw-circuit-ui 04f8ce8 (#155, breadboard-pitch DIPs) seats the package pin-1 corner on
+    // the other breadboard row (datasheet top view): the leads' rows flip.
+    assert.deepEqual(sidecar.footprint.leads.out, {dRow: 0, dCol: 2});
+    assert.deepEqual(sidecar.footprint.leads.vpos, {dRow: 0, dCol: 1});
     assert.ok(REFUSED['analog-only'].includes('lm741'),
         'the real analog IC must be catalogued without inventing a programmable-part profile');
 
