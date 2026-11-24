@@ -241,7 +241,12 @@ test('every shipped circuit resolves every wire endpoint into a real electrical 
     // lab-radio-whistle and lab-reflex-radio. None removed.
     for (const id of ['lab-crystal-set', 'lab-one-transistor-radio', 'lab-radio-loudspeaker',
         'lab-radio-whistle', 'lab-reflex-radio']) assert.ok(files.includes(id + '/circuit.json'), id);
-    assert.equal(files.length, 1609, 'the gate must cover the complete vendored corpus');
+    // 1609 -> 1647 on 2026-11-24 (sb3-creator 539a3d9 -> cafdfb1, #193): +38, the round-4
+    // lab benches: 10 on room fields and junction noise, 8 sensing transducers, 12 optics
+    // and 8 radio. None removed.
+    for (const id of ['lab-hum-finder', 'lab-thermocouple', 'lab-light-guide', 'lab-am-transmitter'])
+        assert.ok(files.includes(id + '/circuit.json'), id);
+    assert.equal(files.length, 1647, 'the gate must cover the complete vendored corpus');
     assert.deepEqual(failures, []);
 });
 
