@@ -1,23 +1,26 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright (c) 2026 Brickwright contributors
 import PropTypes from 'prop-types';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {MODEL_LESSONS} from '../../lib/bw-sim/model/example-catalog.js';
 import {EXPERIMENTAL_MODEL_DETAILS} from '../../lib/bw-sim/model/experimental-models.js';
 import {EXAMPLE_TOPICS, filterModelExamples, visibleExampleModels} from '../../lib/bw-sim/model/example-browser.js';
 import {galleryArtworkUrl, loadGalleryArtwork} from '../../lib/gallery-artwork.js';
 const EXAMPLE_DETAILS = Object.freeze({...MODEL_LESSONS, ...EXPERIMENTAL_MODEL_DETAILS});
+const EXAMPLES_PER_PAGE = 24;
 
 export const EXAMPLES_TEXT = {
     en: {title: 'Robot Lab examples', search: 'Search models and physics', topics: 'Physics topic', all: 'All topics',
         size: 'Model size', anySize: 'Any piece count', large: 'More than 50 pieces', small: 'Up to 50 pieces',
         close: 'Close examples', open: 'Open model', program: 'Open model + program', pieces: 'pieces', motors: 'motors',
         lesson: 'Read lesson', count: '{n} models', empty: 'No models match these filters.', loading: 'Opening…',
+        pages: 'Model pages', previous: 'Previous page', next: 'Next page', page: 'Page {page} of {total}',
         hint: 'Open an example to replace the model and code. Press Run to start.'},
     de: {title: 'Beispiele im Roboter-Labor', search: 'Modelle und Physik suchen', topics: 'Physikthema', all: 'Alle Themen',
         size: 'Modellgröße', anySize: 'Beliebige Teilezahl', large: 'Mehr als 50 Teile', small: 'Bis zu 50 Teile',
         close: 'Beispiele schließen', open: 'Modell öffnen', program: 'Modell + Programm öffnen', pieces: 'Teile', motors: 'Motoren',
         lesson: 'Lektion lesen', count: '{n} Modelle', empty: 'Keine Modelle passen zu diesen Filtern.', loading: 'Wird geöffnet…',
+        pages: 'Modellseiten', previous: 'Vorherige Seite', next: 'Nächste Seite', page: 'Seite {page} von {total}',
         hint: 'Ein Beispiel ersetzt Modell und Code. Mit Start geht es los.'}
 };
 const button = {minHeight: 40, border: '1px solid #94a3b8', borderRadius: 6, padding: '6px 10px', background: '#fff', color: '#0f172a', cursor: 'pointer'};
@@ -29,11 +32,13 @@ const SimLabExamples = ({models, locale, selected, onChoose, onLesson, onClose})
     const [topic, setTopic] = useState('');
     const [size, setSize] = useState('');
     const [includeExperimental, setIncludeExperimental] = useState(false);
+    const [requestedPage, setRequestedPage] = useState(0);
     const [pending, setPending] = useState(null);
     const [error, setError] = useState('');
     const [artwork, setArtwork] = useState({});
     const search = useRef(null);
     const dialog = useRef(null);
+    const scrollArea = useRef(null);
     const mounted = useRef(true);
     useEffect(() => {
         mounted.current = true;
@@ -55,7 +60,20 @@ const SimLabExamples = ({models, locale, selected, onChoose, onLesson, onClose})
         if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus(); }
         else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
     };
-    const filtered = filterModelExamples(visibleExampleModels(models, includeExperimental), EXAMPLE_DETAILS, {query, topic, size, locale: lang});
+    const visibleModels = useMemo(() => visibleExampleModels(models, includeExperimental), [models, includeExperimental]);
+    const filtered = useMemo(() => filterModelExamples(visibleModels, EXAMPLE_DETAILS, {query, topic, size, locale: lang}),
+        [visibleModels, query, topic, size, lang]);
+    const pageCount = Math.max(1, Math.ceil(filtered.length / EXAMPLES_PER_PAGE));
+    const page = Math.min(requestedPage, pageCount - 1);
+    const start = page * EXAMPLES_PER_PAGE;
+    const goToPage = nextPage => {
+        setRequestedPage(nextPage);
+        if (scrollArea.current) scrollArea.current.scrollTop = 0;
+    };
+    const changeFilter = (setter, value) => {
+        goToPage(0);
+        setter(value);
+    };
     return (
         <div style={{position: 'absolute', inset: 0, zIndex: 30, background: 'rgba(15,23,42,.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8}}>
             <section ref={dialog} role="dialog" aria-modal="true" aria-label={T.title} data-testid="bw-sim-examples" onKeyDown={keyboard}
@@ -66,27 +84,27 @@ const SimLabExamples = ({models, locale, selected, onChoose, onLesson, onClose})
                     <button type="button" style={button} disabled={Boolean(pending)} aria-label={T.close} onClick={onClose}>×</button>
                 </header>
                 <div style={{padding: 12, display: 'flex', gap: 8, flexWrap: 'wrap'}}>
-                    <input ref={search} type="search" aria-label={T.search} placeholder={T.search} value={query} onChange={e => setQuery(e.target.value)}
+                    <input ref={search} type="search" aria-label={T.search} placeholder={T.search} value={query} onChange={e => changeFilter(setQuery, e.target.value)}
                         style={{...button, minWidth: 160, flex: '2 1 220px', boxSizing: 'border-box'}} />
-                    <select aria-label={T.topics} value={topic} onChange={e => setTopic(e.target.value)} style={{...button, minWidth: 0, flex: '1 1 170px'}}>
+                    <select aria-label={T.topics} value={topic} onChange={e => changeFilter(setTopic, e.target.value)} style={{...button, minWidth: 0, flex: '1 1 170px'}}>
                         <option value="">{T.all}</option>
                         {Object.entries(EXAMPLE_TOPICS).map(([id, title]) => <option key={id} value={id}>{title[lang]}</option>)}
                     </select>
-                    <select aria-label={T.size} value={size} onChange={e => setSize(e.target.value)} style={{...button, minWidth: 0, flex: '1 1 170px'}}>
+                    <select aria-label={T.size} value={size} onChange={e => changeFilter(setSize, e.target.value)} style={{...button, minWidth: 0, flex: '1 1 170px'}}>
                         <option value="">{T.anySize}</option><option value="large">{T.large}</option><option value="small">{T.small}</option>
                     </select>
                     <label style={{display: 'flex', alignItems: 'center', gap: 6, fontSize: 12}}>
-                        <input type="checkbox" checked={includeExperimental} onChange={e => setIncludeExperimental(e.target.checked)} />
+                        <input type="checkbox" checked={includeExperimental} onChange={e => changeFilter(setIncludeExperimental, e.target.checked)} />
                         {lang === 'de' ? 'Experimentelle Modelle anzeigen' : 'Include experimental'} ({models.filter(m => m.experimental).length})
                     </label>
                 </div>
                 <p style={{fontSize: 12, color: '#475569', padding: '0 12px', margin: '0 0 10px'}}>{T.hint}</p>
                 <div role="status" style={{padding: '0 12px 8px', fontSize: 13}}>{T.count.replace('{n}', filtered.length)}</div>
                 {error && <div role="alert" style={{padding: 12, color: '#b91c1c'}}>{error}</div>}
-                <div style={{overflow: 'auto', minHeight: 0, padding: '0 12px 12px'}}>
+                <div ref={scrollArea} style={{overflow: 'auto', minHeight: 0, padding: '0 12px 12px'}}>
                     {!filtered.length && <p>{T.empty}</p>}
                     <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(260px, 100%), 1fr))', gap: 12}}>
-                        {filtered.map(entry => {
+                        {filtered.slice(start, start + EXAMPLES_PER_PAGE).map(entry => {
                             const key = entry.id || entry.file;
                             const d = EXAMPLE_DETAILS[key];
                             const title = entry.title[lang] || entry.title.en;
@@ -125,6 +143,18 @@ const SimLabExamples = ({models, locale, selected, onChoose, onLesson, onClose})
                         })}
                     </div>
                 </div>
+                {pageCount > 1 && (
+                    <div role="group" aria-label={T.pages} style={{display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        flexShrink: 0, gap: 8, padding: '6px 12px', borderTop: '1px solid #cbd5e1', fontSize: 13}}>
+                        <button type="button" style={button} disabled={Boolean(pending) || page === 0}
+                            aria-label={T.previous} title={T.previous} onClick={() => goToPage(page - 1)}>‹</button>
+                        <span role="status" aria-label={T.page.replace('{page}', page + 1).replace('{total}', pageCount)}>
+                            {page + 1} / {pageCount}
+                        </span>
+                        <button type="button" style={button} disabled={Boolean(pending) || page + 1 === pageCount}
+                            aria-label={T.next} title={T.next} onClick={() => goToPage(page + 1)}>›</button>
+                    </div>
+                )}
             </section>
         </div>
     );

@@ -15,7 +15,15 @@ export const physicsExamplesInteractions = async (page, {openSimLab, shotsDir, t
     await open.click();
     await gallery.getByRole('combobox', {name: 'Model size', exact: true}).selectOption('large');
     const expectedLarge=MODELS.map(m=>m.id||m.file).filter(key=>MODEL_LESSONS[key].pieces>50).sort();
-    assert.deepEqual(await gallery.getByTestId('bw-sim-example-card').evaluateAll(es=>es.map(e=>e.dataset.model).sort()), expectedLarge);
+    const foundLarge = [];
+    const next = gallery.getByRole('button', {name: 'Next page', exact: true});
+    for (;;) {
+        foundLarge.push(...await gallery.getByTestId('bw-sim-example-card').evaluateAll(cards =>
+            cards.map(card => card.dataset.model)));
+        if (!await next.count() || await next.isDisabled()) break;
+        await next.click();
+    }
+    assert.deepEqual(foundLarge.sort(), expectedLarge);
     await gallery.getByRole('combobox', {name: 'Physics topic', exact: true}).selectOption('chains');
     assert.equal(await gallery.getByTestId('bw-sim-example-card').count(), 1);
     assert.match(await gallery.textContent(), /59 pieces/);

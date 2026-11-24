@@ -11,7 +11,9 @@ const connected = page => page.waitForFunction(() => /Connected to the model|Mit
 const ready = page => page.waitForFunction(() => window.__bwSimLab?.status === 'ready', null, {timeout: 60000});
 const loadExample = async page => {
     await tool(page, 'examples');
-    const exact = page.locator('[data-testid="bw-sim-example-card"][data-model="ev3-wall-stopper.ldr"]');
+    const gallery = page.getByTestId('bw-sim-examples');
+    await gallery.getByRole('searchbox').fill('ev3-wall-stopper');
+    const exact = gallery.locator('[data-model="ev3-wall-stopper.ldr"]');
     await exact.waitFor();
     await exact.getByRole('button').last().click();
     await ready(page);

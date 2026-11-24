@@ -25,4 +25,4 @@ Circuit's parts palette reserves space for each thumbnail and mounts it when its
 
 Opening Circuit starts the bench. The Examples panel and the collapsed examples strip each load the catalog and artwork index on demand. The strip also loads the Codex curriculum, and starter journeys fetch only the catalog needed to open their project.
 
-Circuit Examples renders up to 32 cards per page. Search and filters cover the entire catalog and return to the first page when changed.
+Circuit Examples renders up to 32 cards per page and Robot Lab Examples renders up to 24. Search and filters cover each editor's full catalog and return to the first page when changed.

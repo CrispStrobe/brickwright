@@ -27,6 +27,7 @@ export const filterModelExamples = (models, details, {query = '', topic = '', si
         if (!d || (topic && d.topic !== topic)) return false;
         if (size === 'large' && d.pieces <= 50) return false;
         if (size === 'small' && d.pieces > 50) return false;
+        if (!terms.length) return true;
         const words = [entry.title[locale] || entry.title.en, d.description[locale] || d.description.en,
             EXAMPLE_TOPICS[d.topic]?.[locale], ...d.hubs, d.author, key, ...Object.values(d.mechanism || {}), ...(d.keywords || [])].join(' ');
         const searchable = normalizeExampleSearch(words);
