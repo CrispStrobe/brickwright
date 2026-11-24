@@ -23,6 +23,12 @@ try {
     await page.evaluate(() => {
         const decode = window.atob;
         window.__cadLibraryDecode = {files: 0, bytes: 0};
+        const includes = String.prototype.includes;
+        window.__cadLibrarySearchChecks = {adafruit: 0, '5128': 0};
+        String.prototype.includes = function (term, position) {
+            if (term === 'adafruit' || term === '5128') window.__cadLibrarySearchChecks[term]++;
+            return includes.call(this, term, position);
+        };
         const parse = JSON.parse;
         window.__cadLibraryManifestParses = {count: 0, characters: 0};
         JSON.parse = function (text, reviver) {
@@ -84,7 +90,24 @@ try {
     assert.ok(await originalPreview.evaluate(image => image.isConnected && image.complete && image.naturalWidth > 0),
         'returning to the prior page restores the decoded thumbnail');
     console.log('PASS returning to a page reuses its loaded thumbnail and selected card');
+    const checks = () => page.evaluate(() => window.__cadLibrarySearchChecks);
+    await search.fill('Adafruit');
+    const initialChecks = (await checks()).adafruit;
+    assert.ok(initialChecks > 400, 'the initial query checks the whole model library');
     await forward.click();
+    await back.click();
+    assert.equal((await checks()).adafruit, initialChecks, 'paging a query does no further model matching');
+    const modelType = library.getByLabel('Model type', {exact: true});
+    await modelType.selectOption('source');
+    assert.equal(await library.locator('[data-archive-folder]').count(), 0);
+    await modelType.selectOption('models');
+    await search.fill('512');
+    const prefixCount = Number(await library.locator('.model-library-list').getAttribute('data-model-count'));
+    const beforeNarrowing = (await checks())['5128'];
+    await search.fill('5128');
+    const narrowedChecks = (await checks())['5128'] - beforeNarrowing;
+    assert.ok(narrowedChecks > 0 && narrowedChecks <= prefixCount, 'adding to a term checks only prior matches');
+    console.log(`PASS CAD search: zero checks on page changes, ${narrowedChecks} checks when narrowing "512" to "5128"`);
     await search.fill('5128 MacroPad');
     const archive = library.locator('.model-library-list img[data-adafruit-preview][src*="/cad-sdk/previews/"]').first();
     await archive.waitFor();

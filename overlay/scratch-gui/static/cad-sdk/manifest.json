@@ -2,7 +2,7 @@
   "format": "brickwright-cad-sdk",
   "version": 1,
   "repository": "https://github.com/CrispStrobe/brickwright-cad",
-  "commit": "4054376fbdc0f8a74f7d9be5742161dabac97fe3",
+  "commit": "696b60e7632eee3d1af9aceed98e0939001b1532",
   "dirty": false,
   "entry": "sdk.js",
   "wasm": "cad-assets/manifold.wasm",
@@ -20,7 +20,7 @@
     "assets/step-import.worker-BXyahCPA.js": "c801ad85e2cd4ddcde0c54bfbcb45721b69e30f4aeb8f2ff76e76db75a73560b",
     "cad-assets/manifold.wasm": "73e3b419ad31294f6b1cc478173944e50efc4a34bfdeeff0107bdfc12975f11c",
     "model-library-cache-DiMFGzp9.js": "75dc4ad7999b4571b227f1c675ca00af698fcc886dc73e98dd4c0eb2604e2b20",
-    "model-library-local-DYzxWNXD.js": "cab1c7bf2bfd5d08b58bd00bcd347f62c21fa55f46653db21c99e0b36c53f026",
+    "model-library-local-Dak3hdVz.js": "599c5e52441982da6bb1eb96e6b75da2d728bfe2c1542446c307db6c113e7318",
     "previews/0032bf7f999c3572c3411d1149c79066401db463c71ef6d754f08579ac423747.png": "0032bf7f999c3572c3411d1149c79066401db463c71ef6d754f08579ac423747",
     "previews/00923aa5ecc7ed2388365e7abffba7fd79cba2916e3e5d24066abd18ce158a1f.png": "00923aa5ecc7ed2388365e7abffba7fd79cba2916e3e5d24066abd18ce158a1f",
     "previews/00ba924719ee907a0ac919438cbc4a3776ba31d4d63def024419a73e0e750985.png": "00ba924719ee907a0ac919438cbc4a3776ba31d4d63def024419a73e0e750985",
@@ -834,7 +834,7 @@
     "previews/fe8d0d35d9d4a5a2118db14b8b01759048cb9c3e6b32303b4535713240f03324.png": "fe8d0d35d9d4a5a2118db14b8b01759048cb9c3e6b32303b4535713240f03324",
     "previews/fef03d55e4f8953fe85099bd749d404fb778289dc2ac836bf7e2ea88a201f44a.png": "fef03d55e4f8953fe85099bd749d404fb778289dc2ac836bf7e2ea88a201f44a",
     "previews/ff71a6a76b555a4ce21ab970e871ec28d1ce8f81af107d71cc396fa7df109efb.png": "ff71a6a76b555a4ce21ab970e871ec28d1ce8f81af107d71cc396fa7df109efb",
-    "sdk-E3DLYDdt.js": "053bd2c195ef61b0750fe7e07ac08216d104e1d0a46d6024ee0001172411efd2",
-    "sdk.js": "ed2d5bcc317a3d6eff84e2f81e1f1a46061239ec9f47c0e60992ff2dc4b0a1ae"
+    "sdk-DBP84-9T.js": "0fe4011fe1d6f41fcd9dbfe2465fc68cdd081932d815c08a0c4ef75d6aa2b405",
+    "sdk.js": "6ef7d1af4ed1d12019cf27ff587b288657fc30a29896e02bd41274ee138c46f1"
   }
 }

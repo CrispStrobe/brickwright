@@ -31,6 +31,8 @@ The CAD model library renders up to 36 cards per page. Search and model-type fil
 
 The CAD library retains up to 36 recently viewed cards with finished previews outside the grid. Returning to a page can reuse those cards immediately, and unfinished thumbnails wait for the viewport as usual.
 
+Paging reuses the active CAD search results. A more specific query can search only the previous matches. Broader queries and type changes search the applicable catalog again.
+
 The CAD library materializes bundled source and STL bytes during insertion. Browsing and availability checks use the catalog and exact bundled paths, and insertion can still use the bundled files offline.
 
 Catalog construction parses each source manifest once and reuses its records for licence attribution. The standalone editor keeps the normalized catalog when a different project is opened in the same app session.
