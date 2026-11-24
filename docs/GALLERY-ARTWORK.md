@@ -20,3 +20,5 @@ Keep the manifest and new images together when committing. Gallery images are op
 Robot cover geometry is credited to [the LDraw Parts Library](https://library.ldraw.org/) and its individual part authors under CC BY 4.0, as described in [Third-party notices](../THIRD-PARTY-NOTICES.md#ldraw-parts-library--cc-by-40-some-files-dual-cc-by-20--cc-by-40). The covers are raster projections of that geometry. The gallery retains the authored examples’ separate attribution.
 
 The app build derives a compact index for each editor from the manifest. Its URL depends on the index contents, so a new app build can keep reusing the cached index when its covers stay the same. The browser loads one editor's index at a time and the cards request images near the viewport.
+
+Circuit's parts palette reserves space for each thumbnail and mounts it when its card first enters view. The palette and the board share the existing per-part artwork cache.
