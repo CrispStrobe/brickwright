@@ -249,8 +249,13 @@ test('every shipped circuit resolves every wire endpoint into a real electrical 
     // 1647 -> 1646 on 2026-11-24 (sb3-creator cafdfb1 -> c048a55, #195): -1,
     // lab-shortwave-regen withdrawn (read robustly it squegged instead of beating
     // against its beacon). Nothing added.
-    assert.ok(!files.includes('lab-shortwave-regen/circuit.json'), 'lab-shortwave-regen withdrawn');
-    assert.equal(files.length, 1646, 'the gate must cover the complete vendored corpus');
+    // 1646 -> 1650 on 2026-11-24 (sb3-creator c048a55 -> 2dace04, #196-#199): lab-shortwave-regen
+    // back (the engine now tracks the receiver's own carrier and it beats against its
+    // beacon), lab-broadcast-pickup and lab-mosfet-regen new, and one more circuit
+    // variant from the DIP/module reseat (#198).
+    for (const id of ['lab-shortwave-regen', 'lab-broadcast-pickup', 'lab-mosfet-regen'])
+        assert.ok(files.includes(id + '/circuit.json'), id);
+    assert.equal(files.length, 1650, 'the gate must cover the complete vendored corpus');
     assert.deepEqual(failures, []);
 });
 
