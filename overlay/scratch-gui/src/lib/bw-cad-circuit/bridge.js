@@ -5,6 +5,22 @@ import {CAD_TOGGLE_EVENT} from '../bw-cad-preferences.js';
 import {SimLabClock} from '../bw-sim/sim-clock.js';
 export const STATUS_EVENT = 'bw-cad-circuit-status';
 const stoppedError = () => new Error('Coupled simulation was stopped');
+
+// The clock needs a new task after the VM's promise continuations. Posting
+// a message keeps that boundary without nested browser timer clamping.
+const deferClockTask = callback => {
+    if (typeof window.MessageChannel !== 'function') {
+        setTimeout(callback, 0);
+        return;
+    }
+    const {port1, port2} = new window.MessageChannel();
+    port1.onmessage = () => {
+        port1.close();
+        port2.close();
+        callback();
+    };
+    port2.postMessage(null);
+};
 // CAD worker operations can outlive the bridge's preparation attempt. Stop must
 // settle its Run immediately, while a clock arriving afterwards is still released.
 const prepareCad = (signal, action, discard = () => {}) => new Promise((resolve, reject) => {
@@ -62,7 +78,7 @@ async function circuitReady(runtime, signal, config) {
 }
 export function installCircuitCadBridge(vm) {
     const runtime = vm.runtime, originalFlag = vm.greenFlag;
-    const clock = new SimLabClock({paceNominal: true});
+    const clock = new SimLabClock({paceNominal: true, defer: deferClockTask});
     let session = null, generation = 0, pending = false, disposed = false, ownsCircuit = false, mechanics = null, ownedBoard = null;
     let preparation = null;
     let status = {phase: 'idle', time: 0, readings: [], error: ''};
