@@ -1309,3 +1309,35 @@ knurl collision test exceeded its 30-second deadline on the shared
 Mac and passed on an isolated retry with a longer test deadline.
 Brickwright SDK integration and the sustained 1× production target
 remain open.
+
+### Retain the validated physics document on repeat Run
+
+The initial run validates and copies the authored physics document
+into a private snapshot. The parked worker keeps that snapshot, the
+qualified collision geometry and only the layout needed for telemetry.
+A repeat Run reuses the snapshot and its geometry key while checking
+the source and hull hashes again. Fix base is a per-run option, so
+the same snapshot can start with a fixed or dynamic base.
+
+A baseline worker profile attributed a median 121 ms for Atlas and
+153 ms for Scout to document and collision verification. The Chrome
+pairs below measured eight warm starts per version and robot on the
+Mac with the same Jolt 5.7 SIMD engine. The interval starts after
+Park and ends at the initial physics frame.
+
+| Robot | First order, before → after | Reverse order, before → after |
+| --- | ---: | ---: |
+| Atlas | 238 → 161 ms | 223 → 133 ms |
+| Scout | 493 → 339 ms | 521 → 364 ms |
+
+Both robots resumed the last valid document after an unsupported
+replacement was refused. The paired warm runs matched sampled joint
+motion and circuit readings over 600 ticks, and their restart frames
+matched exactly. Type checking and twelve focused tests passed,
+including Fix base toggling and stale document handling.
+
+The embedded CAD editor passed Atlas Run, movement, Pause, Reset,
+repeat Run and Close using the local SDK worker overlay. Brickwright
+SDK integration and sustained 1× production qualification remain
+open.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/b6228bc4162c8f5b15e0d241c4a08acd2762628c)
