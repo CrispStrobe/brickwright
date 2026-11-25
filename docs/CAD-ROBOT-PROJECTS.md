@@ -1117,3 +1117,25 @@ at the application level.
 Scout sustained 1.006× in the local candidate and passed Run, motion,
 Stop, Reset and repeat Run. The production Board pin and sustained 1×
 qualification status remain unchanged.
+
+### Reduce coupled clock handoff latency
+
+The Circuit–CAD bridge uses browser message tasks for the cooperative
+handoffs between VM steps, timer continuations and physics batches. This
+preserves task boundaries and the 200 Hz circuit and shaft feedback cadence.
+The bridge closes its message ports on disposal, and a queued handoff
+cannot advance a stopped simulation. All 18 focused clock and co-simulation
+tests passed, including real AVR feedback and the queued Stop regression.
+
+In two Chrome pairs, average delay before a physics batch fell from
+0.915 to 0.096 ms and from 0.534 to 0.115 ms. With CPU sampling enabled,
+Atlas sustained 0.823× → 0.820× and 0.740× → 0.808×. All four editor
+runs passed one-click Run, joint motion, Stop and Reset.
+
+With CPU sampling disabled in an eight-second comparison, Atlas sustained
+1.000× before and 0.992× after, rounded to three decimals. Both runs
+passed Stop, Reset and repeat Run. The lower rates above were observed
+under profiling. Scout sustained 1.003× over four seconds on the candidate
+and passed the same restart checks. Both previews used the same local
+Board chunks and Jolt 5.7 SIMD. The sustained 1× production target stays
+open, and these measurements do not establish an end-to-end speedup.

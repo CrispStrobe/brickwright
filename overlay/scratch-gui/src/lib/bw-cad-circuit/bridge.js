@@ -62,7 +62,19 @@ async function circuitReady(runtime, signal, config) {
 }
 export function installCircuitCadBridge(vm) {
     const runtime = vm.runtime, originalFlag = vm.greenFlag;
-    const clock = new SimLabClock({paceNominal: true});
+    // Yield to the browser after program continuations, without the delay
+    // imposed by nested zero-duration timers between coupled batches.
+    let channel;
+    const tasks = [];
+    const defer = typeof window.MessageChannel === 'function' ? task => {
+        if (!channel) {
+            channel = new window.MessageChannel();
+            channel.port1.onmessage = () => tasks.shift()?.();
+        }
+        tasks.push(task);
+        channel.port2.postMessage(null);
+    } : undefined;
+    const clock = new SimLabClock({paceNominal: true, defer});
     let session = null, generation = 0, pending = false, disposed = false, ownsCircuit = false, mechanics = null, ownedBoard = null;
     let preparation = null;
     let status = {phase: 'idle', time: 0, readings: [], error: ''};
@@ -144,6 +156,7 @@ export function installCircuitCadBridge(vm) {
     for(const event of [CONNECTIONS_EVENT,CAD_TOGGLE_EVENT,'bw-project-bundle-loaded','bw-cad-simulation-interrupt'])window.addEventListener(event,onChange);
     document.addEventListener('visibilitychange',hidden);
     return ()=>{disposed=true;api.stop();runtime.off('PROJECT_STOP_ALL',onStop);
+        channel?.port1.close();channel?.port2.close();tasks.length=0;
         for(const event of [CONNECTIONS_EVENT,CAD_TOGGLE_EVENT,'bw-project-bundle-loaded','bw-cad-simulation-interrupt'])window.removeEventListener(event,onChange);
         document.removeEventListener('visibilitychange',hidden);if(vm.greenFlag===wrappedFlag)vm.greenFlag=originalFlag;
         if(runtime.cadCircuitSimulation===api)delete runtime.cadCircuitSimulation;
