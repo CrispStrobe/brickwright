@@ -769,3 +769,32 @@ override. This is startup work. The release SDK pin remains
 [Source on CrispCAD main](https://github.com/CrispStrobe/CrispCAD/commit/3860e7ac20a81dd193b72822bfabb2e332835ecb)
 Scout also passed the restart proof. Repeat Run omitted its authored
 document (2975205 JSON bytes) and its mesh buffers.
+
+### Prepared collision construction on repeat Run
+
+A payload-free start reuses the construction stored with the last
+successful authored document. The worker skips recomputing the visual
+signature and construction key for that same document. A start with a
+new document computes fresh keys. A failed start leaves the previous
+successful document and construction paired. Fix base still applies
+to the current run, and physics still validates the document and
+creates a fresh world.
+
+Type checking and all 28 focused tests passed. The worker tests
+confirmed one geometry-key computation across repeated starts and
+recovery after a new construction fails. The [test worker backport](https://github.com/CrispStrobe/CrispCAD/commit/73c24b4)
+was rebuilt against the previous local restart SDK. Its host and
+remaining assets came from that SDK.
+
+Both paired Chrome worker orders used the same Board bundle,
+Jolt 5.7.0 SIMD module, and three warm starts after 600 coupled ticks.
+Sampled motion, electrical traces, and restart frames matched exactly.
+Atlas's median restart was 335 ms before and 316 ms after in one
+order, and 277 ms before and 290 ms after in the other. Scout's
+medians were 629 to 589 ms and 548 to 579 ms. These timings do
+not show a consistent restart speedup.
+[Source on CrispCAD main](https://github.com/CrispStrobe/CrispCAD/commit/79b403e589993614469e08536562cb8298299e74)
+
+Atlas and Scout passed the full editor Run, Stop, Reset, and restart
+checks. The release SDK stays at `7760321`, and the sustained 1×
+viewport target remains open.
