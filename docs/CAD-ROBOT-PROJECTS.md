@@ -908,3 +908,31 @@ seconds and passed repeat Run. These local checks covered one-click Run,
 physical motion, Stop and Reset with the Jolt 5.7 SIMD module. Brickwright's
 current release uses CAD SDK `0953e18`. Release-wide sustained 1× remains
 open.
+
+### Triangle mass integration on Run
+
+CrispCAD now reuses vertex-coordinate storage across triangles and computes
+coordinate sums once per triangle. The signed tetrahedron formulas and
+accumulation order stay the same. The worker calculates mass, centre of
+mass and the full inertia tensor from the evaluated solid.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/7e11eeddafe196bd16de115de46e8880df6d42e0)
+
+In 20 alternating CPU-time measurements per version, all mass properties
+matched exactly for every part in both shipped examples. Atlas's 36,530
+triangles took a median of 26.75 ms before and 2.83 ms after. Scout's
+48,938 triangles took 34.29 ms before and 3.22 ms after. Type checking and
+seven focused physics cases passed, including the translated-box mass and
+inertia, fixed-assembly mass, contact and tampered collider coverage.
+
+Matched Chrome worker runs used the same Board bundle and Jolt 5.7 SIMD
+module. Motion and circuit samples matched over 600 ticks per run, and
+restart frames matched the original initial frame. Median worker restart
+time for Atlas moved from 165 to 141 ms in the first order and from 158
+to 149 ms in the reverse order. Scout moved from 295 to 318 ms and from
+365 to 298 ms. The Scout samples show no consistent restart gain.
+
+Both robots passed Run, motion, Stop, Reset and repeat Run in the full
+editor with the locally bundled Jolt 5.7 SIMD module. Three-second
+sustained samples were 0.994× for Atlas and 1.005× for Scout. This
+change reduces startup work. Brickwright's release still uses CAD SDK
+`0953e18`, and release-wide sustained 1× remains open.
