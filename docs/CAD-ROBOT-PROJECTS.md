@@ -823,3 +823,33 @@ normally. The paired results above used a complete SDK throughout.
 
 Scout passed both engine checks and sustained 0.248× with bundled
 Jolt and 0.506× with Jolt 5.7 SIMD in one pair.
+
+#### Jolt 5.7 module qualification
+
+Both single-thread WebAssembly compat modules matched the original
+physical controls and exact `f7b0121879392938` regression hash. Each
+passed 11 reflected-rotor cases and three native motor-block controls.
+The scalar SHA-256 was
+`8277f49cb9df363f7eec59ef1fea5346987d00b1836ced3d4a6b93058c13faeb`.
+The SIMD SHA-256 was
+`5f25671f51625ad3eb9ff8afc22ac40c63be95bb9380c747babec5fbacdf7fdf`.
+
+With the 5.7 SIMD module, the forward Atlas comparison averaged 9.92 ms
+between coupled ticks. Its 6.28 ms mechanical worker round trip and
+2.83 ms electrical step account for most of the time. The 200 Hz loop
+has a 5 ms budget for the whole tick.
+
+A normal Chrome worker loaded the preview’s SIMD module with the
+recorded SHA-256 and stepped the Scout scene. The preview uses the
+repaired CAD worker with only the two Jolt engine assets replaced.
+
+Set `PROOF_JOLT_SCALAR_MODULE` to the candidate module when running
+`scripts/verify-cad-robot-projects.mjs` to block the SIMD import.
+The test checks that the worker requested the supplied scalar module
+and records the SHA-256 with the result. Atlas and Scout passed Run,
+joint motion, Stop, and Reset with this route. Their unpaired scalar
+runs sustained 0.238× and 0.389×, respectively.
+
+The release SDK pin remains `7760321`. This qualification covers two
+single-thread compat modules. The complete npm export matrix and the
+sustained 1× full-viewport target remain open.
