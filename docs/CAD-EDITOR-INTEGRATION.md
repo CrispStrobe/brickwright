@@ -142,7 +142,15 @@ launching the installed TestFlight simulator was not tested in this delivery.
 
 ## Exact kernel and document version 41 (25 November 2026)
 
-Lite pins CrispCAD SDK `0953e188a6ff93f8eee558844da04303254a3509`. It reads and
+Lite pins CrispCAD SDK `dda7ce21627d0925391249482e1515bef15dba5f` (previously
+`0953e188`). Over that pin it brings exact kernel 0.1.1 (exact bounding boxes of
+rotated curved solids, tighter convex hulls; the `smlibwasm` file is unchanged, only
+the kernel's JavaScript under `assets/exact/` changes; exact commands recorded with
+0.1.0 are refused on replay as stale while saved exact features keep their display),
+compact one-line display buffers for exact features in saved documents (same JSON
+format and version), atomic multi-line terminal scripts, and the CAD physics
+cold-start and repeat-Run work recorded in [CAD-ROBOT-PROJECTS.md](CAD-ROBOT-PROJECTS.md).
+It reads and
 writes CAD document version 41, which adds exact fillet, chamfer and shell
 features (`exact-feature` nodes). Such a node stores the exact kernel's display
 mesh, so evaluation, simulation and printing of a saved design still use Manifold
