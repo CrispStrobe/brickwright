@@ -1087,3 +1087,33 @@ and Jolt 5.7 SIMD. The timings show no consistent full-editor gain.
 Scout sustained 1.007× in the local candidate and passed Run, motion, Stop,
 Reset and repeat Run. Production still pins Board `9ff1fff3`. The
 sustained 1× production target remains open.
+
+### Reuse GPIO terminal lookups across live solves
+
+The Board retains lowercase pin names for registered device terminals.
+The bindings are rebuilt with the netlist. Each solve still uses the
+current GPIO mode, level and logic voltage, and the model keeps ownership
+of its supply terminals. A regression test covers both snapshot restore
+and reusing a device ID with different wiring.
+[Board source](https://github.com/CrispStrobe/bw-board/commit/d98b7dd23fc5888f9515b1fd5cce83f73ef28c6a)
+
+All 119 focused tests passed. A focused Chrome benchmark used both
+robot circuits, with repeated writes to six pins over 120,000
+synchronizations per sample. Median GPIO synchronization times fell from 85.3 to 60.6 ms
+and 76.7 to 65.3 ms for Atlas, and from 79.4 to 58.1 ms and 65.4 to
+48.7 ms for Scout.
+
+Both Chrome worker orders produced identical sampled voltages, shaft
+readings, motion and restart frames over 600 ticks per run. In that
+broader test Atlas electrical solve time rose from 443 to 493 ms and
+435 to 471 ms. Scout solve time fell from 292 to 282 ms and 271 to 237 ms.
+Solve counts stayed at 18,930 for Atlas and 12,618 for Scout.
+
+Atlas passed one-click Run, motion, Stop and Reset in all four full-editor
+tests with local Board chunks and Jolt 5.7 SIMD. Sustained rates were
+0.809× → 0.808× and 0.810× → 0.813×. This is effectively unchanged
+at the application level.
+
+Scout sustained 1.006× in the local candidate and passed Run, motion,
+Stop, Reset and repeat Run. The production Board pin and sustained 1×
+qualification status remain unchanged.
