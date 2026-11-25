@@ -36,20 +36,22 @@ const styles=Object.fromEntries([...css.matchAll(/\.([A-Za-z][\w-]*)/g)].map(mat
 const stylesUrl=url(`export default ${JSON.stringify(styles)};`);
 const typesUrl=url('const v=()=>null;v.isRequired=v;export default new Proxy({}, {get:()=>v});');
 const reactUrl=pathToFileURL(requireDeps.resolve('react')).href;
-async function compile(filename,overrides={}){
+const reactDomUrl=pathToFileURL(requireDeps.resolve('react-dom')).href;
+async function compileUrl(filename,overrides={}){
  const source=await readFile(filename,'utf8');
  const transformed=await transformWithOxc(source,filename,{jsx:{runtime:'classic'}});
  const code=transformed.code.replace(/(from\s+|import\s*)(['"])([^'"]+)\2/g,(whole,prefix,quote,specifier)=>{
   let resolved=overrides[specifier];
-  if(!resolved){if(specifier==='react')resolved=reactUrl;else if(specifier==='prop-types')resolved=typesUrl;
+  if(!resolved){if(specifier==='react')resolved=reactUrl;else if(specifier==='react-dom')resolved=reactDomUrl;else if(specifier==='prop-types')resolved=typesUrl;
    else if(specifier.endsWith('.css'))resolved=stylesUrl;
    else if(specifier.startsWith('.'))resolved=pathToFileURL(path.resolve(path.dirname(filename),specifier)).href;
    else throw Error(`Unresolved proof import ${specifier}`);}
   return `${prefix}${quote}${resolved}${quote}`;
  });
- return import(url(code));
+ return url(code);
 }
-const {default:Cp1Panel}=await compile(panelPath);
+const surfacesUrl=await compileUrl(path.join(path.dirname(panelPath),'cp1-surfaces.js'));
+const {default:Cp1Panel}=await import(await compileUrl(panelPath,{'./cp1-surfaces.js':surfacesUrl}));
 const source='VALUE EQU 42\nORG 0\nstart: AKO VALUE\ndisplay: ANZ\nSPU display\n';
 const rom=new Uint8Array(2048);
 // Independently authored synthetic firmware: configure display output, then loop.
@@ -180,7 +182,7 @@ try{
  const effects=[];globalValue('__cp1ProofEffects',effects);globalValue('__cp1ProofPanelProps',null);
  const reactEffectsUrl=url(`import React from ${JSON.stringify(reactUrl)};export default React;export const useState=React.useState,useRef=React.useRef,useCallback=React.useCallback;export const useEffect=(fn,deps)=>{globalThis.__cp1ProofEffects.push(fn);return React.useEffect(fn,deps);};`);
  const panelProbe=url(`import React from ${JSON.stringify(reactUrl)};export default props=>{globalThis.__cp1ProofPanelProps=props;return React.createElement('div',{'data-host-panel-probe':true});};`);
- const {default:Cp1Host}=await compile(hostPath,{'react':reactEffectsUrl,'./cp1-panel.jsx':panelProbe});
+ const {default:Cp1Host}=await import(await compileUrl(hostPath,{'react':reactEffectsUrl,'./cp1-panel.jsx':panelProbe}));
  const cleanups=[];let configureResolve;const configurations=[];let imported=0;
  const hostRunner={cp1Snapshot:()=>machine.snapshot(),cp1ReleaseKeys:()=>machine.releaseKeys(),cp1LoadProgram:()=>{throw Error('real callback rejection');}};
  renderToStaticMarkup(React.createElement(Cp1Host,{runner:hostRunner,running:false,locale:'en',configuration:{partId:'cp1-fixture',expansion:false,clockHz:6000000},onRun(){},onConfigure:next=>{configurations.push(next);return new Promise(resolve=>{configureResolve=resolve;});},onImportRom:()=>{imported++;}}));
