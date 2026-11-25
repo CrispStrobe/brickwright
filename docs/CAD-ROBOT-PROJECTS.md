@@ -369,3 +369,15 @@ JoltPhysics.js release `1.1.0-bw.10` at
 `b6c1e2ada2b34be610c7a4c91bdd2127e3cc69ec`. The native commit and
 the fork's `brickwright/gear-mesh-master` merge tip have the same
 source tree. The candidate checks use a local SIMD override.
+
+Both projects also passed the full Playwright GUI proof on the MacBook
+with SDK `7760321` and the convex-hull SIMD override. The local build
+disabled JS minification. Each project loaded from the Model Library
+with visible wiring and untouched widget defaults. One Run click moved
+the commanded joints through Blocks and Circuit, and Stop and Reset
+worked. Chrome reported no page errors or scalar fallback. Sustained
+rates were 0.996× for Scout and 0.642× for Atlas. Time to first motion
+was 9.68 s and 7.21 s, respectively. This is one candidate run per
+project, with the full viewport and no paired GUI baseline. The expanded
+collision fixture passed on native macOS as well as WASM. The 1× GUI
+target remains open.
