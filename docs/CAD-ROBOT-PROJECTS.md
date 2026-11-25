@@ -1139,3 +1139,38 @@ under profiling. Scout sustained 1.003× over four seconds on the candidate
 and passed the same restart checks. Both previews used the same local
 Board chunks and Jolt 5.7 SIMD. The sustained 1× production target stays
 open, and these measurements do not establish an end-to-end speedup.
+
+### Reuse transforms during collision preparation
+
+CrispCAD now computes each collision transform's rotation coefficients
+once and writes the transformed coordinates directly into the candidate
+buffers. A focused benchmark on the shipped robot documents measured
+median CPU time over 20 alternating samples per version.
+
+| Robot | Candidate hulls | Before | After |
+| --- | ---: | ---: | ---: |
+| Atlas | 2,299 | 103.1 ms | 75.7 ms |
+| Scout | 3,352 | 126.1 ms | 87.0 ms |
+
+Candidate coordinate and index buffers matched byte for byte. In Chrome,
+sampled motion and circuit readings matched over 600 coupled ticks for
+each robot, and three restart frames per run matched the initial frame.
+The CAD editor passed Atlas Run, joint motion, Pause, Reset, repeat Run
+and Close with the local worker. The authored scene was identical after
+the simulation.
+
+The cold Chrome starts varied by seconds on the shared Mac. Atlas went
+from 11.16 to 11.03 s and 11.71 to 11.31 s in the two orders. Scout went
+from 15.33 to 18.63 s and 14.25 to 14.70 s. The timing does not establish
+a consistent cold-start gain. In the instrumented runs, source/compound
+CSG comparisons accounted for about 92% of collision preparation time on
+both robots. The two motor housings alone took 4.94 of Atlas's 9.56 s of
+collision preparation in that sample.
+
+Type checking and seven focused tests passed. The collision-fragment
+fixture now uses actual Boolean children, so it exercises provenance
+pruning while the evaluated root mesh is reused.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/ace475947df1c3b6a5df251431367cabeaeb66ff) · [Fixture](https://github.com/CrispStrobe/CrispCAD/commit/a39fa4ba52da5feb5abcd64cfb3a639b6855f8eb)
+
+The browser work used a local CAD SDK worker overlay. Brickwright retains
+its production SDK pin, and its sustained 1× production target remains open.
