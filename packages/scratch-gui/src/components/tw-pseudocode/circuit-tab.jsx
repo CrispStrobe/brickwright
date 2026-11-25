@@ -1420,9 +1420,12 @@ class CircuitTab extends React.Component {
     /** Open one of the three first-run journeys through the normal loaders. */
     async loadStarterJourney (event) {
         const journey = event && event.detail || {};
-        const finish = detail => window.dispatchEvent(new CustomEvent('bw-starter-result', {
-            detail: {journeyId: journey.id, ...detail}
-        }));
+        const finish = detail => {
+            window.dispatchEvent(new CustomEvent('bw-starter-result', {
+                detail: {journeyId: journey.id, ...detail}
+            }));
+            journey.onResult?.(detail);
+        };
         try {
             const list = await this.loadExamples();
             if (!Array.isArray(list)) throw new Error(this.examplesLoadError ||

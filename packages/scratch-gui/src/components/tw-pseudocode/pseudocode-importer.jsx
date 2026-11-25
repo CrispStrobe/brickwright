@@ -141,6 +141,8 @@ const L10N = {
         mcRunTitle: 'Compile this MakeCode project with MakeCode\'s own compiler and run it in MakeCode\'s simulator — nothing is translated, so nothing is lost',
         mcRunCompiling: n => `Compiling ${n} with MakeCode…`,
         moreLanguages: 'More languages',
+        cp1Language: 'Kosmos CP1 teaching language…',
+        cp1Open: 'Open the Kosmos CP1 starter? This replaces the current circuit and CP1 source.',
         mcRunStarted: (n, t) => `${n} is running in MakeCode's ${({arcade: 'Arcade', calliopemini: 'Calliope mini', ev3: 'EV3', adafruit: 'Circuit Playground'})[t] || 'micro:bit'} simulator.`,
         mcFetched: list => ` Extensions fetched from GitHub for this build: ${list}.`,
         mcLicenceUnknown: 'licence not recognised',
@@ -480,6 +482,8 @@ const L10N = {
         mcRunTitle: 'Dieses MakeCode-Projekt mit dem MakeCode-eigenen Compiler übersetzen und im MakeCode-Simulator ausführen — es wird nichts umgewandelt, also geht nichts verloren',
         mcRunCompiling: n => `${n} wird mit MakeCode übersetzt…`,
         moreLanguages: 'Weitere Sprachen',
+        cp1Language: 'Kosmos-CP1-Lernsprache…',
+        cp1Open: 'Kosmos-CP1-Einstieg öffnen? Die aktuelle Schaltung und der CP1-Quelltext werden ersetzt.',
         mcRunStarted: (n, t) => `${n} läuft im MakeCode-Simulator (${({arcade: 'Arcade', calliopemini: 'Calliope mini', ev3: 'EV3', adafruit: 'Circuit Playground'})[t] || 'micro:bit'}).`,
         mcFetched: list => ` Für diesen Build von GitHub geladene Erweiterungen: ${list}.`,
         mcLicenceUnknown: 'Lizenz nicht erkannt',
@@ -2860,6 +2864,19 @@ class PseudocodeImporter extends React.Component {
         try { localStorage.setItem(BW_EXTRA_LANGS_KEY, JSON.stringify(extraLangs)); } catch { /* per-browser convenience only */ }
         this.setState({extraLangs, langMenuOpen: false}, () => this.switchTab(l));
     }
+    async openCp1Language () {
+        this.setState({langMenuOpen: false});
+        if (!(await confirmAsync(this.L.cp1Open))) return;
+        window.dispatchEvent(new CustomEvent('bw-start-journey', {detail: {
+            id: 'code:kosmos-cp1',
+            exampleId: 'cp1-first-display',
+            mode: 'circuit-only',
+            onResult: result => {
+                if (!this._unmounted && result.error) this.setState({status: result.error});
+            }
+        }}));
+    }
+
     switchTab (to) {
         const from = this.state.lang;
         if (to === from || this.state.busy) return;
@@ -5942,7 +5959,6 @@ class PseudocodeImporter extends React.Component {
                     {(() => {
                         const shown = this.visibleOptionalLangs().map(([l]) => l);
                         const hidden = BW_OPTIONAL_LANGS.filter(([l]) => !shown.includes(l));
-                        if (!hidden.length) return null;
                         return (
                             <Popup id="code-lang-more" anchorTestId="bw-lang-more-anchor" testId="bw-lang-more-menu" role="menu"
                                 open={this.props.isVisible !== false && this.state.langMenuOpen} align="left" width={220}
@@ -5955,6 +5971,12 @@ class PseudocodeImporter extends React.Component {
                                         fontWeight: 700, fontSize: 13, background: '#eef2f7', color: '#64748b', position: 'relative', top: 1}}>
                                     +
                                 </button>}>
+                                <button type="button" role="menuitem" data-testid="bw-code-open-cp1"
+                                    onClick={() => this.openCp1Language()}
+                                    style={{padding: '7px 10px', border: 0, background: 'transparent', textAlign: 'left',
+                                        cursor: 'pointer', fontSize: 13, color: '#1e293b', whiteSpace: 'nowrap'}}>
+                                    {this.L.cp1Language}
+                                </button>
                                 {hidden.map(([l, label, name]) => (
                                     <button key={l} type="button" role="menuitem" onClick={() => this.addOptionalLang(l)}
                                         style={{padding: '7px 10px', border: 0, background: 'transparent', textAlign: 'left', cursor: 'pointer',
