@@ -4,7 +4,7 @@ Original CrispCAD code: BSD-3-Clause, see LICENSE.
 
 Reused independent arithmetic: Brickwright contributors, BSD-3-Clause.
 `packages/editor/src/vendor/touch-gestures.js` and `transform-math.js` are copied
-unmodified from CrispStrobe/brickwright-lite; exact source revision, paths and
+unmodified from CrispStrobe/brickwright (formerly brickwright-lite); exact source revision, paths and
 hashes are in docs/brickwright-provenance.json. Their SPDX/copyright headers are
 retained. These files have no imports from Scratch or the LEGO simulation.
 The new solid model, worker, integration adapter and UI are independent code.
@@ -68,9 +68,9 @@ Runtime dependencies:
   (MIT / University of Illinois-NCSA). Preserve their upstream notices when
   redistributing a runtime build.
 - fflate 0.8.3, MIT, copyright Arjun Barrett.
-- Optional exact B-rep kernel: `@crispcad/exact-kernel` 0.1.0 from the CrispCAD
+- Optional exact B-rep kernel: `@crispcad/exact-kernel` 0.1.1 from the CrispCAD
   kernel lab (https://github.com/CrispStrobe/crispcad-kernel-lab, release
-  `exact-kernel-v0.1.0`), MIT AND Apache-2.0, copyright CrispCAD contributors. It
+  `exact-kernel-v0.1.1`), MIT AND Apache-2.0, copyright CrispCAD contributors. It
   prebundles `@classcad/smlibwasm` 0.6.2 (MIT, copyright 2026 AWV Informatik AG)
   without its OFL font, with SMLib and its SM_API wrapper from USD BRep
   (Apache-2.0, copyright 2020-2026 NVIDIA CORPORATION & AFFILIATES; a few files
@@ -963,7 +963,7 @@ Original CrispCAD code: BSD-3-Clause, see LICENSE.
 
 Reused independent arithmetic: Brickwright contributors, BSD-3-Clause.
 `packages/editor/src/vendor/touch-gestures.js` and `transform-math.js` are copied
-unmodified from CrispStrobe/brickwright-lite; exact source revision, paths and
+unmodified from CrispStrobe/brickwright (formerly brickwright-lite); exact source revision, paths and
 hashes are in docs/brickwright-provenance.json. Their SPDX/copyright headers are
 retained. These files have no imports from Scratch or the LEGO simulation.
 The new solid model, worker, integration adapter and UI are independent code.
@@ -1332,7 +1332,7 @@ Original CrispCAD code: BSD-3-Clause, see LICENSE.
 
 Reused independent arithmetic: Brickwright contributors, BSD-3-Clause.
 `packages/editor/src/vendor/touch-gestures.js` and `transform-math.js` are copied
-unmodified from CrispStrobe/brickwright-lite; exact source revision, paths and
+unmodified from CrispStrobe/brickwright (formerly brickwright-lite); exact source revision, paths and
 hashes are in docs/brickwright-provenance.json. Their SPDX/copyright headers are
 retained. These files have no imports from Scratch or the LEGO simulation.
 The new solid model, worker, integration adapter and UI are independent code.
@@ -1594,10 +1594,10 @@ from `experiments/exact-kernel` on 2026-11-25).
 
 Runtime dependencies:
 - `@brickwright/cad-core` 0.1.0 (this repository, BSD-3-Clause).
-- `@crispcad/exact-kernel` 0.1.0 from the CrispCAD kernel lab
-  (https://github.com/CrispStrobe/crispcad-kernel-lab, release `exact-kernel-v0.1.0`,
-  tarball `crispcad-exact-kernel-0.1.0.tgz`, SHA-256
-  1de74c8d15d184359c855f119e5d5a89e587fa6faa6ead9beb6efd73fc510027), declared
+- `@crispcad/exact-kernel` 0.1.1 from the CrispCAD kernel lab
+  (https://github.com/CrispStrobe/crispcad-kernel-lab, release `exact-kernel-v0.1.1`,
+  tarball `crispcad-exact-kernel-0.1.1.tgz`, SHA-256
+  a4852c58f150ea9b61a33135aa8ad60ea9dd2410095ed4b9bbae39060cc608a7), declared
   `MIT AND Apache-2.0`, copyright CrispCAD contributors. It has no runtime dependencies.
   Its `dist/` prebundles:
   - `@classcad/smlibwasm` 0.6.2, MIT, copyright 2026 AWV Informatik AG, without its
@@ -1624,7 +1624,7 @@ Original CrispCAD code: BSD-3-Clause, see LICENSE.
 Reused independent arithmetic: Brickwright contributors, BSD-3-Clause.
 `packages/editor/src/vendor/touch-gestures.js`, `transform-math.js` and
 `box-selection.js` are copied
-unmodified from CrispStrobe/brickwright-lite; exact source revision, paths and
+unmodified from CrispStrobe/brickwright (formerly brickwright-lite); exact source revision, paths and
 hashes are in docs/brickwright-provenance.json. Their SPDX/copyright headers are
 retained. These files have no imports from Scratch or the LEGO simulation.
 The new solid model, worker, integration adapter and UI are independent code.
@@ -1653,9 +1653,9 @@ Runtime dependencies:
   (MIT / University of Illinois-NCSA). Preserve their upstream notices when
   redistributing a runtime build.
 - fflate 0.8.3, MIT, copyright Arjun Barrett.
-- Optional exact B-rep kernel: `@crispcad/exact-kernel` 0.1.0 from the CrispCAD
+- Optional exact B-rep kernel: `@crispcad/exact-kernel` 0.1.1 from the CrispCAD
   kernel lab (https://github.com/CrispStrobe/crispcad-kernel-lab, release
-  `exact-kernel-v0.1.0`), MIT AND Apache-2.0, copyright CrispCAD contributors. It
+  `exact-kernel-v0.1.1`), MIT AND Apache-2.0, copyright CrispCAD contributors. It
   prebundles `@classcad/smlibwasm` 0.6.2 (MIT, copyright 2026 AWV Informatik AG)
   without its OFL font, with SMLib and its SM_API wrapper from USD BRep
   (Apache-2.0, copyright 2020-2026 NVIDIA CORPORATION & AFFILIATES; a few files
@@ -2134,7 +2134,7 @@ Original CrispCAD code: BSD-3-Clause, see LICENSE.
 
 Reused independent arithmetic: Brickwright contributors, BSD-3-Clause.
 `packages/editor/src/vendor/touch-gestures.js` and `transform-math.js` are copied
-unmodified from CrispStrobe/brickwright-lite; exact source revision, paths and
+unmodified from CrispStrobe/brickwright (formerly brickwright-lite); exact source revision, paths and
 hashes are in docs/brickwright-provenance.json. Their SPDX/copyright headers are
 retained. These files have no imports from Scratch or the LEGO simulation.
 The new solid model, worker, integration adapter and UI are independent code.
@@ -2247,7 +2247,7 @@ Original CrispCAD code: BSD-3-Clause, see LICENSE.
 
 Reused independent arithmetic: Brickwright contributors, BSD-3-Clause.
 `packages/editor/src/vendor/touch-gestures.js` and `transform-math.js` are copied
-unmodified from CrispStrobe/brickwright-lite; exact source revision, paths and
+unmodified from CrispStrobe/brickwright (formerly brickwright-lite); exact source revision, paths and
 hashes are in docs/brickwright-provenance.json. Their SPDX/copyright headers are
 retained. These files have no imports from Scratch or the LEGO simulation.
 The new solid model, worker, integration adapter and UI are independent code.
@@ -2360,7 +2360,7 @@ Original CrispCAD code: BSD-3-Clause, see LICENSE.
 
 Reused independent arithmetic: Brickwright contributors, BSD-3-Clause.
 `packages/editor/src/vendor/touch-gestures.js` and `transform-math.js` are copied
-unmodified from CrispStrobe/brickwright-lite; exact source revision, paths and
+unmodified from CrispStrobe/brickwright (formerly brickwright-lite); exact source revision, paths and
 hashes are in docs/brickwright-provenance.json. Their SPDX/copyright headers are
 retained. These files have no imports from Scratch or the LEGO simulation.
 The new solid model, worker, integration adapter and UI are independent code.
