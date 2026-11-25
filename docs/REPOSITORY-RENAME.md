@@ -1,13 +1,13 @@
 # Brickwright repository migration
 
-The GitHub repositories were renamed on 25 November 2026. Their repository IDs and default branches carried over. The Vercel project names and public editor addresses stayed in place.
+The GitHub repositories were renamed on 25 November 2026. Their repository IDs and default branches carried over. The Vercel production domains now follow the GitHub names.
 
 | Project | Current GitHub repository | Default branch | Web editor |
 | --- | --- | --- | --- |
 | Brickwright | [CrispStrobe/brickwright](https://github.com/CrispStrobe/brickwright) · ID `1291854269` | `main` | [Brickwright on Vercel](https://brickwright.vercel.app/) |
 | Brickwright Legacy | [CrispStrobe/brickwright-legacy](https://github.com/CrispStrobe/brickwright-legacy) · ID `881088189` | `develop` | [Brickwright Legacy on Vercel](https://brickwright-legacy.vercel.app/editor.html) |
 
-The old `CrispStrobe/brickwright-lite` GitHub name redirects to Brickwright. The earlier `CrispStrobe/brickwright` name now identifies the active repository. For Legacy issues, source files, and branches, use `CrispStrobe/brickwright-legacy`. [GitHub repository rename behavior](https://docs.github.com/en/repositories/creating-and-managing-repositories/renaming-a-repository)
+The old `CrispStrobe/brickwright-lite` GitHub name redirects to Brickwright. The earlier `CrispStrobe/brickwright` name now identifies the active repository. The previous Vercel address `brickwright-lite.vercel.app` still serves Brickwright. For Legacy issues, source files, and branches, use `CrispStrobe/brickwright-legacy`. [GitHub repository rename behavior](https://docs.github.com/en/repositories/creating-and-managing-repositories/renaming-a-repository)
 
 Existing clones can check `git remote -v` and update the remote for the repository they actually contain. For the active workbench use `https://github.com/CrispStrobe/brickwright.git`. For the TurboWarp application use `https://github.com/CrispStrobe/brickwright-legacy.git`. Check the existing checkout before updating a remote shared by multiple worktrees.
 

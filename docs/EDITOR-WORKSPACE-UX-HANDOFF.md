@@ -50,7 +50,7 @@ Keep original v1 incomplete/failed boundaries, v2 measured identities, LM741 pen
 
 The incomplete `677f9bf` commit exposed a stale project-level Ignored Build Step: `bash scripts/vercel-ignore.sh`. The complete source tree was restored normally at `643f50c`; every original entry was independently compared. The script is intentionally absent. The obsolete project command was removed and fresh API reads confirmed it is null, preserving build/install/runtime settings; 21 existing deployment-policy controls pass. Repository Git-triggered deployment remains disabled in favour of the guarded workflow.
 
-Production still reports `5cd027707eceed3451bd62eaa21125a051650e59` at `https://brickwright-lite.vercel.app/brickwright-version.json`. The configuration defect is fixed; **a fresh production deployment and live UX acceptance remain outstanding**. Do not retry the incomplete commit, add a dummy ignore script or bypass qualification.
+At this checkpoint, production reported `5cd027707eceed3451bd62eaa21125a051650e59`. For the current production version, see `https://brickwright.vercel.app/brickwright-version.json`. The configuration defect is fixed; **a fresh production deployment and live UX acceptance remain outstanding**. Do not retry the incomplete commit, add a dummy ignore script or bypass qualification.
 
 Use hosted CI or a capable worker for builds and suites. Keep operator paths, credentials, raw receipts and session coordination in ignored private notes.
 
