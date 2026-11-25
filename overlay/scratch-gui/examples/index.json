@@ -9250,8 +9250,8 @@
   {
     "id": "lab-barrier-counter",
     "title": {
-      "en": "Pulsed light barrier counter: relay after six",
-      "de": "Zähler an gepulster Lichtschranke: Relais nach sechs"
+      "en": "Pulsed light barrier counter: relay after five",
+      "de": "Zähler an gepulster Lichtschranke: Relais nach fünf"
     },
     "kind": "circuit",
     "category": "pure-circuit",
@@ -16257,5 +16257,617 @@
    "expected": "cp1-yard-dispatch/EXPECTED.md"
   },
   "devices": []
- }
+ },
+  {
+    "id": "lab-555-humidity-switch",
+    "title": {
+      "en": "Humidity switch with a 555",
+      "de": "Feuchteschalter mit dem 555"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 1,
+    "files": {
+      "program": "lab-555-humidity-switch/program.bw",
+      "circuit": "lab-555-humidity-switch/circuit.json",
+      "expected": "lab-555-humidity-switch/EXPECTED.md",
+      "intro": "lab-555-humidity-switch/intro.md",
+      "introDE": "lab-555-humidity-switch/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-555-direction-tester",
+    "title": {
+      "en": "Direction tester with a 555 tone",
+      "de": "Durchlassprüfer mit 555-Ton"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 1,
+    "files": {
+      "program": "lab-555-direction-tester/program.bw",
+      "circuit": "lab-555-direction-tester/circuit.json",
+      "expected": "lab-555-direction-tester/EXPECTED.md",
+      "intro": "lab-555-direction-tester/intro.md",
+      "introDE": "lab-555-direction-tester/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-555-morse-touch",
+    "title": {
+      "en": "Morse key and touch key on the reset pin",
+      "de": "Morsetaste und Fingertaste am Reset-Pin"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 2,
+    "files": {
+      "program": "lab-555-morse-touch/program.bw",
+      "circuit": "lab-555-morse-touch/circuit.json",
+      "expected": "lab-555-morse-touch/EXPECTED.md",
+      "intro": "lab-555-morse-touch/intro.md",
+      "introDE": "lab-555-morse-touch/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-555-wail",
+    "title": {
+      "en": "Siren and wail on the control pin",
+      "de": "Sirene und Heulton am Steuereingang"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 2,
+    "files": {
+      "program": "lab-555-wail/program.bw",
+      "circuit": "lab-555-wail/circuit.json",
+      "expected": "lab-555-wail/EXPECTED.md",
+      "intro": "lab-555-wail/intro.md",
+      "introDE": "lab-555-wail/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-555-touch-timer",
+    "title": {
+      "en": "Touch timer with a hum guard",
+      "de": "Berührungs-Zeitschalter mit Brummschutz"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 2,
+    "files": {
+      "program": "lab-555-touch-timer/program.bw",
+      "circuit": "lab-555-touch-timer/circuit.json",
+      "expected": "lab-555-touch-timer/EXPECTED.md",
+      "intro": "lab-555-touch-timer/intro.md",
+      "introDE": "lab-555-touch-timer/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-555-touch-toggle",
+    "title": {
+      "en": "One-touch on/off switch",
+      "de": "Ein-Tasten-Ein/Aus-Schalter"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 2,
+    "files": {
+      "program": "lab-555-touch-toggle/program.bw",
+      "circuit": "lab-555-touch-toggle/circuit.json",
+      "expected": "lab-555-touch-toggle/EXPECTED.md",
+      "intro": "lab-555-touch-toggle/intro.md",
+      "introDE": "lab-555-touch-toggle/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-555-sound-switch",
+    "title": {
+      "en": "Switched by a clap or a torch",
+      "de": "Geschaltet durch Klatschen oder Taschenlampe"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 2,
+    "files": {
+      "program": "lab-555-sound-switch/program.bw",
+      "circuit": "lab-555-sound-switch/circuit.json",
+      "expected": "lab-555-sound-switch/EXPECTED.md",
+      "intro": "lab-555-sound-switch/intro.md",
+      "introDE": "lab-555-sound-switch/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-555-hysteresis-feedback",
+    "title": {
+      "en": "How feedback sets the hysteresis",
+      "de": "Wie Rückkopplung die Hysterese bestimmt"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 3,
+    "files": {
+      "program": "lab-555-hysteresis-feedback/program.bw",
+      "circuit": "lab-555-hysteresis-feedback/circuit.json",
+      "expected": "lab-555-hysteresis-feedback/EXPECTED.md",
+      "intro": "lab-555-hysteresis-feedback/intro.md",
+      "introDE": "lab-555-hysteresis-feedback/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-555-trip-latch",
+    "title": {
+      "en": "Trip-wire alarm that stays on",
+      "de": "Stolperdraht-Alarm, der an bleibt"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 1,
+    "files": {
+      "program": "lab-555-trip-latch/program.bw",
+      "circuit": "lab-555-trip-latch/circuit.json",
+      "expected": "lab-555-trip-latch/EXPECTED.md",
+      "intro": "lab-555-trip-latch/intro.md",
+      "introDE": "lab-555-trip-latch/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-555-twilight",
+    "title": {
+      "en": "Twilight switch",
+      "de": "Dämmerungsschalter"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 1,
+    "files": {
+      "program": "lab-555-twilight/program.bw",
+      "circuit": "lab-555-twilight/circuit.json",
+      "expected": "lab-555-twilight/EXPECTED.md",
+      "intro": "lab-555-twilight/intro.md",
+      "introDE": "lab-555-twilight/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-555-fibre-darlington",
+    "title": {
+      "en": "Light guide onto a photo-Darlington",
+      "de": "Lichtleiter auf einen Foto-Darlington"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 2,
+    "files": {
+      "program": "lab-555-fibre-darlington/program.bw",
+      "circuit": "lab-555-fibre-darlington/circuit.json",
+      "expected": "lab-555-fibre-darlington/EXPECTED.md",
+      "intro": "lab-555-fibre-darlington/intro.md",
+      "introDE": "lab-555-fibre-darlington/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-555-amp-beats",
+    "title": {
+      "en": "Beats between two different oscillators",
+      "de": "Schwebung zwischen zwei verschiedenen Oszillatoren"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 2,
+    "files": {
+      "program": "lab-555-amp-beats/program.bw",
+      "circuit": "lab-555-amp-beats/circuit.json",
+      "expected": "lab-555-amp-beats/EXPECTED.md",
+      "intro": "lab-555-amp-beats/intro.md",
+      "introDE": "lab-555-amp-beats/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-555-mic-fm",
+    "title": {
+      "en": "Your voice bends the pitch",
+      "de": "Deine Stimme verbiegt den Ton"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 2,
+    "files": {
+      "program": "lab-555-mic-fm/program.bw",
+      "circuit": "lab-555-mic-fm/circuit.json",
+      "expected": "lab-555-mic-fm/EXPECTED.md",
+      "intro": "lab-555-mic-fm/intro.md",
+      "introDE": "lab-555-mic-fm/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-counter-traffic-lights",
+    "title": {
+      "en": "Traffic light from a counter",
+      "de": "Ampel aus einem Zähler"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 2,
+    "files": {
+      "program": "lab-counter-traffic-lights/program.bw",
+      "circuit": "lab-counter-traffic-lights/circuit.json",
+      "expected": "lab-counter-traffic-lights/EXPECTED.md",
+      "intro": "lab-counter-traffic-lights/intro.md",
+      "introDE": "lab-counter-traffic-lights/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-opamp-plus-minus",
+    "title": {
+      "en": "The op-amp on a plus-minus supply",
+      "de": "Der Operationsverstärker an Plus-Minus-Spannung"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 2,
+    "files": {
+      "program": "lab-opamp-plus-minus/program.bw",
+      "circuit": "lab-opamp-plus-minus/circuit.json",
+      "expected": "lab-opamp-plus-minus/EXPECTED.md",
+      "intro": "lab-opamp-plus-minus/intro.md",
+      "introDE": "lab-opamp-plus-minus/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-opamp-sawtooth",
+    "title": {
+      "en": "Triangle, sawtooth and a diode",
+      "de": "Dreieck, Sägezahn und eine Diode"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 2,
+    "files": {
+      "program": "lab-opamp-sawtooth/program.bw",
+      "circuit": "lab-opamp-sawtooth/circuit.json",
+      "expected": "lab-opamp-sawtooth/EXPECTED.md",
+      "intro": "lab-opamp-sawtooth/intro.md",
+      "introDE": "lab-opamp-sawtooth/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-opamp-staircase",
+    "title": {
+      "en": "A staircase from charge packets",
+      "de": "Eine Treppe aus Ladungspaketen"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 3,
+    "files": {
+      "program": "lab-opamp-staircase/program.bw",
+      "circuit": "lab-opamp-staircase/circuit.json",
+      "expected": "lab-opamp-staircase/EXPECTED.md",
+      "intro": "lab-opamp-staircase/intro.md",
+      "introDE": "lab-opamp-staircase/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-wien-mosfet",
+    "title": {
+      "en": "Wien-bridge sine with a MOSFET",
+      "de": "Wien-Brücken-Sinus mit einem MOSFET"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 3,
+    "files": {
+      "program": "lab-wien-mosfet/program.bw",
+      "circuit": "lab-wien-mosfet/circuit.json",
+      "expected": "lab-wien-mosfet/EXPECTED.md",
+      "intro": "lab-wien-mosfet/intro.md",
+      "introDE": "lab-wien-mosfet/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-opamp-baby-monitor",
+    "title": {
+      "en": "Baby monitor with three op-amp stages",
+      "de": "Babyfon mit drei Verstärkerstufen"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 2,
+    "files": {
+      "program": "lab-opamp-baby-monitor/program.bw",
+      "circuit": "lab-opamp-baby-monitor/circuit.json",
+      "expected": "lab-opamp-baby-monitor/EXPECTED.md",
+      "intro": "lab-opamp-baby-monitor/intro.md",
+      "introDE": "lab-opamp-baby-monitor/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-opamp-hysteresis",
+    "title": {
+      "en": "What sets a Schmitt trigger's window",
+      "de": "Was das Fenster eines Schmitt-Triggers bestimmt"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 2,
+    "files": {
+      "program": "lab-opamp-hysteresis/program.bw",
+      "circuit": "lab-opamp-hysteresis/circuit.json",
+      "expected": "lab-opamp-hysteresis/EXPECTED.md",
+      "intro": "lab-opamp-hysteresis/intro.md",
+      "introDE": "lab-opamp-hysteresis/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-opamp-hand-astable",
+    "title": {
+      "en": "A flip-flop by hand, then by itself",
+      "de": "Eine Kippstufe von Hand, dann von selbst"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 1,
+    "files": {
+      "program": "lab-opamp-hand-astable/program.bw",
+      "circuit": "lab-opamp-hand-astable/circuit.json",
+      "expected": "lab-opamp-hand-astable/EXPECTED.md",
+      "intro": "lab-opamp-hand-astable/intro.md",
+      "introDE": "lab-opamp-hand-astable/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-opamp-hearing-limit",
+    "title": {
+      "en": "How high can you hear?",
+      "de": "Wie hoch kannst du hören?"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 1,
+    "files": {
+      "program": "lab-opamp-hearing-limit/program.bw",
+      "circuit": "lab-opamp-hearing-limit/circuit.json",
+      "expected": "lab-opamp-hearing-limit/EXPECTED.md",
+      "intro": "lab-opamp-hearing-limit/intro.md",
+      "introDE": "lab-opamp-hearing-limit/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-opamp-toggle",
+    "title": {
+      "en": "Op-amp flip-flops: set, reset and toggle",
+      "de": "Flipflops aus Operationsverstärkern: setzen, löschen, umschalten"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 2,
+    "files": {
+      "program": "lab-opamp-toggle/program.bw",
+      "circuit": "lab-opamp-toggle/circuit.json",
+      "expected": "lab-opamp-toggle/EXPECTED.md",
+      "intro": "lab-opamp-toggle/intro.md",
+      "introDE": "lab-opamp-toggle/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-opamp-meter-stages",
+    "title": {
+      "en": "Op-amp meters: offset null and reverse protection",
+      "de": "Messverstärker: Nullabgleich und Verpolschutz"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 2,
+    "files": {
+      "program": "lab-opamp-meter-stages/program.bw",
+      "circuit": "lab-opamp-meter-stages/circuit.json",
+      "expected": "lab-opamp-meter-stages/EXPECTED.md",
+      "intro": "lab-opamp-meter-stages/intro.md",
+      "introDE": "lab-opamp-meter-stages/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-opamp-gated-tones",
+    "title": {
+      "en": "Gated tones: pips and rattle",
+      "de": "Getastete Töne: Piepser und Rattern"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 2,
+    "files": {
+      "program": "lab-opamp-gated-tones/program.bw",
+      "circuit": "lab-opamp-gated-tones/circuit.json",
+      "expected": "lab-opamp-gated-tones/EXPECTED.md",
+      "intro": "lab-opamp-gated-tones/intro.md",
+      "introDE": "lab-opamp-gated-tones/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-opamp-beats",
+    "title": {
+      "en": "Two op-amp tones in beat",
+      "de": "Zwei Töne aus Operationsverstärkern in Schwebung"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 2,
+    "files": {
+      "program": "lab-opamp-beats/program.bw",
+      "circuit": "lab-opamp-beats/circuit.json",
+      "expected": "lab-opamp-beats/EXPECTED.md",
+      "intro": "lab-opamp-beats/intro.md",
+      "introDE": "lab-opamp-beats/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-opamp-doubler",
+    "title": {
+      "en": "Frequency doubler from four op-amps",
+      "de": "Frequenzverdoppler aus vier Operationsverstärkern"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 3,
+    "files": {
+      "program": "lab-opamp-doubler/program.bw",
+      "circuit": "lab-opamp-doubler/circuit.json",
+      "expected": "lab-opamp-doubler/EXPECTED.md",
+      "intro": "lab-opamp-doubler/intro.md",
+      "introDE": "lab-opamp-doubler/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-opamp-gates",
+    "title": {
+      "en": "Logic gates from op-amps",
+      "de": "Logikgatter aus Operationsverstärkern"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 1,
+    "files": {
+      "program": "lab-opamp-gates/program.bw",
+      "circuit": "lab-opamp-gates/circuit.json",
+      "expected": "lab-opamp-gates/EXPECTED.md",
+      "intro": "lab-opamp-gates/intro.md",
+      "introDE": "lab-opamp-gates/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-opamp-led-pitch",
+    "title": {
+      "en": "Telling LEDs apart by ear",
+      "de": "LEDs am Klang unterscheiden"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 3,
+    "files": {
+      "program": "lab-opamp-led-pitch/program.bw",
+      "circuit": "lab-opamp-led-pitch/circuit.json",
+      "expected": "lab-opamp-led-pitch/EXPECTED.md",
+      "intro": "lab-opamp-led-pitch/intro.md",
+      "introDE": "lab-opamp-led-pitch/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-opamp-key-finder",
+    "title": {
+      "en": "Key finder: a whistle latches the alarm",
+      "de": "Schlüsselfinder: ein Pfiff hält den Alarm"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 2,
+    "files": {
+      "program": "lab-opamp-key-finder/program.bw",
+      "circuit": "lab-opamp-key-finder/circuit.json",
+      "expected": "lab-opamp-key-finder/EXPECTED.md",
+      "intro": "lab-opamp-key-finder/intro.md",
+      "introDE": "lab-opamp-key-finder/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-ir-reflect-alarm",
+    "title": {
+      "en": "Reflective infrared alarm",
+      "de": "Infrarot-Reflexionsalarm"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 3,
+    "files": {
+      "program": "lab-ir-reflect-alarm/program.bw",
+      "circuit": "lab-ir-reflect-alarm/circuit.json",
+      "expected": "lab-ir-reflect-alarm/EXPECTED.md",
+      "intro": "lab-ir-reflect-alarm/intro.md",
+      "introDE": "lab-ir-reflect-alarm/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-mosfet-tone-key",
+    "title": {
+      "en": "A tone switched by static charge",
+      "de": "Ein Ton, geschaltet durch statische Ladung"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 2,
+    "files": {
+      "program": "lab-mosfet-tone-key/program.bw",
+      "circuit": "lab-mosfet-tone-key/circuit.json",
+      "expected": "lab-mosfet-tone-key/EXPECTED.md",
+      "intro": "lab-mosfet-tone-key/intro.md",
+      "introDE": "lab-mosfet-tone-key/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-door-chime",
+    "title": {
+      "en": "Shop-door chime",
+      "de": "Ladentür-Gong"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 2,
+    "files": {
+      "program": "lab-door-chime/program.bw",
+      "circuit": "lab-door-chime/circuit.json",
+      "expected": "lab-door-chime/EXPECTED.md",
+      "intro": "lab-door-chime/intro.md",
+      "introDE": "lab-door-chime/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-amp-supply-decoupling",
+    "title": {
+      "en": "Howl and hum through the supply",
+      "de": "Heulen und Brummen über die Versorgung"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 3,
+    "files": {
+      "program": "lab-amp-supply-decoupling/program.bw",
+      "circuit": "lab-amp-supply-decoupling/circuit.json",
+      "expected": "lab-amp-supply-decoupling/EXPECTED.md",
+      "intro": "lab-amp-supply-decoupling/intro.md",
+      "introDE": "lab-amp-supply-decoupling/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-amp-schmitt-sweep",
+    "title": {
+      "en": "The amplifier as a Schmitt trigger",
+      "de": "Der Verstärker als Schmitt-Trigger"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 2,
+    "files": {
+      "program": "lab-amp-schmitt-sweep/program.bw",
+      "circuit": "lab-amp-schmitt-sweep/circuit.json",
+      "expected": "lab-amp-schmitt-sweep/EXPECTED.md",
+      "intro": "lab-amp-schmitt-sweep/intro.md",
+      "introDE": "lab-amp-schmitt-sweep/intro.de.md"
+    }
+  },
+  {
+    "id": "lab-amp-dc-gain",
+    "title": {
+      "en": "DC gain of the amplifier chip",
+      "de": "Gleichspannungsverstärkung des Verstärker-Chips"
+    },
+    "kind": "circuit",
+    "category": "pure-circuit",
+    "difficulty": 2,
+    "files": {
+      "program": "lab-amp-dc-gain/program.bw",
+      "circuit": "lab-amp-dc-gain/circuit.json",
+      "expected": "lab-amp-dc-gain/EXPECTED.md",
+      "intro": "lab-amp-dc-gain/intro.md",
+      "introDE": "lab-amp-dc-gain/intro.de.md"
+    }
+  }
 ]
