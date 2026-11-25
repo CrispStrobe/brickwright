@@ -44,30 +44,35 @@ async function assertSelectAndDrag(page,probe){
  console.log('PASS Stop restores canvas selection and drag without a simulation reset');
 }
 const proofURL=process.env.PROOF_URL||'http://127.0.0.1:8141/';
-const overridePath=process.env.PROOF_JOLT_SIMD_MODULE;
+const simdOverridePath=process.env.PROOF_JOLT_SIMD_MODULE;
+const scalarOverridePath=process.env.PROOF_JOLT_SCALAR_MODULE;
+const forceScalar=process.env.PROOF_FORCE_SCALAR==='1'||Boolean(scalarOverridePath);
+assert.ok(!simdOverridePath||!forceScalar,'The SIMD override requires the SIMD engine');
+const overridePath=scalarOverridePath||simdOverridePath;
 const joltOverride=overridePath?await readFile(overridePath):null;
-assert.ok(!joltOverride||process.env.PROOF_FORCE_SCALAR!=='1','The SIMD override requires the SIMD engine');
 const joltOverrideSHA256=joltOverride?createHash('sha256').update(joltOverride).digest('hex'):null;
 const simdModule=/\/jolt-physics\.simd\.wasm-compat[^/]*\.js$/;
+const scalarModule=/\/jolt-physics\.wasm-compat[^/]*\.js$/;
+const origin=new URL(proofURL).origin;
 const browserType={chromium,firefox,webkit}[process.env.PROOF_BROWSER||'chromium'];
 if(!browserType)throw new Error('Unsupported proof browser');
 const browser=await browserType.launch({headless:true,executablePath:process.env.BW_BROWSER_EXECUTABLE,
  ...(browserType===chromium&&process.env.PROOF_SOFTWARE_GPU==='1'?{args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']}:{}),
  ...(browserType===firefox?{firefoxUserPrefs:{'webgl.force-enabled':true}}:{})});
 const page=await browser.newPage({viewport:process.argv.includes('--ipad')?{width:1024,height:768}:{width:1440,height:1000},hasTouch:process.argv.includes('--ipad'),serviceWorkers:'block'}),errors=[],results=[];let cancelNext=false;
-if(process.env.PROOF_FORCE_SCALAR==='1')await page.route(simdModule,route=>route.abort());
+if(forceScalar)await page.context().route(url=>url.origin===origin&&simdModule.test(url.pathname),route=>route.abort());
 let joltOverrideUses=0,scalarUses=0;
 if(joltOverride){
- const origin=new URL(proofURL).origin;
- await page.context().route(url=>url.origin===origin&&simdModule.test(url.pathname),async route=>{
+ const overriddenModule=forceScalar?scalarModule:simdModule;
+ await page.context().route(url=>url.origin===origin&&overriddenModule.test(url.pathname),async route=>{
   await route.fulfill({contentType:'text/javascript',body:joltOverride});
   joltOverrideUses++;
  });
- page.context().on('request',request=>{
-  const url=new URL(request.url());
-  if(url.origin===origin&&/\/jolt-physics\.wasm-compat[^/]*\.js$/.test(url.pathname))scalarUses++;
- });
 }
+if(joltOverride||forceScalar)page.context().on('request',request=>{
+ const url=new URL(request.url());
+ if(url.origin===origin&&scalarModule.test(url.pathname))scalarUses++;
+});
 
 if(process.env.PROOF_DIAGNOSTICS==='1'){
  page.on('console',message=>{if(['error','warning'].includes(message.type()))console.log('Browser',message.text().slice(0,400));});
@@ -176,7 +181,7 @@ try{
   if(process.argv.includes('--ipad')&&!process.env.ONLY_ROBOT&&i>0)break;
   if((process.env.SKIP_ROBOTS||'').split(',').includes(item.id))continue;
   if(process.env.ONLY_ROBOT&&process.env.ONLY_ROBOT!==item.id)continue;console.log('Selecting',item.id);
-  const initialOverrideUses=joltOverrideUses;
+  const initialOverrideUses=joltOverrideUses,initialScalarUses=scalarUses;
   const panel=page.getByTestId('bw-cad-circuit-panel');if(await panel.isVisible())await panel.getByRole('button',{name:'Close program settings'}).click();
   await cad.getByRole('button',{name:'Model library',exact:true}).click();
   const library=cad.getByRole('dialog',{name:'Model library',exact:true});
@@ -306,10 +311,13 @@ await wait(()=>{const s=window.__brickwrightStore.getState().scratchGui.vm.runti
    await writeFile(`${out}/phases-${item.id}${process.env.PROOF_REPEAT==='1'?'-with-restarts':''}.json`,JSON.stringify(timing,null,2));
    console.log('Mechanical worker start timings (ms)',timing.startup);
   }
+  if(forceScalar)assert.ok(scalarUses>initialScalarUses,'The simulation did not request the scalar engine');
   if(joltOverride){
-   assert.ok(joltOverrideUses>initialOverrideUses,'The simulation did not load the supplied SIMD module');
-   assert.equal(scalarUses,0,'The supplied module fell back to the scalar engine');
+   const flavor=forceScalar?'scalar':'SIMD';
+   assert.ok(joltOverrideUses>initialOverrideUses,`The simulation did not load the supplied ${flavor} module`);
+   if(!forceScalar)assert.equal(scalarUses,initialScalarUses,'The supplied module fell back to the scalar engine');
    after.joltOverrideSHA256=joltOverrideSHA256;
+   after.joltOverrideFlavor=flavor;
   }
   if(process.env.PROOF_MIN_RTF!==undefined){
    const minimum=Number(process.env.PROOF_MIN_RTF);
