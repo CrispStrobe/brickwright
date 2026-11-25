@@ -709,3 +709,29 @@ The observed startup improvement does not establish the full editor's
 sustained 1× target. The local test worker replaces only the bundled
 worker and its assets. Lite's release SDK remains at pin `7760321`.
 Scout passed the same full-editor restart proof on the local build.
+
+### Geometry payload on repeat Run
+
+The simulation controller sends rendered mesh buffers on a cold start
+and reuses the parked worker's mesh buffers on repeat Run. A document
+revision disposes of the previous worker, so the next cold start sends
+the current mesh buffers. The worker still rebuilds the physical world
+and uses its existing geometry and collision cache checks.
+
+Type checking and the controller, worker, and base tests passed.
+The replay test timed out at five seconds under Mac load and passed
+when rerun with a 60-second timeout. All 25 cases passed across these
+runs. The [test SDK](https://github.com/CrispStrobe/CrispCAD/commit/4fc87ad)
+was built from Brickwright's pinned CAD source and this change.
+
+The change is on [CrispCAD main](https://github.com/CrispStrobe/CrispCAD/commit/80cf22542844e4ecc95acd97bdd961469fb80daf).
+The full editor passed Atlas Run, Stop, Reset, and three repeat Runs.
+A Chrome probe counted 656,316 bytes of mesh buffers on each start
+with the pinned build. The local SDK sent the same 656,316 bytes at
+first Run and zero on all three repeat Runs. The CAD document still
+goes to the worker when creating a new world. Mac load varied
+substantially between builds, so the comparison measures bytes
+avoided and does not establish an end-to-end latency gain.
+The release SDK pin remains `7760321`.
+Scout passed the same restart proof, with 879732 bytes at first
+Run and zero bytes at repeat Run.
