@@ -306,6 +306,8 @@ class CircuitTab extends React.Component {
             if (typeof this._applyToLiveCircuit === 'function') this._applyToLiveCircuit(data);
         };
         window.addEventListener('bw-load-circuit-data', this._loadCircuitData);
+        this._loadFirmwareCircuit = event => this.loadFirmwareCircuit(event.detail);
+        window.addEventListener('bw-load-firmware-circuit', this._loadFirmwareCircuit);
         // Project save/load carries the Circuit and Widgets tabs through the
         // .sb3 bundle (lib/bw-project-bundle.js). COLLECT: flush the LIVE
         // state into the bundle's keys before the save reads them — the
@@ -717,6 +719,7 @@ class CircuitTab extends React.Component {
         window.removeEventListener('resize', this._measureBox);
         window.removeEventListener('bw-circuit-file', this._circuitFileWake);
         window.removeEventListener('bw-load-circuit-data', this._loadCircuitData);
+        window.removeEventListener('bw-load-firmware-circuit', this._loadFirmwareCircuit);
         window.removeEventListener('bw-project-bundle-collect', this._onBundleCollect);
         window.removeEventListener('bw-project-bundle-loaded', this._onBundleLoaded);
         window.removeEventListener('bw-settings-change', this._settingsHandler);
@@ -1060,7 +1063,13 @@ class CircuitTab extends React.Component {
     async load ({explicit = false} = {}) {
         this._markReactUpdate('host:stc-load');
         this.setState({stc: this.readStc()});
-        if (this.state.Designer || this.loading) return;
+        if (this.loading) {
+            return new Promise(resolve => {
+                if (!this._designerLoadWaiters) this._designerLoadWaiters = [];
+                this._designerLoadWaiters.push(resolve);
+            });
+        }
+        if (this.state.Designer) return;
         if (!shouldLoadCircuitDesigner({
             explicit,
             isVisible: this.props.isVisible,
@@ -1186,6 +1195,42 @@ class CircuitTab extends React.Component {
             this.setState(recovering ? {reloading: true} : {error: e.message});
         }
         this.loading = false;
+        for (const resolve of (this._designerLoadWaiters || []).splice(0)) resolve();
+    }
+
+    /** Install a firmware's real bench before its image reaches the debugger. */
+    async loadFirmwareCircuit (detail) {
+        const {data, onLoaded, onError} = detail || {};
+        try {
+            if (!data || !Array.isArray(data.parts) || !Array.isArray(data.wires)) {
+                throw new Error('Firmware circuit needs parts and persistent wires');
+            }
+            await this.load({explicit: true});
+            if (!this._Circuit) throw new Error('Circuit designer is unavailable');
+            // Validate before replacing a live model. fromJSON catches solver
+            // errors, so absence of an exception alone does not prove success.
+            const parsed = this._Circuit.fromJSON(data);
+            if (parsed.netlistError) throw new Error(parsed.netlistError);
+            const runtime = this.props.vm.runtime;
+            if (runtime.circuitModel) {
+                // The mounted Designer keeps this object in a ref. Preserve
+                // its identity so the displayed circuit and runner agree.
+                this._applyToLiveCircuit(data);
+                if (runtime.circuitModel.netlistError) throw new Error(runtime.circuitModel.netlistError);
+            } else {
+                runtime.circuitModel = parsed;
+                runtime.circuitBoard = parsed.board;
+                window.__circuit = parsed;
+                window.__board = parsed.board;
+                window.dispatchEvent(new CustomEvent('bw-board-ready'));
+            }
+            await new Promise(resolve => this.setState({circuitData: {...data, fileOnly: true},
+                examplesError: null, machineBooted: true}, resolve));
+            if (typeof onLoaded === 'function') onLoaded();
+        } catch (error) {
+            this.setState({examplesError: error.message});
+            if (typeof onError === 'function') onError(error);
+        }
     }
 
     /**

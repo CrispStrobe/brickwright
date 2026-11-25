@@ -37,6 +37,7 @@
 // the ASM tab, the gate and the local-assembly list all read this.
 import {sketchBoardFor} from '../bw-debug/arduino-sketch.js';
 import I8086_ALL, {I8086_EXAMPLES} from './examples-i8086.js';
+import STC8051_TEACHING_EXAMPLES from './examples-stc8051.js';
 
 /**
  * @typedef {{id: string, label: string, labelDe: string, source: string,
@@ -45,6 +46,7 @@ import I8086_ALL, {I8086_EXAMPLES} from './examples-i8086.js';
 
 /** ATmel-style 8051 parts: every STC device here. */
 const STC = [
+    ...STC8051_TEACHING_EXAMPLES,
     {
         id: 'blink',
         label: 'Blink P1.0',
