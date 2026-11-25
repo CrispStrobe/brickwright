@@ -404,7 +404,7 @@ class CircuitTab extends React.Component {
                     this._markReactUpdate('host:circuit-data');
                     this.setState({circuitData: parsed});
                     this._applyToLiveCircuit(parsed);
-                    this.activateCp1Circuit(parsed);
+                    if (this.activateCp1Circuit(parsed)) this.showControllerDock();
                 } else if (event?.detail?.outcome === 'legacy' || event?.detail?.outcome === 'loaded') {
                     try { localStorage.setItem('bw-circuit-file-loaded', '1'); } catch (e) { /* full */ }
                     const emptied = {version: 1, parts: [], wires: []};
@@ -1444,6 +1444,15 @@ class CircuitTab extends React.Component {
         }
     }
 
+    showControllerDock () {
+        window.dispatchEvent(new CustomEvent('bw-settings-change', {
+            detail: {key: 'bw-right-pane-hidden', value: '0'}
+        }));
+        window.dispatchEvent(new CustomEvent('bw-settings-change', {
+            detail: {key: 'bw-debug-dock', value: 'controller'}
+        }));
+    }
+
     activateCp1Circuit (data) {
         const part = data?.parts?.find(item => item.kind === 'kosmos-cp1');
         const runtime = this.props.vm?.runtime;
@@ -1774,20 +1783,7 @@ class CircuitTab extends React.Component {
             // behind a toggle nobody knows to press.
             try {
                 const applied = await this.applyControllerLayout(ex);
-                if (applied || ex.files?.cp1) {
-                    // BOTH events: the dock chooses WHAT the right column
-                    // shows; the pane key makes the column exist. This tab
-                    // itself nones the stage wrapper while rightPaneHidden
-                    // is set, so a dock switch alone mounted 19 widgets
-                    // into display:none (measured: every rect 0×0 while
-                    // the OLED canvas painted invisibly).
-                    window.dispatchEvent(new CustomEvent('bw-settings-change', {
-                        detail: {key: 'bw-right-pane-hidden', value: '0'}
-                    }));
-                    window.dispatchEvent(new CustomEvent('bw-settings-change', {
-                        detail: {key: 'bw-debug-dock', value: 'controller'}
-                    }));
-                }
+                if (applied || ex.files?.cp1) this.showControllerDock();
             } catch (e) {
                 console.warn('[brickwright] example controller layout failed', e);
             }
