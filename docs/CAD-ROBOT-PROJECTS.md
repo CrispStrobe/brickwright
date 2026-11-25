@@ -1407,3 +1407,28 @@ was refused. In the embedded editor, Atlas passed Run, joint motion,
 Pause, Reset, repeat Run and Close with a local SDK worker overlay.
 Brickwright SDK integration and sustained 1× production qualification
 remain open.
+
+### Sample shared hinge poses once per substep boundary
+
+The separation guard now reads each rigid body's native position and
+rotation once per boundary, even if two hinges share the body. Pose
+buffers are reused. Both checks, the drift threshold and explicit
+invalidation on external mutations still apply.
+
+In paired Mac Chrome worker runs with the same Jolt 5.7 SIMD module,
+Scout's enabled guard took 13.7 → 12.3 ms over 1,200 checks. The
+reverse run order measured 13.2 → 9.5 ms. Atlas had no active separated
+pairs in this trace. All 100 motion and electrical samples across
+600 substeps matched in both orders, as did warm restart frames.
+The optimized worker runs averaged 1.28–1.38× for Atlas and 2.04× for
+Scout. Atlas's overall rate varied with run order.
+
+Type checking and 21 focused tests passed. A new two-hinge fixture
+verified 12 native position reads and 12 rotation reads across two
+substeps, down from 16 each for separate per-hinge pose reads. The
+known scalar Rover torque assertion was excluded from the focused run.
+A local embedded-SDK worker overlay passed Atlas Run, joint motion,
+Pause, Reset, repeat Run and Close. The published Brickwright SDK
+remains pinned to `0953e188`. Sustained 1× production qualification
+remains open.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/c3f45ff1916f5de80937392af9c31cea336af780)
