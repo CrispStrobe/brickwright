@@ -1253,6 +1253,8 @@ class PseudocodeImporter extends React.Component {
         // end up with (say) pseudocode sitting in the Python tab.
         this.state = {revealed: props.isVisible !== false, lang: 'pseudocode', importedPython: false,
             extraLangs: readExtraLangs(), langMenuOpen: false,
+            cp1Active: typeof window !== 'undefined' && window.__bwMachineExtracted?.kind === 'cp1',
+            cp1Available: typeof window !== 'undefined' && window.__bwMachineExtracted?.kind === 'cp1',
             // The Arcade board picker: the boards (null until loaded) and the one chosen.
             arcadeBoards: null, arcadeBoard: '',
             // One empty buffer per tab, from LANG_LABEL (the list of tabs);
@@ -1333,6 +1335,9 @@ class PseudocodeImporter extends React.Component {
         this._unmounted = false;
         this._unregisterCodeMenu = registerEditorMenuActions('code', () => this.codeMenuActions());
         window.addEventListener('bw-microbit-run-request', this._onMicrobitRunRequest);
+        window.addEventListener('bw-cp1-source-load', this.selectCp1);
+        window.addEventListener('bw-cp1-circuit-detached', this.detachCp1);
+        window.addEventListener('bw-machine-extracted', this.rememberCp1);
         // CodeMirror arrives when the tab is first shown (_reveal), not now:
         // every TabPanel is force-rendered, so "mounted" is every first paint.
         // Bundled examples wait for the no-device Tools menu or a real source
@@ -2697,6 +2702,9 @@ class PseudocodeImporter extends React.Component {
         window.removeEventListener('bw-load-pseudocode', this._onLoadPseudocode);
         window.removeEventListener('bw-project-bundle-loaded', this._onBundleLoaded);
         window.removeEventListener('bw-microbit-run-request', this._onMicrobitRunRequest);
+        window.removeEventListener('bw-cp1-source-load', this.selectCp1);
+        window.removeEventListener('bw-cp1-circuit-detached', this.detachCp1);
+        window.removeEventListener('bw-machine-extracted', this.rememberCp1);
         // A pending debounce would otherwise lose the last edits on unmount.
         if (this._autosaveTimer) {
             clearTimeout(this._autosaveTimer);
@@ -2864,22 +2872,37 @@ class PseudocodeImporter extends React.Component {
         try { localStorage.setItem(BW_EXTRA_LANGS_KEY, JSON.stringify(extraLangs)); } catch { /* per-browser convenience only */ }
         this.setState({extraLangs, langMenuOpen: false}, () => this.switchTab(l));
     }
+    rememberCp1 = event => {
+        if (event.detail?.kind === 'cp1' && !this.state.cp1Available) this.setState({cp1Available: true});
+    };
+    detachCp1 = () => this.setState({cp1Active: false, cp1Available: false});
+    selectCp1 = () => this.setState({cp1Active: true, cp1Available: true});
+    leaveCp1 = () => this.setState({cp1Active: false});
+
     async openCp1Language () {
         this.setState({langMenuOpen: false});
-        if (!(await confirmAsync(this.L.cp1Open))) return;
+        if (window.__bwMachineExtracted?.kind === 'cp1') {
+            this.selectCp1();
+            return;
+        }
+        if (!(await confirmAsync(this.L.cp1Open)) || this._unmounted) return;
         window.dispatchEvent(new CustomEvent('bw-start-journey', {detail: {
             id: 'code:kosmos-cp1',
             exampleId: 'cp1-first-display',
             mode: 'circuit-only',
             onResult: result => {
-                if (!this._unmounted && result.error) this.setState({status: result.error});
+                if (this._unmounted) return;
+                if (result.ok) this.selectCp1();
+                else if (result.error) this.setState({status: result.error});
             }
         }}));
     }
 
     switchTab (to) {
+        if (this.state.busy) return;
+        if (this.state.cp1Active) this.leaveCp1();
         const from = this.state.lang;
-        if (to === from || this.state.busy) return;
+        if (to === from) return;
         // ASM tab: author mode just switches. Listing mode must RE-DERIVE: the
         // listing belongs to the program as it is now, and the program may have
         // changed since the listing was built (To blocks, an edit in another
@@ -5915,7 +5938,7 @@ class PseudocodeImporter extends React.Component {
                     style={{marginBottom: -1, paddingRight: 40}} scrollerStyle={{paddingBottom: 1}}
                     trailing={(
                         <React.Fragment>
-                            {this.renderActionMenu(csel)}
+                            {!this.state.cp1Active && this.renderActionMenu(csel)}
                     <button onClick={() => this.toggleMaximize()}
                         style={{...csel, cursor: 'pointer', background: max ? '#4c97ff' : '#f1f5f9',
                             color: max ? '#fff' : 'inherit', minWidth: 24, border: '1px solid #cbd5e1', alignSelf: 'center'}}
@@ -5944,7 +5967,7 @@ class PseudocodeImporter extends React.Component {
                         // file you opened does not vanish when you switch tabs.
                         ...(this.rcxLoaded() || (this.state.buffers.nqc || '').trim() ?
                             [['nqc', '🧱 NQC']] : [])].map(([l, label]) => {
-                        const active = this.state.lang === l;
+                        const active = !this.state.cp1Active && this.state.lang === l;
                         return (
                             <button key={l} type="button" aria-pressed={active} onClick={() => this.switchTab(l)}
                                 disabled={this.state.busy && !active}
@@ -5956,6 +5979,13 @@ class PseudocodeImporter extends React.Component {
                             </button>
                         );
                     })}
+                    {this.state.cp1Available && (
+                        <button type="button" data-testid="bw-code-cp1-tab" onClick={this.selectCp1}
+                            aria-pressed={this.state.cp1Active} title={this.L.cp1Language}
+                            style={{...csel, whiteSpace: 'nowrap', fontWeight: this.state.cp1Active ? 700 : 400}}>
+                            CP1
+                        </button>
+                    )}
                     {(() => {
                         const shown = this.visibleOptionalLangs().map(([l]) => l);
                         const hidden = BW_OPTIONAL_LANGS.filter(([l]) => !shown.includes(l));
@@ -5987,6 +6017,7 @@ class PseudocodeImporter extends React.Component {
                             </Popup>
                         );
                     })()}
+                    {!this.state.cp1Active && <React.Fragment>
                     {/* Convert/run actions live in the tab row, in maximize mode too. */}
                     <div data-testid="bw-code-action-row" style={{display: 'inline-flex', alignSelf: 'center',
                         alignItems: 'center', gap: 6, flexWrap: 'nowrap', flexShrink: 0}}>
@@ -6461,7 +6492,12 @@ class PseudocodeImporter extends React.Component {
                             </span>
                         ) : null}
                     </React.Fragment>
+                    </React.Fragment>}
                 </ScrollRow>
+                {this.state.cp1Active ? (
+                    <div ref={this.props.onCp1CodeSlot} data-cp1-language-pane
+                        style={{flex: 1, minHeight: 0, overflow: 'auto'}} />
+                ) : <React.Fragment>
                 {/* Transient messages sit under the row, not in it: they can be long and expand. */}
                 {this.state.status || this.state.conversionReport ? (
                     <div data-testid="bw-code-notices" style={{display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'flex-start',
@@ -7023,12 +7059,14 @@ class PseudocodeImporter extends React.Component {
                         {this.state.output || '…'}
                     </pre>
                 ) : null}
+                </React.Fragment>}
             </div>
         );
     }
 }
 
 PseudocodeImporter.propTypes = {
+    onCp1CodeSlot: PropTypes.func,
     vm: PropTypes.shape({loadProject: PropTypes.func, toJSON: PropTypes.func}).isRequired,
     locale: PropTypes.string,
     // Whether this tab is the selected one. Gates the CodeMirror chunk and the

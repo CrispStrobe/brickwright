@@ -149,7 +149,7 @@ test('the view reads the panel flag, and the control can reach the panel', () =>
         'the card is not told whether to hide the line');
     assert.match(src, /\{!hideBindings && \(/,
         'the card ignores the flag it is given');
-    assert.match(src, /panel\.setHideBindings\(e\.target\.checked\)/,
+    assert.match(src, /panel\.setHideBindings\(!panel\.hideBindings\)/,
         'the toolbar control cannot reach the panel');
     assert.match(src, /data-testid="bw-ctl-hide-bindings"/, 'the control is unnamed');
 });
