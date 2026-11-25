@@ -405,3 +405,31 @@ paired throughput baseline. The 1× GUI target remains open. The
 SIMD module SHA-256 is
 `5f25671f51625ad3eb9ff8afc22ac40c63be95bb9380c747babec5fbacdf7fdf`.
 The released engine is JoltPhysics.js `1.1.0-bw.10`.
+
+### Circuit allocation and collision query profiles
+
+Atlas's full Chrome trace attributed about 2.5 ms per 5 ms tick to
+circuit advance and 3.9 ms to the CAD worker round trip while the
+profiler was active. The Board engine now indexes solver terminals
+until the netlist changes and reuses sparse matrix conversion buffers
+between solves. It still uses the same matrix entries, pivot rules,
+and event times. All 82 targeted tests passed on Board's mainline,
+including scope loads, netlist replacement, sparse pattern changes,
+and current conservation.
+[Board mainline](https://github.com/CrispStrobe/bw-board/commit/a03b03640b61156893906788652f1307e81fc7b7)
+
+A paired Chrome comparison kept the Jolt 5.7.0 module, models, and 600
+ticks identical. Atlas's non-mechanical work fell from 1.70 to 1.58 ms
+per tick in one order and from 1.75 to 1.41 ms in the reverse order.
+Scout's host times fell from 0.91 to 0.86 ms and from 1.06 to 0.83 ms.
+All motion and electrical traces matched exactly. Overall throughput
+varied with worker scheduling during the runs. The browser tests used
+the two Board changes applied to Lite's existing Board pin, with
+no other Board changes.
+[Tested Board backport](https://github.com/CrispStrobe/bw-board/commit/c908e55d)
+
+Separately, the upstream single-box SIMD backport passed 653 native
+cases and preserved both coupled traces. It made Atlas's mechanical
+round trip slower in both run orders, so that backport remains a
+candidate branch.
+[Jolt candidate](https://github.com/CrispStrobe/JoltPhysics/commit/dd9cc56)
