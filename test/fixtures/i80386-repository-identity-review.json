@@ -1,0 +1,72 @@
+{
+  "schema": "bw.x86-repository-identity-review.v1",
+  "file": "test/i80386-hdd-gui-actual.test.mjs",
+  "before": {
+    "bytes": 655145,
+    "sha256": "7dbf9ee26df56d5986e4ac4770e1284e462b9e949413c8ba50854e678439ac2a"
+  },
+  "after": {
+    "bytes": 655685,
+    "sha256": "685f7d1640fd4c15362e1bcd0c1ccae394fff1f533316bf031bc14cad932cfc7"
+  },
+  "changes": [
+    {
+      "before": "import {fileURLToPath} from 'node:url';\n",
+      "after": "import {fileURLToPath} from 'node:url';\nimport {hddWorkflowBeforeRepositoryIdentity} from './helpers/reviewed-repository-identity.mjs';\n"
+    },
+    {
+      "before": "const workflow = heldBeforeConcurrencyPolicy('i80386-hdd-gui-actual',\n        fs.readFileSync(new URL('../.github/workflows/i80386-hdd-gui-actual.yml',import.meta.url),'utf8'));",
+      "after": "const workflow = heldBeforeConcurrencyPolicy('i80386-hdd-gui-actual',\n        hddWorkflowBeforeRepositoryIdentity('.github/workflows/i80386-hdd-gui-actual.yml',\n            fs.readFileSync(new URL('../.github/workflows/i80386-hdd-gui-actual.yml',import.meta.url),'utf8')));"
+    },
+    {
+      "before": "        \"github.repository == 'CrispStrobe/brickwright-lite'\",\"github.run_attempt == 1\",",
+      "after": "        \"github.repository_id == '1291854269'\",\"github.run_attempt == 1\","
+    },
+    {
+      "before": "    const conditions=[\"github.event_name == 'pull_request'\",\"github.event.action == 'labeled'\",\"github.event.label.name == 'x86-hdd-gui-font-bridge'\",\"github.actor == 'CrispStrobe'\",\"github.repository == 'CrispStrobe/brickwright-lite'\",'github.run_attempt == 1','github.event.pull_request.head.repo.full_name == github.repository','github.event.pull_request.head.repo.fork == false',\"github.event.pull_request.base.ref == 'main'\"];",
+      "after": "    const conditions=[\"github.event_name == 'pull_request'\",\"github.event.action == 'labeled'\",\"github.event.label.name == 'x86-hdd-gui-font-bridge'\",\"github.actor == 'CrispStrobe'\",\"github.repository_id == '1291854269'\",'github.run_attempt == 1','github.event.pull_request.head.repo.full_name == github.repository','github.event.pull_request.head.repo.fork == false',\"github.event.pull_request.base.ref == 'main'\"];"
+    },
+    {
+      "before": "        shift('github.run_attempt == 1','github.run_attempt == 2'),shift('github.event.pull_request.head.repo.fork == false','true'),",
+      "after": "        shift(\"github.repository_id == '1291854269'\",\"github.repository_id == '1291854270'\"),\n        shift(\"github.repository_id == '1291854269'\",\"github.repository == 'CrispStrobe/brickwright-lite'\"),\n        shift('github.run_attempt == 1','github.run_attempt == 2'),shift('github.event.pull_request.head.repo.fork == false','true'),"
+    },
+    {
+      "before": "    for(const [old,value] of [['${{ true &&','${{ false &&'],['github.run_attempt == 1','github.run_attempt == 2'],['font-bridge-guard','font-chain-guard'],['if: always()','if: success()'],['GH_TOKEN: \\'\\'','GH_TOKEN: ${{ github.token }}'],['timeout-minutes: 16','timeout-minutes: 8'],['--ignore-scripts','--foreground-scripts'],['node-version: 22.23.3','node-version: 22']]){",
+      "after": "    for(const [old,value] of [[\"github.repository_id == '1291854269'\",\"github.repository_id == '1291854270'\"],[\"github.repository_id == '1291854269'\",\"github.repository == 'CrispStrobe/brickwright-lite'\"],['${{ true &&','${{ false &&'],['github.run_attempt == 1','github.run_attempt == 2'],['font-bridge-guard','font-chain-guard'],['if: always()','if: success()'],['GH_TOKEN: \\'\\'','GH_TOKEN: ${{ github.token }}'],['timeout-minutes: 16','timeout-minutes: 8'],['--ignore-scripts','--foreground-scripts'],['node-version: 22.23.3','node-version: 22']]){"
+    }
+  ],
+  "workflow": {
+    "file": ".github/workflows/i80386-hdd-gui-actual.yml",
+    "reviewedCommit": "69f962a163eac791036b0794fa4370023c0c8536",
+    "before": {
+      "bytes": 64983,
+      "sha256": "9dbadb90d827ff13d79174ac31adf9e9c6b62ae89f963c6585fa3be44c68fd6c"
+    },
+    "after": {
+      "bytes": 64923,
+      "sha256": "0b45f11e5a02ff1b01bfc5127bcaf9c4603c9e13e279b3d6967356d7dd58d9b7"
+    },
+    "guards": [
+      {
+        "job": "actual-v8",
+        "before": "  actual-v8:\n    if: >-\n      ${{ false && github.event_name == 'workflow_dispatch' && github.actor == 'CrispStrobe' &&\n          github.repository == 'CrispStrobe/brickwright-lite' && github.run_attempt == 1 &&\n          github.ref_type == 'tag' && github.event.inputs.pull_request != '' &&\n          github.event.inputs.request_sha256 != '' &&\n          github.event.inputs.source_head == github.sha &&\n          github.ref == format('refs/tags/{0}', github.event.inputs.tag_name) &&\n          startsWith(github.event.inputs.tag_name, 'bw-gui-hdd-actual-v8-') }}\n",
+        "after": "  actual-v8:\n    if: >-\n      ${{ false && github.event_name == 'workflow_dispatch' && github.actor == 'CrispStrobe' &&\n          github.repository_id == '1291854269' && github.run_attempt == 1 &&\n          github.ref_type == 'tag' && github.event.inputs.pull_request != '' &&\n          github.event.inputs.request_sha256 != '' &&\n          github.event.inputs.source_head == github.sha &&\n          github.ref == format('refs/tags/{0}', github.event.inputs.tag_name) &&\n          startsWith(github.event.inputs.tag_name, 'bw-gui-hdd-actual-v8-') }}\n"
+      },
+      {
+        "job": "actual-v9",
+        "before": "  actual-v9:\n    if: >-\n      ${{ true && github.event_name == 'workflow_dispatch' && github.actor == 'CrispStrobe' &&\n          github.repository == 'CrispStrobe/brickwright-lite' && github.run_attempt == 1 &&\n          github.event.inputs.protocol == 'actual-v9' && github.ref_type == 'branch' &&\n          github.event.inputs.pull_request != '' && github.event.inputs.prelude_sha256 != '' &&\n          github.event.inputs.request_sha256 == '' && github.event.inputs.tag_name == '' &&\n          github.event.inputs.source_head == github.sha &&\n          github.event.inputs.source_ref == github.ref && startsWith(github.ref, 'refs/heads/lane/') }}\n",
+        "after": "  actual-v9:\n    if: >-\n      ${{ true && github.event_name == 'workflow_dispatch' && github.actor == 'CrispStrobe' &&\n          github.repository_id == '1291854269' && github.run_attempt == 1 &&\n          github.event.inputs.protocol == 'actual-v9' && github.ref_type == 'branch' &&\n          github.event.inputs.pull_request != '' && github.event.inputs.prelude_sha256 != '' &&\n          github.event.inputs.request_sha256 == '' && github.event.inputs.tag_name == '' &&\n          github.event.inputs.source_head == github.sha &&\n          github.event.inputs.source_ref == github.ref && startsWith(github.ref, 'refs/heads/lane/') }}\n"
+      },
+      {
+        "job": "font-bridge",
+        "before": "  font-bridge:\n    if: >-\n      ${{ true && github.event_name == 'pull_request' && github.event.action == 'labeled' &&\n          github.event.label.name == 'x86-hdd-gui-font-bridge' && github.actor == 'CrispStrobe' &&\n          github.repository == 'CrispStrobe/brickwright-lite' && github.run_attempt == 1 &&\n          github.event.pull_request.head.repo.full_name == github.repository &&\n          github.event.pull_request.head.repo.fork == false && github.event.pull_request.base.ref == 'main' }}\n",
+        "after": "  font-bridge:\n    if: >-\n      ${{ true && github.event_name == 'pull_request' && github.event.action == 'labeled' &&\n          github.event.label.name == 'x86-hdd-gui-font-bridge' && github.actor == 'CrispStrobe' &&\n          github.repository_id == '1291854269' && github.run_attempt == 1 &&\n          github.event.pull_request.head.repo.full_name == github.repository &&\n          github.event.pull_request.head.repo.fork == false && github.event.pull_request.base.ref == 'main' }}\n"
+      },
+      {
+        "job": "font-discovery",
+        "before": "  font-discovery:\n    if: >-\n      ${{ true && github.event_name == 'pull_request' && github.event.action == 'labeled' &&\n          github.event.label.name == 'x86-hdd-gui-font-discovery' && github.actor == 'CrispStrobe' &&\n          github.repository == 'CrispStrobe/brickwright-lite' && github.run_attempt == 1 &&\n          github.event.pull_request.head.repo.full_name == github.repository &&\n          github.event.pull_request.head.repo.fork == false && github.event.pull_request.base.ref == 'main' }}\n",
+        "after": "  font-discovery:\n    if: >-\n      ${{ true && github.event_name == 'pull_request' && github.event.action == 'labeled' &&\n          github.event.label.name == 'x86-hdd-gui-font-discovery' && github.actor == 'CrispStrobe' &&\n          github.repository_id == '1291854269' && github.run_attempt == 1 &&\n          github.event.pull_request.head.repo.full_name == github.repository &&\n          github.event.pull_request.head.repo.fork == false && github.event.pull_request.base.ref == 'main' }}\n"
+      }
+    ]
+  }
+}

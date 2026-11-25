@@ -24,6 +24,8 @@ Add **Busch Microtronic 2090** from the Circuits palette. The component panel
 provides the hexadecimal keypad, six-digit display, program editor and Run,
 Halt, Step and Reset controls. Choose **Open wired I/O example** for a prepared
 experiment with three input switches, four output LEDs and CLOCK wired to IN4.
+The same experiment is available from **Circuit → Examples** by searching for
+**Busch Microtronic** and opening **Busch Microtronic 2090: Wired I/O**.
 Run starts the shared circuit simulation. Halt stops this computer while the
 circuit clock continues; the circuit toolbar's Pause freezes the experiment.
 

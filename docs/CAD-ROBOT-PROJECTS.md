@@ -1273,3 +1273,71 @@ passed Atlas Run, joint motion, Pause, Reset, repeat Run and Close in
 the embedded CAD editor without changing the authored scene.
 Brickwright SDK integration and sustained 1× production qualification
 remain open.
+
+### Reuse qualified Jolt shapes on repeat Run
+
+The parked simulation retains one native reference to each immutable
+compound shape for the current authored revision. Repeat Run creates a
+fresh physics world, with fresh bodies, constraints, and initial state.
+Compound reuse still requires the same engine, ordered part tokens,
+and qualified collision inputs. The world checks the source and hull
+proofs before consulting the cache. A new authored revision gets its
+own cache, and the prior cache is released after successful setup.
+
+Each Mac Chrome pair measured eight warm starts per version and robot.
+The interval starts after the worker parks and ends at its initial
+physics frame. Both versions used the same Jolt 5.7 SIMD engine.
+
+| Robot | First order, before → after | Reverse order, before → after |
+| --- | ---: | ---: |
+| Atlas | 319 → 234 ms | 336 → 232 ms |
+| Scout | 678 → 503 ms | 694 → 506 ms |
+
+The embedded CAD editor passed Atlas Run, joint motion, Pause, Reset,
+repeat Run and Close with the rebuilt worker in a local SDK overlay.
+The authored scene remained identical after the run.
+
+Both robots produced identical sampled motion and circuit readings over
+600 ticks **after** a warm start, with matching initial and restart
+frames. The native debug test checks that clearing the cache leaves an
+active world's shapes usable, a replacement collider creates a new
+compound, and mutated collision bytes are still rejected.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/28253502ad6d75992776479a7bdb868b708525c9)
+
+Type checking and eleven focused tests passed in the first run. The
+knurl collision test exceeded its 30-second deadline on the shared
+Mac and passed on an isolated retry with a longer test deadline.
+Brickwright SDK integration and the sustained 1× production target
+remain open.
+
+### Retain the validated physics document on repeat Run
+
+The initial run validates and copies the authored physics document
+into a private snapshot. The parked worker keeps that snapshot, the
+qualified collision geometry and only the layout needed for telemetry.
+A repeat Run reuses the snapshot and its geometry key while checking
+the source and hull hashes again. Fix base is a per-run option, so
+the same snapshot can start with a fixed or dynamic base.
+
+A baseline worker profile attributed a median 121 ms for Atlas and
+153 ms for Scout to document and collision verification. The Chrome
+pairs below measured eight warm starts per version and robot on the
+Mac with the same Jolt 5.7 SIMD engine. The interval starts after
+Park and ends at the initial physics frame.
+
+| Robot | First order, before → after | Reverse order, before → after |
+| --- | ---: | ---: |
+| Atlas | 238 → 161 ms | 223 → 133 ms |
+| Scout | 493 → 339 ms | 521 → 364 ms |
+
+Both robots resumed the last valid document after an unsupported
+replacement was refused. The paired warm runs matched sampled joint
+motion and circuit readings over 600 ticks, and their restart frames
+matched exactly. Type checking and twelve focused tests passed,
+including Fix base toggling and stale document handling.
+
+The embedded CAD editor passed Atlas Run, movement, Pause, Reset,
+repeat Run and Close using the local SDK worker overlay. Brickwright
+SDK integration and sustained 1× production qualification remain
+open.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/b6228bc4162c8f5b15e0d241c4a08acd2762628c)

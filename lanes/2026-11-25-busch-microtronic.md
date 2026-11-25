@@ -74,6 +74,12 @@ and [UI PR #174](https://github.com/CrispStrobe/bw-circuit-ui/pull/174).
 Full engine evidence: [CI run 45688117968](https://github.com/CrispStrobe/bw-board/actions/runs/45688117968).
 The consumer's hosted qualification attaches to this implementation head.
 
+Current main's Microtronic gallery entry, CAD artwork and KIM-1 lane reservation
+are preserved. Five inherited host CI source-reader failures are repaired in
+the coordinated `2026-11-25-microtronic-host-ci-controls.md` lane. On the combined
+checkout, all 529 focused debugger checks and 132 HDD/history/projection controls
+pass without changing runtime behavior, workflow gates or historical seals.
+
 Usage and reproducible checks are in `docs/BUSCH-MICROTRONIC.md`. Native TMS1600
 execution, display scanning, cassette support and replacement firmware remain
 the later phase requested by the user; this integration imports none of the

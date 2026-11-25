@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {parse} from 'acorn';
 
 import {createReverseContinueCoordinator} from
     '../overlay/scratch-gui/src/lib/bw-debug/reverse-continue.js';
@@ -68,21 +69,33 @@ test('failed replay does not advance the occurrence chain', () => {
 test('runner resets reverse chaining for every new forward lifecycle', () => {
     const source = readFileSync(new URL(
         '../overlay/scratch-gui/src/lib/bw-debug/debug-runner.js', import.meta.url), 'utf8');
-    const body = (start, end) => {
-        const from = source.indexOf(start);
-        const to = source.indexOf(end, from + start.length);
-        assert.ok(from >= 0 && to > from, `${start} must have a stable test boundary`);
-        return source.slice(from, to);
+    // Use the real method body: start accepts a destructured optional argument,
+    // and neither parameter braces nor a neighboring method belong to its body.
+    const ast = parse(source, {ecmaVersion: 'latest', sourceType: 'module'});
+    const factory = ast.body.find(node => node.type === 'ExportNamedDeclaration' &&
+        node.declaration?.type === 'FunctionDeclaration' &&
+        node.declaration.id.name === 'createDebugRunner')?.declaration;
+    assert.ok(factory, 'runner factory must exist');
+    const methods = factory.body.body.filter(node => node.type === 'VariableDeclaration')
+        .flatMap(node => node.declarations)
+        .find(node => node.id.type === 'Identifier' && node.id.name === 'runner')?.init;
+    assert.equal(methods?.type, 'ObjectExpression', 'runner must expose its methods');
+    const body = name => {
+        const method = methods.properties.find(node => node.type === 'Property' &&
+            node.method && !node.computed && node.key.name === name);
+        assert.equal(method?.value.body.type, 'BlockStatement', `${name} must have a method body`);
+        if (name === 'start') assert.equal(method.value.async, true, 'start remains asynchronous');
+        return source.slice(method.value.body.start, method.value.body.end);
     };
 
     for (const [name, section] of [
-        ['new run', body('async start()', '\n        pause()')],
-        ['resume', body('resume()', '/** One block')],
-        ['forward block step', body("step(kind = 'block')", '\n        stop()')],
-        ['new recording', body('startDebugRecording()', 'stopDebugRecording')],
-        ['forward instruction step', body('stepInstruction(count = 1)', '/** `over`')],
-        ['step over', body('stepOver()', 'stepOut()')],
-        ['step out', body('stepOut()', '/**\n         * The user')]
+        ['new run', body('start')],
+        ['resume', body('resume')],
+        ['forward block step', body('step')],
+        ['new recording', body('startDebugRecording')],
+        ['forward instruction step', body('stepInstruction')],
+        ['step over', body('stepOver')],
+        ['step out', body('stepOut')]
     ]) {
         assert.match(section, /reverseCursor = null;[\s\S]*reverseContinue\.reset\(\)/, name);
     }
