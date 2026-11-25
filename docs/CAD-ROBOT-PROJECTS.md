@@ -1174,3 +1174,40 @@ pruning while the evaluated root mesh is reused.
 
 The browser work used a local CAD SDK worker overlay. Brickwright retains
 its production SDK pin, and its sustained 1× production target remains open.
+
+### Overlap collision checks on cold Run
+
+On large scenes, the simulation worker sends one large root's source and
+convex hulls to a second worker for the same CSG measurement. It waits
+for that worker to start the measurement before starting its own
+checks. This avoids delaying the helper's initialization while the
+simulation worker runs synchronous CSG. The helper is closed after
+preparation and the results retain the original body order. Small
+scenes and environments without a helper use the serial route.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/dbf3ca5b3efbdb0cf3aff17a4cc8ca219f55d9d3)
+
+Cold starts on the Mac in Chrome used the same Jolt 5.7 SIMD module and
+fresh contexts. Each order measured the time to the initial physics
+frame, including geometry and collision preparation.
+
+| Robot | First order, before → after | Reverse order, before → after |
+| --- | ---: | ---: |
+| Atlas | 9.27 → 7.42 s | 9.25 → 7.52 s |
+| Scout | 12.67 → 11.75 s | 12.49 → 11.86 s |
+
+Initial and restart frames matched exactly. Blocking the helper's
+script returned both robots to serial preparation, with their same
+initial frames. The async measurements remain bound to the original
+source and hull hashes. All nine focused tests passed, including
+background ordering, byte mutation, and stale collider checks.
+
+The packaged SDK built locally and all 842 manifest entries verified.
+The embedded CAD editor used the packaged Jolt and loaded the hashed
+helper asset in Chrome. Atlas passed Run, joint motion, Pause, Reset,
+repeat Run, and Close. The authored scene matched its pre-run state.
+
+The paired coupled runs produced identical sampled motion and electrical
+readings over 600 ticks for each robot, followed by three exact restart
+frames per run. These tests cover cold-start latency. Brickwright's
+production pin is still `0953e188`, and the sustained 1× production
+target remains open.
