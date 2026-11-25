@@ -34,6 +34,20 @@ try{
  await page.locator('[data-cp1-panel]').waitFor();
  assert.equal(await page.locator('[data-cp1-physical-key]').count(),30);
  assert.equal(await page.locator('[data-cp1-digit]').count(),6);
+ const panel=page.locator('[data-cp1-panel]');
+ assert.equal(await panel.getByText('Raw masks',{exact:false}).count(),0);
+ assert.match(await panel.locator('[title^="Raw masks"]').getAttribute('title'),/79 79 F9/);
+ assert.equal(await panel.getByText('Command debugging needs a qualified monitor ROM',{exact:false}).count(),0);
+ assert.equal(await panel.locator('header [data-cp1-semantic="unavailable"]').count(),1);
+ const monitorRows=()=>panel.locator('header').evaluate(header=>{
+  const centers=[...header.children].map(control=>{
+   const r=control.getBoundingClientRect();
+   return (r.top+r.bottom)/2;
+  });
+  return Math.max(...centers)-Math.min(...centers);
+ });
+ assert.ok(await monitorRows()<=1,'monitor controls share one row');
+
  assert.equal(await page.locator('[data-cp1-digit="2"]').getAttribute('data-segments'),'249');
  const source='VALUE EQU 42\nORG 0\nstart: AKO VALUE\ndisplay: ANZ\nSPU display\n';
  const editor=page.locator('[data-cp1-source]');
@@ -97,10 +111,11 @@ try{
  await page.goto(`${url}/?mode=panel&locale=de&theme=dark`,{waitUntil:'networkidle'});
  await page.setViewportSize({width:390,height:1180});
  assert.equal(await page.getByRole('button',{name:'CPU-Schritt',exact:true}).count(),1);
+ assert.ok(await monitorRows()<=1,'narrow monitor controls share one row');
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true);
  await page.screenshot({path:path.join(output,'mobile-de-dark.png'),fullPage:true});
  assert.deepEqual(errors,[]);
- const result={status:'passed',browser:browser.version(),react:fixture.react,scope:'Actual component browser behavior with original synthetic 8049 firmware and real CP1 machine',checks:['raw displays','thirty keys','incomplete-source reload','RAM load','load refusal','pointer/keyboard ownership','blur release','manual/circuit inputs','RAM editing','async CP3 source preservation','German narrow layout'],propTypes:'validator-only stub',fullApplicationBuild:false};
+ const result={status:'passed',browser:browser.version(),react:fixture.react,scope:'Actual component browser behavior with original synthetic 8049 firmware and real CP1 machine',checks:['raw displays and hover diagnostics','single-row monitor controls','thirty keys','incomplete-source reload','RAM load','load refusal','pointer/keyboard ownership','blur release','manual/circuit inputs','RAM editing','async CP3 source preservation','German narrow layout'],propTypes:'validator-only stub',fullApplicationBuild:false};
  await writeFile(path.join(output,'result.json'),`${JSON.stringify(result,null,2)}\n`);
  console.log(JSON.stringify(result));
 }catch(error){
