@@ -27,6 +27,11 @@ Own the following narrow package boundary and its normal adoption:
   the declared qualified inputs; do not hand-restamp observations. Review any
   numerical delta against the prior inputs, retaining all thresholds, assertions
   and historical source records. No workflow structural or selection change.
+- In `sb3-creator`, `test/circuit-params-are-read.test.mjs` only to activate
+  Microtronic through its public Run control and observe a sufficient simulated
+  interval for the declared instruction rate. Other benches retain their current
+  sampling. Keep all parameter assertions, thresholds and `KNOWN_INERT` entries
+  unchanged; a disconnected or rate-ignoring model must still be rejected.
 - In Brickwright, the exact `sb3-creator` pin and the normal compiler/gallery
   sync outputs, required mirrored/generated current-pin records and focused
   adoption evidence. Review incoming upstream changes before choosing the pin.
