@@ -351,9 +351,16 @@ Sources and limitations are recorded in Board `docs/MCS48-IMPLEMENTATION.md`,
 - Qualify the full production application and known-ROM semantic browser
   workflow, including production menus/VM restore and semantic controls. The
   six scoped synthetic-firmware Chromium gates are complete.
-- CP2 cassette pulse transport and CAS/CAL behavior.
-- A dedicated CP4 relay teaching surface. CP5's current switch/LED circuit and
-  lessons are implemented; that does not complete every expansion in the plan.
+- CP2 physical recorder and analog threshold qualification. The independent
+  monitor already saves and loads CAS/CAL through the digital cassette path.
+- Complete the CP4 eight-channel module and qualify its original input and
+  contact filters. The bilingual [relay signals example](../overlay/scratch-gui/examples/cp1-cp4-relay-signals/intro.md)
+  exercises two channels on the shared CP1 circuit. The independent monitor
+  drove both simulated contacts at startup, then ran the entry/exit sequence
+  twice with no retrigger while the request stayed closed. The switched
+  branches drew about 3.25 mA from a separate simulated battery.
+  The [CP4 manual](https://www.retrozone.ch/docs/cp1/CP4-Relais-Modul.pdf)
+  documents the eight-channel hardware and its original filtering.
 - Freely rewired internal 8049/8155 schematic construction.
 - Independently obtained mask-ROM-B qualification and additional firmware cases.
 - Generic 8155 strobed-port modes and exact internal timer-register encoding;
