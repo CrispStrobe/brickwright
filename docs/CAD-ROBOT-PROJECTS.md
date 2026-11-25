@@ -469,3 +469,18 @@ exactly. Atlas's host time fell from 2.21 to 2.13 ms and from 2.29 to
 2.15 ms per tick. Scout's fell from 1.18 to 1.12 ms and from 1.39 to
 1.31 ms. The test covers the real Circuit engine and CAD worker.
 [Board backport for the Lite pin](https://github.com/CrispStrobe/bw-board/commit/22b14d5e)
+
+The CAD clock candidate schedules program continuation with browser
+message tasks. The task boundary still lets the VM's promise
+continuations finish before Circuit and CAD advance. The focused
+session, cancellation, and clock suite passed all 45 tests.
+
+Atlas passed four full Chrome GUI runs with the same Jolt 5.7 module
+and the same Board build. The timer version sustained 0.515× and
+0.607×, and the message-task version 0.640× and 0.656×. The measured
+electrical and worker round trips also moved substantially across
+the runs. After subtracting the instrumented work, mean overhead was
+0.55 to 0.38 ms per tick in one order and 0.41 to 0.42 ms in reverse.
+The results do not establish a repeatable clock-specific throughput
+gain, so this change remains a candidate.
+[CAD clock candidate](https://github.com/CrispStrobe/brickwright-lite/commit/195502ee0)
