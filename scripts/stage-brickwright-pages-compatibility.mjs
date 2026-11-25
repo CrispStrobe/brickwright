@@ -29,7 +29,16 @@ export async function stageCompatibility(site, {repository, repositoryId}) {
     assertBrickwrightRepository(repository, Number(repositoryId));
     await access(resolve(site, 'index.html'));
     const outputs = new Map(legacyPages.map(page => [page, legacyRedirect(page)]));
-    // Publish the marker after all legacy entry points were created.
+    outputs.set('privacy.html', `<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="refresh" content="0; url=/brickwright-privacy.html">
+<title>Brickwright Privacy Policy</title>
+<p><a href="/brickwright-privacy.html">Open the Brickwright privacy policy</a></p>
+</html>
+`);
+    // Publish the marker after all compatibility routes were created.
     for (const [name, content] of outputs) await writeFile(resolve(site, name), content, {flag: 'wx'});
     const marker = {schema: 1, repositoryId: BRICKWRIGHT_REPOSITORY_ID, repository};
     await writeFile(resolve(site, 'brickwright-pages.json'), `${JSON.stringify(marker)}\n`, {flag: 'wx'});

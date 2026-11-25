@@ -23,10 +23,10 @@ Validate links, privacy, whitespace and every enabled exact-head documentation
 check before a normal matched-head merge; verify reviewed/predicted/landed trees
 and parents. Do not rerun ARM/native/guest builds for this documentation-only work.
 
-Qualified source integrations are [PR1322](https://github.com/CrispStrobe/brickwright-lite/pull/1322),
-[PR1327](https://github.com/CrispStrobe/brickwright-lite/pull/1327),
-[PR1337](https://github.com/CrispStrobe/brickwright-lite/pull/1337) and
-[PR1339](https://github.com/CrispStrobe/brickwright-lite/pull/1339). The editor
+Qualified source integrations are [PR1322](https://github.com/CrispStrobe/brickwright/pull/1322),
+[PR1327](https://github.com/CrispStrobe/brickwright/pull/1327),
+[PR1337](https://github.com/CrispStrobe/brickwright/pull/1337) and
+[PR1339](https://github.com/CrispStrobe/brickwright/pull/1339). The editor
 landed as `2351457441a5188247ba3600d9192583d735ccda` with the reviewed parents
 and tree. The finite native result, original failures, actual browser/worker
 boundaries and the remaining G02, configured-host, packaging and device work

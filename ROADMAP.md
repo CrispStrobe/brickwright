@@ -85,8 +85,8 @@ state; its live synthesis path remains byte-identical. Actual hosted acceptance
 is still required. The preceding `09a4f407` run set was superseded before any
 child started; cancellation followed explicit zero-running-child verification.
 
-Fresh fast [Build40869114327](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40869114327)
-and necessary full [Build40869128682](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40869128682)
+Fresh fast [Build40869114327](https://github.com/CrispStrobe/brickwright/actions/runs/40869114327)
+and necessary full [Build40869128682](https://github.com/CrispStrobe/brickwright/actions/runs/40869128682)
 are pending on that exact source. The earlier manual run `40856189963` was
 cancelled before application execution after its unsupported consumer context
 was identified; it is not qualification. The prior fast head `d32860b8` had one
@@ -120,7 +120,7 @@ signal observations from missing supply-current physics; Board PR704 replaces
 false zero measurements with named refusal. CUI PR122 supplies opt-in ideal
 ADC reconstruction over actual voltage point captures, with 83 browser checks.
 Both suppliers are adopted by the [joint Lite lane](lanes/2026-10-25-meter-adc-package-adoption.md).
-[Build40264899201](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40264899201)
+[Build40264899201](https://github.com/CrispStrobe/brickwright/actions/runs/40264899201)
 and all enabled exact-head checks passed with six source-declared skips.
 Original-log readback accepted 10 new browser checks, six preserved checks and
 three unit checks. The actual checkout and reviewed source trees match.
@@ -182,22 +182,22 @@ stratified measurement regression → demonstrated causal repairs → bounded
 instrument-realism proof. As reconciled on 2026-10-24, upstream qualification
 and consumer adoption PR965 are complete. Existing v0.1.26 TestFlight delivery
 is now independently verified by read-only
-[audit 40048235422](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40048235422):
+[audit 40048235422](https://github.com/CrispStrobe/brickwright/actions/runs/40048235422):
 iOS/macOS, both groups, matching bilingual notes and approved reviews. No new
 upload or metadata write was needed. The original failed metadata wait remains
 preserved; it did not describe the current Apple state.
 
 The [CLI instrument result](docs/CIRCUIT-INSTRUMENT-REGRESSION.md) now records
-[run 40057471489](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40057471489):
+[run 40057471489](https://github.com/CrispStrobe/brickwright/actions/runs/40057471489):
 312/312 comparable passes, independently recomputed across 87,488 checks;
 264 ngspice and 48 nominal analytic cases, with zero refusals or missing cases.
 There is no demonstrated numerical cause to patch in this fixed matrix.
 The bounded scope acquisition/overrange/aliasing disclosure is implemented in
 upstream [PR117](https://github.com/CrispStrobe/bw-circuit-ui/pull/117), qualified
 by all three checks and 71/71 actual browser scenarios. Lite's exact-pin
-adoption [PR1334](https://github.com/CrispStrobe/brickwright-lite/pull/1334)
+adoption [PR1334](https://github.com/CrispStrobe/brickwright/pull/1334)
 completes the fifth item. Its new-consumer
-[campaign 40077158320](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40077158320)
+[campaign 40077158320](https://github.com/CrispStrobe/brickwright/actions/runs/40077158320)
 passed 312/312 and 87,488 independent checks; all 240 waveform CSVs equal the
 preceding campaign byte-for-byte. The independently audited actual built GUI
 passed capture metadata, prefix/wrap, viewport warning/clear and HOLD/resume

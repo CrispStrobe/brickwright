@@ -483,7 +483,7 @@ the runs. After subtracting the instrumented work, mean overhead was
 0.55 to 0.38 ms per tick in one order and 0.41 to 0.42 ms in reverse.
 The results do not establish a repeatable clock-specific throughput
 gain, so this change remains a candidate.
-[CAD clock candidate](https://github.com/CrispStrobe/brickwright-lite/commit/195502ee0)
+[CAD clock candidate](https://github.com/CrispStrobe/brickwright/commit/195502ee0)
 
 ### Sparse numeric refactorization
 

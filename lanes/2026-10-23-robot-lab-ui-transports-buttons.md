@@ -1,6 +1,6 @@
 # Robot Lab UI transports and brick interaction (WP9 / WP5)
 
-DONE — merged in [#1274](https://github.com/CrispStrobe/brickwright-lite/pull/1274).
+DONE — merged in [#1274](https://github.com/CrispStrobe/brickwright/pull/1274).
 All enabled exact-head checks and source-bound built-browser qualification passed.
 Codex hub-coverage continuation, isolated branch
 `lane/robot-lab-ui-transports-buttons-20261023`, base

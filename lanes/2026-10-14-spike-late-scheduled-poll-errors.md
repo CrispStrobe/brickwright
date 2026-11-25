@@ -1,6 +1,6 @@
 ## SPIKE late scheduled-poll errors — 2026-10-14
 
-ADOPTED — [PR936](https://github.com/CrispStrobe/brickwright-lite/pull/936),
+ADOPTED — [PR936](https://github.com/CrispStrobe/brickwright/pull/936),
 qualified source `65494ed81b8751f2f6f2f3e9e6c57e5f07e125c0`, merged as
 `e22fd9fe0017b4e8291b4ff2af44ff6b9d6efde1`. Scheduled poll errors delivered
 after Stop stay silent; live errors still report and close their owned session.

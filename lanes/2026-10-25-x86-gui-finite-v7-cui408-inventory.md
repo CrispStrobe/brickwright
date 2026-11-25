@@ -157,7 +157,7 @@ authorized by these source flags.
 
 ## Spent V7 failure and distinct F8 continuation — 2026-10-26
 
-The [once-selected V7 run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40352829291)
+The [once-selected V7 run](https://github.com/CrispStrobe/brickwright/actions/runs/40352829291)
 passed source admission and setup-node, then failed trusted Chromium dependency
 setup at its existing deadline after npm succeeded. Inventory observation was
 skipped; conditional failure upload succeeded. This event remains spent and

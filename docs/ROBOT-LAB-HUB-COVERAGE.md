@@ -184,7 +184,7 @@ and EV3 `.rbf` cells.
 
 ## Hosted firmware qualification
 
-Source [#1239](https://github.com/CrispStrobe/brickwright-lite/pull/1239) landed at `6da92497d2e8f51b2a75e137fab9e6946d3a3457` from qualified head `64949a78117a3937ad5241e8ec41d1b8fffca3b2` after all 32 enabled exact-head checks succeeded; six conditional jobs were skipped as declared. [Official own-firmware run 39892243464](https://github.com/CrispStrobe/brickwright-lite/actions/runs/39892243464) passed both motor comparisons and all six real Python cases. Independent original reading bound the fixed Runtime/Infra/firmware graph, source hashes and built outputs to the actual Lab consumer. The timed speed ratio was 1.0053; degrees endpoints were 359.16° versus 359.15° (target 360°), within the unchanged limits.
+Source [#1239](https://github.com/CrispStrobe/brickwright/pull/1239) landed at `6da92497d2e8f51b2a75e137fab9e6946d3a3457` from qualified head `64949a78117a3937ad5241e8ec41d1b8fffca3b2` after all 32 enabled exact-head checks succeeded; six conditional jobs were skipped as declared. [Official own-firmware run 39892243464](https://github.com/CrispStrobe/brickwright/actions/runs/39892243464) passed both motor comparisons and all six real Python cases. Independent original reading bound the fixed Runtime/Infra/firmware graph, source hashes and built outputs to the actual Lab consumer. The timed speed ratio was 1.0053; degrees endpoints were 359.16° versus 359.15° (target 360°), within the unchanged limits.
 
 This qualifies embedded MicroPython in the project’s own NuttX through the Lab route. No physical hardware accuracy, standalone raw-REPL or installed native lifecycle claim follows from this result.
 

@@ -32,7 +32,7 @@ among 32 inputs. All four earlier disagreements remain noncomparable; no model
 repair was inferred from them. Historical supplier identities never advance.
 
 Scope PR128 and its unmerged negative PR129 establish the injected re-render
-mechanism. Combined [Lite PR1536](https://github.com/CrispStrobe/brickwright-lite/pull/1536)
+mechanism. Combined [Lite PR1536](https://github.com/CrispStrobe/brickwright/pull/1536)
 preserves the frozen `93aba754` longer-capture, LM741 and provenance ancestry
 previously gathered in the now-closed, unmerged PR1538. Board remains `8785e468`;
 the current adoption targets qualified CUI PR131 landing `4b65f154`. Consumer
@@ -91,8 +91,8 @@ state; its live synthesis path remains byte-identical. Actual hosted acceptance
 is still required. The preceding `09a4f407` run set was superseded before any
 child started; cancellation followed explicit zero-running-child verification.
 
-Fresh fast [Build40869114327](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40869114327)
-and necessary full [Build40869128682](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40869128682)
+Fresh fast [Build40869114327](https://github.com/CrispStrobe/brickwright/actions/runs/40869114327)
+and necessary full [Build40869128682](https://github.com/CrispStrobe/brickwright/actions/runs/40869128682)
 are pending on that exact source. The earlier manual run `40856189963` was
 cancelled before application execution after its unsupported consumer context
 was identified; it is not qualification. The prior fast head `d32860b8` had one
@@ -106,7 +106,7 @@ keeps exact actions, evidence boundaries and remaining limits.
 ## Current imported-circuit and model-accuracy sequence — 2026-10-25
 
 The separately authorized five-item sequence has reached its bounded consumer
-acceptance endpoint through [PR1413](https://github.com/CrispStrobe/brickwright-lite/pull/1413),
+acceptance endpoint through [PR1413](https://github.com/CrispStrobe/brickwright/pull/1413),
 merged as `b26ae0aedde4e53a254b0bc48c83b156be7cb026`. Its
 [campaign record](lanes/2026-10-25-imported-circuit-instrument-campaign.md)
 keeps the remaining limits and earlier failures explicit.
@@ -115,7 +115,7 @@ Shared model/importer/instrument work belongs only in the operator-owned
 qualified Lite package adoption. No third-party original is patched.
 
 1. **Current-consumer baseline: accepted.**
-   [Run40172711900](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40172711900)
+   [Run40172711900](https://github.com/CrispStrobe/brickwright/actions/runs/40172711900)
    qualifies consumer `4c416bcfe1a219faaec371ac638f607628f347a7`, Board
    `761153ff92d521c01107ee7b32922ba7adc10ee2` and CUI
    `91d8434a79d373cef2837c137ab356356f1a3b44`. Independent original-only readers
@@ -194,12 +194,12 @@ history, not reservations or evidence that their work is still pending.
    `1db1bb9ee565338672c7acfefec4cf94b27196e1`. Its qualified CLI and built-GUI
    checks do not prove a newer signed or installed release. PR1011's release
    ownership claim is merged, not a delivery receipt. The read-only
-   [audit 40048235422](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40048235422)
+   [audit 40048235422](https://github.com/CrispStrobe/brickwright/actions/runs/40048235422)
    independently verified existing v0.1.26 on iOS and macOS in both TestFlight
    groups, with matching bilingual notes and approved reviews. No write or new
    upload was required. The earlier metadata-wait failure remains preserved.
 3. **Fixed installed-consumer regression: complete.**
-   [Run 40057471489](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40057471489)
+   [Run 40057471489](https://github.com/CrispStrobe/brickwright/actions/runs/40057471489)
    executed all 312 authored parameter cases across 12 topologies: 264 ngspice
    and 48 explicitly nominal analytic comparisons. Independent original readers
    agreed on all cases and 87,488 numerical checks; no failed, refused,
@@ -212,9 +212,9 @@ history, not reservations or evidence that their work is still pending.
 5. **Bounded scope-display adoption and consumer proof: complete.**
    CUI [PR117](https://github.com/CrispStrobe/bw-circuit-ui/pull/117) passed all
    three checks and 71/71 actual browser scenarios. Lite
-   [PR1334](https://github.com/CrispStrobe/brickwright-lite/pull/1334) adopts
+   [PR1334](https://github.com/CrispStrobe/brickwright/pull/1334) adopts
    `420f3e15bd0064119416386853bd35713347c252`. The new consumer passed the
-   separate [312-case campaign](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40077158320),
+   separate [312-case campaign](https://github.com/CrispStrobe/brickwright/actions/runs/40077158320),
    with 87,488 independent numerical checks and all 240 waveform CSVs
    byte-identical to the preceding campaign. The exact built GUI passed actual
    metadata, warning/clear, prefix/wrap and HOLD/resume checks; both raw CSV

@@ -111,7 +111,7 @@ Independent read-only review found no concrete counterexample; that is not
 runtime qualification.
 
 The same new test file contains an enabled-by-default original-PXT/native case.
-Its [first hosted attempt](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40758182799/job/123090494998)
+Its [first hosted attempt](https://github.com/CrispStrobe/brickwright/actions/runs/40758182799/job/123090494998)
 failed in the original simulator's startup-marker observation, before Lite ran:
 the single unused constant was absent from simulator globals. The corrected
 fixture executes `ready = 0; ready += 1` and requires exactly one published

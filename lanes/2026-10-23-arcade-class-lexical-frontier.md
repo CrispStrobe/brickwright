@@ -7,7 +7,7 @@ Merge this scope before implementation. Continue the same owner's lexical
 readiness and captured class-result work; preserve preceding source candidates,
 original failures, their pending qualification and all other owners.
 This implementation follows the unmerged captured-result work in
-[PR #1128](https://github.com/CrispStrobe/brickwright-lite/pull/1128),
+[PR #1128](https://github.com/CrispStrobe/brickwright/pull/1128),
 published at `df2cdb4c94592bdda7fb4c177e5d99604e1311e5`. Its capabilities
 and pending hosted checks are not asserted as already landed on main.
 

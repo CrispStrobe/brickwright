@@ -70,4 +70,4 @@ annotation or guessed callback order supplies declaration readiness.
 
 The ownership contract is
 [`lanes/2026-10-23-arcade-captured-class-primitive-results.md`](../lanes/2026-10-23-arcade-captured-class-primitive-results.md).
-The integration PR is [#1128](https://github.com/CrispStrobe/brickwright-lite/pull/1128).
+The integration PR is [#1128](https://github.com/CrispStrobe/brickwright/pull/1128).

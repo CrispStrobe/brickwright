@@ -2,7 +2,7 @@
 
 Owner: Codex, Arcade compatibility lane. Branch: `lane/arcade-sdk-receivers-20261021`.
 Base: `e8f48db1a9a07919f8490f593cc06ad0cde7ed9a`. Claim merged in
-[PR1173](https://github.com/CrispStrobe/brickwright-lite/pull/1173).
+[PR1173](https://github.com/CrispStrobe/brickwright/pull/1173).
 Status: source implementation complete; native, original-SDK, hosted and GUI
 qualification pending before landing.
 

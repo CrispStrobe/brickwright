@@ -17,7 +17,8 @@ const POLICY = Object.freeze({
 });
 const POLICY_RECEIPT = process.env.BW_DISTRIBUTION_POLICY_RECEIPT;
 
-const REPO_URL = 'https://github.com/CrispStrobe/brickwright-lite';
+const REPO_URL = 'https://github.com/CrispStrobe/brickwright';
+const PRIVACY_URL = 'https://crispstrobe.github.io/brickwright-privacy.html';
 const NOTICES_URL = `${REPO_URL}/blob/main/THIRD-PARTY-NOTICES.md`;
 
 /**
@@ -89,9 +90,7 @@ const L10N = {
         email: 'E-mail',
         phone: 'Phone',
         privacy: 'Privacy',
-        privacyText: 'This is a static page: no accounts, no tracking by us, and projects stay ' +
-            'in your browser. Pressing Build/Run sends your program text to the compile service ' +
-            'to be compiled and is not stored; the optional local compiler removes even that.',
+        privacyPolicy: 'Privacy policy',
         disclaimer: 'Disclaimer',
         disclaimerText: 'An educational tool. The simulation is a model, not silicon: check ' +
             'polarity, voltage and current limits before wiring real hardware, and treat ' +
@@ -148,10 +147,7 @@ const L10N = {
         email: 'E-Mail',
         phone: 'Telefon',
         privacy: 'Datenschutz',
-        privacyText: 'Dies ist eine statische Seite: keine Konten, kein Tracking durch uns, ' +
-            'Projekte bleiben im Browser. Build/Run sendet den Programmtext zum Kompilieren an ' +
-            'den Compile-Dienst und wird nicht gespeichert; der optionale lokale Compiler ' +
-            'vermeidet auch das.',
+        privacyPolicy: 'Datenschutzerklärung',
         disclaimer: 'Haftungsausschluss',
         disclaimerText: 'Ein Lernwerkzeug. Die Simulation ist ein Modell, kein Silizium: vor ' +
             'echter Hardware Polung, Spannungen und Stromgrenzen prufen; alles ohne Nachweis ' +
@@ -400,7 +396,9 @@ class BwAbout extends React.Component {
                                     {t('phone')}: <a href={`tel:${PROVIDER.phone.replace(/[^+0-9]/g, '')}`}>{PROVIDER.phone}</a>
                                 </p>
                                 <div className={styles.heading}>{t('privacy')}</div>
-                                <p className={styles.body}>{t('privacyText')}</p>
+                                <p className={styles.body}>
+                                    <a href={PRIVACY_URL} rel="noopener noreferrer" target="_blank">{t('privacyPolicy')}</a>
+                                </p>
                                 <div className={styles.heading}>{t('disclaimer')}</div>
                                 <p className={styles.body}>{t('disclaimerText')}</p>
 

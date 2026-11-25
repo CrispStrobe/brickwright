@@ -33,7 +33,7 @@ ignored), an offline source-bound Linux package and twelve actual installed
 NuttX native/Python/storage/lifecycle cases passed. Original source-manifest,
 launch and view failures remain retained and scoped in
 [the delivery record](../docs/SPIKE-CURRENT-RUNTIME-DELIVERY-2026-10-28.md).
-PR: https://github.com/CrispStrobe/brickwright-lite/pull/1547.
+PR: https://github.com/CrispStrobe/brickwright/pull/1547.
 
 Integration: the complete SPIKE change is folded into existing PR1533 for one
 final fast-CI queue. PR1547 and its published branch preserve the original

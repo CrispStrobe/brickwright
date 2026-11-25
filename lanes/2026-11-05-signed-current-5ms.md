@@ -25,7 +25,7 @@ integral agree for both polarities. Frozen newly authored ngspice 42 inputs agre
 with analytic voltage and source current over 5,001 points per polarity; worst
 errors are 8.54 nV and 10.2 pA, and integrated current differs by 41.1 pA.
 These are independent reference observations. On the installed Lite pins,
-[Build42120820267](https://github.com/CrispStrobe/brickwright-lite/actions/runs/42120820267)
+[Build42120820267](https://github.com/CrispStrobe/brickwright/actions/runs/42120820267)
 passed both actual CLI cases and the comparator's reversed-current and nonfinite
 controls. The original log retains assertions, not exact observed values. This
 is no physical calibration or broad corpus claim.

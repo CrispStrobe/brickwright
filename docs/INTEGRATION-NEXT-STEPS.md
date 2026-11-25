@@ -17,7 +17,7 @@ deployment work has succeeded.
 | Measurement editor | PR1339, `23514574` | 19 React tests and actual Jolt Edit/Save/Cancel plus CRC-checked SB3 save/reopen. Successful standalone SB3 bytes were not retained; no separate downloaded-file audit is claimed. |
 | Installed lifecycle and usability | PR1345/PR1354/PR1355/PR1358 and the G02/G03 sections in the [SPIKE guide](SPIKE-STATUS-AND-LANES.md) | Finite installed Linux matrix, generation census and UI fixes; original timing/controller failures remain recorded. |
 | Linux package and release exercise | PR1368 and the v0.1.27 hosted package exercise | Hosted packaging and upload evidence; placeholder exercise inputs do not qualify a production runtime, signed delivery or TestFlight availability. |
-| Versioned TestFlight availability | [Existing read-only audit](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40378785039), release `v0.1.27` / `23ec9082` | iOS and macOS valid, unexpired, linked to internal/external tester groups and in beta testing; review approved and EN/DE notes matched at the recorded observation. This does not deliver newer main features or qualify installed hardware/runtime behavior. |
+| Versioned TestFlight availability | [Existing read-only audit](https://github.com/CrispStrobe/brickwright/actions/runs/40378785039), release `v0.1.27` / `23ec9082` | iOS and macOS valid, unexpired, linked to internal/external tester groups and in beta testing; review approved and EN/DE notes matched at the recorded observation. This does not deliver newer main features or qualify installed hardware/runtime behavior. |
 | Experimental registry | PR1336 and subsequent model/control updates | 61 active experimental entries, 63 checkpoint records and 14 qualification contracts at the inspected snapshot. Registry inclusion does not establish model-wide mechanical acceptance. |
 | NXT data-file calls | PR1430, `2f3ba1fa` | 83 affected cases across ten files; 40 checks, 33 successful and seven declared skips. Details: [NXT RXE VM](NXT-RXE-VM.md). |
 | API sparse timestamp correction | PR1444, `696f0076` | Three hosted Jolt regressions; 44 checks, 37 successful and seven declared skips. Source and finite operator adoption are accepted; the cutover used dense recording and did not exercise deployed sparse sampling. |
@@ -57,8 +57,8 @@ no new cutover job, promotion, request comment or receipt acquisition is needed.
 
 ### Pending work: exact pickup and stopping conditions
 
-1. **Keep resting-frame creep separate.** [Issue #1435](https://github.com/CrispStrobe/brickwright-lite/issues/1435)
-   remains open. [PR1472](https://github.com/CrispStrobe/brickwright-lite/pull/1472)
+1. **Keep resting-frame creep separate.** [Issue #1435](https://github.com/CrispStrobe/brickwright/issues/1435)
+   remains open. [PR1472](https://github.com/CrispStrobe/brickwright/pull/1472)
    owns the diagnostic implementation at this checkpoint; preserve its source,
    runs and original acquisition. Start with the [resting-creep handoff](ROBOT-LAB-RESTING-CREEP.md),
    refresh that PR and coordinate before implementing.
@@ -104,11 +104,11 @@ handoffs and private evidence. Reuse retained originals; never acquire or replay
 a successful original just to inspect it.
 
 Qualified core base: `1825cf0308d3ba0e217a3117fedefbe959cab8c8`
-([PR1322](https://github.com/CrispStrobe/brickwright-lite/pull/1322) and
-[PR1327](https://github.com/CrispStrobe/brickwright-lite/pull/1327), including the
+([PR1322](https://github.com/CrispStrobe/brickwright/pull/1322) and
+[PR1327](https://github.com/CrispStrobe/brickwright/pull/1327), including the
 qualified native producer and metadata integration).
 
-Final API integration: [PR1337](https://github.com/CrispStrobe/brickwright-lite/pull/1337), merged as
+Final API integration: [PR1337](https://github.com/CrispStrobe/brickwright/pull/1337), merged as
 `0576e01408145c79a03508909adbde388710dfe1`; the landed parents and tree matched
 the reviewed composition with current main.
 
@@ -133,7 +133,7 @@ new affected qualification, admit its exact source, inputs and existing resource
 limits. Preserve original failures; do not replay a successful case to restate it
 or expand its claim beyond the observed boundary.
 
-### 2. Native installed acceptance — [PR1279](https://github.com/CrispStrobe/brickwright-lite/pull/1279) and its producer
+### 2. Native installed acceptance — [PR1279](https://github.com/CrispStrobe/brickwright/pull/1279) and its producer
 
 The frozen PR1279 consumer completed all 25 finite installed cases, including
 untouched cold own-NuttX completion, output-boundary Stop, distinct recovery,
@@ -142,11 +142,11 @@ served-body binding passed. The original resource-timing probe remains failed;
 the narrower result does not claim executed-response or full timing-census proof.
 
 The final combined source is
-[PR1322](https://github.com/CrispStrobe/brickwright-lite/pull/1322), frozen at
+[PR1322](https://github.com/CrispStrobe/brickwright/pull/1322), frozen at
 `ccf990c4`. It includes the native repair, model/renderer changes and merged
 virtual transport routing. The old matrix remains finite component evidence.
 Its new hosted executable producer
-[PR1326](https://github.com/CrispStrobe/brickwright-lite/pull/1326) passed; an
+[PR1326](https://github.com/CrispStrobe/brickwright/pull/1326) passed; an
 independent reader joined its executable, 182 native source files, ten resource
 pins and all 7,997 frontend file hashes. The installed image audit confirmed the
 original resource base plus only the current executable. A fresh running-app
@@ -165,7 +165,7 @@ source delta. The joint producer/model workflow integration landed through PR132
 the native producer by ancestry. Its actual merge parents and tree matched the
 reviewed prediction, with all current main additions preserved.
 
-### 3. Robot Lab model/WebKit qualification — [PR1322](https://github.com/CrispStrobe/brickwright-lite/pull/1322)
+### 3. Robot Lab model/WebKit qualification — [PR1322](https://github.com/CrispStrobe/brickwright/pull/1322)
 
 The current renderer prepares each line instance's clip transform in the early
 scene hooks, before Three uploads the attribute buffers. Eight actual-Three
@@ -174,7 +174,7 @@ change preserves the face transforms, geometry, counts, model programs, clocks,
 viewport, physical oracles and qualification deadlines.
 
 The fresh immutable-runtime comparison
-[PR1327](https://github.com/CrispStrobe/brickwright-lite/pull/1327), frozen at
+[PR1327](https://github.com/CrispStrobe/brickwright/pull/1327), frozen at
 `2f3bbff0`, passed its actual hosted job. An independent original reader accepted
 all four actual/reopened traces, saved projects and the complete 7,997-file
 frontend inventory. Sine Shuttle completed with completed 1, failed 0 and stage
@@ -197,7 +197,7 @@ predecessors are included on main, and the remaining older native producer PRs
 were closed as included. Their original failed or held requests and branches
 remain preserved; source inclusion does not relabel those older outcomes.
 
-### 4. Virtual transport integration — [PR1274](https://github.com/CrispStrobe/brickwright-lite/pull/1274)
+### 4. Virtual transport integration — [PR1274](https://github.com/CrispStrobe/brickwright/pull/1274)
 
 PR1274 merged as `ec36c07d8b`; the owner closeout also landed. All 31 enabled
 source checks succeeded, with six declared skips. The actual browser packet
@@ -207,7 +207,7 @@ and actual browser outputs were independently joined. Do not repeat or reopen
 this completed transport lane. Its effect on the installed shared SPIKE provider
 is covered by the combined qualification above.
 
-### 5. Submitted-model API integration — [PR1282](https://github.com/CrispStrobe/brickwright-lite/pull/1282)
+### 5. Submitted-model API integration — [PR1282](https://github.com/CrispStrobe/brickwright/pull/1282)
 
 At the PR1282/PR1337 source-only stage, the API had resource/authentication/refusal
 controls, private SHA-CAS admission evidence and a source-bound hosted VM/Jolt
@@ -216,7 +216,7 @@ deployment. Its zero/unobserved production steps remain historical observations;
 the subsequent configured-service readback is recorded in Delivery readback below.
 Never dispatch merely to populate a census.
 
-[PR1337](https://github.com/CrispStrobe/brickwright-lite/pull/1337) preserves
+[PR1337](https://github.com/CrispStrobe/brickwright/pull/1337) preserves
 PR1282 and normally composes qualified main in a new owned branch. Its fresh
 hosted fixture worker passed, and an unchanged independent reader accepted the
 retained encrypted result, 335 source blobs, 185 actual Jolt samples and six real
@@ -236,7 +236,7 @@ results are recorded below without relabeling the earlier source-only evidence.
 
 ## Saved measurement definition editing
 
-[PR1339](https://github.com/CrispStrobe/brickwright-lite/pull/1339) merged as
+[PR1339](https://github.com/CrispStrobe/brickwright/pull/1339) merged as
 `2351457441a5188247ba3600d9192583d735ccda` after all 28 enabled checks passed, with
 seven declared skips. Its actual parents and tree matched the fresh-main
 prediction, preserving the current main and API entries. The production GUI
@@ -253,8 +253,8 @@ audit of original saved-project bytes is claimed.
 Existing teaching presets, units and provenance are already present. The narrow
 follow-on is Edit/Save/Cancel for a saved definition, preserving its stable ID,
 order, visibility and plots. Its owning claim is
-[PR1330](https://github.com/CrispStrobe/brickwright-lite/pull/1330). Implementation
-[PR1339](https://github.com/CrispStrobe/brickwright-lite/pull/1339), at `e774a119`,
+[PR1330](https://github.com/CrispStrobe/brickwright/pull/1330). Implementation
+[PR1339](https://github.com/CrispStrobe/brickwright/pull/1339), at `e774a119`,
 repairs an idle preset callback that unnecessarily waited for a React state
 callback; active editing still clears its state before continuing. The original
 failed lesson assertion is unchanged and now passes, alongside the new deferred
@@ -266,10 +266,10 @@ or workflow change is included in this panel follow-on.
 
 ## Measurement experiments — qualified follow-on
 
-[PR1375](https://github.com/CrispStrobe/brickwright-lite/pull/1375) landed as
+[PR1375](https://github.com/CrispStrobe/brickwright/pull/1375) landed as
 `eef726fe67d505733b31c599a677ab1897f96a94`; its owning
 [closeout](../lanes/2026-10-25-robot-measurement-experiments.md) landed through
-[PR1387](https://github.com/CrispStrobe/brickwright-lite/pull/1387). The source
+[PR1387](https://github.com/CrispStrobe/brickwright/pull/1387). The source
 passed 31 checks, with six declared conditional skips, including all 18 browser
 shards. This adds scene-assisted measurement picks, sampled acceleration and
 pneumatic gauge pressure, bounded two-run recording and CSV comparison, and
@@ -281,7 +281,7 @@ and both recorded CSV runs' source, time, unit and definition joins. These are
 retained originals from this later workflow; PR1339's earlier successful files
 remain unavailable for a separate byte audit. Material estimates and tracked
 coasting/steering limits remain documented. The subsequent
-[PR1404](https://github.com/CrispStrobe/brickwright-lite/pull/1404) adds completed-step
+[PR1404](https://github.com/CrispStrobe/brickwright/pull/1404) adds completed-step
 signed motor torque, separate local stop reactions and mechanical power, plus
 bounded saved histories and finite inspector properties. Its 39 checks completed
 with 33 successes and six declared skips; retained saved-project and CSV joins
@@ -291,7 +291,7 @@ establish physical accuracy or experimental-model qualification.
 
 ## Virtual-brick data and crane winch — qualified follow-on
 
-[PR1415](https://github.com/CrispStrobe/brickwright-lite/pull/1415) landed normally
+[PR1415](https://github.com/CrispStrobe/brickwright/pull/1415) landed normally
 as `5cd027707e`, with the predicted parents and tree. It adds bounded NXT
 FLATTEN/UNFLATTEN and EV3 virtual program-data files, including handle and
 snapshot lifecycle controls. The shipped crane gains a retained motor-C winch
@@ -318,7 +318,7 @@ qualify the named software cases, not physical calibration or a new deployment.
 
 ## NXT VM virtual file calls
 
-[PR1430](https://github.com/CrispStrobe/brickwright-lite/pull/1430) implements
+[PR1430](https://github.com/CrispStrobe/brickwright/pull/1430) implements
 FileOpenRead, FileOpenWrite, FileOpenAppend, FileRead, FileWrite, FileClose,
 FileResolveHandle, FileRename, FileDelete and ListFiles for compiled programs.
 They share bounded virtual flash with telegram file operations while preserving
@@ -358,15 +358,15 @@ newer main features are already in that release. Source/readback ownership is
 preserved for any genuinely new release or changed-state request.
 
 The accepted PR1327 model/browser results above remain complete. The separate
-[PR1336](https://github.com/CrispStrobe/brickwright-lite/pull/1336) merged as
+[PR1336](https://github.com/CrispStrobe/brickwright/pull/1336) merged as
 `c62595f6`, bringing 60 experimental entries. The subsequent
-[PR1432](https://github.com/CrispStrobe/brickwright-lite/pull/1432) merged as
+[PR1432](https://github.com/CrispStrobe/brickwright/pull/1432) merged as
 `22329fc1` and added the Sarrus single-chain control, for 61 entries at that
 checkpoint. Its observe-only headless completion and simulator agreement remain
 distinct from browser load and saved-project replay, which are recorded NOT_RUN.
 
-At inspected main `560cf7e6`, [PR1446](https://github.com/CrispStrobe/brickwright-lite/pull/1446)
-and [PR1449](https://github.com/CrispStrobe/brickwright-lite/pull/1449) have promoted
+At inspected main `560cf7e6`, [PR1446](https://github.com/CrispStrobe/brickwright/pull/1446)
+and [PR1449](https://github.com/CrispStrobe/brickwright/pull/1449) have promoted
 Toggle Lever and Thirdline and added Phasor Twin and its control. There are now
 61 active experimental entries, 63 retained checkpoint records and 14 separate
 qualification contracts. The prior twelve contracts are unchanged; the two
@@ -432,7 +432,7 @@ The retained zero-cold sparse trace also exposed an elapsed-label defect: the
 first observation follows a 25 ms VM tick but carries elapsed time zero. Its
 scene timestamp remains available; this operational readback does not qualify
 that elapsed-label interpretation. The separate source correction in
-[PR1444](https://github.com/CrispStrobe/brickwright-lite/pull/1444) qualified three
+[PR1444](https://github.com/CrispStrobe/brickwright/pull/1444) qualified three
 actual hosted Jolt cases for zero-cold sampling, cold-start phase association and
 early-completion phase boundaries. All 44 exact-head checks completed with 37
 successes and seven declared skips. The normal merge `696f00761b92` preserves
@@ -463,7 +463,7 @@ finite qualifications above; their detailed contracts are in the
 | G03 sandbox/editor usability | DONE finite scoped work: PR1345/PR1354 record rendered controls and repair touch Move-drag; PR1358 adds an idle empty-editor action after failed conversion while preserving the source buffer. See the current G03 section in the SPIKE guide. | EN/DE, touch, large pane, long reports, mat save/reopen and bounded Identify retain their observed UI boundary; no firmware or physical accuracy claim. |
 | G05 packaging/provenance | Finite Linux source/notices and real installed layout work landed through PR1347/PR1353/PR1356/PR1360. The hosted workflow landed in PR1368 and its post-merge v0.1.27 package exercise passed. | Real Linux installation and hosted pipeline results with placeholder runtime/support/frontend inputs stay distinct. Signed/non-Unix delivery and redistribution clearance remain separate. |
 | Configured API host | Finite operational readback completed: authenticated transport refusals, one current owned status/result, a different-owner receipt refusal, input/worker/report joins and actual terminal reservation release. The unchanged worker commit is now reachable from main. | No key/MAC audit, separately acquired installed engine bytes, capacity saturation or model/library qualification. Host-buffered stalled upload remains inconclusive; source deadlines are unchanged. |
-| Experimental-model floor contacts | PR1445 landed the finite driven-linkage contact repair for [#1436](https://github.com/CrispStrobe/brickwright-lite/issues/1436) at `7b4f2f84`: eight hosted old/current drop, driven single-chain, intact and held controls passed alongside the unchanged broader gates. See [the floor-contact contract](ROBOT-LAB-FLOOR-CONTACT.md). The separate unpowered coplanar-frame drift report [#1435](https://github.com/CrispStrobe/brickwright-lite/issues/1435) remains with its owning lane. | The repair preserves authored geometry, drive programs, numerical limits and pins. Its finite footprint and downward linear-risk trigger do not establish general contact stability or physical calibration; retain the rejected geometry candidates and original failures. |
+| Experimental-model floor contacts | PR1445 landed the finite driven-linkage contact repair for [#1436](https://github.com/CrispStrobe/brickwright/issues/1436) at `7b4f2f84`: eight hosted old/current drop, driven single-chain, intact and held controls passed alongside the unchanged broader gates. See [the floor-contact contract](ROBOT-LAB-FLOOR-CONTACT.md). The separate unpowered coplanar-frame drift report [#1435](https://github.com/CrispStrobe/brickwright/issues/1435) remains with its owning lane. | The repair preserves authored geometry, drive programs, numerical limits and pins. Its finite footprint and downward linear-risk trigger do not establish general contact stability or physical calibration; retain the rejected geometry candidates and original failures. |
 
 The retained two-UI-Stop result qualifies its named older package. The current
 finite G02 matrix closure comes from the separate installed matrix referenced
@@ -493,7 +493,7 @@ Deferred iOS audit pickup starts with the audit jobs in
 [mobile.yml](../.github/workflows/mobile.yml),
 [resource-preparation controls](../test/ios-workflow-resource-preparation.test.mjs)
 and [embedded-asset controls](../test/ios-workflow-embedded-asset-audit.test.mjs).
-The [retained Darwin design contract](https://github.com/CrispStrobe/brickwright-lite/blob/14e9e199c389a4beedfa5f37ec1d9f1078d7c9b1/docs/INTEGRATION-NEXT-STEPS.md#darwin-sampler-admission-before-controller-wiring)
+The [retained Darwin design contract](https://github.com/CrispStrobe/brickwright/blob/14e9e199c389a4beedfa5f37ec1d9f1078d7c9b1/docs/INTEGRATION-NEXT-STEPS.md#darwin-sampler-admission-before-controller-wiring)
 provides the detailed identity and transaction boundaries. Refresh actual source
 and ownership before implementing this deferred lane.
 

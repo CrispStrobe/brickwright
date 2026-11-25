@@ -106,7 +106,7 @@ run passed 26/26 scenarios, including the three served notice/source files.
 
 ## Review branch and first CI cycle
 
-Draft PR: https://github.com/CrispStrobe/brickwright-lite/pull/110 . Original
+Draft PR: https://github.com/CrispStrobe/brickwright/pull/110 . Original
 worktree preservation was rechecked: its tracked diff still has the initial
 SHA-256 recorded above. No default-branch merge or deployment has been performed.
 

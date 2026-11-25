@@ -250,7 +250,7 @@ later browser gates still collect evidence after an earlier failure. A gate may
 be reported as passing only after its own assertions succeed; the whole workflow
 must pass before claiming complete qualification of this scope.
 
-The [initial hosted run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/45552587031)
+The [initial hosted run](https://github.com/CrispStrobe/brickwright/actions/runs/45552587031)
 at Lite `50b32fa7405dcc5f30637b23f1a6be69c0ee12de` passed the connector gate in
 Chromium 149.0.7827.55, covering all eight orientations, 40 contacts, base/CP3
 configuration and synthetic-ROM import. Its desktop screenshot was inspected.
@@ -268,13 +268,13 @@ environment; the local source/component tests remain separate evidence.
 
 ### Subsequent hosted findings
 
-Run [45555731912](https://github.com/CrispStrobe/brickwright-lite/actions/runs/45555731912)
+Run [45555731912](https://github.com/CrispStrobe/brickwright/actions/runs/45555731912)
 at `ccac35d80d2c03c0faa4adc77b2b5d3284b456ec` passed the connector and reached
 real switch/firmware/LED behavior in the shared runner. The remaining fixtures
 needed React update synchronization, an exact PropTypes alias, and the production
 project loader's completion event. Those fixture defects were corrected.
 
-Run [45557001274](https://github.com/CrispStrobe/brickwright-lite/actions/runs/45557001274)
+Run [45557001274](https://github.com/CrispStrobe/brickwright/actions/runs/45557001274)
 at `b9033ae6ebea0b5854f9489110373a3bbcc76728` passed the connector and CP5
 electrical/control gate: eight switches, twelve patterns and fourteen measured
 observations, including paused keyboard control. Its overall status remained
@@ -292,7 +292,7 @@ The old screenshots are retained as evidence of the defect, not a layout pass.
 
 ### Passing hosted checkpoint
 
-[Run 45559592991](https://github.com/CrispStrobe/brickwright-lite/actions/runs/45559592991)
+[Run 45559592991](https://github.com/CrispStrobe/brickwright/actions/runs/45559592991)
 completed successfully on Lite `8498ebdd322b515aa97b6c3930ef77270e54a52e` after
 these product and fixture fixes. All six gates passed: standalone connector,
 panel on React 18 and 16, shared runner/project restore on both versions, and

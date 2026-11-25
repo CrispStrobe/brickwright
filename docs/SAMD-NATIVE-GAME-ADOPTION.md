@@ -53,7 +53,7 @@ runs40826297334 (Chromium) and40828345515 (installed Tauri/WebKit) passed three
 fresh instances each. Independent audits decoded all 102 original RGB frames,
 verified press/release and sampled RSS, and joined source/frontend/executable/
 engine/profile/firmware identities. Consumer
-[PR1533](https://github.com/CrispStrobe/brickwright-lite/pull/1533) folds the
+[PR1533](https://github.com/CrispStrobe/brickwright/pull/1533) folds the
 SPIKE support closure and merged as
 `9f1a620f2aae5ee988ed02069a8bf34c18949123`. Seventeen final-head checks passed,
 but the enabled `full CI requested` check failed before that merge. The source

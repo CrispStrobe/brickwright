@@ -2,7 +2,7 @@
 
 Status: bounded original/native, Code, export/reimport and saved-project qualification. Production GUI authoring and low-level system-event callbacks remain pending.
 
-This continuation uses the merged native text-dialog claim for controller gating and scene composition, the class/reference claim [#889](https://github.com/CrispStrobe/brickwright-lite/pull/889) for typed scene authoring, and the scheduler claim [#881](https://github.com/CrispStrobe/brickwright-lite/pull/881) for scene/render lifecycle. It preserves the existing scene-reference kind and actual source timing.
+This continuation uses the merged native text-dialog claim for controller gating and scene composition, the class/reference claim [#889](https://github.com/CrispStrobe/brickwright/pull/889) for typed scene authoring, and the scheduler claim [#881](https://github.com/CrispStrobe/brickwright/pull/881) for scene/render lifecycle. It preserves the existing scene-reference kind and actual source timing.
 
 ## Source contract
 

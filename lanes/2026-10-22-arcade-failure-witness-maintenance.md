@@ -6,7 +6,7 @@ Merge this claim before implementation; preserve other active workflow lanes.
 
 ## Observed failures and owned paths
 
-The complete [integration run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/39705808582)
+The complete [integration run](https://github.com/CrispStrobe/brickwright/actions/runs/39705808582)
 has a source-policy failure for an actual native score test and two remaining
 legacy SDK failures. Work only these narrow witnesses and capture routes:
 

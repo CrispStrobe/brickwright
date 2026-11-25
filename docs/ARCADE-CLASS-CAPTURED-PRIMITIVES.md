@@ -2,7 +2,7 @@
 
 ## Purpose and current boundary
 
-Merged [claim #1300](https://github.com/CrispStrobe/brickwright-lite/pull/1300)
+Merged [claim #1300](https://github.com/CrispStrobe/brickwright/pull/1300)
 owns this work. A complete inherited class example imports but refuses export
 because the addition analysis cannot establish all captured operand domains and
 entry readiness. Keep the entire original example, including field initializers,
@@ -79,7 +79,7 @@ Run complete modules, without title filters or changed expected values.
 | `test/native-class-lexical-frontier.test.mjs` | Class activation and lexical entry frontier |
 | `test/makecode-arcade-class-inheritance.test.mjs` | Original affected runtime and MakeCode qualification; keep its program and expectations unchanged |
 
-The public continuation is [PR #1128](https://github.com/CrispStrobe/brickwright-lite/pull/1128).
+The public continuation is [PR #1128](https://github.com/CrispStrobe/brickwright/pull/1128).
 Refresh its actual head and enabled checks before acting. A successful result on
 a different branch or an older head does not qualify its current candidate.
 

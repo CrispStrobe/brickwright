@@ -232,7 +232,7 @@ retained; the later audit is a saved-graph comparison, not emitted-source AST
 equality, native or export equivalence, visible GUI qualification or a
 compatibility-corpus promotion.
 
-A separate [ordinary local initializer transport contract](https://github.com/CrispStrobe/brickwright-lite/blob/main/docs/ARCADE-LOCAL-INITIALIZER-TRANSPORT.md)
+A separate [ordinary local initializer transport contract](https://github.com/CrispStrobe/brickwright/blob/main/docs/ARCADE-LOCAL-INITIALIZER-TRANSPORT.md)
 now defines **C1**: represent a proved first literal write at the same position
 without adding a duplicate declaration initializer. Its reviewed foundation must
 qualify before implementation. A no-value declaration protocol (**C2**), startup

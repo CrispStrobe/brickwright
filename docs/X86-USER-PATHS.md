@@ -1,6 +1,6 @@
 # x86 user paths in Lite
 
-Current documentation checkpoint: 2026-10-27; see [the handoff and acceptance tasks](X86-NEXT-LANES.md#current-handoff-2026-10-27). Main selects board `836867513c3e7fac420ddaa32c17e1c7b6d3e513` in [vendor-pins.json](../vendor-pins.json). This is a source-backed guide, not a fresh installed-browser or guest acceptance. PR1318 remains pending, and newer board qualification does not silently update this consumer. The original guide checkpoint was [Lite 2796d2f5](https://github.com/CrispStrobe/brickwright-lite/tree/2796d2f5ac344986a9fb870d0b2f06344b3d259b) with board `3b03d226`.
+Current documentation checkpoint: 2026-10-27; see [the handoff and acceptance tasks](X86-NEXT-LANES.md#current-handoff-2026-10-27). Main selects board `836867513c3e7fac420ddaa32c17e1c7b6d3e513` in [vendor-pins.json](../vendor-pins.json). This is a source-backed guide, not a fresh installed-browser or guest acceptance. PR1318 remains pending, and newer board qualification does not silently update this consumer. The original guide checkpoint was [Lite 2796d2f5](https://github.com/CrispStrobe/brickwright/tree/2796d2f5ac344986a9fb870d0b2f06344b3d259b) with board `3b03d226`.
 
 ## Pick the right machine
 
@@ -62,7 +62,7 @@ Coordinate a supplier-pin update with its active owner before editing shared pac
 
 ## Finite inventory bootstrap checkpoint — 2026-10-26
 
-The [once-selected finite V7 inventory](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40352829291)
+The [once-selected finite V7 inventory](https://github.com/CrispStrobe/brickwright/actions/runs/40352829291)
 failed Chromium dependency setup before inventory observation. Its failure is
 retained and the event is spent. The [distinct F8 lane](../lanes/2026-10-26-x86-finite-v8-browser-bootstrap.md)
 starts disabled and reuses the existing official-Ubuntu mirror preparation
@@ -87,7 +87,7 @@ GUI export/reload and forward-debug acceptance remain unselected and unproved.
 
 ## Finite V9 resolver-role source checkpoint — 2026-10-27
 
-The [once-selected V8 inventory](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40422314383)
+The [once-selected V8 inventory](https://github.com/CrispStrobe/brickwright/actions/runs/40422314383)
 passed source and trusted setup, then refused `/etc/resolv.conf` because its
 selected alias role did not match the observed regular file. Its independent
 negative reader joined the event with qualification false. Preserve that

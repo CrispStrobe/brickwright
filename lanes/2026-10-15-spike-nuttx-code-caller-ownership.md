@@ -1,7 +1,7 @@
 ## SPIKE NuttX Code caller ownership — 2026-10-15
 
 IN PROGRESS — Codex SPIKE G02 continuation, branch
-`lane/spike-g02-code-caller-20261015`. Scope claim [PR978](https://github.com/CrispStrobe/brickwright-lite/pull/978)
+`lane/spike-g02-code-caller-20261015`. Scope claim [PR978](https://github.com/CrispStrobe/brickwright/pull/978)
 merged before product changes. Extend the existing SPIKE session/pane/feedback envelope only
 to `runOnNuttxPython` in
 `overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx` and

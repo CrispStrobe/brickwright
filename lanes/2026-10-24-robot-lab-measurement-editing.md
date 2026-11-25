@@ -73,7 +73,7 @@ retained successful log. The observed checkout `2fb2726d` joins to tree
 Successful JSON/SB3 files are not retained by the existing workflow; no separate
 independent audit of original saved-project bytes is claimed.
 
-[PR1339](https://github.com/CrispStrobe/brickwright-lite/pull/1339), reviewed head
+[PR1339](https://github.com/CrispStrobe/brickwright/pull/1339), reviewed head
 `e774a119d5f4603e17c735ae1980f7ae27ec6862`, merged normally as
 `2351457441a5188247ba3600d9192583d735ccda` after all 28 enabled checks passed,
 with seven declared skips and no external legacy statuses. The actual parents

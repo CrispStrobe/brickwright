@@ -151,7 +151,7 @@ the census's parse-yield guard disabled ............... RED, exit 1
 
 ## 4. The observed sweep — measured on a CI runner
 
-**Run [32780994663](https://github.com/CrispStrobe/brickwright-lite/actions/runs/32780994663), branch tip `d739ff4d9`.**
+**Run [32780994663](https://github.com/CrispStrobe/brickwright/actions/runs/32780994663), branch tip `d739ff4d9`.**
 
 Not on a developer box. This repo's own `check-system-load.mjs` reported **6.1 load per CPU
 against an allowed 1.5** here and refused to build at all — and it was right to. These

@@ -1,6 +1,6 @@
 # Robot Lab measurement experiments — 2026-10-25
 
-Status: DONE — all six items qualified and landed in [PR1375](https://github.com/CrispStrobe/brickwright-lite/pull/1375).
+Status: DONE — all six items qualified and landed in [PR1375](https://github.com/CrispStrobe/brickwright/pull/1375).
 Owner: Codex, user-requested six-item continuation. Isolated branch
 `lane/robot-measurement-experiments-20261025`, base `23ec908232f6d4c4604ed6f7dcb23b75af19053d`.
 The claim merged before implementation. All six items completed qualification;
@@ -81,7 +81,7 @@ Existing assertions and deadlines remain in place.
 
 ## Qualified result
 
-[PR1375](https://github.com/CrispStrobe/brickwright-lite/pull/1375) landed normally
+[PR1375](https://github.com/CrispStrobe/brickwright/pull/1375) landed normally
 at `eef726fe67d505733b31c599a677ab1897f96a94`, with the reviewed parents and
 predicted tree verified. Its exact head passed 31 checks, with six declared
 conditional skips and no failing or pending checks. All 18 browser shards passed.

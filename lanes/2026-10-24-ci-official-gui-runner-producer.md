@@ -1,7 +1,7 @@
 # Same-workflow official GUI producer evidence — claim amendment
 
 **SOURCE CANDIDATE; hosted qualification pending.** Claim merged in
-[PR 1350](https://github.com/CrispStrobe/brickwright-lite/pull/1350). Owner: Codex CI audit repair,
+[PR 1350](https://github.com/CrispStrobe/brickwright/pull/1350). Owner: Codex CI audit repair,
 continuing the user-authorized narrow CI audit takeover in
 [the browser evidence claim](2026-10-24-ci-browser-runner-step-outcomes.md).
 Base: `97518e42cac77f146bbe79113a9e91dbaaec5342`. Public branch:
@@ -11,7 +11,7 @@ only producer evidence admission; it does not transfer Arcade feature work.
 
 ## Observed boundary
 
-[Build 40113882924](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40113882924)
+[Build 40113882924](https://github.com/CrispStrobe/brickwright/actions/runs/40113882924)
 at source `2ffb3bb8327053b939cf14bb243c4392253a17e5` retains a failed official
 numeric GUI consumer. Its `needs: build` dependency has finished successfully,
 but the official API still reports a required producer step as pending.

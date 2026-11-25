@@ -8,7 +8,7 @@ This methods page supplies no numerical or physical qualification by itself.
 ## Retained first-study result and held correction
 
 The original v1 study at source `92a9ab6e7e4c639fb43299451a974c6a700592d3`,
-[run 40335666363](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40335666363),
+[run 40335666363](https://github.com/CrispStrobe/brickwright/actions/runs/40335666363),
 failed and remains unchanged. One acquired original artifact and the frozen
 independent reader establish an incomplete report: 23 of 32 designs numerically
 passed, with all 3,726 compared values agreeing. Nine unsuccessful requests stay

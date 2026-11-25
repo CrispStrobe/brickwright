@@ -42,14 +42,14 @@ request remains unchanged and still refuses a paginated response.
 
 ## Qualified source and postmerge operation — 2026-10-24
 
-[PR1333](https://github.com/CrispStrobe/brickwright-lite/pull/1333) merged after
+[PR1333](https://github.com/CrispStrobe/brickwright/pull/1333) merged after
 all 29 enabled exact-head checks passed, with six source-declared conditional
 skips. Eleven focused actual-CLI/limit/coverage tests pass. An independent audit
 of the retained 29-job/4,151-step failure input reproduces complete coverage
 through 42 windows without a build or guest replay. The legacy reporter and its
 200-step refusal remain unchanged.
 
-A new postmerge [operational run40091607422](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40091607422)
+A new postmerge [operational run40091607422](https://github.com/CrispStrobe/brickwright/actions/runs/40091607422)
 successfully reported completed Build40085834852: 14 jobs, 288 steps and nine
 nonempty windows. Its actual checkout's reporter/workflow blobs equal the
 qualified source; the retained official artifact's digest, schema/profile,

@@ -9,7 +9,7 @@ preparation, not a claim that namespace Buffer imports already work.
 
 - Original PXT algorithms: https://github.com/microsoft/pxt/tree/v13.2.1/pxtsim
 - Original MIT notice: https://raw.githubusercontent.com/microsoft/pxt/v13.2.1/LICENSE
-- Candidate integration: https://github.com/CrispStrobe/brickwright-lite/pull/810
+- Candidate integration: https://github.com/CrispStrobe/brickwright/pull/810
 - Canonical authoring producer: https://github.com/CrispStrobe/sb3-creator/pull/96
 - UTF8 construction producer: https://github.com/CrispStrobe/sb3-creator/pull/97
 - Readonly Boolean producer: https://github.com/CrispStrobe/sb3-creator/pull/98
@@ -401,8 +401,8 @@ These changes remove duplicate backing stores on two allocation paths; they
 do not introduce live collection or an aggregate memory limit.
 
 The authored Buffer GUI/export journey passed on
-[PR850 head f30e57cfa2](https://github.com/CrispStrobe/brickwright-lite/pull/850),
-[run38342374353](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38342374353).
+[PR850 head f30e57cfa2](https://github.com/CrispStrobe/brickwright/pull/850),
+[run38342374353](https://github.com/CrispStrobe/brickwright/actions/runs/38342374353).
 It covers actual dropdown/numeric edits, A/B/down controller input, Code/Blocks
 reconstruction, saved project replacement/reopen and a genuine downloaded
 MakeCode project executed in the original runtime. Original artifact11789541637

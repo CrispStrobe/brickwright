@@ -22,7 +22,7 @@ product acceptance. No `ci:full` label or repeat of retained guest originals.
 
 ## Handoff, 2026-10-29
 
-The consumer is draft [Lite PR #1565](https://github.com/CrispStrobe/brickwright-lite/pull/1565),
+The consumer is draft [Lite PR #1565](https://github.com/CrispStrobe/brickwright/pull/1565),
 branch `lane/samd-profile-admission-20261029`, in the isolated checkout above.
 The supplier is [bw-board PR #721](https://github.com/CrispStrobe/bw-board/pull/721),
 branch `lane/samd-controller-memory-rgb888-20261029`, exact final source candidate

@@ -68,28 +68,28 @@ their original scope. Statements of completed or pending work in this ledger
 describe that earlier adoption; current 9c consumer status is stated above.
 
 **Source landed; enabled-check closure remains open.**
-[PR1533](https://github.com/CrispStrobe/brickwright-lite/pull/1533) merged as
+[PR1533](https://github.com/CrispStrobe/brickwright/pull/1533) merged as
 `9f1a620f2aae5ee988ed02069a8bf34c18949123`, folding PR1547. On reviewed head
 `4e225970574ca517d7908811fe9bf9c3ed2f4fb4`, 17 checks succeeded and 11 were
 conditionally skipped. The enabled
-[`full CI requested` check](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40836953746/job/123335306292)
+[`full CI requested` check](https://github.com/CrispStrobe/brickwright/actions/runs/40836953746/job/123335306292)
 failed before the merge because the executing policy required the `ci:full`
 label. The operator's fast-tier preference did not change that source policy or
 turn its failed verdict into success. The landed tree matches the merge of the
 reviewed parents; that structural proof does not close the enabled-check failure.
 Original source branches, guest evidence and failures remain retained.
 
-The full [source run40783464522](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40783464522)
-and [native run40803428616](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40803428616)
+The full [source run40783464522](https://github.com/CrispStrobe/brickwright/actions/runs/40783464522)
+and [native run40803428616](https://github.com/CrispStrobe/brickwright/actions/runs/40803428616)
 passed on consumer `48df0f93f9b6b642238c13448e6f075d8871eb83`. Independent original
 archive/source audit joined all 8,563 frontend files, 184 native sources and
 binary `b1e644b68b203e196f25203ed2424220b2fcff15766f31cee32ba245b45c8a38`.
 Compile defaults and qualified original inputs remained unchanged.
 
 **Both actual game realms passed:** Chromium in
-[40826297334](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40826297334),
+[40826297334](https://github.com/CrispStrobe/brickwright/actions/runs/40826297334),
 installed Tauri/WebKit in
-[40828345515](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40828345515).
+[40828345515](https://github.com/CrispStrobe/brickwright/actions/runs/40828345515).
 Each ran three fresh instances and retained 51 RGB frames. Independent decoding
 confirmed eight targets, ball motion, eight-pixel press displacement and stopped
 movement after release in all six instances. Original source/frontend/executable,
@@ -168,7 +168,7 @@ passed two builds, determinism, 125 existing tests and three game samples.
 Independent review checked 565 files and 51 RGB frames. Motion remains deferred.
 Keep component notices and the narrow Node 22 inlining workaround documented by
 the [producer handoff](https://github.com/CrispStrobe/bw-board/blob/master/docs/SAMD-ENGINE-RELEASE-HANDOFF.md).
-Infrastructure [PR1456](https://github.com/CrispStrobe/brickwright-lite/pull/1456)
+Infrastructure [PR1456](https://github.com/CrispStrobe/brickwright/pull/1456)
 merged as `dea504b32a9a4bd43a2a9d25b587590a0ac9763f`. The package owner released
 the former PR1318-first hold for this exact adoption and its claimed repairs;
 no general package boundary is open.
@@ -183,12 +183,12 @@ No board/compiler/CUI package pin, native producer or compile default changes.
   now passed. Shard6 reports 1,885 passes, zero failures, one existing TurboWarp
   checkout skip and four existing Arcade TODOs; keep their documented limits in
   [ARCADE-888-OPEN-FAILURES.md](ARCADE-888-OPEN-FAILURES.md).
-- [Tauri40783464531](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40783464531)
+- [Tauri40783464531](https://github.com/CrispStrobe/brickwright/actions/runs/40783464531)
   passed full Rust tests (273 passed, zero failed, 11 existing ignored) and E2E.
   Vendor, GUI infrastructure and historical-study controls passed. The separate
   actual historical study is correctly skipped on this event.
 - The official frontend
-  [producing job123176209089](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40783464522/job/123176209089)
+  [producing job123176209089](https://github.com/CrispStrobe/brickwright/actions/runs/40783464522/job/123176209089)
   succeeded. Artifact12866901737 was acquired once after metadata admission.
   Independent review hashed all 8,563 emitted files (298,288,470 bytes) and verified
   actual checkout `5b6d453136967e943fd36ef29c3c8054a295a1fb`, its parents/tree,
@@ -199,24 +199,24 @@ No board/compiler/CUI package pin, native producer or compile default changes.
   Wasm `1ad2947b99df8a13fce29c9240a79c61fb66e4d57ede26ca50880f141f3e3978`,
   profile `0fe1e72ae684153696efbca5874d2633007b92a9c9144f38cd62fdd28d030750`.
   This proves byte binding, not successful overall source CI or actual guests.
-- [Native40803428616](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40803428616)
+- [Native40803428616](https://github.com/CrispStrobe/brickwright/actions/runs/40803428616)
   uses this reviewed consumer, frontend40783464522 and the unchanged closed
   `compile_pins` object from the reviewed
-  [qualification profile](https://github.com/CrispStrobe/brickwright-lite/blob/48df0f93f9b6b642238c13448e6f075d8871eb83/scripts/native-installed-qualification-profile.json).
+  [qualification profile](https://github.com/CrispStrobe/brickwright/blob/48df0f93f9b6b642238c13448e6f075d8871eb83/scripts/native-installed-qualification-profile.json).
   Both producing jobs succeeded. Its official originals were acquired once;
   independent audit joined 184 native source files, all 8,563 frontend files and
   executable SHA256 `b1e644b68b203e196f25203ed2424220b2fcff15766f31cee32ba245b45c8a38`.
   Compile defaults are unchanged. This is an identity audit, not installed-game
   acceptance; the remaining source workflow is still pending.
 
-The retained [five-target benchmark](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40730146231)
+The retained [five-target benchmark](https://github.com/CrispStrobe/brickwright/actions/runs/40730146231)
 passed its unchanged floor at source `317c069003803f9e8bfbe570ca7c371da6e52c10`.
 Its inputs are unchanged; do not repeat it. Core-loop ceilings do not qualify
 active-game or hardware speed.
 
 ## Historical failures and bounded repairs
 
-Original [Build40734487998](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40734487998)
+Original [Build40734487998](https://github.com/CrispStrobe/brickwright/actions/runs/40734487998)
 failed historical-study controls. Its successful producing job also minified the
 verified 153,114-byte glue to 51,263 bytes. Strict byte admission refused that
 frontend. Preserve both failures; this quarantined original must never feed
@@ -230,7 +230,7 @@ experiment pins, identity sources, thresholds, captures and intent are unchanged
 Current-pin/never-pinned guards remain strict. Do not import the supplier's
 entire PR. Hosted shard6 now passes all four sealed historical-role controls.
 
-Original [Tauri40765450230](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40765450230)
+Original [Tauri40765450230](https://github.com/CrispStrobe/brickwright/actions/runs/40765450230)
 reported 269 passed, one failed and11 ignored: the owner-crash test observed a
 child surviving its existing three-second bound. Its original fixture/test
 matched commit `3d77472b518ae4e9a57fd8cfb154e31ecba1b432`; SAMD had changed no
@@ -262,7 +262,7 @@ older frontend or native executable into a new qualified consumer.
 
 The earlier source landing and software acceptance results recorded above remain
 separate from closure of the failed enabled check. The selected-tier policy
-repair is owned by [PR1536](https://github.com/CrispStrobe/brickwright-lite/pull/1536).
+repair is owned by [PR1536](https://github.com/CrispStrobe/brickwright/pull/1536).
 Its final source and artifact-event admission must qualify before a preserving
 normal composition reaches main. Require every enabled check on that final head
 to succeed; a manual run does not replace an enabled PR admission check.

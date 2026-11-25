@@ -1,6 +1,6 @@
 ### Native song runtime checkpoint — 2026-10-11
 
-Draft [PR806](https://github.com/CrispStrobe/brickwright-lite/pull/806), tested
+Draft [PR806](https://github.com/CrispStrobe/brickwright/pull/806), tested
 code117a5b31230ae282aa4adee89bed2ab627fc0a6d, stacked normally on PR804.
 Retained MIT PXT instrument/song/TypeScript sequencer now queues real sound,
 with clock-driven playback, malformed/mutable-buffer refusal and empty-track

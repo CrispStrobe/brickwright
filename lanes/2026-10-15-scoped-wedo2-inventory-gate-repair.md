@@ -1,7 +1,7 @@
 ## Scoped WeDo2 inventory gate repair — 2026-10-15
 
 IMPLEMENTED, hosted qualification pending — SPIKE G02 integration follow-up.
-Ownership claim [PR994](https://github.com/CrispStrobe/brickwright-lite/pull/994)
+Ownership claim [PR994](https://github.com/CrispStrobe/brickwright/pull/994)
 merged before implementation. Source branch `fix/scoped-wedo-inventory-20261016`.
 
 The existing `wedo2unified` artifact pin is present in `vendor-pins.json`, but

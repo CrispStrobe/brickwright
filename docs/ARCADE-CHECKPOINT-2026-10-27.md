@@ -1,17 +1,17 @@
 # Arcade checkpoint and fresh-agent continuation — 27 October 2026
 
 Read this file first, then the checkpoint branch’s
-[detailed handoff](https://github.com/CrispStrobe/brickwright-lite/blob/lane/arcade-source-entry-image-banks-20261026/docs/ARCADE-AGENT-HANDOFF.md) and
-[GUI ledger](https://github.com/CrispStrobe/brickwright-lite/blob/lane/arcade-source-entry-image-banks-20261026/docs/CONVERSION-CAPABILITIES-AND-GUI-GAPS.md). Follow `LANES.md` and
+[detailed handoff](https://github.com/CrispStrobe/brickwright/blob/lane/arcade-source-entry-image-banks-20261026/docs/ARCADE-AGENT-HANDOFF.md) and
+[GUI ledger](https://github.com/CrispStrobe/brickwright/blob/lane/arcade-source-entry-image-banks-20261026/docs/CONVERSION-CAPABILITIES-AND-GUI-GAPS.md). Follow `LANES.md` and
 `lanes/PROTOCOL.md`. Operational paths and retained-original locations belong in
 ignored local Markdown; none are required to understand the public tasks below.
 
 ## Where the code is
 
 The complete source checkpoint is on
-[`lane/arcade-source-entry-image-banks-20261026`](https://github.com/CrispStrobe/brickwright-lite/tree/lane/arcade-source-entry-image-banks-20261026).
+[`lane/arcade-source-entry-image-banks-20261026`](https://github.com/CrispStrobe/brickwright/tree/lane/arcade-source-entry-image-banks-20261026).
 The current test/diagnostic continuation is
-[`lane/arcade-source-continuation-20261027`](https://github.com/CrispStrobe/brickwright-lite/tree/lane/arcade-source-continuation-20261027),
+[`lane/arcade-source-continuation-20261027`](https://github.com/CrispStrobe/brickwright/tree/lane/arcade-source-continuation-20261027),
 based on that complete source branch. Its checkpoints `0aa5d9add99` and
 `f6ad4b17a33` are pushed, but have not replaced #1128 or passed hosted tests.
 
@@ -21,10 +21,10 @@ branch history; isolated cherry-picks lose earlier Array, Image, callable,
 accessor, controller, loader and pin-policy repairs documented in the handoff.
 
 This is a **source checkpoint, not a merged or runtime-qualified release**.
-[PR #1437](https://github.com/CrispStrobe/brickwright-lite/pull/1437) and the
+[PR #1437](https://github.com/CrispStrobe/brickwright/pull/1437) and the
 previous documentation checkpoint #1470 have merged. Their owner retains the
 #1437 originals; do not download them again.
-[PR #1128](https://github.com/CrispStrobe/brickwright-lite/pull/1128) now has
+[PR #1128](https://github.com/CrispStrobe/brickwright/pull/1128) now has
 integration head `7ef0dacc`, containing the qualified main composition and
 source work through the publication-frontier checkpoint. Its hosted gates are
 still running. Unit shard 4 failed with 11 blocking tests and three declared
@@ -70,7 +70,7 @@ will close every row.
    test canonical frame reads positively and retain shadowed/replaced/escaped
    context negatives and source-mutation revocation. The isolated continuation
    includes this test repair; it has not been run on the shared server.
-3. Merge the claim in [#1482](https://github.com/CrispStrobe/brickwright-lite/pull/1482)
+3. Merge the claim in [#1482](https://github.com/CrispStrobe/brickwright/pull/1482)
    before implementing known `controller.moveSprite` reference retention.
    Preserve actual receiver allocation, speed Number/readiness, all writers,
    namespace ownership and construction-before-use. Qualify an independently
@@ -87,9 +87,9 @@ private operational details.
 
 | Shard | Original job | Blocking tests | Declared TODO failures |
 | --- | --- | ---: | ---: |
-| 2 | [122078179870](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40469189304/job/122078179870) | 20 | 2 |
-| 3 | [122078179967](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40469189304/job/122078179967) | 13 | 10 |
-| 4 | [122078179880](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40469189304/job/122078179880) | 11 | 3 |
+| 2 | [122078179870](https://github.com/CrispStrobe/brickwright/actions/runs/40469189304/job/122078179870) | 20 | 2 |
+| 3 | [122078179967](https://github.com/CrispStrobe/brickwright/actions/runs/40469189304/job/122078179967) | 13 | 10 |
+| 4 | [122078179880](https://github.com/CrispStrobe/brickwright/actions/runs/40469189304/job/122078179880) | 11 | 3 |
 
 Counts include nested tests and are failure diagnostics, not corpus rows or new
 app regressions. Other jobs are still pending and must be classified separately.

@@ -3,7 +3,7 @@
 Owner: Codex, Arcade assessment lane.
 Branch: `lane/arcade-assessment-stdio-claim-20261021`.
 Base: `c99c397f6ae0a3162f7fda9a0c4827d186585429`.
-Claim merged in [PR1177](https://github.com/CrispStrobe/brickwright-lite/pull/1177).
+Claim merged in [PR1177](https://github.com/CrispStrobe/brickwright/pull/1177).
 Implementation branch: `lane/arcade-assessment-stdio-source-20261021`.
 Status: source implementation complete; actual CLI and final hosted
 qualification pending before landing.

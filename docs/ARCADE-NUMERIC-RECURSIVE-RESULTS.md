@@ -2,7 +2,7 @@
 
 ## Scope and current qualification
 
-The [current composed hosted run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/39899568550)
+The [current composed hosted run](https://github.com/CrispStrobe/brickwright/actions/runs/39899568550)
 now passes the **complete original twelve-case function-return module (12/12)**.
 Recursive/mutual and parameter-write exports pass, together with the previously
 repaired Sprite forwarding case. Both new retained-draft grouping groups pass.

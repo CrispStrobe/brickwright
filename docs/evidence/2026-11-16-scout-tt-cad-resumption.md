@@ -5,7 +5,7 @@ Date: 2026-11-16. Environment: Node 24.22.1, npm 11.9.0.
 This continuation recovered the existing work from GitHub and verified it
 without changing runtime source, the SDK pin or the saved private demo.
 
-- Tested Lite source: [`3ae00ea69a307d1eb8647bd514037c53da692901`](https://github.com/CrispStrobe/brickwright-lite/commit/3ae00ea69a307d1eb8647bd514037c53da692901).
+- Tested Lite source: [`3ae00ea69a307d1eb8647bd514037c53da692901`](https://github.com/CrispStrobe/brickwright/commit/3ae00ea69a307d1eb8647bd514037c53da692901).
 - Clean-source CAD SDK: [`0ee57d91be6f4f910f8b8d6106ba894b9b1a8d1d`](https://github.com/CrispStrobe/brickwright-cad/commit/0ee57d91be6f4f910f8b8d6106ba894b9b1a8d1d).
 - Working branch: `feat/pla-rover-cad-20261115`.
 - Its merge retains main `6e8f065c6798cc4bfa1261f5c9413e69c4cbf367`

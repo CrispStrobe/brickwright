@@ -7,7 +7,7 @@ and local patch locations. Preserve other owners and read their current claims.
 
 ## Checkpoints and the immediate blocker
 
-- Public delivery PR [#1555](https://github.com/CrispStrobe/brickwright-lite/pull/1555)
+- Public delivery PR [#1555](https://github.com/CrispStrobe/brickwright/pull/1555)
   had product checkpoint `4fd045d0bea9b22a4c5259768a2e5df54a6a7df2` before this
   documentation update. It retains #1508/#1535/#1539/#1541, five proposed
   promotions, explicit motor compatibility and editor follow-ups. Its earlier
@@ -26,7 +26,7 @@ and local patch locations. Preserve other owners and read their current claims.
   Keep that receipt unchanged as evidence of the bug. Its 277 construction and
   27 native-motion/negative checks are valid bounded evidence; it is not model
   browser acceptance. The private kit promotion helper is locked against use.
-- Circuit [#1536](https://github.com/CrispStrobe/brickwright-lite/pull/1536)
+- Circuit [#1536](https://github.com/CrispStrobe/brickwright/pull/1536)
   is owned elsewhere, last observed frozen at `2e7846f8a901726a296e3a8ef006cff24bc457b5`.
   Its current exact-head qualification is pending. Predecessor `d32860b8` had
   build and five unit shards green, one genuine stale-wiring test failure;
@@ -95,8 +95,8 @@ or replaying historical studies. The editor browser gate cannot fill this gap.
 ## P1 — return Circuit/paint work to its owner
 
 **Owner:** #1536 maintainer; coordinator coordinates and supplies tests.
-Read [the paint patch return](https://github.com/CrispStrobe/brickwright-lite/pull/1536#issuecomment-6496620103)
-and [the bounded FPGA return](https://github.com/CrispStrobe/brickwright-lite/pull/1536#issuecomment-6496282204).
+Read [the paint patch return](https://github.com/CrispStrobe/brickwright/pull/1536#issuecomment-6496620103)
+and [the bounded FPGA return](https://github.com/CrispStrobe/brickwright/pull/1536#issuecomment-6496282204).
 
 The paint proposal changes only both PaintEditor container mirrors and existing
 `test/paint-editor-menu-bridge.test.mjs`: a bound native key wrapper ignores

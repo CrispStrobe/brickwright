@@ -28,7 +28,7 @@ These controls establish graph structure and eventual loop results. They do not
 establish exact original frame scheduling for finite loops that draw, mixed
 ordinary/source threads, scene replacement, debugger suspension or the physical
 GUI cadence. Those requirements belong to the
-[frame scheduler lane](https://github.com/CrispStrobe/brickwright-lite/pull/881). Its diagnostic prototype
+[frame scheduler lane](https://github.com/CrispStrobe/brickwright/pull/881). Its diagnostic prototype
 must be integrated and qualified through actual consumer, GUI and original
 runtime controls before a full-game promotion. Unknown or unsupported loop
 expressions remain reported rather than silently replaced.

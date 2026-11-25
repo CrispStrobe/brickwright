@@ -52,7 +52,7 @@ remain separate acceptance surfaces.
 ## Reached implementation checkpoint
 
 The documentation claim merged through
-[PR931](https://github.com/CrispStrobe/brickwright-lite/pull/931) at
+[PR931](https://github.com/CrispStrobe/brickwright/pull/931) at
 `e8b876bdb0e6aad68eee058ed5ad9e6b785e0ed5` after all 11 enabled checks passed;
 reviewed and landed trees match. Local implementation retains the ordinary parse
 for ordinary programs and enables the lexical pipeline only after an independent

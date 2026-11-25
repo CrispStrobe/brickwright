@@ -1,6 +1,6 @@
 ## SPIKE deferred-storage observer cancellation — 2026-10-14
 
-ADOPTED — [PR928](https://github.com/CrispStrobe/brickwright-lite/pull/928), tested
+ADOPTED — [PR928](https://github.com/CrispStrobe/brickwright/pull/928), tested
 source `aaa60836f1375a44cb69224e95dc511dd56e8d1c`, merged
 `fff84dc6ead5c1da7a89fee52a256497d6cc32f2`. This continuation stays
 within the merged G02 session/test envelope. Deferred storage frames can invoke

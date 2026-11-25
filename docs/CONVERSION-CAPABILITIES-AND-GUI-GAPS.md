@@ -32,7 +32,7 @@ These are source capabilities in the integration candidate. They do not change
 the 184-input census or certify a complete game. Read
 [the current handoff](ARCADE-AGENT-HANDOFF.md) before using older sections below.
 
-The [readonly startup Number task](https://github.com/CrispStrobe/brickwright-lite/pull/1461)
+The [readonly startup Number task](https://github.com/CrispStrobe/brickwright/pull/1461)
 has a source implementation; hosted and visible-editor acceptance remain open.
 Its private proof covers readonly startup arithmetic occurrences, all writers
 and entry order, while rejecting ambiguous emitted bindings. This grants no
@@ -108,7 +108,7 @@ open; these source controls do not reclassify applications.
 
 ## Current measured boundary and open editor work — 23 October 2026
 
-The [completed unit run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/39959713589)
+The [completed unit run](https://github.com/CrispStrobe/brickwright/actions/runs/39959713589)
 has 12,463 passes and 147 failures. Its frontier, class, operation, diagnostic
 and original SDK Sprite receiver cohorts pass. These counts do not measure
 application completion or editor parity.
@@ -631,7 +631,7 @@ Text-only addition, mixed addition and the text `"0"` truth case already behave
 correctly and must retain those results. Source-inserted numeric wrappers
 conceal this Blocks authoring failure. Track
 the shared input/canonical supplier correction in
-[PR949](https://github.com/CrispStrobe/brickwright-lite/pull/949); preserve text
+[PR949](https://github.com/CrispStrobe/brickwright/pull/949); preserve text
 behavior while qualifying actual Number producers.
 
 ## Identifier compound authoring checkpoint — 2026-10-15
@@ -788,7 +788,7 @@ It preserves captured receiver identity and separate Number/String generic
 results. Complete library support remains open.
 
 [The default admission contract](compatibility/arcade-ordinary-class-callable-default-admission.md)
-landed in [PR937](https://github.com/CrispStrobe/brickwright-lite/pull/937).
+landed in [PR937](https://github.com/CrispStrobe/brickwright/pull/937).
 Its bounded implementation is now integrated: independent complete-source flow,
 current editable project validation and reconstructed-source export proof choose
 the ordinary class profile. Independent review passed 36 affected controls,
@@ -862,7 +862,7 @@ No raw corpus project is promoted by this checkpoint: the immutable census
 remains 147 translated, 36 partial and one parse failure out of 184 inputs.
 
 Baseline reviewed 2026-10-07 against Lite main
-[`168457065`](https://github.com/CrispStrobe/brickwright-lite/commit/16845706545b115b76dd04f391cdebb1c3204e4c).
+[`168457065`](https://github.com/CrispStrobe/brickwright/commit/16845706545b115b76dd04f391cdebb1c3204e4c).
 The Arcade integration claim in [LANES.md](../LANES.md) owns this handoff.
 The previous agent is paused; its preserved branch is an integration input,
 not a second active owner. SPIKE G01, CPU and hardware ownership remain separate.
@@ -905,7 +905,7 @@ or reference type from these words.
 | Controller and stage | Numeric original comparisons include complete rendered frames; event input/waiter/player edits pass bounded official comparisons. | Repeat delay/interval, defaults and all 24 advertised player/button pairs have bounded original/native/Code/SB3/export controls. Their prepared real palette/controller-pane journey still needs matching hosted proof. Full source cadence and complete corpus games remain unqualified. |
 | Debugger and lifecycle | Focused tests retain Stop, restart, stale ownership, scalar/reference and callback cancellation assertions. | Add visible typed-cell/object/callable inspection without converting unknown values or editing retained execution state. |
 
-[Build 38514362889](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38514362889)
+[Build 38514362889](https://github.com/CrispStrobe/brickwright/actions/runs/38514362889)
 passes numeric/event authoring and light/heavy/FPGA browser gates, but both unit
 shards fail. Feature passes are not an all-checks-passing product claim. Bounded typed reference and nullable array routes pass source/native/export
 controls; their visible declaration, rename and editing journeys remain open.
@@ -939,7 +939,7 @@ original declarations without executing unused initializers.
   ownership for the original project at source startup; editing that graph
   requires a new start before reporter provenance is reused. Live graph
   migration remains an editor gap.
-  Aggregate JSON APIs keep their separate contracts. [The source-type contract](https://github.com/CrispStrobe/brickwright-lite/pull/913)
+  Aggregate JSON APIs keep their separate contracts. [The source-type contract](https://github.com/CrispStrobe/brickwright/pull/913)
   is merged and requires real value/ownership authority and editable source/export proof.
 - **Array queries:** typed search/removal export erases only the needle’s static
   view. Array declarations, aliases and image identity remain intact; search
@@ -1982,7 +1982,7 @@ journey is prepared; full shipped qualification remains required.
 See the [receipt](receipts/2026-10-09-arcade-literal-array-values.json).
 
 The preceding display-repair source `c7c1ae4aa` now passes the full build and
-both browser shards in [run37939577542](https://github.com/CrispStrobe/brickwright-lite/actions/runs/37939577542),
+both browser shards in [run37939577542](https://github.com/CrispStrobe/brickwright/actions/runs/37939577542),
 including the previous canvas/question and narrow graphics gate failures.
 The focused gate was still running at this checkpoint; nothing is merged on
 that partial check set. Camera-shake and array-feature branches need their own
@@ -2027,7 +2027,7 @@ remain named gaps. See the [receipt](receipts/2026-10-09-arcade-camera-shake.jso
 ## Device display lifecycle and hosted qualification — 2026-10-09
 
 PR752 source `c68661e2c` passed the full build and heavyweight browser shard in
-[run37918731553](https://github.com/CrispStrobe/brickwright-lite/actions/runs/37918731553).
+[run37918731553](https://github.com/CrispStrobe/brickwright/actions/runs/37918731553).
 Its light shard observed all four direct controllers with independent input,
 pointer release and retained velocity after detachment. The native truncation
 journey observed two argument evaluations and sprite coordinates35/40.
@@ -2543,7 +2543,7 @@ verification scripts under `scripts/`. These pointers do not claim fresh passes.
 ## Pending work and stale statements
 
 The paused checkpoint
-[`9fba4739d`](https://github.com/CrispStrobe/brickwright-lite/commit/9fba4739d3549780e01cd9dc111b73fc9d826f54)
+[`9fba4739d`](https://github.com/CrispStrobe/brickwright/commit/9fba4739d3549780e01cd9dc111b73fc9d826f54)
 contains F4 rotation/data and is preserved by a merge into the integration
 branch. Its original scaled rotation allocated the entire image; the integration
 implements bounded viewport sampling and tests exact pixels against pinned PXT.
@@ -2672,7 +2672,7 @@ than flattening timings. Include sheet and frames-as-costumes journeys.
 
 #### Uniform animation resource candidate — full browser journey qualified locally
 
-The candidate in [draft PR704](https://github.com/CrispStrobe/brickwright-lite/pull/704)
+The candidate in [draft PR704](https://github.com/CrispStrobe/brickwright/pull/704)
 on `lane/arcade-animation-resources-20261007` implements:
 
 - **Publish/Update/Remove** with a persistent UUID and display name; frame IDs,
@@ -2745,7 +2745,7 @@ recovery, persistent resource reconstruction and original-editor acceptance.
 merged at
 [`33ce7380e388e20b7c3a30e8ea84d1b774c30248`](https://github.com/CrispStrobe/sb3-creator/commit/33ce7380e388e20b7c3a30e8ea84d1b774c30248)
 and the app pins that exact producer. Consumer source
-[`96e812a23`](https://github.com/CrispStrobe/brickwright-lite/commit/96e812a2355a193bfb92cfb4b6982d82299792ad)
+[`96e812a23`](https://github.com/CrispStrobe/brickwright/commit/96e812a2355a193bfb92cfb4b6982d82299792ad)
 includes both canonical words and literal resource menu shadows. Two highlight
 tests, four explicit provider identity tests (zero skips), eight codec tests and
 four vendored original-export tests pass. The complete browser journey is now
@@ -3816,7 +3816,7 @@ Same184 import-only102/81/1,0 changed diagnostic rows. The original slices still
 The parent source at `ec2747905274da4bc74dd94cc58321268e60b642` passed all eight
 callback GUI journeys, including instance destruction and parallel captures,
 using the hosted production build. This does not mean overall CI passed:
-[the exact run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/37831089850)
+[the exact run](https://github.com/CrispStrobe/brickwright/actions/runs/37831089850)
 failed ten unit checks and four older heavy-browser checks.
 
 The follow-up repairs stale native-opcode, typed-array, overlap-registration,
@@ -3886,9 +3886,9 @@ narrow-target GUI and exported-PXT timeouts remain preserved privately.
 
 ## Controller reset lifecycle — 2026-10-09
 
-[PR740's hosted heavy browser job](https://github.com/CrispStrobe/brickwright-lite/actions/runs/37851310198/job/113580725332)
+[PR740's hosted heavy browser job](https://github.com/CrispStrobe/brickwright/actions/runs/37851310198/job/113580725332)
 passed, including the repaired camera, image-bounds and speech checks. The
-[PR741 build](https://github.com/CrispStrobe/brickwright-lite/actions/runs/37852453546/job/113568513617)
+[PR741 build](https://github.com/CrispStrobe/brickwright/actions/runs/37852453546/job/113568513617)
 recorded 6,474 passed unit checks, one camera gate-audit failure and 21 skips.
 Its heavy browser job separately timed out waiting for the controller reset.
 Neither parent has overall green CI.
@@ -4131,7 +4131,7 @@ whole-game equivalence is claimed.
 
 Persistence PR792 is merged at `18b2929a8479bcec880660b94c13bbb6c991741a`.
 Its seven enabled checks and all34 hosted painter observations passed:
-https://github.com/CrispStrobe/brickwright-lite/actions/runs/38146762544 .
+https://github.com/CrispStrobe/brickwright/actions/runs/38146762544 .
 Reviewed head `eae43ccbad345a5d123026d6a615a83828a6de89`; expected and actual
 merge tree `4470f89493e6c944ef62359888a9053df514c325` match. Conditional PR
 deployment jobs skipped as configured. Original compilation/rendering is
@@ -4160,7 +4160,7 @@ fixture check also passed. Source ownership is
 `overlay/scratch-gui/src/lib/bw-makecode/legacy-layout-editor.js`; regression
 coverage is `test/makecode-arcade-legacy-layout-editor.test.mjs`.
 The lane `lane/arcade-legacy-frame-selection-20261011` is stacked on
-[PR795](https://github.com/CrispStrobe/brickwright-lite/pull/795). Fresh
+[PR795](https://github.com/CrispStrobe/brickwright/pull/795). Fresh
 exact-source browser checks and normal parent integration remain required;
 these headless observations do not qualify a new frame-range GUI journey or
 rerank the original corpus. No painter JSX/model or peer-owned placement changes.
@@ -4169,7 +4169,7 @@ Named-tile PR793 now includes main through a normal merge at
 `aa6b54ae9d7416977d8953b0d73f41d34af692ff`. The preceding source
 `4fb23b92b59b7b875d0cb1a690765ded4d778660` passed its light shard and all11
 named-tile browser observations in
-https://github.com/CrispStrobe/brickwright-lite/actions/runs/38150051112 .
+https://github.com/CrispStrobe/brickwright/actions/runs/38150051112 .
 Actual downloads and failed/predecessor observations are archived privately.
 The refreshed merge still needs every enabled exact-head check; the older
 light-shard result is not a full-workflow or merged-main claim.
@@ -5150,7 +5150,7 @@ raw corpus still has 41 partial projects; these bounded checks do not change it.
 
 ## Scalar, evaluation order and official numeric GUI acceptance — 2026-10-14
 
-This section supersedes the earlier pending scalar/default and numeric GUI entries. The official [8d7 authoring run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38504674776) passes all five owned-game GUI journeys: import, visible blocks, edited Code, fresh SB3 and actual MakeCode export/reimport. Variables and complete frames match twelve selected original comparisons. Light and heavy browser jobs pass. Unit failures and the 41 corpus partials remain explicit; the owned fixture does not qualify an unrelated real game.
+This section supersedes the earlier pending scalar/default and numeric GUI entries. The official [8d7 authoring run](https://github.com/CrispStrobe/brickwright/actions/runs/38504674776) passes all five owned-game GUI journeys: import, visible blocks, edited Code, fresh SB3 and actual MakeCode export/reimport. Variables and complete frames match twelve selected original comparisons. Light and heavy browser jobs pass. Unit failures and the 41 corpus partials remain explicit; the owned fixture does not qualify an unrelated real game.
 
 | Capability now implemented | Blocks and Code authoring | GUI work still required |
 | --- | --- | --- |

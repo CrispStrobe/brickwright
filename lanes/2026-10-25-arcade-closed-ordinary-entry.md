@@ -5,7 +5,7 @@ Base: `7f9edea2cc648d7139d1f57099d5121361d48a01`.
 Owner: Arcade integration, isolated source lane. Preserve the active Arcade
 integration publisher and its Sprite factory/property proof.
 
-Claim [#1398](https://github.com/CrispStrobe/brickwright-lite/pull/1398) merged at
+Claim [#1398](https://github.com/CrispStrobe/brickwright/pull/1398) merged at
 `d11627829b514398368a5e782e148f3386161983` before implementation, with all four
 required checks successful and declared conditional skips. The source component
 and actual project component each derive their own private current proof; no
