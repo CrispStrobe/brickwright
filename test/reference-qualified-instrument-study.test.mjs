@@ -1,7 +1,7 @@
 /** Synthetic protocol controls only. No engine, CLI, SPICE or protected study is run. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync,writeFileSync,mkdirSync,mkdtempSync,rmSync,existsSync,copyFileSync} from 'node:fs';
+import {readFileSync,writeFileSync,mkdirSync,mkdtempSync,rmSync,existsSync,copyFileSync,realpathSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join,resolve,dirname} from 'node:path';
 import {pathToFileURL} from 'node:url';
@@ -384,7 +384,7 @@ test('reference quadrature accepts declared clock rounding and rejects a missing
 
 test('actual collector with process/source doubles roundtrips through the independent reader',
     {skip:process.versions.node.split('.')[0]!=='22'?'collector runtime admission requires Node22; executed by the source-controls workflow':false},async t=>{
-        const template=fixture(t),parent=mkdtempSync(join(tmpdir(),'reference-collector-'));
+        const template=fixture(t),parent=mkdtempSync(join(realpathSync(tmpdir()),'reference-collector-'));
         const historical=await historicalCollector(t);
         const historicalRead=output=>reader(output,HEAD,RUN,historical.root);
         t.after(()=>rmSync(parent,{recursive:true,force:true}));
