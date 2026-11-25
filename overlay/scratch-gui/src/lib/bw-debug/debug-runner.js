@@ -4240,7 +4240,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         snapshotPerformance: snapshotEmitter.stats,
 
         /** Build, attach, and run. The ⚑ of the debug world. */
-        async start() {
+        async start({paused = false} = {}) {
             if (['preparing','compiling','running'].includes(vm?.runtime?.cadCircuitSimulation?.state().phase)) {
                 throw new Error('Stop the circuit–CAD simulation before starting the debugger');
             }
@@ -4295,6 +4295,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                     unsubscribeBps = subscribeBreakpoints(syncBreakpoints);
                 }
                 session.start();
+                if (paused) session.pause();
                 boardBaseNs = boardTimeBase(board, target);
                 if (destroyed) return {accepted: false, code: 'destroyed'};
                 // Stop returns the board to the designer, but a restart reuses
@@ -4305,8 +4306,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                     if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('bw-board-ready'));
                 }
                 if (destroyed) return {accepted: false, code: 'destroyed'};
-                setStatus('running');
-                schedule();
+                setStatus(paused ? 'paused' : 'running');
+                if (paused) unschedule(); else schedule();
             } catch (e) {
                 unschedule();
                 i8086Execution.release(i8086ExecutionResult);
