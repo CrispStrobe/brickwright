@@ -377,10 +377,6 @@ class Cp1Panel extends React.Component {
         const stateKey = {ready: 'stateReady', running: 'stateRunning', halted: 'stateHalted',
             error: 'stateError', unknown: 'stateUnknown'}[view.execution] || 'stateUnknown';
         const step = view.step;
-        if (!view.qualified) {
-            return <span data-cp1-semantic="unavailable" className={styles.programHelp} role="img" tabIndex={0}
-                aria-label={this._t('semanticUnavailable')} title={this._t('semanticUnavailable')}>ⓘ</span>;
-        }
         const result = step && step.status !== 'pending' ?
             [this._t('stepResult', {completed: step.completed, instructions: step.instructions, cycles: step.cycles}),
                 step.status === 'limit' && this._t('stepBudget')].filter(Boolean).join(' ') : '';
@@ -419,6 +415,7 @@ class Cp1Panel extends React.Component {
     }
 
     _renderProgram (view, ready, compact = false, Editor) {
+        const showEditor = compact || !this.context?.Editor;
         const sourceLabel = this._t('source');
         const fallback = <textarea value={this.state.source} aria-label={sourceLabel}
             spellCheck={false} autoCapitalize="off" autoCorrect="off" data-cp1-source="true"
@@ -428,17 +425,19 @@ class Cp1Panel extends React.Component {
         return <div className={styles.program}>
             <div className={compact ? styles.compactActions : styles.actions}>
                 {this._iconButton(loadLabel, '↓', {disabled: !canLoad, onClick: () => this._load()})}
-                {this._iconButton(this._t('openSource'), '↗', {disabled: this.state.busy,
-                    onClick: () => this._sourceInput.current.click()})}
-                {this._iconButton(this._t('listing'), '⇩', {disabled: this.state.busy, onClick: () => {
-                    const result = this._assemble();
-                    if (result) this._action(() => downloadBlob('kosmos-cp1.cp1', new Blob(
-                        [exportCp1Program(result)], {type: 'text/plain;charset=utf-8'})));
-                }})}
-                {this._iconButton(this._t('save'), '▣', {disabled: this.state.busy, onClick: () => this._saveProject()})}
-                <span className={styles.programHelp} title={this._t('sourceHint')} tabIndex={0}>ⓘ</span>
+                {showEditor && <React.Fragment>
+                    {this._iconButton(this._t('openSource'), '↗', {disabled: this.state.busy,
+                        onClick: () => this._sourceInput.current.click()})}
+                    {this._iconButton(this._t('listing'), '⇩', {disabled: this.state.busy, onClick: () => {
+                        const result = this._assemble();
+                        if (result) this._action(() => downloadBlob('kosmos-cp1.cp1', new Blob(
+                            [exportCp1Program(result)], {type: 'text/plain;charset=utf-8'})));
+                    }})}
+                    {this._iconButton(this._t('save'), '▣', {disabled: this.state.busy, onClick: () => this._saveProject()})}
+                    <span className={styles.programHelp} title={this._t('sourceHint')} tabIndex={0}>ⓘ</span>
+                </React.Fragment>}
             </div>
-            {compact && Editor ? <div className={styles.sharedEditor} role="group" aria-label={sourceLabel}
+            {!showEditor ? null : Editor ? <div className={styles.sharedEditor} role="group" aria-label={sourceLabel}
                 data-cp1-source-editor><React.Suspense fallback={fallback}>
                     <Editor value={this.state.source} lang="cp1" onChange={text => this._setSource(text)} isVisible />
                 </React.Suspense></div> : fallback}
@@ -563,12 +562,14 @@ class Cp1Panel extends React.Component {
                 {disabled: running || busy || !onStep, onClick: () => onStep()})}
             {debug && ready && onReset && this._iconButton(this._t('reset'), '↺',
                 {disabled: busy, onClick: () => { this._releaseAll(); return onReset(); }})}
-            {debug && <span tabIndex={0} className={styles.programHelp}
-                title={[status, this._t('keyboard'), this._t('stepHint'), rom &&
+            {debug && <span tabIndex={0} className={styles.programHelp} role="img"
+                aria-label={view?.qualified ? status : this._t('semanticUnavailable')}
+                data-cp1-semantic={view && !view.qualified ? 'unavailable' : undefined}
+                title={[status, this._t('keyboard'), this._t('stepHint'), view && !view.qualified &&
+                    this._t('semanticUnavailable'), rom &&
                     `${rom.name || 'ROM'} · SHA-256 ${rom.sha256} · ${this._t('romLocal')}`].filter(Boolean).join('\n')}>
                 ⓘ
             </span>}
-            {debug && view && !view.qualified && this._renderSemantic(view)}
         </header>;
     }
 
