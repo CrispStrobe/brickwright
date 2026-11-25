@@ -967,3 +967,34 @@ checks confirmed both circuits used the new path. Sustained ratios in
 these unpaired samples were 0.683× for Atlas and 1.004× for Scout.
 Brickwright's release still pins Board commit `099c186` and the
 production 1× target remains open.
+
+### Circuit solver checkpoint and result allocation
+
+The MNA solver keeps a flat table of Newton checkpoints and copies a
+shared solution vector once per checkpoint. Restoring a checkpoint still
+returns independent vectors. The solver constructs return objects directly
+and keeps the same optional diagnostic fields and fallback rules.
+[Board source](https://github.com/CrispStrobe/bw-board/commit/ae6f226e0020154e602a146de3c0a70a7157f339)
+
+The paired Chrome worker test used the same CAD worker and Jolt 5.7 SIMD
+bytes. It matched all sampled voltages, shaft readings, poses and restart
+frames across two orders and 600 ticks per run per robot. Solve counts
+stayed at 18,930 for Atlas and 12,618 for Scout. Atlas's measured solve time
+was 783 → 791 ms and 823 → 833 ms. Scout's was 468 → 437 ms and
+444 → 438 ms. These worker bundles used native JavaScript object spread
+for the baseline.
+
+The matched full-editor tests used the same locally compiled GUI, with
+only the three targeted solver sections replaced in the candidate chunk.
+The baseline GUI compiled result spreads into JavaScript helper calls.
+Atlas passed Run, motion, Stop and Reset in both orders. Over three
+simulated seconds, sustained rates rose from 0.609× to 0.624× and from
+0.654× to 0.689×. CPU samples after the initial half-second attributed
+137 and 102 ms to direct result-copy helper calls and Newton checkpoints
+in the baseline. The corresponding candidate samples totalled 18 and
+15 ms. All 130 focused Board tests passed, including nonlinear fallback,
+transient startup and diagnostic output.
+
+Scout passed Run, motion, Stop, Reset, and repeat Run in the candidate
+preview. Its three-second sample sustained 1.000×. Brickwright's release
+pins Board `9ff1fff3`, and the production 1× target remains open.
