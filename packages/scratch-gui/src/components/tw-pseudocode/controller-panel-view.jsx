@@ -1772,3 +1772,244 @@ class ControllerPanelView extends React.Component {
                         {t('title')}
                     </span>
                     <EditorHelp editor="Widgets" label="Widgets" locale={this.props.locale} />
+                    {/* ENTERING full screen from here, because there is no other way in
+                        on a phone: the stage header that normally offers it is capped
+                        to 44px in this dock mode, and a sweep of the pane on a phone
+                        found no reachable enter-fullscreen control at all. Exit was
+                        already covered; entry was not. */}
+                    {!this.props.isFullScreen && this.props.onEnterFullScreen && (
+                        <button type="button" data-testid="bw-widgets-enter-fullscreen"
+                            onClick={this.props.onEnterFullScreen}
+                            aria-label={t('enterFullScreen')}
+                            title={t('enterFullScreen')}
+                            style={{
+                                background: '#ede9fe', color: '#5b21b6',
+                                border: '1px solid #c4b5fd', borderRadius: 6,
+                                padding: 0, width: 24, height: 28, flexShrink: 0, cursor: 'pointer', fontSize: 14,
+                            }}>
+                            <span aria-hidden="true">⛶</span>
+                        </button>
+                    )}
+                    {this.props.isFullScreen && (
+                        <button type="button" data-testid="bw-widgets-exit-fullscreen"
+                            onClick={this.props.onExitFullScreen}
+                            aria-label={t('exitFullScreen')}
+                            title={t('exitFullScreen')}
+                            style={{border: '1px solid #cbd5e1', borderRadius: 6,
+                                background: '#fff', color: '#334155', padding: 0, width: 24, height: 28, flexShrink: 0,
+                                cursor: 'pointer', fontSize: 12}}>
+                            <span aria-hidden="true">↙</span>
+                        </button>
+                    )}
+                    {/* Mode toggle */}
+                    <div style={{
+                        display: 'flex', flexShrink: 0, borderRadius: 6,
+                        border: '1px solid #cbd5e1', overflow: 'hidden'
+                    }}>
+                        <button
+                            type="button"
+                            data-testid="bw-ctl-mode-edit"
+                            aria-label={t('edit')}
+                            aria-pressed={mode === 'edit'}
+                            title={t('edit')}
+                            onClick={() => this._setMode('edit')}
+                            style={{
+                                width: 24, height: 28, padding: 0, fontSize: 16, border: 'none',
+                                cursor: 'pointer', fontWeight: 600,
+                                background: mode === 'edit' ? '#7C3AED' : '#f1f5f9',
+                                color: mode === 'edit' ? '#fff' : '#64748b',
+                            }}
+                        >
+                            {'✎'}
+                        </button>
+                        <button
+                            type="button"
+                            data-testid="bw-ctl-mode-play"
+                            aria-label={t('play')}
+                            aria-pressed={mode === 'play'}
+                            title={t('play')}
+                            onClick={() => this._setMode('play')}
+                            style={{
+                                width: 24, height: 28, padding: 0, fontSize: 16, border: 'none',
+                                cursor: 'pointer', fontWeight: 600,
+                                background: mode === 'play' ? '#7C3AED' : '#f1f5f9',
+                                color: mode === 'play' ? '#fff' : '#64748b',
+                            }}
+                        >
+                            {'▶'}
+                        </button>
+                    </div>
+                    {/* Grid snap toggle (edit mode only) */}
+                    {mode === 'edit' && (
+                        <button
+                            data-testid="bw-ctl-snap-toggle"
+                            aria-label={'Grid snap'} aria-pressed={this.state.snap}
+                            onClick={() => this.setState(st => ({ snap: !st.snap }))}
+                            title={'Grid snap ' + (this.state.snap ? 'on' : 'off') + ' (' + this.state.grid + 'px)'}
+                            style={{
+                                padding: 0, width: 24, height: 28, flexShrink: 0, fontSize: 14, borderRadius: 6,
+                                border: '1px solid #cbd5e1', cursor: 'pointer', fontWeight: 600,
+                                background: this.state.snap ? '#ede9fe' : '#f1f5f9',
+                                color: this.state.snap ? '#7C3AED' : '#64748b',
+                            }}
+                        >
+                            <span aria-hidden="true">▦</span>
+                        </button>
+                    )}
+                    {/* Hide the binding line on every card. PANEL-LEVEL, and it sits
+                        in the toolbar rather than the per-widget inspector for that
+                        reason: the per-widget flags describe one card's own face,
+                        while a binding line is the same information on all of them.
+                        Edit mode only -- there is nothing to change in Play -- but
+                        the setting persists either way, because it is serialised
+                        upstream. */}
+                    {mode === 'edit' && (
+                        <button type="button" data-testid="bw-ctl-hide-bindings"
+                            aria-label={t('hideBindings')} title={t('hideBindings')} aria-pressed={!!panel.hideBindings}
+                            style={{width: 24, height: 28, padding: 0, flexShrink: 0, border: '1px solid #cbd5e1',
+                                borderRadius: 6, cursor: 'pointer', background: panel.hideBindings ? '#ede9fe' : '#f1f5f9'}}
+                            onClick={() => {
+                                const before = this._snapshot();
+                                panel.setHideBindings(!panel.hideBindings);
+                                this._persist();
+                                this._recordUndo(before, 'Show or hide bindings');
+                                this.forceUpdate();
+                            }}>
+                            <span aria-hidden="true">⌁</span>
+                        </button>
+                    )}
+
+                    {/* Add widget (edit mode only) */}
+                    {mode === 'edit' && (
+                        <div style={{position: 'relative', flexShrink: 0}}>
+                            <button
+                                type="button" aria-label={t('addWidget')} title={t('addWidget')}
+                                aria-expanded={this.state.addMenuOpen}
+                                onClick={() => this.setState(s => ({ addMenuOpen: !s.addMenuOpen }))}
+                                style={{
+                                    background: '#7C3AED', color: '#fff', border: 'none',
+                                    borderRadius: 6, width: 24, height: 28, padding: 0, fontSize: 16,
+                                    cursor: 'pointer', fontWeight: 600,
+                                }}
+                            >
+                                <span aria-hidden="true">+</span>
+                            </button>
+                            {this.state.addMenuOpen && (
+                                <div style={{
+                                    position: 'absolute', top: '100%', right: 0, marginTop: 4,
+                                    background: '#fff', border: '1px solid #e2e8f0',
+                                    borderRadius: 6, boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                                    padding: 4, zIndex: 100, minWidth: 120,
+                                }}>
+                                    {Object.values(WIDGET_TYPES).map(type => (
+                                        <button
+                                            key={type}
+                                            onClick={() => this._addWidget(type)}
+                                            style={{
+                                                display: 'block', width: '100%', textAlign: 'left',
+                                                padding: '6px 10px', border: 'none', background: 'none',
+                                                cursor: 'pointer', fontSize: 12, borderRadius: 4,
+                                                color: '#334155',
+                                            }}
+                                            onMouseOver={e => e.target.style.background = '#f1f5f9'}
+                                            onMouseOut={e => e.target.style.background = 'none'}
+                                        >
+                                            {t(type)}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                <SpikePortMonitor vm={this.props.vm} locale={this.props.locale} />
+
+                {/* Widget canvas: absolute placement from layout.{x,y}, size from
+                    layout.{w,h}, rotation + colour + label applied. In EDIT mode
+                    widgets drag (grid-snapped), resize by the corner handle and
+                    rotate by the top handle; click selects for the inspector. */}
+                <div data-testid="bw-controller-canvas"
+                    style={{ flex: 1, overflow: 'auto', position: 'relative' }}
+                    onPointerDown={e => {
+                        if (e.target === e.currentTarget) this.setState({ selected: null });
+                    }}>
+                    {widgets.length === 0 && (
+                        <div style={{
+                            color: '#94a3b8', fontSize: 14, textAlign: 'center',
+                            padding: '40px 20px',
+                        }}>
+                            {t('noWidgets')}
+                        </div>
+                    )}
+                    {machineWidget ? (
+                        <MachineConsole widget={machineWidget}
+                            keyboardSet={this.props.machineConsole.keyboardSet}
+                            keyIn={this.props.machineConsole.keyIn}
+                            mouseIn={this.props.machineConsole.mouseIn} />
+                    ) : widgets.map(w => (
+                        <PositionedWidget
+                            key={w.name}
+                            widget={w}
+                            mode={mode}
+                            selected={mode === 'edit' && this.state.selected === w.name}
+                            snap={v => this._snap(v)}
+                            onSelect={() => this.setState({ selected: w.name })}
+                            onLayout={(patch, persist) => this._layout(w.name, patch, persist)}
+                        >
+                            <WidgetCard
+                                widget={w}
+                                mode={mode}
+                                panel={panel}
+                                buttonInputs={this._buttonInputs}
+                                onInput={(name, x, y) => this._handleJoystickInput(name, x, y)}
+                                onRemove={() => { this._removeWidget(w.name); this.setState({ selected: null }); }}
+                                hideBindings={panel.hideBindings}
+                            />
+                        </PositionedWidget>
+                    ))}
+                    {mode === 'edit' && this.state.selected && panel.getWidget(this.state.selected) && (() => {
+                        // Snapshot the widget the moment its inspector opens,
+                        // so ✕ can revert everything edited since (config,
+                        // layout, binding, name). _rename keeps the snapshot
+                        // attached across a rename; a NEW selection re-snaps.
+                        if (this._snapFor !== this.state.selected) {
+                            const sw = panel.getWidget(this.state.selected);
+                            this._snapFor = this.state.selected;
+                            this._inspectorSnap = {
+                                name: sw.name,
+                                config: JSON.parse(JSON.stringify(sw.config || {})),
+                                layout: JSON.parse(JSON.stringify(sw.layout || {})),
+                                binding: sw.binding ? JSON.parse(JSON.stringify(sw.binding)) : null
+                            };
+                        }
+                        return (
+                            <WidgetInspector
+                                widget={panel.getWidget(this.state.selected)}
+                                onRename={n => this._rename(this.state.selected, n)}
+                                onLayout={patch => this._layout(this.state.selected, patch, true)}
+                                onConfig={patch => this._config(this.state.selected, patch)}
+                                onBind={(target, value, param) =>
+                                    this._bind(this.state.selected, target, value, param)}
+                                variableNames={this._variableNames()}
+                                partIds={this._partIds()}
+                                onOpenLibrary={() => this.setState({ libraryOpen: true })}
+                                onOk={() => { this._snapFor = null; this.setState({ selected: null }); }}
+                                onCancel={() => this._restoreWidget(this.state.selected, this._inspectorSnap)}
+                            />
+                        );
+                    })()}
+                </div>
+                {this.state.libraryOpen && (
+                    <ScratchImagePicker
+                        vm={this.props.vm}
+                        onSelect={item => this._pickLibraryImage(item)}
+                        onClose={() => this.setState({ libraryOpen: false })}
+                    />
+                )}
+            </div>
+        );
+    }
+}
+
+export default ControllerPanelView;
