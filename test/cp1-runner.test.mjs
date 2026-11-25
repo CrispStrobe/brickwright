@@ -3,6 +3,7 @@
 // Every ROM byte below is authored for this test; no historical ROM is used.
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
 import {BoardImpl, registerAllDevices, CP1_TERMINALS} from 'bw-board';
 import {createDebugRunner, boardTimeBase} from
     '../overlay/scratch-gui/src/lib/bw-debug/debug-runner.js';
@@ -394,8 +395,33 @@ test('hot CP1 ROM replacement cancels an armed step, releases keys and publishes
         'unqualified test firmware does not fabricate semantic observations');
 });
 
+test('default CP1 monitor runs the assembled program through the original keypad', async t => {
+    const f = fixture(t, {bootMedia: null});
+    const rom = await readFile(new URL('../overlay/scratch-gui/static/roms/cp1-independent-monitor.bin', import.meta.url));
+    globalThis.fetch = async url => {
+        assert.equal(url, 'static/roms/cp1-independent-monitor.bin');
+        return new Response(rom);
+    };
+    await f.runner.start({paused: true});
+    assert.equal(f.runner.state().phase, 'paused');
+    assert.equal(f.runner.cp1Snapshot().cp1.profileQualified, true);
+    for (const address of [0, 10]) {
+        const assembly = assembleCp1Program(`ORG ${address}\nstart: AKO 42\nshow: ANZ\nSPU show\n`);
+        f.runner.cp1RunProgram(assembly);
+        for (let i = 0; i < 100 && f.browser.frames.size; i++) {
+            f.browser.frame();
+            const snapshot = f.runner.cp1Snapshot();
+            if (snapshot.display.digits.slice(-2).join(',') === '102,91' && snapshot.keys.length === 0) break;
+        }
+        const snapshot = f.runner.cp1Snapshot();
+        assert.deepEqual(snapshot.cells[address], {opcode: 4, operand: 42});
+        assert.deepEqual(snapshot.display.digits.slice(-2), [102, 91]);
+        assert.deepEqual(snapshot.keys, []);
+        f.runner.pause();
+    }
+});
+
 for (const [label, bootMedia] of [
-    ['missing', null],
     ['empty', {bytes: new Uint8Array()}],
     ['short', {bytes: new Uint8Array(2047)}],
     ['long', {bytes: new Uint8Array(2049)}],

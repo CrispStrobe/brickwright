@@ -1748,6 +1748,7 @@ class ControllerPanelView extends React.Component {
         const panel = this._getPanel();
         const mode = panel.mode;
         const widgets = panel.getWidgets();
+        const {cp1WidgetSlot} = this.props;
         const machineWidget = mode === 'play' && this.props.machineConsole
             ? widgets.find(w => w.name === this.props.machineConsole.name && w.type === 'simplevga')
             : null;
@@ -1930,11 +1931,12 @@ class ControllerPanelView extends React.Component {
                     widgets drag (grid-snapped), resize by the corner handle and
                     rotate by the top handle; click selects for the inspector. */}
                 <div data-testid="bw-controller-canvas"
-                    style={{ flex: 1, overflow: 'auto', position: 'relative' }}
+                    style={{flex: 1, overflow: 'auto', position: 'relative', scrollbarWidth: 'thin'}}
                     onPointerDown={e => {
                         if (e.target === e.currentTarget) this.setState({ selected: null });
                     }}>
-                    {widgets.length === 0 && (
+                    {cp1WidgetSlot && <div ref={cp1WidgetSlot} data-cp1-widget-slot />}
+                    {widgets.length === 0 && !cp1WidgetSlot && (
                         <div style={{
                             color: '#94a3b8', fontSize: 14, textAlign: 'center',
                             padding: '40px 20px',
@@ -1942,32 +1944,34 @@ class ControllerPanelView extends React.Component {
                             {t('noWidgets')}
                         </div>
                     )}
-                    {machineWidget ? (
-                        <MachineConsole widget={machineWidget}
-                            keyboardSet={this.props.machineConsole.keyboardSet}
-                            keyIn={this.props.machineConsole.keyIn}
-                            mouseIn={this.props.machineConsole.mouseIn} />
-                    ) : widgets.map(w => (
-                        <PositionedWidget
-                            key={w.name}
-                            widget={w}
-                            mode={mode}
-                            selected={mode === 'edit' && this.state.selected === w.name}
-                            snap={v => this._snap(v)}
-                            onSelect={() => this.setState({ selected: w.name })}
-                            onLayout={(patch, persist) => this._layout(w.name, patch, persist)}
-                        >
-                            <WidgetCard
+                    <div style={cp1WidgetSlot && widgets.length ? {position: 'relative', minHeight: 240} : undefined}>
+                        {machineWidget ? (
+                            <MachineConsole widget={machineWidget}
+                                keyboardSet={this.props.machineConsole.keyboardSet}
+                                keyIn={this.props.machineConsole.keyIn}
+                                mouseIn={this.props.machineConsole.mouseIn} />
+                        ) : widgets.map(w => (
+                            <PositionedWidget
+                                key={w.name}
                                 widget={w}
                                 mode={mode}
-                                panel={panel}
-                                buttonInputs={this._buttonInputs}
-                                onInput={(name, x, y) => this._handleJoystickInput(name, x, y)}
-                                onRemove={() => { this._removeWidget(w.name); this.setState({ selected: null }); }}
-                                hideBindings={panel.hideBindings}
-                            />
-                        </PositionedWidget>
-                    ))}
+                                selected={mode === 'edit' && this.state.selected === w.name}
+                                snap={v => this._snap(v)}
+                                onSelect={() => this.setState({ selected: w.name })}
+                                onLayout={(patch, persist) => this._layout(w.name, patch, persist)}
+                            >
+                                <WidgetCard
+                                    widget={w}
+                                    mode={mode}
+                                    panel={panel}
+                                    buttonInputs={this._buttonInputs}
+                                    onInput={(name, x, y) => this._handleJoystickInput(name, x, y)}
+                                    onRemove={() => { this._removeWidget(w.name); this.setState({ selected: null }); }}
+                                    hideBindings={panel.hideBindings}
+                                />
+                            </PositionedWidget>
+                        ))}
+                    </div>
                     {mode === 'edit' && this.state.selected && panel.getWidget(this.state.selected) && (() => {
                         // Snapshot the widget the moment its inspector opens,
                         // so ✕ can revert everything edited since (config,

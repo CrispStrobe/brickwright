@@ -137,3 +137,9 @@
     .teachingRegisters {gap: 4px;}
     .teachingRegisters dd {font-size: 11px;}
 }
+
+.root .actionButton {min-height: 26px; padding: 2px 6px; font-size: 11px; white-space: nowrap;}
+.helpDialog {max-width: min(340px, 92vw); border: 1px solid var(--cp1-border); border-radius: 8px;
+    padding: 10px 14px; background: var(--cp1-panel); color: var(--cp1-text);}
+.helpDialog form {display: flex; justify-content: flex-end;}
+.helpDialog p {margin: 6px 0;}

@@ -6,20 +6,19 @@ import PropTypes from 'prop-types';
 import styles from './cp1-panel.css';
 import {browserLocale, makeT} from '../../lib/bw-i18n.js';
 import {parseCp1Program, exportCp1Program} from '../../lib/cp1-program.js';
+import {loadCp1Monitor} from '../../lib/cp1-monitor.js';
 import {cp1DebugView} from '../../lib/cp1-debug-view.js';
 import {createCp1Project, serializeCp1Project, cp1RomReference} from '../../lib/cp1-project.js';
 import {CP1_PHYSICAL_KEYS, createCp1KeyInput, cp1KeyForKeyboard, cp1KeyboardOwner, cp1IsTypingTarget,
     cp1DisplayDigits, cp1SegmentDescription, readCp1PanelSnapshot} from '../../lib/cp1-panel-input.js';
 import downloadBlob from '../../lib/download-blob.js';
 
-const INDEPENDENT_ROM_NAME = 'cp1-independent-monitor.bin';
-const INDEPENDENT_ROM_SHA256 = 'ce3e7a33af990e3e5bd69780c6ab046502e1be57ead43655a95eb3f42d789a0f';
 
 const COPY = {
     en: {
         title: 'Kosmos CP1', base: '128 cells', expanded: '256 cells · CP3', expansion: 'CP3 expansion (256 cells)',
         importRom: 'Import monitor ROM', useIndependentRom: 'Use Brickwright monitor',
-        noRom: 'Choose the Brickwright monitor or import a compatible 2048-byte monitor ROM.',
+        noRom: 'The bundled Brickwright monitor starts on Run.',
         independentRomError: 'The bundled Brickwright monitor is missing or damaged.',
         romLocal: 'The project keeps a ROM reference. Select the same monitor again when reopening.',
         run: 'Run CPU', pause: 'Pause CPU', step: 'CPU step', reset: 'Reset CPU',
@@ -28,6 +27,9 @@ const COPY = {
         keyboard: 'Focus this panel to use digits, Enter (RUN), Escape (STP), Backspace (CLR), or F1–F10 for the function row.',
         display: 'Six raw segment displays', digit: 'Display {index}: lit segments {segments}',
         keys: 'CP1 keypad: 30 buttons, 20 shared contacts', duplicate: 'duplicate digit button',
+        runProgram: 'Run CP1 program', shortRun: 'Run', shortLoad: 'Load', shortOpen: 'Open',
+        shortExport: 'Export', shortSave: 'Save', help: 'CP1 editor help', close: 'Close',
+        runHint: 'Run or the green flag assembles the source, loads it and starts the CP1 program.',
         program: 'Program', memory: 'Memory', ports: 'Ports',
         source: 'CP1 source or decimal listing', load: 'Load cells', listing: 'Export listing',
         save: 'Save CP1 project', openSource: 'Open source',
@@ -63,7 +65,7 @@ const COPY = {
     de: {
         title: 'Kosmos CP1', base: '128 Zellen', expanded: '256 Zellen · CP3', expansion: 'CP3-Erweiterung (256 Zellen)',
         importRom: 'Monitor-ROM importieren', useIndependentRom: 'Brickwright-Monitor verwenden',
-        noRom: 'Wähle den Brickwright-Monitor oder importiere ein kompatibles Monitor-ROM mit 2048 Bytes.',
+        noRom: 'Beim Start wird der eingebaute Brickwright-Monitor verwendet.',
         independentRomError: 'Der mitgelieferte Brickwright-Monitor fehlt oder ist beschädigt.',
         romLocal: 'Das Projekt speichert eine ROM-Referenz. Wähle beim erneuten Öffnen denselben Monitor.',
         run: 'CPU ausführen', pause: 'CPU pausieren', step: 'CPU-Schritt', reset: 'CPU zurücksetzen',
@@ -72,6 +74,9 @@ const COPY = {
         keyboard: 'Fokussiere dieses Feld: Ziffern, Eingabe (RUN), Escape (STP), Rücktaste (CLR) oder F1–F10 für die Funktionstasten.',
         display: 'Sechs rohe Segmentanzeigen', digit: 'Anzeige {index}: aktive Segmente {segments}',
         keys: 'CP1-Tastatur: 30 Tasten, 20 gemeinsame Kontakte', duplicate: 'zweite Zifferntaste',
+        runProgram: 'CP1-Programm starten', shortRun: 'Start', shortLoad: 'Laden', shortOpen: 'Öffnen',
+        shortExport: 'Export', shortSave: 'Speichern', help: 'Hilfe zum CP1-Editor', close: 'Schließen',
+        runHint: 'Start oder die grüne Flagge assembliert, lädt und startet das CP1-Programm.',
         program: 'Programm', memory: 'Speicher', ports: 'Ports',
         source: 'CP1-Quelle oder Dezimallisting', load: 'Zellen laden', listing: 'Listing exportieren',
         save: 'CP1-Projekt speichern', openSource: 'Quelle öffnen',
@@ -138,6 +143,8 @@ class Cp1Panel extends React.Component {
         this._assistiveTimers = new Set();
         this._assistiveCounter = 0;
         this._mounted = false;
+        this._programHelp = React.createRef();
+        this._programRun = null;
         this._keys = createCp1KeyInput((key, down) => {
             if (this.props.onKey) this.props.onKey(key, down);
             if (this._mounted) this.forceUpdate();
@@ -150,6 +157,8 @@ class Cp1Panel extends React.Component {
 
     componentDidMount () {
         this._mounted = true;
+        window.addEventListener('bw-cp1-run-request', this._runProgram);
+        window.addEventListener('bw-cp1-stop-request', this._stopProgram);
         this._controllerSlot = this.context?.controller;
         window.addEventListener('blur', this._releaseAll);
         window.addEventListener('keyup', this._onKeyUp);
@@ -190,6 +199,9 @@ class Cp1Panel extends React.Component {
 
     componentWillUnmount () {
         this._mounted = false;
+        window.removeEventListener('bw-cp1-run-request', this._runProgram);
+        window.removeEventListener('bw-cp1-stop-request', this._stopProgram);
+        this._programRun?.abort();
         this._releaseAll();
         window.cancelAnimationFrame(this._frame);
         window.removeEventListener('blur', this._releaseAll);
@@ -294,13 +306,32 @@ class Cp1Panel extends React.Component {
 
     async _loadIndependentRom () {
         await this._action(async () => {
-            const response = await fetch(`static/roms/${INDEPENDENT_ROM_NAME}`);
-            if (!response.ok) throw new Error(this._t('independentRomError'));
-            const bytes = new Uint8Array(await response.arrayBuffer());
-            if (bytes.byteLength !== 2048) throw new Error(this._t('independentRomError'));
-            await this._installRom(bytes, INDEPENDENT_ROM_NAME, INDEPENDENT_ROM_SHA256);
+            const {bytes, name, reference} = await loadCp1Monitor().catch(() => {
+                throw new Error(this._t('independentRomError'));
+            });
+            await this._installRom(bytes, name, reference.sha256);
         });
     }
+
+    _runProgram = async () => {
+        if (!this.props.onRunProgram || this.state.busy || this._programRun) return;
+        const result = this._assemble();
+        if (!result) return;
+        const request = new AbortController();
+        this._programRun = request;
+        this._releaseAll();
+        try {
+            await this._action(() => this.props.onRunProgram(result, request.signal));
+        } finally {
+            this._programRun = null;
+        }
+    };
+
+    _stopProgram = () => {
+        this._programRun?.abort();
+        this._releaseAll();
+        if (this.props.snapshot || this.state.snapshot || this.props.machine) this.props.onPause?.();
+    };
 
     async _openSource (file) {
         if (!file) return;
@@ -423,20 +454,33 @@ class Cp1Panel extends React.Component {
         const loadLabel = this._t('load');
         const canLoad = ready && !this.state.busy && !this.props.running && this.props.onLoad;
         return <div className={styles.program}>
-            <div className={compact ? styles.compactActions : styles.actions}>
-                {this._iconButton(loadLabel, '↓', {disabled: !canLoad, onClick: () => this._load()})}
-                {showEditor && <React.Fragment>
-                    {this._iconButton(this._t('openSource'), '↗', {disabled: this.state.busy,
-                        onClick: () => this._sourceInput.current.click()})}
-                    {this._iconButton(this._t('listing'), '⇩', {disabled: this.state.busy, onClick: () => {
+            {showEditor && <div className={styles.compactActions}>
+                {this.props.onRunProgram && <button type="button" className={styles.actionButton}
+                    disabled={this.state.busy} title={this._t('runProgram')} aria-label={this._t('runProgram')}
+                    onClick={this._runProgram}>
+                    {this._t('shortRun')}
+                </button>}
+                <button type="button" className={styles.actionButton} title={loadLabel} aria-label={loadLabel}
+                    disabled={!canLoad} onClick={() => this._load()}>{this._t('shortLoad')}</button>
+                <button type="button" className={styles.actionButton} title={this._t('openSource')} aria-label={this._t('openSource')}
+                    disabled={this.state.busy} onClick={() => this._sourceInput.current.click()}>{this._t('shortOpen')}</button>
+                <button type="button" className={styles.actionButton} title={this._t('listing')} aria-label={this._t('listing')}
+                    disabled={this.state.busy} onClick={() => {
                         const result = this._assemble();
                         if (result) this._action(() => downloadBlob('kosmos-cp1.cp1', new Blob(
                             [exportCp1Program(result)], {type: 'text/plain;charset=utf-8'})));
-                    }})}
-                    {this._iconButton(this._t('save'), '▣', {disabled: this.state.busy, onClick: () => this._saveProject()})}
-                    <span className={styles.programHelp} title={this._t('sourceHint')} tabIndex={0}>ⓘ</span>
-                </React.Fragment>}
-            </div>
+                    }}>{this._t('shortExport')}</button>
+                <button type="button" className={styles.actionButton} title={this._t('save')} aria-label={this._t('save')}
+                    disabled={this.state.busy} onClick={() => this._saveProject()}>{this._t('shortSave')}</button>
+                {this._iconButton(this._t('help'), 'ⓘ', {
+                    'aria-haspopup': 'dialog', onClick: () => this._programHelp.current.showModal()
+                })}
+                <dialog ref={this._programHelp} className={styles.helpDialog} aria-label={this._t('help')}>
+                    <form method="dialog"><button type="submit">{this._t('close')}</button></form>
+                    <p>{this._t('runHint')}</p>
+                    <p>{this._t('sourceHint')}</p>
+                </dialog>
+            </div>}
             {!showEditor ? null : Editor ? <div className={styles.sharedEditor} role="group" aria-label={sourceLabel}
                 data-cp1-source-editor><React.Suspense fallback={fallback}>
                     <Editor value={this.state.source} lang="cp1" onChange={text => this._setSource(text)} isVisible />
@@ -555,7 +599,7 @@ class Cp1Panel extends React.Component {
                 {disabled: busy, onClick: () => this._loadIndependentRom()})}
             {(!ready || debug) && this._iconButton(this._t('importRom'), '↗',
                 {disabled: busy, onClick: () => this._romInput.current.click()})}
-            {ready && this._iconButton(this._t(running ? 'pause' : 'run'), running ? 'Ⅱ' : '▶',
+            {(ready || !debug && onRun) && this._iconButton(this._t(running ? 'pause' : 'run'), running ? 'Ⅱ' : '▶',
                 {disabled: busy || !(running ? onPause : onRun),
                     onClick: () => { this._releaseAll(); return running ? onPause() : onRun(); }})}
             {debug && ready && this._iconButton(this._t('step'), '▸|',
@@ -580,13 +624,12 @@ class Cp1Panel extends React.Component {
                 {this._renderProgram(view, ready, true, slots.Editor)}
                 {this._renderSourceStatus()}
             </section>, slots.code)}
-            {slots?.controller && createPortal(<section className={styles.root} data-cp1-controller-face
+            {slots?.controller && createPortal(<section className={styles.root} data-cp1-controller-face data-controller-widget="cp1"
                 tabIndex={0} onKeyDown={this._onKeyDown}
                 onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) this._releaseAll(); }}>
                 {this._renderMonitorBar(ready)}
                 {this._renderDisplay(snapshot && snapshot.display)}
                 {this._renderKeypad(ready)}
-                {this._renderSourceStatus()}
             </section>, slots.controller)}
         </React.Fragment>;
     }
@@ -601,8 +644,8 @@ class Cp1Panel extends React.Component {
             tabIndex={0} onKeyDown={this._onKeyDown}
             onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) this._releaseAll(); }}>
             {this._renderMonitorBar(ready, true, rom, debugView)}
-            {this._renderDisplay(snapshot && snapshot.display, cpu)}
-            {this._renderKeypad(ready)}
+            {!this.context?.Editor && this._renderDisplay(snapshot && snapshot.display, cpu)}
+            {!this.context?.Editor && this._renderKeypad(ready)}
             {debugView.qualified && this._renderSemantic(debugView)}
             <div className={styles.tabs} role="group" aria-label={this._t('title')}>
                 {['program', 'memory', 'ports'].map(view => <button key={view} type="button" aria-pressed={this.state.view === view}
@@ -634,7 +677,7 @@ Cp1Panel.propTypes = {
     machine: PropTypes.object, snapshot: PropTypes.object, running: PropTypes.bool,
     expansion: PropTypes.bool, expansionDisabled: PropTypes.bool, onExpansionChange: PropTypes.func, clockHz: PropTypes.number, locale: PropTypes.string,
     colorMode: PropTypes.string, source: PropTypes.string, romReference: PropTypes.object,
-    onSourceChange: PropTypes.func, onKey: PropTypes.func, onReleaseKeys: PropTypes.func,
+    onRunProgram: PropTypes.func, onSourceChange: PropTypes.func, onKey: PropTypes.func, onReleaseKeys: PropTypes.func,
     onRun: PropTypes.func, onPause: PropTypes.func, onStep: PropTypes.func, onReset: PropTypes.func,
     onStepCommand: PropTypes.func, onToggleBreakpoint: PropTypes.func,
     onLoad: PropTypes.func, onWriteCell: PropTypes.func, onPortInput: PropTypes.func,

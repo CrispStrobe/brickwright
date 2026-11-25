@@ -6,7 +6,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {clearControllerPanel, connectControllerBoard, serializeControllerPanel} from '../../lib/controller-inputs.js';
 import {Cp1Surfaces} from '../tw-pseudocode/cp1-surfaces.js';
-import cp1SurfaceStyles from '../tw-pseudocode/cp1-surfaces.css';
 import {defineMessages, FormattedMessage, injectIntl, intlShape} from 'react-intl';
 import {connect} from 'react-redux';
 import MediaQuery from 'react-responsive';
@@ -428,6 +427,17 @@ const GUIComponent = props => {
     });
     const [cp1CodeSlot, setCp1CodeSlot] = React.useState(null);
     const [cp1ControllerSlot, setCp1ControllerSlot] = React.useState(null);
+    const [cp1Attached, setCp1Attached] = React.useState(() => window.__bwMachineExtracted?.kind === 'cp1');
+    React.useEffect(() => {
+        const selected = event => setCp1Attached(event.detail?.kind === 'cp1');
+        const detached = () => setCp1Attached(false);
+        window.addEventListener('bw-machine-extracted', selected);
+        window.addEventListener('bw-cp1-circuit-detached', detached);
+        return () => {
+            window.removeEventListener('bw-machine-extracted', selected);
+            window.removeEventListener('bw-cp1-circuit-detached', detached);
+        };
+    }, []);
     const cp1Surfaces = React.useMemo(() => ({code: cp1CodeSlot, controller: cp1ControllerSlot, Editor: Cp1CodeEditor}),
         [cp1CodeSlot, cp1ControllerSlot]);
     const [gameControlKey, setGameControlKey] = React.useState(() =>
@@ -1152,8 +1162,6 @@ const GUIComponent = props => {
                             >
                                 <TabList className={tabClassNames.tabList} data-bw-editor-tabs="">
                                     <ChromeToggle className={chromeStyles.chromeToggle} hidden={stageFullScreen} />
-                                    <EditorHelp inTabList editor={helpEditor} locale={intl.locale}
-                                        label={intl.formatMessage({id: `gui.gui.${helpLabelId}`, defaultMessage: helpLabelDefault})} />
                                     <Tab className={tabClassNames.tab}
                                         title={intl.formatMessage({id: 'gui.gui.blocksTab', defaultMessage: 'Blocks'})}
                                         aria-label={intl.formatMessage({id: 'gui.gui.blocksTab', defaultMessage: 'Blocks'})}
@@ -1214,6 +1222,8 @@ const GUIComponent = props => {
                                         <span aria-hidden="true" data-bw-tab-icon="">◇</span>
                                         <span data-bw-tab-label="">{'CAD'}</span>
                                     </Tab> : null}
+                                    <EditorHelp inTabList editor={helpEditor} locale={intl.locale}
+                                        label={intl.formatMessage({id: `gui.gui.${helpLabelId}`, defaultMessage: helpLabelDefault})} />
                                 </TabList>
                                 <TabPanel className={tabClassNames.tabPanel}>
                                     {middleContent === 'code' ? (
@@ -1431,22 +1441,18 @@ const GUIComponent = props => {
                                         circuit-tab.jsx splits the column at data-bw-stage-dock: Widgets
                                         on top, debugger below (z-index 2), so neither covers the other. */}
                                     <div data-bw-stage-dock="controller" style={dockFullScreenStyle || {position: 'relative', zIndex: 1, flex: 1, minHeight: 0, borderTop: '1px solid #ffffff', background: '#f8fafc'}}>
-                                        <div className={cp1SurfaceStyles.controllerShell}>
-                                            <div ref={setCp1ControllerSlot} className={cp1SurfaceStyles.controllerSlot} />
-                                            <div className={cp1SurfaceStyles.controllerWidgets}>
-                                                <ControllerPanelView
-                                                    panel={controllerPanel}
-                                                    board={board}
-                                                    manageBoardBinding={false}
-                                                    vm={vm}
-                                                    machineConsole={machineConsole}
-                                                    locale={intl.locale}
-                                                    isFullScreen={isFullScreen}
-                                                    onExitFullScreen={props.onExitFullScreen}
-                                                    onEnterFullScreen={props.onEnterFullScreen}
-                                                />
-                                            </div>
-                                        </div>
+                                        <ControllerPanelView
+                                            panel={controllerPanel}
+                                            board={board}
+                                            manageBoardBinding={false}
+                                            vm={vm}
+                                            machineConsole={machineConsole}
+                                            cp1WidgetSlot={cp1Attached ? setCp1ControllerSlot : undefined}
+                                            locale={intl.locale}
+                                            isFullScreen={isFullScreen}
+                                            onExitFullScreen={props.onExitFullScreen}
+                                            onEnterFullScreen={props.onEnterFullScreen}
+                                        />
                                     </div>
                                 </React.Suspense>
                             ) : (

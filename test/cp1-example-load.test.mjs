@@ -24,8 +24,8 @@ function cp1Loader () {
         }
     }};
     const fetch = async path => ({ok: true, text: async () => read(`overlay/scratch-gui/${path}`)});
-    const activation = tab.slice(tab.indexOf('    activateCp1Circuit (data)'),
-        tab.indexOf('\n    }', tab.indexOf('    activateCp1Circuit (data)')) + 6);
+    const activation = tab.slice(tab.indexOf('    activateCp1Circuit (data,'),
+        tab.indexOf('\n    }', tab.indexOf('    activateCp1Circuit (data,')) + 6);
     const begin = tab.indexOf('            if (ex.files?.cp1) {');
     const end = tab.indexOf('            // The program first:', begin);
     assert.ok(activation.includes('bw-cp1-circuit-detached') && begin >= 0 && end > begin);

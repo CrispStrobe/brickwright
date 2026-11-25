@@ -19,7 +19,7 @@ function readWorkspace () {
 const programConfig = config => ({expansion: config.expansion === true, clockHz: config.clockHz || 6000000});
 
 /** Application state and persistence only. All execution belongs to the shared runner. */
-export default function Cp1Host ({runner, running, locale, configuration, onImportRom, onConfigure, onRun}) {
+export default function Cp1Host ({runner, running, locale, configuration, onImportRom, onConfigure, onRun, onRunProgram}) {
     const [workspace, setWorkspace] = useState(readWorkspace);
     const [error, setError] = useState('');
     const [pending, setPending] = useState(0);
@@ -27,7 +27,7 @@ export default function Cp1Host ({runner, running, locale, configuration, onImpo
     const alive = useRef(true);
     const queue = useRef(Promise.resolve());
     const callbacks = useRef(null);
-    callbacks.current = {runner, onImportRom, onConfigure, onRun, configuration,
+    callbacks.current = {runner, onImportRom, onConfigure, onRun, onRunProgram, configuration,
         german: /^de/i.test(locale || browserLocale())};
     const message = useCallback((english, german) => callbacks.current.german ? german : english, []);
     const report = useCallback(failure => {
@@ -76,8 +76,8 @@ export default function Cp1Host ({runner, running, locale, configuration, onImpo
     const callRunner = (method, ...args) => {
         const current = callbacks.current.runner;
         if (!current || typeof current[method] !== 'function') {
-            throw new Error(message('Import a CP1 monitor ROM before operating the machine.',
-                'Importiere ein CP1-Monitor-ROM, bevor du die Maschine bedienst.'));
+            throw new Error(message('Start the CP1 monitor before operating the machine.',
+                'Starte den CP1-Monitor, bevor du die Maschine bedienst.'));
         }
         const result = current[method](...args);
         if (result === false) throw new Error(message('The CP1 machine is unavailable.', 'Die CP1-Maschine ist nicht verfügbar.'));
@@ -151,6 +151,8 @@ export default function Cp1Host ({runner, running, locale, configuration, onImpo
             onKey={pending ? undefined : (key, down) => runner?.cp1Key(key, down)}
             onReleaseKeys={() => runner?.cp1ReleaseKeys?.()}
             onRun={pending ? undefined : uiAction(() => callbacks.current.onRun())}
+            onRunProgram={onRunProgram && request((assembly, signal) =>
+                enqueue(() => callbacks.current.onRunProgram(assembly, signal)))}
             onPause={uiAction(() => callRunner('pause'))}
             onStep={pending ? undefined : uiAction(() => callRunner('step', 'insn'))}
             onStepCommand={pending ? undefined : request(() => callRunner('step', 'cp1'))}
@@ -196,4 +198,4 @@ export default function Cp1Host ({runner, running, locale, configuration, onImpo
 }
 Cp1Host.propTypes = {runner: PropTypes.object, running: PropTypes.bool, locale: PropTypes.string,
     configuration: PropTypes.object, onImportRom: PropTypes.func.isRequired,
-    onConfigure: PropTypes.func.isRequired, onRun: PropTypes.func.isRequired};
+    onConfigure: PropTypes.func.isRequired, onRun: PropTypes.func.isRequired, onRunProgram: PropTypes.func};
