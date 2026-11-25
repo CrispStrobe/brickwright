@@ -21,7 +21,3 @@
     background: rgba(83, 93, 110, .45);
     border-radius: 6px;
 }
-
-@supports not selector(::-webkit-scrollbar) {
-    .toolbar { scrollbar-width: thin; }
-}
