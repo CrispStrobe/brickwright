@@ -484,3 +484,27 @@ the runs. After subtracting the instrumented work, mean overhead was
 The results do not establish a repeatable clock-specific throughput
 gain, so this change remains a candidate.
 [CAD clock candidate](https://github.com/CrispStrobe/brickwright-lite/commit/195502ee0)
+
+### Sparse numeric refactorization
+
+The Board solver now precomputes the pivot-order row indices when it
+factors a matrix and reuses its zeroed scatter buffer for subsequent
+same-pattern numeric refactors. Pivot selection and row traversal
+order are unchanged. All 51 targeted tests passed on Board's mainline.
+[Board change](https://github.com/CrispStrobe/bw-board/commit/e21e2dae)
+[Backport tested against Lite's Board pin](https://github.com/CrispStrobe/bw-board/commit/b1e71df9)
+
+On a 20-row, 29-entry matrix recorded during an accepted Atlas
+refactor, seven alternating Node trials measured a median of 1.16 µs
+per old refactor and 0.57 µs per new refactor. The solved vector matched
+exactly. Both Chrome robots also returned exact motion and electrical
+traces over 600 ticks in both test orders. Host timings varied and did
+not show a consistent end-to-end gain.
+
+The separate CSC layout experiment reused the layout on 37,879 of
+37,900 conversions in the Atlas probe. Conversion of the captured
+matrix fell from 0.31 to 0.17 µs, but Atlas's host time rose from 2.09
+to 2.46 ms per tick in one browser order and fell from 2.12 to 1.93 ms
+in reverse. Both robot traces matched. That experiment remains on
+its candidate branch.
+[CSC layout candidate](https://github.com/CrispStrobe/bw-board/commit/ab11f876)
