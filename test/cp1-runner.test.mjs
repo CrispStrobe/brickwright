@@ -138,6 +138,22 @@ function fixture(t, options = {}) {
     return result;
 }
 
+test('CP1 can attach its monitor paused with the circuit clock and ROM at startup', async t => {
+    const f = fixture(t);
+    const initialBoardTime = f.board.timeNs;
+    await f.runner.start({paused: true});
+    assert.equal(f.runner.state().phase, 'paused');
+    assert.equal(f.runner.board(), f.board);
+    assert.equal(f.target().timeNs(), 0n);
+    assert.equal(f.board.timeNs, initialBoardTime);
+    assert.equal(f.browser.frames.size, 0);
+    f.runner.resume();
+    f.browser.frame();
+    assert.equal(f.runner.state().phase, 'running');
+    assert.ok(f.target().timeNs() > 0n);
+    assert.equal(f.board.timeNs, initialBoardTime + f.target().timeNs());
+});
+
 test('CP1 runner executes supplied firmware on the existing real board with one clock and qualified pins', async t => {
     const f = fixture(t, {expansion: true});
     assert.equal(f.runner.cp1Snapshot(), null);

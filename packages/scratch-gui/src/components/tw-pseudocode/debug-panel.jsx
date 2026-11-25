@@ -465,7 +465,7 @@ class DebugPanel extends React.Component {
         await new Promise(resolve => this.setState(
             {kind: nextKind, runner: null, ui: {phase: 'idle', message: ''}}, resolve));
         const runner = await this.runner();
-        await runner.start();
+        await runner.start({paused: nextKind === 'cp1'});
         // The runner reports attachment failures in state() rather than
         // rejecting start(). Promote that failure to the media completion
         // promise before the manager closes or a dead screen is mirrored.
