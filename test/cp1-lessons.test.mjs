@@ -49,7 +49,7 @@ test('CP1 checks use explicit observations with one exact completed-command cont
     assert.match(text, /no ROM is bundled/);
     assert.match(text, /one 8049|many 8049|8049 instruction/i);
     assert.match(text, /requested waits|requested delay/i);
-    assert.match(text, /do not report an exact measured period/i);
+    assert.match(text, /requested wait time.*measured period separately from the matching edges/i);
     assert.match(text, /held keys|Gehaltene Tasten/);
     assert.match(text, /actual six segment masks|tatsächlichen Segmentmasken/);
 });

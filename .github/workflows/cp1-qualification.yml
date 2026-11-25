@@ -14,6 +14,12 @@ on:
       - 'overlay/scratch-gui/examples/index.json'
       - 'packages/scratch-gui/examples/cp1-*/**'
       - 'overlay/scratch-gui/src/components/tw-pseudocode/cp1-*'
+      - 'overlay/scratch-gui/src/components/tw-pseudocode/circuit-tab.jsx'
+      - 'overlay/scratch-gui/src/components/tw-pseudocode/debug-panel.jsx'
+      - 'overlay/scratch-gui/src/components/gui/gui.jsx'
+      - 'packages/scratch-gui/src/components/tw-pseudocode/circuit-tab.jsx'
+      - 'packages/scratch-gui/src/components/tw-pseudocode/debug-panel.jsx'
+      - 'packages/scratch-gui/src/components/gui/gui.jsx'
       - 'packages/scratch-gui/src/components/tw-pseudocode/cp1-*'
       - 'overlay/scratch-gui/src/lib/cp1-*'
       - 'packages/scratch-gui/src/lib/cp1-*'
@@ -27,11 +33,13 @@ on:
       - 'packages/scratch-gui/src/components/gui/guided-lessons.*'
       - 'overlay/scratch-gui/src/components/gui/lesson-waves/*.json'
       - 'packages/scratch-gui/src/components/gui/lesson-waves/*.json'
+      - 'scripts/ci-vendor-pins.mjs'
       - 'scripts/detect-lesson-defects.mjs'
       - 'scripts/verify-cp1-*.mjs'
       - 'scripts/lib/cp1-*.mjs'
       - 'test/fixtures/cp1-panel/**'
       - 'test/cp1-*.test.mjs'
+      - 'test/ci-workflow-inputs.test.mjs'
       - 'test/workflow-trigger-coverage.test.mjs'
   pull_request:
     paths:
@@ -45,6 +53,12 @@ on:
       - 'overlay/scratch-gui/examples/index.json'
       - 'packages/scratch-gui/examples/cp1-*/**'
       - 'overlay/scratch-gui/src/components/tw-pseudocode/cp1-*'
+      - 'overlay/scratch-gui/src/components/tw-pseudocode/circuit-tab.jsx'
+      - 'overlay/scratch-gui/src/components/tw-pseudocode/debug-panel.jsx'
+      - 'overlay/scratch-gui/src/components/gui/gui.jsx'
+      - 'packages/scratch-gui/src/components/tw-pseudocode/circuit-tab.jsx'
+      - 'packages/scratch-gui/src/components/tw-pseudocode/debug-panel.jsx'
+      - 'packages/scratch-gui/src/components/gui/gui.jsx'
       - 'packages/scratch-gui/src/components/tw-pseudocode/cp1-*'
       - 'overlay/scratch-gui/src/lib/cp1-*'
       - 'packages/scratch-gui/src/lib/cp1-*'
@@ -58,11 +72,13 @@ on:
       - 'packages/scratch-gui/src/components/gui/guided-lessons.*'
       - 'overlay/scratch-gui/src/components/gui/lesson-waves/*.json'
       - 'packages/scratch-gui/src/components/gui/lesson-waves/*.json'
+      - 'scripts/ci-vendor-pins.mjs'
       - 'scripts/detect-lesson-defects.mjs'
       - 'scripts/verify-cp1-*.mjs'
       - 'scripts/lib/cp1-*.mjs'
       - 'test/fixtures/cp1-panel/**'
       - 'test/cp1-*.test.mjs'
+      - 'test/ci-workflow-inputs.test.mjs'
       - 'test/workflow-trigger-coverage.test.mjs'
   workflow_dispatch:
 
@@ -82,15 +98,12 @@ jobs:
         with:
           node-version: 22
       - name: Resolve the exact adopted supplier revisions
-        id: pins
+        id: vendor_pins
         run: |
+          node scripts/ci-vendor-pins.mjs >> "$GITHUB_OUTPUT"
           node --input-type=module <<'NODE'
-          import {readFileSync, appendFileSync, mkdirSync, writeFileSync} from 'node:fs';
+          import {readFileSync, mkdirSync, writeFileSync} from 'node:fs';
           const pins = JSON.parse(readFileSync('vendor-pins.json', 'utf8'));
-          for (const name of ['bw-board', 'bw-circuit-ui']) {
-            if (!/^[a-f0-9]{40}$/.test(pins[name])) throw new Error(`Invalid exact ${name} pin`);
-            appendFileSync(process.env.GITHUB_OUTPUT, `${name}=${pins[name]}\n`);
-          }
           mkdirSync('test-results/cp1-browser', {recursive: true});
           writeFileSync('test-results/cp1-browser/inputs.json', JSON.stringify({
             lite: process.env.GITHUB_SHA, suppliers: pins,
@@ -102,14 +115,14 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           repository: CrispStrobe/bw-circuit-ui
-          ref: ${{ steps.pins.outputs.bw-circuit-ui }}
+          ref: ${{ steps.vendor_pins.outputs.bw-circuit-ui }}
           path: .cp1-ci/bw-circuit-ui
           persist-credentials: false
       - name: Check out the adopted engine source
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           repository: CrispStrobe/bw-board
-          ref: ${{ steps.pins.outputs.bw-board }}
+          ref: ${{ steps.vendor_pins.outputs.bw-board }}
           path: .cp1-ci/bw-board
           persist-credentials: false
       - name: Build the independent CP1 monitor for cassette checks
@@ -150,11 +163,11 @@ jobs:
       - name: Verify CP1 source and workflow contracts
         run: |
           node --test --import ./scripts/lib/register-gui-scope.mjs \
-            test/cp1-project.test.mjs test/cp1-panel-input.test.mjs \
+            test/cp1-project.test.mjs test/cp1-panel-input.test.mjs test/cp1-example-load.test.mjs \
             test/cp1-bundle.test.mjs test/cp1-runner.test.mjs \
             test/cp1-debug-view.test.mjs test/cp1-lesson-observation.test.mjs \
             test/cp1-lessons.test.mjs test/cp1-lesson-defects.test.mjs \
-            test/workflow-trigger-coverage.test.mjs
+            test/ci-workflow-inputs.test.mjs test/workflow-trigger-coverage.test.mjs
           node scripts/verify-cp1-components.mjs --deps .cp1-ci/bw-circuit-ui/node_modules --board .cp1-ci/bw-board
           node scripts/verify-cp1-components.mjs --deps packages/scratch-gui/node_modules --compiler-deps .cp1-ci/bw-circuit-ui/node_modules --board .cp1-ci/bw-board
       - name: CP1 connector static geometry
@@ -173,7 +186,7 @@ jobs:
       - name: Shared CP1 runner, actual circuit interactions and project restore with React 18
         if: ${{ !cancelled() }}
         timeout-minutes: 4
-        run: node scripts/verify-cp1-runner-browser.mjs --deps .cp1-ci/bw-circuit-ui/node_modules --board .cp1-ci/bw-board --circuit .cp1-ci/bw-circuit-ui --cassette-rom .cp1-ci/bw-board/build/cp2/cp1-monitor.bin --curriculum --out test-results/cp1-browser/runner-react18
+        run: node scripts/verify-cp1-runner-browser.mjs --deps .cp1-ci/bw-circuit-ui/node_modules --board .cp1-ci/bw-board --circuit .cp1-ci/bw-circuit-ui --cassette-rom .cp1-ci/bw-board/build/cp2/cp1-monitor.bin --curriculum --surfaces --out test-results/cp1-browser/runner-react18
       - name: CP1 host and panel with the installed GUI React 16
         if: ${{ !cancelled() }}
         timeout-minutes: 3
@@ -181,7 +194,7 @@ jobs:
       - name: Shared CP1 runner, actual circuit interactions and project restore with the installed GUI React 16
         if: ${{ !cancelled() }}
         timeout-minutes: 4
-        run: node scripts/verify-cp1-runner-browser.mjs --deps packages/scratch-gui/node_modules --compiler-deps .cp1-ci/bw-circuit-ui/node_modules --board .cp1-ci/bw-board --circuit .cp1-ci/bw-circuit-ui --cassette-rom .cp1-ci/bw-board/build/cp2/cp1-monitor.bin --curriculum --out test-results/cp1-browser/runner-react16
+        run: node scripts/verify-cp1-runner-browser.mjs --deps packages/scratch-gui/node_modules --compiler-deps .cp1-ci/bw-circuit-ui/node_modules --board .cp1-ci/bw-board --circuit .cp1-ci/bw-circuit-ui --cassette-rom .cp1-ci/bw-board/build/cp2/cp1-monitor.bin --curriculum --surfaces --out test-results/cp1-browser/runner-react16
       - name: CP5 live switch contacts and eight real LED branches with the installed GUI React 16
         if: ${{ !cancelled() }}
         timeout-minutes: 4

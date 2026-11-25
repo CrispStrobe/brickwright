@@ -50,7 +50,7 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
-      - name: Install Playwright (Lite's locked version)
+      - name: Install the locked Playwright version
         # In its own directory: the repository's package.json must not be installed.
         run: |
           mkdir -p "$RUNNER_TEMP/probe" && cd "$RUNNER_TEMP/probe"
@@ -64,9 +64,15 @@ jobs:
           [ -n "$prev" ] && gh run download "$prev" -R "$GITHUB_REPOSITORY" -n sw-profiles -D prev 2>/dev/null || echo "no previous seed: this run only seeds"
           probe() { node "$RUNNER_TEMP/probe/probe-production-sw.mjs" "$@"; }
           fail=0
-          for t in pages=https://crispstrobe.github.io/brickwright-lite/ vercel=https://brickwright-lite.vercel.app/; do
+          for t in vercel=https://brickwright.vercel.app/ pages=https://crispstrobe.github.io/brickwright/; do
             name=${t%%=*} url=${t#*=}
-            if [ -d "prev/next/$name" ]; then
+            if [ "$name" = pages ] && ! curl -fsS --max-time 15 "${url}brickwright-pages.json" \
+              | jq -e '.repositoryId == 1291854269 and .repository == "CrispStrobe/brickwright"' >/dev/null; then
+              echo "::notice::Pages probe skipped until the Brickwright deployment is available at $url"
+              continue
+            fi
+            if [ -f "prev/next/$name/probe-seed.json" ] && \
+              jq -e --arg url "$url" '.url == $url' "prev/next/$name/probe-seed.json" >/dev/null; then
               set +e; probe check --url "$url" --profile "prev/next/$name" --json "probe-$name.json"; rc=$?; set -e
               if [ "$rc" = 3 ]; then echo "::notice::$name: inconclusive (probed chunks unchanged since the seed)";
               elif [ "$rc" != 0 ]; then echo "::error::$name: service-worker probe failed ($rc)"; fail=1; fi

@@ -198,7 +198,8 @@ test('matching runner evidence never bypasses archive bytes, digest or embedded 
 test('genuine CLI binds checked Git source and terminal context before its sole mocked archive intake', async () => ownedTemporary(async dir => {
     const fixture = path.join(dir, 'source'); await mkdir(fixture);
     const files = ['scripts/admit-official-gui-artifact.mjs', 'scripts/lib/official-gui-artifact.mjs',
-        'scripts/lib/gui-harness-source.mjs', 'scripts/lib/workflow-gates.mjs', '.github/workflows/build.yml'];
+        'scripts/lib/gui-harness-source.mjs', 'scripts/lib/workflow-gates.mjs',
+        'scripts/lib/brickwright-repository.mjs', '.github/workflows/build.yml'];
     for (const file of files) {await mkdir(path.dirname(path.join(fixture, file)), {recursive: true}); await writeFile(path.join(fixture, file), await readFile(path.join(root, file)));}
     await writeFile(path.join(fixture, 'vendor-pins.json'), JSON.stringify({'sb3-creator': expected.producerSha, 'arrays-values': expected.arraysValuesSha}));
     const git = args => execFileSync('/usr/bin/git', ['-C', fixture, ...args], {encoding: 'utf8'}).trim();
@@ -252,6 +253,7 @@ test('source and identity guard mutants accept the coherent hostile fixture only
     assert.equal(new URL(jszip).protocol, 'file:', 'resolve the approved package from this normal file context');
     const code = (await readFile(file, 'utf8'))
         .replace("'./workflow-gates.mjs'", JSON.stringify(pathToFileURL(path.join(root, 'scripts/lib/workflow-gates.mjs')).href))
+        .replace("'./brickwright-repository.mjs'", JSON.stringify(pathToFileURL(path.join(root, 'scripts/lib/brickwright-repository.mjs')).href))
         .replace("'jszip'", JSON.stringify(jszip));
     const load = async body => import('data:text/javascript;base64,' + Buffer.from(body).toString('base64'));
     const wrong = workflow.replace("steps['gui_pages_upload'].outcome", "steps['build_editor'].outcome");

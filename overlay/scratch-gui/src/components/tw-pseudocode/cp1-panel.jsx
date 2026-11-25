@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import React from 'react';
+import {createPortal} from 'react-dom';
+import {Cp1Surfaces} from './cp1-surfaces.js';
 import PropTypes from 'prop-types';
 import styles from './cp1-panel.css';
 import {browserLocale, makeT} from '../../lib/bw-i18n.js';
@@ -141,6 +143,7 @@ class Cp1Panel extends React.Component {
 
     componentDidMount () {
         this._mounted = true;
+        this._controllerSlot = this.context?.controller;
         window.addEventListener('blur', this._releaseAll);
         window.addEventListener('keyup', this._onKeyUp);
         document.addEventListener('visibilitychange', this._visibility);
@@ -157,6 +160,12 @@ class Cp1Panel extends React.Component {
     }
 
     componentDidUpdate (previous) {
+        const slot = this.context?.controller;
+        if (this._controllerSlot !== slot) {
+            const previousSlot = this._controllerSlot;
+            this._controllerSlot = slot;
+            if (previousSlot) this._releaseAll();
+        }
         if (previous.source !== this.props.source && typeof this.props.source === 'string' && this.props.source !== this.state.source) {
             this.setState({source: this.props.source, errors: []});
         }
@@ -372,7 +381,7 @@ class Cp1Panel extends React.Component {
         </section>;
     }
 
-    _renderProgram (view) {
+    _renderProgram (view, ready) {
         return <div className={styles.program}>
             <label className={styles.field}>
                 <span>{this._t('source')}</span>
@@ -381,7 +390,7 @@ class Cp1Panel extends React.Component {
             </label>
             <p className={styles.hint}>{this._t('sourceHint')}</p>
             <div className={styles.actions}>
-                <button type="button" disabled={this.state.busy || this.props.running || !this.props.onLoad}
+                <button type="button" disabled={!ready || this.state.busy || this.props.running || !this.props.onLoad}
                     onClick={() => this._load()}>{this._t('load')}</button>
                 <button type="button" disabled={this.state.busy} onClick={() => this._sourceInput.current.click()}>{this._t('openSource')}</button>
                 <button type="button" disabled={this.state.busy} onClick={() => {
@@ -478,13 +487,47 @@ class Cp1Panel extends React.Component {
         </div>;
     }
 
+    _renderSourceStatus () {
+        return <React.Fragment>
+            {this.state.errors.length ? <div role="alert" className={styles.errors} aria-label={this._t('error')}>
+                {this.state.errors.map((error, index) => <p key={index}>{error.line ? this._t('lineError', error) : error.message}</p>)}
+            </div> : null}
+            <div className={styles.notice} role="status">{this.state.busy ? this._t('busy') : this.state.notice}</div>
+        </React.Fragment>;
+    }
+
+    _renderSurfaceViews (snapshot, view, ready) {
+        const slots = this.context;
+        return <React.Fragment>
+            {slots?.code && createPortal(<section className={styles.root} data-cp1-code-editor>
+                <h2>{this._t('title')}</h2>
+                {this._renderProgram(view, ready)}
+                {this._renderSourceStatus()}
+            </section>, slots.code)}
+            {slots?.controller && createPortal(<section className={styles.root} data-cp1-controller-face
+                tabIndex={0} onKeyDown={this._onKeyDown}
+                onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) this._releaseAll(); }}>
+                <header className={styles.header}><h2>{this._t('title')}</h2>
+                    <span className={styles.badge}>{this._t(this.props.expansion ? 'expanded' : 'base')}</span>
+                </header>
+                {!ready && <button type="button" disabled={this.state.busy}
+                    onClick={() => this._romInput.current.click()}>{this._t('importRom')}</button>}
+                {ready && <button type="button" disabled={this.state.busy || !(this.props.running ? this.props.onPause : this.props.onRun)}
+                    onClick={() => { this._releaseAll(); return this.props.running ? this.props.onPause() : this.props.onRun(); }}>
+                    {this._t(this.props.running ? 'pause' : 'run')}</button>}
+                {this._renderDisplay(snapshot && snapshot.display)}
+                {this._renderKeypad(ready)}
+            </section>, slots.controller)}
+        </React.Fragment>;
+    }
+
     render () {
         const snapshot = this.props.snapshot || this.state.snapshot;
         const ready = Boolean(snapshot || this.props.machine);
         const cpu = snapshot && snapshot.cpu;
         const rom = this.props.romReference || this.state.importedRom;
         const debugView = cp1DebugView(snapshot, this.state.source, {expansion: Boolean(this.props.expansion)});
-        return <section className={styles.root} data-cp1-panel="true" data-color-mode={this.props.colorMode}
+        return <React.Fragment><section className={styles.root} data-cp1-panel="true" data-color-mode={this.props.colorMode}
             tabIndex={0} onKeyDown={this._onKeyDown}
             onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) this._releaseAll(); }}>
             <header className={styles.header}><h2>{this._t('title')}</h2>
@@ -513,11 +556,8 @@ class Cp1Panel extends React.Component {
                 {['program', 'memory', 'ports'].map(view => <button key={view} type="button" aria-pressed={this.state.view === view}
                     onClick={() => this.setState({view})}>{this._t(view)}</button>)}
             </div>
-            {this.state.view === 'program' ? this._renderProgram(debugView) : this.state.view === 'memory' ? this._renderMemory(snapshot, debugView) : this._renderPorts(snapshot)}
-            {this.state.errors.length ? <div role="alert" className={styles.errors} aria-label={this._t('error')}>
-                {this.state.errors.map((error, index) => <p key={index}>{error.line ? this._t('lineError', error) : error.message}</p>)}
-            </div> : null}
-            <div className={styles.notice} role="status">{this.state.busy ? this._t('busy') : this.state.notice}</div>
+            {this.state.view === 'program' ? this._renderProgram(debugView, ready) : this.state.view === 'memory' ? this._renderMemory(snapshot, debugView) : this._renderPorts(snapshot)}
+            {this._renderSourceStatus()}
             {this.props.children}
             <input ref={this._romInput} className={styles.hidden} type="file" accept=".bin,.rom,application/octet-stream"
                 aria-label={this._t('importRom')} onChange={event => {
@@ -531,10 +571,13 @@ class Cp1Panel extends React.Component {
                     event.target.value = '';
                     this._openSource(file);
                 }} />
-        </section>;
+        </section>
+        {this._renderSurfaceViews(snapshot, debugView, ready)}
+        </React.Fragment>;
     }
 }
 
+Cp1Panel.contextType = Cp1Surfaces;
 Cp1Panel.propTypes = {
     machine: PropTypes.object, snapshot: PropTypes.object, running: PropTypes.bool,
     expansion: PropTypes.bool, clockHz: PropTypes.number, locale: PropTypes.string,

@@ -6,10 +6,11 @@ import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {inspectGuiHarnessSource} from './lib/gui-harness-source.mjs';
 import {GUI_MANIFEST} from './lib/official-gui-artifact.mjs';
+import {assertBrickwrightRepository} from './lib/brickwright-repository.mjs';
 
 export async function writeGuiBuildManifest({root, site, gitExecutable, context}) {
     const inspected = inspectGuiHarnessSource({root, executable: gitExecutable});
-    assert.equal(context.repository, 'CrispStrobe/brickwright-lite');
+    assertBrickwrightRepository(context.repository, context.repositoryId);
     assert.equal(context.job, 'build');
     assert.equal(inspected.sourceSha, context.githubSha, 'Actual producer checkout must equal GITHUB_SHA');
     assert.match(context.reviewedHeadSha || '', /^[0-9a-f]{40}$/);
@@ -39,7 +40,8 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     const root = path.resolve(fileURLToPath(new URL('..', import.meta.url)));
     const manifest = await writeGuiBuildManifest({root, site: path.resolve(process.argv[2] || 'packages/scratch-gui/build'),
         gitExecutable: process.env.BW_GUI_GIT_EXECUTABLE,
-        context: {repository: process.env.GITHUB_REPOSITORY, runId: Number(process.env.GITHUB_RUN_ID),
+        context: {repository: process.env.GITHUB_REPOSITORY, repositoryId: Number(process.env.GITHUB_REPOSITORY_ID),
+            runId: Number(process.env.GITHUB_RUN_ID),
             attempt: Number(process.env.GITHUB_RUN_ATTEMPT), job: process.env.GITHUB_JOB,
             githubSha: process.env.GITHUB_SHA, reviewedHeadSha: process.env.BW_GUI_REVIEWED_HEAD_SHA}});
     console.log(JSON.stringify({manifest: GUI_MANIFEST, sourceSha: manifest.sourceSha, treeSha: manifest.treeSha}));

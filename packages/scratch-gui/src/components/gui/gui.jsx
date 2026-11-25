@@ -5,6 +5,8 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {clearControllerPanel, connectControllerBoard, serializeControllerPanel} from '../../lib/controller-inputs.js';
+import {Cp1Surfaces} from '../tw-pseudocode/cp1-surfaces.js';
+import cp1SurfaceStyles from '../tw-pseudocode/cp1-surfaces.css';
 import {defineMessages, FormattedMessage, injectIntl, intlShape} from 'react-intl';
 import {connect} from 'react-redux';
 import MediaQuery from 'react-responsive';
@@ -421,6 +423,10 @@ const GUIComponent = props => {
             return dock;
         } catch { return 'top'; }
     });
+    const [cp1CodeSlot, setCp1CodeSlot] = React.useState(null);
+    const [cp1ControllerSlot, setCp1ControllerSlot] = React.useState(null);
+    const cp1Surfaces = React.useMemo(() => ({code: cp1CodeSlot, controller: cp1ControllerSlot}),
+        [cp1CodeSlot, cp1ControllerSlot]);
     const [gameControlKey, setGameControlKey] = React.useState(() =>
         props.vm?.runtime?.bwGameControlKey || null);
     React.useEffect(() => {
@@ -932,7 +938,7 @@ const GUIComponent = props => {
         </React.Suspense>
     ) : null;
 
-    return (<React.Fragment><MediaQuery minWidth={layout.fullSizeMinWidth}>{isFullSize => {
+    return (<Cp1Surfaces.Provider value={cp1Surfaces}><React.Fragment><MediaQuery minWidth={layout.fullSizeMinWidth}>{isFullSize => {
         const stageSize = resolveStageSize(stageSizeMode, isFullSize);
 
         // Three-column pane sizing from the paneLayout reducer.
@@ -944,6 +950,16 @@ const GUIComponent = props => {
         const middleSize = paneLayout?.middle?.size || 'l';
         const rightSize = paneLayout?.right?.size || 'm';
         const middleContent = paneLayout?.middle?.upper || 'blocks-canvas';
+        const renderCodePane = isVisible => (
+            <div className={cp1SurfaceStyles.codeShell}>
+                <div ref={setCp1CodeSlot} className={cp1SurfaceStyles.codeSlot} />
+                <div className={cp1SurfaceStyles.codeFallback}>
+                    <EditorErrorBoundary name="Code"><LazyPseudocodeImporter
+                        isVisible={isVisible} vm={vm}
+                    /></EditorErrorBoundary>
+                </div>
+            </div>
+        );
         const helpEditor = [
             middleContent === 'code' ? 'Code' : 'Blocks',
             targetIsStage ? 'Backdrops' : 'Costumes',
@@ -1206,7 +1222,7 @@ const GUIComponent = props => {
                                         /* Content swap: the code preset puts the pseudocode editor
                                            in the first (blocks) tab panel. The blocks workspace
                                            stays mounted in TabPanel index 3 so it is not destroyed. */
-                                        <LazyPseudocodeImporter isVisible={activeTabIndex === 0} vm={vm} />
+                                        renderCodePane(activeTabIndex === 0)
                                     ) : (
                                         <React.Fragment>
                                             <Box className={styles.blocksWrapper}>
@@ -1249,12 +1265,7 @@ const GUIComponent = props => {
                                     {soundsTabVisible ? <LazySoundTab vm={vm} /> : null}
                                 </TabPanel>
                                 <TabPanel className={tabClassNames.tabPanel}>
-                                    {middleContent !== 'code' ? (
-                                        <EditorErrorBoundary name="Code"><LazyPseudocodeImporter
-                                            isVisible={activeTabIndex === CODE_TAB_INDEX}
-                                            vm={vm}
-                                        /></EditorErrorBoundary>
-                                    ) : null}
+                                    {middleContent !== 'code' ? renderCodePane(activeTabIndex === CODE_TAB_INDEX) : null}
                                 </TabPanel>
                                 <TabPanel className={tabClassNames.tabPanel}>
                                     <EditorErrorBoundary name="Circuit"><CircuitTab /></EditorErrorBoundary>
@@ -1422,17 +1433,22 @@ const GUIComponent = props => {
                                         circuit-tab.jsx splits the column at data-bw-stage-dock: Widgets
                                         on top, debugger below (z-index 2), so neither covers the other. */}
                                     <div data-bw-stage-dock="controller" style={dockFullScreenStyle || {position: 'relative', zIndex: 1, flex: 1, minHeight: 0, borderTop: '1px solid #ffffff', background: '#f8fafc'}}>
-                                        <ControllerPanelView
-                                            panel={controllerPanel}
-                                            board={board}
-                                            manageBoardBinding={false}
-                                            vm={vm}
-                                            machineConsole={machineConsole}
-                                            locale={intl.locale}
-                                            isFullScreen={isFullScreen}
-                                            onExitFullScreen={props.onExitFullScreen}
-                                            onEnterFullScreen={props.onEnterFullScreen}
-                                        />
+                                        <div className={cp1SurfaceStyles.controllerShell}>
+                                            <div ref={setCp1ControllerSlot} className={cp1SurfaceStyles.controllerSlot} />
+                                            <div className={cp1SurfaceStyles.controllerWidgets}>
+                                                <ControllerPanelView
+                                                    panel={controllerPanel}
+                                                    board={board}
+                                                    manageBoardBinding={false}
+                                                    vm={vm}
+                                                    machineConsole={machineConsole}
+                                                    locale={intl.locale}
+                                                    isFullScreen={isFullScreen}
+                                                    onExitFullScreen={props.onExitFullScreen}
+                                                    onEnterFullScreen={props.onEnterFullScreen}
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
                                 </React.Suspense>
                             ) : (
@@ -1448,7 +1464,7 @@ const GUIComponent = props => {
                 <DragLayer />
             </Box>
         );
-    }}</MediaQuery>{machineManagerModal}</React.Fragment>);
+    }}</MediaQuery>{machineManagerModal}</React.Fragment></Cp1Surfaces.Provider>);
 };
 
 GUIComponent.propTypes = {

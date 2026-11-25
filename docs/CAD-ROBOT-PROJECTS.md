@@ -575,3 +575,137 @@ editor speedup, and the sustained 1× viewport target remains open.
 Scout passed the full editor restart proof at 1.003× with the override.
 Atlas also passed the functional proof with the packaged Jolt module
 at 0.325× in a single run. That sample has no paired baseline.
+
+### Live circuit option allocation
+
+[Board source](https://github.com/CrispStrobe/bw-board/commit/2a15e76fca1efcd253d5aa7c44c450011e47a012)
+now builds the live solver options once and adds warm-start fields only
+when applicable. This removes the compatibility build's object-spread
+copies from the main solve path. All 50 focused tests passed on the
+backport and again on Board master, including power-off resistance,
+transient reset, current conservation, and incomplete-advance handling.
+
+Both paired orders in Mac Chrome used the same CAD SDK and Jolt 5.7.0
+SIMD module. Both Board bundles applied browser compatibility
+transforms. Across 600 ticks for each robot, sampled motion and
+electrical readings matched exactly. Atlas host time per 5 ms step
+fell from 1.73/1.85 ms to 1.55/1.52 ms and simulation-only throughput
+rose from 1.082×/1.063× to 1.141×/1.192×. Scout's host time fell from
+1.03/0.99 ms to 0.88/0.88 ms. These runs omit the full viewport.
+
+The local Chrome editor build used the post-CP1 Lite merge, Board pin
+`ddd77e4e` plus only this source change, and CAD SDK `7760321`. Atlas
+passed one-click Run, joint motion, Stop, and Reset at 0.660× with the
+Jolt 5.7.0 override. Scout passed its restart proof at 1.002× with the
+same override. The full editor has no paired baseline on this Lite
+revision. Atlas's full-editor 1× target remains open.
+Atlas also passed the functional proof with bundled Jolt at 0.296×.
+
+### Hinge-clearance sampling between physics ticks
+
+[CrispCAD candidate](https://github.com/CrispStrobe/CrispCAD/commit/bc02c29)
+checks authored hinge clearance once before the first physics step and
+after every step. Commands between steps leave the sampled poses in
+place. External commands that invalidate a clearance pair keep doing
+so immediately. The clearance threshold and solver settings keep
+their existing values.
+[Pinned-source backport](https://github.com/CrispStrobe/CrispCAD/commit/a7ef013)
+
+Across 160 direct Jolt ticks with fixed motor and servo commands, the
+position reads during world stepping fell from 1,128 to 568 for Atlas
+and from 296 to 150 for Scout. Rotation read counts were the same as
+position read counts. The sampled poses, angles, and active-clearance
+counts matched exactly in both test orders.
+
+The paired Chrome worker comparison used the same Board bundle and
+Jolt 5.7.0 SIMD module, and the candidate was built from pin `7760321`
+plus only this change. Both models produced identical sampled motion
+and electrical traces over 600 ticks. Atlas mechanical round-trip
+time was 3.13/2.41 ms per tick on the previous SDK and 3.08/2.47 ms on
+the candidate. Scout also had mixed results across the two orders.
+
+Type checking and 28 focused tests passed. Atlas's lift-and-drive test
+and Scout's standalone qualification timed out under the loaded
+Mac. The separate Scout clearance-count test still expected two and
+observed one, the same assertion reproduced earlier on the original
+physics source. The source and SDK backport are saved on their
+candidate branches. The published CAD SDK pin remains `7760321`.
+
+The full editor passed Atlas one-click Run, joint motion, Stop, and
+Reset at 0.960× with the pinned SDK and 0.977× with the candidate.
+Scout passed its restart proof at 1.003× with the candidate. Both
+runs used the Jolt 5.7.0 SIMD override. The single editor comparison
+does not establish a throughput gain, and Atlas remains below 1×.
+
+### Native actuator bindings and persistent motor settings
+
+[CrispCAD candidate](https://github.com/CrispStrobe/CrispCAD/tree/codex/cad-actuator-bindings-20261125)
+caches the native actuator handles and dynamic impulse targets per
+world. It also avoids sending unchanged motor mode and solver iteration
+settings to Jolt every tick. Motor mode transitions still send a write,
+and serial servo tuning invalidates any cached impulse velocity override
+for the affected hinge. Type checking and all six focused tests passed,
+including tests for both state transitions. The previously failing
+full-rover clearance-count case was outside this focused run.
+
+With fixed commands and the same Jolt 5.7.0 SIMD build, a 120-tick
+direct Atlas comparison produced identical chassis poses and joint
+values. Hinge motor-state writes fell from 360 to five, and position
+and velocity override writes each fell from 240 to two. In the
+command-only benchmark, median CPU time per impulse was 3.80–3.89 µs
+before and 3.34–3.46 µs after.
+
+The Chrome test used the pinned SDK's host and assets with a local
+worker rebuilt from [pin plus this change](https://github.com/CrispStrobe/CrispCAD/commit/659e24f).
+Atlas and Scout both produced identical sampled 600-tick motion and
+electrical traces in both orders. Atlas's mechanical round trip was
+3.22/2.78 ms before and 3.34/2.70 ms after. Scout's was 2.19/2.28 ms
+before and 2.21/2.14 ms after. The worker comparison does not establish
+a throughput gain.
+
+In the full editor, Atlas passed one-click Run, joint motion, Stop,
+and Reset at 0.770× with the pinned worker and 0.823× with the local
+worker. Both used the same Jolt 5.7.0 SIMD override. The single
+editor comparison leaves sustained 1× unverified. The change stays
+on its candidate branches and the published CAD SDK pin stays in place.
+Scout passed its full-editor restart proof at 1.005×.
+
+### Temporary native vectors during collision-world setup
+
+[CrispCAD main](https://github.com/CrispStrobe/CrispCAD/commit/5ccc31ae989770c4f082708e7b59b7c21ca8e2b8)
+reuses a vertex vector, a compound-position vector, and an identity
+quaternion while creating Jolt hulls. Jolt copies their values into
+its own settings. The code also reads each hull's native point array
+once and validates its coordinates while calculating its bounds.
+The source and the [exact pin backport](https://github.com/CrispStrobe/CrispCAD/commit/a128776)
+are saved on GitHub.
+
+The direct Jolt 5.7.0 startup probe used the same qualified collision
+buffers and counted Vec3, RVec3, and Quat objects constructed by the
+JavaScript world setup. Atlas went from 30,278 to 80 objects. CPU time
+for the complete world setup fell from 1,781 to 828 ms in one order
+and from 838 to 494 ms in the reverse order. Sampled motion across
+24 ticks was exact.
+
+The paired Mac Chrome worker runs used the same Board bundle and
+Jolt 5.7.0 SIMD override. Each robot ran for 600 ticks, followed by
+three warm starts. The sampled motion, electrical telemetry, and
+restart frames matched exactly. Median Atlas restart time fell from
+415 to 347 ms in one order and 453 to 354 ms in the other. Scout
+fell from 785 to 697 ms and from 809 to 756 ms. This comparison
+measures world startup separately from sustained simulation speed.
+
+Type checking and six focused geometry and actuator tests passed.
+The broader run produced 29 passes and 11 timeouts at its existing
+per-test budgets. Two of the focused tests initially hit their
+five-second timeout and both passed on the targeted retry with
+the timeout raised to 60 seconds.
+
+Atlas passed the full editor Run, Stop, Reset, and repeat-Run proof
+on both builds with the same Jolt 5.7.0 override. Instrumented worker
+restart time was 659 ms on the pinned build and 631 ms on the local
+build. Sustained throughput was 0.520× and 0.557× during those runs.
+The observed startup improvement does not establish the full editor's
+sustained 1× target. The local test worker replaces only the bundled
+worker and its assets. Lite's release SDK remains at pin `7760321`.
+Scout passed the same full-editor restart proof on the local build.

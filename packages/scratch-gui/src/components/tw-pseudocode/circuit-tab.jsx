@@ -404,12 +404,14 @@ class CircuitTab extends React.Component {
                     this._markReactUpdate('host:circuit-data');
                     this.setState({circuitData: parsed});
                     this._applyToLiveCircuit(parsed);
+                    this.activateCp1Circuit(parsed);
                 } else if (event?.detail?.outcome === 'legacy' || event?.detail?.outcome === 'loaded') {
                     try { localStorage.setItem('bw-circuit-file-loaded', '1'); } catch (e) { /* full */ }
                     const emptied = {version: 1, parts: [], wires: []};
                     this._markReactUpdate('host:circuit-data');
                     this.setState({circuitData: emptied});
                     this._applyToLiveCircuit(emptied);
+                    this.activateCp1Circuit(emptied);
                 }
                 // The GUI owns project Widgets restoration, including when Circuit is hidden.
             } catch (e) {
@@ -1442,6 +1444,27 @@ class CircuitTab extends React.Component {
         }
     }
 
+    activateCp1Circuit (data) {
+        const part = data?.parts?.find(item => item.kind === 'kosmos-cp1');
+        const runtime = this.props.vm?.runtime;
+        if (!part) {
+            if (window.__bwMachineExtracted?.kind !== 'cp1' && runtime?.bwDeviceCore !== 'cp1') return null;
+            if (window.__bwMachineExtracted?.kind === 'cp1') {
+                delete window.__bwMachineExtracted;
+                this.setState({machineBooted: false});
+            }
+            if (window.__bwPendingMedia?.detail?.kind === 'cp1') delete window.__bwPendingMedia;
+            if (runtime?.bwDeviceCore === 'cp1') delete runtime.bwDeviceCore;
+            window.dispatchEvent(new CustomEvent('bw-cp1-circuit-detached'));
+            return null;
+        }
+        const config = {partId: part.id, expansion: part.params?.expansion === true,
+            clockHz: part.params?.clockHz || 6000000};
+        if (runtime) runtime.bwDeviceCore = 'cp1';
+        window.dispatchEvent(new CustomEvent('bw-machine-extracted', {detail: {kind: 'cp1', config}}));
+        return config;
+    }
+
     /**
      * Apply an example's shipped controller layout (files.controller) to
      * the runtime panel — replacing whatever widgets the previous project
@@ -1713,19 +1736,21 @@ class CircuitTab extends React.Component {
                 !(Array.isArray(data.wires) || Array.isArray(data.nets))) {
                 throw new Error('not a circuit (no parts with wires or nets)');
             }
-            if (ex?.files?.cp1) {
+            if (ex.files?.cp1) {
                 const sourceResponse = await fetch(`examples/${ex.files.cp1}`);
                 if (!sourceResponse.ok) throw new Error(`CP1 program: HTTP ${sourceResponse.status}`);
                 const source = await sourceResponse.text();
                 const part = data.parts.find(item => item.kind === 'kosmos-cp1');
-                const config = {expansion: part?.params?.expansion === true, clockHz: 6000000, partId: part?.id};
-                const draft = {format: 'brickwright.cp1-workspace', version: 1,
-                    configuration: {expansion: config.expansion, clockHz: config.clockHz}, rom: null, source};
-                // Persist before mounting the CP1 panel: DOM events alone can precede its listener.
+                if (!part) throw new Error('The CP1 example needs a CP1 board');
+                const configuration = {expansion: part.params?.expansion === true,
+                    clockHz: part.params?.clockHz || 6000000};
+                const draft = {format: 'brickwright.cp1-workspace', version: 1, configuration, rom: null, source};
+                // Persist before mounting the panel. A lazy debugger can miss the event.
                 localStorage.setItem('bw-cp1-workspace', JSON.stringify(draft));
-                if (this.props.vm?.runtime) this.props.vm.runtime.bwDeviceCore = 'cp1';
-                window.dispatchEvent(new CustomEvent('bw-machine-extracted', {detail: {kind: 'cp1', config}}));
+                const config = this.activateCp1Circuit(data);
                 window.dispatchEvent(new CustomEvent('bw-cp1-source-load', {detail: {source, ...config}}));
+            } else if (!data.parts.some(item => item.kind === 'kosmos-cp1')) {
+                this.activateCp1Circuit(data);
             }
             // The program first: it calls vm.loadProject, which would otherwise
             // discard a circuit loaded a moment earlier. Its failure is not
@@ -1749,7 +1774,7 @@ class CircuitTab extends React.Component {
             // behind a toggle nobody knows to press.
             try {
                 const applied = await this.applyControllerLayout(ex);
-                if (applied) {
+                if (applied || ex.files?.cp1) {
                     // BOTH events: the dock chooses WHAT the right column
                     // shows; the pane key makes the column exist. This tab
                     // itself nones the stage wrapper while rightPaneHidden
@@ -2256,7 +2281,8 @@ class CircuitTab extends React.Component {
         this._portalOn = !this.state.cadCircuitRequested && this._stagePortalOn();
         // On the dedicated Circuit tab 'solo' behaves as 'top': the designer
         // with the compact debugger in its Instruments column.
-        const dock = this.state.debugDock === 'solo' ? 'top'
+        const cp1ControllerDock = this.state.debugDock === 'controller' && window.__bwMachineExtracted?.kind === 'cp1';
+        const dock = this.state.debugDock === 'solo' || cp1ControllerDock ? 'top'
             : CIRCUIT_DOCKS.has(this.state.debugDock) ? this.state.debugDock : 'off';
         const content = (
             <div ref={this._boxRef} style={box} onPointerDown={() => activateUndoSurface('circuit')}>

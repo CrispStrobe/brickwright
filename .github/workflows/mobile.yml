@@ -318,7 +318,7 @@ jobs:
                   require(all(hasattr(os,key) for key in ('waitid','P_PID','WEXITED','WNOHANG','WNOWAIT')) and
                           signal.getsignal(signal.SIGCHLD) == signal.SIG_DFL)
                   require(os.environ['GITHUB_EVENT_NAME'] == 'workflow_dispatch' and
-                          os.environ['GITHUB_REPOSITORY'] == 'CrispStrobe/brickwright-lite' and
+                          os.environ.get('GITHUB_REPOSITORY_ID') == '1291854269' and
                           os.environ['GITHUB_REF'] == 'refs/heads/lane/ios-active-asset-source-20261018')
                   report['stage']='producer-loading'
                   workflow=(Path(os.environ['GITHUB_WORKSPACE'])/'.github/workflows/mobile.yml').read_text()
@@ -717,7 +717,7 @@ jobs:
               owners=[];started=time.monotonic();deadline=started+15
               try:
                   need(sys.platform=='darwin' and platform.machine()=='arm64' and sys.version_info[:2]==(3,13))
-                  need(os.environ['GITHUB_EVENT_NAME']=='workflow_dispatch' and os.environ['GITHUB_REPOSITORY']=='CrispStrobe/brickwright-lite' and
+                  need(os.environ['GITHUB_EVENT_NAME']=='workflow_dispatch' and os.environ.get('GITHUB_REPOSITORY_ID')=='1291854269' and
                       os.environ['GITHUB_REF']=='refs/heads/lane/ios-active-asset-source-20261018' and os.environ['GITHUB_JOB']=='ios-audit-directory')
                   need(os.environ['BW_DIRECTORY_MODE']=='true' and os.environ['BW_DIRECTORY_OTHER_MODE']=='false' and
                       os.environ['BW_DIRECTORY_RETAIN']=='true' and os.environ['BW_DIRECTORY_SIGN']=='false' and os.environ['BW_DIRECTORY_DEVICE']=='false' and
@@ -2837,7 +2837,7 @@ jobs:
           def main():
               global ROWS, USED
               need(os.environ.get('GITHUB_EVENT_NAME') == 'workflow_dispatch' and
-                   os.environ.get('GITHUB_REPOSITORY') == 'CrispStrobe/brickwright-lite' and
+                   os.environ.get('GITHUB_REPOSITORY_ID') == '1291854269' and
                    os.environ.get('GITHUB_REF') in ('refs/heads/main',
                        'refs/heads/lane/ios-active-asset-source-20261018') and
                    os.environ.get('BW_RETAIN_IOS_INPUTS') == 'true' and

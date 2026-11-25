@@ -62,6 +62,7 @@ export async function cp1BrowserFixture ({root, deps, compilerDeps = deps, board
             {find: /^bw-board\/(.*)$/, replacement: `${board}/src/$1`},
             {find: '@cp1-panel', replacement: path.join(component, 'cp1-panel.jsx')},
             {find: '@cp1-host', replacement: path.join(component, 'cp1-host.jsx')},
+            {find: '@cp1-surfaces', replacement: path.join(component, 'cp1-surfaces.js')},
             {find: '@cp1-machine', replacement: path.join(board, 'src/cp1-machine.js')},
             {find: '@cp1-runner', replacement: path.join(library, 'bw-debug/debug-runner.js')},
             {find: '@cp1-project-bundle', replacement: path.join(library, 'bw-project-bundle.js')},
