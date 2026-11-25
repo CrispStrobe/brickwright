@@ -29,7 +29,7 @@ var U = {
   next: "load the module again (reload the page) before relying on what it computes, or run the modeling in a KernelWorker, which starts a new kernel after a crash"
 };
 U.next = null;
-var J = import("./chunk-ZPST7NB3-OEK9S8Dq.js"), z = 1, B = 2, E = 3, v = 4, C = 5;
+var J = import("./chunk-T3BBAX2G-CmWqW0-f.js"), z = 1, B = 2, E = 3, v = 4, C = 5;
 function x({ k: a, module: e }, n) {
   const r = "/tmp/smlibwasm-probe.smb";
   e.FS.writeFile(r, n);

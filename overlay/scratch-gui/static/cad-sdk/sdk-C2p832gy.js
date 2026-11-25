@@ -41502,7 +41502,7 @@ return subtract(` + (u.length ? "union(" + [p, ...u].join(",") + ")" : p) + ",un
 function yD() {
   const i = new Worker(new URL(
     /* @vite-ignore */
-    "" + new URL("assets/simulation.worker-t77lghC0.js", import.meta.url).href,
+    "" + new URL("assets/simulation.worker-CQgWgqi_.js", import.meta.url).href,
     import.meta.url
   ), { type: "module" });
   let e = 0, t = !1;
@@ -43275,7 +43275,7 @@ function VR(i, e) {
       u.clear();
     }, q = () => d || (d = e ? e() : new Worker(new URL(
       /* @vite-ignore */
-      "" + new URL("assets/geometry.worker-DcSxf_wm.js", import.meta.url).href,
+      "" + new URL("assets/geometry.worker-C0tQ3NWa.js", import.meta.url).href,
       import.meta.url
     ), { type: "module" }), d.onmessage = (x) => {
       const m = x.data, f = u.get(m.request);
@@ -43333,7 +43333,7 @@ function VR(i, e) {
     }
   };
 }
-const jR = "@crispcad/exact-kernel", HR = "0.1.1", GR = "smlib", Sx = Object.freeze({ id: GR, package: jR, version: HR }), WR = Object.freeze([Sx]);
+const jR = "@crispcad/exact-kernel", HR = "0.1.2", GR = "smlib", Sx = Object.freeze({ id: GR, package: jR, version: HR }), WR = Object.freeze([Sx]);
 function XR(i, e) {
   return i.some((t) => t.id === e.id && t.package === e.package && t.version === e.version);
 }
@@ -60370,7 +60370,7 @@ function hU(i, e) {
   async function V(h1) {
     if (!M) {
       if (!B) {
-        const { mountModelLibraryPanel: K1 } = await import("./model-library-panel-C1QtQnQP.js");
+        const { mountModelLibraryPanel: K1 } = await import("./model-library-panel-CT4K1Kgc.js");
         if (M)
           return;
         B ?? (B = K1(r, t, (i2) => G.evaluate(i2), e.modelLibrary, async () => {
@@ -61665,7 +61665,7 @@ function hU(i, e) {
 }
 let Sa, Qq;
 async function Iv() {
-  const [{ createBundledModelLibraryOptions: i }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-KAvIlObS.js"), import("./model-library-cache-DiMFGzp9.js")]);
+  const [{ createBundledModelLibraryOptions: i }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-B6g64tLl.js"), import("./model-library-cache-DiMFGzp9.js")]);
   return Sa ?? (Sa = i()), { ...Sa, cache: e() };
 }
 async function SU() {
