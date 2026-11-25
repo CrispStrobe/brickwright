@@ -600,3 +600,39 @@ Jolt 5.7.0 override. Scout passed its restart proof at 1.002× with the
 same override. The full editor has no paired baseline on this Lite
 revision. Atlas's full-editor 1× target remains open.
 Atlas also passed the functional proof with bundled Jolt at 0.296×.
+
+### Hinge-clearance sampling between physics ticks
+
+[CrispCAD candidate](https://github.com/CrispStrobe/CrispCAD/commit/bc02c29)
+checks authored hinge clearance once before the first physics step and
+after every step. Commands between steps leave the sampled poses in
+place. External commands that invalidate a clearance pair keep doing
+so immediately. The clearance threshold and solver settings keep
+their existing values.
+[Pinned-source backport](https://github.com/CrispStrobe/CrispCAD/commit/a7ef013)
+
+Across 160 direct Jolt ticks with fixed motor and servo commands, the
+position reads during world stepping fell from 1,128 to 568 for Atlas
+and from 296 to 150 for Scout. Rotation read counts were the same as
+position read counts. The sampled poses, angles, and active-clearance
+counts matched exactly in both test orders.
+
+The paired Chrome worker comparison used the same Board bundle and
+Jolt 5.7.0 SIMD module, and the candidate was built from pin `7760321`
+plus only this change. Both models produced identical sampled motion
+and electrical traces over 600 ticks. Atlas mechanical round-trip
+time was 3.13/2.41 ms per tick on the previous SDK and 3.08/2.47 ms on
+the candidate. Scout also had mixed results across the two orders.
+
+Type checking and 28 focused tests passed. Atlas's lift-and-drive test
+and Scout's standalone qualification timed out under the loaded
+Mac. The separate Scout clearance-count test still expected two and
+observed one, the same assertion reproduced earlier on the original
+physics source. The source and SDK backport are saved on their
+candidate branches. The published CAD SDK pin remains `7760321`.
+
+The full editor passed Atlas one-click Run, joint motion, Stop, and
+Reset at 0.960× with the pinned SDK and 0.977× with the candidate.
+Scout passed its restart proof at 1.003× with the candidate. Both
+runs used the Jolt 5.7.0 SIMD override. The single editor comparison
+does not establish a throughput gain, and Atlas remains below 1×.
