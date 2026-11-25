@@ -8,7 +8,7 @@ import {parseArgs} from 'node:util';
 import {parseCp1Program} from '../overlay/scratch-gui/src/lib/cp1-program.js';
 
 const {values: args} = parseArgs({options: {
-    board: {type: 'string'}, circuit: {type: 'string'}, rom: {type: 'string'}, bank: {type: 'boolean'}
+    board: {type: 'string'}, circuit: {type: 'string'}, rom: {type: 'string'}, bank: {type: 'boolean'}, capstone: {type: 'boolean'}
 }});
 assert.ok(args.board && args.circuit && args.rom, 'Pass --board, --circuit and --rom');
 const load = (directory, file) => import(pathToFileURL(resolve(directory, file)).href);
@@ -19,15 +19,17 @@ const {Circuit} = await load(args.circuit, 'src/model/circuit.js');
 engine.registerAllDevices();
 setEngine(engine);
 
-const example = args.bank ? 'cp1-cp4-relay-bank' : 'cp1-cp4-relay-signals';
+assert.ok(!(args.bank && args.capstone), 'Choose either --bank or --capstone');
+const example = args.capstone ? 'cp1-cp3-cp4-relay-sequence' :
+    (args.bank ? 'cp1-cp4-relay-bank' : 'cp1-cp4-relay-signals');
 const gallery = new URL(`../overlay/scratch-gui/examples/${example}/`, import.meta.url);
 const json = JSON.parse(readFileSync(new URL('circuit.json', gallery), 'utf8'));
 const source = readFileSync(new URL('program.cp1', gallery), 'utf8');
-const program = parseCp1Program(source);
+const program = parseCp1Program(source, {expansion: Boolean(args.capstone)});
 assert.ok(program.ok, JSON.stringify(program.errors));
 const circuit = Circuit.fromJSON(json);
 const board = circuit.board;
-const adapter = createCp1Adapter({rom: readFileSync(args.rom), partId: 'cp1'});
+const adapter = createCp1Adapter({rom: readFileSync(args.rom), partId: 'cp1', expansion: Boolean(args.capstone)});
 adapter.attachBoard(board);
 const {machine} = adapter;
 const advance = ms => adapter.advanceNs(ms * 1e6);
@@ -57,8 +59,9 @@ for (const {relay, load, returnPin} of channels) {
 }
 
 const observations = [];
+const outputPort = args.capstone ? 4 : 2;
 function expectSignals(expected, label) {
-    const ports = machine.getPortState(2);
+    const ports = machine.getPortState(outputPort);
     assert.equal(ports.latch, expected, label);
     const currents = channels.map(({relay, load, feed}, bit) => {
         const energized = Boolean(expected & (1 << bit));
@@ -81,10 +84,33 @@ expectSignals(255, 'startup');
 function startProgram() {
     for (const {address, opcode, operand} of program.words) machine.writeCell(address, opcode, operand);
     for (const name of ['0', '0', '0', 'PC', 'RUN']) key(name);
-    expectSignals(0, 'idle');
+    if (!args.capstone) expectSignals(0, 'idle');
 }
 
-if (args.bank) {
+if (args.capstone) {
+    assert.equal(netFor('cp1', 'P4.0'), netFor('entry-base', 'a'));
+    assert.equal(netFor('cp1', 'P4.1'), netFor('exit-base', 'a'));
+    assert.equal(machine.capacity, 256);
+    const baseLatch = machine.getPortState(2).latch;
+    startProgram();
+    assert.deepEqual(machine.readCell(128), {opcode: 0, operand: 1});
+    assert.deepEqual(machine.readCell(255), {opcode: 0, operand: 2});
+    function waitForSignals(expected, label) {
+        for (let elapsed = 0; elapsed < 1000 && machine.getPortState(4).latch !== expected; elapsed += 25) {
+            advance(25);
+        }
+        advance(20); // Let the electrical outputs settle after the latch changes.
+        expectSignals(expected, label);
+    }
+    waitForSignals(1, 'read first expansion cell');
+    waitForSignals(2, 'read last expansion cell');
+    machine.writeCell(255, 0, 3);
+    waitForSignals(0, 'dark phase');
+    waitForSignals(1, 'first expansion cell unaffected');
+    waitForSignals(3, 'edit takes effect on the next pass');
+    assert.equal(machine.getPortState(2).latch, baseLatch);
+    console.log(JSON.stringify({observations}, null, 2));
+} else if (args.bank) {
     startProgram();
     let previous = 0;
     for (const value of [1, 2, 4, 8, 16, 32, 64, 128, 85, 170, 255, 0]) {

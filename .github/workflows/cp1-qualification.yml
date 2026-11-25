@@ -185,6 +185,12 @@ jobs:
           set -o pipefail
           node scripts/verify-cp1-cp4.mjs --bank --board .cp1-ci/bw-board --circuit .cp1-ci/bw-circuit-ui \
             --rom .cp1-ci/bw-board/build/cp2/cp1-monitor.bin | tee test-results/cp1-browser/cp4-bank.json
+      - name: CP3 expansion sequence through CP4 relay contacts
+        timeout-minutes: 3
+        run: |
+          set -o pipefail
+          node scripts/verify-cp1-cp4.mjs --capstone --board .cp1-ci/bw-board --circuit .cp1-ci/bw-circuit-ui \
+            --rom .cp1-ci/bw-board/build/cp2/cp1-monitor.bin | tee test-results/cp1-browser/cp3-cp4-sequence.json
       - name: CP1 connector static geometry
         working-directory: .cp1-ci/bw-circuit-ui
         run: npm run verify:cp1
