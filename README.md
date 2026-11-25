@@ -71,6 +71,22 @@ captures, saved receipts and explicit reference comparisons. Invoke it with
 for supported models, sample rates and bounded precision captures. CLI and GUI
 acquisition limits differ; neither implies an unmodelled oscilloscope front end.
 
+### Program a Logikus with wires
+
+Open **Widgets → Logikus Lab**, or search **Logikus** in **Lessons**. Ten
+switches operate five independent contact banks each; ten lamps show the
+results. Nine editable programs cover AND/OR/NOT, XOR, a half-adder, majority
+voting, the river-crossing puzzle and a ten-bit code lock. Follow a lamp's
+connection path, edit the wires, and use **Test all states** to find a concrete
+input that disagrees with a preset's goal. **Use in Widgets** makes the same
+logic available through a live control panel. Wiring and switch settings travel
+with `.sb3` projects and can also be exported as JSON.
+
+Six English/German lessons teach prediction, testing and the distinction
+between combinational logic and a sequence supplied by the person. The lab
+models ideal contacts; its highlights show source connectivity, not measured
+current. See [Logikus Lab: operation, model and next ideas](docs/LOGIKUS-LAB.md).
+
 ### Program with blocks — or with code, and switch freely
 
 The editor is a Scratch-style block canvas. A **Code tab** shows the exact same

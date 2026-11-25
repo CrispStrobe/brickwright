@@ -1,0 +1,481 @@
+{
+  "wave": "logikus-9",
+  "title": {
+    "en": "Logikus: programs made of connections",
+    "de": "Logikus: Programme aus Verbindungen"
+  },
+  "sources": [
+    {"title": "Logikus information and original workbooks", "url": "https://www.logikus.info/"},
+    {"title": "Werner Lauff: Der Logikus-Simulator", "url": "https://www.lauff.org/Logikus.pdf"}
+  ],
+  "lessons": [
+    {
+      "id": "logikus-paths",
+      "version": 1,
+      "presetId": "lamp",
+      "loadMode": "logikus",
+      "wave": "logikus-9",
+      "topic": "contacts-and-paths",
+      "domains": ["circuits", "computer-architecture"],
+      "depth": "discover",
+      "ageGuidance": "10+",
+      "minutes": 12,
+      "environment": "simulation",
+      "languages": [],
+      "prerequisites": [],
+      "copy": {
+        "en": {
+          "title": "Logikus: a program made of wires",
+          "objective": "Trace the path from Q to a lamp and explain how a mechanical switch changes the result without executing instructions."
+        },
+        "de": {
+          "title": "Logikus: ein Programm aus Drähten",
+          "objective": "Verfolge den Weg von Q zu einer Lampe und erkläre, wie ein mechanischer Schalter das Ergebnis ohne Befehlsausführung verändert."
+        }
+      },
+      "checkpoints": [
+        {
+          "id": "predict",
+          "copy": {
+            "en": {
+              "action": "Before moving S0, trace the Lamp preset from source Q through the contact to L0. Predict the lamp for S0 = 0 and S0 = 1.",
+              "explain": "The original Logikus had ten switches, ten lamps and a momentary button. Wires formed the program. A lamp lit when the selected contacts completed a connection from the source; its return path was inside the case.",
+              "hint": "A wire to a switch contact does not automatically connect to every contact controlled by that switch. Find the closed pair along this particular path.",
+              "manual": "I predicted both lamp states and traced the complete path"
+            },
+            "de": {
+              "action": "Verfolge im Beispiel Lampe den Weg von der Quelle Q über den Kontakt zu L0, bevor du S0 verstellst. Sage den Lampenzustand für S0 = 0 und S0 = 1 voraus.",
+              "explain": "Der ursprüngliche Logikus hatte zehn Schalter, zehn Lampen und einen Taster. Die Drähte bildeten das Programm. Eine Lampe leuchtete, wenn die gewählten Kontakte eine Verbindung von der Quelle herstellten; der Rückweg verlief im Gehäuse.",
+              "hint": "Ein Draht zu einem Schaltkontakt verbindet nicht automatisch alle Kontakte desselben Schalters. Finde das geschlossene Kontaktpaar auf diesem Weg.",
+              "manual": "Ich habe beide Lampenzustände vorhergesagt und den vollständigen Weg verfolgt"
+            }
+          }
+        },
+        {
+          "id": "observe",
+          "copy": {
+            "en": {
+              "action": "Open Wire view, toggle S0 twice and compare the lamp and highlighted connections with your prediction. Then move an unused switch and explain why the lamp stays unchanged.",
+              "explain": "Each slider operates five electrically independent contact banks together. The upper or lower pair closes in every bank. The mechanical link is shared; the electrical paths are separate.",
+              "hint": "An unused switch has no contact in the source-to-lamp path. It can move without changing this program's output.",
+              "manual": "I checked the used and unused switches and explained the difference"
+            },
+            "de": {
+              "action": "Öffne die Ansicht Verdrahten, schalte S0 zweimal um und vergleiche Lampe und hervorgehobene Verbindungen mit deiner Vorhersage. Verstelle danach einen unbenutzten Schalter und erkläre, warum die Lampe unverändert bleibt.",
+              "explain": "Jeder Schieber betätigt fünf elektrisch unabhängige Kontaktgruppen gemeinsam. In jeder Gruppe schließt das obere oder das untere Paar. Die mechanische Verbindung ist gemeinsam, die Strompfade bleiben getrennt.",
+              "hint": "Der unbenutzte Schalter hat keinen Kontakt im Weg zwischen Quelle und Lampe. Seine Stellung kann sich ändern, ohne den Ausgang dieses Programms zu verändern.",
+              "manual": "Ich habe benutzte und unbenutzte Schalter geprüft und den Unterschied erklärt"
+            }
+          }
+        },
+        {
+          "id": "explain",
+          "copy": {
+            "en": {
+              "action": "Explain what changes when you move a switch, and what changes when you move a wire. Identify who supplies the sequence of operations.",
+              "explain": "A switch changes an input; rewiring changes the logic. The original board has no CPU, instruction counter or automatic clock. The person supplies the sequence. Brickwright's contact model evaluates connectivity, not lamp current, contact resistance or switch bounce.",
+              "hint": "The current wiring and current input positions determine the outputs. A lamp does not remember that it was lit earlier.",
+              "manual": "I distinguished an input, a program and a human-controlled sequence"
+            },
+            "de": {
+              "action": "Erkläre, was sich beim Verstellen eines Schalters und was sich beim Umstecken eines Drahtes ändert. Wer gibt die Abfolge der Bedienung vor?",
+              "explain": "Ein Schalter verändert eine Eingabe, Umverdrahten verändert die Logik. Die ursprüngliche Maschine hat keine CPU, keinen Befehlszähler und keinen automatischen Takt. Der Mensch gibt die Abfolge vor. Brickwrights Kontaktmodell berechnet Verbindungen, nicht Lampenstrom, Kontaktwiderstand oder Prellen.",
+              "hint": "Die aktuelle Verdrahtung und die aktuellen Schalterstellungen bestimmen die Ausgänge. Eine Lampe merkt sich nicht, dass sie zuvor geleuchtet hat.",
+              "manual": "Ich habe Eingabe, Programm und menschlich gesteuerte Abfolge unterschieden"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "logikus-conditions",
+      "version": 1,
+      "presetId": "and",
+      "loadMode": "logikus",
+      "wave": "logikus-9",
+      "topic": "and-or-not",
+      "domains": ["circuits", "representations"],
+      "depth": "foundation",
+      "ageGuidance": "10+",
+      "minutes": 18,
+      "environment": "simulation",
+      "languages": [],
+      "prerequisites": ["logikus-paths"],
+      "copy": {
+        "en": {
+          "title": "Logikus: all, any, and the other contact",
+          "objective": "Predict AND, OR and NOT from contact paths, then compare every relevant input state with a truth table."
+        },
+        "de": {
+          "title": "Logikus: alle, mindestens eine und der andere Kontakt",
+          "objective": "Leite UND, ODER und NICHT aus Kontaktpfaden ab und vergleiche alle relevanten Eingaben mit einer Wahrheitstabelle."
+        }
+      },
+      "checkpoints": [
+        {
+          "id": "series",
+          "copy": {
+            "en": {
+              "action": "For the AND preset, write L0's expected values for S0 S1 = 00, 01, 10, 11. Operate both switches and check all four cases.",
+              "explain": "Series contacts implement AND: every contact in the path must be closed. The predicted output column is 0, 0, 0, 1.",
+              "hint": "If either contact is open, stop your trace at that gap. The order of two ideal contacts in series does not change the truth table.",
+              "manual": "I predicted and checked every AND state"
+            },
+            "de": {
+              "action": "Notiere für das UND-Beispiel die erwarteten L0-Werte bei S0 S1 = 00, 01, 10, 11. Betätige beide Schalter und prüfe alle vier Fälle.",
+              "explain": "Kontakte in Reihe bilden UND: Jeder Kontakt im Weg muss geschlossen sein. Die erwartete Ausgangsspalte lautet 0, 0, 0, 1.",
+              "hint": "Ist ein Kontakt offen, endet deine Verfolgung an dieser Lücke. Die Reihenfolge zweier idealer Kontakte in Reihe ändert die Wahrheitstabelle nicht.",
+              "manual": "Ich habe jeden UND-Zustand vorhergesagt und geprüft"
+            }
+          }
+        },
+        {
+          "id": "parallel",
+          "copy": {
+            "en": {
+              "action": "Choose the OR preset. Predict all four input states before testing them. Explain why 11 still lights L0 even though two paths are available.",
+              "explain": "Parallel paths implement inclusive OR: at least one complete path is sufficient. The output column is 0, 1, 1, 1. Both inputs being 1 is allowed.",
+              "hint": "Trace each branch separately. Two routes to the same lamp do not mean the lamp represents the number 2.",
+              "manual": "I checked inclusive OR and explained the both-on case"
+            },
+            "de": {
+              "action": "Wähle das ODER-Beispiel. Sage alle vier Eingabefälle vor dem Prüfen voraus. Erkläre, warum L0 auch bei 11 leuchtet, obwohl zwei Wege vorhanden sind.",
+              "explain": "Parallele Wege bilden das einschließende ODER: Mindestens ein vollständiger Weg genügt. Die Ausgangsspalte lautet 0, 1, 1, 1. Beide Eingaben dürfen zugleich 1 sein.",
+              "hint": "Verfolge jeden Zweig getrennt. Zwei Wege zur gleichen Lampe bedeuten nicht, dass diese Lampe die Zahl 2 darstellt.",
+              "manual": "Ich habe das einschließende ODER geprüft und den Fall mit beiden Eingaben erklärt"
+            }
+          }
+        },
+        {
+          "id": "opposite",
+          "copy": {
+            "en": {
+              "action": "Choose the NOT preset and predict L0 for both positions of S0. Locate the contact that closes at 0. Describe a condition such as 'alarm when the door is not closed' using that contact.",
+              "explain": "The opposite contact implements NOT directly: the lower pair closes when the input is 0. No transistor inverter or software instruction is required in this contact model.",
+              "hint": "NOT's output column is 1, 0. Compare this path with the Lamp preset: the lamp still needs a complete connection to Q.",
+              "manual": "I checked NOT and related it to a practical condition"
+            },
+            "de": {
+              "action": "Wähle das NICHT-Beispiel und sage L0 für beide S0-Stellungen voraus. Finde den Kontakt, der bei 0 schließt. Beschreibe damit eine Bedingung wie „Alarm, wenn die Tür nicht geschlossen ist“.",
+              "explain": "Der entgegengesetzte Kontakt bildet NICHT unmittelbar: Das untere Paar schließt bei Eingabe 0. Im Kontaktmodell ist dafür weder ein Transistor-Inverter noch ein Softwarebefehl nötig.",
+              "hint": "Die Ausgangsspalte von NICHT lautet 1, 0. Vergleiche den Weg mit dem Lampenbeispiel: Die Lampe braucht weiterhin eine vollständige Verbindung zu Q.",
+              "manual": "Ich habe NICHT geprüft und auf eine praktische Bedingung bezogen"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "logikus-half-adder",
+      "version": 1,
+      "presetId": "half-adder",
+      "loadMode": "logikus",
+      "wave": "logikus-9",
+      "topic": "xor-and-binary-addition",
+      "domains": ["circuits", "representations", "computer-architecture"],
+      "depth": "foundation",
+      "ageGuidance": "10+",
+      "minutes": 18,
+      "environment": "simulation",
+      "languages": [],
+      "prerequisites": ["logikus-conditions"],
+      "copy": {
+        "en": {
+          "title": "Logikus: add with paths",
+          "objective": "Build a two-bit result from sum and carry, and explain why XOR differs from OR."
+        },
+        "de": {
+          "title": "Logikus: mit Wegen addieren",
+          "objective": "Setze aus Summenbit und Übertrag ein Ergebnis mit zwei Bits zusammen und erkläre den Unterschied zwischen XOR und ODER."
+        }
+      },
+      "checkpoints": [
+        {
+          "id": "predict",
+          "copy": {
+            "en": {
+              "action": "Before operating the Half-adder preset, add S0 and S1 for 00, 01, 10, 11. Write the expected result as L1 L0, with carry on L1 and sum on L0.",
+              "explain": "The result is 00, 01, 01, 10. Each input has value 0 or 1. At 11, 1 + 1 = 2 in decimal, written 10 in binary; the sum bit is 0 and the carry bit is 1.",
+              "hint": "Read L1 L0, not L0 L1. The carry has weight 2, so the numeric result is 2 × L1 + L0.",
+              "manual": "I predicted the sum and carry separately for every input"
+            },
+            "de": {
+              "action": "Addiere vor dem Bedienen des Halbaddierers S0 und S1 für 00, 01, 10, 11. Notiere das erwartete Ergebnis als L1 L0: Übertrag an L1, Summenbit an L0.",
+              "explain": "Die Ergebnisse lauten 00, 01, 01, 10. Jede Eingabe hat den Wert 0 oder 1. Bei 11 ergibt 1 + 1 dezimal 2, binär geschrieben 10: Summenbit 0 und Übertrag 1.",
+              "hint": "Lies L1 L0, nicht L0 L1. Der Übertrag hat das Gewicht 2. Der Zahlenwert des Ergebnisses ist daher 2 × L1 + L0.",
+              "manual": "Ich habe Summenbit und Übertrag für jede Eingabe getrennt vorhergesagt"
+            }
+          }
+        },
+        {
+          "id": "test",
+          "copy": {
+            "en": {
+              "action": "Check all four states on the panel and compare the truth table with your predictions. Trace a sum path for 01, then explain why neither sum path conducts at 11.",
+              "explain": "The sum is XOR: (S0 AND NOT S1) OR (NOT S0 AND S1). The carry is S0 AND S1. Opposite contacts let each sum path reject the both-on case.",
+              "hint": "Use the XOR preset to study the sum path alone, then return to Half-adder. Independent contact banks let one mechanical input participate in several paths.",
+              "manual": "I checked all sums and traced how XOR rejects 11"
+            },
+            "de": {
+              "action": "Prüfe alle vier Zustände am Bedienfeld und vergleiche die Wahrheitstabelle mit deinen Vorhersagen. Verfolge einen Summenpfad bei 01 und erkläre, warum bei 11 keiner der Summenpfade leitet.",
+              "explain": "Das Summenbit ist XOR: (S0 UND NICHT S1) ODER (NICHT S0 UND S1). Der Übertrag ist S0 UND S1. Die Gegenkontakte sperren bei beiden Summenpfaden den Fall 11.",
+              "hint": "Untersuche mit dem XOR-Beispiel zunächst nur den Summenpfad und kehre dann zum Halbaddierer zurück. Unabhängige Kontaktgruppen erlauben einem mechanischen Eingang, an mehreren Wegen mitzuwirken.",
+              "manual": "Ich habe alle Summen geprüft und verfolgt, wie XOR den Fall 11 ausschließt"
+            }
+          }
+        },
+        {
+          "id": "transfer",
+          "copy": {
+            "en": {
+              "action": "Find the one input state that distinguishes XOR from OR. Explain why replacing the sum circuit with OR would make this adder wrong.",
+              "explain": "At 11, OR gives 1 but XOR gives 0. Keeping carry = 1 while changing sum to OR would display binary 11, or decimal 3, for an addition whose correct result is 2.",
+              "hint": "A half-adder has two inputs and no carry-in. Adding a third input would require a full-adder design; it is not an extra feature of this preset.",
+              "manual": "I explained the failing OR case and the half-adder's boundary"
+            },
+            "de": {
+              "action": "Finde die eine Eingabe, die XOR von ODER unterscheidet. Erkläre, warum der Addierer falsch rechnen würde, wenn du den Summenpfad durch ODER ersetzt.",
+              "explain": "Bei 11 liefert ODER den Wert 1, XOR jedoch 0. Bleibt der Übertrag 1 und wird das Summenbit durch ODER ersetzt, erscheint binär 11, also dezimal 3, obwohl das richtige Ergebnis 2 ist.",
+              "hint": "Ein Halbaddierer hat zwei Eingaben und keinen eingehenden Übertrag. Eine dritte Eingabe erfordert einen Volladdierer; sie ist keine zusätzliche Funktion dieses Beispiels.",
+              "manual": "Ich habe den fehlerhaften ODER-Fall und die Grenze des Halbaddierers erklärt"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "logikus-majority",
+      "version": 1,
+      "presetId": "majority",
+      "loadMode": "logikus",
+      "wave": "logikus-9",
+      "topic": "majority-and-exhaustive-testing",
+      "domains": ["circuits", "debugging"],
+      "depth": "foundation",
+      "ageGuidance": "10+",
+      "minutes": 18,
+      "environment": "simulation",
+      "languages": [],
+      "prerequisites": ["logikus-conditions"],
+      "copy": {
+        "en": {
+          "title": "Logikus: three voters, one decision",
+          "objective": "Describe a two-of-three majority as alternative contact paths and use every input combination to test the specification."
+        },
+        "de": {
+          "title": "Logikus: drei Stimmen, eine Entscheidung",
+          "objective": "Beschreibe eine Zwei-aus-drei-Mehrheit durch alternative Kontaktpfade und prüfe die Vorgabe mit jeder Eingabekombination."
+        }
+      },
+      "checkpoints": [
+        {
+          "id": "predict",
+          "copy": {
+            "en": {
+              "action": "Treat S0, S1 and S2 as three votes. List all eight input combinations and predict when the majority lamp L0 should light. Include 111 explicitly.",
+              "explain": "A majority means at least two votes, not exactly two. The lit cases are 011, 101, 110 and 111. Three binary inputs have 2³ = 8 possible states.",
+              "hint": "Group the states by zero, one, two or three votes. There are 1, 3, 3 and 1 cases in those groups.",
+              "manual": "I listed all eight states and included the unanimous vote"
+            },
+            "de": {
+              "action": "Behandle S0, S1 und S2 als drei Stimmen. Notiere alle acht Eingabekombinationen und sage voraus, wann die Mehrheitslampe L0 leuchten soll. Nimm 111 ausdrücklich auf.",
+              "explain": "Mehrheit bedeutet mindestens zwei Stimmen, nicht genau zwei. Die leuchtenden Fälle sind 011, 101, 110 und 111. Drei binäre Eingaben haben 2³ = 8 mögliche Zustände.",
+              "hint": "Ordne die Zustände nach null, einer, zwei oder drei Stimmen. Diese Gruppen enthalten 1, 3, 3 und 1 Fälle.",
+              "manual": "Ich habe alle acht Zustände einschließlich der einstimmigen Entscheidung notiert"
+            }
+          }
+        },
+        {
+          "id": "trace",
+          "copy": {
+            "en": {
+              "action": "Trace the three alternative paths in the Majority preset. Match them to (S0 AND S1), (S0 AND S2), and (S1 AND S2). Explain why 111 may complete several paths but still produces one Boolean output.",
+              "explain": "OR combines the three pairs. A single switch appears in more than one condition through separate contact banks, so shared mechanical control does not require joining the internal electrical nodes.",
+              "hint": "At 110, only the S0/S1 pair is enough. At 111, all three pairs are true. In both cases L0 = 1.",
+              "manual": "I matched each path to its pair condition"
+            },
+            "de": {
+              "action": "Verfolge die drei alternativen Pfade des Mehrheitsbeispiels. Ordne sie (S0 UND S1), (S0 UND S2) und (S1 UND S2) zu. Erkläre, warum 111 mehrere Wege schließen kann und trotzdem nur einen booleschen Ausgang erzeugt.",
+              "explain": "ODER verknüpft die drei Paare. Ein Schalter wirkt über getrennte Kontaktgruppen an mehreren Bedingungen mit. Die gemeinsame mechanische Betätigung erfordert keine elektrische Verbindung ihrer inneren Knoten.",
+              "hint": "Bei 110 genügt nur das Paar S0/S1. Bei 111 sind alle drei Paare wahr. In beiden Fällen ist L0 = 1.",
+              "manual": "Ich habe jeden Pfad seiner Paarbedingung zugeordnet"
+            }
+          }
+        },
+        {
+          "id": "test",
+          "copy": {
+            "en": {
+              "action": "Check every state using the controls or truth table. Choose one pair path and predict which case would fail if that path were disconnected. Verify that case by tracing the remaining paths.",
+              "explain": "A complete truth table can expose a missing branch that a single successful demonstration misses. For example, losing only the S0/S1 branch should break 110 while 111 still has other complete paths.",
+              "hint": "Compare against the written rule 'at least two'. A table computed from the wiring describes what the wiring does; your independently predicted table states what it should do.",
+              "manual": "I compared all states with the specification and found a revealing failure case"
+            },
+            "de": {
+              "action": "Prüfe mit den Bedienelementen oder der Wahrheitstabelle jeden Zustand. Wähle einen Paarpfad und sage voraus, welcher Fall bei dessen Unterbrechung fehlschlagen würde. Prüfe diesen Fall durch Verfolgen der verbleibenden Wege.",
+              "explain": "Eine vollständige Wahrheitstabelle kann einen fehlenden Zweig aufdecken, den eine einzelne erfolgreiche Vorführung übersieht. Fehlt nur der S0/S1-Zweig, sollte 110 scheitern, während bei 111 andere vollständige Wege bleiben.",
+              "hint": "Vergleiche mit der aufgeschriebenen Regel „mindestens zwei“. Die aus der Verdrahtung berechnete Tabelle beschreibt das tatsächliche Verhalten. Deine unabhängige Vorhersage beschreibt das gewünschte Verhalten.",
+              "manual": "Ich habe alle Zustände mit der Vorgabe verglichen und einen aussagekräftigen Fehlerfall gefunden"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "logikus-river",
+      "version": 1,
+      "presetId": "river",
+      "loadMode": "logikus",
+      "wave": "logikus-9",
+      "topic": "river-crossing-and-state",
+      "domains": ["circuits", "debugging", "computer-architecture"],
+      "depth": "practitioner",
+      "ageGuidance": "10+",
+      "minutes": 22,
+      "environment": "simulation",
+      "languages": [],
+      "prerequisites": ["logikus-conditions"],
+      "copy": {
+        "en": {
+          "title": "Logikus: who is safe on the riverbank?",
+          "objective": "Use a contact program to detect danger, while distinguishing a safe state from a legal boat crossing."
+        },
+        "de": {
+          "title": "Logikus: wer ist am Flussufer sicher?",
+          "objective": "Erkenne mit einem Kontaktprogramm Gefahr und unterscheide einen sicheren Zustand von einer erlaubten Bootsfahrt."
+        }
+      },
+      "checkpoints": [
+        {
+          "id": "predict",
+          "copy": {
+            "en": {
+              "action": "Read S0 S1 S2 S3 as farmer, wolf, goat, cabbage; 0 means left and 1 means right. Predict danger lamps L0 (left) and L1 (right) for 0000, 1000, 0111 and 1111, then check them.",
+              "explain": "Danger exists where the farmer is absent and the goat shares a bank with the wolf or cabbage. Everyone together on either bank is safe. The two lamps identify the unattended dangerous bank.",
+              "hint": "0000 and 1111 are safe. At 1000 the left bank is dangerous; at 0111 the right bank is dangerous. Always locate the farmer before judging the animal pair.",
+              "manual": "I predicted both danger lamps in the four anchor states"
+            },
+            "de": {
+              "action": "Lies S0 S1 S2 S3 als Bauer, Wolf, Ziege, Kohl; 0 bedeutet links, 1 rechts. Sage die Gefahrenlampen L0 (links) und L1 (rechts) für 0000, 1000, 0111 und 1111 voraus und prüfe sie.",
+              "explain": "Gefahr entsteht am Ufer ohne Bauern, wenn dort die Ziege mit dem Wolf oder dem Kohl zusammentrifft. Alle gemeinsam an einem Ufer sind sicher. Die beiden Lampen benennen das unbeaufsichtigte gefährliche Ufer.",
+              "hint": "0000 und 1111 sind sicher. Bei 1000 ist das linke, bei 0111 das rechte Ufer gefährlich. Finde immer zuerst den Bauern, bevor du die Tierkombination beurteilst.",
+              "manual": "Ich habe beide Gefahrenlampen für die vier Ausgangsfälle vorhergesagt"
+            }
+          }
+        },
+        {
+          "id": "cross",
+          "copy": {
+            "en": {
+              "action": "Find a route from 0000 to 1111. On each crossing, change the farmer's bank and at most one passenger who starts on that same bank. Record every completed crossing and verify that neither danger lamp stays lit.",
+              "explain": "The circuit judges the current positions. It does not enforce boat capacity, passenger availability or legal transitions. Moving directly from 0000 to 1111 produces a safe state but is not a legal crossing.",
+              "hint": "One route is 0000 → 1010 → 0010 → 1110 → 0100 → 1101 → 0101 → 1111. Toggle the farmer and passenger separately when needed; the intermediate switch position may briefly show danger. Judge the completed crossing.",
+              "manual": "I completed and recorded a legal route with safe completed states"
+            },
+            "de": {
+              "action": "Finde einen Weg von 0000 nach 1111. Wechsle bei jeder Fahrt das Ufer des Bauern und höchstens eines Mitfahrers, der am selben Ufer startet. Notiere jede abgeschlossene Fahrt und prüfe, dass keine Gefahrenlampe anbleibt.",
+              "explain": "Die Schaltung beurteilt die aktuellen Positionen. Sie erzwingt weder Bootsgröße noch Verfügbarkeit des Mitfahrers noch erlaubte Übergänge. Direkt von 0000 auf 1111 zu wechseln ergibt einen sicheren Zustand, ist aber keine erlaubte Fahrt.",
+              "hint": "Ein Weg lautet 0000 → 1010 → 0010 → 1110 → 0100 → 1101 → 0101 → 1111. Schalte Bauer und Mitfahrer bei Bedarf einzeln um. Die Zwischenstellung kann kurz Gefahr anzeigen. Beurteile die abgeschlossene Fahrt.",
+              "manual": "Ich habe einen erlaubten Weg mit sicheren Endzuständen aufgezeichnet und durchgespielt"
+            }
+          }
+        },
+        {
+          "id": "explain",
+          "copy": {
+            "en": {
+              "action": "Use the truth table to inspect all 16 arrangements. Explain why both danger lamps cannot be on together, and what extra information a program would need to reject an illegal move.",
+              "explain": "The farmer occupies one bank, so only the other bank can be unattended. To validate a move, a controller also needs the previous state and a rule comparing old and new positions; a combinational danger detector has neither memory nor a move history.",
+              "hint": "For left danger, S0 must be 1; for right danger, S0 must be 0. A single input cannot have both values at once.",
+              "manual": "I explained the mutual exclusion of the alarms and the need for transition memory"
+            },
+            "de": {
+              "action": "Untersuche mit der Wahrheitstabelle alle 16 Anordnungen. Erkläre, warum nie beide Gefahrenlampen zugleich leuchten können und welche zusätzliche Information ein Programm zum Zurückweisen eines unerlaubten Zuges braucht.",
+              "explain": "Der Bauer befindet sich an einem Ufer, daher kann nur das andere unbeaufsichtigt sein. Zur Zugprüfung braucht eine Steuerung auch den vorherigen Zustand und eine Regel für den Vergleich alter und neuer Positionen. Der kombinatorische Gefahrendetektor hat weder Gedächtnis noch Zugverlauf.",
+              "hint": "Gefahr links erfordert S0 = 1, Gefahr rechts S0 = 0. Eine einzelne Eingabe kann nicht beide Werte zugleich haben.",
+              "manual": "Ich habe den gegenseitigen Ausschluss der Alarme und den Bedarf an Übergangsspeicher erklärt"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "logikus-code-lock",
+      "version": 1,
+      "presetId": "code-lock",
+      "loadMode": "logikus",
+      "wave": "logikus-9",
+      "topic": "code-lock-and-controller",
+      "domains": ["circuits", "widgets", "debugging"],
+      "depth": "practitioner",
+      "ageGuidance": "10+",
+      "minutes": 20,
+      "environment": "simulation",
+      "languages": [],
+      "prerequisites": ["logikus-conditions", "logikus-majority"],
+      "copy": {
+        "en": {
+          "title": "Logikus: a code lock on a control desk",
+          "objective": "Operate ten inputs and a momentary test button, distinguish a latched switch from a held button, and test a code lock from its controller."
+        },
+        "de": {
+          "title": "Logikus: ein Codeschloss am Bedienpult",
+          "objective": "Bediene zehn Eingaben und einen Prüftaster, unterscheide rastenden Schalter und gehaltenen Taster und prüfe das Codeschloss am Bedienpult."
+        }
+      },
+      "checkpoints": [
+        {
+          "id": "count",
+          "copy": {
+            "en": {
+              "action": "Before trying the lock, calculate how many patterns ten binary switches can represent. Then inspect the wiring and identify the input position required at each contact.",
+              "explain": "Every added independent switch doubles the possibilities. Ten switches have 2¹⁰ = 1024 patterns, not 10². The preset's code, read from S0 to S9, is 1011101101; the momentary Test button gates the result.",
+              "hint": "Start with one switch: 2 patterns. Two switches: 4. Three: 8. A required 0 uses the opposite contact, so a zero in the code is an active condition, not a missing connection.",
+              "manual": "I counted the patterns correctly and read the ten required contacts"
+            },
+            "de": {
+              "action": "Berechne vor dem Ausprobieren, wie viele Muster zehn binäre Schalter darstellen können. Untersuche dann die Verdrahtung und bestimme die erforderliche Stellung an jedem Kontakt.",
+              "explain": "Jeder zusätzliche unabhängige Schalter verdoppelt die Möglichkeiten. Zehn Schalter haben 2¹⁰ = 1024 Muster, nicht 10². Der Beispielcode lautet von S0 bis S9 gelesen 1011101101. Der Prüftaster schaltet das Ergebnis frei.",
+              "hint": "Beginne mit einem Schalter: 2 Muster. Zwei Schalter: 4. Drei: 8. Eine erforderliche 0 benutzt den Gegenkontakt. Eine Null im Code ist eine echte Bedingung, keine fehlende Verbindung.",
+              "manual": "Ich habe die Muster richtig gezählt und die zehn erforderlichen Kontakte gelesen"
+            }
+          }
+        },
+        {
+          "id": "button",
+          "copy": {
+            "en": {
+              "action": "Set the correct code. Predict L0 before pressing Test, while holding Test, and after releasing it. Check all three states, then change one code bit and repeat.",
+              "explain": "With the correct code, L0 is 0, then 1, then 0 as Test is released, held and released. With any incorrect bit, L0 stays 0. The pushbutton adds a condition; it does not start a CPU or store an unlocked state.",
+              "hint": "The ten switches retain their selected positions. The momentary button must return to its released state. Check that releasing your input really releases Test.",
+              "manual": "I checked the correct and incorrect code with Test held and released"
+            },
+            "de": {
+              "action": "Stelle den richtigen Code ein. Sage L0 vor dem Drücken, während des Haltens und nach dem Loslassen des Prüftasters voraus. Prüfe alle drei Zustände, ändere dann ein Codebit und wiederhole den Versuch.",
+              "explain": "Mit richtigem Code ist L0 bei losgelassenem, gehaltenem und erneut losgelassenem Taster 0, dann 1, dann 0. Bei einem falschen Bit bleibt L0 = 0. Der Taster ergänzt eine Bedingung; er startet keine CPU und speichert keinen entriegelten Zustand.",
+              "hint": "Die zehn Schalter behalten ihre gewählten Stellungen. Der Taster muss in den losgelassenen Zustand zurückkehren. Prüfe, dass das Loslassen deiner Eingabe auch den Prüftaster freigibt.",
+              "manual": "Ich habe richtigen und falschen Code mit gehaltenem und losgelassenem Prüftaster geprüft"
+            }
+          }
+        },
+        {
+          "id": "controller",
+          "copy": {
+            "en": {
+              "action": "Choose Use in Widgets, then use the Logikus controls to set the same code and operate Test. Compare L0 with the Logikus panel. Change each of the ten input bits in turn, returning to the correct code between trials.",
+              "explain": "A controller gives the circuit a named operating surface. The inputs still feed the same contact program and the lamps report its result. Ten single-bit fault trials check that every input matters, although they do not cover all 1024 patterns.",
+              "hint": "Keep a checklist S0 through S9. During each trial, hold Test and expect L0 = 0 for the one-bit error, then restore the bit and expect L0 = 1. Release Test before finishing.",
+              "manual": "I operated the widget controls and checked all ten single-bit errors"
+            },
+            "de": {
+              "action": "Wähle In Widgets nutzen, stelle mit den Logikus-Bedienelementen denselben Code ein und betätige den Prüftaster. Vergleiche L0 mit dem Logikus-Feld. Ändere nacheinander jedes der zehn Eingabebits und stelle zwischen den Versuchen den richtigen Code wieder her.",
+              "explain": "Ein Bedienpult gibt der Schaltung eine benannte Bedienoberfläche. Die Eingaben steuern weiterhin dasselbe Kontaktprogramm, die Lampen melden dessen Ergebnis. Zehn Versuche mit jeweils einem falschen Bit prüfen, dass jede Eingabe zählt; sie decken aber nicht alle 1024 Muster ab.",
+              "hint": "Führe eine Prüfliste von S0 bis S9. Halte bei jedem Versuch den Prüftaster: Beim falschen Einzelbit wird L0 = 0 erwartet, nach dem Zurückstellen L0 = 1. Lass den Prüftaster am Ende los.",
+              "manual": "Ich habe die Widgets bedient und alle zehn Einzelfehler geprüft"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
