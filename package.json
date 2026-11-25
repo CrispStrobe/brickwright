@@ -155,7 +155,7 @@
     "devDependencies": {
         "acorn": "8.14.0",
         "bw-board": "github:CrispStrobe/bw-board#9ff1fff362db4366e11ab47abd62e1f04edc6af6",
-        "bw-circuit-ui": "github:CrispStrobe/bw-circuit-ui#52e81057f9f1e59eb97d0f085d13a752914f803d",
+        "bw-circuit-ui": "github:CrispStrobe/bw-circuit-ui#5c400ea23fa3f7046f6c89c59ef2a70534f84fd6",
         "digitaljs": "^0.14.2",
         "jszip": "3.10.1",
         "playwright": "^1.62.1",
