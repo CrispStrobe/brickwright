@@ -17,6 +17,11 @@ class Controls extends React.Component {
             this.props.vm.setTurboMode(!this.props.turbo);
         } else {
             const runtime = this.props.vm.runtime;
+            if (window.__bwMachineExtracted?.kind === 'cp1') {
+                window.dispatchEvent(new CustomEvent('bw-cp1-run-request'));
+                return;
+            }
+
             const device = runtime.bwDeviceId || (runtime.stc && runtime.stc.device);
             if (device === 'microbit' || device === 'calliopemini') {
                 // The green flag is the global Run affordance. Simulator-only
@@ -47,6 +52,10 @@ class Controls extends React.Component {
     }
     handleStopAllClick (e) {
         e.preventDefault();
+        if (window.__bwMachineExtracted?.kind === 'cp1') {
+            window.dispatchEvent(new CustomEvent('bw-cp1-stop-request'));
+            return;
+        }
         this.props.vm.stopAll();
         window.setTimeout(() => window.dispatchEvent(new CustomEvent('bw-stop-all')), 0);
     }

@@ -5911,6 +5911,12 @@ class PseudocodeImporter extends React.Component {
         const sel = {padding: '6px 10px', borderRadius: 6, border: '1px solid #cbd5e1', font: 'inherit'};
         const max = this.state.maximized;
         const csel = {...sel, padding: '4px 8px', fontSize: 12}; // compact select
+        const languageTabStyle = active => ({
+            padding: '6px 10px', border: '1px solid #cbd5e1', borderBottomColor: active ? '#fff' : '#cbd5e1',
+            borderRadius: '8px 8px 0 0', cursor: 'pointer', fontWeight: active ? 700 : 500, fontSize: 13,
+            background: active ? '#fff' : '#eef2f7', color: active ? '#1e293b' : '#64748b',
+            position: 'relative', top: active ? 0 : 1, whiteSpace: 'nowrap'
+        });
         const spikeCode = /\b(?:spike(?:prime)?|PrimeHub|InventorHub)\b/i.test(this.activeCode());
         const showSpikeAction = isSpikeExtensionLoaded(this.props.vm) || spikeCode;
         // The device this tab is writing for: the MakeCode project's target, else the DEVICE header.
@@ -5966,17 +5972,14 @@ class PseudocodeImporter extends React.Component {
                         return (
                             <button key={l} type="button" aria-pressed={active} onClick={() => this.switchTab(l)}
                                 disabled={this.state.busy && !active}
-                                style={{padding: '6px 10px', border: '1px solid #cbd5e1', borderBottom: active ? '1px solid #fff' : '1px solid #cbd5e1',
-                                    borderRadius: '8px 8px 0 0', cursor: 'pointer', fontWeight: active ? 700 : 500, fontSize: 13,
-                                    background: active ? '#fff' : '#eef2f7', color: active ? '#1e293b' : '#64748b',
-                                    position: 'relative', top: active ? 0 : 1, whiteSpace: 'nowrap'}}>
+                                style={languageTabStyle(active)}>
                                 {label}
                             </button>
                         );
                     })}
                     <button type="button" data-testid="bw-code-cp1-tab" onClick={() => this.openCp1Language()}
                         disabled={this.state.busy} aria-pressed={this.state.cp1Active} title={this.L.cp1Language}
-                        style={{...csel, whiteSpace: 'nowrap', fontWeight: this.state.cp1Active ? 700 : 400}}>
+                        style={languageTabStyle(this.state.cp1Active)}>
                         CP1
                     </button>
                     {(() => {

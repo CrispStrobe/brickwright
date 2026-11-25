@@ -359,7 +359,7 @@ class DebugPanel extends React.Component {
         // in the loader; dropping _bootMedia here made the visible Sim control
         // run an all-zero image. Keep the media and recreate the runner so the
         // newly extracted machine and the already loaded image boot together.
-        if (detail.kind === 'cp1' && this.state.kind !== 'cp1') this._bootMedia = null;
+        if (detail.kind === 'cp1' && (this.state.kind !== 'cp1' || detail.useDefaultMonitor)) this._bootMedia = null;
         const hasBootMedia = !!this._bootMedia;
         const kind = detail.kind === 'cp1' ? 'cp1' : detail.kind === 'z80' ? 'z80'
             : detail.kind === 'eater6502' || detail.kind === '6502' ? 'eater6502'
@@ -994,6 +994,20 @@ class DebugPanel extends React.Component {
         }
     }
 
+    async runCp1Program (assembly, signal) {
+        if (signal.aborted) return;
+        const pending = this.runner();
+        const owner = this._runnerPromise;
+        const runner = await pending;
+        if (signal.aborted || this._runnerPromise !== owner) return;
+        if (!runner.cp1Snapshot()) {
+            await runner.start({paused: true});
+            if (signal.aborted || this._runnerPromise !== owner) return;
+            if (!runner.cp1Snapshot()) throw new Error(this.state.ui.message || 'The CP1 monitor could not start.');
+        }
+        runner.cp1RunProgram(assembly);
+    }
+
     // A LabWired board with a display: its screen is a widget (the same mirror
     // a machine's VGA uses), sized from the first frame the engine reports.
     mirrorLabwiredDisplay (runner) {
@@ -1452,6 +1466,20 @@ class DebugPanel extends React.Component {
         const actionCounters = Object.entries(actionStatus?.counters || {}).slice(-4);
         const hasActionStatus = actionFailures.length || actionLog.length || actionCounters.length;
 
+        if (this.state.kind === 'cp1') return <div data-debug-panel data-debug-phase={phase}>
+            <Cp1Host
+                    runner={this.state.runner} running={running} locale={this.props.locale}
+                    configuration={this.state.machineConfig}
+                    onConfigure={config => {
+                        this._onMachineExtracted({detail: {kind: 'cp1', config}});
+                        return new Promise(resolve => this.setState({machineConfig: config}, resolve));
+                    }}
+                    onImportRom={image => this._onMediaLoad({detail: {kind: 'cp1', slotId: 'rom',
+                        bytes: image.bytes, name: image.name}})}
+                    onRun={() => this.onStart()}
+                    onRunProgram={(assembly, signal) => this.runCp1Program(assembly, signal)} />
+        </div>;
+
         // The red "improvised board" alert exists because a BLOCKS program has
         // an example circuit the inferred bench can be mistaken for. Firmware
         // (a compiled sketch, a picked .hex) has no example and no PIN lines:
@@ -1465,16 +1493,6 @@ class DebugPanel extends React.Component {
                 background: '#1a1a2e', border: '1px solid #2c3e50', borderRadius: 8,
                 fontFamily: 'monospace', fontSize: 12, color: '#bdc3c7'
             }}>
-                {this.state.kind === 'cp1' ? <Cp1Host
-                    runner={this.state.runner} running={running} locale={this.props.locale}
-                    configuration={this.state.machineConfig}
-                    onConfigure={config => {
-                        this._onMachineExtracted({detail: {kind: 'cp1', config}});
-                        return new Promise(resolve => this.setState({machineConfig: config}, resolve));
-                    }}
-                    onImportRom={image => this._onMediaLoad({detail: {kind: 'cp1', slotId: 'rom',
-                        bytes: image.bytes, name: image.name}})}
-                    onRun={() => this.onStart()} /> : null}
                 {inferredBoard ? (
                     <div data-inferred-board-warning role="alert" style={{
                         display: 'flex', gap: 8, alignItems: 'flex-start',

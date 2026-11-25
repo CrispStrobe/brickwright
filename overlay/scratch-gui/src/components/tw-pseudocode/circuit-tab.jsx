@@ -1456,7 +1456,7 @@ class CircuitTab extends React.Component {
         }));
     }
 
-    activateCp1Circuit (data) {
+    activateCp1Circuit (data, useDefaultMonitor = false) {
         const part = data?.parts?.find(item => item.kind === 'kosmos-cp1');
         const runtime = this.props.vm?.runtime;
         if (!part) {
@@ -1473,7 +1473,8 @@ class CircuitTab extends React.Component {
         const config = {partId: part.id, expansion: part.params?.expansion === true,
             clockHz: part.params?.clockHz || 6000000};
         if (runtime) runtime.bwDeviceCore = 'cp1';
-        window.dispatchEvent(new CustomEvent('bw-machine-extracted', {detail: {kind: 'cp1', config}}));
+        if (useDefaultMonitor && window.__bwPendingMedia?.detail?.kind === 'cp1') delete window.__bwPendingMedia;
+        window.dispatchEvent(new CustomEvent('bw-machine-extracted', {detail: {kind: 'cp1', config, useDefaultMonitor}}));
         return config;
     }
 
@@ -1759,7 +1760,7 @@ class CircuitTab extends React.Component {
                 const draft = {format: 'brickwright.cp1-workspace', version: 1, configuration, rom: null, source};
                 // Persist before mounting the panel. A lazy debugger can miss the event.
                 localStorage.setItem('bw-cp1-workspace', JSON.stringify(draft));
-                const config = this.activateCp1Circuit(data);
+                const config = this.activateCp1Circuit(data, true);
                 window.dispatchEvent(new CustomEvent('bw-cp1-source-load', {detail: {source, ...config}}));
             } else if (!data.parts.some(item => item.kind === 'kosmos-cp1')) {
                 this.activateCp1Circuit(data);
@@ -2253,7 +2254,7 @@ class CircuitTab extends React.Component {
                 // no-code warning) rendered flush against the tab strip and
                 // read as misplaced (owner report, 2026-08-17 — and 7 hours
                 // before that).
-                <div style={{...box, overflow: 'auto', paddingTop: 48}} data-debugger-solo-pane>
+                <div style={{...box, overflow: 'auto', paddingTop: this._controllerSplitLive() ? 4 : 48}} data-debugger-solo-pane>
                     <HostMount host={this._ensureDebugHost()} />
                 </div>
             );

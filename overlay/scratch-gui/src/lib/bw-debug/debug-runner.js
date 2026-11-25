@@ -34,6 +34,7 @@
  * @module
  */
 
+import {loadCp1Monitor} from '../cp1-monitor.js';
 import {
     listBreakpoints, subscribeBreakpoints, toggleBreakpoint,
     setCondition, conditionOf, allConditions
@@ -632,6 +633,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
     let hddSnapshotOwner = {};
     let target = null;
     let cp1LessonBatch = null;
+    let cp1RunKeyUntil = null;
     let cp2Recording = null;
     const cancelCp2Recording = () => {
         cp2Recording?.cancel();
@@ -3055,11 +3057,11 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
     // user's own machine with the delivered image; with nothing at all,
     // the default remains Tali Forth 2 on py65mon.
     async function attachCp1() {
-        if (!bootMedia) throw new Error('Choose a 2048-byte CP1 firmware ROM in the CP1 panel first.');
+        const media = bootMedia || await loadCp1Monitor();
         const {createDebugTarget, createDebugSession} =
             await import(/* webpackChunkName: "bw-board" */ 'bw-board');
         // Every byte is a CPU opcode, including 0x3A. Never sniff raw CP1 ROM as Intel HEX text.
-        const bytes = bootMedia.bytes;
+        const bytes = media.bytes;
         if (!(bytes instanceof Uint8Array) || bytes.length !== 2048) {
             throw new Error('CP1 firmware must contain exactly 2048 raw bytes.');
         }
@@ -3071,7 +3073,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         const result = await createDebugTarget('cp1', options);
         wireMachineBench(result, createDebugSession);
         delete runner.sendSerial;
-        setStatus('ready', `CP1 firmware loaded: ${bootMedia.name || 'user ROM'}`);
+        setStatus('ready', `CP1 firmware loaded: ${media.name || 'user ROM'}`);
         return session;
     }
 
@@ -3900,6 +3902,9 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         const perfWallStart = perfProbe ? performance.now() : 0;
         const perfSimStart = perfProbe ? target.timeNs() : 0n;
         let outcome = session.pump();
+        if (cp1RunKeyUntil !== null && (target.timeNs() >= cp1RunKeyUntil || outcome !== 'ran')) {
+            releaseCp1RunKey();
+        }
         if (linuxProgressWatch) linuxProgressWatch();
 
         // Absorb skipped hits in this frame rather than one per frame. Bounded,
@@ -3962,7 +3967,14 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         }
     }
 
+    function releaseCp1RunKey() {
+        if (cp1RunKeyUntil === null) return;
+        cp1RunKeyUntil = null;
+        target?.releaseKeys?.();
+    }
+
     function unschedule() {
+        releaseCp1RunKey();
         if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
     }
 
@@ -4201,6 +4213,32 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             emit();
             if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('bw-cp1-program-loaded',
                 {detail: {cells: assembly.words.length, expansion: target.machine.expansion}}));
+        },
+        cp1RunProgram(assembly) {
+            if (target?.kind !== 'cp1') throw new Error('CP1 is unavailable.');
+            const forked = beginForwardBranch();
+            if (!forked.accepted) throw new Error(forked.reason || forked.code);
+            runner.pause();
+            runner.cp1Reset();
+            const adapter = target.adapter;
+            // Let the real monitor finish initialization before writing the program.
+            // The adapter advances the same clock and board used by the debugger.
+            adapter.advanceNs(300_000_000);
+            runner.cp1LoadProgram(assembly);
+            const entry = assembly.words.find(word => word.opcode !== 0)?.address || 0;
+            // Address zero is the monitor's reset PC. For an ORG elsewhere, enter
+            // the address with the physical keypad before pressing RUN.
+            if (entry) {
+                for (const key of [...String(entry).padStart(3, '0'), 'PC']) {
+                    target.setKey(key, true);
+                    adapter.advanceNs(40_000_000);
+                    target.setKey(key, false);
+                    adapter.advanceNs(40_000_000);
+                }
+            }
+            target.setKey('RUN', true);
+            cp1RunKeyUntil = target.timeNs() + 40_000_000n;
+            runner.resume();
         },
         cp1WriteCell(index, cell) {
             if (target?.kind !== 'cp1') return false;
