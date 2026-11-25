@@ -269,4 +269,36 @@ of the actual rendered trainer after Fit and proves all eight controls are
 reachable through the instruments pane's real inner scroll at 390 pixels.
 The old screenshots are retained as evidence of the defect, not a layout pass.
 
-The next complete browser run is pending after these product and fixture fixes.
+### Passing hosted checkpoint
+
+[Run 45559592991](https://github.com/CrispStrobe/brickwright-lite/actions/runs/45559592991)
+completed successfully on Lite `8498ebdd322b515aa97b6c3930ef77270e54a52e` after
+these product and fixture fixes. All six gates passed: standalone connector,
+panel on React 18 and 16, shared runner/project restore on both versions, and
+CP5 on the installed GUI React 16. The hosted source suite passed 55 tests and
+the SSR gate passed 17 checks per runtime. This is the complete browser scope
+defined above, not the complete production application.
+
+The actual versions were Node 22.23.5, Playwright 1.61.1, Chromium
+149.0.7827.55, React 18.3.1 and GUI React 16.14.0. The adopted suppliers were
+Board `1fa4734c18c7e037ff220e508ad33da5273d999f`, Circuit UI
+`dd1c007c4c5f2333f2acc905530703144f043ebf` and sb3
+`fdadba6743839763fcb8bb2fad64063937e16a7e`. The standalone connector retained
+its own locked Board `85fcc3a2785130c3317cbce3e4f0457a4e8e180d`; the integrated
+runner used the adopted `1fa4734c` source alias.
+
+The [browser qualification receipt](receipts/cp1-browser-qualification.json)
+records those identities, each gate, historical failures and visual observations.
+Artifact `14996873996` was downloaded and its ZIP verified against SHA-256
+`82da06383c6454861510b072749633d3a312bfe1be14172af3116b0aa275227d`.
+Final screenshot inspection confirms complete CP1 artwork after Fit at desktop
+and 390 pixels, all eight live switches reachable through the actual controls
+scroll, and the restored unfinished source with no ROM or execution resumption.
+The English desktop and German dark narrow panel screenshots are byte-identical
+across the two React versions. At narrow width the circuit is an overview and
+the generic voltage legend is partly clipped at the right canvas edge; that
+limitation is recorded. Source-listing columns use their own horizontal scroll.
+
+This documentation checkpoint does not change the qualified code. Historical
+monitor semantic controls in a browser, production GUI menus/the full Scratch
+VM, and physical hardware remain outside this successful fixture qualification.

@@ -7,8 +7,9 @@ browser contract is [CP1-EDITOR-CONTRACT.md](CP1-EDITOR-CONTRACT.md).
 
 **Status: the continuation adds qualified semantic debugging, truthful source
 views and CP5 circuits, controls and lessons. Focused verification and the current
-Lite production build pass. Integrated browser qualification is pending, and an
-existing global pin-chain gate is not green.** This is a feature-branch candidate,
+Lite production build pass. All six scoped Chromium gates pass at Lite
+`8498ebdd322b515aa97b6c3930ef77270e54a52e`; an existing global pin-chain gate is
+not green.** This is a feature-branch candidate,
 not a production deployment. November 24 results below are historical evidence,
 not substitutes for checks of the current continuation.
 
@@ -20,7 +21,10 @@ not substitutes for checks of the current continuation.
 | bw-circuit-ui | `dd1c007c4c5f2333f2acc905530703144f043ebf` | Live switch controls and correct CP1 fit/hit bounds |
 | sb3-creator | `fdadba6743839763fcb8bb2fad64063937e16a7e` | CP5 example, electrical and monitor observations, four CP1 examples |
 
-Lite's own integration checkpoint is recorded by this file's Git history.
+Lite's browser-qualified code checkpoint is
+`8498ebdd322b515aa97b6c3930ef77270e54a52e`. The subsequent documentation-only
+checkpoint is recorded by this file's Git history; it does not change the code
+that was built and exercised in Chromium.
 `vendor-pins.json` is the package identity authority; package specifications,
 lockfile, integrated GUI, source notices and derived mirrors follow those pins.
 Behavior remains in its owning package.
@@ -107,6 +111,8 @@ the normal circuit engine. The binary example has 35 parts and 67 wires, includi
 the existing Darlington-driver component. Its proof covers each individual bit,
 mixed patterns and both endpoints. Original bilingual introductions explain
 initialization, source loading, physical controls and expected behavior.
+This is a simplified CP5-style 5 V teaching circuit, not a reproduction of the
+original panel's complete power and transistor stage.
 
 There are **ten original bilingual CP1 lessons**, still stored in the legacy
 filename `lesson-waves/cp1-8.json`. One command checkpoint observes a completed
@@ -142,7 +148,7 @@ hardware qualification.
 | Canonical source/gallery sync and derived mirrors | Passed, including regenerated Arcade inventory pin |
 | Current Lite production Webpack build | Passed, exit 0, with Webpack 5.96.1 in approximately 61.6 seconds after the browser-discovered keyboard and fit fixes |
 | Global pin-move-chain gate | Not green: current 38 passed / 5 failed; clean historical Lite `50b32fa7405dcc5f30637b23f1a6be69c0ee12de` reproduced all five failures and had 36 passed / 7 failed; both runs had 43 tests and no skips |
-| New hosted integrated CP1/CP5 browser workflow | Connector and CP5 interaction gates passed at `b9033ae6`; full-scope rerun pending after the keyboard/fit fixes |
+| Hosted CP1/CP5 browser workflow | All six gates passed at `8498ebdd`: connector, panel on React 18 and 16, shared runner/project restore on both, and CP5 on GUI React 16; separate hosted source suite 55/55 and SSR 17/17 per runtime |
 
 The remaining global pin-chain failures concern epoch-gated historical x86
 reader roles assuming older live Circuit UI/sb3 pins. The sealed reader bytes
@@ -233,39 +239,65 @@ Browser gate commands and dependency arguments are maintained in
 6. The first-display example loops ANZ to keep `A00.042` visible. Original **STP**
    stops the teaching program; **Pause CPU** freezes simulated time. HLT returns
    to the monitor's position display and does not itself pause the emulator.
-7. Operate the CP5 circuit switches and inspect output LEDs. Save `.sb3` or export
-   a CP1 project; reimport the ROM when needed. Saved projects retain its identity.
+7. For `cp1-cp5-binary`, open **Instruments → Switches**. Closed means input 0;
+   open means input 1 through the pull-up. Open only S1, S3, S6 and S8 for
+   hexadecimal A5 / decimal 165, then inspect P1 input, P2 latch, cell 32 and LEDs.
+   Pausing the CPU holds its output while switches can still change the input.
+8. Save `.sb3` or export a CP1 project; reimport the ROM when needed. Saved
+   projects retain its identity and incomplete source, but do not resume execution.
 
-This workflow is backed by machine, runner and component tests. Full application
+Machine and external-ROM tests establish the semantic workflow; scoped browser
+gates establish the synthetic-firmware component/runner journeys. Full application
 browser execution, including known-ROM semantic controls, remains unqualified.
 
 ## Hosted browser status and limits
 
-The initial hosted run
-[45552587031](https://github.com/CrispStrobe/brickwright-lite/actions/runs/45552587031),
-at Lite `50b32fa7405dcc5f30637b23f1a6be69c0ee12de`, passed the standalone connector
-gate in Chromium 149.0.7827.55: eight orientations, 40 contacts and base/CP3 import.
-Its desktop screenshot was inspected. The same run **failed the panel gate before
-browser launch** because the resolved Playwright CommonJS package was imported
-as a URL with an unavailable named `chromium` export. The loader now uses the
-explicitly supplied CommonJS API and validates `chromium.launch`; the original
-failed run remains part of the record.
+[Run 45559592991](https://github.com/CrispStrobe/brickwright-lite/actions/runs/45559592991)
+**passed all six gates** on Lite `8498ebdd322b515aa97b6c3930ef77270e54a52e`.
+The execution used Node 22.23.5, Playwright 1.61.1, Chromium 149.0.7827.55,
+React 18.3.1 and the actual installed GUI React 16.14.0. The durable
+[browser qualification receipt](receipts/cp1-browser-qualification.json)
+records exact inputs, each gate, prior failures, artifact identity and limits.
 
-The next hosted workflow is pending. Its intended scope is real CircuitDesigner,
-Cp1Host, runner and bundle helpers around a minimal VM fixture, with original
-synthetic firmware. It covers live electrical input/output, pause/step/reset,
-source/RAM, portable project restore, CP5 switch controls, desktop/narrow layout
-and installed GUI React 16. Artifacts include input identity, results and
-screenshots; fixture compilation alone is not a browser pass. It does not cover
-the complete production Scratch VM/menu flow, historical-ROM semantic stepping
-in a browser, or physical hardware.
+| Chromium gate | Passed scope |
+| --- | --- |
+| Standalone CP1 connector | Eight orientations, 40 contacts, Build Machine base/CP3 configuration and ROM import validation |
+| CP1 panel, React 18 and React 16 | Actual panel interaction, key release, source/RAM and import/configuration journeys; desktop and German dark 390-pixel layout |
+| Shared runner, React 18 and React 16 | Real CircuitDesigner, Cp1Host, runner, board/adapter and clock; physical input through firmware to LED; pause/step/reset and ordinary project save/restore helpers |
+| CP5, GUI React 16 | Eight live switches; 12 walking/mixed/endpoint patterns and 14 measured observations including paused keyboard input/resume; actual trainer containment after Fit and all controls reachable through the real inner scroll |
+
+Artifact `14996873996` contains `inputs.json`, six per-gate `result.json` files
+and screenshots. Its downloaded ZIP was verified against SHA-256
+`82da06383c6454861510b072749633d3a312bfe1be14172af3116b0aa275227d`.
+Screenshot inspection confirms the complete CP1 drawing fits at desktop and
+390-pixel widths, all eight switch controls are reachable, the German dark
+panel wraps its actions, and project restore preserves the incomplete draft
+with CPU/keypad disabled until a ROM is supplied. At 390 pixels the circuit is
+an overview; the generic voltage legend remains partly clipped at the canvas
+edge. That minor limitation is retained in the receipt.
+
+These are actual component and runner interactions around a minimal VM fixture,
+using original synthetic firmware. The bundle and production `loadProjectFile`
+helpers are real, but the surrounding buttons and VM delegate are fixtures.
+The standalone connector uses Circuit UI's locked Board `85fcc3a2`; the integrated
+runner uses Lite's exact adopted Board `1fa4734c`. The artifact records this
+distinction. This does not qualify the complete production Scratch VM/menu flow,
+historical-ROM semantic stepping in a browser, or physical hardware.
+
+Three earlier hosted runs remain recorded as failures, not superseded passes:
+
+| Run / Lite code | Finding resolved in the passing run |
+| --- | --- |
+| [45552587031](https://github.com/CrispStrobe/brickwright-lite/actions/runs/45552587031) / `50b32fa7` | Connector passed; panel stopped before launch because the CommonJS Playwright import did not expose a named `chromium` export |
+| [45555731912](https://github.com/CrispStrobe/brickwright-lite/actions/runs/45555731912) / `ccac35d8` | React update synchronization, exact PropTypes alias and the production restore completion route needed fixture corrections |
+| [45557001274](https://github.com/CrispStrobe/brickwright-lite/actions/runs/45557001274) / `b9033ae6` | Connector and CP5 interaction passed; further asynchronous assertions needed correction, and browser/visual review exposed the real React 16 key-ownership and CP1 fit-footprint bugs |
 
 Local launch remained blocked: November 24 Chromium failed its process-singleton
 socket with `Operation not permitted`, and automatic approval review rejected
 escalation. On November 25 the launcher was available but its binary was absent;
 the standard Playwright download returned HTTP 403 through the workspace proxy.
-No sandbox or download-policy bypass was attempted. Hosted execution is the
-pending route, not an inferred local browser success.
+No sandbox or download-policy bypass was attempted. Hosted execution supplied
+the passing Chromium evidence; no local browser pass is claimed.
 
 ## Historical baseline: November 24
 
@@ -316,9 +348,9 @@ Sources and limitations are recorded in Board `docs/MCS48-IMPLEMENTATION.md`,
 
 ## Remaining plan work
 
-- Complete the pending hosted integrated fixture gates, then separately qualify
-  the full production application and known-ROM semantic browser workflow,
-  including restore, keyboard/pointer ownership and responsive layout.
+- Qualify the full production application and known-ROM semantic browser
+  workflow, including production menus/VM restore and semantic controls. The
+  six scoped synthetic-firmware Chromium gates are complete.
 - CP2 cassette pulse transport and CAS/CAL behavior.
 - A dedicated CP4 relay teaching surface. CP5's current switch/LED circuit and
   lessons are implemented; that does not complete every expansion in the plan.
@@ -329,5 +361,5 @@ Sources and limitations are recorded in Board `docs/MCS48-IMPLEMENTATION.md`,
 - Event replay, finer bus-phase timing, electrical calibration, analog key
   bounce/ghost paths, overvoltage display behavior and physical-hardware comparison.
 
-Passing source tests, a firmware acceptance program or a renderer establishes
-only its measured scope. The pending browser and hardware work remains explicit.
+Each source, firmware, component and Chromium result establishes its measured
+scope. The remaining production-browser and hardware work stays explicit.
