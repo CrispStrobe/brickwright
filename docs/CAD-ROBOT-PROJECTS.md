@@ -1244,3 +1244,32 @@ loaded the packaged helper and Jolt assets and passed Atlas Run, joint
 motion, Pause, Reset, repeat Run, and Close without changing the scene.
 The Brickwright production SDK integration and sustained 1× production
 qualification remain open.
+
+### Load Jolt during collision preparation
+
+The simulation worker starts the existing Jolt loader when a Run
+has a document with roots. Collision preparation and engine loading
+can overlap. World construction uses the same cached engine promise,
+including the scalar fallback when the SIMD module cannot load.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/83b881af7597862b7128a545ac6396659b838347)
+
+The Mac Chrome requests moved from the end of collision preparation
+to the beginning of Run. With a fixed 700 ms delay applied only to the
+SIMD JavaScript response, time to the first physics frame changed from
+7.02 to 6.42 s for Atlas and from 8.90 to 8.57 s for Scout.
+
+Unthrottled samples varied in both directions. Atlas ran at
+5.86 → 5.40 s and 5.93 → 6.16 s. Scout ran at 7.17 → 7.88 s
+and 8.01 → 7.68 s. Unthrottled performance varied between run orders.
+
+Blocking SIMD exercised the packaged scalar fallback in both versions.
+Both robots matched their initial and restart frames with the same
+engine. All ten focused tests passed.
+
+The paired co-simulation runs matched sampled motion and electrical
+values over 600 ticks, with three matching warm restarts per run.
+The rebuilt SDK verified all 842 asset hashes. Its packaged engine
+passed Atlas Run, joint motion, Pause, Reset, repeat Run and Close in
+the embedded CAD editor without changing the authored scene.
+Brickwright SDK integration and sustained 1× production qualification
+remain open.
