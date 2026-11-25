@@ -10,6 +10,7 @@ import '@cp1-cui-sidecars';
 import {setEngine} from '@cp1-cui-engine';
 import {CircuitDesigner} from '@cp1-circuit-designer';
 import Cp1Host from '@cp1-host';
+import {Cp1Surfaces} from '@cp1-surfaces';
 import {createDebugRunner} from '@cp1-runner';
 import {attachBrickwrightState} from '@cp1-project-bundle';
 import loadProjectFile from '@cp1-project-load';
@@ -30,6 +31,9 @@ function App () {
     const [notice, setNotice] = useState('');
     const [circuitData, setCircuitData] = useState(circuit);
     const [gallery, setGallery] = useState(null);
+    const [showSurfaces, setShowSurfaces] = useState(false);
+    const [code, setCode] = useState(null);
+    const [controller, setController] = useState(null);
     const board = useRef(null);
     const current = useRef(null);
     const config = useRef(configuration);
@@ -145,7 +149,10 @@ function App () {
     };
     h.setGallery = setGallery;
     h.unmount = () => root.unmount();
-    return <>
+    h.setShowSurfaces = setShowSurfaces;
+    return <Cp1Surfaces.Provider value={{code, controller}}>
+        {showSurfaces && <div ref={setCode} data-test-code-slot />}
+        {showSurfaces && <div ref={setController} data-test-controller-slot />}
         <section style={{height: 650, minWidth: 0}} data-cp1-real-circuit>
             <CircuitDesigner project={project} circuitData={circuitData}
                 {...(gallery && {examples: gallery.examples, curriculum: gallery.curriculum, lang: gallery.lang,
@@ -166,7 +173,7 @@ function App () {
                 configuration={configuration} onConfigure={configure}
                 onImportRom={importRom} onRun={() => current.current?.resume()} />
         </section>
-    </>;
+    </Cp1Surfaces.Provider>;
 }
 
 root.render(<App />);
