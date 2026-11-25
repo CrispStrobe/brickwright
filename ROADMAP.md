@@ -1,4 +1,8 @@
-# brickwright-lite — roadmap
+# Brickwright roadmap
+
+## Examples across the workspace
+
+Use the [example surface audit](docs/EXAMPLE-SURFACES.md) to prioritize examples that leave a stale pane, ship an incomplete bench, or rely on manual setup the example never explains. Use the [repository transition plan](docs/REPOSITORY-RENAME.md) for the Brickwright and Brickwright Legacy cutover.
 
 ## Current status — 2026-11-05
 
