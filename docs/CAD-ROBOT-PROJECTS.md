@@ -798,3 +798,28 @@ not show a consistent restart speedup.
 Atlas and Scout passed the full editor Run, Stop, Reset, and restart
 checks. The release SDK stays at `7760321`, and the sustained 1×
 viewport target remains open.
+
+### Paired full-editor Jolt 5.7 comparison
+
+The same complete local CAD SDK and host were used for both engine
+flavors, with the same robots, widget defaults and full viewport.
+The bundled engine was JoltPhysics.js `1.1.0-bw.10`. The candidate
+was the single-thread Jolt 5.7 SIMD module from
+[wrapper source](https://github.com/CrispStrobe/JoltPhysics.js/commit/74d8feedc34213b3034d8ad21255ad2d0224da88)
+and [native source](https://github.com/CrispStrobe/JoltPhysics/commit/783255b0c2fcb54e877a21d3abf5680009b26a57).
+
+Atlas passed Run, physical motion, Stop, and Reset in both orders.
+Sustained speed rose from 0.226× to 0.495× in one order and from
+0.235× to 0.512× in the reverse order. The mechanical worker round
+trip fell from 19.74/20.14 ms to 6.28/6.03 ms per tick. The full
+editor remained below 1× on the shared Mac.
+
+A previous local worker-only preview on port 8292 had used Vite's
+page preload path. With bundled Jolt that could throw a browser
+`window is not defined` error inside the worker. The preview worker
+was rebuilt through Vite's module-worker configuration. Chrome
+verified that it loaded its bundled SIMD engine and advanced Scout
+normally. The paired results above used a complete SDK throughout.
+
+Scout passed both engine checks and sustained 0.248× with bundled
+Jolt and 0.506× with Jolt 5.7 SIMD in one pair.
