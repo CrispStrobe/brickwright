@@ -346,6 +346,24 @@ Sources and limitations are recorded in Board `docs/MCS48-IMPLEMENTATION.md`,
 `docs/CP1-HARDWARE.md`, `docs/CP1-SEMANTIC-DEBUG.md` and local
 [CP1-CLEAN-AUTHORSHIP.md](CP1-CLEAN-AUTHORSHIP.md).
 
+## CP4 eight-channel relay bank
+
+The bilingual [relay bank](../overlay/scratch-gui/examples/cp1-cp4-relay-bank/intro.md)
+adds eight editable input and output channels alongside the shorter
+[two-relay signals lesson](../overlay/scratch-gui/examples/cp1-cp4-relay-signals/intro.md).
+Each input has the documented 1 kΩ and 470 Ω bias pair, clamps and 100 nF
+capacitor. Each output has the transistor driver, flyback diode, and normally
+open contact with a 100 nF capacitor. The resistive loads use a separate battery. The
+[CP4 manual, section IV](https://www.retrozone.ch/docs/cp1/CP4-Relais-Modul.pdf)
+documents the physical circuit.
+
+The qualification drives the gallery program through the monitor, measures all
+eight load branches on walking and mixed byte patterns, and measures the signal
+rise on switch release. The contact measurements concern settled states and
+load current. Simultaneous switching with diode lamps exceeded the transient
+solver’s step budget. The relay bank uses resistive loads and retains the
+contact capacitors. Nominal coil supply and relay thresholds are simulator settings.
+
 ## Remaining plan work
 
 - Qualify the full production application and known-ROM semantic browser
@@ -353,14 +371,9 @@ Sources and limitations are recorded in Board `docs/MCS48-IMPLEMENTATION.md`,
   six scoped synthetic-firmware Chromium gates are complete.
 - CP2 physical recorder and analog threshold qualification. The independent
   monitor already saves and loads CAS/CAL through the digital cassette path.
-- Complete the CP4 eight-channel module and qualify its original input and
-  contact filters. The bilingual [relay signals example](../overlay/scratch-gui/examples/cp1-cp4-relay-signals/intro.md)
-  exercises two channels on the shared CP1 circuit. The independent monitor
-  drove both simulated contacts at startup, then ran the entry/exit sequence
-  twice with no retrigger while the request stayed closed. The switched
-  branches drew about 3.25 mA from a separate simulated battery.
-  The [CP4 manual](https://www.retrozone.ch/docs/cp1/CP4-Relais-Modul.pdf)
-  documents the eight-channel hardware and its original filtering.
+- Qualify the CP4 power supply, relay mechanics and interference behavior on
+  physical hardware. The eight-channel bench uses fixed DC supplies and
+  generic relay models.
 - Freely rewired internal 8049/8155 schematic construction.
 - Independently obtained mask-ROM-B qualification and additional firmware cases.
 - Generic 8155 strobed-port modes and exact internal timer-register encoding;
