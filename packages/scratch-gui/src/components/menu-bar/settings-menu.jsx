@@ -49,6 +49,8 @@ const NativeBenchmarks = lazyDialog(
     () => import(/* webpackChunkName: "bw-native-benchmarks" */ './native-benchmarks.jsx'),
     'bw-open-native-benchmarks');
 
+const DEBUG_DIAGNOSTICS_KEY = 'bw-debug-diagnostics';
+
 const emit = (name, value) => {
     window.dispatchEvent(new CustomEvent(name, {detail: value}));
 };
@@ -70,6 +72,12 @@ const SettingsMenu = ({intl, canChangeLanguage, canChangeTheme, isRtl, onRequest
     const [preferencesOpen, setPreferencesOpen] = useState(false);
     const current = key => {
         try { return localStorage.getItem(key); } catch { return null; }
+    };
+    const [debugDiagnostics, setDebugDiagnostics] = useState(() => current(DEBUG_DIAGNOSTICS_KEY) === '1');
+    const changeDebugDiagnostics = value => {
+        setDebugDiagnostics(value === '1');
+        try { localStorage.setItem(DEBUG_DIAGNOSTICS_KEY, value); } catch { /* allow a session-only preference */ }
+        onRequestClose();
     };
     const workspaceValue = (key, fallback) => current(key) || fallback;
     const setWorkspace = (key, value) => {
@@ -173,6 +181,12 @@ const SettingsMenu = ({intl, canChangeLanguage, canChangeTheme, isRtl, onRequest
                                     {value: '1', label: t('gui.workspace.on', 'On')}
                                 ], t('gui.workspace.costumePrecisionHint', de ?
                                     'Vektorflächen als bearbeitbare CAD-Skizzen übernehmen' : 'Send vector regions to CAD as editable sketches')) : null}
+                            {workspaceSelect(t('gui.workspace.debugDiagnostics', de ? 'Debug-Diagnose' : 'Debug diagnostics'),
+                                debugDiagnostics ? '1' : '0', changeDebugDiagnostics, [
+                                    {value: '0', label: t('gui.workspace.off', 'Off')},
+                                    {value: '1', label: t('gui.workspace.on', 'On')}
+                                ], de ? 'Verbindungs-, Fähigkeits- und CPU-Diagnosen im Menü anzeigen' :
+                                    'Show connection, capability and CPU diagnostics in Settings')}
                             {workspaceSelect(t('gui.workspace.legacySpike', 'Legacy SPIKE extensions'), getLegacySpikeVisible() ? '1' : '0',
                                 value => { setLegacySpikeVisible(value === '1'); onRequestClose(); }, [
                                     {value: '0', label: t('gui.workspace.off', 'Off')},
@@ -250,20 +264,6 @@ const SettingsMenu = ({intl, canChangeLanguage, canChangeTheme, isRtl, onRequest
                             id="gui.menuBar.virtualSpikePrime"
                         />
                     </MenuItem>
-                    <MenuItem onClick={() => { emit('bw-open-ble-diagnostics'); onRequestClose(); }}>
-                        <FormattedMessage
-                            defaultMessage="Connection diagnostics…"
-                            description="Settings action that opens the on-screen Bluetooth/connection log"
-                            id="gui.menuBar.connectionDiagnostics"
-                        />
-                    </MenuItem>
-                    <MenuItem onClick={() => { emit('bw-open-capability-diagnostics'); onRequestClose(); }}>
-                        <FormattedMessage
-                            defaultMessage="Capability diagnostics…"
-                            description="Settings action that opens the extension capability audit panel"
-                            id="gui.menuBar.capabilityDiagnostics"
-                        />
-                    </MenuItem>
                     <MenuItem onClick={() => { emit('bw-open-toolchain-manager'); onRequestClose(); }}>
                         <FormattedMessage
                             defaultMessage="C compiler for 8051 boards…"
@@ -274,12 +274,28 @@ const SettingsMenu = ({intl, canChangeLanguage, canChangeTheme, isRtl, onRequest
                     <MenuItem onClick={() => { emit('bw-open-about'); onRequestClose(); }}>
                         {t('gui.menuBar.aboutBrickwright', 'About Brickwright…')}
                     </MenuItem>
-                    <MenuItem onClick={() => { emit('bw-open-i8086-lab'); onRequestClose(); }}>
-                        {t('gui.menuBar.i8086Diagnostics', '8086 execution diagnostics…')}
-                    </MenuItem>
-                    <MenuItem onClick={() => { emit('bw-open-native-benchmarks'); onRequestClose(); }}>
-                        {t('gui.menuBar.nativeBenchmarks', 'Benchmarks (native i80386)…')}
-                    </MenuItem>
+                    {debugDiagnostics && <>
+                        <MenuItem onClick={() => { emit('bw-open-ble-diagnostics'); onRequestClose(); }}>
+                            <FormattedMessage
+                                defaultMessage="Connection diagnostics…"
+                                description="Settings action that opens the on-screen Bluetooth/connection log"
+                                id="gui.menuBar.connectionDiagnostics"
+                            />
+                        </MenuItem>
+                        <MenuItem onClick={() => { emit('bw-open-capability-diagnostics'); onRequestClose(); }}>
+                            <FormattedMessage
+                                defaultMessage="Capability diagnostics…"
+                                description="Settings action that opens the extension capability audit panel"
+                                id="gui.menuBar.capabilityDiagnostics"
+                            />
+                        </MenuItem>
+                        <MenuItem onClick={() => { emit('bw-open-i8086-lab'); onRequestClose(); }}>
+                            {t('gui.menuBar.i8086Diagnostics', '8086 execution diagnostics…')}
+                        </MenuItem>
+                        <MenuItem onClick={() => { emit('bw-open-native-benchmarks'); onRequestClose(); }}>
+                            {t('gui.menuBar.nativeBenchmarks', 'Benchmarks (native i80386)…')}
+                        </MenuItem>
+                    </>}
                 </MenuSection>
             </MenuBarMenu>
             <BwAbout />
