@@ -433,3 +433,12 @@ cases and preserved both coupled traces. It made Atlas's mechanical
 round trip slower in both run orders, so that backport remains a
 candidate branch.
 [Jolt candidate](https://github.com/CrispStrobe/JoltPhysics/commit/dd9cc56)
+
+The full Chrome GUI comparison used the same Jolt 5.7 SIMD override in
+both builds, with one eight-second Atlas run in each direction of the
+comparison. The local builds disabled JavaScript minification. Atlas
+sustained 0.772× and 0.745× with the pinned Board code, and 0.797× and
+0.771× with the two Board changes, a 3.2–3.5% paired improvement.
+The mean electrical advance fell from 2.36–2.39 to 2.14 ms per 5 ms
+tick. All four runs passed one-click Run, motion, Stop, and Reset.
+Scout passed the same workflow with the two Board changes at 0.991×.
