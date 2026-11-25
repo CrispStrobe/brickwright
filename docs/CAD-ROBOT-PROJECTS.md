@@ -998,3 +998,39 @@ transient startup and diagnostic output.
 Scout passed Run, motion, Stop, Reset, and repeat Run in the candidate
 preview. Its three-second sample sustained 1.000×. Brickwright's release
 pins Board `9ff1fff3`, and the production 1× target remains open.
+
+### Reuse grounded circuit topology between solves
+
+Live Board MNA solves reuse the canonical net view, terminal lookup,
+part lookup, and base node indices for an explicitly grounded circuit.
+Netlist edits and finite scope loads replace the solver arrays. Resistance
+measurements and reference selection for batteries and supplies keep their
+existing paths. Per-solve voltage source rows and intrinsic transistor
+nodes still use the current circuit conditions.
+[Board source](https://github.com/CrispStrobe/bw-board/commit/3dc119b42f0bd20f52ed5e65cb67b81471a99448)
+
+Both matched Chrome worker orders used the same CAD worker and Jolt 5.7
+SIMD bytes. Each run advanced 600 coupled ticks. The sampled net voltages,
+shaft readings, motion, and restart frames matched exactly. Solve counts
+stayed at 18,930 for Atlas and 12,618 for Scout.
+
+| Project | First order, before → after | Reverse order, before → after |
+| --- | ---: | ---: |
+| Atlas electrical solve time | 884 → 707 ms | 745 → 701 ms |
+| Scout electrical solve time | 414 → 403 ms | 482 → 395 ms |
+
+Atlas gained roughly 0.07–0.30 ms per coupled tick in this stage. The
+mechanics-only scene, collision settings, and 5 ms control cadence were
+identical across these comparisons.
+
+In the full Chrome editor with Jolt 5.7 SIMD, Atlas passed one-click Run,
+physical motion, Stop, and Reset on both builds. Sustained three-second
+samples moved from 0.585× to 0.630× and from 0.716× to 0.740×. The
+candidate preview used locally patched Board chunks. All 148 focused
+Board tests passed, including resistance references, scope-load changes,
+transient fallback, and changing intrinsic transistor rows on a live
+netlist.
+
+Scout passed Run, motion, Stop, Reset, and repeat Run. Its local sample
+sustained 1.005×. Production still pins Board `9ff1fff3`, and the
+sustained 1× production target remains open.
