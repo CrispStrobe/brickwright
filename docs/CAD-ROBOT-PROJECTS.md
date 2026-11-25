@@ -343,3 +343,29 @@ The SIMD compatibility artifact SHA-256 is
 These sustained rates cover the coupled Circuit engine and CAD worker.
 Full GUI throughput including Blocks and viewport rendering still
 requires a separate measurement. The published SDK pin is unchanged.
+
+The follow-up extends the same conservative bounds query to convex
+hulls, which Atlas uses for part collisions. The expanded WASM fixture
+returned the same rotated hit fractions and tie order for box and hull
+targets, including candidate-buffer fallback. The browser compatibility
+module also passed the Jolt smoke checks.
+
+A separate paired Chrome run compared the two tree candidates in both
+orders. All 600 ticks matched exactly for each robot, including the
+electrical trace. Atlas's physics round trip fell from 6.25–6.59 ms to
+3.21–3.60 ms per 5 ms tick, and the coupled rate rose from 0.55–0.57×
+to 0.82–0.88×. Scout sustained 1.29–1.32× with the extended candidate
+and 1.34–1.39× with the box-only tree in the same comparison. The
+53 Lite project, default actuator direction, and provenance tests passed.
+
+The extended SIMD module SHA-256 is
+`3c463978c83694b04a1e4a78c1611f488e195ac087fb5d30a572a4ed10b80af9`.
+[Native candidate](https://github.com/CrispStrobe/JoltPhysics/commit/7085d0d)
+[Reproducible SIMD build pin](https://github.com/CrispStrobe/JoltPhysics.js/commit/cd40daa)
+
+The shipped pin chain is CAD SDK `776032146f996db36ed38da2008ee27eaa609bb0`,
+JoltPhysics.js release `1.1.0-bw.10` at
+`c67783a391038612c9675567b0c6d1d517a648a3`, and native Jolt
+`b6c1e2ada2b34be610c7a4c91bdd2127e3cc69ec`. The native commit and
+the fork's `brickwright/gear-mesh-master` merge tip have the same
+source tree. The candidate checks use a local SIMD override.
