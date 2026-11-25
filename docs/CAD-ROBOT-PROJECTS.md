@@ -669,3 +669,43 @@ worker. Both used the same Jolt 5.7.0 SIMD override. The single
 editor comparison leaves sustained 1× unverified. The change stays
 on its candidate branches and the published CAD SDK pin stays in place.
 Scout passed its full-editor restart proof at 1.005×.
+
+### Temporary native vectors during collision-world setup
+
+[CrispCAD main](https://github.com/CrispStrobe/CrispCAD/commit/5ccc31ae989770c4f082708e7b59b7c21ca8e2b8)
+reuses a vertex vector, a compound-position vector, and an identity
+quaternion while creating Jolt hulls. Jolt copies their values into
+its own settings. The code also reads each hull's native point array
+once and validates its coordinates while calculating its bounds.
+The source and the [exact pin backport](https://github.com/CrispStrobe/CrispCAD/commit/a128776)
+are saved on GitHub.
+
+The direct Jolt 5.7.0 startup probe used the same qualified collision
+buffers and counted Vec3, RVec3, and Quat objects constructed by the
+JavaScript world setup. Atlas went from 30,278 to 80 objects. CPU time
+for the complete world setup fell from 1,781 to 828 ms in one order
+and from 838 to 494 ms in the reverse order. Sampled motion across
+24 ticks was exact.
+
+The paired Mac Chrome worker runs used the same Board bundle and
+Jolt 5.7.0 SIMD override. Each robot ran for 600 ticks, followed by
+three warm starts. The sampled motion, electrical telemetry, and
+restart frames matched exactly. Median Atlas restart time fell from
+415 to 347 ms in one order and 453 to 354 ms in the other. Scout
+fell from 785 to 697 ms and from 809 to 756 ms. This comparison
+measures world startup separately from sustained simulation speed.
+
+Type checking and six focused geometry and actuator tests passed.
+The broader run produced 29 passes and 11 timeouts at its existing
+per-test budgets. Two of the focused tests initially hit their
+five-second timeout and both passed on the targeted retry with
+the timeout raised to 60 seconds.
+
+Atlas passed the full editor Run, Stop, Reset, and repeat-Run proof
+on both builds with the same Jolt 5.7.0 override. Instrumented worker
+restart time was 659 ms on the pinned build and 631 ms on the local
+build. Sustained throughput was 0.520× and 0.557× during those runs.
+The observed startup improvement does not establish the full editor's
+sustained 1× target. The local test worker replaces only the bundled
+worker and its assets. Lite's release SDK remains at pin `7760321`.
+Scout passed the same full-editor restart proof on the local build.
