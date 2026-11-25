@@ -1341,3 +1341,39 @@ repeat Run and Close using the local SDK worker overlay. Brickwright
 SDK integration and sustained 1× production qualification remain
 open.
 [CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/b6228bc4162c8f5b15e0d241c4a08acd2762628c)
+
+### Reuse authored hinge clearance on repeat Run
+
+The private physics document retains the authored hinge clearance
+calculation for the same ordered, qualified collider inputs. Every
+world still verifies its source and hull hashes and creates its own
+contact-filter state. Runtime drift and externally applied motion
+continue to restore contacts for that world.
+
+Each Mac Chrome pair measured eight warm starts per version and robot,
+from Park to the initial physics frame. Both versions used Jolt 5.7 SIMD.
+
+| Robot | First order, before → after | Reverse order, before → after |
+| --- | ---: | ---: |
+| Atlas | 120 → 19 ms | 116 → 17 ms |
+| Scout | 362 → 22 ms | 352 → 26 ms |
+
+Every initial and warm restart frame matched. The native regression
+checks show that external motion restores contacts, the next world
+reuses the authored result with fresh contact state, replacing a
+collider recomputes the clearance, and altered hull bytes are rejected.
+
+Warm paired runs matched sampled motion and circuit readings over
+600 ticks. Both robots resumed the last valid scene after refusing an
+unsupported document. Atlas passed Run, joint motion, Pause, Reset,
+repeat Run and Close in the embedded CAD editor with the local SDK worker
+overlay.
+
+Type checking and 19 of 20 focused tests passed. The Rover startup
+torque test timed out in the first run. On an isolated run with a longer
+deadline it reported one separated pair where its assertion expects
+two. Repeating the case with the preceding world implementation and
+the same packaged scalar engine reproduced the one-pair result.
+Brickwright SDK integration and sustained 1× production qualification
+remain open.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/a31b4b85725774dba64852dec9e2c4664cbb184c)
