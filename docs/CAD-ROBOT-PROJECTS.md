@@ -1341,3 +1341,94 @@ repeat Run and Close using the local SDK worker overlay. Brickwright
 SDK integration and sustained 1× production qualification remain
 open.
 [CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/b6228bc4162c8f5b15e0d241c4a08acd2762628c)
+
+### Reuse authored hinge clearance on repeat Run
+
+The private physics document retains the authored hinge clearance
+calculation for the same ordered, qualified collider inputs. Every
+world still verifies its source and hull hashes and creates its own
+contact-filter state. Runtime drift and externally applied motion
+continue to restore contacts for that world.
+
+Each Mac Chrome pair measured eight warm starts per version and robot,
+from Park to the initial physics frame. Both versions used Jolt 5.7 SIMD.
+
+| Robot | First order, before → after | Reverse order, before → after |
+| --- | ---: | ---: |
+| Atlas | 120 → 19 ms | 116 → 17 ms |
+| Scout | 362 → 22 ms | 352 → 26 ms |
+
+Every initial and warm restart frame matched. The native regression
+checks show that external motion restores contacts, the next world
+reuses the authored result with fresh contact state, replacing a
+collider recomputes the clearance, and altered hull bytes are rejected.
+
+Warm paired runs matched sampled motion and circuit readings over
+600 ticks. Both robots resumed the last valid scene after refusing an
+unsupported document. Atlas passed Run, joint motion, Pause, Reset,
+repeat Run and Close in the embedded CAD editor with the local SDK worker
+overlay.
+
+Type checking and 19 of 20 focused tests passed. The Rover startup
+torque test timed out in the first run. On an isolated run with a longer
+deadline it reported one separated pair where its assertion expects
+two. Repeating the case with the preceding world implementation and
+the same packaged scalar engine reproduced the one-pair result.
+Brickwright SDK integration and sustained 1× production qualification
+remain open.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/a31b4b85725774dba64852dec9e2c4664cbb184c)
+
+### Narrow the hull pairs checked for cold-start hinge clearance
+
+The full-turn proof indexes hulls by axial interval and visits the
+pairs whose axial ranges may overlap. It projects a hull into the
+radial plane only when this can change the result. The existing
+clearance margin and hull-pair budget still apply.
+
+The table measures the authored hinge calculation during cold
+construction in paired Mac Chrome tests with the same Jolt 5.7 SIMD
+module. Total first-frame time varied across the run orders.
+
+| Robot | First order, before → after | Reverse order, before → after |
+| --- | ---: | ---: |
+| Atlas | 111 → 33 ms | 100 → 27 ms |
+| Scout | 268 → 35 ms | 267 → 48 ms |
+
+All initial and repeat frames matched. A differential check compared
+16,000 generated fixtures against the preceding implementation.
+All decisions matched, including 7,705 separation proofs and 8,295
+refusals. Type checking and 20 focused tests passed. That run excluded
+the previously reproduced scalar Rover torque assertion failure.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/bc095d12249c27e02f264fb429ad6f27a4ec12c7)
+
+Both robots produced identical sampled motion and circuit readings for
+600 warm ticks, with matching restart frames after an unsupported scene
+was refused. In the embedded editor, Atlas passed Run, joint motion,
+Pause, Reset, repeat Run and Close with a local SDK worker overlay.
+Brickwright SDK integration and sustained 1× production qualification
+remain open.
+
+### Sample shared hinge poses once per substep boundary
+
+The separation guard now reads each rigid body's native position and
+rotation once per boundary, even if two hinges share the body. Pose
+buffers are reused. Both checks, the drift threshold and explicit
+invalidation on external mutations still apply.
+
+In paired Mac Chrome worker runs with the same Jolt 5.7 SIMD module,
+Scout's enabled guard took 13.7 → 12.3 ms over 1,200 checks. The
+reverse run order measured 13.2 → 9.5 ms. Atlas had no active separated
+pairs in this trace. All 100 motion and electrical samples across
+600 substeps matched in both orders, as did warm restart frames.
+The optimized worker runs averaged 1.28–1.38× for Atlas and 2.04× for
+Scout. Atlas's overall rate varied with run order.
+
+Type checking and 21 focused tests passed. A new two-hinge fixture
+verified 12 native position reads and 12 rotation reads across two
+substeps, down from 16 each for separate per-hinge pose reads. The
+known scalar Rover torque assertion was excluded from the focused run.
+A local embedded-SDK worker overlay passed Atlas Run, joint motion,
+Pause, Reset, repeat Run and Close. The published Brickwright SDK
+remains pinned to `0953e188`. Sustained 1× production qualification
+remains open.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/c3f45ff1916f5de80937392af9c31cea336af780)

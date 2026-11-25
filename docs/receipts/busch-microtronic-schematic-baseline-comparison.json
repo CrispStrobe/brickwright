@@ -1,0 +1,175 @@
+{
+  "schema": 1,
+  "subject": "10-motor-speed-circuit.pico.svg",
+  "verdict": "Inherited golden mismatch; no change introduced by the Microtronic supplier adoption.",
+  "scope": "One targeted rendering comparison. No baseline, gate, source, dependency, or pin edits; no broad suite.",
+  "host": {
+    "previousHead": "72cad0d38a2eb90ba847cd80cb2b740beb219885",
+    "headAtComparison": "9ba80edf653707ef69f0b0e3f23256456e1897eb",
+    "previousBoardPin": "9ff1fff362db4366e11ab47abd62e1f04edc6af6",
+    "currentBoardPin": "cc18f3c8d84d68e008450e65ddf838b8ec03c7f7",
+    "boardRuntimeUsed": false,
+    "explanation": "The production renderer script injects AuditBoard rather than importing the bw-board runtime.",
+    "identicalSourceBlobsAtBothHeads": {
+      "scripts/render-schematic.mjs": "e0f16be5492b32bac9928b82f2d892a36cf641ef",
+      "test/schematic-visual-baselines.test.mjs": "ac0bd1f29be012ccce67586fd9138c7352041189",
+      "overlay/scratch-gui/examples/10-motor-speed/circuit.pico.json": "04d8afdbd533e93195441b96a5c26578db407dc2",
+      "docs/schematic-baselines/10-motor-speed-circuit.pico.svg": "9a2a3a03a4e8c85a85db17b43906de6610af6695"
+    }
+  },
+  "suppliers": {
+    "previousUi": {
+      "commit": "11532a80eee13b7dad4451e167dc6780bd546ea0",
+      "tree": "b37ddc6c076c5d37e65c275031e5a6efdafc84d1"
+    },
+    "currentUi": {
+      "commit": "0a1b15edb0daecd723c7c07126450d84b86e3e68",
+      "tree": "5cdb31294376eed5ab22ea88ffecaafd1e392e65"
+    },
+    "moduleClosure": {
+      "count": 20,
+      "allBlobsIdenticalBetweenSuppliers": true,
+      "blobs": {
+        "src/engine.js": "f230047b43c7b3db5c95ae2ea6ce4736d9150a84",
+        "src/model/breadboard.js": "63ae12428d1bf82d238a22b9fc7286c7b391b694",
+        "src/model/carriers.js": "3568ad3e685f793f19f498b3d348fb7838c8d6d6",
+        "src/model/circuit.js": "157f8fa73a67e095cba79b6a1034de22c26d7044",
+        "src/model/component-measurements.js": "f329bf257bde256672480ea4f53ea24eb3b70800",
+        "src/model/dip-chips.js": "da28b5b7370aa22e0d30128b0ed00074148ae026",
+        "src/model/esp32-s040-face.js": "a3fc62e2d21cda340b605c1545429befa23d11df",
+        "src/model/exact-hypot.js": "94a76684f5000e389df4cf7d7621e1f2ef8649ef",
+        "src/model/footprints.js": "cfae342aed2c4ed43c7989088b8cc80de5bd78a3",
+        "src/model/history.js": "aed8fa73f5152b0f958208785352f205e81fe593",
+        "src/model/import-singleton-nets.js": "a5e9ea902804f972093829f535d061aa4152e6ac",
+        "src/model/merge-nets.js": "e84d344a637ce4fae321691ebd3b5e775cb61078",
+        "src/model/meter-load.js": "707926373289ace2423355ac9f769db64438cc35",
+        "src/model/parts-registry.js": "43d8db0883b71eeac49b529cd105d3a7663d8016",
+        "src/model/physical-package-bindings.js": "1ddf024d3e29b472bacdc4d512b0cce048dfb027",
+        "src/model/schematic-projection.js": "4d56913e2aa6be1efa3f506a38b09aa0cf00e696",
+        "src/model/schematic-svg.js": "006d414a6b5289999fd2e4637b65c8a8222ff15c",
+        "src/model/schematic-symbols.js": "7ad484e26f4107a05519d8cf2f8528a05f01c1ed",
+        "src/model/terminal-aliases.js": "88ec63f1e8d91ceaa59e459c9e1f34fed199a947",
+        "src/model/wire-endpoints.js": "4eb449b689491878cd5758577c7dbde12d18ed25"
+      }
+    },
+    "sidecars": "All src/parts-data/*.json files from each supplier's own immutable Git tree were registered."
+  },
+  "mechanism": {
+    "cwd": "/home/agent/.codex/skills/remote-skills/.worktrees/brickwright-microtronic-full",
+    "command": "node --no-warnings --experimental-vm-modules --input-type=module <<'JS'\nimport {readFileSync,readdirSync} from 'node:fs';\nimport {execFileSync} from 'node:child_process';\nimport {SourceTextModule,SyntheticModule} from 'node:vm';\nimport {createHash} from 'node:crypto';\nimport {renderSchematicSvg} from 'bw-circuit-ui/model/schematic-svg.js';\nimport {Circuit} from 'bw-circuit-ui/model/circuit.js';\nimport {setEngine} from 'bw-circuit-ui/engine.js';\nimport {registerSidecar} from 'bw-circuit-ui/model/parts-registry.js';\nconst uiRepo='/home/agent/.codex/skills/remote-skills/.worktrees/bw-circuit-ui-microtronic';\nconst source=readFileSync('overlay/scratch-gui/examples/10-motor-speed/circuit.pico.json','utf8');\nconst golden=readFileSync('docs/schematic-baselines/10-motor-speed-circuit.pico.svg','utf8');\nclass AuditBoard {setNetlist(){}snapshot(){return null;}}\nconst engine={BoardImpl:AuditBoard,inferNetlist:()=>({}),checkWiring:()=>[]};\nsetEngine(engine);\nfor(const f of readdirSync('node_modules/bw-circuit-ui/src/parts-data'))if(f.endsWith('.json'))registerSidecar(JSON.parse(readFileSync('node_modules/bw-circuit-ui/src/parts-data/'+f,'utf8')));\nconst c=Circuit.fromJSON(JSON.parse(source));\nconst installed=renderSchematicSvg({parts:c.parts,nets:c.resolvedNets},{dark:false});\nasync function renderGit(rev){\n const modules=new Map();const git=(...args)=>execFileSync('git',['-C',uiRepo,...args],{encoding:'utf8'});\n const get=(path)=>{\n  if(modules.has(path))return modules.get(path);\n  const source=git('show',rev+':'+path);\n  const m=path.endsWith('.json')?new SyntheticModule(['default'],function(){this.setExport('default',JSON.parse(source));},{identifier:'git:/'+rev+'/'+path}):new SourceTextModule(source,{identifier:'git:/'+rev+'/'+path,initializeImportMeta(meta,mod){meta.url=mod.identifier;}});\n  modules.set(path,m);return m;\n };\n const linker=(specifier,reference)=>{\n  if(!specifier.startsWith('.'))throw Error('Unexpected external import '+specifier+' in '+reference.identifier);\n  return get(new URL(specifier,reference.identifier).pathname.split('/').slice(2).join('/'));\n };\n const ns=async path=>{const m=get(path);if(m.status==='unlinked')await m.link(linker);if(m.status==='linked')await m.evaluate();return m.namespace;};\n const e=await ns('src/engine.js');e.setEngine(engine);\n const registry=await ns('src/model/parts-registry.js');\n for(const p of git('ls-tree','-r','--name-only',rev,'src/parts-data').trim().split('\\n').filter(p=>p.endsWith('.json')))registry.registerSidecar(JSON.parse(git('show',rev+':'+p)));\n const model=await ns('src/model/circuit.js');const renderer=await ns('src/model/schematic-svg.js');\n const c=model.Circuit.fromJSON(JSON.parse(source));const rendered=renderer.renderSchematicSvg({parts:c.parts,nets:c.resolvedNets},{dark:false});\n return {rendered,modules:[...modules.keys()].sort()};\n}\nconst old=await renderGit('11532a80eee13b7dad4451e167dc6780bd546ea0');\nconst current=await renderGit('0a1b15edb0daecd723c7c07126450d84b86e3e68');\nconst hash=s=>createHash('sha256').update(s).digest('hex');\nconsole.log(JSON.stringify({golden,installed:installed.svg,old:old.rendered.svg,current:current.rendered.svg,summary:{hashes:{golden:hash(golden),installed:hash(installed.svg),old:hash(old.rendered.svg),current:hash(current.rendered.svg)},oldEqualsNew:old.rendered.svg===current.rendered.svg,newEqualsInstalled:current.rendered.svg===installed.svg,oldEqualsGolden:old.rendered.svg===golden,metadata:{width:installed.width,height:installed.height,symbols:installed.symbols,wires:installed.wires,generic:installed.generic,wireSymbolCrossings:installed.wireSymbolCrossings,symbolOverlaps:installed.symbolOverlaps},oldModuleCount:old.modules.length,currentModuleCount:current.modules.length,modules:current.modules}}));\nJS",
+    "description": "The installed package was rendered normally. Each immutable Git UI was executed using SourceTextModule with relative-import linking to git-show source, sharing its own module cache. Both used the exact AuditBoard setup, all of their own JSON sidecars, Circuit.fromJSON, and renderSchematicSvg({parts, nets: resolvedNets}, {dark:false}). The current Git result matched the installed-package result.",
+    "commandRerunWhenWritingReceipt": false
+  },
+  "results": {
+    "oldEqualsNew": true,
+    "newEqualsInstalled": true,
+    "oldEqualsGolden": false,
+    "sha256": {
+      "golden": "a852e416abfaeb34b778d61a3296994894a9538f4af097da8a3fb41163e2ce1f",
+      "installed": "9d31e2efbb0b2748aa1cf9df80734a359ad5b971e6c7ebe48552e458244b86a3",
+      "old": "9d31e2efbb0b2748aa1cf9df80734a359ad5b971e6c7ebe48552e458244b86a3",
+      "current": "9d31e2efbb0b2748aa1cf9df80734a359ad5b971e6c7ebe48552e458244b86a3"
+    },
+    "outputMetadata": {
+      "width": 540,
+      "height": 396,
+      "symbols": 8,
+      "wires": 3,
+      "generic": 1,
+      "wireSymbolCrossings": [],
+      "symbolOverlaps": []
+    },
+    "onlyGoldenDifferenceIsTheFourAttributesBelow": true
+  },
+  "goldenDifference": {
+    "description": "A single three-segment wire detour moved from y=201 to y=193; endpoints and every other byte remain identical.",
+    "attributes": [
+      {
+        "element": "svg/g[2]/line[1]",
+        "attribute": "y2",
+        "golden": 201,
+        "actual": 193
+      },
+      {
+        "element": "svg/g[2]/line[2]",
+        "attribute": "y1",
+        "golden": 201,
+        "actual": 193
+      },
+      {
+        "element": "svg/g[2]/line[2]",
+        "attribute": "y2",
+        "golden": 201,
+        "actual": 193
+      },
+      {
+        "element": "svg/g[2]/line[3]",
+        "attribute": "y1",
+        "golden": 201,
+        "actual": 193
+      }
+    ],
+    "goldenSegments": [
+      [
+        390,
+        163,
+        390,
+        201
+      ],
+      [
+        390,
+        201,
+        240,
+        201
+      ],
+      [
+        240,
+        201,
+        240,
+        219
+      ]
+    ],
+    "actualSegments": [
+      [
+        390,
+        163,
+        390,
+        193
+      ],
+      [
+        390,
+        193,
+        240,
+        193
+      ],
+      [
+        240,
+        193,
+        240,
+        219
+      ]
+    ]
+  },
+  "retainedOutputs": {
+    "old": {
+      "path": ".task-tmp/microtronic-schematic-baseline-old.svg",
+      "absolutePath": "/home/agent/.codex/skills/remote-skills/.worktrees/brickwright-microtronic-full/.task-tmp/microtronic-schematic-baseline-old.svg",
+      "sha256": "9d31e2efbb0b2748aa1cf9df80734a359ad5b971e6c7ebe48552e458244b86a3"
+    },
+    "current": {
+      "path": ".task-tmp/microtronic-schematic-baseline-new.svg",
+      "absolutePath": "/home/agent/.codex/skills/remote-skills/.worktrees/brickwright-microtronic-full/.task-tmp/microtronic-schematic-baseline-new.svg",
+      "sha256": "9d31e2efbb0b2748aa1cf9df80734a359ad5b971e6c7ebe48552e458244b86a3"
+    },
+    "installed": {
+      "path": ".task-tmp/microtronic-schematic-baseline-installed.svg",
+      "absolutePath": "/home/agent/.codex/skills/remote-skills/.worktrees/brickwright-microtronic-full/.task-tmp/microtronic-schematic-baseline-installed.svg",
+      "sha256": "9d31e2efbb0b2748aa1cf9df80734a359ad5b971e6c7ebe48552e458244b86a3"
+    },
+    "golden": {
+      "path": ".task-tmp/microtronic-schematic-baseline-golden-copy.svg",
+      "absolutePath": "/home/agent/.codex/skills/remote-skills/.worktrees/brickwright-microtronic-full/.task-tmp/microtronic-schematic-baseline-golden-copy.svg",
+      "sha256": "a852e416abfaeb34b778d61a3296994894a9538f4af097da8a3fb41163e2ce1f"
+    }
+  }
+}

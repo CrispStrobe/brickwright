@@ -1,0 +1,84 @@
+{
+  "schema": "bw.microtronic-browser-receipt.v1",
+  "qualifiedHostCommit": "830b2b5fe11c440ed17d780a1c388a503fe99a91",
+  "qualifiedHostTree": "5679ffc8b971c48bdee9434d4aa1901e474922bc",
+  "equivalentPublishedHostCommit": "ad492c7ac87d2ca393e0da9ceed4d96a3da16563",
+  "buildManifest": {
+    "schema": 2,
+    "product": "Brickwright",
+    "commit": "830b2b5",
+    "builtAt": "2026-11-25T21:26:08.770Z",
+    "distributionPolicy": {
+      "remoteExtensions": "allow",
+      "executableToolchains": "allow",
+      "machineImages": "allow"
+    }
+  },
+  "buildEnvironment": {
+    "NODE_ENV": "production",
+    "BW_ENABLE_CAD": "1",
+    "BW_ENABLE_FPGA": "1",
+    "BW_SYNTHESIS_ENDPOINT": "https://synth.crispstro.be/api"
+  },
+  "testResult": {
+    "status": "passed",
+    "targetURL": "http://127.0.0.1:8242/",
+    "browser": "158.0.8127.0",
+    "executablePath": "/home/agent/.codex/skills/remote-skills/.worktrees/bw-circuit-ui-microtronic/.work-tmp/chromium",
+    "fullApplicationBuild": true,
+    "scope": "Installed Brickwright Circuit tab; real palette, learner program, switch/LED nets, shared clock and File menu",
+    "checks": [
+      {
+        "name": "Full host palette places the Microtronic with its 24-key front panel"
+      },
+      {
+        "name": "Run applies the visible program draft and executes it on the installed engine"
+      },
+      {
+        "name": "Program file input works and an invalid draft leaves the accepted program intact"
+      },
+      {
+        "name": "Visible switch contacts drive IN1/IN3 through the drawn circuit and light external LED faces"
+      },
+      {
+        "name": "Independent CLOCK reaches IN4 and changes OUT4 through the loaded echo program",
+        "detail": [
+          {
+            "output": 13,
+            "input": 13,
+            "clockHigh": true,
+            "tNs": "702000000"
+          },
+          {
+            "output": 5,
+            "input": 5,
+            "clockHigh": false,
+            "tNs": "1152000000"
+          }
+        ]
+      },
+      {
+        "name": "Opening a physical switch removes its input and extinguishes the corresponding external LED"
+      },
+      {
+        "name": "Halt, Step and Reset operate on the computer while preserving the independent circuit clock"
+      },
+      {
+        "name": "Physical keypad NEXT commits a word into both the running model and the saved circuit source"
+      },
+      {
+        "name": "Unloaded editor text survives live rerenders and Run executes the retained draft"
+      },
+      {
+        "name": "The real File menu saves and reopens the wired circuit with its accepted program, which runs again"
+      }
+    ],
+    "pageErrors": [],
+    "failedRequests": []
+  },
+  "screenshot": {
+    "path": "docs/images/busch-microtronic-circuits.png",
+    "sha256": "9d5ab83cbff164119c2d42214aa0a19b5609e91c37377e9d7cda945e8f5a2dab"
+  },
+  "scopeNote": "This receipt qualifies the recorded production tree. It is not a full repository CI verdict or a public deployment claim."
+}

@@ -5,6 +5,16 @@ palette. Its execution and electrical state belong to `bw-board`; its panel,
 terminals and artwork belong to `bw-circuit-ui`. Brickwright consumes both
 through its normal exact package pins.
 
+The engine and panel changes are merged upstream. The host acceptance PR is
+still blocked by broader repository CI failures and the gallery's pending
+upstream source adoption. See the dated [qualification record](BUSCH-MICROTRONIC-QUALIFICATION.md)
+for the exact tested build, current landing limits and reproduction evidence.
+
+![Microtronic running a wired input/output experiment in Brickwright](images/busch-microtronic-circuits.png)
+
+This screenshot is from the verified production build of the full application,
+with a real switch input driving an external LED through the learner program.
+
 ## First phase
 
 This is a **documented-behavior model of the Microtronic teaching instruction
@@ -126,7 +136,7 @@ simulation time itself.
 Build the app from the repository root, then serve the build directory:
 
 ```sh
-npm run build:gui
+NODE_ENV=production BW_ENABLE_CAD=1 BW_ENABLE_FPGA=1 npm run build:gui
 python3 -m http.server 8242 --bind 127.0.0.1 --directory packages/scratch-gui/build
 ```
 
