@@ -199,7 +199,7 @@ recording buffers are transient session data and stay outside saved projects.
 The runner browser fixture accepts `--cassette-rom /path/to/cp2-monitor.bin` for
 a local WAV import, CAL and F007 recovery check.
 
-The Chromium 149 fixture with React 18 passed the cassette controls with the
+The Chromium 149 fixtures with React 18.3.1 and 16.14.0 passed the cassette controls with the
 independent CP2 image. It exercised arm/discard, file import, physical CAL,
 preservation of completed tape bytes on F007, and ejection on the shared
 runner. Complete tape exchange is covered by the Board pin-level checks.
