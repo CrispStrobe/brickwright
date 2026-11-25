@@ -1,5 +1,17 @@
 name: KIM-1 full app acceptance
 on:
+  push:
+    branches: ['feat/kim1-circuits']
+    paths:
+      - 'vendor-pins.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'packages/scratch-gui/package.json'
+      - 'packages/scratch-gui/package-lock.json'
+      - 'overlay/scratch-gui/examples/kim1-wired-io/**'
+      - 'overlay/scratch-gui/examples/index.json'
+      - 'scripts/verify-kim1-circuits-browser.mjs'
+      - '.github/workflows/kim1-app.yml'
   workflow_dispatch:
 permissions:
   contents: read

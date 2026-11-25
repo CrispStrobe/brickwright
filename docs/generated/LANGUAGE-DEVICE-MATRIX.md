@@ -141,7 +141,7 @@ question from whether the row agrees with the code.
 
 ## Oracles the tiers rest on (bw-board census at the pinned sha)
 
-Joined from `docs/generated/bw-board-census.json` (bw-board `cc18f3c8d`, read 2026-11-25).
+Joined from `docs/generated/bw-board-census.json` (bw-board `e834b270c`, read 2026-11-25).
 **standing** = bw-board's CI runs the oracle on every push (the census reports bw-board's gates only — a cell whose
 standing check lives in lite's own CI, like the labwired heavy tier, says so in its row); **recorded** = measured once
 on the box the census was read on; **absent** = not present there; a **service** row is reachability, never probed.
