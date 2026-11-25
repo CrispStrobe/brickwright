@@ -63,7 +63,9 @@ const UNITS = {
 // not word characters, so `Ω\b` requires the NEXT character to be one and
 // silently drops every "10 kΩ and ..." in the corpus. Found by testing the
 // extractor on a sentence whose answer was known.
-const NUMBER = /(-?\d+(?:[.,]\d+)?)\s*(MΩ|kΩ|mΩ|Ω|µF|µA|µH|µs|mV|kV|mA|uA|kohm|mohm|ohms?|nF|pF|uF|mH|uH|kHz|MHz|Hz|ms|us|V|A|F|H|s)(?![a-zA-Z0-9µ])/g;
+// The leading guard keeps identifier suffixes such as the CP1 opcode P2A
+// and dotted pin names from reading as standalone measurements.
+const NUMBER = /(?<![\p{L}\p{N}_.])(-?\d+(?:[.,]\d+)?)\s*(MΩ|kΩ|mΩ|Ω|µF|µA|µH|µs|mV|kV|mA|uA|kohm|mohm|ohms?|nF|pF|uF|mH|uH|kHz|MHz|Hz|ms|us|V|A|F|H|s)(?![a-zA-Z0-9µ])/gu;
 
 /** Pull every electrical quantity out of a block of prose. */
 export function claimsIn(text) {

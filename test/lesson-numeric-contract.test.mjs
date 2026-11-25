@@ -42,6 +42,11 @@ test('the extractor finds electrical quantities and ignores everything else', ()
     assert.equal(claims.find(c => c.raw === '4.9 mV').quantum, 0.5 * 1e-1 * 1e-3);
 });
 
+test('pin identifiers and teaching opcodes do not imply measurements', () => {
+    assert.deepEqual(claimsIn('Predict P2.0 after P2A 1, write 0x5A, and compare R1.0A with 2A and -0.2 V.')
+        .map(claim => claim.raw), ['2A', '-0.2 V']);
+});
+
 test('the whole catalog matches, and enough was examined for that to mean something', async () => {
     // Sampled before the work so the discriminator can be given the same window the
     // benches ran in, rather than a guess about it.

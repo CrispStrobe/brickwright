@@ -326,13 +326,13 @@
             "en": {
               "action": "Run the loop, compare P2.0 with the resistor-fed LED, then pause while the output is high. Record the stored level and the time between equivalent edges if a suitable trace is available.",
               "explain": "An output latch can hold its state while the CPU is paused. The requested waits contribute to loop time, alongside firmware work.",
-              "hint": "Two 200 ms requests contribute 400 ms, but do not report an exact measured period from that arithmetic. If no edge trace is available, record the visible logic-low/logic-high transitions and state the timing measurement is unavailable.",
+              "hint": "Add the two VZG operands to find the requested wait time. Record the measured period separately from the matching edges. If no edge trace is available, record the visible logic-low and logic-high transitions.",
               "manual": "I observed logic-low/logic-high transitions and retained latch state"
             },
             "de": {
               "action": "Lass die Schleife laufen, vergleiche P2.0 mit der LED samt Vorwiderstand und pausiere bei hohem Ausgang. Notiere den gehaltenen Pegel und, sofern eine passende Spur verfügbar ist, den Abstand gleichartiger Flanken.",
               "explain": "Ein Ausgangsregister kann seinen Zustand bei pausierter CPU halten. Angeforderte Wartezeiten tragen neben der Firmwarearbeit zur Schleifendauer bei.",
-              "hint": "Zwei Anforderungen von 200 ms tragen 400 ms bei. Gib diese Rechnung nicht als exakt gemessene Periode aus. Ohne passende Flankenspur notierst du die sichtbaren Übergänge zwischen logisch niedrigem und hohem Pegel und kennzeichnest die Zeitmessung als nicht verfügbar.",
+              "hint": "Addiere die beiden VZG-Operanden für die angeforderte Wartezeit. Ermittle die gemessene Periode getrennt anhand gleichartiger Flanken. Ohne Flankenspur notierst du die sichtbaren Übergänge zwischen logisch niedrigem und hohem Pegel.",
               "manual": "Ich habe Übergänge zwischen logisch niedrigem und hohem Pegel sowie den gehaltenen Registerwert beobachtet"
             }
           }
@@ -676,13 +676,13 @@
             "en": {
           "action": "Under Switches in the instruments panel, open only S1, S3, S6 and S8; keep S2, S4, S5 and S7 closed. After the next sample, compare P1 Input and P2 Latch under Ports, cell 32 under Memory, the display and lit LEDs 1, 3, 6 and 8. Close those four switches, then open only S2, S4, S5 and S7 for byte 90. Pause CPU, change one switch, and compare the immediate input change with the held output; use Run CPU to allow the next sample.",
               "explain": "The switch can change the electrical input while the CPU is paused. The output stays at its previous sample until the firmware runs again. This separates the external circuit, program memory and execution time.",
-          "hint": "S1 is bit 0 (weight 1); S8 is bit 7 (weight 128). Open produces a high bit and Closed produces a low bit. Ports uses hexadecimal: A5 means decimal 165, and 5A means 90. Memory cell 32 shows opcode 000 and operand 165 or 090; the display shows A00.165 or A00.090. Wait for the sampling loop and record the observed states yourself; this checkpoint does not infer an LED result from source text.",
+          "hint": "S1 is bit 0 (weight 1); S8 is bit 7 (weight 128). Open produces a high bit and Closed produces a low bit. Ports uses hexadecimal: 0xA5 means decimal 165, and 0x5A means 90. Memory cell 32 shows opcode 000 and operand 165 or 090; the display shows A00.165 or A00.090. Wait for the sampling loop and record the observed states yourself; this checkpoint does not infer an LED result from source text.",
               "manual": "I matched both binary patterns and verified that output waits for resumed execution"
             },
             "de": {
           "action": "Öffne unter „Schalter“ im Instrumentenpanel nur S1, S3, S6 und S8; lasse S2, S4, S5 und S7 geschlossen. Vergleiche nach der nächsten Abtastung unter „Ports“ den „Eingang“ von P1 und das „Register“ von P2, unter „Speicher“ Zelle 32, die Anzeige und die leuchtenden LEDs 1, 3, 6 und 8. Schließe diese vier Schalter und öffne dann nur S2, S4, S5 und S7 für Byte 90. Wähle „CPU pausieren“, ändere einen Schalter und vergleiche die sofortige Eingangsänderung mit dem gehaltenen Ausgang. Wähle für die nächste Abtastung „CPU ausführen“.",
               "explain": "Der Schalter kann den elektrischen Eingang auch bei pausierter CPU ändern. Der Ausgang behält seinen vorherigen Messwert, bis die Firmware wieder läuft. So werden externe Schaltung, Programmspeicher und Ausführungszeit unterscheidbar.",
-          "hint": "S1 ist Bit 0 (Wert 1); S8 ist Bit 7 (Wert 128). „Offen“ erzeugt ein High-Bit und „Geschlossen“ ein Low-Bit. „Ports“ verwendet Hexadezimalzahlen: A5 bedeutet dezimal 165, 5A bedeutet 90. Speicherzelle 32 zeigt Befehl 000 und Operand 165 oder 090; die Anzeige zeigt A00.165 oder A00.090. Warte auf die Abtastschleife und protokolliere die Zustände selbst; diese Prüfung leitet kein LED-Ergebnis aus dem Quelltext ab.",
+          "hint": "S1 ist Bit 0 (Wert 1); S8 ist Bit 7 (Wert 128). „Offen“ erzeugt ein High-Bit und „Geschlossen“ ein Low-Bit. „Ports“ verwendet Hexadezimalzahlen: 0xA5 bedeutet dezimal 165, 0x5A bedeutet 90. Speicherzelle 32 zeigt Befehl 000 und Operand 165 oder 090; die Anzeige zeigt A00.165 oder A00.090. Warte auf die Abtastschleife und protokolliere die Zustände selbst; diese Prüfung leitet kein LED-Ergebnis aus dem Quelltext ab.",
               "manual": "Ich habe beide Binärmuster verglichen und geprüft, dass der Ausgang auf die fortgesetzte Ausführung wartet"
             }
           }
