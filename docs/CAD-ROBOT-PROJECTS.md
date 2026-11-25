@@ -575,3 +575,28 @@ editor speedup, and the sustained 1× viewport target remains open.
 Scout passed the full editor restart proof at 1.003× with the override.
 Atlas also passed the functional proof with the packaged Jolt module
 at 0.325× in a single run. That sample has no paired baseline.
+
+### Live circuit option allocation
+
+[Board source](https://github.com/CrispStrobe/bw-board/commit/2a15e76fca1efcd253d5aa7c44c450011e47a012)
+now builds the live solver options once and adds warm-start fields only
+when applicable. This removes the compatibility build's object-spread
+copies from the main solve path. All 50 focused tests passed on the
+backport and again on Board master, including power-off resistance,
+transient reset, current conservation, and incomplete-advance handling.
+
+Both paired orders in Mac Chrome used the same CAD SDK and Jolt 5.7.0
+SIMD module. Both Board bundles applied browser compatibility
+transforms. Across 600 ticks for each robot, sampled motion and
+electrical readings matched exactly. Atlas host time per 5 ms step
+fell from 1.73/1.85 ms to 1.55/1.52 ms and simulation-only throughput
+rose from 1.082×/1.063× to 1.141×/1.192×. Scout's host time fell from
+1.03/0.99 ms to 0.88/0.88 ms. These runs omit the full viewport.
+
+The local Chrome editor build used the post-CP1 Lite merge, Board pin
+`ddd77e4e` plus only this source change, and CAD SDK `7760321`. Atlas
+passed one-click Run, joint motion, Stop, and Reset at 0.660× with the
+Jolt 5.7.0 override. Scout passed its restart proof at 1.002× with the
+same override. The full editor has no paired baseline on this Lite
+revision. Atlas's full-editor 1× target remains open.
+Atlas also passed the functional proof with bundled Jolt at 0.296×.
