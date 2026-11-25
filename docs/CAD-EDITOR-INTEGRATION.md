@@ -139,3 +139,30 @@ be signed with our distribution identity before upload. Compute the packaged
 runtime pin after this signing step and rebuild with that pin. The receipt's
 runtime-pin check covers the package before Apple's TestFlight re-signing;
 launching the installed TestFlight simulator was not tested in this delivery.
+
+## Exact kernel and document version 41 (25 November 2026)
+
+Lite pins CrispCAD SDK `0f01df55da6366225eeae25b58418e863f6ae3e4`. It reads and
+writes CAD document version 41, which adds exact fillet, chamfer and shell
+features (`exact-feature` nodes). Such a node stores the exact kernel's display
+mesh, so evaluation, simulation and printing of a saved design still use Manifold
+alone. Projects without exact features keep their document version. An editor on
+the previous SDK refused version 41 sidecars; `brickwright/cad.json` was always
+carried byte for byte.
+
+The SDK now ships CrispCAD's optional exact B-rep kernel (`@crispcad/exact-kernel`,
+MIT AND Apache-2.0; notices in the SDK's `NOTICE.txt` and in
+THIRD-PARTY-NOTICES.md) under `static/cad-sdk/assets/exact/`, about 27 MB on
+disk because the SDK's library build inlines its WebAssembly into the worker
+chunks. Nothing there loads with the CAD tab: the geometry worker imports it
+only when a user creates or recomputes an exact feature, measures exactly or
+exports STEP. The service worker has no precache list; it caches those files
+only after such a request, like every other lazy chunk.
+
+Known gap: the CAD tab passes its own host session (`sdk.createCadSession(doc)`),
+and a host session must declare the exact kernel for the editor to create or
+recompute exact features. The SDK entry does not yet export CrispCAD's
+`exactKernelIdentity`, so in Lite the Fillet, chamfer, shell dialog currently
+reports "This session does not provide the smlib kernel". Opening, editing
+around, saving and simulating version 41 designs is unaffected. Lite should
+declare the identity once the SDK exports it, rather than copy the pin by hand.

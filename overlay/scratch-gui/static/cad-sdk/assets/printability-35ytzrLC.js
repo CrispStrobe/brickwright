@@ -1,7 +1,7 @@
 var mt = Object.defineProperty;
 var Mt = (f, t, o) => t in f ? mt(f, t, { enumerable: !0, configurable: !0, writable: !0, value: o }) : f[t] = o;
 var _ = (f, t, o) => Mt(f, typeof t != "symbol" ? t + "" : t, o);
-import { t as ht } from "./geometry.worker-CtjAoIMH.js";
+import { t as ht } from "./geometry.worker-vmZ1spj-.js";
 const j = (f, t) => f[0] * t[0] + f[1] * t[1] + f[2] * t[2], $ = (f, t) => [f[0] - t[0], f[1] - t[1], f[2] - t[2]], G = (f, t) => j($(f, t), $(f, t));
 function W(f, t, o, r) {
   const e = $(o, t), n = $(r, t), s = $(f, t), i = e[1] * n[2] - e[2] * n[1], c = e[2] * n[0] - e[0] * n[2], l = e[0] * n[1] - e[1] * n[0], a = i * i + c * c + l * l;
