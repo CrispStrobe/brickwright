@@ -381,3 +381,27 @@ was 9.68 s and 7.21 s, respectively. This is one candidate run per
 project, with the full viewport and no paired GUI baseline. The expanded
 collision fixture passed on native macOS as well as WASM. The 1× GUI
 target remains open.
+
+### Upstream Jolt 5.7.0 integration
+
+The native fork's `brickwright/main` integrates upstream v5.7.0, uses
+upstream's gear torque correction, and retains Brickwright's gear and
+rack meshes, rotor and rope work, internal-edge pairs, and compound
+sweep optimizations. The fork's `master` mirrors upstream.
+[Native integration](https://github.com/CrispStrobe/JoltPhysics/commit/783255b0c2fcb54e877a21d3abf5680009b26a57)
+[JoltPhysics.js build pin](https://github.com/CrispStrobe/JoltPhysics.js/commit/74d8fee)
+
+All 653 macOS C++ cases and 25 targeted Robot Lab tests passed. The
+single-thread SIMD WASM module passed the wrapper's smoke checks. In
+Chrome, the candidate drove the Robot Lab starter, line follower,
+governor, and TwistSpan with replay. The tests loaded the candidate
+module and never requested the scalar fallback.
+
+Both CAD projects passed their full Chrome proofs with CAD SDK
+`7760321` and the new SIMD module. Each loaded with visible wiring,
+ran from one click with untouched widgets, and passed Stop and Reset.
+Scout sustained 0.999× and Atlas 0.792× in the local GUI build, with no
+paired throughput baseline. The 1× GUI target remains open. The
+SIMD module SHA-256 is
+`5f25671f51625ad3eb9ff8afc22ac40c63be95bb9380c747babec5fbacdf7fdf`.
+The released engine is JoltPhysics.js `1.1.0-bw.10`.
