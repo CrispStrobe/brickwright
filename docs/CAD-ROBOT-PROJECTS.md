@@ -1061,3 +1061,29 @@ order. All 160 focused Board tests passed.
 Scout passed Run, motion, Stop, Reset, and repeat Run. Its local sample
 sustained 0.722×. The candidate runs used local Board chunks. Production
 still pins Board `9ff1fff`, and the sustained 1× target remains open.
+
+### Skip redundant development-board supply stamps
+
+Atlas and Scout wire the Uno's automatic 5 V supply fallback to an
+explicit ideal rail. The solver now skips that fallback during the drive's
+normal net lookup. This avoids copying the drive table for drive-only boards.
+Registered stamp callbacks still receive the filtered state.
+[Board source](https://github.com/CrispStrobe/bw-board/commit/2ab1589777ae71d3aae68d23bf4ebfb8247121b7)
+
+The sampled voltages, shaft readings, motion and restart frames matched
+exactly across 600 coupled ticks per run in both Chrome worker orders.
+The solve counts stayed at 18,930 for Atlas and 12,618 for Scout.
+
+| Project | First order, before → after | Reverse order, before → after |
+| --- | ---: | ---: |
+| Atlas electrical solve time | 547 → 430 ms | 539 → 497 ms |
+| Scout electrical solve time | 259 → 242 ms | 251 → 239 ms |
+
+All 118 focused Board tests passed. Atlas passed one-click Run, motion,
+Stop and Reset in four full-editor Chrome runs. Sustained three-second
+rates were 0.807× → 0.807× and 0.789× → 0.806×, with local Board chunks
+and Jolt 5.7 SIMD. The timings show no consistent full-editor gain.
+
+Scout sustained 1.007× in the local candidate and passed Run, motion, Stop,
+Reset and repeat Run. Production still pins Board `9ff1fff3`. The
+sustained 1× production target remains open.
