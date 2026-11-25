@@ -12,11 +12,16 @@ import {CP1_PHYSICAL_KEYS, createCp1KeyInput, cp1KeyForKeyboard, cp1KeyboardOwne
     cp1DisplayDigits, cp1SegmentDescription, readCp1PanelSnapshot} from '../../lib/cp1-panel-input.js';
 import downloadBlob from '../../lib/download-blob.js';
 
+const INDEPENDENT_ROM_NAME = 'cp1-independent-monitor.bin';
+const INDEPENDENT_ROM_SHA256 = 'ce3e7a33af990e3e5bd69780c6ab046502e1be57ead43655a95eb3f42d789a0f';
+
 const COPY = {
     en: {
         title: 'Kosmos CP1', base: '128 cells', expanded: '256 cells · CP3',
-        importRom: 'Import monitor ROM', noRom: 'Import your own 2048-byte CP1 monitor ROM to start the machine.',
-        romLocal: 'The project keeps a ROM reference. Import the ROM again when reopening on another device.',
+        importRom: 'Import monitor ROM', useIndependentRom: 'Use Brickwright monitor',
+        noRom: 'Choose the Brickwright monitor or import a compatible 2048-byte monitor ROM.',
+        independentRomError: 'The bundled Brickwright monitor is missing or damaged.',
+        romLocal: 'The project keeps a ROM reference. Select the same monitor again when reopening.',
         run: 'Run CPU', pause: 'Pause CPU', step: 'CPU step', reset: 'Reset CPU',
         running: 'CPU running', paused: 'CPU paused',
         stepHint: 'CPU step advances one 8049 instruction. The keypad STEP and RUN keys operate the teaching program through the monitor ROM.',
@@ -57,8 +62,10 @@ const COPY = {
     },
     de: {
         title: 'Kosmos CP1', base: '128 Zellen', expanded: '256 Zellen · CP3',
-        importRom: 'Monitor-ROM importieren', noRom: 'Importiere ein eigenes CP1-Monitor-ROM mit 2048 Bytes, um die Maschine zu starten.',
-        romLocal: 'Das Projekt speichert eine ROM-Referenz. Importiere das ROM auf einem anderen Gerät erneut.',
+        importRom: 'Monitor-ROM importieren', useIndependentRom: 'Brickwright-Monitor verwenden',
+        noRom: 'Wähle den Brickwright-Monitor oder importiere ein kompatibles Monitor-ROM mit 2048 Bytes.',
+        independentRomError: 'Der mitgelieferte Brickwright-Monitor fehlt oder ist beschädigt.',
+        romLocal: 'Das Projekt speichert eine ROM-Referenz. Wähle beim erneuten Öffnen denselben Monitor.',
         run: 'CPU ausführen', pause: 'CPU pausieren', step: 'CPU-Schritt', reset: 'CPU zurücksetzen',
         running: 'CPU läuft', paused: 'CPU pausiert',
         stepHint: 'CPU-Schritt führt einen 8049-Befehl aus. STEP und RUN auf der Tastatur bedienen das Lernprogramm über das Monitor-ROM.',
@@ -262,19 +269,36 @@ class Cp1Panel extends React.Component {
         });
     }
 
+    async _installRom (bytes, name, expectedSha256) {
+        const reference = await cp1RomReference(bytes, name);
+        if (expectedSha256 && reference.sha256 !== expectedSha256) {
+            throw new Error(this._t('independentRomError'));
+        }
+        if (!this._mounted) return;
+        this._releaseAll();
+        if (this.props.onImportRom) await this.props.onImportRom({bytes, name, reference});
+        else window.dispatchEvent(new CustomEvent('bw-machine-media-load', {
+            detail: {kind: 'cp1', slotId: 'rom', bytes, name}
+        }));
+        if (this._mounted) this.setState({importedRom: reference, notice: this._t('romImported', {name})});
+    }
+
     async _importRom (file) {
         if (!file) return;
         await this._action(async () => {
             if (file.size !== 2048) throw new RangeError(this._t('invalidRom'));
             const bytes = new Uint8Array(await readFile(file, 'bytes'));
-            const reference = await cp1RomReference(bytes, file.name);
-            if (!this._mounted) return;
-            this._releaseAll();
-            if (this.props.onImportRom) await this.props.onImportRom({bytes, name: file.name, reference});
-            else window.dispatchEvent(new CustomEvent('bw-machine-media-load', {
-                detail: {kind: 'cp1', slotId: 'rom', bytes, name: file.name}
-            }));
-            if (this._mounted) this.setState({importedRom: reference, notice: this._t('romImported', {name: file.name})});
+            await this._installRom(bytes, file.name);
+        });
+    }
+
+    async _loadIndependentRom () {
+        await this._action(async () => {
+            const response = await fetch(`static/roms/${INDEPENDENT_ROM_NAME}`);
+            if (!response.ok) throw new Error(this._t('independentRomError'));
+            const bytes = new Uint8Array(await response.arrayBuffer());
+            if (bytes.byteLength !== 2048) throw new Error(this._t('independentRomError'));
+            await this._installRom(bytes, INDEPENDENT_ROM_NAME, INDEPENDENT_ROM_SHA256);
         });
     }
 
@@ -510,13 +534,18 @@ class Cp1Panel extends React.Component {
                 <header className={styles.header}><h2>{this._t('title')}</h2>
                     <span className={styles.badge}>{this._t(this.props.expansion ? 'expanded' : 'base')}</span>
                 </header>
-                {!ready && <button type="button" disabled={this.state.busy}
-                    onClick={() => this._romInput.current.click()}>{this._t('importRom')}</button>}
+                {!ready && <div className={styles.actions}>
+                    <button type="button" disabled={this.state.busy}
+                        onClick={() => this._loadIndependentRom()}>{this._t('useIndependentRom')}</button>
+                    <button type="button" disabled={this.state.busy}
+                        onClick={() => this._romInput.current.click()}>{this._t('importRom')}</button>
+                </div>}
                 {ready && <button type="button" disabled={this.state.busy || !(this.props.running ? this.props.onPause : this.props.onRun)}
                     onClick={() => { this._releaseAll(); return this.props.running ? this.props.onPause() : this.props.onRun(); }}>
                     {this._t(this.props.running ? 'pause' : 'run')}</button>}
                 {this._renderDisplay(snapshot && snapshot.display)}
                 {this._renderKeypad(ready)}
+                {this._renderSourceStatus()}
             </section>, slots.controller)}
         </React.Fragment>;
     }
@@ -535,6 +564,8 @@ class Cp1Panel extends React.Component {
                 <span className={styles.status}>{ready ? this._t(this.props.running ? 'running' : 'paused') : this._t('unavailable')}</span>
             </header>
             <div className={styles.actions}>
+                {!ready && <button type="button" disabled={this.state.busy}
+                    onClick={() => this._loadIndependentRom()}>{this._t('useIndependentRom')}</button>}
                 <button type="button" onClick={() => this._romInput.current.click()} disabled={this.state.busy}>{this._t('importRom')}</button>
                 <button type="button" disabled={!ready || this.state.busy || !(this.props.running ? this.props.onPause : this.props.onRun)}
                     onClick={() => { this._releaseAll(); return this.props.running ? this.props.onPause() : this.props.onRun(); }}>

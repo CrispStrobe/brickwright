@@ -46,7 +46,7 @@ test('CP1 checks use explicit observations with one exact completed-command cont
     }}]);
     const text = JSON.stringify(wave);
     assert.match(text, /2048/);
-    assert.match(text, /no ROM is bundled/);
+    assert.match(text, /bundled ROM is the independent Brickwright monitor/);
     assert.match(text, /one 8049|many 8049|8049 instruction/i);
     assert.match(text, /requested waits|requested delay/i);
     assert.match(text, /requested wait time.*measured period separately from the matching edges/i);

@@ -1,9 +1,15 @@
 # Kosmos CP1 editor and front-panel contract
 
-The CP1 panel displays one machine owned by the debugger. It does not create a
-second CPU, execute teaching-language opcodes, synthesize a display from the
-source, or fetch a monitor ROM. Source assembly comes from the independently
+The CP1 panel displays the machine owned by the debugger, including its hardware
+display and teaching state. Source assembly comes from the independently
 authored `sb3-creator/src/utils/cp1Program.js`, synced to `lib/cp1-program.js`.
+**Use Brickwright monitor** reads the bundled independent image on request and
+verifies its digest before installing it in the paused session. Local 2048-byte
+monitor import is also available. Projects save the digest reference and source. The shipped image has SHA-1
+`5bc9835367f89df4be8d1258760b779d1ef4b41f`. Rebuild it with
+`python3 firmware/cp1/build.py --output build/cp2` from the `bw-board` revision
+in `vendor-pins.json`. The CP1 qualification workflow compares the result
+byte for byte with the distribution asset.
 
 ## Component boundary
 
@@ -22,7 +28,7 @@ authored `sb3-creator/src/utils/cp1Program.js`, synced to `lib/cp1-program.js`.
 | `onLoad(assembly, {source, clear: true})` | Atomically load a successful assembly. `assembly.words` contains `{address, opcode, operand, line, column}` entries. |
 | `onWriteCell?(address, {opcode, operand})` | Optional paused RAM editing. Both cell bytes may be 0–255. |
 | `onPortInput?(name, value)` | External input byte for P1, or P3 when expanded. |
-| `onImportRom?({bytes, name, reference})` | Explicit local file import, 2048 bytes. If absent, the panel dispatches the existing media-load event. |
+| `onImportRom?({bytes, name, reference})` | Explicit installation of the bundled or locally imported 2048-byte monitor. If absent, the panel dispatches the existing media-load event. |
 | `onSaveProject?(project)` | Optional host export. If absent, uses the existing app download helper. |
 | `locale`, `colorMode` | English/German interface copy and light/dark styling. |
 
@@ -121,7 +127,7 @@ checkpoints use manual completion for conceptual reasoning and observations;
 opening a panel, loading cells or clicking an input is not claimed to prove a
 correct display or output waveform. Timing copy separates requested delay from
 measured period and permits an explicit unavailable measurement when no suitable
-trace exists. ROM-dependent behavior requires a user-provided compatible image.
+trace exists. Use the bundled Brickwright monitor or select a compatible local image.
 
 The command-debugging lesson has one automatic checkpoint. `bw-cp1-command`
 must report an actually completed cell-0 `AKO 42` with accumulator `00.042`.
