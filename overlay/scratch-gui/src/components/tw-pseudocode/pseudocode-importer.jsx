@@ -2871,10 +2871,16 @@ class PseudocodeImporter extends React.Component {
     }
     detachCp1 = () => this.setState({cp1Active: false});
     selectCp1 = () => this.setState({cp1Active: true});
-    leaveCp1 = () => this.setState({cp1Active: false});
+    leaveCp1 () {
+        if (window.__bwMachineExtracted?.kind === 'cp1') {
+            window.dispatchEvent(new CustomEvent('bw-cp1-code-selection', {detail: {active: false}}));
+        }
+        if (this.state.cp1Active) this.detachCp1();
+    }
 
     async openCp1Language () {
         this.setState({langMenuOpen: false});
+        window.dispatchEvent(new CustomEvent('bw-cp1-code-selection', {detail: {active: true}}));
         if (window.__bwMachineExtracted?.kind === 'cp1') {
             this.selectCp1();
             return;
@@ -2894,7 +2900,7 @@ class PseudocodeImporter extends React.Component {
 
     switchTab (to) {
         if (this.state.busy) return;
-        if (this.state.cp1Active) this.leaveCp1();
+        this.leaveCp1();
         const from = this.state.lang;
         if (to === from) return;
         // ASM tab: author mode just switches. Listing mode must RE-DERIVE: the
@@ -3868,6 +3874,7 @@ class PseudocodeImporter extends React.Component {
             return;
         }
         if (!deviceId) {
+            this.leaveCp1();
             // "no chips" — pure Scratch stage mode. Drop the DEVICE line and the
             // runtime device hints; "Load example…" goes back to the stage games.
             this.setState(s => ({

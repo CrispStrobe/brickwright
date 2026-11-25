@@ -126,7 +126,6 @@
 .codeEditor {padding: 4px 0; max-width: none; border: 0; border-radius: 0; background: transparent;}
 .compactActions {margin-bottom: 5px;}
 .sharedEditor {display: flex; min-height: 180px; height: min(50vh, 440px); min-width: 0;}
-.programHelp {display: inline-block; color: var(--cp1-muted); padding: 0 3px;}
 
 @container (max-width: 235px) {
     .keypad {gap: 2px; padding: 3px;}

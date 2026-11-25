@@ -35,12 +35,28 @@ try{
  assert.equal(await page.locator('[data-cp1-physical-key]').count(),30);
  assert.equal(await page.locator('[data-cp1-digit]').count(),6);
  const panel=page.locator('[data-cp1-panel]');
- assert.equal(await panel.getByText('Raw masks',{exact:false}).count(),0);
- assert.match(await panel.locator('[title^="Raw masks"]').getAttribute('title'),/79 79 F9/);
- assert.equal(await panel.getByText('Command debugging needs a qualified monitor ROM',{exact:false}).count(),0);
- assert.equal(await panel.locator('header [data-cp1-semantic="unavailable"]').count(),1);
+ const debugHelp=panel.getByRole('button',{name:'CP1 debugger help',exact:true});
+ assert.equal(await debugHelp.getAttribute('data-cp1-semantic'),'unavailable');
+ assert.equal(await panel.locator('[title^="Raw masks"]').count(),0);
+ await debugHelp.click();
+ const dialog=page.getByRole('dialog',{name:'CP1 debugger help',exact:true});
+ await dialog.getByText('Command debugging needs a qualified monitor ROM',{exact:false}).waitFor();
+ await dialog.getByText('Diagnostics',{exact:true}).click();
+ await dialog.getByText(/Raw masks: 79 79 F9/).waitFor();
+ await dialog.getByRole('button',{name:'Close',exact:true}).click();
+ assert.equal(await dialog.isVisible(),false);
+ const symmetry=await panel.locator('[data-cp1-digit="0"] > g').evaluate(group=>{
+  const shapes=[...group.querySelectorAll('polygon')].map(node=>node.getBBox());
+  const [top,rightTop,rightBottom,bottom,leftBottom,leftTop,middle]=shapes;
+  return group.getAttribute('transform')==='translate(11.5 0) skewX(-7)' &&
+   top.x===middle.x && middle.x===bottom.x && top.width===middle.width && middle.width===bottom.width &&
+   leftTop.x===leftBottom.x && rightTop.x===rightBottom.x &&
+   leftTop.y===rightTop.y && leftBottom.y===rightBottom.y &&
+   rightTop.height===rightBottom.height && leftTop.height===leftBottom.height;
+ });
+ assert.ok(symmetry,'the segment pairs share axes and one slant');
  const monitorRows=()=>panel.locator('header').evaluate(header=>{
-  const centers=[...header.children].map(control=>{
+  const centers=[...header.children].filter(control=>control.getClientRects().length).map(control=>{
    const r=control.getBoundingClientRect();
    return (r.top+r.bottom)/2;
   });
@@ -115,7 +131,7 @@ try{
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true);
  await page.screenshot({path:path.join(output,'mobile-de-dark.png'),fullPage:true});
  assert.deepEqual(errors,[]);
- const result={status:'passed',browser:browser.version(),react:fixture.react,scope:'Actual component browser behavior with original synthetic 8049 firmware and real CP1 machine',checks:['raw displays and hover diagnostics','single-row monitor controls','thirty keys','incomplete-source reload','RAM load','load refusal','pointer/keyboard ownership','blur release','manual/circuit inputs','RAM editing','async CP3 source preservation','German narrow layout'],propTypes:'validator-only stub',fullApplicationBuild:false};
+ const result={status:'passed',browser:browser.version(),react:fixture.react,scope:'Actual component browser behavior with original synthetic 8049 firmware and real CP1 machine',checks:['aligned segments and clickable debugger diagnostics','single-row monitor controls','thirty keys','incomplete-source reload','RAM load','load refusal','pointer/keyboard ownership','blur release','manual/circuit inputs','RAM editing','async CP3 source preservation','German narrow layout'],propTypes:'validator-only stub',fullApplicationBuild:false};
  await writeFile(path.join(output,'result.json'),`${JSON.stringify(result,null,2)}\n`);
  console.log(JSON.stringify(result));
 }catch(error){
