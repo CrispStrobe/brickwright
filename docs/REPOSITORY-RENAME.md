@@ -4,8 +4,8 @@ The GitHub repositories were renamed on 25 November 2026. Their repository IDs a
 
 | Project | Current GitHub repository | Default branch | Web editor |
 | --- | --- | --- | --- |
-| Brickwright | [CrispStrobe/brickwright](https://github.com/CrispStrobe/brickwright) · ID `1291854269` | `main` | [Brickwright on Vercel](https://brickwright-lite.vercel.app/) |
-| Brickwright Legacy | [CrispStrobe/brickwright-legacy](https://github.com/CrispStrobe/brickwright-legacy) · ID `881088189` | `develop` | [Brickwright Legacy on Vercel](https://brickwright.vercel.app/editor.html) |
+| Brickwright | [CrispStrobe/brickwright](https://github.com/CrispStrobe/brickwright) · ID `1291854269` | `main` | [Brickwright on Vercel](https://brickwright.vercel.app/) |
+| Brickwright Legacy | [CrispStrobe/brickwright-legacy](https://github.com/CrispStrobe/brickwright-legacy) · ID `881088189` | `develop` | [Brickwright Legacy on Vercel](https://brickwright-legacy.vercel.app/editor.html) |
 
 The old `CrispStrobe/brickwright-lite` GitHub name redirects to Brickwright. The earlier `CrispStrobe/brickwright` name now identifies the active repository. For Legacy issues, source files, and branches, use `CrispStrobe/brickwright-legacy`. [GitHub repository rename behavior](https://docs.github.com/en/repositories/creating-and-managing-repositories/renaming-a-repository)
 

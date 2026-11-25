@@ -15,9 +15,9 @@ lessons the whole way.
   board, an STC flash program, a SPIKE robot — in software before touching the
   real hardware.
 
-The earlier TurboWarp-based editor lives in [Brickwright Legacy](https://github.com/CrispStrobe/brickwright-legacy) and remains available at its [web editor](https://brickwright.vercel.app/editor.html). See the [repository migration notes](docs/REPOSITORY-RENAME.md) for compatibility links.
+The earlier TurboWarp-based editor lives in [Brickwright Legacy](https://github.com/CrispStrobe/brickwright-legacy) and remains available at its [web editor](https://brickwright-legacy.vercel.app/editor.html). See the [repository migration notes](docs/REPOSITORY-RENAME.md) for compatibility links.
 
-**Try it now (web)** · <https://brickwright-lite.vercel.app>
+**Try it now (web)** · <https://brickwright.vercel.app>
 **Native apps:** Tauri wrappers target macOS, Windows, Linux, iOS and Android.
 See [local macOS testing](docs/LOCAL-MACOS-ROBOT-CAD.md) for the robot/CAD build;
 repository merges do not imply a new App Store or TestFlight delivery.

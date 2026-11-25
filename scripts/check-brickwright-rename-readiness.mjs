@@ -32,9 +32,9 @@ check('Account Pages fallback', `${pages}/brickwright-migration-check/status.jso
     value => value.activeRepositoryId === BRICKWRIGHT_REPOSITORY_ID && value.legacyRepositoryId === legacyRepositoryId, true);
 check('Primary Pages identity marker', `${primaryBase}/brickwright-pages.json`,
     value => value.repositoryId === BRICKWRIGHT_REPOSITORY_ID && value.repository === primarySlug, true);
-check('Primary Vercel editor version', 'https://brickwright-lite.vercel.app/brickwright-version.json',
+check('Primary Vercel editor version', 'https://brickwright.vercel.app/brickwright-version.json',
     value => /^[0-9a-f]{40}$/.test(value.commit), true);
-check('Legacy Vercel editor', 'https://brickwright.vercel.app/editor.html', value => value.includes('js/pentapod/'));
+check('Legacy Vercel editor', 'https://brickwright-legacy.vercel.app/editor.html', value => value.includes('js/pentapod/'));
 for (const page of ['editor.html', 'player.html', 'embed.html', 'fullscreen.html']) {
     check(`Legacy bookmark bridge ${page}`, `${primaryBase}/${page}`, value => value.includes(`/brickwright-legacy/${page}`));
 }
@@ -43,7 +43,7 @@ if (after) {
     check('Previous primary Pages entry', `${pages}/brickwright-lite/`, value => value.includes('/brickwright-migration-check/active.js'));
 } else {
     check('Future Legacy Pages fallback', `${pages}/brickwright-legacy/editor.html`,
-        value => value.includes('https://brickwright.vercel.app/editor.html'));
+        value => value.includes('https://brickwright-legacy.vercel.app/editor.html'));
 }
 
 const results = await Promise.all(checks);
