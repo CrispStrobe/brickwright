@@ -2,7 +2,8 @@
 // Complete GUI selection -> shared loader -> real VM, Widgets, Circuit and Jolt.
 import {chromium,firefox,webkit} from 'playwright';
 import assert from 'node:assert/strict';
-import {mkdir,writeFile} from 'node:fs/promises';
+import {mkdir,readFile,writeFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
 import {CAD_ROBOT_EXAMPLES} from '../overlay/scratch-gui/src/lib/bw-cad-robot-catalog.js';
 
 function checkQuasarCycle(frame,samples){
@@ -42,13 +43,31 @@ async function assertSelectAndDrag(page,probe){
  await page.waitForFunction(({id,point})=>window.__bwCad.editor.session.state.document.nodes[id].transform.position.some((v,i)=>Math.abs(v-point[i])>1),probe,{timeout:10000});
  console.log('PASS Stop restores canvas selection and drag without a simulation reset');
 }
+const proofURL=process.env.PROOF_URL||'http://127.0.0.1:8141/';
+const overridePath=process.env.PROOF_JOLT_SIMD_MODULE;
+const joltOverride=overridePath?await readFile(overridePath):null;
+assert.ok(!joltOverride||process.env.PROOF_FORCE_SCALAR!=='1','The SIMD override requires the SIMD engine');
+const joltOverrideSHA256=joltOverride?createHash('sha256').update(joltOverride).digest('hex'):null;
+const simdModule=/\/jolt-physics\.simd\.wasm-compat[^/]*\.js$/;
 const browserType={chromium,firefox,webkit}[process.env.PROOF_BROWSER||'chromium'];
 if(!browserType)throw new Error('Unsupported proof browser');
 const browser=await browserType.launch({headless:true,executablePath:process.env.BW_BROWSER_EXECUTABLE,
  ...(browserType===chromium&&process.env.PROOF_SOFTWARE_GPU==='1'?{args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']}:{}),
  ...(browserType===firefox?{firefoxUserPrefs:{'webgl.force-enabled':true}}:{})});
 const page=await browser.newPage({viewport:process.argv.includes('--ipad')?{width:1024,height:768}:{width:1440,height:1000},hasTouch:process.argv.includes('--ipad'),serviceWorkers:'block'}),errors=[],results=[];let cancelNext=false;
-if(process.env.PROOF_FORCE_SCALAR==='1')await page.route(/\/jolt-physics\.simd\.wasm-compat[^/]*\.js$/,route=>route.abort());
+if(process.env.PROOF_FORCE_SCALAR==='1')await page.route(simdModule,route=>route.abort());
+let joltOverrideUses=0,scalarUses=0;
+if(joltOverride){
+ const origin=new URL(proofURL).origin;
+ await page.context().route(url=>url.origin===origin&&simdModule.test(url.pathname),async route=>{
+  await route.fulfill({contentType:'text/javascript',body:joltOverride});
+  joltOverrideUses++;
+ });
+ page.context().on('request',request=>{
+  const url=new URL(request.url());
+  if(url.origin===origin&&/\/jolt-physics\.wasm-compat[^/]*\.js$/.test(url.pathname))scalarUses++;
+ });
+}
 
 if(process.env.PROOF_DIAGNOSTICS==='1'){
  page.on('console',message=>{if(['error','warning'].includes(message.type()))console.log('Browser',message.text().slice(0,400));});
@@ -151,12 +170,13 @@ if(process.env.PROOF_PHASES==='1')await page.addInitScript(legacyShafts=>{
 },process.env.PROOF_LEGACY_SHAFTS==='1');
 const wait=fn=>page.waitForFunction(fn,null,{timeout:180000,polling:100});const out=process.env.PROOF_OUT||'artifacts/cad-robot-projects';await mkdir(out,{recursive:true});
 try{
- await page.goto(process.env.PROOF_URL||'http://127.0.0.1:8141/',{waitUntil:'commit'});await wait(()=>window.__brickwrightStore?.getState().scratchGui.vm?.runtime?.cadCircuitSimulation);await page.getByRole('tab',{name:'CAD',exact:true}).click();await wait(()=>window.__bwCad?.editor);console.log('GUI CAD ready');
+ await page.goto(proofURL,{waitUntil:'commit'});await wait(()=>window.__brickwrightStore?.getState().scratchGui.vm?.runtime?.cadCircuitSimulation);await page.getByRole('tab',{name:'CAD',exact:true}).click();await wait(()=>window.__bwCad?.editor);console.log('GUI CAD ready');
  const cad=page.getByTestId('bw-cad-tab');
  for(const [i,item]of CAD_ROBOT_EXAMPLES.entries()){
   if(process.argv.includes('--ipad')&&!process.env.ONLY_ROBOT&&i>0)break;
   if((process.env.SKIP_ROBOTS||'').split(',').includes(item.id))continue;
   if(process.env.ONLY_ROBOT&&process.env.ONLY_ROBOT!==item.id)continue;console.log('Selecting',item.id);
+  const initialOverrideUses=joltOverrideUses;
   const panel=page.getByTestId('bw-cad-circuit-panel');if(await panel.isVisible())await panel.getByRole('button',{name:'Close program settings'}).click();
   await cad.getByRole('button',{name:'Model library',exact:true}).click();
   const library=cad.getByRole('dialog',{name:'Model library',exact:true});
@@ -285,6 +305,11 @@ await wait(()=>{const s=window.__brickwrightStore.getState().scratchGui.vm.runti
    const timing=await page.evaluate(()=>window.__phaseTiming);
    await writeFile(`${out}/phases-${item.id}${process.env.PROOF_REPEAT==='1'?'-with-restarts':''}.json`,JSON.stringify(timing,null,2));
    console.log('Mechanical worker start timings (ms)',timing.startup);
+  }
+  if(joltOverride){
+   assert.ok(joltOverrideUses>initialOverrideUses,'The simulation did not load the supplied SIMD module');
+   assert.equal(scalarUses,0,'The supplied module fell back to the scalar engine');
+   after.joltOverrideSHA256=joltOverrideSHA256;
   }
   if(process.env.PROOF_MIN_RTF!==undefined){
    const minimum=Number(process.env.PROOF_MIN_RTF);
