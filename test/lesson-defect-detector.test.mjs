@@ -275,6 +275,6 @@ test('corpus ratchet: no lesson checkpoint is unachievable except the known thre
 
     // Coverage, stated rather than implied: a run that scanned nothing would
     // satisfy both assertions above.
-    assert.equal(report.lessons, 79, 'the sweep must cover the whole catalog');
+    assert.equal(report.lessons, 89, 'the sweep must cover the whole catalog, including the ten CP1 lessons');
     assert.ok(report.checkpoints >= 180, `only ${report.checkpoints} checkpoints scanned`);
 });

@@ -43,7 +43,7 @@ const method = (source, header) => {
 };
 
 const KINDS = ['emulator', 'avr8js', 'atmega2560', 'attiny85', 'attiny88', 'rp2040js', 'stm32f0', 'labwired',
-    'z80', 'eater6502', 'riscv32', 'i8086', 'i80386'];
+    'z80', 'eater6502', 'riscv32', 'i8086', 'i80386', 'cp1'];
 
 test('the green flag\'s author rule is start()\'s own split, for every kind, media and firmware', () => {
     // start() picks `built`: null for an interpreter or boot-media machine,

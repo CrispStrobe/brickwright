@@ -381,3 +381,197 @@ was 9.68 s and 7.21 s, respectively. This is one candidate run per
 project, with the full viewport and no paired GUI baseline. The expanded
 collision fixture passed on native macOS as well as WASM. The 1× GUI
 target remains open.
+
+### Upstream Jolt 5.7.0 integration
+
+The native fork's `brickwright/main` integrates upstream v5.7.0, uses
+upstream's gear torque correction, and retains Brickwright's gear and
+rack meshes, rotor and rope work, internal-edge pairs, and compound
+sweep optimizations. The fork's `master` mirrors upstream.
+[Native integration](https://github.com/CrispStrobe/JoltPhysics/commit/783255b0c2fcb54e877a21d3abf5680009b26a57)
+[JoltPhysics.js build pin](https://github.com/CrispStrobe/JoltPhysics.js/commit/74d8fee)
+
+All 653 macOS C++ cases and 25 targeted Robot Lab tests passed. The
+single-thread SIMD WASM module passed the wrapper's smoke checks. In
+Chrome, the candidate drove the Robot Lab starter, line follower,
+governor, and TwistSpan with replay. The tests loaded the candidate
+module and never requested the scalar fallback.
+
+Both CAD projects passed their full Chrome proofs with CAD SDK
+`7760321` and the new SIMD module. Each loaded with visible wiring,
+ran from one click with untouched widgets, and passed Stop and Reset.
+Scout sustained 0.999× and Atlas 0.792× in the local GUI build, with no
+paired throughput baseline. The 1× GUI target remains open. The
+SIMD module SHA-256 is
+`5f25671f51625ad3eb9ff8afc22ac40c63be95bb9380c747babec5fbacdf7fdf`.
+The released engine is JoltPhysics.js `1.1.0-bw.10`.
+
+### Circuit allocation and collision query profiles
+
+Atlas's full Chrome trace attributed about 2.5 ms per 5 ms tick to
+circuit advance and 3.9 ms to the CAD worker round trip while the
+profiler was active. The Board engine now indexes solver terminals
+until the netlist changes and reuses sparse matrix conversion buffers
+between solves. It still uses the same matrix entries, pivot rules,
+and event times. All 82 targeted tests passed on Board's mainline,
+including scope loads, netlist replacement, sparse pattern changes,
+and current conservation.
+[Board mainline](https://github.com/CrispStrobe/bw-board/commit/a03b03640b61156893906788652f1307e81fc7b7)
+
+A paired Chrome comparison kept the Jolt 5.7.0 module, models, and 600
+ticks identical. Atlas's non-mechanical work fell from 1.70 to 1.58 ms
+per tick in one order and from 1.75 to 1.41 ms in the reverse order.
+Scout's host times fell from 0.91 to 0.86 ms and from 1.06 to 0.83 ms.
+All motion and electrical traces matched exactly. Overall throughput
+varied with worker scheduling during the runs. The browser tests used
+the two Board changes applied to Lite's existing Board pin, with
+no other Board changes.
+[Tested Board backport](https://github.com/CrispStrobe/bw-board/commit/c908e55d)
+
+Separately, the upstream single-box SIMD backport passed 653 native
+cases and preserved both coupled traces. It made Atlas's mechanical
+round trip slower in both run orders, so that backport remains a
+candidate branch.
+[Jolt candidate](https://github.com/CrispStrobe/JoltPhysics/commit/dd9cc56)
+
+The full Chrome GUI comparison used the same Jolt 5.7 SIMD override in
+both builds, with one eight-second Atlas run in each direction of the
+comparison. The local builds disabled JavaScript minification. Atlas
+sustained 0.772× and 0.745× with the pinned Board code, and 0.797× and
+0.771× with the two Board changes, a 3.2–3.5% paired improvement.
+The mean electrical advance fell from 2.36–2.39 to 2.14 ms per 5 ms
+tick. All four runs passed one-click Run, motion, Stop, and Reset.
+Scout passed the same workflow with the two Board changes at 0.991×.
+
+The four-child overlap experiment skipped the remaining separating-axis
+calculations when every SIMD lane was already disjoint. All 653 native
+tests and the WASM smoke checks passed. Atlas retained the exact motion
+and electrical traces in both Chrome run orders, but the mechanical
+round trip rose from 2.81 to 3.03 ms and from 3.10 to 3.26 ms. The Jolt
+5.7 integration stays on the previous implementation.
+[Four-child query candidate](https://github.com/CrispStrobe/JoltPhysics.js/commit/8315f05)
+
+### Small-circuit Newton allocations
+
+For circuits with up to 64 matrix rows, the Board solver now uses a
+bounded direct index to find each sparse entry. Larger matrices keep
+the map. Entry order and explicit zero slots are preserved. Newton
+rollback also saves only populated maps while still clearing every map
+it restores. All 45 targeted Board tests passed, including the boundary
+between the two index paths, sparse refactorization, and current
+conservation.
+[Board mainline](https://github.com/CrispStrobe/bw-board/commit/032290ad)
+
+Chrome replayed 600 ticks in each run order, comparing the new code
+with the earlier terminal-index and buffer-reuse candidate on the same
+Jolt 5.7.0 build. Both robots' motion and electrical traces matched
+exactly. Atlas's host time fell from 2.21 to 2.13 ms and from 2.29 to
+2.15 ms per tick. Scout's fell from 1.18 to 1.12 ms and from 1.39 to
+1.31 ms. The test covers the real Circuit engine and CAD worker.
+[Board backport for the Lite pin](https://github.com/CrispStrobe/bw-board/commit/22b14d5e)
+
+The CAD clock candidate schedules program continuation with browser
+message tasks. The task boundary still lets the VM's promise
+continuations finish before Circuit and CAD advance. The focused
+session, cancellation, and clock suite passed all 45 tests.
+
+Atlas passed four full Chrome GUI runs with the same Jolt 5.7 module
+and the same Board build. The timer version sustained 0.515× and
+0.607×, and the message-task version 0.640× and 0.656×. The measured
+electrical and worker round trips also moved substantially across
+the runs. After subtracting the instrumented work, mean overhead was
+0.55 to 0.38 ms per tick in one order and 0.41 to 0.42 ms in reverse.
+The results do not establish a repeatable clock-specific throughput
+gain, so this change remains a candidate.
+[CAD clock candidate](https://github.com/CrispStrobe/brickwright-lite/commit/195502ee0)
+
+### Sparse numeric refactorization
+
+The Board solver now precomputes the pivot-order row indices when it
+factors a matrix and reuses its zeroed scatter buffer for subsequent
+same-pattern numeric refactors. Pivot selection and row traversal
+order are unchanged. All 51 targeted tests passed on Board's mainline.
+[Board change](https://github.com/CrispStrobe/bw-board/commit/e21e2dae)
+[Backport tested against Lite's Board pin](https://github.com/CrispStrobe/bw-board/commit/b1e71df9)
+
+On a 20-row, 29-entry matrix recorded during an accepted Atlas
+refactor, seven alternating Node trials measured a median of 1.16 µs
+per old refactor and 0.57 µs per new refactor. The solved vector matched
+exactly. Both Chrome robots also returned exact motion and electrical
+traces over 600 ticks in both test orders. Host timings varied and did
+not show a consistent end-to-end gain.
+
+The separate CSC layout experiment reused the layout on 37,879 of
+37,900 conversions in the Atlas probe. Conversion of the captured
+matrix fell from 0.31 to 0.17 µs, but Atlas's host time rose from 2.09
+to 2.46 ms per tick in one browser order and fell from 2.12 to 1.93 ms
+in reverse. Both robot traces matched. That experiment remains on
+its candidate branch.
+[CSC layout candidate](https://github.com/CrispStrobe/bw-board/commit/ab11f876)
+
+Both robots also passed the local full Chrome GUI proof with SDK
+`7760321`, the Jolt 5.7 SIMD override, and the new Board refactor
+code. One click started each project with its default widgets, and
+Stop and Reset passed. The local build disabled JS minification.
+Atlas sustained 0.606× and Scout 0.843×, with no paired full-GUI
+baseline. The published engine pins retain their existing versions.
+
+### Batched simulation frame publication
+
+The CAD candidate reads each Jolt body pose once per displayed frame
+and returns independent coordinate arrays for its welded parts. The
+worker channel clones telemetry directly, and the host forwards each
+fresh intermediate reply while retaining independent full snapshots.
+[CAD source](https://github.com/CrispStrobe/CrispCAD/tree/codex/cad-frame-publication-20261125)
+[Backport to the pinned SDK](https://github.com/CrispStrobe/CrispCAD/commit/798ff78)
+
+Atlas still published 26 poses with six native transform reads instead
+of 26. Scout published 26 with three reads. In seven alternating runs
+on the shipped models, median CPU time per pose batch fell from 20.9
+to 7.1 µs for Atlas and from 21.1 to 5.4 µs for Scout. The returned poses
+matched exactly. Both test orders in Chrome returned exact 600-tick
+motion and electrical traces for both robots, with no consistent
+worker speedup.
+
+Type checking and 32 focused CAD cases passed. The separate rover
+clearance test expected two separated hinge pairs and reported one.
+The same assertion failed with the original physics source. An
+exploratory four-second Atlas GUI proof also missed its fork tilt
+tolerance with the original SDK. The established three-second GUI
+proof passed in both orders, including Run, Stop, and Reset. Atlas
+sustained 0.945× and 0.996× with the previous SDK, and 0.785× and
+0.967× with the candidate. Scout passed the candidate's restart proof
+at 1.004×. All GUI tests used the Jolt 5.7.0 SIMD override. Since
+the measured Atlas throughput did not improve, the CAD change stays
+on its candidate branch and the published SDK pin keeps its current
+value.
+
+### Circuit stamping setup
+
+[bw-board master](https://github.com/CrispStrobe/bw-board/commit/1d8699a81f1864d8708f6bbe516ef8179b07eef3)
+now reuses the static solver classifications, resolves each device's
+terminal map once per stamp, and only copies a drive map when an
+explicit rail actually suppresses an opted-in board supply. All 85
+focused tests passed on the release-pin backport and again on the
+updated Board branch. They cover floating terminals, physical source
+currents, automatic supply fallback, and power-off measurements.
+
+Paired Mac Chrome runs used the same pinned CAD SDK and Jolt 5.7.0 SIMD
+module. Both orders ran 600 ticks per robot with identical sampled
+electrical readings and motion. Atlas host time per 5 ms step fell
+from 1.87/1.86 ms to 1.75/1.73 ms, and its simulation-only throughput
+rose from 0.931×/0.915× to 1.007×/1.025×. Scout's host step took
+1.01/0.99 ms with the change and 1.04/1.14 ms before it. These
+measurements omit the full editor viewport. The packaged Lite
+dependency still requires exact-SHA upstream CI evidence for a repin.
+
+The full Chrome editor passed both three-second Atlas comparisons,
+including one-click Run, moving joints, Stop, and Reset. With the same
+Jolt 5.7.0 override, Atlas sustained 0.613× and 0.775× in the previous
+build and 0.676× and 0.601× with the candidate. The Mac was heavily
+loaded during those runs. The paired data does not establish an
+editor speedup, and the sustained 1× viewport target remains open.
+
+Scout passed the full editor restart proof at 1.003× with the override.
+Atlas also passed the functional proof with the packaged Jolt module
+at 0.325× in a single run. That sample has no paired baseline.
