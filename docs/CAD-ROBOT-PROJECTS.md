@@ -1377,3 +1377,33 @@ the same packaged scalar engine reproduced the one-pair result.
 Brickwright SDK integration and sustained 1× production qualification
 remain open.
 [CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/a31b4b85725774dba64852dec9e2c4664cbb184c)
+
+### Narrow the hull pairs checked for cold-start hinge clearance
+
+The full-turn proof indexes hulls by axial interval and visits the
+pairs whose axial ranges may overlap. It projects a hull into the
+radial plane only when this can change the result. The existing
+clearance margin and hull-pair budget still apply.
+
+The table measures the authored hinge calculation during cold
+construction in paired Mac Chrome tests with the same Jolt 5.7 SIMD
+module. Total first-frame time varied across the run orders.
+
+| Robot | First order, before → after | Reverse order, before → after |
+| --- | ---: | ---: |
+| Atlas | 111 → 33 ms | 100 → 27 ms |
+| Scout | 268 → 35 ms | 267 → 48 ms |
+
+All initial and repeat frames matched. A differential check compared
+16,000 generated fixtures against the preceding implementation.
+All decisions matched, including 7,705 separation proofs and 8,295
+refusals. Type checking and 20 focused tests passed. That run excluded
+the previously reproduced scalar Rover torque assertion failure.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/bc095d12249c27e02f264fb429ad6f27a4ec12c7)
+
+Both robots produced identical sampled motion and circuit readings for
+600 warm ticks, with matching restart frames after an unsupported scene
+was refused. In the embedded editor, Atlas passed Run, joint motion,
+Pause, Reset, repeat Run and Close with a local SDK worker overlay.
+Brickwright SDK integration and sustained 1× production qualification
+remain open.
