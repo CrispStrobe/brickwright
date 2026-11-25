@@ -12,6 +12,7 @@ on:
       - 'overlay/scratch-gui/examples/cp1-*/**'
       - 'overlay/scratch-gui/examples/curriculum.json'
       - 'overlay/scratch-gui/examples/index.json'
+      - 'overlay/scratch-gui/static/roms/cp1-independent-monitor.bin'
       - 'packages/scratch-gui/examples/cp1-*/**'
       - 'overlay/scratch-gui/src/components/tw-pseudocode/cp1-*'
       - 'overlay/scratch-gui/src/components/tw-pseudocode/circuit-tab.jsx'
@@ -51,6 +52,7 @@ on:
       - 'overlay/scratch-gui/examples/cp1-*/**'
       - 'overlay/scratch-gui/examples/curriculum.json'
       - 'overlay/scratch-gui/examples/index.json'
+      - 'overlay/scratch-gui/static/roms/cp1-independent-monitor.bin'
       - 'packages/scratch-gui/examples/cp1-*/**'
       - 'overlay/scratch-gui/src/components/tw-pseudocode/cp1-*'
       - 'overlay/scratch-gui/src/components/tw-pseudocode/circuit-tab.jsx'
@@ -128,6 +130,8 @@ jobs:
       - name: Build the independent CP1 monitor for cassette checks
         working-directory: .cp1-ci/bw-board
         run: python3 firmware/cp1/build.py --output build/cp2
+      - name: Match the shipped monitor to the pinned firmware source
+        run: cmp overlay/scratch-gui/static/roms/cp1-independent-monitor.bin .cp1-ci/bw-board/build/cp2/cp1-monitor.bin
       - name: Install locked Lite inputs
         run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Install locked browser fixture dependencies

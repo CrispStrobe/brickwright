@@ -156,10 +156,23 @@ try {
             page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
             await page.goto(`${url}/runner.html`, {waitUntil: 'networkidle'});
             await page.waitForFunction(() => window.__cp1Integration?.board()?.parts?.some(part => part.id === 'trainer'));
-            await page.getByLabel('Import monitor ROM', {exact: true}).setInputFiles({
-                name: 'cp1-cp2.bin', mimeType: 'application/octet-stream', buffer: firmware
-            });
+            const builtInPath = path.join(root, 'overlay/scratch-gui/static/roms/cp1-independent-monitor.bin');
+            assert.deepEqual(await readFile(builtInPath), firmware);
+            const asset = '**/static/roms/cp1-independent-monitor.bin';
+            await page.route(asset, route => route.fulfill({body: Buffer.alloc(2048)}));
+            const debug = page.locator('[data-cp1-panel]');
+            await debug.getByRole('button', {name: 'Use Brickwright monitor', exact: true}).click();
+            await debug.getByRole('alert').filter({hasText: 'missing or damaged'}).waitFor();
+            assert.equal(await page.evaluate(() => window.__cp1Integration.snapshot()), null);
+            await page.unroute(asset);
+            await page.route(asset, route => route.fulfill({path: builtInPath}));
+            await page.evaluate(() => window.__cp1Integration.setShowSurfaces(true));
+            const widgets = page.locator('[data-cp1-controller-face]');
+            await widgets.getByRole('button', {name: 'Use Brickwright monitor', exact: true}).click();
             await page.waitForFunction(() => window.__cp1Integration.phase() === 'paused');
+            await page.evaluate(() => window.__cp1Integration.setShowSurfaces(false));
+            await widgets.waitFor({state: 'detached'});
+            checks.push('damaged bundled ROM is refused, and Widgets loads the independent monitor into the shared paused machine');
             await page.getByRole('button', {name: 'Run CPU', exact: true}).click();
             await page.waitForFunction(() => window.__cp1Integration.snapshot().display.digits[0] === 0x73);
             assert.equal(await page.evaluate(() => window.__cp1Integration.snapshot().cp1.profileQualified), true);
@@ -220,7 +233,7 @@ try {
                 await page.getByTestId(`codex-station-${fixture.id}`).click();
                 assert.equal((await fetch).status(), 200);
                 const reader = page.getByTestId('codex-reader-modal');
-                await reader.getByText(lang === 'en' ? /Import the monitor ROM/ : /Monitor-ROM importieren/).waitFor();
+                await reader.getByText(lang === 'en' ? /Use Brickwright monitor/ : /Brickwright-Monitor verwenden/).waitFor();
                 await reader.getByTestId('codex-open-bench').click();
                 assert.equal(await page.evaluate(() => window.__cp1Integration.galleryPicked), entry.files.cp1);
             }
