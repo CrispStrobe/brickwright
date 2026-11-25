@@ -2374,6 +2374,17 @@
        }
       },
       {
+       "example": "cp1-cp4-relay-signals",
+       "title": {
+        "en": "Two isolated relay signals",
+        "de": "Zwei galvanisch getrennte Relaissignale"
+       },
+       "lead": {
+        "en": "Start at 000. Close the request switch to light the entry and exit signals in sequence. Trace the separate load battery and open the switch to rearm the program.",
+        "de": "Bei 000 starten. Den Anforderungsschalter schließen, um das Einfahrt- und dann das Ausfahrtsignal einzuschalten. Die getrennte Lampenbatterie verfolgen und den Schalter öffnen, um das Programm für die nächste Anforderung freizugeben."
+       }
+      },
+      {
        "example": "cp1-cp2-sample-logger",
        "title": {
         "en": "Four samples to cassette",

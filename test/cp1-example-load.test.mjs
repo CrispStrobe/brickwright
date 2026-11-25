@@ -36,7 +36,7 @@ function cp1Loader () {
     return {load: host.load.bind(host), events, state, storage, window, runtime: host.props.vm.runtime};
 }
 
-for (const [id, expansion] of [['cp1-first-display', false], ['cp1-cp2-sample-logger', true]]) {
+for (const [id, expansion] of [['cp1-first-display', false], ['cp1-cp4-relay-signals', false], ['cp1-cp2-sample-logger', true]]) {
     test(`${id} opens the original listing with the authored machine configuration`, async () => {
         const entry = index.find(ex => ex.id === id);
         const circuit = JSON.parse(read(`${gallery}${entry.files.circuit}`));
