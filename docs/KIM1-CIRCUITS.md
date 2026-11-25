@@ -6,7 +6,7 @@ Open **Circuit → Examples**, search for **KIM-1**, and open **KIM-1: Wired I/O
 
 Press **GO**, then toggle PB0–PB3 under Switches. The four external PA LEDs follow the input bits through a running NMOS 6502 program. The engine, ports and external components use the same circuit clock and electrical network.
 
-The panel provides all 23 keys, the SST switch, a six-digit display, CPU registers, port values, an addressed-hex program editor, original example programs and text-file import/export. Accepted programs and keypad edits are saved with each circuit part.
+The panel provides all 23 keys, the SST switch, a six-digit display, CPU registers, port values, an editor for addressed hex, Intel HEX and paper-tape programs, and Brickwright-authored examples. Accepted programs and keypad edits are saved with each circuit part.
 
 | Control | Action |
 | --- | --- |
@@ -27,9 +27,17 @@ The engine belongs to **bw-board**; the panel, palette, connector and controls b
 
 The CPU implements the 151 documented NMOS 6502 opcodes and their architectural cycle counts, including decimal arithmetic, indirect-JMP page wrapping, read-modify-write behavior and the JSR operand/stack overlap case. The CPU reuses this project's original MIT W65C02 instruction plumbing with a separate NMOS profile. The monitor, memory map, 6530-style ports/timers and demonstrations are independently written.
 
-This first phase has stock 1 KiB main RAM, the two small peripheral RAM regions, the original 13-bit address decoding and fifteen user GPIO pins. The palette and wired lesson use deliberately slow teaching clocks. This is an instruction-level circuit model, not a cycle-by-cycle electrical model of the historical board.
+The learning monitor starts with 1 KiB main RAM and the two 64-byte 6530
+banks. To open a paper tape, use **Open…** and **Load program** in the KIM-1
+panel. The loader verifies the checksum and end record before applying the
+bytes. Paper tape (.pap and .ptp) and Intel HEX can enable expansion RAM.
+Circuit saves preserve the accepted program and its expansion map.
 
-Historical ROM bytes, cassette/TTY routines, undocumented opcodes and expansion RAM are not supplied. Programs that depend on unimplemented ROM services or absent memory are refused rather than silently given substitute behavior. The reset and front-panel stop path are provided by the independent learning monitor. Exact original-ROM compatibility is not claimed.
+For hardware mode, open **Firmware and TTY** and mount your 6530-003 and
+6530-002 ROMs. A combined 2 KiB file is also supported with 003 first.
+The ROM drives the keypad matrix and display at the simulated 1 MHz clock.
+The optional virtual TTY operates at 300 baud. Use the keypad to choose the
+entry address after a file import. ROMs stay in the active simulation session.
 
 ## Source and licensing boundary
 
@@ -51,6 +59,6 @@ References: [MOS manuals](https://bitsavers.trailing-edge.com/components/mosTech
 
 ## Qualification
 
-The NMOS CPU passed 1,510,000 generated reference cases: 10,000 for each documented opcode, checking registers, memory and instruction cycle totals. This does not grade every bus transaction or asynchronous interrupt timing. The source-bound receipt and reproducible harness live in the engine repository.
+The NMOS CPU passed 1,510,000 generated reference cases: 10,000 for each documented opcode, checking registers, memory, cycle totals and every ordered bus transaction. Asynchronous interrupt races and electrical waveforms need separate qualification. The source-bound receipt and reproducible harness live in the engine repository.
 
 The circuit UI has focused engine/connector/persistence tests and a real Chromium interaction gate. `scripts/verify-kim1-circuits-browser.mjs` exercises the KIM-1 through the built Brickwright application and its example gallery. A passing upstream designer harness alone is not a claim that the full app was built or tested; the actual run results remain the authority.

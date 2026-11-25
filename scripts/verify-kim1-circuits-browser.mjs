@@ -101,6 +101,32 @@ try {
     assert.match(saved.parts.find(part => part.id === 'kim1').params.program, /0300: A5/);
     checks.push('Keypad memory edits and RS retention reach the serialized app circuit');
 
+    await panel.locator('input[accept*=".ptp"]').setInputFiles({
+        name: 'authored.ptp', mimeType: 'text/plain',
+        buffer: Buffer.from(';032000A94200010E\r\n;0000010001\r\n')
+    });
+    await page.waitForFunction(() => document.querySelector('[data-kim1-panel="kim1"] textarea')?.value.startsWith(';03'));
+    await panel.locator('[data-kim1-load]').click();
+    await page.waitForFunction(() => window.__board?.getDeviceState('kim1')?.expansion?.[0x2000] === 0xa9);
+    assert.match(await panel.getByRole('textbox', {name: 'KIM-1 program', exact: true}).inputValue(), /2000: A9 42 00/);
+    checks.push('An uploaded paper tape is checked and installed in expansion RAM');
+
+    const images = Buffer.alloc(2048);
+    // This authored ROM outputs a zero on the first 6530-driven digit.
+    const fixture = Buffer.from([0xa9,0x7f,0x8d,0x41,0x17,0xa9,0x1e,0x8d,0x43,0x17,
+        0xa9,0x3f,0x8d,0x40,0x17,0xa9,8,0x8d,0x42,0x17,0x4c,0x14,0x1c]);
+    fixture.copy(images, 1024);
+    images[2045] = 0x1c;
+    await panel.getByText('Firmware and TTY', {exact: true}).click();
+    await panel.locator('[data-kim1-rom-input]').setInputFiles({
+        name: 'authored.rom', mimeType: 'application/octet-stream', buffer: images
+    });
+    await page.waitForFunction(() => window.__board?.getDeviceState('kim1')?.segments?.[0] === 0x3f);
+    assert.equal(await panel.locator('[data-kim1-display]').getAttribute('data-kim1-display'), '0     ');
+    await panel.getByRole('button', {name: 'Learning monitor', exact: true}).click();
+    await page.waitForFunction(() => window.__board?.getDeviceState('kim1')?.roms === null);
+    checks.push('A session-mounted ROM drives the display through the 6530');
+
     await panel.scrollIntoViewIfNeeded();
     await page.screenshot({path: path.join(output, 'kim1-brickwright-panel.png'), fullPage: true});
     assert.deepEqual(pageErrors, []);
