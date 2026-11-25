@@ -1,10 +1,10 @@
 # micro:bit Firmware Provenance
 
 Reproducibility audit and build provenance for the two MicroPython→WASM
-firmwares that brickwright-lite vendors under
+firmwares that Brickwright vendors under
 `overlay/scratch-gui/static/microbit-sim/`.
 
-## What lite ships
+## What Brickwright ships
 
 | Path | Variant | Size | Purpose |
 |------|---------|------|---------|

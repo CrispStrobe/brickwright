@@ -178,7 +178,7 @@ complete from static translation alone.
 
 ## Commands and durable locations
 
-Public source: https://github.com/CrispStrobe/brickwright-lite
+Public source: https://github.com/CrispStrobe/brickwright
 
 Combined candidate: https://github.com/CrispStrobe/brickwright-lite/pull/810
 

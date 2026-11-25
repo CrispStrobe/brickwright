@@ -18,7 +18,7 @@ This section supersedes older "in flight" notes below where they disagree. Check
   - For RimRun, SwayShift, Tipline and TwistSpan, each package's own runner was re-run on main, with tracks byte-identical to the supplied recordings.
   - All ten entries complete in Chrome on the live GitHub Pages site.
   - Evidence for every entry is in `docs/data/robot-lab-experimental-checkpoint.json`.
-- **See new models on GitHub Pages.** https://crispstrobe.github.io/brickwright-lite is current. https://brickwright-lite.vercel.app can lag by days; check `/brickwright-version.json` against main, and see O3.
+- **See new models on Vercel.** Open https://brickwright.vercel.app/ and check `/brickwright-version.json` against main. See O3 for deployment timing.
 - **`ci:full` policy changed (owner, 2026-10-27).** No `ci:full` label on PRs at all, overriding the rule further down: merge on the fast tier and fix forward from main's full run.
   - Removing the label doesn't change a run that's already queued, because the scope comes from the event payload.
   - To swap a queued full run for a fast one, close and reopen the PR.
