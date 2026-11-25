@@ -3,7 +3,7 @@
   "bytes": 368640,
   "sha256": "5fbbe5e86fb845cff120ae8d17a01904c0db9d0b6103ce382b31130bd3eadd39",
   "description": "Bootable MS-DOS 2.0 360K FAT12 disk: IO.SYS (assembled from bw-board dos/iosys.asm) + Microsoft MSDOS.SYS + COMMAND.COM. No user program; the code tab injects PROG.COM at runtime (bw-board/dos-fat-inject).",
-  "bwBoardPin": "eb3ec0a7b4e8557e6e3c181a70a3fad5e8d09f08",
+  "bwBoardPin": "cc18f3c8d84d68e008450e65ddf838b8ec03c7f7",
   "sourceHashes": {
     "MSDOS.SYS": "1edf5190671ed4edcc9e6cc095e5094749c58f1833a2e26e40ba7d3389e276d1",
     "COMMAND.COM": "4cc71b3692b894eef9a7c8b3ac0fc63a71bdfa08175089562fdc4c7c5b038e8a",

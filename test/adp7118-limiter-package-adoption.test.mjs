@@ -8,7 +8,7 @@ import {pathToFileURL} from 'node:url';
 import {loadCircuitModel} from '../scripts/lib/polarity-oracle.mjs';
 
 const root=path.resolve(import.meta.dirname,'..');
-const boardPin='eb3ec0a7b4e8557e6e3c181a70a3fad5e8d09f08';
+const boardPin='cc18f3c8d84d68e008450e65ddf838b8ec03c7f7';
 const packageSpec=`github:CrispStrobe/bw-board#${boardPin}`;
 const fixture=JSON.parse(readFileSync(path.join(root,'test/fixtures/adp7118-fixed-regulator.json'),'utf8'));
 const terminals=['vout_1','vout_2','sense_adj','gnd','en','ss','vin_7','vin_8'];
@@ -99,7 +99,7 @@ async function installedCircuit(R,C){
 test('limiter adoption selects the exact pinned installed package rather than a board override',()=>{
     const pins=JSON.parse(readFileSync(path.join(root,'vendor-pins.json'),'utf8'));
     assert.equal(pins['bw-board'],boardPin);
-    assert.equal(pins['bw-circuit-ui'],'4c57f3a6458a3f385b87c2d9213d02062fe0918d');
+    assert.equal(pins['bw-circuit-ui'],'0a1b15edb0daecd723c7c07126450d84b86e3e68');
     const pkg=JSON.parse(readFileSync(path.join(root,'package.json'),'utf8'));
     assert.equal(pkg.devDependencies['bw-board'],packageSpec);
     const lock=JSON.parse(readFileSync(path.join(root,'package-lock.json'),'utf8'));
