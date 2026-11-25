@@ -110,7 +110,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          live_sha=$(curl -fsS --max-time 15 "https://brickwright-lite.vercel.app/brickwright-version.json?probe=$GITHUB_RUN_ID" \
+          live_sha=$(curl -fsS --max-time 15 "https://brickwright.vercel.app/brickwright-version.json?probe=$GITHUB_RUN_ID" \
             | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const c=JSON.parse(s).commit||"";if(!/^[a-f0-9]{40}$/.test(c))process.exit(1);console.log(c)})')
           git fetch --quiet --depth=200 origin main
           target_sha=""
@@ -141,7 +141,7 @@ jobs:
           echo "::endgroup::"
           # Re-read production right before publishing: the concurrency group
           # serialises our own runs, but a manual publish could still land.
-          now_live=$(curl -fsS --max-time 15 "https://brickwright-lite.vercel.app/brickwright-version.json?probe=$GITHUB_RUN_ID-2" \
+          now_live=$(curl -fsS --max-time 15 "https://brickwright.vercel.app/brickwright-version.json?probe=$GITHUB_RUN_ID-2" \
             | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log(JSON.parse(s).commit||""))')
           if git merge-base --is-ancestor "$now_live" "$local_sha" && [ "$now_live" != "$local_sha" ]; then
             vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"

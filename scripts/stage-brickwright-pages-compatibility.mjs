@@ -15,7 +15,7 @@ function legacyRedirect(page) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Open Brickwright Legacy</title>
 <p><a id="editor" href="${destination}">Open Brickwright Legacy</a></p>
-<p><a id="fallback" href="https://brickwright.vercel.app/${page}">Open the Legacy Vercel editor</a></p>
+<p><a id="fallback" href="https://brickwright-legacy.vercel.app/${page}">Open the Legacy Vercel editor</a></p>
 <script>
 const suffix = location.search + location.hash;
 document.querySelector('#fallback').href += suffix;

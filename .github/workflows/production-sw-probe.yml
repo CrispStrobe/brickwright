@@ -64,7 +64,7 @@ jobs:
           [ -n "$prev" ] && gh run download "$prev" -R "$GITHUB_REPOSITORY" -n sw-profiles -D prev 2>/dev/null || echo "no previous seed: this run only seeds"
           probe() { node "$RUNNER_TEMP/probe/probe-production-sw.mjs" "$@"; }
           fail=0
-          for t in pages=https://crispstrobe.github.io/brickwright-lite/ vercel=https://brickwright-lite.vercel.app/; do
+          for t in pages=https://crispstrobe.github.io/brickwright-lite/ vercel=https://brickwright.vercel.app/; do
             name=${t%%=*} url=${t#*=}
             if [ -d "prev/next/$name" ]; then
               set +e; probe check --url "$url" --profile "prev/next/$name" --json "probe-$name.json"; rc=$?; set -e

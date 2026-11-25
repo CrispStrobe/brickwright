@@ -41,7 +41,7 @@ test('the Pages artifact preserves legacy URLs, query, fragment and same-origin 
             location: {search: '?sample=test', hash: '#project', replace: url => destinations.push(url)}
         });
         assert.deepEqual(destinations, [`${origin}/brickwright-legacy/${entry}?sample=test#project`]);
-        assert.equal(anchors.fallback.href, `https://brickwright.vercel.app/${entry}?sample=test#project`);
+        assert.equal(anchors.fallback.href, `https://brickwright-legacy.vercel.app/${entry}?sample=test#project`);
     }
 }));
 
