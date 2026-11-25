@@ -35,8 +35,9 @@
       "id": "input0",
       "kind": "switch",
       "declName": "PB0",
-      "x": 110,
+      "x": 740,
       "y": 165,
+      "flipped": true,
       "params": {
         "closed": false
       },
@@ -48,7 +49,7 @@
     {
       "id": "bias0",
       "kind": "resistor",
-      "x": 220,
+      "x": 650,
       "y": 190,
       "params": {
         "ohms": 33000
@@ -61,8 +62,9 @@
     {
       "id": "limit0",
       "kind": "resistor",
-      "x": 655,
+      "x": 190,
       "y": 165,
+      "flipped": true,
       "params": {
         "ohms": 1000
       },
@@ -75,8 +77,9 @@
       "id": "lamp0",
       "kind": "led",
       "declName": "PA0",
-      "x": 755,
+      "x": 90,
       "y": 165,
+      "flipped": true,
       "params": {
         "color": "red"
       },
@@ -89,8 +92,9 @@
       "id": "input1",
       "kind": "switch",
       "declName": "PB1",
-      "x": 110,
+      "x": 740,
       "y": 233,
+      "flipped": true,
       "params": {
         "closed": false
       },
@@ -102,7 +106,7 @@
     {
       "id": "bias1",
       "kind": "resistor",
-      "x": 220,
+      "x": 650,
       "y": 258,
       "params": {
         "ohms": 33000
@@ -115,8 +119,9 @@
     {
       "id": "limit1",
       "kind": "resistor",
-      "x": 655,
+      "x": 190,
       "y": 233,
+      "flipped": true,
       "params": {
         "ohms": 1000
       },
@@ -129,8 +134,9 @@
       "id": "lamp1",
       "kind": "led",
       "declName": "PA1",
-      "x": 755,
+      "x": 90,
       "y": 233,
+      "flipped": true,
       "params": {
         "color": "yellow"
       },
@@ -143,8 +149,9 @@
       "id": "input2",
       "kind": "switch",
       "declName": "PB2",
-      "x": 110,
+      "x": 740,
       "y": 301,
+      "flipped": true,
       "params": {
         "closed": false
       },
@@ -156,7 +163,7 @@
     {
       "id": "bias2",
       "kind": "resistor",
-      "x": 220,
+      "x": 650,
       "y": 326,
       "params": {
         "ohms": 33000
@@ -169,8 +176,9 @@
     {
       "id": "limit2",
       "kind": "resistor",
-      "x": 655,
+      "x": 190,
       "y": 301,
+      "flipped": true,
       "params": {
         "ohms": 1000
       },
@@ -183,8 +191,9 @@
       "id": "lamp2",
       "kind": "led",
       "declName": "PA2",
-      "x": 755,
+      "x": 90,
       "y": 301,
+      "flipped": true,
       "params": {
         "color": "green"
       },
@@ -197,8 +206,9 @@
       "id": "input3",
       "kind": "switch",
       "declName": "PB3",
-      "x": 110,
+      "x": 740,
       "y": 369,
+      "flipped": true,
       "params": {
         "closed": false
       },
@@ -210,7 +220,7 @@
     {
       "id": "bias3",
       "kind": "resistor",
-      "x": 220,
+      "x": 650,
       "y": 394,
       "params": {
         "ohms": 33000
@@ -223,8 +233,9 @@
     {
       "id": "limit3",
       "kind": "resistor",
-      "x": 655,
+      "x": 190,
       "y": 369,
+      "flipped": true,
       "params": {
         "ohms": 1000
       },
@@ -237,8 +248,9 @@
       "id": "lamp3",
       "kind": "led",
       "declName": "PA3",
-      "x": 755,
+      "x": 90,
       "y": 369,
+      "flipped": true,
       "params": {
         "color": "blue"
       },
@@ -259,7 +271,21 @@
         "part": "input0",
         "terminal": "a"
       },
-      "color": "#ef4444"
+      "color": "#ef4444",
+      "waypoints": [
+        {
+          "x": 370,
+          "y": 510
+        },
+        {
+          "x": 820,
+          "y": 510
+        },
+        {
+          "x": 820,
+          "y": 165
+        }
+      ]
     },
     {
       "id": "kimwire2",
@@ -294,7 +320,21 @@
         "part": "kim1",
         "terminal": "gnd"
       },
-      "color": "#64748b"
+      "color": "#64748b",
+      "waypoints": [
+        {
+          "x": 790,
+          "y": 190
+        },
+        {
+          "x": 790,
+          "y": 470
+        },
+        {
+          "x": 470,
+          "y": 470
+        }
+      ]
     },
     {
       "id": "kimwire5",
@@ -329,7 +369,21 @@
         "part": "kim1",
         "terminal": "gnd"
       },
-      "color": "#64748b"
+      "color": "#64748b",
+      "waypoints": [
+        {
+          "x": 40,
+          "y": 165
+        },
+        {
+          "x": 40,
+          "y": 470
+        },
+        {
+          "x": 470,
+          "y": 470
+        }
+      ]
     },
     {
       "id": "kimwire8",
@@ -341,7 +395,21 @@
         "part": "input1",
         "terminal": "a"
       },
-      "color": "#ef4444"
+      "color": "#ef4444",
+      "waypoints": [
+        {
+          "x": 370,
+          "y": 510
+        },
+        {
+          "x": 820,
+          "y": 510
+        },
+        {
+          "x": 820,
+          "y": 233
+        }
+      ]
     },
     {
       "id": "kimwire9",
@@ -376,7 +444,21 @@
         "part": "kim1",
         "terminal": "gnd"
       },
-      "color": "#64748b"
+      "color": "#64748b",
+      "waypoints": [
+        {
+          "x": 790,
+          "y": 258
+        },
+        {
+          "x": 790,
+          "y": 470
+        },
+        {
+          "x": 470,
+          "y": 470
+        }
+      ]
     },
     {
       "id": "kimwire12",
@@ -411,7 +493,21 @@
         "part": "kim1",
         "terminal": "gnd"
       },
-      "color": "#64748b"
+      "color": "#64748b",
+      "waypoints": [
+        {
+          "x": 40,
+          "y": 233
+        },
+        {
+          "x": 40,
+          "y": 470
+        },
+        {
+          "x": 470,
+          "y": 470
+        }
+      ]
     },
     {
       "id": "kimwire15",
@@ -423,7 +519,21 @@
         "part": "input2",
         "terminal": "a"
       },
-      "color": "#ef4444"
+      "color": "#ef4444",
+      "waypoints": [
+        {
+          "x": 370,
+          "y": 510
+        },
+        {
+          "x": 820,
+          "y": 510
+        },
+        {
+          "x": 820,
+          "y": 301
+        }
+      ]
     },
     {
       "id": "kimwire16",
@@ -458,7 +568,21 @@
         "part": "kim1",
         "terminal": "gnd"
       },
-      "color": "#64748b"
+      "color": "#64748b",
+      "waypoints": [
+        {
+          "x": 790,
+          "y": 326
+        },
+        {
+          "x": 790,
+          "y": 470
+        },
+        {
+          "x": 470,
+          "y": 470
+        }
+      ]
     },
     {
       "id": "kimwire19",
@@ -493,7 +617,21 @@
         "part": "kim1",
         "terminal": "gnd"
       },
-      "color": "#64748b"
+      "color": "#64748b",
+      "waypoints": [
+        {
+          "x": 40,
+          "y": 301
+        },
+        {
+          "x": 40,
+          "y": 470
+        },
+        {
+          "x": 470,
+          "y": 470
+        }
+      ]
     },
     {
       "id": "kimwire22",
@@ -505,7 +643,21 @@
         "part": "input3",
         "terminal": "a"
       },
-      "color": "#ef4444"
+      "color": "#ef4444",
+      "waypoints": [
+        {
+          "x": 370,
+          "y": 510
+        },
+        {
+          "x": 820,
+          "y": 510
+        },
+        {
+          "x": 820,
+          "y": 369
+        }
+      ]
     },
     {
       "id": "kimwire23",
@@ -540,7 +692,21 @@
         "part": "kim1",
         "terminal": "gnd"
       },
-      "color": "#64748b"
+      "color": "#64748b",
+      "waypoints": [
+        {
+          "x": 790,
+          "y": 394
+        },
+        {
+          "x": 790,
+          "y": 470
+        },
+        {
+          "x": 470,
+          "y": 470
+        }
+      ]
     },
     {
       "id": "kimwire26",
@@ -575,7 +741,21 @@
         "part": "kim1",
         "terminal": "gnd"
       },
-      "color": "#64748b"
+      "color": "#64748b",
+      "waypoints": [
+        {
+          "x": 40,
+          "y": 369
+        },
+        {
+          "x": 40,
+          "y": 470
+        },
+        {
+          "x": 470,
+          "y": 470
+        }
+      ]
     }
   ],
   "holeWires": []
