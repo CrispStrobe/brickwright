@@ -7,4 +7,4 @@
 | 2, 4, 6, 8 | 85 | 170 |
 | All eight | 0 | 255 |
 
-During monitor startup all eight relay contacts close. Once the program runs, a closed request switch lights only its own lamp. A lit branch carries about 3 mA. These observations are taken after the relay contacts and their suppression capacitors settle.
+During monitor startup all eight relay contacts close. Once the program runs, a closed request switch energizes only its own relay. A closed branch carries about 3.2 mA through its resistive load. These observations are taken after the relay contacts and their suppression capacitors settle.

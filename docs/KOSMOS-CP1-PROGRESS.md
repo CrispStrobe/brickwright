@@ -353,14 +353,16 @@ adds eight editable input and output channels alongside the shorter
 [two-relay signals lesson](../overlay/scratch-gui/examples/cp1-cp4-relay-signals/intro.md).
 Each input has the documented 1 kΩ and 470 Ω bias pair, clamps and 100 nF
 capacitor. Each output has the transistor driver, flyback diode, and normally
-open contact with a 100 nF capacitor. The lamps use a separate battery. The
+open contact with a 100 nF capacitor. The resistive loads use a separate battery. The
 [CP4 manual, section IV](https://www.retrozone.ch/docs/cp1/CP4-Relais-Modul.pdf)
 documents the physical circuit.
 
 The qualification drives the gallery program through the monitor, measures all
-eight lamp branches on walking and mixed byte patterns, and measures the signal
+eight load branches on walking and mixed byte patterns, and measures the signal
 rise on switch release. The contact measurements concern settled states and
-load current. Nominal coil supply and relay thresholds are simulator settings.
+load current. Simultaneous switching with diode lamps exceeded the transient
+solver’s step budget. The relay bank uses resistive loads and retains the
+contact capacitors. Nominal coil supply and relay thresholds are simulator settings.
 
 ## Remaining plan work
 

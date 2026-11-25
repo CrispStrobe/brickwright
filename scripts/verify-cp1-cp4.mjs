@@ -44,15 +44,15 @@ const netFor = (part, terminal) => {
     return net.id;
 };
 const channels = args.bank
-    ? Array.from({length: 8}, (_, bit) => ({relay: `relay${bit + 1}`, lamp: `lamp${bit + 1}`}))
-    : ['entry', 'exit'].map(name => ({relay: `${name}-relay`, lamp: `${name}-lamp`}));
+    ? Array.from({length: 8}, (_, bit) => ({relay: `relay${bit + 1}`, load: `load${bit + 1}`, feed: 'a', returnPin: 'b'}))
+    : ['entry', 'exit'].map(name => ({relay: `${name}-relay`, load: `${name}-lamp`, feed: 'anode', returnPin: 'cathode'}));
 const logicGround = netFor(args.bank ? 'ground' : 'logic-ground', 'gnd');
 const lampReturn = netFor('load-supply', 'neg');
 const lampFeed = netFor('load-supply', 'pos');
 assert.notEqual(lampReturn, logicGround);
 assert.notEqual(lampFeed, logicGround);
-for (const {relay, lamp} of channels) {
-    assert.equal(netFor(lamp, 'cathode'), lampReturn);
+for (const {relay, load, returnPin} of channels) {
+    assert.equal(netFor(load, returnPin), lampReturn);
     assert.equal(netFor(relay, 'com'), lampFeed);
 }
 
@@ -60,19 +60,19 @@ const observations = [];
 function expectSignals(expected, label) {
     const ports = machine.getPortState(2);
     assert.equal(ports.latch, expected, label);
-    const currents = channels.map(({relay, lamp}, bit) => {
+    const currents = channels.map(({relay, load, feed}, bit) => {
         const energized = Boolean(expected & (1 << bit));
-        const current = -board.branchCurrent(lamp, 'anode');
+        const current = -board.branchCurrent(load, feed);
         assert.equal(board.getDeviceState(relay).energized, energized, `${label}: ${relay} contact`);
         if (energized) {
-            assert.ok(current > 0.002 && current < 0.004, `${label}: ${lamp} carries ${current} A`);
+            assert.ok(current > 0.002 && current < 0.004, `${label}: ${load} carries ${current} A`);
         } else {
-            assert.ok(Math.abs(current) < 1e-6, `${label}: ${lamp} leakage ${current} A`);
+            assert.ok(Math.abs(current) < 1e-6, `${label}: ${load} leakage ${current} A`);
         }
         return current;
     });
     assert.equal(board.transientAnalysisStatus().failure, null);
-    observations.push({label, latch: ports.latch, lampAmps: currents});
+    observations.push({label, latch: ports.latch, [args.bank ? 'loadAmps' : 'lampAmps']: currents});
     if (args.bank) console.error(`CP4 passed ${label}`);
 }
 
