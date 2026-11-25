@@ -439,8 +439,6 @@ class Cp1Panel extends React.Component {
                 title: [this._t(stateKey), result].filter(Boolean).join('\n'),
                 onClick: () => this._debugHelp.current.showModal()
             })}
-            {view.execution === 'error' ? '⚠' : 'ⓘ'}
-            </span>
             {view.execution === 'error' && view.lastEvent && view.lastEvent.error ? <span data-cp1-monitor-error>
                 {this._t('monitorError', {code: Number.isInteger(view.lastEvent.error.code) ?
                     cellText(view.lastEvent.error.code) : '—'})}</span> : null}
