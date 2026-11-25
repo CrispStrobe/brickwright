@@ -17,7 +17,7 @@ The panel provides all 23 keys, the SST switch, a six-digit display, CPU registe
 | SST, then GO | Execute one instruction |
 | ST | Stop this computer while the circuit continues |
 | PC | Return to the stopped program counter |
-| RS | Reset controls and ports, retaining RAM |
+| RS | Reset controls and ports, retaining RAM and the SST switch position |
 
 Keyboard entry stays within the focused panel. Text editors retain normal editing keys. Unloaded program text is a draft; Load or GO accepts it. Save exports the accepted memory image.
 

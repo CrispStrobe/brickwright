@@ -14,12 +14,28 @@ const browser = await chromium.launch({
     ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ?
         {executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH} : {})
 });
-let page;
+let page, buildManifest = null;
+const sourceCommit = process.env.GITHUB_SHA || null;
+const packageCommits = {board: process.env.BW_KIM1_BOARD_SHA || null, ui: process.env.BW_KIM1_UI_SHA || null};
+if (process.env.CI) {
+    assert.match(sourceCommit || '', /^[0-9a-f]{40}$/);
+    for (const sha of Object.values(packageCommits)) assert.match(sha || '', /^[0-9a-f]{40}$/);
+}
 try {
     page = await browser.newPage({viewport: {width: 1440, height: 960}, locale: 'en-US', serviceWorkers: 'block'});
     page.setDefaultTimeout(45000);
     page.on('pageerror', error => pageErrors.push(error.message));
     await page.addInitScript(() => localStorage.setItem('bw-starter-v1-complete', '1'));
+    const manifestResponse = await page.request.get(new URL('brickwright-build.json', base).href);
+    assert.equal(manifestResponse.status(), 200);
+    buildManifest = await manifestResponse.json();
+    assert.equal(buildManifest.schema, 2);
+    assert.equal(buildManifest.product, 'Brickwright');
+    if (sourceCommit) assert.equal(buildManifest.commit, sourceCommit.slice(0, 7));
+    assert.ok(Number.isFinite(Date.parse(buildManifest.builtAt)));
+    assert.deepEqual(buildManifest.distributionPolicy, {
+        remoteExtensions: 'allow', executableToolchains: 'allow', machineImages: 'allow'
+    });
     await page.goto(base, {waitUntil: 'domcontentloaded'});
     await page.getByRole('tab', {name: 'Circuit', exact: true}).click();
     await page.getByTestId('bw-circuit-panel-examples').first().click();
@@ -27,11 +43,12 @@ try {
     const card = page.locator('[data-example-id="kim1-wired-io"]:visible');
     await card.getByText('KIM-1: Wired I/O', {exact: true}).click();
     const confirmation = page.getByRole('button', {name: 'OK', exact: true});
-    if (await confirmation.isVisible()) await confirmation.click();
+    await confirmation.click();
     const panel = page.locator('[data-kim1-panel="kim1"]:visible');
     await panel.waitFor();
+    await page.locator('[data-canvas] [data-part-id="kim1"][data-art-loaded="true"]').waitFor();
     assert.equal(await panel.locator('[data-kim1-key]').count(), 23);
-    checks.push('Brickwright Circuit gallery opens the KIM-1 lesson and all 23 front-panel keys');
+    checks.push('The source-bound Brickwright build opens the KIM-1 gallery lesson, artwork and all 23 front-panel keys');
 
     await panel.locator('[data-kim1-key="GO"]').click();
     await page.locator('[data-switch-control="input0"]:visible').click();
@@ -88,13 +105,13 @@ try {
     await page.screenshot({path: path.join(output, 'kim1-brickwright-panel.png'), fullPage: true});
     assert.deepEqual(pageErrors, []);
     const result = {status: 'passed', application: 'Brickwright', fullApplicationBuild: true,
-        sourceCommit: process.env.GITHUB_SHA || null, browser: browser.version(), checks};
+        sourceCommit, packageCommits, buildManifest, browser: browser.version(), checks};
     await writeFile(path.join(output, 'result.json'), JSON.stringify(result, null, 2) + '\n');
     console.log(JSON.stringify(result));
 } catch (error) {
     if (page) await page.screenshot({path: path.join(output, 'failure.png'), fullPage: true}).catch(() => {});
     await writeFile(path.join(output, 'failure.json'), JSON.stringify({
-        status: 'failed', sourceCommit: process.env.GITHUB_SHA || null,
+        status: 'failed', sourceCommit, packageCommits, buildManifest,
         checks, pageErrors, error: String(error.stack || error)
     }, null, 2) + '\n');
     throw error;
