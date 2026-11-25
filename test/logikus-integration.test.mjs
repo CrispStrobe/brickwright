@@ -7,6 +7,7 @@ import {createWorkspace, validateWorkspace, LOGIKUS_STORAGE_KEY} from
     '../overlay/scratch-gui/src/lib/logikus/workspace.js';
 import {connectLogikusController} from '../overlay/scratch-gui/src/lib/logikus/controller-bridge.js';
 import {getPreset} from '../overlay/scratch-gui/src/lib/logikus/presets.js';
+import {inspectRailway} from '../overlay/scratch-gui/src/lib/logikus/railway.js';
 import {BUNDLE_PATH, BUNDLE_FORMAT, BUNDLE_VERSION, attachBrickwrightState, extractBrickwrightState,
     encodeProjectState, decodeProjectState, isContentKey, parseBundleDocument} from
     '../overlay/scratch-gui/src/lib/bw-project-bundle.js';
@@ -126,6 +127,63 @@ test('SB3 attach/extract preserves wiring, labels, switches and controller ident
         restored.bridge.dispose();
     });
     harness.bridge.dispose();
+});
+
+test('railway SB3 round-trip preserves edited permissions and the restored widgets operate the repaired circuit', async () => {
+    const initial = workspaceFor('railway', [1, 0, 1, 0, 0, 0, 0, 0, 0, 0]);
+    initial.program.switchLabels[2] = 'Diamond occupied';
+    initial.program.lampLabels[0] = 'Proceed north';
+    initial.program.wires.push({id: 'railway-crossing-bypass', from: 'S2.Ba', to: 'S2.Bb'});
+    const original = controller(initial);
+    original.workspace = original.bridge.install(initial);
+    try {
+        assert.equal(original.panel.getValue('logikus_L0'), 1,
+            'the edited contact network grants A despite the occupied crossing');
+        const raw = {[LOGIKUS_STORAGE_KEY]: JSON.stringify(original.workspace),
+            'bw-ctl-widgets': JSON.stringify(original.panel.toJSON())};
+        await withStorage(raw, async store => {
+            const saved = await attachBrickwrightState(new Blob([await archive()]));
+            store.setItem(LOGIKUS_STORAGE_KEY, JSON.stringify(workspaceFor()));
+            assert.equal((await extractBrickwrightState(await saved.arrayBuffer())).outcome, 'loaded');
+            const workspace = validateWorkspace(JSON.parse(store.getItem(LOGIKUS_STORAGE_KEY)));
+            assert.equal(workspace.presetId, 'railway');
+            assert.deepEqual(workspace.program, initial.program,
+                'restoration preserves the learner edit instead of replacing it with the target preset');
+            assert.deepEqual(workspace.switches, initial.switches);
+            assert.equal(workspace.controller, true);
+            const restored = controller(workspace,
+                ControllerPanel.fromJSON(JSON.parse(store.getItem('bw-ctl-widgets'))));
+            try {
+                restored.bridge.sync(workspace);
+                assert.equal(restored.panel.getValue('logikus_S2'), 1);
+                assert.equal(restored.panel.getWidget('logikus_S2').layout.label, 'Diamond occupied');
+                assert.equal(restored.panel.getWidget('logikus_L0').layout.label, 'Proceed north');
+                assert.equal(restored.panel.getValue('logikus_L0'), 1,
+                    'renamed restored outputs still reflect the actual unsafe wiring');
+                assert.ok(inspectRailway(workspace.program).safetyCounterexample.violations
+                    .includes('crossing-occupied'));
+
+                restored.workspace = createWorkspace({...workspace, program: {...workspace.program,
+                    wires: workspace.program.wires.filter(wire => wire.id !== 'railway-crossing-bypass')}});
+                restored.bridge.sync(restored.workspace);
+                assert.equal(restored.panel.getValue('logikus_L0'), 0,
+                    'repairing the wiring immediately blocks the occupied crossing');
+                const repaired = inspectRailway(restored.workspace.program);
+                assert.equal(repaired.safeCount, 32);
+                assert.equal(repaired.matched, 32);
+                restored.panel.setSliderInput('logikus_S2', 0);
+                assert.equal(restored.panel.getValue('logikus_L0'), 1,
+                    'clearing the crossing through Widgets grants the restored request');
+                restored.panel.setSliderInput('logikus_S1', 1);
+                assert.equal(restored.panel.getValue('logikus_L0'), 0);
+                assert.equal(restored.panel.getValue('logikus_L1'), 0,
+                    'both requests retain the both-stop policy after restoration');
+                restored.panel.setSliderInput('logikus_S0', 0);
+                assert.equal(restored.panel.getValue('logikus_L1'), 1,
+                    'withdrawing A leaves the valid B route permitted');
+            } finally { restored.bridge.dispose(); }
+        });
+    } finally { original.bridge.dispose(); }
 });
 
 test('malformed Logikus archive refuses all writes; legacy or absent sections clear stale state', async () => {

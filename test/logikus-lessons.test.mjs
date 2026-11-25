@@ -14,7 +14,7 @@ const byId = new Map(wave.lessons.map(lesson => [lesson.id, lesson]));
 test('Logikus lessons open real presets and contain complete bilingual learning sequences', () => {
     assert.equal(wave.wave, 'logikus-9');
     assert.ok(wave.title.en && wave.title.de);
-    assert.equal(wave.lessons.length, 6);
+    assert.equal(wave.lessons.length, 7);
     assert.equal(byId.size, wave.lessons.length);
     const availablePresets = new Set(LOGIKUS_PRESETS.map(preset => preset.id));
     const topics = new Set();
@@ -174,5 +174,71 @@ test('the taught code and all ten single-bit fault trials operate the real momen
         faulty[index] = !faulty[index];
         assert.equal(lamp(faulty, true), false, `S${index} must matter`);
         assert.equal(lamp(switches, true), true, 'restoring the bit restores the correct code');
+    }
+});
+
+test('the railway lesson lists exactly the four combinations that grant a route', () => {
+    const lesson = byId.get('logikus-railway');
+    const prediction = lesson.checkpoints.find(checkpoint => checkpoint.id === 'predict').copy;
+    const program = getPreset(lesson.presetId).program;
+    const rows = truthTable(program);
+    const granted = rows.filter(row => row.lamps[0] || row.lamps[1]);
+    const bits = row => row.switches.slice(0, 5).map(Number).join('');
+    assert.equal(rows.length, 32);
+    assert.equal(granted.length, 4);
+    assert.equal(rows.filter(row => !row.lamps[0] && !row.lamps[1]).length, 28);
+    for (const locale of ['en', 'de']) {
+        const taught = prediction[locale].explain.match(/\b[01]{5}\b/g);
+        assert.deepEqual(taught?.slice(0, 2), ['10000', '10001']);
+        assert.deepEqual(taught?.slice(2), ['01000', '01010']);
+        assert.deepEqual(taught.slice().sort(), granted.map(bits).sort());
+        assert.match(prediction[locale].explain, /32/);
+        assert.match(prediction[locale].explain, /28/);
+    }
+    for (const row of granted) {
+        assert.equal(row.lamps[0], row.switches[0]);
+        assert.equal(row.lamps[1], row.switches[1]);
+    }
+    const both = evaluateProgram(program, {switches: [1, 1, 0, 0, 0, 0, 0, 0, 0, 0]});
+    assert.deepEqual(both.lamps.slice(0, 2), [false, false]);
+});
+
+test('the railway lesson bypass is a real unsafe permission at the taught input', () => {
+    const lesson = byId.get('logikus-railway');
+    const challenge = lesson.checkpoints.find(checkpoint => checkpoint.id === 'unsafe').copy;
+    const program = getPreset(lesson.presetId).program;
+    for (const locale of ['en', 'de']) {
+        assert.match(challenge[locale].action, /S2\.Ba/);
+        assert.match(challenge[locale].action, /S2\.Bb/);
+        assert.match(challenge[locale].action, /10100/);
+    }
+    const inputs = {switches: [1, 0, 1, 0, 0, 0, 0, 0, 0, 0]};
+    assert.equal(evaluateProgram(program, inputs).lamps[0], false,
+        'the original circuit blocks the occupied crossing');
+    program.wires.push({id: 'lesson-crossing-bypass', from: 'S2.Ba', to: 'S2.Bb'});
+    const result = evaluateProgram(program, inputs);
+    assert.equal(result.lamps[0], true, 'the taught bypass grants A into an occupied crossing');
+    assert.equal(result.lamps[1], false);
+    assert.ok(result.paths[0].includes('lesson-crossing-bypass'),
+        'the path inspector can identify the fault the lesson asks the learner to trace');
+});
+
+test('disconnecting the two taught lamp leads avoids every unsafe permission but blocks four valid requests', () => {
+    const lesson = byId.get('logikus-railway');
+    const program = getPreset(lesson.presetId).program;
+    const target = truthTable(program);
+    const originalCount = program.wires.length;
+    program.wires = program.wires.filter(wire => !['L0', 'L1'].includes(wire.to));
+    assert.equal(originalCount - program.wires.length, 2);
+    const rows = truthTable(program, {switchIndices: [0, 1, 2, 3, 4]});
+    assert.equal(rows.length, 32);
+    assert.ok(rows.every(row => !row.lamps[0] && !row.lamps[1]));
+    assert.equal(rows.filter((row, index) =>
+        row.lamps[0] !== target[index].lamps[0] || row.lamps[1] !== target[index].lamps[1]).length, 4);
+    const useful = lesson.checkpoints.find(checkpoint => checkpoint.id === 'useful').copy;
+    for (const locale of ['en', 'de']) {
+        assert.match(useful[locale].action, /L0/);
+        assert.match(useful[locale].action, /L1/);
+        assert.match(useful[locale].hint, /10000/);
     }
 });

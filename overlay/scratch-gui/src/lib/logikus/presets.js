@@ -139,6 +139,22 @@ const presets = [
         ], {switchLabels: ['Farmer', 'Wolf', 'Goat', 'Cabbage'], lampLabels: ['Danger left', 'Danger right']})
     },
     {
+        id: 'railway', usedSwitches: [0, 1, 2, 3, 4],
+        copy: {
+            en: {title: 'Railway crossing interlock', summary: 'Two routes share one crossing. A green signal needs a request, a clear crossing and a clear exit.',
+                challenge: 'Request both routes: both must stop. Bypass a crossing contact, then find an unsafe state. Is a circuit that always stops useful?',
+                hint: 'A = S0 AND NOT S1 AND NOT S2 AND NOT S3. B = S1 AND NOT S0 AND NOT S2 AND NOT S4. The circuit checks the current state; it does not reserve routes.'},
+            de: {title: 'Verriegelung einer Gleiskreuzung', summary: 'Zwei Fahrwege teilen eine Kreuzung. Grün braucht eine Anforderung, eine freie Kreuzung und eine freie Ausfahrt.',
+                challenge: 'Fordere beide Fahrwege an: Beide müssen halten. Überbrücke einen Kreuzungskontakt und finde einen unsicheren Zustand. Ist ständiges Halt sinnvoll?',
+                hint: 'A = S0 UND NICHT S1 UND NICHT S2 UND NICHT S3. B = S1 UND NICHT S0 UND NICHT S2 UND NICHT S4. Die Schaltung prüft den aktuellen Zustand; sie reserviert keine Fahrwege.'}
+        },
+        program: fromTerms('Railway crossing interlock', [
+            [[[0, 1], [1, 0], [2, 0], [3, 0]]],
+            [[[1, 1], [0, 0], [2, 0], [4, 0]]]
+        ], {switchLabels: ['Request A', 'Request B', 'Crossing occupied', 'Exit A occupied', 'Exit B occupied'],
+            lampLabels: ['A may proceed', 'B may proceed']})
+    },
+    {
         id: 'code-lock', usedSwitches: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], usesButton: true,
         copy: {
             en: {title: 'The ten-bit code lock', summary: 'Set 1011101101 from S0 to S9, then hold Test to check the code.',

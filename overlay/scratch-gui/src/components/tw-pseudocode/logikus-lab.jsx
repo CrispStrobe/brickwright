@@ -6,6 +6,8 @@ import {CONTACT_ROWS, ENDPOINTS, createEmptyProgram, evaluateProgram} from '../.
 import {LOGIKUS_PRESETS, getPreset} from '../../lib/logikus/presets.js';
 import {createWorkspace, validateWorkspace, LOGIKUS_WORKSPACE_MAX_BYTES} from '../../lib/logikus/workspace.js';
 import {inspectProgram} from '../../lib/logikus/inspection.js';
+import {inspectRailway} from '../../lib/logikus/railway.js';
+import LogikusRailway, {railwayViolationText} from './logikus-railway.jsx';
 import downloadBlob from '../../lib/download-blob.js';
 import styles from './logikus-lab.css';
 
@@ -74,7 +76,7 @@ export default function LogikusLab ({workspace, button, locale, error, onChange,
     const [to, setTo] = useState('S0.Aa');
     const [history, setHistory] = useState([]);
     const [future, setFuture] = useState([]);
-    const [inspection, setInspection] = useState(null);
+    const [inspectionReport, setInspection] = useState(null);
     const [page, setPage] = useState(0);
     const [showHint, setShowHint] = useState(false);
     const [notice, setNotice] = useState('');
@@ -89,6 +91,11 @@ export default function LogikusLab ({workspace, button, locale, error, onChange,
     const callbacks = useRef({onClose, onTest});
     callbacks.current = {onClose, onTest};
     const preset = LOGIKUS_PRESETS.find(item => item.id === workspace.presetId);
+    const isRailway = workspace.presetId === 'railway';
+    // A prop change renders before effects clear the old report. Bind reports
+    // to both wiring and goal, while keeping them valid when only inputs move.
+    const inspectionSignature = JSON.stringify([workspace.presetId, workspace.program]);
+    const inspection = inspectionReport?.signature === inspectionSignature ? inspectionReport.result : null;
     const brief = preset ? copy(preset.copy, de) : null;
     const result = useMemo(() => evaluateProgram(workspace.program, {switches: workspace.switches, button}),
         [workspace.program, workspace.switches, button]);
@@ -180,6 +187,15 @@ export default function LogikusLab ({workspace, button, locale, error, onChange,
         onChange({...workspace, switches: switches.map(Number)});
         onTest(down);
     });
+    const toggleSwitch = index => {
+        const next = [...workspace.switches]; next[index] = Number(!next[index]); setInputs(next);
+    };
+    const showWiring = () => {
+        setTab('wire');
+        // Inspect/replay controls disappear with their panel. Keep keyboard
+        // focus inside the dialog at the requested view instead of on body.
+        modal.current?.querySelector('#logikus-tab-wire')?.focus();
+    };
     const pressTest = source => {
         if (testOwners.current.has(source)) return;
         testOwners.current.add(source);
@@ -190,11 +206,12 @@ export default function LogikusLab ({workspace, button, locale, error, onChange,
         onTest(testOwners.current.size > 0);
     };
     const testAll = () => act(() => {
-        const checked = inspectProgram(workspace.program, preset?.program);
-        setInspection(checked); setPage(0); setTab('table');
+        const checked = isRailway ? inspectRailway(workspace.program) : inspectProgram(workspace.program, preset?.program);
+        setInspection({signature: inspectionSignature, result: checked}); setPage(0); setTab('table');
         window.dispatchEvent(new CustomEvent('bw-logikus-tested', {detail: {
             presetId: workspace.presetId, states: checked.rows.length,
-            matched: checked.matched, goal: !!preset
+            matched: checked.matched, goal: !!preset,
+            ...(isRailway ? {safe: checked.safeCount} : {})
         }}));
     });
     const exportJson = async () => {
@@ -275,6 +292,8 @@ export default function LogikusLab ({workspace, button, locale, error, onChange,
                     <div className={styles.experimentHeading}><div><h3>{workspace.program.title}</h3>
                         <p>{brief?.summary || say('Connect Q to a lamp through contacts of your choice.', 'Verbinde Q über selbst gewählte Kontakte mit einer Lampe.')}</p></div>
                         <button type="button" className={styles.primary} onClick={testAll}>{say('Test all states', 'Alle Zustände testen')}</button></div>
+                    {isRailway && tab === 'operate' && <LogikusRailway result={result} selectedLamp={selectedLamp}
+                        onSwitch={toggleSwitch} onSelectLamp={setSelectedLamp} onInspect={showWiring} de={de} />}
                     <div className={styles.lamps} aria-label={say('Lamp outputs', 'Lampenausgänge')}>
                         {result.lamps.map((on, i) => <button type="button" key={i}
                             className={styles.lamp} data-on={on} data-selected={selectedLamp === i}
@@ -287,9 +306,7 @@ export default function LogikusLab ({workspace, button, locale, error, onChange,
                     <div className={styles.switches} aria-label={say('Switch inputs', 'Schaltereingänge')}>
                         {workspace.switches.map((value, i) => <button key={i} type="button" role="switch"
                             aria-checked={!!value} aria-label={`S${i} ${workspace.program.switchLabels[i]}`}
-                            className={styles.switch} data-on={!!value} onClick={() => {
-                                const next = [...workspace.switches]; next[i] = Number(!value); setInputs(next);
-                            }}><span>{`S${i}`}</span><span className={styles.switchTrack}><b>{value ? '1' : '0'}</b></span>
+                            className={styles.switch} data-on={!!value} onClick={() => toggleSwitch(i)}><span>{`S${i}`}</span><span className={styles.switchTrack}><b>{value ? '1' : '0'}</b></span>
                             <strong>{workspace.program.switchLabels[i]}</strong></button>)}
                     </div>
                     <div className={styles.inputTools}>
@@ -319,7 +336,7 @@ export default function LogikusLab ({workspace, button, locale, error, onChange,
                             const wire = workspace.program.wires.find(w => w.id === id);
                             return wire ? <span key={id}>{wire.from}<b> ↔ </b>{wire.to}</span> : null;
                         })}</div> : <p>{say('Change an input, or inspect the contacts in Wire view. Open contacts interrupt the route.', 'Ändere einen Eingang oder prüfe die Kontakte unter Verdrahten. Offene Kontakte unterbrechen den Weg.')}</p>}
-                        <button type="button" onClick={() => setTab('wire')}>{say('Inspect the wiring', 'Verdrahtung ansehen')}</button>
+                        <button type="button" onClick={showWiring}>{say('Inspect the wiring', 'Verdrahtung ansehen')}</button>
                         <div className={styles.explainer}><div><h4>{say('Predict', 'Vorhersagen')}</h4><p>{say('Pick an input combination. Which lamps should light?', 'Wähle eine Eingangskombination. Welche Lampen sollten leuchten?')}</p></div>
                             <div><h4>{say('Experiment', 'Experimentieren')}</h4><p>{say('Flip the switches. Select a lamp to reveal its route.', 'Betätige die Schalter. Wähle eine Lampe und entdecke ihren Weg.')}</p></div>
                             <div><h4>{say('Remix', 'Verändern')}</h4><p>{say('Move a wire, then test every state against the example.', 'Versetze einen Draht und prüfe alle Zustände gegen das Beispiel.')}</p></div></div>
@@ -348,23 +365,43 @@ export default function LogikusLab ({workspace, button, locale, error, onChange,
                         {!inspection ? <div className={styles.emptyTable}><h3>{say('Check every possibility', 'Prüfe jede Möglichkeit')}</h3>
                             <p>{say('Test all states generates the complete table. For an example, it also checks your wiring against the original goal and finds a counterexample if it differs.', 'Alle Zustände testen erstellt die vollständige Tabelle. Bei einem Beispiel prüft es deine Verdrahtung auch gegen das ursprüngliche Ziel und findet bei Abweichungen ein Gegenbeispiel.')}</p>
                             <button type="button" onClick={testAll}>{say('Test all states', 'Alle Zustände testen')}</button></div> : <>
-                            <div role="status" className={styles.verdict} data-pass={!inspection.counterexample}>
+                            {isRailway && <div className={styles.railwayReport}>
+                                <div role="status" className={styles.verdict} data-pass={!inspection.safetyCounterexample} data-testid="railway-safety-result">
+                                    <div><span>{say('Safety checks', 'Sicherheitsprüfungen')}</span>
+                                        <strong>{`${inspection.safeCount} / ${inspection.rows.length} ${say('states have no unsafe permissions', 'Zustände ohne unsichere Freigabe')}`}</strong></div>
+                                    {inspection.safetyCounterexample && <button type="button" onClick={() => {
+                                        const row = inspection.safetyCounterexample;
+                                        setInputs(row.switches, row.button);
+                                        const incorrectSignal = row.different.find(index => index < 2 && row.lamps[index]);
+                                        setSelectedLamp(incorrectSignal ?? (row.lamps[0] ? 0 : 1)); showWiring();
+                                    }}>{say('Show unsafe state', 'Unsicheren Zustand zeigen')}</button>}
+                                </div>
+                                {inspection.safetyCounterexample && <p className={styles.hint}>
+                                    {inspection.safetyCounterexample.violations.map(code => railwayViolationText(code, de)).join(' ')}</p>}
+                                <p className={styles.hint}>{say('An always-red circuit can pass these safety checks and still fail the target behavior. Both requests must give both red; a clear route requested alone must get green.',
+                                    'Eine immer rote Schaltung kann diese Sicherheitsprüfungen bestehen und trotzdem das Ziel verfehlen. Bei zwei Anforderungen müssen beide Signale rot sein; ein einzeln angeforderter freier Fahrweg muss grün erhalten.')}</p>
+                            </div>}
+                            <div role="status" className={styles.verdict} data-pass={!inspection.counterexample} data-testid="logikus-target-result">
+                                <div>{isRailway && <span>{say('Target behavior', 'Zielverhalten')}</span>}
                                 <strong>{preset ? `${inspection.matched} / ${inspection.rows.length} ${say('states match the goal', 'Zustände entsprechen dem Ziel')}` :
-                                    `${inspection.rows.length} ${say('states enumerated', 'Zustände aufgelistet')}`}</strong>
+                                    `${inspection.rows.length} ${say('states enumerated', 'Zustände aufgelistet')}`}</strong></div>
                                 {inspection.counterexample && <button type="button" onClick={() => {
                                     setInputs(inspection.counterexample.switches, inspection.counterexample.button);
-                                    setSelectedLamp(inspection.counterexample.different[0]); setTab('wire');
+                                    setSelectedLamp(inspection.counterexample.different[0]); showWiring();
                                 }}>{say('Show counterexample', 'Gegenbeispiel zeigen')}</button>}
                             </div>
                             <p className={styles.hint}>{say('All relevant inputs are included, even a switch removed from the goal circuit. Select a row to try it; a Test = 1 row holds the test contact until the next input or reset.', 'Alle relevanten Eingänge sind enthalten, auch ein aus der Zielschaltung entfernter Schalter. Wähle eine Zeile zum Ausprobieren; bei Test = 1 bleibt der Tasterkontakt bis zur nächsten Eingabe oder zum Zurücksetzen geschlossen.')}</p>
                             <div className={styles.tableScroll}><table><thead><tr><th>{say('Try', 'Testen')}</th>
                                 {inspection.switchIndices.map(i => <th key={i}>{`S${i}`}</th>)}{inspection.button && <th>Test</th>}
-                                {Array.from({length: 10}, (_, i) => <th key={i}>{`L${i}`}</th>)}{preset && <th>{say('Goal', 'Ziel')}</th>}</tr></thead>
+                                {Array.from({length: 10}, (_, i) => <th key={i}>{`L${i}`}</th>)}{isRailway && <th>{say('Safety', 'Sicherheit')}</th>}{preset && <th>{say('Goal', 'Ziel')}</th>}</tr></thead>
                                 <tbody>{inspection.rows.slice(page * 16, page * 16 + 16).map((row, i) => <tr key={page * 16 + i} data-match={row.matches}>
                                     <td><button type="button" onClick={() => setInputs(row.switches, row.button)}>{page * 16 + i + 1}</button></td>
                                     {inspection.switchIndices.map(index => <td key={index}>{Number(row.switches[index])}</td>)}{inspection.button && <td>{Number(row.button)}</td>}
                                     {row.lamps.map((on, index) => <td key={index} className={row.different.includes(index) ? styles.mismatch : undefined}
                                         title={row.expected ? `${say('Expected', 'Erwartet')}: ${Number(row.expected[index])}` : undefined}>{Number(on)}</td>)}
+                                    {isRailway && <td className={row.safe ? undefined : styles.mismatch}
+                                        title={row.violations.map(code => railwayViolationText(code, de)).join(' ')}>
+                                        {row.safe ? '✓' : say('Unsafe', 'Unsicher')}</td>}
                                     {preset && <td>{row.matches ? '✓' : row.different.map(index => `L${index}=${Number(row.expected[index])}`).join(', ')}</td>}
                                 </tr>)}</tbody></table></div>
                             <div className={styles.pagination}><button type="button" disabled={page === 0} onClick={() => setPage(page - 1)}>{say('Previous', 'Zurück')}</button>

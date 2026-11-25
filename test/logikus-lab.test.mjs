@@ -12,6 +12,7 @@ import * as model from '../overlay/scratch-gui/src/lib/logikus/model.js';
 import * as presets from '../overlay/scratch-gui/src/lib/logikus/presets.js';
 import * as workspaceModule from '../overlay/scratch-gui/src/lib/logikus/workspace.js';
 import * as inspection from '../overlay/scratch-gui/src/lib/logikus/inspection.js';
+import * as railway from '../overlay/scratch-gui/src/lib/logikus/railway.js';
 
 const gui = createRequire(process.env.BW_INTEGRATED_ROOT ?
     pathToFileURL(resolve(process.env.BW_INTEGRATED_ROOT, 'package.json')) :
@@ -45,21 +46,26 @@ dom.window.HTMLElement.prototype.getClientRects = function () {
 
 const React = gui('react'), ReactDOM = gui('react-dom');
 const {act, Simulate} = gui('react-dom/test-utils');
-const source = readFileSync(new URL('../overlay/scratch-gui/src/components/tw-pseudocode/logikus-lab.jsx', import.meta.url), 'utf8');
-const code = gui('@babel/core').transformSync(source, {filename: 'logikus-lab.jsx', babelrc: false, configFile: false,
-    presets: [gui.resolve('@babel/preset-react')], plugins: [gui.resolve('@babel/plugin-transform-modules-commonjs')]}).code;
-const module = {exports: {}};
 const styleNames = new Proxy({}, {get: (_, name) => name === '__esModule' ? false : String(name)});
-new Function('require', 'module', 'exports', code)(name => {
-    if (name.endsWith('/logikus/model.js')) return model;
-    if (name.endsWith('/logikus/presets.js')) return presets;
-    if (name.endsWith('/logikus/workspace.js')) return workspaceModule;
-    if (name.endsWith('/logikus/inspection.js')) return inspection;
-    if (name.endsWith('/download-blob.js')) return async () => {};
-    if (name === './logikus-lab.css') return styleNames;
-    return gui(name);
-}, module, module.exports);
-const Lab = module.exports.default;
+function loadComponent (filename) {
+    const source = readFileSync(new URL(`../overlay/scratch-gui/src/components/tw-pseudocode/${filename}`, import.meta.url), 'utf8');
+    const code = gui('@babel/core').transformSync(source, {filename, babelrc: false, configFile: false,
+        presets: [gui.resolve('@babel/preset-react')], plugins: [gui.resolve('@babel/plugin-transform-modules-commonjs')]}).code;
+    const module = {exports: {}};
+    new Function('require', 'module', 'exports', code)(name => {
+        if (name.endsWith('/logikus/model.js')) return model;
+        if (name.endsWith('/logikus/presets.js')) return presets;
+        if (name.endsWith('/logikus/workspace.js')) return workspaceModule;
+        if (name.endsWith('/logikus/inspection.js')) return inspection;
+        if (name.endsWith('/logikus/railway.js')) return railway;
+        if (name.endsWith('/download-blob.js')) return async () => {};
+        if (name === './logikus-lab.css') return styleNames;
+        if (name === './logikus-railway.jsx') return loadComponent('logikus-railway.jsx');
+        return gui(name);
+    }, module, module.exports);
+    return module.exports;
+}
+const Lab = loadComponent('logikus-lab.jsx').default;
 const makeWorkspace = id => workspaceModule.createWorkspace({program: presets.getPreset(id).program, presetId: id});
 const flush = callback => act(async () => { callback?.(); await Promise.resolve(); await Promise.resolve(); });
 const deferred = () => {
@@ -76,7 +82,7 @@ after(() => {
     }
 });
 
-function fixture (t, initial = makeWorkspace('half-adder')) {
+function fixture (t, initial = makeWorkspace('half-adder'), {locale = 'en'} = {}) {
     const launcher = document.createElement('button'); launcher.textContent = 'Open lab';
     document.body.appendChild(launcher); launcher.focus();
     const container = document.createElement('div'); document.body.appendChild(container);
@@ -87,7 +93,7 @@ function fixture (t, initial = makeWorkspace('half-adder')) {
         const [button, updateButton] = React.useState(false);
         const [error, updateError] = React.useState('');
         live = {workspace, button}; setWorkspace = updateWorkspace; setButton = updateButton;
-        return React.createElement(Lab, {workspace, button, locale: 'en', error,
+        return React.createElement(Lab, {workspace, button, locale, error,
             onChange: next => { const checked = workspaceModule.validateWorkspace(next); changes.push(checked); updateWorkspace(checked); },
             onTest: down => { testWrites.push(down); updateButton(down); },
             onError: failure => { errors.push(failure); updateError(failure.message); },
@@ -243,4 +249,165 @@ test('only the newest import can apply, and an unmounted lab ignores pending fil
     f.close();
     await flush(() => final.resolve(JSON.stringify(makeWorkspace('and'))));
     assert.equal(f.changes.length, count);
+});
+
+test('the railway scene and normal switch panel share actual circuit inputs and outputs', t => {
+    const f = fixture(t, makeWorkspace('railway'));
+    const scene = () => f.lab().querySelector('[data-testid="logikus-railway"]');
+    const input = i => scene().querySelector(`[data-input="${i}"]`);
+    const signal = i => scene().querySelector(`[data-signal="${i}"]`);
+    assert.equal(signal(0).getAttribute('data-green'), 'false');
+    f.click(input(0));
+    assert.equal(f.current.workspace.switches[0], 1);
+    assert.equal(f.switch(0).getAttribute('aria-checked'), 'true');
+    assert.equal(f.lamp(0).getAttribute('data-on'), 'true');
+    assert.equal(signal(0).getAttribute('data-green'), 'true');
+    f.click(f.switch(4));
+    assert.equal(input(4).getAttribute('aria-checked'), 'true');
+    assert.equal(signal(0).getAttribute('data-green'), 'true', 'unrelated exit B does not stop route A');
+    f.click(input(1));
+    assert.equal(signal(0).getAttribute('data-green'), 'false');
+    assert.equal(signal(1).getAttribute('data-green'), 'false', 'two requests stop both signals');
+    f.click(input(0)); f.click(input(4));
+    assert.equal(signal(1).getAttribute('data-green'), 'true');
+    f.click(signal(1));
+    assert.equal(f.lamp(1).getAttribute('data-selected'), 'true');
+    const inspect = scene().querySelector('button:not([role="switch"]):not([data-signal])');
+    inspect.focus(); f.click(inspect);
+    assert.ok(f.lab().querySelector('#logikus-wire'));
+    assert.equal(document.activeElement.id, 'logikus-tab-wire', 'the disappearing trigger transfers keyboard focus');
+    assert.equal(f.lamp(1).getAttribute('data-selected'), 'true', 'Wire keeps the selected signal path');
+});
+
+test('a learner can bypass occupancy, reproduce an unsafe state and undo the fault', t => {
+    const f = fixture(t, makeWorkspace('railway'));
+    f.click('Wire');
+    f.click(f.lab().querySelector('[aria-label="Terminal S2.Ba"]'));
+    f.click(f.lab().querySelector('[aria-label="Terminal S2.Bb"]'));
+    f.click('Operate');
+    f.click(f.switch(0)); f.click(f.switch(2));
+    const scene = f.lab().querySelector('[data-testid="logikus-railway"]');
+    assert.equal(scene.querySelector('[data-signal="0"]').getAttribute('data-green'), 'true',
+        'the scene must show the faulty wiring, not an ideal Boolean target');
+    assert.match(scene.querySelector('[role="status"]').textContent, /crossing is occupied/);
+    f.click('Test all states');
+    assert.match(f.lab().querySelector('[data-testid="railway-safety-result"]').textContent, /30 \/ 32/);
+    assert.match(f.lab().querySelector('[data-testid="logikus-target-result"]').textContent, /30 \/ 32/);
+    const replay = f.byText('Show unsafe state');
+    replay.focus(); f.click(replay);
+    assert.deepEqual(f.current.workspace.switches.slice(0, 5), [1, 0, 1, 0, 0]);
+    assert.ok(f.lab().querySelector('#logikus-wire'));
+    assert.equal(document.activeElement.id, 'logikus-tab-wire');
+    assert.equal(f.lamp(0).getAttribute('data-on'), 'true');
+    assert.equal(f.lamp(0).getAttribute('data-selected'), 'true');
+    assert.ok(model.evaluateProgram(f.current.workspace.program, {switches: f.current.workspace.switches}).paths[0]);
+    f.click('Undo');
+    f.click('Truth table');
+    assert.equal(f.lab().querySelector('[data-testid="railway-safety-result"]'), null, 'an edit invalidates the old report');
+    f.click('Test all states');
+    assert.match(f.lab().querySelector('[data-testid="railway-safety-result"]').textContent, /32 \/ 32/);
+    assert.equal(f.byText('Show unsafe state'), undefined);
+    assert.equal(f.byText('Show counterexample'), undefined);
+    f.click('Redo');
+    f.click('Test all states');
+    assert.match(f.lab().querySelector('[data-testid="railway-safety-result"]').textContent, /30 \/ 32/);
+});
+
+test('an always-red railway reports safety success and target failure separately', t => {
+    const initial = makeWorkspace('railway');
+    initial.program.wires = initial.program.wires.filter(wire => !/^L[01]$/.test(wire.to));
+    const f = fixture(t, initial);
+    f.click('Test all states');
+    const safety = f.lab().querySelector('[data-testid="railway-safety-result"]');
+    const behavior = f.lab().querySelector('[data-testid="logikus-target-result"]');
+    assert.equal(safety.getAttribute('data-pass'), 'true');
+    assert.match(safety.textContent, /32 \/ 32/);
+    assert.equal(behavior.getAttribute('data-pass'), 'false');
+    assert.match(behavior.textContent, /28 \/ 32/);
+    assert.equal(f.byText('Show unsafe state'), undefined);
+    const replay = f.byText('Show counterexample');
+    replay.focus(); f.click(replay);
+    assert.ok(f.lab().querySelector('#logikus-wire'));
+    assert.equal(document.activeElement.id, 'logikus-tab-wire');
+    const expected = railway.railwayTarget(f.current.workspace.switches);
+    const selected = expected.findIndex(Boolean);
+    assert.ok(selected === 0 || selected === 1);
+    assert.equal(f.lamp(selected).getAttribute('data-selected'), 'true');
+    assert.equal(f.lamp(selected).getAttribute('data-on'), 'false');
+});
+
+test('renamed railway labels keep fixed semantic ports and German scene copy', t => {
+    const initial = makeWorkspace('railway');
+    initial.program.switchLabels[0] = 'Renamed input';
+    initial.program.lampLabels[0] = 'Renamed output';
+    const f = fixture(t, initial, {locale: 'de-DE'});
+    const scene = f.lab().querySelector('[data-testid="logikus-railway"]');
+    assert.match(scene.textContent, /Zwei Fahrwege, eine Kreuzung/);
+    const input = scene.querySelector('[data-input="0"]');
+    assert.match(input.getAttribute('aria-label'), /S0: Fahrweg A anfordern/);
+    f.click(input);
+    assert.equal(f.current.workspace.switches[0], 1);
+    assert.match(f.lamp(0).getAttribute('aria-label'), /Renamed output: an/);
+    assert.match(scene.querySelector('[data-signal="0"]').textContent, /FAHRT/);
+    f.click('Alle Zustände testen');
+    assert.match(f.lab().querySelector('[data-testid="railway-safety-result"]').textContent, /Sicherheitsprüfungen/);
+    assert.match(f.lab().querySelector('[data-testid="logikus-target-result"]').textContent, /Zielverhalten/);
+});
+
+test('a railway import restores the scene and leaving the preset removes railway reports', async t => {
+    const f = fixture(t, makeWorkspace('half-adder')), pending = deferred();
+    const imported = makeWorkspace('railway');
+    imported.switches[1] = 1;
+    f.importFile(pending);
+    await flush(() => pending.resolve(JSON.stringify(imported)));
+    assert.equal(f.current.workspace.presetId, 'railway');
+    assert.equal(f.lab().querySelector('[data-signal="1"]').getAttribute('data-green'), 'true');
+    f.click('Test all states');
+    assert.ok(f.lab().querySelector('[data-testid="railway-safety-result"]'));
+    f.click('Half adder: 1 + 1 = 10');
+    assert.equal(f.lab().querySelector('[data-testid="logikus-railway"]'), null);
+    f.click('Test all states');
+    assert.equal(f.lab().querySelector('[data-testid="railway-safety-result"]'), null);
+    assert.match(f.lab().querySelector('[data-testid="logikus-target-result"]').textContent, /4 \/ 4/);
+});
+
+test('Undo and Redo across railway and other experiments cannot render a stale table', t => {
+    const f = fixture(t, makeWorkspace('railway'));
+    f.click('Half adder: 1 + 1 = 10');
+    f.click('Test all states');
+    assert.match(f.lab().querySelector('[data-testid="logikus-target-result"]').textContent, /4 \/ 4/);
+    f.click('Undo');
+    assert.equal(f.current.workspace.presetId, 'railway');
+    assert.equal(f.lab().querySelector('[data-testid="logikus-target-result"]'), null);
+    f.click('Test all states');
+    assert.match(f.lab().querySelector('[data-testid="railway-safety-result"]').textContent, /32 \/ 32/);
+    f.click('Redo');
+    assert.equal(f.current.workspace.presetId, 'half-adder');
+    assert.equal(f.lab().querySelector('[data-testid="railway-safety-result"]'), null);
+    f.click('Test all states');
+    assert.match(f.lab().querySelector('[data-testid="logikus-target-result"]').textContent, /4 \/ 4/);
+});
+
+test('importing railway over a populated nonrailway table never renders incompatible rows', async t => {
+    const f = fixture(t, makeWorkspace('half-adder')), pending = deferred();
+    f.click('Test all states');
+    f.importFile(pending);
+    await flush(() => pending.resolve(JSON.stringify(makeWorkspace('railway'))));
+    assert.equal(f.current.workspace.presetId, 'railway');
+    assert.equal(f.lab().querySelector('[data-testid="logikus-target-result"]'), null);
+    f.click('Test all states');
+    assert.match(f.lab().querySelector('[data-testid="railway-safety-result"]').textContent, /32 \/ 32/);
+});
+
+test('unsafe replay highlights the incorrect signal when the other green is legitimate', t => {
+    const initial = makeWorkspace('railway');
+    initial.program.wires.push({id: 'fault-entry', from: 'Q', to: 'S0.Ca'},
+        {id: 'fault-exit', from: 'S0.Cb', to: 'L1'});
+    const f = fixture(t, initial);
+    f.click('Test all states');
+    f.click('Show unsafe state');
+    assert.deepEqual(f.current.workspace.switches.slice(0, 5), [1, 0, 0, 0, 0]);
+    assert.equal(f.lamp(0).getAttribute('data-on'), 'true');
+    assert.equal(f.lamp(1).getAttribute('data-on'), 'true');
+    assert.equal(f.lamp(1).getAttribute('data-selected'), 'true', 'the extra green B is the counterexample');
 });

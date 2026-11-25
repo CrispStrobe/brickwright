@@ -476,6 +476,125 @@
           }
         }
       ]
+    },
+    {
+      "id": "logikus-railway",
+      "version": 1,
+      "presetId": "railway",
+      "loadMode": "logikus",
+      "wave": "logikus-9",
+      "topic": "railway-permissions-and-safety",
+      "domains": [
+        "circuits",
+        "debugging",
+        "widgets"
+      ],
+      "depth": "practitioner",
+      "ageGuidance": "10+",
+      "minutes": 25,
+      "environment": "simulation",
+      "languages": [],
+      "prerequisites": [
+        "logikus-conditions",
+        "logikus-majority"
+      ],
+      "copy": {
+        "en": {
+          "title": "Logikus: two routes, one crossing",
+          "objective": "Explain railway permissions through contact paths, find an unsafe wiring change, and distinguish a circuit that avoids unsafe states from one that performs its job."
+        },
+        "de": {
+          "title": "Logikus: zwei Fahrwege, eine Kreuzung",
+          "objective": "Erkläre Fahrfreigaben durch Kontaktpfade, finde einen gefährlichen Verdrahtungsfehler und unterscheide das Vermeiden gefährlicher Zustände vom Erfüllen der Aufgabe."
+        }
+      },
+      "checkpoints": [
+        {
+          "id": "predict",
+          "copy": {
+            "en": {
+              "action": "Identify S0 = request A, S1 = request B, S2 = crossing occupied, S3 = exit A occupied, and S4 = exit B occupied. Predict L0 and L1 for a clear requested route, an occupied crossing, and two simultaneous requests before using the controls.",
+              "explain": "L0 grants A when S0 AND NOT S1 AND NOT S2 AND NOT S3; L1 grants B when S1 AND NOT S0 AND NOT S2 AND NOT S4. Both requests deliberately mean both stop. Five binary inputs have 32 combinations. Read S0 through S4: 10000 and 10001 permit A; 01000 and 01010 permit B. The other 28 combinations permit neither.",
+              "hint": "An occupied section is 1. The other route's exit does not block your route. With both requests set to 1, neither route gets priority.",
+              "manual": "I mapped the five inputs and predicted permissions, including simultaneous requests"
+            },
+            "de": {
+              "action": "Ordne die Eingaben zu: S0 = Anforderung A, S1 = Anforderung B, S2 = Kreuzung belegt, S3 = Ausfahrt A belegt, S4 = Ausfahrt B belegt. Sage L0 und L1 für einen freien angeforderten Fahrweg, eine belegte Kreuzung und zwei gleichzeitige Anforderungen voraus, bevor du die Bedienelemente benutzt.",
+              "explain": "L0 gibt A frei bei S0 UND NICHT S1 UND NICHT S2 UND NICHT S3; L1 gibt B frei bei S1 UND NICHT S0 UND NICHT S2 UND NICHT S4. Zwei Anforderungen bedeuten hier bewusst zweimal Halt. Fünf binäre Eingaben haben 32 Kombinationen. Von S0 bis S4 gelesen erlauben 10000 und 10001 den Fahrweg A, 01000 und 01010 den Fahrweg B. Die anderen 28 Kombinationen erlauben keinen Fahrweg.",
+              "hint": "Ein belegter Abschnitt hat den Wert 1. Die Ausfahrt des anderen Fahrwegs sperrt deinen Fahrweg nicht. Bei beiden Anforderungen auf 1 erhält keiner Vorrang.",
+              "manual": "Ich habe die fünf Eingaben zugeordnet und Freigaben einschließlich gleichzeitiger Anforderungen vorhergesagt"
+            }
+          }
+        },
+        {
+          "id": "trace",
+          "copy": {
+            "en": {
+              "action": "Request A with the crossing and exit A clear. Select its signal, then choose Inspect the wiring and trace the path to L0. Change S2, S3 and S4 separately and compare their effects. Repeat for B, then choose Test all states.",
+              "explain": "The scene and patch board operate the same input values. Signal colors come from the actual wired L0 and L1 outputs. Red means the permission lamp is off; it is not an extra wired output. A complete circuit should pass both Safety checks and Target behavior for all 32 combinations.",
+              "hint": "For A, S2 and S3 must each block permission, while S4 alone must leave it unchanged. For B, S2 and S4 block permission, while S3 alone does not. The purple trace explains a live path rather than the intended formula.",
+              "manual": "I traced each real permission path and checked the occupied sections"
+            },
+            "de": {
+              "action": "Fordere A bei freier Kreuzung und freier Ausfahrt A an. Wähle das Signal, dann Verdrahtung ansehen, und verfolge den Weg zu L0. Ändere S2, S3 und S4 einzeln und vergleiche ihre Wirkung. Wiederhole das für B und wähle Alle Zustände testen.",
+              "explain": "Szene und Steckfeld bedienen dieselben Eingabewerte. Die Signalfarben stammen von den tatsächlich verdrahteten Ausgängen L0 und L1. Rot bedeutet, dass die Freigabelampe aus ist; es ist kein zusätzlicher verdrahteter Ausgang. Eine vollständige Schaltung sollte die Sicherheitsprüfungen bestehen und das Zielverhalten für alle 32 Kombinationen erfüllen.",
+              "hint": "Bei A müssen S2 und S3 jeweils die Freigabe sperren; S4 allein darf sie nicht verändern. Bei B sperren S2 und S4, während S3 allein nicht sperrt. Die violette Spur erklärt einen tatsächlich leitenden Weg statt der gewünschten Formel.",
+              "manual": "Ich habe beide tatsächlichen Freigabepfade verfolgt und die belegten Abschnitte geprüft"
+            }
+          }
+        },
+        {
+          "id": "unsafe",
+          "copy": {
+            "en": {
+              "action": "In Wire, add a connection from S2.Ba to S2.Bb to bypass A's crossing contact. Predict and try S0 through S4 = 10100. Run Test all states, choose Show unsafe state, and identify the contact that no longer protects the crossing. Undo the added wire.",
+              "explain": "At 10100, A is requested and the crossing is occupied, but the added wire lets L0 turn on. Safety checks find permission into an occupied section; Target behavior also disagrees. The counterexample is a concrete input that exposes the wiring error.",
+              "hint": "Use From and To if the sockets are hard to select. The new wire conducts regardless of S2. The checker always includes S0–S4 and any extra switch or Test input used by your wiring, even if you disconnect part of the original circuit.",
+              "manual": "I reproduced an unsafe permission, traced its cause, and restored the occupancy check"
+            },
+            "de": {
+              "action": "Füge in Verdrahten eine Verbindung von S2.Ba nach S2.Bb hinzu, um den Kreuzungskontakt von A zu überbrücken. Sage den Fall S0 bis S4 = 10100 voraus und prüfe ihn. Wähle Alle Zustände testen und Unsicheren Zustand zeigen. Finde den Kontakt, der die Kreuzung nicht mehr schützt. Mache den zusätzlichen Draht rückgängig.",
+              "explain": "Bei 10100 ist A angefordert und die Kreuzung belegt, doch der zusätzliche Draht lässt L0 aufleuchten. Die Sicherheitsprüfungen finden eine Freigabe in einen belegten Abschnitt; auch das Zielverhalten weicht ab. Das Gegenbeispiel ist eine konkrete Eingabe, die den Verdrahtungsfehler zeigt.",
+              "hint": "Benutze Von und Nach, wenn die Buchsen schwer auszuwählen sind. Der neue Draht leitet unabhängig von S2. Die Prüfung berücksichtigt immer S0–S4 und jeden zusätzlich verdrahteten Schalter oder Prüftaster, auch wenn du Teile der ursprünglichen Schaltung trennst.",
+              "manual": "Ich habe eine gefährliche Freigabe reproduziert, ihre Ursache verfolgt und die Belegungsprüfung wiederhergestellt"
+            }
+          }
+        },
+        {
+          "id": "useful",
+          "copy": {
+            "en": {
+              "action": "Remove the two wires ending at L0 and L1. Predict the two reports, then run Test all states. Explain why no unsafe state is found although Target behavior fails. Choose Show counterexample, then undo both removals.",
+              "explain": "With both lamp leads disconnected, all 32 combinations produce two red signals. No route receives an unsafe permission, but four valid requests are wrongly blocked. Avoiding unsafe states is one requirement; granting the intended clear route is another.",
+              "hint": "Try 10000: A should be permitted, but its disconnected lamp is off. Safety alone cannot distinguish a useful interlock from an always-red circuit. A policy that selects just A when both routes are requested can also avoid conflicting greens while differing from this lesson's both-stop target.",
+              "manual": "I distinguished the safety predicates from the complete behavior requirement and repaired both paths"
+            },
+            "de": {
+              "action": "Entferne die beiden Drähte, die an L0 und L1 enden. Sage die beiden Prüfberichte voraus und wähle Alle Zustände testen. Erkläre, warum kein unsicherer Zustand gefunden wird, obwohl das Zielverhalten nicht erfüllt ist. Wähle Gegenbeispiel zeigen und mache anschließend beide Entfernungen rückgängig.",
+              "explain": "Mit beiden Lampenzuleitungen getrennt zeigen alle 32 Kombinationen zweimal Rot. Kein Fahrweg erhält eine gefährliche Freigabe, aber vier zulässige Anforderungen werden fälschlich gesperrt. Gefährliche Zustände zu vermeiden ist eine Anforderung; den vorgesehenen freien Fahrweg freizugeben ist eine weitere.",
+              "hint": "Probiere 10000: A sollte freigegeben werden, doch die getrennte Lampe bleibt aus. Die Sicherheitsprüfungen allein unterscheiden eine brauchbare Verriegelung nicht von einer immer roten Schaltung. Auch eine Regel, die bei beiden Anforderungen nur A auswählt, kann gleichzeitiges Grün vermeiden und dennoch vom Zweimal-Halt-Soll dieser Lektion abweichen.",
+              "manual": "Ich habe Sicherheitsbedingungen und vollständiges Zielverhalten unterschieden und beide Pfade repariert"
+            }
+          }
+        },
+        {
+          "id": "transfer",
+          "copy": {
+            "en": {
+              "action": "Choose Use in Widgets and reproduce a clear route and an occupied crossing with the same S0–S4 controls. Reopen the lab and compare the lamps. Explain what extra information a controller would need to remember a granted route while a train moves.",
+              "explain": "The widgets still operate the same editable contact program. This experiment checks the current input state; you set requests and occupied sections. It does not move trains, reserve a route, remember earlier permission, or implement timing and route release.",
+              "hint": "A train movement is a sequence of states. A route lock would need explicit stored state and rules for setting and releasing it. Those are new model elements, not behavior hidden in this combinational circuit.",
+              "manual": "I transferred the circuit to Widgets and explained the boundary between current-state logic and route memory"
+            },
+            "de": {
+              "action": "Wähle In Widgets nutzen und stelle mit denselben S0–S4-Reglern einen freien Fahrweg sowie eine belegte Kreuzung nach. Öffne das Labor erneut und vergleiche die Lampen. Erkläre, welche zusätzlichen Informationen eine Steuerung speichern müsste, um einen freigegebenen Fahrweg während einer Zugfahrt festzuhalten.",
+              "explain": "Die Widgets bedienen weiterhin dasselbe veränderbare Kontaktprogramm. Dieses Experiment prüft den aktuellen Eingabezustand; du setzt Anforderungen und belegte Abschnitte. Es bewegt keine Züge, reserviert keinen Fahrweg, merkt sich keine frühere Freigabe und enthält keine Zeitsteuerung oder Fahrwegauflösung.",
+              "hint": "Eine Zugfahrt ist eine Folge von Zuständen. Eine Fahrwegverriegelung bräuchte ausdrücklich gespeicherten Zustand und Regeln zum Setzen und Auflösen. Das wären neue Modellelemente, keine versteckte Funktion dieser kombinatorischen Schaltung.",
+              "manual": "Ich habe die Schaltung in Widgets bedient und die Grenze zwischen aktueller Zustandslogik und Fahrwegspeicher erklärt"
+            }
+          }
+        }
+      ]
     }
   ]
 }

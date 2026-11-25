@@ -93,6 +93,7 @@ const expectedOutputs = (id, s, button) => {
         'half-adder': [a !== b, a && b],
         majority: [[a, b, c].filter(Boolean).length >= 2],
         river: [a && !c && (!b || !d), !a && c && (b || d)],
+        railway: [a && !b && !c && !d, b && !a && !c && !s[4]],
         'code-lock': [button && s.map(Number).join('') === '1011101101']
     };
     return [...outputs[id], ...Array(10 - outputs[id].length).fill(false)];

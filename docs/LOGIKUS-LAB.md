@@ -83,7 +83,7 @@ Sources: [original workbooks and information](https://www.logikus.info/),
 pages 2–5. Workbook page references in this document are **printed page
 numbers**, which do not always match a PDF viewer's page index.
 
-## The nine supplied programs
+## The ten supplied programs
 
 Let A = S0, B = S1 and C = S2. All outputs are Boolean lamp states.
 
@@ -98,6 +98,7 @@ Let A = S0, B = S1 and C = S2. All outputs are Boolean lamp states.
 | `majority` | Three voters | L0 = at least two of S0, S1 and S2; 111 also passes |
 | `river` | Wolf, goat and cabbage | L0 = danger left; L1 = danger right |
 | `code-lock` | Ten-bit code lock | L0 = `1011101101` on S0…S9 AND Test held |
+| `railway` | Two routes, one crossing | L0 = S0 AND NOT S1 AND NOT S2 AND NOT S3; L1 = S1 AND NOT S0 AND NOT S2 AND NOT S4 |
 
 For the river program, S0 = farmer, S1 = wolf, S2 = goat, S3 = cabbage, with
 0 = left and 1 = right. A bank is dangerous when the farmer is absent and the
@@ -117,6 +118,81 @@ The presets, interface, explanations and tests are newly written for
 Brickwright. They are inspired by Logikus's contact model and teaching ideas.
 The application does not bundle original workbook scans or copy the original
 simulator's source code.
+
+## Railway crossing: permissions you can explain
+
+Choose the **Railway** experiment to operate two routes that share one
+crossing. You set requests and occupied sections; the editable contact
+program decides which signal may be green now.
+
+| Input or output | Meaning |
+| --- | --- |
+| S0 | Route A requested |
+| S1 | Route B requested |
+| S2 | Shared crossing occupied |
+| S3 | Route A exit occupied |
+| S4 | Route B exit occupied |
+| L0 | Route A may proceed |
+| L1 | Route B may proceed |
+
+An occupied section has value 1. Route A requires S0 = 1 and S1 = S2 = S3 = 0;
+route B requires S1 = 1 and S0 = S2 = S4 = 0. **If both routes are requested,
+both signals stay red.** This is the experiment's explicit choice of policy;
+there is no priority or remembered first request. The other route's exit is
+independent: S4 alone must not block A, and S3 alone must not block B.
+
+The supplied program uses eight contacts arranged in two separate series
+paths. It shares Q but does not join intermediate nodes between those paths.
+S0, S1 and S2 each participate in both route conditions through electrically
+separate contact pairs. There are **32 combinations** of the five inputs:
+two permit A, two permit B, and 28 permit neither. S5–S9 and Test are unused
+in the starting circuit.
+
+The railway scene operates the same switch values as the rest of the lab.
+Its signals display the actual L0 and L1 results, including wiring mistakes.
+Selecting a signal selects that lamp's explanation; **Inspect the wiring** opens
+the patch board with the selected lamp retained. A red signal means that its
+green-permission lamp is off; it is a scene display, not another wired output.
+Renaming the panel's labels does not change the fixed input/output mapping.
+
+**Test all states** gives two distinct results:
+
+- **Safety checks** detect simultaneous greens, permission into an occupied
+  crossing or exit, and permission without the corresponding request.
+- **Target behavior** compares the actual lamps with the specified route
+  rules, including the both-requests-stop policy and the unused lamps staying
+  off. This catches a circuit that blocks a valid request as well as one that
+  gives permission incorrectly.
+
+The checker always includes S0–S4, plus every additional switch or Test input
+referenced by the edited wiring. Removing a condition cannot hide its input
+from testing, and adding S9 or Test cannot create an unexamined dependency.
+The route target is calculated from independent Boolean conditions, not by
+evaluating the preset's reference wiring again.
+
+Try two different failures:
+
+1. In **Wire**, add a wire from **S2.Ba** to **S2.Bb**. This bypasses the
+   crossing-occupancy contact in A's path. Set S0…S4 to **10100**: A is
+   requested and the crossing is occupied, yet L0 turns on. Run **Test all
+   states**, choose **Show unsafe state**, and trace the complete path that
+   grants permission. **Undo** restores the occupancy check.
+2. Remove the two wires ending at **L0** and **L1**, then test all states.
+   Both signals are always red, so these state-based safety predicates find
+   no unsafe combination. The circuit still fails its target in the four
+   combinations that should permit a route. **Show counterexample** displays
+   such a blocked valid request. Undo both removals to restore the design.
+
+Passing the safety predicates therefore does not establish useful behavior.
+Likewise, choosing one route when both are requested can avoid simultaneous
+greens while violating this experiment's policy.
+
+This is a **combinational crossing experiment**. It does not simulate train
+movement, reserve or lock a route, remember a granted permission, or implement
+timing and route release. The checker evaluates current input states; it
+does not establish a safe sequence of train movements or a physical railway
+controller. The widget bridge and normal project save/restore carry this
+experiment's wiring and input settings just like the other Logikus presets.
 
 ## Follow a path and find a counterexample
 
@@ -201,13 +277,13 @@ are limited to 128 KiB and programs to 512 wires. Valid endpoints, unique wire
 IDs and duplicate connections are checked. Held Test state, computed outputs,
 inspection reports and undo history are transient and are not project content.
 
-## Six guided lessons
+## Seven guided lessons
 
 Search for **Logikus** in Lessons. The sequence covers paths, AND/OR/NOT,
-XOR/half-addition, majority testing, the river puzzle and the code-lock
-controller. All six lessons have English and German guidance, hints and
-manual completion checkpoints. The lessons distinguish opening a bench,
-predicting a result, observing it, and explaining it. Opening the lab or
+XOR/half-addition, majority testing, the river puzzle, the code-lock
+controller and railway permissions. All seven lessons have English and German
+guidance, hints and manual completion checkpoints. The lessons distinguish
+opening a bench, predicting a result, observing it, and explaining it. Opening the lab or
 generating a table does not automatically complete a learning checkpoint.
 
 The lab is a modal workspace. Close it to return to the lesson drawer and
@@ -220,7 +296,8 @@ This is an ideal contact simulator. It does not calculate resistance, voltage,
 current, supply loading, switch bounce or lamp warm-up. It collapses the
 original socket triplets to nodes and does not enforce the physical limit of
 three sockets per terminal group. It has no automatic clock, built-in
-sequencer, flip-flop or CPU. The river program has no transition validator.
+sequencer, flip-flop or CPU. The river program has no transition validator,
+and the railway program has no route memory or train movement model.
 The new bridge operates Brickwright Widgets; it does not automatically bind
 the contact graph to the analog circuit solver, GPIO or physical hardware.
 
@@ -229,8 +306,9 @@ The original books suggest useful next projects that fit Brickwright:
 - **Traffic controller:** start with the manually selected traffic/pedestrian
   phases in volume 2, pages 23–26. A future sequencer can add explicit stored
   phase and elapsed time, with those new capabilities clearly visible.
-- **Railway interlock:** use the single-track scenario in volume 2, pages
-  30–31, to teach conflicting requests, safe outputs and counterexample tests.
+- **Railway sequencing:** extend the supplied crossing experiment with
+  explicit route reservation, train movement and route release. Stored state
+  and transition rules would become new parts of the model and its tests.
 - **Aquarium control:** adapt the temperature and aquarium discussions in
   volume 2, pages 37–42. A future sensor adapter could map measured thresholds
   to switch inputs and expose contradictory hot/cold indications as a fault.
@@ -246,12 +324,14 @@ tests; a control-panel demonstration does not establish a physical controller.
 | File | Responsibility |
 | --- | --- |
 | `src/lib/logikus/model.js` | Validated contact graph, reachability, lamp paths and truth tables |
-| `src/lib/logikus/presets.js` | Nine immutable preset definitions; editable detached copies |
+| `src/lib/logikus/presets.js` | Ten immutable preset definitions; editable detached copies |
 | `src/lib/logikus/inspection.js` | Relevant input discovery, comparison and counterexamples |
+| `src/lib/logikus/railway.js` | Independent railway target, state safety predicates and exhaustive checks |
 | `src/lib/logikus/workspace.js` | Validated persistence format and size limit |
 | `src/lib/logikus/controller-bridge.js` | Two-way input synchronization and computed lamp widgets |
 | `src/components/tw-pseudocode/logikus-host.jsx` | Persistent controller lifetime, opening and project restoration |
 | `src/components/tw-pseudocode/logikus-lab.jsx` | Operate / Wire / Truth table interface |
+| `src/components/tw-pseudocode/logikus-railway.jsx` | Railway scene, shared input controls and live signal explanations |
 | `src/components/gui/lesson-waves/logikus-9.json` | Bilingual guided lesson content |
 
 The paths above are relative to `overlay/scratch-gui/`. This code and its
@@ -259,11 +339,12 @@ lessons are app-owned; they do not modify the example gallery vendored from
 `sb3-creator`.
 
 The focused tests are `test/logikus-model.test.mjs`,
-`test/logikus-integration.test.mjs`, `test/logikus-inspection.test.mjs`, and
-`test/logikus-lessons.test.mjs`, `test/logikus-lab.test.mjs`, and
-`test/logikus-host-lifecycle.test.mjs`. They cover independent truth-condition
-oracles, exact contact behavior, invalid input, controller operations, project
+`test/logikus-integration.test.mjs`, `test/logikus-inspection.test.mjs`,
+`test/logikus-lessons.test.mjs`, `test/logikus-railway.test.mjs`,
+`test/logikus-lab.test.mjs`, and `test/logikus-host-lifecycle.test.mjs`.
+They cover independent truth-condition oracles, exact contact behavior,
+invalid input, controller operations, project
 round-trips, counterexamples, actual React interactions and project lifecycles,
-and the numerical claims in the lessons. Test
-results and browser/release verification should be recorded for the actual
-commit being delivered.
+the railway's safety/behavior distinction, and the numerical claims in the
+lessons. Test results and browser/release verification should be recorded for
+the actual commit being delivered.
