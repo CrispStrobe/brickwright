@@ -735,3 +735,37 @@ avoided and does not establish an end-to-end latency gain.
 The release SDK pin remains `7760321`.
 Scout passed the same restart proof, with 879732 bytes at first
 Run and zero bytes at repeat Run.
+
+### Authored document payload on repeat Run
+
+The simulation worker retains its copy of the authored document while
+parked, along with the geometry retained by the preceding change.
+Repeat Run still creates a new physical world. Fix base applies to
+that run's copy of the first solid's motion setting, so toggling it
+does not overwrite the authored setting. Editing the design discards
+the old worker and the next cold start sends the new document and
+mesh buffers.
+
+All 27 focused controller, worker, base, and replay tests passed.
+They cover cold start after an edit, rejecting a warm start with no
+prior document, and alternating Fix base on and off across restarts.
+The [local SDK backport](https://github.com/CrispStrobe/CrispCAD/commit/42e79ed)
+uses the pinned CAD source plus the two restart payload changes.
+
+Chrome measured the authored document as 2,289,271 UTF-8 bytes when
+serialized as JSON for Atlas. That is a size reference, since the
+browser sends the object through structured clone. The previous
+local SDK sent the document on the first Run and all three repeat
+Runs, with no mesh buffers on the repeat Runs.
+
+The optimized SDK sent the same document and mesh buffers at first
+Run and neither payload on all three Atlas repeat Runs. In this
+full-editor Chrome comparison, the synchronous worker post took
+20.6–29.5 ms before and 0–0.1 ms after. Median instrumented worker
+startup was 514 ms before and 390 ms after in the individual runs.
+Atlas passed Run, Stop, Reset, and repeat Run with the same Jolt 5.7
+override. This is startup work. The release SDK pin remains
+`7760321` and the sustained 1× target remains open.
+[Source on CrispCAD main](https://github.com/CrispStrobe/CrispCAD/commit/3860e7ac20a81dd193b72822bfabb2e332835ecb)
+Scout also passed the restart proof. Repeat Run omitted its authored
+document (2975205 JSON bytes) and its mesh buffers.
