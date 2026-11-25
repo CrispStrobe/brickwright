@@ -107,13 +107,13 @@ installed-payload proof; hosted provenance and GUI checks remain mandatory.
 
 ## Final result reconciliation
 
-[PR1334](https://github.com/CrispStrobe/brickwright-lite/pull/1334) completed
+[PR1334](https://github.com/CrispStrobe/brickwright/pull/1334) completed
 consumer adoption after all enabled final-head checks passed. The single
-[campaign40077158320](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40077158320)
+[campaign40077158320](https://github.com/CrispStrobe/brickwright/actions/runs/40077158320)
 qualifies head `75c95bea9b34b08d0dc1014c41df551c1451b10f` on its named lane
 branch: 312/312 cases and 87,488 independent checks, with all 240 waveform CSVs
 byte-identical to the preceding consumer. Actual built-browser originals from
-[Build40074942830](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40074942830)
+[Build40074942830](https://github.com/CrispStrobe/brickwright/actions/runs/40074942830)
 also pass independent audit: exact candidate tree, both installed package
 scopes, six acquisition/readout observations, three decoded canvas controls
 and byte-identical raw CSV before/after viewport changes.

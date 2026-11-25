@@ -28,6 +28,6 @@ The authored base64 command consumes the complete pipe before returning its
 fixture bytes. A 96 KiB authored input in both signed job blocks verifies the
 exact consumed count, including the echo newline. The workflow, pipefail,
 original assertions and timeouts are preserved. The original failure is
-[unit shard 3](https://github.com/CrispStrobe/brickwright-lite/actions/runs/39589540153/job/119190873980).
+[unit shard 3](https://github.com/CrispStrobe/brickwright/actions/runs/39589540153/job/119190873980).
 This repairs the test protocol; actual iOS packaging and signing acceptance
 remain governed by their owning lane.

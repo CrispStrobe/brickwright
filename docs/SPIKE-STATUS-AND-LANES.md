@@ -22,7 +22,7 @@ a fresh owned container (2 CPU, 2 GiB, no network, unchanged 120 s startup):
   a compiled-model runtime aborted the model include, so the debugger endpoint
   never opened (`rsp-connect unavailable` after 60 s). Pin preparation now
   refuses that pairing and the native producer accepts the compiled profile pin
-  ([PR1349](https://github.com/CrispStrobe/brickwright-lite/pull/1349)). With
+  ([PR1349](https://github.com/CrispStrobe/brickwright/pull/1349)). With
   compiled support, startup attaches at 32.6 s.
 - **MicroPython matrix:** raw-REPL completion and guest error with six motors,
   Stop during final sampling, ownership release and distinct fresh recovery
@@ -36,7 +36,7 @@ a fresh owned container (2 CPU, 2 GiB, no network, unchanged 120 s startup):
   passed. That failure is retained.
 - **Pane disposal:** found a real defect. Closing the arena during a
   dual-ultrasonic run left port F's sensor in the shared hub for the next pane.
-  [PR1355](https://github.com/CrispStrobe/brickwright-lite/pull/1355) returns
+  [PR1355](https://github.com/CrispStrobe/brickwright/pull/1355) returns
   port F after the disposed Stop settles unless a newer session owns the hub;
   the installed case passes on an executable built from that head (merged as
   `b06ad7c6`).
@@ -61,7 +61,7 @@ The newer [integration handoff](INTEGRATION-NEXT-STEPS.md) scopes the remaining
 work, qualification gates and release prerequisites. Older dated sections below
 retain their original source and observation boundaries.
 
-[PR990](https://github.com/CrispStrobe/brickwright-lite/pull/990) is merged as
+[PR990](https://github.com/CrispStrobe/brickwright/pull/990) is merged as
 `6d9dfeb1d50139de517cfbdf302055b71eab125f`. Finite installed Linux Stop,
 held teardown-return, cleanup and two own-NuttX startup cases passed. This does
 not qualify two actual UI Stops or close G02. The later generation diagnostic
@@ -87,7 +87,7 @@ controls pass, six broken guards are caught, and 220 affected controls passed
 before the final focused case was added. Older timing controls preserve late
 reply delivery after actual teardown instead of waiting circularly.
 
-The Code caller/output follow-up [PR985](https://github.com/CrispStrobe/brickwright-lite/pull/985) is merged. Its three frozen
+The Code caller/output follow-up [PR985](https://github.com/CrispStrobe/brickwright/pull/985) is merged. Its three frozen
 package cases do not qualify repeated Stop. Fresh installed own-guest repeated-Stop cleanup/recovery and final-head CI are still
 required; the earlier lifecycle package does not qualify this implementation.
 Full G02, physical/reference, licensing and release qualification remain open.
@@ -100,7 +100,7 @@ installed own-NuttX cases and their standalone readers, with six successful
 native startup transactions, full cleanup and distinct recovery in every case.
 Official frontend checkout and consumer trees match; independent package/input
 audits pass. Its eleven enabled source-head checks pass in
-[run38790549120](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38790549120)
+[run38790549120](https://github.com/CrispStrobe/brickwright/actions/runs/38790549120)
 and the separate vendor check; two conditional GUI/deployment jobs skip.
 
 - An older Code call's original successful return cannot clear a newer pending
@@ -127,9 +127,9 @@ change during these corrections.
 This result belongs to the named frozen package. Integration preserves its
 SPIKE/native inputs and both importer copies while retaining newer main work.
 Final documentation-head CI, the lifecycle integration in
-[PR979](https://github.com/CrispStrobe/brickwright-lite/pull/979), and exact-head
+[PR979](https://github.com/CrispStrobe/brickwright/pull/979), and exact-head
 merge review remain required. The repeated-Stop follow-up in
-[PR990](https://github.com/CrispStrobe/brickwright-lite/pull/990) is separate and
+[PR990](https://github.com/CrispStrobe/brickwright/pull/990) is separate and
 not installed-qualified here. Whole G02, reference/physical behavior, rollback,
 licensing, distribution and release qualification remain open.
 
@@ -154,10 +154,10 @@ physical UART attribution or close G02.
 ## Composed G02 qualification target — 2026-10-15
 
 `lane/spike-g02-lifecycle-batch-20261015` integrates the existing fixes from
-[PR966](https://github.com/CrispStrobe/brickwright-lite/pull/966),
-[PR967](https://github.com/CrispStrobe/brickwright-lite/pull/967),
-[PR973](https://github.com/CrispStrobe/brickwright-lite/pull/973) and
-[PR974](https://github.com/CrispStrobe/brickwright-lite/pull/974), in that order.
+[PR966](https://github.com/CrispStrobe/brickwright/pull/966),
+[PR967](https://github.com/CrispStrobe/brickwright/pull/967),
+[PR973](https://github.com/CrispStrobe/brickwright/pull/973) and
+[PR974](https://github.com/CrispStrobe/brickwright/pull/974), in that order.
 The Pause conflict preserves full-session pending-upload cancellation and the
 retained-session ownership guard. All 176 affected host controls pass; a new
 combined sequence rejects both single-fix baselines. Eleven unchanged pane
@@ -169,7 +169,7 @@ drive four, upload/Stop four and Code three. All individual readers and the
 combined reader pass, with cleanup, distinct recovery and thirty successful
 native startups. Official frontend checkout and consumer trees match; package
 payload/input audits pass. All eleven enabled source-head checks pass in
-[run38769805667](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38769805667)
+[run38769805667](https://github.com/CrispStrobe/brickwright/actions/runs/38769805667)
 (two conditional GUI/deployment jobs skip).
 
 Five earlier failed test attempts remain preserved. Corrections address held
@@ -185,7 +185,7 @@ native inputs and the NuttX dispatcher method remain unchanged from the tested
 consumer. Final documentation-head checks and merge review are pending. Earlier
 and current installed results remain attributed to their exact packages. The
 new overlapping caller/output changes in
-[PR985](https://github.com/CrispStrobe/brickwright-lite/pull/985) are separate and
+[PR985](https://github.com/CrispStrobe/brickwright/pull/985) are separate and
 are not installed-qualified by this result. G02, physical/reference behavior,
 rollback, licensing and release qualification remain open.
 
@@ -232,7 +232,7 @@ G03, physical safety, rollback, distribution or licensing.
 
 ## G02 Code caller ownership — 2026-10-15
 
-The scope claim in [PR978](https://github.com/CrispStrobe/brickwright-lite/pull/978)
+The scope claim in [PR978](https://github.com/CrispStrobe/brickwright/pull/978)
 is merged. The implementation gives each NuttX Code run its own caller token:
 old completions, errors, output and callbacks cannot replace a newer caller's
 feedback, and Stop cancels the current waiter before it can submit code. Delayed
@@ -255,19 +255,19 @@ Seven focused changes have landed, each with a separately frozen installed
 consumer. These observations qualify the named source and owned guest scenarios;
 they do not qualify every later package assembled from main.
 
-- [PR895](https://github.com/CrispStrobe/brickwright-lite/pull/895), tested
+- [PR895](https://github.com/CrispStrobe/brickwright/pull/895), tested
   consumer `b776bef598ae4608d93fa8c07ce17a842abc7dde`: after the old pane's real
   firmware Stop returns, its resumed cleanup cannot stop a replacement VM.
   The installed case retains positive Stop, Reset/Start and fresh guest recovery.
-- [PR898](https://github.com/CrispStrobe/brickwright-lite/pull/898), tested
+- [PR898](https://github.com/CrispStrobe/brickwright/pull/898), tested
   consumer `3be3c02ed72ac79d5dbf447100073cc46fd88e56`: the fresh native package
   passes two owned-NuttX startups, teardown/replacement and subsequent recovery.
   The closed startup trace records two complete transactions. Its shared EV3
   path separately passes both exact public guest tests in
-  [run38516801049](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38516801049),
+  [run38516801049](https://github.com/CrispStrobe/brickwright/actions/runs/38516801049),
   with one executed test and no failures or ignored tests in each invocation.
   The EV3 workflow's Runtime pin remains separate from the NuttX package pin.
-- [PR905](https://github.com/CrispStrobe/brickwright-lite/pull/905), tested
+- [PR905](https://github.com/CrispStrobe/brickwright/pull/905), tested
   consumer `ecc0ccb36006c871ab3e40109d7c92f6268e8c8a`: Stop invoked synchronously
   by the real final-frame or NuttX program-state observer suppresses a later
   completion callback. Each installed case observes the real owned guest reach
@@ -276,7 +276,7 @@ they do not qualify every later package assembled from main.
   The baseline frame case had reproduced Stop requested → completion → stopped;
   both candidate cases produce only Stop requested → stopped. This concerns late
   notification after Stop, not a claim of continued guest execution after Stop.
-- [PR912](https://github.com/CrispStrobe/brickwright-lite/pull/912), tested
+- [PR912](https://github.com/CrispStrobe/brickwright/pull/912), tested
   consumer `2d5e560b0357c924b434916e590a24070397fa22`, merged as
   `c5e31b8324fea454afe08ad682f8b98f2ab43596`: closure checks between observers
   and after an awaited packet input-write reply suppress later native input
@@ -287,7 +287,7 @@ they do not qualify every later package assembled from main.
   completes a distinct fresh guest and stops it normally.
 
 
-- [PR928](https://github.com/CrispStrobe/brickwright-lite/pull/928), tested
+- [PR928](https://github.com/CrispStrobe/brickwright/pull/928), tested
   consumer `aaa60836f1375a44cb69224e95dc511dd56e8d1c`, merged as
   `fff84dc6ead5c1da7a89fee52a256497d6cc32f2`: deferred-storage closure checks
   suppress later frame/program-state publication after observer Stop. Both
@@ -296,7 +296,7 @@ they do not qualify every later package assembled from main.
   a distinct fresh guest. The terminal LOAD/frame Stop succeeds. Pending
   SAVE/hub Stop retains the native checkpoint-refusal response while local
   cleanup and recovery pass; this does not fix that refusal or promise rollback.
-- [PR930](https://github.com/CrispStrobe/brickwright-lite/pull/930), tested
+- [PR930](https://github.com/CrispStrobe/brickwright/pull/930), tested
   consumer `59c78f3bee80b496dcd2b76180397bbae563a634`, merged as
   `9a6706dc430472345031a82a2f83e04d4ec79035`: Stop from configuration
   notification prevents native startup, and Stop from first-frame publication
@@ -306,7 +306,7 @@ they do not qualify every later package assembled from main.
   final Stop. Configuration cancellation admits zero arena-session native calls; first-frame
   cancellation permits only native start/read/close.
 
-- [PR936](https://github.com/CrispStrobe/brickwright-lite/pull/936), tested
+- [PR936](https://github.com/CrispStrobe/brickwright/pull/936), tested
   consumer `65494ed81b8751f2f6f2f3e9e6c57e5f07e125c0`, merged as
   `e22fd9fe0017b4e8291b4ff2af44ff6b9d6efde1`: a scheduled poll failure delivered
   after original pane Stop no longer invokes an obsolete error observer. Both
@@ -361,10 +361,10 @@ recomputation from its actual parents; the intervening main change was ledger
 only. These observations do not qualify all later main packages.
 
 All current required hosted contexts pass. PR928’s final
-[Build run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38607200124)
+[Build run](https://github.com/CrispStrobe/brickwright/actions/runs/38607200124)
 and vendor check have 11 enabled successes. PR930’s
-[FAST run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38610739555),
-[THOROUGH run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38610753537)
+[FAST run](https://github.com/CrispStrobe/brickwright/actions/runs/38610739555),
+[THOROUGH run](https://github.com/CrispStrobe/brickwright/actions/runs/38610753537)
 and vendor check have 13 successful required executions representing 11 current
 named contexts. Its initial code-event full-CI gate failed before the label was
 present in that event snapshot; the newer label-event gate passes under the
@@ -377,7 +377,7 @@ PR936's 55 affected session controls pass; the late-rejection baseline fails,
 and removing its new closure check restores that failure. Both installed cases
 retain 191 control-file hashes and 28 raw startup records. Package readers bind
 180 installer files/23 directories, 177 native source files, 5919 frontend files and
-126 runtime inputs. The [final readiness run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38673916767)
+126 runtime inputs. The [final readiness run](https://github.com/CrispStrobe/brickwright/actions/runs/38673916767)
 passes all ten enabled build jobs; its vendor check also passes. The original
 pre-label full-CI gate failure remains preserved, with the later label verdict
 and final readiness gate successful. Qualified session/test blobs match their
@@ -385,7 +385,7 @@ landed versions, and the landed tree equals the reviewed prediction. Independent
 main pin adoptions are retained; this is not qualification of every evolving-main
 package. Existing product budgets and firmware/Runtime/model pins did not change.
 
-The [compiled-profile claim PR946](https://github.com/CrispStrobe/brickwright-lite/pull/946)
+The [compiled-profile claim PR946](https://github.com/CrispStrobe/brickwright/pull/946)
 is merged. Its implementation is in progress: explicit native descriptor/runtime
 pins select native platform types while retaining the legacy source-overlay
 route. Initial host packaging and actual Rust planner checks pass, including
@@ -401,7 +401,7 @@ six distinct generations, ownership release and stopped/non-OOM container state.
 The built implementation is `8c1ec5ef066b4d18ab99bd80d569620425c89c03`;
 fixture-only follow-up `1058d91cacad66c1a4bf88d08c7e12d0374f4bca` has identical
 production sources. All enabled final-head CI checks remain required for
-[implementation PR948](https://github.com/CrispStrobe/brickwright-lite/pull/948).
+[implementation PR948](https://github.com/CrispStrobe/brickwright/pull/948).
 This finite package result does not qualify unrelated later main changes.
 Earlier chooser-control, backend-button and sanitized-error expectation failures
 remain preserved separately; they are not product fixes or passing matrix runs.
@@ -434,7 +434,7 @@ deadline or physical-accuracy change is proposed.
 
 ## Native startup observation candidate — 2026-10-13
 
-The merged [PR891](https://github.com/CrispStrobe/brickwright-lite/pull/891)
+The merged [PR891](https://github.com/CrispStrobe/brickwright/pull/891)
 claim covers a native-only startup trace candidate. Closed phase/result names
 and monotonic elapsed milliseconds distinguish session lock, launch, RSP
 connection, interrupt handle, state connection/readiness, applicable identity
@@ -472,11 +472,11 @@ Arena Stop observations below do not qualify this new source or close G02.
 
 ### Qualified startup Stop follow-up
 
-[PR860](https://github.com/CrispStrobe/brickwright-lite/pull/860) merged the
+[PR860](https://github.com/CrispStrobe/brickwright/pull/860) merged the
 focused fix at `5e69e8ac85c006a0d5724e3be17bc3d03729f88b`. Tested consumer
-[`da373394`](https://github.com/CrispStrobe/brickwright-lite/commit/da37339468a1080d22812b8747eb9659ac85d6c5)
+[`da373394`](https://github.com/CrispStrobe/brickwright/commit/da37339468a1080d22812b8747eb9659ac85d6c5)
 passed all seven enabled hosted checks, including
-[Build38359601487](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38359601487).
+[Build38359601487](https://github.com/CrispStrobe/brickwright/actions/runs/38359601487).
 Its emitted CI checkout has exactly the same tracked tree. Offline native
 compilation passed, and independent installer verification matched all 180 files
 and 23 directories and their bytes/modes to staging, and checked root ownership. Retained
@@ -500,9 +500,9 @@ chooser/final-sampling/generation/late-poll cases and G05 closure remain open.
 
 ## Stale firmware cleanup follow-up — 2026-10-13
 
-[PR879](https://github.com/CrispStrobe/brickwright-lite/pull/879) merged finite
+[PR879](https://github.com/CrispStrobe/brickwright/pull/879) merged finite
 native Start and chooser intent guards. Its separately reviewed installed
-consumer [`f1772cf0`](https://github.com/CrispStrobe/brickwright-lite/commit/f1772cf0fe96988f7a4a3c665a478ef8fac4b065)
+consumer [`f1772cf0`](https://github.com/CrispStrobe/brickwright/commit/f1772cf0fe96988f7a4a3c665a478ef8fac4b065)
 qualified seven UI cases and own-NuttX Code Stop during startup. These observations
 do not qualify every later main package or close G02.
 
@@ -523,10 +523,10 @@ Firmware, Runtime, model pins and startup deadlines remain unchanged.
 
 ## Installed dual-ultrasonic checkpoint — 2026-10-12
 
-[PR755](https://github.com/CrispStrobe/brickwright-lite/pull/755) is merged at
+[PR755](https://github.com/CrispStrobe/brickwright/pull/755) is merged at
 `a2517162000246e40c1d1a10e510ae685cfb48ab`. The installed package was built
 from reviewed consumer `bb293fad02d3448c5ea2d187b07ebedc82283fa6`;
-[its exact-head CI](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38291405858)
+[its exact-head CI](https://github.com/CrispStrobe/brickwright/actions/runs/38291405858)
 and the separate native/vendor checks passed all nine enabled checks. Four
 conditional profile/publication jobs skipped. The authenticated frontend's actual
 CI checkout, `c7064a182363568db4cde6e8ccc2f5bfd6bc4819`, differs from the
@@ -603,7 +603,7 @@ concurrent actions, general rendering correctness or release/licensing clearance
 G02 still needs its remaining chooser/startup/final-sampling, generation and
 late-poll adversaries; G03 responsive controls and G05 distribution closure remain
 separate lanes. The source merge's
-[main Build](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38305155209)
+[main Build](https://github.com/CrispStrobe/brickwright/actions/runs/38305155209)
 passed its build, corpus, light/heavy browser, FPGA, deployment and published-GUI
 verification checks. The separate native and vendor main checks also passed.
 These results remain bound to that source merge rather than every later main.
@@ -639,11 +639,11 @@ motor controller over the same session. See [arena](SPIKE-ARENA.md),
 
 ## Evidence and version boundaries
 
-[PR #631](https://github.com/CrispStrobe/brickwright-lite/pull/631) merged as
+[PR #631](https://github.com/CrispStrobe/brickwright/pull/631) merged as
 `9c999cdd6274278e5e54f1c135d35af11fb5feac`. Code-tab feedback now follows
 actual firmware completion, faults and cancellation; Stop is installed during
 startup and terminal results survive cleanup. Its 73 focused tests passed;
-[merged-main qualification](https://github.com/CrispStrobe/brickwright-lite/actions/runs/37249838252)
+[merged-main qualification](https://github.com/CrispStrobe/brickwright/actions/runs/37249838252)
 reported 5,512 passing tests, 15 documented skips and no failures. A terminal-state
 mutation was detected. These counts describe that qualification, not every later head.
 
@@ -666,10 +666,10 @@ not automatically advance every consumer. Record each route's actual pins.
 
 ## 2026-10-07 desktop adoption candidate
 
-[PR #695](https://github.com/CrispStrobe/brickwright-lite/pull/695) merged as
+[PR #695](https://github.com/CrispStrobe/brickwright/pull/695) merged as
 `0faacb84211a5d6df8b4d3ed8ed9127c14b76fc5`, adding retained NuttX program
 restart to the arena. All seven enabled
-[reviewed-head checks](https://github.com/CrispStrobe/brickwright-lite/actions/runs/37579912369)
+[reviewed-head checks](https://github.com/CrispStrobe/brickwright/actions/runs/37579912369)
 passed; the two main-only deployment jobs were not enabled on the PR. The merge
 tree matched the reviewed plan, preserving the tested production source and
 unrelated task/claim documentation. Tested package source is
@@ -1284,7 +1284,7 @@ caller messages are `unknown SPIKE topology` and
 `custom topology requires own NuttX firmware`. Default starts remain unchanged;
 NuttX supports the declared custom profiles, and the existing MicroPython
 six-motor pairing remains forwarded unchanged. Dual ultrasonic is still subject
-to the separate [PR755](https://github.com/CrispStrobe/brickwright-lite/pull/755)
+to the separate [PR755](https://github.com/CrispStrobe/brickwright/pull/755)
 package adoption and native guards; forwarding is not package support evidence.
 
 A local refusal preserves an existing session, pending replies and contiguous
@@ -1309,7 +1309,7 @@ these original observations are not relabelled as results for a later package.
 
 ## Retained Linux installer qualification — 2026-10-12
 
-The fixed broker-failure classification in [PR805](https://github.com/CrispStrobe/brickwright-lite/pull/805)
+The fixed broker-failure classification in [PR805](https://github.com/CrispStrobe/brickwright/pull/805)
 merged as `8f2cdf8a8867a7c996c5f68b8ca2fcbfcf303769` after every enabled
 check passed. It preserves fixed failure codes and does not expose native
 exception text. Its reviewed adapter/test files match the merged files.
@@ -1344,7 +1344,7 @@ The initial GUI wait was the separately recorded 120-second diagnostic setting;
 assertions and numerical tolerances were unchanged. These observations establish
 neither current-main package qualification nor physical motor accuracy, external
 firmware compatibility or complete distribution licensing. The adoption
-[PR755](https://github.com/CrispStrobe/brickwright-lite/pull/755) remains draft.
+[PR755](https://github.com/CrispStrobe/brickwright/pull/755) remains draft.
 
 ### Next implementation and qualification slices
 

@@ -1,7 +1,7 @@
 # Arcade SDK scalar results and native addition
 
 Status: IMPLEMENTED; final qualification pending. Claim merged in
-[PR #1373](https://github.com/CrispStrobe/brickwright-lite/pull/1373).
+[PR #1373](https://github.com/CrispStrobe/brickwright/pull/1373).
 All 44 affected source controls pass across five complete cohorts; two guard
 mutations are detected. Code/SB3/export/reimport preserve edited position and
 pixels. Actual hosted runtime/editor acceptance remains open; see

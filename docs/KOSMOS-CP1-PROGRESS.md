@@ -252,7 +252,7 @@ browser execution, including known-ROM semantic controls, remains unqualified.
 
 ## Hosted browser status and limits
 
-[Run 45559592991](https://github.com/CrispStrobe/brickwright-lite/actions/runs/45559592991)
+[Run 45559592991](https://github.com/CrispStrobe/brickwright/actions/runs/45559592991)
 **passed all six gates** on Lite `8498ebdd322b515aa97b6c3930ef77270e54a52e`.
 The execution used Node 22.23.5, Playwright 1.61.1, Chromium 149.0.7827.55,
 React 18.3.1 and the actual installed GUI React 16.14.0. The durable
@@ -288,9 +288,9 @@ Three earlier hosted runs remain recorded as failures, not superseded passes:
 
 | Run / Lite code | Finding resolved in the passing run |
 | --- | --- |
-| [45552587031](https://github.com/CrispStrobe/brickwright-lite/actions/runs/45552587031) / `50b32fa7` | Connector passed; panel stopped before launch because the CommonJS Playwright import did not expose a named `chromium` export |
-| [45555731912](https://github.com/CrispStrobe/brickwright-lite/actions/runs/45555731912) / `ccac35d8` | React update synchronization, exact PropTypes alias and the production restore completion route needed fixture corrections |
-| [45557001274](https://github.com/CrispStrobe/brickwright-lite/actions/runs/45557001274) / `b9033ae6` | Connector and CP5 interaction passed; further asynchronous assertions needed correction, and browser/visual review exposed the real React 16 key-ownership and CP1 fit-footprint bugs |
+| [45552587031](https://github.com/CrispStrobe/brickwright/actions/runs/45552587031) / `50b32fa7` | Connector passed; panel stopped before launch because the CommonJS Playwright import did not expose a named `chromium` export |
+| [45555731912](https://github.com/CrispStrobe/brickwright/actions/runs/45555731912) / `ccac35d8` | React update synchronization, exact PropTypes alias and the production restore completion route needed fixture corrections |
+| [45557001274](https://github.com/CrispStrobe/brickwright/actions/runs/45557001274) / `b9033ae6` | Connector and CP5 interaction passed; further asynchronous assertions needed correction, and browser/visual review exposed the real React 16 key-ownership and CP1 fit-footprint bugs |
 
 Local launch remained blocked: November 24 Chromium failed its process-singleton
 socket with `Operation not permitted`, and automatic approval review rejected
@@ -346,14 +346,34 @@ Sources and limitations are recorded in Board `docs/MCS48-IMPLEMENTATION.md`,
 `docs/CP1-HARDWARE.md`, `docs/CP1-SEMANTIC-DEBUG.md` and local
 [CP1-CLEAN-AUTHORSHIP.md](CP1-CLEAN-AUTHORSHIP.md).
 
+## CP4 eight-channel relay bank
+
+The bilingual [relay bank](../overlay/scratch-gui/examples/cp1-cp4-relay-bank/intro.md)
+adds eight editable input and output channels alongside the shorter
+[two-relay signals lesson](../overlay/scratch-gui/examples/cp1-cp4-relay-signals/intro.md).
+Each input has the documented 1 kΩ and 470 Ω bias pair, clamps and 100 nF
+capacitor. Each output has the transistor driver, flyback diode, and normally
+open contact with a 100 nF capacitor. The resistive loads use a separate battery. The
+[CP4 manual, section IV](https://www.retrozone.ch/docs/cp1/CP4-Relais-Modul.pdf)
+documents the physical circuit.
+
+The qualification drives the gallery program through the monitor, measures all
+eight load branches on walking and mixed byte patterns, and measures the signal
+rise on switch release. The contact measurements concern settled states and
+load current. Simultaneous switching with diode lamps exceeded the transient
+solver’s step budget. The relay bank uses resistive loads and retains the
+contact capacitors. Nominal coil supply and relay thresholds are simulator settings.
+
 ## Remaining plan work
 
 - Qualify the full production application and known-ROM semantic browser
   workflow, including production menus/VM restore and semantic controls. The
   six scoped synthetic-firmware Chromium gates are complete.
-- CP2 cassette pulse transport and CAS/CAL behavior.
-- A dedicated CP4 relay teaching surface. CP5's current switch/LED circuit and
-  lessons are implemented; that does not complete every expansion in the plan.
+- CP2 physical recorder and analog threshold qualification. The independent
+  monitor already saves and loads CAS/CAL through the digital cassette path.
+- Qualify the CP4 power supply, relay mechanics and interference behavior on
+  physical hardware. The eight-channel bench uses fixed DC supplies and
+  generic relay models.
 - Freely rewired internal 8049/8155 schematic construction.
 - Independently obtained mask-ROM-B qualification and additional firmware cases.
 - Generic 8155 strobed-port modes and exact internal timer-register encoding;

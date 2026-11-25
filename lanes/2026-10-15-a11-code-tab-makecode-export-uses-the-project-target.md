@@ -1,6 +1,6 @@
 ## A11: Code-tab MakeCode export uses the project target — 2026-10-15
 
-DONE — merged 2026-10-15 in [PR #971](https://github.com/CrispStrobe/brickwright-lite/pull/971)
+DONE — merged 2026-10-15 in [PR #971](https://github.com/CrispStrobe/brickwright/pull/971)
 as `f1440691`. Original branch `lane/a11-project-target-export-20261015`,
 base `c6f1ff5c3`. Single-board Code-tab MakeCode export selects the existing
 micro:bit, Calliope or EV3 emitter from the parsed project device and writes

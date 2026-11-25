@@ -765,7 +765,7 @@ This does not migrate any existing example. A migration must check its program,
 lesson directions and mechanical-law qualification together. The setting makes
 the compiler consistent with the motor's frame; it does not establish a
 physical SPIKE motor's clockwise/counterclockwise command convention. See
-[issue #1460](https://github.com/CrispStrobe/brickwright-lite/issues/1460).
+[issue #1460](https://github.com/CrispStrobe/brickwright/issues/1460).
 Qualify an opted-in model on a runtime revision that includes this setting;
 older pinned-worker receipts cannot qualify the changed drive behavior.
 
@@ -778,7 +778,7 @@ the motor's housing does not turn about its own axis: a clamped motor, a frame
 standing on the floor, a driving base. It is wrong when the housing is free to
 turn about the axis: each body then gets its own Jr, and a free platform turns
 (Iw + Jr)/(J + 2·Jr) per wheel degree instead of Iw/J
-([issue #1494](https://github.com/CrispStrobe/brickwright-lite/issues/1494)).
+([issue #1494](https://github.com/CrispStrobe/brickwright/issues/1494)).
 A model whose motor housing is free to turn about the motor axis can opt into
 the engine's relative hinge rotor by placing this line once in its main
 LDraw/MPD model section:

@@ -7,7 +7,7 @@ Base: main `bea6ff04f43c4b053bf5f2bfd01bf21615fa7d8a`.
 
 ## Observed failure and hypothesis
 
-The [Tauri unit job](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40801257415/job/123209645340)
+The [Tauri unit job](https://github.com/CrispStrobe/brickwright/actions/runs/40801257415/job/123209645340)
 failed the existing
 `renode_brick_state::tests::lockstep_steps_land_exactly_one_quantum_apart_without_polling`
 test: fastest exchange 2.555585 ms against its 2.5 ms assertion, median
@@ -41,7 +41,7 @@ step, which remains intact.
 ## Qualification and next step
 
 The unchanged isolated test subsequently failed on head `ae22d4a2618`:
-[official job](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40813806300/job/123250070998),
+[official job](https://github.com/CrispStrobe/brickwright/actions/runs/40813806300/job/123250070998),
 fastest 2.591604 ms, median 4.736635 ms; the remaining default suite passed
 269 tests with 11 ignored. Original evidence is retained once. Isolation alone
 does not resolve the failure. Route a separately claimed Rust-source diagnosis;

@@ -11,7 +11,7 @@ panel's probe selecting the lab's hidden Close button. Revision `c05b6be37` unmo
 closed dialogs; rerun `34237479071` passes all 18 8086 browser checks, including
 the new assertion that no closed sandbox controls remain in the document.
 
-Final combined [application CI](https://github.com/CrispStrobe/brickwright-lite/actions/runs/34237479071)
+Final combined [application CI](https://github.com/CrispStrobe/brickwright/actions/runs/34237479071)
 is GREEN at `c05b6be37`: build, corpus, light and heavy browser suites, including
 the Bluetooth check. This verified runtime is being fast-forward promoted to
 main with a ledger/report-only handoff; the default engine branch receives the
@@ -168,7 +168,7 @@ exception. Both overlay and package copies are now tracked; a focused ownership
 gate rejects a missing pair, mismatched bytes, or a future `liteAuthored` claim.
 
 Corrected comparison
-[34221210990](https://github.com/CrispStrobe/brickwright-lite/actions/runs/34221210990)
+[34221210990](https://github.com/CrispStrobe/brickwright/actions/runs/34221210990)
 is green at `79c401df76e1a7cc13f336f7a54cb20196058660`, with unchanged production
 code from `911d09104` and no bare-core regression. Final normal-speed string
 machine/DOS/debugger/peripherals gains are **113.2% / 48.1% / 78.9% / 34.2%**;
@@ -186,7 +186,7 @@ baseline/candidate comparisons are the optimization evidence.
 No default-branch merge or deployment has been performed.
 
 Final application
-[CI 34221225525](https://github.com/CrispStrobe/brickwright-lite/actions/runs/34221225525)
+[CI 34221225525](https://github.com/CrispStrobe/brickwright/actions/runs/34221225525)
 is **green** at `79c401df76e1a7cc13f336f7a54cb20196058660`: build, corpus,
 light browser and heavy browser suites. Deployment and deployed-site checks
 were intentionally skipped for this feature-branch run. Final ledger/report

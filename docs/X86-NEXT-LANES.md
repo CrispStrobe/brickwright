@@ -24,7 +24,7 @@ only open x86 lane, and three optional follow-ups are scoped after it.
   after every enabled exact-head check, including the full tier and the
   x86-xv6 protected guest job. This is an authored-loop result only: no
   physical 386 timing, whole-OS or general-workload speed claim.
-- **Lite consumes it.** [PR1503](https://github.com/CrispStrobe/brickwright-lite/pull/1503)
+- **Lite consumes it.** [PR1503](https://github.com/CrispStrobe/brickwright/pull/1503)
   moved the board pin from `c7bcbe4b` to `8785e468` on all current-role surfaces
   (merged `e6fa377008c677b6dcd24f177453d4118955666d`, all 38 enabled checks
   including the full browser tier). `vendor-pins.json` now selects board
@@ -60,7 +60,7 @@ admits exactly the omitted form as well (see
 [the claim](../lanes/2026-11-02-x86-actual9-dispatch-inputs.md)); a new event
 needs its own selection, Build and audit.
 
-**Scope:** [PR1540](https://github.com/CrispStrobe/brickwright-lite/pull/1540),
+**Scope:** [PR1540](https://github.com/CrispStrobe/brickwright/pull/1540),
 the successor to the now-closed PR1318. Start with
 [`lanes/2026-10-28-x86-finite-v10-resolver-kind.md`](../lanes/2026-10-28-x86-finite-v10-resolver-kind.md),
 `scripts/run-i80386-hdd-gui-actual.py`,
@@ -283,7 +283,7 @@ The [optional real FreeDOS interaction probe](I80386-FREEDOS-INTERACTION.md) ext
 **Work:** align config-relative media resolution, explicit CHS validation, unsupported-command reporting and CLI/GUI selection. Add bounded ZIP admission with traversal/count/size protections, deterministic config choice and no host-shell execution. A DOSBox package is an input format, not a promise of DOSBox compatibility. ISO support needs a real upstream CD-ROM/ATAPI path; do not enable a file picker that implies an absent device. Disk writeback/export is a separate explicit workflow.
 
 The first connected GUI slice is proposed in
-[PR992](https://github.com/CrispStrobe/brickwright-lite/pull/992). It admits only a
+[PR992](https://github.com/CrispStrobe/brickwright/pull/992). It admits only a
 STORED ZIP of at most 16 MiB and 32 regular ASCII-named files: one `dosbox.conf`,
 one matching config-relative `.img` HDD and optional `LICENSE.txt` notices.
 Raw local/central records, extents, CRCs and paths are checked before extraction;
@@ -328,8 +328,8 @@ board diagnostic does not qualify the installed app.
 
 First qualify forward debugging in the actual installed package. Source support
 for target-declared physical bounds and read-only memory is merged in
-[PR970](https://github.com/CrispStrobe/brickwright-lite/pull/970) and
-[PR972](https://github.com/CrispStrobe/brickwright-lite/pull/972). The drawer uses
+[PR970](https://github.com/CrispStrobe/brickwright/pull/970) and
+[PR972](https://github.com/CrispStrobe/brickwright/pull/972). The drawer uses
 those descriptors for address jumps, bounded pages, refusals and editing controls.
 Legacy targets retain their 64 KiB behavior. A newer drawer does not supply
 missing metadata to an older installed board package.
@@ -418,13 +418,13 @@ crash durability or a full-OS result. Preserve the original failure; the passing
 finite run does not establish a general BIOS failure cause.
 
 GUI memory descriptor normalization and the memory drawer are merged in
-[PR970](https://github.com/CrispStrobe/brickwright-lite/pull/970) and
-[PR972](https://github.com/CrispStrobe/brickwright-lite/pull/972). These source
+[PR970](https://github.com/CrispStrobe/brickwright/pull/970) and
+[PR972](https://github.com/CrispStrobe/brickwright/pull/972). These source
 checkpoints do not adopt a newer board package or qualify the installed app.
 The runner bridge is in
-[PR986](https://github.com/CrispStrobe/brickwright-lite/pull/986); the complete
+[PR986](https://github.com/CrispStrobe/brickwright/pull/986); the complete
 download helper and panel consumer are in
-[PR987](https://github.com/CrispStrobe/brickwright-lite/pull/987). PR987 supersedes
+[PR987](https://github.com/CrispStrobe/brickwright/pull/987). PR987 supersedes
 the standalone helper PR984. Source checks, supplier adoption and installed
 browser acceptance remain distinct gates.
 
@@ -450,7 +450,7 @@ harness. Exercise browser download permission behavior: two mocked anchor clicks
 do not prove two files were saved.
 
 The optional real download/reload scenario is proposed in
-[PR989](https://github.com/CrispStrobe/brickwright-lite/pull/989), extending
+[PR989](https://github.com/CrispStrobe/brickwright/pull/989), extending
 `scripts/verify-i80386-local-hdd-gui.mjs`. Its default authored boot-sector
 scenario stays unchanged. After qualified supplier/consumer adoption and an
 externally reviewed source/build/input manifest, run from the repository root:
@@ -488,12 +488,12 @@ owns only these two documents. Refresh both repositories and the existing
 adopters before implementation; do not treat this dated checkpoint as a current
 merge decision.
 
-The STM32 owner holds [PR975](https://github.com/CrispStrobe/brickwright-lite/pull/975),
+The STM32 owner holds [PR975](https://github.com/CrispStrobe/brickwright/pull/975),
 branch `chore/stm32-faithful-pins-20261015`, at
 `fb9961382287f5981d70ea6a15f504ee45101d39`. Its merged claim PR969 covers
 Board/SB3 pins, package specifications and locks, notices and generated outputs,
 and the STM32 runner changes. The PR says **Not for agent merge**. The CUI
-adopter holds [PR965](https://github.com/CrispStrobe/brickwright-lite/pull/965),
+adopter holds [PR965](https://github.com/CrispStrobe/brickwright/pull/965),
 at `fcf39b5cdfa1d4422ec4da685730baef429b43c1`, under merged claim PR961,
 including shared lock surfaces. Preserve both owners and their recorded
 coordination; this proposal changes neither their order nor their merge authority.
@@ -585,7 +585,7 @@ event, and independent original reader. No earlier source result or consumed
 event qualifies this candidate; no guest attempt is authorized here.
 
 The earlier GUI source work in
-[PR #1095](https://github.com/CrispStrobe/brickwright-lite/pull/1095) has merged.
+[PR #1095](https://github.com/CrispStrobe/brickwright/pull/1095) has merged.
 The current-main compiler selection is an ancestor of the explicit D7 adoption;
 D7 adds the source operators, score callbacks and motor-power support. The
 candidate's twenty mapped compiler files and mirrors match D7. Preserve that
@@ -781,10 +781,10 @@ the retained original independently, preserve failed producing conclusions, then
 close native font selection and the complete runtime/frontend graph before any
 clean affected browser/guest qualification. Keep actual execution disabled.
 
-The existing runner bridge [PR986](https://github.com/CrispStrobe/brickwright-lite/pull/986),
-download action [PR987](https://github.com/CrispStrobe/brickwright-lite/pull/987)
-and persistence scenario [PR989](https://github.com/CrispStrobe/brickwright-lite/pull/989)
-are composed in [draft PR1013](https://github.com/CrispStrobe/brickwright-lite/pull/1013)
+The existing runner bridge [PR986](https://github.com/CrispStrobe/brickwright/pull/986),
+download action [PR987](https://github.com/CrispStrobe/brickwright/pull/987)
+and persistence scenario [PR989](https://github.com/CrispStrobe/brickwright/pull/989)
+are composed in [draft PR1013](https://github.com/CrispStrobe/brickwright/pull/1013)
 under their merged ownership, with canonical manifest admission corrected.
 The source candidate remains at `79afc8bc4c67c71ae251cc60fed5c5aff9231fec`;
 its 17 enabled final-head checks passed, with seven declared conditional skips.
@@ -794,10 +794,10 @@ any later integration without changing pins as part of this handoff.
 The [merged acceptance claim](../lanes/2026-10-16-386-gui-hdd-and-forward-debug-hosted-acceptance.md)
 adds only one hosted entry controller, one standalone original reader, focused
 inert controls and a separate workflow around the existing probe. Ownership
-was merged in [PR1014](https://github.com/CrispStrobe/brickwright-lite/pull/1014)
+was merged in [PR1014](https://github.com/CrispStrobe/brickwright/pull/1014)
 before implementation; the hosted acceptance remains unfinished.
 
-The [acceptance source checkpoint](https://github.com/CrispStrobe/brickwright-lite/commit/37cf9a63cb6da453145b031fc682880e448dbb11)
+The [acceptance source checkpoint](https://github.com/CrispStrobe/brickwright/commit/37cf9a63cb6da453145b031fc682880e448dbb11)
 implements the controller, standalone reader, workflow and two probe scenarios
 in the same draft composition. The HDD scenario uses genuine
 browser downloads and a fresh chooser session. The separate self-authored boot
@@ -816,7 +816,7 @@ cache paths are excluded. This inventory does not establish executing Python
 import/bytecode closure; selected hosted system interpreter/native libraries
 remain an explicit trusted platform boundary.
 
-The [startup checkpoint](https://github.com/CrispStrobe/brickwright-lite/commit/7e11a159c)
+The [startup checkpoint](https://github.com/CrispStrobe/brickwright/commit/7e11a159c)
 versions the future actual request and reader as v3 while preserving v2 metadata
 inventory. Before CPython entry, the actual workflow exclusively creates and
 records an empty cache prefix; fixed isolated, no-site and no-bytecode-write
@@ -827,7 +827,7 @@ nine detected startup source cuts. These controls do not prove source/native
 import closure, whole-host authenticity or a browser/guest result.
 
 The first metadata event is already consumed for source `671702949709dc78da7d0cc8d0e064f9799ff399`:
-[run 39106669518](https://github.com/CrispStrobe/brickwright-lite/actions/runs/39106669518).
+[run 39106669518](https://github.com/CrispStrobe/brickwright/actions/runs/39106669518).
 Its template digest is `668f81ce67ad7bd4313da934e0bddbd0e78e6cd152e67b68e55bb695fbdaf583`.
 It failed because the required selected font configuration
 `/etc/fonts/conf.avail/65-droid-sans-fallback.conf` was absent. Its sole official
@@ -835,11 +835,11 @@ artifact is already acquired and independently audited; do not repeat the label
 or download. There is no successful inventory original or observed runtime/source
 graph. Later source changes do not qualify that failed selection.
 
-The [GUI readiness checkpoint](https://github.com/CrispStrobe/brickwright-lite/commit/ad636dbd1)
+The [GUI readiness checkpoint](https://github.com/CrispStrobe/brickwright/commit/ad636dbd1)
 waits for actual configuration text, drawer controls, the requested memory page
 and rendered full-width registers. It preserves the existing debugger assertions;
 four removed-wait mutations are detected. The
-[failure-diagnostic checkpoint](https://github.com/CrispStrobe/brickwright-lite/commit/ca1867592)
+[failure-diagnostic checkpoint](https://github.com/CrispStrobe/brickwright/commit/ca1867592)
 collects bounded selected-file and alias problems in a distinct
 `inventory-failure.json`, preserves the first error, and returns nonzero before
 runtime/Git probes after any required-path failure. Successful v2 output and
@@ -884,7 +884,7 @@ failure payload itself. A successful audit still reports `candidate: false`
 and `qualified: false`. Earlier failure v1 originals lack the raw event and
 cannot gain this joined-event result retroactively.
 
-Preserve the previous head's separate [native test failure](https://github.com/CrispStrobe/brickwright-lite/actions/runs/39111138775/job/117627344977):
+Preserve the previous head's separate [native test failure](https://github.com/CrispStrobe/brickwright/actions/runs/39111138775/job/117627344977):
 `renode_brick_state::tests::lockstep_steps_land_exactly_one_quantum_apart_without_polling`
 failed while 252 tests passed and ten were ignored. Its cause is unestablished;
 do not relabel it as flaky or lower the timing threshold. Coordinate diagnosis
@@ -896,7 +896,7 @@ Continue within the already claimed five implementation paths; dependency
 writers and other workflows remain outside this lane. Next tasks are:
 
 1. **Bounded reads and alias source delivered.** The subsequent
-   [v2 source checkpoint](https://github.com/CrispStrobe/brickwright-lite/commit/7dd18548e)
+   [v2 source checkpoint](https://github.com/CrispStrobe/brickwright/commit/7dd18548e)
    bounds held proc reads to 4097 bytes before parsing and both lazy censuses to
    8192 entries. Explicit directory aliases have a combined 256-alias cap,
    bounded declared resolution and observed target-directory identities. The
@@ -921,7 +921,7 @@ writers and other workflows remain outside this lane. Next tasks are:
    freezing any complete runtime input.
    The inventory is an observation, not automatic actual approval or a complete
    host attestation. Preserve any mismatch; do not install a fallback.
-   The distinct [diagnostic run39111308927](https://github.com/CrispStrobe/brickwright-lite/actions/runs/39111308927)
+   The distinct [diagnostic run39111308927](https://github.com/CrispStrobe/brickwright/actions/runs/39111308927)
    is now consumed and its original acquired once: 288/306 selected files,
    84/101 file aliases and all three directory aliases were observed, with
    no unvisited paths. Thirty-four missing font/configuration paths and one
@@ -953,7 +953,7 @@ writers and other workflows remain outside this lane. Next tasks are:
    close the component/composition merge gates. Refresh ownership and normal
    merge parents/tree before merging; source controls alone do not qualify it.
 
-The [typed metadata checkpoint](https://github.com/CrispStrobe/brickwright-lite/commit/1f8565a7a)
+The [typed metadata checkpoint](https://github.com/CrispStrobe/brickwright/commit/1f8565a7a)
 delivers template, successful-original, failure and admission v3 with a separate
 `emptyPythonSources` map. Only `/usr/lib/python3.12/urllib/__init__.py` is admitted
 under the declared `python-empty-package-source` role: root-owned0644, zero
@@ -1180,7 +1180,7 @@ are detected. No threshold, detector baseline, runtime or workflow condition
 changed. The earlier failed CI results remain failures.
 
 The scoped census claim
-[PR1079](https://github.com/CrispStrobe/brickwright-lite/pull/1079) is merged.
+[PR1079](https://github.com/CrispStrobe/brickwright/pull/1079) is merged.
 The unchanged generator refreshed only this workflow from 19 completed historical
 runs, retaining all 21 unrelated workflow rows, their 299 ordered runs and main
 provenance. Eleven exact dated pointers document the actual/font paths that
@@ -1196,8 +1196,8 @@ controls pass. These are source and metadata checks; final hosted CI and clean
 affected browser/guest qualification remain separate requirements.
 
 The one admitted font event is consumed:
-[run39170725966](https://github.com/CrispStrobe/brickwright-lite/actions/runs/39170725966),
-[job117803003700](https://github.com/CrispStrobe/brickwright-lite/actions/runs/39170725966/job/117803003700).
+[run39170725966](https://github.com/CrispStrobe/brickwright/actions/runs/39170725966),
+[job117803003700](https://github.com/CrispStrobe/brickwright/actions/runs/39170725966/job/117803003700).
 The collector failed after guard, setup and input installation succeeded;
 upload also succeeded. Sole artifact `12152507881`, 491,919 bytes, SHA256
 `b0188bdde17b0645ae2707a74b494512531b352c14fbef484ffff96b887173db`,
@@ -1228,9 +1228,9 @@ chain event; do not silently relax existing runtime checks or claim traversal
 of the retained environment from manufactured positives.
 
 Separate source continuations remain unmerged drafts:
-[the exact-entry chain reader (PR1084)](https://github.com/CrispStrobe/brickwright-lite/pull/1084)
-and [the historical bridge observation (PR1086)](https://github.com/CrispStrobe/brickwright-lite/pull/1086),
-followed by [the chain dependency repair (PR1088)](https://github.com/CrispStrobe/brickwright-lite/pull/1088).
+[the exact-entry chain reader (PR1084)](https://github.com/CrispStrobe/brickwright/pull/1084)
+and [the historical bridge observation (PR1086)](https://github.com/CrispStrobe/brickwright/pull/1086),
+followed by [the chain dependency repair (PR1088)](https://github.com/CrispStrobe/brickwright/pull/1088).
 They keep chain, bridge and actual execution disabled. The chain's strict parent
 policy would refuse the retained `040777` parent. The bridge asks a different
 question: it starts at the selected alternatives child named in the prior
@@ -1280,9 +1280,9 @@ A fresh agent should continue in these bounded lanes:
    forward debugging through clean affected browser/guest runs. Every enabled
    exact-head source check and separate actual admission remains mandatory.
 
-Main [PR1066](https://github.com/CrispStrobe/brickwright-lite/pull/1066) advanced
+Main [PR1066](https://github.com/CrispStrobe/brickwright/pull/1066) advanced
 CUI from `055930e` to `fe89e3425bf323b1acd9e3f98df6a7383e9b836b`.
-The [separate consumer update](https://github.com/CrispStrobe/brickwright-lite/commit/d07be38c7)
+The [separate consumer update](https://github.com/CrispStrobe/brickwright/commit/d07be38c7)
 explicitly matches that canonical selection without writing dependencies. The
 four CUI commits change five module-label/layout and supporting files; existing
 386 target/API source is unchanged. Full rendering and this scenario's browser
@@ -1347,7 +1347,7 @@ module graph matches the retained CLI source anchor, while an unrelated
 labwired source change means the entire supplier source tree is not identical.
 Source equality does not qualify an installed browser or transfer ownership.
 
-At the 2026-10-18 refresh, [PR975](https://github.com/CrispStrobe/brickwright-lite/pull/975)
+At the 2026-10-18 refresh, [PR975](https://github.com/CrispStrobe/brickwright/pull/975)
 has merged. Canonical main selects Board
 `f84ba60ead0a90deb9830f0c1468839c293ecf05`, CUI
 `055930ec51300e0d71466c696ce1bf76284bde38` and SB3
@@ -1388,7 +1388,7 @@ ISO/CD/ATAPI and general DOSBox compatibility are outside this claim.
 
 ## Finite inventory bootstrap checkpoint — 2026-10-26
 
-The [once-selected finite V7 inventory](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40352829291)
+The [once-selected finite V7 inventory](https://github.com/CrispStrobe/brickwright/actions/runs/40352829291)
 failed Chromium dependency setup before inventory observation. Its failure is
 retained and the event is spent. The [distinct F8 lane](../lanes/2026-10-26-x86-finite-v8-browser-bootstrap.md)
 starts disabled and reuses the existing official-Ubuntu mirror preparation
@@ -1413,7 +1413,7 @@ GUI export/reload and forward-debug acceptance remain unselected and unproved.
 
 ## Finite V9 resolver-role source checkpoint — 2026-10-27
 
-The [once-selected V8 inventory](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40422314383)
+The [once-selected V8 inventory](https://github.com/CrispStrobe/brickwright/actions/runs/40422314383)
 passed source and trusted setup, then refused `/etc/resolv.conf` because its
 selected alias role did not match the observed regular file. Its independent
 negative reader joined the event with qualification false. Preserve that

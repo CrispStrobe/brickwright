@@ -1,6 +1,6 @@
 ## A12 — Circuit Playground Express MakeCode translator — 2026-10-16
 
-DONE — Codex CPX translator lane. [PR1009](https://github.com/CrispStrobe/brickwright-lite/pull/1009)
+DONE — Codex CPX translator lane. [PR1009](https://github.com/CrispStrobe/brickwright/pull/1009)
 merged as `e0b89072` on 2026-10-16, with reviewed source `16dda603`.
 All 11 enabled exact-head checks passed; deploy and verify-gui were declared
 conditional skips. Both complete unit shards passed, including all fifteen

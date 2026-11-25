@@ -483,7 +483,7 @@ the runs. After subtracting the instrumented work, mean overhead was
 0.55 to 0.38 ms per tick in one order and 0.41 to 0.42 ms in reverse.
 The results do not establish a repeatable clock-specific throughput
 gain, so this change remains a candidate.
-[CAD clock candidate](https://github.com/CrispStrobe/brickwright-lite/commit/195502ee0)
+[CAD clock candidate](https://github.com/CrispStrobe/brickwright/commit/195502ee0)
 
 ### Sparse numeric refactorization
 
@@ -709,3 +709,152 @@ The observed startup improvement does not establish the full editor's
 sustained 1× target. The local test worker replaces only the bundled
 worker and its assets. Lite's release SDK remains at pin `7760321`.
 Scout passed the same full-editor restart proof on the local build.
+
+### Geometry payload on repeat Run
+
+The simulation controller sends rendered mesh buffers on a cold start
+and reuses the parked worker's mesh buffers on repeat Run. A document
+revision disposes of the previous worker, so the next cold start sends
+the current mesh buffers. The worker still rebuilds the physical world
+and uses its existing geometry and collision cache checks.
+
+Type checking and the controller, worker, and base tests passed.
+The replay test timed out at five seconds under Mac load and passed
+when rerun with a 60-second timeout. All 25 cases passed across these
+runs. The [test SDK](https://github.com/CrispStrobe/CrispCAD/commit/4fc87ad)
+was built from Brickwright's pinned CAD source and this change.
+
+The change is on [CrispCAD main](https://github.com/CrispStrobe/CrispCAD/commit/80cf22542844e4ecc95acd97bdd961469fb80daf).
+The full editor passed Atlas Run, Stop, Reset, and three repeat Runs.
+A Chrome probe counted 656,316 bytes of mesh buffers on each start
+with the pinned build. The local SDK sent the same 656,316 bytes at
+first Run and zero on all three repeat Runs. The CAD document still
+goes to the worker when creating a new world. Mac load varied
+substantially between builds, so the comparison measures bytes
+avoided and does not establish an end-to-end latency gain.
+The release SDK pin remains `7760321`.
+Scout passed the same restart proof, with 879732 bytes at first
+Run and zero bytes at repeat Run.
+
+### Authored document payload on repeat Run
+
+The simulation worker retains its copy of the authored document while
+parked, along with the geometry retained by the preceding change.
+Repeat Run still creates a new physical world. Fix base applies to
+that run's copy of the first solid's motion setting, so toggling it
+does not overwrite the authored setting. Editing the design discards
+the old worker and the next cold start sends the new document and
+mesh buffers.
+
+All 27 focused controller, worker, base, and replay tests passed.
+They cover cold start after an edit, rejecting a warm start with no
+prior document, and alternating Fix base on and off across restarts.
+The [local SDK backport](https://github.com/CrispStrobe/CrispCAD/commit/42e79ed)
+uses the pinned CAD source plus the two restart payload changes.
+
+Chrome measured the authored document as 2,289,271 UTF-8 bytes when
+serialized as JSON for Atlas. That is a size reference, since the
+browser sends the object through structured clone. The previous
+local SDK sent the document on the first Run and all three repeat
+Runs, with no mesh buffers on the repeat Runs.
+
+The optimized SDK sent the same document and mesh buffers at first
+Run and neither payload on all three Atlas repeat Runs. In this
+full-editor Chrome comparison, the synchronous worker post took
+20.6–29.5 ms before and 0–0.1 ms after. Median instrumented worker
+startup was 514 ms before and 390 ms after in the individual runs.
+Atlas passed Run, Stop, Reset, and repeat Run with the same Jolt 5.7
+override. This is startup work. The release SDK pin remains
+`7760321` and the sustained 1× target remains open.
+[Source on CrispCAD main](https://github.com/CrispStrobe/CrispCAD/commit/3860e7ac20a81dd193b72822bfabb2e332835ecb)
+Scout also passed the restart proof. Repeat Run omitted its authored
+document (2975205 JSON bytes) and its mesh buffers.
+
+### Prepared collision construction on repeat Run
+
+A payload-free start reuses the construction stored with the last
+successful authored document. The worker skips recomputing the visual
+signature and construction key for that same document. A start with a
+new document computes fresh keys. A failed start leaves the previous
+successful document and construction paired. Fix base still applies
+to the current run, and physics still validates the document and
+creates a fresh world.
+
+Type checking and all 28 focused tests passed. The worker tests
+confirmed one geometry-key computation across repeated starts and
+recovery after a new construction fails. The [test worker backport](https://github.com/CrispStrobe/CrispCAD/commit/73c24b4)
+was rebuilt against the previous local restart SDK. Its host and
+remaining assets came from that SDK.
+
+Both paired Chrome worker orders used the same Board bundle,
+Jolt 5.7.0 SIMD module, and three warm starts after 600 coupled ticks.
+Sampled motion, electrical traces, and restart frames matched exactly.
+Atlas's median restart was 335 ms before and 316 ms after in one
+order, and 277 ms before and 290 ms after in the other. Scout's
+medians were 629 to 589 ms and 548 to 579 ms. These timings do
+not show a consistent restart speedup.
+[Source on CrispCAD main](https://github.com/CrispStrobe/CrispCAD/commit/79b403e589993614469e08536562cb8298299e74)
+
+Atlas and Scout passed the full editor Run, Stop, Reset, and restart
+checks. The release SDK stays at `7760321`, and the sustained 1×
+viewport target remains open.
+
+### Paired full-editor Jolt 5.7 comparison
+
+The same complete local CAD SDK and host were used for both engine
+flavors, with the same robots, widget defaults and full viewport.
+The bundled engine was JoltPhysics.js `1.1.0-bw.10`. The candidate
+was the single-thread Jolt 5.7 SIMD module from
+[wrapper source](https://github.com/CrispStrobe/JoltPhysics.js/commit/74d8feedc34213b3034d8ad21255ad2d0224da88)
+and [native source](https://github.com/CrispStrobe/JoltPhysics/commit/783255b0c2fcb54e877a21d3abf5680009b26a57).
+
+Atlas passed Run, physical motion, Stop, and Reset in both orders.
+Sustained speed rose from 0.226× to 0.495× in one order and from
+0.235× to 0.512× in the reverse order. The mechanical worker round
+trip fell from 19.74/20.14 ms to 6.28/6.03 ms per tick. The full
+editor remained below 1× on the shared Mac.
+
+A previous local worker-only preview on port 8292 had used Vite's
+page preload path. With bundled Jolt that could throw a browser
+`window is not defined` error inside the worker. The preview worker
+was rebuilt through Vite's module-worker configuration. Chrome
+verified that it loaded its bundled SIMD engine and advanced Scout
+normally. The paired results above used a complete SDK throughout.
+
+Scout passed both engine checks and sustained 0.248× with bundled
+Jolt and 0.506× with Jolt 5.7 SIMD in one pair.
+
+#### Jolt 5.7 module qualification
+
+Both single-thread WebAssembly compat modules matched the original
+physical controls and exact `f7b0121879392938` regression hash. Each
+passed 11 reflected-rotor cases and three native motor-block controls.
+The scalar SHA-256 was
+`8277f49cb9df363f7eec59ef1fea5346987d00b1836ced3d4a6b93058c13faeb`.
+The SIMD SHA-256 was
+`5f25671f51625ad3eb9ff8afc22ac40c63be95bb9380c747babec5fbacdf7fdf`.
+
+With the 5.7 SIMD module, the forward Atlas comparison averaged 9.92 ms
+between coupled ticks. Its 6.28 ms mechanical worker round trip and
+2.83 ms electrical step account for most of the time. The 200 Hz loop
+has a 5 ms budget for the whole tick.
+
+A normal Chrome worker loaded the preview’s SIMD module with the
+recorded SHA-256 and stepped the Scout scene. The preview uses the
+repaired CAD worker with only the two Jolt engine assets replaced.
+
+Set `PROOF_JOLT_SCALAR_MODULE` to the candidate module when running
+`scripts/verify-cad-robot-projects.mjs` to block the SIMD import.
+The test checks that the worker requested the supplied scalar module
+and records the SHA-256 with the result. Atlas and Scout passed Run,
+joint motion, Stop, and Reset with this route. Their unpaired scalar
+runs sustained 0.238× and 0.389×, respectively.
+
+All 25 focused Robot Lab tests passed with the scalar candidate,
+covering the forklift program and reverse command, world mechanics,
+ray casts, rotor inertia, and motor stops. The forklift lifted its
+pallet 39.81 mm against the 40 mm target.
+
+The release SDK pin remains `7760321`. This qualification covers two
+single-thread compat modules. The complete npm export matrix and the
+sustained 1× full-viewport target remain open.

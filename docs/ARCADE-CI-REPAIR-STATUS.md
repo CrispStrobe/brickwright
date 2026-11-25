@@ -2,7 +2,7 @@
 
 ## Latest hosted observation — 22 October 2026
 
-The [next integration run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/39719305574)
+The [next integration run](https://github.com/CrispStrobe/brickwright/actions/runs/39719305574)
 for candidate `f92ba12441be` completed all four unit shards: **12,160 pass,
 168 fail, 19 skip and 43 TODO**. Compared with the earlier run, thirteen
 failures are resolved and no previously passing title newly fails. All eleven
@@ -48,11 +48,11 @@ attribute them to the identity-procedure prefix without the actual project and
 writer predicates establishing that connection.
 
 The journey repair and diagnostic upload are published in the existing PR;
-[their automatic qualification](https://github.com/CrispStrobe/brickwright-lite/actions/runs/39722942637)
+[their automatic qualification](https://github.com/CrispStrobe/brickwright/actions/runs/39722942637)
 completed with 30 successful checks, eight declared skips and five failures
 (the four unit shards and numeric authoring). Its unit totals and all 168 failing
 titles match the preceding candidate; standard build, heavy/light browsers and
-Robot Lab groups pass. Do not substitute those successes for the failed gates. The [recursive numeric-result claim](https://github.com/CrispStrobe/brickwright-lite/pull/1213)
+Robot Lab groups pass. Do not substitute those successes for the failed gates. The [recursive numeric-result claim](https://github.com/CrispStrobe/brickwright/pull/1213)
 has merged. Its final complete source cohort passes **55/55**, including all
 47 preceding controls and all eight new groups. Earlier integration and new-test
 contract failures are retained. Native/SDK and visible editor acceptance remain
@@ -64,7 +64,7 @@ grant no application-completion credit.
 
 ## Earlier complete hosted observation — 22 October 2026
 
-The [integration run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/39705808582)
+The [integration run](https://github.com/CrispStrobe/brickwright/actions/runs/39705808582)
 at `f9e8bca35f` finished with failures. Across the four ordinary unit shards,
 12,103 tests passed and 181 failed; 19 were skipped and 43 marked TODO.
 These are test results, not application counts. The historical **36 partial
@@ -191,7 +191,7 @@ The intervening supplier-maintenance commits updated these consumers before
 the later D7 adoption omitted them; this was not a merge-conflict reversion.
 
 The earlier remote refresh confirmed that
-[PR #1095](https://github.com/CrispStrobe/brickwright-lite/pull/1095) is already
+[PR #1095](https://github.com/CrispStrobe/brickwright/pull/1095) is already
 merged. Its earlier supplier selection does not qualify D7. Main's `7d3f8be7`
 is an ancestor of D7, which adds the source operators, score callbacks and motor
 power needed by this candidate. All twenty mapped compiler files and both
@@ -200,7 +200,7 @@ no new supplier selection or sync is needed for this handoff.
 
 The operator authorized taking over this narrow maintenance. The
 [new claim](../lanes/2026-10-21-x86-d7-gui-consumer-source-maintenance.md)
-landed in PR [#1193](https://github.com/CrispStrobe/brickwright-lite/pull/1193),
+landed in PR [#1193](https://github.com/CrispStrobe/brickwright/pull/1193),
 preserving the earlier acceptance lane and receipts. The source candidate
 updates only the fixed expectations in
 [the runner](../scripts/run-i80386-hdd-gui-actual.py) and
@@ -275,7 +275,7 @@ the declared Jolt provider. An older installed provider cannot substitute for it
 
 ## Latest complete hosted observation — 2026-10-21
 
-PR [#1128](https://github.com/CrispStrobe/brickwright-lite/pull/1128), exact head
+PR [#1128](https://github.com/CrispStrobe/brickwright/pull/1128), exact head
 `125dacab7e183ca15d08224524b576894480d8b1`, completed its enabled checks:
 three browser groups passed, while build and four unit groups failed. The
 178-control source fence passed. The SPIKE gate reports 232 passes and two
@@ -412,7 +412,7 @@ after a balanced actual-input episode found it slower; it is excluded from
 delivery. Historical 36 partials remain unchanged pending a complete replacement
 census.
 
-At the same head, the existing [hosted campaign](https://github.com/CrispStrobe/brickwright-lite/actions/runs/39551853068)
+At the same head, the existing [hosted campaign](https://github.com/CrispStrobe/brickwright/actions/runs/39551853068)
 passes official-build Arcade numeric authoring, Robot Lab and FPGA jobs. The
 light job records a passing painted-level journey through fresh reopen, live
 pixels/walls, original MakeCode compilation/rendering and file reimport. Its
@@ -430,7 +430,7 @@ evidence that these later assertions passed. Preserve each failing assertion
 and investigate actual program/target publication and debugger ownership.
 Do not increase waits or relax the engine choices to hide the failure.
 
-Main subsequently merged [PR1159](https://github.com/CrispStrobe/brickwright-lite/pull/1159),
+Main subsequently merged [PR1159](https://github.com/CrispStrobe/brickwright/pull/1159),
 including actual `PROJECT_CHANGED` publication after import and reload-event
 filtering. The integration now preserves that filtering and restores the VM
 listener even if XML parsing or error reporting throws. All 22 controls in the
@@ -512,7 +512,7 @@ Further work is scoped as follows:
 4. **Browser initialization:** the official numeric artifact observes a changed
    `Function.prototype.toString` value. Investigate global tooltip/polyfill
    initialization before runtime capture. Keep intrinsic checks unchanged.
-   The separate ownership claim in [#1153](https://github.com/CrispStrobe/brickwright-lite/pull/1153)
+   The separate ownership claim in [#1153](https://github.com/CrispStrobe/brickwright/pull/1153)
    has merged after all four enabled checks passed. Both GUI entries now order
    the required compatibility dependencies before the VM graph. Three complete
    Node controls pass using the genuine dependency modules, retaining Promise
@@ -533,7 +533,7 @@ Further work is scoped as follows:
 6. **Initial payload:** the original browser build contains 4,486,993 initial
    JavaScript bytes, exceeding the existing limit by 10,641. Its ownership
    report failed before runtime performance measurements. A separate documentation
-   claim, [#1154](https://github.com/CrispStrobe/brickwright-lite/pull/1154), scopes
+   claim, [#1154](https://github.com/CrispStrobe/brickwright/pull/1154), scopes
    optional micro:bit updater loading after device selection. Preserve chooser
    activation, APIs, error handling and all size/performance limits. Merge the
    claim before implementation; qualify the emitted build and affected journey.
@@ -609,8 +609,8 @@ unchanged.
 
 ## Current batch and acceptance boundary — 2026-10-20
 
-The saved failures on [#1128](https://github.com/CrispStrobe/brickwright-lite/pull/1128)
-and [#1132](https://github.com/CrispStrobe/brickwright-lite/pull/1132) are caused by
+The saved failures on [#1128](https://github.com/CrispStrobe/brickwright/pull/1128)
+and [#1132](https://github.com/CrispStrobe/brickwright/pull/1132) are caused by
 this development stack. Later repairs on main are composed explicitly below;
 a historical green run does not qualify its latest head. The current batch
 composes the follow-up from #1132 into #1128 for one hosted qualification
@@ -688,10 +688,10 @@ These observations do not promote corpus entries or close browser failures.
 The exact-head hosted x86 controls reported one additional composition failure:
 the app's seven canonical Circuit UI declarations already select the newer B27
 revision, while the GUI audit controller and reader still require the previous
-revision. Main has since landed [#1136](https://github.com/CrispStrobe/brickwright-lite/pull/1136),
+revision. Main has since landed [#1136](https://github.com/CrispStrobe/brickwright/pull/1136),
 which makes both consumer declarations explicitly follow the existing app
 selection. The integration branch includes that normal merge and the separate
-CAD pointer repair from [#1131](https://github.com/CrispStrobe/brickwright-lite/pull/1131). Dependency pins, drift assertions, workflow activation guards and
+CAD pointer repair from [#1131](https://github.com/CrispStrobe/brickwright/pull/1131). Dependency pins, drift assertions, workflow activation guards and
 limits are unchanged. Historical originals keep their historical readers; a
 new actual observation needs a fresh complete source/request/event/artifact
 envelope and the existing affected qualification.
@@ -831,7 +831,7 @@ hosted failures remain open; these fixture controls establish no corpus result.
 | Generated helper recognition | Thirty-six focused controls pass. Recognition proves actual lexical bindings, complete bodies, parse profiles, defaults and continuation effects; legacy nested Array helpers rewrite against the same original proof before staging. | Complete affected native and authored-project journeys, source census and final integration checks. |
 
 The six implementation contracts landed through
-[joint claim 1007](https://github.com/CrispStrobe/brickwright-lite/pull/1007),
+[joint claim 1007](https://github.com/CrispStrobe/brickwright/pull/1007),
 including the original claim commits from 1005 and 1008. All enabled checks
 passed at the reviewed claim head; its actual merge parents and tree matched
 the review. This authorizes bounded implementation and does not qualify the
@@ -866,7 +866,7 @@ observations retained. Its earlier test failure incorrectly looked for global
 variable writers on the Stage; the corrected fixture joins actual Game writers
 to the same Stage cells by IDs and connected source-entry chains. The authentic
 seven-backing project, edited artwork and visible authoring remain open. The
-[source provenance scope](https://github.com/CrispStrobe/brickwright-lite/pull/1012)
+[source provenance scope](https://github.com/CrispStrobe/brickwright/pull/1012)
 is merged. Its private prepared-source issuer passes nine focused controls,
 binding the actual prepared map, exact admitted source and currentness. That
 receipt alone authorizes neither Text effects nor any value type or game result.
@@ -876,7 +876,7 @@ private currentness, connected ordinary-Array fallback and Code/SB3/export.
 This source-model result does not qualify the authentic seven-backing project
 or new SDK/resolver execution.
 
-The [original failing campaign](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38862860015)
+The [original failing campaign](https://github.com/CrispStrobe/brickwright/actions/runs/38862860015)
 remains the regression baseline. Current source composition preserves adopted
 SPIKE/editor changes and existing dependency pins. Its final-head checks remain
 required before merging.
@@ -1090,7 +1090,7 @@ or a GUI/SDK/corpus result. See [the exact boundary and remaining acceptance](AR
 
 ## Next single hosted qualification batch — 2026-10-22
 
-Use the existing [PR1128](https://github.com/CrispStrobe/brickwright-lite/pull/1128)
+Use the existing [PR1128](https://github.com/CrispStrobe/brickwright/pull/1128)
 branch after its normal ancestry check. Its existing `ci:full` already requests
 the browser gates needed by the composed converter changes; do not add another
 label or dispatch. Finish and review the image proof, complete affected source

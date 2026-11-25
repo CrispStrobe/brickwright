@@ -1,6 +1,6 @@
 ## SPIKE startup observer cancellation — 2026-10-14
 
-ADOPTED — [PR930](https://github.com/CrispStrobe/brickwright-lite/pull/930), tested
+ADOPTED — [PR930](https://github.com/CrispStrobe/brickwright/pull/930), tested
 source `59c78f3bee80b496dcd2b76180397bbae563a634`, merged
 `9a6706dc430472345031a82a2f83e04d4ec79035`, in the merged G02 session/test
 envelope following the separately qualified deferred-storage consumer. A synchronous Stop from the configuration

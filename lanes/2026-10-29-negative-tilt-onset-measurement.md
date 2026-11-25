@@ -16,7 +16,7 @@ when the physical table angle is -7.289738 degrees. Its critical-angle error is
 0.312235 degrees; the late check instead has 0.695328 degrees error. This
 identifies different measurement times, without establishing that every
 remaining physical behavior or either direction is qualified. Supporting
-consumer status is recorded in [PR 1553](https://github.com/CrispStrobe/brickwright-lite/pull/1553).
+consumer status is recorded in [PR 1553](https://github.com/CrispStrobe/brickwright/pull/1553).
 
 Own only the tilting-tower measurement in `test/bw-sim-validation-2.test.mjs`,
 focused first-crossing controls in a new `test/helpers/tilt-onset.mjs` and

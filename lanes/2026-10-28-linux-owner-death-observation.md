@@ -3,7 +3,7 @@
 Owner: Codex SAMD dependency continuation. Status: CLAIMED.
 Base: `b660420d8fd1db838b788647c8fa69009d90e6ba`. Branch: `lane/samd-release-adoption-20261028`.
 
-Existing [Tauri40765450230](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40765450230)
+Existing [Tauri40765450230](https://github.com/CrispStrobe/brickwright/actions/runs/40765450230)
 failed the unchanged Linux owner-crash test:269 passed,1 failed,11 ignored.
 The original is retained and remains unattributed. The test does not bind its
 shell-published PID to the expected parent/start identity, distinguish every

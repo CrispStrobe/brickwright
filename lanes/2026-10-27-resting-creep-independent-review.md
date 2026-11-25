@@ -7,7 +7,7 @@ Branch: `lane/robot-resting-creep-independent-review-20261027`.
 Review checkpoint base: `dea504b32a9a4bd43a2a9d25b587590a0ac9763f`.
 Scope: this review record and read-only qualification metadata. The diagnostic
 implementation remains owned by the successor in
-[PR #1472](https://github.com/CrispStrobe/brickwright-lite/pull/1472).
+[PR #1472](https://github.com/CrispStrobe/brickwright/pull/1472).
 Coordinate sole artifact intake before any original acquisition or source edit.
 
 ## Completed source review

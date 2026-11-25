@@ -295,7 +295,7 @@ late capture would change its security and currentness guarantees. Arcade's
 pixel/tile editors and device pane already have lazy boundaries.
 
 The separate documentation claim
-[#1140](https://github.com/CrispStrobe/brickwright-lite/pull/1140) scopes optional
+[#1140](https://github.com/CrispStrobe/brickwright/pull/1140) scopes optional
 GIF/CSV parser loading has landed. The CSV-only source candidate opens the
 picker synchronously and acquires the actual parser after selection. Synchronous
 parser throws now reject the owning Promise with the same error and an owned

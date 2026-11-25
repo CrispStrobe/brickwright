@@ -1,7 +1,7 @@
 ## SPIKE pending Stop teardown implementation — 2026-10-15
 
 G02 continuation, branch `lane/spike-g02-pending-stop-20261015`, based on main
-after the Code caller/output follow-up [PR985](https://github.com/CrispStrobe/brickwright-lite/pull/985) merged.
+after the Code caller/output follow-up [PR985](https://github.com/CrispStrobe/brickwright/pull/985) merged.
 Its frozen-package qualification below does not
 qualify this new teardown change. A second Stop can see no
 attached session while native teardown still owns the hub clock. Remember the

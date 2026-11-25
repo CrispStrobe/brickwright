@@ -19,9 +19,9 @@ completion tasks. Preserve the earlier forward-integration and accessor/Sprite
 claims, their delivered source, branches and original evidence. Do not assert a
 peer release or discard another worker's changes. Do not edit shared checkouts.
 The existing parameter/declaration source is in
-[draft PR #1544](https://github.com/CrispStrobe/brickwright-lite/pull/1544),
+[draft PR #1544](https://github.com/CrispStrobe/brickwright/pull/1544),
 stacked on its own parameter branch. Its author retains publication/intake.
-The broader stack is [PR #1128](https://github.com/CrispStrobe/brickwright-lite/pull/1128).
+The broader stack is [PR #1128](https://github.com/CrispStrobe/brickwright/pull/1128).
 Preserve each live head until its required terminal originals are admitted and
 retained. Prepare later work separately; never race another publisher.
 

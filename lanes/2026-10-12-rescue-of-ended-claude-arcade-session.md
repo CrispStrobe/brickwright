@@ -13,7 +13,7 @@ Named-song work remains in its own branch and is not discarded by this rescue.
 
 
 Claude rescue publication checkpoint:
-[PR810](https://github.com/CrispStrobe/brickwright-lite/pull/810), head
+[PR810](https://github.com/CrispStrobe/brickwright/pull/810), head
 fbf016c065cb5925821489aa8bc8ddfd35f4902c. Three exact original heads preserved
 by normal merges;20 combined focused checks pass. Private inventory/prototypes
 and original797/800 failed logs archived. Hosted checks queued; no main merge.

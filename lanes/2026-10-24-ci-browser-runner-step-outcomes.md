@@ -7,7 +7,7 @@ explicitly authorized to take over this narrow CI boundary. Base:
 and detailed original audit are recorded privately. This takeover excludes
 Arcade application/features and every other owner's product work.
 
-[Build40113882924](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40113882924)
+[Build40113882924](https://github.com/CrispStrobe/brickwright/actions/runs/40113882924)
 at source `2ffb3bb8327053b939cf14bb243c4392253a17e5` retains browser gate PASS
 output followed by an unauditable step API snapshot. Completed job envelopes
 still contain pending/missing step records after job completion. Unique read

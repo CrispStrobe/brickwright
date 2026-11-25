@@ -1080,6 +1080,10 @@ licensed under the **MIT License**.
 
 - **Licence:** MIT
 - **Upstream:** https://github.com/CrispStrobe/bw-board
+- **Independent CP1 monitor:** `static/roms/cp1-independent-monitor.bin` is
+  built from the engine's original `firmware/cp1` sources. The focused CP1
+  workflow rebuilds the image from the adopted Board revision and compares the
+  complete binary. See [the firmware record](docs/CP1-EDITOR-CONTRACT.md).
 - **Licence file:** `overlay/scratch-gui/static/licenses/bw-board.MIT.txt`,
   shipped as `static/licenses/bw-board.MIT.txt`.
 - **Pinned source links:** `static/licenses/bw-packages.sources.json` in the application.

@@ -73,7 +73,7 @@ Owner: existing Codex SAMD continuation, branch
 `lane/samd-release-adoption-20261028`. Source implementation starts after this
 claim extension lands and native-package boundary coordination is complete.
 
-Original [frontend run40734487998](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40734487998)
+Original [frontend run40734487998](https://github.com/CrispStrobe/brickwright/actions/runs/40734487998)
 verified the three release inputs before compilation. Its emitted WASM and
 profile retain their exact hashes, but Webpack minified the153114-byte web glue
 to51263 bytes. Strict consumer admission correctly rejects that changed hash;
@@ -101,7 +101,7 @@ matched-head adoption merge. No new hardware or real-time performance claim.
 ## Released historical-study gate repair — dependency scope, 2026-10-28
 
 The source owner released a narrow repair from
-[`e85dc904ac5c56d327e993c47dc730c5d1c7abeb`](https://github.com/CrispStrobe/brickwright-lite/commit/e85dc904ac5c56d327e993c47dc730c5d1c7abeb)
+[`e85dc904ac5c56d327e993c47dc730c5d1c7abeb`](https://github.com/CrispStrobe/brickwright/commit/e85dc904ac5c56d327e993c47dc730c5d1c7abeb)
 for this continuation. Claim these three paths before carrying it into the next
 SAMD qualification head:
 
@@ -124,9 +124,9 @@ before the next exact-head qualification; the original failed run stays retained
 
 Corrected candidate: the released sealed-study controls and exact emitted-glue
 preservation pass88 focused Node22 controls with zero skips. The retained
-[first consumer run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40734487998)
+[first consumer run](https://github.com/CrispStrobe/brickwright/actions/runs/40734487998)
 remains failed and its changed emitted glue remains refused. The retained
-[five-target benchmark](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40730146231)
+[five-target benchmark](https://github.com/CrispStrobe/brickwright/actions/runs/40730146231)
 passed its unchanged floor; these authored core-loop ceilings do not qualify
 active-game or hardware performance. Fresh source, emitted-byte and actual
 browser/installed acceptance still must succeed before adoption lands.

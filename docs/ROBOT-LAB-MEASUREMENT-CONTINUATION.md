@@ -1,7 +1,7 @@
 # Robot Lab measurements — accepted checkpoint and next work
 
 Updated 2026-10-28. The four measurement capabilities from
-[PR1437](https://github.com/CrispStrobe/brickwright-lite/pull/1437) are on main.
+[PR1437](https://github.com/CrispStrobe/brickwright/pull/1437) are on main.
 Their combined-main acceptance was independently audited on the exact checkpoint
 below. Later physics and model changes need their own qualification. The broader
 physics follow-up loop remains open; this document closes only the measurement
@@ -26,7 +26,7 @@ mechanical or program replay. See [the measurement guide](ROBOT-LAB-MEASUREMENTS
 The accepted main checkout is
 `566c905d2f6ce0db35f6037b589b91491678b94c`, tree
 `d2d49b92a46419d6bcb9f9d050ed74422204e0c4`.
-[Build40514051175](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40514051175)
+[Build40514051175](https://github.com/CrispStrobe/brickwright/actions/runs/40514051175)
 completed successfully. All 46 exact-head check-runs were admitted: 43 SUCCESS
 and three declared conditional skips (two deployment jobs and the PR-only
 full-CI-label guard), with zero legacy statuses. This is acceptance of that
@@ -34,9 +34,9 @@ checkout, not a claim that every subsequent main tree has been tested.
 
 The actual successful producers were:
 
-- [Unit5 job122246021259](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40514051175/job/122246021259): seven actual source-timer lifecycle cases executed without target skips or TODOs; independent TAP and checkout joins passed.
-- [Light job122246022260](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40514051175/job/122246022260): the independent native-keyboard trace audit and all 81 assigned browser-gate joins passed. Unassigned gates remained skipped.
-- [Robot Lab job122246022225](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40514051175/job/122246022225): editor build, measurement journey and unique successful artifact12751668829 passed.
+- [Unit5 job122246021259](https://github.com/CrispStrobe/brickwright/actions/runs/40514051175/job/122246021259): seven actual source-timer lifecycle cases executed without target skips or TODOs; independent TAP and checkout joins passed.
+- [Light job122246022260](https://github.com/CrispStrobe/brickwright/actions/runs/40514051175/job/122246022260): the independent native-keyboard trace audit and all 81 assigned browser-gate joins passed. Unassigned gates remained skipped.
+- [Robot Lab job122246022225](https://github.com/CrispStrobe/brickwright/actions/runs/40514051175/job/122246022225): editor build, measurement journey and unique successful artifact12751668829 passed.
 
 Each new official original was acquired once after exact metadata admission.
 All three original logs bind the actual push checkout above. The measurement
@@ -73,9 +73,9 @@ above does not retroactively turn this into a qualified pre-merge landing.
 
 The old candidate had its own successful qualification and sealed originals;
 those were not renamed as evidence for the new main combination. Earlier
-[Build40468979773](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40468979773)
+[Build40468979773](https://github.com/CrispStrobe/brickwright/actions/runs/40468979773)
 ended canceled and
-[Build40470766517](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40470766517)
+[Build40470766517](https://github.com/CrispStrobe/brickwright/actions/runs/40470766517)
 failed. Those outcomes remain preserved; they were not rerun to obtain this
 later successful checkpoint.
 

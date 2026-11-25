@@ -8,7 +8,7 @@ This completes the interrupted Scout TT continuation from Lite
 control and executable-program corrections described in the
 [control-contract receipt](2026-11-16-scout-control-contract.md).
 The refreshed SDK is saved in Lite checkpoint
-[`0bbc92e932c3ea8d1a1b8d43b816924947ecaebd`](https://github.com/CrispStrobe/brickwright-lite/commit/0bbc92e932c3ea8d1a1b8d43b816924947ecaebd).
+[`0bbc92e932c3ea8d1a1b8d43b816924947ecaebd`](https://github.com/CrispStrobe/brickwright/commit/0bbc92e932c3ea8d1a1b8d43b816924947ecaebd).
 The [machine-readable receipt](scout-tt-sdk-completion-2026-11-16.json)
 records the same identities and results.
 

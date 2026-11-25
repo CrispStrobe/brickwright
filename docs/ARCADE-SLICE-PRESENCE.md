@@ -1,6 +1,6 @@
 # Bounded slice results and nested Array presence
 
-Source candidate under the claim merged in [#1148](https://github.com/CrispStrobe/brickwright-lite/pull/1148).
+Source candidate under the claim merged in [#1148](https://github.com/CrispStrobe/brickwright/pull/1148).
 The complete `test/makecode-array-reference-export-authority.test.mjs` passes
 50 tests with zero skips or TODOs. Its original 45 test bodies are unchanged.
 This is pure importer, Creator, exporter and exported-file reimport evidence.

@@ -1,7 +1,7 @@
 # Tilting-tower onset measurement
 
 The measurement source is implemented under [the merged claim](../lanes/2026-10-29-negative-tilt-onset-measurement.md)
-and [PR 1556](https://github.com/CrispStrobe/brickwright-lite/pull/1556).
+and [PR 1556](https://github.com/CrispStrobe/brickwright/pull/1556).
 Only pure observer controls have run for this candidate. Both-direction actual
 native qualification, the adopted package/source join and current-head CI remain
 pending. The claim merge establishes ownership; it does not qualify an app tree.
@@ -40,7 +40,7 @@ critical-error guard; a later sample near the expected angle cannot rescue it. T
 ## Evidence and limits
 
 The original bw.9 negative-case failure remains recorded in
-[PR 1553](https://github.com/CrispStrobe/brickwright-lite/pull/1553): the late check
+[PR 1553](https://github.com/CrispStrobe/brickwright/pull/1553): the late check
 was −7.672831 degrees against a 6.977503 degree critical angle and the unchanged
 0.5 degree limit. Separate saved-step analysis found the first strict crossing
 at −7.289738 degrees, during the same unmodified hold. The different sample times

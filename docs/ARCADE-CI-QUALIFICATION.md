@@ -2,7 +2,7 @@
 
 ## Why the workload is split
 
-[PR845 build](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38306464578/job/115001603045)
+[PR845 build](https://github.com/CrispStrobe/brickwright/actions/runs/38306464578/job/115001603045)
 passed7037 units in20m42s. Setup, source checks and later guards consumed most
 of the remaining30-minute job budget. Webpack started at21:40:11UTC and the
 job was cancelled at21:42:48UTC. Unit success did not establish distribution
@@ -64,7 +64,7 @@ No whole-app MakeCode compatibility promotion follows from sharding CI.
 
 ## First hosted split and audit correction — 2026-10-13
 
-[First split run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38314745493)
+[First split run](https://github.com/CrispStrobe/brickwright/actions/runs/38314745493)
 completed build in6m57s and unit legs in16m24s/16m57s. Heavy browser and FPGA
 passed. Unit1 passed; unit2 reported two source-audit failures. The full candidate
 was not qualified. These observations establish reached job durations, not a

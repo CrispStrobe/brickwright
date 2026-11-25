@@ -10,7 +10,7 @@ Owner: Arcade integration. Isolated branch:
 `lane/arcade-native-frame-reset-claim-20261023`.
 Base: `95b5b97034058abffe5b2e8746581ee64e23691c`.
 Continue the same owner's Array authority work after the lexical-frontier
-candidate in [PR #1128](https://github.com/CrispStrobe/brickwright-lite/pull/1128).
+candidate in [PR #1128](https://github.com/CrispStrobe/brickwright/pull/1128).
 That candidate is not asserted as merged or fully qualified. Preserve every
 other owner's source, pending checks and original failures.
 

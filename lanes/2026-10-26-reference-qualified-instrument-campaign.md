@@ -49,8 +49,8 @@ state; its live synthesis path remains byte-identical. Actual hosted acceptance
 is still required. The preceding `09a4f407` run set was superseded before any
 child started; cancellation followed explicit zero-running-child verification.
 
-Fresh fast [Build40869114327](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40869114327)
-and necessary full [Build40869128682](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40869128682)
+Fresh fast [Build40869114327](https://github.com/CrispStrobe/brickwright/actions/runs/40869114327)
+and necessary full [Build40869128682](https://github.com/CrispStrobe/brickwright/actions/runs/40869128682)
 are pending on that exact source. The earlier manual run `40856189963` was
 cancelled before application execution after its unsupported consumer context
 was identified; it is not qualification. The prior fast head `d32860b8` had one

@@ -1,6 +1,6 @@
 ### Carnival host checkpoint — 2026-10-11
 
-Claimed host/settings lane has draft [PR803](https://github.com/CrispStrobe/brickwright-lite/pull/803),
+Claimed host/settings lane has draft [PR803](https://github.com/CrispStrobe/brickwright/pull/803),
 head c8e23f75f3032150a87b4cd08ee69c270388dd70, stacked on PR802 with exact
 PR800 candidate integration. Native dialogs, ordinary blocks/pseudocode,
 MakeCode package export and program number-record SB3 hooks are implemented.

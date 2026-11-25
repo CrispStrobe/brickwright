@@ -102,7 +102,7 @@ is a separate pending check.
 
 ## Current GUI qualification work
 
-The [current source candidate](https://github.com/CrispStrobe/brickwright-lite/pull/1318)
+The [current source candidate](https://github.com/CrispStrobe/brickwright/pull/1318)
 prepares a distinct finite inventory v4 bootstrap; actual GUI execution remains
 disabled. Its next acceptance sequence is:
 

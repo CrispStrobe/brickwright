@@ -51,7 +51,7 @@ The shared parser [PR62](https://github.com/CrispStrobe/sb3-creator/pull/62) is
 merged and the consumer now pins
 [`33ce7380e388e20b7c3a30e8ea84d1b774c30248`](https://github.com/CrispStrobe/sb3-creator/commit/33ce7380e388e20b7c3a30e8ea84d1b774c30248).
 At consumer source
-[`96e812a23`](https://github.com/CrispStrobe/brickwright-lite/commit/96e812a2355a193bfb92cfb4b6982d82299792ad),
+[`96e812a23`](https://github.com/CrispStrobe/brickwright/commit/96e812a2355a193bfb92cfb4b6982d82299792ad),
 the canonical frame/interval resource words and native menu shadows are adopted.
 Three publication-browser journeys qualify the named Blocks reporters, actual
 palette drag/drop and UUID picker storage alongside Pixel publication/SB3

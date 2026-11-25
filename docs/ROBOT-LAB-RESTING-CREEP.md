@@ -11,11 +11,11 @@ another owner or newer model cannot have landed.
 
 ## Completed work
 
-- [Floor #1436 / PR #1445](https://github.com/CrispStrobe/brickwright-lite/pull/1445)
+- [Floor #1436 / PR #1445](https://github.com/CrispStrobe/brickwright/pull/1445)
   merged as `7b4f2f84ac55e238bbb75663acbdc1e26f3d0358`. Its finite contact
   acceptance and retained limits are in [the floor contract](ROBOT-LAB-FLOOR-CONTACT.md).
   No floor reimplementation or repeat acquisition is needed to resume this lane.
-- [Diagnostic claim #1463](https://github.com/CrispStrobe/brickwright-lite/pull/1463)
+- [Diagnostic claim #1463](https://github.com/CrispStrobe/brickwright/pull/1463)
   merged as `d719999331dc6eae2ca929ae18f113a7e50b7e94` after four successful
   enabled checks and twelve declared conditional skips. This is a claim-only
   merge, not engine qualification.
@@ -26,7 +26,7 @@ another owner or newer model cannot have landed.
 
 ## Open problem and frozen starting point
 
-[Issue #1435](https://github.com/CrispStrobe/brickwright-lite/issues/1435)
+[Issue #1435](https://github.com/CrispStrobe/brickwright/issues/1435)
 reports an unpowered rigid frame on four coplanar flat beams translating about
 10 mm and yawing about 3 degrees in 1.75 seconds, with small vertical motion
 and rocking. Raising one rail by 1 LDU suppresses the reported drift. Small-part
@@ -60,7 +60,7 @@ not demonstrated causes or authorized product-setting changes.
 1. **Refresh ownership and inputs.** Fetch Main; read the protocol, this claim,
    issue #1435 and open claims. Record continuation in the existing diagnostic
    claim after confirming no successor is active. Reconcile changes from
-   [PR #1455](https://github.com/CrispStrobe/brickwright-lite/pull/1455), which
+   [PR #1455](https://github.com/CrispStrobe/brickwright/pull/1455), which
    changes the shipped Orrery model. Preserve the exact historical input above
    as a test fixture and bind any newer input separately; do not silently relabel
    the repaired model as the reported reproduction. Keep the shipped mitigation.
@@ -287,7 +287,7 @@ An existing actual-test entry point or workflow edit needs a scope extension.
 Use isolated worktrees; source/pure controls may run locally, actual engine and
 browser qualification belongs on hosted CI in the owned repositories.
 
-[Measurement PR #1437](https://github.com/CrispStrobe/brickwright-lite/pull/1437)
+[Measurement PR #1437](https://github.com/CrispStrobe/brickwright/pull/1437)
 and model PR #1455 have separate owners. Refresh their status; do not take over
 their session, worker, model, catalogue, qualification harness or Circuit verifier
 paths. Subsequent Circuit publication failures on other heads do not erase the

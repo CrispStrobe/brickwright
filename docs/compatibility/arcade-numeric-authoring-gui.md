@@ -8,7 +8,7 @@ The fixture is owned code and four-pixel art in `test/fixtures/arcade-numeric-au
 
 ## Latest hosted result
 
-[Numeric authoring job 116143137971](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38645260680/job/116143137971)
+[Numeric authoring job 116143137971](https://github.com/CrispStrobe/brickwright/actions/runs/38645260680/job/116143137971)
 failed during the initial file import, before any completed authoring journey or
 original execution comparison. The reviewed PR head was
 `249dc22ddee151159b72b36d183b5f2545db0949`; the actual admitted build and
@@ -52,7 +52,7 @@ Receipt shape:
     "runId": "numeric official run ID",
     "jobId": "numeric successful official build job ID",
     "artifactId": "numeric original artifact ID",
-    "runUrl": "https://github.com/CrispStrobe/brickwright-lite/actions/runs/RUN_ID",
+    "runUrl": "https://github.com/CrispStrobe/brickwright/actions/runs/RUN_ID",
     "conclusion": "success",
     "checkoutSha": "same actual tested checkout SHA",
     "archiveSha256": "SHA256 of original acquired ZIP"
@@ -66,7 +66,7 @@ Receipt shape:
 }
 ```
 
-Inventory every served JavaScript asset and the Arcade SDK target.json using its URL path relative to `PROOF_URL`, including lazy chunks. The original comparison SDK must match the admitted target and worker hashes. Record the original extracted byte length of every inventoried member in `assetBytes` (the example length is illustrative). The runner refuses an unlisted or different actual GET response body or byte length. HEAD responses are separate metadata observations: identity-encoded resource lengths must match the admitted length, while compressed resource lengths describe the transferred representation. A HEAD observation never attests body bytes or counts as JavaScript consumption. Successful GET body observations remain required. Keep the receipt, acquisition mapping, source paths and raw reports private when they include local operational data. Public acceptance records should link the official [Actions runs](https://github.com/CrispStrobe/brickwright-lite/actions) and reviewed source, with the exact tested pins and boundary.
+Inventory every served JavaScript asset and the Arcade SDK target.json using its URL path relative to `PROOF_URL`, including lazy chunks. The original comparison SDK must match the admitted target and worker hashes. Record the original extracted byte length of every inventoried member in `assetBytes` (the example length is illustrative). The runner refuses an unlisted or different actual GET response body or byte length. HEAD responses are separate metadata observations: identity-encoded resource lengths must match the admitted length, while compressed resource lengths describe the transferred representation. A HEAD observation never attests body bytes or counts as JavaScript consumption. Successful GET body observations remain required. Keep the receipt, acquisition mapping, source paths and raw reports private when they include local operational data. Public acceptance records should link the official [Actions runs](https://github.com/CrispStrobe/brickwright/actions) and reviewed source, with the exact tested pins and boundary.
 
 ## Actual user journey
 
@@ -121,8 +121,8 @@ The comparison compiler must use that admitted site's `static/makecode` director
 
 ## Official five-journey result — 2026-10-15
 
-The official [authoring job](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38793608489/job/116659147575)
-passes all five journeys. The [retained proof artifact](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38793608489/artifacts/12006424917)
+The official [authoring job](https://github.com/CrispStrobe/brickwright/actions/runs/38793608489/job/116659147575)
+passes all five journeys. The [retained proof artifact](https://github.com/CrispStrobe/brickwright/actions/runs/38793608489/artifacts/12006424917)
 binds reviewed consumer `777aae8e0d49cf692ba7bb6ca6915fe4f47016e1` and actual
 merge checkout `1d0336a2e60cb95c8063f82d3376ef59975d02db` to the same tree
 `3861ed9baa1d2d85d66f17ea1f5b3505ed0e169f`. Its compiler is

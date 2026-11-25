@@ -2,7 +2,7 @@
 
 The user explicitly requested a checkpoint now, rather than completion of the
 previous release/API/pilot loop. Continue from draft PR
-[#1336](https://github.com/CrispStrobe/brickwright-lite/pull/1336), branch
+[#1336](https://github.com/CrispStrobe/brickwright/pull/1336), branch
 `lane/robot-delivery-final-20261024`. This is an experimental integration, not
 release qualification. Preserve other owners' worktrees and all original
 failure/interruption evidence. Private machine paths and credentials belong

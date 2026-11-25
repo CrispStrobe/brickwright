@@ -137,11 +137,11 @@ all14 existing GUI controls still require final acceptance.
 
 ## Consumer qualification checkpoint — 2026-10-26
 
-This checkpoint describes the [pending adoption branch PR1413](https://github.com/CrispStrobe/brickwright-lite/pull/1413).
+This checkpoint describes the [pending adoption branch PR1413](https://github.com/CrispStrobe/brickwright/pull/1413).
 
 **OPEN: consumer qualification has not passed.** At head
 `dba6e95cc455296a41be013e3a5a4be50705d28b`,
-[Build40250390101](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40250390101)
+[Build40250390101](https://github.com/CrispStrobe/brickwright/actions/runs/40250390101)
 failed the actual circuit UX journey. The LM741 meter journey and the first
 four ADC groups passed: explicit primary acquisition, modeled rendering with
 unchanged raw data, modeled triggering, and paired CSV/HOLD behavior.
@@ -177,7 +177,7 @@ Next work within this lane:
 ### Later point-rearm failure
 
 At diagnostic head `65cc5c8d84852878c7d72ef842d5f3452ea006e2`,
-[Build40256837534](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40256837534)
+[Build40256837534](https://github.com/CrispStrobe/brickwright/actions/runs/40256837534)
 passed the combined envelope-publication wait and then failed
 `ADC_POINT_REARM_REUSED_RECORD`. The earlier intermittent mode-publication
 failure is not thereby resolved. The three-part point-rearm assertion did not
@@ -198,7 +198,7 @@ the consumer qualification and final failed-source controls remain open.
 ## Final bounded consumer closeout — 2026-10-26
 
 **DONE — the bounded consumer contract is accepted.**
-[PR1413](https://github.com/CrispStrobe/brickwright-lite/pull/1413) matched-merged
+[PR1413](https://github.com/CrispStrobe/brickwright/pull/1413) matched-merged
 as `b26ae0aedde4e53a254b0bc48c83b156be7cb026`. All five source workflows
 succeeded: 36 successful checks and six source-declared skips. The actual
 checkout `41aa713874cccb5457007a8b6d10f67a347c6634`, reviewed source and
@@ -207,7 +207,7 @@ The historical checkpoints above retain their original failure and pending
 states; this section records the later accepted run.
 
 At source `02ef9419443bbc3154b7a94ace8e35616df31750`,
-[Build40264899201](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40264899201)
+[Build40264899201](https://github.com/CrispStrobe/brickwright/actions/runs/40264899201)
 passed the hosted circuit UX journey, including envelope/point rearm and the
 failed-source refusal controls. Independent readback of retained official
 outputs found all 10 new browser checks, 6 preserved browser checks and 3
@@ -255,7 +255,7 @@ to its original source.
    campaign is part of this follow-up.
 
 The protected numerical result remains
-[Run40237367378](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40237367378)
+[Run40237367378](https://github.com/CrispStrobe/brickwright/actions/runs/40237367378)
 on original source `1f967949ffc16a0ff792e493c1343e7fe88a6e2e`: 312 accepted
 cases / 87,488 checks, with all 240 raw waveform CSVs byte-identical to the
 preceding baseline. Its whole-head Rust cancellation remains unqualified.

@@ -20,7 +20,7 @@ ARM/native/guest build is required. Keep private operational context ignored.
 
 ## Completion and validation
 
-Claim [PR1304](https://github.com/CrispStrobe/brickwright-lite/pull/1304) merged
+Claim [PR1304](https://github.com/CrispStrobe/brickwright/pull/1304) merged
 before implementation. All three guide targets now name the exact migrated
 claim files. The two companion guide anchors already resolve and stay unchanged.
 Historical statuses, qualification limits and other owners' sections remain.

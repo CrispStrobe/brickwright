@@ -81,7 +81,7 @@ user-selected files. They grant OS access; they do not select the download
 policy above.
 
 Before each submission, verify that the hosted privacy policy at
-<https://crispstrobe.github.io/brickwright/privacy.html> matches these actual
+<https://crispstrobe.github.io/brickwright-privacy.html> matches these actual
 transfers and that App Store Connect's privacy answers match the submitted
 version. Apple requires a privacy-policy link both in metadata and in the app.
 

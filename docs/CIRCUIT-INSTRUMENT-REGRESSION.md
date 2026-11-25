@@ -2,14 +2,14 @@
 
 ## Current circuit/editor status — 2026-11-05
 
-Circuit/editor integration [PR1536](https://github.com/CrispStrobe/brickwright-lite/pull/1536)
+Circuit/editor integration [PR1536](https://github.com/CrispStrobe/brickwright/pull/1536)
 merged as `81d8f4929a17e1d0c645c07b99eda0dd818d9642`; the circuit handoff
-[PR1542](https://github.com/CrispStrobe/brickwright-lite/pull/1542) also merged.
+[PR1542](https://github.com/CrispStrobe/brickwright/pull/1542) also merged.
 The original fast Build `40869114327` succeeded. The separately dispatched full
 Build `40869128682` failed: its heavy Machine Loader gate and light Circuit UX,
 Code chrome/Controller/Instruments and CPX circuit gates failed. Preserve that
 failure; the cause has not been established from retained original diagnostics.
-A later main [Build41735633603](https://github.com/CrispStrobe/brickwright-lite/actions/runs/41735633603)
+A later main [Build41735633603](https://github.com/CrispStrobe/brickwright/actions/runs/41735633603)
 at `f17192e868049eff3487377a996fc3ffa03f76ac` succeeded: those four named
 browser gates and the FPGA surface job succeeded according to job metadata. The
 original heavy log reports a 30-second file-chooser timeout; the light log
@@ -33,7 +33,7 @@ do not silently advance either package pin.
 Next: (1) use the already retained failed-job originals and frozen diagnostic summary;
 do not download them again or rerun the consumed study. Identify any unresolved
 cause without guessing from a later passing run; (2) coordinate with existing
-[Lite PR1622](https://github.com/CrispStrobe/brickwright-lite/pull/1622), whose
+[Lite PR1622](https://github.com/CrispStrobe/brickwright/pull/1622), whose
 S040 binding lane already owns supplier pins and the firmware-to-screen journey.
 Review the complete supplier ranges, then qualify one package/lock update,
 installed identity and affected actual GUI journeys. A read-only preview of
@@ -57,14 +57,14 @@ current-polarity limits and the untested output-size boundary explicit.
 The earlier `test/circuit-passive-batch-5ms.test.mjs` compares all 5,000
 voltage points but checks meter-current magnitude only. The new
 `test/circuit-signed-current-5ms.test.mjs`, merged in
-[PR1656](https://github.com/CrispStrobe/brickwright-lite/pull/1656), checks two
+[PR1656](https://github.com/CrispStrobe/brickwright/pull/1656), checks two
 newly authored positive/negative RC cases through the installed CLI. Each checks
 5,000 voltage points, both signed resistor-terminal meter means and a single
 whole-capture work budget. The comparator rejects reversed nonzero current and
 nonfinite values. The independently authored analytic reference was checked
 against ngspice 42; worst voltage and instantaneous source-current errors were
 8.54 nV and 10.2 pA, and the 5 ms integral differed by at most 41.1 pA. The
-[hosted Build42120820267](https://github.com/CrispStrobe/brickwright-lite/actions/runs/42120820267)
+[hosted Build42120820267](https://github.com/CrispStrobe/brickwright/actions/runs/42120820267)
 passed both installed CLI cases and the comparator control. The retained log
 records assertion outcomes, not exact observed numeric readings. This covers
 two authored cases and the pinned model, not physical calibration or general
@@ -78,10 +78,10 @@ otherwise. Refresh heads, current claims, CI and deployment before acting.
 ## Current handoff — 2026-10-29
 
 The remaining delivery is owned by the Circuit/editor integration maintainer.
-The frozen [PR1536](https://github.com/CrispStrobe/brickwright-lite/pull/1536)
+The frozen [PR1536](https://github.com/CrispStrobe/brickwright/pull/1536)
 head is `2e7846f8a901726a296e3a8ef006cff24bc457b5`. At the latest check its
-fast [Build40869114327](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40869114327),
-necessary full [Build40869128682](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40869128682)
+fast [Build40869114327](https://github.com/CrispStrobe/brickwright/actions/runs/40869114327),
+necessary full [Build40869128682](https://github.com/CrispStrobe/brickwright/actions/runs/40869128682)
 and other enabled workflows were queued. Refresh the actual head, default branch
 and checks before acting; a queued run is not a passing result. Use fast-tier PR
 checks by default and do not add a `ci:full` label.
@@ -128,7 +128,7 @@ only current action list. Dated snapshots below retain their original evidence
 and failures; their old resume instructions are historical. Read `LANES.md`
 and refresh live PR heads before acting. Never replay the consumed studies.
 
-The current [Lite PR1536](https://github.com/CrispStrobe/brickwright-lite/pull/1536)
+The current [Lite PR1536](https://github.com/CrispStrobe/brickwright/pull/1536)
 preserves longer-capture PR1516, repaired LM741 PR1515, provenance PR1517 and
 the complete frozen `93aba75473e65042925928fe8c1a0a4427fd59ca` ancestry.
 The separate PR1538 was closed without merging. Current candidate pins are Board
@@ -147,10 +147,10 @@ nor supplier qualification establish this consumer's main landing or deployment.
 | 5. LM741 | At `e85dc904`, hosted v2 passes six sign/load combinations, refusals, default-off output and GUI non-exposure; the v1 TODO remains | Nominal typical 25 C domain. Successful per-load JSON was not separately retained; this is CI assertion evidence |
 | 6. Coupling and provenance | At `e85dc904`, four installed AC tests pass, including three buildable supplier mutants. Independent retained-log reader accepts all 60 values across three modes | One authored two-channel circuit; maximum error below 5e-16 V. CLI-only RC view; no physical calibration or probe-loading claim. Provenance/redaction integration still needs final combined qualification |
 
-The AC original is [unit shard 3](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40744838545/job/123035439525);
-LM741 is [unit shard 2](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40744838545/job/123035439624).
+The AC original is [unit shard 3](https://github.com/CrispStrobe/brickwright/actions/runs/40744838545/job/123035439525);
+LM741 is [unit shard 2](https://github.com/CrispStrobe/brickwright/actions/runs/40744838545/job/123035439624).
 The long-capture and historical-seal assertions passed inside
-[unit shard 6](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40744838545/job/123035439688),
+[unit shard 6](https://github.com/CrispStrobe/brickwright/actions/runs/40744838545/job/123035439688),
 whose overall result failed the documentation-trigger gate. These observations
 retain their actual `e85dc904` source identity and do not qualify the successor.
 A private exact-package preflight also passed 11 CLI tests and two static
@@ -218,8 +218,8 @@ state; its live synthesis path remains byte-identical. Actual hosted acceptance
 is still required. The preceding `09a4f407` run set was superseded before any
 child started; cancellation followed explicit zero-running-child verification.
 
-Fresh fast [Build40869114327](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40869114327)
-and necessary full [Build40869128682](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40869128682)
+Fresh fast [Build40869114327](https://github.com/CrispStrobe/brickwright/actions/runs/40869114327)
+and necessary full [Build40869128682](https://github.com/CrispStrobe/brickwright/actions/runs/40869128682)
 are pending on that exact source. The earlier manual run `40856189963` was
 cancelled before application execution after its unsupported consumer context
 was identified; it is not qualification. The prior fast head `d32860b8` had one
@@ -270,7 +270,7 @@ implementation lane is opened. Package adoption and browser qualification do
 not establish a newer signed release or deployment.
 
 The corrected successor also passes
-[unit shard 6](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40767699282/job/123128359151):
+[unit shard 6](https://github.com/CrispStrobe/brickwright/actions/runs/40767699282/job/123128359151):
 three long-capture assertions, original refusals, all four historical seals and
 the previously failing documentation-trigger check. The shard reports zero
 ordinary failures; its four declared Arcade TODOs remain recorded. The complete
@@ -280,7 +280,7 @@ The successor `93aba754` unit-shard-3 original also passes the same four AC
 checks and three mutations. Its independent reader accepts all 60 values,
 with maximum error below 5e-16 V. This repeats the same authored input at CUI
 `373d562b`; it adds no distinct designs and does not qualify the later menu
-package. [Original job](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40767699282/job/123128359044).
+package. [Original job](https://github.com/CrispStrobe/brickwright/actions/runs/40767699282/job/123128359044).
 
 ### Explicit remaining limits
 
@@ -313,12 +313,12 @@ owns this sequence. Read `LANES.md` and the affected lane records before edits.
 | Boundary | Accepted evidence | Limit |
 | --- | --- | --- |
 | Previous consumer and fixed regression | Lite PR1413; 312 cases and 87,488 checks in the separately retained numerical run | 12 authored topologies; not 312 distinct imported designs, a new run on a later head, or physical calibration |
-| New teaching-study acquisition | [Run40335666363](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40335666363), retained and independently read once | Failed/incomplete: 23 conforming designs, not a completed 31-design qualification |
+| New teaching-study acquisition | [Run40335666363](https://github.com/CrispStrobe/brickwright/actions/runs/40335666363), retained and independently read once | Failed/incomplete: 23 conforming designs, not a completed 31-design qualification |
 | Board junction DC reachability | [Board PR710](https://github.com/CrispStrobe/bw-board/pull/710), merged `dfa4be8eff4cef22462ac508a67da5f706f7d72d` | Conservative DC-path admission repaired; no new transistor law or solver calibration |
 | Matching CUI package return | [CUI PR124](https://github.com/CrispStrobe/bw-circuit-ui/pull/124), merged `66e3724020e795c3442f8da9a7af149dd5f74bd9`; actual Circuit/CLI checks, 17 SPICE checks and 83 browser scenarios | Supplier acceptance; not Lite adoption or v2 study execution |
-| Lite adoption of the repaired pair | [Lite PR1478](https://github.com/CrispStrobe/brickwright-lite/pull/1478), merged `e643932e`; pins Board `c7bcbe4b` and CUI `da28bb8c` | Step 1 done; packaged GUI acceptance of the LM741 domain is still owed (task 5) |
-| v2 reference-qualified study | Harness [PR1501](https://github.com/CrispStrobe/brickwright-lite/pull/1501), merged `8afe1333` at reviewed head `bfa530fc`; sole event [Run40681635060](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40681635060) attempt 1, read independently once | **Accepted** as numerical conformance against admitted ngspice-42 references; no physical calibration claim |
-| Scope proof source | Merged publication observer and strict gates; forward native-keyboard diagnostic composed in [Lite PR1437](https://github.com/CrispStrobe/brickwright-lite/pull/1437) | Forward native-keyboard path accepted in the actual browser; source PR remains unmerged at the recorded handoff; historical cause and product repair remain unproved |
+| Lite adoption of the repaired pair | [Lite PR1478](https://github.com/CrispStrobe/brickwright/pull/1478), merged `e643932e`; pins Board `c7bcbe4b` and CUI `da28bb8c` | Step 1 done; packaged GUI acceptance of the LM741 domain is still owed (task 5) |
+| v2 reference-qualified study | Harness [PR1501](https://github.com/CrispStrobe/brickwright/pull/1501), merged `8afe1333` at reviewed head `bfa530fc`; sole event [Run40681635060](https://github.com/CrispStrobe/brickwright/actions/runs/40681635060) attempt 1, read independently once | **Accepted** as numerical conformance against admitted ngspice-42 references; no physical calibration claim |
+| Scope proof source | Merged publication observer and strict gates; forward native-keyboard diagnostic composed in [Lite PR1437](https://github.com/CrispStrobe/brickwright/pull/1437) | Forward native-keyboard path accepted in the actual browser; source PR remains unmerged at the recorded handoff; historical cause and product repair remain unproved |
 
 Board's new checks exercise Shockley bridge and NPN-tail connectivity rather
 than disguising a floating circuit with a ground resistor. A reference mismatch
@@ -397,7 +397,7 @@ page-level native ArrowDown, preserving actual identity, channel-removal,
 precommit-negative, committed-mode, ADC, sole-add and rearm assertions. Four pure
 controls and eight isolated syntax-valid mutants passed source review. The
 owner's subsequent original-log audit accepted Browser light job122009150417 in
-[Build40446909033](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40446909033):
+[Build40446909033](https://github.com/CrispStrobe/brickwright/actions/runs/40446909033):
 all81 assigned gates passed without skips or failures. The actual trace records
 one focus/input/change, the observed envelope-to-sample ArrowDown action,
 precommit rejection and strict final focused sample/ADC/zero-channel publication.
@@ -535,7 +535,7 @@ is part of this closeout.
 
 ### Accepted joint consumer and protected numerical result — 2026-10-26
 
-[Build40264899201](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40264899201)
+[Build40264899201](https://github.com/CrispStrobe/brickwright/actions/runs/40264899201)
 qualified source `02ef9419443bbc3154b7a94ace8e35616df31750` with all five
 workflows successful: 36 successful checks and six source-declared skips.
 Independent original-log readback accepted 10 new browser checks, six preserved
@@ -548,7 +548,7 @@ Pinned-package verification reports were observed; the independent reader did
 not re-execute npm-pack verification or audit a compiled artifact body.
 
 The separate fixed recheck
-[Run40237367378](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40237367378)
+[Run40237367378](https://github.com/CrispStrobe/brickwright/actions/runs/40237367378)
 ran once at `1f967949ffc16a0ff792e493c1343e7fe88a6e2e` with Board83686751
 and CUI1bc233c9. Independent readers accepted 312 cases and 87,488 checks:
 264 ngspice cases and 48 explicitly nominal cases across 12 authored topologies.
@@ -567,7 +567,7 @@ part/instrument modeling. No further lane is started by this closeout.
 
 ### Step 1 accepted: current package baseline
 
-[Run40172711900](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40172711900)
+[Run40172711900](https://github.com/CrispStrobe/brickwright/actions/runs/40172711900)
 executed once at `4c416bcfe1a219faaec371ac638f607628f347a7` on the frozen
 `lane/circuit-instrument-baseline-20261025` reference, with Board
 `761153ff92d521c01107ee7b32922ba7adc10ee2` and CUI
@@ -699,7 +699,7 @@ Use [the lane protocol](../lanes/PROTOCOL.md) and dated claims for current owner
 ## What is complete and what remains
 
 The upstream nominal LM741 six-case CLI proof and Lite adoption
-[PR965](https://github.com/CrispStrobe/brickwright-lite/pull/965) are complete.
+[PR965](https://github.com/CrispStrobe/brickwright/pull/965) are complete.
 The new harness contract was traced against Board
 `b5650092695643622a53bcc40008133760e2d8a2` and CUI
 `17fd4afb0bf27015b099ca67c9cca05919084654`. The runner refuses a different
@@ -707,7 +707,7 @@ consumer pin until its admission and manifest have been reviewed; it never
 substitutes a newer sibling or silently moves a dependency.
 
 1. **Release prerequisite: verified.** The read-only
-   [audit 40048235422](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40048235422)
+   [audit 40048235422](https://github.com/CrispStrobe/brickwright/actions/runs/40048235422)
    observed v0.1.26 on both iOS and macOS: valid, unexpired, matching English and
    German notes, both groups linked, review approved, and both internal/external
    states `IN_BETA_TESTING`. Independent readback of the retained original
@@ -731,7 +731,7 @@ substitutes a newer sibling or silently moves a dependency.
 
 ## Executed campaign — 2026-10-24
 
-[Run 40057471489](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40057471489)
+[Run 40057471489](https://github.com/CrispStrobe/brickwright/actions/runs/40057471489)
 executed the fixed manifest at Lite `20f5ade6dda10616a3f51d5230496415c6e6b2f4`,
 Board `b5650092695643622a53bcc40008133760e2d8a2` and CUI
 `17fd4afb0bf27015b099ca67c9cca05919084654`, using Node 22.23.3 and ngspice 42.
@@ -952,7 +952,7 @@ actual clock, capture count and ready state; it preserves the original failure
 and does not change production behavior, expected counts or timing budgets.
 
 The first consumer source-controls job
-[40072171188](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40072171188)
+[40072171188](https://github.com/CrispStrobe/brickwright/actions/runs/40072171188)
 reported 66/67: the tracked GUI manifests and current x86 browser
 controller/reader still selected the preceding CUI pin. An initial census of
 materialized sparse files had omitted them. The forward repair derives the
@@ -963,7 +963,7 @@ controls pass; the original failure is retained. The final hosted controls job
 also passed all 67 on the qualified consumer head. Historical originals keep their original reader
 revision and measured sources.
 
-Lite adoption [PR1334](https://github.com/CrispStrobe/brickwright-lite/pull/1334)
+Lite adoption [PR1334](https://github.com/CrispStrobe/brickwright/pull/1334)
 is qualified under the
 [consumer claim](../lanes/2026-10-24-scope-display-consumer.md). Its evidence
 was acquired once and read independently, without replaying the CLI, engine,
@@ -971,7 +971,7 @@ oracle or browser. Historical originals above retain their original identities.
 
 ### New-consumer numerical result
 
-[Run 40077158320](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40077158320)
+[Run 40077158320](https://github.com/CrispStrobe/brickwright/actions/runs/40077158320)
 executed once on branch `lane/scope-display-adoption-20261024`, exact head
 `75c95bea9b34b08d0dc1014c41df551c1451b10f`: Board
 `b5650092695643622a53bcc40008133760e2d8a2`, CUI
@@ -998,7 +998,7 @@ transitive-dependency reconstruction, hardware or full-corpus qualification.
 
 ### Actual built-browser result
 
-[Build 40074942830](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40074942830)
+[Build 40074942830](https://github.com/CrispStrobe/brickwright/actions/runs/40074942830)
 qualified the same consumer. Light browser job `120819548000` passed its actual
 Instruments checks. The original checkout
 `5070169cc275ec5035b81bcc6c5545dfb8cdef60` has parents

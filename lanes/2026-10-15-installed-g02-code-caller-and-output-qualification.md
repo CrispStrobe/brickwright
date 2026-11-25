@@ -5,7 +5,7 @@ installed own-NuttX cases and their standalone readers, with six successful
 native startup transactions, full cleanup and distinct recovery in every case.
 Official frontend checkout and consumer trees match; independent package/input
 audits pass. Its eleven enabled source-head checks pass in
-[run38790549120](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38790549120)
+[run38790549120](https://github.com/CrispStrobe/brickwright/actions/runs/38790549120)
 and the separate vendor check; two conditional GUI/deployment jobs skip.
 
 - An older Code call's original successful return cannot clear a newer pending
@@ -32,8 +32,8 @@ change during these corrections.
 This result belongs to the named frozen package. Integration preserves its
 SPIKE/native inputs and both importer copies while retaining newer main work.
 Final documentation-head CI, the lifecycle integration in
-[PR979](https://github.com/CrispStrobe/brickwright-lite/pull/979), and exact-head
+[PR979](https://github.com/CrispStrobe/brickwright/pull/979), and exact-head
 merge review remain required. The repeated-Stop follow-up in
-[PR990](https://github.com/CrispStrobe/brickwright-lite/pull/990) is separate and
+[PR990](https://github.com/CrispStrobe/brickwright/pull/990) is separate and
 not installed-qualified here. Whole G02, reference/physical behavior, rollback,
 licensing, distribution and release qualification remain open.

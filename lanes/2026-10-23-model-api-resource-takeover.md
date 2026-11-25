@@ -62,7 +62,7 @@ record and ordered observation, and adds only the API's historical registration
 and matching native-test registrations. The API host documentation now states
 the raw-stream helper contract and the separate configured-host acceptance.
 
-[PR1337](https://github.com/CrispStrobe/brickwright-lite/pull/1337) merged as
+[PR1337](https://github.com/CrispStrobe/brickwright/pull/1337) merged as
 `0576e01408145c79a03508909adbde388710dfe1` after 36 current enabled checks
 passed, with 21 declared skips. The obsolete pre-label full-CI guard refusal is
 retained; the successful current-label verdict superseded only that guard under

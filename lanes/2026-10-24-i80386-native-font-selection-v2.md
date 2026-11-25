@@ -10,14 +10,14 @@ privately; public branch
 The claim merged at `e41ef4c3fc1e4f5ab406812775c8f585dbf2fe81`; this source selects no input or event.
 
 The five native implementation files are published on unmerged
-[PR1318](https://github.com/CrispStrobe/brickwright-lite/pull/1318) at source
+[PR1318](https://github.com/CrispStrobe/brickwright/pull/1318) at source
 `850082102c73383783b507c8305e92139b7cff49`; they are not on this main base.
 After this claim lands, normally compose that pinned source with the main
 containing the merged claim in a new isolated source checkout before coding.
 Preserve all incoming qualified dependency adoptions.
 
 The v1 label `x86-native-font-selection-v1` is consumed. Its metadata event
-[run40107222402](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40107222402)
+[run40107222402](https://github.com/CrispStrobe/brickwright/actions/runs/40107222402)
 ran once and failed during its first service resource
 observation, before tool, input or native-process observation. Its independent
 failed-original reader reports no native selection or actual/guest approval.

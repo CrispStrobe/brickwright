@@ -12,8 +12,8 @@ Updated 2026-10-29. The supplier menu work is qualified and merged. The combined
 ## Current identities
 
 - [CUI #131](https://github.com/CrispStrobe/bw-circuit-ui/pull/131) merged normally at `4b65f15485abbc039958d8e1a8a29ac3459b75f9`, tree `c07bedfe0a003c361621fbe9fb2b3a0bb9413d46`. All three exact-head checks passed. Independent original-log readback verified 83/83 scenarios, zero failures/skips, and all seven required browser/touch steps. CI and landed parents/tree matched the prediction. [Qualification run](https://github.com/CrispStrobe/bw-circuit-ui/actions/runs/40802516708).
-- [Lite #1536](https://github.com/CrispStrobe/brickwright-lite/pull/1536) checkpoint `b1d4b5eadc17059feeb6a2d5d704942d51fe89b6` normally composes the complete frozen Circuit #1538 source `93aba75473e65042925928fe8c1a0a4427fd59ca`, editor source and main through `e15b7e11c8fdb0862ff73369dab50bf55ead52b8`. It explicitly adopts CUI `4b65f154`; Board remains `8785e4688cc308b34fea434c1734523caa621f74`.
-- The current operator policy is fast-default qualification with no `ci:full` labels; the original label instruction is historical. Combined [Build run 40822785950](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40822785950) was pending at this checkpoint. Refresh the actual final head and checks before acting; no queued result is acceptance.
+- [Lite #1536](https://github.com/CrispStrobe/brickwright/pull/1536) checkpoint `b1d4b5eadc17059feeb6a2d5d704942d51fe89b6` normally composes the complete frozen Circuit #1538 source `93aba75473e65042925928fe8c1a0a4427fd59ca`, editor source and main through `e15b7e11c8fdb0862ff73369dab50bf55ead52b8`. It explicitly adopts CUI `4b65f154`; Board remains `8785e4688cc308b34fea434c1734523caa621f74`.
+- The current operator policy is fast-default qualification with no `ci:full` labels; the original label instruction is historical. Combined [Build run 40822785950](https://github.com/CrispStrobe/brickwright/actions/runs/40822785950) was pending at this checkpoint. Refresh the actual final head and checks before acting; no queued result is acceptance.
 
 ## Implemented source
 

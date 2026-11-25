@@ -1,7 +1,7 @@
 # Claim: actual frame completion in the Arcade pauseUntil input test
 
 DONE locally — owner: Robot Lab delivery lane. Claim merged in
-[PR1191](https://github.com/CrispStrobe/brickwright-lite/pull/1191); hosted source
+[PR1191](https://github.com/CrispStrobe/brickwright/pull/1191); hosted source
 qualification remains part of the addon candidate.
 
 Scope: only the `native pauseUntil consumes actual held controller input after

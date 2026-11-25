@@ -81,8 +81,8 @@ and forward-debug scenarios. No QEMU adapter or supplier-pin change is included.
 
 ## Current finite inventory v4 bootstrap — 2026-10-24
 
-The [source candidate, PR1318](https://github.com/CrispStrobe/brickwright-lite/pull/1318),
-at [ac7703a8](https://github.com/CrispStrobe/brickwright-lite/commit/ac7703a8b74103e20ee468687472df121564a949),
+The [source candidate, PR1318](https://github.com/CrispStrobe/brickwright/pull/1318),
+at [ac7703a8](https://github.com/CrispStrobe/brickwright/commit/ac7703a8b74103e20ee468687472df121564a949),
 enables only the separately selected finite metadata path. The actual GUI
 source and workflow guards remain false. No template, variable or producing
 label is authorized merely by that source activation. This remains work in

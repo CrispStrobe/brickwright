@@ -255,7 +255,7 @@ open; these source controls do not reclassify applications.
 
 ## Latest measured boundary and current candidate — 23 October 2026
 
-The [completed four-unit run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/39959713589)
+The [completed four-unit run](https://github.com/CrispStrobe/brickwright/actions/runs/39959713589)
 on `6df26f1d0e738f1228057671c350a221388f0988` reports **12,463 passes,
 147 failures, 19 skips and 37 TODOs**. This remains a historical baseline:
 it adds 30 passes against its predecessor with no new or resolved failing
@@ -263,7 +263,7 @@ title. Its frontier, class/operation/diagnostic, original SDK Sprite receiver
 and existing Array cohorts pass. These unit results do not measure application
 completion.
 
-The subsequent [hosted run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/39989932904)
+The subsequent [hosted run](https://github.com/CrispStrobe/brickwright/actions/runs/39989932904)
 at `4089698bef96246f73500b62e94954faf7fd89f4` reports five successful numeric
 authoring journeys. Its optional clean-export freshness observation is
 unavailable, so that result does not establish a fresh capture. Unit shard 3
@@ -272,7 +272,7 @@ whole-unit or whole-four-unit result from it. The earlier 6df run's results and
 failures remain preserved as their own head.
 
 [Native-frame reset analysis](ARCADE-NATIVE-FRAME-RESET.md), under merged
-[PR #1283](https://github.com/CrispStrobe/brickwright-lite/pull/1283) and its
+[PR #1283](https://github.com/CrispStrobe/brickwright/pull/1283) and its
 same-owner custom-kind amendment, now has bounded source results: the original
 whole11 module passes all eleven groups at
 `40f6434f0b5686032c5e5735708423d3335ef917`; the separate custom-kind
@@ -291,7 +291,7 @@ the resulting controller and kind behavior. Source conversion alone does not
 qualify that journey.
 
 Continue with exact-head qualification in
-[PR #1128](https://github.com/CrispStrobe/brickwright-lite/pull/1128): run the
+[PR #1128](https://github.com/CrispStrobe/brickwright/pull/1128): run the
 full affected unit cohorts and all enabled checks. Keep every original asset and
 assertion. Diagnose remaining refusals independently; never remove a failing
 gate or borrow another head's result. Historical **36 partial / one malformed**
@@ -308,7 +308,7 @@ existing Identifier-only capture exception. The
 merged; its source candidate and eleven new pure groups require qualification.
 It preserves input initialization, all writers, effects and Array guards.
 
-The [current composed run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/39899568550)
+The [current composed run](https://github.com/CrispStrobe/brickwright/actions/runs/39899568550)
 confirms the **complete original function-return module passes 12/12**, including
 recursive/mutual calls, parameter writes and Sprite forwarding. Its complete
 identity-constraint module passes **8/8**. The complete four-shard unit set reports **12,335 passes, 163 failures, 19 skips
@@ -339,9 +339,9 @@ Continue in this order:
 
 1. Qualify the ordinary Sprite source-restoration repair with the complete
    existing receiver module and affected source/SDK controls. Preserve failures.
-2. Qualify the implementation of the [merged refusal-capture scope](https://github.com/CrispStrobe/brickwright-lite/pull/1256).
+2. Qualify the implementation of the [merged refusal-capture scope](https://github.com/CrispStrobe/brickwright/pull/1256).
    Follow its
-   [self-contained contract](https://github.com/CrispStrobe/brickwright-lite/blob/0266e30e76bd36a39c4362328b60d8d7354f505c/lanes/2026-10-23-arcade-exact-refusal-capture.md)
+   [self-contained contract](https://github.com/CrispStrobe/brickwright/blob/0266e30e76bd36a39c4362328b60d8d7354f505c/lanes/2026-10-23-arcade-exact-refusal-capture.md)
    before implementation. The existing GUI failure lacks the exact consumed
    project, so an earlier project or matching visible code cannot explain it.
    The source candidate now adds exact input/result capture to the existing
@@ -362,7 +362,7 @@ publication is needed. Current source is not merged while enabled checks fail.
 
 ## Earlier complete hosted result and subsequent repair
 
-The [complete composed unit set](https://github.com/CrispStrobe/brickwright-lite/actions/runs/39866817484)
+The [complete composed unit set](https://github.com/CrispStrobe/brickwright/actions/runs/39866817484)
 reports **12,208 passes, 167 failures, 19 skips and 43 TODOs** across 12,437 tests.
 Three preceding failure titles are resolved, including original Sprite forwarding;
 two new Sprite safety controls fail and remain blocking. Complete SDK32, the
@@ -399,7 +399,7 @@ qualification; no later original journey is claimed from source review alone.
 
 ### Earlier hosted checkpoints
 
-The preceding [published Array-prefix checkpoint](https://github.com/CrispStrobe/brickwright-lite/actions/runs/39737626495)
+The preceding [published Array-prefix checkpoint](https://github.com/CrispStrobe/brickwright/actions/runs/39737626495)
 completed with **12,174 passes, 173 failures, 19 skips and 43 TODOs** across
 12,409 tests. Compared with the preceding checkpoint, one existing failure is
 resolved and six new regression-control groups fail. The complete original
@@ -426,14 +426,14 @@ capture, rather than declaring these functions intrinsically unsupported.
 Emitted compilation and saved-project continuation after those refusals were
 not reached.
 
-[Claim #1217](https://github.com/CrispStrobe/brickwright-lite/pull/1217) and its
-[currentness amendment #1218](https://github.com/CrispStrobe/brickwright-lite/pull/1218)
+[Claim #1217](https://github.com/CrispStrobe/brickwright/pull/1217) and its
+[currentness amendment #1218](https://github.com/CrispStrobe/brickwright/pull/1218)
 are merged. The active repair handles owned `Any` identity prefixes and retains
 its proof through cached writer removal and public validation. The exact test
 consumer is added under the existing canonical VM model scope key; no new
 provider or value authority is granted. Complete qualification remains pending.
 
-[Diagnostic claim #1227](https://github.com/CrispStrobe/brickwright-lite/pull/1227)
+[Diagnostic claim #1227](https://github.com/CrispStrobe/brickwright/pull/1227)
 is merged, and bounded failure evidence from all three original refusals is now
 retained. It contains the actual project argument, consumed Code
 and export result, including emitted files and native-addition draft. Read the
@@ -457,7 +457,7 @@ that graph.
 
 ## Published-history composition awaiting qualification
 
-[Composition claim #1228](https://github.com/CrispStrobe/brickwright-lite/pull/1228)
+[Composition claim #1228](https://github.com/CrispStrobe/brickwright/pull/1228)
 merged before conflict resolution. The candidate normally merges MakeCode repair
 `400706ab` (including PR1219) with the Arcade history and current main. Three
 conflicts preserve both implementations: locked Playwright plus Array evidence
@@ -560,7 +560,7 @@ when the affected acceptance requires it.
 
 ### 1. Qualify and finish the Array identity-prefix repair
 
-The implementation is in [PR #1128](https://github.com/CrispStrobe/brickwright-lite/pull/1128),
+The implementation is in [PR #1128](https://github.com/CrispStrobe/brickwright/pull/1128),
 with the scope in
 [`arcade-array-identity-constraint-prefix`](../lanes/2026-10-22-arcade-array-identity-constraint-prefix.md).
 Read that scope for the complete nine existing modules and the new
@@ -768,7 +768,7 @@ runtime smoke, behavior and GUI acceptance distinct.
 
 This section supersedes the dated integration status below. The previous
 foundation and follow-up stack have been reconciled with main. The remaining
-combined delivery is [PR #1128](https://github.com/CrispStrobe/brickwright-lite/pull/1128);
+combined delivery is [PR #1128](https://github.com/CrispStrobe/brickwright/pull/1128);
 its exact head still needs every enabled hosted check. One existing full-CI
 request is justified by the tile editor changes. Do not repeat that request or
 add full CI to runtime-only follow-ups without a browser qualification need.
@@ -979,7 +979,7 @@ See [the current acceptance checklist](ARCADE-CURRENT-FAILURE-WORK-PACKAGES.md#m
 
 ## Current queue update — 2026-10-19
 
-The dated foundation heads below are historical snapshots. Refresh current [PR888](https://github.com/CrispStrobe/brickwright-lite/pull/888) and main before integration. A newer local composition normally merges the Array, Camera/parser and shared conversion-CLI branches with recent main, preserving other lanes. It still needs final affected runtime and hosted qualification. Supplier [PR #52](https://github.com/CrispStrobe/extensions/pull/52) remains under review. Its earlier formatting failure is retained; the current formatting check succeeds. Refresh every other enabled exact-head check before integration; one successful check does not qualify the supplier.
+The dated foundation heads below are historical snapshots. Refresh current [PR888](https://github.com/CrispStrobe/brickwright/pull/888) and main before integration. A newer local composition normally merges the Array, Camera/parser and shared conversion-CLI branches with recent main, preserving other lanes. It still needs final affected runtime and hosted qualification. Supplier [PR #52](https://github.com/CrispStrobe/extensions/pull/52) remains under review. Its earlier formatting failure is retained; the current formatting check succeeds. Refresh every other enabled exact-head check before integration; one successful check does not qualify the supplier.
 
 Use [the current failure work packages](ARCADE-CURRENT-FAILURE-WORK-PACKAGES.md) as the ordered repair queue and [the capability ledger](CONVERSION-CAPABILITIES-AND-GUI-GAPS.md) for concrete editor surfaces. Current priorities are genuine Array value execution, complete lossless 225-input CLI measurement, then actual remaining producer/parser/runtime families and visible editor/export journeys. Input provenance is independently audited for all 184 raw and 41 complete contexts; conversion and execution are not inferred from that audit. Historical partials remain 36 until a complete measured replacement exists.
 
@@ -997,7 +997,7 @@ compatibility or qualify the pending source as part of `main`.
 
 ## Integration blocker
 
-The foundation in [PR #888](https://github.com/CrispStrobe/brickwright-lite/pull/888)
+The foundation in [PR #888](https://github.com/CrispStrobe/brickwright/pull/888)
 is still open. The historical hosted checkpoint was `f288fd633`. Its observed failures
 include the source controls, vendor check, four unit shards, deployable build
 and heavy browser check. The light browser check passed. Refresh the exact
@@ -1338,7 +1338,7 @@ scanner controls, if run separately, do not qualify the complete modules.
 
 ## Current-main notice integration
 
-[Amendment #1252](https://github.com/CrispStrobe/brickwright-lite/pull/1252) merged
+[Amendment #1252](https://github.com/CrispStrobe/brickwright/pull/1252) merged
 before the current-main conflict resolution. The normal composition keeps both
 published histories and the already landed motor/Robot Lab adoption. Its only
 manual conflict preserves the union of scoped notice entries, with one entry per

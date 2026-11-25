@@ -1,6 +1,6 @@
 # Arcade editor startup dependency boundary
 
-[PR893](https://github.com/CrispStrobe/brickwright-lite/pull/893) merged after all
+[PR893](https://github.com/CrispStrobe/brickwright/pull/893) merged after all
 12 enabled checks passed. The Costumes tab now uses the pure
 `lib/bw-makecode/tilemap-presence.js` query to decide whether to show its Tile
 maps button. It preserves original-target filtering, modern and legacy command
