@@ -132,5 +132,8 @@
     .keypad {gap: 2px; padding: 3px;}
     .keypad .functionKey {font-size: 7px; letter-spacing: -.035em; padding-inline: 0;}
     .monitorBar {gap: 3px;}
-    .monitorBar .iconButton {width: 22px;}
+    .monitorBar .iconButton, .semantic .iconButton {width: 22px;}
+    .semantic {gap: 4px;}
+    .teachingRegisters {gap: 4px;}
+    .teachingRegisters dd {font-size: 11px;}
 }
