@@ -44,9 +44,9 @@ try {
         await page.waitForFunction(() => window.__cp1Integration?.board()?.parts?.some(part => part.id === 'trainer'));
         await page.getByRole('button', {name: 'Fit all parts', exact: true}).click();
         await page.locator('[data-cp1-panel]').waitFor();
-        assert.equal(await page.getByRole('button', {name: 'Run CPU', exact: true}).isDisabled(), true);
+        assert.equal(await page.getByRole('button', {name: 'Run CPU', exact: true}).count(), 0);
         const rom = Buffer.from(switchToLedFirmware());
-        const romInput = page.getByLabel('Import monitor ROM', {exact: true});
+        const romInput = page.locator('input[type="file"][aria-label="Import monitor ROM"]');
         await romInput.setInputFiles({name: 'original-switch-led.rom', mimeType: 'application/octet-stream', buffer: rom});
         await page.waitForFunction(() => window.__cp1Integration.phase() === 'paused');
         const identity = await page.evaluate(() => window.__cp1Integration.identity());
@@ -130,7 +130,7 @@ try {
         assert.deepEqual(await page.evaluate(() => JSON.parse(localStorage.getItem('bw-cp1-workspace'))), savedDraft);
         assert.equal(await page.evaluate(() => window.__cp1Integration.snapshot()), null);
         assert.equal(await page.evaluate(() => window.__cp1Integration.phase()), 'idle');
-        assert.equal(await page.getByRole('button', {name: 'Run CPU', exact: true}).isDisabled(), true);
+        assert.equal(await page.getByRole('button', {name: 'Run CPU', exact: true}).count(), 0);
         await page.waitForFunction(() => window.__cp1Integration.board()?.parts?.some(part => part.id === 'trainer'));
         assert.equal(await page.evaluate(() => window.__cp1Integration.vmProjectLoads), 1);
         await page.getByRole('button', {name: 'Fit all parts', exact: true}).click();
@@ -249,7 +249,7 @@ try {
                 await controller.getByRole('button', {name: 'Import monitor ROM', exact: true}).waitFor();
                 assert.equal(await code.getByRole('button', {name: 'Load cells', exact: true}).isDisabled(), true);
                 const rom = option('--cassette-rom') ? await readFile(option('--cassette-rom')) : Buffer.from(switchToLedFirmware());
-                await debug.getByLabel('Import monitor ROM', {exact: true}).setInputFiles({
+                await debug.locator('input[type="file"][aria-label="Import monitor ROM"]').setInputFiles({
                     name: 'cp1-test.bin', mimeType: 'application/octet-stream', buffer: rom
                 });
                 await page.waitForFunction(() => window.__cp1Integration.phase() === 'paused');

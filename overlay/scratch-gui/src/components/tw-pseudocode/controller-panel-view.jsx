@@ -1761,25 +1761,14 @@ class ControllerPanelView extends React.Component {
                 overflow: 'hidden',
                 zIndex: 10,
             }} onPointerDown={() => activateUndoSurface('widgets')}>
-                {/* Toolbar. WRAPS, because on a phone it cannot all fit on one
-                    line and the alternative is not "smaller" but "on top of each
-                    other": this row holds fixed-width segmented groups that carry
-                    their own `overflow: hidden`, so when the touch-target floor
-                    raised every button to 32px the row overflowed and
-                    bw-ctl-snap-toggle landed on the Play button — measured, Play
-                    went from 17x30 (hittable) to 32x32 with the snap toggle on
-                    top of it. Wrapping turns "too little space" into a second
-                    line instead of a collision. */}
                 <div data-widgets-toolbar style={{
-                    display: 'flex', alignItems: 'center', gap: 8,
-                    flexWrap: 'wrap', rowGap: 6,
-                    padding: '8px 12px',
-                    paddingTop: this.props.isFullScreen ? 'calc(env(safe-area-inset-top, 0px) + 56px)' : 8,
-                    borderBottom: '1px solid #e2e8f0',
-                    background: '#fff',
-                    flexShrink: 0,
+                    display: 'flex', alignItems: 'center', flexWrap: 'nowrap', gap: 3,
+                    minWidth: 0, padding: '4px 6px',
+                    paddingTop: this.props.isFullScreen ? 'calc(env(safe-area-inset-top, 0px) + 56px)' : 4,
+                    borderBottom: '1px solid #e2e8f0', background: '#fff', flexShrink: 0
                 }}>
-                    <span style={{ fontWeight: 700, fontSize: 14, color: '#7C3AED' }}>
+                    <span title={t('title')} style={{flex: '1 1 auto', minWidth: 0, overflow: 'hidden',
+                        textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 700, fontSize: 12, color: '#7C3AED'}}>
                         {t('title')}
                     </span>
                     <EditorHelp editor="Widgets" label="Widgets" locale={this.props.locale} />
@@ -1796,9 +1785,9 @@ class ControllerPanelView extends React.Component {
                             style={{
                                 background: '#ede9fe', color: '#5b21b6',
                                 border: '1px solid #c4b5fd', borderRadius: 6,
-                                padding: '4px 10px', cursor: 'pointer', fontSize: 12,
+                                padding: 0, width: 24, height: 28, flexShrink: 0, cursor: 'pointer', fontSize: 14,
                             }}>
-                            {'⛶ '}{t('enterFullScreen')}
+                            <span aria-hidden="true">⛶</span>
                         </button>
                     )}
                     {this.props.isFullScreen && (
@@ -1807,15 +1796,14 @@ class ControllerPanelView extends React.Component {
                             aria-label={t('exitFullScreen')}
                             title={t('exitFullScreen')}
                             style={{border: '1px solid #cbd5e1', borderRadius: 6,
-                                background: '#fff', color: '#334155', padding: '5px 9px',
+                                background: '#fff', color: '#334155', padding: 0, width: 24, height: 28, flexShrink: 0,
                                 cursor: 'pointer', fontSize: 12}}>
-                            {'↙ '}{t('exitFullScreen')}
+                            <span aria-hidden="true">↙</span>
                         </button>
                     )}
-                    <div style={{ flex: 1 }} />
                     {/* Mode toggle */}
                     <div style={{
-                        display: 'flex', borderRadius: 6,
+                        display: 'flex', flexShrink: 0, borderRadius: 6,
                         border: '1px solid #cbd5e1', overflow: 'hidden'
                     }}>
                         <button
@@ -1826,7 +1814,7 @@ class ControllerPanelView extends React.Component {
                             title={t('edit')}
                             onClick={() => this._setMode('edit')}
                             style={{
-                                width: 34, height: 30, padding: 0, fontSize: 16, border: 'none',
+                                width: 24, height: 28, padding: 0, fontSize: 16, border: 'none',
                                 cursor: 'pointer', fontWeight: 600,
                                 background: mode === 'edit' ? '#7C3AED' : '#f1f5f9',
                                 color: mode === 'edit' ? '#fff' : '#64748b',
@@ -1842,7 +1830,7 @@ class ControllerPanelView extends React.Component {
                             title={t('play')}
                             onClick={() => this._setMode('play')}
                             style={{
-                                width: 34, height: 30, padding: 0, fontSize: 16, border: 'none',
+                                width: 24, height: 28, padding: 0, fontSize: 16, border: 'none',
                                 cursor: 'pointer', fontWeight: 600,
                                 background: mode === 'play' ? '#7C3AED' : '#f1f5f9',
                                 color: mode === 'play' ? '#fff' : '#64748b',
@@ -1855,16 +1843,17 @@ class ControllerPanelView extends React.Component {
                     {mode === 'edit' && (
                         <button
                             data-testid="bw-ctl-snap-toggle"
+                            aria-label={'Grid snap'} aria-pressed={this.state.snap}
                             onClick={() => this.setState(st => ({ snap: !st.snap }))}
                             title={'Grid snap ' + (this.state.snap ? 'on' : 'off') + ' (' + this.state.grid + 'px)'}
                             style={{
-                                padding: '4px 10px', fontSize: 12, borderRadius: 6,
+                                padding: 0, width: 24, height: 28, flexShrink: 0, fontSize: 14, borderRadius: 6,
                                 border: '1px solid #cbd5e1', cursor: 'pointer', fontWeight: 600,
                                 background: this.state.snap ? '#ede9fe' : '#f1f5f9',
                                 color: this.state.snap ? '#7C3AED' : '#64748b',
                             }}
                         >
-                            {'\u229e ' + (this.state.snap ? this.state.grid + 'px' : 'free')}
+                            <span aria-hidden="true">▦</span>
                         </button>
                     )}
                     {/* Hide the binding line on every card. PANEL-LEVEL, and it sits
@@ -1875,34 +1864,35 @@ class ControllerPanelView extends React.Component {
                         the setting persists either way, because it is serialised
                         upstream. */}
                     {mode === 'edit' && (
-                        <label data-testid="bw-ctl-hide-bindings"
-                            style={{ display: 'flex', alignItems: 'center', gap: 5,
-                                fontSize: 12, color: '#475569', cursor: 'pointer' }}>
-                            <input type="checkbox"
-                                checked={!!panel.hideBindings}
-                                onChange={e => {
-                                    const before = this._snapshot();
-                                    panel.setHideBindings(e.target.checked);
-                                    this._persist();
-                                    this._recordUndo(before, 'Show or hide bindings');
-                                    this.forceUpdate();
-                                }} />
-                            {t('hideBindings')}
-                        </label>
+                        <button type="button" data-testid="bw-ctl-hide-bindings"
+                            aria-label={t('hideBindings')} title={t('hideBindings')} aria-pressed={!!panel.hideBindings}
+                            style={{width: 24, height: 28, padding: 0, flexShrink: 0, border: '1px solid #cbd5e1',
+                                borderRadius: 6, cursor: 'pointer', background: panel.hideBindings ? '#ede9fe' : '#f1f5f9'}}
+                            onClick={() => {
+                                const before = this._snapshot();
+                                panel.setHideBindings(!panel.hideBindings);
+                                this._persist();
+                                this._recordUndo(before, 'Show or hide bindings');
+                                this.forceUpdate();
+                            }}>
+                            <span aria-hidden="true">⌁</span>
+                        </button>
                     )}
 
                     {/* Add widget (edit mode only) */}
                     {mode === 'edit' && (
-                        <div style={{ position: 'relative' }}>
+                        <div style={{position: 'relative', flexShrink: 0}}>
                             <button
+                                type="button" aria-label={t('addWidget')} title={t('addWidget')}
+                                aria-expanded={this.state.addMenuOpen}
                                 onClick={() => this.setState(s => ({ addMenuOpen: !s.addMenuOpen }))}
                                 style={{
                                     background: '#7C3AED', color: '#fff', border: 'none',
-                                    borderRadius: 6, padding: '4px 12px', fontSize: 12,
+                                    borderRadius: 6, width: 24, height: 28, padding: 0, fontSize: 16,
                                     cursor: 'pointer', fontWeight: 600,
                                 }}
                             >
-                                {t('addWidget')}
+                                <span aria-hidden="true">+</span>
                             </button>
                             {this.state.addMenuOpen && (
                                 <div style={{

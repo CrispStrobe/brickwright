@@ -17,7 +17,7 @@ const INDEPENDENT_ROM_SHA256 = 'ce3e7a33af990e3e5bd69780c6ab046502e1be57ead43655
 
 const COPY = {
     en: {
-        title: 'Kosmos CP1', base: '128 cells', expanded: '256 cells · CP3',
+        title: 'Kosmos CP1', base: '128 cells', expanded: '256 cells · CP3', expansion: 'CP3 expansion (256 cells)',
         importRom: 'Import monitor ROM', useIndependentRom: 'Use Brickwright monitor',
         noRom: 'Choose the Brickwright monitor or import a compatible 2048-byte monitor ROM.',
         independentRomError: 'The bundled Brickwright monitor is missing or damaged.',
@@ -61,7 +61,7 @@ const COPY = {
         monitorError: 'Monitor error {code}', sourceDiffers: 'RAM differs'
     },
     de: {
-        title: 'Kosmos CP1', base: '128 Zellen', expanded: '256 Zellen · CP3',
+        title: 'Kosmos CP1', base: '128 Zellen', expanded: '256 Zellen · CP3', expansion: 'CP3-Erweiterung (256 Zellen)',
         importRom: 'Monitor-ROM importieren', useIndependentRom: 'Brickwright-Monitor verwenden',
         noRom: 'Wähle den Brickwright-Monitor oder importiere ein kompatibles Monitor-ROM mit 2048 Bytes.',
         independentRomError: 'Der mitgelieferte Brickwright-Monitor fehlt oder ist beschädigt.',
@@ -339,9 +339,12 @@ class Cp1Panel extends React.Component {
         });
     }
 
-    _renderDisplay (display) {
+    _renderDisplay (display, cpu) {
         const digits = cp1DisplayDigits(display);
-        return <div className={styles.displaySection}>
+        const masks = `${this._t('raw')}: ${digits.map(hex).join(' ')}`;
+        const registers = cpu && `8049 PC ${hex(cpu.pc)} · A ${hex(cpu.a)} · PSW ${hex(cpu.psw)} · ` +
+            `${Number.isFinite(cpu.cycles) ? cpu.cycles : '—'} ${this._t('cycles')}`;
+        return <div className={styles.displaySection} title={[masks, registers].filter(Boolean).join('\n')}>
             <div className={styles.display} role="group" aria-label={this._t('display')}>
                 {digits.map((mask, index) => <svg key={index} className={styles.digit} viewBox="0 0 68 98"
                     role="img" aria-label={this._t('digit', {index: index + 1, segments: cp1SegmentDescription(mask)})}
@@ -351,12 +354,11 @@ class Cp1Panel extends React.Component {
                     <circle cx="60" cy="85" r="5" className={mask & 128 ? styles.segmentOn : styles.segmentOff} />
                 </svg>)}
             </div>
-            <div className={styles.rawMasks}>{this._t('raw')}: {digits.map(hex).join(' ')}</div>
         </div>;
     }
 
     _renderKeypad (ready) {
-        return <div className={styles.keypad} role="group" aria-label={this._t('keys')}>
+        return <div className={styles.keypad} role="group" aria-label={this._t('keys')} title={this._t('keyboard')}>
             {CP1_PHYSICAL_KEYS.map(({id, key, group}) => <button key={id} type="button"
                 data-cp1-key={key} data-cp1-physical-key={id} data-key-group={group}
                 aria-label={group === 'lower' ? `${key} (${this._t('duplicate')})` : key}
@@ -375,60 +377,75 @@ class Cp1Panel extends React.Component {
         const stateKey = {ready: 'stateReady', running: 'stateRunning', halted: 'stateHalted',
             error: 'stateError', unknown: 'stateUnknown'}[view.execution] || 'stateUnknown';
         const step = view.step;
-        return <section className={styles.semantic} data-cp1-semantic={view.qualified ? 'qualified' : 'unavailable'}
+        const result = step && step.status !== 'pending' ?
+            [this._t('stepResult', {completed: step.completed, instructions: step.instructions, cycles: step.cycles}),
+                step.status === 'limit' && this._t('stepBudget')].filter(Boolean).join(' ') : '';
+        return <section className={styles.semantic} data-cp1-semantic="qualified"
             aria-label={this._t('teaching')}>
-            <h3>{this._t('teaching')}</h3>
-            {view.qualified ? <React.Fragment>
-                <dl className={styles.teachingRegisters}>
-                    <div><dt>{this._t('teachingPc')}</dt><dd data-cp1-teaching-pc>{cellText(view.pc)}</dd></div>
-                    <div><dt>{this._t('accumulator')}</dt><dd data-cp1-accumulator>{view.accumulator ?
-                        `${String(view.accumulator.opcode).padStart(2, '0')}.${cellText(view.accumulator.operand)}` : '—'}</dd></div>
-                    <div><dt>{this._t('comparison')}</dt><dd data-cp1-comparison>{view.comparison === null ? '—' :
-                        this._t(view.comparison ? 'yes' : 'no')}</dd></div>
-                </dl>
-                <div className={styles.actions}>
-                    <button type="button" data-cp1-command-step disabled={this.props.running || this.state.busy ||
-                        waiting || !this.props.onStepCommand} onClick={() => {
-                        this._releaseAll();
-                        this._action(() => this.props.onStepCommand());
-                    }}>{this._t('commandStep')}</button>
-                    <span data-cp1-execution={view.execution}>{this._t(stateKey)}</span>
-                </div>
-                {view.execution === 'error' && view.lastEvent && view.lastEvent.error ? <p className={styles.hint} data-cp1-monitor-error>
-                    {this._t('monitorError', {code: Number.isInteger(view.lastEvent.error.code) ?
-                        cellText(view.lastEvent.error.code) : '—'})}</p> : null}
-                {step && step.status !== 'pending' ? <p className={styles.hint} data-cp1-step-result>
-                    {this._t('stepResult', {completed: step.completed, instructions: step.instructions, cycles: step.cycles})}
-                    {step.status === 'limit' ? ` ${this._t('stepBudget')}` : ''}</p> : null}
-                <p className={styles.hint}>{this._t(waiting ? 'monitorIdle' : 'semanticHint')}</p>
-            </React.Fragment> : <p className={styles.hint}>{this._t('semanticUnavailable')}</p>}
+            {this._iconButton(this._t('commandStep'), '⇥', {
+                'data-cp1-command-step': true,
+                title: [this._t('commandStep'), this._t(waiting ? 'monitorIdle' : 'semanticHint'), result].filter(Boolean).join('\n'),
+                disabled: this.props.running || this.state.busy || waiting || !this.props.onStepCommand,
+                onClick: () => {
+                    this._releaseAll();
+                    this._action(() => this.props.onStepCommand());
+                }
+            })}
+            <dl className={styles.teachingRegisters}>
+                <div><dt title={this._t('teachingPc')}>PC</dt><dd data-cp1-teaching-pc>{cellText(view.pc)}</dd></div>
+                <div><dt title={this._t('accumulator')}>ACC</dt><dd data-cp1-accumulator>{view.accumulator ?
+                    `${String(view.accumulator.opcode).padStart(2, '0')}.${cellText(view.accumulator.operand)}` : '—'}</dd></div>
+                <div><dt title={this._t('comparison')}>=</dt><dd data-cp1-comparison>{view.comparison === null ? '—' :
+                    this._t(view.comparison ? 'yes' : 'no')}</dd></div>
+            </dl>
+            <span className={styles.programHelp} tabIndex={0} data-cp1-execution={view.execution}
+                aria-label={this._t(stateKey)} title={[this._t(stateKey), result].filter(Boolean).join('\n')}>
+                {view.execution === 'error' ? '⚠' : 'ⓘ'}
+            </span>
+            {view.execution === 'error' && view.lastEvent && view.lastEvent.error ? <span data-cp1-monitor-error>
+                {this._t('monitorError', {code: Number.isInteger(view.lastEvent.error.code) ?
+                    cellText(view.lastEvent.error.code) : '—'})}</span> : null}
         </section>;
     }
 
-    _renderProgram (view, ready) {
+    _iconButton (label, icon, props = {}) {
+        return <button type="button" className={styles.iconButton} title={label} aria-label={label} {...props}>
+            <span aria-hidden="true">{icon}</span>
+        </button>;
+    }
+
+    _renderProgram (view, ready, compact = false, Editor) {
+        const showEditor = compact || !this.context?.Editor;
+        const sourceLabel = this._t('source');
+        const fallback = <textarea value={this.state.source} aria-label={sourceLabel}
+            spellCheck={false} autoCapitalize="off" autoCorrect="off" data-cp1-source="true"
+            onChange={event => this._setSource(event.target.value)} />;
+        const loadLabel = this._t('load');
+        const canLoad = ready && !this.state.busy && !this.props.running && this.props.onLoad;
         return <div className={styles.program}>
-            <label className={styles.field}>
-                <span>{this._t('source')}</span>
-                <textarea value={this.state.source} spellCheck={false} autoCapitalize="off" autoCorrect="off"
-                    data-cp1-source="true" onChange={event => this._setSource(event.target.value)} />
-            </label>
-            <p className={styles.hint}>{this._t('sourceHint')}</p>
-            <div className={styles.actions}>
-                <button type="button" disabled={!ready || this.state.busy || this.props.running || !this.props.onLoad}
-                    onClick={() => this._load()}>{this._t('load')}</button>
-                <button type="button" disabled={this.state.busy} onClick={() => this._sourceInput.current.click()}>{this._t('openSource')}</button>
-                <button type="button" disabled={this.state.busy} onClick={() => {
-                    const result = this._assemble();
-                    if (result) this._action(() => downloadBlob('kosmos-cp1.cp1', new Blob(
-                        [exportCp1Program(result)], {type: 'text/plain;charset=utf-8'})));
-                }}>{this._t('listing')}</button>
-                <button type="button" disabled={this.state.busy} onClick={() => this._saveProject()}>{this._t('save')}</button>
+            <div className={compact ? styles.compactActions : styles.actions}>
+                {this._iconButton(loadLabel, '↓', {disabled: !canLoad, onClick: () => this._load()})}
+                {showEditor && <React.Fragment>
+                    {this._iconButton(this._t('openSource'), '↗', {disabled: this.state.busy,
+                        onClick: () => this._sourceInput.current.click()})}
+                    {this._iconButton(this._t('listing'), '⇩', {disabled: this.state.busy, onClick: () => {
+                        const result = this._assemble();
+                        if (result) this._action(() => downloadBlob('kosmos-cp1.cp1', new Blob(
+                            [exportCp1Program(result)], {type: 'text/plain;charset=utf-8'})));
+                    }})}
+                    {this._iconButton(this._t('save'), '▣', {disabled: this.state.busy, onClick: () => this._saveProject()})}
+                    <span className={styles.programHelp} title={this._t('sourceHint')} tabIndex={0}>ⓘ</span>
+                </React.Fragment>}
             </div>
+            {!showEditor ? null : Editor ? <div className={styles.sharedEditor} role="group" aria-label={sourceLabel}
+                data-cp1-source-editor><React.Suspense fallback={fallback}>
+                    <Editor value={this.state.source} lang="cp1" onChange={text => this._setSource(text)} isVisible />
+                </React.Suspense></div> : fallback}
             {view.current ? <p className={styles.hint} data-cp1-current-source>
                 {this._t('currentSource', {line: view.current.line, address: cellText(view.current.address)})}
                 {' '}<mark>{view.current.source}</mark></p> : null}
             {view.sourceMismatch ? <p className={styles.hint} data-cp1-source-mismatch>{this._t('sourceMismatch')}</p> : null}
-            {view.rows.length ? <details className={styles.listing} open>
+            {view.rows.length ? <details className={styles.listing} open={compact ? undefined : true}>
                 <summary>{this._t('executionListing')}</summary>
                 <div className={styles.tableScroll}><table className={styles.table} data-cp1-source-listing>
                     <thead><tr>{['breakpoint', 'address', 'instruction', 'line', 'source'].map(key =>
@@ -520,29 +537,53 @@ class Cp1Panel extends React.Component {
         </React.Fragment>;
     }
 
+    _renderMonitorBar (ready, debug = false, rom = null, view = null) {
+        const {running, expansion, expansionDisabled, onExpansionChange, onPause, onRun, onStep, onReset} = this.props;
+        const {busy} = this.state;
+        const status = this._t(ready ? (running ? 'running' : 'paused') : 'noRom');
+        return <header className={styles.monitorBar} aria-label={this._t('title')}>
+            <strong className={styles.monitorName} title={this._t('title')}>{this._t('title')}</strong>
+            {debug && onExpansionChange ? <label className={styles.expansionToggle}
+                title={`${this._t('expansion')} · ${this._t(expansion ? 'expanded' : 'base')}`}>
+                <input type="checkbox" aria-label={this._t('expansion')} checked={expansion}
+                    disabled={expansionDisabled || busy} onChange={event => onExpansionChange(event.target.checked)} />
+                <span aria-hidden="true">{expansion ? 'CP3 · 256' : '128'}</span>
+            </label> : <span className={styles.monitorBadge} title={this._t(expansion ? 'expanded' : 'base')}>
+                {expansion ? '256' : '128'}
+            </span>}
+            {!ready && this._iconButton(this._t('useIndependentRom'), '▣',
+                {disabled: busy, onClick: () => this._loadIndependentRom()})}
+            {(!ready || debug) && this._iconButton(this._t('importRom'), '↗',
+                {disabled: busy, onClick: () => this._romInput.current.click()})}
+            {ready && this._iconButton(this._t(running ? 'pause' : 'run'), running ? 'Ⅱ' : '▶',
+                {disabled: busy || !(running ? onPause : onRun),
+                    onClick: () => { this._releaseAll(); return running ? onPause() : onRun(); }})}
+            {debug && ready && this._iconButton(this._t('step'), '▸|',
+                {disabled: running || busy || !onStep, onClick: () => onStep()})}
+            {debug && ready && onReset && this._iconButton(this._t('reset'), '↺',
+                {disabled: busy, onClick: () => { this._releaseAll(); return onReset(); }})}
+            {debug && <span tabIndex={0} className={styles.programHelp} role="img"
+                aria-label={view?.qualified ? status : this._t('semanticUnavailable')}
+                data-cp1-semantic={view && !view.qualified ? 'unavailable' : undefined}
+                title={[status, this._t('keyboard'), this._t('stepHint'), view && !view.qualified &&
+                    this._t('semanticUnavailable'), rom &&
+                    `${rom.name || 'ROM'} · SHA-256 ${rom.sha256} · ${this._t('romLocal')}`].filter(Boolean).join('\n')}>
+                ⓘ
+            </span>}
+        </header>;
+    }
+
     _renderSurfaceViews (snapshot, view, ready) {
         const slots = this.context;
         return <React.Fragment>
-            {slots?.code && createPortal(<section className={styles.root} data-cp1-code-editor>
-                <h2>{this._t('title')}</h2>
-                {this._renderProgram(view, ready)}
+            {slots?.code && createPortal(<section className={`${styles.root} ${styles.codeEditor}`} data-cp1-code-editor data-color-mode={this.props.colorMode}>
+                {this._renderProgram(view, ready, true, slots.Editor)}
                 {this._renderSourceStatus()}
             </section>, slots.code)}
             {slots?.controller && createPortal(<section className={styles.root} data-cp1-controller-face
                 tabIndex={0} onKeyDown={this._onKeyDown}
                 onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) this._releaseAll(); }}>
-                <header className={styles.header}><h2>{this._t('title')}</h2>
-                    <span className={styles.badge}>{this._t(this.props.expansion ? 'expanded' : 'base')}</span>
-                </header>
-                {!ready && <div className={styles.actions}>
-                    <button type="button" disabled={this.state.busy}
-                        onClick={() => this._loadIndependentRom()}>{this._t('useIndependentRom')}</button>
-                    <button type="button" disabled={this.state.busy}
-                        onClick={() => this._romInput.current.click()}>{this._t('importRom')}</button>
-                </div>}
-                {ready && <button type="button" disabled={this.state.busy || !(this.props.running ? this.props.onPause : this.props.onRun)}
-                    onClick={() => { this._releaseAll(); return this.props.running ? this.props.onPause() : this.props.onRun(); }}>
-                    {this._t(this.props.running ? 'pause' : 'run')}</button>}
+                {this._renderMonitorBar(ready)}
                 {this._renderDisplay(snapshot && snapshot.display)}
                 {this._renderKeypad(ready)}
                 {this._renderSourceStatus()}
@@ -559,30 +600,10 @@ class Cp1Panel extends React.Component {
         return <React.Fragment><section className={styles.root} data-cp1-panel="true" data-color-mode={this.props.colorMode}
             tabIndex={0} onKeyDown={this._onKeyDown}
             onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) this._releaseAll(); }}>
-            <header className={styles.header}><h2>{this._t('title')}</h2>
-                <span className={styles.badge}>{this._t(this.props.expansion ? 'expanded' : 'base')}</span>
-                <span className={styles.status}>{ready ? this._t(this.props.running ? 'running' : 'paused') : this._t('unavailable')}</span>
-            </header>
-            <div className={styles.actions}>
-                {!ready && <button type="button" disabled={this.state.busy}
-                    onClick={() => this._loadIndependentRom()}>{this._t('useIndependentRom')}</button>}
-                <button type="button" onClick={() => this._romInput.current.click()} disabled={this.state.busy}>{this._t('importRom')}</button>
-                <button type="button" disabled={!ready || this.state.busy || !(this.props.running ? this.props.onPause : this.props.onRun)}
-                    onClick={() => { this._releaseAll(); return this.props.running ? this.props.onPause() : this.props.onRun(); }}>
-                    {this._t(this.props.running ? 'pause' : 'run')}</button>
-                <button type="button" disabled={!ready || this.props.running || this.state.busy || !this.props.onStep}
-                    onClick={() => this.props.onStep()}>{this._t('step')}</button>
-                {this.props.onReset ? <button type="button" disabled={!ready || this.state.busy}
-                    onClick={() => { this._releaseAll(); return this.props.onReset(); }}>{this._t('reset')}</button> : null}
-            </div>
-            {!ready ? <p className={styles.empty}>{this._t('noRom')}</p> : null}
-            {rom ? <p className={styles.hint}>{rom.name || 'ROM'} · SHA-256 {rom.sha256.slice(0, 12)}…<br />{this._t('romLocal')}</p> : null}
-            {this._renderDisplay(snapshot && snapshot.display)}
-            {cpu ? <div className={styles.cpuState}>8049 PC {hex(cpu.pc)} · A {hex(cpu.a)} · PSW {hex(cpu.psw)} · {Number.isFinite(cpu.cycles) ? cpu.cycles : '—'} {this._t('cycles')}</div> : null}
+            {this._renderMonitorBar(ready, true, rom, debugView)}
+            {this._renderDisplay(snapshot && snapshot.display, cpu)}
             {this._renderKeypad(ready)}
-            <p className={styles.hint}>{this._t('keyboard')}</p>
-            <p className={styles.hint}>{this._t('stepHint')}</p>
-            {this._renderSemantic(debugView)}
+            {debugView.qualified && this._renderSemantic(debugView)}
             <div className={styles.tabs} role="group" aria-label={this._t('title')}>
                 {['program', 'memory', 'ports'].map(view => <button key={view} type="button" aria-pressed={this.state.view === view}
                     onClick={() => this.setState({view})}>{this._t(view)}</button>)}
@@ -611,7 +632,7 @@ class Cp1Panel extends React.Component {
 Cp1Panel.contextType = Cp1Surfaces;
 Cp1Panel.propTypes = {
     machine: PropTypes.object, snapshot: PropTypes.object, running: PropTypes.bool,
-    expansion: PropTypes.bool, clockHz: PropTypes.number, locale: PropTypes.string,
+    expansion: PropTypes.bool, expansionDisabled: PropTypes.bool, onExpansionChange: PropTypes.func, clockHz: PropTypes.number, locale: PropTypes.string,
     colorMode: PropTypes.string, source: PropTypes.string, romReference: PropTypes.object,
     onSourceChange: PropTypes.func, onKey: PropTypes.func, onReleaseKeys: PropTypes.func,
     onRun: PropTypes.func, onPause: PropTypes.func, onStep: PropTypes.func, onReset: PropTypes.func,

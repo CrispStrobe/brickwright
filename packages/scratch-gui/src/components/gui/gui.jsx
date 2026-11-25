@@ -70,6 +70,9 @@ import ChromeToggle from './chrome-toggle.jsx';
 import StarterJourneys from './starter-journeys.jsx';
 // The lessons panel carries seven wave catalogs (232 KiB raw, 74 KiB compressed)
 // and is closed on every first paint; it arrives when someone opens it.
+const Cp1CodeEditor = React.lazy(() =>
+    import(/* webpackChunkName: "bw-codemirror" */ '../../lib/codemirror-editor.jsx')
+);
 const GuidedLessons = React.lazy(() => import(/* webpackChunkName: "guided-lessons" */ './guided-lessons.jsx'));
 import lessonCatalog from './lessons.json';
 import chromeStyles from './compact-chrome.css';
@@ -425,7 +428,7 @@ const GUIComponent = props => {
     });
     const [cp1CodeSlot, setCp1CodeSlot] = React.useState(null);
     const [cp1ControllerSlot, setCp1ControllerSlot] = React.useState(null);
-    const cp1Surfaces = React.useMemo(() => ({code: cp1CodeSlot, controller: cp1ControllerSlot}),
+    const cp1Surfaces = React.useMemo(() => ({code: cp1CodeSlot, controller: cp1ControllerSlot, Editor: Cp1CodeEditor}),
         [cp1CodeSlot, cp1ControllerSlot]);
     const [gameControlKey, setGameControlKey] = React.useState(() =>
         props.vm?.runtime?.bwGameControlKey || null);
@@ -951,14 +954,9 @@ const GUIComponent = props => {
         const rightSize = paneLayout?.right?.size || 'm';
         const middleContent = paneLayout?.middle?.upper || 'blocks-canvas';
         const renderCodePane = isVisible => (
-            <div className={cp1SurfaceStyles.codeShell}>
-                <div ref={setCp1CodeSlot} className={cp1SurfaceStyles.codeSlot} />
-                <div className={cp1SurfaceStyles.codeFallback}>
-                    <EditorErrorBoundary name="Code"><LazyPseudocodeImporter
-                        isVisible={isVisible} vm={vm}
-                    /></EditorErrorBoundary>
-                </div>
-            </div>
+            <EditorErrorBoundary name="Code"><LazyPseudocodeImporter
+                isVisible={isVisible} vm={vm} onCp1CodeSlot={setCp1CodeSlot}
+            /></EditorErrorBoundary>
         );
         const helpEditor = [
             middleContent === 'code' ? 'Code' : 'Blocks',

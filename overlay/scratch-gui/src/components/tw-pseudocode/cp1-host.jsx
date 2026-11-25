@@ -128,17 +128,15 @@ export default function Cp1Host ({runner, running, locale, configuration, onImpo
     const snapshot = runner?.cp1Snapshot?.();
     const cassette = (action, bytes) => callRunner('cp1Cassette', action, bytes);
     return <section data-cp1-host>
-        <label><input type="checkbox" checked={config.expansion} disabled={running || pending > 0}
-            onChange={event => {
-                const next = {expansion: event.target.checked, clockHz: config.clockHz};
-                uiAction(() => enqueue(async () => {
-                    await configure(next);
-                    if (alive.current) save(previous => ({...previous, configuration: next}));
-                }))();
-            }} />{' '}{message('CP3 expansion (256 cells)', 'CP3-Erweiterung (256 Zellen)')}</label>
         {error ? <p role="alert">{error}</p> : null}
         <Cp1Panel snapshot={snapshot} running={running} locale={locale}
             expansion={config.expansion} clockHz={config.clockHz}
+            expansionDisabled={running || pending > 0}
+            onExpansionChange={uiAction(expansion => enqueue(async () => {
+                const next = {expansion, clockHz: config.clockHz};
+                await configure(next);
+                if (alive.current) save(previous => ({...previous, configuration: next}));
+            }))}
             source={workspace.source} romReference={workspace.rom}
             onSourceChange={source => {
                 try { setError(''); save(previous => ({...previous, source})); }

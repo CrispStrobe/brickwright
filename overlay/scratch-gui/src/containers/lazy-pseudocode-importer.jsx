@@ -177,6 +177,7 @@ class LazyPseudocodeImporter extends React.Component {
                 <Importer
                     key={this.state.generation}
                     isVisible={this.props.isVisible}
+                    onCp1CodeSlot={this.props.onCp1CodeSlot}
                     pendingBundleDetail={this.state.pendingBundleDetail}
                     onPendingBundleHandled={this.handlePendingBundleHandled}
                     onReady={this.handleImporterReady}
@@ -187,6 +188,7 @@ class LazyPseudocodeImporter extends React.Component {
 }
 
 LazyPseudocodeImporter.propTypes = {
+    onCp1CodeSlot: PropTypes.func,
     isVisible: PropTypes.bool,
     vm: PropTypes.shape({runtime: PropTypes.shape({
         on: PropTypes.func,

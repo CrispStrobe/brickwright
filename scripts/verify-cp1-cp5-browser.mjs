@@ -60,7 +60,7 @@ try {
     await page.evaluate(data => window.__cp1Integration.loadCircuit(data), example);
     await page.waitForFunction(count => window.__cp1Integration.board()?.parts?.length === count, example.parts.length);
     await fitCp1('initial');
-    await page.getByLabel('Import monitor ROM', {exact: true}).setInputFiles({
+    await page.locator('input[type="file"][aria-label="Import monitor ROM"]').setInputFiles({
         name: 'original-byte-echo.rom', mimeType: 'application/octet-stream', buffer: Buffer.from(switchToLedFirmware())
     });
     await page.waitForFunction(() => window.__cp1Integration.phase() === 'paused');
