@@ -166,6 +166,19 @@ test('removing a real wire produces a reproducible counterexample, and Undo repa
     assert.equal(f.byText('Show counterexample'), undefined);
 });
 
+test('generating a report from the empty table retains keyboard focus inside the lab', t => {
+    const f = fixture(t, makeWorkspace('lamp'));
+    f.click('Truth table');
+    const trigger = f.lab().querySelector('#logikus-table button');
+    assert.equal(trigger.textContent, 'Test all states');
+    trigger.focus();
+    f.click(trigger);
+    assert.equal(trigger.isConnected, false, 'the empty table is replaced by its report');
+    assert.equal(document.activeElement.id, 'logikus-tab-table');
+    assert.equal(document.activeElement.getAttribute('aria-selected'), 'true');
+    assert.match(f.lab().querySelector('#logikus-table').textContent, /2 \/ 2 states match the goal/);
+});
+
 test('changing only the goal clears the old report, and an unknown imported goal stays ungraded', t => {
     const f = fixture(t, makeWorkspace('lamp'));
     f.click('Test all states');

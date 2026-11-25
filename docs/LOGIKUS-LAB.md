@@ -348,3 +348,28 @@ round-trips, counterexamples, actual React interactions and project lifecycles,
 the railway's safety/behavior distinction, and the numerical claims in the
 lessons. Test results and browser/release verification should be recorded for
 the actual commit being delivered.
+
+### Browser acceptance
+
+After installing the repository and GUI dependencies and building the editor
+with the normal production build, run:
+
+```sh
+node scripts/verify-logikus-browser.mjs
+```
+
+The check serves `packages/scratch-gui/build` on an ephemeral loopback port and
+opens the actual Widgets launcher in Chromium. It exercises railway inputs,
+edited wiring, unsafe-state replay, Undo, the distinction between all-red
+safety and target behavior, and the momentary Test contact using native
+pointer and keyboard input. It also checks dialog layout at desktop and narrow
+viewport sizes and focus when generating a report from the empty Truth table.
+Missing build output or Chromium is a failure; this check does not substitute
+a DOM simulation for a rendered browser.
+
+Results and screenshots are written to `artifacts/logikus-browser/`, including
+a failure report when the check cannot complete. The ordinary PR build runs
+this focused check immediately after the production editor build and retains
+the evidence as `logikus-browser-evidence`; the larger `ci:full` browser matrix
+is not required to run it. A queued workflow or an unexecuted browser script
+is not a validation pass.

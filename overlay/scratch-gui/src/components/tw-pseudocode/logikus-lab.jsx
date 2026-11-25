@@ -208,6 +208,9 @@ export default function LogikusLab ({workspace, button, locale, error, onChange,
     const testAll = () => act(() => {
         const checked = isRailway ? inspectRailway(workspace.program) : inspectProgram(workspace.program, preset?.program);
         setInspection({signature: inspectionSignature, result: checked}); setPage(0); setTab('table');
+        // The empty table's trigger is replaced by the result. Retain focus
+        // on the requested view instead of leaving it on the removed button.
+        modal.current?.querySelector('#logikus-tab-table')?.focus();
         window.dispatchEvent(new CustomEvent('bw-logikus-tested', {detail: {
             presetId: workspace.presetId, states: checked.rows.length,
             matched: checked.matched, goal: !!preset,
