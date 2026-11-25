@@ -196,6 +196,36 @@ try {
             await page.screenshot({path: path.join(output, 'cp2-cassette-desktop.png'), fullPage: true});
             checks.push('CP2 controls arm and discard recording, load WAV via CAL, preserve complete bytes on F007, and eject');
         }
+        if (process.argv.includes('--curriculum')) {
+            const galleryRoot = path.join(root, 'overlay/scratch-gui/examples');
+            const curriculum = JSON.parse(await readFile(path.join(galleryRoot, 'curriculum.json'), 'utf8'));
+            const examples = JSON.parse(await readFile(path.join(galleryRoot, 'index.json'), 'utf8'));
+            const trail = curriculum.trails.find(item => item.id === 'kosmos-cp1');
+            const fixture = {id: 'cp1-cp2-sample-logger', chapter: trail.chapters.at(-1)};
+            const entry = examples.find(example => example.id === fixture.id);
+            for (const [lang, file] of [['en', entry.files.intro], ['de', entry.files.introDE]]) {
+                await page.route(`${url}/examples/${file}`, async route => route.fulfill({
+                    contentType: 'text/markdown', body: await readFile(path.join(galleryRoot, file), 'utf8')
+                }));
+                await page.evaluate(data => window.__cp1Integration.setGallery(data), {examples, curriculum, lang});
+                const codex = page.getByRole('button', {name: lang === 'en' ? /Codex/ : /Kodex/});
+                if (lang === 'en') {
+                    const expand = page.getByRole('button', {name: 'Expand Examples', exact: true});
+                    if (await expand.isVisible()) await expand.click();
+                    await codex.click();
+                    await page.getByTestId('codex-trail-kosmos-cp1').click();
+                    await page.getByText(fixture.chapter.title.en, {exact: true}).click();
+                }
+                const fetch = page.waitForResponse(`${url}/examples/${file}`);
+                await page.getByTestId(`codex-station-${fixture.id}`).click();
+                assert.equal((await fetch).status(), 200);
+                const reader = page.getByTestId('codex-reader-modal');
+                await reader.getByText(lang === 'en' ? /Import the monitor ROM/ : /Monitor-ROM importieren/).waitFor();
+                await reader.getByTestId('codex-open-bench').click();
+                assert.equal(await page.evaluate(() => window.__cp1Integration.galleryPicked), entry.files.cp1);
+            }
+            checks.push('Codex opens the CP1 trail, renders English and German logger notes, and selects its real CP1 source');
+        }
         assert.deepEqual(requests, []);
         assert.deepEqual(errors, []);
         const result = {status: 'passed', browser: browser.version(), react: fixture.react, checks,

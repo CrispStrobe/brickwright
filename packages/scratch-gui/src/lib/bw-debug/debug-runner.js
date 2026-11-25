@@ -632,6 +632,11 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
     let hddSnapshotOwner = {};
     let target = null;
     let cp1LessonBatch = null;
+    let cp2Recording = null;
+    const cancelCp2Recording = () => {
+        cp2Recording?.cancel();
+        cp2Recording = null;
+    };
     let unsubscribeCp1Lessons = null;
     let releaseEsp32S040Target = null;
     let i8086ExecutionResult = null;
@@ -2789,6 +2794,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
      *  keyboard input, video face (when the machine's chips include one),
      *  and a hot loadRom for media applied to a live machine. */
     function wireMachineBench(result, createDebugSession) {
+        cancelCp2Recording();
         if (unsubscribeCp1Lessons) unsubscribeCp1Lessons();
         unsubscribeCp1Lessons = null;
         cp1LessonBatch?.clear();
@@ -2991,6 +2997,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                 // A new ROM ends the old observation/step lifetime. Pause the
                 // session before resetting its target so an armed step cannot
                 // survive as stale UI intent or publish an old lesson event.
+                cancelCp2Recording();
+                target.machine.stopCassette?.();
                 cp1LessonBatch?.clear();
                 session.pause();
                 unschedule();
@@ -4119,7 +4127,31 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         cp1Snapshot() {
             if (target?.kind !== 'cp1') return null;
             const observed = target.snapshot();
-            return {...observed, cp1: {...observed.cp1, breakpoints: cp1BreakpointCells()}};
+            return {...observed, cp1: {...observed.cp1, breakpoints: cp1BreakpointCells()},
+                cp2Recording: cp2Recording ? (cp2Recording.finished ? 'ready' : 'recording') : null};
+        },
+        cp1Cassette(action, bytes) {
+            const machine = target?.kind === 'cp1' && target.machine;
+            if (!machine?.playCassetteWave) return {unsupported: 'CP2 cassette transport is unavailable.'};
+            if (action === 'play') {
+                machine.playCassetteWave(bytes);
+                cancelCp2Recording();
+            } else if (action === 'eject') {
+                machine.stopCassette();
+            } else if (action === 'record') {
+                cancelCp2Recording();
+                cp2Recording = machine.recordCassetteWave();
+                machine.stopCassette();
+            } else if (action === 'cancel') {
+                cancelCp2Recording();
+            } else if (action === 'save') {
+                if (!cp2Recording?.finished) return {refused: 'Complete a CAS transfer before saving.'};
+                try { return cp2Recording.save(); }
+                finally { cp2Recording = null; emit(); }
+            } else {
+                throw new RangeError('Unknown CP2 cassette operation');
+            }
+            emit();
         },
         cp1ToggleBreakpoint(address) {
             if (target?.kind !== 'cp1') throw new Error('Load CP1 firmware before setting a command breakpoint.');
@@ -4180,6 +4212,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         },
         cp1Reset() {
             if (target?.kind !== 'cp1') return false;
+            cancelCp2Recording();
             cp1LessonBatch?.clear();
             session.pause();
             target.reset();
@@ -4331,6 +4364,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         },
 
         stop() {
+            cancelCp2Recording();
             cp1LessonBatch?.clear();
             hddSnapshotOwner = {};
             unschedule();
@@ -5535,6 +5569,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             debugEventsTarget = null;
             if (unsubscribeDebugInputs) { unsubscribeDebugInputs(); unsubscribeDebugInputs = null; }
             if (unsubscribeCp1Lessons) { unsubscribeCp1Lessons(); unsubscribeCp1Lessons = null; }
+            cancelCp2Recording();
             cp1LessonBatch?.clear();
             cp1LessonBatch = null;
             unsubscribeRecordingEvents();

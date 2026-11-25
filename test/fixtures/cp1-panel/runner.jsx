@@ -29,6 +29,7 @@ function App () {
     const [configuration, setConfiguration] = useState({partId: 'trainer', expansion: false, clockHz: 6000000});
     const [notice, setNotice] = useState('');
     const [circuitData, setCircuitData] = useState(circuit);
+    const [gallery, setGallery] = useState(null);
     const board = useRef(null);
     const current = useRef(null);
     const config = useRef(configuration);
@@ -142,10 +143,13 @@ function App () {
         setConfiguration(extracted.config);
         setCircuitData(data);
     };
+    h.setGallery = setGallery;
     h.unmount = () => root.unmount();
     return <>
         <section style={{height: 650, minWidth: 0}} data-cp1-real-circuit>
             <CircuitDesigner project={project} circuitData={circuitData}
+                {...(gallery && {examples: gallery.examples, curriculum: gallery.curriculum, lang: gallery.lang,
+                    onLoadExample: example => { h.galleryPicked = example.files.cp1; }})}
                 onBoardReady={onBoardReady} onCircuitReady={value => { circuitModel.current = value; }}
                 board={runner?.board() || undefined} debuggerOn={Boolean(runner)}
                 debugState={{halted: state.phase !== 'running', skewNs: 0n}} />
