@@ -17,7 +17,7 @@ concurrency:
 jobs:
   compare:
     if: >-
-      github.repository == 'CrispStrobe/brickwright-lite' &&
+      github.repository_id == '1291854269' &&
       github.event.pull_request.head.repo.full_name == github.repository &&
       github.event.pull_request.head.ref == 'lane/robot-model-webkit-instance-clip-20261024'
     runs-on: ubuntu-24.04

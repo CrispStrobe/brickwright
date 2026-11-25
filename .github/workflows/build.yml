@@ -1532,6 +1532,9 @@ jobs:
           BW_GUI_GIT_EXECUTABLE: /usr/bin/git
           BW_GUI_REVIEWED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: node scripts/write-gui-build-manifest.mjs packages/scratch-gui/build
+      - name: Stage Brickwright Pages compatibility routes
+        if: ${{ !cancelled() && steps.build_editor.outcome == 'success' && github.repository_id == '1291854269' }}
+        run: node scripts/stage-brickwright-pages-compatibility.mjs packages/scratch-gui/build
       - name: Upload GUI Pages artifact
         id: gui_pages_upload
         uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
@@ -4573,6 +4576,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     outputs:
       deployed: ${{ steps.order.outputs.stale != 'true' }}
+      page_url: ${{ steps.deployment.outputs.page_url }}
     steps:
       # Evaluated INSIDE the job, so it runs after the queue lets this deploy
       # through — by which time a newer commit may already have published.
@@ -4633,11 +4637,14 @@ jobs:
       - name: Install Playwright
         run: npm install playwright && npx playwright install chromium --with-deps
       - name: Verify GUI renders on deployed site
+        env:
+          BW_DEPLOYED_PAGES_URL: ${{ needs.deploy.outputs.page_url }}
         run: |
           node -e "
             const { chromium } = require('playwright');
             (async () => {
-              const url = 'https://crispstrobe.github.io/brickwright-lite/';
+              const deployedUrl = process.env.BW_DEPLOYED_PAGES_URL;
+              const url = new URL(deployedUrl.endsWith('/') ? deployedUrl : deployedUrl + '/').href;
               const browser = await chromium.launch();
               const page = await browser.newPage({ viewport: { width: 1400, height: 800 } });
               const errors = [];

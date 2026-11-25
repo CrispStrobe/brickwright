@@ -16,4 +16,17 @@ GitHub reports workflow-based Pages deployments on both repositories, with no cu
 3. Replace live workflow self-repository guards that compare `github.repository` with `CrispStrobe/brickwright-lite` with an identity that survives the rename. Audit the mobile and native qualification workflows, release and updater metadata, deploy probes, Pages base paths, the Vercel Git binding, and references in the sibling repositories. Historical receipts continue to identify the repositories and URLs recorded at the time.
 4. Verify both editors, real deployment health, download and update routes, and a representative old link set. Record the repository IDs, Pages settings, deployment URLs, and exact branch tips. Rename the legacy repository first and check its new canonical routes. Rename the active repository second and verify that `brickwright` now resolves to ID `1291854269`, with the legacy ID at `brickwright-legacy`.
 
-The remaining cutover dependency is a verified hosting arrangement for the two existing GitHub Pages paths. The cutover stays pending while those paths remain tied to their current repository names.
+## Compatibility paths
+
+The [account Pages repository](https://github.com/CrispStrobe/crispstrobe.github.io) stages the existing `/brickwright-lite/` entry and fallback routes for Legacy. Its active entry opens the new `/brickwright/` Pages editor after that site publishes the primary repository ID marker. Both the primary Pages artifact and the account-site fallback preserve Legacy’s `editor.html`, `player.html`, `embed.html`, and `fullscreen.html` paths. They forward query and fragment on the same origin. This includes the `sb3-creator` handoff through `#project_url` and keeps browser-local storage accessible. The existing Vercel editors remain separate fallback links.
+
+The primary Pages artifact stages the compatibility files alongside the built editor. The deployed smoke test uses the URL returned by GitHub Pages. The build manifest and artifact checks accept the final primary slug only for repository ID `1291854269`.
+
+## Cutover checks
+
+Run `node scripts/check-brickwright-rename-readiness.mjs` for the public preflight. Run it with `--after-cutover` for the final names and URLs.
+
+- Wait for the account Pages build to publish and check `/brickwright-migration-check/status.json`, the Legacy fallback, and the existing two project editors.
+- Verify that Pages publishes the identity marker and reserved Legacy HTML aliases from the primary build. Test the query, fragment, and browser storage through old and new Chrome sessions.
+- Locate and migrate remaining direct GitHub links to the Legacy repository, frozen proof producers and consumers, and any Vercel Git bindings that still rely on repository names. The two Vercel editor URLs already resolve separately and retain their names.
+- Confirm acceptance of the old Legacy GitHub deep-link change before reclaiming the name. The editor redirects are separate from GitHub’s repository redirects. GitHub routes the old Legacy GitHub slug to the active repository once that slug is reused.

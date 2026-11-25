@@ -102,7 +102,7 @@ jobs:
 
   # Metadata v2 requires final source qualification and separate one-shot event admission.
   native-font-selection-v2:
-    if: ${{ github.event.action == 'labeled' && github.event.label.name == 'x86-native-font-selection-v2' && github.actor == 'CrispStrobe' && github.repository == 'CrispStrobe/brickwright-lite' && github.run_attempt == 1 && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.repo.fork == false && github.event.pull_request.base.ref == 'main' }}
+    if: ${{ github.event.action == 'labeled' && github.event.label.name == 'x86-native-font-selection-v2' && github.actor == 'CrispStrobe' && github.repository_id == '1291854269' && github.run_attempt == 1 && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.repo.fork == false && github.event.pull_request.base.ref == 'main' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     env:
