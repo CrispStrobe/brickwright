@@ -1322,7 +1322,7 @@ const GUIComponent = props => {
                                     // as empty gap. Nudge it once the DOM has reflowed.
                                     requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
                                 }}
-                                style={{position: 'absolute', zIndex: 20, right: 0, top: 11, width: 32, minWidth: 32, height: 34, padding: 0, border: '1px solid #94a3b8', borderRadius: 5, background: stagePaneVisible ? '#2563eb' : '#475569', color: '#fff', cursor: 'pointer', fontWeight: 700, fontSize: 22, lineHeight: 1}}
+                                style={{position: 'absolute', zIndex: 20, right: 0, top: 6, width: 32, minWidth: 32, height: 32, padding: 0, border: '1px solid #94a3b8', borderRadius: 5, background: stagePaneVisible ? '#2563eb' : '#475569', color: '#fff', cursor: 'pointer', fontWeight: 700, fontSize: 22, lineHeight: 1}}
                             >{stagePaneVisible ? '›' : '‹'}</button>
                             {backpackVisible ? (
                                 <Backpack host={backpackHost} />

@@ -33,6 +33,11 @@
     "defaultMessage": "Virtual SPIKE Prime…"
   },
   {
+    "id": "gui.menuBar.toolchainManager",
+    "description": "Settings item opening the SDCC toolchain download manager",
+    "defaultMessage": "C compiler for 8051 boards…"
+  },
+  {
     "id": "gui.menuBar.connectionDiagnostics",
     "description": "Settings action that opens the on-screen Bluetooth/connection log",
     "defaultMessage": "Connection diagnostics…"
@@ -41,10 +46,5 @@
     "id": "gui.menuBar.capabilityDiagnostics",
     "description": "Settings action that opens the extension capability audit panel",
     "defaultMessage": "Capability diagnostics…"
-  },
-  {
-    "id": "gui.menuBar.toolchainManager",
-    "description": "Settings item opening the SDCC toolchain download manager",
-    "defaultMessage": "C compiler for 8051 boards…"
   }
 ]

@@ -28,6 +28,25 @@
     font-weight: 700;
     line-height: 1;
 }
+.tab-slot {
+    margin-inline: 9px 4px;
+}
+.tab-slot .trigger {
+    width: 26px;
+    height: 26px;
+    border-color: transparent;
+    border-radius: 6px;
+    background: transparent;
+}
+.tab-slot .trigger:hover {
+    border-color: var(--bw-border, #9caec6);
+    background: var(--bw-panel, #fff);
+}
+.tab-slot .trigger span {
+    width: 15px;
+    height: 15px;
+    font-size: 11px;
+}
 .dialog {
     width: min(36rem, calc(100% - 24px));
     max-height: calc(100% - 24px);
@@ -69,6 +88,6 @@
 .dialog dt { font-weight: 600; }
 .dialog dd { margin: 2px 0 0; }
 @media (pointer: coarse) {
-    .trigger { width: 40px; height: 40px; }
+    .trigger, .tab-slot .trigger { width: 40px; height: 40px; }
     .header button { min-height: 44px; }
 }

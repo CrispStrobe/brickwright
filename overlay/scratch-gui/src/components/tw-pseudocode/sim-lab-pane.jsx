@@ -3281,9 +3281,9 @@ class SimLabPane extends React.Component {
             reserved: modeWidth + examplesWidth + s.size + (this.state.mode === 'simulate' ? 470 : 8), wrap});
         const TT = this.ttext;
         return (
-            <div role="toolbar" aria-label={TT.toolbar} data-testid="bw-sim-lab-toolbar"
+            <div role="toolbar" aria-label={TT.toolbar} data-testid="bw-sim-lab-toolbar" className={paneStyles.toolbar}
                 style={{display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'nowrap', minWidth: 0, flexShrink: 0,
-                    overflowX: 'auto', overflowY: 'hidden', scrollbarWidth: 'thin',
+                    overflowX: 'auto', overflowY: 'hidden',
                     paddingRight: RIGHT_PANE_TOGGLE_PX}}>
                 {this.renderModeSwitch()}
                 <button type="button" data-testid="bw-sim-lab-examples" aria-label={TT.actions.examples} title={TT.actions.examples}
