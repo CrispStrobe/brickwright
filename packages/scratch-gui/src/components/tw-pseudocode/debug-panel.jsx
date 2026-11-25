@@ -359,6 +359,7 @@ class DebugPanel extends React.Component {
         // in the loader; dropping _bootMedia here made the visible Sim control
         // run an all-zero image. Keep the media and recreate the runner so the
         // newly extracted machine and the already loaded image boot together.
+        if (detail.kind === 'cp1' && this.state.kind !== 'cp1') this._bootMedia = null;
         const hasBootMedia = !!this._bootMedia;
         const kind = detail.kind === 'cp1' ? 'cp1' : detail.kind === 'z80' ? 'z80'
             : detail.kind === 'eater6502' || detail.kind === '6502' ? 'eater6502'
@@ -609,6 +610,14 @@ class DebugPanel extends React.Component {
         // The machine-bench pipeline: Build Machine → config; Machine
         // Loader / ASM tab → image; both meet in _onMediaLoad's reboot.
         window.addEventListener('bw-machine-extracted', this._onMachineExtracted);
+        this._onCp1CircuitDetached = () => {
+            if (this.state.kind !== 'cp1') return;
+            this._teardownRunner();
+            this._bootMedia = null;
+            this.setState({kind: 'emulator', machineConfig: null, runner: null,
+                ui: {phase: 'idle', message: ''}}, () => this.syncDeviceKind());
+        };
+        window.addEventListener('bw-cp1-circuit-detached', this._onCp1CircuitDetached);
         window.addEventListener('bw-machine-media-load', this._onMediaLoad);
         window.addEventListener('bw-asm-rom-ready', this._onAsmRomReady);
         // Replay what was dispatched before this panel existed: the panel
@@ -867,6 +876,7 @@ class DebugPanel extends React.Component {
         if (rt && rt.off && this._onProjectChanged) rt.off('PROJECT_CHANGED', this._onProjectChanged);
         else if (rt && rt.removeListener && this._onProjectChanged) rt.removeListener('PROJECT_CHANGED', this._onProjectChanged);
         window.removeEventListener('bw-machine-extracted', this._onMachineExtracted);
+        window.removeEventListener('bw-cp1-circuit-detached', this._onCp1CircuitDetached);
         if (this._onBoardSource) window.removeEventListener('bw-board-source', this._onBoardSource);
         window.removeEventListener('bw-machine-media-load', this._onMediaLoad);
         window.removeEventListener('bw-asm-rom-ready', this._onAsmRomReady);

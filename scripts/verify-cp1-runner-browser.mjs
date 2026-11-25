@@ -226,6 +226,55 @@ try {
             }
             checks.push('Codex opens the CP1 trail, renders English and German logger notes, and selects its real CP1 source');
         }
+        if (process.argv.includes('--surfaces')) {
+            const source = await readFile(path.join(root, 'overlay/scratch-gui/examples/cp1-first-display/program.cp1'), 'utf8');
+            await page.evaluate(() => window.__cp1Integration.setShowSurfaces(true));
+            const code = page.locator('[data-cp1-code-editor]');
+            const controller = page.locator('[data-cp1-controller-face]');
+            const debug = page.locator('[data-cp1-panel]');
+            if (!await page.evaluate(() => window.__cp1Integration.snapshot())) {
+                await controller.getByRole('button', {name: 'Import monitor ROM', exact: true}).waitFor();
+                assert.equal(await code.getByRole('button', {name: 'Load cells', exact: true}).isDisabled(), true);
+                const rom = option('--cassette-rom') ? await readFile(option('--cassette-rom')) : Buffer.from(switchToLedFirmware());
+                await debug.getByLabel('Import monitor ROM', {exact: true}).setInputFiles({
+                    name: 'cp1-test.bin', mimeType: 'application/octet-stream', buffer: rom
+                });
+                await page.waitForFunction(() => window.__cp1Integration.phase() === 'paused');
+            }
+            const boardBefore = await page.evaluate(() => window.__cp1Integration.identity().sameBoard);
+            assert.equal(boardBefore, true);
+            // The fixture dispatches the event the production gallery issues after
+            // reading the listing. The Code and Widgets views belong to the same host.
+            await page.evaluate(value => window.dispatchEvent(new CustomEvent('bw-cp1-source-load', {
+                detail: {source: value, expansion: false}
+            })), source);
+            await page.waitForFunction(value => document.querySelector('[data-cp1-code-editor] [data-cp1-source]')?.value === value,
+                source);
+            const revised = `${source.trimEnd()}\n; Edited in Code\n`;
+            await code.locator('[data-cp1-source]').fill(revised);
+            assert.equal(await debug.locator('[data-cp1-source]').inputValue(), revised);
+            await debug.locator('[data-cp1-source]').fill(source);
+            assert.equal(await code.locator('[data-cp1-source]').inputValue(), source);
+            await page.waitForFunction(() => window.__cp1Integration.phase() === 'paused');
+            await code.getByRole('button', {name: 'Load cells', exact: true}).click();
+            await code.getByRole('status').filter({hasText: 'Loaded'}).waitFor();
+            assert.equal(await page.evaluate(() => window.__cp1Integration.snapshot().cells[0].opcode), 4);
+            await controller.focus();
+            await page.keyboard.down('5');
+            assert.deepEqual(await page.evaluate(() => window.__cp1Integration.snapshot().keys), ['5']);
+            await page.keyboard.up('5');
+            assert.deepEqual(await page.evaluate(() => window.__cp1Integration.snapshot().keys), []);
+            const digits = pane => pane.locator('[data-cp1-digit]').evaluateAll(elements => elements.map(el => el.dataset.segments));
+            assert.deepEqual(await digits(controller), await digits(debug));
+            await page.keyboard.down('5');
+            await page.evaluate(() => window.__cp1Integration.setShowSurfaces(false));
+            await page.waitForFunction(() => window.__cp1Integration.snapshot().keys.length === 0);
+            await page.keyboard.up('5');
+            await code.waitFor({state: 'detached'});
+            await controller.waitFor({state: 'detached'});
+            assert.equal(await page.evaluate(() => window.__cp1Integration.identity().sameBoard), true);
+            checks.push('Code and Widgets use one debugger session, synchronize the listing, load its cells, and share the physical keys and display');
+        }
         assert.deepEqual(requests, []);
         assert.deepEqual(errors, []);
         const result = {status: 'passed', browser: browser.version(), react: fixture.react, checks,

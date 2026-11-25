@@ -1,8 +1,8 @@
-# Brickwright Lite
+# Brickwright
 
 **Build circuits. Program machines. See how they work.**
 
-Brickwright Lite is a free, open-source workbench for electronics and
+Brickwright is a free, open-source workbench for electronics and
 programming that runs entirely in a web browser, and as a native desktop and
 mobile app. You wire up a circuit on a virtual breadboard and watch it behave,
 write a program as Scratch blocks or as real code, run that program on an
@@ -14,6 +14,8 @@ lessons the whole way.
 - **For retro-computer and LEGO builders** who want to try a design — a Z80
   board, an STC flash program, a SPIKE robot — in software before touching the
   real hardware.
+
+The Brickwright repository is currently published as [`brickwright-lite`](https://github.com/CrispStrobe/brickwright-lite). The earlier TurboWarp-based editor remains available at its [current site](https://crispstrobe.github.io/brickwright/editor.html). See the [repository transition plan](docs/REPOSITORY-RENAME.md) for the planned Brickwright Legacy name and link migration.
 
 **Try it now (web):** <https://brickwright-lite.vercel.app> ·
 <https://crispstrobe.github.io/brickwright-lite> — both auto-deploy from `main`.
@@ -361,7 +363,7 @@ actionable lanes, [PLAN.md](PLAN.md) for the working sequence, and
 
 ## How it's built: vendor + overlay
 
-Brickwright Lite is built on the last BSD-3-licensed release of the Scratch
+Brickwright is built on the last BSD-3-licensed release of the Scratch
 editor stack (see **Licensing** below for why). Rather than fork those
 repositories, it **pins exact versions, keeps its own copies of only the files
 it changes in `overlay/`, and copies them over the vendored sources at build
@@ -432,7 +434,7 @@ GPL/AGPL oracle code stays outside the product entirely.
 
 ## Licensing
 
-Brickwright Lite's application code is **BSD-3-Clause**. The shipped dependency
+Brickwright's application code is **BSD-3-Clause**. The shipped dependency
 set is open source under BSD-3-Clause, Apache-2.0, MIT and MPL-2.0 — **no GPL or
 AGPL code is bundled**. [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) has the
 exact file-and-package inventory.
@@ -440,7 +442,7 @@ exact file-and-package inventory.
 ### Why this base
 
 The Scratch Foundation relicensed its whole stack from BSD-3-Clause to AGPL-3.0
-on 2024-11-25 (scratch-gui commit `3de24da0`). Brickwright Lite pins the **last
+on 2024-11-25 (scratch-gui commit `3de24da0`). Brickwright pins the **last
 BSD-3 commit** of each component:
 
 | Component | Pin | License |
@@ -485,15 +487,15 @@ This was established by re-runnable checks, not by trust:
 
 ### How this differs from mainline Brickwright and from TurboWarp
 
-Brickwright Lite freezes a BSD-licensed Scratch stack (so upstream security and
+Brickwright freezes a BSD-licensed Scratch stack (so upstream security and
 compatibility fixes must be ported deliberately) and does **not** use
 TurboWarp's compiler or addon system. In exchange it ships its own electronics,
 debugger, lesson and native-device layers — including direct LEGO Bluetooth —
-without depending on TurboWarp. Brickwright Lite is not a TurboWarp fork.
+without depending on TurboWarp. Brickwright is not a TurboWarp fork.
 
 ### Affiliation and trademarks
 
-Brickwright Lite is an independent project. **Not affiliated with or endorsed
+Brickwright is an independent project. **Not affiliated with or endorsed
 by Scratch, MIT, LEGO, STC, Arduino, or Raspberry Pi, nor by the makers of the
 circuit file formats the Circuit tab imports and exports (KiCad, EasyEDA, EAGLE,
 LTspice). All trademarks belong to their owners.** It is likewise not authorized
