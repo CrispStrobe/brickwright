@@ -1211,3 +1211,36 @@ readings over 600 ticks for each robot, followed by three exact restart
 frames per run. These tests cover cold-start latency. Brickwright's
 production pin is still `0953e188`, and the sustained 1× production
 target remains open.
+
+### Balance cold-start collision work across two workers
+
+The simulation worker estimates work from the supplied hull counts and
+queues several large roots on the existing helper. Both workers use the
+same CSG measurement and geometry tolerances. The results are assembled
+in authored body order. The helper's startup deadline is two seconds.
+If it fails to load or never acknowledges startup, every pending
+measurement runs locally.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/ddb12f27e72225421776671241e0449a2a980fd5)
+
+These Mac Chrome pairs compare the previous one-root helper with the
+balanced queue. Both used fresh contexts and the same Jolt 5.7 SIMD
+engine. The measured interval ends at the initial physics frame.
+
+| Robot | First order, before → after | Reverse order, before → after |
+| --- | ---: | ---: |
+| Atlas | 7.68 → 6.11 s | 7.76 → 6.36 s |
+| Scout | 11.83 → 8.23 s | 13.49 → 8.27 s |
+
+Both robots produced identical initial and restart frames. Serving the
+helper with a 404 or a script that never sends the startup acknowledgment
+returned both robots to the serial route and produced the same frames.
+Ten distinct focused tests passed, including a fake-timer check that
+both pending measurements fall back after the startup deadline.
+
+Paired coupled runs matched sampled motion and electrical values over
+600 ticks with three matching warm restarts per run. The rebuilt SDK
+verified all 842 manifest entries. In Chrome the embedded CAD editor
+loaded the packaged helper and Jolt assets and passed Atlas Run, joint
+motion, Pause, Reset, repeat Run, and Close without changing the scene.
+The Brickwright production SDK integration and sustained 1× production
+qualification remain open.
