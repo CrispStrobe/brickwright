@@ -1254,7 +1254,6 @@ class PseudocodeImporter extends React.Component {
         this.state = {revealed: props.isVisible !== false, lang: 'pseudocode', importedPython: false,
             extraLangs: readExtraLangs(), langMenuOpen: false,
             cp1Active: typeof window !== 'undefined' && window.__bwMachineExtracted?.kind === 'cp1',
-            cp1Available: typeof window !== 'undefined' && window.__bwMachineExtracted?.kind === 'cp1',
             // The Arcade board picker: the boards (null until loaded) and the one chosen.
             arcadeBoards: null, arcadeBoard: '',
             // One empty buffer per tab, from LANG_LABEL (the list of tabs);
@@ -1337,7 +1336,6 @@ class PseudocodeImporter extends React.Component {
         window.addEventListener('bw-microbit-run-request', this._onMicrobitRunRequest);
         window.addEventListener('bw-cp1-source-load', this.selectCp1);
         window.addEventListener('bw-cp1-circuit-detached', this.detachCp1);
-        window.addEventListener('bw-machine-extracted', this.rememberCp1);
         // CodeMirror arrives when the tab is first shown (_reveal), not now:
         // every TabPanel is force-rendered, so "mounted" is every first paint.
         // Bundled examples wait for the no-device Tools menu or a real source
@@ -2704,7 +2702,6 @@ class PseudocodeImporter extends React.Component {
         window.removeEventListener('bw-microbit-run-request', this._onMicrobitRunRequest);
         window.removeEventListener('bw-cp1-source-load', this.selectCp1);
         window.removeEventListener('bw-cp1-circuit-detached', this.detachCp1);
-        window.removeEventListener('bw-machine-extracted', this.rememberCp1);
         // A pending debounce would otherwise lose the last edits on unmount.
         if (this._autosaveTimer) {
             clearTimeout(this._autosaveTimer);
@@ -2872,11 +2869,8 @@ class PseudocodeImporter extends React.Component {
         try { localStorage.setItem(BW_EXTRA_LANGS_KEY, JSON.stringify(extraLangs)); } catch { /* per-browser convenience only */ }
         this.setState({extraLangs, langMenuOpen: false}, () => this.switchTab(l));
     }
-    rememberCp1 = event => {
-        if (event.detail?.kind === 'cp1' && !this.state.cp1Available) this.setState({cp1Available: true});
-    };
-    detachCp1 = () => this.setState({cp1Active: false, cp1Available: false});
-    selectCp1 = () => this.setState({cp1Active: true, cp1Available: true});
+    detachCp1 = () => this.setState({cp1Active: false});
+    selectCp1 = () => this.setState({cp1Active: true});
     leaveCp1 = () => this.setState({cp1Active: false});
 
     async openCp1Language () {
@@ -3863,6 +3857,7 @@ class PseudocodeImporter extends React.Component {
     // any hard blockers ("no ADC on this chip"). Code without pins just gets its
     // DEVICE line rewritten — there is nothing to refuse.
     async setDevice (deviceId) {
+        if (deviceId === 'kosmos-cp1') return this.openCp1Language();
         if (deviceId === '__manage__') {
             // The "Manage machines…" entry is a command, not a device: open the
             // library modal (gui.jsx owns it) and leave the current device as-is,
@@ -5979,13 +5974,11 @@ class PseudocodeImporter extends React.Component {
                             </button>
                         );
                     })}
-                    {this.state.cp1Available && (
-                        <button type="button" data-testid="bw-code-cp1-tab" onClick={this.selectCp1}
-                            aria-pressed={this.state.cp1Active} title={this.L.cp1Language}
-                            style={{...csel, whiteSpace: 'nowrap', fontWeight: this.state.cp1Active ? 700 : 400}}>
-                            CP1
-                        </button>
-                    )}
+                    <button type="button" data-testid="bw-code-cp1-tab" onClick={() => this.openCp1Language()}
+                        disabled={this.state.busy} aria-pressed={this.state.cp1Active} title={this.L.cp1Language}
+                        style={{...csel, whiteSpace: 'nowrap', fontWeight: this.state.cp1Active ? 700 : 400}}>
+                        CP1
+                    </button>
                     {(() => {
                         const shown = this.visibleOptionalLangs().map(([l]) => l);
                         const hidden = BW_OPTIONAL_LANGS.filter(([l]) => !shown.includes(l));
@@ -6453,13 +6446,14 @@ class PseudocodeImporter extends React.Component {
                             style={{...csel, alignSelf: 'center', maxWidth: '100%', minWidth: 0}} title={this.L.deviceTitle}
                             data-testid="bw-device-select">
                             <option value="">{this.L.noChips}</option>
+                            <option value="kosmos-cp1" data-machine-launch="">Kosmos CP1</option>
                             {DEVICE_GROUPS.map(g => (
                                 <optgroup key={g.label} label={g.label}>
                                     {g.devices.map(d => <option key={d.id} value={d.id}>{d.label}</option>)}
                                 </optgroup>
                             ))}
                             {/* Opens the machine library (gui.jsx renders it); not a device. */}
-                            <option value="__manage__">{'Manage machines…'}</option>
+                            <option value="__manage__" data-machine-launch="">{'Manage machines…'}</option>
                         </select>
                         {/* What this language can do on this device: native, lowered, or
                             an open task — one line, read from lib/bw-matrix/capabilities.js,

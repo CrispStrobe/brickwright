@@ -7,7 +7,7 @@ const labels = {en: {run: 'Run project', stop: 'Stop project'}, de: {run: 'Proje
 export function desktopMenuSnapshot(surface, locale) {
     const text = labels[pickLocale(locale, labels)];
     const tabs=[...document.querySelectorAll('[data-bw-editor-tabs] [role="tab"]')];
-    return {surface:surface||'',canUndo:getUndoState().canUndo,canRedo:getUndoState().canRedo,file:getEditorMenuItems(surface,'file'),edit:surface==='blocks'?[{name:'run',label:text.run,enabled:true},{name:'stop',label:text.stop,enabled:true}]:getEditorMenuItems(surface,'edit'),tabs:tabs.map((tab,index)=>({id:`tab:${index}`,label:tab.textContent.trim(),enabled:tab.getAttribute('aria-disabled')!=='true'}))};
+    return {surface:surface||'',canUndo:getUndoState().canUndo,canRedo:getUndoState().canRedo,file:getEditorMenuItems(surface,'file'),edit:surface==='blocks'?[{name:'run',label:text.run,enabled:true},{name:'stop',label:text.stop,enabled:true}]:getEditorMenuItems(surface,'edit'),tabs:tabs.map((tab,index)=>({id:`tab:${index}`,label:tab.getAttribute('aria-label') || tab.querySelector('[data-bw-tab-label]')?.textContent.trim() || tab.textContent.trim(),enabled:tab.getAttribute('aria-disabled')!=='true'}))};
 }
 export function runDesktopMenuAction(id,owner) {
     if(id==='project:new')return owner.handleClickNew();
