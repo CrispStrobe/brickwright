@@ -1,7 +1,7 @@
 # WeDo asynchronous send-failure follow-on to transport UI #1274
 
 DONE — supplier [#66](https://github.com/CrispStrobe/extensions/pull/66) and qualified
-Lite adoption [#1274](https://github.com/CrispStrobe/brickwright-lite/pull/1274) merged.
+Lite adoption [#1274](https://github.com/CrispStrobe/brickwright/pull/1274) merged.
 Codex transport/buttons owner. Own only the asynchronous send outcome
 boundary in CrispStrobe/extensions `extensions/CrispStrobe/lego_wedo2_universal.js`
 and its focused producer controls. Real VM teardown exposes an unhandled rejected

@@ -95,7 +95,7 @@ limits and narrowly scoped future work in the public handoff.
 ClaimPR1370 landed as `4c416bcfe1a219faaec371ac638f607628f347a7` after all
 four enabled source-policy checks succeeded; only the new lane file changed.
 The frozen operational branch has that exact commit. The single
-[baseline40172711900](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40172711900)
+[baseline40172711900](https://github.com/CrispStrobe/brickwright/actions/runs/40172711900)
 passes independent original-only admission: 312/312 cases, 87,488 numerical
 checks, 4,448 retained files and matching installed source/runtime identities.
 All 240 waveform CSVs equal the preceding retained baseline; no original was

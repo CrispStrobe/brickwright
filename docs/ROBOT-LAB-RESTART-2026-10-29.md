@@ -7,7 +7,7 @@ below are tied to the named revisions; an updated branch needs its own evidence.
 
 ## Existing integration dependency
 
-[Lite PR #1536](https://github.com/CrispStrobe/brickwright-lite/pull/1536) is
+[Lite PR #1536](https://github.com/CrispStrobe/brickwright/pull/1536) is
 owned by the existing combined editor/Circuit delivery maintainer. At this
 checkpoint its head is `2e7846f8a901726a296e3a8ef006cff24bc457b5`; it is open
 and its current checks are queued. Its owner also reports an already dispatched
@@ -38,7 +38,7 @@ allowed, and affected actual guest/application evidence remains necessary.
 
 ### Cross Ratio — PR #1537
 
-[PR #1537](https://github.com/CrispStrobe/brickwright-lite/pull/1537) is open at
+[PR #1537](https://github.com/CrispStrobe/brickwright/pull/1537) is open at
 `f5844d3bf5df6eb513b533a96e44fd983826fcec`. Its checkout identity supplier and
 acknowledgment framing were corrected without raising a gate baseline; the
 source-bound gate-policy checks passed. The current unit-six artifact reports
@@ -59,7 +59,7 @@ and mechanism-causation limits.
 
 ### Model-source line endings — PR #1549
 
-[PR #1549](https://github.com/CrispStrobe/brickwright-lite/pull/1549) is open at
+[PR #1549](https://github.com/CrispStrobe/brickwright/pull/1549) is open at
 `f6ebe4276bf46b79ef0614da6b8b2a2751d29aec`. It uses an LF matching view for
 physical-part disconnection while preserving the original source bytes for
 provenance. Tests cover LF, CRLF, mixed endings, exact IDs, duplicate/missing
@@ -77,7 +77,7 @@ checks and merge normally with matched-head and tree/parent verification.
 
 ### NXT IOMap — PR #1550
 
-[PR #1550](https://github.com/CrispStrobe/brickwright-lite/pull/1550) is open at
+[PR #1550](https://github.com/CrispStrobe/brickwright/pull/1550) is open at
 `959dd4a4ee314f2b911d140cb16d5e5581d376ef`. It implements a bounded
 `Button.mod` projection for IOMap read/write syscalls: short/long/total release
 counters, held bits, exact three-counter zeroing, signed errors and conservative

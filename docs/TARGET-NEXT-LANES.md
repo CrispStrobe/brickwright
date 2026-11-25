@@ -23,11 +23,11 @@ qualify GPIO-heavy firmware or gate PXT usability.
 
 Recent progress:
 
-- [PR625](https://github.com/CrispStrobe/brickwright-lite/pull/625) merged
+- [PR625](https://github.com/CrispStrobe/brickwright/pull/625) merged
   `0577e68e3745a20c9ebb60d1f5d4ef04d9ebdb06`: actual upstream Arcade controls,
   six press/release paths, keyboard, changed pixels and stop/restart qualified
-  on desktop/mobile. [Isolated run37211432649](https://github.com/CrispStrobe/brickwright-lite/actions/runs/37211432649)
-  and [full-app run37211432613](https://github.com/CrispStrobe/brickwright-lite/actions/runs/37211432613)
+  on desktop/mobile. [Isolated run37211432649](https://github.com/CrispStrobe/brickwright/actions/runs/37211432649)
+  and [full-app run37211432613](https://github.com/CrispStrobe/brickwright/actions/runs/37211432613)
   passed. Verification observes the original `board.handleKeyEvent` after
   forwarding; it does not inject state or replace the bridge.
 - [LabWired PR151](https://github.com/CrispStrobe/labwired-core/pull/151)
@@ -69,7 +69,7 @@ Recent progress:
   this artifact. [WASM publication37438840274](https://github.com/CrispStrobe/bw-board/actions/runs/37438840274)
   passed builds/determinism and 108 integration tests (zero failures/skips),
   but its motion job was **skipped**: active WASM motion/RAM/GPIO remains owed.
-- Lite [target performance37463042960](https://github.com/CrispStrobe/brickwright-lite/actions/runs/37463042960)
+- Lite [target performance37463042960](https://github.com/CrispStrobe/brickwright/actions/runs/37463042960)
   on `23bc15cf4e9f5910f1f7455425b238cccd4c4834` measured Arduboy **5.561x**,
   ATtiny88 **10.227x**, Uno **5.178x**, micro:bit-class WASM **26.818x** and
   PyBadge-class WASM **33.417x**. The WASM rows are terminal post-boot smoke,

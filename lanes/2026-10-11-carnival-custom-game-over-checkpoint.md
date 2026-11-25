@@ -1,6 +1,6 @@
 ### Carnival custom game-over checkpoint — 2026-10-11
 
-Owned continuation: [PR804](https://github.com/CrispStrobe/brickwright-lite/pull/804),
+Owned continuation: [PR804](https://github.com/CrispStrobe/brickwright/pull/804),
 branch lane/arcade-carnival-custom-gameover-20261011, head17a64b689, stacked
 on stable PR803. Original custom message/scoring/Melody/optional-score behavior
 now has native execution, blocks/pseudocode and actual MakeCode export/reimport.

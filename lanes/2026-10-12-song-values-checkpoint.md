@@ -1,6 +1,6 @@
 ### Song values checkpoint — 2026-10-12
 
-Draft [PR807](https://github.com/CrispStrobe/brickwright-lite/pull/807), stacked
+Draft [PR807](https://github.com/CrispStrobe/brickwright/pull/807), stacked
 on PR806, tested source79b873478 and final docs0c102b56b. Ordinary song playable
 reporter + shared producer Code word; literal and dynamic hex import/export;
 actual SB3 reopening into fresh VM. 35 affected checks and HEAD mirrors pass,

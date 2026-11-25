@@ -24,7 +24,7 @@ guest text, clocks and first-failure logs. It uploads no guest media or app
 bundle. The result must be audited against the original artifact before any
 acceptance claim.
 
-The [first hosted attempt](https://github.com/CrispStrobe/brickwright-lite/actions/runs/37627418944)
+The [first hosted attempt](https://github.com/CrispStrobe/brickwright/actions/runs/37627418944)
 stopped before build completion or guest launch. The installed-package verifier
 rejected the exact GitHub HTTPS checkout origin without the optional `.git`
 suffix. The narrow correction accepts that exact owner/repository URL while
@@ -33,7 +33,7 @@ first artifact's inventory named the generated probe, but its upload omitted
 the `.mjs` file; the corrected workflow retains it for independent rehashing.
 That attempt establishes no Circuit key or guest result.
 
-The [second hosted attempt](https://github.com/CrispStrobe/brickwright-lite/actions/runs/37629972190)
+The [second hosted attempt](https://github.com/CrispStrobe/brickwright/actions/runs/37629972190)
 built the app and authenticated the free media, but stopped at the preguest
 build admission. Webpack stamped the ambient pull-request merge revision in
 its seven-character build manifest, while the gate expected the reviewed
@@ -42,7 +42,7 @@ to Webpack at build time and verifies its seven-character manifest projection
 against that full head. The original second failure remains a failure; no
 guest input or Circuit pixel response was observed in it.
 
-The [third hosted attempt](https://github.com/CrispStrobe/brickwright-lite/actions/runs/37632115411)
+The [third hosted attempt](https://github.com/CrispStrobe/brickwright/actions/runs/37632115411)
 passed source, build and free-media admission and booted the guest, retaining
 the listing and PS/2 output. It stopped before sending Circuit keys: the
 probe tried to click the VDP parent while the Controller pane's AT canvas
@@ -52,7 +52,7 @@ canvas through the browser pointer path, and checks actual VDP focus before
 typing. The third attempt does not establish a Circuit input response; the
 corrected source has not yet passed the hosted guest gate.
 
-The [fourth hosted attempt](https://github.com/CrispStrobe/brickwright-lite/actions/runs/37640159639)
+The [fourth hosted attempt](https://github.com/CrispStrobe/brickwright/actions/runs/37640159639)
 passed the physical Debugger-button and VDP-canvas focus checks. Its retained
 screen visibly shows FreeDOS and `PS2 DONE`, but the probe stopped before
 Circuit keys because its pixel observer was supplied to Playwright as a
@@ -64,14 +64,14 @@ glyph pixels and rejects changed pixels and frame dimensions. The fourth
 attempt remains a failure, and the corrected probe still requires a fresh
 hosted pixel-response result.
 
-The [fifth hosted attempt](https://github.com/CrispStrobe/brickwright-lite/actions/runs/37643740464)
+The [fifth hosted attempt](https://github.com/CrispStrobe/brickwright/actions/runs/37643740464)
 at `50f12bdf215b1a572cbade711c4fd2d6b773004f` reached the corrected
 pixel observer. The Circuit VDP decoded the prior FreeDOS prompt and `PS2 DONE`,
 and the visible canvas accepted a physical click and retained focus. After
 physical `echo circuitok` keys, guest time advanced from 68.2 to 99.9 seconds,
 but the before/after Circuit canvas pixel SHA-256 and decoded text were
 identical. The run therefore failed the real guest-response gate. Its
-[original artifact 11494886005](https://api.github.com/repos/CrispStrobe/brickwright-lite/actions/artifacts/11494886005)
+[original artifact 11494886005](https://api.github.com/repos/CrispStrobe/brickwright/actions/artifacts/11494886005)
 is 245,565 bytes, SHA-256
 `ebee7c6199b94d90c0511cbdb70074ba533d95b8fcd1dcf1573a17e078c16e10`.
 The retained Widgets-keyboard scan list observes only the Widgets mirror
@@ -81,9 +81,9 @@ target `keyIn` calls while forwarding the original method with the same
 receiver and return value. It still requires visible guest pixels to change;
 the fifth failure is not a passing result.
 
-The [sixth hosted attempt](https://github.com/CrispStrobe/brickwright-lite/actions/runs/37647337533)
+The [sixth hosted attempt](https://github.com/CrispStrobe/brickwright/actions/runs/37647337533)
 at `780b7a7ff7c737f632a90152f0d9ca38890aec10` retained
-[original artifact 11496105114](https://api.github.com/repos/CrispStrobe/brickwright-lite/actions/artifacts/11496105114)
+[original artifact 11496105114](https://api.github.com/repos/CrispStrobe/brickwright/actions/artifacts/11496105114)
 (247,016 bytes, SHA-256
 `c5123adaa338ebaac36584f734fd76cb30f07e966b1fd74aa9df1e2aeb28e785`).
 All 30 physical VDP keydown/up events were trusted and targeted the focused
@@ -94,9 +94,9 @@ an unhandled React key event, or a changed runner/target remain possible. The
 next probe records those route facts without synthesizing input or relaxing
 the pixel gate.
 
-The [seventh hosted attempt](https://github.com/CrispStrobe/brickwright-lite/actions/runs/37650021025)
+The [seventh hosted attempt](https://github.com/CrispStrobe/brickwright/actions/runs/37650021025)
 at `a5e63608dca10706ab619c8d1d5a0db60802202c` retained
-[original artifact 11496508160](https://api.github.com/repos/CrispStrobe/brickwright-lite/actions/artifacts/11496508160)
+[original artifact 11496508160](https://api.github.com/repos/CrispStrobe/brickwright/actions/artifacts/11496508160)
 (249,068 bytes, SHA-256
 `74b6bc8c2dc815229e7ce0746c156ea1f17bb2d2cd3ff1147567b3b6d61244a1`).
 All 15 keydown and 15 keyup events were trusted, focused and bubbled through
@@ -115,9 +115,9 @@ to the previously installed Circuit UI pin. The separate
 applies the same change on the newer main line; Lite does not adopt its other
 changes here.
 
-The [eighth hosted attempt](https://github.com/CrispStrobe/brickwright-lite/actions/runs/37653831331)
+The [eighth hosted attempt](https://github.com/CrispStrobe/brickwright/actions/runs/37653831331)
 at `c766b2c2ec05b3654ca7865d451134eb8d12d97c` retained
-[original artifact 11498327697](https://api.github.com/repos/CrispStrobe/brickwright-lite/actions/artifacts/11498327697)
+[original artifact 11498327697](https://api.github.com/repos/CrispStrobe/brickwright/actions/artifacts/11498327697)
 (102,499 bytes, SHA-256
 `a048b699d4b3e122e9f94f1dbf2136b1cc1db00c5b73ad833b0552d6e5e5be6c`).
 The direct Circuit input portion passed: all 30 trusted, focused make/break
@@ -133,9 +133,9 @@ source has not yet run in the hosted browser. The proposed narrow
 adds only the CI registration correction to the eighth-attempt pin; it does
 not adopt unrelated Circuit UI main-line changes.
 
-The [ninth hosted attempt](https://github.com/CrispStrobe/brickwright-lite/actions/runs/37660250589)
+The [ninth hosted attempt](https://github.com/CrispStrobe/brickwright/actions/runs/37660250589)
 at `428c00934938f596200466ed838aeb157fac101a` retained
-[original artifact 11501990608](https://api.github.com/repos/CrispStrobe/brickwright-lite/actions/artifacts/11501990608)
+[original artifact 11501990608](https://api.github.com/repos/CrispStrobe/brickwright/actions/artifacts/11501990608)
 (11,228 bytes, SHA-256
 `e5a38a9976eb06f0dbfcfebc3e5a454e649e2675012d6c31e98d2ed9de354ca3`)
 and stopped before media or guest execution. Its source-control and exact

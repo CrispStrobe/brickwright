@@ -129,9 +129,9 @@ tests use small inline fixtures.
 
 The previous Arcade agent is paused. The active integration lane in
 [LANES.md](../LANES.md) owns the preserved branch work and its qualification.
-Source checkpoint: [`bfecedb74`](https://github.com/CrispStrobe/brickwright-lite/commit/bfecedb74).
+Source checkpoint: [`bfecedb74`](https://github.com/CrispStrobe/brickwright/commit/bfecedb74).
 The fresh generated Arcade audit records exact tested source
-[`293cf62a8`](https://github.com/CrispStrobe/brickwright-lite/commit/293cf62a8), clean at invocation,
+[`293cf62a8`](https://github.com/CrispStrobe/brickwright/commit/293cf62a8), clean at invocation,
 and declared corpus commit `19a52f6d65ab9e8adc90bb19a6e3ea04544a1339`.
 This is integration-branch evidence; it is not a claim that a shipped package has adopted it.
 

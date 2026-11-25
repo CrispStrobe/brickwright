@@ -96,7 +96,7 @@ observations**. Preserve the first observer failure and successful cached-binary
 recovery; they did not change the source. No source/native Map implementation
 is qualified by that observation contract.
 
-[PR888](https://github.com/CrispStrobe/brickwright-lite/pull/888) is now at
+[PR888](https://github.com/CrispStrobe/brickwright/pull/888) is now at
 CI-only `9133a871b`, awaiting its own checks. The preceding `b190d3e7d` campaign
 closed with successful build, corpus, both browser shards and FPGA, and three
 retained failures in TODO accounting, event observation and Image selection.
@@ -113,7 +113,7 @@ is still pending. These controls do not reduce the immutable or whole-project
 counts, and do not close GUI or complete-game requirements.
 
 The six coordinated claims in
-[PR954](https://github.com/CrispStrobe/brickwright-lite/pull/954), head `e978`,
+[PR954](https://github.com/CrispStrobe/brickwright/pull/954), head `e978`,
 merged normally at `8205ef07` after their enabled checks passed. Their bounded
 implementations are now in progress; this does not qualify them. The canonical protocol documentation
 claim [PR156](https://github.com/CrispStrobe/sb3-creator/pull/156) is merged,
@@ -180,7 +180,7 @@ complete from static translation alone.
 
 Public source: https://github.com/CrispStrobe/brickwright
 
-Combined candidate: https://github.com/CrispStrobe/brickwright-lite/pull/810
+Combined candidate: https://github.com/CrispStrobe/brickwright/pull/810
 
 Producer grammar: https://github.com/CrispStrobe/sb3-creator
 
@@ -207,7 +207,7 @@ local controls are not installed/production-GUI proof.
 ## B0 checkpoint — 2026-10-12
 
 PR810 candidate `56badf1a17ceb691bf283cda1f09492851a8502a`:
-[Build38208078539](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38208078539)
+[Build38208078539](https://github.com/CrispStrobe/brickwright/actions/runs/38208078539)
 passed build and corpus; both browser shards failed. Light failed the already
 peer-owned painted-map installation observation. Heavy timed out on the
 Carnival SVG text selector even though its original screenshot visibly shows
@@ -669,7 +669,7 @@ class, callback and library gaps. Do not count eight completions from one adapte
 ## Integration following Text Sprite controls
 
 Text Sprite and asset factory changes are in
-[PR870](https://github.com/CrispStrobe/brickwright-lite/pull/870), with shared
+[PR870](https://github.com/CrispStrobe/brickwright/pull/870), with shared
 compiler words in [producer PR115](https://github.com/CrispStrobe/sb3-creator/pull/115).
 The affected integration batch passes17 controls, with zero skips. Authentic
 Smurfy now registers zero tile-overlap handlers in both original MakeCode and

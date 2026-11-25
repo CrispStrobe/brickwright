@@ -6,7 +6,7 @@ Base: main `a08622efed67b779adcbe4bfadd56c9003bf74db`.
 
 ## Preserved failure
 
-The once-selected [finite V8 run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40422314383)
+The once-selected [finite V8 run](https://github.com/CrispStrobe/brickwright/actions/runs/40422314383)
 passed source admission, setup-node and trusted package/Chromium setup, then
 failed its inventory observation. Conditional upload succeeded. Its independent
 negative reader joined the event and preserved the first failure: `/etc/resolv.conf`
@@ -120,7 +120,7 @@ then separately admitted once-only selection and originals, remain mandatory.
 
 ## Failed source-CI checkpoint and current-main composition — 2026-10-27
 
-The [H408 source browser job](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40439219786/job/121975783533)
+The [H408 source browser job](https://github.com/CrispStrobe/brickwright/actions/runs/40439219786/job/121975783533)
 failed `Browser gate — circuit UX` with the aggregate
 `ADC_POINT_REARM_REUSED_RECORD` refusal. Its diagnostic recorded a new scope
 handle (`3`, previously `2`), while both the captured mode and selector mode

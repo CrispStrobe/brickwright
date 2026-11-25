@@ -6,7 +6,7 @@ Base: main `2318dd8e26ae7c41b928b4d8a537d42f929f1412`.
 
 ## Preserved failure and bounded repair
 
-The once-selected [finite V7 run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40352829291)
+The once-selected [finite V7 run](https://github.com/CrispStrobe/brickwright/actions/runs/40352829291)
 failed in trusted package/Chromium setup. Source admission and setup-node passed;
 npm reported successful installation, but the Chromium dependency setup reached
 its existing timeout while Ubuntu mirror downloads stalled. The inventory
@@ -91,7 +91,7 @@ No physical accuracy, whole OS, performance, release or broad licence claim.
 
 ## Disabled implementation checkpoint
 
-The claim merged in [PR1451](https://github.com/CrispStrobe/brickwright-lite/pull/1451).
+The claim merged in [PR1451](https://github.com/CrispStrobe/brickwright/pull/1451).
 Phase A introduces distinct finite V8 schemas and CLI routes with execution
 and reader guards false, and retires finite V7 execution while preserving its
 reader, fixed 836/1bc identities and eighteen historical witnesses. Current
@@ -135,10 +135,10 @@ precede any distinct actual-V8 GUI acceptance. No such event is selected.
 
 ## Finite V8 failed-attempt checkpoint — 2026-10-27
 
-Source candidate [`2079bf18`](https://github.com/CrispStrobe/brickwright-lite/commit/2079bf1884199a294e7321612ce4cb9ef86807f2)
-was under [PR1318](https://github.com/CrispStrobe/brickwright-lite/pull/1318)
+Source candidate [`2079bf18`](https://github.com/CrispStrobe/brickwright/commit/2079bf1884199a294e7321612ce4cb9ef86807f2)
+was under [PR1318](https://github.com/CrispStrobe/brickwright/pull/1318)
 and unmerged at this checkpoint. The once-selected
-[finite V8 run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40422314383)
+[finite V8 run](https://github.com/CrispStrobe/brickwright/actions/runs/40422314383)
 passed source admission, setup-node and trusted package/Chromium setup. Its
 inventory step failed; conditional artifact upload succeeded. The independent
 failure reader accepted the negative record and joined the selected event,

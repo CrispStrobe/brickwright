@@ -23,7 +23,7 @@ fifteen standalone readers and the combined cohort reader pass, including thirty
 successful native startup transactions, cleanup and distinct recovery per case.
 The official frontend checkout tree equals this consumer; package payload and
 input audits pass. Its eleven enabled CI checks pass in
-[run38769805667](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38769805667);
+[run38769805667](https://github.com/CrispStrobe/brickwright/actions/runs/38769805667);
 the conditional GUI verification and deploy jobs skip.
 
 Original failed test attempts remain preserved: a circular held-reply cleanup

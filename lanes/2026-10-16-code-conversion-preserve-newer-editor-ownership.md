@@ -1,7 +1,7 @@
 ## Code conversion: preserve newer editor ownership — 2026-10-16
 
 IMPLEMENTED, hosted qualification pending — SPIKE integration follow-up.
-Ownership claim [PR1000](https://github.com/CrispStrobe/brickwright-lite/pull/1000)
+Ownership claim [PR1000](https://github.com/CrispStrobe/brickwright/pull/1000)
 merged before implementation. Own the narrow conversion-completion and editor-buffer hooks in
 both `overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx`
 and its `packages/scratch-gui` mirror, a focused

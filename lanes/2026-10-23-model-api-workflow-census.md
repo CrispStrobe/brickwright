@@ -41,7 +41,7 @@ The initial registration used the existing census/scoped-merge APIs to add the a
 
 At initial registration, all six unchanged census groups passed with no skips or TODOs. That independent exact-delta audit preserved 25 prior workflow objects, 321 ordered runs, main provenance and every prior pointer byte; eight observed qualification steps are source-bound to run 39960513501. Seven production steps remain unobserved and measure remains zero executions. Generator, judge, tests, classifier, conditions and runtime code are unchanged.
 
-The qualified successor [PR1337](https://github.com/CrispStrobe/brickwright-lite/pull/1337)
+The qualified successor [PR1337](https://github.com/CrispStrobe/brickwright/pull/1337)
 landed normally as `0576e01408145c79a03508909adbde388710dfe1`. Its final
 composition preserved all 29 current-main workflow records and 324 ordered
 observations, adding only the retained historical API registration to reach 30

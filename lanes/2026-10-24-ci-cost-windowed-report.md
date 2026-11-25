@@ -37,7 +37,7 @@ third-window verdict/cost controls, and retained real 29-job/4,151-step metadata
 exercise the repair without a build/guest rerun. See
 [the report contract](../docs/CI-COST-WINDOWED-REPORT.md).
 
-Qualified implementation landed in [PR1333](https://github.com/CrispStrobe/brickwright-lite/pull/1333)
+Qualified implementation landed in [PR1333](https://github.com/CrispStrobe/brickwright/pull/1333)
 with 29 enabled checks successful and six source-declared conditional skips.
 The separate postmerge operational report also passed for 14 jobs/288 steps/nine
 windows; see the [qualified results](../docs/CI-COST-WINDOWED-REPORT.md#qualified-source-and-postmerge-operation--2026-10-24).

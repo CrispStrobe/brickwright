@@ -2,7 +2,7 @@
 
 ## Saved work
 
-Lite branch: `feat/cad-integration-improvements-20261116`, draft PR [#1798](https://github.com/CrispStrobe/brickwright-lite/pull/1798).
+Lite branch: `feat/cad-integration-improvements-20261116`, draft PR [#1798](https://github.com/CrispStrobe/brickwright/pull/1798).
 
 Final runtime source checkpoint: `072dd0faab399132faa01db5d9375046ba143305`.
 Runtime source tree: `32c8a157604aac8f1c95b17c5b76502dc13a0b87`.

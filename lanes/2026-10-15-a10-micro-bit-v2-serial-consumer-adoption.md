@@ -37,7 +37,7 @@ including the five release jobs; four skips are declared. Fresh engine run
 with zero failures or skips. Release `labwired-wasm-de14721e` has five assets
 whose digests and sizes match the original build bytes. Node test and benchmark
 callers supply their CommonJS marker explicitly.
-[Consumer PR988](https://github.com/CrispStrobe/brickwright-lite/pull/988) now
+[Consumer PR988](https://github.com/CrispStrobe/brickwright/pull/988) now
 pins that source/tag and the two admitted web hashes. Its matching performance
 workflow verifies both downloaded Node executable hashes before benchmarking;
 methods, sample counts and thresholds are unchanged. The automatic pin-push benchmark

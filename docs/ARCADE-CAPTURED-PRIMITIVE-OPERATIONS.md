@@ -2,7 +2,7 @@
 
 ## Observed boundary
 
-The [retained hosted unit run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/39905957395/job/120261094679)
+The [retained hosted unit run](https://github.com/CrispStrobe/brickwright/actions/runs/39905957395/job/120261094679)
 contains actual Math.idiv current-export refusals in `Game_left`. The first
 rejected operand is `__bwBinaryMultiply(idivTrace, (0 + 10))`: its observed result
 domain is Number, initialization is false, and the captured-scalar Identifier

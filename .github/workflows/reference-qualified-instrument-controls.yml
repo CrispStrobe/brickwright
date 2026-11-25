@@ -1,0 +1,41 @@
+name: Reference-qualified instrument controls
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/reference-qualified-instrument-controls.yml
+      - .github/workflows/reference-qualified-instruments.yml
+      - docs/receipts/reference-qualified-v2-ui-package.json
+      - scripts/lib/reference-qualified-*.mjs
+      - scripts/package-provenance.mjs
+      - scripts/read-reference-qualified-instruments.py
+      - scripts/reference-qualified-instrument-study.mjs
+      - test/reference-qualified-instrument-study.test.mjs
+
+permissions:
+  contents: read
+
+jobs:
+  controls:
+    if: github.repository_id == '1291854269'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Test the protocol and reader with synthetic inputs
+        run: node --max-old-space-size=384 --test test/reference-qualified-instrument-study.test.mjs
+      - name: Check the historical intent digest
+        env:
+          ADMITTED_INTENT: 2b3a5be44e6dcfcd3fbef73c5888921118c792a6825795066258154fe793b430
+        run: |
+          node --input-type=module - <<'JS'
+          import {createManifest, canonical, sha256} from './scripts/lib/reference-qualified-circuits.mjs';
+          if (sha256(canonical(createManifest())) !== process.env.ADMITTED_INTENT) {
+              throw new Error('Historical study intent digest changed');
+          }
+          JS

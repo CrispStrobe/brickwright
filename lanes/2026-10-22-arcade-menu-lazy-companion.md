@@ -6,7 +6,7 @@ Merge this claim before implementation.
 
 ## Observed failure
 
-The [official build failure](https://github.com/CrispStrobe/brickwright-lite/actions/runs/39705808582/job/119587378144)
+The [official build failure](https://github.com/CrispStrobe/brickwright/actions/runs/39705808582/job/119587378144)
 rejects the extension-menu positive marker in the named lazy entry. Independent
 inspection of the admitted artifact finds the table exclusively in a shared
 lazy companion that the actual menu loader requests before invoking its bound

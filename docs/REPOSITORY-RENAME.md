@@ -16,3 +16,7 @@ Existing clones can check `git remote -v` and update the remote for the reposito
 Use the Vercel editor addresses above while the Pages compatibility routes are being published. The primary Pages build stages the Legacy `editor.html`, `player.html`, `embed.html`, and `fullscreen.html` routes. They forward query and fragment to the Legacy Pages host on the same origin. The [account Pages repository](https://github.com/CrispStrobe/crispstrobe.github.io) stages the old `/brickwright-lite/` entry and recognizes the new primary site by its repository ID marker. Chromium verified the staged redirects and same-origin storage before cutover.
 
 Run `node scripts/check-brickwright-rename-readiness.mjs --after-cutover` to check the public routes. Confirm the Pages deployments and test an old editor bookmark with a project fragment. The required Board CI and production deploy checks remain in force.
+
+The [Brickwright privacy policy](https://crispstrobe.github.io/brickwright-privacy.html) is published at the account site root. It is available independently of the project Pages deployment.
+
+The reference-qualified instrument controls run on the current repository ID. The sealed study workflow and receipts preserve the historical run and its GitHub repository name.

@@ -27,8 +27,8 @@ and cleanup checks; no private inputs or live assessment are enabled by this
 registration. Normal exact-head checks and matched-head landing still apply.
 
 Status: the claim and inert registration are merged in
-[PR1167](https://github.com/CrispStrobe/brickwright-lite/pull/1167) and
-[PR1186](https://github.com/CrispStrobe/brickwright-lite/pull/1186).
+[PR1167](https://github.com/CrispStrobe/brickwright/pull/1167) and
+[PR1186](https://github.com/CrispStrobe/brickwright/pull/1186).
 The first metadata-only dispatch returned failure before a run could be
 admitted; its error text was not retained, so its cause is unestablished.
 A separate reviewed candidate fixes an invalid job environment reference by
@@ -94,7 +94,7 @@ pending before the complete assessment.
 
 ## Registration landed; first metadata attempt — 2026-10-22
 
-[PR1186](https://github.com/CrispStrobe/brickwright-lite/pull/1186) is merged.
+[PR1186](https://github.com/CrispStrobe/brickwright/pull/1186) is merged.
 All 29 enabled checks on the reviewed head succeeded; six conditional jobs were
 skipped. The actual merge tree and parents matched the reviewed composition,
 and the registered manual workflow is active. This qualifies registration only.

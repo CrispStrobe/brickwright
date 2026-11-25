@@ -252,7 +252,7 @@ browser execution, including known-ROM semantic controls, remains unqualified.
 
 ## Hosted browser status and limits
 
-[Run 45559592991](https://github.com/CrispStrobe/brickwright-lite/actions/runs/45559592991)
+[Run 45559592991](https://github.com/CrispStrobe/brickwright/actions/runs/45559592991)
 **passed all six gates** on Lite `8498ebdd322b515aa97b6c3930ef77270e54a52e`.
 The execution used Node 22.23.5, Playwright 1.61.1, Chromium 149.0.7827.55,
 React 18.3.1 and the actual installed GUI React 16.14.0. The durable
@@ -288,9 +288,9 @@ Three earlier hosted runs remain recorded as failures, not superseded passes:
 
 | Run / Lite code | Finding resolved in the passing run |
 | --- | --- |
-| [45552587031](https://github.com/CrispStrobe/brickwright-lite/actions/runs/45552587031) / `50b32fa7` | Connector passed; panel stopped before launch because the CommonJS Playwright import did not expose a named `chromium` export |
-| [45555731912](https://github.com/CrispStrobe/brickwright-lite/actions/runs/45555731912) / `ccac35d8` | React update synchronization, exact PropTypes alias and the production restore completion route needed fixture corrections |
-| [45557001274](https://github.com/CrispStrobe/brickwright-lite/actions/runs/45557001274) / `b9033ae6` | Connector and CP5 interaction passed; further asynchronous assertions needed correction, and browser/visual review exposed the real React 16 key-ownership and CP1 fit-footprint bugs |
+| [45552587031](https://github.com/CrispStrobe/brickwright/actions/runs/45552587031) / `50b32fa7` | Connector passed; panel stopped before launch because the CommonJS Playwright import did not expose a named `chromium` export |
+| [45555731912](https://github.com/CrispStrobe/brickwright/actions/runs/45555731912) / `ccac35d8` | React update synchronization, exact PropTypes alias and the production restore completion route needed fixture corrections |
+| [45557001274](https://github.com/CrispStrobe/brickwright/actions/runs/45557001274) / `b9033ae6` | Connector and CP5 interaction passed; further asynchronous assertions needed correction, and browser/visual review exposed the real React 16 key-ownership and CP1 fit-footprint bugs |
 
 Local launch remained blocked: November 24 Chromium failed its process-singleton
 socket with `Operation not permitted`, and automatic approval review rejected

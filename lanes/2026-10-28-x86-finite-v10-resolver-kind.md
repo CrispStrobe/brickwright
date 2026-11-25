@@ -1,6 +1,6 @@
 # x86 finite V10 resolver-kind inventory and current GUI acceptance
 
-Owner: x86 coordinator. Status: source-arming candidate [PR1540](https://github.com/CrispStrobe/brickwright-lite/pull/1540); actual selection and guest acceptance pending.
+Owner: x86 coordinator. Status: source-arming candidate [PR1540](https://github.com/CrispStrobe/brickwright/pull/1540); actual selection and guest acceptance pending.
 Initial base: Lite main `8acc3b962803e360a0c561c696d097839046c1ab`.
 Current composition also preserves later Main changes.
 

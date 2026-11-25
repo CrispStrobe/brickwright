@@ -6,7 +6,7 @@ Claim branch: `lane/arcade-native-frame-custom-kind-claim-20261023`.
 Implementation branch: `lane/arcade-native-frame-reset-source-20261023`.
 Base: `c5be666c2faf24dbc5711069b5b79f8b83267c07`.
 This is the same owner's merged claim #1283 and source continuation in
-[PR #1128](https://github.com/CrispStrobe/brickwright-lite/pull/1128).
+[PR #1128](https://github.com/CrispStrobe/brickwright/pull/1128).
 The unchanged original source module passes at
 `40f6434f0b5686032c5e5735708423d3335ef917`; the separate custom-kind
 module passes at `40f6434f0b5686032c5e5735708423d3335ef917`. These source results

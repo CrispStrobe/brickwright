@@ -1750,7 +1750,7 @@ three-value policy is visible in About and in `brickwright-build.json`.
 | Promotional text | Build circuits, program machines, and learn by measuring and debugging what really happens. | Baue Schaltungen, programmiere Maschinen und lerne, indem du misst und Fehler mit Belegen findest. |
 | Keywords | electronics,circuits,coding,blocks,debugger,LEGO,simulation,oscilloscope,STEM | Elektronik,Schaltungen,Code,Bloecke,Debugger,LEGO,Simulation,Oszilloskop,MINT |
 | Support URL | https://github.com/CrispStrobe/brickwright | https://github.com/CrispStrobe/brickwright |
-| Privacy policy URL | https://crispstrobe.github.io/brickwright/privacy.html | https://crispstrobe.github.io/brickwright/privacy.html |
+| Privacy policy URL | https://crispstrobe.github.io/brickwright-privacy.html | https://crispstrobe.github.io/brickwright-privacy.html |
 
 ## Screenshots
 

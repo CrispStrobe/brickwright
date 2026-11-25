@@ -118,7 +118,7 @@ the live tree before landing: `bw-circuit-ui` and `bw-board` both match their pi
 `overlay/scratch-gui/src/lib/offline-assets.js` fetches
 
 ```
-https://github.com/CrispStrobe/brickwright-lite/releases/download/library-pack-v1/brickwright-library.zip
+https://github.com/CrispStrobe/brickwright/releases/download/library-pack-v1/brickwright-library.zip
 ```
 
 A release **tag** is movable and a release **asset** can be deleted and re-uploaded under the

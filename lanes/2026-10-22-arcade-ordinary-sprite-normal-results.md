@@ -18,7 +18,7 @@ functions. The retained draft includes `image.create(4,3)`, Image fill/clone,
 proofs support selected subclass x getters; they do not prove this class-free
 allocation and forwarding path. Type annotations are not allocation evidence.
 The original failure is retained in the
-[complete unit shard](https://github.com/CrispStrobe/brickwright-lite/actions/runs/39850339272/job/120080453419).
+[complete unit shard](https://github.com/CrispStrobe/brickwright/actions/runs/39850339272/job/120080453419).
 
 ## Exact owned implementation envelope
 

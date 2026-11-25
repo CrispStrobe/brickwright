@@ -12,7 +12,7 @@ Preserve all other lanes and both published Arcade/MakeCode histories.
 The original twelve-case function-return module in the composed Arcade candidate
 refuses recursive and parameter-writing exports. Its existing one-call capture
 now retains the actual project, consumed Code, exporter result and emitted draft:
-[original unit shard](https://github.com/CrispStrobe/brickwright-lite/actions/runs/39850339272/job/120080453419).
+[original unit shard](https://github.com/CrispStrobe/brickwright/actions/runs/39850339272/job/120080453419).
 The rejecting operands are recursive calls in `Game_fib` and `Game_descend`, with
 Opaque/Number domains and initialization false. The actual drafts contain complete
 ordinary Boolean comparison helpers. The closed recursive proof currently demands

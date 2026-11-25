@@ -30,6 +30,9 @@ test('the Pages artifact preserves legacy URLs, query, fragment and same-origin 
     const owner = JSON.parse(await readFile(join(site, 'brickwright-pages.json'), 'utf8'));
     assert.deepEqual(owner, {schema: 1, repositoryId: BRICKWRIGHT_REPOSITORY_ID, repository: primary});
     assert.equal(await readFile(join(site, 'index.html'), 'utf8'), 'existing application');
+    const privacy = await readFile(join(site, 'privacy.html'), 'utf8');
+    assert.match(privacy, /http-equiv="refresh" content="0; url=\/brickwright-privacy\.html"/);
+    assert.match(privacy, /href="\/brickwright-privacy\.html"/);
     for (const entry of ['editor.html', 'player.html', 'embed.html', 'fullscreen.html']) {
         const html = await readFile(join(site, entry), 'utf8');
         const href = id => html.match(new RegExp(`id="${id}" href="([^"]+)"`))[1];

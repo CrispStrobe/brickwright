@@ -13,7 +13,7 @@ bridge landed at ancestor `47e0cb0b`). RTx means simulated
 seconds per wall second; 1.0x is real time. Functional and throughput evidence
 remain separate.
 The in-process figures below are three-pass medians from the quiet GitHub
-Ubuntu 24.04 runner in [run 36404517587](https://github.com/CrispStrobe/brickwright-lite/actions/runs/36404517587).
+Ubuntu 24.04 runner in [run 36404517587](https://github.com/CrispStrobe/brickwright/actions/runs/36404517587).
 Run `npm run bench:board-targets` to repeat them; set `LABWIRED_WASM` and
 `LABWIRED_CORE` to add the heavy-tier rows.
 
@@ -75,7 +75,7 @@ pause, state, reset and close) completed in 29.91 seconds. That first real
 package run exposed and fixed the cold-start timeout, Renode path-token, initial
 GDB stop-frame, asynchronous stop-frame and Cortex-M xPSR assumptions in
 Brickwright Lite PR 497. The independent hosted reproduction is isolated in
-[run 36472620755](https://github.com/CrispStrobe/brickwright-lite/actions/runs/36472620755);
+[run 36472620755](https://github.com/CrispStrobe/brickwright/actions/runs/36472620755);
 it was still waiting for GitHub runner capacity when this checkpoint was
 recorded, rather than being treated as a passing receipt.
 
@@ -84,7 +84,7 @@ Renode `06d86c51` tree and the public, source-built MIT smoke firmware: 1/1 in
 21.29 seconds. Its UART receipt is emitted only after the ARM926 payload has
 acknowledged AM1808 AINTC IRQ 53, so the state assertion cannot pass on boot or
 idle output alone. The immutable post-merge hosted reproduction is isolated in
-[run 36476481543](https://github.com/CrispStrobe/brickwright-lite/actions/runs/36476481543);
+[run 36476481543](https://github.com/CrispStrobe/brickwright/actions/runs/36476481543);
 it was queued for GitHub runner capacity when CP06 was closed and is likewise
 not represented as a passing result.
 
@@ -190,17 +190,17 @@ rows must not be marked complete while an earlier row remains open.
 | ID | State | Checkpoint | Definition of done | Evidence |
 |---|---|---|---|---|
 | CP01 | DONE | Reconcile the target ledger | Every currently claimed target has an exact engine, workload and non-idle result; stale EV3 VPS and F412-proxy claims are removed. | Renode [run 36437429134](https://github.com/CrispStrobe/renode-spike-prime/actions/runs/36437429134), docs `7a5d4173`; LabWired `bdffe947` |
-| CP02 | DONE | Enforce ordered evidence | A repository test rejects fewer than ten checkpoints, malformed IDs/states, completion without immutable evidence, and any completed row after the first open row. | Brickwright Lite [PR 472](https://github.com/CrispStrobe/brickwright-lite/pull/472) |
+| CP02 | DONE | Enforce ordered evidence | A repository test rejects fewer than ten checkpoints, malformed IDs/states, completion without immutable evidence, and any completed row after the first open row. | Brickwright Lite [PR 472](https://github.com/CrispStrobe/brickwright/pull/472) |
 | CP03 | DONE | Qualify exact SPIKE Prime RTx | The STM32F413VG platform runs a source-built public firmware workload; five non-idle passes report exact instruction deltas, median/minimum RTx, UART/brick-state proof, and median plus minimum are at least 1.0x. | Renode [PR 7](https://github.com/CrispStrobe/renode-spike-prime/pull/7), [run 36440006278](https://github.com/CrispStrobe/renode-spike-prime/actions/runs/36440006278), merge `06d86c51` |
-| CP04 | DONE | Supervise Renode as an optional native backend | The desktop Tauri host owns a build-pinned Renode executable without a shell, reserves a random loopback port and token, enforces time/output limits, and always kills the process tree through the shared reset, project-close and app-exit teardown path. The raw supervisor is deliberately not exposed as a Tauri command; CP05 attaches the isolated semantic broker and debugger adapter. | Brickwright Lite [PR 476](https://github.com/CrispStrobe/brickwright-lite/pull/476), merge `1fc5a602`; 112 Rust library tests passed locally |
-| CP05 | DONE | Connect SPIKE Prime to Lite | The debugger can load the public simulation firmware, run/pause/reset/step, inspect registers and memory, set a breakpoint, and receive bounded `brick-state/v1` updates through CP04. | Brickwright Lite [PR 487](https://github.com/CrispStrobe/brickwright-lite/pull/487), [PR 488](https://github.com/CrispStrobe/brickwright-lite/pull/488), [PR 493](https://github.com/CrispStrobe/brickwright-lite/pull/493), [PR 497](https://github.com/CrispStrobe/brickwright-lite/pull/497), merge `46380dba`; exact packaged test 1/1 locally |
-| CP06 | DONE | Connect EV3 to Lite | The same debugger contract operates the source-built EV3 smoke image through Renode/GDB, including UART and AINTC IRQ evidence, without private recovery firmware. | Brickwright Lite [PR 504](https://github.com/CrispStrobe/brickwright-lite/pull/504), merge `cb2e03ee`; exact packaged test 1/1 locally |
+| CP04 | DONE | Supervise Renode as an optional native backend | The desktop Tauri host owns a build-pinned Renode executable without a shell, reserves a random loopback port and token, enforces time/output limits, and always kills the process tree through the shared reset, project-close and app-exit teardown path. The raw supervisor is deliberately not exposed as a Tauri command; CP05 attaches the isolated semantic broker and debugger adapter. | Brickwright Lite [PR 476](https://github.com/CrispStrobe/brickwright/pull/476), merge `1fc5a602`; 112 Rust library tests passed locally |
+| CP05 | DONE | Connect SPIKE Prime to Lite | The debugger can load the public simulation firmware, run/pause/reset/step, inspect registers and memory, set a breakpoint, and receive bounded `brick-state/v1` updates through CP04. | Brickwright Lite [PR 487](https://github.com/CrispStrobe/brickwright/pull/487), [PR 488](https://github.com/CrispStrobe/brickwright/pull/488), [PR 493](https://github.com/CrispStrobe/brickwright/pull/493), [PR 497](https://github.com/CrispStrobe/brickwright/pull/497), merge `46380dba`; exact packaged test 1/1 locally |
+| CP06 | DONE | Connect EV3 to Lite | The same debugger contract operates the source-built EV3 smoke image through Renode/GDB, including UART and AINTC IRQ evidence, without private recovery firmware. | Brickwright Lite [PR 504](https://github.com/CrispStrobe/brickwright/pull/504), merge `cb2e03ee`; exact packaged test 1/1 locally |
 | CP07 | DONE | Model DA8xx Timer64 | Exact documented register behavior and IRQ routing are covered by unit tests and exercised by a source-built ARM926 payload. | Infrastructure [PR 3](https://github.com/CrispStrobe/renode-infrastructure-spike-prime/pull/3), merge `7feaab14`; Renode [PR 8](https://github.com/CrispStrobe/renode-spike-prime/pull/8), merge `bbaf76d4`; 5/5 model tests and executable IRQ proof passed locally |
 | CP08 | DONE | Model EV3 boot clocks and pinmux | PSC, PLL and pinmux behavior required by the public DA850/EV3 boot path is modeled with mutation-sensitive tests. | Infrastructure [PR 4](https://github.com/CrispStrobe/renode-infrastructure-spike-prime/pull/4), merge `ad68f7601`; Renode [PR 9](https://github.com/CrispStrobe/renode-spike-prime/pull/9), merge `07a1bd6d`; 14/14 model tests, full Release build and exact executable UART proof passed locally |
 | CP09 | DONE | Model AM1808 EDMA | The required EDMA channels, completion/error interrupts and memory transfers pass peripheral and executable payload tests. | Infrastructure [PR 5](https://github.com/CrispStrobe/renode-infrastructure-spike-prime/pull/5), merge `ecf4d0ac`; Renode [PR 10](https://github.com/CrispStrobe/renode-spike-prime/pull/10), merge `546300f7`; 13/13 model tests, exact-pin full Release build and both executable IRQ paths passed locally |
 | CP10 | DONE | Model MMC/SD boot storage | A redistributable test image is read through the modeled AM1808 MMC/SD path with bounded media input and deterministic block receipts. | Infrastructure [PR 6](https://github.com/CrispStrobe/renode-infrastructure-spike-prime/pull/6), merge `0c92bedf`; Infrastructure [PR 7](https://github.com/CrispStrobe/renode-infrastructure-spike-prime/pull/7), merge `94ec6e91`; Renode [PR 11](https://github.com/CrispStrobe/renode-spike-prime/pull/11), merge `0b5d9cc3`; 9/9 model tests, exact-pin full Release build, both executable read paths and media non-mutation passed locally |
 | CP11 | DONE | Model EV3 GPIO and SPI display | GPIO direction/edge IRQs and the physical 178x128 monochrome SPI1 display path (CS GPIO44, A0 GPIO43, reset GPIO80) are observable in tests and through the debugger; the disabled AM1808 LCDC is not misrepresented as the EV3 display. | Infrastructure [PR 8](https://github.com/CrispStrobe/renode-infrastructure-spike-prime/pull/8), [PR 9](https://github.com/CrispStrobe/renode-infrastructure-spike-prime/pull/9), [PR 10](https://github.com/CrispStrobe/renode-infrastructure-spike-prime/pull/10), merge `f3f7a7ec`; Renode [PR 12](https://github.com/CrispStrobe/renode-spike-prime/pull/12), merge `1484844e`; 135/135 model tests, full Release build, actual GPIO/display UARTs, pixels/checksum and GDB reads passed locally |
-| CP12 | DONE | Model EV3 motors and sensors | Permissive front ends cover raw ten-bit analog channels and ideal PWM/bridge/quadrature motors and publish actual model output through the neutral brick-state contract. | Infrastructure [PR 11](https://github.com/CrispStrobe/renode-infrastructure-spike-prime/pull/11), [PR 12](https://github.com/CrispStrobe/renode-infrastructure-spike-prime/pull/12), merge `f864d7ce`; Renode [PR 13](https://github.com/CrispStrobe/renode-spike-prime/pull/13), merge `e0e38e7a`; 89/89 model tests, ADC injections, four-motor guest IRQ phases, full Release build and live model feed passed [hosted](https://github.com/CrispStrobe/renode-spike-prime/actions/runs/36669748932); both actual Lite packaged debugger contracts passed [hosted](https://github.com/CrispStrobe/brickwright-lite/actions/runs/36671631679), merge `b71ee87e` |
+| CP12 | DONE | Model EV3 motors and sensors | Permissive front ends cover raw ten-bit analog channels and ideal PWM/bridge/quadrature motors and publish actual model output through the neutral brick-state contract. | Infrastructure [PR 11](https://github.com/CrispStrobe/renode-infrastructure-spike-prime/pull/11), [PR 12](https://github.com/CrispStrobe/renode-infrastructure-spike-prime/pull/12), merge `f864d7ce`; Renode [PR 13](https://github.com/CrispStrobe/renode-spike-prime/pull/13), merge `e0e38e7a`; 89/89 model tests, ADC injections, four-motor guest IRQ phases, full Release build and live model feed passed [hosted](https://github.com/CrispStrobe/renode-spike-prime/actions/runs/36669748932); both actual Lite packaged debugger contracts passed [hosted](https://github.com/CrispStrobe/brickwright/actions/runs/36671631679), merge `b71ee87e` |
 | CP13 | NEXT | Complete micro:bit v2 board I/O | The LabWired target drives the 5x5 display, buttons and selected sensor/audio paths with board-level tests while retaining >=1.0x hosted RTx. | pending |
 | CP14 | TODO | Complete PyBadge board I/O | ST7735, button mux, NeoPixels, audio and QSPI are exercised by public firmware and debugger-visible tests; USB is either implemented or explicitly isolated, while hosted RTx remains >=1.0x. | pending |
 
@@ -574,11 +574,11 @@ requires every motor to report Forward, direction 1, duty 0.5 and positive signe
 counts and emitted edges. Source validation passed 29 Python state tests,
 62 Rust boundary/debugger/transport tests and 57 JavaScript broker tests.
 The [hosted Renode reproduction](https://github.com/CrispStrobe/renode-spike-prime/actions/runs/36669748932)
-passed. The first [hosted Lite reproduction](https://github.com/CrispStrobe/brickwright-lite/actions/runs/36670127225)
+passed. The first [hosted Lite reproduction](https://github.com/CrispStrobe/brickwright/actions/runs/36670127225)
 failed before the debugger tests because Renode's build script was invoked from
 the Lite checkout directory. The specialized job now builds from the Renode root
 and installs the same required Tauri system libraries as the ordinary test job;
-the [replacement hosted run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/36671631679)
+the [replacement hosted run](https://github.com/CrispStrobe/brickwright/actions/runs/36671631679)
 passed both complete packaged debugger and guest-driven four-motor contracts
 at Lite `b71ee87e`.
 CP12 closes this functional subset; it does not establish >=1.0x RTx for the

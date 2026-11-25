@@ -3,7 +3,7 @@
 ## Exact integration unit shard — 2026-10-15
 
 Published integration `a30cb432c` now reaches an actual unit census after the
-canonical creator adoption. [Unit shard 2](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38701251292/job/116324641586)
+canonical creator adoption. [Unit shard 2](https://github.com/CrispStrobe/brickwright/actions/runs/38701251292/job/116324641586)
 reports **3,914 tests /3,902 passes /five failures /five skipped /two TODO**. This is one completed
 shard, not the entire suite. The official failure log is preserved privately.
 The build and corpus jobs pass; all campaigns on that published head are now
@@ -31,7 +31,7 @@ VM clear/load/restart. The callback-routing correction passes six portable
 controls; a combined drawing/routing selection passes nine. Their final hosted
 integration is still pending.
 
-[Unit shard one](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38701251292/job/116324641612)
+[Unit shard one](https://github.com/CrispStrobe/brickwright/actions/runs/38701251292/job/116324641612)
 was cancelled at its existing 30-minute job bound, without a completed census.
 Its retained log contains a genuine Sprite constructor-service export refusal
 for an actual factory receiver; its separate local correction now passes the
@@ -65,12 +65,12 @@ reclassified as passing.
 
 ## Extension refresh failure at 6350fba49 — 2026-10-15
 
-[Run 38684882095](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38684882095)
+[Run 38684882095](https://github.com/CrispStrobe/brickwright/actions/runs/38684882095)
 completed with a failing light browser job; both unit shards were cancelled
 without completed censuses. Build, corpus, heavy browser and the official
 Arcade numeric authoring job passed. The light job failed in the animation
 resource journey after an imported-library pixel edit. Its
-[original artifact](https://api.github.com/repos/CrispStrobe/brickwright-lite/actions/artifacts/11950903078/zip)
+[original artifact](https://api.github.com/repos/CrispStrobe/brickwright/actions/artifacts/11950903078/zip)
 retains the failure screenshot, report and projects. Nine preceding journeys
 passed; the final one emitted `Primitive execution requires the actual cached
 caller` and never produced the expected sprite.
@@ -108,10 +108,10 @@ class-export repairs or hosted SDK Sprite and GUI checks.
 
 ## Replacement full run at 60de95e9 — 2026-10-15
 
-[Run 38676138489](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38676138489)
-completed with failure. [Shard one](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38676138489/job/116237956433)
+[Run 38676138489](https://github.com/CrispStrobe/brickwright/actions/runs/38676138489)
+completed with failure. [Shard one](https://github.com/CrispStrobe/brickwright/actions/runs/38676138489/job/116237956433)
 reports **4,705 tests: 4,686 passed, three failed, 14 skipped, two TODO**.
-[Shard two](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38676138489/job/116237956509)
+[Shard two](https://github.com/CrispStrobe/brickwright/actions/runs/38676138489/job/116237956509)
 was cancelled without a completed census. Preserve both original logs; do not
 count examples printed by the TAP validation script as additional failures.
 
@@ -136,9 +136,9 @@ value closes these failures.
 
 ## Integration review at e422d3145 — 2026-10-15
 
-[Run 38672271891](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38672271891)
+[Run 38672271891](https://github.com/CrispStrobe/brickwright/actions/runs/38672271891)
 checks PR head `e422d3145446cb5d0af9c93dccba6c76ec64ab60`.
-[Shard two](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38672271891/job/116218549815)
+[Shard two](https://github.com/CrispStrobe/brickwright/actions/runs/38672271891/job/116218549815)
 completed **3,819 tests: 3,812 passed, zero failed, five skipped, two TODO**.
 The overall run was cancelled. Shard one has no completed census; its retained
 log contains **34 top-level failures**, separately from one nested declared TODO.
@@ -187,7 +187,7 @@ Hosted exact-source verification remains required. Raw corpus counts stay
 
 ## Latest completed hosted result — 2026-10-15
 
-[Run 38657701085](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38657701085)
+[Run 38657701085](https://github.com/CrispStrobe/brickwright/actions/runs/38657701085)
 reviewed PR head `ec3f294706e101647ca0c356387773b971410c6b` and actually built
 merge-ref checkout `f664ffaee02a495e900055922ca51d6e7d32c30d`. Keep those identities
 separate. Build, heavy browser, gallery, corpus, focused, supplier and FPGA
@@ -221,8 +221,8 @@ still require a new exact-source hosted run; the corpus remains **147/36/1**.
 
 The integrated class/default and Font branch
 `ec3f294706e101647ca0c356387773b971410c6b` passes its
-[hosted production build](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38657701085/job/116171389346),
-[gallery browser check](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38657701122/job/116171292199),
+[hosted production build](https://github.com/CrispStrobe/brickwright/actions/runs/38657701085/job/116171389346),
+[gallery browser check](https://github.com/CrispStrobe/brickwright/actions/runs/38657701122/job/116171292199),
 focused controls, supplier freshness, corpus and FPGA checks. Full unit shards,
 heavy/light browser suites and numeric authoring are still running at this
 checkpoint. Their conclusions must be refreshed before any merge.
@@ -249,7 +249,7 @@ historical failures below remain preserved.
 
 This is a triage list from reviewed integration source
 `2c2141954cbc3063274a18650d9e248f63bfdf92`,
-[completed unit shard](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38586245394/job/115928912237).
+[completed unit shard](https://github.com/CrispStrobe/brickwright/actions/runs/38586245394/job/115928912237).
 The shard has 3,550 tests: 3,503 pass, 40 fail, five skip and two TODO.
 Its failures are a different denominator from the unchanged 184-input corpus.
 Later source-type and exported Array receiver fixes require new exact-source
@@ -277,9 +277,9 @@ the yielding-wall scheduling entry or establish a new full-shard result.
 ## Current exact-source qualification failures
 
 Later integration `249dc22ddee151159b72b36d183b5f2545db0949` passes all
-496 [hosted focused controls](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38645260700/job/116132025480),
+496 [hosted focused controls](https://github.com/CrispStrobe/brickwright/actions/runs/38645260700/job/116132025480),
 with zero failures, skips or TODOs. Its
-[gallery browser check](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38645261066/job/116130412892)
+[gallery browser check](https://github.com/CrispStrobe/brickwright/actions/runs/38645261066/job/116130412892)
 also succeeds. These results close the earlier focused mirror failure; full
 unit shards, production build and Arcade browser journeys remain separately
 pending. Retain the historical failures below.
@@ -319,21 +319,21 @@ unchanged. This is compile and native round-trip evidence, not an executed
 original-simulator comparison or a visible browser result.
 
 At `12d8bc43327309003a9de9c69c06a7c60cac2cea`, the
-[completed first unit shard](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38618756907/job/116045316170)
+[completed first unit shard](https://github.com/CrispStrobe/brickwright/actions/runs/38618756907/job/116045316170)
 reports 4,610 tests: 4,548 pass, 46 fail, 14 skip and two TODO. The
-[second shard](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38618756907/job/116045316011)
+[second shard](https://github.com/CrispStrobe/brickwright/actions/runs/38618756907/job/116045316011)
 was cancelled, with 29 visible top-level failures and no completed fast-shard
 census. Its earlier 13-control preflight summary is not the shard result.
 These counts remain separate from the corpus's 36 partial inputs.
 
-The [light browser check](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38618756907/job/116050270743)
+The [light browser check](https://github.com/CrispStrobe/brickwright/actions/runs/38618756907/job/116050270743)
 now saves the edited assigned-image project and downloads its MakeCode export.
 Its retained failure report shows the next project replacement temporarily has
 no targets. The harness dereferenced the absent stage in that interval. Its wait
 now requires a present replacement stage with a different ID; the conversion,
 pixel, save and reimport assertions remain intact. Hosted qualification is pending.
 
-The [heavy browser check](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38618756907/job/116050270760)
+The [heavy browser check](https://github.com/CrispStrobe/brickwright/actions/runs/38618756907/job/116050270760)
 failed its unchanged startup budget: 4,484,181 initial JavaScript bytes against
 4,467,136. The official chunk graph shows Circuit Playground's synchronous
 builtin manager entry contributes its 44,933 raw source bytes to the startup
@@ -344,7 +344,7 @@ lazy chunk and rejects that marker in startup scripts. Seven focused controls pa
 registration readiness, primitive execution and project builtin precedence.
 Fresh hosted byte measurement remains required.
 
-The [build job](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38618756907/job/116045316099)
+The [build job](https://github.com/CrispStrobe/brickwright/actions/runs/38618756907/job/116045316099)
 failed the source-manifest gate because the generated stage-header message
 catalogue lacked the Circuit Playground entry. Standard Babel extraction now
 regenerates that entry. The manifest gate and bundle budget are unchanged.
@@ -354,7 +354,7 @@ no qualification for this source.
 ## Latest completed integration run
 
 At `6992416ec1224e567abc6b964753c28784d8323a`, the
-[completed second unit shard](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38600508784/job/115994916126)
+[completed second unit shard](https://github.com/CrispStrobe/brickwright/actions/runs/38600508784/job/115994916126)
 reports 3,570 tests: 3,526 pass, 37 fail, five skip and two TODO.
 The first shard was cancelled and has no complete census. These counts are
 separate from the immutable corpus's 36 partial inputs.
@@ -378,7 +378,7 @@ separate work.
 
 ## Later completed shard and pending qualification
 
-The [later completed unit shard](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38595437543/job/115960919223)
+The [later completed unit shard](https://github.com/CrispStrobe/brickwright/actions/runs/38595437543/job/115960919223)
 at `9879c62f023755d88168cdaa17acf441c3a4c422` reports 3,570 tests:
 3,522 pass, 41 fail, five skip and two TODO. It retains the forty historical
 failures below and additionally fails
@@ -528,7 +528,7 @@ not a new full-shard count or a corpus promotion.
 
 ## Subsequent composed checks
 
-The [focused check at composed source](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38630804698/job/116083332275)
+The [focused check at composed source](https://github.com/CrispStrobe/brickwright/actions/runs/38630804698/job/116083332275)
 `28bb7c07051d8f8990ba96de11ab18859f5c44d0` reports 496 controls:
 495 pass and one fails. The failure is the tracked extension-manager mirror
 being stale relative to the lazy-loader source. The mirror is now refreshed
@@ -570,7 +570,7 @@ qualification checks. None of these test corrections promotes corpus rows.
 
 ## Official authoring browser qualification — 2026-10-15
 
-The [official-build authoring job](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38664222463/job/116195750851)
+The [official-build authoring job](https://github.com/CrispStrobe/brickwright/actions/runs/38664222463/job/116195750851)
 passed for reviewed PR source `1d0b4edb046c139925ecd94687b4a9eca3541b4d`.
 Its actual merge-ref checkout was `f3bde53e4d2fddfd794b708c1755588ecec3dcc0`.
 Numeric, event and controller-repeat authoring each passed five editor cycles
@@ -579,9 +579,9 @@ original executions, including visible dropdown edits to the six metric
 reporters. Every reporter retained fixed FIELD selectors with no connected
 selector inputs. All four reports have empty page-error lists. The Font
 compilation inputs and outputs are retained in the
-[official proof artifact](https://api.github.com/repos/CrispStrobe/brickwright-lite/actions/artifacts/11940922121/zip).
+[official proof artifact](https://api.github.com/repos/CrispStrobe/brickwright/actions/artifacts/11940922121/zip).
 
-The [owned-game artifact](https://api.github.com/repos/CrispStrobe/brickwright-lite/actions/artifacts/11940857092/zip)
+The [owned-game artifact](https://api.github.com/repos/CrispStrobe/brickwright/actions/artifacts/11940857092/zip)
 passed eight journeys: visible A/B control, Code and Blocks edits, Stage access,
 Costumes pixel painting, fresh saved-project reopening, executed MakeCode
 export and reimport. Both page-error and block-error lists are empty. This
@@ -591,7 +591,7 @@ are not reduced by these browser results.
 
 ## Remaining official unit failures
 
-The completed [unit shard](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38664222463/job/116192614182)
+The completed [unit shard](https://github.com/CrispStrobe/brickwright/actions/runs/38664222463/job/116192614182)
 reported 3,783 tests: 3,761 pass, 15 fail, five skips and two TODOs. Repeated
 log sections contain thirty failure lines representing fifteen distinct tests.
 The other enabled checks, including both browser suites and the official
@@ -639,9 +639,9 @@ unrecorded wall-clock frame cadence. The original source fixture is unchanged.
 
 ## Composed branch authoring requalification
 
-The [official authoring job for `0ddf0c69a`](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38668906753/job/116209738911)
+The [official authoring job for `0ddf0c69a`](https://github.com/CrispStrobe/brickwright/actions/runs/38668906753/job/116209738911)
 passed on actual build checkout `36d65a29d39e2774e7e5d9570d3db791b91b8b73`.
-Its [retained proof artifact](https://api.github.com/repos/CrispStrobe/brickwright-lite/actions/artifacts/11944260336/zip)
+Its [retained proof artifact](https://api.github.com/repos/CrispStrobe/brickwright/actions/artifacts/11944260336/zip)
 contains passing numeric, event, live-Font and controller-repeat reports with
 empty page-error lists. Numeric, event and repeat retain twelve original
 observations each; Font retains four. This requalifies those existing editor
@@ -658,7 +658,7 @@ before saving; the failed held-input expectation is preserved separately.
 
 ## Completed composed-branch unit shard
 
-The [unit shard for `0ddf0c69a`](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38668906753/job/116207175452)
+The [unit shard for `0ddf0c69a`](https://github.com/CrispStrobe/brickwright/actions/runs/38668906753/job/116207175452)
 completed with 3,806 tests: 3,793 pass, six fail, five skips and two TODOs.
 The six failures are membership cadence, pixel callback/reload observation,
 hat kind lookup, browser settings dependencies, snapshot destruction and

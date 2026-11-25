@@ -1,6 +1,6 @@
 # 386 native-font and GUI fetch census repair — claim, 2026-10-24
 
-**Claim merged; source candidate only.** Owner: Codex x86 GUI fetch-policy coordination. Claim base: `20f5ade6dda10616a3f51d5230496415c6e6b2f4`; merged at `bc32b58d619cd379e8ac357306e5d40d630d2863` before implementation. The [current GUI Build](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40056328600) failed the existing fetch-pinning census at source `ac7703a8b74103e20ee468687472df121564a949`. Preserve that failure and require a new exact-head qualification after repair.
+**Claim merged; source candidate only.** Owner: Codex x86 GUI fetch-policy coordination. Claim base: `20f5ade6dda10616a3f51d5230496415c6e6b2f4`; merged at `bc32b58d619cd379e8ac357306e5d40d630d2863` before implementation. The [current GUI Build](https://github.com/CrispStrobe/brickwright/actions/runs/40056328600) failed the existing fetch-pinning census at source `ac7703a8b74103e20ee468687472df121564a949`. Preserve that failure and require a new exact-head qualification after repair.
 
 ## Owned path and boundary
 

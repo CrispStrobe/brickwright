@@ -1,8 +1,8 @@
 # Driven linkage floor contact
 
-Status: complete. [PR #1445](https://github.com/CrispStrobe/brickwright-lite/pull/1445)
+Status: complete. [PR #1445](https://github.com/CrispStrobe/brickwright/pull/1445)
 merged normally as `7b4f2f84ac55e238bbb75663acbdc1e26f3d0358` and closed
-[issue #1436](https://github.com/CrispStrobe/brickwright-lite/issues/1436).
+[issue #1436](https://github.com/CrispStrobe/brickwright/issues/1436).
 The reviewed source was `65cb2cded84aca8b74f6e43eb80901608fd2dfce`;
 34 enabled checks succeeded, seven conditional checks were declared skipped.
 All six unit shards passed: 13,069 passes, zero failures. The eight actual floor

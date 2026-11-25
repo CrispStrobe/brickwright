@@ -41,7 +41,7 @@ The fixed 60-step experiment in `3e224535` failed hosted qualification. Unit6
 reported two actuator clutch regressions and excavator yaw above its unchanged
 10-degree bound. The crane also retained an alignment failure and failed its
 removed-counterweight stability control. The source and original failures are
-retained in [the official run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40271880462).
+retained in [the official run](https://github.com/CrispStrobe/brickwright/actions/runs/40271880462).
 
 The experiment is withdrawn: the product restores the previous 10-step screw
 position request, velocity setup and ten pre-existing clutch controls byte for

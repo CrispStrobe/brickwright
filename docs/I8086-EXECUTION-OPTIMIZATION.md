@@ -92,7 +92,7 @@ ROM provenance (unchanged ROM bytes), census and capability metadata.
 The execution workflow's final comparison uses the actual vendored candidate
 against the original Lite revision, without experimental source overlays.
 
-Final combined Chromium run [34199861670](https://github.com/CrispStrobe/brickwright-lite/actions/runs/34199861670)
+Final combined Chromium run [34199861670](https://github.com/CrispStrobe/brickwright/actions/runs/34199861670)
 compared Lite `f76e32abef43f85bd4d2c94c8aab4104b374de67` against
 `1d849ee9bc03565cba16e3012ca4fa0629df5b44`. All 300 timing observations
 completed with matching compared architectural states. Selected results
@@ -122,7 +122,7 @@ measures headroom; this production run verifies the existing UI budgets.
 The build's bounded unit set reported 3,022 passing tests, eight documented
 skips and no failures (3,030 total).
 
-Full production workflow [34199861677](https://github.com/CrispStrobe/brickwright-lite/actions/runs/34199861677)
+Full production workflow [34199861677](https://github.com/CrispStrobe/brickwright/actions/runs/34199861677)
 finished green for build, lesson corpus, and both light/heavy browser suites
 at runtime integration revision `f76e32abe`. Deploy and deployed-GUI verification
 were intentionally skipped by the branch workflow's conditions. The final

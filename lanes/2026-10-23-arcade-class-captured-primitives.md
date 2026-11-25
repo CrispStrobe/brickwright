@@ -1,6 +1,6 @@
 # Arcade captured primitive domains across class initialization
 
-Status: IN PROGRESS. Claim merged in [PR #1300](https://github.com/CrispStrobe/brickwright-lite/pull/1300).
+Status: IN PROGRESS. Claim merged in [PR #1300](https://github.com/CrispStrobe/brickwright/pull/1300).
 Owner: Arcade integration. The complete six-group source module passes at
 `7f08e871ad3c76929282787092270b1b09158744`; the separate fourteen-group class
 regression also passes.
@@ -8,7 +8,7 @@ Remaining affected cohorts, mutations, final-head hosted checks and affected run
 See [the implementation and next tasks](../docs/ARCADE-CLASS-CAPTURED-PRIMITIVES.md).
 Claim branch: `lane/arcade-class-captured-primitives-claim-20261023`.
 Base: `9d037ce7427ed21ceca1f67be5a050131a96b4e2`.
-This continues the same owner's [PR #1128](https://github.com/CrispStrobe/brickwright-lite/pull/1128).
+This continues the same owner's [PR #1128](https://github.com/CrispStrobe/brickwright/pull/1128).
 The custom-kind source implementation is preserved on
 `lane/arcade-native-frame-reset-source-20261023`; its source tests do not mean
 it is merged to main. Preserve other owners, original failures and live checks.

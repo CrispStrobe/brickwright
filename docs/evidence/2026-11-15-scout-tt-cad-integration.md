@@ -3,7 +3,7 @@
 Date: 2026-11-15. Environment: Node 24.22.1, npm 11.9.0.
 
 - Pinned CAD source: [`0ee57d91be6f4f910f8b8d6106ba894b9b1a8d1d`](https://github.com/CrispStrobe/brickwright-cad/commit/0ee57d91be6f4f910f8b8d6106ba894b9b1a8d1d), built from a clean checkout.
-- Lite SDK checkpoint: [`d1d97fc47b01f77a4fa291a45cf64ade982de5e3`](https://github.com/CrispStrobe/brickwright-lite/commit/d1d97fc47b01f77a4fa291a45cf64ade982de5e3).
+- Lite SDK checkpoint: [`d1d97fc47b01f77a4fa291a45cf64ade982de5e3`](https://github.com/CrispStrobe/brickwright/commit/d1d97fc47b01f77a4fa291a45cf64ade982de5e3).
 - Integration branch: `feat/pla-rover-cad-20261115`. Its merge preserves the original latest-main and PR #1791 parents.
 
 ## Observed Lite and shared SDK checks

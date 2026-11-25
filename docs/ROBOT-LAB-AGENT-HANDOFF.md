@@ -74,7 +74,7 @@ This section supersedes older "in flight" notes below where they disagree. Check
 
 **O5. #1477 closed after verification, 2026-10-28.**
 - #1486 fixed the scope-capture re-render. The five most recent completed main Builds after that fix succeeded; their three selected `browser (light)` jobs passed, and the other two did not select that shard. Newer queued runs were not counted as passing evidence.
-- The [issue closeout](https://github.com/CrispStrobe/brickwright-lite/issues/1477) links all five runs. Preserve the assertion trace and run link if `ADC_POINT_MODE_PUBLICATION` recurs.
+- The [issue closeout](https://github.com/CrispStrobe/brickwright/issues/1477) links all five runs. Preserve the assertion trace and run link if `ADC_POINT_MODE_PUBLICATION` recurs.
 
 **O6. #1435 (coplanar flat-beam frame creeps on the floor).** Diagnostics PR #1498 merged; this does not establish that the engine defect is fixed. Preserve the owning lane and re-qualify affected models only after its engine fix lands.
 

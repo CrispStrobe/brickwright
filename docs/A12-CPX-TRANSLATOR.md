@@ -5,7 +5,7 @@ as `DEVICE CPX` code. Building it produces the existing `circuitplayground`
 blocks and device world. The original recovered files remain available for
 MakeCode's own simulator and the original-source download.
 
-Delivered on 2026-10-16 in [PR1009](https://github.com/CrispStrobe/brickwright-lite/pull/1009),
+Delivered on 2026-10-16 in [PR1009](https://github.com/CrispStrobe/brickwright/pull/1009),
 merge `e0b89072`, reviewed source `16dda603`. Required hosted qualification
 passed with the exact timing limits described below.
 
@@ -102,7 +102,7 @@ must pass before its source merge.
 ## First hosted comparison findings
 
 The first hosted candidate is **not qualified**. In
-[run 38897566772](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38897566772),
+[run 38897566772](https://github.com/CrispStrobe/brickwright/actions/runs/38897566772),
 seven documentation comparisons pass and five fail their exact frame/tone
 checks: `set-brightness#0`, `show-animation#0`, `tutorials/siren#4`,
 `learnsystem/beep-beep#0` and `set-pixel-color#0`. The failed run remains the
@@ -122,10 +122,10 @@ replacement program rather than any CPX header, and selecting the visible
 CPX dock rather than a hidden firmware button. It records complete comparison
 differences before retaining the original strict assertions. The actual native
 Start/button/Shake journey and timing boundary remain unqualified. In the
-[next run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38902268468),
+[next run](https://github.com/CrispStrobe/brickwright/actions/runs/38902268468),
 source import, original simulation and native block loading pass; after Start,
 the expected red ring is absent and the pane button is no longer found. A
-[read-only Start diagnostic](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38905304607)
+[read-only Start diagnostic](https://github.com/CrispStrobe/brickwright/actions/runs/38905304607)
 then observes that the native board does contain all ten red pixels at full
 brightness while the CPX pane has unmounted. Local storage still says `cpx`;
 the actual dock-change event was not captured.
@@ -137,7 +137,7 @@ consistent with the disappearance; it is not a captured full attribution.
 The next browser candidate clears only that scenario's firmware through the
 existing “back to blocks” control, requiring the firmware chip to disappear
 and the debugger to become idle before later device scenarios. The
-[first cleanup run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38907684694)
+[first cleanup run](https://github.com/CrispStrobe/brickwright/actions/runs/38907684694)
 finds that control visible and enabled after the serial checks pass, but the
 retained LabWired display canvas intercepts its clicks. The next control path closes the actions menu and explicitly
 opens the debugger through its existing button before clearing the firmware.
@@ -182,7 +182,7 @@ does not establish compatibility with newer editor APIs.
 
 ## Observed original-runtime boundaries
 
-The [fifteen-program diagnostic run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38917231822)
+The [fifteen-program diagnostic run](https://github.com/CrispStrobe/brickwright/actions/runs/38917231822)
 has ten exact matching comparisons and the same five strict failures. The
 instrumented derivatives preserve every original captured frame, ordered tone
 and serial line before reaching those failures. All five original factory
@@ -224,7 +224,7 @@ requires fresh qualification of that combined head before merge.
 
 ## Diagnostic transport follow-up
 
-The [combined-head run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38931471960)
+The [combined-head run](https://github.com/CrispStrobe/brickwright/actions/runs/38931471960)
 passes the complete CPX browser journey and the first unit shard. The second
 shard remains failed: its census reports zero tests for the comparison file
 and rejects 30,125 raw stdout bytes from its observer diagnostics. Those
@@ -241,7 +241,7 @@ the changed head still requires fresh hosted unit and browser results.
 
 ## Delivered qualification
 
-The [final source run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/38945485781)
+The [final source run](https://github.com/CrispStrobe/brickwright/actions/runs/38945485781)
 passes both complete unit shards, including all fifteen comparisons: ten exact
 matches and five separately named exact runtime-boundary controls. All 459 files
 in the affected shard report tests, with zero raw stdout bytes. The standalone

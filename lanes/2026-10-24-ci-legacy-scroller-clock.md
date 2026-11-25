@@ -1,7 +1,7 @@
 # Legacy scroller test-local wait clock — narrow CI takeover
 
 **IMPLEMENTATION CANDIDATE; hosted qualification pending.** Claim merged in
-[PR 1352](https://github.com/CrispStrobe/brickwright-lite/pull/1352). Owner: Codex CI audit repair,
+[PR 1352](https://github.com/CrispStrobe/brickwright/pull/1352). Owner: Codex CI audit repair,
 under the user's explicit assignment to take over the CI audit repair.
 Base: `ae38c0099337220cd68f62d588945883d4f4d438`. Public branch:
 `lane/ci-legacy-scroller-clock-claim-20261024`. The isolated checkout and
@@ -30,7 +30,7 @@ change is included. Preserve all unrelated tests and active ownership.
 
 ## Retained failure and source premise
 
-[Run 40121590975](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40121590975)
+[Run 40121590975](https://github.com/CrispStrobe/brickwright/actions/runs/40121590975)
 at `74bcffabf34956cc0b1453239977b77225d62ad6` retains the unit cohort failure
 `scene callbacks complete` in the six-API legacy scroller test. Keep the original
 failure; do not rerun the unchanged failed source or reinterpret it as success.

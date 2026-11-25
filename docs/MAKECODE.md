@@ -513,7 +513,7 @@ the Code tab sends it to the Debug console. The pinned
 completion faults that corrupted CODAL output. Real compiled programs passed
 complete greeting/ordered-counter checks with the matrix, fault and guest-time
 bounds intact; a fresh browser V2 ELF reached Running and printed its complete
-unique greeting ([A10, PR988](https://github.com/CrispStrobe/brickwright-lite/pull/988)).
+unique greeting ([A10, PR988](https://github.com/CrispStrobe/brickwright/pull/988)).
 
 MakeCode's `serial.writeLine` pads records to 32 bytes including CRLF by default.
 Use `serial.setWriteLinePadding(0)` in the program for unpadded lines.

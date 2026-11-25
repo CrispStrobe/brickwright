@@ -1,6 +1,6 @@
 # 386 GUI actual v6 expectation parts — 2026-10-25
 
-**Status: bounded reader source candidate implemented locally; exact-head CI and actual-event admission pending.** Owner: Codex x86 GUI. This is a narrow follow-up to the [finite v6 installed-entry claim](2026-10-25-x86-gui-finite-v6-package-entry.md) and the existing [actual GUI source PR](https://github.com/CrispStrobe/brickwright-lite/pull/1318). The finite v6 metadata event has been consumed once. Its observed installed graph is a candidate input for a separately reviewed actual request, not an actual GUI or guest result. The actual v6 source head still requires every enabled exact-head check and a fresh Build/request/event review. The reader candidate does not authorize an actual event.
+**Status: bounded reader source candidate implemented locally; exact-head CI and actual-event admission pending.** Owner: Codex x86 GUI. This is a narrow follow-up to the [finite v6 installed-entry claim](2026-10-25-x86-gui-finite-v6-package-entry.md) and the existing [actual GUI source PR](https://github.com/CrispStrobe/brickwright/pull/1318). The finite v6 metadata event has been consumed once. Its observed installed graph is a candidate input for a separately reviewed actual request, not an actual GUI or guest result. The actual v6 source head still requires every enabled exact-head check and a fresh Build/request/event review. The reader candidate does not authorize an actual event.
 
 ## Observed reader transport limit
 

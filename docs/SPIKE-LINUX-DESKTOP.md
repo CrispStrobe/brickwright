@@ -96,7 +96,7 @@ A negative fixture reads back the supervisor's registered kill signal, clears it
 then demonstrates survival through the same bound before exact cleanup. Linux
 source tests require pidfd support and `/usr/bin/python3`; the Python fixture runs
 isolated from inherited Python settings and adds no application dependency.
-The earlier [native test failure](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40765450230)
+The earlier [native test failure](https://github.com/CrispStrobe/brickwright/actions/runs/40765450230)
 is retained and remains unattributed; the observation repair does not establish
 its cause or change production launch behavior. See the
 [bounded claim](../lanes/2026-10-28-linux-owner-death-observation.md).
@@ -306,7 +306,7 @@ desktop entry all PASS. The five `usr/share/doc/brickwright` checks FAIL, as
 expected: that image predates the crate-notice installation. That earlier image is a retained negative result. The later full-build exercise
 above passed all 36 checks under normal dpkg policy; the excluded-documentation
 image still fails, including the repaired nonempty-file crate-notice check.
-The hosted workflow landed in PR1368, and its [post-merge v0.1.27 exercise](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40174318530) at `8b92fda6e998` passed all 36 checks. An [equivalent-input official exercise](https://github.com/CrispStrobe/brickwright-lite/actions/runs/40172941760) also passed with labelled
+The hosted workflow landed in PR1368, and its [post-merge v0.1.27 exercise](https://github.com/CrispStrobe/brickwright/actions/runs/40174318530) at `8b92fda6e998` passed all 36 checks. An [equivalent-input official exercise](https://github.com/CrispStrobe/brickwright/actions/runs/40172941760) also passed with labelled
 placeholder inputs. Its independently reviewed job log records compilation, package creation,
 651 crate-notice files and the package/executable digests. The package and
 executable bytes are not retained by that workflow, so those logged digests are
