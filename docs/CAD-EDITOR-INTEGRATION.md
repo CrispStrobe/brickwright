@@ -142,7 +142,7 @@ launching the installed TestFlight simulator was not tested in this delivery.
 
 ## Exact kernel and document version 41 (25 November 2026)
 
-Lite pins CrispCAD SDK `0f01df55da6366225eeae25b58418e863f6ae3e4`. It reads and
+Lite pins CrispCAD SDK `0953e188a6ff93f8eee558844da04303254a3509`. It reads and
 writes CAD document version 41, which adds exact fillet, chamfer and shell
 features (`exact-feature` nodes). Such a node stores the exact kernel's display
 mesh, so evaluation, simulation and printing of a saved design still use Manifold
@@ -152,17 +152,13 @@ carried byte for byte.
 
 The SDK now ships CrispCAD's optional exact B-rep kernel (`@crispcad/exact-kernel`,
 MIT AND Apache-2.0; notices in the SDK's `NOTICE.txt` and in
-THIRD-PARTY-NOTICES.md) under `static/cad-sdk/assets/exact/`, about 27 MB on
-disk because the SDK's library build inlines its WebAssembly into the worker
-chunks. Nothing there loads with the CAD tab: the geometry worker imports it
-only when a user creates or recomputes an exact feature, measures exactly or
-exports STEP. The service worker has no precache list; it caches those files
-only after such a request, like every other lazy chunk.
+THIRD-PARTY-NOTICES.md) under `static/cad-sdk/assets/exact/`: about 11 MB on
+disk, of which the separate `smlibwasm-*.wasm` file is 9.4 MB. Nothing there
+loads with the CAD tab: the geometry worker imports it only when a user creates
+or recomputes an exact feature, measures exactly or exports STEP. The service
+worker has no precache list; it caches those files only after such a request,
+like every other lazy chunk.
 
-Known gap: the CAD tab passes its own host session (`sdk.createCadSession(doc)`),
-and a host session must declare the exact kernel for the editor to create or
-recompute exact features. The SDK entry does not yet export CrispCAD's
-`exactKernelIdentity`, so in Lite the Fillet, chamfer, shell dialog currently
-reports "This session does not provide the smlib kernel". Opening, editing
-around, saving and simulating version 41 designs is unaffected. Lite should
-declare the identity once the SDK exports it, rather than copy the pin by hand.
+The CAD tab's host session (`sdk.createCadSession(doc)`) declares the pinned
+exact kernel by default, so Edit → Fillet, chamfer, shell works in Lite without
+host code declaring a kernel.

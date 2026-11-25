@@ -11,7 +11,7 @@ function f() {
     } else
       e = new Worker(new URL(
         /* @vite-ignore */
-        "" + new URL("_defeature_worker-CsKCd8rD.js", import.meta.url).href,
+        "" + new URL("_defeature_worker-B9xHHvQ_.js", import.meta.url).href,
         import.meta.url
       ), { type: "module", name: "smlibwasm-probe" }), e.onerror = () => n(e);
     return e;

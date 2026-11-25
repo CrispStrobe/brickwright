@@ -1663,8 +1663,9 @@ Runtime dependencies:
   third_party/patches), the Emscripten runtime (MIT) and the Brotli static
   dictionary (MIT). It contains no OpenCASCADE code. The release tarball URL and
   integrity are pinned in package-lock.json; it is a dependency of
-  `@brickwright/cad-exact` only, and the standalone app downloads it (9.4 MB
-  WebAssembly) only when an exact command or STEP export first runs. Its NOTICE,
+  `@brickwright/cad-exact` only, and the standalone app and the Brickwright SDK
+  download it (a separate 9.4 MB WebAssembly file under `assets/exact/`) only when
+  an exact command or STEP export first runs. Its NOTICE,
   LICENSE and the bundled MIT and Apache-2.0 licence texts ship in the app's
   offline notices (`cad-assets/notices.txt`).
 - qrcode-generator 2.0.4, MIT, copyright 2009 Kazuhiko Arase.

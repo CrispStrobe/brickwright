@@ -2628,7 +2628,8 @@ Erstelle zuerst den Workspace. Oberfläche und MCP verwenden denselben begrenzte
   "Expected a positive kernelCAD extrusion depth": "Eine positive kernelCAD-Extrusionstiefe wurde erwartet",
   "Expected a positive kernelCAD sphere radius": "Ein positiver kernelCAD-Kugelradius wurde erwartet",
   "Expected kernelCAD solid geometry": "kernelCAD-Volumengeometrie wurde erwartet",
-  "Expected positive kernelCAD box dimensions": "Positive kernelCAD-Quadermaße wurden erwartet",
+  "Expected nonzero kernelCAD box dimensions": "Von null verschiedene kernelCAD-Quadermaße wurden erwartet",
+  "Expected a positive kernelCAD circle radius": "Ein positiver kernelCAD-Kreisradius wurde erwartet",
   "Expected positive kernelCAD cylinder dimensions": "Positive kernelCAD-Zylindermaße wurden erwartet",
   "Ignored kernelCAD assembly {0}(); parts keep their authored placement": "kernelCAD-Baugruppe {0}() ignoriert; Teile behalten ihre modellierte Lage",
   "Ignored kernelCAD metadata {0}()": "kernelCAD-Metadaten {0}() ignoriert",
@@ -2804,7 +2805,8 @@ Optionen: --locale en|de. Die Ausgabe ist JSON auf stdout. measure, step und die
   Operation: "Operation",
   "Built exactly by the B-rep kernel (loaded on first use). A face is chosen by its outward normal; the outermost matching face is used. The source stays editable under Inputs.": "Exakt vom B-Rep-Kern erzeugt (beim ersten Gebrauch geladen). Eine Fläche wird über ihre äußere Normale gewählt; die äußerste passende Fläche wird verwendet. Die Quelle bleibt unter „Eingaben“ bearbeitbar.",
   "Apply exact feature changes": "Änderungen am exakten Feature anwenden",
-  "Apply exact feature": "Exaktes Feature anwenden"
+  "Apply exact feature": "Exaktes Feature anwenden",
+  "This editor session does not declare the exact kernel. The host must create it with createEditorSession() (or kernels: [exactKernelIdentity]).": "Diese Editor-Sitzung deklariert den exakten Kern nicht. Die Host-Anwendung muss sie mit createEditorSession() (oder kernels: [exactKernelIdentity]) erzeugen."
 };
 let Oe = "en";
 function wn(e) {
