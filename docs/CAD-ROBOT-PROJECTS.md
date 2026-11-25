@@ -850,6 +850,11 @@ and records the SHA-256 with the result. Atlas and Scout passed Run,
 joint motion, Stop, and Reset with this route. Their unpaired scalar
 runs sustained 0.238× and 0.389×, respectively.
 
+All 25 focused Robot Lab tests passed with the scalar candidate,
+covering the forklift program and reverse command, world mechanics,
+ray casts, rotor inertia, and motor stops. The forklift lifted its
+pallet 39.81 mm against the 40 mm target.
+
 The release SDK pin remains `7760321`. This qualification covers two
 single-thread compat modules. The complete npm export matrix and the
 sustained 1× full-viewport target remain open.
