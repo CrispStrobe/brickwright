@@ -1,0 +1,309 @@
+{
+  "schema": 1,
+  "sources": [
+    {
+      "id": "stc15lib",
+      "repository": "https://github.com/mgoblin/STC15lib",
+      "commit": "9b6dfece57540e344da6ce5f5dc1593274ee9321",
+      "tag": "v0.18.0",
+      "license": "Apache-2.0",
+      "notice": "Selected unmodified headers; excludes known incorrect ADRJ=1 reconstruction from qualified usage."
+    },
+    {
+      "id": "hourglass",
+      "repository": "https://github.com/mgoblin/ElectronicHourGlassKit",
+      "commit": "f434bb574ba5a89350bf26beca7cb0462db3c2dc",
+      "license": "MIT",
+      "notice": "Stage 2 and its LED helper are unmodified upstream sources. Uses STC15lib v0.18.0."
+    },
+    {
+      "id": "clock",
+      "repository": "https://github.com/orangetrialtruck/stc_diyclock",
+      "commit": "0a3972439846843dc3f4671a8bbc6f9846b2e17a",
+      "license": "MIT",
+      "notice": "Selected unmodified firmware; retain STC MCU vendor attribution in adc.c, adc.h and eeprom.c. stcgal is not vendored."
+    }
+  ],
+  "files": [
+    {
+      "path": "vendor/clock/LICENCE",
+      "repository": "orangetrialtruck/stc_diyclock",
+      "commit": "0a3972439846843dc3f4671a8bbc6f9846b2e17a",
+      "upstreamPath": "LICENCE",
+      "gitBlob": "5e77d5da5ef7835d049dde7a69442b216c76424c",
+      "sha256": "efe24cfeb6bd94aa08ddacec960fdbacd5843eb985fe5c10405432e4b4ad6b4b"
+    },
+    {
+      "path": "vendor/clock/Makefile",
+      "repository": "orangetrialtruck/stc_diyclock",
+      "commit": "0a3972439846843dc3f4671a8bbc6f9846b2e17a",
+      "upstreamPath": "Makefile",
+      "gitBlob": "3b73eec0538f836d37038b1080a297e4f314aeec",
+      "sha256": "bcd01c607666f9d2c451d3c90bbd7730945ebde75d5bc9db136322edcd57f28f"
+    },
+    {
+      "path": "vendor/clock/src/adc.c",
+      "repository": "orangetrialtruck/stc_diyclock",
+      "commit": "0a3972439846843dc3f4671a8bbc6f9846b2e17a",
+      "upstreamPath": "src/adc.c",
+      "gitBlob": "c6ad9b46e20b7343e3a259790e2e390804a92d0d",
+      "sha256": "1a329796498ec4e73c1881eed3dbf9069b3a9a6be7f9a96a2391105395d83203"
+    },
+    {
+      "path": "vendor/clock/src/adc.h",
+      "repository": "orangetrialtruck/stc_diyclock",
+      "commit": "0a3972439846843dc3f4671a8bbc6f9846b2e17a",
+      "upstreamPath": "src/adc.h",
+      "gitBlob": "92995400d898e8bd89acc96bfa9d0ef87249a385",
+      "sha256": "063d83708b41b1b49f212fb752a4cf651f551678a757929220bb8e7ac7009ccb"
+    },
+    {
+      "path": "vendor/clock/src/buttonmonitor.h",
+      "repository": "orangetrialtruck/stc_diyclock",
+      "commit": "0a3972439846843dc3f4671a8bbc6f9846b2e17a",
+      "upstreamPath": "src/buttonmonitor.h",
+      "gitBlob": "4faf0829b2f77bcf0856a41af4722b673c38c270",
+      "sha256": "29b3a6f8286257cc5426c2ffc8fc2f6a141f219b71e725d7dbf49aeecf04e589"
+    },
+    {
+      "path": "vendor/clock/src/buttonsmode.h",
+      "repository": "orangetrialtruck/stc_diyclock",
+      "commit": "0a3972439846843dc3f4671a8bbc6f9846b2e17a",
+      "upstreamPath": "src/buttonsmode.h",
+      "gitBlob": "59b1cadea81806d61b9b46480e1f4fa1e9b1d8ed",
+      "sha256": "d388e2b56d21714770aa512aebcabc5fa935b7e24657309fee55749fd0540205"
+    },
+    {
+      "path": "vendor/clock/src/displaymode.h",
+      "repository": "orangetrialtruck/stc_diyclock",
+      "commit": "0a3972439846843dc3f4671a8bbc6f9846b2e17a",
+      "upstreamPath": "src/displaymode.h",
+      "gitBlob": "ddfd7b3fb3dd420e2c0cbd7dd13bfa4e55a3e128",
+      "sha256": "13ce9a23dbd227db080f1f66b129ca6b52d33817980c21e86731f4b3bc2214f0"
+    },
+    {
+      "path": "vendor/clock/src/ds1302.c",
+      "repository": "orangetrialtruck/stc_diyclock",
+      "commit": "0a3972439846843dc3f4671a8bbc6f9846b2e17a",
+      "upstreamPath": "src/ds1302.c",
+      "gitBlob": "9b847d093edb7faff80b3ed82fe5acdf24b3f3c6",
+      "sha256": "dda6a33c13f457632f86219f884eb8a7b02ec33d714267f8ca4c4ef43f3f284b"
+    },
+    {
+      "path": "vendor/clock/src/ds1302.h",
+      "repository": "orangetrialtruck/stc_diyclock",
+      "commit": "0a3972439846843dc3f4671a8bbc6f9846b2e17a",
+      "upstreamPath": "src/ds1302.h",
+      "gitBlob": "df770acf354183339e14f671942f3e3430ca55f7",
+      "sha256": "f2c388a5c4a99ebd5da66d3a9c85af2bbdd9ff0b281c8815e38b529db0cef890"
+    },
+    {
+      "path": "vendor/clock/src/eeprom.c",
+      "repository": "orangetrialtruck/stc_diyclock",
+      "commit": "0a3972439846843dc3f4671a8bbc6f9846b2e17a",
+      "upstreamPath": "src/eeprom.c",
+      "gitBlob": "f09c94f8f66606c0aa9f2868cce0ac201083c12c",
+      "sha256": "610debc376ee27b6e37498aef12f5b70b65a85bdde86e5426d4bba8a03a7b520"
+    },
+    {
+      "path": "vendor/clock/src/eeprom.h",
+      "repository": "orangetrialtruck/stc_diyclock",
+      "commit": "0a3972439846843dc3f4671a8bbc6f9846b2e17a",
+      "upstreamPath": "src/eeprom.h",
+      "gitBlob": "34237a8d993caed3d4c888d53d252e4b342e629b",
+      "sha256": "4b7bfb2615e5da940b414e137a99d914ad62838f65cd602358016f919f608bdb"
+    },
+    {
+      "path": "vendor/clock/src/eeprom_consts.h",
+      "repository": "orangetrialtruck/stc_diyclock",
+      "commit": "0a3972439846843dc3f4671a8bbc6f9846b2e17a",
+      "upstreamPath": "src/eeprom_consts.h",
+      "gitBlob": "d71649e181b888599e8750cd9a4dce4a484ea84c",
+      "sha256": "a340396d65290a4ecffb2801ff499c59e199bce59b6b1758150f595c7f9ed179"
+    },
+    {
+      "path": "vendor/clock/src/event.h",
+      "repository": "orangetrialtruck/stc_diyclock",
+      "commit": "0a3972439846843dc3f4671a8bbc6f9846b2e17a",
+      "upstreamPath": "src/event.h",
+      "gitBlob": "5dd0eb0cf1a78f3624b40972e2ea428de8a5b044",
+      "sha256": "b7e6a12ec81a83862b8db7a4a349e9fdcb2051600567e797591c3295f16cc5d8"
+    },
+    {
+      "path": "vendor/clock/src/hwconfig.h",
+      "repository": "orangetrialtruck/stc_diyclock",
+      "commit": "0a3972439846843dc3f4671a8bbc6f9846b2e17a",
+      "upstreamPath": "src/hwconfig.h",
+      "gitBlob": "f32f02845c3366773a516dcbd36ff5646863468b",
+      "sha256": "2fe37340e23d0101e6462878fac3b1197952b18bbcda1ccb6a31c9306b3be67a"
+    },
+    {
+      "path": "vendor/clock/src/led.h",
+      "repository": "orangetrialtruck/stc_diyclock",
+      "commit": "0a3972439846843dc3f4671a8bbc6f9846b2e17a",
+      "upstreamPath": "src/led.h",
+      "gitBlob": "7d424ad87173bbe0a29041c7b7780fa9de77d862",
+      "sha256": "1d1d218ec7599746d2bd2c4431e71373cfccb5088f9ceccade770de5789bf870"
+    },
+    {
+      "path": "vendor/clock/src/led_bcd.h",
+      "repository": "orangetrialtruck/stc_diyclock",
+      "commit": "0a3972439846843dc3f4671a8bbc6f9846b2e17a",
+      "upstreamPath": "src/led_bcd.h",
+      "gitBlob": "c7882d8a9a27aadf82600cc9e7b839822cbb8cf9",
+      "sha256": "a1ae8e76c53c4f93a54d28182970ac868b38b9c65f316ecf6fff932c535d4085"
+    },
+    {
+      "path": "vendor/clock/src/led_pcb_v2.h",
+      "repository": "orangetrialtruck/stc_diyclock",
+      "commit": "0a3972439846843dc3f4671a8bbc6f9846b2e17a",
+      "upstreamPath": "src/led_pcb_v2.h",
+      "gitBlob": "2d2ab0232686c8f866e8096bfc8265ca6c4d6d3b",
+      "sha256": "968ffcd6a92eb2fb240d19c168bda3e82d9b75a8eae34895aa3c8ce26b4b1b43"
+    },
+    {
+      "path": "vendor/clock/src/main.c",
+      "repository": "orangetrialtruck/stc_diyclock",
+      "commit": "0a3972439846843dc3f4671a8bbc6f9846b2e17a",
+      "upstreamPath": "src/main.c",
+      "gitBlob": "6439678364cc5b16c5d891a46154533b685ba07a",
+      "sha256": "a37aa91952428c4957ec6f49545aebd203800b751f2aa4292f5c58045d0f9cd9"
+    },
+    {
+      "path": "vendor/clock/src/models.h",
+      "repository": "orangetrialtruck/stc_diyclock",
+      "commit": "0a3972439846843dc3f4671a8bbc6f9846b2e17a",
+      "upstreamPath": "src/models.h",
+      "gitBlob": "d3c513dc73a98713fec315842dfd4d3fa3d8b751",
+      "sha256": "1c1e5bd6da8dd37d16f32c959569146e6d8098f2eae7f428e6c53e66fb662189"
+    },
+    {
+      "path": "vendor/clock/src/nmea.h",
+      "repository": "orangetrialtruck/stc_diyclock",
+      "commit": "0a3972439846843dc3f4671a8bbc6f9846b2e17a",
+      "upstreamPath": "src/nmea.h",
+      "gitBlob": "d17d4bab9e15ddab758862022d7d7c7a91976d39",
+      "sha256": "4329b967dff3217af0d82d4267ceca6ff8ece0525918b655bcaa33c0047d27d0"
+    },
+    {
+      "path": "vendor/clock/src/stc15.h",
+      "repository": "orangetrialtruck/stc_diyclock",
+      "commit": "0a3972439846843dc3f4671a8bbc6f9846b2e17a",
+      "upstreamPath": "src/stc15.h",
+      "gitBlob": "d69a0a9a50729e7e1f20536817f2830918de0ece",
+      "sha256": "f92bf4f3b5f201aa74187a4a7ccea6894e26b01cc140574b6e8d1e2f814184b4"
+    },
+    {
+      "path": "vendor/hourglass/LICENSE",
+      "repository": "mgoblin/ElectronicHourGlassKit",
+      "commit": "f434bb574ba5a89350bf26beca7cb0462db3c2dc",
+      "upstreamPath": "LICENSE",
+      "gitBlob": "e22cc90bbac41f46e6e04afe5cec89b30e9cf0fb",
+      "sha256": "558e4555da717b3faaece8aab5baca30aea486363f34acd3dc7c8b8df24b0445"
+    },
+    {
+      "path": "vendor/hourglass/src/stages/stage2/led_timer.c",
+      "repository": "mgoblin/ElectronicHourGlassKit",
+      "commit": "f434bb574ba5a89350bf26beca7cb0462db3c2dc",
+      "upstreamPath": "src/stages/stage2/led_timer.c",
+      "gitBlob": "6fa0757d9b55267bd1435b91fe6bed0cdfd17456",
+      "sha256": "60688b7f341843056440725acfe70aa6e25ce301cfabc34767484ebc85d32dbc"
+    },
+    {
+      "path": "vendor/hourglass/lib/leds1/leds1.c",
+      "repository": "mgoblin/ElectronicHourGlassKit",
+      "commit": "f434bb574ba5a89350bf26beca7cb0462db3c2dc",
+      "upstreamPath": "lib/leds1/leds1.c",
+      "gitBlob": "2e656667403a2e42717c24d0c37677af0a718ac1",
+      "sha256": "dd1632807af9a62131af8195baa32e2cd4891d34483709486a11bc19de91f54a"
+    },
+    {
+      "path": "vendor/hourglass/lib/leds1/leds1.h",
+      "repository": "mgoblin/ElectronicHourGlassKit",
+      "commit": "f434bb574ba5a89350bf26beca7cb0462db3c2dc",
+      "upstreamPath": "lib/leds1/leds1.h",
+      "gitBlob": "97c421f970f00a2f05c76d5e2b4215d7fc9b6163",
+      "sha256": "092ac1fb20e18e6f27652ff79c61b4cd2aca1cc0ecb5299b4c7ae928249c1c09"
+    },
+    {
+      "path": "vendor/stc15lib/include/sys.h",
+      "repository": "mgoblin/STC15lib",
+      "commit": "9b6dfece57540e344da6ce5f5dc1593274ee9321",
+      "upstreamPath": "include/sys.h",
+      "gitBlob": "ee1b1d4863d4654364fe9229c7d81f891d5aaad3",
+      "sha256": "b5ef29cde16e74ce2375819678c1f6a34630c45245678e3b1b24ee8913733718"
+    },
+    {
+      "path": "vendor/stc15lib/include/bits.h",
+      "repository": "mgoblin/STC15lib",
+      "commit": "9b6dfece57540e344da6ce5f5dc1593274ee9321",
+      "upstreamPath": "include/bits.h",
+      "gitBlob": "7d6cf8dde4bd6d8b5980a0c31e3a797cbf879548",
+      "sha256": "274fe34125c4e709b24ee97c8c471a86b8026493c20791107b5d5dc40fbdf12a"
+    },
+    {
+      "path": "vendor/stc15lib/include/gpio.h",
+      "repository": "mgoblin/STC15lib",
+      "commit": "9b6dfece57540e344da6ce5f5dc1593274ee9321",
+      "upstreamPath": "include/gpio.h",
+      "gitBlob": "9ce174ec4bf4628173a80a1efc1014d264c8b602",
+      "sha256": "afcc745ae531a8bcad017b2d0d2557a262160f0e8718fbdfdb5ebc15c0c1d6de"
+    },
+    {
+      "path": "vendor/stc15lib/include/adc.h",
+      "repository": "mgoblin/STC15lib",
+      "commit": "9b6dfece57540e344da6ce5f5dc1593274ee9321",
+      "upstreamPath": "include/adc.h",
+      "gitBlob": "f1f391763047eb402cda32812e196a742132956d",
+      "sha256": "917cccc69f24c249b3ac67e4ad0a0572dab92fc6a774f5a9797553bcb4d125bf"
+    },
+    {
+      "path": "vendor/stc15lib/include/timer0_mode0.h",
+      "repository": "mgoblin/STC15lib",
+      "commit": "9b6dfece57540e344da6ce5f5dc1593274ee9321",
+      "upstreamPath": "include/timer0_mode0.h",
+      "gitBlob": "413a5626bd4d4b22f7e56f8df3d9ad8532c36cef",
+      "sha256": "81e457571c4ce7b7cc8e5fe1edd8f11a2fd5e2c5054dd7729d236f0f680f04b3"
+    },
+    {
+      "path": "vendor/stc15lib/include/STC15Fxx.h",
+      "repository": "mgoblin/STC15lib",
+      "commit": "9b6dfece57540e344da6ce5f5dc1593274ee9321",
+      "upstreamPath": "include/STC15Fxx.h",
+      "gitBlob": "4596866fe71311316321aee5ecd032a1612d5afc",
+      "sha256": "860f1fb542b433a35e9536cf985985a99beae9c2a68db82f6330335696faba21"
+    },
+    {
+      "path": "vendor/stc15lib/include/frequency.h",
+      "repository": "mgoblin/STC15lib",
+      "commit": "9b6dfece57540e344da6ce5f5dc1593274ee9321",
+      "upstreamPath": "include/frequency.h",
+      "gitBlob": "fa6f4e7c40e79d2b86b83a2bca99b6b7349ff88c",
+      "sha256": "6e29f9f316b2cff6927f69305d1e11d454f4e8687745114475b2e669cc11e0b3"
+    },
+    {
+      "path": "vendor/stc15lib/include/interrupt.h",
+      "repository": "mgoblin/STC15lib",
+      "commit": "9b6dfece57540e344da6ce5f5dc1593274ee9321",
+      "upstreamPath": "include/interrupt.h",
+      "gitBlob": "cfda3a7d8522ef9c00ef00ce56cc17f157ed98cf",
+      "sha256": "368a37b052407fbcdf2fdd1f56d8ecc5991770cfd2d72736ff2e758257b0de7b"
+    },
+    {
+      "path": "vendor/stc15lib/include/timer_structs.h",
+      "repository": "mgoblin/STC15lib",
+      "commit": "9b6dfece57540e344da6ce5f5dc1593274ee9321",
+      "upstreamPath": "include/timer_structs.h",
+      "gitBlob": "4f2ff1f9bf147b77d740cfc7ec51961b80524f14",
+      "sha256": "6aec186d92ef5dc84e3a7b3d53e14abca51a1904de11160e33abdf9c35bab017"
+    },
+    {
+      "path": "vendor/stc15lib/LICENSE",
+      "repository": "mgoblin/STC15lib",
+      "commit": "9b6dfece57540e344da6ce5f5dc1593274ee9321",
+      "upstreamPath": "LICENSE",
+      "gitBlob": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    }
+  ]
+}

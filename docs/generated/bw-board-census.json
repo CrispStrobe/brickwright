@@ -2,7 +2,7 @@
   "schema": 1,
   "source": {
     "repo": "https://github.com/CrispStrobe/bw-board",
-    "sha": "ddd77e4ee7ee1bf0e91a65198e4ae3fc59f88b35",
+    "sha": "5af626649e52dbea26d1f3156620dfa420490c57",
     "read": "2026-11-25"
   },
   "rows": [
@@ -201,10 +201,10 @@
     {
       "id": "lcapy",
       "kind": "oracle",
-      "present": true,
+      "present": false,
       "ciAvailable": false,
       "ci": "no",
-      "via": "[local path omitted]",
+      "via": "tried $LCAPY_PYTHON, [local path omitted]",
       "gates": [
         "test/lcapy-oracle.test.mjs"
       ],
@@ -225,10 +225,10 @@
     {
       "id": "ngspice",
       "kind": "oracle",
-      "present": true,
+      "present": false,
       "ciAvailable": true,
       "ci": "yes — installed by apt in the `test` job and asserted by `--require ngspice`, so the live solver comparison is a standing claim rather than a recorded one",
-      "via": "ngspice on $PATH at [local path omitted]",
+      "via": "tried $NGSPICE, ngspice on $PATH",
       "gates": [
         "test/ngspice-neutral-oracle.test.mjs",
         "test/nonuic-transient.test.mjs",
@@ -285,10 +285,10 @@
     {
       "id": "stc-examples",
       "kind": "fixture",
-      "present": true,
+      "present": false,
       "ciAvailable": false,
       "ci": "no — the `test` job checks out emu8051-stc only",
-      "via": "[local path omitted]",
+      "via": "tried [local path omitted], [local path omitted], [local path omitted]",
       "gates": [
         "test/example-manifest.test.js"
       ],

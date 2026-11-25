@@ -54,8 +54,8 @@ test('vendored 8051 exposes its native oscillator provider and its limits', asyn
         fidelity: 'recorded',
         resumable: true,
         signals: [],
-        // emu8051-stc 68ef757a (task B11) exports the checkpoint ABI, and
-        // bw-board df7dae85 accepts its layout (build 0x80510102).
+        // The shipping emu8051-stc pin exports the checkpoint ABI, and
+        // the shipping bw-board pin accepts the same complete-state layout.
         checkpoint: true
     });
     assert.ok(target.capabilities().steps.includes('cycle'));
