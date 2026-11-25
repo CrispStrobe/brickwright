@@ -73,11 +73,21 @@ try{
  assert.deepEqual(await page.evaluate(()=>window.__cp1Harness.readCell(127)),{opcode:0,operand:99});
  await page.getByRole('button',{name:'Program',exact:true}).click();
  await page.evaluate(()=>{window.__cp1Harness.holdConfigure=true;});
- await page.getByRole('checkbox',{name:'CP3 expansion (256 cells)',exact:true}).check();
+ const cp3=page.getByRole('checkbox',{name:'CP3 expansion (256 cells)',exact:true});
+ // The controlled checkbox continues showing the applied configuration while
+ // this deliberately delayed request is pending. A check() expects an immediate
+ // state change, so use the actual click and verify each state in order.
+ await cp3.click();
+ await page.waitForFunction(()=>window.__cp1Harness.configureWaits.length===1 &&
+  document.querySelector('label input[type="checkbox"]')?.disabled);
+ assert.equal(await cp3.isChecked(),false);
+ assert.equal(await cp3.isDisabled(),true);
  await editor.fill('ORG 255\nDATA 2 ; keep this draft');
  assert.equal(await page.getByRole('button',{name:'Load cells',exact:true}).isDisabled(),true);
  await page.evaluate(()=>window.__cp1Harness.resolveConfigure());
  await page.waitForFunction(()=>JSON.parse(localStorage.getItem('bw-cp1-workspace')).configuration.expansion===true);
+ await page.waitForFunction(()=>document.querySelector('label input[type="checkbox"]')?.checked===true);
+ assert.equal(await cp3.isChecked(),true);
  assert.equal(await editor.inputValue(),'ORG 255\nDATA 2 ; keep this draft');
  assert.equal(await page.evaluate(()=>window.__cp1Harness.config().partId),'cp1-proof');
  await page.getByRole('button',{name:'Load cells',exact:true}).click();

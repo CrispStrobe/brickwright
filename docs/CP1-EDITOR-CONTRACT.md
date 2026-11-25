@@ -81,7 +81,10 @@ queued observations, releases keys, resets the target and publishes paused state
 `lib/cp1-panel-input.js` declares 30 physical buttons and 20 logical contacts.
 The two sets of digit buttons share contacts. Pointer, keyboard and assistive
 click owners are tracked independently. A contact opens only when its final
-owner releases it. Repeat keydown does not create another owner. Pointer up,
+owner releases it. Keyboard ownership uses `event.code`, then
+`event.nativeEvent.code` for React 16, with `event.key` as a legacy fallback.
+Synthetic key-down and native window key-up therefore release the same owner.
+Repeat keydown does not create another owner. Pointer up,
 pointer cancel, lost capture, leaving the panel, window blur, hidden documents,
 pause, machine replacement and unmount all release the appropriate inputs.
 
@@ -161,7 +164,7 @@ scripts use Playwright's installed Chromium by default; `--executable` selects a
 explicit existing browser. The runner's `--compile-only` flag only checks the
 fixture production bundle and must not be reported as a browser pass.
 
-On 2026-11-25, both SSR commands passed the same 16 checks: first with React
+On 2026-11-25, both SSR commands passed the same 17 checks: first with React
 18.3.1, then with the GUI's actual React 16.14.0 and installed pinned `bw-board`.
 Vite/Oxc compiled the JSX in both runs. The checks cover
 actual JSX/SSR rendering, raw masks, key lifetimes, load/ROM refusal feedback,
@@ -241,3 +244,29 @@ underlying binary, and the standard Playwright download returns HTTP 403 from
 the workspace network proxy. No escalation or alternate download bypass was
 used. Hosted execution is the reproducible qualification route for this
 environment; the local source/component tests remain separate evidence.
+
+### Subsequent hosted findings
+
+Run [45555731912](https://github.com/CrispStrobe/brickwright-lite/actions/runs/45555731912)
+at `ccac35d80d2c03c0faa4adc77b2b5d3284b456ec` passed the connector and reached
+real switch/firmware/LED behavior in the shared runner. The remaining fixtures
+needed React update synchronization, an exact PropTypes alias, and the production
+project loader's completion event. Those fixture defects were corrected.
+
+Run [45557001274](https://github.com/CrispStrobe/brickwright-lite/actions/runs/45557001274)
+at `b9033ae6ebea0b5854f9489110373a3bbcc76728` passed the connector and CP5
+electrical/control gate: eight switches, twelve patterns and fourteen measured
+observations, including paused keyboard control. Its overall status remained
+failed. Further assertions needed to wait for queued CP3 configuration and the
+runner's scheduled instruction step. It also exposed a real React 16 keyboard
+ownership bug, now covered by a regression that failed before the product fix.
+
+Inspection of that run's CP5 screenshots found clipped trainer artwork. The
+Circuit UI fit path used a 48 × 48 fallback for the 300 × 400 CP1 part. Upstream
+`dd1c007c4c5f2333f2acc905530703144f043ebf` corrects its footprint with rotated/
+mirrored bounds and fit regressions. The browser gate now requires containment
+of the actual rendered trainer after Fit and proves all eight controls are
+reachable through the instruments pane's real inner scroll at 390 pixels.
+The old screenshots are retained as evidence of the defect, not a layout pass.
+
+The next complete browser run is pending after these product and fixture fixes.

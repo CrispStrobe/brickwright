@@ -74,6 +74,10 @@ try {
         await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
         assert.deepEqual(await page.evaluate(() => window.__cp1Integration.time()), paused);
         await page.getByRole('button', {name: 'CPU step', exact: true}).click();
+        // A real runner schedules instruction execution on its shared frame.
+        // Observe completion instead of assuming the click executes synchronously.
+        await page.waitForFunction(before => window.__cp1Integration.phase() === 'paused' &&
+            BigInt(window.__cp1Integration.time().machine) > BigInt(before), paused.machine);
         const stepped = await page.evaluate(() => window.__cp1Integration.time());
         assert.ok(BigInt(stepped.machine) > BigInt(paused.machine));
         assert.equal(BigInt(stepped.board) - BigInt(paused.board), BigInt(stepped.machine) - BigInt(paused.machine));

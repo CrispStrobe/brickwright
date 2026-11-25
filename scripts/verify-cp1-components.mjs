@@ -105,6 +105,21 @@ try{
   assert.deepEqual(machine.pressedKeys,['4']);p._keys.release('pointer:1');p._onKeyUp(keyEvent('4','Digit4'));
   assert.deepEqual(machine.pressedKeys,['4']);p._keys.release('pointer:2');assert.deepEqual(machine.pressedKeys,[]);p.componentWillUnmount();
  });
+ await check('React 16 synthetic keydown and native keyup release the same physical owner',()=>{
+  const p=panel();
+  try{
+   // React 16 exposes the physical code only on nativeEvent. The component's
+   // window listener receives a native keyup with code directly on the event.
+   const down=keyEvent('4');delete down.code;down.nativeEvent={key:'4',code:'Digit4'};
+   p._onKeyDown(down);
+   const digit=findElement(p._renderKeypad(true),element=>element.props?.['data-cp1-physical-key']==='upper-4');
+   assert.ok(digit);digit.props.onPointerDown(pointer(1));
+   hostWindow.dispatchEvent({type:'keyup',key:'4',code:'Digit4'});
+   assert.deepEqual(machine.pressedKeys,['4'],'the pointer still owns the shared contact');
+   digit.props.onPointerCancel({pointerId:1});digit.props.onPointerUp({pointerId:1});
+   assert.deepEqual(machine.pressedKeys,[],'pointer cancellation must not leave an unmatched keyboard owner');
+  }finally{p.componentWillUnmount();}
+ });
  await check('focus loss, visibility change, disabled input and unmount release engine contacts',()=>{
   const p=panel();p._onKeyDown(keyEvent('Enter','Enter'));hostWindow.dispatchEvent({type:'blur'});assert.deepEqual(machine.pressedKeys,[]);
   p._onKeyDown(keyEvent('1','Digit1'));hostDocument.hidden=true;hostDocument.dispatchEvent({type:'visibilitychange'});assert.deepEqual(machine.pressedKeys,[]);hostDocument.hidden=false;

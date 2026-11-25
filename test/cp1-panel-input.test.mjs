@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {CP1_LOGICAL_KEYS, CP1_PHYSICAL_KEYS, createCp1KeyInput, cp1KeyForKeyboard,
+import {CP1_LOGICAL_KEYS, CP1_PHYSICAL_KEYS, createCp1KeyInput, cp1KeyForKeyboard, cp1KeyboardOwner,
     cp1DisplayDigits, cp1SegmentDescription, readCp1PanelSnapshot} from '../overlay/scratch-gui/src/lib/cp1-panel-input.js';
 
 test('30 physical CP1 buttons share exactly 20 logical contacts', () => {
@@ -44,6 +44,32 @@ test('cancel, blur, visibility loss and unmount can release all contacts idempot
     assert.deepEqual(events.slice(-3), [['1', true], ['1', false], ['2', true]]);
     assert.throws(() => keys.press('RESET', 'key'), RangeError);
     assert.throws(() => keys.press('RUN'), TypeError);
+});
+
+test('React 16 keyboard owners preserve separate digit and numpad holds through native keyup', () => {
+    const events = [];
+    const keys = createCp1KeyInput((key, down) => events.push([key, down]));
+    for (const code of ['Digit4', 'Numpad4']) {
+        const event = {key: '4', nativeEvent: {key: '4', code}};
+        keys.press(cp1KeyForKeyboard(event), cp1KeyboardOwner(event));
+    }
+    assert.deepEqual(events, [['4', true]]);
+    // A modifier may change key between down and up; the physical code is stable.
+    keys.release(cp1KeyboardOwner({key: '$', code: 'Digit4'}));
+    assert.deepEqual(keys.heldKeys(), ['4'], 'the numpad owner must remain held');
+    keys.release(cp1KeyboardOwner({key: '4', code: 'Numpad4'}));
+    assert.deepEqual(keys.heldKeys(), []);
+    assert.deepEqual(events, [['4', true], ['4', false]]);
+});
+
+test('keyboard ownership also accepts modern synthetic events and code-less native events', () => {
+    const keys = createCp1KeyInput(() => {});
+    keys.press('RUN', cp1KeyboardOwner({key: 'Enter', code: 'NumpadEnter', nativeEvent: {code: 'NumpadEnter'}}));
+    keys.release(cp1KeyboardOwner({key: 'Enter', code: 'NumpadEnter'}));
+    assert.deepEqual(keys.heldKeys(), []);
+    keys.press('STP', cp1KeyboardOwner({key: 'Escape', nativeEvent: {key: 'Escape'}}));
+    keys.release(cp1KeyboardOwner({key: 'Escape'}));
+    assert.deepEqual(keys.heldKeys(), []);
 });
 
 test('keyboard mappings keep browser modifier shortcuts out of CP1 input', () => {

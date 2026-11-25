@@ -71,6 +71,10 @@ export function cp1KeyForKeyboard (event) {
     return null;
 }
 
+/** React 16 keeps code on nativeEvent; window keyup receives the native event. */
+export const cp1KeyboardOwner = event =>
+    `keyboard:${event.code || (event.nativeEvent && event.nativeEvent.code) || event.key}`;
+
 export const cp1IsTypingTarget = target => Boolean(target && target.closest && target.closest(
     'input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"], .cm-editor, .CodeMirror'
 ));

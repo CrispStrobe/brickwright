@@ -17,7 +17,7 @@ not substitutes for checks of the current continuation.
 | Repository | Exact adopted commit | Continuation |
 | --- | --- | --- |
 | bw-board | `1fa4734c18c7e037ff220e508ad33da5273d999f` | Qualified CP1 observer, bounded command steps, teaching breakpoints, events and external-ROM acceptance |
-| bw-circuit-ui | `5d5ad58540e7e6f120a693aa223a9bcce6145c2e` | Live switch controls and CP5 circuit interaction |
+| bw-circuit-ui | `dd1c007c4c5f2333f2acc905530703144f043ebf` | Live switch controls and correct CP1 fit/hit bounds |
 | sb3-creator | `fdadba6743839763fcb8bb2fad64063937e16a7e` | CP5 example, electrical and monitor observations, four CP1 examples |
 
 Lite's own integration checkpoint is recorded by this file's Git history.
@@ -46,6 +46,8 @@ cells, or 256 with CP3.
 
 The complete CP1 system component has 38 GPIO contacts plus supply and ground.
 All 40 contacts have geometry checks in eight rotation/mirror combinations.
+The CP1 fit/hit footprint now matches its 300 × 400 drawing rather than the
+48 × 48 fallback that clipped it in the browser.
 Circuit inputs, output drives, resistors and LEDs use the normal electrical
 solver. The machine and circuit retain one clock owner across attach, pause,
 reset and target replacement. Freely rewired internal 8049/8155 construction
@@ -54,6 +56,9 @@ remains separate work.
 The panel accepts a local 2048-byte monitor ROM and observes six raw segment
 displays and 30 physical keys sharing 20 contacts. Keys have independent owners
 and release on cancellation, blur, hiding, pause, replacement and teardown.
+A live React 16 regression exposed a mismatched synthetic key-down/native key-up
+owner. Both now use the same physical code, including `nativeEvent.code`, so a
+released keyboard key cannot keep a contact held after pointer cancellation.
 Original **RUN / STP / STEP** contacts execute through the firmware. **Run CPU /
 Pause CPU / CPU step** control the emulator. Circuit-owned inputs hide manual
 panel overrides. There is no second CPU, teaching-language VM or firmware fetch.
@@ -126,18 +131,18 @@ hardware qualification.
 | Original acceptance programs on the external, identified 2716 ROM | 11 scenarios passed; full accumulator load/store, comparisons and branches, nonzero start, CP3 jump, delay budget/resume, overflow, invalid command and loop breakpoint reentry |
 | CP5 circuit with original synthetic 8049 stimulus | 14 input patterns passed through switch → CP1 P1 → firmware → 8155 P2 → driver/resistor/LED |
 | CP5 circuit with the identified historical monitor | 13 input patterns passed, observing ports, cell 32, display segments and LED/resistor currents |
-| Circuit UI focused regressions and production build | 49 tests passed; build passed |
+| Circuit UI focused regressions and production build | 49 live-control regressions and 40 geometry regressions passed (overlapping suites); builds passed |
 | sb3 CP1 and topology regressions | 476 tests passed |
-| Lite combined CP1, pins, vendor identity, lesson catalog and workflow tests | 76 passed, no skips; full 89-lesson catalog covered |
+| Lite combined CP1, pins, vendor identity, lesson catalog and workflow tests | 78 passed, no skips; full 89-lesson catalog covered |
 | Lite package provenance, engine census, SPIKE import and i8086 presets | 33 passed |
 | Lite project bundle and one-board regressions | 36 passed |
 | Exact existing SPIKE artifact regression | 1 passed |
-| Actual component/host SSR and callback checks | 16 checks passed on each of React 18.3.1 and GUI React 16.14.0 |
+| Actual component/host SSR and callback checks | 17 checks passed on each of React 18.3.1 and GUI React 16.14.0 |
 | Installed package bytes at root and integrated GUI | Each installation matches 13,690 Board files and 1,425 Circuit UI files at the exact pins; single-engine resolution passed in both |
 | Canonical source/gallery sync and derived mirrors | Passed, including regenerated Arcade inventory pin |
-| Current Lite production Webpack build | Passed, exit 0, with Webpack 5.96.1 in approximately 55.4 seconds |
+| Current Lite production Webpack build | Passed, exit 0, with Webpack 5.96.1 in approximately 61.6 seconds after the browser-discovered keyboard and fit fixes |
 | Global pin-move-chain gate | Not green: current 38 passed / 5 failed; clean historical Lite `50b32fa7405dcc5f30637b23f1a6be69c0ee12de` reproduced all five failures and had 36 passed / 7 failed; both runs had 43 tests and no skips |
-| New hosted integrated CP1/CP5 browser workflow | Pending after the integration checkpoint |
+| New hosted integrated CP1/CP5 browser workflow | Connector and CP5 interaction gates passed at `b9033ae6`; full-scope rerun pending after the keyboard/fit fixes |
 
 The remaining global pin-chain failures concern epoch-gated historical x86
 reader roles assuming older live Circuit UI/sb3 pins. The sealed reader bytes
@@ -156,6 +161,9 @@ effects and event fixtures; it does not establish browser interaction or layout.
 The 11-scenario Board receipt is upstream `docs/CP1-SEMANTIC-OBSERVATION.json`;
 the CP5 receipt is sb3 `reference/cp1-cp5-observations.json`. These record original
 programs and machine observations, with source identities, not firmware bytes.
+The CP5 historical receipt retains the Circuit UI `5d5ad585` identity at which it
+was measured. The later `dd1c007c` change affects CP1 hit/fit bounds; that receipt
+is not restamped as a new electrical measurement.
 No physical-hardware claim follows from simulated voltage/current measurements.
 
 ### Reproducible focused commands

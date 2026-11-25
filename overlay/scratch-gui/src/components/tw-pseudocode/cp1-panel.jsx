@@ -6,7 +6,7 @@ import {browserLocale, makeT} from '../../lib/bw-i18n.js';
 import {parseCp1Program, exportCp1Program} from '../../lib/cp1-program.js';
 import {cp1DebugView} from '../../lib/cp1-debug-view.js';
 import {createCp1Project, serializeCp1Project, cp1RomReference} from '../../lib/cp1-project.js';
-import {CP1_PHYSICAL_KEYS, createCp1KeyInput, cp1KeyForKeyboard, cp1IsTypingTarget,
+import {CP1_PHYSICAL_KEYS, createCp1KeyInput, cp1KeyForKeyboard, cp1KeyboardOwner, cp1IsTypingTarget,
     cp1DisplayDigits, cp1SegmentDescription, readCp1PanelSnapshot} from '../../lib/cp1-panel-input.js';
 import downloadBlob from '../../lib/download-blob.js';
 
@@ -198,10 +198,10 @@ class Cp1Panel extends React.Component {
         const key = button && (event.key === ' ' || event.key === 'Enter') ? button.dataset.cp1Key : cp1KeyForKeyboard(event);
         if (!key) return;
         event.preventDefault();
-        this._keys.press(key, `keyboard:${event.code || event.key}`);
+        this._keys.press(key, cp1KeyboardOwner(event));
     }
 
-    _onKeyUp (event) { this._keys.release(`keyboard:${event.code || event.key}`); }
+    _onKeyUp (event) { this._keys.release(cp1KeyboardOwner(event)); }
 
     _pressPointer (event, key) {
         if (!this.props.onKey || event.button !== 0) return;
