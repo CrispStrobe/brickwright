@@ -1,0 +1,693 @@
+{
+  "wave": "cp1-8",
+  "title": {
+    "en": "Kosmos CP1: programs you can trace",
+    "de": "Kosmos CP1: Programme zum Nachverfolgen"
+  },
+  "lessons": [
+    {
+      "id": "cp1-first-display",
+      "version": 1,
+      "exampleId": "cp1-first-display",
+      "loadMode": "circuit-only",
+      "wave": "cp1-8",
+      "topic": "cells-and-display",
+      "domains": [
+        "computer-architecture",
+        "code",
+        "debugging"
+      ],
+      "depth": "foundation",
+      "ageGuidance": "11+",
+      "minutes": 18,
+      "environment": "simulation",
+      "languages": [],
+      "prerequisites": [],
+      "copy": {
+        "en": {
+          "title": "Three cells, one visible number",
+          "objective": "Encode a constant, a display request and a repeat, then compare the real segment display with your prediction."
+        },
+        "de": {
+          "title": "Drei Zellen, eine sichtbare Zahl",
+          "objective": "Codiere Konstante, Anzeigeanforderung und Wiederholung und vergleiche die echte Segmentanzeige mit deiner Vorhersage."
+        }
+      },
+      "checkpoints": [
+        {
+          "id": "predict",
+          "copy": {
+            "en": {
+              "action": "Predict the cells for AKO 42, ANZ and SPU display, where display labels cell 1. Explain why 04.042 contains two byte values.",
+              "explain": "The first field is an opcode and the second is an operand; the dot separates them.",
+              "hint": "The expected pairs are [4,42], [2,0] and [9,1]. Export the listing and compare its fields. The third cell returns to ANZ to keep the result visible.",
+              "manual": "I matched each source command to its two bytes"
+            },
+            "de": {
+              "action": "Sage die Zellen für AKO 42, ANZ und SPU display voraus; display bezeichnet Zelle 1. Erkläre, weshalb 04.042 zwei Bytewerte enthält.",
+              "explain": "Das erste Feld ist der Befehl, das zweite der Operand. Der Punkt trennt die Felder.",
+              "hint": "Erwartet werden [4,42], [2,0] und [9,1]. Exportiere das Listing und vergleiche seine Felder. Die dritte Zelle springt zu ANZ zurück, damit das Ergebnis sichtbar bleibt.",
+              "manual": "Ich habe jeden Quellbefehl seinen zwei Bytes zugeordnet"
+            }
+          }
+        },
+        {
+          "id": "observe",
+          "copy": {
+            "en": {
+              "action": "Import your own compatible 2048-byte monitor ROM. Use Run CPU until its ready display is stable, then Pause CPU and load the cells. Resume without resetting; on the CP1 keypad select cell 0 with PC and press RUN. Compare the display with 42. Stop with keypad STP, pause the CPU, change the constant to 73, and repeat the load/resume/PC 0/RUN sequence.",
+              "explain": "The 8049 executes the monitor ROM, which reads the teaching cells and scans the physical display.",
+              "hint": "Let the monitor finish initialization before the first RAM load; resetting afterward can let its startup code overwrite the cells. Run CPU advances the hardware; keypad RUN starts the teaching program. Read the actual six segment masks and complete this check yourself; no ROM is bundled. In the tested 2716 ROM, HLT immediately after ANZ replaces the value with P003. The repeat avoids that monitor-message change.",
+              "manual": "I observed both constants on the real segment display"
+            },
+            "de": {
+              "action": "Importiere ein eigenes kompatibles Monitor-ROM mit 2048 Bytes. Lass die CPU mit „CPU ausführen“ bis zur stabilen Bereitschaftsanzeige laufen, pausiere sie und lade die Zellen. Setze ohne Zurücksetzen fort; wähle auf der CP1-Tastatur mit PC Zelle 0 und drücke RUN. Vergleiche die Anzeige mit 42. Halte mit STP an, pausiere die CPU, ändere die Konstante auf 73 und wiederhole Laden/Fortsetzen/PC 0/RUN.",
+              "explain": "Der 8049 führt das Monitor-ROM aus. Dieses liest die Lernprogrammzellen und steuert die physische Anzeige an.",
+              "hint": "Lass den Monitor vor dem ersten RAM-Laden seine Initialisierung beenden. Zurücksetzen danach kann dazu führen, dass sein Startcode die Zellen überschreibt. „CPU ausführen“ lässt die Hardware laufen; RUN auf der Tastatur startet das Lernprogramm. Lies die sechs tatsächlichen Segmentmasken ab und bestätige selbst; ein ROM wird nicht mitgeliefert. Im geprüften 2716-ROM ersetzt HLT direkt nach ANZ den Wert durch P003. Die Wiederholung vermeidet diesen Wechsel zur Monitormeldung.",
+              "manual": "Ich habe beide Konstanten auf der echten Segmentanzeige beobachtet"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "cp1-keypad-and-steps",
+      "version": 1,
+      "exampleId": "cp1-first-display",
+      "loadMode": "circuit-only",
+      "wave": "cp1-8",
+      "topic": "key-matrix-and-steps",
+      "domains": [
+        "computer-architecture",
+        "code",
+        "debugging"
+      ],
+      "depth": "foundation",
+      "ageGuidance": "11+",
+      "minutes": 20,
+      "environment": "simulation",
+      "languages": [],
+      "prerequisites": [
+        "cp1-first-display"
+      ],
+      "copy": {
+        "en": {
+          "title": "One key contact, two kinds of step",
+          "objective": "Distinguish duplicate physical digit buttons, shared contacts, CPU instructions and CP1 teaching operations."
+        },
+        "de": {
+          "title": "Ein Tastenkontakt, zwei Schrittarten",
+          "objective": "Unterscheide doppelte Zifferntasten, gemeinsame Kontakte, CPU-Befehle und CP1-Lernsprachbefehle."
+        }
+      },
+      "checkpoints": [
+        {
+          "id": "predict",
+          "copy": {
+            "en": {
+              "action": "Count the 30 printed buttons and the 20 logical contacts. Predict what should happen when both copies of one digit are held and just one is released.",
+              "explain": "The two copies of a digit operate one contact. That contact stays closed until every physical input holding it is released.",
+              "hint": "Use the duplicate buttons with separate pointers when your device permits it, or hold the keyboard digit while pressing its on-screen copy. Function keys each have one logical contact.",
+              "manual": "I explained and checked shared key ownership"
+            },
+            "de": {
+              "action": "Zähle die 30 sichtbaren Tasten und die 20 logischen Kontakte. Sage voraus, was geschieht, wenn beide Tasten derselben Ziffer gehalten werden und nur eine losgelassen wird.",
+              "explain": "Die beiden Zifferntasten betätigen denselben Kontakt. Er bleibt geschlossen, bis alle haltenden Eingaben losgelassen sind.",
+              "hint": "Nutze zwei Zeiger, wenn dein Gerät dies erlaubt, oder halte eine Ziffer auf der Computertastatur und drücke zusätzlich ihre Bildschirmtaste. Jede Funktionstaste hat einen eigenen logischen Kontakt.",
+              "manual": "Ich habe das gemeinsame Halten erklärt und geprüft"
+            }
+          }
+        },
+        {
+          "id": "compare",
+          "copy": {
+            "en": {
+              "action": "Pause the CPU and note its 8049 PC. Use CPU step once. Then let the monitor run and request a teaching-language step with the keypad STEP key. Record which level each action advances.",
+              "explain": "One teaching operation can involve many 8049 instructions, including monitor work and display scanning.",
+              "hint": "The CPU PC is a ROM execution address. Do not assume it is the CP1 teaching-program cell number. Check that leaving the panel or losing focus releases held keys.",
+              "manual": "I distinguished CPU stepping from monitor STEP"
+            },
+            "de": {
+              "action": "Pausiere die CPU und notiere ihren 8049-PC. Betätige CPU-Schritt einmal. Lass dann den Monitor laufen und fordere mit STEP auf der Tastatur einen Lernsprachschritt an. Notiere, welche Ebene die jeweilige Aktion weiterführt.",
+              "explain": "Ein Lernsprachbefehl kann viele 8049-Befehle einschließlich Monitorarbeit und Anzeigescanning umfassen.",
+              "hint": "Der CPU-PC ist eine Ausführungsadresse im ROM. Er ist nicht automatisch die Nummer der CP1-Lernprogrammzelle. Prüfe, dass das Verlassen des Felds oder Fokusverlust gehaltene Tasten freigibt.",
+              "manual": "Ich habe CPU-Schritt und Monitor-STEP unterschieden"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "cp1-memory-and-source",
+      "version": 1,
+      "exampleId": "cp1-first-display",
+      "loadMode": "circuit-only",
+      "wave": "cp1-8",
+      "topic": "memory-and-source",
+      "domains": [
+        "computer-architecture",
+        "code",
+        "debugging"
+      ],
+      "depth": "foundation",
+      "ageGuidance": "11+",
+      "minutes": 20,
+      "environment": "simulation",
+      "languages": [],
+      "prerequisites": [
+        "cp1-first-display"
+      ],
+      "copy": {
+        "en": {
+          "title": "Find the source behind a RAM cell",
+          "objective": "Connect a source line, its decimal listing and the two bytes in the engine memory snapshot."
+        },
+        "de": {
+          "title": "Die Quelle einer RAM-Zelle finden",
+          "objective": "Verbinde Quellzeile, Dezimallisting und die zwei Bytes im Speicherzustand der Maschine."
+        }
+      },
+      "checkpoints": [
+        {
+          "id": "predict",
+          "copy": {
+            "en": {
+              "action": "Before loading, predict which cell changes when VALUE moves from 42 to 73 and which cells stay the same.",
+              "explain": "The assembler records source-to-cell correspondence; a source edit becomes machine data only when it is loaded.",
+              "hint": "Cell 0 keeps opcode 4 and changes its operand. The ANZ and SPU cells keep both bytes. A source-line annotation describes the editor mapping, not proof that RAM still matches it.",
+              "manual": "I predicted the exact changed byte"
+            },
+            "de": {
+              "action": "Sage vor dem Laden voraus, welche Zelle sich bei VALUE von 42 auf 73 ändert und welche Zellen gleich bleiben.",
+              "explain": "Der Assembler ordnet Quelle und Zellen einander zu. Eine Quelländerung wird erst beim Laden zu Maschinendaten.",
+              "hint": "Zelle 0 behält Befehl 4 und ändert den Operanden. ANZ und SPU behalten beide Bytes. Eine Quellzeilenangabe beschreibt die Editorzuordnung und beweist nicht, dass das RAM noch dazu passt.",
+              "manual": "Ich habe das genau veränderte Byte vorausgesagt"
+            }
+          }
+        },
+        {
+          "id": "compare",
+          "copy": {
+            "en": {
+              "action": "Load the changed program while the CPU is paused. Open Memory and compare cells 0–2 with the exported listing. Explain any later RAM difference using the running program or a deliberate edit.",
+              "explain": "The memory table reads a detached snapshot of the real machine. It must not be synthesized from source text.",
+              "hint": "Unoccupied source-map cells have no line association. If the host offers a cell editor, make a deliberate paused edit and identify how it breaks source/RAM agreement; otherwise compare the two successive loads.",
+              "manual": "I compared source, listing and actual RAM"
+            },
+            "de": {
+              "action": "Lade das geänderte Programm bei pausierter CPU. Öffne Speicher und vergleiche Zellen 0–2 mit dem exportierten Listing. Erkläre spätere RAM-Unterschiede durch das laufende Programm oder eine bewusste Änderung.",
+              "explain": "Die Speichertabelle liest einen abgetrennten Zustand der echten Maschine. Sie darf nicht aus Quelltext erzeugt werden.",
+              "hint": "Nicht belegte Quellzuordnungen haben keine Zeilenangabe. Wenn der Arbeitsbereich einen Zelleditor anbietet, ändere eine Zelle bei pausierter CPU und erkenne die Abweichung zur Quelle; andernfalls vergleiche zwei aufeinanderfolgende Ladevorgänge.",
+              "manual": "Ich habe Quelle, Listing und tatsächliches RAM verglichen"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "cp1-switch-reading",
+      "version": 1,
+      "exampleId": "cp1-switch-input",
+      "loadMode": "circuit-only",
+      "wave": "cp1-8",
+      "topic": "switch-input",
+      "domains": [
+        "computer-architecture",
+        "code",
+        "debugging"
+      ],
+      "depth": "foundation",
+      "ageGuidance": "11+",
+      "minutes": 24,
+      "environment": "simulation",
+      "languages": [],
+      "prerequisites": [
+        "cp1-first-display"
+      ],
+      "copy": {
+        "en": {
+          "title": "Pressed does not always mean one",
+          "objective": "Relate the pull-up circuit, P1.0, the one-based CP1 line selector and the displayed sample."
+        },
+        "de": {
+          "title": "Gedrückt bedeutet nicht immer eins",
+          "objective": "Verknüpfe Pull-up-Schaltung, P1.0, den ab eins zählenden CP1-Selektor und den angezeigten Messwert."
+        }
+      },
+      "checkpoints": [
+        {
+          "id": "predict",
+          "copy": {
+            "en": {
+              "action": "Trace the pull-up from the CP1 5 V connector to P1.0 and the button path to ground. Predict the input level when released and when pressed.",
+              "explain": "A closed button to ground produces a low level. The meaning pressed comes from the wiring and naming.",
+              "hint": "P1E 1 selects CP1 line 1, which is circuit bit P1.0. P1E 0 would read the complete port. Keep those numbering systems separate.",
+              "manual": "I predicted both electrical input levels"
+            },
+            "de": {
+              "action": "Verfolge den Pull-up vom CP1-5-V-Anschluss zu P1.0 und den Tasterweg nach Masse. Sage den Pegel bei losgelassenem und gedrücktem Taster voraus.",
+              "explain": "Ein geschlossener Taster nach Masse erzeugt einen niedrigen Pegel. Die Bedeutung gedrückt ergibt sich aus Verdrahtung und Benennung.",
+              "hint": "P1E 1 wählt CP1-Leitung 1, also Schaltungsbit P1.0. P1E 0 würde den ganzen Port lesen. Trenne diese beiden Nummerierungen.",
+              "manual": "Ich habe beide elektrischen Eingangspegel vorausgesagt"
+            }
+          }
+        },
+        {
+          "id": "observe",
+          "copy": {
+            "en": {
+              "action": "Run the supplied program with your imported ROM and hold the button. Compare the port input, display and release state. Change VZG from 100 to 250 and compare short presses.",
+              "explain": "The program polls repeatedly. A brief change can occur between samples; more delay can make that easier to miss.",
+              "hint": "Observe actual input bits and segment output before marking this complete. Port input switches can provide a direct input when the circuit is not attached; do not treat a click itself as proof of the sampled result.",
+              "manual": "I related the button, sampled bit and display"
+            },
+            "de": {
+              "action": "Führe das Beispiel mit deinem importierten ROM aus und halte den Taster. Vergleiche Porteingang, Anzeige und Zustand nach dem Loslassen. Ändere VZG von 100 auf 250 und vergleiche kurze Tastendrücke.",
+              "explain": "Das Programm liest wiederholt. Eine kurze Änderung kann zwischen zwei Abfragen liegen; mehr Wartezeit erleichtert dieses Verpassen.",
+              "hint": "Beobachte tatsächliche Eingangsbits und Segmente, bevor du bestätigst. Die Porteingangsschalter liefern einen direkten Eingang, wenn keine Schaltung verbunden ist. Der Klick allein beweist noch keinen gelesenen Wert.",
+              "manual": "Ich habe Taster, gelesenes Bit und Anzeige verbunden"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "cp1-output-loop",
+      "version": 1,
+      "exampleId": "cp1-blink",
+      "loadMode": "circuit-only",
+      "wave": "cp1-8",
+      "topic": "output-and-loop",
+      "domains": [
+        "computer-architecture",
+        "code",
+        "debugging"
+      ],
+      "depth": "foundation",
+      "ageGuidance": "11+",
+      "minutes": 25,
+      "environment": "simulation",
+      "languages": [],
+      "prerequisites": [
+        "cp1-switch-reading",
+        "cp1-memory-and-source"
+      ],
+      "copy": {
+        "en": {
+          "title": "Seven cells make an output repeat",
+          "objective": "Trace a high/write/wait/low/write/wait/jump loop and compare its output with the LED."
+        },
+        "de": {
+          "title": "Sieben Zellen wiederholen einen Ausgang",
+          "objective": "Verfolge die Folge Hoch/Schreiben/Warten/Niedrig/Schreiben/Warten/Sprung und vergleiche den Ausgang mit der LED."
+        }
+      },
+      "checkpoints": [
+        {
+          "id": "predict",
+          "copy": {
+            "en": {
+              "action": "Write the seven opcode/operand pairs and predict P2.0 after each P2A 1 operation. Identify where the next loop begins.",
+              "explain": "AKO changes the teaching accumulator; P2A copies the selected value to an output line; SPU changes the next cell to execute.",
+              "hint": "The expected pairs are 4/1, 18/1, 3/200, 4/0, 18/1, 3/200 and 9/0. Selector 1 is circuit bit P2.0.",
+              "manual": "I traced the seven-cell output loop"
+            },
+            "de": {
+              "action": "Notiere die sieben Befehls-/Operandenpaare und sage P2.0 nach jedem P2A 1 voraus. Bestimme den Beginn der nächsten Schleife.",
+              "explain": "AKO ändert den Lernprogramm-Akkumulator; P2A überträgt den Wert auf eine Ausgangsleitung; SPU ändert die nächste auszuführende Zelle.",
+              "hint": "Erwartet werden 4/1, 18/1, 3/200, 4/0, 18/1, 3/200 und 9/0. Selektor 1 entspricht Schaltungsbit P2.0.",
+              "manual": "Ich habe die Ausgangsschleife aus sieben Zellen verfolgt"
+            }
+          }
+        },
+        {
+          "id": "observe",
+          "copy": {
+            "en": {
+              "action": "Run the loop, compare P2.0 with the resistor-fed LED, then pause while the output is high. Record the stored level and the time between equivalent edges if a suitable trace is available.",
+              "explain": "An output latch can hold its state while the CPU is paused. The requested waits contribute to loop time, alongside firmware work.",
+              "hint": "Two 200 ms requests contribute 400 ms, but do not report an exact measured period from that arithmetic. If no edge trace is available, record the visible logic-low/logic-high transitions and state the timing measurement is unavailable.",
+              "manual": "I observed logic-low/logic-high transitions and retained latch state"
+            },
+            "de": {
+              "action": "Lass die Schleife laufen, vergleiche P2.0 mit der LED samt Vorwiderstand und pausiere bei hohem Ausgang. Notiere den gehaltenen Pegel und, sofern eine passende Spur verfügbar ist, den Abstand gleichartiger Flanken.",
+              "explain": "Ein Ausgangsregister kann seinen Zustand bei pausierter CPU halten. Angeforderte Wartezeiten tragen neben der Firmwarearbeit zur Schleifendauer bei.",
+              "hint": "Zwei Anforderungen von 200 ms tragen 400 ms bei. Gib diese Rechnung nicht als exakt gemessene Periode aus. Ohne passende Flankenspur notierst du die sichtbaren Übergänge zwischen logisch niedrigem und hohem Pegel und kennzeichnest die Zeitmessung als nicht verfügbar.",
+              "manual": "Ich habe Übergänge zwischen logisch niedrigem und hohem Pegel sowie den gehaltenen Registerwert beobachtet"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "cp1-labels-and-diagnostics",
+      "version": 1,
+      "exampleId": "cp1-blink",
+      "loadMode": "circuit-only",
+      "wave": "cp1-8",
+      "topic": "labels-and-diagnostics",
+      "domains": [
+        "computer-architecture",
+        "code",
+        "debugging"
+      ],
+      "depth": "practitioner",
+      "ageGuidance": "11+",
+      "minutes": 24,
+      "environment": "simulation",
+      "languages": [],
+      "prerequisites": [
+        "cp1-output-loop"
+      ],
+      "copy": {
+        "en": {
+          "title": "Move a loop without guessing its jump",
+          "objective": "Use labels, ORG and EQU, and read source diagnostics before loading any cells."
+        },
+        "de": {
+          "title": "Eine Schleife ohne geratenes Sprungziel verschieben",
+          "objective": "Verwende Labels, ORG und EQU und lies Quelldiagnosen, bevor Zellen geladen werden."
+        }
+      },
+      "checkpoints": [
+        {
+          "id": "predict",
+          "copy": {
+            "en": {
+              "action": "Change ORG from 0 to 20 while retaining the label again. Predict the address encoded by SPU again and inspect the new listing.",
+              "explain": "Labels resolve to cell addresses. EQU supplies a constant, while ORG chooses where subsequent cells are placed.",
+              "hint": "The branch should target cell 20 and the loop occupies 20–26. Select teaching PC 20 in the monitor before running the relocated program.",
+              "manual": "I verified the relocated jump target"
+            },
+            "de": {
+              "action": "Ändere ORG von 0 auf 20 und behalte das Label again. Sage die durch SPU again codierte Adresse voraus und prüfe das neue Listing.",
+              "explain": "Labels werden zu Zelladressen aufgelöst. EQU liefert eine Konstante; ORG legt den Ort folgender Zellen fest.",
+              "hint": "Der Sprung sollte Zelle 20 ansteuern; die Schleife belegt 20–26. Wähle vor dem Start im Monitor Lernprogramm-PC 20.",
+              "manual": "Ich habe das verschobene Sprungziel geprüft"
+            }
+          }
+        },
+        {
+          "id": "reject",
+          "copy": {
+            "en": {
+              "action": "Try a duplicate label, a second write to an already occupied cell, and AKO 256 one at a time. Read each line diagnostic, correct it, and load only after all errors are gone.",
+              "explain": "A failed assembly produces no runnable byte image, so a partial valid prefix cannot silently replace the program.",
+              "hint": "Keep a note of the RAM before each rejected load and compare afterward. This is an editor-validation check; it does not require executing a faulty program.",
+              "manual": "I checked located errors and unchanged RAM after rejection"
+            },
+            "de": {
+              "action": "Probiere nacheinander ein doppeltes Label, einen zweiten Schreibzugriff auf eine bereits belegte Zelle und AKO 256. Lies jeweils die Zeilendiagnose, korrigiere den Fehler und lade erst ohne Fehler.",
+              "explain": "Eine fehlgeschlagene Assemblierung erzeugt kein ausführbares Byteabbild. Ein gültiger Anfang kann deshalb das Programm nicht unbemerkt teilweise ersetzen.",
+              "hint": "Notiere das RAM vor jedem abgelehnten Ladevorgang und vergleiche danach. Dies prüft die Editorvalidierung; ein fehlerhaftes Programm muss dafür nicht ausgeführt werden.",
+              "manual": "Ich habe lokalisierte Fehler und unverändertes RAM nach Ablehnung geprüft"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "cp1-capacity-and-ports",
+      "version": 1,
+      "exampleId": "cp1-first-display",
+      "loadMode": "circuit-only",
+      "wave": "cp1-8",
+      "topic": "cp3-capacity",
+      "domains": [
+        "computer-architecture",
+        "code",
+        "debugging"
+      ],
+      "depth": "practitioner",
+      "ageGuidance": "11+",
+      "minutes": 22,
+      "environment": "simulation",
+      "languages": [],
+      "prerequisites": [
+        "cp1-labels-and-diagnostics"
+      ],
+      "copy": {
+        "en": {
+          "title": "Where the base machine ends",
+          "objective": "Distinguish the 128-cell base configuration from the 256-cell CP3 expansion and validate port selectors."
+        },
+        "de": {
+          "title": "Wo die Grundmaschine endet",
+          "objective": "Unterscheide die Grundkonfiguration mit 128 Zellen von der CP3-Erweiterung mit 256 Zellen und prüfe Portselektoren."
+        }
+      },
+      "checkpoints": [
+        {
+          "id": "predict",
+          "copy": {
+            "en": {
+              "action": "In the base configuration, assemble ORG 127 followed by DATA 255. Then add a second data cell and explain the error.",
+              "explain": "Base RAM has cells 0–127. Two bytes per cell give a 256-byte image; CP3 extends the cell addresses to 0–255.",
+              "hint": "The value 255 fits in one operand byte even when address 255 is unavailable. Address range and stored-value range are different constraints.",
+              "manual": "I distinguished address capacity from byte values"
+            },
+            "de": {
+              "action": "Assembliere in der Grundkonfiguration ORG 127 und danach DATA 255. Füge eine zweite Datenzelle hinzu und erkläre den Fehler.",
+              "explain": "Das Grund-RAM hat Zellen 0–127. Zwei Bytes je Zelle ergeben 256 Bytes; CP3 erweitert die Zelladressen auf 0–255.",
+              "hint": "Der Wert 255 passt in ein Operandenbyte, obwohl Adresse 255 nicht verfügbar ist. Adressbereich und Wertebereich sind verschiedene Grenzen.",
+              "manual": "Ich habe Adresskapazität und Bytewerte unterschieden"
+            }
+          }
+        },
+        {
+          "id": "compare",
+          "copy": {
+            "en": {
+              "action": "If CP3 configuration is available, enable it and assemble a data cell at 255. Compare P3/P4/P5 availability with the base setting and test an invalid P5A 7 selector.",
+              "explain": "The expansion adds memory and ports. A whole-port selector is zero; single-line selectors start at one, and P5 has six lines.",
+              "hint": "If this host cannot change CP3 configuration, keep the base setting and document its rejection instead of claiming an expansion run. Compiler acceptance proves an encoding, not execution by a particular ROM.",
+              "manual": "I recorded the actual configuration and its bounds"
+            },
+            "de": {
+              "action": "Wenn eine CP3-Konfiguration verfügbar ist, aktiviere sie und assembliere eine Datenzelle bei 255. Vergleiche die Verfügbarkeit von P3/P4/P5 mit der Grundkonfiguration und prüfe den ungültigen Selektor P5A 7.",
+              "explain": "Die Erweiterung ergänzt Speicher und Ports. Null wählt den ganzen Port, Einzelleitungen beginnen bei eins und P5 hat sechs Leitungen.",
+              "hint": "Kann dieser Arbeitsbereich CP3 nicht umschalten, bleibe in der Grundkonfiguration und dokumentiere die Ablehnung, statt einen Erweiterungslauf zu behaupten. Annahme durch den Assembler beweist die Codierung, nicht die Ausführung durch ein bestimmtes ROM.",
+              "manual": "Ich habe die tatsächliche Konfiguration und ihre Grenzen dokumentiert"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "cp1-save-and-evidence",
+      "version": 1,
+      "exampleId": "cp1-first-display",
+      "loadMode": "circuit-only",
+      "wave": "cp1-8",
+      "topic": "project-and-evidence",
+      "domains": [
+        "computer-architecture",
+        "code",
+        "debugging"
+      ],
+      "depth": "practitioner",
+      "ageGuidance": "11+",
+      "minutes": 25,
+      "environment": "simulation",
+      "languages": [],
+      "prerequisites": [
+        "cp1-memory-and-source",
+        "cp1-capacity-and-ports"
+      ],
+      "copy": {
+        "en": {
+          "title": "Save the program; keep the evidence honest",
+          "objective": "Round-trip a CP1 project while separating source, cells, ROM references, segment observations and debugger state."
+        },
+        "de": {
+          "title": "Programm speichern, Belege sauber benennen",
+          "objective": "Speichere und öffne ein CP1-Projekt und trenne Quelle, Zellen, ROM-Referenzen, Segmentbeobachtungen und Debuggerzustand."
+        }
+      },
+      "checkpoints": [
+        {
+          "id": "compare",
+          "copy": {
+            "en": {
+              "action": "Export a decimal listing and save a CP1 project. Inspect that the project identifies its version, configuration, source, cell values and ROM digest reference. Compare the listing after reopening the source.",
+              "explain": "A portable normal project records the program and configuration. The actual monitor ROM is a separate local import.",
+              "hint": "No held keys or CPU resume state belong in this file. Reopening on another device may require importing the matching ROM again. The ordinary workspace can also preserve an unfinished source line without treating it as an assembled program.",
+              "manual": "I compared the saved source, cells and ROM reference"
+            },
+            "de": {
+              "action": "Exportiere ein Dezimallisting und speichere ein CP1-Projekt. Prüfe Version, Konfiguration, Quelle, Zellwerte und ROM-Prüfsummenreferenz. Vergleiche das Listing nach erneutem Öffnen der Quelle.",
+              "explain": "Ein portables normales Projekt hält Programm und Konfiguration fest. Das tatsächliche Monitor-ROM bleibt ein eigener lokaler Import.",
+              "hint": "Gehaltene Tasten und CPU-Fortsetzungszustand gehören nicht in diese Datei. Auf einem anderen Gerät kann der erneute Import des passenden ROMs nötig sein. Der normale Arbeitsbereich kann auch eine unvollständige Quellzeile bewahren, ohne sie als assembliertes Programm auszugeben.",
+              "manual": "Ich habe gespeicherte Quelle, Zellen und ROM-Referenz verglichen"
+            }
+          }
+        },
+        {
+          "id": "observe",
+          "copy": {
+            "en": {
+              "action": "Record a six-digit segment snapshot, including the decimal point, and label which facts you directly observed versus inferred from the program. Save a short note describing the ROM and starting cell used.",
+              "explain": "The display is scanned by firmware. Raw segment masks can represent monitor messages or partial scan history, so a numeric interpretation needs evidence.",
+              "hint": "The physical display order is left to right. The fixed separator is carried by the third digit mask. If a pattern is ambiguous, report the segments rather than inventing a number; use manual completion after recording the evidence.",
+              "manual": "I documented the real display and the limits of my observation"
+            },
+            "de": {
+              "action": "Notiere einen Zustand aller sechs Segmentanzeigen einschließlich Punkt und kennzeichne direkt beobachtete Fakten gegenüber Schlussfolgerungen aus dem Programm. Halte verwendetes ROM und Startzelle in einer kurzen Notiz fest.",
+              "explain": "Die Firmware scannt die Anzeige. Rohe Segmentmasken können Monitormeldungen oder einen unvollständigen Scanverlauf darstellen; eine Zahlendeutung braucht daher einen Beleg.",
+              "hint": "Die physische Reihenfolge ist links nach rechts. Der feste Trenner steckt in der Maske der dritten Ziffer. Melde bei Mehrdeutigkeit die Segmente statt einer erfundenen Zahl. Bestätige nach dem Dokumentieren des Belegs selbst.",
+              "manual": "Ich habe die tatsächliche Anzeige und die Grenzen meiner Beobachtung dokumentiert"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "cp1-command-debugging",
+      "version": 1,
+      "exampleId": "cp1-first-display",
+      "loadMode": "circuit-only",
+      "wave": "cp1-8",
+      "topic": "command-boundaries",
+      "domains": [
+        "computer-architecture",
+        "code",
+        "debugging"
+      ],
+      "depth": "intermediate",
+      "ageGuidance": "11+",
+      "minutes": 25,
+      "environment": "simulation",
+      "languages": [],
+      "prerequisites": [
+        "cp1-keypad-and-steps",
+        "cp1-memory-and-source"
+      ],
+      "copy": {
+        "en": {
+          "title": "Stop at a teaching command",
+          "objective": "Use a cell breakpoint and the observed CP1 state to distinguish a whole teaching command from one 8049 instruction."
+        },
+        "de": {
+          "title": "An einem Lernbefehl anhalten",
+          "objective": "Unterscheide mit einem Zellhaltepunkt und dem beobachteten CP1-Zustand einen vollständigen Lernbefehl von einem einzelnen 8049-Befehl."
+        }
+      },
+      "checkpoints": [
+        {
+          "id": "complete-ako",
+          "copy": {
+            "en": {
+              "action": "Import your compatible 2048-byte monitor ROM, run the CPU until initialization finishes, then pause and load the unchanged first-display cells. With a qualified ROM, enable the listing breakpoint at cell 0, use Run CPU and enter 0, 0, 0, PC, RUN on the original keypad. At the breakpoint, choose Step CP1 command and read the teaching PC and full accumulator.",
+          "explain": "The earlier keypad lesson distinguished two execution levels: CPU step advances one 8049 instruction, while keypad STEP asks the monitor to execute a teaching command. Step CP1 command is another control at the teaching-command level: it runs the monitor between observed command boundaries. This check completes automatically only after an engine event reports that cell 0 really completed AKO 42 with accumulator 00.042.",
+              "hint": "The expected next cell is 1 and the accumulator is 00.042. Do not reset after loading. Command stepping at the idle monitor requires the original STEP key or RUN toward a breakpoint first. Automatic observations currently require the qualified 2716 ROM; another ROM retains CPU controls and manual completion.",
+              "manual": "I observed AKO 42 complete and recorded the teaching PC and full accumulator"
+            },
+            "de": {
+              "action": "Importiere dein kompatibles Monitor-ROM mit 2048 Bytes, lass die CPU ihre Initialisierung beenden, pausiere und lade die unveränderten Zellen des ersten Anzeigebeispiels. Aktiviere bei einem qualifizierten ROM den Listing-Haltepunkt an Zelle 0, starte die CPU und gib auf der Originaltastatur 0, 0, 0, PC, RUN ein. Wähle am Haltepunkt „CP1-Befehlsschritt“ und lies Lernprogrammzähler und vollständigen Akkumulator ab.",
+          "explain": "Die frühere Tastaturlektion unterschied zwei Ausführungsebenen: „CPU-Schritt“ führt einen 8049-Befehl aus, während STEP auf der Tastatur einen Lernbefehl vom Monitor ausführen lässt. „CP1-Befehlsschritt“ ist eine weitere Steuerung auf der Lernbefehlsebene: Sie führt den Monitor zwischen beobachteten Befehlsgrenzen aus. Diese Prüfung bestätigt sich nur automatisch, wenn ein Engine-Ereignis die tatsächliche Ausführung von AKO 42 an Zelle 0 mit Akkumulator 00.042 meldet.",
+              "hint": "Erwartet werden die nächste Zelle 1 und Akkumulator 00.042. Setze nach dem Laden nicht zurück. Im wartenden Monitor benötigst du zuerst die Originaltaste STEP oder RUN bis zu einem Haltepunkt. Automatische Beobachtungen benötigen derzeit das qualifizierte 2716-ROM; mit anderen ROMs bleiben CPU-Steuerung und manuelle Bestätigung verfügbar.",
+              "manual": "Ich habe die Ausführung von AKO 42 beobachtet und Lernprogrammzähler sowie vollständigen Akkumulator notiert"
+            }
+          },
+          "observe": {
+            "event": "cp1-command",
+            "match": {
+              "profileQualified": true,
+              "address": 0,
+              "opcode": 4,
+              "operand": 42,
+              "outcome": "completed",
+              "accumulatorOpcode": 0,
+              "accumulatorOperand": 42
+            }
+          }
+        },
+        {
+          "id": "source-agreement",
+          "copy": {
+            "en": {
+              "action": "While paused, change the source constant from 42 to 73 without loading it. Compare the source listing with live RAM, then undo the edit. Enable a breakpoint at cell 1 and resume; observe it again when SPU returns to ANZ.",
+              "explain": "A source highlight requires matching bytes in RAM. A breakpoint belongs to a cell address, even when its source draft changes. Resuming from a breakpoint allows that command once and stops again when a loop returns.",
+              "hint": "The edited row must be marked as a draft that differs from RAM. Step CP1 command can span many 8049 instructions; long waits can exhaust a bounded instruction budget and be resumed. The comparison indicator reports the current condition, which later monitor work can clear.",
+              "manual": "I checked the draft mismatch and a breakpoint on loop reentry"
+            },
+            "de": {
+              "action": "Ändere im pausierten Zustand die Quellkonstante von 42 auf 73, ohne sie zu laden. Vergleiche Listing und Live-RAM und mache die Änderung rückgängig. Aktiviere einen Haltepunkt an Zelle 1 und setze fort; beobachte ihn erneut, wenn SPU zu ANZ zurückkehrt.",
+              "explain": "Eine Quellmarkierung setzt passende Bytes im RAM voraus. Ein Haltepunkt gehört zur Zelladresse, auch wenn sich der Quelltextentwurf ändert. Fortsetzen lässt diesen Befehl einmal passieren und hält bei der nächsten Schleifenrunde erneut an.",
+              "hint": "Die bearbeitete Zeile muss als vom RAM abweichender Entwurf erscheinen. Ein CP1-Befehl kann viele 8049-Befehle benötigen. Lange Wartezeiten können das begrenzte Befehlsbudget ausschöpfen und lassen sich fortsetzen. Die Vergleichsanzeige zeigt die aktuelle Bedingung; spätere Monitorarbeit kann sie löschen.",
+              "manual": "Ich habe die Abweichung des Entwurfs und den Haltepunkt bei der Schleifenrückkehr geprüft"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "cp1-cp5-binary",
+      "version": 1,
+      "exampleId": "cp1-cp5-binary",
+      "loadMode": "circuit-only",
+      "wave": "cp1-8",
+      "topic": "parallel-binary-panel",
+      "domains": [
+        "computer-architecture",
+        "code",
+        "debugging"
+      ],
+      "depth": "intermediate",
+      "ageGuidance": "11+",
+      "minutes": 25,
+      "environment": "simulation",
+      "languages": [],
+      "prerequisites": [
+        "cp1-switch-reading",
+        "cp1-output-loop"
+      ],
+      "copy": {
+        "en": {
+          "title": "Eight switches, one byte",
+          "objective": "Trace an eight-bit input through a CP1 program, a stored sample and eight driven LEDs."
+        },
+        "de": {
+          "title": "Acht Schalter, ein Byte",
+          "objective": "Verfolge eine Acht-Bit-Eingabe durch ein CP1-Programm, einen gespeicherten Messwert und acht angesteuerte LEDs."
+        }
+      },
+      "checkpoints": [
+        {
+          "id": "startup-and-polarity",
+          "copy": {
+            "en": {
+          "action": "Open the CP5 binary example. Under CP1 Ports, find Input in the P1 row and Latch in the P2 row; in the instruments panel, find Switches. Import your compatible 2048-byte monitor ROM and use Run CPU until initialization finishes. Pause CPU and load the cells. Resume without resetting and enter 0, 0, 0, PC, RUN on the CP1 keypad. Compare the LEDs after initialization with the later program-controlled pattern.",
+              "explain": "Each closed switch pulls its input low; opening it lets the pull-up produce a high bit. The program first writes zero to the output, waits, then samples P1, stores the byte in cell 32 and copies it to P2. The output driver controls the real LED branches.",
+              "hint": "A high startup port can light all LEDs before the program clears it. Start with all switches closed for input zero. This is a 5 V teaching circuit inspired by CP5, not a model of its original supply or power ratings. LED levels come from the circuit solver.",
+              "manual": "I recorded switch polarity and the startup-to-program output change"
+            },
+            "de": {
+          "action": "Öffne das CP5-Binärbeispiel. Finde unter „Ports“ im CP1-Feld die Spalte „Eingang“ in Zeile P1 und „Register“ in Zeile P2 sowie „Schalter“ im Instrumentenpanel. Importiere dein kompatibles Monitor-ROM mit 2048 Bytes und wähle „CPU ausführen“, bis die Initialisierung beendet ist. Wähle „CPU pausieren“ und lade die Zellen. Setze ohne Zurücksetzen fort und gib auf der CP1-Tastatur 0, 0, 0, PC, RUN ein. Vergleiche die LEDs nach der Initialisierung mit dem späteren programmgesteuerten Muster.",
+              "explain": "Jeder geschlossene Schalter zieht seinen Eingang auf Low; beim Öffnen erzeugt der Pull-up ein High-Bit. Das Programm schreibt zuerst null auf den Ausgang, wartet, liest P1, speichert das Byte in Zelle 32 und kopiert es nach P2. Der Ausgangstreiber steuert die echten LED-Zweige.",
+              "hint": "Ein High-Startpegel kann alle LEDs einschalten, bevor das Programm sie löscht. Beginne mit geschlossenen Schaltern für Eingabe null. Dies ist eine von CP5 angeregte 5-V-Lernschaltung, kein Modell seiner ursprünglichen Versorgung oder Belastbarkeit. Die LED-Pegel stammen aus dem Schaltungslöser.",
+              "manual": "Ich habe Schalterpolarität und den Wechsel vom Startzustand zur Programmausgabe notiert"
+            }
+          }
+        },
+        {
+          "id": "patterns-and-pause",
+          "copy": {
+            "en": {
+          "action": "Under Switches in the instruments panel, open only S1, S3, S6 and S8; keep S2, S4, S5 and S7 closed. After the next sample, compare P1 Input and P2 Latch under Ports, cell 32 under Memory, the display and lit LEDs 1, 3, 6 and 8. Close those four switches, then open only S2, S4, S5 and S7 for byte 90. Pause CPU, change one switch, and compare the immediate input change with the held output; use Run CPU to allow the next sample.",
+              "explain": "The switch can change the electrical input while the CPU is paused. The output stays at its previous sample until the firmware runs again. This separates the external circuit, program memory and execution time.",
+          "hint": "S1 is bit 0 (weight 1); S8 is bit 7 (weight 128). Open produces a high bit and Closed produces a low bit. Ports uses hexadecimal: A5 means decimal 165, and 5A means 90. Memory cell 32 shows opcode 000 and operand 165 or 090; the display shows A00.165 or A00.090. Wait for the sampling loop and record the observed states yourself; this checkpoint does not infer an LED result from source text.",
+              "manual": "I matched both binary patterns and verified that output waits for resumed execution"
+            },
+            "de": {
+          "action": "Öffne unter „Schalter“ im Instrumentenpanel nur S1, S3, S6 und S8; lasse S2, S4, S5 und S7 geschlossen. Vergleiche nach der nächsten Abtastung unter „Ports“ den „Eingang“ von P1 und das „Register“ von P2, unter „Speicher“ Zelle 32, die Anzeige und die leuchtenden LEDs 1, 3, 6 und 8. Schließe diese vier Schalter und öffne dann nur S2, S4, S5 und S7 für Byte 90. Wähle „CPU pausieren“, ändere einen Schalter und vergleiche die sofortige Eingangsänderung mit dem gehaltenen Ausgang. Wähle für die nächste Abtastung „CPU ausführen“.",
+              "explain": "Der Schalter kann den elektrischen Eingang auch bei pausierter CPU ändern. Der Ausgang behält seinen vorherigen Messwert, bis die Firmware wieder läuft. So werden externe Schaltung, Programmspeicher und Ausführungszeit unterscheidbar.",
+          "hint": "S1 ist Bit 0 (Wert 1); S8 ist Bit 7 (Wert 128). „Offen“ erzeugt ein High-Bit und „Geschlossen“ ein Low-Bit. „Ports“ verwendet Hexadezimalzahlen: A5 bedeutet dezimal 165, 5A bedeutet 90. Speicherzelle 32 zeigt Befehl 000 und Operand 165 oder 090; die Anzeige zeigt A00.165 oder A00.090. Warte auf die Abtastschleife und protokolliere die Zustände selbst; diese Prüfung leitet kein LED-Ergebnis aus dem Quelltext ab.",
+              "manual": "Ich habe beide Binärmuster verglichen und geprüft, dass der Ausgang auf die fortgesetzte Ausführung wartet"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

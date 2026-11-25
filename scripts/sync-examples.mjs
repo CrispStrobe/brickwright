@@ -112,10 +112,21 @@ async function discoverRemote () {
     }
     const dirs = [...dirSet].sort();
 
+    // Fetch every declared file, including CP1 source and bilingual lesson prose.
+    // The fixed legacy names below remain optional extras, not the format contract.
+    const declared = [...new Set(index.flatMap(entry => Object.values(entry.files || {})))];
+    for (const name of declared) {
+        if (typeof name !== 'string' || name.startsWith('/') || name.split('/').includes('..')) {
+            throw new Error(`invalid declared example path: ${String(name)}`);
+        }
+        files.set(name, await readSource(name));
+    }
+
     // Fetch known file names per directory
     const KNOWN_FILES = ['program.bw', 'circuit.json', 'EXPECTED.md'];
     for (const dir of dirs) {
         for (const name of KNOWN_FILES) {
+            if (files.has(`${dir}/${name}`)) continue;
             try {
                 const buf = await readSource(`${dir}/${name}`);
                 files.set(`${dir}/${name}`, buf);

@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 
 import DebugDrawer from './debug-drawer.jsx';
+import Cp1Host from './cp1-host.jsx';
 import DebugInspector from './debug-inspector.jsx';
 import DebugPipeline from './debug-pipeline.jsx';
 import DebugFrames from './debug-frames.jsx';
@@ -359,7 +360,7 @@ class DebugPanel extends React.Component {
         // run an all-zero image. Keep the media and recreate the runner so the
         // newly extracted machine and the already loaded image boot together.
         const hasBootMedia = !!this._bootMedia;
-        const kind = detail.kind === 'z80' ? 'z80'
+        const kind = detail.kind === 'cp1' ? 'cp1' : detail.kind === 'z80' ? 'z80'
             : detail.kind === 'eater6502' || detail.kind === '6502' ? 'eater6502'
                 : this.state.kind;
         this.setState({machineConfig: detail.config, kind, runner: null,
@@ -443,7 +444,7 @@ class DebugPanel extends React.Component {
             // identical to one that failed to start.
             romAt: typeof romAt === 'number' ? romAt : null
         };
-        const nextKind = kind === 'riscv32' ? 'riscv32'
+        const nextKind = kind === 'cp1' ? 'cp1' : kind === 'riscv32' ? 'riscv32'
             // The RP2040 media bundle (a pico-sdk .uf2 in a `flash` slot) boots
             // on the rp2040js target from flash — debug-runner's
             // attachRp2040jsBundle, UART0 REPL on the serial terminal below.
@@ -737,6 +738,7 @@ class DebugPanel extends React.Component {
         // when no core was published at all, stayed on the 8051 emulator
         // and the pendant's matrix never lit (owner report, 3791c09).
         const DEVICE_TO_KIND = {
+            cp1: 'cp1', 'kosmos-cp1': 'cp1',
             attiny88: 'attiny88', attiny85: 'attiny85',
             'arduino-mega': 'atmega2560', atmega2560: 'atmega2560',
             pico: 'rp2040js', stm32f030: 'stm32f0', esp8266: 'esp8266', eater6502: 'eater6502',
@@ -749,7 +751,7 @@ class DebugPanel extends React.Component {
         // emulator by default — and the 8086 image would have been run as
         // 8051 opcodes. Plausible and wrong, which is the same shape as the
         // ATtiny88 note above.
-        const CORE_TO_KIND = { '8051': 'emulator', arduino: 'avr8js', rp2040: 'rp2040js', arm: 'stm32f0', esp8266: 'esp8266', micropython: 'rp2040js', w65c02: 'eater6502', z80: 'z80', i8086: 'i8086' };
+        const CORE_TO_KIND = { cp1: 'cp1', '8049': 'cp1', '8051': 'emulator', arduino: 'avr8js', rp2040: 'rp2040js', arm: 'stm32f0', esp8266: 'esp8266', micropython: 'rp2040js', w65c02: 'eater6502', z80: 'z80', i8086: 'i8086' };
         // The user's remembered pick for THIS device wins over the map:
         // choosing an engine in the picker persists per device (see
         // onChange below), so "I always debug my Uno on the 2560 engine"
@@ -1453,6 +1455,16 @@ class DebugPanel extends React.Component {
                 background: '#1a1a2e', border: '1px solid #2c3e50', borderRadius: 8,
                 fontFamily: 'monospace', fontSize: 12, color: '#bdc3c7'
             }}>
+                {this.state.kind === 'cp1' ? <Cp1Host
+                    runner={this.state.runner} running={running} locale={this.props.locale}
+                    configuration={this.state.machineConfig}
+                    onConfigure={config => {
+                        this._onMachineExtracted({detail: {kind: 'cp1', config}});
+                        return new Promise(resolve => this.setState({machineConfig: config}, resolve));
+                    }}
+                    onImportRom={image => this._onMediaLoad({detail: {kind: 'cp1', slotId: 'rom',
+                        bytes: image.bytes, name: image.name}})}
+                    onRun={() => this.onStart()} /> : null}
                 {inferredBoard ? (
                     <div data-inferred-board-warning role="alert" style={{
                         display: 'flex', gap: 8, alignItems: 'flex-start',

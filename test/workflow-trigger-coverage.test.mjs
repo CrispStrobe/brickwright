@@ -79,3 +79,47 @@ test('either committed debugger UI copy triggers the focused debugger lane', () 
         'test/workflow-trigger-coverage.test.mjs'
     ]);
 });
+
+test('CP1 qualification runs for both committed UI copies, runner, persistence, fixtures and supplier pins', () => {
+    assertLane('cp1-qualification.yml', [
+        '.github/workflows/cp1-qualification.yml',
+        'vendor-pins.json', 'package.json', 'package-lock.json',
+        'packages/scratch-gui/package*.json',
+        'overlay/scratch-gui/examples/cp1-*/**',
+        'packages/scratch-gui/examples/cp1-*/**',
+        'overlay/scratch-gui/src/components/tw-pseudocode/cp1-*',
+        'packages/scratch-gui/src/components/tw-pseudocode/cp1-*',
+        'overlay/scratch-gui/src/lib/cp1-*',
+        'packages/scratch-gui/src/lib/cp1-*',
+        'overlay/scratch-gui/src/lib/bw-debug/**',
+        'packages/scratch-gui/src/lib/bw-debug/**',
+        'overlay/scratch-gui/src/lib/bw-project-bundle.js',
+        'packages/scratch-gui/src/lib/bw-project-bundle.js',
+        'overlay/scratch-gui/src/lib/bw-project-load.js',
+        'packages/scratch-gui/src/lib/bw-project-load.js',
+        'overlay/scratch-gui/src/components/gui/guided-lessons.*',
+        'packages/scratch-gui/src/components/gui/guided-lessons.*',
+        'overlay/scratch-gui/src/components/gui/lesson-waves/*.json',
+        'packages/scratch-gui/src/components/gui/lesson-waves/*.json',
+        'scripts/detect-lesson-defects.mjs',
+        'scripts/verify-cp1-*.mjs', 'scripts/lib/cp1-*.mjs', 'test/fixtures/cp1-panel/**',
+        'test/cp1-*.test.mjs', 'test/workflow-trigger-coverage.test.mjs'
+    ]);
+    const workflow = readFileSync(path.join(ROOT, '.github/workflows/cp1-qualification.yml'), 'utf8');
+    assert.match(workflow, /branches: \[main, 'feat\/kosmos-cp1-20261124'\]/);
+    assert.match(workflow, /permissions:\n  contents: read/);
+    assert.match(workflow, /npm run verify:cp1:browser/);
+    assert.match(workflow, /node scripts\/verify-cp1-panel-browser\.mjs/);
+    assert.match(workflow, /node scripts\/verify-cp1-runner-browser\.mjs/);
+    assert.match(workflow, /node scripts\/verify-cp1-cp5-browser\.mjs/);
+    assert.match(workflow, /--example overlay\/scratch-gui\/examples\/cp1-cp5-binary\/circuit\.json/);
+    assert.match(workflow, /--deps packages\/scratch-gui\/node_modules --compiler-deps/);
+    assert.match(workflow, /connectorEngine:.*connectorRevision/);
+    assert.match(workflow, /sharedRunnerEngine:.*inputs\.suppliers\['bw-board'\]/);
+    for (const sourceGate of ['cp1-debug-view', 'cp1-lesson-observation', 'cp1-lessons', 'cp1-lesson-defects']) {
+        assert.ok(workflow.includes(`test/${sourceGate}.test.mjs`), `${sourceGate} is not qualified`);
+    }
+    assert.doesNotMatch(workflow, /--compile-only/);
+    assert.match(workflow, /if: always\(\)/);
+    assert.doesNotMatch(workflow, /continue-on-error|pull_request_target|\$\{\{\s*secrets\./);
+});

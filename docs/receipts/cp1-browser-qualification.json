@@ -1,0 +1,434 @@
+{
+  "schema": "brickwright.cp1.browser-qualification",
+  "version": 1,
+  "status": "passed",
+  "recordedAt": "2026-11-25T06:28:23.767Z",
+  "run": {
+    "id": 45559592991,
+    "url": "https://github.com/CrispStrobe/brickwright-lite/actions/runs/45559592991",
+    "jobId": 139019819051,
+    "workflow": ".github/workflows/cp1-qualification.yml",
+    "branch": "feat/kosmos-cp1-20261124",
+    "testedLiteRevision": "8498ebdd322b515aa97b6c3930ef77270e54a52e",
+    "conclusion": "success"
+  },
+  "sources": {
+    "bw-board": "1fa4734c18c7e037ff220e508ad33da5273d999f",
+    "bw-circuit-ui": "dd1c007c4c5f2333f2acc905530703144f043ebf",
+    "sb3-creator": "fdadba6743839763fcb8bb2fad64063937e16a7e",
+    "connectorStandaloneEngine": {
+      "revision": "85fcc3a2785130c3317cbce3e4f0457a4e8e180d",
+      "source": "Circuit UI standalone devDependency lock"
+    },
+    "sharedRunnerEngine": {
+      "revision": "1fa4734c18c7e037ff220e508ad33da5273d999f",
+      "source": "Explicit Lite-adopted source alias"
+    },
+    "completeInputsArtifact": "inputs.json"
+  },
+  "runtime": {
+    "node": "v22.23.5",
+    "playwright": "1.61.1",
+    "chromium": "149.0.7827.55",
+    "react18": "18.3.1",
+    "guiReact": "16.14.0"
+  },
+  "artifact": {
+    "id": 14996873996,
+    "name": "cp1-browser-8498ebdd322b515aa97b6c3930ef77270e54a52e",
+    "url": "https://api.github.com/repos/CrispStrobe/brickwright-lite/actions/artifacts/14996873996",
+    "sizeBytes": 2539223,
+    "digest": "sha256:82da06383c6454861510b072749633d3a312bfe1be14172af3116b0aa275227d",
+    "downloadDigestVerified": true,
+    "createdAt": "2026-11-25T06:21:58Z",
+    "expiresAt": "2026-12-09T06:21:57Z"
+  },
+  "scope": {
+    "actualModules": [
+      "CircuitDesigner",
+      "Cp1Host",
+      "createDebugRunner",
+      "BoardImpl",
+      "project bundle save",
+      "loadProjectFile restore"
+    ],
+    "firmware": "Original synthetic 2048-byte 8049 display and input/output programs only",
+    "historicalFirmwareUsed": false,
+    "fullProductionApplicationBrowserSession": false,
+    "completeScratchVm": false,
+    "physicalHardwareMeasured": false,
+    "fixtureVm": "Minimal archive-validating delegate; production loadProjectFile owns state application and notification",
+    "propTypes": "Validator-only component stub; React 16's internal checkPropTypes subpath uses the real dependency"
+  },
+  "prerequisiteGates": {
+    "sourceContracts": {
+      "passed": 55,
+      "failed": 0,
+      "skipped": 0,
+      "evidence": "workflow job log"
+    },
+    "componentSsr": [
+      {
+        "react": "18.3.1",
+        "passed": 17
+      },
+      {
+        "react": "16.14.0",
+        "passed": 17
+      }
+    ],
+    "connectorStaticGeometry": "passed"
+  },
+  "browserGates": {
+    "connector": {
+      "status": "passed",
+      "browser": "149.0.7827.55",
+      "artifactResult": "connector/result.json",
+      "checks": [
+        "base and CP3 palette entries",
+        "40 contacts: rotation 0, flipped false",
+        "40 contacts: rotation 0, flipped true",
+        "40 contacts: rotation 90, flipped false",
+        "40 contacts: rotation 90, flipped true",
+        "40 contacts: rotation 180, flipped false",
+        "40 contacts: rotation 180, flipped true",
+        "40 contacts: rotation 270, flipped false",
+        "40 contacts: rotation 270, flipped true",
+        "Build Machine configuration handoff",
+        "wrong-size ROM refusal",
+        "original synthetic ROM import"
+      ],
+      "scope": "Actual CircuitDesigner connector interactions; no historical firmware or full Lite application"
+    },
+    "panel-react18": {
+      "status": "passed",
+      "browser": "149.0.7827.55",
+      "react": "18.3.1",
+      "artifactResult": "panel-react18/result.json",
+      "checks": [
+        "raw displays",
+        "thirty keys",
+        "incomplete-source reload",
+        "RAM load",
+        "load refusal",
+        "pointer/keyboard ownership",
+        "blur release",
+        "manual/circuit inputs",
+        "RAM editing",
+        "async CP3 source preservation",
+        "German narrow layout"
+      ],
+      "scope": "Actual component browser behavior with original synthetic 8049 firmware and real CP1 machine"
+    },
+    "runner-react18": {
+      "status": "passed",
+      "browser": "149.0.7827.55",
+      "react": "18.3.1",
+      "artifactResult": "runner-react18/result.json",
+      "checks": [
+        "ROM import attaches one machine to the actual designer board and remains paused",
+        "unknown synthetic firmware exposes raw CPU controls without claiming qualified command debugging",
+        "real canvas button press and release propagate through 8049 firmware to resistor/LED",
+        "pause, 8049 instruction step and reset preserve the shared circuit timeline",
+        "ordinary .sb3 adapter saves circuit and incomplete source with ROM identity only",
+        "fresh-browser project restore preserves the draft without ROM bytes, held keys or automatic execution"
+      ],
+      "scope": "Actual CircuitDesigner, Cp1Host, createDebugRunner, BoardImpl, .sb3 bundle and loadProjectFile in an authored browser shell with a minimal VM delegate"
+    },
+    "panel-react16": {
+      "status": "passed",
+      "browser": "149.0.7827.55",
+      "react": "16.14.0",
+      "artifactResult": "panel-react16/result.json",
+      "checks": [
+        "raw displays",
+        "thirty keys",
+        "incomplete-source reload",
+        "RAM load",
+        "load refusal",
+        "pointer/keyboard ownership",
+        "blur release",
+        "manual/circuit inputs",
+        "RAM editing",
+        "async CP3 source preservation",
+        "German narrow layout"
+      ],
+      "scope": "Actual component browser behavior with original synthetic 8049 firmware and real CP1 machine"
+    },
+    "runner-react16": {
+      "status": "passed",
+      "browser": "149.0.7827.55",
+      "react": "16.14.0",
+      "artifactResult": "runner-react16/result.json",
+      "checks": [
+        "ROM import attaches one machine to the actual designer board and remains paused",
+        "unknown synthetic firmware exposes raw CPU controls without claiming qualified command debugging",
+        "real canvas button press and release propagate through 8049 firmware to resistor/LED",
+        "pause, 8049 instruction step and reset preserve the shared circuit timeline",
+        "ordinary .sb3 adapter saves circuit and incomplete source with ROM identity only",
+        "fresh-browser project restore preserves the draft without ROM bytes, held keys or automatic execution"
+      ],
+      "scope": "Actual CircuitDesigner, Cp1Host, createDebugRunner, BoardImpl, .sb3 bundle and loadProjectFile in an authored browser shell with a minimal VM delegate"
+    },
+    "cp5-react16": {
+      "status": "passed",
+      "browser": "149.0.7827.55",
+      "react": "16.14.0",
+      "artifactResult": "cp5-react16/result.json",
+      "checks": [
+        "eight live controls are reachable and display the real closed initial state",
+        "12 walking, mixed and endpoint byte patterns pass from real switch clicks through 8049/8155 to all eight LED branches",
+        "desktop and 390-pixel workbench evidence with the entire rendered CP1 face inside the fitted canvas and no horizontal page overflow",
+        "all eight narrow switch controls can be scrolled into view with unobstructed hit targets",
+        "narrow keyboard switch toggle changes the live contact while paused, advances neither clock, and reaches firmware/LEDs after resume"
+      ],
+      "scope": "Exact CP5-style example, actual CircuitDesigner live controls, Lite host/runner and electrical solver"
+    }
+  },
+  "cp5Observations": {
+    "parts": 35,
+    "wires": 67,
+    "byteObservations": 14,
+    "inputByteSequence": [
+      0,
+      1,
+      2,
+      4,
+      8,
+      16,
+      32,
+      64,
+      128,
+      165,
+      255,
+      0,
+      165,
+      164
+    ],
+    "ledBranchObservations": 112,
+    "simulatedLedCurrentAmps": {
+      "minimumOn": 0.0022721205245427897,
+      "maximumOn": 0.0022733218734611645,
+      "maximumAbsoluteOff": 6.217291254083625e-27
+    },
+    "renderedFaceFits": [
+      {
+        "label": "desktop",
+        "viewport": {
+          "width": 1440,
+          "height": 1100
+        },
+        "canvas": {
+          "x": 214,
+          "y": 108,
+          "width": 922,
+          "height": 568
+        },
+        "cp1Face": {
+          "x": 822.591064453125,
+          "y": 187.71524047851562,
+          "width": 281.125732421875,
+          "height": 374.8344421386719
+        },
+        "minimumEdgeClearancePx": 32.283203125
+      },
+      {
+        "label": "narrow",
+        "viewport": {
+          "width": 390,
+          "height": 1100
+        },
+        "canvas": {
+          "x": 24,
+          "y": 136,
+          "width": 354,
+          "height": 568
+        },
+        "cp1Face": {
+          "x": 259.0523681640625,
+          "y": 339.648193359375,
+          "width": 110.57589721679688,
+          "height": 147.43453979492188
+        },
+        "minimumEdgeClearancePx": 8.371734619140625
+      }
+    ],
+    "fullMeasurementsArtifact": "cp5-react16/result.json"
+  },
+  "visualReview": [
+    {
+      "images": [
+        {
+          "artifactPath": "connector/connector-desktop.png",
+          "sha256": "07797ff8b629e107b08af46513c8309d342b23c70273741a4700244732900eec"
+        }
+      ],
+      "observations": "Full CP1 connector and all port-bank labels fit the desktop canvas. The selection toolbar crosses a middle divider but does not obscure contacts."
+    },
+    {
+      "images": [
+        {
+          "artifactPath": "panel-react16/desktop.png",
+          "sha256": "f82156b6df4762493b2e2b6b587d2393a6d2b3fad0b2314a0476564cb969b4bf"
+        },
+        {
+          "artifactPath": "panel-react18/desktop.png",
+          "sha256": "f82156b6df4762493b2e2b6b587d2393a6d2b3fad0b2314a0476564cb969b4bf"
+        }
+      ],
+      "observations": "The CP3 checkbox and 256-cell badge agree; the edited ORG 255 draft, loaded cell 255, six displays and thirty key faces are visible. The two React-version images are byte-identical."
+    },
+    {
+      "images": [
+        {
+          "artifactPath": "panel-react16/mobile-de-dark.png",
+          "sha256": "f9a2b2a84e25f20c027459677914a0e89b1c3bd51b4603ca87649883c4405fdb"
+        },
+        {
+          "artifactPath": "panel-react18/mobile-de-dark.png",
+          "sha256": "f9a2b2a84e25f20c027459677914a0e89b1c3bd51b4603ca87649883c4405fdb"
+        }
+      ],
+      "observations": "At 390 pixels the German dark panel displays all six digits and thirty key faces; CPU actions and text wrap. The source listing uses its contained horizontal scroll region. The two React-version images are byte-identical."
+    },
+    {
+      "images": [
+        {
+          "artifactPath": "runner-react18/restored-project-desktop.png",
+          "sha256": "27e98ce05787baaf9a2bd4fd5a6558578896f5d4689d1dea5f5b78fce28ff93f"
+        }
+      ],
+      "observations": "The complete trainer and attached circuit are visible. The exact incomplete draft and ROM identity are restored, while the CPU controls and keypad remain disabled without imported firmware."
+    },
+    {
+      "images": [
+        {
+          "artifactPath": "cp5-react16/cp5-desktop.png",
+          "sha256": "71d50f2a54f1a3720eb64082ca9aafc66291a37f6319dac092cb4ff4f9f08655"
+        }
+      ],
+      "observations": "The corrected fitted trainer is fully visible, including the right CP3 banks. All eight switch controls and the eight LED channels are visible."
+    },
+    {
+      "images": [
+        {
+          "artifactPath": "cp5-react16/cp5-narrow.png",
+          "sha256": "93153a9c0c992b9b37107bce450bbf66356f3c88a08c83fc57633627f33db179"
+        },
+        {
+          "artifactPath": "cp5-react16/cp5-narrow-controls.png",
+          "sha256": "7f7a074347c980947d448d5e1084d3b20a54beb6001bd7f6ea5a517e775264ae"
+        }
+      ],
+      "observations": "The complete CP1 face fits the 390-pixel circuit overview. After normal inner-pane scrolling, all S1-S8 controls are visible and legible. The CP1 front panel and its wrapped actions fit below."
+    }
+  ],
+  "limitations": [
+    "This is an actual-component integration browser suite in authored shells; production GUI menus and the complete Scratch VM were not exercised.",
+    "Known-monitor CP1 semantic stepping was not exercised in these browsers; synthetic firmware is correctly shown as unqualified for command debugging.",
+    "At 390 pixels the circuit is an overview requiring zoom for small schematic labels, and the small generic voltage legend remains partly clipped at the canvas right edge."
+  ],
+  "previousRuns": [
+    {
+      "runId": 45552587031,
+      "url": "https://github.com/CrispStrobe/brickwright-lite/actions/runs/45552587031",
+      "lite": "50b32fa7405dcc5f30637b23f1a6be69c0ee12de",
+      "status": "failed",
+      "artifact": {
+        "id": 14994825956,
+        "digest": "sha256:fb7993f070a870083a5a64a9281bfc4402cc51aa2d91898f3418d5f5885f54da"
+      },
+      "connector": "passed",
+      "failure": "Panel loader used a named Chromium export from a dynamically imported resolved CommonJS Playwright file; no panel browser launch",
+      "fix": "Use the explicitly supplied Playwright CommonJS registry API"
+    },
+    {
+      "runId": 45555731912,
+      "url": "https://github.com/CrispStrobe/brickwright-lite/actions/runs/45555731912",
+      "lite": "ccac35d80d2c03c0faa4adc77b2b5d3284b456ec",
+      "status": "failed",
+      "artifact": {
+        "id": 14995093346,
+        "digest": "sha256:b1a3475af2d2aa67a635ee46be9a3579f891ef1c93d4ade48d581110a4e6a371",
+        "downloadDigestVerified": true
+      },
+      "connector": "passed",
+      "failures": [
+        {
+          "gate": "panel-react18",
+          "cause": "Immediate assertion raced the asynchronous React commit after switching fixture input ownership to circuit",
+          "evidence": "Failure screenshot already shows manual input checkboxes removed",
+          "fix": "Wait for actual checkbox detachment, retain the zero-count assertion"
+        },
+        {
+          "gate": "runner-react18",
+          "cause": "Fixture restored storage through low-level extraction without the normal project's load notification",
+          "completedChecks": [
+            "ROM import/shared machine and board",
+            "Unqualified synthetic semantic controls",
+            "Actual circuit button through CPU to LED",
+            "Shared pause/step/reset clock",
+            "SB3 incomplete-source save with ROM identity only"
+          ],
+          "fix": "Use production loadProjectFile with explicit minimal VM delegate and verify normal load announcement"
+        },
+        {
+          "gates": [
+            "panel-react16",
+            "runner-react16",
+            "cp5-react16"
+          ],
+          "cause": "Broad fixture PropTypes alias rewrote React16's development prop-types/checkPropTypes subpath",
+          "fix": "Exact package alias preserves React16's genuine internal subpath; development dependency optimizer preflight passed"
+        }
+      ]
+    },
+    {
+      "runId": 45557001274,
+      "url": "https://github.com/CrispStrobe/brickwright-lite/actions/runs/45557001274",
+      "lite": "b9033ae6ebea0b5854f9489110373a3bbcc76728",
+      "status": "failed",
+      "artifact": {
+        "id": 14996047857,
+        "digest": "sha256:3565cb7b20544f963738a40a957e26c02e3c164ae20061e3dac57d8af3cf7505",
+        "downloadDigestVerified": true
+      },
+      "connector": "passed",
+      "failures": [
+        {
+          "gate": "panel-react18",
+          "cause": "A check() call assumed immediate checked state while the fixture intentionally held the asynchronous CP3 request",
+          "fix": "Click and verify pending disabled/unapplied state, then resolve and wait for the applied checked state"
+        },
+        {
+          "gate": "panel-react16",
+          "cause": "Actual React16 SyntheticKeyboardEvent lacks code: keydown ownership keyboard:4 did not match native keyup ownership keyboard:Digit4",
+          "fix": "Shared keyboard-owner helper reads nativeEvent.code when the synthetic code field is absent"
+        },
+        {
+          "gates": [
+            "runner-react18",
+            "runner-react16"
+          ],
+          "cause": "Assertion read CPU time before scheduled single-step execution completed",
+          "fix": "Wait for observed instruction time advance and paused state, then retain exact shared clock-delta assertions"
+        },
+        {
+          "gate": "cp5-react16 visual review",
+          "cause": "Actual CP1 footprint was the generic 48x48 fallback while rendered artwork is 300×400",
+          "fix": "Supplier CP1 footprint corrected to 300×400 with rotated/mirrored fit regressions; browser now requires rendered face containment after Fit"
+        }
+      ],
+      "cp5": {
+        "gateStatus": "passed",
+        "react": "16.14.0",
+        "browser": "149.0.7827.55",
+        "parts": 35,
+        "wires": 67,
+        "measurements": 14,
+        "circuitUi": "5d5ad58540e7e6f120a693aa223a9bcce6145c2e",
+        "review": "Functional switch/firmware/LED and pause tests passed. Screenshot inspection found the CP1 face clipped, so this run does not establish complete geometry qualification."
+      }
+    }
+  ]
+}

@@ -50,6 +50,7 @@ import {readFileSync, existsSync} from 'node:fs';
 import path from 'node:path';
 import {boot, EXAMPLES, circuitPathFor, circuitPathOrNull} from './lesson-bench.mjs';
 import {benchCapabilities} from './bench-capabilities.mjs';
+import {parseCp1Program} from '../overlay/scratch-gui/src/lib/cp1-program.js';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const GUI = path.join(ROOT, 'overlay/scratch-gui/src/components/gui');
@@ -79,6 +80,12 @@ export const OBSERVABLES = {
     // in its own circuit with no program.bw at all. Gating on loadMode alone
     // flagged three correct lessons.
     'debug-phase': {producer: 'tw-pseudocode/circuit-tab.jsx', needs: 'debuggable'},
+    // Only qualified engine observations, relayed by the shared machine runner.
+    // A locally imported exact-ROM profile is a runtime prerequisite; the
+    // curriculum keeps manual completion available when it is unavailable.
+    'cp1-command': {producer: 'lib/bw-debug/debug-runner.js', needs: 'cp1-program'},
+    'cp1-halt': {producer: 'lib/bw-debug/debug-runner.js', needs: 'cp1-program'},
+    'cp1-error': {producer: 'lib/bw-debug/debug-runner.js', needs: 'cp1-program'},
     // components/gui/gui.jsx, on peripheral connect/disconnect
     'hardware-state': {producer: 'components/gui/gui.jsx', needs: 'hardware'},
     // guided-lessons.jsx completes this itself when opened from a starter journey
@@ -190,9 +197,46 @@ const panelCapabilities = exampleId => {
     return out;
 };
 
+/** circuit-tab loads files.cp1 into the CP1 workspace even for circuit-only
+ * lessons. A source file is usable only with the loaded system and its actual
+ * RAM configuration. This establishes source availability, not ROM availability
+ * or successful execution; those remain the learner's explicit observations. */
+export function cp1ExampleCapabilities(entry, {loadMode, partKinds = []}) {
+    const out = {hasCp1Keypad: false, hasCp1Program: false};
+    if (loadMode === 'program-only' || !partKinds.includes('kosmos-cp1')) return out;
+    const circuitFile = entry.files?.circuit;
+    if (!circuitFile || !existsSync(path.join(EXAMPLES, circuitFile))) return out;
+    const part = readJson(path.join(EXAMPLES, circuitFile)).parts?.find(
+        item => item.kind === 'kosmos-cp1');
+    if (!part) return out;
+    out.hasCp1Keypad = true;
+    const sourceFile = entry.files?.cp1;
+    if (!sourceFile || !existsSync(path.join(EXAMPLES, sourceFile))) return out;
+    const assembly = parseCp1Program(readFileSync(path.join(EXAMPLES, sourceFile), 'utf8'),
+        {expansion: part.params?.expansion === true});
+    out.hasCp1Program = assembly.ok && assembly.words.length > 0;
+    return out;
+}
+
+// CP1 has its own named keypad contacts, not a general-purpose external button.
+// Keep the recognized span narrow so a later "press the external button" in the
+// same sentence still reports a missing bench control.
+const CP1_KEY_PRESS = /\bpress(?:es|ing|ed)?\s+(?:the\s+)?(?:(?:CP1\s+)?keypad(?:'s)?\s+|CP1\s+)?["'\x60“”]?(?:CAS|CLR|PC|ACC|CAL|STEP|STP|RUN|OUT|INP|[0-9])["'\x60“”]?(?=\s|[.,;:!?]|$)(?:\s+(?:key|button)\b)?(?!\s+switch\b)/gi;
+
+const firstDemandHit = (demand, source, props) => {
+    if (demand.id !== 'press-a-button' || !props.hasCp1Keypad) return demand.pattern.exec(source);
+    const keypadActions = [...source.matchAll(CP1_KEY_PRESS)];
+    const hits = source.matchAll(new RegExp(demand.pattern.source, demand.pattern.flags + 'g'));
+    for (const hit of hits) {
+        if (!keypadActions.some(action =>
+            hit.index >= action.index && hit.index < action.index + action[0].length)) return hit;
+    }
+    return null;
+};
+
 export function loadCatalog() {
     const waves = ['electricity-1', 'measurement-2', 'languages-3', 'interactive-4',
-        'debugging-5', 'signals-6', 'machines-7'];
+        'debugging-5', 'signals-6', 'machines-7', 'cp1-8'];
     const lessons = [...readJson(path.join(GUI, 'lessons.json')).lessons];
     for (const wave of waves) {
         lessons.push(...readJson(path.join(GUI, 'lesson-waves', `${wave}.json`)).lessons);
@@ -345,14 +389,16 @@ export async function detect(opts = {}) {
             ? readFileSync(path.join(EXAMPLES, programFile), 'utf8') : '';
         const programIsPlaceholder = !/^\s*(WHEN|EVERY|PIN|DEVICE)/mi.test(programSource);
         const panel = panelCapabilities(lesson.exampleId);
+        const cp1 = cp1ExampleCapabilities(entry, {loadMode: lesson.loadMode, partKinds: cap.partKinds});
         const props = {
             ...cap,
+            ...cp1,
             panelWidgets: panel.widgets,
             hasSourceControl: cap.controlKinds.includes('vsource'),
             hasButton: cap.controlKinds.includes('button') || panel.hasButton,
             hasSwitch: cap.controlKinds.includes('switch'),
             hasPot: cap.controlKinds.includes('potentiometer') || panel.hasPot,
-            hasProgram: loadsProgram && !!programFile && !programIsPlaceholder
+            hasProgram: (loadsProgram && !!programFile && !programIsPlaceholder) || cp1.hasCp1Program
         };
 
         for (const checkpoint of lesson.checkpoints) {
@@ -367,6 +413,11 @@ export async function detect(opts = {}) {
                         `observes "${observe.event}", which nothing in the app dispatches`,
                         {known: Object.keys(OBSERVABLES)});
                 } else {
+                    if (spec.needs === 'cp1-program' && !cp1.hasCp1Program) {
+                        add(checkpoint, 'A', 'blocking',
+                            `observes ${observe.event} but no valid CP1 teaching program and system are loaded`,
+                            {producer: spec.producer});
+                    }
                     if (spec.needs === 'program' && !loadsProgram) {
                         add(checkpoint, 'A', 'blocking',
                             `observes ${observe.event} but loadMode is ${lesson.loadMode}, so no program is loaded to run`,
@@ -419,8 +470,8 @@ export async function detect(opts = {}) {
             const imperative = `${copy.action} ${copy.hint}`;
             const background = copy.explain || '';
             for (const demand of DEMANDS) {
-                const inImperative = demand.pattern.exec(imperative);
-                const inBackground = demand.pattern.exec(background);
+                const inImperative = firstDemandHit(demand, imperative, props);
+                const inBackground = firstDemandHit(demand, background, props);
                 if (!inImperative && !inBackground) continue;
                 if (props[demand.needs]) continue;
                 const hit = inImperative || inBackground;
