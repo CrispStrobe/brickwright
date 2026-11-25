@@ -3,9 +3,10 @@
 // Actual CircuitDesigner + Cp1Host + createDebugRunner + project-bundle proof.
 // The surrounding shell and Scratch project.json are fixtures, not the full GUI.
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
 import {mkdir, readFile, writeFile} from 'node:fs/promises';
 import path from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath, pathToFileURL} from 'node:url';
 import JSZip from 'jszip';
 import {cp1BrowserFixture} from './lib/cp1-browser-fixture.mjs';
 import {switchToLedFirmware} from '../test/fixtures/cp1-panel/synthetic-circuit.mjs';
@@ -35,6 +36,7 @@ try {
         browser = await fixture.chromium.launch({headless: true,
             ...(option('--executable') ? {executablePath: option('--executable')} : {})});
         page = await browser.newPage({viewport: {width: 1440, height: 1100}});
+        page.setDefaultNavigationTimeout(90_000);
         page.on('pageerror', error => errors.push(error.message));
         page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
         await page.route('https://compiler.invalid/**', route => { requests.push(route.request().url()); return route.abort(); });
@@ -135,11 +137,70 @@ try {
         await page.screenshot({path: path.join(output, 'restored-project-desktop.png'), fullPage: true});
         checks.push('fresh-browser project restore preserves the draft without ROM bytes, held keys or automatic execution');
         assert.equal(await page.evaluate(() => window.__cp1Integration.compilerCalls), 0);
+        let cassetteRom;
+        if (option('--cassette-rom')) {
+            const firmware = await readFile(option('--cassette-rom'));
+            cassetteRom = createHash('sha1').update(firmware).digest('hex');
+            const {encodeCp2Memory} = await import(pathToFileURL(path.join(board, 'src/cp2-tape.js')));
+            const {encodeCp2Wave} = await import(pathToFileURL(path.join(board, 'src/cp2-wave.js')));
+            const image = new Uint8Array(256);
+            image[0] = 255;
+            image[255] = 91;
+            image[254] = 47;
+            const partial = encodeCp2Memory(image).slice(0, 1 + 3 * 16 + 7);
+            const waveform = encodeCp2Wave(Uint32Array.from(partial, at => at - 14_400_000));
+            await page.close();
+            page = await browser.newPage({viewport: {width: 1440, height: 1100}});
+            page.setDefaultNavigationTimeout(90_000);
+            page.on('pageerror', error => errors.push(error.message));
+            page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+            await page.goto(`${url}/runner.html`, {waitUntil: 'networkidle'});
+            await page.waitForFunction(() => window.__cp1Integration?.board()?.parts?.some(part => part.id === 'trainer'));
+            await page.getByLabel('Import monitor ROM', {exact: true}).setInputFiles({
+                name: 'cp1-cp2.bin', mimeType: 'application/octet-stream', buffer: firmware
+            });
+            await page.waitForFunction(() => window.__cp1Integration.phase() === 'paused');
+            await page.getByRole('button', {name: 'Run CPU', exact: true}).click();
+            await page.waitForFunction(() => window.__cp1Integration.snapshot().display.digits[0] === 0x73);
+            assert.equal(await page.evaluate(() => window.__cp1Integration.snapshot().cp1.profileQualified), true);
+            await page.getByText('CP2 cassette', {exact: true}).click();
+            await page.getByRole('button', {name: 'Arm recording', exact: true}).click();
+            await page.waitForFunction(() => window.__cp1Integration.snapshot().cp2Recording === 'recording');
+            await page.getByRole('button', {name: 'Discard recording', exact: true}).click();
+            await page.waitForFunction(() => window.__cp1Integration.snapshot().cp2Recording === null);
+            await page.getByLabel('Open cassette WAV', {exact: true}).setInputFiles({
+                name: 'truncated-original-test.wav', mimeType: 'audio/wav', buffer: Buffer.from(waveform)
+            });
+            await page.waitForFunction(() => window.__cp1Integration.snapshot().cassettePlaying);
+            const cal = page.getByRole('button', {name: 'CAL', exact: true});
+            await page.waitForFunction(() => !document.querySelector('[data-cp1-key="CAL"]')?.disabled);
+            await cal.scrollIntoViewIfNeeded();
+            const bounds = await cal.boundingBox();
+            assert.ok(bounds);
+            await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+            await page.mouse.down();
+            try {
+                await page.waitForFunction(() => window.__cp1Integration.snapshot().display.digits[0] === 0x1c);
+            } finally {
+                await page.mouse.up();
+            }
+            await page.waitForFunction(() => window.__cp1Integration.snapshot().display.digits.join(',') === '113,0,128,63,63,39',
+                null, {timeout: 120_000});
+            const cells = await page.evaluate(() => [0, 127].map(address => {
+                const {opcode, operand} = window.__cp1Integration.snapshot().cells[address];
+                return [opcode, operand];
+            }));
+            assert.deepEqual(cells, [[255, 0], [47, 91]]);
+            await page.getByRole('button', {name: 'Eject cassette', exact: true}).click();
+            await page.waitForFunction(() => window.__cp1Integration.snapshot().cassettePlaying === false);
+            await page.screenshot({path: path.join(output, 'cp2-cassette-desktop.png'), fullPage: true});
+            checks.push('CP2 controls arm and discard recording, load WAV via CAL, preserve complete bytes on F007, and eject');
+        }
         assert.deepEqual(requests, []);
         assert.deepEqual(errors, []);
         const result = {status: 'passed', browser: browser.version(), react: fixture.react, checks,
             scope: 'Actual CircuitDesigner, Cp1Host, createDebugRunner, BoardImpl, .sb3 bundle and loadProjectFile in an authored browser shell with a minimal VM delegate',
-            firmware: 'original synthetic 8049 switch-to-LED firmware',
+            firmware: 'original synthetic 8049 switch-to-LED firmware', cassetteRom,
             propTypes: 'validator-only stub', fullApplicationBuild: false};
         await writeFile(path.join(output, 'result.json'), `${JSON.stringify(result, null, 2)}\n`);
         console.log(JSON.stringify(result));

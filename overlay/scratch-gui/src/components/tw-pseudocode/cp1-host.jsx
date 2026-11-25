@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import Cp1Panel from './cp1-panel.jsx';
 import {validateCp1Workspace} from '../../lib/cp1-project.js';
 import {browserLocale} from '../../lib/bw-i18n.js';
+import downloadBlob from '../../lib/download-blob.js';
+import styles from './cp1-panel.css';
 
 const STORAGE_KEY = 'bw-cp1-workspace';
 const emptyWorkspace = () => ({format: 'brickwright.cp1-workspace', version: 1,
@@ -123,6 +125,8 @@ export default function Cp1Host ({runner, running, locale, configuration, onImpo
     useEffect(() => () => runner?.cp1ReleaseKeys?.(), [runner]);
 
     const config = programConfig(configuration || workspace.configuration);
+    const snapshot = runner?.cp1Snapshot?.();
+    const cassette = (action, bytes) => callRunner('cp1Cassette', action, bytes);
     return <section data-cp1-host>
         <label><input type="checkbox" checked={config.expansion} disabled={running || pending > 0}
             onChange={event => {
@@ -133,7 +137,7 @@ export default function Cp1Host ({runner, running, locale, configuration, onImpo
                 }))();
             }} />{' '}{message('CP3 expansion (256 cells)', 'CP3-Erweiterung (256 Zellen)')}</label>
         {error ? <p role="alert">{error}</p> : null}
-        <Cp1Panel snapshot={runner?.cp1Snapshot?.()} running={running} locale={locale}
+        <Cp1Panel snapshot={snapshot} running={running} locale={locale}
             expansion={config.expansion} clockHz={config.clockHz}
             source={workspace.source} romReference={workspace.rom}
             onSourceChange={source => {
@@ -157,7 +161,39 @@ export default function Cp1Host ({runner, running, locale, configuration, onImpo
             onLoad={pending ? undefined : request(assembly => callRunner('cp1LoadProgram', assembly))}
             onWriteCell={pending ? undefined : request((address, cell) => callRunner('cp1WriteCell', address, cell))}
             onPortInput={pending || runner?.cp1InputMode?.() === 'circuit' ? undefined :
-                uiAction((port, value) => callRunner('cp1SetInput', port, value))} />
+                uiAction((port, value) => callRunner('cp1SetInput', port, value))}>
+            {snapshot?.capabilities?.cassetteTransport && <details className={styles.cassette}>
+                <summary>{message('CP2 cassette', 'CP2-Kassette')}</summary>
+                <p className={styles.hint}>{message('Use a monitor with cassette support. Open a PCM WAV and press CAL to load it. To save, arm recording and press CAS.',
+                    'Verwende einen Monitor mit Kassettenfunktion. Öffne eine PCM-WAV-Datei und drücke CAL. Zum Speichern die Aufnahme vorbereiten und CAS drücken.')}</p>
+                <label className={styles.field}>
+                    {message('Open cassette WAV', 'Kassetten-WAV öffnen')}
+                    <input type="file" accept=".wav,audio/wav" disabled={pending > 0} onChange={uiAction(async event => {
+                        const file = event.target.files?.[0];
+                        event.target.value = '';
+                        if (!file) return;
+                        if (file.size > 192 * 1024 * 1024) throw new RangeError(message('The cassette WAV exceeds 192 MiB.',
+                            'Die Kassetten-WAV-Datei überschreitet 192 MiB.'));
+                        await enqueue(async () => {
+                            const bytes = new Uint8Array(await file.arrayBuffer());
+                            if (alive.current && callbacks.current.runner === runner) cassette('play', bytes);
+                        });
+                    })} />
+                </label>
+                <div className={styles.actions}>
+                    <button type="button" disabled={!snapshot.cassettePlaying || pending > 0}
+                        onClick={uiAction(() => cassette('eject'))}>{message('Eject cassette', 'Kassette auswerfen')}</button>
+                    <button type="button" disabled={!!snapshot.cp2Recording || pending > 0}
+                        onClick={uiAction(() => cassette('record'))}>{message('Arm recording', 'Aufnahme vorbereiten')}</button>
+                    <button type="button" disabled={!snapshot.cp2Recording || pending > 0}
+                        onClick={uiAction(() => cassette('cancel'))}>{message('Discard recording', 'Aufnahme verwerfen')}</button>
+                    <button type="button" disabled={snapshot.cp2Recording !== 'ready' || pending > 0}
+                        onClick={uiAction(() => downloadBlob('kosmos-cp2.wav', new Blob([cassette('save')], {type: 'audio/wav'})))}>
+                        {message('Save WAV', 'WAV speichern')}
+                    </button>
+                </div>
+            </details>}
+        </Cp1Panel>
     </section>;
 }
 Cp1Host.propTypes = {runner: PropTypes.object, running: PropTypes.bool, locale: PropTypes.string,

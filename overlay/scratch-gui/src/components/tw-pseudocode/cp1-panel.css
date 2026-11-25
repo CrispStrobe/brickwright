@@ -83,6 +83,9 @@
 .hidden {display: none;}
 .semantic {border: 1px solid var(--cp1-border); border-radius: 8px; padding: 10px 12px; margin-top: 12px;}
 .semantic h3 {font-size: 14px; margin: 0 0 8px;}
+.cassette {border-top: 1px solid var(--cp1-border); margin-top: 8px; padding-top: 8px;}
+.cassette summary {cursor: pointer; font-weight: 600;}
+.cassette input[type="file"] {max-width: 100%; padding: 4px;}
 .teachingRegisters {display: flex; flex-wrap: wrap; gap: 14px 28px; margin: 0;}
 .teachingRegisters dt {color: var(--cp1-muted); font-size: 11px;}
 .teachingRegisters dd {margin: 2px 0; font: 700 16px/1.4 ui-monospace, monospace;}

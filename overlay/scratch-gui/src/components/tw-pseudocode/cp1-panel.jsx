@@ -518,6 +518,7 @@ class Cp1Panel extends React.Component {
                 {this.state.errors.map((error, index) => <p key={index}>{error.line ? this._t('lineError', error) : error.message}</p>)}
             </div> : null}
             <div className={styles.notice} role="status">{this.state.busy ? this._t('busy') : this.state.notice}</div>
+            {this.props.children}
             <input ref={this._romInput} className={styles.hidden} type="file" accept=".bin,.rom,application/octet-stream"
                 aria-label={this._t('importRom')} onChange={event => {
                     const file = event.target.files && event.target.files[0];
@@ -542,7 +543,7 @@ Cp1Panel.propTypes = {
     onRun: PropTypes.func, onPause: PropTypes.func, onStep: PropTypes.func, onReset: PropTypes.func,
     onStepCommand: PropTypes.func, onToggleBreakpoint: PropTypes.func,
     onLoad: PropTypes.func, onWriteCell: PropTypes.func, onPortInput: PropTypes.func,
-    onImportRom: PropTypes.func, onSaveProject: PropTypes.func
+    onImportRom: PropTypes.func, onSaveProject: PropTypes.func, children: PropTypes.node
 };
 Cp1Panel.defaultProps = {running: false, expansion: false, clockHz: 6000000};
 

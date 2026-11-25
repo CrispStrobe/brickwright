@@ -183,7 +183,28 @@ the policy disables sandbox approval. That attempt produced no browser pass or s
 The checked-in browser fixture uses an original synthetic 8049 ROM and reports a
 failure when browser launch is unavailable; it does not silently skip the gate.
 
-### Hosted browser qualification
+### CP2 cassette
+
+The CP1 host exposes a CP2 deck when the attached Board supports cassette
+transport. Use the independent CP2 monitor or the 2716 image. Open a 16-bit PCM
+WAV, run the CPU, and press CAL during the leader. For saving, arm the deck and
+press CAS. When the complete tape is available, Save WAV exports the recorded
+signal. STP stops firmware transfer, and Eject removes the virtual tape.
+
+The deck shares the machine's simulation clock. Pausing the CPU pauses the
+tape. Transfer affects the original P1 pins and teaching RAM. A truncated input
+can leave complete bytes in RAM before F007. Waveforms, tape position and
+recording buffers are transient session data and stay outside saved projects.
+
+The runner browser fixture accepts `--cassette-rom /path/to/cp2-monitor.bin` for
+a local WAV import, CAL and F007 recovery check.
+
+The Chromium 149 fixture with React 18 passed the cassette controls with the
+independent CP2 image. It exercised arm/discard, file import, physical CAL,
+preservation of completed tape bytes on F007, and ejection on the shared
+runner. Complete tape exchange is covered by the Board pin-level checks.
+
+## Hosted browser qualification
 
 The focused `CP1 browser qualification` workflow runs on the CP1 feature branch
 and relevant pull-request/main changes. It reads exact engine and Circuit UI
