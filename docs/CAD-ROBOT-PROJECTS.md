@@ -936,3 +936,34 @@ editor with the locally bundled Jolt 5.7 SIMD module. Three-second
 sustained samples were 0.994× for Atlas and 1.005× for Scout. This
 change reduces startup work. Brickwright's release still uses CAD SDK
 `0953e18`, and release-wide sustained 1× remains open.
+
+### Circuit rail lookup during CAD co-simulation
+
+The Board compiles the drawn capacitor and ideal-rail lists once per
+netlist. Each electrical substep still reads current rail settings and
+uses the same event timing and capacitor math. With zero capacitors and
+all rails already at the front of the voltage map, non-rail entries stay
+in place. Replacing the netlist rebuilds the lookup.
+[Board source](https://github.com/CrispStrobe/bw-board/commit/dfcbd548afca66eec12ef166ec0a20b9fc8799d9)
+
+Paired Chrome worker comparisons used the same CAD worker and Jolt 5.7
+SIMD bytes. Each run advanced 600 coupled ticks. The sampled motion, net
+voltages in map order, shaft readings and restart frames matched exactly.
+Time inside the targeted routine, summed over each run, was:
+
+| Project | Electrical calls | First order, before → after | Reverse order, before → after |
+| --- | ---: | ---: | ---: |
+| Atlas | 4,650 | 22.5 → 4.4 ms | 26.7 → 3.6 ms |
+| Scout | 4,500 | 18.8 → 2.5 ms | 20.2 → 3.6 ms |
+
+Whole-loop timings varied across the paired runs. The isolated saving is
+about 27–39 µs per coupled tick. Fifty-nine focused tests passed, including
+rail reconfiguration and ordered voltage restoration. Three STC firmware
+cases skipped because their emulator build was unavailable locally.
+
+Atlas and Scout passed Run, motion, Stop, Reset and repeat Run in the
+full editor using Jolt 5.7 SIMD and the local Board change. The live
+checks confirmed both circuits used the new path. Sustained ratios in
+these unpaired samples were 0.683× for Atlas and 1.004× for Scout.
+Brickwright's release still pins Board commit `099c186` and the
+production 1× target remains open.
