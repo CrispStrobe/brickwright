@@ -1,7 +1,7 @@
 var py = Object.defineProperty;
 var my = (e, t, n) => t in e ? py(e, t, { enumerable: !0, configurable: !0, writable: !0, value: n }) : e[t] = n;
 var N = (e, t, n) => my(e, typeof t != "symbol" ? t + "" : t, n);
-import { _ as gy } from "./chunk-AJV3MJKC-eTtNTT3-.js";
+import { _ as gy } from "./chunk-WNM5TYC5-DPBFlphI.js";
 var j = class extends Error {
   constructor(e) {
     super(e), this.name = "ModelingError";
@@ -3057,7 +3057,7 @@ function tg() {
     } else {
       const t = new Worker(new URL(
         /* @vite-ignore */
-        "" + new URL("_defeature_supervisor-CQ9kWe1m.js", import.meta.url).href,
+        "" + new URL("_defeature_supervisor-BX8xI1KA.js", import.meta.url).href,
         import.meta.url
       ), { type: "module", name: "smlibwasm-guard" });
       t.onerror = () => Al(t), Vr = t;

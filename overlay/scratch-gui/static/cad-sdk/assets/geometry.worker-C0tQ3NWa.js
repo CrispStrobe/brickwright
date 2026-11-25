@@ -11797,7 +11797,7 @@ self.onmessage = async (e) => {
   try {
     if (N7(e.data.locale ?? "en"), "exact" in e.data) {
       const { operation: i, document: r, bodies: s } = e.data.exact, o = performance.now();
-      W5 ?? (W5 = import("./exact/dist-DGbAGxKI.js").then((c) => c.createExactBackend()).catch((c) => {
+      W5 ?? (W5 = import("./exact/dist-CAndC7ZA.js").then((c) => c.createExactBackend()).catch((c) => {
         throw W5 = null, c;
       }));
       const d = await W5, a = performance.now(), f = { ...i === "measure" ? { operation: i, ...d.measure(r, s) } : i === "feature-display" ? { operation: i, ...d.featureDisplays(r, s) } : { operation: i, ...d.exportStep(r, s) }, timing: { loadMs: a - o, runMs: performance.now() - a, memoryBytes: d.kernel.memory().heap } };
@@ -11818,7 +11818,7 @@ self.onmessage = async (e) => {
     }
     const n = t.evaluate(e.data.document);
     if (e.data.printability) {
-      const { checkPrintability: i } = await import("./printability-Db1FsRDA.js");
+      const { checkPrintability: i } = await import("./printability-mkpTeqHq.js");
       self.postMessage({ request: q, result: i(n.bodies, e.data.printability) });
       return;
     }

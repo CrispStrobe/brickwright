@@ -142,8 +142,12 @@ launching the installed TestFlight simulator was not tested in this delivery.
 
 ## Exact kernel and document version 41 (25 November 2026)
 
-Lite pins CrispCAD SDK `dda7ce21627d0925391249482e1515bef15dba5f` (previously
-`0953e188`). Over that pin it brings exact kernel 0.1.1 (exact bounding boxes of
+Lite pins CrispCAD SDK `f0136b8cb85ffc71f103fa7fa3768a899e919b4b` (previously
+`dda7ce21`). That pin brings exact kernel 0.1.2, whose bounding box evaluates
+B-spline edges in JavaScript (the same boxes, milliseconds instead of up to minutes
+on trimmed curved bodies; `smlibwasm` is again byte-identical), fresh `for (let ...)`
+bindings per iteration in CAD Script import, and a 2,048-face limit for exact
+polyhedra. The `dda7ce21` pin, over `0953e188`, brought exact kernel 0.1.1 (exact bounding boxes of
 rotated curved solids, tighter convex hulls; the `smlibwasm` file is unchanged, only
 the kernel's JavaScript under `assets/exact/` changes; exact commands recorded with
 0.1.0 are refused on replay as stale while saved exact features keep their display),
