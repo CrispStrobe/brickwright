@@ -53,7 +53,9 @@ export async function cp1BrowserFixture ({root, deps, compilerDeps = deps, board
         resolve: {alias: [
             {find: 'react', replacement: path.join(deps, 'react')},
             {find: 'react-dom', replacement: path.join(deps, 'react-dom')},
-            {find: 'prop-types', replacement: path.join(fixture, 'prop-types.js')},
+            // React 16's development runtime imports prop-types/checkPropTypes;
+            // leave that real subpath intact while stubbing component validators.
+            {find: /^prop-types$/, replacement: path.join(fixture, 'prop-types.js')},
             {find: 'jszip', replacement: requireRoot.resolve('jszip/dist/jszip.min.js')},
             {find: /^bw-board$/, replacement: path.join(board, 'src/index.js')},
             {find: /^bw-board\/(roms?\/.*)$/, replacement: `${board}/$1`},
@@ -63,6 +65,7 @@ export async function cp1BrowserFixture ({root, deps, compilerDeps = deps, board
             {find: '@cp1-machine', replacement: path.join(board, 'src/cp1-machine.js')},
             {find: '@cp1-runner', replacement: path.join(library, 'bw-debug/debug-runner.js')},
             {find: '@cp1-project-bundle', replacement: path.join(library, 'bw-project-bundle.js')},
+            {find: '@cp1-project-load', replacement: path.join(library, 'bw-project-load.js')},
             ...(circuit ? [
                 {find: '@cp1-cui-sidecars', replacement: path.join(circuit, 'src/model/sidecar-loader.js')},
                 {find: '@cp1-cui-engine', replacement: path.join(circuit, 'src/engine.js')},

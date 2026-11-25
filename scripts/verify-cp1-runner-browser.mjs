@@ -40,6 +40,7 @@ try {
         await page.route('https://compiler.invalid/**', route => { requests.push(route.request().url()); return route.abort(); });
         await page.goto(`${url}/runner.html`, {waitUntil: 'networkidle'});
         await page.waitForFunction(() => window.__cp1Integration?.board()?.parts?.some(part => part.id === 'trainer'));
+        await page.getByRole('button', {name: 'Fit all parts', exact: true}).click();
         await page.locator('[data-cp1-panel]').waitFor();
         assert.equal(await page.getByRole('button', {name: 'Run CPU', exact: true}).isDisabled(), true);
         const rom = Buffer.from(switchToLedFirmware());
@@ -125,12 +126,15 @@ try {
         assert.equal(await page.evaluate(() => window.__cp1Integration.phase()), 'idle');
         assert.equal(await page.getByRole('button', {name: 'Run CPU', exact: true}).isDisabled(), true);
         await page.waitForFunction(() => window.__cp1Integration.board()?.parts?.some(part => part.id === 'trainer'));
+        assert.equal(await page.evaluate(() => window.__cp1Integration.vmProjectLoads), 1);
+        await page.getByRole('button', {name: 'Fit all parts', exact: true}).click();
+        await page.screenshot({path: path.join(output, 'restored-project-desktop.png'), fullPage: true});
         checks.push('fresh-browser project restore preserves the draft without ROM bytes, held keys or automatic execution');
         assert.equal(await page.evaluate(() => window.__cp1Integration.compilerCalls), 0);
         assert.deepEqual(requests, []);
         assert.deepEqual(errors, []);
         const result = {status: 'passed', browser: browser.version(), react: fixture.react, checks,
-            scope: 'Actual CircuitDesigner, Cp1Host, createDebugRunner, BoardImpl and .sb3 adapters in an authored browser shell',
+            scope: 'Actual CircuitDesigner, Cp1Host, createDebugRunner, BoardImpl, .sb3 bundle and loadProjectFile in an authored browser shell with a minimal VM delegate',
             firmware: 'original synthetic 8049 switch-to-LED firmware',
             propTypes: 'validator-only stub', fullApplicationBuild: false};
         await writeFile(path.join(output, 'result.json'), `${JSON.stringify(result, null, 2)}\n`);

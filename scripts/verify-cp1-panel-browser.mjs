@@ -65,6 +65,7 @@ try{
  await page.getByRole('checkbox',{name:'P1 input bit 0',exact:true}).uncheck();
  assert.equal(await page.evaluate(()=>window.__cp1Harness.snapshot().ports.P1.input),254);
  await page.evaluate(()=>{window.__cp1Harness.inputMode='circuit';window.__cp1Harness.refresh();});
+ await page.getByRole('checkbox',{name:'P1 input bit 0',exact:true}).waitFor({state:'detached'});
  assert.equal(await page.getByRole('checkbox',{name:'P1 input bit 0',exact:true}).count(),0);
  await page.getByRole('button',{name:'Memory',exact:true}).click();
  await page.getByLabel('Cell',{exact:true}).fill('127');await page.getByLabel('Opcode',{exact:true}).fill('0');await page.getByLabel('Operand',{exact:true}).fill('99');

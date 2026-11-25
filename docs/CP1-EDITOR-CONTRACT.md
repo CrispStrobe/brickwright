@@ -197,8 +197,9 @@ alias). It also records the actual Node, Playwright and both React versions. A
 connector geometry pass is not reported as a newer engine's semantic-debug pass.
 
 The shared-runner fixture mounts the actual CircuitDesigner and Cp1Host, starts
-the actual `createDebugRunner`, and uses the actual project-bundle save/restore
-helpers. The circuit and CPU share the same board, adapter and simulation clock.
+the actual `createDebugRunner`, and uses the actual project-bundle save helper
+and production `loadProjectFile` restore route. The circuit and CPU share the
+same board, adapter and simulation clock.
 It checks ROM import, a visible circuit-button press through P1/8049/8155/P2 to
 the resistor and LED, pause/CPU-step/reset clock behavior, source assembly/RAM,
 and downloading/restoring an `.sb3` carrying incomplete source and configuration
@@ -217,7 +218,8 @@ resuming the CPU must propagate the new byte to the LED branches.
 These are real component/connector interactions against adopted sources, with
 original synthetic firmware. The surrounding page and minimal VM interface are
 test fixtures, PropTypes uses a validator-only stub, and the `.sb3` buttons call
-the actual bundle helpers directly. This scope does not include production GUI
+the actual bundle/loader helpers directly. The minimal VM delegate validates the
+fixture archive and records the loader call. This scope does not include production GUI
 menus, the complete Scratch VM, historical-monitor semantics or physical
 hardware. The JSON records that boundary. Assertion failures are fatal, and
 later browser gates still collect evidence after an earlier failure. A gate may

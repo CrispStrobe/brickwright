@@ -11,14 +11,15 @@ import {setEngine} from '@cp1-cui-engine';
 import {CircuitDesigner} from '@cp1-circuit-designer';
 import Cp1Host from '@cp1-host';
 import {createDebugRunner} from '@cp1-runner';
-import {attachBrickwrightState, extractBrickwrightState} from '@cp1-project-bundle';
+import {attachBrickwrightState} from '@cp1-project-bundle';
+import loadProjectFile from '@cp1-project-load';
 import {circuit} from './synthetic-circuit.mjs';
 
 registerAllDevices();
 setEngine({BoardImpl, inferNetlist, checkWiring, getDevice, extractCp1Machine});
 const project = {device: 'kosmos-cp1', clock: 6000000, pins: []};
 const root = mount(document.querySelector('#app'));
-const h = window.__cp1Integration = {compilerCalls: 0, loadedEvents: [], restore: null};
+const h = window.__cp1Integration = {compilerCalls: 0, vmProjectLoads: 0, loadedEvents: [], restore: null};
 const scratchProject = {targets: [{isStage: true, name: 'Stage', blocks: {},
     costumes: [], sounds: []}], meta: {semver: '3.0.0'}};
 
@@ -34,7 +35,17 @@ function App () {
     const media = useRef(null);
     const circuitModel = useRef(null);
     const vm = useRef({runtime: {stc: project, targets: [], on () {}, off () {}, emit () {}, glowBlock () {}},
-        toJSON () { h.compilerCalls++; throw new Error('CP1 must not compile Scratch blocks'); }});
+        toJSON () { h.compilerCalls++; throw new Error('CP1 must not compile Scratch blocks'); },
+        // Minimal VM delegate: validate the fixture archive and record the
+        // production loader's call. This does not claim full Scratch VM loading.
+        async loadProject (bytes) {
+            const zip = await JSZip.loadAsync(bytes);
+            const entry = zip.file('project.json');
+            if (!entry || !Array.isArray(JSON.parse(await entry.async('string')).targets)) {
+                throw new Error('Fixture Scratch project is invalid');
+            }
+            h.vmProjectLoads++;
+        }});
     const onBoardReady = useCallback(next => {
         board.current = next;
         vm.current.runtime.circuitBoard = next;
@@ -93,17 +104,20 @@ function App () {
         // A fresh project has no historical firmware or held keys hidden in it.
         media.current = null;
         destroyRunner();
-        const result = await extractBrickwrightState(await file.arrayBuffer());
-        h.restore = result;
-        if (result.outcome !== 'loaded') throw new Error(`Project restore: ${result.outcome}`);
+        h.restore = null;
+        await loadProjectFile(vm.current, await file.arrayBuffer(), file.name);
+        if (h.restore?.outcome !== 'loaded') throw new Error(`Project restore: ${h.restore?.outcome}`);
         setCircuitData(JSON.parse(localStorage.getItem('bw-circuit-autosave')));
         setNotice('Restored CP1 project');
     };
     useEffect(() => {
         const loaded = event => { h.loadedEvents.push(event.detail); };
+        const restored = event => { h.restore = event.detail; };
         window.addEventListener('bw-cp1-program-loaded', loaded);
+        window.addEventListener('bw-project-bundle-loaded', restored);
         return () => {
             window.removeEventListener('bw-cp1-program-loaded', loaded);
+            window.removeEventListener('bw-project-bundle-loaded', restored);
             current.current?.destroy();
         };
     }, []);
