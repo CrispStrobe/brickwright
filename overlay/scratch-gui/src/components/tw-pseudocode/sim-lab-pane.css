@@ -12,3 +12,12 @@
     -webkit-user-select: text;
     user-select: text;
 }
+
+.toolbar::-webkit-scrollbar {
+    height: 5px;
+}
+
+.toolbar::-webkit-scrollbar-thumb {
+    background: rgba(83, 93, 110, .45);
+    border-radius: 6px;
+}

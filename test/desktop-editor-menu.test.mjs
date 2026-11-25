@@ -23,3 +23,30 @@ test('native menu refresh reflects a live locale change',async()=>{
  const owner={state:{nativeDocuments:true},props:{intl:{locale:'en'}},resolveAssetMenuSurface:()=> 'blocks'};
  try {const dispose=installDesktopEditorMenu(owner);await Promise.resolve();owner.props.intl.locale='de-DE';owner._refreshDesktopMenu();await Promise.resolve();assert.deepEqual(snapshots.map(x=>x.edit.map(y=>y.label)),[['Run project','Stop project'],['Projekt starten','Projekt stoppen']]);dispose();} finally {delete globalThis.document;delete globalThis.window;}
 });
+
+test('native Editors uses the localized tab label without its decorative icon', () => {
+    const tab = {
+        textContent: '🔌Schaltung',
+        getAttribute: name => name === 'aria-label' ? 'Schaltung' : null
+    };
+    globalThis.document = {querySelectorAll: () => [tab]};
+    try {
+        assert.deepEqual(desktopMenuSnapshot('circuit','de').tabs,
+            [{id: 'tab:0', label: 'Schaltung', enabled: true}]);
+    } finally {
+        delete globalThis.document;
+    }
+});
+
+test('native About opens the shared Brickwright About dialog', () => {
+    const window = new EventTarget();
+    globalThis.window = window;
+    let opened = 0;
+    window.addEventListener('bw-open-about', () => opened++);
+    try {
+        assert.equal(runDesktopMenuAction('app:about', {}), true);
+        assert.equal(opened, 1);
+    } finally {
+        delete globalThis.window;
+    }
+});

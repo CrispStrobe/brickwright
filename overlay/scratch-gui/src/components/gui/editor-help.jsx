@@ -131,7 +131,7 @@ const EditorHelp = ({editor, label, locale, inTabList = false}) => {
     const Slot = inTabList ? 'li' : 'div';
     const testId = inTabList ? 'bw-editor-help' : 'bw-widgets-help';
     return (
-        <Slot className={styles.slot} role={inTabList ? 'presentation' : undefined}>
+        <Slot className={inTabList ? `${styles.slot} ${styles.tabSlot}` : styles.slot} role={inTabList ? 'presentation' : undefined}>
             <button ref={trigger} className={styles.trigger} type="button" aria-label={title} aria-haspopup="dialog"
                 title={title} data-testid={testId} onClick={() => {
                     setCamera(getCameraPreferences());

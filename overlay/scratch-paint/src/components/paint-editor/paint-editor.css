@@ -462,3 +462,24 @@ $border-radius: 0.25rem;
         display: inline;
     }
 }
+
+/* Keep both tool strips scrollable with the same slim affordance as Blocks. */
+.command-strip,
+.settings-row,
+.editor-container .mode-selector {
+    scrollbar-width: thin;
+}
+
+.command-strip::-webkit-scrollbar,
+.settings-row::-webkit-scrollbar,
+.editor-container .mode-selector::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.command-strip::-webkit-scrollbar-thumb,
+.settings-row::-webkit-scrollbar-thumb,
+.editor-container .mode-selector::-webkit-scrollbar-thumb {
+    background: rgba(83, 93, 110, .45);
+    border-radius: 6px;
+}

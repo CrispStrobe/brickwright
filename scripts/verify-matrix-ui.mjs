@@ -115,9 +115,9 @@ try {
     const panel = page.getByTestId('bw-matrix-panel');
     await panel.waitFor({state: 'visible', timeout: 15000});
     const pickerDeviceSet = [...new Set(await device.locator('option').evaluateAll(options =>
-        // `__manage__` is a COMMAND entry (opens the machine library), not a
-        // device — exclude it so the picker's DEVICE set still matches the panel.
-        options.map(option => option.value).filter(v => v && v !== '__manage__')))].sort();
+        // Machine launch actions use their own workspace, outside the compiler matrix.
+        options.filter(option => option.value && !option.hasAttribute('data-machine-launch'))
+            .map(option => option.value)))].sort();
     const panelDeviceSet = [...new Set(((await panel.getAttribute('data-device-ids')) || '')
         .split(' ').filter(Boolean))].sort();
     check('picker and panel expose the same device set',
