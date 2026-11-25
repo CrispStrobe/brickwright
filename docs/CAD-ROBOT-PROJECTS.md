@@ -508,3 +508,10 @@ to 2.46 ms per tick in one browser order and fell from 2.12 to 1.93 ms
 in reverse. Both robot traces matched. That experiment remains on
 its candidate branch.
 [CSC layout candidate](https://github.com/CrispStrobe/bw-board/commit/ab11f876)
+
+Both robots also passed the local full Chrome GUI proof with SDK
+`7760321`, the Jolt 5.7 SIMD override, and the new Board refactor
+code. One click started each project with its default widgets, and
+Stop and Reset passed. The local build disabled JS minification.
+Atlas sustained 0.606× and Scout 0.843×, with no paired full-GUI
+baseline. The published engine pins retain their existing versions.
