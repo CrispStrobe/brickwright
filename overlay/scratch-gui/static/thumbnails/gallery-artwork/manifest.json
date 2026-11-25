@@ -2285,6 +2285,13 @@
       "artwork": "039f5ae5d56eb3e8b0595527bf5f944e1ba30e5f4fd2e3f387e6c35402b2c6f7.svg",
       "bytes": 67422
     },
+    "busch-microtronic-wired-io": {
+      "source": "busch-microtronic-wired-io/circuit.json",
+      "input": "17106da7f1b6e28c140c43b9460faf4902987673bf0c4ec9285971bedf58cfc7",
+      "renderer": "07608d931c45a450bd33eb349ada6b53318acd8add9e1bed7a60ae6db2028c72",
+      "artwork": "b77ae1fe3db832908ef7c708df26afb3633341b1c9230b60638b4b1358e3561c.svg",
+      "bytes": 14651
+    },
     "chip-thermometer": {
       "source": "chip-thermometer/circuit.arduino-uno.json",
       "input": "1c35b82534c49e6f5aa4b37000b7cf7d86ea7d768dffd8dbffd078c418df94fa",
