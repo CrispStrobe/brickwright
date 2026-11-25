@@ -15,12 +15,18 @@ Own the following narrow package boundary and its normal adoption:
 - In `sb3-creator`, `examples/busch-microtronic-wired-io/circuit.json`,
   `intro.md`, `intro.de.md`, the required `EXPECTED.md`, and the canonical
   example registration/index generator inputs for this same wired experiment.
-- In `sb3-creator`, `test/fixtures/siblings.json` only to select the already
+- In `sb3-creator`, `test/fixtures/siblings.json` and its two matching sibling
+  checkout refs in `.github/workflows/ci.yml`, only to select the already
   qualified Microtronic-capable Board `cc18f3c8d84d68e008450e65ddf838b8ec03c7f7`
   and UI `0a1b15edb0daecd723c7c07126450d84b86e3e68` for the existing whole-corpus
   circuit-load and parameter-consumption gates. Verify ancestry or review the
   exact delta from the former sibling inputs; preserve all their assertions.
   Brickwright's Board and UI package pins remain unchanged.
+- If the existing upstream provenance gate requires it, the normal generated
+  `examples/*/EXPECTED.md` records for that same sibling pair. Remeasure against
+  the declared qualified inputs; do not hand-restamp observations. Review any
+  numerical delta against the prior inputs, retaining all thresholds, assertions
+  and historical source records. No workflow structural or selection change.
 - In Brickwright, the exact `sb3-creator` pin and the normal compiler/gallery
   sync outputs, required mirrored/generated current-pin records and focused
   adoption evidence. Review incoming upstream changes before choosing the pin.
