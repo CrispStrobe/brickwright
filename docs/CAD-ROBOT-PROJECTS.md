@@ -1273,3 +1273,39 @@ passed Atlas Run, joint motion, Pause, Reset, repeat Run and Close in
 the embedded CAD editor without changing the authored scene.
 Brickwright SDK integration and sustained 1× production qualification
 remain open.
+
+### Reuse qualified Jolt shapes on repeat Run
+
+The parked simulation retains one native reference to each immutable
+compound shape for the current authored revision. Repeat Run creates a
+fresh physics world, with fresh bodies, constraints, and initial state.
+Compound reuse still requires the same engine, ordered part tokens,
+and qualified collision inputs. The world checks the source and hull
+proofs before consulting the cache. A new authored revision gets its
+own cache, and the prior cache is released after successful setup.
+
+Each Mac Chrome pair measured eight warm starts per version and robot.
+The interval starts after the worker parks and ends at its initial
+physics frame. Both versions used the same Jolt 5.7 SIMD engine.
+
+| Robot | First order, before → after | Reverse order, before → after |
+| --- | ---: | ---: |
+| Atlas | 319 → 234 ms | 336 → 232 ms |
+| Scout | 678 → 503 ms | 694 → 506 ms |
+
+The embedded CAD editor passed Atlas Run, joint motion, Pause, Reset,
+repeat Run and Close with the rebuilt worker in a local SDK overlay.
+The authored scene remained identical after the run.
+
+Both robots produced identical sampled motion and circuit readings over
+600 ticks **after** a warm start, with matching initial and restart
+frames. The native debug test checks that clearing the cache leaves an
+active world's shapes usable, a replacement collider creates a new
+compound, and mutated collision bytes are still rejected.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/28253502ad6d75992776479a7bdb868b708525c9)
+
+Type checking and eleven focused tests passed in the first run. The
+knurl collision test exceeded its 30-second deadline on the shared
+Mac and passed on an isolated retry with a longer test deadline.
+Brickwright SDK integration and the sustained 1× production target
+remain open.
