@@ -858,3 +858,26 @@ pallet 39.81 mm against the 40 mm target.
 The release SDK pin remains `7760321`. This qualification covers two
 single-thread compat modules. The complete npm export matrix and the
 sustained 1× full-viewport target remain open.
+
+### Single distance sample per coupled tick
+
+CrispCAD validates each distance ray before applying actuator commands and
+casts it once after the 5 ms physics step. Distance-only queries read the
+hit fraction directly. The editor's picking query still identifies the hit
+part. [CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/942c16352a8a108f1ba0f25901c2e22906e866f8)
+
+Paired Chrome worker runs used the same Scout design and Jolt 5.7 SIMD
+bytes with zero, one and eight rays. Across both orders, all 576 frames
+matched exactly, including measured distances, motion, and poses on
+every fourth frame. Malformed rays left the world at its previous time.
+At eight rays, mean worker round-trip time fell from 3.00 to 2.73 ms
+and from 3.04 to 2.94 ms. The zero-ray controls varied in both directions.
+The timings apply to worker round trips. The stock Scout and Atlas
+examples have zero distance rays.
+
+Type checking and 13 focused tests passed. The same Scout hinge-clearance
+assertion failed on the previous and updated source with bundled Jolt.
+A complete local SDK built from CrispCAD `942c163` matched all 841
+file digests in its manifest. Scout and Atlas passed Run, motion, Stop,
+and Reset in the full Brickwright editor with its bundled Jolt engine.
+The release pin remains `7760321`, and full-viewport 1× remains open.
