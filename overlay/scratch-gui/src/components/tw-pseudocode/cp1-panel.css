@@ -81,6 +81,20 @@
 .root[data-color-mode="dark"] .errors {color: #ffd3cc; background: #4c2424;}
 .notice {min-height: 20px; color: var(--cp1-muted); font-size: 12px; margin-top: 8px;}
 .hidden {display: none;}
+.semantic {border: 1px solid var(--cp1-border); border-radius: 8px; padding: 10px 12px; margin-top: 12px;}
+.semantic h3 {font-size: 14px; margin: 0 0 8px;}
+.teachingRegisters {display: flex; flex-wrap: wrap; gap: 14px 28px; margin: 0;}
+.teachingRegisters dt {color: var(--cp1-muted); font-size: 11px;}
+.teachingRegisters dd {margin: 2px 0; font: 700 16px/1.4 ui-monospace, monospace;}
+.listing {margin-top: 12px;}
+.listing summary {cursor: pointer; padding: 5px 0; font-weight: 600;}
+.listing .tableScroll {max-height: 320px; overflow: auto;}
+.listing button {min-width: 36px; padding: 3px 8px; font-size: 17px;}
+.listing button[aria-pressed="true"] {color: #a12a22; font-weight: 700;}
+.table tr[aria-current="step"] {background: #d5edf4; color: #133c4b; box-shadow: inset 4px 0 0 #126078;}
+.root[data-color-mode="dark"] .table tr[aria-current="step"] {background: #284d5b; color: #e9f8ff;}
+.root mark {background: #d5edf4; color: #133c4b; padding: 2px 4px; border-radius: 3px;}
+.draftLabel {margin-left: 8px; color: var(--cp1-muted); font: 10px system-ui, sans-serif;}
 @media (max-width: 460px) {
     .root {padding: 10px;}
     .keypad {gap: 3px; padding: 6px;}

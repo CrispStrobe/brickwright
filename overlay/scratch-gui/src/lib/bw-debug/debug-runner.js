@@ -79,6 +79,7 @@ import {
     shippedImageFor, provenanceSentence
 } from './shipped-images.js';
 import { t as statusT } from './runner-status-l10n.js';
+import {createCp1LessonBatch} from '../cp1-lesson-observation.js';
 
 /**
  * The document language, for everything this module says in words.
@@ -630,6 +631,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
     // Invalidate stop/start even when target and session references are reused.
     let hddSnapshotOwner = {};
     let target = null;
+    let cp1LessonBatch = null;
+    let unsubscribeCp1Lessons = null;
     let releaseEsp32S040Target = null;
     let i8086ExecutionResult = null;
     const i8086ExecutionLifetime = new AbortController();
@@ -1277,12 +1280,20 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
     const snapshotEmitter = createDebugSnapshotEmitter({snapshot, onChange});
     const replayOutputGate = createHistoricalOutputGate({publishState: state => onChange(state)});
 
+    function publishCp1Observations() {
+        if (!cp1LessonBatch || typeof window === 'undefined') return;
+        for (const item of cp1LessonBatch.take()) {
+            window.dispatchEvent(new CustomEvent(`bw-${item.event}`, {detail: item.detail}));
+        }
+    }
+
     /** Immediate by default: every existing call is a semantic event. */
     function emit() {
         // A destroyed runner has been replaced; a status it reaches on the way
         // out of an attach await (attaching/ready) describes nothing on screen.
         if (destroyed) return undefined;
         if (replayingDebugHistory) return replayOutputGate.emit(null);
+        publishCp1Observations();
         snapshotEmitter.immediate();
     }
 
@@ -1290,6 +1301,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
     function emitLive() {
         if (destroyed) return undefined;
         if (replayingDebugHistory) return replayOutputGate.emit(null);
+        publishCp1Observations();
         snapshotEmitter.live();
     }
 
@@ -2777,8 +2789,16 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
      *  keyboard input, video face (when the machine's chips include one),
      *  and a hot loadRom for media applied to a live machine. */
     function wireMachineBench(result, createDebugSession) {
+        if (unsubscribeCp1Lessons) unsubscribeCp1Lessons();
+        unsubscribeCp1Lessons = null;
+        cp1LessonBatch?.clear();
+        cp1LessonBatch = null;
         target = result.target;
         const adapter = result.adapter || result;
+        if (target.kind === 'cp1' && typeof target.onEvent === 'function') {
+            cp1LessonBatch = createCp1LessonBatch(machineConfig?.partId);
+            unsubscribeCp1Lessons = target.onEvent(event => cp1LessonBatch.accept(event));
+        }
 
         // THE ONLY PATH FROM THE PANEL TO A CHIP, and deliberately the collector
         // rather than the chips. chipRefusals() finds any field whose NAME says
@@ -2967,9 +2987,19 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                 return applyI8086Input('i8086.rom', {bytes: image, at},
                     () => target.applyReplayInput({producer: 'i8086.rom', payload: {bytes: image, at}}).accepted);
             }
+            if (target?.kind === 'cp1') {
+                // A new ROM ends the old observation/step lifetime. Pause the
+                // session before resetting its target so an armed step cannot
+                // survive as stale UI intent or publish an old lesson event.
+                cp1LessonBatch?.clear();
+                session.pause();
+                unschedule();
+                target.releaseKeys();
+            }
             const load = adapter.loadRom || adapter.load;
             if (load) load.call(adapter, image, at);
             if (target && target.reset) target.reset();
+            if (target?.kind === 'cp1') setStatus('paused');
         };
 
         if (targetKind === 'i8086' && typeof target.nmi === 'function') {
@@ -4076,8 +4106,35 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
     let eventBreakpointDispatcher;
     let replayBreakpointDispatcher;
     let selectedEventSeek;
+    let cp1BreakpointTarget = null;
+    const cp1BreakpointHandles = new Map();
+    const cp1BreakpointCells = () => {
+        if (cp1BreakpointTarget !== target) {
+            cp1BreakpointHandles.clear();
+            cp1BreakpointTarget = target;
+        }
+        return [...cp1BreakpointHandles.keys()].sort((a, b) => a - b);
+    };
     const runner = {
-        cp1Snapshot: () => target?.kind === 'cp1' ? target.snapshot() : null,
+        cp1Snapshot() {
+            if (target?.kind !== 'cp1') return null;
+            const observed = target.snapshot();
+            return {...observed, cp1: {...observed.cp1, breakpoints: cp1BreakpointCells()}};
+        },
+        cp1ToggleBreakpoint(address) {
+            if (target?.kind !== 'cp1') throw new Error('Load CP1 firmware before setting a command breakpoint.');
+            cp1BreakpointCells();
+            if (cp1BreakpointHandles.has(address)) {
+                target.clearBreakpoint(cp1BreakpointHandles.get(address));
+                cp1BreakpointHandles.delete(address);
+            } else {
+                const result = target.setBreakpoint({kind: 'cp1', space: 'program', addr: address, stopSide: 'before'});
+                if (!Number.isSafeInteger(result)) throw new Error(result?.unsupported || 'The CP1 breakpoint was refused.');
+                cp1BreakpointHandles.set(address, result);
+            }
+            emit();
+            return {address, enabled: cp1BreakpointHandles.has(address)};
+        },
         cp1Key(key, down) {
             if (target?.kind !== 'cp1') return false;
             target.setKey(key, down);
@@ -4103,6 +4160,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             if (bytes.length !== target.machine.capacity * 2) {
                 throw new Error(`CP1 program image must contain exactly ${target.machine.capacity * 2} bytes for this machine.`);
             }
+            cp1LessonBatch?.clear();
             session.pause();
             target.releaseKeys();
             const cells = Array.from({length: bytes.length / 2}, (_, index) =>
@@ -4114,6 +4172,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         },
         cp1WriteCell(index, cell) {
             if (target?.kind !== 'cp1') return false;
+            cp1LessonBatch?.clear();
             session.pause();
             target.machine.writeCell(index, cell.opcode, cell.operand);
             emit();
@@ -4121,6 +4180,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         },
         cp1Reset() {
             if (target?.kind !== 'cp1') return false;
+            cp1LessonBatch?.clear();
             session.pause();
             target.reset();
             emit();
@@ -4271,6 +4331,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         },
 
         stop() {
+            cp1LessonBatch?.clear();
             hddSnapshotOwner = {};
             unschedule();
             if (activeRunTo) {
@@ -5473,6 +5534,9 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             if (unsubscribeDebugEvents) { unsubscribeDebugEvents(); unsubscribeDebugEvents = null; }
             debugEventsTarget = null;
             if (unsubscribeDebugInputs) { unsubscribeDebugInputs(); unsubscribeDebugInputs = null; }
+            if (unsubscribeCp1Lessons) { unsubscribeCp1Lessons(); unsubscribeCp1Lessons = null; }
+            cp1LessonBatch?.clear();
+            cp1LessonBatch = null;
             unsubscribeRecordingEvents();
             if (!preserveRuntime) clearGlow();
             const cleanupErrors = [];

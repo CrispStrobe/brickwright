@@ -79,6 +79,7 @@ export default function Cp1Host ({runner, running, locale, configuration, onImpo
         }
         const result = current[method](...args);
         if (result === false) throw new Error(message('The CP1 machine is unavailable.', 'Die CP1-Maschine ist nicht verfügbar.'));
+        if (result && (result.unsupported || result.refused)) throw new Error(result.unsupported || result.refused);
         return result;
     };
 
@@ -150,6 +151,8 @@ export default function Cp1Host ({runner, running, locale, configuration, onImpo
             onRun={pending ? undefined : uiAction(() => callbacks.current.onRun())}
             onPause={uiAction(() => callRunner('pause'))}
             onStep={pending ? undefined : uiAction(() => callRunner('step', 'insn'))}
+            onStepCommand={pending ? undefined : request(() => callRunner('step', 'cp1'))}
+            onToggleBreakpoint={pending ? undefined : request(address => callRunner('cp1ToggleBreakpoint', address))}
             onReset={pending ? undefined : uiAction(() => callRunner('cp1Reset'))}
             onLoad={pending ? undefined : request(assembly => callRunner('cp1LoadProgram', assembly))}
             onWriteCell={pending ? undefined : request((address, cell) => callRunner('cp1WriteCell', address, cell))}

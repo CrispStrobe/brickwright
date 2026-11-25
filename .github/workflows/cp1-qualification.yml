@@ -8,6 +8,9 @@ on:
       - 'vendor-pins.json'
       - 'package.json'
       - 'package-lock.json'
+      - 'packages/scratch-gui/package*.json'
+      - 'overlay/scratch-gui/examples/cp1-*/**'
+      - 'packages/scratch-gui/examples/cp1-*/**'
       - 'overlay/scratch-gui/src/components/tw-pseudocode/cp1-*'
       - 'packages/scratch-gui/src/components/tw-pseudocode/cp1-*'
       - 'overlay/scratch-gui/src/lib/cp1-*'
@@ -16,7 +19,13 @@ on:
       - 'packages/scratch-gui/src/lib/bw-debug/**'
       - 'overlay/scratch-gui/src/lib/bw-project-bundle.js'
       - 'packages/scratch-gui/src/lib/bw-project-bundle.js'
+      - 'overlay/scratch-gui/src/components/gui/guided-lessons.*'
+      - 'packages/scratch-gui/src/components/gui/guided-lessons.*'
+      - 'overlay/scratch-gui/src/components/gui/lesson-waves/*.json'
+      - 'packages/scratch-gui/src/components/gui/lesson-waves/*.json'
+      - 'scripts/detect-lesson-defects.mjs'
       - 'scripts/verify-cp1-*.mjs'
+      - 'scripts/lib/cp1-*.mjs'
       - 'test/fixtures/cp1-panel/**'
       - 'test/cp1-*.test.mjs'
       - 'test/workflow-trigger-coverage.test.mjs'
@@ -26,6 +35,9 @@ on:
       - 'vendor-pins.json'
       - 'package.json'
       - 'package-lock.json'
+      - 'packages/scratch-gui/package*.json'
+      - 'overlay/scratch-gui/examples/cp1-*/**'
+      - 'packages/scratch-gui/examples/cp1-*/**'
       - 'overlay/scratch-gui/src/components/tw-pseudocode/cp1-*'
       - 'packages/scratch-gui/src/components/tw-pseudocode/cp1-*'
       - 'overlay/scratch-gui/src/lib/cp1-*'
@@ -34,7 +46,13 @@ on:
       - 'packages/scratch-gui/src/lib/bw-debug/**'
       - 'overlay/scratch-gui/src/lib/bw-project-bundle.js'
       - 'packages/scratch-gui/src/lib/bw-project-bundle.js'
+      - 'overlay/scratch-gui/src/components/gui/guided-lessons.*'
+      - 'packages/scratch-gui/src/components/gui/guided-lessons.*'
+      - 'overlay/scratch-gui/src/components/gui/lesson-waves/*.json'
+      - 'packages/scratch-gui/src/components/gui/lesson-waves/*.json'
+      - 'scripts/detect-lesson-defects.mjs'
       - 'scripts/verify-cp1-*.mjs'
+      - 'scripts/lib/cp1-*.mjs'
       - 'test/fixtures/cp1-panel/**'
       - 'test/cp1-*.test.mjs'
       - 'test/workflow-trigger-coverage.test.mjs'
@@ -47,7 +65,7 @@ permissions:
 jobs:
   browser:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
@@ -68,7 +86,7 @@ jobs:
           mkdirSync('test-results/cp1-browser', {recursive: true});
           writeFileSync('test-results/cp1-browser/inputs.json', JSON.stringify({
             lite: process.env.GITHUB_SHA, suppliers: pins,
-            scope: 'Connector and CP1 component browser qualification; no historical monitor ROM',
+            scope: 'Connector, CP1 panel, actual shared runner/project bundle and CP5 live controls; original synthetic firmware',
             fullApplicationBuild: false
           }, null, 2) + '\n');
           NODE
@@ -91,6 +109,30 @@ jobs:
       - name: Install locked browser fixture dependencies
         working-directory: .cp1-ci/bw-circuit-ui
         run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Install the actual locked GUI React runtime
+        working-directory: packages/scratch-gui
+        run: npm ci --ignore-scripts --legacy-peer-deps --no-audit --no-fund
+      - name: Record the distinct connector and shared-runner execution inputs
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync, writeFileSync} from 'node:fs';
+          const read = file => JSON.parse(readFileSync(file, 'utf8'));
+          const file = 'test-results/cp1-browser/inputs.json';
+          const inputs = read(file);
+          const cui = '.cp1-ci/bw-circuit-ui';
+          const lockedBoard = read(`${cui}/package-lock.json`).packages['node_modules/bw-board'];
+          const connectorRevision = lockedBoard.resolved?.match(/#([a-f0-9]{40})$/)?.[1];
+          if (!connectorRevision) throw new Error('Connector engine must have an exact locked revision');
+          inputs.execution = {
+            node: process.version,
+            playwright: read(`${cui}/node_modules/playwright/package.json`).version,
+            react18: read(`${cui}/node_modules/react/package.json`).version,
+            guiReact: read('packages/scratch-gui/node_modules/react/package.json').version,
+            connectorEngine: {revision: connectorRevision, source: 'Circuit UI standalone devDependency lock'},
+            sharedRunnerEngine: {revision: inputs.suppliers['bw-board'], source: 'Explicit Lite-adopted source alias'}
+          };
+          writeFileSync(file, JSON.stringify(inputs, null, 2) + '\n');
+          NODE
       - name: Install the locked Playwright Chromium and system libraries
         working-directory: .cp1-ci/bw-circuit-ui
         run: npx playwright install --with-deps chromium
@@ -99,8 +141,11 @@ jobs:
           node --test --import ./scripts/lib/register-gui-scope.mjs \
             test/cp1-project.test.mjs test/cp1-panel-input.test.mjs \
             test/cp1-bundle.test.mjs test/cp1-runner.test.mjs \
+            test/cp1-debug-view.test.mjs test/cp1-lesson-observation.test.mjs \
+            test/cp1-lessons.test.mjs test/cp1-lesson-defects.test.mjs \
             test/workflow-trigger-coverage.test.mjs
           node scripts/verify-cp1-components.mjs --deps .cp1-ci/bw-circuit-ui/node_modules --board .cp1-ci/bw-board
+          node scripts/verify-cp1-components.mjs --deps packages/scratch-gui/node_modules --compiler-deps .cp1-ci/bw-circuit-ui/node_modules --board .cp1-ci/bw-board
       - name: CP1 connector static geometry
         working-directory: .cp1-ci/bw-circuit-ui
         run: npm run verify:cp1
@@ -110,10 +155,26 @@ jobs:
         env:
           BW_CP1_BROWSER_OUT: ${{ github.workspace }}/test-results/cp1-browser/connector
         run: npm run verify:cp1:browser
-      - name: CP1 host and panel real browser interactions
+      - name: CP1 host and panel with React 18
         if: ${{ !cancelled() }}
         timeout-minutes: 3
-        run: node scripts/verify-cp1-panel-browser.mjs --deps .cp1-ci/bw-circuit-ui/node_modules --board .cp1-ci/bw-board --out test-results/cp1-browser/panel
+        run: node scripts/verify-cp1-panel-browser.mjs --deps .cp1-ci/bw-circuit-ui/node_modules --board .cp1-ci/bw-board --out test-results/cp1-browser/panel-react18
+      - name: Shared CP1 runner, actual circuit interactions and project restore with React 18
+        if: ${{ !cancelled() }}
+        timeout-minutes: 4
+        run: node scripts/verify-cp1-runner-browser.mjs --deps .cp1-ci/bw-circuit-ui/node_modules --board .cp1-ci/bw-board --circuit .cp1-ci/bw-circuit-ui --out test-results/cp1-browser/runner-react18
+      - name: CP1 host and panel with the installed GUI React 16
+        if: ${{ !cancelled() }}
+        timeout-minutes: 3
+        run: node scripts/verify-cp1-panel-browser.mjs --deps packages/scratch-gui/node_modules --compiler-deps .cp1-ci/bw-circuit-ui/node_modules --board .cp1-ci/bw-board --out test-results/cp1-browser/panel-react16
+      - name: Shared CP1 runner, actual circuit interactions and project restore with the installed GUI React 16
+        if: ${{ !cancelled() }}
+        timeout-minutes: 4
+        run: node scripts/verify-cp1-runner-browser.mjs --deps packages/scratch-gui/node_modules --compiler-deps .cp1-ci/bw-circuit-ui/node_modules --board .cp1-ci/bw-board --circuit .cp1-ci/bw-circuit-ui --out test-results/cp1-browser/runner-react16
+      - name: CP5 live switch contacts and eight real LED branches with the installed GUI React 16
+        if: ${{ !cancelled() }}
+        timeout-minutes: 4
+        run: node scripts/verify-cp1-cp5-browser.mjs --deps packages/scratch-gui/node_modules --compiler-deps .cp1-ci/bw-circuit-ui/node_modules --board .cp1-ci/bw-board --circuit .cp1-ci/bw-circuit-ui --example overlay/scratch-gui/examples/cp1-cp5-binary/circuit.json --out test-results/cp1-browser/cp5-react16
       - name: Preserve browser observations and failure evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

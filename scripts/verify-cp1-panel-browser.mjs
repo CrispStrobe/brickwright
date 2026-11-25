@@ -6,47 +6,27 @@
  * This gate must report failure if the environment cannot launch a browser.
  */
 import assert from 'node:assert/strict';
-import {readFile, mkdir, writeFile} from 'node:fs/promises';
+import {mkdir, writeFile} from 'node:fs/promises';
 import path from 'node:path';
-import {createRequire} from 'node:module';
-import {fileURLToPath, pathToFileURL} from 'node:url';
+import {fileURLToPath} from 'node:url';
+import {cp1BrowserFixture} from './lib/cp1-browser-fixture.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const option=flag=>{const i=process.argv.indexOf(flag);return i<0?null:process.argv[i+1];};
 if(!option('--deps')||!option('--board'))throw Error('Pass explicit --deps <node_modules> and --board <bw-board checkout> paths.');
 const deps=path.resolve(root,option('--deps'));
+const compilerDeps=path.resolve(root,option('--compiler-deps')||option('--deps'));
 const board=path.resolve(root,option('--board'));
 const output=path.resolve(root,option('--out')||'test-results/cp1-panel-browser');
-const fixture=path.join(root,'test/fixtures/cp1-panel');
-const component=path.join(root,'overlay/scratch-gui/src/components/tw-pseudocode');
-const requireDeps=createRequire(path.join(deps,'__cp1_browser__.cjs'));
-const {createServer}=await import(pathToFileURL(requireDeps.resolve('vite')).href);
-const {default:react}=await import(pathToFileURL(requireDeps.resolve('@vitejs/plugin-react')).href);
-const {chromium}=await import(pathToFileURL(requireDeps.resolve('playwright')).href);
+const fixture=await cp1BrowserFixture({root,deps,compilerDeps,board});
 const errors=[];
 let browser,server,page;
 await mkdir(output,{recursive:true});
 try{
- server=await createServer({root:fixture,logLevel:'warn',plugins:[{
-  name:'cp1-component-css-module',enforce:'pre',
-  resolveId(source){if(source.endsWith('/cp1-panel.css'))return '\0cp1-panel-style.js';},
-  async load(id){
-   if(id!=='\0cp1-panel-style.js')return;
-   const css=await readFile(path.join(component,'cp1-panel.css'),'utf8');
-   const classes=Object.fromEntries([...css.matchAll(/\.([a-zA-Z][\w-]*)/g)].map(match=>[match[1],match[1]]));
-   return `const style=document.createElement('style');style.textContent=${JSON.stringify(css)};document.head.appendChild(style);export default ${JSON.stringify(classes)};`;
-  }
- },react()],resolve:{alias:[
-  {find:'react',replacement:path.join(deps,'react')},
-  {find:'react-dom',replacement:path.join(deps,'react-dom')},
-  {find:'prop-types',replacement:path.join(fixture,'prop-types.js')},
-  {find:'@cp1-panel',replacement:path.join(component,'cp1-panel.jsx')},
-  {find:'@cp1-host',replacement:path.join(component,'cp1-host.jsx')},
-  {find:'@cp1-machine',replacement:path.join(board,'src/cp1-machine.js')}
- ]},server:{host:'127.0.0.1',port:0,fs:{allow:[root,board,deps]}}});
+ server=await fixture.createServer(fixture.config);
  await server.listen();
  const address=server.httpServer.address();
  const url=`http://127.0.0.1:${address.port}`;
- browser=await chromium.launch({headless:true,...(option('--executable')?{executablePath:option('--executable')}:{})});
+ browser=await fixture.chromium.launch({headless:true,...(option('--executable')?{executablePath:option('--executable')}:{})});
  page=await browser.newPage({viewport:{width:980,height:1180}});
  page.on('pageerror',error=>errors.push(error.message));
  page.on('console',message=>{if(message.type()==='error')errors.push(message.text());});
@@ -109,7 +89,7 @@ try{
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true);
  await page.screenshot({path:path.join(output,'mobile-de-dark.png'),fullPage:true});
  assert.deepEqual(errors,[]);
- const result={status:'passed',browser:browser.version(),scope:'Actual component browser behavior with original synthetic 8049 firmware and real CP1 machine',checks:['raw displays','thirty keys','incomplete-source reload','RAM load','load refusal','pointer/keyboard ownership','blur release','manual/circuit inputs','RAM editing','async CP3 source preservation','German narrow layout'],propTypes:'validator-only stub',fullApplicationBuild:false};
+ const result={status:'passed',browser:browser.version(),react:fixture.react,scope:'Actual component browser behavior with original synthetic 8049 firmware and real CP1 machine',checks:['raw displays','thirty keys','incomplete-source reload','RAM load','load refusal','pointer/keyboard ownership','blur release','manual/circuit inputs','RAM editing','async CP3 source preservation','German narrow layout'],propTypes:'validator-only stub',fullApplicationBuild:false};
  await writeFile(path.join(output,'result.json'),`${JSON.stringify(result,null,2)}\n`);
  console.log(JSON.stringify(result));
 }catch(error){

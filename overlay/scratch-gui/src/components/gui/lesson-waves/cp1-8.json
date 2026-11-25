@@ -540,6 +540,154 @@
           }
         }
       ]
+    },
+    {
+      "id": "cp1-command-debugging",
+      "version": 1,
+      "exampleId": "cp1-first-display",
+      "loadMode": "circuit-only",
+      "wave": "cp1-8",
+      "topic": "command-boundaries",
+      "domains": [
+        "computer-architecture",
+        "code",
+        "debugging"
+      ],
+      "depth": "intermediate",
+      "ageGuidance": "11+",
+      "minutes": 25,
+      "environment": "simulation",
+      "languages": [],
+      "prerequisites": [
+        "cp1-keypad-and-steps",
+        "cp1-memory-and-source"
+      ],
+      "copy": {
+        "en": {
+          "title": "Stop at a teaching command",
+          "objective": "Use a cell breakpoint and the observed CP1 state to distinguish a whole teaching command from one 8049 instruction."
+        },
+        "de": {
+          "title": "An einem Lernbefehl anhalten",
+          "objective": "Unterscheide mit einem Zellhaltepunkt und dem beobachteten CP1-Zustand einen vollständigen Lernbefehl von einem einzelnen 8049-Befehl."
+        }
+      },
+      "checkpoints": [
+        {
+          "id": "complete-ako",
+          "copy": {
+            "en": {
+              "action": "Import your compatible 2048-byte monitor ROM, run the CPU until initialization finishes, then pause and load the unchanged first-display cells. With a qualified ROM, enable the listing breakpoint at cell 0, use Run CPU and enter 0, 0, 0, PC, RUN on the original keypad. At the breakpoint, choose Step CP1 command and read the teaching PC and full accumulator.",
+          "explain": "The earlier keypad lesson distinguished two execution levels: CPU step advances one 8049 instruction, while keypad STEP asks the monitor to execute a teaching command. Step CP1 command is another control at the teaching-command level: it runs the monitor between observed command boundaries. This check completes automatically only after an engine event reports that cell 0 really completed AKO 42 with accumulator 00.042.",
+              "hint": "The expected next cell is 1 and the accumulator is 00.042. Do not reset after loading. Command stepping at the idle monitor requires the original STEP key or RUN toward a breakpoint first. Automatic observations currently require the qualified 2716 ROM; another ROM retains CPU controls and manual completion.",
+              "manual": "I observed AKO 42 complete and recorded the teaching PC and full accumulator"
+            },
+            "de": {
+              "action": "Importiere dein kompatibles Monitor-ROM mit 2048 Bytes, lass die CPU ihre Initialisierung beenden, pausiere und lade die unveränderten Zellen des ersten Anzeigebeispiels. Aktiviere bei einem qualifizierten ROM den Listing-Haltepunkt an Zelle 0, starte die CPU und gib auf der Originaltastatur 0, 0, 0, PC, RUN ein. Wähle am Haltepunkt „CP1-Befehlsschritt“ und lies Lernprogrammzähler und vollständigen Akkumulator ab.",
+          "explain": "Die frühere Tastaturlektion unterschied zwei Ausführungsebenen: „CPU-Schritt“ führt einen 8049-Befehl aus, während STEP auf der Tastatur einen Lernbefehl vom Monitor ausführen lässt. „CP1-Befehlsschritt“ ist eine weitere Steuerung auf der Lernbefehlsebene: Sie führt den Monitor zwischen beobachteten Befehlsgrenzen aus. Diese Prüfung bestätigt sich nur automatisch, wenn ein Engine-Ereignis die tatsächliche Ausführung von AKO 42 an Zelle 0 mit Akkumulator 00.042 meldet.",
+              "hint": "Erwartet werden die nächste Zelle 1 und Akkumulator 00.042. Setze nach dem Laden nicht zurück. Im wartenden Monitor benötigst du zuerst die Originaltaste STEP oder RUN bis zu einem Haltepunkt. Automatische Beobachtungen benötigen derzeit das qualifizierte 2716-ROM; mit anderen ROMs bleiben CPU-Steuerung und manuelle Bestätigung verfügbar.",
+              "manual": "Ich habe die Ausführung von AKO 42 beobachtet und Lernprogrammzähler sowie vollständigen Akkumulator notiert"
+            }
+          },
+          "observe": {
+            "event": "cp1-command",
+            "match": {
+              "profileQualified": true,
+              "address": 0,
+              "opcode": 4,
+              "operand": 42,
+              "outcome": "completed",
+              "accumulatorOpcode": 0,
+              "accumulatorOperand": 42
+            }
+          }
+        },
+        {
+          "id": "source-agreement",
+          "copy": {
+            "en": {
+              "action": "While paused, change the source constant from 42 to 73 without loading it. Compare the source listing with live RAM, then undo the edit. Enable a breakpoint at cell 1 and resume; observe it again when SPU returns to ANZ.",
+              "explain": "A source highlight requires matching bytes in RAM. A breakpoint belongs to a cell address, even when its source draft changes. Resuming from a breakpoint allows that command once and stops again when a loop returns.",
+              "hint": "The edited row must be marked as a draft that differs from RAM. Step CP1 command can span many 8049 instructions; long waits can exhaust a bounded instruction budget and be resumed. The comparison indicator reports the current condition, which later monitor work can clear.",
+              "manual": "I checked the draft mismatch and a breakpoint on loop reentry"
+            },
+            "de": {
+              "action": "Ändere im pausierten Zustand die Quellkonstante von 42 auf 73, ohne sie zu laden. Vergleiche Listing und Live-RAM und mache die Änderung rückgängig. Aktiviere einen Haltepunkt an Zelle 1 und setze fort; beobachte ihn erneut, wenn SPU zu ANZ zurückkehrt.",
+              "explain": "Eine Quellmarkierung setzt passende Bytes im RAM voraus. Ein Haltepunkt gehört zur Zelladresse, auch wenn sich der Quelltextentwurf ändert. Fortsetzen lässt diesen Befehl einmal passieren und hält bei der nächsten Schleifenrunde erneut an.",
+              "hint": "Die bearbeitete Zeile muss als vom RAM abweichender Entwurf erscheinen. Ein CP1-Befehl kann viele 8049-Befehle benötigen. Lange Wartezeiten können das begrenzte Befehlsbudget ausschöpfen und lassen sich fortsetzen. Die Vergleichsanzeige zeigt die aktuelle Bedingung; spätere Monitorarbeit kann sie löschen.",
+              "manual": "Ich habe die Abweichung des Entwurfs und den Haltepunkt bei der Schleifenrückkehr geprüft"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "cp1-cp5-binary",
+      "version": 1,
+      "exampleId": "cp1-cp5-binary",
+      "loadMode": "circuit-only",
+      "wave": "cp1-8",
+      "topic": "parallel-binary-panel",
+      "domains": [
+        "computer-architecture",
+        "code",
+        "debugging"
+      ],
+      "depth": "intermediate",
+      "ageGuidance": "11+",
+      "minutes": 25,
+      "environment": "simulation",
+      "languages": [],
+      "prerequisites": [
+        "cp1-switch-reading",
+        "cp1-output-loop"
+      ],
+      "copy": {
+        "en": {
+          "title": "Eight switches, one byte",
+          "objective": "Trace an eight-bit input through a CP1 program, a stored sample and eight driven LEDs."
+        },
+        "de": {
+          "title": "Acht Schalter, ein Byte",
+          "objective": "Verfolge eine Acht-Bit-Eingabe durch ein CP1-Programm, einen gespeicherten Messwert und acht angesteuerte LEDs."
+        }
+      },
+      "checkpoints": [
+        {
+          "id": "startup-and-polarity",
+          "copy": {
+            "en": {
+          "action": "Open the CP5 binary example. Under CP1 Ports, find Input in the P1 row and Latch in the P2 row; in the instruments panel, find Switches. Import your compatible 2048-byte monitor ROM and use Run CPU until initialization finishes. Pause CPU and load the cells. Resume without resetting and enter 0, 0, 0, PC, RUN on the CP1 keypad. Compare the LEDs after initialization with the later program-controlled pattern.",
+              "explain": "Each closed switch pulls its input low; opening it lets the pull-up produce a high bit. The program first writes zero to the output, waits, then samples P1, stores the byte in cell 32 and copies it to P2. The output driver controls the real LED branches.",
+              "hint": "A high startup port can light all LEDs before the program clears it. Start with all switches closed for input zero. This is a 5 V teaching circuit inspired by CP5, not a model of its original supply or power ratings. LED levels come from the circuit solver.",
+              "manual": "I recorded switch polarity and the startup-to-program output change"
+            },
+            "de": {
+          "action": "Öffne das CP5-Binärbeispiel. Finde unter „Ports“ im CP1-Feld die Spalte „Eingang“ in Zeile P1 und „Register“ in Zeile P2 sowie „Schalter“ im Instrumentenpanel. Importiere dein kompatibles Monitor-ROM mit 2048 Bytes und wähle „CPU ausführen“, bis die Initialisierung beendet ist. Wähle „CPU pausieren“ und lade die Zellen. Setze ohne Zurücksetzen fort und gib auf der CP1-Tastatur 0, 0, 0, PC, RUN ein. Vergleiche die LEDs nach der Initialisierung mit dem späteren programmgesteuerten Muster.",
+              "explain": "Jeder geschlossene Schalter zieht seinen Eingang auf Low; beim Öffnen erzeugt der Pull-up ein High-Bit. Das Programm schreibt zuerst null auf den Ausgang, wartet, liest P1, speichert das Byte in Zelle 32 und kopiert es nach P2. Der Ausgangstreiber steuert die echten LED-Zweige.",
+              "hint": "Ein High-Startpegel kann alle LEDs einschalten, bevor das Programm sie löscht. Beginne mit geschlossenen Schaltern für Eingabe null. Dies ist eine von CP5 angeregte 5-V-Lernschaltung, kein Modell seiner ursprünglichen Versorgung oder Belastbarkeit. Die LED-Pegel stammen aus dem Schaltungslöser.",
+              "manual": "Ich habe Schalterpolarität und den Wechsel vom Startzustand zur Programmausgabe notiert"
+            }
+          }
+        },
+        {
+          "id": "patterns-and-pause",
+          "copy": {
+            "en": {
+          "action": "Under Switches in the instruments panel, open only S1, S3, S6 and S8; keep S2, S4, S5 and S7 closed. After the next sample, compare P1 Input and P2 Latch under Ports, cell 32 under Memory, the display and lit LEDs 1, 3, 6 and 8. Close those four switches, then open only S2, S4, S5 and S7 for byte 90. Pause CPU, change one switch, and compare the immediate input change with the held output; use Run CPU to allow the next sample.",
+              "explain": "The switch can change the electrical input while the CPU is paused. The output stays at its previous sample until the firmware runs again. This separates the external circuit, program memory and execution time.",
+          "hint": "S1 is bit 0 (weight 1); S8 is bit 7 (weight 128). Open produces a high bit and Closed produces a low bit. Ports uses hexadecimal: A5 means decimal 165, and 5A means 90. Memory cell 32 shows opcode 000 and operand 165 or 090; the display shows A00.165 or A00.090. Wait for the sampling loop and record the observed states yourself; this checkpoint does not infer an LED result from source text.",
+              "manual": "I matched both binary patterns and verified that output waits for resumed execution"
+            },
+            "de": {
+          "action": "Öffne unter „Schalter“ im Instrumentenpanel nur S1, S3, S6 und S8; lasse S2, S4, S5 und S7 geschlossen. Vergleiche nach der nächsten Abtastung unter „Ports“ den „Eingang“ von P1 und das „Register“ von P2, unter „Speicher“ Zelle 32, die Anzeige und die leuchtenden LEDs 1, 3, 6 und 8. Schließe diese vier Schalter und öffne dann nur S2, S4, S5 und S7 für Byte 90. Wähle „CPU pausieren“, ändere einen Schalter und vergleiche die sofortige Eingangsänderung mit dem gehaltenen Ausgang. Wähle für die nächste Abtastung „CPU ausführen“.",
+              "explain": "Der Schalter kann den elektrischen Eingang auch bei pausierter CPU ändern. Der Ausgang behält seinen vorherigen Messwert, bis die Firmware wieder läuft. So werden externe Schaltung, Programmspeicher und Ausführungszeit unterscheidbar.",
+          "hint": "S1 ist Bit 0 (Wert 1); S8 ist Bit 7 (Wert 128). „Offen“ erzeugt ein High-Bit und „Geschlossen“ ein Low-Bit. „Ports“ verwendet Hexadezimalzahlen: A5 bedeutet dezimal 165, 5A bedeutet 90. Speicherzelle 32 zeigt Befehl 000 und Operand 165 oder 090; die Anzeige zeigt A00.165 oder A00.090. Warte auf die Abtastschleife und protokolliere die Zustände selbst; diese Prüfung leitet kein LED-Ergebnis aus dem Quelltext ab.",
+              "manual": "Ich habe beide Binärmuster verglichen und geprüft, dass der Ausgang auf die fortgesetzte Ausführung wartet"
+            }
+          }
+        }
+      ]
     }
   ]
 }

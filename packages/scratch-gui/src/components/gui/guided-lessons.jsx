@@ -102,6 +102,9 @@ const eventNames = {
     'circuit-ready': 'bw-circuit-ready',
     'circuit-changed': 'bw-circuit-changed',
     'debug-phase': 'bw-debug-phase',
+    'cp1-command': 'bw-cp1-command',
+    'cp1-halt': 'bw-cp1-halt',
+    'cp1-error': 'bw-cp1-error',
     'hardware-state': 'bw-hardware-state'
 };
 

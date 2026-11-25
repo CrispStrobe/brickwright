@@ -24,3 +24,26 @@ The parser's separate upstream record is
 `sb3-creator/reference/cp1-program-format.md`. This authorship record covers the
 editor/content contribution; the CPU and peripheral contributors maintain
 their own primary-source and implementation records.
+
+## 2026-11-25 continuation
+
+Fresh independent contributors authored the semantic observer/debug target and
+CP5-style example without receiving GPL emulator code, translated algorithms or
+reference implementation structure. The semantic profile uses hash-specific
+hardware facts and observed outcomes from original experiments on the independently
+authored machine. The implementation does not decode or translate historical ROM
+instructions into a separate teaching-language interpreter.
+
+The coordinator supplied a separately held 2048-byte monitor image to optional
+acceptance tools. Only behavioral observations, exact ROM identity and source
+hashes were retained in reports. Historical bytes remain external and are absent
+from all four repositories and their package dependencies. The optional scripts
+accept a user's local file and do not fetch it.
+
+The CP5 workbench uses ordinary circuit components and newly written bilingual
+instructions/programs. It is a simplified 5 V educational circuit; no original
+scanned artwork, manual listings or power-rating claims were imported. New UI
+source matching, lesson events and the two additional lessons were written from
+the independent engine API and actual circuit observations. Browser fixtures
+use short original synthetic firmware and preserve that distinction from
+historical-monitor acceptance.

@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import styles from './cp1-panel.css';
 import {browserLocale, makeT} from '../../lib/bw-i18n.js';
 import {parseCp1Program, exportCp1Program} from '../../lib/cp1-program.js';
+import {cp1DebugView} from '../../lib/cp1-debug-view.js';
 import {createCp1Project, serializeCp1Project, cp1RomReference} from '../../lib/cp1-project.js';
 import {CP1_PHYSICAL_KEYS, createCp1KeyInput, cp1KeyForKeyboard, cp1IsTypingTarget,
     cp1DisplayDigits, cp1SegmentDescription, readCp1PanelSnapshot} from '../../lib/cp1-panel-input.js';
@@ -36,7 +37,21 @@ const COPY = {
         noLoader: 'No CP1 program loader is attached.', invalidCell: 'Use a valid cell address and two byte values (0–255).',
         saved: 'CP1 project prepared.', written: 'Cell {address} written.',
         romImported: 'Monitor ROM imported: {name}', raw: 'Raw masks', busy: 'Working…', cycles: 'cycles',
-        invalidRom: 'Import a 2048-byte CP1 monitor ROM.'
+        invalidRom: 'Import a 2048-byte CP1 monitor ROM.',
+        teaching: 'CP1 command debugger', commandStep: 'Step CP1 command', teachingPc: 'CP1 PC',
+        accumulator: 'Accumulator', comparison: 'Comparison', yes: 'true', no: 'false',
+        semanticUnavailable: 'Command debugging needs a qualified monitor ROM. Raw CPU stepping and the original keypad remain available.',
+        semanticHint: 'Set a breakpoint at the starting cell, run the CPU, then select that cell and press RUN on the keypad. At the breakpoint, Step CP1 command advances through the monitor to the next command boundary.',
+        monitorIdle: 'The monitor is waiting. Use its STEP key while the CPU runs, or set a cell breakpoint and start with keypad RUN.',
+        sourceMismatch: 'The current cell has no matching source line. Check the draft and the actual RAM before loading or editing.',
+        executionListing: 'Source and command breakpoints', breakpoint: 'Breakpoint',
+        breakpointAt: 'Breakpoint at cell {address}', instruction: 'Cell value',
+        currentSource: 'Current source: line {line}, cell {address}',
+        stateReady: 'At a command boundary', stateRunning: 'Executing a command',
+        stateHalted: 'Monitor waiting', stateError: 'Monitor error', stateUnknown: 'Waiting for a monitor observation',
+        stepResult: 'Last command step: {completed} command(s), {instructions} CPU instructions, {cycles} machine cycles.',
+        stepBudget: 'The command-step budget was reached. The CPU is paused; inspect the program or continue.',
+        monitorError: 'Monitor error {code}', sourceDiffers: 'RAM differs'
     },
     de: {
         title: 'Kosmos CP1', base: '128 Zellen', expanded: '256 Zellen · CP3',
@@ -64,7 +79,21 @@ const COPY = {
         noLoader: 'Kein CP1-Programmlader verbunden.', invalidCell: 'Verwende eine gültige Zelladresse und zwei Bytewerte (0–255).',
         saved: 'CP1-Projekt vorbereitet.', written: 'Zelle {address} geschrieben.',
         romImported: 'Monitor-ROM importiert: {name}', raw: 'Rohe Masken', busy: 'Wird bearbeitet…', cycles: 'Zyklen',
-        invalidRom: 'Importiere ein CP1-Monitor-ROM mit 2048 Bytes.'
+        invalidRom: 'Importiere ein CP1-Monitor-ROM mit 2048 Bytes.',
+        teaching: 'CP1-Befehlsdebugger', commandStep: 'CP1-Befehlsschritt', teachingPc: 'CP1-PC',
+        accumulator: 'Akkumulator', comparison: 'Vergleich', yes: 'wahr', no: 'falsch',
+        semanticUnavailable: 'Befehlsdebugging benötigt ein geprüftes Monitor-ROM. CPU-Schritte und die ursprüngliche Tastatur bleiben verfügbar.',
+        semanticHint: 'Setze einen Haltepunkt an der Startzelle, starte die CPU, wähle die Zelle und drücke RUN auf der Tastatur. Am Haltepunkt führt ein CP1-Befehlsschritt den Monitor bis zur nächsten Befehlsgrenze aus.',
+        monitorIdle: 'Der Monitor wartet. Verwende STEP bei laufender CPU oder setze einen Zellhaltepunkt und starte mit RUN auf der Tastatur.',
+        sourceMismatch: 'Zur aktuellen Zelle passt keine Quellzeile. Prüfe Entwurf und tatsächliches RAM vor dem Laden oder Bearbeiten.',
+        executionListing: 'Quelle und Befehlshaltepunkte', breakpoint: 'Haltepunkt',
+        breakpointAt: 'Haltepunkt an Zelle {address}', instruction: 'Zellwert',
+        currentSource: 'Aktuelle Quelle: Zeile {line}, Zelle {address}',
+        stateReady: 'An einer Befehlsgrenze', stateRunning: 'Befehl wird ausgeführt',
+        stateHalted: 'Monitor wartet', stateError: 'Monitorfehler', stateUnknown: 'Warten auf eine Monitorbeobachtung',
+        stepResult: 'Letzter Befehlsschritt: {completed} Befehl(e), {instructions} CPU-Befehle, {cycles} Maschinenzyklen.',
+        stepBudget: 'Das Budget für den Befehlsschritt wurde erreicht. Die CPU ist pausiert; prüfe das Programm oder setze fort.',
+        monitorError: 'Monitorfehler {code}', sourceDiffers: 'RAM weicht ab'
     }
 };
 const translate = makeT(COPY);
@@ -308,7 +337,42 @@ class Cp1Panel extends React.Component {
         </div>;
     }
 
-    _renderProgram () {
+    _renderSemantic (view) {
+        const waiting = view.execution === 'halted' || view.execution === 'error';
+        const stateKey = {ready: 'stateReady', running: 'stateRunning', halted: 'stateHalted',
+            error: 'stateError', unknown: 'stateUnknown'}[view.execution] || 'stateUnknown';
+        const step = view.step;
+        return <section className={styles.semantic} data-cp1-semantic={view.qualified ? 'qualified' : 'unavailable'}
+            aria-label={this._t('teaching')}>
+            <h3>{this._t('teaching')}</h3>
+            {view.qualified ? <React.Fragment>
+                <dl className={styles.teachingRegisters}>
+                    <div><dt>{this._t('teachingPc')}</dt><dd data-cp1-teaching-pc>{cellText(view.pc)}</dd></div>
+                    <div><dt>{this._t('accumulator')}</dt><dd data-cp1-accumulator>{view.accumulator ?
+                        `${String(view.accumulator.opcode).padStart(2, '0')}.${cellText(view.accumulator.operand)}` : '—'}</dd></div>
+                    <div><dt>{this._t('comparison')}</dt><dd data-cp1-comparison>{view.comparison === null ? '—' :
+                        this._t(view.comparison ? 'yes' : 'no')}</dd></div>
+                </dl>
+                <div className={styles.actions}>
+                    <button type="button" data-cp1-command-step disabled={this.props.running || this.state.busy ||
+                        waiting || !this.props.onStepCommand} onClick={() => {
+                        this._releaseAll();
+                        this._action(() => this.props.onStepCommand());
+                    }}>{this._t('commandStep')}</button>
+                    <span data-cp1-execution={view.execution}>{this._t(stateKey)}</span>
+                </div>
+                {view.execution === 'error' && view.lastEvent && view.lastEvent.error ? <p className={styles.hint} data-cp1-monitor-error>
+                    {this._t('monitorError', {code: Number.isInteger(view.lastEvent.error.code) ?
+                        cellText(view.lastEvent.error.code) : '—'})}</p> : null}
+                {step && step.status !== 'pending' ? <p className={styles.hint} data-cp1-step-result>
+                    {this._t('stepResult', {completed: step.completed, instructions: step.instructions, cycles: step.cycles})}
+                    {step.status === 'limit' ? ` ${this._t('stepBudget')}` : ''}</p> : null}
+                <p className={styles.hint}>{this._t(waiting ? 'monitorIdle' : 'semanticHint')}</p>
+            </React.Fragment> : <p className={styles.hint}>{this._t('semanticUnavailable')}</p>}
+        </section>;
+    }
+
+    _renderProgram (view) {
         return <div className={styles.program}>
             <label className={styles.field}>
                 <span>{this._t('source')}</span>
@@ -327,13 +391,36 @@ class Cp1Panel extends React.Component {
                 }}>{this._t('listing')}</button>
                 <button type="button" disabled={this.state.busy} onClick={() => this._saveProject()}>{this._t('save')}</button>
             </div>
+            {view.current ? <p className={styles.hint} data-cp1-current-source>
+                {this._t('currentSource', {line: view.current.line, address: cellText(view.current.address)})}
+                {' '}<mark>{view.current.source}</mark></p> : null}
+            {view.sourceMismatch ? <p className={styles.hint} data-cp1-source-mismatch>{this._t('sourceMismatch')}</p> : null}
+            {view.rows.length ? <details className={styles.listing} open>
+                <summary>{this._t('executionListing')}</summary>
+                <div className={styles.tableScroll}><table className={styles.table} data-cp1-source-listing>
+                    <thead><tr>{['breakpoint', 'address', 'instruction', 'line', 'source'].map(key =>
+                        <th key={key} scope="col">{this._t(key)}</th>)}</tr></thead>
+                    <tbody>{view.rows.map(row => <tr key={row.address} data-cp1-source-cell={row.address}
+                        aria-current={row.current ? 'step' : undefined}>
+                        <td><button type="button" data-cp1-breakpoint={row.address} aria-pressed={row.breakpoint}
+                            aria-label={this._t('breakpointAt', {address: row.address})}
+                            disabled={!view.qualified || this.state.busy || !this.props.onToggleBreakpoint}
+                            onClick={() => this._action(() => this.props.onToggleBreakpoint(row.address))}>
+                            {row.breakpoint ? '●' : '○'}</button></td>
+                        <th scope="row">{cellText(row.address)}</th>
+                        <td>{String(row.opcode).padStart(2, '0')}.{cellText(row.operand)}</td>
+                        <td>{row.line}</td><td><code>{row.source}</code>
+                            {!row.matchesMemory ? <span className={styles.draftLabel}>{this._t('sourceDiffers')}</span> : null}</td>
+                    </tr>)}</tbody>
+                </table></div>
+            </details> : null}
         </div>;
     }
 
-    _renderMemory (snapshot) {
+    _renderMemory (snapshot, view) {
         const capacity = this.props.expansion ? 256 : 128;
         const page = Math.min(this.state.memoryPage, capacity / 16 - 1);
-        const parsed = parseCp1Program(this.state.source, {expansion: Boolean(this.props.expansion)});
+        const sourceRows = new Map(view.rows.filter(row => row.matchesMemory).map(row => [row.address, row]));
         return <div>
             <p className={styles.hint}>{this._t('memoryHint')}</p>
             <div className={styles.tableScroll}><table className={styles.table}>
@@ -341,9 +428,10 @@ class Cp1Panel extends React.Component {
                 <tbody>{Array.from({length: 16}, (_, offset) => {
                     const address = page * 16 + offset;
                     const cell = snapshot && snapshot.cells && snapshot.cells[address];
-                    return <tr key={address}><th scope="row">{cellText(address)}</th>
+                    return <tr key={address} aria-current={view.currentAddress === address ? 'step' : undefined}>
+                        <th scope="row">{cellText(address)}</th>
                         <td>{cell ? cellText(cell.opcode) : '—'}</td><td>{cell ? cellText(cell.operand) : '—'}</td>
-                        <td>{parsed.ok && parsed.sourceMap[address] ? parsed.sourceMap[address].line : '—'}</td></tr>;
+                        <td>{sourceRows.has(address) ? sourceRows.get(address).line : '—'}</td></tr>;
                 })}</tbody>
             </table></div>
             <div className={styles.actions}>
@@ -395,6 +483,7 @@ class Cp1Panel extends React.Component {
         const ready = Boolean(snapshot || this.props.machine);
         const cpu = snapshot && snapshot.cpu;
         const rom = this.props.romReference || this.state.importedRom;
+        const debugView = cp1DebugView(snapshot, this.state.source, {expansion: Boolean(this.props.expansion)});
         return <section className={styles.root} data-cp1-panel="true" data-color-mode={this.props.colorMode}
             tabIndex={0} onKeyDown={this._onKeyDown}
             onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) this._releaseAll(); }}>
@@ -419,11 +508,12 @@ class Cp1Panel extends React.Component {
             {this._renderKeypad(ready)}
             <p className={styles.hint}>{this._t('keyboard')}</p>
             <p className={styles.hint}>{this._t('stepHint')}</p>
+            {this._renderSemantic(debugView)}
             <div className={styles.tabs} role="group" aria-label={this._t('title')}>
                 {['program', 'memory', 'ports'].map(view => <button key={view} type="button" aria-pressed={this.state.view === view}
                     onClick={() => this.setState({view})}>{this._t(view)}</button>)}
             </div>
-            {this.state.view === 'program' ? this._renderProgram() : this.state.view === 'memory' ? this._renderMemory(snapshot) : this._renderPorts(snapshot)}
+            {this.state.view === 'program' ? this._renderProgram(debugView) : this.state.view === 'memory' ? this._renderMemory(snapshot, debugView) : this._renderPorts(snapshot)}
             {this.state.errors.length ? <div role="alert" className={styles.errors} aria-label={this._t('error')}>
                 {this.state.errors.map((error, index) => <p key={index}>{error.line ? this._t('lineError', error) : error.message}</p>)}
             </div> : null}
@@ -450,6 +540,7 @@ Cp1Panel.propTypes = {
     colorMode: PropTypes.string, source: PropTypes.string, romReference: PropTypes.object,
     onSourceChange: PropTypes.func, onKey: PropTypes.func, onReleaseKeys: PropTypes.func,
     onRun: PropTypes.func, onPause: PropTypes.func, onStep: PropTypes.func, onReset: PropTypes.func,
+    onStepCommand: PropTypes.func, onToggleBreakpoint: PropTypes.func,
     onLoad: PropTypes.func, onWriteCell: PropTypes.func, onPortInput: PropTypes.func,
     onImportRom: PropTypes.func, onSaveProject: PropTypes.func
 };

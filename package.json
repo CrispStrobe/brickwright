@@ -154,8 +154,8 @@
     },
     "devDependencies": {
         "acorn": "8.14.0",
-        "bw-board": "github:CrispStrobe/bw-board#85fcc3a2785130c3317cbce3e4f0457a4e8e180d",
-        "bw-circuit-ui": "github:CrispStrobe/bw-circuit-ui#395162693a267b4c1db6bf9c9305f712e116337c",
+        "bw-board": "github:CrispStrobe/bw-board#1fa4734c18c7e037ff220e508ad33da5273d999f",
+        "bw-circuit-ui": "github:CrispStrobe/bw-circuit-ui#5d5ad58540e7e6f120a693aa223a9bcce6145c2e",
         "digitaljs": "^0.14.2",
         "jszip": "3.10.1",
         "playwright": "^1.62.1",

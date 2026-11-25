@@ -115,3 +115,20 @@ test('CP1 teaching source does not invent a generic project-run completion event
     assert.equal(report.findings[0].severity, 'blocking');
     assert.match(report.findings[0].message, /project-run/);
 });
+
+test('qualified CP1 events require a loaded real system and a valid teaching source', async () => {
+    for (const event of ['cp1-command', 'cp1-halt', 'cp1-error']) {
+        const lesson = lessonWith('Read the CP1 cells.');
+        lesson.checkpoints[0].observe = {event};
+        assert.deepEqual((await scan(lesson)).findings, [], event);
+        for (const [candidate, capability] of [
+            [lesson, {...cp1Bench, partKinds: []}],
+            [{...lesson, loadMode: 'program-only'}, cp1Bench],
+            [{...lesson, exampleId: '42-diode-rectifier'}, cp1Bench]
+        ]) {
+            const findings = (await scan(candidate, capability)).findings;
+            assert.ok(findings.some(finding => finding.check === 'A' && finding.severity === 'blocking' &&
+                finding.message.includes(`observes ${event}`)), `${event}: missing system/source`);
+        }
+    }
+});

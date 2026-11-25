@@ -338,6 +338,46 @@ test('CP1 runner treats a 2048-byte image beginning with OUTL P2,A as raw firmwa
     assert.equal(f.runner.cp1Snapshot().rom.known, false);
 });
 
+test('hot CP1 ROM replacement cancels an armed step, releases keys and publishes a paused fresh target', async t => {
+    const f = await fixture(t).start();
+    f.browser.frame();
+    const target = f.target();
+    f.runner.pause();
+    f.browser.drainIdle();
+    f.runner.cp1Key('RUN', true);
+    assert.equal(f.runner.step('insn'), undefined);
+    assert.equal(f.runner.state().phase, 'stepping');
+    assert.equal(f.runner.state().session.stepping, true);
+    assert.equal(f.browser.frames.size, 1);
+    const cycles = target.machine.cycles;
+    const boardTime = f.board.timeNs;
+    const replacement = firmware([0x23, 73, 0x04, 0]); // MOV A,#73; JMP 0
+    f.runner.loadRom(replacement);
+    assert.equal(f.target(), target, 'replacement keeps the one machine and circuit attachment');
+    assert.equal(f.runner.state().phase, 'paused');
+    assert.equal(f.runner.state().session.stepping, false);
+    assert.equal(target.state(), 'halted');
+    assert.equal(target.machine.cpu.pc, 0);
+    assert.equal(target.machine.cpu.cycles, 0);
+    assert.equal(target.machine.cycles, cycles, 'replacement does not advance simulated time');
+    assert.equal(f.board.timeNs, boardTime);
+    assert.equal(f.browser.frames.size, 0, 'the replaced step leaves no scheduled CPU callback');
+    assert.deepEqual(f.runner.cp1Snapshot().keys, []);
+    assert.equal(f.runner.cp1Snapshot().cp1.step, null);
+    assert.equal(f.runner.cp1Snapshot().cp1.lastEvent, null);
+    assert.equal(f.seen.at(-1).phase, 'paused', 'the host receives the new state immediately');
+    replacement.fill(0xff);
+    assert.equal(f.runner.step('insn'), undefined);
+    f.browser.frame();
+    assert.equal(f.runner.state().phase, 'paused');
+    assert.equal(target.machine.cpu.a, 73, 'the next explicit step executes the copied replacement ROM');
+    assert.equal(target.machine.cpu.pc, 2);
+    assert.equal(target.machine.cycles, cycles + 2);
+    assert.equal(f.board.timeNs, boardTime + 5000n);
+    assert.equal(f.browser.dispatched.filter(event => /^bw-cp1-(command|halt|error)$/.test(event.type)).length, 0,
+        'unqualified test firmware does not fabricate semantic observations');
+});
+
 for (const [label, bootMedia] of [
     ['missing', null],
     ['empty', {bytes: new Uint8Array()}],

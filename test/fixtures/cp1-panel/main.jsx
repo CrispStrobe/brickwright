@@ -1,6 +1,6 @@
 // Original component harness. The firmware below is newly authored test code.
 import React, {useState,useEffect} from 'react';
-import {createRoot} from 'react-dom/client';
+import {mount} from '@cp1-react-root';
 import Cp1Panel from '@cp1-panel';
 import Cp1Host from '@cp1-host';
 import {Cp1Machine} from '@cp1-machine';
@@ -13,7 +13,7 @@ const h=window.__cp1Harness={events:[],failLoad:false,failImport:false,holdConfi
 const mode=new URLSearchParams(location.search).get('mode')||'host';
 const locale=new URLSearchParams(location.search).get('locale')||'en';
 const colorMode=new URLSearchParams(location.search).get('theme')||'light';
-const root=createRoot(document.querySelector('#app'));
+const root=mount(document.querySelector('#app'));
 function App(){
  const [tick,setTick]=useState(0),[running,setRunning]=useState(false),[config,setConfig]=useState({partId:'cp1-proof',expansion:false,clockHz:6000000}),[text,setText]=useState(source);
  const refresh=()=>setTick(v=>v+1);

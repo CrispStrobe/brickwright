@@ -360,9 +360,11 @@ test('vendored SPIKE compiler emits a canonical executable round-trip artifact',
     // -> 318a9ad (2026-11-24): flat-twin partition verdicts re-derived (#200) and the bw-circuit-ui pin 4c57f3a (#201); `src/` unchanged again.
     // -> 73f9490 (2026-11-24): independent CP1 assembler and teaching examples;
     // the SPIKE artifact assertions below are re-run at this exact supplier pin.
+    // -> fdadba67 (2026-11-25): CP5 example and registration; the SPIKE
+    // emitter is unchanged. Re-run the complete artifact assertions at this pin.
     // Keep the exact supplier identity gate and every SPIKE artifact assertion below.
     assert.equal(JSON.parse(readFileSync(new URL('../vendor-pins.json', import.meta.url)))['sb3-creator'],
-        '73f949086e2f074c2c045d76ef37c9ee4a43d271');
+        'fdadba6743839763fcb8bb2fad64063937e16a7e');
 
     const creator = new SB3Creator();
     creator.parse(PROGRAM);

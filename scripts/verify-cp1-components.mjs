@@ -27,6 +27,7 @@ const React=requireDeps('react');
 const {renderToStaticMarkup}=requireDeps('react-dom/server');
 const {transformWithOxc}=await import(pathToFileURL(requireCompiler.resolve('vite')).href);
 const {Cp1Machine}=await import(pathToFileURL(path.join(board,'src/cp1-machine.js')).href);
+const {cp1DebugView}=await import(pathToFileURL(path.join(root,'overlay/scratch-gui/src/lib/cp1-debug-view.js')).href);
 const url=source=>`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`;
 const panelPath=path.join(root,'overlay/scratch-gui/src/components/tw-pseudocode/cp1-panel.jsx');
 const hostPath=path.join(root,'overlay/scratch-gui/src/components/tw-pseudocode/cp1-host.jsx');
@@ -81,6 +82,14 @@ function panel(extra={}){
 }
 const keyEvent=(key,code,target={closest:()=>null})=>({key,code,target,preventDefault(){this.prevented=true;}});
 const pointer=(id)=>({pointerId:id,button:0,currentTarget:{focus(){},setPointerCapture(){}},preventDefault(){}});
+function findElement(node,predicate){
+ if(!node||typeof node!=='object')return null;
+ if(predicate(node))return node;
+ for(const child of React.Children.toArray(node.props?.children)){
+  const found=findElement(child,predicate);if(found)return found;
+ }
+ return null;
+}
 try{
  await check('JSX compiles and real React SSR renders six raw masks and thirty keys',()=>{
   const html=renderToStaticMarkup(React.createElement(Cp1Panel,{snapshot:machine.snapshot(),source,onKey(){},onLoad(){},onStep(){},onRun(){}}));
@@ -119,6 +128,27 @@ try{
   p._setSource('AKO 256');await p._load();assert.equal(calls,1);assert.ok(p.state.errors.length);assert.equal(p.state.notice,'');
   p._setSource(source);p.props={...p.props,onLoad:()=>{throw Error('loader refusal');}};await p._load();assert.match(p.state.errors[0].message,/loader refusal/);assert.equal(p.state.notice,'');p.componentWillUnmount();
  });
+ await check('qualified teaching UI renders both accumulator bytes and uses actual command and breakpoint callbacks',async()=>{
+  const snapshot={...machine.snapshot(),cp1:{available:true,profileQualified:true,profileId:'test-view',
+   pc:0,accumulator:{opcode:17,operand:231},comparison:{label:'comparison',value:false},
+   execution:'ready',atCommandBoundary:true,command:{address:0,opcode:4,operand:42},breakpoints:[0]}};
+  let steps=0,cell=null;const p=panel({snapshot,onStepCommand:()=>{steps++;},onToggleBreakpoint:address=>{cell=address;}});
+  const html=renderToStaticMarkup(p.render());assert.match(html,/17\.231/);assert.match(html,/data-cp1-current-source/);
+  assert.match(html,/data-cp1-breakpoint="0" aria-pressed="true"/);
+  const view=cp1DebugView(snapshot,p.state.source);
+  findElement(p._renderSemantic(view),el=>Object.hasOwn(el.props||{},'data-cp1-command-step')).props.onClick();
+  for(let i=0;i<4;i++)await Promise.resolve();assert.equal(steps,1);
+  findElement(p._renderProgram(view),el=>el.props?.['data-cp1-breakpoint']===0).props.onClick();
+  for(let i=0;i<4;i++)await Promise.resolve();assert.equal(cell,0);p.componentWillUnmount();
+ });
+ await check('stale source has no live line highlight and monitor-idle command stepping is disabled',()=>{
+  const snapshot={...machine.snapshot(),cp1:{available:true,profileQualified:true,pc:0,
+   accumulator:{opcode:0,operand:42},execution:'halted',comparison:{value:false}}};
+  const p=panel({snapshot,onStepCommand(){},source:'AKO 73\nANZ\nSPU 1'});
+  const html=renderToStaticMarkup(p.render());assert.match(html,/data-cp1-source-mismatch/);
+  assert.doesNotMatch(html,/data-cp1-current-source/);assert.match(html,/data-cp1-command-step[^>]*disabled/);
+  p.componentWillUnmount();
+ });
  await check('normal project export excludes live keys and source typing is reported immediately',async()=>{
   let saved,edited;const p=panel({onSaveProject:value=>{saved=value;},onSourceChange:value=>{edited=value;}});
   p._onKeyDown(keyEvent('1','Digit1'));await p._saveProject();assert.equal(saved.words[2].opcode,9);assert.equal(Object.hasOwn(saved,'heldKeys'),false);
@@ -141,6 +171,12 @@ try{
  renderToStaticMarkup(React.createElement(Cp1Host,{runner:hostRunner,running:false,locale:'en',configuration:{partId:'cp1-fixture',expansion:false,clockHz:6000000},onRun(){},onConfigure:next=>{configurations.push(next);return new Promise(resolve=>{configureResolve=resolve;});},onImportRom:()=>{imported++;}}));
  for(const effect of effects.splice(0)){const cleanup=effect();if(cleanup)cleanups.push(cleanup);}
  const host=globalThis.__cp1ProofPanelProps;
+ await check('host semantic controls preserve runner refusals and exact cell addresses',async()=>{
+  hostRunner.step=()=>({unsupported:'ROM not qualified'});
+  await assert.rejects(()=>host.onStepCommand(),/ROM not qualified/);
+  let observed=null;hostRunner.cp1ToggleBreakpoint=address=>{observed=address;return {address,enabled:true};};
+  await host.onToggleBreakpoint(37);assert.equal(observed,37);
+ });
  await check('host persists unfinished source and does not turn loader failure into success',async()=>{
   host.onSourceChange('again: AKO unfinished +');assert.equal(JSON.parse(storage.get('bw-cp1-workspace')).source,'again: AKO unfinished +');
   await assert.rejects(()=>host.onLoad({ok:true}),/real callback rejection/);

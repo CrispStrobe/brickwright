@@ -18,6 +18,7 @@ authored `sb3-creator/src/utils/cp1Program.js`, synced to `lib/cp1-program.js`.
 | `romReference` | Optional `{sha256, byteLength: 2048, name?}` metadata; never ROM bytes. |
 | `onKey(key, down)`, `onReleaseKeys()` | Logical matrix contacts and complete release. Digits are strings `0`–`9`; function names are uppercase. |
 | `onRun()`, `onPause()`, `onStep()`, `onReset?()` | Host CPU controls. `onStep` advances one 8049 instruction, separate from keypad STEP. |
+| `onStepCommand()`, `onToggleBreakpoint(address)` | Qualified CP1 command stepping and program-cell breakpoints over the same runner. Refusals propagate to the panel. |
 | `onLoad(assembly, {source, clear: true})` | Atomically load a successful assembly. `assembly.words` contains `{address, opcode, operand, line, column}` entries. |
 | `onWriteCell?(address, {opcode, operand})` | Optional paused RAM editing. Both cell bytes may be 0–255. |
 | `onPortInput?(name, value)` | External input byte for P1, or P3 when expanded. |
@@ -44,6 +45,36 @@ physical left to right, bits a/b/c/d/e/f/g/dp. The fixed separator arrives as th
 third digit's dp bit. The panel renders those bits directly, including blank or
 nonnumeric monitor patterns. CPU PC/A/PSW/cycle values are labeled as 8049 state.
 They are not presented as the CP1 teaching-program PC or accumulator.
+
+### Qualified teaching-program state
+
+The optional `snapshot.cp1` is produced by the engine observer. Both `available`
+and `profileQualified` must be true before the panel displays the teaching PC,
+the complete accumulator pair, comparison condition or command controls. The
+2716 profile is admitted by the complete ROM SHA-1
+`ff4befcf82a664950186d3af1843fdef70d2209f`. An unknown or mask-B ROM retains raw
+8049 controls without guessed teaching state. The profile and bounded execution
+contract are documented upstream in `docs/CP1-SEMANTIC-DEBUG.md`.
+
+`Step CP1 command` drives the existing machine through monitor instructions;
+there is no second interpreter or clock. It runs until an observed command
+completion, a terminal condition or its instruction budget. A paused command
+can be resumed after budget exhaustion. At the idle monitor, use the original
+STEP key while the CPU runs, or set a listing breakpoint at the starting cell,
+use Run CPU and enter `0, 0, 0, PC, RUN`. A cell breakpoint stops before the
+teaching command; resuming permits that occurrence and can stop on loop reentry.
+
+The source listing is a current draft. A highlighted source line requires exact
+opcode/operand agreement with live RAM and, while running, the captured command.
+Unknown or invalidated observation state receives no current-source highlight.
+The memory table likewise withholds a source-line number when the draft differs.
+The accumulator displays both bytes (for example `17.231`), and comparison is
+the current monitor condition, not a retained verdict of the last comparison.
+A cleared historical error is not presented as a current monitor error.
+
+Breakpoints are session controls. They are not serialized as portable project
+state. ROM replacement pauses the shared session, cancels any pending step and
+queued observations, releases keys, resets the target and publishes paused state.
 
 ## Key lifetime
 
@@ -82,12 +113,22 @@ states belong to the engine's independent debugger contract.
 
 ## Learning and verification
 
-`lesson-waves/cp1-8.json` contains eight original English/German lessons. Their
+`lesson-waves/cp1-8.json` contains ten original English/German lessons. Most
 checkpoints use manual completion for conceptual reasoning and observations;
 opening a panel, loading cells or clicking an input is not claimed to prove a
 correct display or output waveform. Timing copy separates requested delay from
 measured period and permits an explicit unavailable measurement when no suitable
 trace exists. ROM-dependent behavior requires a user-provided compatible image.
+
+The command-debugging lesson has one automatic checkpoint. `bw-cp1-command`
+must report an actually completed cell-0 `AKO 42` with accumulator `00.042`.
+The shared runner relays qualified `cp1.command`, `cp1.halt` and `cp1.error`
+engine events as `bw-cp1-command`, `bw-cp1-halt` and `bw-cp1-error`. Its bounded
+batch keeps the latest event of each kind/cell until UI publication; it is not a
+complete execution trace. Reset, program edits and ROM/target replacement clear
+pending observations. Manual completion remains available without a qualified ROM.
+The CP5 lesson requires observed switch, RAM and LED states and does not complete
+automatically merely because its source or circuit was loaded.
 
 Run the focused source suites with:
 
@@ -108,27 +149,34 @@ registry and the independently authored engine checkout:
 ```sh
 node scripts/verify-cp1-components.mjs --deps ../bw-circuit-ui/node_modules --board ../bw-board
 node scripts/verify-cp1-components.mjs --deps packages/scratch-gui/node_modules --compiler-deps ../bw-circuit-ui/node_modules --board packages/scratch-gui/node_modules/bw-board
-node scripts/verify-cp1-panel-browser.mjs --deps ../bw-circuit-ui/node_modules --board ../bw-board --executable /usr/bin/chromium
+node scripts/verify-cp1-panel-browser.mjs --deps ../bw-circuit-ui/node_modules --board ../bw-board
+node scripts/verify-cp1-runner-browser.mjs --deps ../bw-circuit-ui/node_modules --board ../bw-board --circuit ../bw-circuit-ui
+node scripts/verify-cp1-runner-browser.mjs --deps packages/scratch-gui/node_modules --compiler-deps ../bw-circuit-ui/node_modules --board ../bw-board --circuit ../bw-circuit-ui
+node scripts/verify-cp1-cp5-browser.mjs --deps packages/scratch-gui/node_modules --compiler-deps ../bw-circuit-ui/node_modules --board ../bw-board --circuit ../bw-circuit-ui --example overlay/scratch-gui/examples/cp1-cp5-binary/circuit.json
 ```
 
-The optional `--compiler-deps` flag selects the Vite/Oxc registry and defaults to
-`--deps`. React and its server renderer always come from `--deps`.
+The optional `--compiler-deps` flag selects the Vite/Oxc/Playwright registry and
+defaults to `--deps`. React and its renderer always come from `--deps`. Browser
+scripts use Playwright's installed Chromium by default; `--executable` selects an
+explicit existing browser. The runner's `--compile-only` flag only checks the
+fixture production bundle and must not be reported as a browser pass.
 
-On 2026-11-24, both SSR commands passed the same 13 checks: first with React
+On 2026-11-25, both SSR commands passed the same 16 checks: first with React
 18.3.1, then with the GUI's actual React 16.14.0 and installed pinned `bw-board`.
 Vite/Oxc compiled the JSX in both runs. The checks cover
 actual JSX/SSR rendering, raw masks, key lifetimes, load/ROM refusal feedback,
 real RAM writes, source preservation, storage refusal recovery, queued CP3/ROM
-operations and circuit input ownership. Event surfaces and effect scheduling are
+operations, circuit input ownership, full teaching-accumulator rendering,
+stale-source refusal and semantic callback/error propagation. Event surfaces and effect scheduling are
 controlled test doubles, PropTypes uses a validator-only stub, and CSS uses the
 actual stylesheet's class names. This is a component/callback proof, not a full
 application or visual browser pass. React 16.14.0 compatibility is exercised by
 the second command within these stated boundaries.
 
-The browser launch was blocked before page load by the execution sandbox:
+On 2026-11-24, browser launch was blocked before page load by the execution sandbox:
 Chromium's process singleton could not create its socket (`Operation not
 permitted`). The sanctioned escalation request was automatically rejected because
-the policy disables sandbox approval. No browser pass or screenshots are claimed.
+the policy disables sandbox approval. That attempt produced no browser pass or screenshots.
 The checked-in browser fixture uses an original synthetic 8049 ROM and reports a
 failure when browser launch is unavailable; it does not silently skip the gate.
 
@@ -136,16 +184,55 @@ failure when browser launch is unavailable; it does not silently skip the gate.
 
 The focused `CP1 browser qualification` workflow runs on the CP1 feature branch
 and relevant pull-request/main changes. It reads exact engine and Circuit UI
-revisions from `vendor-pins.json`, installs the locked test dependencies and
-Playwright Chromium, and runs the connector and panel gates. It preserves
+revisions from `vendor-pins.json`, installs the locked test dependencies, actual
+GUI React runtime and Playwright Chromium, and runs the connector and panel gates.
+Panel and shared-runner journeys run on both React 18 and the GUI's React 16. It preserves
 `inputs.json`, per-gate `result.json`, desktop/narrow screenshots and available
 failure screenshots in one workflow artifact. The job has read-only repository
 permissions and does not deploy or publish the application.
 
-These are real component/connector interactions against the adopted sources,
-with original synthetic firmware. They are separate from a full Lite build,
-historical-monitor qualification and physical-hardware evidence. The workflow
-must finish successfully before any browser pass is claimed.
+`inputs.json` distinguishes the standalone connector's engine (the Circuit UI
+development lock) from the shared runner's engine (the exact Lite-adopted source
+alias). It also records the actual Node, Playwright and both React versions. A
+connector geometry pass is not reported as a newer engine's semantic-debug pass.
+
+The shared-runner fixture mounts the actual CircuitDesigner and Cp1Host, starts
+the actual `createDebugRunner`, and uses the actual project-bundle save/restore
+helpers. The circuit and CPU share the same board, adapter and simulation clock.
+It checks ROM import, a visible circuit-button press through P1/8049/8155/P2 to
+the resistor and LED, pause/CPU-step/reset clock behavior, source assembly/RAM,
+and downloading/restoring an `.sb3` carrying incomplete source and configuration
+without firmware or held keys. A compiler trap rejects any unexpected attempt
+to send the CP1 program to the block compiler.
+
+The CP5 gate loads the adopted 35-part, 67-wire teaching workbench and clicks the
+eight actual live switch controls. Walking-bit, mixed-byte and endpoint patterns
+must agree in P1, P2 and all eight current-limited LED branches. Desktop and
+390-pixel screenshots record the actual layout. This gate uses the installed
+GUI React runtime. The narrow journey collapses the rails through their actual
+buttons before fitting the circuit, then reopens the live controls. A keyboard
+toggle while paused must change the contact without advancing either clock;
+resuming the CPU must propagate the new byte to the LED branches.
+
+These are real component/connector interactions against adopted sources, with
+original synthetic firmware. The surrounding page and minimal VM interface are
+test fixtures, PropTypes uses a validator-only stub, and the `.sb3` buttons call
+the actual bundle helpers directly. This scope does not include production GUI
+menus, the complete Scratch VM, historical-monitor semantics or physical
+hardware. The JSON records that boundary. Assertion failures are fatal, and
+later browser gates still collect evidence after an earlier failure. A gate may
+be reported as passing only after its own assertions succeed; the whole workflow
+must pass before claiming complete qualification of this scope.
+
+The [initial hosted run](https://github.com/CrispStrobe/brickwright-lite/actions/runs/45552587031)
+at Lite `50b32fa7405dcc5f30637b23f1a6be69c0ee12de` passed the connector gate in
+Chromium 149.0.7827.55, covering all eight orientations, 40 contacts, base/CP3
+configuration and synthetic-ROM import. Its desktop screenshot was inspected.
+The panel gate failed before launch because importing Playwright's resolved
+CommonJS file by URL did not expose a named `chromium` export. The shared fixture
+loader now uses the explicitly supplied registry's CommonJS API, with a checked
+`chromium.launch` function. The initial run remains recorded as failed; its
+connector result does not qualify the panel or shared-runner journeys.
 
 The continuation workspace on 2026-11-25 has a Chromium launcher without its
 underlying binary, and the standard Playwright download returns HTTP 403 from

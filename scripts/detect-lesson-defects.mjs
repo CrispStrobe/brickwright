@@ -80,6 +80,12 @@ export const OBSERVABLES = {
     // in its own circuit with no program.bw at all. Gating on loadMode alone
     // flagged three correct lessons.
     'debug-phase': {producer: 'tw-pseudocode/circuit-tab.jsx', needs: 'debuggable'},
+    // Only qualified engine observations, relayed by the shared machine runner.
+    // A locally imported exact-ROM profile is a runtime prerequisite; the
+    // curriculum keeps manual completion available when it is unavailable.
+    'cp1-command': {producer: 'lib/bw-debug/debug-runner.js', needs: 'cp1-program'},
+    'cp1-halt': {producer: 'lib/bw-debug/debug-runner.js', needs: 'cp1-program'},
+    'cp1-error': {producer: 'lib/bw-debug/debug-runner.js', needs: 'cp1-program'},
     // components/gui/gui.jsx, on peripheral connect/disconnect
     'hardware-state': {producer: 'components/gui/gui.jsx', needs: 'hardware'},
     // guided-lessons.jsx completes this itself when opened from a starter journey
@@ -407,6 +413,11 @@ export async function detect(opts = {}) {
                         `observes "${observe.event}", which nothing in the app dispatches`,
                         {known: Object.keys(OBSERVABLES)});
                 } else {
+                    if (spec.needs === 'cp1-program' && !cp1.hasCp1Program) {
+                        add(checkpoint, 'A', 'blocking',
+                            `observes ${observe.event} but no valid CP1 teaching program and system are loaded`,
+                            {producer: spec.producer});
+                    }
                     if (spec.needs === 'program' && !loadsProgram) {
                         add(checkpoint, 'A', 'blocking',
                             `observes ${observe.event} but loadMode is ${lesson.loadMode}, so no program is loaded to run`,
