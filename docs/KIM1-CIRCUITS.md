@@ -29,7 +29,7 @@ The CPU implements the 151 documented NMOS 6502 opcodes and their architectural 
 
 This first phase has stock 1 KiB main RAM, the two small peripheral RAM regions, the original 13-bit address decoding and fifteen user GPIO pins. The palette and wired lesson use deliberately slow teaching clocks. This is an instruction-level circuit model, not a cycle-by-cycle electrical model of the historical board.
 
-Historical ROM bytes, cassette/TTY routines, undocumented opcodes and expansion RAM are not supplied. Programs that depend on unimplemented ROM services or absent memory are refused rather than silently given substitute behavior. The reset and front-panel stop path are provided by the independent learning monitor. Exact original-ROM compatibility is not claimed.
+Historical ROM bytes, cassette/TTY routines, undocumented opcodes and expansion RAM are not supplied. Programs that depend on unimplemented ROM services or absent memory are refused rather than silently given substitute behavior. The reset and front-panel stop path are provided by the independent learning monitor. Exact original-ROM compatibility is not claimed. External CPU IRQ/NMI terminals are not exposed. CPU-written RAM and execution state are transient; saved circuits retain the authored program and keypad RAM edits, not a resumable execution checkpoint.
 
 ## Source and licensing boundary
 
@@ -51,6 +51,36 @@ References: [MOS manuals](https://bitsavers.trailing-edge.com/components/mosTech
 
 ## Qualification
 
-The NMOS CPU passed 1,510,000 generated reference cases: 10,000 for each documented opcode, checking registers, memory and instruction cycle totals. This does not grade every bus transaction or asynchronous interrupt timing. The source-bound receipt and reproducible harness live in the engine repository.
+The tested implementation is Brickwright `1512f923b42d64ab13dfdba969ef02fc1591bc8d`, with **bw-board** `e834b270cd21ca90be4407610566cdd75750168d` and **bw-circuit-ui** `a76feb3000e30902537ef986c8c4c76cecf8e407`. The final evidence/documentation commit does not change that implementation.
 
-The circuit UI has focused engine/connector/persistence tests and a real Chromium interaction gate. `scripts/verify-kim1-circuits-browser.mjs` exercises the KIM-1 through the built Brickwright application and its example gallery. A passing upstream designer harness alone is not a claim that the full app was built or tested; the actual run results remain the authority.
+| Check | Actual result | Evidence |
+| --- | --- | --- |
+| NMOS CPU reference vectors | 1,510,000 / 1,510,000 passed | [Engine qualification and reproducible harness](https://github.com/CrispStrobe/bw-board/blob/e834b270cd21ca90be4407610566cdd75750168d/docs/KIM1.md#cpu-qualification-and-tests) |
+| Focused engine and electrical-circuit tests | 26 passed, 0 failed, 0 skipped | [Supplier receipt](receipts/2026-11-25-kim1-ui.json) |
+| UI integration tests | 10 passed, 0 failed, 0 skipped | [Supplier receipt](receipts/2026-11-25-kim1-ui.json) |
+| Actual CircuitDesigner Chromium interaction | All 11 groups passed | [Upstream run](https://github.com/CrispStrobe/bw-circuit-ui/actions/runs/45706138128) |
+| Brickwright source suite | 179 passed, 0 failed, 0 skipped | [App job](https://github.com/CrispStrobe/brickwright/actions/runs/45709736264/job/139540746767) |
+| Built Brickwright application in Chromium | All 5 groups passed | [App receipt](receipts/2026-11-25-kim1-app.json), [app job](https://github.com/CrispStrobe/brickwright/actions/runs/45709736264/job/139540746767) |
+
+The CPU oracle checks registers, final RAM and instruction cycle totals for 10,000 generated cases per documented opcode. It does not grade every bus transaction or asynchronous interrupt timing.
+
+The upstream designer check covers all 17 contacts at eight rotations/reflections, program import/export, atomic invalid loading, single stepping, live and saved RAM behavior, save/reload, real switches and LEDs, independent machines, and a 390-pixel panel. The final lesson also verifies that all wire paths fit within the canvas.
+
+The full application was actually built and served. `scripts/verify-kim1-circuits-browser.mjs` opened the real example gallery and verified artwork and all 23 keys; PB switches through the running CPU to external PA LEDs; a newly entered program storing 42 at $0300; atomic invalid loading and SST; and keypad edits/RS retention in the serialized circuit. Both screenshots were visually reviewed. The panel screenshot retains the deliberate malformed-load warning from the negative test; subsequent valid operations passed.
+
+The app job verified the installed bw-board and bw-circuit-ui package contents against their exact Git/npm-pack bytes in both root and GUI installations, plus single-engine resolution. This does not claim complete transitive-dependency byte verification. The production build used the existing circuit acceptance profile with CAD and FPGA disabled. Emitted broker proof, license notices, distribution policy and the existing no-GPL-payload/no-LGPL-sparse-solver check passed. The [app receipt](receipts/2026-11-25-kim1-app.json) includes the build manifest, browser version, artifact identity and SHA-256 hashes.
+
+### Remaining upstream qualification blocker
+
+**The app job is green; the overall workflow is not.** Its independent, unchanged `verify:bwboard-ci` job fails because the exact engine pin has no successful complete upstream CI run. Focused feature acceptance does not waive that gate.
+
+The sole ordinary engine-test failure is present on the exact pre-KIM base as well as the candidate:
+
+| Engine revision | Passed | Failed | Skipped |
+| --- | ---: | ---: | ---: |
+| Base `e744ede765c76ce15b9e5c101aa23f56210eab09` | 10,046 | 1 | 307 |
+| Candidate `e834b270cd21ca90be4407610566cdd75750168d` | 10,072 | 1 | 307 |
+
+Both fail `test/multimeter-chain.test.mjs:163`, current mode `A`: expected digits `0 9 7`, actual `0 9 2`. The candidate adds exactly 26 passing KIM tests. See the [comparison receipt and original run links](receipts/2026-11-25-kim1-engine-ci-comparison.json).
+
+The feature code remains on `feat/kim1-circuits` in all three repositories, with [engine PR #771](https://github.com/CrispStrobe/bw-board/pull/771) and [UI PR #176](https://github.com/CrispStrobe/bw-circuit-ui/pull/176). No feature merge, deployment or release qualification is claimed. Landing must still satisfy the repository's upstream-default and exact-pin qualification rules.
