@@ -1034,3 +1034,30 @@ netlist.
 Scout passed Run, motion, Stop, Reset, and repeat Run. Its local sample
 sustained 1.005×. Production still pins Board `9ff1fff3`, and the
 sustained 1× production target remains open.
+
+### Reuse part lists for circuit matrix rows
+
+Live grounded circuit solves retain ordered lists of bipolar transistors,
+independent voltage sources, capacitors, and parts that may require a
+voltage row. Each solve still reads current component parameters before
+assigning rows. Netlist and scope-load changes replace the lists along
+with the underlying topology.
+[Board source](https://github.com/CrispStrobe/bw-board/commit/36210dabe979d8829b0f93c5cf5dafb6200e5b99)
+
+Both Chrome worker orders matched all sampled voltages, shaft readings,
+motion and restart frames over 600 ticks per run. Solve counts were
+18,930 for Atlas and 12,618 for Scout in both versions.
+
+| Project | First order, before → after | Reverse order, before → after |
+| --- | ---: | ---: |
+| Atlas electrical solve time | 721 → 687 ms | 688 → 697 ms |
+| Scout electrical solve time | 501 → 436 ms | 387 → 357 ms |
+
+Atlas passed Run, motion, Stop, and Reset in all four full-editor runs.
+With the same local GUI and Jolt 5.7 SIMD, sustained rates were 0.744×
+and 0.747× in the first order, and 0.749× and 0.756× in the reverse
+order. All 160 focused Board tests passed.
+
+Scout passed Run, motion, Stop, Reset, and repeat Run. Its local sample
+sustained 0.722×. The candidate runs used local Board chunks. Production
+still pins Board `9ff1fff`, and the sustained 1× target remains open.
