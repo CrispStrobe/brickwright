@@ -442,3 +442,11 @@ sustained 0.772× and 0.745× with the pinned Board code, and 0.797× and
 The mean electrical advance fell from 2.36–2.39 to 2.14 ms per 5 ms
 tick. All four runs passed one-click Run, motion, Stop, and Reset.
 Scout passed the same workflow with the two Board changes at 0.991×.
+
+The four-child overlap experiment skipped the remaining separating-axis
+calculations when every SIMD lane was already disjoint. All 653 native
+tests and the WASM smoke checks passed. Atlas retained the exact motion
+and electrical traces in both Chrome run orders, but the mechanical
+round trip rose from 2.81 to 3.03 ms and from 3.10 to 3.26 ms. The Jolt
+5.7 integration stays on the previous implementation.
+[Four-child query candidate](https://github.com/CrispStrobe/JoltPhysics.js/commit/8315f05)
