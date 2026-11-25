@@ -97,15 +97,15 @@ export default [
         featured: true
     },
     ...(process.env.BW_ENABLE_CAD ? [{
-        name: browserLocale().toLowerCase().startsWith('de') ? 'CAD-Modelle' : 'CAD models', extensionId: 'cadlab', iconURL: 'static/extension-posters/cad-models.svg',
-        insetIconURL: 'static/extension-posters/cad-models.svg',
+        name: browserLocale().toLowerCase().startsWith('de') ? 'CAD-Modelle' : 'CAD models', extensionId: 'cadlab', iconURL: 'static/extension-posters/cad-models.webp',
+        insetIconURL: 'static/extension-posters/cad-cube.svg',
         description: browserLocale().toLowerCase().startsWith('de')
             ? 'CAD-Motoren antreiben, um Grad drehen und Drehgeber lesen. Das CAD-Modell erscheint neben den Blöcken.'
             : 'Drive CAD hinge motors, turn by degrees and read encoders. The CAD model shows beside your blocks.',
         featured: true
     }, {
-        name: browserLocale().toLowerCase().startsWith('de') ? 'CAD-Formen' : 'CAD shapes', extensionId: 'cadshapes', iconURL: 'static/extension-posters/cad-models.svg',
-        insetIconURL: 'static/extension-posters/cad-models.svg',
+        name: browserLocale().toLowerCase().startsWith('de') ? 'CAD-Formen' : 'CAD shapes', extensionId: 'cadshapes', iconURL: 'static/extension-posters/cad-shapes.webp',
+        insetIconURL: 'static/extension-posters/cad-cube.svg',
         description: browserLocale().toLowerCase().startsWith('de')
             ? 'Baue 3D-Modelle mit Blöcken. Das Modell erscheint neben den Blöcken und aktualisiert sich bei jeder Änderung; Export nach OpenSCAD und JSCAD.'
             : 'Build 3D models from blocks. The model shows beside your blocks and updates as you edit; exports to OpenSCAD and JSCAD.',
