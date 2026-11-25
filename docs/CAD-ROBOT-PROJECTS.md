@@ -450,3 +450,22 @@ and electrical traces in both Chrome run orders, but the mechanical
 round trip rose from 2.81 to 3.03 ms and from 3.10 to 3.26 ms. The Jolt
 5.7 integration stays on the previous implementation.
 [Four-child query candidate](https://github.com/CrispStrobe/JoltPhysics.js/commit/8315f05)
+
+### Small-circuit Newton allocations
+
+For circuits with up to 64 matrix rows, the Board solver now uses a
+bounded direct index to find each sparse entry. Larger matrices keep
+the map. Entry order and explicit zero slots are preserved. Newton
+rollback also saves only populated maps while still clearing every map
+it restores. All 45 targeted Board tests passed, including the boundary
+between the two index paths, sparse refactorization, and current
+conservation.
+[Board mainline](https://github.com/CrispStrobe/bw-board/commit/032290ad)
+
+Chrome replayed 600 ticks in each run order, comparing the new code
+with the earlier terminal-index and buffer-reuse candidate on the same
+Jolt 5.7.0 build. Both robots' motion and electrical traces matched
+exactly. Atlas's host time fell from 2.21 to 2.13 ms and from 2.29 to
+2.15 ms per tick. Scout's fell from 1.18 to 1.12 ms and from 1.39 to
+1.31 ms. The test covers the real Circuit engine and CAD worker.
+[Board backport for the Lite pin](https://github.com/CrispStrobe/bw-board/commit/22b14d5e)
