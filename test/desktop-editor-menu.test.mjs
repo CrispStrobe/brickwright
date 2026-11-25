@@ -37,3 +37,16 @@ test('native Editors uses the localized tab label without its decorative icon', 
         delete globalThis.document;
     }
 });
+
+test('native About opens the shared Brickwright About dialog', () => {
+    const window = new EventTarget();
+    globalThis.window = window;
+    let opened = 0;
+    window.addEventListener('bw-open-about', () => opened++);
+    try {
+        assert.equal(runDesktopMenuAction('app:about', {}), true);
+        assert.equal(opened, 1);
+    } finally {
+        delete globalThis.window;
+    }
+});

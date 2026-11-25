@@ -10,6 +10,7 @@ export function desktopMenuSnapshot(surface, locale) {
     return {surface:surface||'',canUndo:getUndoState().canUndo,canRedo:getUndoState().canRedo,file:getEditorMenuItems(surface,'file'),edit:surface==='blocks'?[{name:'run',label:text.run,enabled:true},{name:'stop',label:text.stop,enabled:true}]:getEditorMenuItems(surface,'edit'),tabs:tabs.map((tab,index)=>({id:`tab:${index}`,label:tab.getAttribute('aria-label') || tab.querySelector('[data-bw-tab-label]')?.textContent.trim() || tab.textContent.trim(),enabled:tab.getAttribute('aria-disabled')!=='true'}))};
 }
 export function runDesktopMenuAction(id,owner) {
+    if (id === 'app:about') return window.dispatchEvent(new CustomEvent('bw-open-about'));
     if(id==='project:new')return owner.handleClickNew();
     if(id==='project:open')return owner.handleNativeOpen();
     if(id==='project:save'||id==='project:save-as')return owner._desktopSave?.(id==='project:save'?'save':'saveAs');

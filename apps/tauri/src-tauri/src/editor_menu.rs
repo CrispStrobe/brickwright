@@ -14,8 +14,22 @@ pub fn update_editor_menu(window: tauri::WebviewWindow, snapshot: Snapshot) -> R
 }
 fn build(app:&tauri::AppHandle,s:Snapshot)->tauri::Result<()> {
     let menu=Menu::new(app)?;
-    #[cfg(target_os="macos")]
-    menu.append(&SubmenuBuilder::new(app,"Brickwright").about(None).separator().services().separator().hide().hide_others().show_all().separator().quit().build()?)?;
+    #[cfg(target_os = "macos")]
+    {
+        let about = MenuItem::with_id(app, "app:about", "About Brickwright", true, None::<&str>)?;
+        let application = SubmenuBuilder::new(app, "Brickwright")
+            .item(&about)
+            .separator()
+            .services()
+            .separator()
+            .hide()
+            .hide_others()
+            .show_all()
+            .separator()
+            .quit()
+            .build()?;
+        menu.append(&application)?;
+    }
     let add=|parent:&tauri::menu::Submenu<tauri::Wry>,id:&str,label:&str,enabled:bool,key:Option<&str>|->tauri::Result<()> {
         parent.append(&MenuItem::with_id(app,id,label,enabled,key)?)
     };
@@ -39,5 +53,12 @@ fn build(app:&tauri::AppHandle,s:Snapshot)->tauri::Result<()> {
     app.set_menu(menu)?;Ok(())
 }
 pub fn install(app:&tauri::AppHandle) {
-    app.on_menu_event(|app,event|{let id=event.id().as_ref();if id.starts_with("project:")||id.starts_with("editor:")||id.starts_with("edit:")||id.starts_with("tab:"){let _=app.emit_to("main","bw-desktop-menu",id);}});
+    app.on_menu_event(|app, event| {
+        let id = event.id().as_ref();
+        if id == "app:about" || id.starts_with("project:") || id.starts_with("editor:")
+            || id.starts_with("edit:") || id.starts_with("tab:")
+        {
+            let _ = app.emit_to("main", "bw-desktop-menu", id);
+        }
+    });
 }
