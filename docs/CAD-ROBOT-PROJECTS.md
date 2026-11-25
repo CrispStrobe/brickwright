@@ -316,3 +316,30 @@ These runs include electrical integration and feedback. The Blocks VM
 and viewport were outside the harness. The 1× project target remains
 open. The old local GUI build was missing and its cold rebuild was
 stopped after the focused checks on the heavily loaded Mac.
+
+### Static compound bounds tree
+
+The next candidate queries the moving compound's existing bounds tree
+with the swept box in compound-local coordinates. It preserves the
+original child order, including ties, and falls back to the per-child
+scan when the temporary candidate buffer fills. Focused native macOS
+and SIMD WASM checks passed for rotated casts, grazing contacts, ties,
+and the candidate-buffer fallback.
+[Native candidate](https://github.com/CrispStrobe/JoltPhysics/commit/5188498)
+[Reproducible SIMD build pin](https://github.com/CrispStrobe/JoltPhysics.js/commit/ad73649)
+
+In Chrome on the MacBook, the same 600-tick Circuit and CAD worker run
+was repeated in both engine orders. The tests loaded the shipped robot
+assets, verified the SIMD artifact in use, and compared motion, joint
+positions, and electrical readings exactly. All comparisons matched.
+
+| Robot | Per-child bounds | Bounds tree | Physics round trip with bounds tree |
+| --- | --- | --- | --- |
+| Scout TT rover | 0.59–0.70× | 1.03–1.16× | 2.81–3.19 ms per 5 ms tick |
+| Atlas forklift | 0.41–0.42× | 0.45–0.46× | 7.85–7.93 ms per 5 ms tick |
+
+The SIMD compatibility artifact SHA-256 is
+`26aa7bc1c8d117b4aed64d22d184171add35950d91b66afc775dede4ca11fc20`.
+These sustained rates cover the coupled Circuit engine and CAD worker.
+Full GUI throughput including Blocks and viewport rendering still
+requires a separate measurement. The published SDK pin is unchanged.
