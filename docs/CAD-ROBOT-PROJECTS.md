@@ -881,3 +881,30 @@ A complete local SDK built from CrispCAD `942c163` matched all 841
 file digests in its manifest. Scout and Atlas passed Run, motion, Stop,
 and Reset in the full Brickwright editor with its bundled Jolt engine.
 The release pin remains `7760321`, and full-viewport 1× remains open.
+
+### Contact material lookups
+
+The CAD physics world retains one shape handle and native default material
+per body. Contacts still use the authored leaf material for its native
+token and the original friction and restitution formulas. The new test
+also covers an object spawned after the contact listener is installed.
+Type checking and 19 focused cases passed.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/206d1689e9042c19ec2ae7fb0c8540a11310aeeb)
+
+An instrumented fixture measured 300 contact callbacks in both versions.
+The 600 shape reads, 400 friction reads and 400 restitution reads inside
+those callbacks fell to zero. Pose traces and contact counts matched.
+
+Both comparison orders in Chrome matched the sampled motion and circuit
+traces over 600 ticks per run for Scout and Atlas with the same Board
+bundle and Jolt 5.7 SIMD module. Atlas's mean mechanical round trip went
+from 2.25 to 2.15 ms in the first order and from 2.52 to 2.66 ms in the
+reverse order. Scout went from 1.89 to 1.91 ms and from 1.95 to 1.60 ms.
+The paired timings show no consistent throughput gain.
+
+In the complete editor, Atlas sustained 1.001× in both versions over
+three simulated seconds. The updated Scout sustained 1.001× over six
+seconds and passed repeat Run. These local checks covered one-click Run,
+physical motion, Stop and Reset with the Jolt 5.7 SIMD module. Brickwright's
+current release uses CAD SDK `0953e18`. Release-wide sustained 1× remains
+open.
