@@ -362,9 +362,10 @@ test('vendored SPIKE compiler emits a canonical executable round-trip artifact',
     // the SPIKE artifact assertions below are re-run at this exact supplier pin.
     // -> fdadba67 (2026-11-25): CP5 example and registration; the SPIKE
     // emitter is unchanged. Re-run the complete artifact assertions at this pin.
+    // -> ece2e0d3 (2026-11-25): Independent CP1 gallery exercises.
     // Keep the exact supplier identity gate and every SPIKE artifact assertion below.
     assert.equal(JSON.parse(readFileSync(new URL('../vendor-pins.json', import.meta.url)))['sb3-creator'],
-        'fdadba6743839763fcb8bb2fad64063937e16a7e');
+        'ece2e0d37d1d5592af376ba31495fe0d15d857fd');
 
     const creator = new SB3Creator();
     creator.parse(PROGRAM);
