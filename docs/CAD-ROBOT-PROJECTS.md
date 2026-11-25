@@ -545,3 +545,33 @@ at 1.004×. All GUI tests used the Jolt 5.7.0 SIMD override. Since
 the measured Atlas throughput did not improve, the CAD change stays
 on its candidate branch and the published SDK pin keeps its current
 value.
+
+### Circuit stamping setup
+
+[bw-board master](https://github.com/CrispStrobe/bw-board/commit/1d8699a81f1864d8708f6bbe516ef8179b07eef3)
+now reuses the static solver classifications, resolves each device's
+terminal map once per stamp, and only copies a drive map when an
+explicit rail actually suppresses an opted-in board supply. All 85
+focused tests passed on the release-pin backport and again on the
+updated Board branch. They cover floating terminals, physical source
+currents, automatic supply fallback, and power-off measurements.
+
+Paired Mac Chrome runs used the same pinned CAD SDK and Jolt 5.7.0 SIMD
+module. Both orders ran 600 ticks per robot with identical sampled
+electrical readings and motion. Atlas host time per 5 ms step fell
+from 1.87/1.86 ms to 1.75/1.73 ms, and its simulation-only throughput
+rose from 0.931×/0.915× to 1.007×/1.025×. Scout's host step took
+1.01/0.99 ms with the change and 1.04/1.14 ms before it. These
+measurements omit the full editor viewport. The packaged Lite
+dependency still requires exact-SHA upstream CI evidence for a repin.
+
+The full Chrome editor passed both three-second Atlas comparisons,
+including one-click Run, moving joints, Stop, and Reset. With the same
+Jolt 5.7.0 override, Atlas sustained 0.613× and 0.775× in the previous
+build and 0.676× and 0.601× with the candidate. The Mac was heavily
+loaded during those runs. The paired data does not establish an
+editor speedup, and the sustained 1× viewport target remains open.
+
+Scout passed the full editor restart proof at 1.003× with the override.
+Atlas also passed the functional proof with the packaged Jolt module
+at 0.325× in a single run. That sample has no paired baseline.
