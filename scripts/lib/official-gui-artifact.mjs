@@ -4,6 +4,7 @@ import {mkdir, readFile, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import JSZip from 'jszip';
 import {parseJobs} from './workflow-gates.mjs';
+import {assertBrickwrightRepository, assertBrickwrightSlug, BRICKWRIGHT_SLUG} from './brickwright-repository.mjs';
 
 export const GUI_MANIFEST = 'bw-gui-build-source.json';
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -25,7 +26,11 @@ function admitGuiArtifactEnvelope({run, job, artifact, artifacts}, expected, adm
     // A single-job rerun reuses the earlier attempt's build job and outputs, so
     // the producer attempt may precede the consumer (run) attempt, never follow it.
     const producerAttempt = producerAttemptOf(expected);
-    assert.equal(repository, 'CrispStrobe/brickwright-lite', 'Only the owned repository is admitted');
+    assertBrickwrightSlug(repository);
+    if (repository === BRICKWRIGHT_SLUG) {
+        assertBrickwrightRepository(repository, run.repository?.id);
+        assertBrickwrightRepository(repository, run.head_repository?.id);
+    }
     for (const value of [runId, attempt, artifactId, jobId]) id(value);
     for (const value of [runHeadSha, checkoutSha, reviewedHeadSha]) fullSha(value);
     const api = `https://api.github.com/repos/${repository}/actions`;
@@ -151,7 +156,7 @@ export function guiRunnerProducerReceipt(wire, source, {expected, env}) {
     const fields = lines[0].split('\t');same(fields.length, 10, 'Closed producer header');
     const [schema, repository, runId, attempt, job, checkoutSha, runHeadSha, reviewedHeadSha, workflowSha, workflowRef] = fields;
     same(schema, GUI_RUNNER_SCHEMA, 'Producer evidence schema');same(source.schema, schema, 'Selected producer source schema');
-    same(repository, expected.repository, 'Producer scalar repository');same(repository, 'CrispStrobe/brickwright-lite', 'Owned producer scalar repository');
+    same(repository, expected.repository, 'Producer scalar repository');assertBrickwrightRepository(repository, env.GITHUB_REPOSITORY_ID);
     same(runId, String(expected.runId), 'Producer scalar run');
     assert.match(attempt, /^[1-9][0-9]{0,8}$/, 'Producer scalar attempt');
     const producerAttempt = producerAttemptOf({attempt: expected.attempt, producerAttempt: Number(attempt)});
@@ -162,7 +167,9 @@ export function guiRunnerProducerReceipt(wire, source, {expected, env}) {
     same(env.GITHUB_RUN_ATTEMPT, String(expected.attempt), 'Consumer attempt');same(env.GITHUB_SHA, checkoutSha, 'Consumer actual checkout');
     same(env.GITHUB_JOB, 'arcade-numeric-authoring', 'Consumer logical job');same(env.BW_GUI_PRODUCER_RESULT, 'success', 'Successful build dependency result');
     same(env.GITHUB_WORKFLOW_SHA, workflowSha, 'Same executing workflow source');same(env.GITHUB_WORKFLOW_REF, workflowRef, 'Same executing workflow reference');
-    assert.match(workflowRef, /^CrispStrobe\/brickwright-lite\/\.github\/workflows\/build\.yml@refs\/(?:pull\/[1-9][0-9]*\/merge|heads\/[^\s\t]+)$/, 'Official producer workflow reference');
+    const workflowPrefix = `${repository}/.github/workflows/build.yml@`;
+    assert.ok(workflowRef.startsWith(workflowPrefix), 'Official producer workflow reference');
+    assert.match(workflowRef.slice(workflowPrefix.length), /^refs\/(?:pull\/[1-9][0-9]*\/merge|heads\/[^\s\t]+)$/, 'Official producer workflow reference');
     const rows = lines.slice(1).map((line, i) => {
         const parts = line.split('\t');same(parts.length, 3, 'Closed terminal producer row');
         const [stepId, outcome, conclusion] = parts;const selected = source.steps[i];
@@ -322,7 +329,7 @@ export async function extractAdmittedGui(inspected, directory) {
 }
 
 export async function fetchGuiArtifactMetadata({repository, runId, attempt, producerAttempt = attempt, fetchImpl = fetch, token, signal}) {
-    assert.equal(repository, 'CrispStrobe/brickwright-lite'); id(runId); producerAttemptOf({attempt, producerAttempt});
+    assertBrickwrightSlug(repository); id(runId); producerAttemptOf({attempt, producerAttempt});
     const base = `https://api.github.com/repos/${repository}/actions`;
     const headers = {accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28',
         ...(token ? {authorization: `Bearer ${token}`} : {})};

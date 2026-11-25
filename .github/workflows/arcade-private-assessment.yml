@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   registration-only:
-    if: github.event_name == 'workflow_dispatch' && github.repository == 'CrispStrobe/brickwright-lite'
+    if: github.event_name == 'workflow_dispatch' && github.repository_id == '1291854269'
     name: Registration only; no assessment or qualification
     runs-on: ubuntu-24.04
     timeout-minutes: 1

@@ -740,7 +740,7 @@ jobs:
   actual-v8:
     if: >-
       ${{ false && github.event_name == 'workflow_dispatch' && github.actor == 'CrispStrobe' &&
-          github.repository == 'CrispStrobe/brickwright-lite' && github.run_attempt == 1 &&
+          github.repository_id == '1291854269' && github.run_attempt == 1 &&
           github.ref_type == 'tag' && github.event.inputs.pull_request != '' &&
           github.event.inputs.request_sha256 != '' &&
           github.event.inputs.source_head == github.sha &&
@@ -898,7 +898,7 @@ jobs:
   actual-v9:
     if: >-
       ${{ true && github.event_name == 'workflow_dispatch' && github.actor == 'CrispStrobe' &&
-          github.repository == 'CrispStrobe/brickwright-lite' && github.run_attempt == 1 &&
+          github.repository_id == '1291854269' && github.run_attempt == 1 &&
           github.event.inputs.protocol == 'actual-v9' && github.ref_type == 'branch' &&
           github.event.inputs.pull_request != '' && github.event.inputs.prelude_sha256 != '' &&
           github.event.inputs.request_sha256 == '' && github.event.inputs.tag_name == '' &&
@@ -1104,7 +1104,7 @@ jobs:
     if: >-
       ${{ true && github.event_name == 'pull_request' && github.event.action == 'labeled' &&
           github.event.label.name == 'x86-hdd-gui-font-bridge' && github.actor == 'CrispStrobe' &&
-          github.repository == 'CrispStrobe/brickwright-lite' && github.run_attempt == 1 &&
+          github.repository_id == '1291854269' && github.run_attempt == 1 &&
           github.event.pull_request.head.repo.full_name == github.repository &&
           github.event.pull_request.head.repo.fork == false && github.event.pull_request.base.ref == 'main' }}
     runs-on: ubuntu-24.04
@@ -1190,7 +1190,7 @@ jobs:
     if: >-
       ${{ true && github.event_name == 'pull_request' && github.event.action == 'labeled' &&
           github.event.label.name == 'x86-hdd-gui-font-discovery' && github.actor == 'CrispStrobe' &&
-          github.repository == 'CrispStrobe/brickwright-lite' && github.run_attempt == 1 &&
+          github.repository_id == '1291854269' && github.run_attempt == 1 &&
           github.event.pull_request.head.repo.full_name == github.repository &&
           github.event.pull_request.head.repo.fork == false && github.event.pull_request.base.ref == 'main' }}
     runs-on: ubuntu-24.04
