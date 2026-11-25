@@ -79,3 +79,27 @@ test('either committed debugger UI copy triggers the focused debugger lane', () 
         'test/workflow-trigger-coverage.test.mjs'
     ]);
 });
+
+test('CP1 qualification runs for both committed UI copies, runner, persistence, fixtures and supplier pins', () => {
+    assertLane('cp1-qualification.yml', [
+        '.github/workflows/cp1-qualification.yml',
+        'vendor-pins.json', 'package.json', 'package-lock.json',
+        'overlay/scratch-gui/src/components/tw-pseudocode/cp1-*',
+        'packages/scratch-gui/src/components/tw-pseudocode/cp1-*',
+        'overlay/scratch-gui/src/lib/cp1-*',
+        'packages/scratch-gui/src/lib/cp1-*',
+        'overlay/scratch-gui/src/lib/bw-debug/**',
+        'packages/scratch-gui/src/lib/bw-debug/**',
+        'overlay/scratch-gui/src/lib/bw-project-bundle.js',
+        'packages/scratch-gui/src/lib/bw-project-bundle.js',
+        'scripts/verify-cp1-*.mjs', 'test/fixtures/cp1-panel/**',
+        'test/cp1-*.test.mjs', 'test/workflow-trigger-coverage.test.mjs'
+    ]);
+    const workflow = readFileSync(path.join(ROOT, '.github/workflows/cp1-qualification.yml'), 'utf8');
+    assert.match(workflow, /branches: \[main, 'feat\/kosmos-cp1-20261124'\]/);
+    assert.match(workflow, /permissions:\n  contents: read/);
+    assert.match(workflow, /npm run verify:cp1:browser/);
+    assert.match(workflow, /node scripts\/verify-cp1-panel-browser\.mjs/);
+    assert.match(workflow, /if: always\(\)/);
+    assert.doesNotMatch(workflow, /continue-on-error|pull_request_target|\$\{\{\s*secrets\./);
+});

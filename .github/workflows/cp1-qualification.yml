@@ -1,0 +1,124 @@
+name: CP1 browser qualification
+
+on:
+  push:
+    branches: [main, 'feat/kosmos-cp1-20261124']
+    paths:
+      - '.github/workflows/cp1-qualification.yml'
+      - 'vendor-pins.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'overlay/scratch-gui/src/components/tw-pseudocode/cp1-*'
+      - 'packages/scratch-gui/src/components/tw-pseudocode/cp1-*'
+      - 'overlay/scratch-gui/src/lib/cp1-*'
+      - 'packages/scratch-gui/src/lib/cp1-*'
+      - 'overlay/scratch-gui/src/lib/bw-debug/**'
+      - 'packages/scratch-gui/src/lib/bw-debug/**'
+      - 'overlay/scratch-gui/src/lib/bw-project-bundle.js'
+      - 'packages/scratch-gui/src/lib/bw-project-bundle.js'
+      - 'scripts/verify-cp1-*.mjs'
+      - 'test/fixtures/cp1-panel/**'
+      - 'test/cp1-*.test.mjs'
+      - 'test/workflow-trigger-coverage.test.mjs'
+  pull_request:
+    paths:
+      - '.github/workflows/cp1-qualification.yml'
+      - 'vendor-pins.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'overlay/scratch-gui/src/components/tw-pseudocode/cp1-*'
+      - 'packages/scratch-gui/src/components/tw-pseudocode/cp1-*'
+      - 'overlay/scratch-gui/src/lib/cp1-*'
+      - 'packages/scratch-gui/src/lib/cp1-*'
+      - 'overlay/scratch-gui/src/lib/bw-debug/**'
+      - 'packages/scratch-gui/src/lib/bw-debug/**'
+      - 'overlay/scratch-gui/src/lib/bw-project-bundle.js'
+      - 'packages/scratch-gui/src/lib/bw-project-bundle.js'
+      - 'scripts/verify-cp1-*.mjs'
+      - 'test/fixtures/cp1-panel/**'
+      - 'test/cp1-*.test.mjs'
+      - 'test/workflow-trigger-coverage.test.mjs'
+  workflow_dispatch:
+
+# This is a source qualification job. It has no publish/deploy step or secrets.
+permissions:
+  contents: read
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Resolve the exact adopted supplier revisions
+        id: pins
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync, appendFileSync, mkdirSync, writeFileSync} from 'node:fs';
+          const pins = JSON.parse(readFileSync('vendor-pins.json', 'utf8'));
+          for (const name of ['bw-board', 'bw-circuit-ui']) {
+            if (!/^[a-f0-9]{40}$/.test(pins[name])) throw new Error(`Invalid exact ${name} pin`);
+            appendFileSync(process.env.GITHUB_OUTPUT, `${name}=${pins[name]}\n`);
+          }
+          mkdirSync('test-results/cp1-browser', {recursive: true});
+          writeFileSync('test-results/cp1-browser/inputs.json', JSON.stringify({
+            lite: process.env.GITHUB_SHA, suppliers: pins,
+            scope: 'Connector and CP1 component browser qualification; no historical monitor ROM',
+            fullApplicationBuild: false
+          }, null, 2) + '\n');
+          NODE
+      - name: Check out the adopted Circuit UI source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: CrispStrobe/bw-circuit-ui
+          ref: ${{ steps.pins.outputs.bw-circuit-ui }}
+          path: .cp1-ci/bw-circuit-ui
+          persist-credentials: false
+      - name: Check out the adopted engine source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: CrispStrobe/bw-board
+          ref: ${{ steps.pins.outputs.bw-board }}
+          path: .cp1-ci/bw-board
+          persist-credentials: false
+      - name: Install locked Lite inputs
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Install locked browser fixture dependencies
+        working-directory: .cp1-ci/bw-circuit-ui
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Install the locked Playwright Chromium and system libraries
+        working-directory: .cp1-ci/bw-circuit-ui
+        run: npx playwright install --with-deps chromium
+      - name: Verify CP1 source and workflow contracts
+        run: |
+          node --test --import ./scripts/lib/register-gui-scope.mjs \
+            test/cp1-project.test.mjs test/cp1-panel-input.test.mjs \
+            test/cp1-bundle.test.mjs test/cp1-runner.test.mjs \
+            test/workflow-trigger-coverage.test.mjs
+          node scripts/verify-cp1-components.mjs --deps .cp1-ci/bw-circuit-ui/node_modules --board .cp1-ci/bw-board
+      - name: CP1 connector static geometry
+        working-directory: .cp1-ci/bw-circuit-ui
+        run: npm run verify:cp1
+      - name: CP1 connector real browser interactions
+        timeout-minutes: 3
+        working-directory: .cp1-ci/bw-circuit-ui
+        env:
+          BW_CP1_BROWSER_OUT: ${{ github.workspace }}/test-results/cp1-browser/connector
+        run: npm run verify:cp1:browser
+      - name: CP1 host and panel real browser interactions
+        if: ${{ !cancelled() }}
+        timeout-minutes: 3
+        run: node scripts/verify-cp1-panel-browser.mjs --deps .cp1-ci/bw-circuit-ui/node_modules --board .cp1-ci/bw-board --out test-results/cp1-browser/panel
+      - name: Preserve browser observations and failure evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: cp1-browser-${{ github.sha }}
+          path: test-results/cp1-browser/
+          if-no-files-found: error
+          retention-days: 14

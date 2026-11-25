@@ -131,3 +131,24 @@ permitted`). The sanctioned escalation request was automatically rejected becaus
 the policy disables sandbox approval. No browser pass or screenshots are claimed.
 The checked-in browser fixture uses an original synthetic 8049 ROM and reports a
 failure when browser launch is unavailable; it does not silently skip the gate.
+
+### Hosted browser qualification
+
+The focused `CP1 browser qualification` workflow runs on the CP1 feature branch
+and relevant pull-request/main changes. It reads exact engine and Circuit UI
+revisions from `vendor-pins.json`, installs the locked test dependencies and
+Playwright Chromium, and runs the connector and panel gates. It preserves
+`inputs.json`, per-gate `result.json`, desktop/narrow screenshots and available
+failure screenshots in one workflow artifact. The job has read-only repository
+permissions and does not deploy or publish the application.
+
+These are real component/connector interactions against the adopted sources,
+with original synthetic firmware. They are separate from a full Lite build,
+historical-monitor qualification and physical-hardware evidence. The workflow
+must finish successfully before any browser pass is claimed.
+
+The continuation workspace on 2026-11-25 has a Chromium launcher without its
+underlying binary, and the standard Playwright download returns HTTP 403 from
+the workspace network proxy. No escalation or alternate download bypass was
+used. Hosted execution is the reproducible qualification route for this
+environment; the local source/component tests remain separate evidence.

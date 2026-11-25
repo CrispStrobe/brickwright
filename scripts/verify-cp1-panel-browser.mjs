@@ -23,7 +23,7 @@ const {createServer}=await import(pathToFileURL(requireDeps.resolve('vite')).hre
 const {default:react}=await import(pathToFileURL(requireDeps.resolve('@vitejs/plugin-react')).href);
 const {chromium}=await import(pathToFileURL(requireDeps.resolve('playwright')).href);
 const errors=[];
-let browser,server;
+let browser,server,page;
 await mkdir(output,{recursive:true});
 try{
  server=await createServer({root:fixture,logLevel:'warn',plugins:[{
@@ -47,7 +47,7 @@ try{
  const address=server.httpServer.address();
  const url=`http://127.0.0.1:${address.port}`;
  browser=await chromium.launch({headless:true,...(option('--executable')?{executablePath:option('--executable')}:{})});
- const page=await browser.newPage({viewport:{width:980,height:1180}});
+ page=await browser.newPage({viewport:{width:980,height:1180}});
  page.on('pageerror',error=>errors.push(error.message));
  page.on('console',message=>{if(message.type()==='error')errors.push(message.text());});
  await page.goto(`${url}/?mode=host`,{waitUntil:'networkidle'});
@@ -109,10 +109,11 @@ try{
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true);
  await page.screenshot({path:path.join(output,'mobile-de-dark.png'),fullPage:true});
  assert.deepEqual(errors,[]);
- const result={status:'passed',scope:'Actual component browser behavior with original synthetic 8049 firmware and real CP1 machine',checks:['raw displays','thirty keys','incomplete-source reload','RAM load','load refusal','pointer/keyboard ownership','blur release','manual/circuit inputs','RAM editing','async CP3 source preservation','German narrow layout'],propTypes:'validator-only stub',fullApplicationBuild:false};
+ const result={status:'passed',browser:browser.version(),scope:'Actual component browser behavior with original synthetic 8049 firmware and real CP1 machine',checks:['raw displays','thirty keys','incomplete-source reload','RAM load','load refusal','pointer/keyboard ownership','blur release','manual/circuit inputs','RAM editing','async CP3 source preservation','German narrow layout'],propTypes:'validator-only stub',fullApplicationBuild:false};
  await writeFile(path.join(output,'result.json'),`${JSON.stringify(result,null,2)}\n`);
  console.log(JSON.stringify(result));
 }catch(error){
+ if(page&&!page.isClosed())await page.screenshot({path:path.join(output,'failure.png'),fullPage:true}).catch(()=>{});
  await writeFile(path.join(output,'result.json'),`${JSON.stringify({status:'failed',message:error.message,browserErrors:errors,fullApplicationBuild:false},null,2)}\n`);
  throw error;
 }finally{if(browser)await browser.close();if(server)await server.close();}
