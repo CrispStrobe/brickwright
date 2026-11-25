@@ -515,3 +515,33 @@ code. One click started each project with its default widgets, and
 Stop and Reset passed. The local build disabled JS minification.
 Atlas sustained 0.606× and Scout 0.843×, with no paired full-GUI
 baseline. The published engine pins retain their existing versions.
+
+### Batched simulation frame publication
+
+The CAD candidate reads each Jolt body pose once per displayed frame
+and returns independent coordinate arrays for its welded parts. The
+worker channel clones telemetry directly, and the host forwards each
+fresh intermediate reply while retaining independent full snapshots.
+[CAD source](https://github.com/CrispStrobe/CrispCAD/tree/codex/cad-frame-publication-20261125)
+[Backport to the pinned SDK](https://github.com/CrispStrobe/CrispCAD/commit/798ff78)
+
+Atlas still published 26 poses with six native transform reads instead
+of 26. Scout published 26 with three reads. In seven alternating runs
+on the shipped models, median CPU time per pose batch fell from 20.9
+to 7.1 µs for Atlas and from 21.1 to 5.4 µs for Scout. The returned poses
+matched exactly. Both test orders in Chrome returned exact 600-tick
+motion and electrical traces for both robots, with no consistent
+worker speedup.
+
+Type checking and 32 focused CAD cases passed. The separate rover
+clearance test expected two separated hinge pairs and reported one.
+The same assertion failed with the original physics source. An
+exploratory four-second Atlas GUI proof also missed its fork tilt
+tolerance with the original SDK. The established three-second GUI
+proof passed in both orders, including Run, Stop, and Reset. Atlas
+sustained 0.945× and 0.996× with the previous SDK, and 0.785× and
+0.967× with the candidate. Scout passed the candidate's restart proof
+at 1.004×. All GUI tests used the Jolt 5.7.0 SIMD override. Since
+the measured Atlas throughput did not improve, the CAD change stays
+on its candidate branch and the published SDK pin keeps its current
+value.
