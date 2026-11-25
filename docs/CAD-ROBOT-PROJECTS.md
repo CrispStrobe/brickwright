@@ -636,3 +636,36 @@ Reset at 0.960× with the pinned SDK and 0.977× with the candidate.
 Scout passed its restart proof at 1.003× with the candidate. Both
 runs used the Jolt 5.7.0 SIMD override. The single editor comparison
 does not establish a throughput gain, and Atlas remains below 1×.
+
+### Native actuator bindings and persistent motor settings
+
+[CrispCAD candidate](https://github.com/CrispStrobe/CrispCAD/tree/codex/cad-actuator-bindings-20261125)
+caches the native actuator handles and dynamic impulse targets per
+world. It also avoids sending unchanged motor mode and solver iteration
+settings to Jolt every tick. Motor mode transitions still send a write,
+and serial servo tuning invalidates any cached impulse velocity override
+for the affected hinge. Type checking and all six focused tests passed,
+including tests for both state transitions. The previously failing
+full-rover clearance-count case was outside this focused run.
+
+With fixed commands and the same Jolt 5.7.0 SIMD build, a 120-tick
+direct Atlas comparison produced identical chassis poses and joint
+values. Hinge motor-state writes fell from 360 to five, and position
+and velocity override writes each fell from 240 to two. In the
+command-only benchmark, median CPU time per impulse was 3.80–3.89 µs
+before and 3.34–3.46 µs after.
+
+The Chrome test used the pinned SDK's host and assets with a local
+worker rebuilt from [pin plus this change](https://github.com/CrispStrobe/CrispCAD/commit/659e24f).
+Atlas and Scout both produced identical sampled 600-tick motion and
+electrical traces in both orders. Atlas's mechanical round trip was
+3.22/2.78 ms before and 3.34/2.70 ms after. Scout's was 2.19/2.28 ms
+before and 2.21/2.14 ms after. The worker comparison does not establish
+a throughput gain.
+
+In the full editor, Atlas passed one-click Run, joint motion, Stop,
+and Reset at 0.770× with the pinned worker and 0.823× with the local
+worker. Both used the same Jolt 5.7.0 SIMD override. The single
+editor comparison leaves sustained 1× unverified. The change stays
+on its candidate branches and the published CAD SDK pin stays in place.
+Scout passed its full-editor restart proof at 1.005×.
