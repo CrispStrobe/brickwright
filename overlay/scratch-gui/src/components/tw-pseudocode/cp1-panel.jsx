@@ -29,6 +29,7 @@ const COPY = {
         keys: 'CP1 keypad: 30 buttons, 20 shared contacts', duplicate: 'duplicate digit button',
         runProgram: 'Run CP1 program', shortRun: 'Run', shortLoad: 'Load', shortOpen: 'Open',
         shortExport: 'Export', shortSave: 'Save', help: 'CP1 editor help', close: 'Close',
+        debuggerHelp: 'CP1 debugger help', diagnostics: 'Diagnostics',
         runHint: 'Run or the green flag assembles the source, loads it and starts the CP1 program.',
         program: 'Program', memory: 'Memory', ports: 'Ports',
         source: 'CP1 source or decimal listing', load: 'Load cells', listing: 'Export listing',
@@ -76,6 +77,7 @@ const COPY = {
         keys: 'CP1-Tastatur: 30 Tasten, 20 gemeinsame Kontakte', duplicate: 'zweite Zifferntaste',
         runProgram: 'CP1-Programm starten', shortRun: 'Start', shortLoad: 'Laden', shortOpen: 'Öffnen',
         shortExport: 'Export', shortSave: 'Speichern', help: 'Hilfe zum CP1-Editor', close: 'Schließen',
+        debuggerHelp: 'Hilfe zum CP1-Debugger', diagnostics: 'Diagnose',
         runHint: 'Start oder die grüne Flagge assembliert, lädt und startet das CP1-Programm.',
         program: 'Programm', memory: 'Speicher', ports: 'Ports',
         source: 'CP1-Quelle oder Dezimallisting', load: 'Zellen laden', listing: 'Listing exportieren',
@@ -111,14 +113,15 @@ const COPY = {
     }
 };
 const translate = makeT(COPY);
+// Draw one symmetric digit and slant it as a unit in the SVG.
 const SEGMENTS = [
-    '13,6 43,6 48,11 42,16 14,16 9,11',
-    '45,17 50,12 54,17 50,42 44,47 40,42',
-    '43,52 49,47 53,52 49,78 44,83 39,78',
-    '12,80 40,80 45,85 40,90 11,90 6,85',
-    '6,52 11,47 16,52 12,77 7,82 3,77',
-    '9,17 14,12 19,17 15,42 10,47 5,42',
-    '13,43 40,43 45,48 40,53 12,53 7,48'
+    '15,7 42,7 47,12 42,17 15,17 10,12',
+    '45,15 50,20 50,41 45,46 40,41 40,20',
+    '45,52 50,57 50,78 45,83 40,78 40,57',
+    '15,81 42,81 47,86 42,91 15,91 10,86',
+    '12,52 17,57 17,78 12,83 7,78 7,57',
+    '12,15 17,20 17,41 12,46 7,41 7,20',
+    '15,44 42,44 47,49 42,54 15,54 10,49'
 ];
 const hex = value => Number.isInteger(value) ? value.toString(16).toUpperCase().padStart(2, '0') : '—';
 const cellText = value => Number.isInteger(value) ? String(value).padStart(3, '0') : '—';
@@ -144,6 +147,7 @@ class Cp1Panel extends React.Component {
         this._assistiveCounter = 0;
         this._mounted = false;
         this._programHelp = React.createRef();
+        this._debugHelp = React.createRef();
         this._programRun = null;
         this._keys = createCp1KeyInput((key, down) => {
             if (this.props.onKey) this.props.onKey(key, down);
@@ -220,7 +224,8 @@ class Cp1Panel extends React.Component {
 
     _onKeyDown (event) {
         if (!this.props.onKey || !(this.props.snapshot || this.state.snapshot || this.props.machine) ||
-            event.defaultPrevented || event.repeat || cp1IsTypingTarget(event.target)) return;
+            event.defaultPrevented || event.repeat || cp1IsTypingTarget(event.target) ||
+            event.target?.closest?.('dialog[open]')) return;
         const button = event.target && event.target.closest && event.target.closest('[data-cp1-key]');
         if (!button && (event.key === 'Enter' || event.key === ' ') && event.target && event.target.closest && event.target.closest('button')) return;
         const key = button && (event.key === ' ' || event.key === 'Enter') ? button.dataset.cp1Key : cp1KeyForKeyboard(event);
@@ -370,19 +375,18 @@ class Cp1Panel extends React.Component {
         });
     }
 
-    _renderDisplay (display, cpu) {
+    _renderDisplay (display) {
         const digits = cp1DisplayDigits(display);
-        const masks = `${this._t('raw')}: ${digits.map(hex).join(' ')}`;
-        const registers = cpu && `8049 PC ${hex(cpu.pc)} · A ${hex(cpu.a)} · PSW ${hex(cpu.psw)} · ` +
-            `${Number.isFinite(cpu.cycles) ? cpu.cycles : '—'} ${this._t('cycles')}`;
-        return <div className={styles.displaySection} title={[masks, registers].filter(Boolean).join('\n')}>
+        return <div className={styles.displaySection}>
             <div className={styles.display} role="group" aria-label={this._t('display')}>
                 {digits.map((mask, index) => <svg key={index} className={styles.digit} viewBox="0 0 68 98"
                     role="img" aria-label={this._t('digit', {index: index + 1, segments: cp1SegmentDescription(mask)})}
                     data-cp1-digit={index} data-segments={mask}>
-                    {SEGMENTS.map((points, bit) => <polygon key={bit} points={points}
-                        className={mask & (1 << bit) ? styles.segmentOn : styles.segmentOff} />)}
-                    <circle cx="60" cy="85" r="5" className={mask & 128 ? styles.segmentOn : styles.segmentOff} />
+                    <g transform="translate(11.5 0) skewX(-7)">
+                        {SEGMENTS.map((points, bit) => <polygon key={bit} points={points}
+                            className={mask & (1 << bit) ? styles.segmentOn : styles.segmentOff} />)}
+                    </g>
+                    <circle cx="60" cy="86" r="4.5" className={mask & 128 ? styles.segmentOn : styles.segmentOff} />
                 </svg>)}
             </div>
         </div>;
@@ -429,9 +433,13 @@ class Cp1Panel extends React.Component {
                 <div><dt title={this._t('comparison')}>=</dt><dd data-cp1-comparison>{view.comparison === null ? '—' :
                     this._t(view.comparison ? 'yes' : 'no')}</dd></div>
             </dl>
-            <span className={styles.programHelp} tabIndex={0} data-cp1-execution={view.execution}
-                aria-label={this._t(stateKey)} title={[this._t(stateKey), result].filter(Boolean).join('\n')}>
-                {view.execution === 'error' ? '⚠' : 'ⓘ'}
+            {this._iconButton(this._t(stateKey), view.execution === 'error' ? '⚠' : 'ⓘ', {
+                'data-cp1-execution': view.execution,
+                'aria-haspopup': 'dialog',
+                title: [this._t(stateKey), result].filter(Boolean).join('\n'),
+                onClick: () => this._debugHelp.current.showModal()
+            })}
+            {view.execution === 'error' ? '⚠' : 'ⓘ'}
             </span>
             {view.execution === 'error' && view.lastEvent && view.lastEvent.error ? <span data-cp1-monitor-error>
                 {this._t('monitorError', {code: Number.isInteger(view.lastEvent.error.code) ?
@@ -581,7 +589,7 @@ class Cp1Panel extends React.Component {
         </React.Fragment>;
     }
 
-    _renderMonitorBar (ready, debug = false, rom = null, view = null) {
+    _renderMonitorBar (ready, debug = false, rom = null, view = null, snapshot = null) {
         const {running, expansion, expansionDisabled, onExpansionChange, onPause, onRun, onStep, onReset} = this.props;
         const {busy} = this.state;
         const status = this._t(ready ? (running ? 'running' : 'paused') : 'noRom');
@@ -606,14 +614,27 @@ class Cp1Panel extends React.Component {
                 {disabled: running || busy || !onStep, onClick: () => onStep()})}
             {debug && ready && onReset && this._iconButton(this._t('reset'), '↺',
                 {disabled: busy, onClick: () => { this._releaseAll(); return onReset(); }})}
-            {debug && <span tabIndex={0} className={styles.programHelp} role="img"
-                aria-label={view?.qualified ? status : this._t('semanticUnavailable')}
-                data-cp1-semantic={view && !view.qualified ? 'unavailable' : undefined}
-                title={[status, this._t('keyboard'), this._t('stepHint'), view && !view.qualified &&
-                    this._t('semanticUnavailable'), rom &&
-                    `${rom.name || 'ROM'} · SHA-256 ${rom.sha256} · ${this._t('romLocal')}`].filter(Boolean).join('\n')}>
-                ⓘ
-            </span>}
+            {debug && <React.Fragment>
+                {this._iconButton(this._t('debuggerHelp'), 'ⓘ', {
+                    'aria-haspopup': 'dialog',
+                    'data-cp1-semantic': view && !view.qualified ? 'unavailable' : undefined,
+                    onClick: () => this._debugHelp.current.showModal()
+                })}
+                <dialog ref={this._debugHelp} className={styles.helpDialog} aria-label={this._t('debuggerHelp')}>
+                    <form method="dialog"><button type="submit">{this._t('close')}</button></form>
+                    <p><strong>{status}</strong></p>
+                    <p>{this._t('stepHint')}</p>
+                    <p>{this._t('keyboard')}</p>
+                    {view && !view.qualified && <p>{this._t('semanticUnavailable')}</p>}
+                    <details>
+                        <summary>{this._t('diagnostics')}</summary>
+                        <p>{this._t('raw')}: {cp1DisplayDigits(snapshot?.display).map(hex).join(' ')}</p>
+                        {snapshot?.cpu && <p>8049 PC {hex(snapshot.cpu.pc)} · A {hex(snapshot.cpu.a)} ·
+                            {' '}PSW {hex(snapshot.cpu.psw)} · {snapshot.cpu.cycles} {this._t('cycles')}</p>}
+                        {rom && <p>{rom.name || 'ROM'} · SHA-256 {rom.sha256}. {this._t('romLocal')}</p>}
+                    </details>
+                </dialog>
+            </React.Fragment>}
         </header>;
     }
 
@@ -637,14 +658,13 @@ class Cp1Panel extends React.Component {
     render () {
         const snapshot = this.props.snapshot || this.state.snapshot;
         const ready = Boolean(snapshot || this.props.machine);
-        const cpu = snapshot && snapshot.cpu;
         const rom = this.props.romReference || this.state.importedRom;
         const debugView = cp1DebugView(snapshot, this.state.source, {expansion: Boolean(this.props.expansion)});
         return <React.Fragment><section className={styles.root} data-cp1-panel="true" data-color-mode={this.props.colorMode}
             tabIndex={0} onKeyDown={this._onKeyDown}
             onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) this._releaseAll(); }}>
-            {this._renderMonitorBar(ready, true, rom, debugView)}
-            {!this.context?.Editor && this._renderDisplay(snapshot && snapshot.display, cpu)}
+            {this._renderMonitorBar(ready, true, rom, debugView, snapshot)}
+            {!this.context?.Editor && this._renderDisplay(snapshot && snapshot.display)}
             {!this.context?.Editor && this._renderKeypad(ready)}
             {debugView.qualified && this._renderSemantic(debugView)}
             <div className={styles.tabs} role="group" aria-label={this._t('title')}>

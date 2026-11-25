@@ -359,7 +359,10 @@ class DebugPanel extends React.Component {
         // in the loader; dropping _bootMedia here made the visible Sim control
         // run an all-zero image. Keep the media and recreate the runner so the
         // newly extracted machine and the already loaded image boot together.
-        if (detail.kind === 'cp1' && (this.state.kind !== 'cp1' || detail.useDefaultMonitor)) this._bootMedia = null;
+        if (detail.kind === 'cp1' && (this.state.kind !== 'cp1' || detail.useDefaultMonitor)) {
+            this._bootMedia = detail.resumeCp1 ? this._suspendedCp1Media : null;
+            this._suspendedCp1Media = null;
+        }
         const hasBootMedia = !!this._bootMedia;
         const kind = detail.kind === 'cp1' ? 'cp1' : detail.kind === 'z80' ? 'z80'
             : detail.kind === 'eater6502' || detail.kind === '6502' ? 'eater6502'
@@ -610,7 +613,8 @@ class DebugPanel extends React.Component {
         // The machine-bench pipeline: Build Machine → config; Machine
         // Loader / ASM tab → image; both meet in _onMediaLoad's reboot.
         window.addEventListener('bw-machine-extracted', this._onMachineExtracted);
-        this._onCp1CircuitDetached = () => {
+        this._onCp1CircuitDetached = event => {
+            this._suspendedCp1Media = event.detail?.suspended ? this._bootMedia : null;
             if (this.state.kind !== 'cp1') return;
             this._teardownRunner();
             this._bootMedia = null;
@@ -739,7 +743,8 @@ class DebugPanel extends React.Component {
         if (!rt) return;
         const core = rt.bwDeviceCore;
         const dev = rt.bwDeviceId;
-        const key = `${core}/${dev}`;
+        const cp1Selected = window.__bwMachineExtracted?.kind === 'cp1';
+        const key = `${core}/${dev}/${cp1Selected}`;
         if (key === this._lastCore) return;
         this._lastCore = key;
         // Device-specific engines first: an ATtiny88 on the coarse
@@ -768,7 +773,8 @@ class DebugPanel extends React.Component {
         // longer exists) falls back to the map rather than a dead panel.
         let stored = null;
         try { stored = localStorage.getItem(`bw-emulator-pref:${dev}`); } catch { /* private mode */ }
-        const kind = stored || DEVICE_TO_KIND[dev] || CORE_TO_KIND[core];
+        const preferred = stored || DEVICE_TO_KIND[dev] || CORE_TO_KIND[core];
+        const kind = cp1Selected ? 'cp1' : (preferred === 'cp1' ? 'emulator' : preferred);
         if (kind && kind !== this.state.kind) {
             // Changing the kind while a runner exists would leave it on the
             // wrong engine. Destroy it so the next Start creates a fresh one.
@@ -1471,6 +1477,8 @@ class DebugPanel extends React.Component {
                     runner={this.state.runner} running={running} locale={this.props.locale}
                     configuration={this.state.machineConfig}
                     onConfigure={config => {
+                        const machine = window.__bwMachineExtracted;
+                        if (machine?.kind === 'cp1') window.__bwMachineExtracted = {...machine, config};
                         this._onMachineExtracted({detail: {kind: 'cp1', config}});
                         return new Promise(resolve => this.setState({machineConfig: config}, resolve));
                     }}

@@ -478,6 +478,9 @@ class CircuitTab extends React.Component {
                 try { localStorage.setItem('bw-right-pane-hidden', value === '1' ? '1' : '0'); } catch { /* private mode */ }
                 this.setState({rightPaneHidden: value === '1'});
             }
+            if (key === 'bw-device-id' && value !== 'cp1' && value !== 'kosmos-cp1') {
+                this._onCp1CodeSelection({detail: {active: false}});
+            }
             if (key === 'bw-circuit-theme') {
                 try { localStorage.setItem('bw-circuit-theme', value); } catch { /* private mode */ }
                 // CircuitDesigner owns the visual theme; forward the same
@@ -503,6 +506,8 @@ class CircuitTab extends React.Component {
             this.setState({machineBooted: true});
         };
         window.addEventListener('bw-machine-extracted', this._machineExtractedHandler);
+        window.addEventListener('bw-cp1-code-selection', this._onCp1CodeSelection);
+        window.addEventListener('bw-cp1-circuit-detached', this._restoreCp1Dock);
         this._mediaStashHandler = e => {
             window.__bwPendingMedia = {type: 'media', detail: e && e.detail};
             this._markReactUpdate('host:machine-booted');
@@ -722,6 +727,8 @@ class CircuitTab extends React.Component {
         window.removeEventListener('bw-settings-change', this._settingsHandler);
         window.removeEventListener('bw-start-journey', this._starterJourneyHandler);
         window.removeEventListener('bw-machine-extracted', this._machineExtractedHandler);
+        window.removeEventListener('bw-cp1-code-selection', this._onCp1CodeSelection);
+        window.removeEventListener('bw-cp1-circuit-detached', this._restoreCp1Dock);
         window.removeEventListener('bw-machine-media-load', this._mediaStashHandler);
         window.removeEventListener('bw-asm-rom-ready', this._asmStashHandler);
         window.removeEventListener('bw-example-bench', this._benchHandler);
@@ -1236,7 +1243,8 @@ class CircuitTab extends React.Component {
             const rt = this.props.vm && this.props.vm.runtime;
             if (rt && !rt.bwDeviceCore) {
                 const is8086 = (k) => k === 'i8086' || k === '8086' || k === 'i8088' || k === '8088';
-                if (circuit.parts.some(p => p.kind === 'kosmos-cp1')) {
+                if (window.__bwMachineExtracted?.kind === 'cp1' &&
+                    circuit.parts.some(p => p.kind === 'kosmos-cp1')) {
                     rt.bwDeviceCore = 'cp1';
                 } else if (circuit.parts.some(p => p.kind === 'z80')) {
                     rt.bwDeviceCore = 'z80';
@@ -1448,6 +1456,9 @@ class CircuitTab extends React.Component {
     }
 
     showControllerDock () {
+        if (window.__bwMachineExtracted?.kind === 'cp1' && CIRCUIT_DOCKS.has(this.state.debugDock)) {
+            this._cp1NormalDock = this.state.debugDock;
+        }
         window.dispatchEvent(new CustomEvent('bw-settings-change', {
             detail: {key: 'bw-right-pane-hidden', value: '0'}
         }));
@@ -1456,7 +1467,44 @@ class CircuitTab extends React.Component {
         }));
     }
 
+    _restoreCp1Dock = () => {
+        if (this.state.debugDock === 'controller') {
+            window.dispatchEvent(new CustomEvent('bw-settings-change', {
+                detail: {key: 'bw-debug-dock', value: this._cp1NormalDock || 'top'}
+            }));
+        }
+        this._cp1NormalDock = null;
+    };
+
+    _onCp1CodeSelection = event => {
+        const runtime = this.props.vm?.runtime;
+        const active = window.__bwMachineExtracted;
+        if (event.detail?.active) {
+            const suspended = this._cp1Suspended;
+            if (active?.kind === 'cp1' || !suspended) return;
+            const parts = this.state.circuit?.parts || this.state.circuitData?.parts;
+            this._cp1Suspended = null;
+            if (!parts?.some(part => part.kind === 'kosmos-cp1' && part.id === suspended.config.partId)) return;
+            this._cp1NormalCore = runtime?.bwDeviceCore;
+            if (runtime) runtime.bwDeviceCore = 'cp1';
+            window.dispatchEvent(new CustomEvent('bw-machine-extracted', {
+                detail: {kind: 'cp1', config: suspended.config, resumeCp1: true}
+            }));
+            this.showControllerDock();
+            return;
+        }
+        if (active?.kind !== 'cp1') return;
+        this._cp1Suspended = active;
+        delete window.__bwMachineExtracted;
+        if (window.__bwPendingMedia?.detail?.kind === 'cp1') delete window.__bwPendingMedia;
+        if (runtime?.bwDeviceCore === 'cp1') runtime.bwDeviceCore = this._cp1NormalCore;
+        this._cp1NormalCore = undefined;
+        this.setState({machineBooted: false});
+        window.dispatchEvent(new CustomEvent('bw-cp1-circuit-detached', {detail: {suspended: true}}));
+    };
+
     activateCp1Circuit (data, useDefaultMonitor = false) {
+        this._cp1Suspended = null;
         const part = data?.parts?.find(item => item.kind === 'kosmos-cp1');
         const runtime = this.props.vm?.runtime;
         if (!part) {
@@ -1466,12 +1514,14 @@ class CircuitTab extends React.Component {
                 this.setState({machineBooted: false});
             }
             if (window.__bwPendingMedia?.detail?.kind === 'cp1') delete window.__bwPendingMedia;
-            if (runtime?.bwDeviceCore === 'cp1') delete runtime.bwDeviceCore;
+            if (runtime?.bwDeviceCore === 'cp1') runtime.bwDeviceCore = this._cp1NormalCore;
+            this._cp1NormalCore = undefined;
             window.dispatchEvent(new CustomEvent('bw-cp1-circuit-detached'));
             return null;
         }
         const config = {partId: part.id, expansion: part.params?.expansion === true,
             clockHz: part.params?.clockHz || 6000000};
+        if (runtime && runtime.bwDeviceCore !== 'cp1') this._cp1NormalCore = runtime.bwDeviceCore;
         if (runtime) runtime.bwDeviceCore = 'cp1';
         if (useDefaultMonitor && window.__bwPendingMedia?.detail?.kind === 'cp1') delete window.__bwPendingMedia;
         window.dispatchEvent(new CustomEvent('bw-machine-extracted', {detail: {kind: 'cp1', config, useDefaultMonitor}}));
