@@ -69,14 +69,14 @@ function storageWith (values = {}) {
     const entries = new Map(Object.entries(values));
     return {getItem: key => entries.get(key) ?? null, setItem: (key, value) => entries.set(key, String(value))};
 }
-function fixture ({dock, storage = storageWith({'bw-debug-dock': dock}), visible = false,
-    buildCircuit = makeCircuit} = {}) {
+function fixture ({dock, storage = storageWith({'bw-debug-dock': dock, 'bw-stage-circuit': '1'}), visible = false,
+    buildCircuit = makeCircuit, window = {}} = {}) {
     const connected = new Set();
     const document = {contains: node => connected.has(node),
         createElement: () => ({dataset: {}, style: {}})};
     const ReactDOM = {createPortal: (children, container, key) => ({portal: true, children, container, key})};
     const Panel = () => null;
-    const CircuitTab = buildCircuit({React, ReactDOM, document, localStorage: storage, DebugPanel: Panel,
+    const CircuitTab = buildCircuit({React, ReactDOM, document, window, localStorage: storage, DebugPanel: Panel,
         loadBenchTemperature: () => 25, getReactPerformanceProbe: () => null,
         profileReactSubtree: (_react, _name, element) => element, pt: (_locale, key) => key,
         advanceDebugPhase, shouldRefreshDesignerDebugState, applyBenchTemperature});
@@ -111,6 +111,25 @@ test('invalid or inaccessible saved settings retain the ordinary right-dock defa
     }
     const storage = {getItem () {throw new Error('storage unavailable');}};
     assert.equal(fixture({storage}).host.state.debugDock, 'right');
+});
+
+test('Scratch owns the pane on fresh load and after leaving a running debugger', () => {
+    const {host} = fixture({storage: storageWith({'bw-debug-dock': 'right'})});
+    host.state.Designer = () => null;
+    assert.equal(host._stagePortalOn(), false);
+    host.state.showInStage = true;
+    host.render();
+    applyHostVisibility.call(host);
+    assert.equal(host._stageHost.style.display, 'block');
+    const debugHost = host._debugHost;
+    for (const visible of [false, true]) {
+        host.props.isVisible = visible;
+        host.state.showInStage = false;
+        const shown = portals(host.render());
+        applyHostVisibility.call(host);
+        assert.equal(host._stageHost.style.display, 'none');
+        assert.deepEqual(shown.map(portal => portal.container), [debugHost]);
+    }
 });
 
 test('setDock switches in both directions and persists only recognized pane modes', () => {
@@ -264,7 +283,7 @@ test('real React reconciles the actual dock renders without remounting or destro
             render () {return React.createElement('button', {'data-live-runner': true}, 'Run');}
         }
         const CircuitTab = makeCircuit({React, ReactDOM, document, window,
-            localStorage: storageWith({'bw-debug-dock': 'right', 'bw-right-pane-hidden': '0'}),
+            localStorage: storageWith({'bw-debug-dock': 'right', 'bw-right-pane-hidden': '0', 'bw-stage-circuit': '1'}),
             DebugPanel: LivePanel, loadBenchTemperature: () => 25,
             getReactPerformanceProbe: () => null,
             profileReactSubtree: (_react, _name, element) => element,
@@ -424,6 +443,12 @@ test('beside a live machine the controller dock shares the column with the debug
     }
 });
 
+test('CP1 controller keeps its keypad without a second CP1 debugger face', () => {
+    const {host} = fixture({dock: 'controller', window: {__bwMachineExtracted: {kind: 'cp1'}}});
+    host.state.machineBooted = true;
+    assert.equal(host._stagePortalOn(), false);
+});
+
 test('restoring the original dock refusals or removing stage ownership fails the same pane contracts', () => {
     for (const [name, needle, replacement, oracle] of [
         ['saved device ignored', 'CIRCUIT_DOCKS.has(d) || DEVICE_DOCKS.has(d)',
@@ -441,8 +466,8 @@ test('restoring the original dock refusals or removing stage ownership fails the
                 const {host} = fixture({dock: 'controller', buildCircuit});
                 assert.equal(host._stagePortalOn(), false);
             }],
-        ['controller split dropped (I3/I4 regression)', 'this.state.debugDock === \'controller\' &&',
-            'false &&', buildCircuit => {
+        ['controller split dropped (I3/I4 regression)', 'return this.state.debugDock === \'controller\' &&',
+            'return false &&', buildCircuit => {
                 const {host} = fixture({dock: 'controller', buildCircuit});
                 host.state.machineBooted = true;
                 assert.equal(host._stagePortalOn(), true);

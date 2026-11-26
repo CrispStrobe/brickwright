@@ -147,10 +147,10 @@ class CircuitTab extends React.Component {
         // asked for the right-pane debugger roughly ten times before this
         // default changed (2026-08-17). 'top' stays selectable in settings.
         let debugDock = 'right';
-        let showInStage = true; // owner default: while coding, the circuit replaces the stage
+        let showInStage = false;
         let rightPaneHidden = true;
         try {
-            showInStage = localStorage.getItem('bw-stage-circuit') !== '0';
+            showInStage = localStorage.getItem('bw-stage-circuit') === '1';
             rightPaneHidden = localStorage.getItem('bw-right-pane-hidden') !== '0';
         } catch { /* private mode */ }
         this._stageHost = null;
@@ -668,7 +668,7 @@ class CircuitTab extends React.Component {
             // stage should be, and what dock 'right' showed instead of the
             // debugger. _portalRendered is set by render at the points where
             // it actually returns a portal, so this can never drift from it.
-            const rightHere = this.props.isVisible &&
+            const rightHere = this.props.isVisible && this.state.showInStage &&
                 this.state.debugDock === 'right' && this._stageRightRendered;
             this._stageHost.style.display =
                 (portalNow && this._portalRendered) || rightHere ? 'block' : 'none';
@@ -1007,6 +1007,7 @@ class CircuitTab extends React.Component {
      *  layout in gui.jsx. Other device panes still own the whole column. */
     _controllerSplitLive () {
         return this.state.debugDock === 'controller' &&
+            window.__bwMachineExtracted?.kind !== 'cp1' &&
             !!(stcDrives(this.state.stc) || this.state.machineBooted);
     }
 
@@ -2468,7 +2469,7 @@ class CircuitTab extends React.Component {
         // right pane — the stage column beyond the movable splitter.
         this._stageRightRendered = false;
         let stagePane = null;
-        if (this.state.debugDock === 'right') {
+        if (this.state.debugDock === 'right' && this.state.showInStage) {
             const host = this._ensureStageHost();
             if (host) {
                 this._stageRightRendered = true;
@@ -2540,8 +2541,8 @@ class CircuitTab extends React.Component {
             }
             entries[action.name] = entry;
         }
-        const panels = de ? [['designer', 'Designer'], ['warnings', 'Warnungen'], ['bom', 'Stückliste'], ['examples', 'Beispiele']] :
-            [['designer', 'Designer'], ['warnings', 'Warnings'], ['bom', 'Parts list'], ['examples', 'Examples']];
+        const panels = de ? [['designer', 'Designer'], ['warnings', 'Schaltungsprüfung'], ['bom', 'Stückliste'], ['examples', 'Beispiele']] :
+            [['designer', 'Designer'], ['warnings', 'Circuit Check'], ['bom', 'Parts list'], ['examples', 'Examples']];
         for (const [panel, label] of panels) {
             entries[`host-panel-${panel}`] = {label, location: 'edit', submenu: de ? 'Bereiche' : 'Panels',
                 enabled: true, checked: this.state.panel === panel, radio: true, run: () => this.setState({panel})};
