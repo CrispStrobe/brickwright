@@ -1714,3 +1714,88 @@ The standalone Playwright suite timed out during page navigation under
 high system load. Brickwright pins SDK `f2a596a`. Sustained 1× production
 qualification remains open.
 [CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/37068339a078016fe1a4b8e54155442a82338ec8)
+
+### Skip unchanged CAD scene transforms
+
+The viewport keeps the workplane transforms fixed and updates body and
+outline world matrices when their local physics matrices change. A pose
+missing from a frame still returns to its authored position.
+
+Two paired Chrome replays on the MacBook compared 100 recorded simulation
+frames for Atlas and Scout. Each went from 2,400 workplane world-matrix
+calculations to zero. Repeating the final pose with a fresh snapshot
+reduced body and outline world-matrix calculations from 63 to 11 for Atlas
+and from 60 to 8 for Scout. The remaining updates came from cable anchor
+lookups. Workplane, body and outline transforms matched exactly on every
+frame, as did sampled cable buffers. Overall submission timing varied
+between run orders, so the results establish fewer matrix calculations.
+
+Live Chrome checks ran each robot for 600 Circuit–CAD substeps and
+displayed 100 frames. Both moved and restored their authored scenes when
+parked. A separate browser check reset a moved box and used the mouse to
+select and drag it, committing the new position in one edit. The editor
+TypeScript build and six camera and transform-selection unit cases passed.
+The three wiring tests passed on retry with a longer per-test timeout.
+Brickwright pins SDK `f2a596a`. Sustained 1× in production remains open.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/e8463d8d5230d92436fb42a58a4783055f1b6ccd)
+
+### Reuse authored cable anchors during simulation
+
+The viewport prepares cable anchors from the CAD document once per
+immutable snapshot and looks up each connected body once per frame. It
+still applies the current body pose to the anchors before drawing the
+cable. A document replacement refreshes the anchors. The fallback for
+mutable documents reads edits on the next update.
+
+Chrome on the MacBook ran a paired 100-frame replay in both orders. The
+timings are medians of three replays in each order. The separate counted
+pass measured how often the renderer converted an authored anchor or
+looked up a connected body after the viewport warmed up.
+
+| Robot | Authored conversions | Connected-body lookups | Cable CPU, first order | Cable CPU, reverse order |
+| --- | ---: | ---: | ---: | ---: |
+| Atlas forklift | 9,900 → 0 | 9,900 → 1,100 | 112.8 → 90.4 ms | 116.3 → 94.4 ms |
+| Scout TT rover | 6,300 → 0 | 6,300 → 800 | 77.4 → 81.1 ms | 75.0 → 66.5 ms |
+
+The workplane and body matrices matched on all frames, and sampled
+cable position and normal buffers matched exactly. Atlas cable CPU
+time fell in both orders. Scout timings varied between orders.
+Both robots finished 600 live Circuit–CAD substeps in Chrome, displayed
+100 frames with moving cables, and restored their authored scenes after
+parking. The editor TypeScript build and the focused regression for
+authored anchor invalidation passed. Brickwright pins SDK `f2a596a`.
+Sustained 1× in production remains open.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/38e3eabbd1201825a923e04ea3fbc1c2d17b3e24)
+
+### Package the viewport and collision optimizations for Brickwright
+
+The SDK refresh from `f2a596a` to `38e3eab` includes the collision-buffer
+validation, viewport pose and cable reuse, stationary camera readouts,
+unchanged world transforms and authored cable anchor changes described
+above. The package comes from a clean CrispCAD checkout.
+
+The manifest covers 842 files. All standalone WASM payloads and all
+immutable model provenance URLs matched the previous pin. The scalar and
+SIMD Jolt modules matched after normalizing their generated worker import
+names. The exact kernel and Jolt versions are unchanged.
+
+Chrome ran Atlas and Scout with both SDKs in the same existing Brickwright
+host build (`e47f2dc`). All four runs passed project selection, one-click
+Run, moving joints, visible wiring, Stop, Reset and repeat Run. The fresh
+build was the SDK. The host was reused.
+
+| Robot | Sustained real-time factor, previous → refreshed SDK |
+| --- | ---: |
+| Atlas forklift | 0.257× → 0.234× |
+| Scout TT rover | 0.211× → 0.242× |
+
+These were three-simulated-second runs under heavy, varying Mac load.
+The shorter component measurements above quantify removed work. These
+host runs showed mixed timing, and sustained 1× production qualification
+remains open.
+
+The SDK sync verified all manifest hashes. The six telemetry tests and
+all 24 pin and fetch tests passed across the initial run and a focused
+retry of the font test after its Python subprocess timed out. Chrome
+also loaded the packaged exact WASM on demand and measured a 10 × 20 ×
+30 mm box at 6,000 mm³ and 2,200 mm².

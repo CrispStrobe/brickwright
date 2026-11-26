@@ -12002,7 +12002,7 @@ self.onmessage = async (e) => {
   try {
     if ($7(e.data.locale ?? "en"), "exact" in e.data) {
       const i = performance.now();
-      Z5 ?? (Z5 = import("./exact/dist-DtHh8MIW.js").then(async (h) => ({ module: h, backend: await h.createExactBackend() })).catch((h) => {
+      Z5 ?? (Z5 = import("./exact/dist-R3zMQvCO.js").then(async (h) => ({ module: h, backend: await h.createExactBackend() })).catch((h) => {
         throw Z5 = null, h;
       }));
       const { module: r, backend: o } = await Z5, a = r.runExactRequest(o, e.data.exact, performance.now() - i);
@@ -12023,7 +12023,7 @@ self.onmessage = async (e) => {
     }
     const n = t.evaluate(e.data.document);
     if (e.data.printability) {
-      const { checkPrintability: i } = await import("./printability-oYjuagLN.js");
+      const { checkPrintability: i } = await import("./printability-2qc-_gZs.js");
       self.postMessage({ request: q, result: i(n.bodies, e.data.printability) });
       return;
     }
