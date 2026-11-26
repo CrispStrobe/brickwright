@@ -190,8 +190,7 @@ async function createI8086DosBenchSelected (opts) {
             return realStep();
         }
         // Idempotent by construction; safe before OR after an instruction.
-        if (dos.service() !== null) return 0;
-        const cycles = realStep();
+        const cycles = dos.step();
         if (dos.terminated && !exitAnnounced) {
             exitAnnounced = true;
             if (onExit) onExit(dos.exitCode);

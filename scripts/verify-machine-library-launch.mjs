@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
+import {FUNSCII} from 'bw-board/funscii-font.js';
 
 const base = process.argv[2];
 assert.ok(base, 'Pass the URL of the assembled Brickwright frontend.');
@@ -44,6 +45,77 @@ try {
     for (const value of ['42', '120', '720']) assert.match(result, new RegExp(`\\b${value}\\b`));
     console.log('File → Machines → partcl Tcl (DOS) → Run executes the real sample Tcl script.');
     await dos.close();
+
+    const forth = await freshProject();
+    await openFromFile(forth, 'i8086');
+    await forth.getByRole('searchbox', {name: 'Search firmware'}).fill('zForth (DOS)');
+    await forth.getByTestId('bw-mm-downloadable-media').getByRole('button', {name: 'Run', exact: true}).click();
+    await forth.getByTestId('bw-ctl-terminal-DOS Console')
+        .getByText(/zForth on DOS[\s\S]*49 42 64[\s\S]*5 4 3 2 1/).waitFor({timeout: 60000});
+    await forth.close();
+    console.log('File → Machines → zForth (DOS) → Run displays the sample output.');
+
+    const vdp = await freshProject();
+    await openFromFile(vdp, 'z80');
+    await vdp.locator('[data-lesson-id="lesson-cpm-z80-vdp"]').getByTestId('bw-mm-lesson-run').click();
+    const screen = vdp.getByTestId('bw-machine-canvas');
+    await screen.waitFor();
+    const waitForVdpText = (value, atStart = false) => vdp.waitForFunction(({glyphs, length, atStart}) => {
+        const screenCanvas = document.querySelector('[data-testid="bw-machine-canvas"]');
+        if (!screenCanvas || screenCanvas.width !== 256 || screenCanvas.height !== 192) return false;
+        const {data} = screenCanvas.getContext('2d').getImageData(0, 0, 256, 192);
+        // Read the six visible pixels of each character cell from the actual frame.
+        for (let row = 0; row < 24; row++) {
+            for (let col = 0; col <= (atStart ? 0 : 40 - length); col++) {
+                if (glyphs.every((pattern, chr) => pattern.every((bits, y) =>
+                    Array.from({length: 6}, (_, x) => x).every(x => {
+                        const pixel = ((row * 8 + y) * 256 + 8 + (col + chr) * 6 + x) * 4;
+                        return (data[pixel] > 128) === Boolean((bits >> (x + 1)) & 1);
+                    })))) return true;
+            }
+        }
+        return false;
+    }, {
+        glyphs: Array.from(value, ch => Array.from(FUNSCII.slice(ch.charCodeAt(0) * 8, ch.charCodeAt(0) * 8 + 8))),
+        length: value.length, atStart
+    }, {timeout: 15000});
+    await waitForVdpText('A>');
+    await screen.click();
+    await vdp.keyboard.type('DIR');
+    await vdp.keyboard.press('Enter');
+    await waitForVdpText('BBCBASIC COM');
+    await vdp.keyboard.type('BBCBASIC');
+    await vdp.keyboard.press('Enter');
+    await waitForVdpText('BBC BASIC (Z80)');
+    await waitForVdpText('>', true);
+    await vdp.keyboard.type('PRINT 2+2', {delay: 30});
+    await vdp.keyboard.press('Enter');
+    await waitForVdpText('         4', true).catch(async error => {
+        await screen.screenshot({path: 'artifacts/cpm-vdp-failure.png'});
+        throw error;
+    });
+    await vdp.close();
+    console.log('BBC BASIC on CP/M produces the directory and arithmetic result on the TMS9918A raster.');
+
+    const pico = await freshProject();
+    await openFromFile(pico, 'rp2040js');
+    await pico.getByRole('searchbox', {name: 'Search firmware'}).fill('PicoBB');
+    await pico.getByTestId('bw-mm-downloadable-media').getByRole('button', {name: 'Run', exact: true}).click();
+    await pico.getByTestId('bw-serial-console').getByText(/BBC BASIC for Pico Console/).waitFor();
+    await pico.close();
+    console.log('PicoBB wakes and reaches the BBC BASIC banner on the serial console.');
+
+    const benchmark = await freshProject();
+    await openFromFile(benchmark, 'i80386');
+    await benchmark.getByRole('searchbox', {name: 'Search firmware'}).fill('TOPBENCH');
+    await benchmark.getByTestId('bw-mm-downloadable-media').getByRole('button', {name: 'Run', exact: true}).click();
+    await benchmark.getByTestId('native-benchmark-result').waitFor({timeout: 120000});
+    const benchmarkResult = JSON.parse(await benchmark.getByTestId('native-benchmark-result').textContent());
+    assert.equal(benchmarkResult.accepted, true);
+    assert.equal(benchmarkResult.exitCode, 4);
+    assert.match(benchmarkResult.screen.join('\n'), /Score:/);
+    await benchmark.close();
+    console.log('TOPBENCH runs from Machines and publishes the validated 386 result.');
 
     const at = await freshProject();
     await openFromFile(at, 'i80386');

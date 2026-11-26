@@ -12,7 +12,7 @@ export const libraryMedia = [
     {id: 'forth-dos', title: 'zForth (DOS)', machine: 'i8086', license: 'MIT'},
     {id: 'tcl-dos', title: 'partcl Tcl (DOS)', machine: 'i8086', license: 'MIT'},
     {id: 'ubasic-dos', title: 'uBASIC (DOS)', machine: 'i8086', license: 'BSD-3-Clause'},
-    {id: 'x86-benchmarks/topbench', title: 'TOPBENCH', machine: 'i8086', license: 'MIT'},
+    {id: 'x86-benchmarks/topbench', title: 'TOPBENCH (386)', machine: 'i80386', license: 'MIT', benchmark: 'topbench'},
     {id: 'picobb-rp2040', title: 'PicoBB BBC BASIC', machine: 'rp2040js', license: 'Zlib'}
 ];
 

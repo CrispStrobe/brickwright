@@ -660,6 +660,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
     let board = null;
     let xtKeyboard = null;
     let pcSerialInput = null;
+    let cpmAutoRun = null;
     /**
      * Board time minus target time, fixed at each (re)start (boardTimeBase).
      * The target's clock restarts at zero on every run; a board that has
@@ -2137,6 +2138,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         // CLI proof gives. Without this PicoBB hangs before its banner.
         let lineBuf = '';
         let probe = '';
+        let wakeOnPrompt = bootMedia.picoWakeOnPrompt === true;
         serialLines = [];
         adapter.onSerial((byte) => {
             probe = (probe + String.fromCharCode(byte)).slice(-4);
@@ -2146,6 +2148,10 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             }
             const ch = String.fromCharCode(byte);
             if (ch === '\n') {
+                if (wakeOnPrompt && lineBuf.trim() === 'Waiting for connection') {
+                    wakeOnPrompt = false;
+                    feedByte(13);
+                }
                 serialLines.push(lineBuf);
                 lineBuf = '';
                 if (serialLines.length > 200) serialLines.shift();
@@ -2866,7 +2872,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             // Bound the 8086's work inside one browser callback. The session
             // carries unspent PROGRAM time forward, so this protects input and
             // paint latency without changing timer/wait semantics.
-            ...(targetKind === 'i8086' ? {wallBudgetMs: 8, maxQuantumNs: 1_000_000} : {}),
+            ...(targetKind === 'i8086' ? {wallBudgetMs: 8, maxQuantumNs: 1_000_000,
+                ...(bootMedia?.dosFastStart ? {speed: 16} : {})} : {}),
             // createDebugSession reports through onChange ONLY. This bench
             // once passed onHalt/onRun, which the session never calls: a
             // breakpoint hit halted the target and stopped the pump, but no
@@ -3188,6 +3195,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
     // ROM boots the extracted config (or the default Searle map). With no
     // media at all, the default remains BBC BASIC.
     async function attachZ80() {
+        cpmAutoRun = null;
         const { createDebugTarget, createDebugSession } =
             await import(/* webpackChunkName: "bw-board" */ 'bw-board');
 
@@ -3208,11 +3216,17 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                 if (!r.ok) throw new Error(`Failed to load ${p}: HTTP ${r.status}`);
                 return new Uint8Array(await r.arrayBuffer());
             };
+            const vdpConsole = bootMedia.machinePreset === 'CPM64K_TMS9918';
             const [ccpBdos, bios] = await Promise.all([
                 fetchRom('static/roms/cpm22-64k.bin'),
-                fetchRom('static/roms/cpm-bios.bin')
+                fetchRom(vdpConsole ? 'static/roms/cpm-bios-vdp.bin' : 'static/roms/cpm-bios.bin')
             ]);
-            const files = {};
+            if (vdpConsole) {
+                const {CPM64K} = await import('bw-board/z80-machine.js');
+                targetOpts.config = {...CPM64K,
+                    ports: [...CPM64K.ports, {kind: 'vdp', name: 'vdp1', at: 0x98}]};
+            }
+            const files = {...bootMedia.cpmFiles};
             const bbc = await fetchRom('static/roms/bbcbasic.com').catch(() => null);
             if (bbc) files['BBCBASIC.COM'] = bbc;
             if (bootMedia.bytes || bootMedia.url) {
@@ -3224,6 +3238,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                 files[cpmFileName(bootMedia.name)] = (await resolveMediaImage(bootMedia)).bytes;
             }
             targetOpts.cpmSystem = { ccpBdos, bios, files };
+            cpmAutoRun = bootMedia.cpmLaunch || null;
             readyMsg = S('cpm-system.ready') +
                 (files['BBCBASIC.COM'] ? S('cpm-system.ready.bbcbasic') : '');
         } else if (isCom) {
@@ -3979,7 +3994,15 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         xtKeyboard?.pump();
         pcSerialInput?.pump();
         let outcome = session.pump();
-        if (outcome === 'ran') basicStartup?.answer(serialLines.at(-1), runner.sendSerial);
+        if (outcome === 'ran') {
+            const lastLine = serialLines.at(-1);
+            basicStartup?.answer(lastLine, runner.sendSerial);
+            if (cpmAutoRun && lastLine === 'A>') {
+                const command = cpmAutoRun;
+                cpmAutoRun = null;
+                runner.sendSerial(`${command}\r`);
+            }
+        }
         if (cp1RunKeyUntil !== null && (target.timeNs() >= cp1RunKeyUntil || outcome !== 'ran')) {
             releaseCp1RunKey();
         }

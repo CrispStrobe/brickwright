@@ -150,6 +150,9 @@ const TABLE = {
             'Run fetches the floppy ({size}) from brickwright-media-lab and checks its SHA-256 first.',
         'elks.source': 'Source code',
         'cpm.title': 'BBC BASIC on CP/M 2.2',
+        'cpm.vdpTitle': 'BBC BASIC on CP/M 2.2 + TMS9918A',
+        'cpm.vdpSummary': 'Click the 40×24 Controller screen to type. At A>, run BBCBASIC, then try PRINT 2+2. ' +
+            'The Z80 drives the VDP at ports $98 and $99. CP/M and BBC BASIC are bundled.',
         'cpm.summary': 'DRI’s real CP/M 2.2 (CCP+BDOS, not a shim) boots on the emulated Z80 to the A> prompt. ' +
             'BBC BASIC is on drive A: — type DIR to list it, BBCBASIC to run it. ' +
             'The console is the Debug panel’s serial terminal. Everything ships in the app — no download.',
@@ -188,6 +191,9 @@ const TABLE = {
             'Ausführen lädt die Diskette ({size}) von brickwright-media-lab und prüft vorher ihre SHA-256.',
         'elks.source': 'Quellcode',
         'cpm.title': 'BBC BASIC auf CP/M 2.2',
+        'cpm.vdpTitle': 'BBC BASIC auf CP/M 2.2 + TMS9918A',
+        'cpm.vdpSummary': 'Klicke auf den 40×24-Controller-Bildschirm. Gib bei A> BBCBASIC und dann PRINT 2+2 ein. ' +
+            'Der Z80 steuert den VDP über die Ports $98 und $99. CP/M und BBC BASIC sind enthalten.',
         'cpm.summary': 'DRIs echtes CP/M 2.2 (CCP+BDOS, kein Shim) startet auf dem emulierten Z80 am A>-Prompt. ' +
             'BBC BASIC liegt auf Laufwerk A: — DIR listet es, BBCBASIC startet es. ' +
             'Die Konsole ist das serielle Terminal im Debug-Panel. Alles ist in der App enthalten — kein Download.',
@@ -342,6 +348,22 @@ export function lessonMachines (locale) {
         summary: t('cpm.summary'),
         licence: t('cpm.licence'),
         source: `${MEDIA_LAB}/tree/main/projects/bbc-basic-z80`,
+        sourceLabel: t('cpm.source'),
+        size: '25 KB'
+    });
+
+    rows.push({
+        config: newMachineConfig({
+            ...cpmConfig,
+            id: 'lesson-cpm-z80-vdp',
+            title: t('cpm.vdpTitle'),
+            machineConfig: 'CPM64K_TMS9918',
+            widgets: [{name: 'TMS9918A', type: 'simplevga', source: 'video',
+                config: {width: 256, height: 192}}]
+        }),
+        summary: t('cpm.vdpSummary'),
+        licence: t('cpm.licence'),
+        source: cpmConfig.provenance.sourceCode,
         sourceLabel: t('cpm.source'),
         size: '25 KB'
     });

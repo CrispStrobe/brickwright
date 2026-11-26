@@ -2063,6 +2063,7 @@ class ControllerPanelView extends React.Component {
                     {machineWidget && <MachineConsole widget={machineWidget}
                         keyboardSet={this.props.machineConsole.keyboardSet}
                         keyIn={this.props.machineConsole.keyIn}
+                        serialIn={this.props.machineConsole.serialIn}
                         isFullScreen={this.props.isFullScreen}
                         onToggleFullScreen={this.props.isFullScreen ? this.props.onExitFullScreen : this.props.onEnterFullScreen}
                         mouseIn={this.props.machineConsole.mouseIn} />}

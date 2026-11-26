@@ -1,4 +1,4 @@
-import {showCircuitDebugger} from '../../lib/bw-debug/debug-view.js';
+import {setCircuitView, showCircuitDebugger} from '../../lib/bw-debug/debug-view.js';
 import {addCardiacFace, addMicrotronicFace, addKim1Face} from '../../lib/controller-machine-faces.js';
 import React from 'react';
 import {clearControllerPanel, serializeControllerPanel} from '../../lib/controller-inputs.js';
@@ -554,8 +554,9 @@ class CircuitTab extends React.Component {
             const detail = e?.detail;
             const previous = window.__bwPendingMedia?.detail;
             window.__bwPendingMedia = {type: 'media', detail};
-            if (detail !== previous && detail?.kind === 'z80' && detail.profile === 'cpm-system') {
-                showCircuitDebugger();
+            if (detail !== previous) {
+                if (detail?.machineView === 'debugger') showCircuitDebugger();
+                if (detail?.machineView === 'controller') setCircuitView({fullWidth: false, dock: 'controller'});
             }
             this._markReactUpdate('host:machine-booted');
             this.setState({machineBooted: true});

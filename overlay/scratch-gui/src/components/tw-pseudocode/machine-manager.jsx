@@ -406,8 +406,15 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                             <span style={{flex: 1, minWidth: 0}}>{item.title}
                                 <small style={{marginLeft: 8, color: '#64748b'}}>{item.license}</small>
                             </span>
-                            <button type="button" disabled={launching !== null || !onRun} style={btn}
-                                onClick={() => launch(item.id, async () => onRun(await openLibraryMedia(item)))}>
+                            <button type="button" disabled={launching !== null || (!item.benchmark && !onRun)} style={btn}
+                                onClick={() => launch(item.id, async () => {
+                                    if (item.benchmark) {
+                                        window.dispatchEvent(new CustomEvent('bw-open-native-benchmarks',
+                                            {detail: {run: item.benchmark}}));
+                                        return true;
+                                    }
+                                    return onRun(await openLibraryMedia(item));
+                                })}>
                                 {t('run')}
                             </button>
                         </div>)}

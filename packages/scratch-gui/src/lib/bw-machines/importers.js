@@ -202,9 +202,15 @@ export function fromMediaManifest(manifest, opts = {}) {
         (components.length ? components.map(c => c.license).filter(Boolean).join(' + ') : null);
 
     const dosProgram = manifest.program?.kind === 'dos' && manifest.machine === 'i8086';
-    const dosMount = dosProgram ? Object.fromEntries(Object.entries(manifest.mount || {}).map(([name, value]) => [
+    const cpmProgram = manifest.program?.kind === 'cpm' && manifest.machine === 'z80' &&
+        slots.com && Object.keys(manifest.mount || {}).length > 0;
+    const mount = (dosProgram || cpmProgram) ? Object.fromEntries(Object.entries(manifest.mount || {}).map(([name, value]) => [
         name, typeof value === 'string' ? {url: resolveUrl(value)} : {...value, url: resolveUrl(value.url)}
     ])) : null;
+    if (cpmProgram) {
+        slots.cpmsys = slots.com;
+        delete slots.com;
+    }
 
     return newMachineConfig({
         title: manifest.title || manifest.machine || 'imported machine',
@@ -239,7 +245,8 @@ export function fromMediaManifest(manifest, opts = {}) {
             // so a later increment can wire a host-run bundle without re-reading
             // the manifest.
             program: manifest.program || null,
-            ...(dosMount ? {dosMount} : {}),
+            ...(dosProgram && mount ? {dosMount: mount} : {}),
+            ...(cpmProgram ? {cpmMount: mount, cpmLaunch: slots.cpmsys.url.split('/').at(-1)} : {}),
             run: manifest.run || null,
             boot: manifest.boot === true
         }

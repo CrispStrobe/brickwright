@@ -85,3 +85,20 @@ test('CP/M lesson: strings resolve in EN and DE with matching keys', () => {
         assert.notEqual(lessonT('de', k), k, `${k} resolves in DE`);
     }
 });
+
+test('the CP/M VDP lesson has its own BIOS preset and routes the real boot to Controller', async () => {
+    const row = lessonMachines('en').find(entry => entry.config.id === 'lesson-cpm-z80-vdp');
+    assert.deepEqual(validateMachineConfig(row.config), {ok: true, errors: []});
+    assert.deepEqual(row.config.slots, cpmRow().config.slots);
+    await runMachineConfig(row.config, {
+        awaitBoot: true,
+        fetcher: async () => ({bytes: new Uint8Array([0xc9])}),
+        dispatch(detail) {
+            assert.equal(detail.profile, 'cpm-system');
+            assert.equal(detail.machinePreset, 'CPM64K_TMS9918');
+            assert.equal(detail.machineView, 'controller');
+            assert.equal(detail.widgets[0].source, 'video');
+            detail.bootCompletion.resolve();
+        }
+    });
+});

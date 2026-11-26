@@ -787,6 +787,7 @@ const GUIComponent = props => {
             mirror.start();
             setMachineConsole({name: widget.name, keyboardSet: p.keyboardSet,
                 keyIn: typeof p.keyInFn === 'function' ? p.keyInFn : null,
+                serialIn: typeof p.serialInFn === 'function' ? p.serialInFn : null,
                 mouseIn: typeof p.mouseInFn === 'function' ? p.mouseInFn : null});
             // Make the screen actually visible: dock the Widgets pane, play
             // mode, and surface the code tab where the dock renders — exactly as

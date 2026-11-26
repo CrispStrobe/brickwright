@@ -63,6 +63,12 @@ export async function runMachineConfig(config, opts = {}) {
         // stays in the Debug instrument).
         widgets: Array.isArray(activated.widgets) ? activated.widgets : []
     };
+    if (bm.cpmLaunch) {
+        detail.cpmLaunch = bm.cpmLaunch;
+        detail.cpmFiles = bm.cpmFiles;
+    }
+    if (bm.picoWakeOnPrompt) detail.picoWakeOnPrompt = true;
+    if (bm.dosFastStart) detail.dosFastStart = true;
     if (bm.dosVariant) detail.dosVariant = bm.dosVariant;
     if (bm.dosArgs) detail.dosArgs = bm.dosArgs;
     if (bm.dosFiles) detail.dosFiles = bm.dosFiles;
@@ -99,8 +105,9 @@ export async function runMachineConfig(config, opts = {}) {
     // browser machine routes below, wait for the panel's actual attach result so a
     // failed ROM/media load remains visible in Machine Manager. Injected
     // dispatchers keep the old synchronous contract unless a test opts in.
-    const awaitBoot = (activated.machinePreset === 'freedos-vga' ||
-        (activated.targetKind === 'z80' && bm.profile === 'cpm-system') ||
+    const serialMachine = ['z80', 'rp2040js', 'eater6502', 'riscv32'].includes(activated.targetKind);
+    if (serialMachine) detail.machineView = activated.videoWidget ? 'controller' : 'debugger';
+    const awaitBoot = (activated.machinePreset === 'freedos-vga' || serialMachine ||
         (activated.targetKind === 'i80386' && bm.slot === 'bios') ||
         (activated.targetKind === 'i8086' && ['rom', 'com', 'exe'].includes(bm.slot))) &&
         (opts.awaitBoot ?? typeof opts.dispatch !== 'function');

@@ -429,7 +429,7 @@ class DebugPanel extends React.Component {
         // Its post-boot snapshot (the lesson's default Run), likewise.
         const {linuxSnapshot} = e.detail || {};
         const {nativeBlocks, machinePreset, i80386Media, machineConfig6502, machineConfig8086} = e.detail || {};
-        const {dosArgs, dosFiles, dosVariant} = e.detail || {};
+        const {dosArgs, dosFiles, dosVariant, dosFastStart, cpmLaunch, cpmFiles, picoWakeOnPrompt} = e.detail || {};
         if (!bytes && !riscvImage) return;
         // THE SAME LOAD, DELIVERED TWICE. circuit-tab stashes every media-load
         // and, when that flips it to "machine booted", re-dispatches the very
@@ -480,10 +480,14 @@ class DebugPanel extends React.Component {
             dosArgs,
             dosFiles,
             dosVariant,
+            dosFastStart,
+            cpmLaunch,
+            cpmFiles,
+            picoWakeOnPrompt,
             machineConfig8086,
             name: name || null,
             nativeBlocks: kind === 'i80386' && nativeBlocks === true,
-            machinePreset: kind === 'i80386' ? machinePreset || null : null,
+            machinePreset: kind === 'i80386' || kind === 'z80' ? machinePreset || null : null,
             i80386Media: kind === 'i80386' ? i80386Media || null : null,
             machineConfig6502: kind === 'eater6502' ? machineConfig6502 || null : null,
             // HARDWARE THE PROGRAM ASKED FOR, and it has to be listed here
@@ -566,6 +570,7 @@ class DebugPanel extends React.Component {
             window.bwMirrorMachineVideo({videoFn: () => runner.video(), widget: screen,
                 keyboardSet: nextKind === 'i80386' ? 'at-set1' : 'xt-set1',
                 keyInFn: typeof runner.keyIn === 'function' ? sc => runner.keyIn(sc) : null,
+                serialInFn: machinePreset === 'CPM64K_TMS9918' ? byte => runner.sendSerial(byte) : null,
                 mouseInFn: typeof runner.mouseIn === 'function' ? event => runner.mouseIn(event) : null,
                 focusController: nextKind !== 'i8086'});
             if (nextKind === 'i8086') this._showPcController();

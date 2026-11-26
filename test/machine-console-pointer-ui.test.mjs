@@ -191,3 +191,33 @@ test('legacy Widgets keyboard ignores AT aliases while original keys remain held
         await act(async () => { renderer.unmount(); });
         assert.deepEqual(received, [0x1d, 0x4b, 0xcb, 0x9d]);
     }));
+
+test('serial machine screens send printable keys, CR and editing controls as ASCII',
+    async () => withConsole(async MachineConsole => {
+        const received = [];
+        const listeners = new Map();
+        window.addEventListener = (name, listener) => listeners.set(name, listener);
+        const focused = {};
+        let renderer;
+        await act(async () => {
+            renderer = create(React.createElement(MachineConsole, {
+                widget, serialIn: byte => received.push(byte)
+            }), {createNodeMock: element => element.props['data-testid'] === 'bw-machine-console' ? focused : null});
+        });
+        const input = (key, extras = {}, name = 'keydown') => {
+            const event = {key, preventDefault() { this.prevented = true; }, stopPropagation() {}, ...extras};
+            listeners.get(name)(event);
+            return event.prevented;
+        };
+        assert.equal(input('A'), undefined);
+        document.activeElement = focused;
+        assert.equal(input('A'), true);
+        assert.equal(input('A', {}, 'keyup'), undefined);
+        assert.equal(input('Enter'), true);
+        assert.equal(input('Backspace'), true);
+        assert.equal(input('c', {ctrlKey: true}), true);
+        assert.equal(input('Tab'), undefined);
+        assert.equal(input('é'), undefined);
+        assert.deepEqual(received, [65, 13, 8, 3]);
+        await act(async () => { renderer.unmount(); });
+    }));

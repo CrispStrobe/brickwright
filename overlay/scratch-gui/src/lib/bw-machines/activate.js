@@ -204,20 +204,31 @@ export async function activateConfig(config, opts = {}) {
     // reset vector reads from real bytes (debug-runner's romAt path).
     if (typeof bootRef.romAt === 'number') bootMedia.romAt = bootRef.romAt;
 
+    const loadMounts = (mounts, system) => Promise.all(Object.entries(mounts).map(async ([name, ref]) => {
+        if (!/^[a-z0-9_~-]{1,8}(?:\.[a-z0-9_~-]{1,3})?$/i.test(name)) {
+            throw new Error(`Invalid ${system} mount filename: ${name}`);
+        }
+        const file = await resolveSlot(ref, fetcher, name);
+        return [name.toUpperCase(), file.bytes];
+    }));
+    if (bootSlotId === 'cpmsys' && isStr(cfg.provenance?.cpmLaunch)) {
+        const program = cfg.provenance.cpmLaunch.toUpperCase();
+        if (!/^[A-Z0-9_~-]{1,8}\.COM$/.test(program)) throw new Error('Invalid CP/M program filename');
+        bootMedia.name = program;
+        bootMedia.cpmLaunch = program.slice(0, -4);
+        bootMedia.cpmFiles = Object.fromEntries(await loadMounts(cfg.provenance.cpmMount || {}, 'CP/M'));
+    }
     if (TARGET_KIND[cfg.machine] === 'i8086' && ['com', 'exe'].includes(bootSlotId)) {
         bootMedia.dosVariant = cfg.cpu.variant;
+        if (cfg.provenance?.program?.max >= 100_000_000) bootMedia.dosFastStart = true;
         if (typeof cfg.provenance?.program?.args === 'string') bootMedia.dosArgs = cfg.provenance.program.args;
-        const mounts = Object.entries(cfg.provenance?.dosMount || {});
-        const files = await Promise.all(mounts.map(async ([name, ref]) => {
-            if (!/^[a-z0-9_~-]{1,8}(?:\.[a-z0-9_~-]{1,3})?$/i.test(name)) {
-                throw new Error(`Invalid DOS mount filename: ${name}`);
-            }
-            const file = await resolveSlot(ref, fetcher, name);
-            return [name.toUpperCase(), file.bytes];
-        }));
+        const files = await loadMounts(cfg.provenance?.dosMount || {}, 'DOS');
         if (files.length) bootMedia.dosFiles = new Map(files);
     }
 
+    if (cfg.machine === 'rp2040js' && bootSlotId === 'flash' && cfg.provenance?.program?.startKey === '\r') {
+        bootMedia.picoWakeOnPrompt = true;
+    }
     const warnings = [];
 
     const targetKind = TARGET_KIND[cfg.machine] || cfg.machine;

@@ -1,10 +1,11 @@
 import React from 'react';
+import {keyToBytes} from '../../lib/bw-debug/terminal-keys.js';
 import {pcSet1Bytes} from '../../lib/bw-machines/pc-scancodes.js';
 import {ps2ButtonBit, ps2Delta} from '../../lib/bw-machines/ps2-pointer.js';
 
 /** Large, focusable VGA face for the Widgets pane. The panel owns frame storage;
  * this face only paints it and sends live input to the active machine runner. */
-export default function MachineConsole({widget, keyIn, mouseIn, keyboardSet, isFullScreen, onToggleFullScreen}) {
+export default function MachineConsole({widget, keyIn, serialIn, mouseIn, keyboardSet, isFullScreen, onToggleFullScreen}) {
     const root = React.useRef(null);
     const canvas = React.useRef(null);
     const held = React.useRef(new Set());
@@ -42,12 +43,21 @@ export default function MachineConsole({widget, keyIn, mouseIn, keyboardSet, isF
         };
     }, [keyIn, mouseIn, keyboardSet]);
     React.useEffect(() => {
-        if (!keyIn) return undefined;
+        if (!keyIn && !serialIn) return undefined;
         // Scratch's global keyboard listener can stop propagation before React's
         // delegated onKeyDown reaches this component. Window capture runs first,
         // and only when the console itself has focus.
         const onKey = (e, down) => {
             if (document.activeElement !== root.current) return;
+            if (serialIn) {
+                if (!down || e.key === 'Tab') return;
+                const encoded = keyToBytes(e);
+                if (!encoded || encoded.length !== 1 || encoded[0] > 0x7f) return;
+                e.preventDefault();
+                e.stopPropagation();
+                serialIn(e.key === 'Backspace' ? 0x08 : encoded[0]);
+                return;
+            }
             const bytes = pcSet1Bytes(e.code, down, keyboardSet === 'at-set1');
             if (bytes == null) return;
             e.preventDefault(); e.stopPropagation();
@@ -68,7 +78,7 @@ export default function MachineConsole({widget, keyIn, mouseIn, keyboardSet, isF
             window.removeEventListener('keydown', down, true);
             window.removeEventListener('keyup', up, true);
         };
-    }, [keyIn, keyboardSet]);
+    }, [keyIn, serialIn, keyboardSet]);
     const pointerMove = e => {
         if (!mouseIn) return;
         const next = {x: e.clientX, y: e.clientY};
@@ -106,7 +116,7 @@ export default function MachineConsole({widget, keyIn, mouseIn, keyboardSet, isF
                 display: 'flex', flexDirection: 'column', outline: focused ? '2px solid #60a5fa' : 'none'}}>
             <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 padding: '4px 8px', background: '#111827', color: '#cbd5e1', fontSize: 12}}>
-                <span>{widget.name}{keyIn && (focused ? ' · Keyboard active' : ' · Click screen for keyboard')}
+                <span>{widget.name}{(keyIn || serialIn) && (focused ? ' · Keyboard active' : ' · Click screen for keyboard')}
                     {mouseIn && ' · Mouse'}</span>
                 {onToggleFullScreen && <button type="button" onClick={toggleFull} data-testid="bw-machine-fullscreen"
                     onPointerDown={e => e.stopPropagation()} onPointerUp={e => e.stopPropagation()}

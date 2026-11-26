@@ -30,14 +30,16 @@ import {getLegacySpikeVisible, setLegacySpikeVisible} from '../../lib/spike-lega
 const lazyDialog = (load, openEvent, props = {}) => {
     const Panel = React.lazy(load);
     const LazyDialog = () => {
-        const [wanted, setWanted] = React.useState(false);
+        const [request, setRequest] = React.useState(null);
         React.useEffect(() => {
-            if (wanted) return undefined;
-            const want = () => setWanted(true);
+            if (request) return undefined;
+            const want = event => setRequest({detail: event.detail});
             window.addEventListener(openEvent, want);
             return () => window.removeEventListener(openEvent, want);
-        }, [wanted]);
-        return wanted ? <React.Suspense fallback={null}><Panel {...props} initiallyOpen /></React.Suspense> : null;
+        }, [request]);
+        return request ? <React.Suspense fallback={null}>
+            <Panel {...props} initiallyOpen initialOpenDetail={request.detail} />
+        </React.Suspense> : null;
     };
     return LazyDialog;
 };
