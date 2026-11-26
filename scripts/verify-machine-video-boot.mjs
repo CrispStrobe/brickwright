@@ -61,7 +61,9 @@ try {
     await page.waitForFunction(() => {
         const canvas = document.querySelector('[data-testid="bw-machine-canvas"]');
         const box = canvas.getBoundingClientRect();
-        return box.width >= innerWidth - 3 && box.height >= innerHeight * 0.85;
+        const dock = canvas.closest('[data-testid="bw-controller-canvas"]');
+        return box.width >= innerWidth - 3 && box.top <= 36 && Math.abs(box.bottom - innerHeight) <= 1 &&
+            dock.scrollHeight === dock.clientHeight;
     }, null, {timeout: 5000});
     assert.equal(await button.innerText(), 'Exit full screen');
     const full = await canvas.boundingBox();

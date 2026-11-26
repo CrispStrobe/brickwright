@@ -69,7 +69,8 @@ try {
     await fullScreenButton.getByText('Exit full screen', {exact: true}).waitFor();
     const fullBox = await canvas.boundingBox();
     const viewport = page.viewportSize();
-    assert.ok(fullBox.width >= viewport.width - 3 && fullBox.height >= viewport.height * 0.85,
+    assert.ok(fullBox.width >= viewport.width - 3 && fullBox.y <= 36 &&
+        Math.abs(fullBox.y + fullBox.height - viewport.height) <= 1,
         `full screen fills viewport: ${JSON.stringify(fullBox)}`);
     assert.ok(await consoleFace.evaluate(element => element === document.activeElement));
     await page.keyboard.press('b');

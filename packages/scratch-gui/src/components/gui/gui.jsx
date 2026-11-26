@@ -1416,7 +1416,8 @@ const GUIComponent = props => {
                                 toggle buttons) stays reachable in every mode.
                                 In controller mode the stage canvas is hidden
                                 so the panel owns the full column. */}
-                            <div style={circuitOwnsStage || dockMode === 'controller' || dockMode === 'arcade' || dockMode === 'cpx' || dockMode === 'arduboy' || dockMode === 'makecode' || dockMode === 'spikearena' || dockMode === 'cad' || dockMode === 'robots' ? {maxHeight: 44, overflow: 'hidden', flexShrink: 0, borderBottom: '3px solid #475569', background: '#cbd5e1', boxShadow: '0 3px 6px rgba(0,0,0,0.22)', position: 'relative', zIndex: 5, boxSizing: 'border-box'} : undefined}>
+                            <div hidden={Boolean(isFullScreen && dockMode === 'controller' && machineConsole)}
+                                style={circuitOwnsStage || dockMode === 'controller' || dockMode === 'arcade' || dockMode === 'cpx' || dockMode === 'arduboy' || dockMode === 'makecode' || dockMode === 'spikearena' || dockMode === 'cad' || dockMode === 'robots' ? {maxHeight: 44, overflow: 'hidden', flexShrink: 0, borderBottom: '3px solid #475569', background: '#cbd5e1', boxShadow: '0 3px 6px rgba(0,0,0,0.22)', position: 'relative', zIndex: 5, boxSizing: 'border-box'} : undefined}>
                                 <EditorErrorBoundary name="Stage"><StageWrapper
                                     isFullScreen={isFullScreen}
                                     isRendererSupported={isRendererSupported}

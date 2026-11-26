@@ -1860,6 +1860,7 @@ class ControllerPanelView extends React.Component {
         const machineWidget = mode === 'play' && this.props.machineConsole
             ? widgets.find(w => w.name === this.props.machineConsole.name && w.type === 'simplevga')
             : null;
+        const machineFullScreen = Boolean(machineWidget && this.props.isFullScreen);
 
         return (
             <div style={{
@@ -1871,7 +1872,7 @@ class ControllerPanelView extends React.Component {
                 zIndex: 10,
             }} onPointerDown={() => activateUndoSurface('widgets')}>
                 <div data-widgets-toolbar style={{
-                    display: 'flex', alignItems: 'center', flexWrap: 'nowrap', gap: 3,
+                    display: machineFullScreen ? 'none' : 'flex', alignItems: 'center', flexWrap: 'nowrap', gap: 3,
                     minWidth: 0, padding: '4px 6px',
                     paddingTop: this.props.isFullScreen ? 'calc(env(safe-area-inset-top, 0px) + 56px)' : 4,
                     borderBottom: '1px solid #e2e8f0', background: '#fff', flexShrink: 0
@@ -2038,18 +2039,19 @@ class ControllerPanelView extends React.Component {
                     )}
                 </div>
 
-                <SpikePortMonitor vm={this.props.vm} locale={this.props.locale} />
+                {!machineFullScreen && <SpikePortMonitor vm={this.props.vm} locale={this.props.locale} />}
 
                 {/* Widget canvas: absolute placement from layout.{x,y}, size from
                     layout.{w,h}, rotation + colour + label applied. In EDIT mode
                     widgets drag (grid-snapped), resize by the corner handle and
                     rotate by the top handle; click selects for the inspector. */}
                 <div data-testid="bw-controller-canvas"
-                    style={{flex: 1, overflow: 'auto', position: 'relative', scrollbarWidth: 'thin'}}
+                    style={{flex: 1, minHeight: 0, overflow: machineFullScreen ? 'hidden' : 'auto',
+                        position: 'relative', scrollbarWidth: 'thin'}}
                     onPointerDown={e => {
                         if (e.target === e.currentTarget) this.setState({ selected: null });
                     }}>
-                    {cp1WidgetSlot && <div ref={cp1WidgetSlot} data-cp1-widget-slot />}
+                    {cp1WidgetSlot && <div ref={cp1WidgetSlot} data-cp1-widget-slot hidden={machineFullScreen} />}
                     {widgets.length === 0 && !cp1WidgetSlot && (
                         <div style={{
                             color: '#94a3b8', fontSize: 14, textAlign: 'center',
@@ -2064,7 +2066,7 @@ class ControllerPanelView extends React.Component {
                         isFullScreen={this.props.isFullScreen}
                         onToggleFullScreen={this.props.isFullScreen ? this.props.onExitFullScreen : this.props.onEnterFullScreen}
                         mouseIn={this.props.machineConsole.mouseIn} />}
-                    <div style={machineWidget || (cp1WidgetSlot && widgets.length) ? {
+                    <div hidden={machineFullScreen} style={machineWidget || (cp1WidgetSlot && widgets.length) ? {
                         position: 'relative', minHeight: cp1WidgetSlot ? 240 : undefined
                     } : undefined}>
                         {widgets.filter(widget => widget !== machineWidget).map(w => (
