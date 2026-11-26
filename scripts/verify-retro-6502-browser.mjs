@@ -11,19 +11,23 @@ const browser = await chromium.launch({
 });
 
 try {
-    const page = await browser.newPage({viewport: {width: 1530, height: 1000},
-        locale: 'en-US', serviceWorkers: 'block'});
-    page.setDefaultTimeout(60_000);
     let openingExample = null;
-    page.on('dialog', async dialog => {
-        if (dialog.type() === 'confirm' && openingExample && dialog.message().includes(openingExample)) {
-            await dialog.accept();
-        } else {
-            await dialog.dismiss();
-        }
-    });
-    await page.addInitScript(() => localStorage.setItem('bw-starter-v1-complete', '1'));
-    await page.goto(base, {waitUntil: 'domcontentloaded'});
+    const openPage = async () => {
+        const fresh = await browser.newPage({viewport: {width: 1530, height: 1000},
+            locale: 'en-US', serviceWorkers: 'block'});
+        fresh.setDefaultTimeout(60_000);
+        fresh.on('dialog', async dialog => {
+            if (dialog.type() === 'confirm' && openingExample && dialog.message().includes(openingExample)) {
+                await dialog.accept();
+            } else {
+                await dialog.dismiss();
+            }
+        });
+        await fresh.addInitScript(() => localStorage.setItem('bw-starter-v1-complete', '1'));
+        await fresh.goto(base, {waitUntil: 'domcontentloaded'});
+        return fresh;
+    };
+    let page = await openPage();
     async function chooseExample(id, item) {
         openingExample = id;
         try {
@@ -105,6 +109,10 @@ try {
     await vdpHelloFrame(vdpWidget);
     await vdpDebuggerFrame();
     console.log('Loading the VDP example from Code boots its ROM and displays HELLO in both surfaces.');
+
+    // Run the established Circuit gallery journey in its own fresh workspace.
+    await page.close();
+    page = await openPage();
 
     await openExample('eater6502-full-build', '6502 Computer with LCD');
     await page.getByTestId('bw-ctl-lcd-LCD').waitFor();
