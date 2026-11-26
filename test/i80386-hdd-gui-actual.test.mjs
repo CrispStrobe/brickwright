@@ -103,8 +103,8 @@ test('V9 manual selection preserves nine prior jobs and consumed execution retir
     assert.equal(prior.split(retiredV7).length,2,'one explicitly disabled V7 execution guard');
     const heldPrior=prior.replace(retiredV7,retiredV7.replace('false &&','true &&'));
     assert.equal(createHash('sha256').update(heldPrior.replace(registration,'')).digest('hex'),
-        '756841f781e3ab65175558538fb4793dd792c9dcc921fba9e1790a3eb0386ec0',
-        'all other permissions, concurrency, nine prior job guards and steps retain reviewed bytes with the stable Brickwright repository ID');
+        'd14d38590321bc2afd367bc7c4e695e82414049362233ab1f089250a39d9e6a5',
+        'all other permissions, concurrency, nine prior job guards and steps retain reviewed H1fd bytes');
     const oldJobs=[...prior.matchAll(/^  ([a-z][a-z0-9-]*):\n    if:/gm)];
     assert.equal(oldJobs.length,9,'nine prior guarded jobs');
     for (let i=0;i<oldJobs.length;i++) {
