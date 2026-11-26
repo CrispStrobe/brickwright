@@ -18,6 +18,7 @@ import {constants} from 'node:fs';
 import {access, mkdir, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {chromium} from 'playwright';
+import {typeIntoEditor} from './lib/type-into-editor.mjs';
 
 const targetURL = process.argv[2] || process.env.BW_MICROTRONIC_URL ||
     process.env.PROOF_URL || 'http://127.0.0.1:8242/';
@@ -114,6 +115,7 @@ try {
     await page.addInitScript(() => {
         // A new browser context is used, so these are only this test's stores.
         localStorage.setItem('bw-starter-v1-complete', '1');
+        localStorage.setItem('bw-right-pane-hidden', '0');
     });
     console.log(`Opening full Brickwright host: ${targetURL}`);
     await page.goto(targetURL, {waitUntil: 'commit', timeout: 120000});
@@ -134,7 +136,14 @@ try {
     await card.click();
     // Palette cards arm a placement ghost; a real canvas click commits it.
     await designer.locator('[data-canvas]').click({position: {x: 400, y: 150}});
-    let panel = page.locator('[data-microtronic-panel]:visible').first();
+    const view = page.getByTestId('bw-right-pane-view');
+    if (await view.isVisible()) await view.selectOption('controller');
+    else await page.getByTitle('Controller', {exact: true}).click();
+    await page.getByTestId('bw-ctl-mode-edit').click();
+    await page.getByRole('button', {name: '+ Add Widget', exact: true}).click();
+    await page.getByRole('button', {name: 'Busch Microtronic', exact: true}).click();
+    await page.getByTestId('bw-ctl-mode-play').click();
+    let panel = page.locator('[data-microtronic-view="front"]:visible').first();
     await panel.waitFor();
     const firstId = await panel.getAttribute('data-microtronic-panel');
     assert.ok(firstId);
@@ -142,37 +151,51 @@ try {
     assert.deepEqual(await panel.locator('[data-microtronic-key]').allTextContents(), expectedKeys);
     const placed = await snapshot(firstId);
     assert.equal(placed.sameBoard, true, 'The panel must observe the host-owned circuit Board');
-    pass('Full host palette places the Microtronic with its 24-key front panel');
+    pass('Palette placement and Add Widget expose the Microtronic’s 24-key front panel');
 
-    await panel.getByRole('textbox', {name: 'Microtronic program', exact: true})
-        .fill('00: 1A0\n01: FE0\n02: F00');
-    await panel.locator('[data-microtronic-action="run"]').click();
+    const selectCode = async () => {
+        await page.getByRole('tab', {name: 'Code', exact: true}).click();
+        await page.getByTestId('bw-code-microtronic-tab').click();
+        const code = page.locator('[data-microtronic-view="code"]:visible');
+        await code.locator('.cm-content').waitFor();
+        return code;
+    };
+    let code = await selectCode();
+    await typeIntoEditor(page, '00: 1A0\n01: FE0\n02: F00');
+    await code.locator('[data-microtronic-run-source]').click();
     await waitForProgram(firstId, {output: 10, pc: 2, running: false});
     assert.equal(await panel.locator('[data-microtronic-bit="OUT2"]').getAttribute('data-high'), 'true');
     assert.equal(await panel.locator('[data-microtronic-bit="OUT4"]').getAttribute('data-high'), 'true');
     pass('Run applies the visible program draft and executes it on the installed engine');
 
     const accepted = (await snapshot(firstId)).source;
-    await panel.getByRole('textbox', {name: 'Microtronic program', exact: true}).fill('00: WRONG');
-    await panel.locator('[data-microtronic-load]').click();
-    await panel.getByRole('alert').waitFor();
+    await typeIntoEditor(page, '00: WRONG');
+    await code.locator('[data-microtronic-load]').click();
+    await code.getByRole('alert').waitFor();
     assert.equal((await snapshot(firstId)).source, accepted, 'Invalid text must not replace the accepted program');
-    await panel.getByLabel('Microtronic program file', {exact: true}).setInputFiles({
+    await code.getByLabel('Microtronic program file', {exact: true}).setInputFiles({
         name: 'microtronic-echo.mic', mimeType: 'text/plain', buffer: Buffer.from('FD0\nFE0\nC00')
     });
-    await page.waitForFunction(id => document.querySelector(
-        `[data-microtronic-panel="${id}"] textarea`)?.value === 'FD0\nFE0\nC00', firstId);
-    await panel.locator('[data-microtronic-load]').click();
-    assert.equal(await panel.getByRole('alert').count(), 0);
+    await code.locator('.cm-content').filter({hasText: 'C00'}).waitFor();
+    assert.equal(await code.locator('.cm-content').innerText(), 'FD0\nFE0\nC00');
+    await code.locator('[data-microtronic-load]').click();
+    assert.equal(await code.getByRole('alert').count(), 0);
     pass('Program file input works and an invalid draft leaves the accepted program intact');
 
-    await panel.getByRole('button', {name: 'Open wired I/O example', exact: true}).click();
-    panel = page.locator('[data-microtronic-panel="microtronic"]:visible');
+    await circuitTab.click();
+    await page.getByTestId('bw-circuit-panel-examples').first().click();
+    await page.getByPlaceholder(/^Search \d+ examples/).first().fill('Busch Microtronic');
+    await page.locator('[data-example-id="busch-microtronic-wired-io"]:visible')
+        .getByText(/Busch Microtronic 2090: Wired I\/O/).click();
+    await page.getByRole('button', {name: 'OK', exact: true}).click();
+    panel = page.locator('[data-microtronic-panel="microtronic"][data-microtronic-view="front"]:visible');
     await panel.waitFor();
     await page.waitForFunction(() => window.__circuit?.board?.getDeviceState?.('microtronic'));
     const example = await snapshot('microtronic');
     assert.equal(example.wireCount, 25, 'The example must load all switch, LED and CLOCK wires');
     await panel.locator('[data-microtronic-action="run"]').click();
+    const instruments = page.getByRole('button', {name: 'Expand instruments panel', exact: true});
+    if (await instruments.isVisible()) await instruments.click();
     await page.locator('[data-switch-control="input1"]').click();
     await page.locator('[data-switch-control="input3"]').click();
     await page.waitForFunction(() => {
@@ -236,14 +259,16 @@ try {
     pass('Physical keypad NEXT commits a word into both the running model and the saved circuit source');
 
     const draft = '00: 1B0\n01: FE0\n02: F00';
-    await panel.getByRole('textbox', {name: 'Microtronic program', exact: true}).fill(draft);
+    code = await selectCode();
+    await typeIntoEditor(page, draft);
     const beforeDraftTick = await snapshot('microtronic');
     await waitForElapsed(beforeDraftTick.tNs, 300_000_000n);
-    assert.equal(await panel.getByRole('textbox', {name: 'Microtronic program', exact: true}).inputValue(), draft);
-    await panel.locator('[data-microtronic-action="run"]').click();
+    assert.equal(await code.locator('.cm-content').innerText(), draft);
+    await code.locator('[data-microtronic-run-source]').click();
     await waitForProgram('microtronic', {output: 11, pc: 2, running: false});
     pass('Unloaded editor text survives live rerenders and Run executes the retained draft');
 
+    await circuitTab.click();
     const savedBytes = await saveCircuit();
     const saved = JSON.parse(savedBytes.toString('utf8'));
     const savedPart = saved.parts.find(part => part.id === 'microtronic');
@@ -251,9 +276,11 @@ try {
     assert.match(savedPart.params.program, /00: 1B0/);
     assert.equal(saved.wires.length, 25);
     await writeFile(path.join(output, 'saved-circuit.json'), savedBytes);
-    await panel.getByRole('textbox', {name: 'Microtronic program', exact: true}).fill('F00');
-    await panel.locator('[data-microtronic-load]').click();
+    code = await selectCode();
+    await typeIntoEditor(page, 'F00');
+    await code.locator('[data-microtronic-load]').click();
     assert.equal((await snapshot('microtronic')).program[0], 0xF00, 'The load check must restore a genuinely different program');
+    await circuitTab.click();
     await page.getByText('File', {exact: true}).first().click();
     const [chooser] = await Promise.all([
         page.waitForEvent('filechooser'),
@@ -265,7 +292,6 @@ try {
         return state?.program[0] === 0x1B0 && state.output === 0 && !state.running &&
             circuit.getPart('microtronic')?.params?.program === source;
     }, savedPart.params.program);
-    panel = page.locator('[data-microtronic-panel="microtronic"]:visible');
     await panel.locator('[data-microtronic-action="run"]').click();
     await waitForProgram('microtronic', {output: 11, pc: 2, running: false});
     pass('The real File menu saves and reopens the wired circuit with its accepted program, which runs again');

@@ -3118,6 +3118,16 @@ jobs:
         timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
         if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'heavy' }}
         run: node scripts/verify-machine-project-library.mjs http://127.0.0.1:8617/
+      - name: Browser gate — Microtronic through Circuits, Code and Controller
+        id: bw_browser_microtronic_controller
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'heavy' }}
+        run: node scripts/verify-microtronic-circuit.mjs http://127.0.0.1:8617/
+      - name: Browser gate — native TMS1600 firmware, input and output
+        id: bw_browser_tms1600_controller
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'heavy' }}
+        run: node scripts/verify-tms1600-browser.mjs http://127.0.0.1:8617/
       # The debugger docked beside a running x86 machine must own its controls:
       # a hosted event's real click on Pause landed on the Widgets Full screen
       # button. Real page, real (unforced) click, hit-test at Pause's centre.

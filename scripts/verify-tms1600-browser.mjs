@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
+import {typeIntoEditor} from './lib/type-into-editor.mjs';
 
 const browser = await chromium.launch({
     executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
@@ -16,14 +17,16 @@ try {
         .getByText(/Busch Microtronic 2090: Wired I\/O/).click();
     await page.getByRole('button', {name: 'OK', exact: true}).click();
 
-    const panel = page.locator('[data-microtronic-panel="microtronic"]:visible');
+    const panel = page.locator('[data-microtronic-panel="microtronic"][data-microtronic-view="front"]:visible');
     const mode = panel.getByRole('combobox', {name: 'Microtronic execution mode'});
     assert.equal(await mode.inputValue(), 'documented-behavior');
     await mode.selectOption('tms1600');
     await page.waitForFunction(() => window.__board?.getDeviceState('microtronic')?.model === 'tms1600');
 
-    await page.locator('[data-switch-control="input1"]:visible').click();
     await panel.getByRole('button', {name: 'Run', exact: true}).click();
+    const instruments = page.getByRole('button', {name: 'Expand instruments panel', exact: true});
+    if (await instruments.isVisible()) await instruments.click();
+    await page.locator('[data-switch-control="input1"]:visible').click();
     await page.waitForFunction(() => {
         const board = window.__board;
         const state = board?.getDeviceState('microtronic');
@@ -33,7 +36,12 @@ try {
     await page.waitForFunction(() => window.__board?.getDeviceState('microtronic')?.output === 9);
     await panel.getByRole('button', {name: 'Halt', exact: true}).click();
 
-    await panel.getByRole('textbox', {name: 'Microtronic program', exact: true}).fill('@ 00\n1A0\nFE0\nF00');
+    await page.getByRole('tab', {name: 'Code', exact: true}).click();
+    await page.getByTestId('bw-code-microtronic-tab').click();
+    const code = page.locator('[data-microtronic-view="code"]:visible');
+    await code.locator('.cm-content').waitFor();
+    await typeIntoEditor(page, '@ 00\n1A0\nFE0\nF00');
+    await code.getByRole('button', {name: 'Load program', exact: true}).click();
     await panel.getByRole('button', {name: 'Step', exact: true}).click();
     await page.waitForFunction(() => {
         const state = window.__board?.getDeviceState('microtronic');
