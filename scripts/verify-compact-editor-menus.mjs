@@ -23,7 +23,7 @@ try {
     await blocksMenu.getByRole('button', {name: 'Zoom in'}).click();
     await blocksTools.click();
     await blocksMenu.getByRole('button', {name: 'Read Blocks into Code'}).click();
-    await page.getByTestId('bw-code-status').filter({hasText: /read into all languages/i}).waitFor();
+    await page.getByTestId('bw-code-status').filter({hasText: /read .*all languages/i}).waitFor();
     const openCodeMenu = () => page.getByTestId('bw-code-actions-trigger').click();
     await openCodeMenu();
     const codeMenu = page.getByTestId('bw-code-actions-menu');
