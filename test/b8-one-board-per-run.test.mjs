@@ -216,7 +216,11 @@ test('a board that outlives a run keeps its clock moving when the target\'s rest
     assert.equal(boardTimeBase(null, target), 0n);
     // And the runner uses it at every (re)start and on both of its clocks.
     const runner = read('lib/bw-debug/debug-runner.js');
-    assert.match(runner, /session\.start\(\);\s*boardBaseNs = boardTimeBase\(board, target\);/);
+    const startSession = runner.indexOf('session.start();');
+    const baseAfterReset = runner.indexOf('boardBaseNs = boardTimeBase(board, target);', startSession);
+    const publishRunning = runner.indexOf("setStatus(paused ? 'paused' : 'running');", startSession);
+    assert.ok(startSession >= 0 && baseAfterReset > startSession && publishRunning > baseAfterReset,
+        'the runner rebases the board after starting the session and before publishing it as running');
     assert.equal((runner.match(/advanceTo\(target\.timeNs\(\) \+ boardBaseNs\)/g) || []).length, 2);
     assert.doesNotMatch(runner, /advanceTo\(target\.timeNs\(\)\)/, 'a pump that advances without the base');
 });
