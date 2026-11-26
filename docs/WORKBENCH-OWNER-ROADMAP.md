@@ -80,7 +80,7 @@ KIM comparison references include schematics, ROMs, documentation, and independe
 
 ## Follow-up receipts
 
-- The 74HC595 chaser and binary-counter lessons pass on all 22 catalog variants. The CLI reads current through the eight wired LEDs. It checks a complete chaser sweep and verifies counts 0–7 and 248–255 followed by rollover in the counter. It advances the program's counter variable between the two ranges to keep the test budget small. The existing 6502 Wave 7 assertions about debugger integration and the Pico motor schematic comparison still require maintenance.
+- The 74HC595 chaser and binary-counter lessons pass on all 22 catalog variants. The CLI reads current through the eight wired LEDs. It checks a complete chaser sweep and verifies counts 0–7 and 248–255 followed by rollover in the counter. It advances the program's counter variable between the two ranges to keep the test budget small. The [browser gate](../scripts/verify-circuit-shift-registers.mjs) selects a different target in Code and verifies that Sim drives the LEDs on the new Circuit board. The existing 6502 Wave 7 assertions about debugger integration and the Pico motor schematic comparison still require maintenance.
 
 - Build `d708267` passed all 25 firmware-library launch checks. The Controller browser gate edited CP/M Sieve to enumerate primes below 60 and confirmed that a syntax error preserves the running guest. The signed native build includes CAD and FPGA. The same edited-source check passed against the production compiler `e992c0d`. The SDCC implementation and Linux CI are recorded in the merged [compiler PR 21](https://github.com/CrispStrobe/stc-compiler/pull/21).
 

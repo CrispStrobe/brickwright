@@ -576,7 +576,7 @@ class CircuitTab extends React.Component {
         // board must show THAT wiring and seating, not the authored default
         // and never the runner's inferred fallback.
         this._benchHandler = async (e) => {
-            const {benchPath, exampleId} = (e && e.detail) || {};
+            const {benchPath, exampleId, device} = (e && e.detail) || {};
             if (!benchPath) return;
             try {
                 const res = await fetch(`examples/${benchPath}`);
@@ -590,7 +590,9 @@ class CircuitTab extends React.Component {
                     throw new Error('not a circuit (no parts with wires or nets)');
                 }
                 this._markReactUpdate('host:circuit-data');
-                this.setState({circuitData: {...data, fileOnly: true},
+                // Keep the file's wiring through designer inference. Sim can
+                // still run the loaded program when it matches this device.
+                this.setState({circuitData: {...data, fileOnly: true, catalogProgramDevice: normalizeDeviceId(device)},
                     loadingExample: null, examplesError: null});
             } catch (err) {
                 this.setState({examplesError:
@@ -923,7 +925,9 @@ class CircuitTab extends React.Component {
         const {vm} = this.props;
         const {stc, circuitData, machineBooted} = this.state;
         const device = vm?.runtime?.bwDeviceId || stc?.device;
-        if (!vm || this._coupledBoard || machineBooted || circuitData?.fileOnly ||
+        const programBench = circuitData?.catalogProgramDevice &&
+            circuitData.catalogProgramDevice === normalizeDeviceId(device);
+        if (!vm || this._coupledBoard || machineBooted || (circuitData?.fileOnly && !programBench) ||
             !stcDrives(stc) || device === 'microbit' || device === 'calliopemini') {
             this.handleProjectStart();
             return;
