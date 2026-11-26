@@ -6,9 +6,11 @@ import {clearControllerPanel, createWidgetButtonInputs, releaseMomentaryButtons,
 import EditorHelp from '../gui/editor-help.jsx';
 import MachineConsole from './machine-console.jsx';
 import {activateUndoSurface, notifyUndoState, registerUndoSurface} from '../../lib/global-undo.js';
-import {addCardiacFace, isCardiacFace, MACHINE_WIDGET_HEIGHT} from '../../lib/controller-machine-faces.js';
+import {addCardiacFace, addKim1Face, isCardiacFace, isKim1Face, MACHINE_WIDGET_HEIGHT} from '../../lib/controller-machine-faces.js';
 import {LOGIKUS_LAMP_WIDGETS, LOGIKUS_SWITCH_WIDGETS, LOGIKUS_TEST_WIDGET} from '../../lib/logikus/controller-bridge.js';
 import SpikePortMonitor from './spike-port-monitor.jsx';
+
+const Kim1Surface = React.lazy(() => import(/* webpackChunkName: "bw-kim1-surface" */ './kim1-surface.jsx'));
 
 const L10N = {
     en: {
@@ -1072,7 +1074,8 @@ function SimpleVgaWidget({widget}) {
     return (
         <div data-testid={'bw-ctl-simplevga-' + widget.name}
             style={{position: 'relative', background: '#000', borderRadius: 2, overflow: 'hidden'}}>
-            <canvas ref={ref} style={{display: 'block', width: '100%', height: '100%', imageRendering: 'pixelated'}} />
+            <canvas ref={ref} style={{display: 'block', width: '100%', height: '100%',
+                imageRendering: widget.state.source === 'serial' ? 'auto' : 'pixelated'}} />
             {!widget.state.signal && <span style={{position: 'absolute', inset: 0, display: 'grid',
                 placeItems: 'center', color: '#0f0', fontSize: 10, fontFamily: 'monospace'}}>NO SIGNAL</span>}
         </div>
@@ -1141,7 +1144,21 @@ function RemoveWidgetButton({name, onRemove}) {
     );
 }
 
-function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBindings, buttonInputs }) {
+function BasicSerialKeyboard({name, sendLine}) {
+    const input = useRef(null);
+    const label = /^de/i.test(navigator.language) ? 'BASIC-Serieneingabe' : 'BASIC serial input';
+    return <form onSubmit={event => {
+        event.preventDefault();
+        if (sendLine(input.current.value) === true) input.current.value = '';
+    }} style={{display: 'flex', gap: 4, width: '100%'}}>
+        <input ref={input} aria-label={label} data-testid={'bw-ctl-keyboard-' + name}
+            placeholder="PRINT 2+2" autoCapitalize="off" autoComplete="off" spellCheck={false}
+            style={{minWidth: 0, flex: 1, fontFamily: 'monospace', padding: 4}} />
+        <button type="submit" aria-label={label} title={label}>⏎</button>
+    </form>;
+}
+
+function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBindings, buttonInputs, sendBasicLine }) {
     const typeLabels = {
         joystick: t('joystick'), button: t('button'), slider: t('slider'),
         dpad: t('dpad'), dial: t('dial'), gauge: 'Gauge', matrix: 'Matrix', sevenseg: '7-Seg',
@@ -1187,7 +1204,7 @@ function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBi
                         {typeLabels[widget.type] || widget.type}
                     </span>}
                     <span data-testid={'bw-ctl-title-' + widget.name}>
-                        {L.label || widget.name}
+                        {sendBasicLine ? 'ACIA keyboard' : (L.label || widget.name)}
                     </span>
                 </div>
             )}
@@ -1296,7 +1313,8 @@ function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBi
                 </div>
             )}
 
-            {widget.type === 'keyboard' && (
+            {widget.type === 'keyboard' && (sendBasicLine ?
+                <BasicSerialKeyboard name={widget.name} sendLine={sendBasicLine} /> :
                 <input type="text" data-testid={'bw-ctl-keyboard-' + widget.name}
                     disabled={mode !== 'play'}
                     placeholder={mode === 'play' ? 'Type here...' : 'Keyboard'}
@@ -1752,9 +1770,15 @@ class ControllerPanelView extends React.Component {
         const {cp1WidgetSlot, cardiacWidgetSlot} = this.props;
         const logikusLabel = /^de/i.test(this.props.locale || '') ? 'Logikus-Labor' : 'Logikus Lab';
         const cardiacWidget = widgets.find(isCardiacFace);
+        const kimParts = (this.props.board?.parts || []).filter(part => part.kind === 'kim-1');
         const german = /^de/i.test(this.props.locale || '');
         const sendLogikus = (type, detail) => window.dispatchEvent(new CustomEvent(`bw-logikus-${type}`, {detail}));
         const machineChoices = [
+            ...kimParts.map(part => ({
+                label: kimParts.length > 1 ? `KIM-1 · ${part.id}` : (german ? 'KIM-1-Frontplatte' : 'KIM-1 front panel'),
+                disabled: widgets.some(widget => isKim1Face(widget) && widget.config.partId === part.id),
+                run: () => this._addMachineWidget(panel => addKim1Face(panel, part.id))
+            })),
             cardiacWidgetSlot && {
                 label: german ? 'CARDIAC-Anzeige' : 'CARDIAC display', disabled: !!cardiacWidget,
                 run: () => this._addMachineWidget(addCardiacFace)
@@ -2003,6 +2027,13 @@ class ControllerPanelView extends React.Component {
                                         {w === cardiacWidget && cardiacWidgetSlot ?
                                             <div ref={cardiacWidgetSlot} data-cardiac-widget-slot
                                                 style={{flex: 1, minHeight: 0, overflow: 'auto', scrollbarWidth: 'thin'}} /> :
+                                            isKim1Face(w) && kimParts.some(part => part.id === w.config.partId) ?
+                                                <div style={{flex: 1, minHeight: 0, overflow: 'auto', scrollbarWidth: 'thin'}}>
+                                                    <React.Suspense fallback={null}>
+                                                        <Kim1Surface vm={this.props.vm} partId={w.config.partId} variant="front"
+                                                            locale={this.props.locale} />
+                                                    </React.Suspense>
+                                                </div> :
                                             <span style={{display: 'block', padding: 8}}>
                                                 {german ? 'Nicht verbunden' : 'Disconnected'}
                                             </span>}
@@ -2016,6 +2047,9 @@ class ControllerPanelView extends React.Component {
                                     mode={mode}
                                     panel={panel}
                                     buttonInputs={this._buttonInputs}
+                                    sendBasicLine={mode === 'play' && w.type === 'keyboard' && w.binding?.target === 'part' &&
+                                        this.props.board?.parts?.some(part => part.id === w.binding.partId && part.kind === 'ps2')
+                                        ? this.props.sendBasicLine : undefined}
                                     onInput={(name, x, y) => this._handleJoystickInput(name, x, y)}
                                     onRemove={() => { this._removeWidget(w.name); this.setState({ selected: null }); }}
                                     hideBindings={panel.hideBindings}

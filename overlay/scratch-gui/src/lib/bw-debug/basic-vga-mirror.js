@@ -1,6 +1,7 @@
 /** Preview BASIC's ACIA text on a monitor while its VGA card is waiting for sync. */
 export function mirrorBasicSerialOnVga(card, readLines, createCanvas = () => document.createElement('canvas')) {
     const hardwareFrame = card.videoFrame.bind(card);
+    const scale = 3;
     let canvas;
     let lastText;
     let frame;
@@ -12,13 +13,14 @@ export function mirrorBasicSerialOnVga(card, readLines, createCanvas = () => doc
         if (video.signal) return video;
         const {width, height} = video;
         if (!canvas) canvas = createCanvas();
-        if (canvas.width !== width || canvas.height !== height) {
-            canvas.width = width;
-            canvas.height = height;
+        if (canvas.width !== width * scale || canvas.height !== height * scale) {
+            canvas.width = width * scale;
+            canvas.height = height * scale;
             lastText = undefined;
         }
         const ctx = canvas.getContext('2d');
         if (!ctx) return video;
+        ctx.setTransform(scale, 0, 0, scale, 0, 0);
         ctx.font = '9px monospace';
         const columns = Math.max(1, Math.floor((width - 8) / ctx.measureText('M').width));
         const rows = Math.max(1, Math.floor((height - 17) / 10));
@@ -44,8 +46,9 @@ export function mirrorBasicSerialOnVga(card, readLines, createCanvas = () => doc
         ctx.fillText('ACIA serial mirror', 4, 2);
         ctx.fillStyle = '#ccedda';
         for (const [row, line] of visible.entries()) ctx.fillText(line, 4, 16 + row * 10);
-        frame = {width, height, rgba: ctx.getImageData(0, 0, width, height).data,
-            signal: true, frame: --generation};
+        frame = {width: canvas.width, height: canvas.height,
+            rgba: ctx.getImageData(0, 0, canvas.width, canvas.height).data,
+            source: 'serial', signal: true, frame: --generation};
         return frame;
     };
 }

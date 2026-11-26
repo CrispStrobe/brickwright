@@ -1224,6 +1224,8 @@ const CMEditor = React.lazy(() =>
     import(/* webpackChunkName: "bw-codemirror" */ '../../lib/codemirror-editor.jsx')
 );
 
+const Kim1Surface = React.lazy(() => import(/* webpackChunkName: "bw-kim1-surface" */ './kim1-surface.jsx'));
+
 // ── VDU terminal for BBC BASIC graphics (lazy-loaded) ──────────────
 const VduTerminal = React.lazy(() =>
     import(/* webpackChunkName: "bw-vdu-terminal" */ './vdu-terminal.jsx')
@@ -1255,6 +1257,9 @@ class PseudocodeImporter extends React.Component {
         // end up with (say) pseudocode sitting in the Python tab.
         this.state = {revealed: props.isVisible !== false, lang: 'pseudocode', importedPython: false,
             extraLangs: readExtraLangs(), langMenuOpen: false,
+            kim1PartId: typeof window !== 'undefined' && window.__bwMachineExtracted?.kind === 'kim1'
+                ? window.__bwMachineExtracted.config.partId : null,
+            kim1Active: typeof window !== 'undefined' && window.__bwMachineExtracted?.kind === 'kim1',
             cardiacActive: typeof window !== 'undefined' && window.__bwMachineExtracted?.kind === 'cardiac',
             cp1Active: typeof window !== 'undefined' && window.__bwMachineExtracted?.kind === 'cp1',
             // The Arcade board picker: the boards (null until loaded) and the one chosen.
@@ -1338,6 +1343,7 @@ class PseudocodeImporter extends React.Component {
         this._unregisterCodeMenu = registerEditorMenuActions('code', () => this.codeMenuActions());
         window.addEventListener('bw-microbit-run-request', this._onMicrobitRunRequest);
         window.addEventListener('bw-cp1-source-load', this.selectCp1);
+        window.addEventListener('bw-kim1-selection', this.selectKim1);
         window.addEventListener('bw-cardiac-selected', this.selectCardiac);
         window.addEventListener('bw-machine-extracted', this.onCardiacMachineSelection);
         window.addEventListener('bw-cardiac-detached', this.detachCardiac);
@@ -2707,6 +2713,7 @@ class PseudocodeImporter extends React.Component {
         window.removeEventListener('bw-project-bundle-loaded', this._onBundleLoaded);
         window.removeEventListener('bw-microbit-run-request', this._onMicrobitRunRequest);
         window.removeEventListener('bw-cp1-source-load', this.selectCp1);
+        window.removeEventListener('bw-kim1-selection', this.selectKim1);
         window.removeEventListener('bw-cardiac-selected', this.selectCardiac);
         window.removeEventListener('bw-machine-extracted', this.onCardiacMachineSelection);
         window.removeEventListener('bw-cardiac-detached', this.detachCardiac);
@@ -2878,14 +2885,20 @@ class PseudocodeImporter extends React.Component {
         try { localStorage.setItem(BW_EXTRA_LANGS_KEY, JSON.stringify(extraLangs)); } catch { /* per-browser convenience only */ }
         this.setState({extraLangs, langMenuOpen: false}, () => this.switchTab(l));
     }
+    selectKim1 = event => {
+        const kim1PartId = event.detail?.partId || null;
+        this.setState({kim1PartId, kim1Active: !!kim1PartId,
+            ...(kim1PartId ? {cp1Active: false, cardiacActive: false} : {})});
+    };
     detachCp1 = () => this.setState({cp1Active: false});
     selectCp1 = () => {
         this.leaveCardiac();
-        this.setState({cp1Active: true, cardiacActive: false});
+        this.setState({cp1Active: true, cardiacActive: false, kim1Active: false});
     };
     detachCardiac = () => this.setState({cardiacActive: false});
-    selectCardiac = () => this.setState({cardiacActive: true, cp1Active: false});
+    selectCardiac = () => this.setState({cardiacActive: true, cp1Active: false, kim1Active: false});
     onCardiacMachineSelection = event => {
+        if (event.detail?.kind !== 'kim1' && this.state.kim1PartId) this.selectKim1({});
         if (event.detail?.kind !== 'cardiac' && this.state.cardiacActive) this.detachCardiac();
     };
     leaveCardiac () {
@@ -2932,6 +2945,7 @@ class PseudocodeImporter extends React.Component {
         if (this.state.busy) return;
         this.detachCardiac();
         this.leaveCp1();
+        this.setState({kim1Active: false});
         const from = this.state.lang;
         if (to === from) return;
         // ASM tab: author mode just switches. Listing mode must RE-DERIVE: the
@@ -5977,7 +5991,7 @@ class PseudocodeImporter extends React.Component {
                     style={{marginBottom: -1, paddingRight: 40}} scrollerStyle={{paddingBottom: 1}}
                     trailing={(
                         <React.Fragment>
-                            {!this.state.cp1Active && !this.state.cardiacActive && this.renderActionMenu(csel)}
+                            {!this.state.cp1Active && !this.state.cardiacActive && !this.state.kim1Active && this.renderActionMenu(csel)}
                     <button onClick={() => this.toggleMaximize()}
                         style={{...csel, cursor: 'pointer', background: max ? '#4c97ff' : '#f1f5f9',
                             color: max ? '#fff' : 'inherit', minWidth: 24, border: '1px solid #cbd5e1', alignSelf: 'center'}}
@@ -6006,7 +6020,7 @@ class PseudocodeImporter extends React.Component {
                         // file you opened does not vanish when you switch tabs.
                         ...(this.rcxLoaded() || (this.state.buffers.nqc || '').trim() ?
                             [['nqc', '🧱 NQC']] : [])].map(([l, label]) => {
-                        const active = !this.state.cp1Active && !this.state.cardiacActive && this.state.lang === l;
+                        const active = !this.state.cp1Active && !this.state.cardiacActive && !this.state.kim1Active && this.state.lang === l;
                         return (
                             <button key={l} type="button" aria-pressed={active} onClick={() => this.switchTab(l)}
                                 disabled={this.state.busy && !active}
@@ -6025,6 +6039,11 @@ class PseudocodeImporter extends React.Component {
                         title={this.L.cardiacLanguage} style={languageTabStyle(this.state.cardiacActive)}>
                         CARDIAC
                     </button>
+                    {this.state.kim1PartId && <button type="button" data-testid="bw-code-kim1-tab"
+                        onClick={() => this.setState({kim1Active: true, cp1Active: false, cardiacActive: false})}
+                        aria-pressed={this.state.kim1Active} style={languageTabStyle(this.state.kim1Active)}>
+                        KIM-1
+                    </button>}
                     {(() => {
                         const shown = this.visibleOptionalLangs().map(([l]) => l);
                         const hidden = BW_OPTIONAL_LANGS.filter(([l]) => !shown.includes(l));
@@ -6056,7 +6075,7 @@ class PseudocodeImporter extends React.Component {
                             </Popup>
                         );
                     })()}
-                    {!this.state.cp1Active && !this.state.cardiacActive && <React.Fragment>
+                    {!this.state.cp1Active && !this.state.cardiacActive && !this.state.kim1Active && <React.Fragment>
                     {/* Convert/run actions live in the tab row, in maximize mode too. */}
                     <div data-testid="bw-code-action-row" style={{display: 'inline-flex', alignSelf: 'center',
                         alignItems: 'center', gap: 6, flexWrap: 'nowrap', flexShrink: 0}}>
@@ -6534,7 +6553,12 @@ class PseudocodeImporter extends React.Component {
                     </React.Fragment>
                     </React.Fragment>}
                 </ScrollRow>
-                {this.state.cardiacActive ? (
+                {this.state.kim1Active ? (
+                    <React.Suspense fallback={null}>
+                        <Kim1Surface vm={this.props.vm} partId={this.state.kim1PartId} variant="code"
+                            locale={this.props.locale} Editor={CMEditor} />
+                    </React.Suspense>
+                ) : this.state.cardiacActive ? (
                     <div ref={this.props.onCardiacCodeSlot} data-cardiac-language-pane
                         style={{flex: 1, minHeight: 0, overflow: 'auto'}} />
                 ) : this.state.cp1Active ? (

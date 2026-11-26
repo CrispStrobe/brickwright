@@ -128,6 +128,10 @@ const L10N = {
         timeline: 'Timeline', timelineRefresh: 'Read events', timelineOlder: 'Older',
         timelineNewer: 'Newer', timelineLatest: 'Latest', timelineCheckpoint: 'Last checkpoint',
         timelineGoSelected: 'Go to selected',
+        controlsHelp: 'Debugger controls', closeHelp: 'Close',
+        transportHelp: 'Run loads or resumes the selected target. Pause freezes execution, Step advances it, and Stop ends the current run.',
+        sessionHelp: 'History contains recording and reverse controls. Session files preserve recordings. Mark a good and a bad history point to look for the first divergence.',
+        valuesHelp: 'Run a program with inspectable variables to show their values.',
         history: 'History', target: 'Target', firmwareFile: 'Load firmware file',
         timelineGoSelectedHint: 'Restore and replay to the selected event boundary',
         actionActivity: 'Breakpoint actions', actionFailures: 'Failures',
@@ -196,6 +200,10 @@ const L10N = {
         timeline: 'Zeitleiste', timelineRefresh: 'Ereignisse lesen', timelineOlder: 'Älter',
         timelineNewer: 'Neuer', timelineLatest: 'Neueste', timelineCheckpoint: 'Letzter Prüfpunkt',
         timelineGoSelected: 'Zur Auswahl springen',
+        controlsHelp: 'Debugger-Steuerung', closeHelp: 'Schließen',
+        transportHelp: 'Start lädt das ausgewählte Ziel oder setzt es fort. Pause hält es an, Schritt führt es weiter und Stopp beendet den Lauf.',
+        sessionHelp: 'Der Verlauf enthält Aufnahme und Rückwärtssteuerung. Sitzungsdateien speichern Aufnahmen. Markiere zwei Verlaufspunkte, um die erste Abweichung zu suchen.',
+        valuesHelp: 'Starte ein Programm mit inspizierbaren Variablen, um ihre Werte anzuzeigen.',
         history: 'Verlauf', target: 'Zielsystem', firmwareFile: 'Firmwaredatei laden',
         timelineGoSelectedHint: 'Bis zur ausgewählten Ereignisgrenze wiederherstellen und abspielen',
         actionActivity: 'Haltepunkt-Aktionen', actionFailures: 'Fehler',
@@ -369,7 +377,8 @@ class DebugPanel extends React.Component {
             this._suspendedCp1Media = null;
         }
         if (detail.clearLoadedMedia) this._bootMedia = null;
-        const hasBootMedia = !!this._bootMedia;
+        const media = this._bootMedia;
+        const hasBootMedia = !!media;
         const kind = detail.kind === 'cardiac' ? 'cardiac' : detail.kind === 'cp1' ? 'cp1' : detail.kind === 'z80' ? 'z80'
             : detail.kind === 'eater6502' || detail.kind === '6502' ? 'eater6502'
                 : this.state.kind;
@@ -377,7 +386,12 @@ class DebugPanel extends React.Component {
             cardiacGeneration: (this.state.cardiacGeneration || 0) + 1,
             ui: {phase: 'idle', message: hasBootMedia ?
                 'machine extracted — loaded program ready' :
-                'machine extracted — load a program (presets, file, or ASM tab)'}});
+                'machine extracted — load a program (presets, file, or ASM tab)'}}, () => {
+            if (detail.runLoadedMedia && media && this._bootMedia === media &&
+                (detail.kind === '6502' || detail.kind === 'eater6502') && this.state.machineConfig === detail.config) {
+                this.onStart();
+            }
+        });
     }
 
     /** Machine Loader (presets / file picker) delivered an image. The
@@ -1119,7 +1133,8 @@ class DebugPanel extends React.Component {
         const runner = this.state.runner;
         const line = this.state.serialInput;
         if (!runner || typeof runner.sendSerial !== 'function') return;
-        runner.sendSerial(`${line}\r`);
+        if (runner.sendBasicLine) runner.sendBasicLine(line);
+        else runner.sendSerial(`${line}\r`);
         this.setState({serialInput: ''});
     }
 
@@ -1570,6 +1585,7 @@ class DebugPanel extends React.Component {
                         borderRadius: 6, padding: '6px 8px', color: '#cbd5e1'
                     }}>{this.tx('firmwareBareChip')}</div>
                 ) : null}
+                <div data-debug-controls style={{display: 'flex', flexWrap: 'wrap', gap: 4, alignItems: 'center'}}>
                 <div data-debug-transport style={{display: 'flex', gap: 4, alignItems: 'center'}}>
                     <button
                         data-debug-run
@@ -1606,7 +1622,7 @@ class DebugPanel extends React.Component {
                     >{'⏹'}</button>
 
                 </div>
-                <div data-debug-target-controls style={{display: 'flex', gap: 4, alignItems: 'flex-start', minWidth: 0}}>
+                <div data-debug-target-controls style={{display: 'flex', gap: 4, alignItems: 'center', flex: '1 1 180px', minWidth: 0}}>
                     {this.state.kinds && this.state.kinds.length > 1 ? (
                         <span style={{display: 'flex', flexWrap: 'wrap', flex: '1 1 0', minWidth: 0, alignItems: 'center', gap: 6}}>
                             <select
@@ -1726,6 +1742,7 @@ class DebugPanel extends React.Component {
                         />
                     </span>
                 </div>
+                </div>
                 {this.state.firmwareName ? (
                     <span data-firmware-chip style={{fontSize: 11, opacity: 0.9}}>
                         {this.state.firmwareName}{' '}{this.tx(running ? 'firmwareRunning' : 'firmwareLoaded')}
@@ -1751,7 +1768,10 @@ class DebugPanel extends React.Component {
                     <span data-debug-hdd-download-status role="status">{this.state.hddDownloadStatus}</span>
                 ) : null}
 
-                <details data-debug-history>
+                <div data-debug-tools style={{display: 'flex', flexWrap: 'wrap', gap: 4, alignItems: 'center'}}>
+                <details data-debug-history onToggle={event =>
+                    this.setState({historyOpen: event.currentTarget.open})}
+                    style={{flexBasis: this.state.historyOpen ? '100%' : 'auto', minWidth: 0}}>
                     <summary style={{...BTN, display: 'inline-block', padding: '4px 8px'}}
                         aria-label={this.tx('history')}>
                         {'› '}{this.tx('history')}{recording?.active ? ' ●' : ''}
@@ -1872,6 +1892,45 @@ class DebugPanel extends React.Component {
                     ) : null}
                 </details>
 
+                {this.state.runner ? <DebugSessionTransfer
+                    disabled={running || busy}
+                    status={this.state.sessionTransferStatus}
+                    onExport={this.onDebugSessionExport}
+                    onImport={this.onDebugSessionImport}
+                /> : null}
+
+                {this.state.runner ? <DebugDivergenceBisection
+                    disabled={running || busy}
+                    status={this.state.runner.debugBisectionStatus()}
+                    onMarkGood={this.onBisectionMarkGood}
+                    onMarkBad={this.onBisectionMarkBad}
+                    onStart={this.onBisectionStart}
+                    onCancel={this.onBisectionCancel}
+                /> : null}
+
+                <div data-debug-status style={{display: 'flex', gap: 6, alignItems: 'baseline', minWidth: 0}}>
+                    <strong style={{color: phase === 'error' ? '#e74c3c'
+                        : running ? '#2ecc71' : paused ? '#f39c12' : '#7f8c8d'}}>
+                        {this.tx(phase) || phase}
+                    </strong>
+                    {message ? <span title={message} style={{color: phase === 'error' ? '#fca5a5' : '#a6b4c2',
+                        overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis'}}>{message}</span> : null}
+                    {noImageLoaded ? <span data-debug-no-image style={{color: '#7f8c8d'}}>
+                        {this.tx('noImageLoaded')}
+                    </span> : null}
+                </div>
+
+                <button type="button" style={{...BTN, padding: '3px 6px'}} aria-label={this.tx('controlsHelp')}
+                    title={this.tx('controlsHelp')} onClick={() => this.debugControlsHelp?.showModal()}>ⓘ</button>
+                </div>
+                <dialog ref={element => { this.debugControlsHelp = element; }} aria-label={this.tx('controlsHelp')}
+                    style={{maxWidth: 420}}>
+                    <form method="dialog"><button type="submit" aria-label={this.tx('closeHelp')}>×</button></form>
+                    <p>{this.tx('transportHelp')}</p>
+                    <p>{this.tx('sessionHelp')}</p>
+                    <p>{this.tx('valuesHelp')}</p>
+                </dialog>
+
                 {this.state.kind === 'labwired' && this.state.labwiredChip === 'software:samd51-no-asf-simulation' ?
                     <div data-samd-software-buttons style={{display: 'flex', gap: 4, flexWrap: 'wrap'}}>
                         {['left', 'up', 'down', 'right', 'select', 'start', 'a', 'b'].map(name =>
@@ -1897,22 +1956,6 @@ class DebugPanel extends React.Component {
                         data-debug-chip-refusal data-debug-chip-refusal-part={r.part}
                         style={{color: '#92400e', fontSize: 12}}>{r.text}</div>)}
                 </div> : null}
-
-                {this.state.runner ? <DebugSessionTransfer
-                    disabled={running || busy}
-                    status={this.state.sessionTransferStatus}
-                    onExport={this.onDebugSessionExport}
-                    onImport={this.onDebugSessionImport}
-                /> : null}
-
-                {this.state.runner ? <DebugDivergenceBisection
-                    disabled={running || busy}
-                    status={this.state.runner.debugBisectionStatus()}
-                    onMarkGood={this.onBisectionMarkGood}
-                    onMarkBad={this.onBisectionMarkBad}
-                    onStart={this.onBisectionStart}
-                    onCancel={this.onBisectionCancel}
-                /> : null}
 
                 {correlatedView ? <DebugCorrelatedTargets
                     view={correlatedView}
@@ -2127,17 +2170,6 @@ class DebugPanel extends React.Component {
                     >{ui.imageProvenance.sentence}</div>
                 ) : null}
 
-                <div data-debug-status style={{display: 'flex', gap: 6, alignItems: 'baseline', overflowWrap: 'anywhere'}}>
-                    <strong style={{color: phase === 'error' ? '#e74c3c'
-                        : running ? '#2ecc71' : paused ? '#f39c12' : '#7f8c8d'}}>
-                        {this.tx(phase) || phase}
-                    </strong>
-                    {message ? <span style={{color: '#7f8c8d'}}>{message}</span> : null}
-                    {noImageLoaded ? <span data-debug-no-image style={{color: '#7f8c8d'}}>
-                        {this.tx('noImageLoaded')}
-                    </span> : null}
-                </div>
-
                 {/* What the user has marked, and what this build can actually do
                     with it. A mark on a block with no yield point is kept rather
                     than refused (block-menu.js), so it has to be VISIBLE — an
@@ -2195,7 +2227,7 @@ class DebugPanel extends React.Component {
                           onMouseUp={this.state.runner.mouseIn ? this._mouseUp : undefined}
                           onMouseLeave={this.state.runner.mouseIn ? this._mouseLeave : undefined}
                           onContextMenu={this.state.runner.mouseIn ? e => e.preventDefault() : undefined}
-                          style={{width: 'fit-content'}}>
+                          style={{width: 'fit-content', maxWidth: '100%'}}>
                         <VdpScreen
                             videoFn={this._videoFn}
                             {...(this.state.runner && typeof this.state.runner.keyIn === 'function'

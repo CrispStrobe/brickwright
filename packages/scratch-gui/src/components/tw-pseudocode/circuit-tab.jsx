@@ -1,4 +1,4 @@
-import {addCardiacFace} from '../../lib/controller-machine-faces.js';
+import {addCardiacFace, addKim1Face} from '../../lib/controller-machine-faces.js';
 import React from 'react';
 import {clearControllerPanel, serializeControllerPanel} from '../../lib/controller-inputs.js';
 import {makeT} from '../../lib/bw-i18n.js';
@@ -52,6 +52,8 @@ const PANEL_L10N = {
 };
 const pt = makeT(PANEL_L10N);
 
+
+const Kim1Surface = React.lazy(() => import(/* webpackChunkName: "bw-kim1-surface" */ './kim1-surface.jsx'));
 
 const DebugPanel = React.lazy(() =>
     import(/* webpackChunkName: "bw-debug-panel" */ './debug-panel.jsx')
@@ -1664,6 +1666,23 @@ class CircuitTab extends React.Component {
         return config;
     }
 
+    selectKim1(part) {
+        const current = window.__bwMachineExtracted;
+        if (!part) {
+            if (current?.kind === 'kim1') {
+                delete window.__bwMachineExtracted;
+                window.dispatchEvent(new CustomEvent('bw-kim1-selection'));
+                this.setState({machineBooted: false});
+            }
+            return;
+        }
+        if (current?.kind === 'kim1' && current.config.partId === part.id) return;
+        window.dispatchEvent(new CustomEvent('bw-machine-extracted', {
+            detail: {kind: 'kim1', config: {partId: part.id}, clearLoadedMedia: true}
+        }));
+        window.dispatchEvent(new CustomEvent('bw-kim1-selection', {detail: {partId: part.id}}));
+    }
+
     handleWiredBootReady = (data, board, result) => {
         const pending = this._wiredExample;
         if (!pending || pending.data !== data) return;
@@ -1951,6 +1970,8 @@ class CircuitTab extends React.Component {
                 !(Array.isArray(data.wires) || Array.isArray(data.nets))) {
                 throw new Error('not a circuit (no parts with wires or nets)');
             }
+            const kim1Part = data.parts.find(item => item.kind === 'kim-1');
+            if (!kim1Part) this.selectKim1(null);
             if (ex.files?.cp1) {
                 const sourceResponse = await fetch(`examples/${ex.files.cp1}`);
                 if (!sourceResponse.ok) throw new Error(`CP1 program: HTTP ${sourceResponse.status}`);
@@ -1989,7 +2010,17 @@ class CircuitTab extends React.Component {
             // behind a toggle nobody knows to press.
             try {
                 const applied = await this.applyControllerLayout(ex);
-                if (applied || ex.files?.cp1) this.showControllerDock();
+                if (kim1Part) {
+                    this.selectKim1(kim1Part);
+                    const panel = this.props.vm?.runtime?.controllerPanel;
+                    if (panel && addKim1Face(panel, kim1Part.id)) {
+                        panel.setMode('play');
+                        window.dispatchEvent(new CustomEvent('bw-controller-changed', {
+                            detail: {data: serializeControllerPanel(panel)}
+                        }));
+                    }
+                }
+                if (applied || ex.files?.cp1 || kim1Part) this.showControllerDock();
             } catch (e) {
                 console.warn('[brickwright] example controller layout failed', e);
             }
@@ -2484,7 +2515,7 @@ class CircuitTab extends React.Component {
         this._portalOn = !this.state.cadCircuitRequested && this._stagePortalOn();
         // On the dedicated Circuit tab 'solo' behaves as 'top': the designer
         // with the compact debugger in its Instruments column.
-        const cp1ControllerDock = this.state.debugDock === 'controller' && ['cp1', 'cardiac'].includes(window.__bwMachineExtracted?.kind);
+        const cp1ControllerDock = this.state.debugDock === 'controller' && ['cp1', 'cardiac', 'kim1'].includes(window.__bwMachineExtracted?.kind);
         const dock = this.state.debugDock === 'solo' || cp1ControllerDock ? 'top'
             : CIRCUIT_DOCKS.has(this.state.debugDock) ? this.state.debugDock : 'off';
         const content = (
@@ -2530,6 +2561,7 @@ class CircuitTab extends React.Component {
                     onEditorMenuActions={this.handleDesignerMenuActions}
                     onCircuitReady={c => { window.__circuit = c; if (this.props.vm && this.props.vm.runtime) this.props.vm.runtime.circuitModel = c; this.handleCircuitReady(c); }}
                     circuitData={this.state.circuitData || undefined}
+                    kim1Instruments={window.__bwMachineExtracted?.kind !== 'kim1'}
                     onWiredBootReady={this.handleWiredBootReady}
                     onBoardReady={(board) => {
                         // Same diagnosis hook the standalone harness exposes —
@@ -2541,6 +2573,7 @@ class CircuitTab extends React.Component {
                         const vm = this.props.vm;
                         if (vm && vm.runtime) {
                             vm.runtime.circuitBoard = board;
+                            this.selectKim1(board.getParts?.().find(part => part.kind === 'kim-1'));
                             const cardiac = window.__bwMachineExtracted;
                             if (cardiac?.kind === 'cardiac' && cardiac.config?.partId && this._cardiacAttachedBoard !== board) {
                                 this._cardiacAttachedBoard = board;
@@ -2651,6 +2684,13 @@ class CircuitTab extends React.Component {
      *  '>>' to the right pane and back (owner requirement, 2026-08-17). */
     renderDebugPanel () {
         const {stc} = this.state;
+        const machine = window.__bwMachineExtracted;
+        if (machine?.kind === 'kim1') return <PanelBoundary>
+            <React.Suspense fallback={null}>
+                <Kim1Surface vm={this.props.vm} partId={machine.config.partId}
+                    locale={this.props.locale} variant="debugger" />
+            </React.Suspense>
+        </PanelBoundary>;
         return (
             <PanelBoundary>
                 <React.Suspense fallback={null}>

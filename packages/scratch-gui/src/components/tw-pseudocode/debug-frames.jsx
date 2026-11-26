@@ -36,7 +36,7 @@ const L10N = {
         returnTo: 'returns to',
         variables: 'Variables',
         noneYet: 'Nothing to show yet.',
-        collapse: 'Hide', expand: 'Show'
+        collapse: 'Hide', expand: 'Show', reason: 'About this stack'
     },
     de: {
         title: 'Position',
@@ -47,7 +47,7 @@ const L10N = {
         returnTo: 'springt zurück nach',
         variables: 'Variablen',
         noneYet: 'Noch nichts anzuzeigen.',
-        collapse: 'Ausblenden', expand: 'Anzeigen'
+        collapse: 'Ausblenden', expand: 'Anzeigen', reason: 'Über diesen Stapel'
     }
 };
 
@@ -143,6 +143,11 @@ export default class DebugFrames extends React.Component {
                     style={{display: 'flex', justifyContent: 'space-between', alignItems: 'baseline'}}
                 >
                     <span style={LABEL}>{`${this.tx('title')} — ${heading}`}</span>
+                    <div style={{display: 'flex', alignItems: 'center'}}>
+                    {view.why && <button type="button" aria-label={this.tx('reason')} title={view.why}
+                        aria-expanded={!!this.state.showReason}
+                        onClick={() => this.setState(state => ({showReason: !state.showReason}))}
+                        style={{background: 'none', border: 0, color: '#5dade2', cursor: 'pointer'}}>ⓘ</button>}
                     <button
                         onClick={this.toggle}
                         style={{
@@ -150,14 +155,10 @@ export default class DebugFrames extends React.Component {
                             cursor: 'pointer', fontSize: 11, fontFamily: 'monospace'
                         }}
                     >{this.state.open ? this.tx('collapse') : this.tx('expand')}</button>
+                    </div>
                 </div>
 
-                {/* The refusal comes FIRST and is never collapsed away. On the
-                    C target it is the most important thing in this pane: it
-                    says a call stack does not exist here and what to do
-                    instead. A pane that showed the list and buried the reason
-                    would teach exactly the wrong thing. */}
-                {view.why ? (
+                {view.why && this.state.showReason ? (
                     <div style={WHY} data-frames-why>{view.why}</div>
                 ) : null}
 

@@ -10,17 +10,16 @@ const DebugDivergenceBisection = ({status, disabled, onMarkGood, onMarkBad, onSt
     const running = status?.phase === 'running' || status?.phase === 'cancelling';
     return <section data-debug-divergence-bisection style={{display: 'flex', gap: 5,
         alignItems: 'center', flexWrap: 'wrap'}}>
-        <strong>{'Divergence'}</strong>
-        <span data-debug-bisection-good>{`Good ${cursor(status?.good)}`}</span>
-        <span data-debug-bisection-bad>{`Bad ${cursor(status?.bad)}`}</span>
         <button data-debug-bisection-mark-good style={BUTTON} disabled={disabled || running}
-            onClick={onMarkGood}>{'Mark good'}</button>
+            title={`Mark good · ${cursor(status?.good)}`} aria-label="Mark good" aria-pressed={!!status?.good}
+            onClick={onMarkGood}><span data-debug-bisection-good>✓</span></button>
         <button data-debug-bisection-mark-bad style={BUTTON} disabled={disabled || running}
-            onClick={onMarkBad}>{'Mark bad'}</button>
+            title={`Mark bad · ${cursor(status?.bad)}`} aria-label="Mark bad" aria-pressed={!!status?.bad}
+            onClick={onMarkBad}><span data-debug-bisection-bad>✕</span></button>
         <button data-debug-bisection-start style={BUTTON}
-            disabled={disabled || running || !status?.good || !status?.bad} onClick={onStart}>{'Bisect'}</button>
-        <button data-debug-bisection-cancel style={BUTTON} disabled={!running}
-            onClick={onCancel}>{'Cancel'}</button>
+            disabled={disabled || running || !status?.good || !status?.bad} onClick={onStart} title="Bisect divergence" aria-label="Bisect divergence">⇄</button>
+        {running && <button data-debug-bisection-cancel style={BUTTON} disabled={!running}
+            onClick={onCancel} title="Cancel bisection" aria-label="Cancel bisection">⏹</button>}
         {running ? <progress data-debug-bisection-progress max={status.maxProbes || 1}
             value={status.probes || 0} /> : null}
         {status?.result ? <span data-debug-bisection-result role="status">

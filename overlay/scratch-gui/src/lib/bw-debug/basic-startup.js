@@ -17,3 +17,9 @@ export function createBasicStartup (prompts) {
         reset () { next = 0; }
     };
 }
+
+/** BASIC 1.1 recognizes uppercase tokens. Quoted strings retain their case. */
+export function microsoftBasicLine(line) {
+    return line.split('"').map((part, index) => index % 2 ? part :
+        part.replace(/[a-z]/g, letter => letter.toUpperCase())).join('"') + '\r';
+}

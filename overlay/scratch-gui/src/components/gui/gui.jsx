@@ -1490,6 +1490,7 @@ const GUIComponent = props => {
                                             manageBoardBinding={false}
                                             vm={vm}
                                             machineConsole={machineConsole}
+                                            sendBasicLine={vm?.runtime?.bwBasicSerial}
                                             cp1WidgetSlot={cp1Attached ? setCp1ControllerSlot : undefined}
                                             cardiacWidgetSlot={cardiacAttached ? setCardiacControllerSlot : undefined}
                                             locale={intl.locale}

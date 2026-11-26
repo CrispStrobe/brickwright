@@ -2432,6 +2432,13 @@
       "artwork": "ae33d7937bbc88a6dcc388589cf1d4fffb67b85bb4a76d68e9cedcdf34b40f80.svg",
       "bytes": 5734
     },
+    "kim1-wired-io": {
+      "source": "kim1-wired-io/circuit.json",
+      "input": "62b93f0de61035a736bea302f40552184a71c073b02ee521b21c48dc5de31179",
+      "renderer": "07608d931c45a450bd33eb349ada6b53318acd8add9e1bed7a60ae6db2028c72",
+      "artwork": "1022250bb2516bf7ad48e008e2c2f8f1d99245af2994e9245275ffb35a75d2f3.svg",
+      "bytes": 15521
+    },
     "lab-2bit-adc": {
       "source": "lab-2bit-adc/circuit.json",
       "input": "73ba330cd35865cd070ca5fc403c765378d42425741f0f0d74325968f4e0df2b",

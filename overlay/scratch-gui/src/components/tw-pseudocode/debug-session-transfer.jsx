@@ -11,11 +11,11 @@ const BUTTON = {
 const DebugSessionTransfer = ({disabled, status, onExport, onImport}) => (
     <div data-debug-session-transfer style={{display: 'flex', gap: 5, alignItems: 'center'}}>
         <button data-debug-session-export style={BUTTON} disabled={disabled}
-            onClick={onExport}>{'Export session'}</button>
-        <label data-debug-session-import-label style={{...BUTTON,
+            onClick={onExport} title="Export session" aria-label="Export session">⇧</button>
+        <label data-debug-session-import-label title="Import session" style={{...BUTTON,
             cursor: disabled ? 'not-allowed' : 'pointer'}}>
-            {'Import session'}
-            <input data-debug-session-import type="file" accept=".bwdebug,application/json"
+            {'⇩'}
+            <input data-debug-session-import aria-label="Import session" type="file" accept=".bwdebug,application/json"
                 disabled={disabled} style={{display: 'none'}} onChange={event => {
                     const file = event.target.files?.[0];
                     event.target.value = '';

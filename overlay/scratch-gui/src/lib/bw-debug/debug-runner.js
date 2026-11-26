@@ -34,7 +34,7 @@
  * @module
  */
 
-import {createBasicStartup, isBundledMicrosoftBasic} from './basic-startup.js';
+import {createBasicStartup, isBundledMicrosoftBasic, microsoftBasicLine} from './basic-startup.js';
 import {mirrorBasicSerialOnVga} from './basic-vga-mirror.js';
 import {loadCp1Monitor} from '../cp1-monitor.js';
 import {
@@ -3173,6 +3173,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             declaredMachine && await isBundledMicrosoftBasic(targetOpts.rom)) {
             const {MS_PROFILE} = await import('bw-board/basic-machine-runner.js');
             basicStartup = createBasicStartup(MS_PROFILE.bootPrompts);
+            runner.sendBasicLine = line => runner.sendSerial(microsoftBasicLine(line));
             for (const chip of targetOpts.config?.chips || []) {
                 if (chip.kind !== 'simplevga') continue;
                 const card = result.adapter.machine.chips[chip.name];
@@ -4173,6 +4174,19 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         }
         return [...cp1BreakpointHandles.keys()].sort((a, b) => a - b);
     };
+    function publishBasicSerial(active) {
+        const runtime = vm?.runtime;
+        const send = runner.sendBasicLine;
+        if (!runtime || !send) return;
+        if (active && board && runtime.bwRunBoard === board) {
+            runtime.bwBasicSerial = send;
+        } else if (runtime.bwBasicSerial === send) {
+            delete runtime.bwBasicSerial;
+        } else {
+            return;
+        }
+        if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('bw-board-ready'));
+    }
     const runner = {
         cardiacSnapshot() {
             if (target?.kind !== 'cardiac') return null;
@@ -4416,6 +4430,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                     if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('bw-board-ready'));
                 }
                 if (destroyed) return {accepted: false, code: 'destroyed'};
+                publishBasicSerial(true);
                 setStatus(paused ? 'paused' : 'running');
                 if (paused) unschedule(); else schedule();
             } catch (e) {
@@ -4475,6 +4490,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         },
 
         stop() {
+            publishBasicSerial(false);
             cancelCp2Recording();
             cp1LessonBatch?.clear();
             hddSnapshotOwner = {};
@@ -5666,6 +5682,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         symbols: () => symbols,
 
         destroy({preserveRuntime = false} = {}) {
+            publishBasicSerial(false);
             i8086ExecutionLifetime.abort();
             i8086Execution.release(i8086ExecutionResult);
             // The aborted lifetime fences reentry even if release throws.
