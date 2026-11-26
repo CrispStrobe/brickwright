@@ -54,7 +54,7 @@ try {
     await openTab('Circuit');
     await page.locator('[data-toolbar-more]:visible button').first().click();
     const circuitMenu = page.locator('[data-toolbar-more-menu]:visible');
-    for (const label of ['Designer', 'Warnings', 'Parts list', 'Examples', 'Realistic view', 'Schematic view', 'Board view']) {
+    for (const label of ['Designer', 'Circuit Check', 'Parts list', 'Examples', 'Realistic view', 'Schematic view', 'Board view']) {
         await circuitMenu.getByRole('menuitemradio', {name: new RegExp(label, 'i')}).waitFor();
     }
     await circuitMenu.getByRole('menuitemradio', {name: 'Examples'}).click();
