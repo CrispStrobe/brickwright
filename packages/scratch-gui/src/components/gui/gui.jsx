@@ -998,7 +998,7 @@ const GUIComponent = props => {
                 onRun={async (cfg, opts) => {
                     const started = await runMachineConfig(cfg, opts);
                     if (started && opts?.code) {
-                        const program = {...opts.code, run: () => runMachineConfig(cfg)};
+                        const program = {...opts.code, config: cfg, run: () => runMachineConfig(cfg)};
                         vm.runtime.bwLibraryCode = program;
                         window.dispatchEvent(new CustomEvent('bw-library-code', {detail: program}));
                         props.onActivateTab(CODE_TAB_INDEX);

@@ -13,6 +13,15 @@ page.on('pageerror', error => errors.push(error.message));
 page.on('dialog', dialog => dialog.accept());
 await page.addInitScript(() => localStorage.setItem('bw-starter-v1-complete', '1'));
 
+// Forward the actual build request to a test deployment when rehearsing rollout.
+if (process.env.BW_CPM_TEST_COMPILER) {
+    await page.route('https://stc-compiler.vercel.app/compile', async route => {
+        if (route.request().postDataJSON().target !== 'z80-cpm') return route.fallback();
+        const response = await route.fetch({url: new URL('/compile', process.env.BW_CPM_TEST_COMPILER).href});
+        return route.fulfill({response, headers: {...response.headers(), 'access-control-allow-origin': '*'}});
+    });
+}
+
 const manager = async machine => {
     await page.getByTestId('bw-file-menu-trigger').click();
     await page.getByRole('menuitem', {name: 'Machines…', exact: true}).click();
@@ -66,6 +75,22 @@ try {
     await page.waitForFunction(() => window.__benchTarget && window.__benchTarget !== window.previousSieveTarget);
     await serial(/2 3 5 7 11 13 17 19 23 29 31 37 41 43 47/);
     console.log('CP/M Sieve opened the exact C source, ran in Controller and restarted from Code.');
+
+    if (process.env.BW_TEST_EDITED_CPM === '1' || process.env.BW_CPM_TEST_COMPILER) {
+        const source = await page.locator('.cm-content .cm-line').allTextContents();
+        assert.ok(source.some(line => line.includes('#define N 50')));
+        await typeIntoEditor(page, source.join('\n').replace('#define N 50', '#define N 60'));
+        await page.getByTitle('Go', {exact: true}).click();
+        await serial(/47 53 59/);
+        await page.evaluate(() => { window.editedSieveTarget = window.__benchTarget; });
+        await typeIntoEditor(page, 'void main(void) { syntax error; }');
+        await page.getByTitle('Go', {exact: true}).click();
+        await read('[data-testid="bw-code-status"]', /main\.c:1/);
+        assert.ok(await page.evaluate(() => window.__benchTarget === window.editedSieveTarget),
+            'A failed build preserves the running CP/M guest');
+        await serial(/47 53 59/);
+        console.log('Edited CP/M C printed the new primes through 59. A syntax error left the guest intact.');
+    }
 
 
     await page.getByTestId('bw-lang-more').click();

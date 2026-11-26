@@ -13,6 +13,13 @@
 // so a Node test drives this without a DOM or the network.
 
 import {activateConfig, defaultImageFetcher} from './activate.js';
+export function runCpmCom(config, bytes) {
+    const url = 'local-media:compiled.com';
+    const compiled = {...config, slots: {...config.slots, com: {url}}};
+    return runMachineConfig(compiled, {
+        fetcher: ref => ref.url === url ? {bytes} : defaultImageFetcher(ref)
+    });
+}
 
 /**
  * Boot a machine config.

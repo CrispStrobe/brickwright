@@ -187,6 +187,42 @@ async function checkStarterMotor (bench, circuit, examples) {
     }
 }
 
+async function checkSiren (bench, circuit, examples) {
+    const [buzzer, ...others] = circuit.board.getBuzzers();
+    if (!buzzer || others.length) throw new Error('The siren lesson needs one buzzer');
+    let vm;
+    try {
+        const runtime = await startProgram(bench, circuit, examples, value => { vm = value; });
+        const start = circuit.board.getTime();
+        let now = 0;
+        vm.runtime.updateCurrentMSecs = () => { vm.runtime.currentMSecs = now; };
+        vm.runtime.updateCurrentMSecs();
+        vm.runtime.ioDevices.clock.resetProjectTimer();
+        const changes = [];
+        let previous = 0;
+        for (; now <= 1180; now += 20) {
+            await runtime.stepFrames(vm, 1, 20);
+            circuit.advanceTo(start + BigInt(now + 20) * 1_000_000n);
+            const tone = circuit.board.buzzerTone(buzzer);
+            const hz = tone.on ? tone.hz : 0;
+            if (hz !== previous) changes.push({ms: now, hz});
+            previous = hz;
+        }
+        if (runtime.errors.length) throw new Error(runtime.errors.join(', '));
+        const expected = [440, 880, 440];
+        const checks = [
+            {expected, observed: changes.map(change => change.hz),
+                ok: changes.length === expected.length && changes.every(({hz}, i) => Math.abs(hz - expected[i]) <= expected[i] * 0.05)},
+            {expected: 'two 500 ms phases (±50 ms)', observed: changes.slice(1).map(({ms}, i) => ms - changes[i].ms),
+                ok: changes.length === 3 && changes.slice(1).every(({ms}, i) => Math.abs(ms - changes[i].ms - 500) <= 50)}
+        ];
+        return {status: checks.every(check => check.ok) ? 'pass' : 'fail', checks};
+    } finally {
+        vm?.stopAll();
+        vm?.quit();
+    }
+}
+
 function checkClapLatch (circuit) {
     const checks = [];
     const advance = ms => circuit.advanceTo(circuit.board.getTime() + BigInt(ms) * 1_000_000n);
@@ -223,6 +259,7 @@ export async function checkBehavior (bench, circuit, examples) {
         if (cp1) return cp1;
     }
     if (bench.id === 'eater6502-crtc80') return checkCrtc80(bench, circuit, examples);
+    if (bench.id === '07-buzzer-siren') return checkSiren(bench, circuit, examples);
     if (bench.id === 'lab-amp-ic-clap-latch') return checkClapLatch(circuit);
     if (bench.id === 'arduino-sk-p09-motorized-pinwheel' || bench.id === 'arduino-sk-p10-zoetrope') {
         return checkStarterMotor(bench, circuit, examples);

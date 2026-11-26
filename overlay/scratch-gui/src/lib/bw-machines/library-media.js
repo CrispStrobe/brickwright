@@ -8,7 +8,7 @@ const mediaDirectory = item => new URL(`https://raw.githubusercontent.com/CrispS
 export const libraryMedia = [
     {id: 'forth-cpm', title: 'zForth on CP/M', machine: 'z80', license: 'MIT'},
     {id: 'cpm-software', title: 'CP/M Sieve', machine: 'z80', license: 'BSD-2-Clause',
-        code: {language: 'c', path: 'src/sieve.c'}},
+        code: {language: 'c', path: 'src/sieve.c', compilerTarget: 'z80-cpm'}},
     {id: 'fe-dos', title: 'fe Lisp (DOS)', machine: 'i8086', license: 'MIT'},
     {id: 'forth-dos', title: 'zForth (DOS)', machine: 'i8086', license: 'MIT'},
     {id: 'tcl-dos', title: 'partcl Tcl (DOS)', machine: 'i8086', license: 'MIT'},
@@ -43,5 +43,5 @@ export async function readLibraryCode (item) {
     const response = await fetch(url, {redirect: 'error'});
     if (!response.ok) throw new Error(`Source HTTP ${response.status}`);
     return {language: item.code.language, text: await response.text(), title: item.title,
-        machine: item.machine, url: url.href};
+        machine: item.machine, url: url.href, compilerTarget: item.code.compilerTarget};
 }

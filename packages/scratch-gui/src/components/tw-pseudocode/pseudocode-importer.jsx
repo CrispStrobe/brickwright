@@ -1,4 +1,5 @@
 import React from 'react';
+import {remoteToolchainsAllowed} from '../../lib/distribution-policy.js';
 import {createPortal} from 'react-dom';
 import {showDebuggerOnStage} from '../../lib/bw-debug/show-debugger-on-stage.js';
 import {Icon, Popup, toolStyles} from './sim-lab-toolbar.jsx';
@@ -1355,15 +1356,38 @@ class PseudocodeImporter extends React.Component {
         }));
     };
 
-    runLibraryProgram = () => {
+    runLibraryProgram = async () => {
         const program = this.state.libraryProgram;
-        if (this.activeCode() !== program.text) {
-            this.setState({status: 'Running edited CP/M C requires an SDCC build of the .COM program.'});
-            return;
-        }
+        if (!program || this.state.busy) return;
+        const source = this.activeCode();
         this.setState({busy: true, status: ''});
-        Promise.resolve(program.run()).catch(error => this.setState({status: error.message}))
-            .finally(() => this.setState({busy: false}));
+        try {
+            if (source === program.text) {
+                await program.run();
+                return;
+            }
+            if (program.compilerTarget !== 'z80-cpm' || !remoteToolchainsAllowed()) {
+                throw new Error('The CP/M compiler is unavailable in this build.');
+            }
+            this.setState({status: 'Compiling C for CP/M…'});
+            const {runCpmCom} = await import('../../lib/bw-machines/run-machine.js');
+            const out = await this.hostedCompileC(source, program.compilerTarget, 'bin');
+            const bytes = Uint8Array.from(atob(out.base64 || ''), char => char.charCodeAt(0));
+            if (out.origin !== 0x100 || !bytes.length || bytes.length > 0xcf00 || bytes.length !== out.bytes) {
+                throw new Error('The compiler returned an invalid CP/M image.');
+            }
+            if (this._unmounted || this.state.libraryProgram !== program || this.state.lang !== program.language) return;
+            if (this.activeCode() !== source) {
+                this.setState({status: 'The source changed during compilation. Run the updated program.'});
+                return;
+            }
+            await runCpmCom(program.config, bytes);
+            this.setState({status: ''});
+        } catch (error) {
+            if (!this._unmounted) this.setState({status: error.message});
+        } finally {
+            if (!this._unmounted) this.setState({busy: false});
+        }
     };
 
     runActiveCode = event => {
@@ -6439,7 +6463,7 @@ class PseudocodeImporter extends React.Component {
                         ) : null}
                         {this.state.lang === this.state.libraryProgram?.language && (
                             <button type="button" style={actionBtn} onClick={this.runLibraryProgram}
-                                disabled={this.state.busy} title="Run the published CP/M program"
+                                disabled={this.state.busy} title="Run the CP/M program. Edits build with hosted SDCC."
                                 data-testid={menu ? 'bw-library-code-run-menu' : 'bw-library-code-run'}>
                                 ▶ {this.state.libraryProgram.title}
                             </button>
