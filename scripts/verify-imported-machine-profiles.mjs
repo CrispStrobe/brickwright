@@ -53,7 +53,7 @@ try {
                 await page.waitForFunction(() => {
                     const canvas = document.querySelector('[data-testid="bw-machine-canvas"]');
                     return canvas.width === 288 && canvas.height === 224 &&
-                        canvas.getContext('2d').getImageData(16, 16, 1, 1).data[0] > 200;
+                        canvas.getContext('2d').getImageData(16, 16, 1, 1).data[1] > 200;
                 });
                 const keyReleased = released => (window.__benchTarget?.readMem('mem', 0x8000, 1)[0] & 2) ===
                     (released ? 2 : 0);
@@ -67,7 +67,14 @@ try {
             assert.deepEqual(errors, []);
             console.log(`${kind} imported through Machines and executes its own firmware`);
         } catch (error) {
-            console.error((await page.locator('body').innerText()).slice(-2500));
+            console.error(await page.evaluate(() => {
+                const target = window.__benchTarget;
+                const canvas = document.querySelector('[data-testid="bw-machine-canvas"]');
+                return {registers: target?.regs(), attribute: target?.readMem('mem', 0x5800, 1)?.[0],
+                    canvas: canvas && {width: canvas.width, height: canvas.height,
+                        pixel: Array.from(canvas.getContext('2d').getImageData(16, 16, 1, 1).data)}};
+            }));
+            console.error((await page.locator('body').innerText()).slice(-1500));
             throw error;
         } finally {
             await page.close();

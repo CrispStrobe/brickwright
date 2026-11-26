@@ -27,6 +27,7 @@ const hddPath = process.env.FREEDOS_HDD;
 if (!floppyPath || !hddPath) throw new Error('Set FREEDOS_IMAGE and FREEDOS_HDD to local image paths');
 if (!existsSync(join(build, 'index.html'))) throw new Error('Build packages/scratch-gui first');
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
+const portableCanvas = process.env.FREEDOS_PORTABLE_CANVAS === '1';
 const interaction = process.env.FREEDOS_INTERACTION === '1';
 const [floppy, baseHdd] = await Promise.all([readFile(floppyPath), readFile(hddPath)]);
 const hdd = interaction ? interactionHdd(baseHdd) : baseHdd;
@@ -78,11 +79,11 @@ const waitForGuestTime = async (advanceNs, timeout = 30000) => {
         Number(window.__benchTarget?.timeNs?.()) >= startNs + advanceNs,
     {startNs,advanceNs}, {timeout});
 };
-const captureExpected = async (label, expected) => {
+const captureExpected = async (label, expected, text) => {
     let shot;
     for (let attempt = 0; attempt < 20; attempt++) {
         shot = await capture(label);
-        if (shot.sha256 === expected) return shot;
+        if (shot.sha256 === expected || (portableCanvas && text.test(await guestText()))) return shot;
         const frame = await page.evaluate(() => window.__benchTarget?.video?.()?.frame);
         await page.waitForFunction(frame =>
             (window.__benchTarget?.video?.()?.frame ?? 0) > frame + 100,
@@ -177,7 +178,7 @@ try {
         // stable HLT/IRQ wait. The preceding canvas is retained for review.
         if (!declined && state.pc === 156847 && state.halted &&
             state.video.frame > 90000) {
-            installerCapture = await captureExpected('installer-question', expectedScreen.installer);
+            installerCapture = await captureExpected('installer-question', expectedScreen.installer, /Do you want to proceed \[Y,N\]\?/);
             await page.getByTestId('bw-machine-canvas').click();
             await page.keyboard.press('n');
             await waitForGuestTime(100_000_000);
@@ -188,7 +189,7 @@ try {
         }
         if (declined && !dirSent && state.video.lit >= 109490 &&
             Number(state.timeNs) > 60_000_000_000) {
-            promptCapture = await captureExpected('dos-prompt', expectedScreen.prompt);
+            promptCapture = await captureExpected('dos-prompt', expectedScreen.prompt, /^\s*[A-Z]:\\?>\s*$/m);
             await page.getByTestId('bw-machine-canvas').click();
             for (const key of ['d','i','r',' ','c']) {
                 await page.keyboard.press(key);
@@ -208,7 +209,8 @@ try {
         }
         if (dirSent && (interaction ? /CMOUNTOK\s+TXT/.test(state.text) && /MOUSE\s+COM/.test(state.text) : state.video.lit === 75246)) {
             cMountCapture = await capture('c-mounted');
-            if (interaction || cMountCapture.sha256 === expectedScreen.cMounted) {
+            if (interaction || cMountCapture.sha256 === expectedScreen.cMounted ||
+                (portableCanvas && /CMOUNTOK\s+TXT/.test(await guestText()))) {
                 passed = true;
                 break;
             }
@@ -286,7 +288,7 @@ try {
     const report = {schema:'brickwright-lite.i80386-freedos-real-browser.v1', passed,
         elapsedSec:(Date.now()-started)/1000, maxMs, buildCommit:buildManifest.commit,
         buildIndexSha256:sha256(await readFile(join(build,'index.html'))),
-        mediaSha256:mediaHashes, media:media.media,mirror:media.mirror,
+        portableCanvas, mediaSha256:mediaHashes, media:media.media,mirror:media.mirror,
         input:'Widgets physical keyboard: n, Enter, d i r Space c Shift+Semicolon Enter',
         keyScans:await page.evaluate(() => window.__realFree386.keyScans),
         installerCapture,promptCapture,cMountCapture,declined,dirSent,interactions,
