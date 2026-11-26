@@ -682,6 +682,7 @@ const Yt = {
   "Edit shape parameters": "Formparameter bearbeiten",
   "Add code object": "Codeobjekt hinzufügen",
   "Edit code object": "Codeobjekt bearbeiten",
+  "Upgrade lofts to ruled surfaces": "Lofts auf Regelflächen umstellen",
   "Add sketch": "Skizze hinzufügen",
   "Extrude sketch": "Skizze extrudieren",
   "Add sketch extrusion": "Skizzenextrusion hinzufügen",
@@ -2637,7 +2638,6 @@ Erstelle zuerst den Workspace. Oberfläche und MCP verwenden denselben begrenzte
   "Invalid kernelCAD fillet radius": "Ungültiger kernelCAD-Rundungsradius",
   "Invalid kernelCAD rounded rectangle": "Ungültiges abgerundetes kernelCAD-Rechteck",
   "No kernelCAD part fits the CAD Script limits": "Kein kernelCAD-Teil passt in die Grenzen von CAD Script",
-  "Smooth kernelCAD lofts through more than two sections are converted as ruled lofts": "Glatte kernelCAD-Übergänge durch mehr als zwei Querschnitte werden als geradlinige Übergänge konvertiert",
   "Unknown kernelCAD name “{0}”": "Unbekannter kernelCAD-Name „{0}“",
   "Unsupported kernelCAD feature “{0}”": "Nicht unterstützte kernelCAD-Funktion „{0}“",
   "kernelCAD array limit exceeded": "kernelCAD-Array-Grenze überschritten",
@@ -2654,7 +2654,19 @@ Erstelle zuerst den Workspace. Oberfläche und MCP verwenden denselben begrenzte
   "kernelCAD source must return a shape or an assembly model": "Der kernelCAD-Quelltext muss eine Form oder ein Baugruppenmodell zurückgeben",
   "kernelCAD source threw an error": "Der kernelCAD-Quelltext hat einen Fehler ausgelöst",
   "kernelCAD syntax nesting limit exceeded": "kernelCAD-Verschachtelungsgrenze überschritten",
-  "kernelCAD syntax tree limit exceeded": "kernelCAD-Syntaxbaumgrenze überschritten"
+  "kernelCAD syntax tree limit exceeded": "kernelCAD-Syntaxbaumgrenze überschritten",
+  // CAD Script revision 2: ruled lofts.
+  "CAD Script revision 2 (ruled lofts) requires document version 42": "CAD Script Revision 2 (Regelflächen-Lofts) erfordert Dokumentversion 42",
+  "No triangulated lofts to upgrade": "Keine triangulierten Lofts zum Umstellen",
+  "Upgrade lofts to ruled surfaces": "Lofts auf Regelflächen umstellen",
+  "This object’s lofts are triangulated along one diagonal, as saved. Upgrading rebuilds them as ruled surfaces; Undo restores them.": "Die Lofts dieses Objekts sind wie gespeichert entlang einer Diagonale trianguliert. Umstellen baut sie als Regelflächen neu auf; Rückgängig stellt sie wieder her.",
+  "Lofts upgraded to ruled surfaces. Undo restores the triangulated lofts.": "Lofts auf Regelflächen umgestellt. Rückgängig stellt die triangulierten Lofts wieder her.",
+  "Rebuild triangulated lofts (CAD Script revision 1) as ruled surfaces in one Undo step": "Triangulierte Lofts (CAD Script Revision 1) in einem Rückgängig-Schritt als Regelflächen neu aufbauen",
+  "Upgraded the lofts of {0} code objects to ruled surfaces: {1}. Undo restores the triangulated lofts.": "Lofts von {0} Codeobjekten auf Regelflächen umgestellt: {1}. Rückgängig stellt die triangulierten Lofts wieder her.",
+  // smoothLoft (document version 43).
+  "CAD Script smoothLoft requires document version 43": "CAD Script smoothLoft erfordert Dokumentversion 43",
+  "Smooth loft folds back along Z; space its sections further apart or reduce their offsets": "Der glatte Loft läuft entlang Z zurück; Querschnitte weiter auseinander legen oder ihre Versätze verringern",
+  "Smooth loft surface crosses itself between its sections": "Die Fläche des glatten Lofts schneidet sich zwischen ihren Querschnitten selbst"
 }, bn = {
   "Summarize or export the command journal": "Befehlsprotokoll zusammenfassen oder exportieren",
   "Usage: journal [export [cadscript|replay]].": "Verwendung: journal [export [cadscript|replay]].",
@@ -3435,8 +3447,8 @@ c.parseStatement = function(e, t, n) {
       var d = this.isAwaitUsing(!1) ? "await using" : this.isUsing(!1) ? "using" : null;
       if (d)
         return this.allowUsing || this.raise(this.start, "Using declaration cannot appear in the top level when source type is `script` or in the bare case statement"), e && this.raise(this.start, "Using declaration is not allowed in single-statement positions"), d === "await using" && (this.canAwait || this.raise(this.start, "Await using cannot appear outside of async function"), this.next()), this.next(), this.parseVar(s, !1, d), this.semicolon(), this.finishNode(s, "VariableDeclaration");
-      var p = this.value, g = this.parseExpression();
-      return i === r.name && g.type === "Identifier" && this.eat(r.colon) ? this.parseLabeledStatement(s, p, g, e) : this.parseExpressionStatement(s, g);
+      var p = this.value, f = this.parseExpression();
+      return i === r.name && f.type === "Identifier" && this.eat(r.colon) ? this.parseLabeledStatement(s, p, f, e) : this.parseExpressionStatement(s, f);
   }
 };
 c.parseBreakContinueStatement = function(e, t) {
@@ -3470,8 +3482,8 @@ c.parseForStatement = function(e) {
     var u = this.startNode();
     return this.next(), l === "await using" && (this.canAwait || this.raise(this.start, "Await using cannot appear outside of async function"), this.next()), this.parseVar(u, !0, l), this.finishNode(u, "VariableDeclaration"), this.parseForAfterInit(e, u, t);
   }
-  var d = this.containsEsc, p = new Me(), g = this.start, S = t > -1 ? this.parseExprSubscripts(p, "await") : this.parseExpression(!0, p);
-  return this.type === r._in || (a = this.options.ecmaVersion >= 6 && this.isContextual("of")) ? (t > -1 ? (this.type === r._in && this.unexpected(t), e.await = !0) : a && this.options.ecmaVersion >= 8 && (S.start === g && !d && S.type === "Identifier" && S.name === "async" ? this.unexpected() : this.options.ecmaVersion >= 9 && (e.await = !1)), o && a && this.raise(S.start, "The left-hand side of a for-of loop may not start with 'let'."), this.toAssignable(S, !1, p), this.checkLValPattern(S), this.parseForIn(e, S)) : (this.checkExpressionErrors(p, !0), t > -1 && this.unexpected(t), this.parseFor(e, S));
+  var d = this.containsEsc, p = new Me(), f = this.start, S = t > -1 ? this.parseExprSubscripts(p, "await") : this.parseExpression(!0, p);
+  return this.type === r._in || (a = this.options.ecmaVersion >= 6 && this.isContextual("of")) ? (t > -1 ? (this.type === r._in && this.unexpected(t), e.await = !0) : a && this.options.ecmaVersion >= 8 && (S.start === f && !d && S.type === "Identifier" && S.name === "async" ? this.unexpected() : this.options.ecmaVersion >= 9 && (e.await = !1)), o && a && this.raise(S.start, "The left-hand side of a for-of loop may not start with 'let'."), this.toAssignable(S, !1, p), this.checkLValPattern(S), this.parseForIn(e, S)) : (this.checkExpressionErrors(p, !0), t > -1 && this.unexpected(t), this.parseFor(e, S));
 };
 c.parseForAfterInit = function(e, t, n) {
   return (this.type === r._in || this.options.ecmaVersion >= 6 && this.isContextual("of")) && t.declarations.length === 1 ? (this.type === r._in ? ((t.kind === "using" || t.kind === "await using") && !t.declarations[0].init && this.raise(this.start, "Using declaration is not allowed in for-in loops"), this.options.ecmaVersion >= 9 && n > -1 && this.unexpected(n)) : this.options.ecmaVersion >= 9 && (e.await = n > -1), this.parseForIn(e, t)) : (n > -1 && this.unexpected(n), this.parseFor(e, t));
@@ -4132,7 +4144,7 @@ m.parseExprOp = function(e, t, n, i, s) {
     l && (o = r.logicalAND.binop);
     var u = this.value;
     this.next();
-    var d = this.start, p = this.startLoc, g = this.parseExprOp(this.parseMaybeUnary(null, !1, !1, s), d, p, o, s), S = this.buildBinary(t, n, e, g, u, a || l);
+    var d = this.start, p = this.startLoc, f = this.parseExprOp(this.parseMaybeUnary(null, !1, !1, s), d, p, o, s), S = this.buildBinary(t, n, e, f, u, a || l);
     return (a && this.type === r.coalesce || l && (this.type === r.logicalOR || this.type === r.logicalAND)) && this.raiseRecoverable(this.start, "Logical expressions and coalesce expressions cannot be mixed. Wrap either by parentheses"), this.parseExprOp(S, t, n, i, s);
   }
   return e;
@@ -4207,12 +4219,12 @@ m.parseSubscript = function(e, t, n, i, s, o, a) {
     var p = this.startNodeAt(t, n);
     p.object = e, d ? (p.property = this.parseExpression(), this.expect(r.bracketR)) : this.type === r.privateId && e.type !== "Super" ? p.property = this.parsePrivateIdent() : p.property = this.parseIdent(this.options.allowReserved !== "never"), p.computed = !!d, l && (p.optional = u), e = this.finishNode(p, "MemberExpression");
   } else if (!i && this.eat(r.parenL)) {
-    var g = new Me(), S = this.yieldPos, b = this.awaitPos, I = this.awaitIdentPos;
+    var f = new Me(), S = this.yieldPos, b = this.awaitPos, I = this.awaitIdentPos;
     this.yieldPos = 0, this.awaitPos = 0, this.awaitIdentPos = 0;
-    var j = this.parseExprList(r.parenR, this.options.ecmaVersion >= 8, !1, g);
+    var j = this.parseExprList(r.parenR, this.options.ecmaVersion >= 8, !1, f);
     if (s && !u && this.shouldParseAsyncArrow())
-      return this.checkPatternErrors(g, !1), this.checkYieldAwaitInDefaultParams(), this.awaitIdentPos > 0 && this.raise(this.awaitIdentPos, "Cannot use 'await' as identifier inside an async function"), this.yieldPos = S, this.awaitPos = b, this.awaitIdentPos = I, this.parseSubscriptAsyncArrow(t, n, j, a);
-    this.checkExpressionErrors(g, !0), this.yieldPos = S || this.yieldPos, this.awaitPos = b || this.awaitPos, this.awaitIdentPos = I || this.awaitIdentPos;
+      return this.checkPatternErrors(f, !1), this.checkYieldAwaitInDefaultParams(), this.awaitIdentPos > 0 && this.raise(this.awaitIdentPos, "Cannot use 'await' as identifier inside an async function"), this.yieldPos = S, this.awaitPos = b, this.awaitIdentPos = I, this.parseSubscriptAsyncArrow(t, n, j, a);
+    this.checkExpressionErrors(f, !0), this.yieldPos = S || this.yieldPos, this.awaitPos = b || this.awaitPos, this.awaitIdentPos = I || this.awaitIdentPos;
     var K = this.startNodeAt(t, n);
     K.callee = e, K.arguments = j, l && (K.optional = u), e = this.finishNode(K, "CallExpression");
   } else if (this.type === r.backQuote) {
@@ -4252,8 +4264,8 @@ m.parseExprAtom = function(e, t, n) {
     case r._false:
       return i = this.startNode(), i.value = this.type === r._null ? null : this.type === r._true, i.raw = this.type.keyword, this.next(), this.finishNode(i, "Literal");
     case r.parenL:
-      var p = this.start, g = this.parseParenAndDistinguishExpression(s, t);
-      return e && (e.parenthesizedAssign < 0 && !this.isSimpleAssignTarget(g) && (e.parenthesizedAssign = p), e.parenthesizedBind < 0 && (e.parenthesizedBind = p)), g;
+      var p = this.start, f = this.parseParenAndDistinguishExpression(s, t);
+      return e && (e.parenthesizedAssign < 0 && !this.isSimpleAssignTarget(f) && (e.parenthesizedAssign = p), e.parenthesizedBind < 0 && (e.parenthesizedBind = p)), f;
     case r.bracketL:
       return i = this.startNode(), this.next(), i.elements = this.parseExprList(r.bracketR, !0, !0, e), this.finishNode(i, "ArrayExpression");
     case r.braceL:
@@ -4315,7 +4327,7 @@ m.parseParenAndDistinguishExpression = function(e, t) {
   var n = this.start, i = this.startLoc, s, o = this.options.ecmaVersion >= 8;
   if (this.options.ecmaVersion >= 6) {
     this.next();
-    var a = this.start, l = this.startLoc, u = [], d = !0, p = !1, g = new Me(), S = this.yieldPos, b = this.awaitPos, I;
+    var a = this.start, l = this.startLoc, u = [], d = !0, p = !1, f = new Me(), S = this.yieldPos, b = this.awaitPos, I;
     for (this.yieldPos = 0, this.awaitPos = 0; this.type !== r.parenR; )
       if (d ? d = !1 : this.expect(r.comma), o && this.afterTrailingComma(r.parenR, !0)) {
         p = !0;
@@ -4327,11 +4339,11 @@ m.parseParenAndDistinguishExpression = function(e, t) {
         );
         break;
       } else
-        u.push(this.parseMaybeAssign(!1, g, this.parseParenItem));
+        u.push(this.parseMaybeAssign(!1, f, this.parseParenItem));
     var j = this.lastTokEnd, K = this.lastTokEndLoc;
     if (this.expect(r.parenR), e && this.shouldParseArrow(u) && this.eat(r.arrow))
-      return this.checkPatternErrors(g, !1), this.checkYieldAwaitInDefaultParams(), this.yieldPos = S, this.awaitPos = b, this.parseParenArrowList(n, i, u, t);
-    (!u.length || p) && this.unexpected(this.lastTokStart), I && this.unexpected(I), this.checkExpressionErrors(g, !0), this.yieldPos = S || this.yieldPos, this.awaitPos = b || this.awaitPos, u.length > 1 ? (s = this.startNodeAt(a, l), s.expressions = u, this.finishNodeAt(s, "SequenceExpression", j, K)) : s = u[0];
+      return this.checkPatternErrors(f, !1), this.checkYieldAwaitInDefaultParams(), this.yieldPos = S, this.awaitPos = b, this.parseParenArrowList(n, i, u, t);
+    (!u.length || p) && this.unexpected(this.lastTokStart), I && this.unexpected(I), this.checkExpressionErrors(f, !0), this.yieldPos = S || this.yieldPos, this.awaitPos = b || this.awaitPos, u.length > 1 ? (s = this.startNodeAt(a, l), s.expressions = u, this.finishNodeAt(s, "SequenceExpression", j, K)) : s = u[0];
   } else
     s = this.parseParenExpression();
   if (this.options.preserveParens) {
@@ -5761,14 +5773,14 @@ k.readRegexp = function() {
 };
 k.readInt = function(e, t, n) {
   for (var i = this.options.ecmaVersion >= 12 && t === void 0, s = n && this.input.charCodeAt(this.pos) === 48, o = this.pos, a = 0, l = 0, u = 0, d = t ?? 1 / 0; u < d; ++u, ++this.pos) {
-    var p = this.input.charCodeAt(this.pos), g = void 0;
+    var p = this.input.charCodeAt(this.pos), f = void 0;
     if (i && p === 95) {
       s && this.raiseRecoverable(this.pos, "Numeric separator is not allowed in legacy octal numeric literals"), l === 95 && this.raiseRecoverable(this.pos, "Numeric separator must be exactly one underscore"), u === 0 && this.raiseRecoverable(this.pos, "Numeric separator is not allowed at the first of digits"), l = p;
       continue;
     }
-    if (p >= 97 ? g = p - 97 + 10 : p >= 65 ? g = p - 65 + 10 : p >= 48 && p <= 57 ? g = p - 48 : g = 1 / 0, g >= e)
+    if (p >= 97 ? f = p - 97 + 10 : p >= 65 ? f = p - 65 + 10 : p >= 48 && p <= 57 ? f = p - 48 : f = 1 / 0, f >= e)
       break;
-    l = p, a = a * e + g;
+    l = p, a = a * e + f;
   }
   return i && l === 95 && this.raiseRecoverable(this.pos - 1, "Numeric separator is not allowed at the last of digits"), this.pos === o || t != null && this.pos - o !== t ? null : a;
 };
@@ -6057,33 +6069,34 @@ jscad primitives booleans transforms extrusions hulls geometries geom2 geom3 cub
   const t = e.map((l) => l[0]), n = e.map((l) => l[1]), i = Math.max(...t) - Math.min(...t), s = Math.max(...n) - Math.min(...n), o = (Math.max(...n) + Math.min(...n)) / 2, a = Math.max(i, s);
   return e.map(([l, u]) => [l / a, (u - o) / a]).reverse();
 })();
-const f = (e, t, n = {}) => ({ name: e, kind: t, ...n }), ve = (e) => f(e, "point", { optional: !0, plane: "XY" }), ut = [
-  { name: "help", aliases: ["?"], description: "Command help", usage: "help [command]", category: "terminal", editsModel: !1, arguments: [f("command", "command", { optional: !0 })], headless: !0 },
+const g = (e, t, n = {}) => ({ name: e, kind: t, ...n }), ve = (e) => g(e, "point", { optional: !0, plane: "XY" }), ut = [
+  { name: "help", aliases: ["?"], description: "Command help", usage: "help [command]", category: "terminal", editsModel: !1, arguments: [g("command", "command", { optional: !0 })], headless: !0 },
   { name: "list", aliases: ["ls"], description: "List objects and sketches", usage: "list", category: "terminal", editsModel: !1, arguments: [], headless: !0 },
   { name: "clear", aliases: ["cls"], description: "Clear the terminal transcript", usage: "clear", category: "terminal", editsModel: !1, arguments: [] },
-  { name: "alias", aliases: [], description: "List, inspect or define a custom command alias", usage: "alias [name [command]]", category: "terminal", editsModel: !1, arguments: [f("name", "alias", { optional: !0 }), f("command", "command", { optional: !0 })] },
-  { name: "unalias", aliases: [], description: "Remove a custom command alias", usage: "unalias <name>", category: "terminal", editsModel: !1, arguments: [f("name", "alias")] },
+  { name: "alias", aliases: [], description: "List, inspect or define a custom command alias", usage: "alias [name [command]]", category: "terminal", editsModel: !1, arguments: [g("name", "alias", { optional: !0 }), g("command", "command", { optional: !0 })] },
+  { name: "unalias", aliases: [], description: "Remove a custom command alias", usage: "unalias <name>", category: "terminal", editsModel: !1, arguments: [g("name", "alias")] },
   { name: "repeat", aliases: [], description: "Repeat the last command or script", usage: "repeat", category: "terminal", editsModel: !0, arguments: [] },
-  { name: "box", aliases: ["b"], description: "Create a box", usage: "box [width,depth,height] [center]", category: "create", editsModel: !0, arguments: [f("size", "vector", { min: 0.01, max: 1e5 }), f("center", "point", { optional: !0 })], headless: !0 },
-  { name: "sphere", aliases: ["sp"], description: "Create a sphere", usage: "sphere [radius] [center]", category: "create", editsModel: !0, arguments: [f("radius", "number", { min: 0.01, max: 5e4 }), f("center", "point", { optional: !0 })], headless: !0 },
-  { name: "cylinder", aliases: ["cyl"], description: "Create a cylinder", usage: "cylinder [radius] [height] [center]", category: "create", editsModel: !0, arguments: [f("radius", "number", { min: 0.01, max: 5e4 }), f("height", "number", { min: 0.01, max: 1e5 }), f("center", "point", { optional: !0 })], headless: !0 },
+  { name: "box", aliases: ["b"], description: "Create a box", usage: "box [width,depth,height] [center]", category: "create", editsModel: !0, arguments: [g("size", "vector", { min: 0.01, max: 1e5 }), g("center", "point", { optional: !0 })], headless: !0 },
+  { name: "sphere", aliases: ["sp"], description: "Create a sphere", usage: "sphere [radius] [center]", category: "create", editsModel: !0, arguments: [g("radius", "number", { min: 0.01, max: 5e4 }), g("center", "point", { optional: !0 })], headless: !0 },
+  { name: "cylinder", aliases: ["cyl"], description: "Create a cylinder", usage: "cylinder [radius] [height] [center]", category: "create", editsModel: !0, arguments: [g("radius", "number", { min: 0.01, max: 5e4 }), g("height", "number", { min: 0.01, max: 1e5 }), g("center", "point", { optional: !0 })], headless: !0 },
   { name: "line", aliases: ["l"], description: "Draw an XY sketch line", usage: "line [start] [end]", category: "sketch", editsModel: !0, arguments: [{ ...ve("start"), optional: !1 }, { ...ve("end"), optional: !1 }], headless: !0 },
   { name: "rectangle", aliases: ["rect"], description: "Draw an XY sketch rectangle", usage: "rectangle [corner] [opposite]", category: "sketch", editsModel: !0, arguments: [{ ...ve("corner"), optional: !1 }, { ...ve("opposite"), optional: !1 }], headless: !0 },
-  { name: "circle", aliases: ["c"], description: "Draw an XY sketch circle", usage: "circle [center] [radius]", category: "sketch", editsModel: !0, arguments: [{ ...ve("center"), optional: !1 }, f("radius", "number", { min: 0.01, max: 1e5 })], headless: !0 },
-  { name: "extrude", aliases: ["ex"], description: "Extrude a closed sketch", usage: 'extrude [sketch ID or "name"] [height]', category: "feature", editsModel: !0, arguments: [f("sketch", "sketch"), f("height", "number", { min: 0.01, max: 1e5 })], headless: !0 },
-  { name: "move", aliases: ["m"], description: "Move selected bodies between points", usage: "move [base] [destination]", category: "transform", editsModel: !0, arguments: [f("base", "point", { optional: !0 }), f("destination", "point")], headless: !0 },
-  { name: "rotate", aliases: ["ro"], description: "Rotate selected bodies by XYZ degrees", usage: "rotate [x,y,z]", category: "transform", editsModel: !0, arguments: [f("degrees", "vector")], headless: !0 },
-  { name: "scale", aliases: ["sc"], description: "Scale selected bodies by XYZ factors", usage: "scale [x,y,z]", category: "transform", editsModel: !0, arguments: [f("factors", "vector", { min: 0, max: 1e5 })], headless: !0 },
-  { name: "select", aliases: ["sel"], description: "Select bodies by ID or exact name", usage: 'select [all|none|"name"|id ...]', category: "selection", editsModel: !1, arguments: [f("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0 },
+  { name: "circle", aliases: ["c"], description: "Draw an XY sketch circle", usage: "circle [center] [radius]", category: "sketch", editsModel: !0, arguments: [{ ...ve("center"), optional: !1 }, g("radius", "number", { min: 0.01, max: 1e5 })], headless: !0 },
+  { name: "extrude", aliases: ["ex"], description: "Extrude a closed sketch", usage: 'extrude [sketch ID or "name"] [height]', category: "feature", editsModel: !0, arguments: [g("sketch", "sketch"), g("height", "number", { min: 0.01, max: 1e5 })], headless: !0 },
+  { name: "move", aliases: ["m"], description: "Move selected bodies between points", usage: "move [base] [destination]", category: "transform", editsModel: !0, arguments: [g("base", "point", { optional: !0 }), g("destination", "point")], headless: !0 },
+  { name: "rotate", aliases: ["ro"], description: "Rotate selected bodies by XYZ degrees", usage: "rotate [x,y,z]", category: "transform", editsModel: !0, arguments: [g("degrees", "vector")], headless: !0 },
+  { name: "scale", aliases: ["sc"], description: "Scale selected bodies by XYZ factors", usage: "scale [x,y,z]", category: "transform", editsModel: !0, arguments: [g("factors", "vector", { min: 0, max: 1e5 })], headless: !0 },
+  { name: "select", aliases: ["sel"], description: "Select bodies by ID or exact name", usage: 'select [all|none|"name"|id ...]', category: "selection", editsModel: !1, arguments: [g("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0 },
   { name: "code", aliases: ["script"], description: "Open the persistent code workspace", usage: "code", category: "panel", editsModel: !1, arguments: [] },
-  { name: "apply", aliases: [], description: "Replay a recorded model edit", usage: "apply <recorded JSON>", category: "replay", editsModel: !0, arguments: [f("record", "json")], headless: !0 },
-  { name: "export", aliases: [], description: "Export geometry", usage: 'export [step [all|"name"|id ...]]', category: "exchange", editsModel: !1, arguments: [f("format", "keyword", { optional: !0, values: ["step"] }), f("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
-  { name: "measure", aliases: [], description: "Measure volume, area and bounds exactly with the B-rep kernel", usage: 'measure exact [all|"name"|id ...]', category: "analysis", editsModel: !1, arguments: [f("mode", "keyword", { values: ["exact"] }), f("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
-  { name: "fillet", aliases: [], description: "Round edges exactly with the B-rep kernel", usage: 'fillet <radius> [all|"name"|id ...] [--face <normal>]', category: "feature", editsModel: !0, arguments: [f("radius", "number", { min: 0.01, max: 1e4 }), f("targets", "bodies", { optional: !0, repeated: !0 }), f("face", "keyword", { optional: !0, values: ["--face"] })], headless: !0, kernel: "exact" },
-  { name: "chamfer", aliases: [], description: "Bevel edges exactly with the B-rep kernel", usage: 'chamfer <distance> [all|"name"|id ...] [--face <normal>]', category: "feature", editsModel: !0, arguments: [f("distance", "number", { min: 0.01, max: 1e4 }), f("targets", "bodies", { optional: !0, repeated: !0 }), f("face", "keyword", { optional: !0, values: ["--face"] })], headless: !0, kernel: "exact" },
-  { name: "shell", aliases: [], description: "Hollow a body to a wall thickness with open faces, exactly with the B-rep kernel", usage: 'shell <thickness> [all|"name"|id ...] --open <normal> [--open <normal> ...]', category: "feature", editsModel: !0, arguments: [f("thickness", "number", { min: 0.01, max: 1e4 }), f("targets", "bodies", { optional: !0, repeated: !0 }), f("open", "keyword", { values: ["--open"], repeated: !0 })], headless: !0, kernel: "exact" },
-  { name: "recompute", aliases: [], description: "Recompute out-of-date exact fillets, chamfers and shells with the B-rep kernel", usage: 'recompute exact [all|"name"|id ...]', category: "feature", editsModel: !0, arguments: [f("mode", "keyword", { values: ["exact"] }), f("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
-  { name: "journal", aliases: [], description: "Summarize or export the command journal", usage: "journal [export [cadscript|replay]]", category: "terminal", editsModel: !1, arguments: [f("action", "keyword", { optional: !0, values: ["export"] }), f("format", "keyword", { optional: !0, values: ["cadscript", "replay"] })], headless: !0 }
+  { name: "apply", aliases: [], description: "Replay a recorded model edit", usage: "apply <recorded JSON>", category: "replay", editsModel: !0, arguments: [g("record", "json")], headless: !0 },
+  { name: "export", aliases: [], description: "Export geometry", usage: 'export [step [all|"name"|id ...]]', category: "exchange", editsModel: !1, arguments: [g("format", "keyword", { optional: !0, values: ["step"] }), g("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
+  { name: "measure", aliases: [], description: "Measure volume, area and bounds exactly with the B-rep kernel", usage: 'measure exact [all|"name"|id ...]', category: "analysis", editsModel: !1, arguments: [g("mode", "keyword", { values: ["exact"] }), g("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
+  { name: "fillet", aliases: [], description: "Round edges exactly with the B-rep kernel", usage: 'fillet <radius> [all|"name"|id ...] [--face <normal>]', category: "feature", editsModel: !0, arguments: [g("radius", "number", { min: 0.01, max: 1e4 }), g("targets", "bodies", { optional: !0, repeated: !0 }), g("face", "keyword", { optional: !0, values: ["--face"] })], headless: !0, kernel: "exact" },
+  { name: "chamfer", aliases: [], description: "Bevel edges exactly with the B-rep kernel", usage: 'chamfer <distance> [all|"name"|id ...] [--face <normal>]', category: "feature", editsModel: !0, arguments: [g("distance", "number", { min: 0.01, max: 1e4 }), g("targets", "bodies", { optional: !0, repeated: !0 }), g("face", "keyword", { optional: !0, values: ["--face"] })], headless: !0, kernel: "exact" },
+  { name: "shell", aliases: [], description: "Hollow a body to a wall thickness with open faces, exactly with the B-rep kernel", usage: 'shell <thickness> [all|"name"|id ...] --open <normal> [--open <normal> ...]', category: "feature", editsModel: !0, arguments: [g("thickness", "number", { min: 0.01, max: 1e4 }), g("targets", "bodies", { optional: !0, repeated: !0 }), g("open", "keyword", { values: ["--open"], repeated: !0 })], headless: !0, kernel: "exact" },
+  { name: "recompute", aliases: [], description: "Recompute out-of-date exact fillets, chamfers and shells with the B-rep kernel", usage: 'recompute exact [all|"name"|id ...]', category: "feature", editsModel: !0, arguments: [g("mode", "keyword", { values: ["exact"] }), g("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
+  { name: "upgrade-lofts", aliases: [], description: "Rebuild triangulated lofts (CAD Script revision 1) as ruled surfaces in one Undo step", usage: 'upgrade-lofts [all|"name"|id ...]', category: "edit", editsModel: !0, arguments: [g("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0 },
+  { name: "journal", aliases: [], description: "Summarize or export the command journal", usage: "journal [export [cadscript|replay]]", category: "terminal", editsModel: !1, arguments: [g("action", "keyword", { optional: !0, values: ["export"] }), g("format", "keyword", { optional: !0, values: ["cadscript", "replay"] })], headless: !0 }
 ], We = [
   { command: "shapes", label: "Find a shape", alias: "shape browser primitives" },
   { command: "model-library", label: "Model library", alias: "parts catalog" },
@@ -6100,6 +6113,7 @@ const f = (e, t, n = {}) => ({ name: e, kind: t, ...n }), ve = (e) => f(e, "poin
   { command: "terminal", label: "CAD terminal", alias: "command line console" },
   { command: "code-workspace", label: "Code workspace", alias: "persistent CAD Script editor" },
   { command: "model-source", label: "Model source" },
+  { command: "upgrade-lofts", label: "Upgrade lofts to ruled surfaces", alias: "ruled loft triangulated revision" },
   { command: "union", label: "Union", alias: "combine join", requires: "canCombine" },
   { command: "subtract", label: "Subtract", alias: "boolean cut difference", requires: "canCombine" },
   { command: "intersect", label: "Intersect", alias: "boolean overlap", requires: "canCombine" },
@@ -6172,7 +6186,7 @@ function bi(e) {
   }
   const s = [], o = /* @__PURE__ */ new Map();
   for (let a = 0; a < e.indices.length; a += 3) {
-    const l = i[e.indices[a]], u = i[e.indices[a + 1]], d = i[e.indices[a + 2]], p = n[l], g = n[u], S = n[d], [b, I, j] = g.map((y, E) => y - p[E]), [K, L, be] = S.map((y, E) => y - p[E]), oe = [I * be - j * L, j * K - b * be, b * L - I * K], le = Math.hypot(...oe);
+    const l = i[e.indices[a]], u = i[e.indices[a + 1]], d = i[e.indices[a + 2]], p = n[l], f = n[u], S = n[d], [b, I, j] = f.map((y, E) => y - p[E]), [K, L, be] = S.map((y, E) => y - p[E]), oe = [I * be - j * L, j * K - b * be, b * L - I * K], le = Math.hypot(...oe);
     if (le <= 1e-12)
       continue;
     const A = [oe[0] / le, oe[1] / le, oe[2] / le];
@@ -6189,19 +6203,19 @@ function ki(e, t, n, i) {
     const I = b[0] - s[0], j = b[1] - s[1], K = (I * (a[1] - s[1]) - j * (a[0] - s[0])) / l, L = ((o[0] - s[0]) * j - (o[1] - s[1]) * I) / l;
     return [K, L, 1 - K - L, s[2] + K * (o[2] - s[2]) + L * (a[2] - s[2]) - b[2] - i];
   }, d = u(t), p = u(n);
-  let g = 0, S = 1;
+  let f = 0, S = 1;
   for (let b = 0; b < d.length; b++) {
     if (d[b] <= 0 && p[b] <= 0) {
       if (b === 3 || d[b] < -1e-10 || p[b] < -1e-10)
         return;
       continue;
     }
-    d[b] < 0 ? g = Math.max(g, d[b] / (d[b] - p[b])) : p[b] < 0 && (S = Math.min(S, d[b] / (d[b] - p[b])));
+    d[b] < 0 ? f = Math.max(f, d[b] / (d[b] - p[b])) : p[b] < 0 && (S = Math.min(S, d[b] / (d[b] - p[b])));
   }
-  return S - g > 1e-8 ? [g, S] : void 0;
+  return S - f > 1e-8 ? [f, S] : void 0;
 }
 function vi(e, t, n, i) {
-  const { horizontal: s, vertical: o, depth: a, near: l } = t, u = i[s] - n[s], d = i[o] - n[o], p = Math.max(1e-6, Math.min(2e-3, (i[a] - n[a]) * 1e-6)), g = e.map((A) => A.vertices.map((y) => [y[s] - n[s], y[o] - n[o], y[a] * l])), S = Array.from({ length: ue * ue }, () => []), b = (A, y) => Math.min(ue - 1, Math.max(0, Math.floor(A / y * ue))), I = (A, y) => {
+  const { horizontal: s, vertical: o, depth: a, near: l } = t, u = i[s] - n[s], d = i[o] - n[o], p = Math.max(1e-6, Math.min(2e-3, (i[a] - n[a]) * 1e-6)), f = e.map((A) => A.vertices.map((y) => [y[s] - n[s], y[o] - n[o], y[a] * l])), S = Array.from({ length: ue * ue }, () => []), b = (A, y) => Math.min(ue - 1, Math.max(0, Math.floor(A / y * ue))), I = (A, y) => {
     const E = b(A.left, u), z = b(A.right, u), V = b(A.bottom, d), D = b(A.top, d);
     for (let P = V; P <= D; P++)
       for (let U = E; U <= z; U++)
@@ -6226,7 +6240,7 @@ function vi(e, t, n, i) {
   };
   for (const [A, y] of e.entries())
     for (const E of y.faces) {
-      const [z, V, D] = [g[A][E.a], g[A][E.b], g[A][E.c]], P = (V[0] - z[0]) * (D[1] - z[1]) - (V[1] - z[1]) * (D[0] - z[0]);
+      const [z, V, D] = [f[A][E.a], f[A][E.b], f[A][E.c]], P = (V[0] - z[0]) * (D[1] - z[1]) - (V[1] - z[1]) * (D[0] - z[0]);
       if (Math.abs(P) < 1e-10)
         continue;
       const U = { a: z, b: V, c: D, det: P, box: Ne(z, V, D), nearest: Math.max(z[2], V[2], D[2]) };
@@ -6240,7 +6254,7 @@ function vi(e, t, n, i) {
       const [z, ...V] = E.normals;
       if (V.length && !V.some((B) => fi(z, B) < mi || z[a] * l > 1e-8 != B[a] * l > 1e-8))
         continue;
-      const D = g[A][E.a], P = g[A][E.b], U = Math.hypot(P[0] - D[0], P[1] - D[1]);
+      const D = f[A][E.a], P = f[A][E.b], U = Math.hypot(P[0] - D[0], P[1] - D[1]);
       if (U < 1e-5)
         continue;
       const J = Ne(D, P), De = Math.min(D[2], P[2]) + p, ke = /* @__PURE__ */ new Set(), N = [];

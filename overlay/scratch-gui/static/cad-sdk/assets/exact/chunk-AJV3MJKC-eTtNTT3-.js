@@ -41,7 +41,7 @@ function w(n = {}) {
     throw new TypeError("init(): wasmModule must be a WebAssembly.Module (WebAssembly.compile)");
   if (["wasmBinary", "wasmModule", "instantiateWasm"].filter((t) => e[t] != null).length > 1)
     throw new TypeError("init(): give one of wasmBinary, wasmModule and instantiateWasm");
-  return a.length && y(n), import("./chunk-IYXHJQNO-Pj8U6r-0.js");
+  return a.length && y(n), import("./chunk-MK7NZM5N-e3CmWXLH.js");
 }
 var h = /* @__PURE__ */ Object.freeze({
   __proto__: null,
