@@ -297,6 +297,46 @@ function checkAudio (bench, circuit) {
         checks.push({check: 'all keys released stops sustained speaker pulses', expected: 0, observed: quiet, ok: quiet === 0});
         return checks;
     }
+    case 'lab-meissner-squegg': {
+        const run = (position, reverse, settleMs) => {
+            const probe = circuit.constructor.fromJSON(circuit.toJSON());
+            probe.setControl('potentiometer_7', position);
+            if (reverse) {
+                probe.setControl('slide_switch_12', 1);
+                probe.setControl('slide_switch_13', 1);
+            }
+            probe.setPower(true);
+            const runtime = probe.board;
+            const tank = outputNet(runtime, 'tuning_cap_5', 'b');
+            const detector = outputNet(runtime, 'diode_16', 'cathode');
+            advanceMs(runtime, settleMs);
+            const samples = Array.from({length: 100}, () => {
+                advanceMs(runtime, 0.02);
+                const rf = runtime._radio?.bandAmplitudes(tank) ?? [];
+                return {tank: Math.max(0, ...rf.map(band => band.volts)), detector: runtime.nodeVoltage(detector)};
+            });
+            const limits = name => [Math.min(...samples.map(sample => sample[name])),
+                Math.max(...samples.map(sample => sample[name]))];
+            const failure = runtime.transientAnalysisStatus().failure ?? runtime._radio?.error;
+            if (failure) throw new Error(`RF or transient solve failed at bias ${position}`);
+            return {tank: limits('tank'), detector: limits('detector'), tone: runtime.buzzerTone('earphone_19')};
+        };
+        const bursts = run(0.05, false, 5);
+        const steady = run(0.3, false, 22);
+        const reversed = run(0.3, true, 5);
+        return [
+            {check: 'weak bias produces radio bursts and an audible receiver tone',
+                expected: 'tank drops below 0.01 V, peaks near 9 V, detector swings by over 1 V, tone from 700 to 1100 Hz',
+                observed: bursts, ok: bursts.tank[0] < 0.01 && bursts.tank[1] > 8.6 && bursts.tank[1] < 10 &&
+                    bursts.detector[1] - bursts.detector[0] > 1 && bursts.tone.on && Math.abs(bursts.tone.hz - 900) <= 200},
+            {check: 'stronger bias sustains a steady carrier without an audio envelope',
+                expected: 'near 8.9 V RF with less than 0.01 V RF variation and 0.05 V detector variation',
+                observed: steady, ok: Math.abs(steady.tank[0] - 8.89) < 0.1 &&
+                    steady.tank[1] - steady.tank[0] < 0.01 && steady.detector[1] - steady.detector[0] < 0.05 && !steady.tone.on},
+            {check: 'reversing the feedback winding stops RF and audio', expected: 'less than 1 mV RF and silent',
+                observed: reversed, ok: reversed.tank[1] < 0.001 && !reversed.tone.on}
+        ];
+    }
     case 'school-intercom-101455': {
         advanceMs(board, 1000);
         const receiving = span(board, 'resistor_93', 'a', 'b');

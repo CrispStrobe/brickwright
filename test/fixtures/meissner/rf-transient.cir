@@ -1,0 +1,41 @@
+* Independent approximation of the original Brickwright Meissner circuit.
+* Coil Q=120 is represented by series loss near 800 kHz, plus copper.
+* The transistor is a nominal NPN and the receiver load is the detector RC.
+.param bias=0.05 polarity=1
+V1 vcc 0 PWL(0 0 10u 9)
+Rcoil vcc l1 12.47
+Ltx l1 collector 250u
+C1 vcc collector 157p
+Rfeedback bias_node l2 44m
+Lbase base l2 100n
+Ktx Ltx Lbase {0.9*polarity}
+Q1 collector base emitter Qnom
+.model Qnom NPN(IS=1e-14 BF=100 BR=1)
+RE emitter 0 1k
+CE emitter 0 1n
+RB vcc bias_node {10000+1000000*(1-bias)}
+CB bias_node 0 4.7n
+LRX rx rx_l 250u
+RRX rx_l 0 12.47
+KRX LTX LRX 0.008
+Kfb Lbase LRX {0.008*polarity}
+CRX rx 0 161.41p
+D1 rx detector Dnom
+.model Dnom D(IS=2e-7 RS=5 N=1.3)
+Rdet detector 0 47k
+Cdet detector 0 2.2n
+.control
+set wr_singlescale
+tran 50n 30m 0 50n
+wrdata meissner-weak.tsv v(collector) v(detector) v(bias_node)
+alterparam bias=0.3
+reset
+tran 50n 30m 0 50n
+wrdata meissner-steady.tsv v(collector) v(detector) v(bias_node)
+alterparam polarity=-1
+reset
+tran 50n 30m 0 50n
+wrdata meissner-reversed.tsv v(collector) v(detector) v(bias_node)
+quit
+.endc
+.end
