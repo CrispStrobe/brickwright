@@ -24,6 +24,21 @@ try {
     });
     await page.addInitScript(() => localStorage.setItem('bw-starter-v1-complete', '1'));
     await page.goto(base, {waitUntil: 'domcontentloaded'});
+    async function chooseExample(id, item) {
+        openingExample = id;
+        try {
+            const loaded = page.waitForResponse(response =>
+                response.ok() && new URL(response.url()).pathname.endsWith(`/examples/${id}/circuit.json`));
+            await item.click();
+            // The shell can confirm in its own dialog or via browser confirm.
+            // The dialog event above accepts the latter without a DOM button.
+            const ok = page.getByRole('button', {name: 'OK', exact: true});
+            await Promise.race([loaded, ok.waitFor().then(() => ok.click()).then(() => loaded)]);
+        } finally {
+            openingExample = null;
+        }
+    }
+
     async function openExample(id, title) {
         await page.getByRole('tab', {name: 'Circuit', exact: true}).click();
         const examples = page.locator('[data-testid="bw-circuit-panel-examples"]:visible').first();
@@ -32,13 +47,7 @@ try {
         if (!await examples.isVisible()) await more.click();
         await examples.click();
         await page.getByPlaceholder(/^Search \d+ examples/).first().fill(title);
-        await page.locator(`[data-example-id="${id}"]:visible`).getByText(title, {exact: true}).click();
-        openingExample = id;
-        const circuit = page.waitForResponse(response =>
-            response.ok() && new URL(response.url()).pathname.endsWith(`/examples/${id}/circuit.json`));
-        await page.getByRole('button', {name: 'OK', exact: true}).click();
-        await circuit;
-        openingExample = null;
+        await chooseExample(id, page.locator(`[data-example-id="${id}"]:visible`).getByText(title, {exact: true}));
         await page.getByTestId('bw-circuit-panel-designer').first().waitFor();
     }
 
@@ -91,11 +100,9 @@ try {
     await page.getByTestId('bw-device-select').selectOption('eater6502');
     await page.getByTestId('bw-code-actions-trigger').click();
     await page.getByTestId('bw-catalog-toggle').click();
-    openingExample = 'eater6502-vdp-hello';
-    await page.locator('[data-testid="bw-catalog-item"][title="eater6502-vdp-hello"]').click();
-    await page.getByRole('button', {name: 'OK', exact: true}).click();
+    await chooseExample('eater6502-vdp-hello',
+        page.locator('[data-testid="bw-catalog-item"][title="eater6502-vdp-hello"]'));
     await vdpHelloFrame(vdpWidget);
-    openingExample = null;
     await vdpDebuggerFrame();
     console.log('Loading the VDP example from Code boots its ROM and displays HELLO in both surfaces.');
 
