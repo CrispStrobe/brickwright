@@ -101,7 +101,7 @@ try {
     await openFromFile(pico, 'rp2040js');
     await pico.getByRole('searchbox', {name: 'Search firmware'}).fill('PicoBB');
     await pico.getByTestId('bw-mm-downloadable-media').getByRole('button', {name: 'Run', exact: true}).click();
-    await pico.getByTestId('bw-serial-console').getByText(/BBC BASIC for Pico Console/).waitFor();
+    await pico.getByTestId('bw-picobb-terminal').locator('.xterm-rows').getByText(/BBC BASIC for Pico Console/).waitFor();
     await pico.close();
     console.log('PicoBB wakes and reaches the BBC BASIC banner on the serial console.');
 

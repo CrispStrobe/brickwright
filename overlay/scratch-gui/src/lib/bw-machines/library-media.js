@@ -3,7 +3,7 @@ import {validateMachineConfig} from './machine-config.js';
 
 // Reviewed manifest references only. Program bytes stay in media-lab.
 const MEDIA_REVISION = '081bd4156797cf8b14b9ceef7245ff9e100577e5';
-const MEDIA_ROOT = `https://raw.githubusercontent.com/CrispStrobe/brickwright-media-lab/${MEDIA_REVISION}/projects/`;
+const mediaDirectory = item => new URL(`https://raw.githubusercontent.com/CrispStrobe/brickwright-media-lab/${item.revision || MEDIA_REVISION}/projects/${item.id}/`);
 
 export const libraryMedia = [
     {id: 'forth-cpm', title: 'zForth on CP/M', machine: 'z80', license: 'MIT'},
@@ -14,7 +14,8 @@ export const libraryMedia = [
     {id: 'tcl-dos', title: 'partcl Tcl (DOS)', machine: 'i8086', license: 'MIT'},
     {id: 'ubasic-dos', title: 'uBASIC (DOS)', machine: 'i8086', license: 'BSD-3-Clause'},
     {id: 'x86-benchmarks/topbench', title: 'TOPBENCH (386)', machine: 'i80386', license: 'MIT', benchmark: 'topbench'},
-    {id: 'picobb-rp2040', title: 'PicoBB BBC BASIC', machine: 'rp2040js', license: 'Zlib'}
+    {id: 'picobb-rp2040', title: 'PicoBB BBC BASIC', machine: 'rp2040js', license: 'Zlib',
+        revision: 'd6f09f79a6c73a2fcdf7f53b75624aa01f096baf'}
 ];
 
 export async function readMediaManifest (url) {
@@ -24,7 +25,7 @@ export async function readMediaManifest (url) {
 }
 
 export async function openLibraryMedia (item) {
-    const baseUrl = new URL(`${item.id}/`, MEDIA_ROOT);
+    const baseUrl = mediaDirectory(item);
     const source = new URL('brickwright-media.json', baseUrl).href;
     const manifest = await readMediaManifest(source);
     if (manifest.machine !== item.machine || manifest.license !== item.license || manifest.boot === false) {
@@ -38,7 +39,7 @@ export async function openLibraryMedia (item) {
 
 export async function readLibraryCode (item) {
     if (!item.code) return null;
-    const url = new URL(`${item.id}/${item.code.path}`, MEDIA_ROOT);
+    const url = new URL(item.code.path, mediaDirectory(item));
     const response = await fetch(url, {redirect: 'error'});
     if (!response.ok) throw new Error(`Source HTTP ${response.status}`);
     return {language: item.code.language, text: await response.text(), title: item.title,

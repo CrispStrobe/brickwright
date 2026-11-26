@@ -69,6 +69,7 @@ const L10N = {
         basicStartupHint: 'Press Enter for the default',
         terminalHint: 'Click the terminal and type a command at the bwb# prompt (try uname -a). ' +
             'Ctrl-C interrupts, arrows recall history, and Ctrl-Shift-V pastes.',
+        picoTerminalHint: 'Click the terminal and type a BBC BASIC command at the > prompt. Try PRINT 2+2.',
         serialSend: 'Send this line to the machine (ends with CR)',
         modem: 'Blinkenrocket audio modem',
         modemHint: 'message for the badge',
@@ -140,6 +141,7 @@ const L10N = {
         basicStartupHint: 'Enter übernimmt den Standardwert',
         terminalHint: 'Klicke ins Terminal und tippe am bwb#-Prompt einen Befehl ein (z. B. uname -a). ' +
             'Strg-C bricht ab, Pfeiltasten holen frühere Befehle, Strg-Umschalt-V fügt ein.',
+        picoTerminalHint: 'Klicke ins Terminal und gib am >-Prompt einen BBC-BASIC-Befehl ein, zum Beispiel PRINT 2+2.',
         serialSend: 'Diese Zeile an die Maschine senden (endet mit CR)',
         modem: 'Blinkenrocket-Audiomodem',
         modemHint: 'Nachricht für das Badge',
@@ -1181,7 +1183,7 @@ class DebugPanel extends React.Component {
             raw,
             title: raw ? `Terminal ${raw.cols}×${raw.rows}`
                 : runner.i8086MediaIo?.terminalName || (pc ? 'PC serial' : this.state.kind === 'eater6502' ? 'ACIA' : 'Serial'),
-            help: this.tx(raw ? 'terminalHint' : 'serialHint'),
+            help: this.tx(raw?.kind === 'pico' ? 'picoTerminalHint' : raw ? 'terminalHint' : 'serialHint'),
             inputLabel: this.tx('serialSend'),
             send: writable ? line => sendConsoleLine(runner, line) : null,
             subscribe: listener => {

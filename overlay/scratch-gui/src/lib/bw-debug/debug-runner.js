@@ -42,6 +42,8 @@ import {
 } from './breakpoints.js';
 import { parseCondition } from './condition.js';
 import {createLinuxConsole} from './linux-console.js';
+import {createReadyGatedInput} from './ready-gated-input.js';
+import {createTerminalOutput} from './terminal-output.js';
 import {createEngineeringInputRoute} from './engineering-input-route.js';
 import {cpmFileName} from './cpm-z80.js';
 import { canRecordDebugInput } from 'bw-board/debug-replay-contract.js';
@@ -628,6 +630,8 @@ export function selectEsp32S040Circuit (sourceBoard, model, mcuId = null) {
     }
     return {sourceBoard, mcuId: selected[0].id};
 }
+
+let picoTerminalSequence = 0;
 
 export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.vercel.app', targetKind = 'emulator', machineConfig = null, bootMedia = null, labwiredChip = null, labwiredBoardVariant = null, esp32S040McuId = null, esp32s3Console = 'uart0', onChange = () => {} }) {
     let session = null;
@@ -2130,46 +2134,47 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         adapter.attachBoard(board);
         adapter.bootFromFlash(flash);
 
-        const feedByte = (b) => adapter.rp2040.uart[0].feedByte(b & 0xff);
-
-        // Serial out → the panel's console, and auto-answer the console's VT100
-        // cursor-position probe (ESC[6n): the firmware queries terminal size on
-        // start and BLOCKS until it gets ESC[rows;colsR. The panel's <pre>
-        // terminal cannot answer, so the runner does — 24x80, the same reply the
-        // CLI proof gives. Without this PicoBB hangs before its banner.
+        const uart = adapter.rp2040.uart[0];
+        const feedByte = byte => uart.feedByte(byte & 0xff);
+        const output = createTerminalOutput();
+        const input = createReadyGatedInput({isReady: () => true, send: feedByte,
+            canAccept: () => uart.rxFIFO.empty, burst: 32});
+        const cursorQuery = '\x1b[6n';
+        let escape = '';
         let lineBuf = '';
-        let probe = '';
         let wakeOnPrompt = bootMedia.picoWakeOnPrompt === true;
-        serialLines = [];
-        adapter.onSerial((byte) => {
-            probe = (probe + String.fromCharCode(byte)).slice(-4);
-            if (probe === '\x1b[6n') {
-                for (const c of '\x1b[24;80R') feedByte(c.charCodeAt(0));
-                probe = '';
-            }
+
+        adapter.onSerial(byte => {
             const ch = String.fromCharCode(byte);
-            if (ch === '\n') {
-                if (wakeOnPrompt && lineBuf.trim() === 'Waiting for connection') {
-                    wakeOnPrompt = false;
-                    feedByte(13);
-                }
-                serialLines.push(lineBuf);
-                lineBuf = '';
-                if (serialLines.length > 200) serialLines.shift();
-            } else if (ch !== '\r') {
-                lineBuf += ch;
+            if (wakeOnPrompt) {
+                if (ch === '\n') {
+                    if (lineBuf.trim() === 'Waiting for connection') {
+                        wakeOnPrompt = false;
+                        feedByte(13);
+                    }
+                    lineBuf = '';
+                } else if (ch !== '\r') lineBuf = (lineBuf + ch).slice(-64);
             }
+            if (!escape && byte !== 0x1b) {
+                output.push(byte);
+                return;
+            }
+            escape += ch;
+            if (cursorQuery.startsWith(escape) && escape !== cursorQuery) return;
+            // Answer the size query before the Controller has mounted. Keep
+            // the answered query out of replay so xterm cannot answer twice.
+            if (escape === cursorQuery) {
+                for (const c of '\x1b[24;80R') feedByte(c.charCodeAt(0));
+            } else {
+                for (const c of escape) output.push(c.charCodeAt(0));
+            }
+            escape = '';
         });
 
-        // RX into the REPL: what the serial console types reaches UART0. A string
-        // (a typed line, CR-terminated by the panel) or a single byte. This is
-        // what turns on the panel's serial input box (canSendSerial).
-        runner.sendSerial = (data) => {
-            const bytes = typeof data === 'number'
-                ? [data & 0xff]
-                : Array.from(String(data), ch => ch.charCodeAt(0) & 0xff);
-            for (const b of bytes) feedByte(b);
-        };
+        runner.sendSerial = data => input.write(typeof data === 'number' ? [data] :
+            typeof data === 'string' ? new TextEncoder().encode(data) : data);
+        runner.terminal = {id: `pico-uart-${++picoTerminalSequence}`, kind: 'pico', rows: 24, cols: 80,
+            subscribe: output.subscribe, send: input.write};
 
         setValueResolver((blockId) => runner.valuesAtBlock(blockId));
         if (vm && vm.runtime) vm.runtime._bwDebugVariables = () => runner.variables();
@@ -2180,6 +2185,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         target = createRp2040jsDebugTarget(adapter, { symbols: undefined, clockHz });
         session = createDebugSession(target, {
             onChange: (st) => {
+                output.deliver();
+                input.flush();
                 if (st.halted) {
                     if (shouldSkip(st)) { skipped++; skipRequested = true; return; }
                     glow(st.tasks);

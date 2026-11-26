@@ -1,0 +1,65 @@
+// SPDX-License-Identifier: BSD-3-Clause
+import assert from 'node:assert/strict';
+import {chromium} from 'playwright';
+
+const url = process.argv[2];
+assert.ok(url, 'Pass the URL of the assembled Brickwright frontend');
+const browser = await chromium.launch({headless: true, executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
+const page = await browser.newPage({viewport: {width: 1440, height: 900}, locale: 'en-US', serviceWorkers: 'block'});
+const errors = [];
+page.on('pageerror', error => errors.push(error.message));
+await page.addInitScript(() => localStorage.setItem('bw-starter-v1-complete', '1'));
+try {
+    await page.goto(url, {waitUntil: 'domcontentloaded'});
+    await page.getByTestId('bw-file-menu-trigger').click();
+    await page.getByRole('menuitem', {name: 'Machines…', exact: true}).click();
+    const modal = page.getByTestId('bw-machine-manager');
+    const group = name => modal.getByRole('region', {name, exact: true});
+    const xt = group('8086');
+    const at = group('80386');
+    await xt.getByText(/ELKS/).first().waitFor();
+    await xt.getByText('partcl Tcl (DOS)', {exact: true}).waitFor();
+    await xt.getByTestId('bw-mm-8086-cga-demo').waitFor();
+    await at.getByText(/TOPBENCH/).waitFor();
+    await at.getByText('Local 386 media', {exact: true}).waitFor();
+    assert.equal(await xt.getByText(/TOPBENCH/).count(), 0);
+    assert.equal(await at.getByText(/ELKS/).count(), 0);
+    const sections = await modal.locator('[data-machine-kind]').evaluateAll(rows => rows.map(row => row.dataset.machineKind));
+    assert.equal(new Set(sections).size, sections.length);
+    assert.ok(sections.indexOf('i8086') < sections.indexOf('i80386'));
+    const type = modal.getByRole('combobox', {name: 'Machine type'});
+    await type.selectOption('i80386');
+    assert.equal(await xt.count(), 0);
+    await type.selectOption('');
+    const search = modal.getByRole('searchbox', {name: 'Search firmware'});
+    await search.fill('PicoBB');
+    assert.equal(await at.count(), 0);
+    const pico = group('Raspberry Pi Pico (RP2040)');
+    await pico.getByTestId('bw-mm-downloadable-media').getByRole('button', {name: 'Run', exact: true}).click();
+
+    const terminal = page.locator('[data-bw-stage-dock="controller"]').getByTestId('bw-picobb-terminal');
+    const rows = terminal.locator('.xterm-rows');
+    await rows.getByText(/BBC BASIC for Pico Console/).waitFor();
+    assert.doesNotMatch(await rows.innerText(), /Corrupted dir pair|Unable to locate LittleFS|Unable to format/);
+    const input = terminal.locator('textarea');
+    const send = async command => {
+        await input.focus();
+        await page.keyboard.type(command, {delay: 14});
+        await page.keyboard.press('Enter');
+        await rows.getByText('>' + command, {exact: true}).waitFor();
+    };
+    await send('10 PRINT "PICO-GUI-FILE"');
+    await send('SAVE "FLASH"');
+    await send('NEW');
+    await send('LOAD "FLASH"');
+    await send('RUN');
+    await rows.getByText('PICO-GUI-FILE', {exact: true}).waitFor();
+    await page.getByTestId('bw-machine-fullscreen').click();
+    const bounds = await terminal.boundingBox();
+    assert.ok(bounds.width >= 1420, JSON.stringify(bounds));
+    await page.getByTestId('bw-machine-fullscreen').click();
+    assert.deepEqual(errors, []);
+    console.log('CPU groups filter correctly, and PicoBB mounts LittleFS and runs a saved program from the Controller terminal.');
+} finally {
+    await browser.close();
+}

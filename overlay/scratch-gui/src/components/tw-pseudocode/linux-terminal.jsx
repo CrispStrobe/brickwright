@@ -140,7 +140,7 @@ class LinuxTerminal extends React.Component {
         return (
             <div>
                 <div
-                    data-testid="bw-linux-terminal"
+                    data-testid={this.props.terminal.kind === 'pico' ? 'bw-picobb-terminal' : 'bw-linux-terminal'}
                     data-terminal-state={phase}
                     ref={this.host}
                     style={{
@@ -159,6 +159,7 @@ class LinuxTerminal extends React.Component {
 
 LinuxTerminal.propTypes = {
     terminal: PropTypes.shape({
+        kind: PropTypes.string,
         cols: PropTypes.number,
         rows: PropTypes.number,
         subscribe: PropTypes.func.isRequired,
