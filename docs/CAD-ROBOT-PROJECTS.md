@@ -1766,3 +1766,36 @@ parking. The editor TypeScript build and the focused regression for
 authored anchor invalidation passed. Brickwright pins SDK `f2a596a`.
 Sustained 1× in production remains open.
 [CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/38e3eabbd1201825a923e04ea3fbc1c2d17b3e24)
+
+### Package the viewport and collision optimizations for Brickwright
+
+The SDK refresh from `f2a596a` to `38e3eab` includes the collision-buffer
+validation, viewport pose and cable reuse, stationary camera readouts,
+unchanged world transforms and authored cable anchor changes described
+above. The package comes from a clean CrispCAD checkout.
+
+The manifest covers 842 files. All standalone WASM payloads and all
+immutable model provenance URLs matched the previous pin. The scalar and
+SIMD Jolt modules matched after normalizing their generated worker import
+names. The exact kernel and Jolt versions are unchanged.
+
+Chrome ran Atlas and Scout with both SDKs in the same existing Brickwright
+host build (`e47f2dc`). All four runs passed project selection, one-click
+Run, moving joints, visible wiring, Stop, Reset and repeat Run. The fresh
+build was the SDK. The host was reused.
+
+| Robot | Sustained real-time factor, previous → refreshed SDK |
+| --- | ---: |
+| Atlas forklift | 0.257× → 0.234× |
+| Scout TT rover | 0.211× → 0.242× |
+
+These were three-simulated-second runs under heavy, varying Mac load.
+The shorter component measurements above quantify removed work. These
+host runs showed mixed timing, and sustained 1× production qualification
+remains open.
+
+The SDK sync verified all manifest hashes. The six telemetry tests and
+all 24 pin and fetch tests passed across the initial run and a focused
+retry of the font test after its Python subprocess timed out. Chrome
+also loaded the packaged exact WASM on demand and measured a 10 × 20 ×
+30 mm box at 6,000 mm³ and 2,200 mm².
