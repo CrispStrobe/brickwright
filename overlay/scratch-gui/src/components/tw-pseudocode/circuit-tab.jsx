@@ -1,4 +1,4 @@
-import {addCardiacFace, addKim1Face} from '../../lib/controller-machine-faces.js';
+import {addCardiacFace, addMicrotronicFace, addKim1Face} from '../../lib/controller-machine-faces.js';
 import React from 'react';
 import {clearControllerPanel, serializeControllerPanel} from '../../lib/controller-inputs.js';
 import {makeT} from '../../lib/bw-i18n.js';
@@ -130,6 +130,20 @@ const DEBUG_LIVE_REFRESH_MS = 250;
 // These modes share the right column with panes owned by gui.jsx. Remember
 // their selection too, so a controller/device face never covers a stale
 // debugger portal that still thinks the column belongs to it.
+function CircuitPanelNavigation({Switch, panel, drc, locale, onSelect, menu, onPick}) {
+    return <>
+        <Switch {...{panel, drc, locale, onSelect, menu, onPick}} />
+        {menu && <button type="button" className="circuit-menu-row" data-testid="bw-circuit-machines"
+            onClick={() => {
+                onPick?.();
+                window.dispatchEvent(new CustomEvent('bw-open-machine-manager'));
+            }}>
+            <span aria-hidden="true" style={{width: 18, textAlign: 'center'}}>▣</span>
+            <span className="circuit-menu-label">{/^de/i.test(locale) ? 'Maschinen…' : 'Machines…'}</span>
+        </button>}
+    </>;
+}
+
 const CIRCUIT_DOCKS = new Set(['top', 'right', 'off', 'solo']);
 const DEVICE_DOCKS = new Set(['controller', 'microbit', 'arcade', 'cpx', 'arduboy', 'makecode', 'spikearena', 'cad', 'robots']);
 
@@ -1985,6 +1999,7 @@ class CircuitTab extends React.Component {
                 !(Array.isArray(data.wires) || Array.isArray(data.nets))) {
                 throw new Error('not a circuit (no parts with wires or nets)');
             }
+            const microtronicPart = data.parts.find(item => item.kind === 'busch-microtronic');
             const kim1Part = data.parts.find(item => item.kind === 'kim-1');
             if (!kim1Part) this.selectKim1(null);
             if (ex.files?.cp1) {
@@ -2035,7 +2050,17 @@ class CircuitTab extends React.Component {
                         }));
                     }
                 }
-                if (applied || ex.files?.cp1 || kim1Part) this.showControllerDock();
+                if (microtronicPart) {
+                    const panel = this.props.vm?.runtime?.controllerPanel;
+                    if (panel && addMicrotronicFace(panel, microtronicPart.id)) {
+                        panel.setMode('play');
+                        window.dispatchEvent(new CustomEvent('bw-controller-changed', {
+                            detail: {data: serializeControllerPanel(panel)}
+                        }));
+                    }
+                    window.dispatchEvent(new CustomEvent('bw-microtronic-selected', {detail: {partId: microtronicPart.id}}));
+                }
+                if (applied || ex.files?.cp1 || kim1Part || microtronicPart) this.showControllerDock();
             } catch (e) {
                 console.warn('[brickwright] example controller layout failed', e);
             }
@@ -2576,6 +2601,7 @@ class CircuitTab extends React.Component {
                     onEditorMenuActions={this.handleDesignerMenuActions}
                     onCircuitReady={c => { window.__circuit = c; if (this.props.vm && this.props.vm.runtime) this.props.vm.runtime.circuitModel = c; this.handleCircuitReady(c); }}
                     circuitData={this.state.circuitData || undefined}
+                    microtronicInstruments={false}
                     kim1Instruments={window.__bwMachineExtracted?.kind !== 'kim1'}
                     onWiredBootReady={this.handleWiredBootReady}
                     onBoardReady={(board) => {
@@ -2790,8 +2816,8 @@ class CircuitTab extends React.Component {
     renderPanelStrip () {
         const {panels, panel} = this.state;
         if (!panels) return null;
-        return (<panels.PanelSwitch panel={panel} drc={this.drcWarnings()} locale={this.props.locale}
-            onSelect={this.selectPanel} />);
+        return <CircuitPanelNavigation Switch={panels.PanelSwitch} panel={panel} drc={this.drcWarnings()}
+            locale={this.props.locale} onSelect={this.selectPanel} />;
     }
 
     renderPanel () {

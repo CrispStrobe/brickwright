@@ -19,3 +19,6 @@ function addMachineFace(panel, face, label, partId) {
 
 export const addCardiacFace = panel => addMachineFace(panel, CARDIAC_FACE, 'CARDIAC');
 export const addKim1Face = (panel, partId) => addMachineFace(panel, 'kim1', 'KIM-1', partId);
+
+export const isMicrotronicFace = widget => widget.type === 'machine' && widget.config.face === 'microtronic';
+export const addMicrotronicFace = (panel, partId) => addMachineFace(panel, 'microtronic', 'Busch Microtronic', partId);

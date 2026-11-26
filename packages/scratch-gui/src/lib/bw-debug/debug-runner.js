@@ -3436,7 +3436,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             let exited = null;
             const bench = await createI8086DosBench({
                 executionSignal: i8086ExecutionLifetime.signal,
-                bytes: img.bytes, format,
+                bytes: img.bytes, format, variant: bootMedia.dosVariant,
+                files: bootMedia.dosFiles ? new Map(bootMedia.dosFiles) : undefined,
                 // Hardware the program asked for. `createI8086DosBench`
                 // merges these onto the preset BY NAME, so a scheduled
                 // program's IRQ0-wired timer replaces the preset's plain one
@@ -3487,6 +3488,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                 bench.sendKeys(typeof data === 'number'
                     ? String.fromCharCode(data & 0xff) : String(data));
             };
+            runner.i8086MediaIo = {serial: true, terminalName: 'DOS Console'};
             if (exited === null) {
                 setStatus('ready', S('ready.dosBench', {
                     name: bootMedia.name || S('noun.program'), format

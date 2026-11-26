@@ -429,6 +429,7 @@ class DebugPanel extends React.Component {
         // Its post-boot snapshot (the lesson's default Run), likewise.
         const {linuxSnapshot} = e.detail || {};
         const {nativeBlocks, machinePreset, i80386Media, machineConfig6502, machineConfig8086} = e.detail || {};
+        const {dosFiles, dosVariant} = e.detail || {};
         if (!bytes && !riscvImage) return;
         // THE SAME LOAD, DELIVERED TWICE. circuit-tab stashes every media-load
         // and, when that flips it to "machine booted", re-dispatches the very
@@ -476,6 +477,8 @@ class DebugPanel extends React.Component {
                 ? (linuxSnapshot instanceof Uint8Array ? linuxSnapshot : new Uint8Array(linuxSnapshot)) : null,
             profile: profile || null,
             i8086Hardware,
+            dosFiles,
+            dosVariant,
             machineConfig8086,
             name: name || null,
             nativeBlocks: kind === 'i80386' && nativeBlocks === true,
@@ -1214,9 +1217,10 @@ class DebugPanel extends React.Component {
         };
         if (generatedDisplay && !panel.getWidget(displayName)) created.add(displayName);
         if (keyboardName && !panel.getWidget(keyboardName)) created.add(keyboardName);
-        const terminal = serial ? 'PC serial' : null;
+        const terminal = serial ? runner.i8086MediaIo.terminalName || 'PC serial' : null;
         if (terminal) {
-            runtime.bwPcSerial = {name: terminal, runner};
+            runtime.bwPcSerial = {name: terminal, runner,
+                label: runner.i8086MediaIo.terminalName ? 'DOS input' : 'PC serial input'};
             add(terminal, 'terminal', {rows: 14, cols: 42}, {x: 8, y: 8});
         }
         if (gpio && runner.setInput && runner.outputs) {

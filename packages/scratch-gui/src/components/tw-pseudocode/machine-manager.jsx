@@ -21,7 +21,7 @@ import {
 import {localDosboxMachine} from '../../lib/bw-machines/local-dosbox.js';
 import {readDosPackageZip, DOS_PACKAGE_LIMITS} from '../../lib/bw-machines/dos-package-zip.js';
 import {localDosPackage} from '../../lib/bw-machines/local-dos-package.js';
-import {localFreedosVgaMachine} from '../../lib/bw-machines/local-freedos-vga.js';
+import {localAtBiosMachine, localFreedosVgaMachine} from '../../lib/bw-machines/local-freedos-vga.js';
 import {defaultImageFetcher} from '../../lib/bw-machines/activate.js';
 import {remoteMachineImagesAllowed} from '../../lib/distribution-policy.js';
 import {CIRCUIT_LIBRARY_MACHINES, libraryCircuitPrograms} from '../../lib/bw-machines/library-circuits.js';
@@ -40,6 +40,14 @@ const T = {
     }
 };
 const tr = (locale, k) => (T[(locale || 'en').slice(0, 2)] || T.en)[k] || T.en[k] || k;
+
+const virtual8086Presets = [
+    ['Serial Shell', 'serial-monitor', 'serialshell'], ['CGA Text Demo', 'cga-demo', 'cgademo'],
+    ['CGA Graphics', 'cga-gfx-demo', 'cgademo'], ['VGA 256-colour', 'vga-demo', 'vgademo'],
+    ['Hercules Mono', 'hercules-demo', 'hercdemo'], ['EGA 16-colour', 'ega-demo', 'egademo'],
+    ['Keyboard Echo', 'keyboard-demo', 'kbddemo'], ['Timer + Keyboard', 'desk-demo', 'deskdemo'],
+    ['Blink (GPIO)', 'blink-demo', 'blink'], ['Timer Tick', 'timer-demo', 'timerdemo']
+];
 
 const modeBadge = m => (m === 'wired' ? '🔌 wired' : m === 'auto' ? '◐ auto' : '⚙ functional');
 
@@ -158,6 +166,20 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
             if (current()) {owner.busy = false; setDosPackageBusy(false);}
         }
     };
+    const runBios = async () => {
+        try {
+            const cfg = localAtBiosMachine(freeMedia);
+            await run(cfg, {fetcher: async ref => {
+                const file = ref.url === 'local-media:bios' ? freeMedia.bios :
+                    ref.url === 'local-media:vga-rom' ? freeMedia.vgaRom : null;
+                return file ? {bytes: new Uint8Array(await file.arrayBuffer())} : defaultImageFetcher(ref);
+            }});
+        } catch (error) { setStatus(error.message); }
+    };
+    const runVirtual8086 = (title, name, profile) => run(newMachineConfig({
+        title, machine: 'i8086', executionMode: 'functional',
+        slots: {rom: {url: `static/roms/i8086-${name}.bin`}}, bootOrder: ['rom']
+    }), {i8086RomProfile: profile});
     const runFree386 = async () => {
         try {
             const cfg = localFreedosVgaMachine({...freeMedia,
@@ -182,7 +204,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     // an unhandled rejection behind a closed modal.
     const allLessons = React.useMemo(() => lessonMachines(locale), [locale]);
     const lessons = allLessons.filter(lesson => matchesType(lesson.config.machine) && matchesTitle(lesson.config.title));
-    const machineKinds = [...new Set([preferredMachine, 'i80386', ...CIRCUIT_LIBRARY_MACHINES,
+    const machineKinds = [...new Set([preferredMachine, 'i8086', 'i80386', ...CIRCUIT_LIBRARY_MACHINES,
         ...allLessons.map(lesson => lesson.config.machine), ...(mediaAllowed ? libraryMedia.map(item => item.machine) : []),
         ...machines.map(machine => machine.machine)].filter(Boolean))].sort();
     const circuitTitle = example => example.title?.[/^de/i.test(locale) ? 'de' : 'en'] || example.title?.en || example.id;
@@ -205,6 +227,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     const launch = async (id, action) => {
         invalidateDosPackage();
         setLaunching(id);
+        setStatus(/^de/i.test(locale) ? 'Wird gestartet…' : 'Starting…');
         try {
             if (await action() !== false) onClose?.();
         } catch (error) {
@@ -300,6 +323,19 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                 </div>
 
                 <div style={{overflowY: 'auto', padding: '8px 16px', flex: 1}}>
+                    {machineFilter === 'i80386' && matchesTitle('386 AT BIOS') && <div style={rowStyle}>
+                        <strong style={{flex: 1}}>386 AT BIOS</strong>
+                        <button type="button" style={primary} data-testid="bw-mm-at-bios-run"
+                            title="Start the virtual 386 with the bundled BIOS and no boot disk"
+                            onClick={runBios}>Start 386</button>
+                    </div>}
+                    {machineFilter === 'i8086' && !wiredPresets?.length && virtual8086Presets
+                        .filter(([title]) => matchesTitle(title)).map(([title, name, profile]) =>
+                            <div key={name} style={rowStyle}>
+                                <strong style={{flex: 1}}>{title}</strong>
+                                <button type="button" style={primary} data-testid={`bw-mm-8086-${name}`}
+                                    onClick={() => runVirtual8086(title, name, profile)}>{t('run')}</button>
+                            </div>)}
                     {matchingPresets.length > 0 && <section aria-label="Wired firmware" data-testid="bw-mm-wired-presets">
                         {matchingPresets.map(preset => <div key={preset.id} style={rowStyle}>
                             <strong style={{flex: 1, minWidth: 0}}>{preset.title}</strong>
@@ -336,7 +372,8 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                             </div>
                         </div>
                     ))}
-                    {matchingMachines.length === 0 && lessons.length === 0 && !matchingPresets.length && !matchingMedia.length && !matchingCircuits.length ? (
+                    {matchingMachines.length === 0 && lessons.length === 0 && !matchingPresets.length && !matchingMedia.length &&
+                        !matchingCircuits.length && machineFilter !== 'i80386' && machineFilter !== 'i8086' ? (
                         <div style={{color: '#64748b', padding: '18px 4px'}}>{t('empty')}</div>
                     ) : matchingMachines.map(m => (
                         <div key={m.id} data-testid="bw-mm-row"
@@ -437,6 +474,8 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                             </label>)}
                             <button onClick={() => {invalidateDosPackage(); return runFree386();}} style={primary}
                                 data-testid="bw-mm-free386-run" title="Floppy or type-1 HDD. Leave the ROM fields empty to use the bundled BIOS and VGA firmware.">Boot FreeDOS VGA</button>
+                            {(freeMedia.bios || freeMedia.vgaRom) && <button type="button" style={btn}
+                                onClick={runBios}>Boot BIOS only</button>}
                             <label style={{fontSize: 11, color: '#475569'}}>
                                 <input type="checkbox" data-testid="bw-mm-free386-native-blocks"
                                     checked={freeNativeBlocks}

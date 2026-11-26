@@ -201,6 +201,19 @@ export async function activateConfig(config, opts = {}) {
     // reset vector reads from real bytes (debug-runner's romAt path).
     if (typeof bootRef.romAt === 'number') bootMedia.romAt = bootRef.romAt;
 
+    if (TARGET_KIND[cfg.machine] === 'i8086' && ['com', 'exe'].includes(bootSlotId)) {
+        bootMedia.dosVariant = cfg.cpu.variant;
+        const mounts = Object.entries(cfg.provenance?.dosMount || {});
+        const files = await Promise.all(mounts.map(async ([name, ref]) => {
+            if (!/^[a-z0-9_~-]{1,8}(?:\.[a-z0-9_~-]{1,3})?$/i.test(name)) {
+                throw new Error(`Invalid DOS mount filename: ${name}`);
+            }
+            const file = await resolveSlot(ref, fetcher, name);
+            return [name.toUpperCase(), file.bytes];
+        }));
+        if (files.length) bootMedia.dosFiles = new Map(files);
+    }
+
     const warnings = [];
 
     const targetKind = TARGET_KIND[cfg.machine] || cfg.machine;

@@ -1225,6 +1225,7 @@ const CMEditor = React.lazy(() =>
     import(/* webpackChunkName: "bw-codemirror" */ '../../lib/codemirror-editor.jsx')
 );
 
+const MicrotronicSurface = React.lazy(() => import(/* webpackChunkName: "bw-microtronic-surface" */ './microtronic-surface.jsx'));
 const Kim1Surface = React.lazy(() => import(/* webpackChunkName: "bw-kim1-surface" */ './kim1-surface.jsx'));
 
 // ── VDU terminal for BBC BASIC graphics (lazy-loaded) ──────────────
@@ -1349,6 +1350,9 @@ class PseudocodeImporter extends React.Component {
         window.addEventListener('bw-microbit-run-request', this._onMicrobitRunRequest);
         window.addEventListener('bw-cp1-source-load', this.selectCp1);
         window.addEventListener('bw-kim1-selection', this.selectKim1);
+        window.addEventListener('bw-microtronic-selected', this.selectMicrotronic);
+        window.addEventListener('bw-board-ready', this.updateMicrotronicPart);
+        this.updateMicrotronicPart();
         window.addEventListener('bw-cardiac-selected', this.selectCardiac);
         window.addEventListener('bw-machine-extracted', this.onCardiacMachineSelection);
         window.addEventListener('bw-cardiac-detached', this.detachCardiac);
@@ -2725,6 +2729,8 @@ class PseudocodeImporter extends React.Component {
         window.removeEventListener('bw-microbit-run-request', this._onMicrobitRunRequest);
         window.removeEventListener('bw-cp1-source-load', this.selectCp1);
         window.removeEventListener('bw-kim1-selection', this.selectKim1);
+        window.removeEventListener('bw-microtronic-selected', this.selectMicrotronic);
+        window.removeEventListener('bw-board-ready', this.updateMicrotronicPart);
         window.removeEventListener('bw-cardiac-selected', this.selectCardiac);
         window.removeEventListener('bw-machine-extracted', this.onCardiacMachineSelection);
         window.removeEventListener('bw-cardiac-detached', this.detachCardiac);
@@ -2904,10 +2910,10 @@ class PseudocodeImporter extends React.Component {
     detachCp1 = () => this.setState({cp1Active: false});
     selectCp1 = () => {
         this.leaveCardiac();
-        this.setState({cp1Active: true, cardiacActive: false, kim1Active: false});
+        this.setState({cp1Active: true, cardiacActive: false, kim1Active: false, microtronicActive: false});
     };
     detachCardiac = () => this.setState({cardiacActive: false});
-    selectCardiac = () => this.setState({cardiacActive: true, cp1Active: false, kim1Active: false});
+    selectCardiac = () => this.setState({cardiacActive: true, cp1Active: false, kim1Active: false, microtronicActive: false});
     onCardiacMachineSelection = event => {
         if (event.detail?.kind !== 'kim1' && this.state.kim1PartId) this.selectKim1({});
         if (event.detail?.kind !== 'cardiac' && this.state.cardiacActive) this.detachCardiac();
@@ -2952,11 +2958,25 @@ class PseudocodeImporter extends React.Component {
         }}));
     }
 
+    selectMicrotronic = event => {
+        const partId = event.detail?.partId || this.state.microtronicPartId;
+        if (partId) this.setState({microtronicPartId: partId, microtronicActive: true,
+            cp1Active: false, cardiacActive: false, kim1Active: false});
+    };
+
+    updateMicrotronicPart = () => {
+        const parts = this.props.vm?.runtime?.circuitBoard?.getParts?.() || [];
+        const partId = parts.find(part => part.kind === 'busch-microtronic')?.id || null;
+        if (this.state.microtronicPartId !== partId) this.setState({
+            microtronicPartId: partId, ...(partId ? {} : {microtronicActive: false})
+        });
+    };
+
     switchTab (to) {
         if (this.state.busy) return;
         this.detachCardiac();
         this.leaveCp1();
-        this.setState({kim1Active: false});
+        this.setState({kim1Active: false, microtronicActive: false});
         const from = this.state.lang;
         if (to === from) return;
         // ASM tab: author mode just switches. Listing mode must RE-DERIVE: the
@@ -6464,7 +6484,7 @@ class PseudocodeImporter extends React.Component {
                     </React.Fragment>
             </React.Fragment>
         );
-        const machine = this.state.cardiacActive ? 'cardiac' : this.state.cp1Active ? 'cp1' :
+        const machine = this.state.microtronicActive ? 'microtronic' : this.state.cardiacActive ? 'cardiac' : this.state.cp1Active ? 'cp1' :
             this.state.kim1Active ? 'kim1' : null;
         const renderLanguages = menu => (
             <React.Fragment>
@@ -6485,7 +6505,7 @@ class PseudocodeImporter extends React.Component {
                         // file you opened does not vanish when you switch tabs.
                         ...(this.rcxLoaded() || (this.state.buffers.nqc || '').trim() ?
                             [['nqc', '🧱 NQC']] : [])].map(([l, label]) => {
-                        const active = !this.state.cp1Active && !this.state.cardiacActive && !this.state.kim1Active && this.state.lang === l;
+                        const active = !this.state.cp1Active && !this.state.cardiacActive && !this.state.kim1Active && !this.state.microtronicActive && this.state.lang === l;
                         return (
                             <button key={l} type="button" aria-pressed={active} onClick={() => this.switchTab(l)}
                                 disabled={this.state.busy && !active} title={label} aria-label={label}
@@ -6504,8 +6524,12 @@ class PseudocodeImporter extends React.Component {
                         title={this.L.cardiacLanguage} style={languageTabStyle(this.state.cardiacActive)}>
                         CARDIAC
                     </button>
+                    {this.state.microtronicPartId && <button type="button"
+                        data-testid={menu ? 'bw-code-microtronic-tab-menu' : 'bw-code-microtronic-tab'}
+                        onClick={this.selectMicrotronic} aria-pressed={!!this.state.microtronicActive}
+                        style={languageTabStyle(this.state.microtronicActive)}>Microtronic</button>}
                     {this.state.kim1PartId && <button type="button" data-testid={menu ? "bw-code-kim1-tab-menu" : "bw-code-kim1-tab"}
-                        onClick={() => this.setState({kim1Active: true, cp1Active: false, cardiacActive: false})}
+                        onClick={() => this.setState({kim1Active: true, cp1Active: false, cardiacActive: false, microtronicActive: false})}
                         aria-pressed={this.state.kim1Active} style={languageTabStyle(this.state.kim1Active)}>
                         KIM-1
                     </button>}
@@ -6559,7 +6583,7 @@ class PseudocodeImporter extends React.Component {
                     {renderLanguages(false)}
                     {this.state.cardiacActive && !this.state.actionsOpen && <div ref={this.props.onCardiacToolsSlot}
                         data-cardiac-tools-slot style={{display: 'flex', flexShrink: 0, alignItems: 'center', paddingLeft: 4}} />}
-                    {!this.state.cp1Active && !this.state.cardiacActive && !this.state.kim1Active && <React.Fragment>
+                    {!this.state.cp1Active && !this.state.cardiacActive && !this.state.kim1Active && !this.state.microtronicActive && <React.Fragment>
                     {renderCodeControls(false)}
                     </React.Fragment>}
                 </ScrollRow>
@@ -6583,7 +6607,12 @@ class PseudocodeImporter extends React.Component {
                         {languageBar}
                     </div>
                 </details> : languageBar}
-                {this.state.kim1Active ? (
+                {this.state.microtronicActive ? (
+                    <React.Suspense fallback={null}>
+                        <MicrotronicSurface vm={this.props.vm} partId={this.state.microtronicPartId} variant="code"
+                            locale={this.props.locale} Editor={CMEditor} />
+                    </React.Suspense>
+                ) : this.state.kim1Active ? (
                     <React.Suspense fallback={null}>
                         <Kim1Surface vm={this.props.vm} partId={this.state.kim1PartId} variant="code"
                             locale={this.props.locale} Editor={CMEditor} />

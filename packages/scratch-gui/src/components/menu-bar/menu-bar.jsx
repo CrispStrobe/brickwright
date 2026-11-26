@@ -681,6 +681,12 @@ class MenuBar extends React.Component {
                                 >
                                     <MenuSection>
                                         <MenuItem onClick={() => {
+                                            window.dispatchEvent(new CustomEvent('bw-open-machine-manager'));
+                                            this.props.onRequestCloseFile();
+                                        }}>
+                                            <FormattedMessage id="gui.menuBar.machines" defaultMessage="Machines…" />
+                                        </MenuItem>
+                                        <MenuItem onClick={() => {
                                             window.dispatchEvent(new CustomEvent('bw-open-lessons'));
                                             this.props.onRequestCloseFile();
                                         }}>

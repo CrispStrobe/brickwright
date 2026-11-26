@@ -6,11 +6,12 @@ import {clearControllerPanel, createWidgetButtonInputs, releaseMomentaryButtons,
 import EditorHelp from '../gui/editor-help.jsx';
 import MachineConsole from './machine-console.jsx';
 import {activateUndoSurface, notifyUndoState, registerUndoSurface} from '../../lib/global-undo.js';
-import {addCardiacFace, addKim1Face, isCardiacFace, isKim1Face, MACHINE_WIDGET_HEIGHT} from '../../lib/controller-machine-faces.js';
+import {addCardiacFace, addKim1Face, addMicrotronicFace, isCardiacFace, isKim1Face, isMicrotronicFace, MACHINE_WIDGET_HEIGHT} from '../../lib/controller-machine-faces.js';
 import {LOGIKUS_LAMP_WIDGETS, LOGIKUS_SWITCH_WIDGETS, LOGIKUS_TEST_WIDGET} from '../../lib/logikus/controller-bridge.js';
 import SpikePortMonitor from './spike-port-monitor.jsx';
 import {CONSOLE_6502_CHANGED, sendConsoleLine} from '../../lib/bw-debug/console-6502.js';
 
+const MicrotronicSurface = React.lazy(() => import(/* webpackChunkName: "bw-microtronic-surface" */ './microtronic-surface.jsx'));
 const Kim1Surface = React.lazy(() => import(/* webpackChunkName: "bw-kim1-surface" */ './kim1-surface.jsx'));
 
 const L10N = {
@@ -1086,19 +1087,23 @@ function MonitorConsole({route, interactive}) {
     </div>;
 }
 
-function SimpleVgaWidget({widget, runtime, interactive}) {
-    const ref = useRef(null);
+function useMonitorConsole(runtime, name) {
     const [route, setRoute] = React.useState(null);
     useEffect(() => {
+        if (!runtime || !name) return;
         const update = () => {
-            const current = runtime?.bw6502Console;
-            setRoute(current?.destination === widget.name ? current : null);
+            const current = runtime.bw6502Console;
+            setRoute(current?.destination === name ? current : null);
         };
-        runtime?.on(CONSOLE_6502_CHANGED, update);
+        runtime.on(CONSOLE_6502_CHANGED, update);
         update();
-        return () => runtime?.removeListener(CONSOLE_6502_CHANGED, update);
-    }, [runtime, widget.name]);
+        return () => runtime.removeListener(CONSOLE_6502_CHANGED, update);
+    }, [runtime, name]);
+    return route;
+}
 
+function SimpleVgaWidget({widget, route, interactive}) {
+    const ref = useRef(null);
     useEffect(() => {
         const canvas = ref.current;
         const rgba = widget.state.rgba;
@@ -1197,13 +1202,14 @@ function SerialKeyboard({name, sendLine, label, placeholder}) {
     </form>;
 }
 
-function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBindings, buttonInputs, sendBasicLine, runtime }) {
+function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBindings, buttonInputs, sendBasicLine, runtime, videoKind }) {
+    const serialRoute = useMonitorConsole(runtime, widget.type === 'simplevga' ? widget.name : null);
     const typeLabels = {
         joystick: t('joystick'), button: t('button'), slider: t('slider'),
         dpad: t('dpad'), dial: t('dial'), gauge: 'Gauge', matrix: 'Matrix', sevenseg: '7-Seg',
         keypad: 'Keypad', lcd: 'LCD', oled: 'OLED', terminal: 'Terminal',
         text: 'Text', image: 'Image',
-        keyboard: 'Keyboard', bargraph: 'Bar Graph', simplevga: 'VGA',
+        keyboard: 'Keyboard', bargraph: 'Bar Graph', simplevga: serialRoute ? 'Serial' : videoKind === 'tms9918' ? 'TMS9918' : 'VGA',
         mono_lcd: 'Mono LCD', rgb_light: 'RGB Light',
     };
     const pcSerial = runtime?.bwPcSerial?.name === widget.name ? runtime.bwPcSerial : null;
@@ -1244,7 +1250,7 @@ function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBi
                         {typeLabels[widget.type] || widget.type}
                     </span>}
                     <span data-testid={'bw-ctl-title-' + widget.name}>
-                        {sendBasicLine ? 'ACIA keyboard' : (L.label || widget.name)}
+                        {serialRoute ? 'Console' : sendBasicLine ? 'ACIA keyboard' : (L.label || widget.name)}
                     </span>
                 </div>
             )}
@@ -1326,7 +1332,7 @@ function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBi
             {widget.type === 'terminal' && (
                 <React.Fragment>
                     <TerminalWidget widget={widget} />
-                    {pcSerial && mode === 'play' && <SerialKeyboard name={widget.name} label="PC serial input"
+                    {pcSerial && mode === 'play' && <SerialKeyboard name={widget.name} label={pcSerial.label}
                         sendLine={line => sendConsoleLine(pcSerial.runner, line)} />}
                 </React.Fragment>
             )}
@@ -1401,7 +1407,7 @@ function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBi
             )}
 
             {widget.type === 'simplevga' && (
-                <SimpleVgaWidget widget={widget} runtime={runtime} interactive={mode === 'play'} />
+                <SimpleVgaWidget widget={widget} route={serialRoute} interactive={mode === 'play'} />
             )}
 
             {widget.type === 'mono_lcd' && (
@@ -1441,7 +1447,7 @@ function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBi
                 control was deliberately unwired until then, since a checkbox
                 calling a method the vendored copy did not have would have been a
                 control that throws when pressed. */}
-            {!hideBindings && (
+            {!hideBindings && (!serialRoute || mode === 'edit') && (
                 <div data-testid={'bw-ctl-binding-' + widget.name}
                     style={{ fontSize: 10, color: '#94a3b8' }}>
                     {bindingLabel}
@@ -1818,7 +1824,13 @@ class ControllerPanelView extends React.Component {
         const kimParts = (this.props.board?.parts || []).filter(part => part.kind === 'kim-1');
         const german = /^de/i.test(this.props.locale || '');
         const sendLogikus = (type, detail) => window.dispatchEvent(new CustomEvent(`bw-logikus-${type}`, {detail}));
+        const microtronicParts = (this.props.board?.parts || []).filter(part => part.kind === 'busch-microtronic');
         const machineChoices = [
+            ...microtronicParts.map(part => ({
+                label: microtronicParts.length > 1 ? `Busch Microtronic · ${part.id}` : 'Busch Microtronic',
+                disabled: widgets.some(widget => isMicrotronicFace(widget) && widget.config.partId === part.id),
+                run: () => this._addMachineWidget(target => addMicrotronicFace(target, part.id))
+            })),
             ...kimParts.map(part => ({
                 label: kimParts.length > 1 ? `KIM-1 · ${part.id}` : (german ? 'KIM-1-Frontplatte' : 'KIM-1 front panel'),
                 disabled: widgets.some(widget => isKim1Face(widget) && widget.config.partId === part.id),
@@ -2076,6 +2088,13 @@ class ControllerPanelView extends React.Component {
                                         {w === cardiacWidget && cardiacWidgetSlot ?
                                             <div ref={cardiacWidgetSlot} data-cardiac-widget-slot
                                                 style={{flex: 1, minHeight: 0, overflow: 'auto', scrollbarWidth: 'thin'}} /> :
+                                            isMicrotronicFace(w) && microtronicParts.some(part => part.id === w.config.partId) ?
+                                                <div style={{flex: 1, minHeight: 0, overflow: 'auto', scrollbarWidth: 'thin'}}>
+                                                    <React.Suspense fallback={null}>
+                                                        <MicrotronicSurface vm={this.props.vm} partId={w.config.partId}
+                                                            variant="front" locale={this.props.locale} />
+                                                    </React.Suspense>
+                                                </div> :
                                             isKim1Face(w) && kimParts.some(part => part.id === w.config.partId) ?
                                                 <div style={{flex: 1, minHeight: 0, overflow: 'auto', scrollbarWidth: 'thin'}}>
                                                     <React.Suspense fallback={null}>
@@ -2097,6 +2116,8 @@ class ControllerPanelView extends React.Component {
                                     panel={panel}
                                     buttonInputs={this._buttonInputs}
                                     runtime={this.props.vm?.runtime}
+                                    videoKind={w.type === 'simplevga' && w.binding?.target === 'part' ?
+                                        this.props.board?.parts?.find(part => part.id === w.binding.partId)?.kind : null}
                                     sendBasicLine={mode === 'play' && w.type === 'keyboard' && w.binding?.target === 'part' &&
                                         this.props.board?.parts?.some(part => part.id === w.binding.partId && part.kind === 'ps2')
                                         ? this.props.sendBasicLine : undefined}

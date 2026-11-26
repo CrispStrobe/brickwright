@@ -53,7 +53,8 @@ export async function runMachineConfig(config, opts = {}) {
         slotId: bm.slot,
         bytes: bm.bytes,
         kind: activated.targetKind,
-        profile: bm.profile || null,
+        profile: activated.targetKind === 'i8086' && bm.slot === 'rom'
+            ? opts.i8086RomProfile || bm.profile || null : bm.profile || null,
         name: bm.name || null,
         nativeBlocks: bm.nativeBlocks === true,
         machinePreset: activated.machinePreset || null,
@@ -62,6 +63,8 @@ export async function runMachineConfig(config, opts = {}) {
         // stays in the Debug instrument).
         widgets: Array.isArray(activated.widgets) ? activated.widgets : []
     };
+    if (bm.dosVariant) detail.dosVariant = bm.dosVariant;
+    if (bm.dosFiles) detail.dosFiles = bm.dosFiles;
     if (typeof bm.romAt === 'number') detail.romAt = bm.romAt;
     if (bm.geometry) detail.geometry = {...bm.geometry};
     // A Linux kernel boots WITH its initramfs: both were fetched and
@@ -95,7 +98,9 @@ export async function runMachineConfig(config, opts = {}) {
     // named browser 386 route, wait for the panel's actual attach result so a
     // failed ROM/media load remains visible in Machine Manager. Injected
     // dispatchers keep the old synchronous contract unless a test opts in.
-    const awaitBoot = activated.machinePreset === 'freedos-vga' &&
+    const awaitBoot = (activated.machinePreset === 'freedos-vga' ||
+        (activated.targetKind === 'i80386' && bm.slot === 'bios') ||
+        (activated.targetKind === 'i8086' && ['rom', 'com', 'exe'].includes(bm.slot))) &&
         (opts.awaitBoot ?? typeof opts.dispatch !== 'function');
     let completion = null;
     let timer = null;
@@ -108,7 +113,7 @@ export async function runMachineConfig(config, opts = {}) {
                 else resolve();
             };
             detail.bootCompletion = {resolve: () => settle(null), reject: settle};
-            timer = setTimeout(() => settle(new Error('timed out waiting for the 386 machine to attach')), 60000);
+            timer = setTimeout(() => settle(new Error('timed out waiting for the machine to attach')), 60000);
         });
     }
     try {
