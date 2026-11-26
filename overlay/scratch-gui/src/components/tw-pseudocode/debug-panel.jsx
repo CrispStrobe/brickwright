@@ -1059,8 +1059,7 @@ class DebugPanel extends React.Component {
             // replacement alone may publish a Widgets display.
             if (this._runnerPromise !== owner) return;
             if (this.state.kind === 'labwired') this.mirrorRunnerDisplay(runner);
-            else if (['i8086', 'i80286', 'i80386'].includes(this.state.kind) &&
-                (runner.i8086MediaIo?.display || this.state.kind !== 'i8086')) {
+            else if (!this._bootMedia && ['i8086', 'i80286', 'i80386'].includes(this.state.kind)) {
                 this.mirrorRunnerDisplay(runner, this.state.kind === 'i8086' ? 'xt-set1' : 'at-set1');
             }
             this._mountGuestTerminal(runner, runner.state());

@@ -39,7 +39,7 @@ try {
     await dos.getByRole('searchbox', {name: 'Search firmware'}).fill('partcl Tcl');
     const row = dos.getByTestId('bw-mm-downloadable-media').locator('div').filter({hasText: 'partcl Tcl (DOS)'});
     await row.getByRole('button', {name: 'Run', exact: true}).click();
-    const consoleOutput = dos.getByTestId('bw-ctl-terminal-DOS Console');
+    const consoleOutput = dos.locator('[data-bw-stage-dock="controller"]').getByTestId('bw-serial-console');
     await consoleOutput.getByText(/partcl on DOS[\s\S]*?42[\s\S]*?120[\s\S]*?720/).waitFor();
     const result = await consoleOutput.textContent();
     for (const value of ['42', '120', '720']) assert.match(result, new RegExp(`\\b${value}\\b`));
@@ -50,7 +50,7 @@ try {
     await openFromFile(forth, 'i8086');
     await forth.getByRole('searchbox', {name: 'Search firmware'}).fill('zForth (DOS)');
     await forth.getByTestId('bw-mm-downloadable-media').getByRole('button', {name: 'Run', exact: true}).click();
-    await forth.getByTestId('bw-ctl-terminal-DOS Console')
+    await forth.locator('[data-bw-stage-dock="controller"]').getByTestId('bw-serial-console')
         .getByText(/zForth on DOS[\s\S]*49 42 64[\s\S]*5 4 3 2 1/).waitFor({timeout: 60000});
     await forth.close();
     console.log('File → Machines → zForth (DOS) → Run displays the sample output.');

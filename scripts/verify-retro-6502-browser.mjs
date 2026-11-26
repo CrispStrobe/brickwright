@@ -94,7 +94,9 @@ try {
 
     const debuggerPanel = () => page.locator('[data-debugger-solo-pane]:visible');
     const terminal = () => debuggerPanel().getByTestId('bw-serial-console');
-    const serialInput = () => debuggerPanel().getByTestId('bw-serial-input');
+    const controller = () => page.locator('[data-bw-stage-dock="controller"]');
+    const controllerTerminal = () => controller().getByTestId('bw-serial-console');
+    const controllerInput = () => controller().getByTestId('bw-serial-input');
     const consoleOutput = () => debuggerPanel().getByRole('combobox', {name: 'Console output'});
     const monitorConsole = widget => page.getByTestId(`bw-ctl-simplevga-${widget}`)
         .locator('[data-6502-monitor-serial]');
@@ -156,14 +158,15 @@ try {
     await rightView('Controller');
     await vdpHelloFrame(vdpWidget);
     await page.getByTestId('bw-machine-preset-basic').click();
+    await rightView('Controller');
+    await waitingForResult(controllerTerminal(), /MICROSOFT BASIC V1.1/);
     await checkDebuggerHasNoVideo();
-    await waitingForResult(terminal(), /MICROSOFT BASIC V1.1/);
     const basicMonitor = await routeToMonitor('Video', 'ACIA');
     await waitingForResult(basicMonitor, /MICROSOFT BASIC V1.1/);
     await sendLine(basicMonitor.getByRole('textbox', {name: '6502 console input'}), 'print 2+2');
     await waitingForResult(basicMonitor, /(?:^|\n)\s*4\s*(?:\n|$)/);
     await checkDebuggerHasNoVideo();
-    await consoleOutput().selectOption('');
+    await consoleOutput().selectOption('debugger');
     await waitingForResult(terminal(), /(?:^|\n)\s*4\s*(?:\n|$)/);
     console.log('MS BASIC can use the Debugger console or the Controller VDP monitor.');
 
@@ -173,7 +176,7 @@ try {
     await sendLine(forthMonitor.getByRole('textbox', {name: '6502 console input'}), '2 2 + .');
     await waitingForResult(forthMonitor, /2 2 \+ \.[\s\S]*?\b4\b[\s\S]*?ok/i);
     await checkDebuggerHasNoVideo();
-    await consoleOutput().selectOption('');
+    await consoleOutput().selectOption('debugger');
     await waitingForResult(terminal(), /2 2 \+ \.[\s\S]*?\b4\b[\s\S]*?ok/i);
     console.log('Tali Forth accepts commands on the same VDP monitor and retains its output when switched back.');
 
@@ -200,9 +203,12 @@ try {
     await page.getByTestId('bw-mm-wired-aurora65').waitFor();
     await page.getByTestId('bw-mm-wired-basic').click();
     await checkDebuggerHasNoVideo();
-    await waitingForResult(terminal(), /MICROSOFT BASIC V1.1/);
-    await sendLine(serialInput(), 'print 2+2');
-    await waitingForResult(terminal(), /(?:^|\n)\s*4\s*(?:\n|$)/);
+    await consoleOutput().selectOption('controller');
+    await rightView('Controller');
+    await waitingForResult(controllerTerminal(), /MICROSOFT BASIC V1.1/);
+    await sendLine(controllerInput(), 'print 2+2');
+    await waitingForResult(controllerTerminal(), /(?:^|\n)\s*4\s*(?:\n|$)/);
+    await checkDebuggerHasNoVideo();
     const vgaConsole = await routeToMonitor('vgaMonitor', 'ACIA');
     await sendLine(page.getByRole('textbox', {name: 'BASIC serial input'}), 'print "Mixed Case"');
     await waitingForResult(vgaConsole, /Mixed Case/);

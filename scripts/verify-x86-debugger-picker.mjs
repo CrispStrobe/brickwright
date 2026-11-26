@@ -27,6 +27,9 @@ try {
                 const regs = target?.regs();
                 return regs && (regs.cycles > 1000 || regs.eip > 1000) && target.video()?.width > 0;
             }, null, {timeout: 20000});
+            const screen = page.locator('[data-bw-stage-dock="controller"]').getByTestId('bw-machine-canvas');
+            await screen.waitFor();
+            assert.equal(await page.locator('[data-vdp-screen]').count(), 0);
             if (variant) {
                 const topology = await page.evaluate(() => window.__benchTarget.captureCheckpoint().topology);
                 assert.equal(JSON.parse(topology).variant, variant);

@@ -59,7 +59,12 @@ try {
     await serial(/2 3 5 7 11 13 17 19 23 29 31 37 41 43 47/);
     await read('.cm-content', /static unsigned char composite/);
     await fullscreen();
-    console.log('CP/M Sieve opened the exact C source and drew its guest output in Controller.');
+    await page.evaluate(() => { window.previousSieveTarget = window.__benchTarget; });
+    await page.getByTitle('Go', {exact: true}).click();
+    await page.waitForFunction(() => window.__benchTarget && window.__benchTarget !== window.previousSieveTarget);
+    await serial(/2 3 5 7 11 13 17 19 23 29 31 37 41 43 47/);
+    console.log('CP/M Sieve opened the exact C source, ran in Controller and restarted from Code.');
+
 
     await page.getByTestId('bw-lang-more').click();
     await page.getByTestId('bw-lang-more-menu').getByRole('menuitem', {name: /Tcl/}).click();
