@@ -205,3 +205,20 @@ test('retargeted retro console drives both matrices and silences its PNP buzzer 
     const {rows: [{behavior}]} = JSON.parse(result.stdout);
     assert.deepEqual(behavior.checks.map(check => check.observed), [[64, 64], [0, 1, 2], true, true]);
 });
+
+test('the 555 retrigger actually discharges its timing capacitor and extends the pulse', () => {
+    const result = invoke('pc64-555-retrigger', '--json');
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const {rows: [{behavior}]} = JSON.parse(result.stdout);
+    assert.deepEqual(behavior.checks.slice(0, 3).map(check => check.observed), [true, true, false]);
+    const discharge = behavior.checks[3].observed;
+    assert.ok(discharge.before > 1 && discharge.after < 0.3);
+});
+
+test('hourglass diode matrix accumulates six lit LEDs and its tilt reset clears them', () => {
+    const result = invoke('pc86-led-sanduhr', '--json');
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const {rows: [{behavior}]} = JSON.parse(result.stdout);
+    assert.deepEqual(behavior.checks[0].observed.slice(0, 8), [0, 1, 3, 7, 15, 31, 63, 0]);
+    assert.equal(behavior.checks[1].observed, 0);
+});

@@ -76,6 +76,8 @@ export function checkWaveformLesson (bench, circuit) {
         });
     } else if (bench.id === 'pc64-555-retrigger' || bench.id === 'pc66-555-langzeit') {
         const retrigger = bench.id === 'pc64-555-retrigger';
+        const timingNet = retrigger && outputNet(board, 'timer_555_3', 'threshold');
+        let discharge;
         const pulse = () => {
             circuit.setControl('button_5', 1);
             advanceMs(board, 10);
@@ -90,12 +92,18 @@ export function checkWaveformLesson (bench, circuit) {
             time = at;
             const observed = current(board, 'led_9') > 1;
             if (retrigger && index === 0) {
+                const before = board.nodeVoltage(timingNet);
                 pulse();
                 time += 10;
+                discharge = {before, after: board.nodeVoltage(timingNet)};
             }
             return {check: retrigger ? 'the second trigger extends the lit phase' : 'long timer stays lit until about 110 s',
                 input: at, expected: plan[index], observed, ok: observed === plan[index]};
         });
+        if (retrigger) {
+            checks.push({check: 'the retrigger diode discharges the timing capacitor',
+                expected: 'fall by at least 0.5 V', observed: discharge, ok: discharge.before - discharge.after >= 0.5});
+        }
     } else if (bench.id === 'pc47-555-monostable') {
         const lit = () => current(board, 'led') > 1;
         const idle = lit();
@@ -115,15 +123,29 @@ export function checkWaveformLesson (bench, circuit) {
         ];
     } else if (bench.id === 'pc84-led-herz' || bench.id === 'pc85-led-lampe-puls') {
         const leds = circuit.parts.filter(part => part.kind === 'led').map(part => part.id);
-        const waveform = Array.from({length: 140}, () => {
+        const [triangleNet, comparatorNet] = ['1_out', '2_out'].map(terminal => outputNet(board, 'lm358_3', terminal));
+        const samples = Array.from({length: 140}, () => {
             advanceMs(board, 30);
-            return current(board, leds[0]);
+            return {currents: leds.map(id => current(board, id)), triangle: board.nodeVoltage(triangleNet),
+                comparator: board.nodeVoltage(comparatorNet)};
         });
+        const waveform = samples.map(sample => sample.currents[0]);
         const low = Math.min(...waveform);
         const high = Math.max(...waveform);
         const rises = waveform.filter((sample, i) => sample > 1 && i > 0 && waveform[i - 1] <= 1).length;
-        checks = [{check: 'LED current repeatedly rises and falls (mA)', observed: {low, high, rises},
-            ok: low < 0.2 && high > 2 && rises >= 2}];
+        const limits = field => [Math.min(...samples.map(sample => sample[field])), Math.max(...samples.map(sample => sample[field]))];
+        const triangle = limits('triangle');
+        const comparator = limits('comparator');
+        const intermediate = samples.filter(sample => sample.triangle > triangle[0] + 0.3 &&
+            sample.triangle < triangle[1] - 0.3).length;
+        checks = [
+            {check: 'LED current repeatedly rises and falls (mA)', observed: {low, high, rises},
+                ok: low < 0.2 && high > 2 && rises >= 2},
+            {check: 'integrator ramps between comparator transitions', observed: {triangle, comparator, intermediate},
+                ok: triangle[1] - triangle[0] > 1 && comparator[0] < 0.1 && comparator[1] > 3 && intermediate > 12},
+            {check: 'all LEDs follow the same waveform', observed: leds.length,
+                ok: samples.every(({currents}) => currents.every(value => Math.abs(value - currents[0]) < 0.01))}
+        ];
     } else {
         checks = checkAudio(bench, circuit);
         if (!checks) return null;
@@ -135,24 +157,60 @@ const chases = {
     'pc81-led-lauflicht': {period: 660, nodes: [22, 27, 32, 37, 42, 47, 52, 57, 62, 67]},
     'pc82-mini-roulette': {period: 145, nodes: [32, 37, 42, 47, 52, 57, 62, 67, 72, 77], input: 'button_9'},
     'pc83-gluecksrad': {period: 145, nodes: [32, 37, 42, 47, 52, 57], tilt: 'tilt_sensor_9'},
-    'pc86-led-sanduhr': {period: 1000, nodes: [26, 31, 36, 41, 46, 51], filling: true}
+    'pc86-led-sanduhr': {period: 1000, nodes: [26, 31, 36, 41, 46, 51], tilt: 'tilt_sensor_21', filling: true}
 };
 
 function checkChase (board, circuit, spec) {
     if (spec.input) circuit.setControl(spec.input, 1);
     if (spec.tilt) circuit.setPartParam(spec.tilt, 'tilted', 1);
-    const sequence = [];
+    const maskNow = () => spec.nodes.reduce((bits, id, bit) =>
+        current(board, 'led_' + id) > 1 ? bits | (1 << bit) : bits, 0);
+    const sequence = [maskNow()];
     for (let sample = 0; sample < (spec.nodes.length + 3) * 12; sample++) {
         advanceMs(board, spec.period / 12);
-        const mask = spec.nodes.reduce((bits, id, bit) =>
-            current(board, 'led_' + id) > 1 ? bits | (1 << bit) : bits, 0);
-        if (sequence.at(-1) !== mask && mask) sequence.push(mask);
+        const mask = maskNow();
+        if (sequence.at(-1) !== mask) sequence.push(mask);
     }
-    const allLit = (1 << spec.nodes.length) - 1;
-    return [{check: spec.filling ? 'hourglass fills all indicator positions before wrapping'
-        : 'chaser lights each position in turn',
-    observed: sequence, ok: spec.filling ? sequence.includes(allLit)
-        : spec.nodes.every((_, bit) => sequence.includes(1 << bit)) && sequence.every(mask => (mask & (mask - 1)) === 0)}];
+    const count = spec.nodes.length;
+    const chasing = Array.from({length: count}, (_, index) => 1 << index);
+    if (spec.filling) {
+        const fill = [0, ...chasing.map(bit => (bit << 1) - 1), 0];
+        circuit.setPartParam(spec.tilt, 'tilted', 0);
+        advanceMs(board, 2 * spec.period);
+        const reset = maskNow();
+        circuit.setPartParam(spec.tilt, 'tilted', 1);
+        const afterReset = [];
+        for (let sample = 0; sample < 30; sample++) {
+            advanceMs(board, spec.period / 12);
+            const mask = maskNow();
+            if (afterReset.at(-1) !== mask) afterReset.push(mask);
+        }
+        return [
+            {check: 'hourglass fills in order and wraps', expected: fill, observed: sequence,
+                ok: fill.every((mask, index) => sequence[index] === mask)},
+            {check: 'returning the hourglass to reset clears it', expected: 0, observed: reset, ok: reset === 0},
+            {check: 'the next tilt restarts filling from the first LED', expected: [0, 1], observed: afterReset,
+                ok: afterReset[0] === 0 && afterReset[1] === 1}
+        ];
+    }
+    const active = sequence.filter(Boolean);
+    const checks = [{check: 'chaser lights each position in turn', observed: active,
+        ok: chasing.every(mask => active.includes(mask)) && active.every(mask => (mask & (mask - 1)) === 0)}];
+    if (spec.tilt) {
+        checks.push({check: 'wheel advances through all six positions in order and wraps', observed: active,
+            ok: active.length > count && active.every((mask, index) =>
+                mask === chasing[(chasing.indexOf(active[0]) + index) % count])});
+        circuit.setPartParam(spec.tilt, 'tilted', 0);
+        advanceMs(board, 250);
+        const resting = maskNow();
+        const stopped = Array.from({length: 5}, () => {
+            advanceMs(board, spec.period);
+            return maskNow();
+        });
+        checks.push({check: 'the level sensor stops the wheel and holds the last LED', observed: stopped,
+            ok: resting !== 0 && stopped.every(mask => mask === resting)});
+    }
+    return checks;
 }
 
 function span (board, id, a, b, count = 80, interval = 0.05) {
@@ -204,15 +262,41 @@ function checkAudio (bench, circuit) {
         return [{check: 'oscillation sustains at mid gain and dies at low gain',
             observed: {running, damped}, ok: running > 8 && damped < 0.08}];
     }
-    case 'school-miniorgan-107056':
-        return [[28, 261.3], [71, 523.0]].map(([key, expected]) => {
+    case 'school-miniorgan-107056': {
+        const speaker = outputNet(board, 'resistor_9', 'a');
+        const note = (ms, threshold) => {
+            const scope = board.addScopeChannel({type: 'digital', netId: speaker, threshold});
+            try {
+                advanceMs(board, ms);
+                const {transitions, count} = board.getScopeData(scope);
+                const rising = [];
+                for (let sample = 0; sample < count; sample++) {
+                    if (transitions[sample * 2 + 1] === 1) rising.push(transitions[sample * 2]);
+                }
+                return rising;
+            } finally {
+                board.removeScopeChannel(scope);
+            }
+        };
+        const keys = [28, 35, 41, 47, 53, 59, 65, 71];
+        const pitches = [261.3, 293.82, 329.93, 349.36, 391.82, 440.8, 493.98, 523];
+        const checks = keys.map((key, index) => {
             circuit.setControl('button_' + key, 1);
-            advanceMs(board, 25);
-            const check = frequencyCheck(board, 'resistor_9', expected, key, 'a', 1, 350);
+            advanceMs(board, 6);
+            // Narrow speaker pulses can fall between fixed display samples.
+            // The digital scope timestamps real threshold crossings at solver steps.
+            const rising = note(15, 1);
             circuit.setControl('button_' + key, 0);
-            advanceMs(board, 20);
-            return check;
+            advanceMs(board, 6);
+            const expected = pitches[index];
+            const observed = rising.length < 3 ? null : 1e9 * (rising.length - 1) / (rising.at(-1) - rising[0]);
+            return {check: 'speaker pulse frequency (Hz)', input: key, expected, observed,
+                ok: observed !== null && Math.abs(observed - expected) <= 0.01 * expected};
         });
+        const quiet = note(15, 1).length;
+        checks.push({check: 'all keys released stops sustained speaker pulses', expected: 0, observed: quiet, ok: quiet === 0});
+        return checks;
+    }
     case 'school-intercom-101455': {
         advanceMs(board, 1000);
         const receiving = span(board, 'resistor_93', 'a', 'b');
