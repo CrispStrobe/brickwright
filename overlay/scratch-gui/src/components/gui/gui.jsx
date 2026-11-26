@@ -443,6 +443,7 @@ const GUIComponent = props => {
     const circuitOwnsStage = showCircuitStage && (dockMode === 'right' ||
         (props.activeTabIndex !== CIRCUIT_TAB_INDEX && ['top', 'off', 'solo'].includes(dockMode)));
     const [cardiacCodeSlot, setCardiacCodeSlot] = React.useState(null);
+    const [cardiacToolsSlot, setCardiacToolsSlot] = React.useState(null);
     const [cardiacControllerSlot, setCardiacControllerSlot] = React.useState(null);
     const [cardiacAttached, setCardiacAttached] = React.useState(() => window.__bwMachineExtracted?.kind === 'cardiac');
     React.useEffect(() => {
@@ -455,8 +456,9 @@ const GUIComponent = props => {
             window.removeEventListener('bw-cardiac-detached', detached);
         };
     }, []);
-    const cardiacSurfaces = React.useMemo(() => ({code: cardiacCodeSlot, controller: cardiacControllerSlot, Editor: MachineCodeEditor}),
-        [cardiacCodeSlot, cardiacControllerSlot]);
+    const cardiacSurfaces = React.useMemo(() => ({code: cardiacCodeSlot, tools: cardiacToolsSlot,
+        controller: cardiacControllerSlot, Editor: MachineCodeEditor}),
+    [cardiacCodeSlot, cardiacToolsSlot, cardiacControllerSlot]);
     const [cp1CodeSlot, setCp1CodeSlot] = React.useState(null);
     const [cp1ControllerSlot, setCp1ControllerSlot] = React.useState(null);
     const [cp1Attached, setCp1Attached] = React.useState(() => window.__bwMachineExtracted?.kind === 'cp1');
@@ -1008,7 +1010,7 @@ const GUIComponent = props => {
         const middleContent = paneLayout?.middle?.upper || 'blocks-canvas';
         const renderCodePane = isVisible => (
             <EditorErrorBoundary name="Code"><LazyPseudocodeImporter
-                isVisible={isVisible} vm={vm} onCp1CodeSlot={setCp1CodeSlot} onCardiacCodeSlot={setCardiacCodeSlot}
+                isVisible={isVisible} vm={vm} onCp1CodeSlot={setCp1CodeSlot} onCardiacCodeSlot={setCardiacCodeSlot} onCardiacToolsSlot={setCardiacToolsSlot}
             /></EditorErrorBoundary>
         );
         const helpEditor = [

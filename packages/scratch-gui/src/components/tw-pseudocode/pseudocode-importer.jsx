@@ -1594,6 +1594,9 @@ class PseudocodeImporter extends React.Component {
         if (prevProps.isVisible !== this.props.isVisible || prevState.busy !== this.state.busy ||
             prevState.revealed !== this.state.revealed || prevState.buffers !== this.state.buffers ||
             prevState.lang !== this.state.lang || prevState.asmMode !== this.state.asmMode) notifyEditorMenuActions();
+        if (prevProps.isVisible !== this.props.isVisible) {
+            this.setMaximizedChrome(this.props.isVisible !== false && this.state.maximized);
+        }
         if (this.props.isVisible && !this.state.revealed) this._reveal();
         // Tools may have opened while a hardware device was selected. If the
         // user then chooses "none" without closing it, onToggle does not fire
@@ -2700,6 +2703,7 @@ class PseudocodeImporter extends React.Component {
     }
 
     componentWillUnmount () {
+        this.setMaximizedChrome(false);
         this._unmounted = true;
         if (this._unregisterCodeMenu) this._unregisterCodeMenu();
         this._makeCodeRequest = null;
@@ -5628,9 +5632,19 @@ class PseudocodeImporter extends React.Component {
         }
     }
 
+    setMaximizedChrome (active) {
+        if (active && this._chromeBeforeMaximize === undefined) {
+            this._chromeBeforeMaximize = document.body.classList.contains('bw-compact-chrome');
+        } else if (active || this._chromeBeforeMaximize === undefined) return;
+        const compact = active || this._chromeBeforeMaximize;
+        if (!active) this._chromeBeforeMaximize = undefined;
+        window.dispatchEvent(new CustomEvent('bw-chrome-compact-request', {detail: {compact}}));
+    }
+
     /** Toggle maximize: collapse reference/art/info panels and hide the right pane. */
     toggleMaximize () {
         const next = !this.state.maximized;
+        this.setMaximizedChrome(next);
         this.setState({maximized: next, showRef: false, showArt: false, showInfo: false, showMatrix: false});
         try { localStorage.setItem('bw-editor-max', next ? '1' : '0'); } catch { /* noop */ }
         // Toggle the right pane via the existing mechanic
@@ -5964,7 +5978,7 @@ class PseudocodeImporter extends React.Component {
         const max = this.state.maximized;
         const csel = {...sel, padding: '4px 8px', fontSize: 12}; // compact select
         const languageTabStyle = active => ({
-            padding: '6px 10px', border: '1px solid #cbd5e1', borderBottomColor: active ? '#fff' : '#cbd5e1',
+            padding: this.state.cardiacActive ? '5px 6px' : '6px 10px', border: '1px solid #cbd5e1', borderBottomColor: active ? '#fff' : '#cbd5e1',
             borderRadius: '8px 8px 0 0', cursor: 'pointer', fontWeight: active ? 700 : 500, fontSize: 13,
             background: active ? '#fff' : '#eef2f7', color: active ? '#1e293b' : '#64748b',
             position: 'relative', top: active ? 0 : 1, whiteSpace: 'nowrap'
@@ -5974,19 +5988,7 @@ class PseudocodeImporter extends React.Component {
         // The device this tab is writing for: the MakeCode project's target, else the DEVICE header.
         const toolbarDevice = (this._makeCodeProject && this._makeCodeProject.target) || this.currentDevice();
         const applies = id => toolbarActionApplies(id, {device: toolbarDevice, evidence: showSpikeAction});
-        return (
-            <div style={wrap} data-testid="bw-code-editor">
-                {/* ── Single merged row: language tabs (left) + compact controls (right) ── */}
-                {/* paddingRight reserves the top-right corner for the floating
-                    "Show right panel" button, which is absolutely positioned at
-                    z-index 20 over this very area. The two did not collide while
-                    the editor chrome was 92px tall and this row sat at y=109;
-                    shrinking the chrome to one row moved the row to y=52 and the
-                    maximize button landed under it — measured, ⊞ at x=980 with
-                    the floating button at x=992, covered and untappable. The
-                    room is reserved unconditionally because the overlay is there
-                    at every chrome height; it was only ever luck that they
-                    missed each other. */}
+        const languageBar = (
                 <ScrollRow testId="bw-lang-row" label={this.L.toolbarLabel}
                     style={{marginBottom: -1, paddingRight: 40}} scrollerStyle={{paddingBottom: 1}}
                     trailing={(
@@ -6023,9 +6025,9 @@ class PseudocodeImporter extends React.Component {
                         const active = !this.state.cp1Active && !this.state.cardiacActive && !this.state.kim1Active && this.state.lang === l;
                         return (
                             <button key={l} type="button" aria-pressed={active} onClick={() => this.switchTab(l)}
-                                disabled={this.state.busy && !active}
+                                disabled={this.state.busy && !active} title={label} aria-label={label}
                                 style={languageTabStyle(active)}>
-                                {label}
+                                {this.state.cardiacActive ? label.split(' ')[0] : label}
                             </button>
                         );
                     })}
@@ -6059,22 +6061,18 @@ class PseudocodeImporter extends React.Component {
                                         fontWeight: 700, fontSize: 13, background: '#eef2f7', color: '#64748b', position: 'relative', top: 1}}>
                                     +
                                 </button>}>
-                                <button type="button" role="menuitem" data-testid="bw-code-open-cp1"
-                                    onClick={() => this.openCp1Language()}
-                                    style={{padding: '7px 10px', border: 0, background: 'transparent', textAlign: 'left',
-                                        cursor: 'pointer', fontSize: 13, color: '#1e293b', whiteSpace: 'nowrap'}}>
-                                    {this.L.cp1Language}
-                                </button>
                                 {hidden.map(([l, label, name]) => (
-                                    <button key={l} type="button" role="menuitem" onClick={() => this.addOptionalLang(l)}
+                                    <button key={l} type="button" role="menuitem" title={name} onClick={() => this.addOptionalLang(l)}
                                         style={{padding: '7px 10px', border: 0, background: 'transparent', textAlign: 'left', cursor: 'pointer',
                                             fontSize: 13, color: '#1e293b', whiteSpace: 'nowrap'}}>
-                                        {label} — {name}
+                                        {label}
                                     </button>
                                 ))}
                             </Popup>
                         );
                     })()}
+                    {this.state.cardiacActive && <div ref={this.props.onCardiacToolsSlot}
+                        data-cardiac-tools-slot style={{display: 'flex', flexShrink: 0, alignItems: 'center', paddingLeft: 4}} />}
                     {!this.state.cp1Active && !this.state.cardiacActive && !this.state.kim1Active && <React.Fragment>
                     {/* Convert/run actions live in the tab row, in maximize mode too. */}
                     <div data-testid="bw-code-action-row" style={{display: 'inline-flex', alignSelf: 'center',
@@ -6553,6 +6551,26 @@ class PseudocodeImporter extends React.Component {
                     </React.Fragment>
                     </React.Fragment>}
                 </ScrollRow>
+        );
+        return (
+            <div style={{...wrap, position: 'relative'}} data-testid="bw-code-editor">
+                {max ? <details data-code-max-tools style={{position: 'absolute', top: 8, left: 16, right: 52,
+                    zIndex: 20, pointerEvents: 'none'}} onKeyDown={event => {
+                    if (event.key === 'Escape') {
+                        event.currentTarget.open = false;
+                        event.currentTarget.querySelector('summary')?.focus();
+                    }
+                }}>
+                    <summary data-testid="bw-max-editor-tools" aria-label={this.L.toolbarLabel} title={this.L.toolbarLabel}
+                        style={{listStyle: 'none', textAlign: 'center', cursor: 'pointer', width: 28, marginLeft: 'auto',
+                            pointerEvents: 'auto', color: '#334155', border: '1px solid #cbd5e1', borderRadius: 6, background: '#fff'}}>
+                        …
+                    </summary>
+                    <div style={{pointerEvents: 'auto', background: '#f1f5f9', padding: 4, borderRadius: 6,
+                        border: '1px solid #cbd5e1', boxShadow: '0 2px 8px #0002'}}>
+                        {languageBar}
+                    </div>
+                </details> : languageBar}
                 {this.state.kim1Active ? (
                     <React.Suspense fallback={null}>
                         <Kim1Surface vm={this.props.vm} partId={this.state.kim1PartId} variant="code"
@@ -7135,6 +7153,7 @@ class PseudocodeImporter extends React.Component {
 PseudocodeImporter.propTypes = {
     onCp1CodeSlot: PropTypes.func,
     onCardiacCodeSlot: PropTypes.func,
+    onCardiacToolsSlot: PropTypes.func,
     vm: PropTypes.shape({loadProject: PropTypes.func, toJSON: PropTypes.func}).isRequired,
     locale: PropTypes.string,
     // Whether this tab is the selected one. Gates the CodeMirror chunk and the

@@ -1668,7 +1668,7 @@ class CircuitTab extends React.Component {
         return config;
     }
 
-    selectKim1(part) {
+    selectKim1 (part) {
         const current = window.__bwMachineExtracted;
         if (!part) {
             if (current?.kind === 'kim1') {

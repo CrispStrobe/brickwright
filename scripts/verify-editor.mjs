@@ -186,7 +186,8 @@ async function verify () {
             } else {
                 fail('Maximize toggle did not set localStorage');
             }
-            // Toggle back
+            // Toggle back through the maximized toolbar.
+            await page.getByTestId('bw-max-editor-tools').click();
             await maxBtn.click();
             await page.waitForTimeout(300);
             const restored = await page.evaluate(() => localStorage.getItem('bw-editor-max'));

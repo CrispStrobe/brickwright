@@ -82,3 +82,9 @@
     .machine .trays { grid-template-columns: minmax(0, 1fr); }
     .machine .memory { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
+
+.toolbar { display: flex; flex-wrap: nowrap; gap: 3px; align-items: center; padding: 0; background: transparent; }
+.toolbar button, .toolbar .fileButton, .toolbar select {
+    font-size: 12px; padding: 4px 6px; min-height: 26px; box-sizing: border-box;
+}
+.toolbar .examplePicker { min-width: 0; width: 104px; max-width: 104px; }

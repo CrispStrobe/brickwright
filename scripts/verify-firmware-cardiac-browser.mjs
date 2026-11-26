@@ -29,7 +29,8 @@ try {
     await page.locator('[data-cardiac-editor]:visible').waitFor();
     await page.getByTestId('bw-code-editor').locator('[data-cardiac-editor] .cm-editor').waitFor();
     assert.equal(await page.getByRole('combobox', {name: 'Example program'}).inputValue(), 'cardiac-echo');
-    await page.locator('[data-cardiac-editor]').getByRole('button', {name: 'Run source + cards', exact: true}).click();
+    const toolbar = page.getByTestId('bw-lang-row').locator('[data-cardiac-code-tools]');
+    await toolbar.getByRole('button', {name: 'Run source + cards', exact: true}).click();
     const controller = page.locator('[data-cardiac-controller]:visible');
     await controller.waitFor();
     await page.waitForFunction(() => document.querySelector('[data-cardiac-controller]')?.dataset.cardiacStatus === 'halted');

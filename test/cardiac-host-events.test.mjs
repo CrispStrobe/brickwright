@@ -22,9 +22,10 @@ function restoreFixture (restored) {
         cardiacControl: (...args) => calls.push(args)
     }}};
     const fn = new Function('callbacks', 'generation', 'current', 'initialWorkspace', 'setWorkspace',
-        'setPrediction', 'setBusy', 'CARDIAC_WORKSPACE_KEY', `return event => {${match[1]}};`)(
+        'setPrediction', 'setBusy', 'setExampleId', 'setSuppliedCards', 'exampleForSource', 'CARDIAC_WORKSPACE_KEY', `return event => {${match[1]}};`)(
         callbacks, generation, current, () => restored, value => calls.push(['workspace', value]),
-        value => calls.push(['prediction', value]), value => calls.push(['busy', value]), CARDIAC_WORKSPACE_KEY);
+        value => calls.push(['prediction', value]), value => calls.push(['busy', value]),
+        () => {}, () => {}, () => '', CARDIAC_WORKSPACE_KEY);
     return {restore: fn, calls, current, generation};
 }
 

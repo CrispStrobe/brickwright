@@ -160,9 +160,11 @@ try {
 
     const maximize = page.getByTestId('bw-editor-maximize');
     await maximize.click();
+    await page.getByTestId('bw-max-editor-tools').waitFor();
+    check(await page.locator('body.bw-compact-chrome').count() === 1, 'maximize collapses the top menu');
+    check(!await langRow.isVisible(), 'maximize folds the language bar into its overflow menu');
+    await page.getByTestId('bw-max-editor-tools').click();
     await page.getByTitle('Restore panels').waitFor({state: 'visible', timeout: 10000});
-    // The merged row, which now also holds the conversion actions, is
-    // deliberately retained in maximize mode.
     check(await page.getByTestId('bw-device-select').isVisible(),
         'maximize retains the compact target selector');
     const actions = page.getByTestId('bw-code-action-row');

@@ -50,7 +50,7 @@ function routingFixture ({deferState = false, circuitFailure = false, initialCir
         text: async () => path.endsWith('input.deck') ? '042\n' : listing,
         json: async () => structuredClone(image)
     });
-    const methods = ['activateCardiac', 'activateCp1Circuit', 'loadCardiacExample', 'loadExample'].map(method);
+    const methods = ['activateCardiac', 'activateCp1Circuit', 'loadCardiacExample', 'loadExample', 'selectKim1'].map(method);
     const fields = ['_onCardiacCodeSelection', '_onCp1CodeSelection'].map(field);
     const host = new Function('window', 'localStorage', 'fetch', 'CustomEvent', ...Object.keys(CardiacProject),
         'normalizeDeviceId', 'confirmAsync', 'navigator',

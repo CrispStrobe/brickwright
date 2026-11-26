@@ -110,9 +110,7 @@ export default function CardiacPanel ({workspace, assembly, snapshot, busy, erro
     };
     const sourceInput = <textarea aria-label={t.source} data-testid={Editor ? undefined : 'cardiac-source'} className={styles.source}
         value={workspace.source} onChange={event => onSource(event.target.value)} spellCheck={false} maxLength={131072} />;
-    const editor = <section className={Editor ? `${styles.panel} ${styles.codeEditor}` : styles.panel} data-cardiac-editor>
-        {!Editor && <header className={styles.header}><strong>CARDIAC</strong><span>{t.program}</span></header>}
-        <div className={styles.actions}>
+    const tools = <div className={`${styles.panel} ${styles.toolbar}`} data-cardiac-code-tools>
             <select aria-label={t.examples} title={t.examples} value={exampleId || ''}
                 onChange={event => onExample(event.target.value)} disabled={busy} className={styles.examplePicker}>
                 <option value="" disabled>{examplesLabel}</option>
@@ -132,7 +130,10 @@ export default function CardiacPanel ({workspace, assembly, snapshot, busy, erro
                 disabled={!assembly.ok || assembly.entry === null}>{icon('⇩', t.listing)}</button>
             {Editor && <button type="button" title={t.reference} aria-label={t.reference}
                 onClick={() => sourceHelp.current.showModal()}>ⓘ</button>}
-        </div>
+        </div>;
+    const editor = <section className={Editor ? `${styles.panel} ${styles.codeEditor}` : styles.panel} data-cardiac-editor>
+        {!Editor && <header className={styles.header}><strong>CARDIAC</strong><span>{t.program}</span></header>}
+        {surfaces?.tools ? createPortal(tools, surfaces.tools) : tools}
         {error && <p className={styles.error} role="alert">{error}</p>}
         {Editor ? <div className={styles.sharedEditor} role="group" aria-label={t.source} data-testid="cardiac-source">
             <React.Suspense fallback={sourceInput}>
