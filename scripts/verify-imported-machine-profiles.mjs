@@ -16,10 +16,20 @@ editor.set([0x01, 0xfd, 0x7f, 0x3e, 0x10, 0xed, 0x79]); // Page in ROM 1 at the 
 const basic = new Uint8Array(16384);
 basic.set(keyboardRom, 7);
 
+const makeXtRom = prefix => {
+    const rom = new Uint8Array(32768).fill(0xff);
+    rom.set([...prefix, 0x8e, 0xc0, 0xb8, 0x41, 0x1f, 0x26, 0xa3, 0, 0, 0xf4]);
+    rom.set([0xea, 0, 0, 0, 0xf8], 0x7ff0);
+    return rom;
+};
+const xtRom = makeXtRom([0xb8, 0x00, 0xb8]); // AX = B800.
+const rom186 = makeXtRom([0x31, 0xc0, 0x8e, 0xd0, 0xbc, 0, 0x70, 0xb8, 0x00, 0xb8,
+    0x60, 0x31, 0xc0, 0x61]); // PUSHA and POPA across a destructive XOR.
+
 const browser = await chromium.launch({headless: true, executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
 try {
     for (const [kind, images] of [['zx48', {rom: rom48}], ['zx128', {rom0: editor, rom1: basic}],
-        ['gpascal', {rom: gpascal}]]) {
+        ['gpascal', {rom: gpascal}], ['i8088', {rom: xtRom}], ['i80186', {rom: rom186}]]) {
         const page = await browser.newPage({viewport: {width: 1600, height: 1000}, locale: 'en-US', serviceWorkers: 'block'});
         const errors = [];
         page.on('pageerror', error => errors.push(error.message));
@@ -47,6 +57,13 @@ try {
 
             if (kind === 'gpascal') {
                 await page.getByTestId('bw-serial-console').getByText(/G-Pascal compiler, version/).waitFor();
+            } else if (kind.startsWith('i80')) {
+                await page.waitForFunction(() => {
+                    const target = window.__benchTarget;
+                    return target?.regs()?.halted && target.readMem('mem', 0xb8000, 2)[0] === 0x41;
+                });
+                const topology = await page.evaluate(() => window.__benchTarget.captureCheckpoint().topology);
+                assert.equal(JSON.parse(topology).variant, kind === 'i8088' ? '8086' : '80186');
             } else {
                 const screen = page.getByTestId('bw-machine-canvas');
                 await screen.waitFor();
