@@ -187,3 +187,21 @@ test('Pico Ping measures its real GPIO echo through a voltage divider', () => {
     assert.ok(inputs.every(input => input.gpioPeak > 3 && input.gpioPeak < 3.3));
     assert.deepEqual(outputs.map(readings => [...new Set(readings)]), [[40], [120]]);
 });
+
+test('retargeted flyback lesson opens the original unclamped winding circuit', () => {
+    const result = invoke('33-inductive-no-flyback', '--device', 'pico', '--json');
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const {rows: [{behavior}]} = JSON.parse(result.stdout);
+    const measured = new Map(behavior.checks.map(({check, observed}) => [check, observed]));
+    assert.deepEqual(measured.get('explicit winding inductance'), ['l1']);
+    assert.deepEqual(measured.get('no flyback diode'), []);
+    assert.deepEqual(measured.get('program switches the motor at the mapped GPIO'), [true, false]);
+    assert.ok(measured.get('unprotected collector transient') > 60);
+});
+
+test('retargeted retro console drives both matrices and silences its PNP buzzer on release', () => {
+    const result = invoke('60-retro-console', '--device', 'arduino-mega', '--json');
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const {rows: [{behavior}]} = JSON.parse(result.stdout);
+    assert.deepEqual(behavior.checks.map(check => check.observed), [[64, 64], [0, 1, 2], true, true]);
+});

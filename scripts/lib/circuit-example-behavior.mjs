@@ -363,7 +363,7 @@ export async function checkBehavior (bench, circuit, examples) {
     if (bench.id === 'arduino-sk-p09-motorized-pinwheel' || bench.id === 'arduino-sk-p10-zoetrope') {
         return checkStarterMotor(bench, circuit, examples);
     }
-    if (bench.id === '33-inductive-no-flyback') return checkInductiveLesson(bench, circuit, examples);
+    if (bench.id === '33-inductive-no-flyback') return checkInductiveLesson(bench, circuit, examples, startProgram);
     const arduino = await checkArduinoLesson(bench, circuit, examples, startProgram);
     if (arduino) return arduino;
     const display = await checkDisplayLesson(bench, circuit, examples, startProgram);
