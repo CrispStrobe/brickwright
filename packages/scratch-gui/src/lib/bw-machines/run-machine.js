@@ -13,7 +13,6 @@
 // so a Node test drives this without a DOM or the network.
 
 import {activateConfig, defaultImageFetcher} from './activate.js';
-import {showCircuitDebugger} from '../bw-debug/debug-view.js';
 
 /**
  * Boot a machine config.
@@ -35,7 +34,6 @@ export async function runMachineConfig(config, opts = {}) {
                 typeof globalThis.CustomEvent !== 'function') {
                 throw new Error('no DOM event target to boot the machine on');
             }
-            if (detail.kind === 'z80' && detail.profile === 'cpm-system') showCircuitDebugger();
             globalThis.dispatchEvent(new globalThis.CustomEvent('bw-machine-media-load', {detail}));
         };
 

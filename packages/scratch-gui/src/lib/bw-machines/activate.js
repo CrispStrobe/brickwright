@@ -195,6 +195,9 @@ export async function activateConfig(config, opts = {}) {
         name: cfg.title || bootSlotId,
         profile: SLOT_PROFILE[bootSlotId] || null
     };
+    if (bootSlotId === 'cpmsys' && isStr(cfg.provenance?.program?.name)) {
+        bootMedia.name = cfg.provenance.program.name;
+    }
     if (cfg.machine === 'i80386') bootMedia.nativeBlocks = cfg.nativeBlocks === true;
     if (bootRef.geometry) bootMedia.geometry = {...bootRef.geometry};
     // A ROM image states its own load address via the config; carry it so the

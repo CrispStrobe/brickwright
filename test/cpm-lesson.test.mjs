@@ -44,6 +44,7 @@ test('CP/M lesson: activates into the z80 real-CP/M boot', async () => {
     const activated = await activateConfig(config, {fetcher});
     assert.equal(activated.targetKind, 'z80', 'folds onto the z80 debug target');
     assert.equal(activated.bootMedia.slot, 'cpmsys');
+    assert.equal(activated.bootMedia.name, 'BBCBASIC.COM');
     assert.equal(activated.bootMedia.profile, 'cpm-system', 'the cpmsys slot selects the real CP/M 2.2 boot path');
     assert.ok(asked.some(u => /static\/roms\/bbcbasic\.com$/.test(u)), 'BBC BASIC is the drive-A: program');
 });

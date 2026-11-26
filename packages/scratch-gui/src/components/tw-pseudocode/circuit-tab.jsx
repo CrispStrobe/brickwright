@@ -1,3 +1,4 @@
+import {showCircuitDebugger} from '../../lib/bw-debug/debug-view.js';
 import {addCardiacFace, addMicrotronicFace, addKim1Face} from '../../lib/controller-machine-faces.js';
 import React from 'react';
 import {clearControllerPanel, serializeControllerPanel} from '../../lib/controller-inputs.js';
@@ -550,7 +551,12 @@ class CircuitTab extends React.Component {
         window.addEventListener('bw-cardiac-program-loaded', this._onCardiacProgramLoaded);
         window.addEventListener('bw-cp1-circuit-detached', this._restoreCp1Dock);
         this._mediaStashHandler = e => {
-            window.__bwPendingMedia = {type: 'media', detail: e && e.detail};
+            const detail = e?.detail;
+            const previous = window.__bwPendingMedia?.detail;
+            window.__bwPendingMedia = {type: 'media', detail};
+            if (detail !== previous && detail?.kind === 'z80' && detail.profile === 'cpm-system') {
+                showCircuitDebugger();
+            }
             this._markReactUpdate('host:machine-booted');
             this.setState({machineBooted: true});
         };

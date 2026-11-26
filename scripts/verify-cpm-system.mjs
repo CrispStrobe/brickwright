@@ -208,6 +208,8 @@ try {
             await input.press('Enter');
             await expectOutput(response);
         }
+        check(!/BBCBASIC\s+2(?:\s|$)/.test(await output.innerText()),
+            'the built-in lesson lists one copy of BBCBASIC.COM');
         check(true, 'the built-in CP/M lesson opens its console and runs BBC BASIC');
     } finally {
         await page.close();

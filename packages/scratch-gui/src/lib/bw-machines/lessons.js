@@ -318,7 +318,7 @@ export function lessonMachines (locale) {
     // self-contained build. A `cpmsys` boot slot selects the real-CP/M boot
     // (debug-runner attachZ80 cpm-system branch, which also loads the system ROMs
     // from static/roms); the slot points at BBC BASIC, placed on drive A:. The
-    // title makes its CP/M 8.3 name BBCBASIC.COM, so it coincides with the copy
+    // program name is BBCBASIC.COM, so it coincides with the copy
     // the boot already loads — one A: entry, not a duplicate. The console is the
     // Debug serial terminal (no video widget). CP/M 2.2 is DRI-redistributable
     // and BBC BASIC is zlib, so neither is GPL media — hence not behind the gate.
@@ -332,6 +332,7 @@ export function lessonMachines (locale) {
         tags: ['lesson', 'cpm'],
         provenance: {
             source: 'brickwright-media-lab/projects/bbc-basic-z80',
+            program: {name: 'BBCBASIC.COM'},
             license: 'CP/M 2.2 (DRI redistributable, 2022 grant) + zlib (BBC BASIC Z80)',
             sourceCode: `${MEDIA_LAB}/tree/main/projects/bbc-basic-z80`
         }
