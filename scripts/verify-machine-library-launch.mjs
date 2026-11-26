@@ -150,6 +150,19 @@ try {
         await page.getByTestId('bw-circuit-panel-designer').first().waitFor();
     }
 
+    const cp1 = await freshProject();
+    await loadCircuitExample(cp1, 'CP1: First display', 'cp1-first-display');
+    await cp1.getByRole('tab', {name: 'Code', exact: true}).click();
+    await cp1.locator('[data-cp1-code-editor]').getByRole('button', {name: 'Run CP1 program'}).click();
+    await cp1.waitForFunction(() => {
+        const face = document.querySelector('[data-cp1-controller-face]');
+        const digits = face?.querySelectorAll('[data-cp1-digit]');
+        return digits?.length === 6 && Number(digits[4].dataset.segments) === 0x66 &&
+            Number(digits[5].dataset.segments) === 0x5b;
+    });
+    await cp1.close();
+    console.log('The CP1 Code editor runs the independent monitor and displays 42 on the Controller keypad face.');
+
     const micro = await freshProject();
     await loadCircuitExample(micro, 'Busch Microtronic 2090: Wired I/O', 'busch-microtronic-wired-io');
     const front = micro.locator('[data-microtronic-view="front"]');

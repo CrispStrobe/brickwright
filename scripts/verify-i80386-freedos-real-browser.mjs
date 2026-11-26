@@ -222,11 +222,11 @@ try {
         await page.evaluate(() => {window.__interactionTarget = window.__benchTarget;});
         const before = await canvas.boundingBox();
         await page.getByTestId('bw-machine-fullscreen').click();
-        await page.waitForFunction(() => document.fullscreenElement !== null);
+        await page.getByTestId('bw-machine-fullscreen').getByText('Exit full screen', {exact: true}).waitFor();
         const fullscreen = await canvas.boundingBox();
         assert.ok(fullscreen.width > 1400 && fullscreen.height > 850,'real guest screen fills fullscreen');
         await page.getByTestId('bw-machine-fullscreen').click();
-        await page.waitForFunction(() => document.fullscreenElement === null);
+        await page.getByTestId('bw-machine-fullscreen').getByText('Full screen', {exact: true}).waitFor();
         const divider = page.getByRole('separator', {name:'Resize the stage column'});
         let resized = null;
         await divider.waitFor({state:'visible'});
