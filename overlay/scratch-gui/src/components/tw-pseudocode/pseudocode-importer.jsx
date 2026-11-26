@@ -5012,9 +5012,9 @@ class PseudocodeImporter extends React.Component {
 
     // Fetch examples/index.json once — the same file the Circuit tab's gallery
     // loads (see circuit-tab.jsx loadExamples). Kept as a fetch, not an import:
-    // the catalog is data for a control most users never open. Only entries that
-    // are programs (kind 'program' or 'full') with an actual program.bw file are
-    // kept; circuit-only entries have nothing to put in the editor.
+    // the catalog is data for a control most users never open. An entry needs
+    // source for the Code editor. Wired ROM lessons can be tagged as circuits
+    // even when they ship a program and a bootable image.
     async loadCatalog () {
         if (this.state.catalog || this._catalogLoading) return;
         this._catalogLoading = true;
@@ -5023,7 +5023,7 @@ class PseudocodeImporter extends React.Component {
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
             const list = (Array.isArray(data) ? data : (data.examples || []))
-                .filter(ex => (ex.kind === 'program' || ex.kind === 'full') && ex.files && ex.files.program);
+                .filter(ex => ex.files?.program && (ex.kind === 'program' || ex.kind === 'full' || ex.files.rom));
             this.setState({catalog: list, catalogError: null});
         } catch (e) {
             this.setState({catalogError: e.message});
