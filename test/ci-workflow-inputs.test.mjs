@@ -39,7 +39,11 @@ const kim1Suppliers = new Map([
 ]);
 const allowedKIM1 = site => kim1Suppliers.get(site.file)?.some(name =>
     site.repository === `CrispStrobe/${name}` && site.ref === `\${{ steps.pins.outputs.${name} }}`);
-const allowed = site => allowedGlobal(site) || allowedFlasher(site) || allowedProbe(site) || allowedCP1(site) || allowedKIM1(site);
+const cardiacSuppliers = ['bw-board', 'bw-circuit-ui'];
+const allowedCardiac = site => site.file === '.github/workflows/cardiac-lab.yml'
+    && cardiacSuppliers.some(name => site.repository === `CrispStrobe/${name}`
+        && site.ref === `\${{ steps.vendor_pins.outputs.${name} }}`);
+const allowed = site => allowedCardiac(site) || allowedGlobal(site) || allowedFlasher(site) || allowedProbe(site) || allowedCP1(site) || allowedKIM1(site);
 
 function assertFlasherValidation(body, name) {
     assert.match(body, /id: stc_flasher_pin\n\s+if:[^\n]+\n\s+run: \|\n\s+node -e .*stc-compiler-flasher.*\/\^\[0-9a-f\]\{40\}\$\//, name);
@@ -73,6 +77,13 @@ test('every external workflow checkout has a full pin or validated vendor-pin ou
     assert.match(cp1, /id: vendor_pins\n\s+run: \|\n\s+node scripts\/ci-vendor-pins\.mjs >> "\$GITHUB_OUTPUT"/);
     for (const name of cp1Suppliers) assert.ok(cp1.indexOf('id: vendor_pins') < cp1.indexOf(`repository: CrispStrobe/${name}`));
     assert.deepEqual(sites.filter(allowedCP1).map(site => site.repository).sort(), cp1Suppliers.map(name => `CrispStrobe/${name}`));
+    const cardiac = workflows.get('.github/workflows/cardiac-lab.yml');
+    assert.match(cardiac, /id: vendor_pins\n\s+run: node scripts\/ci-vendor-pins\.mjs >> "\$GITHUB_OUTPUT"/);
+    for (const name of cardiacSuppliers) {
+        assert.ok(cardiac.indexOf('id: vendor_pins') < cardiac.indexOf(`repository: CrispStrobe/${name}`));
+    }
+    assert.deepEqual(sites.filter(allowedCardiac).map(site => site.repository).sort(),
+        cardiacSuppliers.map(name => `CrispStrobe/${name}`));
     for (const [file, suppliers] of kim1Suppliers) {
         const body = workflows.get(file);
         assert.match(body, /id: pins\n\s+run: node scripts\/ci-vendor-pins\.mjs >> "\$GITHUB_OUTPUT"/);
