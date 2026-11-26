@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-25 21:17:09 UTC",
+  "status": "passed",
+  "engine": {
+    "repository": "CrispStrobe/bw-board",
+    "commit": "76c2d923f79a4197224ecf3e6f1faf34a0f44d6e"
+  },
+  "runtime": {
+    "node": "v24.22.3",
+    "mode": "unchanged exact-SHA source modules loaded in memory because the workspace disk could not hold a checkout",
+    "modulesLoaded": 115
+  },
+  "testFile": "test/kim1-circuit.test.mjs",
+  "tests": {
+    "passed": 3,
+    "failed": 0,
+    "skipped": 0
+  },
+  "checks": [
+    "Real switch input reaches the executed NMOS program, then resistor and LED; ST holds output while input can change",
+    "Coarse and fine Board time advances preserve CPU execution count, port output and visible LED result",
+    "Invalid load is atomic; canonical keypad RAM edits survive parameter persistence and Board reset"
+  ],
+  "limitations": [
+    "This receipt covers the actual Board runtime and electrical solver, not a browser or full application build.",
+    "CPU vector qualification has its separate source-bound engine receipt."
+  ]
+}

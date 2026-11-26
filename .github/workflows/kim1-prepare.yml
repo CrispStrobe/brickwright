@@ -1,0 +1,72 @@
+name: Prepare KIM-1 package integration
+on:
+  push:
+    branches: ['feat/kim1-circuits']
+    paths:
+      - 'vendor-pins.json'
+      - '.github/workflows/kim1-prepare.yml'
+permissions:
+  contents: read
+concurrency:
+  group: kim1-prepare-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  derive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Resolve exact engine input
+        id: pins
+        run: node scripts/ci-vendor-pins.mjs >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: CrispStrobe/bw-board
+          ref: ${{ steps.pins.outputs.bw-board }}
+          path: .kim1-board
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Derive package metadata from the explicit candidate pins
+        run: npm run pin:packages
+      - name: Derive GUI package metadata and owned mirrors
+        run: |
+          node scripts/integrate.mjs
+          cd packages/scratch-gui
+          npm install --package-lock-only --ignore-scripts --legacy-peer-deps --no-audit --no-fund
+      - name: Regenerate source-bound package evidence
+        run: |
+          node scripts/gen-bw-board-census.mjs --dir .kim1-board
+          node scripts/gen-language-device-matrix.mjs
+          node scripts/gen-i8086-capability-report.mjs
+          node scripts/package-upstream-notices.mjs
+          node scripts/sync-i8086-bios.mjs --dir .kim1-board --record
+          cp overlay/scratch-gui/static/roms/i8086-bios.provenance.json packages/scratch-gui/static/roms/i8086-bios.provenance.json
+          node scripts/pin-packages.mjs --check
+          node scripts/gen-bw-board-census.mjs --dir .kim1-board --check
+          node scripts/package-upstream-notices.mjs --check
+      - name: Record reviewable generated changes
+        if: always()
+        run: |
+          node --input-type=module <<'NODE'
+          import {execFileSync} from 'node:child_process';
+          import {mkdirSync,writeFileSync} from 'node:fs';
+          const git = args => execFileSync('git',args,{encoding:'utf8',maxBuffer:20*1024*1024});
+          const record={head:process.env.GITHUB_SHA,files:git(['diff','--name-only']).trim().split('\n').filter(Boolean),
+            diff:git(['diff','--no-ext-diff','--unified=3'])};
+          mkdirSync('artifacts/kim1-preparation',{recursive:true});
+          writeFileSync('artifacts/kim1-preparation/generated.json',JSON.stringify(record,null,2)+'\n');
+          console.log('BW_KIM1_GENERATED_DIFF_BEGIN');
+          console.log(JSON.stringify(record));
+          console.log('BW_KIM1_GENERATED_DIFF_END');
+          NODE
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: kim1-generated-${{ github.sha }}
+          path: artifacts/kim1-preparation/
+          retention-days: 7
