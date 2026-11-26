@@ -3,6 +3,18 @@ import {keyToBytes} from '../../lib/bw-debug/terminal-keys.js';
 import {pcSet1Bytes} from '../../lib/bw-machines/pc-scancodes.js';
 import {ps2ButtonBit, ps2Delta} from '../../lib/bw-machines/ps2-pointer.js';
 
+const spectrumSpecialKeys = {
+    ShiftLeft: ['caps'], ShiftRight: ['caps'], AltLeft: ['sym'], AltRight: ['sym'],
+    Enter: ['enter'], NumpadEnter: ['enter'], Space: ['space'], Backspace: ['caps', '0'],
+    ArrowLeft: ['caps', '5'], ArrowDown: ['caps', '6'], ArrowUp: ['caps', '7'], ArrowRight: ['caps', '8']
+};
+
+function spectrumKeys (code) {
+    if (/^Key[A-Z]$/.test(code)) return [code.slice(3).toLowerCase()];
+    if (/^Digit[0-9]$/.test(code)) return [code.slice(5)];
+    return spectrumSpecialKeys[code] || [];
+}
+
 /** Large, focusable VGA face for the Widgets pane. The panel owns frame storage;
  * this face only paints it and sends live input to the active machine runner. */
 export default function MachineConsole({widget, keyIn, serialIn, mouseIn, keyboardSet, isFullScreen, onToggleFullScreen}) {
@@ -24,8 +36,12 @@ export default function MachineConsole({widget, keyIn, serialIn, mouseIn, keyboa
             new ImageData(new Uint8ClampedArray(rgba), width, height), 0, 0);
     }, [widget?.state?.rgba, widget?.state?.frame, widget?.config?.width, widget?.config?.height]);
     const release = () => {
-        for (const code of held.current) {
-            for (const byte of pcSet1Bytes(code, false, keyboardSet === 'at-set1')) keyIn?.(byte);
+        if (keyboardSet === 'spectrum') {
+            if (held.current.size) keyIn?.([]);
+        } else {
+            for (const code of held.current) {
+                for (const byte of pcSet1Bytes(code, false, keyboardSet === 'at-set1')) keyIn?.(byte);
+            }
         }
         held.current.clear();
         if (buttons.current) mouseIn?.({dx: 0, dy: 0, buttons: 0});
@@ -56,6 +72,16 @@ export default function MachineConsole({widget, keyIn, serialIn, mouseIn, keyboa
                 e.preventDefault();
                 e.stopPropagation();
                 serialIn(e.key === 'Backspace' ? 0x08 : encoded[0]);
+                return;
+            }
+            if (keyboardSet === 'spectrum') {
+                const names = spectrumKeys(e.code);
+                if (!names.length) return;
+                e.preventDefault();
+                e.stopPropagation();
+                if (down) held.current.add(e.code);
+                else held.current.delete(e.code);
+                keyIn([...new Set([...held.current].flatMap(spectrumKeys))]);
                 return;
             }
             const bytes = pcSet1Bytes(e.code, down, keyboardSet === 'at-set1');

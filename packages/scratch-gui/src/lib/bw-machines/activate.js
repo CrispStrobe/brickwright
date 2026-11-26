@@ -51,6 +51,8 @@ const SLOT_PROFILE = Object.freeze({
     flash: 'uf2'
 });
 
+const SPECTRUM_ROM_SLOTS = {zx48: ['rom'], zx128: ['rom0', 'rom1']};
+
 const isObj = v => v != null && typeof v === 'object' && !Array.isArray(v);
 const isStr = v => typeof v === 'string' && v.length > 0;
 
@@ -155,6 +157,11 @@ export async function activateConfig(config, opts = {}) {
     const bootSlotId = cfg.bootOrder.find(id => cfg.slots[id]) || Object.keys(cfg.slots)[0];
     if (!bootSlotId) throw new Error('functional config has no boot slot to activate');
     const bootRef = cfg.slots[bootSlotId];
+    const spectrumRoms = SPECTRUM_ROM_SLOTS[cfg.machine];
+    if (spectrumRoms) {
+        const missing = spectrumRoms.find(id => !cfg.slots[id]);
+        if (missing) throw new Error(`Spectrum requires the ${missing} slot`);
+    }
 
     // machineConfig for createDebugRunner is the wired-extractor {regions,chips}
     // — an INLINE object (the Eater 6502 case) passes straight through; a STRING
@@ -173,9 +180,9 @@ export async function activateConfig(config, opts = {}) {
     // A Linux kernel's initramfs is the same kind of companion: a `kernel`
     // boot needs its `initrd` before the first instruction runs — and its
     // `snapshot`, when the config has one, to open at the shell prompt.
-    const extraSlots = ['bios', 'vga-rom', 'initrd', 'snapshot',
-        ...(cfg.machine === 'i80386' && machinePreset === 'freedos-vga' ? ['hdd', 'floppy'] : [])]
-        .filter(id => id !== bootSlotId && cfg.slots[id]);
+    const extraSlots = [...new Set(['bios', 'vga-rom', 'initrd', 'snapshot',
+        ...(cfg.machine === 'i80386' && machinePreset === 'freedos-vga' ? ['hdd', 'floppy'] : []),
+        ...(spectrumRoms ? [...spectrumRoms, 'tape', 'snapshot'] : [])])].filter(id => id !== bootSlotId && cfg.slots[id]);
     // ALL AT ONCE. The boot image and every companion are fetched in parallel:
     // one after the other, the Linux lesson's three files (9.5 MB) cost the sum
     // of three round trips before the first instruction. They are started in
@@ -195,6 +202,15 @@ export async function activateConfig(config, opts = {}) {
         name: cfg.title || bootSlotId,
         profile: SLOT_PROFILE[bootSlotId] || null
     };
+    if (spectrumRoms) {
+        const entries = Object.fromEntries([...spectrumRoms, 'tape', 'snapshot']
+            .filter(id => cfg.slots[id]).map(id => [id, id === bootSlotId ? resolved.bytes : media[id].bytes]));
+        for (const id of spectrumRoms) {
+            if (entries[id].length !== 16384) throw new Error(`Spectrum ${id} must contain 16384 bytes`);
+        }
+        bootMedia.spectrum = {kind: cfg.machine, entries};
+    }
+    if (cfg.machine === 'gpascal') bootMedia.profile = 'gpascal';
     if (bootSlotId === 'cpmsys' && isStr(cfg.provenance?.program?.name)) {
         bootMedia.name = cfg.provenance.program.name;
     }
@@ -218,7 +234,8 @@ export async function activateConfig(config, opts = {}) {
         bootMedia.cpmLaunch = program.slice(0, -4);
         bootMedia.cpmFiles = Object.fromEntries(await loadMounts(cfg.provenance.cpmMount || {}, 'CP/M'));
     }
-    if (TARGET_KIND[cfg.machine] === 'i8086' && ['com', 'exe'].includes(bootSlotId)) {
+    if (TARGET_KIND[cfg.machine] === 'i8086') bootMedia.x86Variant = cfg.cpu.variant;
+    if (TARGET_KIND[cfg.machine] === 'i8086' && ['com', 'exe', 'disk'].includes(bootSlotId)) {
         bootMedia.dosVariant = cfg.cpu.variant;
         if (cfg.provenance?.program?.max >= 100_000_000) bootMedia.dosFastStart = true;
         if (typeof cfg.provenance?.program?.args === 'string') bootMedia.dosArgs = cfg.provenance.program.args;
@@ -243,7 +260,11 @@ export async function activateConfig(config, opts = {}) {
     // these on the ControllerPanel and mirrors video into `videoWidget`; a
     // config that declares none has no screen widget (videoWidget: null), which
     // is correct for a serial-only or headless machine.
-    const widgets = Array.isArray(cfg.widgets) ? cfg.widgets : [];
+    const widgets = Array.isArray(cfg.widgets) ? [...cfg.widgets] : [];
+    if (spectrumRoms && !widgets.some(widget => widget?.source === 'video')) {
+        widgets.push({name: cfg.machine === 'zx128' ? 'ZX Spectrum 128K' : 'ZX Spectrum 48K',
+            type: 'simplevga', source: 'video', config: {width: 288, height: 224}});
+    }
     const videoWidgetDecl = widgets.find(w => w && w.source === 'video') || null;
 
     return {

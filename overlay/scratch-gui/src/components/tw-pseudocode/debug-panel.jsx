@@ -429,7 +429,7 @@ class DebugPanel extends React.Component {
         // Its post-boot snapshot (the lesson's default Run), likewise.
         const {linuxSnapshot} = e.detail || {};
         const {nativeBlocks, machinePreset, i80386Media, machineConfig6502, machineConfig8086} = e.detail || {};
-        const {dosArgs, dosFiles, dosVariant, dosFastStart, cpmLaunch, cpmFiles, picoWakeOnPrompt} = e.detail || {};
+        const {dosArgs, dosFiles, dosVariant, x86Variant, spectrum, dosFastStart, cpmLaunch, cpmFiles, picoWakeOnPrompt} = e.detail || {};
         if (!bytes && !riscvImage) return;
         // THE SAME LOAD, DELIVERED TWICE. circuit-tab stashes every media-load
         // and, when that flips it to "machine booted", re-dispatches the very
@@ -480,6 +480,8 @@ class DebugPanel extends React.Component {
             dosArgs,
             dosFiles,
             dosVariant,
+            x86Variant,
+            spectrum,
             dosFastStart,
             cpmLaunch,
             cpmFiles,
@@ -523,6 +525,7 @@ class DebugPanel extends React.Component {
                     // tier: it boots the LGPL Bochs BIOS on the experimental
                     // 80386 AT machine (debug-runner's attachI80386). Mapping it
                     // onto i8086 would run a 386 boot floppy on the XT map.
+                    : kind === 'i80286' || kind === '80286' ? 'i80286'
                     : kind === 'i80386' || kind === '80386' ? 'i80386'
                         : this.state.kind;
         await new Promise(resolve => this.setState(
@@ -568,8 +571,9 @@ class DebugPanel extends React.Component {
             typeof window !== 'undefined' &&
             typeof window.bwMirrorMachineVideo === 'function') {
             window.bwMirrorMachineVideo({videoFn: () => runner.video(), widget: screen,
-                keyboardSet: nextKind === 'i80386' ? 'at-set1' : 'xt-set1',
-                keyInFn: typeof runner.keyIn === 'function' ? sc => runner.keyIn(sc) : null,
+                keyboardSet: spectrum ? 'spectrum' : nextKind === 'i80386' ? 'at-set1' : 'xt-set1',
+                keyInFn: spectrum ? names => runner.setSpectrumKeys(names)
+                    : typeof runner.keyIn === 'function' ? sc => runner.keyIn(sc) : null,
                 serialInFn: machinePreset === 'CPM64K_TMS9918' ? byte => runner.sendSerial(byte) : null,
                 mouseInFn: typeof runner.mouseIn === 'function' ? event => runner.mouseIn(event) : null,
                 focusController: nextKind !== 'i8086'});

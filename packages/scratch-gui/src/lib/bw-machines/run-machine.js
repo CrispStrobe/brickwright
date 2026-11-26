@@ -67,8 +67,10 @@ export async function runMachineConfig(config, opts = {}) {
         detail.cpmLaunch = bm.cpmLaunch;
         detail.cpmFiles = bm.cpmFiles;
     }
+    if (bm.spectrum) detail.spectrum = bm.spectrum;
     if (bm.picoWakeOnPrompt) detail.picoWakeOnPrompt = true;
     if (bm.dosFastStart) detail.dosFastStart = true;
+    if (bm.x86Variant) detail.x86Variant = bm.x86Variant;
     if (bm.dosVariant) detail.dosVariant = bm.dosVariant;
     if (bm.dosArgs) detail.dosArgs = bm.dosArgs;
     if (bm.dosFiles) detail.dosFiles = bm.dosFiles;

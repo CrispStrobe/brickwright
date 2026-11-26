@@ -484,7 +484,7 @@ export function boardTimeBase (board, target) {
 export function runnerCompilesProjectBlocks ({selectedKind, bootMedia = null, userFirmware = null}) {
     if (selectedKind === 'cp1' || selectedKind === 'cardiac') return false;
     if (selectedKind === 'z80' || selectedKind === 'eater6502' || selectedKind === 'riscv32') return false;
-    if ((selectedKind === 'i8086' || selectedKind === 'i80386') && bootMedia) return false;
+    if (selectedKind === 'i8086' || selectedKind === 'i80286' || selectedKind === 'i80386') return false;
     // An rp2040 .uf2 media bundle boots prebuilt firmware from flash; it does
     // not compile the project's blocks (a bare rp2040js/pico firmware run still does).
     if (selectedKind === 'rp2040js' && bootMedia) return false;
@@ -1643,8 +1643,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             return attachEater6502();
         }
 
-        if (selectedTargetKind === 'i8086') {
-            return attachI8086();
+        if (selectedTargetKind === 'i8086' || selectedTargetKind === 'i80286') {
+            return attachI8086(selectedTargetKind === 'i80286' ? '80286' : bootMedia?.x86Variant);
         }
 
         if (selectedTargetKind === 'i80386') {
@@ -1895,6 +1895,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         // yield breakpoints and block-level position reporting.
         const {target: avrTarget, adapter: avrAdapter} = await createDebugTarget(avrKind, {
             board, hex: built.hex, symbols: built.symbols, clockHz,
+            chip: (built.device || stc.device)?.toLowerCase() === 'atmega168p' ? 'atmega168p' : undefined,
         });
 
         // Wire serial output: each byte from the AVR's USART0 (print
@@ -3122,6 +3123,9 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             if (bootMedia.profile === 'py65mon') {
                 targetOpts.py65mon = true;
                 readyMsg = S('ready.py65mon', {name: bootMedia.name || S('noun.image')});
+            } else if (bootMedia.profile === 'gpascal' && !declaredMachine) {
+                targetOpts.gpascal = true;
+                readyMsg = S('ready.eater', {name: bootMedia.name || 'G-Pascal'});
             } else if (declaredMachine) {
                 targetOpts.config = {clockHz: 1_000_000, chips: [], ...declaredMachine};
                 readyMsg = S('ready.eater', {name: bootMedia.name || S('noun.image')});
@@ -3209,7 +3213,12 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         // in the com slot).
         const isCpmSystem = bootMedia && bootMedia.profile === 'cpm-system';
         const isCom = !isCpmSystem && bootMedia && (bootMedia.slot === 'com' || bootMedia.profile === 'cpm');
-        if (isCpmSystem) {
+        const spectrum = bootMedia?.spectrum;
+        if (spectrum) {
+            targetOpts.config = spectrum.kind === 'zx128' ? {clockHz: 3_546_900, zx128: true}
+                : {clockHz: 3_500_000, regions: [{kind: 'rom', start: 0, end: 0x3fff}], ula: true};
+            readyMsg = bootMedia.name;
+        } else if (isCpmSystem) {
             setStatus('attaching', S('cpm-system.booting'));
             const fetchRom = async (p) => {
                 const r = await fetch(new URL(p, document.baseURI).href);
@@ -3274,7 +3283,13 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         }
         readyMsg += ` — ${db.why}`;
         const result = await createDebugTarget('z80', targetOpts);
+        if (spectrum) {
+            const {applyMedia} = await import('bw-board/machine-media.js');
+            const {errors} = applyMedia(result, spectrum.entries, {kind: spectrum.kind});
+            if (errors.length) throw new Error(errors.map(({slot, error}) => `${slot}: ${error}`).join(', '));
+        }
         wireMachineBench(result, createDebugSession);
+        if (spectrum) runner.setSpectrumKeys = names => result.target.setKeys(names);
         setStatus('ready', readyMsg);
         return session;
     }
@@ -3412,7 +3427,9 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
     // a ROM. A .COM loaded at F0000 executes nothing, and a machine that
     // executes nothing is indistinguishable on screen from one that failed to
     // start — the exact shape of failure this codebase keeps paying for.
-    async function attachI8086() {
+    async function attachI8086(requestedVariant) {
+        // The functional 8088 shares the 8086 instruction core.
+        const variant = requestedVariant === '8088' ? '8086' : requestedVariant;
         const targetOpts = {};
         let readyMsg;
         const isDosProgram = bootMedia &&
@@ -3451,7 +3468,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             let exited = null;
             const bench = await createI8086DosBench({
                 executionSignal: i8086ExecutionLifetime.signal,
-                bytes: img.bytes, format, args: bootMedia.dosArgs, variant: bootMedia.dosVariant,
+                bytes: img.bytes, format, args: bootMedia.dosArgs, variant: variant || bootMedia.dosVariant,
                 files: bootMedia.dosFiles ? new Map(bootMedia.dosFiles) : undefined,
                 // Hardware the program asked for. `createI8086DosBench`
                 // merges these onto the preset BY NAME, so a scheduled
@@ -3528,7 +3545,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         // every sector; supplied as an opt-in onInterrupt hook, no vendored
         // change, exactly as bw-board's own ELKS scripts do it.)
         let floppyBoot = null;
-        const virtualHardware = bootMedia?.i8086Hardware === 'virtual';
+        const virtualHardware = bootMedia?.i8086Hardware === 'virtual' || (!bootMedia && !machineConfig);
         if (bootMedia && (bootMedia.slot === 'floppy' || bootMedia.profile === 'floppy-os')) {
             setStatus('attaching', S('boot.media', {name: bootMedia.name || S('noun.floppy')}));
             const { PCXT8086 } =
@@ -3607,7 +3624,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             // Machine Loader uses; it gives the same answer here and the right
             // one for the 32K demo ROMs beside it.
             targetOpts.romAt = 0x100000 - targetOpts.rom.length;
-            if (machineConfig) targetOpts.config = benchConfigI8086();
+            const {PCXT8086} = await import('bw-board/i8086-machine.js');
+            targetOpts.config = PCXT8086;
             // No serial console on this ROM, and saying so is the point: its
             // INT 14h is a stub and the BIOS equipment word reports no COM
             // port, because the XT config has no 8250. Output is the CGA text
@@ -3645,6 +3663,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         // consumer, so there is no moment where the preference is unapplied.
         const {BREADBOARD8086} = await import('bw-board/i8086-machine.js');
         targetOpts.config = withI8086MemoryPreference(targetOpts.config ?? BREADBOARD8086);
+        if (variant) targetOpts.config = {...targetOpts.config, variant};
 
         const result = await i8086Execution.construct({context: 'hardware',
             family: targetOpts.config.variant || '8086', signal: i8086ExecutionLifetime.signal},
@@ -4105,7 +4124,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             // symbols when the firmware brought its own (a compiled sketch's
             // table, built WITH this image); a picked .hex has none.
             return { hex: text, image: null, symbols: fw.symbols || null, c: null,
-                bytes: text.length, f_cpu: fw.fCpu || null, format: 'ihx' };
+                bytes: text.length, f_cpu: fw.fCpu || null, device: fw.device, format: 'ihx' };
         }
         if (kind === 'rp2040js' || kind === 'stm32f0' || kind === 'stm32g0') {
             const bytes = fw.bytes || new TextEncoder().encode(fw.text || '');
@@ -4449,16 +4468,9 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                             ? 'ESP32-4848S040: load firmware before starting; blocks compilation is not supported'
                             : 'ESP32-S3: load a merged .bin firmware file before starting ROM boot');
                     }
-                    // Z80/6502 interactive interpreters: no compile step
-                    // riscv32 never compiles the project: its program is the
-                    // Code tab's assembled image, a shipped RTOS image, or a
-                    // booted Linux — all of which arrive as bootMedia.
-                    const built = (selectedKind === 'cardiac' || selectedKind === 'cp1' || selectedKind === 'z80' || selectedKind === 'eater6502' ||
-                        selectedKind === 'riscv32' ||
-                        ((selectedKind === 'i8086' || selectedKind === 'i80386') && bootMedia) ||
-                        (selectedKind === 'rp2040js' && bootMedia)) ? null
-                        : userFirmware ? await builtFromUserFirmware(selectedKind)
-                            : await build();
+                    const built = runnerCompilesProjectBlocks({selectedKind, bootMedia})
+                        ? (userFirmware ? await builtFromUserFirmware(selectedKind) : await build())
+                        : null;
                     await attach(built);
                     if (destroyed) {
                         // Torn down while attaching: release what attach built

@@ -98,7 +98,7 @@ test('a build asks the one hosted compile for an arduino-language hex', async ()
     assert.equal(built.bytes, 2, 'bytes counts data records, not text');
     assert.deepEqual(built.libraries, ['Wire']);
     assert.deepEqual(route.sketchFirmware(built),
-        {name: 'sketch.hex', bytes: null, text: built.hex, fCpu: 16000000, symbols: null});
+        {name: 'sketch.hex', bytes: null, text: built.hex, fCpu: 16000000, symbols: null, device: 'arduino-nano'});
 });
 
 test('the board\'s crystal wins over the clock the image reports, and a mismatch is kept', async () => {
@@ -223,8 +223,8 @@ test('the C tab ▶ is gated by the route table and uses the one hosted compile'
     const src = read('components/tw-pseudocode/pseudocode-importer.jsx');
     assert.match(src, /this\.state\.lang === 'c' && sketchBoardFor\(this\.currentDevice\(\)\) \?/,
         'the button must be gated by the route\'s own table, not a device list in the JSX');
-    assert.match(src, /data-testid="bw-run-arduino-sketch"/);
-    assert.match(src, /data-testid="bw-arduino-sketch-examples"/);
+    assert.match(src, /data-testid=\{menu \? "bw-run-arduino-sketch-menu" : "bw-run-arduino-sketch"\}/);
+    assert.match(src, /data-testid=\{menu \? "bw-arduino-sketch-examples-menu" : "bw-arduino-sketch-examples"\}/);
     const handler = src.slice(src.indexOf('async runSketchOnAvr ()'));
     const body = handler.slice(0, handler.indexOf('\n    /**'));
     assert.match(body, /await this\.hostedCompileC\(code, target, format, language, extra\)/,
