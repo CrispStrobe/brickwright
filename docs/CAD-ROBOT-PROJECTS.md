@@ -1860,3 +1860,27 @@ Physics type checking and all 18 actuator and worker telemetry tests
 passed. Brickwright pins SDK `5d40e25`. Sustained 1× in the production app
 remains open.
 [CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/11a68ae843f637cef31716723dae6fd3ef0eb375)
+
+### Share native poses across distance sensors
+
+Pre-step ray validation and post-step sensor sampling reuse the same
+position and rotation for each rigid body at a solver boundary. Welded
+parts share a native pose and retain their own authored ray offsets.
+The next native step invalidates the samples.
+
+In Chrome, 32 distance rays ran across 200 substeps on a moving welded
+assembly. Native pose samples fell from 12,800 to 402 across validation
+and casting. All 6,400 distances and the full and compact frames matched
+exactly in both run orders. Invalid input left the simulation clock
+unchanged, and restarting restored the initial poses.
+
+| Worker time per 6,400 rays | Before | After |
+| --- | ---: | ---: |
+| Validation and sampling, first order | 49.3 ms | 43.5 ms |
+| Validation and sampling, reverse order | 53.8 ms | 53.6 ms |
+
+The timings exclude allocation and pose counters. Physics type checking
+and all 18 actuator and worker telemetry tests passed. Brickwright pins
+SDK `68666ce`, which precedes the two native sensor optimizations.
+Sustained 1× in the production app remains open.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/156bf088187b3fe6226b7b57d4074d8a526c239d)
