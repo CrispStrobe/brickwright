@@ -49,10 +49,10 @@ async function startProgram ({device, program}, circuit, examples, observeVM) {
     if (!validation.isValid) throw new Error(validation.errors.join(', '));
     const run = await runCreatedProgram(creator, {
         frames: 0,
+        circuitBoard: circuit.board,
         observeRun: ({vm}) => observeVM(vm)
     });
     if (!run.greenFlagThreadsStarted) throw new Error('Green flag started no program threads');
-    run.vm.runtime.circuitBoard = circuit.board;
     return {errors: run.errors, stepFrames};
 }
 
