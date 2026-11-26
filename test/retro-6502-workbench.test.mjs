@@ -13,7 +13,7 @@ import {extract6502Machine} from 'bw-board/m6502-extract.js';
 import {warningsBadge, warningsView} from '../overlay/scratch-gui/src/lib/circuit-panels-model.js';
 
 import {MS_PROFILE} from 'bw-board/basic-machine-runner.js';
-import {createBasicStartup, isBundledMicrosoftBasic} from '../overlay/scratch-gui/src/lib/bw-debug/basic-startup.js';
+import {createBasicStartup, isBundledMicrosoftBasic, microsoftBasicLine} from '../overlay/scratch-gui/src/lib/bw-debug/basic-startup.js';
 
 import {mirrorBasicSerialOnVga} from '../overlay/scratch-gui/src/lib/bw-debug/basic-vga-mirror.js';
 import {addCardiacFace, hasCardiacFace} from '../overlay/scratch-gui/src/lib/controller-machine-faces.js';
@@ -109,16 +109,18 @@ test('BASIC leaves the VGA card unlocked and the ACIA preview yields to a real f
     const display = {videoFrame: () => hardware};
     const rendered = [];
     const canvas = {getContext: () => ({
-        measureText: () => ({width: 5}), fillRect() {},
+        measureText: () => ({width: 5}), setTransform() {}, fillRect() {},
         fillText(text) { rendered.push(text); },
-        getImageData: () => ({data: new Uint8ClampedArray(160 * 128 * 4)})
+        getImageData: (x, y, width, height) => ({data: new Uint8ClampedArray(width * height * 4)})
     })};
     const lines = ['MICROSOFT BASIC V1.1', 'OK'];
     mirrorBasicSerialOnVga(display, () => lines, () => canvas);
     const first = display.videoFrame();
     assert.deepEqual(rendered, ['ACIA serial mirror', ...lines]);
     assert.equal(first.signal, true);
+    assert.deepEqual([first.width, first.height, first.source], [480, 384, 'serial']);
     assert.equal(hardware.signal, false);
+    assert.equal(microsoftBasicLine('print "Hello world"'), 'PRINT "Hello world"\r');
     assert.equal(display.videoFrame(), first);
     lines.push('PRINT 2+2', ' 4', 'OK');
     assert.notEqual(display.videoFrame().frame, first.frame);

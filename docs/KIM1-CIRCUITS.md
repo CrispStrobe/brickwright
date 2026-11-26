@@ -2,7 +2,7 @@
 
 ## Expansions in Circuits
 
-Open the **KIM-1** panel under Circuits and expand **Expansion and storage**.
+Open **Debugger** for the KIM-1 and expand **Expansion and storage**.
 
 - **KIM-4 slots** — Add KIM-2 (4 KiB), KIM-3 (8 KiB) or KIM-3B (8 KiB) at a
   selected address. KIM-5 takes a locally supplied 6 KiB ROM at $E000. The
@@ -29,11 +29,11 @@ terminal to reach the CP/M prompt.
 
 ## Open the first experiment
 
-Open **Circuit → Examples**, search for **KIM-1**, and open **KIM-1: Wired I/O**. The KIM-1 also appears in the computer palette. Its front panel appears in Instruments.
+Open **Circuit → Examples**, search for **KIM-1**, and open **KIM-1: Wired I/O**. The KIM-1 also appears in the computer palette. The example installs the display and keypad in **Controller**. To add the front panel to your own layout, use **Controller → Edit → + Add Widget → KIM-1 front panel**.
 
 Press **GO**, then toggle PB0–PB3 under Switches. The four external PA LEDs follow the input bits through a running NMOS 6502 program. The engine, ports and external components use the same circuit clock and electrical network.
 
-The panel provides all 23 keys, the SST switch, a six-digit display, CPU registers, port values, an editor for addressed hex, Intel HEX and paper-tape programs, and Brickwright-authored examples. Accepted programs and keypad edits are saved with each circuit part.
+Controller provides all 23 keys, SST, and the six-digit display. **Code → KIM-1** edits addressed hex, Intel HEX, and paper-tape programs. **Debugger** opens the execution and expansion controls for the same circuit device. Accepted programs and keypad edits are saved with each circuit part.
 
 | Control | Action |
 | --- | --- |
@@ -46,7 +46,7 @@ The panel provides all 23 keys, the SST switch, a six-digit display, CPU registe
 | PC | Return to the stopped program counter |
 | RS | Reset controls and ports, retaining RAM and the SST switch position |
 
-Keyboard entry stays within the focused panel. Text editors retain normal editing keys. Unloaded program text is a draft; Load or GO accepts it. Save exports the accepted memory image.
+Keyboard entry stays within the focused panel. Text editors retain normal editing keys. The Code editor keeps edits as a draft until you choose **Load program** or **Load and run**. Save exports the accepted memory image.
 
 ## Implementation and scope
 
@@ -55,8 +55,7 @@ The engine belongs to **bw-board**; the panel, palette, connector and controls b
 The CPU implements the 151 documented NMOS 6502 opcodes and their architectural cycle counts, including decimal arithmetic, indirect-JMP page wrapping, read-modify-write behavior and the JSR operand/stack overlap case. The CPU reuses this project's original MIT W65C02 instruction plumbing with a separate NMOS profile. The monitor, memory map, 6530-style ports/timers and demonstrations are independently written.
 
 The learning monitor starts with 1 KiB main RAM and the two 64-byte 6530
-banks. To open a paper tape, use **Open…** and **Load program** in the KIM-1
-panel. The loader verifies the checksum and end record before applying the
+banks. To open a paper tape, choose **Open…** and **Load program** in **Code → KIM-1**. The loader verifies the checksum and end record before applying the
 bytes. Paper tape (.pap and .ptp) and Intel HEX can enable expansion RAM.
 Circuit saves preserve the accepted program and its expansion map.
 
@@ -66,6 +65,12 @@ at the simulated 1 MHz clock. It provides a 300-baud terminal and its own
 paper-tape load and dump commands. Use the keypad to select a program entry
 after importing a file. The same menu accepts 6530-003 and 6530-002 images for
 the active session.
+
+## Component-level KIM-1
+
+The wired I/O lesson uses a single KIM-1 board component with external switches and LEDs. The component-level version requires a netlist that exposes the NMOS 6502 bus, the two distinct 6530 devices, the RAM and address decoding, and the keypad and display drivers. The existing KIM-1 model keeps the two 6530s and front-panel scan logic inside one device. An editable reconstruction needs separate circuit parts and an extractor for their bus and timing connections. [MOS KIM-1 User Manual and schematics](https://bitsavers.computerhistory.org/components/mosTechnology/kim-1/6500-15B_KIM-1_Users_Manual_197608.pdf)
+
+Qualify the reconstructed board by running the same ROM and keyed program sequences on both models. Compare reset and single-step timing, port and timer accesses, interrupt delivery, display strobes, and keypad scanning before adding it as a second example.
 
 ## Source and licensing boundary
 

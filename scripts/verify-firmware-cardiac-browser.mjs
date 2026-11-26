@@ -28,13 +28,18 @@ try {
     await manager.waitFor({state: 'hidden'});
     await page.locator('[data-cardiac-editor]:visible').waitFor();
     await page.getByTestId('bw-code-editor').locator('[data-cardiac-editor] .cm-editor').waitFor();
+    assert.equal(await page.getByRole('combobox', {name: 'Example program'}).inputValue(), 'cardiac-echo');
     await page.locator('[data-cardiac-editor]').getByRole('button', {name: 'Run source + cards', exact: true}).click();
     const controller = page.locator('[data-cardiac-controller]:visible');
     await controller.waitFor();
     await page.waitForFunction(() => document.querySelector('[data-cardiac-controller]')?.dataset.cardiacStatus === 'halted');
     assert.match(await controller.getByTestId('cardiac-output').textContent(), /042/);
+    assert.match(await controller.getByTestId('cardiac-input-queue').textContent(), /1 read/);
+    assert.equal(await controller.locator('details').filter({hasText: 'You are the processor'}).evaluate(node => node.open), false);
     const widget = page.getByTestId('bw-ctl-widget-cardiac');
     await widget.locator('[data-cardiac-controller]').waitFor();
+    const coverage = await widget.evaluate(element => element.clientWidth / element.parentElement.closest('[data-testid="bw-controller-canvas"]').clientWidth);
+    assert.ok(coverage > .9);
     await page.getByRole('button', {name: 'Edit', exact: true}).last().click();
     const header = page.getByTestId('bw-ctl-machine-header-cardiac');
     await header.scrollIntoViewIfNeeded();

@@ -56,3 +56,29 @@
 .codeEditor .field { margin: 0; }
 .codeEditor .actions { margin: 0; align-items: center; }
 .sharedEditor { min-height: 280px; height: clamp(280px, 45vh, 620px); display: flex; flex-direction: column; }
+
+.examplePicker { flex: 0 1 auto; min-width: 110px; max-width: min(42%, 290px); text-overflow: ellipsis; }
+.listingLine { display: grid; grid-template-columns: 3ch minmax(5ch, 10ch) auto; gap: 1ch; }
+.listingLine > span:nth-child(2) { overflow: hidden; text-overflow: ellipsis; }
+.machine { container-type: inline-size; padding: 8px; }
+.machine .registers { margin-top: 0; }
+.machine .registers > div { padding: 4px 7px; }
+.machine .registers output { font-size: 18px; }
+.machine .machineActions { margin: 6px 0; align-items: center; }
+.machine .machineActions .status { flex: 1; font-size: 11px; }
+.machine .trays { gap: 6px; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.machine .trays > section { padding: 6px; }
+.machine h3 { margin: 0 0 4px; font-size: 13px; }
+.machine .cardTray { min-height: 0; margin: 3px 0; gap: 3px; }
+.machine .trayLabel { display: block; margin-top: 4px; font-size: 11px; }
+.machine textarea { min-height: 0; }
+.machine details { margin-top: 5px; padding-top: 4px; }
+.machine .prediction:not([open]), .machine .trace:not([open]) { padding: 4px 0; background: transparent; }
+.machine .memory button { display: flex; align-items: baseline; justify-content: center; gap: 2px; white-space: nowrap; }
+@container (max-width: 550px) {
+    .machine .memory { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
+@container (max-width: 300px) {
+    .machine .trays { grid-template-columns: minmax(0, 1fr); }
+    .machine .memory { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}

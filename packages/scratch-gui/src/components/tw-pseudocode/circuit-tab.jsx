@@ -1036,7 +1036,7 @@ class CircuitTab extends React.Component {
      *  layout in gui.jsx. Other device panes still own the whole column. */
     _controllerSplitLive () {
         return this.state.debugDock === 'controller' &&
-            window.__bwMachineExtracted?.kind !== 'cp1' &&
+            !['cp1', 'cardiac', 'kim1'].includes(window.__bwMachineExtracted?.kind) &&
             !!(stcDrives(this.state.stc) || this.state.machineBooted);
     }
 
@@ -1602,7 +1602,9 @@ class CircuitTab extends React.Component {
                     detail: {data: serializeControllerPanel(panel)}
                 }));
             }
-            window.dispatchEvent(new CustomEvent('bw-cardiac-source-load', {detail: {source, inputDeck, inputMode: draft.inputMode}}));
+            if (!partId) window.dispatchEvent(new CustomEvent('bw-activate-tab', {detail: {index: 3}}));
+            window.dispatchEvent(new CustomEvent('bw-cardiac-source-load',
+                {detail: {source, inputDeck, inputMode: draft.inputMode, exampleId: example.id}}));
             this.publishExampleTitle(example);
             this.setState({loadingExample: null});
             return {ok: true};

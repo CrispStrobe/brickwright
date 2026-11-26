@@ -606,7 +606,7 @@ function TerminalWidget({ widget }) {
 // snapped by the host), a corner resize handle and a rotate handle (15deg
 // steps). layout is PLACEMENT — a joystick's state.{x,y} INPUT is unrelated.
 
-function PositionedWidget({ widget, mode, selected, snap, onSelect, onLayout, children }) {
+function PositionedWidget({ widget, mode, selected, snap, onSelect, onLayout, children, fitCanvas }) {
     const L = widget.layout || {};
     const machine = widget.type === 'machine';
     const ref = React.useRef(null);
@@ -678,8 +678,9 @@ function PositionedWidget({ widget, mode, selected, snap, onSelect, onLayout, ch
                 position: 'absolute',
                 left: L.x || 0,
                 top: L.y || 0,
-                width: L.w || (machine ? `min(440px, calc(100% - ${(L.x || 0) + 8}px))` : undefined),
-                height: L.h || (machine ? MACHINE_WIDGET_HEIGHT : undefined),
+                width: fitCanvas ? 'calc(100% - 16px)' : L.w || (machine ?
+                    `min(440px, max(180px, calc(100% - ${(L.x || 0) + 8}px)))` : undefined),
+                height: fitCanvas ? 'calc(100% - 16px)' : L.h || (machine ? MACHINE_WIDGET_HEIGHT : undefined),
                 transform: L.rotation ? 'rotate(' + L.rotation + 'deg)' : undefined,
                 transformOrigin: 'center center',
                 outline: selected ? '2px solid #7C3AED' : 'none',
@@ -2008,6 +2009,9 @@ class ControllerPanelView extends React.Component {
                             <PositionedWidget
                                 key={w.name}
                                 widget={w}
+                                fitCanvas={widgets.length === 1 && isCardiacFace(w) &&
+                                    w.layout.x === 8 && w.layout.y === 8 && !w.layout.w &&
+                                    w.layout.h === MACHINE_WIDGET_HEIGHT}
                                 mode={mode}
                                 selected={mode === 'edit' && this.state.selected === w.name}
                                 snap={v => this._snap(v)}

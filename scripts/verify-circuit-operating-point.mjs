@@ -52,6 +52,7 @@ const runOperatingPoint = async designer => {
     if (await expand.count()) await expand.click({force: true});
     const sim = designer.getByRole('radio', {name: 'Sim mode'});
     await sim.click({force: true});
+    await designer.getByText('Circuit analysis', {exact: true}).click();
     const run = designer.getByTestId('bw-operating-point-run');
     await run.scrollIntoViewIfNeeded();
     await run.click();

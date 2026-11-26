@@ -17,6 +17,8 @@ const initialWorkspace = () => {
     const example = CARDIAC_EXAMPLES['cardiac-echo'];
     return createCardiacWorkspace(example.source, formatCardiacDeck(example.input));
 };
+const exampleForSource = source => Object.values(CARDIAC_EXAMPLES)
+    .find(example => example.source.trim() === source.trim())?.id || '';
 const imageOf = assembly => ({entry: assembly.entry,
     words: assembly.words.map(({address, value}) => ({address, value})).sort((a, b) => a.address - b.address)});
 const diagnosticText = diagnostics => diagnostics.map(item => `${item.line}:${item.column} — ${item.message}`).join('\n');
@@ -24,6 +26,8 @@ const diagnosticText = diagnostics => diagnostics.map(item => `${item.line}:${it
 /** Owns drafts and user actions. The shared debug runner alone executes. */
 export default function CardiacHost ({runner, locale, configuration, onReady}) {
     const [workspace, setWorkspace] = useState(initialWorkspace);
+    const [exampleId, setExampleId] = useState(() => exampleForSource(workspace.source));
+    const [suppliedCards, setSuppliedCards] = useState(0);
     const [error, setError] = useState('');
     const [busy, setBusy] = useState(false);
     const [prediction, setPrediction] = useState(null);
@@ -95,6 +99,7 @@ export default function CardiacHost ({runner, locale, configuration, onReady}) {
         save(previous => ({...previous, loadedProgram: program}));
         setPrediction(null);
         if (values.length) selected.cardiacControl('enqueueInput', values);
+        setSuppliedCards(values.length);
         if (start) selected.resume();
     });
     const control = (verb, value) => request(async valid => {
@@ -102,7 +107,11 @@ export default function CardiacHost ({runner, locale, configuration, onReady}) {
         const selected = await ready();
         if (!valid()) return;
         const result = selected.cardiacControl(verb === 'queueDeck' ? 'enqueueInput' : verb, input);
-        if (verb === 'reset') setPrediction(null);
+        if (verb === 'queueDeck') setSuppliedCards(count => count + input.length);
+        if (verb === 'reset') {
+            setPrediction(null);
+            setSuppliedCards(0);
+        }
         return result;
     });
 
@@ -112,6 +121,7 @@ export default function CardiacHost ({runner, locale, configuration, onReady}) {
             if (typeof event.detail?.source !== 'string') return;
             generation.current++;
             callbacks.current.runner?.pause?.();
+            setExampleId(CARDIAC_EXAMPLES[event.detail.exampleId] ? event.detail.exampleId : exampleForSource(event.detail.source));
             save(previous => ({...previous, source: event.detail.source,
                 inputDeck: typeof event.detail.inputDeck === 'string' ? event.detail.inputDeck : '',
                 inputMode: event.detail.inputMode === 'circuit' ? 'circuit' : 'manual', loadedProgram: null}));
@@ -127,6 +137,8 @@ export default function CardiacHost ({runner, locale, configuration, onReady}) {
             const next = initialWorkspace();
             current.current = next;
             setWorkspace(next);
+            setExampleId(exampleForSource(next.source));
+            setSuppliedCards(0);
             setPrediction(null);
             setBusy(false);
             // Reopening restores the authored image, paused, never live memory.
@@ -181,12 +193,14 @@ export default function CardiacHost ({runner, locale, configuration, onReady}) {
     return <section data-cardiac-host>
         <CardiacPanel workspace={workspace} assembly={assembly} snapshot={snapshot} busy={busy}
             error={error} locale={locale} attached={!!configuration?.partId} prediction={prediction}
+            exampleId={exampleId} suppliedCards={suppliedCards}
             onSource={source => save(previous => ({...previous, source}))}
             onDeck={inputDeck => save(previous => ({...previous, inputDeck}))}
             onMode={inputMode => save(previous => ({...previous, inputMode}))}
             onExample={id => {
                 const example = CARDIAC_EXAMPLES[id];
                 if (!example) return;
+                setExampleId(id);
                 runner?.pause?.();
                 save(previous => ({...previous, source: example.source,
                     inputDeck: formatCardiacDeck(example.input), inputMode: 'manual'}));
@@ -215,6 +229,7 @@ export default function CardiacHost ({runner, locale, configuration, onReady}) {
                 if (!valid()) return;
                 runner?.pause?.();
                 save(next);
+                setExampleId(exampleForSource(next.source));
                 if (/\.json$/i.test(file.name)) {
                     const selected = await ready();
                     if (valid()) selected.cardiacControl('loadProgram', next.loadedProgram || {words: [], entry: 0});

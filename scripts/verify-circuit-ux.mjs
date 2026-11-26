@@ -1440,6 +1440,7 @@ try {
             if (!await designer.locator('[data-instruments-column]').count()) {
                 await designer.getByRole('button', {name: /Expand instruments panel/i}).click();
             }
+            await designer.getByText('Circuit analysis', {exact: true}).click();
             await designer.getByTestId('bw-operating-point-run').click();
             const result = designer.getByTestId('bw-operating-point-result');
             await result.waitFor({state: 'visible'});

@@ -73,11 +73,12 @@ const COPY = {
 };
 
 export default function CardiacPanel ({workspace, assembly, snapshot, busy, error, locale, prediction,
-    onSource, onDeck, onMode, onExample, onLoad, onRunSource, onControl, onRun, onPredict, onSave, onOpen, onListing, attached}) {
+    exampleId, suppliedCards = 0, onSource, onDeck, onMode, onExample, onLoad, onRunSource, onControl, onRun, onPredict, onSave, onOpen, onListing, attached}) {
     const language = /^de/i.test(locale || '') ? 'de' : 'en';
     const t = COPY[language];
     const surfaces = useContext(CardiacSurfaces);
     const sourceHelp = useRef(null);
+    const faceHelp = useRef(null);
     const [cell, setCell] = useState(1);
     const [cellValue, setCellValue] = useState('');
     const [predictPc, setPredictPc] = useState('');
@@ -94,21 +95,41 @@ export default function CardiacPanel ({workspace, assembly, snapshot, busy, erro
     const predictionMessage = prediction?.kind === 'waiting' ? t.waitPrediction : t[prediction?.kind];
 
     const Editor = surfaces?.Editor;
+    const exemplar = CARDIAC_EXAMPLES[exampleId];
+    const exampleEdited = exemplar && exemplar.source.trim() !== workspace.source.trim();
+    const readCards = Math.max(0, suppliedCards - (state?.inputQueue?.length || 0));
+    const local = (en, de) => language === 'de' ? de : en;
+    const examplesLabel = Editor ? local('Examples', 'Beispiele') : t.examples;
+    const icon = (glyph, label) => Editor ? <span title={label} aria-hidden="true">{glyph}</span> : label;
+    const sourceLine = item => {
+        const text = item.source.trim();
+        const match = /^([a-z_]\w*:|\d{1,2}:)\s*(.*)$/i.exec(text);
+        return <span className={styles.listingLine}>
+            <span>{item.line}</span><span title={match?.[1]}>{match?.[1]}</span><span>{match?.[2] ?? text}</span>
+        </span>;
+    };
     const sourceInput = <textarea aria-label={t.source} data-testid={Editor ? undefined : 'cardiac-source'} className={styles.source}
         value={workspace.source} onChange={event => onSource(event.target.value)} spellCheck={false} maxLength={131072} />;
     const editor = <section className={Editor ? `${styles.panel} ${styles.codeEditor}` : styles.panel} data-cardiac-editor>
         {!Editor && <header className={styles.header}><strong>CARDIAC</strong><span>{t.program}</span></header>}
         <div className={styles.actions}>
-            <label className={styles.field}>{t.examples}<select value="" onChange={event => onExample(event.target.value)} disabled={busy}>
-            <option value="">—</option>
-            {Object.values(CARDIAC_EXAMPLES).map(example => <option key={example.id} value={example.id}>{example.title[language]}</option>)}
-            </select></label>
-            <button type="button" onClick={onLoad} disabled={busy || !assembly.ok || assembly.entry === null}>{t.load}</button>
-            <button type="button" className={styles.primary} onClick={onRunSource} disabled={busy || !assembly.ok || assembly.entry === null}>{t.runSource}</button>
-            <button type="button" onClick={onSave}>{t.save}</button>
-            <label className={styles.fileButton}>{t.open}<input type="file" accept=".cardiac,.txt,.json" disabled={busy}
-                onChange={event => { const file = event.target.files[0]; event.target.value = ''; if (file) onOpen(file); }} /></label>
-            <button type="button" onClick={onListing} disabled={!assembly.ok || assembly.entry === null}>{t.listing}</button>
+            <select aria-label={t.examples} title={t.examples} value={exampleId || ''}
+                onChange={event => onExample(event.target.value)} disabled={busy} className={styles.examplePicker}>
+                <option value="" disabled>{examplesLabel}</option>
+                {Object.values(CARDIAC_EXAMPLES).map(example => <option key={example.id} value={example.id}>
+                    {exampleEdited && example.id === exampleId ? '* ' : ''}{example.title[language]}
+                </option>)}
+            </select>
+            <button type="button" title={t.load} aria-label={t.load} onClick={onLoad}
+                disabled={busy || !assembly.ok || assembly.entry === null}>{icon('↓', t.load)}</button>
+            <button type="button" className={styles.primary} title={t.runSource} aria-label={t.runSource}
+                onClick={onRunSource} disabled={busy || !assembly.ok || assembly.entry === null}>{icon('▶', t.runSource)}</button>
+            <button type="button" title={t.save} aria-label={t.save} onClick={onSave}>{icon('▣', t.save)}</button>
+            <label className={styles.fileButton} title={t.open}>{icon('↗', t.open)}
+                <input type="file" aria-label={t.open} accept=".cardiac,.txt,.json" disabled={busy}
+                    onChange={event => { const file = event.target.files[0]; event.target.value = ''; if (file) onOpen(file); }} /></label>
+            <button type="button" title={t.listing} aria-label={t.listing} onClick={onListing}
+                disabled={!assembly.ok || assembly.entry === null}>{icon('⇩', t.listing)}</button>
             {Editor && <button type="button" title={t.reference} aria-label={t.reference}
                 onClick={() => sourceHelp.current.showModal()}>ⓘ</button>}
         </div>
@@ -123,11 +144,11 @@ export default function CardiacPanel ({workspace, assembly, snapshot, busy, erro
             {assembly.diagnostics.map((item, index) => <li key={index} data-severity={item.severity}>
                 {item.line}:{item.column} — {item.message}</li>)}
         </ul>}
-        {assembly.ok && !!assembly.listing?.length && <details open={Editor ? undefined : true}><summary>{t.listing}</summary>
+        {assembly.ok && !!assembly.listing?.length && <details open={Editor ? undefined : true}><summary>{local('Listing', 'Listing')}</summary>
             <div className={styles.tableScroll}><table className={styles.listing}><thead><tr><th>PC</th><th>{t.program}</th><th>{t.sourceLine}</th></tr></thead>
                 <tbody>{assembly.listing.map(item => <tr key={item.address}
                     data-current={state?.pc === item.address && state?.memory[item.address] === item.value ? 'true' : undefined}>
-                    <td>{addr(item.address)}</td><td>{word(item.value)}</td><td>{item.line}: {item.source}</td>
+                    <td>{addr(item.address)}</td><td>{word(item.value)}</td><td>{sourceLine(item)}</td>
                 </tr>)}</tbody></table></div>
         </details>}
         {Editor ? <dialog ref={sourceHelp} aria-label={t.reference}>
@@ -141,45 +162,62 @@ export default function CardiacPanel ({workspace, assembly, snapshot, busy, erro
         </details>}
     </section>;
 
-    const machine = <section className={styles.panel} data-cardiac-controller data-cardiac-status={state?.status || 'ready'}>
+    const machine = <section className={`${styles.panel} ${Editor ? styles.machine : ''}`} data-cardiac-controller data-cardiac-status={state?.status || 'ready'}>
         {!Editor && <header className={styles.header}><strong>CARDIAC</strong><span>{t.subtitle}</span></header>}
         {error && !surfaces?.code && <p className={styles.error} role="alert">{error}</p>}
         <div className={styles.registers}>
-            <div><span>{t.pc}</span><output data-testid="cardiac-pc">{addr(state?.pc)}</output></div>
-            <div><span>{t.acc}</span><output data-testid="cardiac-acc">{word(state?.acc, 4)}</output></div>
-            <div><span>{t.ir}</span><output data-testid="cardiac-ir">{word(state?.ir)}</output></div>
-            <div><span>{t.steps}</span><output data-testid="cardiac-steps">{state?.steps ?? '—'}</output></div>
+            <div><span title={t.pc}>{Editor ? 'PC' : t.pc}</span><output data-testid="cardiac-pc">{addr(state?.pc)}</output></div>
+            <div><span title={t.acc}>{Editor ? 'ACC' : t.acc}</span><output data-testid="cardiac-acc">{word(state?.acc, 4)}</output></div>
+            <div><span title={t.ir}>{Editor ? 'IR' : t.ir}</span><output data-testid="cardiac-ir">{word(state?.ir)}</output></div>
+            <div><span title={t.steps}>{Editor ? local('Steps', 'Schritte') : t.steps}</span><output data-testid="cardiac-steps">{state?.steps ?? '—'}</output></div>
         </div>
-        <p role="status" className={styles.status}>{status}{state ? ` · ${t.current}: ${addr(state.pc)} / ${word(nextWord)}` : ''}</p>
-        <div className={styles.actions}>
-            <button type="button" className={styles.primary} onClick={onRun} disabled={busy || running || !loaded}>{t.run}</button>
-            <button type="button" onClick={() => onControl('pause')} disabled={busy || !running}>{t.pause}</button>
-            <button type="button" onClick={() => onControl('step')} disabled={busy || running || !loaded}>{t.step}</button>
-            <button type="button" onClick={() => onControl('reset')} disabled={busy}>{t.reset}</button>
+        <div className={`${styles.actions} ${styles.machineActions}`}>
+            <button type="button" className={styles.primary} title={t.run} aria-label={t.run}
+                onClick={onRun} disabled={busy || running || !loaded}>{icon('▶', t.run)}</button>
+            <button type="button" title={t.pause} aria-label={t.pause}
+                onClick={() => onControl('pause')} disabled={busy || !running}>{icon('⏸', t.pause)}</button>
+            <button type="button" title={t.step} aria-label={t.step}
+                onClick={() => onControl('step')} disabled={busy || running || !loaded}>{icon('⏭', t.step)}</button>
+            <button type="button" title={t.reset} aria-label={t.reset}
+                onClick={() => onControl('reset')} disabled={busy}>{icon('↺', t.reset)}</button>
+            <span role="status" className={styles.status} title={state ? `${t.current} · ${addr(state.pc)} / ${word(nextWord)}` : undefined}>
+                {status}
+            </span>
+            <button type="button" title={local('About CARDIAC controls', 'Über die CARDIAC-Steuerung')}
+                aria-label={local('About CARDIAC controls', 'Über die CARDIAC-Steuerung')}
+                onClick={() => faceHelp.current.showModal()}>ⓘ</button>
         </div>
+        <dialog ref={faceHelp} aria-label={local('CARDIAC controls', 'CARDIAC-Steuerung')}>
+            <form method="dialog"><button type="submit" aria-label={local('Close', 'Schließen')}>×</button></form>
+            <p>{local('Run source + cards loads the program and queues the draft cards. Each INP removes one card from the queue. Queue cards appends the current draft to the running or waiting machine.',
+                'Quelle + Karten starten lädt das Programm und legt die Karten ein. Jeder INP-Befehl liest eine Karte. Karten einlegen hängt den Entwurf an die aktuelle Warteschlange an.')}</p>
+            <p>{t.ioHint}</p><p>{t.memoryHint}</p><p>{t.predictHint}</p>
+        </dialog>
         <div className={styles.trays}>
             <section><h3>{t.cards}</h3>
-                <label className={styles.field}>{t.inputMode}<select value={workspace.inputMode} onChange={event => onMode(event.target.value)}>
+                {(attached || !Editor) && <label className={styles.field}>{t.inputMode}<select value={workspace.inputMode} onChange={event => onMode(event.target.value)}>
                     <option value="manual">{t.manual}</option><option value="circuit" disabled={!attached}>{t.circuit}</option>
-                </select></label>
+                </select></label>}
                 {workspace.inputMode === 'manual' ? <React.Fragment>
-                    <textarea aria-label={t.deck} data-testid="cardiac-input-deck" rows={3} maxLength={32768}
+                    <textarea aria-label={t.deck} data-testid="cardiac-input-deck" rows={2} maxLength={32768}
                         value={workspace.inputDeck} onChange={event => onDeck(event.target.value)} spellCheck={false} />
-                    <button type="button" onClick={() => onControl('queueDeck')} disabled={busy}>{t.enqueue}</button>
+                    <button type="button" title={t.enqueue} aria-label={t.enqueue}
+                        onClick={() => onControl('queueDeck')} disabled={busy}>{icon('↓', t.enqueue)}</button>
                 </React.Fragment> : <button type="button" onClick={() => onControl('sampleInput')} disabled={busy || !attached}>{t.sample}</button>}
-                <h4>{t.queue}</h4><output data-testid="cardiac-input-queue" className={styles.cardTray}>
+                <span className={styles.trayLabel}>{t.queue}</span>
+                <output data-testid="cardiac-input-queue" className={styles.cardTray}>
                     {state?.inputQueue?.length ? state.inputQueue.map((value, index) => <span key={index} title={state.inputSources?.[index] === 'circuit' ? t.circuit : t.manual}>
-                        {word(value)}{state.inputSources?.[index] === 'circuit' ? ` · ${t.circuit}` : ''}</span>) : t.noCards}
+                        {word(value)}{state.inputSources?.[index] === 'circuit' ? ` · ${t.circuit}` : ''}</span>) : readCards ? local(`${readCards} read`, `${readCards} gelesen`) : t.noCards}
                 </output>
             </section>
             <section><h3>{t.output}</h3><output data-testid="cardiac-output" className={styles.cardTray}>
                 {state?.output?.length ? state.output.map((value, index) => <span key={index}>{word(value)}</span>) : t.noCards}
-            </output><button type="button" onClick={() => onControl('clearOutput')} disabled={busy}>{t.clearOutput}</button>
-                <p className={styles.hint}>{t.modern}</p><p className={styles.hint}>{t.ioHint}</p>
-                {attached ? <p className={styles.hint}>IN: {Number.isFinite(state?.inputVoltage) ? state.inputVoltage.toFixed(3) : '—'} V · OUT: {state?.outputHigh ? '5' : '0'} V</p> : <p className={styles.hint}>{t.needsCircuit}</p>}
+            </output>{!!state?.output?.length && <button type="button" title={t.clearOutput} aria-label={t.clearOutput}
+                    onClick={() => onControl('clearOutput')} disabled={busy}>{icon('×', t.clearOutput)}</button>}
+                {attached && <p className={styles.hint}>IN {Number.isFinite(state?.inputVoltage) ? state.inputVoltage.toFixed(3) : '—'} V · OUT {state?.outputHigh ? '5' : '0'} V</p>}
             </section>
         </div>
-        <details open className={styles.prediction}><summary>{t.prediction}</summary><p className={styles.hint}>{t.predictHint}</p>
+        <details open={Editor ? undefined : true} className={styles.prediction}><summary>{t.prediction}</summary>
             <div className={styles.actions}><label>{t.predictPc}<input inputMode="numeric" value={predictPc}
                 onChange={event => setPredictPc(event.target.value)} /></label>
             <label>{t.predictAcc}<input inputMode="numeric" value={predictAcc} onChange={event => setPredictAcc(event.target.value)} /></label>
@@ -187,7 +225,7 @@ export default function CardiacPanel ({workspace, assembly, snapshot, busy, erro
             {predictionMessage && <p role="status" data-cardiac-prediction={prediction.kind}>{predictionMessage}
                 {prediction.expectedPc !== undefined && ` PC ${addr(prediction.expectedPc)} · ACC ${word(prediction.expectedAcc, 4)}`}</p>}
         </details>
-        {currentEvent && <section className={styles.trace} data-cardiac-last-instruction><h3>{t.latest}</h3>
+        {currentEvent && <details open={Editor ? undefined : true} className={styles.trace} data-cardiac-last-instruction><summary>{t.latest}</summary>
             <p>{addr(currentEvent.pcBefore)}: {word(currentEvent.word)} {currentEvent.mnemonic} → PC {addr(currentEvent.pcAfter)} · ACC {word(currentEvent.accBefore, 4)} → {word(currentEvent.accAfter, 4)}</p>
             {!!currentEvent.reads?.length && <p>{t.reads}: {currentEvent.reads.map(item => `${addr(item.address)} = ${word(item.value)}`).join(', ')}</p>}
             {!!currentEvent.writes?.length && <p>{t.writes}: {currentEvent.writes.map(item => `${addr(item.address)}: ${word(item.before)} → ${word(item.after)}`).join(', ')}</p>}
@@ -195,8 +233,8 @@ export default function CardiacPanel ({workspace, assembly, snapshot, busy, erro
             {currentEvent.output !== null && <p>{t.output}: {word(currentEvent.output)}</p>}
             {currentEvent.branchTaken !== null && <p>{t.branch}: {currentEvent.branchTaken ? t.taken : t.notTaken}</p>}
             {currentEvent.notes?.map(note => <p key={note}>{note}</p>)}
-        </section>}
-        <details open><summary>{t.memory}</summary><p className={styles.hint}>{t.memoryHint}</p>
+        </details>}
+        <details open={Editor ? undefined : true}><summary>{t.memory}</summary>
             {state?.sourceDiffers && <p className={styles.notice}>{t.sourceDiffers}</p>}
             {state?.sourceLine && <p>{t.sourceLine}: {state.sourceLine}</p>}
             <div className={styles.memory} role="group" aria-label={t.memory}>
@@ -206,7 +244,7 @@ export default function CardiacPanel ({workspace, assembly, snapshot, busy, erro
                     data-testid={`cardiac-cell-${addr(address)}`} data-pc={state?.pc === address ? 'true' : undefined}
                     data-written={currentEvent?.writes?.some(item => item.address === address) ? 'true' : undefined}
                     data-read={currentEvent?.reads?.some(item => item.address === address) ? 'true' : undefined}>
-                    <small>{addr(address)}{state?.breakpoints?.includes(address) ? ' ●' : ''}</small><b>{word(state?.memory[address])}</b>
+                    <small>{addr(address)}{state?.breakpoints?.includes(address) ? '●' : ':'}</small><b>{word(state?.memory[address])}</b>
                 </button>)}
             </div>
             <div className={styles.actions}><strong>{t.selected}: {addr(cell)} = {word(selectedWord)}</strong>
@@ -220,12 +258,13 @@ export default function CardiacPanel ({workspace, assembly, snapshot, busy, erro
     return <React.Fragment>
         {surfaces?.code ? createPortal(editor, surfaces.code) : <details><summary>CARDIAC · {t.program}</summary>{editor}</details>}
         {surfaces?.controller ? createPortal(machine, surfaces.controller) : !surfaces && machine}
-        {surfaces && <p className={styles.hint}>CARDIAC · {status} · PC {addr(state?.pc)} · ACC {word(state?.acc, 4)}</p>}
+        {surfaces && !surfaces.controller && <p className={styles.hint}>CARDIAC · {status} · PC {addr(state?.pc)} · ACC {word(state?.acc, 4)}</p>}
     </React.Fragment>;
 }
 
 CardiacPanel.propTypes = {
     workspace: PropTypes.object.isRequired, assembly: PropTypes.object.isRequired, snapshot: PropTypes.object,
+    exampleId: PropTypes.string, suppliedCards: PropTypes.number,
     busy: PropTypes.bool, error: PropTypes.string, locale: PropTypes.string, prediction: PropTypes.object, attached: PropTypes.bool,
     onSource: PropTypes.func.isRequired, onDeck: PropTypes.func.isRequired, onMode: PropTypes.func.isRequired,
     onExample: PropTypes.func.isRequired, onLoad: PropTypes.func.isRequired, onRunSource: PropTypes.func.isRequired,
