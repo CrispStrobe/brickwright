@@ -127,6 +127,14 @@ try {
     await page.waitForFunction(() => window.__board?.getDeviceState('kim1')?.roms === null);
     checks.push('A session-mounted ROM drives the display through the 6530');
 
+    await panel.getByRole('button', {name: 'Use Brickwright ROM', exact: true}).click();
+    await page.waitForFunction(() => window.__board?.getDeviceState('kim1')?.romSource === 'brickwright');
+    await page.waitForFunction(() =>
+        document.querySelector('[data-kim1-panel="kim1"] [data-kim1-display]')?.getAttribute('data-kim1-display') === '000000');
+    await panel.getByRole('button', {name: 'Learning monitor', exact: true}).click();
+    await page.waitForFunction(() => window.__board?.getDeviceState('kim1')?.roms === null);
+    checks.push('The bundled Brickwright ROM boots and drives the six display digits');
+
     await panel.scrollIntoViewIfNeeded();
     await page.screenshot({path: path.join(output, 'kim1-brickwright-panel.png'), fullPage: true});
     assert.deepEqual(pageErrors, []);
