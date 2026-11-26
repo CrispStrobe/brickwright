@@ -898,7 +898,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
      */
     let terminalOutput = null;
     /** Per-frame boot-progress hook for the Linux lesson, or null. */
-    let linuxProgressWatch = null;
+    let terminalFrame = null;
     /**
      * Set by destroy(). A runner destroyed while its start() is still awaiting
      * attach() must not come back to life when attach resolves: before this,
@@ -1613,7 +1613,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         serialEsc = 0;
         terminalOutput = null;
         delete runner.terminal;
-        linuxProgressWatch = null;
+        terminalFrame = null;
         const device = String(projectStc(null)?.device || '').toLowerCase();
         const selectedTargetKind = selectDebugTargetKind(device, targetKind);
         // The picker offers two targets and only one of them can be honoured
@@ -2175,6 +2175,10 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             typeof data === 'string' ? new TextEncoder().encode(data) : data);
         runner.terminal = {id: `pico-uart-${++picoTerminalSequence}`, kind: 'pico', rows: 24, cols: 80,
             subscribe: output.subscribe, send: input.write};
+        terminalFrame = () => {
+            output.deliver();
+            input.flush();
+        };
 
         setValueResolver((blockId) => runner.valuesAtBlock(blockId));
         if (vm && vm.runtime) vm.runtime._bwDebugVariables = () => runner.variables();
@@ -2185,8 +2189,6 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         target = createRp2040jsDebugTarget(adapter, { symbols: undefined, clockHz });
         session = createDebugSession(target, {
             onChange: (st) => {
-                output.deliver();
-                input.flush();
                 if (st.halted) {
                     if (shouldSkip(st)) { skipped++; skipRequested = true; return; }
                     glow(st.tasks);
@@ -3399,7 +3401,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             send: data => linuxConsole.send(data)
         };
         let shown = '';
-        linuxProgressWatch = () => {
+        terminalFrame = () => {
             const p = target && typeof target.linuxProgress === 'function' ? target.linuxProgress() : null;
             if (!p) return;
             linuxConsole.frame();
@@ -4032,7 +4034,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         if (cp1RunKeyUntil !== null && (target.timeNs() >= cp1RunKeyUntil || outcome !== 'ran')) {
             releaseCp1RunKey();
         }
-        if (linuxProgressWatch) linuxProgressWatch();
+        if (terminalFrame) terminalFrame();
 
         // Absorb skipped hits in this frame rather than one per frame. Bounded,
         // because a pause point inside a tight loop with a condition that never

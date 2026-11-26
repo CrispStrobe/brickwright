@@ -1345,6 +1345,8 @@ class PseudocodeImporter extends React.Component {
     openLibraryCode = event => {
         const program = event.detail;
         if (!program) return;
+        const runtime = this.props.vm?.runtime;
+        if (runtime?.bwLibraryCode === program) delete runtime.bwLibraryCode;
         this.setState(state => ({
             lang: program.language, libraryProgram: program, status: '', output: null,
             cardiacActive: false, cp1Active: false, kim1Active: false, microtronicActive: false,
@@ -3056,9 +3058,9 @@ class PseudocodeImporter extends React.Component {
         // dropped and the tab filled with an empty program. Since D5 the parser
         // refuses a line it cannot read, so that became an error that kept the
         // learner on the ASM tab. Just switch.
-        const program = from === 'pseudocode' && src ?
-            src.replace(/^DEVICE\s+[^\n]*(?:\n|$)/im, '') : src;
-        if (from === 'asm' || (existing && existing.trim()) || !program?.trim()) {
+        const hasSource = (buffer, language) => Boolean(buffer && (language === 'pseudocode' ?
+            buffer.replace(/^DEVICE\s+[^\n]*(?:\n|$)/im, '') : buffer).trim());
+        if (from === 'asm' || hasSource(existing, to) || !hasSource(src, from)) {
             this.setState({lang: to, output: null, status: '', emptyTabOffer: null});
             return;
         }
@@ -3074,8 +3076,9 @@ class PseudocodeImporter extends React.Component {
     openEmptyTab (to) {
         if (this.state.busy || this.state.emptyTabOffer !== to) return;
         // The source buffer is kept; only the requested tab opens, empty.
+        const device = this.currentDevice();
         this.setState(s => ({lang: to, output: null, status: '', statusExpanded: false, emptyTabOffer: null,
-            buffers: {...s.buffers, [to]: ''}}));
+            buffers: {...s.buffers, [to]: to === 'pseudocode' && device ? `DEVICE ${device}\n` : ''}}));
     }
 
     /** Simple hash for cache key — FNV-1a 32-bit on the source string. */

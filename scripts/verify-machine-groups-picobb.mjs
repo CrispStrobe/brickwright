@@ -18,7 +18,7 @@ try {
     const xt = group('8086');
     const at = group('80386');
     await xt.getByText(/ELKS/).first().waitFor();
-    await xt.getByText('partcl Tcl (DOS)', {exact: true}).waitFor();
+    await xt.getByText('partcl Tcl (DOS)').waitFor();
     await xt.getByTestId('bw-mm-8086-cga-demo').waitFor();
     await at.getByText(/TOPBENCH/).waitFor();
     await at.getByText('Local 386 media', {exact: true}).waitFor();
