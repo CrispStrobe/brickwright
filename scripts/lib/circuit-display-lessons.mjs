@@ -73,18 +73,25 @@ async function inspectMeter (id, circuit, until, now, state, checks) {
     for (const position of [0, 0.5, 1]) {
         circuit.setControl(pot, position);
         await until(now() + 260);
-        const title = id === '73-voltmeter' ? 'VOLTMETER' : 'AMMETER';
-        const screen = id === '73-voltmeter' ? state('ssd1306') : state('char_lcd_i2c');
-        const seenTitle = id === '73-voltmeter' ? await oledText(screen, 0, 0, title) : screen?.display?.[0]?.trim();
+        const voltmeter = id === '73-voltmeter';
+        const title = voltmeter ? 'VOLTMETER' : 'AMMETER';
+        const screen = voltmeter ? state('ssd1306') : state('char_lcd_i2c');
+        const seenTitle = voltmeter ? await oledText(screen, 0, 0, title) : screen?.display?.[0]?.trim();
         check(checks, 'title at ' + position, title, seenTitle ?? null);
-        const seen = id === '73-voltmeter' ? await oledText(screen, 3, 3) : screen?.display?.[1];
-        const units = id === '73-voltmeter' ? 'mV' : 'mA';
-        const match = seen?.match(new RegExp(`^([0-9.]+) ${units} *$`));
+        const seen = voltmeter ? await oledText(screen, 3, 3) : screen?.display?.[1];
+        const units = voltmeter ? 'mV' : 'mA';
+        const match = (voltmeter ? /^(\d+) mV *$/ : /^(\d+\.\d) mA *$/).exec(seen || '');
         checks.push({check: `visible ${units} value and unit at ${position}`,
-            expected: `a number and ${units}`, observed: seen?.trim() ?? null, ok: Boolean(match)});
-        const target = id === '73-voltmeter' ? position * 5000 : 5000 / (1000 * (1 - position) + 10);
-        const tolerance = id === '73-voltmeter' ? 65 : target * 0.1 + 0.5;
-        checkRange(checks, `measurement at ${position * 100}%`, target, tolerance, Number.parseFloat(seen));
+            expected: voltmeter ? 'whole mV' : 'mA with one decimal place', observed: seen?.trim() ?? null, ok: Boolean(match)});
+        const board = circuit.board;
+        const wiper = board.getNets().find(net => net.terminals.some(t => t.part === pot && t.terminal === 'wiper'));
+        const actual = voltmeter ? board.nodeVoltage(wiper.id) * 1000 : Math.abs(board.branchCurrent('shunt1', 'a')) * 1000;
+        const ideal = voltmeter ? position * 5000 : 5000 / (Math.max(1, 1000 * (1 - position)) + 10);
+        checkRange(checks, `circuit at ${position * 100}%`, ideal, voltmeter ? 6 : 0.1, actual);
+        // The 5 V / 10-bit ADC quantizes to 4.89 mV; the display then rounds to 1 mV.
+        const toleranceMv = 5000 / 1023 / 2 + 0.5;
+        checkRange(checks, `displayed measurement at ${position * 100}%`, actual,
+            voltmeter ? toleranceMv : toleranceMv / 10, match ? Number(match[1]) : NaN);
     }
 }
 

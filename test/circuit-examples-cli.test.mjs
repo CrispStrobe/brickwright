@@ -162,3 +162,28 @@ test('circuit CLI rejects an unknown gallery ID', () => {
     assert.equal(result.status, 2);
     assert.match(result.stderr, /No matching gallery circuit benches/);
 });
+
+test('meter lessons show readable, calibrated values at three pot positions', () => {
+    for (const [lesson, units, expected] of [
+        ['73-voltmeter', 'mV', ['0 mV', '2502 mV', '5000 mV']],
+        ['74-ammeter', 'mA', ['4.9 mA', '9.8 mA', '454.5 mA']]
+    ]) {
+        const result = invoke(lesson, '--device', 'arduino-uno', '--json');
+        assert.equal(result.status, 0, result.stderr || result.stdout);
+        const {rows: [{behavior}]} = JSON.parse(result.stdout);
+        const readings = behavior.checks.filter(check => check.check.startsWith(`visible ${units}`));
+        assert.deepEqual(readings.map(check => check.observed), expected);
+    }
+});
+
+test('Pico Ping measures its real GPIO echo through a voltage divider', () => {
+    const result = invoke('arduino-06-ping', '--device', 'pico', '--json');
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const {rows: [{behavior}]} = JSON.parse(result.stdout);
+    const inputs = behavior.checks.find(check => check.check.startsWith('echo reaches MCU')).observed;
+    const outputs = behavior.checks.find(check => check.check.startsWith('reported whole centimetres')).observed;
+    assert.ok(inputs[0].gpioUs.every(pulse => pulse === 2320));
+    assert.ok(inputs[1].gpioUs.every(pulse => pulse === 6960));
+    assert.ok(inputs.every(input => input.gpioPeak > 3 && input.gpioPeak < 3.3));
+    assert.deepEqual(outputs.map(readings => [...new Set(readings)]), [[40], [120]]);
+});

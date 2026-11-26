@@ -92,15 +92,18 @@ async function checkTones (scenario, circuit, vm, stepFrames) {
 async function checkUltrasonic (circuit, vm, stepFrames) {
     const {board} = circuit;
     const sensor = circuit.parts.find(part => part.kind === 'ultrasonic');
-    const terminalNet = name => board.nets.find(net => net.terminals.some(term =>
-        term.part === sensor?.id && term.terminal === name));
-    const trigger = terminalNet('trig');
-    if (!trigger || !terminalNet('echo')) throw new Error('The ultrasonic sensor must have wired trigger and echo');
+    const terminalNet = (id, name) => board.getNets().find(net => net.terminals.some(term =>
+        term.part === id && term.terminal.toLowerCase() === name.toLowerCase()));
+    const echoPin = vm.runtime.stc?.parts?.find(part => part.type === 'hcsr04')?.echo;
+    const gpio = echoPin && terminalNet('board', echoPin.where ?? `P${echoPin.port}.${echoPin.bit}`);
+    const trigger = terminalNet(sensor?.id, 'trig');
+    const echo = terminalNet(sensor?.id, 'echo');
+    if (!trigger || !echo || !gpio) throw new Error('The ultrasonic sensor must have wired trigger and echo GPIO');
     const observed = [];
     const originalLog = console.log;
     let output = [];
-    const sampleMs = 0.5;
     let now = 0;
+    const sampleMs = 10;
     const start = board.getTime();
     vm.runtime.updateCurrentMSecs = () => { vm.runtime.currentMSecs = now; };
     vm.runtime.updateCurrentMSecs();
@@ -110,36 +113,54 @@ async function checkUltrasonic (circuit, vm, stepFrames) {
         for (const cm of [40, 120]) {
             circuit.setPartParam(sensor.id, 'distance', cm);
             output = [];
-            const deadline = now + 280;
-            const pulses = [];
-            let rise = null;
-            for (; now < deadline; now += sampleMs) {
-                await stepFrames(vm, 1, sampleMs);
-                circuit.advanceTo(start + BigInt(Math.round((now + sampleMs) * 1_000_000)));
-                const high = board.nodeVoltage(trigger.id) > circuit.vcc / 2;
-                if (high && rise === null) {
-                    rise = now;
-                } else if (!high && rise !== null) {
-                    pulses.push((now - rise) * 1000);
-                    rise = null;
+            let gpioPeak = 0;
+            const trace = [trigger, echo, gpio].map(net => ({
+                id: net.id, high: board.nodeVoltage(net.id) > circuit.vcc / 2, rise: null, pulses: []
+            }));
+            const recordEdges = event => {
+                if (event.type !== 'pin' && event.type !== 'time') return;
+                const time = board.getTime();
+                gpioPeak = Math.max(gpioPeak, board.nodeVoltage(gpio.id));
+                for (const signal of trace) {
+                    const high = board.nodeVoltage(signal.id) > circuit.vcc / 2;
+                    if (high === signal.high) continue;
+                    signal.high = high;
+                    if (high) signal.rise = time;
+                    else if (signal.rise !== null) signal.pulses.push(Number(time - signal.rise) / 1000);
                 }
+            };
+            board.onChange(recordEdges);
+            try {
+                const deadline = now + 280;
+                for (; now < deadline; now += sampleMs) {
+                    await stepFrames(vm, 1, sampleMs);
+                    circuit.advanceTo(start + BigInt(Math.round((now + sampleMs) * 1_000_000)));
+                }
+            } finally {
+                board.offChange(recordEdges);
             }
-            const device = board.getDeviceState(sensor.id);
-            observed.push({cm, output, pulses, echoUs: Number(device._echoEndNs - device._echoStartNs) / 1000});
+            observed.push({cm, output, triggerUs: trace[0].pulses, echoUs: trace[1].pulses,
+                gpioUs: trace[2].pulses, gpioPeak});
         }
     } finally {
         console.log = originalLog;
     }
-    const widths = observed.map(({echoUs}) => echoUs);
-    const values = observed.map(({output: samples}) => samples);
+    const samples = (field, target) => observed.every(run => {
+        const values = run[field];
+        return values.length >= 2 && values.every(value => value === target(run.cm));
+    });
+    const maxGpioVolts = gpio.id === echo.id ? circuit.vcc : 3.3;
     return verdict([
-        {check: 'wired sensor echo width in us for 40 and 120 cm', expected: [2320, 6960], observed: widths,
-            ok: widths[0] === 2320 && widths[1] === 6960},
-        {check: 'program reports different readings at 40 and 120 cm', expected: 'distance-dependent numeric output',
-            observed: values, ok: values.every(samples => samples.length >= 2 && samples.every(Number.isFinite)) &&
-                values[0].at(-1) < values[1].at(-1)},
-        {check: 'no trigger stays high for a full 0.5 ms frame', expected: '10 us trigger pulse (shorter than 0.5 ms)',
-            observed: observed.map(({pulses}) => pulses), ok: observed.every(({pulses}) => pulses.length === 0)}
+        {check: 'wired trigger pulses', expected: '10 µs per pulse', observed: observed.map(run => run.triggerUs),
+            ok: samples('triggerUs', () => 10)},
+        {check: 'wired echo widths at 40 and 120 cm', expected: [2320, 6960], observed: observed.map(run => run.echoUs),
+            ok: samples('echoUs', cm => cm * 58)},
+        {check: 'echo reaches MCU input with the same width and within its voltage range',
+            expected: {widths: [2320, 6960], peakAtMost: maxGpioVolts},
+            observed: observed.map(({gpioUs, gpioPeak}) => ({gpioUs, gpioPeak})),
+            ok: samples('gpioUs', cm => cm * 58) && observed.every(run => run.gpioPeak <= maxGpioVolts + 0.001)},
+        {check: 'reported whole centimetres at 40 and 120 cm', expected: [40, 120], observed: observed.map(run => run.output),
+            ok: samples('output', cm => cm)}
     ]);
 }
 

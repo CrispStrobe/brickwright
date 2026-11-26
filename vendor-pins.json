@@ -1,9 +1,9 @@
 {
   "bw-circuit-ui": "21a54233b7e190253d6c71cd696a87f0f06e848f",
-  "bw-board": "91c11271a072fbf2ca271a947de45b244ee9958c",
+  "bw-board": "324b8cc247efd1f35ea318b85116df4761bee63b",
   "sb3-creator": "b7c0f3d8c95ef5aaaf1634333538a729fecf1a14",
   "stc-compiler-flasher": "30f43384a9f226de3c3cb753e119dd93ca2e81ff",
-  "devices": "f8c15543a8ffbf99a08e79beb359e0a2a5b24c8b",
+  "devices": "624cd047851e4434df5d99432dc4f1fe4035d505",
   "stc12": "65257390341f6af333ae45af6a1fcb44ffdbd041",
   "arrays-values": "035ab22a4d946fe5b8e367013caf898cd763e5f4",
   "microbitplus": "3dc133320c2b9c3725bfc69b0f2d2406c4e8900f",
