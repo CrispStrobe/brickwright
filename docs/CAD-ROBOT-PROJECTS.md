@@ -1738,3 +1738,31 @@ TypeScript build and six camera and transform-selection unit cases passed.
 The three wiring tests passed on retry with a longer per-test timeout.
 Brickwright pins SDK `f2a596a`. Sustained 1× in production remains open.
 [CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/e8463d8d5230d92436fb42a58a4783055f1b6ccd)
+
+### Reuse authored cable anchors during simulation
+
+The viewport prepares cable anchors from the CAD document once per
+immutable snapshot and looks up each connected body once per frame. It
+still applies the current body pose to the anchors before drawing the
+cable. A document replacement refreshes the anchors. The fallback for
+mutable documents reads edits on the next update.
+
+Chrome on the MacBook ran a paired 100-frame replay in both orders. The
+timings are medians of three replays in each order. The separate counted
+pass measured how often the renderer converted an authored anchor or
+looked up a connected body after the viewport warmed up.
+
+| Robot | Authored conversions | Connected-body lookups | Cable CPU, first order | Cable CPU, reverse order |
+| --- | ---: | ---: | ---: | ---: |
+| Atlas forklift | 9,900 → 0 | 9,900 → 1,100 | 112.8 → 90.4 ms | 116.3 → 94.4 ms |
+| Scout TT rover | 6,300 → 0 | 6,300 → 800 | 77.4 → 81.1 ms | 75.0 → 66.5 ms |
+
+The workplane and body matrices matched on all frames, and sampled
+cable position and normal buffers matched exactly. Atlas cable CPU
+time fell in both orders. Scout timings varied between orders.
+Both robots finished 600 live Circuit–CAD substeps in Chrome, displayed
+100 frames with moving cables, and restored their authored scenes after
+parking. The editor TypeScript build and the focused regression for
+authored anchor invalidation passed. Brickwright pins SDK `f2a596a`.
+Sustained 1× in production remains open.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/38e3eabbd1201825a923e04ea3fbc1c2d17b3e24)
