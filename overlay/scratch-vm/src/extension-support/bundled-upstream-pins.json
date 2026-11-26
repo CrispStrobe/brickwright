@@ -128,8 +128,10 @@
         },
         "devices": {
             "path": "extensions/CrispStrobe/devices.js",
-            "sha256": "70b61cc973c4b5074bbe74f629d9116e26d0953dd337d5fb125869dd94634a88",
-            "bytes": 31078
+            "sha256": "4a0475a5a53c976a690d162043a4a83376de94faa43b83fa790a031b6605e5e6",
+            "bytes": 32628,
+            "repo": "CrispStrobe/extensions",
+            "commit": "f8c15543a8ffbf99a08e79beb359e0a2a5b24c8b"
         },
         "microbitplus": {
             "path": "extensions/CrispStrobe/microbitplus.js",
@@ -148,7 +150,7 @@
             "sha256": "e7c35e7ae3d45ec2bdb1a7b1b9d51c727889bfd3780b852ffb11fe13a92ad079",
             "bytes": 15127,
             "repo": "CrispStrobe/bw-board",
-            "commit": "1e9cf0fb271eecfb343e58d53e600c68b30d5533"
+            "commit": "91c11271a072fbf2ca271a947de45b244ee9958c"
         }
     }
 }

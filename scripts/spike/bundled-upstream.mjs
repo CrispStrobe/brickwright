@@ -95,7 +95,7 @@ export const MAP = {
     // bitops_* and devices_* opcodes — so the gallery is their proper home
     // rather than a courtesy copy.
     bitops: 'extensions/CrispStrobe/bitops.js',
-    devices: 'extensions/CrispStrobe/devices.js',
+    devices: {repo: 'CrispStrobe/extensions', pin: 'devices', path: 'extensions/CrispStrobe/devices.js'},
     microbitplus: {repo: 'CrispStrobe/extensions', pin: 'microbitplus', path: 'extensions/CrispStrobe/microbitplus.js'},
     // Keyed by DIRECTORY, which is not this one's extension id: the folder is
     // `text2speech` (it replaced the stock extension of that name) while the

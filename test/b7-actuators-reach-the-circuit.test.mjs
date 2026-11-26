@@ -257,3 +257,41 @@ test('JS driver: a keypad read reaches the circuit and comes back out on a port'
     const v = [0, 1, 2, 3, 4, 5, 6, 7].reduce((a, i) => a | ((b.pinStates.get(`p0.${i}`)?.driveHigh ? 1 : 0) << i), 0);
     assert.equal(v, 6, 'key 6 scanned and written to P0');
 });
+
+test('devices: NeoPixel strip indices follow DOUT to DIN across wired packages', () => {
+    const board = new BoardImpl(5);
+    const packages = [
+        {id: 'tail', pixels: 1},
+        {id: 'head', pixels: 2},
+        {id: 'independent', pixels: 1}
+    ].map(({id, pixels}) => ({
+        id,
+        kind: 'neopixel',
+        params: {pixels},
+        terminals: ['din', 'dout', 'vcc', 'gnd']
+    }));
+    const wired = [{id: 'data', terminals: [T('head', 'dout'), T('tail', 'din')]}];
+    board.setNetlist(packages, wired);
+    board.setPower(true);
+    const ext = withBoard('devices', board);
+    const write = (strip, index, red) => ext.setneopixel({STRIP: strip, INDEX: index, R: red, G: 0, B: 0});
+    const colors = id => board.getDeviceState(id).pixels;
+
+    write('1', 1, 11);
+    write('1', 2, 22);
+    write('2', 0, 33);
+    assert.deepEqual(colors('head'), [0, 0x0B0000]);
+    assert.deepEqual(colors('tail'), [0x160000]);
+    assert.deepEqual(colors('independent'), [0x210000]);
+
+    write('tail', 0, 44);
+    assert.deepEqual(colors('tail'), [0x2C0000]);
+    ext.clearneopixels({STRIP: 'head'});
+    assert.deepEqual(colors('head'), [0, 0]);
+    assert.deepEqual(colors('tail'), [0]);
+    assert.deepEqual(colors('independent'), [0x210000]);
+
+    board.setNetlist(packages, []);
+    write('head', 2, 55);
+    assert.deepEqual(colors('tail'), [0]);
+});
