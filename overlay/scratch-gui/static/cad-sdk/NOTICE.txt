@@ -68,10 +68,11 @@ Runtime dependencies:
   (MIT / University of Illinois-NCSA). Preserve their upstream notices when
   redistributing a runtime build.
 - fflate 0.8.3, MIT, copyright Arjun Barrett.
-- Optional exact B-rep kernel: `@crispcad/exact-kernel` 0.1.4 from the CrispCAD
+- Optional exact B-rep kernel: `@crispcad/exact-kernel` 0.1.6 from the CrispCAD
   kernel lab (https://github.com/CrispStrobe/crispcad-kernel-lab, release
-  `exact-kernel-v0.1.4`), MIT AND Apache-2.0, copyright CrispCAD contributors. It
-  prebundles `@classcad/smlibwasm` 0.6.2 (MIT, copyright 2026 AWV Informatik AG)
+  `exact-kernel-v0.1.6`), MIT AND Apache-2.0, copyright CrispCAD contributors. It
+  prebundles smlibwasm 0.6.2 (`@classcad/smlibwasm`, MIT, copyright 2026 AWV
+  Informatik AG), built from source by the lab with recorded provenance and
   without its OFL font, with SMLib and its SM_API wrapper from USD BRep
   (Apache-2.0, copyright 2020-2026 NVIDIA CORPORATION & AFFILIATES; a few files
   modified by AWV Informatik AG to fix defects, listed in the smlibpy repository's
@@ -633,8 +634,13 @@ relicensed MIT here.
 Bundled third-party code
 ------------------------
 
-dist/ contains a prebundled copy of @classcad/smlibwasm 0.6.2
-(https://github.com/awv-informatik/smlibpy, directory js):
+dist/ contains a prebundled copy of smlibwasm 0.6.2 (@classcad/smlibwasm,
+https://github.com/awv-informatik/smlibpy, directory js), built from source:
+smlibpy v0.6.2 (commit a6320aa21df7c7fa4980e10ed5a94f5bcd94ce65) with USD BRep at commit
+c9c5979f04cea8c38213004d4f04df0dcfb40d05, compiled with Emscripten 6.0.12 (emsdk
+35ff8a6d150541276abbc6bae512ca90bcfbe220) and TypeScript 5.9.3. BUILD-PROVENANCE.json
+records these sources, the build and the sha256 of every file of the build; each is
+identical to the file published on npm as @classcad/smlibwasm@0.6.2.
 
   smlibwasm
   Copyright (c) 2026 AWV Informatik AG. Licensed under the MIT License
@@ -652,7 +658,7 @@ dist/ contains a prebundled copy of @classcad/smlibwasm 0.6.2
   A few USD BRep source files are compiled from copies modified by AWV Informatik AG to
   fix defects; the copies, each with a notice of what was changed, are in
   third_party/patches of the smlibpy repository, whose third_party/patches/README.md
-  lists the changes. dist/smlibwasm.wasm is the unmodified file from the npm package.
+  lists the changes. dist/smlibwasm.wasm is the module so built, unmodified.
 
   The Emscripten runtime in the loader is used under the MIT License
   (licenses/emscripten-LICENSE).
@@ -1594,14 +1600,17 @@ from `experiments/exact-kernel` on 2026-11-25).
 
 Runtime dependencies:
 - `@brickwright/cad-core` 0.1.0 (this repository, BSD-3-Clause).
-- `@crispcad/exact-kernel` 0.1.4 from the CrispCAD kernel lab
-  (https://github.com/CrispStrobe/crispcad-kernel-lab, release `exact-kernel-v0.1.4`,
-  tarball `crispcad-exact-kernel-0.1.4.tgz`, SHA-256
-  ee3f53510c6c406137b79417769547aed0877240c653eed925ca8c3efa578b6e), declared
+- `@crispcad/exact-kernel` 0.1.6 from the CrispCAD kernel lab
+  (https://github.com/CrispStrobe/crispcad-kernel-lab, release `exact-kernel-v0.1.6`,
+  tarball `crispcad-exact-kernel-0.1.6.tgz`, SHA-256
+  2f928537b3c55c96ddab8656af6760e09f670980ec01621dd324bc83545deaa3), declared
   `MIT AND Apache-2.0`, copyright CrispCAD contributors. It has no runtime dependencies.
   Its `dist/` prebundles:
-  - `@classcad/smlibwasm` 0.6.2, MIT, copyright 2026 AWV Informatik AG, without its
-    default text font (the OFL Lato font module is replaced by an empty one);
+  - smlibwasm 0.6.2 (`@classcad/smlibwasm`), MIT, copyright 2026 AWV Informatik AG,
+    built from source by the kernel lab (smlibpy v0.6.2 with USD BRep, Emscripten
+    6.0.12; the package's `BUILD-PROVENANCE.json` records the sources and the sha256 of
+    every file, each identical to the npm release), not installed from npm, and without
+    its default text font (the OFL Lato font module is replaced by an empty one);
   - `dist/smlibwasm.wasm`: SMLib and its SM_API wrapper from USD BRep, Apache-2.0,
     copyright 2020-2026 NVIDIA CORPORATION & AFFILIATES, with AWV's bindings (MIT). A few
     USD BRep files are compiled from copies modified by AWV Informatik AG to fix defects
@@ -1653,10 +1662,11 @@ Runtime dependencies:
   (MIT / University of Illinois-NCSA). Preserve their upstream notices when
   redistributing a runtime build.
 - fflate 0.8.3, MIT, copyright Arjun Barrett.
-- Optional exact B-rep kernel: `@crispcad/exact-kernel` 0.1.4 from the CrispCAD
+- Optional exact B-rep kernel: `@crispcad/exact-kernel` 0.1.6 from the CrispCAD
   kernel lab (https://github.com/CrispStrobe/crispcad-kernel-lab, release
-  `exact-kernel-v0.1.4`), MIT AND Apache-2.0, copyright CrispCAD contributors. It
-  prebundles `@classcad/smlibwasm` 0.6.2 (MIT, copyright 2026 AWV Informatik AG)
+  `exact-kernel-v0.1.6`), MIT AND Apache-2.0, copyright CrispCAD contributors. It
+  prebundles smlibwasm 0.6.2 (`@classcad/smlibwasm`, MIT, copyright 2026 AWV
+  Informatik AG), built from source by the lab with recorded provenance and
   without its OFL font, with SMLib and its SM_API wrapper from USD BRep
   (Apache-2.0, copyright 2020-2026 NVIDIA CORPORATION & AFFILIATES; a few files
   modified by AWV Informatik AG to fix defects, listed in the smlibpy repository's
