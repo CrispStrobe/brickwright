@@ -2758,8 +2758,8 @@ including Three.js (MIT), Manifold (Apache-2.0) and the bundled font licenses.
 The SDK is copied to the application only when `BW_ENABLE_CAD=1`.
 
 The SDK also carries CrispCAD's optional exact B-rep kernel,
-`@crispcad/exact-kernel` 0.1.6 (https://github.com/CrispStrobe/crispcad-kernel-lab,
-release `exact-kernel-v0.1.6`), MIT AND Apache-2.0. It prebundles smlibwasm 0.6.2
+`@crispcad/exact-kernel` 0.1.7 (https://github.com/CrispStrobe/crispcad-kernel-lab,
+release `exact-kernel-v0.1.7`), MIT AND Apache-2.0. It prebundles smlibwasm 0.6.2
 (`@classcad/smlibwasm`, MIT, Copyright 2026 AWV Informatik AG), built from source
 by the kernel lab with recorded provenance, with SMLib
 and its SM_API wrapper from USD BRep (Apache-2.0, Copyright 2020-2026 NVIDIA

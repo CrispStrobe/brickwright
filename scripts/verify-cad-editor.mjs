@@ -65,6 +65,9 @@ try{
    await shapes.waitFor({state:'visible'});
    await shapes.getByLabel('Search shapes',{exact:true}).fill('Box');
    await shapes.getByRole('button',{name:'Add Box',exact:true}).click();
+   // The click returns before the preset is built in the worker and inserted (whenIdle does not
+   // cover a pending insertion), so wait for the box like the GUI path below does.
+   await page.waitForFunction(()=>session.state.document.roots.length===1);
    await page.evaluate(()=>editor.whenIdle());
    assert.equal(await page.evaluate(()=>session.state.document.roots.length),1);
   }

@@ -5,8 +5,8 @@
       "id": "robot-tt-rover",
       "name": "Scout TT rover",
       "file": "scout.sb3",
-      "bytes": 637078,
-      "sha256": "df80c911d291661bded2bf8bbea7d992f36e1e5113dd00aa74f09d2fc9e3e112",
+      "bytes": 637043,
+      "sha256": "01cdf22dcd0765d675ef3b8712c13f9a3cadd83a59f86c2bcff1b30c5352bd39",
       "widgets": [
         "left",
         "right"
