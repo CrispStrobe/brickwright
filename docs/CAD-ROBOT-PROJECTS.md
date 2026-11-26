@@ -1714,3 +1714,27 @@ The standalone Playwright suite timed out during page navigation under
 high system load. Brickwright pins SDK `f2a596a`. Sustained 1× production
 qualification remains open.
 [CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/37068339a078016fe1a4b8e54155442a82338ec8)
+
+### Skip unchanged CAD scene transforms
+
+The viewport keeps the workplane transforms fixed and updates body and
+outline world matrices when their local physics matrices change. A pose
+missing from a frame still returns to its authored position.
+
+Two paired Chrome replays on the MacBook compared 100 recorded simulation
+frames for Atlas and Scout. Each went from 2,400 workplane world-matrix
+calculations to zero. Repeating the final pose with a fresh snapshot
+reduced body and outline world-matrix calculations from 63 to 11 for Atlas
+and from 60 to 8 for Scout. The remaining updates came from cable anchor
+lookups. Workplane, body and outline transforms matched exactly on every
+frame, as did sampled cable buffers. Overall submission timing varied
+between run orders, so the results establish fewer matrix calculations.
+
+Live Chrome checks ran each robot for 600 Circuit–CAD substeps and
+displayed 100 frames. Both moved and restored their authored scenes when
+parked. A separate browser check reset a moved box and used the mouse to
+select and drag it, committing the new position in one edit. The editor
+TypeScript build and six camera and transform-selection unit cases passed.
+The three wiring tests passed on retry with a longer per-test timeout.
+Brickwright pins SDK `f2a596a`. Sustained 1× in production remains open.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/e8463d8d5230d92436fb42a58a4783055f1b6ccd)
