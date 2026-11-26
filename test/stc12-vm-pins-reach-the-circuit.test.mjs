@@ -31,16 +31,13 @@
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import path from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {importPackageSource} from './helpers/package-source.mjs';
 
 import {loadExtensionClass, stubRuntime} from './helpers/bw-extensions.mjs';
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const BWB = path.join(ROOT, 'node_modules/bw-board/src');
-const {BoardImpl} = await import(path.join(BWB, 'board.js'));
-(await import(path.join(BWB, 'register-all.js'))).registerAllDevices();
-const {inferNetlist} = await import(path.join(BWB, 'infer-netlist.js'));
+const {BoardImpl} = await importPackageSource('bw-board/board.js');
+(await importPackageSource('bw-board/register-all.js')).registerAllDevices();
+const {inferNetlist} = await importPackageSource('bw-board/infer-netlist.js');
 
 const MS = 1_000_000n;
 
@@ -80,6 +77,7 @@ test('turn on / off / toggle / set drive the LED the declaration names', () => {
     r.ext.setpin({PIN: 'LED', STATE: 'on'});
     const on = run(r, 'LED_LED');
     assert.ok(on > 2, `turn on LED (active low) lights it: ${on.toFixed(3)} mA`);
+    assert.equal(r.ext.read({PIN: 'LED'}), 1, 'read reports an active-low output as on');
     r.ext.setpin({PIN: 'LED', STATE: 'off'});
     assert.ok(run(r, 'LED_LED') < 0.01, 'turn off LED darkens it');
     r.ext.toggle({PIN: 'LED'});
@@ -119,11 +117,13 @@ test('set LED to N percent dims it to N % of full-on', () => {
 test('read and the when-pressed hat read the circuit, not the last write', () => {
     const r = rig(STC());
     run(r, 'LED_LED', 50);
-    assert.equal(r.ext.read({PIN: 'KEY'}), 1, 'released: the pull-up holds P3.2 high');
+    assert.equal(Number(r.board.readPin('P3.2')), 1, 'released: the pull-up holds P3.2 high');
+    assert.equal(r.ext.read({PIN: 'KEY'}), 0, 'released: an active-low button is logically off');
     assert.equal(r.ext.whenpin({PIN: 'KEY', EDGE: 'pressed'}), false);
     r.board.setControl('BTN_KEY', 1);
     run(r, 'LED_LED', 50);
-    assert.equal(r.ext.read({PIN: 'KEY'}), 0, 'pressed: the button pulls P3.2 low');
+    assert.equal(Number(r.board.readPin('P3.2')), 0, 'pressed: the button pulls P3.2 low');
+    assert.equal(r.ext.read({PIN: 'KEY'}), 1, 'pressed: an active-low button is logically on');
     assert.equal(r.ext.whenpin({PIN: 'KEY', EDGE: 'pressed'}), true, 'active-low key reads pressed');
     assert.equal(r.ext.whenpin({PIN: 'KEY', EDGE: 'released'}), false);
 });
@@ -148,10 +148,10 @@ test('an input with no external pull reads its programmed pull, as the drivers a
     board.setPower(true);
     runtime.circuitBoard = board;
     const ext = new (loadExtensionClass('stc12'))(runtime);
-    assert.equal(ext.read({PIN: 'KEY'}), 1, 'released: the programmed pull-up holds GP15 high');
+    assert.equal(ext.read({PIN: 'KEY'}), 0, 'the programmed pull-up holds an active-low key inactive');
     board.setControl('BTN', 1);
     board.advanceTo(10n * MS);
-    assert.equal(ext.read({PIN: 'KEY'}), 0, 'pressed: GP15 pulled to GND');
+    assert.equal(ext.read({PIN: 'KEY'}), 1, 'grounding an active-low input asserts it');
 });
 
 test('a board-class pin is addressed by its terminal name', () => {
