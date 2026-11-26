@@ -24,6 +24,7 @@ import {localDosPackage} from '../../lib/bw-machines/local-dos-package.js';
 import {localFreedosVgaMachine} from '../../lib/bw-machines/local-freedos-vga.js';
 import {defaultImageFetcher} from '../../lib/bw-machines/activate.js';
 import {remoteMachineImagesAllowed} from '../../lib/distribution-policy.js';
+import {CIRCUIT_LIBRARY_MACHINES, libraryCircuitPrograms} from '../../lib/bw-machines/library-circuits.js';
 import {lessonMachines, lessonT} from '../../lib/bw-machines/lessons.js';
 
 const T = {
@@ -31,7 +32,7 @@ const T = {
         title: 'Machines', empty: 'No machines yet — import one below.',
         run: 'Run', dup: 'Duplicate', del: 'Delete', close: 'Close',
         importL: 'Import a manifest URL, machine JSON, or DOSBox .conf',
-        importB: 'Import', exportB: 'Export all', paste: 'Paste JSON or .conf here…',
+        importB: 'Import', exportB: 'Export all',
         imported: 'Imported.', exported: 'Exported below — copy it.', removed: 'Deleted.',
         duped: 'Duplicated.', badImport: 'Could not import: ',
         nativeBlocks: 'Native blocks (experimental)', nativeSaved: 'Execution setting saved.'
@@ -41,7 +42,10 @@ const tr = (locale, k) => (T[(locale || 'en').slice(0, 2)] || T.en)[k] || T.en[k
 
 const modeBadge = m => (m === 'wired' ? '🔌 wired' : m === 'auto' ? '◐ auto' : '⚙ functional');
 
-export default function MachineManager({store, onRun, onClose, locale, preferredMachine}) {
+const machineLabels = {cp1: 'Kosmos CP1', eater6502: '6502', i80386: '80386',
+    i8086: '8086', kim1: 'KIM-1', microtronic: 'Busch Microtronic', riscv32: 'RISC-V', z80: 'Z80'};
+
+export default function MachineManager({store, onRun, onClose, locale, preferredMachine, wiredPresets, onOpenExample}) {
     // WHERE THE SCREEN IS, not where the page is. `inset: 0` covers the LAYOUT
     // viewport, which this app floors at 1024px wide — so on a 430pt phone the
     // modal centred at x=512 and its buttons sat off the side of the screen.
@@ -54,7 +58,15 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
         typeof window === 'undefined' ? 0 : window.innerWidth);
     const [machines, setMachines] = React.useState([]);
     const [machineFilter, setMachineFilter] = React.useState(preferredMachine || '');
-    const matchingMachines = machines.filter(machine => !machineFilter || machine.machine === machineFilter);
+    const [query, setQuery] = React.useState('');
+    const matchesType = kind => !machineFilter || kind === machineFilter;
+    const matchesTitle = title => String(title || '').toLowerCase().includes(query.trim().toLowerCase());
+    const matchingMachines = machines.filter(machine => matchesType(machine.machine) && matchesTitle(machine.title));
+    const matchingPresets = matchesType(preferredMachine)
+        ? (wiredPresets || []).filter(preset => matchesTitle(preset.title)) : [];
+    const showLocal386 = matchesType('i80386');
+    const [circuits, setCircuits] = React.useState(null);
+    const [launching, setLaunching] = React.useState(null);
     const [status, setStatus] = React.useState('');
     const [text, setText] = React.useState('');
     const [localDisk, setLocalDisk] = React.useState(null);
@@ -166,9 +178,32 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     // (a hash mismatch names the slot) is shown here instead of vanishing into
     // an unhandled rejection behind a closed modal.
     const allLessons = React.useMemo(() => lessonMachines(locale), [locale]);
-    const lessons = allLessons.filter(lesson => !machineFilter || lesson.config.machine === machineFilter);
-    const machineKinds = [...new Set([preferredMachine, ...allLessons.map(lesson => lesson.config.machine),
-        ...machines.map(machine => machine.machine)].filter(Boolean))].sort();
+    const lessons = allLessons.filter(lesson => matchesType(lesson.config.machine) && matchesTitle(lesson.config.title));
+    const machineKinds = [...new Set([preferredMachine, 'i80386', ...CIRCUIT_LIBRARY_MACHINES,
+        ...allLessons.map(lesson => lesson.config.machine), ...machines.map(machine => machine.machine)].filter(Boolean))].sort();
+    const circuitTitle = example => example.title?.[/^de/i.test(locale) ? 'de' : 'en'] || example.title?.en || example.id;
+    const showCircuitPrograms = onOpenExample && (!machineFilter || CIRCUIT_LIBRARY_MACHINES.includes(machineFilter));
+    const loadCircuits = async () => {
+        if (circuits) return;
+        try {
+            const response = await fetch('examples/index.json');
+            if (!response.ok) throw new Error(`Examples HTTP ${response.status}`);
+            setCircuits(libraryCircuitPrograms(await response.json()));
+        } catch (error) {
+            setStatus(error.message);
+        }
+    };
+    const launch = async (id, action) => {
+        invalidateDosPackage();
+        setLaunching(id);
+        try {
+            if (await action() !== false) onClose?.();
+        } catch (error) {
+            setStatus(error.message);
+        } finally {
+            setLaunching(null);
+        }
+    };
     const [lessonBusy, setLessonBusy] = React.useState(null);
     // `cold`: the lesson's "Boot from scratch" config (no snapshot slot).
     const runLesson = async (lesson, cold = false) => {
@@ -232,6 +267,8 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     const stop = e => e.stopPropagation();
     const btn = {padding: '4px 10px', borderRadius: 6, border: '1px solid #cbd5e1',
         background: '#fff', cursor: 'pointer', fontSize: 12};
+    const rowStyle = {display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0',
+        fontSize: 13, borderBottom: '1px solid #f1f5f9'};
     const primary = {...btn, background: 'linear-gradient(135deg,#4c97ff,#4280d7)', color: '#fff', border: 'none'};
 
     return (
@@ -241,36 +278,46 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
             <div onClick={stop} style={{background: '#fff', borderRadius: 10, width: 'min(680px, 92vw)',
                 maxHeight: '86vh', display: 'flex', flexDirection: 'column', overflow: 'hidden',
                 boxShadow: '0 12px 40px rgba(0,0,0,0.3)'}}>
-                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                <div style={{display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
                     padding: '12px 16px', borderBottom: '1px solid #e2e8f0'}}>
                     <strong style={{fontSize: 15}}>{preferredMachine ? (/^de/i.test(locale) ? 'Firmware-Bibliothek' : 'Firmware library') : t('title')}</strong>
                     <select aria-label={/^de/i.test(locale) ? 'Zielsystem' : 'Machine type'} value={machineFilter}
                         onChange={event => setMachineFilter(event.target.value)}>
                         <option value="">{/^de/i.test(locale) ? 'Alle Maschinen' : 'All machines'}</option>
-                        {machineKinds.map(kind => <option key={kind} value={kind}>{kind === 'eater6502' ? '6502' : kind}</option>)}
+                        {machineKinds.map(kind => <option key={kind} value={kind}>{machineLabels[kind] || kind}</option>)}
                     </select>
+                    <input type="search" aria-label={/^de/i.test(locale) ? 'Firmware suchen' : 'Search firmware'}
+                        placeholder={/^de/i.test(locale) ? 'Suchen' : 'Search'} value={query}
+                        style={{flex: '1 1 100px', minWidth: 80}} onChange={event => setQuery(event.target.value)} />
                     <button onClick={closeManager} style={btn} data-testid="bw-mm-close">{t('close')}</button>
                 </div>
 
                 <div style={{overflowY: 'auto', padding: '8px 16px', flex: 1}}>
-                    <div style={{fontSize: 11, fontWeight: 700, color: '#475569', textTransform: 'uppercase',
-                        letterSpacing: 0.4, margin: '4px 0'}}>{lessonT(locale, 'lessons.heading')}</div>
+                    {matchingPresets.length > 0 && <section aria-label="Wired firmware" data-testid="bw-mm-wired-presets">
+                        {matchingPresets.map(preset => <div key={preset.id} style={rowStyle}>
+                            <strong style={{flex: 1, minWidth: 0}}>{preset.title}</strong>
+                            <button type="button" onClick={() => launch(preset.id, preset.run)} title={preset.summary}
+                                disabled={launching !== null} data-testid={`bw-mm-wired-${preset.id}`} style={primary}>
+                                {t('run')}
+                            </button>
+                        </div>)}
+                    </section>}
                     {lessons.map(lesson => (
                         <div key={lesson.config.id} data-testid="bw-mm-lesson"
                             data-lesson-id={lesson.config.id}
                             style={{display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 0',
                                 borderBottom: '1px solid #f1f5f9'}}>
-                            <div style={{flex: 1, minWidth: 0}}>
-                                <div style={{fontWeight: 600, fontSize: 13}}>{lesson.config.title}</div>
-                                <div style={{fontSize: 12, color: '#334155', marginTop: 2}}>{lesson.summary}</div>
+                            <details style={{flex: 1, minWidth: 0}}>
+                                <summary style={{fontWeight: 600, fontSize: 13, cursor: 'pointer'}}>{lesson.config.title}</summary>
+                                <div style={{fontSize: 12, color: '#334155', marginTop: 4}}>{lesson.summary}</div>
                                 <div style={{fontSize: 11, color: '#64748b', marginTop: 4}}
                                     data-testid="bw-mm-lesson-licence">
                                     {lesson.licence}{' '}
                                     <a href={lesson.source} target="_blank" rel="noopener noreferrer"
                                         data-testid="bw-mm-lesson-source">{lesson.sourceLabel}</a>
                                 </div>
-                            </div>
-                            <div style={{display: 'flex', flexDirection: 'column', gap: 4}}>
+                            </details>
+                            <div style={{display: 'flex', flexWrap: 'wrap', gap: 4}}>
                                 <button onClick={() => {invalidateDosPackage(); return runLesson(lesson);}} style={primary}
                                     disabled={lessonBusy === lesson.config.id}
                                     data-testid="bw-mm-lesson-run">{lessonT(locale, 'lessons.run')}</button>
@@ -282,7 +329,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                             </div>
                         </div>
                     ))}
-                    {matchingMachines.length === 0 && lessons.length === 0 ? (
+                    {matchingMachines.length === 0 && lessons.length === 0 && !matchingPresets.length && !showCircuitPrograms ? (
                         <div style={{color: '#64748b', padding: '18px 4px'}}>{t('empty')}</div>
                     ) : matchingMachines.map(m => (
                         <div key={m.id} data-testid="bw-mm-row"
@@ -307,78 +354,83 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                             <button onClick={() => del(m.id)} style={{...btn, color: '#b91c1c'}}>{t('del')}</button>
                         </div>
                     ))}
+                    {showCircuitPrograms && <details data-testid="bw-mm-circuit-programs">
+                        <summary onClick={loadCircuits} style={{cursor: 'pointer', padding: '8px 0'}}>
+                            {/^de/i.test(locale) ? 'Schaltungsprogramme' : 'Circuit programs'}
+                        </summary>
+                        {circuits?.filter(example => matchesType(example.machine) && matchesTitle(circuitTitle(example)))
+                            .map(example => <div key={example.id} style={rowStyle}>
+                                <span style={{flex: 1, minWidth: 0}}>{circuitTitle(example)}</span>
+                                <button type="button" disabled={launching !== null} style={btn}
+                                    onClick={() => launch(example.id, () => onOpenExample(example.id))}>
+                                    {/^de/i.test(locale) ? 'Öffnen' : 'Open'}
+                                </button>
+                            </div>)}
+                    </details>}
+                    {showLocal386 && <details data-testid="bw-mm-local-386" open={localDisk || dosPackageFile ||
+                        Object.values(freeMedia).some(Boolean) ? true : undefined}>
+                        <summary style={{cursor: 'pointer', padding: '8px 0'}}>Local 386 media</summary>
+                        <div style={{fontSize: 12, fontWeight: 600, marginBottom: 4}}>Boot a local DOSBox HDD</div>
+
+                        <div style={{display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBottom: 10}}>
+                            <input type="file" accept=".img,.ima,.bin" data-testid="bw-mm-local-disk" title="Raw HDD image and optional DOSBox configuration."
+                                onChange={e => setLocalDisk(e.target.files?.[0] || null)} />
+                            <label style={{fontSize: 11}}>DOSBox .conf
+                                <input type="file" accept=".conf,.txt" data-testid="bw-mm-local-conf"
+                                    onChange={async e => {
+                                        const file = e.target.files?.[0];
+                                        if (file) setText(await file.text());
+                                    }} />
+                            </label>
+                            <button onClick={() => {invalidateDosPackage(); return runLocal();}} style={primary} data-testid="bw-mm-local-run">Boot disk</button>
+                            <label style={{fontSize: 11, color: '#475569'}}>
+                                <input type="checkbox" data-testid="bw-mm-local-native-blocks"
+                                    checked={localNativeBlocks}
+                                    onChange={e => setLocalNativeBlocks(e.target.checked)} />
+                                {t('nativeBlocks')}
+                            </label>
+                        </div>
+                        <div style={{fontSize: 12, fontWeight: 600, marginBottom: 4}}>Local DOS package (STORED ZIP)</div>
+
+                        <div style={{display: 'flex', gap: 8, alignItems: 'center', marginBottom: 10}}>
+                            <input type="file" accept=".zip" data-testid="bw-mm-dos-package" title="Stored ZIP with a DOSBox configuration and matching raw HDD image (max 16 MiB)."
+                                onChange={e => selectDosPackage(e.target.files?.[0] || null)} />
+                            <button data-testid="bw-mm-dos-package-run" style={primary}
+                                disabled={!dosPackageFile || dosPackageBusy} onClick={runDosPackage}>Boot package HDD</button>
+                        </div>
+                        <div style={{fontSize: 12, fontWeight: 600, marginBottom: 4}}>FreeDOS VGA (named 386 profile)</div>
+
+                        <div style={{display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBottom: 10}}>
+                            {[
+                                ['floppy', 'Floppy', '.img,.ima,.dsk'],
+                                ['hdd', 'HDD', '.img,.ima'],
+                                ['bios', 'AT BIOS', '.rom,.bin'],
+                                ['vgaRom', 'VGA ROM', '.rom,.bin'],
+                            ].map(([slot, label, accept]) => <label key={slot} style={{fontSize: 11}}>
+                                {label}
+                                <input type="file" accept={accept} data-testid={`bw-mm-free386-${slot}`}
+                                    onChange={e => {
+                                        const file = e.target.files?.[0] || null;
+                                        setFreeMedia(current => ({...current, [slot]: file}));
+                                    }} />
+                            </label>)}
+                            <button onClick={() => {invalidateDosPackage(); return runFree386();}} style={primary}
+                                data-testid="bw-mm-free386-run" title="Floppy or type-1 HDD. Leave the ROM fields empty to use the bundled BIOS and VGA firmware.">Boot FreeDOS VGA</button>
+                            <label style={{fontSize: 11, color: '#475569'}}>
+                                <input type="checkbox" data-testid="bw-mm-free386-native-blocks"
+                                    checked={freeNativeBlocks}
+                                    onChange={e => setFreeNativeBlocks(e.target.checked)} />
+                                {t('nativeBlocks')}
+                            </label>
+                        </div>
+                    </details>}
                 </div>
 
-                <div style={{borderTop: '1px solid #e2e8f0', padding: '10px 16px'}}>
-                    <div style={{fontSize: 12, fontWeight: 600, marginBottom: 4}}>Boot a local DOSBox HDD</div>
-                    <div style={{fontSize: 11, color: '#64748b', marginBottom: 6}}>
-                        Select a raw .img disk. Optionally load a DOSBox .conf with 386 CPU and
-                        imgmount -size geometry. The selected filename must match imgmount.
-                        The image stays in this browser tab.
-                    </div>
-                    <div style={{display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBottom: 10}}>
-                        <input type="file" accept=".img,.ima,.bin" data-testid="bw-mm-local-disk"
-                            onChange={e => setLocalDisk(e.target.files?.[0] || null)} />
-                        <label style={{fontSize: 11}}>DOSBox .conf
-                            <input type="file" accept=".conf,.txt" data-testid="bw-mm-local-conf"
-                                onChange={async e => {
-                                    const file = e.target.files?.[0];
-                                    if (file) setText(await file.text());
-                                }} />
-                        </label>
-                        <button onClick={() => {invalidateDosPackage(); return runLocal();}} style={primary} data-testid="bw-mm-local-run">Boot disk</button>
-                        <label style={{fontSize: 11, color: '#475569'}}>
-                            <input type="checkbox" data-testid="bw-mm-local-native-blocks"
-                                checked={localNativeBlocks}
-                                onChange={e => setLocalNativeBlocks(e.target.checked)} />
-                            {t('nativeBlocks')}
-                        </label>
-                    </div>
-                    <div style={{fontSize: 12, fontWeight: 600, marginBottom: 4}}>Local DOS package (STORED ZIP)</div>
-                    <div style={{fontSize: 11, color: '#64748b', marginBottom: 6}}>
-                        One dosbox.conf and one matching bootable raw HDD image, at most 16 MiB.
-                        Compressed ZIPs, COM/EXE packages and host commands are not supported.
-                        Selected bytes stay in this tab; the existing raw-image chooser remains available.
-                    </div>
-                    <div style={{display: 'flex', gap: 8, alignItems: 'center', marginBottom: 10}}>
-                        <input type="file" accept=".zip" data-testid="bw-mm-dos-package"
-                            onChange={e => selectDosPackage(e.target.files?.[0] || null)} />
-                        <button data-testid="bw-mm-dos-package-run" style={primary}
-                            disabled={!dosPackageFile || dosPackageBusy} onClick={runDosPackage}>Boot package HDD</button>
-                    </div>
-                    <div style={{fontSize: 12, fontWeight: 600, marginBottom: 4}}>FreeDOS VGA (named 386 profile)</div>
-                    <div style={{fontSize: 11, color: '#64748b', marginBottom: 6}}>
-                        Select a 1.2MB floppy or a type-1 306×4×17 hard disk. BIOS and VGA ROM
-                        files are optional; the bundled LGPL firmware is used when omitted.
-                        The selected bytes stay in this browser tab.
-                    </div>
-                    <div style={{display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBottom: 10}}>
-                        {[
-                            ['floppy', 'Floppy', '.img,.ima,.dsk'],
-                            ['hdd', 'HDD', '.img,.ima'],
-                            ['bios', 'AT BIOS', '.rom,.bin'],
-                            ['vgaRom', 'VGA ROM', '.rom,.bin'],
-                        ].map(([slot, label, accept]) => <label key={slot} style={{fontSize: 11}}>
-                            {label}
-                            <input type="file" accept={accept} data-testid={`bw-mm-free386-${slot}`}
-                                onChange={e => {
-                                    const file = e.target.files?.[0] || null;
-                                    setFreeMedia(current => ({...current, [slot]: file}));
-                                }} />
-                        </label>)}
-                        <button onClick={() => {invalidateDosPackage(); return runFree386();}} style={primary}
-                            data-testid="bw-mm-free386-run">Boot FreeDOS VGA</button>
-                        <label style={{fontSize: 11, color: '#475569'}}>
-                            <input type="checkbox" data-testid="bw-mm-free386-native-blocks"
-                                checked={freeNativeBlocks}
-                                onChange={e => setFreeNativeBlocks(e.target.checked)} />
-                            {t('nativeBlocks')}
-                        </label>
-                    </div>
-                    <label style={{fontSize: 12, color: '#475569'}}>{t('importL')}</label>
-                    <textarea value={text} onChange={e => setText(e.target.value)}
-                        placeholder={t('paste')} data-testid="bw-mm-import-text"
-                        style={{width: '100%', height: 72, marginTop: 6, fontFamily: 'monospace',
+                <div style={{borderTop: '1px solid #e2e8f0', padding: '8px 16px'}}>
+                    <textarea aria-label={showLocal386 ? t('importL') : 'Import a manifest URL or machine JSON'}
+                        rows={1} value={text} onChange={e => setText(e.target.value)}
+                        placeholder={showLocal386 ? t('importL') : 'Paste a manifest URL or machine JSON'} data-testid="bw-mm-import-text"
+                        style={{width: '100%', minHeight: 32, maxHeight: 140, marginTop: 2, fontFamily: 'monospace',
                             fontSize: 11, borderRadius: 6, border: '1px solid #cbd5e1', padding: 6,
                             boxSizing: 'border-box', resize: 'vertical'}} />
                     <div style={{display: 'flex', gap: 8, alignItems: 'center', marginTop: 6}}>

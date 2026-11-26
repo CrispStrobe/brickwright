@@ -34,6 +34,7 @@
  * @module
  */
 
+import {createBasicStartup, isBundledMicrosoftBasic} from './basic-startup.js';
 import {loadCp1Monitor} from '../cp1-monitor.js';
 import {
     listBreakpoints, subscribeBreakpoints, toggleBreakpoint,
@@ -870,6 +871,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
     let conditionErrors = {};
     /** Serial output buffer — bytes received from adapter.onSerial, decoded as UTF-8. */
     let serialLines = [];
+    let basicStartup = null;
     /**
      * The serial face is a TERMINAL, not a log: set for a booted Linux, whose
      * shell edits its own line — backspace-space-backspace to erase, ANSI CSI
@@ -3144,6 +3146,11 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
 
         const result = await createDebugTarget('eater6502', targetOpts);
         wireMachineBench(result, createDebugSession);
+        if (bootMedia?.profile === 'eater' && bootMedia.name === 'basic.rom' ||
+            declaredMachine && await isBundledMicrosoftBasic(targetOpts.rom)) {
+            const {MS_PROFILE} = await import('bw-board/basic-machine-runner.js');
+            basicStartup = createBasicStartup(MS_PROFILE.bootPrompts);
+        }
         setStatus('ready', readyMsg);
         return session;
     }
@@ -3904,6 +3911,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         const perfWallStart = perfProbe ? performance.now() : 0;
         const perfSimStart = perfProbe ? target.timeNs() : 0n;
         let outcome = session.pump();
+        if (outcome === 'ran') basicStartup?.answer(serialLines.at(-1), runner.sendSerial);
         if (cp1RunKeyUntil !== null && (target.timeNs() >= cp1RunKeyUntil || outcome !== 'ran')) {
             releaseCp1RunKey();
         }
@@ -4414,6 +4422,10 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                 activeRunTo = null;
             }
             if (session) session.stop();
+            if (basicStartup) {
+                basicStartup.reset();
+                serialLines = [];
+            }
             clearGlow();
             // The run board dies with the run — fall back to the designer's.
             if (vm && vm.runtime && vm.runtime.bwRunBoard) {

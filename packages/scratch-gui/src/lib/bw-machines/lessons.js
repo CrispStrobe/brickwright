@@ -23,6 +23,7 @@
 // SLOT NAME, before anything boots. The licence line and the source link are
 // shown next to the Run button, so the offer travels with the binary.
 
+import {MSBASIC_ROM_SHA256} from '../bw-debug/basic-startup.js';
 import {remoteMachineImagesAllowed} from '../distribution-policy.js';
 //
 // WHY raw.githubusercontent.com AT A COMMIT, not the release download: a
@@ -108,7 +109,6 @@ const CPM_BBCBASIC_SHA256 = '833839801fe3edbb73b91613eb43ea6052822d2d09dafd08639
 // whose config (RAM $0000-$3FFF, ROM $8000-$FFFF, 65C51 ACIA console at $5000) is
 // given inline here — the same config bw-board's EATER6502 preset uses, which the
 // media-lab project's proof relies on. Keep the SHA in step with the shipped ROM.
-const MSBASIC_ROM_SHA256 = '89c5072ea5162f8990676492d8a4c04c8b4dd3d54186e48ca576f93f2e63816c';
 const EATER6502_CONFIG = Object.freeze({
     clockHz: 1_000_000,
     regions: [
@@ -158,8 +158,8 @@ const TABLE = {
         'cpm.source': 'Project',
         'msbasic.title': 'Microsoft BASIC on 6502',
         'msbasic.summary': 'Microsoft’s original 1978 6502 BASIC (V1.1, the MIT release) boots on the emulated ' +
-            'Ben Eater 6502 to the MICROSOFT BASIC V1.1 banner and the OK prompt. Answer MEMORY SIZE? and ' +
-            'WIDTH? with Enter, then type a program (PRINT 2+2, or 10 FOR I=1 TO 3 …). ' +
+            'Ben Eater 6502 to the OK prompt with the default memory size and terminal width. ' +
+            'Try PRINT 2+2 in the debugger’s serial console. ' +
             'The console is the Debug panel’s serial terminal (the 65C51 ACIA). Ships in the app — no download.',
         'msbasic.licence': 'Microsoft BASIC for 6502 is MIT (Microsoft’s 1978 source, MIT release; built with ca65). ' +
             'It ships in this app.',
@@ -196,8 +196,8 @@ const TABLE = {
         'cpm.source': 'Projekt',
         'msbasic.title': 'Microsoft BASIC auf 6502',
         'msbasic.summary': 'Microsofts ursprüngliches 6502-BASIC von 1978 (V1.1, die MIT-Ausgabe) startet auf dem ' +
-            'emulierten Ben-Eater-6502 mit dem Banner MICROSOFT BASIC V1.1 und dem OK-Prompt. Beantworte MEMORY SIZE? ' +
-            'und WIDTH? mit der Eingabetaste und tippe dann ein Programm (PRINT 2+2 oder 10 FOR I=1 TO 3 …). ' +
+            'emulierten Ben-Eater-6502 mit Standardwerten für Speichergröße und Terminalbreite bis zum OK-Prompt. ' +
+            'Probiere PRINT 2+2 im seriellen Terminal des Debuggers. ' +
             'Die Konsole ist das serielle Terminal im Debug-Panel (der 65C51-ACIA). In der App enthalten — kein Download.',
         'msbasic.licence': 'Microsoft BASIC für 6502 steht unter MIT (Microsofts Quellcode von 1978, MIT-Ausgabe; mit ca65 gebaut). ' +
             'Es ist in dieser App enthalten.',

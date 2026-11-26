@@ -1431,7 +1431,7 @@ class CircuitTab extends React.Component {
     async loadStarterJourney (event) {
         const journey = event && event.detail || {};
         const finish = detail => {
-            window.dispatchEvent(new CustomEvent('bw-starter-result', {
+            if (journey.id) window.dispatchEvent(new CustomEvent('bw-starter-result', {
                 detail: {journeyId: journey.id, ...detail}
             }));
             journey.onResult?.(detail);
@@ -2430,8 +2430,8 @@ class CircuitTab extends React.Component {
                         return undefined; // default: simulator assumed
                     })()}
                         onCircuitEdit={this.handleCircuitEdit}
-                        onOpenMachineLibrary={kind => window.dispatchEvent(new CustomEvent('bw-open-machine-manager',
-                            {detail: {kind}}))}
+                        onOpenMachineLibrary={(kind, presets) => window.dispatchEvent(new CustomEvent('bw-open-machine-manager',
+                            {detail: {kind, presets}}))}
                         onDeclarationChange={this.handleDeclarationChange}
                         panelNav={this.renderPanelStrip()}
                         lang={String(this.props.locale || 'en').slice(0, 2) === 'de' ? 'de' : 'en'}

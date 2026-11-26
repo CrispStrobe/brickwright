@@ -956,7 +956,7 @@ const GUIComponent = props => {
     // screen/keyboard land in the Widgets pane like any other machine.
     const [showMachines, setShowMachines] = React.useState(null);
     React.useEffect(() => {
-        const open = event => setShowMachines({kind: event.detail?.kind || null});
+        const open = event => setShowMachines({kind: event.detail?.kind || null, presets: event.detail?.presets});
         window.addEventListener('bw-open-machine-manager', open);
         return () => window.removeEventListener('bw-open-machine-manager', open);
     }, []);
@@ -964,6 +964,16 @@ const GUIComponent = props => {
         <React.Suspense fallback={null}>
             <MachineManager store={getMachineStore()} locale={props.locale} preferredMachine={showMachines.kind}
                 onRun={(cfg, opts) => runMachineConfig(cfg, opts)}
+                wiredPresets={showMachines.presets}
+                onOpenExample={exampleId => new Promise((resolve, reject) => {
+                    props.onActivateTab(CIRCUIT_TAB_INDEX);
+                    window.dispatchEvent(new CustomEvent('bw-start-journey', {detail: {
+                        exampleId, onResult: result => {
+                            if (result.error) reject(new Error(result.error));
+                            else resolve(result.ok);
+                        }
+                    }}));
+                })}
                 onClose={() => setShowMachines(null)} />
         </React.Suspense>
     ) : null;
