@@ -3400,17 +3400,7 @@ class PseudocodeImporter extends React.Component {
         }));
     }
 
-    /**
-     * ▶ Run C on RISC-V — the C counterpart of the RV32IM assembler's ▶.
-     *
-     * C for rv32 needs a real cross-compiler, too heavy for the browser, so this
-     * posts the C to the HOSTED compile service (assemble-route's
-     * `requestRiscvCBuild`, client lib/bw-debug/riscv-compile.js). The service
-     * returns the SAME {entry, segments} image the local assembler produces, so
-     * it boots the SAME `bw-asm-rom-ready` → debug-panel → attachRiscV32 path (a
-     * `format: 'riscv'` detail). With no BW_RISCV_CC_ENDPOINT configured the
-     * route REFUSES by name — the status says so honestly, assembly still runs.
-     */
+    // Both RISC-V C compilers produce the same loadable image as ASM.
     // fe's own interpreter on RISC-V: one generated C file (bw-lang/fe-target-c.js)
     // on the hosted full-C route, booted like any RISC-V C program.
     runFeOnRiscv () {
@@ -6188,7 +6178,7 @@ class PseudocodeImporter extends React.Component {
                                             disabled={this.state.busy}
                                             style={{padding: '5px 8px', borderRadius: 6, border: '1px solid #cbd5e1', font: 'inherit'}}>
                                             <option value="browser">{this.L.runCRiscvRouteBrowser}</option>
-                                            <option value="server">{this.L.runCRiscvRouteServer}</option>
+                                            <option value="server" disabled={!RISCV_CC_ENDPOINT}>{this.L.runCRiscvRouteServer}</option>
                                         </select>
                                     </label>
                                     <button onClick={() => this.runCOnRiscv()} disabled={this.state.busy}
@@ -6562,16 +6552,16 @@ class PseudocodeImporter extends React.Component {
                             </button>
                         );
                     })}
-                    <button type="button" data-testid={menu ? "bw-code-cp1-tab-menu" : "bw-code-cp1-tab"} onClick={() => this.openCp1Language()}
+                    {this.state.cp1Active && <button type="button" data-testid={menu ? "bw-code-cp1-tab-menu" : "bw-code-cp1-tab"} onClick={() => this.openCp1Language()}
                         disabled={this.state.busy} aria-pressed={this.state.cp1Active} title={this.L.cp1Language}
                         style={languageTabStyle(this.state.cp1Active)}>
                         CP1
-                    </button>
-                    <button type="button" data-testid={menu ? "bw-code-cardiac-tab-menu" : "bw-code-cardiac-tab"} onClick={() => this.openCardiacLanguage()}
+                    </button>}
+                    {this.state.cardiacActive && <button type="button" data-testid={menu ? "bw-code-cardiac-tab-menu" : "bw-code-cardiac-tab"} onClick={() => this.openCardiacLanguage()}
                         disabled={this.state.busy} aria-pressed={this.state.cardiacActive}
                         title={this.L.cardiacLanguage} style={languageTabStyle(this.state.cardiacActive)}>
                         CARDIAC
-                    </button>
+                    </button>}
                     {this.state.microtronicPartId && <button type="button"
                         data-testid={menu ? 'bw-code-microtronic-tab-menu' : 'bw-code-microtronic-tab'}
                         onClick={this.selectMicrotronic} aria-pressed={!!this.state.microtronicActive}
@@ -6583,10 +6573,13 @@ class PseudocodeImporter extends React.Component {
                     </button>}
                     {(() => {
                         const shown = this.visibleOptionalLangs().map(([l]) => l);
-                        const hidden = BW_OPTIONAL_LANGS.filter(([l]) => !shown.includes(l));
-                        if (menu) return hidden.map(([language, label, name]) =>
+                        const hidden = BW_OPTIONAL_LANGS.filter(([l]) => !shown.includes(l))
+                            .map(([language, label, name]) => [language, label, name, () => this.addOptionalLang(language)]);
+                        if (!this.state.cp1Active) hidden.push(['cp1', 'CP1', this.L.cp1Language, () => this.openCp1Language()]);
+                        if (!this.state.cardiacActive) hidden.push(['cardiac', 'CARDIAC', this.L.cardiacLanguage, () => this.openCardiacLanguage()]);
+                        if (menu) return hidden.map(([language, label, name, open]) =>
                             <button key={language} type="button" title={name} disabled={this.state.busy}
-                                onClick={() => this.addOptionalLang(language)}>＋ {label}</button>);
+                                onClick={open}>＋ {label}</button>);
                         return (
                             <Popup id="code-lang-more" anchorTestId="bw-lang-more-anchor" testId="bw-lang-more-menu" role="menu"
                                 open={this.props.isVisible !== false && this.state.langMenuOpen} align="left" width={220}
@@ -6599,8 +6592,8 @@ class PseudocodeImporter extends React.Component {
                                         fontWeight: 700, fontSize: 13, background: '#eef2f7', color: '#64748b', position: 'relative', top: 1}}>
                                     +
                                 </button>}>
-                                {hidden.map(([l, label, name]) => (
-                                    <button key={l} type="button" role="menuitem" title={name} onClick={() => this.addOptionalLang(l)}
+                                {hidden.map(([l, label, name, open]) => (
+                                    <button key={l} type="button" role="menuitem" title={name} onClick={open}
                                         style={{padding: '7px 10px', border: 0, background: 'transparent', textAlign: 'left', cursor: 'pointer',
                                             fontSize: 13, color: '#1e293b', whiteSpace: 'nowrap'}}>
                                         {label}
