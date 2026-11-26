@@ -14,4 +14,5 @@ pc84-led-herz		pc84-led-herz/circuit.json	fail	pass	pass	pc84-led-herz.json
 pc85-led-lampe-puls		pc85-led-lampe-puls/circuit.json	fail	pass	pass	pc85-led-lampe-puls.json
 pc86-led-sanduhr		pc86-led-sanduhr/circuit.json	fail	pass	pass	pc86-led-sanduhr.json
 school-miniorgan-107056		school-miniorgan-107056/circuit.json	fail	pass	pass	school-miniorgan-107056.json
+lab-meissner-squegg		lab-meissner-squegg/circuit.json	fail	pass	fail	lab-meissner-squegg.json
 lab-fibre-pll-music		lab-fibre-pll-music/circuit.json	pass	pass	pass	lab-fibre-pll-music-startup.json
