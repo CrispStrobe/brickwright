@@ -99,8 +99,10 @@
         },
         "stc12": {
             "path": "extensions/CrispStrobe/stc12.js",
-            "sha256": "f1fd19debc58c18d9203a96427f4d017c78843a978125e7ec84f00bd4001972a",
-            "bytes": 42696
+            "sha256": "c131eab69c113d7a96b6c7e1af4409384bc9abdaa6e43c05ce94506eefb22735",
+            "bytes": 42934,
+            "repo": "CrispStrobe/extensions",
+            "commit": "be601ad66cc9b94c754e1cd570fc4cbb01f38217"
         },
         "stc12live": {
             "path": "extensions/CrispStrobe/stc12live.js",

@@ -84,7 +84,7 @@ export const MAP = {
     spikeprimeBridge: 'extensions/CrispStrobe/legospike_bridge.js',
     spikeprimeble: 'extensions/CrispStrobe/legospike_ble.js',
     legospikeprimeBLE: 'extensions/CrispStrobe/legospikeprime_ble.js',
-    stc12: 'extensions/CrispStrobe/stc12.js',
+    stc12: {repo: 'CrispStrobe/extensions', pin: 'stc12', path: 'extensions/CrispStrobe/stc12.js'},
     stc12live: 'extensions/CrispStrobe/stc12live.js',
     universalgamepad: 'extensions/CrispStrobe/gamepad.js',
     wedo2unified: {repo: 'CrispStrobe/extensions', pin: 'wedo2unified', path: 'extensions/CrispStrobe/lego_wedo2_universal.js'},
