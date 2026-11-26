@@ -1748,7 +1748,7 @@ class ControllerPanelView extends React.Component {
         const panel = this._getPanel();
         const mode = panel.mode;
         const widgets = panel.getWidgets();
-        const {cp1WidgetSlot} = this.props;
+        const {cp1WidgetSlot, cardiacWidgetSlot} = this.props;
         const machineWidget = mode === 'play' && this.props.machineConsole
             ? widgets.find(w => w.name === this.props.machineConsole.name && w.type === 'simplevga')
             : null;
@@ -1936,7 +1936,8 @@ class ControllerPanelView extends React.Component {
                         if (e.target === e.currentTarget) this.setState({ selected: null });
                     }}>
                     {cp1WidgetSlot && <div ref={cp1WidgetSlot} data-cp1-widget-slot />}
-                    {widgets.length === 0 && !cp1WidgetSlot && (
+                    {cardiacWidgetSlot && <div ref={cardiacWidgetSlot} data-cardiac-widget-slot /> }
+                    {widgets.length === 0 && !cp1WidgetSlot && !cardiacWidgetSlot && (
                         <div style={{
                             color: '#94a3b8', fontSize: 14, textAlign: 'center',
                             padding: '40px 20px',
@@ -1944,7 +1945,7 @@ class ControllerPanelView extends React.Component {
                             {t('noWidgets')}
                         </div>
                     )}
-                    <div style={cp1WidgetSlot && widgets.length ? {position: 'relative', minHeight: 240} : undefined}>
+                    <div style={(cp1WidgetSlot || cardiacWidgetSlot) && widgets.length ? {position: 'relative', minHeight: 240} : undefined}>
                         {machineWidget ? (
                             <MachineConsole widget={machineWidget}
                                 keyboardSet={this.props.machineConsole.keyboardSet}

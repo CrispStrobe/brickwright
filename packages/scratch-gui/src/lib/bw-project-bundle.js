@@ -1,5 +1,6 @@
 import {CONNECTIONS_KEY, validateConnections} from './bw-cad-circuit/connections.js';
 import {validateCp1Workspace} from './cp1-project.js';
+import {validateCardiacWorkspace} from './cardiac-project.js';
 import {CAD_PROJECT_PATH, CAD_STORAGE_KEY, CAD_PROJECT_LIMIT, inspectCadText, readCadText, getLiveCadText, setLiveCadText, getCadProjectGeneration, setCadProjectGeneration} from './bw-cad-project.js';
 import {sandboxWorld, SANDBOX_STORAGE_KEY} from './spike-arena/arena-sandbox.js';
 import {simLabRecord, SIM_LAB_STORAGE_KEY, SIM_LAB_LIMIT} from './bw-sim/model/sim-lab-persist.js';
@@ -41,8 +42,8 @@ const BUNDLE_FORMAT = 'brickwright-state';
 const BUNDLE_VERSION = 2;
 const MAX_BUNDLE_BYTES = 2 * 1024 * 1024;
 const SECTION_LIMITS = Object.freeze({code: 512 * 1024, circuit: 1024 * 1024,
-    controller: 512 * 1024, spikeArena: 1024 * 1024, simLab: SIM_LAB_LIMIT, cadCircuit: 32 * 1024, fpga: 512 * 1024, cp1: 256 * 1024});
-const KNOWN_SECTIONS = Object.freeze(['code', 'circuit', 'controller', 'legacyWidgets', 'spikeArena', 'simLab', 'fpga', 'cadCircuit', 'cp1']);
+    controller: 512 * 1024, spikeArena: 1024 * 1024, simLab: SIM_LAB_LIMIT, cadCircuit: 32 * 1024, fpga: 512 * 1024, cp1: 256 * 1024, cardiac: 256 * 1024});
+const KNOWN_SECTIONS = Object.freeze(['code', 'circuit', 'controller', 'legacyWidgets', 'spikeArena', 'simLab', 'fpga', 'cadCircuit', 'cp1', 'cardiac']);
 // The FPGA lab's Verilog/constraints and its gate-builder canvas (fpga-tab.jsx,
 // fpga-gate-builder-rf.jsx) travel as one optional `fpga` section.
 const FPGA_DESIGN_KEY = 'bw-fpga-autosave';
@@ -57,7 +58,7 @@ const utf8Size = value => new TextEncoder().encode(value).byteLength;
  * project, and copying them between machines would be a surprise.
  */
 const EXACT_KEYS = ['bw-circuit-autosave', 'bw-code-autosave', 'bw-ctl-widgets', SANDBOX_STORAGE_KEY,
-    SIM_LAB_STORAGE_KEY, FPGA_DESIGN_KEY, FPGA_GATES_KEY, CAD_STORAGE_KEY, CONNECTIONS_KEY, 'bw-cp1-workspace'];
+    SIM_LAB_STORAGE_KEY, FPGA_DESIGN_KEY, FPGA_GATES_KEY, CAD_STORAGE_KEY, CONNECTIONS_KEY, 'bw-cp1-workspace', 'bw-cardiac-workspace'];
 // The old per-widget prefix stays on the allowlist so a file saved while it
 // was documented (nothing ever wrote such keys, but a hand-built bundle
 // might) still restores; the panel itself serializes to ONE key above.
@@ -84,6 +85,11 @@ const decodeSection = (name, value) => {
         throw new Error('controller must contain a widgets array');
     }
     if (name === 'spikeArena') return sandboxWorld(value);
+    if (name === 'cardiac') {
+        const result = validateCardiacWorkspace(value);
+        if (!result.ok) throw new Error(result.errors.map(item => item.message).join('; '));
+        return result.project;
+    }
     if (name === 'cp1') {
         const result = validateCp1Workspace(value);
         if (!result.ok) throw new Error(result.errors.map(item => item.message).join('; '));
@@ -112,6 +118,7 @@ const decodeStored = (name, value) => {
 /** Convert allowlisted storage strings into the typed v2 state. */
 const encodeProjectState = raw => {
     const state = {};
+    if (raw['bw-cardiac-workspace'] !== undefined) state.cardiac = decodeStored('cardiac', raw['bw-cardiac-workspace']);
     if (raw['bw-cp1-workspace'] !== undefined) state.cp1 = decodeStored('cp1', raw['bw-cp1-workspace']);
     if (raw[CONNECTIONS_KEY] !== undefined) state.cadCircuit = decodeStored('cadCircuit', raw[CONNECTIONS_KEY]);
     if (raw[SANDBOX_STORAGE_KEY] !== undefined) state.spikeArena = decodeStored('spikeArena', raw[SANDBOX_STORAGE_KEY]);
@@ -140,6 +147,7 @@ const encodeProjectState = raw => {
 const decodeProjectState = state => {
     if (!isRecord(state)) throw new Error('state must be an object');
     const raw = {};
+    if (state.cardiac !== undefined) raw['bw-cardiac-workspace'] = JSON.stringify(decodeSection('cardiac', state.cardiac));
     if (state.cp1 !== undefined) raw['bw-cp1-workspace'] = JSON.stringify(decodeSection('cp1', state.cp1));
     if (state.cadCircuit !== undefined) raw[CONNECTIONS_KEY] = JSON.stringify(decodeSection('cadCircuit', state.cadCircuit));
     if (state.spikeArena !== undefined) raw[SANDBOX_STORAGE_KEY] = JSON.stringify(decodeSection('spikeArena', state.spikeArena));

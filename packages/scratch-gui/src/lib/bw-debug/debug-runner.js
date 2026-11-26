@@ -481,7 +481,7 @@ export function boardTimeBase (board, target) {
  * (task B8: one board per run, one author per board).
  */
 export function runnerCompilesProjectBlocks ({selectedKind, bootMedia = null, userFirmware = null}) {
-    if (selectedKind === 'cp1') return false;
+    if (selectedKind === 'cp1' || selectedKind === 'cardiac') return false;
     if (selectedKind === 'z80' || selectedKind === 'eater6502' || selectedKind === 'riscv32') return false;
     if ((selectedKind === 'i8086' || selectedKind === 'i80386') && bootMedia) return false;
     // An rp2040 .uf2 media bundle boots prebuilt firmware from flash; it does
@@ -493,6 +493,7 @@ export function runnerCompilesProjectBlocks ({selectedKind, bootMedia = null, us
 export function selectDebugTargetKind(device, requested = 'emulator') {
     if (requested !== 'emulator') return requested;
     const normalized = String(device || '').toLowerCase();
+    if (normalized === 'cardiac') return 'cardiac';
     if (['cp1', 'kosmos-cp1', '8049'].includes(normalized)) return 'cp1';
     if (['arduino-uno', 'arduino-nano', 'atmega328p', 'atmega168p'].includes(normalized)) return 'avr8js';
     if (['arduino-mega', 'atmega2560'].includes(normalized)) return 'atmega2560';
@@ -632,6 +633,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
     // Invalidate stop/start even when target and session references are reused.
     let hddSnapshotOwner = {};
     let target = null;
+    let cardiacInitialSnapshot = null;
     let cp1LessonBatch = null;
     let cp1RunKeyUntil = null;
     let cp2Recording = null;
@@ -1624,6 +1626,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             return attachZ80();
         }
 
+        if (selectedTargetKind === 'cardiac') return attachCardiac();
         if (selectedTargetKind === 'cp1') return attachCp1();
 
         if (selectedTargetKind === 'riscv32') {
@@ -3056,6 +3059,25 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
     // anything else. Otherwise the wired-extractor config boots the
     // user's own machine with the delivered image; with nothing at all,
     // the default remains Tali Forth 2 on py65mon.
+    async function attachCardiac() {
+        const {createDebugTarget, createDebugSession} =
+            await import(/* webpackChunkName: "bw-board" */ 'bw-board');
+        const selected = machineConfig?.partId ? designerBoard().board : null;
+        if (machineConfig?.partId && !selected) throw new Error('The CARDIAC circuit is not ready. Open the circuit and try again.');
+        if (selected) board = selected;
+        const result = await createDebugTarget('cardiac', {
+            ...(selected ? {board: selected, partId: machineConfig.partId} : {}),
+            ...(!selected && machineConfig?.program ? {program: machineConfig.program} : {})
+        });
+        wireMachineBench(result, createDebugSession);
+        // The circuit may already have executed. The first session start must
+        // adopt that state, including queued cards, rather than reset it.
+        cardiacInitialSnapshot = selected ? target.snapshot() : null;
+        delete runner.sendSerial;
+        setStatus('ready', 'CARDIAC · decimal instruction stepping');
+        return session;
+    }
+
     async function attachCp1() {
         const media = bootMedia || await loadCp1Monitor();
         const {createDebugTarget, createDebugSession} =
@@ -4136,6 +4158,34 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         return [...cp1BreakpointHandles.keys()].sort((a, b) => a - b);
     };
     const runner = {
+        cardiacSnapshot() {
+            if (target?.kind !== 'cardiac') return null;
+            const observed = target.snapshot();
+            return observed.cardiac || observed;
+        },
+        cardiacControl(verb, value) {
+            if (target?.kind !== 'cardiac' || typeof target.control !== 'function') {
+                throw new Error('Open the CARDIAC machine before using its controls.');
+            }
+            // Deliberate input may be queued while running. Editing the image
+            // or single-stepping always owns the shared session's pause.
+            if (!['enqueueInput', 'sampleInput', 'toggleBreakpoint'].includes(verb)) {
+                session.pause();
+                unschedule();
+            }
+            target.control(verb, value);
+            const observed = runner.cardiacSnapshot();
+            if (verb === 'loadProgram' && machineConfig?.partId && typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('bw-cardiac-program-loaded', {detail: {
+                    partId: machineConfig.partId, program: observed.program
+                }}));
+            }
+            if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('bw-cardiac-observation', {
+                detail: {partId: machineConfig?.partId || null, ...observed}
+            }));
+            setStatus(observed.running ? 'running' : 'paused', observed.error || '');
+            return observed;
+        },
         cp1Snapshot() {
             if (target?.kind !== 'cp1') return null;
             const observed = target.snapshot();
@@ -4311,7 +4361,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                     // riscv32 never compiles the project: its program is the
                     // Code tab's assembled image, a shipped RTOS image, or a
                     // booted Linux — all of which arrive as bootMedia.
-                    const built = (selectedKind === 'cp1' || selectedKind === 'z80' || selectedKind === 'eater6502' ||
+                    const built = (selectedKind === 'cardiac' || selectedKind === 'cp1' || selectedKind === 'z80' || selectedKind === 'eater6502' ||
                         selectedKind === 'riscv32' ||
                         ((selectedKind === 'i8086' || selectedKind === 'i80386') && bootMedia) ||
                         (selectedKind === 'rp2040js' && bootMedia)) ? null
@@ -4333,6 +4383,12 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                     unsubscribeBps = subscribeBreakpoints(syncBreakpoints);
                 }
                 session.start();
+                if (cardiacInitialSnapshot) {
+                    const saved = cardiacInitialSnapshot.cardiac || cardiacInitialSnapshot;
+                    target.control('restore', {...saved, running: false});
+                    cardiacInitialSnapshot = null;
+                    if (!paused) target.run();
+                }
                 if (paused) session.pause();
                 boardBaseNs = boardTimeBase(board, target);
                 if (destroyed) return {accepted: false, code: 'destroyed'};

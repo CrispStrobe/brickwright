@@ -141,6 +141,7 @@ const L10N = {
         mcRunTitle: 'Compile this MakeCode project with MakeCode\'s own compiler and run it in MakeCode\'s simulator — nothing is translated, so nothing is lost',
         mcRunCompiling: n => `Compiling ${n} with MakeCode…`,
         moreLanguages: 'More languages',
+        cardiacLanguage: 'CARDIAC decimal computer',
         cp1Language: 'Kosmos CP1 teaching language…',
         cp1Open: 'Open the Kosmos CP1 starter? This replaces the current circuit and CP1 source.',
         mcRunStarted: (n, t) => `${n} is running in MakeCode's ${({arcade: 'Arcade', calliopemini: 'Calliope mini', ev3: 'EV3', adafruit: 'Circuit Playground'})[t] || 'micro:bit'} simulator.`,
@@ -482,6 +483,7 @@ const L10N = {
         mcRunTitle: 'Dieses MakeCode-Projekt mit dem MakeCode-eigenen Compiler übersetzen und im MakeCode-Simulator ausführen — es wird nichts umgewandelt, also geht nichts verloren',
         mcRunCompiling: n => `${n} wird mit MakeCode übersetzt…`,
         moreLanguages: 'Weitere Sprachen',
+        cardiacLanguage: 'CARDIAC-Dezimalrechner',
         cp1Language: 'Kosmos-CP1-Lernsprache…',
         cp1Open: 'Kosmos-CP1-Einstieg öffnen? Die aktuelle Schaltung und der CP1-Quelltext werden ersetzt.',
         mcRunStarted: (n, t) => `${n} läuft im MakeCode-Simulator (${({arcade: 'Arcade', calliopemini: 'Calliope mini', ev3: 'EV3', adafruit: 'Circuit Playground'})[t] || 'micro:bit'}).`,
@@ -1253,6 +1255,7 @@ class PseudocodeImporter extends React.Component {
         // end up with (say) pseudocode sitting in the Python tab.
         this.state = {revealed: props.isVisible !== false, lang: 'pseudocode', importedPython: false,
             extraLangs: readExtraLangs(), langMenuOpen: false,
+            cardiacActive: typeof window !== 'undefined' && window.__bwMachineExtracted?.kind === 'cardiac',
             cp1Active: typeof window !== 'undefined' && window.__bwMachineExtracted?.kind === 'cp1',
             // The Arcade board picker: the boards (null until loaded) and the one chosen.
             arcadeBoards: null, arcadeBoard: '',
@@ -1335,6 +1338,9 @@ class PseudocodeImporter extends React.Component {
         this._unregisterCodeMenu = registerEditorMenuActions('code', () => this.codeMenuActions());
         window.addEventListener('bw-microbit-run-request', this._onMicrobitRunRequest);
         window.addEventListener('bw-cp1-source-load', this.selectCp1);
+        window.addEventListener('bw-cardiac-selected', this.selectCardiac);
+        window.addEventListener('bw-machine-extracted', this.onCardiacMachineSelection);
+        window.addEventListener('bw-cardiac-detached', this.detachCardiac);
         window.addEventListener('bw-cp1-circuit-detached', this.detachCp1);
         // CodeMirror arrives when the tab is first shown (_reveal), not now:
         // every TabPanel is force-rendered, so "mounted" is every first paint.
@@ -2701,6 +2707,9 @@ class PseudocodeImporter extends React.Component {
         window.removeEventListener('bw-project-bundle-loaded', this._onBundleLoaded);
         window.removeEventListener('bw-microbit-run-request', this._onMicrobitRunRequest);
         window.removeEventListener('bw-cp1-source-load', this.selectCp1);
+        window.removeEventListener('bw-cardiac-selected', this.selectCardiac);
+        window.removeEventListener('bw-machine-extracted', this.onCardiacMachineSelection);
+        window.removeEventListener('bw-cardiac-detached', this.detachCardiac);
         window.removeEventListener('bw-cp1-circuit-detached', this.detachCp1);
         // A pending debounce would otherwise lose the last edits on unmount.
         if (this._autosaveTimer) {
@@ -2870,7 +2879,27 @@ class PseudocodeImporter extends React.Component {
         this.setState({extraLangs, langMenuOpen: false}, () => this.switchTab(l));
     }
     detachCp1 = () => this.setState({cp1Active: false});
-    selectCp1 = () => this.setState({cp1Active: true});
+    selectCp1 = () => {
+        this.leaveCardiac();
+        this.setState({cp1Active: true, cardiacActive: false});
+    };
+    detachCardiac = () => this.setState({cardiacActive: false});
+    selectCardiac = () => this.setState({cardiacActive: true, cp1Active: false});
+    onCardiacMachineSelection = event => {
+        if (event.detail?.kind !== 'cardiac' && this.state.cardiacActive) this.detachCardiac();
+    };
+    leaveCardiac () {
+        if (window.__bwMachineExtracted?.kind === 'cardiac') {
+            window.dispatchEvent(new CustomEvent('bw-cardiac-code-selection', {detail: {active: false}}));
+        }
+        if (this.state.cardiacActive) this.detachCardiac();
+    }
+    openCardiacLanguage () {
+        this.leaveCp1();
+        this.setState({langMenuOpen: false});
+        window.dispatchEvent(new CustomEvent('bw-cardiac-code-selection', {detail: {active: true}}));
+        this.selectCardiac();
+    }
     leaveCp1 () {
         if (window.__bwMachineExtracted?.kind === 'cp1') {
             window.dispatchEvent(new CustomEvent('bw-cp1-code-selection', {detail: {active: false}}));
@@ -2879,6 +2908,7 @@ class PseudocodeImporter extends React.Component {
     }
 
     async openCp1Language () {
+        this.leaveCardiac();
         this.setState({langMenuOpen: false});
         window.dispatchEvent(new CustomEvent('bw-cp1-code-selection', {detail: {active: true}}));
         if (window.__bwMachineExtracted?.kind === 'cp1') {
@@ -2900,6 +2930,7 @@ class PseudocodeImporter extends React.Component {
 
     switchTab (to) {
         if (this.state.busy) return;
+        this.leaveCardiac();
         this.leaveCp1();
         const from = this.state.lang;
         if (to === from) return;
@@ -5946,7 +5977,7 @@ class PseudocodeImporter extends React.Component {
                     style={{marginBottom: -1, paddingRight: 40}} scrollerStyle={{paddingBottom: 1}}
                     trailing={(
                         <React.Fragment>
-                            {!this.state.cp1Active && this.renderActionMenu(csel)}
+                            {!this.state.cp1Active && !this.state.cardiacActive && this.renderActionMenu(csel)}
                     <button onClick={() => this.toggleMaximize()}
                         style={{...csel, cursor: 'pointer', background: max ? '#4c97ff' : '#f1f5f9',
                             color: max ? '#fff' : 'inherit', minWidth: 24, border: '1px solid #cbd5e1', alignSelf: 'center'}}
@@ -5975,7 +6006,7 @@ class PseudocodeImporter extends React.Component {
                         // file you opened does not vanish when you switch tabs.
                         ...(this.rcxLoaded() || (this.state.buffers.nqc || '').trim() ?
                             [['nqc', '🧱 NQC']] : [])].map(([l, label]) => {
-                        const active = !this.state.cp1Active && this.state.lang === l;
+                        const active = !this.state.cp1Active && !this.state.cardiacActive && this.state.lang === l;
                         return (
                             <button key={l} type="button" aria-pressed={active} onClick={() => this.switchTab(l)}
                                 disabled={this.state.busy && !active}
@@ -5988,6 +6019,11 @@ class PseudocodeImporter extends React.Component {
                         disabled={this.state.busy} aria-pressed={this.state.cp1Active} title={this.L.cp1Language}
                         style={languageTabStyle(this.state.cp1Active)}>
                         CP1
+                    </button>
+                    <button type="button" data-testid="bw-code-cardiac-tab" onClick={() => this.openCardiacLanguage()}
+                        disabled={this.state.busy} aria-pressed={this.state.cardiacActive}
+                        title={this.L.cardiacLanguage} style={languageTabStyle(this.state.cardiacActive)}>
+                        CARDIAC
                     </button>
                     {(() => {
                         const shown = this.visibleOptionalLangs().map(([l]) => l);
@@ -6020,7 +6056,7 @@ class PseudocodeImporter extends React.Component {
                             </Popup>
                         );
                     })()}
-                    {!this.state.cp1Active && <React.Fragment>
+                    {!this.state.cp1Active && !this.state.cardiacActive && <React.Fragment>
                     {/* Convert/run actions live in the tab row, in maximize mode too. */}
                     <div data-testid="bw-code-action-row" style={{display: 'inline-flex', alignSelf: 'center',
                         alignItems: 'center', gap: 6, flexWrap: 'nowrap', flexShrink: 0}}>
@@ -6498,7 +6534,10 @@ class PseudocodeImporter extends React.Component {
                     </React.Fragment>
                     </React.Fragment>}
                 </ScrollRow>
-                {this.state.cp1Active ? (
+                {this.state.cardiacActive ? (
+                    <div ref={this.props.onCardiacCodeSlot} data-cardiac-language-pane
+                        style={{flex: 1, minHeight: 0, overflow: 'auto'}} />
+                ) : this.state.cp1Active ? (
                     <div ref={this.props.onCp1CodeSlot} data-cp1-language-pane
                         style={{flex: 1, minHeight: 0, overflow: 'auto'}} />
                 ) : <React.Fragment>
@@ -7071,6 +7110,7 @@ class PseudocodeImporter extends React.Component {
 
 PseudocodeImporter.propTypes = {
     onCp1CodeSlot: PropTypes.func,
+    onCardiacCodeSlot: PropTypes.func,
     vm: PropTypes.shape({loadProject: PropTypes.func, toJSON: PropTypes.func}).isRequired,
     locale: PropTypes.string,
     // Whether this tab is the selected one. Gates the CodeMirror chunk and the

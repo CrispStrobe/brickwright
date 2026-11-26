@@ -244,6 +244,21 @@ architecture. Lessons sit beside the live project and use prediction,
 observation, hints, resumable progress, and manual fallbacks — not a
 click-through slideshow.
 
+### Follow a whole computer with CARDIAC
+
+Open **Code → CARDIAC** to explore a decimal computer with 100 memory words
+and ten instructions. Assemble labelled source, feed numeric cards, inspect
+every memory change, set a breakpoint, or predict the next program counter
+and accumulator before taking a step. Code and Controller share one machine.
+
+Six original English/German lessons connect arithmetic and branching to
+bootstrapping and self-modifying code. The night-light example adds an explicitly
+modern circuit adapter: sample a voltage into an input card, let the program
+make its decision, and watch the solved resistor/LED circuit respond. Saved
+projects keep unfinished source separately from the last loaded image and
+reopen paused. See the [CARDIAC Lab guide](docs/CARDIAC-LAB.md) for the exact
+compatibility profile, examples, reference comparisons and verification scope.
+
 ### Use it as a native app
 
 One Tauri 2 project produces apps for **macOS, Windows, Linux, iOS and

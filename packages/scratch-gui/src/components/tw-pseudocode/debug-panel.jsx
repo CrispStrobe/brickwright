@@ -6,6 +6,7 @@ import {connect} from 'react-redux';
 
 import DebugDrawer from './debug-drawer.jsx';
 import Cp1Host from './cp1-host.jsx';
+import CardiacHost from './cardiac-host.jsx';
 import DebugInspector from './debug-inspector.jsx';
 import DebugPipeline from './debug-pipeline.jsx';
 import DebugFrames from './debug-frames.jsx';
@@ -364,10 +365,11 @@ class DebugPanel extends React.Component {
             this._suspendedCp1Media = null;
         }
         const hasBootMedia = !!this._bootMedia;
-        const kind = detail.kind === 'cp1' ? 'cp1' : detail.kind === 'z80' ? 'z80'
+        const kind = detail.kind === 'cardiac' ? 'cardiac' : detail.kind === 'cp1' ? 'cp1' : detail.kind === 'z80' ? 'z80'
             : detail.kind === 'eater6502' || detail.kind === '6502' ? 'eater6502'
                 : this.state.kind;
         this.setState({machineConfig: detail.config, kind, runner: null,
+            cardiacGeneration: (this.state.cardiacGeneration || 0) + 1,
             ui: {phase: 'idle', message: hasBootMedia ?
                 'machine extracted — loaded program ready' :
                 'machine extracted — load a program (presets, file, or ASM tab)'}});
@@ -622,6 +624,22 @@ class DebugPanel extends React.Component {
                 ui: {phase: 'idle', message: ''}}, () => this.syncDeviceKind());
         };
         window.addEventListener('bw-cp1-circuit-detached', this._onCp1CircuitDetached);
+        this._onCardiacDetached = () => {
+            if (this.state.kind !== 'cardiac') return;
+            this._teardownRunner();
+            this.setState({kind: 'emulator', machineConfig: null, runner: null,
+                ui: {phase: 'idle', message: ''}}, () => this.syncDeviceKind());
+        };
+        window.addEventListener('bw-cardiac-detached', this._onCardiacDetached);
+        this._onCardiacRun = event => {
+            if (this.state.kind !== 'cardiac' || event.detail?.partId !== this.state.machineConfig?.partId) return;
+            this.onStart().catch(error => this.setState({ui: {phase: 'error', message: error.message}}));
+        };
+        this._onCardiacPause = event => {
+            if (this.state.kind === 'cardiac' && event.detail?.partId === this.state.machineConfig?.partId) this.state.runner?.pause();
+        };
+        window.addEventListener('bw-cardiac-run', this._onCardiacRun);
+        window.addEventListener('bw-cardiac-pause', this._onCardiacPause);
         window.addEventListener('bw-machine-media-load', this._onMediaLoad);
         window.addEventListener('bw-asm-rom-ready', this._onAsmRomReady);
         // Replay what was dispatched before this panel existed: the panel
@@ -743,8 +761,9 @@ class DebugPanel extends React.Component {
         if (!rt) return;
         const core = rt.bwDeviceCore;
         const dev = rt.bwDeviceId;
+        const cardiacSelected = window.__bwMachineExtracted?.kind === 'cardiac';
         const cp1Selected = window.__bwMachineExtracted?.kind === 'cp1';
-        const key = `${core}/${dev}/${cp1Selected}`;
+        const key = `${core}/${dev}/${cp1Selected}/${cardiacSelected}`;
         if (key === this._lastCore) return;
         this._lastCore = key;
         // Device-specific engines first: an ATtiny88 on the coarse
@@ -774,7 +793,7 @@ class DebugPanel extends React.Component {
         let stored = null;
         try { stored = localStorage.getItem(`bw-emulator-pref:${dev}`); } catch { /* private mode */ }
         const preferred = stored || DEVICE_TO_KIND[dev] || CORE_TO_KIND[core];
-        const kind = cp1Selected ? 'cp1' : (preferred === 'cp1' ? 'emulator' : preferred);
+        const kind = cardiacSelected ? 'cardiac' : cp1Selected ? 'cp1' : (['cp1', 'cardiac'].includes(preferred) ? 'emulator' : preferred);
         if (kind && kind !== this.state.kind) {
             // Changing the kind while a runner exists would leave it on the
             // wrong engine. Destroy it so the next Start creates a fresh one.
@@ -883,6 +902,9 @@ class DebugPanel extends React.Component {
         else if (rt && rt.removeListener && this._onProjectChanged) rt.removeListener('PROJECT_CHANGED', this._onProjectChanged);
         window.removeEventListener('bw-machine-extracted', this._onMachineExtracted);
         window.removeEventListener('bw-cp1-circuit-detached', this._onCp1CircuitDetached);
+        window.removeEventListener('bw-cardiac-detached', this._onCardiacDetached);
+        window.removeEventListener('bw-cardiac-run', this._onCardiacRun);
+        window.removeEventListener('bw-cardiac-pause', this._onCardiacPause);
         if (this._onBoardSource) window.removeEventListener('bw-board-source', this._onBoardSource);
         window.removeEventListener('bw-machine-media-load', this._onMediaLoad);
         window.removeEventListener('bw-asm-rom-ready', this._onAsmRomReady);
@@ -998,6 +1020,18 @@ class DebugPanel extends React.Component {
             if (this._runnerPromise !== owner) return;
             this.mirrorLabwiredDisplay(runner);
         }
+    }
+
+    async readyCardiac () {
+        const pending = this.runner();
+        const owner = this._runnerPromise;
+        const runner = await pending;
+        if (this._runnerPromise !== owner) throw new Error('The selected machine changed.');
+        if (!runner.cardiacSnapshot()) await runner.start({paused: true});
+        if (this._runnerPromise !== owner || !runner.cardiacSnapshot()) {
+            throw new Error(this.state.ui.message || 'CARDIAC could not start.');
+        }
+        return runner;
     }
 
     async runCp1Program (assembly, signal) {
@@ -1472,6 +1506,11 @@ class DebugPanel extends React.Component {
         const actionCounters = Object.entries(actionStatus?.counters || {}).slice(-4);
         const hasActionStatus = actionFailures.length || actionLog.length || actionCounters.length;
 
+        if (this.state.kind === 'cardiac') return <div data-debug-panel data-debug-phase={phase}>
+            <CardiacHost key={this.state.cardiacGeneration || 0} runner={this.state.runner} running={running} locale={this.props.locale}
+                configuration={this.state.machineConfig} onReady={() => this.readyCardiac()} />
+        </div>;
+
         if (this.state.kind === 'cp1') return <div data-debug-panel data-debug-phase={phase}>
             <Cp1Host
                     runner={this.state.runner} running={running} locale={this.props.locale}
@@ -1662,6 +1701,10 @@ class DebugPanel extends React.Component {
                                 title={(this.state.kinds.find(k => k.kind === this.state.kind) || {}).description}
                                 onChange={e => {
                                     const kind = e.target.value;
+                                    if (kind === 'cardiac') {
+                                        window.dispatchEvent(new CustomEvent('bw-cardiac-code-selection', {detail: {active: true}}));
+                                        return;
+                                    }
                                     // Persist per device — the setting the
                                     // picker IS. Cleared by picking the
                                     // device's default again.

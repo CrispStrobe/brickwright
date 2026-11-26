@@ -4,6 +4,7 @@ import React from 'react';
 
 import coreCatalog from './lessons.json';
 import cp1Wave from './lesson-waves/cp1-8.json';
+import cardiacWave from './lesson-waves/cardiac-9.json';
 import debuggingWave from './lesson-waves/debugging-5.json';
 import electricityWave from './lesson-waves/electricity-1.json';
 import interactiveWave from './lesson-waves/interactive-4.json';
@@ -17,7 +18,7 @@ import {lessonMatchesQuery} from './lesson-search.mjs';
 const catalog = {
     lessons: [...coreCatalog.lessons, ...electricityWave.lessons, ...measurementWave.lessons,
         ...languagesWave.lessons, ...interactiveWave.lessons, ...debuggingWave.lessons,
-        ...signalsWave.lessons, ...machinesWave.lessons, ...cp1Wave.lessons]
+        ...signalsWave.lessons, ...machinesWave.lessons, ...cp1Wave.lessons, ...cardiacWave.lessons]
 };
 
 const UI = {

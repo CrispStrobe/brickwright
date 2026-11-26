@@ -66,6 +66,8 @@ const RAW = `https://raw.githubusercontent.com/${REPO}/${remoteSha}`;
 
 // [source path relative to the sb3-creator repo, local vendored destination]
 const FILES = [
+    ['src/utils/cardiacProgram.js', path.join(lib, 'cardiac-program.js')],
+    ['src/utils/cardiacExamples.js', path.join(lib, 'cardiac-examples.js')],
     ['src/utils/cp1Program.js', path.join(lib, 'cp1-program.js')],
     ['src/utils/sb3Creator.js', path.join(lib, 'sb3-creator.js')],
     ['src/utils/procedureParameterConstraints.js', path.join(lib, 'procedureParameterConstraints.js')],

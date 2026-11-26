@@ -367,7 +367,7 @@ test('vendored SPIKE compiler emits a canonical executable round-trip artifact',
     // -> 1c29f69f (2026-11-25): electronics benches and the CP3/CP4 lesson.
     // Keep the exact supplier identity gate and every SPIKE artifact assertion below.
     assert.equal(JSON.parse(readFileSync(new URL('../vendor-pins.json', import.meta.url)))['sb3-creator'],
-        '1c29f69fd22c86ecb0051938eedb246921cb3b88');
+        'fd5ea63fc4bda8696fbe6c672b4f11c1c8171d12');
 
     const creator = new SB3Creator();
     creator.parse(PROGRAM);
