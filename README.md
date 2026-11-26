@@ -309,6 +309,8 @@ bwlite 8051 build program.bw --out program.ihx
 bwlite 8051 flash program.ihx --port /dev/cu.usbserial-XXXX
 bwlite toolchain status
 bwlite machine validate machine.json
+bwlite circuit test 05-counter --device stc12c5a60s2
+bwlite circuit test --json > circuit-report.json
 ```
 
 `convert` reads `.bw`, `.sb3`, `.c`, `.py`, `.js` and `.bas`, and writes
@@ -318,6 +320,13 @@ uses installed SDCC; `8051 flash` uses installed `stcgal` and an explicit
 serial port (and the STC's usual cold power-cycle into its ISP bootloader).
 `machine` manages emulator configurations and boot plans; `toolchain`, `fpga`
 and `makecode` forward to their repository CLIs.
+
+`circuit test` loads, powers and advances every selected gallery bench with the
+same circuit engine the app uses. The JSON report gives a separate functional
+verdict. Scripted scenarios run the actual lesson program in the headless
+Scratch VM and measure the circuit's response to inputs. A bench without a
+scenario is marked `unverified` for behavior. Use `--smoke-only` to skip
+functional checks. Failed or incomplete checks set exit status 1.
 
 SPIKE over USB needs LEGO MINDSTORMS MicroPython firmware and Python with
 `pyserial`. See the [CLI guide](docs/CLI.md) (it maps old `bw` references to
