@@ -429,7 +429,7 @@ class DebugPanel extends React.Component {
         // Its post-boot snapshot (the lesson's default Run), likewise.
         const {linuxSnapshot} = e.detail || {};
         const {nativeBlocks, machinePreset, i80386Media, machineConfig6502, machineConfig8086} = e.detail || {};
-        const {dosFiles, dosVariant} = e.detail || {};
+        const {dosArgs, dosFiles, dosVariant} = e.detail || {};
         if (!bytes && !riscvImage) return;
         // THE SAME LOAD, DELIVERED TWICE. circuit-tab stashes every media-load
         // and, when that flips it to "machine booted", re-dispatches the very
@@ -477,6 +477,7 @@ class DebugPanel extends React.Component {
                 ? (linuxSnapshot instanceof Uint8Array ? linuxSnapshot : new Uint8Array(linuxSnapshot)) : null,
             profile: profile || null,
             i8086Hardware,
+            dosArgs,
             dosFiles,
             dosVariant,
             machineConfig8086,
@@ -1241,7 +1242,8 @@ class DebugPanel extends React.Component {
         this._updatePcController = (active, ui) => {
             if (active !== runner) return;
             const widget = terminal && panel.getWidget(terminal);
-            const text = widget ? (ui.serialOutput || []).join('\n') : null;
+            const output = widget ? (ui.serialOutput || []).join('\n') : '';
+            const text = output.trim() ? output : runner.dosScreenText?.().join('\n').trimEnd() || '';
             if (widget?.type === 'terminal' && widget.state.text !== text) panel.setTerminalText(terminal, text);
             if (gpio && panel.getWidget('PC GPIO')?.type === 'bargraph') {
                 const port = runner.outputs?.().find(item => String(item.port).toUpperCase() === 'B');

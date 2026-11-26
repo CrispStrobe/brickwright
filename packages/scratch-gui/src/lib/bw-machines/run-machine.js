@@ -64,6 +64,7 @@ export async function runMachineConfig(config, opts = {}) {
         widgets: Array.isArray(activated.widgets) ? activated.widgets : []
     };
     if (bm.dosVariant) detail.dosVariant = bm.dosVariant;
+    if (bm.dosArgs) detail.dosArgs = bm.dosArgs;
     if (bm.dosFiles) detail.dosFiles = bm.dosFiles;
     if (typeof bm.romAt === 'number') detail.romAt = bm.romAt;
     if (bm.geometry) detail.geometry = {...bm.geometry};

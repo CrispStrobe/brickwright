@@ -203,6 +203,7 @@ export async function activateConfig(config, opts = {}) {
 
     if (TARGET_KIND[cfg.machine] === 'i8086' && ['com', 'exe'].includes(bootSlotId)) {
         bootMedia.dosVariant = cfg.cpu.variant;
+        if (typeof cfg.provenance?.program?.args === 'string') bootMedia.dosArgs = cfg.provenance.program.args;
         const mounts = Object.entries(cfg.provenance?.dosMount || {});
         const files = await Promise.all(mounts.map(async ([name, ref]) => {
             if (!/^[a-z0-9_~-]{1,8}(?:\.[a-z0-9_~-]{1,3})?$/i.test(name)) {

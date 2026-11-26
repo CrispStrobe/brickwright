@@ -10,7 +10,7 @@ test('partcl launch sends its 80186 variant and mounted script to the live runne
     const executable = Uint8Array.of(0x4d, 0x5a);
     const script = new TextEncoder().encode('puts [* 6 7]\n');
     const config = fromMediaManifest({
-        machine: 'i8086', program: {kind: 'dos', variant: '80186'},
+        machine: 'i8086', program: {kind: 'dos', variant: '80186', args: '-i'},
         slots: {exe: 'TCL.EXE'}, mount: {'prog.tcl': 'samples/demo.tcl'}
     }, {baseUrl});
     let seen;
@@ -24,6 +24,7 @@ test('partcl launch sends its 80186 variant and mounted script to the live runne
     await runMachineConfig(config, opts);
     assert.equal(seen.slotId, 'exe');
     assert.equal(seen.dosVariant, '80186');
+    assert.equal(seen.dosArgs, '-i');
     assert.equal(seen.bytes, executable);
     assert.equal(seen.dosFiles.get('PROG.TCL'), script);
     await assert.rejects(runMachineConfig(config, {...opts, dispatch: detail =>

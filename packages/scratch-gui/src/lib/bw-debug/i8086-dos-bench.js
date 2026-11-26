@@ -178,8 +178,8 @@ async function createI8086DosBenchSelected (opts) {
     }).install();
 
     if (format === 'disk') dos.loadBoot(bytes.subarray(0, 512), 0);
-    else if (format === 'exe') dos.loadExe(bytes);
-    else dos.loadCom(bytes);
+    else if (format === 'exe') dos.loadExe(bytes, {args: opts.args});
+    else dos.loadCom(bytes, {args: opts.args});
 
     let exitAnnounced = false;
     const realStep = machine.step.bind(machine);
