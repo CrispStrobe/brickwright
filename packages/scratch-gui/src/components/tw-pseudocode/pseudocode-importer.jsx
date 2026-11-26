@@ -2864,7 +2864,11 @@ class PseudocodeImporter extends React.Component {
     setActiveCode (text) {
         if (this.state.lang === 'asm' && this.state.asmMode === 'listing') return;
         this.invalidateArcadeReport();
-        this.setState(s => ({buffers: {...Object.fromEntries(Object.keys(LANG_LABEL).map(l => [l, ''])), [s.lang]: text}}));
+        this.setState(s => {
+            const device = s.buffers.pseudocode?.match(/^DEVICE\s+[\w-]+[^\n]*/im)?.[0];
+            return {buffers: {...Object.fromEntries(Object.keys(LANG_LABEL).map(lang => [lang, ''])),
+                pseudocode: device ? `${device}\n` : '', [s.lang]: text}};
+        });
     }
 
     // Lazily import the compiler through the registering door, which injects this
@@ -4093,6 +4097,10 @@ class PseudocodeImporter extends React.Component {
             // only the editor text, leaving the VM and generated MicroPython
             // on the previous device. Compile this route too, and await it so
             // the Calliope tab cannot open onto an empty/stale derivation.
+            if (deviceId === 'riscv32') {
+                this.publishAppliedDevice({device: deviceId});
+                return;
+            }
             await this.compile({pseudocode: nextSource});
             if (['microbit', 'calliopemini'].includes(deviceId)) {
                 const generated = await this.deriveBuffer(nextSource, 'pseudocode', 'micropython');

@@ -22,7 +22,7 @@ const items = [
     ['i80386', 'bw-mm-at-bios-run', 'preset', null],
     ...['serial-monitor', 'cga-demo', 'cga-gfx-demo', 'vga-demo', 'hercules-demo', 'ega-demo',
         'keyboard-demo', 'desk-demo', 'blink-demo', 'timer-demo'].map(name => (
-        ['i8086', `bw-mm-8086-${name}`, 'preset', null]))
+        ['i8086', `bw-mm-8086-${name}`, 'preset', name === 'serial-monitor' ? /8086 serial shell/ : null]))
 ].filter(([,name]) => !process.env.BW_MACHINE_FILTER || new RegExp(process.env.BW_MACHINE_FILTER,'i').test(name));
 const browser = await chromium.launch({headless: true,
     executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
