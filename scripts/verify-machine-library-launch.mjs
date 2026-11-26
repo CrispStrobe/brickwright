@@ -7,13 +7,17 @@ assert.ok(base, 'Pass the URL of the assembled Brickwright frontend.');
 const browser = await chromium.launch({headless: true,
     executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
 try {
-    const freshProject = async () => {
+    const freshProject = async ({macDesktop = false} = {}) => {
         const page = await browser.newPage({viewport: {width: 1440, height: 900}, locale: 'en-US'});
         page.setDefaultTimeout(45000);
-        await page.addInitScript(() => {
+        await page.addInitScript(useMacPicker => {
+            if (useMacPicker) {
+                Object.defineProperty(navigator, 'platform', {value: 'MacIntel'});
+                window.__TAURI__ = {};
+            }
             localStorage.setItem('bw-starter-v1-complete', '1');
             localStorage.setItem('bw-right-pane-hidden', '1');
-        });
+        }, macDesktop);
         await page.goto(base, {waitUntil: 'domcontentloaded'});
         return page;
     };
@@ -92,18 +96,19 @@ try {
     console.log('Microtronic source and front panel use the same device from Code and Controller.');
     await micro.close();
 
-    const night = await freshProject();
+    const night = await freshProject({macDesktop: true});
     let reloads = 0;
     let crashes = 0;
     night.on('crash', () => crashes++);
     night.on('framenavigated', frame => { if (frame === night.mainFrame()) reloads++; });
     await loadCircuitExample(night, 'Automatic night light', '03-night-light');
     await night.getByRole('tab', {name: 'Code', exact: true}).click();
-    const target = night.getByTestId('bw-device-select');
-    await target.waitFor();
+    const target = night.getByTestId('bw-device-picker-trigger');
+    await target.click();
+    const options = night.getByTestId('bw-mac-device-menu');
     const bench = night.waitForResponse(response => response.ok() &&
         new URL(response.url()).pathname.endsWith('/03-night-light/circuit.stm32f030.json'));
-    await target.selectOption('stm32f030');
+    await options.getByRole('menuitemradio', {name: 'STM32F030', exact: true}).click();
     await bench;
     await night.waitForFunction(() => document.querySelector('.cm-content')?.textContent?.includes('DEVICE STM32F030'));
     await night.getByRole('tab', {name: 'Circuit', exact: true}).click();
@@ -111,7 +116,7 @@ try {
         [...document.querySelectorAll('[data-part-id]')].some(part => /stm32/i.test(part.outerHTML.slice(0, 450)))));
     assert.equal(crashes, 0);
     assert.equal(reloads, 0);
-    console.log('Automatic Night Light reseats to STM32F030 without a browser reload.');
+    console.log('The Mac device picker reseats Automatic Night Light to STM32F030 without a reload.');
     await night.close();
 
     if (!process.env.BW_SKIP_ZOOM) {

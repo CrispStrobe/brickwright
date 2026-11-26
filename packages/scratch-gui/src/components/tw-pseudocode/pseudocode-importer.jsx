@@ -5750,6 +5750,40 @@ class PseudocodeImporter extends React.Component {
         );
     }
 
+    renderMacDevicePicker (menu, style) {
+        const slot = menu ? 'menu' : 'toolbar';
+        const current = this.currentDevice() || '';
+        const close = () => this.setState({macDevicePicker: null});
+        const choose = id => {
+            close();
+            this.setDevice(id);
+        };
+        const item = (id, label) => <button type="button" key={id || 'none'} role="menuitemradio"
+            aria-checked={id === current} data-device-option={id}
+            style={{...toolStyles(false).button, textAlign: 'left', justifyContent: 'flex-start'}}
+            onClick={() => choose(id)}>{label}</button>;
+        const heading = {padding: '5px 8px 2px', fontSize: 11, fontWeight: 700, color: '#64748b'};
+        return <Popup id={`code-mac-device-${slot}`} testId="bw-mac-device-menu" align="right" role="menu"
+            width={260} label={this.L.deviceTitle} open={this.state.macDevicePicker === slot}
+            onToggle={() => this.setState(state => ({macDevicePicker: state.macDevicePicker === slot ? null : slot}))}
+            onClose={close} button={<button type="button" aria-label={this.L.deviceTitle}
+                data-testid={menu ? 'bw-device-picker-trigger-menu' : 'bw-device-picker-trigger'}
+                title={this.L.deviceTitle} style={{...style, cursor: 'pointer'}}>
+                {DEVICE_BY_ID[current]?.label || this.L.noChips} ▾
+            </button>}>
+            <button type="button" role="menuitem" style={toolStyles(false).button}
+                onClick={() => choose('__manage__')}>Manage machines…</button>
+            {item('', this.L.noChips)}
+            <strong style={heading}>Intel 8049</strong>
+            <button type="button" role="menuitem" style={toolStyles(false).button}
+                onClick={() => choose('kosmos-cp1')}>Kosmos CP1</button>
+            {DEVICE_GROUPS.map(group => <React.Fragment key={group.label}>
+                <strong style={heading}>{group.label}</strong>
+                {group.devices.map(device => item(device.id, device.label))}
+            </React.Fragment>)}
+        </Popup>;
+    }
+
     renderActionMenu (csel, renderCodeControls, renderLanguages, machine) {
         const item = {...csel, ...toolStyles(false).button, display: 'flex', alignItems: 'center', justifyContent: 'flex-start',
             width: '100%', boxSizing: 'border-box', textAlign: 'left', cursor: 'pointer', height: 'auto',
@@ -6436,6 +6470,9 @@ class PseudocodeImporter extends React.Component {
                                 color: '#475569', fontSize: 11, fontWeight: 700, cursor: 'pointer', alignSelf: 'center'}}>
                             <span aria-hidden="true">🐞</span>{menu && (pickLocale(this.props.locale) === 'de' ? ' Debugger öffnen' : ' Open debugger')}
                         </button>
+                        {/* WKWebView's native popup can lose its selection owner during a board reseat. */}
+                        {typeof window !== 'undefined' && window.__TAURI__ && /^Mac/.test(navigator.platform) ?
+                            this.renderMacDevicePicker(menu, {...csel, alignSelf: 'center', maxWidth: '100%', minWidth: 0}) : (
                         <select value={this.currentDevice() || ''} onChange={e => this.setDevice(e.target.value)}
                             style={{...csel, alignSelf: 'center', maxWidth: '100%', minWidth: 0}} title={this.L.deviceTitle}
                             data-testid={menu ? "bw-device-select-menu" : "bw-device-select"}>
@@ -6450,7 +6487,7 @@ class PseudocodeImporter extends React.Component {
                             ))}
                             {/* Opens the machine library (gui.jsx renders it); not a device. */}
                             <option value="__manage__" data-machine-launch="">{'Manage machines…'}</option>
-                        </select>
+                        </select>)}
                         {/* What this language can do on this device: native, lowered, or
                             an open task — one line, read from lib/bw-matrix/capabilities.js,
                             the same table the docs are generated from. Title = the long form. */}
