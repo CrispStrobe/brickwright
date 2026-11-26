@@ -13,7 +13,6 @@ import {connect} from 'react-redux';
 import MediaQuery from 'react-responsive';
 import {Tab, Tabs, TabList, TabPanel} from 'react-tabs';
 import EditorHelp from './editor-help.jsx';
-import {runEditorMenuAction} from '../../lib/editor-menu-actions.js';
 import CircuitTab from '../tw-pseudocode/circuit-tab.jsx';
 import {setCircuitView} from '../../lib/bw-debug/debug-view.js';
 import {getCadEnabled, setCadEnabled as setCadPreference, CAD_TOGGLE_EVENT, CAD_OPEN_EVENT} from '../../lib/bw-cad-preferences.js';
@@ -1288,7 +1287,7 @@ const GUIComponent = props => {
                                                     onAddExtension={onExtensionButtonClick}
                                                     onReadCode={() => {
                                                         onActivateTab(CODE_TAB_INDEX);
-                                                        runEditorMenuAction('code', 'from-blocks');
+                                                        window.dispatchEvent(new CustomEvent('bw-read-blocks-into-code'));
                                                     }}
                                                     options={{
                                                         media: `${basePath}static/${themeMap[theme].blocksMediaFolder}/`

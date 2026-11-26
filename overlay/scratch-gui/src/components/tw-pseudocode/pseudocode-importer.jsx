@@ -1344,6 +1344,7 @@ class PseudocodeImporter extends React.Component {
     componentDidMount () {
         this._unmounted = false;
         window.addEventListener('bw-hardware-state', this.onHardwareState);
+        window.addEventListener('bw-read-blocks-into-code', this.fromBlocks);
         this._unregisterCodeMenu = registerEditorMenuActions('code', () => this.codeMenuActions());
         window.addEventListener('bw-microbit-run-request', this._onMicrobitRunRequest);
         window.addEventListener('bw-cp1-source-load', this.selectCp1);
@@ -2708,6 +2709,7 @@ class PseudocodeImporter extends React.Component {
 
     componentWillUnmount () {
         window.removeEventListener('bw-hardware-state', this.onHardwareState);
+        window.removeEventListener('bw-read-blocks-into-code', this.fromBlocks);
         this.setMaximizedChrome(false);
         this._unmounted = true;
         if (this._unregisterCodeMenu) this._unregisterCodeMenu();
