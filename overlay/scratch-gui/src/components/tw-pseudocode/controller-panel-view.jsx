@@ -6,7 +6,7 @@ import {clearControllerPanel, createWidgetButtonInputs, releaseMomentaryButtons,
 import EditorHelp from '../gui/editor-help.jsx';
 import MachineConsole from './machine-console.jsx';
 import {activateUndoSurface, notifyUndoState, registerUndoSurface} from '../../lib/global-undo.js';
-import {addCardiacFace, isCardiacFace} from '../../lib/controller-machine-faces.js';
+import {addCardiacFace, isCardiacFace, MACHINE_WIDGET_HEIGHT} from '../../lib/controller-machine-faces.js';
 import {LOGIKUS_LAMP_WIDGETS, LOGIKUS_SWITCH_WIDGETS, LOGIKUS_TEST_WIDGET} from '../../lib/logikus/controller-bridge.js';
 import SpikePortMonitor from './spike-port-monitor.jsx';
 
@@ -606,6 +606,7 @@ function TerminalWidget({ widget }) {
 
 function PositionedWidget({ widget, mode, selected, snap, onSelect, onLayout, children }) {
     const L = widget.layout || {};
+    const machine = widget.type === 'machine';
     const ref = React.useRef(null);
     const gesture = React.useRef(null);
 
@@ -621,12 +622,12 @@ function PositionedWidget({ widget, mode, selected, snap, onSelect, onLayout, ch
         const w = el.offsetWidth, h = el.offsetHeight;
         setNatural(prev => (prev && prev.w === w && prev.h === h) ? prev : { w, h });
     }, [widget.type, widget.config]);
-    const sx = (widget.type !== 'machine' && L.w && natural && natural.w) ? L.w / natural.w : 1;
-    const sy = (L.h && natural && natural.h) ? L.h / natural.h : 1;
+    const sx = (!machine && L.w && natural && natural.w) ? L.w / natural.w : 1;
+    const sy = (!machine && L.h && natural && natural.h) ? L.h / natural.h : 1;
 
     const beginDrag = e => {
         if (mode !== 'edit') return;
-        if (widget.type === 'machine' && e.target.closest('button, input, select, textarea, summary')) return;
+        if (machine && e.target.closest('button, input, select, textarea, summary')) return;
         onSelect();
         try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* synthetic events have no active pointer */ }
         gesture.current = { kind: 'move', px: e.clientX, py: e.clientY, x: L.x || 0, y: L.y || 0 };
@@ -675,22 +676,22 @@ function PositionedWidget({ widget, mode, selected, snap, onSelect, onLayout, ch
                 position: 'absolute',
                 left: L.x || 0,
                 top: L.y || 0,
-                width: L.w || (widget.type === 'machine' ? `min(440px, calc(100% - ${(L.x || 0) + 8}px))` : undefined),
-                height: L.h || undefined,
+                width: L.w || (machine ? `min(440px, calc(100% - ${(L.x || 0) + 8}px))` : undefined),
+                height: L.h || (machine ? MACHINE_WIDGET_HEIGHT : undefined),
                 transform: L.rotation ? 'rotate(' + L.rotation + 'deg)' : undefined,
                 transformOrigin: 'center center',
                 outline: selected ? '2px solid #7C3AED' : 'none',
                 outlineOffset: 2,
                 borderRadius: 8,
                 cursor: mode === 'edit' ? 'move' : 'default',
-                touchAction: 'none',
+                touchAction: machine && mode === 'play' ? 'auto' : 'none',
                 userSelect: 'none',
             }}
         >
             <div
                 ref={contentRef}
                 style={{
-                    display: 'inline-block', width: widget.type === 'machine' ? '100%' : undefined,
+                    display: 'inline-block', width: machine ? '100%' : undefined, height: machine ? '100%' : undefined,
                     transformOrigin: 'top left',
                     transform: (sx !== 1 || sy !== 1) ? ('scale(' + sx + ', ' + sy + ')') : undefined,
                 }}
@@ -1991,11 +1992,19 @@ class ControllerPanelView extends React.Component {
                             >
                                 {w.type === 'machine' ? (
                                     <section aria-label={w.layout.label || w.name}
-                                        style={{background: '#f6f8f4', border: '1px solid #c5d5d8', borderRadius: 8}}>
+                                        style={{background: '#f6f8f4', border: '1px solid #c5d5d8', borderRadius: 8,
+                                            height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden'}}>
+                                        <header data-testid={`bw-ctl-machine-header-${w.name}`}
+                                            title={mode === 'edit' ? (german ? 'Zum Verschieben ziehen' : 'Drag to move') : undefined}
+                                            style={{padding: '5px 26px 5px 8px', fontSize: 12, fontWeight: 700, color: '#16333c',
+                                                borderBottom: '1px solid #c5d5d8'}}>
+                                            {w.layout.label || w.name}
+                                        </header>
                                         {w === cardiacWidget && cardiacWidgetSlot ?
-                                            <div ref={cardiacWidgetSlot} data-cardiac-widget-slot /> :
+                                            <div ref={cardiacWidgetSlot} data-cardiac-widget-slot
+                                                style={{flex: 1, minHeight: 0, overflow: 'auto', scrollbarWidth: 'thin'}} /> :
                                             <span style={{display: 'block', padding: 8}}>
-                                                {w.layout.label || w.name} · {german ? 'Nicht verbunden' : 'Disconnected'}
+                                                {german ? 'Nicht verbunden' : 'Disconnected'}
                                             </span>}
                                         {mode === 'edit' && <RemoveWidgetButton name={w.name} onRemove={() => {
                                             this._removeWidget(w.name);

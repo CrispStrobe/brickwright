@@ -36,6 +36,17 @@ try {
     const widget = page.getByTestId('bw-ctl-widget-cardiac');
     await widget.locator('[data-cardiac-controller]').waitFor();
     await page.getByRole('button', {name: 'Edit', exact: true}).last().click();
+    const header = page.getByTestId('bw-ctl-machine-header-cardiac');
+    await header.scrollIntoViewIfNeeded();
+    const bounds = await header.boundingBox();
+    const originalX = await widget.evaluate(element => element.offsetLeft);
+    await page.mouse.move(bounds.x + 30, bounds.y + 10);
+    await page.mouse.down();
+    await page.mouse.move(bounds.x + 70, bounds.y + 10, {steps: 4});
+    await page.mouse.up();
+    await page.waitForFunction(original =>
+        document.querySelector('[data-testid="bw-ctl-widget-cardiac"]')?.offsetLeft > original, originalX);
+    await page.getByTestId('bw-ctl-insp-ok').click();
     const remove = page.getByTestId('bw-ctl-remove-cardiac');
     const add = page.getByRole('button', {name: '+ Add Widget', exact: true});
     await add.click();

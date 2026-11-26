@@ -142,7 +142,7 @@ export default function CardiacPanel ({workspace, assembly, snapshot, busy, erro
     </section>;
 
     const machine = <section className={styles.panel} data-cardiac-controller data-cardiac-status={state?.status || 'ready'}>
-        <header className={styles.header}><strong>CARDIAC</strong><span>{t.subtitle}</span></header>
+        {!Editor && <header className={styles.header}><strong>CARDIAC</strong><span>{t.subtitle}</span></header>}
         {error && !surfaces?.code && <p className={styles.error} role="alert">{error}</p>}
         <div className={styles.registers}>
             <div><span>{t.pc}</span><output data-testid="cardiac-pc">{addr(state?.pc)}</output></div>
