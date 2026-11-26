@@ -77,6 +77,7 @@ import {tmpdir} from 'node:os';
 import path from 'node:path';
 import vm from 'node:vm';
 import {hddBeforeFixtureControl, hddBeforeConcurrencyControl, hddHistoricalHashBody, studyBeforeConcurrencyPolicy} from './helpers/reviewed-concurrency-projections.mjs';
+import {hddBeforeRepositoryIdentityControl, hddWorkflowBeforeRepositoryIdentity} from './helpers/reviewed-repository-identity.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const PINS = path.join(ROOT, 'vendor-pins.json');
@@ -106,7 +107,7 @@ const HISTORICAL_X86_CUI_V5_V7 = '91d8434a79d373cef2837c137ab356356f1a3b44';
 const HISTORICAL_X86_V8_CUI = '1bc233c9297e03abb9b7eb603e045b4e92b0bb40';
 const CURRENT_X86_CUI = 'a5860b9cf6cb0e7f652130ce987d51dc42651b8b';
 // CURRENT_X86_CUI retains the F9 epoch meaning; only these F10 values are live.
-const LIVE_X86_CUI = '4c57f3a6458a3f385b87c2d9213d02062fe0918d';
+const LIVE_X86_CUI = 'e3d30784d77d3e331164926290a1920f81a6b1e9';
 // The CUI the consumed, whole-file-sealed F10 controllers were shipped at. Like
 // HISTORICAL_X86_F10_SB3, it stays in their exact F10 map field after the live
 // pin moves on (to LIVE_X86_CUI); no other position may carry it.
@@ -120,7 +121,7 @@ const HISTORICAL_X86_CURRENT_BOARD = '836867513c3e7fac420ddaa32c17e1c7b6d3e513';
 // the reviewed bodies (historicalSb3Spans) and this declaration may carry.
 const HISTORICAL_X86_SB3 = '1cbaeed325f5a890e43b78a4211acae8f801f2d2';
 // The live supplier identity follows the current pin, separate from consumed F10.
-const LIVE_X86_SB3 = '318a9ad1df19c7951460ff59d231f981c7600e84';
+const LIVE_X86_SB3 = 'f823a41b38c41c9f95a66b8d0d339db6bb910ab5';
 // Consumed F10 controllers remain whole-file sealed at this shipped epoch.
 const HISTORICAL_X86_F10_SB3 = '8e53c1621a1b9eeb42e0565f987c4c47ab598961';
 const HISTORICAL_X86_FINITE_V7_PINS = "FINITE_V7_PINS = {'bw-board':'" + HISTORICAL_X86_CURRENT_BOARD + "','bw-circuit-ui':'" + HISTORICAL_X86_V8_CUI + "','sb3-creator':'" + HISTORICAL_X86_SB3 + "'}";
@@ -1141,11 +1142,12 @@ test('reviewed fixture inverse retains sealed extents and rejects missing duplic
     const file='test/i80386-hdd-gui-actual.test.mjs';
     const source=readFileSync(path.join(ROOT,file),'utf8');
     const review=JSON.parse(readFileSync(path.join(ROOT,'test/fixtures/i80386-fixture-path-review.json'),'utf8'));
+    const fixtureSource=hddBeforeRepositoryIdentityControl(file,source);
     const held=hddBeforeFixtureControl(file,source);
     assert.equal(Buffer.byteLength(held),review.before.bytes);
     assert.equal(createHash('sha256').update(held).digest('hex'),review.before.sha256);
-    assert.equal(Buffer.byteLength(source),review.after.bytes);
-    assert.equal(createHash('sha256').update(source).digest('hex'),review.after.sha256);
+    assert.equal(Buffer.byteLength(fixtureSource),review.after.bytes);
+    assert.equal(createHash('sha256').update(fixtureSource).digest('hex'),review.after.sha256);
     for(const {after} of review.changes){
         for(const changed of [source.replace(after,''),source+after,source.replace(after,after.slice(0,-1)+'X')]){
             assert.notEqual(changed,source);
@@ -1155,6 +1157,73 @@ test('reviewed fixture inverse retains sealed extents and rejects missing duplic
     const drift=hddBeforeConcurrencyControl(file,source+'// unrelated drift\n');
     assert.notEqual(createHash('sha256').update(drift).digest('hex'),PRE_CONCURRENCY_X86_TEST_PROFILE.sha256);
     assert.equal(hddBeforeFixtureControl('test/unreviewed.mjs',source),source);
+});
+
+test('reviewed repository identity restores the exact four historical workflow guards', () => {
+    const review=JSON.parse(readFileSync(path.join(ROOT,'test/fixtures/i80386-repository-identity-review.json'),'utf8'));
+    const file=review.workflow.file,source=readFileSync(path.join(ROOT,file),'utf8');
+    const held=hddWorkflowBeforeRepositoryIdentity(file,source);
+    for(const [text,profile] of [[source,review.workflow.after],[held,review.workflow.before]]){
+        assert.equal(Buffer.byteLength(text),profile.bytes);
+        assert.equal(createHash('sha256').update(text).digest('hex'),profile.sha256);
+    }
+    assert.equal((held.match(/github\.repository == 'CrispStrobe\/brickwright-lite'/g)||[]).length,4);
+    for(const row of review.workflow.guards)assert.equal(held.split(row.before).length,2);
+});
+
+test('repository identity projection rejects wrong or displaced guards and preserves unrelated bytes', () => {
+    const review=JSON.parse(readFileSync(path.join(ROOT,'test/fixtures/i80386-repository-identity-review.json'),'utf8'));
+    const file=review.workflow.file,source=readFileSync(path.join(ROOT,file),'utf8');
+    const held=hddWorkflowBeforeRepositoryIdentity(file,source);
+    for(const {job,after} of review.workflow.guards){
+        const variants=[
+            source.replace(after,''), source+'\n'+after,
+            source.replace(after,after.replace(`  ${job}:`,`  misplaced-${job}:`)),
+            source.replace(after,after.replace("github.repository_id == '1291854269'","github.repository_id == '1291854270'")),
+            source.replace(after,after.replace("github.repository_id == '1291854269'","github.repository == 'CrispStrobe/brickwright-lite'")),
+            source.replace(after,after.replace("github.actor == 'CrispStrobe'","github.actor == 'SomeoneElse'")),
+            source.replace(after,after.replace(' && github.event_name',' || true && github.event_name')),
+            source.replace(after,after.replace('github.event_name ==','github.event_name !=')),
+            source.replace(after,after.includes('${{ false &&')?after.replace('${{ false &&','${{ true &&'):after.replace('${{ true &&','${{ false &&')),
+        ];
+        for(const changed of variants){
+            assert.notEqual(changed,source,job+' meaningful mutation');
+            assert.throws(()=>hddWorkflowBeforeRepositoryIdentity(file,changed),job+' altered guard refuses');
+        }
+    }
+    assert.throws(()=>hddWorkflowBeforeRepositoryIdentity(file,source+"\n# github.repository_id == '1291854269'\n"));
+    assert.throws(()=>hddWorkflowBeforeRepositoryIdentity('unreviewed-workflow.yml',source));
+    const suffix='# unrelated workflow drift\n';
+    assert.equal(hddWorkflowBeforeRepositoryIdentity(file,source+suffix),held+suffix);
+    assert.notEqual(createHash('sha256').update(held+suffix).digest('hex'),review.workflow.before.sha256);
+    const changed=source.replace('  contents: read','  contents: write');
+    assert.notEqual(changed,source);
+    assert.equal(hddWorkflowBeforeRepositoryIdentity(file,changed),held.replace('  contents: read','  contents: write'));
+});
+
+test('repository identity source inverse retains sealed stages and rejects hunk mutations', () => {
+    const review=JSON.parse(readFileSync(path.join(ROOT,'test/fixtures/i80386-repository-identity-review.json'),'utf8'));
+    const file=review.file,source=readFileSync(path.join(ROOT,file),'utf8');
+    const held=hddBeforeRepositoryIdentityControl(file,source);
+    for(const [text,profile] of [[source,review.after],[held,review.before]]){
+        assert.equal(Buffer.byteLength(text),profile.bytes);
+        assert.equal(createHash('sha256').update(text).digest('hex'),profile.sha256);
+    }
+    const fixture=JSON.parse(readFileSync(path.join(ROOT,'test/fixtures/i80386-fixture-path-review.json'),'utf8'));
+    assert.deepEqual(review.before,fixture.after,'new inverse returns the unchanged prior fixture stage');
+    for(const {after} of review.changes){
+        for(const changed of [source.replace(after,''),source+after,source.replace(after,after.slice(0,-1)+'X')]){
+            assert.notEqual(changed,source);
+            assert.throws(()=>hddBeforeRepositoryIdentityControl(file,changed),/exact reviewed repository identity source hunk/);
+        }
+    }
+    assert.equal(hddBeforeRepositoryIdentityControl('test/unreviewed.mjs',source),source);
+    const suffix='// unrelated source drift\n';
+    assert.equal(hddBeforeRepositoryIdentityControl(file,source+suffix),held+suffix);
+    const original=hddBeforeConcurrencyControl(file,source);
+    assert.equal(Buffer.byteLength(original),PRE_CONCURRENCY_X86_TEST_PROFILE.bytes);
+    assert.equal(createHash('sha256').update(original).digest('hex'),PRE_CONCURRENCY_X86_TEST_PROFILE.sha256);
+    assert.notEqual(createHash('sha256').update(hddBeforeConcurrencyControl(file,source+suffix)).digest('hex'),PRE_CONCURRENCY_X86_TEST_PROFILE.sha256);
 });
 
 test('completed study scheduler projection rejects policy drift and retains unrelated bytes', () => {

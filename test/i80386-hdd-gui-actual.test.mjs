@@ -5,6 +5,7 @@ import {createHash} from 'node:crypto';
 import vm from 'node:vm';
 import {spawn,spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
+import {hddWorkflowBeforeRepositoryIdentity} from './helpers/reviewed-repository-identity.mjs';
 const root = fileURLToPath(new URL('../',import.meta.url));
 const readOriginalControlSummary = stdout => JSON.parse(stdout.trim());
 const runControlChildren = async (specs,deadlineMs) => {
@@ -78,7 +79,8 @@ test('reviewed concurrency projection rejects missing, duplicate and altered pol
 
 test('V9 manual selection preserves nine prior jobs and consumed execution retirement', () => {
     const workflow = heldBeforeConcurrencyPolicy('i80386-hdd-gui-actual',
-        fs.readFileSync(new URL('../.github/workflows/i80386-hdd-gui-actual.yml',import.meta.url),'utf8'));
+        hddWorkflowBeforeRepositoryIdentity('.github/workflows/i80386-hdd-gui-actual.yml',
+            fs.readFileSync(new URL('../.github/workflows/i80386-hdd-gui-actual.yml',import.meta.url),'utf8')));
     const registration = "  workflow_dispatch:\n    inputs:\n      pull_request:\n        description: Owned ready pull request number\n        required: true\n        type: string\n      source_head:\n        description: Reviewed 40-hex source head\n        required: true\n        type: string\n      request_sha256:\n        description: Historical Actual-V8 request SHA-256 (empty for V9)\n        required: false\n        default: ''\n        type: string\n      tag_name:\n        description: Historical Actual-V8 source tag (empty for V9)\n        required: false\n        default: ''\n        type: string\n      protocol:\n        description: Separately reviewed execution protocol\n        required: true\n        default: actual-v8\n        type: choice\n        options: [actual-v8, actual-v9]\n      source_ref:\n        description: Exact owned source branch ref for V9\n        required: false\n        default: ''\n        type: string\n      prelude_sha256:\n        description: Reviewed canonical same-job prelude SHA-256 for V9\n        required: false\n        default: ''\n        type: string\n";
     const anchor = 'on:\n  pull_request:\n    types: [opened, synchronize, reopened, labeled]\n';
     assert.equal(workflow.split(registration).length,2,'one exact closed seven-input manual trigger');
@@ -6785,6 +6787,8 @@ test('enabled font-discovery source delivers pinned inputs to the finite observa
         shift("NODE_OPTIONS: ''","NODE_OPTIONS: ''\n      NODE_OPTIONS: '--eval=unreviewed'"),
         shift("        env:\n          GH_TOKEN: ''","        GH_TOKEN: ${{ github.token }}\n        env:\n          GH_TOKEN: ''"),
         shift('${{ true &&','${{ false &&'),shift('x86-hdd-gui-font-discovery','x86-hdd-gui-inventory'),
+        shift("github.repository_id == '1291854269'","github.repository_id == '1291854270'"),
+        shift("github.repository_id == '1291854269'","github.repository == 'CrispStrobe/brickwright-lite'"),
         shift('github.run_attempt == 1','github.run_attempt == 2'),shift('github.event.pull_request.head.repo.fork == false','true'),
         shift('ref: ${{ github.event.pull_request.head.sha }}','ref: ${{ github.sha }}'),shift('node-version: 22.23.3','node-version: 22'),
         shift('actions/checkout@11d5960a326750d5838078e36cf38b85af677262','actions/checkout@v4'),
@@ -6831,7 +6835,7 @@ test('bridge delivery job uses exact owned event with pinned bounded source guar
     fontBridgeDeliveryWorkflowContract(workflow,controller);
     const marker='\n  font-bridge:\n',prefix=workflow.split(marker)[0]+marker,parts=workflow.split(marker)[1].split('\n  # Observation delivery only.'),job=parts[0],suffix='\n  # Observation delivery only.'+parts[1];
     assert.throws(()=>fontBridgeDeliveryWorkflowContract(prefix+job.replace('${{ true &&','${{ true || true &&')+suffix,controller));
-    for(const [old,value] of [['${{ true &&','${{ false &&'],['github.run_attempt == 1','github.run_attempt == 2'],['font-bridge-guard','font-chain-guard'],['if: always()','if: success()'],['GH_TOKEN: \'\'','GH_TOKEN: ${{ github.token }}'],['timeout-minutes: 16','timeout-minutes: 8'],['--ignore-scripts','--foreground-scripts'],['node-version: 22.23.3','node-version: 22']]){
+    for(const [old,value] of [["github.repository_id == '1291854269'","github.repository_id == '1291854270'"],["github.repository_id == '1291854269'","github.repository == 'CrispStrobe/brickwright-lite'"],['${{ true &&','${{ false &&'],['github.run_attempt == 1','github.run_attempt == 2'],['font-bridge-guard','font-chain-guard'],['if: always()','if: success()'],['GH_TOKEN: \'\'','GH_TOKEN: ${{ github.token }}'],['timeout-minutes: 16','timeout-minutes: 8'],['--ignore-scripts','--foreground-scripts'],['node-version: 22.23.3','node-version: 22']]){
         assert.ok(job.includes(old));assert.throws(()=>fontBridgeDeliveryWorkflowContract(prefix+job.replace(old,value)+suffix,controller));
     }
 });

@@ -1,4 +1,4 @@
-# Microtronic host CI control repairs — CLAIMED, 2026-11-25
+# Microtronic host CI control repairs — DONE, 2026-11-25
 
 Owner: the coordinated Microtronic integration session, requested by CrispStrobe.
 Consumer PR: #1846. Canonical base: `64cb2e31f87e5a88588a6ea24a6b468134d0b775`.
@@ -40,3 +40,27 @@ admissions, both debugger contracts and their negative controls. No workflow
 execution gate, fixture exclusion, historical restamp, production code change
 or dependency/pin change is part of this repair. Carry the verified correction
 into the same Microtronic consumer PR and release this claim in that candidate.
+
+## Delivered and qualified
+
+The repository-identity review records the exact four named-job predicate
+changes from the repository rename. Its sealed inverse restores the original
+workflow bytes for the historical comparison; the two live font controls now
+require the actual immutable repository ID. An exact test-source inverse runs
+before the existing fixture and concurrency inverses. The original historical
+digests, receipts, producer/reader code and workflow execution policy remain
+unchanged. Wrong IDs, old live-name guards and altered or duplicated predicates
+remain rejected.
+
+The two debugger readers use the already-declared Acorn parser to locate the
+actual asynchronous start-method body. Every reset and forward-branch assertion
+is retained. Removing either required call in memory still fails its intended
+test; the application runtime is unchanged.
+
+After combining these repairs with current main's gallery/CAD adoption, the
+prepared host checkout passes all **529 focused debugger checks** and all
+**132 HDD, download, pin-history and reviewed-projection controls**, with no
+failures or skips. The pin scanner judges 14,170 files and reports no stale
+references or unreadable files. The seven implementation files match the
+independently reviewed repair byte-for-byte. No workflow, frozen fixture,
+dependency, execution gate or production code is modified by this repair.
