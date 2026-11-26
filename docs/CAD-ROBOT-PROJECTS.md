@@ -1834,3 +1834,29 @@ deadline twice and passed in an isolated rerun with a 180-second
 deadline. The checked-in deadline is 60 seconds.
 Brickwright pins SDK `5d40e25`, which precedes this change.
 [CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/a9214b26c62ff3de915e21d3237f24920817b192)
+
+### Reuse native Jolt ray queries
+
+A physics world creates its native ray, filters, and closest-hit
+collector on the first cast and frees them when the world is disposed.
+Each query resets the collector. A body-mounted sensor ignores its
+own rigid assembly, and ordinary picks include all bodies as before.
+
+A Chrome worker ran 32 distance rays per 5 ms substep for 200 substeps
+on a moving welded assembly. The test alternated hits, misses, and the
+body to ignore. All 6,400 distances and all full and compact frame
+payloads matched in both run orders. Park and restart restored the
+initial frame, and an invalid ray left simulation time unchanged.
+
+| Per 6,400 casts | Before | After |
+| --- | ---: | ---: |
+| Owned native query objects created | 64,000 | 9 |
+| Sensor sampling CPU time, first order | 74.3 ms | 43.0 ms |
+| Sensor sampling CPU time, reverse order | 77.6 ms | 42.0 ms |
+
+The timing runs excluded allocation counters. This measurement covers
+sensor sampling, including ray endpoint calculation and native casts.
+Physics type checking and all 18 actuator and worker telemetry tests
+passed. Brickwright pins SDK `5d40e25`. Sustained 1× in the production app
+remains open.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/11a68ae843f637cef31716723dae6fd3ef0eb375)
