@@ -7,6 +7,7 @@ import ReactDOM from 'react-dom';
 import {clearControllerPanel, connectControllerBoard, serializeControllerPanel} from '../../lib/controller-inputs.js';
 import LogikusHost from '../tw-pseudocode/logikus-host.jsx';
 import {Cp1Surfaces} from '../tw-pseudocode/cp1-surfaces.js';
+import {CardiacSurfaces} from '../tw-pseudocode/cardiac-surfaces.js';
 import {defineMessages, FormattedMessage, injectIntl, intlShape} from 'react-intl';
 import {connect} from 'react-redux';
 import MediaQuery from 'react-responsive';
@@ -441,6 +442,21 @@ const GUIComponent = props => {
     });
     const circuitOwnsStage = showCircuitStage && (dockMode === 'right' ||
         (props.activeTabIndex !== CIRCUIT_TAB_INDEX && ['top', 'off', 'solo'].includes(dockMode)));
+    const [cardiacCodeSlot, setCardiacCodeSlot] = React.useState(null);
+    const [cardiacControllerSlot, setCardiacControllerSlot] = React.useState(null);
+    const [cardiacAttached, setCardiacAttached] = React.useState(() => window.__bwMachineExtracted?.kind === 'cardiac');
+    React.useEffect(() => {
+        const selected = event => setCardiacAttached(event.detail?.kind === 'cardiac');
+        const detached = () => setCardiacAttached(false);
+        window.addEventListener('bw-machine-extracted', selected);
+        window.addEventListener('bw-cardiac-detached', detached);
+        return () => {
+            window.removeEventListener('bw-machine-extracted', selected);
+            window.removeEventListener('bw-cardiac-detached', detached);
+        };
+    }, []);
+    const cardiacSurfaces = React.useMemo(() => ({code: cardiacCodeSlot, controller: cardiacControllerSlot}),
+        [cardiacCodeSlot, cardiacControllerSlot]);
     const [cp1CodeSlot, setCp1CodeSlot] = React.useState(null);
     const [cp1ControllerSlot, setCp1ControllerSlot] = React.useState(null);
     const [cp1Attached, setCp1Attached] = React.useState(() => window.__bwMachineExtracted?.kind === 'cp1');
@@ -965,8 +981,8 @@ const GUIComponent = props => {
             <MachineManager store={getMachineStore()} locale={props.locale} preferredMachine={showMachines.kind}
                 onRun={(cfg, opts) => runMachineConfig(cfg, opts)}
                 wiredPresets={showMachines.presets}
-                onOpenExample={exampleId => new Promise((resolve, reject) => {
-                    props.onActivateTab(CIRCUIT_TAB_INDEX);
+                onOpenExample={(exampleId, codeOnly) => new Promise((resolve, reject) => {
+                    props.onActivateTab(codeOnly ? 3 : CIRCUIT_TAB_INDEX);
                     window.dispatchEvent(new CustomEvent('bw-start-journey', {detail: {
                         exampleId, onResult: result => {
                             if (result.error) reject(new Error(result.error));
@@ -978,7 +994,7 @@ const GUIComponent = props => {
         </React.Suspense>
     ) : null;
 
-    return (<Cp1Surfaces.Provider value={cp1Surfaces}><React.Fragment><MediaQuery minWidth={layout.fullSizeMinWidth}>{isFullSize => {
+    return (<CardiacSurfaces.Provider value={cardiacSurfaces}><Cp1Surfaces.Provider value={cp1Surfaces}><React.Fragment><MediaQuery minWidth={layout.fullSizeMinWidth}>{isFullSize => {
         const stageSize = resolveStageSize(stageSizeMode, isFullSize);
 
         // Three-column pane sizing from the paneLayout reducer.
@@ -992,7 +1008,7 @@ const GUIComponent = props => {
         const middleContent = paneLayout?.middle?.upper || 'blocks-canvas';
         const renderCodePane = isVisible => (
             <EditorErrorBoundary name="Code"><LazyPseudocodeImporter
-                isVisible={isVisible} vm={vm} onCp1CodeSlot={setCp1CodeSlot}
+                isVisible={isVisible} vm={vm} onCp1CodeSlot={setCp1CodeSlot} onCardiacCodeSlot={setCardiacCodeSlot}
             /></EditorErrorBoundary>
         );
         const helpEditor = [
@@ -1475,6 +1491,7 @@ const GUIComponent = props => {
                                             vm={vm}
                                             machineConsole={machineConsole}
                                             cp1WidgetSlot={cp1Attached ? setCp1ControllerSlot : undefined}
+                                            cardiacWidgetSlot={cardiacAttached ? setCardiacControllerSlot : undefined}
                                             locale={intl.locale}
                                             isFullScreen={isFullScreen}
                                             onExitFullScreen={props.onExitFullScreen}
@@ -1495,7 +1512,7 @@ const GUIComponent = props => {
                 <DragLayer />
             </Box>
         );
-    }}</MediaQuery>{machineManagerModal}<LogikusHost panel={controllerPanel} locale={intl.locale} vm={vm} /></React.Fragment></Cp1Surfaces.Provider>);
+    }}</MediaQuery>{machineManagerModal}<LogikusHost panel={controllerPanel} locale={intl.locale} vm={vm} /></React.Fragment></Cp1Surfaces.Provider></CardiacSurfaces.Provider>);
 };
 
 GUIComponent.propTypes = {

@@ -12,6 +12,9 @@ import {createM6502Adapter} from 'bw-board/m6502-adapter.js';
 import {extract6502Machine} from 'bw-board/m6502-extract.js';
 import {warningsBadge, warningsView} from '../overlay/scratch-gui/src/lib/circuit-panels-model.js';
 
+import {MS_PROFILE} from 'bw-board/basic-machine-runner.js';
+import {createBasicStartup, isBundledMicrosoftBasic} from '../overlay/scratch-gui/src/lib/bw-debug/basic-startup.js';
+
 const require = createRequire(import.meta.url);
 const cui = new URL('file://' + require.resolve('bw-circuit-ui'));
 const {Circuit} = await import(new URL('./model/circuit.js', cui));
@@ -38,7 +41,7 @@ function bench(id) {
     return {files, circuit, config, result};
 }
 
-function consoleMachine(config) {
+function consoleMachine(config, startup) {
     const rom = readFileSync(new URL('basic.rom', roms));
     const adapter = createM6502Adapter({rom, config});
     adapter.attachBoard({setPin() {}});
@@ -49,7 +52,10 @@ function consoleMachine(config) {
             for (const char of input + '\r') assert.equal(adapter.sendSerial(char.charCodeAt(0)), true);
         },
         waitFor(text) {
-            for (let step = 0; step < 160 && !output.includes(text); step++) adapter.advanceNs(50_000_000);
+            for (let step = 0; step < 160 && !output.includes(text); step++) {
+                adapter.advanceNs(50_000_000);
+                startup?.answer(output.split('\n').at(-1), value => adapter.sendSerial(value.charCodeAt(0)));
+            }
             assert.ok(output.includes(text), output);
             output = '';
         }
@@ -68,6 +74,36 @@ test('the supplied BASIC ROM reproduces startup syntax errors and reaches OK on 
     serial.waitFor('OK');
     serial.line('PRINT 2+2');
     serial.waitFor(' 4');
+});
+
+test('the qualified BASIC image boots straight to OK with two ordered startup replies', async () => {
+    const rom = readFileSync(new URL('basic.rom', roms));
+    assert.equal(await isBundledMicrosoftBasic(rom), true);
+    rom[0] ^= 1;
+    assert.equal(await isBundledMicrosoftBasic(rom), false);
+    const {config} = bench('aurora65-workstation');
+    const startup = createBasicStartup(MS_PROFILE.bootPrompts);
+    for (let boot = 0; boot < 2; boot++) {
+        const serial = consoleMachine(config, startup);
+        serial.waitFor('OK');
+        serial.line('PRINT 2+2');
+        serial.waitFor(' 4');
+        startup.reset();
+    }
+});
+
+test('BASIC startup ignores other lines, retries refused serial input and stops after width', () => {
+    const startup = createBasicStartup(MS_PROFILE.bootPrompts);
+    const calls = [];
+    const send = accepted => value => { calls.push(value); return accepted; };
+    startup.answer('WIDTH?', send(true));
+    startup.answer('PRINT "MEMORY SIZE?"', send(true));
+    startup.answer('MEMORY SIZE? ', send(false));
+    startup.answer('MEMORY SIZE? ', send(true));
+    startup.answer('MEMORY SIZE? ', send(true));
+    startup.answer('WIDTH? ', send(true));
+    startup.answer('WIDTH? ', send(true));
+    assert.deepEqual(calls, ['\r', '\r', '\r']);
 });
 
 test('the actual display bench selects the four-bit ROM and mirrors physical LCD text into Controller', () => {
@@ -131,4 +167,14 @@ test('all five Aurora decode findings survive as notes while real wiring faults 
     assert.equal(warningsBadge({warnings}), null);
     assert.equal(warningsView('en', {warnings}).warnings.length, 5);
     assert.deepEqual(warningsBadge({warnings: [...warnings, {severity: 'danger'}]}), {count: 1, danger: true});
+});
+
+test('the library lists ROM projects and all six CARDIAC programs under their actual targets', async () => {
+    const {libraryCircuitPrograms} = await import('../overlay/scratch-gui/src/lib/bw-machines/library-circuits.js');
+    const programs = libraryCircuitPrograms(index);
+    assert.equal(programs.find(program => program.id === 'eater6502-vdp-hello').machine, 'eater6502');
+    assert.equal(programs.find(program => program.id === 'kim1-wired-io').machine, 'kim1');
+    assert.equal(programs.filter(program => program.machine === 'cardiac').length, 6);
+    assert.equal(programs.find(program => program.id === 'cardiac-echo').codeOnly, true);
+    assert.equal(programs.find(program => program.id === 'cardiac-night-light').codeOnly, false);
 });

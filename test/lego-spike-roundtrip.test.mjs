@@ -369,7 +369,7 @@ test('vendored SPIKE compiler emits a canonical executable round-trip artifact',
     // -> f823a41b (2026-11-26): 6502 circuit and Controller gallery integration.
     // Keep the exact supplier identity gate and every SPIKE artifact assertion below.
     assert.equal(JSON.parse(readFileSync(new URL('../vendor-pins.json', import.meta.url)))['sb3-creator'],
-        'f823a41b38c41c9f95a66b8d0d339db6bb910ab5');
+        '7f8d76f77efd2266c16e2e59da7d00f552d714bf');
 
     const creator = new SB3Creator();
     creator.parse(PROGRAM);

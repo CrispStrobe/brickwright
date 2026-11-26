@@ -213,3 +213,53 @@ test('an HTTPS media manifest resolves relative ROM paths in the supplied reposi
         renderer.unmount();
     }
 });
+
+test('firmware browsing filters machine-specific media, searches wired presets and opens on the current board', async () => {
+    const MachineManager = await loadManager();
+    const store = createMemoryMachineStore();
+    let launched = false;
+    let renderer;
+    await act(async () => {
+        renderer = create(React.createElement(MachineManager, {
+            store, preferredMachine: 'eater6502', onClose() {},
+            wiredPresets: [
+                {id: 'basic', title: 'MS BASIC (6502)', run: () => { launched = true; }},
+                {id: 'vdp', title: 'VDP Hello', run() {}}
+            ]
+        }));
+    });
+    const get = id => renderer.root.findAllByProps({'data-testid': id});
+    assert.equal(get('bw-mm-local-386').length, 0);
+    assert.equal(get('bw-mm-wired-basic').length, 1);
+    assert.equal(get('bw-mm-wired-vdp').length, 1);
+    assert.equal(renderer.root.findAllByType('details').every(row => !row.props.open), true);
+    const search = renderer.root.findByProps({type: 'search'});
+    await act(async () => search.props.onChange({target: {value: 'basic'}}));
+    assert.equal(get('bw-mm-wired-vdp').length, 0);
+    await act(async () => get('bw-mm-wired-basic')[0].props.onClick());
+    assert.equal(launched, true);
+    await act(async () => renderer.root.findByType('select').props.onChange({target: {value: 'i80386'}}));
+    assert.equal(get('bw-mm-wired-basic').length, 0);
+    assert.equal(get('bw-mm-local-386').length, 1);
+    renderer.unmount();
+});
+
+test('reviewed media uses an immutable manifest URL and rejects a changed machine or license', async () => {
+    const {libraryMedia, openLibraryMedia} = await import('../overlay/scratch-gui/src/lib/bw-machines/library-media.js');
+    const item = libraryMedia.find(row => row.id === 'forth-cpm');
+    const oldFetch = globalThis.fetch;
+    try {
+        const manifest = {title: 'zForth', machine: 'z80', slots: {com: 'FORTH.COM'}, license: 'MIT'};
+        globalThis.fetch = async url => {
+            assert.match(String(url), /\/brickwright-media-lab\/[a-f0-9]{40}\/projects\/forth-cpm\/brickwright-media\.json$/);
+            return {ok: true, json: async () => manifest};
+        };
+        const config = await openLibraryMedia(item);
+        assert.equal(config.machine, 'z80');
+        assert.match(config.slots.com.url, /\/forth-cpm\/FORTH\.COM$/);
+        manifest.license = 'unknown';
+        await assert.rejects(openLibraryMedia(item), /reviewed catalog/);
+    } finally {
+        globalThis.fetch = oldFetch;
+    }
+});

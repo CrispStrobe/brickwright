@@ -4,11 +4,12 @@ const WIRED_TARGETS = {
     'busch-microtronic-wired-io': 'microtronic'
 };
 
-export const CIRCUIT_LIBRARY_MACHINES = ['cp1', 'eater6502', 'kim1', 'microtronic', 'z80'];
+export const CIRCUIT_LIBRARY_MACHINES = ['cardiac', 'cp1', 'eater6502', 'kim1', 'microtronic', 'z80'];
 
 export function libraryCircuitPrograms (index) {
     return index.flatMap(example => {
         const files = example.files;
+        if (files?.cardiac) return [{id: example.id, title: example.title, machine: 'cardiac', codeOnly: !files.circuit}];
         if (!files?.circuit) return [];
         const machine = WIRED_TARGETS[example.id] || (files.cp1 ? 'cp1' :
             files.rom && /^(eater6502-|aurora65-)/.test(example.id) ? 'eater6502' :

@@ -86,23 +86,23 @@ try {
     const machine = page.getByRole('combobox', {name: 'Machine type', exact: true});
     await machine.waitFor();
     assert.equal(await machine.inputValue(), 'eater6502');
-    await page.getByTestId('bw-mm-close').click();
-    await page.getByTestId('bw-machine-preset-basic').click();
+    assert.equal(await page.getByTestId('bw-mm-local-386').count(), 0);
+    await page.getByTestId('bw-mm-wired-forth').waitFor();
+    await page.getByTestId('bw-mm-wired-aurora65').waitFor();
+    await page.getByTestId('bw-mm-wired-basic').click();
     await rightView('Debugger');
     const debuggerPanel = page.locator('[data-debugger-solo-pane]:visible');
     const terminal = debuggerPanel.getByTestId('bw-serial-console');
-    await terminal.getByText('MEMORY SIZE?', {exact: false}).waitFor();
     const input = debuggerPanel.getByTestId('bw-serial-input');
-    assert.equal(await input.getAttribute('placeholder'), 'Press Enter for the default');
-    await input.press('Enter');
-    await terminal.getByText('WIDTH?', {exact: false}).waitFor();
-    await input.press('Enter');
     await terminal.getByText('MICROSOFT BASIC V1.1', {exact: false}).waitFor();
+    await page.waitForFunction(() => /(?:^|\n)OK\s*$/.test(
+        document.querySelector('[data-testid="bw-serial-console"]')?.textContent || ''
+    ));
     await input.fill('PRINT 2+2');
     await input.press('Enter');
     await page.waitForFunction(() => /(?:^|\n)\s*4\s*(?:\n|$)/
         .test(document.querySelector('[data-testid="bw-serial-console"]')?.textContent || ''));
-    console.log('The actual debugger answers both BASIC startup prompts and computes PRINT 2+2.');
+    console.log('BASIC boots directly to OK from the filtered firmware library and computes PRINT 2+2.');
 
     await debuggerPanel.locator('[data-debug-history] > summary').waitFor();
     assert.equal(await debuggerPanel.locator('[data-debug-record]').isVisible(), false);

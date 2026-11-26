@@ -1,6 +1,7 @@
 import React from 'react';
 import {clearControllerPanel, serializeControllerPanel} from '../../lib/controller-inputs.js';
 import {makeT} from '../../lib/bw-i18n.js';
+import {createCardiacWorkspace, CARDIAC_WORKSPACE_KEY, readCardiacWorkspaceActive, setCardiacWorkspaceActive} from '../../lib/cardiac-project.js';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
@@ -404,7 +405,14 @@ class CircuitTab extends React.Component {
                     this._markReactUpdate('host:circuit-data');
                     this.setState({circuitData: parsed});
                     this._applyToLiveCircuit(parsed);
-                    if (this.activateCp1Circuit(parsed)) this.showControllerDock();
+                    const cp1 = this.activateCp1Circuit(parsed);
+                    const cardiacPart = parsed.parts?.find(part => part.kind === 'cardiac');
+                    if (cp1) {
+                        setCardiacWorkspaceActive(localStorage, false);
+                        this.showControllerDock();
+                    } else if (cardiacPart) this.activateCardiac(cardiacPart.id);
+                    else if (readCardiacWorkspaceActive(localStorage)) this.activateCardiac();
+                    else this._onCardiacCodeSelection({detail: {active: false}});
                 } else if (event?.detail?.outcome === 'legacy' || event?.detail?.outcome === 'loaded') {
                     try { localStorage.setItem('bw-circuit-file-loaded', '1'); } catch (e) { /* full */ }
                     const emptied = {version: 1, parts: [], wires: []};
@@ -412,6 +420,8 @@ class CircuitTab extends React.Component {
                     this.setState({circuitData: emptied});
                     this._applyToLiveCircuit(emptied);
                     this.activateCp1Circuit(emptied);
+                    if (readCardiacWorkspaceActive(localStorage)) this.activateCardiac();
+                    else this._onCardiacCodeSelection({detail: {active: false}});
                 }
                 // The GUI owns project Widgets restoration, including when Circuit is hidden.
             } catch (e) {
@@ -478,6 +488,9 @@ class CircuitTab extends React.Component {
                 try { localStorage.setItem('bw-right-pane-hidden', value === '1' ? '1' : '0'); } catch { /* private mode */ }
                 this.setState({rightPaneHidden: value === '1'});
             }
+            if (key === 'bw-device-id' && value !== 'cardiac') {
+                this._onCardiacCodeSelection({detail: {active: false}});
+            }
             if (key === 'bw-device-id' && value !== 'cp1' && value !== 'kosmos-cp1') {
                 this._onCp1CodeSelection({detail: {active: false}});
             }
@@ -501,6 +514,12 @@ class CircuitTab extends React.Component {
         // first one — it replays the stash on mount. Same for a program
         // delivered (preset / file / ASM) before the panel finished mounting.
         this._machineExtractedHandler = e => {
+            if (window.__bwMachineExtracted?.kind === 'cardiac' && e?.detail?.kind !== 'cardiac') {
+                setCardiacWorkspaceActive(localStorage, false);
+                const runtime = this.props.vm?.runtime;
+                if (runtime?.bwDeviceCore === 'cardiac') runtime.bwDeviceCore = this._cardiacNormalCore;
+                this._cardiacNormalCore = undefined;
+            }
             window.__bwMachineExtracted = e && e.detail;
             if (e.detail?.clearLoadedMedia) delete window.__bwPendingMedia;
             this._markReactUpdate('host:machine-booted');
@@ -508,6 +527,9 @@ class CircuitTab extends React.Component {
         };
         window.addEventListener('bw-machine-extracted', this._machineExtractedHandler);
         window.addEventListener('bw-cp1-code-selection', this._onCp1CodeSelection);
+        window.addEventListener('bw-cardiac-code-selection', this._onCardiacCodeSelection);
+        window.addEventListener('bw-cardiac-open', this._onCardiacOpen);
+        window.addEventListener('bw-cardiac-program-loaded', this._onCardiacProgramLoaded);
         window.addEventListener('bw-cp1-circuit-detached', this._restoreCp1Dock);
         this._mediaStashHandler = e => {
             window.__bwPendingMedia = {type: 'media', detail: e && e.detail};
@@ -729,6 +751,9 @@ class CircuitTab extends React.Component {
         window.removeEventListener('bw-start-journey', this._starterJourneyHandler);
         window.removeEventListener('bw-machine-extracted', this._machineExtractedHandler);
         window.removeEventListener('bw-cp1-code-selection', this._onCp1CodeSelection);
+        window.removeEventListener('bw-cardiac-code-selection', this._onCardiacCodeSelection);
+        window.removeEventListener('bw-cardiac-open', this._onCardiacOpen);
+        window.removeEventListener('bw-cardiac-program-loaded', this._onCardiacProgramLoaded);
         window.removeEventListener('bw-cp1-circuit-detached', this._restoreCp1Dock);
         window.removeEventListener('bw-machine-media-load', this._mediaStashHandler);
         window.removeEventListener('bw-asm-rom-ready', this._asmStashHandler);
@@ -1232,6 +1257,11 @@ class CircuitTab extends React.Component {
         } catch { /* never block circuit publication */ }
         this._markReactUpdate('host:circuit-ready');
         this.setState({circuit});
+        const selectedCardiac = window.__bwMachineExtracted;
+        if (selectedCardiac?.kind === 'cardiac' && selectedCardiac.config?.partId &&
+            !circuit?.parts?.some(part => part.kind === 'cardiac' && part.id === selectedCardiac.config.partId)) {
+            this._onCardiacCodeSelection({detail: {active: false}});
+        }
         if (typeof window !== 'undefined') {
             const parts = circuit && circuit.parts ?
                 (circuit.parts.size ?? circuit.parts.length ?? 0) : 0;
@@ -1478,10 +1508,106 @@ class CircuitTab extends React.Component {
         this._cp1NormalDock = null;
     };
 
+    _onCardiacCodeSelection = event => {
+        if (event.detail?.active) {
+            if (window.__bwMachineExtracted?.kind !== 'cardiac') this.activateCardiac();
+            else this.showControllerDock();
+            window.dispatchEvent(new CustomEvent('bw-cardiac-selected'));
+            return;
+        }
+        if (window.__bwMachineExtracted?.kind !== 'cardiac') return;
+        setCardiacWorkspaceActive(localStorage, false);
+        delete window.__bwMachineExtracted;
+        const runtime = this.props.vm?.runtime;
+        if (runtime?.bwDeviceCore === 'cardiac') runtime.bwDeviceCore = this._cardiacNormalCore;
+        this._cardiacNormalCore = undefined;
+        this.setState({machineBooted: false});
+        window.dispatchEvent(new CustomEvent('bw-cardiac-detached'));
+    };
+
+    _onCardiacProgramLoaded = async event => {
+        // CircuitTab retains the model even when the Designer is hidden. Its
+        // normal parameter writer preserves the accepted initial image there.
+        try {
+            const {acceptedCardiacProgram, saveCardiacProgram} = await import('bw-circuit-ui/model/cardiac-controls.js');
+            const circuit = this.state.circuit;
+            const partId = event.detail?.partId;
+            const board = this.props.vm?.runtime?.circuitBoard;
+            const program = acceptedCardiacProgram(board, circuit?.getPart?.(partId), event.detail?.program);
+            if (!program || !saveCardiacProgram(circuit, partId, program)) return;
+            circuit.setPartParam(partId, 'program', program);
+            const record = circuitAutosaveRecord(circuit, readCircuitOwner(localStorage));
+            if (record !== null) localStorage.setItem('bw-circuit-autosave', record);
+        } catch (error) {
+            this.setState({examplesError: `CARDIAC program could not be saved to the circuit: ${error.message}`});
+        }
+    };
+
+    _onCardiacOpen = event => {
+        const partId = event.detail?.partId;
+        const board = this.props.vm?.runtime?.circuitBoard;
+        if (!partId || !board?.getParts?.().some(part => part.id === partId && part.kind === 'cardiac')) return;
+        this.activateCardiac(partId);
+    };
+
+    activateCardiac (partId = null) {
+        if (window.__bwMachineExtracted?.kind === 'cp1') this._onCp1CodeSelection({detail: {active: false}});
+        setCardiacWorkspaceActive(localStorage, true);
+        const runtime = this.props.vm?.runtime;
+        if (runtime?.bwDeviceCore !== 'cardiac') this._cardiacNormalCore = runtime?.bwDeviceCore;
+        if (runtime) runtime.bwDeviceCore = 'cardiac';
+        this._cardiacAttachedBoard = partId ? runtime?.circuitBoard : null;
+        const config = partId ? {partId} : {};
+        window.dispatchEvent(new CustomEvent('bw-machine-extracted', {detail: {kind: 'cardiac', config}}));
+        window.dispatchEvent(new CustomEvent('bw-cardiac-selected'));
+        this.showControllerDock();
+        return config;
+    }
+
+    async loadCardiacExample (example, opts = {}) {
+        this.setState({loadingExample: example.id, examplesError: null});
+        try {
+            const sourceResponse = await fetch(`examples/${example.files.cardiac}`);
+            if (!sourceResponse.ok) throw new Error(`CARDIAC source: HTTP ${sourceResponse.status}`);
+            const source = await sourceResponse.text();
+            let inputDeck = '';
+            if (example.files.deck) {
+                const deckResponse = await fetch(`examples/${example.files.deck}`);
+                if (!deckResponse.ok) throw new Error(`CARDIAC deck: HTTP ${deckResponse.status}`);
+                inputDeck = await deckResponse.text();
+            }
+            if (source.length > 131072 || inputDeck.length > 32768) throw new Error('CARDIAC example exceeds workspace limits.');
+            // Persist before mounting: a lazy host can miss the source event.
+            const draft = createCardiacWorkspace(source, inputDeck);
+            if (example.files.circuit) draft.inputMode = 'circuit';
+            let partId = null;
+            if (example.files.circuit) {
+                await this.load({explicit: true});
+                const opened = await this.loadExample({...example, files: {...example.files, cardiac: null}}, opts);
+                if (!opened.ok) return opened;
+                const data = opened.circuitData;
+                const part = data?.parts?.find(item => item.kind === 'cardiac');
+                if (!part) throw new Error('The CARDIAC example needs a CARDIAC adapter.');
+                this._applyToLiveCircuit(data);
+                partId = part.id;
+            }
+            localStorage.setItem(CARDIAC_WORKSPACE_KEY, JSON.stringify(draft));
+            this.activateCardiac(partId);
+            window.dispatchEvent(new CustomEvent('bw-cardiac-source-load', {detail: {source, inputDeck, inputMode: draft.inputMode}}));
+            this.publishExampleTitle(example);
+            this.setState({loadingExample: null});
+            return {ok: true};
+        } catch (error) {
+            this.setState({loadingExample: null, examplesError: error.message});
+            return {ok: false, error: error.message};
+        }
+    }
+
     _onCp1CodeSelection = event => {
         const runtime = this.props.vm?.runtime;
         const active = window.__bwMachineExtracted;
         if (event.detail?.active) {
+            if (active?.kind === 'cardiac') this._onCardiacCodeSelection({detail: {active: false}});
             const suspended = this._cp1Suspended;
             if (active?.kind === 'cp1' || !suspended) return;
             const parts = this.state.circuit?.parts || this.state.circuitData?.parts;
@@ -1521,6 +1647,7 @@ class CircuitTab extends React.Component {
             window.dispatchEvent(new CustomEvent('bw-cp1-circuit-detached'));
             return null;
         }
+        if (window.__bwMachineExtracted?.kind === 'cardiac') this._onCardiacCodeSelection({detail: {active: false}});
         const config = {partId: part.id, expansion: part.params?.expansion === true,
             clockHz: part.params?.clockHz || 6000000};
         if (runtime && runtime.bwDeviceCore !== 'cp1') this._cp1NormalCore = runtime.bwDeviceCore;
@@ -1586,6 +1713,7 @@ class CircuitTab extends React.Component {
 
     /** Program-only starters (currently LEGO) have no fictional circuit to load. */
     async loadProgramOnlyStarter (example) {
+        if (example.files?.cardiac) return this.loadCardiacExample(example);
         const message = /^de/i.test(navigator.language) ?
             `„${example.id}" öffnen?\n\nDas ersetzt das aktuelle Projekt. Nicht Gespeichertes geht verloren.` :
             `Open "${example.id}"?\n\nThis replaces the current project. Anything unsaved is lost.`;
@@ -1758,6 +1886,7 @@ class CircuitTab extends React.Component {
     }
 
     async loadExample (ex, opts) {
+        if (ex?.files?.cardiac) return this.loadCardiacExample(ex, opts);
         // The Examples browser's device chip arrives here as opts.device
         // (with opts.bench naming the generated per-device circuit). It
         // used to be DROPPED: clicking Pico on any example loaded the
@@ -1938,7 +2067,8 @@ class CircuitTab extends React.Component {
                     `"${ex.id}" loaded, but its program declares no pins, so the ` +
                     'debugger stays hidden.'});
             }
-            return programError ? {ok: false, error: programError} : {ok: true};
+            return programError ? {ok: false, error: programError} :
+                {ok: true, circuitData: hasProgram ? data : {...data, fileOnly: true}};
         } catch (e) {
             this.setState({loadingExample: null, examplesError:
                 `Could not open "${ex.id}": ${e.message}. The board is unchanged.`});
@@ -2347,7 +2477,7 @@ class CircuitTab extends React.Component {
         this._portalOn = !this.state.cadCircuitRequested && this._stagePortalOn();
         // On the dedicated Circuit tab 'solo' behaves as 'top': the designer
         // with the compact debugger in its Instruments column.
-        const cp1ControllerDock = this.state.debugDock === 'controller' && window.__bwMachineExtracted?.kind === 'cp1';
+        const cp1ControllerDock = this.state.debugDock === 'controller' && ['cp1', 'cardiac'].includes(window.__bwMachineExtracted?.kind);
         const dock = this.state.debugDock === 'solo' || cp1ControllerDock ? 'top'
             : CIRCUIT_DOCKS.has(this.state.debugDock) ? this.state.debugDock : 'off';
         const content = (
@@ -2404,6 +2534,11 @@ class CircuitTab extends React.Component {
                         const vm = this.props.vm;
                         if (vm && vm.runtime) {
                             vm.runtime.circuitBoard = board;
+                            const cardiac = window.__bwMachineExtracted;
+                            if (cardiac?.kind === 'cardiac' && cardiac.config?.partId && this._cardiacAttachedBoard !== board) {
+                                this._cardiacAttachedBoard = board;
+                                window.dispatchEvent(new CustomEvent('bw-machine-extracted', {detail: cardiac}));
+                            }
                             // A published board mutates independently of debugger props.
                             // Publish only changes to the S040 selection to avoid render loops.
                             const ids = s040PartIds(board);

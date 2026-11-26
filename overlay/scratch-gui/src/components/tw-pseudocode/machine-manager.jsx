@@ -25,6 +25,7 @@ import {localFreedosVgaMachine} from '../../lib/bw-machines/local-freedos-vga.js
 import {defaultImageFetcher} from '../../lib/bw-machines/activate.js';
 import {remoteMachineImagesAllowed} from '../../lib/distribution-policy.js';
 import {CIRCUIT_LIBRARY_MACHINES, libraryCircuitPrograms} from '../../lib/bw-machines/library-circuits.js';
+import {libraryMedia, openLibraryMedia, readMediaManifest} from '../../lib/bw-machines/library-media.js';
 import {lessonMachines, lessonT} from '../../lib/bw-machines/lessons.js';
 
 const T = {
@@ -42,8 +43,8 @@ const tr = (locale, k) => (T[(locale || 'en').slice(0, 2)] || T.en)[k] || T.en[k
 
 const modeBadge = m => (m === 'wired' ? '🔌 wired' : m === 'auto' ? '◐ auto' : '⚙ functional');
 
-const machineLabels = {cp1: 'Kosmos CP1', eater6502: '6502', i80386: '80386',
-    i8086: '8086', kim1: 'KIM-1', microtronic: 'Busch Microtronic', riscv32: 'RISC-V', z80: 'Z80'};
+const machineLabels = {cardiac: 'CARDIAC', cp1: 'Kosmos CP1', eater6502: '6502', i80386: '80386',
+    i8086: '8086', kim1: 'KIM-1', microtronic: 'Busch Microtronic', riscv32: 'RISC-V', rp2040js: 'Raspberry Pi Pico', z80: 'Z80'};
 
 export default function MachineManager({store, onRun, onClose, locale, preferredMachine, wiredPresets, onOpenExample}) {
     // WHERE THE SCREEN IS, not where the page is. `inset: 0` covers the LAYOUT
@@ -65,6 +66,8 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     const matchingPresets = matchesType(preferredMachine)
         ? (wiredPresets || []).filter(preset => matchesTitle(preset.title)) : [];
     const showLocal386 = matchesType('i80386');
+    const mediaAllowed = remoteMachineImagesAllowed();
+    const matchingMedia = mediaAllowed ? libraryMedia.filter(item => matchesType(item.machine) && matchesTitle(item.title)) : [];
     const [circuits, setCircuits] = React.useState(null);
     const [launching, setLaunching] = React.useState(null);
     const [status, setStatus] = React.useState('');
@@ -180,19 +183,25 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
     const allLessons = React.useMemo(() => lessonMachines(locale), [locale]);
     const lessons = allLessons.filter(lesson => matchesType(lesson.config.machine) && matchesTitle(lesson.config.title));
     const machineKinds = [...new Set([preferredMachine, 'i80386', ...CIRCUIT_LIBRARY_MACHINES,
-        ...allLessons.map(lesson => lesson.config.machine), ...machines.map(machine => machine.machine)].filter(Boolean))].sort();
+        ...allLessons.map(lesson => lesson.config.machine), ...(mediaAllowed ? libraryMedia.map(item => item.machine) : []),
+        ...machines.map(machine => machine.machine)].filter(Boolean))].sort();
     const circuitTitle = example => example.title?.[/^de/i.test(locale) ? 'de' : 'en'] || example.title?.en || example.id;
-    const showCircuitPrograms = onOpenExample && (!machineFilter || CIRCUIT_LIBRARY_MACHINES.includes(machineFilter));
-    const loadCircuits = async () => {
-        if (circuits) return;
-        try {
-            const response = await fetch('examples/index.json');
+    const canOpenExample = !!onOpenExample;
+    const showCircuitPrograms = canOpenExample && (!machineFilter || CIRCUIT_LIBRARY_MACHINES.includes(machineFilter));
+    React.useEffect(() => {
+        if (!canOpenExample) return undefined;
+        let current = true;
+        fetch('examples/index.json').then(response => {
             if (!response.ok) throw new Error(`Examples HTTP ${response.status}`);
-            setCircuits(libraryCircuitPrograms(await response.json()));
-        } catch (error) {
-            setStatus(error.message);
-        }
-    };
+            return response.json();
+        }).then(index => {
+            if (current) setCircuits(libraryCircuitPrograms(index));
+        }).catch(error => {
+            if (current) setStatus(error.message);
+        });
+        return () => { current = false; };
+    }, [canOpenExample]);
+    const matchingCircuits = circuits?.filter(example => matchesType(example.machine) && matchesTitle(circuitTitle(example))) || [];
     const launch = async (id, action) => {
         invalidateDosPackage();
         setLaunching(id);
@@ -240,9 +249,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                 if (!url.pathname.endsWith('/brickwright-media.json') || url.username || url.password) {
                     throw new Error('Use an HTTPS URL for a brickwright-media.json manifest.');
                 }
-                const response = await fetch(url, {redirect: 'error'});
-                if (!response.ok) throw new Error(`Manifest HTTP ${response.status}`);
-                cfg = fromMediaManifest(await response.json(), {source: url.href, baseUrl: new URL('.', url).href});
+                cfg = fromMediaManifest(await readMediaManifest(url), {source: url.href, baseUrl: new URL('.', url).href});
             } else if (/\[(dosbox|cpu|autoexec)\]/i.test(src)) {
                 cfg = fromDosboxConf(src);
             } else {
@@ -329,7 +336,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                             </div>
                         </div>
                     ))}
-                    {matchingMachines.length === 0 && lessons.length === 0 && !matchingPresets.length && !showCircuitPrograms ? (
+                    {matchingMachines.length === 0 && lessons.length === 0 && !matchingPresets.length && !matchingMedia.length && !matchingCircuits.length ? (
                         <div style={{color: '#64748b', padding: '18px 4px'}}>{t('empty')}</div>
                     ) : matchingMachines.map(m => (
                         <div key={m.id} data-testid="bw-mm-row"
@@ -354,15 +361,29 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                             <button onClick={() => del(m.id)} style={{...btn, color: '#b91c1c'}}>{t('del')}</button>
                         </div>
                     ))}
-                    {showCircuitPrograms && <details data-testid="bw-mm-circuit-programs">
-                        <summary onClick={loadCircuits} style={{cursor: 'pointer', padding: '8px 0'}}>
-                            {/^de/i.test(locale) ? 'Schaltungsprogramme' : 'Circuit programs'}
+                    {matchingMedia.length > 0 && <details data-testid="bw-mm-downloadable-media" open={query ? true : undefined}>
+                        <summary style={{cursor: 'pointer', padding: '8px 0'}}>
+                            {/^de/i.test(locale) ? 'Downloads' : 'Downloadable firmware'} ({matchingMedia.length})
                         </summary>
-                        {circuits?.filter(example => matchesType(example.machine) && matchesTitle(circuitTitle(example)))
-                            .map(example => <div key={example.id} style={rowStyle}>
+                        {matchingMedia.map(item => <div key={item.id} style={rowStyle}>
+                            <span style={{flex: 1, minWidth: 0}}>{item.title}
+                                <small style={{marginLeft: 8, color: '#64748b'}}>{item.license}</small>
+                            </span>
+                            <button type="button" disabled={launching !== null || !onRun} style={btn}
+                                onClick={() => launch(item.id, async () => onRun(await openLibraryMedia(item)))}>
+                                {t('run')}
+                            </button>
+                        </div>)}
+                    </details>}
+                    {showCircuitPrograms && matchingCircuits.length > 0 &&
+                        <details data-testid="bw-mm-circuit-programs" open={query ? true : undefined}>
+                        <summary style={{cursor: 'pointer', padding: '8px 0'}}>
+                            {/^de/i.test(locale) ? 'Projektbeispiele' : 'Example programs'} ({matchingCircuits.length})
+                        </summary>
+                        {matchingCircuits.map(example => <div key={example.id} style={rowStyle}>
                                 <span style={{flex: 1, minWidth: 0}}>{circuitTitle(example)}</span>
                                 <button type="button" disabled={launching !== null} style={btn}
-                                    onClick={() => launch(example.id, () => onOpenExample(example.id))}>
+                                    onClick={() => launch(example.id, () => onOpenExample(example.id, example.codeOnly))}>
                                     {/^de/i.test(locale) ? 'Öffnen' : 'Open'}
                                 </button>
                             </div>)}

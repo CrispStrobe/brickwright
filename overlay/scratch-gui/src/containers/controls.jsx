@@ -17,6 +17,10 @@ class Controls extends React.Component {
             this.props.vm.setTurboMode(!this.props.turbo);
         } else {
             const runtime = this.props.vm.runtime;
+            if (window.__bwMachineExtracted?.kind === 'cardiac') {
+                window.dispatchEvent(new CustomEvent('bw-cardiac-run-request'));
+                return;
+            }
             if (window.__bwMachineExtracted?.kind === 'cp1') {
                 window.dispatchEvent(new CustomEvent('bw-cp1-run-request'));
                 return;
@@ -52,6 +56,10 @@ class Controls extends React.Component {
     }
     handleStopAllClick (e) {
         e.preventDefault();
+        if (window.__bwMachineExtracted?.kind === 'cardiac') {
+            window.dispatchEvent(new CustomEvent('bw-cardiac-stop-request'));
+            return;
+        }
         if (window.__bwMachineExtracted?.kind === 'cp1') {
             window.dispatchEvent(new CustomEvent('bw-cp1-stop-request'));
             return;
