@@ -10,7 +10,8 @@ Every bench is loaded, powered on and advanced 1 ms in the circuit engine.
 --timeout-ms sets the worker wall-clock budget for this startup check.
 Functional checks cover lesson scenarios, separately measured electrical I/O,
 or non-rail voltage/current assertions on the exact authored circuit.
-Exit 1 indicates a failed or incomplete smoke check, or a failed or incomplete functional check.`;
+Exit 1 indicates a failed or incomplete startup check, or a bench without a passing functional check.
+--smoke-only checks startup alone and reports functional coverage as unverified.`;
 
 function startWorker (smokeTimeout) {
     const worker = new Worker(new URL('./lib/circuit-example-worker.mjs', import.meta.url), {
@@ -152,7 +153,8 @@ async function main () {
             .map(row => row.behavior.scope ?? 'lesson'))};
     if (values.json) console.log(JSON.stringify({summary, rows}, null, 2));
     else console.log(JSON.stringify(summary));
-    if (rows.some(row => row.smoke !== 'pass' || ['fail', 'incomplete'].includes(row.behavior.status))) process.exitCode = 1;
+    if (rows.some(row => row.smoke !== 'pass' ||
+        (!values['smoke-only'] && row.behavior.status !== 'pass'))) process.exitCode = 1;
 }
 
 try {

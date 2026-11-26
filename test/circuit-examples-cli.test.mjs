@@ -92,6 +92,14 @@ test('the bundled CP1 monitor drives the actual CP5 LEDs and saves the sampled b
         [true, false, true, false, false, true, false, true]);
 });
 
+test('circuit CLI fails the coverage gate when a powered bench has no functional assertion', () => {
+    const result = invoke('arduino-08-string-append', '--device', 'arduino-nano', '--json');
+    assert.equal(result.status, 1, result.stderr || result.stdout);
+    const {rows: [{smoke, behavior}]} = JSON.parse(result.stdout);
+    assert.equal(smoke, 'pass');
+    assert.equal(behavior.status, 'unverified');
+});
+
 test('circuit CLI rejects an unknown gallery ID', () => {
     const result = invoke('missing-example', '--json');
     assert.equal(result.status, 2);
