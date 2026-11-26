@@ -1535,3 +1535,32 @@ Pause, Reset, repeat Run and Close in the local embedded editor with
 the new worker and packaged engine. Brickwright still pins SDK
 `f0136b8`.
 [CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/9e92c7786c40d0757b94065777c3f2b32a2d5fd3)
+
+### Sample welded assemblies once per full simulation frame
+
+The CAD worker samples each native rigid body once when building a
+full frame. Welded parts retain ordered, independent pose records for
+rendering. Preview objects keep their pose and shape metadata.
+
+Paired MacBook Chrome runs used the same Board bundle and local Jolt
+5.7 SIMD module. Each run advanced 600 coupled substeps and produced
+100 full frames. The other replies carried telemetry only.
+
+| Measurement | Atlas | Scout |
+| --- | ---: | ---: |
+| Native pose samples across 100 frames | 2,600 → 600 | 2,600 → 300 |
+| Full-reply time in the first order | 19.1 → 18.1 ms | 15.0 → 15.0 ms |
+| Full-reply time in the reverse order | 17.4 → 13.7 ms | 16.2 → 16.2 ms |
+
+All sampled poses, joint outputs and circuit readings matched, as did
+warm restart frames. The optimized worker averaged 0.69–0.73× for
+Atlas and 1.01–1.03× for Scout over these short runs. The worker
+measurements exclude the Brickwright viewport. Sustained 1×
+qualification for the shipping application remains open.
+
+All 37 focused tests passed, including a welded-body read-count test,
+independent pose arrays, compact replies and preview metadata. Atlas
+passed Run, joint motion, Pause, Reset, repeat Run and Close in the
+local embedded editor with the new worker and bundled engine.
+Brickwright still pins SDK `f0136b8`.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/4aad300e33b1a775e6869122a7482a8b03f75ef4)
