@@ -27,11 +27,27 @@ try {
         .locator('..').getByRole('button', {name: 'Open', exact: true}).click();
     await manager.waitFor({state: 'hidden'});
     await page.locator('[data-cardiac-editor]:visible').waitFor();
+    await page.getByTestId('bw-code-editor').locator('[data-cardiac-editor] .cm-editor').waitFor();
     await page.locator('[data-cardiac-editor]').getByRole('button', {name: 'Run source + cards', exact: true}).click();
     const controller = page.locator('[data-cardiac-controller]:visible');
     await controller.waitFor();
     await page.waitForFunction(() => document.querySelector('[data-cardiac-controller]')?.dataset.cardiacStatus === 'halted');
     assert.match(await controller.getByTestId('cardiac-output').textContent(), /042/);
+    const widget = page.getByTestId('bw-ctl-widget-cardiac');
+    await widget.locator('[data-cardiac-controller]').waitFor();
+    await page.getByRole('button', {name: 'Edit', exact: true}).last().click();
+    const remove = page.getByTestId('bw-ctl-remove-cardiac');
+    const add = page.getByRole('button', {name: '+ Add Widget', exact: true});
+    await add.click();
+    await page.getByRole('button', {name: 'Button', exact: true}).click();
+    await page.getByTestId('bw-ctl-widget-btn1').waitFor();
+    await remove.click();
+    await widget.waitFor({state: 'hidden'});
+    await add.click();
+    await page.getByRole('button', {name: 'CARDIAC display', exact: true}).click();
+    await widget.locator('[data-cardiac-controller]').waitFor();
+    await page.getByTestId('bw-ctl-widget-btn1').waitFor();
+    assert.match(await widget.getByTestId('cardiac-output').textContent(), /042/);
     console.log('The CARDIAC firmware catalog opens and runs an authored program in Code and Controller.');
 } finally {
     await browser.close();

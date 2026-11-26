@@ -15,6 +15,9 @@ import {warningsBadge, warningsView} from '../overlay/scratch-gui/src/lib/circui
 import {MS_PROFILE} from 'bw-board/basic-machine-runner.js';
 import {createBasicStartup, isBundledMicrosoftBasic} from '../overlay/scratch-gui/src/lib/bw-debug/basic-startup.js';
 
+import {mirrorBasicSerialOnVga} from '../overlay/scratch-gui/src/lib/bw-debug/basic-vga-mirror.js';
+import {addCardiacFace, hasCardiacFace} from '../overlay/scratch-gui/src/lib/controller-machine-faces.js';
+
 const require = createRequire(import.meta.url);
 const cui = new URL('file://' + require.resolve('bw-circuit-ui'));
 const {Circuit} = await import(new URL('./model/circuit.js', cui));
@@ -48,6 +51,7 @@ function consoleMachine(config, startup) {
     let output = '';
     adapter.onSerial(byte => { output += String.fromCharCode(byte & 0x7f); });
     return {
+        adapter,
         line(input) {
             for (const char of input + '\r') assert.equal(adapter.sendSerial(char.charCodeAt(0)), true);
         },
@@ -90,6 +94,53 @@ test('the qualified BASIC image boots straight to OK with two ordered startup re
         serial.waitFor(' 4');
         startup.reset();
     }
+});
+
+test('BASIC leaves the VGA card unlocked and the ACIA preview yields to a real frame', () => {
+    const {config} = bench('aurora65-workstation');
+    const serial = consoleMachine(config, createBasicStartup(MS_PROFILE.bootPrompts));
+    serial.waitFor('OK');
+    serial.line('PRINT 2+2');
+    serial.waitFor(' 4');
+    const card = serial.adapter.machine.chips.vga;
+    assert.equal(card.videoFrame().signal, false);
+
+    const hardware = {width: 160, height: 128, signal: false, frame: 0};
+    const display = {videoFrame: () => hardware};
+    const rendered = [];
+    const canvas = {getContext: () => ({
+        measureText: () => ({width: 5}), fillRect() {},
+        fillText(text) { rendered.push(text); },
+        getImageData: () => ({data: new Uint8ClampedArray(160 * 128 * 4)})
+    })};
+    const lines = ['MICROSOFT BASIC V1.1', 'OK'];
+    mirrorBasicSerialOnVga(display, () => lines, () => canvas);
+    const first = display.videoFrame();
+    assert.deepEqual(rendered, ['ACIA serial mirror', ...lines]);
+    assert.equal(first.signal, true);
+    assert.equal(hardware.signal, false);
+    assert.equal(display.videoFrame(), first);
+    lines.push('PRINT 2+2', ' 4', 'OK');
+    assert.notEqual(display.videoFrame().frame, first.frame);
+    assert.ok(rendered.includes(' 4'));
+    hardware.signal = true;
+    assert.equal(display.videoFrame(), hardware);
+});
+
+test('a CARDIAC face uses the normal widget layout and serialization', () => {
+    const panel = new ControllerPanel();
+    panel.addWidget('cardiac', 'button', {}, {x: 24, y: 32, h: 64});
+    const face = addCardiacFace(panel);
+    assert.equal(face.name, 'cardiac1');
+    assert.equal(face.layout.y, 112);
+    panel.setWidgetLayout(face.name, {x: 96, y: 144});
+    const restored = ControllerPanel.fromJSON(panel.toJSON());
+    assert.equal(restored.getWidget(face.name).config.face, 'cardiac');
+    assert.equal(restored.getWidget(face.name).layout.x, 96);
+    assert.equal(addCardiacFace(restored), undefined);
+    restored.removeWidget(face.name);
+    assert.equal(hasCardiacFace(restored), false);
+    assert.equal(restored.getWidget('cardiac').type, 'button');
 });
 
 test('BASIC startup ignores other lines, retries refused serial input and stops after width', () => {

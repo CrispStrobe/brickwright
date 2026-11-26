@@ -80,6 +80,9 @@ try {
     await openExample('aurora65-workstation', 'Aurora-65 Display Workstation');
     await activeFrame('vgaMonitor', 160, 128);
     console.log('Aurora/65 boots into its SimpleVGA Controller display.');
+    const monitor = page.getByTestId('bw-ctl-simplevga-vgaMonitor').locator('canvas');
+    const rawVga = await monitor.evaluate(canvas => canvas.toDataURL());
+    assert.equal(await page.getByTestId('bw-open-logikus').count(), 0);
     await presets();
     assert.equal(await page.getByTestId('bw-machine-preset-lcdhello').count(), 0);
     await page.getByRole('button', {name: 'Firmware library', exact: true}).click();
@@ -98,11 +101,30 @@ try {
     await page.waitForFunction(() => /(?:^|\n)OK\s*$/.test(
         document.querySelector('[data-testid="bw-serial-console"]')?.textContent || ''
     ));
+    const screen = debuggerPanel.locator('canvas').first();
+    await screen.waitFor();
+    const pixel = canvas => canvas.getContext('2d').getImageData(0, 0, 1, 1).data.slice(0, 3).join(',');
+    await page.waitForFunction(() => {
+        const canvas = document.querySelector('[data-debugger-solo-pane] canvas');
+        return canvas?.getContext('2d').getImageData(0, 0, 1, 1).data.slice(0, 3).join(',') === '37,70,90';
+    });
+    const bootFrame = await screen.evaluate(canvas => canvas.toDataURL());
     await input.fill('PRINT 2+2');
     await input.press('Enter');
     await page.waitForFunction(() => /(?:^|\n)\s*4\s*(?:\n|$)/
         .test(document.querySelector('[data-testid="bw-serial-console"]')?.textContent || ''));
     console.log('BASIC boots directly to OK from the filtered firmware library and computes PRINT 2+2.');
+
+    await page.waitForFunction(previous =>
+        document.querySelector('[data-debugger-solo-pane] canvas')?.toDataURL() !== previous, bootFrame);
+    const basicFrame = await screen.evaluate(canvas => canvas.toDataURL());
+    await rightView('Controller');
+    await activeFrame('vgaMonitor', 160, 128);
+    assert.equal(await monitor.evaluate(pixel), '37,70,90');
+    assert.equal(await monitor.evaluate(canvas => canvas.toDataURL()), basicFrame);
+    assert.notEqual(basicFrame, rawVga);
+    await rightView('Debugger');
+    console.log('The same ACIA mirror updates in the Debugger and the wired Controller monitor.');
 
     await debuggerPanel.locator('[data-debug-history] > summary').waitFor();
     assert.equal(await debuggerPanel.locator('[data-debug-record]').isVisible(), false);
