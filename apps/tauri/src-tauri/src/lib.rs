@@ -94,6 +94,7 @@ pub fn run_with_context(context: tauri::Context<tauri::Wry>) {
     // reload can make repeated native failures look like app navigation.
     #[cfg(target_os = "macos")]
     let builder = builder.on_web_content_process_terminate(|webview| {
+        use tauri::Manager;
         use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
 
         log::error!("WebKit content process terminated (webview: {})", webview.label());
@@ -108,7 +109,10 @@ pub fn run_with_context(context: tauri::Context<tauri::Wry>) {
         webview
             .app_handle()
             .dialog()
-            .message("The editor's WebKit process stopped. Reload the editor to continue. If an autosave is available, Brickwright will offer to restore it.")
+            .message(concat!(
+                "The editor's WebKit process stopped. Reload the editor to continue. ",
+                "If an autosave is available, Brickwright will offer to restore it."
+            ))
             .title("Brickwright editor stopped")
             .kind(MessageDialogKind::Warning)
             .buttons(MessageDialogButtons::OkCancelCustom("Reload editor".into(), "Dismiss".into()))
