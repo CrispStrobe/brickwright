@@ -297,9 +297,7 @@ async function verify () {
         await catalogSearch.fill('Sensor Readout');
         const sensorExample = page.locator('[data-testid="bw-catalog-item"][title="mb02-sensors"]');
         await sensorExample.waitFor({state: 'visible', timeout: 15000});
-        // The manifest orders micro:bit first; use its explicit chip so this
-        // proof is independent of the device selected by the preceding case.
-        await sensorExample.locator('[data-testid="bw-catalog-device"]').first().click();
+        await sensorExample.click();
         await page.waitForFunction(() => Array.from(document.querySelectorAll('.cm-content'))
             .some(element => /DEVICE MICROBIT/.test(element.textContent || '')));
         pass('authored Sensor Readout example loaded as micro:bit pseudocode');

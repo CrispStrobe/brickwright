@@ -5192,7 +5192,7 @@ class ArcadeEmitter {
             pre.push(`let ${kept} = 0  // ... except this one, the run that stopped them`);
         }
         if (this.usesStageSpeech) {
-            out.push('let _bwStageSpeech = sprites.create(image.create(1, 1))');
+            out.push('let _bwStageSpeech = sprites.create(image.create(1, 1), SpriteKind.create())');
             out.push('_bwStageSpeech.setPosition(80, 65)');
             out.push('_bwStageSpeech.z = 100');
         }

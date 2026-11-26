@@ -49,7 +49,7 @@ test('the toolbar is one non-wrapping row with Maximize pinned, and measures not
 });
 
 test('the Code actions menu closes on pick, on a file or example choice, and Popup closes on focus leaving', () => {
-    const menu = importer.slice(importer.indexOf('    renderActionMenu (csel, renderCodeControls) {'), importer.indexOf('    renderActionMenu (csel, renderCodeControls) {') + 900);
+    const menu = importer.slice(importer.indexOf('    renderActionMenu (csel, renderCodeControls, renderLanguages, machine) {'), importer.indexOf('    renderActionMenu (csel, renderCodeControls, renderLanguages, machine) {') + 900);
     assert.doesNotMatch(menu, /closeOnPick=\{false\}/);
     assert.match(importer, /onChange=\{event => \{ this\.setState\(\{actionsOpen: false\}\); this\.openCodeFile\(event\); \}\}/);
     assert.match(importer, /onChange=\{e => \{ this\.setState\(\{actionsOpen: false\}\); this\.loadExample\(e\.target\.value\); \}\}/);

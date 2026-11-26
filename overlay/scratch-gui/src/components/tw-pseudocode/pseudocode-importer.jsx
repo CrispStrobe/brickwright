@@ -141,7 +141,7 @@ const L10N = {
         mcRun: '▶ Run in MakeCode simulator',
         mcRunTitle: 'Compile this MakeCode project with MakeCode\'s own compiler and run it in MakeCode\'s simulator — nothing is translated, so nothing is lost',
         mcRunCompiling: n => `Compiling ${n} with MakeCode…`,
-        moreLanguages: 'More languages',
+        toolbarLanguages: 'Languages', moreLanguages: 'More languages',
         cardiacLanguage: 'CARDIAC decimal computer',
         cp1Language: 'Kosmos CP1 teaching language…',
         cp1Open: 'Open the Kosmos CP1 starter? This replaces the current circuit and CP1 source.',
@@ -483,7 +483,7 @@ const L10N = {
         mcRun: '▶ Im MakeCode-Simulator ausführen',
         mcRunTitle: 'Dieses MakeCode-Projekt mit dem MakeCode-eigenen Compiler übersetzen und im MakeCode-Simulator ausführen — es wird nichts umgewandelt, also geht nichts verloren',
         mcRunCompiling: n => `${n} wird mit MakeCode übersetzt…`,
-        moreLanguages: 'Weitere Sprachen',
+        toolbarLanguages: 'Sprachen', moreLanguages: 'Weitere Sprachen',
         cardiacLanguage: 'CARDIAC-Dezimalrechner',
         cp1Language: 'Kosmos-CP1-Lernsprache…',
         cp1Open: 'Kosmos-CP1-Einstieg öffnen? Die aktuelle Schaltung und der CP1-Quelltext werden ersetzt.',
@@ -5636,7 +5636,7 @@ class PseudocodeImporter extends React.Component {
     toggleMaximize () {
         const next = !this.state.maximized;
         this.setMaximizedChrome(next);
-        this.setState({maximized: next, showRef: false, showArt: false, showInfo: false, showMatrix: false});
+        this.setState({maximized: next, actionsOpen: false, showRef: false, showArt: false, showInfo: false, showMatrix: false});
         try { localStorage.setItem('bw-editor-max', next ? '1' : '0'); } catch { /* noop */ }
         // Toggle the right pane via the existing mechanic
         window.dispatchEvent(new CustomEvent('bw-settings-change', {
@@ -5715,7 +5715,7 @@ class PseudocodeImporter extends React.Component {
         );
     }
 
-    renderActionMenu (csel, renderCodeControls) {
+    renderActionMenu (csel, renderCodeControls, renderLanguages, machine) {
         const item = {...csel, ...toolStyles(false).button, display: 'flex', alignItems: 'center', justifyContent: 'flex-start',
             width: '100%', boxSizing: 'border-box', textAlign: 'left', cursor: 'pointer', height: 'auto',
             minHeight: 32, padding: '6px 8px', whiteSpace: 'normal', fontSize: 12};
@@ -5733,7 +5733,8 @@ class PseudocodeImporter extends React.Component {
                         <style>{`
                             [data-code-overflow-controls] {display: grid; gap: 2px}
                             [data-code-overflow-controls] > div,
-                            [data-code-overflow-controls] > div > span {display: grid !important; gap: 2px !important}
+                            [data-code-overflow-controls] > div > span,
+                            [data-cardiac-overflow-tools] > div {display: grid !important; gap: 2px !important}
                             [data-code-overflow-controls] button {
                                 width: 100% !important; min-height: 32px; height: auto !important;
                                 display: flex !important; align-items: center; justify-content: flex-start !important;
@@ -5744,8 +5745,14 @@ class PseudocodeImporter extends React.Component {
                             [data-code-overflow-controls] button:hover {background: #eef2f7 !important}
                             [data-code-overflow-controls] button:disabled {opacity: .45; cursor: default}
                         `}</style>
-                        {renderCodeControls(true)}
+                        {machine === 'cardiac' ? <div ref={this.props.onCardiacToolsSlot} data-cardiac-overflow-tools /> :
+                            !machine && renderCodeControls(true)}
+                        <details>
+                            <summary style={{cursor: 'pointer', padding: '6px 8px'}}>{this.L.toolbarLanguages}</summary>
+                            {renderLanguages(true)}
+                        </details>
                     </div>}
+                    {!machine && <>
                     <strong style={{padding: '4px 8px', fontSize: 11, color: '#64748b'}}>{this.L.actionFiles}</strong>
                     <label style={item} title={this.L.openFileTitle(`${CODE_ACCEPT},${IMPORT_ACCEPT}`)}
                         data-testid="bw-open-file" role="button" tabIndex={this.state.busy ? -1 : 0} aria-disabled={this.state.busy}
@@ -5858,6 +5865,7 @@ class PseudocodeImporter extends React.Component {
                         style={item} title={this.L.customArtTitle}>
                         🖼️ {this.L.customArt}{this.state.uploads.length ? ` (${this.state.uploads.length})` : ''}
                     </button>
+                    </>}
                 </div>
             </Popup>
         );
@@ -6441,23 +6449,10 @@ class PseudocodeImporter extends React.Component {
                     </React.Fragment>
             </React.Fragment>
         );
-        const languageBar = (
-                <ScrollRow testId="bw-lang-row" label={this.L.toolbarLabel}
-                    style={{marginBottom: -1, paddingRight: 40}} scrollerStyle={{paddingBottom: 1}}
-                    trailing={(
-                        <React.Fragment>
-                            {!this.state.cp1Active && !this.state.cardiacActive && !this.state.kim1Active && this.renderActionMenu(csel, renderCodeControls)}
-                    <button onClick={() => this.toggleMaximize()}
-                        style={{...csel, cursor: 'pointer', background: max ? '#4c97ff' : '#f1f5f9',
-                            color: max ? '#fff' : 'inherit', minWidth: 24, border: '1px solid #cbd5e1', alignSelf: 'center'}}
-                        title={max ? this.L.restoreTitle : this.L.maximizeTitle}
-                        aria-label={max ? this.L.restoreTitle : this.L.maximizeTitle} aria-pressed={max}
-                        data-testid="bw-editor-maximize">
-                        {max ? '⊡' : '⊞'}
-                    </button>
-
-                        </React.Fragment>
-                    )}>
+        const machine = this.state.cardiacActive ? 'cardiac' : this.state.cp1Active ? 'cp1' :
+            this.state.kim1Active ? 'kim1' : null;
+        const renderLanguages = menu => (
+            <React.Fragment>
                     {[['pseudocode', '🧩 Pseudo'], ['python', '🐍 Py'], ['javascript', '🟨 JS'], ['c', '🔧 C'], ['basic', '📺 BAS'], ['asm', '🔩 ASM'],
                         ...this.visibleOptionalLangs().map(([l, label]) => [l, label]),
                         // The tab follows the DEVICE line, except when a
@@ -6480,21 +6475,21 @@ class PseudocodeImporter extends React.Component {
                             <button key={l} type="button" aria-pressed={active} onClick={() => this.switchTab(l)}
                                 disabled={this.state.busy && !active} title={label} aria-label={label}
                                 style={languageTabStyle(active)}>
-                                {this.state.cardiacActive ? label.split(' ')[0] : label}
+                                {this.state.cardiacActive && !menu ? label.split(' ')[0] : label}
                             </button>
                         );
                     })}
-                    <button type="button" data-testid="bw-code-cp1-tab" onClick={() => this.openCp1Language()}
+                    <button type="button" data-testid={menu ? "bw-code-cp1-tab-menu" : "bw-code-cp1-tab"} onClick={() => this.openCp1Language()}
                         disabled={this.state.busy} aria-pressed={this.state.cp1Active} title={this.L.cp1Language}
                         style={languageTabStyle(this.state.cp1Active)}>
                         CP1
                     </button>
-                    <button type="button" data-testid="bw-code-cardiac-tab" onClick={() => this.openCardiacLanguage()}
+                    <button type="button" data-testid={menu ? "bw-code-cardiac-tab-menu" : "bw-code-cardiac-tab"} onClick={() => this.openCardiacLanguage()}
                         disabled={this.state.busy} aria-pressed={this.state.cardiacActive}
                         title={this.L.cardiacLanguage} style={languageTabStyle(this.state.cardiacActive)}>
                         CARDIAC
                     </button>
-                    {this.state.kim1PartId && <button type="button" data-testid="bw-code-kim1-tab"
+                    {this.state.kim1PartId && <button type="button" data-testid={menu ? "bw-code-kim1-tab-menu" : "bw-code-kim1-tab"}
                         onClick={() => this.setState({kim1Active: true, cp1Active: false, cardiacActive: false})}
                         aria-pressed={this.state.kim1Active} style={languageTabStyle(this.state.kim1Active)}>
                         KIM-1
@@ -6502,6 +6497,9 @@ class PseudocodeImporter extends React.Component {
                     {(() => {
                         const shown = this.visibleOptionalLangs().map(([l]) => l);
                         const hidden = BW_OPTIONAL_LANGS.filter(([l]) => !shown.includes(l));
+                        if (menu) return hidden.map(([language, label, name]) =>
+                            <button key={language} type="button" title={name} disabled={this.state.busy}
+                                onClick={() => this.addOptionalLang(language)}>＋ {label}</button>);
                         return (
                             <Popup id="code-lang-more" anchorTestId="bw-lang-more-anchor" testId="bw-lang-more-menu" role="menu"
                                 open={this.props.isVisible !== false && this.state.langMenuOpen} align="left" width={220}
@@ -6524,7 +6522,27 @@ class PseudocodeImporter extends React.Component {
                             </Popup>
                         );
                     })()}
-                    {this.state.cardiacActive && <div ref={this.props.onCardiacToolsSlot}
+            </React.Fragment>
+        );
+        const languageBar = (
+                <ScrollRow testId="bw-lang-row" label={this.L.toolbarLabel}
+                    style={{marginBottom: -1, paddingRight: 40}} scrollerStyle={{paddingBottom: 1}}
+                    trailing={(
+                        <React.Fragment>
+                            {this.renderActionMenu(csel, renderCodeControls, renderLanguages, machine)}
+                    <button onClick={() => this.toggleMaximize()}
+                        style={{...csel, cursor: 'pointer', background: max ? '#4c97ff' : '#f1f5f9',
+                            color: max ? '#fff' : 'inherit', minWidth: 24, border: '1px solid #cbd5e1', alignSelf: 'center'}}
+                        title={max ? this.L.restoreTitle : this.L.maximizeTitle}
+                        aria-label={max ? this.L.restoreTitle : this.L.maximizeTitle} aria-pressed={max}
+                        data-testid="bw-editor-maximize">
+                        {max ? '⊡' : '⊞'}
+                    </button>
+
+                        </React.Fragment>
+                    )}>
+                    {renderLanguages(false)}
+                    {this.state.cardiacActive && !this.state.actionsOpen && <div ref={this.props.onCardiacToolsSlot}
                         data-cardiac-tools-slot style={{display: 'flex', flexShrink: 0, alignItems: 'center', paddingLeft: 4}} />}
                     {!this.state.cp1Active && !this.state.cardiacActive && !this.state.kim1Active && <React.Fragment>
                     {renderCodeControls(false)}

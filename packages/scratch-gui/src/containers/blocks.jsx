@@ -281,6 +281,7 @@ class Blocks extends React.Component {
         return (
             this.props.artworkOnly !== nextProps.artworkOnly ||
             this.state.prompt !== nextState.prompt ||
+            this.state.toolsOpen !== nextState.toolsOpen ||
             this.props.isVisible !== nextProps.isVisible ||
             this._renderedToolboxXML !== nextProps.toolboxXML ||
             this.props.extensionLibraryVisible !== nextProps.extensionLibraryVisible ||

@@ -201,13 +201,13 @@ try {
     check('the (i) still names the example after the learner renames the project',
         introAfterRename === '03-night-light', String(introAfterRename));
 
-    // ---- J2: the catalogue does not narrow with the device ------------------
+    // ---- J2: Code filters examples by the selected device -------------------
     await page.getByRole('tab', {name: 'Code', exact: true}).click();
     const device = page.getByTestId('bw-device-select');
     await device.waitFor({state: 'visible', timeout: 20000});
     const toggle = page.getByTestId('bw-catalog-toggle');
     const catalogPanel = page.locator('[data-testid="bw-catalog-panel"]');
-    const countItems = () => page.locator('[data-testid="bw-catalog-item"]').count();
+    const catalogIds = () => page.getByTestId('bw-catalog-item').evaluateAll(rows => rows.map(row => row.title));
 
     // OPEN STATE IS READ FROM THE CONTROL, NOT INFERRED FROM ITS CONTENTS.
     // Returning early on "an item is showing" broke in both directions. An
@@ -242,9 +242,9 @@ try {
             .waitFor({state: 'visible', timeout: 30000});
     };
     await openCatalog();
-    const before = await countItems();
+    const before = await catalogIds();
     // Named here, so an empty catalogue fails as an empty catalogue.
-    check('the catalogue lists examples at all', before > 0, `saw ${before}`);
+    check('the catalogue lists examples at all', before.length > 0, `saw ${before.length}`);
     const noNeeds = await page.evaluate(() =>
         !/Ben\u00f6tigt:|Needs:/.test(document.body.textContent || ''));
     check('no example is labelled with a device requirement', noNeeds);
@@ -263,10 +263,11 @@ try {
     // be counted.
     await page.locator('[data-testid="bw-catalog-panel"][data-device="arduino-uno"]')
         .waitFor({state: 'visible', timeout: 20000});
-    const after = await countItems();
-    check('changing the device does not narrow the catalogue', after === before,
-        `${before} before, ${after} after`);
-    await snap('catalogue-unnarrowed');
+    const after = await catalogIds();
+    check('changing the device refreshes the matching examples',
+        after.length > 0 && JSON.stringify(before) !== JSON.stringify(after),
+        `${before.length} before, ${after.length} after`);
+    await snap('catalogue-filtered');
 
     // ---- J1: the device pick must refuse, not leave a stale board -----------
     // stc89 has no bench for this example, so setDevice must say so BY NAME.
