@@ -9,7 +9,7 @@ import {activateUndoSurface, notifyUndoState, registerUndoSurface} from '../../l
 import {addCardiacFace, addKim1Face, addMicrotronicFace, isCardiacFace, isKim1Face, isMicrotronicFace, MACHINE_WIDGET_HEIGHT} from '../../lib/controller-machine-faces.js';
 import {LOGIKUS_LAMP_WIDGETS, LOGIKUS_SWITCH_WIDGETS, LOGIKUS_TEST_WIDGET} from '../../lib/logikus/controller-bridge.js';
 import SpikePortMonitor from './spike-port-monitor.jsx';
-import {CONSOLE_6502_CHANGED, sendConsoleLine} from '../../lib/bw-debug/console-6502.js';
+import {CONSOLE_6502_CHANGED, isConsoleMonitor, sendConsoleLine} from '../../lib/bw-debug/console-6502.js';
 
 const MicrotronicSurface = React.lazy(() => import(/* webpackChunkName: "bw-microtronic-surface" */ './microtronic-surface.jsx'));
 const Kim1Surface = React.lazy(() => import(/* webpackChunkName: "bw-kim1-surface" */ './kim1-surface.jsx'));
@@ -586,10 +586,10 @@ function makeTerminalRows(text, rows, cols) {
     return out.map(l => l.padEnd(cols, ' '));
 }
 
-function TerminalWidget({ widget }) {
+function TerminalWidget({ widget, text = widget.state.text }) {
     const cols = (widget.config.cols | 0) || 40;
     const rows = (widget.config.rows | 0) || 8;
-    const shown = makeTerminalRows(widget.state.text, rows, cols);
+    const shown = makeTerminalRows(text, rows, cols);
     return (
         <div data-testid={`bw-ctl-terminal-${widget.name}`} data-shown={shown.join('|')}
             style={{
@@ -1117,9 +1117,10 @@ function SimpleVgaWidget({widget, route, interactive}) {
     }, [widget.state.rgba, widget.state.frame, widget.config.width, widget.config.height]);
     return (
         <div data-testid={'bw-ctl-simplevga-' + widget.name}
+            data-video-size={widget.state.signal ? `${widget.config.width}×${widget.config.height}` : undefined}
             style={{position: 'relative', background: '#000', borderRadius: 2, overflow: 'hidden'}}>
-            <canvas ref={ref} style={{display: 'block', width: '100%', height: '100%',
-                imageRendering: widget.state.source === 'serial' ? 'auto' : 'pixelated'}} />
+            <canvas ref={ref} style={{display: 'block', width: '100%', height: '100%', objectFit: 'contain',
+                aspectRatio: `${widget.config.width} / ${widget.config.height}`, imageRendering: 'pixelated'}} />
             {route ? <MonitorConsole route={route} interactive={interactive} /> :
                 !widget.state.signal && <span style={{position: 'absolute', inset: 0, display: 'grid',
                 placeItems: 'center', color: '#0f0', fontSize: 10, fontFamily: 'monospace'}}>NO SIGNAL</span>}
@@ -1203,13 +1204,14 @@ function SerialKeyboard({name, sendLine, label, placeholder}) {
 }
 
 function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBindings, buttonInputs, sendBasicLine, runtime, videoKind }) {
-    const serialRoute = useMonitorConsole(runtime, widget.type === 'simplevga' ? widget.name : null);
+    const serialRoute = useMonitorConsole(runtime, isConsoleMonitor(widget) ? widget.name : null);
+    const displayLabel = {tms9918: 'TMS9918', mc6845: 'MC6845'}[videoKind] || 'VGA';
     const typeLabels = {
         joystick: t('joystick'), button: t('button'), slider: t('slider'),
         dpad: t('dpad'), dial: t('dial'), gauge: 'Gauge', matrix: 'Matrix', sevenseg: '7-Seg',
         keypad: 'Keypad', lcd: 'LCD', oled: 'OLED', terminal: 'Terminal',
         text: 'Text', image: 'Image',
-        keyboard: 'Keyboard', bargraph: 'Bar Graph', simplevga: serialRoute ? 'Serial' : videoKind === 'tms9918' ? 'TMS9918' : 'VGA',
+        keyboard: 'Keyboard', bargraph: 'Bar Graph', simplevga: serialRoute ? 'Serial' : displayLabel,
         mono_lcd: 'Mono LCD', rgb_light: 'RGB Light',
     };
     const pcSerial = runtime?.bwPcSerial?.name === widget.name ? runtime.bwPcSerial : null;
@@ -1331,9 +1333,10 @@ function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBi
 
             {widget.type === 'terminal' && (
                 <React.Fragment>
-                    <TerminalWidget widget={widget} />
-                    {pcSerial && mode === 'play' && <SerialKeyboard name={widget.name} label={pcSerial.label}
-                        sendLine={line => sendConsoleLine(pcSerial.runner, line)} />}
+                    <TerminalWidget widget={widget} text={serialRoute?.text ?? widget.state.text} />
+                    {mode === 'play' && (serialRoute || pcSerial) && <SerialKeyboard name={widget.name}
+                        label={serialRoute?.source || pcSerial?.label}
+                        sendLine={line => sendConsoleLine((serialRoute || pcSerial).runner, line)} />}
                 </React.Fragment>
             )}
 
@@ -1748,7 +1751,7 @@ class ControllerPanelView extends React.Component {
     /** Board part ids, for the part binding's picker. */
     _circuitParts(widget) {
         const kinds = widget?.type === 'lcd' ? ['hd44780', 'char_lcd']
-            : widget?.type === 'simplevga' ? ['simplevga_card', 'tms9918'] : null;
+            : widget?.type === 'simplevga' ? ['simplevga_card', 'tms9918', 'mc6845'] : null;
         return [...(this.props.board?.parts || [])]
             .filter(part => !kinds || kinds.includes(part.kind))
             .sort((a, b) => a.id.localeCompare(b.id));

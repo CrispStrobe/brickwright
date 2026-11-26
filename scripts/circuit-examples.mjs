@@ -7,7 +7,7 @@ const help = `bwlite circuit test [EXAMPLE_ID] [--device DEVICE] [--smoke-only] 
 
 Without an ID test every circuit and device variant listed in the gallery.
 Every bench is loaded, powered on and advanced 1 ms in the circuit engine.
-Lessons with scripted inputs also run their functional checks in the Scratch VM.
+Scripted lessons also run functional checks in their Scratch VM or machine engine.
 Exit 1 indicates a failed or incomplete smoke check, or a failed or incomplete functional check.`;
 
 function startWorker () {
@@ -85,7 +85,7 @@ async function main () {
         if (defaultFile && !sameAsDefault) variants.unshift([null, defaultFile]);
         for (const [device, file] of variants) {
             if (!values.device || device === values.device) {
-                benches.push({id: item.id, device, file, program: item.files?.program});
+                benches.push({id: item.id, device, file, program: item.files?.program, rom: item.files?.rom});
             }
         }
     }

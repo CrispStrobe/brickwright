@@ -8,6 +8,7 @@ import {getDevice} from 'bw-board/devices.js';
 import {registerAllDevices} from 'bw-board/register-all.js';
 import {ControllerPanel} from 'bw-board/controller.js';
 import {bindPanelToBoard} from 'bw-board/controller-binding.js';
+import {createDebugTarget} from 'bw-board/debug-target-factory.js';
 import {createM6502Adapter} from 'bw-board/m6502-adapter.js';
 import {extract6502Machine} from 'bw-board/m6502-extract.js';
 import {warningsBadge, warningsView} from '../overlay/scratch-gui/src/lib/circuit-panels-model.js';
@@ -111,7 +112,24 @@ test('BASIC sends text to the ACIA and leaves the SimpleVGA framebuffer untouche
     assert.equal(microsoftBasicLine('print "Hello world"'), 'PRINT "Hello world"\r');
 });
 
-test('the console link only offers part-bound video and sends a carriage return to the monitor', () => {
+test('Tali Forth answers through the py65mon serial route', async () => {
+    const rom = readFileSync(new URL('taliforth-py65mon.bin', roms));
+    const {adapter} = await createDebugTarget('eater6502', {rom, py65mon: true});
+    let output = '';
+    adapter.onSerial(byte => { output += String.fromCharCode(byte & 0x7f); });
+    const waitFor = text => {
+        for (let step = 0; step < 60 && !text.test(output); step++) adapter.advanceNs(25_000_000);
+        assert.match(output, text);
+    };
+    waitFor(/Tali Forth/i);
+    output = '';
+    assert.ok(sendConsoleLine({sendSerial: line => [...line].every(char => adapter.sendSerial(char.charCodeAt(0)))},
+        '2 2 + .'));
+    waitFor(/(?:^|\s)4\s/);
+});
+
+test('the console link can use a terminal or part-bound video and sends a carriage return', () => {
+    assert.equal(isConsoleMonitor({type: 'terminal'}), true);
     assert.equal(isConsoleMonitor({type: 'simplevga', binding: {target: 'part'}}), true);
     assert.equal(isConsoleMonitor({type: 'simplevga', binding: {target: 'variable'}}), false);
     assert.equal(isConsoleMonitor({type: 'oled', binding: {target: 'part'}}), false);
@@ -197,6 +215,7 @@ test('the actual display bench selects the four-bit ROM and mirrors physical LCD
 
 for (const [id, widgetName, partId, width, height] of [
     ['eater6502-vdp-hello', 'Video', 'vdp1', 256, 192],
+    ['eater6502-crtc80', 'CRTC Screen', 'crtc1', 640, 256],
     ['aurora65-workstation', 'vgaMonitor', 'vga', 160, 128]
 ]) {
     test(id + ' boots the shipped ROM and paints its part-bound Controller display', () => {
@@ -226,6 +245,43 @@ for (const [id, widgetName, partId, width, height] of [
     });
 }
 
+test('the CRTC demo programs 80×32 and renders the last cell from CPU RAM', () => {
+    const {files, circuit, config} = bench('eater6502-crtc80');
+    const board = circuit.board;
+    const adapter = createM6502Adapter({config, rom: readFileSync(new URL(files.rom, examples))});
+    adapter.attachBoard({parts: board.parts, getDeviceState: id => board.getDeviceState(id), setPin() {}});
+    const video = board.getDeviceState('crtc1');
+    assert.equal(video.videoFrame().signal, false);
+    adapter.advanceNs(50_000_000);
+    const chip = adapter.machine.chips.crtc1;
+    assert.equal(chip.cols, 80);
+    assert.equal(chip.rows, 32);
+    assert.equal(adapter.machine.mem[0x39ff], '+'.charCodeAt(0));
+    const frame = video.videoFrame();
+    assert.equal(frame.width, 640);
+    assert.equal(frame.height, 256);
+    const pixels = (x, y) => Array.from({length: 8}, (_, line) =>
+        frame.rgba.slice(((y + line) * frame.width + x) * 4, ((y + line) * frame.width + x + 8) * 4));
+    assert.ok(pixels(632, 248).some(row => row.some((value, index) => index % 4 !== 3 && value > 0)));
+    assert.deepEqual(pixels(632, 248), pixels(0, 0), 'the four corner glyphs match');
+    adapter.machine._write(0x4000, 1);
+    adapter.machine._write(0x4001, 40);
+    assert.equal(video.videoFrame().width, 320);
+    adapter.machine._write(0x4001, 20);
+    assert.equal(video.videoFrame().width, 160);
+    adapter.machine._write(0x4001, 255);
+    assert.equal(video.videoFrame().signal, false, 'oversized timing must not allocate a huge frame');
+});
+
+test('BASIC works through serial on the new display bench', () => {
+    const {config} = bench('eater6502-crtc80');
+    const serial = consoleMachine(config, createBasicStartup(MS_PROFILE.bootPrompts));
+    serial.waitFor('OK');
+    serial.line('PRINT 2+2');
+    serial.waitFor(' 4');
+    assert.equal(serial.adapter.machine.chips.crtc1.videoFrame().signal, false);
+});
+
 test('all five Aurora decode findings survive as notes while real wiring faults earn a warning badge', () => {
     const {result} = bench('aurora65-workstation');
     assert.equal(result.notes.length, 5);
@@ -240,6 +296,7 @@ test('the library lists ROM projects and all six CARDIAC programs under their ac
     const {libraryCircuitPrograms} = await import('../overlay/scratch-gui/src/lib/bw-machines/library-circuits.js');
     const programs = libraryCircuitPrograms(index);
     assert.equal(programs.find(program => program.id === 'eater6502-vdp-hello').machine, 'eater6502');
+    assert.equal(programs.find(program => program.id === 'eater6502-crtc80').machine, 'eater6502');
     assert.equal(programs.find(program => program.id === 'kim1-wired-io').machine, 'kim1');
     assert.equal(programs.filter(program => program.machine === 'cardiac').length, 6);
     assert.equal(programs.find(program => program.id === 'cardiac-echo').codeOnly, true);

@@ -2,7 +2,7 @@
 export const CONSOLE_6502_CHANGED = 'BW_6502_CONSOLE_CHANGED';
 
 export const isConsoleMonitor = widget =>
-    widget?.type === 'simplevga' && widget.binding?.target === 'part';
+    widget?.type === 'terminal' || (widget?.type === 'simplevga' && widget.binding?.target === 'part');
 
 export function sendConsoleLine(runner, line) {
     if (typeof runner?.sendSerial !== 'function') return false;

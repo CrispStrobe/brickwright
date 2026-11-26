@@ -56,7 +56,35 @@ async function startProgram ({device, program}, circuit, examples, observeVM) {
     return {errors: run.errors, stepFrames};
 }
 
+async function checkCrtc80 (bench, circuit, examples) {
+    const [{flatWire}, {extract6502Machine}, {createM6502Adapter}] = await Promise.all([
+        import('bw-circuit-ui/model/wire-endpoints.js'),
+        import('bw-board/m6502-extract.js'),
+        import('bw-board/m6502-adapter.js')
+    ]);
+    const config = extract6502Machine({parts: circuit.parts, wires: circuit.wires.map(flatWire)});
+    if (!config.ok) throw new Error(config.reasons.join(', '));
+    const rom = await readFile(join(examples, bench.rom));
+    const adapter = createM6502Adapter({config: {clockHz: 1_000_000, ...config}, rom});
+    adapter.attachBoard(circuit.board);
+    adapter.advanceNs(50_000_000);
+    const frame = circuit.board.getDeviceState('crtc1').videoFrame();
+    const observed = {
+        width: frame?.width,
+        height: frame?.height,
+        lastCell: adapter.machine.mem[0x39ff],
+        bottomRightLit: frame?.rgba?.some((value, offset) => {
+            const pixel = offset >> 2;
+            return (offset & 3) !== 3 && value > 0 && pixel % frame.width >= 632 && pixel / frame.width >= 248;
+        }) ?? false
+    };
+    const expected = {width: 640, height: 256, lastCell: 43, bottomRightLit: true};
+    const ok = Object.keys(expected).every(key => expected[key] === observed[key]);
+    return {status: ok ? 'pass' : 'fail', checks: [{expected, observed, ok}]};
+}
+
 export async function checkBehavior (bench, circuit, examples) {
+    if (bench.id === 'eater6502-crtc80') return checkCrtc80(bench, circuit, examples);
     const spec = behaviors[bench.id];
     if (!spec) return {status: 'unverified', reason: 'No functional scenario for this lesson'};
     const led = spec.led ?? 'LED_led1';
