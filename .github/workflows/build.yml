@@ -3103,6 +3103,21 @@ jobs:
         timeout-minutes: 3  # derived: p95 7 s × 3 → 3 min over 20 green runs to 36823340082; max 12 s in run 36544779088 (gen-gate-budgets.mjs)
         if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'light' }}
         run: PROOF_URL=http://localhost:8617/ node scripts/verify-i80386-local-hdd-gui.mjs
+      - name: Browser gate — Code BASIC profiles and guest keyboard
+        id: bw_browser_code_basic_profiles
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'light' }}
+        run: node scripts/verify-code-basic-profiles.mjs http://127.0.0.1:8617/
+      - name: Browser gate — Code machine switching and reload
+        id: bw_browser_code_machine_recovery
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'light' }}
+        run: node scripts/verify-code-machine-recovery.mjs http://127.0.0.1:8617/
+      - name: Browser gate — Machines example catalog handoffs
+        id: bw_browser_machine_catalog_handoffs
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'heavy' }}
+        run: node scripts/verify-machine-project-library.mjs http://127.0.0.1:8617/
       # The debugger docked beside a running x86 machine must own its controls:
       # a hosted event's real click on Pause landed on the Widgets Full screen
       # button. Real page, real (unforced) click, hit-test at Pause's centre.

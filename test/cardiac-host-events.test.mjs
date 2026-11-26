@@ -82,7 +82,11 @@ function globalControlFixture (kind) {
     const handlers = new Map();
     const window = {
         __bwMachineExtracted: kind ? {kind} : undefined,
-        dispatchEvent: event => {calls.push(['event', event.type]); handlers.get(event.type)?.(event);},
+        dispatchEvent: event => {
+            calls.push(['event', event.type]);
+            handlers.get(event.type)?.(event);
+            return true;
+        },
         setTimeout: fn => fn()
     };
     const CustomEvent = class {constructor (type) {this.type = type;}};
@@ -115,7 +119,9 @@ function globalControlFixture (kind) {
 test('the global green flag reaches the selected CARDIAC host without starting Scratch', () => {
     const fixture = globalControlFixture('cardiac');
     fixture.controls.handleGreenFlagClick(fixture.click);
-    assert.deepEqual(fixture.calls, [['event', 'bw-cardiac-run-request'], ['source-run', true]]);
+    assert.deepEqual(fixture.calls, [
+        ['event', 'bw-run-active-code'], ['event', 'bw-cardiac-run-request'], ['source-run', true]
+    ]);
 });
 
 test('global Stop pauses CARDIAC and cancels pending actions without stopping an unrelated VM', () => {
@@ -132,5 +138,7 @@ test('CARDIAC routing preserves the existing shift/turbo and CP1 control paths',
     const cp1 = globalControlFixture('cp1');
     cp1.controls.handleGreenFlagClick(cp1.click);
     cp1.controls.handleStopAllClick(cp1.click);
-    assert.deepEqual(cp1.calls, [['event', 'bw-cp1-run-request'], ['event', 'bw-cp1-stop-request']]);
+    assert.deepEqual(cp1.calls, [
+        ['event', 'bw-run-active-code'], ['event', 'bw-cp1-run-request'], ['event', 'bw-cp1-stop-request']
+    ]);
 });

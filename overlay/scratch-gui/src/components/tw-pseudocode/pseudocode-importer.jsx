@@ -227,6 +227,7 @@ const L10N = {
         basicRealDosBuilding: 'Compiling BASIC and preparing a real MS-DOS 2.0 boot disk…',
         basicRealDosFailed: (m) => `Could not prepare the MS-DOS boot disk: ${m}`,
         basicRealDosBooted: (n) => `Built ${n} bytes and booting real MS-DOS 2.0 — it runs PROG.COM at the A> prompt.`,
+        basicEmpty: 'Enter a BASIC program to run.',
         basicUbasicRunning: 'Running your BASIC on the libre uBASIC interpreter on the DOS bench…',
         basicUbasicFailed: (m) => `The uBASIC (on DOS) route could not run: ${m}`,
         feRunning: 'Running your fe (Lisp) on the libre fe interpreter on the DOS bench…',
@@ -570,6 +571,7 @@ const L10N = {
         basicRealDosBuilding: 'Übersetze BASIC und bereite eine echte MS-DOS-2.0-Bootdiskette vor…',
         basicRealDosFailed: (m) => `Die MS-DOS-Bootdiskette konnte nicht vorbereitet werden: ${m}`,
         basicRealDosBooted: (n) => `${n} Bytes erzeugt — starte echtes MS-DOS 2.0; es führt PROG.COM am A>-Prompt aus.`,
+        basicEmpty: 'Gib ein BASIC-Programm zum Ausführen ein.',
         basicUbasicRunning: 'Führe dein BASIC mit dem freien uBASIC-Interpreter auf der DOS-Werkbank aus…',
         basicUbasicFailed: (m) => `Die uBASIC-(auf-DOS)-Route lief nicht: ${m}`,
         feRunning: 'Führe dein fe (Lisp) mit dem freien fe-Interpreter auf der DOS-Werkbank aus…',
@@ -1350,6 +1352,7 @@ class PseudocodeImporter extends React.Component {
         if (runtime?.bwLibraryCode === program) delete runtime.bwLibraryCode;
         this.setState(state => ({
             lang: program.language, libraryProgram: program, status: '', output: null,
+            ...(program.dosSourceName ? {basicProfile: 'i8086-ubasic'} : {}),
             cardiacActive: false, cp1Active: false, kim1Active: false, microtronicActive: false,
             buffers: {...state.buffers, [program.language]: program.text,
                 pseudocode: `DEVICE ${program.machine}\n${(state.buffers.pseudocode || '').replace(/^DEVICE[^\n]*\n?/im, '')}`}
@@ -1362,6 +1365,16 @@ class PseudocodeImporter extends React.Component {
         const source = this.activeCode();
         this.setState({busy: true, status: ''});
         try {
+            if (program.dosSourceName) {
+                if (!source.trim()) {
+                    this.setState({status: this.L.basicEmpty});
+                    return;
+                }
+                this.setState({status: this.L.basicUbasicRunning});
+                await program.run(source);
+                if (!this._unmounted) this.setState({status: ''});
+                return;
+            }
             if (source === program.text) {
                 await program.run();
                 return;
@@ -1394,7 +1407,7 @@ class PseudocodeImporter extends React.Component {
         if (!this.props.isVisible || this.state.cardiacActive || this.state.cp1Active ||
             this.state.kim1Active || this.state.microtronicActive) return;
         event.detail.editor = 'code';
-        if (!this.activeCode().trim()) return;
+        if (this.state.lang !== 'basic' && !this.activeCode().trim()) return;
         const {lang, libraryProgram, busy, running} = this.state;
         const target = asmTargetForDevice(this.currentDevice());
         const actions = {
@@ -3258,6 +3271,7 @@ class PseudocodeImporter extends React.Component {
             const detail = {rom: out.bytes, image: out.image || null,
                 listing: out.listing, target: out.target,
                 slotId: out.slotId, profile: out.profile, format: out.format,
+                ...(out.target === 'i8086' ? {i8086Assembly: true} : {}),
                 ...(chips.length ? {chips} : {})};
             const builtLen = out.bytes ? out.bytes.length
                 : (out.image ? out.image.segments.reduce((n, s) => n + s.bytes.length, 0) : 0);
@@ -3719,7 +3733,7 @@ class PseudocodeImporter extends React.Component {
      * browser-safe FAT12 injector (bw-board/dos-fat-inject) drops it as PROG.COM
      * onto a copy of the prebuilt MIT MS-DOS 2.0 boot image (a static asset), and
      * the DOS bench boots that disk — the boot sector loads IO.SYS -> MSDOS.SYS
-     * -> COMMAND.COM, which auto-runs PROG at the A> prompt. Nothing here touches
+     * -> COMMAND.COM, which runs PROG from AUTOEXEC.BAT. Nothing here touches
      * the receipt-pinned image BUILDER; it only injects into a prebuilt image.
      */
     async runBasicOnRealDos (code) {
@@ -3744,6 +3758,7 @@ class PseudocodeImporter extends React.Component {
             if (!res.ok) throw new Error(`base image HTTP ${res.status}`);
             const base = new Uint8Array(await res.arrayBuffer());
             disk = inj.injectFile(base, 'PROG.COM', out.bytes);
+            disk = inj.injectFile(disk, 'AUTOEXEC.BAT', new TextEncoder().encode('PROG\r\n'));
         } catch (e) {
             this.setState({busy: false, running: false, status: this.L.basicRealDosFailed(e.message)});
             return;
@@ -5065,8 +5080,15 @@ class PseudocodeImporter extends React.Component {
     }
 
     async runBasic () {
+        if (this.state.busy || this.state.running) return;
         const code = this.activeCode();
-        if (!code.trim()) return;
+        if (!code.trim()) {
+            this.setState({status: this.L.basicEmpty});
+            return;
+        }
+        if (this.state.basicProfile === 'i8086-ubasic' && this.state.libraryProgram?.dosSourceName) {
+            return this.runLibraryProgram();
+        }
         // The 8086 profile compiles BASIC to a .COM and boots the DOS bench (the
         // C/asm-tab path), rather than running a 6502/Z80 ROM interpreter.
         if (this.state.basicProfile === 'i8086') return this.runBasicOn8086(code);
@@ -6883,7 +6905,7 @@ class PseudocodeImporter extends React.Component {
                     <div style={{display: 'flex', gap: 16, padding: '6px 12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderTop: 'none', fontSize: 13, alignItems: 'center'}}>
                         <label style={{display: 'flex', alignItems: 'center', gap: 4}}>
                             {this.L.profile}
-                            <select value={this.state.basicProfile} onChange={e => this.setState({basicProfile: e.target.value, buffers: {...this.state.buffers, basic: ''}})}
+                            <select value={this.state.basicProfile} onChange={e => this.setState({basicProfile: e.target.value})}
                                 style={{padding: '2px 6px', borderRadius: 4, border: '1px solid #cbd5e1'}}>
                                 <option value="bbc">{'BBC BASIC'}</option>
                                 <option value="ms">{'6502 BASIC'}</option>

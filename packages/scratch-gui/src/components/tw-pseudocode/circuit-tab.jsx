@@ -547,6 +547,7 @@ class CircuitTab extends React.Component {
         window.addEventListener('bw-machine-extracted', this._machineExtractedHandler);
         window.addEventListener('bw-cp1-code-selection', this._onCp1CodeSelection);
         window.addEventListener('bw-cardiac-code-selection', this._onCardiacCodeSelection);
+        window.addEventListener('bw-cardiac-run-request', this._onCardiacRunRequest);
         window.addEventListener('bw-cardiac-open', this._onCardiacOpen);
         window.addEventListener('bw-cardiac-program-loaded', this._onCardiacProgramLoaded);
         window.addEventListener('bw-cp1-circuit-detached', this._restoreCp1Dock);
@@ -781,6 +782,7 @@ class CircuitTab extends React.Component {
         window.removeEventListener('bw-machine-extracted', this._machineExtractedHandler);
         window.removeEventListener('bw-cp1-code-selection', this._onCp1CodeSelection);
         window.removeEventListener('bw-cardiac-code-selection', this._onCardiacCodeSelection);
+        window.removeEventListener('bw-cardiac-run-request', this._onCardiacRunRequest);
         window.removeEventListener('bw-cardiac-open', this._onCardiacOpen);
         window.removeEventListener('bw-cardiac-program-loaded', this._onCardiacProgramLoaded);
         window.removeEventListener('bw-cp1-circuit-detached', this._restoreCp1Dock);
@@ -1245,6 +1247,9 @@ class CircuitTab extends React.Component {
      * half-worked: the panels kept saying they had no circuit.)
      */
     handleCircuitReady (circuit) {
+        const selectedMachine = window.__bwMachineExtracted;
+        const selectedCardiac = selectedMachine?.kind === 'cardiac' ? selectedMachine : null;
+        const virtualCardiac = selectedCardiac && !selectedCardiac.config?.partId;
         // Deleting/clearing the circuit must STOP the debugger: a live
         // runner kept driving a board that no longer exists (owner
         // report, 2026-08-17). An empty board with a runner attached =
@@ -1254,14 +1259,13 @@ class CircuitTab extends React.Component {
                 ? (circuit.parts.size ?? circuit.parts.length ?? 0) : 0;
             const hadParts = this.state.circuit && this.state.circuit.parts
                 ? (this.state.circuit.parts.size ?? this.state.circuit.parts.length ?? 0) : 0;
-            if (nParts === 0 && hadParts > 0) {
+            if (nParts === 0 && hadParts > 0 && !virtualCardiac) {
                 this.setState(st => ({stopToken: (st.stopToken || 0) + 1}));
             }
         } catch { /* never block circuit publication */ }
         this._markReactUpdate('host:circuit-ready');
         this.setState({circuit});
-        const selectedCardiac = window.__bwMachineExtracted;
-        if (selectedCardiac?.kind === 'cardiac' && selectedCardiac.config?.partId &&
+        if (selectedCardiac?.config?.partId && this._cardiacAttachedBoard &&
             !circuit?.parts?.some(part => part.kind === 'cardiac' && part.id === selectedCardiac.config.partId)) {
             this._onCardiacCodeSelection({detail: {active: false}});
         }
@@ -1514,11 +1518,12 @@ class CircuitTab extends React.Component {
     _onCardiacCodeSelection = event => {
         if (event.detail?.active) {
             if (window.__bwMachineExtracted?.kind !== 'cardiac') this.activateCardiac();
-            else this.showControllerDock();
+            else this.showCardiacController();
             window.dispatchEvent(new CustomEvent('bw-cardiac-selected'));
             return;
         }
         if (window.__bwMachineExtracted?.kind !== 'cardiac') return;
+        this._cardiacAttachedBoard = null;
         setCardiacWorkspaceActive(localStorage, false);
         delete window.__bwMachineExtracted;
         const runtime = this.props.vm?.runtime;
@@ -1553,17 +1558,33 @@ class CircuitTab extends React.Component {
         this.activateCardiac(partId);
     };
 
+    _onCardiacRunRequest = () => {
+        if (window.__bwMachineExtracted?.kind === 'cardiac') this.showCardiacController();
+    };
+
+    showCardiacController () {
+        const panel = this.props.vm?.runtime?.controllerPanel;
+        if (panel && addCardiacFace(panel)) {
+            window.dispatchEvent(new CustomEvent('bw-controller-changed', {
+                detail: {data: serializeControllerPanel(panel)}
+            }));
+        }
+        this.showControllerDock();
+    }
+
     activateCardiac (partId = null) {
         if (window.__bwMachineExtracted?.kind === 'cp1') this._onCp1CodeSelection({detail: {active: false}});
         setCardiacWorkspaceActive(localStorage, true);
         const runtime = this.props.vm?.runtime;
         if (runtime?.bwDeviceCore !== 'cardiac') this._cardiacNormalCore = runtime?.bwDeviceCore;
         if (runtime) runtime.bwDeviceCore = 'cardiac';
-        this._cardiacAttachedBoard = partId ? runtime?.circuitBoard : null;
+        const board = runtime?.circuitBoard;
+        this._cardiacAttachedBoard = partId &&
+            board?.getParts?.().some(part => part.kind === 'cardiac' && part.id === partId) ? board : null;
         const config = partId ? {partId} : {};
-        window.dispatchEvent(new CustomEvent('bw-machine-extracted', {detail: {kind: 'cardiac', config}}));
+        window.dispatchEvent(new CustomEvent('bw-machine-extracted', {detail: {kind: 'cardiac', config, clearLoadedMedia: true}}));
         window.dispatchEvent(new CustomEvent('bw-cardiac-selected'));
-        this.showControllerDock();
+        this.showCardiacController();
         return config;
     }
 
@@ -1596,12 +1617,6 @@ class CircuitTab extends React.Component {
             }
             localStorage.setItem(CARDIAC_WORKSPACE_KEY, JSON.stringify(draft));
             this.activateCardiac(partId);
-            const panel = this.props.vm?.runtime?.controllerPanel;
-            if (panel && addCardiacFace(panel)) {
-                window.dispatchEvent(new CustomEvent('bw-controller-changed', {
-                    detail: {data: serializeControllerPanel(panel)}
-                }));
-            }
             if (!partId) window.dispatchEvent(new CustomEvent('bw-activate-tab', {detail: {index: 3}}));
             window.dispatchEvent(new CustomEvent('bw-cardiac-source-load',
                 {detail: {source, inputDeck, inputMode: draft.inputMode, exampleId: example.id}}));
@@ -1626,6 +1641,7 @@ class CircuitTab extends React.Component {
             if (!parts?.some(part => part.kind === 'kosmos-cp1' && part.id === suspended.config.partId)) return;
             this._cp1NormalCore = runtime?.bwDeviceCore;
             if (runtime) runtime.bwDeviceCore = 'cp1';
+            delete window.__bwPendingMedia;
             window.dispatchEvent(new CustomEvent('bw-machine-extracted', {
                 detail: {kind: 'cp1', config: suspended.config, resumeCp1: true}
             }));
@@ -1663,7 +1679,9 @@ class CircuitTab extends React.Component {
             clockHz: part.params?.clockHz || 6000000};
         if (runtime && runtime.bwDeviceCore !== 'cp1') this._cp1NormalCore = runtime.bwDeviceCore;
         if (runtime) runtime.bwDeviceCore = 'cp1';
-        if (useDefaultMonitor && window.__bwPendingMedia?.detail?.kind === 'cp1') delete window.__bwPendingMedia;
+        if (window.__bwPendingMedia && (useDefaultMonitor || window.__bwPendingMedia.detail?.kind !== 'cp1')) {
+            delete window.__bwPendingMedia;
+        }
         window.dispatchEvent(new CustomEvent('bw-machine-extracted', {detail: {kind: 'cp1', config, useDefaultMonitor}}));
         return config;
     }
@@ -2590,7 +2608,8 @@ class CircuitTab extends React.Component {
                             vm.runtime.circuitBoard = board;
                             this.selectKim1(board.getParts?.().find(part => part.kind === 'kim-1'));
                             const cardiac = window.__bwMachineExtracted;
-                            if (cardiac?.kind === 'cardiac' && cardiac.config?.partId && this._cardiacAttachedBoard !== board) {
+                            if (cardiac?.kind === 'cardiac' && cardiac.config?.partId && this._cardiacAttachedBoard !== board &&
+                                board.getParts?.().some(part => part.kind === 'cardiac' && part.id === cardiac.config.partId)) {
                                 this._cardiacAttachedBoard = board;
                                 window.dispatchEvent(new CustomEvent('bw-machine-extracted', {detail: cardiac}));
                             }

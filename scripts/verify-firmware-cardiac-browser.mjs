@@ -22,9 +22,7 @@ try {
     assert.equal(await manager.getByRole('combobox', {name: 'Machine type'}).inputValue(), 'cardiac');
     assert.equal(await manager.getByTestId('bw-mm-local-386').count(), 0);
     const examples = manager.getByTestId('bw-mm-circuit-programs');
-    await examples.getByText('Example programs (6)').click();
-    await examples.getByText('CARDIAC: A number makes a round trip', {exact: true})
-        .locator('..').getByRole('button', {name: 'Open', exact: true}).click();
+    await examples.locator('[data-machine-example="cardiac-echo"]').getByRole('button', {name: 'Open', exact: true}).click();
     await manager.waitFor({state: 'hidden'});
     await page.locator('[data-cardiac-editor]:visible').waitFor();
     await page.getByTestId('bw-code-editor').locator('[data-cardiac-editor] .cm-editor').waitFor();

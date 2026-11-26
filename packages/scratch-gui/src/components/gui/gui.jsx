@@ -996,9 +996,13 @@ const GUIComponent = props => {
         <React.Suspense fallback={null}>
             <MachineManager store={getMachineStore()} locale={props.locale} preferredMachine={showMachines.kind}
                 onRun={async (cfg, opts) => {
-                    const started = await runMachineConfig(cfg, opts);
-                    if (started && opts?.code) {
-                        const program = {...opts.code, config: cfg, run: () => runMachineConfig(cfg)};
+                    const code = opts?.code;
+                    const run = (source = code?.text) => runMachineConfig(cfg, code?.dosSourceName ? {
+                        ...opts, dosSource: {name: code.dosSourceName, text: source}
+                    } : opts);
+                    const started = await run();
+                    if (started && code) {
+                        const program = {...code, config: cfg, run};
                         vm.runtime.bwLibraryCode = program;
                         window.dispatchEvent(new CustomEvent('bw-library-code', {detail: program}));
                         props.onActivateTab(CODE_TAB_INDEX);

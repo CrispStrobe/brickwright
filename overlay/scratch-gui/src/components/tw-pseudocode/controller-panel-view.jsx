@@ -1864,7 +1864,8 @@ class ControllerPanelView extends React.Component {
         const showTerminal = session && (screen ? this.state.machineSurface === 'terminal' :
             this.state.machineSurface !== 'widgets' || !widgets.length);
         const terminal = showTerminal ? session : null;
-        const machineWidget = showTerminal ? null : screen;
+        const hasOtherWidgets = screen && widgets.some(widget => widget !== screen);
+        const machineWidget = showTerminal || (hasOtherWidgets && this.state.machineSurface === 'widgets') ? null : screen;
         const machineFullScreen = Boolean((machineWidget || terminal) && this.props.isFullScreen);
         const toggleMachineFullScreen = this.props.isFullScreen ?
             this.props.onExitFullScreen : this.props.onEnterFullScreen;
@@ -1887,12 +1888,13 @@ class ControllerPanelView extends React.Component {
                         textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 700, fontSize: 12, color: '#7C3AED'}}>
                         {t('title')}
                     </span>
-                    {session && (screen || widgets.length > 0) && (
+                    {((session && (screen || widgets.length > 0)) || hasOtherWidgets) && (
                         <select aria-label="Controller surface" title="Controller surface"
-                            value={terminal ? 'terminal' : 'widgets'}
+                            value={terminal ? 'terminal' : machineWidget ? 'screen' : 'widgets'}
                             onChange={event => this.setState({machineSurface: event.target.value})}>
-                            <option value="widgets">{screen ? 'Screen' : 'Widgets'}</option>
-                            <option value="terminal">{session.title}</option>
+                            {screen && <option value="screen">Screen</option>}
+                            {(!screen || hasOtherWidgets) && <option value="widgets">Widgets</option>}
+                            {session && <option value="terminal">{session.title}</option>}
                         </select>
                     )}
                     <EditorHelp editor="Widgets" label="Widgets" locale={this.props.locale} />
@@ -2088,7 +2090,7 @@ class ControllerPanelView extends React.Component {
                     <div hidden={machineFullScreen || Boolean(terminal)} style={machineWidget || (cp1WidgetSlot && widgets.length) ? {
                         position: 'relative', minHeight: cp1WidgetSlot ? 240 : undefined
                     } : undefined}>
-                        {widgets.filter(widget => widget !== machineWidget).map(w => (
+                        {widgets.filter(widget => widget !== screen).map(w => (
                             <PositionedWidget
                                 key={w.name}
                                 widget={w}

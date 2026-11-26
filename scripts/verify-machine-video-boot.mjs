@@ -42,6 +42,7 @@ try {
     await page.goto(`http://127.0.0.1:${server.address().port}/`);
     await page.getByTestId('bw-file-menu-trigger').click();
     await page.getByText('Machines…', {exact: true}).click();
+    await page.getByRole('combobox', {name: 'Machine type'}).selectOption('i8086');
     const lesson = page.locator('[data-lesson-id="lesson-elks-i8086"]');
     await lesson.getByTestId('bw-mm-lesson-run').click();
     const canvas = page.getByTestId('bw-machine-canvas');
@@ -61,8 +62,10 @@ try {
     await page.waitForFunction(() => {
         const canvas = document.querySelector('[data-testid="bw-machine-canvas"]');
         const box = canvas.getBoundingClientRect();
+        const header = canvas.closest('[data-testid="bw-machine-console"]').querySelector('header').getBoundingClientRect();
         const dock = canvas.closest('[data-testid="bw-controller-canvas"]');
-        return box.width >= innerWidth - 3 && box.top <= 36 && Math.abs(box.bottom - innerHeight) <= 1 &&
+        return box.width >= innerWidth - 3 && header.top <= 1 && Math.abs(box.top - header.bottom) <= 1 &&
+            Math.abs(box.bottom - innerHeight) <= 1 &&
             dock.scrollHeight === dock.clientHeight;
     }, null, {timeout: 5000});
     assert.equal(await button.innerText(), 'Exit full screen');

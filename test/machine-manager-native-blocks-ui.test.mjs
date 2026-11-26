@@ -232,7 +232,8 @@ test('firmware browsing filters machine-specific media, searches wired presets a
     assert.equal(get('bw-mm-local-386').length, 0);
     assert.equal(get('bw-mm-wired-basic').length, 1);
     assert.equal(get('bw-mm-wired-vdp').length, 1);
-    assert.equal(renderer.root.findAllByType('details').every(row => !row.props.open), true);
+    assert.equal(get('bw-mm-group-toggle')[0].props['aria-expanded'], true);
+    assert.equal(get('bw-mm-item-description').length, 0);
     const search = renderer.root.findByProps({type: 'search'});
     await act(async () => search.props.onChange({target: {value: 'basic'}}));
     assert.equal(get('bw-mm-wired-vdp').length, 0);
@@ -240,6 +241,8 @@ test('firmware browsing filters machine-specific media, searches wired presets a
     assert.equal(launched, true);
     await act(async () => renderer.root.findByType('select').props.onChange({target: {value: 'i80386'}}));
     assert.equal(get('bw-mm-wired-basic').length, 0);
+    assert.equal(get('bw-mm-local-386').length, 0, 'search still filters the newly selected CPU');
+    await act(async () => search.props.onChange({target: {value: ''}}));
     assert.equal(get('bw-mm-local-386').length, 1);
     renderer.unmount();
 });

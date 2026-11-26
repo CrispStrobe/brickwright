@@ -192,6 +192,7 @@ try {
         await page.goto(url, {waitUntil: 'domcontentloaded'});
         await page.getByTestId('bw-file-menu-trigger').click();
         await page.getByText('Machines…', {exact: true}).click();
+        await page.getByRole('combobox', {name: 'Machine type'}).selectOption('z80');
         await page.locator('[data-lesson-id="lesson-cpm-z80"]').getByTestId('bw-mm-lesson-run').click();
         const output = page.locator('[data-testid="bw-serial-console"]:visible').first();
         const input = page.locator('[data-testid="bw-serial-input"]:visible').first();
@@ -263,6 +264,7 @@ async function startLinux(button, inspectRow = null) {
     const device = page.getByTestId('bw-device-select');
     await device.waitFor({state: 'visible', timeout: 60000});
     await device.selectOption('__manage__');
+    await page.getByRole('combobox', {name: 'Machine type'}).selectOption('riscv32');
     const row = page.getByTestId('bw-mm-lesson').filter({hasText: 'Linux on RISC-V'});
     await row.waitFor({state: 'visible', timeout: 15000});
     if (inspectRow) await inspectRow(row);
@@ -288,6 +290,7 @@ async function startLinux(button, inspectRow = null) {
 try {
     // ── Run: the post-boot snapshot ──
     const run = await startLinux('bw-mm-lesson-run', async row => {
+        await row.getByTestId('bw-mm-item-info').click();
         const licence = await row.getByTestId('bw-mm-lesson-licence').textContent();
         check(/GPL-2\.0/.test(licence) && /LGPL-2\.1/.test(licence) && /brickwright-media-lab/.test(licence),
             'the Linux lesson row carries its GPL/LGPL licence line and names where the media come from',

@@ -70,6 +70,7 @@ function routingFixture ({deferState = false, circuitFailure = false, initialCir
     host._markReactUpdate = () => {};
     host.load = async () => {};
     host.showControllerDock = () => {};
+    host.showCardiacController = () => {};
     host.applyControllerLayout = async () => false;
     host.readStc = () => null;
     host.publishExampleTitle = () => {};

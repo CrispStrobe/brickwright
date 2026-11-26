@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
+import {typeIntoEditor} from './lib/type-into-editor.mjs';
 
 const base = process.argv[2];
 assert.ok(base, 'Pass the URL of the assembled Brickwright frontend');
@@ -8,7 +9,7 @@ const items = [
     ['i8086', 'zForth (DOS)', 'download', /49 42 64.*5 4 3 2 1/i],
     ['i8086', 'partcl Tcl (DOS)', 'download', /partcl on DOS[\s\S]*720/i],
     ['i8086', 'fe Lisp (DOS)', 'download', /\b(?:fe|42|720)\b/i],
-    ['i8086', 'uBASIC (DOS)', 'download', /uBASIC|42|720/i],
+    ['i8086', 'uBASIC (DOS)', 'download', /counting:[\s\S]*the answer/i],
     ['i80386', 'TOPBENCH', 'download', /Score:/i],
     ['z80', 'zForth on CP/M', 'download', /total=40/i],
     ['z80', 'CP/M Sieve', 'download', /prime|sieve/i],
@@ -27,6 +28,54 @@ const items = [
 const browser = await chromium.launch({headless: true,
     executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
 const failures = [];
+const expectedVideoModes = {
+    'cga-demo': 0x03,
+    'cga-gfx-demo': 0x04,
+    'vga-demo': 0x13,
+    'hercules-demo': 0x100,
+    'ega-demo': 0x0d
+};
+
+async function exercisePreset (page, name) {
+    const preset = name.replace(/^bw-mm-8086-/, '');
+    if (Object.hasOwn(expectedVideoModes, preset)) {
+        await page.waitForFunction(mode => window.__benchTarget?.video()?.mode === mode,
+            expectedVideoModes[preset]);
+    }
+    if (preset === 'cga-demo') {
+        await page.waitForFunction(() => {
+            const label = '8086 PC/XT - CGA text ready';
+            const bytes = window.__benchTarget?.readMem('mem', 0xb8000, label.length * 2);
+            return bytes && String.fromCharCode(...bytes.filter((_, index) => index % 2 === 0)) ===
+                label;
+        });
+    } else if (preset === 'serial-monitor') {
+        const input = page.getByTestId('bw-serial-input');
+        await input.fill('SERIAL-ECHO-OK');
+        await input.press('Enter');
+        await page.getByTestId('bw-serial-console').filter({hasText: 'SERIAL-ECHO-OK'}).waitFor();
+    } else if (preset === 'timer-demo') {
+        const readCounter = () => {
+            const bytes = window.__benchTarget?.readMem('mem', 0x500, 2);
+            return bytes && (bytes[0] | (bytes[1] << 8));
+        };
+        const before = await page.evaluate(readCounter);
+        await page.waitForFunction(previous => {
+            const bytes = window.__benchTarget?.readMem('mem', 0x500, 2);
+            return bytes && (bytes[0] | (bytes[1] << 8)) !== previous;
+        }, before);
+    } else if (preset === 'blink-demo') {
+        const bargraph = page.getByTestId('bw-ctl-bargraph-PC GPIO');
+        const before = (await bargraph.innerText()).trim();
+        await page.waitForFunction(previous =>
+            document.querySelector('[data-testid="bw-ctl-bargraph-PC GPIO"]')?.textContent.trim() !== previous,
+        before);
+        const button = page.getByTestId('bw-ctl-button-PC switch');
+        await button.click();
+        assert.equal(await button.getAttribute('aria-pressed'), 'true');
+    }
+}
+
 async function run([machine, name, route, expected]) {
     const page = await browser.newPage({viewport: {width: 1440, height: 900}, serviceWorkers: 'block'});
     page.setDefaultTimeout(12000);
@@ -60,7 +109,12 @@ async function run([machine, name, route, expected]) {
                 .getByRole('button',{name:'Run',exact:true});
         } else if (route === 'lesson' || route === 'cold') {
             button = page.locator(`[data-lesson-id="${name}"]`).getByTestId(route === 'cold' ? 'bw-mm-lesson-cold' : 'bw-mm-lesson-run');
-        } else button = page.getByTestId(name);
+        } else {
+            if (/^bw-mm-8086-(cga|vga|ega|hercules)/.test(name)) {
+                await page.getByTestId('bw-mm-8086-graphics').selectOption(name.slice('bw-mm-8086-'.length));
+            }
+            button = page.getByTestId(name);
+        }
         await button.click();
         if (/keyboard-demo|desk-demo/.test(name)) {
             await page.getByTestId('bw-machine-console').focus();
@@ -76,6 +130,14 @@ async function run([machine, name, route, expected]) {
             await page.waitForTimeout(250);
         } while (Date.now() < deadline);
         assert.ok(expected ? expected.test(state.surfaces) : state.video || state.gpio, JSON.stringify(state));
+        if (route === 'preset') await exercisePreset(page, name);
+        if (name === 'uBASIC (DOS)') {
+            assert.match(await page.locator('.cm-content').innerText(), /gosub 100/i);
+            await typeIntoEditor(page, '10 PRINT "EDITED BASIC"\n20 PRINT 11*9\n30 END\n');
+            await page.getByTitle('Go', {exact: true}).click();
+            const output = page.locator('[data-bw-stage-dock="controller"]').getByTestId('bw-serial-console');
+            await output.filter({hasText: /EDITED BASIC[\s\S]*99/}).waitFor();
+        }
         assert.deepEqual(errors, []);
         if (name !== 'TOPBENCH') {
             const panel = page.locator('[data-bw-stage-dock="controller"]');

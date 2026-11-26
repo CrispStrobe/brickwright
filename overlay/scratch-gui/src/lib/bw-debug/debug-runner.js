@@ -3529,7 +3529,11 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                 bench.sendKeys(typeof data === 'number'
                     ? String.fromCharCode(data & 0xff) : String(data));
             };
-            runner.i8086MediaIo = {serial: true, terminalName: 'DOS Console'};
+            runner.i8086MediaIo = {
+                serial: true,
+                terminalName: 'DOS Console',
+                ...(bootMedia.i8086Assembly ? {display: 'cga', dosKeyboard: true, gpio: 'A'} : {})
+            };
             runner.dosScreenText = bench.screenText;
             if (exited === null) {
                 setStatus('ready', S('ready.dosBench', {

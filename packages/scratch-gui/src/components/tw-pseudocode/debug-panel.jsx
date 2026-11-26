@@ -371,6 +371,7 @@ class DebugPanel extends React.Component {
         // Its post-boot snapshot (the lesson's default Run), likewise.
         const {linuxSnapshot} = e.detail || {};
         const {nativeBlocks, machinePreset, i80386Media, machineConfig6502, machineConfig8086} = e.detail || {};
+        const {i8086Assembly} = e.detail || {};
         const {dosArgs, dosFiles, dosVariant, x86Variant, spectrum, dosFastStart, cpmLaunch, cpmFiles, picoWakeOnPrompt} = e.detail || {};
         if (!bytes && !riscvImage) return;
         // THE SAME LOAD, DELIVERED TWICE. circuit-tab stashes every media-load
@@ -419,6 +420,7 @@ class DebugPanel extends React.Component {
                 ? (linuxSnapshot instanceof Uint8Array ? linuxSnapshot : new Uint8Array(linuxSnapshot)) : null,
             profile: profile || null,
             i8086Hardware,
+            i8086Assembly,
             dosArgs,
             dosFiles,
             dosVariant,
@@ -516,7 +518,7 @@ class DebugPanel extends React.Component {
                 keyboardSet: spectrum ? 'spectrum' : ['i80286', 'i80386'].includes(nextKind) ? 'at-set1' : 'xt-set1',
                 keyInFn: spectrum ? names => runner.setSpectrumKeys(names)
                     : typeof runner.keyIn === 'function' ? sc => runner.keyIn(sc) : null,
-                serialInFn: machinePreset === 'CPM64K_TMS9918' ? byte => runner.sendSerial(byte) : null,
+                serialInFn: machinePreset === 'CPM64K_TMS9918' || io?.dosKeyboard ? byte => runner.sendSerial(byte) : null,
                 mouseInFn: typeof runner.mouseIn === 'function' ? event => runner.mouseIn(event) : null,
                 focusController: nextKind !== 'i8086'});
             if (nextKind === 'i8086') this._showPcController();
@@ -594,6 +596,7 @@ class DebugPanel extends React.Component {
         return this._onMediaLoad({detail: {
             slotId: slotId || 'rom', bytes: rom,
             profile: profile || null,
+            i8086Assembly: e.detail?.i8086Assembly === true,
             // The chips the program's own declarations require. Carried with
             // the image because they are a property of the PROGRAM, not of
             // the board the user happened to draw.
@@ -1237,7 +1240,7 @@ class DebugPanel extends React.Component {
             const input = runner.inputs.find(item => String(item.port).toUpperCase() === 'C');
             if (input && !runner.board()) {
                 const name = 'PC switch';
-                add(name, 'button', {label: 'PC0', toggle: true}, {x: 8, y: 72});
+                add(name, 'button', {label: 'PC0', toggle: true}, {x: 8, y: 104});
                 const onInput = (kind, event) => {
                     if (kind === 'input' && event.name === name) {
                         runner.setInput(input.chip, input.port, 0, event.pressed ? 0 : 1);
@@ -1250,7 +1253,7 @@ class DebugPanel extends React.Component {
         this._updatePcController = active => {
             if (active !== runner) return;
             if (gpio && panel.getWidget('PC GPIO')?.type === 'bargraph') {
-                const port = runner.outputs?.().find(item => String(item.port).toUpperCase() === 'B');
+                const port = runner.outputs?.().find(item => String(item.port).toUpperCase() === (gpio === 'A' ? 'A' : 'B'));
                 const mask = port?.value ?? 0;
                 if (panel.getWidget('PC GPIO').state.value !== mask) panel.setBargraphValue('PC GPIO', mask);
             }

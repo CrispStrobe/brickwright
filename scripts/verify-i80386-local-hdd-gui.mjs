@@ -385,6 +385,7 @@ async function runPersistenceGui () {
         if (await toggle.count() && await toggle.getAttribute('aria-pressed') === 'false') await toggle.click();
         await page.getByTestId('bw-device-select').selectOption('__manage__');
         await page.getByTestId('bw-machine-manager').waitFor();
+        await page.getByRole('combobox', {name: 'Machine type'}).selectOption('i80386');
         for (const [slot, bytes] of Object.entries({...inputs, hdd})) {
             await page.getByTestId(`bw-mm-free386-${slot}`).setInputFiles({name:`${slot}.img`,mimeType:'application/octet-stream',buffer:bytes});
         }
@@ -722,6 +723,7 @@ try {
         window.dispatchEvent(new Event('bw-open-machine-manager'));
     });
     await page.getByTestId('bw-machine-manager').waitFor();
+    await page.getByRole('combobox', {name: 'Machine type'}).selectOption('i80386');
     await page.getByTestId('bw-mm-local-disk').setInputFiles({name: 'owned-boot.img',
         mimeType: 'application/octet-stream', buffer: disk});
     await page.getByTestId('bw-mm-local-conf').setInputFiles({name: 'owned.conf',

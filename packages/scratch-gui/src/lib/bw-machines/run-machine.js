@@ -13,6 +13,7 @@
 // so a Node test drives this without a DOM or the network.
 
 import {activateConfig, defaultImageFetcher} from './activate.js';
+import {ubasicSource} from './ubasic-source.js';
 export function runCpmCom(config, bytes) {
     const url = 'local-media:compiled.com';
     const compiled = {...config, slots: {...config.slots, com: {url}}};
@@ -81,6 +82,13 @@ export async function runMachineConfig(config, opts = {}) {
     if (bm.dosVariant) detail.dosVariant = bm.dosVariant;
     if (bm.dosArgs) detail.dosArgs = bm.dosArgs;
     if (bm.dosFiles) detail.dosFiles = bm.dosFiles;
+    if (opts.dosSource) {
+        const {name, text} = opts.dosSource;
+        if (activated.targetKind !== 'i8086' || bm.slot !== 'exe' || !bm.dosFiles?.has(name)) {
+            throw new Error('The DOS image does not declare this program file.');
+        }
+        detail.dosFiles = new Map(bm.dosFiles).set(name, new TextEncoder().encode(ubasicSource(text)));
+    }
     if (typeof bm.romAt === 'number') detail.romAt = bm.romAt;
     if (bm.geometry) detail.geometry = {...bm.geometry};
     // A Linux kernel boots WITH its initramfs: both were fetched and
