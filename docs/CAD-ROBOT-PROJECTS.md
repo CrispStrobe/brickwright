@@ -1884,3 +1884,28 @@ and all 18 actuator and worker telemetry tests passed. Brickwright pins
 SDK `68666ce`, which precedes the two native sensor optimizations.
 Sustained 1× in the production app remains open.
 [CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/156bf088187b3fe6226b7b57d4074d8a526c239d)
+
+### Reuse authored distance-sensor coordinates
+
+The simulation worker carries the sensor ID into the physics world.
+For stable sensor definitions, the world reuses authored sensor offsets
+and directions and reuses the final endpoints at the same physics
+boundary. Changing a mounting body, origin, direction or range refreshes
+the cached coordinates. The cache holds at most 32 sensors per world.
+
+A paired Chrome worker run used 32 rays on a moving welded assembly for
+200 substeps. All 6,400 distances and all frame payloads matched exactly
+in both run orders. Invalid rays left simulation time unchanged and
+restarting restored the initial poses.
+
+| Measurement | Before | After |
+| --- | ---: | ---: |
+| Authored ray transforms | 12,800 | 32 |
+| Ray projections into the scene | 12,800 | 6,432 |
+| Validation and sampling, first order | 105.1 ms | 75.8 ms |
+| Validation and sampling, reverse order | 76.9 ms | 64.6 ms |
+
+The timing runs excluded transform counters. Physics type checking
+and all 18 actuator and worker telemetry tests passed. Brickwright
+pins SDK `68666ce`. Sustained 1× in the production app remains open.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/e1fcb4142864ef175268413d5b3632cd518a490e)
