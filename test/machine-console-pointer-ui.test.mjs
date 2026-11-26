@@ -16,7 +16,11 @@ async function loadConsole() {
     const sourceUrl = new URL('../overlay/scratch-gui/src/components/tw-pseudocode/machine-console.jsx', import.meta.url);
     const tempUrl = new URL(`./machine-console-test-${randomUUID()}.mjs`, sourceUrl);
     const reactUrl = pathToFileURL(guiRequire.resolve('react')).href;
-    const source = (await readFile(sourceUrl, 'utf8')).replace("from 'react'", `from '${reactUrl}'`);
+    const header = (await readFile(new URL('./machine-screen-header.jsx', sourceUrl), 'utf8'))
+        .replace("import React from 'react';", '').replace('export default function', 'function');
+    const source = (await readFile(sourceUrl, 'utf8'))
+        .replace("from 'react'", `from '${reactUrl}'`)
+        .replace("import MachineScreenHeader from './machine-screen-header.jsx';", header);
     const transformed = babel.transformSync(source, {
         filename: 'machine-console.jsx', babelrc: false, configFile: false,
         presets: [[guiRequire.resolve('@babel/preset-react'), {runtime: 'classic'}]]

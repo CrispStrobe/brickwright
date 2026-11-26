@@ -1,4 +1,5 @@
 import React from 'react';
+import MachineScreenHeader from './machine-screen-header.jsx';
 import {keyToBytes} from '../../lib/bw-debug/terminal-keys.js';
 import {pcSet1Bytes} from '../../lib/bw-machines/pc-scancodes.js';
 import {ps2ButtonBit, ps2Delta} from '../../lib/bw-machines/ps2-pointer.js';
@@ -140,18 +141,10 @@ export default function MachineConsole({widget, keyIn, serialIn, mouseIn, keyboa
             onFocus={() => setFocused(true)} onBlur={() => { setFocused(false); release(); }}
             style={{width: '100%', height: '100%', minHeight: 0, background: '#000',
                 display: 'flex', flexDirection: 'column', outline: focused ? '2px solid #60a5fa' : 'none'}}>
-            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '4px 8px', background: '#111827', color: '#cbd5e1', fontSize: 12}}>
-                <span>{widget.name}{(keyIn || serialIn) && (focused ? ' · Keyboard active' : ' · Click screen for keyboard')}
-                    {mouseIn && ' · Mouse'}</span>
-                {onToggleFullScreen && <button type="button" onClick={toggleFull} data-testid="bw-machine-fullscreen"
-                    onPointerDown={e => e.stopPropagation()} onPointerUp={e => e.stopPropagation()}
-                    onKeyDown={e => e.stopPropagation()} onKeyUp={e => e.stopPropagation()}
-                    style={{background: '#374151', color: '#fff', border: 0, borderRadius: 4,
-                        padding: '4px 9px', cursor: 'pointer'}}>
-                    {isFullScreen ? 'Exit full screen' : 'Full screen'}
-                </button>}
-            </div>
+            <MachineScreenHeader title={widget.name}
+                help={(keyIn || serialIn) && (mouseIn ? 'Click the screen to use the keyboard and mouse.'
+                    : 'Click the screen to type into the machine.')}
+                isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen && toggleFull} />
             <div onPointerMove={pointerMove} onPointerDown={pointerDown} onPointerUp={pointerUp}
                 onLostPointerCapture={() => {
                     if (buttons.current) { buttons.current = 0; mouseIn?.({dx: 0, dy: 0, buttons: 0}); }

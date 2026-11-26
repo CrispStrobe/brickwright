@@ -16,6 +16,9 @@ class Controls extends React.Component {
         if (e.shiftKey) {
             this.props.vm.setTurboMode(!this.props.turbo);
         } else {
+            const intent = {editor: this.props.activeTabIndex === 0 ? 'blocks' : null};
+            const codeRun = new CustomEvent('bw-run-active-code', {cancelable: true, detail: intent});
+            if (!window.dispatchEvent(codeRun)) return;
             const runtime = this.props.vm.runtime;
             if (window.__bwMachineExtracted?.kind === 'cardiac') {
                 window.dispatchEvent(new CustomEvent('bw-cardiac-run-request'));
@@ -50,7 +53,9 @@ class Controls extends React.Component {
             // the VM stepped first (task B7, measured in a real browser: `turn on
             // led` at 68.7 ms, the clear at 174 ms). vm.greenFlag() only queues the
             // hats; the scripts run on the VM's next step, after this returns.
-            window.dispatchEvent(new CustomEvent('bw-green-flag'));
+            window.dispatchEvent(new CustomEvent('bw-green-flag', {
+                detail: {runMachine: !intent.editor}
+            }));
             this.props.vm.greenFlag();
         }
     }
@@ -68,13 +73,14 @@ class Controls extends React.Component {
         window.setTimeout(() => window.dispatchEvent(new CustomEvent('bw-stop-all')), 0);
     }
     render () {
-        const {vm, isStarted, projectRunning, turbo, ...props} = this.props;
+        const {activeTabIndex, vm, isStarted, projectRunning, turbo, ...props} = this.props;
         return <ControlsComponent {...props} active={projectRunning} turbo={turbo}
             onGreenFlagClick={this.handleGreenFlagClick} onStopAllClick={this.handleStopAllClick} />;
     }
 }
 
 Controls.propTypes = {
+    activeTabIndex: PropTypes.number,
     isStarted: PropTypes.bool.isRequired,
     projectRunning: PropTypes.bool.isRequired,
     turbo: PropTypes.bool.isRequired,
@@ -82,6 +88,7 @@ Controls.propTypes = {
 };
 
 const mapStateToProps = state => ({
+    activeTabIndex: state.scratchGui.editorTab.activeTabIndex,
     isStarted: state.scratchGui.vmStatus.running,
     projectRunning: state.scratchGui.vmStatus.running,
     turbo: state.scratchGui.vmStatus.turbo

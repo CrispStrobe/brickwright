@@ -7,7 +7,8 @@ const MEDIA_ROOT = `https://raw.githubusercontent.com/CrispStrobe/brickwright-me
 
 export const libraryMedia = [
     {id: 'forth-cpm', title: 'zForth on CP/M', machine: 'z80', license: 'MIT'},
-    {id: 'cpm-software', title: 'CP/M Sieve', machine: 'z80', license: 'BSD-2-Clause'},
+    {id: 'cpm-software', title: 'CP/M Sieve', machine: 'z80', license: 'BSD-2-Clause',
+        code: {language: 'c', path: 'src/sieve.c'}},
     {id: 'fe-dos', title: 'fe Lisp (DOS)', machine: 'i8086', license: 'MIT'},
     {id: 'forth-dos', title: 'zForth (DOS)', machine: 'i8086', license: 'MIT'},
     {id: 'tcl-dos', title: 'partcl Tcl (DOS)', machine: 'i8086', license: 'MIT'},
@@ -33,4 +34,13 @@ export async function openLibraryMedia (item) {
     const verdict = validateMachineConfig(config);
     if (!verdict.ok) throw new Error(verdict.errors.join('; '));
     return config;
+}
+
+export async function readLibraryCode (item) {
+    if (!item.code) return null;
+    const url = new URL(`${item.id}/${item.code.path}`, MEDIA_ROOT);
+    const response = await fetch(url, {redirect: 'error'});
+    if (!response.ok) throw new Error(`Source HTTP ${response.status}`);
+    return {language: item.code.language, text: await response.text(), title: item.title,
+        machine: item.machine, url: url.href};
 }

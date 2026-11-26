@@ -919,9 +919,10 @@ class CircuitTab extends React.Component {
         }
     }
 
-    handleProjectStart () {
+    handleProjectStart (event) {
         if (this._coupledBoard) return;
-        this.setState(state => ({runToken: (state.runToken || 0) + 1}));
+        this.setState(state => ({runToken: (state.runToken || 0) + 1,
+            runMachineOnFlag: event?.detail?.runMachine !== false}));
     }
 
     handleSimulationStart () {
@@ -2762,6 +2763,7 @@ class CircuitTab extends React.Component {
                     {profileReactSubtree(React, 'DebugPanel', (<DebugPanel
                         clockHz={(stc && Number(stc.clock)) || 11059200}
                         runToken={this.state.runToken}
+                        runMachineOnFlag={this.state.runMachineOnFlag}
                         stopToken={this.state.stopToken}
                         s040PartIds={this.state.s040PartIds}
                         onRunnerChange={this.handleRunnerChange}

@@ -561,6 +561,7 @@ const GUIComponent = props => {
     if (!controllerPanelRef.current) controllerPanelRef.current = new ControllerPanel();
     const controllerPanel = controllerPanelRef.current;
     const [machineConsole, setMachineConsole] = React.useState(null);
+    const [machineTerminal, setMachineTerminal] = React.useState(null);
     // Expose on vm.runtime so ControllerExtension can find it, and wire the
     // LIVE variable binding: input widgets write program variables, display
     // widgets show them (bindPanelToVariables polls via requestAnimationFrame).
@@ -807,6 +808,15 @@ const GUIComponent = props => {
         window.addEventListener('bw-machine-video-stop', onStop);
         // Imperative API so a run path need not know the event names.
         window.bwMirrorMachineVideo = payload => start(payload);
+        window.bwMirrorMachineTerminal = (session, focus) => {
+            setMachineTerminal(session);
+            if (focus) {
+                controllerPanel.setMode('play');
+                window.dispatchEvent(new CustomEvent('bw-settings-change',
+                    {detail: {key: 'bw-debug-dock', value: 'controller'}}));
+            }
+            return () => setMachineTerminal(active => active === session ? null : active);
+        };
         window.bwStopMachineVideo = () => stop();
         // "Run this machine config": resolve its media and boot it via the
         // existing media-load path, carrying its declared screen widget so the
@@ -821,6 +831,8 @@ const GUIComponent = props => {
             window.removeEventListener('bw-machine-video', onStart);
             window.removeEventListener('bw-machine-video-stop', onStop);
             if (window.bwMirrorMachineVideo) delete window.bwMirrorMachineVideo;
+            delete window.bwMirrorMachineTerminal;
+            setMachineTerminal(null);
             if (window.bwStopMachineVideo) delete window.bwStopMachineVideo;
             if (window.bwRunMachine) delete window.bwRunMachine;
             if (window.bwSteerMachineKeyboard) delete window.bwSteerMachineKeyboard;
@@ -982,7 +994,16 @@ const GUIComponent = props => {
     const machineManagerModal = showMachines ? (
         <React.Suspense fallback={null}>
             <MachineManager store={getMachineStore()} locale={props.locale} preferredMachine={showMachines.kind}
-                onRun={(cfg, opts) => runMachineConfig(cfg, opts)}
+                onRun={async (cfg, opts) => {
+                    const started = await runMachineConfig(cfg, opts);
+                    if (started && opts?.code) {
+                        const program = {...opts.code, run: () => runMachineConfig(cfg)};
+                        vm.runtime.bwLibraryCode = program;
+                        window.dispatchEvent(new CustomEvent('bw-library-code', {detail: program}));
+                        props.onActivateTab(CODE_TAB_INDEX);
+                    }
+                    return started;
+                }}
                 wiredPresets={showMachines.presets}
                 onOpenExample={(exampleId, codeOnly) => new Promise((resolve, reject) => {
                     props.onActivateTab(codeOnly ? 3 : CIRCUIT_TAB_INDEX);
@@ -1417,7 +1438,7 @@ const GUIComponent = props => {
                                 toggle buttons) stays reachable in every mode.
                                 In controller mode the stage canvas is hidden
                                 so the panel owns the full column. */}
-                            <div hidden={Boolean(isFullScreen && dockMode === 'controller' && machineConsole)}
+                            <div hidden={isFullScreen && dockMode === 'controller'}
                                 style={circuitOwnsStage || dockMode === 'controller' || dockMode === 'arcade' || dockMode === 'cpx' || dockMode === 'arduboy' || dockMode === 'makecode' || dockMode === 'spikearena' || dockMode === 'cad' || dockMode === 'robots' ? {maxHeight: 44, overflow: 'hidden', flexShrink: 0, borderBottom: '3px solid #475569', background: '#cbd5e1', boxShadow: '0 3px 6px rgba(0,0,0,0.22)', position: 'relative', zIndex: 5, boxSizing: 'border-box'} : undefined}>
                                 <EditorErrorBoundary name="Stage"><StageWrapper
                                     isFullScreen={isFullScreen}
@@ -1499,6 +1520,7 @@ const GUIComponent = props => {
                                             manageBoardBinding={false}
                                             vm={vm}
                                             machineConsole={machineConsole}
+                                            machineTerminal={machineTerminal}
                                             sendBasicLine={vm?.runtime?.bwBasicSerial}
                                             cp1WidgetSlot={cp1Attached ? setCp1ControllerSlot : undefined}
                                             cardiacWidgetSlot={cardiacAttached ? setCardiacControllerSlot : undefined}

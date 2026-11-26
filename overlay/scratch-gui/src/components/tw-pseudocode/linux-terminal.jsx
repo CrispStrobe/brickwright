@@ -56,6 +56,7 @@ class LinuxTerminal extends React.Component {
         this.host = React.createRef();
         this.term = null;
         this.unsubscribe = null;
+        this.resizeObserver = null;
         this.disposed = false;
         this.state = {phase: 'loading', error: null};
     }
@@ -82,6 +83,7 @@ class LinuxTerminal extends React.Component {
         this.disposed = true;
         if (this.unsubscribe) this.unsubscribe();
         this.unsubscribe = null;
+        this.resizeObserver?.disconnect();
         if (this.term) this.term.dispose();
         this.term = null;
     }
@@ -118,6 +120,18 @@ class LinuxTerminal extends React.Component {
         term.onBinary(data => send(Array.from(data, ch => ch.charCodeAt(0) & 0xff)));
         term.open(this.host.current);
         this.unsubscribe = terminal.subscribe(bytes => term.write(bytes));
+        const viewport = this.host.current.parentElement?.parentElement;
+        if (viewport && typeof ResizeObserver !== 'undefined') {
+            this.resizeObserver = new ResizeObserver(([entry]) => {
+                const {width, height} = entry.contentRect;
+                const size = Math.max(10, Math.min(24, Math.floor(Math.min(
+                    (width - 12) / (term.cols * 0.61),
+                    (height - 12) / (term.rows * 1.25)
+                ))));
+                if (term.options.fontSize !== size) term.options.fontSize = size;
+            });
+            this.resizeObserver.observe(viewport);
+        }
         this.setState({phase: 'ready'});
     }
 
@@ -134,9 +148,10 @@ class LinuxTerminal extends React.Component {
                         borderRadius: 4, minHeight: 60
                     }}
                 />
-                <div style={{color: error ? '#e74c3c' : '#7f8c8d', fontSize: 11, marginTop: 4}}>
+                {(error || this.props.hint) && <div
+                    style={{color: error ? '#e74c3c' : '#7f8c8d', fontSize: 11, marginTop: 4}}>
                     {error || this.props.hint}
-                </div>
+                </div>}
             </div>
         );
     }

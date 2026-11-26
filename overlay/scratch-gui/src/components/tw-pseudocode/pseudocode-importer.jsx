@@ -1342,9 +1342,59 @@ class PseudocodeImporter extends React.Component {
 
     onHardwareState = () => this.forceUpdate();
 
+    openLibraryCode = event => {
+        const program = event.detail;
+        if (!program) return;
+        this.setState(state => ({
+            lang: program.language, libraryProgram: program, status: '', output: null,
+            cardiacActive: false, cp1Active: false, kim1Active: false, microtronicActive: false,
+            buffers: {...state.buffers, [program.language]: program.text,
+                pseudocode: `DEVICE ${program.machine}\n${(state.buffers.pseudocode || '').replace(/^DEVICE[^\n]*\n?/im, '')}`}
+        }));
+    };
+
+    runLibraryProgram = () => {
+        const program = this.state.libraryProgram;
+        if (this.activeCode() !== program.text) {
+            this.setState({status: 'Running edited CP/M C requires an SDCC build of the .COM program.'});
+            return;
+        }
+        this.setState({busy: true, status: ''});
+        Promise.resolve(program.run()).catch(error => this.setState({status: error.message}))
+            .finally(() => this.setState({busy: false}));
+    };
+
+    runActiveCode = event => {
+        if (!this.props.isVisible || this.state.cardiacActive || this.state.cp1Active ||
+            this.state.kim1Active || this.state.microtronicActive) return;
+        event.detail.editor = 'code';
+        if (!this.activeCode().trim()) return;
+        const {lang, libraryProgram, busy, running} = this.state;
+        const target = asmTargetForDevice(this.currentDevice());
+        const actions = {
+            tcl: () => target === 'riscv32' ? this.runTclOnRiscv() : this.runTclOnDosInterp(),
+            forth: () => target === 'riscv32' ? this.runForthOnRiscv() : this.runForthOnDosInterp(),
+            fe: () => target === 'riscv32' ? this.runFeOnRiscv() : this.runFeOnDosInterp(),
+            basic: () => this.runBasic(),
+            python: () => this.run(),
+            javascript: () => this.run(),
+            asm: target && (() => this.assembleAndRun()),
+            c: libraryProgram ? this.runLibraryProgram : target === 'riscv32' ? () => this.runCOnRiscv()
+                : target === 'z80' ? () => this.runCOnZ80()
+                    : target === 'i8086' ? () => this.runCOn8086()
+                        : sketchBoardFor(this.currentDevice()) ? () => this.runSketchOnAvr() : null
+        };
+        if (!actions[lang]) return;
+        event.preventDefault();
+        if (!busy && !running) actions[lang]();
+    };
+
     componentDidMount () {
         this._unmounted = false;
         window.addEventListener('bw-hardware-state', this.onHardwareState);
+        window.addEventListener('bw-library-code', this.openLibraryCode);
+        window.addEventListener('bw-run-active-code', this.runActiveCode);
+        this.openLibraryCode({detail: this.props.vm?.runtime?.bwLibraryCode});
         window.addEventListener('bw-read-blocks-into-code', this.fromBlocks);
         this._unregisterCodeMenu = registerEditorMenuActions('code', () => this.codeMenuActions());
         window.addEventListener('bw-microbit-run-request', this._onMicrobitRunRequest);
@@ -2713,6 +2763,8 @@ class PseudocodeImporter extends React.Component {
 
     componentWillUnmount () {
         window.removeEventListener('bw-hardware-state', this.onHardwareState);
+        window.removeEventListener('bw-library-code', this.openLibraryCode);
+        window.removeEventListener('bw-run-active-code', this.runActiveCode);
         window.removeEventListener('bw-read-blocks-into-code', this.fromBlocks);
         this.setMaximizedChrome(false);
         this._unmounted = true;
@@ -3000,7 +3052,9 @@ class PseudocodeImporter extends React.Component {
         // dropped and the tab filled with an empty program. Since D5 the parser
         // refuses a line it cannot read, so that became an error that kept the
         // learner on the ASM tab. Just switch.
-        if (from === 'asm' || (existing && existing.trim()) || !src || !src.trim()) {
+        const program = from === 'pseudocode' && src ?
+            src.replace(/^DEVICE\s+[^\n]*(?:\n|$)/im, '') : src;
+        if (from === 'asm' || (existing && existing.trim()) || !program?.trim()) {
             this.setState({lang: to, output: null, status: '', emptyTabOffer: null});
             return;
         }
@@ -3929,6 +3983,7 @@ class PseudocodeImporter extends React.Component {
     // any hard blockers ("no ADC on this chip"). Code without pins just gets its
     // DEVICE line rewritten — there is nothing to refuse.
     async setDevice (deviceId) {
+        if (this.state.libraryProgram && deviceId !== '__manage__') this.setState({libraryProgram: null});
         if (deviceId === 'kosmos-cp1') return this.openCp1Language();
         if (deviceId === '__manage__') {
             // The "Manage machines…" entry is a command, not a device: open the
@@ -6233,7 +6288,7 @@ class PseudocodeImporter extends React.Component {
                             ) : null}
                         {/* N1: the Z80 bench's C ▶, gated by the route function that
                             decides what a Z80 is (asmTargetForDevice). */}
-                        {this.state.lang === 'c' && asmTargetForDevice(this.currentDevice()) === 'z80' ? (
+                        {this.state.lang === 'c' && !this.state.libraryProgram && asmTargetForDevice(this.currentDevice()) === 'z80' ? (
                                 <button onClick={this.runCOnZ80} disabled={this.state.busy}
                                     data-testid={menu ? "bw-run-c-z80-menu" : "bw-run-c-z80"}
                                     title={this.L.runCZ80Title}
@@ -6387,6 +6442,13 @@ class PseudocodeImporter extends React.Component {
                                 {this.L.runTclRiscv}
                             </button>
                         ) : null}
+                        {this.state.lang === this.state.libraryProgram?.language && (
+                            <button type="button" style={actionBtn} onClick={this.runLibraryProgram}
+                                disabled={this.state.busy} title="Run the published CP/M program"
+                                data-testid={menu ? 'bw-library-code-run-menu' : 'bw-library-code-run'}>
+                                ▶ {this.state.libraryProgram.title}
+                            </button>
+                        )}
                         {this.state.lang === 'c' ? (
                             <button type="button" onClick={() => this.setState(s => ({showCInfo: !s.showCInfo}))}
                                 style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18,

@@ -25,7 +25,7 @@ import {localAtBiosMachine, localFreedosVgaMachine} from '../../lib/bw-machines/
 import {defaultImageFetcher} from '../../lib/bw-machines/activate.js';
 import {remoteMachineImagesAllowed} from '../../lib/distribution-policy.js';
 import {CIRCUIT_LIBRARY_MACHINES, libraryCircuitPrograms} from '../../lib/bw-machines/library-circuits.js';
-import {libraryMedia, openLibraryMedia, readMediaManifest} from '../../lib/bw-machines/library-media.js';
+import {libraryMedia, openLibraryMedia, readLibraryCode, readMediaManifest} from '../../lib/bw-machines/library-media.js';
 import {lessonMachines, lessonT} from '../../lib/bw-machines/lessons.js';
 
 const T = {
@@ -413,7 +413,8 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                             {detail: {run: item.benchmark}}));
                                         return true;
                                     }
-                                    return onRun(await openLibraryMedia(item));
+                                    const [config, code] = await Promise.all([openLibraryMedia(item), readLibraryCode(item)]);
+                                    return onRun(config, {code});
                                 })}>
                                 {t('run')}
                             </button>

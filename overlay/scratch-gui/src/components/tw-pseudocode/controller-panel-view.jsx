@@ -5,6 +5,7 @@ import {clearControllerPanel, createWidgetButtonInputs, releaseMomentaryButtons,
     serializeControllerPanel} from '../../lib/controller-inputs.js';
 import EditorHelp from '../gui/editor-help.jsx';
 import MachineConsole from './machine-console.jsx';
+import MachineTerminal from './machine-terminal.jsx';
 import {activateUndoSurface, notifyUndoState, registerUndoSurface} from '../../lib/global-undo.js';
 import {addCardiacFace, addKim1Face, addMicrotronicFace, isCardiacFace, isKim1Face, isMicrotronicFace, MACHINE_WIDGET_HEIGHT} from '../../lib/controller-machine-faces.js';
 import {LOGIKUS_LAMP_WIDGETS, LOGIKUS_SWITCH_WIDGETS, LOGIKUS_TEST_WIDGET} from '../../lib/logikus/controller-bridge.js';
@@ -1214,7 +1215,6 @@ function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBi
         keyboard: 'Keyboard', bargraph: 'Bar Graph', simplevga: serialRoute ? 'Serial' : displayLabel,
         mono_lcd: 'Mono LCD', rgb_light: 'RGB Light',
     };
-    const pcSerial = runtime?.bwPcSerial?.name === widget.name ? runtime.bwPcSerial : null;
     const bindingLabel = widget.binding
         ? (widget.binding.target === 'part'
             ? `→ ${widget.binding.partId}${widget.binding.param ? '.' + widget.binding.param : ''}`
@@ -1334,9 +1334,9 @@ function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBi
             {widget.type === 'terminal' && (
                 <React.Fragment>
                     <TerminalWidget widget={widget} text={serialRoute?.text ?? widget.state.text} />
-                    {mode === 'play' && (serialRoute || pcSerial) && <SerialKeyboard name={widget.name}
-                        label={serialRoute?.source || pcSerial?.label}
-                        sendLine={line => sendConsoleLine((serialRoute || pcSerial).runner, line)} />}
+                    {mode === 'play' && serialRoute && <SerialKeyboard name={widget.name}
+                        label={serialRoute.source}
+                        sendLine={line => sendConsoleLine(serialRoute.runner, line)} />}
                 </React.Fragment>
             )}
 
@@ -1857,10 +1857,17 @@ class ControllerPanelView extends React.Component {
                     run: () => this._addMachineWidget(() => sendLogikus('add-control', {name}))};
             })
         ].filter(Boolean);
-        const machineWidget = mode === 'play' && this.props.machineConsole
+        const screen = mode === 'play' && this.props.machineConsole
             ? widgets.find(w => w.name === this.props.machineConsole.name && w.type === 'simplevga')
             : null;
-        const machineFullScreen = Boolean(machineWidget && this.props.isFullScreen);
+        const session = mode === 'play' ? this.props.machineTerminal : null;
+        const showTerminal = session && (screen ? this.state.machineSurface === 'terminal' :
+            this.state.machineSurface !== 'widgets' || !widgets.length);
+        const terminal = showTerminal ? session : null;
+        const machineWidget = showTerminal ? null : screen;
+        const machineFullScreen = Boolean((machineWidget || terminal) && this.props.isFullScreen);
+        const toggleMachineFullScreen = this.props.isFullScreen ?
+            this.props.onExitFullScreen : this.props.onEnterFullScreen;
 
         return (
             <div style={{
@@ -1874,13 +1881,20 @@ class ControllerPanelView extends React.Component {
                 <div data-widgets-toolbar style={{
                     display: machineFullScreen ? 'none' : 'flex', alignItems: 'center', flexWrap: 'nowrap', gap: 3,
                     minWidth: 0, padding: '4px 6px',
-                    paddingTop: this.props.isFullScreen ? 'calc(env(safe-area-inset-top, 0px) + 56px)' : 4,
                     borderBottom: '1px solid #e2e8f0', background: '#fff', flexShrink: 0
                 }}>
                     <span title={t('title')} style={{flex: '1 1 auto', minWidth: 0, overflow: 'hidden',
                         textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 700, fontSize: 12, color: '#7C3AED'}}>
                         {t('title')}
                     </span>
+                    {session && (screen || widgets.length > 0) && (
+                        <select aria-label="Controller surface" title="Controller surface"
+                            value={terminal ? 'terminal' : 'widgets'}
+                            onChange={event => this.setState({machineSurface: event.target.value})}>
+                            <option value="widgets">{screen ? 'Screen' : 'Widgets'}</option>
+                            <option value="terminal">{session.title}</option>
+                        </select>
+                    )}
                     <EditorHelp editor="Widgets" label="Widgets" locale={this.props.locale} />
                     {widgets.some(widget => widget.config.logikus === true) && (
                         <button type="button" data-testid="bw-open-logikus"
@@ -2052,7 +2066,7 @@ class ControllerPanelView extends React.Component {
                         if (e.target === e.currentTarget) this.setState({ selected: null });
                     }}>
                     {cp1WidgetSlot && <div ref={cp1WidgetSlot} data-cp1-widget-slot hidden={machineFullScreen} />}
-                    {widgets.length === 0 && !cp1WidgetSlot && (
+                    {widgets.length === 0 && !cp1WidgetSlot && !terminal && (
                         <div style={{
                             color: '#94a3b8', fontSize: 14, textAlign: 'center',
                             padding: '40px 20px',
@@ -2065,9 +2079,13 @@ class ControllerPanelView extends React.Component {
                         keyIn={this.props.machineConsole.keyIn}
                         serialIn={this.props.machineConsole.serialIn}
                         isFullScreen={this.props.isFullScreen}
-                        onToggleFullScreen={this.props.isFullScreen ? this.props.onExitFullScreen : this.props.onEnterFullScreen}
+                        onToggleFullScreen={toggleMachineFullScreen}
                         mouseIn={this.props.machineConsole.mouseIn} />}
-                    <div hidden={machineFullScreen} style={machineWidget || (cp1WidgetSlot && widgets.length) ? {
+                    {terminal && <div style={{height: '100%', minHeight: 0}}>
+                        <MachineTerminal session={terminal} isFullScreen={this.props.isFullScreen}
+                            onToggleFullScreen={toggleMachineFullScreen} />
+                    </div>}
+                    <div hidden={machineFullScreen || Boolean(terminal)} style={machineWidget || (cp1WidgetSlot && widgets.length) ? {
                         position: 'relative', minHeight: cp1WidgetSlot ? 240 : undefined
                     } : undefined}>
                         {widgets.filter(widget => widget !== machineWidget).map(w => (

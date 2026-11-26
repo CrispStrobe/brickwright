@@ -17,7 +17,6 @@ import DebugCorrelatedTargets from './debug-correlated-targets.jsx';
 import {mergeTargetKinds} from '../../lib/bw-debug/target-kinds.js';
 import {reverseCycleControlStatus} from '../../lib/bw-debug/reverse-cycle-ui.js';
 import {createRunnerOwnership} from '../../lib/bw-debug/runner-ownership.js';
-import {ps2ButtonBit, ps2Delta} from '../../lib/bw-machines/ps2-pointer.js';
 import {confirmAsync, promptAsync} from '../../lib/native-dialog.js';
 import {createRawHddDownload} from '../../lib/bw-machines/raw-hdd-download.js';
 import {add6502ControllerDevices} from '../../lib/bw-debug/6502-controller-devices.js';
@@ -32,15 +31,6 @@ const SwitchPanel = React.lazy(() =>
     import(/* webpackChunkName: "bw-debug-faces" */ 'bw-circuit-ui/components/SwitchPanel.jsx')
         .then(m => ({default: m.SwitchPanel}))
 );
-// The Linux lesson's terminal (xterm.js) — lazy, its own chunk, only for a booted Linux.
-const LinuxTerminal = React.lazy(() =>
-    import(/* webpackChunkName: "bw-xterm" */ './linux-terminal.jsx')
-);
-const VdpScreen = React.lazy(() =>
-    import(/* webpackChunkName: "bw-debug-faces" */ 'bw-circuit-ui/components/VdpScreen.jsx')
-        .then(m => ({default: m.VdpScreen}))
-);
-
 /**
  * The debugger's controls: ⚑ ⏸ ⏭ ⏹, a speed dial, and what the program is doing.
  *
@@ -77,8 +67,8 @@ const L10N = {
         stepHint: 'Run to the next block boundary',
         serialHint: 'type a line, Enter sends it',
         basicStartupHint: 'Press Enter for the default',
-        terminalHint: 'Click the terminal and type: every key goes straight to Linux. ' +
-            'Ctrl-C interrupts, arrows recall history, Ctrl-Shift-V pastes. 80×24.',
+        terminalHint: 'Click the terminal and type a command at the bwb# prompt (try uname -a). ' +
+            'Ctrl-C interrupts, arrows recall history, and Ctrl-Shift-V pastes.',
         serialSend: 'Send this line to the machine (ends with CR)',
         modem: 'Blinkenrocket audio modem',
         modemHint: 'message for the badge',
@@ -148,8 +138,8 @@ const L10N = {
         stepHint: 'Bis zur nächsten Blockgrenze laufen',
         serialHint: 'Zeile eingeben, Enter sendet',
         basicStartupHint: 'Enter übernimmt den Standardwert',
-        terminalHint: 'Ins Terminal klicken und tippen: jede Taste geht direkt an Linux. ' +
-            'Strg-C bricht ab, Pfeiltasten holen frühere Befehle, Strg-Umschalt-V fügt ein. 80×24.',
+        terminalHint: 'Klicke ins Terminal und tippe am bwb#-Prompt einen Befehl ein (z. B. uname -a). ' +
+            'Strg-C bricht ab, Pfeiltasten holen frühere Befehle, Strg-Umschalt-V fügt ein.',
         serialSend: 'Diese Zeile an die Maschine senden (endet mit CR)',
         modem: 'Blinkenrocket-Audiomodem',
         modemHint: 'Nachricht für das Badge',
@@ -228,7 +218,7 @@ class DebugPanel extends React.Component {
         // order a user works in.
         this.state = {runner: null, ui: {phase: 'idle', message: ''}, kind: 'emulator', kinds: null,
             labwiredChip: '', labwiredChips: null, esp32S040McuId: '', esp32s3Console: 'uart0', samdInputError: null,
-            machineConfig: null, serialInput: '', consoleDestination: '', modemInput: '', modemStatus: null,
+            machineConfig: null, serialInput: '', consoleDestination: 'controller', modemInput: '', modemStatus: null,
             firmwareName: null,
             recordingStatus: null, reverseStatus: null, timelineStatus: null,
             sessionTransferStatus: null, hddDownloadStatus: null, hddDownloadBusy: false};
@@ -295,18 +285,6 @@ class DebugPanel extends React.Component {
          *  {slot, bytes, profile, name, romAt}. Kept off state: the bytes are
          *  runner input, not render input. */
         this._bootMedia = null;
-        /** STABLE identity, bound once: the panel re-renders on every
-         *  runner emit (rAF cadence), and an inline arrow here gave
-         *  VdpScreen a new videoFn each render — its paint effect then
-         *  cancelled and rescheduled its own rAF every frame, so the
-         *  paint callback never once ran and the screen stayed black
-         *  while the machine rendered perfect frames behind it. */
-        /** STABLE identity, bound once -- same reason as _videoFn below. An
-         *  inline arrow here would give VdpScreen a new sendScancodeFn every
-         *  render, and its key handlers are useCallback'd on that prop, so
-         *  every render would rebuild them. Returns undefined when the runner
-         *  has no keyIn, which is how VdpScreen decides not to offer a
-         *  keyboard at all. */
         /** STABLE identity, bound once -- SwitchPanel's toggle handler is
          *  useCallback'd on it, so an inline arrow would rebuild every
          *  switch's handler on every runner emit (rAF cadence). */
@@ -321,44 +299,6 @@ class DebugPanel extends React.Component {
             return r && typeof r.setInput === 'function'
                 ? r.setInput(chip, port, bit, level) : false;
         };
-        this._scancodeFn = (sc) => {
-            const r = this.state.runner;
-            if (r && typeof r.keyIn === 'function') r.keyIn(sc);
-        };
-        this._videoFn = () => {
-            const r = this.state.runner;
-            return r && typeof r.video === 'function' ? r.video() : null;
-        };
-        this._mousePoint = null;
-        this._mouseButtons = 0;
-        this._mouseMove = e => {
-            const point = {x: e.clientX, y: e.clientY};
-            const previous = this._mousePoint;
-            this._mousePoint = point;
-            if (!previous) return;
-            const dx = ps2Delta(point.x - previous.x);
-            const dy = ps2Delta(point.y - previous.y);
-            if (dx || dy) this._mouseFn({dx, dy, buttons: this._mouseButtons});
-        };
-        this._mouseDown = e => {
-            e.preventDefault();
-            e.currentTarget.querySelector('[data-vdp-screen]')?.focus();
-            this._mousePoint = {x: e.clientX, y: e.clientY};
-            this._mouseButtons |= ps2ButtonBit(e.button);
-            this._mouseFn({dx: 0, dy: 0, buttons: this._mouseButtons});
-        };
-        this._mouseUp = e => {
-            this._mouseButtons &= ~ps2ButtonBit(e.button);
-            this._mouseFn({dx: 0, dy: 0, buttons: this._mouseButtons});
-        };
-        this._mouseLeave = () => {
-            this._mousePoint = null;
-            if (this._mouseButtons) {
-                this._mouseButtons = 0;
-                this._mouseFn({dx: 0, dy: 0, buttons: 0});
-            }
-        };
-        this._mouseFn = event => this.state.runner?.mouseIn?.(event) ?? false;
     }
 
     /** Build Machine succeeded: the bus extractor's {regions, chips}.
@@ -556,7 +496,7 @@ class DebugPanel extends React.Component {
         const displayName = io?.display && `PC ${io.display === 'hercules' ? 'Hercules' : io.display.toUpperCase()}`;
         const screen = (Array.isArray(widgets)
             ? widgets.find(w => w && w.source === 'video') : null) ||
-            (nextKind === 'i80386' ? {name: 'AT VGA', type: 'simplevga', source: 'video',
+            (['i80286', 'i80386'].includes(nextKind) ? {name: 'AT VGA', type: 'simplevga', source: 'video',
                 config: {width: 640, height: 480}} : null) ||
             (displayName ? {name: displayName, type: 'simplevga', source: 'video',
                 config: {width: 640, height: 480}} : null);
@@ -571,7 +511,7 @@ class DebugPanel extends React.Component {
             typeof window !== 'undefined' &&
             typeof window.bwMirrorMachineVideo === 'function') {
             window.bwMirrorMachineVideo({videoFn: () => runner.video(), widget: screen,
-                keyboardSet: spectrum ? 'spectrum' : nextKind === 'i80386' ? 'at-set1' : 'xt-set1',
+                keyboardSet: spectrum ? 'spectrum' : ['i80286', 'i80386'].includes(nextKind) ? 'at-set1' : 'xt-set1',
                 keyInFn: spectrum ? names => runner.setSpectrumKeys(names)
                     : typeof runner.keyIn === 'function' ? sc => runner.keyIn(sc) : null,
                 serialInFn: machinePreset === 'CPM64K_TMS9918' ? byte => runner.sendSerial(byte) : null,
@@ -579,6 +519,7 @@ class DebugPanel extends React.Component {
                 focusController: nextKind !== 'i8086'});
             if (nextKind === 'i8086') this._showPcController();
         }
+        this._mountGuestTerminal(runner, runner.state(), !screen);
         // A declared keyboard widget (source:'keyIn') steers the machine: its
         // keys are drained and fed runner.keyIn (design §4.5, the input side of
         // the screen mirror). Only when the machine can actually take keys.
@@ -940,7 +881,8 @@ class DebugPanel extends React.Component {
     }
 
     syncProjectTokens (prevProps, initial) {
-        if (this.props.runToken && (initial || this.props.runToken !== prevProps.runToken)) {
+        if (this.props.runToken && (initial || this.props.runToken !== prevProps.runToken) &&
+            this.props.runMachineOnFlag !== false) {
             this.onGreenFlag();
         }
         if (!initial && this.props.stopToken && this.props.stopToken !== prevProps.stopToken) {
@@ -1009,6 +951,8 @@ class DebugPanel extends React.Component {
         this._consolePanel?.removeListener(this._onConsoleWidgetsChanged);
         this._consolePanel = null;
         if (this._routed6502Console) this._publish6502Console();
+        this._guestTerminal?.close();
+        this._guestTerminal = null;
         this._pcControllerCleanup?.();
         this._pcControllerCleanup = null;
         // Accepted release writes publish synchronously. Silence the old
@@ -1018,7 +962,6 @@ class DebugPanel extends React.Component {
         this._hddDownloadRunner = null;
         this._hddDownloadPhase = 'idle';
         this._runnerStoppedExplicitly = false;
-        this._mouseLeave();
         // The host shows a runner's board only while that runner lives (B8).
         if (this.props.onRunnerGone) this.props.onRunnerGone();
         // Stop mirroring the old machine's video / draining its keyboard into the
@@ -1073,7 +1016,11 @@ class DebugPanel extends React.Component {
                         this._watchConsoleWidgets(runner);
                         this._publish6502Console(runner, ui);
                     }
-                    this._updatePcController?.(runner, ui);
+                    this._updatePcController?.(runner);
+                    if (this._guestTerminal?.runner === runner && this._guestTerminal.raw === runner.terminal) {
+                        this._guestTerminal.update(ui);
+                    }
+                    else if (runner.terminal || ui.serialOutput?.length) this._mountGuestTerminal(runner, ui);
                     this.setState({ui});
                     // The board only exists after attach, and the tab has to be told:
                     // until it is, the designer is showing a board of its own that
@@ -1111,7 +1058,12 @@ class DebugPanel extends React.Component {
             // Loading and attaching can outlive this panel's ownership. Its
             // replacement alone may publish a Widgets display.
             if (this._runnerPromise !== owner) return;
-            this.mirrorLabwiredDisplay(runner);
+            if (this.state.kind === 'labwired') this.mirrorRunnerDisplay(runner);
+            else if (['i8086', 'i80286', 'i80386'].includes(this.state.kind) &&
+                (runner.i8086MediaIo?.display || this.state.kind !== 'i8086')) {
+                this.mirrorRunnerDisplay(runner, this.state.kind === 'i8086' ? 'xt-set1' : 'at-set1');
+            }
+            this._mountGuestTerminal(runner, runner.state());
         }
     }
 
@@ -1143,7 +1095,7 @@ class DebugPanel extends React.Component {
 
     // A LabWired board with a display: its screen is a widget (the same mirror
     // a machine's VGA uses), sized from the first frame the engine reports.
-    mirrorLabwiredDisplay (runner) {
+    mirrorRunnerDisplay (runner, keyboardSet) {
         // A placed S040 already owns its display and touch face in the circuit.
         // Do not replace that view with the generic controller mirror.
         if (runner?.esp32S040PartId) return;
@@ -1157,8 +1109,11 @@ class DebugPanel extends React.Component {
         // The micro:bit console must remain visible for run state and serial;
         // Widgets still receives its live display and can be opened on demand.
         window.bwMirrorMachineVideo({videoFn: () => runner.video(),
+            keyboardSet,
+            keyInFn: typeof runner.keyIn === 'function' ? byte => runner.keyIn(byte) : null,
+            mouseInFn: typeof runner.mouseIn === 'function' ? event => runner.mouseIn(event) : null,
             ...(selected === 'board:microbit-v2' ? {focusController: false} : {}), widget: {
-            name: 'LabWired display', type: 'simplevga', source: 'video',
+            name: keyboardSet ? (keyboardSet === 'xt-set1' ? 'PC screen' : 'AT VGA') : 'LabWired display', type: 'simplevga', source: 'video',
             config: {width: (first && first.width) || (selected.includes('esp32-4848s040') ? 480 : 128),
                 height: (first && first.height) || (selected.includes('esp32-4848s040') ? 480 :
                     selected.startsWith('software:') ? 160 : 64)}
@@ -1208,6 +1163,55 @@ class DebugPanel extends React.Component {
         if (sendConsoleLine(runner, line)) this.setState({serialInput: ''});
     }
 
+    _mountGuestTerminal (runner, ui, preferController = true) {
+        if ((this._guestTerminal?.runner === runner && this._guestTerminal.raw === runner.terminal) ||
+            typeof window.bwMirrorMachineTerminal !== 'function' ||
+            !['ready', 'running', 'paused', 'stepping'].includes(ui.phase)) return;
+        const raw = runner.terminal;
+        const writable = typeof runner.sendSerial === 'function';
+        const pc = ['i8086', 'i80286', 'i80386'].includes(this.state.kind);
+        if (!raw && (!writable && !ui.serialOutput?.length ||
+            pc && !runner.i8086MediaIo?.serial)) return;
+        const sink = new Set();
+        const getText = snapshot => {
+            const serial = (snapshot.serialOutput || []).join('\n');
+            return serial.trim() ? serial : runner.dosScreenText?.().join('\n').trimEnd() || serial;
+        };
+        let text = getText(ui);
+        const session = {
+            raw,
+            title: raw ? `Terminal ${raw.cols}×${raw.rows}`
+                : runner.i8086MediaIo?.terminalName || (pc ? 'PC serial' : this.state.kind === 'eater6502' ? 'ACIA' : 'Serial'),
+            help: this.tx(raw ? 'terminalHint' : 'serialHint'),
+            inputLabel: this.tx('serialSend'),
+            send: writable ? line => sendConsoleLine(runner, line) : null,
+            subscribe: listener => {
+                sink.add(listener);
+                listener(text);
+                return () => sink.delete(listener);
+            }
+        };
+        const focus = preferController && (Boolean(raw) || ['eater6502', 'z80', 'riscv32'].includes(this.state.kind) ||
+            pc && !runner.i8086MediaIo?.display || this.state.kind === 'rp2040js' && Boolean(this._bootMedia));
+        this._guestTerminal?.close();
+        let release = null;
+        const route = enabled => {
+            if (enabled && !release) release = window.bwMirrorMachineTerminal(session, focus);
+            if (!enabled && release) {
+                release();
+                release = null;
+            }
+        };
+        this._guestTerminal = {runner, raw, route, close: () => route(false), update: snapshot => {
+            if (raw) return;
+            const next = getText(snapshot);
+            if (next === text) return;
+            text = next;
+            for (const listener of sink) listener(text);
+        }};
+        route(!runner.console6502Source || this.state.consoleDestination === 'controller');
+    }
+
     _showPcController () {
         this.props.vm?.runtime?.controllerPanel?.setMode('play');
         window.dispatchEvent(new CustomEvent('bw-settings-change',
@@ -1218,7 +1222,7 @@ class DebugPanel extends React.Component {
         const runtime = this.props.vm?.runtime;
         const panel = runtime?.controllerPanel;
         if (!panel) return;
-        const {serial, gpio} = runner.i8086MediaIo;
+        const {gpio} = runner.i8086MediaIo;
         const created = new Set();
         const add = (name, type, config, layout) => {
             if (panel.getWidget(name)) return;
@@ -1227,12 +1231,6 @@ class DebugPanel extends React.Component {
         };
         if (generatedDisplay && !panel.getWidget(displayName)) created.add(displayName);
         if (keyboardName && !panel.getWidget(keyboardName)) created.add(keyboardName);
-        const terminal = serial ? runner.i8086MediaIo.terminalName || 'PC serial' : null;
-        if (terminal) {
-            runtime.bwPcSerial = {name: terminal, runner,
-                label: runner.i8086MediaIo.terminalName ? 'DOS input' : 'PC serial input'};
-            add(terminal, 'terminal', {rows: 14, cols: 42}, {x: 8, y: 8});
-        }
         if (gpio && runner.setInput && runner.outputs) {
             add('PC GPIO', 'bargraph', {segments: 8, min: 0, max: 255}, {x: 8, y: 8});
             const input = runner.inputs.find(item => String(item.port).toUpperCase() === 'C');
@@ -1248,27 +1246,22 @@ class DebugPanel extends React.Component {
                 this._removePcSwitch = () => panel.removeListener(onInput);
             }
         }
-        this._updatePcController = (active, ui) => {
+        this._updatePcController = active => {
             if (active !== runner) return;
-            const widget = terminal && panel.getWidget(terminal);
-            const output = widget ? (ui.serialOutput || []).join('\n') : '';
-            const text = output.trim() ? output : runner.dosScreenText?.().join('\n').trimEnd() || '';
-            if (widget?.type === 'terminal' && widget.state.text !== text) panel.setTerminalText(terminal, text);
             if (gpio && panel.getWidget('PC GPIO')?.type === 'bargraph') {
                 const port = runner.outputs?.().find(item => String(item.port).toUpperCase() === 'B');
                 const mask = port?.value ?? 0;
                 if (panel.getWidget('PC GPIO').state.value !== mask) panel.setBargraphValue('PC GPIO', mask);
             }
         };
-        this._updatePcController(runner, this.state.ui);
+        this._updatePcController(runner);
         this._pcControllerCleanup = () => {
             this._updatePcController = null;
             this._removePcSwitch?.();
             this._removePcSwitch = null;
-            if (runtime.bwPcSerial?.runner === runner) delete runtime.bwPcSerial;
             for (const name of created) if (panel.getWidget(name)) panel.removeWidget(name);
         };
-        if (!displayName && (terminal || gpio)) this._showPcController();
+        if (!displayName && gpio) this._showPcController();
     }
 
     _watchConsoleWidgets (runner) {
@@ -1278,7 +1271,8 @@ class DebugPanel extends React.Component {
             if (!['add', 'remove', 'rename', 'bind', 'layout'].includes(event)) return;
             const destination = this.state.consoleDestination;
             const renamed = event === 'rename' && detail.oldName === destination ? detail.newName : destination;
-            const next = isConsoleMonitor(this._consolePanel.getWidget(renamed)) ? renamed : '';
+            const next = ['controller', 'debugger'].includes(renamed) ||
+                isConsoleMonitor(this._consolePanel.getWidget(renamed)) ? renamed : 'controller';
             if (next === destination) this.forceUpdate();
             else this.setState({consoleDestination: next},
                 () => this._publish6502Console(this.state.runner, this.state.ui));
@@ -1291,6 +1285,9 @@ class DebugPanel extends React.Component {
         if (!runtime) return;
         const previous = runtime.bw6502Console;
         const destination = this.state.consoleDestination;
+        if (runner?.console6502Source && this._guestTerminal?.runner === runner) {
+            this._guestTerminal.route(destination === 'controller');
+        }
         const widget = runtime.controllerPanel?.getWidget(destination);
         if (!runner?.console6502Source || !['ready', 'running', 'paused', 'stepping'].includes(ui?.phase) ||
             !isConsoleMonitor(widget)) {
@@ -1632,7 +1629,7 @@ class DebugPanel extends React.Component {
         const consoleMonitors = this.state.runner?.console6502Source ?
             (this.props.vm?.runtime?.controllerPanel?.getWidgets().filter(isConsoleMonitor) || []) : [];
         const consoleDestination = consoleMonitors.some(widget => widget.name === this.state.consoleDestination) ?
-            this.state.consoleDestination : '';
+            this.state.consoleDestination : (this.state.consoleDestination === 'debugger' ? 'debugger' : 'controller');
         const basicStartupPrompt = this.state.kind === 'eater6502' &&
             /(?:MEMORY SIZE|WIDTH)\?\s*$/i.test((ui.serialOutput || []).slice(-2).join('\n'));
 
@@ -2392,28 +2389,6 @@ class DebugPanel extends React.Component {
                     </div>
                 ) : null}
 
-                {/* The 6502 framebuffer belongs to its part-bound Controller widget.
-                    Other machines can use this video surface for direct input. */}
-                {this.state.kind !== 'eater6502' && this.state.runner &&
-                    typeof this.state.runner.video === 'function' ? (
-                    <React.Suspense fallback={null}>
-                      <div onMouseMove={this.state.runner.mouseIn ? this._mouseMove : undefined}
-                          onMouseDown={this.state.runner.mouseIn ? this._mouseDown : undefined}
-                          onMouseUp={this.state.runner.mouseIn ? this._mouseUp : undefined}
-                          onMouseLeave={this.state.runner.mouseIn ? this._mouseLeave : undefined}
-                          onContextMenu={this.state.runner.mouseIn ? e => e.preventDefault() : undefined}
-                          style={{width: 'fit-content', maxWidth: '100%'}}>
-                        <VdpScreen
-                            videoFn={this._videoFn}
-                            {...(this.state.runner && typeof this.state.runner.keyIn === 'function'
-                                ? {sendScancodeFn: this._scancodeFn} : {})}
-                            lang={this.props.locale}
-                            data-testid="bw-vdp-screen"
-                        />
-                      </div>
-                    </React.Suspense>
-                ) : null}
-
                 {/* LEDS. Mounted only when the machine has ports to show --
                     eight lamps that never light read as a broken program
                     rather than an absent chip. */}
@@ -2488,7 +2463,8 @@ class DebugPanel extends React.Component {
                     it has said something: a console that is output-only is a
                     terminal with the keyboard unplugged — you can watch BBC
                     BASIC print its banner and have no way to answer it. */}
-                {(ui.serialOutput && ui.serialOutput.length) || canSendSerial ? (
+                {(consoleMonitors.length || consoleDestination === 'debugger' || !this._guestTerminal) &&
+                    ((ui.serialOutput && ui.serialOutput.length) || canSendSerial) ? (
                     <div style={{borderTop: '1px solid #2c3e50', paddingTop: 8}}>
                         <div style={{color: '#7f8c8d', marginBottom: 4, display: 'flex', gap: 8, alignItems: 'center'}}>
                             <span>{this.state.runner && this.state.runner.terminal
@@ -2503,7 +2479,8 @@ class DebugPanel extends React.Component {
                                         this.setState({consoleDestination: event.target.value},
                                             () => this._publish6502Console(this.state.runner, this.state.ui));
                                     }}>
-                                    <option value="">Debugger console</option>
+                                    <option value="controller">Controller terminal</option>
+                                    <option value="debugger">Debugger console</option>
                                     {consoleMonitors.map(widget => (
                                         <option key={widget.name} value={widget.name}>
                                             {widget.layout?.label || widget.name} (Controller)
@@ -2512,17 +2489,8 @@ class DebugPanel extends React.Component {
                                 </select>
                             )}
                         </div>
-                        {this.state.runner && this.state.runner.terminal ? (
-                            // A booted Linux: a real terminal, keys straight
-                            // to the guest's tty (linux-terminal.jsx).
-                            <React.Suspense fallback={<div data-testid="bw-linux-terminal-loading">{'…'}</div>}>
-                                <LinuxTerminal
-                                    key={this.state.runner.terminal.id}
-                                    terminal={this.state.runner.terminal}
-                                    hint={this.tx('terminalHint')}
-                                />
-                            </React.Suspense>
-                        ) : !consoleDestination && <React.Fragment>
+                        {(!this._guestTerminal || consoleDestination === 'debugger') &&
+                            !this.state.runner?.terminal && <React.Fragment>
                             <pre
                                 data-testid="bw-serial-console"
                                 style={{
@@ -2670,6 +2638,7 @@ DebugPanel.propTypes = {
     onRunnerChange: PropTypes.func,
     onRunnerGone: PropTypes.func,
     runToken: PropTypes.number,
+    runMachineOnFlag: PropTypes.bool,
     stopToken: PropTypes.number,
     locale: PropTypes.string,
     vm: PropTypes.shape({toJSON: PropTypes.func, runtime: PropTypes.object}).isRequired

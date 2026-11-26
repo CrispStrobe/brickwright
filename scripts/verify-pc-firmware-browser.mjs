@@ -106,10 +106,10 @@ try {
     }
 
     await choosePreset('serialmon');
-    const terminal = page.getByTestId('bw-ctl-terminal-PC serial');
+    const terminal = page.locator('[data-bw-stage-dock="controller"]').getByTestId('bw-serial-console');
     await terminal.waitFor();
     await terminal.getByText(/8086/i).waitFor();
-    const input = page.getByRole('textbox', {name: 'PC serial input'});
+    const input = page.getByTestId('bw-serial-input');
     await input.fill('HELLO');
     await input.press('Enter');
     await terminal.getByText(/HELLO/).waitFor();

@@ -47,14 +47,19 @@ try {
     const hosted = await app();
     await hosted.getByTestId('bw-device-select').selectOption('riscv32');
     await hosted.getByRole('button', {name: '🔧 C', exact: true}).click();
-    const route = hosted.getByTestId('bw-riscv-c-route');
+    const toolbarRoute = hosted.getByTestId('bw-riscv-c-route');
+    if (!(await toolbarRoute.isVisible())) await hosted.getByTestId('bw-code-actions-trigger').click();
+    const route = hosted.locator('[data-testid^="bw-riscv-c-route"]:visible');
     assert.equal(await route.locator('option[value="server"]').isEnabled(), true);
     await route.selectOption('server');
+    await hosted.keyboard.press('Escape');
     await typeIntoEditor(hosted, '#include <stdio.h>\nint main(void) { puts("RISCV HOSTED CODE OK"); return 0; }\n');
     const compiled = hosted.waitForResponse(response => response.request().method() === 'POST' &&
         new URL(response.url()).pathname.endsWith('/compile') &&
         response.request().postDataJSON()?.target === 'riscv32-gcc');
-    await hosted.getByTestId('bw-run-c-riscv').click();
+    const toolbarRun = hosted.getByTestId('bw-run-c-riscv');
+    if (!(await toolbarRun.isVisible())) await hosted.getByTestId('bw-code-actions-trigger').click();
+    await hosted.locator('[data-testid="bw-run-c-riscv"]:visible,[data-testid="bw-run-c-riscv-menu"]:visible').click();
     const response = await compiled;
     assert.equal(response.ok(), true, `Compiler HTTP status ${response.status()}`);
     await hosted.getByTestId('bw-serial-console').getByText('RISCV HOSTED CODE OK', {exact: false}).waitFor();
