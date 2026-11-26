@@ -56,6 +56,20 @@ try {
         }
     }
 
+    async function vdpHelloFrame(selector) {
+        await page.waitForFunction(selector => {
+            const canvas = document.querySelector(selector);
+            if (!canvas || canvas.width !== 256 || canvas.height !== 192) return false;
+            const context = canvas.getContext('2d');
+            const pixel = (x, y) => context.getImageData(x, y, 1, 1).data.join(',');
+            return pixel(0, 0) === '84,85,237,255' &&
+                pixel(105, 88) === '255,255,255,255' &&
+                pixel(107, 88) === '84,85,237,255' &&
+                pixel(107, 91) === '255,255,255,255' &&
+                pixel(140, 88) === '255,255,255,255';
+        }, selector);
+    }
+
     async function activeFrame(widget, width, height) {
         await page.waitForFunction(({widget, width, height}) => {
             const canvas = document.querySelector(`[data-testid="bw-ctl-simplevga-${widget}"] canvas`);
@@ -67,13 +81,23 @@ try {
 
     async function vdpDebuggerFrame() {
         await rightView('Debugger');
-        await page.waitForFunction(() => {
-            const canvas = document.querySelector('[data-debugger-solo-pane] [data-vdp-screen] canvas');
-            if (!canvas || canvas.width !== 256 || canvas.height !== 192) return false;
-            const rgba = canvas.getContext('2d').getImageData(0, 0, 256, 192).data;
-            return rgba.some((value, i) => i % 4 === 0 && value !== rgba[i + 2]);
-        });
+        await vdpHelloFrame('[data-debugger-solo-pane] [data-vdp-screen] canvas');
     }
+
+    const vdpWidget = '[data-testid="bw-ctl-simplevga-Video"] canvas';
+    // Cold Code entry. A compiled declaration alone can show a wired VDP and
+    // a controller widget while leaving the ROM slot empty.
+    await page.getByRole('tab', {name: 'Code', exact: true}).click();
+    await page.getByTestId('bw-device-select').selectOption('eater6502');
+    await page.getByTestId('bw-code-actions-trigger').click();
+    await page.getByTestId('bw-catalog-toggle').click();
+    openingExample = 'eater6502-vdp-hello';
+    await page.locator('[data-testid="bw-catalog-item"][title="eater6502-vdp-hello"]').click();
+    await page.getByRole('button', {name: 'OK', exact: true}).click();
+    await vdpHelloFrame(vdpWidget);
+    openingExample = null;
+    await vdpDebuggerFrame();
+    console.log('Loading the VDP example from Code boots its ROM and displays HELLO in both surfaces.');
 
     await openExample('eater6502-full-build', '6502 Computer with LCD');
     await page.getByTestId('bw-ctl-lcd-LCD').waitFor();
@@ -84,12 +108,12 @@ try {
     console.log('6502 LCD Hello reaches the wired Controller LCD.');
 
     await openExample('eater6502-vdp-hello', '6502 + VDP Video');
-    await activeFrame('Video', 256, 192);
+    await vdpHelloFrame(vdpWidget);
     await vdpDebuggerFrame();
     await presets();
     await vdpDebuggerFrame();
     await rightView('Controller');
-    await activeFrame('Video', 256, 192);
+    await vdpHelloFrame(vdpWidget);
     console.log('VDP colors reach both panes after loading the example and rebuilding the machine.');
 
     await openExample('aurora65-workstation', 'Aurora-65 Display Workstation');

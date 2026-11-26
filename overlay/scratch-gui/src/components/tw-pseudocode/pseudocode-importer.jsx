@@ -5074,6 +5074,19 @@ class PseudocodeImporter extends React.Component {
             if (!res.ok) throw new Error(`program: HTTP ${res.status}`);
             let src = await res.text();
             const exDevice = this._normDevice((src.match(/^DEVICE\s+([\w-]+)/im) || [])[1]);
+            if (ex.files.rom && ex.files.circuit && /^(eater6502|6502|w65c02)$/.test(exDevice) &&
+                (!device || device === exDevice)) {
+                // The wired loader applies the circuit, faceplate and ROM in
+                // order. Compiling only the declaration leaves the VDP idle.
+                const outcome = await new Promise(complete => {
+                    const handled = !window.dispatchEvent(new CustomEvent('bw-open-wired-machine-example', {
+                        cancelable: true, detail: {example: ex, complete}
+                    }));
+                    if (!handled) complete({ok: false, error: 'The Circuit example loader is unavailable.'});
+                });
+                this.setState({busy: false, status: outcome.error ? this.L.stError(outcome.error) : ''});
+                return;
+            }
             let warnings = [];
             if (device && exDevice && exDevice !== device) {
                 const SB3Creator = (await this.lib()).default;

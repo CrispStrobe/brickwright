@@ -576,6 +576,14 @@ class CircuitTab extends React.Component {
             }
         };
         window.addEventListener('bw-example-bench', this._benchHandler);
+        this._openMachineExample = event => {
+            const {example, complete} = event.detail || {};
+            if (!example?.files?.rom || typeof complete !== 'function') return;
+            event.preventDefault();
+            this.loadExample(example, {activateCircuit: true})
+                .then(complete, error => complete({ok: false, error: error.message}));
+        };
+        window.addEventListener('bw-open-wired-machine-example', this._openMachineExample);
         // The Scratch controls dispatch these user-level events even when the
         // VM has no executable MCU program. Keep the designer simulation in
         // lockstep with Green Flag/Red Flag in that case too.
@@ -761,6 +769,7 @@ class CircuitTab extends React.Component {
         window.removeEventListener('bw-machine-media-load', this._mediaStashHandler);
         window.removeEventListener('bw-asm-rom-ready', this._asmStashHandler);
         window.removeEventListener('bw-example-bench', this._benchHandler);
+        window.removeEventListener('bw-open-wired-machine-example', this._openMachineExample);
         window.removeEventListener('bw-green-flag', this._greenFlagHandler);
         window.removeEventListener('bw-stop-all', this._stopAllHandler);
         window.removeEventListener('bw-power-off', this._powerOffHandler);
@@ -1953,6 +1962,10 @@ class CircuitTab extends React.Component {
         }
         this.setState({loadingExample: ex.id, examplesError: null});
         try {
+            if (opts?.activateCircuit) {
+                await this.load({explicit: true});
+                window.dispatchEvent(new CustomEvent('bw-activate-tab', {detail: {index: 4}}));
+            }
             // Which circuit: the authored one for the authored device, the
             // generated bench for a genuinely different picked device.
             let circuitPath = path;
