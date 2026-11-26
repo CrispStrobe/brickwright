@@ -1470,3 +1470,35 @@ engine averaged 0.22× for Atlas and 0.25× for Scout. The local Jolt
 Its three consecutive Scout windows ran at 0.995×, 0.987× and 1.009×.
 The comparison excludes the full Brickwright viewport and uses
 sequential runs. Sustained 1× production qualification remains open.
+
+### Reuse native Jolt impulse configuration
+
+The physics world retains the motor handle and impulse configuration.
+A velocity motor taking over or a serial servo retuning the same
+chain causes the next impulse to restore its native settings. The
+torque, impulse cadence and solver iteration values stay the same.
+
+The Chrome worker comparison used the same local Jolt 5.7 SIMD module
+and Board bundle for both versions. Each run applied 1,800 Atlas
+impulses or 1,200 Scout impulses over 600 substeps.
+
+| Calls from the impulse path | Before → after |
+| --- | ---: |
+| Atlas motor-state writes | 1,800 → 3 |
+| Atlas solver-iteration writes | 2,400 → 4 |
+| Scout motor-state writes | 1,200 → 2 |
+| Scout solver-iteration writes | 2,400 → 4 |
+
+Initial frames, warm restarts and all 100 sampled motion and electrical
+readings matched in both run orders. Elapsed time in the impulse path
+and whole-worker throughput varied with run order under heavy MacBook
+load. The reduction is in native writes. These runs leave sustained
+1× production qualification open.
+
+Physics type checking and 28 focused tests passed across two runs.
+The material-contact test passed with a 30-second limit after hitting
+its original five-second deadline. The known scalar Rover torque
+assertion was excluded. Atlas passed Run, joint motion, Pause, Reset,
+repeat Run and Close with a local worker overlay and the bundled
+engine. Brickwright still pins SDK `f0136b8`.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/fe6a9fc790cf7a8cbf3cee443c0c3241f67b84a1)
