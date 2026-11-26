@@ -1622,3 +1622,37 @@ motion, Pause, Reset, repeat Run and Close in the local embedded editor
 with the new workers. The published Brickwright SDK pin is `f0136b8`.
 Sustained 1× production qualification remains open.
 [CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/4a5a4e20486b7728e1aa168397a49896ccb38a05)
+
+### Validate collision buffers without copying them
+
+Collision qualification scans the existing typed buffers for source
+positions, indices and candidate vertices. Core now uses the hash
+library's hexadecimal formatter. The same SHA-256 digests, geometry
+budgets and candidate checks apply.
+
+In seven alternating Node trials using the evaluated source meshes,
+median CPU time for one validation scan of Atlas's 26 bodies fell from
+11.76 to 4.16 ms. Scout's scan fell from 15.40 to 5.35 ms. In Chrome,
+500 hashes of a 1,024-byte buffer took a median 5.5 → 2.8 ms over seven
+alternating pairs with WebCrypto dispatch on both versions.
+
+The live Chrome comparisons used the same Board bundle and local Jolt
+5.7 SIMD module. Time through the first physics frame was:
+
+| Robot | First order, before → after | Reverse order, before → after |
+| --- | ---: | ---: |
+| Atlas | 5.67 → 5.25 s | 3.89 → 3.81 s |
+| Scout | 6.31 → 5.25 s | 4.83 → 4.75 s |
+
+Initial frames and warm restarts matched. All 100
+sampled motion and circuit readings across 600 substeps matched in
+both orders.
+
+The physics TypeScript build and 50 focused tests passed, including
+identical SHA-256 addresses when native hashing is available or fails.
+Atlas passed Run, joint motion, Pause, Reset, repeat Run and Close in
+the local embedded editor with the new workers and the bundled engine.
+The current Brickwright SDK pin is `f2a596a`, which includes the earlier
+closed-hull seam optimization. Sustained 1× production qualification
+remains open.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/aa1f536b820451e5e8115d8b02a78f2eb854a551)
