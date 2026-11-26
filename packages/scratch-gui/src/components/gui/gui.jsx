@@ -77,6 +77,7 @@ const MachineCodeEditor = React.lazy(() =>
 const GuidedLessons = React.lazy(() => import(/* webpackChunkName: "guided-lessons" */ './guided-lessons.jsx'));
 import lessonCatalog from './lessons.json';
 import chromeStyles from './compact-chrome.css';
+import {editorOverflowStyles} from '../tw-pseudocode/editor-overflow-styles.js';
 import PaneDivider from './pane-divider.jsx';
 import PaneStrip from './pane-strip.jsx';
 import {computePaneStyles, isCollapsed, isExplicitFraction} from '../../lib/pane-sizes.js';
@@ -1018,7 +1019,7 @@ const GUIComponent = props => {
         </React.Suspense>
     ) : null;
 
-    return (<CardiacSurfaces.Provider value={cardiacSurfaces}><Cp1Surfaces.Provider value={cp1Surfaces}><React.Fragment><MediaQuery minWidth={layout.fullSizeMinWidth}>{isFullSize => {
+    return (<CardiacSurfaces.Provider value={cardiacSurfaces}><Cp1Surfaces.Provider value={cp1Surfaces}><React.Fragment><style>{editorOverflowStyles}</style><MediaQuery minWidth={layout.fullSizeMinWidth}>{isFullSize => {
         const stageSize = resolveStageSize(stageSizeMode, isFullSize);
 
         // Three-column pane sizing from the paneLayout reducer.

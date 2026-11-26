@@ -1,7 +1,7 @@
 import React from 'react';
 import {createPortal} from 'react-dom';
 import {showDebuggerOnStage} from '../../lib/bw-debug/show-debugger-on-stage.js';
-import {Popup, toolStyles} from './sim-lab-toolbar.jsx';
+import {Icon, Popup, toolStyles} from './sim-lab-toolbar.jsx';
 import ScrollRow from './toolbar-scroll-row.jsx';
 import {toolbarActionApplies} from '../../lib/code-toolbar-actions.js';
 import {notifyEditorMenuActions, registerEditorMenuActions} from '../../lib/editor-menu-actions.js';
@@ -102,8 +102,8 @@ const L10N = {
         loadExample: '📚 Load example…', loadExampleTitle: 'Load a built-in example',
         examplesLoading: 'Loading built-in examples…',
         examplesRetry: 'Built-in examples unavailable — retry',
-        openFile: '📂 Open', openFileTitle: t => `Open a source file (${t})`,
-        saveFile: '💾 Save', saveFileTitle: n => `Save this tab as ${n}`,
+        openFile: 'Open', openFileTitle: t => `Open a source file (${t})`,
+        saveFile: 'Save', saveFileTitle: n => `Save this tab as ${n}`,
         exportMakeCode: '📦 MakeCode source',
         exportMakeCodeTitle: 'Download the original recovered MakeCode project files for the official editor or PXT CLI',
         openBad: e => `Don't know that file type (${e}).`,
@@ -444,8 +444,8 @@ const L10N = {
         loadExample: '📚 Beispiel laden…', loadExampleTitle: 'Ein eingebautes Beispiel laden',
         examplesLoading: 'Eingebaute Beispiele werden geladen…',
         examplesRetry: 'Eingebaute Beispiele nicht verfügbar — erneut versuchen',
-        openFile: '📂 Öffnen', openFileTitle: t => `Eine Quelldatei öffnen (${t})`,
-        saveFile: '💾 Speichern', saveFileTitle: n => `Diesen Tab als ${n} speichern`,
+        openFile: 'Öffnen', openFileTitle: t => `Eine Quelldatei öffnen (${t})`,
+        saveFile: 'Speichern', saveFileTitle: n => `Diesen Tab als ${n} speichern`,
         exportMakeCode: '📦 MakeCode-Quellcode',
         exportMakeCodeTitle: 'Die unveränderten, wiederhergestellten MakeCode-Projektdateien für den offiziellen Editor oder die PXT-CLI laden',
         openBad: e => `Unbekannter Dateityp (${e}).`,
@@ -5841,7 +5841,7 @@ class PseudocodeImporter extends React.Component {
             width: '100%', boxSizing: 'border-box', textAlign: 'left', cursor: 'pointer', height: 'auto',
             minHeight: 32, padding: '6px 8px', whiteSpace: 'normal', fontSize: 12};
         return (
-            <Popup id="code-actions" anchorTestId="bw-code-actions" testId="bw-code-actions-menu"
+            <Popup id="code-actions" overflowMenu anchorTestId="bw-code-actions" testId="bw-code-actions-menu"
                 open={this.props.isVisible !== false && this.state.actionsOpen} align="right" width={260} keepMounted
                 label={L10N[pickLocale(this.props.locale)].fileMenuTitle}
                 onToggle={() => this.setState(state => ({actionsOpen: !state.actionsOpen}))}
@@ -5851,21 +5851,6 @@ class PseudocodeImporter extends React.Component {
                     aria-label={L10N[pickLocale(this.props.locale)].fileMenuTitle}>⋯</button>}>
                 <div style={{display: 'flex', flexDirection: 'column', gap: 2}}>
                     {this.state.actionsOpen && <div data-code-overflow-controls>
-                        <style>{`
-                            [data-code-overflow-controls] {display: grid; gap: 2px}
-                            [data-code-overflow-controls] > div,
-                            [data-code-overflow-controls] > div > span,
-                            [data-cardiac-overflow-tools] > div {display: grid !important; gap: 2px !important}
-                            [data-code-overflow-controls] button {
-                                width: 100% !important; min-height: 32px; height: auto !important;
-                                display: flex !important; align-items: center; justify-content: flex-start !important;
-                                gap: 6px; text-align: left; white-space: normal; font-size: 12px !important;
-                                font-style: normal !important; padding: 6px 8px !important; border: 0 !important;
-                                border-radius: 6px !important; background: transparent !important; color: #1e293b !important;
-                            }
-                            [data-code-overflow-controls] button:hover {background: #eef2f7 !important}
-                            [data-code-overflow-controls] button:disabled {opacity: .45; cursor: default}
-                        `}</style>
                         {machine === 'cardiac' ? <div ref={this.props.onCardiacToolsSlot} data-cardiac-overflow-tools /> :
                             !machine && renderCodeControls(true)}
                         <details>
@@ -5875,41 +5860,41 @@ class PseudocodeImporter extends React.Component {
                     </div>}
                     {!machine && <>
                     <strong style={{padding: '4px 8px', fontSize: 11, color: '#64748b'}}>{this.L.actionFiles}</strong>
-                    <label style={item} title={this.L.openFileTitle(`${CODE_ACCEPT},${IMPORT_ACCEPT}`)}
+                    <label data-overflow-action style={item} title={this.L.openFileTitle(`${CODE_ACCEPT},${IMPORT_ACCEPT}`)}
                         data-testid="bw-open-file" role="button" tabIndex={this.state.busy ? -1 : 0} aria-disabled={this.state.busy}
                         onKeyDown={event => {
                             if (event.key !== 'Enter' && event.key !== ' ') return;
                             event.preventDefault();
                             if (!this.state.busy) this._codeFileInput.current?.click();
                         }}>
-                        {this.L.openFile}
+                        <Icon name="open" />{this.L.openFile}
                         <input ref={this._codeFileInput} type="file" accept={`${CODE_ACCEPT},${IMPORT_ACCEPT}`} style={{display: 'none'}}
                             disabled={this.state.busy}
                             onChange={event => { this.setState({actionsOpen: false}); this.openCodeFile(event); }} />
                     </label>
-                    <button type="button" onClick={this.saveCodeFile} style={item}
+                    <button type="button" onClick={this.saveCodeFile} data-overflow-action style={item}
                         title={this.L.saveFileTitle(this.saveFileName())} data-testid="bw-save-file">
-                        {this.L.saveFile}
+                        <Icon name="save" />{this.L.saveFile}
                     </button>
                     <strong style={{padding: '8px 8px 4px', marginTop: 4, borderTop: '1px solid #e2e8f0', fontSize: 11, color: '#64748b'}}>{this.L.actionPrograms}</strong>
                     {this.state.lang === 'micropython' ? (
-                        <button type="button" onClick={() => this.downloadMicrobitHex()} style={item}
+                        <button type="button" onClick={() => this.downloadMicrobitHex()} data-overflow-action style={item}
                             disabled={this.state.busy || !this.state.buffers.micropython.trim() || /^# ===/.test(this.state.buffers.micropython)}
                             title={this.L.microbitNeedFirmware} data-testid="bw-microbit-download-hex">
                             {this.L.downloadHex}
                         </button>
                     ) : null}
-                    <button type="button" onClick={this.openMakeCodeShare} style={item}
+                    <button type="button" onClick={this.openMakeCodeShare} data-overflow-action style={item}
                         title={this.L.mcShareTitle} data-testid="bw-makecode-share">
                         {this.L.mcShare}
                     </button>
                     {['microbit', 'calliopemini', 'ev3', 'cpx'].includes(this.currentDevice()) ? (
-                        <button type="button" onClick={this.exportMakeCode} style={item}
+                        <button type="button" onClick={this.exportMakeCode} data-overflow-action style={item}
                             title={this.L.mcExportTitle} disabled={this.state.busy}
                             data-testid="bw-makecode-export">{this.L.mcExport}</button>
                     ) : null}
                     {this._makeCodeProject ? (
-                        <button type="button" onClick={() => this.exportMakeCodeSource()} style={item}
+                        <button type="button" onClick={() => this.exportMakeCodeSource()} data-overflow-action style={item}
                             title={this.L.exportMakeCodeTitle} data-testid="bw-export-makecode-source">
                             {this.L.exportMakeCode}
                         </button>
@@ -5918,18 +5903,18 @@ class PseudocodeImporter extends React.Component {
                         ['microbit', 'calliopemini'].includes(this.currentDevice())) &&
                         this.makeCodeRunOffered(this._makeCodeProject ? this._makeCodeProject.target :
                             (this.currentDevice() === 'calliopemini' ? 'calliopemini' : 'microbit')) ? (
-                            <button type="button" onClick={() => this.runInMakeCode()} style={item}
+                            <button type="button" onClick={() => this.runInMakeCode()} data-overflow-action style={item}
                                 title={this.L.mcRunTitle} disabled={this.state.busy}
                                 data-testid="bw-makecode-run">{this.L.mcRun}</button>
                         ) : null}
                     {(this._makeCodeProject ? this._makeCodeProject.target === 'microbit' : this.currentDevice() === 'microbit') &&
                         this.makeCodeRunOffered('microbit') ? (
-                            <button type="button" onClick={() => this.runOnEmulatedMicrobit()} style={item}
+                            <button type="button" onClick={() => this.runOnEmulatedMicrobit()} data-overflow-action style={item}
                                 title={this.L.mcEmulateTitle} disabled={this.state.busy}
                                 data-testid="bw-makecode-emulate">{this.L.mcEmulate}</button>
                         ) : null}
                     {this._makeCodeProject && this._makeCodeProject.target === 'arcade' ? (
-                        <select value={this.state.arcadeBoard} style={item} disabled={this.state.busy}
+                        <select value={this.state.arcadeBoard} data-overflow-action style={item} disabled={this.state.busy}
                             title={this.L.mcBoardTitle} data-testid="bw-makecode-arcade-board"
                             data-boards={(this.state.arcadeBoards || []).length}
                             onChange={e => this.setState({arcadeBoard: e.target.value})}>
@@ -5946,21 +5931,20 @@ class PseudocodeImporter extends React.Component {
                     ) : null}
                     {(this._makeCodeProject && MAKECODE_FIRMWARE[this._makeCodeProject.target]) ||
                         (!this._makeCodeProject && ['microbit', 'calliopemini'].includes(this.currentDevice())) ? (
-                            <button type="button" onClick={() => this.downloadMakeCodeFirmware()} style={item}
+                            <button type="button" onClick={() => this.downloadMakeCodeFirmware()} data-overflow-action style={item}
                                 title={this.L.mcFirmwareTitle} disabled={this.state.busy}
                                 data-testid="bw-makecode-firmware">{this.L.mcFirmware}</button>
                         ) : null}
-                    <button type="button" onClick={() => this.runAsArcade()} style={item}
+                    <button type="button" onClick={() => this.runAsArcade()} data-overflow-action style={item}
                         title={this.L.arcRunTitle} disabled={this.state.busy}
                         data-testid="bw-makecode-arcade-run">{this.L.arcRun}</button>
-                    <button type="button" onClick={() => this.exportArcade()} style={item}
+                    <button type="button" onClick={() => this.exportArcade()} data-overflow-action style={item}
                         title={this.L.arcExportTitle} disabled={this.state.busy}
                         data-testid="bw-makecode-arcade-export">{this.L.arcExport}</button>
-                    <div style={{borderTop: '1px solid #e2e8f0', margin: '3px 0'}} />
                     <strong style={{padding: '8px 8px 4px', marginTop: 4, borderTop: '1px solid #e2e8f0', fontSize: 11, color: '#64748b'}}>{this.L.actionExamples}</strong>
                     {this.currentDevice() ? this.renderCatalogControl(item) :
                         this.state.bundledExamplesStatus === 'error' ? (
-                            <button type="button" onClick={this._loadBundledExamples} style={item}
+                            <button type="button" onClick={this._loadBundledExamples} data-overflow-action style={item}
                                 title={this.L.loadExampleTitle} data-testid="bw-load-example-retry">
                                 {this.L.examplesRetry}
                             </button>
@@ -5981,9 +5965,9 @@ class PseudocodeImporter extends React.Component {
                         </select>
                     )}
                     <button type="button" onClick={() => this.setState(s => ({showRef: !s.showRef}))}
-                        style={item} title={this.L.referenceTitle(this.state.lang)}>📝 {this.L.reference}</button>
+                        data-overflow-action style={item} title={this.L.referenceTitle(this.state.lang)}>📝 {this.L.reference}</button>
                     <button type="button" onClick={() => this.setState(s => ({showArt: !s.showArt}))}
-                        style={item} title={this.L.customArtTitle}>
+                        data-overflow-action style={item} title={this.L.customArtTitle}>
                         🖼️ {this.L.customArt}{this.state.uploads.length ? ` (${this.state.uploads.length})` : ''}
                     </button>
                     </>}

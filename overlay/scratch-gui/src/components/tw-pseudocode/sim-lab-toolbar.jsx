@@ -125,7 +125,7 @@ export const ToolButton = ({item, T, coarse, inMenu = false}) => {
     const keys = T.keys[item.id];
     if (inMenu) {
         return (
-            <button type="button" data-testid={`bw-sim-lab-${item.id}`} disabled={item.disabled} title={title} aria-label={item.label}
+            <button type="button" data-overflow-action data-testid={`bw-sim-lab-${item.id}`} disabled={item.disabled} title={title} aria-label={item.label}
                 aria-keyshortcuts={keys || undefined} onClick={item.run} {...aria}
                 style={{...s.button, justifyContent: 'flex-start', width: '100%', height: coarse ? 40 : 30, padding: '0 8px',
                     ...(on ? {background: '#e0e7ff', color: '#312e81'} : {}), opacity: item.disabled ? 0.45 : 1}}>
@@ -151,7 +151,7 @@ export const ToolButton = ({item, T, coarse, inMenu = false}) => {
  * Closes on Escape and on a press outside it (the pane's outside-press handler,
  * which looks for [data-sim-lab-popup]).
  */
-export const Popup = ({id, open, onToggle, onClose, button, children, align = 'left', width = 260, label, closeOnPick = true, testId, role = 'group', anchorTestId, keepMounted = false}) => {
+export const Popup = ({id, open, onToggle, onClose, button, children, align = 'left', width = 260, label, closeOnPick = true, testId, role = 'group', anchorTestId, keepMounted = false, overflowMenu = false}) => {
     const anchor = React.useRef(null);
     const panel = React.useRef(null);
     const toggle = React.useRef(onToggle);
@@ -229,7 +229,7 @@ export const Popup = ({id, open, onToggle, onClose, button, children, align = 'l
         }}>
         {React.cloneElement(button, {'aria-haspopup': role === 'dialog' ? 'dialog' : 'true', 'aria-expanded': open, ...trigger.current})}
         {open || keepMounted ? createPortal(
-            <div ref={panel} role={role} data-sim-lab-popup={id} aria-label={label} data-testid={testId || `bw-sim-lab-${id}-menu`}
+            <div ref={panel} role={role} data-sim-lab-popup={id} data-editor-overflow={overflowMenu || undefined} aria-label={label} data-testid={testId || `bw-sim-lab-${id}-menu`}
                 onClick={e => {
                     if (!closeOnPick || !e.target.closest) return;
                     const pick = e.target.closest('button');
