@@ -25,7 +25,7 @@ function fixture () {
         let board = null, symbols = null, runToTarget = null, runToController = null;
         let unsubscribeBps = null, unsubscribeDebugEvents = null, unsubscribeDebugInputs = null;
         let debugEventsTarget = null, i8086ExecutionResult = null;
-        let engineNotes, serialTerminal, serialEsc, terminalOutput, linuxProgressWatch;
+        let engineNotes, serialTerminal, serialEsc, terminalOutput, linuxProgressWatch, basicStartup;
         const i8086ExecutionLifetime = new AbortController();
         let releaseHook = () => {};
         const i8086Execution = {release() {releaseHook();}};
