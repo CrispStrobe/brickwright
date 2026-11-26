@@ -111,6 +111,18 @@ try {
     assert.match(await panel.getByRole('textbox', {name: 'KIM-1 program', exact: true}).inputValue(), /2000: A9 42 00/);
     checks.push('An uploaded paper tape is checked and installed in expansion RAM');
 
+    await panel.getByText('Expansion and storage', {exact: true}).click();
+    await panel.getByRole('button', {name: 'Add RAM'}).click();
+    await panel.getByLabel('Storage image').setInputFiles({
+        name: 'test.img', mimeType: 'application/octet-stream', buffer: Buffer.alloc(512, 0x5a)
+    });
+    await page.waitForFunction(() => {
+        const machine = window.__board?.getDeviceState('kim1');
+        return machine?.backplane?.type[0x2000] === 1 && machine.sdCard?.image[0] === 0x5a;
+    });
+    await panel.getByText('Expansion and storage', {exact: true}).click();
+    checks.push('The full app mounts a KIM-2 slot and an SPI disk on the same Board');
+
     const images = Buffer.alloc(2048);
     // This authored ROM outputs a zero on the first 6530-driven digit.
     const fixture = Buffer.from([0xa9,0x7f,0x8d,0x41,0x17,0xa9,0x1e,0x8d,0x43,0x17,

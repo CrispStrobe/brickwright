@@ -1,5 +1,32 @@
 # KIM-1 in Brickwright Circuits
 
+## Expansions in Circuits
+
+Open the **KIM-1** panel under Circuits and expand **Expansion and storage**.
+
+- **KIM-4 slots** — Add KIM-2 (4 KiB), KIM-3 (8 KiB) or KIM-3B (8 KiB) at a
+  selected address. KIM-5 takes a locally supplied 6 KiB ROM at $E000. The
+  panel validates overlap and preserves the KIM-1 reset vectors.
+- **Programmable memory** — Import a whole-address-space `memcfg` raw map
+  or turn on **Expanded RAM**. Export the current map with **Save map**.
+- **Storage** — Pick SD (SPI), Corsham (DSK), or K-1013. Load a raw image
+  or, with K-1013, an appropriately sized ImageDisk image in drive A–D.
+  **Save image** downloads the writable state. Back up media before
+  switching circuits or closing the simulation.
+- **Video** — Enable K-1008 at an aligned address. Load the checkerboard
+  tape and run it at $0200 to see the 320×200 framebuffer.
+- **ACE KIM** — Open the separate 65C02 LCD and keypad section and load its
+  pinned MIT firmware. Press ESC to start the monitor.
+
+The [KIM expansion demos](https://github.com/CrispStrobe/brickwright-media-lab/tree/main/projects/kim1-expansion-demos)
+provide original paper tapes, a RAM map and a sector image. The
+[CP/M-65 pack](https://github.com/CrispStrobe/brickwright-media-lab/tree/main/projects/kim1-cpm65)
+includes verified download commands for SPI, Corsham, and K-1013 boot
+media. Select **Use Brickwright ROM** and **TTY**, enable expanded RAM,
+mount the matching disk and import its tape. Send `0200 G` in the TTY
+terminal to reach the CP/M prompt.
+
+
 ## Open the first experiment
 
 Open **Circuit → Examples**, search for **KIM-1**, and open **KIM-1: Wired I/O**. The KIM-1 also appears in the computer palette. Its front panel appears in Instruments.

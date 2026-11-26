@@ -1,7 +1,7 @@
 name: KIM-1 full app acceptance
 on:
   push:
-    branches: ['feat/kim1-circuits', 'feat/kim1-hardware-integration']
+    branches: ['feat/kim1-circuits', 'feat/kim1-hardware-integration', 'feat/kim-expansion-brickwright']
     paths:
       - 'vendor-pins.json'
       - 'package.json'
