@@ -112,7 +112,7 @@ async function prepareHistoryMachine (page) {
             window.dispatchEvent(new CustomEvent('bw-asm-rom-ready', {detail}));
         });
         const panel = page.locator('[data-debug-panel]:visible').first();
-        await panel.locator('[data-debug-record]:not([disabled])').waitFor({timeout: remaining()});
+        await panel.locator('[data-debug-record]:not([disabled])').waitFor({state: 'attached', timeout: remaining()});
         return await page.evaluate(() => ({deviceApplied: window.__bwDebugHistorySetup.applied,
             events: window.__bwDebugHistorySetup.events}));
     } finally {
@@ -160,6 +160,7 @@ try {
     await pause.click();
     await page.waitForFunction(() => !document.querySelector('[data-debug-record]')?.disabled,
         null, {timeout: 15000});
+    await panel.locator('[data-debug-history] > summary').click();
     await panel.locator('[data-debug-record]').click();
     await page.waitForFunction(() => /Recording/.test(
         document.querySelector('[data-debug-record]')?.textContent || '') &&

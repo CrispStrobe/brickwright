@@ -730,7 +730,7 @@ function PositionedWidget({ widget, mode, selected, snap, onSelect, onLayout, ch
 // decoration configs (text content / image source).
 
 function WidgetInspector({ widget, onRename, onLayout, onConfig, onBind, onOpenLibrary,
-    variableNames = [], partIds = [], onOk, onCancel }) {
+    variableNames = [], parts = [], onOk, onCancel }) {
     const L = widget.layout || {};
     const [name, setName] = React.useState(widget.name);
     React.useEffect(() => { setName(widget.name); }, [widget.name]);
@@ -937,7 +937,11 @@ function WidgetInspector({ widget, onRename, onLayout, onConfig, onBind, onOpenL
                                     data-testid="bw-ctl-insp-bind-part"
                                     onChange={e => onBind('part', e.target.value, widget.binding.param)}>
                                     <option value="">—</option>
-                                    {partIds.map(id => <option key={id} value={id}>{id}</option>)}
+                                    {widget.binding.partId && !parts.some(part => part.id === widget.binding.partId) &&
+                                        <option value={widget.binding.partId}>{widget.binding.partId}</option>}
+                                    {parts.map(part => <option key={part.id} value={part.id}>
+                                        {part.id} · {part.kind}
+                                    </option>)}
                                 </select>
                             </div>
                             <div style={row}>
@@ -1676,12 +1680,12 @@ class ControllerPanelView extends React.Component {
     }
 
     /** Board part ids, for the part binding's picker. */
-    _partIds() {
-        try {
-            return (this.props.board.parts || []).map(p => p.id).sort();
-        } catch {
-            return [];
-        }
+    _circuitParts(widget) {
+        const kinds = widget?.type === 'lcd' ? ['hd44780', 'char_lcd']
+            : widget?.type === 'simplevga' ? ['simplevga_card', 'tms9918'] : null;
+        return [...(this.props.board?.parts || [])]
+            .filter(part => !kinds || kinds.includes(part.kind))
+            .sort((a, b) => a.id.localeCompare(b.id));
     }
 
     _rename(oldName, newName) {
@@ -1996,7 +2000,7 @@ class ControllerPanelView extends React.Component {
                                 onBind={(target, value, param) =>
                                     this._bind(this.state.selected, target, value, param)}
                                 variableNames={this._variableNames()}
-                                partIds={this._partIds()}
+                                parts={this._circuitParts(panel.getWidget(this.state.selected))}
                                 onOpenLibrary={() => this.setState({ libraryOpen: true })}
                                 onOk={() => { this._snapFor = null; this.setState({ selected: null }); }}
                                 onCancel={() => this._restoreWidget(this.state.selected, this._inspectorSnap)}

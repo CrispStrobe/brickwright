@@ -97,6 +97,7 @@ try {
     await panel.getByRole('button', {name: /Pause/}).click();
     await page.waitForFunction(() => document.querySelector('[data-debug-panel]')
         ?.getAttribute('data-debug-phase') === 'paused', null, {timeout: 10000});
+    await panel.locator('[data-debug-history] > summary').click();
     await panel.locator('[data-debug-record]').click();
     await panel.getByRole('button', {name: /Under the hood/}).click();
     const runTo = panel.locator('[data-run-to-address]');

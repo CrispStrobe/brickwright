@@ -86,6 +86,9 @@ export async function runMachineConfig(config, opts = {}) {
     if (activated.machineConfig && Array.isArray(activated.machineConfig.chips)) {
         detail.chips = activated.machineConfig.chips;
     }
+    if (activated.targetKind === 'eater6502' && Array.isArray(activated.machineConfig?.regions)) {
+        detail.machineConfig6502 = activated.machineConfig;
+    }
 
     // DOM event listeners cannot return a Promise to dispatchEvent(). For the
     // named browser 386 route, wait for the panel's actual attach result so a

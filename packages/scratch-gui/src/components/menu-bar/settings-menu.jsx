@@ -142,13 +142,16 @@ const SettingsMenu = ({intl, canChangeLanguage, canChangeTheme, isRtl, onRequest
                         </div>
                         <Submenu place={isRtl ? 'left' : 'right'}>
                             {workspaceSelect(t('gui.workspace.debugger', 'Debugger'), workspaceValue('bw-debug-dock', 'top'),
-                                value => setWorkspace('bw-debug-dock', value), [
+                                value => {
+                                    setWorkspace('bw-debug-dock', value);
+                                    if (value === 'right' || value === 'solo') setWorkspace('bw-stage-circuit', '1');
+                                }, [
                                     {value: 'top', label: t('gui.workspace.top', 'Top')},
                                     {value: 'right', label: t('gui.workspace.right', 'Right')},
                                     {value: 'solo', label: t('gui.workspace.fullPane', 'Full pane')},
                                     {value: 'off', label: t('gui.workspace.off', 'Off')}
                                 ], t('gui.workspace.debuggerHint', 'Choose where the circuit debugger appears — Full pane gives it the whole right pane while coding'))}
-                            {workspaceSelect(t('gui.workspace.whileCoding', 'While coding'), workspaceValue('bw-stage-circuit', '1'),
+                            {workspaceSelect(t('gui.workspace.whileCoding', 'While coding'), workspaceValue('bw-stage-circuit', '0'),
                                 value => setWorkspace('bw-stage-circuit', value), [
                                     {value: '1', label: t('gui.workspace.circuit', 'Circuit')},
                                     {value: '0', label: t('gui.workspace.scratchStage', 'Scratch stage')}
