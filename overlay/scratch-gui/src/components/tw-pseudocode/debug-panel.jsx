@@ -73,6 +73,7 @@ const L10N = {
         hddDownloadInitiated: 'HDD image and JSON downloads initiated; check browser downloads. This is not a guest flush.',
         stepHint: 'Run to the next block boundary',
         serialHint: 'type a line, Enter sends it',
+        basicStartupHint: 'Press Enter for the default',
         terminalHint: 'Click the terminal and type: every key goes straight to Linux. ' +
             'Ctrl-C interrupts, arrows recall history, Ctrl-Shift-V pastes. 80×24.',
         serialSend: 'Send this line to the machine (ends with CR)',
@@ -139,6 +140,7 @@ const L10N = {
         error: 'Fehler',
         stepHint: 'Bis zur nächsten Blockgrenze laufen',
         serialHint: 'Zeile eingeben, Enter sendet',
+        basicStartupHint: 'Enter übernimmt den Standardwert',
         terminalHint: 'Ins Terminal klicken und tippen: jede Taste geht direkt an Linux. ' +
             'Strg-C bricht ab, Pfeiltasten holen frühere Befehle, Strg-Umschalt-V fügt ein. 80×24.',
         serialSend: 'Diese Zeile an die Maschine senden (endet mit CR)',
@@ -365,6 +367,7 @@ class DebugPanel extends React.Component {
             this._bootMedia = detail.resumeCp1 ? this._suspendedCp1Media : null;
             this._suspendedCp1Media = null;
         }
+        if (detail.clearLoadedMedia) this._bootMedia = null;
         const hasBootMedia = !!this._bootMedia;
         const kind = detail.kind === 'cp1' ? 'cp1' : detail.kind === 'z80' ? 'z80'
             : detail.kind === 'eater6502' || detail.kind === '6502' ? 'eater6502'
@@ -407,7 +410,7 @@ class DebugPanel extends React.Component {
         const {linuxInitrd} = e.detail || {};
         // Its post-boot snapshot (the lesson's default Run), likewise.
         const {linuxSnapshot} = e.detail || {};
-        const {nativeBlocks, machinePreset, i80386Media} = e.detail || {};
+        const {nativeBlocks, machinePreset, i80386Media, machineConfig6502} = e.detail || {};
         if (!bytes && !riscvImage) return;
         // THE SAME LOAD, DELIVERED TWICE. circuit-tab stashes every media-load
         // and, when that flips it to "machine booted", re-dispatches the very
@@ -432,6 +435,7 @@ class DebugPanel extends React.Component {
             nativeBlocks: kind === 'i80386' && nativeBlocks === true,
             machinePreset: kind === 'i80386' ? machinePreset || null : null,
             i80386Media: kind === 'i80386' ? i80386Media || null : null,
+            machineConfig6502: kind === 'eater6502' ? machineConfig6502 || null : null,
             // HARDWARE THE PROGRAM ASKED FOR, and it has to be listed here
             // explicitly: this destructure is a fixed field list, so a new
             // field on the event is silently dropped unless it is named in
@@ -1405,6 +1409,9 @@ class DebugPanel extends React.Component {
         // input line rather than a dead one.
         const canSendSerial = !!(this.state.runner &&
             typeof this.state.runner.sendSerial === 'function');
+        const basicStartupPrompt = this.state.kind === 'eater6502' &&
+            /(?:MEMORY SIZE|WIDTH)\?\s*$/i.test((ui.serialOutput || []).slice(-2).join('\n'));
+
         const canSendBlinkenrocket = !!(this.state.runner &&
             typeof this.state.runner.sendBlinkenrocket === 'function');
         const recording = this.state.runner && this.state.runner.debugRecordingStatus();
@@ -2270,7 +2277,7 @@ class DebugPanel extends React.Component {
                                         value={this.state.serialInput}
                                         onChange={this.onSerialInput}
                                         onKeyDown={this.onSerialKeyDown}
-                                        placeholder={this.tx('serialHint')}
+                                        placeholder={this.tx(basicStartupPrompt ? 'basicStartupHint' : 'serialHint')}
                                         aria-label={this.tx('serialSend')}
                                         style={{
                                             flex: '1 1 auto', minWidth: 0, padding: '4px 6px',

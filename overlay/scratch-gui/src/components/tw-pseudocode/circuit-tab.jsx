@@ -502,6 +502,7 @@ class CircuitTab extends React.Component {
         // delivered (preset / file / ASM) before the panel finished mounting.
         this._machineExtractedHandler = e => {
             window.__bwMachineExtracted = e && e.detail;
+            if (e.detail?.clearLoadedMedia) delete window.__bwPendingMedia;
             this._markReactUpdate('host:machine-booted');
             this.setState({machineBooted: true});
         };
@@ -1529,6 +1530,20 @@ class CircuitTab extends React.Component {
         return config;
     }
 
+    handleWiredBootReady = (data, board, result) => {
+        const pending = this._wiredExample;
+        if (!pending || pending.data !== data) return;
+        this._wiredExample = null;
+        if (!result.ok || !board) {
+            this.setState({examplesError: result.reasons?.join(' · ') || 'The circuit could not be attached.'});
+            return;
+        }
+        const runtime = this.props.vm?.runtime;
+        if (runtime) runtime.circuitBoard = board;
+        window.dispatchEvent(new CustomEvent('bw-board-ready'));
+        if (pending.media) window.dispatchEvent(new CustomEvent('bw-machine-media-load', {detail: pending.media}));
+    };
+
     /**
      * Apply an example's shipped controller layout (files.controller) to
      * the runtime panel — replacing whatever widgets the previous project
@@ -1856,6 +1871,9 @@ class CircuitTab extends React.Component {
             // established path — this tab stashes it to window.__bwPendingMedia
             // and debug-panel applies it when the panel mounts, which is what
             // makes an example loaded BEFORE the debugger exists still boot.
+            let wiredMedia = null;
+            const wiredBoot = this.state.Designer?.supportsWiredExampleBoot &&
+                data.parts.some(part => part.kind === 'w65c02');
             try {
                 const romPath = ex.files && ex.files.rom;
                 if (romPath) {
@@ -1879,15 +1897,9 @@ class CircuitTab extends React.Component {
                         const kind = cpu.kind === 'z80' ? 'z80'
                             : /^(i8086|8086|i8088|8088)$/.test(cpu.kind) ? 'i8086'
                                 : 'eater6502';
-                        window.dispatchEvent(new CustomEvent('bw-machine-media-load', {
-                            detail: {
-                                slotId: 'rom',
-                                bytes,
-                                kind,
-                                profile: null,
-                                name: romPath.split('/').pop(),
-                            },
-                        }));
+                        const media = {slotId: 'rom', bytes, kind, profile: null, name: romPath.split('/').pop()};
+                        if (kind === 'eater6502' && wiredBoot) wiredMedia = media;
+                        else window.dispatchEvent(new CustomEvent('bw-machine-media-load', {detail: media}));
                     }
                 }
             } catch (e) {
@@ -1897,11 +1909,14 @@ class CircuitTab extends React.Component {
             // Switching to the Designer is the point of clicking an example —
             // leaving the user on the gallery with an invisible change would be
             // the same silence this panel strip exists to avoid.
+            const circuitData = wiredBoot ? {...data, fileOnly: true, bootWiredExample: true}
+                : hasProgram ? data : {...data, fileOnly: true};
+            this._wiredExample = wiredBoot ? {data: circuitData, media: wiredMedia} : null;
             this.setState({
                 // fileOnly tells the designer this circuit came with no
                 // program: never rebuild it from whatever pins the previous
                 // project left behind.
-                circuitData: hasProgram ? data : {...data, fileOnly: true},
+                circuitData,
                 panel: 'designer',
                 loadingExample: null,
                 stc: this.readStc(),
@@ -2378,6 +2393,7 @@ class CircuitTab extends React.Component {
                     onEditorMenuActions={this.handleDesignerMenuActions}
                     onCircuitReady={c => { window.__circuit = c; if (this.props.vm && this.props.vm.runtime) this.props.vm.runtime.circuitModel = c; this.handleCircuitReady(c); }}
                     circuitData={this.state.circuitData || undefined}
+                    onWiredBootReady={this.handleWiredBootReady}
                     onBoardReady={(board) => {
                         // Same diagnosis hook the standalone harness exposes —
                         // production incidents get measured, not guessed at.
@@ -2414,6 +2430,8 @@ class CircuitTab extends React.Component {
                         return undefined; // default: simulator assumed
                     })()}
                         onCircuitEdit={this.handleCircuitEdit}
+                        onOpenMachineLibrary={kind => window.dispatchEvent(new CustomEvent('bw-open-machine-manager',
+                            {detail: {kind}}))}
                         onDeclarationChange={this.handleDeclarationChange}
                         panelNav={this.renderPanelStrip()}
                         lang={String(this.props.locale || 'en').slice(0, 2) === 'de' ? 'de' : 'en'}

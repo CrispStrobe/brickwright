@@ -944,17 +944,17 @@ const GUIComponent = props => {
     // "Manage machines…" entry (it dispatches bw-open-machine-manager). Running
     // a machine from it boots via the shared runMachineConfig bridge — so its
     // screen/keyboard land in the Widgets pane like any other machine.
-    const [showMachines, setShowMachines] = React.useState(false);
+    const [showMachines, setShowMachines] = React.useState(null);
     React.useEffect(() => {
-        const open = () => setShowMachines(true);
+        const open = event => setShowMachines({kind: event.detail?.kind || null});
         window.addEventListener('bw-open-machine-manager', open);
         return () => window.removeEventListener('bw-open-machine-manager', open);
     }, []);
     const machineManagerModal = showMachines ? (
         <React.Suspense fallback={null}>
-            <MachineManager store={getMachineStore()} locale={props.locale}
+            <MachineManager store={getMachineStore()} locale={props.locale} preferredMachine={showMachines.kind}
                 onRun={(cfg, opts) => runMachineConfig(cfg, opts)}
-                onClose={() => setShowMachines(false)} />
+                onClose={() => setShowMachines(null)} />
         </React.Suspense>
     ) : null;
 

@@ -23,13 +23,14 @@ import {readDosPackageZip, DOS_PACKAGE_LIMITS} from '../../lib/bw-machines/dos-p
 import {localDosPackage} from '../../lib/bw-machines/local-dos-package.js';
 import {localFreedosVgaMachine} from '../../lib/bw-machines/local-freedos-vga.js';
 import {defaultImageFetcher} from '../../lib/bw-machines/activate.js';
+import {remoteMachineImagesAllowed} from '../../lib/distribution-policy.js';
 import {lessonMachines, lessonT} from '../../lib/bw-machines/lessons.js';
 
 const T = {
     en: {
         title: 'Machines', empty: 'No machines yet — import one below.',
         run: 'Run', dup: 'Duplicate', del: 'Delete', close: 'Close',
-        importL: 'Import a brickwright-media.json, a DOSBox .conf, or a machine config:',
+        importL: 'Import a manifest URL, machine JSON, or DOSBox .conf',
         importB: 'Import', exportB: 'Export all', paste: 'Paste JSON or .conf here…',
         imported: 'Imported.', exported: 'Exported below — copy it.', removed: 'Deleted.',
         duped: 'Duplicated.', badImport: 'Could not import: ',
@@ -40,7 +41,7 @@ const tr = (locale, k) => (T[(locale || 'en').slice(0, 2)] || T.en)[k] || T.en[k
 
 const modeBadge = m => (m === 'wired' ? '🔌 wired' : m === 'auto' ? '◐ auto' : '⚙ functional');
 
-export default function MachineManager({store, onRun, onClose, locale}) {
+export default function MachineManager({store, onRun, onClose, locale, preferredMachine}) {
     // WHERE THE SCREEN IS, not where the page is. `inset: 0` covers the LAYOUT
     // viewport, which this app floors at 1024px wide — so on a 430pt phone the
     // modal centred at x=512 and its buttons sat off the side of the screen.
@@ -52,6 +53,8 @@ export default function MachineManager({store, onRun, onClose, locale}) {
     const overlayBox = overlayStyleFor(vvBox,
         typeof window === 'undefined' ? 0 : window.innerWidth);
     const [machines, setMachines] = React.useState([]);
+    const [machineFilter, setMachineFilter] = React.useState(preferredMachine || '');
+    const matchingMachines = machines.filter(machine => !machineFilter || machine.machine === machineFilter);
     const [status, setStatus] = React.useState('');
     const [text, setText] = React.useState('');
     const [localDisk, setLocalDisk] = React.useState(null);
@@ -162,7 +165,10 @@ export default function MachineManager({store, onRun, onClose, locale}) {
     // AWAITED: the modal stays open saying what it is fetching, and a refusal
     // (a hash mismatch names the slot) is shown here instead of vanishing into
     // an unhandled rejection behind a closed modal.
-    const lessons = React.useMemo(() => lessonMachines(locale), [locale]);
+    const allLessons = React.useMemo(() => lessonMachines(locale), [locale]);
+    const lessons = allLessons.filter(lesson => !machineFilter || lesson.config.machine === machineFilter);
+    const machineKinds = [...new Set([preferredMachine, ...allLessons.map(lesson => lesson.config.machine),
+        ...machines.map(machine => machine.machine)].filter(Boolean))].sort();
     const [lessonBusy, setLessonBusy] = React.useState(null);
     // `cold`: the lesson's "Boot from scratch" config (no snapshot slot).
     const runLesson = async (lesson, cold = false) => {
@@ -193,7 +199,16 @@ export default function MachineManager({store, onRun, onClose, locale}) {
         if (!src) return;
         try {
             let cfg;
-            if (/\[(dosbox|cpu|autoexec)\]/i.test(src)) {
+            if (/^https:\/\//i.test(src)) {
+                if (!remoteMachineImagesAllowed()) throw new Error('Remote machine images are disabled in this build.');
+                const url = new URL(src);
+                if (!url.pathname.endsWith('/brickwright-media.json') || url.username || url.password) {
+                    throw new Error('Use an HTTPS URL for a brickwright-media.json manifest.');
+                }
+                const response = await fetch(url, {redirect: 'error'});
+                if (!response.ok) throw new Error(`Manifest HTTP ${response.status}`);
+                cfg = fromMediaManifest(await response.json(), {source: url.href, baseUrl: new URL('.', url).href});
+            } else if (/\[(dosbox|cpu|autoexec)\]/i.test(src)) {
                 cfg = fromDosboxConf(src);
             } else {
                 const obj = JSON.parse(src);
@@ -228,7 +243,12 @@ export default function MachineManager({store, onRun, onClose, locale}) {
                 boxShadow: '0 12px 40px rgba(0,0,0,0.3)'}}>
                 <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     padding: '12px 16px', borderBottom: '1px solid #e2e8f0'}}>
-                    <strong style={{fontSize: 15}}>{t('title')}</strong>
+                    <strong style={{fontSize: 15}}>{preferredMachine ? (/^de/i.test(locale) ? 'Firmware-Bibliothek' : 'Firmware library') : t('title')}</strong>
+                    <select aria-label={/^de/i.test(locale) ? 'Zielsystem' : 'Machine type'} value={machineFilter}
+                        onChange={event => setMachineFilter(event.target.value)}>
+                        <option value="">{/^de/i.test(locale) ? 'Alle Maschinen' : 'All machines'}</option>
+                        {machineKinds.map(kind => <option key={kind} value={kind}>{kind === 'eater6502' ? '6502' : kind}</option>)}
+                    </select>
                     <button onClick={closeManager} style={btn} data-testid="bw-mm-close">{t('close')}</button>
                 </div>
 
@@ -262,9 +282,9 @@ export default function MachineManager({store, onRun, onClose, locale}) {
                             </div>
                         </div>
                     ))}
-                    {machines.length === 0 ? (
+                    {matchingMachines.length === 0 && lessons.length === 0 ? (
                         <div style={{color: '#64748b', padding: '18px 4px'}}>{t('empty')}</div>
-                    ) : machines.map(m => (
+                    ) : matchingMachines.map(m => (
                         <div key={m.id} data-testid="bw-mm-row"
                             style={{display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0',
                                 borderBottom: '1px solid #f1f5f9'}}>
