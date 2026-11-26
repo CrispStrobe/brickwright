@@ -1564,3 +1564,30 @@ passed Run, joint motion, Pause, Reset, repeat Run and Close in the
 local embedded editor with the new worker and bundled engine.
 Brickwright still pins SDK `f0136b8`.
 [CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/4aad300e33b1a775e6869122a7482a8b03f75ef4)
+
+### Reduce allocations in the Circuit solver
+
+The Circuit solver reuses its rail-voltage parameter list and skips
+numeric conversion for absent values. It walks each device's own drive
+keys in their existing order, removing the intermediate key–value pairs
+from every stamp. Live voltage values and stamping order still determine
+the same Newton budget and coefficients.
+
+In seven alternating Node replays of each recorded Chrome mechanical
+trace, median CPU time for 600 coupled electrical steps fell from
+1,637 to 1,559 ms for Atlas and from 826 to 800 ms for Scout. Each
+replay matched the sampled voltages, actuator feedback and solve count.
+
+The live Chrome comparisons held the CrispCAD worker and local
+Jolt 5.7 SIMD module fixed. Atlas spent 449 → 462 ms in Circuit solves
+in the first order and 443 → 439 ms in the reverse order. Scout spent
+247 → 243 ms and 256 → 243 ms. Both robot traces matched at all 100
+sample points across 600 steps. Solve counts stayed at 18,930 for Atlas
+and 12,618 for Scout. These browser runs did not include the full
+Brickwright viewport.
+
+All 61 focused tests passed, including H-bridge motion, GPIO, current
+conservation, reference rails, Newton budget and Microtronic scheduling.
+Brickwright currently pins Board `cc18f3c8` and CAD SDK `f0136b8`.
+Sustained 1× qualification for the shipping application remains open.
+[Board source](https://github.com/CrispStrobe/bw-board/commit/34306ce3fa8facd370c8859ddae4bc85abe4c84a)
