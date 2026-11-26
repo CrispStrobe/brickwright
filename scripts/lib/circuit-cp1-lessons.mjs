@@ -2,6 +2,7 @@ import {readFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {createCp1Adapter} from 'bw-board/cp1-adapter.js';
 import {createCp1SemanticObserver} from 'bw-board/cp1-semantics.js';
+import {parseCp1Scenarios, runCp1Scenario} from './cp1-documented-scenarios.mjs';
 import {parseCp1Program} from '../../overlay/scratch-gui/src/lib/cp1-program.js';
 
 const romPath = new URL('../../overlay/scratch-gui/static/roms/cp1-independent-monitor.bin', import.meta.url);
@@ -9,16 +10,7 @@ const cellLessons = {
     'cp1-descending-sum': {start: 10, cells: [[30, 0, 0], [31, 0, 28]]},
     'cp1-crate-division': {start: 20, cells: [[39, 0, 2], [40, 0, 9]]},
     'cp1-lookup-card': {start: 38, accumulator: 123, cells: [[51, 0, 58]]},
-    'cp1-instruction-patch': {start: 66, accumulator: 197},
-    'cp1-beacon-code': {start: 0, accumulator: 33, latch: 0xfd},
-    'cp1-delay-lab': {start: 0, accumulator: 24, latch: 0xff, cells: [['Visits', 0, 24]]},
-    'cp1-display-postcard': {start: 0, accumulator: 73},
-    'cp1-dual-workbench': {start: 0, accumulator: 47, cells: [['Stock', 0, 47], ['Total', 0, 0]]},
-    'cp1-fraction-stream': {start: 0, accumulator: 5, cells: [['DigitA', 0, 3], ['DigitB', 0, 8],
-        ['DigitC', 0, 4], ['DigitD', 0, 6], ['DigitE', 0, 1], ['DigitF', 0, 5], ['Remainder', 0, 5]]},
-    'cp1-signal-melody': {start: 0, accumulator: 0, latch: 0, cells: [['Cursor', 0, 35]]},
-    'cp1-tile-bundles': {start: 0, accumulator: 91, cells: [['Product', 0, 91], ['Remaining', 0, 0]]},
-    'cp1-wide-tile-count': {start: 0, accumulator: 145, cells: [['High', 0, 2], ['Low', 0, 145], ['Remaining', 0, 0]]}
+    'cp1-instruction-patch': {start: 66, accumulator: 197}
 };
 const digitMasks = [63, 6, 91, 79, 102, 109, 125, 39, 127, 111];
 const accumulatorDisplay = value => [119, 63, 191, ...String(value).padStart(3, '0').split('').map(digit => digitMasks[digit])];
@@ -26,14 +18,27 @@ const wiredLessons = new Set(['cp1-first-display', 'cp1-switch-input', 'cp1-blin
 
 export async function checkCp1Lesson (bench, circuit, examples) {
     const cells = cellLessons[bench.id];
-    if (!bench.cp1 || (!cells && !wiredLessons.has(bench.id))) return null;
+    if (!bench.cp1) return null;
+    const docs = bench.expected ? await readFile(join(examples, bench.expected), 'utf8') : '';
+    const scenarios = parseCp1Scenarios(docs);
+    if (!scenarios.length && !cells && !wiredLessons.has(bench.id)) return null;
     const part = circuit.parts.find(item => item.kind === 'kosmos-cp1');
     if (!part) throw new Error('Missing CP1 machine');
     const expansion = part.params?.expansion === true;
     const [rom, source] = await Promise.all([readFile(romPath), readFile(join(examples, bench.cp1), 'utf8')]);
     const program = parseCp1Program(source, {expansion});
     if (!program.ok) throw new Error(JSON.stringify(program.errors));
-    const adapter = createCp1Adapter({rom, expansion, partId: part.id});
+    const options = {rom, expansion, partId: part.id};
+    if (scenarios.length) {
+        const authoredCircuit = circuit.toJSON();
+        const checks = scenarios.flatMap((scenario, index) => {
+            const target = index === 0 ? circuit : circuit.constructor.fromJSON(authoredCircuit);
+            if (index !== 0) target.setPower(true);
+            return runCp1Scenario(scenario, program, target, options).map(check => ({scenario: index + 1, ...check}));
+        });
+        return {status: checks.every(check => check.ok) ? 'pass' : 'fail', checks};
+    }
+    const adapter = createCp1Adapter(options);
     adapter.attachBoard(circuit.board);
     const {machine} = adapter;
     const advance = ms => adapter.advanceNs(ms * 1_000_000);
@@ -65,7 +70,6 @@ export async function checkCp1Lesson (bench, circuit, examples) {
             if (address === undefined) throw new Error(`Unknown assembly symbol ${name}`);
             observe(`Cell ${name}`, {opcode, operand}, machine.readCell(address));
         }
-        if (cells.latch !== undefined) observe('Port 2 latch', cells.latch, machine.getPortState(2).latch);
         if (cells.accumulator !== undefined) {
             key('ACC');
             advance(50);
