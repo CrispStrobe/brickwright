@@ -118,4 +118,3 @@ inherited history-role gates are not represented as green.
 The candidate is ready for review with those limits recorded. No default-branch
 merge or claim publication is authorized by these results; the earlier
 automatic approval block remains in force.
-
