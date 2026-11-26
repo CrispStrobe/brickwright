@@ -1,0 +1,136 @@
+name: KIM-1 full app acceptance
+on:
+  push:
+    branches: ['feat/kim1-circuits', 'feat/kim1-hardware-integration']
+    paths:
+      - 'vendor-pins.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'packages/scratch-gui/package.json'
+      - 'packages/scratch-gui/package-lock.json'
+      - 'overlay/scratch-gui/examples/kim1-wired-io/**'
+      - 'overlay/scratch-gui/examples/index.json'
+      - 'scripts/verify-kim1-circuits-browser.mjs'
+      - '.github/workflows/kim1-app.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: kim1-app-${{ github.ref }}
+  cancel-in-progress: true
+# Focused feature acceptance, not a deployment or a replacement for Build's
+# upstream qualification, pin-move and release gates.
+jobs:
+  upstream_evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Require green upstream evidence for the exact engine pin
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: npm run verify:bwboard-ci
+  app:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Resolve the exact candidate package inputs
+        id: pins
+        run: node scripts/ci-vendor-pins.mjs >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: CrispStrobe/bw-board
+          ref: ${{ steps.pins.outputs.bw-board }}
+          path: .kim1-board
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: CrispStrobe/bw-circuit-ui
+          ref: ${{ steps.pins.outputs.bw-circuit-ui }}
+          path: .kim1-ui
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install locked root dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Verify committed source and mirror checks
+        run: npm run test:source
+      - name: Vendor the pinned permissive Scratch sources
+        run: npm run vendor
+      - name: Integrate the owned app and gallery
+        run: node scripts/integrate.mjs
+      - name: Install locked GUI dependencies
+        run: |
+          (cd packages/scratch-gui && npm ci --ignore-scripts --legacy-peer-deps --no-audit --no-fund)
+          git diff --exit-code -- package.json package-lock.json packages/scratch-gui/package.json packages/scratch-gui/package-lock.json
+      - name: Apply the VM, paint and render overlays
+        run: |
+          node scripts/apply-vm-overlay.mjs
+          node scripts/apply-paint-overlay.mjs
+          node scripts/apply-render-overlay.mjs
+          node scripts/check-test-setup.mjs --integrated
+      - name: Verify installed source contents and package evidence
+        run: |
+          node scripts/pin-packages.mjs --verify-installed \
+            --source bw-board=.kim1-board --source bw-circuit-ui=.kim1-ui \
+            --installed-root node_modules --installed-root packages/scratch-gui/node_modules
+          node scripts/package-upstream-notices.mjs --check
+          node scripts/gen-bw-board-census.mjs --dir .kim1-board --check
+      - name: Build the actual application
+        env:
+          NODE_ENV: production
+          NODE_OPTIONS: --max-old-space-size=2560
+          BW_ENABLE_CAD: '0'
+          BW_ENABLE_FPGA: '0'
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          npm run build:gui
+      - name: Verify built proof and license assets
+        run: |
+          node scripts/verify-emitted-native-broker-proof.mjs packages/scratch-gui/build
+          node scripts/package-upstream-notices.mjs --check --build-dir packages/scratch-gui/build
+          BW_EXPECT_REMOTE_CODE_POLICY=allow node scripts/verify-build-policy.mjs packages/scratch-gui/build
+          node scripts/verify-no-gpl-in-build.mjs packages/scratch-gui/build
+      - name: Prepare browser dependencies
+        run: sudo env "PATH=$PATH" node scripts/prepare-playwright-apt.mjs
+      - name: Install Chromium
+        timeout-minutes: 10
+        run: ./node_modules/.bin/playwright install --with-deps chromium
+      - name: Serve the built application
+        run: |
+          python3 -m http.server 8242 --directory packages/scratch-gui/build > /tmp/kim1-app-server.log 2>&1 &
+          node --input-type=module <<'NODE'
+          const deadline=Date.now()+30000;
+          for (;;) {
+            try { const r=await fetch('http://127.0.0.1:8242/'); if(r.ok) break; } catch {}
+            if(Date.now()>deadline) throw new Error('Built app server did not become ready');
+            await new Promise(resolve=>setTimeout(resolve,250));
+          }
+          NODE
+      - name: Exercise KIM-1 through the actual app gallery
+        timeout-minutes: 4
+        env:
+          BW_KIM1_BOARD_SHA: ${{ steps.pins.outputs.bw-board }}
+          BW_KIM1_UI_SHA: ${{ steps.pins.outputs.bw-circuit-ui }}
+        run: node scripts/verify-kim1-circuits-browser.mjs http://127.0.0.1:8242/
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: kim1-app-${{ github.sha }}
+          path: artifacts/kim1-app/
+          if-no-files-found: warn
+          retention-days: 14

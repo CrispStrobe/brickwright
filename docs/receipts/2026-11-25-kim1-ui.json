@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "scope": "Actual upstream CircuitDesigner; not the full Brickwright application",
+  "ui": {
+    "repository": "CrispStrobe/bw-circuit-ui",
+    "commit": "a76feb3000e30902537ef986c8c4c76cecf8e407",
+    "pullRequest": 176
+  },
+  "engine": {
+    "repository": "CrispStrobe/bw-board",
+    "commit": "e834b270cd21ca90be4407610566cdd75750168d",
+    "pullRequest": 771,
+    "runtimeTreeSha256": "c28daf86c955350c29f10084e0cee98e1dcb314e7bc546a8ba2b67351f715e93"
+  },
+  "evidence": {
+    "run": "https://github.com/CrispStrobe/bw-circuit-ui/actions/runs/45706138128",
+    "jobId": 139528498244,
+    "artifactId": 15066575560
+  },
+  "tests": {
+    "installedEngine": {
+      "passed": 26,
+      "failed": 0,
+      "skipped": 0
+    },
+    "uiIntegration": {
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "provenance": {
+    "sourceClean": true,
+    "installedViaNpm": true,
+    "installedMatchesSource": true,
+    "existingGuardQualified": true
+  },
+  "browser": {
+    "status": "passed",
+    "browser": "149.0.7827.55",
+    "checks": [
+      "palette places KIM-1 with all 23 keys, SST switch and original connector artwork",
+      "GO applies the dirty editor and the actual NMOS CPU stores 42 in RAM before BRK stops",
+      "AD/DA writes actual DDR and port registers while preserving the saved RAM image",
+      "invalid load is atomic; an imported file, SST and PC work through the visible front panel",
+      "DA keypad entry persists, + advances and RS retains RAM; Save exports the accepted bytes",
+      "circuit save/load restores the exact accepted source and keypad-edited RAM",
+      "visible switches drive PB0/PB2 and real PA0/PA2 LEDs; all lesson wires fit in the canvas",
+      "ST freezes this CPU while the circuit clock and inputs continue; live rerenders preserve an unloaded draft",
+      "all 17 connector contacts coincide with real wire targets at every quarter-turn and reflection",
+      "two KIM-1 panels control independent computers on one circuit",
+      "the front panel remains usable without horizontal overflow at 390px"
+    ],
+    "scope": "Actual CircuitDesigner, NMOS CPU and independently written front-panel monitor, shared circuit clock and external electrical nets",
+    "fullApplicationBuild": false
+  }
+}

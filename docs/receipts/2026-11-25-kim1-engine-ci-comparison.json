@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "status": "existing_failure_confirmed_on_exact_base",
+  "baseline": {
+    "commit": "e744ede765c76ce15b9e5c101aa23f56210eab09",
+    "run": 45694835620,
+    "job": 139489395535,
+    "tests": 10354,
+    "passed": 10046,
+    "failed": 1,
+    "skipped": 307
+  },
+  "candidate": {
+    "commit": "e834b270cd21ca90be4407610566cdd75750168d",
+    "run": 45703434612,
+    "job": 139519321285,
+    "tests": 10380,
+    "passed": 10072,
+    "failed": 1,
+    "skipped": 307
+  },
+  "commonFailure": {
+    "file": "test/multimeter-chain.test.mjs",
+    "line": 163,
+    "test": "multimeter chain: firmware -> emu8051(STC15) -> MNA -> digits",
+    "mode": "A",
+    "expected": "0 9 7",
+    "actual": "0 9 2"
+  },
+  "interpretation": "The candidate adds exactly 26 passing KIM tests. The sole ordinary-test failure and skipped-test count are identical on the exact pre-KIM base.",
+  "limitation": "The broader upstream CI is failed, not qualified. Focused KIM results do not waive the existing exact-pin release gate.",
+  "sources": [
+    "https://github.com/CrispStrobe/bw-board/actions/runs/45694835620/job/139489395535",
+    "https://github.com/CrispStrobe/bw-board/actions/runs/45703434612/job/139519321285"
+  ]
+}
