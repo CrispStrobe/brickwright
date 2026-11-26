@@ -74,6 +74,13 @@ test('the analog-write lesson bench follows the retargeted PWM assignments', () 
     ]);
 });
 
+test('an authored LED role checks the correctly mapped Nano PWM output', () => {
+    const result = invoke('arduino-01-fade', '--device', 'arduino-nano', '--json');
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const {rows: [{behavior}]} = JSON.parse(result.stdout);
+    assert.deepEqual(behavior.checks.map(check => [check.part, check.pin, check.ok]), [['led1', 'D3', true]]);
+});
+
 test('8051 relay and LED energize and release in the documented sequence', () => {
     const result = invoke('09-relay-clicker', '--device', 'stc12c5a60s2', '--json');
     assert.equal(result.status, 0, result.stderr || result.stdout);

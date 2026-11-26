@@ -92,12 +92,15 @@ export async function checkDeclaredIO (bench, circuit, examples) {
     if (!/^PIN\s/im.test(source)) return null;
     const creator = await readBenchProgram(bench, examples, source);
     const pins = new Map((creator.project.stc?.pins ?? []).map(pin => [pin.name.toLowerCase(), pin]));
+    const declarations = new Map(circuit.parts.filter(part => typeof part.declName === 'string')
+        .map(part => [part.id, part.declName.toLowerCase()]));
     const checks = [];
     for (const part of parts) {
         const [prefix, directions, param] = pairs[part.kind];
         const id = part.id.toLowerCase();
         const prefixTag = `${prefix.toLowerCase()}_`;
-        const name = partAliases[bench.id]?.[id] ?? (id.startsWith(prefixTag) ? id.slice(prefixTag.length) : id);
+        const name = declarations.get(part.id) ?? partAliases[bench.id]?.[id] ??
+            (id.startsWith(prefixTag) ? id.slice(prefixTag.length) : id);
         const pin = pins.get(name);
         if (!directions.includes(pin?.direction)) continue;
         const coordinate = pin.where ?? `P${pin.port}.${pin.bit}`;
@@ -112,14 +115,19 @@ export async function checkDeclaredIO (bench, circuit, examples) {
             const original = param ? part.params[param] ?? 0 : board.getControl(part.id);
             const set = value => param ? circuit.setPartParam(part.id, param, value) : circuit.setControl(part.id, value);
             const analog = pin.direction === 'analog';
+            const originalPin = board.getPinState(coordinate);
             const levels = [];
             try {
+                if (!analog) {
+                    circuit.setPin(coordinate, pin.activeLow ? 'input-pullup' : 'input-pulldown', Boolean(pin.activeLow));
+                }
                 for (const position of [0, 1]) {
                     set(position);
                     levels.push(analog ? board.readAnalog(coordinate) : board.readPin(coordinate));
                 }
             } finally {
                 if (Number.isFinite(original)) set(original);
+                if (!analog) circuit.setPin(coordinate, originalPin?.mode ?? 'input', originalPin?.driveHigh ?? false);
             }
             // A pull-up, a pull-down and a rotated potentiometer are all valid
             // circuit parts. The paired reaction must reach the program's pin.
