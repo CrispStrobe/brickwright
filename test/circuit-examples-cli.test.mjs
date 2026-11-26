@@ -92,6 +92,15 @@ test('the bundled CP1 monitor drives the actual CP5 LEDs and saves the sampled b
         [true, false, true, false, false, true, false, true]);
 });
 
+test('CP1 voltmeter replays three authored verification scenarios through its wired switches', () => {
+    const result = invoke('cp1-bench-voltmeter', '--json');
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const {rows: [{behavior}]} = JSON.parse(result.stdout);
+    const readings = behavior.checks.filter(check => check.label === 'Cell Reading');
+    assert.deepEqual(readings.map(({scenario, observed}) => [scenario, observed.operand]), [[1, 0], [2, 10], [3, 50]]);
+    assert.equal(behavior.checks.filter(check => check.label === 'Switch levels reach their CP1 pins').length, 3);
+});
+
 test('circuit CLI rejects an unknown gallery ID', () => {
     const result = invoke('missing-example', '--json');
     assert.equal(result.status, 2);
