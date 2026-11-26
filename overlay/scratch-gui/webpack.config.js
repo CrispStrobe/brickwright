@@ -6,6 +6,27 @@ const {artworkDirectory, buildGalleryArtworkIndexes} = require('./gallery-artwor
 // Plugins
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+// Older single-machine examples carry their target in the program itself.
+function addExampleTargets (bytes, filename) {
+    if (filename !== path.resolve(__dirname, 'examples/index.json')) return bytes;
+    const manifest = JSON.parse(bytes);
+    for (const entry of Array.isArray(manifest) ? manifest : manifest.examples || []) {
+        const program = entry.files?.program;
+        if (!program || entry.device || entry.devices?.length) continue;
+        let target = entry.authored;
+        if (!target) {
+            try {
+                const source = readFileSync(path.resolve(path.dirname(filename), program), 'utf8');
+                target = source.match(/^\s*DEVICE[ \t]+([\w-]+)/im)?.[1];
+            } catch (error) {
+                if (error.code !== 'ENOENT') throw error;
+            }
+        }
+        if (target) entry.device = target.toLowerCase().replace(/_/g, '-');
+    }
+    return JSON.stringify(manifest);
+}
+
 const reactProfiling = process.env.BW_REACT_PROFILE === '1';
 const remoteCodePolicy = process.env.BW_REMOTE_CODE_POLICY || 'allow';
 const distributionPolicy = {
@@ -449,10 +470,10 @@ const buildConfig = baseConfig.clone()
                 to: 'sw.js'
             },
             {
-                // Examples gallery index — 22 KiB, 53 entries, bilingual.
-                // The ExamplesBrowser fetches 'examples/index.json' (relative).
+                // Code and Circuit use the same gallery metadata.
                 from: 'examples',
                 to: 'examples',
+                transform: addExampleTargets,
                 noErrorOnMissing: true
             }
         ]

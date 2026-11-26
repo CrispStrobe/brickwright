@@ -23,6 +23,7 @@ try {
     await blocksMenu.getByRole('button', {name: 'Zoom in'}).click();
     await blocksTools.click();
     await blocksMenu.getByRole('button', {name: 'Read Blocks into Code'}).click();
+    await page.getByTestId('bw-code-status').filter({hasText: /read into all languages/i}).waitFor();
     const openCodeMenu = () => page.getByTestId('bw-code-actions-trigger').click();
     await openCodeMenu();
     const codeMenu = page.getByTestId('bw-code-actions-menu');
@@ -40,7 +41,7 @@ try {
     const catalog = page.getByTestId('bw-catalog-panel');
     await page.locator('[data-catalog="ready"][data-device="z80"]').waitFor();
     const eligible = await catalog.getByTestId('bw-catalog-item').evaluateAll(items => items.map(item => item.title));
-    assert.ok(eligible.length, 'The Z80 catalog should offer compatible examples');
+    assert.ok(eligible.includes('z80-pd-bench'), 'The Z80 catalog should include authored Z80 examples');
     assert.ok(!eligible.includes('eeprom-start-counter'), 'The Z80 catalog should exclude the I²C EEPROM counter');
     assert.equal(await catalog.locator('[data-testid="bw-catalog-device"]').count(), 0);
     await catalog.getByRole('button', {name: 'Open full examples library'}).click();
