@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {clearControllerPanel, connectControllerBoard, serializeControllerPanel} from '../../lib/controller-inputs.js';
+import LogikusHost from '../tw-pseudocode/logikus-host.jsx';
 import {Cp1Surfaces} from '../tw-pseudocode/cp1-surfaces.js';
 import {defineMessages, FormattedMessage, injectIntl, intlShape} from 'react-intl';
 import {connect} from 'react-redux';
@@ -356,6 +357,15 @@ const GUIComponent = props => {
     React.useEffect(() => {
         const openLessonProject = event => {
             const lesson = event.detail || {};
+            if (lesson.loadMode === 'logikus') {
+                // The Logikus bench is app-owned and opens beside the current
+                // project; it does not load a vendored gallery example.
+                window.dispatchEvent(new CustomEvent('bw-logikus-open', {detail: {
+                    presetId: lesson.presetId,
+                    journeyId: `lesson:${lesson.id}`
+                }}));
+                return;
+            }
             const editorTab = lesson.loadMode === 'program-only' ? 3 : 4;
             props.onActivateTab(editorTab);
             window.dispatchEvent(new CustomEvent('bw-start-journey', {detail: {
@@ -1475,7 +1485,7 @@ const GUIComponent = props => {
                 <DragLayer />
             </Box>
         );
-    }}</MediaQuery>{machineManagerModal}</React.Fragment></Cp1Surfaces.Provider>);
+    }}</MediaQuery>{machineManagerModal}<LogikusHost panel={controllerPanel} locale={intl.locale} vm={vm} /></React.Fragment></Cp1Surfaces.Provider>);
 };
 
 GUIComponent.propTypes = {
