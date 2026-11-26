@@ -1008,7 +1008,7 @@ class CircuitTab extends React.Component {
         const split = !!(debuggerLive && dock);
         if (this._splitDock && this._splitDock !== dock) this._splitDock.style.maxHeight = '';
         this._splitDock = split ? dock : null;
-        if (dock) dock.style.maxHeight = split ? 'calc(50% - 44px)' : '';
+        if (dock) dock.style.maxHeight = split ? 'var(--bw-dock-max-height, calc(50% - 44px))' : '';
         host.style.top = split ? '50%' : '0';
         host.style.zIndex = split ? '2' : '0';
         if (split) host.dataset.bwDebuggerSplit = 'true';

@@ -4,19 +4,13 @@ import {ps2ButtonBit, ps2Delta} from '../../lib/bw-machines/ps2-pointer.js';
 
 /** Large, focusable VGA face for the Widgets pane. The panel owns frame storage;
  * this face only paints it and sends live input to the active machine runner. */
-export default function MachineConsole({widget, keyIn, mouseIn, keyboardSet}) {
+export default function MachineConsole({widget, keyIn, mouseIn, keyboardSet, isFullScreen, onToggleFullScreen}) {
     const root = React.useRef(null);
     const canvas = React.useRef(null);
     const held = React.useRef(new Set());
     const buttons = React.useRef(0);
     const point = React.useRef(null);
-    const [full, setFull] = React.useState(false);
     const [focused, setFocused] = React.useState(false);
-    React.useEffect(() => {
-        const sync = () => setFull(document.fullscreenElement === root.current);
-        document.addEventListener('fullscreenchange', sync);
-        return () => document.removeEventListener('fullscreenchange', sync);
-    }, []);
     React.useEffect(() => {
         const el = canvas.current;
         const rgba = widget?.state?.rgba;
@@ -100,11 +94,10 @@ export default function MachineConsole({widget, keyIn, mouseIn, keyboardSet}) {
         buttons.current &= ~ps2ButtonBit(e.button);
         mouseIn({dx: 0, dy: 0, buttons: buttons.current});
     };
-    const toggleFull = async () => {
-        try {
-            if (document.fullscreenElement === root.current) await document.exitFullscreen();
-            else await root.current?.requestFullscreen();
-        } catch { /* browser declined fullscreen; pane mode still works */ }
+    const toggleFull = () => {
+        release();
+        onToggleFullScreen();
+        root.current?.focus();
     };
     return (
         <div ref={root} data-testid="bw-machine-console" tabIndex={0}
@@ -115,13 +108,13 @@ export default function MachineConsole({widget, keyIn, mouseIn, keyboardSet}) {
                 padding: '4px 8px', background: '#111827', color: '#cbd5e1', fontSize: 12}}>
                 <span>{widget.name}{keyIn && (focused ? ' · Keyboard active' : ' · Click screen for keyboard')}
                     {mouseIn && ' · Mouse'}</span>
-                <button type="button" onClick={toggleFull} data-testid="bw-machine-fullscreen"
+                {onToggleFullScreen && <button type="button" onClick={toggleFull} data-testid="bw-machine-fullscreen"
                     onPointerDown={e => e.stopPropagation()} onPointerUp={e => e.stopPropagation()}
                     onKeyDown={e => e.stopPropagation()} onKeyUp={e => e.stopPropagation()}
                     style={{background: '#374151', color: '#fff', border: 0, borderRadius: 4,
                         padding: '4px 9px', cursor: 'pointer'}}>
-                    {full ? 'Exit full screen' : 'Full screen'}
-                </button>
+                    {isFullScreen ? 'Exit full screen' : 'Full screen'}
+                </button>}
             </div>
             <div onPointerMove={pointerMove} onPointerDown={pointerDown} onPointerUp={pointerUp}
                 onLostPointerCapture={() => {

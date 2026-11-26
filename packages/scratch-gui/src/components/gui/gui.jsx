@@ -1039,7 +1039,7 @@ const GUIComponent = props => {
         const dockFullScreenStyle = isFullScreen ? {
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
             width: '100vw', height: '100vh', margin: 0, zIndex: 4000,
-            background: '#ffffff', overflow: 'auto'
+            background: '#ffffff', overflow: 'auto', '--bw-dock-max-height': 'none'
         } : null;
 
         // Right-pane full screen: the stock presentation mode is defeated by

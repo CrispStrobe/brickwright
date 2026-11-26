@@ -1,102 +1,78 @@
-/**
- * Live proof of the headline feature: boot a real OS from the Machine Manager
- * and watch its screen render into a Widgets `simplevga` widget (design §4.2).
- *
- * Imports an ELKS machine (floppy + a source:video screen widget), clicks Run,
- * and waits for the VGA widget's canvas to receive a non-blank framebuffer —
- * i.e. the machine's video() actually reached the Widgets pane. Local-only
- * (needs an ELKS image via ELKS_IMG); it exits 0-with-a-note if the image or a
- * frame never arrives, since that is an environment/timing matter, not a code
- * regression the unit suite already covers.
- */
+import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {readFile} from 'node:fs/promises';
-import {existsSync} from 'node:fs';
-import {extname, join, normalize, resolve, dirname} from 'node:path';
+import {extname, resolve, sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
-
-const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const build = join(root, 'packages', 'scratch-gui', 'build');
-const IMG = process.env.ELKS_IMG || '/mnt/volume1/code/elks-images/fd1440-fat.img';
-const MIME = {'.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css',
-    '.json': 'application/json', '.wasm': 'application/wasm', '.map': 'application/json',
-    '.png': 'image/png', '.svg': 'image/svg+xml', '.woff2': 'font/woff2', '.img': 'application/octet-stream'};
-
-if (!existsSync(join(build, 'index.html'))) throw new Error('Build first');
-if (!existsSync(IMG)) { console.log(`NOTE: ELKS image ${IMG} absent — skipping live boot proof`); process.exit(0); }
-
+// Local full-stack proof. Build the GUI first. The ELKS lesson fetches its
+// pinned floppy by default. ELKS_IMG can substitute a local copy of that image.
+const dist = fileURLToPath(new URL('../packages/scratch-gui/build', import.meta.url));
+await readFile(resolve(dist, 'index.html'));
+const localImage = process.env.ELKS_IMG ? await readFile(process.env.ELKS_IMG) : null;
+const types = {'.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.wasm': 'application/wasm',
+    '.json': 'application/json', '.svg': 'image/svg+xml'};
 const server = createServer(async (req, res) => {
     try {
-        let path = decodeURIComponent((req.url || '/').split('?')[0]);
-        if (path === '/elks.img') { res.writeHead(200, {'content-type': 'application/octet-stream'}); res.end(await readFile(IMG)); return; }
-        if (path === '/' || path.endsWith('/')) path += 'index.html';
-        const file = join(build, normalize(path));
-        if (!file.startsWith(build)) throw new Error('escape');
+        const route = new URL(req.url, 'http://localhost').pathname;
+        const file = resolve(dist, '.' + (route === '/' ? '/index.html' : route));
+        if (!file.startsWith(dist + sep)) throw new Error('invalid route');
         const body = await readFile(file);
-        res.writeHead(200, {'content-type': MIME[extname(file)] || 'application/octet-stream'});
+        res.writeHead(200, {'Content-Type': types[extname(file)] || 'application/octet-stream'});
         res.end(body);
-    } catch { res.writeHead(404); res.end('not found'); }
+    } catch { res.writeHead(404).end(); }
 });
-let port = null;
-for (let p = 8680; p < 8700 && port === null; p++) {
-    try { await new Promise((done, fail) => { server.once('error', fail); server.listen(p, () => { server.removeListener('error', fail); done(); }); }); port = p; } catch { /* busy */ }
-}
-const url = `http://localhost:${port}/`;
-
-const MANIFEST = JSON.stringify({
-    title: 'ELKS live', machine: 'i8086', machineConfig: 'PCXT8086',
-    slots: {floppy: 'elks.img'},
-    floppy: {geometry: {cylinders: 80, heads: 2, sectors: 18, bytesPerSector: 512}, quirks: ['at-floppy-drive-type']},
-    boot: true,
-    widgets: [{name: 'screen', type: 'simplevga', config: {width: 640, height: 200}, source: 'video'}]
-});
-
-let failed = false;
-const browser = await chromium.launch();
+await new Promise(ready => server.listen(0, '127.0.0.1', ready));
+let browser;
 try {
-    const page = await browser.newPage({viewport: {width: 1600, height: 1000}});
-    page.on('dialog', d => d.accept());
-    await page.addInitScript(() => { try { localStorage.clear(); localStorage.setItem('bw-starter-v1-complete', '1'); indexedDB.deleteDatabase('bw-machines'); } catch { /* */ } });
-    await page.goto(url, {waitUntil: 'domcontentloaded', timeout: 90000});
-    await page.getByRole('tab', {name: 'Code', exact: true}).click();
-    const device = page.getByTestId('bw-device-select');
-    await device.waitFor({state: 'visible', timeout: 60000});
-    await device.selectOption('__manage__');
-    await page.getByTestId('bw-machine-manager').waitFor({state: 'visible', timeout: 15000});
-    await page.getByTestId('bw-mm-import-text').fill(MANIFEST);
-    await page.getByTestId('bw-mm-import').click();
-    await page.getByTestId('bw-mm-row').filter({hasText: 'ELKS live'}).waitFor({state: 'visible', timeout: 10000});
-    console.log('ok   ELKS machine imported; clicking Run');
-    await page.getByTestId('bw-mm-run').first().click();
-
-    // The mirror creates the screen widget on boot; wait for it, then poll its
-    // canvas for a non-blank framebuffer (the CGA card producing a frame).
-    const vga = page.getByTestId('bw-ctl-simplevga-screen');
-    await vga.waitFor({state: 'attached', timeout: 30000});
-    console.log('ok   a simplevga screen widget appeared in the Widgets pane');
-
-    let lit = false;
-    for (let i = 0; i < 40 && !lit; i++) {   // up to ~40s of emulated boot
-        lit = await page.evaluate(() => {
-            const el = document.querySelector('[data-testid="bw-ctl-simplevga-screen"] canvas');
-            if (!el || !el.width || !el.height) return false;
-            try {
-                const d = el.getContext('2d').getImageData(0, 0, el.width, el.height).data;
-                for (let j = 0; j < d.length; j += 4) if (d[j] || d[j + 1] || d[j + 2]) return true;
-            } catch { return false; }
-            return false;
-        });
-        if (!lit) await page.waitForTimeout(1000);
+    browser = await chromium.launch({headless: true, executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
+    const page = await browser.newPage({viewport: {width: 1800, height: 1100}});
+    page.on('dialog', dialog => dialog.accept());
+    const errors = [];
+    page.on('pageerror', error => errors.push(error.message));
+    if (localImage) {
+        await page.route('https://raw.githubusercontent.com/CrispStrobe/brickwright-media-lab/*/projects/elks/fd1440-fat.img',
+            route => route.fulfill({body: localImage, contentType: 'application/octet-stream',
+                headers: {'Access-Control-Allow-Origin': '*'}}));
     }
-    if (lit) console.log('ok   the ELKS CGA screen rendered a non-blank frame into the Widgets VGA widget');
-    else { console.log('NOTE: no frame within the boot window (emulation timing on a memory-starved box) — the widget mounted but did not light; not a code failure'); }
-} catch (e) {
-    failed = true;
-    console.log(`NOTE: live boot proof did not complete: ${e && e.message} (environment/timing, not a code regression)`);
+    await page.addInitScript(() => {
+        Object.defineProperty(Element.prototype, 'requestFullscreen', {value: undefined});
+        localStorage.setItem('bw-starter-v1-complete', '1');
+        localStorage.setItem('bw-right-pane-hidden', '1');
+    });
+    await page.goto(`http://127.0.0.1:${server.address().port}/`);
+    await page.getByTestId('bw-file-menu-trigger').click();
+    await page.getByText('Machines…', {exact: true}).click();
+    const lesson = page.locator('[data-lesson-id="lesson-elks-i8086"]');
+    await lesson.getByTestId('bw-mm-lesson-run').click();
+    const canvas = page.getByTestId('bw-machine-canvas');
+    await canvas.waitFor({timeout: 60000});
+    const button = page.getByTestId('bw-machine-fullscreen');
+    await page.waitForFunction(() => {
+        const canvas = document.querySelector('[data-testid="bw-machine-canvas"]');
+        if (!canvas) return false;
+        const {data} = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
+        for (let index = 0; index < data.length; index += 4) {
+            if (data[index] > 64 || data[index + 1] > 64 || data[index + 2] > 64) return true;
+        }
+        return false;
+    }, null, {timeout: 90000});
+    const before = await canvas.boundingBox();
+    await button.click();
+    await page.waitForFunction(() => {
+        const canvas = document.querySelector('[data-testid="bw-machine-canvas"]');
+        const box = canvas.getBoundingClientRect();
+        return box.width >= innerWidth - 3 && box.height >= innerHeight * 0.85;
+    }, null, {timeout: 5000});
+    assert.equal(await button.innerText(), 'Exit full screen');
+    const full = await canvas.boundingBox();
+    await page.waitForFunction(() => document.activeElement?.dataset.testid === 'bw-machine-console');
+    await button.click();
+    await button.getByText('Full screen', {exact: true}).waitFor();
+    const after = await canvas.boundingBox();
+    assert.deepEqual(after, before, 'exit restores the docked geometry');
+    assert.deepEqual(errors, []);
+    console.log('ELKS canvas before / full screen / restored', before, full, after);
 } finally {
-    await browser.close();
-    server.close();
+    await browser?.close();
+    await new Promise(resolveClosed => server.close(resolveClosed));
 }
-process.exit(0);   // never fail the run on a timing/environment matter
-void failed;

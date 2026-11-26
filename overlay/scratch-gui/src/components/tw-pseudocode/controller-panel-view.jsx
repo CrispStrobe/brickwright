@@ -2061,6 +2061,8 @@ class ControllerPanelView extends React.Component {
                     {machineWidget && <MachineConsole widget={machineWidget}
                         keyboardSet={this.props.machineConsole.keyboardSet}
                         keyIn={this.props.machineConsole.keyIn}
+                        isFullScreen={this.props.isFullScreen}
+                        onToggleFullScreen={this.props.isFullScreen ? this.props.onExitFullScreen : this.props.onEnterFullScreen}
                         mouseIn={this.props.machineConsole.mouseIn} />}
                     <div style={machineWidget || (cp1WidgetSlot && widgets.length) ? {
                         position: 'relative', minHeight: cp1WidgetSlot ? 240 : undefined
