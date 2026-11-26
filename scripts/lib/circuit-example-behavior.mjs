@@ -1,7 +1,18 @@
 // Observable checks for the gallery's Scratch-VM route. Each lesson declares
 // what the real board should do under specific user input.
 import {readFile} from 'node:fs/promises';
+import {readBenchProgram, checkDocumentedPhysics, checkDeclaredIO} from './circuit-functional-coverage.mjs';
 import {join} from 'node:path';
+import {checkCp1Lesson} from './circuit-cp1-lessons.mjs';
+
+const logicChecks = (and) => ({
+    sampleMs: 20,
+    durationMs: 580,
+    controls: [[0, 'BTN_btnA', 0], [0, 'BTN_btnB', 0], [120, 'BTN_btnA', 1],
+        [240, 'BTN_btnB', 1], [360, 'BTN_btnA', 0], [480, 'BTN_btnB', 0]],
+    checks: [{at: 80, lit: false}, {at: 200, lit: !and}, {at: 320, lit: true},
+        {at: 440, lit: !and}, {at: 560, lit: false}]
+});
 
 const behaviors = {
     '01-blink': {
@@ -15,6 +26,35 @@ const behaviors = {
         controls: [[0, 'LDR_ldr', 1], [220, 'LDR_ldr', 0], [440, 'LDR_ldr', 1]],
         checks: [{at: 200, lit: false}, {at: 420, lit: true}, {at: 640, lit: false}]
     },
+    '09-relay-clicker': {
+        relay: 'RELAY_relay_ctrl',
+        sampleMs: 50,
+        durationMs: 4300,
+        checks: [{at: 200, lit: true}, {at: 2200, lit: false}, {at: 4200, lit: true}]
+    },
+    'arduino-sk-p15-hacking-buttons': {
+        led: 'LED_opto',
+        sampleMs: 20,
+        durationMs: 1100,
+        checks: [{at: 200, lit: true}, {at: 700, lit: false}, {at: 1080, lit: true}]
+    },
+    '11-toggle-button': {
+        sampleMs: 20,
+        durationMs: 820,
+        controls: [[0, 'BTN_btn', 0], [120, 'BTN_btn', 1], [300, 'BTN_btn', 0],
+            [500, 'BTN_btn', 1], [680, 'BTN_btn', 0]],
+        checks: [{at: 80, lit: false}, {at: 240, lit: true}, {at: 420, lit: true},
+            {at: 620, lit: false}, {at: 800, lit: false}]
+    },
+    '17-comparator': {
+        sampleMs: 20,
+        durationMs: 580,
+        controls: [[0, 'POT_potA', 0], [0, 'POT_potB', 1], [200, 'POT_potA', 1],
+            [200, 'POT_potB', 0], [400, 'POT_potA', 0.5], [400, 'POT_potB', 0.5]],
+        checks: [{at: 160, lit: false}, {at: 360, lit: true}, {at: 560, lit: false}]
+    },
+    '18-logic-and-gate': logicChecks(true),
+    '19-logic-or-gate': logicChecks(false),
     '51-555-astable': {
         led: 'led1',
         usesProgram: false,
@@ -34,17 +74,8 @@ const behaviors = {
 
 async function startProgram ({device, program}, circuit, examples, observeVM) {
     if (!program) throw new Error('The functional scenario requires the gallery program');
-    const {SB3Creator, runCreatedProgram, stepFrames} = await import('../../test/helpers/bw-vm.mjs');
-    let source = await readFile(join(examples, program), 'utf8');
-    const authored = source.match(/^DEVICE\s+(\S+)/im)?.[1].toLowerCase();
-    if (device && authored !== device) {
-        const result = SB3Creator.retargetPseudocode(source, device);
-        if (!result.ok) throw new Error(`Retarget refused: ${result.reasons.join(', ')}`);
-        source = result.pseudocode;
-    }
-
-    const creator = new SB3Creator();
-    creator.parse(source);
+    const {runCreatedProgram, stepFrames} = await import('../../test/helpers/bw-vm.mjs');
+    const creator = await readBenchProgram({device, program}, examples);
     const validation = creator.validate();
     if (!validation.isValid) throw new Error(validation.errors.join(', '));
     const run = await runCreatedProgram(creator, {
@@ -163,13 +194,26 @@ function checkClapLatch (circuit) {
 }
 
 export async function checkBehavior (bench, circuit, examples) {
+    if (bench.cp1) {
+        const cp1 = await checkCp1Lesson(bench, circuit, examples);
+        if (cp1) return cp1;
+    }
     if (bench.id === 'eater6502-crtc80') return checkCrtc80(bench, circuit, examples);
     if (bench.id === 'lab-amp-ic-clap-latch') return checkClapLatch(circuit);
     if (bench.id === 'arduino-sk-p09-motorized-pinwheel' || bench.id === 'arduino-sk-p10-zoetrope') {
         return checkStarterMotor(bench, circuit, examples);
     }
     const spec = behaviors[bench.id];
-    if (!spec) return {status: 'unverified', reason: 'No functional scenario for this lesson'};
+    if (!spec) {
+        // Check the authored operating point before perturbing this circuit's controls.
+        const physics = await checkDocumentedPhysics(bench, circuit, examples);
+        const io = await checkDeclaredIO(bench, circuit, examples);
+        if (io && physics) return {
+            status: io.status === 'pass' && physics.status === 'pass' ? 'pass' : 'fail',
+            scope: 'physics-and-io', checks: [...physics.checks, ...io.checks]
+        };
+        return physics ?? io ?? {status: 'unverified', reason: 'No executable behavior matches this bench'};
+    }
     const led = spec.led ?? 'LED_led1';
     if (!circuit.parts.some(part => part.id === led && part.kind === 'led')) {
         throw new Error(`Missing scenario LED ${led}`);
@@ -185,6 +229,7 @@ export async function checkBehavior (bench, circuit, examples) {
         let now = 0;
         if (vm) vm.runtime.updateCurrentMSecs = () => { vm.runtime.currentMSecs = now; };
         const samples = new Map();
+        const relaySamples = new Map();
         const transitions = [];
         let lit = false;
         const start = circuit.board.getTime();
@@ -202,6 +247,7 @@ export async function checkBehavior (bench, circuit, examples) {
             if (next !== lit) transitions.push({ms: now, lit: next, brightness});
             lit = next;
             samples.set(now, lit);
+            if (spec.relay) relaySamples.set(now, circuit.board.getDeviceState(spec.relay)?.energized);
         }
         if (runtime?.errors.length) throw new Error(runtime.errors.join(', '));
         const checks = spec.checks.map(check => {
@@ -216,7 +262,10 @@ export async function checkBehavior (bench, circuit, examples) {
             }
             if (check.at !== undefined) {
                 const observed = samples.get(check.at);
-                return {...check, observed, ok: observed === check.lit};
+                if (!spec.relay) return {...check, observed, ok: observed === check.lit};
+                const energized = relaySamples.get(check.at);
+                return {...check, observed: {lit: observed, energized},
+                    ok: observed === check.lit && energized === check.lit};
             }
             const edges = transitions.filter(edge => edge.ms >= (check.from ?? 0) && edge.ms < check.until);
             const rises = edges.filter(edge => edge.lit).length;

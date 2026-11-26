@@ -45,6 +45,53 @@ test('circuit CLI checks motor input, direction and coast on retargeted benches'
     }
 });
 
+test('the authored physics tier verifies a circuit output without counting its supply rail', () => {
+    const result = invoke('23-voltage-regulator', '--json');
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const {rows: [{behavior}], summary} = JSON.parse(result.stdout);
+    assert.deepEqual(summary.functionalCoverage, {'documented-physics': 1});
+    assert.deepEqual(behavior.checks.map(check => [check.assertion, check.ok]), [
+        ['net r1.b V 5.13 +-0.05', true]
+    ]);
+});
+
+test('retargeted electrical I/O is measured on the exact bench and does not inherit authored assertions', () => {
+    const result = invoke('02-dimmer', '--device', 'arduino-uno', '--json');
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const {rows: [{behavior}], summary} = JSON.parse(result.stdout);
+    assert.deepEqual(summary.functionalCoverage, {'electrical-io': 1});
+    assert.deepEqual(behavior.checks.map(check => [check.part, check.pin, check.ok]), [
+        ['LED_led1', 'D13', true], ['POT_pot', 'A0', true]
+    ]);
+});
+
+test('the analog-write lesson bench follows the retargeted PWM assignments', () => {
+    const result = invoke('arduino-03-analog-write-mega', '--device', 'arduino-uno', '--json');
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const {rows: [{behavior}]} = JSON.parse(result.stdout);
+    assert.deepEqual(behavior.checks.map(check => [check.part, check.pin, check.ok]), [
+        ['led1', 'D3', true], ['led2', 'D11', true], ['led3', 'D9', true]
+    ]);
+});
+
+test('8051 relay and LED energize and release in the documented sequence', () => {
+    const result = invoke('09-relay-clicker', '--device', 'stc12c5a60s2', '--json');
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const {rows: [{behavior}]} = JSON.parse(result.stdout);
+    assert.deepEqual(behavior.checks.map(check => check.observed), [
+        {lit: true, energized: true}, {lit: false, energized: false}, {lit: true, energized: true}
+    ]);
+});
+
+test('the bundled CP1 monitor drives the actual CP5 LEDs and saves the sampled byte', () => {
+    const result = invoke('cp1-cp5-binary', '--json');
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const {rows: [{behavior}]} = JSON.parse(result.stdout);
+    assert.equal(behavior.checks.length, 18);
+    assert.deepEqual(behavior.checks.find(check => check.label === 'CP5 indicator pattern 165').observed,
+        [true, false, true, false, false, true, false, true]);
+});
+
 test('circuit CLI rejects an unknown gallery ID', () => {
     const result = invoke('missing-example', '--json');
     assert.equal(result.status, 2);
