@@ -1687,3 +1687,30 @@ authored scene after parking. The TypeScript build and all eight focused
 tests passed. Brickwright pins SDK `f2a596a`.
 Sustained 1× in the shipping application remains open.
 [CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/995e81d43a6f80eb272da042daf51ad848f2721a)
+
+### Reuse camera readouts between simulation frames
+
+The CAD viewport updates the view cube and camera readouts when the
+camera, target, rotation or zoom changes. Selecting a different
+projection and attaching a new view listener also refresh the controls.
+
+MacBook Chrome replayed 100 stationary-camera frames per run. Atlas
+and Scout each went from 100 cube rebuilds to zero. The table reports
+the median of five replays per version.
+
+| Camera readout CPU time | First order, before → after | Reverse order, before → after |
+| --- | ---: | ---: |
+| Atlas | 20.4 → 0.9 ms | 15.8 → 0.8 ms |
+| Scout | 17.5 → 0.7 ms | 18.1 → 0.5 ms |
+
+All body matrices and sampled cable buffers matched. Viewport checks
+covered Top view, switching to orthographic projection, zoom and
+registering a new view listener. Both robots also displayed 100 full
+frames across 600 live Circuit–CAD substeps and restored their authored
+scenes after parking. The TypeScript build and six focused unit tests
+passed. The focused Chrome viewport check also verified zero DOM updates
+with a stationary camera and successful Top, wheel and projection changes.
+The standalone Playwright suite timed out during page navigation under
+high system load. Brickwright pins SDK `f2a596a`. Sustained 1× production
+qualification remains open.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/37068339a078016fe1a4b8e54155442a82338ec8)
