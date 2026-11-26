@@ -19,6 +19,7 @@ import {IMPORT_ACCEPT, isImportableArtefact} from '../../lib/bw-makecode/accept.
 // synchronous — and the module is a few KB of strings, not a chunk worth
 // splitting.
 import {asmExamplesFor, riscvCExamplesFor, arduinoSketchExamplesFor} from '../../lib/bw-asm/examples.js';
+import {blinkChoices, blinkFamily, blinkMachines, blinkProgramSource, blinkSource, blinkStarter} from '../../lib/bw-asm/blink-machines.js';
 import {requestSketchBuild, sketchBoardFor, sketchFirmware} from '../../lib/bw-debug/arduino-sketch.js';
 import {armRunFor, imageFromIntelHex} from '../../lib/bw-asm/arm-image.js';
 import {
@@ -296,6 +297,7 @@ const L10N = {
         // BASIC / ASM mode bar
         profile: 'Profile:', lineNumbers: 'Line numbers', alwaysOn6502: '(always on for 6502)',
         asmModeLabel: 'Mode:', asmSource: 'Source (editable)', asmListing: 'Listing (from compiler)',
+        asmBlinkRunning: (machine, route) => `Blink 0 is running on ${machine} · ${route}`,
         asmExampleLabel: 'Example:', asmExamplePick: 'choose…',
         asmExampleReplace: 'Replace what is in the assembly editor?',
         asmExampleLoaded: n => `Loaded "${n}". Press Assemble & Run to build it.`,
@@ -640,6 +642,7 @@ const L10N = {
         // BASIC / ASM mode bar
         profile: 'Profil:', lineNumbers: 'Zeilennummern', alwaysOn6502: '(immer an bei 6502)',
         asmModeLabel: 'Modus:', asmSource: 'Source (editierbar)', asmListing: 'Listing (vom Compiler)',
+        asmBlinkRunning: (machine, route) => `LED 0 blinkt auf ${machine} · ${route}`,
         asmExampleLabel: 'Beispiel:', asmExamplePick: 'wählen…',
         asmExampleReplace: 'Inhalt des Assembler-Editors ersetzen?',
         asmExampleLoaded: n => `„${n}" geladen. Mit Assemblieren & Ausführen bauen.`,
@@ -1417,7 +1420,7 @@ class PseudocodeImporter extends React.Component {
             basic: () => this.runBasic(),
             python: () => this.run(),
             javascript: () => this.run(),
-            asm: target && (() => this.assembleAndRun()),
+            asm: this.state.asmMode === 'source' && (() => this.assembleAndRun()),
             c: libraryProgram ? this.runLibraryProgram : target === 'riscv32' ? () => this.runCOnRiscv()
                 : target === 'z80' ? () => this.runCOnZ80()
                     : target === 'i8086' ? () => this.runCOn8086()
@@ -1985,14 +1988,15 @@ class PseudocodeImporter extends React.Component {
     _asmDevice () {
         const stc = this.currentStc();
         const rt = this.props.vm && this.props.vm.runtime;
-        return this.currentDevice() ||
+        return this.state.asmRunDevice || this.currentDevice() ||
             (stc && stc.device) ||
             (rt && (rt.bwDeviceId || rt.bwDeviceCore)) || '';
     }
 
     /** Starter programs for the selected device, or none. */
     _asmExamples () {
-        return asmExamplesFor(this._asmDevice());
+        const examples = asmExamplesFor(this._asmDevice());
+        return [{id: 'blink0', label: 'Blink 0', labelDe: 'LED 0 blinken'}, ...examples];
     }
 
     /**
@@ -2022,8 +2026,10 @@ class PseudocodeImporter extends React.Component {
         if (!example) return;
         const current = (this.state.buffers.asm || '').trim();
         if (current && !(await confirmAsync(this.L.asmExampleReplace))) return;
+        const family = example.source ? blinkFamily(example.source) : null;
+        const source = id === 'blink0' ? blinkStarter : family ? blinkSource(family) : example.source;
         this.setState(state => ({
-            buffers: {...state.buffers, asm: example.source},
+            buffers: {...state.buffers, asm: source},
             asmMode: 'source',
             status: this.L.asmExampleLoaded(
                 pickLocale(this.props.locale) === 'de' ? example.labelDe : example.label)
@@ -3227,13 +3233,133 @@ class PseudocodeImporter extends React.Component {
      * and 8086 benches; other targets assemble (errors surface here) and say
      * so rather than pretending to have run.
      */
-    async assembleAndRun () {
-        const source = this.state.buffers.asm;
+    chooseBlinkMachine (family, source) {
+        const choices = blinkChoices(family);
+        this.setState({actionsOpen: false, blinkChoice: {choices, source, id: choices[0].id}});
+    }
+
+    renderBlinkMachinePicker () {
+        const request = this.state.blinkChoice;
+        if (!request) return null;
+        const de = pickLocale(this.props.locale) === 'de';
+        const close = () => this.setState({blinkChoice: null});
+        return createPortal(
+            <dialog data-testid="bw-blink-machine-dialog"
+                ref={node => { if (node && !node.open) node.showModal(); }}
+                aria-label={de ? 'Zielsystem für LED 0' : 'Machine for Blink 0'}
+                onCancel={close}
+                style={{width: 330, maxWidth: 'calc(100vw - 32px)', padding: 14,
+                    border: '1px solid #94a3b8', borderRadius: 8, color: '#1e293b'}}>
+                <form onSubmit={event => {
+                    event.preventDefault();
+                    const machine = request.choices.find(option => option.id === request.id);
+                    this.setState({blinkChoice: null}, () => {
+                        if (this.state.buffers.asm === request.source) this.assembleAndRun(machine);
+                    });
+                }} style={{display: 'grid', gap: 10}}>
+                    <label htmlFor="bw-blink-machine">{de ? 'Zielsystem für LED 0' : 'Machine for Blink 0'}</label>
+                    <select id="bw-blink-machine" autoFocus value={request.id}
+                        onChange={event => this.setState({blinkChoice: {...request, id: event.target.value}})}>
+                        {request.choices.map(machine => <option key={machine.id} value={machine.id}>
+                            {machine.label}
+                        </option>)}
+                    </select>
+                    {request.choices.find(option => option.id === request.id)?.circuit &&
+                        this.props.vm?.runtime?.circuitBoard?.getParts?.().length > 0 &&
+                        <small>{de ? 'Die Beispielschaltung ersetzt die aktuelle Schaltung.' :
+                            'The example circuit replaces the current circuit.'}</small>}
+                    <div style={{display: 'flex', justifyContent: 'flex-end', gap: 6}}>
+                        <button type="button" onClick={close}>{de ? 'Abbrechen' : 'Cancel'}</button>
+                        <button type="submit">{de ? 'Erstellen und starten' : 'Create and run'}</button>
+                    </div>
+                </form>
+            </dialog>, document.body);
+    }
+
+    async activeBlinkMachine (family) {
+        const runtime = this.props.vm?.runtime;
+        const board = runtime?.circuitBoard;
+        const parts = board?.getParts?.() || [];
+        const previous = window.__bwPendingMedia?.detail?.asmBlink;
+        const previousMachine = blinkMachines.find(machine => machine.id === previous?.id);
+        if (previousMachine && (family === 'any' || previousMachine.family === family) &&
+            (!previous.board || (previous.board === board &&
+                (!previous.led || parts.some(part => part.id === previous.led))))) {
+            return {machine: previousMachine, board: previous.board, config: previous.config, led: previous.led};
+        }
+        const model = runtime?.circuitModel;
+        if (!model) return null;
+        if ((family === 'any' || family === '8051') && parts.some(part => part.id === 'LED_led1')) {
+            const device = (runtime.stc?.device || this._asmDevice()).toLowerCase();
+            const machine = blinkMachines.find(item => item.family === '8051' && item.device === device);
+            const wired = board.getNets().some(net => net.terminals.some(end =>
+                end.part === 'LED_led1' && end.terminal === 'cathode') &&
+                net.terminals.some(end => String(end.terminal).toLowerCase() === 'p1.0'));
+            if (machine && wired) return {machine, board, led: 'LED_led1'};
+        }
+        if ((family === 'any' || family === '6502') && parts.some(part => part.kind === 'w65c02')) {
+            const config = await this.blinkCircuitConfig('6502', model);
+            if (config) return {machine: blinkMachines.find(machine => machine.id === '6502-wired'),
+                board, config};
+        }
+        if ((family === 'any' || family === 'z80') && parts.some(part => part.kind === 'z80')) {
+            const config = await this.blinkCircuitConfig('z80', model);
+            if (config) return {machine: blinkMachines.find(machine => machine.id === 'z80-virtual'), board, config};
+        }
+        return null;
+    }
+
+    async blinkCircuitConfig (family, model) {
+        const {extractMachine} = await import('bw-circuit-ui/model/machine-extract.js');
+        if (family === '6502') {
+            const {extract6502Machine} = await import('bw-board/m6502-extract.js');
+            const result = extractMachine(model, {extract6502Machine});
+            const resetVector = result.regions?.some(region => region.kind === 'rom' &&
+                region.start === 0x8000 && region.end === 0xffff);
+            if (result.ok && resetVector && result.chips.some(chip => chip.kind === 'via' && chip.at === 0x6000)) {
+                return {clockHz: 1000000, regions: result.regions, chips: result.chips};
+            }
+        } else {
+            const {extractZ80Machine} = await import('bw-board/z80-extract.js');
+            const result = extractMachine(model, {extractZ80Machine});
+            if (result.ok && result.ports?.some(port => port.kind === 'latch' && port.at === 1)) {
+                return {clockHz: 7372800, regions: result.regions, ports: result.ports};
+            }
+        }
+        return null;
+    }
+
+    async assembleAndRun (chosenMachine) {
+        if (this.state.busy || this.state.blinkChoice) return;
+        const originalSource = this.state.buffers.asm;
+        const family = blinkFamily(originalSource || '');
+        let active = null;
+        if (family && !chosenMachine) {
+            this.setState({busy: true});
+            try {
+                active = await this.activeBlinkMachine(family);
+            } catch (error) {
+                if (!this._unmounted) this.setState({busy: false, status: this.L.stError(error.message)});
+                return;
+            }
+            if (this._unmounted) return;
+            if (this.state.buffers.asm !== originalSource) {
+                this.setState({busy: false});
+                return;
+            }
+            if (!active) {
+                this.setState({busy: false});
+                this.chooseBlinkMachine(family, originalSource);
+                return;
+            }
+        }
+        const machine = chosenMachine || active?.machine;
+        const source = family === 'any' && machine ? blinkSource(machine.family) : blinkProgramSource(originalSource || '', family);
         if (!source || !source.trim()) {
             this.setState({status: this.L.asmWriteFirst});
             return;
         }
-        const device = this._asmDevice();
+        const device = machine?.device || this._asmDevice();
         const target = asmTargetForDevice(device);
         const route = asmRouteFor(device);
         const routeName = route === 'local' ? this.L.asmRouteLocal : this.L.asmRouteHosted;
@@ -3241,7 +3367,7 @@ class PseudocodeImporter extends React.Component {
         this.setState({busy: true, status: this.L.asmAssembling(routeName)});
         let out;
         try {
-            out = await requestAssembly({source, device, dialect: this.state.asmDialect});
+            out = await requestAssembly({source, device, dialect: machine ? 'auto' : this.state.asmDialect});
         } catch (e) {
             // 'source' is the user's program and the message names the line;
             // 'transport' is the network or a missing module and is not
@@ -3258,6 +3384,35 @@ class PseudocodeImporter extends React.Component {
         const warn = (out.dialect ? this.L.asmDialectUsed(out.dialect) : '') +
             (out.warnings.length ? this.L.asmWarnings(out.warnings) : '');
         const bench = BENCHES[out.target];
+        let asmBlink = null;
+        if (machine) {
+            if (this._unmounted || this.state.buffers.asm !== originalSource) {
+                if (!this._unmounted) this.setState({busy: false, status: ''});
+                return;
+            }
+            try {
+                const board = active?.board || (machine.circuit ? await this.prepareBlinkCircuit(machine) : null);
+                const config = active?.config || (board && machine.family === '6502'
+                    ? await this.blinkCircuitConfig('6502', this.props.vm.runtime.circuitModel) : null);
+                if (board && machine.family === '6502' && !config) throw new Error('The breadboard has no VIA at $6000');
+                if (this._unmounted || this.state.buffers.asm !== originalSource) {
+                    if (!this._unmounted) this.setState({busy: false});
+                    return;
+                }
+                asmBlink = {id: machine.id, device, label: machine.label.split(' · ')[1],
+                    led: active ? active.led : machine.led, board, config};
+                this.setState(state => ({buffers: {...state.buffers, asm: source}, asmRunDevice: device}));
+            } catch (error) {
+                this.setState({busy: false, status: this.L.stError(error.message)});
+                return;
+            }
+        }
+        if (machine?.family === '8051') {
+            this.deliverAssembly({format: 'firmware', kind: 'emulator',
+                firmware: {name: 'blink0.ihx', bytes: out.bytes, device, blinkOutputOnly: true}}, asmBlink,
+            this.L.asmBlinkRunning(machine.label, routeName));
+            return;
+        }
         if (bench) {
             // HARDWARE THE SOURCE ASKS FOR. A pseudocode program declares its
             // pins and the build returns the chips they need; an assembly
@@ -3275,18 +3430,8 @@ class PseudocodeImporter extends React.Component {
                 ...(chips.length ? {chips} : {})};
             const builtLen = out.bytes ? out.bytes.length
                 : (out.image ? out.image.segments.reduce((n, s) => n + s.bytes.length, 0) : 0);
-            // The default debugger dock is the optional right pane. A program
-            // handed to a hidden pane is technically running but unusable, so
-            // open the pane as part of the same user gesture (as the Arduboy
-            // and controller runners already do).
-            try { localStorage.setItem('bw-right-pane-hidden', '0'); } catch { /* private mode */ }
-            window.dispatchEvent(new CustomEvent('bw-settings-change', {
-                detail: {key: 'bw-right-pane-hidden', value: '0'}
-            }));
-            window.__bwPendingMedia = {type: 'asm', detail};
-            window.dispatchEvent(new CustomEvent('bw-asm-rom-ready', {detail}));
-            this.setState({busy: false,
-                status: this.L.asmBuiltBench(builtLen, routeName, bench) + warn});
+            this.deliverAssembly(detail, asmBlink, machine ? this.L.asmBlinkRunning(machine.label, routeName) + warn :
+                this.L.asmBuiltBench(builtLen, routeName, bench) + warn);
         } else if (armRunFor(out.target)) {
             // N4: the hosted ARM chain returns Intel HEX; the STM32F030 light
             // tier and rp2040js take a flash/SRAM image. Same firmware hand-off
@@ -3314,6 +3459,47 @@ class PseudocodeImporter extends React.Component {
             this.setState({busy: false,
                 status: this.L.asmBuiltOnly(out.bytes.length, routeName, target) + warn});
         }
+    }
+
+    async prepareBlinkCircuit (machine) {
+        const response = await fetch(new URL(`examples/${machine.circuit}`, document.baseURI));
+        if (!response.ok) throw new Error(`Circuit HTTP ${response.status}`);
+        const data = await response.json();
+        if (machine.family === '8051') {
+            data.parts = data.parts.map(part => part.kind === 'mcu' ?
+                {...part, params: {...part.params, chip: machine.device}} : part);
+        }
+        return new Promise((resolve, reject) => {
+            const detail = {data: {...data, fileOnly: true}, asmBlinkReady: {resolve, reject}};
+            if (this._unmounted || window.dispatchEvent(new CustomEvent('bw-load-circuit-data', {detail, cancelable: true}))) {
+                reject(new Error('The Circuit editor is unavailable'));
+            }
+        });
+    }
+
+    deliverAssembly (detail, blink, status) {
+        try { localStorage.setItem('bw-right-pane-hidden', '0'); } catch { /* private mode */ }
+        window.dispatchEvent(new CustomEvent('bw-settings-change', {
+            detail: {key: 'bw-right-pane-hidden', value: '0'}
+        }));
+        if (blink) {
+            detail.asmBlink = blink;
+            const timeout = setTimeout(() => detail.bootCompletion.reject(new Error('The machine did not start')), 30000);
+            detail.bootCompletion = {
+                resolve: () => {
+                    clearTimeout(timeout);
+                    if (!this._unmounted) this.setState({busy: false,
+                        ...(window.__bwPendingMedia?.detail === detail ? {status} : {})});
+                },
+                reject: error => {
+                    clearTimeout(timeout);
+                    if (!this._unmounted) this.setState({busy: false, status: this.L.stError(error.message)});
+                }
+            };
+        }
+        window.__bwPendingMedia = {type: 'asm', detail};
+        window.dispatchEvent(new CustomEvent('bw-asm-rom-ready', {detail}));
+        if (!blink) this.setState({busy: false, status});
     }
 
     /**
@@ -4029,6 +4215,7 @@ class PseudocodeImporter extends React.Component {
     // any hard blockers ("no ADC on this chip"). Code without pins just gets its
     // DEVICE line rewritten — there is nothing to refuse.
     async setDevice (deviceId) {
+        if (deviceId !== '__manage__' && this.state.asmRunDevice) this.setState({asmRunDevice: null});
         if (this.state.libraryProgram && deviceId !== '__manage__') this.setState({libraryProgram: null});
         if (deviceId === 'kosmos-cp1') return this.openCp1Language();
         if (deviceId === '__manage__') {
@@ -5781,6 +5968,27 @@ class PseudocodeImporter extends React.Component {
         }));
     }
 
+    renderAsmExamplePicker (menu) {
+        const locale = pickLocale(this.props.locale);
+        return (
+            <label data-code-machine-select={menu || undefined}
+                style={menu ? undefined : {display: 'flex', alignItems: 'center', gap: 4}}>
+                {menu && <Icon name="example" />}
+                {this.L.asmExampleLabel}
+                <select data-testid={menu ? 'bw-asm-examples-menu' : 'bw-asm-examples'}
+                    disabled={this.state.busy} onChange={event => this.loadAsmExample(event.target.value)}
+                    style={{padding: '2px 6px', borderRadius: 4, border: '1px solid #cbd5e1'}} value="">
+                    <option value="">{this.L.asmExamplePick}</option>
+                    {this._asmExamples().map(example => (
+                        <option key={example.id} value={example.id}>
+                            {locale === 'de' ? example.labelDe : example.label}
+                        </option>
+                    ))}
+                </select>
+            </label>
+        );
+    }
+
     renderCatalogControl (item) {
         const {showCatalog, showCatalogFull, catalogError, catalog, exampleFilter} = this.state;
         const device = this.currentDevice();
@@ -5830,8 +6038,8 @@ class PseudocodeImporter extends React.Component {
             <div data-keep-open>
                 <button type="button" onClick={() => { this.loadCatalog(); this.setState(s => ({showCatalog: !s.showCatalog})); }}
                     style={{...item, background: showCatalog ? '#e2e8f0' : '#f1f5f9'}}
-                    aria-expanded={showCatalog} title={this.L.loadCatalogTitle} data-testid="bw-catalog-toggle">
-                    {this.L.loadExample}
+                    aria-expanded={showCatalog} title={this.L.loadCatalogTitle} data-testid="bw-catalog-toggle" data-overflow-action>
+                    <Icon name="example" />{this.L.loadExample.replace(/^📚\s*/, '')}<Icon name="chevronRight" size={12} />
                 </button>
                 {showCatalog && !showCatalogFull && this.state.actionsOpen && list(false)}
                 {showCatalogFull && createPortal(
@@ -5853,7 +6061,7 @@ class PseudocodeImporter extends React.Component {
     }
 
     renderMacDevicePicker () {
-        const current = this.currentDevice() || '';
+        const current = (this.state.lang === 'asm' && this.state.asmRunDevice) || this.currentDevice() || '';
         const close = () => this.macDeviceDialog?.close();
         const choose = id => {
             close();
@@ -5891,24 +6099,25 @@ class PseudocodeImporter extends React.Component {
             minHeight: 32, padding: '6px 8px', whiteSpace: 'normal', fontSize: 12};
         return (
             <Popup id="code-actions" overflowMenu anchorTestId="bw-code-actions" testId="bw-code-actions-menu"
-                open={this.props.isVisible !== false && this.state.actionsOpen} align="right" width={260} keepMounted
+                open={this.props.isVisible !== false && this.state.actionsOpen} align="right" width={270} keepMounted
                 label={L10N[pickLocale(this.props.locale)].fileMenuTitle}
                 onToggle={() => this.setState(state => ({actionsOpen: !state.actionsOpen}))}
                 onClose={() => this.setState({actionsOpen: false})}
                 button={<button type="button" data-testid="bw-code-actions-trigger" style={toolStyles(false).button}
                     title={L10N[pickLocale(this.props.locale)].fileMenuTitle}
-                    aria-label={L10N[pickLocale(this.props.locale)].fileMenuTitle}>⋯</button>}>
-                <div style={{display: 'flex', flexDirection: 'column', gap: 2}}>
-                    {this.state.actionsOpen && <div data-code-overflow-controls>
+                    aria-label={this.L.fileMenuTitle}><Icon name="more" /></button>}>
+                {this.state.actionsOpen && <>
+                    <div data-code-menu-group data-code-overflow-controls>
                         {machine === 'cardiac' ? <div ref={this.props.onCardiacToolsSlot} data-cardiac-overflow-tools /> :
                             !machine && renderCodeControls(true)}
                         <details>
-                            <summary style={{cursor: 'pointer', padding: '6px 8px'}}>{this.L.toolbarLanguages}</summary>
-                            {renderLanguages(true)}
+                            <summary data-overflow-action><Icon name="example" />{this.L.toolbarLanguages}<Icon name="chevronRight" size={12} /></summary>
+                            <div>{renderLanguages(true)}</div>
                         </details>
-                    </div>}
-                    {!machine && <>
-                    <strong style={{padding: '4px 8px', fontSize: 11, color: '#64748b'}}>{this.L.actionFiles}</strong>
+                    </div>
+                </>}
+                {!machine && <>
+                    <div data-code-menu-group role="group" aria-label={this.L.actionFiles}>
                     <label data-overflow-action style={item} title={this.L.openFileTitle(`${CODE_ACCEPT},${IMPORT_ACCEPT}`)}
                         data-testid="bw-open-file" role="button" tabIndex={this.state.busy ? -1 : 0} aria-disabled={this.state.busy}
                         onKeyDown={event => {
@@ -5925,7 +6134,8 @@ class PseudocodeImporter extends React.Component {
                         title={this.L.saveFileTitle(this.saveFileName())} data-testid="bw-save-file">
                         <Icon name="save" />{this.L.saveFile}
                     </button>
-                    <strong style={{padding: '8px 8px 4px', marginTop: 4, borderTop: '1px solid #e2e8f0', fontSize: 11, color: '#64748b'}}>{this.L.actionPrograms}</strong>
+                    </div>
+                    <div data-code-menu-group role="group" aria-label={this.L.actionPrograms}>
                     {this.state.lang === 'micropython' ? (
                         <button type="button" onClick={() => this.downloadMicrobitHex()} data-overflow-action style={item}
                             disabled={this.state.busy || !this.state.buffers.micropython.trim() || /^# ===/.test(this.state.buffers.micropython)}
@@ -5935,7 +6145,7 @@ class PseudocodeImporter extends React.Component {
                     ) : null}
                     <button type="button" onClick={this.openMakeCodeShare} data-overflow-action style={item}
                         title={this.L.mcShareTitle} data-testid="bw-makecode-share">
-                        {this.L.mcShare}
+                        <Icon name="link" />{this.L.mcShare.replace(/^🔗\s*/, '')}
                     </button>
                     {['microbit', 'calliopemini', 'ev3', 'cpx'].includes(this.currentDevice()) ? (
                         <button type="button" onClick={this.exportMakeCode} data-overflow-action style={item}
@@ -5986,11 +6196,12 @@ class PseudocodeImporter extends React.Component {
                         ) : null}
                     <button type="button" onClick={() => this.runAsArcade()} data-overflow-action style={item}
                         title={this.L.arcRunTitle} disabled={this.state.busy}
-                        data-testid="bw-makecode-arcade-run">{this.L.arcRun}</button>
+                        data-testid="bw-makecode-arcade-run"><Icon name="run" />{this.L.arcRun.replace(/^▶\s*/, '')}</button>
                     <button type="button" onClick={() => this.exportArcade()} data-overflow-action style={item}
                         title={this.L.arcExportTitle} disabled={this.state.busy}
-                        data-testid="bw-makecode-arcade-export">{this.L.arcExport}</button>
-                    <strong style={{padding: '8px 8px 4px', marginTop: 4, borderTop: '1px solid #e2e8f0', fontSize: 11, color: '#64748b'}}>{this.L.actionExamples}</strong>
+                        data-testid="bw-makecode-arcade-export"><Icon name="save" />{this.L.arcExport.replace(/^⬆\s*/, '')}</button>
+                    </div>
+                    <div data-code-menu-group role="group" aria-label={this.L.actionExamples}>
                     {this.currentDevice() ? this.renderCatalogControl(item) :
                         this.state.bundledExamplesStatus === 'error' ? (
                             <button type="button" onClick={this._loadBundledExamples} data-overflow-action style={item}
@@ -6014,13 +6225,13 @@ class PseudocodeImporter extends React.Component {
                         </select>
                     )}
                     <button type="button" onClick={() => this.setState(s => ({showRef: !s.showRef}))}
-                        data-overflow-action style={item} title={this.L.referenceTitle(this.state.lang)}>📝 {this.L.reference}</button>
+                        data-overflow-action style={item} title={this.L.referenceTitle(this.state.lang)}><Icon name="instructions" />{this.L.reference}</button>
                     <button type="button" onClick={() => this.setState(s => ({showArt: !s.showArt}))}
                         data-overflow-action style={item} title={this.L.customArtTitle}>
-                        🖼️ {this.L.customArt}{this.state.uploads.length ? ` (${this.state.uploads.length})` : ''}
+                        <Icon name="view-fit" />{this.L.customArt}{this.state.uploads.length ? ` (${this.state.uploads.length})` : ''}
                     </button>
-                    </>}
-                </div>
+                    </div>
+                </>}
             </Popup>
         );
     }
@@ -6110,6 +6321,7 @@ class PseudocodeImporter extends React.Component {
         const actionBtn = {...btn, padding: '5px 9px', fontSize: 12, whiteSpace: 'nowrap', flexShrink: 0};
         const sel = {padding: '6px 10px', borderRadius: 6, border: '1px solid #cbd5e1', font: 'inherit'};
         const max = this.state.maximized;
+        const codeDevice = (this.state.lang === 'asm' && this.state.asmRunDevice) || this.currentDevice();
         const usesMacDevicePicker = typeof window !== 'undefined' && window.__TAURI__ && /^Mac/.test(navigator.platform);
         const csel = {...sel, padding: '4px 8px', fontSize: 12}; // compact select
         const languageTabStyle = active => ({
@@ -6133,13 +6345,13 @@ class PseudocodeImporter extends React.Component {
                             disabled={!this.canCompileToBlocks()}
                             title={this.L.toBlocksTitle(LANG_LABEL[this.state.lang])}
                             style={actionBtn}>
-                            <span aria-hidden="true">⇦ ▣</span>{menu && ` ${this.L.toBlocks.replace('⇦ ', '')}`}
+                            {menu ? <><Icon name="to-blocks" />{this.L.toBlocks.replace('⇦ ', '')}</> : <span aria-hidden="true">⇦ ▣</span>}
                         </button>
                         <button onClick={this.fromBlocks} disabled={this.state.busy}
                             aria-label={this.L.fromBlocks}
                             title={this.L.fromBlocksTitle}
                             style={{...actionBtn, background: 'linear-gradient(135deg,#a55b80,#8e4a6c)'}}>
-                            <span aria-hidden="true">▣ ⇨</span>{menu && ` ${this.L.fromBlocks.replace(' ⇨', '')}`}
+                            {menu ? <><Icon name="from-blocks" />{this.L.fromBlocks.replace(' ⇨', '')}</> : <span aria-hidden="true">▣ ⇨</span>}
                         </button>
                         {this.currentDevice() === 'pico' ? (
                             <button onClick={this.deployToPico} disabled={this.state.busy}
@@ -6483,14 +6695,21 @@ class PseudocodeImporter extends React.Component {
                                 {this.L.runTclRiscv}
                             </button>
                         ) : null}
+                        {menu && this.state.lang === 'asm' && this.state.asmMode === 'source' && <>
+                            <button type="button" data-testid="bw-asm-assemble-menu"
+                                disabled={this.state.busy || !this.state.buffers.asm.trim()} onClick={() => this.assembleAndRun()}>
+                                <Icon name="run" />{this.L.assembleAndRun.replace(/^🔩\s*/, '')}
+                            </button>
+                            {this.renderAsmExamplePicker(true)}
+                        </>}
                         {this.state.lang === this.state.libraryProgram?.language && (
                             <button type="button" style={actionBtn} onClick={this.runLibraryProgram}
                                 disabled={this.state.busy} title="Run the CP/M program. Edits build with hosted SDCC."
                                 data-testid={menu ? 'bw-library-code-run-menu' : 'bw-library-code-run'}>
-                                ▶ {this.state.libraryProgram.title}
+                                {menu ? <Icon name="run" /> : '▶ '}{this.state.libraryProgram.title}
                             </button>
                         )}
-                        {this.state.lang === 'c' ? (
+                        {!menu && this.state.lang === 'c' ? (
                             <button type="button" onClick={() => this.setState(s => ({showCInfo: !s.showCInfo}))}
                                 style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18,
                                     padding: 0, border: 'none', borderRadius: '50%', background: this.state.showCInfo ? '#4c97ff' : '#e2e8f0',
@@ -6511,21 +6730,21 @@ class PseudocodeImporter extends React.Component {
                                     style={{...actionBtn, background: '#4c97ff', color: '#fff'}}>
                                     {this.L.nqcSend}
                                 </button>
-                                <button type="button" onClick={() => this.setState(st => ({showNqcInfo: !st.showNqcInfo}))}
+                                {!menu && <button type="button" onClick={() => this.setState(st => ({showNqcInfo: !st.showNqcInfo}))}
                                     style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18,
                                         padding: 0, border: 'none', borderRadius: '50%', background: this.state.showNqcInfo ? '#4c97ff' : '#e2e8f0',
                                         color: this.state.showNqcInfo ? '#fff' : '#475569', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'serif'}}
-                                    title={this.L.nqcNote.slice(0, 60)} data-testid={menu ? "bw-nqc-info-toggle-menu" : "bw-nqc-info-toggle"}>i</button>
+                                    title={this.L.nqcNote.slice(0, 60)} data-testid={menu ? "bw-nqc-info-toggle-menu" : "bw-nqc-info-toggle"}>i</button>}
                             </React.Fragment>
                         ) : null}
-                        {this.state.lang === 'basic' ? (
+                        {!menu && this.state.lang === 'basic' ? (
                             <button type="button" onClick={() => this.setState(s => ({showBasicInfo: !s.showBasicInfo}))}
                                 style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18,
                                     padding: 0, border: 'none', borderRadius: '50%', background: this.state.showBasicInfo ? '#4c97ff' : '#e2e8f0',
                                     color: this.state.showBasicInfo ? '#fff' : '#475569', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontStyle: 'italic'}}
                                 title={this.L.basicInfoTitle} data-testid={menu ? "bw-basic-info-toggle-menu" : "bw-basic-info-toggle"}>i</button>
                         ) : null}
-                        {this.state.lang === 'asm' ? (
+                        {!menu && this.state.lang === 'asm' ? (
                             <button type="button" onClick={() => this.setState(s => ({showAsmInfo: !s.showAsmInfo}))}
                                 style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18,
                                     padding: 0, border: 'none', borderRadius: '50%', background: this.state.showAsmInfo ? '#4c97ff' : '#e2e8f0',
@@ -6542,7 +6761,7 @@ class PseudocodeImporter extends React.Component {
                                 padding: 0, border: 'none', borderRadius: '50%', background: this.state.showInfo ? '#4c97ff' : '#e2e8f0',
                                 color: this.state.showInfo ? '#fff' : '#475569', fontSize: 11, fontWeight: 700, cursor: 'pointer',
                                 fontStyle: 'italic', alignSelf: 'center'}}>
-                            {menu ? this.L.infoAria : '?'}
+                            {menu ? <><Icon name="help" /><span>{this.L.infoAria}</span></> : '?'}
                         </button>
                         <button type="button" onClick={() => this.setState(s => ({showMatrix: !s.showMatrix}))}
                             aria-label={this.L.matrixAria} title={this.L.matrixTitle}
@@ -6552,7 +6771,8 @@ class PseudocodeImporter extends React.Component {
                                 background: this.state.showMatrix ? '#4c97ff' : '#e2e8f0',
                                 color: this.state.showMatrix ? '#fff' : '#475569', fontSize: 11, fontWeight: 700,
                                 cursor: 'pointer', alignSelf: 'center'}}>
-                            <span aria-hidden="true">⊞⊟</span>{menu && ` ${this.L.matrixAria}`}
+                            {menu ? <><Icon name="grid" /><span>{pickLocale(this.props.locale) === 'de' ? 'Sprachmatrix' : 'Language matrix'}</span></> :
+                                <span aria-hidden="true">⊞⊟</span>}
                         </button>
                         <button type="button" onClick={() => showCircuitDebugger()}
                             aria-label={pickLocale(this.props.locale) === 'de' ? 'Debugger öffnen' : 'Open debugger'}
@@ -6561,9 +6781,12 @@ class PseudocodeImporter extends React.Component {
                             style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', height: 20,
                                 padding: '0 7px', border: 'none', borderRadius: 10, background: '#e2e8f0',
                                 color: '#475569', fontSize: 11, fontWeight: 700, cursor: 'pointer', alignSelf: 'center'}}>
-                            <span aria-hidden="true">🐞</span>{menu && (pickLocale(this.props.locale) === 'de' ? ' Debugger öffnen' : ' Open debugger')}
+                            {menu ? <><Icon name="debugger" />{pickLocale(this.props.locale) === 'de' ? 'Debugger öffnen' : 'Open debugger'}</> :
+                                <span aria-hidden="true">🐞</span>}
                         </button>
                         {/* WKWebView's native popup can lose its selection owner during a board reseat. */}
+                        <div data-code-machine-select={menu || undefined} style={menu ? undefined : {display: 'contents'}}>
+                        {menu && <Icon name="chip" />}
                         {usesMacDevicePicker ? <button type="button" aria-haspopup="dialog"
                             aria-label={this.L.deviceTitle} title={this.L.deviceTitle}
                             data-testid={menu ? 'bw-device-picker-trigger-menu' : 'bw-device-picker-trigger'}
@@ -6575,9 +6798,9 @@ class PseudocodeImporter extends React.Component {
                                     dialog.querySelector('[aria-checked="true"]')?.focus();
                                 }
                             })}>
-                            {DEVICE_BY_ID[this.currentDevice()]?.label || this.L.noChips} ▾
+                            {DEVICE_BY_ID[codeDevice]?.label || this.L.noChips} ▾
                         </button> : (
-                        <select value={this.currentDevice() || ''} onChange={e => this.setDevice(e.target.value)}
+                        <select value={codeDevice || ''} onChange={e => this.setDevice(e.target.value)}
                             style={{...csel, alignSelf: 'center', maxWidth: '100%', minWidth: 0}} title={this.L.deviceTitle}
                             data-testid={menu ? "bw-device-select-menu" : "bw-device-select"}>
                             <option value="">{this.L.noChips}</option>
@@ -6592,6 +6815,7 @@ class PseudocodeImporter extends React.Component {
                             {/* Opens the machine library (gui.jsx renders it); not a device. */}
                             <option value="__manage__" data-machine-launch="">{'Manage machines…'}</option>
                         </select>)}
+                        </div>
                         {/* What this language can do on this device: native, lowered, or
                             an open task — one line, read from lib/bw-matrix/capabilities.js,
                             the same table the docs are generated from. Title = the long form. */}
@@ -6651,7 +6875,8 @@ class PseudocodeImporter extends React.Component {
                             <button key={l} type="button" aria-pressed={active} onClick={() => this.switchTab(l)}
                                 disabled={this.state.busy && !active} title={label} aria-label={label}
                                 style={languageTabStyle(active)}>
-                                {this.state.cardiacActive && !menu ? label.split(' ')[0] : label}
+                                {menu ? <><Icon name="example" />{LANG_LABEL[l] || label.replace(/^\S+\s+/, '')}</> :
+                                    this.state.cardiacActive ? label.split(' ')[0] : label}
                             </button>
                         );
                     })}
@@ -6752,6 +6977,7 @@ class PseudocodeImporter extends React.Component {
                         {languageBar}
                     </div>
                 </details> : languageBar}
+                {this.renderBlinkMachinePicker()}
                 {this.state.microtronicActive ? (
                     <React.Suspense fallback={null}>
                         <MicrotronicSurface vm={this.props.vm} partId={this.state.microtronicPartId} variant="code"
@@ -6949,25 +7175,7 @@ class PseudocodeImporter extends React.Component {
                                 </select>
                             </label>
                         )}
-                        {this.state.asmMode === 'source' && this._asmExamples().length > 0 && (
-                            <label style={{display: 'flex', alignItems: 'center', gap: 4}}>
-                                {this.L.asmExampleLabel}
-                                <select
-                                    data-testid="bw-asm-examples"
-                                    disabled={this.state.busy}
-                                    onChange={e => this.loadAsmExample(e.target.value)}
-                                    style={{padding: '2px 6px', borderRadius: 4, border: '1px solid #cbd5e1'}}
-                                    value=""
-                                >
-                                    <option value="">{this.L.asmExamplePick}</option>
-                                    {this._asmExamples().map(ex => (
-                                        <option key={ex.id} value={ex.id}>
-                                            {pickLocale(this.props.locale) === 'de' ? ex.labelDe : ex.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
-                        )}
+                        {this.state.asmMode === 'source' && this.renderAsmExamplePicker(false)}
                         {/* The licence is the CONDITION these ship under, so it
                             is visible where they are chosen rather than only in
                             THIRD-PARTY-NOTICES.md. The programs also carry their

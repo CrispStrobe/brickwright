@@ -1,4 +1,5 @@
 import React from 'react';
+import {setCircuitView} from '../../lib/bw-debug/debug-view.js';
 import {s040PartIds} from '../../lib/bw-debug/s040-part-ids.js';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
@@ -409,6 +410,7 @@ class DebugPanel extends React.Component {
             if (this._lastMediaDetail !== e.detail) return false;
         }
         this._teardownRunner();
+        if (this._userFirmware?.blinkOutputOnly) this._userFirmware = null;
         this._bootMedia = {
             slot: slotId,
             bytes: bytes ? (bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes)) : null,
@@ -421,6 +423,7 @@ class DebugPanel extends React.Component {
             profile: profile || null,
             i8086Hardware,
             i8086Assembly,
+            asmBlink: e.detail?.asmBlink,
             dosArgs,
             dosFiles,
             dosVariant,
@@ -507,6 +510,9 @@ class DebugPanel extends React.Component {
         if (nextKind === 'eater6502' && !screen) {
             add6502ControllerDevices(this.props.vm?.runtime?.controllerPanel, runner.board());
         }
+        if (e.detail?.asmBlink) {
+            this._installBlinkController(runner, e.detail.asmBlink);
+        }
         if (io) this._installPcController(runner, {displayName: screen?.name,
             generatedDisplay: Boolean(displayName && screen?.name === displayName),
             keyboardName: runner.keyIn && !(Array.isArray(widgets) && widgets.some(w => w && w.source === 'keyIn'))
@@ -591,7 +597,19 @@ class DebugPanel extends React.Component {
         // 'firmware' is the same hand-off for any engine that runs an image
         // the page built elsewhere (N4: hosted ARM assembly on the STM32F030
         // light tier or rp2040js).
-        if (format === 'avr-sketch' || format === 'firmware') return this._runSketch(e.detail);
+        if (format === 'avr-sketch' || format === 'firmware') {
+            if (!e.detail?.asmBlink) return this._runSketch(e.detail);
+            this._bootMedia = null;
+            return this._runSketch(e.detail).then(() => {
+                const runner = this.state.runner;
+                const state = runner?.state();
+                if (!state || state.phase === 'error') {
+                    throw new Error(state?.message || 'The 8051 could not start');
+                }
+                this._installBlinkController(runner, e.detail.asmBlink);
+                e.detail.bootCompletion?.resolve();
+            }).catch(error => e.detail.bootCompletion?.reject(error));
+        }
         if (!rom) return;
         return this._onMediaLoad({detail: {
             slotId: slotId || 'rom', bytes: rom,
@@ -603,7 +621,8 @@ class DebugPanel extends React.Component {
             chips: chips || null,
             kind: target === 'z80' ? 'z80'
                 : target === 'i8086' ? 'i8086' : 'eater6502',
-            name: 'assembled image'
+            name: 'assembled image', asmBlink: e.detail?.asmBlink,
+            bootCompletion: e.detail?.bootCompletion
         }});
     }
 
@@ -1034,6 +1053,7 @@ class DebugPanel extends React.Component {
                 });
             })
         });
+        runner.blinkOutputOnly = Boolean(this._bootMedia?.asmBlink || this._userFirmware?.blinkOutputOnly);
         if (this._userFirmware && typeof runner.setFirmware === 'function') {
             runner.setFirmware(this._userFirmware);
         }
@@ -1168,6 +1188,7 @@ class DebugPanel extends React.Component {
     }
 
     _mountGuestTerminal (runner, ui, preferController = true) {
+        if (runner.blinkOutputOnly) return;
         if ((this._guestTerminal?.runner === runner && this._guestTerminal.raw === runner.terminal) ||
             typeof window.bwMirrorMachineTerminal !== 'function' ||
             !['ready', 'running', 'paused', 'stepping'].includes(ui.phase)) return;
@@ -1220,6 +1241,27 @@ class DebugPanel extends React.Component {
         this.props.vm?.runtime?.controllerPanel?.setMode('play');
         window.dispatchEvent(new CustomEvent('bw-settings-change',
             {detail: {key: 'bw-debug-dock', value: 'controller'}}));
+    }
+
+    _installBlinkController (runner, blink) {
+        const panel = this.props.vm?.runtime?.controllerPanel;
+        if (!panel) return;
+        const name = `Blink 0 · ${blink.label}`;
+        const created = !panel.getWidget(name);
+        if (created) panel.addWidget(name, 'bargraph', {segments: 1, min: 0, max: 1}, {x: 8, y: 8});
+        this._updatePcController = active => {
+            if (active !== runner || panel.getWidget(name)?.type !== 'bargraph') return;
+            const value = blink.led ? Number((runner.board()?.ledBrightnessNow(blink.led) || 0) > 0.01) :
+                runner.asmBlinkValue();
+            if (panel.getWidget(name).state.value !== value) panel.setBargraphValue(name, value);
+        };
+        this._updatePcController(runner);
+        this._pcControllerCleanup = () => {
+            this._updatePcController = null;
+            if (created && panel.getWidget(name)) panel.removeWidget(name);
+        };
+        panel.setMode('play');
+        setCircuitView({fullWidth: false, dock: 'controller'});
     }
 
     _installPcController (runner, {displayName, generatedDisplay, keyboardName}) {

@@ -113,6 +113,10 @@ for (const ex of HOSTED_EXAMPLES) {
         assert.equal(out.success, true,
             `${ex.id}: ${JSON.stringify(out.errors || out.error || out).slice(0, 300)}`);
         assert.ok(out.bytes > 0, `${ex.id} assembled to nothing`);
+        if (ex.target === 'eater6502' && ex.id === 'blink') {
+            const rom = Buffer.from(out.base64, 'base64');
+            assert.equal(rom.readUInt16LE(rom.length - 4), 0x8000, 'Blink starts at its reset routine');
+        }
     });
 }
 
@@ -120,7 +124,7 @@ test('the tab offers them, and does not eat what you typed', () => {
     const src = readFileSync(
         join(REPO, 'overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx'),
         'utf8');
-    assert.match(src, /data-testid="bw-asm-examples"/, 'no example picker in the ASM tab');
+    assert.match(src, /'bw-asm-examples-menu' : 'bw-asm-examples'/, 'no example picker in the ASM tab');
     assert.match(src, /loadAsmExample/);
     // Replacing a non-empty buffer without asking is how someone loses
     // twenty minutes of assembly to a mis-click. The answer is awaited (task E6): in the

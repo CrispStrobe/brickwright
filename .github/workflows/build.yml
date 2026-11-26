@@ -3108,6 +3108,11 @@ jobs:
         timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
         if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'light' }}
         run: node scripts/verify-code-basic-profiles.mjs http://127.0.0.1:8617/
+      - name: Browser gate — ASM Blink 0 machine selection and Code overflow
+        id: bw_browser_code_asm_blink
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'heavy' }}
+        run: node scripts/verify-asm-blink-machines.mjs http://127.0.0.1:8617/
       - name: Browser gate — Code machine switching and reload
         id: bw_browser_code_machine_recovery
         timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)

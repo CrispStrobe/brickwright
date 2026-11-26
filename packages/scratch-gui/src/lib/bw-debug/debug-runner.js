@@ -1614,7 +1614,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         terminalOutput = null;
         delete runner.terminal;
         terminalFrame = null;
-        const device = String(projectStc(null)?.device || '').toLowerCase();
+        const device = String(built?.device || projectStc(null)?.device || '').toLowerCase();
         const selectedTargetKind = selectDebugTargetKind(device, targetKind);
         // The picker offers two targets and only one of them can be honoured
         // here yet. Refusing with the reason is the house rule: silently
@@ -1707,7 +1707,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         const wasm = await createEmu8051({
             locateFile: (file) => new URL(`static/${file}`, document.baseURI).href
         });
-        const stc = projectStc(null);
+        const stc = projectStc(null) || {};
         const fosc = Number(stc.clock) || 11059200;
 
         // ORDER MATTERS, and getting it wrong fails silently.
@@ -1735,7 +1735,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         // unused ports cost nothing. (First application of this fix was
         // reverted by a concurrent reset --hard before it was committed.)
         const adapter = createEmu8051Adapter(wasm, { fosc, ports: [0, 1, 2, 3, 4, 5],
-            part: String(stc.device || '').toLowerCase() });
+            part: String(built.device || stc.device || '').toLowerCase() });
 
         // The board, so the LEDs light and the buzzer sounds while debugging.
         // It is driven by the emulator through boundary A and knows nothing
@@ -1816,7 +1816,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         // point — the exact failure setCondition() warns about.
         if (vm && vm.runtime) vm.runtime._bwDebugVariables = () => runner.variables();
         symbols = built.symbols;
-        variableTable = (symbols.variables || []).filter((v) => v.space);
+        variableTable = (symbols?.variables || []).filter((v) => v.space);
         pinTable = stc.pins || [];
         // `instructionLength` IS INJECTED, not imported by the vendored file.
         // Upstream's emu8051-debug.js used to `import '../bw-debug/opcodes.js'` --
@@ -3122,7 +3122,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             await import(/* webpackChunkName: "bw-board" */ 'bw-board');
 
         const targetOpts = {};
-        const declaredMachine = bootMedia?.machineConfig6502;
+        const blink = bootMedia?.asmBlink;
+        const declaredMachine = bootMedia?.machineConfig6502 || blink?.config;
         let readyMsg;
         if (bootMedia) {
             setStatus('attaching', S('boot.media', {name: bootMedia.name || S('noun.image')}));
@@ -3138,7 +3139,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             } else if (declaredMachine) {
                 targetOpts.config = {clockHz: 1_000_000, chips: [], ...declaredMachine};
                 readyMsg = S('ready.eater', {name: bootMedia.name || S('noun.image')});
-            } else if (machineConfig && (bootMedia.profile !== 'eater' ||
+            } else if (!blink && machineConfig && (bootMedia.profile !== 'eater' ||
                 (machineConfig.chips || []).some(chip => chip.kind === 'acia' && chip.at === 0x5000))) {
                 targetOpts.config = benchConfig6502();
                 readyMsg = S('ready.extracted', {
@@ -3161,7 +3162,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             readyMsg = S('ready.tali');
         }
 
-        const db = declaredMachine ? {board: null, why: 'library machine map'} : designerBoard();
+        const db = blink ? {board: blink.board, why: blink.board ? 'wired Blink circuit' : 'virtual Blink machine'} :
+            declaredMachine ? {board: null, why: 'library machine map'} : designerBoard();
         if (db.board) {
             targetOpts.board = db.board;
             // Machine targets drive the designer's real board rather than a
@@ -3190,6 +3192,11 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
 
         const result = await createDebugTarget('eater6502', targetOpts);
         wireMachineBench(result, createDebugSession);
+        if (blink && !blink.led) {
+            const via = Object.values(result.adapter.machine.chips).find(chip => Number.isInteger(chip.orb));
+            if (!via) throw new Error('Blink requires a 65C22 VIA');
+            runner.asmBlinkValue = () => via.orb & via.ddrb & 1;
+        }
         if (targetOpts.py65mon) runner.console6502Source = 'py65mon';
         if ((bootMedia?.profile === 'eater' && bootMedia.name === 'basic.rom') ||
             (declaredMachine && await isBundledMicrosoftBasic(targetOpts.rom))) {
@@ -3223,6 +3230,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         const isCpmSystem = bootMedia && bootMedia.profile === 'cpm-system';
         const isCom = !isCpmSystem && bootMedia && (bootMedia.slot === 'com' || bootMedia.profile === 'cpm');
         const spectrum = bootMedia?.spectrum;
+        const blink = bootMedia?.asmBlink;
         if (spectrum) {
             targetOpts.config = spectrum.kind === 'zx128' ? {clockHz: 3_546_900, zx128: true}
                 : {clockHz: 3_500_000, regions: [{kind: 'rom', start: 0, end: 0x3fff}], ula: true};
@@ -3268,7 +3276,11 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             const img = await resolveMediaImage(bootMedia);
             targetOpts.rom = img.bytes;
             if (img.origin != null) targetOpts.romAt = img.origin;
-            if (machineConfig) targetOpts.config = benchConfigZ80();
+            if (blink) {
+                const {SEARLE} = await import('bw-board/z80-machine.js');
+                targetOpts.config = blink.config || {...SEARLE,
+                    ports: [...SEARLE.ports, {kind: 'latch', name: 'blink', at: 1}]};
+            } else if (machineConfig) targetOpts.config = benchConfigZ80();
             readyMsg = S('ready.romOnMap', {
                 name: bootMedia.name || S('noun.rom'),
                 map: S(machineConfig ? 'map.extracted' : 'map.searle')
@@ -3285,12 +3297,16 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             readyMsg = S('ready.bbcbasic');
         }
 
-        const db = designerBoard();
+        const db = blink ? {board: blink.board, why: blink.board ? 'wired Blink circuit' : 'virtual Blink machine'} :
+            designerBoard();
         if (db.board) {
             targetOpts.board = db.board;
             board = db.board;
         }
         readyMsg += ` — ${db.why}`;
+        // The latch emits pin edges even with no external circuit. Its value
+        // is read directly by the virtual indicator.
+        if (blink && !targetOpts.board) targetOpts.board = {advanceTo () {}, setPin () {}};
         const result = await createDebugTarget('z80', targetOpts);
         if (spectrum) {
             const {applyMedia} = await import('bw-board/machine-media.js');
@@ -3298,6 +3314,11 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             if (errors.length) throw new Error(errors.map(({slot, error}) => `${slot}: ${error}`).join(', '));
         }
         wireMachineBench(result, createDebugSession);
+        if (blink) {
+            const port = targetOpts.config.ports.find(device => device.kind === 'latch' && device.at === 1);
+            const latch = result.adapter.machine.chips[port.name];
+            runner.asmBlinkValue = () => latch.value & 1;
+        }
         if (spectrum) runner.setSpectrumKeys = names => result.target.setKeys(names);
         setStatus('ready', readyMsg);
         return session;
@@ -4469,7 +4490,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
                     // from an AVR lesson to a machine bench and describe an
                     // image that is not running.
                     imageProvenance = null;
-                    const device = String(projectStc(null)?.device || '').toLowerCase();
+                    const device = String(userFirmware?.device || projectStc(null)?.device || '').toLowerCase();
                     const selectedKind = selectDebugTargetKind(device, targetKind);
                     // This selector consumes an existing merged flash image.
                     // Refuse before build() so an empty picker cannot compile

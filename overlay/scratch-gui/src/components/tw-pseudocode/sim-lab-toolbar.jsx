@@ -69,6 +69,11 @@ export const ICONS = {
     open: 'M3 6h6l2 2h10v3M3 6v13h15l3-8H6l-3 8',
     save: 'M12 4v11M7 10l5 5 5-5M4 20h16',
     example: 'M14 3H6v18h12V7zM14 3v4h4M10 12l-2 2 2 2M14 12l2 2-2 2',
+    'to-blocks': 'M20 4h-7v16h7zM10 12H3m0 0 4-4m-4 4 4 4',
+    'from-blocks': 'M4 4h7v16H4zM14 12h7m0 0-4-4m4 4-4 4',
+    debugger: 'M8 9h8v6a4 4 0 0 1-8 0zM9 9V7a3 3 0 0 1 6 0v2M5 10l3 2M4 15h4m-3 5 4-3m10-7-3 2m4 3h-4m3 5-4-3M9 5 7 3m8 2 2-2',
+    chip: 'M7 7h10v10H7zM10 3v4m4-4v4m-4 10v4m4-4v4M3 10h4m-4 4h4m10-4h4m-4 4h4',
+    link: 'M9 15l6-6m-5 8-2 2a4 4 0 0 1-6-6l5-5a4 4 0 0 1 6 0m-2 8a4 4 0 0 0 6 0l5-5a4 4 0 0 0-6-6l-2 2',
     help: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01',
     more: 'M5 12h.01M12 12h.01M19 12h.01',
     caret: 'M6 9l6 6 6-6',
@@ -208,15 +213,17 @@ export const Popup = ({id, open, onToggle, onClose, button, children, align = 'l
             // The panel is portalled to <body>, so Tab would leave it for the end of the page: arrows move
             // between its controls, ArrowDown on the button opens it onto the first, and Tab off either
             // end returns to the button.
-            const items = Array.from(panel.current?.querySelectorAll('button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), [role="menuitem"]:not([aria-disabled="true"]), [tabindex="0"]') || []);
+            const items = Array.from(panel.current?.querySelectorAll('button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), summary, [role="menuitem"]:not([aria-disabled="true"]), [tabindex="0"]') || [])
+                .filter(item => item.getClientRects().length > 0);
             if (e.target === trigger && e.key === 'ArrowDown' && role !== 'dialog') {
                 e.preventDefault();
                 if (!open) onToggle();
-                requestAnimationFrame(() => (Array.from(panel.current?.querySelectorAll('button:not([disabled]), [role="menuitem"]:not([aria-disabled="true"])') || [])[0])?.focus());
+                requestAnimationFrame(() => (Array.from(panel.current?.querySelectorAll('button:not([disabled]), select:not([disabled]), summary, [role="menuitem"]:not([aria-disabled="true"])') || [])
+                    .find(item => item.getClientRects().length > 0))?.focus());
                 return;
             }
             if (!open || !panel.current || !panel.current.contains(e.target) || !items.length) return;
-            const at = items.indexOf(e.target.closest('button, a[href], input, select, [role="menuitem"], [tabindex="0"]'));
+            const at = items.indexOf(e.target.closest('button, a[href], input, select, summary, [role="menuitem"], [tabindex="0"]'));
             const field = e.target.matches && e.target.matches('input, select, textarea');
             if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && !field && role !== 'dialog') {
                 e.preventDefault();

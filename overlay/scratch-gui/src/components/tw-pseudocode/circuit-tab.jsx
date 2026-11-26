@@ -318,9 +318,40 @@ class CircuitTab extends React.Component {
         // model, but the designer re-renders only on its own edits or a fresh
         // circuitData prop — so it hands us the built circuit's JSON and we LOAD
         // it, the same path a saved circuit takes (re-renders + applies live).
-        this._loadCircuitData = event => {
-            const data = event && event.detail && event.detail.data;
+        this._loadCircuitData = async event => {
+            const {data, asmBlinkReady} = event?.detail || {};
             if (!data || !Array.isArray(data.parts)) return;
+            if (asmBlinkReady) {
+                event.preventDefault();
+                try {
+                    await this.load({explicit: true});
+                    const board = await new Promise((resolve, reject) => {
+                        const expected = data.parts.filter(part => part.kind !== 'breadboard');
+                        const done = () => {
+                            window.removeEventListener('bw-board-ready', ready);
+                            clearTimeout(timeout);
+                        };
+                        const ready = () => {
+                            const live = this.props.vm?.runtime;
+                            const board = live?.circuitBoard;
+                            if (!live?.circuitModel || !board || !expected.every(part =>
+                                board.getParts().some(placed => placed.id === part.id))) return;
+                            done();
+                            resolve(board);
+                        };
+                        const timeout = setTimeout(() => {
+                            done();
+                            reject(new Error('The example circuit could not be loaded'));
+                        }, 15000);
+                        window.addEventListener('bw-board-ready', ready);
+                        this.setState({circuitData: data, panel: 'designer'}, ready);
+                    });
+                    asmBlinkReady.resolve(board);
+                } catch (error) {
+                    asmBlinkReady.reject(error);
+                }
+                return;
+            }
             this._markReactUpdate('host:fpga-demo');
             this.setState({circuitData: data});
             if (typeof this._applyToLiveCircuit === 'function') this._applyToLiveCircuit(data);
