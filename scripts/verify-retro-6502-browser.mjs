@@ -14,15 +14,31 @@ try {
     const page = await browser.newPage({viewport: {width: 1530, height: 1000},
         locale: 'en-US', serviceWorkers: 'block'});
     page.setDefaultTimeout(60_000);
+    let openingExample = null;
+    page.on('dialog', async dialog => {
+        if (dialog.type() === 'confirm' && openingExample && dialog.message().includes(openingExample)) {
+            await dialog.accept();
+        } else {
+            await dialog.dismiss();
+        }
+    });
     await page.addInitScript(() => localStorage.setItem('bw-starter-v1-complete', '1'));
     await page.goto(base, {waitUntil: 'domcontentloaded'});
-    await page.getByRole('tab', {name: 'Circuit', exact: true}).click();
-
     async function openExample(id, title) {
-        await page.getByTestId('bw-circuit-panel-examples').first().click();
+        await page.getByRole('tab', {name: 'Circuit', exact: true}).click();
+        const examples = page.locator('[data-testid="bw-circuit-panel-examples"]:visible').first();
+        const more = page.getByRole('button', {name: 'More circuit controls'}).first();
+        await examples.or(more).first().waitFor();
+        if (!await examples.isVisible()) await more.click();
+        await examples.click();
         await page.getByPlaceholder(/^Search \d+ examples/).first().fill(title);
         await page.locator(`[data-example-id="${id}"]:visible`).getByText(title, {exact: true}).click();
+        openingExample = id;
+        const circuit = page.waitForResponse(response =>
+            response.ok() && new URL(response.url()).pathname.endsWith(`/examples/${id}/circuit.json`));
         await page.getByRole('button', {name: 'OK', exact: true}).click();
+        await circuit;
+        openingExample = null;
         await page.getByTestId('bw-circuit-panel-designer').first().waitFor();
     }
 
@@ -35,11 +51,8 @@ try {
     async function presets() {
         await page.getByRole('button', {name: /Build Machine/}).click();
         const disclosure = page.locator('[data-build-machine] details').filter({hasText: 'Presets and files'});
-        if (!(await disclosure.getAttribute('open'))) {
-            // The open attribute is the empty string when set by the UA.
-            if (!(await disclosure.evaluate(node => node.open))) {
-                await disclosure.getByText('Presets and files', {exact: true}).click();
-            }
+        if (!(await disclosure.evaluate(node => node.open))) {
+            await disclosure.getByText('Presets and files', {exact: true}).click();
         }
     }
 
@@ -60,16 +73,6 @@ try {
         ?.getAttribute('data-shown')?.includes('HI BRICKWRIGHT'));
     console.log('6502 LCD Hello reaches the wired Controller LCD.');
 
-    await rightView('Debugger');
-    const debuggerPanel = page.locator('[data-debugger-solo-pane]:visible');
-    await debuggerPanel.locator('[data-debug-history] > summary').waitFor();
-    assert.equal(await debuggerPanel.locator('[data-debug-record]').isVisible(), false);
-    await debuggerPanel.locator('[data-debug-history] > summary').click();
-    assert.equal(await debuggerPanel.locator('[data-debug-record]').isVisible(), true);
-    await rightView('Scratch Stage');
-    await debuggerPanel.waitFor({state: 'hidden'});
-    console.log('Scratch Stage removes the right-pane debugger and the History disclosure works.');
-
     await openExample('eater6502-vdp-hello', '6502 + VDP Video');
     await activeFrame('Video', 256, 192);
     console.log('The VDP example boots into its Controller display.');
@@ -86,6 +89,7 @@ try {
     await page.getByTestId('bw-mm-close').click();
     await page.getByTestId('bw-machine-preset-basic').click();
     await rightView('Debugger');
+    const debuggerPanel = page.locator('[data-debugger-solo-pane]:visible');
     const terminal = debuggerPanel.getByTestId('bw-serial-console');
     await terminal.getByText('MEMORY SIZE?', {exact: false}).waitFor();
     const input = debuggerPanel.getByTestId('bw-serial-input');
@@ -99,6 +103,14 @@ try {
     await page.waitForFunction(() => /(?:^|\n)\s*4\s*(?:\n|$)/
         .test(document.querySelector('[data-testid="bw-serial-console"]')?.textContent || ''));
     console.log('The actual debugger answers both BASIC startup prompts and computes PRINT 2+2.');
+
+    await debuggerPanel.locator('[data-debug-history] > summary').waitFor();
+    assert.equal(await debuggerPanel.locator('[data-debug-record]').isVisible(), false);
+    await debuggerPanel.locator('[data-debug-history] > summary').click();
+    assert.equal(await debuggerPanel.locator('[data-debug-record]').isVisible(), true);
+    await rightView('Scratch Stage');
+    await debuggerPanel.waitFor({state: 'hidden'});
+    console.log('Scratch Stage removes the right-pane debugger and the History disclosure works.');
 } finally {
     await browser.close();
 }
