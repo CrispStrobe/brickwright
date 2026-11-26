@@ -995,7 +995,7 @@ class DebugPanel extends React.Component {
         this._runnerOwnership.release();
         this._consolePanel?.removeListener(this._onConsoleWidgetsChanged);
         this._consolePanel = null;
-        this._publish6502Console();
+        if (this._routed6502Console) this._publish6502Console();
         this._pcControllerCleanup?.();
         this._pcControllerCleanup = null;
         // Accepted release writes publish synchronously. Silence the old
@@ -1056,8 +1056,10 @@ class DebugPanel extends React.Component {
                 // render/commit passes. Batching changes only when React flushes
                 // these synchronous consumers, not which snapshot either sees.
                 ReactDOM.unstable_batchedUpdates(() => {
-                    this._watchConsoleWidgets(runner);
-                    this._publish6502Console(runner, ui);
+                    if (runner.console6502Source) {
+                        this._watchConsoleWidgets(runner);
+                        this._publish6502Console(runner, ui);
+                    }
                     this._updatePcController?.(runner, ui);
                     this.setState({ui});
                     // The board only exists after attach, and the tab has to be told:
