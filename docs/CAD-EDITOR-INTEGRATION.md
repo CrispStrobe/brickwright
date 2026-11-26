@@ -140,6 +140,33 @@ runtime pin after this signing step and rebuild with that pin. The receipt's
 runtime-pin check covers the package before Apple's TestFlight re-signing;
 launching the installed TestFlight simulator was not tested in this delivery.
 
+## Exact kernel 0.1.7 and faster shape thumbnails (26 November 2026)
+
+Lite pins CrispCAD SDK `68666cefe89235eaff9b1ccd3eeb9543ce299b81` (previously
+`5d40e251`). Over that pin it brings:
+
+- **Exact kernel 0.1.7** (CrispCAD `fc554d5`, release `exact-kernel-v0.1.7`,
+  tarball SHA-256 `09f406f6...ad92b`): the kernel finds smlibwasm's heap-resize
+  import by its key in the module's import table rather than by function name,
+  so the memory ceiling holds in minified builds without CrispCAD's
+  `preserveExactKernelNames`, which is gone; `pairing: 'closest'` handles curved
+  loft sections (CrispCAD passes no pairing, so its lofts are unchanged).
+  Exact commands recorded with 0.1.6 replay as stale, as designed.
+- **Shape library thumbnails** (CrispCAD `68666ce`): a thumbnail is rasterised
+  only while its card is still shown, in a task of its own, with plain arithmetic
+  instead of three.js vectors. Searching the Shapes library and clicking "Add
+  Box" no longer waits behind ~36 thumbnails of cards the search already
+  replaced (5 of 6 runs took 15-17 s before, all 6 under 0.5 s after); the
+  thumbnails themselves are byte-identical.
+- **Scout TT rover collisions** (CrispCAD `adb5b52`): the collision candidates'
+  check compares solids instead of bytes and the file was regenerated (same
+  hulls and vertices, Manifold's triangulation of coplanar faces changed). Only
+  `static/cad-robots/scout.sb3` and the manifest changed; the 22 projects were
+  regenerated from this pin with `npm run gen:cad-robots` and
+  `npm run gen:cad-robots:check` passes against it.
+- Robot and physics test timeouts in CrispCAD (`3ee1328`) and one hinge-clearance
+  check per physics boundary (`a9214b2`).
+
 ## Exact-kernel limits and kernel 0.1.6 (26 November 2026)
 
 Lite pins CrispCAD SDK `5d40e251083012f6517c79a0c3fa012b6a055a7d` (previously

@@ -85,6 +85,8 @@
         "verify:lego-spike": "node scripts/verify-lego-spike-roundtrip.mjs",
         "verify:cad-editor": "node scripts/verify-cad-editor.mjs",
         "verify:cad-sdk": "node scripts/verify-cad-editor.mjs --sdk-only",
+        "gen:cad-robots": "node scripts/generate-cad-robot-projects.mjs",
+        "gen:cad-robots:check": "node scripts/generate-cad-robot-projects.mjs --check",
         "verify:robot-selection": "node scripts/verify-robot-box-selection.mjs",
         "verify:sim-lab": "node scripts/verify-sim-lab-browser.mjs",
         "verify:sim-lab-renode": "node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-sim-lab-renode-lockstep.mjs",

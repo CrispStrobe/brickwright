@@ -65,6 +65,9 @@ try{
    await shapes.waitFor({state:'visible'});
    await shapes.getByLabel('Search shapes',{exact:true}).fill('Box');
    await shapes.getByRole('button',{name:'Add Box',exact:true}).click();
+   // The click returns before the preset is built in the worker and inserted (whenIdle does not
+   // cover a pending insertion), so wait for the box like the GUI path below does.
+   await page.waitForFunction(()=>session.state.document.roots.length===1);
    await page.evaluate(()=>editor.whenIdle());
    assert.equal(await page.evaluate(()=>session.state.document.roots.length),1);
   }
@@ -94,7 +97,13 @@ try{
    const notice=page.getByTestId('bw-sim-lab-blockers').first();await notice.waitFor();
    await page.getByTestId('bw-sim-lab-blockers-close').click();
    await state({status:'loading',blockers:[]});await state({status:'ready',blockers:[{code:'no-motor'}]});
-   assert.equal(await page.getByTestId('bw-sim-lab-blockers').count(),0);
+   // SimLabNotice keeps a dismissed notice mounted under a [hidden] wrapper and
+   // keys the dismissal by its displayed content (sim-lab-notice.jsx), so the
+   // remounted notice must exist but stay hidden; new content must reappear.
+   assert.equal(await page.getByTestId('bw-sim-lab-blockers-notice').count(),1,'blocker notice remounts after reload');
+   assert.equal(await page.getByTestId('bw-sim-lab-blockers').first().isVisible(),false,'dismissed blocker stays hidden after reload');
+   await state({blockers:[{code:'no-motor'},{code:'no-model'}]});
+   assert.equal(await page.getByTestId('bw-sim-lab-blockers').first().isVisible(),true,'changed blockers reappear');
    await state({mode:'build',selection:[],hidden:[],editGroup:null,buildStatus:{kind:'idle'}});
    assert.equal(await page.getByTestId('bw-sim-lab-help-build').count(),0);
    if(ipad){const a=await page.getByRole('tab',{name:'Robots',exact:true}).boundingBox(),b=await page.getByTestId('bw-chrome-toggle').boundingBox();assert.ok(a.x+a.width<=b.x,`Robots tab overlaps menu toggle: ${JSON.stringify({a,b})}`);}
