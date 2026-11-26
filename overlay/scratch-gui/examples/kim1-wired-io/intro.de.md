@@ -6,4 +6,4 @@ Das Programm schaltet Port A auf Ausgabe, liest Port B und schreibt dessen Wert 
 
 **ST** hält die CPU an. Aktiviere **SST** und drücke **GO**, um jeweils einen Befehl auszuführen. **AD** wählt eine Adresse, **DA** ändert ihr Byte, **+** geht weiter und **PC** zeigt den angehaltenen Programmzähler. **RS** setzt die Bedienung zurück und erhält den RAM.
 
-Im Programmeditor kannst du eigene Hex-Bytes mit Adressen laden. Programme und Tastatureingaben werden mit der Schaltung gespeichert. Dieses erste Schaltungsmodell verwendet einen unabhängig geschriebenen Monitor; historisches Monitor-ROM, Kassetten- und TTY-Routinen sind nicht enthalten.
+Das Programm und Tastatureingaben werden mit der Schaltung gespeichert. Der Hardwaremonitor steht unter **Firmware und TTY** bereit. Unter **Erweiterung und Speicher** lassen sich Module und Medien laden.

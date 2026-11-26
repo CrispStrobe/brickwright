@@ -6,4 +6,4 @@ The program makes port A an output, reads port B, and writes that value to port 
 
 Press **ST** to stop the CPU. Select **SST**, then press **GO** to execute one instruction at a time. **AD** selects an address, **DA** changes its byte, **+** advances, and **PC** returns to the stopped program counter. **RS** resets controls and keeps RAM.
 
-Use the program editor to load your own addressed hexadecimal bytes. Programs and keypad edits are saved with the circuit. This first Circuits model uses an independently written monitor; historical monitor ROM, cassette and TTY routines are not included.
+Use the program editor to load your own addressed hexadecimal bytes. Programs and keypad edits are saved with the circuit. For the hardware monitor, select **Use Brickwright ROM** under **Firmware and TTY**. **Expansion and storage** opens the slot and media controls.
