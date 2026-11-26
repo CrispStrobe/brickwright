@@ -38,6 +38,8 @@ try {
     await manager('riscv32');
     await page.locator('[data-lesson-id="lesson-linux-riscv32"]').getByTestId('bw-mm-lesson-run').click();
     await shell(/bwb#/);
+    assert.equal(await page.locator('[data-debugger-solo-pane]:visible').count(), 0,
+        'Controller owns the right pane while the debugger stays mounted');
     assert.equal(await terminal.getByText('uname -a', {exact: false}).count(), 0);
     await terminal.getByRole('button', {name: 'Screen help'}).click();
     await terminal.getByRole('note').getByText('try uname -a', {exact: false}).waitFor();

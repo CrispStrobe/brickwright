@@ -728,12 +728,7 @@ class CircuitTab extends React.Component {
                 this.state.debugDock === 'right' && this._stageRightRendered;
             this._stageHost.style.display =
                 (portalNow && this._portalRendered) || rightHere ? 'block' : 'none';
-            // The host shows the debugger either on the dedicated Circuit tab
-            // (rightHere) or, while coding, through the solo debugger portal.
-            const debuggerDock = this.state.debugDock === 'right' || this.state.debugDock === 'solo' ||
-                this._controllerSplitLive();
-            const debuggerHere = rightHere || (debuggerDock && portalNow && this._portalRendered);
-            this._layoutStageHost(debuggerHere && (rightHere || !!this._soloDebuggerLive));
+
         }
     }
 
@@ -771,7 +766,6 @@ class CircuitTab extends React.Component {
         if (this._unregisterUndo) this._unregisterUndo();
         cancelAnimationFrame(this._hostResizeFrame);
         cancelAnimationFrame(this._circuitFileReplayFrame);
-        if (this._hostMO) this._hostMO.disconnect();
         this._circuitFileReplayFrame = null;
         this._circuitFilePending = null;
         if (this._hostRO) { this._hostRO.disconnect(); this._hostRO = null; }
@@ -994,29 +988,6 @@ class CircuitTab extends React.Component {
         return this._debugHost;
     }
 
-    /** A live debugger and the Widgets dock (data-bw-stage-dock, gui.jsx)
-     *  both claim the whole stage column. Stacked, one always covers the
-     *  other: the Widgets "Full screen" button sat exactly over the
-     *  debugger's Pause, and raising the debugger hid the machine display
-     *  instead. So split the column: the dock keeps the top half and the
-     *  host takes the bottom half (z-index 2 over the dock's 1, below the
-     *  stage header). Anything else keeps the full-column host at z-index
-     *  0, under dock panes such as Arcade, exactly as before. */
-    _layoutStageHost (debuggerLive) {
-        this._debuggerLive = !!debuggerLive;
-        const host = this._stageHost;
-        const dock = host.parentElement &&
-            host.parentElement.querySelector(':scope > [data-bw-stage-dock]');
-        const split = !!(debuggerLive && dock);
-        if (this._splitDock && this._splitDock !== dock) this._splitDock.style.maxHeight = '';
-        this._splitDock = split ? dock : null;
-        if (dock) dock.style.maxHeight = split ? 'var(--bw-dock-max-height, calc(50% - 44px))' : '';
-        host.style.top = split ? '50%' : '0';
-        host.style.zIndex = split ? '2' : '0';
-        if (split) host.dataset.bwDebuggerSplit = 'true';
-        else delete host.dataset.bwDebuggerSplit;
-    }
-
     _ensureStageHost () {
         if (this._stageHost && document.contains(this._stageHost)) return this._stageHost;
         const wrap = document.querySelector('div[class*="stage-and-target-wrapper"]');
@@ -1044,15 +1015,6 @@ class CircuitTab extends React.Component {
             });
             this._hostRO.observe(wrap);
         }
-        // The Widgets dock mounts lazily, after this tab's own update, so the
-        // split must also be re-applied when the column's children change.
-        if (typeof MutationObserver !== 'undefined') {
-            if (this._hostMO) this._hostMO.disconnect();
-            this._hostMO = new MutationObserver(() => {
-                if (this._stageHost && this._stageHost.style.display !== 'none') this._layoutStageHost(this._debuggerLive);
-            });
-            this._hostMO.observe(wrap, {childList: true});
-        }
         return host;
     }
 
@@ -1077,28 +1039,14 @@ class CircuitTab extends React.Component {
         }
     }
 
-    /** The Widgets controller dock beside a debugger that has a live machine
-     *  or program. #1691 began remembering device docks here; before that a
-     *  'controller' selection left the circuit dock in place, and the split
-     *  column (Widgets above, debugger below) is that dock's documented
-     *  layout in gui.jsx. Other device panes still own the whole column. */
-    _controllerSplitLive () {
-        return this.state.debugDock === 'controller' &&
-            !['cp1', 'cardiac', 'kim1'].includes(window.__bwMachineExtracted?.kind) &&
-            !!(stcDrives(this.state.stc) || this.state.machineBooted);
-    }
-
     /** While coding (any other tab), the circuit takes the stage's column —
      *  the owner's default: you watch the LED you are programming, not an
      *  empty Scratch stage. Only when there is circuit content to show. */
     _stagePortalOn () {
         if (this.props.isVisible || !this.state.showInStage) return false;
-        // gui.jsx owns controller and device panes. Leave their column clear
-        // while retaining the same debugger portal and runner off screen.
-        // The controller (Widgets) dock is the one exception: beside a live
-        // machine or program it shares the column with the debugger, split by
-        // _layoutStageHost, so Pause stays reachable next to the machine.
-        if (!CIRCUIT_DOCKS.has(this.state.debugDock) && !this._controllerSplitLive()) return false;
+        // Controller and device panes own their whole column. The runner
+        // stays mounted in its portal while the debugger view is hidden.
+        if (!CIRCUIT_DOCKS.has(this.state.debugDock)) return false;
         // This is a presentation choice, not a capability check. Debugger
         // mode must still show the designer for an empty project so the user
         // can build the circuit before adding MCU code.
@@ -2542,18 +2490,15 @@ class CircuitTab extends React.Component {
         // applies while portalled: on the dedicated Circuit tab, 'right'
         // keeps the designer beside the panel (below) and 'solo' falls back
         // to the instruments-column dock, so the designer stays reachable.
-        if ((this.state.debugDock === 'solo' || this.state.debugDock === 'right' ||
-            this._controllerSplitLive()) && this._stagePortalOn() && !this.state.cadCircuitRequested) {
+        if ((this.state.debugDock === 'solo' || this.state.debugDock === 'right') &&
+            this._stagePortalOn() && !this.state.cadCircuitRequested) {
             this._portalOn = true;
-            // Read by the host layout pass: only a debugger with a live machine
-            // or program shares the column with a dock pane (_layoutStageHost).
-            this._soloDebuggerLive = !!(stcDrives(stc) || this.state.machineBooted);
             const solo = (
                 // paddingTop clears the stage-header row: the panel (and the
                 // no-code warning) rendered flush against the tab strip and
                 // read as misplaced (owner report, 2026-08-17 — and 7 hours
                 // before that).
-                <div style={{...box, overflow: 'auto', paddingTop: this._controllerSplitLive() ? 4 : 48}} data-debugger-solo-pane>
+                <div style={{...box, overflow: 'auto', paddingTop: 48}} data-debugger-solo-pane>
                     <HostMount host={this._ensureDebugHost()} />
                 </div>
             );

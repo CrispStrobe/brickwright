@@ -1062,7 +1062,7 @@ const GUIComponent = props => {
         const dockFullScreenStyle = isFullScreen ? {
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
             width: '100vw', height: '100vh', margin: 0, zIndex: 4000,
-            background: '#ffffff', overflow: 'auto', '--bw-dock-max-height': 'none'
+            background: '#ffffff', overflow: 'auto'
         } : null;
 
         // Right-pane full screen: the stock presentation mode is defeated by
@@ -1509,11 +1509,6 @@ const GUIComponent = props => {
                                 <React.Suspense fallback={
                                     <div style={{padding: 24, color: '#64748b'}}>Loading controller…</div>
                                 }>
-                                    {/* zIndex 1 makes this wrapper a stacking context: the panel's own
-                                        zIndex:10 stays inside it, above the in-stage circuit portal
-                                        (z-index 0). While the debugger has a live machine or program,
-                                        circuit-tab.jsx splits the column at data-bw-stage-dock: Widgets
-                                        on top, debugger below (z-index 2), so neither covers the other. */}
                                     <div data-bw-stage-dock="controller" style={dockFullScreenStyle || {position: 'relative', zIndex: 1, flex: 1, minHeight: 0, borderTop: '1px solid #ffffff', background: '#f8fafc'}}>
                                         <ControllerPanelView
                                             panel={controllerPanel}
