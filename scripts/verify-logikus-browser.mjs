@@ -110,7 +110,8 @@ export async function runSmoke () {
             sha256: createHash('sha256').update(await readFile(index)).digest('hex')};
         ({server, url: report.url} = await serveBuild(build));
         const {chromium} = await import('playwright');
-        browser = await chromium.launch({headless: true});
+        const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+        browser = await chromium.launch({headless: true, ...(executablePath ? {executablePath} : {})});
         report.browserVersion = browser.version();
         const context = await browser.newContext({viewport: {width: 1440, height: 1000}, locale: 'en-US'});
         page = await context.newPage();
