@@ -3,14 +3,16 @@ import {join} from 'node:path';
 import {parseArgs} from 'node:util';
 import {Worker} from 'node:worker_threads';
 
-const help = `bwlite circuit test [EXAMPLE_ID] [--device DEVICE] [--smoke-only] [--jobs N] [--json]
+const help = `bwlite circuit test [EXAMPLE_ID] [--device DEVICE] [--smoke-only] [--jobs N] [--timeout-ms MS] [--json]
 
 Without an ID test every circuit and device variant listed in the gallery.
 Every bench is loaded, powered on and advanced 1 ms in the circuit engine.
-Scripted lessons also run functional checks in their Scratch VM or machine engine.
+--timeout-ms sets the worker wall-clock budget for this startup check.
+Functional checks cover lesson scenarios, separately measured electrical I/O,
+or non-rail voltage/current assertions on the exact authored circuit.
 Exit 1 indicates a failed or incomplete smoke check, or a failed or incomplete functional check.`;
 
-function startWorker () {
+function startWorker (smokeTimeout) {
     const worker = new Worker(new URL('./lib/circuit-example-worker.mjs', import.meta.url), {
         execArgv: ['--import', new URL('./lib/register-gui-scope.mjs', import.meta.url).href],
         stdout: true,
@@ -52,7 +54,7 @@ function startWorker () {
         ready: waitFor('ready', 30_000),
         run (bench) {
             phase = 'smoke';
-            const result = waitFor('result', 8_000);
+            const result = waitFor('result', smokeTimeout);
             worker.postMessage(bench);
             return result;
         },
@@ -64,7 +66,8 @@ function startWorker () {
 async function main () {
     const {positionals, values} = parseArgs({
         allowPositionals: true,
-        options: {device: {type: 'string'}, jobs: {type: 'string'}, json: {type: 'boolean'}, 'smoke-only': {type: 'boolean'}, help: {type: 'boolean'}}
+        options: {device: {type: 'string'}, jobs: {type: 'string'}, 'timeout-ms': {type: 'string'},
+            json: {type: 'boolean'}, 'smoke-only': {type: 'boolean'}, help: {type: 'boolean'}}
     });
     const [command, id, extra] = positionals;
     if (values.help) {
@@ -74,6 +77,11 @@ async function main () {
     if (command !== 'test' || extra) throw new Error(help);
     const jobs = Number(values.jobs ?? 4);
     if (!Number.isInteger(jobs) || jobs < 1 || jobs > 8) throw new Error('--jobs must be between 1 and 8');
+
+    const smokeTimeout = Number(values['timeout-ms'] ?? 8_000);
+    if (!Number.isInteger(smokeTimeout) || smokeTimeout < 1 || smokeTimeout > 300_000) {
+        throw new Error('--timeout-ms must be between 1 and 300000');
+    }
 
     const catalog = JSON.parse(await readFile(join(import.meta.dirname, '../overlay/scratch-gui/examples/index.json'), 'utf8'));
     const benches = [];
@@ -85,7 +93,10 @@ async function main () {
         if (defaultFile && !sameAsDefault) variants.unshift([null, defaultFile]);
         for (const [device, file] of variants) {
             if (!values.device || device === values.device) {
-                benches.push({id: item.id, device, file, program: item.files?.program, rom: item.files?.rom});
+                benches.push({id: item.id, device, file, program: item.files?.program, rom: item.files?.rom,
+                    cp1: file === defaultFile ? item.files.cp1 : undefined,
+                    expected: file === defaultFile
+                        ? item.files.expected ?? join(file, '..', 'EXPECTED.md') : undefined});
             }
         }
     }
@@ -99,7 +110,7 @@ async function main () {
                 const index = cursor++;
                 const bench = benches[index];
                 if (!worker) {
-                    worker = startWorker();
+                    worker = startWorker(smokeTimeout);
                     await worker.ready;
                 }
                 let result;
@@ -118,7 +129,7 @@ async function main () {
                 if (!values.json) {
                     const detail = row.reason ?? row.behavior.reason;
                     const label = row.device ? `${row.id}/${row.device}` : row.id;
-                    console.log(`${label}  smoke=${row.smoke}  behavior=${row.behavior.status}${detail ? '  ' + detail : ''}`);
+                    console.log(`${label}  smoke=${row.smoke}  behavior=${row.behavior.status}${row.behavior.scope ? '/' + row.behavior.scope : ''}${detail ? '  ' + detail : ''}`);
                     for (const check of row.behavior.checks ?? []) {
                         console.log(`  ${check.ok ? 'PASS' : 'FAIL'} ${JSON.stringify(check)}`);
                     }
@@ -136,7 +147,9 @@ async function main () {
         return counts;
     }, {});
     const summary = {examples: new Set(rows.map(row => row.id)).size, benches: rows.length,
-        smoke: countBy(rows.map(row => row.smoke)), behavior: countBy(rows.map(row => row.behavior.status))};
+        smoke: countBy(rows.map(row => row.smoke)), behavior: countBy(rows.map(row => row.behavior.status)),
+        functionalCoverage: countBy(rows.filter(row => row.behavior.status === 'pass')
+            .map(row => row.behavior.scope ?? 'lesson'))};
     if (values.json) console.log(JSON.stringify({summary, rows}, null, 2));
     else console.log(JSON.stringify(summary));
     if (rows.some(row => row.smoke !== 'pass' || ['fail', 'incomplete'].includes(row.behavior.status))) process.exitCode = 1;
