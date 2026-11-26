@@ -35,7 +35,6 @@
  */
 
 import {createBasicStartup, isBundledMicrosoftBasic, microsoftBasicLine} from './basic-startup.js';
-import {mirrorBasicSerialOnVga} from './basic-vga-mirror.js';
 import {loadCp1Monitor} from '../cp1-monitor.js';
 import {
     listBreakpoints, subscribeBreakpoints, toggleBreakpoint,
@@ -3169,16 +3168,13 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
 
         const result = await createDebugTarget('eater6502', targetOpts);
         wireMachineBench(result, createDebugSession);
-        if (bootMedia?.profile === 'eater' && bootMedia.name === 'basic.rom' ||
-            declaredMachine && await isBundledMicrosoftBasic(targetOpts.rom)) {
+        if (targetOpts.py65mon) runner.console6502Source = 'py65mon';
+        if ((bootMedia?.profile === 'eater' && bootMedia.name === 'basic.rom') ||
+            (declaredMachine && await isBundledMicrosoftBasic(targetOpts.rom))) {
             const {MS_PROFILE} = await import('bw-board/basic-machine-runner.js');
             basicStartup = createBasicStartup(MS_PROFILE.bootPrompts);
             runner.sendBasicLine = line => runner.sendSerial(microsoftBasicLine(line));
-            for (const chip of targetOpts.config?.chips || []) {
-                if (chip.kind !== 'simplevga') continue;
-                const card = result.adapter.machine.chips[chip.name];
-                if (card) mirrorBasicSerialOnVga(card, () => serialLines);
-            }
+            runner.console6502Source = 'ACIA';
         }
         setStatus('ready', readyMsg);
         return session;

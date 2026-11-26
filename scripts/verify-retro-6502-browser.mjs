@@ -92,9 +92,35 @@ try {
         }, {widget, width, height});
     }
 
-    async function vdpDebuggerFrame() {
+    const debuggerPanel = () => page.locator('[data-debugger-solo-pane]:visible');
+    const terminal = () => debuggerPanel().getByTestId('bw-serial-console');
+    const serialInput = () => debuggerPanel().getByTestId('bw-serial-input');
+    const consoleOutput = () => debuggerPanel().getByRole('combobox', {name: 'Console output'});
+    const monitorConsole = widget => page.getByTestId(`bw-ctl-simplevga-${widget}`)
+        .locator('[data-6502-monitor-serial]');
+    async function checkDebuggerHasNoVideo() {
         await rightView('Debugger');
-        await vdpHelloFrame('[data-debugger-solo-pane] [data-vdp-screen] canvas');
+        await debuggerPanel().waitFor();
+        assert.equal(await debuggerPanel().locator('[data-vdp-screen]').count(), 0);
+    }
+
+    async function sendLine(input, line) {
+        await input.fill(line);
+        await input.press('Enter');
+    }
+
+    async function waitingForResult(output, expected) {
+        await output.getByText(expected).waitFor();
+    }
+
+    async function routeToMonitor(widget, source) {
+        await consoleOutput().selectOption(widget);
+        await terminal().waitFor({state: 'hidden'});
+        await rightView('Controller');
+        const console = monitorConsole(widget);
+        await console.waitFor();
+        assert.equal(await console.getAttribute('data-6502-monitor-serial'), source);
+        return console;
     }
 
     const vdpWidget = '[data-testid="bw-ctl-simplevga-Video"] canvas';
@@ -107,8 +133,8 @@ try {
     await chooseExample('eater6502-vdp-hello',
         page.locator('[data-testid="bw-catalog-item"][title="eater6502-vdp-hello"]'));
     await vdpHelloFrame(vdpWidget);
-    await vdpDebuggerFrame();
-    console.log('Loading the VDP example from Code boots its ROM and displays HELLO in both surfaces.');
+    await checkDebuggerHasNoVideo();
+    console.log('Loading the VDP example from Code boots its ROM and displays HELLO in Controller.');
 
     // Run the established Circuit gallery journey in its own fresh workspace.
     await page.close();
@@ -124,18 +150,44 @@ try {
 
     await openExample('eater6502-vdp-hello', '6502 + VDP Video');
     await vdpHelloFrame(vdpWidget);
-    await vdpDebuggerFrame();
+    await checkDebuggerHasNoVideo();
     await presets();
-    await vdpDebuggerFrame();
+    await checkDebuggerHasNoVideo();
     await rightView('Controller');
     await vdpHelloFrame(vdpWidget);
-    console.log('VDP colors reach both panes after loading the example and rebuilding the machine.');
+    await page.getByTestId('bw-machine-preset-basic').click();
+    await checkDebuggerHasNoVideo();
+    await waitingForResult(terminal(), /MICROSOFT BASIC V1.1/);
+    const basicMonitor = await routeToMonitor('Video', 'ACIA');
+    await waitingForResult(basicMonitor, /MICROSOFT BASIC V1.1/);
+    await sendLine(basicMonitor.getByRole('textbox', {name: '6502 console input'}), 'print 2+2');
+    await waitingForResult(basicMonitor, /(?:^|\n)\s*4\s*(?:\n|$)/);
+    await checkDebuggerHasNoVideo();
+    await consoleOutput().selectOption('');
+    await waitingForResult(terminal(), /(?:^|\n)\s*4\s*(?:\n|$)/);
+    console.log('MS BASIC can use the Debugger console or the Controller VDP monitor.');
+
+    await page.getByTestId('bw-machine-preset-forth').click();
+    await waitingForResult(terminal(), /Tali Forth 2/i);
+    const forthMonitor = await routeToMonitor('Video', 'py65mon');
+    await sendLine(forthMonitor.getByRole('textbox', {name: '6502 console input'}), '2 2 + .');
+    await waitingForResult(forthMonitor, /2 2 \+ \.[\s\S]*?\b4\b[\s\S]*?ok/i);
+    await checkDebuggerHasNoVideo();
+    await consoleOutput().selectOption('');
+    await waitingForResult(terminal(), /2 2 \+ \.[\s\S]*?\b4\b[\s\S]*?ok/i);
+    console.log('Tali Forth accepts commands on the same VDP monitor and retains its output when switched back.');
+
+    await consoleOutput().selectOption('Video');
+    await page.getByTestId('bw-machine-preset-vdphello').click();
+    await consoleOutput().waitFor({state: 'hidden'});
+    await rightView('Controller');
+    await monitorConsole('Video').waitFor({state: 'hidden'});
+    await vdpHelloFrame(vdpWidget);
+    console.log('Reloading VDP Hello restores the Controller framebuffer.');
 
     await openExample('aurora65-workstation', 'Aurora-65 Display Workstation');
     await activeFrame('vgaMonitor', 160, 128);
     console.log('Aurora/65 boots into its SimpleVGA Controller display.');
-    const monitor = page.getByTestId('bw-ctl-simplevga-vgaMonitor').locator('canvas');
-    const rawVga = await monitor.evaluate(canvas => canvas.toDataURL());
     assert.equal(await page.getByTestId('bw-open-logikus').count(), 0);
     await presets();
     assert.equal(await page.getByTestId('bw-machine-preset-lcdhello').count(), 0);
@@ -147,61 +199,32 @@ try {
     await page.getByTestId('bw-mm-wired-forth').waitFor();
     await page.getByTestId('bw-mm-wired-aurora65').waitFor();
     await page.getByTestId('bw-mm-wired-basic').click();
-    await rightView('Debugger');
-    const debuggerPanel = page.locator('[data-debugger-solo-pane]:visible');
-    const terminal = debuggerPanel.getByTestId('bw-serial-console');
-    const input = debuggerPanel.getByTestId('bw-serial-input');
-    await terminal.getByText('MICROSOFT BASIC V1.1', {exact: false}).waitFor();
-    await page.waitForFunction(() => /(?:^|\n)OK\s*$/.test(
-        document.querySelector('[data-testid="bw-serial-console"]')?.textContent || ''
-    ));
-    const screen = debuggerPanel.locator('canvas').first();
-    await screen.waitFor();
-    const pixel = canvas => canvas.getContext('2d').getImageData(0, 0, 1, 1).data.slice(0, 3).join(',');
-    await page.waitForFunction(() => {
-        const canvas = document.querySelector('[data-debugger-solo-pane] canvas');
-        return canvas?.getContext('2d').getImageData(0, 0, 1, 1).data.slice(0, 3).join(',') === '37,70,90';
-    });
-    const bootFrame = await screen.evaluate(canvas => canvas.toDataURL());
-    await input.fill('print 2+2');
-    await input.press('Enter');
-    await page.waitForFunction(() => /(?:^|\n)\s*4\s*(?:\n|$)/
-        .test(document.querySelector('[data-testid="bw-serial-console"]')?.textContent || ''));
-    console.log('BASIC boots directly to OK from the filtered firmware library and computes PRINT 2+2.');
+    await checkDebuggerHasNoVideo();
+    await waitingForResult(terminal(), /MICROSOFT BASIC V1.1/);
+    await sendLine(serialInput(), 'print 2+2');
+    await waitingForResult(terminal(), /(?:^|\n)\s*4\s*(?:\n|$)/);
+    const vgaConsole = await routeToMonitor('vgaMonitor', 'ACIA');
+    await sendLine(page.getByRole('textbox', {name: 'BASIC serial input'}), 'print "Mixed Case"');
+    await waitingForResult(vgaConsole, /Mixed Case/);
+    assert.doesNotMatch(await vgaConsole.textContent(), /\?SN ERROR/);
+    await checkDebuggerHasNoVideo();
+    console.log('Aurora BASIC boots from the firmware library and accepts the wired Controller keyboard.');
 
-    await page.waitForFunction(previous =>
-        document.querySelector('[data-debugger-solo-pane] canvas')?.toDataURL() !== previous, bootFrame);
-    const basicFrame = await screen.evaluate(canvas => canvas.toDataURL());
-    await rightView('Controller');
-    await activeFrame('vgaMonitor', 480, 384);
-    assert.equal(await monitor.evaluate(pixel), '37,70,90');
-    assert.equal(await monitor.evaluate(canvas => canvas.toDataURL()), basicFrame);
-    assert.notEqual(basicFrame, rawVga);
-    const keyboard = page.getByRole('textbox', {name: 'BASIC serial input'});
-    await keyboard.fill('print "Mixed Case"');
-    await keyboard.press('Enter');
-    await page.waitForFunction(previous =>
-        document.querySelector('[data-testid="bw-ctl-simplevga-vgaMonitor"] canvas')?.toDataURL() !== previous, basicFrame);
-    await rightView('Debugger');
-    await terminal.getByText('Mixed Case', {exact: false}).waitFor();
-    assert.doesNotMatch(await terminal.textContent(), /\?SN ERROR/);
-    console.log('BASIC commands work from the serial console and the wired Controller keyboard.');
-
-    await debuggerPanel.locator('[data-debug-history] > summary').waitFor();
-    assert.equal(await debuggerPanel.locator('[data-debug-record]').isVisible(), false);
-    await debuggerPanel.locator('[data-debug-history] > summary').click();
-    assert.equal(await debuggerPanel.locator('[data-debug-record]').isVisible(), true);
+    await debuggerPanel().locator('[data-debug-history] > summary').waitFor();
+    assert.equal(await debuggerPanel().locator('[data-debug-record]').isVisible(), false);
+    await debuggerPanel().locator('[data-debug-history] > summary').click();
+    assert.equal(await debuggerPanel().locator('[data-debug-record]').isVisible(), true);
     await openExample('kim1-wired-io', 'KIM-1: Wired I/O');
     await rightView('Debugger');
-    await debuggerPanel.locator('[data-kim1-view="debugger"]').waitFor();
-    assert.equal(await debuggerPanel.locator('[data-vdp-screen]').count(), 0);
-    assert.equal(await debuggerPanel.getByRole('alert').count(), 0);
+    await debuggerPanel().locator('[data-kim1-view="debugger"]').waitFor();
+    assert.equal(await debuggerPanel().locator('[data-vdp-screen]').count(), 0);
+    assert.equal(await debuggerPanel().getByRole('alert').count(), 0);
     await rightView('Controller');
     await page.getByTestId('bw-ctl-widget-kim1').locator('[data-kim1-display]').waitFor();
     console.log('Switching from running BASIC to KIM-1 releases the old runner and displays the new device.');
 
     await rightView('Scratch Stage');
-    await debuggerPanel.waitFor({state: 'hidden'});
+    await debuggerPanel().waitFor({state: 'hidden'});
     console.log('Scratch Stage removes the right-pane debugger and the History disclosure works.');
 } finally {
     await browser.close();

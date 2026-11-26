@@ -9,6 +9,7 @@ import {activateUndoSurface, notifyUndoState, registerUndoSurface} from '../../l
 import {addCardiacFace, addKim1Face, isCardiacFace, isKim1Face, MACHINE_WIDGET_HEIGHT} from '../../lib/controller-machine-faces.js';
 import {LOGIKUS_LAMP_WIDGETS, LOGIKUS_SWITCH_WIDGETS, LOGIKUS_TEST_WIDGET} from '../../lib/logikus/controller-bridge.js';
 import SpikePortMonitor from './spike-port-monitor.jsx';
+import {CONSOLE_6502_CHANGED, sendConsoleLine} from '../../lib/bw-debug/console-6502.js';
 
 const Kim1Surface = React.lazy(() => import(/* webpackChunkName: "bw-kim1-surface" */ './kim1-surface.jsx'));
 
@@ -1059,8 +1060,45 @@ function ImageWidget({ widget }) {
     );
 }
 
-function SimpleVgaWidget({widget}) {
+function MonitorConsole({route, interactive}) {
+    const output = useRef(null);
+    const [line, setLine] = React.useState('');
+    useEffect(() => {
+        output.current.scrollTop = output.current.scrollHeight;
+    }, [route.text]);
+    return <div data-6502-monitor-serial={route.source} style={{
+        position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', padding: 8,
+        background: '#0d1117', color: '#9ae6b4', font: '12px monospace', userSelect: 'text'
+    }}>
+        <span title="Virtual serial console">{route.source}</span>
+        <pre ref={output} style={{flex: 1, minHeight: 0, margin: '4px 0', overflow: 'auto',
+            whiteSpace: 'pre-wrap', overflowWrap: 'anywhere'}}>{route.text}</pre>
+        {interactive && <form style={{display: 'flex', gap: 4}} onSubmit={event => {
+            event.preventDefault();
+            event.stopPropagation();
+            if (sendConsoleLine(route.runner, line)) setLine('');
+        }}>
+            <input aria-label="6502 console input" value={line} onChange={event => setLine(event.target.value)}
+                autoCapitalize="off" autoComplete="off" spellCheck={false}
+                style={{flex: 1, minWidth: 0, font: 'inherit'}} />
+            <button type="submit" aria-label="Send console line" title="Send console line">↵</button>
+        </form>}
+    </div>;
+}
+
+function SimpleVgaWidget({widget, runtime, interactive}) {
     const ref = useRef(null);
+    const [route, setRoute] = React.useState(null);
+    useEffect(() => {
+        const update = () => {
+            const current = runtime?.bw6502Console;
+            setRoute(current?.destination === widget.name ? current : null);
+        };
+        runtime?.on(CONSOLE_6502_CHANGED, update);
+        update();
+        return () => runtime?.removeListener(CONSOLE_6502_CHANGED, update);
+    }, [runtime, widget.name]);
+
     useEffect(() => {
         const canvas = ref.current;
         const rgba = widget.state.rgba;
@@ -1077,7 +1115,8 @@ function SimpleVgaWidget({widget}) {
             style={{position: 'relative', background: '#000', borderRadius: 2, overflow: 'hidden'}}>
             <canvas ref={ref} style={{display: 'block', width: '100%', height: '100%',
                 imageRendering: widget.state.source === 'serial' ? 'auto' : 'pixelated'}} />
-            {!widget.state.signal && <span style={{position: 'absolute', inset: 0, display: 'grid',
+            {route ? <MonitorConsole route={route} interactive={interactive} /> :
+                !widget.state.signal && <span style={{position: 'absolute', inset: 0, display: 'grid',
                 placeItems: 'center', color: '#0f0', fontSize: 10, fontFamily: 'monospace'}}>NO SIGNAL</span>}
         </div>
     );
@@ -1159,7 +1198,7 @@ function BasicSerialKeyboard({name, sendLine}) {
     </form>;
 }
 
-function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBindings, buttonInputs, sendBasicLine }) {
+function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBindings, buttonInputs, sendBasicLine, runtime }) {
     const typeLabels = {
         joystick: t('joystick'), button: t('button'), slider: t('slider'),
         dpad: t('dpad'), dial: t('dial'), gauge: 'Gauge', matrix: 'Matrix', sevenseg: '7-Seg',
@@ -1357,7 +1396,7 @@ function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBi
             )}
 
             {widget.type === 'simplevga' && (
-                <SimpleVgaWidget widget={widget} />
+                <SimpleVgaWidget widget={widget} runtime={runtime} interactive={mode === 'play'} />
             )}
 
             {widget.type === 'mono_lcd' && (
@@ -2051,6 +2090,7 @@ class ControllerPanelView extends React.Component {
                                     mode={mode}
                                     panel={panel}
                                     buttonInputs={this._buttonInputs}
+                                    runtime={this.props.vm?.runtime}
                                     sendBasicLine={mode === 'play' && w.type === 'keyboard' && w.binding?.target === 'part' &&
                                         this.props.board?.parts?.some(part => part.id === w.binding.partId && part.kind === 'ps2')
                                         ? this.props.sendBasicLine : undefined}

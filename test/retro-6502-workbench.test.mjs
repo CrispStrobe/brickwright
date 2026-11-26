@@ -15,7 +15,7 @@ import {warningsBadge, warningsView} from '../overlay/scratch-gui/src/lib/circui
 import {MS_PROFILE} from 'bw-board/basic-machine-runner.js';
 import {createBasicStartup, isBundledMicrosoftBasic, microsoftBasicLine} from '../overlay/scratch-gui/src/lib/bw-debug/basic-startup.js';
 
-import {mirrorBasicSerialOnVga} from '../overlay/scratch-gui/src/lib/bw-debug/basic-vga-mirror.js';
+import {isConsoleMonitor, sendConsoleLine} from '../overlay/scratch-gui/src/lib/bw-debug/console-6502.js';
 import {addCardiacFace, hasCardiacFace} from '../overlay/scratch-gui/src/lib/controller-machine-faces.js';
 
 const require = createRequire(import.meta.url);
@@ -96,37 +96,31 @@ test('the qualified BASIC image boots straight to OK with two ordered startup re
     }
 });
 
-test('BASIC leaves the VGA card unlocked and the ACIA preview yields to a real frame', () => {
+test('BASIC sends text to the ACIA and leaves the SimpleVGA framebuffer untouched', () => {
     const {config} = bench('aurora65-workstation');
     const serial = consoleMachine(config, createBasicStartup(MS_PROFILE.bootPrompts));
     serial.waitFor('OK');
-    serial.line('PRINT 2+2');
+    const runner = {
+        sendSerial: line => serial.line(line.slice(0, -1)),
+        sendBasicLine: line => runner.sendSerial(microsoftBasicLine(line))
+    };
+    assert.equal(sendConsoleLine(runner, 'print 2+2'), true);
     serial.waitFor(' 4');
-    const card = serial.adapter.machine.chips.vga;
-    assert.equal(card.videoFrame().signal, false);
-
-    const hardware = {width: 160, height: 128, signal: false, frame: 0};
-    const display = {videoFrame: () => hardware};
-    const rendered = [];
-    const canvas = {getContext: () => ({
-        measureText: () => ({width: 5}), setTransform() {}, fillRect() {},
-        fillText(text) { rendered.push(text); },
-        getImageData: (x, y, width, height) => ({data: new Uint8ClampedArray(width * height * 4)})
-    })};
-    const lines = ['MICROSOFT BASIC V1.1', 'OK'];
-    mirrorBasicSerialOnVga(display, () => lines, () => canvas);
-    const first = display.videoFrame();
-    assert.deepEqual(rendered, ['ACIA serial mirror', ...lines]);
-    assert.equal(first.signal, true);
-    assert.deepEqual([first.width, first.height, first.source], [480, 384, 'serial']);
-    assert.equal(hardware.signal, false);
+    assert.equal(serial.adapter.machine.chips.vga.videoFrame().signal, false);
     assert.equal(microsoftBasicLine('print "Hello world"'), 'PRINT "Hello world"\r');
-    assert.equal(display.videoFrame(), first);
-    lines.push('PRINT 2+2', ' 4', 'OK');
-    assert.notEqual(display.videoFrame().frame, first.frame);
-    assert.ok(rendered.includes(' 4'));
-    hardware.signal = true;
-    assert.equal(display.videoFrame(), hardware);
+});
+
+test('the console link only offers part-bound video and sends a carriage return to the monitor', () => {
+    assert.equal(isConsoleMonitor({type: 'simplevga', binding: {target: 'part'}}), true);
+    assert.equal(isConsoleMonitor({type: 'simplevga', binding: {target: 'variable'}}), false);
+    assert.equal(isConsoleMonitor({type: 'oled', binding: {target: 'part'}}), false);
+    let sent;
+    assert.equal(sendConsoleLine({sendSerial: line => { sent = line; }}, '2 2 + .'), true);
+    assert.equal(sent, '2 2 + .\r');
+    assert.equal(sendConsoleLine({sendSerial: line => { sent = line; }}, ''), true);
+    assert.equal(sent, '\r');
+    assert.equal(sendConsoleLine({sendSerial: () => false}, 'test'), false);
+    assert.equal(sendConsoleLine(null, 'test'), false);
 });
 
 test('a CARDIAC face uses the normal widget layout and serialization', () => {

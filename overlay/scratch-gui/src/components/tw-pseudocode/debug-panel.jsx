@@ -20,6 +20,7 @@ import {createRunnerOwnership} from '../../lib/bw-debug/runner-ownership.js';
 import {ps2ButtonBit, ps2Delta} from '../../lib/bw-machines/ps2-pointer.js';
 import {promptAsync} from '../../lib/native-dialog.js';
 import {createRawHddDownload} from '../../lib/bw-machines/raw-hdd-download.js';
+import {CONSOLE_6502_CHANGED, isConsoleMonitor, sendConsoleLine} from '../../lib/bw-debug/console-6502.js';
 
 // VDP screen — lazy-loaded, only renders when the runner has video output.
 const PortLeds = React.lazy(() =>
@@ -226,7 +227,7 @@ class DebugPanel extends React.Component {
         // order a user works in.
         this.state = {runner: null, ui: {phase: 'idle', message: ''}, kind: 'emulator', kinds: null,
             labwiredChip: '', labwiredChips: null, esp32S040McuId: '', esp32s3Console: 'uart0', samdInputError: null,
-            machineConfig: null, serialInput: '', modemInput: '', modemStatus: null,
+            machineConfig: null, serialInput: '', consoleDestination: '', modemInput: '', modemStatus: null,
             firmwareName: null,
             recordingStatus: null, reverseStatus: null, timelineStatus: null,
             sessionTransferStatus: null, hddDownloadStatus: null, hddDownloadBusy: false};
@@ -943,6 +944,9 @@ class DebugPanel extends React.Component {
         const p = this._runnerPromise;
         this._runnerPromise = null;
         this._runnerOwnership.release();
+        this._consolePanel?.removeListener(this._onConsoleWidgetsChanged);
+        this._consolePanel = null;
+        this._publish6502Console();
         // Accepted release writes publish synchronously. Silence the old
         // runner first, while its target is still alive to receive touch-up.
         this.releaseSamdButtons();
@@ -1001,6 +1005,8 @@ class DebugPanel extends React.Component {
                 // render/commit passes. Batching changes only when React flushes
                 // these synchronous consumers, not which snapshot either sees.
                 ReactDOM.unstable_batchedUpdates(() => {
+                    this._watchConsoleWidgets(runner);
+                    this._publish6502Console(runner, ui);
                     this.setState({ui});
                     // The board only exists after attach, and the tab has to be told:
                     // until it is, the designer is showing a board of its own that
@@ -1132,10 +1138,45 @@ class DebugPanel extends React.Component {
     onSerialSend () {
         const runner = this.state.runner;
         const line = this.state.serialInput;
-        if (!runner || typeof runner.sendSerial !== 'function') return;
-        if (runner.sendBasicLine) runner.sendBasicLine(line);
-        else runner.sendSerial(`${line}\r`);
-        this.setState({serialInput: ''});
+        if (sendConsoleLine(runner, line)) this.setState({serialInput: ''});
+    }
+
+    _watchConsoleWidgets (runner) {
+        if (!runner.console6502Source || this._consolePanel) return;
+        this._consolePanel = this.props.vm?.runtime?.controllerPanel;
+        this._onConsoleWidgetsChanged = (event, detail) => {
+            if (!['add', 'remove', 'rename', 'bind', 'layout'].includes(event)) return;
+            const destination = this.state.consoleDestination;
+            const renamed = event === 'rename' && detail.oldName === destination ? detail.newName : destination;
+            const next = isConsoleMonitor(this._consolePanel.getWidget(renamed)) ? renamed : '';
+            if (next === destination) this.forceUpdate();
+            else this.setState({consoleDestination: next},
+                () => this._publish6502Console(this.state.runner, this.state.ui));
+        };
+        this._consolePanel?.addListener(this._onConsoleWidgetsChanged);
+    }
+
+    _publish6502Console (runner, ui) {
+        const runtime = this.props.vm?.runtime;
+        if (!runtime) return;
+        const previous = runtime.bw6502Console;
+        const destination = this.state.consoleDestination;
+        const widget = runtime.controllerPanel?.getWidget(destination);
+        if (!runner?.console6502Source || !['ready', 'running', 'paused', 'stepping'].includes(ui?.phase) ||
+            !isConsoleMonitor(widget)) {
+            if (this._routed6502Console && previous === this._routed6502Console) {
+                delete runtime.bw6502Console;
+                runtime.emit(CONSOLE_6502_CHANGED);
+            }
+            this._routed6502Console = null;
+            return;
+        }
+        const text = (ui.serialOutput || []).join('\n');
+        if (previous && previous === this._routed6502Console &&
+            previous.runner === runner && previous.destination === destination && previous.text === text) return;
+        this._routed6502Console = {runner, destination, text, source: runner.console6502Source};
+        runtime.bw6502Console = this._routed6502Console;
+        runtime.emit(CONSOLE_6502_CHANGED);
     }
 
     onModemInput (e) { this.setState({modemInput: e.target.value, modemStatus: null}); }
@@ -1458,6 +1499,10 @@ class DebugPanel extends React.Component {
         // input line rather than a dead one.
         const canSendSerial = !!(this.state.runner &&
             typeof this.state.runner.sendSerial === 'function');
+        const consoleMonitors = this.state.runner?.console6502Source ?
+            (this.props.vm?.runtime?.controllerPanel?.getWidgets().filter(isConsoleMonitor) || []) : [];
+        const consoleDestination = consoleMonitors.some(widget => widget.name === this.state.consoleDestination) ?
+            this.state.consoleDestination : '';
         const basicStartupPrompt = this.state.kind === 'eater6502' &&
             /(?:MEMORY SIZE|WIDTH)\?\s*$/i.test((ui.serialOutput || []).slice(-2).join('\n'));
 
@@ -2217,10 +2262,10 @@ class DebugPanel extends React.Component {
                     </div>
                 ) : null}
 
-                {/* VDP screen — video output from machines with a TMS9918A.
-                    Polls runner.video() per animation frame. Only renders
-                    when video() returns non-null (the machine has a VDP). */}
-                {this.state.runner && typeof this.state.runner.video === 'function' ? (
+                {/* The 6502 framebuffer belongs to its part-bound Controller widget.
+                    Other machines can use this video surface for direct input. */}
+                {this.state.kind !== 'eater6502' && this.state.runner &&
+                    typeof this.state.runner.video === 'function' ? (
                     <React.Suspense fallback={null}>
                       <div onMouseMove={this.state.runner.mouseIn ? this._mouseMove : undefined}
                           onMouseDown={this.state.runner.mouseIn ? this._mouseDown : undefined}
@@ -2315,13 +2360,27 @@ class DebugPanel extends React.Component {
                     BASIC print its banner and have no way to answer it. */}
                 {(ui.serialOutput && ui.serialOutput.length) || canSendSerial ? (
                     <div style={{borderTop: '1px solid #2c3e50', paddingTop: 8}}>
-                        <div style={{color: '#7f8c8d', marginBottom: 4}}>
-                            {this.state.runner && this.state.runner.terminal
+                        <div style={{color: '#7f8c8d', marginBottom: 4, display: 'flex', gap: 8, alignItems: 'center'}}>
+                            <span>{this.state.runner && this.state.runner.terminal
                                 ? `Terminal ${this.state.runner.terminal.cols}×${this.state.runner.terminal.rows}`
                                 : 'Serial'}
-                            {ui.serialOutput && ui.serialOutput.length &&
-                                !(this.state.runner && this.state.runner.terminal)
-                                ? ` (${ui.serialOutput.length})` : ''}
+                                {!consoleMonitors.length && ui.serialOutput?.length && !this.state.runner?.terminal
+                                    ? ` (${ui.serialOutput.length})` : ''}
+                            </span>
+                            {consoleMonitors.length > 0 && (
+                                <select aria-label="Console output" title="Console output" value={consoleDestination}
+                                    style={{minWidth: 0}} onChange={event => {
+                                        this.setState({consoleDestination: event.target.value},
+                                            () => this._publish6502Console(this.state.runner, this.state.ui));
+                                    }}>
+                                    <option value="">Debugger console</option>
+                                    {consoleMonitors.map(widget => (
+                                        <option key={widget.name} value={widget.name}>
+                                            {widget.layout?.label || widget.name} (Controller)
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
                         </div>
                         {this.state.runner && this.state.runner.terminal ? (
                             // A booted Linux: a real terminal, keys straight
@@ -2333,7 +2392,7 @@ class DebugPanel extends React.Component {
                                     hint={this.tx('terminalHint')}
                                 />
                             </React.Suspense>
-                        ) : <React.Fragment>
+                        ) : !consoleDestination && <React.Fragment>
                             <pre
                                 data-testid="bw-serial-console"
                                 style={{
