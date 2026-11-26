@@ -13,6 +13,7 @@ import {
 } from '../overlay/scratch-gui/src/lib/bw-machines/lessons.js';
 import {validateMachineConfig, MACHINE_KINDS} from '../overlay/scratch-gui/src/lib/bw-machines/machine-config.js';
 import {activateConfig} from '../overlay/scratch-gui/src/lib/bw-machines/activate.js';
+import {runMachineConfig} from '../overlay/scratch-gui/src/lib/bw-machines/run-machine.js';
 
 const cpmRow = (loc = 'en') => lessonMachines(loc).find(r => r.config.id === 'lesson-cpm-z80');
 
@@ -45,6 +46,25 @@ test('CP/M lesson: activates into the z80 real-CP/M boot', async () => {
     assert.equal(activated.bootMedia.slot, 'cpmsys');
     assert.equal(activated.bootMedia.profile, 'cpm-system', 'the cpmsys slot selects the real CP/M 2.2 boot path');
     assert.ok(asked.some(u => /static\/roms\/bbcbasic\.com$/.test(u)), 'BBC BASIC is the drive-A: program');
+});
+
+test('CP/M lesson waits for a successful attach and surfaces a failed one', async () => {
+    const base = {
+        awaitBoot: true,
+        fetcher: async () => ({bytes: new Uint8Array([0xc9])})
+    };
+    const result = await runMachineConfig(cpmRow().config, {
+        ...base,
+        dispatch(detail) {
+            assert.equal(detail.profile, 'cpm-system');
+            detail.bootCompletion.resolve();
+        }
+    });
+    assert.equal(result.mode, 'functional');
+    await assert.rejects(runMachineConfig(cpmRow().config, {
+        ...base,
+        dispatch: detail => detail.bootCompletion.reject(new Error('CP/M BIOS failed'))
+    }), /CP\/M BIOS failed/);
 });
 
 test('CP/M lesson: strings resolve in EN and DE with matching keys', () => {

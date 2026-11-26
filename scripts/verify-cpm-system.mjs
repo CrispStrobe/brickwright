@@ -179,6 +179,43 @@ try {
     check(false, 'the CP/M boot flow ran without throwing', String(e.message || e).slice(0, 160));
 }
 
+// Exercise the lesson's real Run button from the default Blocks workspace.
+// The imported-machine journey above manually opens the debugger, so it
+// cannot catch a built-in lesson booting into an invisible pane.
+try {
+    const page = await browser.newPage({viewport: {width: 1440, height: 960}});
+    try {
+        await page.addInitScript(() => {
+            localStorage.setItem('bw-starter-v1-complete', '1');
+            localStorage.setItem('bw-right-pane-hidden', '1');
+        });
+        await page.goto(url, {waitUntil: 'domcontentloaded'});
+        await page.getByTestId('bw-file-menu-trigger').click();
+        await page.getByText('Machines…', {exact: true}).click();
+        await page.locator('[data-lesson-id="lesson-cpm-z80"]').getByTestId('bw-mm-lesson-run').click();
+        const output = page.locator('[data-testid="bw-serial-console"]:visible').first();
+        const input = page.locator('[data-testid="bw-serial-input"]:visible').first();
+        const expectOutput = text => page.waitForFunction(pattern =>
+            [...document.querySelectorAll('[data-testid="bw-serial-console"]')]
+                .some(el => el.getClientRects().length && new RegExp(pattern).test(el.textContent)),
+        text.source, {timeout: 30_000});
+        await output.waitFor({state: 'visible', timeout: 30_000});
+        await expectOutput(/A>/);
+        for (const [command, response] of [
+            ['DIR', /A:\s+BBCBASIC/], ['BBCBASIC', /BBC BASIC/], ['PRINT 2+2', /(?:^|\n)\s*4(?:\s|$)/]
+        ]) {
+            await input.fill(command);
+            await input.press('Enter');
+            await expectOutput(response);
+        }
+        check(true, 'the built-in CP/M lesson opens its console and runs BBC BASIC');
+    } finally {
+        await page.close();
+    }
+} catch (error) {
+    check(false, 'the built-in CP/M lesson opens its console and runs BBC BASIC', String(error.message || error));
+}
+
 // ─── LINUX ON RISC-V — the Machine Manager's lesson row ─────────────────────
 // Same surface, second machine: a fresh page (no CP/M state), the built-in
 // "Linux on RISC-V" row, its GPL licence line and source link, Run. The kernel,

@@ -13,6 +13,7 @@
 // so a Node test drives this without a DOM or the network.
 
 import {activateConfig, defaultImageFetcher} from './activate.js';
+import {showCircuitDebugger} from '../bw-debug/debug-view.js';
 
 /**
  * Boot a machine config.
@@ -34,6 +35,7 @@ export async function runMachineConfig(config, opts = {}) {
                 typeof globalThis.CustomEvent !== 'function') {
                 throw new Error('no DOM event target to boot the machine on');
             }
+            if (detail.kind === 'z80' && detail.profile === 'cpm-system') showCircuitDebugger();
             globalThis.dispatchEvent(new globalThis.CustomEvent('bw-machine-media-load', {detail}));
         };
 
@@ -96,10 +98,11 @@ export async function runMachineConfig(config, opts = {}) {
     }
 
     // DOM event listeners cannot return a Promise to dispatchEvent(). For the
-    // named browser 386 route, wait for the panel's actual attach result so a
+    // browser machine routes below, wait for the panel's actual attach result so a
     // failed ROM/media load remains visible in Machine Manager. Injected
     // dispatchers keep the old synchronous contract unless a test opts in.
     const awaitBoot = (activated.machinePreset === 'freedos-vga' ||
+        (activated.targetKind === 'z80' && bm.profile === 'cpm-system') ||
         (activated.targetKind === 'i80386' && bm.slot === 'bios') ||
         (activated.targetKind === 'i8086' && ['rom', 'com', 'exe'].includes(bm.slot))) &&
         (opts.awaitBoot ?? typeof opts.dispatch !== 'function');
