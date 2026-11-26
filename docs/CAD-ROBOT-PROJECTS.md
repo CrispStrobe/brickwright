@@ -1799,3 +1799,32 @@ all 24 pin and fetch tests passed across the initial run and a focused
 retry of the font test after its Python subprocess timed out. Chrome
 also loaded the packaged exact WASM on demand and measured a 10 × 20 ×
 30 mm box at 6,000 mm³ and 2,200 mm².
+
+### Check hinge clearance once per physics boundary
+
+CrispCAD samples hinge clearance before the first native substep and
+after each completed substep. The next step reuses that checked boundary.
+Impulse, velocity and drag commands still restore collision filtering
+for affected hinge pairs before changing the body. A focused test checks
+both a multi-substep call and a separate call after it.
+
+Paired Chrome worker runs used the same bundled Jolt SIMD bytecode and
+the Atlas and Scout CAD documents from Brickwright's current projects.
+Each run advanced 600 Circuit–CAD substeps. All sampled joint, body and
+electrical results matched in both orders. Initial and warm restart
+frames also matched.
+
+| Robot | Clearance checks | Native pose reads for clearance |
+| --- | ---: | ---: |
+| Atlas forklift | 298 → 150 | 892 → 449 |
+| Scout TT rover | 1,200 → 601 | 3,600 → 1,803 |
+
+Worker real-time factors stayed near 0.09–0.10× for Atlas and 0.22–0.25×
+for Scout under variable Mac load. These tests cover the worker and
+Circuit feedback. Sustained 1× in the production app remains open.
+The physics TypeScript build passed. Of 27 focused tests, 26 passed
+in the first run. The Rover startup-torque case hit its 60-second
+deadline twice and passed in an isolated rerun with a 180-second
+deadline. The checked-in deadline is 60 seconds.
+Brickwright pins SDK `5d40e25`, which precedes this change.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/a9214b26c62ff3de915e21d3237f24920817b192)
