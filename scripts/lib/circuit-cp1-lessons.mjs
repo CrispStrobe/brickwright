@@ -14,7 +14,10 @@ const cellLessons = {
 };
 const digitMasks = [63, 6, 91, 79, 102, 109, 125, 39, 127, 111];
 const accumulatorDisplay = value => [119, 63, 191, ...String(value).padStart(3, '0').split('').map(digit => digitMasks[digit])];
-const wiredLessons = new Set(['cp1-first-display', 'cp1-switch-input', 'cp1-blink', 'cp1-cp5-binary']);
+const wiredLessons = new Set([
+    'cp1-first-display', 'cp1-switch-input', 'cp1-blink', 'cp1-cp5-binary', 'cp1-gray-indicator',
+    'cp1-cp3-cp4-relay-sequence', 'cp1-cp4-relay-signals', 'cp1-cp4-relay-bank'
+]);
 
 export async function checkCp1Lesson (bench, circuit, examples) {
     const cells = cellLessons[bench.id];
@@ -54,7 +57,11 @@ export async function checkCp1Lesson (bench, circuit, examples) {
     advance(300);
     const semantic = cells ? createCp1SemanticObserver(machine) : null;
     for (const {address, opcode, operand} of program.words) machine.writeCell(address, opcode, operand);
-    for (const name of [...String(cells?.start ?? 0).padStart(3, '0'), 'PC', 'RUN']) key(name);
+    const lit = id => Math.abs(circuit.board.branchCurrent(id, 'anode')) > 0.001;
+    const gray = bench.id === 'cp1-gray-indicator';
+    const entry = cells?.start ?? (gray ? 8 : 0);
+    for (const name of [...String(entry).padStart(3, '0'), 'PC']) key(name);
+    if (!gray) key('RUN');
     if (cells) {
         let halted = false;
         for (let elapsed = 0; elapsed <= 3000; elapsed += 25) {
@@ -97,6 +104,54 @@ export async function checkCp1Lesson (bench, circuit, examples) {
             if (high === lit && phases.at(-1) !== high) phases.push(high);
         }
         observe('At least two complete output/LED cycles', true, phases.length >= 5);
+    } else if (bench.id === 'cp1-gray-indicator') {
+        const changes = [];
+        machine.setKey('RUN', true);
+        for (let ms = 0; ms < 1000 && changes.length < 8; ms += 5) {
+            if (ms === 40) machine.setKey('RUN', false);
+            advance(5);
+            const value = machine.getPortState(2).latch;
+            if (value === 0xff && !changes.length) continue;
+            if (changes.at(-1)?.value === value) continue;
+            changes.push({value, ms, lamps: Array.from({length: 3}, (_, bit) => lit(`led${bit}`))});
+        }
+        const sequence = [248, 249, 251, 250, 254, 255, 253, 252];
+        observe('Gray sequence at port 2', sequence, changes.map(change => change.value));
+        observe('The three wired indicators follow the Gray sequence',
+            sequence.map(value => Array.from({length: 3}, (_, bit) => Boolean(value & (1 << bit)))),
+            changes.map(change => change.lamps));
+        const dwell = changes.slice(1).map((change, index) => change.ms - changes[index].ms);
+        checks.push({label: 'Seven Gray transitions at 70–105 ms intervals', observed: dwell,
+            ok: dwell.length === 7 && dwell.every(ms => ms >= 70 && ms <= 105)});
+    } else if (bench.id === 'cp1-cp4-relay-bank') {
+        for (const mask of [0, 85, 170, 255]) {
+            for (let bit = 0; bit < 8; bit++) circuit.setControl(`switch${bit + 1}`, (mask >> bit) & 1);
+            advance(180);
+            observe(`Port 2 latches relay mask ${mask}`, mask, machine.getPortState(2).latch);
+            const relayMask = Array.from({length: 8}, (_, bit) => bit).reduce((bits, bit) =>
+                Math.abs(circuit.board.branchCurrent(`load${bit + 1}`, 'a')) > 0.001 ? bits | (1 << bit) : bits, 0);
+            observe(`Isolated relay load current mask ${mask}`, mask, relayMask);
+        }
+    } else if (bench.id === 'cp1-cp3-cp4-relay-sequence' || bench.id === 'cp1-cp4-relay-signals') {
+        const expansionSequence = bench.id === 'cp1-cp3-cp4-relay-sequence';
+        const port = expansionSequence ? 4 : 2;
+        const phases = [];
+        if (!expansionSequence) {
+            advance(120);
+            observe('Both lamps wait unlit for a request', [false, false], [lit('entry-lamp'), lit('exit-lamp')]);
+            circuit.setControl('request', 1);
+        }
+        for (let sample = 0; sample < 90 && phases.length < 3; sample++) {
+            advance(20);
+            const value = machine.getPortState(port).latch;
+            if (value === 0 && !phases.length) continue;
+            if (phases.at(-1)?.value === value) continue;
+            advance(15);
+            phases.push({value, lamps: [lit('entry-lamp'), lit('exit-lamp')]});
+        }
+        observe('The three programmed phases reach the isolated relay lamps', [
+            {value: 1, lamps: [true, false]}, {value: 2, lamps: [false, true]}, {value: 0, lamps: [false, false]}
+        ], phases);
     } else if (bench.id === 'cp1-cp5-binary') {
         for (const pattern of [0, 1, 128, 165, 255, 0]) {
             for (let bit = 0; bit < 8; bit++) circuit.setControl(`switch${bit + 1}`, 1 - ((pattern >> bit) & 1));

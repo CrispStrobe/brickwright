@@ -70,7 +70,19 @@ KIM comparison references include schematics, ROMs, documentation, and independe
 | UI-06 | Improve the CAD Models and CAD Shapes extension gallery cards with illustrated artwork and small distinct icons. Verify the Workspace CAD and FPGA controls and check other regressions after enabling both in the desktop build. |
 | UI-07 | Fix and verify Run as MakeCode Arcade through the ordinary Code action, including a minimal Scratch script, conversion reporting, and unsupported variable visibility operations. |
 | CIRCUIT-01 | Exercise all 1,971 catalog variants through the CLI, then add distinct functional checks until each lesson’s actual behavior is evidenced. Repair observed issues, including Button counter with LED blinks, Automatic Night Light target reseats, PWM, and calibration fixtures. Guard against a component or device error crashing or reloading the app. |
-| CIRCUIT-02 | Retain the circuit ledger with per-case status and evidence. Current audit recorded 1,970 startup passes and 1,470 functional passes. The fibre-optic PLL passed a shorter dynamic check, while the full 1 ms startup exceeded 300 seconds. There are 501 variants without a passing functional check. |
+| CIRCUIT-02 | The audit now has a functional result for each of 1,971 circuit variants. There are 1,699 passes and 272 failed assertions. Startup passed on 1,970 variants. The fibre-optic PLL passed a separate dynamic check while its full 1 ms startup exceeded 300 seconds. Keep the failure receipts and rerun the affected cases after repairs. |
+
+### Circuit audit denominator
+
+The current Examples index has 807 entries. Of these, 780 have a circuit file or a named board variant. The other 27 are program entries with no bench in this audit. The CLI counts a default circuit once unless a named variant already points to it, then checks every named device variant. That produces 722 default-circuit rows and 1,249 device-specific rows, for 1,971 audit cases. A red circuit diagnostic can be the expected outcome of a lesson that deliberately ships a wiring fault.
+
+The follow-up exercised all 501 previously unverified cases across 195 lesson IDs. Of these, 230 passed and 271 failed. A deeper screen test also found that the previously passing default voltmeter drops its unit at midrange. The net result is **1,699 passing and 272 failing variants**, with a verdict for every variant. A pass covers the assertion recorded for that variant. The subagent exercised 363 variants, including the previously passing voltmeter and the 13 remaining discrete-computer lessons. [Per-variant verdicts](receipts/2026-11-26-circuit-functional-follow-up.tsv)
+
+- **Program and display output.** String expressions produce `NaN` across 143 Strings and Character Analysis variants. Some display lessons swap position arguments. Six parallel LCD cases write the correct character RAM while the rendered text stays blank. The seven-segment project reports no changing display data.
+- **Inputs and wiring.** The 11 Ping variants measured different sensor echo pulse widths, but their programs printed zero at both distances. Ten retargeted flyback variants omit the winding inductor and include a clamp diode that contradicts the lesson. The 8086 Blink project did not light its wired LED through the tested green-flag path.
+- **Calibration and documentation.** All seven servo variants reached the full sweep, but their measured 0.5–2.5 ms pulse range differs from the documented 1–2 ms. Several voltmeter and ammeter variants show values that overrun the display or omit units.
+
+The combined JSON ledger and individual raw receipts are in `artifacts/circuit-functional-follow-up/`. Generate a targeted receipt with `node bin/bwlite.mjs circuit test EXAMPLE_ID --json`. Use `--device` for a named target and `--behavior-timeout-ms` for a slow scenario such as the eight-bit machine. Merge new receipts with [the ledger tool](../scripts/circuit-audit-ledger.mjs). The follow-up covers simulated behavior and records physical quantities from the circuit model.
 
 ## Verified in the current integration
 

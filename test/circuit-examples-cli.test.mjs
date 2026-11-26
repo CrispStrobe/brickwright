@@ -128,12 +128,12 @@ test('Arduino lessons verify a retargeted pull-up, switch debounce and the VM ti
     }
 });
 
-test('circuit CLI fails the coverage gate when a powered bench has no functional assertion', () => {
-    const result = invoke('arduino-08-string-append', '--device', 'arduino-nano', '--json');
+test('circuit CLI reports a functional timeout separately from startup', () => {
+    const result = invoke('eater6502-vdp-hello', '--behavior-timeout-ms', '1', '--json');
     assert.equal(result.status, 1, result.stderr || result.stdout);
     const {rows: [{smoke, behavior}]} = JSON.parse(result.stdout);
     assert.equal(smoke, 'pass');
-    assert.equal(behavior.status, 'unverified');
+    assert.equal(behavior.status, 'incomplete');
 });
 
 test('CP1 voltmeter replays three authored verification scenarios through its wired switches', () => {
@@ -143,6 +143,18 @@ test('CP1 voltmeter replays three authored verification scenarios through its wi
     const readings = behavior.checks.filter(check => check.label === 'Cell Reading');
     assert.deepEqual(readings.map(({scenario, observed}) => [scenario, observed.operand]), [[1, 0], [2, 10], [3, 50]]);
     assert.equal(behavior.checks.filter(check => check.label === 'Switch levels reach their CP1 pins').length, 3);
+});
+
+test('the circuit CLI verifies intentional bus contention, real VDP output and wired CARDIAC I/O', () => {
+    const cases = ['eater6502-contention-bug', 'eater6502-vdp-hello', 'cardiac-night-light'];
+    for (const id of cases) {
+        const result = invoke(id, '--json');
+        assert.equal(result.status, 0, result.stderr || result.stdout);
+        const {rows: [{smoke, behavior}]} = JSON.parse(result.stdout);
+        assert.equal(smoke, 'pass');
+        assert.equal(behavior.status, 'pass');
+        assert.ok(behavior.checks.length > 0);
+    }
 });
 
 test('circuit CLI rejects an unknown gallery ID', () => {

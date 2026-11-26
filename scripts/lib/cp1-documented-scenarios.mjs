@@ -42,7 +42,7 @@ export function runCp1Scenario (spec, program, circuit, options) {
     const {machine} = adapter;
     const advance = ms => adapter.advanceNs(ms * 1_000_000);
     const address = name => {
-        const value = program.symbols[name.toUpperCase()];
+        const value = /^\d{1,3}$/.test(name) ? Number(name) : program.symbols[name.toUpperCase()];
         if (value === undefined) throw new Error(`Unknown assembly symbol ${name}`);
         return value;
     };
@@ -68,8 +68,10 @@ export function runCp1Scenario (spec, program, circuit, options) {
             previousBoundary = state.boundaryId;
             stimulusIndex++;
             for (let bit = 0; bit < 8; bit++) {
-                const id = `switch-p${next.port}-${bit}`;
-                if (!partIds.has(id)) continue;
+                const named = `switch-p${next.port}-${bit}`;
+                const numbered = `switch${bit + 1}`;
+                const id = partIds.has(named) ? named : partIds.has(numbered) ? numbered : null;
+                if (!id) continue;
                 const expected = (next.value >> bit) & 1;
                 circuit.setControl(id, 1 - expected);
                 const pin = `${options.partId}.P${next.port}.${bit}`;

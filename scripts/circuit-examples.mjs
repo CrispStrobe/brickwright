@@ -3,17 +3,18 @@ import {join} from 'node:path';
 import {parseArgs} from 'node:util';
 import {Worker} from 'node:worker_threads';
 
-const help = `bwlite circuit test [EXAMPLE_ID] [--device DEVICE] [--smoke-only] [--jobs N] [--timeout-ms MS] [--json]
+const help = `bwlite circuit test [EXAMPLE_ID] [--device DEVICE] [--smoke-only] [--jobs N] [--timeout-ms MS] [--behavior-timeout-ms MS] [--json]
 
 Without an ID test every circuit and device variant listed in the gallery.
 Every bench is loaded, powered on and advanced 1 ms in the circuit engine.
---timeout-ms sets the worker wall-clock budget for this startup check.
+--timeout-ms sets the worker wall-clock budget for startup.
+--behavior-timeout-ms sets the separate functional-check budget (default 30000).
 Functional checks cover lesson scenarios, separately measured electrical I/O,
 or non-rail voltage/current assertions on the exact authored circuit.
 Exit 1 indicates a failed or incomplete startup check, or a bench without a passing functional check.
 --smoke-only checks startup alone and reports functional coverage as unverified.`;
 
-function startWorker (smokeTimeout) {
+function startWorker (smokeTimeout, behaviorTimeout) {
     const worker = new Worker(new URL('./lib/circuit-example-worker.mjs', import.meta.url), {
         execArgv: ['--import', new URL('./lib/register-gui-scope.mjs', import.meta.url).href],
         stdout: true,
@@ -37,7 +38,7 @@ function startWorker (smokeTimeout) {
                 else if (message.type === 'behavior') {
                     phase = 'behavior';
                     clearTimeout(timeout);
-                    timeout = setTimeout(onTimeout, 30_000);
+                    timeout = setTimeout(onTimeout, behaviorTimeout);
                 }
             };
             function finish (error, result) {
@@ -68,7 +69,8 @@ async function main () {
     const {positionals, values} = parseArgs({
         allowPositionals: true,
         options: {device: {type: 'string'}, jobs: {type: 'string'}, 'timeout-ms': {type: 'string'},
-            json: {type: 'boolean'}, 'smoke-only': {type: 'boolean'}, help: {type: 'boolean'}}
+            'behavior-timeout-ms': {type: 'string'}, json: {type: 'boolean'}, 'smoke-only': {type: 'boolean'},
+            help: {type: 'boolean'}}
     });
     const [command, id, extra] = positionals;
     if (values.help) {
@@ -82,6 +84,11 @@ async function main () {
     const smokeTimeout = Number(values['timeout-ms'] ?? 8_000);
     if (!Number.isInteger(smokeTimeout) || smokeTimeout < 1 || smokeTimeout > 300_000) {
         throw new Error('--timeout-ms must be between 1 and 300000');
+    }
+
+    const behaviorTimeout = Number(values['behavior-timeout-ms'] ?? 30_000);
+    if (!Number.isInteger(behaviorTimeout) || behaviorTimeout < 1 || behaviorTimeout > 300_000) {
+        throw new Error('--behavior-timeout-ms must be between 1 and 300000');
     }
 
     const catalog = JSON.parse(await readFile(join(import.meta.dirname, '../overlay/scratch-gui/examples/index.json'), 'utf8'));
@@ -111,7 +118,7 @@ async function main () {
                 const index = cursor++;
                 const bench = benches[index];
                 if (!worker) {
-                    worker = startWorker(smokeTimeout);
+                    worker = startWorker(smokeTimeout, behaviorTimeout);
                     await worker.ready;
                 }
                 let result;

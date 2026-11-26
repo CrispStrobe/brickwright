@@ -4,6 +4,15 @@ import {readFile} from 'node:fs/promises';
 import {readBenchProgram, checkDocumentedPhysics, checkDeclaredIO} from './circuit-functional-coverage.mjs';
 import {join} from 'node:path';
 import {checkCp1Lesson} from './circuit-cp1-lessons.mjs';
+import {checkArduinoLesson} from './circuit-arduino-lessons.mjs';
+import {checkDisplayLesson} from './circuit-display-lessons.mjs';
+import {checkInductiveLesson} from './circuit-inductive-lesson.mjs';
+import {checkPassiveLesson} from './circuit-passive-lessons.mjs';
+import {checkWaveformLesson} from './circuit-waveform-lessons.mjs';
+import {checkPeripheralLesson} from './circuit-peripheral-lessons.mjs';
+import {checkReferenceLesson} from './circuit-reference-lessons.mjs';
+import {checkDigitalLesson} from './circuit-digital-lessons.mjs';
+import {check6502Bench, checkCardiacNightLight, checkWiredTrainer, checkZ80Bench} from './circuit-retro-lessons.mjs';
 
 const logicChecks = (and) => ({
     sampleMs: 20,
@@ -15,6 +24,10 @@ const logicChecks = (and) => ({
 });
 
 const behaviors = {
+    'i8086-blink': {
+        led: 'led0', sampleMs: 20, durationMs: 1500,
+        checks: [{at: 200, lit: true}, {at: 700, lit: false}, {at: 1200, lit: true}]
+    },
     '01-blink': {
         sampleMs: 20,
         durationMs: 1650,
@@ -332,6 +345,15 @@ export async function checkBehavior (bench, circuit, examples) {
         const cp1 = await checkCp1Lesson(bench, circuit, examples);
         if (cp1) return cp1;
     }
+    if (['eater6502-contention-bug', 'eater6502-bench', 'eater6502-blink', 'eater6502-vdp-hello',
+        'aurora65-workstation'].includes(bench.id)) {
+        return check6502Bench(bench, circuit, examples);
+    }
+    if (bench.id === 'kim1-wired-io' || bench.id === 'busch-microtronic-wired-io') {
+        return checkWiredTrainer(bench, circuit);
+    }
+    if (bench.id === 'z80-bench' || bench.id === 'z80-pd-bench') return checkZ80Bench(bench, circuit, examples);
+    if (bench.id === 'cardiac-night-light') return checkCardiacNightLight(circuit);
     if (bench.id === 'eater6502-crtc80') return checkCrtc80(bench, circuit, examples);
     if (bench.id === '07-buzzer-siren') return checkSiren(bench, circuit, examples);
     if (bench.id === '08-led-chaser-595' || bench.id === '20-shift-register-binary') {
@@ -341,6 +363,21 @@ export async function checkBehavior (bench, circuit, examples) {
     if (bench.id === 'arduino-sk-p09-motorized-pinwheel' || bench.id === 'arduino-sk-p10-zoetrope') {
         return checkStarterMotor(bench, circuit, examples);
     }
+    if (bench.id === '33-inductive-no-flyback') return checkInductiveLesson(bench, circuit, examples);
+    const arduino = await checkArduinoLesson(bench, circuit, examples, startProgram);
+    if (arduino) return arduino;
+    const display = await checkDisplayLesson(bench, circuit, examples, startProgram);
+    if (display) return display;
+    const peripheral = await checkPeripheralLesson(bench, circuit, examples, startProgram);
+    if (peripheral) return peripheral;
+    const reference = await checkReferenceLesson(bench, circuit, examples);
+    if (reference) return reference;
+    const digital = checkDigitalLesson(bench, circuit);
+    if (digital) return digital;
+    const passive = checkPassiveLesson(bench, circuit);
+    if (passive) return passive;
+    const waveform = checkWaveformLesson(bench, circuit);
+    if (waveform) return waveform;
     const spec = behaviors[bench.id];
     if (!spec) {
         // Check the authored operating point before perturbing this circuit's controls.
