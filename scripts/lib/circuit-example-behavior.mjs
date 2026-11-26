@@ -223,6 +223,80 @@ async function checkSiren (bench, circuit, examples) {
     }
 }
 
+async function checkShiftRegister (bench, circuit, examples) {
+    const chaser = bench.id === '08-led-chaser-595';
+    const bits = Array.from({length: 8}, (_, bit) => bit);
+    const usesNumberedDiodes = circuit.parts.some(part => part.id === 'd1');
+    const ledIds = chaser
+        ? bits.map(bit => usesNumberedDiodes ? `d${bit + 1}` : `LED_leds_q${bit}`)
+        : bits.map(bit => `LED_595_q${bit}`);
+    for (const id of ledIds) {
+        if (!circuit.parts.some(part => part.id === id && part.kind === 'led')) {
+            throw new Error(`Missing shift-register LED ${id}`);
+        }
+    }
+    const ascending = bits.map(bit => 1 << bit);
+    const sequence = chaser
+        ? [...ascending, ...ascending.slice(0, -1).reverse(), ascending[1]]
+        : [...bits, ...bits.map(value => 248 + value), 0];
+    const periodMs = chaser ? 100 : 250;
+    const sampleMs = chaser ? 25 : 5;
+    const toleranceMs = 50;
+    let vm;
+    try {
+        const runtime = await startProgram(bench, circuit, examples, value => { vm = value; });
+        let now = 0;
+        vm.runtime.updateCurrentMSecs = () => { vm.runtime.currentMSecs = now; };
+        vm.runtime.updateCurrentMSecs();
+        vm.runtime.ioDevices.clock.resetProjectTimer();
+        const changes = [];
+        // Allow for the frame in which Scratch schedules each wait.
+        const deadline = sequence.length * (periodMs + toleranceMs);
+        for (; now <= deadline && changes.length < sequence.length; now += sampleMs) {
+            await runtime.stepFrames(vm, 1, sampleMs);
+            // This resistive load settles at the pin edge. Sample current with
+            // the VM clock controlling the program's waits.
+            const mask = ledIds.reduce((value, id, bit) => {
+                const brightness = circuit.board.ledBrightnessNow(id);
+                if (!Number.isFinite(brightness)) throw new Error(`Missing brightness for ${id}`);
+                return brightness >= 0.02 ? value | (1 << bit) : value;
+            }, 0);
+            if (changes.at(-1)?.mask !== mask) {
+                changes.push({ms: now, mask});
+                if (mask !== sequence[changes.length - 1]) break;
+                if (!chaser && mask === 7) {
+                    // Skip the middle counts so this gate exercises the high
+                    // outputs and the actual program's rollover on every board.
+                    const counter = vm.runtime.getTargetForStage().lookupVariableByNameAndType('counter', '');
+                    if (counter?.value !== 8) throw new Error('Binary counter did not advance after latching 7');
+                    counter.value = 248;
+                }
+            } else if (now - changes.at(-1).ms > 2 * periodMs + toleranceMs) {
+                break;
+            }
+        }
+        if (runtime.errors.length) throw new Error(runtime.errors.join(', '));
+        const mismatch = sequence.findIndex((mask, index) => changes[index]?.mask !== mask);
+        const timing = changes.slice(1).findIndex(({ms}, index) => {
+            const previous = changes[index];
+            const dwell = chaser && (index === 7 || index === 14) ? 2 * periodMs : periodMs;
+            return Math.abs(ms - previous.ms - dwell) > toleranceMs;
+        });
+        const checks = [
+            {check: 'LED patterns', expected: sequence.length, observed: changes.length,
+                ...(mismatch >= 0 && {mismatch, expectedMask: sequence[mismatch], observedMask: changes[mismatch]?.mask}),
+                ok: mismatch < 0},
+            {check: 'LED dwell', periodMs, ...(timing >= 0 && {
+                pattern: changes[timing].mask, observedMs: changes[timing + 1].ms - changes[timing].ms
+            }), ok: timing < 0 && changes.length === sequence.length}
+        ];
+        return {status: checks.every(check => check.ok) ? 'pass' : 'fail', checks};
+    } finally {
+        vm?.stopAll();
+        vm?.quit();
+    }
+}
+
 function checkClapLatch (circuit) {
     const checks = [];
     const advance = ms => circuit.advanceTo(circuit.board.getTime() + BigInt(ms) * 1_000_000n);
@@ -260,6 +334,9 @@ export async function checkBehavior (bench, circuit, examples) {
     }
     if (bench.id === 'eater6502-crtc80') return checkCrtc80(bench, circuit, examples);
     if (bench.id === '07-buzzer-siren') return checkSiren(bench, circuit, examples);
+    if (bench.id === '08-led-chaser-595' || bench.id === '20-shift-register-binary') {
+        return checkShiftRegister(bench, circuit, examples);
+    }
     if (bench.id === 'lab-amp-ic-clap-latch') return checkClapLatch(circuit);
     if (bench.id === 'arduino-sk-p09-motorized-pinwheel' || bench.id === 'arduino-sk-p10-zoetrope') {
         return checkStarterMotor(bench, circuit, examples);

@@ -20,6 +20,21 @@ test('circuit CLI drives the loaded button and measures one and two blinks', () 
     ]);
 });
 
+test('the circuit CLI measures all eight shift-register outputs on retargeted lessons', () => {
+    const benches = [
+        ['08-led-chaser-595', 'pico', 16],
+        ['20-shift-register-binary', 'stc89c52rc', 17]
+    ];
+    for (const [id, device, patterns] of benches) {
+        const result = invoke(id, '--device', device, '--timeout-ms', '45000', '--json');
+        assert.equal(result.status, 0, result.stderr || result.stdout);
+        const {rows: [{behavior}]} = JSON.parse(result.stdout);
+        assert.equal(behavior.status, 'pass');
+        assert.deepEqual(behavior.checks[0], {check: 'LED patterns', expected: patterns, observed: patterns, ok: true});
+        assert.equal(behavior.checks[1].ok, true);
+    }
+});
+
 test('circuit CLI distinguishes smoke from functional coverage', () => {
     const result = invoke('05-counter', '--device', 'stm32f030', '--smoke-only', '--json');
     assert.equal(result.status, 0, result.stderr || result.stdout);

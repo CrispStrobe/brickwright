@@ -70,7 +70,7 @@ KIM comparison references include schematics, ROMs, documentation, and independe
 | UI-06 | Improve the CAD Models and CAD Shapes extension gallery cards with illustrated artwork and small distinct icons. Verify the Workspace CAD and FPGA controls and check other regressions after enabling both in the desktop build. |
 | UI-07 | Fix and verify Run as MakeCode Arcade through the ordinary Code action, including a minimal Scratch script, conversion reporting, and unsupported variable visibility operations. |
 | CIRCUIT-01 | Exercise all 1,971 catalog variants through the CLI, then add distinct functional checks until each lesson’s actual behavior is evidenced. Repair observed issues, including Button counter with LED blinks, Automatic Night Light target reseats, PWM, and calibration fixtures. Guard against a component or device error crashing or reloading the app. |
-| CIRCUIT-02 | Retain the circuit ledger with per-case status and evidence. Current audit recorded 1,970 startup passes and 1,448 functional passes. The fibre-optic PLL passed a shorter dynamic check, while the full 1 ms startup exceeded 300 seconds. There are 523 variants without a passing functional check. |
+| CIRCUIT-02 | Retain the circuit ledger with per-case status and evidence. Current audit recorded 1,970 startup passes and 1,470 functional passes. The fibre-optic PLL passed a shorter dynamic check, while the full 1 ms startup exceeded 300 seconds. There are 501 variants without a passing functional check. |
 
 ## Verified in the current integration
 
@@ -79,6 +79,8 @@ KIM comparison references include schematics, ROMs, documentation, and independe
 - New work should reference this roadmap and link passing checks or receipts before changing a status. Track each still-open acceptance item even when its broader feature has landed.
 
 ## Follow-up receipts
+
+- The 74HC595 chaser and binary-counter lessons pass on all 22 catalog variants. The CLI reads current through the eight wired LEDs. It checks a complete chaser sweep and verifies counts 0–7 and 248–255 followed by rollover in the counter. It advances the program's counter variable between the two ranges to keep the test budget small. The existing 6502 Wave 7 assertions about debugger integration and the Pico motor schematic comparison still require maintenance.
 
 - Build `d708267` passed all 25 firmware-library launch checks. The Controller browser gate edited CP/M Sieve to enumerate primes below 60 and confirmed that a syntax error preserves the running guest. The signed native build includes CAD and FPGA. The same edited-source check passed against the production compiler `e992c0d`. The SDCC implementation and Linux CI are recorded in the merged [compiler PR 21](https://github.com/CrispStrobe/stc-compiler/pull/21).
 
