@@ -1,5 +1,7 @@
 # Brickwright Lite improvement plan
 
+The [workbench owner roadmap](docs/WORKBENCH-OWNER-ROADMAP.md) tracks the machine, circuit, desktop, and editor requests and their verification.
+
 ## Current status — 2026-11-05
 
 The integration has merged, and later browser gates passed after an earlier full

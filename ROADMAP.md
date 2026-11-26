@@ -1,5 +1,7 @@
 # Brickwright roadmap
 
+The [workbench owner roadmap](docs/WORKBENCH-OWNER-ROADMAP.md) tracks the machine, circuit, desktop, and editor requests and their verification.
+
 ## Examples across the workspace
 
 Use the [example surface audit](docs/EXAMPLE-SURFACES.md) to prioritize examples that leave a stale pane, ship an incomplete bench, or rely on manual setup the example never explains. Use the [repository transition plan](docs/REPOSITORY-RENAME.md) for the Brickwright and Brickwright Legacy cutover.
