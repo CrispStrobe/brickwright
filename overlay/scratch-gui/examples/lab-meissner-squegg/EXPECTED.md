@@ -9,7 +9,22 @@
 - Bias pot turned low (0.05): the base's rectified current charges the reservoir negative faster than the weak bias can refill it, so the oscillation stops, the bias recovers, it starts again — about nine hundred times a second (squegging). The tank swings between nothing (below 0.1 mV) and about 9.2 V, the receiver's detector between 0.5 V and 3.5 V, and the earphone hears a buzzing tone near 0.9 kHz: a carrier keyed by a tone.
 - Both switches over (the feedback winding reversed): the feedback now opposes the signal; nothing starts at all (tank below 5 µV).
 
-## Measured on the engine
+## Current simulation
+
+The weak-bias burst is an open functional failure on the current engine.
+At 0.05 bias the measured tank stays near 8.90 V peak and the detector
+near 1.13 V. The earphone is silent. The 0.30 steady-carrier case and the
+reversed-winding case both pass. The CLI tests the three cases independently.
+
+The [independent ngspice deck](../../../../test/fixtures/meissner/rf-transient.cir)
+models the same oscillator and detector with nominal junctions and coil
+loss near resonance. Run it with `ngspice -b` from a scratch directory.
+Over the final 5 ms, 25 µs windows show a steady carrier near 17.8 V
+peak-to-peak in both forward-bias runs, with under 1 mV of variation in
+the detector window averages. The reversed run is silent. This is a
+comparison of circuit models with no physical bench measurement.
+
+## Historical engine measurements
 bw-board d4113b4b (unchanged on b094eb22), `test/lab-circuits-r7b.test.mjs` (2 ms sampled every 20 µs): pot 0.05 tank 0.0000004–9.22 V, detector 0.49–3.52 V, tone 903 Hz; pot 0.30 (after 22 ms) tank 8.876 V, detector flat at 1.131 V; reversed 0.0000002–0.000004 V.
 
 ## What this verifies
