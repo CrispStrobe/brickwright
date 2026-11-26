@@ -113,7 +113,8 @@ export default function MachineConsole({widget, keyIn, mouseIn, keyboardSet}) {
                 display: 'flex', flexDirection: 'column', outline: focused ? '2px solid #60a5fa' : 'none'}}>
             <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 padding: '4px 8px', background: '#111827', color: '#cbd5e1', fontSize: 12}}>
-                <span>{widget.name} · {focused ? 'Keyboard active' : 'Click screen for keyboard'}</span>
+                <span>{widget.name}{keyIn && (focused ? ' · Keyboard active' : ' · Click screen for keyboard')}
+                    {mouseIn && ' · Mouse'}</span>
                 <button type="button" onClick={toggleFull} data-testid="bw-machine-fullscreen"
                     onPointerDown={e => e.stopPropagation()} onPointerUp={e => e.stopPropagation()}
                     onKeyDown={e => e.stopPropagation()} onKeyUp={e => e.stopPropagation()}

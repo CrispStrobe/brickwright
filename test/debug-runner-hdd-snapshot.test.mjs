@@ -22,7 +22,7 @@ function fixture () {
     vm.runInContext(`
         ${declarations}
         let destroyed = false, activeRunTo = null, vm = null;
-        let board = null, symbols = null, runToTarget = null, runToController = null;
+        let board = null, xtKeyboard = null, pcSerialInput = null, symbols = null, runToTarget = null, runToController = null;
         let unsubscribeBps = null, unsubscribeDebugEvents = null, unsubscribeDebugInputs = null;
         let debugEventsTarget = null, i8086ExecutionResult = null;
         let engineNotes, serialTerminal, serialEsc, terminalOutput, linuxProgressWatch, basicStartup;

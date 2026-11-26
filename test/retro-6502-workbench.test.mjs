@@ -15,6 +15,7 @@ import {warningsBadge, warningsView} from '../overlay/scratch-gui/src/lib/circui
 import {MS_PROFILE} from 'bw-board/basic-machine-runner.js';
 import {createBasicStartup, isBundledMicrosoftBasic, microsoftBasicLine} from '../overlay/scratch-gui/src/lib/bw-debug/basic-startup.js';
 
+import {add6502ControllerDevices} from '../overlay/scratch-gui/src/lib/bw-debug/6502-controller-devices.js';
 import {isConsoleMonitor, sendConsoleLine} from '../overlay/scratch-gui/src/lib/bw-debug/console-6502.js';
 import {addCardiacFace, hasCardiacFace} from '../overlay/scratch-gui/src/lib/controller-machine-faces.js';
 
@@ -121,6 +122,25 @@ test('the console link only offers part-bound video and sends a carriage return 
     assert.equal(sent, '\r');
     assert.equal(sendConsoleLine({sendSerial: () => false}, 'test'), false);
     assert.equal(sendConsoleLine(null, 'test'), false);
+});
+
+test('6502 firmware fills missing Controller devices using the active circuit part IDs', () => {
+    const panel = new ControllerPanel();
+    const parts = [
+        {id: 'vd1', kind: 'tms9918'}, {id: 'lcd', kind: 'hd44780'},
+        {id: 'keyboard', kind: 'ps2'}, {id: 'olo', kind: 'ssd1306'},
+        {id: 'unwired', kind: 'hd44780'}
+    ];
+    const states = {vd1: {videoFrame() {}}, lcd: {text: []}, olo: {fb: new Uint8Array(1024)}};
+    const active = {getParts: () => parts, getDeviceState: name => states[name]};
+    panel.addWidget('My Video', 'simplevga');
+    panel.bindToPart('My Video', 'vd1');
+    assert.equal(add6502ControllerDevices(panel, active), 3);
+    assert.equal(add6502ControllerDevices(panel, active), 0);
+    assert.equal(panel.mode, 'play');
+    assert.deepEqual(panel.getWidgets().map(widget => [widget.type, widget.binding.partId]), [
+        ['simplevga', 'vd1'], ['lcd', 'lcd'], ['keyboard', 'keyboard'], ['oled', 'olo']
+    ]);
 });
 
 test('a CARDIAC face uses the normal widget layout and serialization', () => {

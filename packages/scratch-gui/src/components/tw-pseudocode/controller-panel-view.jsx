@@ -1184,15 +1184,14 @@ function RemoveWidgetButton({name, onRemove}) {
     );
 }
 
-function BasicSerialKeyboard({name, sendLine}) {
+function SerialKeyboard({name, sendLine, label, placeholder}) {
     const input = useRef(null);
-    const label = /^de/i.test(navigator.language) ? 'BASIC-Serieneingabe' : 'BASIC serial input';
     return <form onSubmit={event => {
         event.preventDefault();
         if (sendLine(input.current.value) === true) input.current.value = '';
     }} style={{display: 'flex', gap: 4, width: '100%'}}>
         <input ref={input} aria-label={label} data-testid={'bw-ctl-keyboard-' + name}
-            placeholder="PRINT 2+2" autoCapitalize="off" autoComplete="off" spellCheck={false}
+            placeholder={placeholder} autoCapitalize="off" autoComplete="off" spellCheck={false}
             style={{minWidth: 0, flex: 1, fontFamily: 'monospace', padding: 4}} />
         <button type="submit" aria-label={label} title={label}>⏎</button>
     </form>;
@@ -1207,6 +1206,7 @@ function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBi
         keyboard: 'Keyboard', bargraph: 'Bar Graph', simplevga: 'VGA',
         mono_lcd: 'Mono LCD', rgb_light: 'RGB Light',
     };
+    const pcSerial = runtime?.bwPcSerial?.name === widget.name ? runtime.bwPcSerial : null;
     const bindingLabel = widget.binding
         ? (widget.binding.target === 'part'
             ? `→ ${widget.binding.partId}${widget.binding.param ? '.' + widget.binding.param : ''}`
@@ -1324,7 +1324,11 @@ function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBi
             )}
 
             {widget.type === 'terminal' && (
-                <TerminalWidget widget={widget} />
+                <React.Fragment>
+                    <TerminalWidget widget={widget} />
+                    {pcSerial && mode === 'play' && <SerialKeyboard name={widget.name} label="PC serial input"
+                        sendLine={line => sendConsoleLine(pcSerial.runner, line)} />}
+                </React.Fragment>
             )}
 
             {widget.type === 'oled' && (
@@ -1354,7 +1358,8 @@ function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBi
             )}
 
             {widget.type === 'keyboard' && (sendBasicLine ?
-                <BasicSerialKeyboard name={widget.name} sendLine={sendBasicLine} /> :
+                <SerialKeyboard name={widget.name} sendLine={sendBasicLine} placeholder="PRINT 2+2"
+                    label={/^de/i.test(navigator.language) ? 'BASIC-Serieneingabe' : 'BASIC serial input'} /> :
                 <input type="text" data-testid={'bw-ctl-keyboard-' + widget.name}
                     disabled={mode !== 'play'}
                     placeholder={mode === 'play' ? 'Type here...' : 'Keyboard'}
@@ -2038,13 +2043,14 @@ class ControllerPanelView extends React.Component {
                             {t('noWidgets')}
                         </div>
                     )}
-                    <div style={cp1WidgetSlot && widgets.length ? {position: 'relative', minHeight: 240} : undefined}>
-                        {machineWidget ? (
-                            <MachineConsole widget={machineWidget}
-                                keyboardSet={this.props.machineConsole.keyboardSet}
-                                keyIn={this.props.machineConsole.keyIn}
-                                mouseIn={this.props.machineConsole.mouseIn} />
-                        ) : widgets.map(w => (
+                    {machineWidget && <MachineConsole widget={machineWidget}
+                        keyboardSet={this.props.machineConsole.keyboardSet}
+                        keyIn={this.props.machineConsole.keyIn}
+                        mouseIn={this.props.machineConsole.mouseIn} />}
+                    <div style={machineWidget || (cp1WidgetSlot && widgets.length) ? {
+                        position: 'relative', minHeight: cp1WidgetSlot ? 240 : undefined
+                    } : undefined}>
+                        {widgets.filter(widget => widget !== machineWidget).map(w => (
                             <PositionedWidget
                                 key={w.name}
                                 widget={w}

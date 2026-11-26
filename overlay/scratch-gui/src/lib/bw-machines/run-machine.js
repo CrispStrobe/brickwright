@@ -86,8 +86,9 @@ export async function runMachineConfig(config, opts = {}) {
     if (activated.machineConfig && Array.isArray(activated.machineConfig.chips)) {
         detail.chips = activated.machineConfig.chips;
     }
-    if (activated.targetKind === 'eater6502' && Array.isArray(activated.machineConfig?.regions)) {
-        detail.machineConfig6502 = activated.machineConfig;
+    if (Array.isArray(activated.machineConfig?.regions)) {
+        if (activated.targetKind === 'eater6502') detail.machineConfig6502 = activated.machineConfig;
+        if (activated.targetKind === 'i8086') detail.machineConfig8086 = activated.machineConfig;
     }
 
     // DOM event listeners cannot return a Promise to dispatchEvent(). For the

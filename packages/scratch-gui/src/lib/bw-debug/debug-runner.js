@@ -658,6 +658,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
     let capsOf = null;
     let cycleProviderOf = null;
     let board = null;
+    let xtKeyboard = null;
+    let pcSerialInput = null;
     /**
      * Board time minus target time, fixed at each (re)start (boardTimeBase).
      * The target's clock restarts at zero on every run; a board that has
@@ -3508,6 +3510,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         // every sector; supplied as an opt-in onInterrupt hook, no vendored
         // change, exactly as bw-board's own ELKS scripts do it.)
         let floppyBoot = null;
+        const virtualHardware = bootMedia?.i8086Hardware === 'virtual';
         if (bootMedia && (bootMedia.slot === 'floppy' || bootMedia.profile === 'floppy-os')) {
             setStatus('attaching', S('boot.media', {name: bootMedia.name || S('noun.floppy')}));
             const { PCXT8086 } =
@@ -3544,11 +3547,18 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             // executing open bus, which on screen is indistinguishable from a
             // machine that never started.
             if (img.origin != null) targetOpts.romAt = img.origin;
-            else if (typeof bootMedia.romAt === 'number') targetOpts.romAt = bootMedia.romAt;
-            if (machineConfig) targetOpts.config = benchConfigI8086();
+            else targetOpts.romAt = bootMedia.romAt ?? (0x100000 - img.bytes.length);
+            if (virtualHardware) {
+                const {i8086VirtualHardware} = await import('./i8086-media-hardware.js');
+                targetOpts.config = bootMedia.machineConfig8086
+                    ? {clockHz: 4_772_727, chips: [], ...bootMedia.machineConfig8086}
+                    : i8086VirtualHardware(bootMedia.profile);
+            } else if (machineConfig) {
+                targetOpts.config = benchConfigI8086();
+            }
             readyMsg = S('ready.romOnMap', {
                 name: bootMedia.name || S('noun.rom'),
-                map: S(machineConfig ? 'map.extracted' : 'map.default8086')
+                map: S(!virtualHardware && machineConfig ? 'map.extracted' : 'map.default8086')
             });
         } else if (machineConfig) {
             setStatus('attaching', S('boot.extracted8086'));
@@ -3587,7 +3597,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             readyMsg = S('ready.xtBios');
         }
 
-        const db = designerBoard();
+        const db = virtualHardware || floppyBoot ? {board: null, why: 'virtual PC'} : designerBoard();
+        if (typeof window !== 'undefined') window.__bwMachineBoard = db;
         if (db.board) {
             targetOpts.board = db.board;
             board = db.board;
@@ -3649,6 +3660,25 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             machine.reset();
         }
         wireMachineBench(result, createDebugSession);
+        const machine = result.adapter?.machine || result.target?.machine;
+        const chips = targetOpts.config.chips || [];
+        runner.i8086MediaIo = {
+            display: chips.find(chip => ['cga', 'vga', 'ega', 'hercules'].includes(chip.kind))?.kind,
+            serial: chips.some(chip => ['uart16550', 'acia6850', 'usart8251'].includes(chip.kind)),
+            gpio: bootMedia?.profile === 'blink'
+        };
+        const {createPcInputQueue} = await import('../bw-machines/pc-input-queue.js');
+        const pic = machine?.chips?.[chips.find(chip => chip.kind === 'pic')?.name];
+        if (runner.keyIn && pic && chips.some(chip => chip.kind === 'ppi') && !targetOpts.config.a20) {
+            xtKeyboard = createPcInputQueue(runner.keyIn, () => !!((pic.irr | pic.isr) & 2));
+            runner.keyIn = byte => xtKeyboard.enqueue(byte);
+        }
+        const uart = machine?.chips?.[chips.find(chip => chip.kind === 'uart16550')?.name];
+        if (uart) {
+            pcSerialInput = createPcInputQueue(runner.sendSerial, () => uart.rxFifo.length > 0);
+            runner.sendSerial = data => pcSerialInput.enqueue(data);
+        }
+        if (machine?.canTakeMouse?.()) runner.mouseIn = event => machine.mouseIn(event);
         setStatus('ready', readyMsg);
         return session;
     }
@@ -3692,23 +3722,31 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         // decoder honours). The LGPL VGABios is the C000h option ROM.
         const biosUrl = new URL('static/roms/free-386-bochs-bios.rom', document.baseURI).href;
         const vgaUrl = new URL('static/roms/free-386-vgabios-lgpl.bin', document.baseURI).href;
-        const [biosRes, vgaRes] = await Promise.all([fetch(biosUrl), fetch(vgaUrl)]);
-        if (!biosRes.ok) throw new Error(`Failed to load the free-386 BIOS: HTTP ${biosRes.status}`);
-        if (!vgaRes.ok) throw new Error(`Failed to load the free-386 VGABios: HTTP ${vgaRes.status}`);
-        const bios = new Uint8Array(await biosRes.arrayBuffer());
-        const vga = new Uint8Array(await vgaRes.arrayBuffer());
+        const biosBoot = bootMedia?.slot === 'bios' || bootMedia?.slot === 'rom';
+        const dosBios = biosBoot ? await resolveMediaImage(bootMedia) : null;
+        const companionBios = bootMedia?.i80386Media?.bios;
+        const companionVga = bootMedia?.i80386Media?.['vga-rom'];
+        const fallback = async (url, label) => {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Failed to load ${label}: HTTP ${response.status}`);
+            return new Uint8Array(await response.arrayBuffer());
+        };
+        const [bios, vga] = await Promise.all([
+            dosBios?.bytes ?? companionBios ?? fallback(biosUrl, 'the free-386 BIOS'),
+            companionVga ?? fallback(vgaUrl, 'the free-386 VGA BIOS')
+        ]);
+        const biosAddress = dosBios?.origin ?? (biosBoot ? bootMedia.romAt : null) ?? (0x100000 - bios.length);
+        if (biosAddress < 0xf0000 || biosAddress + bios.length !== 0x100000 || bios.length < 16) {
+            throw new Error('The 386 BIOS must fit the 64 KiB ROM window through FFFFFh.');
+        }
+        if (vga.length > 0xa000) throw new Error('The VGA option ROM exceeds its 40 KiB window.');
 
-        // A 386 boots either a floppy (µPD765, drive A:) or a hard disk (the
-        // ATA16 controller, drive C:). The config's boot slot decides — 'floppy'
-        // (or the floppy-os profile) is the disk-in-A: case, everything else
-        // ('hdd'/'disk'/'hd') is the hard-disk case. A hard disk also needs the
-        // image resolved BEFORE construction (the adapter attaches ATA from its
-        // constructor hooks), so resolve it here.
-        const isFloppy = !!bootMedia &&
-            (bootMedia.slot === 'floppy' || bootMedia.profile === 'floppy-os');
-        const isHdd = !!bootMedia && !isFloppy;
-        let bootImg = null;
-        if (bootMedia) bootImg = await resolveMediaImage(bootMedia);
+        const isFloppy = bootMedia?.slot === 'floppy' || bootMedia?.profile === 'floppy-os';
+        const isHdd = ['hdd', 'disk', 'hd'].includes(bootMedia?.slot);
+        if (bootMedia && !biosBoot && !isFloppy && !isHdd) {
+            throw new Error('Choose a 386 BIOS, a boot floppy or a hard disk image.');
+        }
+        const bootImg = isFloppy || isHdd ? await resolveMediaImage(bootMedia) : null;
 
         // The FreeDOS-VGA preset carves a 32K option-ROM window at C0000h; the
         // LGPL VGABios is 38400 bytes, so widen that one region to C0000-C9FFF
@@ -3771,8 +3809,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         }
         // Firmware at its three aliases (F0000h, FF0000h, C0000h), before the
         // media so the BIOS is resident when the machine boots the disk.
-        machine.loadRom(bios, 0xf0000);
-        machine.loadRom(bios, 0xff0000);
+        machine.loadRom(bios, biosAddress);
+        machine.loadRom(bios, 0xf00000 + biosAddress);
         machine.loadRom(vga, 0xc0000);
 
         let readyMsg = S('ready.free386NoMedia');
@@ -3935,6 +3973,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         const perfProbe = typeof window !== 'undefined' ? window.__BW_I8086_PERF__ : null;
         const perfWallStart = perfProbe ? performance.now() : 0;
         const perfSimStart = perfProbe ? target.timeNs() : 0n;
+        xtKeyboard?.pump();
+        pcSerialInput?.pump();
         let outcome = session.pump();
         if (outcome === 'ran') basicStartup?.answer(serialLines.at(-1), runner.sendSerial);
         if (cp1RunKeyUntil !== null && (target.timeNs() >= cp1RunKeyUntil || outcome !== 'ran')) {
@@ -4486,6 +4526,8 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         },
 
         stop() {
+            xtKeyboard?.clear();
+            pcSerialInput?.clear();
             publishBasicSerial(false);
             cancelCp2Recording();
             cp1LessonBatch?.clear();

@@ -18,8 +18,9 @@ import {mergeTargetKinds} from '../../lib/bw-debug/target-kinds.js';
 import {reverseCycleControlStatus} from '../../lib/bw-debug/reverse-cycle-ui.js';
 import {createRunnerOwnership} from '../../lib/bw-debug/runner-ownership.js';
 import {ps2ButtonBit, ps2Delta} from '../../lib/bw-machines/ps2-pointer.js';
-import {promptAsync} from '../../lib/native-dialog.js';
+import {confirmAsync, promptAsync} from '../../lib/native-dialog.js';
 import {createRawHddDownload} from '../../lib/bw-machines/raw-hdd-download.js';
+import {add6502ControllerDevices} from '../../lib/bw-debug/6502-controller-devices.js';
 import {CONSOLE_6502_CHANGED, isConsoleMonitor, sendConsoleLine} from '../../lib/bw-debug/console-6502.js';
 
 // VDP screen — lazy-loaded, only renders when the runner has video output.
@@ -427,7 +428,7 @@ class DebugPanel extends React.Component {
         const {linuxInitrd} = e.detail || {};
         // Its post-boot snapshot (the lesson's default Run), likewise.
         const {linuxSnapshot} = e.detail || {};
-        const {nativeBlocks, machinePreset, i80386Media, machineConfig6502} = e.detail || {};
+        const {nativeBlocks, machinePreset, i80386Media, machineConfig6502, machineConfig8086} = e.detail || {};
         if (!bytes && !riscvImage) return;
         // THE SAME LOAD, DELIVERED TWICE. circuit-tab stashes every media-load
         // and, when that flips it to "machine booted", re-dispatches the very
@@ -437,6 +438,32 @@ class DebugPanel extends React.Component {
         // 64 MiB kernel. Identity, not equality: a new Run makes a new detail.
         if (e.detail && e.detail === this._lastMediaDetail) return false;
         this._lastMediaDetail = e.detail || null;
+        let i8086Hardware;
+        let i8086WiredConfig;
+        if (['i8086', 'i8088', '8086', '8088'].includes(kind) && slotId === 'rom') {
+            const {i8086CanUseBreadboard, isI8086Rom} =
+                await import('../../lib/bw-debug/i8086-media-hardware.js');
+            if (isI8086Rom({kind, slotId, profile})) {
+                const machine = window.__bwMachineExtracted;
+                const board = ['i8086', '8086', 'i8088', '8088'].includes(machine?.kind) ? machine.config : null;
+                const currentParts = this.props.vm?.runtime?.circuitBoard?.getParts?.() || [];
+                let image = {profile, romAt, bytes, machineConfig8086};
+                if (board && bytes?.[0] === 0x3a) {
+                    try {
+                        const {parseIhex} = await import('bw-board/machine-media.js');
+                        const decoded = parseIhex(new TextDecoder().decode(bytes));
+                        image = {...image, bytes: decoded.bytes, romAt: decoded.origin};
+                    } catch { /* The runner reports malformed Intel HEX in the Debugger. */ }
+                }
+                const hasWiredRoute = currentParts.some(part => ['i8086', '8086', 'i8088', '8088'].includes(part.kind)) &&
+                    i8086CanUseBreadboard(board, image);
+                const useWired = hasWiredRoute && await confirmAsync(
+                    'Run on the wired breadboard? Choose Cancel to use the virtual PC.');
+                i8086WiredConfig = useWired ? board : null;
+                i8086Hardware = useWired ? 'wired' : 'virtual';
+            }
+            if (this._lastMediaDetail !== e.detail) return false;
+        }
         this._teardownRunner();
         this._bootMedia = {
             slot: slotId,
@@ -448,6 +475,8 @@ class DebugPanel extends React.Component {
             linuxSnapshot: linuxSnapshot
                 ? (linuxSnapshot instanceof Uint8Array ? linuxSnapshot : new Uint8Array(linuxSnapshot)) : null,
             profile: profile || null,
+            i8086Hardware,
+            machineConfig8086,
             name: name || null,
             nativeBlocks: kind === 'i80386' && nativeBlocks === true,
             machinePreset: kind === 'i80386' ? machinePreset || null : null,
@@ -489,15 +518,20 @@ class DebugPanel extends React.Component {
                     : kind === 'i80386' || kind === '80386' ? 'i80386'
                         : this.state.kind;
         await new Promise(resolve => this.setState(
-            {kind: nextKind, runner: null, ui: {phase: 'idle', message: ''}}, resolve));
-        const runner = await this.runner();
+            {kind: nextKind, runner: null, ui: {phase: 'idle', message: ''},
+                ...(i8086WiredConfig ? {machineConfig: i8086WiredConfig} : {})}, resolve));
+        const pending = this.runner();
+        const owner = this._runnerPromise;
+        const runner = await pending;
+        if (this._runnerPromise !== owner) return false;
         await runner.start({paused: nextKind === 'cp1'});
         // The runner reports attachment failures in state() rather than
         // rejecting start(). Promote that failure to the media completion
         // promise before the manager closes or a dead screen is mirrored.
-        const bootState = e.detail?.bootCompletion ? runner.state() : null;
+        if (this._lastMediaDetail !== e.detail || this._runnerPromise !== owner) return false;
+        const bootState = e.detail?.bootCompletion || i8086Hardware ? runner.state() : null;
         if (bootState?.phase === 'error') {
-            throw new Error(bootState.message || 'the 386 machine failed to attach');
+            throw new Error(bootState.message || 'The machine failed to attach');
         }
         // A machine that declares a screen widget (a source:'video' display in
         // its config/manifest) mirrors its framebuffer into the Widgets pane —
@@ -507,23 +541,38 @@ class DebugPanel extends React.Component {
         // instrument, exactly as before — this only adds a surface, never removes
         // one. The video-widget declaration rides the media-load event's
         // `widgets` field (the machine-manager activate action supplies it).
+        const io = nextKind === 'i8086' ? runner.i8086MediaIo : null;
+        const displayName = io?.display && `PC ${io.display === 'hercules' ? 'Hercules' : io.display.toUpperCase()}`;
         const screen = (Array.isArray(widgets)
             ? widgets.find(w => w && w.source === 'video') : null) ||
             (nextKind === 'i80386' ? {name: 'AT VGA', type: 'simplevga', source: 'video',
+                config: {width: 640, height: 480}} : null) ||
+            (displayName ? {name: displayName, type: 'simplevga', source: 'video',
                 config: {width: 640, height: 480}} : null);
+        if (nextKind === 'eater6502' && !screen) {
+            add6502ControllerDevices(this.props.vm?.runtime?.controllerPanel, runner.board());
+        }
+        if (io) this._installPcController(runner, {displayName: screen?.name,
+            generatedDisplay: Boolean(displayName && screen?.name === displayName),
+            keyboardName: runner.keyIn && !(Array.isArray(widgets) && widgets.some(w => w && w.source === 'keyIn'))
+                ? 'PC keyboard' : null});
         if (screen && typeof runner.video === 'function' &&
             typeof window !== 'undefined' &&
             typeof window.bwMirrorMachineVideo === 'function') {
             window.bwMirrorMachineVideo({videoFn: () => runner.video(), widget: screen,
                 keyboardSet: nextKind === 'i80386' ? 'at-set1' : 'xt-set1',
                 keyInFn: typeof runner.keyIn === 'function' ? sc => runner.keyIn(sc) : null,
-                mouseInFn: typeof runner.mouseIn === 'function' ? event => runner.mouseIn(event) : null});
+                mouseInFn: typeof runner.mouseIn === 'function' ? event => runner.mouseIn(event) : null,
+                focusController: nextKind !== 'i8086'});
+            if (nextKind === 'i8086') this._showPcController();
         }
         // A declared keyboard widget (source:'keyIn') steers the machine: its
         // keys are drained and fed runner.keyIn (design §4.5, the input side of
         // the screen mirror). Only when the machine can actually take keys.
-        const kbd = Array.isArray(widgets)
-            ? widgets.find(w => w && w.source === 'keyIn') : null;
+        const kbd = (Array.isArray(widgets)
+            ? widgets.find(w => w && w.source === 'keyIn') : null) ||
+            (io && runner.keyIn ? {name: 'PC keyboard', type: 'keyboard',
+                layout: {x: 8, y: 8, w: 266}} : null);
         if (kbd && typeof runner.keyIn === 'function' &&
             typeof window !== 'undefined' &&
             typeof window.bwSteerMachineKeyboard === 'function') {
@@ -947,6 +996,8 @@ class DebugPanel extends React.Component {
         this._consolePanel?.removeListener(this._onConsoleWidgetsChanged);
         this._consolePanel = null;
         this._publish6502Console();
+        this._pcControllerCleanup?.();
+        this._pcControllerCleanup = null;
         // Accepted release writes publish synchronously. Silence the old
         // runner first, while its target is still alive to receive touch-up.
         this.releaseSamdButtons();
@@ -1007,6 +1058,7 @@ class DebugPanel extends React.Component {
                 ReactDOM.unstable_batchedUpdates(() => {
                     this._watchConsoleWidgets(runner);
                     this._publish6502Console(runner, ui);
+                    this._updatePcController?.(runner, ui);
                     this.setState({ui});
                     // The board only exists after attach, and the tab has to be told:
                     // until it is, the designer is showing a board of its own that
@@ -1139,6 +1191,67 @@ class DebugPanel extends React.Component {
         const runner = this.state.runner;
         const line = this.state.serialInput;
         if (sendConsoleLine(runner, line)) this.setState({serialInput: ''});
+    }
+
+    _showPcController () {
+        this.props.vm?.runtime?.controllerPanel?.setMode('play');
+        window.dispatchEvent(new CustomEvent('bw-settings-change',
+            {detail: {key: 'bw-debug-dock', value: 'controller'}}));
+    }
+
+    _installPcController (runner, {displayName, generatedDisplay, keyboardName}) {
+        const runtime = this.props.vm?.runtime;
+        const panel = runtime?.controllerPanel;
+        if (!panel) return;
+        const {serial, gpio} = runner.i8086MediaIo;
+        const created = new Set();
+        const add = (name, type, config, layout) => {
+            if (panel.getWidget(name)) return;
+            panel.addWidget(name, type, config, layout);
+            created.add(name);
+        };
+        if (generatedDisplay && !panel.getWidget(displayName)) created.add(displayName);
+        if (keyboardName && !panel.getWidget(keyboardName)) created.add(keyboardName);
+        const terminal = serial ? 'PC serial' : null;
+        if (terminal) {
+            runtime.bwPcSerial = {name: terminal, runner};
+            add(terminal, 'terminal', {rows: 14, cols: 42}, {x: 8, y: 8});
+        }
+        if (gpio && runner.setInput && runner.outputs) {
+            add('PC GPIO', 'bargraph', {segments: 8, min: 0, max: 255}, {x: 8, y: 8});
+            const input = runner.inputs.find(item => String(item.port).toUpperCase() === 'C');
+            if (input && !runner.board()) {
+                const name = 'PC switch';
+                add(name, 'button', {label: 'PC0', toggle: true}, {x: 8, y: 72});
+                const onInput = (kind, event) => {
+                    if (kind === 'input' && event.name === name) {
+                        runner.setInput(input.chip, input.port, 0, event.pressed ? 0 : 1);
+                    }
+                };
+                panel.addListener(onInput);
+                this._removePcSwitch = () => panel.removeListener(onInput);
+            }
+        }
+        this._updatePcController = (active, ui) => {
+            if (active !== runner) return;
+            const widget = terminal && panel.getWidget(terminal);
+            const text = widget ? (ui.serialOutput || []).join('\n') : null;
+            if (widget?.type === 'terminal' && widget.state.text !== text) panel.setTerminalText(terminal, text);
+            if (gpio && panel.getWidget('PC GPIO')?.type === 'bargraph') {
+                const port = runner.outputs?.().find(item => String(item.port).toUpperCase() === 'B');
+                const mask = port?.value ?? 0;
+                if (panel.getWidget('PC GPIO').state.value !== mask) panel.setBargraphValue('PC GPIO', mask);
+            }
+        };
+        this._updatePcController(runner, this.state.ui);
+        this._pcControllerCleanup = () => {
+            this._updatePcController = null;
+            this._removePcSwitch?.();
+            this._removePcSwitch = null;
+            if (runtime.bwPcSerial?.runner === runner) delete runtime.bwPcSerial;
+            for (const name of created) if (panel.getWidget(name)) panel.removeWidget(name);
+        };
+        if (!displayName && (terminal || gpio)) this._showPcController();
     }
 
     _watchConsoleWidgets (runner) {
