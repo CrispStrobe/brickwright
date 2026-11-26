@@ -1470,3 +1470,68 @@ engine averaged 0.22× for Atlas and 0.25× for Scout. The local Jolt
 Its three consecutive Scout windows ran at 0.995×, 0.987× and 1.009×.
 The comparison excludes the full Brickwright viewport and uses
 sequential runs. Sustained 1× production qualification remains open.
+
+### Reuse native Jolt impulse configuration
+
+The physics world retains the motor handle and impulse configuration.
+A velocity motor taking over or a serial servo retuning the same
+chain causes the next impulse to restore its native settings. The
+torque, impulse cadence and solver iteration values stay the same.
+
+The Chrome worker comparison used the same local Jolt 5.7 SIMD module
+and Board bundle for both versions. Each run applied 1,800 Atlas
+impulses or 1,200 Scout impulses over 600 substeps.
+
+| Calls from the impulse path | Before → after |
+| --- | ---: |
+| Atlas motor-state writes | 1,800 → 3 |
+| Atlas solver-iteration writes | 2,400 → 4 |
+| Scout motor-state writes | 1,200 → 2 |
+| Scout solver-iteration writes | 2,400 → 4 |
+
+Initial frames, warm restarts and all 100 sampled motion and electrical
+readings matched in both run orders. Elapsed time in the impulse path
+and whole-worker throughput varied with run order under heavy MacBook
+load. The reduction is in native writes. These runs leave sustained
+1× production qualification open.
+
+Physics type checking and 28 focused tests passed across two runs.
+The material-contact test passed with a 30-second limit after hitting
+its original five-second deadline. The known scalar Rover torque
+assertion was excluded. Atlas passed Run, joint motion, Pause, Reset,
+repeat Run and Close with a local worker overlay and the bundled
+engine. Brickwright still pins SDK `f0136b8`.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/fe6a9fc790cf7a8cbf3cee443c0c3241f67b84a1)
+
+### Reuse validated mass and inertia on repeat Run
+
+The prepared physics document retains part mass properties and the
+combined inertia of fixed assemblies. Reuse requires the same ordered
+body IDs, verified source digests, buffer lengths and integration
+bounds. Source meshes and collision hulls are verified on every run.
+The world still applies Fix base per run and builds fresh native bodies.
+
+In MacBook Chrome, each candidate ran eight measured warm starts with
+the same Board bundle and local Jolt 5.7 SIMD module. The first order
+tested the cache before it began retaining the source digests directly
+from verification. The reverse order tested the committed code.
+
+| Median worker restart | First order, before → after | Reverse order, before → after |
+| --- | ---: | ---: |
+| Atlas | 16.65 → 8.85 ms | 12.65 → 6.75 ms |
+| Scout | 17.45 → 9.05 ms | 15.40 → 8.10 ms |
+
+In the reverse order, the median mass stage dropped from 4.0 ms for
+Atlas and 5.85 ms for Scout to under 0.1 ms for both. Initial frames,
+warm restart frames and all 100 sampled motion and circuit readings
+over 600 substeps matched in both run orders. This change targets
+restart latency. Sustained 1× in the shipping application remains open.
+
+Physics type checking and 29 focused tests passed. The warm cache test
+covered reuse across Fix base changes, recalculation after a bounds
+change and rejection after source mesh bytes changed. The known scalar
+Rover torque assertion was excluded. Atlas passed Run, joint motion,
+Pause, Reset, repeat Run and Close in the local embedded editor with
+the new worker and packaged engine. Brickwright still pins SDK
+`f0136b8`.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/9e92c7786c40d0757b94065777c3f2b32a2d5fd3)
