@@ -1591,3 +1591,34 @@ conservation, reference rails, Newton budget and Microtronic scheduling.
 Brickwright currently pins Board `cc18f3c8` and CAD SDK `f0136b8`.
 Sustained 1× qualification for the shipping application remains open.
 [Board source](https://github.com/CrispStrobe/bw-board/commit/34306ce3fa8facd370c8859ddae4bc85abe4c84a)
+
+### Skip seam repair for closed collision hulls
+
+Collision preparation checks the directed edges of small indexed meshes
+before asking Manifold to merge seams. A closed mesh goes directly
+through Manifold's normal validation. Open seams, repeated edges and
+meshes outside the check's size limit use the existing merge path.
+
+A local differential run compared all 26 collision measurements per
+robot. The volumes, residuals and bounds matched exactly. Atlas used
+19 seam-merge calls instead of 2,380, and Scout used 21 instead of 3,432.
+The isolated measurement CPU time fell from 2.78 to 2.76 s for Atlas
+and 4.39 to 4.32 s for Scout.
+
+The paired Chrome timings below measure worker startup through the
+initial physics frame, with the same Board bundle and local Jolt 5.7
+SIMD module.
+
+| Robot | First order, before → after | Reverse order, before → after |
+| --- | ---: | ---: |
+| Atlas | 2.58 → 2.85 s | 3.28 → 2.84 s |
+| Scout | 3.67 → 3.60 s | 3.39 → 3.35 s |
+
+Initial and warm restart frames matched. All 100 sampled motion and
+circuit readings across 600 substeps matched in both orders. Geometry
+type checking and 48 focused tests passed, including repair of an
+imported seam and rejection of an open mesh. Atlas passed Run, joint
+motion, Pause, Reset, repeat Run and Close in the local embedded editor
+with the new workers. The published Brickwright SDK pin is `f0136b8`.
+Sustained 1× production qualification remains open.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/4a5a4e20486b7728e1aa168397a49896ccb38a05)
