@@ -63,11 +63,13 @@ export function connectLogikusController (panel, {getWorkspace, onInputs}) {
         return result;
     };
 
-    const install = input => {
+    const install = (input, controlName) => {
         if (disposed) throw new Error('The Logikus controller connection is closed.');
         const workspace = validateWorkspace(input);
-        // Preflight the whole namespace before any widget, label or mode changes.
-        for (const {name, type} of definitions) {
+        const selected = controlName ? definitions.filter(entry => entry.name === controlName) : definitions;
+        if (!selected.length) throw new Error('Unknown Logikus control.');
+        // Preflight the selected controls before any widget, label or mode changes.
+        for (const {name, type} of selected) {
             const existing = panel.getWidget(name);
             if (existing && !owned(existing, type)) {
                 throw new Error(`Cannot add Logikus controls: widget "${name}" already belongs to another control. Rename it first.`);
@@ -78,7 +80,7 @@ export function connectLogikusController (panel, {getWorkspace, onInputs}) {
             (Number.isFinite(widget.layout.y) ? widget.layout.y : 0) +
             (Number.isFinite(widget.layout.h) ? widget.layout.h : 160))) + 24 : 24;
         guarded(() => {
-            for (const {name, type, index} of definitions) {
+            for (const {name, type, index} of selected) {
                 const isSwitch = type === 'slider';
                 const label = type === 'button' ? 'Test / T' :
                     (isSwitch ? workspace.program.switchLabels[index] : workspace.program.lampLabels[index]);
@@ -92,13 +94,14 @@ export function connectLogikusController (panel, {getWorkspace, onInputs}) {
                     if (Object.keys(changed).length) panel.setWidgetConfig(name, changed);
                     if (widget.layout.label !== label) panel.setWidgetLayout(name, {label});
                 } else {
-                    const layout = type === 'button' ? {x: 24, y: baseY + 360, w: 144, h: 64, label} :
+                    const layout = controlName ? {x: 24, y: baseY, w: 144, h: isSwitch ? 76 : 64, label} :
+                        type === 'button' ? {x: 24, y: baseY + 360, w: 144, h: 64, label} :
                         {x: 24 + (index % 5) * 164, y: baseY + Math.floor(index / 5) * 176 + (isSwitch ? 76 : 0),
                             w: 144, h: isSwitch ? 76 : 64, label};
                     panel.addWidget(name, type, config, layout);
                 }
             }
-            panel.setMode('play');
+            if (!controlName) panel.setMode('play');
             sync({...workspace, controller: true}, false);
         });
         return {...workspace, controller: true};

@@ -71,7 +71,7 @@ import ChromeToggle from './chrome-toggle.jsx';
 import StarterJourneys from './starter-journeys.jsx';
 // The lessons panel carries seven wave catalogs (232 KiB raw, 74 KiB compressed)
 // and is closed on every first paint; it arrives when someone opens it.
-const Cp1CodeEditor = React.lazy(() =>
+const MachineCodeEditor = React.lazy(() =>
     import(/* webpackChunkName: "bw-codemirror" */ '../../lib/codemirror-editor.jsx')
 );
 const GuidedLessons = React.lazy(() => import(/* webpackChunkName: "guided-lessons" */ './guided-lessons.jsx'));
@@ -455,7 +455,7 @@ const GUIComponent = props => {
             window.removeEventListener('bw-cardiac-detached', detached);
         };
     }, []);
-    const cardiacSurfaces = React.useMemo(() => ({code: cardiacCodeSlot, controller: cardiacControllerSlot}),
+    const cardiacSurfaces = React.useMemo(() => ({code: cardiacCodeSlot, controller: cardiacControllerSlot, Editor: MachineCodeEditor}),
         [cardiacCodeSlot, cardiacControllerSlot]);
     const [cp1CodeSlot, setCp1CodeSlot] = React.useState(null);
     const [cp1ControllerSlot, setCp1ControllerSlot] = React.useState(null);
@@ -470,7 +470,7 @@ const GUIComponent = props => {
             window.removeEventListener('bw-cp1-circuit-detached', detached);
         };
     }, []);
-    const cp1Surfaces = React.useMemo(() => ({code: cp1CodeSlot, controller: cp1ControllerSlot, Editor: Cp1CodeEditor}),
+    const cp1Surfaces = React.useMemo(() => ({code: cp1CodeSlot, controller: cp1ControllerSlot, Editor: MachineCodeEditor}),
         [cp1CodeSlot, cp1ControllerSlot]);
     const [gameControlKey, setGameControlKey] = React.useState(() =>
         props.vm?.runtime?.bwGameControlKey || null);

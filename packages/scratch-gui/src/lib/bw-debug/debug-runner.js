@@ -35,6 +35,7 @@
  */
 
 import {createBasicStartup, isBundledMicrosoftBasic} from './basic-startup.js';
+import {mirrorBasicSerialOnVga} from './basic-vga-mirror.js';
 import {loadCp1Monitor} from '../cp1-monitor.js';
 import {
     listBreakpoints, subscribeBreakpoints, toggleBreakpoint,
@@ -3172,6 +3173,11 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             declaredMachine && await isBundledMicrosoftBasic(targetOpts.rom)) {
             const {MS_PROFILE} = await import('bw-board/basic-machine-runner.js');
             basicStartup = createBasicStartup(MS_PROFILE.bootPrompts);
+            for (const chip of targetOpts.config?.chips || []) {
+                if (chip.kind !== 'simplevga') continue;
+                const card = result.adapter.machine.chips[chip.name];
+                if (card) mirrorBasicSerialOnVga(card, () => serialLines);
+            }
         }
         setStatus('ready', readyMsg);
         return session;

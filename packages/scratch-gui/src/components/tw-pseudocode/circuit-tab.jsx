@@ -1,3 +1,4 @@
+import {addCardiacFace} from '../../lib/controller-machine-faces.js';
 import React from 'react';
 import {clearControllerPanel, serializeControllerPanel} from '../../lib/controller-inputs.js';
 import {makeT} from '../../lib/bw-i18n.js';
@@ -1593,6 +1594,12 @@ class CircuitTab extends React.Component {
             }
             localStorage.setItem(CARDIAC_WORKSPACE_KEY, JSON.stringify(draft));
             this.activateCardiac(partId);
+            const panel = this.props.vm?.runtime?.controllerPanel;
+            if (panel && addCardiacFace(panel)) {
+                window.dispatchEvent(new CustomEvent('bw-controller-changed', {
+                    detail: {data: serializeControllerPanel(panel)}
+                }));
+            }
             window.dispatchEvent(new CustomEvent('bw-cardiac-source-load', {detail: {source, inputDeck, inputMode: draft.inputMode}}));
             this.publishExampleTitle(example);
             this.setState({loadingExample: null});

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-import React, {useContext, useState} from 'react';
+import React, {useContext, useRef, useState} from 'react';
 import {createPortal} from 'react-dom';
 import PropTypes from 'prop-types';
 import {CardiacSurfaces} from './cardiac-surfaces.js';
@@ -77,6 +77,7 @@ export default function CardiacPanel ({workspace, assembly, snapshot, busy, erro
     const language = /^de/i.test(locale || '') ? 'de' : 'en';
     const t = COPY[language];
     const surfaces = useContext(CardiacSurfaces);
+    const sourceHelp = useRef(null);
     const [cell, setCell] = useState(1);
     const [cellValue, setCellValue] = useState('');
     const [predictPc, setPredictPc] = useState('');
@@ -92,39 +93,52 @@ export default function CardiacPanel ({workspace, assembly, snapshot, busy, erro
     const nextWord = state?.memory[state.pc];
     const predictionMessage = prediction?.kind === 'waiting' ? t.waitPrediction : t[prediction?.kind];
 
-    const editor = <section className={styles.panel} data-cardiac-editor>
-        <header className={styles.header}><strong>CARDIAC</strong><span>{t.program}</span></header>
-        <label className={styles.field}>{t.examples}<select value="" onChange={event => onExample(event.target.value)} disabled={busy}>
+    const Editor = surfaces?.Editor;
+    const sourceInput = <textarea aria-label={t.source} data-testid={Editor ? undefined : 'cardiac-source'} className={styles.source}
+        value={workspace.source} onChange={event => onSource(event.target.value)} spellCheck={false} maxLength={131072} />;
+    const editor = <section className={Editor ? `${styles.panel} ${styles.codeEditor}` : styles.panel} data-cardiac-editor>
+        {!Editor && <header className={styles.header}><strong>CARDIAC</strong><span>{t.program}</span></header>}
+        <div className={styles.actions}>
+            <label className={styles.field}>{t.examples}<select value="" onChange={event => onExample(event.target.value)} disabled={busy}>
             <option value="">—</option>
             {Object.values(CARDIAC_EXAMPLES).map(example => <option key={example.id} value={example.id}>{example.title[language]}</option>)}
-        </select></label>
-        <div className={styles.actions}>
+            </select></label>
             <button type="button" onClick={onLoad} disabled={busy || !assembly.ok || assembly.entry === null}>{t.load}</button>
             <button type="button" className={styles.primary} onClick={onRunSource} disabled={busy || !assembly.ok || assembly.entry === null}>{t.runSource}</button>
             <button type="button" onClick={onSave}>{t.save}</button>
             <label className={styles.fileButton}>{t.open}<input type="file" accept=".cardiac,.txt,.json" disabled={busy}
                 onChange={event => { const file = event.target.files[0]; event.target.value = ''; if (file) onOpen(file); }} /></label>
             <button type="button" onClick={onListing} disabled={!assembly.ok || assembly.entry === null}>{t.listing}</button>
+            {Editor && <button type="button" title={t.reference} aria-label={t.reference}
+                onClick={() => sourceHelp.current.showModal()}>ⓘ</button>}
         </div>
         {error && <p className={styles.error} role="alert">{error}</p>}
-        <label className={styles.field}>{t.source}<textarea data-testid="cardiac-source" className={styles.source}
-            value={workspace.source} onChange={event => onSource(event.target.value)} spellCheck={false} maxLength={131072} /></label>
-        <p className={styles.hint}>{t.sourceHint}</p>
+        {Editor ? <div className={styles.sharedEditor} role="group" aria-label={t.source} data-testid="cardiac-source">
+            <React.Suspense fallback={sourceInput}>
+                <Editor value={workspace.source} lang="cardiac" onChange={onSource} isVisible />
+            </React.Suspense>
+        </div> : sourceInput}
         {dirty && <p className={styles.notice} data-cardiac-dirty>{t.dirty}</p>}
         {!!assembly.diagnostics?.length && <ul className={styles.diagnostics} aria-live="polite">
             {assembly.diagnostics.map((item, index) => <li key={index} data-severity={item.severity}>
                 {item.line}:{item.column} — {item.message}</li>)}
         </ul>}
-        {assembly.ok && !!assembly.listing?.length && <details open><summary>{t.listing}</summary>
+        {assembly.ok && !!assembly.listing?.length && <details open={Editor ? undefined : true}><summary>{t.listing}</summary>
             <div className={styles.tableScroll}><table className={styles.listing}><thead><tr><th>PC</th><th>{t.program}</th><th>{t.sourceLine}</th></tr></thead>
                 <tbody>{assembly.listing.map(item => <tr key={item.address}
                     data-current={state?.pc === item.address && state?.memory[item.address] === item.value ? 'true' : undefined}>
                     <td>{addr(item.address)}</td><td>{word(item.value)}</td><td>{item.line}: {item.source}</td>
                 </tr>)}</tbody></table></div>
         </details>}
-        <details><summary>{t.reference}</summary><p>{t.original}</p><ol start="0">
-            {t.mappings.map(text => <li key={text}>{text}</li>)}
-        </ol><p className={styles.hint}>{t.limits}</p></details>
+        {Editor ? <dialog ref={sourceHelp} aria-label={t.reference}>
+            <form method="dialog"><button type="submit" aria-label={language === 'de' ? 'Schließen' : 'Close'}>×</button></form>
+            <p>{t.sourceHint}</p><p>{t.original}</p>
+            <ol start="0">{t.mappings.map(text => <li key={text}>{text}</li>)}</ol>
+            <p>{t.limits}</p>
+        </dialog> : <details><summary>{t.reference}</summary><p>{t.sourceHint}</p><p>{t.original}</p>
+            <ol start="0">{t.mappings.map(text => <li key={text}>{text}</li>)}</ol>
+            <p className={styles.hint}>{t.limits}</p>
+        </details>}
     </section>;
 
     const machine = <section className={styles.panel} data-cardiac-controller data-cardiac-status={state?.status || 'ready'}>
@@ -205,8 +219,8 @@ export default function CardiacPanel ({workspace, assembly, snapshot, busy, erro
     </section>;
     return <React.Fragment>
         {surfaces?.code ? createPortal(editor, surfaces.code) : <details><summary>CARDIAC · {t.program}</summary>{editor}</details>}
-        {surfaces?.controller ? createPortal(machine, surfaces.controller) : machine}
-        {surfaces?.controller && <p className={styles.hint}>CARDIAC · {status} · PC {addr(state?.pc)} · ACC {word(state?.acc, 4)}</p>}
+        {surfaces?.controller ? createPortal(machine, surfaces.controller) : !surfaces && machine}
+        {surfaces && <p className={styles.hint}>CARDIAC · {status} · PC {addr(state?.pc)} · ACC {word(state?.acc, 4)}</p>}
     </React.Fragment>;
 }
 

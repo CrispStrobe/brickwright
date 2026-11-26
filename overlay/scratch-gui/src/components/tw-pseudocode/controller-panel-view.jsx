@@ -6,6 +6,8 @@ import {clearControllerPanel, createWidgetButtonInputs, releaseMomentaryButtons,
 import EditorHelp from '../gui/editor-help.jsx';
 import MachineConsole from './machine-console.jsx';
 import {activateUndoSurface, notifyUndoState, registerUndoSurface} from '../../lib/global-undo.js';
+import {addCardiacFace, isCardiacFace} from '../../lib/controller-machine-faces.js';
+import {LOGIKUS_LAMP_WIDGETS, LOGIKUS_SWITCH_WIDGETS, LOGIKUS_TEST_WIDGET} from '../../lib/logikus/controller-bridge.js';
 import SpikePortMonitor from './spike-port-monitor.jsx';
 
 const L10N = {
@@ -624,6 +626,7 @@ function PositionedWidget({ widget, mode, selected, snap, onSelect, onLayout, ch
 
     const beginDrag = e => {
         if (mode !== 'edit') return;
+        if (widget.type === 'machine' && e.target.closest('button, input, select, textarea, summary')) return;
         onSelect();
         try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* synthetic events have no active pointer */ }
         gesture.current = { kind: 'move', px: e.clientX, py: e.clientY, x: L.x || 0, y: L.y || 0 };
@@ -672,7 +675,7 @@ function PositionedWidget({ widget, mode, selected, snap, onSelect, onLayout, ch
                 position: 'absolute',
                 left: L.x || 0,
                 top: L.y || 0,
-                width: L.w || undefined,
+                width: L.w || (widget.type === 'machine' ? `min(440px, calc(100% - ${(L.x || 0) + 8}px))` : undefined),
                 height: L.h || undefined,
                 transform: L.rotation ? 'rotate(' + L.rotation + 'deg)' : undefined,
                 transformOrigin: 'center center',
@@ -687,7 +690,7 @@ function PositionedWidget({ widget, mode, selected, snap, onSelect, onLayout, ch
             <div
                 ref={contentRef}
                 style={{
-                    display: 'inline-block',
+                    display: 'inline-block', width: widget.type === 'machine' ? '100%' : undefined,
                     transformOrigin: 'top left',
                     transform: (sx !== 1 || sy !== 1) ? ('scale(' + sx + ', ' + sy + ')') : undefined,
                 }}
@@ -1589,6 +1592,14 @@ class ControllerPanelView extends React.Component {
         this._recordUndo(before, 'Add widget');
     }
 
+    _addMachineWidget(add) {
+        const before = this._snapshot();
+        add(this._getPanel());
+        this.setState({addMenuOpen: false});
+        this._persist();
+        this._recordUndo(before, 'Add widget');
+    }
+
     _removeWidget(name) {
         const before = this._snapshot();
         this._buttonInputs?.release(name);
@@ -1753,6 +1764,29 @@ class ControllerPanelView extends React.Component {
         const mode = panel.mode;
         const widgets = panel.getWidgets();
         const {cp1WidgetSlot, cardiacWidgetSlot} = this.props;
+        const logikusLabel = /^de/i.test(this.props.locale || '') ? 'Logikus-Labor' : 'Logikus Lab';
+        const cardiacWidget = widgets.find(isCardiacFace);
+        const german = /^de/i.test(this.props.locale || '');
+        const sendLogikus = (type, detail) => window.dispatchEvent(new CustomEvent(`bw-logikus-${type}`, {detail}));
+        const machineChoices = [
+            cardiacWidgetSlot && {
+                label: german ? 'CARDIAC-Anzeige' : 'CARDIAC display', disabled: !!cardiacWidget,
+                run: () => this._addMachineWidget(addCardiacFace)
+            },
+            {label: logikusLabel, run: () => {
+                this.setState({addMenuOpen: false});
+                sendLogikus('open');
+            }},
+            ...[
+                [german ? 'Logikus-Schalter' : 'Logikus switch', LOGIKUS_SWITCH_WIDGETS],
+                [german ? 'Logikus-Lampe' : 'Logikus lamp', LOGIKUS_LAMP_WIDGETS],
+                ['Logikus Test', [LOGIKUS_TEST_WIDGET]]
+            ].map(([label, names]) => {
+                const name = names.find(candidate => !panel.getWidget(candidate));
+                return {label, disabled: !name,
+                    run: () => this._addMachineWidget(() => sendLogikus('add-control', {name}))};
+            })
+        ].filter(Boolean);
         const machineWidget = mode === 'play' && this.props.machineConsole
             ? widgets.find(w => w.name === this.props.machineConsole.name && w.type === 'simplevga')
             : null;
@@ -1777,12 +1811,15 @@ class ControllerPanelView extends React.Component {
                         {t('title')}
                     </span>
                     <EditorHelp editor="Widgets" label="Widgets" locale={this.props.locale} />
-                    <button type="button" data-testid="bw-open-logikus"
-                        onClick={() => window.dispatchEvent(new CustomEvent('bw-logikus-open'))}
-                        style={{background: '#ede9fe', color: '#5b21b6', border: '1px solid #c4b5fd',
-                            borderRadius: 6, padding: '5px 10px', fontSize: 14, cursor: 'pointer'}}>
-                        {/^de/i.test(this.props.locale || '') ? 'Logikus-Labor' : 'Logikus Lab'}
-                    </button>
+                    {widgets.some(widget => widget.config.logikus === true) && (
+                        <button type="button" data-testid="bw-open-logikus"
+                            aria-label={logikusLabel} title={logikusLabel}
+                            onClick={() => window.dispatchEvent(new CustomEvent('bw-logikus-open'))}
+                            style={{background: '#ede9fe', color: '#5b21b6', border: '1px solid #c4b5fd',
+                                borderRadius: 6, width: 24, height: 28, padding: 0, cursor: 'pointer'}}>
+                            <span aria-hidden="true">↗</span>
+                        </button>
+                    )}
                     {/* ENTERING full screen from here, because there is no other way in
                         on a phone: the stage header that normally offers it is capped
                         to 44px in this dock mode, and a sweep of the pane on a phone
@@ -1912,22 +1949,19 @@ class ControllerPanelView extends React.Component {
                                     borderRadius: 6, boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                                     padding: 4, zIndex: 100, minWidth: 120,
                                 }}>
-                                    {Object.values(WIDGET_TYPES).map(type => (
-                                        <button
-                                            key={type}
-                                            onClick={() => this._addWidget(type)}
-                                            style={{
-                                                display: 'block', width: '100%', textAlign: 'left',
-                                                padding: '6px 10px', border: 'none', background: 'none',
-                                                cursor: 'pointer', fontSize: 12, borderRadius: 4,
-                                                color: '#334155',
-                                            }}
-                                            onMouseOver={e => e.target.style.background = '#f1f5f9'}
-                                            onMouseOut={e => e.target.style.background = 'none'}
-                                        >
-                                            {t(type)}
-                                        </button>
-                                    ))}
+                                    <div style={{maxHeight: 'min(55vh, 360px)', overflowY: 'auto', scrollbarWidth: 'thin'}}>
+                                        {[...machineChoices, ...Object.values(WIDGET_TYPES)
+                                            .filter(type => type !== 'machine')
+                                            .map(type => ({label: t(type), run: () => this._addWidget(type)}))]
+                                            .map(({label, disabled, run}) => (
+                                                <button key={label} disabled={disabled} onClick={run} style={{
+                                                    display: 'block', width: '100%', textAlign: 'left', whiteSpace: 'nowrap',
+                                                    padding: '6px 10px', border: 'none', background: 'none',
+                                                    cursor: disabled ? 'default' : 'pointer', color: '#334155',
+                                                    opacity: disabled ? .5 : 1, fontSize: 12, borderRadius: 4
+                                                }}>{label}</button>
+                                            ))}
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -1946,8 +1980,7 @@ class ControllerPanelView extends React.Component {
                         if (e.target === e.currentTarget) this.setState({ selected: null });
                     }}>
                     {cp1WidgetSlot && <div ref={cp1WidgetSlot} data-cp1-widget-slot />}
-                    {cardiacWidgetSlot && <div ref={cardiacWidgetSlot} data-cardiac-widget-slot /> }
-                    {widgets.length === 0 && !cp1WidgetSlot && !cardiacWidgetSlot && (
+                    {widgets.length === 0 && !cp1WidgetSlot && (
                         <div style={{
                             color: '#94a3b8', fontSize: 14, textAlign: 'center',
                             padding: '40px 20px',
@@ -1955,7 +1988,7 @@ class ControllerPanelView extends React.Component {
                             {t('noWidgets')}
                         </div>
                     )}
-                    <div style={(cp1WidgetSlot || cardiacWidgetSlot) && widgets.length ? {position: 'relative', minHeight: 240} : undefined}>
+                    <div style={cp1WidgetSlot && widgets.length ? {position: 'relative', minHeight: 240} : undefined}>
                         {machineWidget ? (
                             <MachineConsole widget={machineWidget}
                                 keyboardSet={this.props.machineConsole.keyboardSet}
@@ -1971,7 +2004,16 @@ class ControllerPanelView extends React.Component {
                                 onSelect={() => this.setState({ selected: w.name })}
                                 onLayout={(patch, persist) => this._layout(w.name, patch, persist)}
                             >
-                                <WidgetCard
+                                {w.type === 'machine' ? (
+                                    <section aria-label={w.layout.label || w.name}
+                                        style={{background: '#f6f8f4', border: '1px solid #c5d5d8', borderRadius: 8}}>
+                                        {w === cardiacWidget && cardiacWidgetSlot ?
+                                            <div ref={cardiacWidgetSlot} data-cardiac-widget-slot /> :
+                                            <span style={{display: 'block', padding: 8}}>
+                                                {w.layout.label || w.name} · {german ? 'Nicht verbunden' : 'Disconnected'}
+                                            </span>}
+                                    </section>
+                                ) : <WidgetCard
                                     widget={w}
                                     mode={mode}
                                     panel={panel}
@@ -1979,7 +2021,7 @@ class ControllerPanelView extends React.Component {
                                     onInput={(name, x, y) => this._handleJoystickInput(name, x, y)}
                                     onRemove={() => { this._removeWidget(w.name); this.setState({ selected: null }); }}
                                     hideBindings={panel.hideBindings}
-                                />
+                                />}
                             </PositionedWidget>
                         ))}
                     </div>

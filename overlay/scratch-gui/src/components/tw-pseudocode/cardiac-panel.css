@@ -51,3 +51,8 @@
 .listing th, .listing td { text-align: left; padding: 3px 7px; border-bottom: 1px solid var(--line); white-space: pre; }
 .listing [data-current='true'] { background: #cde9df; }
 @media (max-width: 480px) { .trays { grid-template-columns: 1fr; } .registers { grid-template-columns: repeat(2, minmax(0, 1fr)); } .panel { padding: 9px; } .memory { gap: 2px; } .memory b { font-size: 10px; } }
+
+.codeEditor { padding: 0; background: transparent; display: flex; flex-direction: column; gap: 5px; color: inherit; }
+.codeEditor .field { margin: 0; }
+.codeEditor .actions { margin: 0; align-items: center; }
+.sharedEditor { min-height: 280px; height: clamp(280px, 45vh, 620px); display: flex; flex-direction: column; }

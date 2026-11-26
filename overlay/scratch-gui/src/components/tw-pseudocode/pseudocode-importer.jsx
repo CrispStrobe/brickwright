@@ -2930,7 +2930,7 @@ class PseudocodeImporter extends React.Component {
 
     switchTab (to) {
         if (this.state.busy) return;
-        this.leaveCardiac();
+        this.detachCardiac();
         this.leaveCp1();
         const from = this.state.lang;
         if (to === from) return;
