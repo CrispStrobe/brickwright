@@ -2703,6 +2703,21 @@ Erstelle zuerst den Workspace. Oberfläche und MCP verwenden denselben begrenzte
   "Exact kernel: load {0} ms · run {1} ms · WASM memory {2} MiB": "Exakter Kern: Laden {0} ms · Ausführung {1} ms · WASM-Speicher {2} MiB",
   "STEP export: {0} bodies, {1} KiB, exact B-rep ({2}).": "STEP-Export: {0} Körper, {1} KiB, exakte B-Rep ({2}).",
   "The exact kernel exceeded 60 seconds; the request was stopped.": "Der exakte Kern hat 60 Sekunden überschritten; die Anfrage wurde gestoppt.",
+  "The exact kernel did not finish within {0} seconds, so it was stopped. The model was not changed.": "Der exakte Kern ist nicht innerhalb von {0} Sekunden fertig geworden und wurde gestoppt. Das Modell wurde nicht geändert.",
+  "The exact kernel ran out of memory for this job, so it was stopped. The model was not changed. Simplify the feature (fewer edges or holes) or run it on a computer.": "Dem exakten Kern ist für diesen Auftrag der Speicher ausgegangen, deshalb wurde er gestoppt. Das Modell wurde nicht geändert. Vereinfache das Feature (weniger Kanten oder Löcher) oder führe es auf einem Computer aus.",
+  "The exact kernel failed and was restarted. The model was not changed. ({0})": "Der exakte Kern ist fehlgeschlagen und wurde neu gestartet. Das Modell wurde nicht geändert. ({0})",
+  "Rounding {0} edges ({1} of them curved) at once is too much for the exact kernel on this device, which allows about {2} curved or {3} straight edges per feature. Choose a face with fewer edges.": "{0} Kanten ({1} davon gekrümmt) auf einmal zu runden ist für den exakten Kern auf diesem Gerät zu viel; er erlaubt etwa {2} gekrümmte oder {3} gerade Kanten pro Feature. Wähle eine Fläche mit weniger Kanten.",
+  "Beveling {0} edges ({1} of them curved) at once is too much for the exact kernel on this device, which allows about {2} curved or {3} straight edges per feature. Choose a face with fewer edges.": "{0} Kanten ({1} davon gekrümmt) auf einmal zu fasen ist für den exakten Kern auf diesem Gerät zu viel; er erlaubt etwa {2} gekrümmte oder {3} gerade Kanten pro Feature. Wähle eine Fläche mit weniger Kanten.",
+  "Shelling a body with {0} faces is too much for the exact kernel on this device, which allows {1}. Shell a simpler body, or add the holes after shelling.": "Einen Körper mit {0} Flächen auszuhöhlen ist für den exakten Kern auf diesem Gerät zu viel; er erlaubt {1}. Höhle einen einfacheren Körper aus oder füge die Löcher nach dem Aushöhlen hinzu.",
+  "The exact kernel stopped this step at its own {0} s limit, so it was not built. The model was not changed. Try a simpler body.": "Der exakte Kern hat diesen Schritt an seiner eigenen Grenze von {0} s gestoppt, deshalb wurde er nicht erstellt. Das Modell wurde nicht geändert. Versuche es mit einem einfacheren Körper.",
+  "Stop the exact kernel. The model is not changed.": "Den exakten Kern stoppen. Das Modell wird nicht geändert.",
+  "Cancel exact kernel job": "Auftrag des exakten Kerns abbrechen",
+  "Exact feature": "Exaktes Feature",
+  "STEP export": "STEP-Export",
+  "Exact measure": "Exakte Messung",
+  "{0} on the exact kernel… {1} s": "{0} auf dem exakten Kern … {1} s",
+  "Running on the exact kernel… {0} s": "Läuft auf dem exakten Kern … {0} s",
+  "Cancelled. The model was not changed.": "Abgebrochen. Das Modell wurde nicht geändert.",
   "STEP · exact B-rep (loads the exact kernel)": "STEP · exakte B-Rep (lädt den exakten Kern)",
   "STEP export rebuilds the selected bodies (or all bodies) with the exact B-rep kernel, which loads on first use (about 9 MB). Bodies without an exact construction, such as imported meshes, are reported instead of being exported as triangles.": "Der STEP-Export baut die ausgewählten Körper (oder alle Körper) mit dem exakten B-Rep-Kern neu auf, der bei der ersten Verwendung geladen wird (etwa 9 MB). Körper ohne exakte Konstruktion, etwa importierte Netze, werden gemeldet statt als Dreiecke exportiert.",
   "Recorded library sources export as STL with attribution; exact STEP export is not available for them yet.": "Erfasste Bibliotheksquellen werden als STL mit Namensnennung exportiert; ein exakter STEP-Export ist für sie noch nicht verfügbar.",
@@ -3595,7 +3610,7 @@ c.parseClass = function(e, t) {
   var i = this.enterClassBody(), s = this.startNode(), o = !1;
   for (s.body = [], this.expect(r.braceL); this.type !== r.braceR; ) {
     var a = this.parseClassElement(e.superClass !== null);
-    a && (s.body.push(a), a.type === "MethodDefinition" && a.kind === "constructor" ? (o && this.raiseRecoverable(a.start, "Duplicate constructor in the same class"), o = !0) : a.key && a.key.type === "PrivateIdentifier" && In(i, a) && this.raiseRecoverable(a.key.start, "Identifier '#" + a.key.name + "' has already been declared"));
+    a && (s.body.push(a), a.type === "MethodDefinition" && a.kind === "constructor" ? (o && this.raiseRecoverable(a.start, "Duplicate constructor in the same class"), o = !0) : a.key && a.key.type === "PrivateIdentifier" && Kn(i, a) && this.raiseRecoverable(a.key.start, "Identifier '#" + a.key.name + "' has already been declared"));
   }
   return this.strict = n, this.next(), e.body = this.finishNode(s, "ClassBody"), this.exitClassBody(), this.finishNode(e, t ? "ClassDeclaration" : "ClassExpression");
 };
@@ -3661,7 +3676,7 @@ c.exitClassBody = function() {
       ge(t, a.name) || (s ? s.used.push(a) : this.raiseRecoverable(a.start, "Private field '#" + a.name + "' must be declared in an enclosing class"));
     }
 };
-function In(e, t) {
+function Kn(e, t) {
   var n = t.key.name, i = e[n], s = "true";
   return t.type === "MethodDefinition" && (t.kind === "get" || t.kind === "set") && (s = (t.static ? "s" : "i") + t.kind), i === "iget" && s === "iset" || i === "iset" && s === "iget" || i === "sget" && s === "sset" || i === "sset" && s === "sget" ? (e[n] = "true", !1) : i ? !0 : (e[n] = s, !1);
 }
@@ -4219,14 +4234,14 @@ m.parseSubscript = function(e, t, n, i, s, o, a) {
     var p = this.startNodeAt(t, n);
     p.object = e, d ? (p.property = this.parseExpression(), this.expect(r.bracketR)) : this.type === r.privateId && e.type !== "Super" ? p.property = this.parsePrivateIdent() : p.property = this.parseIdent(this.options.allowReserved !== "never"), p.computed = !!d, l && (p.optional = u), e = this.finishNode(p, "MemberExpression");
   } else if (!i && this.eat(r.parenL)) {
-    var f = new Me(), S = this.yieldPos, b = this.awaitPos, I = this.awaitIdentPos;
+    var f = new Me(), S = this.yieldPos, b = this.awaitPos, K = this.awaitIdentPos;
     this.yieldPos = 0, this.awaitPos = 0, this.awaitIdentPos = 0;
     var j = this.parseExprList(r.parenR, this.options.ecmaVersion >= 8, !1, f);
     if (s && !u && this.shouldParseAsyncArrow())
-      return this.checkPatternErrors(f, !1), this.checkYieldAwaitInDefaultParams(), this.awaitIdentPos > 0 && this.raise(this.awaitIdentPos, "Cannot use 'await' as identifier inside an async function"), this.yieldPos = S, this.awaitPos = b, this.awaitIdentPos = I, this.parseSubscriptAsyncArrow(t, n, j, a);
-    this.checkExpressionErrors(f, !0), this.yieldPos = S || this.yieldPos, this.awaitPos = b || this.awaitPos, this.awaitIdentPos = I || this.awaitIdentPos;
-    var K = this.startNodeAt(t, n);
-    K.callee = e, K.arguments = j, l && (K.optional = u), e = this.finishNode(K, "CallExpression");
+      return this.checkPatternErrors(f, !1), this.checkYieldAwaitInDefaultParams(), this.awaitIdentPos > 0 && this.raise(this.awaitIdentPos, "Cannot use 'await' as identifier inside an async function"), this.yieldPos = S, this.awaitPos = b, this.awaitIdentPos = K, this.parseSubscriptAsyncArrow(t, n, j, a);
+    this.checkExpressionErrors(f, !0), this.yieldPos = S || this.yieldPos, this.awaitPos = b || this.awaitPos, this.awaitIdentPos = K || this.awaitIdentPos;
+    var I = this.startNodeAt(t, n);
+    I.callee = e, I.arguments = j, l && (I.optional = u), e = this.finishNode(I, "CallExpression");
   } else if (this.type === r.backQuote) {
     (u || o) && this.raise(this.start, "Optional chaining cannot appear in the tag of tagged template expressions");
     var L = this.startNodeAt(t, n);
@@ -4327,23 +4342,23 @@ m.parseParenAndDistinguishExpression = function(e, t) {
   var n = this.start, i = this.startLoc, s, o = this.options.ecmaVersion >= 8;
   if (this.options.ecmaVersion >= 6) {
     this.next();
-    var a = this.start, l = this.startLoc, u = [], d = !0, p = !1, f = new Me(), S = this.yieldPos, b = this.awaitPos, I;
+    var a = this.start, l = this.startLoc, u = [], d = !0, p = !1, f = new Me(), S = this.yieldPos, b = this.awaitPos, K;
     for (this.yieldPos = 0, this.awaitPos = 0; this.type !== r.parenR; )
       if (d ? d = !1 : this.expect(r.comma), o && this.afterTrailingComma(r.parenR, !0)) {
         p = !0;
         break;
       } else if (this.type === r.ellipsis) {
-        I = this.start, u.push(this.parseParenItem(this.parseRestBinding())), this.type === r.comma && this.raiseRecoverable(
+        K = this.start, u.push(this.parseParenItem(this.parseRestBinding())), this.type === r.comma && this.raiseRecoverable(
           this.start,
           "Comma is not permitted after the rest element"
         );
         break;
       } else
         u.push(this.parseMaybeAssign(!1, f, this.parseParenItem));
-    var j = this.lastTokEnd, K = this.lastTokEndLoc;
+    var j = this.lastTokEnd, I = this.lastTokEndLoc;
     if (this.expect(r.parenR), e && this.shouldParseArrow(u) && this.eat(r.arrow))
       return this.checkPatternErrors(f, !1), this.checkYieldAwaitInDefaultParams(), this.yieldPos = S, this.awaitPos = b, this.parseParenArrowList(n, i, u, t);
-    (!u.length || p) && this.unexpected(this.lastTokStart), I && this.unexpected(I), this.checkExpressionErrors(f, !0), this.yieldPos = S || this.yieldPos, this.awaitPos = b || this.awaitPos, u.length > 1 ? (s = this.startNodeAt(a, l), s.expressions = u, this.finishNodeAt(s, "SequenceExpression", j, K)) : s = u[0];
+    (!u.length || p) && this.unexpected(this.lastTokStart), K && this.unexpected(K), this.checkExpressionErrors(f, !0), this.yieldPos = S || this.yieldPos, this.awaitPos = b || this.awaitPos, u.length > 1 ? (s = this.startNodeAt(a, l), s.expressions = u, this.finishNodeAt(s, "SequenceExpression", j, I)) : s = u[0];
   } else
     s = this.parseParenExpression();
   if (this.options.preserveParens) {
@@ -4358,7 +4373,7 @@ m.parseParenItem = function(e) {
 m.parseParenArrowList = function(e, t, n, i) {
   return this.parseArrowExpression(this.startNodeAt(e, t), n, !1, i);
 };
-var Kn = [];
+var In = [];
 m.parseNew = function() {
   this.containsEsc && this.raiseRecoverable(this.start, "Escape sequence in keyword new");
   var e = this.startNode();
@@ -4369,7 +4384,7 @@ m.parseNew = function() {
     return e.property = this.parseIdent(!0), e.property.name !== "target" && this.raiseRecoverable(e.property.start, "The only valid meta property for new is 'new.target'"), n && this.raiseRecoverable(e.start, "'new.target' must not contain escaped characters"), this.allowNewDotTarget || this.raiseRecoverable(e.start, "'new.target' can only be used in functions and class static block"), this.finishNode(e, "MetaProperty");
   }
   var i = this.start, s = this.startLoc;
-  return e.callee = this.parseSubscripts(this.parseExprAtom(null, !1, !0), i, s, !0, !1), e.callee.type === "Super" && this.raiseRecoverable(i, "Invalid use of 'super'"), this.eat(r.parenL) ? e.arguments = this.parseExprList(r.parenR, this.options.ecmaVersion >= 8, !1) : e.arguments = Kn, this.finishNode(e, "NewExpression");
+  return e.callee = this.parseSubscripts(this.parseExprAtom(null, !1, !0), i, s, !0, !1), e.callee.type === "Super" && this.raiseRecoverable(i, "Invalid use of 'super'"), this.eat(r.parenL) ? e.arguments = this.parseExprList(r.parenR, this.options.ecmaVersion >= 8, !1) : e.arguments = In, this.finishNode(e, "NewExpression");
 };
 m.parseTemplateElement = function(e) {
   var t = e.isTagged, n = this.startNode();
@@ -4620,10 +4635,10 @@ var Fn = "Berf Beria_Erfe Gara Garay Gukh Gurung_Khema Hrkt Katakana_Or_Hiragana
   12: "",
   13: "",
   14: On
-}, ot = "Cased_Letter LC Close_Punctuation Pe Connector_Punctuation Pc Control Cc cntrl Currency_Symbol Sc Dash_Punctuation Pd Decimal_Number Nd digit Enclosing_Mark Me Final_Punctuation Pf Format Cf Initial_Punctuation Pi Letter L Letter_Number Nl Line_Separator Zl Lowercase_Letter Ll Mark M Combining_Mark Math_Symbol Sm Modifier_Letter Lm Modifier_Symbol Sk Nonspacing_Mark Mn Number N Open_Punctuation Ps Other C Other_Letter Lo Other_Number No Other_Punctuation Po Other_Symbol So Paragraph_Separator Zp Private_Use Co Punctuation P punct Separator Z Space_Separator Zs Spacing_Mark Mc Surrogate Cs Symbol S Titlecase_Letter Lt Unassigned Cn Uppercase_Letter Lu", Rt = "Adlam Adlm Ahom Anatolian_Hieroglyphs Hluw Arabic Arab Armenian Armn Avestan Avst Balinese Bali Bamum Bamu Bassa_Vah Bass Batak Batk Bengali Beng Bhaiksuki Bhks Bopomofo Bopo Brahmi Brah Braille Brai Buginese Bugi Buhid Buhd Canadian_Aboriginal Cans Carian Cari Caucasian_Albanian Aghb Chakma Cakm Cham Cham Cherokee Cher Common Zyyy Coptic Copt Qaac Cuneiform Xsux Cypriot Cprt Cyrillic Cyrl Deseret Dsrt Devanagari Deva Duployan Dupl Egyptian_Hieroglyphs Egyp Elbasan Elba Ethiopic Ethi Georgian Geor Glagolitic Glag Gothic Goth Grantha Gran Greek Grek Gujarati Gujr Gurmukhi Guru Han Hani Hangul Hang Hanunoo Hano Hatran Hatr Hebrew Hebr Hiragana Hira Imperial_Aramaic Armi Inherited Zinh Qaai Inscriptional_Pahlavi Phli Inscriptional_Parthian Prti Javanese Java Kaithi Kthi Kannada Knda Katakana Kana Kayah_Li Kali Kharoshthi Khar Khmer Khmr Khojki Khoj Khudawadi Sind Lao Laoo Latin Latn Lepcha Lepc Limbu Limb Linear_A Lina Linear_B Linb Lisu Lisu Lycian Lyci Lydian Lydi Mahajani Mahj Malayalam Mlym Mandaic Mand Manichaean Mani Marchen Marc Masaram_Gondi Gonm Meetei_Mayek Mtei Mende_Kikakui Mend Meroitic_Cursive Merc Meroitic_Hieroglyphs Mero Miao Plrd Modi Mongolian Mong Mro Mroo Multani Mult Myanmar Mymr Nabataean Nbat New_Tai_Lue Talu Newa Newa Nko Nkoo Nushu Nshu Ogham Ogam Ol_Chiki Olck Old_Hungarian Hung Old_Italic Ital Old_North_Arabian Narb Old_Permic Perm Old_Persian Xpeo Old_South_Arabian Sarb Old_Turkic Orkh Oriya Orya Osage Osge Osmanya Osma Pahawh_Hmong Hmng Palmyrene Palm Pau_Cin_Hau Pauc Phags_Pa Phag Phoenician Phnx Psalter_Pahlavi Phlp Rejang Rjng Runic Runr Samaritan Samr Saurashtra Saur Sharada Shrd Shavian Shaw Siddham Sidd SignWriting Sgnw Sinhala Sinh Sora_Sompeng Sora Soyombo Soyo Sundanese Sund Syloti_Nagri Sylo Syriac Syrc Tagalog Tglg Tagbanwa Tagb Tai_Le Tale Tai_Tham Lana Tai_Viet Tavt Takri Takr Tamil Taml Tangut Tang Telugu Telu Thaana Thaa Thai Thai Tibetan Tibt Tifinagh Tfng Tirhuta Tirh Ugaritic Ugar Vai Vaii Warang_Citi Wara Yi Yiii Zanabazar_Square Zanb", It = Rt + " Dogra Dogr Gunjala_Gondi Gong Hanifi_Rohingya Rohg Makasar Maka Medefaidrin Medf Old_Sogdian Sogo Sogdian Sogd", Kt = It + " Elymaic Elym Nandinagari Nand Nyiakeng_Puachue_Hmong Hmnp Wancho Wcho", Lt = Kt + " Chorasmian Chrs Diak Dives_Akuru Khitan_Small_Script Kits Yezi Yezidi", Ft = Lt + " Cypro_Minoan Cpmn Old_Uyghur Ougr Tangsa Tnsa Toto Vithkuqi Vith", Un = Ft + " " + Fn, Gn = {
+}, ot = "Cased_Letter LC Close_Punctuation Pe Connector_Punctuation Pc Control Cc cntrl Currency_Symbol Sc Dash_Punctuation Pd Decimal_Number Nd digit Enclosing_Mark Me Final_Punctuation Pf Format Cf Initial_Punctuation Pi Letter L Letter_Number Nl Line_Separator Zl Lowercase_Letter Ll Mark M Combining_Mark Math_Symbol Sm Modifier_Letter Lm Modifier_Symbol Sk Nonspacing_Mark Mn Number N Open_Punctuation Ps Other C Other_Letter Lo Other_Number No Other_Punctuation Po Other_Symbol So Paragraph_Separator Zp Private_Use Co Punctuation P punct Separator Z Space_Separator Zs Spacing_Mark Mc Surrogate Cs Symbol S Titlecase_Letter Lt Unassigned Cn Uppercase_Letter Lu", Rt = "Adlam Adlm Ahom Anatolian_Hieroglyphs Hluw Arabic Arab Armenian Armn Avestan Avst Balinese Bali Bamum Bamu Bassa_Vah Bass Batak Batk Bengali Beng Bhaiksuki Bhks Bopomofo Bopo Brahmi Brah Braille Brai Buginese Bugi Buhid Buhd Canadian_Aboriginal Cans Carian Cari Caucasian_Albanian Aghb Chakma Cakm Cham Cham Cherokee Cher Common Zyyy Coptic Copt Qaac Cuneiform Xsux Cypriot Cprt Cyrillic Cyrl Deseret Dsrt Devanagari Deva Duployan Dupl Egyptian_Hieroglyphs Egyp Elbasan Elba Ethiopic Ethi Georgian Geor Glagolitic Glag Gothic Goth Grantha Gran Greek Grek Gujarati Gujr Gurmukhi Guru Han Hani Hangul Hang Hanunoo Hano Hatran Hatr Hebrew Hebr Hiragana Hira Imperial_Aramaic Armi Inherited Zinh Qaai Inscriptional_Pahlavi Phli Inscriptional_Parthian Prti Javanese Java Kaithi Kthi Kannada Knda Katakana Kana Kayah_Li Kali Kharoshthi Khar Khmer Khmr Khojki Khoj Khudawadi Sind Lao Laoo Latin Latn Lepcha Lepc Limbu Limb Linear_A Lina Linear_B Linb Lisu Lisu Lycian Lyci Lydian Lydi Mahajani Mahj Malayalam Mlym Mandaic Mand Manichaean Mani Marchen Marc Masaram_Gondi Gonm Meetei_Mayek Mtei Mende_Kikakui Mend Meroitic_Cursive Merc Meroitic_Hieroglyphs Mero Miao Plrd Modi Mongolian Mong Mro Mroo Multani Mult Myanmar Mymr Nabataean Nbat New_Tai_Lue Talu Newa Newa Nko Nkoo Nushu Nshu Ogham Ogam Ol_Chiki Olck Old_Hungarian Hung Old_Italic Ital Old_North_Arabian Narb Old_Permic Perm Old_Persian Xpeo Old_South_Arabian Sarb Old_Turkic Orkh Oriya Orya Osage Osge Osmanya Osma Pahawh_Hmong Hmng Palmyrene Palm Pau_Cin_Hau Pauc Phags_Pa Phag Phoenician Phnx Psalter_Pahlavi Phlp Rejang Rjng Runic Runr Samaritan Samr Saurashtra Saur Sharada Shrd Shavian Shaw Siddham Sidd SignWriting Sgnw Sinhala Sinh Sora_Sompeng Sora Soyombo Soyo Sundanese Sund Syloti_Nagri Sylo Syriac Syrc Tagalog Tglg Tagbanwa Tagb Tai_Le Tale Tai_Tham Lana Tai_Viet Tavt Takri Takr Tamil Taml Tangut Tang Telugu Telu Thaana Thaa Thai Thai Tibetan Tibt Tifinagh Tfng Tirhuta Tirh Ugaritic Ugar Vai Vaii Warang_Citi Wara Yi Yiii Zanabazar_Square Zanb", Kt = Rt + " Dogra Dogr Gunjala_Gondi Gong Hanifi_Rohingya Rohg Makasar Maka Medefaidrin Medf Old_Sogdian Sogo Sogdian Sogd", It = Kt + " Elymaic Elym Nandinagari Nand Nyiakeng_Puachue_Hmong Hmnp Wancho Wcho", Lt = It + " Chorasmian Chrs Diak Dives_Akuru Khitan_Small_Script Kits Yezi Yezidi", Ft = Lt + " Cypro_Minoan Cpmn Old_Uyghur Ougr Tangsa Tnsa Toto Vithkuqi Vith", Un = Ft + " " + Fn, Gn = {
   9: Rt,
-  10: It,
-  11: Kt,
+  10: Kt,
+  11: It,
   12: Lt,
   13: Ft,
   14: Un
@@ -6186,7 +6201,7 @@ function bi(e) {
   }
   const s = [], o = /* @__PURE__ */ new Map();
   for (let a = 0; a < e.indices.length; a += 3) {
-    const l = i[e.indices[a]], u = i[e.indices[a + 1]], d = i[e.indices[a + 2]], p = n[l], f = n[u], S = n[d], [b, I, j] = f.map((y, E) => y - p[E]), [K, L, be] = S.map((y, E) => y - p[E]), oe = [I * be - j * L, j * K - b * be, b * L - I * K], le = Math.hypot(...oe);
+    const l = i[e.indices[a]], u = i[e.indices[a + 1]], d = i[e.indices[a + 2]], p = n[l], f = n[u], S = n[d], [b, K, j] = f.map((y, E) => y - p[E]), [I, L, be] = S.map((y, E) => y - p[E]), oe = [K * be - j * L, j * I - b * be, b * L - K * I], le = Math.hypot(...oe);
     if (le <= 1e-12)
       continue;
     const A = [oe[0] / le, oe[1] / le, oe[2] / le];
@@ -6200,8 +6215,8 @@ function bi(e) {
 }
 function ki(e, t, n, i) {
   const { a: s, b: o, c: a, det: l } = e, u = (b) => {
-    const I = b[0] - s[0], j = b[1] - s[1], K = (I * (a[1] - s[1]) - j * (a[0] - s[0])) / l, L = ((o[0] - s[0]) * j - (o[1] - s[1]) * I) / l;
-    return [K, L, 1 - K - L, s[2] + K * (o[2] - s[2]) + L * (a[2] - s[2]) - b[2] - i];
+    const K = b[0] - s[0], j = b[1] - s[1], I = (K * (a[1] - s[1]) - j * (a[0] - s[0])) / l, L = ((o[0] - s[0]) * j - (o[1] - s[1]) * K) / l;
+    return [I, L, 1 - I - L, s[2] + I * (o[2] - s[2]) + L * (a[2] - s[2]) - b[2] - i];
   }, d = u(t), p = u(n);
   let f = 0, S = 1;
   for (let b = 0; b < d.length; b++) {
@@ -6215,7 +6230,7 @@ function ki(e, t, n, i) {
   return S - f > 1e-8 ? [f, S] : void 0;
 }
 function vi(e, t, n, i) {
-  const { horizontal: s, vertical: o, depth: a, near: l } = t, u = i[s] - n[s], d = i[o] - n[o], p = Math.max(1e-6, Math.min(2e-3, (i[a] - n[a]) * 1e-6)), f = e.map((A) => A.vertices.map((y) => [y[s] - n[s], y[o] - n[o], y[a] * l])), S = Array.from({ length: ue * ue }, () => []), b = (A, y) => Math.min(ue - 1, Math.max(0, Math.floor(A / y * ue))), I = (A, y) => {
+  const { horizontal: s, vertical: o, depth: a, near: l } = t, u = i[s] - n[s], d = i[o] - n[o], p = Math.max(1e-6, Math.min(2e-3, (i[a] - n[a]) * 1e-6)), f = e.map((A) => A.vertices.map((y) => [y[s] - n[s], y[o] - n[o], y[a] * l])), S = Array.from({ length: ue * ue }, () => []), b = (A, y) => Math.min(ue - 1, Math.max(0, Math.floor(A / y * ue))), K = (A, y) => {
     const E = b(A.left, u), z = b(A.right, u), V = b(A.bottom, d), D = b(A.top, d);
     for (let P = V; P <= D; P++)
       for (let U = E; U <= z; U++)
@@ -6223,7 +6238,7 @@ function vi(e, t, n, i) {
   }, j = (A, y, E) => {
     const [z, V] = A[0] <= y[0] ? [A, y] : [y, A], D = V[0] - z[0];
     if (D < 1e-10) {
-      I(Ne(A, y), E);
+      K(Ne(A, y), E);
       return;
     }
     const P = V[1] - z[1], U = u / ue;
@@ -6233,9 +6248,9 @@ function vi(e, t, n, i) {
         E(N * ue + J);
     }
   };
-  let K = 0, L = 0;
+  let I = 0, L = 0;
   const be = () => {
-    if (++K > ci)
+    if (++I > ci)
       throw qe();
   };
   for (const [A, y] of e.entries())
@@ -6244,7 +6259,7 @@ function vi(e, t, n, i) {
       if (Math.abs(P) < 1e-10)
         continue;
       const U = { a: z, b: V, c: D, det: P, box: Ne(z, V, D), nearest: Math.max(z[2], V[2], D[2]) };
-      I(U.box, (J) => {
+      K(U.box, (J) => {
         be(), S[J].push(U);
       });
     }
@@ -6276,21 +6291,21 @@ function vi(e, t, n, i) {
             }
           }
       }), N.sort((B, O) => B[0] - O[0]);
-      const nt = (B) => [D[0] + (P[0] - D[0]) * B, D[1] + (P[1] - D[1]) * B], Ie = (B, O, $) => {
+      const nt = (B) => [D[0] + (P[0] - D[0]) * B, D[1] + (P[1] - D[1]) * B], Ke = (B, O, $) => {
         if ((O - B) * U <= 1e-5)
           return;
         const ie = nt(B), it = nt(O);
         oe.push(...ie, ...it, $ ? 1 : 0), $ || le.push(A, ...y.vertices[E.a], ...y.vertices[E.b], ...ie, ...it);
       };
-      let Ke = 0;
+      let Ie = 0;
       for (let B = 0; B < N.length; B++) {
         const [O, $] = N[B];
         let ie = $;
         for (; B + 1 < N.length && N[B + 1][0] <= ie + 1e-8; )
           ie = Math.max(ie, N[++B][1]);
-        Ie(Ke, O, !1), Ie(O, ie, !0), Ke = ie;
+        Ke(Ie, O, !1), Ke(O, ie, !0), Ie = ie;
       }
-      Ie(Ke, 1, !1);
+      Ke(Ie, 1, !1);
     }
   return { view: t.view, width: u, height: d, segments: Float64Array.from(oe), edgePicks: Float64Array.from(le) };
 }

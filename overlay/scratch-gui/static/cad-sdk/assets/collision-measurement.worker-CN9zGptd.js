@@ -1,6 +1,6 @@
-var b7 = Object.defineProperty;
-var _7 = (e, q, l) => q in e ? b7(e, q, { enumerable: !0, configurable: !0, writable: !0, value: l }) : e[q] = l;
-var r2 = (e, q, l) => _7(e, typeof q != "symbol" ? q + "" : q, l);
+var be = Object.defineProperty;
+var _e = (e, q, l) => q in e ? be(e, q, { enumerable: !0, configurable: !0, writable: !0, value: l }) : e[q] = l;
+var r2 = (e, q, l) => _e(e, typeof q != "symbol" ? q + "" : q, l);
 function v6(e) {
   let q = 2166136261, l = 3339675911;
   for (let t = 0; t < e.length; t++) {
@@ -9,7 +9,7 @@ function v6(e) {
   }
   return `${e.length}:${q >>> 0}:${l >>> 0}`;
 }
-const v7 = {
+const ve = {
   "Aiming yaw servo": "Servo für die horizontale Ausrichtung",
   "Swivel spreader servo": "Drehservo für die Lasttraverse",
   "Purchased Feather controller clearance": "Bauraum für den gekauften Feather-Controller",
@@ -189,7 +189,7 @@ const v7 = {
   "Preview position Z (mm)": "Vorschauposition Z (mm)",
   "Expand simulation controls": "Simulationssteuerung ausklappen",
   "Minimize simulation controls": "Simulationssteuerung minimieren"
-}, k7 = {
+}, ke = {
   "Expected a finite number": "Eine endliche Zahl wird erwartet",
   "Text construction budget exceeded": "Budget für die Texterstellung überschritten",
   "Source assertion failed: {0}": "Zusicherung im Quelltext fehlgeschlagen: {0}",
@@ -264,7 +264,7 @@ const v7 = {
   "Expanded include tokens exceed the existing 8192-token limit": "Die erweiterten Includes überschreiten die Grenze von 8192 Tokens",
   "Drag a thumbnail onto the grid or a face.": "Vorschaubild auf das Raster oder eine Fläche ziehen.",
   "Drag onto a face, or tap a shape then its destination.": "Auf eine Fläche ziehen oder erst die Form und dann das Ziel antippen."
-}, w7 = {
+}, we = {
   "This source draft belongs to another project": "Dieser Quelltextentwurf gehört zu einem anderen Projekt",
   "Both GUI and source changed the same value in “{0}”. Resolve it before merging.": "Oberfläche und Quelltext haben denselben Wert in „{0}“ geändert. Lösen Sie den Konflikt vor dem Zusammenführen.",
   "Merge GUI changes": "Oberflächenänderungen zusammenführen",
@@ -329,7 +329,7 @@ const v7 = {
   "Model preview ready. No history entry was created.": "Modellvorschau bereit. Es wurde kein Verlaufseintrag erstellt.",
   "Read the current design source with stable object IDs and the current history revision.": "Aktuellen Modellquelltext mit stabilen Objektkennungen und der aktuellen Verlaufsrevision lesen.",
   "Preflight and apply a complete declarative design edit as one saved history step.": "Eine vollständige deklarative Modelländerung prüfen und als einen gespeicherten Verlaufsschritt anwenden."
-}, y7 = {
+}, ye = {
   "Model type": "Modelltyp",
   "All models": "Alle Modelle",
   "Preview unavailable": "Keine Vorschau verfügbar",
@@ -398,7 +398,7 @@ const v7 = {
   "Inserted with provenance. File could not be cached for offline reuse.": "Mit Herkunftsnachweis eingefügt. Die Datei konnte nicht zur Offline-Nutzung zwischengespeichert werden.",
   "Model inserted with provenance; viewport refresh failed. Close this panel to inspect the editor status.": "Modell mit Herkunftsnachweis eingefügt; die Ansicht konnte nicht aktualisiert werden. Dieses Fenster schließen und den Editorstatus prüfen.",
   "Catalogue exceeds 4 MiB": "Katalog überschreitet 4 MiB"
-}, S7 = {
+}, Se = {
   "Drive width (mm)": "Antriebsbreite (mm)",
   Cube: "Würfel",
   "Edge length (mm)": "Kantenlänge (mm)",
@@ -537,7 +537,7 @@ const v7 = {
   "Cylinder rounding must be smaller than its radius and half its height": "Die Zylinderabrundung muss kleiner als der Radius und die halbe Höhe sein",
   "Elliptical sector needs at least one angular segment": "Der elliptische Sektor benötigt mindestens ein Winkelsegment",
   "Negative elliptical angles are not supported": "Negative elliptische Winkel werden nicht unterstützt"
-}, A7 = {
+}, Ae = {
   "Unknown code example": "Unbekanntes Codebeispiel",
   "Code examples": "Codebeispiele",
   "Load example": "Beispiel laden",
@@ -654,7 +654,7 @@ const v7 = {
   "Only whole-output JSCAD colours are retained in conversion metadata; face colours are not converted.": "Nur JSCAD-Farben für vollständige Ausgaben bleiben in den Konvertierungsmetadaten erhalten; Farben einzelner Flächen werden nicht konvertiert.",
   "Camera controls": "Kamerasteuerung",
   "Pinch to zoom. Tinkercad: scroll to zoom, Shift-scroll to pan, Alt-scroll to orbit. Fusion: two-finger swipe to pan, Shift-swipe to orbit. Right-drag orbits; Shift-right-drag, middle-drag or Space-left-drag pans.": "Zum Zoomen zwei Finger zusammen- oder auseinanderziehen. Tinkercad: Scrollen zoomt, Umschalt-Scrollen verschiebt, Alt-Scrollen dreht die Ansicht. Fusion: Wischen mit zwei Fingern verschiebt, Umschalt-Wischen dreht. Ziehen mit rechts dreht; Umschalt-rechts, Mitteltaste oder Leertaste-links verschiebt die Ansicht."
-}, D7 = {
+}, De = {
   "The project changed while opening. Try again.": "Das Projekt wurde während des Öffnens geändert. Versuchen Sie es erneut.",
   "Imported 1 project.": "1 Projekt importiert.",
   "1 iteration · {0}": "1 Version · {0}",
@@ -717,7 +717,7 @@ const v7 = {
   "Paste objects": "Objekte einfügen",
   "Restore coded project": "Codeprojekt wiederherstellen",
   "Restored iteration {0}": "Version {0} wiederhergestellt"
-}, E7 = {
+}, Ee = {
   "Project actions": "Projektaktionen",
   "New project": "Neues Projekt",
   "Open project": "Projekt öffnen",
@@ -838,7 +838,7 @@ const v7 = {
   "Based on nominal threaded length; end runouts are trimmed": "Bezogen auf die Nenngewindelänge; die Ausläufe an den Enden werden beschnitten",
   "Apply thread redesign": "Gewindeauslegung anwenden",
   "Rebuild a resized screw at a chosen pitch or turns per start, resetting its local scale as one saved edit.": "Eine skalierte Schraube mit gewählter Steigung oder Windungszahl pro Gang als einen gespeicherten Schritt neu aufbauen und ihre lokale Skalierung zurücksetzen."
-}, C7 = {
+}, Ce = {
   "An edge length match refers to a missing edge.": "Eine Kantenlängenbeziehung verweist auf eine fehlende Kante.",
   "Match lengths between straight edges.": "Gleiche die Längen gerader Kanten ab.",
   "Invalid region edge length match.": "Ungültige Kantenlängenbeziehung in der Region.",
@@ -1929,7 +1929,7 @@ Benannte Formen verwenden let; ein abschließendes return erzeugt einen starren 
   "Open shape library as dialog": "Formenbibliothek als Dialog öffnen",
   "Dimension expressions": "Maßausdrücke",
   "Drag to change dimensions": "Ziehen zum Ändern der Maße"
-}, z7 = {
+}, ze = {
   "At most 64 boolean operands": "Höchstens 64 boolesche Operanden sind erlaubt",
   "Boolean operations need at least two shapes": "Boolesche Operationen benötigen mindestens zwei Formen",
   "Brickwright archive exceeds 64 MiB": "Das Brickwright-Archiv überschreitet 64 MiB",
@@ -2150,7 +2150,7 @@ Benannte Formen verwenden let; ein abschließendes return erzeugt einen starren 
   "{0}: {1}. Import a closed, consistently oriented solid mesh.": "{0}: {1}. Importiere ein geschlossenes, einheitlich orientiertes Körpernetz.",
   "“{0}” is driven; edit its expression or detach its binding first": "„{0}“ wird gesteuert; bearbeite zuerst den Ausdruck oder löse die Bindung",
   "“{0}” is not available on {1}": "„{0}“ ist bei {1} nicht verfügbar"
-}, P7 = {
+}, Pe = {
   "{0} {1}: {2}": "{0} {1}: {2}",
   "3D workplane": "3D-Arbeitsebene",
   "View cube": "Ansichtswürfel",
@@ -2179,7 +2179,7 @@ Benannte Formen verwenden let; ein abschließendes return erzeugt einen starren 
   "Geometry worker failed": "Die Geometrieberechnung ist fehlgeschlagen.",
   "Editor was disposed": "Der Editor wurde geschlossen",
   "Geometry exceeded 30 seconds. Simplify the edit or Undo.": "Die Geometrieberechnung dauert länger als 30 Sekunden. Vereinfachen Sie die Änderung oder machen Sie sie rückgängig."
-}, M7 = {
+}, Me = {
   "Command help": "Befehlshilfe",
   "List objects and sketches": "Körper und Skizzen auflisten",
   "Clear the terminal transcript": "Terminalprotokoll leeren",
@@ -2277,7 +2277,7 @@ Benannte Formen verwenden let; ein abschließendes return erzeugt einen starren 
   "Choose a parameter suggestion.": "Wählen Sie einen Parametervorschlag.",
   "Choose a parameter suggestion with ↑/↓ and Enter or Tab.": "Wählen Sie mit ↑/↓ einen Parametervorschlag und bestätigen Sie mit Enter oder Tab.",
   "No parameter suggestions.": "Keine Parametervorschläge."
-}, T7 = {
+}, Te = {
   "Interference check is limited to 64 bodies": "Die Kollisionsprüfung ist auf 64 Körper begrenzt",
   "{0} is not a closed solid; interference cannot be measured": "{0} ist kein geschlossener Körper; Überschneidungen können nicht gemessen werden",
   "Unknown object id": "Unbekannte Objekt-ID",
@@ -2351,7 +2351,7 @@ Benannte Formen verwenden let; ein abschließendes return erzeugt einen starren 
 node apps/mcp/server.mjs [--project /absolute/path/project.bcad] [--locale en|de]
 Erstelle zuerst den Workspace. Oberfläche und MCP verwenden denselben begrenzten CAD-Script-Compiler.
 `
-}, B7 = {
+}, Be = {
   "— move / rotate / scale": "— verschieben / drehen / skalieren",
   "— fit the view": "— Ansicht einpassen",
   "— undo": "— rückgängig",
@@ -2457,7 +2457,7 @@ Erstelle zuerst den Workspace. Oberfläche und MCP verwenden denselben begrenzte
   "Library file recovery/save failed: {0}": "Wiederherstellen/Speichern der Bibliotheksdatei fehlgeschlagen: {0}",
   ". Your saved data has not been overwritten.": ". Ihre gespeicherten Daten wurden nicht überschrieben.",
   ". WebGL 2 and WebAssembly are required.": ". WebGL 2 und WebAssembly werden benötigt."
-}, I7 = {
+}, Ie = {
   "Original files; units and orientation have not been verified. STEP, Fusion and other formats are available as source files. These files have not been screened for insertion or collision.": "Originaldateien: Einheiten und Ausrichtung sind nicht geprüft. STEP, Fusion und weitere Formate stehen als Quelldateien bereit. Zum Einfügen wird die Geometrie gesondert geprüft.",
   "Original file": "Originaldatei",
   "Upstream original": "Original beim Urheber",
@@ -2481,7 +2481,7 @@ Erstelle zuerst den Workspace. Oberfläche und MCP verwenden denselben begrenzte
   "STL inserted with provenance; viewport refresh failed.": "STL mit Herkunftsnachweis eingefügt. Die Ansicht konnte nicht aktualisiert werden.",
   "The model changed while loading. Retry insertion.": "Das Modell wurde während des Ladens geändert. Füge es erneut ein.",
   "Adafruit · Original files": "Adafruit · Originaldateien"
-}, R7 = {
+}, Re = {
   Robots: "Roboter",
   "Scout TT rover": "Scout-TT-Rover",
   "Scout PLA print layout": "Scout-PLA-Druckanordnung",
@@ -2545,7 +2545,7 @@ Erstelle zuerst den Workspace. Oberfläche und MCP verwenden denselben begrenzte
   "Start simulation first": "Starte zuerst die Simulation",
   "Motor speed must be between -720 and 720 degrees per second": "Die Drehzahl muss zwischen -720 und 720 Grad pro Sekunde liegen",
   "Invalid hinge motor command": "Ungültiger Motorbefehl für das Drehgelenk"
-}, V7 = {
+}, Ve = {
   "A block program can have at most 64 parameters": "Ein Blockprogramm kann höchstens 64 Parameter haben",
   "A loop step cannot be zero": "Die Schrittweite einer Schleife darf nicht null sein",
   "Blocks are nested too deeply": "Die Blöcke sind zu tief verschachtelt",
@@ -2584,7 +2584,7 @@ Erstelle zuerst den Workspace. Oberfläche und MCP verwenden denselben begrenzte
   "{0} must be a whole number from {1} to {2}": "{0} muss eine ganze Zahl von {1} bis {2} sein",
   "The block program is not valid JSON": "Das Blockprogramm ist kein gültiges JSON",
   "Compile a block/pseudocode modelling program (JSON, format brickwright-cad-blocks) to parametric CAD Script, OpenSCAD or JSCAD without changing the model. Pass CAD Script output to cad_create_code_object.": "Kompiliert ein Block-/Pseudocode-Modellprogramm (JSON, Format brickwright-cad-blocks) in parametrisches CAD Script, OpenSCAD oder JSCAD, ohne das Modell zu ändern. Übergib die CAD-Script-Ausgabe an cad_create_code_object."
-}, O7 = {
+}, Oe = {
   "Check printability…": "Druckbarkeit prüfen…",
   "Check printability": "Druckbarkeit prüfen",
   "Build a solid before checking printability": "Erstellen Sie zuerst einen Körper, bevor Sie die Druckbarkeit prüfen",
@@ -2618,7 +2618,7 @@ Erstelle zuerst den Workspace. Oberfläche und MCP verwenden denselben begrenzte
   "Bed Z (mm)": "Druckbett Z (mm)",
   "Printability settings must be finite positive millimetres and an overhang angle between 0 and 90 degrees": "Druckbarkeitseinstellungen müssen endliche positive Millimeterwerte und einen Überhangwinkel zwischen 0 und 90 Grad enthalten",
   "Printability check is limited to {0} triangles; the design has {1}": "Die Druckbarkeitsprüfung ist auf {0} Dreiecke begrenzt; das Design hat {1}"
-}, F7 = {
+}, Fe = {
   "Invalid gear mesh": "Ungültiger Zahneingriff",
   "Choose two different hinge connectors": "Wählen Sie zwei verschiedene Drehgelenke",
   "Gear ratio must be between 0.001 and 1000 in magnitude": "Das Übersetzungsverhältnis muss betragsmäßig zwischen 0,001 und 1000 liegen",
@@ -2631,7 +2631,7 @@ Erstelle zuerst den Workspace. Oberfläche und MCP verwenden denselben begrenzte
   "Gear pair": "Zahnradpaar",
   "Two meshing involute spur gears, 12 and 24 teeth, module 2 mm, on axles over a fixed plate. The driver hinge (A) turns the driven gear at −1:2.": "Zwei kämmende Evolventen-Stirnräder mit 12 und 24 Zähnen, Modul 2 mm, auf Achsen über einer festen Platte. Das Antriebsgelenk (A) dreht das Abtriebsrad im Verhältnis −1:2.",
   "Meshing gears must be separate moving bodies": "Kämmende Zahnräder müssen getrennte bewegliche Körper sein"
-}, N7 = {
+}, Ne = {
   "Cannot read “{0}” of nothing": "„{0}“ kann nicht von einem leeren Wert gelesen werden",
   "Expected a bounded kernelCAD array": "Ein begrenztes kernelCAD-Array wurde erwartet",
   "Expected a finite kernelCAD number": "Eine endliche kernelCAD-Zahl wurde erwartet",
@@ -2678,7 +2678,7 @@ Erstelle zuerst den Workspace. Oberfläche und MCP verwenden denselben begrenzte
   "CAD Script smoothLoft requires document version 43": "CAD Script smoothLoft erfordert Dokumentversion 43",
   "Smooth loft folds back along Z; space its sections further apart or reduce their offsets": "Der glatte Loft läuft entlang Z zurück; Querschnitte weiter auseinander legen oder ihre Versätze verringern",
   "Smooth loft surface crosses itself between its sections": "Die Fläche des glatten Lofts schneidet sich zwischen ihren Querschnitten selbst"
-}, L7 = {
+}, Le = {
   "Summarize or export the command journal": "Befehlsprotokoll zusammenfassen oder exportieren",
   "Usage: journal [export [cadscript|replay]].": "Verwendung: journal [export [cadscript|replay]].",
   "Enter a command.": "Geben Sie einen Befehl ein.",
@@ -2703,7 +2703,7 @@ Erstelle zuerst den Workspace. Oberfläche und MCP verwenden denselben begrenzte
   "Nothing to repeat.": "Nichts zu wiederholen.",
   "Finish or cancel the current command before running a script.": "Schließen Sie den aktuellen Befehl ab oder brechen Sie ihn ab, bevor Sie ein Skript ausführen.",
   "Tab completes · ↑↓ history · Esc cancels · paste several lines to run a script": "Tab ergänzt · ↑↓ Befehlsverlauf · Esc bricht ab · mehrere Zeilen einfügen führt ein Skript aus"
-}, j7 = {
+}, je = {
   "Measure volume, area and bounds exactly with the B-rep kernel": "Volumen, Fläche und Grenzen exakt mit dem B-Rep-Kern messen",
   'Usage: export step [all|"name"|id ...].': 'Verwendung: export step [all|"Name"|ID ...].',
   'Usage: measure exact [all|"name"|id ...].': 'Verwendung: measure exact [all|"Name"|ID ...].',
@@ -2714,6 +2714,21 @@ Erstelle zuerst den Workspace. Oberfläche und MCP verwenden denselben begrenzte
   "Exact kernel: load {0} ms · run {1} ms · WASM memory {2} MiB": "Exakter Kern: Laden {0} ms · Ausführung {1} ms · WASM-Speicher {2} MiB",
   "STEP export: {0} bodies, {1} KiB, exact B-rep ({2}).": "STEP-Export: {0} Körper, {1} KiB, exakte B-Rep ({2}).",
   "The exact kernel exceeded 60 seconds; the request was stopped.": "Der exakte Kern hat 60 Sekunden überschritten; die Anfrage wurde gestoppt.",
+  "The exact kernel did not finish within {0} seconds, so it was stopped. The model was not changed.": "Der exakte Kern ist nicht innerhalb von {0} Sekunden fertig geworden und wurde gestoppt. Das Modell wurde nicht geändert.",
+  "The exact kernel ran out of memory for this job, so it was stopped. The model was not changed. Simplify the feature (fewer edges or holes) or run it on a computer.": "Dem exakten Kern ist für diesen Auftrag der Speicher ausgegangen, deshalb wurde er gestoppt. Das Modell wurde nicht geändert. Vereinfache das Feature (weniger Kanten oder Löcher) oder führe es auf einem Computer aus.",
+  "The exact kernel failed and was restarted. The model was not changed. ({0})": "Der exakte Kern ist fehlgeschlagen und wurde neu gestartet. Das Modell wurde nicht geändert. ({0})",
+  "Rounding {0} edges ({1} of them curved) at once is too much for the exact kernel on this device, which allows about {2} curved or {3} straight edges per feature. Choose a face with fewer edges.": "{0} Kanten ({1} davon gekrümmt) auf einmal zu runden ist für den exakten Kern auf diesem Gerät zu viel; er erlaubt etwa {2} gekrümmte oder {3} gerade Kanten pro Feature. Wähle eine Fläche mit weniger Kanten.",
+  "Beveling {0} edges ({1} of them curved) at once is too much for the exact kernel on this device, which allows about {2} curved or {3} straight edges per feature. Choose a face with fewer edges.": "{0} Kanten ({1} davon gekrümmt) auf einmal zu fasen ist für den exakten Kern auf diesem Gerät zu viel; er erlaubt etwa {2} gekrümmte oder {3} gerade Kanten pro Feature. Wähle eine Fläche mit weniger Kanten.",
+  "Shelling a body with {0} faces is too much for the exact kernel on this device, which allows {1}. Shell a simpler body, or add the holes after shelling.": "Einen Körper mit {0} Flächen auszuhöhlen ist für den exakten Kern auf diesem Gerät zu viel; er erlaubt {1}. Höhle einen einfacheren Körper aus oder füge die Löcher nach dem Aushöhlen hinzu.",
+  "The exact kernel stopped this step at its own {0} s limit, so it was not built. The model was not changed. Try a simpler body.": "Der exakte Kern hat diesen Schritt an seiner eigenen Grenze von {0} s gestoppt, deshalb wurde er nicht erstellt. Das Modell wurde nicht geändert. Versuche es mit einem einfacheren Körper.",
+  "Stop the exact kernel. The model is not changed.": "Den exakten Kern stoppen. Das Modell wird nicht geändert.",
+  "Cancel exact kernel job": "Auftrag des exakten Kerns abbrechen",
+  "Exact feature": "Exaktes Feature",
+  "STEP export": "STEP-Export",
+  "Exact measure": "Exakte Messung",
+  "{0} on the exact kernel… {1} s": "{0} auf dem exakten Kern … {1} s",
+  "Running on the exact kernel… {0} s": "Läuft auf dem exakten Kern … {0} s",
+  "Cancelled. The model was not changed.": "Abgebrochen. Das Modell wurde nicht geändert.",
   "STEP · exact B-rep (loads the exact kernel)": "STEP · exakte B-Rep (lädt den exakten Kern)",
   "STEP export rebuilds the selected bodies (or all bodies) with the exact B-rep kernel, which loads on first use (about 9 MB). Bodies without an exact construction, such as imported meshes, are reported instead of being exported as triangles.": "Der STEP-Export baut die ausgewählten Körper (oder alle Körper) mit dem exakten B-Rep-Kern neu auf, der bei der ersten Verwendung geladen wird (etwa 9 MB). Körper ohne exakte Konstruktion, etwa importierte Netze, werden gemeldet statt als Dreiecke exportiert.",
   "Recorded library sources export as STL with attribution; exact STEP export is not available for them yet.": "Erfasste Bibliotheksquellen werden als STL mit Namensnennung exportiert; ein exakter STEP-Export ist für sie noch nicht verfügbar.",
@@ -2743,7 +2758,7 @@ node apps/cli/crispcad.mjs inspect|interference|printability|measure <projekt.bc
 node apps/cli/crispcad.mjs step <projekt.bcad> <datei.step>
 Optionen: --locale en|de. Die Ausgabe ist JSON auf stdout. measure, step und die Befehle fillet, chamfer, shell und recompute exact verwenden den exakten B-Rep-Kern; --out schreibt Dateien, die Befehle erzeugen, etwa export step.
 `
-}, K7 = {
+}, Ke = {
   // Model and validation
   "exact-feature": "Exaktes Feature",
   fillet: "Verrundung",
@@ -2842,26 +2857,26 @@ Optionen: --locale en|de. Die Ausgabe ist JSON auf stdout. measure, step und die
   "This editor session does not declare the exact kernel. The host must create it with createEditorSession() (or kernels: [exactKernelIdentity]).": "Diese Editor-Sitzung deklariert den exakten Kern nicht. Die Host-Anwendung muss sie mit createEditorSession() (oder kernels: [exactKernelIdentity]) erzeugen."
 };
 let G3 = "en";
-function U7(e) {
+function Ue(e) {
   return G3 = e.toLowerCase().split(/[-_]/)[0] === "de" ? "de" : "en", G3;
 }
 function d(e, ...q) {
-  const l = typeof e == "string" ? e : e.reduce((n, i, r) => n + (r ? `{${r - 1}}` : "") + i, ""), t = G3 === "de" ? V7[l] ?? O7[l] ?? F7[l] ?? N7[l] ?? v7[l] ?? I7[l] ?? R7[l] ?? k7[l] ?? w7[l] ?? S7[l] ?? y7[l] ?? A7[l] ?? C7[l] ?? z7[l] ?? B7[l] ?? P7[l] ?? M7[l] ?? L7[l] ?? T7[l] ?? E7[l] ?? D7[l] ?? j7[l] ?? K7[l] ?? l : l;
+  const l = typeof e == "string" ? e : e.reduce((n, i, r) => n + (r ? `{${r - 1}}` : "") + i, ""), t = G3 === "de" ? Ve[l] ?? Oe[l] ?? Fe[l] ?? Ne[l] ?? ve[l] ?? Ie[l] ?? Re[l] ?? ke[l] ?? we[l] ?? Se[l] ?? ye[l] ?? Ae[l] ?? Ce[l] ?? ze[l] ?? Be[l] ?? Pe[l] ?? Me[l] ?? Le[l] ?? Te[l] ?? Ee[l] ?? De[l] ?? je[l] ?? Ke[l] ?? l : l;
   return typeof e == "string" ? t : t.replace(/\{(\d+)\}/g, (n, i) => String(q[Number(i)]));
 }
-const W7 = ["1:5", "1:2", "1:1", "2:1", "5:1"], Z3 = 4, z3 = 24, N4 = { number: 24, revision: 12, drawnBy: 16 }, m2 = (e) => !!e && typeof e == "object" && !Array.isArray(e), $1 = (e) => typeof e == "string" && /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,95}$/.test(e) && !["constructor", "prototype", "__proto__"].includes(e), k6 = (e) => typeof e == "string" && /^vertex:[a-zA-Z0-9_-]{1,96}:[a-zA-Z0-9_-]{1,96}$/.test(e) && e.split(":").slice(1).every($1), L4 = (e) => typeof e == "string" && /^arc:[a-zA-Z0-9_-]{1,96}:[a-zA-Z0-9_-]{1,96}:[a-zA-Z0-9_-]{1,96}$/.test(e) && e.split(":").slice(1).every($1), Z5 = (e) => e.startsWith("circle:") && $1(e.slice(7)), j4 = (e) => typeof e == "string" && (/^bounds:(sw|se|nw|ne)$/.test(e) || Z5(e) || k6(e));
+const We = ["1:5", "1:2", "1:1", "2:1", "5:1"], Z3 = 4, z3 = 24, N4 = { number: 24, revision: 12, drawnBy: 16 }, m2 = (e) => !!e && typeof e == "object" && !Array.isArray(e), $1 = (e) => typeof e == "string" && /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,95}$/.test(e) && !["constructor", "prototype", "__proto__"].includes(e), k6 = (e) => typeof e == "string" && /^vertex:[a-zA-Z0-9_-]{1,96}:[a-zA-Z0-9_-]{1,96}$/.test(e) && e.split(":").slice(1).every($1), L4 = (e) => typeof e == "string" && /^arc:[a-zA-Z0-9_-]{1,96}:[a-zA-Z0-9_-]{1,96}:[a-zA-Z0-9_-]{1,96}$/.test(e) && e.split(":").slice(1).every($1), Z5 = (e) => e.startsWith("circle:") && $1(e.slice(7)), j4 = (e) => typeof e == "string" && (/^bounds:(sw|se|nw|ne)$/.test(e) || Z5(e) || k6(e));
 function P3(e, q) {
   return Number.isFinite(e) && Number.isFinite(q) && e >= 10 && e <= 265 && q >= 28 && q <= 176;
 }
 const K4 = (e) => Array.isArray(e) && e.length === 3 && Array.from(e).every((q) => typeof q == "number" && Number.isFinite(q) && Math.abs(q) <= 1e6), $3 = (e) => typeof e == "number" ? Number.isFinite(e) && Math.abs(e) <= 1e5 : typeof e == "string" && !!e.trim() && e.length <= 160 && !/[\u0000-\u001f]/.test(e), U4 = (e) => m2(e) && $3(e.at) && $3(e.position);
-function G7(e) {
+function Ge(e) {
   if (e.drawings === void 0)
     return;
   const q = /* @__PURE__ */ new Set(), l = () => new Error(d("Invalid drawing sheets in this CAD project."));
   if (e.version < 9 || !Array.isArray(e.drawings) || e.drawings.length > 64)
     throw l();
   for (const t of e.drawings) {
-    if (!m2(t) || !$1(t.id) || q.has(t.id) || typeof t.title != "string" || !t.title.trim() || t.title.length > 80 || /[\u0000-\u001f]/.test(t.title) || !W7.includes(t.scale) || typeof t.hiddenLines != "boolean" || !m2(t.source))
+    if (!m2(t) || !$1(t.id) || q.has(t.id) || typeof t.title != "string" || !t.title.trim() || t.title.length > 80 || /[\u0000-\u001f]/.test(t.title) || !We.includes(t.scale) || typeof t.hiddenLines != "boolean" || !m2(t.source))
       throw l();
     if (t.titleBlock !== void 0) {
       if (e.version < 29 || !m2(t.titleBlock))
@@ -2941,12 +2956,12 @@ function x5(e) {
 function H3(e) {
   return e.kind === "outline" ? [e] : e.kind === "region" && Array.isArray(e.loops) ? e.loops.filter((q) => q?.kind === "outline") : [];
 }
-function Z7(e, q) {
+function Ze(e, q) {
   for (const { points: l, vertexIds: t } of H3(e))
     if (t !== void 0 && (q < 18 || !Array.isArray(t) || t.length !== l.length || !Array.from(t).every($1) || new Set(t).size !== t.length))
       throw new Error(d("Invalid outline vertex identities."));
 }
-function $7(e, q, l) {
+function $e(e, q, l) {
   const t = H3(e);
   for (const n of H3(q)) {
     if (n.relations !== void 0 || q.kind === "region" && Array.isArray(q.edgeMatches) && q.edgeMatches.some((s) => s?.target === n.id || s?.reference === n.id) || q.kind === "region" && Array.isArray(q.placements) && q.placements.some((s) => s?.target === n.id && s.targetEdge || s?.reference === n.id && s.referenceEdge))
@@ -2970,7 +2985,7 @@ function $7(e, q, l) {
   }
 }
 const X3 = (e, q, l) => typeof e == "number" && Number.isFinite(e) && e >= q && e <= l, W4 = (e, q = 1e6) => Array.isArray(e) && e.length === 3 && e.every((l) => X3(l, -q, q));
-function H7(e) {
+function He(e) {
   if (e.version < 8)
     return;
   const q = () => {
@@ -2987,7 +3002,7 @@ function H7(e) {
       (!t || typeof t.id != "string" || !/^[a-zA-Z0-9_-]{1,96}$/.test(t.id) || l.has(t.id) || !e.roots.includes(t.bodyId) || e.nodes[t.bodyId].reference || e.nodes[t.bodyId].role === "hole" || !W4(t.point) || !/^#[a-f0-9]{6}$/i.test(t.color)) && q(), l.add(t.id);
   }
 }
-function X7(e, q, l = !1) {
+function Xe(e, q, l = !1) {
   let [t, n, i] = e;
   for (const r of l ? [2, 1, 0] : [0, 1, 2]) {
     const o = q[r] * Math.PI / 180 * (l ? -1 : 1), a = Math.cos(o), h = Math.sin(o);
@@ -2995,8 +3010,8 @@ function X7(e, q, l = !1) {
   }
   return [t, n, i];
 }
-const Y7 = (e, q) => X7(e.map((l, t) => l * q.scale[t]), q.rotation).map((l, t) => l + q.position[t]), S5 = (e) => !!e && typeof e == "object" && !Array.isArray(e), V2 = (e, q) => S5(e) && Object.keys(e).length === q.split(" ").length && q.split(" ").every((l) => Object.hasOwn(e, l)), Q2 = (e, q) => Array.isArray(e) ? Array.isArray(q) && e.length === q.length && e.every((l, t) => Q2(l, q[t])) : S5(e) ? S5(q) && Object.keys(e).length === Object.keys(q).length && Object.keys(e).every((l) => Object.hasOwn(q, l) && Q2(e[l], q[l])) : e === q, w6 = (e) => typeof e == "number" && Number.isFinite(e) && e >= 0, L5 = (e) => w6(e) && e > 0, J7 = (e) => typeof e == "string" && /^[a-f0-9]{64}$/.test(e), G4 = (e) => Array.isArray(e) && e.length === 3 && e.every((q) => typeof q == "number" && Number.isFinite(q));
-function Q7(e, q) {
+const Ye = (e, q) => Xe(e.map((l, t) => l * q.scale[t]), q.rotation).map((l, t) => l + q.position[t]), S5 = (e) => !!e && typeof e == "object" && !Array.isArray(e), V2 = (e, q) => S5(e) && Object.keys(e).length === q.split(" ").length && q.split(" ").every((l) => Object.hasOwn(e, l)), Q2 = (e, q) => Array.isArray(e) ? Array.isArray(q) && e.length === q.length && e.every((l, t) => Q2(l, q[t])) : S5(e) ? S5(q) && Object.keys(e).length === Object.keys(q).length && Object.keys(e).every((l) => Object.hasOwn(q, l) && Q2(e[l], q[l])) : e === q, w6 = (e) => typeof e == "number" && Number.isFinite(e) && e >= 0, L5 = (e) => w6(e) && e > 0, Je = (e) => typeof e == "string" && /^[a-f0-9]{64}$/.test(e), G4 = (e) => Array.isArray(e) && e.length === 3 && e.every((q) => typeof q == "number" && Number.isFinite(q));
+function Qe(e, q) {
   if (!V2(e, "format version selectedFile quality evidence") || e.format !== "brickwright-library-collision-report" || e.version !== 1)
     return !1;
   const l = e.selectedFile;
@@ -3012,7 +3027,7 @@ function Q7(e, q) {
   if (!S5(a) || a.maxAnalysisBytes !== 16777216 || a.maxAnalysisTriangles !== 83333 || l.bytes > a.maxAnalysisBytes || a.maxTriangles > a.maxAnalysisTriangles || !Number.isSafeInteger(t.triangles) || t.triangles < 1 || t.triangles > a.maxTriangles || !V2(t.boundsMm, "min max") || !G4(t.boundsMm.min) || !G4(t.boundsMm.max) || !t.boundsMm.max.every((p, g) => p >= t.boundsMm.min[g] && p - t.boundsMm.min[g] <= a.maxExtentMm) || !L5(t.signedVolumeMm3))
     return !1;
   const h = e.evidence;
-  if (!V2(h, "fileSha256 checkedOn toMillimetresZUp engine engineVersion qualifierVersion qualified scope geometrySha256 sourceVolumeMm3 hulls certificate nativeCheck") || h.fileSha256 !== l.sha256 || h.checkedOn !== t.checkedOn || !Q2(h.toMillimetresZUp, a.toMillimetresZUp) || h.engine !== "Jolt" || !["1.1.0-bw.9", "1.1.0-bw.10"].includes(h.engineVersion) || h.qualifierVersion !== "brickwright-library-collision/1" || h.qualified !== !0 || h.scope !== "rigid-collision-preview" || !J7(h.geometrySha256) || !L5(h.sourceVolumeMm3))
+  if (!V2(h, "fileSha256 checkedOn toMillimetresZUp engine engineVersion qualifierVersion qualified scope geometrySha256 sourceVolumeMm3 hulls certificate nativeCheck") || h.fileSha256 !== l.sha256 || h.checkedOn !== t.checkedOn || !Q2(h.toMillimetresZUp, a.toMillimetresZUp) || h.engine !== "Jolt" || !["1.1.0-bw.9", "1.1.0-bw.10"].includes(h.engineVersion) || h.qualifierVersion !== "brickwright-library-collision/1" || h.qualified !== !0 || h.scope !== "rigid-collision-preview" || !Je(h.geometrySha256) || !L5(h.sourceVolumeMm3))
     return !1;
   const s = h.certificate;
   if (!(V2(s, "sourceSHA256 algorithm strategy maxHulls missingVolumeMm3 extraVolumeMm3 relativeError boundsErrorMm tolerance") || V2(s, "sourceSHA256 algorithm strategy maxHulls missingVolumeMm3 extraVolumeMm3 numericalResidualVolumeMm3 relativeError boundsErrorMm tolerance")) || s.sourceSHA256 !== h.geometrySha256 || s.algorithm !== "manifold-compound/v1" || s.strategy !== "bsp" || !Number.isSafeInteger(s.maxHulls) || s.maxHulls < 1 || s.maxHulls > 2048 || !Number.isSafeInteger(h.hulls) || h.hulls < 1 || h.hulls > s.maxHulls)
@@ -3023,7 +3038,7 @@ function Q7(e, q) {
   const c = (s.missingVolumeMm3 + s.extraVolumeMm3 + (s.numericalResidualVolumeMm3 ?? 0)) / h.sourceVolumeMm3;
   return !Number.isFinite(c) || Math.abs(c - s.relativeError) > Number.EPSILON * 16 * Math.max(1, c, s.relativeError) || n.physics && (n.physics.qualified !== !0 || n.physics.engine !== h.engine || n.physics.engineVersion !== h.engineVersion || n.physics.qualifierVersion !== h.qualifierVersion) ? !1 : Q2(h.nativeCheck, { build: "debug", ground: !1, steps: 1, stepSeconds: 5e-3 });
 }
-const ee = [
+const e7 = [
   "CC0-1.0",
   "MIT",
   "Apache-2.0",
@@ -3031,9 +3046,9 @@ const ee = [
   "BSD-3-Clause",
   "CC-BY-3.0",
   "CC-BY-4.0"
-], qe = ["cad-script", "openscad", "jscad"];
-function le(e) {
-  return qe.includes(e);
+], q7 = ["cad-script", "openscad", "jscad"];
+function l7(e) {
+  return q7.includes(e);
 }
 const a2 = (e) => !!e && typeof e == "object" && !Array.isArray(e), l2 = (e, q = 4096) => typeof e == "string" && e.trim().length > 0 && e.length <= q && !/[\u0000-\u001f]/.test(e), y6 = (e) => typeof e == "string" && /^[a-f0-9]{64}$/.test(e), o5 = (e) => {
   if (!l2(e, 8192))
@@ -3049,21 +3064,21 @@ const a2 = (e) => !!e && typeof e == "object" && !Array.isArray(e), l2 = (e, q =
     return !1;
   const q = new Date(e);
   return Number.isFinite(q.getTime()) && q.toISOString().slice(0, 10) === e;
-}, u2 = (e, q) => Object.keys(e).every((l) => q.split(" ").includes(l)), te = (e) => typeof e == "string" && e.length <= 512 && /^(?:sources|meshes|evidence)\/(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_-]+\.[A-Za-z0-9._-]+$/.test(e), Y2 = (e) => a2(e) && u2(e, "url path format sha256 bytes") && (Object.hasOwn(e, "url") && !Object.hasOwn(e, "path") && o5(e.url) || Object.hasOwn(e, "path") && !Object.hasOwn(e, "url") && te(e.path)) && l2(e.format, 80) && /^[a-zA-Z0-9][a-zA-Z0-9.+_-]*$/.test(e.format) && y6(e.sha256) && Number.isSafeInteger(e.bytes) && e.bytes > 0, Z4 = (e) => a2(e) && u2(e, "spdx scope attribution evidenceUrl capturedOn review reviewer") && ee.includes(e.spdx) && e.scope === "asset" && e.review === "accepted" && l2(e.reviewer, 240) && l2(e.attribution) && o5(e.evidenceUrl) && S6(e.capturedOn), ne = (e) => a2(e) && u2(e, "repositoryUrl commit") && o5(e.repositoryUrl) && typeof e.commit == "string" && /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(e.commit), $4 = (e, q = "openscad") => typeof e == "string" && e.length <= 512 && (q === "ldraw" ? /^(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_-]+\.dat$/ : /^(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_-]+\.scad$/).test(e);
-function ie(e) {
+}, u2 = (e, q) => Object.keys(e).every((l) => q.split(" ").includes(l)), t7 = (e) => typeof e == "string" && e.length <= 512 && /^(?:sources|meshes|evidence)\/(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_-]+\.[A-Za-z0-9._-]+$/.test(e), Y2 = (e) => a2(e) && u2(e, "url path format sha256 bytes") && (Object.hasOwn(e, "url") && !Object.hasOwn(e, "path") && o5(e.url) || Object.hasOwn(e, "path") && !Object.hasOwn(e, "url") && t7(e.path)) && l2(e.format, 80) && /^[a-zA-Z0-9][a-zA-Z0-9.+_-]*$/.test(e.format) && y6(e.sha256) && Number.isSafeInteger(e.bytes) && e.bytes > 0, Z4 = (e) => a2(e) && u2(e, "spdx scope attribution evidenceUrl capturedOn review reviewer") && e7.includes(e.spdx) && e.scope === "asset" && e.review === "accepted" && l2(e.reviewer, 240) && l2(e.attribution) && o5(e.evidenceUrl) && S6(e.capturedOn), n7 = (e) => a2(e) && u2(e, "repositoryUrl commit") && o5(e.repositoryUrl) && typeof e.commit == "string" && /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(e.commit), $4 = (e, q = "openscad") => typeof e == "string" && e.length <= 512 && (q === "ldraw" ? /^(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_-]+\.dat$/ : /^(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_-]+\.scad$/).test(e);
+function i7(e) {
   if (!Array.isArray(e) || e.length !== 16 || !e.every((t) => typeof t == "number" && Number.isFinite(t)) || e[3] !== 0 || e[7] !== 0 || e[11] !== 0 || e[15] !== 1)
     return !1;
   const q = e, l = q[0] * (q[5] * q[10] - q[9] * q[6]) - q[4] * (q[1] * q[10] - q[9] * q[2]) + q[8] * (q[1] * q[6] - q[5] * q[2]);
   return Number.isFinite(l) && l !== 0;
 }
-function re(e) {
+function r7(e) {
   try {
-    return ae(e);
+    return a7(e);
   } catch {
     return { valid: !1, errors: ["Catalogue must contain plain serializable metadata."] };
   }
 }
-function ae(e) {
+function a7(e) {
   const q = [];
   if (!a2(e) || !u2(e, "format version assets") || e.format !== "brickwright-model-library" || e.version !== 1 || !Array.isArray(e.assets) || e.assets.length > 1e3)
     return { valid: !1, errors: ["Unsupported model library format, version or asset list (maximum 1000)."] };
@@ -3087,7 +3102,7 @@ function ae(e) {
         const s = /* @__PURE__ */ new Set([a.rootPath]), f = /* @__PURE__ */ new Set([t.original.path]);
         let c = t.original.bytes;
         for (const p of a.dependencies) {
-          if (!a2(p) || !u2(p, "path file author sourceUrl sourceRevision licence") || !$4(p.path, h) || s.has(p.path) || !Y2(p.file) || !p.file.path || p.file.format !== h || f.has(p.file.path) || !l2(p.author, 1e3) || !o5(p.sourceUrl) || !ne(p.sourceRevision) || !Z4(p.licence)) {
+          if (!a2(p) || !u2(p, "path file author sourceUrl sourceRevision licence") || !$4(p.path, h) || s.has(p.path) || !Y2(p.file) || !p.file.path || p.file.format !== h || f.has(p.file.path) || !l2(p.author, 1e3) || !o5(p.sourceUrl) || !n7(p.sourceRevision) || !Z4(p.licence)) {
             i("Every source dependency requires a distinct local original, pinned revision and reviewed grant.");
             continue;
           }
@@ -3115,11 +3130,11 @@ function ae(e) {
         i("Invalid quality evidence.");
       else {
         const h = [t.original, ...Array.isArray(t.derivatives) ? t.derivatives : []];
-        if (h.some((s) => Y2(s) && s.sha256 === a.fileSha256) || i("Quality evidence must name an original or derivative hash."), h.some((s) => Y2(s) && s.sha256 === a.fileSha256 && le(s.format)) && i("Geometry quality evidence must identify rendered geometry, not program source."), !a.parseable && (a.closedPositiveVolume || a.withinSizeLimits || a.withinTriangleLimits) && i("Unparseable geometry cannot pass geometry checks."), a.screeningPolicy !== void 0) {
+        if (h.some((s) => Y2(s) && s.sha256 === a.fileSha256) || i("Quality evidence must name an original or derivative hash."), h.some((s) => Y2(s) && s.sha256 === a.fileSha256 && l7(s.format)) && i("Geometry quality evidence must identify rendered geometry, not program source."), !a.parseable && (a.closedPositiveVolume || a.withinSizeLimits || a.withinTriangleLimits) && i("Unparseable geometry cannot pass geometry checks."), a.screeningPolicy !== void 0) {
           const s = a.screeningPolicy;
-          (!a2(s) || !u2(s, "maxTriangles maxExtentMm toMillimetresZUp maxAnalysisBytes maxAnalysisTriangles") || !Number.isSafeInteger(s.maxTriangles) || s.maxTriangles < 1 || !Number.isSafeInteger(s.maxAnalysisTriangles) || s.maxAnalysisTriangles < s.maxTriangles || !Number.isSafeInteger(s.maxAnalysisBytes) || s.maxAnalysisBytes < 1 || typeof s.maxExtentMm != "number" || !Number.isFinite(s.maxExtentMm) || s.maxExtentMm <= 0 || !ie(s.toMillimetresZUp)) && i("Invalid reproducible mesh screening policy.");
+          (!a2(s) || !u2(s, "maxTriangles maxExtentMm toMillimetresZUp maxAnalysisBytes maxAnalysisTriangles") || !Number.isSafeInteger(s.maxTriangles) || s.maxTriangles < 1 || !Number.isSafeInteger(s.maxAnalysisTriangles) || s.maxAnalysisTriangles < s.maxTriangles || !Number.isSafeInteger(s.maxAnalysisBytes) || s.maxAnalysisBytes < 1 || typeof s.maxExtentMm != "number" || !Number.isFinite(s.maxExtentMm) || s.maxExtentMm <= 0 || !i7(s.toMillimetresZUp)) && i("Invalid reproducible mesh screening policy.");
         }
-        if (a.collisionReport !== void 0 && !Q7(a.collisionReport, t) && i("Invalid complete collision qualification report or bindings."), a.physics !== void 0) {
+        if (a.collisionReport !== void 0 && !Qe(a.collisionReport, t) && i("Invalid complete collision qualification report or bindings."), a.physics !== void 0) {
           const s = a.physics;
           !a2(s) || !u2(s, "engine engineVersion qualifierVersion qualified") || s.engine !== "Jolt" || !l2(s.engineVersion, 240) || !l2(s.qualifierVersion, 240) || typeof s.qualified != "boolean" ? i("Invalid versioned physics evidence.") : s.qualified && !(a.parseable && a.closedPositiveVolume && a.withinSizeLimits && a.withinTriangleLimits) && i("Physics qualification requires all geometry checks to pass.");
         }
@@ -3133,8 +3148,8 @@ function ae(e) {
     return { valid: !1, errors: ["Catalogue must contain serializable metadata."] };
   }
 }
-const M3 = (e) => !!e && typeof e == "object" && !Array.isArray(e), T3 = (e, q) => Object.keys(e).every((l) => q.split(" ").includes(l)), se = (e) => typeof e == "string" && /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,95}$/.test(e) && !["constructor", "prototype", "__proto__"].includes(e), oe = (e, q) => e.url === q.url && e.path === q.path && e.format === q.format && e.sha256 === q.sha256 && e.bytes === q.bytes;
-function me(e) {
+const M3 = (e) => !!e && typeof e == "object" && !Array.isArray(e), T3 = (e, q) => Object.keys(e).every((l) => q.split(" ").includes(l)), s7 = (e) => typeof e == "string" && /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,95}$/.test(e) && !["constructor", "prototype", "__proto__"].includes(e), o7 = (e, q) => e.url === q.url && e.path === q.path && e.format === q.format && e.sha256 === q.sha256 && e.bytes === q.bytes;
+function m7(e) {
   function q(o) {
     throw new Error(`Invalid CAD project provenance: ${o}`);
   }
@@ -3148,34 +3163,34 @@ function me(e) {
   (!M3(l) || !T3(l, "version records") || l.version !== 1 || !Array.isArray(l.records) || l.records.length > 1e3) && q("unsupported metadata version or records");
   const n = l.records, i = /* @__PURE__ */ new Set();
   for (const o of n) {
-    (!M3(o) || !T3(o, "id asset selectedFile modificationNotes") || !se(o.id) || i.has(o.id)) && q("invalid or duplicate record identity"), i.add(o.id), (typeof o.modificationNotes != "string" || !o.modificationNotes.trim() || o.modificationNotes.length > 4096 || /[\u0000-\u001f]/.test(o.modificationNotes)) && q("explicit modification notes required");
-    const a = re({ format: "brickwright-model-library", version: 1, assets: [o.asset] });
+    (!M3(o) || !T3(o, "id asset selectedFile modificationNotes") || !s7(o.id) || i.has(o.id)) && q("invalid or duplicate record identity"), i.add(o.id), (typeof o.modificationNotes != "string" || !o.modificationNotes.trim() || o.modificationNotes.length > 4096 || /[\u0000-\u001f]/.test(o.modificationNotes)) && q("explicit modification notes required");
+    const a = r7({ format: "brickwright-model-library", version: 1, assets: [o.asset] });
     a.valid || q(a.errors.join(" "));
     const h = a.catalogue.assets[0];
-    (!M3(o.selectedFile) || !T3(o.selectedFile, "url path format sha256 bytes") || ![h.original, h.editableSource, ...h.derivatives].some((s) => s && oe(s, o.selectedFile))) && q("selected file must exactly identify a retained asset file");
+    (!M3(o.selectedFile) || !T3(o.selectedFile, "url path format sha256 bytes") || ![h.original, h.editableSource, ...h.derivatives].some((s) => s && o7(s, o.selectedFile))) && q("selected file must exactly identify a retained asset file");
   }
   const r = /* @__PURE__ */ new Set();
   for (const o of t)
     o.provenance !== void 0 && ((!Array.isArray(o.provenance) || !o.provenance.length || o.provenance.length > 1e3 || new Set(o.provenance).size !== o.provenance.length || !o.provenance.every((a) => typeof a == "string" && i.has(a))) && q("invalid node source references"), o.provenance.forEach((a) => r.add(a)));
   r.size !== i.size && q("unreferenced source record");
 }
-function ue(e) {
+function u7(e) {
   if (e.version < 5 || !e.provenance)
     return;
   const q = new Set(Object.values(e.nodes).flatMap((l) => l.provenance ?? []));
   e.provenance = { version: 1, records: e.provenance.records.filter((l) => q.has(l.id)) };
 }
-var he = [509, 0, 227, 0, 150, 4, 294, 9, 1368, 2, 2, 1, 6, 3, 41, 2, 5, 0, 166, 1, 574, 3, 9, 9, 7, 9, 32, 4, 318, 1, 78, 5, 71, 10, 50, 3, 123, 2, 54, 14, 32, 10, 3, 1, 11, 3, 46, 10, 8, 0, 46, 9, 7, 2, 37, 13, 2, 9, 6, 1, 45, 0, 13, 2, 49, 13, 9, 3, 2, 11, 83, 11, 7, 0, 3, 0, 158, 11, 6, 9, 7, 3, 56, 1, 2, 6, 3, 1, 3, 2, 10, 0, 11, 1, 3, 6, 4, 4, 68, 8, 2, 0, 3, 0, 2, 3, 2, 4, 2, 0, 15, 1, 83, 17, 10, 9, 5, 0, 82, 19, 13, 9, 214, 6, 3, 8, 28, 1, 83, 16, 16, 9, 82, 12, 9, 9, 7, 19, 58, 14, 5, 9, 243, 14, 166, 9, 71, 5, 2, 1, 3, 3, 2, 0, 2, 1, 13, 9, 120, 6, 3, 6, 4, 0, 29, 9, 41, 6, 2, 3, 9, 0, 10, 10, 47, 15, 199, 7, 137, 9, 54, 7, 2, 7, 17, 9, 57, 21, 2, 13, 123, 5, 4, 0, 2, 1, 2, 6, 2, 0, 9, 9, 49, 4, 2, 1, 2, 4, 9, 9, 55, 9, 266, 3, 10, 1, 2, 0, 49, 6, 4, 4, 14, 10, 5350, 0, 7, 14, 11465, 27, 2343, 9, 87, 9, 39, 4, 60, 6, 26, 9, 535, 9, 470, 0, 2, 54, 8, 3, 82, 0, 12, 1, 19628, 1, 4178, 9, 519, 45, 3, 22, 543, 4, 4, 5, 9, 7, 3, 6, 31, 3, 149, 2, 1418, 49, 513, 54, 5, 49, 9, 0, 15, 0, 23, 4, 2, 14, 1361, 6, 2, 16, 3, 6, 2, 1, 2, 4, 101, 0, 161, 6, 10, 9, 357, 0, 62, 13, 499, 13, 245, 1, 2, 9, 233, 0, 3, 0, 8, 1, 6, 0, 475, 6, 110, 6, 6, 9, 4759, 9, 787719, 239], A6 = [0, 11, 2, 25, 2, 18, 2, 1, 2, 14, 3, 13, 35, 122, 70, 52, 268, 28, 4, 48, 48, 31, 14, 29, 6, 37, 11, 29, 3, 35, 5, 7, 2, 4, 43, 157, 19, 35, 5, 35, 5, 39, 9, 51, 13, 10, 2, 14, 2, 6, 2, 1, 2, 10, 2, 14, 2, 6, 2, 1, 4, 51, 13, 310, 10, 21, 11, 7, 25, 5, 2, 41, 2, 8, 70, 5, 3, 0, 2, 43, 2, 1, 4, 0, 3, 22, 11, 22, 10, 30, 66, 18, 2, 1, 11, 21, 11, 25, 7, 25, 39, 55, 7, 1, 65, 0, 16, 3, 2, 2, 2, 28, 43, 28, 4, 28, 36, 7, 2, 27, 28, 53, 11, 21, 11, 18, 14, 17, 111, 72, 56, 50, 14, 50, 14, 35, 39, 27, 10, 22, 251, 41, 7, 1, 17, 5, 57, 28, 11, 0, 9, 21, 43, 17, 47, 20, 28, 22, 13, 52, 58, 1, 3, 0, 14, 44, 33, 24, 27, 35, 30, 0, 3, 0, 9, 34, 4, 0, 13, 47, 15, 3, 22, 0, 2, 0, 36, 17, 2, 24, 20, 1, 64, 6, 2, 0, 2, 3, 2, 14, 2, 9, 8, 46, 39, 7, 3, 1, 3, 21, 2, 6, 2, 1, 2, 4, 4, 0, 19, 0, 13, 4, 31, 9, 2, 0, 3, 0, 2, 37, 2, 0, 26, 0, 2, 0, 45, 52, 19, 3, 21, 2, 31, 47, 21, 1, 2, 0, 185, 46, 42, 3, 37, 47, 21, 0, 60, 42, 14, 0, 72, 26, 38, 6, 186, 43, 117, 63, 32, 7, 3, 0, 3, 7, 2, 1, 2, 23, 16, 0, 2, 0, 95, 7, 3, 38, 17, 0, 2, 0, 29, 0, 11, 39, 8, 0, 22, 0, 12, 45, 20, 0, 19, 72, 200, 32, 32, 8, 2, 36, 18, 0, 50, 29, 113, 6, 2, 1, 2, 37, 22, 0, 26, 5, 2, 1, 2, 31, 15, 0, 24, 43, 261, 18, 16, 0, 2, 12, 2, 33, 125, 0, 80, 921, 103, 110, 18, 195, 2637, 96, 16, 1071, 18, 5, 26, 3994, 6, 582, 6842, 29, 1763, 568, 8, 30, 18, 78, 18, 29, 19, 47, 17, 3, 32, 20, 6, 18, 433, 44, 212, 63, 33, 24, 3, 24, 45, 74, 6, 0, 67, 12, 65, 1, 2, 0, 15, 4, 10, 7381, 42, 31, 98, 114, 8702, 3, 2, 6, 2, 1, 2, 290, 16, 0, 30, 2, 3, 0, 15, 3, 9, 395, 2309, 106, 6, 12, 4, 8, 8, 9, 5991, 84, 2, 70, 2, 1, 3, 0, 3, 1, 3, 3, 2, 11, 2, 0, 2, 6, 2, 64, 2, 3, 3, 7, 2, 6, 2, 27, 2, 3, 2, 4, 2, 0, 4, 6, 2, 339, 3, 24, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 7, 1845, 30, 7, 5, 262, 61, 147, 44, 11, 6, 17, 0, 322, 29, 19, 43, 485, 27, 229, 29, 3, 0, 208, 30, 2, 2, 2, 1, 2, 6, 3, 4, 10, 1, 225, 6, 2, 3, 2, 1, 2, 14, 2, 196, 60, 67, 8, 0, 1205, 3, 2, 26, 2, 1, 2, 0, 3, 0, 2, 9, 2, 3, 2, 0, 2, 0, 7, 0, 5, 0, 2, 0, 2, 0, 2, 2, 2, 1, 2, 0, 3, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 1, 2, 0, 3, 3, 2, 6, 2, 3, 2, 3, 2, 0, 2, 9, 2, 16, 6, 2, 2, 4, 2, 16, 4421, 42719, 33, 4381, 3, 5773, 3, 7472, 16, 621, 2467, 541, 1507, 4938, 6, 8489], ce = "‌‍·̀-ͯ·҃-֑҇-ׇֽֿׁׂׅׄؐ-ًؚ-٩ٰۖ-ۜ۟-۪ۤۧۨ-ۭ۰-۹ܑܰ-݊ަ-ް߀-߉߫-߽߳ࠖ-࠙ࠛ-ࠣࠥ-ࠧࠩ-࡙࠭-࡛ࢗ-࢟࣊-ࣣ࣡-ःऺ-़ा-ॏ॑-ॗॢॣ०-९ঁ-ঃ়া-ৄেৈো-্ৗৢৣ০-৯৾ਁ-ਃ਼ਾ-ੂੇੈੋ-੍ੑ੦-ੱੵઁ-ઃ઼ા-ૅે-ૉો-્ૢૣ૦-૯ૺ-૿ଁ-ଃ଼ା-ୄେୈୋ-୍୕-ୗୢୣ୦-୯ஂா-ூெ-ைொ-்ௗ௦-௯ఀ-ఄ఼ా-ౄె-ైొ-్ౕౖౢౣ౦-౯ಁ-ಃ಼ಾ-ೄೆ-ೈೊ-್ೕೖೢೣ೦-೯ೳഀ-ഃ഻഼ാ-ൄെ-ൈൊ-്ൗൢൣ൦-൯ඁ-ඃ්ා-ුූෘ-ෟ෦-෯ෲෳัิ-ฺ็-๎๐-๙ັິ-ຼ່-໎໐-໙༘༙༠-༩༹༵༷༾༿ཱ-྄྆྇ྍ-ྗྙ-ྼ࿆ါ-ှ၀-၉ၖ-ၙၞ-ၠၢ-ၤၧ-ၭၱ-ၴႂ-ႍႏ-ႝ፝-፟፩-፱ᜒ-᜕ᜲ-᜴ᝒᝓᝲᝳ឴-៓៝០-៩᠋-᠍᠏-᠙ᢩᤠ-ᤫᤰ-᤻᥆-᥏᧐-᧚ᨗ-ᨛᩕ-ᩞ᩠-᩿᩼-᪉᪐-᪙᪰-᪽ᪿ-᫝᫠-᫫ᬀ-ᬄ᬴-᭄᭐-᭙᭫-᭳ᮀ-ᮂᮡ-ᮭ᮰-᮹᯦-᯳ᰤ-᰷᱀-᱉᱐-᱙᳐-᳔᳒-᳨᳭᳴᳷-᳹᷀-᷿‌‍‿⁀⁔⃐-⃥⃜⃡-⃰⳯-⵿⳱ⷠ-〪ⷿ-゙゚〯・꘠-꘩꙯ꙴ-꙽ꚞꚟ꛰꛱ꠂ꠆ꠋꠣ-ꠧ꠬ꢀꢁꢴ-ꣅ꣐-꣙꣠-꣱ꣿ-꤉ꤦ-꤭ꥇ-꥓ꦀ-ꦃ꦳-꧀꧐-꧙ꧥ꧰-꧹ꨩ-ꨶꩃꩌꩍ꩐-꩙ꩻ-ꩽꪰꪲ-ꪴꪷꪸꪾ꪿꫁ꫫ-ꫯꫵ꫶ꯣ-ꯪ꯬꯭꯰-꯹ﬞ︀-️︠-︯︳︴﹍-﹏０-９＿･", D6 = "ªµºÀ-ÖØ-öø-ˁˆ-ˑˠ-ˤˬˮͰ-ʹͶͷͺ-ͽͿΆΈ-ΊΌΎ-ΡΣ-ϵϷ-ҁҊ-ԯԱ-Ֆՙՠ-ֈא-תׯ-ײؠ-يٮٯٱ-ۓەۥۦۮۯۺ-ۼۿܐܒ-ܯݍ-ޥޱߊ-ߪߴߵߺࠀ-ࠕࠚࠤࠨࡀ-ࡘࡠ-ࡪࡰ-ࢇࢉ-࢏ࢠ-ࣉऄ-हऽॐक़-ॡॱ-ঀঅ-ঌএঐও-নপ-রলশ-হঽৎড়ঢ়য়-ৡৰৱৼਅ-ਊਏਐਓ-ਨਪ-ਰਲਲ਼ਵਸ਼ਸਹਖ਼-ੜਫ਼ੲ-ੴઅ-ઍએ-ઑઓ-નપ-રલળવ-હઽૐૠૡૹଅ-ଌଏଐଓ-ନପ-ରଲଳଵ-ହଽଡ଼ଢ଼ୟ-ୡୱஃஅ-ஊஎ-ஐஒ-கஙசஜஞடணதந-பம-ஹௐఅ-ఌఎ-ఐఒ-నప-హఽౘ-ౚ౜ౝౠౡಀಅ-ಌಎ-ಐಒ-ನಪ-ಳವ-ಹಽ೜-ೞೠೡೱೲഄ-ഌഎ-ഐഒ-ഺഽൎൔ-ൖൟ-ൡൺ-ൿඅ-ඖක-නඳ-රලව-ෆก-ะาำเ-ๆກຂຄຆ-ຊຌ-ຣລວ-ະາຳຽເ-ໄໆໜ-ໟༀཀ-ཇཉ-ཬྈ-ྌက-ဪဿၐ-ၕၚ-ၝၡၥၦၮ-ၰၵ-ႁႎႠ-ჅჇჍა-ჺჼ-ቈቊ-ቍቐ-ቖቘቚ-ቝበ-ኈኊ-ኍነ-ኰኲ-ኵኸ-ኾዀዂ-ዅወ-ዖዘ-ጐጒ-ጕጘ-ፚᎀ-ᎏᎠ-Ᏽᏸ-ᏽᐁ-ᙬᙯ-ᙿᚁ-ᚚᚠ-ᛪᛮ-ᛸᜀ-ᜑᜟ-ᜱᝀ-ᝑᝠ-ᝬᝮ-ᝰក-ឳៗៜᠠ-ᡸᢀ-ᢨᢪᢰ-ᣵᤀ-ᤞᥐ-ᥭᥰ-ᥴᦀ-ᦫᦰ-ᧉᨀ-ᨖᨠ-ᩔᪧᬅ-ᬳᭅ-ᭌᮃ-ᮠᮮᮯᮺ-ᯥᰀ-ᰣᱍ-ᱏᱚ-ᱽᲀ-ᲊᲐ-ᲺᲽ-Ჿᳩ-ᳬᳮ-ᳳᳵᳶᳺᴀ-ᶿḀ-ἕἘ-Ἕἠ-ὅὈ-Ὅὐ-ὗὙὛὝὟ-ώᾀ-ᾴᾶ-ᾼιῂ-ῄῆ-ῌῐ-ΐῖ-Ίῠ-Ῥῲ-ῴῶ-ῼⁱⁿₐ-ₜℂℇℊ-ℓℕ℘-ℝℤΩℨK-ℹℼ-ℿⅅ-ⅉⅎⅠ-ↈⰀ-ⳤⳫ-ⳮⳲⳳⴀ-ⴥⴧⴭⴰ-ⵧⵯⶀ-ⶖⶠ-ⶦⶨ-ⶮⶰ-ⶶⶸ-ⶾⷀ-ⷆⷈ-ⷎⷐ-ⷖⷘ-ⷞ々-〇〡-〩〱-〵〸-〼ぁ-ゖ゛-ゟァ-ヺー-ヿㄅ-ㄯㄱ-ㆎㆠ-ㆿㇰ-ㇿ㐀-䶿一-ꒌꓐ-ꓽꔀ-ꘌꘐ-ꘟꘪꘫꙀ-ꙮꙿ-ꚝꚠ-ꛯꜗ-ꜟꜢ-ꞈꞋ-Ƛ꟱-ꠁꠃ-ꠅꠇ-ꠊꠌ-ꠢꡀ-ꡳꢂ-ꢳꣲ-ꣷꣻꣽꣾꤊ-ꤥꤰ-ꥆꥠ-ꥼꦄ-ꦲꧏꧠ-ꧤꧦ-ꧯꧺ-ꧾꨀ-ꨨꩀ-ꩂꩄ-ꩋꩠ-ꩶꩺꩾ-ꪯꪱꪵꪶꪹ-ꪽꫀꫂꫛ-ꫝꫠ-ꫪꫲ-ꫴꬁ-ꬆꬉ-ꬎꬑ-ꬖꬠ-ꬦꬨ-ꬮꬰ-ꭚꭜ-ꭩꭰ-ꯢ가-힣ힰ-ퟆퟋ-ퟻ豈-舘並-龎ﬀ-ﬆﬓ-ﬗיִײַ-ﬨשׁ-זּטּ-לּמּנּסּףּפּצּ-ﮱﯓ-ﴽﵐ-ﶏﶒ-ﷇﷰ-ﷻﹰ-ﹴﹶ-ﻼＡ-Ｚａ-ｚｦ-ﾾￂ-ￇￊ-ￏￒ-ￗￚ-ￜ", B3 = {
+var h7 = [509, 0, 227, 0, 150, 4, 294, 9, 1368, 2, 2, 1, 6, 3, 41, 2, 5, 0, 166, 1, 574, 3, 9, 9, 7, 9, 32, 4, 318, 1, 78, 5, 71, 10, 50, 3, 123, 2, 54, 14, 32, 10, 3, 1, 11, 3, 46, 10, 8, 0, 46, 9, 7, 2, 37, 13, 2, 9, 6, 1, 45, 0, 13, 2, 49, 13, 9, 3, 2, 11, 83, 11, 7, 0, 3, 0, 158, 11, 6, 9, 7, 3, 56, 1, 2, 6, 3, 1, 3, 2, 10, 0, 11, 1, 3, 6, 4, 4, 68, 8, 2, 0, 3, 0, 2, 3, 2, 4, 2, 0, 15, 1, 83, 17, 10, 9, 5, 0, 82, 19, 13, 9, 214, 6, 3, 8, 28, 1, 83, 16, 16, 9, 82, 12, 9, 9, 7, 19, 58, 14, 5, 9, 243, 14, 166, 9, 71, 5, 2, 1, 3, 3, 2, 0, 2, 1, 13, 9, 120, 6, 3, 6, 4, 0, 29, 9, 41, 6, 2, 3, 9, 0, 10, 10, 47, 15, 199, 7, 137, 9, 54, 7, 2, 7, 17, 9, 57, 21, 2, 13, 123, 5, 4, 0, 2, 1, 2, 6, 2, 0, 9, 9, 49, 4, 2, 1, 2, 4, 9, 9, 55, 9, 266, 3, 10, 1, 2, 0, 49, 6, 4, 4, 14, 10, 5350, 0, 7, 14, 11465, 27, 2343, 9, 87, 9, 39, 4, 60, 6, 26, 9, 535, 9, 470, 0, 2, 54, 8, 3, 82, 0, 12, 1, 19628, 1, 4178, 9, 519, 45, 3, 22, 543, 4, 4, 5, 9, 7, 3, 6, 31, 3, 149, 2, 1418, 49, 513, 54, 5, 49, 9, 0, 15, 0, 23, 4, 2, 14, 1361, 6, 2, 16, 3, 6, 2, 1, 2, 4, 101, 0, 161, 6, 10, 9, 357, 0, 62, 13, 499, 13, 245, 1, 2, 9, 233, 0, 3, 0, 8, 1, 6, 0, 475, 6, 110, 6, 6, 9, 4759, 9, 787719, 239], A6 = [0, 11, 2, 25, 2, 18, 2, 1, 2, 14, 3, 13, 35, 122, 70, 52, 268, 28, 4, 48, 48, 31, 14, 29, 6, 37, 11, 29, 3, 35, 5, 7, 2, 4, 43, 157, 19, 35, 5, 35, 5, 39, 9, 51, 13, 10, 2, 14, 2, 6, 2, 1, 2, 10, 2, 14, 2, 6, 2, 1, 4, 51, 13, 310, 10, 21, 11, 7, 25, 5, 2, 41, 2, 8, 70, 5, 3, 0, 2, 43, 2, 1, 4, 0, 3, 22, 11, 22, 10, 30, 66, 18, 2, 1, 11, 21, 11, 25, 7, 25, 39, 55, 7, 1, 65, 0, 16, 3, 2, 2, 2, 28, 43, 28, 4, 28, 36, 7, 2, 27, 28, 53, 11, 21, 11, 18, 14, 17, 111, 72, 56, 50, 14, 50, 14, 35, 39, 27, 10, 22, 251, 41, 7, 1, 17, 5, 57, 28, 11, 0, 9, 21, 43, 17, 47, 20, 28, 22, 13, 52, 58, 1, 3, 0, 14, 44, 33, 24, 27, 35, 30, 0, 3, 0, 9, 34, 4, 0, 13, 47, 15, 3, 22, 0, 2, 0, 36, 17, 2, 24, 20, 1, 64, 6, 2, 0, 2, 3, 2, 14, 2, 9, 8, 46, 39, 7, 3, 1, 3, 21, 2, 6, 2, 1, 2, 4, 4, 0, 19, 0, 13, 4, 31, 9, 2, 0, 3, 0, 2, 37, 2, 0, 26, 0, 2, 0, 45, 52, 19, 3, 21, 2, 31, 47, 21, 1, 2, 0, 185, 46, 42, 3, 37, 47, 21, 0, 60, 42, 14, 0, 72, 26, 38, 6, 186, 43, 117, 63, 32, 7, 3, 0, 3, 7, 2, 1, 2, 23, 16, 0, 2, 0, 95, 7, 3, 38, 17, 0, 2, 0, 29, 0, 11, 39, 8, 0, 22, 0, 12, 45, 20, 0, 19, 72, 200, 32, 32, 8, 2, 36, 18, 0, 50, 29, 113, 6, 2, 1, 2, 37, 22, 0, 26, 5, 2, 1, 2, 31, 15, 0, 24, 43, 261, 18, 16, 0, 2, 12, 2, 33, 125, 0, 80, 921, 103, 110, 18, 195, 2637, 96, 16, 1071, 18, 5, 26, 3994, 6, 582, 6842, 29, 1763, 568, 8, 30, 18, 78, 18, 29, 19, 47, 17, 3, 32, 20, 6, 18, 433, 44, 212, 63, 33, 24, 3, 24, 45, 74, 6, 0, 67, 12, 65, 1, 2, 0, 15, 4, 10, 7381, 42, 31, 98, 114, 8702, 3, 2, 6, 2, 1, 2, 290, 16, 0, 30, 2, 3, 0, 15, 3, 9, 395, 2309, 106, 6, 12, 4, 8, 8, 9, 5991, 84, 2, 70, 2, 1, 3, 0, 3, 1, 3, 3, 2, 11, 2, 0, 2, 6, 2, 64, 2, 3, 3, 7, 2, 6, 2, 27, 2, 3, 2, 4, 2, 0, 4, 6, 2, 339, 3, 24, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 30, 2, 24, 2, 7, 1845, 30, 7, 5, 262, 61, 147, 44, 11, 6, 17, 0, 322, 29, 19, 43, 485, 27, 229, 29, 3, 0, 208, 30, 2, 2, 2, 1, 2, 6, 3, 4, 10, 1, 225, 6, 2, 3, 2, 1, 2, 14, 2, 196, 60, 67, 8, 0, 1205, 3, 2, 26, 2, 1, 2, 0, 3, 0, 2, 9, 2, 3, 2, 0, 2, 0, 7, 0, 5, 0, 2, 0, 2, 0, 2, 2, 2, 1, 2, 0, 3, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 1, 2, 0, 3, 3, 2, 6, 2, 3, 2, 3, 2, 0, 2, 9, 2, 16, 6, 2, 2, 4, 2, 16, 4421, 42719, 33, 4381, 3, 5773, 3, 7472, 16, 621, 2467, 541, 1507, 4938, 6, 8489], c7 = "‌‍·̀-ͯ·҃-֑҇-ׇֽֿׁׂׅׄؐ-ًؚ-٩ٰۖ-ۜ۟-۪ۤۧۨ-ۭ۰-۹ܑܰ-݊ަ-ް߀-߉߫-߽߳ࠖ-࠙ࠛ-ࠣࠥ-ࠧࠩ-࡙࠭-࡛ࢗ-࢟࣊-ࣣ࣡-ःऺ-़ा-ॏ॑-ॗॢॣ०-९ঁ-ঃ়া-ৄেৈো-্ৗৢৣ০-৯৾ਁ-ਃ਼ਾ-ੂੇੈੋ-੍ੑ੦-ੱੵઁ-ઃ઼ા-ૅે-ૉો-્ૢૣ૦-૯ૺ-૿ଁ-ଃ଼ା-ୄେୈୋ-୍୕-ୗୢୣ୦-୯ஂா-ூெ-ைொ-்ௗ௦-௯ఀ-ఄ఼ా-ౄె-ైొ-్ౕౖౢౣ౦-౯ಁ-ಃ಼ಾ-ೄೆ-ೈೊ-್ೕೖೢೣ೦-೯ೳഀ-ഃ഻഼ാ-ൄെ-ൈൊ-്ൗൢൣ൦-൯ඁ-ඃ්ා-ුූෘ-ෟ෦-෯ෲෳัิ-ฺ็-๎๐-๙ັິ-ຼ່-໎໐-໙༘༙༠-༩༹༵༷༾༿ཱ-྄྆྇ྍ-ྗྙ-ྼ࿆ါ-ှ၀-၉ၖ-ၙၞ-ၠၢ-ၤၧ-ၭၱ-ၴႂ-ႍႏ-ႝ፝-፟፩-፱ᜒ-᜕ᜲ-᜴ᝒᝓᝲᝳ឴-៓៝០-៩᠋-᠍᠏-᠙ᢩᤠ-ᤫᤰ-᤻᥆-᥏᧐-᧚ᨗ-ᨛᩕ-ᩞ᩠-᩿᩼-᪉᪐-᪙᪰-᪽ᪿ-᫝᫠-᫫ᬀ-ᬄ᬴-᭄᭐-᭙᭫-᭳ᮀ-ᮂᮡ-ᮭ᮰-᮹᯦-᯳ᰤ-᰷᱀-᱉᱐-᱙᳐-᳔᳒-᳨᳭᳴᳷-᳹᷀-᷿‌‍‿⁀⁔⃐-⃥⃜⃡-⃰⳯-⵿⳱ⷠ-〪ⷿ-゙゚〯・꘠-꘩꙯ꙴ-꙽ꚞꚟ꛰꛱ꠂ꠆ꠋꠣ-ꠧ꠬ꢀꢁꢴ-ꣅ꣐-꣙꣠-꣱ꣿ-꤉ꤦ-꤭ꥇ-꥓ꦀ-ꦃ꦳-꧀꧐-꧙ꧥ꧰-꧹ꨩ-ꨶꩃꩌꩍ꩐-꩙ꩻ-ꩽꪰꪲ-ꪴꪷꪸꪾ꪿꫁ꫫ-ꫯꫵ꫶ꯣ-ꯪ꯬꯭꯰-꯹ﬞ︀-️︠-︯︳︴﹍-﹏０-９＿･", D6 = "ªµºÀ-ÖØ-öø-ˁˆ-ˑˠ-ˤˬˮͰ-ʹͶͷͺ-ͽͿΆΈ-ΊΌΎ-ΡΣ-ϵϷ-ҁҊ-ԯԱ-Ֆՙՠ-ֈא-תׯ-ײؠ-يٮٯٱ-ۓەۥۦۮۯۺ-ۼۿܐܒ-ܯݍ-ޥޱߊ-ߪߴߵߺࠀ-ࠕࠚࠤࠨࡀ-ࡘࡠ-ࡪࡰ-ࢇࢉ-࢏ࢠ-ࣉऄ-हऽॐक़-ॡॱ-ঀঅ-ঌএঐও-নপ-রলশ-হঽৎড়ঢ়য়-ৡৰৱৼਅ-ਊਏਐਓ-ਨਪ-ਰਲਲ਼ਵਸ਼ਸਹਖ਼-ੜਫ਼ੲ-ੴઅ-ઍએ-ઑઓ-નપ-રલળવ-હઽૐૠૡૹଅ-ଌଏଐଓ-ନପ-ରଲଳଵ-ହଽଡ଼ଢ଼ୟ-ୡୱஃஅ-ஊஎ-ஐஒ-கஙசஜஞடணதந-பம-ஹௐఅ-ఌఎ-ఐఒ-నప-హఽౘ-ౚ౜ౝౠౡಀಅ-ಌಎ-ಐಒ-ನಪ-ಳವ-ಹಽ೜-ೞೠೡೱೲഄ-ഌഎ-ഐഒ-ഺഽൎൔ-ൖൟ-ൡൺ-ൿඅ-ඖක-නඳ-රලව-ෆก-ะาำเ-ๆກຂຄຆ-ຊຌ-ຣລວ-ະາຳຽເ-ໄໆໜ-ໟༀཀ-ཇཉ-ཬྈ-ྌက-ဪဿၐ-ၕၚ-ၝၡၥၦၮ-ၰၵ-ႁႎႠ-ჅჇჍა-ჺჼ-ቈቊ-ቍቐ-ቖቘቚ-ቝበ-ኈኊ-ኍነ-ኰኲ-ኵኸ-ኾዀዂ-ዅወ-ዖዘ-ጐጒ-ጕጘ-ፚᎀ-ᎏᎠ-Ᏽᏸ-ᏽᐁ-ᙬᙯ-ᙿᚁ-ᚚᚠ-ᛪᛮ-ᛸᜀ-ᜑᜟ-ᜱᝀ-ᝑᝠ-ᝬᝮ-ᝰក-ឳៗៜᠠ-ᡸᢀ-ᢨᢪᢰ-ᣵᤀ-ᤞᥐ-ᥭᥰ-ᥴᦀ-ᦫᦰ-ᧉᨀ-ᨖᨠ-ᩔᪧᬅ-ᬳᭅ-ᭌᮃ-ᮠᮮᮯᮺ-ᯥᰀ-ᰣᱍ-ᱏᱚ-ᱽᲀ-ᲊᲐ-ᲺᲽ-Ჿᳩ-ᳬᳮ-ᳳᳵᳶᳺᴀ-ᶿḀ-ἕἘ-Ἕἠ-ὅὈ-Ὅὐ-ὗὙὛὝὟ-ώᾀ-ᾴᾶ-ᾼιῂ-ῄῆ-ῌῐ-ΐῖ-Ίῠ-Ῥῲ-ῴῶ-ῼⁱⁿₐ-ₜℂℇℊ-ℓℕ℘-ℝℤΩℨK-ℹℼ-ℿⅅ-ⅉⅎⅠ-ↈⰀ-ⳤⳫ-ⳮⳲⳳⴀ-ⴥⴧⴭⴰ-ⵧⵯⶀ-ⶖⶠ-ⶦⶨ-ⶮⶰ-ⶶⶸ-ⶾⷀ-ⷆⷈ-ⷎⷐ-ⷖⷘ-ⷞ々-〇〡-〩〱-〵〸-〼ぁ-ゖ゛-ゟァ-ヺー-ヿㄅ-ㄯㄱ-ㆎㆠ-ㆿㇰ-ㇿ㐀-䶿一-ꒌꓐ-ꓽꔀ-ꘌꘐ-ꘟꘪꘫꙀ-ꙮꙿ-ꚝꚠ-ꛯꜗ-ꜟꜢ-ꞈꞋ-Ƛ꟱-ꠁꠃ-ꠅꠇ-ꠊꠌ-ꠢꡀ-ꡳꢂ-ꢳꣲ-ꣷꣻꣽꣾꤊ-ꤥꤰ-ꥆꥠ-ꥼꦄ-ꦲꧏꧠ-ꧤꧦ-ꧯꧺ-ꧾꨀ-ꨨꩀ-ꩂꩄ-ꩋꩠ-ꩶꩺꩾ-ꪯꪱꪵꪶꪹ-ꪽꫀꫂꫛ-ꫝꫠ-ꫪꫲ-ꫴꬁ-ꬆꬉ-ꬎꬑ-ꬖꬠ-ꬦꬨ-ꬮꬰ-ꭚꭜ-ꭩꭰ-ꯢ가-힣ힰ-ퟆퟋ-ퟻ豈-舘並-龎ﬀ-ﬆﬓ-ﬗיִײַ-ﬨשׁ-זּטּ-לּמּנּסּףּפּצּ-ﮱﯓ-ﴽﵐ-ﶏﶒ-ﷇﷰ-ﷻﹰ-ﹴﹶ-ﻼＡ-Ｚａ-ｚｦ-ﾾￂ-ￇￊ-ￏￒ-ￗￚ-ￜ", B3 = {
   3: "abstract boolean byte char class double enum export extends final float goto implements import int interface long native package private protected public short static super synchronized throws transient volatile",
   5: "class enum extends super const export import",
   6: "enum",
   strict: "implements interface let package private protected public static yield",
   strictBind: "eval arguments"
-}, I3 = "break case catch continue debugger default do else finally for function if return switch throw try var while with null true false instanceof typeof void delete new in this", de = {
+}, I3 = "break case catch continue debugger default do else finally for function if return switch throw try var while with null true false instanceof typeof void delete new in this", d7 = {
   5: I3,
   "5module": I3 + " export import",
   6: I3 + " const class extends export import super"
-}, E6 = /^in(stanceof)?$/, fe = new RegExp("[" + D6 + "]"), pe = new RegExp("[" + D6 + ce + "]");
+}, E6 = /^in(stanceof)?$/, f7 = new RegExp("[" + D6 + "]"), p7 = new RegExp("[" + D6 + c7 + "]");
 function Y3(e, q) {
   for (var l = 65536, t = 0; t < q.length; t += 2) {
     if (l += q[t], l > e)
@@ -3186,10 +3201,10 @@ function Y3(e, q) {
   return !1;
 }
 function D2(e, q) {
-  return e < 65 ? e === 36 : e < 91 ? !0 : e < 97 ? e === 95 : e < 123 ? !0 : e <= 65535 ? e >= 170 && fe.test(String.fromCharCode(e)) : q === !1 ? !1 : Y3(e, A6);
+  return e < 65 ? e === 36 : e < 91 ? !0 : e < 97 ? e === 95 : e < 123 ? !0 : e <= 65535 ? e >= 170 && f7.test(String.fromCharCode(e)) : q === !1 ? !1 : Y3(e, A6);
 }
 function K2(e, q) {
-  return e < 48 ? e === 36 : e < 58 ? !0 : e < 65 ? !1 : e < 91 ? !0 : e < 97 ? e === 95 : e < 123 ? !0 : e <= 65535 ? e >= 170 && pe.test(String.fromCharCode(e)) : q === !1 ? !1 : Y3(e, A6) || Y3(e, he);
+  return e < 48 ? e === 36 : e < 58 ? !0 : e < 65 ? !1 : e < 91 ? !0 : e < 97 ? e === 95 : e < 123 ? !0 : e <= 65535 ? e >= 170 && p7.test(String.fromCharCode(e)) : q === !1 ? !1 : Y3(e, A6) || Y3(e, h7);
 }
 var w1 = function(q, l) {
   l === void 0 && (l = {}), this.label = q, this.keyword = l.keyword, this.beforeExpr = !!l.beforeExpr, this.startsExpr = !!l.startsExpr, this.isLoop = !!l.isLoop, this.isAssign = !!l.isAssign, this.prefix = !!l.prefix, this.postfix = !!l.postfix, this.binop = l.binop || null, this.updateContext = null;
@@ -3294,7 +3309,7 @@ var x = {
   _typeof: v1("typeof", { beforeExpr: !0, prefix: !0, startsExpr: !0 }),
   _void: v1("void", { beforeExpr: !0, prefix: !0, startsExpr: !0 }),
   _delete: v1("delete", { beforeExpr: !0, prefix: !0, startsExpr: !0 })
-}, t2 = /\r\n?|\n|\u2028|\u2029/, xe = new RegExp(t2.source, "g");
+}, t2 = /\r\n?|\n|\u2028|\u2029/, x7 = new RegExp(t2.source, "g");
 function m5(e) {
   return e === 10 || e === 13 || e === 8232 || e === 8233;
 }
@@ -3307,10 +3322,10 @@ function C6(e, q, l) {
   }
   return -1;
 }
-var z6 = /[\u1680\u2000-\u200a\u202f\u205f\u3000\ufeff]/, W1 = /(?:\s|\/\/.*|\/\*[^]*?\*\/)*/g, P6 = Object.prototype, ge = P6.hasOwnProperty, be = P6.toString, u5 = Object.hasOwn || (function(e, q) {
-  return ge.call(e, q);
+var z6 = /[\u1680\u2000-\u200a\u202f\u205f\u3000\ufeff]/, W1 = /(?:\s|\/\/.*|\/\*[^]*?\*\/)*/g, P6 = Object.prototype, g7 = P6.hasOwnProperty, b7 = P6.toString, u5 = Object.hasOwn || (function(e, q) {
+  return g7.call(e, q);
 }), H4 = Array.isArray || (function(e) {
-  return be.call(e) === "[object Array]";
+  return b7.call(e) === "[object Array]";
 }), X4 = /* @__PURE__ */ Object.create(null);
 function N2(e) {
   return X4[e] || (X4[e] = new RegExp("^(?:" + e.replace(/ /g, "|") + ")$"));
@@ -3318,7 +3333,7 @@ function N2(e) {
 function z2(e) {
   return e <= 65535 ? String.fromCharCode(e) : (e -= 65536, String.fromCharCode((e >> 10) + 55296, (e & 1023) + 56320));
 }
-var _e = /(?:[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])/, A5 = function(q, l) {
+var _7 = /(?:[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])/, A5 = function(q, l) {
   this.line = q, this.column = l;
 };
 A5.prototype.offset = function(q) {
@@ -3435,7 +3450,7 @@ var J3 = {
   // (non-standard) ParenthesizedExpression nodes
   preserveParens: !1
 }, Y4 = !1;
-function ve(e) {
+function v7(e) {
   var q = {};
   for (var l in J3)
     q[l] = e && u5(e, l) ? e[l] : J3[l];
@@ -3446,11 +3461,11 @@ Defaulting to 2020, but this will stop working in the future.`)), q.ecmaVersion 
       return t.push(n);
     };
   }
-  if (H4(q.onComment) && (q.onComment = ke(q, q.onComment)), q.sourceType === "commonjs" && q.allowAwaitOutsideFunction)
+  if (H4(q.onComment) && (q.onComment = k7(q, q.onComment)), q.sourceType === "commonjs" && q.allowAwaitOutsideFunction)
     throw new Error("Cannot use allowAwaitOutsideFunction with sourceType: commonjs");
   return q;
 }
-function ke(e, q) {
+function k7(e, q) {
   return function(l, t, n, i, r, o) {
     var a = {
       type: l ? "Block" : "Line",
@@ -3466,7 +3481,7 @@ function h4(e, q) {
   return i5 | (e ? m4 : 0) | (q ? T6 : 0);
 }
 var Q5 = 0, c4 = 1, M2 = 2, V6 = 3, O6 = 4, F6 = 5, K1 = function(q, l, t) {
-  this.options = q = ve(q), this.sourceFile = q.sourceFile, this.keywords = N2(de[q.ecmaVersion >= 6 ? 6 : q.sourceType === "module" ? "5module" : 5]);
+  this.options = q = v7(q), this.sourceFile = q.sourceFile, this.keywords = N2(d7[q.ecmaVersion >= 6 ? 6 : q.sourceType === "module" ? "5module" : 5]);
   var n = "";
   q.allowReserved !== !0 && (n = B3[q.ecmaVersion >= 6 ? 6 : q.ecmaVersion === 5 ? 5 : 3], q.sourceType === "module" && (n += " await")), this.reservedWords = N2(n);
   var i = (n ? n + " " : "") + B3.strict;
@@ -3545,13 +3560,13 @@ K1.tokenizer = function(q, l) {
   return new this(l, q);
 };
 Object.defineProperties(K1.prototype, d2);
-var X1 = K1.prototype, we = /^(?:'((?:\\[^]|[^'\\])*?)'|"((?:\\[^]|[^"\\])*?)")/;
+var X1 = K1.prototype, w7 = /^(?:'((?:\\[^]|[^'\\])*?)'|"((?:\\[^]|[^"\\])*?)")/;
 X1.strictDirective = function(e) {
   if (this.options.ecmaVersion < 5)
     return !1;
   for (; ; ) {
     W1.lastIndex = e, e += W1.exec(this.input)[0].length;
-    var q = we.exec(this.input.slice(e));
+    var q = w7.exec(this.input.slice(e));
     if (!q)
       return !1;
     if ((q[1] || q[2]) === "use strict") {
@@ -3642,7 +3657,7 @@ t1.parseTopLevel = function(e) {
     }
   return this.adaptDirectivePrologue(e.body), this.next(), e.sourceType = this.options.sourceType === "commonjs" ? "script" : this.options.sourceType, this.finishNode(e, "Program");
 };
-var d4 = { kind: "loop" }, ye = { kind: "switch" };
+var d4 = { kind: "loop" }, y7 = { kind: "switch" };
 t1.isLet = function(e) {
   if (this.options.ecmaVersion < 6 || !this.isContextual("let"))
     return !1;
@@ -3825,7 +3840,7 @@ t1.parseReturnStatement = function(e) {
   return this.allowReturn || this.raise(this.start, "'return' outside of function"), this.next(), this.eat(x.semi) || this.insertSemicolon() ? e.argument = null : (e.argument = this.parseExpression(), this.semicolon()), this.finishNode(e, "ReturnStatement");
 };
 t1.parseSwitchStatement = function(e) {
-  this.next(), e.discriminant = this.parseParenExpression(), e.cases = [], this.expect(x.braceL), this.labels.push(ye), this.enterScope(R6);
+  this.next(), e.discriminant = this.parseParenExpression(), e.cases = [], this.expect(x.braceL), this.labels.push(y7), this.enterScope(R6);
   for (var q, l = !1; this.type !== x.braceR; )
     if (this.type === x._case || this.type === x._default) {
       var t = this.type === x._case;
@@ -3837,7 +3852,7 @@ t1.parseSwitchStatement = function(e) {
 t1.parseThrowStatement = function(e) {
   return this.next(), t2.test(this.input.slice(this.lastTokEnd, this.start)) && this.raise(this.lastTokEnd, "Illegal newline after throw"), e.argument = this.parseExpression(), this.semicolon(), this.finishNode(e, "ThrowStatement");
 };
-var Se = [];
+var S7 = [];
 t1.parseCatchClauseParam = function() {
   var e = this.parseBindingAtom(), q = e.type === "Identifier";
   return this.enterScope(q ? B6 : 0), this.checkLValPattern(e, q ? O6 : M2), this.expect(x.parenR), e;
@@ -3922,7 +3937,7 @@ t1.parseClass = function(e, q) {
   var t = this.enterClassBody(), n = this.startNode(), i = !1;
   for (n.body = [], this.expect(x.braceL); this.type !== x.braceR; ) {
     var r = this.parseClassElement(e.superClass !== null);
-    r && (n.body.push(r), r.type === "MethodDefinition" && r.kind === "constructor" ? (i && this.raiseRecoverable(r.start, "Duplicate constructor in the same class"), i = !0) : r.key && r.key.type === "PrivateIdentifier" && Ae(t, r) && this.raiseRecoverable(r.key.start, "Identifier '#" + r.key.name + "' has already been declared"));
+    r && (n.body.push(r), r.type === "MethodDefinition" && r.kind === "constructor" ? (i && this.raiseRecoverable(r.start, "Duplicate constructor in the same class"), i = !0) : r.key && r.key.type === "PrivateIdentifier" && A7(t, r) && this.raiseRecoverable(r.key.start, "Identifier '#" + r.key.name + "' has already been declared"));
   }
   return this.strict = l, this.next(), e.body = this.finishNode(n, "ClassBody"), this.exitClassBody(), this.finishNode(e, q ? "ClassDeclaration" : "ClassExpression");
 };
@@ -3988,7 +4003,7 @@ t1.exitClassBody = function() {
       u5(q, r.name) || (n ? n.used.push(r) : this.raiseRecoverable(r.start, "Private field '#" + r.name + "' must be declared in an enclosing class"));
     }
 };
-function Ae(e, q) {
+function A7(e, q) {
   var l = q.key.name, t = e[l], n = "true";
   return q.type === "MethodDefinition" && (q.kind === "get" || q.kind === "set") && (n = (q.static ? "s" : "i") + q.kind), t === "iget" && n === "iset" || t === "iset" && n === "iget" || t === "sget" && n === "sset" || t === "sset" && n === "sget" ? (e[l] = "true", !1) : t ? !0 : (e[l] = n, !1);
 }
@@ -4085,7 +4100,7 @@ t1.parseExportSpecifiers = function(e) {
   return q;
 };
 t1.parseImport = function(e) {
-  return this.next(), this.type === x.string ? (e.specifiers = Se, e.source = this.parseExprAtom()) : (e.specifiers = this.parseImportSpecifiers(), this.expectContextual("from"), e.source = this.type === x.string ? this.parseExprAtom() : this.unexpected()), this.options.ecmaVersion >= 16 && (e.attributes = this.parseWithClause()), this.semicolon(), this.finishNode(e, "ImportDeclaration");
+  return this.next(), this.type === x.string ? (e.specifiers = S7, e.source = this.parseExprAtom()) : (e.specifiers = this.parseImportSpecifiers(), this.expectContextual("from"), e.source = this.type === x.string ? this.parseExprAtom() : this.unexpected()), this.options.ecmaVersion >= 16 && (e.attributes = this.parseWithClause()), this.semicolon(), this.finishNode(e, "ImportDeclaration");
 };
 t1.parseImportSpecifier = function() {
   var e = this.startNode();
@@ -4136,7 +4151,7 @@ t1.parseImportAttribute = function() {
 t1.parseModuleExportName = function() {
   if (this.options.ecmaVersion >= 13 && this.type === x.string) {
     var e = this.parseLiteral(this.value);
-    return _e.test(e.value) && this.raise(e.start, "An export name cannot include a lone surrogate."), e;
+    return _7.test(e.value) && this.raise(e.start, "An export name cannot include a lone surrogate."), e;
   }
   return this.parseIdent(!0);
 };
@@ -4685,7 +4700,7 @@ d1.parseParenItem = function(e) {
 d1.parseParenArrowList = function(e, q, l, t) {
   return this.parseArrowExpression(this.startNodeAt(e, q), l, !1, t);
 };
-var De = [];
+var D7 = [];
 d1.parseNew = function() {
   this.containsEsc && this.raiseRecoverable(this.start, "Escape sequence in keyword new");
   var e = this.startNode();
@@ -4696,7 +4711,7 @@ d1.parseNew = function() {
     return e.property = this.parseIdent(!0), e.property.name !== "target" && this.raiseRecoverable(e.property.start, "The only valid meta property for new is 'new.target'"), l && this.raiseRecoverable(e.start, "'new.target' must not contain escaped characters"), this.allowNewDotTarget || this.raiseRecoverable(e.start, "'new.target' can only be used in functions and class static block"), this.finishNode(e, "MetaProperty");
   }
   var t = this.start, n = this.startLoc;
-  return e.callee = this.parseSubscripts(this.parseExprAtom(null, !1, !0), t, n, !0, !1), e.callee.type === "Super" && this.raiseRecoverable(t, "Invalid use of 'super'"), this.eat(x.parenL) ? e.arguments = this.parseExprList(x.parenR, this.options.ecmaVersion >= 8, !1) : e.arguments = De, this.finishNode(e, "NewExpression");
+  return e.callee = this.parseSubscripts(this.parseExprAtom(null, !1, !0), t, n, !0, !1), e.callee.type === "Super" && this.raiseRecoverable(t, "Invalid use of 'super'"), this.eat(x.parenL) ? e.arguments = this.parseExprList(x.parenR, this.options.ecmaVersion >= 8, !1) : e.arguments = D7, this.finishNode(e, "NewExpression");
 };
 d1.parseTemplateElement = function(e) {
   var q = e.isTagged, l = this.startNode();
@@ -4854,11 +4869,11 @@ q3.curPosition = function() {
   if (this.options.locations)
     return new A5(this.curLine, this.pos - this.lineStart);
 };
-var U2 = K1.prototype, Ee = function(q) {
+var U2 = K1.prototype, E7 = function(q) {
   this.flags = q, this.var = [], this.lexical = [], this.functions = [];
 };
 U2.enterScope = function(e) {
-  this.scopeStack.push(new Ee(e));
+  this.scopeStack.push(new E7(e));
 };
 U2.exitScope = function() {
   this.scopeStack.pop();
@@ -4933,42 +4948,42 @@ M5.copyNode = function(e) {
     q[l] = e[l];
   return q;
 };
-var Ce = "Berf Beria_Erfe Gara Garay Gukh Gurung_Khema Hrkt Katakana_Or_Hiragana Kawi Kirat_Rai Krai Nag_Mundari Nagm Ol_Onal Onao Sidetic Sidt Sunu Sunuwar Tai_Yo Tayo Todhri Todr Tolong_Siki Tols Tulu_Tigalari Tutg Unknown Zzzz", K6 = "ASCII ASCII_Hex_Digit AHex Alphabetic Alpha Any Assigned Bidi_Control Bidi_C Bidi_Mirrored Bidi_M Case_Ignorable CI Cased Changes_When_Casefolded CWCF Changes_When_Casemapped CWCM Changes_When_Lowercased CWL Changes_When_NFKC_Casefolded CWKCF Changes_When_Titlecased CWT Changes_When_Uppercased CWU Dash Default_Ignorable_Code_Point DI Deprecated Dep Diacritic Dia Emoji Emoji_Component Emoji_Modifier Emoji_Modifier_Base Emoji_Presentation Extender Ext Grapheme_Base Gr_Base Grapheme_Extend Gr_Ext Hex_Digit Hex IDS_Binary_Operator IDSB IDS_Trinary_Operator IDST ID_Continue IDC ID_Start IDS Ideographic Ideo Join_Control Join_C Logical_Order_Exception LOE Lowercase Lower Math Noncharacter_Code_Point NChar Pattern_Syntax Pat_Syn Pattern_White_Space Pat_WS Quotation_Mark QMark Radical Regional_Indicator RI Sentence_Terminal STerm Soft_Dotted SD Terminal_Punctuation Term Unified_Ideograph UIdeo Uppercase Upper Variation_Selector VS White_Space space XID_Continue XIDC XID_Start XIDS", U6 = K6 + " Extended_Pictographic", W6 = U6, G6 = W6 + " EBase EComp EMod EPres ExtPict", Z6 = G6, ze = Z6, Pe = {
+var C7 = "Berf Beria_Erfe Gara Garay Gukh Gurung_Khema Hrkt Katakana_Or_Hiragana Kawi Kirat_Rai Krai Nag_Mundari Nagm Ol_Onal Onao Sidetic Sidt Sunu Sunuwar Tai_Yo Tayo Todhri Todr Tolong_Siki Tols Tulu_Tigalari Tutg Unknown Zzzz", K6 = "ASCII ASCII_Hex_Digit AHex Alphabetic Alpha Any Assigned Bidi_Control Bidi_C Bidi_Mirrored Bidi_M Case_Ignorable CI Cased Changes_When_Casefolded CWCF Changes_When_Casemapped CWCM Changes_When_Lowercased CWL Changes_When_NFKC_Casefolded CWKCF Changes_When_Titlecased CWT Changes_When_Uppercased CWU Dash Default_Ignorable_Code_Point DI Deprecated Dep Diacritic Dia Emoji Emoji_Component Emoji_Modifier Emoji_Modifier_Base Emoji_Presentation Extender Ext Grapheme_Base Gr_Base Grapheme_Extend Gr_Ext Hex_Digit Hex IDS_Binary_Operator IDSB IDS_Trinary_Operator IDST ID_Continue IDC ID_Start IDS Ideographic Ideo Join_Control Join_C Logical_Order_Exception LOE Lowercase Lower Math Noncharacter_Code_Point NChar Pattern_Syntax Pat_Syn Pattern_White_Space Pat_WS Quotation_Mark QMark Radical Regional_Indicator RI Sentence_Terminal STerm Soft_Dotted SD Terminal_Punctuation Term Unified_Ideograph UIdeo Uppercase Upper Variation_Selector VS White_Space space XID_Continue XIDC XID_Start XIDS", U6 = K6 + " Extended_Pictographic", W6 = U6, G6 = W6 + " EBase EComp EMod EPres ExtPict", Z6 = G6, z7 = Z6, P7 = {
   9: K6,
   10: U6,
   11: W6,
   12: G6,
   13: Z6,
-  14: ze
-}, Me = "Basic_Emoji Emoji_Keycap_Sequence RGI_Emoji_Modifier_Sequence RGI_Emoji_Flag_Sequence RGI_Emoji_Tag_Sequence RGI_Emoji_ZWJ_Sequence RGI_Emoji", Te = {
+  14: z7
+}, M7 = "Basic_Emoji Emoji_Keycap_Sequence RGI_Emoji_Modifier_Sequence RGI_Emoji_Flag_Sequence RGI_Emoji_Tag_Sequence RGI_Emoji_ZWJ_Sequence RGI_Emoji", T7 = {
   9: "",
   10: "",
   11: "",
   12: "",
   13: "",
-  14: Me
-}, J4 = "Cased_Letter LC Close_Punctuation Pe Connector_Punctuation Pc Control Cc cntrl Currency_Symbol Sc Dash_Punctuation Pd Decimal_Number Nd digit Enclosing_Mark Me Final_Punctuation Pf Format Cf Initial_Punctuation Pi Letter L Letter_Number Nl Line_Separator Zl Lowercase_Letter Ll Mark M Combining_Mark Math_Symbol Sm Modifier_Letter Lm Modifier_Symbol Sk Nonspacing_Mark Mn Number N Open_Punctuation Ps Other C Other_Letter Lo Other_Number No Other_Punctuation Po Other_Symbol So Paragraph_Separator Zp Private_Use Co Punctuation P punct Separator Z Space_Separator Zs Spacing_Mark Mc Surrogate Cs Symbol S Titlecase_Letter Lt Unassigned Cn Uppercase_Letter Lu", $6 = "Adlam Adlm Ahom Anatolian_Hieroglyphs Hluw Arabic Arab Armenian Armn Avestan Avst Balinese Bali Bamum Bamu Bassa_Vah Bass Batak Batk Bengali Beng Bhaiksuki Bhks Bopomofo Bopo Brahmi Brah Braille Brai Buginese Bugi Buhid Buhd Canadian_Aboriginal Cans Carian Cari Caucasian_Albanian Aghb Chakma Cakm Cham Cham Cherokee Cher Common Zyyy Coptic Copt Qaac Cuneiform Xsux Cypriot Cprt Cyrillic Cyrl Deseret Dsrt Devanagari Deva Duployan Dupl Egyptian_Hieroglyphs Egyp Elbasan Elba Ethiopic Ethi Georgian Geor Glagolitic Glag Gothic Goth Grantha Gran Greek Grek Gujarati Gujr Gurmukhi Guru Han Hani Hangul Hang Hanunoo Hano Hatran Hatr Hebrew Hebr Hiragana Hira Imperial_Aramaic Armi Inherited Zinh Qaai Inscriptional_Pahlavi Phli Inscriptional_Parthian Prti Javanese Java Kaithi Kthi Kannada Knda Katakana Kana Kayah_Li Kali Kharoshthi Khar Khmer Khmr Khojki Khoj Khudawadi Sind Lao Laoo Latin Latn Lepcha Lepc Limbu Limb Linear_A Lina Linear_B Linb Lisu Lisu Lycian Lyci Lydian Lydi Mahajani Mahj Malayalam Mlym Mandaic Mand Manichaean Mani Marchen Marc Masaram_Gondi Gonm Meetei_Mayek Mtei Mende_Kikakui Mend Meroitic_Cursive Merc Meroitic_Hieroglyphs Mero Miao Plrd Modi Mongolian Mong Mro Mroo Multani Mult Myanmar Mymr Nabataean Nbat New_Tai_Lue Talu Newa Newa Nko Nkoo Nushu Nshu Ogham Ogam Ol_Chiki Olck Old_Hungarian Hung Old_Italic Ital Old_North_Arabian Narb Old_Permic Perm Old_Persian Xpeo Old_South_Arabian Sarb Old_Turkic Orkh Oriya Orya Osage Osge Osmanya Osma Pahawh_Hmong Hmng Palmyrene Palm Pau_Cin_Hau Pauc Phags_Pa Phag Phoenician Phnx Psalter_Pahlavi Phlp Rejang Rjng Runic Runr Samaritan Samr Saurashtra Saur Sharada Shrd Shavian Shaw Siddham Sidd SignWriting Sgnw Sinhala Sinh Sora_Sompeng Sora Soyombo Soyo Sundanese Sund Syloti_Nagri Sylo Syriac Syrc Tagalog Tglg Tagbanwa Tagb Tai_Le Tale Tai_Tham Lana Tai_Viet Tavt Takri Takr Tamil Taml Tangut Tang Telugu Telu Thaana Thaa Thai Thai Tibetan Tibt Tifinagh Tfng Tirhuta Tirh Ugaritic Ugar Vai Vaii Warang_Citi Wara Yi Yiii Zanabazar_Square Zanb", H6 = $6 + " Dogra Dogr Gunjala_Gondi Gong Hanifi_Rohingya Rohg Makasar Maka Medefaidrin Medf Old_Sogdian Sogo Sogdian Sogd", X6 = H6 + " Elymaic Elym Nandinagari Nand Nyiakeng_Puachue_Hmong Hmnp Wancho Wcho", Y6 = X6 + " Chorasmian Chrs Diak Dives_Akuru Khitan_Small_Script Kits Yezi Yezidi", J6 = Y6 + " Cypro_Minoan Cpmn Old_Uyghur Ougr Tangsa Tnsa Toto Vithkuqi Vith", Be = J6 + " " + Ce, Ie = {
+  14: M7
+}, J4 = "Cased_Letter LC Close_Punctuation Pe Connector_Punctuation Pc Control Cc cntrl Currency_Symbol Sc Dash_Punctuation Pd Decimal_Number Nd digit Enclosing_Mark Me Final_Punctuation Pf Format Cf Initial_Punctuation Pi Letter L Letter_Number Nl Line_Separator Zl Lowercase_Letter Ll Mark M Combining_Mark Math_Symbol Sm Modifier_Letter Lm Modifier_Symbol Sk Nonspacing_Mark Mn Number N Open_Punctuation Ps Other C Other_Letter Lo Other_Number No Other_Punctuation Po Other_Symbol So Paragraph_Separator Zp Private_Use Co Punctuation P punct Separator Z Space_Separator Zs Spacing_Mark Mc Surrogate Cs Symbol S Titlecase_Letter Lt Unassigned Cn Uppercase_Letter Lu", $6 = "Adlam Adlm Ahom Anatolian_Hieroglyphs Hluw Arabic Arab Armenian Armn Avestan Avst Balinese Bali Bamum Bamu Bassa_Vah Bass Batak Batk Bengali Beng Bhaiksuki Bhks Bopomofo Bopo Brahmi Brah Braille Brai Buginese Bugi Buhid Buhd Canadian_Aboriginal Cans Carian Cari Caucasian_Albanian Aghb Chakma Cakm Cham Cham Cherokee Cher Common Zyyy Coptic Copt Qaac Cuneiform Xsux Cypriot Cprt Cyrillic Cyrl Deseret Dsrt Devanagari Deva Duployan Dupl Egyptian_Hieroglyphs Egyp Elbasan Elba Ethiopic Ethi Georgian Geor Glagolitic Glag Gothic Goth Grantha Gran Greek Grek Gujarati Gujr Gurmukhi Guru Han Hani Hangul Hang Hanunoo Hano Hatran Hatr Hebrew Hebr Hiragana Hira Imperial_Aramaic Armi Inherited Zinh Qaai Inscriptional_Pahlavi Phli Inscriptional_Parthian Prti Javanese Java Kaithi Kthi Kannada Knda Katakana Kana Kayah_Li Kali Kharoshthi Khar Khmer Khmr Khojki Khoj Khudawadi Sind Lao Laoo Latin Latn Lepcha Lepc Limbu Limb Linear_A Lina Linear_B Linb Lisu Lisu Lycian Lyci Lydian Lydi Mahajani Mahj Malayalam Mlym Mandaic Mand Manichaean Mani Marchen Marc Masaram_Gondi Gonm Meetei_Mayek Mtei Mende_Kikakui Mend Meroitic_Cursive Merc Meroitic_Hieroglyphs Mero Miao Plrd Modi Mongolian Mong Mro Mroo Multani Mult Myanmar Mymr Nabataean Nbat New_Tai_Lue Talu Newa Newa Nko Nkoo Nushu Nshu Ogham Ogam Ol_Chiki Olck Old_Hungarian Hung Old_Italic Ital Old_North_Arabian Narb Old_Permic Perm Old_Persian Xpeo Old_South_Arabian Sarb Old_Turkic Orkh Oriya Orya Osage Osge Osmanya Osma Pahawh_Hmong Hmng Palmyrene Palm Pau_Cin_Hau Pauc Phags_Pa Phag Phoenician Phnx Psalter_Pahlavi Phlp Rejang Rjng Runic Runr Samaritan Samr Saurashtra Saur Sharada Shrd Shavian Shaw Siddham Sidd SignWriting Sgnw Sinhala Sinh Sora_Sompeng Sora Soyombo Soyo Sundanese Sund Syloti_Nagri Sylo Syriac Syrc Tagalog Tglg Tagbanwa Tagb Tai_Le Tale Tai_Tham Lana Tai_Viet Tavt Takri Takr Tamil Taml Tangut Tang Telugu Telu Thaana Thaa Thai Thai Tibetan Tibt Tifinagh Tfng Tirhuta Tirh Ugaritic Ugar Vai Vaii Warang_Citi Wara Yi Yiii Zanabazar_Square Zanb", H6 = $6 + " Dogra Dogr Gunjala_Gondi Gong Hanifi_Rohingya Rohg Makasar Maka Medefaidrin Medf Old_Sogdian Sogo Sogdian Sogd", X6 = H6 + " Elymaic Elym Nandinagari Nand Nyiakeng_Puachue_Hmong Hmnp Wancho Wcho", Y6 = X6 + " Chorasmian Chrs Diak Dives_Akuru Khitan_Small_Script Kits Yezi Yezidi", J6 = Y6 + " Cypro_Minoan Cpmn Old_Uyghur Ougr Tangsa Tnsa Toto Vithkuqi Vith", B7 = J6 + " " + C7, I7 = {
   9: $6,
   10: H6,
   11: X6,
   12: Y6,
   13: J6,
-  14: Be
+  14: B7
 }, Q6 = {};
-function Re(e) {
+function R7(e) {
   var q = Q6[e] = {
-    binary: N2(Pe[e] + " " + J4),
-    binaryOfStrings: N2(Te[e]),
+    binary: N2(P7[e] + " " + J4),
+    binaryOfStrings: N2(T7[e]),
     nonBinary: {
       General_Category: N2(J4),
-      Script: N2(Ie[e])
+      Script: N2(I7[e])
     }
   };
   q.nonBinary.Script_Extensions = q.nonBinary.Script, q.nonBinary.gc = q.nonBinary.General_Category, q.nonBinary.sc = q.nonBinary.Script, q.nonBinary.scx = q.nonBinary.Script_Extensions;
 }
 for (var R3 = 0, Q4 = [9, 10, 11, 12, 13, 14]; R3 < Q4.length; R3 += 1) {
-  var Ve = Q4[R3];
-  Re(Ve);
+  var V7 = Q4[R3];
+  R7(V7);
 }
 var q1 = K1.prototype, l3 = function(q, l) {
   this.parent = q, this.base = l || this;
@@ -5041,13 +5056,13 @@ q1.validateRegExpFlags = function(e) {
   }
   this.options.ecmaVersion >= 15 && t && n && this.raise(e.start, "Invalid regular expression flag");
 };
-function Oe(e) {
+function O7(e) {
   for (var q in e)
     return !0;
   return !1;
 }
 q1.validateRegExpPattern = function(e) {
-  this.regexp_pattern(e), !e.switchN && this.options.ecmaVersion >= 9 && Oe(e.groupNames) && (e.switchN = !0, this.regexp_pattern(e));
+  this.regexp_pattern(e), !e.switchN && this.options.ecmaVersion >= 9 && O7(e.groupNames) && (e.switchN = !0, this.regexp_pattern(e));
 };
 q1.regexp_pattern = function(e) {
   e.pos = 0, e.lastIntValue = 0, e.lastStringValue = "", e.lastAssertionIsQuantifiable = !1, e.numCapturingParens = 0, e.maxBackReference = 0, e.groupNames = /* @__PURE__ */ Object.create(null), e.backReferenceNames.length = 0, e.branchID = null, this.regexp_disjunction(e), e.pos !== e.source.length && (e.eat(
@@ -5249,11 +5264,11 @@ q1.regexp_eatCapturingGroup = function(e) {
   return !1;
 };
 q1.regexp_eatModifiers = function(e) {
-  for (var q = "", l = 0; (l = e.current()) !== -1 && Fe(l); )
+  for (var q = "", l = 0; (l = e.current()) !== -1 && F7(l); )
     q += z2(l), e.advance();
   return q;
 };
-function Fe(e) {
+function F7(e) {
   return e === 105 || e === 109 || e === 115;
 }
 q1.regexp_eatExtendedAtom = function(e) {
@@ -5323,16 +5338,16 @@ q1.regexp_eatRegExpIdentifierName = function(e) {
 };
 q1.regexp_eatRegExpIdentifierStart = function(e) {
   var q = e.pos, l = this.options.ecmaVersion >= 11, t = e.current(l);
-  return e.advance(l), t === 92 && this.regexp_eatRegExpUnicodeEscapeSequence(e, l) && (t = e.lastIntValue), Ne(t) ? (e.lastIntValue = t, !0) : (e.pos = q, !1);
+  return e.advance(l), t === 92 && this.regexp_eatRegExpUnicodeEscapeSequence(e, l) && (t = e.lastIntValue), N7(t) ? (e.lastIntValue = t, !0) : (e.pos = q, !1);
 };
-function Ne(e) {
+function N7(e) {
   return D2(e, !0) || e === 36 || e === 95;
 }
 q1.regexp_eatRegExpIdentifierPart = function(e) {
   var q = e.pos, l = this.options.ecmaVersion >= 11, t = e.current(l);
-  return e.advance(l), t === 92 && this.regexp_eatRegExpUnicodeEscapeSequence(e, l) && (t = e.lastIntValue), Le(t) ? (e.lastIntValue = t, !0) : (e.pos = q, !1);
+  return e.advance(l), t === 92 && this.regexp_eatRegExpUnicodeEscapeSequence(e, l) && (t = e.lastIntValue), L7(t) ? (e.lastIntValue = t, !0) : (e.pos = q, !1);
 };
-function Le(e) {
+function L7(e) {
   return K2(e, !0) || e === 36 || e === 95 || e === 8204 || e === 8205;
 }
 q1.regexp_eatAtomEscape = function(e) {
@@ -5422,13 +5437,13 @@ q1.regexp_eatRegExpUnicodeEscapeSequence = function(e, q) {
     ) && this.regexp_eatHexDigits(e) && e.eat(
       125
       /* } */
-    ) && je(e.lastIntValue))
+    ) && j7(e.lastIntValue))
       return !0;
     t && e.raise("Invalid unicode escape"), e.pos = l;
   }
   return !1;
 };
-function je(e) {
+function j7(e) {
   return e >= 0 && e <= 1114111;
 }
 q1.regexp_eatIdentityEscape = function(e) {
@@ -5454,7 +5469,7 @@ q1.regexp_eatDecimalEscape = function(e) {
 var l0 = 0, P2 = 1, c2 = 2;
 q1.regexp_eatCharacterClassEscape = function(e) {
   var q = e.current();
-  if (Ke(q))
+  if (K7(q))
     return e.lastIntValue = -1, e.advance(), P2;
   var l = !1;
   if (e.switchU && this.options.ecmaVersion >= 9 && ((l = q === 80) || q === 112)) {
@@ -5472,7 +5487,7 @@ q1.regexp_eatCharacterClassEscape = function(e) {
   }
   return l0;
 };
-function Ke(e) {
+function K7(e) {
   return e === 100 || e === 68 || e === 115 || e === 83 || e === 119 || e === 87;
 }
 q1.regexp_eatUnicodePropertyValueExpression = function(e) {
@@ -5514,11 +5529,11 @@ function t0(e) {
 }
 q1.regexp_eatUnicodePropertyValue = function(e) {
   var q = 0;
-  for (e.lastStringValue = ""; Ue(q = e.current()); )
+  for (e.lastStringValue = ""; U7(q = e.current()); )
     e.lastStringValue += z2(q), e.advance();
   return e.lastStringValue !== "";
 };
-function Ue(e) {
+function U7(e) {
   return t0(e) || c3(e);
 }
 q1.regexp_eatLoneUnicodePropertyNameOrValue = function(e) {
@@ -5718,19 +5733,19 @@ q1.regexp_eatClassSetCharacter = function(e) {
       /* b */
     ) ? (e.lastIntValue = 8, !0) : (e.pos = q, !1);
   var l = e.current();
-  return l < 0 || l === e.lookahead() && We(l) || Ge(l) ? !1 : (e.advance(), e.lastIntValue = l, !0);
+  return l < 0 || l === e.lookahead() && W7(l) || G7(l) ? !1 : (e.advance(), e.lastIntValue = l, !0);
 };
-function We(e) {
+function W7(e) {
   return e === 33 || e >= 35 && e <= 38 || e >= 42 && e <= 44 || e === 46 || e >= 58 && e <= 64 || e === 94 || e === 96 || e === 126;
 }
-function Ge(e) {
+function G7(e) {
   return e === 40 || e === 41 || e === 45 || e === 47 || e >= 91 && e <= 93 || e >= 123 && e <= 125;
 }
 q1.regexp_eatClassSetReservedPunctuator = function(e) {
   var q = e.current();
-  return Ze(q) ? (e.lastIntValue = q, e.advance(), !0) : !1;
+  return Z7(q) ? (e.lastIntValue = q, e.advance(), !0) : !1;
 };
-function Ze(e) {
+function Z7(e) {
   return e === 33 || e === 35 || e === 37 || e === 38 || e === 44 || e === 45 || e >= 58 && e <= 62 || e === 64 || e === 96 || e === 126;
 }
 q1.regexp_eatClassControlLetter = function(e) {
@@ -6111,7 +6126,7 @@ g1.readInt = function(e, q, l) {
   }
   return t && o === 95 && this.raiseRecoverable(this.pos - 1, "Numeric separator is not allowed at the last of digits"), this.pos === i || q != null && this.pos - i !== q ? null : r;
 };
-function $e(e, q) {
+function $7(e, q) {
   return q ? parseInt(e, 8) : parseFloat(e.replace(/_/g, ""));
 }
 function a0(e) {
@@ -6134,7 +6149,7 @@ g1.readNumber = function(e) {
     return ++this.pos, D2(this.fullCharCodeAtPos()) && this.raise(this.pos, "Identifier directly after number"), this.finishToken(x.num, n);
   }
   l && /[89]/.test(this.input.slice(q, this.pos)) && (l = !1), t === 46 && !l && (++this.pos, this.readInt(10), t = this.input.charCodeAt(this.pos)), (t === 69 || t === 101) && !l && (t = this.input.charCodeAt(++this.pos), (t === 43 || t === 45) && ++this.pos, this.readInt(10) === null && this.raise(q, "Invalid number")), D2(this.fullCharCodeAtPos()) && this.raise(this.pos, "Identifier directly after number");
-  var i = $e(this.input.slice(q, this.pos), l);
+  var i = $7(this.input.slice(q, this.pos), l);
   return this.finishToken(x.num, i);
 };
 g1.readCodePoint = function() {
@@ -6307,10 +6322,10 @@ g1.readWord = function() {
   var e = this.readWord1(), q = x.name;
   return this.keywords.test(e) && (q = o4[e]), this.finishToken(q, e);
 };
-var He = "8.17.0";
+var H7 = "8.17.0";
 K1.acorn = {
   Parser: K1,
-  version: He,
+  version: H7,
   defaultOptions: J3,
   Position: A5,
   SourceLocation: s3,
@@ -6326,10 +6341,10 @@ K1.acorn = {
   Token: f4,
   isNewLine: m5,
   lineBreak: t2,
-  lineBreakG: xe,
+  lineBreakG: x7,
   nonASCIIwhitespace: z6
 };
-function Xe(e, q) {
+function X7(e, q) {
   return K1.parse(e, q);
 }
 const p4 = 256, e6 = 1024;
@@ -6363,7 +6378,7 @@ function x4(e, q, l) {
   if (!(!Number.isFinite(o) || !r.every(Number.isFinite)))
     return { center: r, radius: o, start: Math.atan2(e[1] - r[1], e[0] - r[0]), sweep: 4 * Math.atan(l) };
 }
-function Ye(e, q, l, t) {
+function Y7(e, q, l, t) {
   const i = Math.hypot(q[0] - e[0], q[1] - e[1]);
   if (!l || i * Math.abs(l) < 0.025 * 2 && Math.abs(4 * Math.atan(l)) < Math.PI / 32 && t > 2)
     return;
@@ -6373,7 +6388,7 @@ function Ye(e, q, l, t) {
   const o = Math.min(Math.PI / 32, 4 * Math.asin(Math.sqrt(Math.min(1, 0.025 / (2 * r.radius)))));
   return { ...r, segments: Math.max(2, Math.ceil(Math.abs(r.sweep) / o)) };
 }
-function Je([e, q], [l, t], n) {
+function J7([e, q], [l, t], n) {
   return [(e + l + (t - q) * n) / 2, (q + t - (l - e) * n) / 2];
 }
 function g4(e, q) {
@@ -6386,7 +6401,7 @@ function g4(e, q) {
     throw new Error(d("Enter one finite bulge per outline point."));
   return q6(m0(e, q, !0));
 }
-function Qe(e, q) {
+function Q7(e, q) {
   if (!Array.isArray(e) || e.length < 2 || e.length > p4 || !e.every(Z1))
     throw new Error(d("An open path needs 2–256 finite points within 100000 mm of the sketch origin."));
   const l = e[0], t = e.at(-1);
@@ -6403,7 +6418,7 @@ function m0(e, q, l) {
     if (Math.hypot(s, f) < 1e-5)
       throw new Error(d(l ? "Outline edges must form one closed loop without crossings or overlaps." : "Consecutive path points must be distinct."));
     t.push(o);
-    const p = Ye(o, a, h, e.length);
+    const p = Y7(o, a, h, e.length);
     if (!p)
       continue;
     const { center: [g, S], radius: A, start: w, sweep: P, segments: v } = p;
@@ -6530,7 +6545,7 @@ function t6(e, q) {
   if (q !== void 0) {
     const l = q4(e, q);
     if (l >= 0)
-      return Je(e.points[l], e.points[(l + 1) % e.points.length], e.bulges?.[l] ?? 0);
+      return J7(e.points[l], e.points[(l + 1) % e.points.length], e.bulges?.[l] ?? 0);
   }
   throw new Error(d("A region position refers to a missing edge. Restore the edge or remove its position."));
 }
@@ -7355,7 +7370,7 @@ function E5(e, q) {
       return { contour: [[-t, -n], [t, -n], [t, n], [-t, n]], edgeIds: ["bottom", "right", "top", "left"].map((i) => `${l.id}:${i}`) };
     }
     if ((l.kind === "outline" || l.kind === "path") && p0(l, l.kind === "outline"), l.kind === "path")
-      return { contour: Qe(O9(l, q), l.bulges), edgeIds: l.points.slice(0, -1).map((t, n) => `${l.id}:edge-${n}`) };
+      return { contour: Q7(O9(l, q), l.bulges), edgeIds: l.points.slice(0, -1).map((t, n) => `${l.id}:edge-${n}`) };
     if (l.kind === "outline")
       return { contour: g4(l.points, l.bulges), edgeIds: l.points.map((n, i) => `${l.id}:edge-${i}`) };
     if (l.kind === "circle") {
@@ -7429,7 +7444,7 @@ function N9(e) {
         if (e.version < 16 && (l.profile.anchors !== void 0 || l.profile.vertexIds !== void 0))
           throw new Error(d("Path point locks require document version 16"));
       }
-      if (E5(l, e), Z7(l.profile, e.version), l.profile.kind === "region" && l.profile.edgeMatches !== void 0) {
+      if (E5(l, e), Ze(l.profile, e.version), l.profile.kind === "region" && l.profile.edgeMatches !== void 0) {
         if (e.version < 38)
           throw new Error(d("Region edge length matches require document version 38"));
         if (!x9(l.profile))
@@ -8905,7 +8920,7 @@ function gq(e) {
   (typeof e != "string" || new TextEncoder().encode(e).length > W5.bytes) && q(d("Model source exceeds 8 MiB"), 0, "resource-limit");
   let l;
   try {
-    l = Xe(e, { ecmaVersion: 2022, sourceType: "script" });
+    l = X7(e, { ecmaVersion: 2022, sourceType: "script" });
   } catch (s) {
     s instanceof RangeError && q(d("Model source nesting limit exceeded"), 0, "resource-limit"), q(d("Invalid design source syntax"), s.pos ?? 0);
   }
@@ -9052,7 +9067,7 @@ function bq(e, q, l = {}) {
   };
   for (const c of Object.values(r.nodes))
     f(c.kind === "mesh" ? { ...c, positions: void 0, indices: void 0 } : c.kind === "exact-feature" ? { ...c, display: void 0 } : c);
-  return f(r.sketches), f(r.joints), f(Object.fromEntries(Object.entries(r).filter(([c]) => !["nodes", "sketches", "joints", "modelSource"].includes(c)))), y9(r), ue(r), r;
+  return f(r.sketches), f(r.joints), f(Object.fromEntries(Object.entries(r).filter(([c]) => !["nodes", "sketches", "joints", "modelSource"].includes(c)))), y9(r), u7(r), r;
 }
 function _q(e) {
   if (e.version < 6)
@@ -9192,7 +9207,7 @@ function Aq(e) {
     const s = q[h];
     t5(s).forEach(a);
   };
-  return e.roots.forEach(a), o.size !== l.length && P1(d("orphaned nodes")), me(e), vq(e), H7(e), S9(e), N9(e), G7(e), _q(e), e;
+  return e.roots.forEach(a), o.size !== l.length && P1(d("orphaned nodes")), m7(e), vq(e), He(e), S9(e), N9(e), Ge(e), _q(e), e;
 }
 function L0(e) {
   return structuredClone(Aq(e));
@@ -10017,12 +10032,12 @@ async function vl(e = {}) {
     return Y1(u, b);
   }
   function _() {
-    var m = { a: p7 };
+    var m = { a: pe };
     return m;
   }
   async function $() {
     function m(T, B) {
-      return X2 = T.exports, X2 = x7(X2), f7(X2), J(), X2;
+      return X2 = T.exports, X2 = xe(X2), fe(X2), J(), X2;
     }
     function u(T) {
       return m(T.instance);
@@ -11053,73 +11068,73 @@ async function vl(e = {}) {
   function Q8(m, u) {
     return m >>>= 0, u >>>= 0, m = N1.toValue(m), u = N1.toValue(u), N1.toHandle(m[u]);
   }
-  function e7(m) {
+  function ee(m) {
     m >>>= 0, m > 9 && (G2[m + 1] += 1);
   }
-  function q7(m, u, b, k, C) {
+  function qe(m, u, b, k, C) {
     return m >>>= 0, u >>>= 0, b >>>= 0, k >>>= 0, C >>>= 0, S3[m](u, b, k, C);
   }
-  function l7(m) {
+  function le(m) {
     return m >>>= 0, N1.toHandle(R4(m));
   }
-  function t7() {
+  function te() {
     return N1.toHandle({});
   }
-  function n7(m) {
+  function ne(m) {
     m >>>= 0;
     var u = N1.toValue(m);
     D1(u), w3(m);
   }
-  function i7(m, u, b) {
+  function ie(m, u, b) {
     m >>>= 0, u >>>= 0, b >>>= 0, m = N1.toValue(m), u = N1.toValue(u), b = N1.toValue(b), m[u] = b;
   }
-  var r7 = () => 4294901760, a7 = (m, u) => Math.ceil(m / u) * u, s7 = (m) => {
+  var re = () => 4294901760, ae = (m, u) => Math.ceil(m / u) * u, se = (m) => {
     var u = N5.buffer.byteLength, b = (m - u + 65535) / 65536 | 0;
     try {
       return N5.grow(b), J(), 1;
     } catch {
     }
   };
-  function o7(m) {
+  function oe(m) {
     m >>>= 0;
-    var u = E.length, b = r7();
+    var u = E.length, b = re();
     if (m > b)
       return !1;
     for (var k = 1; k <= 4; k *= 2) {
       var C = u * (1 + 0.2 / k);
       C = Math.min(C, m + 100663296);
-      var T = Math.min(b, a7(Math.max(m, C), 65536)), B = s7(T);
+      var T = Math.min(b, ae(Math.max(m, C), 65536)), B = se(T);
       if (B)
         return !0;
     }
     return !1;
   }
-  var m7 = (m, u) => {
+  var me = (m, u) => {
     if (Z2)
       for (var b = m; b < m + u; b++) {
         var k = O5(b);
         k && Z2.set(k, b);
       }
-  }, Z2, u7 = (m) => (Z2 || (Z2 = /* @__PURE__ */ new WeakMap(), m7(0, p5.length)), Z2.get(m) || 0), A3 = [], h7 = () => A3.length ? A3.pop() : p5.grow(1), D3 = (m, u) => p5.set(m, u), V4 = (m) => {
+  }, Z2, ue = (m) => (Z2 || (Z2 = /* @__PURE__ */ new WeakMap(), me(0, p5.length)), Z2.get(m) || 0), A3 = [], he = () => A3.length ? A3.pop() : p5.grow(1), D3 = (m, u) => p5.set(m, u), V4 = (m) => {
     const u = m.length;
     return [u % 128 | 128, u >> 7, ...m];
-  }, c7 = { i: 127, p: 127, j: 126, f: 125, d: 124, e: 111 }, O4 = (m) => V4(Array.from(m, (u) => {
-    var b = c7[u];
+  }, ce = { i: 127, p: 127, j: 126, f: 125, d: 124, e: 111 }, O4 = (m) => V4(Array.from(m, (u) => {
+    var b = ce[u];
     return b;
-  })), d7 = (m, u) => {
+  })), de = (m, u) => {
     var b = Uint8Array.of(0, 97, 115, 109, 1, 0, 0, 0, 1, ...V4([1, 96, ...O4(u.slice(1)), ...O4(u[0] === "v" ? "" : u[0])]), 2, 7, 1, 1, 101, 1, 102, 0, 0, 7, 5, 1, 1, 102, 0, 0), k = new WebAssembly.Module(b), C = new WebAssembly.Instance(k, { e: { f: m } }), T = C.exports.f;
     return T;
   }, $2 = (m, u) => {
-    var b = u7(m);
+    var b = ue(m);
     if (b)
       return b;
-    var k = h7();
+    var k = he();
     try {
       D3(k, m);
     } catch (T) {
       if (!(T instanceof TypeError))
         throw T;
-      var C = d7(m, u);
+      var C = de(m, u);
       D3(k, C);
     }
     return Z2.set(m, k), k;
@@ -11131,16 +11146,16 @@ async function vl(e = {}) {
       l.preInit.shift()();
   l.addFunction = $2, l.removeFunction = H2;
   var F4, E3, I2, N5, p5;
-  function f7(m) {
+  function fe(m) {
     F4 = m.K, E3 = m.M, I2 = m.N, N5 = m.I, p5 = m.L;
   }
-  var p7 = { l: n1, C: i1, q: K0, z: W0, G: G0, j: u8, i: f8, a: p8, E: x8, x: b8, d: _8, y: k8, c: w8, p: y8, m: A8, h: D8, n: C8, F: I8, w: j8, r: K8, k: U8, H: W8, u: G8, g: Y8, b: w3, o: J8, B: Q8, t: e7, f: q7, s: l7, A: t7, e: n7, v: i7, D: o7 };
-  function x7(m) {
+  var pe = { l: n1, C: i1, q: K0, z: W0, G: G0, j: u8, i: f8, a: p8, E: x8, x: b8, d: _8, y: k8, c: w8, p: y8, m: A8, h: D8, n: C8, F: I8, w: j8, r: K8, k: U8, H: W8, u: G8, g: Y8, b: w3, o: J8, B: Q8, t: ee, f: qe, s: le, A: te, e: ne, v: ie, D: oe };
+  function xe(m) {
     m = Object.assign({}, m);
     var u = (k) => (C) => k(C) >>> 0, b = (k) => () => k() >>> 0;
     return m.K = u(m.K), m.M = u(m.M), m._emscripten_stack_alloc = u(m._emscripten_stack_alloc), m.emscripten_stack_get_current = b(m.emscripten_stack_get_current), m;
   }
-  function g7() {
+  function ge() {
     G1();
     function m() {
       l.calledRun = !0, !A && (n2(), P?.(l), l.onRuntimeInitialized?.(), A1());
@@ -11150,7 +11165,7 @@ async function vl(e = {}) {
     }, 1)) : m();
   }
   var X2;
-  return X2 = await $(), g7(), s1 ? q = l : q = new Promise((m, u) => {
+  return X2 = await $(), ge(), s1 ? q = l : q = new Promise((m, u) => {
     P = m, v = u;
   }), q;
 }
@@ -11587,7 +11602,7 @@ function zl(e, q, l, t) {
       break;
     }
   }
-  $7(h, s, yq);
+  $e(h, s, yq);
   const f = E5({ ...q, profile: s }, l);
   if (n.loopIds?.[0] !== f.loopIds?.[0])
     throw new Error(d("This offset changes which loop is the outside boundary. Try a smaller distance."));
@@ -11680,7 +11695,7 @@ function Ml(e) {
   return !1;
 }
 function Tl(e) {
-  const q = e.transform.position, l = [[1, 0, 0], [0, 1, 0], [0, 0, 1]], [t, n, i] = l.map((h) => Y7(h, e.transform).map((s, f) => s - q[f])), r = new Float32Array(e.positions.length), o = [1 / 0, 1 / 0, 1 / 0], a = [-1 / 0, -1 / 0, -1 / 0];
+  const q = e.transform.position, l = [[1, 0, 0], [0, 1, 0], [0, 0, 1]], [t, n, i] = l.map((h) => Ye(h, e.transform).map((s, f) => s - q[f])), r = new Float32Array(e.positions.length), o = [1 / 0, 1 / 0, 1 / 0], a = [-1 / 0, -1 / 0, -1 / 0];
   for (let h = 0; h < r.length; h += 3) {
     const s = e.positions[h], f = e.positions[h + 1], c = e.positions[h + 2];
     for (let p = 0; p < 3; p++) {
@@ -11973,7 +11988,7 @@ self.onmessage = async ({ data: e }) => {
   let q;
   try {
     const l = await (_6 ?? (_6 = Pl({ wasmURL: e.wasmURL })));
-    U7(e.locale), self.postMessage({ id: e.id, started: !0 });
+    Ue(e.locale), self.postMessage({ id: e.id, started: !0 });
     try {
       q = { id: e.id, measurement: l.collisionCSG.measure(e.source, e.hulls) };
     } catch (t) {
