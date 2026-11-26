@@ -1432,3 +1432,41 @@ Pause, Reset, repeat Run and Close. The published Brickwright SDK
 remains pinned to `0953e188`. Sustained 1× production qualification
 remains open.
 [CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/c3f45ff1916f5de80937392af9c31cea336af780)
+
+### Index driven joints before the 200 Hz loop
+
+The simulation worker indexes hinge and slider IDs at scene startup.
+Only those joints are sampled for feedback. Actuator validation uses one
+set to reject duplicate commands and overlapping impulse and servo
+targets before the world advances. Worker replies use the browser's
+structured clone to snapshot telemetry.
+
+Two paired MacBook Chrome runs used the bundled SIMD engine from the
+`f0136b8` SDK. All 100 motion and electrical samples across 600 substeps
+matched for Atlas and Scout in both orders. Initial and warm restart
+frames also matched.
+
+| Time over 600 substeps | Before → after | Reverse order, before → after |
+| --- | ---: | ---: |
+| Atlas command validation | 6.9 → 4.2 ms | 8.8 → 6.2 ms |
+| Scout command validation | 5.2 → 2.5 ms | 5.2 → 4.2 ms |
+| Atlas reply construction and posting | 30.2 → 28.3 ms | 36.3 → 32.2 ms |
+| Scout reply construction and posting | 30.3 → 27.9 ms | 33.8 → 32.2 ms |
+
+Joint measurement and whole-run timing varied. All 30 focused tests
+passed with the worker doubles updated for the current startup protocol
+and real message cloning semantics. Editor type checking passed.
+Atlas passed Run, joint motion, Pause, Reset, repeat Run and Close in
+the local embedded SDK with the new worker. The latest Brickwright SDK
+pin is `f0136b8`, which includes the previous hinge optimizations.
+The worker changes in this entry are upstream in CrispCAD.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/f9be35cc74c7dff40e57e2460693ce4c5d1e7c01)
+
+The nine SDK pin tests also passed. A separate nine-simulated-second
+worker run kept the new worker and Board bundle fixed while swapping
+the engine. The MacBook was under heavy, varying load. The bundled
+engine averaged 0.22× for Atlas and 0.25× for Scout. The local Jolt
+5.7 SIMD candidate (SHA-256 prefix `5f25671f`) averaged 0.70× and 0.997×.
+Its three consecutive Scout windows ran at 0.995×, 0.987× and 1.009×.
+The comparison excludes the full Brickwright viewport and uses
+sequential runs. Sustained 1× production qualification remains open.
