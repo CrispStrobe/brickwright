@@ -13,6 +13,7 @@ import {connect} from 'react-redux';
 import MediaQuery from 'react-responsive';
 import {Tab, Tabs, TabList, TabPanel} from 'react-tabs';
 import EditorHelp from './editor-help.jsx';
+import {runEditorMenuAction} from '../../lib/editor-menu-actions.js';
 import CircuitTab from '../tw-pseudocode/circuit-tab.jsx';
 import {setCircuitView} from '../../lib/bw-debug/debug-view.js';
 import {getCadEnabled, setCadEnabled as setCadPreference, CAD_TOGGLE_EVENT, CAD_OPEN_EVENT} from '../../lib/bw-cad-preferences.js';
@@ -1267,8 +1268,8 @@ const GUIComponent = props => {
                                         <span aria-hidden="true" data-bw-tab-icon="">◇</span>
                                         <span data-bw-tab-label="">{'CAD'}</span>
                                     </Tab> : null}
-                                    <EditorHelp inTabList editor={helpEditor} locale={intl.locale}
-                                        label={intl.formatMessage({id: `gui.gui.${helpLabelId}`, defaultMessage: helpLabelDefault})} />
+                                    {helpEditor !== 'Code' && <EditorHelp inTabList editor={helpEditor} locale={intl.locale}
+                                        label={intl.formatMessage({id: `gui.gui.${helpLabelId}`, defaultMessage: helpLabelDefault})} />}
                                 </TabList>
                                 <TabPanel className={tabClassNames.tabPanel}>
                                     {middleContent === 'code' ? (
@@ -1284,6 +1285,11 @@ const GUIComponent = props => {
                                                     canUseCloud={canUseCloud}
                                                     grow={1}
                                                     isVisible={blocksTabVisible}
+                                                    onAddExtension={onExtensionButtonClick}
+                                                    onReadCode={() => {
+                                                        onActivateTab(CODE_TAB_INDEX);
+                                                        runEditorMenuAction('code', 'from-blocks');
+                                                    }}
                                                     options={{
                                                         media: `${basePath}static/${themeMap[theme].blocksMediaFolder}/`
                                                     }}

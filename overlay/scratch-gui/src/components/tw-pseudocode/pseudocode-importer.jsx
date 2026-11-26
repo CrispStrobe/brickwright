@@ -1,4 +1,5 @@
 import React from 'react';
+import {createPortal} from 'react-dom';
 import {showDebuggerOnStage} from '../../lib/bw-debug/show-debugger-on-stage.js';
 import {Popup, toolStyles} from './sim-lab-toolbar.jsx';
 import ScrollRow from './toolbar-scroll-row.jsx';
@@ -79,7 +80,7 @@ for (const g of DEVICE_GROUPS) for (const d of g.devices) DEVICE_BY_ID[d.id] = {
 import {lowerableLines} from '../../lib/bw-fpga/pseudocode-expr.js';
 import {getFpgaEnabled} from '../../lib/bw-fpga-preferences.js';
 import {isSpike3Program, runSpike3OnVirtualHub} from '../../lib/spike3-python-run.js';
-import {isSpikeExtensionLoaded} from '../../lib/spike-port-snapshot.js';
+import {isSpikeExtensionLoaded, snapshotSpikePorts} from '../../lib/spike-port-snapshot.js';
 import {createCodeRunFeedback} from '../../lib/spike-arena/code-run-feedback.js';
 // Every yes/no question is awaited: `window.confirm` cannot block in the desktop/iOS app.
 import {confirmAsync, promptAsync} from '../../lib/native-dialog.js';
@@ -157,7 +158,7 @@ const L10N = {
         mcFirmwareTitle: 'Build the real firmware for this project\'s board (micro:bit or Calliope .hex, EV3, Circuit Playground or the chosen Arcade board .uf2), with the project inside so MakeCode can reopen it',
         mcFirmwareBuilding: n => `Building firmware for ${n}…`,
         mcFirmwareDone: f => `Saved ${f} — copy it onto the board's USB drive (MICROBIT, MINI, CPLAYBOOT, EV3) to flash it. MakeCode also opens it as a project.`,
-        mcNoRuntime: 'This build does not carry the MakeCode runtime (npm run sync:makecode was not run), so MakeCode projects cannot be compiled here.',
+        mcNoRuntime: 'MakeCode runtime files are unavailable in this build.',
         mcNoBase: u => `This project uses a C++ extension outside MakeCode's default set, and building its firmware needs MakeCode's cloud compiler. It still runs in the simulator; to flash it, open it on ${u}.`,
         mcBoardPick: 'Arcade board…',
         mcBoardTitle: 'The board to build this Arcade game\'s firmware for — MakeCode Arcade\'s own list of boards',
@@ -499,7 +500,7 @@ const L10N = {
         mcFirmwareTitle: 'Die echte Firmware für das Board dieses Projekts bauen (micro:bit oder Calliope .hex, EV3, Circuit Playground oder das gewählte Arcade-Board .uf2), mit dem Projekt darin, damit MakeCode es wieder öffnen kann',
         mcFirmwareBuilding: n => `Firmware für ${n} wird gebaut…`,
         mcFirmwareDone: f => `${f} gespeichert — auf das USB-Laufwerk des Boards kopieren (MICROBIT, MINI, CPLAYBOOT, EV3), um es zu flashen. MakeCode öffnet die Datei auch als Projekt.`,
-        mcNoRuntime: 'Dieser Build enthält die MakeCode-Laufzeit nicht (npm run sync:makecode lief nicht), daher können MakeCode-Projekte hier nicht übersetzt werden.',
+        mcNoRuntime: 'Die MakeCode-Laufzeitdateien sind in diesem Build nicht verfügbar.',
         mcNoBase: u => `Dieses Projekt nutzt eine C++-Erweiterung außerhalb des MakeCode-Standardsatzes; seine Firmware braucht den Cloud-Compiler von MakeCode. Im Simulator läuft es trotzdem; zum Flashen auf ${u} öffnen.`,
         mcBoardPick: 'Arcade-Board…',
         mcBoardTitle: 'Das Board, für das die Firmware dieses Arcade-Spiels gebaut wird — die Board-Liste von MakeCode Arcade selbst',
@@ -1338,8 +1339,11 @@ class PseudocodeImporter extends React.Component {
         this._autosaveTimer = null;
     }
 
+    onHardwareState = () => this.forceUpdate();
+
     componentDidMount () {
         this._unmounted = false;
+        window.addEventListener('bw-hardware-state', this.onHardwareState);
         this._unregisterCodeMenu = registerEditorMenuActions('code', () => this.codeMenuActions());
         window.addEventListener('bw-microbit-run-request', this._onMicrobitRunRequest);
         window.addEventListener('bw-cp1-source-load', this.selectCp1);
@@ -2703,6 +2707,7 @@ class PseudocodeImporter extends React.Component {
     }
 
     componentWillUnmount () {
+        window.removeEventListener('bw-hardware-state', this.onHardwareState);
         this.setMaximizedChrome(false);
         this._unmounted = true;
         if (this._unregisterCodeMenu) this._unregisterCodeMenu();
@@ -5032,26 +5037,12 @@ class PseudocodeImporter extends React.Component {
         return normalizeDeviceId(id);
     }
 
-    /** All catalog entries, with compatibility flag for the given device. */
     catalogForDevice (device) {
-        const dev = this._normDevice(device);
-        return (this.state.catalog || []).map(ex => {
-            // Older catalog rows use singular `device`; treating its absence
-            // from `devices` as "works everywhere" exposed Nano/Mega examples
-            // under micro:bit and every other unrelated board.
+        const selected = this._normDevice(device);
+        return (this.state.catalog || []).filter(ex => {
             const devices = ex.devices || (ex.device ? [ex.device] : []);
-            const compatible = devices.length === 0 || devices.some(d => this._normDevice(d) === dev);
-            return { ...ex, devices, _compatible: compatible };
+            return devices.some(target => this._normDevice(target) === selected);
         });
-        // NO `.filter(ex => ex._compatible)` — REMOVED 2026-09-07. The catalogue
-        // is browsed BEFORE the chip is chosen, so filtering by the currently
-        // selected device hid most of it from a learner who had not yet made the
-        // choice being filtered on (owner report). It also made this file's own
-        // "Needs:" annotation unreachable: with the filter in place every row
-        // had _compatible true, so the label below never rendered and the sort
-        // comment described an ordering that could not occur. Each row already
-        // carries a chip per device in `ex.devices`; that is the pick, at the
-        // moment it is actionable.
     }
 
     // Load a catalog example's program.bw into the pseudocode editor. If the
@@ -5653,114 +5644,78 @@ class PseudocodeImporter extends React.Component {
         }));
     }
 
-    // The "Load example…" control when a chip is selected: a button opening a
-    // searchable popover over the catalog (examples/index.json). A native
-    // <select> cannot hold a search input, and the catalog is large enough
-    // (100+ programs, up to ~90 per device) that scrolling unaided is not an
-    // answer — hence the filter box the spec asks for.
-    renderCatalogControl (csel) {
+    renderCatalogControl (item) {
+        const {showCatalog, showCatalogFull, catalogError, catalog, exampleFilter} = this.state;
         const device = this.currentDevice();
-        const unsorted = this.catalogForDevice(device);
-        // Compatible examples first, then incompatible (greyed with "Needs:")
-        const list = unsorted.sort((a, b) => (b._compatible ? 1 : 0) - (a._compatible ? 1 : 0));
-        const q = this.state.exampleFilter.trim().toLowerCase();
         const locale = pickLocale(this.props.locale);
-        const rows = q ? list.filter(ex => {
-            const t = ex.title || {};
-            return [t.en || '', t.de || '', ex.id].some(s => String(s).toLowerCase().includes(q));
-        }) : list;
-        const open = this.state.showCatalog;
+        const de = locale === 'de';
+        const query = exampleFilter.trim().toLowerCase();
+        const rows = this.catalogForDevice(device).filter(({title = {}, id}) =>
+            !query || [title.en, title.de, id].some(value => String(value || '').toLowerCase().includes(query)));
+        const close = () => this.setState({showCatalogFull: false});
+        const list = full => (
+            <div data-testid="bw-catalog-panel" data-device={device || ''}
+                data-catalog={catalogError ? 'error' : catalog ? 'ready' : 'loading'}
+                style={{display: 'flex', flexDirection: 'column', minHeight: 0, flex: 1,
+                    maxHeight: full ? undefined : 300, padding: 6, gap: 6}}>
+                <div style={{display: 'flex', gap: 6, alignItems: 'center'}}>
+                    <input type="search" value={exampleFilter} autoFocus onChange={e => this.setState({exampleFilter: e.target.value})}
+                        placeholder={this.L.searchExamples} aria-label={this.L.searchExamples}
+                        style={{flex: 1, minWidth: 0, padding: '6px 8px', border: '1px solid #cbd5e1', borderRadius: 6, font: 'inherit'}}
+                        data-testid="bw-catalog-search" />
+                    {!full && <button type="button" style={toolStyles(false).button}
+                        aria-label={de ? 'Beispielbibliothek öffnen' : 'Open full examples library'}
+                        title={de ? 'Beispielbibliothek öffnen' : 'Open full examples library'}
+                        onClick={() => this.setState({showCatalogFull: true, actionsOpen: false})}>⛶</button>}
+                </div>
+                <div style={{overflowY: 'auto', minHeight: 0, scrollbarWidth: 'thin', display: 'grid',
+                    gridTemplateColumns: full ? 'repeat(auto-fill, minmax(min(100%, 240px), 1fr))' : '1fr',
+                    gap: 4, alignContent: 'start'}}>
+                    {catalogError ? this.L.catalogUnavailable(catalogError) :
+                        !catalog ? this.L.catalogLoading :
+                            rows.length === 0 ? this.L.catalogNoMatch : rows.map(ex => {
+                                const names = ex.title || {};
+                                const title = names[locale] || names.en || ex.id;
+                                return <button key={ex.id} type="button"
+                                    onClick={() => {
+                                        this.setState({actionsOpen: false, showCatalogFull: false});
+                                        this.loadCatalogExample(ex, device);
+                                    }}
+                                    style={{...item, border: '1px solid #cbd5e1', background: '#fff'}}
+                                    title={ex.id} data-testid="bw-catalog-item">
+                                    {title}
+                                </button>;
+                            })}
+                </div>
+            </div>
+        );
         return (
-            <span style={{display: 'block', width: '100%', minWidth: 0}}>
-                <button type="button"
-                    onClick={() => { this.loadCatalog(); this.setState(s => ({showCatalog: !s.showCatalog})); }}
-                    style={{...csel, cursor: 'pointer', border: '1px solid #cbd5e1',
-                        background: open ? '#e2e8f0' : '#f1f5f9'}}
-                    aria-expanded={open}
-                    title={this.L.loadCatalogTitle} data-testid="bw-catalog-toggle">
+            <div data-keep-open>
+                <button type="button" onClick={() => { this.loadCatalog(); this.setState(s => ({showCatalog: !s.showCatalog})); }}
+                    style={{...item, background: showCatalog ? '#e2e8f0' : '#f1f5f9'}}
+                    aria-expanded={showCatalog} title={this.L.loadCatalogTitle} data-testid="bw-catalog-toggle">
                     {this.L.loadExample}
                 </button>
-                {open && (
-                    <div style={{marginTop: 4, boxSizing: 'border-box',
-                        width: '100%', maxWidth: 340, maxHeight: 380, display: 'flex', flexDirection: 'column',
-                        background: '#fff', border: '1px solid #cbd5e1', borderRadius: 8,
-                        boxShadow: '0 8px 24px rgba(15,23,42,.18)', textAlign: 'left'}}
-                        data-testid="bw-catalog-panel"
-                        data-device={this.currentDevice() || ''}
-                        // loading vs ready vs error, so a reader can tell an
-                        // empty catalogue from one that has not arrived yet.
-                        data-catalog={this.state.catalogError ? 'error'
-                            : this.state.catalog ? 'ready' : 'loading'}>
-                        <input type="search" value={this.state.exampleFilter} autoFocus
-                            onChange={e => this.setState({exampleFilter: e.target.value})}
-                            placeholder={this.L.searchExamples}
-                            style={{margin: 8, padding: '6px 10px', border: '1px solid #cbd5e1',
-                                borderRadius: 6, font: 'inherit', fontSize: 13}}
-                            data-testid="bw-catalog-search" />
-                        <div style={{overflowY: 'auto', padding: '0 8px 8px', minHeight: 0}}>
-                            {this.state.catalogError ? (
-                                <div style={{padding: '6px 8px', fontSize: 12, color: '#b45309'}}>
-                                    {this.L.catalogUnavailable(this.state.catalogError)}
-                                </div>
-                            ) : !this.state.catalog ? (
-                                <div style={{padding: '6px 8px', fontSize: 12, color: '#64748b'}}>
-                                    {this.L.catalogLoading}
-                                </div>
-                            ) : rows.length === 0 ? (
-                                <div style={{padding: '6px 8px', fontSize: 12, color: '#64748b'}}>
-                                    {this.L.catalogNoMatch}
-                                </div>
-                            ) : rows.map(ex => {
-                                const t = ex.title || {};
-                                const title = (locale === 'de' ? t.de : t.en) || t.en || ex.id;
-                                // Every example is shown and none is greyed: the device is
-                                // picked after the example, so annotating against the current
-                                // one warns about a decision the learner has not taken. The
-                                // device chips below carry `ex.devices` and are the pick.
-                                const compat = true;
-                                return (
-                                    <button key={ex.id} type="button"
-                                        onClick={() => this.loadCatalogExample(ex)}
-                                        style={{display: 'block', width: '100%', textAlign: 'left',
-                                            padding: '5px 8px', border: 'none', borderRadius: 6,
-                                            background: 'transparent', cursor: 'pointer',
-                                            font: 'inherit', fontSize: 13,
-                                            color: compat ? '#1e293b' : '#94a3b8',
-                                            opacity: compat ? 1 : 0.7}}
-                                        title={ex.id} data-testid="bw-catalog-item">
-                                        {title}
-                                        <span style={{marginLeft: 6, fontSize: 11, color: '#94a3b8'}}>{ex.id}</span>
-                                        {(ex.devices || []).length > 1 ? (
-                                            <span style={{display: 'block', marginTop: 2}}>
-                                                {(ex.devices || []).map(d => {
-                                                    const isActive = this._normDevice(d) === this._normDevice(device);
-                                                    return (
-                                                        <span key={d} role="button" tabIndex={0}
-                                                            data-testid="bw-catalog-device"
-                                                            onClick={e => { e.stopPropagation(); this.loadCatalogExample(ex, d); }}
-                                                            onKeyDown={e => { if (e.key === 'Enter') { e.stopPropagation(); this.loadCatalogExample(ex, d); } }}
-                                                            style={{display: 'inline-block', margin: '0 4px 2px 0',
-                                                                padding: '0 6px', borderRadius: 8, fontSize: 10,
-                                                                background: isActive ? '#3b82f6' : '#e2e8f0',
-                                                                color: isActive ? '#fff' : '#334155',
-                                                                cursor: 'pointer'}}>
-                                                            {DEVICE_CHIP_LABELS[d] || d}
-                                                        </span>
-                                                    );
-                                                })}
-                                            </span>
-                                        ) : null}
-                                    </button>
-                                );
-                            })}
+                {showCatalog && !showCatalogFull && this.state.actionsOpen && list(false)}
+                {showCatalogFull && createPortal(
+                    <dialog ref={node => { if (node && !node.open) node.showModal(); }} onClose={close}
+                        aria-label={de ? 'Beispielbibliothek' : 'Examples library'}
+                        style={{width: 'calc(100vw - 32px)', height: 'calc(100dvh - 32px)', maxWidth: 'none', maxHeight: 'none',
+                            boxSizing: 'border-box', border: '1px solid #94a3b8', borderRadius: 10, padding: 12, color: '#1e293b'}}>
+                        <div style={{height: '100%', display: 'flex', flexDirection: 'column'}}>
+                            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 6px'}}>
+                                <strong>{de ? 'Beispiele' : 'Examples'} · {DEVICE_CHIP_LABELS[device] || device}</strong>
+                                <button type="button" onClick={close} style={toolStyles(false).button}
+                                    aria-label={de ? 'Schließen' : 'Close'}>×</button>
+                            </div>
+                            {list(true)}
                         </div>
-                    </div>
-                )}
-            </span>
+                    </dialog>, document.body)}
+            </div>
         );
     }
 
-    renderActionMenu (csel) {
+    renderActionMenu (csel, renderCodeControls) {
         const item = {...csel, ...toolStyles(false).button, display: 'flex', alignItems: 'center', justifyContent: 'flex-start',
             width: '100%', boxSizing: 'border-box', textAlign: 'left', cursor: 'pointer', height: 'auto',
             minHeight: 32, padding: '6px 8px', whiteSpace: 'normal', fontSize: 12};
@@ -5774,6 +5729,23 @@ class PseudocodeImporter extends React.Component {
                     title={L10N[pickLocale(this.props.locale)].fileMenuTitle}
                     aria-label={L10N[pickLocale(this.props.locale)].fileMenuTitle}>⋯</button>}>
                 <div style={{display: 'flex', flexDirection: 'column', gap: 2}}>
+                    {this.state.actionsOpen && <div data-code-overflow-controls>
+                        <style>{`
+                            [data-code-overflow-controls] {display: grid; gap: 2px}
+                            [data-code-overflow-controls] > div,
+                            [data-code-overflow-controls] > div > span {display: grid !important; gap: 2px !important}
+                            [data-code-overflow-controls] button {
+                                width: 100% !important; min-height: 32px; height: auto !important;
+                                display: flex !important; align-items: center; justify-content: flex-start !important;
+                                gap: 6px; text-align: left; white-space: normal; font-size: 12px !important;
+                                font-style: normal !important; padding: 6px 8px !important; border: 0 !important;
+                                border-radius: 6px !important; background: transparent !important; color: #1e293b !important;
+                            }
+                            [data-code-overflow-controls] button:hover {background: #eef2f7 !important}
+                            [data-code-overflow-controls] button:disabled {opacity: .45; cursor: default}
+                        `}</style>
+                        {renderCodeControls(true)}
+                    </div>}
                     <strong style={{padding: '4px 8px', fontSize: 11, color: '#64748b'}}>{this.L.actionFiles}</strong>
                     <label style={item} title={this.L.openFileTitle(`${CODE_ACCEPT},${IMPORT_ACCEPT}`)}
                         data-testid="bw-open-file" role="button" tabIndex={this.state.busy ? -1 : 0} aria-disabled={this.state.busy}
@@ -5987,13 +5959,494 @@ class PseudocodeImporter extends React.Component {
         const showSpikeAction = isSpikeExtensionLoaded(this.props.vm) || spikeCode;
         // The device this tab is writing for: the MakeCode project's target, else the DEVICE header.
         const toolbarDevice = (this._makeCodeProject && this._makeCodeProject.target) || this.currentDevice();
-        const applies = id => toolbarActionApplies(id, {device: toolbarDevice, evidence: showSpikeAction});
+        const applies = id => toolbarActionApplies(id, {device: toolbarDevice,
+            evidence: id === 'spike-arena' ? snapshotSpikePorts(this.props.vm?.runtime).connected : showSpikeAction});
+        const renderCodeControls = menu => (
+            <React.Fragment>
+                    <div data-testid={menu ? undefined : "bw-code-action-row"} style={{display: 'inline-flex', alignSelf: 'center',
+                        alignItems: 'center', gap: 6, flexWrap: 'nowrap', flexShrink: 0}}>
+                        <button onClick={this.compile}
+                            aria-label={this.L.toBlocks}
+                            disabled={!this.canCompileToBlocks()}
+                            title={this.L.toBlocksTitle(LANG_LABEL[this.state.lang])}
+                            style={actionBtn}>
+                            <span aria-hidden="true">⇦ ▣</span>{menu && ` ${this.L.toBlocks.replace('⇦ ', '')}`}
+                        </button>
+                        <button onClick={this.fromBlocks} disabled={this.state.busy}
+                            aria-label={this.L.fromBlocks}
+                            title={this.L.fromBlocksTitle}
+                            style={{...actionBtn, background: 'linear-gradient(135deg,#a55b80,#8e4a6c)'}}>
+                            <span aria-hidden="true">▣ ⇨</span>{menu && ` ${this.L.fromBlocks.replace(' ⇨', '')}`}
+                        </button>
+                        {this.currentDevice() === 'pico' ? (
+                            <button onClick={this.deployToPico} disabled={this.state.busy}
+                                data-testid={menu ? "bw-deploy-pico-menu" : "bw-deploy-pico"}
+                                title={this.L.deployPicoTitle}
+                                style={{...actionBtn, background: 'linear-gradient(135deg,#2f9e44,#237a34)'}}>
+                                {this.L.deployPico}
+                            </button>
+                        ) : null}
+                        {this.state.lang === 'pseudocode' && applies('spike-usb') ? (
+                            <span style={{display: 'inline-flex', gap: 5, alignItems: 'center', flexWrap: 'nowrap'}}>
+                                <select value={this.state.spikeUsbRoute} disabled={this.state.busy}
+                                    aria-label={this.L.spikeUsbRouteLabel} data-testid={menu ? "bw-spike-usb-route-menu" : "bw-spike-usb-route"}
+                                    onChange={e => this.setState({spikeUsbRoute: e.target.value})}
+                                    style={{...csel, maxWidth: 180}}>
+                                    <option value="direct">{this.L.spikeUsbDirect}</option>
+                                    <option value="bridge">{this.L.spikeUsbBridge}</option>
+                                </select>
+                                {this.state.spikeUsbRoute === 'bridge' ? (
+                                    <React.Fragment>
+                                        <input type="url" placeholder={this.L.spikeUsbUrl}
+                                            aria-label={this.L.spikeUsbUrl} value={this.state.spikeUsbBridgeUrl}
+                                            onChange={e => this.setState({spikeUsbBridgeUrl: e.target.value})}
+                                            style={{...csel, width: 135}} />
+                                        <input type="password" placeholder={this.L.spikeUsbToken}
+                                            aria-label={this.L.spikeUsbToken} value={this.state.spikeUsbBridgeToken}
+                                            onChange={e => this.setState({spikeUsbBridgeToken: e.target.value})}
+                                            style={{...csel, width: 95}} />
+                                    </React.Fragment>
+                                ) : null}
+                                <button onClick={() => this.runSpikeUsb(true)} disabled={this.state.busy}
+                                    title={this.L.probeSpikeUsbTitle}
+                                    data-testid={menu ? "bw-probe-spike-usb-menu" : "bw-probe-spike-usb"} style={actionBtn}>
+                                    {this.L.probeSpikeUsb}
+                                </button>
+                                <button onClick={() => this.runSpikeUsb(false)} disabled={this.state.busy || !(this.state.buffers.pseudocode || '').trim()}
+                                    data-testid={menu ? "bw-run-spike-usb-menu" : "bw-run-spike-usb"} style={{...actionBtn, background: '#d97706', color: '#fff'}}>
+                                    {this.L.runSpikeUsb}
+                                </button>
+                            </span>
+                        ) : null}
+                        {/* Flash to a real board for every family that has a serial
+                            bootloader (STC ISP, AVR STK500v1, STM32 AN3155); the
+                            method downloads the image + names the programmer for
+                            the rest. Pico keeps its own MicroPython button above. */}
+                        {this.currentDevice() !== 'pico'
+                         && this.state.lang === 'pseudocode'
+                         && this.flashFamily(this.currentDevice()) !== null ? (
+                            <button onClick={this.flashToBoard} disabled={this.state.busy}
+                                data-testid={menu ? "bw-flash-board-menu" : "bw-flash-board"}
+                                title={this.L.flashBoardTitle}
+                                style={{...actionBtn, background: 'linear-gradient(135deg,#c9761b,#a35d12)'}}>
+                                {this.L.flashBoard}
+                            </button>
+                        ) : null}
+                        {/* The 8086's ▶. It sits with the other per-device buttons
+                            rather than with the Python/JS "Run" above, because it
+                            does what THEY do — build for the selected device and
+                            start it — and not what that one does (evaluate the
+                            editor's text in a worker). `asmTargetForDevice` is the
+                            one function that decides what an 8086 is, so the
+                            button and the assembler cannot disagree about it. */}
+                        {this.state.lang === 'pseudocode'
+                         && asmTargetForDevice(this.currentDevice()) === 'i8086' ? (
+                                <button onClick={this.runPseudocodeOn8086} disabled={this.state.busy}
+                                    data-testid={menu ? "bw-run-8086-menu" : "bw-run-8086"}
+                                    title={this.L.run8086Title}
+                                    style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}>
+                                    {this.L.run8086}
+                                </button>
+                            ) : null}
+                        {/* Export beside ▶ Run: the assembled .COM and a bootable
+                            floppy .img, to carry off the bench to real hardware or
+                            another emulator (N10). silicon: export only. */}
+                        {this.state.lang === 'pseudocode'
+                         && asmTargetForDevice(this.currentDevice()) === 'i8086' ? (
+                                <React.Fragment>
+                                    <button onClick={() => this.exportI8086('com')} disabled={this.state.busy}
+                                        data-testid={menu ? "bw-export-8086-com-menu" : "bw-export-8086-com"} title={this.L.export8086ComTitle}
+                                        style={{...actionBtn, background: '#e2e8f0', color: '#334155'}}>
+                                        {this.L.export8086Com}
+                                    </button>
+                                    <button onClick={() => this.exportI8086('img')} disabled={this.state.busy}
+                                        data-testid={menu ? "bw-export-8086-img-menu" : "bw-export-8086-img"} title={this.L.export8086ImgTitle}
+                                        style={{...actionBtn, background: '#e2e8f0', color: '#334155'}}>
+                                        {this.L.export8086Img}
+                                    </button>
+                                </React.Fragment>
+                            ) : null}
+                        {/* The C tab's ▶, and it is the same shape as the one
+                            above: build for the selected device and start it. It
+                            appears only where a LOCAL C route exists, because the
+                            hosted compiler has no 8086 back end — so this button
+                            can never be the thing that posts a program. */}
+                        {this.state.lang === 'c'
+                         && cRouteFor(this.currentDevice()) === 'local' ? (
+                                <button onClick={this.runCOn8086} disabled={this.state.busy}
+                                    data-testid={menu ? "bw-run-c-8086-menu" : "bw-run-c-8086"}
+                                    title={this.L.runC8086Title}
+                                    style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}>
+                                    {this.L.runC8086}
+                                </button>
+                            ) : null}
+                        {/* The RISC-V C ▶ and its route chooser. The user picks where
+                            C compiles: in the BROWSER (shecc.wasm — a C subset, no
+                            server) or on the SERVER (the hosted service — full C via
+                            native gcc + picolibc). Both boot through the same riscv
+                            image path; only the compiler differs. */}
+                        {this.state.lang === 'c'
+                         && asmTargetForDevice(this.currentDevice()) === 'riscv32' ? (
+                                <span style={{display: 'inline-flex', alignItems: 'center', gap: 8}}>
+                                    <label style={{fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 4}}>
+                                        {this.L.asmExampleLabel}
+                                        <select data-testid={menu ? "bw-riscv-c-examples-menu" : "bw-riscv-c-examples"}
+                                            onChange={e => this.loadRiscvCExample(e.target.value)}
+                                            value=""
+                                            disabled={this.state.busy}
+                                            style={{padding: '2px 6px', borderRadius: 4, border: '1px solid #cbd5e1'}}>
+                                            <option value="">{this.L.asmExamplePick}</option>
+                                            {riscvCExamplesFor('riscv32').map(ex => (
+                                                <option key={ex.id} value={ex.id}>
+                                                    {pickLocale(this.props.locale) === 'de' ? ex.labelDe : ex.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </label>
+                                    <label title={this.L.runCRiscvRouteTitle}
+                                        style={{fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 4}}>
+                                        <select value={this.state.riscvCRoute}
+                                            data-testid={menu ? "bw-riscv-c-route-menu" : "bw-riscv-c-route"}
+                                            onChange={e => this.setState({riscvCRoute: e.target.value})}
+                                            disabled={this.state.busy}
+                                            style={{padding: '5px 8px', borderRadius: 6, border: '1px solid #cbd5e1', font: 'inherit'}}>
+                                            <option value="browser">{this.L.runCRiscvRouteBrowser}</option>
+                                            <option value="server">{this.L.runCRiscvRouteServer}</option>
+                                        </select>
+                                    </label>
+                                    <button onClick={() => this.runCOnRiscv()} disabled={this.state.busy}
+                                        data-testid={menu ? "bw-run-c-riscv-menu" : "bw-run-c-riscv"}
+                                        title={this.L.runCRiscvTitle}
+                                        style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}>
+                                        {this.L.runCRiscv}
+                                    </button>
+                                    {/* Smart hint: the browser subset rejected this program;
+                                        offer the full compiler on the server in one click. */}
+                                    {this.state.riscvCanRetryServer ? (
+                                        <button onClick={() => this.runCOnRiscv('server')} disabled={this.state.busy}
+                                            data-testid={menu ? "bw-run-c-riscv-server-menu" : "bw-run-c-riscv-server"}
+                                            title={this.L.runCRiscvTryServerTitle}
+                                            style={{...actionBtn, background: 'linear-gradient(135deg,#f08c00,#e67700)'}}>
+                                            {this.L.runCRiscvTryServer}
+                                        </button>
+                                    ) : null}
+                                </span>
+                            ) : null}
+                        {/* The AVR boards' C tab ▶: the buffer compiled AS A SKETCH —
+                            real Arduino C++ (Serial, String, classes, the core's
+                            libraries) on the hosted `arduino` route — and booted on
+                            the board's own engine through the debug panel's firmware
+                            path. Gated by the route's own device table, so the button
+                            and the compile cannot disagree about which boards it
+                            serves. */}
+                        {this.state.lang === 'c' && sketchBoardFor(this.currentDevice()) ? (
+                                <span style={{display: 'inline-flex', alignItems: 'center', gap: 8}}>
+                                    <label style={{fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 4}}>
+                                        {this.L.asmExampleLabel}
+                                        <select data-testid={menu ? "bw-arduino-sketch-examples-menu" : "bw-arduino-sketch-examples"}
+                                            onChange={e => this.loadArduinoSketchExample(e.target.value)}
+                                            value=""
+                                            disabled={this.state.busy}
+                                            style={{padding: '2px 6px', borderRadius: 4, border: '1px solid #cbd5e1'}}>
+                                            <option value="">{this.L.asmExamplePick}</option>
+                                            {arduinoSketchExamplesFor(this.currentDevice()).map(ex => (
+                                                <option key={ex.id} value={ex.id}>
+                                                    {pickLocale(this.props.locale) === 'de' ? ex.labelDe : ex.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </label>
+                                    <button onClick={this.runSketchOnAvr} disabled={this.state.busy}
+                                        data-testid={menu ? "bw-run-arduino-sketch-menu" : "bw-run-arduino-sketch"}
+                                        title={this.L.runSketchTitle}
+                                        style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}>
+                                        {this.L.runSketch}
+                                    </button>
+                                </span>
+                            ) : null}
+                        {/* N1: the Z80 bench's C ▶, gated by the route function that
+                            decides what a Z80 is (asmTargetForDevice). */}
+                        {this.state.lang === 'c' && asmTargetForDevice(this.currentDevice()) === 'z80' ? (
+                                <button onClick={this.runCOnZ80} disabled={this.state.busy}
+                                    data-testid={menu ? "bw-run-c-z80-menu" : "bw-run-c-z80"}
+                                    title={this.L.runCZ80Title}
+                                    style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}>
+                                    {this.L.runCZ80}
+                                </button>
+                            ) : null}
+                        {this.currentDevice() === 'stm32f030' && this.state.lang === 'pseudocode' ? (
+                            <button onClick={this.flashStm32ViaSwd} disabled={this.state.busy}
+                                data-testid={menu ? "bw-flash-swd-menu" : "bw-flash-swd"}
+                                title={this.L.flashSwdTitle}
+                                style={{...actionBtn, background: 'linear-gradient(135deg,#1b7fc9,#125fa3)'}}>
+                                {this.L.flashSwd}
+                            </button>
+                        ) : null}
+                        {this.state.lang !== 'pseudocode' && this.state.lang !== 'c' && /_[a-z]+\.|Driver/.test(this.activeCode()) ? (
+                            <span style={{fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 8}}>
+                                <label title={this.L.driverTitle}>
+                                    🔌{' '}
+                                    <select value={this.state.driverMode} onChange={e => this.setGenOpt({driverMode: e.target.value})} disabled={this.state.busy}
+                                        style={{padding: '5px 8px', borderRadius: 6, border: '1px solid #cbd5e1', font: 'inherit'}}>
+                                        <option value="shim">{this.L.driverShim}</option>
+                                        <option value="remote">{this.L.driverRemote}</option>
+                                        <option value="ondevice">{this.L.driverOnbrick}</option>
+                                        <option value="simulator">{this.L.driverSim}</option>
+                                    </select>
+                                </label>
+                                <label title={this.L.asyncTitle}>
+                                    <input type="checkbox" checked={this.state.asyncMode} disabled={this.state.busy}
+                                        onChange={e => this.setGenOpt({asyncMode: e.target.checked})} /> {this.L.asyncLabel}
+                                </label>
+                                <label title={this.L.eventsTitle}>
+                                    <input type="checkbox" checked={this.state.eventsMode} disabled={this.state.busy}
+                                        onChange={e => this.setGenOpt({eventsMode: e.target.checked})} /> {this.L.eventsLabel}
+                                </label>
+                            </span>
+                        ) : null}
+                        {(this.state.lang === 'python' || this.state.lang === 'javascript') && this.activeCode().trim() ? (
+                            <button onClick={this.run} disabled={this.state.running}
+                                style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}>
+                                ▶ {this.L.run} {this.state.lang === 'python' ? 'Python' : 'JavaScript'}
+                            </button>
+                        ) : null}
+    
+                        <React.Fragment>
+                            {applies('spike-arena') ? (
+                                <button onClick={() => this.openSpikeArena()} title={this.L.openSpikeArenaTitle}
+                                    style={{...actionBtn, background: 'linear-gradient(135deg,#e8590c,#c2410c)'}}
+                                    data-testid={menu ? "bw-open-spike-arena-menu" : "bw-open-spike-arena"}>
+                                    {this.L.openSpikeArena}
+                                </button>
+                            ) : null}
+                            {applies('spike-nuttx') && window.__TAURI_INTERNALS__ && this.state.lang === 'python' && this.activeCode().trim() ?
+                                <button type="button" onClick={() => this.runOnNuttxPython()} disabled={this.state.busy}
+                                    style={actionBtn} data-testid={menu ? "bw-spike-nuttx-python-run-menu" : "bw-spike-nuttx-python-run"}
+                                    title={pickLocale(this.props.locale) === 'de' ? 'Python in unserer vollständigen NuttX-Firmware ausführen. Benötigt das Desktop-Paket mit eingebettetem MicroPython; Roboter-API: brickwright.' :
+                                        'Run Python in our full NuttX firmware. Requires the desktop package with embedded MicroPython; robot API: brickwright.'}>
+                                    ▶ Python · NuttX
+                                </button> : null}
+                            {applies('spike-nuttx') && window.__TAURI_INTERNALS__ && this.state.lang === 'python' && this.activeCode().trim() ?
+                                <button type="button" onClick={() => this.runOnMicroPythonImage()} disabled={this.state.busy}
+                                    style={actionBtn} data-testid={menu ? "bw-spike-micropython-run-menu" : "bw-spike-micropython-run"}
+                                    title={pickLocale(this.props.locale) === 'de' ? 'Lokales MicroPython-Anwendungsimage auswählen und Python in Renode ausführen. Benötigt ein Desktop-Paket mit MicroPython-Simulationsprofil.' :
+                                        'Choose a local MicroPython application image and run Python in Renode. Requires a desktop package with the MicroPython simulation profile.'}>
+                                    ▶ MicroPython · Image
+                                </button> : null}
+                            {applies('spike-firmware') && window.__TAURI_INTERNALS__ && ((this.state.lang === 'pseudocode' && this.currentDevice() === 'spike') || (this.state.lang === 'python' && isSpike3Program(this.activeCode()))) ? <button type="button" onClick={() => this.runOnSpikeFirmware()}
+                                disabled={this.state.busy} style={actionBtn} data-testid={menu ? "bw-spike-firmware-run-menu" : "bw-spike-firmware-run"}
+                                title={this.L.spikeFirmwareRunTitle}>
+                                ▶ Firmware
+                            </button> : null}
+                        </React.Fragment>
+                        {this.state.lang === 'python' && isSpike3Program(this.activeCode()) ? (
+                            <button onClick={() => this.runOnSpike3()} title={this.L.runOnSpike3Title} disabled={this.state.busy}
+                                style={{...actionBtn, background: 'linear-gradient(135deg,#f59e0b,#d97706)'}}
+                                data-testid={menu ? "bw-spike3-run-menu" : "bw-spike3-run"}>
+                                {this.L.runOnSpike3}
+                            </button>
+                        ) : null}
+                        {this.state.spike3Running ? (
+                            <button onClick={() => this.stopSpike3()} data-testid={menu ? "bw-spike3-stop-menu" : "bw-spike3-stop"}
+                                style={{...actionBtn, background: 'linear-gradient(135deg,#fa5252,#e03131)'}}>
+                                {this.L.spike3Stop}
+                            </button>
+                        ) : null}
+                        {this.state.picoSimRunning ? (
+                            <button onClick={() => this.stopPicoSim()} data-testid={menu ? "bw-pico-sim-stop-menu" : "bw-pico-sim-stop"}
+                                style={{...actionBtn, background: 'linear-gradient(135deg,#fa5252,#e03131)'}}>
+                                ■ {this.L.stop}
+                            </button>
+                        ) : null}
+                        {this.state.lang === 'basic' && this.activeCode().trim() ? (
+                            <button onClick={() => this.runBasic()} disabled={this.state.running}
+                                style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}
+                                data-testid={menu ? "bw-basic-run-menu" : "bw-basic-run"}>
+                                {this.L.runBasic}
+                            </button>
+                        ) : null}
+                        {this.state.lang === 'fe' && this.activeCode().trim() ? (
+                            <button onClick={() => this.runFeOnDosInterp()} disabled={this.state.running}
+                                style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}
+                                data-testid={menu ? "bw-fe-run-menu" : "bw-fe-run"}>
+                                {this.L.runFe}
+                            </button>
+                        ) : null}
+                        {this.state.lang === 'fe' && this.activeCode().trim() ? (
+                            <button onClick={() => this.runFeOnRiscv()} disabled={this.state.running || this.state.busy}
+                                title={this.L.runFeRiscvTitle}
+                                style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}
+                                data-testid={menu ? "bw-fe-run-riscv-menu" : "bw-fe-run-riscv"}>
+                                {this.L.runFeRiscv}
+                            </button>
+                        ) : null}
+                        {this.state.lang === 'forth' && this.activeCode().trim() ? (
+                            <button onClick={() => this.runForthOnDosInterp()} disabled={this.state.running}
+                                style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}
+                                data-testid={menu ? "bw-forth-run-menu" : "bw-forth-run"}>
+                                {this.L.runForth}
+                            </button>
+                        ) : null}
+                        {this.state.lang === 'forth' && this.activeCode().trim() ? (
+                            <button onClick={() => this.runForthOnRiscv()} disabled={this.state.running || this.state.busy}
+                                title={this.L.runForthRiscvTitle}
+                                style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}
+                                data-testid={menu ? "bw-forth-run-riscv-menu" : "bw-forth-run-riscv"}>
+                                {this.L.runForthRiscv}
+                            </button>
+                        ) : null}
+                        {this.state.lang === 'tcl' && this.activeCode().trim() ? (
+                            <button onClick={() => this.runTclOnDosInterp()} disabled={this.state.running}
+                                style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}
+                                data-testid={menu ? "bw-tcl-run-menu" : "bw-tcl-run"}>
+                                {this.L.runTcl}
+                            </button>
+                        ) : null}
+                        {['fe', 'tcl', 'forth'].includes(this.state.lang) && this.currentDevice() &&
+                            this.activeCode().trim() ? (
+                            <button onClick={() => this.runViaBlocksOnDevice()}
+                                disabled={this.state.running || this.state.busy}
+                                title={this.L.runViaBlocksTitle}
+                                style={{...actionBtn, background: 'linear-gradient(135deg,#4c97ff,#4280d7)'}}
+                                data-testid={menu ? "bw-run-via-blocks-menu" : "bw-run-via-blocks"}>
+                                {this.L.runViaBlocks(this.currentDevice())}
+                            </button>
+                        ) : null}
+                        {this.state.lang === 'tcl' && this.activeCode().trim() ? (
+                            <button onClick={() => this.runTclOnRiscv()} disabled={this.state.running || this.state.busy}
+                                title={this.L.runTclRiscvTitle}
+                                style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}
+                                data-testid={menu ? "bw-tcl-run-riscv-menu" : "bw-tcl-run-riscv"}>
+                                {this.L.runTclRiscv}
+                            </button>
+                        ) : null}
+                        {this.state.lang === 'c' ? (
+                            <button type="button" onClick={() => this.setState(s => ({showCInfo: !s.showCInfo}))}
+                                style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18,
+                                    padding: 0, border: 'none', borderRadius: '50%', background: this.state.showCInfo ? '#4c97ff' : '#e2e8f0',
+                                    color: this.state.showCInfo ? '#fff' : '#475569', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'serif'}}
+                                title={this.L.cNote.slice(0, 60)} data-testid={menu ? "bw-c-info-toggle-menu" : "bw-c-info-toggle"}>i</button>
+                        ) : null}
+                        {this.state.lang === 'nqc' ? (
+                            <React.Fragment>
+                                <button type="button" onClick={() => this.compileNqcToFile()}
+                                    disabled={this.state.busy || !(this.state.buffers.nqc || '').trim()}
+                                    data-testid={menu ? "bw-nqc-compile-menu" : "bw-nqc-compile"} title={this.L.nqcNote.slice(0, 80)}
+                                    style={{...actionBtn, background: '#e2e8f0', color: '#334155'}}>
+                                    {this.L.nqcCompile}
+                                </button>
+                                <button type="button" onClick={() => this.sendNqcToBrick()}
+                                    disabled={this.state.busy || !(this.state.buffers.nqc || '').trim()}
+                                    data-testid={menu ? "bw-nqc-send-menu" : "bw-nqc-send"} title={this.L.nqcNote.slice(0, 80)}
+                                    style={{...actionBtn, background: '#4c97ff', color: '#fff'}}>
+                                    {this.L.nqcSend}
+                                </button>
+                                <button type="button" onClick={() => this.setState(st => ({showNqcInfo: !st.showNqcInfo}))}
+                                    style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18,
+                                        padding: 0, border: 'none', borderRadius: '50%', background: this.state.showNqcInfo ? '#4c97ff' : '#e2e8f0',
+                                        color: this.state.showNqcInfo ? '#fff' : '#475569', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'serif'}}
+                                    title={this.L.nqcNote.slice(0, 60)} data-testid={menu ? "bw-nqc-info-toggle-menu" : "bw-nqc-info-toggle"}>i</button>
+                            </React.Fragment>
+                        ) : null}
+                        {this.state.lang === 'basic' ? (
+                            <button type="button" onClick={() => this.setState(s => ({showBasicInfo: !s.showBasicInfo}))}
+                                style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18,
+                                    padding: 0, border: 'none', borderRadius: '50%', background: this.state.showBasicInfo ? '#4c97ff' : '#e2e8f0',
+                                    color: this.state.showBasicInfo ? '#fff' : '#475569', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontStyle: 'italic'}}
+                                title={this.L.basicInfoTitle} data-testid={menu ? "bw-basic-info-toggle-menu" : "bw-basic-info-toggle"}>i</button>
+                        ) : null}
+                        {this.state.lang === 'asm' ? (
+                            <button type="button" onClick={() => this.setState(s => ({showAsmInfo: !s.showAsmInfo}))}
+                                style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18,
+                                    padding: 0, border: 'none', borderRadius: '50%', background: this.state.showAsmInfo ? '#4c97ff' : '#e2e8f0',
+                                    color: this.state.showAsmInfo ? '#fff' : '#475569', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontStyle: 'italic'}}
+                                title={this.L.asmInfoTitle} data-testid={menu ? "bw-asm-info-toggle-menu" : "bw-asm-info-toggle"}>i</button>
+                        ) : null}
+                    </div>
+                    {!menu && <span style={{flex: 1, minWidth: 4}} />}
+                    {/* Compact controls */}
+                    <React.Fragment>
+                        <button type="button" onClick={() => this.setState(s => ({showInfo: !s.showInfo, actionsOpen: false}))}
+                            aria-label={this.L.infoAria} title={this.L.infoTitle}
+                            style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20,
+                                padding: 0, border: 'none', borderRadius: '50%', background: this.state.showInfo ? '#4c97ff' : '#e2e8f0',
+                                color: this.state.showInfo ? '#fff' : '#475569', fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                                fontStyle: 'italic', alignSelf: 'center'}}>
+                            {menu ? this.L.infoAria : '?'}
+                        </button>
+                        <button type="button" onClick={() => this.setState(s => ({showMatrix: !s.showMatrix}))}
+                            aria-label={this.L.matrixAria} title={this.L.matrixTitle}
+                            data-testid={menu ? "bw-matrix-toggle-menu" : "bw-matrix-toggle"}
+                            style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', height: 20,
+                                padding: '0 6px', border: 'none', borderRadius: 10,
+                                background: this.state.showMatrix ? '#4c97ff' : '#e2e8f0',
+                                color: this.state.showMatrix ? '#fff' : '#475569', fontSize: 11, fontWeight: 700,
+                                cursor: 'pointer', alignSelf: 'center'}}>
+                            <span aria-hidden="true">⊞⊟</span>{menu && ` ${this.L.matrixAria}`}
+                        </button>
+                        <button type="button" onClick={() => showCircuitDebugger()}
+                            aria-label={pickLocale(this.props.locale) === 'de' ? 'Debugger öffnen' : 'Open debugger'}
+                            title={pickLocale(this.props.locale) === 'de' ? 'Debugger im rechten Bereich öffnen' : 'Open debugger in the right pane'}
+                            data-testid={menu ? "bw-open-circuit-debugger-menu" : "bw-open-circuit-debugger"}
+                            style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', height: 20,
+                                padding: '0 7px', border: 'none', borderRadius: 10, background: '#e2e8f0',
+                                color: '#475569', fontSize: 11, fontWeight: 700, cursor: 'pointer', alignSelf: 'center'}}>
+                            <span aria-hidden="true">🐞</span>{menu && (pickLocale(this.props.locale) === 'de' ? ' Debugger öffnen' : ' Open debugger')}
+                        </button>
+                        <select value={this.currentDevice() || ''} onChange={e => this.setDevice(e.target.value)}
+                            style={{...csel, alignSelf: 'center', maxWidth: '100%', minWidth: 0}} title={this.L.deviceTitle}
+                            data-testid={menu ? "bw-device-select-menu" : "bw-device-select"}>
+                            <option value="">{this.L.noChips}</option>
+                            <optgroup label="Intel 8049">
+                                <option value="kosmos-cp1" data-machine-launch="">Kosmos CP1</option>
+                            </optgroup>
+                            {DEVICE_GROUPS.map(g => (
+                                <optgroup key={g.label} label={g.label}>
+                                    {g.devices.map(d => <option key={d.id} value={d.id}>{d.label}</option>)}
+                                </optgroup>
+                            ))}
+                            {/* Opens the machine library (gui.jsx renders it); not a device. */}
+                            <option value="__manage__" data-machine-launch="">{'Manage machines…'}</option>
+                        </select>
+                        {/* What this language can do on this device: native, lowered, or
+                            an open task — one line, read from lib/bw-matrix/capabilities.js,
+                            the same table the docs are generated from. Title = the long form. */}
+                        {!menu && this.currentDevice() && matrixSummary(this.state.lang, this.currentDevice(), pickLocale(this.props.locale)) ? (
+                            <span style={{alignSelf: 'center', display: 'inline-flex'}}>
+                                {/* The reach summary is long; keep it behind an (i) button, in a portalled
+                                    pop-up (the toolbar scrolls sideways and would clip an absolute one). */}
+                                <Popup id="code-matrix-info" anchorTestId="bw-matrix-badge-anchor" testId="bw-matrix-badge-popover"
+                                    open={this.props.isVisible !== false && this.state.matrixInfoOpen} align="right" width={320}
+                                    label={this.L.matrixInfoAria}
+                                    onToggle={() => this.setState(state => ({matrixInfoOpen: !state.matrixInfoOpen}))}
+                                    onClose={() => this.setState({matrixInfoOpen: false})}
+                                    button={<button type="button" data-testid={menu ? "bw-matrix-badge-menu" : "bw-matrix-badge"}
+                                        aria-label={this.L.matrixInfoAria}
+                                        data-summary={matrixSummary(this.state.lang, this.currentDevice(), pickLocale(this.props.locale))}
+                                        title={matrixExplain(this.state.lang, this.currentDevice(), pickLocale(this.props.locale))}
+                                        style={{width: 20, height: 20, padding: 0, borderRadius: '50%', fontSize: 11,
+                                            fontWeight: 700, fontStyle: 'italic', fontFamily: 'Georgia, serif', lineHeight: '18px',
+                                            color: '#475569', background: '#f1f5f9', border: '1px solid #cbd5e1', cursor: 'pointer'}}>
+                                        i
+                                    </button>}>
+                                    <div style={{padding: '2px 4px', color: '#334155'}}>
+                                        <strong style={{display: 'block'}}>
+                                            {matrixSummary(this.state.lang, this.currentDevice(), pickLocale(this.props.locale))}
+                                        </strong>
+                                        {matrixExplain(this.state.lang, this.currentDevice(), pickLocale(this.props.locale))}
+                                    </div>
+                                </Popup>
+                            </span>
+                        ) : null}
+                    </React.Fragment>
+            </React.Fragment>
+        );
         const languageBar = (
                 <ScrollRow testId="bw-lang-row" label={this.L.toolbarLabel}
                     style={{marginBottom: -1, paddingRight: 40}} scrollerStyle={{paddingBottom: 1}}
                     trailing={(
                         <React.Fragment>
-                            {!this.state.cp1Active && !this.state.cardiacActive && !this.state.kim1Active && this.renderActionMenu(csel)}
+                            {!this.state.cp1Active && !this.state.cardiacActive && !this.state.kim1Active && this.renderActionMenu(csel, renderCodeControls)}
                     <button onClick={() => this.toggleMaximize()}
                         style={{...csel, cursor: 'pointer', background: max ? '#4c97ff' : '#f1f5f9',
                             color: max ? '#fff' : 'inherit', minWidth: 24, border: '1px solid #cbd5e1', alignSelf: 'center'}}
@@ -6074,481 +6527,7 @@ class PseudocodeImporter extends React.Component {
                     {this.state.cardiacActive && <div ref={this.props.onCardiacToolsSlot}
                         data-cardiac-tools-slot style={{display: 'flex', flexShrink: 0, alignItems: 'center', paddingLeft: 4}} />}
                     {!this.state.cp1Active && !this.state.cardiacActive && !this.state.kim1Active && <React.Fragment>
-                    {/* Convert/run actions live in the tab row, in maximize mode too. */}
-                    <div data-testid="bw-code-action-row" style={{display: 'inline-flex', alignSelf: 'center',
-                        alignItems: 'center', gap: 6, flexWrap: 'nowrap', flexShrink: 0}}>
-                        <button onClick={this.compile}
-                            aria-label={this.L.toBlocks}
-                            disabled={!this.canCompileToBlocks()}
-                            title={this.L.toBlocksTitle(LANG_LABEL[this.state.lang])}
-                            style={actionBtn}>
-                            <span aria-hidden="true">⇦ ▣</span>
-                        </button>
-                        <button onClick={this.fromBlocks} disabled={this.state.busy}
-                            aria-label={this.L.fromBlocks}
-                            title={this.L.fromBlocksTitle}
-                            style={{...actionBtn, background: 'linear-gradient(135deg,#a55b80,#8e4a6c)'}}>
-                            <span aria-hidden="true">▣ ⇨</span>
-                        </button>
-                        {this.currentDevice() === 'pico' ? (
-                            <button onClick={this.deployToPico} disabled={this.state.busy}
-                                data-testid="bw-deploy-pico"
-                                title={this.L.deployPicoTitle}
-                                style={{...actionBtn, background: 'linear-gradient(135deg,#2f9e44,#237a34)'}}>
-                                {this.L.deployPico}
-                            </button>
-                        ) : null}
-                        {this.state.lang === 'pseudocode' && applies('spike-usb') ? (
-                            <span style={{display: 'inline-flex', gap: 5, alignItems: 'center', flexWrap: 'nowrap'}}>
-                                <select value={this.state.spikeUsbRoute} disabled={this.state.busy}
-                                    aria-label={this.L.spikeUsbRouteLabel} data-testid="bw-spike-usb-route"
-                                    onChange={e => this.setState({spikeUsbRoute: e.target.value})}
-                                    style={{...csel, maxWidth: 180}}>
-                                    <option value="direct">{this.L.spikeUsbDirect}</option>
-                                    <option value="bridge">{this.L.spikeUsbBridge}</option>
-                                </select>
-                                {this.state.spikeUsbRoute === 'bridge' ? (
-                                    <React.Fragment>
-                                        <input type="url" placeholder={this.L.spikeUsbUrl}
-                                            aria-label={this.L.spikeUsbUrl} value={this.state.spikeUsbBridgeUrl}
-                                            onChange={e => this.setState({spikeUsbBridgeUrl: e.target.value})}
-                                            style={{...csel, width: 135}} />
-                                        <input type="password" placeholder={this.L.spikeUsbToken}
-                                            aria-label={this.L.spikeUsbToken} value={this.state.spikeUsbBridgeToken}
-                                            onChange={e => this.setState({spikeUsbBridgeToken: e.target.value})}
-                                            style={{...csel, width: 95}} />
-                                    </React.Fragment>
-                                ) : null}
-                                <button onClick={() => this.runSpikeUsb(true)} disabled={this.state.busy}
-                                    title={this.L.probeSpikeUsbTitle}
-                                    data-testid="bw-probe-spike-usb" style={actionBtn}>
-                                    {this.L.probeSpikeUsb}
-                                </button>
-                                <button onClick={() => this.runSpikeUsb(false)} disabled={this.state.busy || !(this.state.buffers.pseudocode || '').trim()}
-                                    data-testid="bw-run-spike-usb" style={{...actionBtn, background: '#d97706', color: '#fff'}}>
-                                    {this.L.runSpikeUsb}
-                                </button>
-                            </span>
-                        ) : null}
-                        {/* Flash to a real board for every family that has a serial
-                            bootloader (STC ISP, AVR STK500v1, STM32 AN3155); the
-                            method downloads the image + names the programmer for
-                            the rest. Pico keeps its own MicroPython button above. */}
-                        {this.currentDevice() !== 'pico'
-                         && this.state.lang === 'pseudocode'
-                         && this.flashFamily(this.currentDevice()) !== null ? (
-                            <button onClick={this.flashToBoard} disabled={this.state.busy}
-                                data-testid="bw-flash-board"
-                                title={this.L.flashBoardTitle}
-                                style={{...actionBtn, background: 'linear-gradient(135deg,#c9761b,#a35d12)'}}>
-                                {this.L.flashBoard}
-                            </button>
-                        ) : null}
-                        {/* The 8086's ▶. It sits with the other per-device buttons
-                            rather than with the Python/JS "Run" above, because it
-                            does what THEY do — build for the selected device and
-                            start it — and not what that one does (evaluate the
-                            editor's text in a worker). `asmTargetForDevice` is the
-                            one function that decides what an 8086 is, so the
-                            button and the assembler cannot disagree about it. */}
-                        {this.state.lang === 'pseudocode'
-                         && asmTargetForDevice(this.currentDevice()) === 'i8086' ? (
-                                <button onClick={this.runPseudocodeOn8086} disabled={this.state.busy}
-                                    data-testid="bw-run-8086"
-                                    title={this.L.run8086Title}
-                                    style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}>
-                                    {this.L.run8086}
-                                </button>
-                            ) : null}
-                        {/* Export beside ▶ Run: the assembled .COM and a bootable
-                            floppy .img, to carry off the bench to real hardware or
-                            another emulator (N10). silicon: export only. */}
-                        {this.state.lang === 'pseudocode'
-                         && asmTargetForDevice(this.currentDevice()) === 'i8086' ? (
-                                <React.Fragment>
-                                    <button onClick={() => this.exportI8086('com')} disabled={this.state.busy}
-                                        data-testid="bw-export-8086-com" title={this.L.export8086ComTitle}
-                                        style={{...actionBtn, background: '#e2e8f0', color: '#334155'}}>
-                                        {this.L.export8086Com}
-                                    </button>
-                                    <button onClick={() => this.exportI8086('img')} disabled={this.state.busy}
-                                        data-testid="bw-export-8086-img" title={this.L.export8086ImgTitle}
-                                        style={{...actionBtn, background: '#e2e8f0', color: '#334155'}}>
-                                        {this.L.export8086Img}
-                                    </button>
-                                </React.Fragment>
-                            ) : null}
-                        {/* The C tab's ▶, and it is the same shape as the one
-                            above: build for the selected device and start it. It
-                            appears only where a LOCAL C route exists, because the
-                            hosted compiler has no 8086 back end — so this button
-                            can never be the thing that posts a program. */}
-                        {this.state.lang === 'c'
-                         && cRouteFor(this.currentDevice()) === 'local' ? (
-                                <button onClick={this.runCOn8086} disabled={this.state.busy}
-                                    data-testid="bw-run-c-8086"
-                                    title={this.L.runC8086Title}
-                                    style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}>
-                                    {this.L.runC8086}
-                                </button>
-                            ) : null}
-                        {/* The RISC-V C ▶ and its route chooser. The user picks where
-                            C compiles: in the BROWSER (shecc.wasm — a C subset, no
-                            server) or on the SERVER (the hosted service — full C via
-                            native gcc + picolibc). Both boot through the same riscv
-                            image path; only the compiler differs. */}
-                        {this.state.lang === 'c'
-                         && asmTargetForDevice(this.currentDevice()) === 'riscv32' ? (
-                                <span style={{display: 'inline-flex', alignItems: 'center', gap: 8}}>
-                                    <label style={{fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 4}}>
-                                        {this.L.asmExampleLabel}
-                                        <select data-testid="bw-riscv-c-examples"
-                                            onChange={e => this.loadRiscvCExample(e.target.value)}
-                                            value=""
-                                            disabled={this.state.busy}
-                                            style={{padding: '2px 6px', borderRadius: 4, border: '1px solid #cbd5e1'}}>
-                                            <option value="">{this.L.asmExamplePick}</option>
-                                            {riscvCExamplesFor('riscv32').map(ex => (
-                                                <option key={ex.id} value={ex.id}>
-                                                    {pickLocale(this.props.locale) === 'de' ? ex.labelDe : ex.label}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </label>
-                                    <label title={this.L.runCRiscvRouteTitle}
-                                        style={{fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 4}}>
-                                        <select value={this.state.riscvCRoute}
-                                            data-testid="bw-riscv-c-route"
-                                            onChange={e => this.setState({riscvCRoute: e.target.value})}
-                                            disabled={this.state.busy}
-                                            style={{padding: '5px 8px', borderRadius: 6, border: '1px solid #cbd5e1', font: 'inherit'}}>
-                                            <option value="browser">{this.L.runCRiscvRouteBrowser}</option>
-                                            <option value="server">{this.L.runCRiscvRouteServer}</option>
-                                        </select>
-                                    </label>
-                                    <button onClick={() => this.runCOnRiscv()} disabled={this.state.busy}
-                                        data-testid="bw-run-c-riscv"
-                                        title={this.L.runCRiscvTitle}
-                                        style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}>
-                                        {this.L.runCRiscv}
-                                    </button>
-                                    {/* Smart hint: the browser subset rejected this program;
-                                        offer the full compiler on the server in one click. */}
-                                    {this.state.riscvCanRetryServer ? (
-                                        <button onClick={() => this.runCOnRiscv('server')} disabled={this.state.busy}
-                                            data-testid="bw-run-c-riscv-server"
-                                            title={this.L.runCRiscvTryServerTitle}
-                                            style={{...actionBtn, background: 'linear-gradient(135deg,#f08c00,#e67700)'}}>
-                                            {this.L.runCRiscvTryServer}
-                                        </button>
-                                    ) : null}
-                                </span>
-                            ) : null}
-                        {/* The AVR boards' C tab ▶: the buffer compiled AS A SKETCH —
-                            real Arduino C++ (Serial, String, classes, the core's
-                            libraries) on the hosted `arduino` route — and booted on
-                            the board's own engine through the debug panel's firmware
-                            path. Gated by the route's own device table, so the button
-                            and the compile cannot disagree about which boards it
-                            serves. */}
-                        {this.state.lang === 'c' && sketchBoardFor(this.currentDevice()) ? (
-                                <span style={{display: 'inline-flex', alignItems: 'center', gap: 8}}>
-                                    <label style={{fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 4}}>
-                                        {this.L.asmExampleLabel}
-                                        <select data-testid="bw-arduino-sketch-examples"
-                                            onChange={e => this.loadArduinoSketchExample(e.target.value)}
-                                            value=""
-                                            disabled={this.state.busy}
-                                            style={{padding: '2px 6px', borderRadius: 4, border: '1px solid #cbd5e1'}}>
-                                            <option value="">{this.L.asmExamplePick}</option>
-                                            {arduinoSketchExamplesFor(this.currentDevice()).map(ex => (
-                                                <option key={ex.id} value={ex.id}>
-                                                    {pickLocale(this.props.locale) === 'de' ? ex.labelDe : ex.label}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </label>
-                                    <button onClick={this.runSketchOnAvr} disabled={this.state.busy}
-                                        data-testid="bw-run-arduino-sketch"
-                                        title={this.L.runSketchTitle}
-                                        style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}>
-                                        {this.L.runSketch}
-                                    </button>
-                                </span>
-                            ) : null}
-                        {/* N1: the Z80 bench's C ▶, gated by the route function that
-                            decides what a Z80 is (asmTargetForDevice). */}
-                        {this.state.lang === 'c' && asmTargetForDevice(this.currentDevice()) === 'z80' ? (
-                                <button onClick={this.runCOnZ80} disabled={this.state.busy}
-                                    data-testid="bw-run-c-z80"
-                                    title={this.L.runCZ80Title}
-                                    style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}>
-                                    {this.L.runCZ80}
-                                </button>
-                            ) : null}
-                        {this.currentDevice() === 'stm32f030' && this.state.lang === 'pseudocode' ? (
-                            <button onClick={this.flashStm32ViaSwd} disabled={this.state.busy}
-                                data-testid="bw-flash-swd"
-                                title={this.L.flashSwdTitle}
-                                style={{...actionBtn, background: 'linear-gradient(135deg,#1b7fc9,#125fa3)'}}>
-                                {this.L.flashSwd}
-                            </button>
-                        ) : null}
-                        {this.state.lang !== 'pseudocode' && this.state.lang !== 'c' && /_[a-z]+\.|Driver/.test(this.activeCode()) ? (
-                            <span style={{fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 8}}>
-                                <label title={this.L.driverTitle}>
-                                    🔌{' '}
-                                    <select value={this.state.driverMode} onChange={e => this.setGenOpt({driverMode: e.target.value})} disabled={this.state.busy}
-                                        style={{padding: '5px 8px', borderRadius: 6, border: '1px solid #cbd5e1', font: 'inherit'}}>
-                                        <option value="shim">{this.L.driverShim}</option>
-                                        <option value="remote">{this.L.driverRemote}</option>
-                                        <option value="ondevice">{this.L.driverOnbrick}</option>
-                                        <option value="simulator">{this.L.driverSim}</option>
-                                    </select>
-                                </label>
-                                <label title={this.L.asyncTitle}>
-                                    <input type="checkbox" checked={this.state.asyncMode} disabled={this.state.busy}
-                                        onChange={e => this.setGenOpt({asyncMode: e.target.checked})} /> {this.L.asyncLabel}
-                                </label>
-                                <label title={this.L.eventsTitle}>
-                                    <input type="checkbox" checked={this.state.eventsMode} disabled={this.state.busy}
-                                        onChange={e => this.setGenOpt({eventsMode: e.target.checked})} /> {this.L.eventsLabel}
-                                </label>
-                            </span>
-                        ) : null}
-                        {(this.state.lang === 'python' || this.state.lang === 'javascript') && this.activeCode().trim() ? (
-                            <button onClick={this.run} disabled={this.state.running}
-                                style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}>
-                                ▶ {this.L.run} {this.state.lang === 'python' ? 'Python' : 'JavaScript'}
-                            </button>
-                        ) : null}
-    
-                        <React.Fragment>
-                            {applies('spike-arena') ? (
-                                <button onClick={() => this.openSpikeArena()} title={this.L.openSpikeArenaTitle}
-                                    style={{...actionBtn, background: 'linear-gradient(135deg,#e8590c,#c2410c)'}}
-                                    data-testid="bw-open-spike-arena">
-                                    {this.L.openSpikeArena}
-                                </button>
-                            ) : null}
-                            {applies('spike-nuttx') && window.__TAURI_INTERNALS__ && this.state.lang === 'python' && this.activeCode().trim() ?
-                                <button type="button" onClick={() => this.runOnNuttxPython()} disabled={this.state.busy}
-                                    style={actionBtn} data-testid="bw-spike-nuttx-python-run"
-                                    title={pickLocale(this.props.locale) === 'de' ? 'Python in unserer vollständigen NuttX-Firmware ausführen. Benötigt das Desktop-Paket mit eingebettetem MicroPython; Roboter-API: brickwright.' :
-                                        'Run Python in our full NuttX firmware. Requires the desktop package with embedded MicroPython; robot API: brickwright.'}>
-                                    ▶ Python · NuttX
-                                </button> : null}
-                            {applies('spike-nuttx') && window.__TAURI_INTERNALS__ && this.state.lang === 'python' && this.activeCode().trim() ?
-                                <button type="button" onClick={() => this.runOnMicroPythonImage()} disabled={this.state.busy}
-                                    style={actionBtn} data-testid="bw-spike-micropython-run"
-                                    title={pickLocale(this.props.locale) === 'de' ? 'Lokales MicroPython-Anwendungsimage auswählen und Python in Renode ausführen. Benötigt ein Desktop-Paket mit MicroPython-Simulationsprofil.' :
-                                        'Choose a local MicroPython application image and run Python in Renode. Requires a desktop package with the MicroPython simulation profile.'}>
-                                    ▶ MicroPython · Image
-                                </button> : null}
-                            {applies('spike-firmware') && window.__TAURI_INTERNALS__ && ((this.state.lang === 'pseudocode' && this.currentDevice() === 'spike') || (this.state.lang === 'python' && isSpike3Program(this.activeCode()))) ? <button type="button" onClick={() => this.runOnSpikeFirmware()}
-                                disabled={this.state.busy} style={actionBtn} data-testid="bw-spike-firmware-run"
-                                title={this.L.spikeFirmwareRunTitle}>
-                                ▶ Firmware
-                            </button> : null}
-                        </React.Fragment>
-                        {this.state.lang === 'python' && isSpike3Program(this.activeCode()) ? (
-                            <button onClick={() => this.runOnSpike3()} title={this.L.runOnSpike3Title} disabled={this.state.busy}
-                                style={{...actionBtn, background: 'linear-gradient(135deg,#f59e0b,#d97706)'}}
-                                data-testid="bw-spike3-run">
-                                {this.L.runOnSpike3}
-                            </button>
-                        ) : null}
-                        {this.state.spike3Running ? (
-                            <button onClick={() => this.stopSpike3()} data-testid="bw-spike3-stop"
-                                style={{...actionBtn, background: 'linear-gradient(135deg,#fa5252,#e03131)'}}>
-                                {this.L.spike3Stop}
-                            </button>
-                        ) : null}
-                        {this.state.picoSimRunning ? (
-                            <button onClick={() => this.stopPicoSim()} data-testid="bw-pico-sim-stop"
-                                style={{...actionBtn, background: 'linear-gradient(135deg,#fa5252,#e03131)'}}>
-                                ■ {this.L.stop}
-                            </button>
-                        ) : null}
-                        {this.state.lang === 'basic' && this.activeCode().trim() ? (
-                            <button onClick={() => this.runBasic()} disabled={this.state.running}
-                                style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}
-                                data-testid="bw-basic-run">
-                                {this.L.runBasic}
-                            </button>
-                        ) : null}
-                        {this.state.lang === 'fe' && this.activeCode().trim() ? (
-                            <button onClick={() => this.runFeOnDosInterp()} disabled={this.state.running}
-                                style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}
-                                data-testid="bw-fe-run">
-                                {this.L.runFe}
-                            </button>
-                        ) : null}
-                        {this.state.lang === 'fe' && this.activeCode().trim() ? (
-                            <button onClick={() => this.runFeOnRiscv()} disabled={this.state.running || this.state.busy}
-                                title={this.L.runFeRiscvTitle}
-                                style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}
-                                data-testid="bw-fe-run-riscv">
-                                {this.L.runFeRiscv}
-                            </button>
-                        ) : null}
-                        {this.state.lang === 'forth' && this.activeCode().trim() ? (
-                            <button onClick={() => this.runForthOnDosInterp()} disabled={this.state.running}
-                                style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}
-                                data-testid="bw-forth-run">
-                                {this.L.runForth}
-                            </button>
-                        ) : null}
-                        {this.state.lang === 'forth' && this.activeCode().trim() ? (
-                            <button onClick={() => this.runForthOnRiscv()} disabled={this.state.running || this.state.busy}
-                                title={this.L.runForthRiscvTitle}
-                                style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}
-                                data-testid="bw-forth-run-riscv">
-                                {this.L.runForthRiscv}
-                            </button>
-                        ) : null}
-                        {this.state.lang === 'tcl' && this.activeCode().trim() ? (
-                            <button onClick={() => this.runTclOnDosInterp()} disabled={this.state.running}
-                                style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}
-                                data-testid="bw-tcl-run">
-                                {this.L.runTcl}
-                            </button>
-                        ) : null}
-                        {['fe', 'tcl', 'forth'].includes(this.state.lang) && this.currentDevice() &&
-                            this.activeCode().trim() ? (
-                            <button onClick={() => this.runViaBlocksOnDevice()}
-                                disabled={this.state.running || this.state.busy}
-                                title={this.L.runViaBlocksTitle}
-                                style={{...actionBtn, background: 'linear-gradient(135deg,#4c97ff,#4280d7)'}}
-                                data-testid="bw-run-via-blocks">
-                                {this.L.runViaBlocks(this.currentDevice())}
-                            </button>
-                        ) : null}
-                        {this.state.lang === 'tcl' && this.activeCode().trim() ? (
-                            <button onClick={() => this.runTclOnRiscv()} disabled={this.state.running || this.state.busy}
-                                title={this.L.runTclRiscvTitle}
-                                style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}
-                                data-testid="bw-tcl-run-riscv">
-                                {this.L.runTclRiscv}
-                            </button>
-                        ) : null}
-                        {this.state.lang === 'c' ? (
-                            <button type="button" onClick={() => this.setState(s => ({showCInfo: !s.showCInfo}))}
-                                style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18,
-                                    padding: 0, border: 'none', borderRadius: '50%', background: this.state.showCInfo ? '#4c97ff' : '#e2e8f0',
-                                    color: this.state.showCInfo ? '#fff' : '#475569', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'serif'}}
-                                title={this.L.cNote.slice(0, 60)} data-testid="bw-c-info-toggle">i</button>
-                        ) : null}
-                        {this.state.lang === 'nqc' ? (
-                            <React.Fragment>
-                                <button type="button" onClick={() => this.compileNqcToFile()}
-                                    disabled={this.state.busy || !(this.state.buffers.nqc || '').trim()}
-                                    data-testid="bw-nqc-compile" title={this.L.nqcNote.slice(0, 80)}
-                                    style={{...actionBtn, background: '#e2e8f0', color: '#334155'}}>
-                                    {this.L.nqcCompile}
-                                </button>
-                                <button type="button" onClick={() => this.sendNqcToBrick()}
-                                    disabled={this.state.busy || !(this.state.buffers.nqc || '').trim()}
-                                    data-testid="bw-nqc-send" title={this.L.nqcNote.slice(0, 80)}
-                                    style={{...actionBtn, background: '#4c97ff', color: '#fff'}}>
-                                    {this.L.nqcSend}
-                                </button>
-                                <button type="button" onClick={() => this.setState(st => ({showNqcInfo: !st.showNqcInfo}))}
-                                    style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18,
-                                        padding: 0, border: 'none', borderRadius: '50%', background: this.state.showNqcInfo ? '#4c97ff' : '#e2e8f0',
-                                        color: this.state.showNqcInfo ? '#fff' : '#475569', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'serif'}}
-                                    title={this.L.nqcNote.slice(0, 60)} data-testid="bw-nqc-info-toggle">i</button>
-                            </React.Fragment>
-                        ) : null}
-                        {this.state.lang === 'basic' ? (
-                            <button type="button" onClick={() => this.setState(s => ({showBasicInfo: !s.showBasicInfo}))}
-                                style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18,
-                                    padding: 0, border: 'none', borderRadius: '50%', background: this.state.showBasicInfo ? '#4c97ff' : '#e2e8f0',
-                                    color: this.state.showBasicInfo ? '#fff' : '#475569', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontStyle: 'italic'}}
-                                title={this.L.basicInfoTitle} data-testid="bw-basic-info-toggle">i</button>
-                        ) : null}
-                        {this.state.lang === 'asm' ? (
-                            <button type="button" onClick={() => this.setState(s => ({showAsmInfo: !s.showAsmInfo}))}
-                                style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18,
-                                    padding: 0, border: 'none', borderRadius: '50%', background: this.state.showAsmInfo ? '#4c97ff' : '#e2e8f0',
-                                    color: this.state.showAsmInfo ? '#fff' : '#475569', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontStyle: 'italic'}}
-                                title={this.L.asmInfoTitle} data-testid="bw-asm-info-toggle">i</button>
-                        ) : null}
-                    </div>
-                    <span style={{flex: 1, minWidth: 4}} />
-                    {/* Compact controls */}
-                    <React.Fragment>
-                        <button type="button" onClick={() => this.setState(s => ({showInfo: !s.showInfo}))}
-                            aria-label={this.L.infoAria} title={this.L.infoTitle}
-                            style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20,
-                                padding: 0, border: 'none', borderRadius: '50%', background: this.state.showInfo ? '#4c97ff' : '#e2e8f0',
-                                color: this.state.showInfo ? '#fff' : '#475569', fontSize: 11, fontWeight: 700, cursor: 'pointer',
-                                fontStyle: 'italic', alignSelf: 'center'}}>
-                            i
-                        </button>
-                        <button type="button" onClick={() => this.setState(s => ({showMatrix: !s.showMatrix}))}
-                            aria-label={this.L.matrixAria} title={this.L.matrixTitle}
-                            data-testid="bw-matrix-toggle"
-                            style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', height: 20,
-                                padding: '0 6px', border: 'none', borderRadius: 10,
-                                background: this.state.showMatrix ? '#4c97ff' : '#e2e8f0',
-                                color: this.state.showMatrix ? '#fff' : '#475569', fontSize: 11, fontWeight: 700,
-                                cursor: 'pointer', alignSelf: 'center'}}>
-                            ⊞⊟
-                        </button>
-                        <button type="button" onClick={() => showCircuitDebugger()}
-                            aria-label={pickLocale(this.props.locale) === 'de' ? 'Debugger öffnen' : 'Open debugger'}
-                            title={pickLocale(this.props.locale) === 'de' ? 'Debugger im rechten Bereich öffnen' : 'Open debugger in the right pane'}
-                            data-testid="bw-open-circuit-debugger"
-                            style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', height: 20,
-                                padding: '0 7px', border: 'none', borderRadius: 10, background: '#e2e8f0',
-                                color: '#475569', fontSize: 11, fontWeight: 700, cursor: 'pointer', alignSelf: 'center'}}>
-                            {'🐞 Debugger'}
-                        </button>
-                        <select value={this.currentDevice() || ''} onChange={e => this.setDevice(e.target.value)}
-                            style={{...csel, alignSelf: 'center', maxWidth: '100%', minWidth: 0}} title={this.L.deviceTitle}
-                            data-testid="bw-device-select">
-                            <option value="">{this.L.noChips}</option>
-                            <option value="kosmos-cp1" data-machine-launch="">Kosmos CP1</option>
-                            {DEVICE_GROUPS.map(g => (
-                                <optgroup key={g.label} label={g.label}>
-                                    {g.devices.map(d => <option key={d.id} value={d.id}>{d.label}</option>)}
-                                </optgroup>
-                            ))}
-                            {/* Opens the machine library (gui.jsx renders it); not a device. */}
-                            <option value="__manage__" data-machine-launch="">{'Manage machines…'}</option>
-                        </select>
-                        {/* What this language can do on this device: native, lowered, or
-                            an open task — one line, read from lib/bw-matrix/capabilities.js,
-                            the same table the docs are generated from. Title = the long form. */}
-                        {this.currentDevice() && matrixSummary(this.state.lang, this.currentDevice(), pickLocale(this.props.locale)) ? (
-                            <span style={{alignSelf: 'center', display: 'inline-flex'}}>
-                                {/* The reach summary is long; keep it behind an (i) button, in a portalled
-                                    pop-up (the toolbar scrolls sideways and would clip an absolute one). */}
-                                <Popup id="code-matrix-info" anchorTestId="bw-matrix-badge-anchor" testId="bw-matrix-badge-popover"
-                                    open={this.props.isVisible !== false && this.state.matrixInfoOpen} align="right" width={320}
-                                    label={this.L.matrixInfoAria}
-                                    onToggle={() => this.setState(state => ({matrixInfoOpen: !state.matrixInfoOpen}))}
-                                    onClose={() => this.setState({matrixInfoOpen: false})}
-                                    button={<button type="button" data-testid="bw-matrix-badge"
-                                        aria-label={this.L.matrixInfoAria}
-                                        data-summary={matrixSummary(this.state.lang, this.currentDevice(), pickLocale(this.props.locale))}
-                                        title={matrixExplain(this.state.lang, this.currentDevice(), pickLocale(this.props.locale))}
-                                        style={{width: 20, height: 20, padding: 0, borderRadius: '50%', fontSize: 11,
-                                            fontWeight: 700, fontStyle: 'italic', fontFamily: 'Georgia, serif', lineHeight: '18px',
-                                            color: '#475569', background: '#f1f5f9', border: '1px solid #cbd5e1', cursor: 'pointer'}}>
-                                        i
-                                    </button>}>
-                                    <div style={{padding: '2px 4px', color: '#334155'}}>
-                                        <strong style={{display: 'block'}}>
-                                            {matrixSummary(this.state.lang, this.currentDevice(), pickLocale(this.props.locale))}
-                                        </strong>
-                                        {matrixExplain(this.state.lang, this.currentDevice(), pickLocale(this.props.locale))}
-                                    </div>
-                                </Popup>
-                            </span>
-                        ) : null}
-                    </React.Fragment>
+                    {renderCodeControls(false)}
                     </React.Fragment>}
                 </ScrollRow>
         );
@@ -6680,34 +6659,21 @@ class PseudocodeImporter extends React.Component {
 
                 {this.state.showMatrix && !max && this.renderMatrixPanel()}
 
-                {this.state.showInfo && !max && (
-                    <div style={{padding: '8px 12px', background: '#eff6ff', border: '1px solid #bfdbfe',
-                        borderRadius: '0 0 8px 8px', fontSize: 12, color: '#334155', flexShrink: 0}}>
-                        <div style={{fontWeight: 'bold', marginBottom: 6, color: '#1e3a8a'}}>
-                            {this.currentDevice() ? deviceHelp(this.currentDevice()) : deviceHelp('default')}
-                        </div>
+                {this.state.showInfo && (
+                    <div data-code-help role="region" aria-label={this.L.infoAria}
+                        style={{padding: '8px 12px', background: '#eff6ff', border: '1px solid #bfdbfe',
+                            borderRadius: 8, fontSize: 12, color: '#334155', flexShrink: 0}}>
+                        {this.currentDevice() && <div>{deviceHelp(this.currentDevice())}</div>}
                         {pickLocale(this.props.locale) === 'de' ? (
-                            <React.Fragment>
-                                Schreibe dein Projekt als Code in jedem Tab. <strong>Pseudocode</strong>, <strong>Python</strong>,{' '}
-                                <strong>JavaScript</strong>, <strong>C</strong> und <strong>BASIC</strong> wandeln nur die{' '}
-                                unterstützte Teilmenge in beide Richtungen um; Warnungen benennen nicht darstellbare Konstrukte:{' '}
-                                <strong>⇦ Zu Blöcken</strong> kompiliert den aktiven Tab, <strong>Von Blöcken ⇨</strong>{' '}
-                                liest das aktuelle Projekt in jede Sprache ein, Tab-Wechsel wandelt um.{' '}
-                                <strong>ASM</strong> ist bewusst einbahnig — schreiben, assemblieren, ausführen; kein Rückweg zu Blöcken.{' '}
-                                <strong>micro:bit</strong> wird für DEVICE MICROBIT generiert (noch kein Rücklesen).{' '}
-                                Sprite-/Stift-Verhalten liegt in den Blöcken (die Wahrheit) — Kommentare bleiben erhalten.
-                            </React.Fragment>
+                            <div>{this.state.lang === 'asm' ? 'Assembler schreiben, assemblieren und ausführen.' :
+                                this.state.lang === 'micropython' ? 'Bearbeite MicroPython und starte es im Simulator oder exportiere die Firmware.' :
+                                    'Zu Blöcken übersetzt den aktiven Tab. Von Blöcken liest das Projekt als Code.'}
+                            {' Strg oder ⌘ + F sucht. Strg oder ⌘ + Z macht eine Texteingabe rückgängig.'}</div>
                         ) : (
-                            <React.Fragment>
-                                Write your project as code in any tab. <strong>Pseudocode</strong>, <strong>Python</strong>,{' '}
-                                <strong>JavaScript</strong>, <strong>C</strong> and <strong>BASIC</strong> convert only the{' '}
-                                supported subset in both directions; warnings identify constructs that cannot be represented:{' '}
-                                <strong>⇦ To blocks</strong> compiles the active tab, <strong>From blocks ⇨</strong>{' '}
-                                reads the current project into every language, switching tabs converts.{' '}
-                                <strong>ASM</strong> is deliberately one-way — write, assemble and run.{' '}
-                                <strong>micro:bit</strong> is generated for DEVICE MICROBIT (no reader yet).{' '}
-                                Sprite/pen behaviour lives in the blocks (ground truth) — comments are kept.
-                            </React.Fragment>
+                            <div>{this.state.lang === 'asm' ? 'Write assembly, then assemble and run it on the selected target.' :
+                                this.state.lang === 'micropython' ? 'Edit MicroPython, then run it in the simulator or export firmware.' :
+                                    'To blocks converts the active editor. From blocks reads the project into Code. Conversion reports identify unsupported operations.'}
+                            {' Ctrl or ⌘ + F searches. Ctrl or ⌘ + Z undoes a text edit.'}</div>
                         )}
                     </div>
                 )}

@@ -41,6 +41,13 @@ const exportOf = (src, uploads = []) => {
     }, soundData: (t, s) => cr.assets.get(s.assetId)?.data || null});
 };
 
+test('a Stage-only Hello world gets a visible Arcade speech bubble', () => {
+    const result = exportOf('STAGE:\nWHEN flag clicked:\n    say "Hello world"');
+    assert.match(result.files['main.ts'], /let _bwStageSpeech = sprites\.create/);
+    assert.match(result.files['main.ts'], /_bwStageSpeech\.sayText\("Hello world"\)/);
+    assert.deepEqual(result.unsupported, []);
+});
+
 test('the model mapping: coordinates, keys, touching', () => {
     const {ts, unsupported} = exportOf(`SPRITE hero:
 WHEN flag clicked:

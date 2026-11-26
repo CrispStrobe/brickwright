@@ -17,7 +17,7 @@
  */
 export const TOOLBAR_ACTIONS = Object.freeze({
     // The virtual SPIKE sandbox and everything that runs a program on a SPIKE hub.
-    'spike-arena': {devices: ['spike'], unscoped: true},
+    'spike-arena': {devices: ['spike'], evidence: true},
     'spike-nuttx': {devices: ['spike'], unscoped: true},
     'spike-firmware': {devices: ['spike'], unscoped: true},
     // A physical hub over USB: only when the project shows a hub.

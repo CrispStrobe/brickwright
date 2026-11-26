@@ -290,7 +290,7 @@ const ident = name => {
 const LEGACY_SCROLLER_REVISION='43651f88b917a98ad886fdd4c1c2ad8001ce9b9c';
 const RESERVED = new Set(['score', 'life', 'info', 'game', 'scene', 'sprites', 'controller', 'Math', 'function', 'let', 'var',
     'if', 'else', 'while', 'for', 'return', 'true', 'false', 'null', 'new', 'this', 'pause', 'forever',
-    '__bwSdkCharCode','__bwSdkConcat','__bwScratchTimerStart','__bwScratchTimer','__bwResetScratchTimer', 'SpriteKind', 'SpriteFlag', 'ControllerButtonEvent', 'DialogLayout', 'Image', 'Buffer', 'NumberFormat', 'console', 'control', 'assets', 'images', 'image', 'hex', 'img', 'undefined', 'bwStringArraySettings']);
+    '__bwSdkCharCode','__bwSdkConcat','__bwScratchTimerStart','__bwScratchTimer','__bwResetScratchTimer', 'SpriteKind', 'SpriteFlag', 'ControllerButtonEvent', 'DialogLayout', 'Image', 'Buffer', 'NumberFormat', 'console', 'control', 'assets', 'images', 'image', 'hex', 'img', 'undefined', 'bwStringArraySettings', '_bwStageSpeech']);
 
 const arraySourceDescriptor=Object.getOwnPropertyDescriptor,arraySourceKeys=Reflect.ownKeys,
     arraySourcePrototype=Object.getPrototypeOf,arraySourceOwn=Object.hasOwn,arraySourceIsArray=Array.isArray,
@@ -854,6 +854,7 @@ class ArcadeEmitter {
         this.usesPen = false;
         this.usesStopAll = false;
         this.usesSay = false;
+        this.usesStageSpeech = false;
         this.stopOthers = new Set();        // targets whose scripts can be stopped by one of their own
         this.soundWaiters = new Set();      // targets that wait on a tone
         const names = new Set(this.sprites.map(t => t.name));
@@ -2720,8 +2721,18 @@ class ArcadeEmitter {
         case 'motion_ifonedgebounce': if (me) push(`${me}.setBounceOnWall(true)`); return;
         case 'looks_show': if (me) push(`${me}.setFlag(SpriteFlag.Invisible, false)`); return;
         case 'looks_hide': if (me) push(`${me}.setFlag(SpriteFlag.Invisible, true)`); return;
-        case 'looks_sayforsecs': if (me) push(`${me}.sayText(${v('MESSAGE', '""')}, ${v('SECS')} * 1000, true)`); return;
-        case 'looks_say': if (me) push(`${me}.sayText(${v('MESSAGE', '""')})`); return;
+        case 'looks_sayforsecs':
+        case 'looks_say': {
+            const timed = b.opcode === 'looks_sayforsecs';
+            if (this.target.isStage) this.usesStageSpeech = true;
+            const speaker = this.target.isStage ? '_bwStageSpeech' : me;
+            if (speaker) {
+                const duration = timed ? `, ${v('SECS')} * 1000, true` : '';
+                push(`${speaker}.sayText(${v('MESSAGE', '""')}${duration})`);
+                if (timed && this.target.isStage) push(`pause(${v('SECS')} * 1000)`);
+            }
+            return;
+        }
         case 'arcade_setBackgroundImage': push(`scene.setBackgroundImage(${this.literalInput(b,'IMAGE') === '' ? 'null' : v('IMAGE')})`); return;
         case 'arcade_setGameStats': {
             const mode=this.field(b,'MODE');
@@ -5180,6 +5191,11 @@ class ArcadeEmitter {
             pre.push(`let ${mark} = 0  // stop other scripts in ${t.isStage ? 'stage' : t.name}: runs up to here are ended`);
             pre.push(`let ${kept} = 0  // ... except this one, the run that stopped them`);
         }
+        if (this.usesStageSpeech) {
+            out.push('let _bwStageSpeech = sprites.create(image.create(1, 1))');
+            out.push('_bwStageSpeech.setPosition(80, 65)');
+            out.push('_bwStageSpeech.z = 100');
+        }
         if (this.usesStopAll) {
             // Scratch's Runtime.stopAll: every script ends, clones are deleted,
             // sounds stop, speech bubbles clear. The sprites, the pen, the
@@ -5189,6 +5205,7 @@ class ArcadeEmitter {
                 '    _stopMark = _tokens',
                 ...[...this.clonable].map(name => `    sprites.destroyAllSpritesOfKind(${this.kindOf(name)})`),
                 '    music.stopAllSounds()',
+                ...(this.usesStageSpeech ? ['    _bwStageSpeech.sayText("")'] : []),
                 ...(this.usesSay ? this.sprites.filter(t => this.emittedSprites.has(t)).map(t => `    ${this.spriteVar.get(t.name)}.sayText("")`) : []),
                 '}'
             ].join('\n'));
