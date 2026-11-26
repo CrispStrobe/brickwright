@@ -43,7 +43,9 @@ async function check({id, machine}) {
             await page.waitForFunction(() => window.__board?.parts.length > 0);
         }
         if (id === 'i8086-blink') {
-            await page.getByTitle('Go', {exact: true}).click();
+            const flag = page.getByTitle('Go', {exact: true});
+            if (!await flag.isVisible()) await page.locator('[data-right-pane-toggle]:visible').first().click();
+            await flag.click();
             for (const lit of [true, false, true]) {
                 await page.waitForFunction(expected => {
                     const board = window.__board;

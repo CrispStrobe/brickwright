@@ -105,17 +105,11 @@ try {
     console.log('ok   CP/M machine imported; clicking Run');
     await page.getByTestId('bw-mm-run').first().click();
 
-    // OPEN THE DEBUGGER PANE. The boot lands in the debug panel, which mounts
-    // but paints nothing until the right pane shows it — the console was
-    // ATTACHED and had text while its input had no bounding box at all, so
-    // typing into it timed out. This is also what a person does: click 🐞.
-    const openDebugger = page.getByTestId('bw-open-circuit-debugger');
-    if (await openDebugger.count()) await openDebugger.first().click();
-
     // The serial console appears once the machine speaks; wait for it, then for
     // 'A>' to appear AND the text to stop growing (streamed output arrives in
     // pieces — assert on stability, not the first match).
-    await page.getByTestId('bw-serial-console').waitFor({state: 'attached', timeout: 30000});
+    await page.locator('[data-bw-stage-dock="controller"]').getByTestId('bw-serial-console')
+        .waitFor({state: 'visible', timeout: 30000});
     let sawAprompt = false, stableText = '';
     try {
         // A> present AND the text unchanged between two polls — streamed output
@@ -179,9 +173,7 @@ try {
     check(false, 'the CP/M boot flow ran without throwing', String(e.message || e).slice(0, 160));
 }
 
-// Exercise the lesson's real Run button from the default Blocks workspace.
-// The imported-machine journey above manually opens the debugger, so it
-// cannot catch a built-in lesson booting into an invisible pane.
+// Also exercise the built-in lesson's Run button from the default Blocks workspace.
 try {
     const page = await browser.newPage({viewport: {width: 1440, height: 960}});
     try {
@@ -277,10 +269,8 @@ async function startLinux(button, inspectRow = null) {
         throw new Error(`the Linux lesson did not start (${button}): ${why}`);
     });
     const fetched = (Date.now() - t0) / 1000;
-    const openDebugger = page.getByTestId('bw-open-circuit-debugger');
-    if (await openDebugger.count()) await openDebugger.first().click();
     await page.waitForFunction(`(() => {
-        const el = document.querySelector('[data-testid="bw-linux-terminal"]');
+        const el = document.querySelector('[data-bw-stage-dock="controller"] [data-testid="bw-linux-terminal"]');
         return !!el && el.dataset.terminalState === 'ready';
     })()`, null, {timeout: 60000, polling: 100});
     const up = await screenShows(page, /BWB-LINUX-USERSPACE-UP|bwb#/, 120000);
