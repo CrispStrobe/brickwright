@@ -5750,38 +5750,37 @@ class PseudocodeImporter extends React.Component {
         );
     }
 
-    renderMacDevicePicker (menu, style) {
-        const slot = menu ? 'menu' : 'toolbar';
+    renderMacDevicePicker () {
         const current = this.currentDevice() || '';
-        const close = () => this.setState({macDevicePicker: null});
+        const close = () => this.macDeviceDialog?.close();
         const choose = id => {
             close();
             this.setDevice(id);
         };
         const item = (id, label) => <button type="button" key={id || 'none'} role="menuitemradio"
             aria-checked={id === current} data-device-option={id}
-            style={{...toolStyles(false).button, textAlign: 'left', justifyContent: 'flex-start'}}
+            style={{...toolStyles(false).button, textAlign: 'left', justifyContent: 'flex-start', width: '100%'}}
             onClick={() => choose(id)}>{label}</button>;
-        const heading = {padding: '5px 8px 2px', fontSize: 11, fontWeight: 700, color: '#64748b'};
-        return <Popup id={`code-mac-device-${slot}`} testId="bw-mac-device-menu" align="right" role="menu"
-            width={260} label={this.L.deviceTitle} open={this.state.macDevicePicker === slot}
-            onToggle={() => this.setState(state => ({macDevicePicker: state.macDevicePicker === slot ? null : slot}))}
-            onClose={close} button={<button type="button" aria-label={this.L.deviceTitle}
-                data-testid={menu ? 'bw-device-picker-trigger-menu' : 'bw-device-picker-trigger'}
-                title={this.L.deviceTitle} style={{...style, cursor: 'pointer'}}>
-                {DEVICE_BY_ID[current]?.label || this.L.noChips} ▾
-            </button>}>
-            <button type="button" role="menuitem" style={toolStyles(false).button}
+        const heading = {display: 'block', padding: '5px 8px 2px', fontSize: 11, color: '#64748b'};
+        return createPortal(<dialog ref={element => {this.macDeviceDialog = element;}}
+            data-testid="bw-mac-device-menu" aria-label={this.L.deviceTitle}
+            style={{width: 270, maxWidth: 'calc(100vw - 24px)', maxHeight: '70vh',
+                padding: 8, border: '1px solid #94a3b8', borderRadius: 8, fontSize: 12}}>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4}}>
+                <strong>{pickLocale(this.props.locale) === 'de' ? 'Zielsystem' : 'Machine'}</strong>
+                <button type="button" style={toolStyles(false).button} aria-label="Close" onClick={close}>×</button>
+            </div>
+            <button type="button" style={{...toolStyles(false).button, width: '100%'}}
                 onClick={() => choose('__manage__')}>Manage machines…</button>
             {item('', this.L.noChips)}
             <strong style={heading}>Intel 8049</strong>
-            <button type="button" role="menuitem" style={toolStyles(false).button}
+            <button type="button" style={{...toolStyles(false).button, width: '100%'}}
                 onClick={() => choose('kosmos-cp1')}>Kosmos CP1</button>
             {DEVICE_GROUPS.map(group => <React.Fragment key={group.label}>
                 <strong style={heading}>{group.label}</strong>
                 {group.devices.map(device => item(device.id, device.label))}
             </React.Fragment>)}
-        </Popup>;
+        </dialog>, document.body);
     }
 
     renderActionMenu (csel, renderCodeControls, renderLanguages, machine) {
@@ -6025,6 +6024,7 @@ class PseudocodeImporter extends React.Component {
         const actionBtn = {...btn, padding: '5px 9px', fontSize: 12, whiteSpace: 'nowrap', flexShrink: 0};
         const sel = {padding: '6px 10px', borderRadius: 6, border: '1px solid #cbd5e1', font: 'inherit'};
         const max = this.state.maximized;
+        const usesMacDevicePicker = typeof window !== 'undefined' && window.__TAURI__ && /^Mac/.test(navigator.platform);
         const csel = {...sel, padding: '4px 8px', fontSize: 12}; // compact select
         const languageTabStyle = active => ({
             padding: this.state.cardiacActive ? '5px 6px' : '6px 10px', border: '1px solid #cbd5e1', borderBottomColor: active ? '#fff' : '#cbd5e1',
@@ -6471,8 +6471,19 @@ class PseudocodeImporter extends React.Component {
                             <span aria-hidden="true">🐞</span>{menu && (pickLocale(this.props.locale) === 'de' ? ' Debugger öffnen' : ' Open debugger')}
                         </button>
                         {/* WKWebView's native popup can lose its selection owner during a board reseat. */}
-                        {typeof window !== 'undefined' && window.__TAURI__ && /^Mac/.test(navigator.platform) ?
-                            this.renderMacDevicePicker(menu, {...csel, alignSelf: 'center', maxWidth: '100%', minWidth: 0}) : (
+                        {usesMacDevicePicker ? <button type="button" aria-haspopup="dialog"
+                            aria-label={this.L.deviceTitle} title={this.L.deviceTitle}
+                            data-testid={menu ? 'bw-device-picker-trigger-menu' : 'bw-device-picker-trigger'}
+                            style={{...csel, alignSelf: 'center', cursor: 'pointer'}}
+                            onClick={() => this.setState({actionsOpen: false}, () => {
+                                const dialog = this.macDeviceDialog;
+                                if (dialog && !dialog.open) {
+                                    dialog.showModal();
+                                    dialog.querySelector('[aria-checked="true"]')?.focus();
+                                }
+                            })}>
+                            {DEVICE_BY_ID[this.currentDevice()]?.label || this.L.noChips} ▾
+                        </button> : (
                         <select value={this.currentDevice() || ''} onChange={e => this.setDevice(e.target.value)}
                             style={{...csel, alignSelf: 'center', maxWidth: '100%', minWidth: 0}} title={this.L.deviceTitle}
                             data-testid={menu ? "bw-device-select-menu" : "bw-device-select"}>
@@ -6627,6 +6638,7 @@ class PseudocodeImporter extends React.Component {
         );
         return (
             <div style={{...wrap, position: 'relative'}} data-testid="bw-code-editor">
+                {usesMacDevicePicker && this.renderMacDevicePicker()}
                 {max ? <details data-code-max-tools style={{position: 'absolute', top: 8, left: 16, right: 52,
                     zIndex: 20, pointerEvents: 'none'}} onKeyDown={event => {
                     if (event.key === 'Escape') {
