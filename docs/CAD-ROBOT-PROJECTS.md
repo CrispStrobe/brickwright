@@ -1909,3 +1909,26 @@ The timing runs excluded transform counters. Physics type checking
 and all 18 actuator and worker telemetry tests passed. Brickwright
 pins SDK `68666ce`. Sustained 1× in the production app remains open.
 [CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/e1fcb4142864ef175268413d5b3632cd518a490e)
+
+### Bind hinge and slider constraints when the world starts
+
+CrispCAD indexes the native hinge and slider bindings as it creates
+each world. Joint telemetry, impulses, velocity motors and position
+servos use those bindings. The 200 Hz sampling path skips a document
+scan and a native constraint cast on each joint read. A fresh world
+builds fresh bindings.
+
+Paired Chrome worker runs used the same bundled Jolt SIMD engine and
+advanced 600 coupled substeps per robot. Full and compact telemetry,
+sampled motion and electrical readings, and warm restart frames matched
+in both run orders.
+
+| Joint sampling per run | Samples | First order, before → after | Reverse order, before → after |
+| --- | ---: | ---: | ---: |
+| Atlas forklift | 2,400 | 24.2 → 17.8 ms | 20.2 → 16.7 ms |
+| Scout TT rover | 1,200 | 11.8 → 7.7 ms | 7.2 → 4.9 ms |
+
+Physics type checking and all 21 actuator, telemetry and gear-train
+tests passed. Overall worker timing varied under Mac load. Brickwright
+pins SDK `68666ce`. Sustained 1× in the production app remains open.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/6db059f5f4b5ccdf773cfa0b5211e1b9f16730f9)
