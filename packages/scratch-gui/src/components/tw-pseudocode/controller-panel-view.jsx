@@ -621,7 +621,7 @@ function PositionedWidget({ widget, mode, selected, snap, onSelect, onLayout, ch
         const w = el.offsetWidth, h = el.offsetHeight;
         setNatural(prev => (prev && prev.w === w && prev.h === h) ? prev : { w, h });
     }, [widget.type, widget.config]);
-    const sx = (L.w && natural && natural.w) ? L.w / natural.w : 1;
+    const sx = (widget.type !== 'machine' && L.w && natural && natural.w) ? L.w / natural.w : 1;
     const sy = (L.h && natural && natural.h) ? L.h / natural.h : 1;
 
     const beginDrag = e => {
@@ -904,7 +904,7 @@ function WidgetInspector({ widget, onRename, onLayout, onConfig, onBind, onOpenL
                 widget and adding it back silently converted a variable
                 binding into a program binding, and only reloading the example
                 put it back (docs/LESSON-REVIEW-WAVE-4.md defect 6). */}
-            {!DECORATION_NAMES.has(widget.type) && (
+            {!DECORATION_NAMES.has(widget.type) && widget.type !== 'machine' && (
                 <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: 6, marginTop: 2 }}
                     data-testid="bw-ctl-insp-binding">
                     <div style={{ fontSize: 11, fontWeight: 600, color: '#64748b', marginBottom: 4 }}>
@@ -1116,6 +1116,28 @@ function WidgetButton({widget, mode, inputs}) {
             cursor: mode === 'play' ? 'pointer' : 'default'}}>
         {widget.config.label || (widget.config.toggle ? (widget.state.pressed ? 'ON' : 'OFF') : '●')}
     </button>;
+}
+
+function RemoveWidgetButton({name, onRemove}) {
+    // Keep pointer capture on the draggable widget from swallowing the click.
+    return (
+        <button
+            onClick={onRemove}
+            onPointerDown={e => e.stopPropagation()}
+            data-testid={'bw-ctl-remove-' + name}
+            title={t('remove')}
+            aria-label={t('remove')}
+            style={{
+                position: 'absolute', top: 2, right: 2, zIndex: 20,
+                width: 18, height: 18, lineHeight: '16px', padding: 0,
+                background: '#fee2e2', color: '#dc2626',
+                border: '1px solid #fca5a5', borderRadius: 4,
+                cursor: 'pointer', fontSize: 12, fontWeight: 700,
+            }}
+        >
+            ×
+        </button>
+    );
 }
 
 function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBindings, buttonInputs }) {
@@ -1347,44 +1369,7 @@ function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBi
                 </div>
             )}
 
-            {mode === 'edit' && (
-                // THE REMOVE CONTROL. Three defects were in the eleven lines this
-                // replaces, and two of them share one cause.
-                //
-                // IT NEVER FIRED. The wiring was always complete -- onRemove ->
-                // _removeWidget -> panel.removeWidget, which deletes and emits --
-                // but the card's wrapper takes POINTER CAPTURE in beginDrag, so
-                // pointerdown on the button sent pointerup to the wrapper and no
-                // click was ever synthesised. A button that is present, styled and
-                // wired, and cannot be pressed. `stopPropagation` on pointerdown is
-                // the fix, and this file already knew it: the inspector panel has
-                // carried exactly that guard for the same reason. A known hazard,
-                // applied to one control and not the other.
-                //
-                // IT CHANGED THE WIDGET'S SIZE. It sat in normal flow in an
-                // edit-only row, so a content-sized widget was taller in Edit than
-                // in Play and a panel arranged in one mode shifted in the other.
-                // 29 of the 88 widgets in the shipped controller examples are
-                // content-sized; the other 59 carry an explicit w/h and never
-                // showed it. `position: absolute` contributes nothing to flow, so
-                // the corner placement the owner asked for is also the size fix.
-                <button
-                    onClick={onRemove}
-                    onPointerDown={e => e.stopPropagation()}
-                    data-testid={'bw-ctl-remove-' + widget.name}
-                    title={t('remove')}
-                    aria-label={t('remove')}
-                    style={{
-                        position: 'absolute', top: 2, right: 2, zIndex: 20,
-                        width: 18, height: 18, lineHeight: '16px', padding: 0,
-                        background: '#fee2e2', color: '#dc2626',
-                        border: '1px solid #fca5a5', borderRadius: 4,
-                        cursor: 'pointer', fontSize: 12, fontWeight: 700,
-                    }}
-                >
-                    ×
-                </button>
-            )}
+            {mode === 'edit' && <RemoveWidgetButton name={widget.name} onRemove={onRemove} />}
 
             {/* Hidden by the panel-level hideBindings flag, which lives in
                 bw-board's ControllerPanel because the serialised shape is that
@@ -2012,6 +1997,10 @@ class ControllerPanelView extends React.Component {
                                             <span style={{display: 'block', padding: 8}}>
                                                 {w.layout.label || w.name} · {german ? 'Nicht verbunden' : 'Disconnected'}
                                             </span>}
+                                        {mode === 'edit' && <RemoveWidgetButton name={w.name} onRemove={() => {
+                                            this._removeWidget(w.name);
+                                            this.setState({selected: null});
+                                        }} />}
                                     </section>
                                 ) : <WidgetCard
                                     widget={w}
