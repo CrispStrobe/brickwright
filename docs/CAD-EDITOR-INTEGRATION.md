@@ -140,6 +140,31 @@ runtime pin after this signing step and rebuild with that pin. The receipt's
 runtime-pin check covers the package before Apple's TestFlight re-signing;
 launching the installed TestFlight simulator was not tested in this delivery.
 
+## Exact-kernel limits and kernel 0.1.6 (26 November 2026)
+
+Lite pins CrispCAD SDK `5d40e251083012f6517c79a0c3fa012b6a055a7d` (previously
+`38e3eabb`). Over that pin it brings:
+
+- **Limits for heavy exact jobs** (CrispCAD `e429280`, `d4a0616`). A fillet or
+  chamfer that touches too many edges (a curved edge counts as four straight
+  ones) or a shell of a body with too many faces is refused before the kernel
+  runs, with a translated message (German included); the exact kernel's memory
+  has a ceiling; its worker is recycled after a job that grew it or broke the
+  kernel; every exact job shows elapsed time and Cancel in the status bar and is
+  stopped after its budget. None of it changes the model or its history. Lite
+  passes no `exactLimits`, so the CAD tab runs with `EXACT_LIMITS_TABLET`
+  (400 weighted edges, 160 shell faces, 512 MiB, 60 s); a desktop host may pass
+  `exactLimits: EXACT_LIMITS_DESKTOP` to `mountCadEditor`.
+- **Exact kernel 0.1.6**: smlibwasm built from source by the kernel lab with
+  recorded provenance (the file is byte-identical to the npm build), loft
+  sections joined vertex i to vertex i as authored, and the kernel's own memory
+  ceiling (`maxMemoryBytes`) and shell guard (`guardSeconds`, half the request
+  budget), which replace CrispCAD's rewrite of the wasm's memory maximum.
+- **Robot fixes** (CrispCAD `a0b0f2e`): Scout's encoder, the electronics-tray
+  posts and access holes, Nova's drive housings and Mantis's power pod. The
+  22 `static/cad-robots/*.sb3` projects were regenerated from this pin with
+  `scripts/generate-cad-robot-projects.mjs`.
+
 ## Ruled and smooth lofts: document versions 42 and 43 (26 November 2026)
 
 Lite pins CrispCAD SDK `f2a596a23ca6a03b967c2a7ebc19ab6df26e71da` (previously
