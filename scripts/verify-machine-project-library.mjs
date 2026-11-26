@@ -42,6 +42,16 @@ async function check({id, machine}) {
         } else {
             await page.waitForFunction(() => window.__board?.parts.length > 0);
         }
+        if (id === 'i8086-blink') {
+            await page.getByTitle('Go', {exact: true}).click();
+            for (const lit of [true, false, true]) {
+                await page.waitForFunction(expected => {
+                    const board = window.__board;
+                    return (board.ledBrightness('led0') > 0.01) === expected &&
+                        [1, 2, 3, 4, 5, 6, 7].every(pin => board.ledBrightness(`led${pin}`) === 0);
+                }, lit, {timeout: 6000});
+            }
+        }
         assert.deepEqual(errors, []);
         console.log(`PASS ${machine} ${id} · project handoff`);
     } catch (error) {
