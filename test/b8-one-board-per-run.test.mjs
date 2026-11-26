@@ -110,6 +110,46 @@ test('the Debug pane: a green flag starts the runner only when it is the run\'s 
     assert.deepEqual(await run({kind: 'emulator', device: 'STC12C5A60S2', userFirmware: {name: 'a.hex'}}), ['start'], 'loaded firmware still starts');
 });
 
+test('Circuit Sim starts wired blocks and supports a second run after stop', () => {
+    const source = read('components/tw-pseudocode/circuit-tab.jsx');
+    assert.match(source, /onSimulationStart=\{this\.handleSimulationStart\}/);
+    const driving = source.match(/const stcDrives = ([\s\S]*?);/)[1];
+    const actions = [];
+    const window = {dispatchEvent: event => actions.push(event.type)};
+    const run = new Function('window', 'CustomEvent', `const stcDrives = ${driving};
+        ${method(source, 'handleSimulationStart ()')}`);
+    const vm = {
+        runtime: {},
+        start: () => actions.push('vm-start'),
+        greenFlag: () => actions.push('vm-flag'),
+        stopAll: () => actions.push('vm-stop')
+    };
+    const circuit = {
+        props: {vm},
+        state: {stc: {device: 'stc12c5a60s2', pins: [{name: 'button'}]}},
+        handleProjectStart: () => actions.push('simulation-only')
+    };
+    const simulate = () => run.call(circuit, window, CustomEvent);
+    simulate();
+    vm.stopAll();
+    simulate();
+    assert.deepEqual(actions, [
+        'vm-start', 'bw-green-flag', 'vm-flag', 'vm-stop',
+        'vm-start', 'bw-green-flag', 'vm-flag'
+    ]);
+
+    for (const state of [
+        {circuitData: {fileOnly: true}},
+        {machineBooted: true},
+        {stc: {device: 'microbit', pins: [{name: 'button'}]}},
+        {stc: null}
+    ]) {
+        actions.length = 0;
+        run.call({...circuit, state: {...circuit.state, ...state}}, window, CustomEvent);
+        assert.deepEqual(actions, ['simulation-only']);
+    }
+});
+
 test('the circuit tab shows a runner\'s board only while its run lives', () => {
     const tab = read('components/tw-pseudocode/circuit-tab.jsx');
     const body = method(tab, 'handleRunnerChange (runner, ui)');
