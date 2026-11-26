@@ -88,3 +88,5 @@
     font-size: 12px; padding: 4px 6px; min-height: 26px; box-sizing: border-box;
 }
 .toolbar .examplePicker { min-width: 0; width: 104px; max-width: 104px; }
+
+[data-cardiac-editor]:not(.codeEditor) .toolbar { flex-wrap: wrap; }
