@@ -30,6 +30,21 @@ test('circuit CLI distinguishes smoke from functional coverage', () => {
     assert.equal(rows[0].behavior.status, 'unverified');
 });
 
+test('circuit CLI checks motor input, direction and coast on retargeted benches', () => {
+    const variants = [
+        ['arduino-sk-p09-motorized-pinwheel', 'arduino-nano', 3],
+        ['arduino-sk-p10-zoetrope', 'stc12c5a60s2', 4]
+    ];
+    for (const [id, device, count] of variants) {
+        const result = invoke(id, '--device', device, '--json');
+        assert.equal(result.status, 0, result.stderr || result.stdout);
+        const {rows: [{smoke, behavior}]} = JSON.parse(result.stdout);
+        assert.equal(smoke, 'pass');
+        assert.equal(behavior.status, 'pass');
+        assert.equal(behavior.checks.length, count);
+    }
+});
+
 test('circuit CLI rejects an unknown gallery ID', () => {
     const result = invoke('missing-example', '--json');
     assert.equal(result.status, 2);

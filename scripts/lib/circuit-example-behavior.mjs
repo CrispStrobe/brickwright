@@ -83,8 +83,91 @@ async function checkCrtc80 (bench, circuit, examples) {
     return {status: ok ? 'pass' : 'fail', checks: [{expected, observed, ok}]};
 }
 
+async function checkStarterMotor (bench, circuit, examples) {
+    const reverses = bench.id === 'arduino-sk-p10-zoetrope';
+    const controls = reverses ? ['BTN_btnFwd', 'BTN_btnRev'] : ['BTN_btn'];
+    const motor = reverses ? 'MOTOR_zoetrope' : 'MOTOR_motor';
+    if (reverses) circuit.setControl('POT_pot', 1);
+    let vm;
+    try {
+        const runtime = await startProgram(bench, circuit, examples, value => { vm = value; });
+        const start = circuit.board.getTime();
+        let elapsedMs = 0;
+        vm.runtime.updateCurrentMSecs = () => { vm.runtime.currentMSecs = elapsedMs; };
+        async function measure (ms) {
+            const end = elapsedMs + ms;
+            while (elapsedMs < end) {
+                elapsedMs += 20;
+                await runtime.stepFrames(vm, 1, 20);
+                circuit.advanceTo(start + BigInt(elapsedMs) * 1_000_000n);
+            }
+            const velocity = circuit.board.getDeviceState(motor)?.velocity;
+            if (!Number.isFinite(velocity)) throw new Error(`Missing velocity for ${motor}`);
+            return velocity;
+        }
+        const idle = await measure(60);
+        circuit.setControl(controls[0], 1);
+        const forward = await measure(80);
+        const checks = [
+            {expected: 'motor stopped before pressing the button', observed: idle, ok: Math.abs(idle) < 0.001},
+            {expected: 'motor turns forward while the button is pressed', observed: forward, ok: forward > 0.01}
+        ];
+        circuit.setControl(controls[0], 0);
+        if (reverses) {
+            circuit.setControl(controls[1], 1);
+            const reverse = await measure(140);
+            circuit.setControl(controls[1], 0);
+            checks.push({expected: 'motor reverses when the reverse button is pressed',
+                observed: reverse, ok: reverse < -0.01});
+        }
+        const coast = await measure(100);
+        const running = Math.abs(checks.at(-1).observed);
+        checks.push({expected: 'motor slows when the button is released',
+            observed: coast, ok: Math.abs(coast) < running - 0.01});
+        if (runtime.errors.length) throw new Error(runtime.errors.join(', '));
+        return {status: checks.every(check => check.ok) ? 'pass' : 'fail', checks};
+    } finally {
+        vm?.stopAll();
+        vm?.quit();
+    }
+}
+
+function checkClapLatch (circuit) {
+    const checks = [];
+    const advance = ms => circuit.advanceTo(circuit.board.getTime() + BigInt(ms) * 1_000_000n);
+    const checkLed = (expected, lit) => {
+        const observed = Math.abs(circuit.board.branchCurrent('led_16', 'anode'));
+        checks.push({expected, observed, ok: Number.isFinite(observed) &&
+            (lit ? observed > 0.001 : observed < 0.00005)});
+    };
+    const sound = db => {
+        circuit.setPartParam('speaker_3', 'soundDb', db);
+        advance(20);
+        circuit.setPartParam('speaker_3', 'soundDb', 0);
+        advance(30);
+    };
+    advance(299);
+    checkLed('LED dark at power-on', false);
+    sound(80);
+    checkLed('LED dark after speech', false);
+    sound(120);
+    checkLed('LED lit after a loud clap', true);
+    advance(100);
+    checkLed('LED still latched after 100 ms of silence', true);
+    circuit.setControl('button_21', 1);
+    advance(5);
+    circuit.setControl('button_21', 0);
+    advance(20);
+    checkLed('LED dark after reset', false);
+    return {status: checks.every(check => check.ok) ? 'pass' : 'fail', checks};
+}
+
 export async function checkBehavior (bench, circuit, examples) {
     if (bench.id === 'eater6502-crtc80') return checkCrtc80(bench, circuit, examples);
+    if (bench.id === 'lab-amp-ic-clap-latch') return checkClapLatch(circuit);
+    if (bench.id === 'arduino-sk-p09-motorized-pinwheel' || bench.id === 'arduino-sk-p10-zoetrope') {
+        return checkStarterMotor(bench, circuit, examples);
+    }
     const spec = behaviors[bench.id];
     if (!spec) return {status: 'unverified', reason: 'No functional scenario for this lesson'};
     const led = spec.led ?? 'LED_led1';
