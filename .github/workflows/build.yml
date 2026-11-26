@@ -3118,6 +3118,16 @@ jobs:
         timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
         if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'heavy' }}
         run: node scripts/verify-machine-project-library.mjs http://127.0.0.1:8617/
+      - name: Browser gate — firmware library launches through Controller
+        id: bw_browser_machine_firmware_library
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'heavy' }}
+        run: node scripts/verify-controller-machine-library.mjs http://127.0.0.1:8617/
+      - name: Browser gate — CPU groups and PicoBB LittleFS
+        id: bw_browser_machine_pico_littlefs
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'light' }}
+        run: node scripts/verify-machine-groups-picobb.mjs http://127.0.0.1:8617/
       - name: Browser gate — Microtronic through Circuits, Code and Controller
         id: bw_browser_microtronic_controller
         timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
