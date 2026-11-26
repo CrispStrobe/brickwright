@@ -1656,3 +1656,34 @@ The current Brickwright SDK pin is `f2a596a`, which includes the earlier
 closed-hull seam optimization. Sustained 1× production qualification
 remains open.
 [CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/aa1f536b820451e5e8115d8b02a78f2eb854a551)
+
+### Reuse viewport pose and cable calculations
+
+The viewport reuses its pose map and transform scratch objects.
+Bodies with an incoming pose receive that transform directly. Bodies
+omitted from a frame return to their authored transforms. Cable drawing
+updates each linked body's world matrix once per draw and reuses the
+tube cross-section's sine and cosine values.
+
+Chrome replayed 100 recorded physics frames through the WebGL viewport.
+Each entry is the median of five replays per version.
+
+| Time across 100 frames | First order, before → after | Reverse order, before → after |
+| --- | ---: | ---: |
+| Atlas cable updates | 179 → 101 ms | 179 → 98 ms |
+| Scout cable updates | 116 → 74 ms | 124 → 80 ms |
+| Atlas frame submission | 358 → 264 ms | 366 → 315 ms |
+| Scout frame submission | 296 → 242 ms | 313 → 283 ms |
+
+Every displayed body matrix matched, as did the cable position and
+normal buffers at three sampled frames per robot. Preview boxes appeared
+and cleared, and reset restored the authored scene. Frame submission
+measures CPU time through WebGL submission.
+
+A separate live Chrome run coupled the real Circuit engine and physics
+worker to the optimized viewport. Both robots drew 100 full frames over
+600 substeps, moved their chassis and cables, and restored the exact
+authored scene after parking. The TypeScript build and all eight focused
+tests passed. Brickwright pins SDK `f2a596a`.
+Sustained 1× in the shipping application remains open.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/995e81d43a6f80eb272da042daf51ad848f2721a)
