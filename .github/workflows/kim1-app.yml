@@ -4,6 +4,7 @@ on:
     branches: ['feat/kim1-circuits', 'feat/kim1-hardware-integration', 'feat/kim-expansion-brickwright']
     paths:
       - 'vendor-pins.json'
+      - 'overlay/scratch-gui/static/licenses/bw-packages.sources.json'
       - 'package.json'
       - 'package-lock.json'
       - 'packages/scratch-gui/package.json'
