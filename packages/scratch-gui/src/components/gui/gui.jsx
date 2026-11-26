@@ -145,6 +145,7 @@ const recordStarterEvent = (type, journeyId) => {
 // costumes, sounds), 3 and 4 are Brickwright's Code and Circuit tabs. The panels
 // are force-rendered, so a panel's own idea of "visible" has to come from here.
 const CODE_TAB_INDEX = 3;
+const CIRCUIT_TAB_INDEX = 4;
 
 // The FPGA/HDL surface is a BUILD-TIME opt-in and ships hidden. Webpack replaces
 // this with a literal, so an off build drops the tab, its panel and everything
@@ -394,7 +395,7 @@ const GUIComponent = props => {
     // from a prior session never activates the sim pane on a mint project.
     const [dockMode, setDockMode] = React.useState(() => {
         try {
-            const dock = localStorage.getItem('bw-debug-dock') || 'top';
+            const dock = localStorage.getItem('bw-debug-dock') || 'right';
             const circuit = localStorage.getItem('bw-stage-circuit');
             // Only honour 'microbit' if the circuit-pane flag is also set
             if ((dock === 'microbit' || dock === 'arcade') && circuit !== '1') return 'top';
@@ -413,7 +414,7 @@ const GUIComponent = props => {
             // The MakeCode simulator holds no program of its own across a
             // reload: restoring its dock would show an empty pane.
             if (dock === 'makecode' && !window.__bwMakeCodePending) return 'top';
-            if (!['top', 'right', 'controller', 'microbit', 'arcade', 'cpx', 'arduboy', 'makecode', 'spikearena', 'cad', 'robots'].includes(dock)) return 'top';
+            if (!['top', 'off', 'right', 'solo', 'controller', 'microbit', 'arcade', 'cpx', 'arduboy', 'makecode', 'spikearena', 'cad', 'robots'].includes(dock)) return 'top';
             // The CAD view restores only where the CAD Editor is built and switched on.
             if (dock === 'cad' && !(process.env.BW_ENABLE_CAD && getCadEnabled())) return 'top';
             // The arena restores only for a SPIKE project.
@@ -425,6 +426,11 @@ const GUIComponent = props => {
             return dock;
         } catch { return 'top'; }
     });
+    const [showCircuitStage, setShowCircuitStage] = React.useState(() => {
+        try { return localStorage.getItem('bw-stage-circuit') === '1'; } catch { return false; }
+    });
+    const circuitOwnsStage = showCircuitStage && (dockMode === 'right' ||
+        (props.activeTabIndex !== CIRCUIT_TAB_INDEX && ['top', 'off', 'solo'].includes(dockMode)));
     const [cp1CodeSlot, setCp1CodeSlot] = React.useState(null);
     const [cp1ControllerSlot, setCp1ControllerSlot] = React.useState(null);
     const [cp1Attached, setCp1Attached] = React.useState(() => window.__bwMachineExtracted?.kind === 'cp1');
@@ -470,6 +476,7 @@ const GUIComponent = props => {
                     try { localStorage.setItem('bw-right-pane-hidden', '0'); } catch { /* private mode */ }
                 }
             } else if (detail.key === 'bw-stage-circuit') {
+                setShowCircuitStage(detail.value === '1');
                 // If the circuit pane is being deactivated while in microbit mode, reset
                 if (detail.value !== '1') {
                     setDockMode(prev => prev === 'microbit' ? 'top' : prev);
@@ -1366,7 +1373,7 @@ const GUIComponent = props => {
                                 toggle buttons) stays reachable in every mode.
                                 In controller mode the stage canvas is hidden
                                 so the panel owns the full column. */}
-                            <div style={dockMode === 'controller' || dockMode === 'arcade' || dockMode === 'cpx' || dockMode === 'arduboy' || dockMode === 'makecode' || dockMode === 'spikearena' || dockMode === 'cad' || dockMode === 'robots' ? {maxHeight: 44, overflow: 'hidden', flexShrink: 0, borderBottom: '3px solid #475569', background: '#cbd5e1', boxShadow: '0 3px 6px rgba(0,0,0,0.22)', position: 'relative', zIndex: 5, boxSizing: 'border-box'} : undefined}>
+                            <div style={circuitOwnsStage || dockMode === 'controller' || dockMode === 'arcade' || dockMode === 'cpx' || dockMode === 'arduboy' || dockMode === 'makecode' || dockMode === 'spikearena' || dockMode === 'cad' || dockMode === 'robots' ? {maxHeight: 44, overflow: 'hidden', flexShrink: 0, borderBottom: '3px solid #475569', background: '#cbd5e1', boxShadow: '0 3px 6px rgba(0,0,0,0.22)', position: 'relative', zIndex: 5, boxSizing: 'border-box'} : undefined}>
                                 <EditorErrorBoundary name="Stage"><StageWrapper
                                     isFullScreen={isFullScreen}
                                     isRendererSupported={isRendererSupported}
@@ -1456,7 +1463,7 @@ const GUIComponent = props => {
                                     </div>
                                 </React.Suspense>
                             ) : (
-                                <Box className={styles.targetWrapper}>
+                                <Box className={styles.targetWrapper} style={circuitOwnsStage ? {display: 'none'} : undefined}>
                                     <EditorErrorBoundary name="Sprites"><React.Suspense fallback={<div role="status">Loading sprites and artwork…</div>}>
                                         <TargetPane stageSize={stageSize} vm={vm} />
                                     </React.Suspense></EditorErrorBoundary>

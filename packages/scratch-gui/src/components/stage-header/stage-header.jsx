@@ -126,7 +126,8 @@ const viewForDock = dock => {
     if (dock === 'controller') return 'controller';
     if (dock === 'cad') return 'cad';
     if (dock === 'robots') return 'robots';
-    // 'top' and any other value default to scratch stage
+    if (dock === 'top') return 'circuit';
+    // Unrecognized modes return to the Scratch stage
     return 'scratch';
 };
 
@@ -137,7 +138,7 @@ const readCircuitView = () => {
         // circuit/debugger choices become active only after the user chooses
         // them or selects them in Settings.
         if (coding !== '1') return 'scratch';
-        return viewForDock(localStorage.getItem('bw-debug-dock'));
+        return viewForDock(localStorage.getItem('bw-debug-dock') || 'right');
     } catch {
         return 'scratch';
     }
@@ -168,9 +169,9 @@ const StageViewButtons = ({intl, vm}) => {
         const sync = event => {
             const {key, value} = event.detail || {};
             if (key === 'bw-stage-circuit') {
-                setView(value === '1' ? viewForDock(localStorage.getItem('bw-debug-dock')) : 'scratch');
+                setView(value === '1' ? viewForDock(localStorage.getItem('bw-debug-dock') || 'right') : 'scratch');
             } else if (key === 'bw-debug-dock') {
-                setView(localStorage.getItem('bw-stage-circuit') === '0' ? 'scratch' : viewForDock(value));
+                setView(localStorage.getItem('bw-stage-circuit') === '1' ? viewForDock(value) : 'scratch');
             } else if (key === 'bw-device-id') {
                 setDeviceIsMicrobit(MICROPYTHON_DEVICES.includes(value));
                 setDeviceIsArduboy(value === 'arduboy');
