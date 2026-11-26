@@ -69,18 +69,80 @@ export function robotProjectState(doc){
  lines.push('    wait 0.02 seconds','');
  return {circuit:{version:1,vcc:5,parts,wires,holeWires:[]},controller:{version:1,mode:'play',hideBindings:true,widgets},cadCircuit:connections,code:{lang:'pseudocode',code:lines.join('\n')}};
 }
+// Byte-reproducible archives: sb3-creator draws block/asset ids from Math.random
+// and JSZip stamps every entry (and implied folder) with the current time.
+// Seed the ids from the model identity, fix every timestamp and sort entries.
+const ZIP_DATE=new Date(Date.UTC(2026,0,1,0,0,0));
+const seededRandom=seed=>{let a=createHash('sha256').update(seed).digest().readUInt32LE(0);return()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;};};
+async function withSeededRandom(seed,run){const random=Math.random;Math.random=seededRandom(seed);try{return await run();}finally{Math.random=random;}}
 export async function packageRobot(doc){
- const state=robotProjectState(doc),creator=new SB3Creator();creator.parse(state.code.code);creator.project.stc.version=1;creator.project.stc.cadRobotProjectVersion=2;
- const valid=creator.validate();if(valid.errors?.length)throw Error(JSON.stringify(valid.errors));
- const zip=await JSZip.loadAsync(await(await creator.generateSB3()).arrayBuffer());zip.file('brickwright/cad.json',JSON.stringify(doc));zip.file('brickwright/state.json',JSON.stringify({format:'brickwright-state',version:2,state}));
- for(const [file,path]of[['ADAFRUIT-MIT-LICENSE.txt','../licenses/adafruit-cad-parts-MIT.txt'],['BRICKWRIGHT-BSD-3-CLAUSE.txt','../LICENSE']])zip.file('brickwright/licenses/'+file,await readFile(new URL(path,import.meta.url)));
- return {state,bytes:await zip.generateAsync({type:'nodebuffer',compression:'DEFLATE'})};
+ const state=robotProjectState(doc),creator=new SB3Creator();
+ const generated=await withSeededRandom('brickwright-cad-robot:'+doc.id,async()=>{
+  creator.parse(state.code.code);creator.project.stc.version=1;creator.project.stc.cadRobotProjectVersion=2;
+  const valid=creator.validate();if(valid.errors?.length)throw Error(JSON.stringify(valid.errors));
+  return JSZip.loadAsync(await(await creator.generateSB3()).arrayBuffer());
+ });
+ const entries=new Map();
+ for(const entry of Object.values(generated.files))if(!entry.dir)entries.set(entry.name,await entry.async('uint8array'));
+ entries.set('brickwright/cad.json',JSON.stringify(doc));entries.set('brickwright/state.json',JSON.stringify({format:'brickwright-state',version:2,state}));
+ for(const [file,path]of[['ADAFRUIT-MIT-LICENSE.txt','../licenses/adafruit-cad-parts-MIT.txt'],['BRICKWRIGHT-BSD-3-CLAUSE.txt','../LICENSE']])entries.set('brickwright/licenses/'+file,await readFile(new URL(path,import.meta.url)));
+ const zip=new JSZip();
+ for(const name of [...entries.keys()].sort())zip.file(name,entries.get(name),{date:ZIP_DATE,createFolders:false});
+ return {state,bytes:await zip.generateAsync({type:'nodebuffer',compression:'DEFLATE',compressionOptions:{level:6},platform:'DOS'})};
+}
+const FACTORIES=[['tt-rover','createTTRoverDocument'],['steerable-rover','createSteerableRoverDocument'],['atlas-forklift','createAtlasForkliftDocument'],['mantis-walker','createMantisWalkerDocument'],['cyclone-sorter','createCycloneSorterDocument'],['helios-catapult','createHeliosCatapultDocument'],['labyrinth-tilter','createLabyrinthTilterDocument'],['apex-scara','createApexScaraDocument'],['orion-carousel','createOrionCarouselDocument'],['vortex-pinball','createVortexPinballDocument'],['titan-vise','createTitanViseDocument'],['hermes-crane','createHermesCraneDocument'],['chronos-drawbridge','createChronosDrawbridgeDocument'],['polaris-tracker','createPolarisTrackerDocument'],['boreal-launcher','createBorealLauncherDocument'],['zephyr-conveyor','createZephyrConveyorDocument'],['quasar-press','createQuasarPressDocument'],['nova-loader','createNovaLoaderDocument'],['vector-plotter','createVectorPlotterDocument'],['aegis-sentry','createAegisSentryDocument'],['stratos-gimbal','createStratosGimbalDocument'],['kestrel-arm','createKestrelArmDocument']];
+export const CAD_ROBOT_OUTPUT=new URL('../overlay/scratch-gui/static/cad-robots/',import.meta.url);
+const manifestText=examples=>JSON.stringify({version:1,examples},null,2)+'\n';
+const manifestRecord=(item,state,bytes)=>({...item,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex'),widgets:state.controller.widgets.map(w=>w.name),joints:[...state.cadCircuit.drives,...state.cadCircuit.servos].map(d=>d.jointId)});
+/** The CAD documents embedded in the committed projects (no CrispCAD checkout needed). */
+export async function committedRobotDocuments(output=CAD_ROBOT_OUTPUT){
+ const docs=[];
+ for(const item of CAD_ROBOT_EXAMPLES){const zip=await JSZip.loadAsync(await readFile(new URL(item.file,output)));docs.push(JSON.parse(await zip.file('brickwright/cad.json').async('text')));}
+ return docs;
+}
+/** Package every robot; returns the archives and the manifest text, writing nothing. */
+export async function buildRobotProjects(docs){
+ const files=new Map(),manifest=[];
+ for(const [i,item]of CAD_ROBOT_EXAMPLES.entries()){
+  const doc=docs[i];if(doc.id!==item.id)throw Error('Unexpected model identity');
+  const {state,bytes}=await packageRobot(doc);files.set(item.file,bytes);manifest.push(manifestRecord(item,state,bytes));
+ }
+ return {files,manifest:manifestText(manifest),records:manifest};
+}
+/** Compare a generated set with the committed archives; returns a list of differences. */
+export async function compareRobotProjects(generated,output=CAD_ROBOT_OUTPUT){
+ const problems=[];
+ for(const [file,bytes]of generated.files){let current=null;try{current=await readFile(new URL(file,output));}catch(_){}if(!current||!Buffer.from(bytes).equals(current))problems.push(file);}
+ let manifest=null;try{manifest=await readFile(new URL('manifest.json',output),'utf8');}catch(_){}
+ if(manifest!==generated.manifest)problems.push('manifest.json');
+ return problems;
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href){
- const root=resolve(process.argv[2]||'../circuit-cad-engine-work'),output=new URL('../overlay/scratch-gui/static/cad-robots/',import.meta.url),factories=[['tt-rover','createTTRoverDocument'],['steerable-rover','createSteerableRoverDocument'],['atlas-forklift','createAtlasForkliftDocument'],['mantis-walker','createMantisWalkerDocument'],['cyclone-sorter','createCycloneSorterDocument'],['helios-catapult','createHeliosCatapultDocument'],['labyrinth-tilter','createLabyrinthTilterDocument'],['apex-scara','createApexScaraDocument'],['orion-carousel','createOrionCarouselDocument'],['vortex-pinball','createVortexPinballDocument'],['titan-vise','createTitanViseDocument'],['hermes-crane','createHermesCraneDocument'],['chronos-drawbridge','createChronosDrawbridgeDocument'],['polaris-tracker','createPolarisTrackerDocument'],['boreal-launcher','createBorealLauncherDocument'],['zephyr-conveyor','createZephyrConveyorDocument'],['quasar-press','createQuasarPressDocument'],['nova-loader','createNovaLoaderDocument'],['vector-plotter','createVectorPlotterDocument'],['aegis-sentry','createAegisSentryDocument'],['stratos-gimbal','createStratosGimbalDocument'],['kestrel-arm','createKestrelArmDocument']],manifest=[];await mkdir(output,{recursive:true});
- for(const [i,item]of CAD_ROBOT_EXAMPLES.entries()){
-  const [file,method]=factories[i],factory=(await import(pathToFileURL(resolve(root,`packages/editor/dist/${file}.js`)).href))[method],doc=factory();if(doc.id!==item.id)throw Error('Unexpected model identity');const {state,bytes}=await packageRobot(doc);await writeFile(new URL(item.file,output),bytes);manifest.push({...item,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex'),widgets:state.controller.widgets.map(w=>w.name),joints:[...state.cadCircuit.drives,...state.cadCircuit.servos].map(d=>d.jointId)});console.log(item.name,bytes.length,state.controller.widgets.length,'live controls');
+ // Usage: node scripts/generate-cad-robot-projects.mjs [CRISPCAD_ROOT] [--check] [--out DIR]
+ //   CRISPCAD_ROOT  CrispCAD checkout with built packages/editor/dist (default ../circuit-cad-engine-work)
+ //   --check        write nothing; fail unless the committed projects and manifest are
+ //                  byte-identical to a fresh build. Without CRISPCAD_ROOT, the CAD
+ //                  documents embedded in the committed projects are repackaged
+ //                  instead, which checks the packaging alone.
+ //   --out DIR      write somewhere other than overlay/scratch-gui/static/cad-robots
+ const args=process.argv.slice(2),check=args.includes('--check'),outIndex=args.indexOf('--out');
+ const positional=args.filter((arg,i)=>!arg.startsWith('--')&&!(outIndex>=0&&i===outIndex+1));
+ const output=outIndex>=0?pathToFileURL(resolve(args[outIndex+1])+'/'):CAD_ROBOT_OUTPUT;
+ const root=resolve(positional[0]||'../circuit-cad-engine-work'),dist=resolve(root,'packages/editor/dist');
+ let docs,source;
+ if(check&&!positional[0])source='embedded';else{await access(resolve(dist,FACTORIES[0][0]+'.js'));source='factories';}
+ if(source==='factories'){
+  docs=[];for(const [file,method]of FACTORIES)docs.push((await import(pathToFileURL(resolve(dist,file+'.js')).href))[method]());
+ }else docs=await committedRobotDocuments();
+ const generated=await buildRobotProjects(docs);
+ if(check){
+  const problems=await compareRobotProjects(generated,CAD_ROBOT_OUTPUT);
+  if(problems.length){console.error(`FAIL robot projects differ from a fresh ${source==='factories'?'build from '+root:'repackaging of the embedded CAD documents'}: ${problems.join(', ')}`);process.exit(1);}
+  console.log(`PASS all ${generated.records.length} robot projects and the manifest are byte-identical to a fresh ${source==='factories'?'build from '+root:'repackaging of their embedded CAD documents'}`);
+ }else{
+  await mkdir(output,{recursive:true});
+  for(const record of generated.records){await writeFile(new URL(record.file,output),generated.files.get(record.file));console.log(record.name,record.bytes,record.widgets.length,'live controls');}
+  await writeFile(new URL('manifest.json',output),generated.manifest);
+  if(outIndex<0){const mirror=new URL('../packages/scratch-gui/static/',import.meta.url);try{await access(mirror);await cp(output,new URL('cad-robots/',mirror),{recursive:true});console.log('Synced canonical robot projects into the GUI build inputs');}catch(error){if(error.code!=='ENOENT')throw error;}}
  }
- await writeFile(new URL('manifest.json',output),JSON.stringify({version:1,examples:manifest},null,2)+'\n');
- const mirror=new URL('../packages/scratch-gui/static/',import.meta.url);try{await access(mirror);await cp(output,new URL('cad-robots/',mirror),{recursive:true});console.log('Synced canonical robot projects into the GUI build inputs');}catch(error){if(error.code!=='ENOENT')throw error;}
 }
