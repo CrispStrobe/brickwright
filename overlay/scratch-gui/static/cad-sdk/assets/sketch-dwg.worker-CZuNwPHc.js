@@ -39284,7 +39284,7 @@ const AB = class AB {
         const we = G.subarray(1, 33).indexOf(0), L = [[0, g], [2, Ki(G.subarray(1, we < 0 ? 33 : we + 1), this.encoding)], [70, String(G[0] & 127)]];
         if (g === "BLOCK") {
           let X = me(L, 2);
-          (/^\*[A-Z]$/i.test(X) || V.some((he) => me(he, 2) === X)) && (X += M), L[1][1] = X;
+          (/^\*[A-Z]$/i.test(X) || V.some((de) => me(de, 2) === X)) && (X += M), L[1][1] = X;
         }
         const j = new Es(G, this.encoding);
         if (j.position = 35, g === "BLOCK" && this.blockOffsets.push(j.view.getUint32(35, !0) & 1073741823), g === "LAYER" && (this.field(L, j, !0, 62, "short"), this.field(L, j, !0, 6, "short", "LTYPE")), g === "STYLE") {
@@ -39409,8 +39409,8 @@ const AB = class AB {
     }
     const X = x.getUint32(28, !0);
     U(b.subarray(X - 16, X)), T.setUint32(28, V, !0), this.patchSequenceAddresses(d, j, V);
-    const he = Bf(j);
-    U(he), T.setUint32(32, 1073741824 + he.length, !0), U(b.subarray(X, X + 16));
+    const de = Bf(j);
+    U(de), T.setUint32(32, 1073741824 + de.length, !0), U(b.subarray(X, X + 16));
     const Pe = b.length - 170;
     U(b.subarray(X + 16, Pe)), T.setUint32(36, V - 16, !0);
     const xe = V, Ne = b.slice(Pe), et = new DataView(Ne.buffer);
@@ -39679,8 +39679,8 @@ const bl = class bl extends Vh {
         const Pe = new di();
         Pe.isEmpty = !0, Pe.offset = X, Pe.decompressedSize = j.decompressedSize, j.localSections.push(Pe), X += j.decompressedSize;
       }
-      const he = j.compressedSize % j.decompressedSize;
-      he > 0 && j.localSections.length > 0 && (j.localSections[j.localSections.length - 1].decompressedSize = he), e.descriptors.set(j.name, j);
+      const de = j.compressedSize % j.decompressedSize;
+      de > 0 && j.localSections.length > 0 && (j.localSections[j.localSections.length - 1].decompressedSize = de), e.descriptors.set(j.name, j);
     }
   }
   _readFileHeaderAC21(e, r) {
@@ -40805,10 +40805,10 @@ const Bc = /* @__PURE__ */ Dc((i, t) => Math.ceil(i / t) * t, "align"), VB = cla
     x = 0;
     for (const ae of e)
       V.set(ae.id, x), x += ae.bytes.length;
-    const U = new A_(), M = U.encodeZero(), G = U.encodeZero(), we = U.next(), L = U.next(), j = U.encodeZero(), X = ox, he = [X(we, L)];
-    for (he.push(X(he[0], he[0]), X(L, X(he[0], he[0]))), he.push(X(he[2], he[2]), X(we, X(he[2], he[2]))); he.length < 8; )
-      he.push(X(he[he.length - 1], he[he.length - 1]));
-    const Pe = Er(ri(he), ~L), xe = [X(we, L)];
+    const U = new A_(), M = U.encodeZero(), G = U.encodeZero(), we = U.next(), L = U.next(), j = U.encodeZero(), X = ox, de = [X(we, L)];
+    for (de.push(X(de[0], de[0]), X(L, X(de[0], de[0]))), de.push(X(de[2], de[2]), X(we, X(de[2], de[2]))); de.length < 8; )
+      de.push(X(de[de.length - 1], de[de.length - 1]));
+    const Pe = Er(ri(de), ~L), xe = [X(we, L)];
     xe.push(X(Pe, xe[0])), xe.push(X(L, xe[1])), xe.push(X(Pe, xe[2])), xe.push(X(we, xe[3])), xe.push(X(Pe, xe[4])), xe.push(X(L, xe[5])), xe.push(X(xe[6], xe[6]));
     const Ne = ri([Pe, Er(ri(xe), ~we, !0), we, L, j]), et = ri([
       112,
@@ -42864,15 +42864,15 @@ const GB = class GB {
     const e = 1048496;
     let r = 6;
     const s = t.map((L) => {
-      const j = L.binaryData.length > 262144 ? Math.ceil(L.binaryData.length / e) : 0, X = Array.from({ length: j }, (he, Pe) => ({
+      const j = L.binaryData.length > 262144 ? Math.ceil(L.binaryData.length / e) : 0, X = Array.from({ length: j }, (de, Pe) => ({
         segmentIndex: r++,
         offset: Pe * e,
         size: Math.min(e, L.binaryData.length - Pe * e)
       }));
       return { entity: L, pages: X, size: j ? 36 + j * 8 : 4 + L.binaryData.length };
-    }), a = [], o = /* @__PURE__ */ j_((L, j, X = 0, he = 0, Pe = !1) => {
+    }), a = [], o = /* @__PURE__ */ j_((L, j, X = 0, de = 0, Pe = !1) => {
       const xe = Math.ceil((48 + j.bytes.length) / 64) * 64, Ne = new ii();
-      Ne.uint16(54700), Ne.append(new TextEncoder().encode(L)), Ne.uint32(a.length), Ne.uint32(Pe ? 1 : 0), Ne.uint32(xe), Ne.uint32(0), Ne.uint32(1), Ne.uint32(0), Ne.uint32(X), Ne.uint32(he), Ne.append(new Uint8Array(8).fill(85)), Ne.append(j.bytes), Ne.align(64, 112), a.push(Ne.bytes);
+      Ne.uint16(54700), Ne.append(new TextEncoder().encode(L)), Ne.uint32(a.length), Ne.uint32(Pe ? 1 : 0), Ne.uint32(xe), Ne.uint32(0), Ne.uint32(1), Ne.uint32(0), Ne.uint32(X), Ne.uint32(de), Ne.append(new Uint8Array(8).fill(85)), Ne.append(j.bytes), Ne.align(64, 112), a.push(Ne.bytes);
     }, "segment"), l = new ii();
     for (let L = 0; L < r; L++)
       l.uint64(0), l.uint32(0);
@@ -42930,8 +42930,8 @@ const GB = class GB {
         T.uint32(L.binaryData.length), T.append(L.binaryData);
       else {
         T.uint32(3138415537), T.uint64(L.binaryData.length), T.uint32(j.length), T.uint32(X), T.uint32(e), T.uint32(j[j.length - 1].size), T.uint32(0), T.uint32(0);
-        for (const he of j)
-          T.uint32(he.segmentIndex), T.uint32(he.size);
+        for (const de of j)
+          T.uint32(de.segmentIndex), T.uint32(de.size);
       }
     o("_data_", T, 0, E);
     const I = new ii();
@@ -42943,9 +42943,9 @@ const GB = class GB {
       I.uint64(j.handle), I.uint64(1), I.uint64(L);
     o("search", I);
     for (const { entity: L, pages: j } of s)
-      for (const [X, he] of j.entries()) {
+      for (const [X, de] of j.entries()) {
         const Pe = new ii();
-        Pe.uint64(L.binaryData.length), Pe.uint64(he.offset), Pe.uint32(X), Pe.uint32(j.length), Pe.uint64(he.size), Pe.append(L.binaryData.subarray(he.offset, he.offset + he.size)), o("blob01", Pe, 0, 0, !0);
+        Pe.uint64(L.binaryData.length), Pe.uint64(de.offset), Pe.uint32(X), Pe.uint32(j.length), Pe.uint64(de.size), Pe.append(L.binaryData.subarray(de.offset, de.offset + de.size)), o("blob01", Pe, 0, 0, !0);
       }
     let V = 128;
     const U = a.map((L) => {
@@ -47259,33 +47259,34 @@ jscad primitives booleans transforms extrusions hulls geometries geom2 geom3 cub
   const t = i.map((l) => l[0]), e = i.map((l) => l[1]), r = Math.max(...t) - Math.min(...t), s = Math.max(...e) - Math.min(...e), a = (Math.max(...e) + Math.min(...e)) / 2, o = Math.max(r, s);
   return i.map(([l, c]) => [l / o, (c - a) / o]).reverse();
 })();
-const de = (i, t, e = {}) => ({ name: i, kind: t, ...e }), Qo = (i) => de(i, "point", { optional: !0, plane: "XY" }), XS = [
-  { name: "help", aliases: ["?"], description: "Command help", usage: "help [command]", category: "terminal", editsModel: !1, arguments: [de("command", "command", { optional: !0 })], headless: !0 },
+const he = (i, t, e = {}) => ({ name: i, kind: t, ...e }), Qo = (i) => he(i, "point", { optional: !0, plane: "XY" }), XS = [
+  { name: "help", aliases: ["?"], description: "Command help", usage: "help [command]", category: "terminal", editsModel: !1, arguments: [he("command", "command", { optional: !0 })], headless: !0 },
   { name: "list", aliases: ["ls"], description: "List objects and sketches", usage: "list", category: "terminal", editsModel: !1, arguments: [], headless: !0 },
   { name: "clear", aliases: ["cls"], description: "Clear the terminal transcript", usage: "clear", category: "terminal", editsModel: !1, arguments: [] },
-  { name: "alias", aliases: [], description: "List, inspect or define a custom command alias", usage: "alias [name [command]]", category: "terminal", editsModel: !1, arguments: [de("name", "alias", { optional: !0 }), de("command", "command", { optional: !0 })] },
-  { name: "unalias", aliases: [], description: "Remove a custom command alias", usage: "unalias <name>", category: "terminal", editsModel: !1, arguments: [de("name", "alias")] },
+  { name: "alias", aliases: [], description: "List, inspect or define a custom command alias", usage: "alias [name [command]]", category: "terminal", editsModel: !1, arguments: [he("name", "alias", { optional: !0 }), he("command", "command", { optional: !0 })] },
+  { name: "unalias", aliases: [], description: "Remove a custom command alias", usage: "unalias <name>", category: "terminal", editsModel: !1, arguments: [he("name", "alias")] },
   { name: "repeat", aliases: [], description: "Repeat the last command or script", usage: "repeat", category: "terminal", editsModel: !0, arguments: [] },
-  { name: "box", aliases: ["b"], description: "Create a box", usage: "box [width,depth,height] [center]", category: "create", editsModel: !0, arguments: [de("size", "vector", { min: 0.01, max: 1e5 }), de("center", "point", { optional: !0 })], headless: !0 },
-  { name: "sphere", aliases: ["sp"], description: "Create a sphere", usage: "sphere [radius] [center]", category: "create", editsModel: !0, arguments: [de("radius", "number", { min: 0.01, max: 5e4 }), de("center", "point", { optional: !0 })], headless: !0 },
-  { name: "cylinder", aliases: ["cyl"], description: "Create a cylinder", usage: "cylinder [radius] [height] [center]", category: "create", editsModel: !0, arguments: [de("radius", "number", { min: 0.01, max: 5e4 }), de("height", "number", { min: 0.01, max: 1e5 }), de("center", "point", { optional: !0 })], headless: !0 },
+  { name: "box", aliases: ["b"], description: "Create a box", usage: "box [width,depth,height] [center]", category: "create", editsModel: !0, arguments: [he("size", "vector", { min: 0.01, max: 1e5 }), he("center", "point", { optional: !0 })], headless: !0 },
+  { name: "sphere", aliases: ["sp"], description: "Create a sphere", usage: "sphere [radius] [center]", category: "create", editsModel: !0, arguments: [he("radius", "number", { min: 0.01, max: 5e4 }), he("center", "point", { optional: !0 })], headless: !0 },
+  { name: "cylinder", aliases: ["cyl"], description: "Create a cylinder", usage: "cylinder [radius] [height] [center]", category: "create", editsModel: !0, arguments: [he("radius", "number", { min: 0.01, max: 5e4 }), he("height", "number", { min: 0.01, max: 1e5 }), he("center", "point", { optional: !0 })], headless: !0 },
   { name: "line", aliases: ["l"], description: "Draw an XY sketch line", usage: "line [start] [end]", category: "sketch", editsModel: !0, arguments: [{ ...Qo("start"), optional: !1 }, { ...Qo("end"), optional: !1 }], headless: !0 },
   { name: "rectangle", aliases: ["rect"], description: "Draw an XY sketch rectangle", usage: "rectangle [corner] [opposite]", category: "sketch", editsModel: !0, arguments: [{ ...Qo("corner"), optional: !1 }, { ...Qo("opposite"), optional: !1 }], headless: !0 },
-  { name: "circle", aliases: ["c"], description: "Draw an XY sketch circle", usage: "circle [center] [radius]", category: "sketch", editsModel: !0, arguments: [{ ...Qo("center"), optional: !1 }, de("radius", "number", { min: 0.01, max: 1e5 })], headless: !0 },
-  { name: "extrude", aliases: ["ex"], description: "Extrude a closed sketch", usage: 'extrude [sketch ID or "name"] [height]', category: "feature", editsModel: !0, arguments: [de("sketch", "sketch"), de("height", "number", { min: 0.01, max: 1e5 })], headless: !0 },
-  { name: "move", aliases: ["m"], description: "Move selected bodies between points", usage: "move [base] [destination]", category: "transform", editsModel: !0, arguments: [de("base", "point", { optional: !0 }), de("destination", "point")], headless: !0 },
-  { name: "rotate", aliases: ["ro"], description: "Rotate selected bodies by XYZ degrees", usage: "rotate [x,y,z]", category: "transform", editsModel: !0, arguments: [de("degrees", "vector")], headless: !0 },
-  { name: "scale", aliases: ["sc"], description: "Scale selected bodies by XYZ factors", usage: "scale [x,y,z]", category: "transform", editsModel: !0, arguments: [de("factors", "vector", { min: 0, max: 1e5 })], headless: !0 },
-  { name: "select", aliases: ["sel"], description: "Select bodies by ID or exact name", usage: 'select [all|none|"name"|id ...]', category: "selection", editsModel: !1, arguments: [de("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0 },
+  { name: "circle", aliases: ["c"], description: "Draw an XY sketch circle", usage: "circle [center] [radius]", category: "sketch", editsModel: !0, arguments: [{ ...Qo("center"), optional: !1 }, he("radius", "number", { min: 0.01, max: 1e5 })], headless: !0 },
+  { name: "extrude", aliases: ["ex"], description: "Extrude a closed sketch", usage: 'extrude [sketch ID or "name"] [height]', category: "feature", editsModel: !0, arguments: [he("sketch", "sketch"), he("height", "number", { min: 0.01, max: 1e5 })], headless: !0 },
+  { name: "move", aliases: ["m"], description: "Move selected bodies between points", usage: "move [base] [destination]", category: "transform", editsModel: !0, arguments: [he("base", "point", { optional: !0 }), he("destination", "point")], headless: !0 },
+  { name: "rotate", aliases: ["ro"], description: "Rotate selected bodies by XYZ degrees", usage: "rotate [x,y,z]", category: "transform", editsModel: !0, arguments: [he("degrees", "vector")], headless: !0 },
+  { name: "scale", aliases: ["sc"], description: "Scale selected bodies by XYZ factors", usage: "scale [x,y,z]", category: "transform", editsModel: !0, arguments: [he("factors", "vector", { min: 0, max: 1e5 })], headless: !0 },
+  { name: "select", aliases: ["sel"], description: "Select bodies by ID or exact name", usage: 'select [all|none|"name"|id ...]', category: "selection", editsModel: !1, arguments: [he("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0 },
   { name: "code", aliases: ["script"], description: "Open the persistent code workspace", usage: "code", category: "panel", editsModel: !1, arguments: [] },
-  { name: "apply", aliases: [], description: "Replay a recorded model edit", usage: "apply <recorded JSON>", category: "replay", editsModel: !0, arguments: [de("record", "json")], headless: !0 },
-  { name: "export", aliases: [], description: "Export geometry", usage: 'export [step [all|"name"|id ...]]', category: "exchange", editsModel: !1, arguments: [de("format", "keyword", { optional: !0, values: ["step"] }), de("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
-  { name: "measure", aliases: [], description: "Measure volume, area and bounds exactly with the B-rep kernel", usage: 'measure exact [all|"name"|id ...]', category: "analysis", editsModel: !1, arguments: [de("mode", "keyword", { values: ["exact"] }), de("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
-  { name: "fillet", aliases: [], description: "Round edges exactly with the B-rep kernel", usage: 'fillet <radius> [all|"name"|id ...] [--face <normal>]', category: "feature", editsModel: !0, arguments: [de("radius", "number", { min: 0.01, max: 1e4 }), de("targets", "bodies", { optional: !0, repeated: !0 }), de("face", "keyword", { optional: !0, values: ["--face"] })], headless: !0, kernel: "exact" },
-  { name: "chamfer", aliases: [], description: "Bevel edges exactly with the B-rep kernel", usage: 'chamfer <distance> [all|"name"|id ...] [--face <normal>]', category: "feature", editsModel: !0, arguments: [de("distance", "number", { min: 0.01, max: 1e4 }), de("targets", "bodies", { optional: !0, repeated: !0 }), de("face", "keyword", { optional: !0, values: ["--face"] })], headless: !0, kernel: "exact" },
-  { name: "shell", aliases: [], description: "Hollow a body to a wall thickness with open faces, exactly with the B-rep kernel", usage: 'shell <thickness> [all|"name"|id ...] --open <normal> [--open <normal> ...]', category: "feature", editsModel: !0, arguments: [de("thickness", "number", { min: 0.01, max: 1e4 }), de("targets", "bodies", { optional: !0, repeated: !0 }), de("open", "keyword", { values: ["--open"], repeated: !0 })], headless: !0, kernel: "exact" },
-  { name: "recompute", aliases: [], description: "Recompute out-of-date exact fillets, chamfers and shells with the B-rep kernel", usage: 'recompute exact [all|"name"|id ...]', category: "feature", editsModel: !0, arguments: [de("mode", "keyword", { values: ["exact"] }), de("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
-  { name: "journal", aliases: [], description: "Summarize or export the command journal", usage: "journal [export [cadscript|replay]]", category: "terminal", editsModel: !1, arguments: [de("action", "keyword", { optional: !0, values: ["export"] }), de("format", "keyword", { optional: !0, values: ["cadscript", "replay"] })], headless: !0 }
+  { name: "apply", aliases: [], description: "Replay a recorded model edit", usage: "apply <recorded JSON>", category: "replay", editsModel: !0, arguments: [he("record", "json")], headless: !0 },
+  { name: "export", aliases: [], description: "Export geometry", usage: 'export [step [all|"name"|id ...]]', category: "exchange", editsModel: !1, arguments: [he("format", "keyword", { optional: !0, values: ["step"] }), he("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
+  { name: "measure", aliases: [], description: "Measure volume, area and bounds exactly with the B-rep kernel", usage: 'measure exact [all|"name"|id ...]', category: "analysis", editsModel: !1, arguments: [he("mode", "keyword", { values: ["exact"] }), he("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
+  { name: "fillet", aliases: [], description: "Round edges exactly with the B-rep kernel", usage: 'fillet <radius> [all|"name"|id ...] [--face <normal>]', category: "feature", editsModel: !0, arguments: [he("radius", "number", { min: 0.01, max: 1e4 }), he("targets", "bodies", { optional: !0, repeated: !0 }), he("face", "keyword", { optional: !0, values: ["--face"] })], headless: !0, kernel: "exact" },
+  { name: "chamfer", aliases: [], description: "Bevel edges exactly with the B-rep kernel", usage: 'chamfer <distance> [all|"name"|id ...] [--face <normal>]', category: "feature", editsModel: !0, arguments: [he("distance", "number", { min: 0.01, max: 1e4 }), he("targets", "bodies", { optional: !0, repeated: !0 }), he("face", "keyword", { optional: !0, values: ["--face"] })], headless: !0, kernel: "exact" },
+  { name: "shell", aliases: [], description: "Hollow a body to a wall thickness with open faces, exactly with the B-rep kernel", usage: 'shell <thickness> [all|"name"|id ...] --open <normal> [--open <normal> ...]', category: "feature", editsModel: !0, arguments: [he("thickness", "number", { min: 0.01, max: 1e4 }), he("targets", "bodies", { optional: !0, repeated: !0 }), he("open", "keyword", { values: ["--open"], repeated: !0 })], headless: !0, kernel: "exact" },
+  { name: "recompute", aliases: [], description: "Recompute out-of-date exact fillets, chamfers and shells with the B-rep kernel", usage: 'recompute exact [all|"name"|id ...]', category: "feature", editsModel: !0, arguments: [he("mode", "keyword", { values: ["exact"] }), he("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0, kernel: "exact" },
+  { name: "upgrade-lofts", aliases: [], description: "Rebuild triangulated lofts (CAD Script revision 1) as ruled surfaces in one Undo step", usage: 'upgrade-lofts [all|"name"|id ...]', category: "edit", editsModel: !0, arguments: [he("targets", "bodies", { optional: !0, repeated: !0 })], headless: !0 },
+  { name: "journal", aliases: [], description: "Summarize or export the command journal", usage: "journal [export [cadscript|replay]]", category: "terminal", editsModel: !1, arguments: [he("action", "keyword", { optional: !0, values: ["export"] }), he("format", "keyword", { optional: !0, values: ["cadscript", "replay"] })], headless: !0 }
 ], F_ = [
   { command: "shapes", label: "Find a shape", alias: "shape browser primitives" },
   { command: "model-library", label: "Model library", alias: "parts catalog" },
@@ -47302,6 +47303,7 @@ const de = (i, t, e = {}) => ({ name: i, kind: t, ...e }), Qo = (i) => de(i, "po
   { command: "terminal", label: "CAD terminal", alias: "command line console" },
   { command: "code-workspace", label: "Code workspace", alias: "persistent CAD Script editor" },
   { command: "model-source", label: "Model source" },
+  { command: "upgrade-lofts", label: "Upgrade lofts to ruled surfaces", alias: "ruled loft triangulated revision" },
   { command: "union", label: "Union", alias: "combine join", requires: "canCombine" },
   { command: "subtract", label: "Subtract", alias: "boolean cut difference", requires: "canCombine" },
   { command: "intersect", label: "Intersect", alias: "boolean overlap", requires: "canCombine" },

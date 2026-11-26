@@ -140,6 +140,29 @@ runtime pin after this signing step and rebuild with that pin. The receipt's
 runtime-pin check covers the package before Apple's TestFlight re-signing;
 launching the installed TestFlight simulator was not tested in this delivery.
 
+## Ruled and smooth lofts: document versions 42 and 43 (26 November 2026)
+
+Lite pins CrispCAD SDK `f2a596a23ca6a03b967c2a7ebc19ab6df26e71da` (previously
+`f0136b8c`). The CAD tab now opens and saves two newer document versions:
+
+- **Version 42**: a code program may be CAD Script revision 2, whose `loft` builds
+  ruled side surfaces between turned sections. Saved revision-1 lofts keep their
+  triangulated geometry until the user runs **Upgrade lofts to ruled surfaces**
+  (`upgrade-lofts`, one Undo step).
+- **Version 43**: a program calls `smoothLoft`, the exact kernel's smooth loft
+  through three or more sections.
+
+Documents without such programs keep their version. The previous SDK refused both
+("unsupported format, version or units"); `brickwright/cad.json` was always carried
+byte for byte. Lite creates no code programs itself, so no host change was needed.
+
+The same pin brings exact kernel 0.1.4, which refuses self-crossing outlines with an
+explicit error and keeps `profile.path` loft sections' vertex order as authored
+(`smlibwasm` is again byte-identical), runs exact requests in their own
+lazily created worker so a slow fillet never blocks the editor (the optional
+`exactFallback` mount option is not used by Lite), and meshes exact faces with many
+holes face by face.
+
 ## Exact kernel and document version 41 (25 November 2026)
 
 Lite pins CrispCAD SDK `f0136b8cb85ffc71f103fa7fa3768a899e919b4b` (previously
