@@ -20,6 +20,30 @@ const behaviors = {
         durationMs: 1650,
         checks: [{until: 1650, rises: 2, falls: 2}]
     },
+    'arduino-01-blink': {
+        led: 'led1', sampleMs: 40, durationMs: 2440,
+        checks: [{at: 400, lit: true}, {at: 1400, lit: false}, {at: 2400, lit: true}]
+    },
+    'arduino-02-blink-without-delay': {
+        led: 'led1', sampleMs: 40, durationMs: 2440,
+        checks: [{at: 400, lit: false}, {at: 1400, lit: true}, {at: 2400, lit: false}]
+    },
+    'arduino-02-button': {
+        led: 'led1', sampleMs: 20, durationMs: 560,
+        controls: [[0, 'btn1', 0], [180, 'btn1', 1], [360, 'btn1', 0]],
+        checks: [{at: 100, lit: false}, {at: 300, lit: true}, {at: 500, lit: false}]
+    },
+    'arduino-02-digital-input-pullup': {
+        led: 'led1', sampleMs: 20, durationMs: 660,
+        controls: [[0, 'btn1', 0], [200, 'btn1', 1], [420, 'btn1', 0]],
+        checks: [{at: 140, lit: false}, {at: 360, lit: true}, {at: 600, lit: false}]
+    },
+    'arduino-02-debounce': {
+        led: 'led1', sampleMs: 10, durationMs: 720,
+        controls: [[0, 'btn1', 0], [120, 'btn1', 1], [140, 'btn1', 0],
+            [250, 'btn1', 1], [410, 'btn1', 0], [540, 'btn1', 1]],
+        checks: [{at: 100, lit: true}, {at: 210, lit: true}, {at: 360, lit: false}, {at: 500, lit: false}, {at: 660, lit: true}]
+    },
     '03-night-light': {
         sampleMs: 20,
         durationMs: 660,
@@ -227,7 +251,11 @@ export async function checkBehavior (bench, circuit, examples) {
     try {
         const runtime = spec.usesProgram === false ? null : await startProgram(bench, circuit, examples, value => { vm = value; });
         let now = 0;
-        if (vm) vm.runtime.updateCurrentMSecs = () => { vm.runtime.currentMSecs = now; };
+        if (vm) {
+            vm.runtime.updateCurrentMSecs = () => { vm.runtime.currentMSecs = now; };
+            vm.runtime.updateCurrentMSecs();
+            vm.runtime.ioDevices.clock.resetProjectTimer();
+        }
         const samples = new Map();
         const relaySamples = new Map();
         const transitions = [];

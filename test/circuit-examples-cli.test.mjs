@@ -92,6 +92,20 @@ test('the bundled CP1 monitor drives the actual CP5 LEDs and saves the sampled b
         [true, false, true, false, false, true, false, true]);
 });
 
+test('Arduino lessons verify a retargeted pull-up, switch debounce and the VM timer', () => {
+    const scenarios = [
+        ['arduino-02-digital-input-pullup', 'stm32f030', [false, true, false]],
+        ['arduino-02-debounce', 'stc12c5a60s2', [true, true, false, false, true]],
+        ['arduino-02-blink-without-delay', 'arduino-nano', [false, true, false]]
+    ];
+    for (const [lesson, device, sequence] of scenarios) {
+        const result = invoke(lesson, '--device', device, '--json');
+        assert.equal(result.status, 0, result.stderr || result.stdout);
+        const {rows: [{behavior}]} = JSON.parse(result.stdout);
+        assert.deepEqual(behavior.checks.map(check => check.observed), sequence);
+    }
+});
+
 test('circuit CLI fails the coverage gate when a powered bench has no functional assertion', () => {
     const result = invoke('arduino-08-string-append', '--device', 'arduino-nano', '--json');
     assert.equal(result.status, 1, result.stderr || result.stdout);
