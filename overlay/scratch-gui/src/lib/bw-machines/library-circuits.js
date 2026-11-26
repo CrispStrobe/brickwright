@@ -1,10 +1,11 @@
 const WIRED_TARGETS = {
     'eater6502-full-build': 'eater6502',
+    'i8086-blink': 'i8086',
     'kim1-wired-io': 'kim1',
     'busch-microtronic-wired-io': 'microtronic'
 };
 
-export const CIRCUIT_LIBRARY_MACHINES = ['cardiac', 'cp1', 'eater6502', 'kim1', 'microtronic', 'z80'];
+export const CIRCUIT_LIBRARY_MACHINES = ['cardiac', 'cp1', 'eater6502', 'i8086', 'kim1', 'microtronic', 'z80'];
 
 export function libraryCircuitPrograms (index) {
     return index.flatMap(example => {

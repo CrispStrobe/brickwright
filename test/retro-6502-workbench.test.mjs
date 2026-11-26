@@ -297,6 +297,7 @@ test('the library lists ROM projects and all six CARDIAC programs under their ac
     const programs = libraryCircuitPrograms(index);
     assert.equal(programs.find(program => program.id === 'eater6502-vdp-hello').machine, 'eater6502');
     assert.equal(programs.find(program => program.id === 'eater6502-crtc80').machine, 'eater6502');
+    assert.equal(programs.find(program => program.id === 'i8086-blink').machine, 'i8086');
     assert.equal(programs.find(program => program.id === 'kim1-wired-io').machine, 'kim1');
     assert.equal(programs.filter(program => program.machine === 'cardiac').length, 6);
     assert.equal(programs.find(program => program.id === 'cardiac-echo').codeOnly, true);
