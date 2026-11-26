@@ -1502,3 +1502,36 @@ assertion was excluded. Atlas passed Run, joint motion, Pause, Reset,
 repeat Run and Close with a local worker overlay and the bundled
 engine. Brickwright still pins SDK `f0136b8`.
 [CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/fe6a9fc790cf7a8cbf3cee443c0c3241f67b84a1)
+
+### Reuse validated mass and inertia on repeat Run
+
+The prepared physics document retains part mass properties and the
+combined inertia of fixed assemblies. Reuse requires the same ordered
+body IDs, verified source digests, buffer lengths and integration
+bounds. Source meshes and collision hulls are verified on every run.
+The world still applies Fix base per run and builds fresh native bodies.
+
+In MacBook Chrome, each candidate ran eight measured warm starts with
+the same Board bundle and local Jolt 5.7 SIMD module. The first order
+tested the cache before it began retaining the source digests directly
+from verification. The reverse order tested the committed code.
+
+| Median worker restart | First order, before → after | Reverse order, before → after |
+| --- | ---: | ---: |
+| Atlas | 16.65 → 8.85 ms | 12.65 → 6.75 ms |
+| Scout | 17.45 → 9.05 ms | 15.40 → 8.10 ms |
+
+In the reverse order, the median mass stage dropped from 4.0 ms for
+Atlas and 5.85 ms for Scout to under 0.1 ms for both. Initial frames,
+warm restart frames and all 100 sampled motion and circuit readings
+over 600 substeps matched in both run orders. This change targets
+restart latency. Sustained 1× in the shipping application remains open.
+
+Physics type checking and 29 focused tests passed. The warm cache test
+covered reuse across Fix base changes, recalculation after a bounds
+change and rejection after source mesh bytes changed. The known scalar
+Rover torque assertion was excluded. Atlas passed Run, joint motion,
+Pause, Reset, repeat Run and Close in the local embedded editor with
+the new worker and packaged engine. Brickwright still pins SDK
+`f0136b8`.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/9e92c7786c40d0757b94065777c3f2b32a2d5fd3)
