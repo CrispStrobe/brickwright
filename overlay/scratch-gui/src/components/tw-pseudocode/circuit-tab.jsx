@@ -199,6 +199,7 @@ class CircuitTab extends React.Component {
         this.handleDeclarationChange = this.handleDeclarationChange.bind(this);
         this.handleCircuitEdit = this.handleCircuitEdit.bind(this);
         this.handleProjectStart = this.handleProjectStart.bind(this);
+        this.handleSimulationStart = this.handleSimulationStart.bind(this);
         this.handleVmProjectStart = this.handleVmProjectStart.bind(this);
         this.handleVmStopAll = this.handleVmStopAll.bind(this);
         this.handleRunnerGone = this.handleRunnerGone.bind(this);
@@ -914,6 +915,22 @@ class CircuitTab extends React.Component {
     handleProjectStart () {
         if (this._coupledBoard) return;
         this.setState(state => ({runToken: (state.runToken || 0) + 1}));
+    }
+
+    handleSimulationStart () {
+        const {vm} = this.props;
+        const {stc, circuitData, machineBooted} = this.state;
+        const device = vm?.runtime?.bwDeviceId || stc?.device;
+        if (!vm || this._coupledBoard || machineBooted || circuitData?.fileOnly ||
+            !stcDrives(stc) || device === 'microbit' || device === 'calliopemini') {
+            this.handleProjectStart();
+            return;
+        }
+        // This button originates the run. The Circuit and Debugger listeners
+        // observe the flag, while the VM executes the blocks on the visible board.
+        vm.start();
+        window.dispatchEvent(new CustomEvent('bw-green-flag'));
+        vm.greenFlag();
     }
 
     handleProjectStop () {
@@ -2682,7 +2699,7 @@ class CircuitTab extends React.Component {
                     benchOpen={this.state.machineBooted}
                         runToken={this.state.runToken}
                         stopToken={this.state.stopToken}
-                        onSimulationStart={this.handleProjectStart}
+                        onSimulationStart={this.handleSimulationStart}
                     />))}
                 </div>
                 </div>
