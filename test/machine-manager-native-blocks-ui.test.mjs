@@ -164,3 +164,52 @@ test('FreeDOS file selection survives React 16 clearing a pooled event before st
     assert.equal(runs[0].slots.floppy.url, 'local-media:floppy');
     renderer.unmount();
 });
+
+test('the Build Machine library starts on the selected target and supports showing all targets', async () => {
+    const MachineManager = await loadManager();
+    const store = createMemoryMachineStore([
+        newMachineConfig({title: 'LCD test ROM', machine: 'eater6502', slots: {rom: 'lcd.bin'}}),
+        config('i8086', 'DOS 8086')
+    ]);
+    let renderer;
+    await act(async () => {
+        renderer = create(React.createElement(MachineManager, {store, preferredMachine: 'eater6502', locale: 'en'}));
+    });
+    try {
+        const filter = renderer.root.findByProps({'aria-label': 'Machine type'});
+        assert.equal(filter.props.value, 'eater6502');
+        assert.equal(renderer.root.findAllByProps({'data-testid': 'bw-mm-row'}).length, 1);
+        await act(async () => filter.props.onChange({target: {value: ''}}));
+        assert.equal(renderer.root.findAllByProps({'data-testid': 'bw-mm-row'}).length, 2);
+    } finally {
+        renderer.unmount();
+    }
+});
+
+test('an HTTPS media manifest resolves relative ROM paths in the supplied repository', async t => {
+    const MachineManager = await loadManager();
+    const store = createMemoryMachineStore();
+    const manifest = 'https://raw.githubusercontent.com/example/media/0123456789/brickwright-media.json';
+    const request = t.mock.method(globalThis, 'fetch', async (url, options) => {
+        assert.equal(url.href, manifest);
+        assert.equal(options.redirect, 'error');
+        return {ok: true, json: async () => ({
+            title: 'Open demonstration', machine: 'eater6502', license: 'MIT', slots: {rom: 'hello.rom'}
+        })};
+    });
+    let renderer;
+    await act(async () => {
+        renderer = create(React.createElement(MachineManager, {store, preferredMachine: 'eater6502', locale: 'en'}));
+    });
+    try {
+        await act(async () => renderer.root.findByProps({'data-testid': 'bw-mm-import-text'})
+            .props.onChange({target: {value: manifest}}));
+        await act(async () => renderer.root.findByProps({'data-testid': 'bw-mm-import'}).props.onClick());
+        assert.equal(request.mock.callCount(), 1);
+        const [imported] = await store.list();
+        assert.equal(imported.slots.rom.url, new URL('hello.rom', manifest).href);
+        assert.equal(imported.provenance.source, manifest);
+    } finally {
+        renderer.unmount();
+    }
+});

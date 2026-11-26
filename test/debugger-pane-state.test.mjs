@@ -492,3 +492,48 @@ test('losing either loaded-input guard makes the actual cue falsely claim an emp
         assert.throws(() => oracle(mutant), {name: 'AssertionError'}, needle);
     }
 });
+
+test('a wired gallery ROM waits for the matching circuit and sees its board before dispatch', () => {
+    const runtime = {};
+    const snapshots = [];
+    const window = {dispatchEvent: event => snapshots.push({
+        type: event.type, media: event.detail, board: runtime.circuitBoard
+    })};
+    const {host} = fixture({window});
+    host.props.vm.runtime = runtime;
+    const old = {}, selected = {}, board = {};
+    const media = {kind: 'eater6502', name: 'rom.bin'};
+    host._wiredExample = {data: selected, media};
+    host.handleWiredBootReady(old, {}, {ok: true});
+    assert.equal(snapshots.length, 0);
+    host.handleWiredBootReady(selected, board, {ok: true});
+    assert.deepEqual(snapshots.map(item => item.type), ['bw-board-ready', 'bw-machine-media-load']);
+    assert.equal(snapshots[1].board, board);
+    assert.equal(snapshots[1].media, media);
+    host.handleWiredBootReady(selected, board, {ok: true});
+    assert.equal(snapshots.length, 2);
+});
+
+test('a failed gallery extract exposes its reason and leaves the ROM unbooted', () => {
+    const {host} = fixture({window: {dispatchEvent: () => assert.fail('unexpected boot')}});
+    const data = {};
+    host._wiredExample = {data, media: {kind: 'eater6502'}};
+    host.handleWiredBootReady(data, {}, {ok: false, reasons: ['Missing reset vector']});
+    assert.equal(host.state.examplesError, 'Missing reset vector');
+    assert.equal(host._wiredExample, null);
+});
+
+test('the debugger keeps transport, target and status visible while history starts folded', () => {
+    const find = attribute => allNodes(panelRender, node => node.type === 'JSXElement' &&
+        node.openingElement.attributes.some(item => item.name?.name === attribute));
+    for (const marker of ['data-debug-transport', 'data-debug-target-controls', 'data-debug-status']) {
+        assert.equal(find(marker).length, 1, marker);
+    }
+    const [history] = find('data-debug-history');
+    assert.equal(history.openingElement.name.name, 'details');
+    assert.equal(history.openingElement.attributes.some(item => item.name?.name === 'open'), false);
+    const historyMarkers = allNodes(history, node => node.type === 'JSXAttribute').map(node => node.name.name);
+    for (const marker of ['data-debug-record', 'data-debug-checkpoint', 'data-debug-timeline-controls']) {
+        assert.ok(historyMarkers.includes(marker), marker);
+    }
+});

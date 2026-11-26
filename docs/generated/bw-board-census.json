@@ -2,7 +2,7 @@
   "schema": 1,
   "source": {
     "repo": "https://github.com/CrispStrobe/bw-board",
-    "sha": "c103462eb1a94deeb29842b93972bb9021bb7db7",
+    "sha": "b63d1878ac82bc68fce5653ffcfe8878b67fdb09",
     "read": "2026-11-26"
   },
   "rows": [
@@ -263,10 +263,10 @@
     {
       "id": "emu8051",
       "kind": "oracle",
-      "present": true,
+      "present": false,
       "ciAvailable": true,
       "ci": "yes — checked out at a pinned ref by the `test` job",
-      "via": "[local path omitted]",
+      "via": "tried $EMU8051_JS, [local path omitted], [local path omitted], [local path omitted]",
       "gates": [
         "test/emu8051-idle-fastforward.test.mjs",
         "test/brightness-emu8051.test.js",
