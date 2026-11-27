@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
-import {readFile, writeFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {readFile, rename, writeFile} from 'node:fs/promises';
 import {parseArgs} from 'node:util';
 import {chromium} from 'playwright';
 import SB3Creator from '../overlay/scratch-gui/src/lib/sb3-creator.js';
@@ -14,6 +15,7 @@ import {runPxtArcade} from '../test/helpers/pxt-arcade-runtime.mjs';
 const {values: options} = parseArgs({options: {
     only: {type: 'string', multiple: true},
     inventory: {type: 'boolean'},
+    portable: {type: 'boolean'},
     report: {type: 'string'},
     simulate: {type: 'boolean'}
 }});
@@ -46,30 +48,69 @@ const classify = ({source, catalogue: example}) => {
     if (example?.files.controller) return {device, outcome: 'Controller-dependent program'};
     return {device};
 };
-const results = [];
+const results = [...entries.values()].filter(entry => !options.only || options.only.includes(entry.id))
+    .map(entry => ({id: entry.id, scope: entry.scope, ...classify(entry)}));
+const provenance = {portable: Boolean(options.portable), simulate: Boolean(options.simulate), files: {}};
+for (const path of ['overlay/scratch-gui/src/lib/bw-makecode/export-arcade.js',
+    'overlay/scratch-gui/src/lib/bw-makecode/scratch-arcade-keyboard.js', 'overlay/scratch-gui/examples/index.json']) {
+    const bytes = await readFile(new URL(`../${path}`, import.meta.url));
+    provenance.files[path] = createHash('sha256').update(bytes).digest('hex');
+}
+const publish = async () => {
+    const report = {provenance, results, counts: {}, scopes: {}};
+    for (const {scope, outcome = 'pending', simulator} of results) {
+        report.counts[outcome] = (report.counts[outcome] || 0) + 1;
+        const section = report.scopes[scope] ||= {total: 0, simulatorRuns: 0, outcomes: {}};
+        section.total++;
+        section.simulatorRuns += simulator ? 1 : 0;
+        section.outcomes[outcome] = (section.outcomes[outcome] || 0) + 1;
+    }
+    if (options.report) {
+        await writeFile(`${options.report}.partial`, JSON.stringify(report, null, 2) + '\n');
+        await rename(`${options.report}.partial`, options.report);
+    }
+    return report.scopes;
+};
 if (!options.report) {
     console.error('Pass --report PATH to retain compiler, simulator and inventory details.');
 }
 SB3Creator.registerVectorArt(vectorArt);
-const browser = options.inventory ? null : await chromium.launch({executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
+let browser, canvas;
+const browserErrors = /Target page, context or browser has been closed|Page crashed|Browser has been closed/i;
+const useBrowser = async operation => {
+    for (let attempt = 0; ; attempt++) {
+        try {
+            if (!browser?.isConnected()) {
+                browser = await chromium.launch({executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
+                canvas = null;
+            }
+            if (!canvas || canvas.isClosed()) canvas = await browser.newPage();
+            return await operation(browser, canvas);
+        } catch (error) {
+            if (attempt > 0 || !browserErrors.test(error.message)) throw error;
+            console.error('Retrying after the local browser or raster page closed.');
+            await browser?.close().catch(() => {});
+            browser = null;
+            canvas = null;
+        }
+    }
+};
+await publish();
 try {
-    const canvas = await browser?.newPage();
-    for (const entry of entries.values()) {
-        const {id, source, scope} = entry;
-        if (options.only && !options.only.includes(id)) continue;
-        const row = {id, scope, ...classify(entry)};
-        results.push(row);
+    for (const row of results) {
+        const {id} = row;
         if (row.outcome) continue;
         if (options.inventory) {
             row.outcome = 'Arcade candidate';
             continue;
         }
+        const {source} = entries.get(id);
         try {
             const creator = new SB3Creator();
             creator.parse(source);
             row.sourceWarnings = creator.warnings;
             const assets = creator.assets;
-            const rasters = new Map(await canvas.evaluate(async entries => Promise.all(entries.map(async ([key, svg]) => {
+            const rasters = new Map(await useBrowser((browser, canvas) => canvas.evaluate(async entries => Promise.all(entries.map(async ([key, svg]) => {
                 const image = new Image();
                 const url = URL.createObjectURL(new Blob([svg], {type: 'image/svg+xml'}));
                 try {
@@ -90,13 +131,14 @@ try {
                 } finally {
                     URL.revokeObjectURL(url);
                 }
-            })), [...assets].filter(([, asset]) => asset.type === 'svg' && !svgToPixels(asset.data)).map(([key, asset]) => [key, asset.data])));
+            })), [...assets].filter(([, asset]) => asset.type === 'svg' && !svgToPixels(asset.data)).map(([key, asset]) => [key, asset.data]))));
             for (const raster of rasters.values()) {
                 raster.rgba = Buffer.from(raster.base64, 'base64');
                 delete raster.base64;
             }
             const output = projectJsonToArcade(JSON.stringify(creator.project), {
                 name: id.replace(/[^a-z0-9_-]/gi, '-'),
+                browserPointer: !options.portable,
                 costumeSvg: (target, costume) => assets.get(costume.assetId)?.data || null,
                 costumeRgba: (target, costume) => rasters.get(costume.assetId) || null,
                 soundData: (target, sound) => assets.get(sound.assetId)?.data || null
@@ -113,7 +155,8 @@ try {
             if (!options.simulate) {
                 recordCompilation(await compile('arcade', output.files));
             } else {
-                const sample = await runPxtArcade(output.files, {
+                const sample = await useBrowser(browser => runPxtArcade(output.files, {
+                    browser,
                     onCompilation: ({built}) => recordCompilation(built),
                     inspectDisplay: true, waitForDisplay: true, waitForMain: false,
                     buttonActions: id === 'twinwall' ? {afterGlobals: {started: 1}, steps: [
@@ -123,7 +166,7 @@ try {
                         {keyUp: 'ArrowDown'}
                     ]} : {steps: [{button: 5, held: true, delay: 1000}, {button: 5, held: false, delay: 80},
                         {button: 4, held: true, delay: 80}, {button: 4, held: false, delay: 80}]}
-                });
+                }));
                 if (sample.$display.screen.length !== 160 * 120 || sample.$display.updatesAfterReady < 1) {
                     throw new Error('Arcade simulator did not present a complete native screen frame.');
                 }
@@ -135,22 +178,14 @@ try {
                     ...(Object.hasOwn(sample, 'started') ? {started: sample.started} : {})};
             }
         } catch (error) {
-            row.error = error.message;
+            row.error = error.message.slice(0, 4000);
             row.outcome = row.compiled ? 'simulator failure' : row.outcome || 'export failure';
         }
+        await publish();
         if (row.error) console.error(id, row.error);
         console.log(`${id}: ${row.outcome}${row.unsupported?.length ? ` (${row.unsupported.length} unsupported)` : ''}`);
     }
 } finally {
-    await browser?.close();
+    await browser?.close().catch(() => {});
 }
-const report = {results, counts: {}, scopes: {}};
-for (const {scope, outcome, simulator} of results) {
-    report.counts[outcome] = (report.counts[outcome] || 0) + 1;
-    const section = report.scopes[scope] ||= {total: 0, simulatorRuns: 0, outcomes: {}};
-    section.total++;
-    section.simulatorRuns += simulator ? 1 : 0;
-    section.outcomes[outcome] = (section.outcomes[outcome] || 0) + 1;
-}
-if (options.report) await writeFile(options.report, JSON.stringify(report, null, 2) + '\n');
-console.log(JSON.stringify(report.scopes));
+console.log(JSON.stringify(await publish()));
