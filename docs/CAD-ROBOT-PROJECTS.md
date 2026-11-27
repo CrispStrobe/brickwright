@@ -2168,3 +2168,31 @@ and 14.74° of tilt at 6.36 simulated seconds. Stop, Reset, repeat Run,
 and worker reuse after a gravity edit passed. Scout passed Stop,
 Reset, and repeat Run. Sustained playback on the shared Mac measured
 0.648× for Atlas and 0.955× for Scout in these runs.
+
+### Reuse shaft feedback in the circuit host
+
+The coupled session converts each mechanical shaft reply once and uses
+that feedback when calculating the next impulse. Drive conversion
+factors are computed at startup. Electrical readouts are assembled
+on demand. The 5 ms cadence and the order of electrical advance,
+mechanical advance, and feedback are preserved.
+
+Two 600-tick Chrome replays in opposite orders used the packaged bw.11
+SDK and matched CAD poses, joint readings, circuit voltages, electrical
+solve counts, and warm restarts. Atlas went from 3,600 shaft conversions
+to 1,803 and Scout from 2,400 to 1,202 in both orders. During the first
+order, Atlas ran at 0.577 → 0.590× and Scout at 0.739 → 0.796×. During
+the reverse order they ran at 0.517 → 0.583× and 0.888 → 0.806×
+respectively. These replays establish the reduction in host work.
+Sustained 1× production playback remains open.
+
+All 45 focused tests passed with the pinned Board source, including
+AVR feedback, cancellation, and the regression check for redundant
+shaft reads. The new regression check failed against the previous
+implementation.
+
+The existing Brickwright browser bundle with the updated session module
+served locally passed one-click Run, Stop, Reset, and repeat Run on
+both projects. Atlas also reused its worker after a gravity edit and
+reached 45.65 mm of lift and 14.98° of tilt. Sustained playback on the
+shared Mac measured 0.499× for Atlas and 0.665× for Scout.

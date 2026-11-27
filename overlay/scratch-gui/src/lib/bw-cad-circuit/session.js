@@ -13,15 +13,30 @@ export async function createCoupledSession({board, mechanics, connections, firmw
     if (typeof board?.attachMechanicalShaft !== 'function' || typeof board?.claimExternalClock !== 'function') throw new Error('This circuit engine does not support mechanical connections');
     if (board.timeNs !== 0n || mechanics.snapshot().time !== 0) throw new Error('Reset the circuit and CAD simulation before connecting');
     const servoPorts = new Map(), sensorPorts = new Map(), rays=config.sensors.map(s=>({id:s.partId,...s}));
-    const releases = [], readouts = new Map(); let lease, stopped = false, generation = 0, pending = Promise.resolve(), budgetMs = 0, frame = mechanics.snapshot(), failed = null;
+    const drives = config.drives.map(drive => {
+        const hinge = drive.kind === 'hinge';
+        return {
+            ...drive,
+            positionField: hinge ? 'angles' : 'linearPositions',
+            speedField: hinge ? 'speeds' : 'linearSpeeds',
+            scale: hinge ? Math.PI / 180 : TAU / drive.leadMm,
+            impulseScale: hinge ? 1 : TAU / (drive.leadMm * .001),
+            rotor: null,
+            electrical: null
+        };
+    });
+    const releases = []; let lease, stopped = false, generation = 0, pending = Promise.resolve(), budgetMs = 0, frame = mechanics.snapshot(), failed = null;
     // Intermediate control samples omit body poses. Public snapshots always keep
     // the most recent complete frame, including while a worker reply is pending.
     let fullFrame = frame;
     const sample = (drive, value) => {
-        const positions = drive.kind === 'hinge' ? value.angles : value.linearPositions, speeds = drive.kind === 'hinge' ? value.speeds : value.linearSpeeds;
+        const positions = value[drive.positionField], speeds = value[drive.speedField];
         if (!Object.hasOwn(positions,drive.jointId) || !Object.hasOwn(speeds,drive.jointId)) throw new Error('A connected CAD joint is missing or has changed kind');
-        const scale = drive.kind === 'hinge' ? Math.PI / 180 : TAU / drive.leadMm;
-        return {angleRad: positions[drive.jointId] * scale * drive.ratio * drive.direction, velocityRadS: speeds[drive.jointId] * scale * drive.ratio * drive.direction};
+        return {
+            partId: drive.partId,
+            angleRad: positions[drive.jointId] * drive.scale * drive.ratio * drive.direction,
+            velocityRadS: speeds[drive.jointId] * drive.scale * drive.ratio * drive.direction
+        };
     };
     const publish = () => {
         for(const servo of config.servos)servoPorts.get(servo.partId).sample(servo.centerDeg + frame.angles[servo.jointId]*servo.direction);
@@ -30,7 +45,7 @@ export async function createCoupledSession({board, mechanics, connections, firmw
     const stop = () => {
         if (stopped) return; stopped = true; generation++;
         const ownsBoard=lease?.isActive() === true;
-        if(ownsBoard)for (const drive of config.drives) {try {const position=sample(drive,frame);board.setMechanicalShaftState(drive.partId,{angleRad:position.angleRad,velocityRadS:0});} catch { /* A board reset may already have released the shaft. */ }}
+        if(ownsBoard)for (const drive of drives) {try {const position=sample(drive,frame);board.setMechanicalShaftState(drive.partId,{angleRad:position.angleRad,velocityRadS:0});} catch { /* A board reset may already have released the shaft. */ }}
         releases.reverse().forEach(release => release()); lease?.release(); mechanics.release();
         if(!ownsBoard)return;
         for (const pin of board.getPinStates()) if (!['input','input-pullup'].includes(pin.mode)) board.setPin(pin.pin,'input',false);
@@ -58,10 +73,11 @@ export async function createCoupledSession({board, mechanics, connections, firmw
     try {
         if (signal?.aborted) throw new Error('Coupled simulation was stopped');
         lease = board.claimExternalClock();
-        for (const drive of config.drives) {
+        for (const drive of drives) {
             const part = board.parts.find(p => p.id === drive.partId);
             if (!part || !motorKinds.has(part.kind)) throw new Error(`Circuit motor ${drive.partId} is missing or unsupported`);
-            releases.push(board.attachMechanicalShaft(drive.partId,sample(drive,frame)));
+            const {angleRad, velocityRadS} = sample(drive,frame);
+            releases.push(board.attachMechanicalShaft(drive.partId,{angleRad,velocityRadS}));
         }
         for(const servo of config.servos){
             if(!Object.hasOwn(frame.angles,servo.jointId))throw new Error('A connected servo hinge is missing');
@@ -81,13 +97,15 @@ export async function createCoupledSession({board, mechanics, connections, firmw
             } else board.advanceTo(target);
         });
         if (board.timeNs < target || board.timeNs-target > 1000n) throw new Error('Controller and mechanical clocks diverged');
-        const impulses = config.drives.map(drive => {
-            const electrical = board.takeMechanicalShaftImpulse(drive.partId), rotor = sample(drive,frame);
+        const impulses = drives.map(drive => {
+            const electrical = board.takeMechanicalShaftImpulse(drive.partId);
+            // The preceding feedback already converted this frame's rotor sample.
+            const rotor = drive.rotor ?? sample(drive,frame);
             const efficiency = electrical.impulseNms * rotor.velocityRadS < 0 ? 1 / drive.efficiency : drive.efficiency;
-            let impulse = electrical.impulseNms * drive.ratio * drive.direction * efficiency;
-            if (drive.kind === 'slider') impulse *= TAU / (drive.leadMm * .001);
+            const impulse = electrical.impulseNms * drive.ratio * drive.direction * efficiency * drive.impulseScale;
             if (!finite(impulse,-1,1)) throw new Error('Actuator impulse exceeds the mechanical solver limit');
-            readouts.set(drive.partId,{...electrical,angleRad:rotor.angleRad,velocityRadS:rotor.velocityRadS});
+            drive.electrical = electrical;
+            drive.rotor = rotor;
             return {id:drive.jointId,impulse};
         });
         const servos=config.servos.map(servo=>{const target=servoPorts.get(servo.partId).target();return{id:servo.jointId,angleRad:(target.angleDeg-servo.centerDeg)*servo.direction*Math.PI/180,torqueNm:servo.torqueNm,enabled:target.powered};});
@@ -96,7 +114,7 @@ export async function createCoupledSession({board, mechanics, connections, firmw
         if (stopped || expected !== generation) return;
         frame = next;
         if (!compact) fullFrame = next;
-        const updates = config.drives.map(drive => ({partId: drive.partId, ...sample(drive,frame)}));
+        const updates = drives.map(drive => sample(drive,frame));
         if (updates.length > 1 && typeof board.setMechanicalShaftStates === 'function') {
             board.setMechanicalShaftStates(updates);
         } else {
@@ -104,9 +122,7 @@ export async function createCoupledSession({board, mechanics, connections, firmw
                 board.setMechanicalShaftState(partId,{angleRad,velocityRadS});
             }
         }
-        for (const {partId, angleRad, velocityRadS} of updates) {
-            readouts.set(partId,{...readouts.get(partId),angleRad,velocityRadS});
-        }
+        for (let index = 0; index < drives.length; index++) drives[index].rotor = updates[index];
         publish();
     }
     return {
@@ -130,6 +146,9 @@ export async function createCoupledSession({board, mechanics, connections, firmw
         idle: () => pending, stop,
         get time() {return frame.time * 1000;}, get failed() {return failed;}, get _disposed() {return stopped;},
         snapshot: () => structuredClone(fullFrame),
-        readings: () => config.drives.map(drive=>({partId:drive.partId,jointId:drive.jointId,...readouts.get(drive.partId)}))
+        readings: () => drives.map(({partId, jointId, electrical, rotor}) => {
+            if (!electrical) return {partId, jointId};
+            return {partId, jointId, ...electrical, angleRad: rotor.angleRad, velocityRadS: rotor.velocityRadS};
+        })
     };
 }
