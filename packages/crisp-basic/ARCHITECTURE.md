@@ -170,12 +170,28 @@ existing clock only through cooperative `PROCdelay` batches. The run's elapsed
 clock starts at zero without resetting circuit component state. Token-protected
 GUI handoff and the solver's external-clock lease prevent competing ownership;
 run invalidation releases the captured host before the designer resumes.
+The captured model also revokes BASIC before saving undo history or rebuilding
+the solver, so a transferred snapshot cannot inherit its temporary GPIO drive.
+Pending or failed cleanup blocks those mutation boundaries and new BASIC
+sessions on that model; read-only snapshots and exports retain their behavior.
 Request, trace, time and cumulative solver-work ceilings remain parent-owned.
 See [BOARD-SIMULATION.md](BOARD-SIMULATION.md) for the exact supported boards,
 pin maps, timing semantics and qualification limits.
 
-Next, qualify a full production GUI bundle and decide how the generator should
-emit the portable library calls with explicit unsupported-operation diagnostics.
+Production qualification builds the complete webpack GUI with its normal
+vendored sources, lockfile, overlays and CAD/FPGA flags. Chromium then drives
+the emitted workbench's actual editor and Circuit controls, including live
+file replacement, while a separate gate authenticates the runtime asset bytes.
+See [VALIDATION.md](VALIDATION.md) for the tested revision and observed results.
+
+Next, add deliberate generator support for the portable library through the
+owning `sb3-creator` producer and its pinned integration. Make the mode explicit,
+retain existing default/retro output, normalize digital writes to `0` or `1`,
+and convert timing units deliberately. Unsupported operations must produce
+diagnostics rather than apparently executable hardware comments. Qualify the
+reverse **To blocks** conversion too; it must preserve the calls' meaning or
+refuse them clearly. A solved electrical read is not an output latch, so a
+toggle cannot safely be implemented by blindly inverting `FNdigitalRead`.
 Extend board and peripheral capabilities only with corresponding solver tests.
 No physical-pin connection is claimed.
 

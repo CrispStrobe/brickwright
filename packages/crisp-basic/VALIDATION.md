@@ -15,6 +15,94 @@ asset against the build recipe and records the production entry/chunk hashes.
 The separate browser gate serves only the emitted build and uses real editor
 and Circuit controls. Reproduction is in [BRICKWRIGHT.md](BRICKWRIGHT.md#complete-production-gui-gate).
 
+### Corrected qualification run
+
+The snapshot/ownership correction is
+[`4696ea34514f`](https://github.com/CrispStrobe/brickwright/commit/4696ea34514f5c8f7259d482e942312d0237df34).
+**All three jobs in its [qualification run, 46078751114](https://github.com/CrispStrobe/brickwright/actions/runs/46078751114),
+completed successfully: 518 tests passed, with zero failures, cancellations or
+skips.** The run finished on 2026-11-27 at 22:55:07 UTC. This includes the complete
+production webpack bundle and all eight full-app Chromium scenarios, including
+the formerly failing circuit-file replacement case.
+
+| Suite | Passed |
+| --- | ---: |
+| Source preparation, reference host and bridge protocol/lifecycle | 100 |
+| Native runtime and CLI | 41 |
+| Actual WASM execution, restricted-host policy and simulation bridge | 147 |
+| Native/WASM comparisons against fixed expected results | 10 |
+| Real Chromium engine workers | 18 |
+| GUI adapter, assets, editor, board host/session, model guards and generated source | 152 |
+| Shared board ownership and existing CAD bridge/cancellation | 30 |
+| Focused Chromium editor, renderer and Circuit integration | 12 |
+| Complete production GUI in Chromium | 8 |
+| **CI total** | **518** |
+
+The runtime jobs used Node 22.23.5, npm 10.9.9 and Emscripten 3.1.64. Chromium
+151.0.7922.34 is installed from lock-pinned Playwright 1.62.1. The current-run
+WASM artifact `15236138049` was downloaded and authenticated against GitHub's
+archive SHA-256
+`713a78f4f41663b32945908fa853d9f651a27b8ab2e6b75286a9c716c8cc84cb`.
+Its 215771-byte WASM and 43705-byte generated JavaScript match the prior
+milestone's hashes below and the locally tested bytes exactly. The packaging
+recipe also authenticates the current source/build inputs and all 20 payload
+files plus their manifest.
+
+The production job used Node 24.22.3, npm 11.19.1 and webpack 5.96.1. The complete
+CAD/FPGA-enabled build finished in 125249 ms. The asset gate authenticated all
+20 CrispBASIC payload assets and recorded three entry scripts and 562 lazy
+JavaScript chunks for build identity `4696ea3`. The three webpack warnings
+concern an existing Microtronic CSS recommendation and asset/entrypoint sizes;
+they do not report a CrispBASIC asset-integrity or loader failure.
+
+The [production evidence archive](https://github.com/CrispStrobe/brickwright/actions/runs/46078751114/artifacts/15236255878)
+was downloaded and authenticated: 368431 bytes, artifact `15236255878`, SHA-256
+`cfdc711d7f44548c244ba432dbf0ee5ffc40a94fba87d2ca614a2e2a8bc1350f`.
+It contains the browser result JSON, asset hashes, build identity, manifest,
+environment, logs and screenshots. `result.json` reports the exact implementation
+commit, eight expected/eight passed scenarios, no failures and no uncaught page
+errors. These Actions artifacts have seven-day retention; source, reproduction
+commands and this qualification record remain in the repository.
+
+### Production browser coverage
+
+The Chromium gate drives the complete emitted application through its actual
+CodeMirror editor, native file choosers and Code/Circuit controls:
+
+1. Generate BBC BASIC from blocks, verify exact output, and load the interpreter
+   only on Run beneath a non-root hosting prefix.
+2. Import authored `.bas` source, retain physical diagnostic lines, and preserve
+   Latin-1 data and recursive input suspension.
+3. Render fixed VDU pixels consistently on identical repeated runs.
+4. Stop a tight loop, reset the editor and run again without stale workers.
+5. Import a supported Circuit, exercise GPIO/pull-up/time semantics, and release
+   pin/clock ownership on completion and repeated runs.
+6. Stop and replace a circuit file while BASIC waits for input, verifying old
+   and replacement pins, worker termination, no late output and subsequent reuse.
+7. Refuse a missing supported board, then run ordinary BASIC successfully.
+8. Report an intentionally missing runtime with the build instruction and no
+   alternate-engine fallback.
+
+The real electrical observation records 13.01447490740977 mA through the Uno's
+220-ohm LED fixture after exactly 25000000 ns. It confirms that the displayed
+board and runtime board are identical. The replacement evidence records D13
+actively driven high, an input prompt and both ownership layers still live
+immediately before import. After import, both the old board and the replacement
+have only input-mode pins and no external-clock lease. The fresh run starts
+`FNmillis` at zero. The assertion that caught the initial bug was not relaxed.
+
+This qualifies CrispBASIC in the complete Chromium web GUI at a 1600 × 1000
+desktop viewport, served beneath `/workbench/`. Service workers are explicitly
+blocked for fresh-network evidence. The replacement case alone uses the existing
+dedicated-Circuit-tab preference to prevent tab navigation from cancelling the
+run before file import; the other connected case retains the default layout.
+Offline/cache upgrades, deployed-host headers, other browsers, desktop/mobile
+shells and every optional engine are separate qualifications. The report retains
+16 unsuccessful probes for the optional LabWired WASM payload; the missing-runtime
+case also deliberately refuses CrispBASIC's entry module. Zero uncaught page
+errors does not mean zero failed network requests. Full VDU and physical-board
+behavior remain outside this milestone.
+
 ### Initial production run and discovered defect
 
 The gate implementation is
@@ -45,6 +133,8 @@ guard tests cover descriptors, partial setup, stale callbacks, constructor and
 cleanup reentrancy, failure retention and successive owners. The production
 assertion remains unchanged; its failure diagnostics now retain exact pin modes.
 
+### Local verification
+
 Local qualification uses Node 24.22.3 and minimal exact-revision solver/model
 dependencies. Source/bridge tests report 100 passes, actual-WASM runtime/policy/
 simulation tests 147, packaging/production asset checks 17, workflow policies 39,
@@ -55,8 +145,9 @@ The new packaging tests use explicitly
 synthetic artifacts to test the checker. This workspace has insufficient free
 disk for the full GUI dependencies or local Chromium. The existing session suite
 passes 28 cases locally; its retained-debugger case requires the omitted debugger
-dependency closure and remains a full-CI gate. Corrected production qualification
-is pending; the first run's failed browser scenario is not claimed as a pass.
+dependency closure. The actual-WASM GUI integration also requires omitted generator
+helpers and JSZip, so it did not execute locally. Both complete suites passed in
+the successful CI run above. No local native rebuild or Chromium pass is claimed.
 
 The previous record's final documentation-only follow-up
 [46073544837](https://github.com/CrispStrobe/brickwright/actions/runs/46073544837)
