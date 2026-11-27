@@ -9,12 +9,18 @@ The Code tab's **BBC BASIC** profile now offers **CrispBASIC (browser)** and
 From the repository root, with Emscripten 3.1.64 available:
 
 ```sh
-# Prepare the ordinary Brickwright GUI checkout/dependencies as documented in
-# the repository BUILD.md. Vendor before staging the optional runtime.
+# Prepare the pinned GUI sources before staging the optional runtime.
+npm ci --ignore-scripts --no-audit --no-fund
+npm run vendor
 npm run build:crispbasic
 npm run package:crispbasic:check
 npm run integrate
-npm run build:gui
+npm --prefix packages/scratch-gui ci --ignore-scripts --legacy-peer-deps --no-audit --no-fund
+node scripts/apply-vm-overlay.mjs
+node scripts/apply-paint-overlay.mjs
+node scripts/apply-render-overlay.mjs
+NODE_ENV=production NODE_OPTIONS=--max-old-space-size=2560 \
+  BW_ENABLE_CAD=1 BW_ENABLE_FPGA=1 npm run build:gui
 ```
 
 `build:crispbasic` builds the pinned C interpreter and stages its browser
@@ -171,3 +177,34 @@ prefix, missing assets and canvas pixels. This is focused integration evidence;
 it is not a complete production GUI build, general circuit qualification or
 validation of browsers other than Chromium. Connected-run tests also use the
 actual pinned solver for fixed LED, switch, clock and cleanup expectations.
+
+### Complete production GUI gate
+
+After the production build above, install the root lockfile's Chromium and run:
+
+```sh
+npx playwright install chromium
+node scripts/verify-crispbasic-production-assets.mjs
+node scripts/verify-crispbasic-production.mjs
+```
+
+The dedicated workflow now has a separate `production` job after the `wasm`
+job. It downloads that same run's compiled runtime, prepares the ordinary
+vendored/overlaid workbench and builds the actual webpack application with
+CAD and FPGA enabled. It uses the committed GUI lockfile, including its pinned
+FPGA toolchain. Unrelated optional firmware downloads are not required, and
+no component or runtime is replaced with a test shell.
+
+The asset gate authenticates `build/static/crispbasic/` against the interpreter
+build recipe and source inputs, checking all emitted bytes, including notices.
+It also records the production build identity and SHA-256 hashes of the HTML,
+entry scripts and lazy JavaScript chunks in
+`artifacts/crispbasic-production/assets.json`. The browser gate serves only
+the emitted build below a URL prefix and drives the complete editor and Circuit
+through their production controls. Test reports, screenshots and logs are
+retained with the workflow's production evidence artifact.
+
+This gate covers the Chromium web application. Desktop/mobile shells, other
+browser engines and the complete VDU language remain separate qualifications.
+See [VALIDATION.md](VALIDATION.md) for the observed outcome and precise test
+scope; adding a gate is not by itself evidence that it has passed.

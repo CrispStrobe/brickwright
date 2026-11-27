@@ -5,6 +5,7 @@ import {mkdir, mkdtemp, readFile, rm, writeFile} from 'node:fs/promises';
 import {dirname, join, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createCrispBasicPackage, packageCrispBasic} from '../scripts/package-crispbasic.mjs';
+import {verifyCrispBasicProductionAssets} from '../scripts/verify-crispbasic-production-assets.mjs';
 import {WASM_LOCAL_INPUTS, WASM_UPSTREAM_INPUTS} from '../packages/crisp-basic/wasm/build-inputs.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -160,4 +161,44 @@ test('packaging rejects an incomplete upstream build record', async t => {
     options.build.sourceInputs.pop();
     await write(options.packageRoot, '.build/wasm/build.json', JSON.stringify(options.build));
     await assert.rejects(createCrispBasicPackage(options.packageRoot), /incomplete upstream source records/);
+});
+
+async function productionFixture(t) {
+    const options = await fixture(t);
+    const buildRoot = join(options.directory, 'build');
+    await packageCrispBasic({...options, destination: join(buildRoot, 'static/crispbasic')});
+    await write(buildRoot, 'brickwright-build.json', JSON.stringify({schema: 2,
+        product: 'Brickwright', commit: '1234567', builtAt: '2026-11-27T00:00:00Z'}));
+    await write(buildRoot, 'index.html', '<!doctype html><script defer src="gui.12345678.js"></script>');
+    await write(buildRoot, 'gui.12345678.js', '/* synthetic production packaging fixture */');
+    await write(buildRoot, 'chunks/editor.js', '/* synthetic lazy chunk */');
+    return {...options, buildRoot, expectedCommit: '1234567890123456789012345678901234567890'};
+}
+
+test('production evidence binds emitted entry, chunks and exact runtime to the requested commit', async t => {
+    const options = await productionFixture(t);
+    const report = await verifyCrispBasicProductionAssets(options);
+    assert.equal(report.sourceCommit, options.expectedCommit);
+    assert.deepEqual(report.entries, ['gui.12345678.js']);
+    assert.equal(report.chunkCount, 1);
+    assert.equal(report.assets['chunks/editor.js'].sha256, sha(Buffer.from('/* synthetic lazy chunk */')));
+    assert.equal(report.crispbasic.assetCount, 20);
+    assert.equal(report.crispbasic.files['wasm/crispbasic.wasm'].sha256, options.build.wasmSha256);
+});
+
+test('production qualification authenticates emitted bytes instead of accepting an unchanged copied manifest', async t => {
+    const options = await productionFixture(t);
+    await write(options.buildRoot, 'static/crispbasic/src/wasm-worker.mjs', 'changed after webpack');
+    await assert.rejects(verifyCrispBasicProductionAssets(options), /asset is stale: src\/wasm-worker/);
+});
+
+test('production qualification refuses a stale build identity and a page without the local GUI entry', async t => {
+    const options = await productionFixture(t);
+    await assert.rejects(verifyCrispBasicProductionAssets({...options, expectedCommit: '7654321'}),
+        /another source commit/);
+    for (const source of ['https://example.test/gui.12345678.js', '../gui.12345678.js', 'harness.js']) {
+        await write(options.buildRoot, 'index.html', `<script src="${source}"></script>`);
+        await assert.rejects(verifyCrispBasicProductionAssets(options),
+            /Non-local production script|Unsafe production script|Expected the webpack production GUI entry/);
+    }
 });

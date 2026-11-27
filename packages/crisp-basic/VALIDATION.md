@@ -1,5 +1,33 @@
 # Validation records
 
+## Production GUI qualification
+
+This milestone adds a complete production webpack build and a Chromium gate
+to the dedicated CrispBASIC workflow. The interpreter package remains at
+`0.1.0-dev.5`: no runtime API, C source, ABI, upstream pin or toolchain pin is
+changed. The English and German BASIC help now describe the existing digital
+Circuit bridge rather than saying all GPIO is unavailable.
+
+The production job consumes the exact WASM artifact built by the same workflow
+run, prepares the normal vendored/overlaid GUI with its committed lockfile and
+builds with CAD and FPGA enabled. It authenticates every emitted CrispBASIC
+asset against the build recipe and records the production entry/chunk hashes.
+The separate browser gate serves only the emitted build and uses real editor
+and Circuit controls. Reproduction is in [BRICKWRIGHT.md](BRICKWRIGHT.md#complete-production-gui-gate).
+
+Local source/bridge qualification reports 100 passes, packaging/production
+asset checks report 17 passes, and existing workflow policy checks report 39
+passes: 156 tests with zero failures, cancellations or skips under Node
+24.22.3. The new packaging tests use explicitly synthetic artifacts
+to verify the checker; actual interpreter and production-browser execution
+remain CI gates. This workspace has insufficient free disk for a full GUI
+dependency installation, so no local production build or browser pass is
+claimed. CI qualification is pending for the implementation commit.
+
+The previous record's final documentation-only follow-up
+[46073544837](https://github.com/CrispStrobe/brickwright/actions/runs/46073544837)
+has been checked and completed successfully.
+
 ## Circuit board adapter milestone
 
 Version `0.1.0-dev.5`, recorded on 2026-11-27 on `feature/crispbasic`.

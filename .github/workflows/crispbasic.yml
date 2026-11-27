@@ -20,12 +20,21 @@ on:
       - 'packages/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx'
       - 'overlay/scratch-gui/src/components/tw-pseudocode/vdu-terminal.jsx'
       - 'packages/scratch-gui/src/components/tw-pseudocode/vdu-terminal.jsx'
+      - 'overlay/scratch-gui/src/lib/codemirror-editor.jsx'
+      - 'packages/scratch-gui/src/lib/codemirror-editor.jsx'
       - 'overlay/scratch-gui/webpack.config.js'
       - 'packages/scratch-gui/webpack.config.js'
+      - 'packages/scratch-gui/package.json'
+      - 'packages/scratch-gui/package-lock.json'
       - 'scripts/package-crispbasic.mjs'
-      - 'scripts/verify-crispbasic-browser.mjs'
+      - 'scripts/verify-crispbasic-*.mjs'
       - 'scripts/lib/crispbasic-*.mjs'
       - 'scripts/integrate.mjs'
+      - 'scripts/vendor.mjs'
+      - 'scripts/apply-vm-overlay.mjs'
+      - 'scripts/apply-paint-overlay.mjs'
+      - 'scripts/apply-render-overlay.mjs'
+      - 'vendor-pins.json'
       - 'test/crispbasic-*.test.mjs'
       - 'test/circuit-cad-cancellation.test.mjs'
       - 'test/circuit-cad-bridge.test.mjs'
@@ -52,12 +61,21 @@ on:
       - 'packages/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx'
       - 'overlay/scratch-gui/src/components/tw-pseudocode/vdu-terminal.jsx'
       - 'packages/scratch-gui/src/components/tw-pseudocode/vdu-terminal.jsx'
+      - 'overlay/scratch-gui/src/lib/codemirror-editor.jsx'
+      - 'packages/scratch-gui/src/lib/codemirror-editor.jsx'
       - 'overlay/scratch-gui/webpack.config.js'
       - 'packages/scratch-gui/webpack.config.js'
+      - 'packages/scratch-gui/package.json'
+      - 'packages/scratch-gui/package-lock.json'
       - 'scripts/package-crispbasic.mjs'
-      - 'scripts/verify-crispbasic-browser.mjs'
+      - 'scripts/verify-crispbasic-*.mjs'
       - 'scripts/lib/crispbasic-*.mjs'
       - 'scripts/integrate.mjs'
+      - 'scripts/vendor.mjs'
+      - 'scripts/apply-vm-overlay.mjs'
+      - 'scripts/apply-paint-overlay.mjs'
+      - 'scripts/apply-render-overlay.mjs'
+      - 'vendor-pins.json'
       - 'test/crispbasic-*.test.mjs'
       - 'test/circuit-cad-cancellation.test.mjs'
       - 'test/circuit-cad-bridge.test.mjs'
@@ -164,3 +182,83 @@ jobs:
       - name: Verify staged assets and Brickwright rendering in Chromium
         working-directory: .
         run: node scripts/verify-crispbasic-browser.mjs
+
+  production:
+    # This gate consumes the exact runtime already qualified above. It builds
+    # and drives the complete webpack app; the focused React harness remains
+    # a separate, faster test of editor/adapter lifecycle edge cases.
+    needs: wasm
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+      - name: Restore this run's qualified WASM build
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: crispbasic-wasm-${{ github.sha }}
+          path: packages/crisp-basic/.build/wasm
+      - name: Install the locked integration and browser dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Prepare the ordinary production GUI sources
+        run: |
+          npm run vendor
+          npm run integrate
+      - name: Install the locked GUI dependencies
+        # The committed lock already includes the real, pinned @yowasp/yosys
+        # needed by the flag-on production build; do not replace its pin here.
+        run: |
+          npm --prefix packages/scratch-gui ci --ignore-scripts --legacy-peer-deps --no-audit --no-fund
+          git diff --exit-code -- packages/scratch-gui/package.json packages/scratch-gui/package-lock.json
+      - name: Apply the ordinary VM, paint and render overlays
+        run: |
+          node scripts/apply-vm-overlay.mjs
+          node scripts/apply-paint-overlay.mjs
+          node scripts/apply-render-overlay.mjs
+      - name: Verify the staged interpreter and production source prerequisites
+        run: |
+          npm run package:crispbasic:check
+          npm run package:broker-proof-pins:check
+          npm run package:broker-assets:check
+          node scripts/check-flagged-jsx.mjs
+      - name: Install Chromium for the production app
+        timeout-minutes: 10
+        run: ./node_modules/.bin/playwright install --with-deps chromium
+      - name: Build the complete production editor
+        id: build_editor
+        env:
+          NODE_ENV: production
+          NODE_OPTIONS: --max-old-space-size=2560
+          BW_ENABLE_CAD: '1'
+          BW_ENABLE_FPGA: '1'
+          BW_SYNTHESIS_ENDPOINT: https://synth.crispstro.be/api
+        # Optional external firmware/SDK downloads used by unrelated hardware
+        # gates are not prerequisites for CrispBASIC; the standard app's
+        # unavailable-engine paths remain intact. No source or UI is stubbed.
+        run: |
+          mkdir -p artifacts/crispbasic-production
+          node -e 'console.log(JSON.stringify({commit: process.env.GITHUB_SHA, node: process.version, nodeEnv: process.env.NODE_ENV, cad: process.env.BW_ENABLE_CAD, fpga: process.env.BW_ENABLE_FPGA}, null, 2))' > artifacts/crispbasic-production/environment.json
+          npm --prefix packages/scratch-gui run build 2>&1 | tee artifacts/crispbasic-production/build.log
+      - name: Verify the emitted runtime's bytes and production asset boundary
+        if: ${{ !cancelled() && steps.build_editor.outcome == 'success' }}
+        run: node scripts/verify-crispbasic-production-assets.mjs 2>&1 | tee artifacts/crispbasic-production/assets.log
+      - name: Drive the complete editor and Circuit in Chromium
+        if: ${{ !cancelled() && steps.build_editor.outcome == 'success' }}
+        timeout-minutes: 10
+        run: node scripts/verify-crispbasic-production.mjs 2>&1 | tee artifacts/crispbasic-production/browser.log
+      - name: Retain production qualification evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: crispbasic-production-${{ github.sha }}
+          path: |
+            artifacts/crispbasic-production/**
+            packages/scratch-gui/build/brickwright-build.json
+            packages/scratch-gui/build/static/crispbasic/manifest.json
+          if-no-files-found: warn
+          retention-days: 7
