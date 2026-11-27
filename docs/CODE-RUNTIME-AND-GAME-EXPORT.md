@@ -1,6 +1,7 @@
 # Code execution and game export (Python and JavaScript)
 
-Status: planned, with the initial bounded evaluation recorded. Recorded 2026-11-27 at the
+Status: planned, with the initial bounded evaluation and a first implementation
+candidate recorded. The candidate awaits hosted qualification. Recorded 2026-11-27 at the
 repository owner's request. This document is an implementation plan, not a
 claim that new runtimes or standalone exporters have shipped.
 
@@ -8,7 +9,9 @@ Source baseline: [`14de1c42bd2e2ea84086a2162d1eff1fdbbac20d`](https://github.com
 The reviewed Code tab files are unchanged from `0aa915915c4f73ad13c851cdb7d7c14b74861433`.
 The [evaluation lane](../lanes/2026-11-27-code-runtime-game-export-evaluation.md)
 owns documentation and bounded probes only. Follow-on implementation needs its
-own claim and the existing upstream ownership rules.
+own claim and the existing upstream ownership rules. The first bounded consumer
+implementation is tracked in the [worker ownership lane](../lanes/2026-11-27-code-worker-ownership-and-javascript-plan.md)
+and section 8.1 below; it does not close the complete R1/R2/J1 milestones.
 
 ## 1. Decisions to evaluate
 
@@ -469,6 +472,76 @@ Primary runtime references: [Skulpt](https://github.com/skulpt/skulpt),
 [pwasm](https://github.com/simonw/pwasm),
 [pygame-ce](https://github.com/pygame-community/pygame-ce), and
 [PyInstaller usage](https://pyinstaller.org/en/stable/usage.html).
+
+### 8.1 First implementation candidate: editor ownership and console sessions
+
+The candidate extends the existing consumer component without changing runtime
+dependencies, upstream reader/emitter sources, vendor pins or device adapters.
+It is held for hosted qualification; the JavaScript plan itself was published
+on `main` at [`d787866d`](https://github.com/CrispStrobe/brickwright/commit/d787866d8662bb6aab07253643ea7a6edb56fcce).
+
+- `switchTab` and `setGenOpt` retain request, VM, language and immutable buffer
+  ownership. Success and error publication recheck ownership inside the React
+  state updater, including edit/revert and competing derivation cases.
+- Generic Run captures the clicked source before loading a runtime. An owned
+  disposable worker session handles streamed output, input, Stop, global/project
+  Stop, rerun, VM replacement and unmount. Stop during lazy loading prevents a
+  late load from creating a worker. There is no generic main-thread fallback
+  when worker creation is unavailable.
+- Python keeps the existing Skulpt runtime and uses Promise-backed input in the
+  worker, including aliased `input`. JavaScript supports explicit top-level
+  `await`, returned promises and `await input(question)`. A fresh run uses a
+  fresh worker. This is a console contract, not an event-driven game scheduler.
+- Input is an inline, cancellable form. Replies belong to the rendered request
+  and the current session. The four-second execution budget pauses for human
+  input and resumes with its remaining time. Output is batched in the worker
+  and parent and capped at 65,536 UTF-16 code units per run, including replayed
+  output; oversized output ends with a named limit result.
+
+Compatibility boundaries remain explicit. Synchronous JavaScript `prompt()`
+uses replay with cached answers and `Math.random()` values. It does not roll back
+global mutations, time, cryptographic randomness, network requests or persistent
+side effects. Prefer `await input(...)` for authored asynchronous source. The
+existing simulator-driver + `prompt` route still uses its legacy main-thread
+board adapter and displays that worker Stop is unavailable. Pico and other
+specialized device routes retain their existing behavior. Dormant main-thread
+Python helper methods remain for the existing native-dialog regression corpus;
+generic Run no longer calls them.
+
+Generated detached async IIFEs are still not owned completion handles. The
+candidate does not implement generated game lifetimes, the shared simulator
+bridge, full authored-document persistence, explicit target routing, upstream
+semantic repairs, a new Python runtime, or any game exporter/package.
+
+**Bounded qualification:** 112 focused source tests passed (9 session, 49
+derivation/run ownership, 3 failed-conversion, 27 existing conversion ownership,
+4 existing Run-via-blocks and 20 existing SPIKE caller controls). The actual
+methods are exercised with controlled asynchronous boundaries; these are not
+rendered whole-app tests. Before the derivation fix, 4 normal controls passed
+and 29 stale-publication counterexamples failed. The old empty-target fixture
+needed only its missing `leaveCp1`/VM setup; its assertions were retained.
+
+The [production-worker browser probe](../scripts/probes/code-runtime/session-browser-probe.mjs)
+and [raw results](../scripts/probes/code-runtime/session-browser-results.json)
+record 19/19 passing cases and zero page errors in Chromium 158.0.8127.0 with
+actual Skulpt 1.2.0, without cross-origin isolation or SharedArrayBuffer. They
+cover normal/error execution, live output, waiting longer than the execution
+budget for input, Stop during input and infinite loops, bounded output, fresh
+restart, JS prompt replay/randoms, explicit awaited completion and loading
+cancellation. Recorded source hashes match the candidate's session/builders.
+The probe uses a localhost harness and the container's `--no-sandbox` launch
+requirement; it does not establish production CSP, React UI, hostile-code
+isolation or desktop/mobile WebView qualification. Reproduction instructions are
+in the [probe README](../scripts/probes/code-runtime/README.md#production-console-session-probe).
+
+**Landing gate:** the existing
+[vendor-freshness run](https://github.com/CrispStrobe/brickwright/actions/runs/45950936687)
+fails on the examples index and three orphaned Microtronic lesson files; its
+converter identity and transpiler checks pass. Those gallery paths are already
+owned by the [Microtronic integration lane](../lanes/2026-11-25-microtronic-gallery-source.md)
+and [consumer PR #1846](https://github.com/CrispStrobe/brickwright/pull/1846).
+This candidate does not remove the lesson, relax the gate or advance its pin.
+Hosted candidate qualification and the broader platform/UI matrix remain open.
 
 ## 9. JavaScript execution and game export across platforms
 

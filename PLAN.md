@@ -39,10 +39,19 @@ translation changes and a Linux pygame bundle with matching source/package state
 and frame hashes. It supports explicit Pyodide/CPython and lightweight MicroPython
 modes as follow-on candidates; production integration and device gates remain open.
 
-Status: **bounded evaluation recorded; runtime/export implementation planned**.
+The [first execution candidate](docs/CODE-RUNTIME-AND-GAME-EXPORT.md#81-first-implementation-candidate-editor-ownership-and-console-sessions)
+adds delayed-conversion ownership fences and owned Python/JS console workers
+with input, Stop and bounded output. Its 112 focused source controls and 19
+Chromium worker cases pass; hosted qualification remains pending, including the
+existing separately owned Microtronic gallery drift. This is a bounded R1/R2/J1
+slice; generated game lifetimes, target/source persistence and export remain open.
+
+Status: **bounded evaluation recorded; first console candidate awaits qualification;
+new runtimes and game export remain planned**.
 The [evaluation lane](lanes/2026-11-27-code-runtime-game-export-evaluation.md)
-owns documentation/probes only; application and shared-compiler repairs remain
-follow-on work under the existing ownership and upstream adoption rules.
+owns documentation/probes only; the [worker ownership lane](lanes/2026-11-27-code-worker-ownership-and-javascript-plan.md)
+owns the first consumer implementation. Shared-compiler repairs remain upstream
+work under the existing adoption rules.
 
 ## Current status — 2026-11-05
 

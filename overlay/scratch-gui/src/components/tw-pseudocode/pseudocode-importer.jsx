@@ -87,6 +87,8 @@ import {createCodeRunFeedback} from '../../lib/spike-arena/code-run-feedback.js'
 // Every yes/no question is awaited: `window.confirm` cannot block in the desktop/iOS app.
 import {confirmAsync, promptAsync} from '../../lib/native-dialog.js';
 import {mathWithRandom, runWithReplayedInput} from '../../lib/replay-input.js';
+import {createCodeExecutionSession} from '../../lib/code-execution-session.js';
+import {JAVASCRIPT_WORKER_SOURCE, createPythonWorkerSource} from '../../lib/code-execution-workers.js';
 // F10: an imported MakeCode project's own files, kept in the .sb3 and marked stale once the program changes.
 import makeCodeOriginal from 'scratch-vm/src/serialization/bw-makecode-original.js';
 
@@ -264,6 +266,12 @@ const L10N = {
         picoSimNoFirmware: 'The Pico simulator firmware is not in this build. Run `npm run sync:picomicropython` and rebuild, then ▶ Run again.',
         picoSimStopped: 'Simulator stopped.',
         stop: 'Stop',
+        codeInput: 'Program input', codeInputSend: 'Send',
+        codeConsolePython: 'Python console · Skulpt', codeConsoleJs: 'JavaScript console',
+        codeStopped: 'Stopped.', codeNoOutput: '(no output)',
+        codeTimeout: 'Stopped after 4 seconds of execution. Time spent waiting for input does not count.',
+        codeOutputLimit: 'Stopped: the console output limit (65,536 characters) was reached.',
+        codeLegacySimulator: 'Legacy simulator preview; worker Stop is not available for this route.',
         deployPicoBootsel: 'The Pico is in BOOTSEL mode — it needs MicroPython first. Flash a MicroPython UF2 onto the RPI-RP2 volume, then deploy again.',
         deployPicoNoC: 'Write or import C in the C tab first, then deploy.',
         deployPicoUf2Done: 'firmware.uf2 downloaded. Hold BOOTSEL, plug the Pico into USB (it mounts as the RPI-RP2 drive), and drag firmware.uf2 onto it — it flashes and reboots into your program.',
@@ -609,6 +617,12 @@ const L10N = {
         picoSimNoFirmware: 'Die Pico-Simulator-Firmware fehlt in diesem Build. `npm run sync:picomicropython` ausführen und neu bauen, dann erneut ▶ ausführen.',
         picoSimStopped: 'Simulator gestoppt.',
         stop: 'Stopp',
+        codeInput: 'Programmeingabe', codeInputSend: 'Senden',
+        codeConsolePython: 'Python-Konsole · Skulpt', codeConsoleJs: 'JavaScript-Konsole',
+        codeStopped: 'Gestoppt.', codeNoOutput: '(keine Ausgabe)',
+        codeTimeout: 'Nach 4 Sekunden Ausführung gestoppt. Wartezeit auf Eingaben zählt nicht mit.',
+        codeOutputLimit: 'Gestoppt: Das Ausgabelimit der Konsole (65.536 Zeichen) wurde erreicht.',
+        codeLegacySimulator: 'Bisherige Simulator-Vorschau; Worker-Stopp ist für diesen Weg nicht verfügbar.',
         deployPicoBootsel: 'Der Pico ist im BOOTSEL-Modus — er braucht zuerst MicroPython. Ein MicroPython-UF2 auf das RPI-RP2-Laufwerk kopieren, dann erneut übertragen.',
         deployPicoNoC: 'Zuerst C im C-Tab schreiben oder importieren, dann übertragen.',
         deployPicoUf2Done: 'firmware.uf2 heruntergeladen. BOOTSEL gedrückt halten, den Pico per USB anstecken (er erscheint als Laufwerk RPI-RP2) und firmware.uf2 darauf ziehen — er flasht und startet in dein Programm.',
@@ -1179,47 +1193,6 @@ const SUPPORTED = {
     ]
 };
 
-// Web Worker bodies for the sandboxed (non-interactive) runner. They run off the
-// main thread so a runaway/`forever` loop can be `terminate()`d on a timeout instead
-// of freezing the tab. Neither has a real `prompt`/`input` — interactive programs take
-// the main-thread path instead. Kept as plain-ES5 strings so they need no transpile.
-const JS_WORKER = [
-    'self.onmessage = function (e) {',
-    '  var log = function () {',
-    '    var a = Array.prototype.slice.call(arguments);',
-    '    self.postMessage({type: "out", text: a.map(function (x) {',
-    '      return typeof x === "string" ? x : JSON.stringify(x);',
-    '    }).join(" ") + "\\n"});',
-    '  };',
-    '  var console = {log: log, error: log, warn: log, info: log};',
-    '  var prompt = function () { return ""; };',
-    '  try {',
-    '    (new Function("console", "prompt", e.data.code))(console, prompt);',
-    '    self.postMessage({type: "done"});',
-    '  } catch (err) { self.postMessage({type: "error", text: String(err && err.message || err)}); }',
-    '};'
-].join('\n');
-
-// Appended after the injected Skulpt sources to form the Python worker.
-const PY_WORKER = [
-    'self.onmessage = function (e) {',
-    '  Sk.configure({',
-    '    output: function (t) { self.postMessage({type: "out", text: t}); },',
-    '    read: function (f) {',
-    '      if (Sk.builtinFiles && Sk.builtinFiles.files[f]) return Sk.builtinFiles.files[f];',
-    '      throw new Error("module " + f + " not found");',
-    '    },',
-    '    inputfun: function () { return ""; },',
-    '    inputfunTakesPrompt: true,',
-    '    __future__: Sk.python3',
-    '  });',
-    '  Sk.misceval.asyncToPromise(function () {',
-    '    return Sk.importMainWithBody("<brickwright>", false, e.data.code, true);',
-    '  }).then(function () { self.postMessage({type: "done"}); })',
-    '    .catch(function (err) { self.postMessage({type: "error", text: String(err && err.message || err)}); });',
-    '};'
-].join('\n');
-
 // ── CodeMirror 6 editor (lazy-loaded) ──────────────────────────────
 // The CM chunk (~600 KB) loads when this tab is first SHOWN — not when it
 // mounts. gui.jsx force-renders every TabPanel, so this component mounts on
@@ -1281,6 +1254,7 @@ class PseudocodeImporter extends React.Component {
             uploads: [], status: '', conversionReport: null, reportExpanded: false, busy: false, showRef: false, showInfo: false, showMatrix: false,
             showRepresentation: true,
             showArt: false, output: null, running: false, picoSimRunning: false,
+            codeSessionRunning: false, codeInput: null, codeInputValue: '', codeRunLabel: '',
             // Hardware-extension codegen options (see reference/runtime-drivers.md): the emitted
             // driver (shim / remote / on-brick), plus async/await and event-hat switches.
             driverMode: 'shim', asyncMode: false, eventsMode: false,
@@ -1326,6 +1300,8 @@ class PseudocodeImporter extends React.Component {
         this.loadExample = this.loadExample.bind(this);
         this._loadBundledExamples = this._loadBundledExamples.bind(this);
         this.run = this.run.bind(this);
+        this.submitCodeInput = this.submitCodeInput.bind(this);
+        this._onStopCodeRun = () => this.stopCodeRun();
         this.switchTab = this.switchTab.bind(this);
         this.flashMicrobitSim = this.flashMicrobitSim.bind(this);
         this._onMicrobitRunRequest = this._onMicrobitRunRequest.bind(this);
@@ -1432,6 +1408,8 @@ class PseudocodeImporter extends React.Component {
     };
 
     componentDidMount () {
+        window.addEventListener('bw-stop-all', this._onStopCodeRun);
+        this.bindCodeStopRuntime();
         this._unmounted = false;
         window.addEventListener('bw-hardware-state', this.onHardwareState);
         window.addEventListener('bw-library-code', this.openLibraryCode);
@@ -1690,6 +1668,10 @@ class PseudocodeImporter extends React.Component {
     }
 
     componentDidUpdate (prevProps, prevState) {
+        if (prevProps.vm !== this.props.vm) {
+            this.disposeCodeRun();
+            this.bindCodeStopRuntime();
+        }
         if (prevProps.vm !== this.props.vm || prevState.lang !== this.state.lang ||
             prevState.buffers[this.state.lang] !== this.state.buffers[this.state.lang]) this.invalidateArcadeReport();
         if (prevProps.isVisible !== this.props.isVisible || prevState.busy !== this.state.busy ||
@@ -2813,6 +2795,10 @@ class PseudocodeImporter extends React.Component {
         window.removeEventListener('bw-read-blocks-into-code', this.fromBlocks);
         this.setMaximizedChrome(false);
         this._unmounted = true;
+        this.disposeCodeRun();
+        window.removeEventListener('bw-stop-all', this._onStopCodeRun);
+        if (this._codeStopRuntime) this._codeStopRuntime.removeListener('PROJECT_STOP_ALL', this._onStopCodeRun);
+        this._codeStopRuntime = null;
         if (this._unregisterCodeMenu) this._unregisterCodeMenu();
         this._makeCodeRequest = null;
         const vm = this.props.vm;
@@ -3113,12 +3099,27 @@ class PseudocodeImporter extends React.Component {
             this.setState({lang: to, output: null, status: '', emptyTabOffer: null});
             return;
         }
+        const request = {};
+        this._deriveRequest = request;
+        const buffers = this.state.buffers;
+        const vm = this.props.vm;
+        const ownsRequest = () => !this._unmounted && this._deriveRequest === request;
+        const ownsEditor = state => ownsRequest() && state.lang === from &&
+            state.buffers === buffers && this.props.vm === vm;
         this.setState({busy: true, status: this.L.stConverting(to), emptyTabOffer: null});
         this.deriveBuffer(src, from, to).then(({code, error}) => {
             // A failed conversion keeps the source tab, and offers an explicit
             // way into the requested tab with an empty buffer instead of a dead end.
-            if (error) { this.setState({busy: false, status: this.L.stCantShow(to, error), emptyTabOffer: to}); return; }
-            this.setState(s => ({lang: to, busy: false, output: null, status: '', emptyTabOffer: null, buffers: {...s.buffers, [to]: code}}));
+            if (!ownsRequest()) return;
+            this.setState(state => {
+                if (!ownsRequest()) return null;
+                // An edit/revert is a new revision even when its text matches.
+                // Only this request's busy state may outlive editor ownership.
+                if (!ownsEditor(state)) return {busy: false};
+                if (error) return {busy: false, status: this.L.stCantShow(to, error), emptyTabOffer: to};
+                return {lang: to, busy: false, output: null, status: '', emptyTabOffer: null,
+                    buffers: {...state.buffers, [to]: code}};
+            });
         });
     }
 
@@ -4688,13 +4689,30 @@ class PseudocodeImporter extends React.Component {
 
     // Apply a codegen-option change and regenerate the active code view.
     setGenOpt (patch) {
-        this.setState(patch, () => {
-            const src = this.state.buffers.pseudocode;
-            if (this.state.lang === 'pseudocode' || !src || !src.trim()) return;
+        const request = {};
+        this._deriveRequest = request;
+        const lang = this.state.lang;
+        const buffers = this.state.buffers;
+        const vm = this.props.vm;
+        const ownsRequest = () => !this._unmounted && this._deriveRequest === request;
+        const ownsEditor = state => ownsRequest() && state.lang === lang &&
+            state.buffers === buffers && this.props.vm === vm;
+        this.setState(state => ownsEditor(state) ? patch : null, () => {
+            if (!ownsRequest()) return;
+            const src = buffers.pseudocode;
+            if (!ownsEditor(this.state) || lang === 'pseudocode' || !src || !src.trim()) {
+                this.setState(() => ownsRequest() ? {busy: false} : null);
+                return;
+            }
             this.setState({busy: true, status: this.L.stRegen});
-            this.deriveBuffer(src, 'pseudocode', this.state.lang).then(({code, error}) => {
-                if (error) { this.setState({busy: false, status: error}); return; }
-                this.setState(s => ({busy: false, status: '', output: null, buffers: {...s.buffers, [s.lang]: code}}));
+            this.deriveBuffer(src, 'pseudocode', lang).then(({code, error}) => {
+                if (!ownsRequest()) return;
+                this.setState(state => {
+                    if (!ownsRequest()) return null;
+                    if (!ownsEditor(state)) return {busy: false};
+                    if (error) return {busy: false, status: error};
+                    return {busy: false, status: '', output: null, buffers: {...state.buffers, [lang]: code}};
+                });
             });
         });
     }
@@ -4721,52 +4739,6 @@ class PseudocodeImporter extends React.Component {
         inject(core); inject(stdlib);
         if (!window.Sk || !window.Sk.configure) throw new Error('Skulpt failed to load');
         return window.Sk;
-    }
-
-    // Run `workerSrc` (a self-contained worker body) against `code` in a fresh Web
-    // Worker, streaming its output into `buf`. Resolves {} on clean finish, {error}
-    // on a thrown error, or {timeout:true} after `timeoutMs` — at which point the
-    // worker (and any infinite loop inside it) is terminated. Never rejects.
-    runViaWorker (workerSrc, code, buf, timeoutMs) {
-        return new Promise((resolve) => {
-            let url;
-            let worker;
-            try {
-                url = URL.createObjectURL(new Blob([workerSrc], {type: 'application/javascript'}));
-                worker = new Worker(url);
-            } catch (e) {
-                if (url) URL.revokeObjectURL(url);
-                resolve({error: String((e && e.message) || e)});
-                return;
-            }
-            let settled = false;
-            const done = (result) => {
-                if (settled) return;
-                settled = true;
-                clearTimeout(timer);
-                worker.terminate();
-                URL.revokeObjectURL(url);
-                resolve(result);
-            };
-            // An uncaught error INSIDE the worker (e.g. Skulpt calling
-            // importScripts('bitops') for a stdlib module the inline bundle
-            // does not carry) otherwise bubbles to window as a page error and
-            // reads like an app crash. It is a preview failure: report it in
-            // the preview pane and stop the noise.
-            worker.onerror = (e) => {
-                if (e && e.preventDefault) e.preventDefault();
-                done({error: `Python preview unavailable for this program: ${(e && e.message) || 'worker error'}`});
-            };
-            const timer = setTimeout(() => done({timeout: true}), timeoutMs);
-            worker.onmessage = (e) => {
-                const d = e.data || {};
-                if (d.type === 'out') buf.push(d.text);
-                else if (d.type === 'done') done({});
-                else if (d.type === 'error') done({error: d.text});
-            };
-            worker.onerror = (e) => done({error: (e && e.message) || 'worker error'});
-            worker.postMessage({code});
-        });
     }
 
     async runJsMain (code, buf) {
@@ -4851,12 +4823,45 @@ class PseudocodeImporter extends React.Component {
         await Sk.misceval.asyncToPromise(() => Sk.importMainWithBody('<brickwright>', false, code, true));
     }
 
-    // Run the generated code in-page. Interactive programs (that read input) need
-    // the main thread's dialog (promptAsync), so they run inline with a forever-loop
-    // guard. Everything else runs in a Web Worker with a hard timeout — a runaway
-    // loop is killed cleanly instead of freezing the tab.
+    bindCodeStopRuntime () {
+        if (this._codeStopRuntime) this._codeStopRuntime.removeListener('PROJECT_STOP_ALL', this._onStopCodeRun);
+        this._codeStopRuntime = this.props.vm && this.props.vm.runtime;
+        if (this._codeStopRuntime) this._codeStopRuntime.on('PROJECT_STOP_ALL', this._onStopCodeRun);
+    }
+
+    stopCodeRun () {
+        if (this._codeSession) this._codeSession.stop();
+    }
+
+    disposeCodeRun () {
+        const owned = this._codeRunRequest || this._codeSession;
+        const session = this._codeSession;
+        // Revoke the component owner BEFORE cleanup callbacks or lazy loads can
+        // publish. A subsequent run must not inherit this run's final output.
+        this._codeRunRequest = null;
+        this._codeSession = null;
+        if (session) session.dispose();
+        if (owned && !this._unmounted) this.setState(() => this._unmounted || this._codeRunRequest ? null : {
+            running: false, codeSessionRunning: false, codeInput: null, codeInputValue: '', codeRunLabel: ''
+        });
+    }
+
+    submitCodeInput (event, expectedInput = this.state.codeInput) {
+        if (event) event.preventDefault();
+        const session = this._codeSession;
+        const input = this.state.codeInput;
+        const request = this._codeRunRequest;
+        if (this._unmounted || !request || this.props.vm !== request.vm ||
+            !session || !input || input !== expectedInput || input.runId !== session.id) return;
+        session.replyToInput(input.requestId, this.state.codeInputValue);
+    }
+
+    // Console runs own their clicked source, lazy runtime load, worker and input.
+    // A worker is a Stop/responsiveness boundary, not a complete security sandbox.
+    // Generated detached async IIFEs still need an upstream task-lifetime contract.
     async run () {
         const lang = this.state.lang;
+        this.disposeCodeRun();
         // Pico + Python: run in the SIMULATOR — boot MicroPython in rp2040js and
         // run the program live over the same createPicoRepl the silicon deploy
         // uses (N3c), instead of the in-page Skulpt console below.
@@ -4864,41 +4869,61 @@ class PseudocodeImporter extends React.Component {
             return this.runPicoSim();
         }
         const code = this.activeCode();
-        const buf = [];
-        this.setState({output: '', running: true, status: ''});
-        const TIMEOUT = 4000;
-        const finish = (extra) => this.setState({
-            output: (buf.join('').trimEnd() + (extra ? (buf.length ? '\n' : '') + extra : '')).trim() || '(no output)',
-            running: false, status: ''
-        });
-        const forever = lang === 'python' ? /^\s*while\s+True\s*:/m : /while\s*\(\s*true\s*\)/;
-        const usesInput = lang === 'python' ? /(^|[^.\w])input\s*\(/.test(code) : /(^|[^.\w])prompt\s*\(/.test(code);
-        const canWorker = typeof Worker !== 'undefined' && typeof Blob !== 'undefined' &&
-            typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function';
-        try {
-            // A `forever:` game loop is meant for the blocks/green flag, not a text console —
-            // catch the obvious case up front with a friendly nudge (the Worker timeout below
-            // is only a safety net for non-obvious runaway loops).
-            if (forever.test(code)) throw new Error(this.L.foreverLoop);
-            if (usesInput || !canWorker) {
-                if (lang === 'python') { this.setState({status: this.L.stLoadingPy}); await this.runPyMain(code, buf); } else await this.runJsMain(code, buf);
-                finish();
-            } else {
-                let result;
-                if (lang === 'python') {
-                    this.setState({status: this.L.stLoadingPy});
-                    const {core, stdlib} = await this.skulptSource();
-                    result = await this.runViaWorker(`${core}\n${stdlib}\n${PY_WORKER}`, code, buf, TIMEOUT);
-                } else {
-                    result = await this.runViaWorker(JS_WORKER, code, buf, TIMEOUT);
-                }
-                if (result.timeout) finish(`⏱ Stopped after ${TIMEOUT / 1000}s — still running (likely an infinite loop).`);
-                else if (result.error) finish(result.error);
-                else finish();
-            }
-        } catch (e) {
-            finish(String(e.message || e));
+        const request = {vm: this.props.vm, lang, code};
+        this._codeRunRequest = request;
+        const ownsRequest = () => !this._unmounted && this._codeRunRequest === request && this.props.vm === request.vm;
+        const python = lang === 'python' || lang === 'micropython';
+        // Preserve the existing interactive board route until R4 provides the
+        // shared worker/board bridge. It has no worker Stop guarantee; do not
+        // silently replace its working board access with an empty worker stub.
+        const legacySimulator = lang === 'javascript' && this.state.driverMode === 'simulator' &&
+            /(^|[^.\w])prompt\s*\(/.test(code);
+        this.setState(() => ownsRequest() ? {
+            output: '', running: true, status: python ? this.L.stLoadingPy : '',
+            codeSessionRunning: !legacySimulator, codeInput: null, codeInputValue: '',
+            codeRunLabel: legacySimulator ? this.L.codeLegacySimulator :
+                (python ? this.L.codeConsolePython : this.L.codeConsoleJs)
+        } : null);
+        if (legacySimulator) {
+            const buf = [];
+            try {
+                if (/while\s*\(\s*true\s*\)/.test(code)) throw new Error(this.L.foreverLoop);
+                await this.runJsMain(code, buf);
+            } catch (error) { buf.push(String(error.message || error)); }
+            if (!ownsRequest()) return;
+            this.setState(() => ownsRequest() ? {
+                output: buf.join('') || this.L.codeNoOutput, running: false, status: '', codeRunLabel: ''
+            } : null);
+            return;
         }
+        const session = createCodeExecutionSession({
+            code,
+            workerSource: python ? async () => {
+                const sources = await this.skulptSource();
+                if (ownsRequest() && this._codeSession === session) this.setState(() =>
+                    ownsRequest() && this._codeSession === session ? {status: ''} : null);
+                return createPythonWorkerSource(sources);
+            } : JAVASCRIPT_WORKER_SOURCE,
+            onOutput: output => {
+                if (ownsRequest() && this._codeSession === session) this.setState(() =>
+                    ownsRequest() && this._codeSession === session ? {output} : null);
+            },
+            onInput: input => {
+                if (ownsRequest() && this._codeSession === session) this.setState(() =>
+                    ownsRequest() && this._codeSession === session ? {codeInput: input, codeInputValue: ''} : null);
+            }
+        });
+        this._codeSession = session;
+        const result = await session.promise;
+        if (!ownsRequest() || this._codeSession !== session) return;
+        this._codeSession = null;
+        const note = result.status === 'timeout' ? this.L.codeTimeout :
+            result.status === 'stopped' ? this.L.codeStopped :
+                result.status === 'output-limit' ? this.L.codeOutputLimit : result.error;
+        this.setState(() => ownsRequest() ? {
+            output: result.output + (note ? `${result.output ? '\n' : ''}${note}` : '') || this.L.codeNoOutput,
+            running: false, status: '', codeSessionRunning: false, codeInput: null, codeInputValue: '', codeRunLabel: ''
+        } : null);
     }
     /**
      * Run the Pico's MicroPython program IN THE SIMULATOR. Boots the pinned
@@ -6318,6 +6343,7 @@ class PseudocodeImporter extends React.Component {
     }
 
     render () {
+        const codeInput = this.state.codeInput;
         // The selected .tab-panel is display:flex (row); like .blocks-wrapper we must
         // flex-grow to fill the column width, else we shrink to content (~660px) and
         // leave a big gap before the stage.
@@ -6597,6 +6623,12 @@ class PseudocodeImporter extends React.Component {
                                 data-testid={menu ? "bw-code-run-menu" : "bw-code-run"}
                                 style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}>
                                 ▶ {this.L.run} {this.state.lang === 'python' ? 'Python' : 'JavaScript'}
+                            </button>
+                        ) : null}
+                        {this.state.codeSessionRunning ? (
+                            <button type="button" onClick={this._onStopCodeRun}
+                                data-testid={menu ? "bw-code-stop-menu" : "bw-code-stop"} style={actionBtn}>
+                                ■ {this.L.stop}
                             </button>
                         ) : null}
     
@@ -7541,11 +7573,30 @@ class PseudocodeImporter extends React.Component {
                     </React.Suspense>
                 ) : null}
                 {this.state.output != null ? (
-                    <pre data-testid={['basic', 'fe', 'tcl'].includes(this.state.lang) ? `bw-${this.state.lang}-output` : undefined}
+                    <pre data-testid={['basic', 'fe', 'tcl'].includes(this.state.lang) ? `bw-${this.state.lang}-output` : 'bw-code-output'}
                         style={{marginTop: 10, padding: 12, background: '#0c3a44', color: '#c7f0e0', borderRadius: 8,
                         fontFamily: 'monospace', fontSize: 13, maxHeight: 220, overflow: 'auto', whiteSpace: 'pre-wrap'}}>
                         {this.state.output || '…'}
                     </pre>
+                ) : null}
+                {this.state.codeRunLabel ? (
+                    <div role="status" style={{fontSize: 12, color: '#475569'}}>{this.state.codeRunLabel}</div>
+                ) : null}
+                {codeInput ? (
+                    <form onSubmit={event => this.submitCodeInput(event, codeInput)} data-testid="bw-code-input"
+                        style={{display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginTop: 8}}>
+                        <label htmlFor="bw-code-input-answer" style={{whiteSpace: 'pre-wrap', overflowWrap: 'anywhere'}}>
+                            {codeInput.prompt || this.L.codeInput}
+                        </label>
+                        <input id="bw-code-input-answer" type="text" autoFocus autoComplete="off" maxLength={65536}
+                            value={this.state.codeInputValue}
+                            onChange={event => {
+                                const value = event.target.value;
+                                this.setState(state => state.codeInput === codeInput ? {codeInputValue: value} : null);
+                            }} />
+                        <button type="submit" style={actionBtn}>{this.L.codeInputSend}</button>
+                        <button type="button" onClick={this._onStopCodeRun} style={actionBtn}>{this.L.stop}</button>
+                    </form>
                 ) : null}
                 </React.Fragment>}
             </div>

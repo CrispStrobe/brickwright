@@ -13,7 +13,12 @@ The [initial evaluation](docs/CODE-RUNTIME-EVALUATION-2026-11-27.md) is recorded
 Node and headless Chromium runtime probes, a separate pwasm host probe, eight
 reader semantic witnesses, and a Linux authored pygame fixture packaged with
 matching state/frame hashes. R0 has bounded evidence; actual app/device
-qualification remains open. R1/R2 and the G0/G1 game runtime are the next work.
+qualification remains open. The [first R1/R2/J1 candidate](docs/CODE-RUNTIME-AND-GAME-EXPORT.md#81-first-implementation-candidate-editor-ownership-and-console-sessions)
+adds conversion ownership fences and console worker/input/Stop handling, with
+112 focused source controls and 19 Chromium worker cases passing. Hosted
+qualification is pending; the existing Microtronic gallery failure has its own
+active owner. Full source/target integrity, generated game lifetimes, runtime
+adoption and the G0/G1 game runtime remain follow-on work.
 
 | Order | Work | Required evidence |
 | --- | --- | --- |
