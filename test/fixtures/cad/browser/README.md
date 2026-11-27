@@ -13,9 +13,13 @@ SHA256 hashes, sizes, licenses and the DWG reproduction recipe.
 ## Sources and reproduction
 
 The DWG comes from the [canonical CrispCAD fixture factory](https://github.com/CrispStrobe/CrispCAD/blob/7b736aa0407584af9b2b276917e97a2a2740a2aa/tests/sketch-dwg-fixture.ts)
-at the exact CAD SDK commit already shipped by Brickwright. CrispCAD was formerly
-named `CrispStrobe/brickwright-cad`. Its source is retained unchanged here as
-`sketch-dwg-fixture.ts`, with the upstream BSD 3-Clause license.
+at the CAD SDK commit used when the fixture was first recorded. CrispCAD was
+formerly named `CrispStrobe/brickwright-cad`. Its source is retained unchanged
+here as `sketch-dwg-fixture.ts`, with the upstream BSD 3-Clause license. The
+current SDK `02287df59bdb8ba7f3685a9241dd6b299276b1c3` retains the same factory
+Git blob `8ec6f4e2771d1297450dafa03081b4e8e1c62492`. The original source and
+license commits remain recorded; the top-level `cadSdk` identity and generation
+worker identify the current reviewed reproduction inputs.
 
 The default factory builds a closed 2 by 1 inch CUT outline with a bulged and
 variable-width first segment, a separate GUIDES line and a paper-space circle.
@@ -41,8 +45,11 @@ generation; updating the SDK requires a reviewed provenance update.
 The STEP is the unchanged [Adafruit 3777 TT Motor source](https://github.com/adafruit/Adafruit_CAD_Parts/blob/9f2a89f3d5c3491886d58cb7fe83385417563cf4/3777%20TT%20Motor/3777%20TT%20Motor.step),
 under the accompanying MIT license. It is also the identical Git blob retained
 in the [pinned CrispCAD source archive](https://github.com/CrispStrobe/CrispCAD/blob/7b736aa0407584af9b2b276917e97a2a2740a2aa/library/sources/adafruit-motors/3777%20TT%20Motor/3777%20TT%20Motor.step).
-The browser gate still requires eight colored reference bodies, print exclusion
-and a complete SB3 save/reopen cycle.
+The browser gate uses the generic `import` command (Import STL or STEP geometry)
+and still requires eight colored reference bodies, print exclusion and a complete
+SB3 save/reopen cycle. SDK `02287df` retains that version-30 path. Its separate
+`import-step` command imports exact B-rep bodies at version 45; adding that route
+does not change this generic-import contract or qualify it through this proof.
 
 ## Admission and validation
 

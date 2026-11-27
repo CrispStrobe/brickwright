@@ -12,10 +12,10 @@ import vm from 'node:vm';
 const {parse} = createRequire(import.meta.url)('acorn');
 const root = path.resolve(import.meta.dirname, '..');
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
-export const DWG_WORKER_SHA256 = '8501950933ee1b451aad4c5d74cc8605aa8c2edaaec2e16fcfd0d909d91d2ff1';
+export const DWG_WORKER_SHA256 = 'b61636ee4049a98623f2eea55d3bd514d4536de4a2f9ff11958c5037e6e21d4d';
 export const DWG_FACTORY_SHA256 = 'd225cc313329a7afb6d61415cfbc8606366adaf654598204146cc1764455f9a3';
 const fixtureDirectory = path.join(root, 'test/fixtures/cad/browser');
-const defaultWorker = path.join(root, 'overlay/scratch-gui/static/cad-sdk/assets/sketch-dwg.worker-CZuNwPHc.js');
+const defaultWorker = path.join(root, 'overlay/scratch-gui/static/cad-sdk/assets/sketch-dwg.worker-FWEoDxb0.js');
 
 export function generateCadBrowserDwg ({worker = defaultWorker,
     factory = path.join(fixtureDirectory, 'sketch-dwg-fixture.ts')} = {}) {

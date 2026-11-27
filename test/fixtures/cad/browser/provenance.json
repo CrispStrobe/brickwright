@@ -3,7 +3,7 @@
   "cadSdk": {
     "repository": "https://github.com/CrispStrobe/CrispCAD",
     "previousRepositoryName": "CrispStrobe/brickwright-cad",
-    "commit": "7b736aa0407584af9b2b276917e97a2a2740a2aa",
+    "commit": "02287df59bdb8ba7f3685a9241dd6b299276b1c3",
     "consumerManifest": "overlay/scratch-gui/static/cad-sdk/manifest.json"
   },
   "fixtures": {
@@ -25,9 +25,9 @@
         "command": "TZ=UTC node scripts/gen-cad-browser-dwg-fixture.mjs",
         "nodeVersion": "24.22.3",
         "factoryOptions": {},
-        "worker": "overlay/scratch-gui/static/cad-sdk/assets/sketch-dwg.worker-CZuNwPHc.js",
-        "workerBytes": 1849262,
-        "workerSha256": "8501950933ee1b451aad4c5d74cc8605aa8c2edaaec2e16fcfd0d909d91d2ff1",
+        "worker": "overlay/scratch-gui/static/cad-sdk/assets/sketch-dwg.worker-FWEoDxb0.js",
+        "workerBytes": 1850080,
+        "workerSha256": "b61636ee4049a98623f2eea55d3bd514d4536de4a2f9ff11958c5037e6e21d4d",
         "clock": "2026-01-01T00:00:00.000Z",
         "uuidSequence": "00000000-0000-4000-8000-000000000001, incrementing the final twelve decimal digits",
         "verification": "Two fresh codec contexts produced identical bytes; the unmodified shipping worker read protocol decoded CUT and GUIDES."
