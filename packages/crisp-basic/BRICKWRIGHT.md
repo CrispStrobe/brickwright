@@ -127,7 +127,11 @@ Starting BASIC does not reset the circuit's controls or component history.
 
 Stop, Reset, unmount, circuit edits and project replacement release the captured
 pin/clock ownership. Competing debugger, firmware and coupled-simulation starts
-are refused while BASIC owns the board. No synthetic bench substitutes for an
+are refused while BASIC owns the board. The captured Circuit model also revokes
+BASIC before saving undo history or copying the old solver into a replacement,
+so these snapshots cannot inherit BASIC's temporary GPIO drive. Read-only
+snapshots and exports leave the run active. Failed or reentrant cleanup blocks
+the mutation until it can safely proceed. No synthetic bench substitutes for an
 unavailable or rejected circuit. [BOARD-SIMULATION.md](BOARD-SIMULATION.md)
 specifies supported controllers, electrical semantics, limits and a runnable
 example. The generator still emits its existing hardware comments.
@@ -203,6 +207,15 @@ entry scripts and lazy JavaScript chunks in
 the emitted build below a URL prefix and drives the complete editor and Circuit
 through their production controls. Test reports, screenshots and logs are
 retained with the workflow's production evidence artifact.
+
+The eight scenarios cover generated and imported BASIC, physical error lines,
+Latin-1 input/output, repeated VDU pixels, Stop/Reset/reuse, live Circuit GPIO
+and timing, circuit-file replacement during blocked input, and explicit missing
+board/runtime failures. Replacement is exercised while the original connection
+and input prompt are still live, so an earlier tab-unmount cancellation cannot
+stand in for the model's actual file-import boundary. Service workers are
+blocked for this fresh-network build check; offline cache upgrades are a
+separate qualification.
 
 This gate covers the Chromium web application. Desktop/mobile shells, other
 browser engines and the complete VDU language remain separate qualifications.

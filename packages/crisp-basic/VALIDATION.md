@@ -15,14 +15,48 @@ asset against the build recipe and records the production entry/chunk hashes.
 The separate browser gate serves only the emitted build and uses real editor
 and Circuit controls. Reproduction is in [BRICKWRIGHT.md](BRICKWRIGHT.md#complete-production-gui-gate).
 
-Local source/bridge qualification reports 100 passes, packaging/production
-asset checks report 17 passes, and existing workflow policy checks report 39
-passes: 156 tests with zero failures, cancellations or skips under Node
-24.22.3. The new packaging tests use explicitly synthetic artifacts
-to verify the checker; actual interpreter and production-browser execution
-remain CI gates. This workspace has insufficient free disk for a full GUI
-dependency installation, so no local production build or browser pass is
-claimed. CI qualification is pending for the implementation commit.
+### Initial production run and discovered defect
+
+The gate implementation is
+[`e3156f125a1d`](https://github.com/CrispStrobe/brickwright/commit/e3156f125a1dc820a730ca004f37a3263f71d1e6).
+Its first [CI run, 46076485235](https://github.com/CrispStrobe/brickwright/actions/runs/46076485235),
+passed all 487 existing/focused tests, the complete webpack build and the
+emitted-asset check. The build used Node 24.22.3 and webpack 5.96.1, emitted
+three entry scripts and 562 lazy JavaScript chunks, and authenticated all 20
+CrispBASIC payload assets. Seven of eight production Chromium scenarios passed.
+The circuit-file replacement scenario correctly failed because the replacement
+board inherited an active BASIC GPIO drive.
+
+The pinned Circuit model saves undo history and copies the old solver snapshot
+before React publishes its edit/replacement notifications. Cleaning up the old
+board from those later notifications cannot remove a drive already copied into
+the new board. The correction guards the captured model's `_saveHistory`,
+`_syncNetlist` and `syncWithExternalNets` boundaries and finishes BASIC cleanup
+before allowing the snapshot. Read-only snapshots/exports and authoritative
+foreign GPIO writes retain their behavior. Reentrant edits are refused while
+cleanup is pending; failed cleanup keeps subsequent edit attempts blocked, and
+a new session cannot stack its methods over a pending/failed older guard.
+
+Six regressions exercise the actual pinned Circuit and Board implementations:
+both rebuild paths, history/undo/redo, read-only state, foreign GPIO ownership,
+and repeated cleanup-failure refusal. Against the published gate-only revision,
+four of these tests fail; all six pass with the correction. Seventeen additional
+guard tests cover descriptors, partial setup, stale callbacks, constructor and
+cleanup reentrancy, failure retention and successive owners. The production
+assertion remains unchanged; its failure diagnostics now retain exact pin modes.
+
+Local qualification uses Node 24.22.3 and minimal exact-revision solver/model
+dependencies. Source/bridge tests report 100 passes, actual-WASM runtime/policy/
+simulation tests 147, packaging/production asset checks 17, workflow policies 39,
+runner/board-host tests 33 and the new guard/model tests 23. These overlap CI suites.
+The local WASM execution uses the authenticated artifact from run 46076485235;
+its interpreter and glue hashes match the prior milestone's binaries below.
+The new packaging tests use explicitly
+synthetic artifacts to test the checker. This workspace has insufficient free
+disk for the full GUI dependencies or local Chromium. The existing session suite
+passes 28 cases locally; its retained-debugger case requires the omitted debugger
+dependency closure and remains a full-CI gate. Corrected production qualification
+is pending; the first run's failed browser scenario is not claimed as a pass.
 
 The previous record's final documentation-only follow-up
 [46073544837](https://github.com/CrispStrobe/brickwright/actions/runs/46073544837)

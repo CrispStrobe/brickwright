@@ -258,9 +258,10 @@ function boardState (page) {
     return page.evaluate(() => {
         const runtime = window.__brickwrightStore.getState().scratchGui.vm.runtime;
         const board = runtime.circuitBoard;
+        const pins = board.getPinStates();
         return {sameDisplayedBoard: board === window.__board, timeNs: board.getTime().toString(),
             owner: Boolean(runtime.bwCrispBasicSimulation), lease: Boolean(board._externalClock),
-            inputs: board.getPinStates().every(pin => pin.mode === 'input'),
+            powered: board.powered, pins, inputs: pins.every(pin => pin.mode === 'input'),
             partIds: board.parts.map(part => part.id)};
     });
 }
@@ -402,6 +403,7 @@ scenario('production Circuit Stop and circuit-file replacement revoke a waiting 
         await page.getByTestId('bw-crispbasic-stop').click();
         await finished(page);
         const stopped = await boardState(page);
+        record.cleanup = {stopped};
         assert.equal(stopped.owner, false);
         assert.equal(stopped.lease, false);
         assert.equal(stopped.inputs, true);
@@ -414,6 +416,7 @@ scenario('production Circuit Stop and circuit-file replacement revoke a waiting 
                 assert.equal(await page.getByTestId('bw-crispbasic-input-form').count(), 1,
                     'tab navigation canceled the run before circuit replacement');
                 const beforeImport = await boardState(page);
+                record.cleanup.beforeImport = beforeImport;
                 assert.equal(beforeImport.owner, true, 'BASIC lost board ownership before circuit replacement');
                 assert.equal(beforeImport.lease, true, 'BASIC lost the solver clock before circuit replacement');
                 assert.equal(await oldBoard.evaluate(board => board === window.__board &&
@@ -422,8 +425,13 @@ scenario('production Circuit Stop and circuit-file replacement revoke a waiting 
             }});
             await codeTab(page);
             await finished(page);
-            assert.equal(await oldBoard.evaluate(board => Boolean(board._externalClock)), false);
+            record.cleanup.oldBoardAfterImport = await oldBoard.evaluate(board => ({
+                lease: Boolean(board._externalClock), pins: board.getPinStates(),
+                powered: board.powered, timeNs: board.getTime().toString()
+            }));
+            assert.equal(record.cleanup.oldBoardAfterImport.lease, false);
             const replaced = await boardState(page);
+            record.cleanup.replaced = replaced;
             assert.equal(replaced.owner, false);
             assert.equal(replaced.lease, false);
             assert.equal(replaced.inputs, true);
@@ -431,7 +439,6 @@ scenario('production Circuit Stop and circuit-file replacement revoke a waiting 
             assert.ok(!(await page.getByTestId('bw-basic-output').textContent()).includes('late'));
             await noInterpreterWorkers(page);
             await successfulOutput(page, 'PRINT STR$(FNmillis)\nEND\n', '0\r\n');
-            record.cleanup = {stopped, replaced};
         } finally { await oldBoard.dispose(); }
     }, {keepCircuitMounted: true});
 

@@ -114,7 +114,7 @@ export function createCrispBasicBoardHost({board, signal, SimulationError,
     let lease, disposed = false, pending = false, internal = false, invalidated = false;
     let interfered = false, externalPowerChange = false;
     let lastTime = origin, solverSteps = 0, elapsedMs = 0, terminalFailure = null;
-    let cleanupDone = false, disposalFailed = false, disposalFailure;
+    let cleanupDone = false, cleanupFinished = false, disposalFailed = false, disposalFailure;
     const capabilities = Object.freeze({
         schemaVersion: 1, backend: 'brickwright-board-simulation', hardware: false,
         basicBridge: false, circuitPhysics: true, digitalPins: true,
@@ -229,6 +229,7 @@ export function createCrispBasicBoardHost({board, signal, SimulationError,
             if (board.powered && !externalPowerChange) attempt(() => lease.run(() => board.setPower(oldPower)));
         }
         attempt(() => lease?.release());
+        cleanupFinished = true;
         if (disposalFailed) throw disposalFailure;
     };
     const abort = () => { try { dispose(); } catch { /* The parent invokes dispose too; no deferred effect may survive. */ } };
@@ -252,6 +253,10 @@ export function createCrispBasicBoardHost({board, signal, SimulationError,
 
     return Object.freeze({
         get state() { return disposed ? 'disposed' : 'ready'; },
+        // `state` changes immediately inside a solver callback. Model edits
+        // must wait until all synchronous pin/clock cleanup has unwound;
+        // dispose() still reports any retained failure after completion.
+        get cleanupComplete() { return cleanupFinished; },
         capabilities,
         get trace() { return Object.freeze(trace.slice()); },
         get solverSteps() { return solverSteps; },

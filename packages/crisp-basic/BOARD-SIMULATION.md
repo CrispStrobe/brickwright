@@ -120,6 +120,21 @@ otherwise cleanup restores the captured power state while its lease and topology
 remain valid. Stale cleanup cannot release a later run's lease or mutate a
 replacement board. The final trace remains available to its owner after disposal.
 
+The captured Circuit model revokes BASIC before it saves undo history or
+rebuilds the solver. This ordering matters because the model transfers the old
+board's snapshot, including GPIO, into a replacement. Cleanup therefore finishes
+before either rebuild path or a history snapshot can copy BASIC's temporary
+drives and power. Read-only board snapshots and circuit exports still expose
+the current state without ending the run. The guards apply only to that captured
+model and restore its original methods after successful cleanup.
+
+If a model mutation reenters a synchronous solver/cleanup callback, it is refused
+until cleanup has unwound. A cleanup failure remains visible and blocks repeated
+mutations of that captured model, rather than allowing a later retry to copy an
+unreleased drive. Another BASIC session cannot install over a pending or failed
+cleanup guard. A later run can use the model normally after successful cleanup;
+stale callbacks cannot remove its guards or restore an earlier owner's methods.
+
 The BASIC Reset control clears BASIC output and ends the active connection. It
 does not rewind capacitors, motors, circuit controls or the solver clock. Use
 the Circuit's own reset when a fresh electrical history is required.
@@ -152,6 +167,8 @@ milestone executes authored library calls without changing generator semantics.
 Focused tests use the actual pinned solver, the actual compiled BASIC runtime
 and the editor's production lifecycle/control seams. They check fixed
 electrical/time results as well as cancellation, ownership and resource bounds.
-See [VALIDATION.md](VALIDATION.md) for the exact revision, commands and observed
-results. This is not a full production GUI bundle qualification, complete VDU
-implementation or physical-board test.
+The production gate additionally builds the full webpack workbench and drives
+its real editor and Circuit file controls in Chromium. See
+[VALIDATION.md](VALIDATION.md) for the exact revision, commands and observed
+results. Complete VDU implementation and physical-board behavior remain outside
+these qualifications.
