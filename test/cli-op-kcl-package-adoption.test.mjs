@@ -7,14 +7,14 @@ import path from 'node:path';
 
 const root = path.resolve(import.meta.dirname, '..');
 const cuiPin = '0a1b15edb0daecd723c7c07126450d84b86e3e68';
-const boardPin = 'cc18f3c8d84d68e008450e65ddf838b8ec03c7f7';
+const boardPin = 'b47e7e09ed873b33ca2fd912b21e136decc5e677';
 const cli = path.join(root, 'node_modules/bw-circuit-ui/bin/bwc.mjs');
 const env = {...process.env}; delete env.BW_BOARD;
 const run = (file, prefix = []) => spawnSync(process.execPath,
     [...prefix, cli, 'op', file, '--kcl', '--json'],
     {cwd: root, env, encoding: 'utf8', timeout: 30000});
 
-test('static KCL adoption binds exact CUI pin and keeps the reviewed Board unchanged', () => {
+test('static KCL adoption binds the exact reviewed Board and CUI pins', () => {
     const pins = JSON.parse(readFileSync(path.join(root, 'vendor-pins.json')));
     assert.equal(pins['bw-circuit-ui'], cuiPin);
     assert.equal(pins['bw-board'], boardPin);
