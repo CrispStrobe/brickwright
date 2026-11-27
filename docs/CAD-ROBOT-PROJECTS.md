@@ -2284,3 +2284,30 @@ the smoke-test box in Chromium, and all 842 SDK file hashes and nine
 pin tests passed. The SDK build skips gzip size reporting and completed
 without the previous reporting-stage failure. Brickwright pins
 `babd27a`.
+
+### Reuse the CAD worker watchdog
+
+The simulation client keeps one watchdog for all pending requests.
+Ordinary steps keep their ten-second deadline and startup keeps its
+sixty-second deadline. Completing a request removes it from the
+pending map. When the watchdog wakes, it checks the next pending
+deadline. A stalled worker is terminated and all pending requests
+reject as before.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/059c08ae9a63ef3991ab7cf41a62a6ae7a7c19a9)
+
+Across 600 simulated worker replies, the unit probe counted two timer
+allocations including startup and one cancellation before disposal.
+In the existing Brickwright GUI host with shared Chromium, Atlas
+allocated 1,360 worker timers with SDK `babd27a` and two with `059c08a`
+over roughly six simulated seconds. Both runs passed one-click Run,
+Stop, Reset, repeat Run, and the gravity-edit restart. The new SDK
+measured 1.002× on Atlas and 1.004× on Scout in these runs. Atlas's
+previous SDK measured 0.999×. These runs establish lower timer
+traffic and show real-time playback on this Mac in this run.
+
+All 52 focused tests passed, including overlapping deadlines, worker
+disposal, telemetry, and the incoming hole-driven fastening suite.
+The real Brickwright SB3 write and load path preserved CAD document
+versions 41–47, including the byte representation of a version 47
+standard counterbored hole. Brickwright pins SDK `059c08a`.
+All 842 SDK file hashes and nine pin tests passed.

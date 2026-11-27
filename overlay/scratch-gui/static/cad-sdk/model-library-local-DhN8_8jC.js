@@ -1,4 +1,4 @@
-import { v as m, p as u } from "./sdk-8T9Zbqz1.js";
+import { v as m, p as u } from "./sdk-CJSOoIns.js";
 function h(d) {
   if (!d || typeof d != "object")
     throw new Error("Invalid local model library manifest.");

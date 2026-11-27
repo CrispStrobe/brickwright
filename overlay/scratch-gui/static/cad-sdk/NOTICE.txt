@@ -19,6 +19,11 @@ Adapted kernelCAD source (MIT):
   unmodified, not part of any package or app bundle)
 - tests/fixtures/kcad/*.kcad.ts are catalog models whose meta() declares CC0-1.0
   (see tests/fixtures/kcad/PROVENANCE.md)
+- packages/core/src/fastener-tables.ts: ISO fastener table rows (clearance, tap drill, head,
+  nut, washer and stocked-length tables) ported as data from CrispStrobe/crispcad-kernel-lab
+  `src/modeling/parts/fastenerStockTables.ts`, `fastenerIsoDims.ts` and `holeInsert.ts` at
+  c4bea5b93 (same licence and copyright header; regrouped by thread, counterbore and
+  heat-set insert rows added); the code around them is original
 are copied from w1ne/kernelCAD-web commit 964fa6cfe94ecf16c2c44b94770846ae23665d82
 with their SPDX/copyright headers retained; each file states what was modified
 (import paths, local types and, for spurGear.ts, a local error renderer). They do

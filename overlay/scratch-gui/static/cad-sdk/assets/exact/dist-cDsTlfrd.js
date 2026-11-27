@@ -1,7 +1,7 @@
 var fn = Object.defineProperty;
 var un = (e, t, n) => t in e ? fn(e, t, { enumerable: !0, configurable: !0, writable: !0, value: n }) : e[t] = n;
 var pe = (e, t, n) => un(e, typeof t != "symbol" ? t + "" : t, n);
-import { c as Wt, C as dn, s as hn, a as pn, t as _, E as mn, M as gn, b as yn, e as xn, d as dt, f as wn, g as ht, S as vn, h as Mn, i as bn, r as En, j as Sn, k as me, l as An, m as Tn, n as $n, o as Pn, p as In, q as Cn, u as _n, v as pt, w as zn, x as Nn, y as Bn, z as On, A as Fn, B as Qe, D as Rn, F as Ln, G as Dn } from "../geometry.worker-BSM4YJe5.js";
+import { c as Wt, C as dn, s as hn, a as pn, t as _, E as mn, M as gn, b as yn, e as xn, d as dt, f as wn, g as ht, S as vn, h as Mn, i as bn, r as En, j as Sn, k as me, l as An, m as Tn, n as $n, o as Pn, p as In, q as Cn, u as _n, v as zn, w as pt, x as Nn, y as Bn, z as On, A as Fn, B as Rn, D as Qe, F as Ln, G as Dn, H as kn } from "../geometry.worker-BOWujeEv.js";
 var E = class extends Error {
   constructor(t, n, o) {
     super(n, o);
@@ -24,7 +24,7 @@ function je(e, t) {
   const n = Math.hypot(t[0], t[1], t[2]);
   return n > 1e-12 || I(`${e} must be a non-zero vector.`), [t[0] / n, t[1] / n, t[2] / n];
 }
-function kn(e) {
+function Xn(e) {
   const t = e.map((o) => [...o]), n = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
   for (let o = 0; o < 64 && !(Math.abs(t[0][1]) + Math.abs(t[0][2]) + Math.abs(t[1][2]) < 1e-30); o++)
     for (const [a, s] of [[0, 1], [0, 2], [1, 2]]) {
@@ -45,7 +45,7 @@ function kn(e) {
     }
   return { values: [t[0][0], t[1][1], t[2][2]], vectors: [0, 1, 2].map((o) => [n[0][o], n[1][o], n[2][o]]) };
 }
-function Xn(e, t) {
+function jn(e, t) {
   const n = new Float64Array(e.length);
   for (let o = 0; o < t.length; o += 3) {
     const r = t[o] * 3, a = t[o + 1] * 3, s = t[o + 2] * 3, i = e[a] - e[r], f = e[a + 1] - e[r + 1], c = e[a + 2] - e[r + 2], u = e[s] - e[r], l = e[s + 1] - e[r + 1], d = e[s + 2] - e[r + 2], g = f * d - c * l, x = c * u - i * d, y = i * l - f * u;
@@ -70,7 +70,7 @@ function P(e, t) {
     throw new E("kernel-failure", `SMLib ${e} failed: ${o}`, { cause: n });
   }
 }
-function jn(e) {
+function Un(e) {
   return { sm: e, solid: (o, r) => {
     if (!(r instanceof e.Part)) throw new E("kernel-failure", `SMLib ${o} did not produce a solid (got ${r?.constructor?.name ?? typeof r}).`);
     return fe(r);
@@ -87,7 +87,7 @@ function jn(e) {
   } };
 }
 var Oe = 1e-7, gt = 0.1, W = (e, t) => [e[0] - t[0], e[1] - t[1], e[2] - t[2]], Y = (e, t) => [e[0] + t[0], e[1] + t[1], e[2] + t[2]], G = (e, t) => [e[0] * t, e[1] * t, e[2] * t], j = (e, t) => e[0] * t[0] + e[1] * t[1] + e[2] * t[2], Gt = (e, t) => [e[1] * t[2] - e[2] * t[1], e[2] * t[0] - e[0] * t[2], e[0] * t[1] - e[1] * t[0]], He = (e) => Math.sqrt(j(e, e)), J = (e, t) => He(W(e, t)), lt = (e) => G(e, 1 / He(e));
-function Un(e, t, n, o) {
+function Wn(e, t, n, o) {
   const r = W(e, t), a = Math.cos(o), s = Math.sin(o);
   return Y(t, Y(Y(G(r, a), G(Gt(n, r), s)), G(n, j(n, r) * (1 - a))));
 }
@@ -106,9 +106,9 @@ function yt(e, t, n) {
   const i = W(n.pos, t.pos);
   j(i, r) < -1e-7 && (r = G(r, -1)), j(i, a) < 1e-7 && (a = G(a, -1));
   const f = Gt(r, a), c = Y(G(a, j(i, r)), G(r, -j(i, a))), u = j(c, r), l = j(c, a), d = u * l > 0 && Math.abs(u) > 1e-4 && Math.abs(l) > 1e-4 ? -1 : 1, g = Math.acos(Math.max(-1, Math.min(1, j(r, a) / (He(r) * He(a)))));
-  return o = Un(o, n.pos, lt(f), g * d), o;
+  return o = Wn(o, n.pos, lt(f), g * d), o;
 }
-function Wn(e, t, n, o) {
+function Gn(e, t, n, o) {
   const r = W(t, e), a = W(o, n), s = W(e, n), i = j(r, r), f = j(r, a), c = j(a, a), u = j(r, s), l = j(a, s), d = i * c - f * f;
   if (!(d <= 1e-24 * i * c))
     return { s: (f * l - c * u) / d, t: (i * l - f * u) / d };
@@ -117,7 +117,7 @@ function xt(e, t, n) {
   const o = W(n, t);
   return j(W(e, t), o) / j(o, o);
 }
-function Gn(e, t, n) {
+function Hn(e, t, n) {
   const o = [1 / 0, 1 / 0, 1 / 0], r = [-1 / 0, -1 / 0, -1 / 0];
   for (const { p: l } of e) for (let d = 0; d < 3; d++)
     o[d] = Math.min(o[d], l[d]), r[d] = Math.max(r[d], l[d]);
@@ -138,7 +138,7 @@ function Gn(e, t, n) {
     f(d) && i.push({ vertex: l, p: l.p, d: J(l.p, Y(t, G(W(s, t), d))) });
   }
   for (let l = 0; l < e.length; l++) {
-    const d = e[l].p, g = e[(l + 1) % e.length].p, x = Wn(t, s, d, g);
+    const d = e[l].p, g = e[(l + 1) % e.length].p, x = Gn(t, s, d, g);
     if (!x || !f(x.s) || !f(x.t)) continue;
     const y = Y(d, G(W(g, d), x.t));
     i.push({ edge: l, t: x.t, p: y, d: J(y, Y(t, G(W(s, t), x.s))) });
@@ -150,7 +150,7 @@ function Gn(e, t, n) {
   return u;
 }
 function wt(e, t, n, o, r) {
-  const a = Gn(e, t, n);
+  const a = Hn(e, t, n);
   if (!a) return;
   if (a.vertex) return a.vertex;
   const s = a.edge, i = e[s], f = e[(s + 1) % e.length], c = a.t;
@@ -161,10 +161,10 @@ function wt(e, t, n, o, r) {
   const d = { id: r(), p: a.p };
   return e.splice(s + 1, 0, d), d;
 }
-function Hn(e, t = "authored") {
+function Kn(e, t = "authored") {
   const n = e.length;
   if (n < 2) return e.map((p) => [...p]);
-  if (e.every((p) => p.length === e[0].length)) return t === "closest" ? Kn(e) : e.map((p) => [...p]);
+  if (e.every((p) => p.length === e[0].length)) return t === "closest" ? Yn(e) : e.map((p) => [...p]);
   let o = 0;
   const r = () => o++, a = e.map((p) => p.map((h) => ({ id: r(), p: h }))), s = e.map(Ht), i = e.reduce((p, h) => p + h.length, 0), f = /* @__PURE__ */ new Map(), c = /* @__PURE__ */ new Set();
   for (let p = n - 1; p > 0; p--) {
@@ -217,7 +217,7 @@ function Hn(e, t = "authored") {
   }
   return y;
 }
-function Kn(e) {
+function Yn(e) {
   return Yt(e).map((t, n) => Kt(e[n], t));
 }
 var Kt = (e, { start: t, forward: n }) => Array.from({ length: e.length }, (o, r) => e[n ? (t + r) % e.length : ((t - r) % e.length + e.length) % e.length]);
@@ -256,11 +256,11 @@ var ft = [[1, 0, 0], [0, 1, 0], [0, 0, 1]], nt = (e, t) => e[0] * t[0] + e[1] * 
     n[0] += o * r[0], n[1] += o * r[1], n[2] += o * r[2];
   return n;
 };
-function Yn(e) {
+function Vn(e) {
   const t = e.bbox(), n = Math.max(1, t.diagonal), o = 1e-7 * n, r = { min: [1 / 0, 1 / 0, 1 / 0], max: [-1 / 0, -1 / 0, -1 / 0], tol: o };
   for (const a of e.vertices()) ne(r, [a.x, a.y, a.z]);
-  for (const a of e.edges({ seams: !0 })) Vn(a, r);
-  for (const a of e.faces()) Jn(a, r);
+  for (const a of e.edges({ seams: !0 })) Zn(a, r);
+  for (const a of e.faces()) eo(a, r);
   return Number.isFinite(r.min[0]) ? { min: r.min, max: r.max } : { min: [t.min.x, t.min.y, t.min.z], max: [t.max.x, t.max.y, t.max.z] };
 }
 function ne(e, t) {
@@ -268,18 +268,18 @@ function ne(e, t) {
     t[n] < e.min[n] && (e.min[n] = t[n]), t[n] > e.max[n] && (e.max[n] = t[n]);
 }
 var Le = (e, t) => t.some((n, o) => n < e.min[o] - e.tol || n > e.max[o] + e.tol), Vt = (e, t) => t.some((n) => Le(e, [n.x, n.y, n.z]));
-function Vn(e, t) {
+function Zn(e, t) {
   ne(t, oe(e.start)), ne(t, oe(e.end));
   const n = e.geomType;
-  if (n === "line" || n === "circle" && Zn(e, t)) return;
+  if (n === "line" || n === "circle" && qn(e, t)) return;
   let o = null;
   try {
     if (o = e.nurbs(), !Vt(t, o.points)) return;
   } catch {
   }
-  vt(n === "bspline" && o ? Qn(o) : { t0: 0, t1: 1, spans: 1, at: (r) => oe(e.pointAt(r)) }, t);
+  vt(n === "bspline" && o ? Jn(o) : { t0: 0, t1: 1, spans: 1, at: (r) => oe(e.pointAt(r)) }, t);
 }
-function Zn(e, t) {
+function qn(e, t) {
   const n = oe(e.arcCenter), o = Fe(oe(e.normal)), r = e.radius;
   if (!o) return !1;
   for (const a of ft) {
@@ -301,19 +301,19 @@ function vt(e, t) {
   for (let s = 0; s < 3; s++) for (const i of [1, -1]) {
     let f = 0;
     for (let u = 1; u <= n; u++) i * r[u][s] > i * r[f][s] && (f = u);
-    qn((u) => {
+    Qn((u) => {
       const l = e.at(u);
       return ne(t, l), i * l[s];
     }, a(Math.max(0, f - 1)), a(Math.min(n, f + 1)));
   }
 }
-function qn(e, t, n) {
+function Qn(e, t, n) {
   const o = (Math.sqrt(5) - 1) / 2, r = 1e-12 * Math.max(1, Math.abs(t), Math.abs(n));
   let a = n - o * (n - t), s = t + o * (n - t), i = e(a), f = e(s);
   for (let c = 0; c < 60 && n - t > r; c++)
     i < f ? (t = a, a = s, i = f, s = t + o * (n - t), f = e(s)) : (n = s, s = a, f = i, a = n - o * (n - t), i = e(a));
 }
-function Qn(e) {
+function Jn(e) {
   const t = e.degree, n = e.knots, o = e.points.length - 1, r = e.weights, a = e.points.map((l, d) => {
     const g = r ? r[d] : 1;
     return [l.x * g, l.y * g, l.z * g, g];
@@ -334,28 +334,28 @@ function Qn(e) {
   };
   return { t0: s, t1: i, spans: Math.max(1, f), at: u };
 }
-function Jn(e, t) {
+function eo(e, t) {
   const n = e.geomType;
   if (n === "plane" || n === "cylinder" || n === "cone" || n === "extrusion") return;
   const o = (r) => Le(t, r) && e.distanceTo(r) <= t.tol;
-  if (n === "sphere") return eo(e, t, o);
-  if (!(n === "torus" && to(e, t, o)) && !e.isPlanar) {
+  if (n === "sphere") return to(e, t, o);
+  if (!(n === "torus" && no(e, t, o)) && !e.isPlanar) {
     try {
       const r = e.nurbs();
       if (r.degrees[0] === 1 || r.degrees[1] === 1 || !Vt(t, r.points.flat())) return;
     } catch {
     }
-    oo(e, t);
+    ro(e, t);
   }
 }
-function eo(e, t, n) {
+function to(e, t, n) {
   const o = oe(e.axis.origin), r = e.radius;
   for (const a of ft) for (const s of [1, -1]) {
     const i = ce(o, [s * r, a]);
     n(i) && ne(t, i);
   }
 }
-function to(e, t, n) {
+function no(e, t, n) {
   const o = e.axis, r = oe(o.origin), a = Fe(oe(o.direction)), s = e.majorRadius, i = e.radius;
   if (!a) return !1;
   for (const f of ft) {
@@ -365,11 +365,11 @@ function to(e, t, n) {
         const d = ce(r, [u * s, c], [l * i, f]);
         n(d) && ne(t, d);
       }
-    else no(r, a, s, i, t, n);
+    else oo(r, a, s, i, t, n);
   }
   return !0;
 }
-function no(e, t, n, o, r, a) {
+function oo(e, t, n, o, r, a) {
   const s = Fe(Math.abs(t[0]) < 0.9 ? ce([1, 0, 0], [-t[0], t]) : ce([0, 1, 0], [-t[1], t])), i = [t[1] * s[2] - t[2] * s[1], t[2] * s[0] - t[0] * s[2], t[0] * s[1] - t[1] * s[0]];
   for (const f of [1, -1])
     if (Le(r, ce(e, [f * o, t])))
@@ -381,18 +381,18 @@ function no(e, t, n, o, r, a) {
         }
       }
 }
-function oo(e, t) {
+function ro(e, t) {
   const o = [];
   for (let r = 0; r <= 24; r++) for (let a = 0; a <= 24; a++) o.push({ u: r / 24, v: a / 24, p: oe(e.positionAt(r / 24, a / 24)) });
   for (let r = 0; r < 3; r++) for (const a of [1, -1]) {
     const i = o.filter((c) => Le(t, c.p)).sort((c, u) => a * u.p[r] - a * c.p[r]).find((c) => e.distanceTo(c.p) <= t.tol);
     if (!i) continue;
     ne(t, i.p);
-    const f = ro(e, i, r, a, 1 / 24);
+    const f = so(e, i, r, a, 1 / 24);
     e.distanceTo(f) <= t.tol && ne(t, f);
   }
 }
-function ro(e, t, n, o, r) {
+function so(e, t, n, o, r) {
   let { u: a, v: s } = t, i = o * t.p[n], f = t.p;
   for (let c = r; c > 1e-9; c /= 2)
     for (let u = !0, l = 0; u && l < 64; l++) {
@@ -406,13 +406,13 @@ function ro(e, t, n, o, r) {
 }
 var Mt = 1024, le = (e, t) => [e[0] - t[0], e[1] - t[1], e[2] - t[2]], V = (e, t) => e[0] * t[0] + e[1] * t[1] + e[2] * t[2], Ke = (e, t) => [e[1] * t[2] - e[2] * t[1], e[2] * t[0] - e[0] * t[2], e[0] * t[1] - e[1] * t[0]];
 function Zt(e) {
-  const n = 1e-9 * Math.max(1, ...e.flatMap((a) => a.map(Math.abs))), o = so(e, n);
+  const n = 1e-9 * Math.max(1, ...e.flatMap((a) => a.map(Math.abs))), o = ao(e, n);
   if (o.length > Mt) throw new E("unsupported", `Hull of ${o.length} distinct vertices exceeds the exact hull budget (${Mt}).`);
   if (o.length < 4) throw new E("invalid-input", "A hull needs at least four non-coplanar points.");
-  const r = ao(o, n);
-  return io(o, r, Math.min(n, 1e-9));
+  const r = io(o, n);
+  return co(o, r, Math.min(n, 1e-9));
 }
-function so(e, t) {
+function ao(e, t) {
   const n = Math.max(t * 4, 1e-300), o = /* @__PURE__ */ new Map(), r = [];
   for (const a of e) {
     const s = a.map((c) => Math.floor(c / n));
@@ -432,7 +432,7 @@ function bt(e, t, n, o) {
   const r = Ke(le(e[n], e[t]), le(e[o], e[t])), a = Math.hypot(...r), s = a > 0 ? [r[0] / a, r[1] / a, r[2] / a] : [0, 0, 0], i = [(e[t][0] + e[n][0] + e[o][0]) / 3, (e[t][1] + e[n][1] + e[o][1]) / 3, (e[t][2] + e[n][2] + e[o][2]) / 3];
   return { v: [t, n, o], n: s, d: V(s, i), area: a / 2, alive: !0 };
 }
-function ao(e, t) {
+function io(e, t) {
   const n = e.length;
   let o = 0;
   for (let h = 1; h < n; h++) e[h][0] < e[o][0] && (o = h);
@@ -499,7 +499,7 @@ function ao(e, t) {
   }
   return u.filter((h) => h.alive);
 }
-function io(e, t, n) {
+function co(e, t, n) {
   const o = e.length, r = /* @__PURE__ */ new Map();
   t.forEach((d, g) => {
     const [x, y, p] = d.v;
@@ -519,7 +519,7 @@ function io(e, t, n) {
         V(b.n, g) < 1 - 1e-6 || b.v.some((A) => Math.abs(V(g, e[A]) - x) > n) || (a[w] = y, p.push(w));
       }
     }
-    const h = p.length > 1 ? co(p.map((m) => t[m].v), o) : t[d].v.slice();
+    const h = p.length > 1 ? lo(p.map((m) => t[m].v), o) : t[d].v.slice();
     if (h) s.push(h);
     else {
       a[d] = y, s.push(t[d].v.slice());
@@ -535,7 +535,7 @@ function io(e, t, n) {
   }), u = [...new Set(c.flat())].sort((d, g) => d - g), l = new Map(u.map((d, g) => [d, g]));
   return { points: u.map((d) => e[d]), faces: c.map((d) => d.map((g) => l.get(g))) };
 }
-function co(e, t) {
+function lo(e, t) {
   const n = /* @__PURE__ */ new Set();
   for (const [s, i, f] of e) for (const [c, u] of [[s, i], [i, f], [f, s]]) n.add(c * t + u);
   const o = /* @__PURE__ */ new Map();
@@ -553,10 +553,10 @@ function co(e, t) {
   }
   return a.length === o.size ? a : null;
 }
-function lo(e, t, n = 1e-9) {
+function fo(e, t, n = 1e-9) {
   const o = [];
   for (const r of t) {
-    const a = fo(e, r);
+    const a = uo(e, r);
     if (r.length === 3 || !a) {
       o.push([...r]);
       continue;
@@ -566,11 +566,11 @@ function lo(e, t, n = 1e-9) {
       o.push([...r]);
       continue;
     }
-    o.push(...uo(e, r, a));
+    o.push(...ho(e, r, a));
   }
   return o;
 }
-function fo(e, t) {
+function uo(e, t) {
   const n = [0, 0, 0];
   for (let r = 0; r < t.length; r++) {
     const a = e[t[r]], s = e[t[(r + 1) % t.length]];
@@ -579,7 +579,7 @@ function fo(e, t) {
   const o = Math.hypot(...n);
   return o > 0 ? [n[0] / o, n[1] / o, n[2] / o] : null;
 }
-function uo(e, t, n) {
+function ho(e, t, n) {
   const o = Math.abs(n[0]) < 0.9 ? [1, 0, 0] : [0, 1, 0], r = Ke(n, o), a = Math.hypot(...r), s = [r[0] / a, r[1] / a, r[2] / a], i = Ke(n, s), f = new Map(t.map((x) => [x, [V(e[x], s), V(e[x], i)]])), c = (x, y, p) => {
     const [h, m] = f.get(x), [M, T] = f.get(y), [v, S] = f.get(p);
     return (M - h) * (S - m) - (T - m) * (v - h);
@@ -601,7 +601,7 @@ function uo(e, t, n) {
   else d.push(l);
   return d;
 }
-function ho(e, t) {
+function po(e, t) {
   const n = Math.max(1, ...e.flatMap((r) => r.map(Math.abs))), o = 1e-9 * n;
   for (const r of t) {
     const a = [0, 0, 0];
@@ -616,12 +616,12 @@ function ho(e, t) {
   }
   return !0;
 }
-function po(e) {
+function mo(e) {
   const t = e.length;
   if (t < 4) return null;
   let n = 1;
   for (const r of e) n = Math.max(n, Math.abs(r[0]), Math.abs(r[1]));
-  const o = mo(e, 1e-9 * n);
+  const o = go(e, 1e-9 * n);
   for (let r = 0; r < t; r++) {
     for (let a = r + 2; a < t; a++) {
       const s = r === 0 && a === t - 1 ? null : o.edgesCross(r, a);
@@ -631,7 +631,7 @@ function po(e) {
   }
   return null;
 }
-function mo(e, t) {
+function go(e, t) {
   const n = e.length, o = (i) => e[(i % n + n) % n], r = (i, f, c) => {
     const u = Math.hypot(f[0] - i[0], f[1] - i[1]), l = u <= t ? 0 : ((f[0] - i[0]) * (c[1] - i[1]) - (f[1] - i[1]) * (c[0] - i[0])) / u;
     return Math.abs(l) <= t ? 0 : Math.sign(l);
@@ -662,7 +662,7 @@ function mo(e, t) {
   };
 }
 var Z = (e) => [e[0], e[1], 0];
-function go(e, t, n) {
+function yo(e, t, n) {
   let o = t;
   const r = [], a = (s, i) => ((!Array.isArray(i) || i.length !== 2) && I(`${s} must be a 2D point.`), X(s, i[0], i[1]), i);
   for (const s of n) {
@@ -672,12 +672,12 @@ function go(e, t, n) {
   return Math.hypot(o[0] - t[0], o[1] - t[1]) > 1e-9 && r.push(e.Line(Z(o), Z(t))), r;
 }
 function Et(e, t) {
-  const n = po(t);
+  const n = mo(t);
   if (!n) return;
   const [o, r] = n.at.map((a) => +a.toPrecision(6));
   I(`The ${e} crosses itself at (${o}, ${r}), so it bounds no region. Reorder its points so no edges cross, or give each region its own contour.`);
 }
-function yo(e) {
+function xo(e) {
   const t = [];
   for (const n of e) {
     const o = n.pointAt(0), r = n.pointAt(1), s = Math.abs(n.length - Math.hypot(r.x - o.x, r.y - o.y)) <= 1e-9 * Math.max(1, n.length) ? 1 : 32;
@@ -688,7 +688,7 @@ function yo(e) {
   }
   return t;
 }
-function xo(e) {
+function wo(e) {
   return {
     polygon(t) {
       (!Array.isArray(t) || !t.length) && I("A polygon profile needs at least one contour.");
@@ -713,7 +713,7 @@ function xo(e) {
     },
     path(t, n) {
       return (!Array.isArray(n) || !n.length) && I("A path profile needs at least one segment."), X("Path start", ...Array.isArray(t) ? t : [NaN]), P("path", () => {
-        const o = go(e, t, n), r = yo(o);
+        const o = yo(e, t, n), r = xo(o);
         Et("path outline", r);
         const a = r.length === o.length ? r.map(([s, i]) => [s, i, 0]) : void 0;
         return H(e.makeFace(new e.Wire(o)), new e.Wire(o), a);
@@ -746,7 +746,7 @@ function xo(e) {
   };
 }
 var ie = (e) => [e.x, e.y, e.z], St = (e) => e._identity(), At = 48;
-function wo(e) {
+function vo(e) {
   const t = e.degree, n = e.knots, o = e.points.length - 1, r = e.weights, a = e.points.map((c, u) => {
     const l = r ? r[u] : 1;
     return [c.x * l, c.y * l, c.z * l, l];
@@ -764,7 +764,7 @@ function wo(e) {
     return [d[0] / d[3], d[1] / d[3], d[2] / d[3]];
   };
 }
-function vo(e, t) {
+function Mo(e, t) {
   const n = ie(e.start), o = ie(e.end);
   if (t === "line") return [n, o];
   let r = (i) => ie(e.pointAt(i)), a = 16;
@@ -773,7 +773,7 @@ function vo(e, t) {
     a = Math.max(4, Math.min(At, Math.ceil(48 * i)));
   } else if (t === "bspline")
     try {
-      const i = e.nurbs(), f = wo(i), c = f(0), u = (l, d) => Math.hypot(l[0] - d[0], l[1] - d[1], l[2] - d[2]);
+      const i = e.nurbs(), f = vo(i), c = f(0), u = (l, d) => Math.hypot(l[0] - d[0], l[1] - d[1], l[2] - d[2]);
       r = u(c, n) <= u(c, o) ? f : (l) => f(1 - l), a = Math.max(8, Math.min(At, 4 * (i.points.length - i.degree)));
     } catch {
     }
@@ -781,7 +781,7 @@ function vo(e, t) {
   for (let i = 1; i < a; i++) s.push(r(i / a));
   return s.push(o), s;
 }
-function Mo(e) {
+function bo(e) {
   const t = [...e.faces()], n = /* @__PURE__ */ new Map(), o = t.map((a, s) => {
     n.set(St(a), s);
     const i = a.geomType, f = a.interiorPoint(), c = { index: s, name: a.name, surface: i, area: a.area, point: ie(f), normal: ie(a.normalAt(f)) };
@@ -791,12 +791,12 @@ function Mo(e) {
     }
     return c;
   }), r = [...e.edges()].map((a, s) => {
-    const i = a.geomType, f = vo(a, i), c = [...a.faces()].map((l) => n.get(St(l))).filter((l) => l !== void 0), u = { index: s, curve: i, faces: c, length: a.length, closed: a.isClosed, points: f };
+    const i = a.geomType, f = Mo(a, i), c = [...a.faces()].map((l) => n.get(St(l))).filter((l) => l !== void 0), u = { index: s, curve: i, faces: c, length: a.length, closed: a.isClosed, points: f };
     return i === "circle" ? { ...u, radius: a.radius, center: ie(a.arcCenter), axis: ie(a.normal) } : u;
   });
   return { faces: o, edges: r };
 }
-function bo(e, t) {
+function Eo(e, t) {
   const n = [...e.faces()];
   if (t.length !== n.length) throw new RangeError(`nameFaces: ${t.length} names for ${n.length} faces.`);
   let o = e;
@@ -804,7 +804,7 @@ function bo(e, t) {
     r !== null && (o = o.named(r === "" ? null : r, { faces: [n[a]] }));
   }), o;
 }
-function Eo(e, t) {
+function So(e, t) {
   const n = [...e.edges()];
   if (!t.length) throw new RangeError("Select at least one edge.");
   if (new Set(t).size !== t.length) throw new RangeError("Each edge may be selected once.");
@@ -813,15 +813,15 @@ function Eo(e, t) {
     return n[o];
   });
 }
-var So = 0.01, Ao = 10, To = "MIT AND Apache-2.0", xe = 65536, ot, Se, $o = () => new URL("" + new URL("smlibwasm-Bw7fxXQ_.wasm", import.meta.url).href, import.meta.url);
-async function Po(e) {
+var Ao = 0.01, To = 10, $o = "MIT AND Apache-2.0", xe = 65536, ot, Se, Po = () => new URL("" + new URL("smlibwasm-Bw7fxXQ_.wasm", import.meta.url).href, import.meta.url);
+async function Io(e) {
   if (e.wasmModule) return e.wasmModule;
   if (e.wasmBinary) return e.wasmBinary;
-  const t = $o(), n = e.locateFile ? e.locateFile("smlibwasm.wasm", new URL(".", t).href) : t.href, o = !!globalThis.process?.versions?.node;
+  const t = Po(), n = e.locateFile ? e.locateFile("smlibwasm.wasm", new URL(".", t).href) : t.href, o = !!globalThis.process?.versions?.node;
   if (n.startsWith("file:") || o && !/^[a-z]+:/i.test(n)) {
-    const { readFile: a } = await import("../geometry.worker-BSM4YJe5.js").then(function(i) {
+    const { readFile: a } = await import("../geometry.worker-BOWujeEv.js").then(function(i) {
       return i._;
-    }), { fileURLToPath: s } = await import("../geometry.worker-BSM4YJe5.js").then(function(i) {
+    }), { fileURLToPath: s } = await import("../geometry.worker-BOWujeEv.js").then(function(i) {
       return i._;
     });
     return a(n.startsWith("file:") ? s(n) : n);
@@ -831,7 +831,7 @@ async function Po(e) {
   return new Uint8Array(await r.arrayBuffer());
 }
 var se = { module: "a", name: "D" };
-function Io(e, t, n) {
+function Co(e, t, n) {
   const o = Math.floor(t / xe);
   return (r, a) => {
     let s;
@@ -845,7 +845,7 @@ function Io(e, t, n) {
       }
     }), (async () => {
       if (!i || typeof f != "function") throw new Error(`the loader has no heap-resize import ${se.module}.${se.name} to hold the memory ceiling with`);
-      const c = await Po(e), u = c instanceof WebAssembly.Module ? c : await WebAssembly.compile(c);
+      const c = await Io(e), u = c instanceof WebAssembly.Module ? c : await WebAssembly.compile(c);
       if (!WebAssembly.Module.imports(u).some((x) => x.module === se.module && x.name === se.name && x.kind === "function"))
         throw new Error(`the module imports no function ${se.module}.${se.name}: it is not the pinned smlibwasm build`);
       const l = await WebAssembly.instantiate(u, r), d = Object.values(l.exports).find((x) => x instanceof WebAssembly.Memory);
@@ -863,7 +863,7 @@ function Io(e, t, n) {
     })().catch((c) => n(c instanceof Error ? c : new Error(String(c)))), {};
   };
 }
-async function Co(e) {
+async function _o(e) {
   const { init: t } = await import("./chunk-WNM5TYC5-DPBFlphI.js").then(function(a) {
     return a.c;
   }), { maxMemoryBytes: n, ...o } = e, r = { ...o };
@@ -878,7 +878,7 @@ async function Co(e) {
     };
     const i = new Promise((c, u) => {
       s = u;
-    }), f = Promise.race([t({ instantiateWasm: Io(r, n, s) }), i]);
+    }), f = Promise.race([t({ instantiateWasm: Co(r, n, s) }), i]);
     Se = { bytes: a, loaded: f };
     try {
       const c = await f;
@@ -891,10 +891,10 @@ async function Co(e) {
   }
 }
 var Tt = (e) => {
-  const t = e.tolerance ?? So, n = e.angleDeg ?? Ao;
+  const t = e.tolerance ?? Ao, n = e.angleDeg ?? To;
   return K("Tessellation tolerance and angle", t, n), { tolerance: t, angle: n };
 };
-function _o({ sm: e, solid: t }) {
+function zo({ sm: e, solid: t }) {
   return {
     box(n) {
       return K("Box size", ...n), P("Box", () => t("Box", e.Box(n[0], n[1], n[2])));
@@ -916,7 +916,7 @@ function _o({ sm: e, solid: t }) {
       for (const r of n) X("Polyhedron points", r[0], r[1], r[2]);
       for (const r of o) (!Array.isArray(r) || r.length < 3 || r.some((a) => !Number.isInteger(a) || a < 0 || a >= n.length)) && I("Polyhedron faces must index at least three existing points.");
       return P("stitch (polyhedron)", () => e.scope(() => {
-        const r = lo(n, o).map((s) => {
+        const r = fo(n, o).map((s) => {
           const i = s.map((f) => te(n[f]));
           return e.makeFace(e.Polyline(...i, i[0]));
         }), a = e.stitch(...r);
@@ -926,21 +926,21 @@ function _o({ sm: e, solid: t }) {
   };
 }
 function qt(e, t, n) {
-  return (Hn(t, n) ?? I("The loft sections cannot be matched vertex to vertex.")).map((r) => new e.Wire(r.map((a, s) => e.Line(te(a), te(r[(s + 1) % r.length])))));
+  return (Kn(t, n) ?? I("The loft sections cannot be matched vertex to vertex.")).map((r) => new e.Wire(r.map((a, s) => e.Line(te(a), te(r[(s + 1) % r.length])))));
 }
-var zo = 1e-6, ge = (e) => [e.x, e.y, e.z];
-function No(e, t) {
-  const n = t.map((i, f) => Bo(i, f));
+var No = 1e-6, ge = (e) => [e.x, e.y, e.z];
+function Bo(e, t) {
+  const n = t.map((i, f) => Oo(i, f));
   if (n.every((i) => i.every((f) => f.geomType === "line")))
     return qt(e, n.map((i) => i.map((f) => ge(f.start))), "closest");
   if (n.some((i) => i.length !== n[0].length))
     throw new E("unsupported", `Loft pairing 'closest' matches sections with different edge counts (${n.map((i) => i.length).join(", ")}) only when every edge is straight; these have curved edges. Use pairing 'authored', or give the sections equal edge counts.`);
   const o = (i) => i.some((f, c) => {
     const u = i[(c + i.length - 1) % i.length].tangentAt(1), l = f.tangentAt(0);
-    return Math.acos(Math.max(-1, Math.min(1, u.x * l.x + u.y * l.y + u.z * l.z))) > zo;
+    return Math.acos(Math.max(-1, Math.min(1, u.x * l.x + u.y * l.y + u.z * l.z))) > No;
   });
   if (!n.some(o)) return;
-  const r = n.map((i) => ({ pos: Oo(i), axis: [0, 0, 1] })), a = Yt(n.map((i) => i.map((f) => ge(f.start))), r), s = t.map((i) => !!Ge(i.profile));
+  const r = n.map((i) => ({ pos: Fo(i), axis: [0, 0, 1] })), a = Yt(n.map((i) => i.map((f) => ge(f.start))), r), s = t.map((i) => !!Ge(i.profile));
   return n.map((i, f) => {
     const { start: c, forward: u } = a[f], l = i.length, d = Array.from({ length: l }, (g, x) => u ? i[(c + x) % l] : i[((c - 1 - x) % l + l) % l]);
     return new e.Wire(d.map((g) => {
@@ -952,7 +952,7 @@ function No(e, t) {
     }));
   });
 }
-function Bo(e, t) {
+function Oo(e, t) {
   const n = (s) => {
     throw new E("unsupported", `Loft pairing 'closest' needs single-outline sections; section ${t + 1} ${s}. Use pairing 'authored' for it.`);
   };
@@ -968,7 +968,7 @@ function Bo(e, t) {
   }
   return r;
 }
-function Oo(e) {
+function Fo(e) {
   let n = 0;
   const o = [0, 0, 0];
   for (const r of e) {
@@ -981,7 +981,7 @@ function Oo(e) {
   }
   return [o[0] / n, o[1] / n, o[2] / n];
 }
-function Fo({ sm: e, solid: t }) {
+function Ro({ sm: e, solid: t }) {
   return {
     extrude(n, o) {
       return K("Extrusion height", o), P("extrude", () => t("extrude", e.extrude(k(n), o)));
@@ -1001,7 +1001,7 @@ function Fo({ sm: e, solid: t }) {
         if (s.every((u) => u !== void 0) && (i || r === "closest"))
           return t("loft", e.loft(qt(e, n.map((u) => mt(u.profile).map((l) => [l[0] + u.at[0], l[1] + u.at[1], l[2] + u.at[2]])), r), { ruled: a }));
         if (r === "closest") {
-          const u = No(e, n);
+          const u = Bo(e, n);
           if (u) return t("loft", e.loft(u, { ruled: a }));
         }
         const c = (n.every((u) => Ge(u.profile)) ? n.map((u) => Ge(u.profile).translate(te(u.at))) : void 0) ?? n.map((u) => k(u.profile).translate(te(u.at)));
@@ -1018,7 +1018,7 @@ function Fo({ sm: e, solid: t }) {
     }
   };
 }
-function Ro({ sm: e, solid: t }) {
+function Lo({ sm: e, solid: t }) {
   return {
     union: (n, ...o) => P("fuse", () => t("fuse", o.length ? e.fuse(z(n), ...o.map(z)) : z(n))),
     subtract: (n, ...o) => P("cut", () => t("cut", o.length ? e.cut(z(n), ...o.map(z)) : z(n))),
@@ -1042,13 +1042,13 @@ function Ro({ sm: e, solid: t }) {
     scale: (n, o) => (X("Scale factors", ...o), o.some((r) => r === 0) && I("A zero scale factor flattens the solid."), P("scale", () => fe(z(n).scale(te(o), [0, 0, 0]))))
   };
 }
-function Lo(e) {
+function Do(e) {
   const { sm: t, solid: n, face: o } = e, r = (s, i) => {
     if (i === "all") return s.edges();
     if (i && typeof i == "object" && "edgeIndices" in i) {
       Array.isArray(i.edgeIndices) || I("edgeIndices must be an array of edge indices.");
       try {
-        return Eo(s, i.edgeIndices);
+        return So(s, i.edgeIndices);
       } catch (f) {
         throw f instanceof RangeError && I(f.message), f;
       }
@@ -1058,10 +1058,10 @@ function Lo(e) {
   return {
     fillet: (s, i, f = "all") => (K("Fillet radius", i), P("fillet", () => n("fillet", t.fillet(r(z(s), f), i)))),
     chamfer: (s, i, f = "all") => (K("Chamfer distance", i), P("chamfer", () => n("chamfer", t.chamfer(r(z(s), f), i)))),
-    topology: (s) => P("topology", () => t.scope(() => Mo(z(s)))),
+    topology: (s) => P("topology", () => t.scope(() => bo(z(s)))),
     nameFaces: (s, i) => ((!Array.isArray(i) || i.some((f) => f !== null && typeof f != "string")) && I("Face names must be strings or null."), P("named", () => {
       try {
-        return n("named", bo(z(s), i));
+        return n("named", Eo(z(s), i));
       } catch (f) {
         throw f instanceof RangeError && I(f.message), f;
       }
@@ -1076,14 +1076,14 @@ function Lo(e) {
     }
   };
 }
-function Do({ sm: e }) {
+function ko({ sm: e }) {
   return {
     volume: (t) => P("volume", () => z(t).volume),
     area: (t) => P("area", () => z(t).area),
     // Not SMLib's bbox(): it misses interior extremes of some rotated spheres (see bbox.ts).
-    bbox: (t) => P("bbox", () => Yn(z(t))),
+    bbox: (t) => P("bbox", () => Vn(z(t))),
     massProperties: (t) => P("massProperties", () => {
-      const n = z(t).massProperties(1), o = n.inertia, r = (f, c) => (o[f][c] + o[c][f]) / 2, a = [[o[0][0], r(0, 1), r(0, 2)], [r(0, 1), o[1][1], r(1, 2)], [r(0, 2), r(1, 2), o[2][2]]], { values: s, vectors: i } = kn(a);
+      const n = z(t).massProperties(1), o = n.inertia, r = (f, c) => (o[f][c] + o[c][f]) / 2, a = [[o[0][0], r(0, 1), r(0, 2)], [r(0, 1), o[1][1], r(1, 2)], [r(0, 2), r(1, 2), o[2][2]]], { values: s, vectors: i } = Xn(a);
       return { volume: n.volume, centroid: [n.center.x, n.center.y, n.center.z], inertia: a, principalMoments: s, principalAxes: i };
     }),
     isValid: (t) => P("isValid", () => z(t).isValid()),
@@ -1092,13 +1092,13 @@ function Do({ sm: e }) {
   };
 }
 var Qt = () => {
-}, ko = 1e3, Xo = "ISO-10303-21", jo = /END-ISO-10303-21;\s*$/;
-function Uo(e) {
+}, Xo = 1e3, jo = "ISO-10303-21", Uo = /END-ISO-10303-21;\s*$/;
+function Wo(e) {
   let t = e.length;
   for (; t > 0 && (e.charCodeAt(t - 1) === 0 || e.charCodeAt(t - 1) === 26); ) t--;
   return e.slice(0, t);
 }
-function Wo(e) {
+function Go(e) {
   if (typeof e == "string") return e;
   if (e instanceof Uint8Array) {
     let t = "";
@@ -1107,9 +1107,9 @@ function Wo(e) {
   }
   return I("STEP input must be text or bytes (a Uint8Array).");
 }
-function Go(e, t, n) {
-  const o = Wo(t);
-  o.length || I("STEP input must not be empty."), o.replace(/^\uFEFF|^\xEF\xBB\xBF/, "").trimStart().startsWith(Xo) || I("This is not a STEP file: it does not start with ISO-10303-21."), jo.test(Uo(o)) || I("The STEP file is incomplete: it does not end with END-ISO-10303-21; (was it cut short?).");
+function Ho(e, t, n) {
+  const o = Go(t);
+  o.length || I("STEP input must not be empty."), o.replace(/^\uFEFF|^\xEF\xBB\xBF/, "").trimStart().startsWith(jo) || I("This is not a STEP file: it does not start with ISO-10303-21."), Uo.test(Wo(o)) || I("The STEP file is incomplete: it does not end with END-ISO-10303-21; (was it cut short?).");
   const r = [];
   let a;
   e.setWarningHandler((c) => {
@@ -1149,7 +1149,7 @@ function Pt(e, t) {
   if (e !== void 0)
     return (typeof e != "string" || !e.length || e.length > $t || [...e].some((n) => n.charCodeAt(0) < 32 || n.charCodeAt(0) === 127)) && I(`${t} must be a non-empty string of at most ${$t} characters without control characters.`), e;
 }
-function Ho(e, t, n) {
+function Ko(e, t, n) {
   (!n || typeof n != "object") && I("exportStep options must be an object.");
   const o = Pt(n.product, "The STEP product name");
   if (!Array.isArray(t)) {
@@ -1171,20 +1171,20 @@ function Ho(e, t, n) {
     return e.toStep(s, i === void 0 ? {} : { name: i });
   }));
 }
-function Ko({ sm: e, solid: t }) {
+function Yo({ sm: e, solid: t }) {
   return {
     tessellate: (n, o = {}) => {
       const { tolerance: r, angle: a } = Tt(o);
       return P("mesh", () => e.scope(() => {
         const s = z(n).mesh(r, a), i = Float64Array.from(s.vertices), f = Uint32Array.from(s.triangles);
-        return { positions: i, normals: Xn(i, f), indices: f };
+        return { positions: i, normals: jn(i, f), indices: f };
       }));
     },
     exportStl: (n, o = {}) => {
       const { tolerance: r, angle: a } = Tt(o);
       return P("toStl", () => e.toStl(z(n), { tolerance: r, angle: a }));
     },
-    exportStep: (n, o = {}) => Ho(e, n, o),
+    exportStep: (n, o = {}) => Ko(e, n, o),
     importStep: (n) => ((typeof n != "string" || !n.length) && I("STEP input must be non-empty text."), P("fromStep", () => {
       const o = e.fromStep(n);
       if (Array.isArray(o) && o.length && o.every((r) => r instanceof e.Part)) {
@@ -1194,26 +1194,26 @@ function Ko({ sm: e, solid: t }) {
       return t("fromStep", o);
     })),
     importStepBodies: (n, o = {}) => {
-      const r = o.maxBodies ?? ko;
-      return (!Number.isInteger(r) || r < 1) && I("maxBodies must be a positive whole number."), Go(e, n, r);
+      const r = o.maxBodies ?? Xo;
+      return (!Number.isInteger(r) || r < 1) && I("maxBodies must be a positive whole number."), Ho(e, n, r);
     }
   };
 }
-async function Yo(e = {}) {
-  const t = await Co(e);
+async function Vo(e = {}) {
+  const t = await _o(e);
   e.guardSeconds !== void 0 && (e.guardSeconds >= 0 || I("guardSeconds must be 0 or more."), t.setGuardSeconds(e.guardSeconds)), t.setWarningHandler(Qt);
-  const n = jn(t);
+  const n = Un(t);
   return {
     name: "@classcad/smlibwasm",
     version: t.version,
-    licence: To,
-    profile: xo(t),
-    ..._o(n),
-    ...Fo(n),
+    licence: $o,
+    profile: wo(t),
+    ...zo(n),
     ...Ro(n),
     ...Lo(n),
     ...Do(n),
-    ...Ko(n),
+    ...ko(n),
+    ...Yo(n),
     memory: () => {
       const o = t.memoryUsage();
       return { used: o.used, heap: o.heap, handles: o.handles };
@@ -1224,7 +1224,7 @@ async function Yo(e = {}) {
     ...ot !== void 0 ? { maxMemoryBytes: ot } : {}
   };
 }
-const Vo = "@crispcad/exact-kernel", Zo = "0.1.10", qo = "smlib", Qo = Object.freeze({ id: qo, package: Vo, version: Zo }), It = 16, Ct = 2048, U = (e) => {
+const Zo = "@crispcad/exact-kernel", qo = "0.1.10", Qo = "smlib", Jo = Object.freeze({ id: Qo, package: Zo, version: qo }), It = 16, Ct = 2048, U = (e) => {
   throw new E("unsupported", e);
 }, Me = (e) => {
   throw new E("invalid-input", e);
@@ -1232,34 +1232,34 @@ const Vo = "@crispcad/exact-kernel", Zo = "0.1.10", qo = "smlib", Qo = Object.fr
 function we(e, t) {
   t < It && U(`${e} with ${t} segments is ambiguous for an exact kernel (a polygon or a circle?); use ${It}+ segments for a true circle, or polygon2d/polyhedron for a polygonal shape.`);
 }
-const Jo = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0], rt = (e, t) => {
+const er = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0], rt = (e, t) => {
   const n = [];
   for (let o = 0; o < 3; o++)
     for (let r = 0; r < 4; r++)
       n.push(e[o * 4] * t[r] + e[o * 4 + 1] * t[4 + r] + e[o * 4 + 2] * t[8 + r] + (r === 3 ? e[o * 4 + 3] : 0));
   return n;
-}, Ae = (e, t) => [0, 1, 2].map((n) => e[n * 4] * t[0] + e[n * 4 + 1] * t[1] + e[n * 4 + 2] * t[2] + e[n * 4 + 3]), _t = (e) => [1, 0, 0, e[0], 0, 1, 0, e[1], 0, 0, 1, e[2]], er = (e) => [e[0], 0, 0, 0, 0, e[1], 0, 0, 0, 0, e[2], 0];
+}, Ae = (e, t) => [0, 1, 2].map((n) => e[n * 4] * t[0] + e[n * 4 + 1] * t[1] + e[n * 4 + 2] * t[2] + e[n * 4 + 3]), _t = (e) => [1, 0, 0, e[0], 0, 1, 0, e[1], 0, 0, 1, e[2]], tr = (e) => [e[0], 0, 0, 0, 0, e[1], 0, 0, 0, 0, e[2], 0];
 function Ue(e, t) {
   const n = Math.hypot(...e);
   n > 0 || Me("Rotation axis must be non-zero.");
   const [o, r, a] = e.map((u) => u / n), s = t * Math.PI / 180, i = Math.cos(s), f = Math.sin(s), c = 1 - i;
   return [c * o * o + i, c * o * r - f * a, c * o * a + f * r, 0, c * o * r + f * a, c * r * r + i, c * r * a - f * o, 0, c * o * a - f * r, c * r * a + f * o, c * a * a + i, 0];
 }
-const tr = (e) => rt(Ue([0, 0, 1], e[2]), rt(Ue([0, 1, 0], e[1]), Ue([1, 0, 0], e[0])));
-function nr(e) {
+const nr = (e) => rt(Ue([0, 0, 1], e[2]), rt(Ue([0, 1, 0], e[1]), Ue([1, 0, 0], e[0])));
+function or(e) {
   const t = Math.hypot(...e);
   t > 0 || Me("Mirror normal must be non-zero.");
   const [n, o, r] = e.map((a) => a / t);
   return [1 - 2 * n * n, -2 * n * o, -2 * n * r, 0, -2 * n * o, 1 - 2 * o * o, -2 * o * r, 0, -2 * n * r, -2 * o * r, 1 - 2 * r * r, 0];
 }
-function or(e) {
+function rr(e) {
   const [t, n, o, , r, a, s, , i, f, c] = e, u = Math.max(-1, Math.min(1, (t + a + c - 1) / 2)), l = Math.acos(u);
   if (l < 1e-15)
     return null;
   let d = [f - s, o - i, r - n];
   return Math.hypot(...d) < 1e-9 && (d = [[t + 1, r, i], [n, a + 1, f], [o, s, c + 1]].reduce((x, y) => Math.hypot(...y) > Math.hypot(...x) ? y : x)), { axis: d, degrees: l * 180 / Math.PI };
 }
-function rr(e) {
+function sr(e) {
   const t = [0, 1, 2].map((s) => [e[s], e[4 + s], e[8 + s]]), n = t.map((s) => Math.hypot(...s));
   n.some((s) => !(s > 1e-12)) && Me("Affine matrix is singular.");
   for (const [s, i] of [[0, 1], [0, 2], [1, 2]]) {
@@ -1387,11 +1387,11 @@ function st(e, t, n) {
     case "move":
       return o(_t(e.vector), e.shape);
     case "rotate":
-      return o(tr(e.vector), e.shape);
-    case "scale":
-      return o(er(e.vector), e.shape);
-    case "mirror":
       return o(nr(e.vector), e.shape);
+    case "scale":
+      return o(tr(e.vector), e.shape);
+    case "mirror":
+      return o(or(e.vector), e.shape);
     case "axisRotate":
       return o(Ue(e.vector, e.angle), e.shape);
     case "affine":
@@ -1433,10 +1433,10 @@ function st(e, t, n) {
       U(`hull of '${e.kind}' has no exact lowering (supported: polyhedral solids, or equal spheres at the corners of a box).`);
   }
 }
-function sr(e, t) {
+function ar(e, t) {
   const n = { points: [], spheres: [] };
   for (const d of t)
-    st(d, Jo, n);
+    st(d, er, n);
   if (n.points.length && n.spheres.length && U("hull mixing spheres and polyhedral solids has no exact lowering."), n.points.length) {
     const d = Zt(n.points);
     return e.polyhedron(d.points, d.faces);
@@ -1461,10 +1461,10 @@ function en(e, t, n) {
   let s = e.revolve(r ? e.profile.scale(t, [-1, 1]) : t, n);
   return r && a !== 360 && (s = e.rotate(s, [0, 0, 1], 180)), s;
 }
-function ar(e, t, n) {
-  const { scale: o, rotation: r, translate: a } = rr(n);
+function ir(e, t, n) {
+  const { scale: o, rotation: r, translate: a } = sr(n);
   let s = o.every((f) => Math.abs(f - 1) < 1e-15) ? t : e.scale(t, o);
-  const i = or(r);
+  const i = rr(r);
   return i && (s = e.rotate(s, i.axis, i.degrees)), a.some((f) => f !== 0) ? e.translate(s, a) : s;
 }
 function ut(e, t) {
@@ -1495,10 +1495,10 @@ function ut(e, t) {
     }
     case "polyhedron": {
       if (t.smooth)
-        return lr(e, t.smooth, t.closest);
+        return fr(e, t.smooth, t.closest);
       if (t.ruled)
-        return cr(e, t.closest ?? t.ruled, t.points, t.faces, t.closest ? "closest" : "authored");
-      if (t.faces.length > Ct && U(`A polyhedron of ${t.faces.length} faces exceeds the exact faceted-solid budget (${Ct} faces).`), ho(t.points, t.faces)) {
+        return lr(e, t.closest ?? t.ruled, t.points, t.faces, t.closest ? "closest" : "authored");
+      if (t.faces.length > Ct && U(`A polyhedron of ${t.faces.length} faces exceeds the exact faceted-solid budget (${Ct} faces).`), po(t.points, t.faces)) {
         const o = Zt(t.points);
         return e.polyhedron(o.points, o.faces);
       }
@@ -1518,7 +1518,7 @@ function ut(e, t) {
       return i.length ? e.subtract(a[0], ...i) : a[0];
     }
     case "hull":
-      return sr(e, t.shapes);
+      return ar(e, t.shapes);
     case "minkowski":
       return U("minkowski has no exact lowering (a general Minkowski sum is not a B-rep operation of this adapter; use fillet/offset intent instead).");
     case "move": {
@@ -1548,7 +1548,7 @@ function ut(e, t) {
     }
     case "affine": {
       const o = n(t.shape);
-      return o && ar(e, o, t.matrix.slice(0, 12));
+      return o && ir(e, o, t.matrix.slice(0, 12));
     }
     case "resize": {
       const o = n(t.shape);
@@ -1568,7 +1568,7 @@ function ut(e, t) {
       return U(`CAD Script '${t.kind}' has no exact lowering.`);
   }
 }
-function ir(e, t) {
+function cr(e, t) {
   let n = 0;
   for (const o of t)
     for (let r = 1; r + 1 < o.length; r++) {
@@ -1577,19 +1577,19 @@ function ir(e, t) {
     }
   return n / 6;
 }
-function cr(e, t, n, o, r = "authored") {
-  const a = e.loft(t.map((f) => ({ profile: e.profile.polygon([f.map((c) => [c[0], c[1]])]), at: [0, 0, f[0][2]] })), r === "closest" ? { ruled: !0, pairing: r } : { ruled: !0 }), s = ir(n, o), i = e.volume(a);
+function lr(e, t, n, o, r = "authored") {
+  const a = e.loft(t.map((f) => ({ profile: e.profile.polygon([f.map((c) => [c[0], c[1]])]), at: [0, 0, f[0][2]] })), r === "closest" ? { ruled: !0, pairing: r } : { ruled: !0 }), s = cr(n, o), i = e.volume(a);
   if (!(Math.abs(i - s) <= 1e-7 * Math.abs(s)))
     throw a.dispose(), new E("kernel-failure", `The ruled loft's volume ${i} differs from its faceted volume ${s}; the kernel did not keep the vertex correspondence.`);
   return a;
 }
-function lr(e, t, n) {
+function fr(e, t, n) {
   const o = e.loft((n ?? t).map((s) => ({ profile: e.profile.polygon([s.map((i) => [i[0], i[1]])]), at: [0, 0, s[0][2]] })), n ? { ruled: !1, pairing: "closest" } : { ruled: !1 }), r = hn(pn(t)), a = e.volume(o);
   if (!(Math.abs(a - r) <= 1e-7 * Math.abs(r)))
     throw o.dispose(), new E("kernel-failure", `The smooth loft's volume ${a} differs from the volume ${r} of the surface CAD Script defines; the kernel built another surface.`);
   return o;
 }
-function ts(e, t) {
+function ns(e, t) {
   let n;
   try {
     n = Wt(t).shape;
@@ -1603,8 +1603,8 @@ function ts(e, t) {
     throw o.dispose(), new E("kernel-failure", "The exact result has no positive volume.");
   return o;
 }
-const ns = (e) => ({ version: 1, language: "brickwright-cad-script", source: e, parameters: {} }), Ce = 1048576, tn = 4, fr = Object.freeze({ maxFeatureEdges: 400, maxShellFaces: 160, maxMemoryBytes: 512 * Ce, recycleAboveBytes: 192 * Ce, requestTimeoutMs: 6e4, maxStepImportBytes: 4 * Ce }), os = Object.freeze({ maxFeatureEdges: 1e3, maxShellFaces: 500, maxMemoryBytes: 2048 * Ce, recycleAboveBytes: 512 * Ce, requestTimeoutMs: 12e4, maxStepImportBytes: 16 * Ce }), rs = Object.freeze({ maxFeatureEdges: 1 / 0, maxShellFaces: 1 / 0, maxMemoryBytes: 1 / 0, recycleAboveBytes: 1 / 0, requestTimeoutMs: 1 / 0, maxStepImportBytes: 1 / 0 });
-function ss(e, t = fr) {
+const os = (e) => ({ version: 1, language: "brickwright-cad-script", source: e, parameters: {} }), Ce = 1048576, tn = 4, ur = Object.freeze({ maxFeatureEdges: 400, maxShellFaces: 160, maxMemoryBytes: 512 * Ce, recycleAboveBytes: 192 * Ce, requestTimeoutMs: 6e4, maxStepImportBytes: 4 * Ce }), rs = Object.freeze({ maxFeatureEdges: 1e3, maxShellFaces: 500, maxMemoryBytes: 2048 * Ce, recycleAboveBytes: 512 * Ce, requestTimeoutMs: 12e4, maxStepImportBytes: 16 * Ce }), ss = Object.freeze({ maxFeatureEdges: 1 / 0, maxShellFaces: 1 / 0, maxMemoryBytes: 1 / 0, recycleAboveBytes: 1 / 0, requestTimeoutMs: 1 / 0, maxStepImportBytes: 1 / 0 });
+function as(e, t = ur) {
   const n = { ...t };
   for (const o of Object.keys(t)) {
     const r = e?.[o];
@@ -1612,19 +1612,19 @@ function ss(e, t = fr) {
   }
   return Object.freeze(n);
 }
-function ur(e) {
+function dr(e) {
   const t = e.requestTimeoutMs;
   return Number.isFinite(t) && t > 0 ? Math.max(1, Math.floor(t / 2e3)) : void 0;
 }
-function dr(e) {
-  const t = ur(e);
+function hr(e) {
+  const t = dr(e);
   return { ...Number.isFinite(e.maxMemoryBytes) && e.maxMemoryBytes > 0 ? { maxMemoryBytes: e.maxMemoryBytes } : {}, ...t !== void 0 ? { guardSeconds: t } : {} };
 }
-const hr = (e) => {
+const pr = (e) => {
   const t = e.part;
   return t && typeof t.faces == "function" ? t : void 0;
 };
-function pr(e, t) {
+function mr(e, t) {
   const [n, o, r] = t.faceNormal, a = Math.hypot(n, o, r);
   if (!(a > 0))
     return;
@@ -1642,8 +1642,8 @@ function pr(e, t) {
   };
   return i.sort((c, u) => f(u) - f(c))[0];
 }
-function mr(e, t, n = "all") {
-  const o = hr(e);
+function gr(e, t, n = "all") {
+  const o = pr(e);
   if (!o)
     return;
   const r = [...o.faces()];
@@ -1654,7 +1654,7 @@ function mr(e, t, n = "all") {
     const f = [...o.edges()];
     a = n.edgeIndices.map((c) => f[c]).filter(Boolean);
   } else if (t !== "shell" && n !== "all") {
-    const f = pr(r, n);
+    const f = mr(r, n);
     if (!f)
       return { edges: 0, curvedEdges: 0, faces: r.length, weightedEdges: 0 };
     a = f.edges();
@@ -1673,10 +1673,10 @@ function mr(e, t, n = "all") {
     s++, f.geomType !== "line" && i++;
   return { edges: s, curvedEdges: i, faces: r.length, weightedEdges: s - i + tn * i };
 }
-function gr(e, t, n, o) {
+function yr(e, t, n, o) {
   if (!Number.isFinite(o.maxFeatureEdges) && !Number.isFinite(o.maxShellFaces))
     return;
-  const r = mr(e, t, n);
+  const r = gr(e, t, n);
   if (r) {
     if (t === "shell") {
       if (r.faces > o.maxShellFaces)
@@ -1688,8 +1688,8 @@ function gr(e, t, n, o) {
     return r;
   }
 }
-const yr = 8, ee = (e, t, n) => (t.x - e.x) * (n.y - e.y) - (t.y - e.y) * (n.x - e.x), Ne = (e, t) => e.x === t.x && e.y === t.y;
-function xr(e, t) {
+const xr = 8, ee = (e, t, n) => (t.x - e.x) * (n.y - e.y) - (t.y - e.y) * (n.x - e.x), Ne = (e, t) => e.x === t.x && e.y === t.y;
+function wr(e, t) {
   let n = 0;
   for (let o = 0, r = t.length - 1; o < t.length; r = o++)
     n += e[2 * t[r]] * e[2 * t[o] + 1] - e[2 * t[o]] * e[2 * t[r] + 1];
@@ -1711,11 +1711,11 @@ function nn(e, t, n, o, r) {
   const a = ee(e, t, o), s = ee(t, n, o), i = ee(n, e, o);
   return r ? a > 0 && s > 0 && i > 0 : a >= 0 && s >= 0 && i >= 0;
 }
-function wr(e, t, n) {
+function vr(e, t, n) {
   const o = { ...e }, r = { ...t }, a = e.next, s = t.prev;
   e.next = t, t.prev = e, o.next = a, a.prev = o, r.next = o, o.prev = r, s.next = r, r.prev = s, n.push(o, r);
 }
-function vr(e, t) {
+function Mr(e, t) {
   let n, o = 1 / 0, r = t;
   do {
     const c = r.next;
@@ -1754,10 +1754,10 @@ function vr(e, t) {
   }
   return s;
 }
-function Mr(e, t) {
+function br(e, t) {
   if (!t.length || t.some((w) => w.length < 3))
     return null;
-  const n = [], o = t.map((w) => xr(e, w));
+  const n = [], o = t.map((w) => wr(e, w));
   if (!(Math.abs(o[0]) > 0))
     return null;
   const r = t.map((w, b) => b === 0 == o[b] > 0 ? w : [...w].reverse()), a = zt(e, r[0], n), s = r.slice(1).map((w) => {
@@ -1769,10 +1769,10 @@ function Mr(e, t) {
   });
   s.sort((w, b) => b.x - w.x || b.y - w.y);
   for (const w of s) {
-    const b = vr(w, a);
+    const b = Mr(w, a);
     if (!b)
       return null;
-    wr(b, w, n);
+    vr(b, w, n);
   }
   let i = 1 / 0, f = 1 / 0, c = -1 / 0, u = -1 / 0;
   for (const w of n)
@@ -1868,12 +1868,12 @@ const ue = (e, t) => e * 67108864 + t, Ye = class Ye {
 };
 pe(Ye, "Q", 1e-6);
 let at = Ye;
-function br(e) {
+function Er(e) {
   const t = on(e);
   if (!t)
     return !1;
   for (const n of t.faces())
-    if (n.geomType === "plane" && n.wires().length >= yr)
+    if (n.geomType === "plane" && n.wires().length >= xr)
       return !0;
   return !1;
 }
@@ -1901,7 +1901,7 @@ function it(e, t, n) {
       M.has(ue($, S)) || T.push([S, $]);
     }
     return T;
-  }, g = [], x = n.bands !== !1 ? Sr(r, n) : /* @__PURE__ */ new Map();
+  }, g = [], x = n.bands !== !1 ? Ar(r, n) : /* @__PURE__ */ new Map();
   for (const h of r) {
     if (h.geomType === "plane") {
       g.push(h);
@@ -1912,7 +1912,7 @@ function it(e, t, n) {
   const y = x.size;
   let p = 0;
   for (const h of g) {
-    const m = Tr(h, a, l), M = h.normalAt(), T = [M.x, M.y, M.z], v = Math.abs(T[0]) < 0.9 ? [1, 0, 0] : [0, 1, 0], S = Ve(ve(v, T)), $ = ve(T, S);
+    const m = $r(h, a, l), M = h.normalAt(), T = [M.x, M.y, M.z], v = Math.abs(T[0]) < 0.9 ? [1, 0, 0] : [0, 1, 0], S = Ve(ve(v, T)), $ = ve(T, S);
     let w = null;
     if (m && m.length === h.wires().length) {
       const b = [...new Set(m.flat())], A = new Map(b.map((N, O) => [N, O])), C = new Float64Array(2 * b.length);
@@ -1920,15 +1920,15 @@ function it(e, t, n) {
         const B = a.positions;
         C[2 * O] = B[3 * N] * S[0] + B[3 * N + 1] * S[1] + B[3 * N + 2] * S[2], C[2 * O + 1] = B[3 * N] * $[0] + B[3 * N + 1] * $[1] + B[3 * N + 2] * $[2];
       });
-      const L = Mr(C, m.map((N) => N.map((O) => A.get(O))));
+      const L = br(C, m.map((N) => N.map((O) => A.get(O))));
       L && (w = L.map((N) => b[N]));
     }
     w ? s.push(...w) : (p++, d(h.mesh(n.tolerance, n.angleDeg))), u(h);
   }
   return { positions: a.positions, indices: s, planar: g.length - p, planarFallbacks: p, bands: y, ...i ? { faceOf: i } : {} };
 }
-const Er = (e, t) => `${Math.round(e.x * 1e6)},${Math.round(e.y * 1e6)},${Math.round(e.z * 1e6)},${Math.round(t * 1e6)}`, ye = (e, t) => e[0] * t[0] + e[1] * t[1] + e[2] * t[2], Te = (e, t) => [e[0] - t[0], e[1] - t[1], e[2] - t[2]];
-function Sr(e, t) {
+const Sr = (e, t) => `${Math.round(e.x * 1e6)},${Math.round(e.y * 1e6)},${Math.round(e.z * 1e6)},${Math.round(t * 1e6)}`, ye = (e, t) => e[0] * t[0] + e[1] * t[1] + e[2] * t[2], Te = (e, t) => [e[0] - t[0], e[1] - t[1], e[2] - t[2]];
+function Ar(e, t) {
   const n = /* @__PURE__ */ new Map();
   for (const r of e) {
     const a = r.geomType;
@@ -1947,7 +1947,7 @@ function Sr(e, t) {
       const x = d.arcCenter, y = d.normal, p = d.radius;
       if (!(p > 0))
         break;
-      f.push({ center: [x.x, x.y, x.z], radius: p, normal: Ve([y.x, y.y, y.z]) }), c.push(Er(x, p)), u.push(g[0]);
+      f.push({ center: [x.x, x.y, x.z], radius: p, normal: Ve([y.x, y.y, y.z]) }), c.push(Sr(x, p)), u.push(g[0]);
     }
     if (f.length !== 2 || c[0] === c[1] || Math.abs(ye(f[0].normal, f[1].normal)) < 1 - 1e-9)
       continue;
@@ -1987,7 +1987,7 @@ function Sr(e, t) {
     const i = [];
     o.clear();
     for (const f of s.values()) {
-      const c = Ar(f, t);
+      const c = Tr(f, t);
       if (c)
         for (const [u, l] of c)
           o.set(u, l);
@@ -2000,7 +2000,7 @@ function Sr(e, t) {
       n.delete(f);
   }
 }
-function Ar(e, t) {
+function Tr(e, t) {
   const n = e[0].circles[0].center, o = e[0].circles[0].normal, r = Math.max(1, ...e.flatMap((p) => p.circles.map((h) => h.radius))), a = (p) => {
     const h = Te(p, n), m = ye(h, o);
     return [Math.hypot(h[0] - m * o[0], h[1] - m * o[1], h[2] - m * o[2]), m];
@@ -2083,7 +2083,7 @@ const ve = (e, t) => [e[1] * t[2] - e[2] * t[1], e[2] * t[0] - e[0] * t[2], e[0]
   const t = Math.hypot(e[0], e[1], e[2]);
   return e.map((n) => n / t);
 };
-function Tr(e, t, n) {
+function $r(e, t, n) {
   const o = e._identity(), r = e.normalAt(), a = /* @__PURE__ */ new Set(), s = t.positions;
   let i;
   const f = /* @__PURE__ */ new Set();
@@ -2183,7 +2183,7 @@ function Nt(e, t) {
   return { positions: n, indices: o };
 }
 function rn(e, t, n, o = mn) {
-  if (br(t))
+  if (Er(t))
     for (const r of [!0, !1])
       try {
         const a = it(e, t, { ...o, bands: r });
@@ -2198,7 +2198,7 @@ function rn(e, t, n, o = mn) {
       }
   return Nt(e.tessellate(t, o), n);
 }
-function $r(e, t, n, o = {}) {
+function Pr(e, t, n, o = {}) {
   const r = t.nodes[n];
   if (r?.kind !== "exact-feature")
     throw new E("invalid-input", _`${n} is not an exact feature`);
@@ -2208,15 +2208,15 @@ function $r(e, t, n, o = {}) {
   const s = rn(e, a, r.name);
   return { display: { sourceKey: xn(t, n), ...s }, volume: e.volume(a) };
 }
-const Bt = 1e-7, Ot = 1e-6, Pr = (e) => e && e.length === 3 && e.every((t) => Number.isFinite(t)) ? "#" + e.map((t) => Math.round(Math.min(1, Math.max(0, t)) * 255).toString(16).padStart(2, "0")).join("") : null, Ft = (e, t) => Math.abs(e - t) / Math.max(Math.abs(t), 1e-12), Rt = (e) => [e[0], e[1], e[2]], Ir = (e) => e?.replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim().slice(0, 120) || "";
-function Cr(e) {
+const Bt = 1e-7, Ot = 1e-6, Ir = (e) => e && e.length === 3 && e.every((t) => Number.isFinite(t)) ? "#" + e.map((t) => Math.round(Math.min(1, Math.max(0, t)) * 255).toString(16).padStart(2, "0")).join("") : null, Ft = (e, t) => Math.abs(e - t) / Math.max(Math.abs(t), 1e-12), Rt = (e) => [e[0], e[1], e[2]], Cr = (e) => e?.replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim().slice(0, 120) || "";
+function _r(e) {
   if (!(e instanceof E))
     return e;
   const t = e.message;
   let n, o;
   return /^This is not a STEP file/.test(t) ? o = _("This is not a STEP file: it does not start with ISO-10303-21.") : /^The STEP file is incomplete/.test(t) ? o = _("The STEP file is incomplete: it does not end with END-ISO-10303-21; (was it cut short?).") : /^STEP input must not be empty/.test(t) ? o = _("The STEP file is empty.") : /^The STEP file holds no solid/.test(t) ? o = _("The STEP file holds no solid (no B-rep body).") : (n = /^The STEP file is malformed: ([\s\S]*)$/.exec(t)) ? o = _`The STEP file is malformed: ${n[1]}` : (n = /^The STEP file cannot be read exactly: ([\s\S]*)$/.exec(t)) ? o = _`The STEP file cannot be read exactly, so nothing was imported: ${n[1]}` : (n = /^The STEP file's (.*) is an open surface \(a sheet\), not a closed solid\.$/.exec(t)) ? o = _`The STEP file's ${n[1]} is an open surface (a sheet), not a closed solid, so nothing was imported.` : (n = /^The STEP file's (.*) is not a valid closed solid, even after repair\.$/.exec(t)) ? o = _`The STEP file's ${n[1]} is not a valid closed solid, even after repair, so nothing was imported.` : (n = /^The STEP file holds (\d+) bodies; at most (\d+) can be imported\.$/.exec(t)) && (o = _`The STEP file holds ${n[1]} bodies; at most ${n[2]} can be imported at once.`), o ? new E(e.code, o, { cause: e }) : e;
 }
-function _r(e, t, n) {
+function zr(e, t, n) {
   if (!(t instanceof Uint8Array) || !t.byteLength)
     throw new E("invalid-input", _("The STEP file is empty."));
   if (t.byteLength > dt)
@@ -2225,21 +2225,21 @@ function _r(e, t, n) {
   try {
     o = e.importStepBodies(t, { maxBodies: wn });
   } catch (s) {
-    throw Cr(s);
+    throw _r(s);
   }
   const r = n.replace(/\.(step|stp)$/i, "") || "STEP body";
   return { bodies: o.bodies.map(({ solid: s, name: i, color: f }, c) => {
-    const u = Ir(i) || (o.bodies.length > 1 ? `${r} ${c + 1}` : r);
-    return { name: u, color: Pr(f), body: zr(e, s, u) };
+    const u = Cr(i) || (o.bodies.length > 1 ? `${r} ${c + 1}` : r);
+    return { name: u, color: Ir(f), body: Nr(e, s, u) };
   }), notes: o.notes };
 }
-function zr(e, t, n) {
+function Nr(e, t, n) {
   const o = e.volume(t), r = e.area(t), a = e.bbox(t), s = e.exportStep(t);
   if (s.length > ht)
     throw new E("unsupported", _`${n}: its exact B-rep is larger than ${ht / 1048576} MiB as STEP, so it cannot be stored in the model.`);
   return { brep: { format: "step", text: s }, measures: { volume: o, area: r, min: Rt(a.min), max: Rt(a.max) }, display: rn(e, t, n, vn) };
 }
-function Nr(e, t, n) {
+function Br(e, t, n) {
   const o = e.importStepBodies(t.brep.text, { maxBodies: 1 });
   if (o.bodies.length !== 1)
     throw new E("kernel-failure", _`${n}: the stored exact B-rep does not hold exactly one solid.`);
@@ -2249,7 +2249,7 @@ function Nr(e, t, n) {
   return r;
 }
 function sn(e, t = 16) {
-  const n = /* @__PURE__ */ new Map(), o = (a, s) => Nr(e, a, s), r = (a) => `${Mn(a)}|${JSON.stringify(a.measures)}`;
+  const n = /* @__PURE__ */ new Map(), o = (a, s) => Br(e, a, s), r = (a) => `${Mn(a)}|${JSON.stringify(a.measures)}`;
   return {
     /** Read every exact body of `nodes` that is not cached yet. Call outside `k.scope`. The bodies of
      * this request are all kept (a 58-body STEP board measured with only 16 kept read 42 of them
@@ -2302,7 +2302,7 @@ function Lt(e, t, n) {
   pt([...t], [...n]);
   const o = t.map((r, a) => {
     const s = t[(a + 1) % t.length], i = n[a] ?? 0;
-    return i ? { kind: "arc", via: zn(r, s, i), to: s } : { kind: "line", to: s };
+    return i ? { kind: "arc", via: Nn(r, s, i), to: s } : { kind: "line", to: s };
   });
   return e.profile.path(t[0], o);
 }
@@ -2336,8 +2336,8 @@ function ze(e, t, n) {
     n[a] && (o = e.rotate(o, r, n[a]));
   }), o;
 }
-const Br = /* @__PURE__ */ new Set(["box", "cylinder", "sphere", "code", "extrusion", "revolution", "exact-body"]), Or = (e, t, n) => e.nameFaces(t, e.topology(t).faces.map((o) => On(n, o.index))), Fr = (e, t, n, o) => e.nameFaces(t, e.topology(t).faces.map((r) => Nn(r.name) ? Bn(n, o, r.name) : null));
-function Rr(e, t) {
+const Or = /* @__PURE__ */ new Set(["box", "cylinder", "sphere", "hole", "code", "extrusion", "revolution", "exact-body"]), Fr = (e, t, n) => e.nameFaces(t, e.topology(t).faces.map((o) => Fn(n, o.index))), Rr = (e, t, n, o) => e.nameFaces(t, e.topology(t).faces.map((r) => Bn(r.name) ? On(n, o, r.name) : null));
+function Lr(e, t) {
   try {
     const { copies: n, node: o, face: r } = bn(t), a = _`${e.nodes[o]?.name ?? o} face ${r + 1}`;
     return n.length ? a + " (" + n.map(({ pattern: s, copy: i }) => _`copy ${i + 1} of ${e.nodes[s]?.name ?? s}`).join(", ") + ")" : a;
@@ -2345,8 +2345,8 @@ function Rr(e, t) {
     return t;
   }
 }
-function Lr(e, t, n, o) {
-  return En(e.topology(n), o, (r) => Rr(t, r));
+function Dr(e, t, n, o) {
+  return En(e.topology(n), o, (r) => Lr(t, r));
 }
 function Pe(e, t, n, o, r, a, s = !1, i) {
   const f = s ? "named:" + n : n, c = r.get(f);
@@ -2364,6 +2364,10 @@ function Pe(e, t, n, o, r, a, s = !1, i) {
         break;
       case "sphere":
         l = e.sphere(u.radius);
+        break;
+      // A standard hole: the same profile Manifold revolves; SMLib makes its walls true cylinders and cones.
+      case "hole":
+        l = e.revolve(e.profile.polygon([_n(u)]), 360);
         break;
       case "code": {
         const y = ut(e, Wt(u.program).shape);
@@ -2405,7 +2409,7 @@ function Pe(e, t, n, o, r, a, s = !1, i) {
             h.push(e.rotate(p, M, T * m, y.center));
         }
         s && h.forEach((m, M) => {
-          h[M] = Fr(e, m, n, M);
+          h[M] = Rr(e, m, n, M);
         }), l = e.union(h[0], ...h.slice(1));
         break;
       }
@@ -2421,8 +2425,8 @@ function Pe(e, t, n, o, r, a, s = !1, i) {
         break;
       }
       case "exact-feature": {
-        const y = An(u, t), p = Tn(y.edges) ? y.edges.references : void 0, h = Pe(e, t, u.source, o, r, a, s || !!p, i), m = p ? { edgeIndices: Lr(e, t, h, p) } : y.edges;
-        a && gr(h, y.operation, m, a), l = y.operation === "fillet" ? e.fillet(h, y.size, m) : y.operation === "chamfer" ? e.chamfer(h, y.size, m) : e.shell(h, y.size, y.openFaces);
+        const y = An(u, t), p = Tn(y.edges) ? y.edges.references : void 0, h = Pe(e, t, u.source, o, r, a, s || !!p, i), m = p ? { edgeIndices: Dr(e, t, h, p) } : y.edges;
+        a && yr(h, y.operation, m, a), l = y.operation === "fillet" ? e.fillet(h, y.size, m) : y.operation === "chamfer" ? e.chamfer(h, y.size, m) : e.shell(h, y.size, y.openFaces);
         break;
       }
       case "exact-body":
@@ -2433,14 +2437,14 @@ function Pe(e, t, n, o, r, a, s = !1, i) {
       default:
         return Be(`'${u.kind}' has no exact lowering.`);
     }
-    s && Br.has(u.kind) && (l = Or(e, l, n));
+    s && Or.has(u.kind) && (l = Fr(e, l, n));
     const { scale: d, rotation: g, position: x } = u.transform;
     d.some((y) => y !== 1) && (l = e.scale(l, d)), l = ze(e, l, g), x.some((y) => y !== 0) && (l = e.translate(l, x));
   } catch (d) {
     if (d instanceof We)
       throw d;
     const g = d instanceof E ? d.code : "invalid-input";
-    if (d instanceof _n)
+    if (d instanceof zn)
       throw new We({ code: "invalid-input", bodyId: o, nodeId: n, feature: u.kind, reason: d.code, message: `${u.name}: ${d.message}` }, { cause: d });
     let x = d instanceof Error ? d.message : String(d);
     const y = /the kernel did not finish within ([\d.]+) s/.exec(x);
@@ -2457,20 +2461,20 @@ function cn(e, t, n, o = {}) {
   const r = t.nodes[n];
   if (!r)
     throw new E("invalid-input", `${n} is not a node of this model.`);
-  const a = o.local ? { ...t, nodes: { ...t.nodes, [n]: { ...r, transform: Fn() } } } : t, s = t.roots.find((i) => i === n) ?? n;
+  const a = o.local ? { ...t, nodes: { ...t.nodes, [n]: { ...r, transform: Rn() } } } : t, s = t.roots.find((i) => i === n) ?? n;
   return Pe(e, a, n, s, /* @__PURE__ */ new Map(), o.limits, o.named, o.breps);
 }
 const Xt = 2e3, jt = 6e3, ct = 4e5;
-function Dr(e) {
+function kr(e) {
   const t = Math.hypot(...e.max.map((n, o) => n - e.min[o]));
   return Math.min(0.05, Math.max(0.01, t * 2e-4));
 }
-const kr = (e) => e.flatMap((t) => [t[0], t[1], t[2]]);
-function Xr(e, t, n, o, r = { triangles: ct }) {
+const Xr = (e) => e.flatMap((t) => [t[0], t[1], t[2]]);
+function jr(e, t, n, o, r = { triangles: ct }) {
   const a = e.topology(t);
   if (a.faces.length > Xt || a.edges.length > jt)
     throw new E("unsupported", _`${o} has ${a.faces.length} faces and ${a.edges.length} edges, more than an exact drawing takes (${Xt} and ${jt}).`);
-  const s = e.bbox(t), i = { min: [...s.min], max: [...s.max] }, f = Dr(i);
+  const s = e.bbox(t), i = { min: [...s.min], max: [...s.max] }, f = kr(i);
   let c = it(e, t, { tolerance: f, angleDeg: 10, faces: !0 });
   if (c?.bands && c.planarFallbacks && (c = it(e, t, { tolerance: f, angleDeg: 10, bands: !1, faces: !0 })), !c?.faceOf)
     throw new E("unsupported", _`${o}: the exact kernel did not mesh the body face by face.`);
@@ -2492,7 +2496,7 @@ function Xr(e, t, n, o, r = { triangles: ct }) {
     edges: a.edges.map((l) => ({
       curve: l.curve,
       faces: [...l.faces],
-      points: kr(l.points),
+      points: Xr(l.points),
       closed: l.closed,
       length: l.length,
       ...l.curve === "circle" && l.radius !== void 0 && l.center && l.axis ? { circle: { center: [...l.center], radius: l.radius, axis: [...l.axis] } } : {}
@@ -2500,7 +2504,7 @@ function Xr(e, t, n, o, r = { triangles: ct }) {
     mesh: { positions: Float64Array.from(c.positions), indices: Uint32Array.from(c.indices), faceOf: Uint32Array.from(c.faceOf) }
   };
 }
-function jr(e, t, n, o) {
+function Ur(e, t, n, o) {
   const r = [], a = [], s = { triangles: ct };
   for (const i of n) {
     const f = t.nodes[i].name;
@@ -2509,7 +2513,7 @@ function jr(e, t, n, o) {
         const c = an(e, t, i, { limits: o.limits, breps: o.breps });
         if (!e.isValid(c))
           throw new E("kernel-failure", _`${f}: the exact result is not a valid closed solid.`);
-        return Xr(e, c, i, f, s);
+        return jr(e, c, i, f, s);
       }));
     } catch (c) {
       if (o.fatal(c))
@@ -2520,8 +2524,8 @@ function jr(e, t, n, o) {
   }
   return { bodies: r, failures: a };
 }
-const Ie = 64, Ur = 64 * 1024 * 1024, Ut = 5e3;
-function Wr(e, t) {
+const Ie = 64, Wr = 64 * 1024 * 1024, Ut = 5e3;
+function Gr(e, t) {
   let n;
   if (t?.length) {
     n = [...new Set(t)];
@@ -2544,14 +2548,14 @@ function Wr(e, t) {
 }
 function tt(e, t) {
   const n = /* @__PURE__ */ new Set(), o = (r) => {
-    n.has(r) || (n.add(r), Dn(e.nodes[r]).forEach(o));
+    n.has(r) || (n.add(r), kn(e.nodes[r]).forEach(o));
   };
   return t.forEach(o), [...n].map((r) => e.nodes[r]);
 }
-const Gr = (e) => [1, 3, 5].map((t) => parseInt(e.slice(t, t + 2), 16) / 255), Hr = (e) => e.length > 0 && e.length <= 1e3 && ![...e].some((t) => t.charCodeAt(0) < 32 || t.charCodeAt(0) === 127);
-function Kr(e, t = e.maxMemoryBytes) {
-  const n = Object.freeze({ ...Qo, smlib: e.version, licence: e.licence }), o = sn(e), r = (s, i) => {
-    const f = Qe(s), c = Wr(f, i);
+const Hr = (e) => [1, 3, 5].map((t) => parseInt(e.slice(t, t + 2), 16) / 255), Kr = (e) => e.length > 0 && e.length <= 1e3 && ![...e].some((t) => t.charCodeAt(0) < 32 || t.charCodeAt(0) === 127);
+function Yr(e, t = e.maxMemoryBytes) {
+  const n = Object.freeze({ ...Jo, smlib: e.version, licence: e.licence }), o = sn(e), r = (s, i) => {
+    const f = Qe(s), c = Gr(f, i);
     return o.warm(tt(f, c)), { doc: f, targets: c };
   }, a = ({ doc: s, targets: i }, f = {}) => ({ doc: s, targets: i, solids: i.map((c) => {
     const u = an(e, s, c, { ...f, breps: o });
@@ -2586,7 +2590,7 @@ function Kr(e, t = e.maxMemoryBytes) {
         const d = cn(e, c, l, { named: !0, limits: f.limits, breps: o }), g = e.topology(d);
         if (g.edges.length > Ut)
           throw new E("unsupported", _`${c.nodes[l].name} has ${g.edges.length} edges, more than ${Ut} can be listed. Fillet every edge or a face instead.`);
-        const x = Ln(g);
+        const x = Dn(g);
         return { id: l, name: c.nodes[l].name, edges: g.edges.map((y, p) => {
           const h = x[p];
           return { number: p + 1, curve: y.curve, length: y.length, points: y.points.map((m) => [...m]), ...h.reference ? { reference: h.reference } : { unreferable: h.reason } };
@@ -2594,23 +2598,23 @@ function Kr(e, t = e.maxMemoryBytes) {
       })) };
     },
     featureDisplays(s, i, f = {}) {
-      const c = Qe(s), u = i?.length ? [...new Set(i)] : Rn(c);
+      const c = Qe(s), u = i?.length ? [...new Set(i)] : Ln(c);
       if (u.length > Ie)
         throw new E("invalid-input", _`Exact commands are limited to ${Ie} bodies.`);
       for (const l of u)
         if (c.nodes[l]?.kind !== "exact-feature")
           throw new E("invalid-input", _`${l} is not an exact feature`);
-      return o.warm(tt(c, u)), { kernel: n, features: u.map((l) => e.scope(() => ({ id: l, name: c.nodes[l].name, ...$r(e, c, l, { ...f, breps: o }) }))) };
+      return o.warm(tt(c, u)), { kernel: n, features: u.map((l) => e.scope(() => ({ id: l, name: c.nodes[l].name, ...Pr(e, c, l, { ...f, breps: o }) }))) };
     },
     drawing(s, i, f = {}) {
       const { doc: c, targets: u } = r(s, i);
-      return { kernel: n, ...jr(e, c, u, { limits: f.limits, breps: o, fatal: Vr }) };
+      return { kernel: n, ...Ur(e, c, u, { limits: f.limits, breps: o, fatal: Zr }) };
     },
     importStep(s, i, f = {}) {
       const c = f.limits?.maxStepImportBytes;
       if (c !== void 0 && s.byteLength > c)
         throw new E("unsupported", _`${i} is ${(s.byteLength / 1048576).toFixed(1)} MiB; this device imports STEP files of up to ${Math.round(c / 1048576)} MiB. Import it on a computer, or split the assembly.`);
-      return { kernel: n, ...e.scope(() => _r(e, s, i)) };
+      return { kernel: n, ...e.scope(() => zr(e, s, i)) };
     },
     exportStep(s, i, f) {
       const c = r(s, i);
@@ -2626,8 +2630,8 @@ function Kr(e, t = e.maxMemoryBytes) {
             throw new E("unsupported", _("Selected bodies touch or overlap, so one STEP file would merge them. Export them separately or combine them first."));
           }
         }
-        const g = e.exportStep(l.map((y, p) => ({ solid: d[p], name: u.nodes[y].name, color: Gr(u.nodes[y].color) })), l.length > 1 && Hr(u.title) ? { product: u.title } : {}), x = new TextEncoder().encode(g).byteLength;
-        if (x > Ur)
+        const g = e.exportStep(l.map((y, p) => ({ solid: d[p], name: u.nodes[y].name, color: Hr(u.nodes[y].color) })), l.length > 1 && Kr(u.title) ? { product: u.title } : {}), x = new TextEncoder().encode(g).byteLength;
+        if (x > Wr)
           throw new E("unsupported", _("The STEP file exceeds 64 MiB."));
         return { kernel: n, bodies: l.map((y) => ({ id: y, name: u.nodes[y].name })), step: g, bytes: x };
       });
@@ -2635,12 +2639,12 @@ function Kr(e, t = e.maxMemoryBytes) {
   };
 }
 let Xe;
-function Yr(e = {}) {
-  return Xe ?? (Xe = Yo(e).then((t) => Kr(t), (t) => {
+function Vr(e = {}) {
+  return Xe ?? (Xe = Vo(e).then((t) => Yr(t), (t) => {
     throw Xe = void 0, t;
   })), Xe;
 }
-function Vr(e) {
+function Zr(e) {
   for (let t = e, n = 0; t && n < 8; t = t.cause, n++) {
     if (typeof WebAssembly < "u" && t instanceof WebAssembly.RuntimeError || t instanceof RangeError && /memory|allocat/i.test(t.message))
       return !0;
@@ -2650,7 +2654,7 @@ function Vr(e) {
   }
   return !1;
 }
-const Zr = (e) => {
+const qr = (e) => {
   const t = e.step?.bytes;
   if (t instanceof Uint8Array)
     return t;
@@ -2658,20 +2662,20 @@ const Zr = (e) => {
     return new Uint8Array(t);
   throw new E("invalid-input", _("Give the STEP file to import."));
 };
-function qr(e, t, n = 0, o = {}) {
+function Qr(e, t, n = 0, o = {}) {
   const r = performance.now();
-  return { ...t.operation === "measure" ? { operation: "measure", ...e.measure(t.document, t.bodies, o) } : t.operation === "feature-display" ? { operation: "feature-display", ...e.featureDisplays(t.document, t.bodies, o) } : t.operation === "edges" ? { operation: "edges", ...e.edges(t.document, t.bodies, o) } : t.operation === "drawing" ? { operation: "drawing", ...e.drawing(t.document, t.bodies, o) } : t.operation === "import-step" ? { operation: "import-step", ...e.importStep(Zr(t), t.step.name, o) } : { operation: "export-step", ...e.exportStep(t.document, t.bodies, o) }, timing: { loadMs: n, runMs: performance.now() - r, memoryBytes: e.kernel.memory().heap } };
+  return { ...t.operation === "measure" ? { operation: "measure", ...e.measure(t.document, t.bodies, o) } : t.operation === "feature-display" ? { operation: "feature-display", ...e.featureDisplays(t.document, t.bodies, o) } : t.operation === "edges" ? { operation: "edges", ...e.edges(t.document, t.bodies, o) } : t.operation === "drawing" ? { operation: "drawing", ...e.drawing(t.document, t.bodies, o) } : t.operation === "import-step" ? { operation: "import-step", ...e.importStep(qr(t), t.step.name, o) } : { operation: "export-step", ...e.exportStep(t.document, t.bodies, o) }, timing: { loadMs: n, runMs: performance.now() - r, memoryBytes: e.kernel.memory().heap } };
 }
-function as(e = {}) {
-  const { limits: t, ...n } = e, o = { ...t && typeof t.maxMemoryBytes == "number" && typeof t.requestTimeoutMs == "number" ? dr(t) : {}, ...n }, r = () => new Error(_("Request cancelled"));
+function is(e = {}) {
+  const { limits: t, ...n } = e, o = { ...t && typeof t.maxMemoryBytes == "number" && typeof t.requestTimeoutMs == "number" ? hr(t) : {}, ...n }, r = () => new Error(_("Request cancelled"));
   return {
     async run(a, s) {
       if (s?.aborted)
         throw r();
-      const i = performance.now(), f = await Yr(o), c = performance.now();
+      const i = performance.now(), f = await Vr(o), c = performance.now();
       if (s?.aborted || (await new Promise((l) => setTimeout(l, 0)), s?.aborted))
         throw r();
-      const u = qr(f, a, c - i, { limits: t });
+      const u = Qr(f, a, c - i, { limits: t });
       if (s?.aborted)
         throw r();
       return u;
@@ -2680,54 +2684,54 @@ function as(e = {}) {
 }
 export {
   tn as CURVED_EDGE_WEIGHT,
-  qo as EXACT_KERNEL_ID,
-  Vo as EXACT_KERNEL_PACKAGE,
-  Zo as EXACT_KERNEL_VERSION,
-  os as EXACT_LIMITS_DESKTOP,
-  rs as EXACT_LIMITS_NONE,
-  fr as EXACT_LIMITS_TABLET,
+  Qo as EXACT_KERNEL_ID,
+  Zo as EXACT_KERNEL_PACKAGE,
+  qo as EXACT_KERNEL_VERSION,
+  rs as EXACT_LIMITS_DESKTOP,
+  ss as EXACT_LIMITS_NONE,
+  ur as EXACT_LIMITS_TABLET,
   E as ExactKernelError,
   We as ExactLoweringError,
-  yr as MANY_LOOPS,
+  xr as MANY_LOOPS,
   jt as MAX_DRAWING_EDGES,
   Xt as MAX_DRAWING_FACES,
   ct as MAX_DRAWING_TRIANGLES,
   Ie as MAX_EXACT_BODIES,
   Ut as MAX_LISTED_EDGES,
   Ct as MAX_POLYHEDRON_FACES,
-  Ur as MAX_STEP_BYTES,
+  Wr as MAX_STEP_BYTES,
   It as MIN_EXACT_SEGMENTS,
-  ns as cadScript,
-  gr as checkExactFeatureCost,
+  os as cadScript,
+  yr as checkExactFeatureCost,
   sn as createBrepCache,
-  Yr as createExactBackend,
-  Kr as createExactBackendFromKernel,
-  as as createInThreadExactHost,
-  Rr as describeExactFace,
+  Vr as createExactBackend,
+  Yr as createExactBackendFromKernel,
+  is as createInThreadExactHost,
+  Lr as describeExactFace,
   Nt as displayMesh,
   rn as displayTessellation,
-  Dr as drawingMeshTolerance,
-  ts as evaluateCadScript,
-  Xr as exactDrawingBody,
-  jr as exactDrawingData,
-  mr as exactFeatureCost,
-  $r as exactFeatureDisplay,
-  ur as exactGuardSeconds,
-  Qo as exactKernelIdentity,
-  dr as exactKernelOptions,
-  Wr as exactTargets,
+  kr as drawingMeshTolerance,
+  ns as evaluateCadScript,
+  jr as exactDrawingBody,
+  Ur as exactDrawingData,
+  gr as exactFeatureCost,
+  Pr as exactFeatureDisplay,
+  dr as exactGuardSeconds,
+  Jo as exactKernelIdentity,
+  hr as exactKernelOptions,
+  Gr as exactTargets,
   it as facewiseMesh,
-  _r as importStepBodies,
-  Vr as isFatalExactError,
+  zr as importStepBodies,
+  Zr as isFatalExactError,
   ut as lowerCodeShape,
   an as lowerDocumentBody,
   cn as lowerDocumentNode,
-  Nr as readStoredBody,
-  ss as resolveExactLimits,
-  Lr as resolveFeatureEdges,
+  Br as readStoredBody,
+  as as resolveExactLimits,
+  Dr as resolveFeatureEdges,
   en as revolveProfile,
-  qr as runExactRequest,
+  Qr as runExactRequest,
   kt as sketchProfile,
-  zr as storedBody,
-  Mr as triangulatePolygon
+  Nr as storedBody,
+  br as triangulatePolygon
 };
