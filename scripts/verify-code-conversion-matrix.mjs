@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import assert from 'node:assert/strict';
 import {chromium, webkit} from 'playwright';
-import {openCodeActions} from './lib-code-actions.mjs';
+import {openCodeActions, openCodeInfo} from './lib-code-actions.mjs';
 import {typeIntoEditor} from './lib/type-into-editor.mjs';
 
 const url = process.argv[2];
@@ -91,8 +91,9 @@ try {
     for (const [name, pattern] of languages) {
         await selectLanguage(name);
         await action(/^From blocks/i);
-        await page.waitForFunction(() =>
-            document.querySelector('[data-testid="bw-conversion-report"]')?.textContent.includes('Blocks → Code'));
+        const help = await openCodeInfo(page);
+        await help.getByTestId('bw-conversion-report').filter({hasText: 'Blocks → Code'}).waitFor();
+        await help.getByRole('button', {name: 'Close Code help'}).click();
         const generated = await source();
         assert.match(generated, pattern, name);
         assert.ok(generated.includes(message), name);

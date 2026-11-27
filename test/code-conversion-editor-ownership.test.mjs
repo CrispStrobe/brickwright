@@ -14,7 +14,7 @@ const extract = (start, end) => {
     assert.ok(a >= 0 && b > a, `Actual method boundaries: ${start}`);
     return original.slice(a, b);
 };
-const methods = extract('    async compile ({strict = false, pseudocode = null} = {}) {',
+const methods = extract('    async compile ({strict = false, pseudocode = null, scratchExample = false} = {}) {',
     '    // Read the running project into all languages at once.') +
     extract('    async loadAsmExample (id) {', '    openArtefactFile (file) {') +
     extract('    publishAppliedDevice (stc) {',

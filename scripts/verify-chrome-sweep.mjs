@@ -128,9 +128,9 @@ try {
     check(await page.getByRole('button', {name: /Run (Python|JavaScript)/i}).count() === 0,
         'BASIC tab never exposes a wrong-language Run control');
 
-    const infoToggle = page.getByTestId('bw-basic-info-toggle');
+    const infoToggle = page.getByTestId('bw-code-info');
     await infoToggle.click();
-    const infoPanel = page.getByTestId('bw-basic-info-panel');
+    const infoPanel = page.locator('[data-code-language-note="basic"]');
     await infoPanel.waitFor({state: 'visible', timeout: 10000});
     const infoText = await infoPanel.innerText();
     check(infoText.includes('BBC BASIC') && infoText.includes(INFO_TOKEN),

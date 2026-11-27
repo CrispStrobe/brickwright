@@ -3,17 +3,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {usesScratchStage} from '../overlay/scratch-gui/src/components/tw-pseudocode/code-example-view.js';
 import {conversionFailure} from '../overlay/scratch-gui/src/lib/bw-conversion-error.js';
 import {captureCodeArtwork, codeArtworkMatches} from '../overlay/scratch-gui/src/lib/bw-code-artwork.js';
 import {balancedFrom, scopeAfter} from './helpers/js-scope.mjs';
 const source = readFileSync(new URL('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx', import.meta.url), 'utf8');
-const signature = 'async compile ({strict = false, pseudocode = null} = {}) {';
+const signature = 'async compile ({strict = false, pseudocode = null, scratchExample = false} = {}) {';
 const compileBody = balancedFrom(source, source.indexOf(signature) + signature.length - 1, '{', '}');
 const publishBody = scopeAfter(source, 'publishAppliedDevice (stc) {');
 const devices = {arcade: {core: 'arcade'}, microbit: {core: 'microbit'}, calliopemini: {core: 'microbit'}, uno: {core: 'avr'}};
 const Event = class { constructor (type, options) { this.type = type; this.detail = options.detail; } };
-const setup = ({program = 'DEVICE ARCADE', lang = 'pseudocode', parseError, loadError, deferred = false, setStc = true, deferredRefresh = false, refreshError} = {}) => {
-    const events = [], calls = [];
+const setup = ({program = 'DEVICE ARCADE', lang = 'pseudocode', parseError, loadError, deferred = false, setStc = true, deferredRefresh = false, refreshError, stageOpcode} = {}) => {
+    const events = [], calls = [], views = [];
     const window = {dispatchEvent: event => events.push(event)};
     let finishLoad;
     const pendingLoad = new Promise(resolve => { finishLoad = resolve; });
@@ -26,7 +27,7 @@ const setup = ({program = 'DEVICE ARCADE', lang = 'pseudocode', parseError, load
         toJSON: () => JSON.stringify({targets: []})};
     if (setStc) vm.setStc = stc => { calls.push('stc'); runtime.stc = stc; };
     class Creator {
-        constructor () { this.warnings = []; this.project = {targets: []}; }
+        constructor () { this.warnings = []; this.project = {targets: stageOpcode ? [{blocks: {test: {opcode: stageOpcode}}}] : []}; }
         parse (text) { if (parseError) throw new Error(parseError); const device = text.match(/^DEVICE\s+(\S+)/im)?.[1]; this.project.stc = device ? {device: device.toLowerCase()} : null; }
         async generateSB3 () { return {arrayBuffer: async () => new ArrayBuffer(0)}; }
         generatePython () { return ''; }
@@ -47,16 +48,16 @@ const setup = ({program = 'DEVICE ARCADE', lang = 'pseudocode', parseError, load
     // DOS_LANG / generateDosLangs: the fe and Tcl tabs, which compile() also
     // regenerates; none here (stubs keep the sandbox to the names it gives).
     component.compile = new Function('TWO_WAY', 'classifyConversionWarnings', 'LANG_LABEL', 'window', 'codeArtworkMatches', 'captureCodeArtwork', 'conversionFailure',
-        'DOS_LANG', 'generateDosLangs',
-        `return async function ({strict = false, pseudocode = null} = {}) ${compileBody}`)(new Set(['pseudocode']),
+        'DOS_LANG', 'generateDosLangs', 'usesScratchStage', 'setCircuitView',
+        `return async function ({strict = false, pseudocode = null, scratchExample = false} = {}) ${compileBody}`)(new Set(['pseudocode']),
         () => ({changed: [], unsupported: []}), {pseudocode: 'Pseudocode'}, window, codeArtworkMatches, captureCodeArtwork, conversionFailure,
-        {}, async () => ({}));
+        {}, async () => ({}), usesScratchStage, view => views.push(view));
     Creator.RETARGET_POOLS = {calliopemini: {}};
     Creator.retargetPseudocode = (text, device) => ({ok: true, warnings: [],
         pseudocode: text.replace(/^DEVICE\s+\S+/im, `DEVICE ${device.toUpperCase()}`)});
     component.setDevice = new Function('DEVICE_BY_ID', 'resolveExampleBench', 'window',
         `return async function (deviceId) ${scopeAfter(source, 'async setDevice (deviceId) {')}`)(devices, () => null, window);
-    return {component, runtime, events, calls, finishLoad, finishRefresh};
+    return {component, runtime, events, calls, views, finishLoad, finishRefresh};
 };
 
 test('Code stays busy until the native block definitions have finished refreshing', async () => {
@@ -171,4 +172,17 @@ test('file import cannot clear authored state during a pending device replacemen
     component.openCodeFile({target: {files: [file], value: 'game.mkcd'}});
     assert.deepEqual(opened, ['cleared controls', 'game.mkcd']);
     assert.equal(component._makeCodeProject, null);
+});
+
+
+test('loading a Scratch example clears the debugger and opens Stage for visual or interactive blocks only', async () => {
+    for (const [program, stageOpcode, expected] of [
+        ['STAGE:', 'looks_say', [{fullWidth: false, dock: 'off', rightPaneVisible: true}]],
+        ['STAGE:', 'data_setvariableto', [{fullWidth: false, dock: 'off', rightPaneVisible: false}]],
+        ['DEVICE ARCADE', 'looks_say', []]
+    ]) {
+        const {component, views} = setup({program, stageOpcode});
+        await component.compile({scratchExample: true});
+        assert.deepEqual(views, expected);
+    }
 });

@@ -101,12 +101,14 @@ ${rows}:disabled {
 [data-code-menu-group] details[open] > summary svg:last-child { transform: rotate(90deg); }
 [data-code-menu-group] summary svg:last-child { margin-inline-start: auto; }
 [data-code-menu-group] [data-code-machine-select] {
-    display: flex;
+    display: flex !important;
+    flex-wrap: nowrap;
     gap: 7px;
     align-items: center;
     padding: 3px 8px;
 }
-[data-code-menu-group] [data-code-machine-select] select {
+[data-code-menu-group] [data-code-machine-select] > svg {flex: 0 0 auto;}
+[data-code-menu-group] [data-code-machine-select] > :is(select, button) {
     flex: 1;
     min-width: 0;
     width: auto;

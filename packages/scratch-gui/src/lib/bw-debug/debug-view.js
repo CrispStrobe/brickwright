@@ -13,13 +13,13 @@ export const CIRCUIT_DEBUGGER_VIEW = Object.freeze({
     'bw-circuit-theme': 'light'
 });
 
-export const setCircuitView = ({fullWidth, dock}, {storage, eventTarget, EventClass} = {}) => {
+export const setCircuitView = ({fullWidth, dock, rightPaneVisible = true}, {storage, eventTarget, EventClass} = {}) => {
     const store = storage === undefined ? globalThis.localStorage : storage;
     const target = eventTarget === undefined ? globalThis.window : eventTarget;
     const CustomEventClass = EventClass === undefined ? globalThis.CustomEvent : EventClass;
     const values = {
         'bw-hide-stage': fullWidth ? '1' : '0',
-        'bw-right-pane-hidden': '0',
+        'bw-right-pane-hidden': rightPaneVisible ? '0' : '1',
         'bw-debug-dock': dock,
         'bw-stage-circuit': fullWidth ? '1' : '0',
         'bw-circuit-theme': 'light'

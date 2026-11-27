@@ -2,6 +2,9 @@ import React from 'react';
 import {remoteToolchainsAllowed} from '../../lib/distribution-policy.js';
 import {createPortal} from 'react-dom';
 import {showDebuggerOnStage} from '../../lib/bw-debug/show-debugger-on-stage.js';
+import {usesScratchStage} from './code-example-view.js';
+import {isMachinePickerBackdrop} from './machine-picker-view.js';
+import {collectCodeNotices} from './code-notices.js';
 import {Icon, Popup, toolStyles} from './sim-lab-toolbar.jsx';
 import ScrollRow from './toolbar-scroll-row.jsx';
 import {toolbarActionApplies} from '../../lib/code-toolbar-actions.js';
@@ -34,7 +37,7 @@ import {
 import {feProgramToC} from '../../lib/bw-lang/fe-target-c.js';
 import {forthProgramToC} from '../../lib/bw-lang/forth-target-c.js';
 import {fetchTclProgramC} from '../../lib/bw-lang/tcl-target-c.js';
-import {showCircuitDebugger} from '../../lib/bw-debug/debug-view.js';
+import {setCircuitView, showCircuitDebugger} from '../../lib/bw-debug/debug-view.js';
 import downloadBlob from '../../lib/download-blob.js';
 import animationResourceMenuItems from 'scratch-vm/src/util/bw-animation-resource-menu.js';
 import {conversionFailure} from '../../lib/bw-conversion-error.js';
@@ -183,8 +186,8 @@ const L10N = {
         arcRunTitle: 'Turn this Scratch project into a MakeCode Arcade game (sprites from their costumes, scripts as code) and run it in MakeCode\'s Arcade simulator',
         arcExport: '⬆ To MakeCode Arcade',
         arcExportTitle: 'Save this project as a MakeCode Arcade game that arcade.makecode.com opens',
-        arcDone: (f, u, w) => `Saved ${f} — drop it on arcade.makecode.com.${u ? ` ${u} block kind(s) have no Arcade counterpart (commented where they stood).` : ''}${w ? ` ${w} costume(s) were matched to Arcade's 16 colours.` : ''}`,
-        arcStarted: (u, w) => `Running as a MakeCode Arcade game.${u ? ` ${u} block kind(s) have no Arcade counterpart.` : ''}${w ? ` ${w} costume(s) were matched to Arcade's 16 colours.` : ''}`,
+        arcDone: (f, u) => `Saved ${f} — drop it on arcade.makecode.com.${u ? ` ${u} block kind(s) have no Arcade counterpart (commented where they stood).` : ''}`,
+        arcStarted: u => `Running as a MakeCode Arcade game.${u ? ` ${u} block kind(s) have no Arcade counterpart.` : ''}`,
         saveEmpty: 'Nothing to save — this tab is empty.',
         restored: t => `Restored your unsaved ${t}.`,
         loadCatalogTitle: 'Load a catalog example for this device',
@@ -533,8 +536,8 @@ const L10N = {
         arcRunTitle: 'Dieses Scratch-Projekt in ein MakeCode-Arcade-Spiel umwandeln (Figuren aus ihren Kostümen, Skripte als Code) und im MakeCode-Arcade-Simulator ausführen',
         arcExport: '⬆ Zu MakeCode Arcade',
         arcExportTitle: 'Dieses Projekt als MakeCode-Arcade-Spiel speichern, das arcade.makecode.com öffnet',
-        arcDone: (f, u, w) => `${f} gespeichert — auf arcade.makecode.com ablegen.${u ? ` Für ${u} Blockart(en) gibt es in Arcade keine Entsprechung (als Kommentar markiert).` : ''}${w ? ` ${w} Kostüm(e) wurden an die 16 Arcade-Farben angepasst.` : ''}`,
-        arcStarted: (u, w) => `Läuft als MakeCode-Arcade-Spiel.${u ? ` Für ${u} Blockart(en) gibt es in Arcade keine Entsprechung.` : ''}${w ? ` ${w} Kostüm(e) wurden an die 16 Arcade-Farben angepasst.` : ''}`,
+        arcDone: (f, u) => `${f} gespeichert — auf arcade.makecode.com ablegen.${u ? ` Für ${u} Blockart(en) gibt es in Arcade keine Entsprechung (als Kommentar markiert).` : ''}`,
+        arcStarted: u => `Läuft als MakeCode-Arcade-Spiel.${u ? ` Für ${u} Blockart(en) gibt es in Arcade keine Entsprechung.` : ''}`,
         saveEmpty: 'Nichts zu speichern — dieser Tab ist leer.',
         restored: t => `Nicht gespeicherter ${t} wiederhergestellt.`,
         loadCatalogTitle: 'Ein Katalog-Beispiel für dieses Gerät laden',
@@ -1251,8 +1254,8 @@ class PseudocodeImporter extends React.Component {
             // undefined and crashed the tab on open.
             buffers: Object.fromEntries(Object.keys(LANG_LABEL).map(l => [l, ''])),
             basicProfile: 'bbc', basicLineNumbers: true,
-            uploads: [], status: '', conversionReport: null, reportExpanded: false, busy: false, showRef: false, showInfo: false, showMatrix: false,
-            showRepresentation: true,
+            uploads: [], status: '', conversionReport: null, busy: false, showInfo: false, showMatrix: false,
+            codeNotices: [], codeNoticeId: 0,
             showArt: false, output: null, running: false, picoSimRunning: false,
             codeSessionRunning: false, codeInput: null, codeInputValue: '', codeRunLabel: '',
             // Hardware-extension codegen options (see reference/runtime-drivers.md): the emitted
@@ -1665,6 +1668,10 @@ class PseudocodeImporter extends React.Component {
         if (this._revealing) return;
         this._revealing = true;
         if (!this.state.revealed) this.setState({revealed: true});
+    }
+
+    static getDerivedStateFromProps (props, state) {
+        return collectCodeNotices(state, props.isVisible !== false);
     }
 
     componentDidUpdate (prevProps, prevState) {
@@ -2705,8 +2712,8 @@ class PseudocodeImporter extends React.Component {
                             Object.getOwnPropertyDescriptor(evidence,'ownedJsonObservation')?.value:null;
                     } catch { /* Missing evidence cannot hide the original unsupported report. */ }
                     return {conversionReport: {direction: operation === 'export' ? 'Blocks → Arcade export' : 'Blocks → Arcade run',
-                        operation, outcome, preserved: false, changed: [], unsupported: [...out.unsupported],
-                        details: out.unsupportedDetails || [], observation: observation || null}, reportExpanded: Boolean(out.unsupported.length)};
+                        operation, outcome, preserved: false, changed: [...(out.warnings || [])], unsupported: [...out.unsupported],
+                        details: out.unsupportedDetails || [], observation: observation || null}};
                 } catch { return null; }
             });
         } catch { /* Reporting must not replace the original export/run outcome. */ }
@@ -2718,7 +2725,6 @@ class PseudocodeImporter extends React.Component {
         let out;
         try {
             out = await this.arcadeFromStage();
-            this.publishArcadeReport(request, out, 'run', 'Arcade source prepared; compiler result pending.');
             const {compileMakeCode} = await import(
                 /* webpackChunkName: "bw-makecode-pxt" */ '../../lib/bw-makecode/pxt-runtime.js');
             const built = await compileMakeCode({target: 'arcade', files: out.files});
@@ -2737,7 +2743,7 @@ class PseudocodeImporter extends React.Component {
             window.dispatchEvent(new CustomEvent('bw-settings-change', {detail: {key: 'bw-debug-dock', value: 'makecode'}}));
             window.dispatchEvent(new CustomEvent('bw-makecode-load', {detail: program}));
             this.publishArcadeReport(request, out, 'run', 'Arcade source compiled and sent to the player; behavior is not verified.');
-            this.setState({busy: false, status: this.L.arcStarted(out.unsupported.length, out.warnings.length)});
+            this.setState({busy: false, status: this.L.arcStarted(out.unsupported.length)});
         } catch (err) {
             if (out) this.publishArcadeReport(request, out, 'run', 'Arcade run failed; the original error is shown in the status.');
             this.setState({busy: false, status: this.makeCodeFailure(err, 'arcade')});
@@ -2762,7 +2768,7 @@ class PseudocodeImporter extends React.Component {
             this.publishArcadeReport(request, out, 'export', original.status === 'current' && original.target === 'arcade' ?
                 'Recovered original Arcade source saved; later behavior is not verified.' :
                 'Arcade source saved, including all reported unsupported operations; it has not been compiled or run.');
-            this.setState({busy: false, status: this.L.arcDone(filename, out.unsupported.length, out.warnings.length)});
+            this.setState({busy: false, status: this.L.arcDone(filename, out.unsupported.length)});
         } catch (err) {
             this.setState({busy: false, status: this.L.mcFailed('MakeCode Arcade', (err && err.message) || String(err))});
         }
@@ -3127,7 +3133,7 @@ class PseudocodeImporter extends React.Component {
         if (this.state.busy || this.state.emptyTabOffer !== to) return;
         // The source buffer is kept; only the requested tab opens, empty.
         const device = this.currentDevice();
-        this.setState(s => ({lang: to, output: null, status: '', statusExpanded: false, emptyTabOffer: null,
+        this.setState(s => ({lang: to, output: null, status: '', emptyTabOffer: null,
             buffers: {...s.buffers, [to]: to === 'pseudocode' && device ? `DEVICE ${device}\n` : ''}}));
     }
 
@@ -5459,7 +5465,7 @@ class PseudocodeImporter extends React.Component {
                 status: warnings.length ? warnings.join('; ') : '',
                 buffers: {pseudocode: src, python: '', javascript: '', c: '', basic: '', asm: '', micropython: ''}},
             () => {
-                Promise.resolve(this.compile()).catch(e => this.setState(
+                Promise.resolve(this.compile({scratchExample: !device && !exDevice && !ex.files?.controller})).catch(e => this.setState(
                     {status: `Loaded, but building the project failed: ${e.message}`}));
             });
             // A FACEPLATE example ships a controller layout beside its
@@ -5554,7 +5560,7 @@ class PseudocodeImporter extends React.Component {
             if (this._unmounted || this._bundledExampleSelection !== request) { resolve(); return; }
             this.setState(patch, () => {
                 if (this._unmounted || this._bundledExampleSelection !== request) { resolve(); return; }
-                Promise.resolve(this.compile()).then(() => {
+                Promise.resolve(this.compile({scratchExample: !device && !exampleDevice})).then(() => {
                     if (patch.status && !this._unmounted && this._bundledExampleSelection === request) {
                         this.setState(state => ({status: [patch.status, state.status].filter(Boolean).join(' · ')}));
                     }
@@ -5659,7 +5665,7 @@ class PseudocodeImporter extends React.Component {
         await this.compile();
         if (this.state.conversionReport?.preserved) showCircuitDebugger();
     }
-    async compile ({strict = false, pseudocode = null} = {}) {
+    async compile ({strict = false, pseudocode = null, scratchExample = false} = {}) {
         const conversionRequest = {};
         this._conversionRequest = conversionRequest;
         const buffersAtStart = this.state.buffers;
@@ -5877,6 +5883,9 @@ class PseudocodeImporter extends React.Component {
             // regenerate the other tabs from the compiled project
             if (!ownsEditor(this.state)) return;
             const proj = creator.project;
+            if (scratchExample && !stc?.device) {
+                setCircuitView({fullWidth: false, dock: 'off', rightPaneVisible: usesScratchStage(proj)});
+            }
             const nb = {...this.state.buffers};
             if (lang !== 'pseudocode') nb.pseudocode = new SB3Creator().decompile(proj);
             if (lang !== 'python') nb.python = new SB3Creator().generatePython(proj, this.genOpts());
@@ -5991,7 +6000,7 @@ class PseudocodeImporter extends React.Component {
     toggleMaximize () {
         const next = !this.state.maximized;
         this.setMaximizedChrome(next);
-        this.setState({maximized: next, actionsOpen: false, showRef: false, showArt: false, showInfo: false, showMatrix: false});
+        this.setState({maximized: next, actionsOpen: false, showArt: false, showInfo: false, showMatrix: false});
         try { localStorage.setItem('bw-editor-max', next ? '1' : '0'); } catch { /* noop */ }
         // Toggle the right pane via the existing mechanic
         window.dispatchEvent(new CustomEvent('bw-settings-change', {
@@ -6106,6 +6115,9 @@ class PseudocodeImporter extends React.Component {
         const heading = {display: 'block', padding: '5px 8px 2px', fontSize: 11, color: '#64748b'};
         return createPortal(<dialog ref={element => {this.macDeviceDialog = element;}}
             data-testid="bw-mac-device-menu" aria-label={this.L.deviceTitle}
+            onClick={event => {
+                if (isMachinePickerBackdrop(event)) close();
+            }}
             style={{width: 270, maxWidth: 'calc(100vw - 24px)', maxHeight: '70vh',
                 padding: 8, border: '1px solid #94a3b8', borderRadius: 8, fontSize: 12}}>
             <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4}}>
@@ -6122,6 +6134,140 @@ class PseudocodeImporter extends React.Component {
                 {group.devices.map(device => item(device.id, device.label))}
             </React.Fragment>)}
         </dialog>, document.body);
+    }
+
+    openCodeInfo () {
+        this.setState({showInfo: true, actionsOpen: false}, () => {
+            this.codeHelpClose?.focus();
+        });
+    }
+
+    renderCodeInfo (machine) {
+        const {lang, asmMode, codeNotices, showInfo, emptyTabOffer} = this.state;
+        const locale = pickLocale(this.props.locale);
+        const de = locale === 'de';
+        const local = (english, german) => de ? german : english;
+        const close = () => this.setState({showInfo: false});
+        const dismiss = id => this.setState(state => ({
+            codeNotices: state.codeNotices.filter(notice => notice.id !== id)
+        }));
+        const count = codeNotices.filter(notice => notice.unread).length;
+        const latestStatus = codeNotices.find(notice => notice.status);
+        const latestReport = codeNotices.find(notice => notice.report);
+        const device = this.currentDevice();
+        const summary = !machine && device && matrixSummary(lang, device, locale);
+        const note = {basic: this.L.basicNote, asm: this.L.asmNote, nqc: this.L.nqcNote, c: this.L.cNote}[lang];
+        const sections = lang === 'pseudocode' ? SYNTAX : SUPPORTED[lang];
+        const closeStyle = {...toolStyles(false).button, fontSize: 18, lineHeight: 1};
+        const lane = {background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: 6, padding: '5px 8px'};
+
+        return <Popup id="code-info" testId="bw-code-info-popover"
+            open={this.props.isVisible !== false && showInfo} align="right" width={440} role="dialog"
+            label={this.L.infoAria} closeOnPick={false} onClose={close}
+            onToggle={() => showInfo ? close() : this.openCodeInfo()}
+            button={<button type="button" data-testid="bw-code-info" aria-label={this.L.infoAria}
+                title={this.L.infoAria} style={{...toolStyles(false).button, position: 'relative'}}>
+                <Icon name="help" />
+                {count > 0 && <span data-testid="bw-code-info-count" style={{position: 'absolute', right: -3, top: 0,
+                    borderRadius: 9, minWidth: 13, padding: '1px 3px', background: '#6435c9', color: '#fff',
+                    fontSize: 9, lineHeight: '12px', textAlign: 'center'}} aria-label={local(
+                    `${count} unread notices`, `${count} ungelesene Meldungen`)}>{count}</span>}
+            </button>}>
+            <div data-code-help style={{padding: 4, display: 'grid', gap: 8, color: '#334155', overflowWrap: 'anywhere'}}>
+                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                    <strong>{this.L.infoAria}</strong>
+                    <button ref={node => { this.codeHelpClose = node; }} type="button" style={closeStyle}
+                        aria-label={local('Close Code help', 'Code-Hilfe schließen')} onClick={event => {
+                            const trigger = event.currentTarget.ownerDocument.querySelector('[data-testid="bw-code-info"]');
+                            close();
+                            trigger?.focus();
+                        }}>×</button>
+                </div>
+                {codeNotices.length > 0 && <section aria-label={local('Notices', 'Meldungen')}
+                    data-testid="bw-code-notices" style={{display: 'grid', gap: 5}}>
+                    <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                        <strong>{local('Notices', 'Meldungen')}</strong>
+                        <button type="button" style={{...closeStyle, fontSize: 22}} data-testid="bw-clear-code-notices"
+                            aria-label={local('Clear all notices', 'Alle Meldungen löschen')}
+                            title={local('Clear all notices', 'Alle Meldungen löschen')}
+                            onClick={() => {
+                                this.codeHelpClose?.focus();
+                                this.setState({codeNotices: []});
+                            }}>×</button>
+                    </div>
+                    {codeNotices.map(notice => {
+                        const report = notice.report;
+                        return <div key={notice.id} data-code-notice style={{...lane, display: 'flex', alignItems: 'flex-start', gap: 8}}>
+                            {report ? <details data-testid={notice === latestReport ? 'bw-conversion-report' : undefined}
+                                open={(!report.preserved || report.changed.length > 0 || report.unsupported.length > 0) || undefined}
+                                style={{flex: 1, minWidth: 0}}>
+                                <summary style={{cursor: 'pointer', fontWeight: 600}}>
+                                    {local('Conversion report', 'Umwandlungsbericht')}: {report.direction}
+                                </summary>
+                                <div data-testid={notice === latestReport ? 'bw-conversion-preserved' : undefined}>
+                                    {report.operation ? report.outcome : <>{local('Preserved', 'Bewahrt')}: {report.preserved ?
+                                        local('project structure generated and loaded', 'Projektstruktur erzeugt und geladen') :
+                                        local('no — conversion failed', 'nein — Umwandlung fehlgeschlagen')}</>}
+                                </div>
+                                <div data-testid={notice === latestReport ? 'bw-conversion-changed' : undefined}>
+                                    {local('Changed', 'Geändert')}: {report.changed.join(' · ') ||
+                                        local('no reported changes', 'keine gemeldeten Änderungen')}
+                                </div>
+                                <div data-testid={notice === latestReport ? 'bw-conversion-unsupported' : undefined}
+                                    style={{color: report.unsupported.length ? '#92400e' : undefined}}>
+                                    {local('Unsupported', 'Nicht unterstützt')}: {report.unsupported.join(' · ') ||
+                                        local('nothing reported', 'nichts gemeldet')}
+                                </div>
+                                {report.details?.length > 0 && <pre data-testid={notice === latestReport ?
+                                    'bw-conversion-refusal-details' : undefined} style={{whiteSpace: 'pre-wrap', fontSize: 11}}>
+                                    {JSON.stringify(report.details, null, 2)}
+                                </pre>}
+                            </details> : <div style={{flex: 1, minWidth: 0, whiteSpace: 'pre-wrap'}}
+                                data-testid={notice === latestStatus ? 'bw-code-status' : undefined}>
+                                {notice.status}
+                                {notice === latestStatus && notice.offer && notice.offer === emptyTabOffer &&
+                                    <button type="button" data-testid="bw-open-empty-tab" onClick={() => {
+                                        this.openEmptyTab(notice.offer);
+                                        dismiss(notice.id);
+                                        close();
+                                    }}>{this.L.openEmptyTab(notice.offer)}</button>}
+                            </div>}
+                            <button type="button" style={closeStyle}
+                                data-testid={notice === latestReport ? 'bw-dismiss-conversion-report' : notice === latestStatus ?
+                                    /^(Restored your unsaved |Nicht gespeicherter )/.test(notice.status) ?
+                                        'bw-dismiss-restored' : 'bw-dismiss-code-status' : undefined}
+                                aria-label={this.L.dismissNotice} title={this.L.dismissNotice}
+                                onClick={() => {
+                                    this.codeHelpClose?.focus();
+                                    dismiss(notice.id);
+                                }}>×</button>
+                        </div>;
+                    })}
+                </section>}
+                {!machine && <>
+                    {device && <div>{deviceHelp(device)}</div>}
+                    {summary && <div data-testid="bw-code-device-capabilities"><strong>{summary}</strong>
+                        <div>{matrixExplain(lang, device, locale)}</div>
+                    </div>}
+                    <div data-testid="bw-representation-status">{representationNotice(lang, asmMode, this.props.locale)}</div>
+                    {TWO_WAY.has(lang) && <div>{local(
+                        'To blocks converts the active editor. From blocks reads the project into Code. Conversion reports identify unsupported operations.',
+                        'Zu Blöcken übersetzt den aktiven Editor. Von Blöcken liest das Projekt als Code. Der Umwandlungsbericht nennt nicht unterstützte Befehle.'
+                    )}</div>}
+                    {note && <div style={{whiteSpace: 'pre-wrap'}} data-code-language-note={lang}>{note}</div>}
+                    {sections?.length > 0 && <details><summary>{this.L.reference}</summary>
+                        {sections.map(([heading, items]) => <div key={heading}>
+                            <strong>{this.L.h[heading] || heading}</strong>
+                            <ul style={{margin: '2px 0 8px', paddingLeft: 20}}>
+                                {items.map(text => <li key={text}><code>{text}</code></li>)}
+                            </ul>
+                        </div>)}
+                    </details>}
+                </>}
+                <div>{local('Ctrl or ⌘ + F searches. Ctrl or ⌘ + Z undoes a text edit.',
+                    'Strg oder ⌘ + F sucht. Strg oder ⌘ + Z macht eine Texteingabe rückgängig.')}</div>
+            </div>
+        </Popup>;
     }
 
     renderActionMenu (csel, renderCodeControls, renderLanguages, machine) {
@@ -6167,6 +6313,9 @@ class PseudocodeImporter extends React.Component {
                     <div data-code-menu-group data-code-overflow-controls>
                         {machine === 'cardiac' ? <div ref={this.props.onCardiacToolsSlot} data-cardiac-overflow-tools /> :
                             !machine && renderCodeControls(true)}
+                        <button type="button" onClick={() => this.openCodeInfo()} data-overflow-action>
+                            <Icon name="help" />{this.L.infoAria}
+                        </button>
                         <details>
                             <summary data-overflow-action><Icon name="example" />{this.L.toolbarLanguages}<Icon name="chevronRight" size={12} /></summary>
                             <div>{renderLanguages(true)}</div>
@@ -6259,8 +6408,6 @@ class PseudocodeImporter extends React.Component {
                         data-testid="bw-makecode-arcade-export"><Icon name="save" />{this.L.arcExport.replace(/^⬆\s*/, '')}</button>
                     </div>
                     <div data-code-menu-group role="group" aria-label={this.L.reference}>
-                    <button type="button" onClick={() => this.setState(s => ({showRef: !s.showRef}))}
-                        data-overflow-action style={item} title={this.L.referenceTitle(this.state.lang)}><Icon name="instructions" />{this.L.reference}</button>
                     <button type="button" onClick={() => this.setState(s => ({showArt: !s.showArt}))}
                         data-overflow-action style={item} title={this.L.customArtTitle}>
                         <Icon name="view-fit" />{this.L.customArt}{this.state.uploads.length ? ` (${this.state.uploads.length})` : ''}
@@ -6761,13 +6908,6 @@ class PseudocodeImporter extends React.Component {
                                 {menu ? <Icon name="run" /> : '▶ '}{this.state.libraryProgram.title}
                             </button>
                         )}
-                        {!menu && this.state.lang === 'c' ? (
-                            <button type="button" onClick={() => this.setState(s => ({showCInfo: !s.showCInfo}))}
-                                style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18,
-                                    padding: 0, border: 'none', borderRadius: '50%', background: this.state.showCInfo ? '#4c97ff' : '#e2e8f0',
-                                    color: this.state.showCInfo ? '#fff' : '#475569', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'serif'}}
-                                title={this.L.cNote.slice(0, 60)} data-testid={menu ? "bw-c-info-toggle-menu" : "bw-c-info-toggle"}>i</button>
-                        ) : null}
                         {this.state.lang === 'nqc' ? (
                             <React.Fragment>
                                 <button type="button" onClick={() => this.compileNqcToFile()}
@@ -6782,39 +6922,12 @@ class PseudocodeImporter extends React.Component {
                                     style={{...actionBtn, background: '#4c97ff', color: '#fff'}}>
                                     {this.L.nqcSend}
                                 </button>
-                                {!menu && <button type="button" onClick={() => this.setState(st => ({showNqcInfo: !st.showNqcInfo}))}
-                                    style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18,
-                                        padding: 0, border: 'none', borderRadius: '50%', background: this.state.showNqcInfo ? '#4c97ff' : '#e2e8f0',
-                                        color: this.state.showNqcInfo ? '#fff' : '#475569', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'serif'}}
-                                    title={this.L.nqcNote.slice(0, 60)} data-testid={menu ? "bw-nqc-info-toggle-menu" : "bw-nqc-info-toggle"}>i</button>}
                             </React.Fragment>
-                        ) : null}
-                        {!menu && this.state.lang === 'basic' ? (
-                            <button type="button" onClick={() => this.setState(s => ({showBasicInfo: !s.showBasicInfo}))}
-                                style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18,
-                                    padding: 0, border: 'none', borderRadius: '50%', background: this.state.showBasicInfo ? '#4c97ff' : '#e2e8f0',
-                                    color: this.state.showBasicInfo ? '#fff' : '#475569', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontStyle: 'italic'}}
-                                title={this.L.basicInfoTitle} data-testid={menu ? "bw-basic-info-toggle-menu" : "bw-basic-info-toggle"}>i</button>
-                        ) : null}
-                        {!menu && this.state.lang === 'asm' ? (
-                            <button type="button" onClick={() => this.setState(s => ({showAsmInfo: !s.showAsmInfo}))}
-                                style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 18, height: 18,
-                                    padding: 0, border: 'none', borderRadius: '50%', background: this.state.showAsmInfo ? '#4c97ff' : '#e2e8f0',
-                                    color: this.state.showAsmInfo ? '#fff' : '#475569', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontStyle: 'italic'}}
-                                title={this.L.asmInfoTitle} data-testid={menu ? "bw-asm-info-toggle-menu" : "bw-asm-info-toggle"}>i</button>
                         ) : null}
                     </div>
                     {!menu && <span style={{flex: 1, minWidth: 4}} />}
                     {/* Compact controls */}
                     <React.Fragment>
-                        <button type="button" onClick={() => this.setState(s => ({showInfo: !s.showInfo, actionsOpen: false}))}
-                            aria-label={this.L.infoAria} title={this.L.infoTitle}
-                            style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20,
-                                padding: 0, border: 'none', borderRadius: '50%', background: this.state.showInfo ? '#4c97ff' : '#e2e8f0',
-                                color: this.state.showInfo ? '#fff' : '#475569', fontSize: 11, fontWeight: 700, cursor: 'pointer',
-                                fontStyle: 'italic', alignSelf: 'center'}}>
-                            {menu ? <><Icon name="help" /><span>{this.L.infoAria}</span></> : '?'}
-                        </button>
                         <button type="button" onClick={() => this.setState(s => ({showMatrix: !s.showMatrix}))}
                             aria-label={this.L.matrixAria} title={this.L.matrixTitle}
                             data-testid={menu ? "bw-matrix-toggle-menu" : "bw-matrix-toggle"}
@@ -6870,36 +6983,6 @@ class PseudocodeImporter extends React.Component {
                             <option value="__manage__" data-machine-launch="">{'Manage machines…'}</option>
                         </select>)}
                         </div>
-                        {/* What this language can do on this device: native, lowered, or
-                            an open task — one line, read from lib/bw-matrix/capabilities.js,
-                            the same table the docs are generated from. Title = the long form. */}
-                        {!menu && this.currentDevice() && matrixSummary(this.state.lang, this.currentDevice(), pickLocale(this.props.locale)) ? (
-                            <span style={{alignSelf: 'center', display: 'inline-flex'}}>
-                                {/* The reach summary is long; keep it behind an (i) button, in a portalled
-                                    pop-up (the toolbar scrolls sideways and would clip an absolute one). */}
-                                <Popup id="code-matrix-info" anchorTestId="bw-matrix-badge-anchor" testId="bw-matrix-badge-popover"
-                                    open={this.props.isVisible !== false && this.state.matrixInfoOpen} align="right" width={320}
-                                    label={this.L.matrixInfoAria}
-                                    onToggle={() => this.setState(state => ({matrixInfoOpen: !state.matrixInfoOpen}))}
-                                    onClose={() => this.setState({matrixInfoOpen: false})}
-                                    button={<button type="button" data-testid={menu ? "bw-matrix-badge-menu" : "bw-matrix-badge"}
-                                        aria-label={this.L.matrixInfoAria}
-                                        data-summary={matrixSummary(this.state.lang, this.currentDevice(), pickLocale(this.props.locale))}
-                                        title={matrixExplain(this.state.lang, this.currentDevice(), pickLocale(this.props.locale))}
-                                        style={{width: 20, height: 20, padding: 0, borderRadius: '50%', fontSize: 11,
-                                            fontWeight: 700, fontStyle: 'italic', fontFamily: 'Georgia, serif', lineHeight: '18px',
-                                            color: '#475569', background: '#f1f5f9', border: '1px solid #cbd5e1', cursor: 'pointer'}}>
-                                        i
-                                    </button>}>
-                                    <div style={{padding: '2px 4px', color: '#334155'}}>
-                                        <strong style={{display: 'block'}}>
-                                            {matrixSummary(this.state.lang, this.currentDevice(), pickLocale(this.props.locale))}
-                                        </strong>
-                                        {matrixExplain(this.state.lang, this.currentDevice(), pickLocale(this.props.locale))}
-                                    </div>
-                                </Popup>
-                            </span>
-                        ) : null}
                     </React.Fragment>
             </React.Fragment>
         );
@@ -6927,9 +7010,10 @@ class PseudocodeImporter extends React.Component {
                         const active = !this.state.cp1Active && !this.state.cardiacActive && !this.state.kim1Active && !this.state.microtronicActive && this.state.lang === l;
                         return (
                             <button key={l} type="button" aria-pressed={active} onClick={() => this.switchTab(l)}
-                                disabled={this.state.busy && !active} title={label} aria-label={label}
+                                disabled={this.state.busy && !active} title={menu ? LANG_LABEL[l] : label}
+                                aria-label={menu ? (l === 'micropython' ? label.replace(/^\S+\s+/, '') : LANG_LABEL[l]) : label}
                                 style={languageTabStyle(active)}>
-                                {menu ? <><Icon name="example" />{LANG_LABEL[l] || label.replace(/^\S+\s+/, '')}</> :
+                                {menu ? (l === 'micropython' ? label.replace(/^\S+\s+/, '') : LANG_LABEL[l]) :
                                     this.state.cardiacActive ? label.split(' ')[0] : label}
                             </button>
                         );
@@ -6961,7 +7045,7 @@ class PseudocodeImporter extends React.Component {
                         if (!this.state.cardiacActive) hidden.push(['cardiac', 'CARDIAC', this.L.cardiacLanguage, () => this.openCardiacLanguage()]);
                         if (menu) return hidden.map(([language, label, name, open]) =>
                             <button key={language} type="button" title={name} disabled={this.state.busy}
-                                onClick={open}>＋ {label}</button>);
+                                onClick={open}>{LANG_LABEL[language] || label}</button>);
                         return (
                             <Popup id="code-lang-more" anchorTestId="bw-lang-more-anchor" testId="bw-lang-more-menu" role="menu"
                                 open={this.props.isVisible !== false && this.state.langMenuOpen} align="left" width={220}
@@ -6991,6 +7075,7 @@ class PseudocodeImporter extends React.Component {
                     style={{marginBottom: -1, paddingRight: 40}} scrollerStyle={{paddingBottom: 1}}
                     trailing={(
                         <React.Fragment>
+                            {this.renderCodeInfo(machine)}
                             {this.renderActionMenu(csel, renderCodeControls, renderLanguages, machine)}
                     <button onClick={() => this.toggleMaximize()}
                         style={{...csel, cursor: 'pointer', background: max ? '#4c97ff' : '#f1f5f9',
@@ -7049,138 +7134,8 @@ class PseudocodeImporter extends React.Component {
                     <div ref={this.props.onCp1CodeSlot} data-cp1-language-pane
                         style={{flex: 1, minHeight: 0, overflow: 'auto'}} />
                 ) : <React.Fragment>
-                {/* Transient messages sit under the row, not in it: they can be long and expand. */}
-                {this.state.status || this.state.conversionReport ? (
-                    <div data-testid="bw-code-notices" style={{display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'flex-start',
-                        flexShrink: 0, minWidth: 0, paddingTop: 4}}>
-                    {/* A one-line status pill; click to read all of it on its own line. */}
-                    {this.state.status ? <div data-testid="bw-code-status" role="status"
-                        data-expanded={this.state.statusExpanded ? 'true' : 'false'}
-                        style={{fontSize: 12, display: 'flex', alignItems: 'flex-start', gap: 4, alignSelf: 'center',
-                            minWidth: 0, flexShrink: 1, padding: '0 0 0 8px', border: '1px solid #cbd5e1', borderRadius: 12,
-                            background: '#f8fafc', ...(this.state.statusExpanded ?
-                                {flexBasis: '100%', maxHeight: 72, overflowY: 'auto', borderRadius: 6} : {maxWidth: 280})}}>
-                        <span title={this.state.status}
-                            onClick={() => this.setState(state => ({statusExpanded: !state.statusExpanded}))}
-                            style={{flex: '1 1 0', minWidth: 0, cursor: 'pointer', alignSelf: 'center',
-                                ...(this.state.statusExpanded ? {whiteSpace: 'pre-wrap', overflowWrap: 'anywhere'} :
-                                    {whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'})}}>
-                            {this.state.status}
-                        </span>
-                        {this.state.emptyTabOffer ? <button type="button" data-testid="bw-open-empty-tab"
-                            onClick={() => this.openEmptyTab(this.state.emptyTabOffer)}
-                            style={{border: '1px solid #cbd5e1', borderRadius: 10, background: '#fff', cursor: 'pointer',
-                                flexShrink: 0, fontSize: 11, padding: '1px 8px', alignSelf: 'center'}}>
-                            {this.L.openEmptyTab(this.state.emptyTabOffer)}
-                        </button> : null}
-                        <button type="button"
-                            data-testid={/^(Restored your unsaved |Nicht gespeicherter )/.test(this.state.status) ?
-                                'bw-dismiss-restored' : 'bw-dismiss-code-status'}
-                            aria-label={this.L.dismissNotice} onClick={() => this.setState({status: '', statusExpanded: false, emptyTabOffer: null})}
-                            style={{border: 0, background: 'transparent', cursor: 'pointer', flexShrink: 0,
-                                fontSize: 18, lineHeight: 1, padding: 4}}>×</button>
-                    </div> : null}
-                    {this.state.conversionReport ? (() => {
-                        const report = this.state.conversionReport;
-                        const de = pickLocale(this.props.locale) === 'de';
-                        const exp = this.state.reportExpanded;
-                        return (
-                            <div data-testid="bw-conversion-report" role="status"
-                                style={{border: '1px solid #cbd5e1', alignSelf: 'center',
-                                    borderRadius: exp ? 6 : 12, background: '#f8fafc', fontSize: 12, color: '#334155',
-                                    flexShrink: 1, minWidth: 0, maxHeight: 180, overflowY: 'auto', overflowWrap: 'anywhere',
-                                    ...(exp ? {flexBasis: '100%'} : {maxWidth: 360})}}>
-                                <div style={{display: 'flex', flexWrap: 'wrap', gap: 4, alignItems: 'center', padding: exp ? '7px 10px 4px' : '4px 8px', cursor: 'pointer', fontWeight: 600}}
-                                    onClick={() => this.setState(s => ({reportExpanded: !s.reportExpanded}))}>
-                                    <span style={{width: 16, display: 'inline-block', fontSize: 10}}>{exp ? '▼' : '▶'}</span>
-                                    {de ? 'Umwandlungsbericht' : 'Conversion report'}: {report.direction}
-                                    {!exp && (
-                                        <span style={{marginLeft: 'auto', display: 'flex', gap: 6, fontSize: 11}}>
-                                            {report.operation || report.preserved ? null : <span style={{color: '#991b1b'}}>❌</span>}
-                                            {report.changed.length > 0 && <span style={{color: '#0284c7'}}>{report.changed.length} {de ? 'geändert' : 'changed'}</span>}
-                                            {report.unsupported.length > 0 && <span style={{color: '#92400e'}}>{report.unsupported.length} {de ? 'nicht unterstützt' : 'unsupported'}</span>}
-                                            {!report.operation && report.preserved && report.changed.length === 0 && report.unsupported.length === 0 && <span style={{color: '#166534'}}>✓ OK</span>}
-                                        </span>
-                                    )}
-                                    <button type="button" data-testid="bw-dismiss-conversion-report"
-                                        aria-label={this.L.dismissNotice} title={this.L.dismissNotice}
-                                        onClick={event => { event.stopPropagation(); this.setState({conversionReport: null}); }}
-                                        style={{marginLeft: 'auto', border: 0, background: 'transparent', cursor: 'pointer',
-                                            fontSize: 18, lineHeight: 1, padding: 4}}>×</button>
-                                </div>
-                                {exp && (
-                                    <div style={{padding: '0 10px 7px 26px'}}>
-                                        <div data-testid="bw-conversion-preserved" style={{color: report.preserved ? '#166534' : '#991b1b'}}>
-                                            {report.operation ? report.outcome : <>{de ? 'Bewahrt' : 'Preserved'}: {report.preserved ?
-                                                (de ? 'Projektstruktur erzeugt und geladen' : 'project structure generated and loaded') :
-                                                (de ? 'nein — Umwandlung fehlgeschlagen' : 'no — conversion failed')}</>}
-                                        </div>
-                                        <div data-testid="bw-conversion-changed">
-                                            {de ? 'Geändert' : 'Changed'}: {report.changed.length ? report.changed.join(' · ') :
-                                                (de ? 'keine gemeldeten Änderungen' : 'no reported changes')}
-                                        </div>
-                                        <div data-testid="bw-conversion-unsupported"
-                                            style={{color: report.unsupported.length ? '#92400e' : '#334155'}}>
-                                            {de ? 'Nicht unterstützt' : 'Unsupported'}: {report.unsupported.length ?
-                                                report.unsupported.join(' · ') : (de ? 'nichts gemeldet' : 'nothing reported')}
-                                        </div>
-                                        {report.details?.length > 0 && <pre data-testid="bw-conversion-refusal-details"
-                                            style={{whiteSpace: 'pre-wrap', fontSize: 11}}>{JSON.stringify(report.details, null, 2)}</pre>}
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })() : null}
-                    </div>
-                ) : null}
-
-                {this.state.showRepresentation && !max && (
-                    <div data-testid="bw-representation-status" role="status"
-                        style={{padding: '5px 10px', background: '#fff8e1', border: '1px solid #f0c36d',
-                            borderRadius: '0 0 6px 6px', color: '#5d4300', fontSize: 11, lineHeight: 1.35,
-                            flexShrink: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                        <span>{representationNotice(this.state.lang, this.state.asmMode, this.props.locale)}</span>
-                        <button onClick={() => this.setState({showRepresentation: false})} style={{background: 'none', border: 'none', cursor: 'pointer', padding: '0 4px', fontSize: 14}}>✕</button>
-                    </div>
-                )}
-
                 {this.state.showMatrix && !max && this.renderMatrixPanel()}
 
-                {this.state.showInfo && (
-                    <div data-code-help role="region" aria-label={this.L.infoAria}
-                        style={{padding: '8px 12px', background: '#eff6ff', border: '1px solid #bfdbfe',
-                            borderRadius: 8, fontSize: 12, color: '#334155', flexShrink: 0}}>
-                        {this.currentDevice() && <div>{deviceHelp(this.currentDevice())}</div>}
-                        {pickLocale(this.props.locale) === 'de' ? (
-                            <div>{this.state.lang === 'asm' ? 'Assembler schreiben, assemblieren und ausführen.' :
-                                this.state.lang === 'micropython' ? 'Bearbeite MicroPython und starte es im Simulator oder exportiere die Firmware.' :
-                                    'Zu Blöcken übersetzt den aktiven Tab. Von Blöcken liest das Projekt als Code.'}
-                            {' Strg oder ⌘ + F sucht. Strg oder ⌘ + Z macht eine Texteingabe rückgängig.'}</div>
-                        ) : (
-                            <div>{this.state.lang === 'asm' ? 'Write assembly, then assemble and run it on the selected target.' :
-                                this.state.lang === 'micropython' ? 'Edit MicroPython, then run it in the simulator or export firmware.' :
-                                    'To blocks converts the active editor. From blocks reads the project into Code. Conversion reports identify unsupported operations.'}
-                            {' Ctrl or ⌘ + F searches. Ctrl or ⌘ + Z undoes a text edit.'}</div>
-                        )}
-                    </div>
-                )}
-
-                {this.state.showRef && !max && (
-                    <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(210px,1fr))',
-                        gap: 12, marginBottom: 4, padding: 10, background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0',
-                        fontSize: 12, flexShrink: 0}}>
-                        {(this.state.lang === 'pseudocode' ? SYNTAX : SUPPORTED[this.state.lang] || []).map(([h, items]) => (
-                            <div key={h}>
-                                <div style={{fontWeight: 700, marginBottom: 4}}>{this.L.h[h] || h}</div>
-                                <ul style={{margin: 0, paddingLeft: 16}}>
-                                    {items.map((it, i) => (
-                                        <li key={i}><code style={{fontSize: 11}}>{it}</code></li>
-                                    ))}
-                                </ul>
-                            </div>
-                        ))}
-                    </div>
-                )}
                 {this.state.lang === 'basic' && !max && (
                     <div style={{display: 'flex', gap: 16, padding: '6px 12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderTop: 'none', fontSize: 13, alignItems: 'center'}}>
                         <label style={{display: 'flex', alignItems: 'center', gap: 4}}>
@@ -7529,43 +7484,6 @@ class PseudocodeImporter extends React.Component {
                     </div>
                 ) : null}
 
-                {this.state.lang === 'basic' && this.state.showBasicInfo && (
-                    <div style={{padding: '6px 12px', background: '#eff6ff', border: '1px solid #bfdbfe',
-                        borderRadius: 8, fontSize: 13, color: '#334155', marginTop: 4, flexShrink: 0}}
-                        data-testid="bw-basic-info-panel">
-                        {this.L.basicNote}
-                    </div>
-                )}
-                {this.state.lang === 'asm' && this.state.showAsmInfo && (
-                    <div style={{padding: '6px 12px', background: '#eff6ff', border: '1px solid #bfdbfe',
-                        borderRadius: 8, fontSize: 13, color: '#334155', marginTop: 4, flexShrink: 0}}
-                        data-testid="bw-asm-info-panel">
-                        {this.L.asmNote}
-                    </div>
-                )}
-                {/* The C note is a paragraph, not a phrase: 700 characters naming the
-                    silent-tone gap, the 8086 port-I/O primitives and the MOVZX trap. It
-                    used to render as a bare inline span in this toolbar row, which is
-                    the "too small and does not wrap" the owner reported. It now uses the
-                    same (i) panel BASIC and ASM already had, and wraps long tokens
-                    (bw_outb(port, value), stc-compiler.vercel.app) instead of pushing
-                    the row sideways. */}
-                {this.state.lang === 'nqc' && this.state.showNqcInfo && (
-                    <div style={{margin: '6px 0', padding: '8px 10px', background: '#f1f5f9',
-                        border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12, lineHeight: 1.5, color: '#334155'}}
-                    data-testid="bw-nqc-info">
-                        {this.L.nqcNote}
-                    </div>
-                )}
-                {this.state.lang === 'c' && this.state.showCInfo && (
-                    <div style={{padding: '10px 14px', background: '#eff6ff', border: '1px solid #bfdbfe',
-                        borderRadius: 8, fontSize: 13, lineHeight: 1.5, color: '#334155', marginTop: 4,
-                        flexShrink: 0, maxWidth: 'min(880px, 94vw)', whiteSpace: 'pre-wrap',
-                        overflowWrap: 'anywhere'}}
-                        data-testid="bw-c-info-panel">
-                        {this.L.cNote}
-                    </div>
-                )}
                 {/* VDU terminal for BBC BASIC — renders DRAW/MOVE/PLOT graphics */}
                 {this.state.basicIsBbc && this.state.basicRawOutput ? (
                     <React.Suspense fallback={null}>

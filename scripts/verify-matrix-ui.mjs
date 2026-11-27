@@ -84,30 +84,20 @@ try {
     const device = page.getByTestId('bw-device-select');
     await device.waitFor({state: 'visible', timeout: 60000});
 
-    // With no chip chosen there is nothing to say, and the badge must not
-    // invent a device.
-    check('no badge without a device', (await page.getByTestId('bw-matrix-badge').count()) === 0);
-
-    // Pseudocode is the tab that opens first; every device's cell for it is
-    // lowered, so the badge reads "lowered via ...".
+    const info = page.getByTestId('bw-code-info');
+    const capabilities = page.getByTestId('bw-code-device-capabilities');
+    const popover = page.getByTestId('bw-code-info-popover');
+    await info.click();
+    check('Code help does not invent a device', (await capabilities.count()) === 0);
+    await info.click();
     await device.selectOption('pico');
-    const badge = page.getByTestId('bw-matrix-badge');
-    await badge.waitFor({state: 'visible', timeout: 15000});
-    // The badge is an (i) button with a fixed accessible name (so it never
-    // matches a language tab's name): the summary is its data-summary, the
-    // sentence its title, and a click opens a popover showing both.
-    const pseudoPico = (await badge.getAttribute('data-summary')) || '';
-    check('badge for pseudocode on the Pico says lowered', /lowered via/.test(pseudoPico), pseudoPico);
-    const title = (await badge.getAttribute('title')) || '';
-    check('badge title is the full sentence', /Pseudocode on Raspberry Pi Pico:/.test(title), title.slice(0, 80));
-    const popover = page.getByTestId('bw-matrix-badge-popover');
-    check('badge popover stays closed until asked', (await popover.count()) === 0);
-    await badge.click();
-    await popover.waitFor({state: 'visible', timeout: 5000});
-    const popoverText = (await popover.textContent()) || '';
-    check('badge popover shows the summary and the sentence',
-        /lowered via/.test(popoverText) && /Pseudocode on Raspberry Pi Pico:/.test(popoverText), popoverText.slice(0, 120));
-    await badge.click();
+    check('capabilities are not exposed in a second toolbar button', (await page.getByTestId('bw-matrix-badge').count()) === 0);
+    check('Code help stays closed until asked', (await popover.count()) === 0);
+    await info.click();
+    const capabilityText = (await capabilities.textContent()) || '';
+    check('Code help shows the device summary and sentence',
+        /lowered via/.test(capabilityText) && /Pseudocode on Raspberry Pi Pico:/.test(capabilityText), capabilityText);
+    await info.click();
     await popover.waitFor({state: 'detached', timeout: 5000});
 
     // The panel: one column per chip family, one row per language.

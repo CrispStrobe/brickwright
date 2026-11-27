@@ -145,3 +145,13 @@ test('the hosted Code-entry proof selects the real DebugPanel marker', () => {
     assert.doesNotMatch(browser, /\[data-debugger-panel\]/,
         'the CircuitDesigner wrapper is absent from the solo Code view');
 });
+
+test('a Scratch example can clear the debugger dock while leaving the right pane closed', () => {
+    const h = harness();
+    setCircuitView({fullWidth: false, dock: 'off', rightPaneVisible: false}, h.options);
+    const settings = Object.fromEntries(h.writes);
+    assert.equal(settings['bw-hide-stage'], '0');
+    assert.equal(settings['bw-stage-circuit'], '0');
+    assert.equal(settings['bw-debug-dock'], 'off');
+    assert.equal(settings['bw-right-pane-hidden'], '1');
+});

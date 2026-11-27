@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import assert from 'node:assert/strict';
 import {chromium, webkit} from 'playwright';
-import {openCodeActions} from './lib-code-actions.mjs';
+import {openCodeActions, openCodeInfo} from './lib-code-actions.mjs';
 import {typeIntoEditor} from './lib/type-into-editor.mjs';
 
 const base = process.argv[2];
@@ -48,6 +48,7 @@ async function run(visibilityBlocks) {
 
         await openCodeActions(page);
         await page.getByTestId('bw-makecode-arcade-run').click();
+        await openCodeInfo(page);
         await page.getByTestId('bw-code-status').filter({hasText: 'Running as a MakeCode Arcade game.'}).waitFor();
         const report = page.getByTestId('bw-conversion-report');
         assert.match(await report.innerText(), /Blocks → Arcade run/);

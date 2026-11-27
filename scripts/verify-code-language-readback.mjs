@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import assert from 'node:assert/strict';
 import {chromium, webkit} from 'playwright';
-import {openCodeActions} from './lib-code-actions.mjs';
+import {openCodeActions, openCodeInfo} from './lib-code-actions.mjs';
 import {typeIntoEditor} from './lib/type-into-editor.mjs';
 
 const url = process.argv[2];
@@ -77,7 +77,7 @@ try {
     await typeIntoEditor(python, 'sys.getsizeof(4)');
     const before = await stageSignature(python);
     await toBlocks(python);
-    const report = python.getByTestId('bw-conversion-report');
+    const report = (await openCodeInfo(python)).getByTestId('bw-conversion-report');
     await report.getByText(/Python → Blocks/).waitFor();
     const issue = python.getByTestId('bw-conversion-unsupported');
     if (!(await issue.count())) await report.getByText(/Conversion report/).click();
