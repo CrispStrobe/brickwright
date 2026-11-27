@@ -1,4 +1,4 @@
-# Code execution and Python game export
+# Code execution and game export (Python and JavaScript)
 
 Status: planned, with the initial bounded evaluation recorded. Recorded 2026-11-27 at the
 repository owner's request. This document is an implementation plan, not a
@@ -22,6 +22,11 @@ own claim and the existing upstream ownership rules.
 4. Develop a separately qualified export path from supported MakeCode Arcade,
    Scratch and Brickwright pseudocode projects to editable Python + pygame,
    followed by optional standalone packaging.
+5. Qualify JavaScript as a common browser/WebView execution and web-game export
+   target, with an owned worker lifecycle, shared simulator/game semantics,
+   offline web/PWA artifacts and separately built native packages. Reuse the
+   existing Tauri architecture; evaluate a second desktop shell only for a
+   demonstrated requirement. See [the JavaScript chapter](#9-javascript-execution-and-game-export-across-platforms).
 
 These are related but distinct products. A Python interpreter does not supply
 Scratch/Arcade sprite, event, audio or physics semantics. pygame requires its own
@@ -428,11 +433,24 @@ well as runtime libraries. This evaluation does not change the project's policy.
 | G2 — game coverage | Scheduler, assets and admitted Scratch/Arcade features | Differential corpus covers supported behavior; approximations remain visible |
 | G3 — desktop standalone | Reproducible per-platform packages | Clean-machine launch, assets/audio/input, restart, licenses and supported OS/architecture matrix pass |
 | G4 — web/mobile expansion | Independently scoped browser and mobile targets | Runtime and packaging qualification on actual target environments; no inheritance of desktop acceptance |
+| J0 — JS contract | Explicit script/module/game lifetimes; source/export capability catalog | Current worker, input, generator and source-download boundaries are recorded; unsupported operations are named |
+| J1 — JS execution | Owned worker async completion, input, Stop/Reset and errors through the R2 service | Await/rejection/input/CPU-loop/rerun fixtures pass with responsive UI and no stale effects; generated async programs expose a completion handle |
+| J2 — JS simulator bridge | Shared stage/circuit/device state, clock and capability API | Admitted blocks/JS scenarios agree; Stop/disconnect cancel host resources and stale commands |
+| J3 — playable JS web export | Semantic model to editable JS game source/runtime/assets; separately labeled VM player if offered | One Scratch and one Arcade fixture pass source/runtime state/event/frame checks; exact/approximate/unsupported report precedes export |
+| J4 — offline web/PWA | Complete local asset/dependency graph, serving contract, optional installable PWA and cache/update policy | Qualified browser floors pass offline restart, update consistency, input/audio and CSP/module/worker loading |
+| J5 — JS desktop bundles | Per-target Tauri player packages; optional Electron assessment only if justified | Clean-target/offline launch, native dependencies, assets, signing/permissions and declared OS/architecture support |
+| J6 — JS mobile bundles | Separately built Android/iOS player applications | Actual supported device/WebView, touch/audio/background lifecycle, native capabilities, signing and distribution qualification |
 
 R1/R2 are valuable with any interpreter. R3 is a measured choice, not a required
 wholesale replacement. Game export can share the conversion/model work but has
 its own runtime and packaging gates. Do not bundle a complete compiler rewrite,
 new interpreter, game engine and mobile distribution into one release.
+
+JavaScript J1/J2 share R2/R4 rather than creating another execution service or
+simulation world. J3 shares G0's source-aware graph and asset contract; JS and
+pygame backends retain independent behavior gates. J4–J6 qualify delivery
+targets separately. A JS engine being present on a host does not close its
+renderer, hardware, offline or packaged-app gates.
 
 ## 8. Evidence and follow-up
 
@@ -451,3 +469,255 @@ Primary runtime references: [Skulpt](https://github.com/skulpt/skulpt),
 [pwasm](https://github.com/simonw/pwasm),
 [pygame-ce](https://github.com/pygame-community/pygame-ce), and
 [PyInstaller usage](https://pyinstaller.org/en/stable/usage.html).
+
+## 9. JavaScript execution and game export across platforms
+
+Status: planned. This chapter extends the Python evaluation with a JavaScript
+execution and export track. It does not qualify a new runner, renderer, exporter,
+PWA or native game package.
+
+JavaScript is the first common web-game target to develop: the browser or native
+shell already supplies its JavaScript engine, and Brickwright already has a JS
+generator and JS-based simulation/rendering components. This avoids adding a
+second language runtime to a basic web export. The remaining work is execution
+ownership, source semantics, a real game runtime, assets and target packaging.
+Keep Python + pygame as a separately qualified editable-source target sharing
+the same semantic model and fixtures.
+
+The intended scope includes Windows, macOS, Linux, Android and iOS/iPadOS. A
+program can use the same browser-compatible JS source across these hosts, but
+syntax support, available APIs, native permissions and packaged-app behavior
+must be qualified separately. Tauri uses WebView2 on Windows, Android System
+WebView on Android, WKWebView on Apple platforms and WebKitGTK on Linux; it does
+not replace those engines with one identical implementation. See the official
+[Tauri architecture](https://github.com/tauri-apps/tauri/blob/dev/README.md) and
+[WebView reference](https://v2.tauri.app/reference/webview-versions/).
+
+### 9.1 Existing JavaScript boundaries
+
+The following are source observations at the document's pinned baseline, not new
+measurements. They describe the generic Code tab route; dedicated device and
+MakeCode routes retain their own contracts.
+
+| Area | Current boundary | Required outcome |
+| --- | --- | --- |
+| JS console worker | `JS_WORKER` invokes `new Function` and immediately sends `done`; `runViaWorker` then terminates it | Completion must follow the declared program lifetime, including awaited work and errors |
+| Generated async code | Flag calls can be emitted as detached async IIFEs; the enclosing function does not return their promises | Emit or register an owned completion handle; merely adding `await fn()` in the runner is insufficient |
+| Input | A source-pattern check for `prompt(` selects the main thread; `runWithReplayedInput` reruns a synchronous program with accumulated answers | Worker input requests/replies, cancellation and declared async input semantics; no replay of device or persistent-state effects |
+| Stage operations | The generated `scratch` proxy prints `say`/`think`; other methods are no-ops returning zero | A qualified renderer/runtime adapter and explicit capability report |
+| Events and unsupported blocks | Ordinary nonflag hats become function definitions with a comment to call them; optional extension-event registration is separate. Fallbacks can emit comments, `undefined` or `false` | Preserve admitted event/scheduler semantics; refuse unsupported operations before export |
+| Download | `saveCodeFile()` saves the visible source as a `.js` file | Distinguish a source download from a playable export containing its runtime, entry point and assets |
+
+Evidence: the baseline
+[Code tab](https://github.com/CrispStrobe/brickwright/blob/14de1c42bd2e2ea84086a2162d1eff1fdbbac20d/overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx),
+[replayed-input helper](https://github.com/CrispStrobe/brickwright/blob/14de1c42bd2e2ea84086a2162d1eff1fdbbac20d/overlay/scratch-gui/src/lib/replay-input.js),
+and [`generateJavaScript` / `scratchShimJs`](https://github.com/CrispStrobe/brickwright/blob/14de1c42bd2e2ea84086a2162d1eff1fdbbac20d/overlay/scratch-gui/src/lib/sb3-creator.js).
+Existing conversion diagnostics and source-ownership rules apply to JS as well
+as Python. Arbitrary executable JS need not be convertible back to blocks.
+
+### 9.2 One execution service, explicit JavaScript program kinds
+
+Use the owned execution service in section 4.2 for JS and Python. A run carries
+the exact source, revision, target, runtime and capabilities. Preserve three
+distinct program contracts:
+
+- **Synchronous script:** finishes when its entry point returns. Retain an
+  explicitly supported compatibility route for existing simple console source.
+- **Async module/program:** provides an entry point whose promise represents its
+  lifetime. Define input, sleeps, spawned tasks and cancellation through the
+  versioned host API; propagate rejections with source locations.
+- **Event/game program:** remains active while its scheduler owns handlers,
+  fibers and resources. Finishing initialization does not end the game. Stop,
+  game-over and restart have explicit lifecycle rules.
+
+For example, an eventual module contract could expose
+`export async function main(api)` with `await api.input(...)` and
+`await api.sleep(...)`. This is a proposed API, not current export syntax.
+Generated code must return/register its tasks rather than launch unobserved
+async IIFEs. Arbitrary detached timers/promises cannot be treated as an
+automatically discoverable completion signal. Define their supported ownership
+policy instead of guessing that the worker is idle.
+
+Use a dedicated worker so CPU-bound user JS can be stopped without waiting for
+that JS to yield. The HTML standard defines worker termination as discarding
+queued work and aborting the running script; cleanup of host-owned device,
+audio, rendering and input resources must therefore happen outside that worker.
+Run IDs, bounded output, stale-message rejection, error propagation, reset and
+unmount cleanup are shared R2/J1 requirements. A four-second console budget
+must not become the lifetime of every event-driven game. See
+[HTML workers and termination](https://html.spec.whatwg.org/multipage/workers.html).
+
+Choose and document classic-script versus module loading. `new Function` is not
+an ES-module loader, and a module worker cannot use `importScripts`. Package a
+closed dependency graph with supported relative imports; do not imply that
+Node's `require`, filesystem APIs or arbitrary npm packages exist in a browser
+worker. Module workers are an appropriate candidate, subject to the actual
+supported WebViews and app-protocol loading tests.
+
+### 9.3 Platform and capability matrix
+
+Every row below is an intended route requiring qualification. No JS game export
+or target-specific package is newly accepted by this chapter.
+
+| Host | JS execution route | Game and export route | Separate qualification |
+| --- | --- | --- | --- |
+| Desktop browsers | Native engine and dedicated worker; declared syntax/module baseline | Static web player or JS project; optional installed PWA | Chromium, Firefox and Safari floors, asset loading, input/audio, offline and Stop |
+| Windows app | Worker in WebView2 | Reuse a minimal Tauri player shell and bundled web assets | Supported Windows/architecture, WebView2 version/install mode, native permissions and offline first launch |
+| macOS app | Worker in WKWebView | Tauri app bundle using the same web-game artifact | Declared macOS 12 floor, graphics/input/audio, signing/notarization and lifecycle |
+| Linux app | Worker in WebKitGTK | Tauri package for a declared distro/ABI floor | Actual WebKitGTK/native dependencies, graphics/audio and package installation |
+| Android | Browser or selected system WebView engine | Web/PWA, or separately built Tauri APK/AAB | WebView version/provider, touch, low memory, background/resume, permissions and native device adapter |
+| iOS/iPadOS | Browser/WKWebView engine | Home Screen web app, or separately built Tauri iOS app | Declared iOS 15 floor, touch/audio/lifecycle, native capabilities, signing and distribution |
+
+The repository's
+[native configuration](https://github.com/CrispStrobe/brickwright/blob/14de1c42bd2e2ea84086a2162d1eff1fdbbac20d/apps/tauri/src-tauri/tauri.conf.json)
+declares the Apple OS floors above. WebKit shipped module workers with
+[Safari 15](https://webkit.org/blog/11989/new-webkit-features-in-safari-15/), but
+OffscreenCanvas 2D arrived in
+[Safari 16.4](https://webkit.org/blog/13966/webkit-features-in-safari-16-4/).
+Therefore keep a renderer on the UI thread, driven by bounded worker
+commands/state updates, as the baseline architecture. Feature-detect and test
+worker rendering as an optional optimization; do not silently raise the OS
+minimum or equate worker support with OffscreenCanvas support.
+
+Transpiling newer syntax can widen syntax compatibility. It does not supply
+missing Bluetooth, serial, USB, filesystem, rendering or native APIs. Device
+access needs a capability-specific adapter and the host's permission/user-action
+flow. For example, Chrome documents different transport/platform availability
+for [Web Serial](https://developer.chrome.com/docs/capabilities/serial) and
+[Web Bluetooth](https://developer.chrome.com/docs/capabilities/bluetooth).
+Test each admitted device/transport on each host; a JS-language support badge
+must not imply universal hardware connectivity.
+
+### 9.4 Reuse the semantic graph, renderer and simulation world
+
+Share section 6's source-aware graph, import diagnostics, assets, provenance and
+capability analysis between JS and Python backends. Preserve Scratch and Arcade
+profiles: event ordering, clocks, numerical/string coercions, list indexing,
+coordinates, random behavior, sprite/image identity and cancellation do not
+become equivalent merely because the implementation language is JavaScript.
+Reuse the existing [Arcade scheduler contract](ARCADE-FRAME-SCHEDULER.md) and
+[conversion-journey boundaries](ARCADE-CONVERSION-JOURNEY.md).
+
+Qualify two clearly named artifacts if both are offered:
+
+1. **Web player:** a current project graph and current assets packaged with the
+   required existing VM/extensions/renderer. This can reuse established project
+   execution, but still needs an inventory of standalone dependencies and tests
+   for every admitted extension.
+2. **Editable JavaScript project:** generated JS modules calling a versioned
+   game API, with its scheduler, renderer adapters and assets. This is a compiler
+   backend with differential behavior gates, not simply the current `.js`
+   download embedded in an HTML page.
+
+Within Brickwright, both JS and Python adapters must operate on the existing
+stage/circuit/device state and simulation clock. A standalone game has its own
+owned game state by design, initialized from its exported manifest; do not
+silently duplicate the live editor's world during preview. Keep renderer and
+host-service adapters separate from game logic so the same generated game can
+use the in-app preview or an exported player without a second semantic model.
+
+Start the editable-JS slice with one sprite/backdrop, keyboard or touch control,
+an update loop, collision, score, one admitted sound and clean restart. Use one
+original Scratch fixture and one imported Arcade fixture. Export from the
+current edited graph/assets, honor original-source current/stale tracking, and
+report exact/approximate/unsupported features before generation. Independently
+edited JS remains editable source with declared conversion limits.
+
+### 9.5 Export deliverables and packaging choices
+
+| Deliverable | Proposed contents or route | What still needs qualification |
+| --- | --- | --- |
+| JS source download | Visible source with the existing save action | Its runtime/API assumptions must be clear; this alone does not include a game player |
+| Editable web-game ZIP | HTML entry point, JS modules/runtime, current assets, source maps, capability/source manifest, notices and run instructions | Independent launch under the documented HTTP(S)/app-protocol environment; source/runtime parity and asset completeness |
+| Installable/offline PWA | The same qualified web game plus manifest/icons and versioned service-worker caching | Actual installation UX, first-load/cache readiness, offline restart, update consistency and storage eviction on each browser |
+| Native desktop game | Web-game artifact in a minimal player profile using the existing Tauri tooling | Per-target native bundle, dependencies, signing where applicable, clean-machine/offline launch and native bridge capabilities |
+| Native mobile game | Web-game artifact in an explicitly configured Tauri mobile player | Android APK/AAB or iOS build, touch/audio/background behavior, permissions, platform toolchain and distribution |
+| Optional Electron desktop package | Same web-game artifact with bundled Chromium/Node | Separate dependency/update/size decision and isolated renderer; no mobile qualification inherited |
+
+Prefer reusing Tauri's player/build conventions before adding a second desktop
+shell. [Tauri distribution](https://v2.tauri.app/distribute/) provides distinct
+desktop and mobile build/package paths;
+[its CLI](https://v2.tauri.app/reference/cli/) documents Android APK/AAB and iOS
+IPA generation, with iOS commands requiring a macOS host. A shared frontend does
+not create one executable for every OS. Exporting source from any host is also
+different from building/signing all native targets on that host.
+
+On Windows, decide whether an offline package must also carry its WebView2
+installation dependency; Tauri documents
+[bootstrapper, offline-installer and fixed-runtime options](https://v2.tauri.app/distribute/windows-installer/#webview2-installation-options).
+On Linux, record the supported distribution/native-library floor. On mobile,
+record lifecycle, input, audio and device behavior on actual supported devices.
+
+[Electron](https://www.electronjs.org/docs/latest/) is a desktop alternative
+that bundles Chromium and Node for Windows/macOS/Linux. It can reduce variation
+in the supplied browser engine, at the cost of a separate engine distribution
+and update responsibility. Measure its package/startup costs before selecting
+it. User game code must not receive Node or unrestricted native privileges;
+follow the documented [renderer isolation and IPC guidance](https://www.electronjs.org/docs/latest/tutorial/security).
+Electron is not an Android/iOS export strategy in this plan.
+
+PWA installation remains a browser/OS-specific delivery mechanism. WebKit's
+[Home Screen web-app documentation](https://webkit.org/blog/13878/web-push-for-web-apps-on-ios-and-ipados/)
+and [macOS web-app documentation](https://webkit.org/blog/14445/) describe
+platform experiences; they do not imply that installing a PWA grants native
+device APIs. A ZIP opened through `file://` is not the baseline for module,
+service-worker and origin-sensitive behavior. Provide the serving instructions
+and separately qualify any promised double-click/single-file export.
+
+### 9.6 Offline assets, CSP and the host boundary
+
+Build exports from pinned local runtime dependencies and the current asset
+manifest. Include fonts, images, sounds, extension code and workers; remove
+accidental CDN/dev-server dependencies. Record source/runtime versions, hashes,
+licenses and the admitted feature profile. Browser exports need a secure origin
+for service workers, and offline behavior depends on their cache/lifecycle:
+see the [Service Worker standard](https://w3c.github.io/ServiceWorker/#secure-context)
+and [service-worker lifecycle guidance](https://web.dev/learn/pwa/service-workers).
+Keep service-worker caching separate from game-worker execution. Native packaged
+assets should also start without a network connection; do not assume the web
+PWA cache supplies native offline behavior.
+
+Design and test the code-loading/CSP policy with the runner. CSP's
+[`worker-src`](https://w3c.github.io/webappsec-csp/#directive-worker-src) governs
+worker URLs, while dynamic `Function` compilation is an eval-controlled sink.
+The current Tauri configuration has `csp: null`; that is an existing condition,
+not an export policy. Prefer packaged module files for generated exports.
+Editable execution may require a distinct, deliberately scoped loading policy;
+do not disable CSP throughout the app as an incidental implementation shortcut.
+Tauri documents its [CSP integration](https://v2.tauri.app/security/csp/).
+
+A worker provides a responsiveness and termination boundary, not complete
+isolation from the origin's network/storage capabilities. Keep raw Tauri invoke,
+Node, shell and unrestricted filesystem interfaces outside user programs.
+Expose only validated, versioned host requests with per-run capabilities,
+resource ownership and cancellation. Connection/permission UI remains owned by
+the host; a worker message does not substitute for a required user gesture.
+Tauri's [capability system](https://v2.tauri.app/security/capabilities/) has
+platform-specific permissions, and registered custom app commands require their
+own deliberate restrictions. Do not assume that merely creating a capability
+file confines every native command or makes an iframe a portable privilege
+boundary. Stronger hostile-code isolation requires a separately scoped design.
+
+### 9.7 Acceptance and sequencing
+
+J0–J6 in section 7 are planned gates. J1 shares execution work with R2; J2 shares
+the simulator contract with R4; J3 shares semantic-model/asset work with G0.
+JavaScript web export can be qualified before Python game export or native
+packaging is complete. No existing Python/pygame measurement closes a JS gate.
+
+The JS corpus must include output before/after `await`, promise rejection,
+repeated input and cancellation, detached-task policy, infinite CPU loop Stop,
+large output, rapid rerun and stale replies. Include generated async/event
+programs and module-load failures under the production CSP/app protocol.
+Simulator fixtures cover state/clock parity, disconnect and Stop without stale
+actuator commands. Game fixtures compare scripted inputs, state at fixed frames,
+event order, collision outcomes, asset hashes and selected rendered frames to
+the appropriate source runtime; add real audio/controller checks for admitted
+features.
+
+For each packaging target, add install/launch, first offline start, update,
+background/resume, viewport/touch and dependency/notice checks. Test the oldest
+supported WebViews as well as current engines. Record exactly which source,
+renderer, runtime, assets, platform and package passed. Keep untested host/device
+cells pending and retain the existing upstream ownership rules for changes to
+the shared reader/emitter.

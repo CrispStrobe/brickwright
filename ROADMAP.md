@@ -1,6 +1,6 @@
 # Brickwright roadmap
 
-## Code runtimes and Python game export — PLANNED 2026-11-27
+## Code runtimes and game export (Python and JavaScript) — 2026-11-27
 
 See the [full plan and acceptance criteria](docs/CODE-RUNTIME-AND-GAME-EXPORT.md)
 and [evaluation claim](lanes/2026-11-27-code-runtime-game-export-evaluation.md).
@@ -30,6 +30,17 @@ justifies its Python-hosted WASM layer. pygame requires a separate game runtime
 and dependency-policy decision; neither MicroPython nor Pyodide automatically
 provides a complete pygame/SDL export stack. Shared converter changes belong
 upstream in `sb3-creator`; this documentation/evaluation lane changes no vendor pin.
+
+The planned [JavaScript execution/export track](docs/CODE-RUNTIME-AND-GAME-EXPORT.md#9-javascript-execution-and-game-export-across-platforms)
+shares source integrity, the owned execution service and the existing simulation
+world with R1/R2/R4. J0 records JS program/export contracts; J1 qualifies awaited
+worker completion, input and Stop; J2 qualifies the shared simulator/device
+bridge; J3 produces an explicitly supported editable JS web game from the
+validated graph/assets. J4 adds offline web/PWA qualification, J5 target-specific
+desktop packages, and J6 separately qualified Android/iOS packages. Prefer the
+existing Tauri tooling; an Electron desktop package needs its own reason and
+dependency/update review. None of these JS gates is closed by the Python runtime
+or authored pygame packaging probes.
 
 ## Examples across the workspace
 

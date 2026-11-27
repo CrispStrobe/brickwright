@@ -1,6 +1,6 @@
 # Brickwright Lite improvement plan
 
-## Code execution and Python game export — 2026-11-27
+## Code execution and game export (Python and JavaScript) — 2026-11-27
 
 The owner-requested [Code runtime and game export plan](docs/CODE-RUNTIME-AND-GAME-EXPORT.md)
 extends milestones 4, 5 and 9 below. Record the plan first, then evaluate the
@@ -19,6 +19,17 @@ This requires a game runtime preserving events, scheduling, sprites, collisions
 and assets; it is not supplied by installing a Python interpreter. Begin with a
 declared playable subset, then per-OS desktop builds. Browser and native mobile
 exports, dependency licensing, and original-runtime parity have distinct gates.
+
+The [JavaScript track](docs/CODE-RUNTIME-AND-GAME-EXPORT.md#9-javascript-execution-and-game-export-across-platforms)
+uses the engines already present in browsers and Tauri WebViews. First correct
+async completion, input and Stop through the shared execution service; then
+qualify a playable JS web export against the same source-aware graph, assets,
+renderer and simulator contracts. Keep a VM/project web player distinct from an
+editable generated-JS project. Follow with complete offline web/PWA artifacts
+and per-target Tauri desktop/mobile packages. Module/renderer/device capabilities
+and the oldest supported WebViews have separate gates; Electron remains an
+optional desktop alternative for a demonstrated need. This chapter is design
+and source review, not new platform or packaging acceptance.
 
 The [initial evaluation report](docs/CODE-RUNTIME-EVALUATION-2026-11-27.md)
 records the same-engine Node/Chromium probes, a pwasm host check, silent reader
