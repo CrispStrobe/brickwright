@@ -2939,16 +2939,23 @@ class PseudocodeImporter extends React.Component {
         return device(text);
     }
 
+    convertedSource ({pseudocode, warnings = []}) {
+        if (pseudocode?.trim() || !warnings.length) return pseudocode;
+        throw new Error(warnings.join(' · '));
+    }
+
     // source → pseudocode → parse() → project → generate(to). Returns {code} or {error}.
     async deriveBuffer (src, from, to) {
         try {
             const SB3 = (await this.lib()).default;
-            let pseudo = src;
-            if (from === 'c') pseudo = (await this.readC(src)).pseudocode;
-            else if (from === 'python') pseudo = (await import(/* webpackChunkName: "sb3-creator-readers" */ '../../lib/robot-lab-pseudocode.js')).readPython(src).pseudocode;
-            else if (from === 'javascript') pseudo = (await import(/* webpackChunkName: "sb3-creator-readers" */ '../../lib/robot-lab-pseudocode.js')).readJavaScript(src).pseudocode;
-            else if (from === 'basic') pseudo = (await import(/* webpackChunkName: "sb3-creator-basic" */ '../../lib/sb3-creator-basic.js')).default(src).pseudocode;
-            else if (DOS_LANG[from]) pseudo = (await DOS_LANG[from].load()).default(src).pseudocode;
+            let result;
+            if (from === 'c') result = await this.readC(src);
+            else if (from === 'python' || from === 'javascript') {
+                const readers = await import(/* webpackChunkName: "sb3-creator-readers" */ '../../lib/robot-lab-pseudocode.js');
+                result = from === 'python' ? readers.readPython(src) : readers.readJavaScript(src);
+            } else if (from === 'basic') result = (await import(/* webpackChunkName: "sb3-creator-basic" */ '../../lib/sb3-creator-basic.js')).default(src);
+            else if (DOS_LANG[from]) result = (await DOS_LANG[from].load()).default(src);
+            const pseudo = result ? this.convertedSource(result) : src;
             const creator = new SB3();
             creator.parse(pseudo);
             const proj = creator.project;
@@ -5664,22 +5671,22 @@ class PseudocodeImporter extends React.Component {
                     publishEditor({status: this.L.asmLiftRefused(res.error.message, res.stats.lifted)});
                     return;
                 }
-                source = res.pseudocode;
+                source = this.convertedSource(res);
                 parseWarnings = [this.L.asmLifted(res.stats.lifted)];
             } else if (lang === 'python') {
                 const res = (await import(/* webpackChunkName: "sb3-creator-readers" */ '../../lib/robot-lab-pseudocode.js')).readPython(source);
                 if (strict && res.unsupported?.length) throw new Error(res.unsupported.join(' · '));
-                source = res.pseudocode; parseWarnings = res.warnings || [];
+                source = this.convertedSource(res); parseWarnings = res.warnings || [];
             } else if (lang === 'javascript') {
                 const res = (await import(/* webpackChunkName: "sb3-creator-readers" */ '../../lib/robot-lab-pseudocode.js')).readJavaScript(source);
-                source = res.pseudocode; parseWarnings = res.warnings || [];
+                source = this.convertedSource(res); parseWarnings = res.warnings || [];
             } else if (lang === 'basic') {
                 const res = (await import(/* webpackChunkName: "sb3-creator-basic" */ '../../lib/sb3-creator-basic.js')).default(source);
-                source = res.pseudocode; parseWarnings = res.warnings || [];
+                source = this.convertedSource(res); parseWarnings = res.warnings || [];
             } else if (DOS_LANG[lang]) {
                 const res = (await DOS_LANG[lang].load()).default(source);
                 if (strict && res.warnings.length) throw new Error(res.warnings.join(' · '));
-                source = res.pseudocode; parseWarnings = res.warnings || [];
+                source = this.convertedSource(res); parseWarnings = res.warnings || [];
             } else if (lang === 'c') {
                 // Keil C51 is a different dialect — sbit/sfr/_at_/reg5x headers that SDCC
                 // does not accept and our front end does not model. stc-compiler already
@@ -5693,7 +5700,7 @@ class PseudocodeImporter extends React.Component {
                     else parseWarnings.push(`could not reach the Keil translator (${t.error}) — parsing the original`);
                 }
                 const res = await this.readC(text);
-                source = res.pseudocode; parseWarnings = parseWarnings.concat(res.warnings || []);
+                source = this.convertedSource(res); parseWarnings = parseWarnings.concat(res.warnings || []);
             }
             const SB3Creator = (await this.lib()).default;
             const creator = new SB3Creator();
