@@ -1,7 +1,7 @@
 # Owned console Code-tab integration and source identity — 2026-11-27
 
-Status: IMPLEMENTED — focused controls pass; rendered acceptance and exact-head
-qualification in progress, with supplier and existing pin/gallery blockers.
+Status: IMPLEMENTED — focused controls and 12/12 rendered checks pass;
+main landing remains blocked by supplier and existing pin/gallery qualification.
 
 Owner: Code execution continuation maintainer, continuing the repository owner's
 approved next milestone. The owner authorizes incremental remote checkpoints and
@@ -68,9 +68,12 @@ truthfully; a real failed gate is not passing qualification.
 Versioned authored documents, explicit owned-console generation, preserved
 target/runtime, exact-source Pico routing, structured Python refusals and
 save-time stale-source refusal are implemented. The focused consumer set passes
-214/214; 133 additional local legacy/import controls pass. Browser acceptance
-uses a separate, explicitly experimental official supplier sync until upstream
-qualification permits normal adoption. See
+214/214; 133 additional local legacy/import controls and 32 selected final
+fixture controls pass. Browser acceptance passes 12/12 on consumer `71d6854c`
+with supplier `4994e2c7`, using a separate, explicitly experimental official
+sync until upstream qualification permits normal adoption. All 53 loaded script
+responses match the build inventory, all nine observed workers close, and there
+are zero uncaught page errors. See
 `docs/CODE-DOCUMENT-INTEGRATION-2026-11-27.md` for boundaries and reproduction.
 
 The existing HDD identity prerequisite is reused as the five-file exact subset

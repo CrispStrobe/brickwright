@@ -713,6 +713,9 @@ the [integration claim](../lanes/2026-11-27-owned-console-code-tab-integration.m
 and [Pico ownership companion](../lanes/2026-11-27-code-document-pico-ownership.md).
 The [integration report](CODE-DOCUMENT-INTEGRATION-2026-11-27.md) records source
 identity, behavior controls, actual-editor reproduction and the landing blockers.
+The [rendered receipt](OWNED-CONSOLE-CODE-TAB-RECEIPT-2026-11-27.md) passes 12/12
+checks against the exact production-source checkpoint and an isolated official
+supplier sync; its full hashes and experimental classification are preserved.
 
 The Code tab now separates one authored document from revision-bound generated
 views. The existing autosave and SB3 sidecar retain the exact source, selected

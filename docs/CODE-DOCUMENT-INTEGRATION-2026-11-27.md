@@ -10,6 +10,10 @@ and [sb3-creator #246](https://github.com/CrispStrobe/sb3-creator/pull/246).
 The owner authorized implementation, incremental remote checkpoints and qualified
 merges. The feature was refreshed with current main before implementation and
 again with the later CAD update `d1e76cc60244ef8814d33e147e39ce4c58749dbc`.
+The companion Pico ownership claim on main
+`87daa291de5c16aef181cf1e9d9688ca81e9eaa5` is included before that helper's
+implementation. The final production/UI/harness checkpoint is
+[`71d6854c`](https://github.com/CrispStrobe/brickwright/commit/71d6854cb3c4411072deeaee448281d2fc9d13c1).
 
 ## Source and execution contract
 
@@ -90,6 +94,20 @@ focused converter/generator set passes **217/217**; its independent reader and
 specialized-route controls pass **177/177**. These are selected behavioral sets,
 not a claim that every hosted repository gate passes.
 
+An additional inspected local legacy/import set passes **133/133**, covering
+compile/device admission, ASM starter ownership, artwork and MakeCode handoff,
+conversion refusals, project bundles and editor menus. The final toolbar wording
+and wrapping limit notice pass **15/15** localization, toolbar and representation
+controls. The owned-console limitation sits below the toolbar so Run stays
+visible, and its generation selector explicitly preserves authored JavaScript.
+These are separate selections, not a claim that their counts are disjoint.
+Six remaining source-document fixture updates pass **32/32 selected local
+controls**, with zero skips: example-bench, NQC, MicroPython retargeting,
+fe/Tcl registration, the 8086 assembly view and starter confirmation (including
+the existing mutation-negative sweeps). Their assertions now execute the real
+document adapters instead of counting removed inline buffer resets. They add no
+further product-contract change.
+
 Reproduce the focused consumer set with the normal workspace dependencies:
 
 ```sh
@@ -117,8 +135,25 @@ to the immutable supplier, consumer checkpoint, exact local sync patch, canonica
 rewritten compiler bytes/mirrors and emitted JS/index hashes. The browser checks
 the hashes of loaded assets and records its actual command line/capabilities.
 The manifest deliberately says `shippingEvidence: false`; it does not fabricate
-a hosted build receipt. The rendered-browser result is recorded separately when
-the final candidate run completes.
+a hosted build receipt. The final
+[rendered Code-tab receipt](OWNED-CONSOLE-CODE-TAB-RECEIPT-2026-11-27.md)
+passes **12/12** checks on consumer `71d6854c` with the official experimental
+supplier `4994e2c7`, in Chromium 158 on Linux. It covers real generation from
+Pseudo and a loaded SB3 graph, multiple flags, an awaited procedure, input held
+for 4,502 ms, Stop/rerun, Boolean output, edited-source conversion refusal,
+File Save/Open, autosave reload, and a Python line-2 floor-division refusal
+followed by Skulpt output `3`.
+
+All 53 observed same-origin script responses (29 distinct emitted files) match
+the recorded production build. All nine observed workers close, including seven
+Code-tab runs. There are zero uncaught page errors. Four console resource-404
+entries are retained and attributed to HEAD/GET probes for
+`/static/labwired/labwired_wasm_bg.wasm` on the initial load and reload; this is
+not a zero-console-error claim. The full receipt, asset manifest, nine final
+screenshots, authored/generated programs and two SB3 archives are retained.
+Run and the complete conversion-limit notice are visible at 1440 px. Later
+fixture/documentation/receipt commits do not relabel this tested build or move
+the shipping supplier pin.
 
 ## Reused prerequisite and remaining landing dependencies
 
@@ -146,6 +181,13 @@ the existing 5830 ±600-Hz expectation. Board #779/#780 were examined; the pinne
 and #780 traces were identical for all 300 retained samples. No tolerance,
 expected frequency or physics fixture was changed. The RF owner still needs a
 settled oscillator/audio explanation and a qualified correction.
+
+The exact supplier checkpoint `4994e2c7` also reproduces that failure in hosted
+[shard 4/4](https://github.com/CrispStrobe/sb3-creator/actions/runs/45976023828/job/140427833984):
+9,185 tests, 8,561 passed, one failed and 623 skipped. The failing test is
+`lab-circuits-r7mix.test.mjs:224`, reporting 1170.569 Hz against 5830 ±600 Hz.
+Passing focused conversion tests and a successful experimental browser journey
+do not supersede this failed upstream qualification.
 
 Normal adoption remains ordered: qualify and land the supplier upstream, then
 move the consumer's exact pin through official sync and regenerate its dependent

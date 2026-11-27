@@ -299,8 +299,10 @@ node --test test/code-execution-session.test.mjs \
 
 These controls and the static browser harness do not qualify the rendered React
 application, production CSP, Scratch game semantics, other browsers or native
-platforms. The generator option remains opt-in upstream and is not selected by
-Brickwright's current Code tab or vendored dependency pin.
+platforms. At that checkpoint, the generator option remained opt-in upstream
+and was not selected by the Code tab or vendored dependency pin. The later
+rendered-editor integration below adds the explicit generation choice while
+retaining the shipping pin until upstream qualification.
 
 ### Boolean-value successor and default factory under CSP
 
@@ -353,3 +355,33 @@ The Tauri configuration is only inspected; the no-CSP profile is not native-host
 execution. These explicit localhost policies do not qualify deployed headers,
 the rendered React application, app protocols, offline delivery, other browsers
 or native/mobile WebViews. No dependency or application policy changes are made.
+
+### Authored documents and the actual Code tab
+
+The next application checkpoint, `71d6854cb3c4411072deeaee448281d2fc9d13c1`,
+adds durable authored source/target/runtime, revision-bound projections, an
+explicit **Console program** generation choice and source-located conversion
+refusals. Its real-editor harness is
+[`scripts/verify-owned-console-code-tab.mjs`](../../verify-owned-console-code-tab.mjs).
+It uses visible Code controls, actual File Save/Open and the production workers;
+it does not replace the VM, worker implementation or editor state.
+
+The [full rendered receipt](../../../docs/OWNED-CONSOLE-CODE-TAB-RECEIPT-2026-11-27.md)
+records **12/12 passed** against that checkpoint with official experimental
+supplier `4994e2c77143c7bee9eb8b76706ffae3321743a0`. It retains all screenshots,
+authored/generated programs, the two SB3 archives, complete result data and an
+emitted-asset manifest. The [integration report](../../../docs/CODE-DOCUMENT-INTEGRATION-2026-11-27.md)
+records the 214 focused controls, additional local fixtures and remaining
+supplier/pin/gallery landing blockers.
+
+The manifest is written by `scripts/write-owned-console-qualification-manifest.mjs`
+with explicit `--supplier` and `--expect-supplier` arguments. It binds a separate
+official-sync worktree to its source checkpoint, complete sync patch, canonical
+supplier rewrites/mirrors and emitted build. The harness accepts that file using
+`--qualification-manifest`. All 53 observed same-origin script responses match
+the emitted inventory. Dynamic Blob responses are recorded separately, with
+real worker creation/closure checks; they are not built HTTP assets.
+
+This receipt is explicitly `experimental-candidate-bundle` with
+`shippingEvidence: false`. It leaves the feature branch's supplier pin unchanged
+and does not replace upstream or deployed/native/platform qualification.

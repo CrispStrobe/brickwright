@@ -35,6 +35,9 @@ import {readFileSync} from 'node:fs';
 import path from 'node:path';
 
 import {SOURCE, REPO} from './helpers/bw-integrated.mjs';
+import {codeDocumentEditorClass} from './helpers/code-document-editor.mjs';
+import {scopeAfter} from './helpers/js-scope.mjs';
+import {createCodeDocument} from '../overlay/scratch-gui/src/lib/code-source-document.js';
 import {
     buildPseudocode8086, emitI8086Asm, SUPPORTED, Pseudocode8086Error, boolishTruthTest
 } from '../overlay/scratch-gui/src/lib/bw-asm/pseudocode-8086.js';
@@ -639,8 +642,23 @@ test('the assembly names the learner\'s own variables, not BW_V0', () => {
 });
 
 test('the component leaves the generated assembly where it can be read', () => {
-    assert.match(importer, /buffers: \{\.\.\.st\.buffers, asm: out\.asm\}/,
+    const handler = scopeAfter(importer, 'async runPseudocodeOn8086 ()');
+    assert.match(handler, /\.\.\.this\.codeProjectionState\(st, sourceDocument, editorBuffers, 'asm', out\.asm\)/,
         'the assembly the blocks became is thrown away, so a learner cannot see it');
+    const Editor = codeDocumentEditorClass(importer, '');
+    const editor = new Editor();
+    const document = createCodeDocument({code: COUNTING});
+    editor.state = editor.codeDocumentState(document);
+    const buffers = editor.state.buffers;
+    const assembly = 'ORG 100h\nBW_MAIN:\n  INT 20h\nEND BW_MAIN\n';
+    const projected = editor.codeProjectionState(editor.state, document, buffers, 'asm', assembly);
+    assert.equal(projected.buffers.asm, assembly);
+    assert.equal(projected.buffers.pseudocode, COUNTING);
+    assert.equal(projected.codeDocument.lang, 'pseudocode');
+    assert.equal(projected.codeDocument.code, COUNTING);
+    assert.equal(projected.codeDocument.projections.asm.sourceRevision, document.revision);
+    assert.deepEqual(editor.codeProjectionState({...editor.state, buffers: {...buffers}},
+        document, buffers, 'asm', assembly), {}, 'an old build must not replace a newer editor revision');
 });
 
 // ── TWO SCRIPTS, WHICH USED TO BE A REFUSAL ─────────────────────────────

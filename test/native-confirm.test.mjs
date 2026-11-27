@@ -29,6 +29,7 @@ import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 import test from 'node:test';
 import {registeredArraysSource, renderRegisteredArraysCarrier} from '../scripts/lib/arrays-carrier.mjs';
+import {codeDocumentEditorClass} from './helpers/code-document-editor.mjs';
 
 const root = path.resolve(import.meta.dirname, '..');
 const read = file => readFileSync(path.join(root, file), 'utf8');
@@ -247,18 +248,18 @@ const SITES = [
         async drive (helper, src) {
             let replaced = false;
             const examples = () => [{id: 'ex', source: 'NEW', label: 'Example'}];
-            const self = {
-                state: {buffers: {[buffer]: 'twenty minutes of typing'}},
+            const Editor = codeDocumentEditorClass(src[IMPORTER], methodSource(IMPORTER, method, src[IMPORTER]), {
+                confirmAsync: helper.confirmAsync, pickLocale: () => 'en',
+                riscvCExamplesFor: examples, arduinoSketchExamplesFor: examples
+            });
+            const self = Object.assign(new Editor(), {
+                state: {lang: buffer, buffers: {[buffer]: 'twenty minutes of typing'}},
                 props: {locale: 'en'},
                 L: {asmExampleReplace: 'Replace?', asmExampleLoaded: () => 'loaded'},
                 _asmExamples: examples, currentDevice: () => 'uno',
                 setState () { replaced = true; }
-            };
-            const load = asMethod(methodSource(IMPORTER, method, src[IMPORTER]), {
-                confirmAsync: helper.confirmAsync, pickLocale: () => 'en',
-                riscvCExamplesFor: examples, arduinoSketchExamplesFor: examples
             });
-            await load.call(self, 'ex');
+            await self[method]('ex');
             await settle();
             return replaced;
         }

@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
+import {scopeAfter} from './helpers/js-scope.mjs';
 import {
     normalizeDeviceId,
     resolveExampleBench
@@ -46,9 +47,11 @@ test('simulator-only boards retarget without requiring a fictional circuit bench
 
 test('device switching refuses before committing firmware when its reseated bench is unavailable', () => {
     const importer = readFileSync(resolve('overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx'), 'utf8');
-    const setDevice = importer.slice(importer.indexOf('async setDevice (deviceId)'), importer.indexOf('async setDevice (deviceId)') + 6500);
+    const setDevice = scopeAfter(importer, 'async setDevice (deviceId)');
     assert.match(setDevice, /resolveExampleBench\(ex, deviceId, sourceDevice\)/);
-    assert.match(setDevice, /if \(resolvedBench && resolvedBench\.error\)/);
-    assert.ok(setDevice.indexOf('if (resolvedBench && resolvedBench.error)') <
-        setDevice.indexOf('buffers: {...this.state.buffers, pseudocode: result.pseudocode'));
+    const refusal = setDevice.indexOf('if (resolvedBench && resolvedBench.error)');
+    const commit = setDevice.indexOf('...this.retargetCodeState(result.pseudocode)');
+    assert.ok(refusal >= 0, 'missing-bench refusal must exist');
+    assert.ok(commit >= 0, 'retarget must atomically commit the authored source document');
+    assert.ok(refusal < commit, 'missing-bench refusal must precede the source-document commit');
 });
