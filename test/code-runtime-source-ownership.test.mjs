@@ -22,7 +22,8 @@ const signatures = [
     'activeCode () {'
 ];
 const methods = signatures.map(signature => signature.slice(0, -1) + scopeAfter(source, signature)).join('\n');
-const Editor = new Function('LANG_LABEL', `return class {${methods}}`)(labels);
+const twoWay = new Set(Object.keys(labels).filter(lang => lang !== 'asm'));
+const Editor = new Function('LANG_LABEL', 'TWO_WAY', `return class {${methods}}`)(labels, twoWay);
 const turn = () => new Promise(resolve => setImmediate(resolve));
 const deferred = () => {
     let resolve;
@@ -58,6 +59,7 @@ function fixture () {
             stWarn: text => `Warning: ${text}`
         },
         leaveCp1 () {},
+        detachCardiac () {},
         invalidateArcadeReport () {},
         deriveBuffer (code, from, to) {
             const gate = deferred();
@@ -391,6 +393,7 @@ function runFixture (context, {lang = 'javascript', code = 'console.log("clicked
         invalidateArcadeReport () {},
         _reveal () {},
         writeAutosave () {},
+        setMaximizedChrome () {},
         picoRuns: 0,
         async runPicoSim () { this.picoRuns++; },
         legacySources: [],
