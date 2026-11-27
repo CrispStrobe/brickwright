@@ -184,6 +184,12 @@ const L10N = {
         arcRunTitle: 'Turn this Scratch project into a MakeCode Arcade game (sprites from their costumes, scripts as code) and run it in MakeCode\'s Arcade simulator',
         arcExport: '⬆ To MakeCode Arcade',
         arcExportTitle: 'Save this project as a MakeCode Arcade game that arcade.makecode.com opens',
+        gameWeb: '⬆ Playable web game (.zip)',
+        gameWebTitle: 'Export this project as an editable JavaScript game: open play.html in any browser',
+        gamePy: '⬆ Python + pygame game (.zip)',
+        gamePyTitle: 'Export this project as an editable Python game: pip install pygame, then python main.py',
+        gameDone: (f, a) => `Saved ${f}.${a ? ` ${a} block kind(s) run approximately — see README.md in the zip.` : ''}`,
+        gameRefused: r => `Not exported: these blocks have no game-runtime equivalent yet — ${r}`,
         arcDone: (f, u, w) => `Saved ${f} — drop it on arcade.makecode.com.${u ? ` ${u} block kind(s) have no Arcade counterpart (commented where they stood).` : ''}${w ? ` ${w} costume(s) were matched to Arcade's 16 colours.` : ''}`,
         arcStarted: (u, w) => `Running as a MakeCode Arcade game.${u ? ` ${u} block kind(s) have no Arcade counterpart.` : ''}${w ? ` ${w} costume(s) were matched to Arcade's 16 colours.` : ''}`,
         saveEmpty: 'Nothing to save — this tab is empty.',
@@ -534,6 +540,12 @@ const L10N = {
         arcRunTitle: 'Dieses Scratch-Projekt in ein MakeCode-Arcade-Spiel umwandeln (Figuren aus ihren Kostümen, Skripte als Code) und im MakeCode-Arcade-Simulator ausführen',
         arcExport: '⬆ Zu MakeCode Arcade',
         arcExportTitle: 'Dieses Projekt als MakeCode-Arcade-Spiel speichern, das arcade.makecode.com öffnet',
+        gameWeb: '⬆ Spielbares Web-Spiel (.zip)',
+        gameWebTitle: 'Dieses Projekt als bearbeitbares JavaScript-Spiel exportieren: play.html in jedem Browser öffnen',
+        gamePy: '⬆ Python-+-pygame-Spiel (.zip)',
+        gamePyTitle: 'Dieses Projekt als bearbeitbares Python-Spiel exportieren: pip install pygame, dann python main.py',
+        gameDone: (f, a) => `${f} gespeichert.${a ? ` ${a} Blockart(en) laufen nur näherungsweise — siehe README.md im Zip.` : ''}`,
+        gameRefused: r => `Nicht exportiert: Für diese Blöcke gibt es noch keine Spiel-Laufzeit — ${r}`,
         arcDone: (f, u, w) => `${f} gespeichert — auf arcade.makecode.com ablegen.${u ? ` Für ${u} Blockart(en) gibt es in Arcade keine Entsprechung (als Kommentar markiert).` : ''}${w ? ` ${w} Kostüm(e) wurden an die 16 Arcade-Farben angepasst.` : ''}`,
         arcStarted: (u, w) => `Läuft als MakeCode-Arcade-Spiel.${u ? ` Für ${u} Blockart(en) gibt es in Arcade keine Entsprechung.` : ''}${w ? ` ${w} Kostüm(e) wurden an die 16 Arcade-Farben angepasst.` : ''}`,
         saveEmpty: 'Nichts zu speichern — dieser Tab ist leer.',
@@ -2667,6 +2679,31 @@ class PseudocodeImporter extends React.Component {
             this.setState({busy: false, status: this.L.arcDone(filename, out.unsupported.length, out.warnings.length)});
         } catch (err) {
             this.setState({busy: false, status: this.L.mcFailed('MakeCode Arcade', (err && err.message) || String(err))});
+        }
+    }
+
+    // The current project as a playable, editable game outside the editor:
+    // target 'web' (JavaScript, play.html) or 'pygame' (Python). The exporter
+    // (sb3-creator src/game, vendored) reads the saved .sb3 — the same bytes
+    // File > Save writes — and refuses blocks its runtime cannot reproduce.
+    async exportPlayableGame (target) {
+        this.setState({busy: true, conversionReport: null});
+        try {
+            const blob = await this.props.vm.saveProjectSb3();
+            const {exportGame, loadSb3, zipExport} = await import(
+                /* webpackChunkName: "bw-game-export" */ '../../lib/sb3-creator-game-export.js');
+            const title = (this.props && this.props.projectTitle) || 'brickwright-game';
+            const out = await exportGame(await loadSb3(await blob.arrayBuffer()), {target, title});
+            if (!out.ok) {
+                this.setState({busy: false, status: this.L.gameRefused(out.reasons.join('; '))});
+                return;
+            }
+            const filename = `${out.name}-${target === 'pygame' ? 'pygame' : 'web'}.zip`;
+            const zip = await zipExport(out.files, out.name);
+            await downloadBlob(filename, new Blob([zip], {type: 'application/zip'}));
+            this.setState({busy: false, status: this.L.gameDone(filename, Object.keys(out.report.approximate).length)});
+        } catch (err) {
+            this.setState({busy: false, status: this.L.mcFailed('game export', (err && err.message) || String(err))});
         }
     }
 
@@ -6080,6 +6117,12 @@ class PseudocodeImporter extends React.Component {
                     <button type="button" onClick={() => this.exportArcade()} style={item}
                         title={this.L.arcExportTitle} disabled={this.state.busy}
                         data-testid="bw-makecode-arcade-export">{this.L.arcExport}</button>
+                    <button type="button" onClick={() => this.exportPlayableGame('web')} style={item}
+                        title={this.L.gameWebTitle} disabled={this.state.busy}
+                        data-testid="bw-game-export-web">{this.L.gameWeb}</button>
+                    <button type="button" onClick={() => this.exportPlayableGame('pygame')} style={item}
+                        title={this.L.gamePyTitle} disabled={this.state.busy}
+                        data-testid="bw-game-export-pygame">{this.L.gamePy}</button>
                     <div style={{borderTop: '1px solid #e2e8f0', margin: '3px 0'}} />
                     <strong style={{padding: '8px 8px 4px', marginTop: 4, borderTop: '1px solid #e2e8f0', fontSize: 11, color: '#64748b'}}>{this.L.actionExamples}</strong>
                     {this.currentDevice() ? this.renderCatalogControl(item) :
