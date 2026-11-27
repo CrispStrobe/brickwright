@@ -255,7 +255,17 @@ test('every shipped circuit resolves every wire endpoint into a real electrical 
     // variant from the DIP/module reseat (#198).
     for (const id of ['lab-shortwave-regen', 'lab-broadcast-pickup', 'lab-mosfet-regen'])
         assert.ok(files.includes(id + '/circuit.json'), id);
-    assert.equal(files.length, 1650, 'the gate must cover the complete vendored corpus');
+    // 1650 -> 1947 on 2026-11-27: comparing the immutable sb3-creator trees
+    // 2dace04 -> current pin 1c29f69 adds 56 cp1-* and 240 lab-* circuit.json
+    // files, removes none, and yields 1946. The integrated canonical
+    // busch-microtronic-wired-io circuit from consumer #1845 adds the remaining one.
+    // The local file set equals that pinned tree plus exactly this Microtronic
+    // file; docs/CP1-CORPUS-PROFILE-REPAIR-2026-11-27.md records the comparison.
+    for (const id of ['cp1-first-display', 'cp1-yard-dispatch', 'lab-superhet',
+        'lab-opamp-shift-register', 'busch-microtronic-wired-io']) {
+        assert.ok(files.includes(id + '/circuit.json'), id);
+    }
+    assert.equal(files.length, 1947, 'the gate must cover the complete vendored corpus');
     assert.deepEqual(failures, []);
 });
 

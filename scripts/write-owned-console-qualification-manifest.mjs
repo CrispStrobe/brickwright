@@ -4,8 +4,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import {execFileSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
+import {bindGuiHarnessGit} from './lib/gui-harness-source.mjs';
 
 const arg = (name, fallback) => {
     const index = process.argv.indexOf(name);
@@ -22,7 +22,14 @@ const out = path.resolve(arg('--out', path.join(root, 'scripts/probes/code-runti
 const expectedSupplier = arg('--expect-supplier');
 assert.match(expectedSupplier || '', /^[0-9a-f]{40}$/, '--expect-supplier requires the reviewed full candidate SHA');
 const sha = value => crypto.createHash('sha256').update(value).digest('hex');
-const git = (cwd, args) => execFileSync('git', args, {cwd, encoding: 'utf8', maxBuffer: 128 * 1024 * 1024});
+const gitExecutable = arg('--git-executable', process.env.BW_GUI_GIT_EXECUTABLE);
+const consumerGit = bindGuiHarnessGit({root, executable: gitExecutable, maxBuffer: 128 * 1024 * 1024});
+const supplierGit = bindGuiHarnessGit({root: supplier, executable: gitExecutable, maxBuffer: 128 * 1024 * 1024});
+assert.deepEqual(supplierGit.tool, consumerGit.tool, 'one explicit Git executable inspects both checkouts');
+const git = (cwd, args) => {
+    assert(cwd === root || cwd === supplier, 'Git is bound only to the admitted checkouts');
+    return (cwd === root ? consumerGit : supplierGit).run(args);
+};
 const consumerCommit = git(root, ['rev-parse', 'HEAD']).trim();
 const supplierCommit = git(supplier, ['rev-parse', 'HEAD']).trim();
 assert.equal(supplierCommit, expectedSupplier);
@@ -60,7 +67,7 @@ for (const relative of [
     'overlay/scratch-gui/src/lib/pico-sim-run.js',
     'packages/scratch-gui/src/lib/pico-sim-run.js',
     'scripts/sync-sb3creator.mjs', 'scripts/sync-examples.mjs',
-    'scripts/lib/vendor-rewrites.mjs', 'scripts/verify-owned-console-code-tab.mjs',
+    'scripts/lib/vendor-rewrites.mjs', 'scripts/lib/gui-harness-source.mjs', 'scripts/verify-owned-console-code-tab.mjs',
     'scripts/write-owned-console-qualification-manifest.mjs',
     'vendor-pins.json', 'package.json', 'package-lock.json',
     'packages/scratch-gui/package.json', 'packages/scratch-gui/package-lock.json'
@@ -97,7 +104,7 @@ const manifest = {
     sourceFiles,
     build: {directory: 'packages/scratch-gui/build', files,
         command: arg('--build-command', 'NODE_ENV=production NODE_OPTIONS=--max-old-space-size=2560 npm run build')},
-    environment: {node: process.version, platform: process.platform, arch: process.arch}
+    environment: {node: process.version, platform: process.platform, arch: process.arch, git: consumerGit.tool}
 };
 await fs.mkdir(path.dirname(out), {recursive: true});
 await fs.writeFile(out, `${JSON.stringify(manifest, null, 2)}\n`);

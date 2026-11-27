@@ -148,12 +148,45 @@ test('the pane asks for the rest before it parses a model and before Build opens
     assert.match(lab, /import\(\/\* webpackChunkName: "bw-sim-parts" \*\/ '\.\/part-meta\/parts\.json\?derived'\)/);
     assert.doesNotMatch(lab, /from '\.\/part-meta\/parts\.json'/, 'the whole file is not bundled as well');
     const pane = readFileSync(path.join(ROOT, 'overlay/scratch-gui/src/components/tw-pseudocode/sim-lab-pane.jsx'), 'utf8');
-    const openText = pane.slice(pane.indexOf('async openText'));
-    assert.ok(openText.indexOf('this.lib.catalogFor(text)') > 0 && openText.indexOf('this.lib.catalogFor(text)') < openText.indexOf('SimSession.fromText('),
+    const babel = createRequire(path.join(ROOT, 'packages/scratch-gui/package.json'))('@babel/core');
+    const ast = babel.parseSync(pane, {babelrc: false, configFile: false, parserOpts: {plugins: ['jsx']}});
+    const methods = new Map();
+    babel.traverse(ast, {ClassMethod(path) {
+        if (!['openText', 'enterBuild'].includes(path.node.key.name)) return;
+        assert.ok(!methods.has(path.node.key.name), 'one production method for each catalog boundary');
+        methods.set(path.node.key.name, path);
+    }});
+    const call = (method, callee) => {
+        const found = [];
+        assert.ok(methods.has(method), `${method} is present`);
+        methods.get(method).traverse({
+            Function(path) { path.skip(); },
+            CallExpression(path) {
+                if (pane.slice(path.node.callee.start, path.node.callee.end) === callee) found.push(path);
+            }
+        });
+        assert.equal(found.length, 1, `${method} directly calls ${callee} once`);
+        return found[0];
+    };
+    const catalog = call('openText', 'this.lib.catalogFor');
+    assert.equal(catalog.parent.type, 'AwaitExpression', 'model-specific catalog loading is awaited');
+    assert.ok(catalog.node.start < call('openText', 'SimSession.fromText').node.start,
         'openText: catalogFor before the model is parsed');
-    const build = pane.slice(pane.indexOf('async enterBuild'));
-    assert.ok(build.indexOf('this.lib.loadFullCatalog()') > 0 && build.indexOf('this.lib.loadFullCatalog()') < build.indexOf('fetchLDrawClosure([...CATALOG.keys()]'),
-        'enterBuild: the whole catalogue before its geometry and the palette');
+    const full = call('enterBuild', 'this.lib.loadFullCatalog');
+    const geometry = call('enterBuild', 'fetchBuildLDraw');
+    assert.equal(full.parent.type, 'AwaitExpression', 'the full catalog is awaited');
+    assert.equal(geometry.parent.type, 'AwaitExpression', 'packed geometry is awaited');
+    const spread = geometry.node.arguments[0]?.elements?.[0];
+    assert.equal(spread?.type, 'SpreadElement');
+    assert.equal(spread.argument?.callee?.object?.name, 'CATALOG');
+    assert.equal(spread.argument?.callee?.property?.name, 'keys');
+    assert.ok(full.node.start < geometry.node.start && geometry.node.start < call('enterBuild', 'createEditor').node.start,
+        'enterBuild: the whole catalog before packed geometry and the editor palette');
+    const imports = ast.program.body.filter(node => node.type === 'ImportDeclaration' &&
+        node.source.value === '../../lib/bw-sim/ldraw/build-pack.js');
+    assert.equal(imports.length, 1);
+    assert.ok(imports[0].specifiers.some(node => node.imported?.name === 'fetchBuildLDraw' &&
+        node.local?.name === 'fetchBuildLDraw'), 'the actual packed geometry loader is imported');
     const config = readFileSync(path.join(ROOT, 'overlay/scratch-gui/webpack.config.js'), 'utf8');
     assert.match(config, /resourceQuery: \/\^\\\?\(core\|derived\)\$\//);
     assert.match(config, /parts-subset-loader\.js/);

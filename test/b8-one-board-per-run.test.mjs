@@ -176,7 +176,10 @@ test('a board that outlives a run keeps its clock moving when the target\'s rest
     assert.equal(boardTimeBase(null, target), 0n);
     // And the runner uses it at every (re)start and on both of its clocks.
     const runner = read('lib/bw-debug/debug-runner.js');
-    assert.match(runner, /session\.start\(\);\s*boardBaseNs = boardTimeBase\(board, target\);/);
+    // start({paused:true}) may pause the freshly reset target before rebasing;
+    // no other statement may intervene before the board's clock is aligned.
+    assert.match(runner,
+        /session\.start\(\);\s*(?:if \(paused\) session\.pause\(\);\s*)?boardBaseNs = boardTimeBase\(board, target\);/);
     assert.equal((runner.match(/advanceTo\(target\.timeNs\(\) \+ boardBaseNs\)/g) || []).length, 2);
     assert.doesNotMatch(runner, /advanceTo\(target\.timeNs\(\)\)/, 'a pump that advances without the base');
 });

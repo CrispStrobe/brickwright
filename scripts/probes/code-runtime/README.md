@@ -382,6 +382,15 @@ supplier rewrites/mirrors and emitted build. The harness accepts that file using
 the emitted inventory. Dynamic Blob responses are recorded separately, with
 real worker creation/closure checks; they are not built HTTP assets.
 
+New manifest creation and replay use an explicit Git executable: pass
+`--git-executable /absolute/path/to/git` to both scripts, or set
+`BW_GUI_GIT_EXECUTABLE` for both commands. The producer records the canonical
+executable path, SHA-256 and Git version; replay requires the same tool identity
+and still checks the complete dirty candidate patch. Inherited `GIT_*` variables
+cannot redirect those reads. Historical manifests and receipts above are
+retained as originally recorded; regenerate a manifest for a new qualification
+with the current harness. See [the executable-authority repair](../../../docs/OWNED-CONSOLE-GIT-AUTHORITY-2026-11-27.md).
+
 This receipt is explicitly `experimental-candidate-bundle` with
 `shippingEvidence: false`. It leaves the feature branch's supplier pin unchanged
 and does not replace upstream or deployed/native/platform qualification.

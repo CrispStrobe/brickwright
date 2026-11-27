@@ -242,3 +242,38 @@ the controller grid-snap label/state tooltip. The overlay and package mirrors
 are identical. The localization and controller undo selection passed 19/19,
 with no skipped cases. These changes do not qualify the still-open RF or full
 integration jobs.
+
+### Corpus, historical controls and recovered third-shard repairs
+
+The [CP1/profile repair](CP1-CORPUS-PROFILE-REPAIR-2026-11-27.md) passes
+23/23 controls: all 1947 circuits retain endpoint/placement checks; eleven
+strictly validated internal CP1 lessons are distinguished from 737 externally
+wired circuits, with zero unexplained empty circuits. Fourteen existing device
+kinds are now catalogued, and the official profile generator and integrate
+pass keep the generated document and package source aligned.
+
+The clock/restart, Resonance-history, immutable HDD identity and random/literal
+reach files pass 17 cases with the one pre-existing hosted compile case skipped.
+The historical Resonance digest and held HDD workflow hashes remain unchanged;
+only explicitly reviewed production deltas are projected before comparison.
+The original 399 program files all remain. The 244 added analog lab programs
+and 56 CP1 stubs are retarget-refused in every i8086 variant; emitted sets and
+actual print/wait/lowering expectations are unchanged. The separate print/wait
+files pass all six cases, including local SmallerC compilation of all 62 emitted
+programs and the commented-zero negative control. No compiler upload is used.
+
+The missing third-shard detail was recovered from the SHA-256-verified
+`unit-shard-3` artifact of run 45982318911. Its ROM census now resolves literal
+local constants through their actual lexical bindings and refuses dynamic,
+mutable or shadowed names (4/4 cases). The lazy-catalog reader checks actual
+method calls, awaited loading and the current packed-geometry import (7/7).
+The four schematic SVGs pass their deterministic baseline check after rendered
+old/new visual review, documented in [the baseline review](schematic-baselines/README.md).
+
+The [owned-console Git authority repair](OWNED-CONSOLE-GIT-AUTHORITY-2026-11-27.md)
+uses the existing absolute executable identity binding in both manifest
+production and browser admission. Its three focused controls pass; exact dirty
+patch binding is retained, and historical receipts are not rewritten.
+
+These are bounded local results. The remaining browser coverage/lifecycle
+inventory repairs and exact-head hosted qualification are still open.

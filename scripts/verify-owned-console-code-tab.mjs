@@ -26,8 +26,8 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {createRequire} from 'node:module';
-import {execFileSync} from 'node:child_process';
 import {openCodeActions} from './lib-code-actions.mjs';
+import {bindGuiHarnessGit} from './lib/gui-harness-source.mjs';
 
 const scriptPath = fileURLToPath(import.meta.url);
 const root = path.resolve(path.dirname(scriptPath), '..');
@@ -57,11 +57,16 @@ const qualification = qualificationBytes ? JSON.parse(qualificationBytes) : {
     shippingEvidence: false,
     note: 'No build/source identity manifest was supplied; this receipt proves only the observed local UI journey.'
 };
+let observedGit = null;
 if (qualificationBytes) {
     assert.equal(qualification.schema, 'bw.owned-console-experimental-bundle.v1');
     assert.equal(qualification.classification, 'experimental-candidate-bundle');
     assert.equal(qualification.shippingEvidence, false, 'an experimental integration is not a shipping qualification');
-    const git = args => execFileSync('git', args, {cwd: root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024});
+    const binding = bindGuiHarnessGit({root, executable: argument('--git-executable', process.env.BW_GUI_GIT_EXECUTABLE)});
+    assert.deepEqual(binding.tool, qualification.environment?.git,
+        'qualification preflight uses the exact Git executable recorded by the manifest producer');
+    observedGit = binding.tool;
+    const git = binding.run;
     assert.equal(git(['rev-parse', 'HEAD']).trim(), qualification.consumer.commit);
     const committedPins = JSON.parse(git(['show', 'HEAD:vendor-pins.json']));
     const experimentalPins = JSON.parse(await fs.readFile(path.join(root, 'vendor-pins.json'), 'utf8'));
@@ -124,7 +129,8 @@ const report = {
     qualification,
     ...(qualificationBytes ? {qualificationManifestSha256: sha256(qualificationBytes)} : {}),
     environment: {node: process.version, platform: process.platform, arch: process.arch,
-        playwright: requireRuntime('playwright/package.json').version},
+        playwright: requireRuntime('playwright/package.json').version,
+        ...(observedGit ? {git: observedGit} : {})},
     checks: [],
     sources: {},
     runs: [],

@@ -21,14 +21,14 @@ const script = join(root, 'scripts/measure-i8086-print-reach.mjs');
 const measureRaw = async examples => (await execFileP(process.execPath,
     ['--import', hook, script, '--examples', examples],
     {cwd: root, maxBuffer: 8 * 1024 * 1024})).stdout;
-const labProgramNames = () => {
+const programNames = prefix => {
     const dir = join(root, 'overlay/scratch-gui/examples');
-    return readdirSync(dir).filter(name => name.startsWith('lab-') &&
+    return readdirSync(dir).filter(name => name.startsWith(prefix) &&
         existsSync(join(dir, name, 'program.bw'))).sort();
 };
 const measure = async examples => JSON.parse(await measureRaw(examples));
 
-test('the exact 399-program post-production print census is disjoint and exhaustive',
+test('the exact 699-program post-production print census is disjoint and exhaustive',
     {timeout: 120000}, async () => {
         const absolute = join(root, 'overlay/scratch-gui/examples');
         const absoluteBytes = await measureRaw(absolute);
@@ -72,17 +72,22 @@ test('the exact 399-program post-production print census is disjoint and exhaust
         // hardware declarations, so every one is retarget refused and adds only
         // to the program/none/retargetRefused denominators (135 -> 227); every
         // other bucket, the emitted set and the opcode inventory are unchanged.
-        assert.equal(report.programs, 399);
-        const labPrograms = labProgramNames();
-        assert.equal(labPrograms.length, 92, 'the lab-* gallery program count moved');
+        // The original 399 programs remain. The shipping cohort adds 244
+        // analog lab and 56 CP1 stubs; all add only to no-output/retarget
+        // buckets. The actual print inventory and emitted sets stay fixed.
+        assert.equal(report.programs, 699);
+        const labPrograms = programNames('lab-');
+        const cp1Programs = programNames('cp1-');
+        assert.equal(labPrograms.length, 336, 'the lab-* gallery program count moved');
+        assert.equal(cp1Programs.length, 56, 'the CP1 gallery program count moved');
         const retargetRows = new Map(report.terminal.retargetRefused.map(row => row.split(': ')));
-        for (const name of labPrograms) {
+        for (const name of [...labPrograms, ...cp1Programs]) {
             assert.equal(retargetRows.get(name), 'the source has no hardware declarations to retarget', name);
         }
         assert.deepEqual(report.source.operations, {say: 0, sayForSecs: 0, print: 120, total: 120});
         assert.deepEqual(report.source.values, {literalText: 48, numericLiteral: 0, computed: 72});
         assert.deepEqual(report.source.programCounts,
-            {literalText: 6, numericLiteral: 0, computed: 34, mixed: 16, none: 343});
+            {literalText: 6, numericLiteral: 0, computed: 34, mixed: 16, none: 643});
         // Until B11 every output-bearing program parsed on the 8086, so the
         // opcode inventory equalled the source one. 7 computed prints do not
         // reach an opcode: those of the five PART programs (parseFailed, 6) and
@@ -95,7 +100,7 @@ test('the exact 399-program post-production print census is disjoint and exhaust
         assert.equal(report.invariants.sourceLiteralTextPrograms, 22);
         assert.equal(report.invariants.sourceNumericOrComputedPrograms, 50);
         assert.equal(report.invariants.sourceOutputPrograms, 56);
-        assert.equal(report.invariants.sourceProgramCount, 399);
+        assert.equal(report.invariants.sourceProgramCount, 699);
         // 151 -> 150 at sb3-creator fa96f5f5+ (task D5): 82-a2-led-row's
         // `light only led step on leds` names a LEDBANK8, which i8086 does not
         // have, so the line was DROPPED with a warning and the program counted
@@ -125,11 +130,11 @@ test('the exact 399-program post-production print census is disjoint and exhaust
         assert.deepEqual(report.currentOutput.counts,
             {notReached: 6, hostC: 0, refused: 38, emitted: 12, commentOnly: 0});
         assert.deepEqual(report.terminalCounts, {
-            retargetRefused: 227, parseFailed: 8, noOutputOpcode: 114, hostC: 0,
+            retargetRefused: 527, parseFailed: 8, noOutputOpcode: 114, hostC: 0,
             printRefused: 15, remainingChoke: 22, waitRefused: 1, int16Refused: 0,
             longLeaked: 0, emitted: 12, commentOnly: 0
         });
-        assert.equal(report.invariants.terminalCount, 399);
+        assert.equal(report.invariants.terminalCount, 699);
         assert.equal(report.invariants.terminalExhaustive, true);
         assert.deepEqual(report.chokeCombinationCounts, {
             adc: 17, none: 28, 'adc + tone': 1,

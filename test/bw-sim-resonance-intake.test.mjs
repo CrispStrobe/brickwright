@@ -58,7 +58,15 @@ test('three Resonance presets share one assembly; the original files and behavio
     // The legacy titles now carry their mechanical explanation, and some gained an
     // intro. Those are deliberate; the files, ids, programs, mats and jog policies
     // that the Resonance patch found must stay byte-for-byte the same.
-    const structure = previous.map(({file, id, example, mat, manualJog}) => ({file, id, example, mat, manualJog}));
+    // Main's reviewed 74d4a08052 binds the existing driving base to its real
+    // first-Run program. Require that one explicit change, then compare the
+    // historical projection without rewriting its original identity hash.
+    const drivingBase = previous.filter(entry => entry.file === 'driving-base.ldr');
+    assert.equal(drivingBase.length, 1);
+    assert.equal(drivingBase[0].example, 'driving-base.bw');
+    const structure = previous.map(({file, id, example, mat, manualJog}) => ({
+        file, id, example: file === 'driving-base.ldr' ? undefined : example, mat, manualJog
+    }));
     assert.equal(hash(JSON.stringify(structure)), 'abcdfa1b102676bfb722410acad20e0a4f786103dde3c541a78c0a44f3f16cbe');
     assert.equal(MODELS.length, 157);
     assert.equal(new Set(MODELS.map(entry => entry.file)).size, 147);
