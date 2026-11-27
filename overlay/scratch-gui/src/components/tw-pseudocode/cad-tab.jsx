@@ -159,6 +159,8 @@ const CadTab = ({vm, isVisible, docked, locale, theme, onEditProgram, onOpenCirc
                     ...fromMenu('import-step'),
                     cadExport:action(label('Export CAD model…','CAD-Modell exportieren…'),'export',mounted.commandState.canExport),
                     ...fromMenu('export-step'),
+                    // Any further File entry of the editor's menu (STEP evidence, …), in the editor's order.
+                    ...Object.assign({},...menu.filter(item=>item.section==='file'&&!listed.has(item.command)&&!['import-step','export-step'].includes(item.command)).map(item=>fromMenu(item.command))),
                     // Every other section of the editor's menu (exact modeling, holes and fasteners,
                     // drawings and checks, …) as a File submenu, in the editor's order.
                     ...Object.assign({},...[...new Set(menu.map(item=>item.section))].filter(section=>!['file','edit','view','object','tools'].includes(section)).map(section=>menuSection(section,'file',listed))),
