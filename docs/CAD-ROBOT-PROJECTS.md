@@ -2024,3 +2024,38 @@ reused the same worker and restarted in 313 ms. The six-second run
 sustained 0.223× under the test machine's load. Sustained 1× playback
 remains open.
 [CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/ae107ae07ceda425ff64c9692ce77324517ff4f2)
+
+### Share body rotations across coupled actuators
+
+CrispCAD now samples a rigid body's quaternion once per physics
+boundary for motor reactions and body-mounted distance sensors. An
+impulse changes velocity while the pose stays fixed until the next
+step. The sensor and motor code keep the same transform math.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/77d503657caf65913ce5985fab18cfdee3f5da30)
+
+Paired Chrome worker runs replayed 600 coupled ticks in both orders
+using the same Jolt 5.7 SIMD candidate in every run. Atlas's native
+rotation reads for these consumers fell from 1,800 to 600. Scout's
+fell from 1,200 to 600. Joint motion, body poses, and electrical
+readings matched exactly. Atlas's mean mechanical round trip fell
+from 4.31 to 3.92 ms and from 4.28 to 3.98 ms. Scout was flat in the
+first order and faster in the reverse order. All 23 focused actuator
+and fixed-assembly tests passed. A further paired replay on the
+packaged bw.10 engine reproduced the same read counts and exact
+traces before and after the change. The two models moved in opposite
+directions on timing under shared machine load, so this pair does
+not establish a speedup on bw.10.
+
+A separate full Brickwright Chrome comparison used the stabilized
+Atlas assembly and the preceding SDK. Jolt 5.7 reached 0.531× against
+0.207× with the packaged engine in that comparison. At about six
+simulated seconds its lift had reached 28.36 mm against 45.59 mm with
+bw.10, below the 30 mm lift check. The package-matrix build was
+stopped after that result, and Brickwright keeps bw.10. The sustained
+1× Atlas viewport target remains open.
+
+Brickwright vendors SDK `77d5036`. All 842 manifest hashes and nine
+SDK pin tests passed. With the packaged engine, Atlas passed Run,
+Stop, Reset, repeat Run, and a restart after a gravity edit in Chrome.
+It sustained 0.215× and reached 45.59 mm of lift and 14.83° of tilt
+at 6.03 simulated seconds.
