@@ -2085,3 +2085,30 @@ Brickwright vendors SDK `34e2d18`. All 842 manifest hashes and nine
 pin tests passed. The live Atlas example passed Run, Stop, Reset,
 repeat Run, and warm restart after a gravity edit using the packaged
 engine.
+
+### Qualify the collision sweep optimization for the current robots
+
+The candidate keeps the bw.10 native source line and accelerates
+continuous collision checks by pruning disjoint compound children in
+box and convex-hull sweeps. It keeps the original candidate hit order.
+[Native source](https://github.com/CrispStrobe/JoltPhysics/commit/7085d0d)
+[Wrapper source](https://github.com/CrispStrobe/JoltPhysics.js/commit/cd40daa)
+
+The current CAD SDK `34e2d18` replayed 600 Chrome Circuit and CAD
+worker ticks for each robot. The two engines produced identical motion,
+electrical readings and warm restart frames. Atlas improved from
+0.405× to 1.210× and Scout from 0.424× to 1.717× in that harness.
+Atlas's mean mechanical round trip fell from 10.83 ms to 2.78 ms.
+
+The existing Brickwright Chrome host, using the same SDK and Atlas
+project, sustained 0.300× with bw.10 and 0.802× with the candidate
+in separate runs. The candidate reached 45.65 mm of lift and 14.91°
+of tilt after 6.065 simulated seconds. Both engines passed one-click
+Run, Stop, Reset, repeat Run, and a restart after a gravity edit.
+Scout passed the full editor Run, Stop, Reset and repeat Run checks
+at 1.000× with the candidate.
+
+These measurements used the SIMD module override with SHA-256
+`3c463978c83694b04a1e4a78c1611f488e195ac087fb5d30a572a4ed10b80af9`.
+The shared release package is being qualified separately. Atlas's
+sustained 1× editor target remains open.
