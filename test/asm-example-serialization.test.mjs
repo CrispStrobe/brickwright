@@ -102,29 +102,30 @@ test('ASM examples become available again after compilation finishes', async () 
 });
 test('dropping accepted buffer publication fails the ownership control', async () => {
     await assert.rejects(() => busyEntry(once(body,
-        "this.authoredCodeState('asm', example.source, this.currentDevice())",
+        "this.authoredCodeState('asm', source, this.currentDevice())",
         "this.authoredCodeState('asm', this.state.buffers.asm, this.currentDevice())")),
         /accepted request must reserve/);
 });
 test('in-place buffer mutation fails captured editor ownership', async () => {
     await assert.rejects(() => busyEntry(once(body,
-        "...this.authoredCodeState('asm', example.source, this.currentDevice()),",
-        "...this.authoredCodeState('asm', example.source, this.currentDevice()),\n" +
-        "buffers: Object.assign(this.state.buffers, this.authoredCodeState('asm', example.source, this.currentDevice()).buffers),")),
+        "this.authoredCodeState('asm', source, this.currentDevice())),",
+        "this.authoredCodeState('asm', source, this.currentDevice())),\n" +
+        "buffers: Object.assign(this.state.buffers, this.authoredCodeState('asm', source, this.currentDevice()).buffers),")),
         /accepted request must replace the captured buffer object/);
 });
 test('losing the selected target or retaining an old program projection fails the ownership control', async () => {
     await assert.rejects(() => busyEntry(once(body,
-        "this.authoredCodeState('asm', example.source, this.currentDevice())",
-        "this.authoredCodeState('asm', example.source)")), /accepted example must preserve the selected target/);
+        "this.authoredCodeState('asm', source, this.currentDevice())",
+        "this.authoredCodeState('asm', source)")), /accepted example must preserve the selected target/);
     await assert.rejects(() => busyEntry(once(body,
-        "...this.authoredCodeState('asm', example.source, this.currentDevice()),",
-        "...this.authoredCodeState('asm', example.source, this.currentDevice()),\n" +
-        "buffers: {...this.state.buffers, asm: example.source},")), /old program projection must be cleared/);
+        "this.authoredCodeState('asm', source, this.currentDevice())),",
+        "this.authoredCodeState('asm', source, this.currentDevice())),\n" +
+        "buffers: {...this.state.buffers, asm: source},")), /old program projection must be cleared/);
 });
 test('the ASM picker busy expression disables pending work, with omission negative', () => {
-    const picker = source.slice(source.indexOf('data-testid="bw-asm-examples"'));
-    const opening = picker.slice(0, picker.indexOf('\n                                >'));
+    const picker = source.slice(source.indexOf("data-testid={menu ? 'bw-asm-examples-menu' : 'bw-asm-examples'}"));
+    // The <select> opening tag ends at its value attribute.
+    const opening = picker.slice(0, picker.indexOf('value="">') + 'value="">'.length);
     const disabled = text => {
         const expression = text.match(/disabled=\{([^}]+)\}/);
         assert.ok(expression, 'ASM picker must have a disabled expression');

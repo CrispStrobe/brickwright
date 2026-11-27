@@ -2137,10 +2137,13 @@ class PseudocodeImporter extends React.Component {
         if (current && !(await confirmAsync(this.L.asmExampleReplace))) return;
         const family = example.source ? blinkFamily(example.source) : null;
         const source = id === 'blink0' ? blinkStarter : family ? blinkSource(family) : example.source;
-        // ASM is an independent draft: an example replaces it, not the authored
-        // Pseudo/Python/JS document beside it.
+        // When ASM is the authored program, an example replaces that program (and
+        // drops projections that described the old one). Beside a document in
+        // another language, ASM is an independent draft and only the draft changes.
+        const document = this.state.codeDocument;
         this.setState({
-            buffers: {...this.state.buffers, asm: source},
+            ...(document && document.lang !== 'asm' ? {buffers: {...this.state.buffers, asm: source}} :
+                this.authoredCodeState('asm', source, this.currentDevice())),
             asmMode: 'source',
             status: this.L.asmExampleLoaded(
                 pickLocale(this.props.locale) === 'de' ? example.labelDe : example.label)
