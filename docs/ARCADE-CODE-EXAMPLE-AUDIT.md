@@ -20,9 +20,9 @@ The earlier Complete Game refusal came from the unimplemented Scratch answer val
 
 The motion, text, color and pointer changes affected 46 candidates. The first recheck compiled and presented 41. The remaining five failures exposed eight size expressions ending in a literal percent sign. The Pseudocode size commands already take percentages, so the suffix had made the expressions text. Orbit Hoops, Echo Trench, Lumen Stack, Plasma Posse and Triple Bingo all compiled, reached their title-ready state and presented a frame after the eight expressions were corrected.
 
-Across the frozen pass and the focused rechecks, 67 candidates have compiled and presented frames. Of these, 61 have no unsupported operations and six retain named gaps. The PyBadge first-pass refusal is tracked separately because its original interface uses Brickwright Controller state. This aggregate spans the recorded exporter versions. The [affected recheck receipt](receipts/2026-11-27-code-arcade-rechecks.json) contains 46 project hashes and before/after results. The [size and title receipt](receipts/2026-11-27-code-arcade-size-and-start-repairs.json) contains the five corrected projects and Nova Grid’s verified title gate.
+By the end of the size and title rechecks, 67 candidates have compiled and presented frames. Of these, 61 have no unsupported operations and six retain named gaps. The PyBadge first-pass refusal is tracked separately because its original interface uses Brickwright Controller state. This aggregate spans the recorded exporter versions. The [affected recheck receipt](receipts/2026-11-27-code-arcade-rechecks.json) contains 46 project hashes and before/after results. The [size and title receipt](receipts/2026-11-27-code-arcade-size-and-start-repairs.json) contains the five corrected projects and Nova Grid’s verified title gate.
 
-| Example | Remaining export gaps |
+| Example | Export gaps at the size and title recheck |
 |---|---|
 | Sound | Sampled Pop sound |
 | Digital Art | Pen color parameter changes |
@@ -30,6 +30,10 @@ Across the frozen pass and the focused rechecks, 67 candidates have compiled and
 | Arrays & Vectors | Range, sum and maximum |
 | Tidegate Rush | Sampled splash sound |
 | Triple Bingo | Range, two-dimensional array access and a sound chosen by a reporter |
+
+## Numeric and tone rechecks
+
+Planète Maths, Arrays & Vectors, Tidegate Rush and Triple Bingo were compiled and run in the native PXT browser simulator after the numeric, array and authored sound-reference fixes. All four presented complete 160×120 frames with zero unsupported operations. Tidegate Rush and Triple Bingo advanced through their title gates. A separate runtime fixture checked factorial, digit sum, π, divisibility, array sum, maximum and two-dimensional indexing. The source regression checks resolve the original splash, call and bingo names to their authored frequencies. The generic browser runs cover compilation, startup and frame publication. See the [numeric and tone receipt](receipts/2026-11-27-code-arcade-math-and-tones.json).
 
 ## Run the audit
 
