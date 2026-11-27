@@ -68,7 +68,7 @@ const check = (name, ok, detail = '') => {
     if (!ok) failures.push(name);
 };
 
-const browser = await chromium.launch();
+const browser = await chromium.launch({executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
 try {
     const page = await browser.newPage({viewport: {width: 1600, height: 1000}});
     page.on('dialog', d => d.accept());

@@ -97,7 +97,7 @@ const waitForCodeIdle = async () => page.waitForFunction(() => {
 
 try {
     if (!url) ({server, url} = await serveBuild());
-    browser = await chromium.launch({headless: true});
+    browser = await chromium.launch({headless: true, executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
     page = await browser.newPage({viewport: {width: 1600, height: 1050}});
     for (const name of ['bw-board.MIT.txt', 'bw-circuit-ui.MPL-2.0.txt', 'bw-packages.sources.json']) {
         const response = await page.request.get(new URL(`static/licenses/${name}`, url).href);
