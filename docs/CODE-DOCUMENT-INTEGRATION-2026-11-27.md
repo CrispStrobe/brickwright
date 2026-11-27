@@ -386,3 +386,19 @@ sampling and independent fine-step behavior are under investigation; no
 expectation has been replaced. Any additional physical repair must be qualified
 before supplier landing and exact-pin consumer adoption. Neither the successful
 receiver scenario nor the CAD receipts close that remaining supplier gate.
+
+The diagnostic consumer run at `29e5265` subsequently completed unit shards
+5–8 successfully. Shard 1 reported one ordinary failure in the source-only CI
+tier control: its isolated Bash environment omitted the five newly declared
+CAD/artwork/robot-view scope variables. The real workflow supplies them, but
+the fixture reached Bash's existing unset-variable refusal before selection.
+The fixture now supplies explicit false defaults and includes shell diagnostics
+in a failed status assertion. No workflow, selector or gate was changed.
+
+The original six-case file reproduced one failure locally before the repair.
+Afterward, the tier controls and executable browser-wiring controls pass all
+nine selected cases with zero skips. They retain actual fast/default/full,
+main/dispatch and docs-only decisions, invalid-input and missing-branch refusal,
+the unconditional-success negative, all 38 command-failure controls and mixed
+browser-family selection. This bounded fix does not relabel the older hosted
+run or qualify the pending supplier pin.
