@@ -1,5 +1,5 @@
 import {makeT} from '../bw-i18n.js';
-import {activateConfig} from './activate.js';
+import {activateConfig, defaultImageFetcher} from './activate.js';
 import {fromMediaManifest} from './importers.js';
 import {validateMachineConfig} from './machine-config.js';
 import {PICOBB_FLASH} from './pico-basic-flash.js';
@@ -48,6 +48,14 @@ export const libraryMedia = [
         infoKey: 'ubasic',
         code: {language: 'basic', path: 'samples/demo.bas', dosSourceName: 'PROG.BAS'}},
     ...ackSamples,
+    ...[
+        ['ram-check', 'KIM-4 RAM Check', '8170c7f0a8af2b7988bd4d3b176efcca2decd020ace6d900d7d961b24239dfea'],
+        ['video', 'K-1008 Checkerboard', 'bd193b042c262ef7379b5a99178d8b8575808b75baa0e17f001c85d6d3b79ddf']
+    ].map(([preset, title, sha256]) => ({
+        id: `kim1-expansion-demos/${preset}`, project: 'kim1-expansion-demos', title, machine: 'kim1',
+        license: 'MIT', licenseFile: 'LICENSE', revision: '5e54caab98d7ca6f641d7cc3e21f2ebdab937400',
+        kim1Tape: {preset, file: `${preset}.ptp`, sha256}
+    })),
     {id: '6502-animation', title: '6502 Animation Lab', machine: 'eater6502',
         license: 'MIT', licenseFile: 'LICENSE', infoKey: 'animation6502', framebufferFormat: 'gray6',
         revision: '5e54caab98d7ca6f641d7cc3e21f2ebdab937400',
@@ -122,6 +130,13 @@ export async function openLibraryMedia (item) {
 
 export function libraryLicenseUrl (item) {
     return item.licenseFile ? new URL(item.licenseFile, mediaDirectory(item)).href : null;
+}
+
+export async function readKim1LibraryTape (item) {
+    const {preset, file, sha256} = item.kim1Tape;
+    const url = new URL(file, mediaDirectory(item)).href;
+    const {bytes} = await defaultImageFetcher({url, sha256});
+    return {preset, title: item.title, program: new TextDecoder('ascii', {fatal: true}).decode(bytes)};
 }
 
 export async function readLibraryCode (item) {

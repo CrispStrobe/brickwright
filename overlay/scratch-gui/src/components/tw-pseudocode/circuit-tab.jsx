@@ -1,5 +1,5 @@
 import {setCircuitView, showCircuitDebugger} from '../../lib/bw-debug/debug-view.js';
-import {addCardiacFace, addMicrotronicFace, addKim1Face} from '../../lib/controller-machine-faces.js';
+import {addCardiacFace, addMicrotronicFace, addKim1Face, addKim1VideoFace} from '../../lib/controller-machine-faces.js';
 import React from 'react';
 import {clearControllerPanel, serializeControllerPanel} from '../../lib/controller-inputs.js';
 import {makeT} from '../../lib/bw-i18n.js';
@@ -1514,7 +1514,11 @@ class CircuitTab extends React.Component {
             if (journey.mode !== 'program-only') this.load({explicit: true});
             const result = journey.mode === 'program-only' ?
                 await this.loadProgramOnlyStarter(example) :
-                await this.loadExample(example, {circuitOnly: journey.mode === 'circuit-only'});
+                await this.loadExample(example, {
+                    circuitOnly: journey.mode === 'circuit-only' || !!journey.kim1Tape,
+                    activateCircuit: !!journey.kim1Tape,
+                    kim1Tape: journey.kim1Tape
+                });
             finish(result && result.ok ? {ok: true} : {
                 ok: false,
                 cancelled: !!(result && result.cancelled),
@@ -1962,6 +1966,51 @@ class CircuitTab extends React.Component {
         };
     }
 
+    loadKim1TapeCircuit (circuitData, partId, tape, nextState) {
+        const runtime = this.props.vm.runtime;
+        const previousPart = runtime.circuitModel?.getPart(partId);
+        return new Promise((resolve, reject) => {
+            const ready = () => {
+                const part = runtime.circuitModel?.getPart(partId);
+                const board = runtime.circuitBoard;
+                if (this.state.circuitData !== circuitData || part === previousPart || part?.params?.program !== tape.program ||
+                    !board?.getDeviceState?.(partId)) return;
+                cleanup();
+                // Run after the Designer has attached its simulation clock to this board.
+                setTimeout(() => {
+                    if (this.state.circuitData !== circuitData || runtime.circuitBoard !== board) {
+                        reject(new Error('The KIM-1 circuit was replaced before launch.'));
+                        return;
+                    }
+                    const [verb, value] = tape.preset === 'video' ? ['setK1008', 0x2000] : ['setBackplane', [
+                        {kind: 'kim-2', address: 0x2000}, {kind: 'kim-3', address: 0x4000},
+                        {kind: 'kim-3b', address: 0x6000}
+                    ]];
+                    try {
+                        if (!board.setDeviceControl(partId, verb, value) ||
+                            !board.setDeviceControl(partId, 'key', 'GO')) {
+                            throw new Error('The KIM-1 could not start the paper-tape program.');
+                        }
+                        window.dispatchEvent(new CustomEvent('bw-kim1-control', {detail: {board, partId, run: true}}));
+                        resolve();
+                    } catch (error) {
+                        reject(error);
+                    }
+                }, 0);
+            };
+            const cleanup = () => {
+                clearTimeout(timeout);
+                window.removeEventListener('bw-board-ready', ready);
+            };
+            const timeout = setTimeout(() => {
+                cleanup();
+                reject(new Error('The KIM-1 circuit did not become ready.'));
+            }, 15000);
+            window.addEventListener('bw-board-ready', ready);
+            this.setState(nextState);
+        });
+    }
+
     async loadExample (ex, opts) {
         if (ex?.files?.cardiac) return this.loadCardiacExample(ex, opts);
         // The Examples browser's device chip arrives here as opts.device
@@ -2027,6 +2076,11 @@ class CircuitTab extends React.Component {
             }
             const microtronicPart = data.parts.find(item => item.kind === 'busch-microtronic');
             const kim1Part = data.parts.find(item => item.kind === 'kim-1');
+            const kim1Tape = opts?.kim1Tape;
+            if (kim1Tape) {
+                if (!kim1Part) throw new Error('The paper tape requires a KIM-1 circuit.');
+                kim1Part.params = {...kim1Part.params, clockHz: 1000000, program: kim1Tape.program};
+            }
             if (!kim1Part) this.selectKim1(null);
             if (ex.files?.cp1) {
                 const sourceResponse = await fetch(`examples/${ex.files.cp1}`);
@@ -2069,7 +2123,9 @@ class CircuitTab extends React.Component {
                 if (kim1Part) {
                     this.selectKim1(kim1Part);
                     const panel = this.props.vm?.runtime?.controllerPanel;
-                    if (panel && addKim1Face(panel, kim1Part.id)) {
+                    const face = panel && addKim1Face(panel, kim1Part.id);
+                    const video = panel && kim1Tape?.preset === 'video' && addKim1VideoFace(panel, kim1Part.id);
+                    if (face || video) {
                         panel.setMode('play');
                         window.dispatchEvent(new CustomEvent('bw-controller-changed', {
                             detail: {data: serializeControllerPanel(panel)}
@@ -2142,10 +2198,11 @@ class CircuitTab extends React.Component {
             // Switching to the Designer is the point of clicking an example —
             // leaving the user on the gallery with an invisible change would be
             // the same silence this panel strip exists to avoid.
-            const circuitData = wiredBoot ? {...data, fileOnly: true, bootWiredExample: true}
-                : hasProgram ? data : {...data, fileOnly: true};
+            const circuitData = kim1Tape ? {vcc: data.vcc, parts: [kim1Part], wires: [], fileOnly: true}
+                : wiredBoot ? {...data, fileOnly: true, bootWiredExample: true}
+                    : hasProgram ? data : {...data, fileOnly: true};
             this._wiredExample = wiredBoot ? {data: circuitData, media: wiredMedia} : null;
-            this.setState({
+            const nextState = {
                 // fileOnly tells the designer this circuit came with no
                 // program: never rebuild it from whatever pins the previous
                 // project left behind.
@@ -2156,11 +2213,13 @@ class CircuitTab extends React.Component {
                 examplesError: programError ?
                     `Opened the circuit for "${ex.id}", but its program did not load ` +
                     `(${programError}), so there are no pins and no debugger.` : null
-            });
+            };
+            if (kim1Tape) await this.loadKim1TapeCircuit(circuitData, kim1Part.id, kim1Tape, nextState);
+            else this.setState(nextState);
             // A loaded example is a named project, not the generic project
             // created by the SB3 converter. Keep the normal title reducer as
             // the single source used by the menu bar, save dialog and window.
-            this.publishExampleTitle(ex);
+            this.publishExampleTitle(kim1Tape ? {...ex, title: kim1Tape.title} : ex);
             // Machine-class devices (the 6502/Z80 benches) have no pin
             // concept — their debugger comes from the bus extract, not
             // from PIN lines. PART bindings drive pins without PIN lines.
@@ -2175,7 +2234,7 @@ class CircuitTab extends React.Component {
                 {ok: true, circuitData: hasProgram ? data : {...data, fileOnly: true}};
         } catch (e) {
             this.setState({loadingExample: null, examplesError:
-                `Could not open "${ex.id}": ${e.message}. The board is unchanged.`});
+                `Could not open "${ex.id}": ${e.message}.`});
             return {ok: false, error: e.message};
         }
     }

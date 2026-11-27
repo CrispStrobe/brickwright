@@ -24,7 +24,8 @@ This inventory covers the 34 manifests on media-lab main at `5e54caab98d7ca6f641
 | Multitasking MS-DOS | The MIT beta recipe reaches its banner and then faults before a prompt. Build the mainstream version and verify the interactive shell before admitting it. |
 | ALICE Pascal, OpenGEM and Freedoom with FastDoom | Need packages mounted in a working DOS guest. Verify the Pascal main menu or graphics and input on the two graphical titles. |
 | ACE KIM | The pinned repository contains the BIOS and monitor. Qualify the keyboard and LCD routes on the dedicated KIM hardware before presenting a library launch. |
-| KIM-1 expansion demos and CP/M-65 | Give paper tape, expanded RAM, video and SD images a handoff through the existing KIM controls. Expansion demos have committed artifacts. CP/M-65 has media recipes and needs an interactive boot check with its matching storage profile. |
+| KIM-1 expansion demos | KIM-4 RAM Check and K-1008 Checkerboard run their checksum-pinned MIT paper tapes from Machines on a KIM-1 circuit at 1 MHz. The RAM check configures all three modules and writes $5A at $0300. The video preset adds a removable 320 × 200 Controller widget. Both tapes are available in Code. The programmable memory map and SD/Corsham sector sample still need library launch actions. |
+| CP/M-65 | Media recipes exist. Verify an interactive boot with the matching KIM-1 storage profile. |
 | KIM-1 memory card and xKIM | Source manifests. The programmable board needs card firmware or a behavioral model. xKIM needs a matching storage and monitor configuration. |
 | Bad Apple and tron-0xf | The 6502 demo needs a verified player image, SD card and framebuffer. The Spectrum game requires a compatible ROM with reviewed redistribution rights as well as the tape. |
 

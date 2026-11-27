@@ -27,7 +27,7 @@ import {defaultImageFetcher} from '../../lib/bw-machines/activate.js';
 import {remoteMachineImagesAllowed} from '../../lib/distribution-policy.js';
 import {CIRCUIT_LIBRARY_MACHINES, libraryCircuitPrograms} from '../../lib/bw-machines/library-circuits.js';
 import {
-    libraryMedia, libraryLicenseUrl, localizedMedia, openLibraryMedia, readLibraryCode, readMediaManifest
+    libraryMedia, libraryLicenseUrl, localizedMedia, openLibraryMedia, readKim1LibraryTape, readLibraryCode, readMediaManifest
 } from '../../lib/bw-machines/library-media.js';
 import {lessonMachines, lessonT} from '../../lib/bw-machines/lessons.js';
 
@@ -531,12 +531,16 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                                 </a> : (/^de/i.test(locale) ? `Lizenz · ${item.license}` : `License · ${item.license}`)}
                                             </>}
                                             actions={
-                                                <button type="button" disabled={launching !== null || (!item.benchmark && !onRun)} style={btn}
+                                                <button type="button" disabled={launching !== null || (item.kim1Tape ? !onOpenExample : !item.benchmark && !onRun)} style={btn}
                                                     onClick={() => launch(item.id, async () => {
                                                         if (item.benchmark) {
                                                             window.dispatchEvent(new CustomEvent('bw-open-native-benchmarks',
                                                                 {detail: {run: item.benchmark}}));
                                                             return true;
+                                                        }
+                                                        if (item.kim1Tape) {
+                                                            const kim1Tape = await readKim1LibraryTape(item);
+                                                            return onOpenExample('kim1-wired-io', false, {kim1Tape});
                                                         }
                                                         const [config, code] = await Promise.all([openLibraryMedia(item), readLibraryCode(item)]);
                                                         return onRun(config, {code});

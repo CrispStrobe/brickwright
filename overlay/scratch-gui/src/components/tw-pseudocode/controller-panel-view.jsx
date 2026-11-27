@@ -8,7 +8,7 @@ import MachineConsole from './machine-console.jsx';
 import MachineTerminal from './machine-terminal.jsx';
 import {browserLocale, makeT} from '../../lib/bw-i18n.js';
 import {activateUndoSurface, notifyUndoState, registerUndoSurface} from '../../lib/global-undo.js';
-import {addCardiacFace, addKim1Face, addMicrotronicFace, isCardiacFace, isKim1Face, isMicrotronicFace, MACHINE_WIDGET_HEIGHT} from '../../lib/controller-machine-faces.js';
+import {addCardiacFace, addKim1Face, addKim1VideoFace, addMicrotronicFace, isCardiacFace, isKim1Face, isKim1VideoFace, isMicrotronicFace, MACHINE_WIDGET_HEIGHT} from '../../lib/controller-machine-faces.js';
 import {LOGIKUS_LAMP_WIDGETS, LOGIKUS_SWITCH_WIDGETS, LOGIKUS_TEST_WIDGET} from '../../lib/logikus/controller-bridge.js';
 import SpikePortMonitor from './spike-port-monitor.jsx';
 import {CONSOLE_6502_CHANGED, isConsoleMonitor, sendConsoleLine} from '../../lib/bw-debug/console-6502.js';
@@ -1855,6 +1855,12 @@ class ControllerPanelView extends React.Component {
                 disabled: widgets.some(widget => isKim1Face(widget) && widget.config.partId === part.id),
                 run: () => this._addMachineWidget(panel => addKim1Face(panel, part.id))
             })),
+            ...kimParts.filter(part => this.props.vm?.runtime?.circuitBoard?.getDeviceState?.(part.id)?.k1008)
+                .map(part => ({
+                    label: kimParts.length > 1 ? `K-1008 · ${part.id}` : 'K-1008',
+                    disabled: widgets.some(widget => isKim1VideoFace(widget) && widget.config.partId === part.id),
+                    run: () => this._addMachineWidget(panel => addKim1VideoFace(panel, part.id))
+                })),
             cardiacWidgetSlot && {
                 label: german ? 'CARDIAC-Anzeige' : 'CARDIAC display', disabled: !!cardiacWidget,
                 run: () => this._addMachineWidget(addCardiacFace)
@@ -2139,10 +2145,11 @@ class ControllerPanelView extends React.Component {
                                                             variant="front" locale={this.props.locale} />
                                                     </React.Suspense>
                                                 </div> :
-                                            isKim1Face(w) && kimParts.some(part => part.id === w.config.partId) ?
+                                            (isKim1Face(w) || isKim1VideoFace(w)) && kimParts.some(part => part.id === w.config.partId) ?
                                                 <div style={{flex: 1, minHeight: 0, overflow: 'auto', scrollbarWidth: 'thin'}}>
                                                     <React.Suspense fallback={null}>
-                                                        <Kim1Surface vm={this.props.vm} partId={w.config.partId} variant="front"
+                                                        <Kim1Surface vm={this.props.vm} partId={w.config.partId}
+                                                            variant={isKim1VideoFace(w) ? 'video' : 'front'}
                                                             locale={this.props.locale} />
                                                     </React.Suspense>
                                                 </div> :
