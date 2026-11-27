@@ -14,7 +14,7 @@ All 68 structural candidates were attempted in one fixed checkout with Scratch m
 | Legacy source | 15 | 15 | 0 |
 | Circuit catalogue | 1 | 0 | 1 |
 
-The earlier Complete Game refusal came from the unimplemented Scratch answer value. Its later export passed after the prompt implementation. The separate PyBadge diagnostic came from a Scratch variable named `screen`, which collided with the Arcade screen API. The named gameplay tests and the Complete Game rerun are recorded in the [gameplay receipt](receipts/2026-11-27-code-arcade-gameplay.json).
+The Complete Game rerun compiled and displayed a frame after the Scratch answer value was implemented. The PyBadge rerun compiled and displayed a frame after the exporter reserved the SDK's `screen` identifier. Across the first pass and these reruns, each of the 68 candidates compiled and reached the simulator. The PyBadge frame contains one color. Its display and buttons still depend on the Brickwright Controller bindings. The Looks demo also compiled and booted with its new thought bubble and sprite scaling. [Gameplay and Complete Game](receipts/2026-11-27-code-arcade-gameplay.json) · [PyBadge and Looks](receipts/2026-11-27-code-arcade-pybadge-looks.json)
 
 ## Run the audit
 
