@@ -1974,3 +1974,28 @@ and electrical readings matched exactly, including the −53.2° fork
 tilt. A separate parity check verified matching frames and completed
 Atlas Stop, Reset and repeat Run on the candidate. Atlas fork control
 and sustained 1× production performance remain open.
+
+### Stabilize the Atlas forklift with a lower electronics tray
+
+The Atlas factory and Brickwright example use 8 mm tray posts in place
+of 28.3 mm posts. The controller and supply move down while the tray
+stays seated on the chassis. The 16 mm trial held the fork angle but
+finished the three-second worker run at 25.8 mm of lift. The 8 mm trial
+held the fork at 14.99° and reached 45.4 mm of its 48 mm lift travel.
+
+Three-second worker runs used the same pinned SDK, Circuit configuration,
+and controls. Worker throughput rose from 0.088× to 0.247× in the first
+order and from 0.278× to 0.725× in reverse order. Test-machine load varied
+between orders.
+
+In the Chrome Brickwright host with SDK `64de0a5`, the updated example
+passed one-click Run, motion, Stop, Reset and repeat Run. At 6.065 simulated
+seconds the fork held 14.91° against the +15° target, the lift was at
+45.65 mm, and both drive wheels had turned. The run sustained 0.331× on
+the MacBook. All 12 Atlas unit tests passed, and all 22 robot archives
+reproduced byte for byte.
+
+The example uses the updated CAD document with the shipped SDK. CrispCAD
+has the updated model factory. Sustained 1× in the production app remains
+open.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/5c922ea961c92928616915245d4ca3b3c24da456)
