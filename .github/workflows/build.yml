@@ -1431,6 +1431,23 @@ jobs:
         if: ${{ !cancelled() && steps.overlays.outcome == 'success' && steps.package_provenance.outcome == 'success' }}
         run: cd packages/scratch-gui && NODE_ENV=production NODE_OPTIONS=--max-old-space-size=2560 BW_ENABLE_CAD=1 BW_ENABLE_FPGA=1 BW_SYNTHESIS_ENDPOINT=https://synth.crispstro.be/api npm run build
 
+      # Keep this focused check in the ordinary PR build: the larger browser
+      # matrix requires ci:full and does not qualify the Logikus workbench.
+      - name: Verify Logikus browser behavior
+        id: logikus_browser
+        if: ${{ !cancelled() && steps.build_editor.outcome == 'success' }}
+        timeout-minutes: 5
+        run: node scripts/verify-logikus-browser.mjs
+      - name: Retain Logikus browser report and screenshots
+        if: ${{ !cancelled() && (steps.logikus_browser.outcome == 'success' || steps.logikus_browser.outcome == 'failure') }}
+        timeout-minutes: 5
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: logikus-browser-evidence
+          path: artifacts/logikus-browser/
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Guard — emitted native broker proof bytes retain reviewed authority
         if: ${{ !cancelled() && steps.build_editor.outcome == 'success' }}
         run: |

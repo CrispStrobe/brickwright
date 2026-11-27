@@ -1,5 +1,8 @@
 import {CONNECTIONS_KEY, validateConnections} from './bw-cad-circuit/connections.js';
 import {validateCp1Workspace} from './cp1-project.js';
+import {LOGIKUS_STORAGE_KEY, LOGIKUS_WORKSPACE_MAX_BYTES, validateWorkspace as validateLogikusWorkspace,
+    getLiveWorkspace as getLiveLogikusWorkspace, setLiveWorkspace as setLiveLogikusWorkspace,
+    getWorkspaceGeneration as getLogikusGeneration, setWorkspaceGeneration as setLogikusGeneration} from './logikus/workspace.js';
 import {CAD_PROJECT_PATH, CAD_STORAGE_KEY, CAD_PROJECT_LIMIT, inspectCadText, readCadText, getLiveCadText, setLiveCadText, getCadProjectGeneration, setCadProjectGeneration} from './bw-cad-project.js';
 import {sandboxWorld, SANDBOX_STORAGE_KEY} from './spike-arena/arena-sandbox.js';
 import {simLabRecord, SIM_LAB_STORAGE_KEY, SIM_LAB_LIMIT} from './bw-sim/model/sim-lab-persist.js';
@@ -42,8 +45,9 @@ const BUNDLE_FORMAT = 'brickwright-state';
 const BUNDLE_VERSION = 2;
 const MAX_BUNDLE_BYTES = 2 * 1024 * 1024;
 const SECTION_LIMITS = Object.freeze({code: 512 * 1024, circuit: 1024 * 1024,
-    controller: 512 * 1024, spikeArena: 1024 * 1024, simLab: SIM_LAB_LIMIT, cadCircuit: 32 * 1024, fpga: 512 * 1024, cp1: 256 * 1024});
-const KNOWN_SECTIONS = Object.freeze(['code', 'circuit', 'controller', 'legacyWidgets', 'spikeArena', 'simLab', 'fpga', 'cadCircuit', 'cp1']);
+    controller: 512 * 1024, spikeArena: 1024 * 1024, simLab: SIM_LAB_LIMIT, cadCircuit: 32 * 1024, fpga: 512 * 1024, cp1: 256 * 1024,
+    logikus: LOGIKUS_WORKSPACE_MAX_BYTES});
+const KNOWN_SECTIONS = Object.freeze(['code', 'circuit', 'controller', 'legacyWidgets', 'spikeArena', 'simLab', 'fpga', 'cadCircuit', 'cp1', 'logikus']);
 // The FPGA lab's Verilog/constraints and its gate-builder canvas (fpga-tab.jsx,
 // fpga-gate-builder-rf.jsx) travel as one optional `fpga` section.
 const FPGA_DESIGN_KEY = 'bw-fpga-autosave';
@@ -58,7 +62,7 @@ const utf8Size = value => new TextEncoder().encode(value).byteLength;
  * project, and copying them between machines would be a surprise.
  */
 const EXACT_KEYS = ['bw-circuit-autosave', 'bw-code-autosave', 'bw-ctl-widgets', SANDBOX_STORAGE_KEY,
-    SIM_LAB_STORAGE_KEY, FPGA_DESIGN_KEY, FPGA_GATES_KEY, CAD_STORAGE_KEY, CONNECTIONS_KEY, 'bw-cp1-workspace'];
+    SIM_LAB_STORAGE_KEY, FPGA_DESIGN_KEY, FPGA_GATES_KEY, CAD_STORAGE_KEY, CONNECTIONS_KEY, 'bw-cp1-workspace', LOGIKUS_STORAGE_KEY];
 // The old per-widget prefix stays on the allowlist so a file saved while it
 // was documented (nothing ever wrote such keys, but a hand-built bundle
 // might) still restores; the panel itself serializes to ONE key above.
@@ -83,6 +87,7 @@ const decodeSection = (name, value) => {
         throw new Error('controller must contain a widgets array');
     }
     if (name === 'spikeArena') return sandboxWorld(value);
+    if (name === 'logikus') return validateLogikusWorkspace(value);
     if (name === 'cp1') {
         const result = validateCp1Workspace(value);
         if (!result.ok) throw new Error(result.errors.map(item => item.message).join('; '));
@@ -111,6 +116,7 @@ const decodeStored = (name, value) => {
 /** Convert allowlisted storage strings into the typed v2 state. */
 const encodeProjectState = raw => {
     const state = {};
+    if (raw[LOGIKUS_STORAGE_KEY] !== undefined) state.logikus = decodeStored('logikus', raw[LOGIKUS_STORAGE_KEY]);
     if (raw['bw-cp1-workspace'] !== undefined) state.cp1 = decodeStored('cp1', raw['bw-cp1-workspace']);
     if (raw[CONNECTIONS_KEY] !== undefined) state.cadCircuit = decodeStored('cadCircuit', raw[CONNECTIONS_KEY]);
     if (raw[SANDBOX_STORAGE_KEY] !== undefined) state.spikeArena = decodeStored('spikeArena', raw[SANDBOX_STORAGE_KEY]);
@@ -139,6 +145,7 @@ const encodeProjectState = raw => {
 const decodeProjectState = state => {
     if (!isRecord(state)) throw new Error('state must be an object');
     const raw = {};
+    if (state.logikus !== undefined) raw[LOGIKUS_STORAGE_KEY] = JSON.stringify(decodeSection('logikus', state.logikus));
     if (state.cp1 !== undefined) raw['bw-cp1-workspace'] = JSON.stringify(decodeSection('cp1', state.cp1));
     if (state.cadCircuit !== undefined) raw[CONNECTIONS_KEY] = JSON.stringify(decodeSection('cadCircuit', state.cadCircuit));
     if (state.spikeArena !== undefined) raw[SANDBOX_STORAGE_KEY] = JSON.stringify(decodeSection('spikeArena', state.spikeArena));
@@ -280,6 +287,8 @@ const applyBrickwrightInspection = (inspection, storage = localStorage) => {
     const previousSimLabRefusal = simLabSaveFailure();
     const previousCadText = getLiveCadText();
     const previousCadGeneration = getCadProjectGeneration();
+    const previousLogikusWorkspace = getLiveLogikusWorkspace();
+    const previousLogikusGeneration = getLogikusGeneration();
     let result = replaceProjectState(storage, inspection.state || {});
     let sessionCad;
     if (result.outcome === 'storage-failed' && result.rolledBack &&
@@ -293,13 +302,18 @@ const applyBrickwrightInspection = (inspection, storage = localStorage) => {
         if (result.outcome === 'loaded') sessionCad = cad;
     }
     if (result.outcome !== 'loaded') return {...result, report: inspection.report};
+    // Retire the previous circuit before controller teardown can emit input
+    // events. The host adopts this generation on the bundle-loaded event.
+    setLiveLogikusWorkspace(undefined);
+    setLogikusGeneration(previousLogikusGeneration + 1);
     clearSimLabSaveFailure();
     setLiveCadText(undefined);
     if (sessionCad !== undefined) setLiveCadText(sessionCad);
     preservedBundle = inspection.outcome === 'loaded' && inspection.version === BUNDLE_VERSION ?
         {outcome: 'loaded', document: inspection.passthrough} : null;
     return {...result, storageMode: sessionCad === undefined ? 'persistent' : 'session-cad', outcome: inspection.outcome, version: inspection.version,
-        found: inspection.outcome === 'loaded', report: inspection.report, previousPreserved, previousSimLabRefusal, previousCadText, previousCadGeneration};
+        found: inspection.outcome === 'loaded', report: inspection.report, previousPreserved, previousSimLabRefusal, previousCadText, previousCadGeneration,
+        previousLogikusWorkspace, previousLogikusGeneration};
 };
 
 /** Restore auxiliary state when the Scratch half fails after a successful apply. */
@@ -312,6 +326,8 @@ const rollbackBrickwrightInspection = (applied, storage = localStorage) => {
         preservedBundle = applied.previousPreserved || null;
         setLiveCadText(applied.previousCadText);
         setCadProjectGeneration(applied.previousCadGeneration ?? getCadProjectGeneration());
+        setLiveLogikusWorkspace(applied.previousLogikusWorkspace);
+        setLogikusGeneration(applied.previousLogikusGeneration ?? getLogikusGeneration());
         if (applied.previousSimLabRefusal) refuseSimLabSave(applied.previousSimLabRefusal);
         else clearSimLabSaveFailure();
     }
@@ -333,6 +349,9 @@ const collectState = () => {
     const cad = readCadText();
     if (cad !== null) out[CAD_STORAGE_KEY] = cad;
     else delete out[CAD_STORAGE_KEY];
+    const logikus = getLiveLogikusWorkspace();
+    if (logikus === null) delete out[LOGIKUS_STORAGE_KEY];
+    else if (logikus !== undefined) out[LOGIKUS_STORAGE_KEY] = JSON.stringify(logikus);
     return out;
 };
 

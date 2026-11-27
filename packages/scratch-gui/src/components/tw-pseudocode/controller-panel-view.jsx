@@ -1775,6 +1775,12 @@ class ControllerPanelView extends React.Component {
                         {t('title')}
                     </span>
                     <EditorHelp editor="Widgets" label="Widgets" locale={this.props.locale} />
+                    <button type="button" data-testid="bw-open-logikus"
+                        onClick={() => window.dispatchEvent(new CustomEvent('bw-logikus-open'))}
+                        style={{background: '#ede9fe', color: '#5b21b6', border: '1px solid #c4b5fd',
+                            borderRadius: 6, padding: '5px 10px', fontSize: 14, cursor: 'pointer'}}>
+                        {/^de/i.test(this.props.locale || '') ? 'Logikus-Labor' : 'Logikus Lab'}
+                    </button>
                     {/* ENTERING full screen from here, because there is no other way in
                         on a phone: the stage header that normally offers it is capped
                         to 44px in this dock mode, and a sweep of the pane on a phone
