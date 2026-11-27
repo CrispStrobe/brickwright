@@ -5,10 +5,10 @@ import {validateMachineConfig} from './machine-config.js';
 import {PICOBB_FLASH} from './pico-basic-flash.js';
 
 const mediaInfo = makeT({
-    en: {sieve: 'CP/M Sieve', forthCpm: 'zForth on CP/M',
+    en: {minix: 'Click the screen and press = to boot MINIX. Log in as root and try ls.', sieve: 'CP/M Sieve', forthCpm: 'zForth on CP/M',
         ackPascal: 'Prints the primes first. The DOS service then reports a file-close error.',
         ubasic: 'Open the sample in BAS. Edit the program and run it again to see the new output in Controller.'},
-    de: {sieve: 'CP/M-Primzahlsieb', forthCpm: 'zForth unter CP/M',
+    de: {minix: 'Klicke auf den Bildschirm und drücke =, um MINIX zu starten. Melde dich als root an und probiere ls.', sieve: 'CP/M-Primzahlsieb', forthCpm: 'zForth unter CP/M',
         ackPascal: 'Gibt zuerst die Primzahlen aus. Danach meldet der DOS-Dienst einen Fehler beim Schließen der Datei.',
         ubasic: 'Öffne das Beispiel in BAS. Bearbeite das Programm und starte es erneut, um die neue Ausgabe im Controller zu sehen.'}
 });
@@ -44,6 +44,8 @@ export const libraryMedia = [
         infoKey: 'ubasic',
         code: {language: 'basic', path: 'samples/demo.bas', dosSourceName: 'PROG.BAS'}},
     ...ackSamples,
+    {id: 'minix-2.0', title: 'MINIX 2.0.4', machine: 'i80386', license: 'BSD-3-Clause',
+        licenseFile: 'LICENSE', infoKey: 'minix', revision: 'b424a9a6d2826360351d1ed1fbcd7548c4edf9f8'},
     {id: 'x86-benchmarks/topbench', title: 'TOPBENCH (386)', machine: 'i80386', license: 'MIT', benchmark: 'topbench'},
     {id: 'picobb-rp2040', title: 'PicoBB BBC BASIC', machine: 'rp2040js', license: 'Zlib',
         revision: 'd6f09f79a6c73a2fcdf7f53b75624aa01f096baf',

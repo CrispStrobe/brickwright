@@ -1,8 +1,8 @@
 # Media lab in Machines
 
-This inventory covers the 31 manifests on media-lab main at `081bd4156797cf8b14b9ceef7245ff9e100577e5`. Each entry needs an exact artifact or a reproducible build, a reviewed redistribution licence, a compatible machine and a guest-output check through its ordinary UI. A program can appear under its host CPU without being presented as a bootable operating system. The library fetches reviewed media on demand. ROMs with unclear redistribution terms stay out of its downloadable entries.
+This inventory covers the 34 manifests on media-lab main at `5e54caab98d7ca6f641d7cc3e21f2ebdab937400`. Each entry needs an exact artifact or a reproducible build, a reviewed redistribution licence, a compatible machine and a guest-output check through its ordinary UI. A program can appear under its host CPU without being presented as a bootable operating system. The library fetches reviewed media on demand. ROMs with unclear redistribution terms stay out of its downloadable entries.
 
-[Media-lab projects at the reviewed revision](https://github.com/CrispStrobe/brickwright-media-lab/tree/081bd4156797cf8b14b9ceef7245ff9e100577e5/projects) · [Candidate ledger at that revision](https://github.com/CrispStrobe/brickwright-media-lab/blob/081bd4156797cf8b14b9ceef7245ff9e100577e5/docs/CANDIDATES.md)
+[Media-lab projects at the reviewed revision](https://github.com/CrispStrobe/brickwright-media-lab/tree/5e54caab98d7ca6f641d7cc3e21f2ebdab937400/projects) · [Candidate ledger at that revision](https://github.com/CrispStrobe/brickwright-media-lab/blob/5e54caab98d7ca6f641d7cc3e21f2ebdab937400/docs/CANDIDATES.md)
 
 | Manifest | Machines handoff or work remaining |
 | --- | --- |
@@ -12,11 +12,13 @@ This inventory covers the 31 manifests on media-lab main at `081bd4156797cf8b14b
 | zForth for CP/M and CP/M-80 software | Existing Z80 entries. CP/M Sieve has an editable C route. |
 | BBC BASIC for Z80 | Existing serial and VDP lessons boot CP/M. The media-lab manifest describes a separate BDOS-shim workflow. |
 | Microsoft BASIC for 6502 | Existing 6502 lesson. |
+| Tali Forth 2 with framebuffer and 6502 Animation Lab | Media Lab publishes separate 65C02 ROMs and CLI proofs. Connect their framebuffer output and keyboard interaction to Controller for dedicated Machines entries. |
 | Linux on RISC-V | Existing Linux lesson and cold-boot option. |
 | PicoBB | Existing RP2040 entry using the reviewed filesystem-enabled revision. |
 | TOPBENCH, Whetstone and native Sieve | TOPBENCH opens the native benchmark panel. Whetstone and Sieve belong to the native benchmark path and need independent Machines handoff checks before receiving standalone rows. |
 | F83, VolksForth and Small-C | The reviewed revision contains fetch recipes and manifests. Publish pinned, redistributable program bytes, then exercise the interactive Forth prompts and Small-C's shared DOS files. |
-| Minix 1.7.5 and 2.0.4 | The reviewed revision contains fetch recipes. Qualify Minix 2.0.4 at login and shell on the free AT BIOS. Track the Minix 1.7.5 memory limit separately. |
+| MINIX 2.0.4 | Runs under 80386 in Machines with a checksum-pinned floppy and the bundled free AT BIOS. Boot with `=` in Controller and log in as `root`. The GUI regression exercises the keyboard, full screen and a root-directory listing from the shell. [Floppy and licence](https://github.com/CrispStrobe/brickwright-media-lab/pull/45) |
+| MINIX 1.7.5 | The 8086 release reaches the boot monitor. Its RAM disk still exceeds the current memory profile. |
 | Multitasking MS-DOS | The MIT beta recipe reaches its banner and then faults before a prompt. Build the mainstream version and verify the interactive shell before admitting it. |
 | ALICE Pascal, OpenGEM and Freedoom with FastDoom | Need packages mounted in a working DOS guest. Verify the Pascal main menu or graphics and input on the two graphical titles. |
 | ACE KIM | The pinned repository contains the BIOS and monitor. Qualify the keyboard and LCD routes on the dedicated KIM hardware before presenting a library launch. |

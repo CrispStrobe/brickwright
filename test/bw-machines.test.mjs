@@ -690,6 +690,21 @@ test('386 hard-disk geometry survives activation and media dispatch', async () =
     assert.deepEqual(dispatched[0].geometry, {cylinders: 1000, heads: 4, sectors: 17});
 });
 
+test('386 floppy launch keeps its geometry and reports an attach failure', async () => {
+    const {fetcher} = stubFetcher();
+    const geometry = {cylinders: 80, heads: 2, sectors: 18, bytesPerSector: 512};
+    const config = fromMediaManifest({
+        machine: 'i80386', bios: {kind: 'bochs-lgpl'}, slots: {floppy: 'minix204.img'}, floppy: {geometry}
+    }, {baseUrl: 'https://cdn/projects/minix-2.0/'});
+    await assert.rejects(runMachineConfig(config, {fetcher, awaitBoot: true, dispatch: detail => {
+        assert.equal(detail.kind, 'i80386');
+        assert.equal(detail.slotId, 'floppy');
+        assert.equal(detail.profile, 'floppy-os');
+        assert.deepEqual(detail.geometry, geometry);
+        detail.bootCompletion.reject(new Error('floppy attach was refused'));
+    }}), /floppy attach was refused/);
+});
+
 test('runMachineConfig returns a wired descriptor and dispatches nothing', async () => {
     const {fetcher} = stubFetcher();
     let dispatched = 0;
