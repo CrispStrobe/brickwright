@@ -10,8 +10,8 @@ const workflow = readFileSync(path.join(root, '.github/workflows/build.yml'), 'u
 test('the 8086 browser proof closes the local assembly, display, key and port journey', () => {
     for (const evidence of [
         "selectOption('i8086')", "selectOption('keys')", "selectOption('pins')",
-        'bw-asm-assemble', 'codeOperationStatus', 'in this browser', 'data-vdp-screen', 'bw-serial-input',
-        '/Z\\s+5A/', 'bw-led-ppi1-a-7', 'bw-switch-ppi1-c-0',
+        'bw-asm-assemble', 'codeOperationStatus', 'in this browser', 'bw-machine-canvas', 'bw-serial-console',
+        '/Z\\s+5A/', 'bw-ctl-bargraph-PC GPIO', 'bw-ctl-button-PC switch',
         'hostedCompilerRequests.length === 0'
     ]) assert.ok(proof.includes(evidence), `missing browser evidence: ${evidence}`);
     assert.match(proof, /isHostedCompilerRequest/);
@@ -82,7 +82,7 @@ test('the 8086 browser proof closes the local assembly, display, key and port jo
         'mount-time auto-run must wait for retained media to finish loading');
     const runner = readFileSync(path.join(root,
         'overlay/scratch-gui/src/lib/bw-debug/debug-runner.js'), 'utf8');
-    assert.match(runner, /\(\(selectedKind === 'i8086' \|\| selectedKind === 'i80386'\) && bootMedia\)/,
+    assert.match(runner, /const built = runnerCompilesProjectBlocks\(\{selectedKind, bootMedia}\)/,
         'an 8086 media image must bypass unrelated Scratch pin compilation');
 });
 
