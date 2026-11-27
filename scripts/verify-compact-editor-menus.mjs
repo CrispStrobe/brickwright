@@ -116,7 +116,7 @@ try {
     await mac.getByTestId('bw-code-actions-trigger').click();
     const macMenu = mac.getByTestId('bw-code-actions-menu');
     const machineRow = macMenu.locator('[data-code-machine-select]').filter({
-        has: macMenu.getByTestId('bw-device-picker-trigger-menu')
+        has: mac.getByTestId('bw-device-picker-trigger-menu')
     });
     const icon = await machineRow.locator('svg').boundingBox();
     const machineButton = machineRow.getByTestId('bw-device-picker-trigger-menu');
