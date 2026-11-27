@@ -30,16 +30,33 @@ if (args['generator-root']) {
     const fixtures = {
         concurrent: 'SPRITE Demo:\n  DEFINE later:\n    wait 0.08 seconds\n    say "later"\n  WHEN flag clicked:\n    say "first"\n    later\n    say "last"\n  WHEN flag clicked:\n    say "second"\n',
         input: 'SPRITE Demo:\n  WHEN flag clicked:\n    ask "Name?" and wait\n    say answer\n',
-        stop: 'SPRITE Demo:\n  WHEN flag clicked:\n    say "ready"\n    wait 10 seconds\n    say "late"\n'
+        stop: 'SPRITE Demo:\n  WHEN flag clicked:\n    say "ready"\n    wait 10 seconds\n    say "late"\n',
+        booleanValue: 'SPRITE Demo:\n  WHEN flag clicked:\n    IF 2 > 1 THEN:\n      say "placeholder"\n'
     };
     for (const [name, source] of Object.entries(fixtures)) {
         const creator = new SB3Creator();
         creator.parse(source);
+        if (name === 'booleanValue') {
+            // Scratch Boolean reporters can occupy ordinary value sockets.
+            // Preserve the actual SB3 graph in the receipt: the source parser
+            // supplies this reporter in a condition socket before relocation.
+            const blocks = creator.project.targets.find(target => !target.isStage).blocks;
+            const [conditionId, condition] = Object.entries(blocks).find(([, block]) => block.opcode === 'control_if');
+            const reporterId = condition.inputs.CONDITION[1];
+            const sayId = condition.inputs.SUBSTACK[1];
+            blocks[condition.parent].next = sayId;
+            blocks[sayId].parent = condition.parent;
+            blocks[sayId].inputs.MESSAGE = [3, reporterId, [10, '']];
+            blocks[reporterId].parent = sayId;
+            delete blocks[conditionId];
+        }
         const validation = creator.validate();
         if (!validation.isValid || creator.warnings.length) throw new Error(`Invalid generated fixture ${name}: ${JSON.stringify({validation, warnings: creator.warnings})}`);
         const code = creator.generateJavaScript(creator.project, {async: true, execution: 'owned-console-v1'});
         if (!code.includes('codeRun.spawn')) throw new Error('The selected generator does not implement owned-console-v1.');
         generatedPrograms[name] = {source, code,
+            ...(name === 'booleanValue' ? {project: creator.project,
+                graphTransform: 'Move the IF comparison reporter to the say MESSAGE value socket and remove the IF.'} : {}),
             sha256: crypto.createHash('sha256').update(code).digest('hex')};
     }
     generator = {
@@ -369,6 +386,11 @@ try {
             await runCase('generated-stop-wait', 'javascript', generatedPrograms.stop.code, {
                 stopOnOutput: true, check: (r, expect) => {
                     expect(r.result.status === 'stopped' && r.result.output === 'ready\n', 'Stop terminates actual generated delayed task');
+                }
+            });
+            await runCase('generated-boolean-reporter-value', 'javascript', generatedPrograms.booleanValue.code, {
+                check: (r, expect) => {
+                    expect(r.result.status === 'completed' && r.result.output === 'true\n', 'admitted Boolean reporter retains its value in actual generated output');
                 }
             });
         }

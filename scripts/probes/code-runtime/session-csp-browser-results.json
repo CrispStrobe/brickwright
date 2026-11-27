@@ -1,0 +1,1326 @@
+{
+  "schema": 1,
+  "createdAt": "2026-11-27T08:57:16.786Z",
+  "scope": "production default Blob-worker factory and console sources under explicit localhost HTTP CSP; no React/application build, hosted production policy, native protocol, WebView or device qualification",
+  "implementation": {
+    "head": "b875bc6b824b11eb82a6e2dd852f934bda2224a3",
+    "sourceModified": false,
+    "defaultFactory": true,
+    "instrumentation": "call-through observation of native Worker construction/terminate and URL create/revoke; no createWorker injection or production-source rewrite"
+  },
+  "probeSha256": "4b25fa7d593b2421a39f3f6935d67b2c30d4b06dec924fc63a6d2027ebdd8965",
+  "harnessSha256": "871fb4aab0002b5c504cefd8d1e2501593ff0e7be25bb3060c7a1ec7438a5284",
+  "sourceHashes": {
+    "code-execution-session.js": "eaa2f153bb51dda2bb025d09441772b0e7a612f9a7a5f5cb5e7fee4538a84cf6",
+    "code-execution-workers.js": "8bb9b3d93c2752f7ecc1c94b7bd228c262797355df0df845c7224dfb8dc66325",
+    "skulpt.min.js": "1a319d8eedf314dba5af2444313e3cf2ac072a335df0f5100277e8f49b64eae9",
+    "skulpt-stdlib.js": "e3ecccbc17c6164d19ed3c5561aaaeb752c38c8efa2d88b62b5fb7a7e1b086a7"
+  },
+  "probeLockSha256": "87fff1c87af4e4092df236501f6a7a152f562fa74eea3905e97e59a792404d62",
+  "nativeConfigObservation": {
+    "path": "apps/tauri/src-tauri/tauri.conf.json",
+    "sha256": "d7877b3c9dfd1128e7769518378e18dbdc169ab1871b6daa56b727b772fca235",
+    "csp": null,
+    "interpretation": "configuration read only; the no-csp profile is a browser baseline, not execution of the native host"
+  },
+  "environment": {
+    "node": "v24.22.3",
+    "platform": "linux",
+    "arch": "x64",
+    "skulpt": "1.2.0",
+    "playwright": "1.62.1",
+    "chromiumPackage": "158.0.0",
+    "suppliedBrowserArgs": [
+      "--no-sandbox"
+    ],
+    "isolationNote": "no COOP/COEP, no web-security bypass or forced SharedArrayBuffer flag; --no-sandbox is the container process limitation",
+    "browserVersion": "158.0.8127.0"
+  },
+  "profiles": [
+    {
+      "name": "no-csp",
+      "phase": "no-csp",
+      "servedPolicy": null,
+      "capabilities": {
+        "isSecureContext": true,
+        "crossOriginIsolated": false,
+        "sharedArrayBuffer": false,
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.0 Safari/537.36"
+      }
+    },
+    {
+      "name": "allowed",
+      "phase": "allowed",
+      "servedPolicy": "default-src 'none'; script-src 'self' 'unsafe-eval'; worker-src blob:; connect-src 'self'; base-uri 'none'; object-src 'none'; report-uri /csp-report?profile=allowed",
+      "capabilities": {
+        "isSecureContext": true,
+        "crossOriginIsolated": false,
+        "sharedArrayBuffer": false,
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.0 Safari/537.36"
+      }
+    },
+    {
+      "name": "worker-denied",
+      "phase": "worker-denied",
+      "servedPolicy": "default-src 'none'; script-src 'self' 'unsafe-eval'; worker-src 'none'; connect-src 'self'; base-uri 'none'; object-src 'none'; report-uri /csp-report?profile=worker-denied",
+      "capabilities": {
+        "isSecureContext": true,
+        "crossOriginIsolated": false,
+        "sharedArrayBuffer": false,
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.0 Safari/537.36"
+      }
+    },
+    {
+      "name": "eval-denied",
+      "phase": "eval-denied",
+      "servedPolicy": "default-src 'none'; script-src 'self'; worker-src blob:; connect-src 'self'; base-uri 'none'; object-src 'none'; report-uri /csp-report?profile=eval-denied",
+      "capabilities": {
+        "isSecureContext": true,
+        "crossOriginIsolated": false,
+        "sharedArrayBuffer": false,
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.0 Safari/537.36"
+      }
+    },
+    {
+      "name": "allowed",
+      "phase": "allowed-after-denial",
+      "servedPolicy": "default-src 'none'; script-src 'self' 'unsafe-eval'; worker-src blob:; connect-src 'self'; base-uri 'none'; object-src 'none'; report-uri /csp-report?profile=allowed",
+      "capabilities": {
+        "isSecureContext": true,
+        "crossOriginIsolated": false,
+        "sharedArrayBuffer": false,
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.0 Safari/537.36"
+      }
+    }
+  ],
+  "results": [
+    {
+      "profile": "no-csp",
+      "phase": "no-csp",
+      "name": "normal",
+      "engine": "javascript",
+      "code": "console.log('hello');",
+      "result": {
+        "runId": "code-run-1",
+        "status": "completed",
+        "output": "hello\n",
+        "totalOutputChars": 6,
+        "truncated": false
+      },
+      "wallMs": 140.30000000074506,
+      "outputs": [
+        {
+          "text": "hello\n",
+          "runId": "code-run-1",
+          "truncated": false,
+          "reset": false,
+          "atMs": 12.5
+        }
+      ],
+      "inputs": [],
+      "metrics": {
+        "constructionAttempts": 1,
+        "createdWorkers": 1,
+        "terminatedWorkers": 1,
+        "createdUrls": 1,
+        "revokedUrls": 1,
+        "inputPings": 0,
+        "messages": [
+          {
+            "type": "out",
+            "runId": "code-run-1",
+            "textLength": 6
+          },
+          {
+            "type": "done",
+            "runId": "code-run-1"
+          }
+        ],
+        "workerErrors": [],
+        "messagesAfterTerminal": 0,
+        "terminal": true
+      },
+      "parentHeartbeats": 14,
+      "lateInputAccepted": null,
+      "documentViolations": [],
+      "failures": [],
+      "pass": true
+    },
+    {
+      "profile": "no-csp",
+      "phase": "no-csp",
+      "name": "normal",
+      "engine": "python",
+      "code": "print('hello')\n",
+      "result": {
+        "runId": "code-run-2",
+        "status": "completed",
+        "output": "hello\n",
+        "totalOutputChars": 6,
+        "truncated": false
+      },
+      "wallMs": 221,
+      "outputs": [
+        {
+          "text": "hello\n",
+          "runId": "code-run-2",
+          "truncated": false,
+          "reset": false,
+          "atMs": 92.70000000111759
+        }
+      ],
+      "inputs": [],
+      "metrics": {
+        "constructionAttempts": 1,
+        "createdWorkers": 1,
+        "terminatedWorkers": 1,
+        "createdUrls": 1,
+        "revokedUrls": 1,
+        "inputPings": 0,
+        "messages": [
+          {
+            "type": "out",
+            "runId": "code-run-2",
+            "textLength": 6
+          },
+          {
+            "type": "done",
+            "runId": "code-run-2"
+          }
+        ],
+        "workerErrors": [],
+        "messagesAfterTerminal": 0,
+        "terminal": true
+      },
+      "parentHeartbeats": 22,
+      "lateInputAccepted": null,
+      "documentViolations": [],
+      "failures": [],
+      "pass": true
+    },
+    {
+      "profile": "allowed",
+      "phase": "allowed",
+      "name": "owned-completion",
+      "engine": "javascript",
+      "code": "codeRun.spawn(async task => { await task.sleep(40); console.log('child'); }); console.log('entry');",
+      "result": {
+        "runId": "code-run-1",
+        "status": "completed",
+        "output": "entry\nchild\n",
+        "totalOutputChars": 12,
+        "truncated": false
+      },
+      "wallMs": 170.19999999925494,
+      "outputs": [
+        {
+          "text": "entry\n",
+          "runId": "code-run-1",
+          "truncated": false,
+          "reset": false,
+          "atMs": 33.09999999962747
+        },
+        {
+          "text": "entry\nchild\n",
+          "runId": "code-run-1",
+          "truncated": false,
+          "reset": false,
+          "atMs": 45.80000000074506
+        }
+      ],
+      "inputs": [],
+      "metrics": {
+        "constructionAttempts": 1,
+        "createdWorkers": 1,
+        "terminatedWorkers": 1,
+        "createdUrls": 1,
+        "revokedUrls": 1,
+        "inputPings": 0,
+        "messages": [
+          {
+            "type": "out",
+            "runId": "code-run-1",
+            "textLength": 6
+          },
+          {
+            "type": "out",
+            "runId": "code-run-1",
+            "textLength": 6
+          },
+          {
+            "type": "done",
+            "runId": "code-run-1"
+          }
+        ],
+        "workerErrors": [],
+        "messagesAfterTerminal": 0,
+        "terminal": true
+      },
+      "parentHeartbeats": 17,
+      "lateInputAccepted": null,
+      "documentViolations": [],
+      "failures": [],
+      "pass": true
+    },
+    {
+      "profile": "allowed",
+      "phase": "allowed",
+      "name": "long-input",
+      "engine": "javascript",
+      "code": "codeRun.spawn(async task => { const name = await task.input('Name?'); console.log('hello ' + name); });",
+      "result": {
+        "runId": "code-run-2",
+        "status": "completed",
+        "output": "hello Ada\n",
+        "totalOutputChars": 10,
+        "truncated": false
+      },
+      "wallMs": 881.5,
+      "outputs": [
+        {
+          "text": "hello Ada\n",
+          "runId": "code-run-2",
+          "truncated": false,
+          "reset": false,
+          "atMs": 760.9000000003725
+        }
+      ],
+      "inputs": [
+        {
+          "runId": "code-run-2",
+          "requestId": 1,
+          "prompt": "Name?",
+          "atMs": 5.699999999254942
+        },
+        null
+      ],
+      "metrics": {
+        "constructionAttempts": 1,
+        "createdWorkers": 1,
+        "terminatedWorkers": 1,
+        "createdUrls": 1,
+        "revokedUrls": 1,
+        "inputPings": 14,
+        "messages": [
+          {
+            "type": "input",
+            "runId": "code-run-2",
+            "requestId": 1
+          },
+          {
+            "type": "input-state",
+            "runId": "code-run-2",
+            "requestId": 1
+          },
+          {
+            "type": "input-pong",
+            "runId": "code-run-2",
+            "requestId": 1,
+            "probeId": 1
+          },
+          {
+            "type": "input-pong",
+            "runId": "code-run-2",
+            "requestId": 1,
+            "probeId": 2
+          },
+          {
+            "type": "input-pong",
+            "runId": "code-run-2",
+            "requestId": 1,
+            "probeId": 3
+          },
+          {
+            "type": "input-pong",
+            "runId": "code-run-2",
+            "requestId": 1,
+            "probeId": 4
+          },
+          {
+            "type": "input-pong",
+            "runId": "code-run-2",
+            "requestId": 1,
+            "probeId": 5
+          },
+          {
+            "type": "input-pong",
+            "runId": "code-run-2",
+            "requestId": 1,
+            "probeId": 6
+          },
+          {
+            "type": "input-pong",
+            "runId": "code-run-2",
+            "requestId": 1,
+            "probeId": 7
+          },
+          {
+            "type": "input-pong",
+            "runId": "code-run-2",
+            "requestId": 1,
+            "probeId": 8
+          },
+          {
+            "type": "input-pong",
+            "runId": "code-run-2",
+            "requestId": 1,
+            "probeId": 9
+          },
+          {
+            "type": "input-pong",
+            "runId": "code-run-2",
+            "requestId": 1,
+            "probeId": 10
+          },
+          {
+            "type": "input-pong",
+            "runId": "code-run-2",
+            "requestId": 1,
+            "probeId": 11
+          },
+          {
+            "type": "input-pong",
+            "runId": "code-run-2",
+            "requestId": 1,
+            "probeId": 12
+          },
+          {
+            "type": "input-pong",
+            "runId": "code-run-2",
+            "requestId": 1,
+            "probeId": 13
+          },
+          {
+            "type": "input-pong",
+            "runId": "code-run-2",
+            "requestId": 1,
+            "probeId": 14
+          },
+          {
+            "type": "out",
+            "runId": "code-run-2",
+            "textLength": 10
+          },
+          {
+            "type": "done",
+            "runId": "code-run-2"
+          }
+        ],
+        "workerErrors": [],
+        "messagesAfterTerminal": 0,
+        "terminal": true
+      },
+      "parentHeartbeats": 88,
+      "lateInputAccepted": false,
+      "documentViolations": [],
+      "failures": [],
+      "pass": true
+    },
+    {
+      "profile": "allowed",
+      "phase": "allowed",
+      "name": "long-input",
+      "engine": "python",
+      "code": "name = input('Name?')\nprint('hello ' + name)\n",
+      "result": {
+        "runId": "code-run-3",
+        "status": "completed",
+        "output": "hello Ada\n",
+        "totalOutputChars": 10,
+        "truncated": false
+      },
+      "wallMs": 951.5,
+      "outputs": [
+        {
+          "text": "hello Ada\n",
+          "runId": "code-run-3",
+          "truncated": false,
+          "reset": false,
+          "atMs": 831.4000000003725
+        }
+      ],
+      "inputs": [
+        {
+          "runId": "code-run-3",
+          "requestId": 1,
+          "prompt": "Name?",
+          "atMs": 79.59999999962747
+        },
+        null
+      ],
+      "metrics": {
+        "constructionAttempts": 1,
+        "createdWorkers": 1,
+        "terminatedWorkers": 1,
+        "createdUrls": 1,
+        "revokedUrls": 1,
+        "inputPings": 14,
+        "messages": [
+          {
+            "type": "input",
+            "runId": "code-run-3",
+            "requestId": 1
+          },
+          {
+            "type": "input-pong",
+            "runId": "code-run-3",
+            "requestId": 1,
+            "probeId": 1
+          },
+          {
+            "type": "input-pong",
+            "runId": "code-run-3",
+            "requestId": 1,
+            "probeId": 2
+          },
+          {
+            "type": "input-pong",
+            "runId": "code-run-3",
+            "requestId": 1,
+            "probeId": 3
+          },
+          {
+            "type": "input-pong",
+            "runId": "code-run-3",
+            "requestId": 1,
+            "probeId": 4
+          },
+          {
+            "type": "input-pong",
+            "runId": "code-run-3",
+            "requestId": 1,
+            "probeId": 5
+          },
+          {
+            "type": "input-pong",
+            "runId": "code-run-3",
+            "requestId": 1,
+            "probeId": 6
+          },
+          {
+            "type": "input-pong",
+            "runId": "code-run-3",
+            "requestId": 1,
+            "probeId": 7
+          },
+          {
+            "type": "input-pong",
+            "runId": "code-run-3",
+            "requestId": 1,
+            "probeId": 8
+          },
+          {
+            "type": "input-pong",
+            "runId": "code-run-3",
+            "requestId": 1,
+            "probeId": 9
+          },
+          {
+            "type": "input-pong",
+            "runId": "code-run-3",
+            "requestId": 1,
+            "probeId": 10
+          },
+          {
+            "type": "input-pong",
+            "runId": "code-run-3",
+            "requestId": 1,
+            "probeId": 11
+          },
+          {
+            "type": "input-pong",
+            "runId": "code-run-3",
+            "requestId": 1,
+            "probeId": 12
+          },
+          {
+            "type": "input-pong",
+            "runId": "code-run-3",
+            "requestId": 1,
+            "probeId": 13
+          },
+          {
+            "type": "input-pong",
+            "runId": "code-run-3",
+            "requestId": 1,
+            "probeId": 14
+          },
+          {
+            "type": "out",
+            "runId": "code-run-3",
+            "textLength": 10
+          },
+          {
+            "type": "done",
+            "runId": "code-run-3"
+          }
+        ],
+        "workerErrors": [],
+        "messagesAfterTerminal": 0,
+        "terminal": true
+      },
+      "parentHeartbeats": 94,
+      "lateInputAccepted": false,
+      "documentViolations": [],
+      "failures": [],
+      "pass": true
+    },
+    {
+      "profile": "allowed",
+      "phase": "allowed",
+      "name": "stop-input",
+      "engine": "javascript",
+      "code": "codeRun.spawn(async task => { await task.input('Waiting?'); console.log('late'); });",
+      "result": {
+        "runId": "code-run-4",
+        "status": "stopped",
+        "output": "",
+        "totalOutputChars": 0,
+        "truncated": false,
+        "reason": "csp-probe-input-stop"
+      },
+      "wallMs": 160.19999999925494,
+      "outputs": [],
+      "inputs": [
+        {
+          "runId": "code-run-4",
+          "requestId": 1,
+          "prompt": "Waiting?",
+          "atMs": 7.099999999627471
+        },
+        null
+      ],
+      "metrics": {
+        "constructionAttempts": 1,
+        "createdWorkers": 1,
+        "terminatedWorkers": 1,
+        "createdUrls": 1,
+        "revokedUrls": 1,
+        "inputPings": 0,
+        "messages": [
+          {
+            "type": "input",
+            "runId": "code-run-4",
+            "requestId": 1
+          },
+          {
+            "type": "input-state",
+            "runId": "code-run-4",
+            "requestId": 1
+          }
+        ],
+        "workerErrors": [],
+        "messagesAfterTerminal": 0,
+        "terminal": true
+      },
+      "parentHeartbeats": 16,
+      "lateInputAccepted": false,
+      "documentViolations": [],
+      "failures": [],
+      "pass": true
+    },
+    {
+      "profile": "allowed",
+      "phase": "allowed",
+      "name": "stop-input",
+      "engine": "python",
+      "code": "input('Waiting?')\nprint('late')\n",
+      "result": {
+        "runId": "code-run-5",
+        "status": "stopped",
+        "output": "",
+        "totalOutputChars": 0,
+        "truncated": false,
+        "reason": "csp-probe-input-stop"
+      },
+      "wallMs": 220.19999999925494,
+      "outputs": [],
+      "inputs": [
+        {
+          "runId": "code-run-5",
+          "requestId": 1,
+          "prompt": "Waiting?",
+          "atMs": 62.90000000037253
+        },
+        null
+      ],
+      "metrics": {
+        "constructionAttempts": 1,
+        "createdWorkers": 1,
+        "terminatedWorkers": 1,
+        "createdUrls": 1,
+        "revokedUrls": 1,
+        "inputPings": 0,
+        "messages": [
+          {
+            "type": "input",
+            "runId": "code-run-5",
+            "requestId": 1
+          }
+        ],
+        "workerErrors": [],
+        "messagesAfterTerminal": 0,
+        "terminal": true
+      },
+      "parentHeartbeats": 22,
+      "lateInputAccepted": false,
+      "documentViolations": [],
+      "failures": [],
+      "pass": true
+    },
+    {
+      "profile": "allowed",
+      "phase": "allowed",
+      "name": "stop-busy-worker",
+      "engine": "javascript",
+      "code": "console.log('x'.repeat(4096)); while (true) {}",
+      "result": {
+        "runId": "code-run-6",
+        "status": "stopped",
+        "output": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n",
+        "totalOutputChars": 4097,
+        "truncated": false,
+        "reason": "csp-probe-output-stop"
+      },
+      "wallMs": 140.2000000011176,
+      "outputs": [
+        {
+          "text": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n",
+          "runId": "code-run-6",
+          "truncated": false,
+          "reset": false,
+          "atMs": 16.5
+        }
+      ],
+      "inputs": [],
+      "metrics": {
+        "constructionAttempts": 1,
+        "createdWorkers": 1,
+        "terminatedWorkers": 1,
+        "createdUrls": 1,
+        "revokedUrls": 1,
+        "inputPings": 0,
+        "messages": [
+          {
+            "type": "out",
+            "runId": "code-run-6",
+            "textLength": 4096
+          },
+          {
+            "type": "out",
+            "runId": "code-run-6",
+            "textLength": 1
+          }
+        ],
+        "workerErrors": [],
+        "messagesAfterTerminal": 0,
+        "terminal": true
+      },
+      "parentHeartbeats": 14,
+      "lateInputAccepted": null,
+      "documentViolations": [],
+      "failures": [],
+      "pass": true
+    },
+    {
+      "profile": "allowed",
+      "phase": "allowed",
+      "name": "output-limit",
+      "engine": "javascript",
+      "code": "globalThis.oldRun = 42; while (true) console.log('x'.repeat(100));",
+      "result": {
+        "runId": "code-run-7",
+        "status": "output-limit",
+        "output": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nxxxxxxxxxxxxxx",
+        "totalOutputChars": 1024,
+        "truncated": true
+      },
+      "wallMs": 130.2000000011176,
+      "outputs": [
+        {
+          "text": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nxxxxxxxxxxxxxx",
+          "runId": "code-run-7",
+          "truncated": true,
+          "reset": false,
+          "atMs": 7.700000001117587
+        }
+      ],
+      "inputs": [],
+      "metrics": {
+        "constructionAttempts": 1,
+        "createdWorkers": 1,
+        "terminatedWorkers": 1,
+        "createdUrls": 1,
+        "revokedUrls": 1,
+        "inputPings": 0,
+        "messages": [
+          {
+            "type": "out",
+            "runId": "code-run-7",
+            "textLength": 1024
+          },
+          {
+            "type": "output-limit",
+            "runId": "code-run-7"
+          }
+        ],
+        "workerErrors": [],
+        "messagesAfterTerminal": 0,
+        "terminal": true
+      },
+      "parentHeartbeats": 13,
+      "lateInputAccepted": null,
+      "documentViolations": [],
+      "failures": [],
+      "pass": true
+    },
+    {
+      "profile": "allowed",
+      "phase": "allowed",
+      "name": "fresh-worker-after-limit",
+      "engine": "javascript",
+      "code": "console.log(typeof oldRun);",
+      "result": {
+        "runId": "code-run-8",
+        "status": "completed",
+        "output": "undefined\n",
+        "totalOutputChars": 10,
+        "truncated": false
+      },
+      "wallMs": 130.10000000149012,
+      "outputs": [
+        {
+          "text": "undefined\n",
+          "runId": "code-run-8",
+          "truncated": false,
+          "reset": false,
+          "atMs": 5.800000000745058
+        }
+      ],
+      "inputs": [],
+      "metrics": {
+        "constructionAttempts": 1,
+        "createdWorkers": 1,
+        "terminatedWorkers": 1,
+        "createdUrls": 1,
+        "revokedUrls": 1,
+        "inputPings": 0,
+        "messages": [
+          {
+            "type": "out",
+            "runId": "code-run-8",
+            "textLength": 10
+          },
+          {
+            "type": "done",
+            "runId": "code-run-8"
+          }
+        ],
+        "workerErrors": [],
+        "messagesAfterTerminal": 0,
+        "terminal": true
+      },
+      "parentHeartbeats": 13,
+      "lateInputAccepted": null,
+      "documentViolations": [],
+      "failures": [],
+      "pass": true
+    },
+    {
+      "profile": "worker-denied",
+      "phase": "worker-denied",
+      "name": "normal",
+      "engine": "javascript",
+      "code": "console.log('hello');",
+      "result": {
+        "runId": "code-run-1",
+        "status": "error",
+        "output": "",
+        "totalOutputChars": 0,
+        "truncated": false,
+        "error": "Worker error"
+      },
+      "wallMs": 121.80000000074506,
+      "outputs": [],
+      "inputs": [],
+      "metrics": {
+        "constructionAttempts": 1,
+        "createdWorkers": 1,
+        "terminatedWorkers": 1,
+        "createdUrls": 1,
+        "revokedUrls": 1,
+        "inputPings": 0,
+        "messages": [],
+        "workerErrors": [
+          {
+            "message": null
+          }
+        ],
+        "messagesAfterTerminal": 0,
+        "terminal": true
+      },
+      "parentHeartbeats": 12,
+      "lateInputAccepted": null,
+      "documentViolations": [
+        {
+          "effectiveDirective": "worker-src",
+          "violatedDirective": "worker-src",
+          "blockedURI": "blob",
+          "disposition": "enforce",
+          "originalPolicy": "default-src 'none'; script-src 'self' 'unsafe-eval'; worker-src 'none'; connect-src 'self'; base-uri 'none'; object-src 'none'; report-uri /csp-report?profile=worker-denied"
+        }
+      ],
+      "failures": [],
+      "pass": true
+    },
+    {
+      "profile": "worker-denied",
+      "phase": "worker-denied",
+      "name": "normal",
+      "engine": "python",
+      "code": "print('hello')\n",
+      "result": {
+        "runId": "code-run-2",
+        "status": "error",
+        "output": "",
+        "totalOutputChars": 0,
+        "truncated": false,
+        "error": "Worker error"
+      },
+      "wallMs": 140.19999999925494,
+      "outputs": [],
+      "inputs": [],
+      "metrics": {
+        "constructionAttempts": 1,
+        "createdWorkers": 1,
+        "terminatedWorkers": 1,
+        "createdUrls": 1,
+        "revokedUrls": 1,
+        "inputPings": 0,
+        "messages": [],
+        "workerErrors": [
+          {
+            "message": null
+          }
+        ],
+        "messagesAfterTerminal": 0,
+        "terminal": true
+      },
+      "parentHeartbeats": 14,
+      "lateInputAccepted": null,
+      "documentViolations": [
+        {
+          "effectiveDirective": "worker-src",
+          "violatedDirective": "worker-src",
+          "blockedURI": "blob",
+          "disposition": "enforce",
+          "originalPolicy": "default-src 'none'; script-src 'self' 'unsafe-eval'; worker-src 'none'; connect-src 'self'; base-uri 'none'; object-src 'none'; report-uri /csp-report?profile=worker-denied"
+        }
+      ],
+      "failures": [],
+      "pass": true
+    },
+    {
+      "profile": "eval-denied",
+      "phase": "eval-denied",
+      "name": "normal",
+      "engine": "javascript",
+      "code": "console.log('hello');",
+      "result": {
+        "runId": "code-run-1",
+        "status": "error",
+        "output": "",
+        "totalOutputChars": 0,
+        "truncated": false,
+        "error": "EvalError: Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: script-src 'self'\".\n\n    at new Function (<anonymous>)\n    at execute (blob:http://127.0.0.1:37503/8cea0e8c-dac0-4d27-afaa-d9980eaf7039:91:51)\n    at blob:http://127.0.0.1:37503/8cea0e8c-dac0-4d27-afaa-d9980eaf7039:301:53"
+      },
+      "wallMs": 130.30000000074506,
+      "outputs": [],
+      "inputs": [],
+      "metrics": {
+        "constructionAttempts": 1,
+        "createdWorkers": 1,
+        "terminatedWorkers": 1,
+        "createdUrls": 1,
+        "revokedUrls": 1,
+        "inputPings": 0,
+        "messages": [
+          {
+            "type": "error",
+            "runId": "code-run-1",
+            "textLength": 381
+          }
+        ],
+        "workerErrors": [],
+        "messagesAfterTerminal": 0,
+        "terminal": true
+      },
+      "parentHeartbeats": 13,
+      "lateInputAccepted": null,
+      "documentViolations": [],
+      "failures": [],
+      "pass": true
+    },
+    {
+      "profile": "eval-denied",
+      "phase": "eval-denied",
+      "name": "normal",
+      "engine": "python",
+      "code": "print('hello')\n",
+      "result": {
+        "runId": "code-run-2",
+        "status": "error",
+        "output": "",
+        "totalOutputChars": 0,
+        "truncated": false,
+        "error": "EvalError: Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: script-src 'self'\".\n\n    at eval (<anonymous>)\n    at Arguments.<anonymous> (blob:http://127.0.0.1:37503/414a561d-1cd8-4ab2-a495-f26748152d32:1000:179)\n    at Sk.misceval.chain (blob:http://127.0.0.1:37503/414a561d-1cd8-4ab2-a495-f26748152d32:417:454)\n    at Arguments.<anonymous> (blob:http://127.0.0.1:37503/414a561d-1cd8-4ab2-a495-f26748152d32:997:390)\n    at Sk.misceval.chain (blob:http://127.0.0.1:37503/414a561d-1cd8-4ab2-a495-f26748152d32:417:454)\n    at Sk.importModuleInternal_ (blob:http://127.0.0.1:37503/414a561d-1cd8-4ab2-a495-f26748152d32:997:279)\n    at Sk.importMainWithBody (blob:http://127.0.0.1:37503/414a561d-1cd8-4ab2-a495-f26748152d32:1002:344)\n    at blob:http://127.0.0.1:37503/414a561d-1cd8-4ab2-a495-f26748152d32:1167:23\n    at blob:http://127.0.0.1:37503/414a561d-1cd8-4ab2-a495-f26748152d32:417:24\n    at new Promise (<anonymous>)"
+      },
+      "wallMs": 200.2000000011176,
+      "outputs": [],
+      "inputs": [],
+      "metrics": {
+        "constructionAttempts": 1,
+        "createdWorkers": 1,
+        "terminatedWorkers": 1,
+        "createdUrls": 1,
+        "revokedUrls": 1,
+        "inputPings": 0,
+        "messages": [
+          {
+            "type": "error",
+            "runId": "code-run-2",
+            "textLength": 1019
+          }
+        ],
+        "workerErrors": [],
+        "messagesAfterTerminal": 0,
+        "terminal": true
+      },
+      "parentHeartbeats": 20,
+      "lateInputAccepted": null,
+      "documentViolations": [],
+      "failures": [],
+      "pass": true
+    },
+    {
+      "profile": "allowed",
+      "phase": "allowed-after-denial",
+      "name": "normal",
+      "engine": "javascript",
+      "code": "console.log('hello');",
+      "result": {
+        "runId": "code-run-1",
+        "status": "completed",
+        "output": "hello\n",
+        "totalOutputChars": 6,
+        "truncated": false
+      },
+      "wallMs": 130.2000000011176,
+      "outputs": [
+        {
+          "text": "hello\n",
+          "runId": "code-run-1",
+          "truncated": false,
+          "reset": false,
+          "atMs": 6.5
+        }
+      ],
+      "inputs": [],
+      "metrics": {
+        "constructionAttempts": 1,
+        "createdWorkers": 1,
+        "terminatedWorkers": 1,
+        "createdUrls": 1,
+        "revokedUrls": 1,
+        "inputPings": 0,
+        "messages": [
+          {
+            "type": "out",
+            "runId": "code-run-1",
+            "textLength": 6
+          },
+          {
+            "type": "done",
+            "runId": "code-run-1"
+          }
+        ],
+        "workerErrors": [],
+        "messagesAfterTerminal": 0,
+        "terminal": true
+      },
+      "parentHeartbeats": 13,
+      "lateInputAccepted": null,
+      "documentViolations": [],
+      "failures": [],
+      "pass": true
+    },
+    {
+      "profile": "allowed",
+      "phase": "allowed-after-denial",
+      "name": "normal",
+      "engine": "python",
+      "code": "print('hello')\n",
+      "result": {
+        "runId": "code-run-2",
+        "status": "completed",
+        "output": "hello\n",
+        "totalOutputChars": 6,
+        "truncated": false
+      },
+      "wallMs": 190.40000000037253,
+      "outputs": [
+        {
+          "text": "hello\n",
+          "runId": "code-run-2",
+          "truncated": false,
+          "reset": false,
+          "atMs": 67.90000000037253
+        }
+      ],
+      "inputs": [],
+      "metrics": {
+        "constructionAttempts": 1,
+        "createdWorkers": 1,
+        "terminatedWorkers": 1,
+        "createdUrls": 1,
+        "revokedUrls": 1,
+        "inputPings": 0,
+        "messages": [
+          {
+            "type": "out",
+            "runId": "code-run-2",
+            "textLength": 6
+          },
+          {
+            "type": "done",
+            "runId": "code-run-2"
+          }
+        ],
+        "workerErrors": [],
+        "messagesAfterTerminal": 0,
+        "terminal": true
+      },
+      "parentHeartbeats": 19,
+      "lateInputAccepted": null,
+      "documentViolations": [],
+      "failures": [],
+      "pass": true
+    }
+  ],
+  "pageErrors": [],
+  "consoleErrors": [
+    {
+      "profile": "worker-denied",
+      "text": "Creating a worker from 'blob:http://127.0.0.1:37503/e60845ff-9a00-454d-be5a-a6b1a0f7c6d8' violates the following Content Security Policy directive: \"worker-src 'none'\". The action has been blocked."
+    },
+    {
+      "profile": "worker-denied",
+      "text": "Creating a worker from 'blob:http://127.0.0.1:37503/9c1668cc-cf49-48bb-ad55-5e22aaccb362' violates the following Content Security Policy directive: \"worker-src 'none'\". The action has been blocked."
+    }
+  ],
+  "cspReports": [
+    {
+      "profile": "worker-denied",
+      "report": {
+        "csp-report": {
+          "document-uri": "http://127.0.0.1:37503/?profile=worker-denied",
+          "referrer": "",
+          "violated-directive": "worker-src",
+          "effective-directive": "worker-src",
+          "original-policy": "default-src 'none'; script-src 'self' 'unsafe-eval'; worker-src 'none'; connect-src 'self'; base-uri 'none'; object-src 'none'; report-uri /csp-report?profile=worker-denied",
+          "disposition": "enforce",
+          "blocked-uri": "blob",
+          "line-number": 52,
+          "column-number": 34,
+          "source-file": "http://127.0.0.1:37503/harness.mjs",
+          "status-code": 200,
+          "script-sample": ""
+        }
+      }
+    },
+    {
+      "profile": "eval-denied",
+      "report": {
+        "csp-report": {
+          "document-uri": "blob",
+          "referrer": "",
+          "violated-directive": "script-src",
+          "effective-directive": "script-src",
+          "original-policy": "default-src 'none'; script-src 'self'; worker-src blob:; connect-src 'self'; base-uri 'none'; object-src 'none'; report-uri /csp-report?profile=eval-denied",
+          "disposition": "enforce",
+          "blocked-uri": "eval",
+          "line-number": 91,
+          "column-number": 51,
+          "source-file": "blob",
+          "status-code": 0,
+          "script-sample": ""
+        }
+      }
+    },
+    {
+      "profile": "eval-denied",
+      "report": {
+        "csp-report": {
+          "document-uri": "blob",
+          "referrer": "",
+          "violated-directive": "script-src",
+          "effective-directive": "script-src",
+          "original-policy": "default-src 'none'; script-src 'self'; worker-src blob:; connect-src 'self'; base-uri 'none'; object-src 'none'; report-uri /csp-report?profile=eval-denied",
+          "disposition": "enforce",
+          "blocked-uri": "eval",
+          "line-number": 12,
+          "column-number": 452,
+          "source-file": "blob",
+          "status-code": 0,
+          "script-sample": ""
+        }
+      }
+    },
+    {
+      "profile": "eval-denied",
+      "report": {
+        "csp-report": {
+          "document-uri": "blob",
+          "referrer": "",
+          "violated-directive": "script-src",
+          "effective-directive": "script-src",
+          "original-policy": "default-src 'none'; script-src 'self'; worker-src blob:; connect-src 'self'; base-uri 'none'; object-src 'none'; report-uri /csp-report?profile=eval-denied",
+          "disposition": "enforce",
+          "blocked-uri": "eval",
+          "line-number": 1000,
+          "column-number": 179,
+          "source-file": "blob",
+          "status-code": 0,
+          "script-sample": ""
+        }
+      }
+    }
+  ],
+  "servedRequests": [
+    {
+      "path": "/harness.mjs",
+      "bytes": 9684
+    },
+    {
+      "path": "/code-execution-session.js",
+      "bytes": 14124
+    },
+    {
+      "path": "/code-execution-workers.js",
+      "bytes": 16537
+    },
+    {
+      "path": "/skulpt.min.js",
+      "bytes": 559460
+    },
+    {
+      "path": "/skulpt-stdlib.js",
+      "bytes": 407300
+    },
+    {
+      "path": "/harness.mjs",
+      "bytes": 9684
+    },
+    {
+      "path": "/code-execution-session.js",
+      "bytes": 14124
+    },
+    {
+      "path": "/code-execution-workers.js",
+      "bytes": 16537
+    },
+    {
+      "path": "/skulpt.min.js",
+      "bytes": 559460
+    },
+    {
+      "path": "/skulpt-stdlib.js",
+      "bytes": 407300
+    },
+    {
+      "path": "/harness.mjs",
+      "bytes": 9684
+    },
+    {
+      "path": "/code-execution-session.js",
+      "bytes": 14124
+    },
+    {
+      "path": "/code-execution-workers.js",
+      "bytes": 16537
+    },
+    {
+      "path": "/skulpt.min.js",
+      "bytes": 559460
+    },
+    {
+      "path": "/skulpt-stdlib.js",
+      "bytes": 407300
+    },
+    {
+      "path": "/harness.mjs",
+      "bytes": 9684
+    },
+    {
+      "path": "/code-execution-session.js",
+      "bytes": 14124
+    },
+    {
+      "path": "/code-execution-workers.js",
+      "bytes": 16537
+    },
+    {
+      "path": "/skulpt.min.js",
+      "bytes": 559460
+    },
+    {
+      "path": "/skulpt-stdlib.js",
+      "bytes": 407300
+    },
+    {
+      "path": "/harness.mjs",
+      "bytes": 9684
+    },
+    {
+      "path": "/code-execution-session.js",
+      "bytes": 14124
+    },
+    {
+      "path": "/code-execution-workers.js",
+      "bytes": 16537
+    },
+    {
+      "path": "/skulpt.min.js",
+      "bytes": 559460
+    },
+    {
+      "path": "/skulpt-stdlib.js",
+      "bytes": 407300
+    }
+  ],
+  "negativeEvidence": [
+    {
+      "profile": "worker-denied",
+      "expectedDirective": "worker-src",
+      "matchingReportCount": 1,
+      "documentEventCount": 2,
+      "failures": [],
+      "pass": true
+    },
+    {
+      "profile": "eval-denied",
+      "expectedDirective": "script-src",
+      "matchingReportCount": 3,
+      "documentEventCount": 0,
+      "failures": [],
+      "pass": true
+    }
+  ],
+  "summary": {
+    "passed": 16,
+    "total": 16,
+    "failed": [],
+    "negativeEvidencePassed": 2,
+    "negativeEvidenceTotal": 2
+  }
+}

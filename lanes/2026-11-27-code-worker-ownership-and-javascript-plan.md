@@ -105,3 +105,12 @@ adds scoped tasks and repairs the reproduced input-watchdog gap. Its 139 focused
 controls and 38-case production-worker/browser receipt supersede coverage only
 for those named sources and behaviors. Its required hosted qualification and
 normal supplier adoption remain pending.
+
+The next published continuation preserves those production sources, reruns all
+139 controls, and records a 39-case generator/worker successor plus 16 real
+default-factory CSP cases and two enforced denial controls. The supplier repairs
+Boolean reporters in admitted value sockets with 201 passing focused controls;
+the worker probe executes that exact published generator. See the owned-task
+claim and section 8.2.1 of the runtime plan for receipts and the inherited
+supplier RF failure. Rendered application/deployment and native qualification
+remain open; these browser loading checks do not replace them.

@@ -301,3 +301,55 @@ These controls and the static browser harness do not qualify the rendered React
 application, production CSP, Scratch game semantics, other browsers or native
 platforms. The generator option remains opt-in upstream and is not selected by
 Brickwright's current Code tab or vendored dependency pin.
+
+### Boolean-value successor and default factory under CSP
+
+`session-console-values-browser-results.json` preserves a **39/39 passing**
+successor to the task receipt, with zero page errors. It executes supplier
+`cbdf179160a3f3054872d045503659967bd1b72e`, including a fourth canonical program
+whose comparison reporter occupies an ordinary `say` value socket. The receipt
+stores the actual SB3 graph and its transformation from the readable source seed;
+the required output is `true`, while the former emitter produced `undefined`.
+Production consumer sources are unchanged. Reproduce without replacing earlier
+receipts:
+
+```sh
+TMPDIR="$PWD/tmp" node session-browser-probe.mjs \
+  --generator-root=/absolute/path/to/sb3-creator \
+  --output=session-console-values-browser-rerun.json
+```
+
+`session-csp-browser-probe.mjs` separately exercises the **default production
+Blob-worker factory**, with real HTTP CSP and an external module harness. It
+observes Worker construction/termination and URL creation/revocation through
+call-through wrappers; it does not inject `createWorker`, replace the transport,
+rewrite production sources or bypass browser policy. The new
+`session-csp-browser-results.json` passes **16/16** cases and **2/2** enforced
+denial profiles, with zero page errors:
+
+| Policy | Observed behavior |
+| --- | --- |
+| No CSP | JavaScript and Skulpt complete normally. |
+| Blob workers and dynamic compilation permitted | Owned completion, long input, Stop, output limits, cleanup and fresh state pass. |
+| `worker-src 'none'` | Both languages fail explicitly with no learner effects; document events and HTTP reports confirm enforcement. |
+| Dynamic compilation denied | Both languages fail with CSP/EvalError diagnostics; worker-side HTTP reports identify blocked evaluation. |
+| Permitted document after denial | Both languages recover in the same browser/context after navigation. |
+
+Every constructed worker is terminated once and every Blob URL is revoked once.
+Late input is rejected; a 120 ms quiet window observes no post-settlement worker
+messages. Expected policy violations are recorded as console errors and reports,
+separately from unexpected page errors. Worker-src denial currently produces a
+generic `Worker error` session diagnostic in Chromium; detailed policy attribution
+comes from the observed violation evidence.
+
+```sh
+TMPDIR="$PWD/tmp" node session-csp-browser-probe.mjs \
+  --output=session-csp-browser-rerun.json
+```
+
+The same `--app-root`, `--runtime-probe-dir` and `--browser` selectors are
+available. Source, probe, harness, lockfile and configuration hashes are recorded.
+The Tauri configuration is only inspected; the no-CSP profile is not native-host
+execution. These explicit localhost policies do not qualify deployed headers,
+the rendered React application, app protocols, offline delivery, other browsers
+or native/mobile WebViews. No dependency or application policy changes are made.
