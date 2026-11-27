@@ -30,4 +30,6 @@ The receipt records source conversion warnings, asset adaptations, compiler diag
 - Arcade delivers a typed answer back to the Scratch script. The Complete Game demo compiles and boots with its game-over prompt and answer comparison intact.
 - Sigil Grid accepted the upper-left tap and the solo rival placed its reply in the center. This verifies the opening and reply. The original forced-win and replay acceptance checks still apply.
 
+- Color and ghost effects use Arcade’s palette and dithered transparency. The browser test rotated a red costume’s hue and verified 32 tinted and 32 transparent pixels in the 8×8 sprite. This is a palette rendering approximation.
+
 Open items include each game’s complete victory, loss and restart sequence on the exported runtime, alongside any refusal recorded by the current census. Palette conversion, embedded audio fidelity and hardware input parity need separate evidence.

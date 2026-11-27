@@ -125,6 +125,41 @@ function _scratchPoseCostume (s: Sprite) {
     s.data["_bwScratchFlipped"] = false
     _scratchPoint(s, _scratchDirection(s))
 }`},
+    scratchEffects: {deps: ['scratchPose'], ts: `function _scratchRenderEffects (s: Sprite, hueTable: number[][]) {
+    const raw = s.data["_bwScratchRawArt"] as Image
+    const hue = s.data["_bwScratchHue"] || 0
+    const ghost = s.data["_bwScratchGhost"] || 0
+    const result = hue || ghost ? raw.clone() : raw
+    if (hue || ghost) {
+        const shift = ((hue % 200) + 200) % 200
+        const colours = hueTable[Math.round(shift * hueTable.length / 200) % hueTable.length]
+        const threshold = Math.round(16 * (100 - ghost) / 100)
+        const dither = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5]
+        for (let y = 0; y < raw.height; y++) {
+            for (let x = 0; x < raw.width; x++) {
+                const pixel = raw.getPixel(x, y)
+                if (pixel) result.setPixel(x, y, dither[(y % 4) * 4 + x % 4] < threshold ? colours[pixel] : 0)
+            }
+        }
+    }
+    s.setImage(result)
+    if (s.data["_bwScratchRotationStyle"]) _scratchPoseCostume(s)
+}
+function _scratchEffectsCostume (s: Sprite, hueTable: number[][]) {
+    s.data["_bwScratchRawArt"] = s.image
+    _scratchRenderEffects(s, hueTable)
+}
+function _scratchSetEffect (s: Sprite, key: string, by: number, delta: boolean, hueTable: number[][]) {
+    let value = (delta ? s.data[key] || 0 : 0) + by
+    if (key === "_bwScratchGhost") value = Math.clamp(0, 100, value)
+    s.data[key] = value
+    _scratchRenderEffects(s, hueTable)
+}
+function _scratchClearEffects (s: Sprite, hueTable: number[][]) {
+    s.data["_bwScratchGhost"] = 0
+    s.data["_bwScratchHue"] = 0
+    _scratchRenderEffects(s, hueTable)
+}`},
     costume: {deps: [], ts: `function _costume (s: Sprite): number {
     const c = s.data["_c"]
     return c ? c : 0
