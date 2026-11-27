@@ -296,7 +296,11 @@ during ordinary parameter transfer, before the bridge runs.
 The interpreter records the caller after evaluating its arguments, so a nested
 simulation call in an argument cannot replace the outer operation's diagnostic
 location. Domain errors in a library wrapper are attributed to its authored
-call site. An unexpected error in hidden library internals reports
+call site. Calls inside `EVAL` retain the enclosing authored expression's
+location across multiple replies and nested evaluations. A scoped source
+origin is restored on both normal return and error/`END`/`QUIT` unwinding;
+an authored function called by `EVAL` still reports its own body location.
+An unexpected error in hidden library internals reports
 `basicLine: 0` and no editor line instead of falsely identifying a user line
 with the same number.
 

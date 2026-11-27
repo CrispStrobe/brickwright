@@ -178,6 +178,92 @@ test('nested argument requests cannot replace the outer callsite in a simulation
     assert.equal(result.error.filename, 'nested.bas');
 });
 
+test('EVAL simulation errors map simple, sequential and nested expressions to their enclosing source', async t => {
+    const session = sessionFor(t, {simulation: {createHost: () => createSimulationHost()}});
+    for (const expression of [
+        'FNdigitalRead(0)',
+        'FNmillis+FNdigitalRead(0)',
+        'EVAL("FNdigitalRead(0)")'
+    ]) {
+        const source = '100 REM EVAL callsite\n\n450 PRINT EVAL("' + expression.replaceAll('"', '""') + '")\n';
+        const result = await session.run(source, {filename: 'eval-origin.bas'});
+        assert.equal(result.status, 'error', `${expression}: ${JSON.stringify(result.error)}`);
+        assert.equal(result.error.code, 206);
+        assert.equal(result.error.simulationCode, 'floating-input');
+        assert.equal(result.error.basicLine, 450, expression);
+        assert.equal(result.error.line, 3, expression);
+        assert.equal(result.error.filename, 'eval-origin.bas');
+    }
+});
+
+test('EVAL origin unwinds through a local error handler before the outer expression fails', async t => {
+    const session = sessionFor(t, {simulation: {createHost: () => createSimulationHost()}});
+    const result = await session.run(`100 PRINT EVAL("FNcaught+FNdigitalRead(0)")
+200 END
+400 DEF FNcaught
+410 LOCAL saved%
+420 saved%=17
+430 ON ERROR LOCAL PRINT "caught:"+STR$(ERR)+":"+STR$(saved%):=7
+450 PRINT EVAL("EVAL(""FNdigitalRead(1)"")")
+460 =0
+`, {filename: 'eval-unwind.bas'});
+    assert.equal(result.status, 'error', JSON.stringify(result.error));
+    assert.equal(result.text, 'caught:206:17\r\n');
+    assert.equal(result.error.code, 206);
+    assert.equal(result.error.simulationCode, 'floating-input');
+    assert.equal(result.error.basicLine, 100, 'the completed nested EVAL must not retain its source origin');
+    assert.equal(result.error.line, 1);
+    assert.equal(result.error.filename, 'eval-unwind.bas');
+});
+
+test('EVAL retains an authored FN body location when the error occurs in that body', async t => {
+    const session = sessionFor(t, {simulation: {createHost: () => createSimulationHost()}});
+    const result = await session.run('100 PRINT EVAL("FNbad")\n200 END\n400 DEF FNbad\n450 =FNdigitalRead(0)\n', {
+        filename: 'eval-body.bas'
+    });
+    assert.equal(result.status, 'error', JSON.stringify(result.error));
+    assert.equal(result.error.code, 206);
+    assert.equal(result.error.simulationCode, 'floating-input');
+    assert.equal(result.error.basicLine, 450, 'an outer EVAL must not replace a real authored body location');
+    assert.equal(result.error.line, 4);
+    assert.equal(result.error.filename, 'eval-body.bas');
+});
+
+test('EVAL recursive success preserves locals through delayed simulation replies', async t => {
+    let calls = 0;
+    const session = sessionFor(t, {simulation: {createHost() {
+        const host = createSimulationHost();
+        return adapterFor(host, {
+            async delay(milliseconds) { calls++; await delay(3); host.delay(milliseconds); },
+            async millis() { calls++; await delay(3); return host.millis(); }
+        });
+    }}});
+    const result = await session.run(`PRINT STR$(FNwalk(4))
+END
+DEF FNwalk(depth%)
+LOCAL before%, value%
+before%=FNmillis
+PROCdelay(2)
+IF depth%=0 THEN =FNmillis-before%
+value%=EVAL("FNwalk(depth%-1)")
+=value%+FNmillis-before%
+`);
+    assert.equal(result.status, 'completed', JSON.stringify(result.error));
+    assert.equal(result.text, '30\r\n');
+    assert.equal(calls, 15);
+});
+
+test('EVAL forwards END and QUIT through every nested expression frame', async t => {
+    const session = sessionFor(t, {simulation: {createHost: () => createSimulationHost()}});
+    for (const [statement, exitCode] of [['END', 0], ['QUIT 17', 17]]) {
+        const result = await session.run('PRINT EVAL("EVAL(""FNfinish"")")\nPRINT "unreachable"\nEND\nDEF FNfinish\n' +
+            statement + '\n=99\n');
+        assert.equal(result.status, 'completed', `${statement}: ${JSON.stringify(result.error)}`);
+        assert.equal(result.exitCode, exitCode);
+        assert.equal(result.text, '');
+    }
+});
+
 test('the simulation library is opt-in and does not reserve public BASIC function names', async t => {
     const ordinary = sessionFor(t);
     const unavailable = await ordinary.run('PRINT STR$(FNmillis)\nEND\n');

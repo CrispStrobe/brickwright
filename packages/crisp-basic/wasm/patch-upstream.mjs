@@ -76,8 +76,15 @@ export function patchWasmUpstream(path, original) {
             replace(before, before + '\n\t\t\t\t\t\terror (255, "Host event handlers are not available in the CrispBASIC WASM backend");');
         }
     } else if (path === 'src/bbeval.c') {
-        replace('#include "BBC.h"', '#include "BBC.h"\nint crisp_simulation_function(VAR *);');
+        replace('#include "BBC.h"', '#include "BBC.h"\nint crisp_simulation_function(VAR *);\nheapptr crisp_simulation_origin(signed char *);\nVAR crisp_simulation_eval(heapptr);');
         replace('case TFN:\n', 'case TFN:\n\t\t\tif (crisp_simulation_function(&v)) return v;\n');
+        // EVAL's tokens live on the BASIC stack, and ENDFN can leave curlin
+        // pointing there. Scope a stable authored origin across the entire
+        // expression, restoring it even when an error/END/QUIT longjmps out.
+        replace('signed char *oldesi ;\n\t\t\theapptr *oldesp ;\n\t\t\tv = items () ;',
+            'signed char *oldesi ;\n\t\t\theapptr *oldesp ;\n\t\t\theapptr crisp_eval_origin = crisp_simulation_origin(esi - 1);\n\t\t\tv = items () ;');
+        replace('esi = (signed char *) esp ;\n\t\t\tv = expr () ;\n\t\t\tesi = oldesi ;',
+            'esi = (signed char *) esp ;\n\t\t\tv = crisp_simulation_eval(crisp_eval_origin);\n\t\t\tesi = oldesi ;');
         deny('TUSR', 'USR');
         deny('TSYS', 'SYS');
         // Unary ^ returns an address; binary exponentiation is unaffected.

@@ -45,11 +45,24 @@ node --test test/crispbasic-assets.test.mjs \
 
 ### Compiler and browser qualification
 
-Qualification of this revision is pending. The previous integration commit's
-[workflow run](https://github.com/CrispStrobe/brickwright/actions/runs/46053771626)
-completed successfully; it does not qualify the new bridge. The workflow now
-picks up the additional tests through the package's `test` and `test:wasm`
-commands, alongside the existing native, parity, browser and GUI suites.
+The initial bridge commit `3357efb0bb2742852a75a4b8a1d2448a88d69c75`
+passed [both workflow jobs](https://github.com/CrispStrobe/brickwright/actions/runs/46060839892):
+99 source/host/protocol tests, 41 native/CLI, 142 WASM/policy/simulation, 10
+native/WASM parity, 17 Chromium worker, 65 GUI/generated-source/packaging and
+8 staged editor browser tests: **382 passed, zero failures or skips**.
+The run used Ubuntu 24.04, Node 22.23.5 and Emscripten 3.1.64. The downloaded
+214711-byte WASM artifact passed packaging's source, import and digest checks
+locally, and the standalone simulation example produced its expected pin/time
+trace.
+
+Additional real-artifact probes then found that bridge errors inside `EVAL`
+lost the enclosing authored line. The follow-up scopes an authored origin
+across EVAL's temporary token buffer and restores it while forwarding errors,
+`END` and `QUIT`. Two targeted regression tests reproduce the missing locations
+against the initial artifact. Three companion tests establish recursive delayed
+replies, user-function body locations and exit forwarding. One Chromium case
+also checks the EVAL error location after delayed replies. This follow-up's
+compiler/runtime qualification is pending a fresh workflow build.
 
 ## Brickwright integration milestone
 

@@ -9,6 +9,7 @@
 #include <string.h>
 #include <limits.h>
 #include <math.h>
+#include <setjmp.h>
 #include "BBC.h"
 #include "crisp-host.h"
 
@@ -30,6 +31,8 @@ extern VAR expr(void);
 extern signed char nxt(void);
 extern void comma(void);
 extern void braket(void);
+extern unsigned short setlin(signed char *, char **);
+extern jmp_buf env;
 
 void *userRAM, *progRAM;
 static void *userTOP;
@@ -55,6 +58,7 @@ static const unsigned char simulation_source[] =
 static unsigned char simulation_library[4096];
 static int simulation_enabled;
 static heapptr simulation_callsite;
+static heapptr simulation_eval_origin;
 
 int crisp_simulation_abi(void) { return 1; }
 
@@ -65,13 +69,50 @@ static int in_simulation_library(const signed char *address)
         pointer < (uintptr_t)simulation_library + sizeof(simulation_library);
 }
 
+/* EVAL executes tokenized text on BASIC's stack, outside either source area.
+ * Prefer an actual authored address (including a user FN body called by EVAL),
+ * then the dynamically scoped EVAL caller. Never retain a temporary token
+ * pointer as source identity. The disabled profile needs no provenance scope. */
+heapptr crisp_simulation_origin(signed char *address)
+{
+    if (!simulation_enabled) return 0;
+    if (in_simulation_library(address)) return simulation_callsite;
+    if (setlin(address, NULL)) return (heapptr)(address - (signed char *)zero);
+    return simulation_eval_origin;
+}
+
+/* EVAL's origin is captured before its string argument is evaluated. Its
+ * nested expression may suspend, call other functions/EVALs, or longjmp to an
+ * ON ERROR handler. Forward every nonzero jump only after restoring the old
+ * environment and numeric origin; no pointer to an unwound C frame survives.
+ * This guard adds no BASIC error handler and preserves the original jump code. */
+VAR crisp_simulation_eval(heapptr origin)
+{
+    if (!simulation_enabled) return expr();
+    const heapptr previous = simulation_eval_origin;
+    jmp_buf saved_env;
+    memcpy(&saved_env, &env, sizeof(env));
+    simulation_eval_origin = origin;
+    int code = setjmp(env);
+    if (code) {
+        simulation_eval_origin = previous;
+        memcpy(&env, &saved_env, sizeof(env));
+        longjmp(env, code);
+    }
+    VAR result = expr();
+    simulation_eval_origin = previous;
+    memcpy(&env, &saved_env, sizeof(env));
+    curlin = origin;
+    return result;
+}
+
 /* Called after ordinary PROC/FN arguments have been evaluated. A nested call
  * in an argument therefore cannot replace the outer call's error location.
  * The trusted wrappers contain no nested public library calls of their own. */
 void crisp_simulation_callsite(signed char *caller, signed char *target)
 {
     if (simulation_enabled && in_simulation_library(target)) {
-        simulation_callsite = (heapptr)(caller - (signed char *)zero);
+        simulation_callsite = crisp_simulation_origin(caller);
     }
 }
 
@@ -116,8 +157,7 @@ int crisp_simulation_function(VAR *result)
     const size_t length = sizeof(name) - 1;
     if (!simulation_enabled || strncmp((const char *)esi, name, length) != 0 ||
         (esi[length] != '(' && esi[length] != ' ')) return 0;
-    heapptr origin = in_simulation_library((signed char *)curlin + (size_t)zero) ?
-        simulation_callsite : curlin;
+    heapptr origin = crisp_simulation_origin(esi - 1);
     esi += length;
     if (nxt() != '(') error(16, NULL);
     esi++;

@@ -588,3 +588,41 @@ test('browser deadlines cover stalled simulation replies while the page remains 
     assert.ok(actual.ticks > 0);
     assert.ok(actual.elapsed < 7000);
 });
+
+test('browser simulation diagnostics retain the authored EVAL location across delayed replies', {timeout: 15000}, async t => {
+    const page = await pageFor(t);
+    const actual = await page.evaluate(async () => {
+        const {createSimulationHost} = await import('/src/simulation-host.mjs');
+        let host, calls = 0;
+        const session = crispbasic.createWasmSession({simulation: {createHost() {
+            host = createSimulationHost();
+            const delayed = method => async (...args) => {
+                calls++;
+                await new Promise(resolve => setTimeout(resolve, 3));
+                return host[method](...args);
+            };
+            return {
+                pinMode: (...args) => host.pinMode(...args),
+                digitalWrite: (...args) => host.digitalWrite(...args),
+                digitalRead: delayed('digitalRead'), delay: (...args) => host.delay(...args),
+                millis: delayed('millis'), dispose: () => host.dispose()
+            };
+        }}});
+        try {
+            const result = await session.run(
+                '100 expression$ = "FNmillis+FNdigitalRead(0)"\n450 PRINT EVAL(expression$)\n',
+                {filename: 'eval.bas'});
+            return {status: result.status, error: result.error, text: result.text,
+                calls, state: host.state};
+        } finally { await session.dispose(); }
+    });
+    assert.equal(actual.status, 'error', JSON.stringify(actual.error));
+    assert.equal(actual.error.code, 206);
+    assert.equal(actual.error.simulationCode, 'floating-input');
+    assert.equal(actual.error.basicLine, 450);
+    assert.equal(actual.error.line, 2);
+    assert.equal(actual.error.filename, 'eval.bas');
+    assert.equal(actual.text, '');
+    assert.equal(actual.calls, 2);
+    assert.equal(actual.state, 'disposed');
+});
