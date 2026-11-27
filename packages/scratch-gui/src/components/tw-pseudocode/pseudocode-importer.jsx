@@ -6340,6 +6340,9 @@ class PseudocodeImporter extends React.Component {
         const toolbarDevice = (this._makeCodeProject && this._makeCodeProject.target) || this.currentDevice();
         const applies = id => toolbarActionApplies(id, {device: toolbarDevice,
             evidence: id === 'spike-arena' ? snapshotSpikePorts(this.props.vm?.runtime).connected : showSpikeAction});
+        const showPythonRunTargets = this.state.lang === 'python' && this.activeCode().trim() &&
+            window.__TAURI_INTERNALS__ && applies('spike-nuttx');
+        const german = pickLocale(this.props.locale) === 'de';
         const renderCodeControls = menu => (
             <React.Fragment>
                     <div data-testid={menu ? undefined : "bw-code-action-row"} style={{display: 'inline-flex', alignSelf: 'center',
@@ -6585,6 +6588,7 @@ class PseudocodeImporter extends React.Component {
                         ) : null}
                         {(this.state.lang === 'python' || this.state.lang === 'javascript') && this.activeCode().trim() ? (
                             <button onClick={this.run} disabled={this.state.running}
+                                data-testid={menu ? "bw-code-run-menu" : "bw-code-run"}
                                 style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}>
                                 ▶ {this.L.run} {this.state.lang === 'python' ? 'Python' : 'JavaScript'}
                             </button>
@@ -6598,20 +6602,26 @@ class PseudocodeImporter extends React.Component {
                                     {this.L.openSpikeArena}
                                 </button>
                             ) : null}
-                            {applies('spike-nuttx') && window.__TAURI_INTERNALS__ && this.state.lang === 'python' && this.activeCode().trim() ?
-                                <button type="button" onClick={() => this.runOnNuttxPython()} disabled={this.state.busy}
-                                    style={actionBtn} data-testid={menu ? "bw-spike-nuttx-python-run-menu" : "bw-spike-nuttx-python-run"}
-                                    title={pickLocale(this.props.locale) === 'de' ? 'Python in unserer vollständigen NuttX-Firmware ausführen. Benötigt das Desktop-Paket mit eingebettetem MicroPython; Roboter-API: brickwright.' :
-                                        'Run Python in our full NuttX firmware. Requires the desktop package with embedded MicroPython; robot API: brickwright.'}>
-                                    ▶ Python · NuttX
-                                </button> : null}
-                            {applies('spike-nuttx') && window.__TAURI_INTERNALS__ && this.state.lang === 'python' && this.activeCode().trim() ?
-                                <button type="button" onClick={() => this.runOnMicroPythonImage()} disabled={this.state.busy}
-                                    style={actionBtn} data-testid={menu ? "bw-spike-micropython-run-menu" : "bw-spike-micropython-run"}
-                                    title={pickLocale(this.props.locale) === 'de' ? 'Lokales MicroPython-Anwendungsimage auswählen und Python in Renode ausführen. Benötigt ein Desktop-Paket mit MicroPython-Simulationsprofil.' :
-                                        'Choose a local MicroPython application image and run Python in Renode. Requires a desktop package with the MicroPython simulation profile.'}>
-                                    ▶ MicroPython · Image
-                                </button> : null}
+                            {menu && showPythonRunTargets && (
+                                <details data-testid="bw-python-run-on">
+                                    <summary data-overflow-action>
+                                        <span aria-hidden="true">▶</span>{german ? 'Ausführen auf' : 'Run on'}
+                                        <Icon name="chevronRight" size={12} />
+                                    </summary>
+                                    <div>
+                                        <button type="button" onClick={() => this.runOnNuttxPython()} disabled={this.state.busy}
+                                            data-testid="bw-spike-nuttx-python-run-menu"
+                                            title={german ? 'Python in der NuttX-Firmware ausführen' : 'Run Python in the NuttX firmware'}>
+                                            NuttX
+                                        </button>
+                                        <button type="button" onClick={() => this.runOnMicroPythonImage()} disabled={this.state.busy}
+                                            data-testid="bw-spike-micropython-run-menu"
+                                            title={german ? 'Lokales MicroPython-Image in Renode ausführen' : 'Run with a local MicroPython image in Renode'}>
+                                            {german ? 'MicroPython-Image…' : 'MicroPython image…'}
+                                        </button>
+                                    </div>
+                                </details>
+                            )}
                             {applies('spike-firmware') && window.__TAURI_INTERNALS__ && ((this.state.lang === 'pseudocode' && this.currentDevice() === 'spike') || (this.state.lang === 'python' && isSpike3Program(this.activeCode()))) ? <button type="button" onClick={() => this.runOnSpikeFirmware()}
                                 disabled={this.state.busy} style={actionBtn} data-testid={menu ? "bw-spike-firmware-run-menu" : "bw-spike-firmware-run"}
                                 title={this.L.spikeFirmwareRunTitle}>
