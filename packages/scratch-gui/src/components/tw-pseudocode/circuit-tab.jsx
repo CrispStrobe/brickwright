@@ -1982,12 +1982,18 @@ class CircuitTab extends React.Component {
                         reject(new Error('The KIM-1 circuit was replaced before launch.'));
                         return;
                     }
-                    const [verb, value] = tape.preset === 'video' ? ['setK1008', 0x2000] : ['setBackplane', [
-                        {kind: 'kim-2', address: 0x2000}, {kind: 'kim-3', address: 0x4000},
-                        {kind: 'kim-3b', address: 0x6000}
-                    ]];
+                    const setup = {
+                        'ram-check': ['setBackplane', [
+                            {kind: 'kim-2', address: 0x2000}, {kind: 'kim-3', address: 0x4000},
+                            {kind: 'kim-3b', address: 0x6000}
+                        ]],
+                        video: ['setK1008', 0x2000],
+                        'memory-map': ['setMemoryCard', tape.image],
+                        'sd-read': ['mountSD', tape.image],
+                        'corsham-read': ['mountCorshamDisk', tape.image]
+                    }[tape.preset];
                     try {
-                        if (!board.setDeviceControl(partId, verb, value) ||
+                        if (!setup || !board.setDeviceControl(partId, ...setup) ||
                             !board.setDeviceControl(partId, 'key', 'GO')) {
                             throw new Error('The KIM-1 could not start the paper-tape program.');
                         }

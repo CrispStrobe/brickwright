@@ -26,6 +26,13 @@ export function localizedMedia (item, locale) {
 const MEDIA_REVISION = '081bd4156797cf8b14b9ceef7245ff9e100577e5';
 const mediaDirectory = item => new URL(`https://raw.githubusercontent.com/CrispStrobe/brickwright-media-lab/${item.revision || MEDIA_REVISION}/projects/${item.project || item.id}/`);
 
+const kim1SectorImage = {
+    file: 'sectors.img', sha256: 'a516c3b2aa55cca2ad08e3e333712d4f9c0a2130d0f844d31542d4543cd0ad47'
+};
+const kim1RamMap = {
+    file: 'expanded-ram.raw', sha256: 'd564fab784e543c63fd82ebf6866ef23381642b270705aa9a66bce04d99d4825'
+};
+
 const ackSamples = [
     ['pascal', 'ACK Pascal (DOS)', 'sieve.com', 'db1ce4885bc04a942ac503730168af5e639c584a81e1077e3fc7e21fb732ae5c'],
     ['c', 'ACK C (DOS)', 'fact.com', 'f53d2a613deb2b5da1b107c18570ae3e131c532ed76522279acbe85e0c916bf7'],
@@ -50,11 +57,15 @@ export const libraryMedia = [
     ...ackSamples,
     ...[
         ['ram-check', 'KIM-4 RAM Check', '8170c7f0a8af2b7988bd4d3b176efcca2decd020ace6d900d7d961b24239dfea'],
-        ['video', 'K-1008 Checkerboard', 'bd193b042c262ef7379b5a99178d8b8575808b75baa0e17f001c85d6d3b79ddf']
-    ].map(([preset, title, sha256]) => ({
+        ['video', 'K-1008 Checkerboard', 'bd193b042c262ef7379b5a99178d8b8575808b75baa0e17f001c85d6d3b79ddf'],
+        ['memory-map', 'Programmable Memory Card', 'eec8fc438012602df0f86b15cc18f4572f2aa55e058a7a9b0f84abec7c9a8410', kim1RamMap],
+        ['sd-read', 'SPI SD Block Read', 'ab10c1fe35e6b2a01b88426c8612190ff44c5dacf835a9af52c3ab942a6563ca', kim1SectorImage],
+        ['corsham-read', 'Corsham Disk Block Read', '3a6fe19806688acf96bf4e3d41f1c54734ef267ae34f5c73a30e936c9b13a798', kim1SectorImage]
+    ].map(([preset, title, sha256, image]) => ({
         id: `kim1-expansion-demos/${preset}`, project: 'kim1-expansion-demos', title, machine: 'kim1',
-        license: 'MIT', licenseFile: 'LICENSE', revision: '5e54caab98d7ca6f641d7cc3e21f2ebdab937400',
-        kim1Tape: {preset, file: `${preset}.ptp`, sha256}
+        license: 'MIT', licenseFile: 'LICENSE',
+        revision: image ? 'cf41bdea84b034514d9b15291877fbc47a92f8ad' : '5e54caab98d7ca6f641d7cc3e21f2ebdab937400',
+        kim1Tape: {preset, file: `${preset}.ptp`, sha256, image}
     })),
     {id: '6502-animation', title: '6502 Animation Lab', machine: 'eater6502',
         license: 'MIT', licenseFile: 'LICENSE', infoKey: 'animation6502', framebufferFormat: 'gray6',
@@ -133,10 +144,12 @@ export function libraryLicenseUrl (item) {
 }
 
 export async function readKim1LibraryTape (item) {
-    const {preset, file, sha256} = item.kim1Tape;
-    const url = new URL(file, mediaDirectory(item)).href;
-    const {bytes} = await defaultImageFetcher({url, sha256});
-    return {preset, title: item.title, program: new TextDecoder('ascii', {fatal: true}).decode(bytes)};
+    const {preset, file, sha256, image} = item.kim1Tape;
+    const directory = mediaDirectory(item);
+    const load = asset => defaultImageFetcher({url: new URL(asset.file, directory).href, sha256: asset.sha256});
+    const [tape, mounted] = await Promise.all([load({file, sha256}), image && load(image)]);
+    return {preset, title: item.title, program: new TextDecoder('utf-8', {fatal: true}).decode(tape.bytes),
+        image: mounted?.bytes};
 }
 
 export async function readLibraryCode (item) {
