@@ -116,6 +116,28 @@ test('an in-flight compact sample never replaces a public full-frame snapshot', 
     assert.notEqual(session.snapshot().poses[0].positionMm[0], -999);
 });
 
+test('a rotor reply supplies both board feedback and the following impulse calculation', async () => {
+    const f = fixture();
+    const hinge = [];
+    const original = f.mechanics.stepTelemetry;
+    f.mechanics.stepTelemetry = async (...args) => {
+        const reply = await original(...args);
+        const speed = reply.speeds.axle;
+        Object.defineProperty(reply.speeds, 'axle', {
+            get() {hinge.push(reply.time);return speed;}
+        });
+        return reply;
+    };
+    const session = await createCoupledSession({...f, connections});
+    session.tick(15);await session.idle();
+    assert.deepEqual(hinge, [.005, .01]);
+    assert.equal(f.states.length, 6);
+    const first = session.readings();
+    assert.equal(first[0].velocityRadS, 90 * (Math.PI / 180));
+    first[0].velocityRadS = 0;
+    assert.equal(session.readings()[0].velocityRadS, 90 * (Math.PI / 180));
+});
+
 test('stop discards a late compact reply and never publishes an incomplete frame', async () => {
     const f = fixture();let resolve;
     f.mechanics.stepTelemetry = () => new Promise(r => {resolve = r;});
