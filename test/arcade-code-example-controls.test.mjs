@@ -85,6 +85,14 @@ STAGE:
     think "Ready"`);
     assert.deepEqual(result.unsupported, []);
     assert.ok(result.warnings.includes('Scratch thoughts use Arcade text bubbles'));
-    assert.match(result.ts, /Reader\.sayText\("What now\?", 2 \* 1000, true\)/i);
+    assert.match(result.ts, /ReaderSprite\.sayText\("What now\?", 2 \* 1000, true\)/i);
     assert.match(result.ts, /_bwStageSpeech\.sayText\("Ready"\)/);
+});
+
+test('shipped size expressions stay numeric in Arcade', () => {
+    for (const id of ['rim_reactor', 'trench_signal', 'prism_spire', 'shard_sheriff', 'triple_bingo']) {
+        const lines = convert(games[id]).ts.split('\n').filter(line => line.includes('.setScale('));
+        assert.ok(lines.length > 0, `${id} must still export its sprite size`);
+        assert.ok(lines.every(line => !/"[^"]*%[^"]*"/.test(line)), `${id} exports a percent suffix as text`);
+    }
 });
