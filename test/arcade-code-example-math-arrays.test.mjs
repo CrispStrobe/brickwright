@@ -15,16 +15,28 @@ const convert = source => {
     creator.parse(source);
     assert.deepEqual(creator.warnings, []);
     return projectJsonToArcade(JSON.stringify(creator.project), {
-        costumeSvg: (target, costume) => creator.assets.get(costume.assetId)?.data || null
+        costumeSvg: (target, costume) => creator.assets.get(costume.assetId)?.data || null,
+        soundData: (target, sound) => creator.assets.get(sound.assetId)?.data || null
     });
 };
 
 test('shipped math and array lessons emit their native operations', () => {
     for (const id of ['planetemaths', 'arrays']) assert.deepEqual(convert(examples[id]).unsupported, [], id);
     const bingo = convert(games.triple_bingo);
-    assert.deepEqual(bingo.unsupported, ['play sound chosen by a reporter (Arcade tones are chosen at export)']);
+    assert.deepEqual(bingo.unsupported, []);
     assert.match(bingo.ts, /__bwNamedArraySetCell\(/);
     assert.match(bingo.ts, /__bwNamedArrayGetCell\(/);
+});
+
+test('Tidegate Rush and Triple Bingo reach their existing named tones', () => {
+    for (const [id, expected] of [['lockstep_lagoon', [260]], ['triple_bingo', [660, 990]]]) {
+        const output = convert(games[id]);
+        assert.deepEqual(output.unsupported, [], id);
+        const tones = [...output.ts.matchAll(/music\.playTone\((\d+),/g)].map(([, hz]) => Number(hz));
+        for (const frequency of expected) {
+            assert.ok(tones.some(hz => Math.abs(hz - frequency) <= 1), `${id} lost its authored ${frequency} Hz tone`);
+        }
+    }
 });
 
 test('PXT runs factorial, digit sums, divisibility, ranges and two-dimensional arrays', {

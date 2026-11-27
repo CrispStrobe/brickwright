@@ -3729,7 +3729,6 @@ STAGE:
 SPRITE Foil:
   SHAPE art tidegate-rush/foil
   COSTUME boost art tidegate-rush/boost
-  SOUND splash 260
   WHEN flag clicked:
     set score to 0
     set gates to 0
@@ -3808,6 +3807,7 @@ SPRITE LockGate:
   SHAPE art tidegate-rush/gate
   COSTUME buoy art tidegate-rush/buoy
   SOUND lock 720
+  SOUND splash 260
   WHEN flag clicked:
     hide
   WHEN I receive "start tidegate rush":
@@ -7496,7 +7496,7 @@ SPRITE Caller:
           set called to (item i of array "pool")
           remove item i of array "pool"
           change calls by 1
-          play sound call
+          play sound "call"
           render tables
         ELSE:
           set started to 0
@@ -7558,7 +7558,7 @@ SPRITE Caller:
     IF run = 1 THEN:
       set started to 0
       set winner to (who + 1)
-      play sound bingo
+      play sound "bingo"
       say (join "BINGO! Player " (join winner (join " wins after " (join calls " calls")))) for 4 seconds
 
   WHEN q key pressed:
