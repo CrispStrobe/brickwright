@@ -2059,3 +2059,29 @@ SDK pin tests passed. With the packaged engine, Atlas passed Run,
 Stop, Reset, repeat Run, and a restart after a gravity edit in Chrome.
 It sustained 0.215× and reached 45.59 mm of lift and 14.83° of tilt
 at 6.03 simulated seconds.
+
+### Reuse poses across clearance, control and rendering
+
+CrispCAD now shares the same per-body position and rotation samples
+between hinge clearance, motor reactions, sensor rays, and published
+poses. The private buffers are reused. Each native substep refreshes
+the samples it needs, including in batched stepping, and each returned
+part pose keeps independently writable arrays.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/34e2d180dc5d0f9b2ba1a9ad3720b3cecd368177)
+
+In paired Chrome worker previews using the packaged bw.10 engine,
+Atlas made 1,106 position and 1,106 rotation reads across 600
+coupled ticks, down from 1,206 each. Scout made 1,803 of each,
+down from 2,106 positions and 2,706 rotations. The work reduction
+was repeatable before and after adding buffer reuse. Both comparisons
+produced identical motion, electrical readings, and warm restart
+frames. The final pair ran slower under shared machine load. The
+read counts establish less native work, and sustained 1× playback
+remains open. All 23 actuator and fixed-assembly tests passed on the
+final implementation. The Atlas lift test passed on an isolated retry
+after the first run exceeded the test deadline.
+
+Brickwright vendors SDK `34e2d18`. All 842 manifest hashes and nine
+pin tests passed. The live Atlas example passed Run, Stop, Reset,
+repeat Run, and warm restart after a gravity edit using the packaged
+engine.

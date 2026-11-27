@@ -41786,7 +41786,7 @@ return subtract(` + (p.length ? "union(" + [q, ...p].join(",") + ")" : q) + ",un
 function KD() {
   const i = new Worker(new URL(
     /* @vite-ignore */
-    "" + new URL("assets/simulation.worker-kVGRes9y.js", import.meta.url).href,
+    "" + new URL("assets/simulation.worker-Dv65xot7.js", import.meta.url).href,
     import.meta.url
   ), { type: "module" });
   let e = 0, t = !1;
@@ -60827,7 +60827,7 @@ function VU(i, e) {
   async function o1(h1) {
     if (!S) {
       if (!O) {
-        const { mountModelLibraryPanel: Z1 } = await import("./model-library-panel-Cmi6nYRU.js");
+        const { mountModelLibraryPanel: Z1 } = await import("./model-library-panel-BEsE0se3.js");
         if (S)
           return;
         O ?? (O = Z1(r, t, (Q1) => G.evaluate(Q1), e.modelLibrary, async () => {
@@ -62134,7 +62134,7 @@ function VU(i, e) {
 }
 let Ta, dm;
 async function Zv() {
-  const [{ createBundledModelLibraryOptions: i }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-DEe3Uu9J.js"), import("./model-library-cache-DiMFGzp9.js")]);
+  const [{ createBundledModelLibraryOptions: i }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-C4FnDwwg.js"), import("./model-library-cache-DiMFGzp9.js")]);
   return Ta ?? (Ta = i()), { ...Ta, cache: e() };
 }
 async function t$() {
