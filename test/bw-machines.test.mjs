@@ -782,3 +782,19 @@ test('the steerer drains a real keyboard widget FIFO into keyIn', () => {
     steer.stop();
     assert.equal(steer.running, false);
 });
+
+test('a declared 65C02 gray framebuffer reaches Controller through the machine handoff', async () => {
+    const {fetcher} = stubFetcher();
+    const framebuffer = {chip: 'screen', at: 0x3000, width: 64, height: 32, stride: 64, format: 'gray8'};
+    const cfg = fromMediaManifest({machine: 'eater6502', slots: {rom: 'forth.rom'},
+        machineConfig: {regions: [], chips: [{kind: 'framebuffer', name: 'screen', at: 0x3000, size: 2048},
+            {kind: 'acia', name: 'acia1', at: 0x5000}]},
+        program: {framebuffer, console: 'acia1'}});
+    const {detail} = await runMachineConfig(cfg, {fetcher, dispatch () {}});
+    assert.deepEqual(detail.machineConfig6502.grayFramebuffer, framebuffer);
+    assert.equal(detail.machineConfig6502.pacedConsole, 'acia1');
+    assert.equal(detail.machineView, 'controller');
+    assert.deepEqual(detail.widgets[0].config, {width: 64, height: 32});
+    cfg.provenance.program.framebuffer = {...framebuffer, stride: 128};
+    await assert.rejects(runMachineConfig(cfg, {fetcher, dispatch () {}}), /Invalid 65C02 grayscale framebuffer/);
+});

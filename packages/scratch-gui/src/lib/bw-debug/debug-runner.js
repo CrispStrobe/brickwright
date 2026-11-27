@@ -42,6 +42,7 @@ import {
 } from './breakpoints.js';
 import { parseCondition } from './condition.js';
 import {createLinuxConsole, TERMINAL_COLS, TERMINAL_ROWS} from './linux-console.js';
+import {createGrayFramebufferVideo, grayFramebufferSpec} from '../bw-machines/gray-framebuffer.js';
 import {createReadyGatedInput} from './ready-gated-input.js';
 import {createTerminalOutput} from './terminal-output.js';
 import {picoBasicAtPrompt, picoBasicConsoleSpec} from '../bw-machines/pico-basic-source.js';
@@ -3219,6 +3220,19 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             const via = Object.values(result.adapter.machine.chips).find(chip => Number.isInteger(chip.orb));
             if (!via) throw new Error('Blink requires a 65C22 VIA');
             runner.asmBlinkValue = () => via.orb & via.ddrb & 1;
+        }
+        if (declaredMachine?.grayFramebuffer) {
+            const spec = grayFramebufferSpec(declaredMachine.chips, declaredMachine.grayFramebuffer);
+            const devices = result.adapter.machine.chips;
+            runner.video = createGrayFramebufferVideo(devices[spec.chip], spec);
+            const acia = devices[declaredMachine.pacedConsole];
+            if (typeof acia?.rdrf === 'boolean') {
+                const input = createReadyGatedInput({isReady: () => serialLines.some(line => line.length),
+                    send: runner.sendSerial, canAccept: () => !acia.rdrf, burst: 1});
+                runner.sendSerial = data => typeof data === 'number' ? input.push(data) :
+                    input.write(Uint8Array.from(String(data), ch => ch.charCodeAt(0)));
+                terminalFrame = input.flush;
+            }
         }
         if (targetOpts.py65mon) runner.console6502Source = 'py65mon';
         if ((bootMedia?.profile === 'eater' && bootMedia.name === 'basic.rom') ||

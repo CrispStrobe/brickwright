@@ -14,6 +14,7 @@
 // Framework-free: no React, no bundler globals. `defaultImageFetcher` uses the
 // host `fetch` + Web Crypto, both present in the browser and Node ≥ 18.
 
+import {grayFramebufferSpec} from './gray-framebuffer.js';
 import {PICOBB_FLASH, picoFlashStorageFor} from './pico-basic-flash.js';
 import {
     normalizeMachineConfig, validateMachineConfig
@@ -273,6 +274,16 @@ export async function activateConfig(config, opts = {}) {
     if (spectrumRoms && !widgets.some(widget => widget?.source === 'video')) {
         widgets.push({name: cfg.machine === 'zx128' ? 'ZX Spectrum 128K' : 'ZX Spectrum 48K',
             type: 'simplevga', source: 'video', config: {width: 288, height: 224}});
+    }
+    const program = cfg.provenance?.program;
+    if (cfg.machine === 'eater6502' && bootSlotId === 'rom' && program?.framebuffer) {
+        const grayFramebuffer = grayFramebufferSpec(machineConfig?.chips, program.framebuffer);
+        const pacedConsole = machineConfig.chips.find(chip => chip.kind === 'acia' && chip.name === program.console)?.name;
+        machineConfig = {...machineConfig, grayFramebuffer, pacedConsole};
+        if (!widgets.some(widget => widget?.source === 'video')) {
+            const {width, height} = grayFramebuffer;
+            widgets.push({name: `${width} × ${height}`, type: 'simplevga', source: 'video', config: {width, height}});
+        }
     }
     const videoWidgetDecl = widgets.find(w => w && w.source === 'video') || null;
 

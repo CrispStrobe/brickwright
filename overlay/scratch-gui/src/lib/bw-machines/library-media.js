@@ -5,10 +5,12 @@ import {validateMachineConfig} from './machine-config.js';
 import {PICOBB_FLASH} from './pico-basic-flash.js';
 
 const mediaInfo = makeT({
-    en: {minix: 'Click the screen and press = to boot MINIX. Log in as root and try ls.', sieve: 'CP/M Sieve', forthCpm: 'zForth on CP/M',
+    en: {minix: 'Click the screen and press = to boot MINIX. Log in as root and try ls.', sieve: 'CP/M Sieve',
+        tali65c02: 'Choose ACIA in Controller. Define a word, or write grayscale pixels at $3000. Switch to Screen to see the framebuffer.', forthCpm: 'zForth on CP/M',
         ackPascal: 'Prints the primes first. The DOS service then reports a file-close error.',
         ubasic: 'Open the sample in BAS. Edit the program and run it again to see the new output in Controller.'},
-    de: {minix: 'Klicke auf den Bildschirm und drücke =, um MINIX zu starten. Melde dich als root an und probiere ls.', sieve: 'CP/M-Primzahlsieb', forthCpm: 'zForth unter CP/M',
+    de: {minix: 'Klicke auf den Bildschirm und drücke =, um MINIX zu starten. Melde dich als root an und probiere ls.', sieve: 'CP/M-Primzahlsieb',
+        tali65c02: 'Wähle im Controller ACIA. Definiere ein Wort oder schreibe Graustufenpixel ab $3000. Wähle Bildschirm für die Bildausgabe.', forthCpm: 'zForth unter CP/M',
         ackPascal: 'Gibt zuerst die Primzahlen aus. Danach meldet der DOS-Dienst einen Fehler beim Schließen der Datei.',
         ubasic: 'Öffne das Beispiel in BAS. Bearbeite das Programm und starte es erneut, um die neue Ausgabe im Controller zu sehen.'}
 });
@@ -44,6 +46,10 @@ export const libraryMedia = [
         infoKey: 'ubasic',
         code: {language: 'basic', path: 'samples/demo.bas', dosSourceName: 'PROG.BAS'}},
     ...ackSamples,
+    {id: 'tali-forth-65c02', title: 'Tali Forth 2 with framebuffer', machine: 'eater6502',
+        license: 'LicenseRef-Public-Domain', licenseFile: 'LICENSE.upstream', infoKey: 'tali65c02',
+        revision: '5e54caab98d7ca6f641d7cc3e21f2ebdab937400',
+        romHash: '81c331f6afcd7f7049dbf51e65d839d0a483ef0699697586819bbeff95e74703'},
     {id: 'minix-2.0', title: 'MINIX 2.0.4', machine: 'i80386', license: 'BSD-3-Clause',
         licenseFile: 'LICENSE', infoKey: 'minix', revision: 'b424a9a6d2826360351d1ed1fbcd7548c4edf9f8'},
     {id: 'x86-benchmarks/topbench', title: 'TOPBENCH (386)', machine: 'i80386', license: 'MIT', benchmark: 'topbench'},
@@ -87,6 +93,10 @@ export async function openLibraryMedia (item) {
     if (item.flashHash) {
         launchManifest = {...launchManifest, slots: {...launchManifest.slots,
             flash: {url: launchManifest.slots.flash, sha256: item.flashHash}}};
+    }
+    if (item.romHash) {
+        launchManifest = {...launchManifest, slots: {...launchManifest.slots,
+            rom: {url: launchManifest.slots.rom, sha256: item.romHash}}};
     }
     const config = fromMediaManifest(launchManifest, {source, baseUrl: baseUrl.href});
     const verdict = validateMachineConfig(config);

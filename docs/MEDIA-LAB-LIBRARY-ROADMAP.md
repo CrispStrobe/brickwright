@@ -12,7 +12,8 @@ This inventory covers the 34 manifests on media-lab main at `5e54caab98d7ca6f641
 | zForth for CP/M and CP/M-80 software | Existing Z80 entries. CP/M Sieve has an editable C route. |
 | BBC BASIC for Z80 | Existing serial and VDP lessons boot CP/M. The media-lab manifest describes a separate BDOS-shim workflow. |
 | Microsoft BASIC for 6502 | Existing 6502 lesson. |
-| Tali Forth 2 with framebuffer and 6502 Animation Lab | Media Lab publishes separate 65C02 ROMs and CLI proofs. Connect their framebuffer output and keyboard interaction to Controller for dedicated Machines entries. |
+| Tali Forth 2 with framebuffer | The Machines entry runs the reviewed ROM on its declared 65C02 map. Switch between ACIA and Screen in Controller to define words and inspect the 64 × 32 framebuffer. The GUI check exercises VIA writes and verifies all 2,048 displayed pixels. |
+| 6502 Animation Lab | Media Lab publishes an original 65C02 ROM and CLI proof. Connect its video format to Controller. |
 | Linux on RISC-V | Existing Linux lesson and cold-boot option. |
 | PicoBB | Existing RP2040 entry using the reviewed filesystem-enabled revision. |
 | TOPBENCH, Whetstone and native Sieve | TOPBENCH opens the native benchmark panel. Whetstone and Sieve belong to the native benchmark path and need independent Machines handoff checks before receiving standalone rows. |
