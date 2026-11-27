@@ -1,0 +1,348 @@
+{
+  "schema": "bw-arcade-example-gameplay-v1",
+  "firstPassReceipt": "2026-11-27-code-arcade-first-pass.json",
+  "runs": [
+    {
+      "run": "Rift Rally independent paddles",
+      "provenance": {
+        "portable": false,
+        "simulate": true,
+        "files": {
+          "overlay/scratch-gui/src/lib/bw-makecode/export-arcade.js": "9bc31614621bce1d4dc978543477d7fc6500550ebf84f7a0a7f0103f0f93fb56",
+          "overlay/scratch-gui/src/lib/bw-makecode/scratch-arcade-keyboard.js": "1c6326b8079674791baebe99cc5103cfee7e5d6bc91583af266798053ea5556b",
+          "overlay/scratch-gui/examples/index.json": "75a128c6d838f8316d16088d3a745fbfe33b196b7b2547d3e5c69f62e59b1902"
+        }
+      },
+      "results": [
+        {
+          "id": "twinwall",
+          "scope": "Code menu",
+          "device": null,
+          "sourceWarnings": [],
+          "opcodes": [
+            "control_create_clone_of",
+            "control_create_clone_of_menu",
+            "control_delete_this_clone",
+            "control_forever",
+            "control_if",
+            "control_repeat",
+            "control_start_as_clone",
+            "control_stop",
+            "control_wait",
+            "data_changevariableby",
+            "data_hidevariable",
+            "data_setvariableto",
+            "data_showvariable",
+            "event_broadcast",
+            "event_whenbroadcastreceived",
+            "event_whenflagclicked",
+            "event_whenkeypressed",
+            "looks_backdrops",
+            "looks_hide",
+            "looks_sayforsecs",
+            "looks_show",
+            "looks_switchbackdropto",
+            "motion_changexby",
+            "motion_gotoxy",
+            "motion_xposition",
+            "operator_equals",
+            "operator_gt",
+            "operator_join",
+            "operator_lt",
+            "operator_mathop",
+            "operator_multiply",
+            "operator_or",
+            "operator_random",
+            "operator_subtract",
+            "sensing_keyoptions",
+            "sensing_keypressed",
+            "sensing_touchingobject",
+            "sensing_touchingobjectmenu",
+            "sound_play"
+          ],
+          "unsupported": [],
+          "warnings": [
+            "Scratch variable monitors use compact labels on the Arcade screen",
+            "Arcade keyboard controls keep the Scratch keys. Physical controllers use the assigned Arcade buttons.",
+            "LeftWall: costume \"costume1\" converted to palette pixels",
+            "RightWall: costume \"costume1\" converted to palette pixels",
+            "Comet: costume \"costume1\" converted to palette pixels",
+            "Shifter: costume \"costume1\" converted to palette pixels",
+            "backdrop \"backdrop1\": no image available — a plain colour",
+            "Stage: costume \"intro\" converted to palette pixels",
+            "Stage: costume \"arena\" converted to palette pixels"
+          ],
+          "pxtSourceSha256": "6a11cfe1d8eb6c88e8cd5d8e8aaf789bf15bfd565bc7b77694aa31c3bfc03c90",
+          "project": {
+            "filename": "arcade-twinwall.mkcd",
+            "sha256": "a8a4f916f1e50dc1911e1b7bdb45bc91160fe9d0006e34db98fcb6b247c8025c"
+          },
+          "outcome": "compiled",
+          "compiled": true,
+          "diagnostics": [],
+          "simulator": {
+            "check": "independent paddle controls",
+            "screenPixels": 19200,
+            "colours": 13,
+            "displayUpdates": 1,
+            "paddles": {
+              "left": 135,
+              "right": -135
+            },
+            "monitors": [
+              [
+                "__bwMonitorVisible",
+                true
+              ],
+              [
+                "__bwMonitorVisible_",
+                true
+              ],
+              [
+                "__bwMonitorVisible__",
+                true
+              ]
+            ],
+            "started": 1
+          }
+        }
+      ]
+    },
+    {
+      "run": "Motion and prompt rechecks",
+      "provenance": {
+        "portable": false,
+        "simulate": true,
+        "files": {
+          "overlay/scratch-gui/src/lib/bw-makecode/export-arcade.js": "afa1cae78942f40434651780b983f60cd605d6e555c7eb1ea13aace7546e8647",
+          "overlay/scratch-gui/src/lib/bw-makecode/scratch-arcade-keyboard.js": "1c6326b8079674791baebe99cc5103cfee7e5d6bc91583af266798053ea5556b",
+          "overlay/scratch-gui/examples/index.json": "75a128c6d838f8316d16088d3a745fbfe33b196b7b2547d3e5c69f62e59b1902"
+        }
+      },
+      "results": [
+        {
+          "id": "game",
+          "scope": "Code menu",
+          "device": null,
+          "sourceWarnings": [],
+          "unsupported": [],
+          "warnings": [
+            "Scratch questions use Arcade’s text entry dialog.",
+            "Player: costume \"costume1\" converted to palette pixels",
+            "Enemy: costume \"costume1\" converted to palette pixels"
+          ],
+          "outcome": "compiled",
+          "compiled": true,
+          "diagnostics": [],
+          "simulator": {
+            "check": "boot and input smoke test",
+            "screenPixels": 19200,
+            "colours": 4,
+            "displayUpdates": 6
+          }
+        },
+        {
+          "id": "sigil_grid",
+          "scope": "Code menu",
+          "device": null,
+          "sourceWarnings": [],
+          "unsupported": [],
+          "warnings": [
+            "Mouse and touch controls use the MakeCode Arcade browser simulator.",
+            "Board: costume \"costume1\" converted to palette pixels",
+            "Board: costume \"blank\" converted to palette pixels",
+            "Board: costume \"sun\" converted to palette pixels",
+            "Board: costume \"moon\" converted to palette pixels",
+            "Solo: costume \"costume1\" converted to palette pixels",
+            "Duo: costume \"costume1\" converted to palette pixels",
+            "Result: costume \"costume1\" converted to palette pixels",
+            "Result: costume \"sunwin\" converted to palette pixels",
+            "Result: costume \"moonwin\" converted to palette pixels",
+            "Result: costume \"draw\" converted to palette pixels",
+            "backdrop \"backdrop1\": no image available — a plain colour",
+            "Stage: costume \"intro\" converted to palette pixels",
+            "Stage: costume \"arena\" converted to palette pixels"
+          ],
+          "outcome": "compiled",
+          "compiled": true,
+          "diagnostics": [],
+          "simulator": {
+            "check": "pointer opening and solo rival reply",
+            "screenPixels": 19200,
+            "colours": 10,
+            "displayUpdates": 1,
+            "moves": 2,
+            "board": [
+              1,
+              0,
+              0,
+              0,
+              2,
+              0,
+              0,
+              0,
+              0
+            ],
+            "started": 1
+          }
+        },
+        {
+          "id": "vector_seven",
+          "scope": "Code menu",
+          "device": null,
+          "sourceWarnings": [],
+          "unsupported": [],
+          "warnings": [
+            "Mouse and touch controls use the MakeCode Arcade browser simulator.",
+            "Scratch variable monitors use compact labels on the Arcade screen",
+            "Player: costume \"costume1\" converted to palette pixels",
+            "Rival: costume \"costume1\" converted to palette pixels",
+            "Pulse: costume \"costume1\" converted to palette pixels",
+            "Pulse: costume \"charged\" converted to palette pixels",
+            "Result: costume \"costume1\" converted to palette pixels",
+            "Result: costume \"win\" converted to palette pixels",
+            "Result: costume \"lose\" converted to palette pixels",
+            "backdrop \"backdrop1\": no image available — a plain colour",
+            "Stage: costume \"intro\" converted to palette pixels",
+            "Stage: costume \"court\" converted to palette pixels"
+          ],
+          "outcome": "compiled",
+          "compiled": true,
+          "diagnostics": [],
+          "simulator": {
+            "check": "pointer aim and serve launch",
+            "screenPixels": 19200,
+            "colours": 9,
+            "displayUpdates": 2,
+            "paddle": 120,
+            "serve": 0,
+            "ballVY": 5.5,
+            "started": 1
+          }
+        },
+        {
+          "id": "flux_vault",
+          "scope": "Code menu",
+          "device": null,
+          "sourceWarnings": [],
+          "unsupported": [],
+          "warnings": [
+            "Mouse and touch controls use the MakeCode Arcade browser simulator.",
+            "Scratch variable monitors use compact labels on the Arcade screen",
+            "Vault: costume \"costume1\" converted to palette pixels",
+            "Vault: costume \"wall\" converted to palette pixels",
+            "Vault: costume \"dock\" converted to palette pixels",
+            "Vault: costume \"core\" converted to palette pixels",
+            "Vault: costume \"charged\" converted to palette pixels",
+            "Vault: costume \"keeper\" converted to palette pixels",
+            "Reset: costume \"costume1\" converted to palette pixels",
+            "Result: costume \"costume1\" converted to palette pixels",
+            "backdrop \"backdrop1\": no image available — a plain colour",
+            "Stage: costume \"intro\" converted to palette pixels",
+            "Stage: costume \"vault\" converted to palette pixels"
+          ],
+          "outcome": "compiled",
+          "compiled": true,
+          "diagnostics": [],
+          "simulator": {
+            "check": "keyboard solution for all three chambers",
+            "screenPixels": 19200,
+            "colours": 6,
+            "displayUpdates": 8,
+            "level": 4,
+            "active": 0,
+            "pushes": 14,
+            "started": 0
+          }
+        }
+      ]
+    },
+    {
+      "run": "Canal Command four legal lock cycles",
+      "provenance": {
+        "portable": false,
+        "simulate": true,
+        "files": {
+          "overlay/scratch-gui/src/lib/bw-makecode/export-arcade.js": "1b0d98b2992ed825e49ee5e2e13a591cde946513637535f5c39e6d31d8318295",
+          "overlay/scratch-gui/src/lib/bw-makecode/scratch-arcade-keyboard.js": "1c6326b8079674791baebe99cc5103cfee7e5d6bc91583af266798053ea5556b",
+          "overlay/scratch-gui/examples/index.json": "75a128c6d838f8316d16088d3a745fbfe33b196b7b2547d3e5c69f62e59b1902"
+        }
+      },
+      "results": [
+        {
+          "id": "canal_command",
+          "scope": "Code menu",
+          "device": null,
+          "sourceWarnings": [],
+          "opcodes": [
+            "argument_reporter_string_number",
+            "control_forever",
+            "control_if",
+            "control_if_else",
+            "control_wait",
+            "data_changevariableby",
+            "data_hidevariable",
+            "data_setvariableto",
+            "data_showvariable",
+            "event_broadcast",
+            "event_whenbroadcastreceived",
+            "event_whenflagclicked",
+            "event_whenkeypressed",
+            "event_whenthisspriteclicked",
+            "looks_backdrops",
+            "looks_costume",
+            "looks_hide",
+            "looks_show",
+            "looks_switchbackdropto",
+            "looks_switchcostumeto",
+            "motion_gotoxy",
+            "operator_and",
+            "operator_equals",
+            "procedures_call",
+            "procedures_definition",
+            "procedures_prototype",
+            "sound_play"
+          ],
+          "unsupported": [],
+          "warnings": [
+            "Mouse and touch controls use the MakeCode Arcade browser simulator.",
+            "Scratch variable monitors use compact labels on the Arcade screen",
+            "Controller: costume \"costume1\" converted to palette pixels",
+            "Boat: costume \"costume1\" converted to palette pixels",
+            "LowerGate: costume \"costume1\" converted to palette pixels",
+            "LowerGate: costume \"open\" converted to palette pixels",
+            "UpperGate: costume \"costume1\" converted to palette pixels",
+            "UpperGate: costume \"open\" converted to palette pixels",
+            "LowerButton: costume \"costume1\" converted to palette pixels",
+            "PumpButton: costume \"costume1\" converted to palette pixels",
+            "UpperButton: costume \"costume1\" converted to palette pixels",
+            "Result: costume \"costume1\" converted to palette pixels",
+            "Result: costume \"win\" converted to palette pixels",
+            "Result: costume \"lose\" converted to palette pixels",
+            "backdrop \"backdrop1\": no image available — a plain colour",
+            "Stage: costume \"intro\" converted to palette pixels",
+            "Stage: costume \"lock\" converted to palette pixels"
+          ],
+          "pxtSourceSha256": "7a22869fc5e35a482270c417e856bf5268300dcecafe1970fb1d58b503df65bb",
+          "project": {
+            "filename": "arcade-canal_command.mkcd",
+            "sha256": "b8a8d766cd212746aaadf5af4c82fcc66e66d9ac61ef376ba5af580a9b7357ae"
+          },
+          "outcome": "compiled",
+          "compiled": true,
+          "diagnostics": [],
+          "simulator": {
+            "check": "four legal lock cycles through on-screen buttons",
+            "screenPixels": 19200,
+            "colours": 11,
+            "displayUpdates": 2,
+            "boats": 4,
+            "faults": 0,
+            "active": 0,
+            "started": 0
+          }
+        }
+      ]
+    }
+  ]
+}

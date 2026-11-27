@@ -4,6 +4,18 @@ The example audit reads the Code menu, its two source banks and the Circuit cata
 
 The Circuit catalogue contains 807 rows. Of those, 79 publish no program, 537 publish a comment-only description, 179 declare a dedicated device, and 11 provide Controller- or circuit-dependent programs without a dedicated device. `pybadge01-hello` is the remaining structural candidate. It uses Brickwright Controller variables, so any successful Arcade compilation still needs a display and input behavior check. These 68 structural candidates are the export census.
 
+## First complete pass
+
+All 68 structural candidates were attempted in one fixed checkout with Scratch monitor rendering, remapped keyboard controls and browser pointer support. The native Arcade compiler accepted 66. All 66 compiled projects presented a real frame in the browser simulator. The 66 comprise 25 projects without unsupported operations and 41 with named gaps. The full per-example inventory, diagnostics, adaptations and simulator results are in the [first-pass receipt](receipts/2026-11-27-code-arcade-first-pass.json).
+
+| Source | Candidates attempted | Compiled and reached the simulator | Compiler refusals |
+|---|---:|---:|---:|
+| Shipped Code menu | 52 | 51 | 1 |
+| Legacy source | 15 | 15 | 0 |
+| Circuit catalogue | 1 | 0 | 1 |
+
+The earlier Complete Game refusal came from the unimplemented Scratch answer value. Its later export passed after the prompt implementation. The separate PyBadge diagnostic came from a Scratch variable named `screen`, which collided with the Arcade screen API. The named gameplay tests and the Complete Game rerun are recorded in the [gameplay receipt](receipts/2026-11-27-code-arcade-gameplay.json).
+
 ## Run the audit
 
 Use a fixed source checkout with the pinned, integrated MakeCode target and its browser simulator.
