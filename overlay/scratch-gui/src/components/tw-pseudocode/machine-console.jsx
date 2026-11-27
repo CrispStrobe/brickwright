@@ -21,6 +21,8 @@ function spectrumKeys (code) {
 export default function MachineConsole({widget, keyIn, serialIn, mouseIn, keyboardSet, isFullScreen, onToggleFullScreen}) {
     const root = React.useRef(null);
     const canvas = React.useRef(null);
+    const aspect = widget.config.displayAspect;
+    const hasDisplayAspect = Number.isFinite(aspect) && aspect > 0;
     const held = React.useRef(new Set());
     const buttons = React.useRef(0);
     const point = React.useRef(null);
@@ -151,10 +153,13 @@ export default function MachineConsole({widget, keyIn, serialIn, mouseIn, keyboa
                     point.current = null;
                 }}
                 onContextMenu={e => { if (mouseIn) e.preventDefault(); }}
-                style={{flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                style={{flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    containerType: hasDisplayAspect ? 'size' : undefined}}>
                 <canvas ref={canvas} data-testid="bw-machine-canvas"
-                    style={{display: 'block', width: '100%', height: '100%', objectFit: 'contain',
-                        imageRendering: 'pixelated'}} />
+                    style={{display: 'block', imageRendering: 'pixelated',
+                        width: hasDisplayAspect ? `min(100cqw, ${100 * aspect}cqh)` : '100%',
+                        height: hasDisplayAspect ? `min(100cqh, ${100 / aspect}cqw)` : '100%',
+                        objectFit: hasDisplayAspect ? 'fill' : 'contain'}} />
                 {!widget.state.signal && <span style={{position: 'absolute', color: '#4ade80'}}>NO SIGNAL</span>}
             </div>
         </div>

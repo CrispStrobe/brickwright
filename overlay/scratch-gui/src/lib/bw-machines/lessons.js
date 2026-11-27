@@ -159,6 +159,9 @@ const TABLE = {
         'cpm.licence': 'CP/M 2.2 is DRI’s redistributable release (2022 grant); BBC BASIC (Z80) is zlib (R.T. Russell). ' +
             'Both ship in this app.',
         'cpm.source': 'Project',
+        'bbcVideo.title': 'BBC-style video on 6502',
+        'bbcVideo.summary': 'Focus the Controller display and press 0–6 to change modes. The 6502 draws both the text and the colour bars into screen RAM.',
+        'bbcVideo.licence': 'Original Brickwright demonstration ROM (BSD-3-Clause).',
         'msbasic.title': 'Microsoft BASIC on 6502',
         'msbasic.summary': 'Microsoft’s original 1978 6502 BASIC (V1.1, the MIT release) boots on the emulated ' +
             'Ben Eater 6502 to the OK prompt with the default memory size and terminal width. ' +
@@ -200,6 +203,9 @@ const TABLE = {
         'cpm.licence': 'CP/M 2.2 ist DRIs weitergabefähige Ausgabe (Freigabe 2022); BBC BASIC (Z80) steht unter zlib (R.T. Russell). ' +
             'Beides ist in dieser App enthalten.',
         'cpm.source': 'Projekt',
+        'bbcVideo.title': 'BBC-artige Bildausgabe auf dem 6502',
+        'bbcVideo.summary': 'Die Controller-Anzeige anklicken und mit 0–6 den Modus wechseln. Der 6502 zeichnet Text und Farbbalken direkt in den Bildspeicher.',
+        'bbcVideo.licence': 'Brickwright-Demo-ROM (BSD-3-Clause).',
         'msbasic.title': 'Microsoft BASIC auf 6502',
         'msbasic.summary': 'Microsofts ursprüngliches 6502-BASIC von 1978 (V1.1, die MIT-Ausgabe) startet auf dem ' +
             'emulierten Ben-Eater-6502 mit Standardwerten für Speichergröße und Terminalbreite bis zum OK-Prompt. ' +
@@ -396,6 +402,31 @@ export function lessonMachines (locale) {
         source: `${MEDIA_LAB}/tree/main/projects/ms-basic-6502`,
         sourceLabel: t('msbasic.source'),
         size: '32 KB'
+    });
+
+    rows.push({
+        config: newMachineConfig({
+            id: 'lesson-bbc-video-6502',
+            title: t('bbcVideo.title'),
+            executionMode: 'functional',
+            machine: 'eater6502',
+            machineConfig: {
+                clockHz: 2_000_000,
+                regions: [{kind: 'ram', start: 0x0000, end: 0x7fff}, {kind: 'rom', start: 0xc000, end: 0xffff}],
+                chips: [{kind: 'bbcvideo', name: 'bbcVideo', at: 0x8000},
+                    {kind: 'console', name: 'keyboard', at: 0x9000}]
+            },
+            slots: {rom: {url: 'static/roms/bbc-video-6502.rom',
+                sha256: 'e6680ddfce4ea46fbed0af304aa8d10820fe1aa8ac68cc8e4ca482468701927e'}},
+            bootOrder: ['rom'],
+            tags: ['lesson', 'video'],
+            widgets: [{name: 'BBC-style display', type: 'simplevga', source: 'video',
+                config: {width: 640, height: 256, displayAspect: 4 / 3}}],
+            provenance: {source: 'Brickwright', license: 'BSD-3-Clause'}
+        }),
+        summary: t('bbcVideo.summary'),
+        licence: t('bbcVideo.licence'),
+        size: '16 KB'
     });
 
     return rows;

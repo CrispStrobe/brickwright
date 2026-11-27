@@ -18,6 +18,7 @@ const items = [
     ['i8086', 'lesson-elks-i8086', 'lesson', null],
     ['z80','lesson-cpm-z80-vdp','lesson',null],
     ['eater6502', 'lesson-msbasic-6502', 'lesson', /MICROSOFT BASIC/i],
+    ['eater6502', 'lesson-bbc-video-6502', 'lesson', null],
     ['riscv32', 'lesson-linux-riscv32', 'lesson', /bwb#/],
     ['riscv32', 'lesson-linux-riscv32', 'cold', /bwb#/],
     ['i80386', 'bw-mm-at-bios-run', 'preset', null],
@@ -76,6 +77,25 @@ async function exercisePreset (page, name) {
     }
 }
 
+async function exerciseBbcVideo(page) {
+    const layouts = [[640, 256], [320, 256], [160, 256], [640, 200],
+        [320, 256], [160, 256], [320, 200]];
+    const screen = page.getByTestId('bw-machine-canvas');
+    await screen.click();
+    for (const [mode, [width, height]] of layouts.entries()) {
+        if (mode) await page.keyboard.press(String(mode));
+        await page.waitForFunction(([expectedWidth, expectedHeight]) => {
+            const canvas = document.querySelector('[data-bw-stage-dock="controller"] [data-testid="bw-machine-canvas"]');
+            if (!canvas || canvas.width !== expectedWidth || canvas.height !== expectedHeight) return false;
+            const ctx = canvas.getContext('2d');
+            return ctx.getImageData(0, 0, 1, 1).data[0] === 255 &&
+                ctx.getImageData(expectedWidth - 5, expectedHeight - 1, 1, 1).data[0] === 255;
+        }, [width, height]);
+        const bounds = await screen.boundingBox();
+        assert.ok(Math.abs(bounds.width / bounds.height - 4 / 3) < 0.02, JSON.stringify(bounds));
+    }
+}
+
 async function run([machine, name, route, expected]) {
     const page = await browser.newPage({viewport: {width: 1440, height: 900}, serviceWorkers: 'block'});
     page.setDefaultTimeout(12000);
@@ -131,6 +151,7 @@ async function run([machine, name, route, expected]) {
         } while (Date.now() < deadline);
         assert.ok(expected ? expected.test(state.surfaces) : state.video || state.gpio, JSON.stringify(state));
         if (route === 'preset') await exercisePreset(page, name);
+        if (name === 'lesson-bbc-video-6502') await exerciseBbcVideo(page);
         if (name === 'uBASIC (DOS)') {
             assert.match(await page.locator('.cm-content').innerText(), /gosub 100/i);
             await typeIntoEditor(page, '10 PRINT "EDITED BASIC"\n20 PRINT 11*9\n30 END\n');

@@ -517,6 +517,7 @@ class DebugPanel extends React.Component {
             generatedDisplay: Boolean(displayName && screen?.name === displayName),
             keyboardName: runner.keyIn && !(Array.isArray(widgets) && widgets.some(w => w && w.source === 'keyIn'))
                 ? 'PC keyboard' : null});
+        const hasBbcKeyboard = machineConfig6502?.chips?.some(chip => chip.kind === 'bbcvideo');
         if (screen && typeof runner.video === 'function' &&
             typeof window !== 'undefined' &&
             typeof window.bwMirrorMachineVideo === 'function') {
@@ -524,7 +525,8 @@ class DebugPanel extends React.Component {
                 keyboardSet: spectrum ? 'spectrum' : ['i80286', 'i80386'].includes(nextKind) ? 'at-set1' : 'xt-set1',
                 keyInFn: spectrum ? names => runner.setSpectrumKeys(names)
                     : typeof runner.keyIn === 'function' ? sc => runner.keyIn(sc) : null,
-                serialInFn: machinePreset === 'CPM64K_TMS9918' || io?.dosKeyboard ? byte => runner.sendSerial(byte) : null,
+                serialInFn: machinePreset === 'CPM64K_TMS9918' || hasBbcKeyboard || io?.dosKeyboard
+                    ? byte => runner.sendSerial(byte) : null,
                 mouseInFn: typeof runner.mouseIn === 'function' ? event => runner.mouseIn(event) : null,
                 focusController: nextKind !== 'i8086'});
             if (nextKind === 'i8086') this._showPcController();
