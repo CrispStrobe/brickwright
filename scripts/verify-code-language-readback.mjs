@@ -53,7 +53,12 @@ try {
             return stage && stage.id !== before && runtime.targets.some(target =>
                 Object.values(target.blocks._blocks).some(block => block.opcode === opcode));
         }, {opcode, before});
-        console.log(`${name} → Blocks loaded ${opcode} in the project`);
+        await page.waitForFunction(() =>
+            document.querySelector('[data-testid="bw-code-action-row"] button[aria-label$="To blocks"]')?.disabled === false);
+        const editor = page.locator('.cm-content').first();
+        assert.equal(await editor.evaluate(el => el.cmTile.root.view.state.doc.toString()), source,
+            `${name} source changed during conversion`);
+        console.log(`${name} → Blocks loaded ${opcode} and retained its source`);
         await page.close();
     }
 

@@ -52,3 +52,16 @@ test('Forth retains the order of loose words and main invocations', () => {
     assert.match(pseudocode, /say "before"\s+say "main"\s+say "after"/);
     assert.deepEqual(readOpcodes(pseudocode), ['event_whenflagclicked', 'looks_say', 'looks_say', 'looks_say']);
 });
+
+test('generated BASIC preserves Scratch output and the original scalar spelling', async () => {
+    const {default: readBasic} = await importSource('src/lib/sb3-creator-basic.js');
+    const creator = new SB3Creator();
+    const p = creator.parse('GLOBAL total\nWHEN flag clicked:\n  set total to 17\n  change total by 25\n  say "Mixed Case"\n');
+    const read = readBasic(creator.generateBASIC(p, {profile: 'ms'}).basic);
+    assert.deepEqual(read.warnings, []);
+    assert.doesNotMatch(read.pseudocode, /^DEVICE /m);
+    assert.match(read.pseudocode, /set total to 17\s+change total by 25\s+say "Mixed Case"/);
+    assert.deepEqual(readOpcodes(read.pseudocode),
+        ['event_whenflagclicked', 'data_setvariableto', 'data_changevariableby', 'looks_say']);
+    assert.match(readBasic('10 PRINT "serial"').pseudocode, /DEVICE EATER6502[\s\S]*print "serial"/);
+});

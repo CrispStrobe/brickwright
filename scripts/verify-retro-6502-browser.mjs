@@ -125,6 +125,22 @@ try {
         return console;
     }
 
+    async function bindDisplay(kind, part) {
+        await rightView('Controller');
+        const dock = controller();
+        await dock.getByTestId('bw-ctl-mode-edit').click();
+        await dock.getByRole('button', {name: '+ Add Widget', exact: true}).click();
+        await dock.getByRole('button', {name: kind, exact: true}).click();
+        const name = `${kind}1`;
+        await dock.getByTestId(`bw-ctl-widget-${name}`).click();
+        if (kind === 'lcd') await dock.getByTestId('bw-ctl-insp-cfg-cols').fill('16');
+        await dock.getByTestId('bw-ctl-insp-bind-target').selectOption('part');
+        await dock.getByTestId('bw-ctl-insp-bind-part').selectOption(part);
+        await dock.getByTestId('bw-ctl-insp-ok').click();
+        await dock.getByTestId('bw-ctl-mode-play').click();
+        return name;
+    }
+
     const vdpWidget = '[data-testid="bw-ctl-simplevga-Video"] canvas';
     // Cold Code entry. A compiled declaration alone can show a wired VDP and
     // a controller widget while leaving the ROM slot empty.
@@ -148,7 +164,10 @@ try {
     await page.getByTestId('bw-machine-preset-lcdhello').click();
     await page.waitForFunction(() => document.querySelector('[data-testid="bw-ctl-lcd-LCD"]')
         ?.getAttribute('data-shown')?.includes('HI BRICKWRIGHT'));
-    console.log('6502 LCD Hello reaches the wired Controller LCD.');
+    const lcd = await bindDisplay('lcd', 'lcd');
+    await page.waitForFunction(name => document.querySelector(`[data-testid="bw-ctl-lcd-${name}"]`)
+        ?.getAttribute('data-shown')?.includes('HI BRICKWRIGHT'), lcd);
+    console.log('6502 LCD Hello reaches both the original and the manually bound Controller LCD.');
 
     await openExample('eater6502-vdp-hello', '6502 + VDP Video');
     await vdpHelloFrame(vdpWidget);
@@ -186,7 +205,9 @@ try {
     await rightView('Controller');
     await monitorConsole('Video').waitFor({state: 'hidden'});
     await vdpHelloFrame(vdpWidget);
-    console.log('Reloading VDP Hello restores the Controller framebuffer.');
+    const video = await bindDisplay('simplevga', 'vdp1');
+    await vdpHelloFrame(`[data-testid="bw-ctl-simplevga-${video}"] canvas`);
+    console.log('VDP Hello renders in the original screen and in a manually bound Controller screen.');
 
     await openExample('aurora65-workstation', 'Aurora-65 Display Workstation');
     await activeFrame('vgaMonitor', 160, 128);

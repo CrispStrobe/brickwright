@@ -2910,9 +2910,11 @@ class PseudocodeImporter extends React.Component {
         if (this.state.lang === 'asm' && this.state.asmMode === 'listing') return;
         this.invalidateArcadeReport();
         this.setState(s => {
+            const independent = {asm: s.buffers.asm ?? '', nqc: s.buffers.nqc ?? ''};
+            if (Object.hasOwn(independent, s.lang)) return {buffers: {...s.buffers, [s.lang]: text}};
             const device = s.buffers.pseudocode?.match(/^DEVICE\s+[\w-]+[^\n]*/im)?.[0];
             return {buffers: {...Object.fromEntries(Object.keys(LANG_LABEL).map(lang => [lang, ''])),
-                pseudocode: device ? `${device}\n` : '', [s.lang]: text}};
+                ...independent, pseudocode: device ? `${device}\n` : '', [s.lang]: text}};
         });
     }
 
@@ -3102,15 +3104,12 @@ class PseudocodeImporter extends React.Component {
         }
         const existing = this.state.buffers[to];
         const src = this.state.buffers[from];
-        // Leaving the ASM tab is not a conversion: assembly is not a source the
-        // other languages are derived from (deriveBuffer has no `asm` reader),
-        // and deriving used to parse the assembly AS PSEUDOCODE — every line was
-        // dropped and the tab filled with an empty program. Since D5 the parser
-        // refuses a line it cannot read, so that became an error that kept the
-        // learner on the ASM tab. Just switch.
+        // ASM source and NQC are edited independently. MicroPython has a
+        // generated preview, but switching away does not reparse it as Pseudocode.
+        const independent = !TWO_WAY.has(from) || to === 'nqc';
         const hasSource = (buffer, language) => Boolean(buffer && (language === 'pseudocode' ?
             buffer.replace(/^DEVICE\s+[^\n]*(?:\n|$)/im, '') : buffer).trim());
-        if (from === 'asm' || hasSource(existing, to) || !hasSource(src, from)) {
+        if (independent || hasSource(existing, to) || !hasSource(src, from)) {
             this.setState({lang: to, output: null, status: '', emptyTabOffer: null});
             return;
         }
@@ -5857,17 +5856,16 @@ class PseudocodeImporter extends React.Component {
             if (lang !== 'pseudocode') nb.pseudocode = new SB3Creator().decompile(proj);
             if (lang !== 'python') nb.python = new SB3Creator().generatePython(proj, this.genOpts());
             if (lang !== 'javascript') nb.javascript = new SB3Creator().generateJavaScript(proj, this.genOpts());
-            nb.c = new SB3Creator().generateC(proj);
-            {
+            if (lang !== 'c') nb.c = new SB3Creator().generateC(proj);
+            if (lang !== 'basic') {
                 const br = new SB3Creator().generateBASIC(proj, {profile: this.state.basicProfile.startsWith('i8086') ? 'ms' : this.state.basicProfile, lineNumbers: this.state.basicLineNumbers});
                 nb.basic = br.ok ? br.basic : `REM === Cannot show as BASIC ===\n${br.reasons.map(s => 'REM ' + s).join('\n')}`;
             }
-            nb.asm = ''; // cleared — re-fetched on next ASM tab switch
             // fe and Tcl are NOT regenerated here: their generators load lazily, and
             // awaiting them inside compile() raced with the user on a slow runner —
             // after the snapshot above it overwrote an edit typed meanwhile; before
             // loadProject it reloaded the project after a machine had started and
-            // stopped it. Cleared like ASM, they re-derive when their tab is opened.
+            // stopped it. Other interpreter tabs re-derive when opened.
             for (const l of Object.keys(DOS_LANG)) if (l !== lang) nb[l] = '';
             {
                 const mp = new SB3Creator().generateMicroPython(proj);
@@ -5913,7 +5911,8 @@ class PseudocodeImporter extends React.Component {
                 javascript: new SB3Creator().generateJavaScript(project, this.genOpts()),
                 c: new SB3Creator().generateC(project),
                 basic: basicResult.ok ? basicResult.basic : `REM === Cannot show as BASIC ===\n${basicResult.reasons.map(s => 'REM ' + s).join('\n')}`,
-                asm: '', // cleared — re-fetched on next ASM tab switch
+                asm: this.state.buffers.asm ?? '',
+                nqc: this.state.buffers.nqc ?? '',
                 micropython: mpResult.ok ? mpResult.py : `# === Cannot generate MicroPython ===\n${mpResult.reasons.map(s => '# ' + s).join('\n')}`,
                 ...(await dosLangBuffersFor(project, this.state.lang))
             };

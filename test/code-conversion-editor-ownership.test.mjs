@@ -4,6 +4,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {blinkFamily, blinkSource, blinkStarter} from '../overlay/scratch-gui/src/lib/bw-asm/blink-machines.js';
 
 const importer = new URL('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx', import.meta.url);
 const original = readFileSync(importer, 'utf8');
@@ -20,10 +21,11 @@ const methods = extract('    async compile ({strict = false, pseudocode = null} 
         '    // Real hardware, two minutes: generate MicroPython and push it to a');
 const Editor = new Function('TWO_WAY', 'DOS_LANG', 'codeArtworkMatches', 'captureCodeArtwork',
     'classifyConversionWarnings', 'conversionFailure', 'LANG_LABEL', 'pickLocale', 'confirmAsync', 'DEVICE_BY_ID',
+    'blinkFamily', 'blinkSource', 'blinkStarter',
     `return class {${methods}}`)(new Set(['pseudocode']), {}, () => false, () => null,
     () => ({changed: [], unsupported: []}), error => ({message: error.message, issues: []}),
     {pseudocode: 'Pseudo'}, () => 'en', async () => true,
-    {pico: {core: 'rp2040', label: 'Pico'}, i8086: {core: 'i8086', label: '8086'}});
+    {pico: {core: 'rp2040', label: 'Pico'}, i8086: {core: 'i8086', label: '8086'}}, blinkFamily, blinkSource, blinkStarter);
 const deferred = () => {
     let resolve;
     const promise = new Promise(done => { resolve = done; });
@@ -112,11 +114,11 @@ function fixture (hold = null, failure = null) {
     }};
 }
 
-test('ordinary conversion still regenerates buffers, clears old ASM and finishes busy', async () => {
+test('ordinary conversion still regenerates buffers, retains authored ASM and finishes busy', async () => {
     const f = fixture(); await f.editor.compile();
     assert.deepEqual(f.calls, ['load', 'refresh']);
     assert.equal(f.editor.state.buffers.python, 'generated Python');
-    assert.equal(f.editor.state.buffers.asm, '');
+    assert.equal(f.editor.state.buffers.asm, 'old ASM');
     assert.equal(f.editor.state.importedPython, false);
     assert.equal(f.editor.state.status, 'Blocks loaded.');
     assert.equal(f.editor.state.busy, false);
@@ -127,7 +129,7 @@ test('explicit device-retarget source still compiles while ASM is selected', asy
     await f.editor.compile({pseudocode: 'DEVICE i8086'});
     assert.deepEqual(f.calls, ['load', 'refresh']);
     assert.equal(f.editor.state.lang, 'asm');
-    assert.equal(f.editor.state.buffers.asm, '');
+    assert.equal(f.editor.state.buffers.asm, 'old ASM');
     assert.equal(f.editor.state.status, 'Blocks loaded.');
 });
 
