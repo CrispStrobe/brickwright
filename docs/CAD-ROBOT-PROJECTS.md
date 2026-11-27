@@ -2132,3 +2132,31 @@ packaged SIMD module. Atlas sustained 0.900×, reached 45.65 mm
 of lift and 14.98° of tilt at 6.10 simulated seconds, and passed
 Stop, Reset, repeat Run and a restart after a gravity edit. Scout
 sustained 0.960× and passed Stop, Reset and repeat Run.
+
+### Reuse native motor settings during coupled playback
+
+CrispCAD binds each impulse to its dynamic reaction bodies once.
+The world activates dynamic bodies when adding them and disables
+sleeping, so coupled impulses and position servos can use the bodies
+without issuing a wake call every tick. Velocity-mode transitions and
+torque-limit changes still update Jolt. Coast, braking, and transfers
+between velocity control, servo control, and impulses are covered by
+the actuator tests.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/7b736aa0407584af9b2b276917e97a2a2740a2aa)
+
+A 600-tick instrumented Chrome replay with bundled bw.11 removed
+4,800 wake calls on Atlas and 2,400 on Scout. Atlas's motor-mode
+writes fell from 603 to four and its motor-settings lookups from
+600 to one. Both run orders produced the same call counts. CAD poses,
+joint readings, electrical readings, and warm restart frames matched
+exactly.
+
+The measured actuator stage for 600 Atlas ticks took 45.3 → 29.4 ms
+in one order and 67.7 → 65.0 ms in the other. Scout took 19.8 → 15.3 ms
+and 34.4 → 18.0 ms. Atlas's complete coupled replay ran at 1.225 → 1.316×
+in the first order and 0.927 → 0.906× in the reverse order under varying
+machine load. The sustained 1× full-editor target remains open.
+
+All 24 focused tests passed across the initial run and isolated
+retry. The loose-object and ground-contact test needed more than
+its default five-second deadline on the shared machine.
