@@ -233,6 +233,7 @@ import {legacyDirectMenuValue} from '../arcadeDialect.js';
 const directMenuValue = (block, slot, blocks) => block.fields?.[slot]?.[0] ?? legacyDirectMenuValue(block, slot, blocks);
 const settingType = (block, blocks) => directMenuValue(block, 'TYPE', blocks);
 import {svgToPixels, quantizeRgba, toImgLiteral, remapPalette, nearestIndex} from './pixel-image.js';
+import {planScratchArcadeKeyboard} from './scratch-arcade-keyboard.js';
 // arcade-character-animations Predicate members.
 const CHARACTER_PREDICATE_NAMES = ['NotMoving', 'Moving', 'FacingUp', 'FacingRight', 'FacingDown', 'FacingLeft', 'MovingUp', 'MovingRight',
     'MovingDown', 'MovingLeft', 'HittingWallUp', 'HittingWallRight', 'HittingWallDown', 'HittingWallLeft'];
@@ -574,6 +575,10 @@ class ArcadeEmitter {
         // stays a Boolean. A Scratch-only project keeps Scratch's numbers.
         this.arcadeValues = project.targets.some(t => Object.values(t.blocks || {})
             .some(b => b && /^(arcade|arrays)_/.test(b.opcode || '')));
+        this.scratchKeyboard = project.targets.some(target => Object.values(target.blocks || {})
+            .some(block => block?.opcode?.startsWith('arcade_'))) ? null : planScratchArcadeKeyboard(project.targets);
+        this.variableMonitors = new Map();
+        this.monitorSymbols = used;
         this.initialGlobals = new Map();
         this.editedSavedReferenceIds = new Map();
         this.globals = new Map();       // Scratch variable id|name -> TS name
@@ -1103,6 +1108,52 @@ class ArcadeEmitter {
             return `self.data[${JSON.stringify(key)}]`;
         }
         return local ? this.varName(this.target, name) : this.varName(this.project.targets.find(t => t.isStage) || this.target, name);
+    }
+
+    scratchButton (key) {
+        return this.scratchKeyboard ? this.scratchKeyboard.controls.get(key) : KEY_BUTTON[key];
+    }
+
+    variableMonitor (id, name) {
+        if (!id || !name) return null;
+        if (this.variableMonitors.has(id)) return this.variableMonitors.get(id);
+        const owner = this.project.targets.find(target => target.variables?.[id]?.[0] === name);
+        if (!owner || !owner.isStage && this.isGlobalVar(name)) return null;
+        const info = this.infoVariable(name);
+        let value;
+        if (info) value = info === 'score' ? 'info.score()' : 'info.life()';
+        else if (this.isClonable(owner)) {
+            const key = `v:${name}`;
+            if (!this.cloneVars.has(owner.name)) this.cloneVars.set(owner.name, new Map());
+            this.cloneVars.get(owner.name).set(key, owner.variables[id][1]);
+            value = `${this.spriteVar.get(owner.name)}.data[${JSON.stringify(key)}]`;
+        } else value = this.varName(owner, name);
+        let flag = '__bwMonitorVisible';
+        const functions = new Set(this.functionNames());
+        while (this.monitorSymbols.has(flag) || functions.has(flag)) flag += '_';
+        this.monitorSymbols.add(flag);
+        const entry = {value, name: owner.isStage ? name : `${owner.name}: ${name}`,
+            flag, visible: false};
+        this.variableMonitors.set(id, entry);
+        return entry;
+    }
+
+    variableMonitorDrawing () {
+        const dark = nearestIndex([0, 0, 0], this.palette);
+        const light = nearestIndex([255, 255, 255], this.palette);
+        const rows = [...this.variableMonitors.values()].map(({flag, value, name}) => [
+            `    if (${flag}) {`,
+            `        const label = (${JSON.stringify(name + ': ')} + (${value})).substr(0, 38)`,
+            '        const width = label.length * image.font5.charWidth + 4',
+            '        if (x + width > screen.width) { x = 2; y += 8 }',
+            '        if (y + 7 <= screen.height) {',
+            `            screen.fillRect(x, y, width, 7, ${dark})`,
+            `            screen.print(label, x + 2, y + 1, ${light}, image.font5)`,
+            '            x += width + 2',
+            '        }',
+            '    }'
+        ].join('\n'));
+        return ['game.onShade(function () {', '    let x = 2; let y = 2', ...rows, '})'].join('\n');
     }
 
     /**
@@ -2447,7 +2498,7 @@ class ArcadeEmitter {
         case 'music_getTempo': return this.use('music', '_tempo');
         case 'sensing_keypressed': {
             const key = this.menuField(b, 'KEY_OPTION', 'KEY_OPTION');
-            const btn = KEY_BUTTON[key];
+            const btn = this.scratchButton(key);
             if (btn) return `${btn}.isPressed()`;
             this.note(`key "${key}" pressed (Arcade has arrows, A and B)`);
             return 'false';
@@ -2592,6 +2643,14 @@ class ArcadeEmitter {
             // They keep their existing validator; do not join pre-rewrite text.
             if(!this.currentClassName)this.createdFieldWriteSites.push({target:this.target,block:b,statement});
             push(statement);return;
+        }
+        case 'data_showvariable':
+        case 'data_hidevariable': {
+            const [name, id] = b.fields?.VARIABLE || [];
+            const monitor = this.variableMonitor(id, name);
+            if (monitor) push(`${monitor.flag} = ${b.opcode === 'data_showvariable'}`);
+            else push('// ' + this.note(b.opcode + ': variable monitor has no unambiguous saved owner'));
+            return;
         }
         case 'data_setvariableto': {
             const scratchName = this.field(b, 'VARIABLE');
@@ -4895,7 +4954,7 @@ class ArcadeEmitter {
                     if (script.length) flagScripts.push({script, clonable, sv, plain: !clonable && !this.tokened()});
                 } else if (b.opcode === 'event_whenkeypressed') {
                     const key = this.field(b, 'KEY_OPTION');
-                    const btn = KEY_BUTTON[key];
+                    const btn = this.scratchButton(key);
                     if (!btn) {
                         handlers.push(`// ${this.note(`when key "${key}" pressed (Arcade has arrows, A and B)`)}`);
                     } else if (clonable) {
@@ -5048,6 +5107,21 @@ class ArcadeEmitter {
         }
         for (const token of this.destroyedCallbacks.keys()) {
             if (!this.usedDestroyedCallbacks.has(token)) this.note(`Arcade sprite destruction callback ${token} has no registration`);
+        }
+        for (const monitor of this.project.monitors || []) {
+            if (monitor?.opcode !== 'data_variable' || !monitor.visible) continue;
+            const entry = this.variableMonitor(monitor.id, monitor.params?.VARIABLE);
+            if (entry) entry.visible = true;
+            if (monitor.mode === 'slider') this.note('Scratch variable monitor sliders have no portable Arcade input');
+        }
+        if (this.variableMonitors.size) {
+            this.warn('Scratch variable monitors use compact labels on the Arcade screen');
+            for (const {flag, visible} of this.variableMonitors.values()) pre.push(`let ${flag} = ${visible}`);
+            handlers.push(this.variableMonitorDrawing());
+        }
+        if (this.scratchKeyboard?.setup.length) {
+            out.push(...this.scratchKeyboard.setup);
+            this.warn('Arcade keyboard controls keep the Scratch keys. Physical controllers use the assigned Arcade buttons.');
         }
         // Declarations: every variable the program touched, then the sprites.
         const objectClasses=this.objectClassExport.render();
