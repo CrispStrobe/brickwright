@@ -1932,3 +1932,18 @@ Physics type checking and all 21 actuator, telemetry and gear-train
 tests passed. Overall worker timing varied under Mac load. Brickwright
 pins SDK `68666ce`. Sustained 1× in the production app remains open.
 [CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/6db059f5f4b5ccdf773cfa0b5211e1b9f16730f9)
+
+### Share hinge angles between telemetry and servo control
+
+A position servo and hinge telemetry share the native angle at each
+physics boundary. Advancing the solver invalidates the sample. The
+torque limit and target angular velocity still apply on every servo
+command.
+
+The paired Chrome workers ran 600 Circuit–CAD substeps per robot with
+the same bundled Jolt SIMD engine. Atlas made 1,803 native hinge-angle
+reads per run, down from 2,403. Scout made 1,202 in both versions since
+its test uses only drive motors. All sampled motion and electrical
+readings matched in both orders, and both robots restored their initial
+frames on warm restart. Overall worker timing varied under Mac load.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/64de0a51fa33d71d8d058f726bd77d4bb899f6be)
