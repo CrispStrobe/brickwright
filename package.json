@@ -155,6 +155,7 @@
         "node": ">=22"
     },
     "devDependencies": {
+        "@xterm/xterm": "6.0.0",
         "acorn": "8.14.0",
         "bw-board": "github:CrispStrobe/bw-board#d21d6d8b819263eb08231134b7556efa82289a90",
         "bw-circuit-ui": "github:CrispStrobe/bw-circuit-ui#21a54233b7e190253d6c71cd696a87f0f06e848f",
