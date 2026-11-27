@@ -411,6 +411,8 @@ try {
         await page.locator('#bw-code-input-answer').fill('Ada');
         await page.getByTestId('bw-code-input').locator('button[type="submit"]').click();
         await finishRun(run, 'first\nsecond\nprocedure\nAda\nlast\n');
+        await page.getByTestId('bw-code-input').waitFor({state: 'hidden'});
+        await page.getByTestId('bw-code-stop').waitFor({state: 'hidden'});
         assert.deepEqual(await vmGraph(), before, 'console execution does not replace or mutate the block graph');
         return {humanInputHeldMs: run.humanInputHeldMs};
     });

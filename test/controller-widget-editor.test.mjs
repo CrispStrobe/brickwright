@@ -42,8 +42,9 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync, mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { ControllerPanel } from 'bw-board/controller.js';
 
@@ -83,32 +84,56 @@ test('the remove control is out of flow, so the box is identical in both modes',
     assert.match(el, /right:\s*\d/, 'not anchored to the right');
 });
 
-test('a CONTENT-SIZED widget is the one that proves parity, and the shipped set has some', () => {
-    // The measurement that corrected the brief, kept as a gate so the claim
-    // cannot rot: if every shipped widget gained an explicit size, the parity
-    // test above would still pass and would be proving nothing about anything
-    // real. This fails if that day comes, and says why.
-    const dir = join(repo, 'overlay', 'scratch-gui', 'static');
+function contentSizedControllerCensus (dir) {
     let total = 0, contentSized = 0;
+    const files = [];
     const walk = (d) => {
         for (const e of readdirSync(d, { withFileTypes: true })) {
             const p = join(d, e.name);
-            if (e.isDirectory()) { walk(p); continue; }
-            if (e.name !== 'controller.json') continue;
-            let data;
-            try { data = JSON.parse(readFileSync(p, 'utf8')); } catch { continue; }
-            for (const w of data.widgets ?? []) {
-                total++;
-                const L = w.layout ?? {};
-                if (!L.w && !L.h) contentSized++;
-            }
+            if (e.isDirectory()) walk(p);
+            else if (e.name === 'controller.json') files.push(p);
         }
     };
-    try { walk(dir); } catch { /* the static tree is optional in some checkouts */ }
-    if (total === 0) return;                  // nothing shipped here to speak about
+    walk(dir);
+    assert.ok(files.length > 0, 'the shipped controller corpus must not be empty');
+    for (const file of files) {
+        const data = JSON.parse(readFileSync(file, 'utf8'));
+        assert.ok(Array.isArray(data.widgets), `${file} must declare its widget list`);
+        for (const w of data.widgets) {
+            total++;
+            const L = w.layout ?? {};
+            if (!L.w && !L.h) contentSized++;
+        }
+    }
+    assert.ok(total > 0, 'the shipped controller corpus must contain widgets');
     assert.ok(contentSized > 0,
         `all ${total} shipped widgets now carry an explicit size, so the parity test above `
         + 'no longer exercises the case it was written for -- re-anchor it');
+    return {files: files.length, total, contentSized};
+}
+
+test('a CONTENT-SIZED widget is the one that proves parity, and the shipped set has some', t => {
+    // Controllers ship in examples/, not static/. A missing or unreadable
+    // corpus must fail instead of making the UI parity assertion vacuous.
+    const census = contentSizedControllerCensus(join(repo, 'overlay', 'scratch-gui', 'examples'));
+    t.diagnostic(`${census.files} controller files, ${census.total} widgets, ${census.contentSized} content-sized`);
+});
+
+test('controller coverage refuses an empty corpus or an unreadable member beside valid widgets', t => {
+    const dir = mkdtempSync(join(tmpdir(), 'controller-coverage-'));
+    t.after(() => rmSync(dir, {recursive: true, force: true}));
+    assert.throws(() => contentSizedControllerCensus(dir), /corpus must not be empty/);
+    const valid = join(dir, 'valid');
+    const invalid = join(dir, 'invalid');
+    mkdirSync(valid);
+    mkdirSync(invalid);
+    writeFileSync(join(valid, 'controller.json'), JSON.stringify({widgets: [{layout: {}}]}));
+    assert.deepEqual(contentSizedControllerCensus(dir), {files: 1, total: 1, contentSized: 1});
+    writeFileSync(join(invalid, 'controller.json'), '{unreadable');
+    assert.throws(() => contentSizedControllerCensus(dir), SyntaxError,
+        'one valid controller cannot conceal another that could not be read');
+    writeFileSync(join(invalid, 'controller.json'), '{}');
+    assert.throws(() => contentSizedControllerCensus(dir), /must declare its widget list/);
 });
 
 test('removing a widget removes it, and the panel still serialises', () => {

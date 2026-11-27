@@ -40,6 +40,7 @@ try {
     const dialog = page.getByRole('dialog', {name: 'Send to CAD', exact: true});
     await dialog.getByRole('button', {name: 'Add editable sketch', exact: true}).waitFor();
     await dialog.getByRole('button', {name: 'Close', exact: true}).click();
+    await dialog.waitFor({state: 'hidden'});
     const stageId = await page.evaluate(() => window.__brickwrightStore.getState().scratchGui.vm.runtime.getTargetForStage().id);
     await page.getByTestId('bw-image-target').selectOption(stageId);
     const newBackdrop = action('New Backdrop');

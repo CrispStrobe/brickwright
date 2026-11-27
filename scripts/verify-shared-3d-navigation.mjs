@@ -69,6 +69,7 @@ const transition = async (canvas, makeInput, expected) => {
 };
 const openRobots = async () => {
     await tab('Robots').click();
+    await cad.waitFor({state: 'hidden'});
     const build = page.getByTestId('bw-sim-lab-mode-build');
     if (!await robots.isVisible()) await build.click();
     await page.waitForFunction(() => window.__bwSimLab?.editView?.camera && __bwSimLab.status === 'ready');
@@ -76,6 +77,7 @@ const openRobots = async () => {
 };
 const openCad = async () => {
     await tab('CAD').click();
+    await robots.waitFor({state: 'hidden'});
     await page.waitForFunction(() => window.__bwCad?.editor);
     await cad.waitFor();
 };
