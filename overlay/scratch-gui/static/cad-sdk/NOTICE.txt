@@ -68,9 +68,9 @@ Runtime dependencies:
   (MIT / University of Illinois-NCSA). Preserve their upstream notices when
   redistributing a runtime build.
 - fflate 0.8.3, MIT, copyright Arjun Barrett.
-- Optional exact B-rep kernel: `@crispcad/exact-kernel` 0.1.9 from the CrispCAD
+- Optional exact B-rep kernel: `@crispcad/exact-kernel` 0.1.10 from the CrispCAD
   kernel lab (https://github.com/CrispStrobe/crispcad-kernel-lab, release
-  `exact-kernel-v0.1.9`), MIT AND Apache-2.0, copyright CrispCAD contributors. It
+  `exact-kernel-v0.1.10`), MIT AND Apache-2.0, copyright CrispCAD contributors. It
   prebundles smlibwasm 0.6.2 (`@classcad/smlibwasm`, MIT, copyright 2026 AWV
   Informatik AG), built from source by the lab with recorded provenance and
   without its OFL font, with SMLib and its SM_API wrapper from USD BRep
@@ -1600,10 +1600,10 @@ from `experiments/exact-kernel` on 2026-11-25).
 
 Runtime dependencies:
 - `@brickwright/cad-core` 0.1.0 (this repository, BSD-3-Clause).
-- `@crispcad/exact-kernel` 0.1.9 from the CrispCAD kernel lab
-  (https://github.com/CrispStrobe/crispcad-kernel-lab, release `exact-kernel-v0.1.9`,
-  tarball `crispcad-exact-kernel-0.1.9.tgz`, SHA-256
-  ad1e6064eca59694d27b86770a1a92c850f269753627b4a629ce0ecf06faf710), declared
+- `@crispcad/exact-kernel` 0.1.10 from the CrispCAD kernel lab
+  (https://github.com/CrispStrobe/crispcad-kernel-lab, release `exact-kernel-v0.1.10`,
+  tarball `crispcad-exact-kernel-0.1.10.tgz`, SHA-256
+  ffe86ae0099d544c38a1eb3ba9660f4b803b68a84d186f9f2fe1973aa43f9b7d), declared
   `MIT AND Apache-2.0`, copyright CrispCAD contributors. It has no runtime dependencies.
   Its `dist/` prebundles:
   - smlibwasm 0.6.2 (`@classcad/smlibwasm`), MIT, copyright 2026 AWV Informatik AG,
@@ -1662,9 +1662,9 @@ Runtime dependencies:
   (MIT / University of Illinois-NCSA). Preserve their upstream notices when
   redistributing a runtime build.
 - fflate 0.8.3, MIT, copyright Arjun Barrett.
-- Optional exact B-rep kernel: `@crispcad/exact-kernel` 0.1.9 from the CrispCAD
+- Optional exact B-rep kernel: `@crispcad/exact-kernel` 0.1.10 from the CrispCAD
   kernel lab (https://github.com/CrispStrobe/crispcad-kernel-lab, release
-  `exact-kernel-v0.1.9`), MIT AND Apache-2.0, copyright CrispCAD contributors. It
+  `exact-kernel-v0.1.10`), MIT AND Apache-2.0, copyright CrispCAD contributors. It
   prebundles smlibwasm 0.6.2 (`@classcad/smlibwasm`, MIT, copyright 2026 AWV
   Informatik AG), built from source by the lab with recorded provenance and
   without its OFL font, with SMLib and its SM_API wrapper from USD BRep

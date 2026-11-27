@@ -140,6 +140,73 @@ runtime pin after this signing step and rebuild with that pin. The receipt's
 runtime-pin check covers the package before Apple's TestFlight re-signing;
 launching the installed TestFlight simulator was not tested in this delivery.
 
+## Chosen-edge fillets, STEP import as exact bodies and kernel 0.1.10 (27 November 2026)
+
+Lite pins CrispCAD SDK `02287df59bdb8ba7f3685a9241dd6b299276b1c3` (previously
+`afb2984b`, the robot-wiring pin; the last section here described `68666ce`).
+`02287df` is CrispCAD main `80d8666` plus the BrickWright round-trip proof for
+document versions 44 to 46. Over `68666ce` the exact-modeling side brings:
+
+- **Exact kernel 0.1.10** (CrispCAD `083a85f`, release `exact-kernel-v0.1.10`,
+  tarball SHA-256 `ffe86ae0...9b7d`), after 0.1.8 (topology, face naming,
+  fillet/chamfer of edge indices, strict `importStepBodies`) and 0.1.9, which
+  the `afb2984` pin already carried without THIRD-PARTY-NOTICES.md following;
+  it now names 0.1.10. STEP export writes one named, coloured solid per body.
+  Exact commands recorded with 0.1.9 replay as stale, as designed.
+- **Fillet and chamfer of chosen edges, document version 44** (CrispCAD
+  `a981d0f`, `80d8666`): "Chosen edges" in the Fillet, chamfer, shell dialog
+  lists the body's B-rep edges; they are picked in the dialog's edge drawing or,
+  new in this pin, with "Pick in the 3D view" on the model itself (24 px touch,
+  10 px mouse targets, hidden edges never picked). Edges are stored as stable
+  references (the two faces each edge bounds), resolved again after upstream
+  edits; a reference that no longer resolves leaves the feature stale rather
+  than picking another edge.
+- **STEP import as exact bodies, document version 45** (CrispCAD `6e86c6e`,
+  `80d8666`): File > Import STEP as exact bodies keeps each solid's B-rep and the
+  kernel's display mesh, so the project opens, displays, simulates and prints
+  without loading the kernel; exact measure, fillet, chamfer, shell and STEP
+  export work on the body. Import is about twice as fast in this pin (58-body
+  board 38.5 s to 19.5 s) and new imports store a lighter display mesh.
+- **CAD Script loft pairing, document version 46** (CrispCAD `afa1536`):
+  `loft([...], {pairing: "closest"})` and `smoothLoft` re-start each section
+  where it is closest to the previous one; lofts without the option are
+  unchanged byte for byte.
+- **Drawings from exact edges** (`f8730d4`): assembly drawing sheets can take
+  B-rep edges and true arcs from the kernel. **Rounded and bevelled hole rims**
+  display in linear time (`286f36a`; 200-hole plate fillet display 28 s to
+  2 s). **Journal export** writes parametric profiles and Booleans of portable
+  bodies as CAD Script (`7264e9a`).
+
+BrickWright's SB3 bundle keeps `brickwright/cad.json` byte for byte at every
+version; until this sync the vendored editor refused version 46 documents.
+CrispCAD's `npm run verify:brickwright` now round-trips one document of each
+version from 41 to 46 through the real BrickWright writer and loader (`02287df`).
+The 22 robot projects were regenerated from this pin with
+`npm run gen:cad-robots`: they are byte-identical to the committed ones, so
+`static/cad-robots` is unchanged, and `npm run gen:cad-robots:check` passes.
+
+Checks on a fresh `BW_ENABLE_CAD=1` production GUI build of this pin, in the
+shared Chromium: CrispCAD `verify:brickwright` (versions 41 to 46) and
+`verify:brickwright-sync`; `sync-cad-sdk.mjs --check`; `gen:cad-robots:check`
+(against the pin and the embedded documents); the CAD SDK fetch-pin and
+fetch-pinning tests (24 pass) and `prove:pins` (11/11 mutations caught);
+`verify-built-cad-sdk` (842 files) and `verify-built-cad-robot-projects` (22);
+`verify-cad-editor.mjs` default, `--sdk-only`, `--ipad`, `--shapes-ui`,
+`--sdk-only --shapes-ui`, `--robots` and `--robots --ipad`. In the CAD tab: a
+2 mm chamfer of the box's +z edges measures exactly 5810.667 mm³ with the
+kernel fetched only on first use; the version 42 and 43 loft documents open,
+edit and save at their versions; a 150-hole rim fillet is refused with the
+tablet-limits message before the kernel runs. A STEP export of a 20 × 30 × 10 mm
+block imported with `import step` (File > Import STEP as exact bodies is not
+shown in the tab's menu bar; the terminal command opens the same chooser)
+becomes an exact body (version 45) measuring 6000 mm³; two 30 mm edges chosen
+in the dialog's edge drawing chamfer it to exactly 5880 mm³ with two stable
+edge references, and after a reload Manifold displays it with no request under
+`assets/exact/`. A version 46 paired-loft document opens (6000 mm³), edits and
+saves at version 46. The `BW_ENABLE_CAD=0` build passes `--expect-absent`.
+Picking edges in the 3D view itself was not driven in BrickWright (the dialog's
+button is present); CrispCAD's `exact-edge-pick-viewport` spec covers it.
+
 ## Exact kernel 0.1.7 and faster shape thumbnails (26 November 2026)
 
 Lite pins CrispCAD SDK `68666cefe89235eaff9b1ccd3eeb9543ce299b81` (previously
