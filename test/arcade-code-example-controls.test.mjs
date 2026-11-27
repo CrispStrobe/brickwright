@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import test from 'node:test';
 import SB3Creator from '../overlay/scratch-gui/src/lib/sb3-creator.js';
 import vectorArt from '../overlay/scratch-gui/src/lib/sb3-creator-vector-art.js';
@@ -87,4 +88,14 @@ STAGE:
     assert.ok(result.warnings.includes('Scratch thoughts use Arcade text bubbles'));
     assert.match(result.ts, /ReaderSprite\.sayText\("What now\?", 2 \* 1000, true\)/i);
     assert.match(result.ts, /_bwStageSpeech\.sayText\("Ready"\)/);
+});
+
+
+test('the PyBadge example preserves its screen variable under a name that compiles in Arcade', () => {
+    const source = readFileSync(new URL('../overlay/scratch-gui/examples/pybadge01-hello/program.bw', import.meta.url), 'utf8');
+    const result = convert(source);
+    assert.deepEqual(result.unsupported, []);
+    assert.match(result.ts, /let screen_\b/);
+    assert.match(result.ts, /screen_ = board/);
+    assert.doesNotMatch(result.ts, /let screen[ =]/);
 });
