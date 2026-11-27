@@ -75,3 +75,16 @@ STAGE:
     });
     assert.deepEqual(stale.unsupported, ['data_showvariable: variable monitor has no unambiguous saved owner']);
 });
+
+test('Scratch thoughts preserve the text, duration and speaker in the Arcade bubble', () => {
+    const result = convert(`SPRITE Reader:
+  WHEN flag clicked:
+    think "What now?" for 2 seconds
+STAGE:
+  WHEN flag clicked:
+    think "Ready"`);
+    assert.deepEqual(result.unsupported, []);
+    assert.ok(result.warnings.includes('Scratch thoughts use Arcade text bubbles'));
+    assert.match(result.ts, /Reader\.sayText\("What now\?", 2 \* 1000, true\)/i);
+    assert.match(result.ts, /_bwStageSpeech\.sayText\("Ready"\)/);
+});

@@ -3030,9 +3030,12 @@ class ArcadeEmitter {
         case 'motion_ifonedgebounce': if (me) push(`${me}.setBounceOnWall(true)`); return;
         case 'looks_show': if (me) push(`${me}.setFlag(SpriteFlag.Invisible, false)`); return;
         case 'looks_hide': if (me) push(`${me}.setFlag(SpriteFlag.Invisible, true)`); return;
+        case 'looks_thinkforsecs':
+        case 'looks_think':
         case 'looks_sayforsecs':
         case 'looks_say': {
-            const timed = b.opcode === 'looks_sayforsecs';
+            const timed = b.opcode.endsWith('forsecs');
+            if (b.opcode.startsWith('looks_think')) this.warn('Scratch thoughts use Arcade text bubbles');
             if (this.target.isStage) this.usesStageSpeech = true;
             const speaker = this.target.isStage ? '_bwStageSpeech' : me;
             if (speaker) {
