@@ -243,6 +243,14 @@ function _penTo (s: Sprite, x: number, y: number) {
     s.setPosition(x, y)
     if (s.data["_pd"]) _penLine(s, x0, y0, s.x, s.y)
 }`},
+    penHue: {deps: ['pen'], ts: `function _scratchPenHue (sprite: Sprite, value: number, relative: boolean, table: number[][]) {
+    const base = sprite.data["_pcBase"] || sprite.data["_pc"]
+    sprite.data["_pcBase"] = base
+    const previous = sprite.data["_pcHue"] || 0
+    const hue = ((relative ? previous + value : value) % 100 + 100) % 100
+    sprite.data["_pcHue"] = hue
+    sprite.data["_pc"] = table[Math.round(hue * table.length / 100) % table.length][base]
+}`},
     plain: {deps: [], ts: `function _plain (c: number): Image {
     const i = image.create(160, 120)
     i.fill(c)

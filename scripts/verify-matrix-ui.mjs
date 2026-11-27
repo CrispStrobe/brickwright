@@ -142,17 +142,14 @@ try {
     check('the panel carries the verification tier and the oracle\'s census status (T8)', /tier 2a \(emu8051: standing in bw-board CI\)/.test(c60), c60.slice(0, 160));
     check('its sibling still compiles in the browser', /in the browser/.test(c60), c60.slice(0, 120));
 
-    // The panel and the badge must also GO AWAY: toggling off removes the
-    // panel, and clearing the device removes the badge. Appearance alone
-    // proves nothing about a toggle.
     await page.getByTestId('bw-matrix-toggle').click();
     let gone = true;
     await panel.waitFor({state: 'detached', timeout: 5000}).catch(() => { gone = false; });
     check('toggling again removes the panel', gone);
     await device.selectOption('');
-    let badgeGone = true;
-    await badge.waitFor({state: 'detached', timeout: 5000}).catch(() => { badgeGone = false; });
-    check('clearing the device removes the badge', badgeGone);
+    await info.click();
+    await popover.waitFor();
+    check('clearing the device removes its capabilities from Code help', (await capabilities.count()) === 0);
 
     check('no page errors', pageErrors.length === 0, pageErrors.join(' | ').slice(0, 200));
 } finally {

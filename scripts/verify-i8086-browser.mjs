@@ -293,8 +293,18 @@ try {
             time: String(target.timeNs()), mem: Array.from(target.readMem('mem', 0, 256))});
     }, projectState));
     await page.screenshot({path: join(artifacts, 'execution-diagnostics.png'), fullPage: true});
+    // On a warm runner the benchmark can finish before a second browser
+    // round trip. Use the visible Cancel control on its first rendered frame.
+    await lab.evaluate(element => {
+        const observer = new MutationObserver(() => {
+            const cancel = element.querySelector('[data-testid="i8086-lab-cancel"]');
+            if (!cancel) return;
+            observer.disconnect();
+            cancel.click();
+        });
+        observer.observe(element, {childList: true, subtree: true});
+    });
     await page.getByTestId('i8086-lab-run').click();
-    await page.getByTestId('i8086-lab-cancel').click();
     await page.waitForFunction(() => /cancelled/.test(document.querySelector('[data-testid="i8086-lab-status"]')?.textContent || ''),
         null, {timeout: 15000});
     record('benchmark cancellation returns control without an accepted result', true);

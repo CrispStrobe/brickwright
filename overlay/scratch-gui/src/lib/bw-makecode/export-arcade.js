@@ -1199,12 +1199,14 @@ class ArcadeEmitter {
         return name;
     }
 
-    scratchEffectTable () {
-        if (!this.hueTableName) {
-            this.hueTableName = this.reserveAuxiliarySymbol('__bwScratchHueTable');
-            this.warn('Scratch color and ghost effects are drawn with Arcade palette colors and dithered transparency.');
-        }
+    scratchHueTable () {
+        if (!this.hueTableName) this.hueTableName = this.reserveAuxiliarySymbol('__bwScratchHueTable');
         return this.hueTableName;
+    }
+
+    scratchEffectTable () {
+        this.warn('Scratch color and ghost effects are drawn with Arcade palette colors and dithered transparency.');
+        return this.scratchHueTable();
     }
 
     scratchTextAnswer () {
@@ -3897,6 +3899,8 @@ class ArcadeEmitter {
             }
             this.use('pen');
             push(`${me}.data["_pc"] = ${nearestIndex([parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)], this.palette)}`);
+            push(`${me}.data["_pcBase"] = ${me}.data["_pc"]`);
+            push(`${me}.data["_pcHue"] = 0`);
             return true;
         }
         case 'pen_setPenSizeTo':
@@ -3911,6 +3915,14 @@ class ArcadeEmitter {
             return true;
         case 'pen_setPenColorParamTo':
         case 'pen_changePenColorParamBy':
+            if (me && this.menuField(b, 'COLOR_PARAM', 'colorParam') === 'color' &&
+                !this.dynamicInput(b, 'COLOR_PARAM')) {
+                this.warn('Scratch pen hue is quantized to the Arcade palette.');
+                const relative = b.opcode === 'pen_changePenColorParamBy';
+                push(this.use('penHue', `_scratchPenHue(${me}, ${v('VALUE')}, ${relative}, ${this.scratchHueTable()})`));
+                return true;
+            }
+            // falls through for the other pen color parameters.
         case 'pen_setPenHueToNumber':
         case 'pen_changePenHueBy':
         case 'pen_setPenShadeToNumber':

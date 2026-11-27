@@ -105,3 +105,10 @@ test('browser gate exercises execution preference through real controls and reco
     assert.doesNotMatch(proof, /i8086Execution\.(?:construct|setPreference)\(/,
         'browser proof must drive actual application controls, not construct a synthetic target');
 });
+
+
+test('cancelling while the diagnostics chunk loads reports a cancelled benchmark', () => {
+    const lab = readFileSync(path.join(root, 'overlay/scratch-gui/src/components/menu-bar/i8086-lab.jsx'), 'utf8');
+    assert.match(lab, /const \{compareSandbox\} = await import\([^;]+\);\s*if \(controller\.signal\.aborted\) throw new Error\('Benchmark cancelled'\)/);
+    assert.match(lab, /catch \(error\) \{\s*if \(active\.current === controller\) setStatus/);
+});

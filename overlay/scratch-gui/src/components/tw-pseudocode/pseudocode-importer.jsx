@@ -2765,7 +2765,8 @@ class PseudocodeImporter extends React.Component {
             const name = JSON.parse(out.files['pxt.json']).name;
             const filename = `arcade-${String(name).replace(/[^a-z0-9_-]+/gi, '-').toLowerCase()}.mkcd`;
             const projectFile = makeCodeProjectFile(out.files, {name, target: 'arcade'});
-            await downloadBlob(filename, new Blob([projectFile], {type: 'application/octet-stream'}));
+            await downloadBlob(filename, new Blob([projectFile], {type: 'application/octet-stream'}),
+                {allowBrowserShare: false});
             this.publishArcadeReport(request, out, 'export', original.status === 'current' && original.target === 'arcade' ?
                 'Recovered original Arcade source saved; later behavior is not verified.' :
                 'Arcade source saved, including all reported unsupported operations; it has not been compiled or run.');

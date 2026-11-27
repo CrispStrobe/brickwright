@@ -114,6 +114,12 @@ async function runRiftRallyExport () {
         assert.match(await help.getByTestId('bw-conversion-unsupported').innerText(), /nothing reported/);
         assert.match(await help.getByTestId('bw-conversion-changed').innerText(), /keyboard controls keep the Scratch keys/i);
         assert.match(await help.getByTestId('bw-conversion-changed').innerText(), /monitors use compact labels/i);
+    } catch (error) {
+        const state = await page.evaluate(() => ({
+            status: document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus,
+            hasShare: typeof navigator.share === 'function'
+        })).catch(() => ({}));
+        throw new Error(`${error.message}\nRift Rally export state: ${JSON.stringify(state)}`, {cause: error});
     } finally {
         await page.close();
     }
@@ -135,8 +141,10 @@ async function runRiftRallyExport () {
 }
 
 try {
-    await run(false);
-    await run(true);
+    if (!process.env.BW_ARCADE_ONLY_RIFT) {
+        await run(false);
+        await run(true);
+    }
     await runRiftRallyExport();
 } finally {
     await browser.close();

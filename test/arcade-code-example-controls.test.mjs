@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 import test from 'node:test';
 import SB3Creator from '../overlay/scratch-gui/src/lib/sb3-creator.js';
 import vectorArt from '../overlay/scratch-gui/src/lib/sb3-creator-vector-art.js';
+import examples from '../overlay/scratch-gui/src/lib/sb3-creator-examples.js';
 import games from '../overlay/scratch-gui/src/lib/sb3-creator-game-examples.js';
 import {projectJsonToArcade} from '../overlay/scratch-gui/src/lib/bw-makecode/export-arcade.js';
 
@@ -98,4 +99,14 @@ test('the PyBadge example preserves its screen variable under a name that compil
     assert.match(result.ts, /let screen_\b/);
     assert.match(result.ts, /screen_ = board/);
     assert.doesNotMatch(result.ts, /let screen[ =]/);
+});
+
+
+test('Digital Art changes pen hue while drawing through the native Arcade palette', () => {
+    const result = convert(examples.art);
+    assert.deepEqual(result.unsupported, []);
+    assert.ok(result.warnings.includes('Scratch pen hue is quantized to the Arcade palette.'));
+    assert.match(result.ts, /_scratchPenHue\(PenSprite, 4, true, __bwScratchHueTable\)/);
+    assert.match(result.ts, /PenSprite\.data\["_pcBase"\] = PenSprite\.data\["_pc"\]/);
+    assert.match(result.ts, /function _penLine/);
 });

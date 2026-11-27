@@ -49,7 +49,7 @@ export default function I8086Lab ({initiallyOpen = false}) {
         active.current = controller; setBusy(true); setResult(null); setStatus('Loading isolated benchmark…');
         try {
             const {compareSandbox} = await import(/* webpackChunkName: "bw-i8086-lab" */ '../../lib/bw-i8086-lab/benchmark.js');
-            if (controller.signal.aborted) return;
+            if (controller.signal.aborted) throw new Error('Benchmark cancelled');
             const report = await compareSandbox({workload, signal: controller.signal,
                 onProgress: message => { if (active.current === controller) setStatus(message); }});
             if (active.current === controller) { setResult(report); setStatus('Complete — all measured states match JavaScript.'); }
