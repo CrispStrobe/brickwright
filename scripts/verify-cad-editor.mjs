@@ -130,6 +130,31 @@ try{
   // The CAD bridges install from their own lazy chunk after first paint (lib/bw-cad-host.js).
   await page.waitForFunction(()=>window.__bwCadProgramApi&&window.__brickwrightStore?.getState().scratchGui.vm.runtime.cadCircuitSimulation);
   const cad=page.getByTestId('bw-cad-tab');
+  // The File menu lists the CAD editor's own menu (CrispCAD editor-menu.ts via editor.menuItems()):
+  // STEP as exact bodies and STEP export at the top, exact modeling and drawings as submenus.
+  // With the compact chrome ("..." toggle) the File menu moves into the CAD tab's bar.
+  {
+   const fileMenu=async()=>{await page.getByTestId('bw-file-menu-trigger').filter({visible:true}).first().click();};
+   const item=name=>page.getByRole('menuitem',{name,exact:true}).filter({visible:true}).first();
+   const checkMenu=async where=>{
+    await fileMenu();
+    for(const name of ['New CAD design…','Import STEP as exact bodies…','Export STEP (exact B-rep)…','Check printability…'])await item(name).waitFor();
+    for(const [submenu,entries] of [['Exact modeling (B-rep)',['Fillet, chamfer or shell…','Fillet or chamfer chosen edges…','Measure exactly','Recompute exact features']],['Holes and fasteners',['Standard hole','Fasten holes','Standard parts']],['Drawings and checks',['Assembly drawing…','Assembly drawing from exact edges…','Check for manufacturing…']]]){
+     await item(submenu).click();
+     for(const name of entries){const entry=item(name);await entry.waitFor();const box=await entry.boundingBox(),view=page.viewportSize();assert.ok(box.x>=0&&box.y>=0&&box.x+box.width<=view.width+1&&box.y+box.height<=view.height+1,`${where}: ${name} inside the viewport`);}
+    }
+    await page.keyboard.press('Escape');await page.mouse.click(5,(page.viewportSize().height)-5);
+    console.log(`PASS File menu (${where}${ipad?", iPad viewport":""}) lists the editor menu's exact items and submenus`);
+   };
+   await checkMenu('menu bar');
+   await page.getByTestId('bw-chrome-toggle').click();
+   await page.waitForFunction(()=>document.body.classList.contains('bw-compact-chrome'));
+   await page.locator('[data-bw-project-ribbon] [data-testid="bw-file-menu-trigger"]').waitFor();
+   await checkMenu('compact chrome, CAD bar');
+   await page.getByTestId('bw-chrome-toggle').click();
+   await page.waitForFunction(()=>!document.body.classList.contains('bw-compact-chrome'));
+   assert.equal(requests.some(url=>url.includes('/assets/exact/')),false,'menus do not load the exact kernel');
+  }
   // Exercise the shipping host, including the deferred catalogue and Redux preference.
   await cad.getByRole('button',{name:'Model library',exact:true}).click();
   const models=cad.getByRole('dialog',{name:'Model library',exact:true});

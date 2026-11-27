@@ -2763,7 +2763,8 @@ Emscripten runtime (MIT) and the Brotli static dictionary (MIT); it contains no
 OpenCASCADE code. Its NOTICE, LICENSE and full MIT and Apache-2.0 texts are part
 of the SDK's `NOTICE.txt`. The kernel lives under `static/cad-sdk/assets/exact/`
 and is fetched only when a user runs an exact feature, exact measurement, STEP
-export or STEP import; the service worker caches it only after such a request.
+export, STEP import, a drawing from exact edges or a manufacturing check (from the
+CAD tab's File menu, its toolbar or the terminal); the service worker caches it only after such a request.
 
 The optional Scout TT project generator retains the Adafruit CAD Parts MIT
 notice at `licenses/adafruit-cad-parts-MIT.txt` (Copyright (c) 2016 Adafruit
