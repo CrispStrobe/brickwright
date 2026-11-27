@@ -1,0 +1,288 @@
+{
+  "schema": 1,
+  "scope": "hand-authored Linux pygame backend and packaging probe; not Brickwright transpiler qualification",
+  "host": {
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "machine": "x86_64",
+    "python": "3.12.14",
+    "libc": [
+      "glibc",
+      "2.41"
+    ]
+  },
+  "dependencies": {
+    "altgraph": "0.17.5",
+    "packaging": "26.4",
+    "pip": "25.0.1",
+    "pygame-ce": "2.5.8",
+    "pyinstaller": "6.22.3",
+    "pyinstaller-hooks-contrib": "2026.10",
+    "setuptools": "84.2.1"
+  },
+  "execution_environment": {
+    "PATH": "",
+    "LANG": "C.UTF-8",
+    "LC_ALL": "C.UTF-8",
+    "SDL_VIDEODRIVER": "dummy",
+    "SDL_AUDIODRIVER": "dummy",
+    "PYGAME_HIDE_SUPPORT_PROMPT": "1"
+  },
+  "checks": {
+    "source_equals_bundle": true,
+    "all_24_frame_hashes_match": true,
+    "source_assertions_pass": true,
+    "packaged_frozen_runtime": true,
+    "empty_path": true,
+    "python_search_path_inside_bundle": true,
+    "pygame_loaded_from_bundle": true,
+    "libpython_loaded_from_bundle": true,
+    "bundled_python_shared_library": [
+      "_internal/libpython3.12.so.1.0"
+    ]
+  },
+  "result": {
+    "asset_sha256": "b173807b1c0b664585f2889281cc8cce2e3d4c103e7792e622ed33e1146ce92c",
+    "fixture": "authored-move-collide-score-restart",
+    "frames": [
+      {
+        "frame": 0,
+        "frame_sha256": "6fcb7e5e4f7006092795cf32ce96d48f1dadc54c6fb72d8c63d03559d068537d",
+        "resets": 0,
+        "score": 0,
+        "target_alive": true,
+        "x": 12
+      },
+      {
+        "frame": 1,
+        "frame_sha256": "d247d120b71a9083b947d4174bdee5fc3775c24fd0300ed595b41f37660ff3c7",
+        "resets": 0,
+        "score": 0,
+        "target_alive": true,
+        "x": 16
+      },
+      {
+        "frame": 2,
+        "frame_sha256": "97b72833d3a59938169e86fbf96c064955b315c41e4d53e771adef19bb92d208",
+        "resets": 0,
+        "score": 0,
+        "target_alive": true,
+        "x": 20
+      },
+      {
+        "frame": 3,
+        "frame_sha256": "e6b5263b75ee07c47bcc57f77fcc6a9361d22011e03aff0b730b6fb002b17276",
+        "resets": 0,
+        "score": 0,
+        "target_alive": true,
+        "x": 24
+      },
+      {
+        "frame": 4,
+        "frame_sha256": "1e133456364cc2650b865a043bf3c21ffa1520105f8a6d57b34bd2ce5d7b9d0a",
+        "resets": 0,
+        "score": 0,
+        "target_alive": true,
+        "x": 28
+      },
+      {
+        "frame": 5,
+        "frame_sha256": "a0f26696cf5ea8f7b04f6a214b8b5e84f3d4032370b7b5a64ca309472d7df225",
+        "resets": 0,
+        "score": 0,
+        "target_alive": true,
+        "x": 32
+      },
+      {
+        "frame": 6,
+        "frame_sha256": "836e9445d828dbd21c8f09908eb67d59eed7fe06e0b315d690d222dac931c2bd",
+        "resets": 0,
+        "score": 0,
+        "target_alive": true,
+        "x": 36
+      },
+      {
+        "frame": 7,
+        "frame_sha256": "f73bc7f0370d7977548e7ffe68a45452780074def3d4b5a4d47836813c9cd6b9",
+        "resets": 0,
+        "score": 0,
+        "target_alive": true,
+        "x": 40
+      },
+      {
+        "frame": 8,
+        "frame_sha256": "2dd47ec735f9f940c04fcfc67f7359deab1f211656014738ac2feb736ccc5aa5",
+        "resets": 0,
+        "score": 1,
+        "target_alive": false,
+        "x": 44
+      },
+      {
+        "frame": 9,
+        "frame_sha256": "b122e4d6fe4458b9661e7c96b1c7d891f258977d194d9b21ec7b6334625b9ae3",
+        "resets": 0,
+        "score": 1,
+        "target_alive": false,
+        "x": 48
+      },
+      {
+        "frame": 10,
+        "frame_sha256": "b122e4d6fe4458b9661e7c96b1c7d891f258977d194d9b21ec7b6334625b9ae3",
+        "resets": 0,
+        "score": 1,
+        "target_alive": false,
+        "x": 48
+      },
+      {
+        "frame": 11,
+        "frame_sha256": "b122e4d6fe4458b9661e7c96b1c7d891f258977d194d9b21ec7b6334625b9ae3",
+        "resets": 0,
+        "score": 1,
+        "target_alive": false,
+        "x": 48
+      },
+      {
+        "frame": 12,
+        "frame_sha256": "6fcb7e5e4f7006092795cf32ce96d48f1dadc54c6fb72d8c63d03559d068537d",
+        "resets": 1,
+        "score": 0,
+        "target_alive": true,
+        "x": 12
+      },
+      {
+        "frame": 13,
+        "frame_sha256": "d247d120b71a9083b947d4174bdee5fc3775c24fd0300ed595b41f37660ff3c7",
+        "resets": 1,
+        "score": 0,
+        "target_alive": true,
+        "x": 16
+      },
+      {
+        "frame": 14,
+        "frame_sha256": "97b72833d3a59938169e86fbf96c064955b315c41e4d53e771adef19bb92d208",
+        "resets": 1,
+        "score": 0,
+        "target_alive": true,
+        "x": 20
+      },
+      {
+        "frame": 15,
+        "frame_sha256": "e6b5263b75ee07c47bcc57f77fcc6a9361d22011e03aff0b730b6fb002b17276",
+        "resets": 1,
+        "score": 0,
+        "target_alive": true,
+        "x": 24
+      },
+      {
+        "frame": 16,
+        "frame_sha256": "1e133456364cc2650b865a043bf3c21ffa1520105f8a6d57b34bd2ce5d7b9d0a",
+        "resets": 1,
+        "score": 0,
+        "target_alive": true,
+        "x": 28
+      },
+      {
+        "frame": 17,
+        "frame_sha256": "a0f26696cf5ea8f7b04f6a214b8b5e84f3d4032370b7b5a64ca309472d7df225",
+        "resets": 1,
+        "score": 0,
+        "target_alive": true,
+        "x": 32
+      },
+      {
+        "frame": 18,
+        "frame_sha256": "836e9445d828dbd21c8f09908eb67d59eed7fe06e0b315d690d222dac931c2bd",
+        "resets": 1,
+        "score": 0,
+        "target_alive": true,
+        "x": 36
+      },
+      {
+        "frame": 19,
+        "frame_sha256": "f73bc7f0370d7977548e7ffe68a45452780074def3d4b5a4d47836813c9cd6b9",
+        "resets": 1,
+        "score": 0,
+        "target_alive": true,
+        "x": 40
+      },
+      {
+        "frame": 20,
+        "frame_sha256": "2dd47ec735f9f940c04fcfc67f7359deab1f211656014738ac2feb736ccc5aa5",
+        "resets": 1,
+        "score": 1,
+        "target_alive": false,
+        "x": 44
+      },
+      {
+        "frame": 21,
+        "frame_sha256": "b122e4d6fe4458b9661e7c96b1c7d891f258977d194d9b21ec7b6334625b9ae3",
+        "resets": 1,
+        "score": 1,
+        "target_alive": false,
+        "x": 48
+      },
+      {
+        "frame": 22,
+        "frame_sha256": "b122e4d6fe4458b9661e7c96b1c7d891f258977d194d9b21ec7b6334625b9ae3",
+        "resets": 1,
+        "score": 1,
+        "target_alive": false,
+        "x": 48
+      },
+      {
+        "frame": 23,
+        "frame_sha256": "b122e4d6fe4458b9661e7c96b1c7d891f258977d194d9b21ec7b6334625b9ae3",
+        "resets": 1,
+        "score": 1,
+        "target_alive": false,
+        "x": 48
+      }
+    ],
+    "hits": 2,
+    "resets": 1,
+    "schema": 1,
+    "size": [
+      96,
+      64
+    ],
+    "trace_sha256": "5a9c20f7602c81c8c5eeeeed8fad3717ad13e6d470e9c8b71c7081e3ab05083e"
+  },
+  "build_seconds": 7.644,
+  "bundle": {
+    "files_including_symlinks": 99,
+    "regular_file_bytes": 54072511,
+    "logical_file_bytes_including_symlinks": 67025737,
+    "executable_bytes": 1572896,
+    "executable_sha256": "b77de3935e96f2027383926bfd2f2998897a337d148d35eef88ee16a7ff65eed",
+    "inventory_sha256": "4e630ae508cbdb30e674426b2da52ff89afa310fe9d29696282006eb1774c286"
+  },
+  "source_files": {
+    "game.py": "2bd79fabae98e1a7ea7568743458c77d2295ece674aeb84760b5dea83fb42c05",
+    "make_asset.py": "5c4f8d86ed64eea3f67957df7b94ec8aecd96764a0c83f16ed006785195a2775",
+    "run_probe.py": "f88df22cb7b3c9110c31e5542e197c650c96e7e6c66c27f948e76c8c2687239c",
+    "requirements.txt": "a04d0a725f64e377413d8e34d3d3b87975a1a68e8e6c65eda02d42c321a62feb",
+    "assets/hero.png": "b173807b1c0b664585f2889281cc8cce2e3d4c103e7792e622ed33e1146ce92c"
+  },
+  "limitations": [
+    "Original hand-authored fixture, not generated by Brickwright or imported from MakeCode.",
+    "Dummy SDL video/audio: no visible GUI, real input, sound, timing or device qualification.",
+    "Executed on this Linux x86_64/glibc 2.41 host only; not a clean-distro container, other desktop OS or mobile test.",
+    "Empty PATH and bundled libpython demonstrate no Python installation lookup, not independence from host libc/loader.",
+    "One-directory standalone bundle; no installer, signing, automatic updater or final distribution-license audit.",
+    "Hashes describe this build; byte-for-byte reproducible builds have not been established."
+  ],
+  "recorded_date": "2026-11-27",
+  "reproduction": "python run_probe.py in the documented isolated environment",
+  "publication_note": "Absolute local paths and local build logs omitted. Measurements, hashes, trace, versions and validation outcomes retained unchanged.",
+  "runtime_metadata": {
+    "python": "3.12.14",
+    "pygame_ce": "2.5.8",
+    "sdl": [
+      2,
+      32,
+      10
+    ],
+    "video_driver": "dummy",
+    "frozen": true,
+    "path_env": ""
+  }
+}

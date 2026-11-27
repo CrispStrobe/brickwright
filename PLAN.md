@@ -20,7 +20,13 @@ and assets; it is not supplied by installing a Python interpreter. Begin with a
 declared playable subset, then per-OS desktop builds. Browser and native mobile
 exports, dependency licensing, and original-runtime parity have distinct gates.
 
-Status: **planning and bounded evaluation; no new runtime or exporter shipped**.
+The [initial evaluation report](docs/CODE-RUNTIME-EVALUATION-2026-11-27.md)
+records the same-engine Node/Chromium probes, a pwasm host check, silent reader
+translation changes and a Linux pygame bundle with matching source/package state
+and frame hashes. It supports explicit Pyodide/CPython and lightweight MicroPython
+modes as follow-on candidates; production integration and device gates remain open.
+
+Status: **bounded evaluation recorded; runtime/export implementation planned**.
 The [evaluation lane](lanes/2026-11-27-code-runtime-game-export-evaluation.md)
 owns documentation/probes only; application and shared-compiler repairs remain
 follow-on work under the existing ownership and upstream adoption rules.

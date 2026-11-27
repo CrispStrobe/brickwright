@@ -1,0 +1,2858 @@
+{
+  "schema": 1,
+  "createdAt": "2026-11-27T05:56:48.674Z",
+  "planCommit": "a29ac18c9e4a8789b6d58f8d5be4b5f034667627",
+  "brickwrightHead": "14de1c42bd2e2ea84086a2162d1eff1fdbbac20d",
+  "environment": {
+    "kind": "Node worker_threads; local installed assets",
+    "node": "v24.22.3",
+    "v8": "13.6.233.17-node.63",
+    "platform": "linux",
+    "arch": "x64",
+    "cpus": 9,
+    "cpuModel": "INTEL(R) XEON(R) PLATINUM 8573C",
+    "totalHostMemory": 10451423232
+  },
+  "protocol": {
+    "coldSamples": 3,
+    "warmRepeats": 5,
+    "startupBudgetMs": 30000,
+    "fixtureBudgetMs": 5000,
+    "hardStopDelayMs": 200,
+    "outputBudgetBytes": 1048576,
+    "coldMeaning": "fresh worker/runtime with already-installed local assets; OS caches and process caches may be warm; no network/download timing",
+    "sizesMeaning": "sum of specified runtime asset bytes and independent gzip/brotli compression; excludes application integration, optional packages and network headers",
+    "memoryMeaning": "Node worker thread counters plus process-wide RSS; diagnostic only, not a browser peak-memory ranking",
+    "inputMeaning": "buffered input plus separate Node SharedArrayBuffer/Atomics.wait diagnostic; this is not proof of browser/WebView input portability",
+    "bridgeMeaning": "mock arithmetic/sensor callbacks only; no actual simulator/VM/hardware integration tested"
+  },
+  "coverage": {
+    "node": "completed within stated probe scope",
+    "browser": "pending: no installed browser; Playwright download returned403 Site Unavailable",
+    "windows": "pending",
+    "macos": "pending",
+    "linuxWebView": "pending",
+    "android": "pending",
+    "ios": "pending",
+    "offlineBrowser": "pending"
+  },
+  "engines": {
+    "skulpt": {
+      "version": "1.2.0",
+      "assets": [
+        {
+          "path": "node_modules/skulpt/dist/skulpt.min.js",
+          "bytes": 559460,
+          "gzipBytes": 139701,
+          "brotliBytes": 115113,
+          "sha256": "1a319d8eedf314dba5af2444313e3cf2ac072a335df0f5100277e8f49b64eae9"
+        },
+        {
+          "path": "node_modules/skulpt/dist/skulpt-stdlib.js",
+          "bytes": 407300,
+          "gzipBytes": 93886,
+          "brotliBytes": 79524,
+          "sha256": "e3ecccbc17c6164d19ed3c5561aaaeb752c38c8efa2d88b62b5fb7a7e1b086a7"
+        }
+      ],
+      "startup": [
+        {
+          "type": "ready",
+          "engine": "skulpt",
+          "engineLoadMs": 59.63489800000002,
+          "runtimeVersion": null,
+          "memory": {
+            "rss": 71217152,
+            "heapTotal": 22257664,
+            "heapUsed": 16295104,
+            "external": 5788791,
+            "arrayBuffers": 488523
+          },
+          "workerStartToReadyMs": 161.27649399999996,
+          "logs": {
+            "stdout": "",
+            "stderr": ""
+          },
+          "firstRun": {
+            "type": "complete",
+            "id": "hello:864gje6l79s",
+            "engineMs": 13.66632299999992,
+            "stdout": "42\n",
+            "stderr": "",
+            "outputBytes": 3,
+            "error": null,
+            "hostCalls": 0,
+            "memory": {
+              "rss": 72396800,
+              "heapTotal": 22519808,
+              "heapUsed": 16697008,
+              "external": 5788834,
+              "arrayBuffers": 488526
+            },
+            "adapterError": null,
+            "wallMs": 14.31652199999985,
+            "outputEvents": [
+              {
+                "stream": "stdout",
+                "chars": 3,
+                "atMs": 14.242913000000044
+              }
+            ],
+            "inputEvents": []
+          },
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        {
+          "type": "ready",
+          "engine": "skulpt",
+          "engineLoadMs": 39.5429909999998,
+          "runtimeVersion": null,
+          "memory": {
+            "rss": 73777152,
+            "heapTotal": 22257664,
+            "heapUsed": 16312136,
+            "external": 5788791,
+            "arrayBuffers": 488523
+          },
+          "workerStartToReadyMs": 92.38830799999982,
+          "logs": {
+            "stdout": "",
+            "stderr": ""
+          },
+          "firstRun": {
+            "type": "complete",
+            "id": "hello:ytl0eeeqy7m",
+            "engineMs": 11.924380999999812,
+            "stdout": "42\n",
+            "stderr": "",
+            "outputBytes": 3,
+            "error": null,
+            "hostCalls": 0,
+            "memory": {
+              "rss": 74039296,
+              "heapTotal": 22519808,
+              "heapUsed": 16713648,
+              "external": 5788834,
+              "arrayBuffers": 488526
+            },
+            "adapterError": null,
+            "wallMs": 12.653769999999895,
+            "outputEvents": [
+              {
+                "stream": "stdout",
+                "chars": 3,
+                "atMs": 12.590418000000227
+              }
+            ],
+            "inputEvents": []
+          },
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        {
+          "type": "ready",
+          "engine": "skulpt",
+          "engineLoadMs": 51.544628999999986,
+          "runtimeVersion": null,
+          "memory": {
+            "rss": 77135872,
+            "heapTotal": 22257664,
+            "heapUsed": 16293248,
+            "external": 5788791,
+            "arrayBuffers": 488523
+          },
+          "workerStartToReadyMs": 125.12930700000015,
+          "logs": {
+            "stdout": "",
+            "stderr": ""
+          },
+          "firstRun": {
+            "type": "complete",
+            "id": "hello:zhwil40pwra",
+            "engineMs": 10.435901999999714,
+            "stdout": "42\n",
+            "stderr": "",
+            "outputBytes": 3,
+            "error": null,
+            "hostCalls": 0,
+            "memory": {
+              "rss": 77529088,
+              "heapTotal": 22781952,
+              "heapUsed": 16691760,
+              "external": 5788834,
+              "arrayBuffers": 488526
+            },
+            "adapterError": null,
+            "wallMs": 10.78969300000017,
+            "outputEvents": [
+              {
+                "stream": "stdout",
+                "chars": 3,
+                "atMs": 10.759465999999975
+              }
+            ],
+            "inputEvents": []
+          },
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        }
+      ],
+      "fixtures": [
+        {
+          "id": "arithmetic:1uhksjvk039j",
+          "category": "common",
+          "type": "complete",
+          "engineMs": 4.2164709999997285,
+          "stdout": "3 -4 1 0.5\n",
+          "stderr": "",
+          "outputBytes": 11,
+          "error": null,
+          "hostCalls": 0,
+          "memory": {
+            "rss": 77660160,
+            "heapTotal": 22781952,
+            "heapUsed": 17651160,
+            "external": 5788845,
+            "arrayBuffers": 488537
+          },
+          "adapterError": null,
+          "wallMs": 4.7578190000003815,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 11,
+              "atMs": 4.584079000000202
+            }
+          ],
+          "inputEvents": [],
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        {
+          "id": "large_integer:k3kjrhrod4",
+          "category": "common",
+          "type": "complete",
+          "engineMs": 1.5103170000002137,
+          "stdout": "1000000000000000000000000000001\n",
+          "stderr": "",
+          "outputBytes": 32,
+          "error": null,
+          "hostCalls": 0,
+          "memory": {
+            "rss": 77660160,
+            "heapTotal": 31170560,
+            "heapUsed": 12924160,
+            "external": 5361034,
+            "arrayBuffers": 81114
+          },
+          "adapterError": null,
+          "wallMs": 4.25894500000004,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 32,
+              "atMs": 4.159306999999899
+            }
+          ],
+          "inputEvents": [],
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        {
+          "id": "class_and_list:9cl2qx7ebrd",
+          "category": "common",
+          "type": "complete",
+          "engineMs": 8.221760999999788,
+          "stdout": "42\n[0, 1, 4, 9, 16]\n",
+          "stderr": "",
+          "outputBytes": 20,
+          "error": null,
+          "hostCalls": 0,
+          "memory": {
+            "rss": 78446592,
+            "heapTotal": 31170560,
+            "heapUsed": 13655472,
+            "external": 5361054,
+            "arrayBuffers": 81134
+          },
+          "adapterError": null,
+          "wallMs": 8.739802999999938,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 3,
+              "atMs": 8.245406999999886
+            },
+            {
+              "stream": "stdout",
+              "chars": 17,
+              "atMs": 8.614242999999988
+            }
+          ],
+          "inputEvents": [],
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        {
+          "id": "json_stdlib:5fv6vwtbb55",
+          "category": "compatibility",
+          "type": "complete",
+          "engineMs": 2.966711999999916,
+          "stdout": "",
+          "stderr": "",
+          "outputBytes": 0,
+          "error": {
+            "name": "constructor",
+            "message": "NotImplementedError: json is not yet implemented in Skulpt on line 1",
+            "traceback": [
+              {
+                "lineno": 1,
+                "filename": "src/lib/json/__init__.py"
+              },
+              {
+                "lineno": 1,
+                "filename": "<probe>.py"
+              }
+            ]
+          },
+          "hostCalls": 0,
+          "memory": {
+            "rss": 78577664,
+            "heapTotal": 31170560,
+            "heapUsed": 13957432,
+            "external": 5361054,
+            "arrayBuffers": 81134
+          },
+          "adapterError": null,
+          "wallMs": 3.453379000000041,
+          "outputEvents": [],
+          "inputEvents": [],
+          "validation": {
+            "pass": false,
+            "reason": "NotImplementedError: json is not yet implemented in Skulpt on line 1"
+          }
+        },
+        {
+          "id": "f_string:luoox5f4h1e",
+          "category": "compatibility",
+          "type": "complete",
+          "engineMs": 2.570075000000088,
+          "stdout": "Brickwright: 21\n",
+          "stderr": "",
+          "outputBytes": 16,
+          "error": null,
+          "hostCalls": 0,
+          "memory": {
+            "rss": 78708736,
+            "heapTotal": 31694848,
+            "heapUsed": 14492968,
+            "external": 5361070,
+            "arrayBuffers": 81150
+          },
+          "adapterError": null,
+          "wallMs": 2.7550679999999375,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 16,
+              "atMs": 2.6893299999997
+            }
+          ],
+          "inputEvents": [],
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        {
+          "id": "dataclass:fjj71tp3at",
+          "category": "compatibility",
+          "type": "complete",
+          "engineMs": 1.981876000000284,
+          "stdout": "",
+          "stderr": "",
+          "outputBytes": 0,
+          "error": {
+            "name": "TypeError",
+            "message": "TypeError: Cannot read properties of null (reading 'lineno')",
+            "traceback": null
+          },
+          "hostCalls": 0,
+          "memory": {
+            "rss": 80281600,
+            "heapTotal": 31694848,
+            "heapUsed": 14363048,
+            "external": 5361070,
+            "arrayBuffers": 81150
+          },
+          "adapterError": null,
+          "wallMs": 2.1702640000003157,
+          "outputEvents": [],
+          "inputEvents": [],
+          "validation": {
+            "pass": false,
+            "reason": "TypeError: Cannot read properties of null (reading 'lineno')"
+          }
+        },
+        {
+          "id": "exception_trace:6hhsodmqapq",
+          "category": "diagnostic",
+          "type": "complete",
+          "engineMs": 1.8287820000000465,
+          "stdout": "",
+          "stderr": "",
+          "outputBytes": 0,
+          "error": {
+            "name": "constructor",
+            "message": "ValueError: probe-marker on line 2",
+            "traceback": [
+              {
+                "lineno": 2,
+                "filename": "<probe>.py"
+              },
+              {
+                "lineno": 3,
+                "filename": "<probe>.py"
+              }
+            ]
+          },
+          "hostCalls": 0,
+          "memory": {
+            "rss": 82247680,
+            "heapTotal": 31694848,
+            "heapUsed": 14501712,
+            "external": 5361070,
+            "arrayBuffers": 81150
+          },
+          "adapterError": null,
+          "wallMs": 2.0278920000000653,
+          "outputEvents": [],
+          "inputEvents": [],
+          "validation": {
+            "pass": true,
+            "reason": "expected guest error"
+          }
+        },
+        {
+          "id": "buffered_input:lh8a0r9vfx9",
+          "category": "interaction",
+          "type": "complete",
+          "engineMs": 1.2546299999999064,
+          "stdout": "before\nhello Ada\n",
+          "stderr": "",
+          "outputBytes": 17,
+          "error": null,
+          "hostCalls": 0,
+          "memory": {
+            "rss": 82378752,
+            "heapTotal": 31694848,
+            "heapUsed": 14670208,
+            "external": 5361087,
+            "arrayBuffers": 81167
+          },
+          "adapterError": null,
+          "wallMs": 1.4134020000001328,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 7,
+              "atMs": 1.1211120000002666
+            },
+            {
+              "stream": "stdout",
+              "chars": 10,
+              "atMs": 1.3270729999999276
+            }
+          ],
+          "inputEvents": [],
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        {
+          "id": "host_bridge:oj5f58rvyua",
+          "category": "bridge",
+          "type": "complete",
+          "engineMs": 1.8905540000000656,
+          "stdout": "42\n17\n",
+          "stderr": "",
+          "outputBytes": 6,
+          "error": null,
+          "hostCalls": 2,
+          "memory": {
+            "rss": 82509824,
+            "heapTotal": 31956992,
+            "heapUsed": 14893968,
+            "external": 5361093,
+            "arrayBuffers": 81173
+          },
+          "adapterError": null,
+          "wallMs": 2.0603320000000167,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 3,
+              "atMs": 1.7836019999999735
+            },
+            {
+              "stream": "stdout",
+              "chars": 3,
+              "atMs": 1.956047000000126
+            }
+          ],
+          "inputEvents": [],
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        {
+          "id": "async_bridge:lajy0q0ht2a",
+          "category": "bridge",
+          "type": "complete",
+          "engineMs": 0.27954100000033577,
+          "stdout": "",
+          "stderr": "",
+          "outputBytes": 0,
+          "error": {
+            "name": "constructor",
+            "message": "SyntaxError: bad input on line 3",
+            "traceback": [
+              {
+                "lineno": 3,
+                "filename": "<probe>.py"
+              }
+            ]
+          },
+          "hostCalls": 0,
+          "memory": {
+            "rss": 82509824,
+            "heapTotal": 31956992,
+            "heapUsed": 14952256,
+            "external": 5361093,
+            "arrayBuffers": 81173
+          },
+          "adapterError": null,
+          "wallMs": 0.4340500000002976,
+          "outputEvents": [],
+          "inputEvents": [],
+          "validation": {
+            "pass": false,
+            "reason": "SyntaxError: bad input on line 3"
+          }
+        }
+      ],
+      "performance": [
+        {
+          "id": "loop_10000",
+          "samples": [
+            {
+              "type": "complete",
+              "id": "loop_10000:mrxl1e4mick",
+              "engineMs": 6.880633000000216,
+              "stdout": "49995000\n",
+              "stderr": "",
+              "outputBytes": 9,
+              "error": null,
+              "hostCalls": 0,
+              "memory": {
+                "rss": 83165184,
+                "heapTotal": 32481280,
+                "heapUsed": 17021624,
+                "external": 5361102,
+                "arrayBuffers": 81182
+              },
+              "adapterError": null,
+              "wallMs": 7.005213999999796,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 9,
+                  "atMs": 6.98967599999969
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "loop_10000:338wfvfmj3x",
+              "engineMs": 5.003888000000188,
+              "stdout": "49995000\n",
+              "stderr": "",
+              "outputBytes": 9,
+              "error": null,
+              "hostCalls": 0,
+              "memory": {
+                "rss": 83951616,
+                "heapTotal": 32481280,
+                "heapUsed": 19005792,
+                "external": 5361111,
+                "arrayBuffers": 81191
+              },
+              "adapterError": null,
+              "wallMs": 5.204991000000064,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 9,
+                  "atMs": 5.053370000000086
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "loop_10000:rclfi4gkarc",
+              "engineMs": 3.7105289999999513,
+              "stdout": "49995000\n",
+              "stderr": "",
+              "outputBytes": 9,
+              "error": null,
+              "hostCalls": 0,
+              "memory": {
+                "rss": 84213760,
+                "heapTotal": 32481280,
+                "heapUsed": 21362440,
+                "external": 5361120,
+                "arrayBuffers": 81200
+              },
+              "adapterError": null,
+              "wallMs": 3.8666410000000724,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 9,
+                  "atMs": 3.7934799999998177
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "loop_10000:pln22ba3ii",
+              "engineMs": 5.383351999999832,
+              "stdout": "49995000\n",
+              "stderr": "",
+              "outputBytes": 9,
+              "error": null,
+              "hostCalls": 0,
+              "memory": {
+                "rss": 84344832,
+                "heapTotal": 32481280,
+                "heapUsed": 15903880,
+                "external": 5361011,
+                "arrayBuffers": 81091
+              },
+              "adapterError": null,
+              "wallMs": 6.091645999999855,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 9,
+                  "atMs": 6.043071999999938
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "loop_10000:xxjhv6fo3pq",
+              "engineMs": 5.440070000000105,
+              "stdout": "49995000\n",
+              "stderr": "",
+              "outputBytes": 9,
+              "error": null,
+              "hostCalls": 0,
+              "memory": {
+                "rss": 85655552,
+                "heapTotal": 32481280,
+                "heapUsed": 17750440,
+                "external": 5361020,
+                "arrayBuffers": 81100
+              },
+              "adapterError": null,
+              "wallMs": 5.5991439999997965,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 9,
+                  "atMs": 5.576904999999897
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            }
+          ],
+          "medianEngineMs": 5.383351999999832
+        },
+        {
+          "id": "host_calls_1000",
+          "samples": [
+            {
+              "type": "complete",
+              "id": "host_calls_1000:cbxnbpen3n8",
+              "engineMs": 5.493807000000288,
+              "stdout": "1000\n",
+              "stderr": "",
+              "outputBytes": 5,
+              "error": null,
+              "hostCalls": 1000,
+              "memory": {
+                "rss": 86310912,
+                "heapTotal": 32481280,
+                "heapUsed": 18470464,
+                "external": 5361025,
+                "arrayBuffers": 81105
+              },
+              "adapterError": null,
+              "wallMs": 5.7027879999996,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 5,
+                  "atMs": 5.612942999999632
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "host_calls_1000:spgwc282hrq",
+              "engineMs": 4.659477000000152,
+              "stdout": "1000\n",
+              "stderr": "",
+              "outputBytes": 5,
+              "error": null,
+              "hostCalls": 1000,
+              "memory": {
+                "rss": 87097344,
+                "heapTotal": 32481280,
+                "heapUsed": 19138024,
+                "external": 5361030,
+                "arrayBuffers": 81110
+              },
+              "adapterError": null,
+              "wallMs": 4.893819999999778,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 5,
+                  "atMs": 4.769347999999809
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "host_calls_1000:rn05i0cp7o",
+              "engineMs": 3.2812559999997575,
+              "stdout": "1000\n",
+              "stderr": "",
+              "outputBytes": 5,
+              "error": null,
+              "hostCalls": 1000,
+              "memory": {
+                "rss": 87621632,
+                "heapTotal": 32481280,
+                "heapUsed": 19738080,
+                "external": 5361035,
+                "arrayBuffers": 81115
+              },
+              "adapterError": null,
+              "wallMs": 3.493652999999995,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 5,
+                  "atMs": 3.4416339999997945
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "host_calls_1000:bf1kaxua9em",
+              "engineMs": 3.659486999999899,
+              "stdout": "1000\n",
+              "stderr": "",
+              "outputBytes": 5,
+              "error": null,
+              "hostCalls": 1000,
+              "memory": {
+                "rss": 88670208,
+                "heapTotal": 32481280,
+                "heapUsed": 20577144,
+                "external": 5361040,
+                "arrayBuffers": 81120
+              },
+              "adapterError": null,
+              "wallMs": 3.863958999999795,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 5,
+                  "atMs": 3.753483999999844
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "host_calls_1000:cqso7433fh8",
+              "engineMs": 2.854464999999891,
+              "stdout": "1000\n",
+              "stderr": "",
+              "outputBytes": 5,
+              "error": null,
+              "hostCalls": 1000,
+              "memory": {
+                "rss": 89325568,
+                "heapTotal": 32481280,
+                "heapUsed": 20999456,
+                "external": 5361045,
+                "arrayBuffers": 81125
+              },
+              "adapterError": null,
+              "wallMs": 2.9970659999999043,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 5,
+                  "atMs": 2.9563379999999597
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            }
+          ],
+          "medianEngineMs": 3.659486999999899
+        }
+      ],
+      "interaction": {
+        "sharedInput": {
+          "type": "complete",
+          "id": "live_input:2ig4tx8r4qr",
+          "engineMs": 41.46206799999982,
+          "stdout": "before\nhello Ada\n",
+          "stderr": "",
+          "outputBytes": 17,
+          "error": null,
+          "hostCalls": 0,
+          "memory": {
+            "rss": 89456640,
+            "heapTotal": 33529856,
+            "heapUsed": 14312632,
+            "external": 5361019,
+            "arrayBuffers": 81099
+          },
+          "adapterError": null,
+          "wallMs": 42.1908269999999,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 7,
+              "atMs": 1.603845999999976
+            },
+            {
+              "stream": "stdout",
+              "chars": 10,
+              "atMs": 42.17543999999998
+            }
+          ],
+          "inputEvents": [
+            {
+              "mode": "shared",
+              "prompt": "Name? ",
+              "atMs": 1.7165430000000015
+            }
+          ],
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        "messageInput": {
+          "type": "complete",
+          "id": "live_input:xiqtgn8u5x",
+          "engineMs": 41.3487869999999,
+          "stdout": "before\nhello Ada\n",
+          "stderr": "",
+          "outputBytes": 17,
+          "error": null,
+          "hostCalls": 0,
+          "memory": {
+            "rss": 89456640,
+            "heapTotal": 33529856,
+            "heapUsed": 14471944,
+            "external": 5361036,
+            "arrayBuffers": 81116
+          },
+          "adapterError": null,
+          "wallMs": 41.48737200000005,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 7,
+              "atMs": 0.8278080000000045
+            },
+            {
+              "stream": "stdout",
+              "chars": 10,
+              "atMs": 41.453843000000234
+            }
+          ],
+          "inputEvents": [
+            {
+              "mode": "message",
+              "prompt": "Name? ",
+              "atMs": 0.8622399999999288
+            }
+          ],
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        "hardStop": {
+          "terminated": true,
+          "outputEvents": [],
+          "inputEvents": [],
+          "terminationLatencyMs": 7.02842099999998,
+          "parentHeartbeats": 20,
+          "method": "worker.terminate; runtime discarded"
+        },
+        "restartAfterStop": {
+          "type": "complete",
+          "id": "restart_after_stop:mf2y0p7lqs",
+          "engineMs": 10.716993000000002,
+          "stdout": "42\n",
+          "stderr": "",
+          "outputBytes": 3,
+          "error": null,
+          "hostCalls": 0,
+          "memory": {
+            "rss": 92372992,
+            "heapTotal": 22519808,
+            "heapUsed": 16715264,
+            "external": 5788834,
+            "arrayBuffers": 488526
+          },
+          "adapterError": null,
+          "wallMs": 11.739494999999806,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 3,
+              "atMs": 11.677275999999893
+            }
+          ],
+          "inputEvents": [],
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        }
+      },
+      "assetTotals": {
+        "bytes": 966760,
+        "gzipBytes": 233587,
+        "brotliBytes": 194637
+      },
+      "summary": {
+        "medianLoadMs": 51.544628999999986,
+        "medianWorkerReadyMs": 125.12930700000015,
+        "fixturesPassed": 7,
+        "fixturesTotal": 10
+      }
+    },
+    "micropython": {
+      "version": "1.29.0-6",
+      "assets": [
+        {
+          "path": "node_modules/@micropython/micropython-webassembly-pyscript/micropython.mjs",
+          "bytes": 110120,
+          "gzipBytes": 31120,
+          "brotliBytes": 26981,
+          "sha256": "26cc7a99064a16518ab9a695e848efb248bfce504aee56ae73b2af35f3dcbf8b"
+        },
+        {
+          "path": "node_modules/@micropython/micropython-webassembly-pyscript/micropython.wasm",
+          "bytes": 449553,
+          "gzipBytes": 200232,
+          "brotliBytes": 170998,
+          "sha256": "d5913c9327072e71d3e7a2e9384ea326f7d784bcc2f50a01b602c52bd2bdcafd"
+        }
+      ],
+      "startup": [
+        {
+          "type": "ready",
+          "engine": "micropython",
+          "engineLoadMs": 23.598378000000594,
+          "runtimeVersion": null,
+          "memory": {
+            "rss": 112111616,
+            "heapTotal": 19451904,
+            "heapUsed": 11463232,
+            "external": 23430764,
+            "arrayBuffers": 1091443
+          },
+          "workerStartToReadyMs": 83.54145699999935,
+          "logs": {
+            "stdout": "",
+            "stderr": ""
+          },
+          "firstRun": {
+            "type": "complete",
+            "id": "hello:ikoy1w8z9gj",
+            "engineMs": 3.598783000000367,
+            "stdout": "42\n",
+            "stderr": "",
+            "outputBytes": 3,
+            "error": null,
+            "hostCalls": 0,
+            "memory": {
+              "rss": 112766976,
+              "heapTotal": 19451904,
+              "heapUsed": 11517088,
+              "external": 23430810,
+              "arrayBuffers": 1091449
+            },
+            "adapterError": null,
+            "wallMs": 4.789452999999412,
+            "outputEvents": [
+              {
+                "stream": "stdout",
+                "chars": 3,
+                "atMs": 4.237148000000161
+              }
+            ],
+            "inputEvents": []
+          },
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        {
+          "type": "ready",
+          "engine": "micropython",
+          "engineLoadMs": 18.233910999999352,
+          "runtimeVersion": null,
+          "memory": {
+            "rss": 111648768,
+            "heapTotal": 19451904,
+            "heapUsed": 11463304,
+            "external": 23430764,
+            "arrayBuffers": 1091443
+          },
+          "workerStartToReadyMs": 94.36832100000083,
+          "logs": {
+            "stdout": "",
+            "stderr": ""
+          },
+          "firstRun": {
+            "type": "complete",
+            "id": "hello:72yqirzmx6",
+            "engineMs": 3.5813799999996263,
+            "stdout": "42\n",
+            "stderr": "",
+            "outputBytes": 3,
+            "error": null,
+            "hostCalls": 0,
+            "memory": {
+              "rss": 111910912,
+              "heapTotal": 19451904,
+              "heapUsed": 11512576,
+              "external": 23430810,
+              "arrayBuffers": 1091449
+            },
+            "adapterError": null,
+            "wallMs": 4.072160000000622,
+            "outputEvents": [
+              {
+                "stream": "stdout",
+                "chars": 3,
+                "atMs": 4.043118999999933
+              }
+            ],
+            "inputEvents": []
+          },
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        {
+          "type": "ready",
+          "engine": "micropython",
+          "engineLoadMs": 22.273269000000255,
+          "runtimeVersion": null,
+          "memory": {
+            "rss": 111202304,
+            "heapTotal": 19714048,
+            "heapUsed": 11452448,
+            "external": 23430764,
+            "arrayBuffers": 1091443
+          },
+          "workerStartToReadyMs": 116.5629799999997,
+          "logs": {
+            "stdout": "",
+            "stderr": ""
+          },
+          "firstRun": {
+            "type": "complete",
+            "id": "hello:tpda7fbcl5l",
+            "engineMs": 3.810844999999972,
+            "stdout": "42\n",
+            "stderr": "",
+            "outputBytes": 3,
+            "error": null,
+            "hostCalls": 0,
+            "memory": {
+              "rss": 111333376,
+              "heapTotal": 19976192,
+              "heapUsed": 11506080,
+              "external": 23430810,
+              "arrayBuffers": 1091449
+            },
+            "adapterError": null,
+            "wallMs": 4.402469999999994,
+            "outputEvents": [
+              {
+                "stream": "stdout",
+                "chars": 3,
+                "atMs": 4.2787850000004255
+              }
+            ],
+            "inputEvents": []
+          },
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        }
+      ],
+      "fixtures": [
+        {
+          "id": "arithmetic:owpvtlr7il",
+          "category": "common",
+          "type": "complete",
+          "engineMs": 1.557133000000249,
+          "stdout": "3 -4 1 0.5\n",
+          "stderr": "",
+          "outputBytes": 11,
+          "error": null,
+          "hostCalls": 0,
+          "memory": {
+            "rss": 111595520,
+            "heapTotal": 20238336,
+            "heapUsed": 9878456,
+            "external": 22401216,
+            "arrayBuffers": 82243
+          },
+          "adapterError": null,
+          "wallMs": 3.4311170000000857,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 11,
+              "atMs": 3.3547200000002704
+            }
+          ],
+          "inputEvents": [],
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        {
+          "id": "large_integer:0fklu6m8chot",
+          "category": "common",
+          "type": "complete",
+          "engineMs": 0.5796929999996792,
+          "stdout": "1000000000000000000000000000001\n",
+          "stderr": "",
+          "outputBytes": 32,
+          "error": null,
+          "hostCalls": 0,
+          "memory": {
+            "rss": 111595520,
+            "heapTotal": 20238336,
+            "heapUsed": 9924880,
+            "external": 22401280,
+            "arrayBuffers": 82307
+          },
+          "adapterError": null,
+          "wallMs": 1.1107529999999315,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 32,
+              "atMs": 1.0238349999999627
+            }
+          ],
+          "inputEvents": [],
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        {
+          "id": "class_and_list:kjalh0n2u6",
+          "category": "common",
+          "type": "complete",
+          "engineMs": 1.5955650000005335,
+          "stdout": "42\n[0, 1, 4, 9, 16]\n",
+          "stderr": "",
+          "outputBytes": 20,
+          "error": null,
+          "hostCalls": 0,
+          "memory": {
+            "rss": 111857664,
+            "heapTotal": 20238336,
+            "heapUsed": 9972744,
+            "external": 22401320,
+            "arrayBuffers": 82347
+          },
+          "adapterError": null,
+          "wallMs": 1.7363050000003568,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 3,
+              "atMs": 1.4299590000000535
+            },
+            {
+              "stream": "stdout",
+              "chars": 17,
+              "atMs": 1.6420750000006592
+            }
+          ],
+          "inputEvents": [],
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        {
+          "id": "json_stdlib:qz6rndxq5qo",
+          "category": "compatibility",
+          "type": "complete",
+          "engineMs": 1.3434379999998782,
+          "stdout": "6\n",
+          "stderr": "",
+          "outputBytes": 2,
+          "error": null,
+          "hostCalls": 0,
+          "memory": {
+            "rss": 112119808,
+            "heapTotal": 20238336,
+            "heapUsed": 10018888,
+            "external": 22401324,
+            "arrayBuffers": 82351
+          },
+          "adapterError": null,
+          "wallMs": 1.9839169999995647,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 2,
+              "atMs": 1.8981169999997292
+            }
+          ],
+          "inputEvents": [],
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        {
+          "id": "f_string:9mpuhn2vez",
+          "category": "compatibility",
+          "type": "complete",
+          "engineMs": 0.382593999999699,
+          "stdout": "Brickwright: 21\n",
+          "stderr": "",
+          "outputBytes": 16,
+          "error": null,
+          "hostCalls": 0,
+          "memory": {
+            "rss": 112250880,
+            "heapTotal": 20238336,
+            "heapUsed": 10040768,
+            "external": 22401356,
+            "arrayBuffers": 82383
+          },
+          "adapterError": null,
+          "wallMs": 0.5288860000000568,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 16,
+              "atMs": 0.44757899999967776
+            }
+          ],
+          "inputEvents": [],
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        {
+          "id": "dataclass:y8sbelk1q5",
+          "category": "compatibility",
+          "type": "complete",
+          "engineMs": 0.9753940000000512,
+          "stdout": "",
+          "stderr": "",
+          "outputBytes": 0,
+          "error": {
+            "name": "PythonError",
+            "message": "PythonError: Traceback (most recent call last):\n  File \"<stdin>\", line 1, in <module>\nImportError: no module named 'dataclasses'\n",
+            "traceback": null
+          },
+          "hostCalls": 0,
+          "memory": {
+            "rss": 112381952,
+            "heapTotal": 20238336,
+            "heapUsed": 10083136,
+            "external": 22401356,
+            "arrayBuffers": 82383
+          },
+          "adapterError": null,
+          "wallMs": 1.1297050000002855,
+          "outputEvents": [],
+          "inputEvents": [],
+          "validation": {
+            "pass": false,
+            "reason": "PythonError: Traceback (most recent call last):\n  File \"<stdin>\", line 1, in <module>\nImportError: no module named 'dataclasses'\n"
+          }
+        },
+        {
+          "id": "exception_trace:hpresi63azu",
+          "category": "diagnostic",
+          "type": "complete",
+          "engineMs": 0.48578599999927974,
+          "stdout": "",
+          "stderr": "",
+          "outputBytes": 0,
+          "error": {
+            "name": "PythonError",
+            "message": "PythonError: Traceback (most recent call last):\n  File \"<stdin>\", line 3, in <module>\n  File \"<stdin>\", line 2, in fail\nValueError: probe-marker\n",
+            "traceback": null
+          },
+          "hostCalls": 0,
+          "memory": {
+            "rss": 112381952,
+            "heapTotal": 20238336,
+            "heapUsed": 10093696,
+            "external": 22401356,
+            "arrayBuffers": 82383
+          },
+          "adapterError": null,
+          "wallMs": 0.6455100000002858,
+          "outputEvents": [],
+          "inputEvents": [],
+          "validation": {
+            "pass": true,
+            "reason": "expected guest error"
+          }
+        },
+        {
+          "id": "buffered_input",
+          "category": "interaction",
+          "timeout": true,
+          "wallMs": 5002.797606000001,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 7,
+              "atMs": 0.3549140000004627
+            }
+          ],
+          "inputEvents": [],
+          "validation": {
+            "pass": false,
+            "reason": "fixture deadline exceeded"
+          }
+        },
+        {
+          "id": "host_bridge:jcw3amq25ve",
+          "category": "bridge",
+          "type": "complete",
+          "engineMs": 4.7500660000005155,
+          "stdout": "42\n17\n",
+          "stderr": "",
+          "outputBytes": 6,
+          "error": null,
+          "hostCalls": 2,
+          "memory": {
+            "rss": 111529984,
+            "heapTotal": 19451904,
+            "heapUsed": 11529456,
+            "external": 23430816,
+            "arrayBuffers": 1091455
+          },
+          "adapterError": null,
+          "wallMs": 5.204577999998946,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 3,
+              "atMs": 4.980703999999605
+            },
+            {
+              "stream": "stdout",
+              "chars": 3,
+              "atMs": 5.085729000000356
+            }
+          ],
+          "inputEvents": [],
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        {
+          "id": "async_bridge:xbspiop1j3l",
+          "category": "bridge",
+          "type": "complete",
+          "engineMs": 26.8406019999984,
+          "stdout": "before-await\n42\n",
+          "stderr": "",
+          "outputBytes": 16,
+          "error": null,
+          "hostCalls": 1,
+          "memory": {
+            "rss": 111529984,
+            "heapTotal": 20238336,
+            "heapUsed": 9946688,
+            "external": 22401232,
+            "arrayBuffers": 82259
+          },
+          "adapterError": null,
+          "wallMs": 28.72687600000063,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 13,
+              "atMs": 2.443119999999908
+            },
+            {
+              "stream": "stdout",
+              "chars": 3,
+              "atMs": 28.47559000000001
+            }
+          ],
+          "inputEvents": [],
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        }
+      ],
+      "performance": [
+        {
+          "id": "loop_10000",
+          "samples": [
+            {
+              "type": "complete",
+              "id": "loop_10000:ch6nfn36d9",
+              "engineMs": 9.44947300000058,
+              "stdout": "49995000\n",
+              "stderr": "",
+              "outputBytes": 9,
+              "error": null,
+              "hostCalls": 0,
+              "memory": {
+                "rss": 116641792,
+                "heapTotal": 20238336,
+                "heapUsed": 10135960,
+                "external": 22401250,
+                "arrayBuffers": 82277
+              },
+              "adapterError": null,
+              "wallMs": 9.801136000000042,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 9,
+                  "atMs": 9.750990000000456
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "loop_10000:jcoasq4v55",
+              "engineMs": 7.092340000001059,
+              "stdout": "49995000\n",
+              "stderr": "",
+              "outputBytes": 9,
+              "error": null,
+              "hostCalls": 0,
+              "memory": {
+                "rss": 117035008,
+                "heapTotal": 20238336,
+                "heapUsed": 10172064,
+                "external": 22401268,
+                "arrayBuffers": 82295
+              },
+              "adapterError": null,
+              "wallMs": 7.266851000000315,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 9,
+                  "atMs": 7.240044000000125
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "loop_10000:os2t1usjqu",
+              "engineMs": 7.72043499999927,
+              "stdout": "49995000\n",
+              "stderr": "",
+              "outputBytes": 9,
+              "error": null,
+              "hostCalls": 0,
+              "memory": {
+                "rss": 117166080,
+                "heapTotal": 20238336,
+                "heapUsed": 10194232,
+                "external": 22401286,
+                "arrayBuffers": 82313
+              },
+              "adapterError": null,
+              "wallMs": 7.937670999999682,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 9,
+                  "atMs": 7.887548000000606
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "loop_10000:olga7iv9q6j",
+              "engineMs": 4.976410000001124,
+              "stdout": "49995000\n",
+              "stderr": "",
+              "outputBytes": 9,
+              "error": null,
+              "hostCalls": 0,
+              "memory": {
+                "rss": 117166080,
+                "heapTotal": 20238336,
+                "heapUsed": 10212664,
+                "external": 22401304,
+                "arrayBuffers": 82331
+              },
+              "adapterError": null,
+              "wallMs": 5.234071999999287,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 9,
+                  "atMs": 5.1708529999996244
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "loop_10000:aiey07wl17",
+              "engineMs": 6.905423000000155,
+              "stdout": "49995000\n",
+              "stderr": "",
+              "outputBytes": 9,
+              "error": null,
+              "hostCalls": 0,
+              "memory": {
+                "rss": 117166080,
+                "heapTotal": 20238336,
+                "heapUsed": 10226528,
+                "external": 22401322,
+                "arrayBuffers": 82349
+              },
+              "adapterError": null,
+              "wallMs": 7.083318000000872,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 9,
+                  "atMs": 7.015902000001006
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            }
+          ],
+          "medianEngineMs": 7.092340000001059
+        },
+        {
+          "id": "host_calls_1000",
+          "samples": [
+            {
+              "type": "complete",
+              "id": "host_calls_1000:2ixhwo9fpld",
+              "engineMs": 4.246380999999019,
+              "stdout": "1000\n",
+              "stderr": "",
+              "outputBytes": 5,
+              "error": null,
+              "hostCalls": 1000,
+              "memory": {
+                "rss": 117297152,
+                "heapTotal": 20500480,
+                "heapUsed": 10827408,
+                "external": 22401332,
+                "arrayBuffers": 82359
+              },
+              "adapterError": null,
+              "wallMs": 4.555963000000702,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 5,
+                  "atMs": 4.37190499999997
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "host_calls_1000:zbzr8etyh7k",
+              "engineMs": 1.6772259999997914,
+              "stdout": "1000\n",
+              "stderr": "",
+              "outputBytes": 5,
+              "error": null,
+              "hostCalls": 1000,
+              "memory": {
+                "rss": 117297152,
+                "heapTotal": 20500480,
+                "heapUsed": 11192728,
+                "external": 22401342,
+                "arrayBuffers": 82369
+              },
+              "adapterError": null,
+              "wallMs": 1.8599399999984598,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 5,
+                  "atMs": 1.756863999999041
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "host_calls_1000:gv0r80ood1j",
+              "engineMs": 1.73192200000085,
+              "stdout": "1000\n",
+              "stderr": "",
+              "outputBytes": 5,
+              "error": null,
+              "hostCalls": 1000,
+              "memory": {
+                "rss": 117428224,
+                "heapTotal": 20500480,
+                "heapUsed": 11572416,
+                "external": 22401352,
+                "arrayBuffers": 82379
+              },
+              "adapterError": null,
+              "wallMs": 2.0786090000001423,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 5,
+                  "atMs": 1.8385899999993853
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "host_calls_1000:zxpscnzxcwg",
+              "engineMs": 2.3944329999994807,
+              "stdout": "1000\n",
+              "stderr": "",
+              "outputBytes": 5,
+              "error": null,
+              "hostCalls": 1000,
+              "memory": {
+                "rss": 117428224,
+                "heapTotal": 20500480,
+                "heapUsed": 11944456,
+                "external": 22401362,
+                "arrayBuffers": 82389
+              },
+              "adapterError": null,
+              "wallMs": 2.607416999999259,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 5,
+                  "atMs": 1.8551959999986138
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "host_calls_1000:x9vtuyr9cqe",
+              "engineMs": 2.0200390000009065,
+              "stdout": "1000\n",
+              "stderr": "",
+              "outputBytes": 5,
+              "error": null,
+              "hostCalls": 1000,
+              "memory": {
+                "rss": 117559296,
+                "heapTotal": 20500480,
+                "heapUsed": 12317240,
+                "external": 22401372,
+                "arrayBuffers": 82399
+              },
+              "adapterError": null,
+              "wallMs": 2.1632769999996526,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 5,
+                  "atMs": 2.1437459999997373
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            }
+          ],
+          "medianEngineMs": 2.0200390000009065
+        }
+      ],
+      "interaction": {
+        "sharedInput": {
+          "timeout": true,
+          "wallMs": 5000.568007,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 7,
+              "atMs": 0.24294100000042818
+            }
+          ],
+          "inputEvents": [],
+          "validation": {
+            "pass": false,
+            "reason": "fixture deadline exceeded"
+          }
+        },
+        "messageInput": {
+          "status": "not implemented by this probe; synchronous stdin requires separate suspension strategy without SharedArrayBuffer"
+        },
+        "hardStop": {
+          "terminated": true,
+          "outputEvents": [],
+          "inputEvents": [],
+          "terminationLatencyMs": 5.0099260000006325,
+          "parentHeartbeats": 20,
+          "method": "worker.terminate; runtime discarded"
+        },
+        "restartAfterStop": {
+          "type": "complete",
+          "id": "restart_after_stop:8jw3vf8057f",
+          "engineMs": 5.9462990000010905,
+          "stdout": "42\n",
+          "stderr": "",
+          "outputBytes": 3,
+          "error": null,
+          "hostCalls": 0,
+          "memory": {
+            "rss": 112881664,
+            "heapTotal": 20238336,
+            "heapUsed": 9838336,
+            "external": 22401194,
+            "arrayBuffers": 82221
+          },
+          "adapterError": null,
+          "wallMs": 10.182697999998709,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 3,
+              "atMs": 10.153275999999096
+            }
+          ],
+          "inputEvents": [],
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        }
+      },
+      "assetTotals": {
+        "bytes": 559673,
+        "gzipBytes": 231352,
+        "brotliBytes": 197979
+      },
+      "summary": {
+        "medianLoadMs": 22.273269000000255,
+        "medianWorkerReadyMs": 94.36832100000083,
+        "fixturesPassed": 8,
+        "fixturesTotal": 10
+      }
+    },
+    "pyodide": {
+      "version": "314.0.8",
+      "assets": [
+        {
+          "path": "node_modules/pyodide/pyodide.mjs",
+          "bytes": 17758,
+          "gzipBytes": 7119,
+          "brotliBytes": 6389,
+          "sha256": "1bb8cc14f9405aaa7cd4e00c12edd0a8539de9cc026618d6ee5a9663f367dc70"
+        },
+        {
+          "path": "node_modules/pyodide/pyodide.asm.mjs",
+          "bytes": 1250259,
+          "gzipBytes": 261215,
+          "brotliBytes": 207278,
+          "sha256": "22514b8be6980e28a02c8b1d6387ce8dfe666fc4edf8d547cff5dce29ff4d972"
+        },
+        {
+          "path": "node_modules/pyodide/pyodide.asm.wasm",
+          "bytes": 9597892,
+          "gzipBytes": 3593128,
+          "brotliBytes": 2739076,
+          "sha256": "e14d49ceca9b4a0e274ea918f3a898de2d3880b6e5573a6cfe1a2267ecc70329"
+        },
+        {
+          "path": "node_modules/pyodide/python_stdlib.zip",
+          "bytes": 2545550,
+          "gzipBytes": 2503691,
+          "brotliBytes": 2487047,
+          "sha256": "2bd3394a145bfbbe5bbc9d9d6ab9136abbb986c6fef6c142b3a2962227aa5c28"
+        },
+        {
+          "path": "node_modules/pyodide/pyodide-lock.json",
+          "bytes": 119077,
+          "gzipBytes": 25492,
+          "brotliBytes": 21689,
+          "sha256": "5dc2fc119108bc148c7457dc86e7675b5c87e1cafd420b9c34c1eaef7b36c010"
+        }
+      ],
+      "startup": [
+        {
+          "type": "ready",
+          "engine": "pyodide",
+          "engineLoadMs": 3253.9752299999964,
+          "runtimeVersion": "314.0.8",
+          "memory": {
+            "rss": 244826112,
+            "heapTotal": 42745856,
+            "heapUsed": 26263240,
+            "external": 52874856,
+            "arrayBuffers": 14815644
+          },
+          "workerStartToReadyMs": 3405.784878999999,
+          "logs": {
+            "stdout": "",
+            "stderr": ""
+          },
+          "firstRun": {
+            "type": "complete",
+            "id": "hello:pgsc9xojyu",
+            "engineMs": 5.987771000000066,
+            "stdout": "42\n",
+            "stderr": "",
+            "outputBytes": 3,
+            "error": null,
+            "hostCalls": 0,
+            "memory": {
+              "rss": 245088256,
+              "heapTotal": 42745856,
+              "heapUsed": 26376552,
+              "external": 52874899,
+              "arrayBuffers": 14815647
+            },
+            "adapterError": null,
+            "wallMs": 7.726777000003494,
+            "outputEvents": [
+              {
+                "stream": "stdout",
+                "chars": 3,
+                "atMs": 6.564578999998048
+              }
+            ],
+            "inputEvents": []
+          },
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        {
+          "type": "ready",
+          "engine": "pyodide",
+          "engineLoadMs": 2697.089949999994,
+          "runtimeVersion": "314.0.8",
+          "memory": {
+            "rss": 266027008,
+            "heapTotal": 42168320,
+            "heapUsed": 32541064,
+            "external": 52885483,
+            "arrayBuffers": 14826271
+          },
+          "workerStartToReadyMs": 2789.41928799999,
+          "logs": {
+            "stdout": "",
+            "stderr": ""
+          },
+          "firstRun": {
+            "type": "complete",
+            "id": "hello:zmqkpeykbah",
+            "engineMs": 8.462742000003345,
+            "stdout": "42\n",
+            "stderr": "",
+            "outputBytes": 3,
+            "error": null,
+            "hostCalls": 0,
+            "memory": {
+              "rss": 267599872,
+              "heapTotal": 44265472,
+              "heapUsed": 26492352,
+              "external": 52872778,
+              "arrayBuffers": 14813526
+            },
+            "adapterError": null,
+            "wallMs": 13.125182999996468,
+            "outputEvents": [
+              {
+                "stream": "stdout",
+                "chars": 3,
+                "atMs": 13.086630000005243
+              }
+            ],
+            "inputEvents": []
+          },
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        {
+          "type": "ready",
+          "engine": "pyodide",
+          "engineLoadMs": 2326.383773999987,
+          "runtimeVersion": "314.0.8",
+          "memory": {
+            "rss": 294318080,
+            "heapTotal": 42332160,
+            "heapUsed": 28094888,
+            "external": 52875643,
+            "arrayBuffers": 14816431
+          },
+          "workerStartToReadyMs": 2408.756681999992,
+          "logs": {
+            "stdout": "",
+            "stderr": ""
+          },
+          "firstRun": {
+            "type": "complete",
+            "id": "hello:3lvo4289pj",
+            "engineMs": 5.316405999998096,
+            "stdout": "42\n",
+            "stderr": "",
+            "outputBytes": 3,
+            "error": null,
+            "hostCalls": 0,
+            "memory": {
+              "rss": 294449152,
+              "heapTotal": 42332160,
+              "heapUsed": 27923120,
+              "external": 52875686,
+              "arrayBuffers": 14816434
+            },
+            "adapterError": null,
+            "wallMs": 6.059347999995225,
+            "outputEvents": [
+              {
+                "stream": "stdout",
+                "chars": 3,
+                "atMs": 5.245318999994197
+              }
+            ],
+            "inputEvents": []
+          },
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        }
+      ],
+      "fixtures": [
+        {
+          "id": "arithmetic:r1jc9x5yw3",
+          "category": "common",
+          "type": "complete",
+          "engineMs": 2.2972410000074888,
+          "stdout": "3 -4 1 0.5\n",
+          "stderr": "",
+          "outputBytes": 11,
+          "error": null,
+          "hostCalls": 0,
+          "memory": {
+            "rss": 294580224,
+            "heapTotal": 42594304,
+            "heapUsed": 27981640,
+            "external": 52875845,
+            "arrayBuffers": 14816593
+          },
+          "adapterError": null,
+          "wallMs": 2.613865999999689,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 11,
+              "atMs": 2.1209620000008726
+            }
+          ],
+          "inputEvents": [],
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        {
+          "id": "large_integer:0shht6usn83d",
+          "category": "common",
+          "type": "complete",
+          "engineMs": 1.0459529999934603,
+          "stdout": "1000000000000000000000000000001\n",
+          "stderr": "",
+          "outputBytes": 32,
+          "error": null,
+          "hostCalls": 0,
+          "memory": {
+            "rss": 294580224,
+            "heapTotal": 42594304,
+            "heapUsed": 28278112,
+            "external": 52875957,
+            "arrayBuffers": 14816705
+          },
+          "adapterError": null,
+          "wallMs": 4.03217200000654,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 32,
+              "atMs": 1.0570020000013756
+            }
+          ],
+          "inputEvents": [],
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        {
+          "id": "class_and_list:vvemmkrbyg",
+          "category": "common",
+          "type": "complete",
+          "engineMs": 2.388181000002078,
+          "stdout": "42\n[0, 1, 4, 9, 16]\n",
+          "stderr": "",
+          "outputBytes": 20,
+          "error": null,
+          "hostCalls": 0,
+          "memory": {
+            "rss": 294580224,
+            "heapTotal": 42594304,
+            "heapUsed": 28076424,
+            "external": 52876741,
+            "arrayBuffers": 14817489
+          },
+          "adapterError": null,
+          "wallMs": 2.640914999996312,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 3,
+              "atMs": 2.2156399999948917
+            },
+            {
+              "stream": "stdout",
+              "chars": 17,
+              "atMs": 2.370920000001206
+            }
+          ],
+          "inputEvents": [],
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        {
+          "id": "json_stdlib:r9m836hjmj",
+          "category": "compatibility",
+          "type": "complete",
+          "engineMs": 1.627570000011474,
+          "stdout": "6\n",
+          "stderr": "",
+          "outputBytes": 2,
+          "error": null,
+          "hostCalls": 0,
+          "memory": {
+            "rss": 294580224,
+            "heapTotal": 42594304,
+            "heapUsed": 28555816,
+            "external": 52877071,
+            "arrayBuffers": 14817819
+          },
+          "adapterError": null,
+          "wallMs": 1.906476999996812,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 2,
+              "atMs": 1.5938989999995101
+            }
+          ],
+          "inputEvents": [],
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        {
+          "id": "f_string:bym3j6mppgs",
+          "category": "compatibility",
+          "type": "complete",
+          "engineMs": 0.9025569999939762,
+          "stdout": "Brickwright: 21\n",
+          "stderr": "",
+          "outputBytes": 16,
+          "error": null,
+          "hostCalls": 0,
+          "memory": {
+            "rss": 294580224,
+            "heapTotal": 42594304,
+            "heapUsed": 28147600,
+            "external": 52877275,
+            "arrayBuffers": 14818023
+          },
+          "adapterError": null,
+          "wallMs": 1.1303919999918435,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 16,
+              "atMs": 0.920098999995389
+            }
+          ],
+          "inputEvents": [],
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        {
+          "id": "dataclass:ktekfd44gjo",
+          "category": "compatibility",
+          "type": "complete",
+          "engineMs": 1.8739950000017416,
+          "stdout": "42\n",
+          "stderr": "",
+          "outputBytes": 3,
+          "error": null,
+          "hostCalls": 0,
+          "memory": {
+            "rss": 294580224,
+            "heapTotal": 42594304,
+            "heapUsed": 28672000,
+            "external": 52877738,
+            "arrayBuffers": 14818486
+          },
+          "adapterError": null,
+          "wallMs": 2.148330000010901,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 3,
+              "atMs": 2.1112060000014026
+            }
+          ],
+          "inputEvents": [],
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        {
+          "id": "exception_trace:lhknmhvil3",
+          "category": "diagnostic",
+          "type": "complete",
+          "engineMs": 5.773560999994515,
+          "stdout": "",
+          "stderr": "",
+          "outputBytes": 0,
+          "error": {
+            "name": "PythonError",
+            "message": "PythonError: Traceback (most recent call last):\n  File \"/lib/python314.zip/_pyodide/_base.py\", line 619, in eval_code_async\n    await CodeRunner(\n    ...<10 lines>...\n    .run_async(globals, locals)\n  File \"/lib/python314.zip/_pyodide/_base.py\", line 420, in run_async\n    coroutine = eval(self.code, globals, locals)\n  File \"<exec>\", line 3, in <module>\n  File \"<exec>\", line 2, in fail\nValueError: probe-marker\n",
+            "traceback": null
+          },
+          "hostCalls": 0,
+          "memory": {
+            "rss": 294711296,
+            "heapTotal": 42594304,
+            "heapUsed": 28267248,
+            "external": 52878362,
+            "arrayBuffers": 14819110
+          },
+          "adapterError": null,
+          "wallMs": 6.042209000006551,
+          "outputEvents": [],
+          "inputEvents": [],
+          "validation": {
+            "pass": true,
+            "reason": "expected guest error"
+          }
+        },
+        {
+          "id": "buffered_input:g10aiyyde6v",
+          "category": "interaction",
+          "type": "complete",
+          "engineMs": 2.5116570000100182,
+          "stdout": "before\nName? hello Ada\n",
+          "stderr": "",
+          "outputBytes": 23,
+          "error": null,
+          "hostCalls": 0,
+          "memory": {
+            "rss": 294711296,
+            "heapTotal": 42594304,
+            "heapUsed": 28335064,
+            "external": 52878633,
+            "arrayBuffers": 14819381
+          },
+          "adapterError": null,
+          "wallMs": 2.7871979999908945,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 7,
+              "atMs": 1.2688530000013998
+            },
+            {
+              "stream": "stdout",
+              "chars": 16,
+              "atMs": 2.5130989999888698
+            }
+          ],
+          "inputEvents": [],
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        {
+          "id": "host_bridge:ljr7b6wqba8",
+          "category": "bridge",
+          "type": "complete",
+          "engineMs": 1.6022070000035455,
+          "stdout": "42\n17\n",
+          "stderr": "",
+          "outputBytes": 6,
+          "error": null,
+          "hostCalls": 2,
+          "memory": {
+            "rss": 294711296,
+            "heapTotal": 42594304,
+            "heapUsed": 28408408,
+            "external": 52878939,
+            "arrayBuffers": 14819687
+          },
+          "adapterError": null,
+          "wallMs": 1.8276590000023134,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 3,
+              "atMs": 1.5279759999975795
+            },
+            {
+              "stream": "stdout",
+              "chars": 3,
+              "atMs": 1.5793770000018412
+            }
+          ],
+          "inputEvents": [],
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        {
+          "id": "async_bridge:ffiowi15t8p",
+          "category": "bridge",
+          "type": "complete",
+          "engineMs": 27.50527899998997,
+          "stdout": "before-await\n42\n",
+          "stderr": "",
+          "outputBytes": 16,
+          "error": null,
+          "hostCalls": 1,
+          "memory": {
+            "rss": 294711296,
+            "heapTotal": 42594304,
+            "heapUsed": 28474960,
+            "external": 52879299,
+            "arrayBuffers": 14820047
+          },
+          "adapterError": null,
+          "wallMs": 27.87821399999666,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 13,
+              "atMs": 1.0237009999982547
+            },
+            {
+              "stream": "stdout",
+              "chars": 3,
+              "atMs": 27.616127999994205
+            }
+          ],
+          "inputEvents": [],
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        }
+      ],
+      "performance": [
+        {
+          "id": "loop_10000",
+          "samples": [
+            {
+              "type": "complete",
+              "id": "loop_10000:jwgorph9t4m",
+              "engineMs": 3.085205000010319,
+              "stdout": "49995000\n",
+              "stderr": "",
+              "outputBytes": 9,
+              "error": null,
+              "hostCalls": 0,
+              "memory": {
+                "rss": 294711296,
+                "heapTotal": 42594304,
+                "heapUsed": 28512144,
+                "external": 52879552,
+                "arrayBuffers": 14820300
+              },
+              "adapterError": null,
+              "wallMs": 3.3054600000032224,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 9,
+                  "atMs": 3.155908000000636
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "loop_10000:a8vjxg7g3s9",
+              "engineMs": 2.237723999991431,
+              "stdout": "49995000\n",
+              "stderr": "",
+              "outputBytes": 9,
+              "error": null,
+              "hostCalls": 0,
+              "memory": {
+                "rss": 294711296,
+                "heapTotal": 42594304,
+                "heapUsed": 28549888,
+                "external": 52879805,
+                "arrayBuffers": 14820553
+              },
+              "adapterError": null,
+              "wallMs": 2.5266819999960717,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 9,
+                  "atMs": 2.295880000005127
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "loop_10000:hl83qw9rs3q",
+              "engineMs": 2.5672190000041155,
+              "stdout": "49995000\n",
+              "stderr": "",
+              "outputBytes": 9,
+              "error": null,
+              "hostCalls": 0,
+              "memory": {
+                "rss": 294711296,
+                "heapTotal": 42594304,
+                "heapUsed": 28584600,
+                "external": 52880058,
+                "arrayBuffers": 14820806
+              },
+              "adapterError": null,
+              "wallMs": 3.64045000000624,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 9,
+                  "atMs": 3.411392000009073
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "loop_10000:96e0twq1rg",
+              "engineMs": 2.8257960000046296,
+              "stdout": "49995000\n",
+              "stderr": "",
+              "outputBytes": 9,
+              "error": null,
+              "hostCalls": 0,
+              "memory": {
+                "rss": 294711296,
+                "heapTotal": 42594304,
+                "heapUsed": 28614872,
+                "external": 52880311,
+                "arrayBuffers": 14821059
+              },
+              "adapterError": null,
+              "wallMs": 3.2782830000069225,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 9,
+                  "atMs": 2.994051000001491
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "loop_10000:5zpqc14p378",
+              "engineMs": 3.949144999991404,
+              "stdout": "49995000\n",
+              "stderr": "",
+              "outputBytes": 9,
+              "error": null,
+              "hostCalls": 0,
+              "memory": {
+                "rss": 294711296,
+                "heapTotal": 42594304,
+                "heapUsed": 28654760,
+                "external": 52880564,
+                "arrayBuffers": 14821312
+              },
+              "adapterError": null,
+              "wallMs": 6.160518000004231,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 9,
+                  "atMs": 6.1421360000094865
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            }
+          ],
+          "medianEngineMs": 2.8257960000046296
+        },
+        {
+          "id": "host_calls_1000",
+          "samples": [
+            {
+              "type": "complete",
+              "id": "host_calls_1000:y2m6weh34mo",
+              "engineMs": 22.224328000011155,
+              "stdout": "1000\n",
+              "stderr": "",
+              "outputBytes": 5,
+              "error": null,
+              "hostCalls": 1000,
+              "memory": {
+                "rss": 295890944,
+                "heapTotal": 42856448,
+                "heapUsed": 30965248,
+                "external": 52880961,
+                "arrayBuffers": 14821709
+              },
+              "adapterError": null,
+              "wallMs": 22.46062100000563,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 5,
+                  "atMs": 22.21941400000651
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "host_calls_1000:7t4gwwpxc6e",
+              "engineMs": 11.493304999996326,
+              "stdout": "1000\n",
+              "stderr": "",
+              "outputBytes": 5,
+              "error": null,
+              "hostCalls": 1000,
+              "memory": {
+                "rss": 299298816,
+                "heapTotal": 45477888,
+                "heapUsed": 27072160,
+                "external": 52881358,
+                "arrayBuffers": 14822106
+              },
+              "adapterError": null,
+              "wallMs": 12.688225999998394,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 5,
+                  "atMs": 8.904787000006763
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "host_calls_1000:z4rb6hzos9i",
+              "engineMs": 4.479382000004989,
+              "stdout": "1000\n",
+              "stderr": "",
+              "outputBytes": 5,
+              "error": null,
+              "hostCalls": 1000,
+              "memory": {
+                "rss": 299298816,
+                "heapTotal": 45477888,
+                "heapUsed": 28711176,
+                "external": 52873172,
+                "arrayBuffers": 14813920
+              },
+              "adapterError": null,
+              "wallMs": 4.8262459999969,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 5,
+                  "atMs": 4.25622700000531
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "host_calls_1000:r8s0n6gxaa8",
+              "engineMs": 4.554161000007298,
+              "stdout": "1000\n",
+              "stderr": "",
+              "outputBytes": 5,
+              "error": null,
+              "hostCalls": 1000,
+              "memory": {
+                "rss": 299429888,
+                "heapTotal": 45477888,
+                "heapUsed": 30348624,
+                "external": 52873569,
+                "arrayBuffers": 14814317
+              },
+              "adapterError": null,
+              "wallMs": 7.234756999998353,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 5,
+                  "atMs": 7.186323999994784
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "host_calls_1000:1rv1zolxmsy",
+              "engineMs": 5.7237719999975525,
+              "stdout": "1000\n",
+              "stderr": "",
+              "outputBytes": 5,
+              "error": null,
+              "hostCalls": 1000,
+              "memory": {
+                "rss": 299429888,
+                "heapTotal": 45477888,
+                "heapUsed": 31994968,
+                "external": 52873966,
+                "arrayBuffers": 14814714
+              },
+              "adapterError": null,
+              "wallMs": 6.156347999989521,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 5,
+                  "atMs": 5.925089999989723
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            }
+          ],
+          "medianEngineMs": 5.7237719999975525
+        }
+      ],
+      "interaction": {
+        "sharedInput": {
+          "type": "complete",
+          "id": "live_input:9zhodwhq6xu",
+          "engineMs": 41.94125899999926,
+          "stdout": "before\nName? hello Ada\n",
+          "stderr": "",
+          "outputBytes": 23,
+          "error": null,
+          "hostCalls": 0,
+          "memory": {
+            "rss": 299429888,
+            "heapTotal": 45477888,
+            "heapUsed": 32028984,
+            "external": 52874229,
+            "arrayBuffers": 14814977
+          },
+          "adapterError": null,
+          "wallMs": 42.201058000006014,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 7,
+              "atMs": 0.902832000007038
+            },
+            {
+              "stream": "stdout",
+              "chars": 6,
+              "atMs": 1.0601330000063172
+            },
+            {
+              "stream": "stdout",
+              "chars": 10,
+              "atMs": 41.846636000002036
+            }
+          ],
+          "inputEvents": [
+            {
+              "mode": "shared",
+              "prompt": "",
+              "atMs": 1.093963999999687
+            }
+          ],
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        },
+        "messageInput": {
+          "status": "not implemented by this probe; synchronous stdin requires separate suspension strategy without SharedArrayBuffer"
+        },
+        "hardStop": {
+          "terminated": true,
+          "outputEvents": [],
+          "inputEvents": [],
+          "terminationLatencyMs": 12.952172999997856,
+          "parentHeartbeats": 20,
+          "method": "worker.terminate; runtime discarded"
+        },
+        "restartAfterStop": {
+          "type": "complete",
+          "id": "restart_after_stop:dcw73z2c9e6",
+          "engineMs": 8.080910999997286,
+          "stdout": "42\n",
+          "stderr": "",
+          "outputBytes": 3,
+          "error": null,
+          "hostCalls": 0,
+          "memory": {
+            "rss": 298856448,
+            "heapTotal": 44527616,
+            "heapUsed": 26452992,
+            "external": 52872778,
+            "arrayBuffers": 14813526
+          },
+          "adapterError": null,
+          "wallMs": 11.016366000010748,
+          "outputEvents": [
+            {
+              "stream": "stdout",
+              "chars": 3,
+              "atMs": 10.985946000000695
+            }
+          ],
+          "inputEvents": [],
+          "validation": {
+            "pass": true,
+            "reason": "output matched"
+          }
+        }
+      },
+      "assetTotals": {
+        "bytes": 13530536,
+        "gzipBytes": 6390645,
+        "brotliBytes": 5461479
+      },
+      "summary": {
+        "medianLoadMs": 2697.089949999994,
+        "medianWorkerReadyMs": 2789.41928799999,
+        "fixturesPassed": 10,
+        "fixturesTotal": 10
+      }
+    }
+  }
+}

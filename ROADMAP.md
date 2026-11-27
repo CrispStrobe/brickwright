@@ -7,6 +7,12 @@ and [evaluation claim](lanes/2026-11-27-code-runtime-game-export-evaluation.md).
 This adds a documented execution/export track; it does not declare an interpreter
 replacement or a game exporter implemented.
 
+The [initial evaluation](docs/CODE-RUNTIME-EVALUATION-2026-11-27.md) is recorded:
+Node and headless Chromium runtime probes, a separate pwasm host probe, eight
+reader semantic witnesses, and a Linux authored pygame fixture packaged with
+matching state/frame hashes. R0 has bounded evidence; actual app/device
+qualification remains open. R1/R2 and the G0/G1 game runtime are the next work.
+
 | Order | Work | Required evidence |
 | --- | --- | --- |
 | R0 | Compare existing Skulpt, direct MicroPython/WASM and Pyodide; assess pwasm's role | Pinned versions, identical fixtures, cold/warm measurements, explicit platform gaps; plan lands before probes |

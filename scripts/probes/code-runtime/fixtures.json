@@ -1,0 +1,14 @@
+[
+  {"id":"arithmetic","category":"common","code":"print(7 // 2, -7 // 2, 7 % 2, 1 / 2)\n","stdout":"3 -4 1 0.5\n"},
+  {"id":"large_integer","category":"common","code":"print(10 ** 30 + 1)\n","stdout":"1000000000000000000000000000001\n"},
+  {"id":"class_and_list","category":"common","code":"class Counter:\n    def __init__(self, value):\n        self.value = value\n    def add(self, n):\n        self.value += n\nc = Counter(20)\nc.add(22)\nprint(c.value)\nprint([x*x for x in range(5)])\n","stdout":"42\n[0, 1, 4, 9, 16]\n"},
+  {"id":"json_stdlib","category":"compatibility","code":"import json\nvalue = json.loads('{\"items\": [1, 2, 3]}')\nprint(sum(value['items']))\n","stdout":"6\n"},
+  {"id":"f_string","category":"compatibility","code":"name = 'Brickwright'\nprint(f'{name}: {3 * 7}')\n","stdout":"Brickwright: 21\n"},
+  {"id":"dataclass","category":"compatibility","code":"from dataclasses import dataclass\n@dataclass\nclass Point:\n    x: int\n    y: int\np = Point(20, 22)\nprint(p.x + p.y)\n","stdout":"42\n"},
+  {"id":"exception_trace","category":"diagnostic","code":"def fail():\n    raise ValueError('probe-marker')\nfail()\n","errorIncludes":["ValueError","probe-marker"]},
+  {"id":"buffered_input","category":"interaction","code":"print('before')\nname = input('Name? ')\nprint('hello ' + name)\n","inputs":["Ada"],"stdoutIncludes":["before\n","hello Ada\n"]},
+  {"id":"host_bridge","category":"bridge","code":"import probehost\nprint(probehost.add(20, 22))\nprint(probehost.sensor('A'))\n","stdout":"42\n17\n","hostCalls":2},
+  {"id":"async_bridge","category":"bridge","code":"import probehost\nprint('before-await')\nvalue = await probehost.delay(25)\nprint(value)\n","stdout":"before-await\n42\n"},
+  {"id":"loop_10000","category":"performance","code":"total = 0\nfor i in range(10000):\n    total += i\nprint(total)\n","stdout":"49995000\n"},
+  {"id":"host_calls_1000","category":"performance","code":"import probehost\ntotal = 0\nfor i in range(1000):\n    total = probehost.add(total, 1)\nprint(total)\n","stdout":"1000\n","hostCalls":1000}
+]

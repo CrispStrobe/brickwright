@@ -1,0 +1,1 @@
+pwasm==0.2a0 --hash=sha256:6bba3f1bea0bfb8d5b76ab5c3bba2f3cd6389c69cab44b2e6a20abf435bc17c0

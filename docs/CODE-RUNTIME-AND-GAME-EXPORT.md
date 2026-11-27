@@ -1,6 +1,6 @@
 # Code execution and Python game export
 
-Status: planned, with evaluation in progress. Recorded 2026-11-27 at the
+Status: planned, with the initial bounded evaluation recorded. Recorded 2026-11-27 at the
 repository owner's request. This document is an implementation plan, not a
 claim that new runtimes or standalone exporters have shipped.
 
@@ -69,8 +69,8 @@ results include:
 | Python input | Current emitted pseudocode | Consequence |
 | --- | --- | --- |
 | `x = 7 // 2` | `set x to (7 / 2)` | Floor division changes into ordinary division |
-| `x = 3; x *= 2` | Set to 3, then change by 2 | Multiplication assignment changes into addition |
-| `x = 8; x /= 2` | Set to 8, then change by 2 | Division assignment changes into addition |
+| `x = 3` then `x *= 2` on a new line | Set to 3, then change by 2 | Multiplication assignment changes into addition |
+| `x = 8` then `x /= 2` on a new line | Set to 8, then change by 2 | Division assignment changes into addition |
 | `break` / `continue` | Statements omitted | Loop control changes |
 
 These cases returned no warnings in the review probes. Enabling a strict flag
@@ -436,11 +436,13 @@ new interpreter, game engine and mobile distribution into one release.
 
 ## 8. Evidence and follow-up
 
-The initial planning commit intentionally contains no new runtime benchmark
-claims. Add the bounded evaluation report here after recording actual results.
-The report must preserve failures and environment restrictions, including cases
-where only source inspection was possible. A successful probe does not close R1
-through R4 or G0 through G4.
+The initial planning commit landed before the probes. The
+[2026-11-27 evaluation report](CODE-RUNTIME-EVALUATION-2026-11-27.md) now records
+Node and real headless Chromium observations for the three runtimes, a separate
+pwasm host probe, eight reader semantic witnesses, and a Linux pygame packaging
+smoke. It preserves initial failures, corrected probe revisions and remaining
+device/application gaps. A successful probe does not close R1 through R4 or G0
+through G4.
 
 Primary runtime references: [Skulpt](https://github.com/skulpt/skulpt),
 [MicroPython WebAssembly](https://github.com/micropython/micropython/tree/v1.29.0/ports/webassembly),

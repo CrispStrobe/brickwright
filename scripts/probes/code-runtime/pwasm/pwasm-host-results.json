@@ -1,0 +1,142 @@
+{
+  "scope": "CPython host running pwasm's custom MicroPython guest; not browser qualification",
+  "python": "3.12.14",
+  "platform": {
+    "system": "Linux",
+    "machine": "x86_64",
+    "libc": [
+      "glibc",
+      "2.41"
+    ]
+  },
+  "pwasm_version": "0.2a0",
+  "mode": "auto",
+  "initialization_samples_ms": [
+    30.378,
+    12.418,
+    13.137
+  ],
+  "cases": [
+    {
+      "id": "arithmetic",
+      "source": "print(7 // 2, -7 // 2, 7 % 2, 1 / 2)",
+      "expected_stdout": "3 -4 1 0.5\n",
+      "matches_expected": true,
+      "stdout": "3 -4 1 0.5\n",
+      "elapsed_ms": 206.912
+    },
+    {
+      "id": "large_integer",
+      "source": "print(10 ** 30 + 1)",
+      "expected_stdout": "1000000000000000000000000000001\n",
+      "matches_expected": true,
+      "stdout": "1000000000000000000000000000001\n",
+      "elapsed_ms": 43.965
+    },
+    {
+      "id": "class_and_list",
+      "source": "class Counter:\n    def __init__(self, value):\n        self.value = value\n    def add(self, n):\n        self.value += n\nc = Counter(20)\nc.add(22)\nprint(c.value)\nprint([x*x for x in range(5)])",
+      "expected_stdout": "42\n[0, 1, 4, 9, 16]\n",
+      "matches_expected": true,
+      "stdout": "42\n[0, 1, 4, 9, 16]\n",
+      "elapsed_ms": 262.614
+    },
+    {
+      "id": "json_stdlib",
+      "source": "import json\nvalue = json.loads('{\"items\": [1, 2, 3]}')\nprint(sum(value['items']))",
+      "expected_stdout": "6\n",
+      "matches_expected": true,
+      "stdout": "6\n",
+      "elapsed_ms": 49.896
+    },
+    {
+      "id": "f_string",
+      "source": "name = 'Brickwright'\nprint(f'{name}: {3 * 7}')",
+      "expected_stdout": "Brickwright: 21\n",
+      "matches_expected": false,
+      "error_type": "PythonError",
+      "error": "Traceback (most recent call last):\n  File \"<stdin>\"\nSyntaxError: invalid syntax\n",
+      "elapsed_ms": 13.046
+    },
+    {
+      "id": "dataclass",
+      "source": "from dataclasses import dataclass\n@dataclass\nclass Point:\n    x: int\n    y: int\np = Point(20, 22)\nprint(p.x + p.y)",
+      "expected_stdout": "42\n",
+      "matches_expected": false,
+      "error_type": "PythonError",
+      "error": "Traceback (most recent call last):\n  File \"<stdin>\", in <module>\nImportError: no module named 'dataclasses'\n",
+      "elapsed_ms": 51.337
+    },
+    {
+      "id": "loop_10000",
+      "source": "total = 0\nfor i in range(10000):\n    total += i\nprint(total)",
+      "expected_stdout": "49995000\n",
+      "matches_expected": true,
+      "stdout": "49995000\n",
+      "elapsed_ms": 337.186
+    },
+    {
+      "id": "registered_host_callback",
+      "calls": [
+        [
+          20,
+          22
+        ]
+      ],
+      "matches_expected": true,
+      "stdout": "42\n",
+      "elapsed_ms": 30.679
+    },
+    {
+      "id": "unknown_host_callback",
+      "error_type": "PythonError",
+      "error": "Traceback (most recent call last):\n  File \"<stdin>\", in <module>\nRuntimeError: NameError: no host function named 'missing'\n",
+      "elapsed_ms": 43.487
+    },
+    {
+      "id": "os_import",
+      "error_type": "PythonError",
+      "error": "Traceback (most recent call last):\n  File \"<stdin>\", in <module>\nImportError: no module named 'os'\n",
+      "elapsed_ms": 13.985
+    },
+    {
+      "id": "infinite_loop_timeout_200ms",
+      "error_type": "Timeout",
+      "error": "execution timed out",
+      "elapsed_ms": 200.802
+    },
+    {
+      "id": "infinite_loop_fuel",
+      "error_type": "OutOfFuel",
+      "error": "fuel budget of 200043 units exhausted",
+      "elapsed_ms": 134.84
+    },
+    {
+      "id": "fresh_restart",
+      "matches_expected": true,
+      "stdout": "fresh after limit\n",
+      "elapsed_ms": 2.85
+    },
+    {
+      "id": "host_callback_150ms_with_deadline_10ms",
+      "stdout": "42\n",
+      "elapsed_ms": 154.443
+    }
+  ],
+  "guest": {
+    "bytes": 286631,
+    "sha256": "6f7b35aa342738ddfc47b3a34381afb62be3f640ead7f0e112020a2873baf84f"
+  },
+  "limitations": [
+    "One host environment, one sample per semantic case, no browser/device qualification.",
+    "pwasm initialization samples include host cache effects; not network startup timings.",
+    "This custom guest and bridge differ from official MicroPython/WASM and the JS runtime harness.",
+    "The host-wait fixture deliberately uses a 150ms callback to locate the deadline boundary.",
+    "No memory-growth, adversarial-security or application-simulator qualification."
+  ],
+  "distribution": {
+    "file": "pwasm-0.2a0-py3-none-any.whl",
+    "bytes": 656319,
+    "sha256": "6bba3f1bea0bfb8d5b76ab5c3bba2f3cd6389c69cab44b2e6a20abf435bc17c0"
+  }
+}

@@ -1,0 +1,2787 @@
+{
+  "schema": 1,
+  "createdAt": "2026-11-27T06:07:26.813Z",
+  "planCommit": "a29ac18c9e4a8789b6d58f8d5be4b5f034667627",
+  "brickwrightHead": "14de1c42bd2e2ea84086a2162d1eff1fdbbac20d",
+  "environment": {
+    "kind": "headless real browser; localhost HTTP",
+    "browserVersion": "158.0.8127.0",
+    "browserDistribution": "@sparticuz/chromium 158.0.0 (serverless Linux Chromium); security-disabling and SAB-enable flags removed",
+    "browserArgs": [
+      "--ash-no-nudges",
+      "--disable-domain-reliability",
+      "--disable-print-preview",
+      "--disk-cache-size=33554432",
+      "--no-default-browser-check",
+      "--no-pings",
+      "--font-render-hinting=none",
+      "--ignore-gpu-blocklist",
+      "--in-process-gpu",
+      "--use-gl=angle",
+      "--use-angle=swiftshader",
+      "--enable-unsafe-swiftshader",
+      "--disable-setuid-sandbox",
+      "--headless='shell'",
+      "--no-sandbox",
+      "--no-zygote"
+    ],
+    "node": "v24.22.3",
+    "platform": "linux",
+    "arch": "x64",
+    "cpuModel": "INTEL(R) XEON(R) PLATINUM 8573C",
+    "cpus": 9
+  },
+  "protocol": {
+    "startupSamples": 3,
+    "warmRepeats": 5,
+    "startupBudgetMs": 30000,
+    "fixtureBudgetMs": 5000,
+    "hardStopDelayMs": 200,
+    "hardStopQuietWindowMs": 200,
+    "outputBudgetBytes": 1048576,
+    "startupMeaning": "fresh worker/runtime, already-installed runtime files served from localhost; browser/OS caches may be warm; not cold network, device launch or app-ready latency",
+    "sharedInputMeaning": "only separately tested with COOP same-origin and COEP require-corp; standard run intentionally has no SharedArrayBuffer",
+    "memoryMeaning": "browser memory/peak RSS not measured",
+    "stopMeaning": "parent event-loop heartbeat and hard Worker.terminate with fresh restart; browser terminate returns void, so no physical termination-completion latency measured",
+    "bridgeMeaning": "mock arithmetic/sensor and explicit async ask only; no actual app/simulator bridge"
+  },
+  "coverage": {
+    "desktopServerChromium": "measured",
+    "windows": "pending",
+    "macos": "pending",
+    "linuxWebView": "pending",
+    "android": "pending",
+    "ios": "pending",
+    "safari": "pending",
+    "firefox": "pending",
+    "offlineBrowser": "pending",
+    "realNetwork": "pending",
+    "stateIsolation": "pending",
+    "outputCapEnforcement": "pending",
+    "inputCancellation": "pending",
+    "generatedPrograms": "pending",
+    "realSimulatorBridge": "pending",
+    "gracefulInterrupt": "pending; hard termination only"
+  },
+  "sourceHashes": {
+    "package-lock.json": "87fff1c87af4e4092df236501f6a7a152f562fa74eea3905e97e59a792404d62",
+    "fixtures.json": "af7a7aa5fe6e3422a1a9a7b6e4ddaeb6618b22350c937bd37e0cceb729aee99c",
+    "engine-worker.mjs": "8cf9834f9f21620eb736f3711f1b66f9387bd097ce261d081fc678b03f523570",
+    "browser-page.mjs": "f4b5576b0aee7cf712fa1da1678686ad95dc0a45bb4bfd2a02f289ff0af1989f",
+    "browser-probe.mjs": "db6adbefd613bbcc4d0a3b2476592c998ad6201553903ff7d4ad343f4210eeef"
+  },
+  "runs": [
+    {
+      "capabilities": {
+        "isSecureContext": true,
+        "crossOriginIsolated": false,
+        "sharedArrayBuffer": false,
+        "wasm": true,
+        "jspi": true,
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.0 Safari/537.36"
+      },
+      "mode": "standard",
+      "engines": {
+        "skulpt": {
+          "startup": [
+            {
+              "type": "ready",
+              "engine": "skulpt",
+              "engineLoadMs": 73.70000000018626,
+              "runtimeVersion": null,
+              "capabilities": {
+                "sharedArrayBuffer": false,
+                "crossOriginIsolated": false,
+                "jspi": true
+              },
+              "memory": null,
+              "workerStartToReadyMs": 85.70000000018626,
+              "firstRun": {
+                "type": "complete",
+                "id": "hello:4g9ma0p76d6",
+                "engineMs": 8.899999999441206,
+                "stdout": "42\n",
+                "stderr": "",
+                "outputBytes": 3,
+                "error": null,
+                "hostCalls": 0,
+                "memory": null,
+                "adapterError": null,
+                "wallMs": 9.099999999627471,
+                "outputEvents": [
+                  {
+                    "stream": "stdout",
+                    "chars": 3,
+                    "atMs": 9
+                  }
+                ],
+                "inputEvents": []
+              },
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "ready",
+              "engine": "skulpt",
+              "engineLoadMs": 37.59999999962747,
+              "runtimeVersion": null,
+              "capabilities": {
+                "sharedArrayBuffer": false,
+                "crossOriginIsolated": false,
+                "jspi": true
+              },
+              "memory": null,
+              "workerStartToReadyMs": 44,
+              "firstRun": {
+                "type": "complete",
+                "id": "hello:5y26imuv4rl",
+                "engineMs": 6.7999999998137355,
+                "stdout": "42\n",
+                "stderr": "",
+                "outputBytes": 3,
+                "error": null,
+                "hostCalls": 0,
+                "memory": null,
+                "adapterError": null,
+                "wallMs": 7.099999999627471,
+                "outputEvents": [
+                  {
+                    "stream": "stdout",
+                    "chars": 3,
+                    "atMs": 7.099999999627471
+                  }
+                ],
+                "inputEvents": []
+              },
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "ready",
+              "engine": "skulpt",
+              "engineLoadMs": 42.59999999962747,
+              "runtimeVersion": null,
+              "capabilities": {
+                "sharedArrayBuffer": false,
+                "crossOriginIsolated": false,
+                "jspi": true
+              },
+              "memory": null,
+              "workerStartToReadyMs": 50.10000000055879,
+              "firstRun": {
+                "type": "complete",
+                "id": "hello:7qccbhyh5cf",
+                "engineMs": 6.099999999627471,
+                "stdout": "42\n",
+                "stderr": "",
+                "outputBytes": 3,
+                "error": null,
+                "hostCalls": 0,
+                "memory": null,
+                "adapterError": null,
+                "wallMs": 6.3999999994412065,
+                "outputEvents": [
+                  {
+                    "stream": "stdout",
+                    "chars": 3,
+                    "atMs": 6.3999999994412065
+                  }
+                ],
+                "inputEvents": []
+              },
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            }
+          ],
+          "fixtures": [
+            {
+              "type": "complete",
+              "id": "arithmetic",
+              "engineMs": 1.7000000001862645,
+              "stdout": "3 -4 1 0.5\n",
+              "stderr": "",
+              "outputBytes": 11,
+              "error": null,
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 1.7000000001862645,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 11,
+                  "atMs": 1.7000000001862645
+                }
+              ],
+              "inputEvents": [],
+              "runId": "arithmetic:5ctnyvcl5cg",
+              "category": "common",
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "large_integer",
+              "engineMs": 1.2999999998137355,
+              "stdout": "1000000000000000000000000000001\n",
+              "stderr": "",
+              "outputBytes": 32,
+              "error": null,
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 1.5,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 32,
+                  "atMs": 1.5
+                }
+              ],
+              "inputEvents": [],
+              "runId": "large_integer:q09sqzsxyl",
+              "category": "common",
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "class_and_list",
+              "engineMs": 6.7000000001862645,
+              "stdout": "42\n[0, 1, 4, 9, 16]\n",
+              "stderr": "",
+              "outputBytes": 20,
+              "error": null,
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 6.900000000372529,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 3,
+                  "atMs": 6.400000000372529
+                },
+                {
+                  "stream": "stdout",
+                  "chars": 17,
+                  "atMs": 6.900000000372529
+                }
+              ],
+              "inputEvents": [],
+              "runId": "class_and_list:4okknd1qmd6",
+              "category": "common",
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "json_stdlib",
+              "engineMs": 2.800000000745058,
+              "stdout": "",
+              "stderr": "",
+              "outputBytes": 0,
+              "error": {
+                "name": "constructor",
+                "message": "NotImplementedError: json is not yet implemented in Skulpt on line 1",
+                "traceback": [
+                  {
+                    "lineno": 1,
+                    "filename": "src/lib/json/__init__.py"
+                  },
+                  {
+                    "lineno": 1,
+                    "filename": "<probe>.py"
+                  }
+                ]
+              },
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 3,
+              "outputEvents": [],
+              "inputEvents": [],
+              "runId": "json_stdlib:abedv3t4c1t",
+              "category": "compatibility",
+              "validation": {
+                "pass": false,
+                "reason": "NotImplementedError: json is not yet implemented in Skulpt on line 1"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "f_string",
+              "engineMs": 2.099999999627471,
+              "stdout": "Brickwright: 21\n",
+              "stderr": "",
+              "outputBytes": 16,
+              "error": null,
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 3.5,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 16,
+                  "atMs": 3.5
+                }
+              ],
+              "inputEvents": [],
+              "runId": "f_string:dg72jyjd57g",
+              "category": "compatibility",
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "dataclass",
+              "engineMs": 1.5,
+              "stdout": "",
+              "stderr": "",
+              "outputBytes": 0,
+              "error": {
+                "name": "TypeError",
+                "message": "TypeError: Cannot read properties of null (reading 'lineno')",
+                "traceback": null
+              },
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 1.7999999998137355,
+              "outputEvents": [],
+              "inputEvents": [],
+              "runId": "dataclass:xttjy8kn2mo",
+              "category": "compatibility",
+              "validation": {
+                "pass": false,
+                "reason": "TypeError: Cannot read properties of null (reading 'lineno')"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "exception_trace",
+              "engineMs": 1.3999999994412065,
+              "stdout": "",
+              "stderr": "",
+              "outputBytes": 0,
+              "error": {
+                "name": "constructor",
+                "message": "ValueError: probe-marker on line 2",
+                "traceback": [
+                  {
+                    "lineno": 2,
+                    "filename": "<probe>.py"
+                  },
+                  {
+                    "lineno": 3,
+                    "filename": "<probe>.py"
+                  }
+                ]
+              },
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 1.5,
+              "outputEvents": [],
+              "inputEvents": [],
+              "runId": "exception_trace:rpuqy3i2f6",
+              "category": "diagnostic",
+              "validation": {
+                "pass": true,
+                "reason": "expected guest error"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "buffered_input",
+              "engineMs": 1.099999999627471,
+              "stdout": "before\nhello Ada\n",
+              "stderr": "",
+              "outputBytes": 17,
+              "error": null,
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 1.099999999627471,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 7,
+                  "atMs": 0.7999999998137355
+                },
+                {
+                  "stream": "stdout",
+                  "chars": 10,
+                  "atMs": 1.099999999627471
+                }
+              ],
+              "inputEvents": [],
+              "runId": "buffered_input:6nzgao8zs8i",
+              "category": "interaction",
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "host_bridge",
+              "engineMs": 2.599999999627471,
+              "stdout": "42\n17\n",
+              "stderr": "",
+              "outputBytes": 6,
+              "error": null,
+              "hostCalls": 2,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 2.599999999627471,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 3,
+                  "atMs": 2.5
+                },
+                {
+                  "stream": "stdout",
+                  "chars": 3,
+                  "atMs": 2.599999999627471
+                }
+              ],
+              "inputEvents": [],
+              "runId": "host_bridge:96gr2sfwi6k",
+              "category": "bridge",
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "async_bridge",
+              "engineMs": 0.39999999944120646,
+              "stdout": "",
+              "stderr": "",
+              "outputBytes": 0,
+              "error": {
+                "name": "constructor",
+                "message": "SyntaxError: bad input on line 3",
+                "traceback": [
+                  {
+                    "lineno": 3,
+                    "filename": "<probe>.py"
+                  }
+                ]
+              },
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 0.5,
+              "outputEvents": [],
+              "inputEvents": [],
+              "runId": "async_bridge:0ykplxxk3a1h",
+              "category": "bridge",
+              "validation": {
+                "pass": false,
+                "reason": "SyntaxError: bad input on line 3"
+              }
+            }
+          ],
+          "performance": [
+            {
+              "id": "loop_10000",
+              "samples": [
+                {
+                  "type": "complete",
+                  "id": "loop_10000:mx9k50yxsb7",
+                  "engineMs": 11.699999999254942,
+                  "stdout": "49995000\n",
+                  "stderr": "",
+                  "outputBytes": 9,
+                  "error": null,
+                  "hostCalls": 0,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 11.799999999813735,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 9,
+                      "atMs": 11.799999999813735
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                },
+                {
+                  "type": "complete",
+                  "id": "loop_10000:bqwsktnodv",
+                  "engineMs": 3.1000000005587935,
+                  "stdout": "49995000\n",
+                  "stderr": "",
+                  "outputBytes": 9,
+                  "error": null,
+                  "hostCalls": 0,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 3.2000000001862645,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 9,
+                      "atMs": 3.2000000001862645
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                },
+                {
+                  "type": "complete",
+                  "id": "loop_10000:t52e1v9vydh",
+                  "engineMs": 6.6000000005587935,
+                  "stdout": "49995000\n",
+                  "stderr": "",
+                  "outputBytes": 9,
+                  "error": null,
+                  "hostCalls": 0,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 6.8999999994412065,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 9,
+                      "atMs": 6.8999999994412065
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                },
+                {
+                  "type": "complete",
+                  "id": "loop_10000:i1w0qyci9tm",
+                  "engineMs": 6.400000000372529,
+                  "stdout": "49995000\n",
+                  "stderr": "",
+                  "outputBytes": 9,
+                  "error": null,
+                  "hostCalls": 0,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 6.6000000005587935,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 9,
+                      "atMs": 6.5
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                },
+                {
+                  "type": "complete",
+                  "id": "loop_10000:oo0oiwspxp",
+                  "engineMs": 2.6000000005587935,
+                  "stdout": "49995000\n",
+                  "stderr": "",
+                  "outputBytes": 9,
+                  "error": null,
+                  "hostCalls": 0,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 2.7999999998137355,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 9,
+                      "atMs": 2.7999999998137355
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                }
+              ],
+              "medianEngineMs": 6.400000000372529
+            },
+            {
+              "id": "host_calls_1000",
+              "samples": [
+                {
+                  "type": "complete",
+                  "id": "host_calls_1000:48lrq1kao5r",
+                  "engineMs": 3.2000000001862645,
+                  "stdout": "1000\n",
+                  "stderr": "",
+                  "outputBytes": 5,
+                  "error": null,
+                  "hostCalls": 1000,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 3.400000000372529,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 5,
+                      "atMs": 3.400000000372529
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                },
+                {
+                  "type": "complete",
+                  "id": "host_calls_1000:03qwrcqr591v",
+                  "engineMs": 2.5,
+                  "stdout": "1000\n",
+                  "stderr": "",
+                  "outputBytes": 5,
+                  "error": null,
+                  "hostCalls": 1000,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 2.5,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 5,
+                      "atMs": 2.5
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                },
+                {
+                  "type": "complete",
+                  "id": "host_calls_1000:jlyn9dl3ze",
+                  "engineMs": 1.3999999994412065,
+                  "stdout": "1000\n",
+                  "stderr": "",
+                  "outputBytes": 5,
+                  "error": null,
+                  "hostCalls": 1000,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 1.3999999994412065,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 5,
+                      "atMs": 1.3999999994412065
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                },
+                {
+                  "type": "complete",
+                  "id": "host_calls_1000:08pd1lquz3x4",
+                  "engineMs": 1.599999999627471,
+                  "stdout": "1000\n",
+                  "stderr": "",
+                  "outputBytes": 5,
+                  "error": null,
+                  "hostCalls": 1000,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 1.7000000001862645,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 5,
+                      "atMs": 1.7000000001862645
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                },
+                {
+                  "type": "complete",
+                  "id": "host_calls_1000:sb7z1psnk9s",
+                  "engineMs": 1.3999999994412065,
+                  "stdout": "1000\n",
+                  "stderr": "",
+                  "outputBytes": 5,
+                  "error": null,
+                  "hostCalls": 1000,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 1.5,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 5,
+                      "atMs": 1.5
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                }
+              ],
+              "medianEngineMs": 1.599999999627471
+            }
+          ],
+          "interaction": {
+            "messageInput": {
+              "type": "complete",
+              "id": "live_input:4u7owfn50q",
+              "engineMs": 41.200000000186265,
+              "stdout": "before\nhello Ada\n",
+              "stderr": "",
+              "outputBytes": 17,
+              "error": null,
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 41.59999999962747,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 7,
+                  "atMs": 0.7999999998137355
+                },
+                {
+                  "stream": "stdout",
+                  "chars": 10,
+                  "atMs": 41.39999999944121
+                }
+              ],
+              "inputEvents": [
+                {
+                  "mode": "message",
+                  "prompt": "Name? ",
+                  "atMs": 0.8999999994412065
+                }
+              ],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            "hardStop": {
+              "terminated": true,
+              "outputEvents": [],
+              "inputEvents": [],
+              "terminateCallMs": 0.10000000055879354,
+              "afterCloseMessages": 0,
+              "parentHeartbeats": 40,
+              "method": "browser Worker.terminate() returns void; measured API call time is NOT confirmed termination latency; observed 200 ms quiet window"
+            },
+            "restartAfterStop": {
+              "type": "complete",
+              "id": "hello:2vt7yexe9gd",
+              "engineMs": 6.1000000005587935,
+              "stdout": "42\n",
+              "stderr": "",
+              "outputBytes": 3,
+              "error": null,
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 6.400000000372529,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 3,
+                  "atMs": 6.400000000372529
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            }
+          },
+          "summary": {
+            "medianLoadMs": 42.59999999962747,
+            "medianWorkerReadyMs": 50.10000000055879,
+            "fixtureCategories": {
+              "common": {
+                "passed": 3,
+                "total": 3
+              },
+              "compatibility": {
+                "passed": 1,
+                "total": 3
+              },
+              "diagnostic": {
+                "passed": 1,
+                "total": 1
+              },
+              "interaction": {
+                "passed": 1,
+                "total": 1
+              },
+              "bridge": {
+                "passed": 1,
+                "total": 2
+              }
+            }
+          }
+        },
+        "micropython": {
+          "startup": [
+            {
+              "type": "ready",
+              "engine": "micropython",
+              "engineLoadMs": 31.399999999441206,
+              "runtimeVersion": null,
+              "capabilities": {
+                "sharedArrayBuffer": false,
+                "crossOriginIsolated": false,
+                "jspi": true
+              },
+              "memory": null,
+              "workerStartToReadyMs": 37.60000000055879,
+              "firstRun": {
+                "type": "complete",
+                "id": "hello:y3nox3l4o6m",
+                "engineMs": 2.900000000372529,
+                "stdout": "42\n",
+                "stderr": "",
+                "outputBytes": 3,
+                "error": null,
+                "hostCalls": 0,
+                "memory": null,
+                "adapterError": null,
+                "wallMs": 3.1000000005587935,
+                "outputEvents": [
+                  {
+                    "stream": "stdout",
+                    "chars": 3,
+                    "atMs": 3.1000000005587935
+                  }
+                ],
+                "inputEvents": []
+              },
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "ready",
+              "engine": "micropython",
+              "engineLoadMs": 16.90000000037253,
+              "runtimeVersion": null,
+              "capabilities": {
+                "sharedArrayBuffer": false,
+                "crossOriginIsolated": false,
+                "jspi": true
+              },
+              "memory": null,
+              "workerStartToReadyMs": 29.199999999254942,
+              "firstRun": {
+                "type": "complete",
+                "id": "hello:svgit6j9ow9",
+                "engineMs": 3,
+                "stdout": "42\n",
+                "stderr": "",
+                "outputBytes": 3,
+                "error": null,
+                "hostCalls": 0,
+                "memory": null,
+                "adapterError": null,
+                "wallMs": 4.1000000005587935,
+                "outputEvents": [
+                  {
+                    "stream": "stdout",
+                    "chars": 3,
+                    "atMs": 4.1000000005587935
+                  }
+                ],
+                "inputEvents": []
+              },
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "ready",
+              "engine": "micropython",
+              "engineLoadMs": 36.200000000186265,
+              "runtimeVersion": null,
+              "capabilities": {
+                "sharedArrayBuffer": false,
+                "crossOriginIsolated": false,
+                "jspi": true
+              },
+              "memory": null,
+              "workerStartToReadyMs": 45.799999999813735,
+              "firstRun": {
+                "type": "complete",
+                "id": "hello:4dzg5xrt1gx",
+                "engineMs": 3.900000000372529,
+                "stdout": "42\n",
+                "stderr": "",
+                "outputBytes": 3,
+                "error": null,
+                "hostCalls": 0,
+                "memory": null,
+                "adapterError": null,
+                "wallMs": 4.1000000005587935,
+                "outputEvents": [
+                  {
+                    "stream": "stdout",
+                    "chars": 3,
+                    "atMs": 4.1000000005587935
+                  }
+                ],
+                "inputEvents": []
+              },
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            }
+          ],
+          "fixtures": [
+            {
+              "type": "complete",
+              "id": "arithmetic",
+              "engineMs": 1.699999999254942,
+              "stdout": "3 -4 1 0.5\n",
+              "stderr": "",
+              "outputBytes": 11,
+              "error": null,
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 1.7999999998137355,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 11,
+                  "atMs": 1.7999999998137355
+                }
+              ],
+              "inputEvents": [],
+              "runId": "arithmetic:aj6ecsxka5",
+              "category": "common",
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "large_integer",
+              "engineMs": 0.7000000001862645,
+              "stdout": "1000000000000000000000000000001\n",
+              "stderr": "",
+              "outputBytes": 32,
+              "error": null,
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 1.099999999627471,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 32,
+                  "atMs": 0.8999999994412065
+                }
+              ],
+              "inputEvents": [],
+              "runId": "large_integer:ccx7qqtfyy9",
+              "category": "common",
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "class_and_list",
+              "engineMs": 5.5,
+              "stdout": "42\n[0, 1, 4, 9, 16]\n",
+              "stderr": "",
+              "outputBytes": 20,
+              "error": null,
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 5.699999999254942,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 3,
+                  "atMs": 5.099999999627471
+                },
+                {
+                  "stream": "stdout",
+                  "chars": 17,
+                  "atMs": 5.699999999254942
+                }
+              ],
+              "inputEvents": [],
+              "runId": "class_and_list:joo8z6yqkys",
+              "category": "common",
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "json_stdlib",
+              "engineMs": 1.300000000745058,
+              "stdout": "6\n",
+              "stderr": "",
+              "outputBytes": 2,
+              "error": null,
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 3.7999999998137355,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 2,
+                  "atMs": 3.7000000001862645
+                }
+              ],
+              "inputEvents": [],
+              "runId": "json_stdlib:56x4q19ukk9",
+              "category": "compatibility",
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "f_string",
+              "engineMs": 0.39999999944120646,
+              "stdout": "Brickwright: 21\n",
+              "stderr": "",
+              "outputBytes": 16,
+              "error": null,
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 0.900000000372529,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 16,
+                  "atMs": 0.599999999627471
+                }
+              ],
+              "inputEvents": [],
+              "runId": "f_string:1fqjhoxq2sb",
+              "category": "compatibility",
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "dataclass",
+              "engineMs": 1,
+              "stdout": "",
+              "stderr": "",
+              "outputBytes": 0,
+              "error": {
+                "name": "PythonError",
+                "message": "PythonError: Traceback (most recent call last):\n  File \"<stdin>\", line 1, in <module>\nImportError: no module named 'dataclasses'\n",
+                "traceback": null
+              },
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 1.7999999998137355,
+              "outputEvents": [],
+              "inputEvents": [],
+              "runId": "dataclass:dm2yod0bot",
+              "category": "compatibility",
+              "validation": {
+                "pass": false,
+                "reason": "PythonError: Traceback (most recent call last):\n  File \"<stdin>\", line 1, in <module>\nImportError: no module named 'dataclasses'\n"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "exception_trace",
+              "engineMs": 0.2999999998137355,
+              "stdout": "",
+              "stderr": "",
+              "outputBytes": 0,
+              "error": {
+                "name": "PythonError",
+                "message": "PythonError: Traceback (most recent call last):\n  File \"<stdin>\", line 3, in <module>\n  File \"<stdin>\", line 2, in fail\nValueError: probe-marker\n",
+                "traceback": null
+              },
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 0.5,
+              "outputEvents": [],
+              "inputEvents": [],
+              "runId": "exception_trace:wzirhdcog2",
+              "category": "diagnostic",
+              "validation": {
+                "pass": true,
+                "reason": "expected guest error"
+              }
+            },
+            {
+              "timeout": true,
+              "wallMs": 5011.799999999814,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 7,
+                  "atMs": 0.6000000005587935
+                }
+              ],
+              "inputEvents": [],
+              "id": "buffered_input",
+              "category": "interaction",
+              "validation": {
+                "pass": false,
+                "reason": "fixture deadline exceeded"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "host_bridge",
+              "engineMs": 1,
+              "stdout": "42\n17\n",
+              "stderr": "",
+              "outputBytes": 6,
+              "error": null,
+              "hostCalls": 2,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 1.2000000001862645,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 3,
+                  "atMs": 1
+                },
+                {
+                  "stream": "stdout",
+                  "chars": 3,
+                  "atMs": 1.1000000005587935
+                }
+              ],
+              "inputEvents": [],
+              "runId": "host_bridge:muxrxvorsq",
+              "category": "bridge",
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "async_bridge",
+              "engineMs": 26.40000000037253,
+              "stdout": "before-await\n42\n",
+              "stderr": "",
+              "outputBytes": 16,
+              "error": null,
+              "hostCalls": 1,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 26.700000000186265,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 13,
+                  "atMs": 1
+                },
+                {
+                  "stream": "stdout",
+                  "chars": 3,
+                  "atMs": 26.700000000186265
+                }
+              ],
+              "inputEvents": [],
+              "runId": "async_bridge:w6tvmtp0y4j",
+              "category": "bridge",
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            }
+          ],
+          "performance": [
+            {
+              "id": "loop_10000",
+              "samples": [
+                {
+                  "type": "complete",
+                  "id": "loop_10000:vfrbxcm77h",
+                  "engineMs": 18.799999999813735,
+                  "stdout": "49995000\n",
+                  "stderr": "",
+                  "outputBytes": 9,
+                  "error": null,
+                  "hostCalls": 0,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 19.5,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 9,
+                      "atMs": 19.5
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                },
+                {
+                  "type": "complete",
+                  "id": "loop_10000:a0tyy2144hv",
+                  "engineMs": 11.900000000372529,
+                  "stdout": "49995000\n",
+                  "stderr": "",
+                  "outputBytes": 9,
+                  "error": null,
+                  "hostCalls": 0,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 12.099999999627471,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 9,
+                      "atMs": 12
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                },
+                {
+                  "type": "complete",
+                  "id": "loop_10000:eckxn8ojmzv",
+                  "engineMs": 16,
+                  "stdout": "49995000\n",
+                  "stderr": "",
+                  "outputBytes": 9,
+                  "error": null,
+                  "hostCalls": 0,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 16.700000000186265,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 9,
+                      "atMs": 16.700000000186265
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                },
+                {
+                  "type": "complete",
+                  "id": "loop_10000:nceqx5h8l0q",
+                  "engineMs": 5,
+                  "stdout": "49995000\n",
+                  "stderr": "",
+                  "outputBytes": 9,
+                  "error": null,
+                  "hostCalls": 0,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 5.7999999998137355,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 9,
+                      "atMs": 5.7999999998137355
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                },
+                {
+                  "type": "complete",
+                  "id": "loop_10000:gvi5xatal98",
+                  "engineMs": 5,
+                  "stdout": "49995000\n",
+                  "stderr": "",
+                  "outputBytes": 9,
+                  "error": null,
+                  "hostCalls": 0,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 5,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 9,
+                      "atMs": 5
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                }
+              ],
+              "medianEngineMs": 11.900000000372529
+            },
+            {
+              "id": "host_calls_1000",
+              "samples": [
+                {
+                  "type": "complete",
+                  "id": "host_calls_1000:en0lzsbj3jk",
+                  "engineMs": 4.8999999994412065,
+                  "stdout": "1000\n",
+                  "stderr": "",
+                  "outputBytes": 5,
+                  "error": null,
+                  "hostCalls": 1000,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 4.8999999994412065,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 5,
+                      "atMs": 4.8999999994412065
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                },
+                {
+                  "type": "complete",
+                  "id": "host_calls_1000:a6q75wu71a",
+                  "engineMs": 1.7999999998137355,
+                  "stdout": "1000\n",
+                  "stderr": "",
+                  "outputBytes": 5,
+                  "error": null,
+                  "hostCalls": 1000,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 1.900000000372529,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 5,
+                      "atMs": 1.900000000372529
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                },
+                {
+                  "type": "complete",
+                  "id": "host_calls_1000:2fm91huomf5",
+                  "engineMs": 1.7000000001862645,
+                  "stdout": "1000\n",
+                  "stderr": "",
+                  "outputBytes": 5,
+                  "error": null,
+                  "hostCalls": 1000,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 2.2000000001862645,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 5,
+                      "atMs": 2.2000000001862645
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                },
+                {
+                  "type": "complete",
+                  "id": "host_calls_1000:9e77u50med",
+                  "engineMs": 1.7999999998137355,
+                  "stdout": "1000\n",
+                  "stderr": "",
+                  "outputBytes": 5,
+                  "error": null,
+                  "hostCalls": 1000,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 2,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 5,
+                      "atMs": 1.7999999998137355
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                },
+                {
+                  "type": "complete",
+                  "id": "host_calls_1000:ufll12cp1jg",
+                  "engineMs": 2,
+                  "stdout": "1000\n",
+                  "stderr": "",
+                  "outputBytes": 5,
+                  "error": null,
+                  "hostCalls": 1000,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 2.2000000001862645,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 5,
+                      "atMs": 2.099999999627471
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                }
+              ],
+              "medianEngineMs": 1.7999999998137355
+            }
+          ],
+          "interaction": {
+            "explicitAsyncAsk": {
+              "type": "complete",
+              "id": "async_ask:hqd5y29a6bi",
+              "engineMs": 41,
+              "stdout": "before\nhello Ada\n",
+              "stderr": "",
+              "outputBytes": 17,
+              "error": null,
+              "hostCalls": 1,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 41.09999999962747,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 7,
+                  "atMs": 0.2999999998137355
+                },
+                {
+                  "stream": "stdout",
+                  "chars": 10,
+                  "atMs": 41.09999999962747
+                }
+              ],
+              "inputEvents": [
+                {
+                  "mode": "message",
+                  "prompt": "Name? ",
+                  "atMs": 0.40000000037252903
+                }
+              ],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              },
+              "scope": "explicit top-level await API, not transparent input() compatibility"
+            },
+            "stdinStream": {
+              "type": "complete",
+              "id": "stdin_stream:ttg82wmb9qo",
+              "engineMs": 0.6000000005587935,
+              "stdout": "before\nhello Ada\n",
+              "stderr": "",
+              "outputBytes": 17,
+              "error": null,
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 0.900000000372529,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 7,
+                  "atMs": 0.5
+                },
+                {
+                  "stream": "stdout",
+                  "chars": 10,
+                  "atMs": 0.8000000007450581
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              },
+              "scope": "filesystem stdin path, distinct from built-in input()"
+            },
+            "hardStop": {
+              "terminated": true,
+              "outputEvents": [],
+              "inputEvents": [],
+              "terminateCallMs": 0,
+              "afterCloseMessages": 0,
+              "parentHeartbeats": 40,
+              "method": "browser Worker.terminate() returns void; measured API call time is NOT confirmed termination latency; observed 200 ms quiet window"
+            },
+            "restartAfterStop": {
+              "type": "complete",
+              "id": "hello:pgkurdjnhi",
+              "engineMs": 0.5,
+              "stdout": "42\n",
+              "stderr": "",
+              "outputBytes": 3,
+              "error": null,
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 0.7999999998137355,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 3,
+                  "atMs": 0.7999999998137355
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            }
+          },
+          "summary": {
+            "medianLoadMs": 31.399999999441206,
+            "medianWorkerReadyMs": 37.60000000055879,
+            "fixtureCategories": {
+              "common": {
+                "passed": 3,
+                "total": 3
+              },
+              "compatibility": {
+                "passed": 2,
+                "total": 3
+              },
+              "diagnostic": {
+                "passed": 1,
+                "total": 1
+              },
+              "interaction": {
+                "passed": 0,
+                "total": 1
+              },
+              "bridge": {
+                "passed": 2,
+                "total": 2
+              }
+            }
+          }
+        },
+        "pyodide": {
+          "startup": [
+            {
+              "type": "ready",
+              "engine": "pyodide",
+              "engineLoadMs": 2857.7999999998137,
+              "runtimeVersion": "314.0.8",
+              "capabilities": {
+                "sharedArrayBuffer": false,
+                "crossOriginIsolated": false,
+                "jspi": true
+              },
+              "memory": null,
+              "workerStartToReadyMs": 2865.5,
+              "firstRun": {
+                "type": "complete",
+                "id": "hello:yddzbt9xlg",
+                "engineMs": 5.2000000001862645,
+                "stdout": "42\n",
+                "stderr": "",
+                "outputBytes": 3,
+                "error": null,
+                "hostCalls": 0,
+                "memory": null,
+                "adapterError": null,
+                "wallMs": 7.7000000001862645,
+                "outputEvents": [
+                  {
+                    "stream": "stdout",
+                    "chars": 3,
+                    "atMs": 6.7000000001862645
+                  }
+                ],
+                "inputEvents": []
+              },
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "ready",
+              "engine": "pyodide",
+              "engineLoadMs": 2418.2999999998137,
+              "runtimeVersion": "314.0.8",
+              "capabilities": {
+                "sharedArrayBuffer": false,
+                "crossOriginIsolated": false,
+                "jspi": true
+              },
+              "memory": null,
+              "workerStartToReadyMs": 2427.100000000559,
+              "firstRun": {
+                "type": "complete",
+                "id": "hello:ikkv00is9g",
+                "engineMs": 4.7999999998137355,
+                "stdout": "42\n",
+                "stderr": "",
+                "outputBytes": 3,
+                "error": null,
+                "hostCalls": 0,
+                "memory": null,
+                "adapterError": null,
+                "wallMs": 7.099999999627471,
+                "outputEvents": [
+                  {
+                    "stream": "stdout",
+                    "chars": 3,
+                    "atMs": 6.400000000372529
+                  }
+                ],
+                "inputEvents": []
+              },
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "ready",
+              "engine": "pyodide",
+              "engineLoadMs": 2095.7999999998137,
+              "runtimeVersion": "314.0.8",
+              "capabilities": {
+                "sharedArrayBuffer": false,
+                "crossOriginIsolated": false,
+                "jspi": true
+              },
+              "memory": null,
+              "workerStartToReadyMs": 2105.7999999998137,
+              "firstRun": {
+                "type": "complete",
+                "id": "hello:kuoy0ulhf3d",
+                "engineMs": 4.3999999994412065,
+                "stdout": "42\n",
+                "stderr": "",
+                "outputBytes": 3,
+                "error": null,
+                "hostCalls": 0,
+                "memory": null,
+                "adapterError": null,
+                "wallMs": 6.2000000001862645,
+                "outputEvents": [
+                  {
+                    "stream": "stdout",
+                    "chars": 3,
+                    "atMs": 5.400000000372529
+                  }
+                ],
+                "inputEvents": []
+              },
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            }
+          ],
+          "fixtures": [
+            {
+              "type": "complete",
+              "id": "arithmetic",
+              "engineMs": 2.1000000005587935,
+              "stdout": "3 -4 1 0.5\n",
+              "stderr": "",
+              "outputBytes": 11,
+              "error": null,
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 2.2999999998137355,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 11,
+                  "atMs": 1.8999999994412065
+                }
+              ],
+              "inputEvents": [],
+              "runId": "arithmetic:7wadqgm72e2",
+              "category": "common",
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "large_integer",
+              "engineMs": 0.900000000372529,
+              "stdout": "1000000000000000000000000000001\n",
+              "stderr": "",
+              "outputBytes": 32,
+              "error": null,
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 1,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 32,
+                  "atMs": 0.7000000001862645
+                }
+              ],
+              "inputEvents": [],
+              "runId": "large_integer:fxxqgdxaq1u",
+              "category": "common",
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "class_and_list",
+              "engineMs": 2.6000000005587935,
+              "stdout": "42\n[0, 1, 4, 9, 16]\n",
+              "stderr": "",
+              "outputBytes": 20,
+              "error": null,
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 2.7000000001862645,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 3,
+                  "atMs": 2.2000000001862645
+                },
+                {
+                  "stream": "stdout",
+                  "chars": 17,
+                  "atMs": 2.5
+                }
+              ],
+              "inputEvents": [],
+              "runId": "class_and_list:dy1m65mmmig",
+              "category": "common",
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "json_stdlib",
+              "engineMs": 1.6000000005587935,
+              "stdout": "6\n",
+              "stderr": "",
+              "outputBytes": 2,
+              "error": null,
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 1.7999999998137355,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 2,
+                  "atMs": 1.5
+                }
+              ],
+              "inputEvents": [],
+              "runId": "json_stdlib:ddbut91r6a",
+              "category": "compatibility",
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "f_string",
+              "engineMs": 1.400000000372529,
+              "stdout": "Brickwright: 21\n",
+              "stderr": "",
+              "outputBytes": 16,
+              "error": null,
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 1.400000000372529,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 16,
+                  "atMs": 0.7999999998137355
+                }
+              ],
+              "inputEvents": [],
+              "runId": "f_string:e8xpgyqwxqd",
+              "category": "compatibility",
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "dataclass",
+              "engineMs": 1.8999999994412065,
+              "stdout": "42\n",
+              "stderr": "",
+              "outputBytes": 3,
+              "error": null,
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 2.2999999998137355,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 3,
+                  "atMs": 2.099999999627471
+                }
+              ],
+              "inputEvents": [],
+              "runId": "dataclass:xvog88psloa",
+              "category": "compatibility",
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "exception_trace",
+              "engineMs": 8.200000000186265,
+              "stdout": "",
+              "stderr": "",
+              "outputBytes": 0,
+              "error": {
+                "name": "PythonError",
+                "message": "PythonError: Traceback (most recent call last):\n  File \"/lib/python314.zip/_pyodide/_base.py\", line 619, in eval_code_async\n    await CodeRunner(\n    ...<10 lines>...\n    .run_async(globals, locals)\n  File \"/lib/python314.zip/_pyodide/_base.py\", line 420, in run_async\n    coroutine = eval(self.code, globals, locals)\n  File \"<exec>\", line 3, in <module>\n  File \"<exec>\", line 2, in fail\nValueError: probe-marker\n",
+                "traceback": null
+              },
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 8.399999999441206,
+              "outputEvents": [],
+              "inputEvents": [],
+              "runId": "exception_trace:1838qpkq4g0j",
+              "category": "diagnostic",
+              "validation": {
+                "pass": true,
+                "reason": "expected guest error"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "buffered_input",
+              "engineMs": 2,
+              "stdout": "before\nName? hello Ada\n",
+              "stderr": "",
+              "outputBytes": 23,
+              "error": null,
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 2.1000000005587935,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 7,
+                  "atMs": 1
+                },
+                {
+                  "stream": "stdout",
+                  "chars": 16,
+                  "atMs": 1.900000000372529
+                }
+              ],
+              "inputEvents": [],
+              "runId": "buffered_input:z5prohsjbz",
+              "category": "interaction",
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "host_bridge",
+              "engineMs": 1.900000000372529,
+              "stdout": "42\n17\n",
+              "stderr": "",
+              "outputBytes": 6,
+              "error": null,
+              "hostCalls": 2,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 2,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 3,
+                  "atMs": 1.7000000001862645
+                },
+                {
+                  "stream": "stdout",
+                  "chars": 3,
+                  "atMs": 1.7999999998137355
+                }
+              ],
+              "inputEvents": [],
+              "runId": "host_bridge:gyzit5qa8li",
+              "category": "bridge",
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            },
+            {
+              "type": "complete",
+              "id": "async_bridge",
+              "engineMs": 26.59999999962747,
+              "stdout": "before-await\n42\n",
+              "stderr": "",
+              "outputBytes": 16,
+              "error": null,
+              "hostCalls": 1,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 26.899999999441206,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 13,
+                  "atMs": 0.7999999998137355
+                },
+                {
+                  "stream": "stdout",
+                  "chars": 3,
+                  "atMs": 26.700000000186265
+                }
+              ],
+              "inputEvents": [],
+              "runId": "async_bridge:thexd8vkuii",
+              "category": "bridge",
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            }
+          ],
+          "performance": [
+            {
+              "id": "loop_10000",
+              "samples": [
+                {
+                  "type": "complete",
+                  "id": "loop_10000:5wk5c3xfxk8",
+                  "engineMs": 1.900000000372529,
+                  "stdout": "49995000\n",
+                  "stderr": "",
+                  "outputBytes": 9,
+                  "error": null,
+                  "hostCalls": 0,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 2.1000000005587935,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 9,
+                      "atMs": 1.800000000745058
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                },
+                {
+                  "type": "complete",
+                  "id": "loop_10000:phlonv49cr",
+                  "engineMs": 1.8999999994412065,
+                  "stdout": "49995000\n",
+                  "stderr": "",
+                  "outputBytes": 9,
+                  "error": null,
+                  "hostCalls": 0,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 1.8999999994412065,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 9,
+                      "atMs": 1.7000000001862645
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                },
+                {
+                  "type": "complete",
+                  "id": "loop_10000:0k5rti4x4r2k",
+                  "engineMs": 1.7999999998137355,
+                  "stdout": "49995000\n",
+                  "stderr": "",
+                  "outputBytes": 9,
+                  "error": null,
+                  "hostCalls": 0,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 2,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 9,
+                      "atMs": 1.800000000745058
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                },
+                {
+                  "type": "complete",
+                  "id": "loop_10000:g8v7173jula",
+                  "engineMs": 1.900000000372529,
+                  "stdout": "49995000\n",
+                  "stderr": "",
+                  "outputBytes": 9,
+                  "error": null,
+                  "hostCalls": 0,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 2,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 9,
+                      "atMs": 1.7000000001862645
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                },
+                {
+                  "type": "complete",
+                  "id": "loop_10000:6pz2vdqqjvh",
+                  "engineMs": 1.900000000372529,
+                  "stdout": "49995000\n",
+                  "stderr": "",
+                  "outputBytes": 9,
+                  "error": null,
+                  "hostCalls": 0,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 1.900000000372529,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 9,
+                      "atMs": 1.7000000001862645
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                }
+              ],
+              "medianEngineMs": 1.900000000372529
+            },
+            {
+              "id": "host_calls_1000",
+              "samples": [
+                {
+                  "type": "complete",
+                  "id": "host_calls_1000:edneyh6v9x",
+                  "engineMs": 11.799999999813735,
+                  "stdout": "1000\n",
+                  "stderr": "",
+                  "outputBytes": 5,
+                  "error": null,
+                  "hostCalls": 1000,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 11.799999999813735,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 5,
+                      "atMs": 11.599999999627471
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                },
+                {
+                  "type": "complete",
+                  "id": "host_calls_1000:1vfuvl6z2pp",
+                  "engineMs": 8,
+                  "stdout": "1000\n",
+                  "stderr": "",
+                  "outputBytes": 5,
+                  "error": null,
+                  "hostCalls": 1000,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 8.299999999813735,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 5,
+                      "atMs": 6.2000000001862645
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                },
+                {
+                  "type": "complete",
+                  "id": "host_calls_1000:6k7cm7yrhoc",
+                  "engineMs": 5.6000000005587935,
+                  "stdout": "1000\n",
+                  "stderr": "",
+                  "outputBytes": 5,
+                  "error": null,
+                  "hostCalls": 1000,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 5.7000000001862645,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 5,
+                      "atMs": 5.5
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                },
+                {
+                  "type": "complete",
+                  "id": "host_calls_1000:ma0rnp2j5u",
+                  "engineMs": 4.099999999627471,
+                  "stdout": "1000\n",
+                  "stderr": "",
+                  "outputBytes": 5,
+                  "error": null,
+                  "hostCalls": 1000,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 4.2999999998137355,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 5,
+                      "atMs": 4.099999999627471
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                },
+                {
+                  "type": "complete",
+                  "id": "host_calls_1000:61bkmckc8b",
+                  "engineMs": 4.2999999998137355,
+                  "stdout": "1000\n",
+                  "stderr": "",
+                  "outputBytes": 5,
+                  "error": null,
+                  "hostCalls": 1000,
+                  "memory": null,
+                  "adapterError": null,
+                  "wallMs": 4.3999999994412065,
+                  "outputEvents": [
+                    {
+                      "stream": "stdout",
+                      "chars": 5,
+                      "atMs": 4.2000000001862645
+                    }
+                  ],
+                  "inputEvents": [],
+                  "validation": {
+                    "pass": true,
+                    "reason": "output matched"
+                  }
+                }
+              ],
+              "medianEngineMs": 5.6000000005587935
+            }
+          ],
+          "interaction": {
+            "explicitAsyncAsk": {
+              "type": "complete",
+              "id": "async_ask:826u3xt6df5",
+              "engineMs": 41.5,
+              "stdout": "before\nhello Ada\n",
+              "stderr": "",
+              "outputBytes": 17,
+              "error": null,
+              "hostCalls": 1,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 41.60000000055879,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 7,
+                  "atMs": 0.7000000001862645
+                },
+                {
+                  "stream": "stdout",
+                  "chars": 10,
+                  "atMs": 41.40000000037253
+                }
+              ],
+              "inputEvents": [
+                {
+                  "mode": "message",
+                  "prompt": "Name? ",
+                  "atMs": 0.8000000007450581
+                }
+              ],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              },
+              "scope": "explicit top-level await API, not transparent input() compatibility"
+            },
+            "hardStop": {
+              "terminated": true,
+              "outputEvents": [],
+              "inputEvents": [],
+              "terminateCallMs": 0,
+              "afterCloseMessages": 0,
+              "parentHeartbeats": 41,
+              "method": "browser Worker.terminate() returns void; measured API call time is NOT confirmed termination latency; observed 200 ms quiet window"
+            },
+            "restartAfterStop": {
+              "type": "complete",
+              "id": "hello:2xljnr7hd8u",
+              "engineMs": 9.200000000186265,
+              "stdout": "42\n",
+              "stderr": "",
+              "outputBytes": 3,
+              "error": null,
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 12.599999999627471,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 3,
+                  "atMs": 11.599999999627471
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            }
+          },
+          "summary": {
+            "medianLoadMs": 2418.2999999998137,
+            "medianWorkerReadyMs": 2427.100000000559,
+            "fixtureCategories": {
+              "common": {
+                "passed": 3,
+                "total": 3
+              },
+              "compatibility": {
+                "passed": 3,
+                "total": 3
+              },
+              "diagnostic": {
+                "passed": 1,
+                "total": 1
+              },
+              "interaction": {
+                "passed": 1,
+                "total": 1
+              },
+              "bridge": {
+                "passed": 2,
+                "total": 2
+              }
+            }
+          }
+        }
+      },
+      "servedRequests": [
+        {
+          "path": "/browser-page.mjs",
+          "bytes": 9803
+        },
+        {
+          "path": "/engine-worker.mjs",
+          "bytes": 8512
+        },
+        {
+          "path": "/node_modules/skulpt/dist/skulpt.min.js",
+          "bytes": 559460
+        },
+        {
+          "path": "/node_modules/skulpt/dist/skulpt-stdlib.js",
+          "bytes": 407300
+        },
+        {
+          "path": "/node_modules/@micropython/micropython-webassembly-pyscript/micropython.mjs",
+          "bytes": 110120
+        },
+        {
+          "path": "/node_modules/@micropython/micropython-webassembly-pyscript/micropython.wasm",
+          "bytes": 449553
+        },
+        {
+          "path": "/node_modules/pyodide/pyodide.mjs",
+          "bytes": 17758
+        },
+        {
+          "path": "/node_modules/pyodide/pyodide-lock.json",
+          "bytes": 119077
+        },
+        {
+          "path": "/node_modules/pyodide/pyodide.asm.mjs",
+          "bytes": 1250259
+        },
+        {
+          "path": "/node_modules/pyodide/python_stdlib.zip",
+          "bytes": 2545550
+        },
+        {
+          "path": "/node_modules/pyodide/pyodide.asm.wasm",
+          "bytes": 9597892
+        },
+        {
+          "path": "/node_modules/pyodide/pyodide.asm.wasm",
+          "bytes": 9597892
+        },
+        {
+          "path": "/node_modules/pyodide/pyodide.asm.wasm",
+          "bytes": 9597892
+        },
+        {
+          "path": "/node_modules/pyodide/pyodide.asm.wasm",
+          "bytes": 9597892
+        },
+        {
+          "path": "/node_modules/pyodide/pyodide.asm.wasm",
+          "bytes": 9597892
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "capabilities": {
+        "isSecureContext": true,
+        "crossOriginIsolated": true,
+        "sharedArrayBuffer": true,
+        "wasm": true,
+        "jspi": true,
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.0 Safari/537.36"
+      },
+      "mode": "isolated-input",
+      "engines": {
+        "skulpt": {
+          "startup": [
+            {
+              "type": "ready",
+              "engine": "skulpt",
+              "engineLoadMs": 52.014999999664724,
+              "runtimeVersion": null,
+              "capabilities": {
+                "sharedArrayBuffer": true,
+                "crossOriginIsolated": true,
+                "jspi": true
+              },
+              "memory": null,
+              "workerStartToReadyMs": 66.27000000048429,
+              "firstRun": {
+                "type": "complete",
+                "id": "hello:77zk61ss5k4",
+                "engineMs": 7.519999999552965,
+                "stdout": "42\n",
+                "stderr": "",
+                "outputBytes": 3,
+                "error": null,
+                "hostCalls": 0,
+                "memory": null,
+                "adapterError": null,
+                "wallMs": 7.879999999888241,
+                "outputEvents": [
+                  {
+                    "stream": "stdout",
+                    "chars": 3,
+                    "atMs": 7.860000000335276
+                  }
+                ],
+                "inputEvents": []
+              },
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            }
+          ],
+          "fixtures": [],
+          "performance": [],
+          "interaction": {
+            "sharedInput": {
+              "type": "complete",
+              "id": "live_input:kz5m0ni1zho",
+              "engineMs": 43.05499999970198,
+              "stdout": "before\n",
+              "stderr": "",
+              "outputBytes": 7,
+              "error": {
+                "name": "constructor",
+                "message": "ExternalError: TypeError: Failed to execute 'decode' on 'TextDecoder': The provided ArrayBufferView value must not be shared. on line 2",
+                "traceback": [
+                  {
+                    "lineno": 2,
+                    "filename": "<probe>.py"
+                  }
+                ]
+              },
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 43.28500000014901,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 7,
+                  "atMs": 2.3100000005215406
+                }
+              ],
+              "inputEvents": [
+                {
+                  "mode": "shared",
+                  "prompt": "Name? ",
+                  "atMs": 2.525000000372529
+                }
+              ],
+              "validation": {
+                "pass": false,
+                "reason": "ExternalError: TypeError: Failed to execute 'decode' on 'TextDecoder': The provided ArrayBufferView value must not be shared. on line 2"
+              }
+            }
+          }
+        },
+        "micropython": {
+          "startup": [
+            {
+              "type": "ready",
+              "engine": "micropython",
+              "engineLoadMs": 20.240000000223517,
+              "runtimeVersion": null,
+              "capabilities": {
+                "sharedArrayBuffer": true,
+                "crossOriginIsolated": true,
+                "jspi": true
+              },
+              "memory": null,
+              "workerStartToReadyMs": 26.270000000484288,
+              "firstRun": {
+                "type": "complete",
+                "id": "hello:tgxautvpuzc",
+                "engineMs": 3.294999999925494,
+                "stdout": "42\n",
+                "stderr": "",
+                "outputBytes": 3,
+                "error": null,
+                "hostCalls": 0,
+                "memory": null,
+                "adapterError": null,
+                "wallMs": 3.669999999925494,
+                "outputEvents": [
+                  {
+                    "stream": "stdout",
+                    "chars": 3,
+                    "atMs": 3.619999999180436
+                  }
+                ],
+                "inputEvents": []
+              },
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            }
+          ],
+          "fixtures": [],
+          "performance": [],
+          "interaction": {
+            "sharedInput": {
+              "timeout": true,
+              "wallMs": 5001.089999999851,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 7,
+                  "atMs": 0.8049999997019768
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": false,
+                "reason": "fixture deadline exceeded"
+              }
+            }
+          }
+        },
+        "pyodide": {
+          "startup": [
+            {
+              "type": "ready",
+              "engine": "pyodide",
+              "engineLoadMs": 2401.0950000006706,
+              "runtimeVersion": "314.0.8",
+              "capabilities": {
+                "sharedArrayBuffer": true,
+                "crossOriginIsolated": true,
+                "jspi": true
+              },
+              "memory": null,
+              "workerStartToReadyMs": 2410.100000000559,
+              "firstRun": {
+                "type": "complete",
+                "id": "hello:0lrv6qceri7b",
+                "engineMs": 5,
+                "stdout": "42\n",
+                "stderr": "",
+                "outputBytes": 3,
+                "error": null,
+                "hostCalls": 0,
+                "memory": null,
+                "adapterError": null,
+                "wallMs": 8.410000000149012,
+                "outputEvents": [
+                  {
+                    "stream": "stdout",
+                    "chars": 3,
+                    "atMs": 7.429999999701977
+                  }
+                ],
+                "inputEvents": []
+              },
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            }
+          ],
+          "fixtures": [],
+          "performance": [],
+          "interaction": {
+            "sharedInput": {
+              "type": "complete",
+              "id": "live_input:705d1t677h",
+              "engineMs": 54.98499999940395,
+              "stdout": "before\nName? ",
+              "stderr": "",
+              "outputBytes": 13,
+              "error": {
+                "name": "PythonError",
+                "message": "PythonError: Traceback (most recent call last):\n  File \"/lib/python314.zip/_pyodide/_base.py\", line 619, in eval_code_async\n    await CodeRunner(\n    ...<10 lines>...\n    .run_async(globals, locals)\n  File \"/lib/python314.zip/_pyodide/_base.py\", line 420, in run_async\n    coroutine = eval(self.code, globals, locals)\n  File \"<exec>\", line 2, in <module>\nOSError: [Errno 29] I/O error\n",
+                "traceback": null
+              },
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 55.23499999940395,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 7,
+                  "atMs": 1.0549999997019768
+                },
+                {
+                  "stream": "stdout",
+                  "chars": 6,
+                  "atMs": 1.7949999999254942
+                }
+              ],
+              "inputEvents": [
+                {
+                  "mode": "shared",
+                  "prompt": "",
+                  "atMs": 1.809999999590218
+                }
+              ],
+              "validation": {
+                "pass": false,
+                "reason": "PythonError: Traceback (most recent call last):\n  File \"/lib/python314.zip/_pyodide/_base.py\", line 619, in eval_code_async\n    await CodeRunner(\n    ...<10 lines>...\n    .run_async(globals, locals)\n  File \"/lib/python314.zip/_pyodide/_base.py\", line 420, in run_async\n    coroutine = eval(self.code, globals, locals)\n  File \"<exec>\", line 2, in <module>\nOSError: [Errno 29] I/O error\n"
+              }
+            }
+          }
+        }
+      },
+      "servedRequests": [
+        {
+          "path": "/browser-page.mjs",
+          "bytes": 9803
+        },
+        {
+          "path": "/engine-worker.mjs",
+          "bytes": 8512
+        },
+        {
+          "path": "/node_modules/skulpt/dist/skulpt.min.js",
+          "bytes": 559460
+        },
+        {
+          "path": "/node_modules/skulpt/dist/skulpt-stdlib.js",
+          "bytes": 407300
+        },
+        {
+          "path": "/node_modules/@micropython/micropython-webassembly-pyscript/micropython.mjs",
+          "bytes": 110120
+        },
+        {
+          "path": "/node_modules/@micropython/micropython-webassembly-pyscript/micropython.wasm",
+          "bytes": 449553
+        },
+        {
+          "path": "/node_modules/pyodide/pyodide.mjs",
+          "bytes": 17758
+        },
+        {
+          "path": "/node_modules/pyodide/pyodide-lock.json",
+          "bytes": 119077
+        },
+        {
+          "path": "/node_modules/pyodide/pyodide.asm.mjs",
+          "bytes": 1250259
+        },
+        {
+          "path": "/node_modules/pyodide/python_stdlib.zip",
+          "bytes": 2545550
+        },
+        {
+          "path": "/node_modules/pyodide/pyodide.asm.wasm",
+          "bytes": 9597892
+        }
+      ],
+      "pageErrors": [
+        "Error thrown in read:",
+        "TypeError: Failed to execute 'decode' on 'TextDecoder': The provided ArrayBufferView value must not be shared.\n    at sharedInput (http://127.0.0.1:42027/engine-worker.mjs:56:28)\n    at nextLine (http://127.0.0.1:42027/engine-worker.mjs:59:46)\n    at Object.stdin (http://127.0.0.1:42027/engine-worker.mjs:134:35)\n    at LegacyReader._getInput (http://127.0.0.1:42027/node_modules/pyodide/pyodide.asm.mjs:1:663309)\n    at LegacyReader.read (http://127.0.0.1:42027/node_modules/pyodide/pyodide.asm.mjs:1:663885)\n    at http://127.0.0.1:42027/node_modules/pyodide/pyodide.asm.mjs:1:660693\n    at handleEAGAIN (http://127.0.0.1:42027/node_modules/pyodide/pyodide.asm.mjs:1:659665)\n    at readWriteHelper (http://127.0.0.1:42027/node_modules/pyodide/pyodide.asm.mjs:1:659781)\n    at Object.read (http://127.0.0.1:42027/node_modules/pyodide/pyodide.asm.mjs:1:660675)\n    at Object.read (http://127.0.0.1:42027/node_modules/pyodide/pyodide.asm.mjs:1:83688)"
+      ]
+    }
+  ]
+}
