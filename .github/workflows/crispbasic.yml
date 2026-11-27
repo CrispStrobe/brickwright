@@ -1,4 +1,4 @@
-name: CrispBASIC native runtime
+name: CrispBASIC native and WASM runtimes
 on:
   push:
     branches: ['**']
@@ -39,3 +39,43 @@ jobs:
         run: npm run test:native
       - name: Run the standalone example
         run: node bin/crispbasic.mjs examples/structured.bas --json
+  wasm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: packages/crisp-basic
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Check out the pinned SDK installer
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: emscripten-core/emsdk
+          ref: a7c808831a666cc903fedb906c171a718cd97341
+          path: packages/crisp-basic/.build/emsdk
+          persist-credentials: false
+      - name: Install the validated Emscripten toolchain
+        run: |
+          .build/emsdk/emsdk install 3.1.64
+          .build/emsdk/emsdk activate 3.1.64
+      - name: Install native parity and browser test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends build-essential nasm
+          npm ci --ignore-scripts --no-audit --no-fund
+          npx playwright install --with-deps chromium
+      - name: Build both real interpreter backends
+        env:
+          EMCC: ${{ github.workspace }}/packages/crisp-basic/.build/emsdk/upstream/emscripten/emcc
+        run: |
+          npm run build:native
+          npm run build:wasm
+      - name: Verify WASM lifecycle and restricted host operations
+        run: npm run test:wasm
+      - name: Compare both backends against fixed expected results
+        run: npm run test:parity
+      - name: Verify real browser workers and cleanup
+        run: npm run test:browser

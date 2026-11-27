@@ -3,13 +3,16 @@
 CrispBASIC is a BBC BASIC-compatible runtime project, incubated in Brickwright
 on `feature/crispbasic`. It is intended to become an independent repository.
 
-**This first milestone runs real BASIC through the pinned BBCSDL C interpreter
-on Linux x86-64.** It adds a headless batch host, a Node session API, a CLI,
-source maps, and execution tests. Browser/WASM, physical boards, graphics
-rendering, the portable hardware library, and source debugging are subsequent
-milestones, not implemented platform claims.
+**CrispBASIC runs real BASIC through the pinned BBCSDL C interpreter in native
+processes and restricted WebAssembly workers.** Both use the original tokenizer
+and executor, source maps, raw VDU output, structured errors and bounded session
+lifetimes. The WASM host runs in browsers and Node without SDL or host filesystem
+access. Brickwright app integration, graphics rendering, the portable hardware
+library, source debugging and physical-board targets remain subsequent work.
 
 ## Try it
+
+### Native CLI
 
 Requirements: Linux x86-64, Node 22 or newer, Git, GCC and NASM. On Debian/Ubuntu
 the native build tools are available as `build-essential` and `nasm`.
@@ -19,21 +22,67 @@ cd packages/crisp-basic
 npm run build:native
 node bin/crispbasic.mjs examples/hello.bas
 node bin/crispbasic.mjs examples/structured.bas --json
-npm run test:all
+npm test
+npm run test:native
 ```
 
-No npm dependencies or root Brickwright installation are needed. The builder
+No npm dependencies or root Brickwright installation are needed for the native
+CLI, either build, or the Node runtime tests. The builder
 fetches the exact upstream commit and verifies SHA-256 for every input file.
 Generated sources, objects, the native executable and build metadata stay in
 `.build/`. Use `CC` or `NASM` to select an installed compiler/assembler. An
 existing BBCSDL checkout can be supplied through `CRISP_BASIC_UPSTREAM`; the
 builder reads the locked Git objects, not its working-tree edits.
 
-`npm test` runs source preparation tests without a toolchain. `npm run
-test:native` requires the built interpreter and runs actual runtime and CLI
-tests; an absent binary is a failure, never a passing skip. The dedicated
-[workflow](../../.github/workflows/crispbasic.yml) builds and tests the package
-on Ubuntu with Node 22.
+### Restricted WASM
+
+Install [Emscripten](https://emscripten.org/docs/getting_started/downloads.html)
+3.1.64, the validated version, and make `emcc` available, or set `EMCC` to its
+executable path. Node 22+ and Git are also required. GCC and NASM are only needed
+when building the native backend for comparison.
+
+```sh
+cd packages/crisp-basic
+npm run build:wasm
+node examples/run-wasm.mjs
+npm run test:wasm
+```
+
+The build produces `.build/wasm/crispbasic.mjs`, `crispbasic.wasm`, the upstream
+license and a `build.json` recording verified source hashes, compiler settings,
+WASM imports and the binary digest. It uses the pinned upstream WASM header and
+data layout; the x86-64 header/data are never substituted. No SDL, filesystem,
+native symbol resolver, inline assembler or dynamic JavaScript evaluator is
+linked. Unexpected WASM imports fail the build. See [wasm/README.md](wasm/README.md)
+for the C host boundary and deployment layout.
+
+### Test suites
+
+| Command | Prerequisites and coverage |
+| --- | --- |
+| `npm test` | Source preparation; no compiled backend needed |
+| `npm run test:native` | Native build; execution, CLI and process cleanup |
+| `npm run test:wasm` | WASM build; execution, host restrictions and worker lifecycle |
+| `npm run test:parity` | Both builds; the same corpus checked against fixed expected bytes |
+| `npm run test:all` | All of the above |
+| `npm run test:browser` | WASM build, Playwright and Chromium; real browser workers |
+
+Missing required binaries are failures, never passing skips. To install only
+the package's browser test dependencies and run the browser suite:
+
+```sh
+npm ci --ignore-scripts
+npx playwright install chromium
+npm run test:browser
+```
+
+On Linux, `npx playwright install --with-deps chromium` also installs browser
+system dependencies. `CRISP_BASIC_PLAYWRIGHT` can select an existing Playwright
+module and `CRISP_BASIC_CHROMIUM` an existing browser executable. No root
+Brickwright GUI dependency installation is needed. The dedicated
+[workflow](../../.github/workflows/crispbasic.yml) tests both backends, parity,
+and real Chromium workers on Ubuntu with Node 22 and the pinned SDK installer.
+The recorded local results and their limits are in [VALIDATION.md](VALIDATION.md).
 
 ## A first program
 
@@ -94,7 +143,7 @@ the bytes, including CR/LF and VDU control bytes; it is not a graphics renderer.
 | Cancelled / Ctrl-C | 130 |
 | Closed downstream output pipe | 141 |
 
-## Session API
+## Native session API
 
 ```js
 import {createNativeSession} from './index.mjs';
@@ -146,42 +195,118 @@ fresh. `await session.dispose()` also closes the session permanently. Limits
 default to 5 seconds and 1 MiB of output. The parent terminates the native
 process group on cancellation or a limit, including a blocked input call.
 
+## WASM session API
+
+```js
+// Browser-safe entry: also works in Node.
+import {createWasmSession} from './browser.mjs';
+
+const session = createWasmSession({
+    timeoutMs: 5000,
+    maxOutputBytes: 1024 * 1024,
+    onEvent(event) {
+        if (event.type === 'output') {
+            // Uint8Array, ready for a terminal or later VDU adapter.
+            consumeBytes(event.bytes);
+        }
+        if (event.type === 'input') {
+            // Obtain an answer asynchronously, then call writeInput().
+        }
+    }
+});
+try {
+    const result = await session.run('PRINT "Hello from WASM"\nEND\n', {
+        filename: 'hello.bas'
+    });
+    console.log(result.status, result.text);
+} finally {
+    await session.dispose();
+}
+```
+
+The package exports `./browser` and `./wasm`; Node's main entry also exports
+`createWasmSession`. Browser applications should import `./browser`, which does
+not import the native process adapter. Serve browser assets over HTTP(S), with
+`.mjs` as JavaScript and `.wasm` as `application/wasm`. The default module URL is
+relative to this package's `.build/wasm/` directory. An embedding app can supply
+`moduleURL` and `workerURL` for its own trusted asset layout. The WASM file must
+remain beside the generated module. This build needs neither SharedArrayBuffer
+nor cross-origin isolation headers.
+
+`run`, `writeInput`, `endInput`, `cancel`, `reset` and `dispose` follow the native
+API above, with the same execution statuses, source diagnostics and byte events.
+Use `interactive: true` for asynchronous input. `writeInput()` copies bytes into
+a bounded message queue and returns `true`; it does not expose stream
+backpressure. The 1 MiB cumulative input cap, 4 MiB prepared-source cap, deadline
+and output budget also apply to this backend. Time spent loading the module or
+waiting for input counts toward the deadline.
+
+Every run owns a new worker and WASM instance. Asyncify preserves the C stack
+across `INPUT`, `GET`, timed `INKEY` and `WAIT`, including recursive functions,
+procedures and `ON ERROR LOCAL`. The parent terminates the worker on timeout,
+cancellation or callback failure, even if BASIC is stuck in a tight loop. Run,
+reset and dispose wait for worker termination before resolving. Separate
+sessions can execute concurrently, and repeated runs share no BASIC variables.
+
 ## Current capabilities and boundaries
 
 `session.capabilities` is an immutable description of the implemented backend.
 
-| Area | This milestone |
-| --- | --- |
-| Language engine | Pinned BBCSDL C core; original tokenizer and executor |
-| Native host | Linux x86-64, one interpreter per process |
-| Execution | Batch, fixed/interactive input, cancellation, deadline, output bound |
-| Diagnostics | Separate protocol channel; original editor-line mapping |
-| Output | Raw VDU bytes and a Latin-1 text view |
-| Graphics | Bytes can be handed to a renderer; no renderer or graphics-query emulation |
-| Sound | Explicitly unsupported |
-| GPIO / portable hardware library | Not implemented |
-| Source debugger | Not implemented; stepping, breakpoints and variable inspection are false |
-| Browser, desktop/mobile shells | No WASM/app embedding yet |
-| PicoBB / other MCU targets / BASIC-to-C | Planned |
+| Area | Native | Restricted WASM |
+| --- | --- | --- |
+| Language engine | Pinned BBCSDL tokenizer and executor | Same pinned core, correct WASM32 ABI |
+| Host | Linux x86-64 process | Browser module worker or Node worker thread |
+| Execution | Fixed/interactive input, cancellation, deadline, output bound | Same, with Asyncify input/wait suspension |
+| Diagnostics | Separate control channel; original editor-line mapping | Separate worker records; same source mapping |
+| Output | Raw VDU bytes and Latin-1 text | Same |
+| Graphics | No renderer or graphics-query emulation | Same; drawing commands emit raw VDU |
+| Sound / GPIO / hardware library | Not implemented | Not implemented; explicit unsupported-operation errors |
+| Source debugger | Not implemented | Not implemented |
+| Host files, native calls, raw memory | Retained for trusted local programs | Denied; virtual files also unavailable |
+| Time | Host time | Monotonic `TIME`/`TIME=` and `WAIT`; no `TIME$` or event timers |
+| App integration / physical boards | Planned | Browser engine tested; app adapters and boards planned |
 
 **The native backend is for trusted local programs.** It retains upstream
 native memory, `SYS`/`CALL`, filesystem and OS facilities. A temporary working
 directory, process isolation, and execution limits are useful lifecycle
 controls; they do not create a security sandbox. It is not exposed as a web
-service or wired into the learner-facing application. The WASM milestone
-needs an explicit host boundary before it becomes the in-app default.
+service or wired into the learner-facing application.
+
+**The restricted WASM profile exposes a deliberately smaller host contract.**
+It rejects named and numeric `SYS`, `CALL`, `USR`, `OSCLI`/star commands, inline
+assembly, file operations, memory indirection, pointer reassignment/queries,
+address-of, indirect `FN`/`PROC`, memory-bound setters and `@system` variables
+except numeric formatting `@%`. These checks run inside the actual evaluator
+and executor, including expressions evaluated through `EVAL`. Raw internal
+token bytes cannot be injected through `EVAL`. `ON ERROR` may catch ordinary
+unsupported-operation errors; it cannot catch or defeat parent-owned limits.
+
+WASM has a fixed 64 MiB linear-memory budget, including a 16 MiB BASIC arena
+plus reserved interpreter space, C stack and Asyncify storage. No filesystem,
+network, process or arbitrary-JavaScript capability is imported. The
+`sandboxed: true` capability denotes this WebAssembly/worker host boundary;
+it is not a claim that the upstream C interpreter is immune to faults inside
+its own memory. Traps become host errors and the instance is discarded. Asset
+URLs are trusted embedding-application configuration, not BASIC program input.
 
 ## How the pieces fit
 
 - `src/source.mjs` normalizes source and records original line identity.
 - `src/native-session.mjs` owns process lifetime, I/O, limits and result mapping.
+- `src/wasm-session.mjs` and `src/wasm-worker.mjs` own WASM worker lifetime and I/O.
 - `native/crispbasic.c` loads source through the upstream tokenizer and supplies
   the batch host's raw VDU and input hooks.
 - `native/patch-upstream.mjs` makes small, exact-match changes to generated
   upstream copies: headless entry, raw I/O, completion and error callbacks.
+- `wasm/crisp-host.h` defines the restricted C embedding boundary;
+  `wasm/crispbasic.c` replaces the OS/SDL host, and `wasm/emscripten-host.c`
+  supplies the JavaScript byte/input/time/error hooks.
+- `wasm/patch-upstream.mjs` applies exact-match runtime restrictions and retains
+  the upstream WASM data layout without SDL tables or exposed function pointers.
 - `upstream.lock.json` records the upstream revision and every input digest.
-- `tests/` checks anchored expected results and failure paths against the real
-  interpreter. These tests are not an independent implementation oracle.
+- `tests/` checks anchored expected results, native/WASM parity and failure paths
+  against the real interpreter. Both backends share a core, so parity is not an
+  independent language-implementation oracle.
 
 The protocol uses stdin for input bytes, stdout for VDU bytes, stderr for host
 diagnostics, and descriptor 3 for versioned JSON records. The host reports

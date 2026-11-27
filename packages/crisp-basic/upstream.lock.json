@@ -44,6 +44,14 @@
       {
         "path": "licence.txt",
         "sha256": "9fc925116006848e6a28fac091b6cfd498e1cad42d36da03901af4fdb9638ce1"
+      },
+      {
+        "path": "bin/wasm/BBC.h",
+        "sha256": "d7dc4db3822262488b66df829206dc79027cc74558dd52fe00e632f65773a249"
+      },
+      {
+        "path": "src/bbdata_wasm32.c",
+        "sha256": "0d898c11aec987c73fc70fec7945f15fa229691052667a74e635a8ea6c9fb162"
       }
     ]
   }
