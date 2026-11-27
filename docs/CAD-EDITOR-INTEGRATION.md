@@ -140,6 +140,80 @@ runtime pin after this signing step and rebuild with that pin. The receipt's
 runtime-pin check covers the package before Apple's TestFlight re-signing;
 launching the installed TestFlight simulator was not tested in this delivery.
 
+## The CAD editor's menu in BrickWright's File menu (27 November 2026)
+
+Lite pins CrispCAD SDK `811bc9977e3558bf2c1df712b450817fb9160716` (vendored for
+the motion-trail work, see CAD-ROBOT-PROJECTS.md), which contains everything
+below; this change adds only the host side. The exact features, STEP exchange,
+standard holes and the manufacturing check are now reachable from the CAD tab's
+menus, not only from the CAD terminal (CrispCAD convergence Phase 7.1):
+
+- **One menu definition in CrispCAD.** The editor's menu is data
+  (`editor-menu.ts`: command, label, section, availability, whether it loads the
+  exact kernel); `editor.menuItems()` returns it translated with each item's
+  enabled state, and the host runs `editor.executeCommand(item.command)`.
+  `cad-tab.jsx` only maps it onto BrickWright's menus; a command CrispCAD adds to
+  the definition appears here with the next pin.
+- **File menu** (at the left of the CAD tab's bar with the compact chrome, in the
+  menu bar otherwise): after the existing CAD items, **Import STEP as exact
+  bodies…** (a chooser for `.step`/`.stp` only: `requestImport` receives
+  `{accept:'.step,.stp', purpose:'exact-step'}`) and **Export STEP (exact
+  B-rep)…** (the export dialog on STEP), then the submenus **Exact modeling
+  (B-rep)** (Fillet, chamfer or shell…; Fillet or chamfer chosen edges…, which
+  opens the dialog on "Chosen edges" and goes straight to picking them on the
+  model in the 3D view; Measure exactly, a dialog with the kernel's volume,
+  area, bounds and centroid; Recompute exact features), **Holes and fasteners**
+  (Standard hole, Fasten holes, Standard parts; CrispCAD `abecefe`, document
+  version 47) and **Drawings and checks** (Assembly drawing…, Assembly drawing
+  from exact edges…, which opens with "Exact edges (B-rep)" on, and Check for
+  manufacturing…; CrispCAD `87b4282`). The rest of the editor's commands
+  (more views, mirror, pattern, revolve, terminal, command palette, …) join
+  **Edit > CAD tools**. German labels come from the SDK.
+- **Narrow windows and iPads:** with the compact chrome ("..." toggle) the File
+  menu sits in the CAD tab's bar and the other menus behind the toggle; submenus
+  open on tap. A submenu longer than the window (Edit > CAD tools) now moves up
+  and scrolls inside the window instead of running off its bottom edge
+  (`menu.jsx`).
+- The editor's own toolbar shows the same exact items in its Edit menu ("Fillet
+  or chamfer chosen edges…", "Measure exactly", "Recompute exact features").
+- Same lazy loading and tablet limits: every item runs through the SDK's exact
+  worker, so nothing under `assets/exact/` is requested until one runs.
+- Also in this pin: picking edges in the 3D view now works with a mouse on a
+  receding edge (a box's top face; touch already worked), CrispCAD `e5340c3`;
+  `verify:brickwright` also round-trips document version 47 (`6627468`).
+
+Checks on a fresh `BW_ENABLE_CAD=1` production GUI build of this pin, in the
+shared Chromium: CrispCAD `verify:brickwright`
+(versions 41 to 47, version 47 new) and `verify:brickwright-sync`;
+`sync-cad-sdk.mjs --check`; `gen:cad-robots:check` (the 22 robot projects are
+byte-identical, so `static/cad-robots` is unchanged); the CAD SDK fetch-pin
+and fetch-pinning tests (24 pass) and `prove:pins` (11/11 mutations caught);
+`verify-built-cad-sdk` (843 files) and `verify-built-cad-robot-projects` (22);
+`verify-cad-editor.mjs` default, `--sdk-only`, `--ipad`, `--shapes-ui`,
+`--sdk-only --shapes-ui`, `--robots` and `--robots --ipad`, which now also open
+the File menu in the menu bar and, after the "..." toggle, in the CAD tab's bar
+(desktop and iPad viewport), and find Import STEP as exact bodies, Export STEP
+and the three submenus with every entry inside the window, without fetching the
+kernel. In the CAD tab, driven only through the menus on a desktop window
+(mouse) and on an iPad-sized touch viewport with the compact chrome: File >
+Import STEP as exact bodies… offers `.step,.stp` and imports a 20 × 30 × 10 mm
+block as an exact body (version 45), fetching the kernel only then; Exact
+modeling > Measure exactly gives 6000 mm³; Exact modeling > Fillet or chamfer
+chosen edges… goes straight to picking, two 30 mm edges are clicked or tapped on
+the model, and the 2 mm chamfer measures exactly 5880 mm³ with two stable edge
+references; Export STEP (exact B-rep)… downloads a STEP file; Drawings and
+checks > Assembly drawing from exact edges… opens with exact edges on, Check for
+manufacturing… runs a report; Holes and fasteners > Standard hole… and Standard
+parts… open; Check printability… opens; Edit > CAD tools > CAD terminal opens
+the terminal (desktop); after a reload the design displays without the kernel.
+A 2 mm chamfer of the box's +z edges measures exactly 5810.667 mm³; the version
+42 and 43 loft documents open, edit and save at their versions; a version 46
+document opens and saves at 46; a 150-hole rim fillet is refused with the
+tablet-limits message before the kernel runs. The `BW_ENABLE_CAD=0` build
+passes `--expect-absent`. Not changed: the three pre-existing failures of
+`asset-editor-menu`, `circuit-file-menu-reach` and `robot-editor-menu` unit
+tests fail the same way without this change.
+
 ## Chosen-edge fillets, STEP import as exact bodies and kernel 0.1.10 (27 November 2026)
 
 Lite pins CrispCAD SDK `02287df59bdb8ba7f3685a9241dd6b299276b1c3` (previously

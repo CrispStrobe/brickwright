@@ -128,7 +128,9 @@ const CadTab = ({vm, isVisible, docked, locale, theme, onEditProgram, onOpenCirc
                 onSimulationInterrupt: () => window.dispatchEvent(new CustomEvent('bw-cad-simulation-interrupt')),
                 onExport: file => download(file.name, new Blob([file.bytes], {type: file.mime})),
                 saveProject: () => download('design.bcad', new Blob([retainedSession.serialize()], {type: 'application/json'})),
-                requestOpen: () => requestFile('.bcad,.json,.stl,.step,.stp'), requestImport: () => requestFile('.stl,.step,.stp'),
+                requestOpen: () => requestFile('.bcad,.json,.stl,.step,.stp'),
+                // STEP import as exact bodies asks for .step/.stp only.
+                requestImport: request => requestFile(request?.accept || '.stl,.step,.stp'),
                 onError: fail
             });
             editor.current = mounted;
@@ -137,12 +139,25 @@ const CadTab = ({vm, isVisible, docked, locale, theme, onEditProgram, onOpenCirc
                 if(!owns.current)return null;
                 const de=locale.startsWith('de'),label=(en,ger)=>de?ger:en;
                 const action=(title,command,enabled=true)=>({label:title,location:'file',enabled,run:()=>{mounted.executeCommand(command).catch(fail);}});
+                // The rest of the editor's own menu (CrispCAD editor-menu.ts, read through the SDK with
+                // labels and availability): STEP as exact bodies, exact modeling, holes and fasteners,
+                // drawings and checks, and the remaining tools.
+                const menu=typeof mounted.menuItems==='function'?mounted.menuItems():[];
+                const fromMenu=(command,extra={})=>{const item=menu.find(entry=>entry.command===command);return item?{['cad-'+command]:{label:item.title,location:'file',enabled:item.enabled,run:()=>{mounted.executeCommand(command).catch(fail);},...extra}}:{};};
+                const menuSection=(section,location,skip)=>Object.assign({},...menu.filter(item=>item.section===section&&!skip.has(item.command)).map(item=>fromMenu(item.command,{location,submenu:item.sectionTitle})));
+                // Already listed below by BrickWright (with its own ids) or owned by BrickWright (Undo).
+                const listed=new Set(['new','open','save','import','export','printability','model-library','robot-projects','undo','redo','cut','copy','paste','duplicate','delete','select-all','deselect','shapes','sketch','sketch-path','code','parameters','model-source','select','move','rotate','scale','union','subtract','intersect','fit','home','top','front','right','objects','properties']);
                 return {
                     cadNew:action(label('New CAD design…','Neues CAD-Modell…'),'new'),
                     cadOpen:action(label('Open CAD design…','CAD-Modell öffnen…'),'open'),
                     cadSave:action(label('Save CAD design (.bcad)…','CAD-Modell speichern (.bcad)…'),'save'),
                     cadImport:action(label('Import STL or STEP into CAD…','STL oder STEP ins CAD importieren…'),'import'),
+                    ...fromMenu('import-step'),
                     cadExport:action(label('Export CAD model…','CAD-Modell exportieren…'),'export',mounted.commandState.canExport),
+                    ...fromMenu('export-step'),
+                    // Every other section of the editor's menu (exact modeling, holes and fasteners,
+                    // drawings and checks, …) as a File submenu, in the editor's order.
+                    ...Object.assign({},...[...new Set(menu.map(item=>item.section))].filter(section=>!['file','edit','view','object','tools'].includes(section)).map(section=>menuSection(section,'file',listed))),
                     cadPrintability:action(label('Check printability…','Druckbarkeit prüfen…'),'printability',mounted.commandState.canExport),
                     cadRobotProjects:action(label('Robot projects…','Roboterprojekte…'),'robot-projects'),
                     cadLibrary:action(label('Model library…','Modellbibliothek…'),'model-library'),
@@ -158,7 +173,9 @@ const CadTab = ({vm, isVisible, docked, locale, theme, onEditProgram, onOpenCirc
                         ['shapes','Shapes…','Formen…'],['sketch','Sketch…','Skizze…'],['sketch-path','Sketch path…','Skizzenpfad…'],['code','Code an object…','Objekt programmieren…'],['parameters','Model parameters…','Modellparameter…'],['model-source','Model source…','Modellquelltext…'],
                         ['select','Select tool','Auswahlwerkzeug'],['move','Move tool','Verschieben'],['rotate','Rotate tool','Drehen'],['scale','Scale tool','Skalieren'],['union','Union solids','Körper vereinigen'],['subtract','Subtract solids','Körper abziehen'],['intersect','Intersect solids','Körper schneiden'],
                         ['fit','Fit model in view','Modell einpassen'],['home','Home view','Startansicht'],['top','Top view','Ansicht von oben'],['front','Front view','Vorderansicht'],['right','Right view','Rechte Ansicht'],['objects','Toggle Objects panel','Objektliste umschalten'],['properties','Toggle Properties panel','Eigenschaften umschalten']
-                    ].map(([command,en,ger])=>['cad-'+command,{...action(label(en,ger),command,['union','subtract','intersect'].includes(command)?mounted.commandState.canCombine:['cut','copy','duplicate','delete'].includes(command)?mounted.commandState.hasSelection:true),location:'edit',submenu:label('CAD tools','CAD-Werkzeuge')}]))
+                    ].map(([command,en,ger])=>['cad-'+command,{...action(label(en,ger),command,['union','subtract','intersect'].includes(command)?mounted.commandState.canCombine:['cut','copy','duplicate','delete'].includes(command)?mounted.commandState.hasSelection:true),location:'edit',submenu:label('CAD tools','CAD-Werkzeuge')}])),
+                    // Remaining editor commands (more views, mirror, pattern, revolve, terminal, …) in the same submenu.
+                    ...Object.fromEntries(menu.filter(item=>['view','object','tools'].includes(item.section)&&!listed.has(item.command)).map(item=>['cad-'+item.command,{...fromMenu(item.command)['cad-'+item.command],location:'edit',submenu:label('CAD tools','CAD-Werkzeuge')}]))
                 };
             });
             removeUndo = registerUndoSurface('cad', {
