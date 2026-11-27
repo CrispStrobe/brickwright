@@ -6,6 +6,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {hiddenCodeDrafts} from '../overlay/scratch-gui/src/lib/bw-matrix/code-languages.js';
 import {scopeAfter} from './helpers/js-scope.mjs';
 
 const source = readFileSync(new URL(
@@ -23,7 +24,7 @@ const signatures = [
 ];
 const methods = signatures.map(signature => signature.slice(0, -1) + scopeAfter(source, signature)).join('\n');
 const twoWay = new Set(Object.keys(labels).filter(lang => lang !== 'asm'));
-const Editor = new Function('LANG_LABEL', 'TWO_WAY', `return class {${methods}}`)(labels, twoWay);
+const Editor = new Function('LANG_LABEL', 'TWO_WAY', 'hiddenCodeDrafts', `return class {${methods}}`)(labels, twoWay, hiddenCodeDrafts);
 const turn = () => new Promise(resolve => setImmediate(resolve));
 const deferred = () => {
     let resolve;

@@ -170,3 +170,14 @@ The combined JSON ledger and individual raw receipts are in `artifacts/circuit-f
 
 - Controller, machine-screen, debugger session and divergence, Blink target and local 386 media labels now use the English and German tables. The localisation and Machines suites passed alongside fetch pinning. The debugger, Code ownership and Logikus focused regressions passed.
 - A Chromium check with an English browser selected German through Settings, opened Machines, verified the translated 386 local-media controls and the ACK Pascal licence link, and launched Pascal into a Controller terminal with a German fullscreen control. Machines now reads the same active app locale as Controller. [Rendered check](../scripts/verify-machine-library-launch.mjs)
+
+### Machine-filtered Code tabs and BASIC profiles
+
+- Filter the Code tabs and language menus by the selected machine and preserve
+  authored source when its tab is out of view. Keep Scratch stage as the
+  general-purpose authoring target.
+- Offer only matching BASIC runtimes in the profile selector. PicoBB source
+  runs through the pinned RP2040 UART firmware with its output in Controller.
+- Extend the Pico BASIC profiles through media-lab, starting with PiccoloBASIC
+  and Stefan's BASIC. Track transport, dialect, firmware and Code execution
+  qualification in [the language matrix plan](LANGUAGE-DEVICE-MATRIX-PLAN.md#code-when-a-machine-is-selected).

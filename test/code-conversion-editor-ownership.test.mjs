@@ -4,6 +4,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {basicProfileFor, hiddenCodeDrafts} from '../overlay/scratch-gui/src/lib/bw-matrix/code-languages.js';
 import {blinkFamily, blinkSource, blinkStarter} from '../overlay/scratch-gui/src/lib/bw-asm/blink-machines.js';
 
 const importer = new URL('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx', import.meta.url);
@@ -21,11 +22,11 @@ const methods = extract('    async compile ({strict = false, pseudocode = null, 
         '    // Real hardware, two minutes: generate MicroPython and push it to a');
 const Editor = new Function('TWO_WAY', 'DOS_LANG', 'codeArtworkMatches', 'captureCodeArtwork',
     'classifyConversionWarnings', 'conversionFailure', 'LANG_LABEL', 'pickLocale', 'confirmAsync', 'DEVICE_BY_ID',
-    'blinkFamily', 'blinkSource', 'blinkStarter',
+    'blinkFamily', 'blinkSource', 'blinkStarter', 'hiddenCodeDrafts',
     `return class {${methods}}`)(new Set(['pseudocode']), {}, () => false, () => null,
     () => ({changed: [], unsupported: []}), error => ({message: error.message, issues: []}),
     {pseudocode: 'Pseudo'}, () => 'en', async () => true,
-    {pico: {core: 'rp2040', label: 'Pico'}, i8086: {core: 'i8086', label: '8086'}}, blinkFamily, blinkSource, blinkStarter);
+    {pico: {core: 'rp2040', label: 'Pico'}, i8086: {core: 'i8086', label: '8086'}}, blinkFamily, blinkSource, blinkStarter, hiddenCodeDrafts);
 const deferred = () => {
     let resolve;
     const promise = new Promise(done => { resolve = done; });
@@ -100,6 +101,9 @@ function fixture (hold = null, failure = null) {
         },
         activeCode () { return this.state.buffers[this.state.lang] || ''; },
         genOpts: () => ({}),
+        leaveCp1 () {}, leaveCardiac () {},
+        codeDevice () { return this.state.buffers.pseudocode?.match(/^DEVICE\s+(\S+)/im)?.[1]?.toLowerCase(); },
+        selectedBasicProfile () { return basicProfileFor(this.codeDevice(), this.state.basicProfile); },
         canLiftAsm: () => false, loadCatalog () {}, _asmExamples: () => [example]
     });
     let libraries = 0;

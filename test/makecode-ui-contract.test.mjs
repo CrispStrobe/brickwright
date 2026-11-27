@@ -149,7 +149,7 @@ test('the micro:bit tab appears for an imported .py, which has no DEVICE line', 
     // Hiding it would hide the Run-on-simulator button for the one
     // imported program that needs no translation at all.
     assert.match(source,
-        /\['microbit', 'calliopemini'\]\.includes\(this\.currentDevice\(\)\) \|\|\s*\(this\.state\.buffers\.micropython \|\| ''\)\.trim\(\)/,
+        /\['microbit', 'calliopemini'\]\.includes\(codeDevice\) \|\|\s*\(!codeDevice && \(this\.state\.buffers\.micropython \|\| ''\)\.trim\(\)\)/,
         'and it reads that buffer defensively — see the buffer-shape test below');
     assert.match(source, /importedPython: res\.kind === 'micropython'/);
 });

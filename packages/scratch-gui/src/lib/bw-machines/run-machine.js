@@ -13,6 +13,7 @@
 // so a Node test drives this without a DOM or the network.
 
 import {activateConfig, defaultImageFetcher} from './activate.js';
+import {picoBasicCommands} from './pico-basic-source.js';
 import {ubasicSource} from './ubasic-source.js';
 export function runCpmCom(config, bytes) {
     const url = 'local-media:compiled.com';
@@ -45,6 +46,7 @@ export async function runMachineConfig(config, opts = {}) {
             globalThis.dispatchEvent(new globalThis.CustomEvent('bw-machine-media-load', {detail}));
         };
 
+    const basicCommands = opts.picoBasicSource == null ? null : picoBasicCommands(opts.picoBasicSource);
     const activated = await activateConfig(config, {
         fetcher: opts.fetcher || defaultImageFetcher
     });
@@ -77,6 +79,12 @@ export async function runMachineConfig(config, opts = {}) {
     }
     if (bm.spectrum) detail.spectrum = bm.spectrum;
     if (bm.picoWakeOnPrompt) detail.picoWakeOnPrompt = true;
+    if (basicCommands) {
+        if (!detail.picoWakeOnPrompt || detail.kind !== 'rp2040js' || bm.slot !== 'flash') {
+            throw new Error('BASIC source needs the PicoBB UART firmware.');
+        }
+        detail.picoBasicCommands = basicCommands;
+    }
     if (bm.dosFastStart) detail.dosFastStart = true;
     if (bm.x86Variant) detail.x86Variant = bm.x86Variant;
     if (bm.dosVariant) detail.dosVariant = bm.dosVariant;

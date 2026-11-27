@@ -83,6 +83,10 @@ try {
     await page.getByTestId('bw-machine-fullscreen').click();
     await send('PRINT 9*7');
     await rows.getByText(/^\s*63\s*$/, {exact: true}).waitFor();
+    await page.getByRole('tab', {name: 'Code', exact: true}).click();
+    const code = page.getByTestId('bw-lang-row');
+    await code.getByRole('button', {name: '📺 BAS', exact: true}).waitFor();
+    assert.equal(await code.getByRole('button', {name: '🟨 JS', exact: true}).count(), 0);
     assert.deepEqual(errors, []);
     console.log('CPU groups filter correctly, and PicoBB mounts LittleFS and runs a saved program from the Controller terminal.');
 } finally {

@@ -2152,7 +2152,18 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         cursor.onData(reply => {
             if (/^\x1b\[\d+;\d+R$/.test(reply)) input.write(new TextEncoder().encode(reply));
         });
-        const unsubscribeCursor = output.subscribe(bytes => cursor.write(bytes));
+        const commands = bootMedia.picoBasicCommands || [];
+        const encoder = new TextEncoder();
+        let nextCommand = 0;
+        let sawBanner = false;
+        const unsubscribeCursor = output.subscribe(bytes => cursor.write(bytes, () => {
+            if (!sawBanner || nextCommand >= commands.length || input.pending()) return;
+            const buffer = cursor.buffer.active;
+            const line = buffer.getLine(buffer.baseY + buffer.cursorY)?.translateToString(true);
+            if (line === '>' && buffer.cursorX === 1) {
+                input.write(encoder.encode(commands[nextCommand++] + '\r'));
+            }
+        }));
         disposeTerminal = () => {
             unsubscribeCursor();
             cursor.dispose();
@@ -2162,14 +2173,15 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
 
         adapter.onSerial(byte => {
             const ch = String.fromCharCode(byte);
-            if (wakeOnPrompt) {
+            if (wakeOnPrompt || (commands.length && !sawBanner)) {
                 if (ch === '\n') {
-                    if (lineBuf.trim() === 'Waiting for connection') {
+                    if (lineBuf.includes('BBC BASIC for Pico Console')) sawBanner = true;
+                    if (wakeOnPrompt && lineBuf.trim() === 'Waiting for connection') {
                         wakeOnPrompt = false;
                         feedByte(13);
                     }
                     lineBuf = '';
-                } else if (ch !== '\r') lineBuf = (lineBuf + ch).slice(-64);
+                } else if (ch !== '\r') lineBuf = (lineBuf + ch).slice(-512);
             }
             output.push(byte);
         });

@@ -1,5 +1,5 @@
 import React from 'react';
-import {remoteToolchainsAllowed} from '../../lib/distribution-policy.js';
+import {remoteMachineImagesAllowed, remoteToolchainsAllowed} from '../../lib/distribution-policy.js';
 import {createPortal} from 'react-dom';
 import {showDebuggerOnStage} from '../../lib/bw-debug/show-debugger-on-stage.js';
 import {usesScratchStage} from './code-example-view.js';
@@ -34,6 +34,9 @@ import {
     summarize as matrixSummary, explain as matrixExplain, LANGUAGES as MATRIX_LANGUAGES,
     DEVICES, DEVICE_GROUPS, cell as matrixCell
 } from '../../lib/bw-matrix/capabilities.js';
+import {basicProfileFor, basicProfilesFor, codeLanguageAvailable, hiddenCodeDrafts} from '../../lib/bw-matrix/code-languages.js';
+import {libraryMedia, openLibraryMedia} from '../../lib/bw-machines/library-media.js';
+import {runMachineConfig} from '../../lib/bw-machines/run-machine.js';
 import {feProgramToC} from '../../lib/bw-lang/fe-target-c.js';
 import {forthProgramToC} from '../../lib/bw-lang/forth-target-c.js';
 import {fetchTclProgramC} from '../../lib/bw-lang/tcl-target-c.js';
@@ -1337,11 +1340,28 @@ class PseudocodeImporter extends React.Component {
         const runtime = this.props.vm?.runtime;
         if (runtime?.bwLibraryCode === program) delete runtime.bwLibraryCode;
         this.setState(state => ({
-            lang: program.language, libraryProgram: program, status: '', output: null,
+            lang: program.language, libraryProgram: program, libraryTarget: null, status: '', output: null,
             ...(program.dosSourceName ? {basicProfile: 'i8086-ubasic'} : {}),
             cardiacActive: false, cp1Active: false, kim1Active: false, microtronicActive: false,
             buffers: {...state.buffers, [program.language]: program.text,
                 pseudocode: `DEVICE ${program.machine}\n${(state.buffers.pseudocode || '').replace(/^DEVICE[^\n]*\n?/im, '')}`}
+        }));
+    };
+
+    onLibraryMachineSelected = event => {
+        const selection = event.detail;
+        const runtime = this.props.vm?.runtime;
+        if (selection && runtime?.bwLibraryMachineSelection === selection) delete runtime.bwLibraryMachineSelection;
+        const kind = selection?.kind;
+        const device = kind === 'rp2040js' ? 'pico' : kind;
+        if (device !== 'i80386' && !DEVICE_BY_ID[device]) return;
+        this.leaveCardiac();
+        this.leaveCp1();
+        this.setState(state => ({
+            asmRunDevice: null, libraryProgram: null, libraryTarget: device === 'i80386' ? device : null,
+            kim1Active: false, microtronicActive: false, langMenuOpen: false,
+            buffers: {...state.buffers, pseudocode: (device === 'i80386' ? '' : `DEVICE ${device.toUpperCase()}\n`) +
+                (state.buffers.pseudocode || '').replace(/^DEVICE[^\n]*\n?/im, '')}
         }));
     };
 
@@ -1395,7 +1415,9 @@ class PseudocodeImporter extends React.Component {
         event.detail.editor = 'code';
         if (this.state.lang !== 'basic' && !this.activeCode().trim()) return;
         const {lang, libraryProgram, busy, running} = this.state;
-        const target = asmTargetForDevice(this.currentDevice());
+        const device = this.currentDevice();
+        if (!this.allowsCodeLanguage(lang)) return;
+        const target = asmTargetForDevice(device);
         const actions = {
             tcl: () => target === 'riscv32' ? this.runTclOnRiscv() : this.runTclOnDosInterp(),
             forth: () => target === 'riscv32' ? this.runForthOnRiscv() : this.runForthOnDosInterp(),
@@ -1420,7 +1442,9 @@ class PseudocodeImporter extends React.Component {
         this._unmounted = false;
         window.addEventListener('bw-hardware-state', this.onHardwareState);
         window.addEventListener('bw-library-code', this.openLibraryCode);
+        window.addEventListener('bw-code-machine-selected', this.onLibraryMachineSelected);
         window.addEventListener('bw-run-active-code', this.runActiveCode);
+        this.onLibraryMachineSelected({detail: this.props.vm?.runtime?.bwLibraryMachineSelection});
         this.openLibraryCode({detail: this.props.vm?.runtime?.bwLibraryCode});
         window.addEventListener('bw-read-blocks-into-code', this.fromBlocks);
         this._unregisterCodeMenu = registerEditorMenuActions('code', () => this.codeMenuActions());
@@ -1679,6 +1703,11 @@ class PseudocodeImporter extends React.Component {
     }
 
     componentDidUpdate (prevProps, prevState) {
+        if ((prevState.lang !== this.state.lang || prevState.libraryTarget !== this.state.libraryTarget ||
+            prevState.buffers.pseudocode !== this.state.buffers.pseudocode) &&
+            !this.allowsCodeLanguage(this.state.lang)) {
+            this.setState({lang: 'pseudocode', output: null, emptyTabOffer: null, langMenuOpen: false});
+        }
         if (prevProps.vm !== this.props.vm) {
             this.disposeCodeRun();
             this.bindCodeStopRuntime();
@@ -2803,6 +2832,7 @@ class PseudocodeImporter extends React.Component {
     componentWillUnmount () {
         window.removeEventListener('bw-hardware-state', this.onHardwareState);
         window.removeEventListener('bw-library-code', this.openLibraryCode);
+        window.removeEventListener('bw-code-machine-selected', this.onLibraryMachineSelected);
         window.removeEventListener('bw-run-active-code', this.runActiveCode);
         window.removeEventListener('bw-read-blocks-into-code', this.fromBlocks);
         this.setMaximizedChrome(false);
@@ -2910,9 +2940,16 @@ class PseudocodeImporter extends React.Component {
         this.setState(s => {
             const independent = {asm: s.buffers.asm ?? '', nqc: s.buffers.nqc ?? ''};
             if (Object.hasOwn(independent, s.lang)) return {buffers: {...s.buffers, [s.lang]: text}};
-            const device = s.buffers.pseudocode?.match(/^DEVICE\s+[\w-]+[^\n]*/im)?.[0];
-            return {buffers: {...Object.fromEntries(Object.keys(LANG_LABEL).map(lang => [lang, ''])),
-                ...independent, pseudocode: device ? `${device}\n` : '', [s.lang]: text}};
+            const device = s.buffers.pseudocode?.match(/^DEVICE\s+([\w-]+)[^\n]*/im);
+            const nextDevice = s.lang === 'pseudocode' ? text.match(/^DEVICE\s+([\w-]+)/im) : device;
+            const target = nextDevice?.[1]?.toLowerCase() || s.libraryTarget;
+            const hiddenDrafts = hiddenCodeDrafts(s.authoredSources, s.buffers, target, s.lang);
+            return {
+                ...(nextDevice && {libraryTarget: null}),
+                authoredSources: {...hiddenDrafts, [s.lang]: text},
+                buffers: {...Object.fromEntries(Object.keys(LANG_LABEL).map(lang => [lang, ''])), ...hiddenDrafts,
+                    ...independent, pseudocode: device ? `${device[0]}\n` : '', [s.lang]: text}
+            };
         });
     }
 
@@ -2964,7 +3001,7 @@ class PseudocodeImporter extends React.Component {
             else if (to === 'python') code = new SB3().generatePython(proj, this.genOpts());
             else if (to === 'c') code = new SB3().generateC(proj);
             else if (to === 'basic') {
-                const r = new SB3().generateBASIC(proj, {profile: this.state.basicProfile.startsWith('i8086') ? 'ms' : this.state.basicProfile, lineNumbers: this.state.basicLineNumbers});
+                const r = new SB3().generateBASIC(proj, {profile: this.selectedBasicProfile()?.dialect || 'bbc', lineNumbers: this.state.basicLineNumbers});
                 code = r.ok ? r.basic : `REM === Cannot show as BASIC ===\n${r.reasons.map(s => 'REM ' + s).join('\n')}`;
             } else if (to === 'micropython') {
                 const r = new SB3().generateMicroPython(proj);
@@ -4205,6 +4242,16 @@ class PseudocodeImporter extends React.Component {
 
 
 
+    allowsCodeLanguage (lang) {
+        return codeLanguageAvailable(lang, this.codeDevice(), {
+            remoteImages: remoteMachineImagesAllowed(), riscvHosted: remoteToolchainsAllowed() && Boolean(RISCV_CC_ENDPOINT)
+        });
+    }
+
+    codeDevice () {
+        return this.state.libraryTarget || (this.state.lang === 'asm' && this.state.asmRunDevice) || this.currentDevice();
+    }
+
     // Read the DEVICE id from the pseudocode buffer. Returns lowercase id or null.
     currentDevice () {
         const src = this.state.buffers.pseudocode || '';
@@ -4246,8 +4293,10 @@ class PseudocodeImporter extends React.Component {
             }
             return;
         }
+        this.leaveCp1();
+        this.leaveCardiac();
+        this.setState({libraryTarget: null, kim1Active: false, microtronicActive: false, langMenuOpen: false});
         if (!deviceId) {
-            this.leaveCp1();
             // "no chips" — pure Scratch stage mode. Drop the DEVICE line and the
             // runtime device hints; "Load example…" goes back to the stage games.
             this.setState(s => ({
@@ -5309,26 +5358,51 @@ class PseudocodeImporter extends React.Component {
             status: result && result.ok ? this.L.nqcSent : String((result && result.log) || 'download failed')});
     }
 
+    selectedBasicProfile () {
+        return basicProfileFor(this.codeDevice(), this.state.basicProfile);
+    }
+
+    async runPicoBasic (source) {
+        if (!remoteMachineImagesAllowed()) {
+            this.setState({status: 'Remote machine images are disabled in this build.'});
+            return;
+        }
+        const media = libraryMedia.find(entry => entry.id === 'picobb-rp2040');
+        this.setState({busy: true, status: this.L.basicLoading, output: null, basicRawOutput: '', basicIsBbc: false});
+        try {
+            const config = await openLibraryMedia(media);
+            if (this._unmounted || this.currentDevice() !== 'pico' || this.state.lang !== 'basic') return;
+            await runMachineConfig(config, {picoBasicSource: source});
+            if (!this._unmounted) this.setState({status: ''});
+        } catch (error) {
+            if (!this._unmounted) this.setState({status: error.message});
+        } finally {
+            if (!this._unmounted) this.setState({busy: false});
+        }
+    }
+
     async runBasic () {
-        if (this.state.busy || this.state.running) return;
+        const profile = this.selectedBasicProfile()?.id;
+        if (!profile || this.state.busy || this.state.running) return;
         const code = this.activeCode();
         if (!code.trim()) {
             this.setState({status: this.L.basicEmpty});
             return;
         }
-        if (this.state.basicProfile === 'i8086-ubasic' && this.state.libraryProgram?.dosSourceName) {
+        if (profile === 'i8086-ubasic' && this.state.libraryProgram?.dosSourceName) {
             return this.runLibraryProgram();
         }
         // The 8086 profile compiles BASIC to a .COM and boots the DOS bench (the
         // C/asm-tab path), rather than running a 6502/Z80 ROM interpreter.
-        if (this.state.basicProfile === 'i8086') return this.runBasicOn8086(code);
-        if (this.state.basicProfile === 'i8086-dos') return this.runBasicOnRealDos(code);
+        if (profile === 'i8086') return this.runBasicOn8086(code);
+        if (profile === 'i8086-dos') return this.runBasicOnRealDos(code);
         // The libre DOS-native interpreter path: uBASIC.EXE runs the program on
         // the 8086 DOS bench (the language itself runs on the machine).
-        if (this.state.basicProfile === 'i8086-ubasic') return this.runBasicOnDosInterp(code);
+        if (profile === 'i8086-ubasic') return this.runBasicOnDosInterp(code);
+        if (profile === 'pico-bbcbasic') return this.runPicoBasic(code);
         this.setState({output: '', running: true, status: this.L.basicLoading, basicRawOutput: '', basicIsBbc: false});
         try {
-            const isBbc = this.state.basicProfile === 'bbc';
+            const isBbc = profile === 'bbc';
             let runner;
             if (isBbc) {
                 const {BbcZ80Runner} = await import(/* webpackChunkName: "bw-board" */ 'bw-board/bbc-z80-runner.js');
@@ -5898,7 +5972,7 @@ class PseudocodeImporter extends React.Component {
             if (lang !== 'javascript') nb.javascript = new SB3Creator().generateJavaScript(proj, this.genOpts());
             if (lang !== 'c') nb.c = new SB3Creator().generateC(proj);
             if (lang !== 'basic') {
-                const br = new SB3Creator().generateBASIC(proj, {profile: this.state.basicProfile.startsWith('i8086') ? 'ms' : this.state.basicProfile, lineNumbers: this.state.basicLineNumbers});
+                const br = new SB3Creator().generateBASIC(proj, {profile: this.selectedBasicProfile()?.dialect || 'bbc', lineNumbers: this.state.basicLineNumbers});
                 nb.basic = br.ok ? br.basic : `REM === Cannot show as BASIC ===\n${br.reasons.map(s => 'REM ' + s).join('\n')}`;
             }
             // fe and Tcl are NOT regenerated here: their generators load lazily, and
@@ -5915,7 +5989,7 @@ class PseudocodeImporter extends React.Component {
             if (missing.length) warns.push(`no sprite named: ${missing.join(', ')}`);
             const classified = classifyConversionWarnings(warns);
             publishEditor(state => ({
-                buffers: nb,
+                buffers: {...nb, ...hiddenCodeDrafts(state.authoredSources, state.buffers, this.codeDevice(), lang)},
                 // This flag belongs to the admitted buffer regeneration too.
                 importedPython: false,
                 uploads: state.uploads.filter(upload => !appliedUploads.has(upload)),
@@ -5943,7 +6017,7 @@ class PseudocodeImporter extends React.Component {
             const {assetLibraryRecords, withoutAssetLibraries} = await import('../../lib/bw-asset-library.js');
             const savedProject = JSON.parse(this.props.vm.toJSON());
             const project = withoutAssetLibraries(savedProject, assetLibraryRecords(this.props.vm, savedProject));
-            const basicResult = new SB3Creator().generateBASIC(project, {profile: this.state.basicProfile.startsWith('i8086') ? 'ms' : this.state.basicProfile, lineNumbers: this.state.basicLineNumbers});
+            const basicResult = new SB3Creator().generateBASIC(project, {profile: this.selectedBasicProfile()?.dialect || 'bbc', lineNumbers: this.state.basicLineNumbers});
             const mpResult = new SB3Creator().generateMicroPython(project);
             const buffers = {
                 pseudocode: new SB3Creator().decompile(project),
@@ -5966,8 +6040,8 @@ class PseudocodeImporter extends React.Component {
             // list each one: a count of column-0 comments reported "✓ OK" for them.
             const unsupportedDiagnostics = Array.from(buffers.pseudocode.matchAll(/^\s*# unsupported:\s*(.*)$/gm), match => match[1].trim());
             const unsupported = unsupportedDiagnostics.length;
-            this.setState({
-                buffers,
+            this.setState(state => ({
+                buffers: {...buffers, ...hiddenCodeDrafts(state.authoredSources, state.buffers, this.codeDevice())},
                 uploads: [], // the live project now owns its artwork; old import SVGs are stale
                 output: null,
                 status: unsupported ?
@@ -5975,7 +6049,7 @@ class PseudocodeImporter extends React.Component {
                     'Read the current project into all languages. Edit any of them, then “To blocks”.',
                 conversionReport: {direction: 'Blocks → Code', preserved: true, changed: [],
                     unsupported: unsupportedDiagnostics}
-            });
+            }));
         } catch (e) {
             const failure = conversionFailure(e);
             this.setState({status: this.L.stError(failure.message), conversionReport: {
@@ -6107,7 +6181,7 @@ class PseudocodeImporter extends React.Component {
     }
 
     renderMacDevicePicker () {
-        const current = (this.state.lang === 'asm' && this.state.asmRunDevice) || this.currentDevice() || '';
+        const current = this.codeDevice() || '';
         const close = () => this.macDeviceDialog?.close();
         const choose = id => {
             close();
@@ -6280,7 +6354,7 @@ class PseudocodeImporter extends React.Component {
         </Popup>;
     }
 
-    renderActionMenu (csel, renderCodeControls, renderLanguages, machine) {
+    renderActionMenu (csel, renderCodeControls, renderLanguages, machine, renderDeviceSelect) {
         const item = {...csel, ...toolStyles(false).button, display: 'flex', alignItems: 'center', justifyContent: 'flex-start',
             width: '100%', boxSizing: 'border-box', textAlign: 'left', cursor: 'pointer', height: 'auto',
             minHeight: 32, padding: '6px 8px', whiteSpace: 'normal', fontSize: 12};
@@ -6323,6 +6397,7 @@ class PseudocodeImporter extends React.Component {
                     <div data-code-menu-group data-code-overflow-controls>
                         {machine === 'cardiac' ? <div ref={this.props.onCardiacToolsSlot} data-cardiac-overflow-tools /> :
                             !machine && renderCodeControls(true)}
+                        {machine && renderDeviceSelect(true)}
                         <button type="button" onClick={() => this.openCodeInfo()} data-overflow-action>
                             <Icon name="help" />{this.L.infoAria}
                         </button>
@@ -6514,7 +6589,7 @@ class PseudocodeImporter extends React.Component {
         const actionBtn = {...btn, padding: '5px 9px', fontSize: 12, whiteSpace: 'nowrap', flexShrink: 0};
         const sel = {padding: '6px 10px', borderRadius: 6, border: '1px solid #cbd5e1', font: 'inherit'};
         const max = this.state.maximized;
-        const codeDevice = (this.state.lang === 'asm' && this.state.asmRunDevice) || this.currentDevice();
+        const codeDevice = this.codeDevice();
         const usesMacDevicePicker = typeof window !== 'undefined' && window.__TAURI__ && /^Mac/.test(navigator.platform);
         const csel = {...sel, padding: '4px 8px', fontSize: 12}; // compact select
         const languageTabStyle = active => ({
@@ -6532,6 +6607,47 @@ class PseudocodeImporter extends React.Component {
         const showPythonRunTargets = this.state.lang === 'python' && this.activeCode().trim() &&
             window.__TAURI_INTERNALS__ && applies('spike-nuttx');
         const german = pickLocale(this.props.locale) === 'de';
+        const selectedMachine = this.state.cp1Active ? 'kosmos-cp1' : this.state.cardiacActive ? 'cardiac' :
+            this.state.kim1Active ? 'kim1' : this.state.microtronicActive ? 'microtronic' : this.state.libraryTarget;
+        const machineLabel = {'kosmos-cp1': 'Kosmos CP1', cardiac: 'CARDIAC', kim1: 'KIM-1',
+            microtronic: 'Microtronic', i80386: '80386'}[selectedMachine] || DEVICE_BY_ID[codeDevice]?.label || this.L.noChips;
+        const renderDeviceSelect = menu => (
+                        <div data-code-machine-select={menu || undefined} style={menu ? undefined : {display: 'contents'}}>
+                        {menu && <Icon name="chip" />}
+                        {usesMacDevicePicker ? <button type="button" aria-haspopup="dialog"
+                            aria-label={this.L.deviceTitle} title={this.L.deviceTitle}
+                            data-testid={menu ? 'bw-device-picker-trigger-menu' : 'bw-device-picker-trigger'}
+                            style={{...csel, alignSelf: 'center', cursor: 'pointer', whiteSpace: 'nowrap',
+                                minWidth: 0, flexShrink: menu ? 1 : 0, overflow: 'hidden', textOverflow: 'ellipsis'}}
+                            onClick={() => this.setState({actionsOpen: false}, () => {
+                                const dialog = this.macDeviceDialog;
+                                if (dialog && !dialog.open) {
+                                    dialog.showModal();
+                                    dialog.querySelector('[aria-checked="true"]')?.focus();
+                                }
+                            })}>
+                            {machineLabel} ▾
+                        </button> : (
+                        <select value={selectedMachine || codeDevice || ''} onChange={e => this.setDevice(e.target.value)}
+                            style={{...csel, alignSelf: 'center', maxWidth: '100%', minWidth: 0, whiteSpace: 'nowrap',
+                                flexShrink: menu ? 1 : 0}} title={this.L.deviceTitle}
+                            data-testid={menu ? "bw-device-select-menu" : "bw-device-select"}>
+                            <option value="">{this.L.noChips}</option>
+                            {selectedMachine && selectedMachine !== 'kosmos-cp1' &&
+                                <option value={selectedMachine} disabled>{machineLabel}</option>}
+                            <optgroup label="Intel 8049">
+                                <option value="kosmos-cp1" data-machine-launch="">Kosmos CP1</option>
+                            </optgroup>
+                            {DEVICE_GROUPS.map(g => (
+                                <optgroup key={g.label} label={g.label}>
+                                    {g.devices.map(d => <option key={d.id} value={d.id}>{d.label}</option>)}
+                                </optgroup>
+                            ))}
+                            {/* Opens the machine library (gui.jsx renders it); not a device. */}
+                            <option value="__manage__" data-machine-launch="">{'Manage machines…'}</option>
+                        </select>)}
+                        </div>
+        );
         const renderCodeControls = menu => (
             <React.Fragment>
                     <div data-testid={menu ? undefined : "bw-code-action-row"} style={{display: 'inline-flex', alignSelf: 'center',
@@ -6843,7 +6959,7 @@ class PseudocodeImporter extends React.Component {
                             </button>
                         ) : null}
                         {this.state.lang === 'basic' && this.activeCode().trim() ? (
-                            <button onClick={() => this.runBasic()} disabled={this.state.running}
+                            <button onClick={() => this.runBasic()} disabled={this.state.running || this.state.busy}
                                 style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}
                                 data-testid={menu ? "bw-basic-run-menu" : "bw-basic-run"}>
                                 {this.L.runBasic}
@@ -6959,45 +7075,16 @@ class PseudocodeImporter extends React.Component {
                             {menu ? <><Icon name="debugger" />{pickLocale(this.props.locale) === 'de' ? 'Debugger öffnen' : 'Open debugger'}</> :
                                 <span aria-hidden="true">🐞</span>}
                         </button>
-                        {/* WKWebView's native popup can lose its selection owner during a board reseat. */}
-                        <div data-code-machine-select={menu || undefined} style={menu ? undefined : {display: 'contents'}}>
-                        {menu && <Icon name="chip" />}
-                        {usesMacDevicePicker ? <button type="button" aria-haspopup="dialog"
-                            aria-label={this.L.deviceTitle} title={this.L.deviceTitle}
-                            data-testid={menu ? 'bw-device-picker-trigger-menu' : 'bw-device-picker-trigger'}
-                            style={{...csel, alignSelf: 'center', cursor: 'pointer', whiteSpace: 'nowrap',
-                                minWidth: 0, flexShrink: menu ? 1 : 0, overflow: 'hidden', textOverflow: 'ellipsis'}}
-                            onClick={() => this.setState({actionsOpen: false}, () => {
-                                const dialog = this.macDeviceDialog;
-                                if (dialog && !dialog.open) {
-                                    dialog.showModal();
-                                    dialog.querySelector('[aria-checked="true"]')?.focus();
-                                }
-                            })}>
-                            {DEVICE_BY_ID[codeDevice]?.label || this.L.noChips} ▾
-                        </button> : (
-                        <select value={codeDevice || ''} onChange={e => this.setDevice(e.target.value)}
-                            style={{...csel, alignSelf: 'center', maxWidth: '100%', minWidth: 0, whiteSpace: 'nowrap',
-                                flexShrink: menu ? 1 : 0}} title={this.L.deviceTitle}
-                            data-testid={menu ? "bw-device-select-menu" : "bw-device-select"}>
-                            <option value="">{this.L.noChips}</option>
-                            <optgroup label="Intel 8049">
-                                <option value="kosmos-cp1" data-machine-launch="">Kosmos CP1</option>
-                            </optgroup>
-                            {DEVICE_GROUPS.map(g => (
-                                <optgroup key={g.label} label={g.label}>
-                                    {g.devices.map(d => <option key={d.id} value={d.id}>{d.label}</option>)}
-                                </optgroup>
-                            ))}
-                            {/* Opens the machine library (gui.jsx renders it); not a device. */}
-                            <option value="__manage__" data-machine-launch="">{'Manage machines…'}</option>
-                        </select>)}
-                        </div>
+                        {renderDeviceSelect(menu)}
                     </React.Fragment>
             </React.Fragment>
         );
         const machine = this.state.microtronicActive ? 'microtronic' : this.state.cardiacActive ? 'cardiac' : this.state.cp1Active ? 'cp1' :
             this.state.kim1Active ? 'kim1' : null;
+        const languageAvailable = lang => !machine && this.allowsCodeLanguage(lang);
+        const basicProfile = this.selectedBasicProfile();
+        const basicProfileLabels = {bbc: 'BBC BASIC (Z80)', ms: '6502 BASIC', i8086: '8086 BASIC (native)',
+            'i8086-dos': '8086 BASIC (MS-DOS 2.0)', 'i8086-ubasic': 'uBASIC (DOS)', 'pico-bbcbasic': 'PicoBB BBC BASIC'};
         const renderLanguages = menu => (
             <React.Fragment>
                     {[['pseudocode', '🧩 Pseudo'], ['python', '🐍 Py'], ['javascript', '🟨 JS'], ['c', '🔧 C'], ['basic', '📺 BAS'], ['asm', '🔩 ASM'],
@@ -7006,8 +7093,8 @@ class PseudocodeImporter extends React.Component {
                         // MicroPython program was imported from a .hex: there
                         // is no pseudocode then, and hiding the tab would hide
                         // the Run button of the one program we can run as-is.
-                        ...(['microbit', 'calliopemini'].includes(this.currentDevice()) ||
-                            (this.state.buffers.micropython || '').trim() ?
+                        ...(['microbit', 'calliopemini'].includes(codeDevice) ||
+                            (!codeDevice && (this.state.buffers.micropython || '').trim()) ?
                             [['micropython', this.currentDevice() === 'calliopemini' ? '🤖 Calliope' : '🤖 micro:bit']] : []),
                         // NQC appears for people who have an RCX and stays out
                         // of everyone else's way. The RCX is not a DEVICE line
@@ -7016,7 +7103,7 @@ class PseudocodeImporter extends React.Component {
                         // "there is already something in the buffer" so a
                         // file you opened does not vanish when you switch tabs.
                         ...(this.rcxLoaded() || (this.state.buffers.nqc || '').trim() ?
-                            [['nqc', '🧱 NQC']] : [])].map(([l, label]) => {
+                            [['nqc', '🧱 NQC']] : [])].filter(([l]) => languageAvailable(l)).map(([l, label]) => {
                         const active = !this.state.cp1Active && !this.state.cardiacActive && !this.state.kim1Active && !this.state.microtronicActive && this.state.lang === l;
                         return (
                             <button key={l} type="button" aria-pressed={active} onClick={() => this.switchTab(l)}
@@ -7038,21 +7125,22 @@ class PseudocodeImporter extends React.Component {
                         title={this.L.cardiacLanguage} style={languageTabStyle(this.state.cardiacActive)}>
                         CARDIAC
                     </button>}
-                    {this.state.microtronicPartId && <button type="button"
+                    {this.state.microtronicPartId && (!machine || machine === 'microtronic') && <button type="button"
                         data-testid={menu ? 'bw-code-microtronic-tab-menu' : 'bw-code-microtronic-tab'}
                         onClick={this.selectMicrotronic} aria-pressed={!!this.state.microtronicActive}
                         style={languageTabStyle(this.state.microtronicActive)}>Microtronic</button>}
-                    {this.state.kim1PartId && <button type="button" data-testid={menu ? "bw-code-kim1-tab-menu" : "bw-code-kim1-tab"}
+                    {this.state.kim1PartId && (!machine || machine === 'kim1') && <button type="button" data-testid={menu ? "bw-code-kim1-tab-menu" : "bw-code-kim1-tab"}
                         onClick={() => this.setState({kim1Active: true, cp1Active: false, cardiacActive: false, microtronicActive: false})}
                         aria-pressed={this.state.kim1Active} style={languageTabStyle(this.state.kim1Active)}>
                         KIM-1
                     </button>}
                     {(() => {
                         const shown = this.visibleOptionalLangs().map(([l]) => l);
-                        const hidden = BW_OPTIONAL_LANGS.filter(([l]) => !shown.includes(l))
+                        const hidden = BW_OPTIONAL_LANGS.filter(([l]) => languageAvailable(l) && !shown.includes(l))
                             .map(([language, label, name]) => [language, label, name, () => this.addOptionalLang(language)]);
-                        if (!this.state.cp1Active) hidden.push(['cp1', 'CP1', this.L.cp1Language, () => this.openCp1Language()]);
-                        if (!this.state.cardiacActive) hidden.push(['cardiac', 'CARDIAC', this.L.cardiacLanguage, () => this.openCardiacLanguage()]);
+                        if (!machine && !codeDevice) hidden.push(['cp1', 'CP1', this.L.cp1Language, () => this.openCp1Language()]);
+                        if (!machine && !codeDevice) hidden.push(['cardiac', 'CARDIAC', this.L.cardiacLanguage, () => this.openCardiacLanguage()]);
+                        if (!hidden.length) return null;
                         if (menu) return hidden.map(([language, label, name, open]) =>
                             <button key={language} type="button" title={name} disabled={this.state.busy}
                                 onClick={open}>{LANG_LABEL[language] || label}</button>);
@@ -7086,7 +7174,7 @@ class PseudocodeImporter extends React.Component {
                     trailing={(
                         <React.Fragment>
                             {this.renderCodeInfo(machine)}
-                            {this.renderActionMenu(csel, renderCodeControls, renderLanguages, machine)}
+                            {this.renderActionMenu(csel, renderCodeControls, renderLanguages, machine, renderDeviceSelect)}
                     <button onClick={() => this.toggleMaximize()}
                         style={{...csel, cursor: 'pointer', background: max ? '#4c97ff' : '#f1f5f9',
                             color: max ? '#fff' : 'inherit', minWidth: 24, border: '1px solid #cbd5e1', alignSelf: 'center'}}
@@ -7147,24 +7235,21 @@ class PseudocodeImporter extends React.Component {
                 ) : <React.Fragment>
                 {this.state.showMatrix && !max && this.renderMatrixPanel()}
 
-                {this.state.lang === 'basic' && !max && (
+                {this.state.lang === 'basic' && basicProfile && !max && (
                     <div style={{display: 'flex', gap: 16, padding: '6px 12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderTop: 'none', fontSize: 13, alignItems: 'center'}}>
                         <label style={{display: 'flex', alignItems: 'center', gap: 4}}>
                             {this.L.profile}
-                            <select value={this.state.basicProfile} onChange={e => this.setState({basicProfile: e.target.value})}
+                            <select value={basicProfile.id} data-testid="bw-basic-profile" onChange={e => this.setState({basicProfile: e.target.value})}
                                 style={{padding: '2px 6px', borderRadius: 4, border: '1px solid #cbd5e1'}}>
-                                <option value="bbc">{'BBC BASIC'}</option>
-                                <option value="ms">{'6502 BASIC'}</option>
-                                <option value="i8086">{'8086 BASIC (native)'}</option>
-                                <option value="i8086-dos">{'8086 BASIC (real MS-DOS 2.0)'}</option>
-                                <option value="i8086-ubasic">{'BASIC (uBASIC on DOS)'}</option>
+                                {basicProfilesFor(codeDevice).map(({id}) =>
+                                    <option key={id} value={id}>{basicProfileLabels[id]}</option>)}
                             </select>
                         </label>
                         <label style={{display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer'}}>
                             <input type="checkbox" checked={this.state.basicLineNumbers}
-                                disabled={this.state.basicProfile === 'ms'}
+                                disabled={basicProfile.id === 'ms'}
                                 onChange={e => this.setState({basicLineNumbers: e.target.checked, buffers: {...this.state.buffers, basic: ''}})} />
-                            {this.L.lineNumbers}{' '}{this.state.basicProfile === 'ms' ? this.L.alwaysOn6502 : ''}
+                            {this.L.lineNumbers}{' '}{basicProfile.id === 'ms' ? this.L.alwaysOn6502 : ''}
                         </label>
                     </div>
                 )}

@@ -392,7 +392,7 @@ class DebugPanel extends React.Component {
         const {linuxSnapshot} = e.detail || {};
         const {nativeBlocks, machinePreset, i80386Media, machineConfig6502, machineConfig8086} = e.detail || {};
         const {i8086Assembly} = e.detail || {};
-        const {dosArgs, dosFiles, dosVariant, x86Variant, spectrum, dosFastStart, cpmLaunch, cpmFiles, picoWakeOnPrompt} = e.detail || {};
+        const {dosArgs, dosFiles, dosVariant, x86Variant, spectrum, dosFastStart, cpmLaunch, cpmFiles, picoWakeOnPrompt, picoBasicCommands} = e.detail || {};
         if (!bytes && !riscvImage) return;
         // THE SAME LOAD, DELIVERED TWICE. circuit-tab stashes every media-load
         // and, when that flips it to "machine booted", re-dispatches the very
@@ -452,6 +452,7 @@ class DebugPanel extends React.Component {
             cpmLaunch,
             cpmFiles,
             picoWakeOnPrompt,
+            picoBasicCommands,
             machineConfig8086,
             name: name || null,
             nativeBlocks: kind === 'i80386' && nativeBlocks === true,

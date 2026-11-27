@@ -6,6 +6,7 @@ import {readFileSync} from 'node:fs';
 import {usesScratchStage} from '../overlay/scratch-gui/src/components/tw-pseudocode/code-example-view.js';
 import {conversionFailure} from '../overlay/scratch-gui/src/lib/bw-conversion-error.js';
 import {captureCodeArtwork, codeArtworkMatches} from '../overlay/scratch-gui/src/lib/bw-code-artwork.js';
+import {basicProfileFor, hiddenCodeDrafts} from '../overlay/scratch-gui/src/lib/bw-matrix/code-languages.js';
 import {balancedFrom, scopeAfter} from './helpers/js-scope.mjs';
 const source = readFileSync(new URL('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx', import.meta.url), 'utf8');
 const signature = 'async compile ({strict = false, pseudocode = null, scratchExample = false} = {}) {';
@@ -41,6 +42,9 @@ const setup = ({program = 'DEVICE ARCADE', lang = 'pseudocode', parseError, load
         L: {stCompiling: 'compiling', stLoaded: 'loaded', stError: error => error},
         setState (patch, done) { Object.assign(this.state, typeof patch === 'function' ? patch(this.state) : patch); done?.(); },
         activeCode () { return this.state.buffers[this.state.lang]; }, canLiftAsm: () => false, loadCatalog () {},
+        leaveCp1 () {}, leaveCardiac () {},
+        codeDevice () { return this.state.buffers.pseudocode?.match(/^DEVICE\s+(\S+)/im)?.[1]?.toLowerCase(); },
+        selectedBasicProfile () { return basicProfileFor(this.codeDevice(), this.state.basicProfile); },
         deriveBuffer: async source => ({code: source}),
         lib: async () => ({default: Creator}), genOpts: () => ({})};
     component.publishAppliedDevice = new Function('DEVICE_BY_ID', 'window', 'CustomEvent',
@@ -48,10 +52,10 @@ const setup = ({program = 'DEVICE ARCADE', lang = 'pseudocode', parseError, load
     // DOS_LANG / generateDosLangs: the fe and Tcl tabs, which compile() also
     // regenerates; none here (stubs keep the sandbox to the names it gives).
     component.compile = new Function('TWO_WAY', 'classifyConversionWarnings', 'LANG_LABEL', 'window', 'codeArtworkMatches', 'captureCodeArtwork', 'conversionFailure',
-        'DOS_LANG', 'generateDosLangs', 'usesScratchStage', 'setCircuitView',
+        'DOS_LANG', 'generateDosLangs', 'usesScratchStage', 'setCircuitView', 'hiddenCodeDrafts',
         `return async function ({strict = false, pseudocode = null, scratchExample = false} = {}) ${compileBody}`)(new Set(['pseudocode']),
         () => ({changed: [], unsupported: []}), {pseudocode: 'Pseudocode'}, window, codeArtworkMatches, captureCodeArtwork, conversionFailure,
-        {}, async () => ({}), usesScratchStage, view => views.push(view));
+        {}, async () => ({}), usesScratchStage, view => views.push(view), hiddenCodeDrafts);
     Creator.RETARGET_POOLS = {calliopemini: {}};
     Creator.retargetPseudocode = (text, device) => ({ok: true, warnings: [],
         pseudocode: text.replace(/^DEVICE\s+\S+/im, `DEVICE ${device.toUpperCase()}`)});

@@ -91,6 +91,24 @@ are joined by family id and nothing else.
 
 ---
 
+## Code when a machine is selected
+
+The Code language row and both language menus use the capability table for
+native runtime and deploy reach. Pseudocode remains available for project
+conversion. Keep lowerings and other incomplete routes documented in the full
+matrix. Returning to Scratch stage restores the general-purpose language tabs
+and any available authored drafts. Keep machine-specific BASIC profiles explicit
+so Run uses the selected interpreter.
+
+PicoBB (Zlib) uses the pinned media-lab UART firmware, with Code source sent
+one line per firmware prompt before `RUN`. Bare RP2040 silicon upload for this
+profile is still open. Qualify additional freely licensed Pico BASIC profiles,
+starting with [PiccoloBASIC](https://github.com/garyexplains/piccoloBASIC) and
+[Stefan's BASIC](https://github.com/slviajero/tinybasic) (both BSD-3-Clause).
+For each, pin a reproducible media build, document its dialect, check UART
+input and Controller output on the emulated Pico, and exercise Code Run before
+adding the profile to the selector.
+
 ## 2. The matrix as measured on 2026-09-05
 
 Read before claiming a task; several cells were wrong in the folklore, and
@@ -107,7 +125,7 @@ task named · **—** physically out, reason given · `?` needs a measurement.
 | **Python** | L · native — (MicroPython needs ≥256 KB flash / 16 KB RAM; STC12 has 60 KB / 1.3 KB) | L · native — (ATmega328P 32 KB / 2 KB) | L · **N** MicroPython on silicon (REPL deploy) · sim **n** (N3) | L · native — (F030 16–32 KB flash) | L · **N** MicroPython, sim + silicon | L · native — (no port) | L · native — (no port) | L · native — (no port) | L · **N** CircuitPython on silicon (copy `code.py`) · sim — (no SAMD51 emulator, see CHOOSING-HARDWARE) |
 | **JavaScript** | L · native — | L · native — | L · native **n** Kaluma (Apache-2.0) or Espruino (MPL-2.0), silicon (N5) | L · native — (Espruino needs F4-class) | L · native **n** PXT static TypeScript (MIT), the MakeCode path (N5) | L · native — | L · native — | L · native — | L via Arcade TS |
 | **C** | **N** local SDCC-WASM + hosted · L | **N** hosted avr-gcc · L — picker `compile: true` (reconciled by T5, 2026-09-05) | **N** hosted bare-metal rp2040, runs in rp2040js · no UF2 deploy from the UI → (L2) | **N** hosted · L | **n** hosted has an `nrf52833` linker script and an ARM *assemble* chain, but no C compile target (N7) | **N** hosted cc65 · L | **N** SDCC `-mz80` hosted, bench ROM (N1 done 2026-09-25) · CP/M `.COM` open | **N** local SmallerC-WASM + the assembler's NASM front end, sim only (N2 done 2026-09-05; `float`/`long` are named edges) | native — sim (no emulator) · silicon **n** low priority |
-| **BASIC** | L · native `?` BASIC-52 (N8, investigation) | L · native `?` Tiny BASIC (MIT) on 328P (N8) | L · native — (no permissive interpreter found; MMBasic licence excludes) | L · native — | L · native — | L · **N** MS BASIC ROM (`ms` profile) | L · **N** BBC BASIC (`bbc` profile) | L · native — (N6 measured: 0/35 GW-BASIC sources assemble, no binary) | L |
+| **BASIC** | L · native `?` BASIC-52 (N8, investigation) | L · native `?` Tiny BASIC (MIT) on 328P (N8) | L · **N** PicoBB BBC BASIC in rp2040js (UART) | L · native — | L · native — | L · **N** MS BASIC ROM (`ms` profile) | L · **N** BBC BASIC (`bbc` profile) | L · native — (N6 measured: 0/35 GW-BASIC sources assemble, no binary) | L |
 | **ASM** | **N** hosted sdas8051 · reader **l** (L1) | **N** hosted avr-gcc · **l** | **N** hosted `rp2040`, runs in rp2040js (N4 done 2026-09-25) · **l** | **N** hosted `stm32f030`, runs in the stm32f0 core (N4) · **l** | **N** hosted `nrf52833`, routed from the ASM tab (N4) · **l** | **N** hosted ca65 · **l** | **N** hosted sdasz80 · **l** | **N** local, MASM **and** NASM (auto-detected; a Dialect selector in the ASM tab forces either, 2026-09-05) · **l** (L1 starts here) | native — (no emulator) |
 | **MicroPython** (tab) | as Python | as Python | as Python | as Python | as Python | as Python | as Python | as Python | as Python |
 

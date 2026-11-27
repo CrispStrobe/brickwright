@@ -1003,9 +1003,15 @@ const GUIComponent = props => {
                     const started = await run();
                     if (started && code) {
                         const program = {...code, config: cfg, run};
+                        delete vm.runtime.bwLibraryMachineSelection;
                         vm.runtime.bwLibraryCode = program;
                         window.dispatchEvent(new CustomEvent('bw-library-code', {detail: program}));
                         props.onActivateTab(CODE_TAB_INDEX);
+                    } else if (started?.detail?.kind) {
+                        const selection = {kind: started.detail.kind};
+                        delete vm.runtime.bwLibraryCode;
+                        vm.runtime.bwLibraryMachineSelection = selection;
+                        window.dispatchEvent(new CustomEvent('bw-code-machine-selected', {detail: selection}));
                     }
                     return started;
                 }}
