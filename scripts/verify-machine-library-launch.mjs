@@ -126,11 +126,14 @@ try {
     await at.close();
 
     const xt = await freshProject();
-    await openFromFile(xt, 'i8086');
+    await xt.getByRole('tab', {name: 'Circuit', exact: true}).click();
+    await xt.getByRole('button', {name: 'More circuit controls'}).click();
+    await xt.getByTestId('bw-circuit-machines').click();
+    await xt.getByRole('combobox', {name: 'Machine type'}).selectOption('i8086');
     await xt.getByTestId('bw-mm-8086-cga-demo').click();
     await xt.getByTestId('bw-machine-console').getByText('PC CGA', {exact: false}).waitFor();
     await paintedDisplay(xt);
-    console.log('The virtual 8086 CGA preset boots without a Circuit example.');
+    console.log("The virtual 8086 CGA preset boots from the blank Circuit editor's Machines menu.");
     await xt.close();
 
     async function loadCircuitExample(page, title, id) {
