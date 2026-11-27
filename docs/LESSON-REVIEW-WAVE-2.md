@@ -261,6 +261,14 @@ value.
 > gain 35.683. The `test` hint names both the resistors' ×46.4545 and the
 > realised ×46.433 and says why they differ — a better point than "exact".
 >
+> **Re-measured with bw-board `d21d6d8b`.** The LM358 now models input bias
+> current. The feedback resistors turn the inverting input's 42.5 nA bias
+> into an approximately −4.25 mV output offset. The small-signal gain is
+> still about 46.433, measured as the change in output divided by the change
+> in shunt voltage. At half load-knob travel the shunt reads 2.00 mV and the
+> output reads 88.58 mV. Full travel still clips at about 3.50 V. Version 4
+> of the lesson distinguishes the ideal prediction from these readings.
+>
 > The finding below is kept as recorded. It is why the engine was fixed.
 
 The volts front end is exact. The 30 kΩ/10 kΩ divider measures a ratio of

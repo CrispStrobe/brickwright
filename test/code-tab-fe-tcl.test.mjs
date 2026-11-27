@@ -404,7 +404,7 @@ test('the importer treats fe and Tcl as two-way languages everywhere one must be
     // Every buffer reset is built from LANG_LABEL, so no tab is left without a
     // buffer (a missing one made activeCode() undefined: "can't access
     // property trim" when the Code tab opened).
-    assert.equal((importer.match(/Object\.fromEntries\(Object\.keys\(LANG_LABEL\)\.map\(l => \[l, ''\]\)\)/g) || []).length, 5);
+    assert.match(importer, /buffers: Object\.fromEntries\(Object\.keys\(LANG_LABEL\)\.map\(l => \[l, ''\]\)\)/);
     assert.doesNotMatch(importer, /buffers: \{pseudocode: ''/, 'a hand-written buffer list is back');
     assert.match(importer, /return this\.state\.buffers\[this\.state\.lang\] \?\? '';/);
     // fe and Tcl are offered from the "+" menu at the end of the tab row
@@ -419,14 +419,15 @@ test('the importer treats fe and Tcl as two-way languages everywhere one must be
     // overwrote an edit typed meanwhile, or reloaded the project after a
     // machine had started.
     assert.match(importer, /for \(const l of Object\.keys\(DOS_LANG\)\) if \(l !== lang\) nb\[l\] = '';/);
-    const compileStart = importer.indexOf('async compile ({strict = false, pseudocode = null} = {})');
+    const compileStart = importer.indexOf('async compile ({strict = false, pseudocode = null, scratchExample = false} = {})');
     const compileEnd = importer.indexOf('async fromBlocks ()', compileStart);
     assert.doesNotMatch(importer.slice(compileStart, compileEnd), /dosLangBuffersFor|generateDosLangs|\.generate\(await/,
         'compile() runs no fe/Tcl generator (reading the open fe/Tcl tab is its input, not a regeneration)');
     assert.match(importer, /\.\.\.\(await dosLangBuffersFor\(project, this\.state\.lang\)\)/);
     // A tab switch derives through them in both directions — before this,
     // switching INTO fe or Tcl fell through to generateJavaScript.
-    assert.match(importer, /else if \(DOS_LANG\[from\]\) pseudo = \(await DOS_LANG\[from\]\.load\(\)\)\.default\(src\)\.pseudocode;/);
+    assert.match(importer, /else if \(DOS_LANG\[from\]\) result = \(await DOS_LANG\[from\]\.load\(\)\)\.default\(src\);/);
+    assert.match(importer, /const pseudo = result \? this\.convertedSource\(result\) : src;/);
     assert.match(importer, /\} else if \(DOS_LANG\[to\]\) \{\n\s+code = DOS_LANG\[to\]\.generate/);
     // The reference panel says what each subset is.
     assert.match(importer, /\n {4}tcl: \[\n {8}\['Overview', \['Jim Tcl/);

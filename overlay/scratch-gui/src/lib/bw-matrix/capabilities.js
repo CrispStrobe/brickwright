@@ -268,7 +268,7 @@ export const DEVICES = Object.freeze([
         // GPIO reaches the board. It does NOT install-and-reboot in the sim —
         // machine.reset() does not reboot the emulator yet (finding N3c-1,
         // docs/PICO-SIM-RUN-FINDINGS.md); that half stays silicon-only below.
-        sim: [eng('rp2040js', ['hex', 'bin', 'uf2', 'py'])],
+        sim: [eng('rp2040js', ['hex', 'bin', 'uf2', 'py', 'bas'])],
         silicon: [
             tx('micropython-raw-repl', ['py'], 'micropython'),
             tx('uf2-bootsel-download', ['uf2'], null, {
@@ -642,7 +642,9 @@ export const CELLS = Object.freeze({
             lowered: [via('c')]
         },
         basic: {
-            native: no('licence', 'MMBasic (PicoMite) is not permissively licensed; no other Pico BASIC found'),
+            native: shipped('bas', 'PicoBB BBC BASIC, PiccoloBASIC, and Stefan’s BASIC', 'none', {
+                note: 'Code runs pinned firmware through UART in rp2040js. PiccoloBASIC uses labels, and Stefan’s BASIC supports numbered lines and interactive INPUT.'
+            }),
             lowered: [via('micropython'), via('c')]
         },
         asm: {native: shipped('hex', 'arm-none-eabi-as', 'hosted', {note: 'runs on rp2040js (N4)'}), lowered: [LISTING]},

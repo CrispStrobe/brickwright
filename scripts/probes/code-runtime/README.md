@@ -213,3 +213,143 @@ and mock callbacks do not satisfy those gates.
 Keep only the scripts, fixtures, package manifests/lock, README and raw JSON results
 under version control. Do not commit `node_modules`, npm caches, extracted browser
 binaries or temporary browser profiles.
+
+## Production console session probe
+
+`session-browser-probe.mjs` exercises the actual consumer
+`code-execution-session.js` and `code-execution-workers.js` through a static
+localhost harness with real Skulpt. It does not load the React application.
+The existing pinned probe package/lock supplies Playwright, Chromium and Skulpt;
+no application runtime dependencies are added.
+
+From this probe directory, after the existing `npm ci --ignore-scripts` setup:
+
+```sh
+mkdir -p tmp
+TMPDIR="$PWD/tmp" node session-browser-probe.mjs --output=session-browser-rerun.json
+```
+
+An isolated dependency directory can be selected with
+`--runtime-probe-dir=/absolute/path/to/probe-dependencies`; `--app-root` selects
+the repository whose production sources are tested. Otherwise the source root
+is three directories above the script. `--browser` can select an existing
+Chromium executable. This is a Node/Linux probe, not an application build.
+
+The recorded `session-browser-results.json` passes 19/19 cases with zero page
+errors on Chromium 158.0.8127.0, Skulpt 1.2.0 and Node 24.22.3. It includes source
+hashes and raw output/input/cleanup observations. Both languages cover normal and
+error completion, streaming, input waiting beyond the execution budget, Stop
+during input and busy loops, output caps and fresh restart. JS also covers
+explicit awaited completion and synchronous prompt/random replay. A host case
+confirms lazy-source disposal creates no worker. The page has no cross-origin
+isolation or SharedArrayBuffer; only the container's `--no-sandbox` argument is
+supplied to Chromium. Browser termination has no completion acknowledgement.
+
+Synchronous JS prompt replay caches answers and `Math.random()` only; it does
+not roll back global, time, network or persistent side effects. Prefer explicit
+`await input(...)`. Generated detached tasks, the legacy simulator route,
+React UI, production CSP, offline delivery, other browsers/native WebViews and
+mobile/device behavior remain separate gates. The earlier runtime-comparison
+results are retained; this probe closes only the named console-worker checks.
+
+### Owned-task and input-watchdog continuation
+
+`session-task-browser-results.json` records the later scoped `codeRun` candidate:
+**38/38 cases pass, zero page errors**. The original 19-case receipt above is
+retained with its original source hashes. The new receipt includes the production
+module and probe hashes, canonical generator source hash, exact generator commit,
+and the actual generated source used in each of three generator/worker cases.
+
+After installing this directory's existing probe dependencies, select a checkout
+of the canonical generator implementing `owned-console-v1`:
+
+```sh
+mkdir -p tmp
+TMPDIR="$PWD/tmp" node session-browser-probe.mjs \
+  --generator-root=/absolute/path/to/sb3-creator \
+  --output=session-task-browser-rerun.json
+```
+
+That generator checkout needs its own locked dependencies for source imports.
+Omitting `--generator-root` runs only the production session/worker cases; it does
+not establish generator integration. A supplied old generator is rejected rather
+than silently testing hand-written replacement output. This explicit external
+source probe does not adopt or modify Brickwright's pinned generator.
+
+The new cases cover registered concurrent/nested completion, ignored rejection,
+task-scoped input/sleeps, Stop, orphan input, invalid continued owned work while
+input is pending, active sibling execution budgets, missing responsiveness
+replies, completed-scope use, output limits and restart. The actual generated
+programs cover concurrent flags and an awaited procedure, input longer than the
+execution budget, and Stop during a wait. The scoped API does not discover
+arbitrary native timers/promises or infer joins: `spawn` registers concurrent
+work and returns `undefined`; sequential work uses awaited local functions.
+
+The 139 focused source/worker controls are reproducible from the repository root:
+
+```sh
+node --test test/code-execution-session.test.mjs \
+  test/code-javascript-tasks.test.mjs \
+  test/code-runtime-source-ownership.test.mjs \
+  test/code-tab-empty-target-after-failed-conversion.test.mjs \
+  test/code-conversion-editor-ownership.test.mjs \
+  test/code-tab-run-via-blocks.test.mjs \
+  test/spike-code-caller-ownership.test.mjs
+```
+
+These controls and the static browser harness do not qualify the rendered React
+application, production CSP, Scratch game semantics, other browsers or native
+platforms. The generator option remains opt-in upstream and is not selected by
+Brickwright's current Code tab or vendored dependency pin.
+
+### Boolean-value successor and default factory under CSP
+
+`session-console-values-browser-results.json` preserves a **39/39 passing**
+successor to the task receipt, with zero page errors. It executes supplier
+`cbdf179160a3f3054872d045503659967bd1b72e`, including a fourth canonical program
+whose comparison reporter occupies an ordinary `say` value socket. The receipt
+stores the actual SB3 graph and its transformation from the readable source seed;
+the required output is `true`, while the former emitter produced `undefined`.
+Production consumer sources are unchanged. Reproduce without replacing earlier
+receipts:
+
+```sh
+TMPDIR="$PWD/tmp" node session-browser-probe.mjs \
+  --generator-root=/absolute/path/to/sb3-creator \
+  --output=session-console-values-browser-rerun.json
+```
+
+`session-csp-browser-probe.mjs` separately exercises the **default production
+Blob-worker factory**, with real HTTP CSP and an external module harness. It
+observes Worker construction/termination and URL creation/revocation through
+call-through wrappers; it does not inject `createWorker`, replace the transport,
+rewrite production sources or bypass browser policy. The new
+`session-csp-browser-results.json` passes **16/16** cases and **2/2** enforced
+denial profiles, with zero page errors:
+
+| Policy | Observed behavior |
+| --- | --- |
+| No CSP | JavaScript and Skulpt complete normally. |
+| Blob workers and dynamic compilation permitted | Owned completion, long input, Stop, output limits, cleanup and fresh state pass. |
+| `worker-src 'none'` | Both languages fail explicitly with no learner effects; document events and HTTP reports confirm enforcement. |
+| Dynamic compilation denied | Both languages fail with CSP/EvalError diagnostics; worker-side HTTP reports identify blocked evaluation. |
+| Permitted document after denial | Both languages recover in the same browser/context after navigation. |
+
+Every constructed worker is terminated once and every Blob URL is revoked once.
+Late input is rejected; a 120 ms quiet window observes no post-settlement worker
+messages. Expected policy violations are recorded as console errors and reports,
+separately from unexpected page errors. Worker-src denial currently produces a
+generic `Worker error` session diagnostic in Chromium; detailed policy attribution
+comes from the observed violation evidence.
+
+```sh
+TMPDIR="$PWD/tmp" node session-csp-browser-probe.mjs \
+  --output=session-csp-browser-rerun.json
+```
+
+The same `--app-root`, `--runtime-probe-dir` and `--browser` selectors are
+available. Source, probe, harness, lockfile and configuration hashes are recorded.
+The Tauri configuration is only inspected; the no-CSP profile is not native-host
+execution. These explicit localhost policies do not qualify deployed headers,
+the rendered React application, app protocols, offline delivery, other browsers
+or native/mobile WebViews. No dependency or application policy changes are made.

@@ -363,6 +363,32 @@ export const installRobotLabReaders = () => {
         }
         return exprStmt.call(this, eRaw, indent);
     };
+    // A plain Python or JavaScript file runs its statements in source order.
+    // Code generated from Blocks already carries its own sections and hats.
+    const startupStatements = new Set(['Assign', 'AugAssign', 'Del', 'Expr', 'If', 'While', 'For']);
+    const nameStartupVariables = (translator, body) => {
+        const names = new Set();
+        const visit = node => {
+            if (!node || typeof node !== 'object') return;
+            if (node.type === 'Name') names.add(node.id);
+            Object.values(node).forEach(visit);
+        };
+        visit(body);
+        for (const name of ['x', 'y']) {
+            if (!names.has(name)) continue;
+            let replacement = `${name}_var`;
+            while (names.has(replacement)) replacement += '_';
+            translator.renameMap.set(name, replacement);
+            translator.warn(`Variable "${name}" is named "${replacement}" in Blocks to distinguish it from the sprite coordinate.`);
+        }
+    };
+    const startup = Symbol('startup');
+    const block = proto.block;
+    proto.block = function (statements, indent) {
+        const lines = block.call(this, statements, indent);
+        if (statements[startup] && !lines.length) this.emptyStartup = true;
+        return lines;
+    };
     proto.program = function (ast) {
         // The hats' registrations are read first (the emitter writes them after the handlers).
         this.labHats = new Map();
@@ -379,7 +405,23 @@ export const installRobotLabReaders = () => {
             else this.warn('unknown Robot Lab event');
             return false;
         });
-        const text = program.call(this, {...ast, body});
+        const hasProjectStructure = body.some(s =>
+            (s.type === 'Def' && this.resolveHat(s.name, s.args)) ||
+            (s.type === 'Expr' && this.asScratch(s.value)) ||
+            (s.type === 'Assign' && s.target.type === 'Name' && s.target.id === 'scratch'));
+        const statements = hasProjectStructure ? [] : body.filter(s => startupStatements.has(s.type));
+        let text;
+        if (statements.length) {
+            nameStartupVariables(this, body);
+            statements[startup] = true;
+            const definitions = body.filter(s => !startupStatements.has(s.type));
+            text = program.call(this, {...ast, body: [...definitions,
+                {type: 'Def', name: 'when_flag_clicked', args: [], body: statements}]});
+            if (this.emptyStartup) {
+                text = text.replace(/^[ \t]*WHEN flag clicked:\n[ \t]*say ""\n/m, '');
+                if (/^SPRITE Main:\s*$/.test(text)) return '\n';
+            }
+        } else text = program.call(this, {...ast, body});
         // Native hub words require their DEVICE context. The runtime emitter
         // names the extension but does not emit a scratch.device marker.
         const declared = /^DEVICE\s+(\S+)/m.exec(text)?.[1].toUpperCase();

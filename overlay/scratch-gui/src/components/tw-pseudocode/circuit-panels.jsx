@@ -45,18 +45,27 @@ PanelIcon.propTypes = {name: PropTypes.string.isRequired, size: PropTypes.number
  * control size, which its 150 px navigation slot and the circuit UX gate both assume), the
  * Robot Lab mode switch's look: a grey track, the current panel raised in indigo.
  */
-export const PanelSwitch = ({panel, drc, locale, onSelect}) => {
+export const PanelSwitch = ({panel, drc, locale, onSelect, menu, onPick}) => {
     const badge = warningsBadge(drc);
     return (
         <div data-panel-navigation role="group" aria-label={circuitPanelText(locale, 'group')}
             // No padding: the group must stay 34 px tall, the height of every designer toolbar
             // control (verify-circuit-ux measures it on the bar and in the overflow menu).
-            style={{display: 'inline-flex', alignItems: 'center', gap: 2, padding: 0, borderRadius: 7,
+            style={menu ? {display: 'grid'} : {display: 'inline-flex', alignItems: 'center', gap: 2, padding: 0, borderRadius: 7,
                 background: '#e2e8f0', flex: '0 0 auto', height: 34}}>
             {CIRCUIT_PANELS.map(({id, icon}) => {
                 const {name, tooltip} = circuitPanelLabel(locale, id);
                 const on = panel === id;
                 const count = id === 'warnings' && badge ? badge.count : null;
+                if (menu) return (
+                    <button key={id} type="button" className="circuit-menu-row" role="menuitemradio"
+                        data-testid={`bw-circuit-panel-${id}`} aria-checked={on} title={tooltip}
+                        onClick={() => { if (!on) onSelect(id); onPick?.(); }}>
+                        <PanelIcon name={icon} />
+                        <span className="circuit-menu-label">{name}{count ? ` (${count})` : ''}</span>
+                        {on && <span aria-hidden="true">✓</span>}
+                    </button>
+                );
                 return (
                     <button
                         key={id}
@@ -93,6 +102,8 @@ export const PanelSwitch = ({panel, drc, locale, onSelect}) => {
 };
 PanelSwitch.propTypes = {
     drc: PropTypes.object,
+    menu: PropTypes.bool,
+    onPick: PropTypes.func,
     locale: PropTypes.string,
     onSelect: PropTypes.func.isRequired,
     panel: PropTypes.string.isRequired

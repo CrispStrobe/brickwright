@@ -43,6 +43,8 @@ const LIB = 'overlay/scratch-gui/src/lib';
 const ROMS = 'overlay/scratch-gui/static/roms';
 // Scoped artifact pins name shipped bundles rather than whole vendored trees.
 const SCOPED_BUNDLES = {
+    devices: 'overlay/scratch-vm/src/extensions/crispstrobe/devices/index.js',
+    stc12: 'overlay/scratch-vm/src/extensions/crispstrobe/stc12/index.js',
     spikeprime: 'overlay/scratch-vm/src/extensions/crispstrobe/spikeprime/index.js',
     'arrays-values': 'overlay/scratch-vm/src/extensions/crispstrobe/arrays/index.js',
     circuitplayground: 'overlay/scratch-vm/src/extensions/crispstrobe/circuitplayground/index.js',
@@ -138,7 +140,7 @@ export const vendoredTrees = (root, owner) => {
             // These sources declare their authors in By headers, not copyright
             // notice. Retain that attribution without changing holderOf or
             // turning it into an own-code exemption.
-            const needsAuthor = ['wedo2unified', 'spikeprime', 'ev3comprehensive', 'legoboostunified', 'legonxt', 'legopoweredup'].includes(name);
+            const needsAuthor = ['devices', 'stc12', 'wedo2unified', 'spikeprime', 'ev3comprehensive', 'legoboostunified', 'legonxt', 'legopoweredup'].includes(name);
             const author = needsAuthor ?
                 header.match(/^[ \t]*\/\/[ \t]*By:[ \t]*([^<\n]+)/m)?.[1].trim() : null;
             if (needsAuthor && !author) throw new Error(`Scoped pin ${name} has no readable source author: ${evidence}`);

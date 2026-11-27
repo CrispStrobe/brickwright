@@ -1,0 +1,107 @@
+{
+  "schema": "bw-arcade-code-examples-v1",
+  "provenance": {
+    "portable": false,
+    "simulate": true,
+    "files": {
+      "overlay/scratch-gui/src/lib/bw-makecode/export-arcade.js": "ba204bd6b551c7548e450ca3b65ce29bf16d7a43ba8b6e7baffa59c549ceec83",
+      "overlay/scratch-gui/src/lib/bw-makecode/scratch-arcade-keyboard.js": "1c6326b8079674791baebe99cc5103cfee7e5d6bc91583af266798053ea5556b",
+      "overlay/scratch-gui/examples/index.json": "75a128c6d838f8316d16088d3a745fbfe33b196b7b2547d3e5c69f62e59b1902"
+    }
+  },
+  "results": [
+    {
+      "id": "looks",
+      "scope": "Code menu",
+      "device": null,
+      "sourceWarnings": [],
+      "opcodes": [
+        "control_wait",
+        "event_whenflagclicked",
+        "looks_changesizeby",
+        "looks_costume",
+        "looks_hide",
+        "looks_nextcostume",
+        "looks_say",
+        "looks_sayforsecs",
+        "looks_setsizeto",
+        "looks_show",
+        "looks_switchcostumeto",
+        "looks_thinkforsecs"
+      ],
+      "unsupported": [],
+      "warnings": [
+        "Scratch thoughts use Arcade text bubbles",
+        "Looks_Test: costume \"costume1\" converted to palette pixels",
+        "Looks_Test: costume \"costume2\" converted to palette pixels"
+      ],
+      "pxtSourceSha256": "e9c758976fa101b712854a4a75ceb1c8e6ab5e391968d26dc2bd4b3519f6e9b0",
+      "outcome": "compiled",
+      "compiled": true,
+      "diagnostics": [],
+      "simulator": {
+        "check": "boot and input smoke test",
+        "screenPixels": 19200,
+        "colours": 1,
+        "displayUpdates": 8
+      }
+    },
+    {
+      "id": "circuit:pybadge01-hello",
+      "scope": "Circuit catalogue",
+      "device": null,
+      "sourceWarnings": [],
+      "opcodes": [
+        "control_forever",
+        "control_if",
+        "control_if_else",
+        "control_repeat",
+        "control_wait",
+        "data_changevariableby",
+        "data_setvariableto",
+        "event_whenflagclicked",
+        "operator_add",
+        "operator_and",
+        "operator_divide",
+        "operator_equals",
+        "operator_gt",
+        "operator_lt",
+        "operator_mod",
+        "operator_multiply",
+        "operator_not",
+        "operator_subtract"
+      ],
+      "unsupported": [],
+      "warnings": [],
+      "pxtSourceSha256": "c68c2931277ab26c5b2cdb0b2866f2ef51abfef2bda319fb323170eec728ae38",
+      "outcome": "compiled",
+      "compiled": true,
+      "diagnostics": [],
+      "simulator": {
+        "check": "boot and input smoke test",
+        "screenPixels": 19200,
+        "colours": 1,
+        "displayUpdates": 4
+      }
+    }
+  ],
+  "counts": {
+    "compiled": 2
+  },
+  "scopes": {
+    "Code menu": {
+      "total": 1,
+      "simulatorRuns": 1,
+      "outcomes": {
+        "compiled": 1
+      }
+    },
+    "Circuit catalogue": {
+      "total": 1,
+      "simulatorRuns": 1,
+      "outcomes": {
+        "compiled": 1
+      }
+    }
+  }
+}

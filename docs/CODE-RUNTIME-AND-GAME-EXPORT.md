@@ -1,14 +1,19 @@
 # Code execution and game export (Python and JavaScript)
 
-Status: planned, with the initial bounded evaluation recorded. Recorded 2026-11-27 at the
+Status: planned, with the initial bounded evaluation, console-session candidate
+and scoped JavaScript task continuation recorded. Hosted qualification and
+supplier adoption remain pending. Recorded 2026-11-27 at the
 repository owner's request. This document is an implementation plan, not a
 claim that new runtimes or standalone exporters have shipped.
 
 Source baseline: [`14de1c42bd2e2ea84086a2162d1eff1fdbbac20d`](https://github.com/CrispStrobe/brickwright/tree/14de1c42bd2e2ea84086a2162d1eff1fdbbac20d).
-The reviewed Code tab files are unchanged from `0aa915915c4f73ad13c851cdb7d7c14b74861433`.
+At that baseline, the reviewed Code tab files are unchanged from `0aa915915c4f73ad13c851cdb7d7c14b74861433`.
 The [evaluation lane](../lanes/2026-11-27-code-runtime-game-export-evaluation.md)
 owns documentation and bounded probes only. Follow-on implementation needs its
-own claim and the existing upstream ownership rules.
+own claim and the existing upstream ownership rules. The first bounded consumer
+implementation is tracked in the [worker ownership lane](../lanes/2026-11-27-code-worker-ownership-and-javascript-plan.md)
+and section 8.1 below; section 8.2 records the explicitly claimed task continuation.
+Neither closes the complete R1/R2/J1 milestones.
 
 ## 1. Decisions to evaluate
 
@@ -469,6 +474,236 @@ Primary runtime references: [Skulpt](https://github.com/skulpt/skulpt),
 [pwasm](https://github.com/simonw/pwasm),
 [pygame-ce](https://github.com/pygame-community/pygame-ce), and
 [PyInstaller usage](https://pyinstaller.org/en/stable/usage.html).
+
+### 8.1 First implementation candidate: editor ownership and console sessions
+
+The initial candidate at `18113510b7f1ac9f78d4bc8b744406b42136427f`
+extends the existing consumer component without changing runtime
+dependencies, upstream reader/emitter sources, vendor pins or device adapters.
+It is held for hosted qualification; the JavaScript plan itself was published
+on `main` at [`d787866d`](https://github.com/CrispStrobe/brickwright/commit/d787866d8662bb6aab07253643ea7a6edb56fcce).
+
+- `switchTab` and `setGenOpt` retain request, VM, language and immutable buffer
+  ownership. Success and error publication recheck ownership inside the React
+  state updater, including edit/revert and competing derivation cases.
+- Generic Run captures the clicked source before loading a runtime. An owned
+  disposable worker session handles streamed output, input, Stop, global/project
+  Stop, rerun, VM replacement and unmount. Stop during lazy loading prevents a
+  late load from creating a worker. There is no generic main-thread fallback
+  when worker creation is unavailable.
+- Python keeps the existing Skulpt runtime and uses Promise-backed input in the
+  worker, including aliased `input`. JavaScript supports explicit top-level
+  `await`, returned promises and `await input(question)`. A fresh run uses a
+  fresh worker. This is a console contract, not an event-driven game scheduler.
+- Input is an inline, cancellable form. Replies belong to the rendered request
+  and the current session. The four-second execution budget pauses for human
+  input and resumes with its remaining time. Output is batched in the worker
+  and parent and capped at 65,536 UTF-16 code units per run, including replayed
+  output; oversized output ends with a named limit result.
+
+Compatibility boundaries remain explicit. Synchronous JavaScript `prompt()`
+uses replay with cached answers and `Math.random()` values. It does not roll back
+global mutations, time, cryptographic randomness, network requests or persistent
+side effects. Prefer `await input(...)` for authored asynchronous source. The
+existing simulator-driver + `prompt` route still uses its legacy main-thread
+board adapter and displays that worker Stop is unavailable. Pico and other
+specialized device routes retain their existing behavior. Dormant main-thread
+Python helper methods remain for the existing native-dialog regression corpus;
+generic Run no longer calls them.
+
+Generated detached async IIFEs are still not owned completion handles. The
+candidate does not implement generated game lifetimes, the shared simulator
+bridge, full authored-document persistence, explicit target routing, upstream
+semantic repairs, a new Python runtime, or any game exporter/package.
+
+**Bounded qualification:** 112 focused source tests passed (9 session, 49
+derivation/run ownership, 3 failed-conversion, 27 existing conversion ownership,
+4 existing Run-via-blocks and 20 existing SPIKE caller controls). The actual
+methods are exercised with controlled asynchronous boundaries; these are not
+rendered whole-app tests. Before the derivation fix, 4 normal controls passed
+and 29 stale-publication counterexamples failed. The old empty-target fixture
+needed only its missing `leaveCp1`/VM setup; its assertions were retained.
+
+The [production-worker browser probe](../scripts/probes/code-runtime/session-browser-probe.mjs)
+and [raw results](../scripts/probes/code-runtime/session-browser-results.json)
+record 19/19 passing cases and zero page errors in Chromium 158.0.8127.0 with
+actual Skulpt 1.2.0, without cross-origin isolation or SharedArrayBuffer. They
+cover normal/error execution, live output, waiting longer than the execution
+budget for input, Stop during input and infinite loops, bounded output, fresh
+restart, JS prompt replay/randoms, explicit awaited completion and loading
+cancellation. Recorded source hashes match the candidate's session/builders.
+The probe uses a localhost harness and the container's `--no-sandbox` launch
+requirement; it does not establish production CSP, React UI, hostile-code
+isolation or desktop/mobile WebView qualification. Reproduction instructions are
+in the [probe README](../scripts/probes/code-runtime/README.md#production-console-session-probe).
+
+**Landing gate:** the existing
+[vendor-freshness run](https://github.com/CrispStrobe/brickwright/actions/runs/45950936687)
+fails on the examples index and three orphaned Microtronic lesson files; its
+converter identity and transpiler checks pass. Those gallery paths are already
+owned by the [Microtronic integration lane](../lanes/2026-11-25-microtronic-gallery-source.md)
+and [consumer PR #1846](https://github.com/CrispStrobe/brickwright/pull/1846).
+This candidate does not remove the lesson, relax the gate or advance its pin.
+Hosted candidate qualification and the broader platform/UI matrix remain open.
+
+### 8.2 Owned JavaScript console tasks and input watchdog continuation
+
+This continuation implements the bounded console portion of J1 in the owned
+worker and a separate canonical `sb3-creator` generator candidate. The
+[cross-repository claim](../lanes/2026-11-27-javascript-owned-console-tasks.md)
+was published on main at `93c991254e51f5457ccfc0f85fa96381f6b896c9` before
+implementation. The consumer's SB3 pin and vendored generator remain unchanged;
+the Code tab does not yet select the new generation mode. Supplier qualification
+and normal coordinated adoption remain necessary before that UI path changes.
+
+The worker supplies version 1 of `codeRun`. Its global API belongs to the entry
+program. `spawn(thunk)` registers concurrent work and supplies a distinct API to
+that task:
+
+```js
+codeRun.spawn(async task => {
+    await task.sleep(100);
+    const name = await task.input('Name?');
+    console.log(name);
+});
+```
+
+The entry and every registered descendant must complete before the worker reports
+done. Each task owns its input and delays; a rejection ends the run and disposes
+its worker. A completed task's API cannot acquire later work. `spawn` deliberately
+returns `undefined`: sequential work awaits a local async function using the same
+task API. The implementation does not guess arbitrary promise dependency graphs.
+Unregistered native timers/promises remain outside this ownership contract.
+
+Outstanding input or sleeps at an owner's completion are errors, even when other
+tasks remain. A task waiting for input cannot start more owned work until that
+input finishes; its existing sleeps must finish before it requests input.
+Concurrent asks are explicitly refused. Owned tasks cannot mix with synchronous
+`prompt()` replay. The existing replay path remains available to legacy console
+programs, with its previously documented side-effect limits.
+
+**Input protection now has two parts.** The normal execution budget continues
+while another registered scope is active. Once the actual input owner is the
+sole active scope, human waiting pauses only the remaining budget. Independently,
+the parent probes worker responsiveness during input: a challenge every 250 ms
+must receive an owned reply within 1,000 ms. Stop, reply, completion and all error
+paths clear these resources. This repairs the reproducible old failure in which
+`input('Question?'); while (true) {}` disabled the only execution timer. It also
+rejects abandoned input and responsive owned work that would otherwise continue
+under an input exemption. This is lifecycle protection, not hostile-code isolation.
+
+Task registration is bounded to 256 simultaneous tasks and 10,000 registrations
+per run; pending sleeps are bounded to 256. The existing four-second console
+execution budget and 65,536-code-unit output limit remain in place. An event/game
+program needs its own lifetime and resource policy.
+
+**Canonical generation.** The supplier candidate on
+`CrispStrobe/sb3-creator:codex/javascript-owned-console-2026-11-27` adds
+`generateJavaScript(project, {async: true, execution: 'owned-console-v1'})`.
+The emitted classic script checks the API version before starting, registers
+flag functions, and passes each flag's scoped `codeRun` through every awaited
+procedure call. Ask uses awaited input; finite waits convert seconds to owned
+milliseconds. An explicit block allowlist admits console output, input, counted
+loops, conditions, procedures and selected data/expressions. Events, game/device
+operations, unsupported shadows/math variants, warp procedures and other
+unadmitted blocks fail by target/block/opcode instead of becoming silent stubs.
+
+Default generation is unchanged. This opt-in source is not admitted by the
+existing JS reverse reader, and its existing numeric/list/initial-state lowering
+does not establish full Scratch semantic equivalence. No shared simulator bridge,
+renderer, game export, new Python runtime or native package is introduced.
+
+**Original task-checkpoint evidence:** 139/139 consumer controls pass, no skips, including 18 session
+tests and 18 actual-production-worker task cases plus the existing editor,
+conversion and device-caller controls. The upstream generator, codegen and
+roundtrip suite passes 193/193, no skips; 240 existing generated outputs across
+40 examples and six existing options are byte-identical to upstream baseline
+`682e462914a22947b196858e5687800521b368e8`. A scoped-procedure negative control
+rejects when only the forwarded owner argument is removed. Removing the input
+watchdog's termination call or the worker's wait for registered tasks likewise
+fails the corresponding behavioral control.
+
+The [original task-browser receipt](../scripts/probes/code-runtime/session-task-browser-results.json)
+passes **38/38 cases with zero page errors**. It uses actual production workers,
+Skulpt 1.2.0 and real Chromium 158 without COI/SAB. Three cases execute source
+from the actual canonical generator: concurrent flags/procedure completion,
+long input and Stop during a generated wait. Other new cases cover nested tasks,
+rejection, scoped orphan input, active sibling budgets, a busy input worker,
+late scope use, output limits and restart. The original 19-case receipt is
+retained as evidence for the initial candidate, not relabeled for these sources.
+Neither receipt qualifies the rendered app, production CSP or native WebViews.
+
+**Landing:** both implementation candidates require hosted qualification. The
+consumer cannot adopt this generator until the supplier revision is qualified
+and the separately owned gallery adoption is coordinated. The local evidence
+does not authorize bypassing either repository's landing gates.
+
+The earlier `18113510` head of [PR #1855](https://github.com/CrispStrobe/brickwright/pull/1855)
+had two confirmed inherited blockers:
+[gallery freshness](https://github.com/CrispStrobe/brickwright/actions/runs/45956026910)
+(one stale index and three Microtronic orphans) and
+[HDD workflow controls](https://github.com/CrispStrobe/brickwright/actions/runs/45956027049)
+(three repository-identity reader failures). Those source/adoption and test
+paths are already owned by PR #1846 and its gallery/controls claims. Its repairs
+are not duplicated here. The initial Build qualification was incomplete at the
+inspection snapshot; it cannot qualify the successor checkpoint below.
+
+#### 8.2.1 Boolean values and default-worker loading qualification
+
+The original candidates were published as [Brickwright draft #1855](https://github.com/CrispStrobe/brickwright/pull/1855)
+at `b875bc6b824b11eb82a6e2dd852f934bda2224a3` and
+[supplier draft #246](https://github.com/CrispStrobe/sb3-creator/pull/246)
+at `c7584fd0f4cbb26e0742d45bfc10a04c47f77ebd`. Their complete Git trees matched
+the locally tested candidates. The counts and receipts above describe that
+checkpoint and remain preserved with their original hashes.
+
+Review found an admitted-graph defect: comparison and Boolean reporters placed
+in ordinary value sockets became `undefined`. Supplier
+[`cbdf1791`](https://github.com/CrispStrobe/sb3-creator/commit/cbdf179160a3f3054872d045503659967bd1b72e)
+routes those six opcodes through the existing condition lowering only in owned
+mode. Eight new executable controls fail against the previous emitter and pass
+after correction. The focused suite now passes **201/201**, no skips, including
+44 owned-console cases. The existing **240/240** corpus outputs remain identical
+to the original baseline; **84/84** additional outputs from 14 Boolean graphs
+under six legacy options match `c7584fd0`, including reused generator instances.
+
+The [39-case successor receipt](../scripts/probes/code-runtime/session-console-values-browser-results.json)
+executes the published supplier and passes with zero page errors. Its fourth
+canonical generated program places an actual SB3 comparison reporter in a say
+value socket and requires `true`, preserving the graph, transform description,
+generated source and source hash. Consumer production sources remain unchanged;
+all **139/139** focused controls pass on the restored checkpoint.
+
+The [CSP probe](../scripts/probes/code-runtime/session-csp-browser-probe.mjs) adds
+coverage of the production default Blob-worker factory. Its external harness
+module loads under actual HTTP response policies; instrumentation calls through
+to the real Worker and URL methods. No replacement worker factory or modified
+production source is supplied. Its [receipt](../scripts/probes/code-runtime/session-csp-browser-results.json)
+passes **16/16** cases and **2/2** enforced-policy negative controls with zero
+page errors: permitted JavaScript/Skulpt execution, long input, Stop, bounded
+output, cleanup and fresh state; denied worker loading and dynamic compilation;
+and recovery in the same browser after navigation to a permitted policy.
+Violation events and HTTP reports establish that denial was enforced. Every
+constructed worker and Blob URL is released once. A 120 ms quiet window observes
+no late worker messages; it is not a termination-completion measurement.
+
+The no-CSP baseline and permissive test policy do not establish deployed headers
+or native-host acceptance. The Tauri configuration is read and hashed only as
+configuration evidence. Under Chromium's worker-src denial the worker error
+event is empty, so the session reports generic `Worker error`; detailed policy
+evidence is in the probe. Rendered React UI, hosted production CSP, app protocols,
+offline delivery, other engines and native/mobile WebViews remain unqualified.
+
+**Hosted blockers remain.** Runtime `b875bc6b` failed
+[gallery freshness](https://github.com/CrispStrobe/brickwright/actions/runs/45965021137)
+and [HDD controls](https://github.com/CrispStrobe/brickwright/actions/runs/45965021191)
+with the same PR #1846-owned defects. Supplier `c7584fd0` passed its original
+36 owned-console controls in [shard 4/4](https://github.com/CrispStrobe/sb3-creator/actions/runs/45965165478/job/140391997862),
+but the RF mixer test measured 1170.569 Hz instead of 5830 ±600 Hz, identical to
+[baseline main's failure](https://github.com/CrispStrobe/sb3-creator/actions/runs/45836555459/job/139966847463).
+Supplier PR #244 records that RF repair's separate owner. The successor commits
+need their own hosted qualification. Pins, vendored source, Code-tab generator
+selection, separately owned repairs and workflow gates do not change here.
 
 ## 9. JavaScript execution and game export across platforms
 

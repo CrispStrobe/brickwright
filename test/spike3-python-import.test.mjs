@@ -249,7 +249,14 @@ test('the run helper connects over Web Bluetooth, starts, forwards print(), and 
 
 test('the Code tab offers the run, a stop and a console, in English and German', () => {
     const jsx = readFileSync(resolve(here, '../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx'), 'utf8');
-    for (const id of ['bw-spike3-run', 'bw-spike3-stop', 'bw-spike3-console']) assert.ok(jsx.includes(`data-testid="${id}"`), id);
+    for (const [id, action] of [['bw-spike3-run', 'runOnSpike3'], ['bw-spike3-stop', 'stopSpike3']]) {
+        const button = jsx.split('</button>').find(block =>
+            block.includes(`data-testid={menu ? "${id}-menu" : "${id}"}`));
+        assert.ok(button, `missing inline or menu ${id} button`);
+        assert.ok(button.slice(button.lastIndexOf('<button')).includes(`onClick={() => this.${action}()}`),
+            `${id} calls the wrong action`);
+    }
+    assert.match(jsx, /data-testid="bw-spike3-console" role="log" aria-label=\{this\.L\.spike3Console\}/);
     const keys = ['runOnSpike3', 'runOnSpike3Title', 'spike3Console', 'spike3Stop', 'spike3Running', 'spike3Stopped',
         'spike3NoHub', 'spike3NoConnect', 'spike3Unsupported', 'spike3Note', 'spike3Error', 'spike3Clear'];
     const en = jsx.slice(jsx.indexOf('    en: {'), jsx.indexOf('    de: {'));

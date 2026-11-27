@@ -22,8 +22,9 @@ test('SPIKE actions show for a SPIKE project', () => {
     }
 });
 
-test('with no device the arena stays reachable and the USB hub actions need evidence of a hub', () => {
-    assert.equal(toolbarActionApplies('spike-arena', {device: null}), true);
+test('with no target the arena and USB controls need evidence of a SPIKE hub', () => {
+    assert.equal(toolbarActionApplies('spike-arena', {device: null}), false);
+    assert.equal(toolbarActionApplies('spike-arena', {device: null, evidence: true}), true);
     assert.equal(toolbarActionApplies('spike-usb', {device: null}), false);
     assert.equal(toolbarActionApplies('spike-usb', {device: null, evidence: true}), true);
 });
@@ -48,7 +49,7 @@ test('the toolbar is one non-wrapping row with Maximize pinned, and measures not
 });
 
 test('the Code actions menu closes on pick, on a file or example choice, and Popup closes on focus leaving', () => {
-    const menu = importer.slice(importer.indexOf('    renderActionMenu (csel) {'), importer.indexOf('    renderActionMenu (csel) {') + 900);
+    const menu = importer.slice(importer.indexOf('    renderActionMenu (csel, renderCodeControls, renderLanguages, machine) {'), importer.indexOf('    renderActionMenu (csel, renderCodeControls, renderLanguages, machine) {') + 900);
     assert.doesNotMatch(menu, /closeOnPick=\{false\}/);
     assert.match(importer, /onChange=\{event => \{ this\.setState\(\{actionsOpen: false\}\); this\.openCodeFile\(event\); \}\}/);
     assert.match(importer, /onChange=\{e => \{ this\.setState\(\{actionsOpen: false\}\); this\.loadExample\(e\.target\.value\); \}\}/);

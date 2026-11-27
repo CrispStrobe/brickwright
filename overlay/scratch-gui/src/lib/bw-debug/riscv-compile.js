@@ -106,12 +106,8 @@ export async function compileRiscvC ({source, endpoint = null, target = 'riscv32
         return refusal('no-source', 'There is no C to compile.');
     }
     if (!endpoint) {
-        // The named refusal that keeps C honest until a compiler is deployed.
         return refusal('no-compile-service',
-            'No RISC-V C compiler is configured. Assembly runs in the browser with no '
-            + 'service; C needs a hosted cross-compiler (set BW_RISCV_CC_ENDPOINT to one '
-            + 'speaking the v1 /compile contract). Until then the C route refuses rather '
-            + 'than pretend.');
+            'The hosted RISC-V C compiler is unavailable in this build. Select Browser for supported C programs.');
     }
     const doFetch = fetchImpl || (typeof fetch === 'function' ? fetch : null);
     if (!doFetch) return refusal('no-fetch', 'This environment has no fetch implementation.');

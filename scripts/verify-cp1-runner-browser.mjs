@@ -24,14 +24,17 @@ const fixture = await cp1BrowserFixture({root, deps, compilerDeps, board, circui
 const errors = [], checks = [], requests = [];
 let server, browser, page;
 try {
+    const compiled = {...fixture.config, build: {
+        outDir: path.join(output, 'compiled'), emptyOutDir: true,
+        dynamicImportVarsOptions: {exclude: [/node_modules[\\/](?!bw-circuit-ui[\\/])/]},
+        rollupOptions: {input: path.join(root, 'test/fixtures/cp1-panel/runner.html')}
+    }};
+    await fixture.build(compiled);
     if (process.argv.includes('--compile-only')) {
-        await fixture.build({...fixture.config, build: {outDir: path.join(output, 'compiled'), emptyOutDir: true,
-            rollupOptions: {input: path.join(root, 'test/fixtures/cp1-panel/runner.html')}}});
         console.log(JSON.stringify({status: 'compiled', react: fixture.react,
             scope: 'Fixture compilation only; no browser or runtime qualification'}));
     } else {
-        server = await fixture.createServer(fixture.config);
-        await server.listen();
+        server = await fixture.preview({...compiled, preview: {host: '127.0.0.1', port: 0}});
         const url = `http://127.0.0.1:${server.httpServer.address().port}`;
         browser = await fixture.chromium.launch({headless: true,
             ...(option('--executable') ? {executablePath: option('--executable')} : {})});
@@ -40,7 +43,7 @@ try {
         page.on('pageerror', error => errors.push(error.message));
         page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
         await page.route('https://compiler.invalid/**', route => { requests.push(route.request().url()); return route.abort(); });
-        await page.goto(`${url}/runner.html`, {waitUntil: 'networkidle'});
+        await page.goto(`${url}/runner.html`, {waitUntil: 'domcontentloaded'});
         await page.waitForFunction(() => window.__cp1Integration?.board()?.parts?.some(part => part.id === 'trainer'));
         await page.getByRole('button', {name: 'Fit all parts', exact: true}).click();
         await page.locator('[data-cp1-panel]').waitFor();
@@ -119,7 +122,7 @@ try {
         await page.screenshot({path: path.join(output, 'shared-runner-desktop.png'), fullPage: true});
 
         await page.evaluate(() => localStorage.clear());
-        await page.reload({waitUntil: 'networkidle'});
+        await page.reload({waitUntil: 'domcontentloaded'});
         assert.equal(await page.evaluate(() => window.__cp1Integration.snapshot()), null);
         await page.getByRole('button', {name: 'Clear fixture circuit', exact: true}).click();
         await page.waitForFunction(() => window.__cp1Integration.board()?.parts?.length === 0);
@@ -154,7 +157,7 @@ try {
             page.setDefaultNavigationTimeout(90_000);
             page.on('pageerror', error => errors.push(error.message));
             page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
-            await page.goto(`${url}/runner.html`, {waitUntil: 'networkidle'});
+            await page.goto(`${url}/runner.html`, {waitUntil: 'domcontentloaded'});
             await page.waitForFunction(() => window.__cp1Integration?.board()?.parts?.some(part => part.id === 'trainer'));
             const builtInPath = path.join(root, 'overlay/scratch-gui/static/roms/cp1-independent-monitor.bin');
             assert.deepEqual(await readFile(builtInPath), firmware);
@@ -305,5 +308,6 @@ try {
     throw error;
 } finally {
     if (browser) await browser.close();
-    if (server) await server.close();
+    if (server?.close) await server.close();
+    else if (server?.httpServer) await new Promise(resolve => server.httpServer.close(resolve));
 }

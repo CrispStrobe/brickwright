@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import React from 'react';
+import {editorOverflowStyles} from './editor-overflow-styles.js';
 import {CAD_ROBOT_EXAMPLES} from '../../lib/bw-cad-robot-catalog.js';
 import {openCadRobotProject} from '../../lib/bw-cad-robot-projects.js';
 import CadCircuitPanel from './cad-circuit-panel.jsx';
@@ -133,6 +134,9 @@ const CadTab = ({vm, isVisible, docked, locale, theme, onEditProgram, onOpenCirc
                 requestImport: request => requestFile(request?.accept || '.stl,.step,.stp'),
                 onError: fail
             });
+            const menuStyles = document.createElement('style');
+            menuStyles.textContent = editorOverflowStyles;
+            host.current.shadowRoot?.appendChild(menuStyles);
             editor.current = mounted;
             setToolbarHost(controls);window.dispatchEvent(new Event('bw-project-ribbon-changed'));
             removeMenus=registerEditorMenuActions('cad',()=>{

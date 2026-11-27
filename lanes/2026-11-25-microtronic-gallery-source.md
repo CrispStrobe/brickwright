@@ -51,3 +51,32 @@ The host's real `sync-examples --check`, compiler identity, mirrors, pin-history
 and vendor-freshness checks must pass with no exclusions. Recheck the actual
 gallery-to-wired-I/O browser path if the generated example changes. Retain the
 failed CI observation; an unchanged rerun is not a repair.
+
+## Review candidate; adoption blocked
+
+The narrow upstream example is published as explicitly blocked
+[draft PR #237](https://github.com/CrispStrobe/sb3-creator/pull/237),
+commit `0491192eaff4a99fdb19ea5a4a567f0c810d9623`,
+tree `0065d5abf658d6ca0e4b490485175fec297269bb`.
+Before publication, upstream main advanced to
+`b76c34e38e58ad1e1bcf5dfd9f4b0dec0ed2e37f`. Preserve its Board test input
+`e744ede765c76ce15b9e5c101aa23f56210eab09` unchanged; it descends from the
+qualified Microtronic engine. The final draft therefore changes only the still
+older UI sibling fixture and its matching CI ref to `0a1b15edb0daecd723c7c07126450d84b86e3e68`.
+Brickwright's Board/UI and SB3 pins do not move.
+
+The draft preserves all 792 incoming EXPECTED pages and 796 existing catalog
+and enrollment entries. Its nine changed files contain only the new example,
+required registration/expectations, UI test input and Microtronic observation.
+The new experiment passes all switch combinations and both clock phases,
+halt/reset/save behavior, and the real instruction-rate observation; a
+constant-rate mutation fails. Seven gallery checks pass, with eight ordinary
+no-program skips. The focused draft measurements use the retained upstream
+Board input; the host production receipt remains tied to Board `cc18f3c8`.
+
+The original upstream baseline's failures are retained in the draft review.
+Recent upstream fixes are preserved without claiming a fresh all-green full
+suite. Corpus-wide provenance remeasurement and full upstream qualification
+remain pending. `docs/UPSTREAM-WIP.md` permits publishing a candidate plus its
+unresolved findings for review; adoption still requires the upstream change to
+land and the source identity/mirror gates to pass. Keep this lane claimed.

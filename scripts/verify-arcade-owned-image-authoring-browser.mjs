@@ -9,7 +9,7 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 import JSZip from 'jszip';
-import {openCodeActions} from './lib-code-actions.mjs';
+import {openCodeActions, openCodeInfo} from './lib-code-actions.mjs';
 import {inspectGuiHarnessSource} from './lib/gui-harness-source.mjs';
 import {inspectGuiArtifactResponse} from './lib/gui-artifact-response.mjs';
 import {makeCodeProjectFile,readMakeCodeProjectText} from '../overlay/scratch-gui/src/lib/bw-makecode/project-file.js';
@@ -48,7 +48,7 @@ const fresh=async()=>{
 };
 const loaded=async()=>{await page.getByText('Blocks loaded.',{exact:true}).waitFor({timeout:60000});await page.waitForFunction(()=>window.__brickwrightStore.getState().scratchGui.vm.runtime.bwDeviceId==='arcade'&&document.querySelector('[data-testid="bw-open-file"] input[type=file]')?.disabled===false);};
 const apply=async()=>{await page.getByRole('button',{name:/To blocks/}).first().click();await loaded();};
-const open=async file=>{await codeTab();await openCodeActions(page);await page.getByTestId('bw-open-file').locator('input[type=file]').setInputFiles(file);await page.getByText(/Imported the Arcade game/).first().waitFor({timeout:60000});assert.doesNotMatch(await page.getByTestId('bw-code-status').innerText(),/unsupported|not translated|could not|partial/i);await apply();};
+const open=async file=>{await codeTab();await openCodeActions(page);await page.getByTestId('bw-open-file').locator('input[type=file]').setInputFiles(file);await (await openCodeInfo(page)).getByTestId('bw-code-status').filter({hasText: /Imported the Arcade game/}).waitFor({timeout:60000});assert.doesNotMatch(await page.getByTestId('bw-code-status').innerText(),/unsupported|not translated|could not|partial/i);await page.getByRole('button',{name:'Close Code help'}).click();await apply();};
 const expected=(changed,original)=>({imageLiteralCalls:3,imageLiteralChanged:changed,imageLiteralOriginal:original,imageLiteralLater:original,imageLiteralOutside:0,imageLiteralAliasSame:true,imageLiteralFresh:true,imageLiteralLaterFresh:true,imageLiteralScore:changed+2*original+10});
 // These are visible native HUD observations, not an independent glyph oracle.
 // The literal Images are offscreen; only their resulting score is drawn here.

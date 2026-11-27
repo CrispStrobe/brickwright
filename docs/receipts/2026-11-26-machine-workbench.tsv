@@ -1,0 +1,106 @@
+build	suite	entry	check	result
+4774bf1	project handoff	kim1 kim1-wired-io	project handoff	pass
+4774bf1	project handoff	microtronic busch-microtronic-wired-io	project handoff	pass
+4774bf1	project handoff	eater6502 eater6502-blink	project handoff	pass
+4774bf1	project handoff	i8086 i8086-blink	project handoff	pass
+4774bf1	project handoff	eater6502 aurora65-workstation	project handoff	pass
+4774bf1	project handoff	eater6502 eater6502-full-build	project handoff	pass
+4774bf1	project handoff	eater6502 eater6502-bench	project handoff	pass
+4774bf1	project handoff	eater6502 eater6502-crtc80	project handoff	pass
+4774bf1	project handoff	eater6502 eater6502-vdp-hello	project handoff	pass
+4774bf1	project handoff	cp1 cp1-first-display	project handoff	pass
+4774bf1	project handoff	z80 z80-pd-bench	project handoff	pass
+4774bf1	project handoff	cp1 cp1-switch-input	project handoff	pass
+4774bf1	project handoff	cp1 cp1-blink	project handoff	pass
+4774bf1	project handoff	cp1 cp1-cp3-cp4-relay-sequence	project handoff	pass
+4774bf1	project handoff	cp1 cp1-cp4-relay-signals	project handoff	pass
+4774bf1	project handoff	cp1 cp1-cp4-relay-bank	project handoff	pass
+4774bf1	project handoff	cp1 cp1-descending-sum	project handoff	pass
+4774bf1	project handoff	cp1 cp1-cp5-binary	project handoff	pass
+4774bf1	project handoff	cp1 cp1-crate-division	project handoff	pass
+4774bf1	project handoff	cp1 cp1-lookup-card	project handoff	pass
+4774bf1	project handoff	cp1 cp1-instruction-patch	project handoff	pass
+4774bf1	project handoff	cp1 cp1-guarded-output	project handoff	pass
+4774bf1	project handoff	cp1 cp1-expansion-step	project handoff	pass
+4774bf1	project handoff	cp1 cp1-sample-log	project handoff	pass
+4774bf1	project handoff	cp1 cp1-status-dispatch	project handoff	pass
+4774bf1	project handoff	cp1 cp1-gray-indicator	project handoff	pass
+4774bf1	project handoff	cp1 cp1-batch-ticker	project handoff	pass
+4774bf1	project handoff	cp1 cp1-bidirectional-beacon	project handoff	pass
+4774bf1	project handoff	cp1 cp1-bench-voltmeter	project handoff	pass
+4774bf1	project handoff	cp1 cp1-beacon-code	project handoff	pass
+4774bf1	project handoff	cp1 cp1-button-stopwatch	project handoff	pass
+4774bf1	project handoff	cp1 cp1-cabinet-panel	project handoff	pass
+4774bf1	project handoff	cp1 cp1-conveyor-controller	project handoff	pass
+4774bf1	project handoff	cp1 cp1-code-feedback	project handoff	pass
+4774bf1	project handoff	cp1 cp1-cp2-sample-logger	project handoff	pass
+4774bf1	project handoff	cp1 cp1-delay-lab	project handoff	pass
+4774bf1	project handoff	cp1 cp1-descent-challenge	project handoff	pass
+4774bf1	project handoff	cp1 cp1-display-postcard	project handoff	pass
+4774bf1	project handoff	cp1 cp1-dual-workbench	project handoff	pass
+4774bf1	project handoff	cp1 cp1-edge-trigger-capture	project handoff	pass
+4774bf1	project handoff	cp1 cp1-fixed-point-filter	project handoff	pass
+4774bf1	project handoff	cp1 cp1-fraction-stream	project handoff	pass
+4774bf1	project handoff	cp1 cp1-gate-tally	project handoff	pass
+4774bf1	project handoff	cp1 cp1-greenhouse-schedule	project handoff	pass
+4774bf1	project handoff	cp1 cp1-grid-escape	project handoff	pass
+4774bf1	project handoff	cp1 cp1-led-route-puzzle	project handoff	pass
+4774bf1	project handoff	cp1 cp1-machine-time-meter	project handoff	pass
+4774bf1	project handoff	cp1 cp1-number-drill	project handoff	pass
+4774bf1	project handoff	cp1 cp1-pulse-bench	project handoff	pass
+4774bf1	project handoff	cp1 cp1-pair-grid	project handoff	pass
+4774bf1	project handoff	cp1 cp1-pulse-stretcher	project handoff	pass
+4774bf1	project handoff	cp1 cp1-ring-selector	project handoff	pass
+4774bf1	project handoff	cp1 cp1-serial-receive	project handoff	pass
+4774bf1	project handoff	cp1 cp1-serial-transmit	project handoff	pass
+4774bf1	project handoff	cp1 cp1-shift-clock	project handoff	pass
+4774bf1	project handoff	cp1 cp1-signal-melody	project handoff	pass
+4774bf1	project handoff	cp1 cp1-signal-reaction	project handoff	pass
+4774bf1	project handoff	cp1 cp1-signal-memory	project handoff	pass
+4774bf1	project handoff	cp1 cp1-studio-annunciator	project handoff	pass
+4774bf1	project handoff	cp1 cp1-ticket-draw	project handoff	pass
+4774bf1	project handoff	cp1 cp1-tile-bundles	project handoff	pass
+4774bf1	project handoff	cp1 cp1-token-match	project handoff	pass
+4774bf1	project handoff	cp1 cp1-twin-samples	project handoff	pass
+4774bf1	project handoff	cp1 cp1-wide-tile-count	project handoff	pass
+4774bf1	project handoff	cp1 cp1-workshop-capacity	project handoff	pass
+4774bf1	project handoff	cp1 cp1-yard-dispatch	project handoff	pass
+4774bf1	project handoff	cardiac cardiac-echo	project handoff	pass
+4774bf1	project handoff	cardiac cardiac-add	project handoff	pass
+4774bf1	project handoff	cardiac cardiac-countdown	project handoff	pass
+4774bf1	project handoff	cardiac cardiac-night-light	project handoff	pass
+4774bf1	project handoff	cardiac cardiac-bootstrap	project handoff	pass
+4774bf1	project handoff	cardiac cardiac-self-modify	project handoff	pass
+4774bf1	firmware library	fe Lisp (DOS)	download	pass
+4774bf1	firmware library	partcl Tcl (DOS)	download	pass
+4774bf1	firmware library	uBASIC (DOS)	download	pass
+4774bf1	firmware library	TOPBENCH	download	pass
+4774bf1	firmware library	zForth (DOS)	download	pass
+4774bf1	firmware library	CP/M Sieve	download	pass
+4774bf1	firmware library	lesson-cpm-z80	lesson	pass
+4774bf1	firmware library	lesson-elks-i8086	lesson	pass
+4774bf1	firmware library	PicoBB BBC BASIC	download	pass
+4774bf1	firmware library	lesson-cpm-z80-vdp	lesson	pass
+4774bf1	firmware library	lesson-msbasic-6502	lesson	pass
+4774bf1	firmware library	lesson-linux-riscv32	lesson	pass
+4774bf1	firmware library	bw-mm-at-bios-run	preset	pass
+4774bf1	firmware library	bw-mm-8086-serial-monitor	preset	pass
+4774bf1	firmware library	zForth on CP/M	download	pass
+4774bf1	firmware library	lesson-linux-riscv32	cold	pass
+4774bf1	firmware library	bw-mm-8086-cga-demo	preset	pass
+4774bf1	firmware library	bw-mm-8086-cga-gfx-demo	preset	pass
+4774bf1	firmware library	bw-mm-8086-vga-demo	preset	pass
+4774bf1	firmware library	bw-mm-8086-hercules-demo	preset	pass
+4774bf1	firmware library	bw-mm-8086-ega-demo	preset	pass
+4774bf1	firmware library	bw-mm-8086-keyboard-demo	preset	pass
+4774bf1	firmware library	bw-mm-8086-desk-demo	preset	pass
+4774bf1	firmware library	bw-mm-8086-blink-demo	preset	pass
+4774bf1	firmware library	bw-mm-8086-timer-demo	preset	pass
+4774bf1	BASIC profile	BBC BASIC	preserved source, Run BASIC, green flag	pass
+4774bf1	BASIC profile	6502 BASIC	preserved source, Run BASIC, green flag	pass
+4774bf1	BASIC profile	8086 BASIC (native)	preserved source, Run BASIC, green flag	pass
+4774bf1	BASIC profile	8086 BASIC (real MS-DOS 2.0)	preserved source, Run BASIC, green flag, DOS keyboard	pass
+4774bf1	BASIC profile	BASIC (uBASIC on DOS)	preserved source, Run BASIC, green flag	pass
+4774bf1	machine lifecycle	CP1 after DOS	returning to CP1 after real DOS restores the editor and Controller.	pass
+4774bf1	machine lifecycle	CARDIAC Controller and flag	selecting CARDIAC shows its widget and the green flag returns to it and runs the cards.	pass
+4774bf1	machine lifecycle	Reload workspace	the workspace reload button reloads while preserving preferences.	pass

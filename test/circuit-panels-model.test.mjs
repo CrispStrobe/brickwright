@@ -21,9 +21,9 @@ test('four panels, each with an English and a German name and help line', () => 
         assert.deepEqual(Object.keys(CIRCUIT_PANEL_TEXT[lang]).sort(), Object.keys(CIRCUIT_PANEL_TEXT.en).sort(), `${lang} has every key`);
     }
     // The browser gates and the Edit menu address the buttons by these English names.
-    assert.deepEqual(CIRCUIT_PANELS.map(p => circuitPanelLabel('en', p.id).name), ['Designer', 'Warnings', 'Parts list', 'Examples']);
+    assert.deepEqual(CIRCUIT_PANELS.map(p => circuitPanelLabel('en', p.id).name), ['Designer', 'Circuit Check', 'Parts list', 'Examples']);
     assert.equal(circuitPanelLabel('de-CH', 'bom').name, 'Stückliste');
-    assert.match(circuitPanelLabel('en', 'warnings').tooltip, /^Warnings · Design-rule check/);
+    assert.match(circuitPanelLabel('en', 'warnings').tooltip, /^Circuit Check · Design-rule check/);
 });
 
 test('warnings: a clean circuit, a check that could not run and a failure read differently', () => {
@@ -45,7 +45,8 @@ test('the Warnings badge counts only real findings', () => {
     assert.equal(warningsBadge({error: 'noCircuit'}), null, 'never "0" for a check that did not run');
     assert.equal(warningsBadge({warnings: []}), null);
     assert.deepEqual(warningsBadge({warnings: [{severity: 'warning'}, {severity: 'danger'}]}), {count: 2, danger: true});
-    assert.deepEqual(warningsBadge({warnings: [{severity: 'info'}]}), {count: 1, danger: false});
+    assert.equal(warningsBadge({warnings: [{severity: 'info'}]}), null);
+    assert.equal(warningsView('en', {warnings: [{severity: 'info'}]}).warnings.length, 1);
 });
 
 test('parts list: empty board offers the Designer and the examples; a full one offers the vendor CSV', () => {

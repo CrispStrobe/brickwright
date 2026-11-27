@@ -115,14 +115,14 @@ test('runDosToolchain("ubasic", …) runs the shipped interpreter and returns it
     // The EXACT production path: route lookup → fetch → compileAndRunOnDos on the
     // real bench. The fetcher returns the shipped static/roms/ubasic.exe bytes.
     const program = [
-        '10 gosub 100',
+        '10 GOSUB 100',
         '20 for i = 1 to 3',
         '30 print i',
         '40 next i',
         '50 print 6*7',
         '60 if 6*7 = 42 then print "ok"',
         '70 end',
-        '100 print "hi"',
+        '100 PRINT "UPPERCASE STRING"',
         '110 return', ''
     ].join('\n');
     const r = await runDosToolchain('ubasic', program, {
@@ -134,7 +134,7 @@ test('runDosToolchain("ubasic", …) runs the shipped interpreter and returns it
     assert.equal(r.stage, 'compile');
     assert.ok(r.compile.terminated, 'the interpreter terminated');
     assert.equal(r.compile.exitCode, 0);
-    for (const want of ['hi', '1', '2', '3', '42', 'ok']) {
+    for (const want of ['UPPERCASE STRING', '1', '2', '3', '42', 'ok']) {
         assert.ok(r.compile.screen.includes(want), `expected ${want} in ${JSON.stringify(r.compile.screen)}`);
     }
     // The user's program was mounted where the interpreter reads it.

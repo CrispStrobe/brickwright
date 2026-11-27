@@ -28,13 +28,13 @@ test('serialized and object VM diagnostics retain every SB3 path and omit unrela
 
 test('actual Code compile catch displays a real VM serialized validation rejection and preserves the loaded project', async () => {
     const source = await fs.readFile(new URL('../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx', import.meta.url), 'utf8');
-    const signature = 'async compile ({strict = false, pseudocode = null} = {})';
+    const signature = 'async compile ({strict = false, pseudocode = null, scratchExample = false} = {})';
     const body = balancedFrom(source, source.indexOf(signature) + signature.length, '{', '}', 'Code compile');
     const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
     // DOS_LANG / generateDosLangs: the fe and Tcl tabs compile() also reads and
     // regenerates; none here.
     const compile = new AsyncFunction('TWO_WAY', 'LANG_LABEL', 'codeArtworkMatches', 'conversionFailure', 'DOS_LANG', 'generateDosLangs',
-        `return async function ({strict = false, pseudocode = null} = {}) ${body}`);
+        `return async function ({strict = false, pseudocode = null, scratchExample = false} = {}) ${body}`);
     const execute = await compile(new Set(['pseudocode']), {pseudocode: 'Pseudocode'}, codeArtworkMatches, conversionFailure,
         {}, async () => ({}));
     class InvalidCostumes extends Creator {
@@ -267,8 +267,7 @@ const realReportTransitions = async fixture => {
         const at = source.indexOf(signature);assert.ok(at >= 0, signature);
         return balancedFrom(source, at + signature.length, '{', '}', signature).slice(1, -1);
     };
-    assert.ok(source.includes('onClick={event => { event.stopPropagation(); this.setState({conversionReport: null}); }}'),
-        'actual report-dismiss handler changes the report state without replacing the request');
+    const dismissNotice = new Function('notice', extract('dismissCodeNotice (notice)'));
     const begin = new Function(extract('beginArcadeReport ()'));
     const publish = new Function('request', 'out', 'operation', 'outcome', extract('publishArcadeReport (request, out, operation, outcome)'));
     let methods = 0;
@@ -280,7 +279,12 @@ const realReportTransitions = async fixture => {
         methods++;publish.call(fixture.instance, request, {unsupported: ['receiver'], unsupportedDetails: [],
             refusalEvidence: {ownedJsonObservation: fixture.observation}}, operation, 'actual extracted report publication');
     };
-    return {start, finish, methods: () => methods};
+    const dismiss = () => {
+        const notice = {id: 1, report: fixture.instance.state.conversionReport};
+        fixture.instance.state.codeNotices = [notice];
+        dismissNotice.call(fixture.instance, notice);
+    };
+    return {start, finish, dismiss, methods: () => methods};
 };
 
 test('an idle prior export run import or dismissed report is followed by the actual new request and report at the same revision', async () => {
@@ -293,7 +297,7 @@ test('an idle prior export run import or dismissed report is followed by the act
             const initial = transitions.start();transitions.finish(initial, kind === 'prior run' ? 'run' : 'export');
             if (kind === 'dismissed report') {
                 assert.ok(f.instance.state.conversionReport);
-                f.instance.setState({conversionReport: null});
+                transitions.dismiss();
                 assert.strictEqual(f.instance._arcadeReportRequest, initial, 'the actual dismiss state update retains the prior request token');
                 assert.equal(f.instance.state.conversionReport, null);
             }

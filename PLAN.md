@@ -1,4 +1,6 @@
-# Brickwright Lite improvement plan
+# Brickwright improvement plan
+
+The [workbench owner roadmap](docs/WORKBENCH-OWNER-ROADMAP.md) tracks the machine, circuit, desktop, and editor requests and their verification.
 
 ## Code execution and game export (Python and JavaScript) — 2026-11-27
 
@@ -37,10 +39,28 @@ translation changes and a Linux pygame bundle with matching source/package state
 and frame hashes. It supports explicit Pyodide/CPython and lightweight MicroPython
 modes as follow-on candidates; production integration and device gates remain open.
 
-Status: **bounded evaluation recorded; runtime/export implementation planned**.
+The [first execution candidate](docs/CODE-RUNTIME-AND-GAME-EXPORT.md#81-first-implementation-candidate-editor-ownership-and-console-sessions)
+adds delayed-conversion ownership fences and owned Python/JS console workers
+with input, Stop and bounded output. Its 112 focused source controls and 19
+Chromium worker cases pass; hosted qualification remains pending, including the
+existing separately owned Microtronic gallery drift. This is a bounded R1/R2/J1
+slice; generated game lifetimes, target/source persistence and export remain open.
+
+The [owned-console continuation](docs/CODE-RUNTIME-AND-GAME-EXPORT.md#82-owned-javascript-console-tasks-and-input-watchdog-continuation)
+adds scoped JavaScript tasks and an input-responsiveness watchdog. Its current
+consumer controls pass 139/139; the canonical opt-in generator passes 201/201
+after a Boolean-value correction. Real Chromium probes pass 39/39 session/task
+cases and 16/16 default-worker CSP cases, including two enforced denial profiles.
+These published drafts retain the inherited gallery/HDD and supplier RF landing
+blockers. Whole-application/deployed-policy and native qualification, normal
+supplier adoption and Code-tab mode selection remain open.
+
+Status: **bounded evaluation recorded; first console candidate awaits qualification;
+new runtimes and game export remain planned**.
 The [evaluation lane](lanes/2026-11-27-code-runtime-game-export-evaluation.md)
-owns documentation/probes only; application and shared-compiler repairs remain
-follow-on work under the existing ownership and upstream adoption rules.
+owns documentation/probes only; the [worker ownership lane](lanes/2026-11-27-code-worker-ownership-and-javascript-plan.md)
+owns the first consumer implementation. Shared-compiler repairs remain upstream
+work under the existing adoption rules.
 
 ## Current status — 2026-11-05
 
@@ -53,7 +73,7 @@ Status: active execution plan
 Started: 2026-08-21  
 Product promise: **Build circuits. Program machines. See how they work.**
 
-Brickwright Lite is a native, open-source visual computing workbench. It combines
+Brickwright is a native, open-source visual computing workbench. It combines
 block programming, editable structured code, circuit design and simulation,
 debugging, and direct control of supported LEGO hubs. It is not a TurboWarp fork.
 It uses upstream Scratch components where they are useful, alongside Brickwright's

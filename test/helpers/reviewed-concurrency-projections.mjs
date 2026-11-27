@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
+import {hddBeforeRepositoryIdentityControl} from './reviewed-repository-identity.mjs';
 
 // Exact policy from the reviewed workflow/ref cancellation change. A projection
 // changes only this block; historical hashes still bind every other byte.
@@ -60,7 +61,7 @@ assert.equal(fixtureReview.file, 'test/i80386-hdd-gui-actual.test.mjs');
 assert.equal(fixtureReview.changes.length, 11);
 export const hddBeforeFixtureControl = (file, text) => {
     if (file !== fixtureReview.file) return text;
-    let held = text;
+    let held = hddBeforeRepositoryIdentityControl(file, text);
     for (const {before, after} of fixtureReview.changes) {
         assert.equal(held.split(after).length, 2, 'one exact reviewed fixture hunk');
         held = held.replace(after, before);

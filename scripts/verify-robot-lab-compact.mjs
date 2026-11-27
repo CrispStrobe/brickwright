@@ -39,7 +39,7 @@ try {
         await page.waitForFunction(() => {
             const p = window.__bwSimLab._pane;
             return p.state.shipped === 'centrifugal-governor.ldr' && p.state.status === 'ready' && !p.state.programLoading && p.spikeLoaded() &&
-                /Blocks loaded|Blöcke geladen/.test(document.querySelector('[data-testid="bw-code-status"]')?.textContent || '');
+                /Blocks loaded|Blöcke geladen/.test(document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus || '');
         }, null, {timeout: 90000});
         const title = await page.evaluate(() => {
             const p = window.__bwSimLab._pane;

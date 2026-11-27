@@ -20,6 +20,7 @@ import {readFileSync, existsSync} from 'node:fs';
 import {newMachineConfig, validateMachineConfig, MACHINE_KINDS} from
     '../overlay/scratch-gui/src/lib/bw-machines/machine-config.js';
 import {runMachineConfig} from '../overlay/scratch-gui/src/lib/bw-machines/run-machine.js';
+import {PICOBB_FLASH} from '../overlay/scratch-gui/src/lib/bw-machines/pico-basic-flash.js';
 
 test('an rp2040js + flash-slot config validates and activates to the rp2040js uf2 boot', async () => {
     assert.ok(MACHINE_KINDS.includes('rp2040js'), 'rp2040js is a known machine kind');
@@ -42,6 +43,65 @@ test('an rp2040js + flash-slot config validates and activates to the rp2040js uf
     assert.equal(detail.kind, 'rp2040js');
     assert.equal(new TextDecoder().decode(detail.bytes), 'fake-uf2-bytes', 'the flash bytes are handed on');
     assert.equal(events.length, 1);
+});
+
+test('Pico BASIC source is dispatched using the selected firmware dialect', async () => {
+    const events = [];
+    const opts = {
+        fetcher: async () => ({bytes: Uint8Array.of(1, 2, 3)}),
+        dispatch: detail => events.push(detail),
+        picoBasicSource: 'print 6*7'
+    };
+    const config = program => newMachineConfig({
+        executionMode: 'functional', machine: 'rp2040js', slots: {flash: 'console.uf2'},
+        provenance: {program}
+    });
+
+    await runMachineConfig(config({basicConsole: 'piccolo'}), opts);
+    assert.equal(events[0].picoBasicConsole, 'piccolo');
+    assert.equal(events[0].picoWakeOnPrompt, undefined);
+    assert.deepEqual(events[0].picoBasicCommands, ['print 6*7', 'RUN']);
+
+    await runMachineConfig(config({startKey: '\r'}), opts);
+    assert.equal(events[1].picoBasicConsole, 'bbc');
+    assert.equal(events[1].picoWakeOnPrompt, true);
+    assert.deepEqual(events[1].picoBasicCommands, ['10 print 6*7', 'RUN']);
+
+    await runMachineConfig(config({basicConsole: 'stefan'}), opts);
+    assert.equal(events[2].picoBasicConsole, 'stefan');
+    assert.equal(events[2].picoWakeOnPrompt, undefined);
+    assert.deepEqual(events[2].picoBasicCommands, ['10 print 6*7', 'RUN']);
+
+    await assert.rejects(runMachineConfig(config({}), opts), /compatible Pico UART firmware/);
+    assert.equal(events.length, 3);
+});
+
+test('Pico media hands a pinned sector-aligned storage partition to the runner', async () => {
+    const sha256 = 'f'.repeat(64);
+    const flashStorage = {offset: 0x1df000, length: 0x20000};
+    const config = newMachineConfig({
+        executionMode: 'functional', machine: 'rp2040js',
+        slots: {flash: {url: 'stefan_basic_uart.uf2', sha256}},
+        provenance: {program: {basicConsole: 'stefan', flashStorage}}
+    });
+    const result = await runMachineConfig(config, {
+        fetcher: async () => ({bytes: Uint8Array.of(1, 2, 3)}),
+        dispatch () {}
+    });
+    assert.deepEqual(result.detail.picoFlashStorage, {...flashStorage, sha256});
+});
+
+test('only the pinned PicoBB console image supplies the preformatted flash partition', async () => {
+    const boot = sha256 => runMachineConfig(newMachineConfig({
+        executionMode: 'functional', machine: 'rp2040js',
+        slots: {flash: {url: 'bbcbasic_console_pico_filesystem.uf2', sha256}},
+        provenance: {program: {startKey: '\r'}}
+    }), {fetcher: async () => ({bytes: Uint8Array.of(1, 2, 3)}), dispatch () {}});
+    const {detail} = await boot(PICOBB_FLASH.sha256);
+    assert.deepEqual(detail.picoFlashStorage, PICOBB_FLASH);
+    assert.equal(detail.picoWakeOnPrompt, true);
+    const unrecognized = await boot('f'.repeat(64));
+    assert.equal(unrecognized.detail.picoFlashStorage, undefined);
 });
 
 const picoUf2 = process.env.PICOBB_UF2;

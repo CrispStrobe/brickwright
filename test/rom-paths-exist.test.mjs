@@ -61,6 +61,7 @@ const CONSTRUCTED = [
     /join\([^)]*?['"]static['"]\s*,\s*['"]roms['"]\s*,\s*([^)'"]+)\)/g,     // join(x, 'static', 'roms', name)
     /join\([^)]*?['"]static\/roms['"]\s*,\s*([^)'"]+)\)/g                  // join('static/roms', name)
 ];
+const EXAMPLE_OVERRIDE = /\bpath\s*:\s*['"](examples\/[A-Za-z0-9_./-]+)['"]/;
 // The list a constructed path draws from: `rom: 'NAME'` / "rom": "NAME" properties.
 const LIST_ENTRY = /\b["']?rom["']?\s*:\s*['"]([A-Za-z0-9_.\-]+)['"]/g;
 const isComment = line => /^\s*(\/\/|\*|\/\*)/.test(line);
@@ -71,26 +72,30 @@ const isComment = line => /^\s*(\/\/|\*|\/\*)/.test(line);
  * @returns {{literal: string[], constructed: {line: number, expr: string}[], listNames: string[]}}
  */
 export function censusRomRefs (text) {
-    const literal = [], constructed = [], listNames = [];
+    const literal = [], constructed = [], listNames = [], examplePaths = [];
     text.split('\n').forEach((line, i) => {
         if (isComment(line)) return;
         for (const m of line.matchAll(REF)) literal.push(m[1]);
         for (const re of CONSTRUCTED) for (const m of line.matchAll(re)) constructed.push({line: i + 1, expr: m[1].trim()});
-        for (const m of line.matchAll(LIST_ENTRY)) listNames.push(m[1]);
+        const override = line.match(EXAMPLE_OVERRIDE);
+        for (const m of line.matchAll(LIST_ENTRY)) {
+            if (override) examplePaths.push(override[1]);
+            else listNames.push(m[1]);
+        }
     });
-    return {literal, constructed, listNames};
+    return {literal, constructed, listNames, examplePaths};
 }
 
 /** The names a file can fetch, and the constructed paths whose source it cannot see. */
 export function resolveRomNames (text) {
-    const {literal, constructed, listNames} = censusRomRefs(text);
+    const {literal, constructed, listNames, examplePaths} = censusRomRefs(text);
     const names = new Set(literal);
     const unresolvable = [];
     if (constructed.length) {
         if (listNames.length === 0) unresolvable.push(...constructed);
         else for (const n of listNames) names.add(n);
     }
-    return {names: [...names], unresolvable, constructed: constructed.length, listNames: listNames.length};
+    return {names: [...names], unresolvable, constructed: constructed.length, listNames: listNames.length, examplePaths};
 }
 
 test('every static/roms file the app and installed Circuit UI can fetch — literal or built from a preset list — exists', () => {
@@ -105,9 +110,12 @@ test('every static/roms file the app and installed Circuit UI can fetch — lite
         'the installed Machine Loader must participate in the ROM census');
     for (const file of [...walk(overlaySrc), ...uiFiles]) {
         const text = readFileSync(file, 'utf8');
-        const {names, unresolvable, constructed} = resolveRomNames(text);
+        const {names, unresolvable, constructed, examplePaths} = resolveRomNames(text);
         constructedSeen += constructed;
         for (const u of unresolvable) blind.push(`${relative(repo, file)}:${u.line} builds static/roms/${'$'}{${u.expr}} and no rom: entry in that file says what it can be`);
+        for (const path of examplePaths) {
+            if (!existsSync(join(repo, 'overlay/scratch-gui', path))) missing.push(`${relative(repo, file)} fetches ${path}`);
+        }
         for (const name of names) {
             seen.add(name);
             if (!existsSync(join(romDir, name))) missing.push(`${relative(repo, file)} fetches static/roms/${name}`);
@@ -137,7 +145,10 @@ test('the widened census can fail, each shape by name (mutation)', () => {
     const blind = "const url = `static/roms/${props.rom}`;";
     assert.equal(resolveRomNames(blind).unresolvable.length, 1, 'a constructed path with no list in the file is refused, not passed');
     const comment = "// const url = `static/roms/${p.rom}`; rom: 'ghost.bin'";
-    assert.deepEqual(resolveRomNames(comment), {names: [], unresolvable: [], constructed: 0, listNames: 0}, 'comment lines never count');
+    assert.deepEqual(resolveRomNames(comment), {names: [], unresolvable: [], constructed: 0, listNames: 0, examplePaths: []}, 'comment lines never count');
+    const override = "const p = {rom: 'rom.bin', path: 'examples/hello/rom.bin'};";
+    assert.deepEqual(resolveRomNames(override).examplePaths, ['examples/hello/rom.bin']);
+    assert.deepEqual(resolveRomNames(override).names, []);
     const literalSlash = "fetch('/static/roms/z.bin')";
     assert.deepEqual(resolveRomNames(literalSlash).names, ['z.bin']);
 });

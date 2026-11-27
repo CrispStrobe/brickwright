@@ -201,10 +201,23 @@ export function fromMediaManifest(manifest, opts = {}) {
     const license = manifest.license ||
         (components.length ? components.map(c => c.license).filter(Boolean).join(' + ') : null);
 
+    const dosProgram = manifest.program?.kind === 'dos' && manifest.machine === 'i8086';
+    const cpmProgram = manifest.program?.kind === 'cpm' && manifest.machine === 'z80' &&
+        slots.com && Object.keys(manifest.mount || {}).length > 0;
+    const mount = (dosProgram || cpmProgram) ? Object.fromEntries(Object.entries(manifest.mount || {}).map(([name, value]) => [
+        name, typeof value === 'string' ? {url: resolveUrl(value)} : {...value, url: resolveUrl(value.url)}
+    ])) : null;
+    if (cpmProgram) {
+        slots.cpmsys = slots.com;
+        delete slots.com;
+    }
+
     return newMachineConfig({
         title: manifest.title || manifest.machine || 'imported machine',
         executionMode: 'functional',
         machine: manifest.machine || null,
+        ...(dosProgram && ['8086', '8088', '80186', '80286'].includes(manifest.program.variant)
+            ? {cpu: {variant: manifest.program.variant}} : {}),
         nativeBlocks: manifest.nativeBlocks === undefined ? false : manifest.nativeBlocks,
         // Carry the manifest's own machine preset verbatim — a string preset
         // name ('PCXT8086') or an inline {regions,chips} (the Eater case). The
@@ -232,6 +245,8 @@ export function fromMediaManifest(manifest, opts = {}) {
             // so a later increment can wire a host-run bundle without re-reading
             // the manifest.
             program: manifest.program || null,
+            ...(dosProgram && mount ? {dosMount: mount} : {}),
+            ...(cpmProgram ? {cpmMount: mount, cpmLaunch: slots.cpmsys.url.split('/').at(-1)} : {}),
             run: manifest.run || null,
             boot: manifest.boot === true
         }

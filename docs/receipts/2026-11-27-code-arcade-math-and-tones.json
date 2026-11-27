@@ -1,0 +1,382 @@
+{
+  "schema": "bw-code-arcade-math-and-tones-v1",
+  "sourceCommits": {
+    "numericAndArrayTranslator": "7eb13295512d3c91ea800bc4d4311bc9cb7f0948",
+    "authoredToneReferences": "916a54c025a0ed683fa99d0ddaab29ff20973265"
+  },
+  "authoredGameSourceSha256": {
+    "Numeric examples and Tidegate run": "e8f92eb856363876f62bbcd094424a959959aaa4079e841df3d56679fdc2072f",
+    "Final Triple Bingo run": "0ad324e638d47f909f69630b69535cbd4215808a0d62e530ca99688a07c8b978"
+  },
+  "evidence": "Native MakeCode PXT compiler and browser simulator. The two authored games waited for their startup state and then presented native frames.",
+  "numeric": {
+    "schema": "bw-arcade-code-examples-v1",
+    "provenance": {
+      "portable": false,
+      "simulate": true,
+      "files": {
+        "overlay/scratch-gui/src/lib/bw-makecode/export-arcade.js": "4daac809c33c49c495f5255f0ba373ecab3d9e6752a01fab243e9a1bd6b29ae6",
+        "overlay/scratch-gui/src/lib/bw-makecode/scratch-arcade-keyboard.js": "1c6326b8079674791baebe99cc5103cfee7e5d6bc91583af266798053ea5556b",
+        "overlay/scratch-gui/examples/index.json": "75a128c6d838f8316d16088d3a745fbfe33b196b7b2547d3e5c69f62e59b1902"
+      }
+    },
+    "results": [
+      {
+        "id": "planetemaths",
+        "scope": "Code menu",
+        "device": null,
+        "sourceWarnings": [],
+        "opcodes": [
+          "control_if_else",
+          "data_setvariableto",
+          "event_whenflagclicked",
+          "looks_sayforsecs",
+          "operator_join",
+          "operator_random",
+          "planetemaths_factorial",
+          "planetemaths_min",
+          "planetemaths_multiple",
+          "planetemaths_nombre_pi",
+          "planetemaths_pow",
+          "planetemaths_sommechiffres"
+        ],
+        "unsupported": [],
+        "warnings": [
+          "Mathbot: costume \"costume1\" converted to palette pixels"
+        ],
+        "pxtSourceSha256": "b2e9d93814d74987a576809361bc841640b01fd18526b9378ea39edcd864e819",
+        "project": {
+          "filename": "arcade-planetemaths.mkcd",
+          "sha256": "fea90f2f64a94876cf7875d42e961cd3ca90e95522721233889cc5b5fa8c859d"
+        },
+        "outcome": "compiled",
+        "compiled": true,
+        "diagnostics": [],
+        "simulator": {
+          "check": "boot and input smoke test",
+          "screenPixels": 19200,
+          "colours": 6,
+          "displayUpdates": 21
+        }
+      },
+      {
+        "id": "arrays",
+        "scope": "Code menu",
+        "device": null,
+        "sourceWarnings": [],
+        "opcodes": [
+          "arrays_contains",
+          "arrays_create1D",
+          "arrays_createRange",
+          "arrays_get",
+          "arrays_max",
+          "arrays_push",
+          "arrays_set",
+          "arrays_sum",
+          "arrays_toJSON",
+          "control_if",
+          "event_whenflagclicked",
+          "looks_sayforsecs",
+          "operator_join"
+        ],
+        "unsupported": [],
+        "warnings": [
+          "Arraybot: costume \"costume1\" converted to palette pixels"
+        ],
+        "pxtSourceSha256": "c9dfe10f1cf9d73d0b0c0846acd95d9053e07c381fa3451fd827943f9f966f53",
+        "project": {
+          "filename": "arcade-arrays.mkcd",
+          "sha256": "42c3a39cd8bfb0a56974af988eff220a265a3fb2d21e09af6ba4c02d099fcca8"
+        },
+        "outcome": "compiled",
+        "compiled": true,
+        "diagnostics": [],
+        "simulator": {
+          "check": "boot and input smoke test",
+          "screenPixels": 19200,
+          "colours": 2,
+          "displayUpdates": 17
+        }
+      }
+    ],
+    "counts": {
+      "compiled": 2
+    },
+    "scopes": {
+      "Code menu": {
+        "total": 2,
+        "simulatorRuns": 2,
+        "outcomes": {
+          "compiled": 2
+        }
+      }
+    }
+  },
+  "tidegate": {
+    "schema": "bw-arcade-code-examples-v1",
+    "provenance": {
+      "portable": false,
+      "simulate": true,
+      "files": {
+        "overlay/scratch-gui/src/lib/bw-makecode/export-arcade.js": "4daac809c33c49c495f5255f0ba373ecab3d9e6752a01fab243e9a1bd6b29ae6",
+        "overlay/scratch-gui/src/lib/bw-makecode/scratch-arcade-keyboard.js": "1c6326b8079674791baebe99cc5103cfee7e5d6bc91583af266798053ea5556b",
+        "overlay/scratch-gui/examples/index.json": "75a128c6d838f8316d16088d3a745fbfe33b196b7b2547d3e5c69f62e59b1902"
+      }
+    },
+    "results": [
+      {
+        "id": "lockstep_lagoon",
+        "scope": "Code menu",
+        "device": null,
+        "sourceWarnings": [],
+        "opcodes": [
+          "control_if",
+          "control_if_else",
+          "control_repeat_until",
+          "control_wait",
+          "data_changevariableby",
+          "data_hidevariable",
+          "data_setvariableto",
+          "data_showvariable",
+          "event_broadcast",
+          "event_whenbroadcastreceived",
+          "event_whenflagclicked",
+          "event_whenkeypressed",
+          "looks_backdrops",
+          "looks_costume",
+          "looks_costumenumbername",
+          "looks_hide",
+          "looks_show",
+          "looks_switchbackdropto",
+          "looks_switchcostumeto",
+          "motion_changeyby",
+          "motion_glidesecstoxy",
+          "motion_gotoxy",
+          "motion_pointindirection",
+          "motion_sety",
+          "motion_yposition",
+          "operator_and",
+          "operator_equals",
+          "operator_gt",
+          "operator_lt",
+          "operator_multiply",
+          "operator_or",
+          "operator_random",
+          "operator_subtract",
+          "sensing_keyoptions",
+          "sensing_keypressed",
+          "sensing_touchingobject",
+          "sensing_touchingobjectmenu",
+          "sound_play"
+        ],
+        "unsupported": [],
+        "warnings": [
+          "Scratch variable monitors use compact labels on the Arcade screen",
+          "Foil: costume \"costume1\" converted to palette pixels",
+          "Foil: costume \"boost\" converted to palette pixels",
+          "LockGate: costume \"costume1\" converted to palette pixels",
+          "LockGate: costume \"buoy\" converted to palette pixels",
+          "SurgeLock: costume \"costume1\" converted to palette pixels",
+          "TidegateResult: costume \"costume1\" converted to palette pixels",
+          "TidegateResult: costume \"win\" converted to palette pixels",
+          "TidegateResult: costume \"lose\" converted to palette pixels",
+          "backdrop \"backdrop1\": no image available — a plain colour",
+          "Stage: costume \"intro\" converted to palette pixels",
+          "Stage: costume \"course\" converted to palette pixels"
+        ],
+        "pxtSourceSha256": "2d856dddf5939164183982a8a119d1a550c6d43ed6b44633e08c2a479808eb22",
+        "project": {
+          "filename": "arcade-lockstep_lagoon.mkcd",
+          "sha256": "246705ef4bfdfe8c8f6fdfe9622d3f51fb01b09ad5c398724314b95bfcb71f6c"
+        },
+        "outcome": "compiled",
+        "compiled": true,
+        "diagnostics": [],
+        "simulator": {
+          "check": "title start, input and display smoke test",
+          "screenPixels": 19200,
+          "colours": 11,
+          "displayUpdates": 2,
+          "titleGate": "started",
+          "started": 1
+        }
+      }
+    ]
+  },
+  "tripleBingo": {
+    "schema": "bw-arcade-code-examples-v1",
+    "provenance": {
+      "portable": false,
+      "simulate": true,
+      "files": {
+        "overlay/scratch-gui/src/lib/bw-makecode/export-arcade.js": "4daac809c33c49c495f5255f0ba373ecab3d9e6752a01fab243e9a1bd6b29ae6",
+        "overlay/scratch-gui/src/lib/bw-makecode/scratch-arcade-keyboard.js": "1c6326b8079674791baebe99cc5103cfee7e5d6bc91583af266798053ea5556b",
+        "overlay/scratch-gui/examples/index.json": "75a128c6d838f8316d16088d3a745fbfe33b196b7b2547d3e5c69f62e59b1902"
+      }
+    },
+    "results": [
+      {
+        "id": "triple_bingo",
+        "scope": "Code menu",
+        "device": null,
+        "sourceWarnings": [],
+        "opcodes": [
+          "argument_reporter_string_number",
+          "arrays_create2D",
+          "arrays_createRange",
+          "arrays_get",
+          "arrays_get2D",
+          "arrays_length",
+          "arrays_remove",
+          "arrays_set2D",
+          "control_if",
+          "control_if_else",
+          "control_repeat",
+          "control_repeat_until",
+          "control_wait",
+          "data_changevariableby",
+          "data_setvariableto",
+          "event_broadcast",
+          "event_whenbroadcastreceived",
+          "event_whenflagclicked",
+          "event_whenkeypressed",
+          "looks_backdrops",
+          "looks_costume",
+          "looks_sayforsecs",
+          "looks_setsizeto",
+          "looks_switchbackdropto",
+          "looks_switchcostumeto",
+          "motion_gotoxy",
+          "operator_add",
+          "operator_and",
+          "operator_equals",
+          "operator_gt",
+          "operator_join",
+          "operator_multiply",
+          "operator_random",
+          "operator_subtract",
+          "pen_clear",
+          "pen_stamp",
+          "procedures_call",
+          "procedures_definition",
+          "procedures_prototype",
+          "sound_play"
+        ],
+        "unsupported": [],
+        "warnings": [
+          "Arcade keyboard controls keep the Scratch keys. Physical controllers use the assigned Arcade buttons.",
+          "Caller: costume \"costume1\" converted to palette pixels",
+          "Caller: costume \"blank\" converted to palette pixels",
+          "Caller: costume \"cell\" converted to palette pixels",
+          "Caller: costume \"daub\" converted to palette pixels",
+          "Caller: costume \"free\" converted to palette pixels",
+          "Caller: costume \"n1\" converted to palette pixels",
+          "Caller: costume \"n2\" converted to palette pixels",
+          "Caller: costume \"n3\" converted to palette pixels",
+          "Caller: costume \"n4\" converted to palette pixels",
+          "Caller: costume \"n5\" converted to palette pixels",
+          "Caller: costume \"n6\" converted to palette pixels",
+          "Caller: costume \"n7\" converted to palette pixels",
+          "Caller: costume \"n8\" converted to palette pixels",
+          "Caller: costume \"n9\" converted to palette pixels",
+          "Caller: costume \"n10\" converted to palette pixels",
+          "Caller: costume \"n11\" converted to palette pixels",
+          "Caller: costume \"n12\" converted to palette pixels",
+          "Caller: costume \"n13\" converted to palette pixels",
+          "Caller: costume \"n14\" converted to palette pixels",
+          "Caller: costume \"n15\" converted to palette pixels",
+          "Caller: costume \"n16\" converted to palette pixels",
+          "Caller: costume \"n17\" converted to palette pixels",
+          "Caller: costume \"n18\" converted to palette pixels",
+          "Caller: costume \"n19\" converted to palette pixels",
+          "Caller: costume \"n20\" converted to palette pixels",
+          "Caller: costume \"n21\" converted to palette pixels",
+          "Caller: costume \"n22\" converted to palette pixels",
+          "Caller: costume \"n23\" converted to palette pixels",
+          "Caller: costume \"n24\" converted to palette pixels",
+          "Caller: costume \"n25\" converted to palette pixels",
+          "Caller: costume \"n26\" converted to palette pixels",
+          "Caller: costume \"n27\" converted to palette pixels",
+          "Caller: costume \"n28\" converted to palette pixels",
+          "Caller: costume \"n29\" converted to palette pixels",
+          "Caller: costume \"n30\" converted to palette pixels",
+          "Caller: costume \"n31\" converted to palette pixels",
+          "Caller: costume \"n32\" converted to palette pixels",
+          "Caller: costume \"n33\" converted to palette pixels",
+          "Caller: costume \"n34\" converted to palette pixels",
+          "Caller: costume \"n35\" converted to palette pixels",
+          "Caller: costume \"n36\" converted to palette pixels",
+          "Caller: costume \"n37\" converted to palette pixels",
+          "Caller: costume \"n38\" converted to palette pixels",
+          "Caller: costume \"n39\" converted to palette pixels",
+          "Caller: costume \"n40\" converted to palette pixels",
+          "Caller: costume \"n41\" converted to palette pixels",
+          "Caller: costume \"n42\" converted to palette pixels",
+          "Caller: costume \"n43\" converted to palette pixels",
+          "Caller: costume \"n44\" converted to palette pixels",
+          "Caller: costume \"n45\" converted to palette pixels",
+          "Caller: costume \"n46\" converted to palette pixels",
+          "Caller: costume \"n47\" converted to palette pixels",
+          "Caller: costume \"n48\" converted to palette pixels",
+          "Caller: costume \"n49\" converted to palette pixels",
+          "Caller: costume \"n50\" converted to palette pixels",
+          "Caller: costume \"n51\" converted to palette pixels",
+          "Caller: costume \"n52\" converted to palette pixels",
+          "Caller: costume \"n53\" converted to palette pixels",
+          "Caller: costume \"n54\" converted to palette pixels",
+          "Caller: costume \"n55\" converted to palette pixels",
+          "Caller: costume \"n56\" converted to palette pixels",
+          "Caller: costume \"n57\" converted to palette pixels",
+          "Caller: costume \"n58\" converted to palette pixels",
+          "Caller: costume \"n59\" converted to palette pixels",
+          "Caller: costume \"n60\" converted to palette pixels",
+          "Caller: costume \"n61\" converted to palette pixels",
+          "Caller: costume \"n62\" converted to palette pixels",
+          "Caller: costume \"n63\" converted to palette pixels",
+          "Caller: costume \"n64\" converted to palette pixels",
+          "Caller: costume \"n65\" converted to palette pixels",
+          "Caller: costume \"n66\" converted to palette pixels",
+          "Caller: costume \"n67\" converted to palette pixels",
+          "Caller: costume \"n68\" converted to palette pixels",
+          "Caller: costume \"n69\" converted to palette pixels",
+          "Caller: costume \"n70\" converted to palette pixels",
+          "Caller: costume \"n71\" converted to palette pixels",
+          "Caller: costume \"n72\" converted to palette pixels",
+          "Caller: costume \"n73\" converted to palette pixels",
+          "Caller: costume \"n74\" converted to palette pixels",
+          "Caller: costume \"n75\" converted to palette pixels",
+          "backdrop \"backdrop1\": no image available — a plain colour",
+          "Stage: costume \"hall\" converted to palette pixels"
+        ],
+        "pxtSourceSha256": "5fd792f01ae7668c85bc8f5447d86c68b09a46501a4872c1e91e2adc33ad25d4",
+        "project": {
+          "filename": "arcade-triple_bingo.mkcd",
+          "sha256": "b0b3c84699db0a624bfebb2ec94fba24db43910a33385efe2b178fca7e7ce629"
+        },
+        "outcome": "compiled",
+        "compiled": true,
+        "diagnostics": [],
+        "simulator": {
+          "check": "title start, input and display smoke test",
+          "screenPixels": 19200,
+          "colours": 7,
+          "displayUpdates": 3,
+          "titleGate": "started",
+          "started": 1
+        }
+      }
+    ],
+    "counts": {
+      "compiled": 1
+    },
+    "scopes": {
+      "Code menu": {
+        "total": 1,
+        "simulatorRuns": 1,
+        "outcomes": {
+          "compiled": 1
+        }
+      }
+    }
+  }
+}

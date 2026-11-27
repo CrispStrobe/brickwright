@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {parse} from 'acorn';
 
 const runner = readFileSync(new URL(
     '../overlay/scratch-gui/src/lib/bw-debug/debug-runner.js', import.meta.url), 'utf8');
@@ -98,13 +99,22 @@ test('UI exposes only runner-gated reverse continue and keeps refusals visible',
 test('forward execution after reverse forks retained history and honors refusal', () => {
     assert.match(runner, /function beginForwardBranch\(requestedBranchId = null\)[\s\S]*prepareFork/);
     assert.match(runner, /prepared\.reservation\.commit\(child\)[\s\S]*forkRecordingStore\.activate/);
-    for (const method of ['async start()', 'resume()', "step(kind = 'block')",
-        'stepInstruction(count = 1)', 'stepOver()', 'stepOut()']) {
-        const at = runner.indexOf(`\n        ${method}`);
-        assert.ok(at >= 0, method);
-        const end = runner.indexOf('\n        },', at);
-        assert.ok(end > at, `method boundary for ${method}`);
-        const body = runner.slice(at, end);
+    // Acorn bounds each actual method independently of its parameter signature.
+    const ast = parse(runner, {ecmaVersion: 'latest', sourceType: 'module'});
+    const factory = ast.body.find(node => node.type === 'ExportNamedDeclaration' &&
+        node.declaration?.type === 'FunctionDeclaration' &&
+        node.declaration.id.name === 'createDebugRunner')?.declaration;
+    assert.ok(factory, 'runner factory must exist');
+    const methods = factory.body.body.filter(node => node.type === 'VariableDeclaration')
+        .flatMap(node => node.declarations)
+        .find(node => node.id.type === 'Identifier' && node.id.name === 'runner')?.init;
+    assert.equal(methods?.type, 'ObjectExpression', 'runner must expose its methods');
+    for (const method of ['start', 'resume', 'step', 'stepInstruction', 'stepOver', 'stepOut']) {
+        const node = methods.properties.find(property => property.type === 'Property' &&
+            property.method && !property.computed && property.key.name === method);
+        assert.equal(node?.value.body.type, 'BlockStatement', `method body for ${method}`);
+        if (method === 'start') assert.equal(node.value.async, true, 'start remains asynchronous');
+        const body = runner.slice(node.value.body.start, node.value.body.end);
         assert.match(body, /beginForwardBranch\(\)/, method);
         assert.match(body, /if \(!forked\.accepted\)/, method);
     }

@@ -90,6 +90,41 @@ pub fn run_with_context(context: tauri::Context<tauri::Wry>) {
         // Open external links (help/docs/credits) in the system browser.
         .plugin(tauri_plugin_opener::init());
 
+    // The renderer is a separate WebKit process. Tauri's default silent
+    // reload can make repeated native failures look like app navigation.
+    #[cfg(target_os = "macos")]
+    let builder = builder.on_web_content_process_terminate(|webview| {
+        use tauri::Manager;
+        use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
+
+        log::error!("WebKit content process terminated (webview: {})", webview.label());
+        if webview.label() != "main" {
+            if let Err(error) = webview.reload() {
+                log::error!("Could not reload {}: {error}", webview.label());
+            }
+            return;
+        }
+
+        let editor = webview.clone();
+        webview
+            .app_handle()
+            .dialog()
+            .message(concat!(
+                "The editor's WebKit process stopped. Reload the editor to continue. ",
+                "If an autosave is available, Brickwright will offer to restore it."
+            ))
+            .title("Brickwright editor stopped")
+            .kind(MessageDialogKind::Warning)
+            .buttons(MessageDialogButtons::OkCancelCustom("Reload editor".into(), "Dismiss".into()))
+            .show(move |reload| {
+                if reload {
+                    if let Err(error) = editor.reload() {
+                        log::error!("Could not reload the editor after a WebKit stop: {error}");
+                    }
+                }
+            });
+    });
+
     // BLE transport (btleplug on desktop/iOS; Tauri Android plugin on Android). Bluetooth is an
     // optional peripheral path, so its platform discovery must not hold the first window hostage:
     // Linux D-Bus waits 25 seconds for a missing BlueZ service. Our exact MIT/Apache fork keeps

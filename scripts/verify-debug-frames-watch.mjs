@@ -627,6 +627,7 @@ WHEN flag clicked:
     record('the session is paused before inspecting or stepping', paused === 'paused',
         `phase=${paused}`);
 
+    await debugPanel.getByRole('button', {name: /About this stack|Über diesen Stapel/}).click();
     const frames = await debugPanel.evaluate(el => {
         el = el.querySelector('[data-debug-frames]');
         if (!el) return null;

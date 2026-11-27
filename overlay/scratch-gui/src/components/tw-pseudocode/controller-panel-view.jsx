@@ -5,11 +5,26 @@ import {clearControllerPanel, createWidgetButtonInputs, releaseMomentaryButtons,
     serializeControllerPanel} from '../../lib/controller-inputs.js';
 import EditorHelp from '../gui/editor-help.jsx';
 import MachineConsole from './machine-console.jsx';
+import MachineTerminal from './machine-terminal.jsx';
+import {browserLocale, makeT} from '../../lib/bw-i18n.js';
 import {activateUndoSurface, notifyUndoState, registerUndoSurface} from '../../lib/global-undo.js';
+import {addCardiacFace, addKim1Face, addMicrotronicFace, isCardiacFace, isKim1Face, isMicrotronicFace, MACHINE_WIDGET_HEIGHT} from '../../lib/controller-machine-faces.js';
+import {LOGIKUS_LAMP_WIDGETS, LOGIKUS_SWITCH_WIDGETS, LOGIKUS_TEST_WIDGET} from '../../lib/logikus/controller-bridge.js';
 import SpikePortMonitor from './spike-port-monitor.jsx';
+import {CONSOLE_6502_CHANGED, isConsoleMonitor, sendConsoleLine} from '../../lib/bw-debug/console-6502.js';
+
+const MicrotronicSurface = React.lazy(() => import(/* webpackChunkName: "bw-microtronic-surface" */ './microtronic-surface.jsx'));
+const Kim1Surface = React.lazy(() => import(/* webpackChunkName: "bw-kim1-surface" */ './kim1-surface.jsx'));
 
 const L10N = {
     en: {
+        virtualSerial: 'Virtual serial console',
+        sendLine: 'Send console line',
+        consoleInput: '6502 console input',
+        surface: 'Controller surface',
+        gridSnap: 'Grid snap',
+        gridOn: 'Grid snap on',
+        gridOff: 'Grid snap off',
         'cancel': 'Cancel',
         'pinPlaceholder': 'P1.0 / D9',
         'chooseImage': 'Choose an Image',
@@ -33,6 +48,13 @@ const L10N = {
         toggleHint: 'latches on press',
     },
     de: {
+        virtualSerial: 'Virtuelle serielle Konsole',
+        sendLine: 'Konsolenzeile senden',
+        consoleInput: '6502-Konsoleneingabe',
+        surface: 'Controller-Oberfläche',
+        gridSnap: 'Am Raster ausrichten',
+        gridOn: 'Rasterfang ein',
+        gridOff: 'Rasterfang aus',
         'cancel': 'Abbrechen',
         'pinPlaceholder': 'P1.0 / D9',
         'chooseImage': 'Ein Bild wählen',
@@ -56,8 +78,9 @@ const L10N = {
         toggleHint: 'rastet beim Drücken ein',
     }
 };
-const pickLocale = () => { try { return /^de/i.test(navigator.language) ? 'de' : 'en'; } catch { return 'en'; } };
-const t = key => (L10N[pickLocale()] || L10N.en)[key] || L10N.en[key] || key;
+const translate = makeT(L10N);
+const t = (key, locale = browserLocale()) => translate(locale, key);
+const BASIC_INPUT_EXAMPLE = 'PRINT 2+2';
 
 // ─── Functional widget config ─────────────────────────────────────────────
 //
@@ -580,10 +603,10 @@ function makeTerminalRows(text, rows, cols) {
     return out.map(l => l.padEnd(cols, ' '));
 }
 
-function TerminalWidget({ widget }) {
+function TerminalWidget({ widget, text = widget.state.text }) {
     const cols = (widget.config.cols | 0) || 40;
     const rows = (widget.config.rows | 0) || 8;
-    const shown = makeTerminalRows(widget.state.text, rows, cols);
+    const shown = makeTerminalRows(text, rows, cols);
     return (
         <div data-testid={`bw-ctl-terminal-${widget.name}`} data-shown={shown.join('|')}
             style={{
@@ -602,8 +625,9 @@ function TerminalWidget({ widget }) {
 // snapped by the host), a corner resize handle and a rotate handle (15deg
 // steps). layout is PLACEMENT — a joystick's state.{x,y} INPUT is unrelated.
 
-function PositionedWidget({ widget, mode, selected, snap, onSelect, onLayout, children }) {
+function PositionedWidget({ widget, mode, selected, snap, onSelect, onLayout, children, fitCanvas }) {
     const L = widget.layout || {};
+    const machine = widget.type === 'machine';
     const ref = React.useRef(null);
     const gesture = React.useRef(null);
 
@@ -619,11 +643,12 @@ function PositionedWidget({ widget, mode, selected, snap, onSelect, onLayout, ch
         const w = el.offsetWidth, h = el.offsetHeight;
         setNatural(prev => (prev && prev.w === w && prev.h === h) ? prev : { w, h });
     }, [widget.type, widget.config]);
-    const sx = (L.w && natural && natural.w) ? L.w / natural.w : 1;
-    const sy = (L.h && natural && natural.h) ? L.h / natural.h : 1;
+    const sx = (!machine && L.w && natural && natural.w) ? L.w / natural.w : 1;
+    const sy = (!machine && L.h && natural && natural.h) ? L.h / natural.h : 1;
 
     const beginDrag = e => {
         if (mode !== 'edit') return;
+        if (machine && e.target.closest('button, input, select, textarea, summary')) return;
         onSelect();
         try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* synthetic events have no active pointer */ }
         gesture.current = { kind: 'move', px: e.clientX, py: e.clientY, x: L.x || 0, y: L.y || 0 };
@@ -672,22 +697,23 @@ function PositionedWidget({ widget, mode, selected, snap, onSelect, onLayout, ch
                 position: 'absolute',
                 left: L.x || 0,
                 top: L.y || 0,
-                width: L.w || undefined,
-                height: L.h || undefined,
+                width: fitCanvas ? 'calc(100% - 16px)' : L.w || (machine ?
+                    `min(440px, max(180px, calc(100% - ${(L.x || 0) + 8}px)))` : undefined),
+                height: fitCanvas ? 'calc(100% - 16px)' : L.h || (machine ? MACHINE_WIDGET_HEIGHT : undefined),
                 transform: L.rotation ? 'rotate(' + L.rotation + 'deg)' : undefined,
                 transformOrigin: 'center center',
                 outline: selected ? '2px solid #7C3AED' : 'none',
                 outlineOffset: 2,
                 borderRadius: 8,
                 cursor: mode === 'edit' ? 'move' : 'default',
-                touchAction: 'none',
+                touchAction: machine && mode === 'play' ? 'auto' : 'none',
                 userSelect: 'none',
             }}
         >
             <div
                 ref={contentRef}
                 style={{
-                    display: 'inline-block',
+                    display: 'inline-block', width: machine ? '100%' : undefined, height: machine ? '100%' : undefined,
                     transformOrigin: 'top left',
                     transform: (sx !== 1 || sy !== 1) ? ('scale(' + sx + ', ' + sy + ')') : undefined,
                 }}
@@ -730,7 +756,7 @@ function PositionedWidget({ widget, mode, selected, snap, onSelect, onLayout, ch
 // decoration configs (text content / image source).
 
 function WidgetInspector({ widget, onRename, onLayout, onConfig, onBind, onOpenLibrary,
-    variableNames = [], partIds = [], onOk, onCancel }) {
+    variableNames = [], parts = [], onOk, onCancel }) {
     const L = widget.layout || {};
     const [name, setName] = React.useState(widget.name);
     React.useEffect(() => { setName(widget.name); }, [widget.name]);
@@ -901,7 +927,7 @@ function WidgetInspector({ widget, onRename, onLayout, onConfig, onBind, onOpenL
                 widget and adding it back silently converted a variable
                 binding into a program binding, and only reloading the example
                 put it back (docs/LESSON-REVIEW-WAVE-4.md defect 6). */}
-            {!DECORATION_NAMES.has(widget.type) && (
+            {!DECORATION_NAMES.has(widget.type) && widget.type !== 'machine' && (
                 <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: 6, marginTop: 2 }}
                     data-testid="bw-ctl-insp-binding">
                     <div style={{ fontSize: 11, fontWeight: 600, color: '#64748b', marginBottom: 4 }}>
@@ -937,7 +963,11 @@ function WidgetInspector({ widget, onRename, onLayout, onConfig, onBind, onOpenL
                                     data-testid="bw-ctl-insp-bind-part"
                                     onChange={e => onBind('part', e.target.value, widget.binding.param)}>
                                     <option value="">—</option>
-                                    {partIds.map(id => <option key={id} value={id}>{id}</option>)}
+                                    {widget.binding.partId && !parts.some(part => part.id === widget.binding.partId) &&
+                                        <option value={widget.binding.partId}>{widget.binding.partId}</option>}
+                                    {parts.map(part => <option key={part.id} value={part.id}>
+                                        {part.id} · {part.kind}
+                                    </option>)}
                                 </select>
                             </div>
                             <div style={row}>
@@ -1048,7 +1078,48 @@ function ImageWidget({ widget }) {
     );
 }
 
-function SimpleVgaWidget({widget}) {
+function MonitorConsole({route, interactive, locale}) {
+    const output = useRef(null);
+    const [line, setLine] = React.useState('');
+    useEffect(() => {
+        output.current.scrollTop = output.current.scrollHeight;
+    }, [route.text]);
+    return <div data-6502-monitor-serial={route.source} style={{
+        position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', padding: 8,
+        background: '#0d1117', color: '#9ae6b4', font: '12px monospace', userSelect: 'text'
+    }}>
+        <span title={t('virtualSerial', locale)}>{route.source}</span>
+        <pre ref={output} style={{flex: 1, minHeight: 0, margin: '4px 0', overflow: 'auto',
+            whiteSpace: 'pre-wrap', overflowWrap: 'anywhere'}}>{route.text}</pre>
+        {interactive && <form style={{display: 'flex', gap: 4}} onSubmit={event => {
+            event.preventDefault();
+            event.stopPropagation();
+            if (sendConsoleLine(route.runner, line)) setLine('');
+        }}>
+            <input aria-label={t('consoleInput', locale)} value={line} onChange={event => setLine(event.target.value)}
+                autoCapitalize="off" autoComplete="off" spellCheck={false}
+                style={{flex: 1, minWidth: 0, font: 'inherit'}} />
+            <button type="submit" aria-label={t('sendLine', locale)} title={t('sendLine', locale)}>↵</button>
+        </form>}
+    </div>;
+}
+
+function useMonitorConsole(runtime, name) {
+    const [route, setRoute] = React.useState(null);
+    useEffect(() => {
+        if (!runtime || !name) return;
+        const update = () => {
+            const current = runtime.bw6502Console;
+            setRoute(current?.destination === name ? current : null);
+        };
+        runtime.on(CONSOLE_6502_CHANGED, update);
+        update();
+        return () => runtime.removeListener(CONSOLE_6502_CHANGED, update);
+    }, [runtime, name]);
+    return route;
+}
+
+function SimpleVgaWidget({widget, route, interactive, locale}) {
     const ref = useRef(null);
     useEffect(() => {
         const canvas = ref.current;
@@ -1063,9 +1134,12 @@ function SimpleVgaWidget({widget}) {
     }, [widget.state.rgba, widget.state.frame, widget.config.width, widget.config.height]);
     return (
         <div data-testid={'bw-ctl-simplevga-' + widget.name}
+            data-video-size={widget.state.signal ? `${widget.config.width}×${widget.config.height}` : undefined}
             style={{position: 'relative', background: '#000', borderRadius: 2, overflow: 'hidden'}}>
-            <canvas ref={ref} style={{display: 'block', width: '100%', height: '100%', imageRendering: 'pixelated'}} />
-            {!widget.state.signal && <span style={{position: 'absolute', inset: 0, display: 'grid',
+            <canvas ref={ref} style={{display: 'block', width: '100%', height: '100%', objectFit: 'contain',
+                aspectRatio: `${widget.config.width} / ${widget.config.height}`, imageRendering: 'pixelated'}} />
+            {route ? <MonitorConsole route={route} interactive={interactive} locale={locale} /> :
+                !widget.state.signal && <span style={{position: 'absolute', inset: 0, display: 'grid',
                 placeItems: 'center', color: '#0f0', fontSize: 10, fontFamily: 'monospace'}}>NO SIGNAL</span>}
         </div>
     );
@@ -1111,13 +1185,50 @@ function WidgetButton({widget, mode, inputs}) {
     </button>;
 }
 
-function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBindings, buttonInputs }) {
+function RemoveWidgetButton({name, onRemove}) {
+    // Keep pointer capture on the draggable widget from swallowing the click.
+    return (
+        <button
+            onClick={onRemove}
+            onPointerDown={e => e.stopPropagation()}
+            data-testid={'bw-ctl-remove-' + name}
+            title={t('remove')}
+            aria-label={t('remove')}
+            style={{
+                position: 'absolute', top: 2, right: 2, zIndex: 20,
+                width: 18, height: 18, lineHeight: '16px', padding: 0,
+                background: '#fee2e2', color: '#dc2626',
+                border: '1px solid #fca5a5', borderRadius: 4,
+                cursor: 'pointer', fontSize: 12, fontWeight: 700,
+            }}
+        >
+            ×
+        </button>
+    );
+}
+
+function SerialKeyboard({name, sendLine, label, placeholder}) {
+    const input = useRef(null);
+    return <form onSubmit={event => {
+        event.preventDefault();
+        if (sendLine(input.current.value) === true) input.current.value = '';
+    }} style={{display: 'flex', gap: 4, width: '100%'}}>
+        <input ref={input} aria-label={label} data-testid={'bw-ctl-keyboard-' + name}
+            placeholder={placeholder} autoCapitalize="off" autoComplete="off" spellCheck={false}
+            style={{minWidth: 0, flex: 1, fontFamily: 'monospace', padding: 4}} />
+        <button type="submit" aria-label={label} title={label}>⏎</button>
+    </form>;
+}
+
+function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBindings, buttonInputs, sendBasicLine, runtime, videoKind, locale }) {
+    const serialRoute = useMonitorConsole(runtime, isConsoleMonitor(widget) ? widget.name : null);
+    const displayLabel = {tms9918: 'TMS9918', mc6845: 'MC6845'}[videoKind] || 'VGA';
     const typeLabels = {
         joystick: t('joystick'), button: t('button'), slider: t('slider'),
         dpad: t('dpad'), dial: t('dial'), gauge: 'Gauge', matrix: 'Matrix', sevenseg: '7-Seg',
         keypad: 'Keypad', lcd: 'LCD', oled: 'OLED', terminal: 'Terminal',
         text: 'Text', image: 'Image',
-        keyboard: 'Keyboard', bargraph: 'Bar Graph', simplevga: 'VGA',
+        keyboard: 'Keyboard', bargraph: 'Bar Graph', simplevga: serialRoute ? 'Serial' : displayLabel,
         mono_lcd: 'Mono LCD', rgb_light: 'RGB Light',
     };
     const bindingLabel = widget.binding
@@ -1157,7 +1268,7 @@ function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBi
                         {typeLabels[widget.type] || widget.type}
                     </span>}
                     <span data-testid={'bw-ctl-title-' + widget.name}>
-                        {L.label || widget.name}
+                        {serialRoute ? 'Console' : sendBasicLine ? 'ACIA keyboard' : (L.label || widget.name)}
                     </span>
                 </div>
             )}
@@ -1237,7 +1348,12 @@ function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBi
             )}
 
             {widget.type === 'terminal' && (
-                <TerminalWidget widget={widget} />
+                <React.Fragment>
+                    <TerminalWidget widget={widget} text={serialRoute?.text ?? widget.state.text} />
+                    {mode === 'play' && serialRoute && <SerialKeyboard name={widget.name}
+                        label={serialRoute.source}
+                        sendLine={line => sendConsoleLine(serialRoute.runner, line)} />}
+                </React.Fragment>
             )}
 
             {widget.type === 'oled' && (
@@ -1266,7 +1382,9 @@ function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBi
                 </div>
             )}
 
-            {widget.type === 'keyboard' && (
+            {widget.type === 'keyboard' && (sendBasicLine ?
+                <SerialKeyboard name={widget.name} sendLine={sendBasicLine} placeholder={BASIC_INPUT_EXAMPLE}
+                    label={/^de/i.test(navigator.language) ? 'BASIC-Serieneingabe' : 'BASIC serial input'} /> :
                 <input type="text" data-testid={'bw-ctl-keyboard-' + widget.name}
                     disabled={mode !== 'play'}
                     placeholder={mode === 'play' ? 'Type here...' : 'Keyboard'}
@@ -1308,7 +1426,7 @@ function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBi
             )}
 
             {widget.type === 'simplevga' && (
-                <SimpleVgaWidget widget={widget} />
+                <SimpleVgaWidget locale={locale} widget={widget} route={serialRoute} interactive={mode === 'play'} />
             )}
 
             {widget.type === 'mono_lcd' && (
@@ -1340,44 +1458,7 @@ function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBi
                 </div>
             )}
 
-            {mode === 'edit' && (
-                // THE REMOVE CONTROL. Three defects were in the eleven lines this
-                // replaces, and two of them share one cause.
-                //
-                // IT NEVER FIRED. The wiring was always complete -- onRemove ->
-                // _removeWidget -> panel.removeWidget, which deletes and emits --
-                // but the card's wrapper takes POINTER CAPTURE in beginDrag, so
-                // pointerdown on the button sent pointerup to the wrapper and no
-                // click was ever synthesised. A button that is present, styled and
-                // wired, and cannot be pressed. `stopPropagation` on pointerdown is
-                // the fix, and this file already knew it: the inspector panel has
-                // carried exactly that guard for the same reason. A known hazard,
-                // applied to one control and not the other.
-                //
-                // IT CHANGED THE WIDGET'S SIZE. It sat in normal flow in an
-                // edit-only row, so a content-sized widget was taller in Edit than
-                // in Play and a panel arranged in one mode shifted in the other.
-                // 29 of the 88 widgets in the shipped controller examples are
-                // content-sized; the other 59 carry an explicit w/h and never
-                // showed it. `position: absolute` contributes nothing to flow, so
-                // the corner placement the owner asked for is also the size fix.
-                <button
-                    onClick={onRemove}
-                    onPointerDown={e => e.stopPropagation()}
-                    data-testid={'bw-ctl-remove-' + widget.name}
-                    title={t('remove')}
-                    aria-label={t('remove')}
-                    style={{
-                        position: 'absolute', top: 2, right: 2, zIndex: 20,
-                        width: 18, height: 18, lineHeight: '16px', padding: 0,
-                        background: '#fee2e2', color: '#dc2626',
-                        border: '1px solid #fca5a5', borderRadius: 4,
-                        cursor: 'pointer', fontSize: 12, fontWeight: 700,
-                    }}
-                >
-                    ×
-                </button>
-            )}
+            {mode === 'edit' && <RemoveWidgetButton name={widget.name} onRemove={onRemove} />}
 
             {/* Hidden by the panel-level hideBindings flag, which lives in
                 bw-board's ControllerPanel because the serialised shape is that
@@ -1385,7 +1466,7 @@ function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBi
                 control was deliberately unwired until then, since a checkbox
                 calling a method the vendored copy did not have would have been a
                 control that throws when pressed. */}
-            {!hideBindings && (
+            {!hideBindings && (!serialRoute || mode === 'edit') && (
                 <div data-testid={'bw-ctl-binding-' + widget.name}
                     style={{ fontSize: 10, color: '#94a3b8' }}>
                     {bindingLabel}
@@ -1585,6 +1666,14 @@ class ControllerPanelView extends React.Component {
         this._recordUndo(before, 'Add widget');
     }
 
+    _addMachineWidget(add) {
+        const before = this._snapshot();
+        add(this._getPanel());
+        this.setState({addMenuOpen: false});
+        this._persist();
+        this._recordUndo(before, 'Add widget');
+    }
+
     _removeWidget(name) {
         const before = this._snapshot();
         this._buttonInputs?.release(name);
@@ -1676,12 +1765,12 @@ class ControllerPanelView extends React.Component {
     }
 
     /** Board part ids, for the part binding's picker. */
-    _partIds() {
-        try {
-            return (this.props.board.parts || []).map(p => p.id).sort();
-        } catch {
-            return [];
-        }
+    _circuitParts(widget) {
+        const kinds = widget?.type === 'lcd' ? ['hd44780', 'char_lcd']
+            : widget?.type === 'simplevga' ? ['simplevga_card', 'tms9918', 'mc6845'] : null;
+        return [...(this.props.board?.parts || [])]
+            .filter(part => !kinds || kinds.includes(part.kind))
+            .sort((a, b) => a.id.localeCompare(b.id));
     }
 
     _rename(oldName, newName) {
@@ -1748,10 +1837,54 @@ class ControllerPanelView extends React.Component {
         const panel = this._getPanel();
         const mode = panel.mode;
         const widgets = panel.getWidgets();
-        const {cp1WidgetSlot} = this.props;
-        const machineWidget = mode === 'play' && this.props.machineConsole
+        const {cp1WidgetSlot, cardiacWidgetSlot} = this.props;
+        const logikusLabel = /^de/i.test(this.props.locale || '') ? 'Logikus-Labor' : 'Logikus Lab';
+        const cardiacWidget = widgets.find(isCardiacFace);
+        const kimParts = (this.props.board?.parts || []).filter(part => part.kind === 'kim-1');
+        const german = /^de/i.test(this.props.locale || '');
+        const sendLogikus = (type, detail) => window.dispatchEvent(new CustomEvent(`bw-logikus-${type}`, {detail}));
+        const microtronicParts = (this.props.board?.parts || []).filter(part => part.kind === 'busch-microtronic');
+        const machineChoices = [
+            ...microtronicParts.map(part => ({
+                label: microtronicParts.length > 1 ? `Busch Microtronic · ${part.id}` : 'Busch Microtronic',
+                disabled: widgets.some(widget => isMicrotronicFace(widget) && widget.config.partId === part.id),
+                run: () => this._addMachineWidget(target => addMicrotronicFace(target, part.id))
+            })),
+            ...kimParts.map(part => ({
+                label: kimParts.length > 1 ? `KIM-1 · ${part.id}` : (german ? 'KIM-1-Frontplatte' : 'KIM-1 front panel'),
+                disabled: widgets.some(widget => isKim1Face(widget) && widget.config.partId === part.id),
+                run: () => this._addMachineWidget(panel => addKim1Face(panel, part.id))
+            })),
+            cardiacWidgetSlot && {
+                label: german ? 'CARDIAC-Anzeige' : 'CARDIAC display', disabled: !!cardiacWidget,
+                run: () => this._addMachineWidget(addCardiacFace)
+            },
+            {label: logikusLabel, run: () => {
+                this.setState({addMenuOpen: false});
+                sendLogikus('open');
+            }},
+            ...[
+                [german ? 'Logikus-Schalter' : 'Logikus switch', LOGIKUS_SWITCH_WIDGETS],
+                [german ? 'Logikus-Lampe' : 'Logikus lamp', LOGIKUS_LAMP_WIDGETS],
+                ['Logikus Test', [LOGIKUS_TEST_WIDGET]]
+            ].map(([label, names]) => {
+                const name = names.find(candidate => !panel.getWidget(candidate));
+                return {label, disabled: !name,
+                    run: () => this._addMachineWidget(() => sendLogikus('add-control', {name}))};
+            })
+        ].filter(Boolean);
+        const screen = mode === 'play' && this.props.machineConsole
             ? widgets.find(w => w.name === this.props.machineConsole.name && w.type === 'simplevga')
             : null;
+        const session = mode === 'play' ? this.props.machineTerminal : null;
+        const showTerminal = session && (screen ? this.state.machineSurface === 'terminal' :
+            this.state.machineSurface !== 'widgets' || !widgets.length);
+        const terminal = showTerminal ? session : null;
+        const hasOtherWidgets = screen && widgets.some(widget => widget !== screen);
+        const machineWidget = showTerminal || (hasOtherWidgets && this.state.machineSurface === 'widgets') ? null : screen;
+        const machineFullScreen = Boolean((machineWidget || terminal) && this.props.isFullScreen);
+        const toggleMachineFullScreen = this.props.isFullScreen ?
+            this.props.onExitFullScreen : this.props.onEnterFullScreen;
 
         return (
             <div style={{
@@ -1763,16 +1896,33 @@ class ControllerPanelView extends React.Component {
                 zIndex: 10,
             }} onPointerDown={() => activateUndoSurface('widgets')}>
                 <div data-widgets-toolbar style={{
-                    display: 'flex', alignItems: 'center', flexWrap: 'nowrap', gap: 3,
+                    display: machineFullScreen ? 'none' : 'flex', alignItems: 'center', flexWrap: 'nowrap', gap: 3,
                     minWidth: 0, padding: '4px 6px',
-                    paddingTop: this.props.isFullScreen ? 'calc(env(safe-area-inset-top, 0px) + 56px)' : 4,
                     borderBottom: '1px solid #e2e8f0', background: '#fff', flexShrink: 0
                 }}>
                     <span title={t('title')} style={{flex: '1 1 auto', minWidth: 0, overflow: 'hidden',
                         textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 700, fontSize: 12, color: '#7C3AED'}}>
                         {t('title')}
                     </span>
+                    {((session && (screen || widgets.length > 0)) || hasOtherWidgets) && (
+                        <select aria-label={t('surface', this.props.locale)} title={t('surface', this.props.locale)}
+                            value={terminal ? 'terminal' : machineWidget ? 'screen' : 'widgets'}
+                            onChange={event => this.setState({machineSurface: event.target.value})}>
+                            {screen && <option value="screen">Screen</option>}
+                            {(!screen || hasOtherWidgets) && <option value="widgets">Widgets</option>}
+                            {session && <option value="terminal">{session.title}</option>}
+                        </select>
+                    )}
                     <EditorHelp editor="Widgets" label="Widgets" locale={this.props.locale} />
+                    {widgets.some(widget => widget.config.logikus === true) && (
+                        <button type="button" data-testid="bw-open-logikus"
+                            aria-label={logikusLabel} title={logikusLabel}
+                            onClick={() => window.dispatchEvent(new CustomEvent('bw-logikus-open'))}
+                            style={{background: '#ede9fe', color: '#5b21b6', border: '1px solid #c4b5fd',
+                                borderRadius: 6, width: 24, height: 28, padding: 0, cursor: 'pointer'}}>
+                            <span aria-hidden="true">↗</span>
+                        </button>
+                    )}
                     {/* ENTERING full screen from here, because there is no other way in
                         on a phone: the stage header that normally offers it is capped
                         to 44px in this dock mode, and a sweep of the pane on a phone
@@ -1844,9 +1994,9 @@ class ControllerPanelView extends React.Component {
                     {mode === 'edit' && (
                         <button
                             data-testid="bw-ctl-snap-toggle"
-                            aria-label={'Grid snap'} aria-pressed={this.state.snap}
+                            aria-label={t('gridSnap', this.props.locale)} aria-pressed={this.state.snap}
                             onClick={() => this.setState(st => ({ snap: !st.snap }))}
-                            title={'Grid snap ' + (this.state.snap ? 'on' : 'off') + ' (' + this.state.grid + 'px)'}
+                            title={`${t(this.state.snap ? 'gridOn' : 'gridOff', this.props.locale)} (${this.state.grid}px)`}
                             style={{
                                 padding: 0, width: 24, height: 28, flexShrink: 0, fontSize: 14, borderRadius: 6,
                                 border: '1px solid #cbd5e1', cursor: 'pointer', fontWeight: 600,
@@ -1902,41 +2052,39 @@ class ControllerPanelView extends React.Component {
                                     borderRadius: 6, boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                                     padding: 4, zIndex: 100, minWidth: 120,
                                 }}>
-                                    {Object.values(WIDGET_TYPES).map(type => (
-                                        <button
-                                            key={type}
-                                            onClick={() => this._addWidget(type)}
-                                            style={{
-                                                display: 'block', width: '100%', textAlign: 'left',
-                                                padding: '6px 10px', border: 'none', background: 'none',
-                                                cursor: 'pointer', fontSize: 12, borderRadius: 4,
-                                                color: '#334155',
-                                            }}
-                                            onMouseOver={e => e.target.style.background = '#f1f5f9'}
-                                            onMouseOut={e => e.target.style.background = 'none'}
-                                        >
-                                            {t(type)}
-                                        </button>
-                                    ))}
+                                    <div style={{maxHeight: 'min(55vh, 360px)', overflowY: 'auto', scrollbarWidth: 'thin'}}>
+                                        {[...machineChoices, ...Object.values(WIDGET_TYPES)
+                                            .filter(type => type !== 'machine')
+                                            .map(type => ({label: t(type), run: () => this._addWidget(type)}))]
+                                            .map(({label, disabled, run}) => (
+                                                <button key={label} disabled={disabled} onClick={run} style={{
+                                                    display: 'block', width: '100%', textAlign: 'left', whiteSpace: 'nowrap',
+                                                    padding: '6px 10px', border: 'none', background: 'none',
+                                                    cursor: disabled ? 'default' : 'pointer', color: '#334155',
+                                                    opacity: disabled ? .5 : 1, fontSize: 12, borderRadius: 4
+                                                }}>{label}</button>
+                                            ))}
+                                    </div>
                                 </div>
                             )}
                         </div>
                     )}
                 </div>
 
-                <SpikePortMonitor vm={this.props.vm} locale={this.props.locale} />
+                {!machineFullScreen && <SpikePortMonitor vm={this.props.vm} locale={this.props.locale} />}
 
                 {/* Widget canvas: absolute placement from layout.{x,y}, size from
                     layout.{w,h}, rotation + colour + label applied. In EDIT mode
                     widgets drag (grid-snapped), resize by the corner handle and
                     rotate by the top handle; click selects for the inspector. */}
                 <div data-testid="bw-controller-canvas"
-                    style={{flex: 1, overflow: 'auto', position: 'relative', scrollbarWidth: 'thin'}}
+                    style={{flex: 1, minHeight: 0, overflow: machineFullScreen ? 'hidden' : 'auto',
+                        position: 'relative', scrollbarWidth: 'thin'}}
                     onPointerDown={e => {
                         if (e.target === e.currentTarget) this.setState({ selected: null });
                     }}>
-                    {cp1WidgetSlot && <div ref={cp1WidgetSlot} data-cp1-widget-slot />}
-                    {widgets.length === 0 && !cp1WidgetSlot && (
+                    {cp1WidgetSlot && <div ref={cp1WidgetSlot} data-cp1-widget-slot hidden={machineFullScreen} />}
+                    {widgets.length === 0 && !cp1WidgetSlot && !terminal && (
                         <div style={{
                             color: '#94a3b8', fontSize: 14, textAlign: 'center',
                             padding: '40px 20px',
@@ -1944,31 +2092,83 @@ class ControllerPanelView extends React.Component {
                             {t('noWidgets')}
                         </div>
                     )}
-                    <div style={cp1WidgetSlot && widgets.length ? {position: 'relative', minHeight: 240} : undefined}>
-                        {machineWidget ? (
-                            <MachineConsole widget={machineWidget}
-                                keyboardSet={this.props.machineConsole.keyboardSet}
-                                keyIn={this.props.machineConsole.keyIn}
-                                mouseIn={this.props.machineConsole.mouseIn} />
-                        ) : widgets.map(w => (
+                    {machineWidget && <MachineConsole widget={machineWidget} locale={this.props.locale}
+                        keyboardSet={this.props.machineConsole.keyboardSet}
+                        keyIn={this.props.machineConsole.keyIn}
+                        serialIn={this.props.machineConsole.serialIn}
+                        isFullScreen={this.props.isFullScreen}
+                        onToggleFullScreen={toggleMachineFullScreen}
+                        mouseIn={this.props.machineConsole.mouseIn} />}
+                    {terminal && <div style={{height: '100%', minHeight: 0}}>
+                        <MachineTerminal session={terminal} locale={this.props.locale} isFullScreen={this.props.isFullScreen}
+                            onToggleFullScreen={toggleMachineFullScreen} />
+                    </div>}
+                    <div hidden={machineFullScreen || Boolean(terminal)} style={machineWidget || (cp1WidgetSlot && widgets.length) ? {
+                        position: 'relative', minHeight: cp1WidgetSlot ? 240 : undefined
+                    } : undefined}>
+                        {widgets.filter(widget => widget !== screen).map(w => (
                             <PositionedWidget
                                 key={w.name}
                                 widget={w}
+                                fitCanvas={widgets.length === 1 && isCardiacFace(w) &&
+                                    w.layout.x === 8 && w.layout.y === 8 && !w.layout.w &&
+                                    w.layout.h === MACHINE_WIDGET_HEIGHT}
                                 mode={mode}
                                 selected={mode === 'edit' && this.state.selected === w.name}
                                 snap={v => this._snap(v)}
                                 onSelect={() => this.setState({ selected: w.name })}
                                 onLayout={(patch, persist) => this._layout(w.name, patch, persist)}
                             >
-                                <WidgetCard
+                                {w.type === 'machine' ? (
+                                    <section aria-label={w.layout.label || w.name}
+                                        style={{background: '#f6f8f4', border: '1px solid #c5d5d8', borderRadius: 8,
+                                            height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden'}}>
+                                        <header data-testid={`bw-ctl-machine-header-${w.name}`}
+                                            title={mode === 'edit' ? (german ? 'Zum Verschieben ziehen' : 'Drag to move') : undefined}
+                                            style={{padding: '5px 26px 5px 8px', fontSize: 12, fontWeight: 700, color: '#16333c',
+                                                borderBottom: '1px solid #c5d5d8'}}>
+                                            {w.layout.label || w.name}
+                                        </header>
+                                        {w === cardiacWidget && cardiacWidgetSlot ?
+                                            <div ref={cardiacWidgetSlot} data-cardiac-widget-slot
+                                                style={{flex: 1, minHeight: 0, overflow: 'auto', scrollbarWidth: 'thin'}} /> :
+                                            isMicrotronicFace(w) && microtronicParts.some(part => part.id === w.config.partId) ?
+                                                <div style={{flex: 1, minHeight: 0, overflow: 'auto', scrollbarWidth: 'thin'}}>
+                                                    <React.Suspense fallback={null}>
+                                                        <MicrotronicSurface vm={this.props.vm} partId={w.config.partId}
+                                                            variant="front" locale={this.props.locale} />
+                                                    </React.Suspense>
+                                                </div> :
+                                            isKim1Face(w) && kimParts.some(part => part.id === w.config.partId) ?
+                                                <div style={{flex: 1, minHeight: 0, overflow: 'auto', scrollbarWidth: 'thin'}}>
+                                                    <React.Suspense fallback={null}>
+                                                        <Kim1Surface vm={this.props.vm} partId={w.config.partId} variant="front"
+                                                            locale={this.props.locale} />
+                                                    </React.Suspense>
+                                                </div> :
+                                            <span style={{display: 'block', padding: 8}}>
+                                                {german ? 'Nicht verbunden' : 'Disconnected'}
+                                            </span>}
+                                        {mode === 'edit' && <RemoveWidgetButton name={w.name} onRemove={() => {
+                                            this._removeWidget(w.name);
+                                            this.setState({selected: null});
+                                        }} />}
+                                    </section>
+                                ) : <WidgetCard locale={this.props.locale}
                                     widget={w}
                                     mode={mode}
                                     panel={panel}
                                     buttonInputs={this._buttonInputs}
+                                    runtime={this.props.vm?.runtime}
+                                    videoKind={w.type === 'simplevga' && w.binding?.target === 'part' ?
+                                        this.props.board?.parts?.find(part => part.id === w.binding.partId)?.kind : null}
+                                    sendBasicLine={mode === 'play' && w.type === 'keyboard' && w.binding?.target === 'part' &&
+                                        this.props.board?.parts?.some(part => part.id === w.binding.partId && part.kind === 'ps2')
+                                        ? this.props.sendBasicLine : undefined}
                                     onInput={(name, x, y) => this._handleJoystickInput(name, x, y)}
                                     onRemove={() => { this._removeWidget(w.name); this.setState({ selected: null }); }}
                                     hideBindings={panel.hideBindings}
-                                />
+                                />}
                             </PositionedWidget>
                         ))}
                     </div>
@@ -1996,7 +2196,7 @@ class ControllerPanelView extends React.Component {
                                 onBind={(target, value, param) =>
                                     this._bind(this.state.selected, target, value, param)}
                                 variableNames={this._variableNames()}
-                                partIds={this._partIds()}
+                                parts={this._circuitParts(panel.getWidget(this.state.selected))}
                                 onOpenLibrary={() => this.setState({ libraryOpen: true })}
                                 onOk={() => { this._snapFor = null; this.setState({ selected: null }); }}
                                 onCancel={() => this._restoreWidget(this.state.selected, this._inspectorSnap)}

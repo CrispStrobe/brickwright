@@ -5,7 +5,9 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {clearControllerPanel, connectControllerBoard, serializeControllerPanel} from '../../lib/controller-inputs.js';
+import LogikusHost from '../tw-pseudocode/logikus-host.jsx';
 import {Cp1Surfaces} from '../tw-pseudocode/cp1-surfaces.js';
+import {CardiacSurfaces} from '../tw-pseudocode/cardiac-surfaces.js';
 import {defineMessages, FormattedMessage, injectIntl, intlShape} from 'react-intl';
 import {connect} from 'react-redux';
 import MediaQuery from 'react-responsive';
@@ -69,12 +71,13 @@ import ChromeToggle from './chrome-toggle.jsx';
 import StarterJourneys from './starter-journeys.jsx';
 // The lessons panel carries seven wave catalogs (232 KiB raw, 74 KiB compressed)
 // and is closed on every first paint; it arrives when someone opens it.
-const Cp1CodeEditor = React.lazy(() =>
+const MachineCodeEditor = React.lazy(() =>
     import(/* webpackChunkName: "bw-codemirror" */ '../../lib/codemirror-editor.jsx')
 );
 const GuidedLessons = React.lazy(() => import(/* webpackChunkName: "guided-lessons" */ './guided-lessons.jsx'));
 import lessonCatalog from './lessons.json';
 import chromeStyles from './compact-chrome.css';
+import {editorOverflowStyles} from '../tw-pseudocode/editor-overflow-styles.js';
 import PaneDivider from './pane-divider.jsx';
 import PaneStrip from './pane-strip.jsx';
 import {computePaneStyles, isCollapsed, isExplicitFraction} from '../../lib/pane-sizes.js';
@@ -145,6 +148,7 @@ const recordStarterEvent = (type, journeyId) => {
 // costumes, sounds), 3 and 4 are Brickwright's Code and Circuit tabs. The panels
 // are force-rendered, so a panel's own idea of "visible" has to come from here.
 const CODE_TAB_INDEX = 3;
+const CIRCUIT_TAB_INDEX = 4;
 
 // The FPGA/HDL surface is a BUILD-TIME opt-in and ships hidden. Webpack replaces
 // this with a literal, so an off build drops the tab, its panel and everything
@@ -355,6 +359,15 @@ const GUIComponent = props => {
     React.useEffect(() => {
         const openLessonProject = event => {
             const lesson = event.detail || {};
+            if (lesson.loadMode === 'logikus') {
+                // The Logikus bench is app-owned and opens beside the current
+                // project; it does not load a vendored gallery example.
+                window.dispatchEvent(new CustomEvent('bw-logikus-open', {detail: {
+                    presetId: lesson.presetId,
+                    journeyId: `lesson:${lesson.id}`
+                }}));
+                return;
+            }
             const editorTab = lesson.loadMode === 'program-only' ? 3 : 4;
             props.onActivateTab(editorTab);
             window.dispatchEvent(new CustomEvent('bw-start-journey', {detail: {
@@ -394,7 +407,7 @@ const GUIComponent = props => {
     // from a prior session never activates the sim pane on a mint project.
     const [dockMode, setDockMode] = React.useState(() => {
         try {
-            const dock = localStorage.getItem('bw-debug-dock') || 'top';
+            const dock = localStorage.getItem('bw-debug-dock') || 'right';
             const circuit = localStorage.getItem('bw-stage-circuit');
             // Only honour 'microbit' if the circuit-pane flag is also set
             if ((dock === 'microbit' || dock === 'arcade') && circuit !== '1') return 'top';
@@ -413,7 +426,7 @@ const GUIComponent = props => {
             // The MakeCode simulator holds no program of its own across a
             // reload: restoring its dock would show an empty pane.
             if (dock === 'makecode' && !window.__bwMakeCodePending) return 'top';
-            if (!['top', 'right', 'controller', 'microbit', 'arcade', 'cpx', 'arduboy', 'makecode', 'spikearena', 'cad', 'robots'].includes(dock)) return 'top';
+            if (!['top', 'off', 'right', 'solo', 'controller', 'microbit', 'arcade', 'cpx', 'arduboy', 'makecode', 'spikearena', 'cad', 'robots'].includes(dock)) return 'top';
             // The CAD view restores only where the CAD Editor is built and switched on.
             if (dock === 'cad' && !(process.env.BW_ENABLE_CAD && getCadEnabled())) return 'top';
             // The arena restores only for a SPIKE project.
@@ -425,6 +438,28 @@ const GUIComponent = props => {
             return dock;
         } catch { return 'top'; }
     });
+    const [showCircuitStage, setShowCircuitStage] = React.useState(() => {
+        try { return localStorage.getItem('bw-stage-circuit') === '1'; } catch { return false; }
+    });
+    const circuitOwnsStage = showCircuitStage && (dockMode === 'right' ||
+        (props.activeTabIndex !== CIRCUIT_TAB_INDEX && ['top', 'off', 'solo'].includes(dockMode)));
+    const [cardiacCodeSlot, setCardiacCodeSlot] = React.useState(null);
+    const [cardiacToolsSlot, setCardiacToolsSlot] = React.useState(null);
+    const [cardiacControllerSlot, setCardiacControllerSlot] = React.useState(null);
+    const [cardiacAttached, setCardiacAttached] = React.useState(() => window.__bwMachineExtracted?.kind === 'cardiac');
+    React.useEffect(() => {
+        const selected = event => setCardiacAttached(event.detail?.kind === 'cardiac');
+        const detached = () => setCardiacAttached(false);
+        window.addEventListener('bw-machine-extracted', selected);
+        window.addEventListener('bw-cardiac-detached', detached);
+        return () => {
+            window.removeEventListener('bw-machine-extracted', selected);
+            window.removeEventListener('bw-cardiac-detached', detached);
+        };
+    }, []);
+    const cardiacSurfaces = React.useMemo(() => ({code: cardiacCodeSlot, tools: cardiacToolsSlot,
+        controller: cardiacControllerSlot, Editor: MachineCodeEditor}),
+    [cardiacCodeSlot, cardiacToolsSlot, cardiacControllerSlot]);
     const [cp1CodeSlot, setCp1CodeSlot] = React.useState(null);
     const [cp1ControllerSlot, setCp1ControllerSlot] = React.useState(null);
     const [cp1Attached, setCp1Attached] = React.useState(() => window.__bwMachineExtracted?.kind === 'cp1');
@@ -438,7 +473,7 @@ const GUIComponent = props => {
             window.removeEventListener('bw-cp1-circuit-detached', detached);
         };
     }, []);
-    const cp1Surfaces = React.useMemo(() => ({code: cp1CodeSlot, controller: cp1ControllerSlot, Editor: Cp1CodeEditor}),
+    const cp1Surfaces = React.useMemo(() => ({code: cp1CodeSlot, controller: cp1ControllerSlot, Editor: MachineCodeEditor}),
         [cp1CodeSlot, cp1ControllerSlot]);
     const [gameControlKey, setGameControlKey] = React.useState(() =>
         props.vm?.runtime?.bwGameControlKey || null);
@@ -470,6 +505,7 @@ const GUIComponent = props => {
                     try { localStorage.setItem('bw-right-pane-hidden', '0'); } catch { /* private mode */ }
                 }
             } else if (detail.key === 'bw-stage-circuit') {
+                setShowCircuitStage(detail.value === '1');
                 // If the circuit pane is being deactivated while in microbit mode, reset
                 if (detail.value !== '1') {
                     setDockMode(prev => prev === 'microbit' ? 'top' : prev);
@@ -526,6 +562,7 @@ const GUIComponent = props => {
     if (!controllerPanelRef.current) controllerPanelRef.current = new ControllerPanel();
     const controllerPanel = controllerPanelRef.current;
     const [machineConsole, setMachineConsole] = React.useState(null);
+    const [machineTerminal, setMachineTerminal] = React.useState(null);
     // Expose on vm.runtime so ControllerExtension can find it, and wire the
     // LIVE variable binding: input widgets write program variables, display
     // widgets show them (bindPanelToVariables polls via requestAnimationFrame).
@@ -752,6 +789,7 @@ const GUIComponent = props => {
             mirror.start();
             setMachineConsole({name: widget.name, keyboardSet: p.keyboardSet,
                 keyIn: typeof p.keyInFn === 'function' ? p.keyInFn : null,
+                serialIn: typeof p.serialInFn === 'function' ? p.serialInFn : null,
                 mouseIn: typeof p.mouseInFn === 'function' ? p.mouseInFn : null});
             // Make the screen actually visible: dock the Widgets pane, play
             // mode, and surface the code tab where the dock renders — exactly as
@@ -771,6 +809,15 @@ const GUIComponent = props => {
         window.addEventListener('bw-machine-video-stop', onStop);
         // Imperative API so a run path need not know the event names.
         window.bwMirrorMachineVideo = payload => start(payload);
+        window.bwMirrorMachineTerminal = (session, focus) => {
+            setMachineTerminal(session);
+            if (focus) {
+                controllerPanel.setMode('play');
+                window.dispatchEvent(new CustomEvent('bw-settings-change',
+                    {detail: {key: 'bw-debug-dock', value: 'controller'}}));
+            }
+            return () => setMachineTerminal(active => active === session ? null : active);
+        };
         window.bwStopMachineVideo = () => stop();
         // "Run this machine config": resolve its media and boot it via the
         // existing media-load path, carrying its declared screen widget so the
@@ -785,6 +832,8 @@ const GUIComponent = props => {
             window.removeEventListener('bw-machine-video', onStart);
             window.removeEventListener('bw-machine-video-stop', onStop);
             if (window.bwMirrorMachineVideo) delete window.bwMirrorMachineVideo;
+            delete window.bwMirrorMachineTerminal;
+            setMachineTerminal(null);
             if (window.bwStopMachineVideo) delete window.bwStopMachineVideo;
             if (window.bwRunMachine) delete window.bwRunMachine;
             if (window.bwSteerMachineKeyboard) delete window.bwSteerMachineKeyboard;
@@ -937,21 +986,50 @@ const GUIComponent = props => {
     // "Manage machines…" entry (it dispatches bw-open-machine-manager). Running
     // a machine from it boots via the shared runMachineConfig bridge — so its
     // screen/keyboard land in the Widgets pane like any other machine.
-    const [showMachines, setShowMachines] = React.useState(false);
+    const [showMachines, setShowMachines] = React.useState(null);
     React.useEffect(() => {
-        const open = () => setShowMachines(true);
+        const open = event => setShowMachines({kind: event.detail?.kind || null, presets: event.detail?.presets});
         window.addEventListener('bw-open-machine-manager', open);
         return () => window.removeEventListener('bw-open-machine-manager', open);
     }, []);
     const machineManagerModal = showMachines ? (
         <React.Suspense fallback={null}>
-            <MachineManager store={getMachineStore()} locale={props.locale}
-                onRun={(cfg, opts) => runMachineConfig(cfg, opts)}
-                onClose={() => setShowMachines(false)} />
+            <MachineManager store={getMachineStore()} locale={props.intl.locale} preferredMachine={showMachines.kind}
+                onRun={async (cfg, opts) => {
+                    const code = opts?.code;
+                    const run = (source = code?.text) => runMachineConfig(cfg, code?.dosSourceName ? {
+                        ...opts, dosSource: {name: code.dosSourceName, text: source}
+                    } : opts);
+                    const started = await run();
+                    if (started && code) {
+                        const program = {...code, config: cfg, run};
+                        delete vm.runtime.bwLibraryMachineSelection;
+                        vm.runtime.bwLibraryCode = program;
+                        window.dispatchEvent(new CustomEvent('bw-library-code', {detail: program}));
+                        props.onActivateTab(CODE_TAB_INDEX);
+                    } else if (started?.detail?.kind) {
+                        const selection = {kind: started.detail.kind, picoBasicConsole: started.detail.picoBasicConsole};
+                        delete vm.runtime.bwLibraryCode;
+                        vm.runtime.bwLibraryMachineSelection = selection;
+                        window.dispatchEvent(new CustomEvent('bw-code-machine-selected', {detail: selection}));
+                    }
+                    return started;
+                }}
+                wiredPresets={showMachines.presets}
+                onOpenExample={(exampleId, codeOnly) => new Promise((resolve, reject) => {
+                    props.onActivateTab(codeOnly ? 3 : CIRCUIT_TAB_INDEX);
+                    window.dispatchEvent(new CustomEvent('bw-start-journey', {detail: {
+                        exampleId, onResult: result => {
+                            if (result.error) reject(new Error(result.error));
+                            else resolve(result.ok);
+                        }
+                    }}));
+                })}
+                onClose={() => setShowMachines(null)} />
         </React.Suspense>
     ) : null;
 
-    return (<Cp1Surfaces.Provider value={cp1Surfaces}><React.Fragment><MediaQuery minWidth={layout.fullSizeMinWidth}>{isFullSize => {
+    return (<CardiacSurfaces.Provider value={cardiacSurfaces}><Cp1Surfaces.Provider value={cp1Surfaces}><React.Fragment><style>{editorOverflowStyles}</style><MediaQuery minWidth={layout.fullSizeMinWidth}>{isFullSize => {
         const stageSize = resolveStageSize(stageSizeMode, isFullSize);
 
         // Three-column pane sizing from the paneLayout reducer.
@@ -965,7 +1043,7 @@ const GUIComponent = props => {
         const middleContent = paneLayout?.middle?.upper || 'blocks-canvas';
         const renderCodePane = isVisible => (
             <EditorErrorBoundary name="Code"><LazyPseudocodeImporter
-                isVisible={isVisible} vm={vm} onCp1CodeSlot={setCp1CodeSlot}
+                isVisible={isVisible} vm={vm} onCp1CodeSlot={setCp1CodeSlot} onCardiacCodeSlot={setCardiacCodeSlot} onCardiacToolsSlot={setCardiacToolsSlot}
             /></EditorErrorBoundary>
         );
         const helpEditor = [
@@ -1222,8 +1300,8 @@ const GUIComponent = props => {
                                         <span aria-hidden="true" data-bw-tab-icon="">◇</span>
                                         <span data-bw-tab-label="">{'CAD'}</span>
                                     </Tab> : null}
-                                    <EditorHelp inTabList editor={helpEditor} locale={intl.locale}
-                                        label={intl.formatMessage({id: `gui.gui.${helpLabelId}`, defaultMessage: helpLabelDefault})} />
+                                    {helpEditor !== 'Code' && <EditorHelp inTabList editor={helpEditor} locale={intl.locale}
+                                        label={intl.formatMessage({id: `gui.gui.${helpLabelId}`, defaultMessage: helpLabelDefault})} />}
                                 </TabList>
                                 <TabPanel className={tabClassNames.tabPanel}>
                                     {middleContent === 'code' ? (
@@ -1239,6 +1317,11 @@ const GUIComponent = props => {
                                                     canUseCloud={canUseCloud}
                                                     grow={1}
                                                     isVisible={blocksTabVisible}
+                                                    onAddExtension={onExtensionButtonClick}
+                                                    onReadCode={() => {
+                                                        onActivateTab(CODE_TAB_INDEX);
+                                                        window.dispatchEvent(new CustomEvent('bw-read-blocks-into-code'));
+                                                    }}
                                                     options={{
                                                         media: `${basePath}static/${themeMap[theme].blocksMediaFolder}/`
                                                     }}
@@ -1366,7 +1449,8 @@ const GUIComponent = props => {
                                 toggle buttons) stays reachable in every mode.
                                 In controller mode the stage canvas is hidden
                                 so the panel owns the full column. */}
-                            <div style={dockMode === 'controller' || dockMode === 'arcade' || dockMode === 'cpx' || dockMode === 'arduboy' || dockMode === 'makecode' || dockMode === 'spikearena' || dockMode === 'cad' || dockMode === 'robots' ? {maxHeight: 44, overflow: 'hidden', flexShrink: 0, borderBottom: '3px solid #475569', background: '#cbd5e1', boxShadow: '0 3px 6px rgba(0,0,0,0.22)', position: 'relative', zIndex: 5, boxSizing: 'border-box'} : undefined}>
+                            <div hidden={isFullScreen && dockMode === 'controller'}
+                                style={circuitOwnsStage || dockMode === 'controller' || dockMode === 'arcade' || dockMode === 'cpx' || dockMode === 'arduboy' || dockMode === 'makecode' || dockMode === 'spikearena' || dockMode === 'cad' || dockMode === 'robots' ? {maxHeight: 44, overflow: 'hidden', flexShrink: 0, borderBottom: '3px solid #475569', background: '#cbd5e1', boxShadow: '0 3px 6px rgba(0,0,0,0.22)', position: 'relative', zIndex: 5, boxSizing: 'border-box'} : undefined}>
                                 <EditorErrorBoundary name="Stage"><StageWrapper
                                     isFullScreen={isFullScreen}
                                     isRendererSupported={isRendererSupported}
@@ -1435,11 +1519,6 @@ const GUIComponent = props => {
                                 <React.Suspense fallback={
                                     <div style={{padding: 24, color: '#64748b'}}>Loading controller…</div>
                                 }>
-                                    {/* zIndex 1 makes this wrapper a stacking context: the panel's own
-                                        zIndex:10 stays inside it, above the in-stage circuit portal
-                                        (z-index 0). While the debugger has a live machine or program,
-                                        circuit-tab.jsx splits the column at data-bw-stage-dock: Widgets
-                                        on top, debugger below (z-index 2), so neither covers the other. */}
                                     <div data-bw-stage-dock="controller" style={dockFullScreenStyle || {position: 'relative', zIndex: 1, flex: 1, minHeight: 0, borderTop: '1px solid #ffffff', background: '#f8fafc'}}>
                                         <ControllerPanelView
                                             panel={controllerPanel}
@@ -1447,7 +1526,10 @@ const GUIComponent = props => {
                                             manageBoardBinding={false}
                                             vm={vm}
                                             machineConsole={machineConsole}
+                                            machineTerminal={machineTerminal}
+                                            sendBasicLine={vm?.runtime?.bwBasicSerial}
                                             cp1WidgetSlot={cp1Attached ? setCp1ControllerSlot : undefined}
+                                            cardiacWidgetSlot={cardiacAttached ? setCardiacControllerSlot : undefined}
                                             locale={intl.locale}
                                             isFullScreen={isFullScreen}
                                             onExitFullScreen={props.onExitFullScreen}
@@ -1456,7 +1538,7 @@ const GUIComponent = props => {
                                     </div>
                                 </React.Suspense>
                             ) : (
-                                <Box className={styles.targetWrapper}>
+                                <Box className={styles.targetWrapper} style={circuitOwnsStage ? {display: 'none'} : undefined}>
                                     <EditorErrorBoundary name="Sprites"><React.Suspense fallback={<div role="status">Loading sprites and artwork…</div>}>
                                         <TargetPane stageSize={stageSize} vm={vm} />
                                     </React.Suspense></EditorErrorBoundary>
@@ -1468,7 +1550,7 @@ const GUIComponent = props => {
                 <DragLayer />
             </Box>
         );
-    }}</MediaQuery>{machineManagerModal}</React.Fragment></Cp1Surfaces.Provider>);
+    }}</MediaQuery>{machineManagerModal}<LogikusHost panel={controllerPanel} locale={intl.locale} vm={vm} /></React.Fragment></Cp1Surfaces.Provider></CardiacSurfaces.Provider>);
 };
 
 GUIComponent.propTypes = {

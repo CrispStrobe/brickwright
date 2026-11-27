@@ -4,7 +4,7 @@ import {catalog, provenance, mediaCommit, fetchAssets, runNativeBenchmark} from 
 import styles from './i8086-lab.css';
 
 // settings-menu.jsx loads this panel lazily on the first open request and mounts it already open.
-export default function NativeBenchmarks ({initiallyOpen = false}) {
+export default function NativeBenchmarks ({initiallyOpen = false, initialOpenDetail}) {
     const dialog = useRef(null);
     const active = useRef(null);
     const [open, setOpen] = useState(initiallyOpen);
@@ -20,7 +20,11 @@ export default function NativeBenchmarks ({initiallyOpen = false}) {
     };
     const close = () => { stop(); setOpen(false); };
     useEffect(() => {
-        const show = () => setOpen(true);
+        const show = event => {
+            setOpen(true);
+            if (Object.hasOwn(catalog, event.detail?.run)) launchPreset(event.detail.run);
+        };
+        if (Object.hasOwn(catalog, initialOpenDetail?.run)) launchPreset(initialOpenDetail.run);
         window.addEventListener('bw-open-native-benchmarks', show);
         return () => {
             window.removeEventListener('bw-open-native-benchmarks', show);
@@ -34,6 +38,7 @@ export default function NativeBenchmarks ({initiallyOpen = false}) {
         return () => { if (node.open) node.close(); };
     }, [open]);
     const execute = async operation => {
+        active.current?.abort();
         const controller = new AbortController();
         active.current = controller; setBusy(true); setOutput(null);
         try {
@@ -52,9 +57,9 @@ export default function NativeBenchmarks ({initiallyOpen = false}) {
         setAssets(result);
         setStatus('Ready. Review the retained notices, then run the native i80386 engine.');
     });
-    const run = () => execute(async controller => {
+    const runAssets = async (prepared, controller) => {
         setStatus('Launching native i80386…');
-        const result = await runNativeBenchmark(assets, {signal: controller.signal, onProgress: progress => {
+        const result = await runNativeBenchmark(prepared, {signal: controller.signal, onProgress: progress => {
             if (active.current !== controller) return;
             setStatus(`Running native i80386 — ${progress.retired} retired instructions`); setOutput(progress);
         }});
@@ -62,6 +67,18 @@ export default function NativeBenchmarks ({initiallyOpen = false}) {
         setOutput(result);
         setStatus(result.accepted ? `Complete — native execution validated; exit ${result.exitCode}.` :
             `No accepted result — ${result.status}; exit ${result.exitCode}.`);
+    };
+    const run = () => execute(controller => runAssets(assets, controller));
+    const launchPreset = id => execute(async controller => {
+        setProject(id);
+        setAssets(null);
+        setNotice('');
+        setStatus('Fetching and verifying SHA-256…');
+        const prepared = await fetchAssets(id, {signal: controller.signal,
+            onNotice: text => { if (active.current === controller) setNotice(text); }});
+        if (active.current !== controller) return;
+        setAssets(prepared);
+        await runAssets(prepared, controller);
     });
     if (!open) return null;
     return createPortal(<dialog ref={dialog} className={styles.dialog} aria-labelledby="native-benchmarks-title"

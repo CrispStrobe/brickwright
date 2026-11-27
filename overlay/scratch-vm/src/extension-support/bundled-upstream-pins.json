@@ -99,8 +99,10 @@
         },
         "stc12": {
             "path": "extensions/CrispStrobe/stc12.js",
-            "sha256": "f1fd19debc58c18d9203a96427f4d017c78843a978125e7ec84f00bd4001972a",
-            "bytes": 42696
+            "sha256": "930d1df5fcb81e566a0640aaa7c50e8c4e6fa8fcc6a5258c981b268ad953c381",
+            "bytes": 42999,
+            "repo": "CrispStrobe/extensions",
+            "commit": "65257390341f6af333ae45af6a1fcb44ffdbd041"
         },
         "stc12live": {
             "path": "extensions/CrispStrobe/stc12live.js",
@@ -126,8 +128,10 @@
         },
         "devices": {
             "path": "extensions/CrispStrobe/devices.js",
-            "sha256": "70b61cc973c4b5074bbe74f629d9116e26d0953dd337d5fb125869dd94634a88",
-            "bytes": 31078
+            "sha256": "2923cdfaf7ad96fd0a9d546bcf0457913b6d77d6e14cd812ca895b3d76da1255",
+            "bytes": 33310,
+            "repo": "CrispStrobe/extensions",
+            "commit": "624cd047851e4434df5d99432dc4f1fe4035d505"
         },
         "microbitplus": {
             "path": "extensions/CrispStrobe/microbitplus.js",
@@ -146,7 +150,7 @@
             "sha256": "e7c35e7ae3d45ec2bdb1a7b1b9d51c727889bfd3780b852ffb11fe13a92ad079",
             "bytes": 15127,
             "repo": "CrispStrobe/bw-board",
-            "commit": "7e0bf8cf8beeb3329f0be550ae08fdd8de5d2099"
+            "commit": "324b8cc247efd1f35ea318b85116df4761bee63b"
         }
     }
 }

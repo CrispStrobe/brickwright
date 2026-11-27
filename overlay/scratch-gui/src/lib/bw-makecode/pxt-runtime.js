@@ -366,10 +366,14 @@ var bwOnMessage = async function (e) {
     var m = e.data;
     try {
         if (m.op === 'init') {
-            var r = await fetch(m.base + 'target.json');
-            if (!r.ok) throw Object.assign(new Error('target.json: HTTP ' + r.status), {code: 'NO_RUNTIME'});
-            self.pxtTargetBundle = await r.json();
-            importScripts(m.base + 'pxtworker.js');
+            try {
+                var r = await fetch(m.base + 'target.json');
+                if (!r.ok) throw new Error('target.json: HTTP ' + r.status);
+                self.pxtTargetBundle = await r.json();
+                importScripts(m.base + 'pxtworker.js');
+            } catch (error) {
+                throw Object.assign(new Error(error.message), {code: 'NO_RUNTIME'});
+            }
             self.onmessage = bwOnMessage;
             postMessage({id: m.id, ok: true});
         } else if (m.op === 'resolveProjectInputs') {

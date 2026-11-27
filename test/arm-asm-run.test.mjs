@@ -85,14 +85,14 @@ test('the Pico program toggles GP25 on rp2040js', async () => {
 
 test('the ASM ▶ hands an ARM image to the debug panel as firmware', () => {
     const src = read('components/tw-pseudocode/pseudocode-importer.jsx');
-    const body = src.slice(src.indexOf('async assembleAndRun ()'));
+    const body = src.slice(src.indexOf('async assembleAndRun ('));
     const fn = body.slice(0, body.indexOf('\n    /**'));
     assert.match(fn, /\} else if \(armRunFor\(out\.target\)\) \{/);
     assert.match(fn, /imageFromIntelHex\(new TextDecoder\(\)\.decode\(out\.bytes\), run\.origin\)/);
     assert.match(fn, /format: 'firmware', kind: run\.kind/);
     assert.equal(src.split('asmBuiltArm:').length - 1, 2, 'asmBuiltArm is not in both locales');
     const panel = read('components/tw-pseudocode/debug-panel.jsx');
-    assert.match(panel, /if \(format === 'avr-sketch' \|\| format === 'firmware'\) return this\._runSketch\(e\.detail\);/);
+    assert.match(panel, /if \(format === 'avr-sketch' \|\| format === 'firmware'\) \{\s*if \(!e\.detail\?\.asmBlink\) return this\._runSketch\(e\.detail\);/);
     const runner = read('lib/bw-debug/debug-runner.js');
     for (const fn2 of ['attachRp2040js(built)', 'attachStm32F0Target(built)']) {
         const start = runner.indexOf(`async function ${fn2}`);

@@ -14,6 +14,7 @@
 // Framework-free: no React, no bundler globals. `defaultImageFetcher` uses the
 // host `fetch` + Web Crypto, both present in the browser and Node ≥ 18.
 
+import {PICOBB_FLASH, picoFlashStorageFor} from './pico-basic-flash.js';
 import {
     normalizeMachineConfig, validateMachineConfig
 } from './machine-config.js';
@@ -50,6 +51,8 @@ const SLOT_PROFILE = Object.freeze({
     // is UART0 on the debug panel's serial terminal.
     flash: 'uf2'
 });
+
+const SPECTRUM_ROM_SLOTS = {zx48: ['rom'], zx128: ['rom0', 'rom1']};
 
 const isObj = v => v != null && typeof v === 'object' && !Array.isArray(v);
 const isStr = v => typeof v === 'string' && v.length > 0;
@@ -155,6 +158,11 @@ export async function activateConfig(config, opts = {}) {
     const bootSlotId = cfg.bootOrder.find(id => cfg.slots[id]) || Object.keys(cfg.slots)[0];
     if (!bootSlotId) throw new Error('functional config has no boot slot to activate');
     const bootRef = cfg.slots[bootSlotId];
+    const spectrumRoms = SPECTRUM_ROM_SLOTS[cfg.machine];
+    if (spectrumRoms) {
+        const missing = spectrumRoms.find(id => !cfg.slots[id]);
+        if (missing) throw new Error(`Spectrum requires the ${missing} slot`);
+    }
 
     // machineConfig for createDebugRunner is the wired-extractor {regions,chips}
     // — an INLINE object (the Eater 6502 case) passes straight through; a STRING
@@ -173,9 +181,9 @@ export async function activateConfig(config, opts = {}) {
     // A Linux kernel's initramfs is the same kind of companion: a `kernel`
     // boot needs its `initrd` before the first instruction runs — and its
     // `snapshot`, when the config has one, to open at the shell prompt.
-    const extraSlots = ['bios', 'vga-rom', 'initrd', 'snapshot',
-        ...(cfg.machine === 'i80386' && machinePreset === 'freedos-vga' ? ['hdd', 'floppy'] : [])]
-        .filter(id => id !== bootSlotId && cfg.slots[id]);
+    const extraSlots = [...new Set(['bios', 'vga-rom', 'initrd', 'snapshot',
+        ...(cfg.machine === 'i80386' && machinePreset === 'freedos-vga' ? ['hdd', 'floppy'] : []),
+        ...(spectrumRoms ? [...spectrumRoms, 'tape', 'snapshot'] : [])])].filter(id => id !== bootSlotId && cfg.slots[id]);
     // ALL AT ONCE. The boot image and every companion are fetched in parallel:
     // one after the other, the Linux lesson's three files (9.5 MB) cost the sum
     // of three round trips before the first instruction. They are started in
@@ -195,12 +203,58 @@ export async function activateConfig(config, opts = {}) {
         name: cfg.title || bootSlotId,
         profile: SLOT_PROFILE[bootSlotId] || null
     };
+    if (spectrumRoms) {
+        const entries = Object.fromEntries([...spectrumRoms, 'tape', 'snapshot']
+            .filter(id => cfg.slots[id]).map(id => [id, id === bootSlotId ? resolved.bytes : media[id].bytes]));
+        for (const id of spectrumRoms) {
+            if (entries[id].length !== 16384) throw new Error(`Spectrum ${id} must contain 16384 bytes`);
+        }
+        bootMedia.spectrum = {kind: cfg.machine, entries};
+    }
+    if (cfg.machine === 'gpascal') bootMedia.profile = 'gpascal';
+    if (bootSlotId === 'cpmsys' && isStr(cfg.provenance?.program?.name)) {
+        bootMedia.name = cfg.provenance.program.name;
+    }
     if (cfg.machine === 'i80386') bootMedia.nativeBlocks = cfg.nativeBlocks === true;
     if (bootRef.geometry) bootMedia.geometry = {...bootRef.geometry};
     // A ROM image states its own load address via the config; carry it so the
     // reset vector reads from real bytes (debug-runner's romAt path).
     if (typeof bootRef.romAt === 'number') bootMedia.romAt = bootRef.romAt;
 
+    const loadMounts = (mounts, system) => Promise.all(Object.entries(mounts).map(async ([name, ref]) => {
+        if (!/^[a-z0-9_~-]{1,8}(?:\.[a-z0-9_~-]{1,3})?$/i.test(name)) {
+            throw new Error(`Invalid ${system} mount filename: ${name}`);
+        }
+        const file = await resolveSlot(ref, fetcher, name);
+        return [name.toUpperCase(), file.bytes];
+    }));
+    if (bootSlotId === 'cpmsys' && isStr(cfg.provenance?.cpmLaunch)) {
+        const program = cfg.provenance.cpmLaunch.toUpperCase();
+        if (!/^[A-Z0-9_~-]{1,8}\.COM$/.test(program)) throw new Error('Invalid CP/M program filename');
+        bootMedia.name = program;
+        bootMedia.cpmLaunch = program.slice(0, -4);
+        bootMedia.cpmFiles = Object.fromEntries(await loadMounts(cfg.provenance.cpmMount || {}, 'CP/M'));
+    }
+    if (TARGET_KIND[cfg.machine] === 'i8086') bootMedia.x86Variant = cfg.cpu.variant;
+    if (TARGET_KIND[cfg.machine] === 'i8086' && ['com', 'exe', 'disk'].includes(bootSlotId)) {
+        bootMedia.dosVariant = cfg.cpu.variant;
+        if (cfg.provenance?.program?.max >= 100_000_000) bootMedia.dosFastStart = true;
+        if (typeof cfg.provenance?.program?.args === 'string') bootMedia.dosArgs = cfg.provenance.program.args;
+        const files = await loadMounts(cfg.provenance?.dosMount || {}, 'DOS');
+        if (files.length) bootMedia.dosFiles = new Map(files);
+    }
+
+    if (cfg.machine === 'rp2040js' && bootSlotId === 'flash') {
+        const basicConsole = cfg.provenance?.program?.basicConsole;
+        if (basicConsole === 'piccolo' || basicConsole === 'stefan') {
+            bootMedia.picoBasicConsole = basicConsole;
+            bootMedia.picoFlashStorage = picoFlashStorageFor(cfg.provenance?.program?.flashStorage, bootRef.sha256);
+        } else if (cfg.provenance?.program?.startKey === '\r') {
+            bootMedia.picoWakeOnPrompt = true;
+            bootMedia.picoBasicConsole = 'bbc';
+            if (bootRef.sha256?.toLowerCase() === PICOBB_FLASH.sha256) bootMedia.picoFlashStorage = PICOBB_FLASH;
+        }
+    }
     const warnings = [];
 
     const targetKind = TARGET_KIND[cfg.machine] || cfg.machine;
@@ -215,7 +269,11 @@ export async function activateConfig(config, opts = {}) {
     // these on the ControllerPanel and mirrors video into `videoWidget`; a
     // config that declares none has no screen widget (videoWidget: null), which
     // is correct for a serial-only or headless machine.
-    const widgets = Array.isArray(cfg.widgets) ? cfg.widgets : [];
+    const widgets = Array.isArray(cfg.widgets) ? [...cfg.widgets] : [];
+    if (spectrumRoms && !widgets.some(widget => widget?.source === 'video')) {
+        widgets.push({name: cfg.machine === 'zx128' ? 'ZX Spectrum 128K' : 'ZX Spectrum 48K',
+            type: 'simplevga', source: 'video', config: {width: 288, height: 224}});
+    }
     const videoWidgetDecl = widgets.find(w => w && w.source === 'video') || null;
 
     return {

@@ -1,6 +1,6 @@
 {
   "note": "Free (LGPL) AT/386 firmware \u2014 the vendored, redistributable ROMs that let the experimental fully-free 80386 AT machine POST, boot, and run FreeDOS in the browser with NO proprietary IBM 5170 ROM. Both binaries are third-party LGPL firmware (the Bochs legacy BIOS and the LGPL VGABios), shipped UNMODIFIED. They are vendored here from bw-board's roms/free-at-bios/ at the pinned sha (bwBoardPin), which is itself an unmodified copy of the upstreams below. lite's debug-runner (attachI80386) loads bios at 0xF0000 + the 386 high alias 0xFF0000 and vgabios at 0xC0000. These REPLACE the copyrighted IBM AT ROM, which stays an optional maintainer-only fidelity oracle ($AT_BIOS_ROM, never committed).",
-  "bwBoardPin": "eb3ec0a7b4e8557e6e3c181a70a3fad5e8d09f08",
+  "bwBoardPin": "d21d6d8b819263eb08231134b7556efa82289a90",
   "upstreamOf": "vendored from bw-board roms/free-at-bios (unmodified upstream firmware)",
   "roms": [
     {

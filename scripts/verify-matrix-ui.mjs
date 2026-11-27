@@ -68,7 +68,7 @@ const check = (name, ok, detail = '') => {
     if (!ok) failures.push(name);
 };
 
-const browser = await chromium.launch();
+const browser = await chromium.launch({executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
 try {
     const page = await browser.newPage({viewport: {width: 1600, height: 1000}});
     page.on('dialog', d => d.accept());
@@ -84,30 +84,20 @@ try {
     const device = page.getByTestId('bw-device-select');
     await device.waitFor({state: 'visible', timeout: 60000});
 
-    // With no chip chosen there is nothing to say, and the badge must not
-    // invent a device.
-    check('no badge without a device', (await page.getByTestId('bw-matrix-badge').count()) === 0);
-
-    // Pseudocode is the tab that opens first; every device's cell for it is
-    // lowered, so the badge reads "lowered via ...".
+    const info = page.getByTestId('bw-code-info');
+    const capabilities = page.getByTestId('bw-code-device-capabilities');
+    const popover = page.getByTestId('bw-code-info-popover');
+    await info.click();
+    check('Code help does not invent a device', (await capabilities.count()) === 0);
+    await info.click();
     await device.selectOption('pico');
-    const badge = page.getByTestId('bw-matrix-badge');
-    await badge.waitFor({state: 'visible', timeout: 15000});
-    // The badge is an (i) button with a fixed accessible name (so it never
-    // matches a language tab's name): the summary is its data-summary, the
-    // sentence its title, and a click opens a popover showing both.
-    const pseudoPico = (await badge.getAttribute('data-summary')) || '';
-    check('badge for pseudocode on the Pico says lowered', /lowered via/.test(pseudoPico), pseudoPico);
-    const title = (await badge.getAttribute('title')) || '';
-    check('badge title is the full sentence', /Pseudocode on Raspberry Pi Pico:/.test(title), title.slice(0, 80));
-    const popover = page.getByTestId('bw-matrix-badge-popover');
-    check('badge popover stays closed until asked', (await popover.count()) === 0);
-    await badge.click();
-    await popover.waitFor({state: 'visible', timeout: 5000});
-    const popoverText = (await popover.textContent()) || '';
-    check('badge popover shows the summary and the sentence',
-        /lowered via/.test(popoverText) && /Pseudocode on Raspberry Pi Pico:/.test(popoverText), popoverText.slice(0, 120));
-    await badge.click();
+    check('capabilities are not exposed in a second toolbar button', (await page.getByTestId('bw-matrix-badge').count()) === 0);
+    check('Code help stays closed until asked', (await popover.count()) === 0);
+    await info.click();
+    const capabilityText = (await capabilities.textContent()) || '';
+    check('Code help shows the device summary and sentence',
+        /lowered via/.test(capabilityText) && /Pseudocode on Raspberry Pi Pico:/.test(capabilityText), capabilityText);
+    await info.click();
     await popover.waitFor({state: 'detached', timeout: 5000});
 
     // The panel: one column per chip family, one row per language.
@@ -152,17 +142,14 @@ try {
     check('the panel carries the verification tier and the oracle\'s census status (T8)', /tier 2a \(emu8051: standing in bw-board CI\)/.test(c60), c60.slice(0, 160));
     check('its sibling still compiles in the browser', /in the browser/.test(c60), c60.slice(0, 120));
 
-    // The panel and the badge must also GO AWAY: toggling off removes the
-    // panel, and clearing the device removes the badge. Appearance alone
-    // proves nothing about a toggle.
     await page.getByTestId('bw-matrix-toggle').click();
     let gone = true;
     await panel.waitFor({state: 'detached', timeout: 5000}).catch(() => { gone = false; });
     check('toggling again removes the panel', gone);
     await device.selectOption('');
-    let badgeGone = true;
-    await badge.waitFor({state: 'detached', timeout: 5000}).catch(() => { badgeGone = false; });
-    check('clearing the device removes the badge', badgeGone);
+    await info.click();
+    await popover.waitFor();
+    check('clearing the device removes its capabilities from Code help', (await capabilities.count()) === 0);
 
     check('no page errors', pageErrors.length === 0, pageErrors.join(' | ').slice(0, 200));
 } finally {

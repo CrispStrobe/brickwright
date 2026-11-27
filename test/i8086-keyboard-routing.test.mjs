@@ -6,12 +6,9 @@
 // discipline, and the capability gate that decides whether a keyboard is
 // offered at all.
 //
-// It is a SOURCE-LEVEL gate rather than a rendered-DOM one, and that is a real
-// limit stated rather than hidden: there is no prebuilt bundle on this box to
-// drive a browser against. What it does check is the three things that were
-// actually wrong in the analogous paths before — a map keyed on the wrong
-// browser field, a break code never sent, and a widget offered on a machine
-// that cannot take one.
+// These source checks protect the keyboard map, make/break handling, and
+// the handoff into Controller. verify-i8086-browser.mjs exercises the same
+// handoff with physical key events in the rendered application.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -26,6 +23,8 @@ const runner = readFileSync(resolve(repo,
     'overlay/scratch-gui/src/lib/bw-debug/debug-runner.js'), 'utf8');
 const panel = readFileSync(resolve(repo,
     'overlay/scratch-gui/src/components/tw-pseudocode/debug-panel.jsx'), 'utf8');
+const gui = readFileSync(resolve(repo,
+    'overlay/scratch-gui/src/components/gui/gui.jsx'), 'utf8');
 
 /** Pull the scancode table out of the source and evaluate it. */
 function scancodeMap() {
@@ -75,8 +74,12 @@ test('the keyboard is offered ONLY when the machine can take a key', () => {
         'debug-runner must gate runner.keyIn on the declared capability');
     assert.match(runner, /delete runner\.keyIn/,
         'and must REMOVE it otherwise, not leave a stale one from a previous machine');
-    assert.match(panel, /typeof this\.state\.runner\.keyIn === 'function'[\s\S]{0,80}sendScancodeFn/,
-        'the panel passes sendScancodeFn only when the runner has keyIn');
+    assert.match(panel, /keyInFn: spectrum[^\n]+\n\s+: typeof runner\.keyIn === 'function' \? sc => runner\.keyIn\(sc\) : null/,
+        'the Controller screen receives a scancode handler only for a capable runner');
+    assert.match(panel, /if \(kbd && typeof runner\.keyIn === 'function'[\s\S]*?bwSteerMachineKeyboard\(\{keyInFn: sc => runner\.keyIn\(sc\), widget: kbd\}\)/,
+        'the Controller keyboard is attached only for a capable runner');
+    assert.match(gui, /keyIn: typeof p\.keyInFn === 'function' \? p\.keyInFn : null/,
+        'Controller retains the absence of keyboard input when mounting the screen');
 });
 
 test('scancodes take precedence over the Spectrum matrix', () => {

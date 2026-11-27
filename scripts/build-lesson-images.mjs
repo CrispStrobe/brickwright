@@ -73,6 +73,8 @@ export function surveyLessonExamples () {
     for (const file of readdirSync(WAVES).filter(f => f.endsWith('.json'))) {
         const wave = JSON.parse(readFileSync(path.join(WAVES, file), 'utf8'));
         for (const lesson of wave.lessons || []) {
+            // Logikus opens a native logic-machine preset instead of a gallery circuit.
+            if (lesson.loadMode === 'logikus' && lesson.presetId && !lesson.exampleId) continue;
             const entry = entries.get(lesson.exampleId);
             const programRel = entry && entry.files && entry.files.program;
             let program = null;

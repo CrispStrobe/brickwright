@@ -1,6 +1,6 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import {Popup, toolStyles} from './sim-lab-toolbar.jsx';
+import {Icon, Popup, toolStyles} from './sim-lab-toolbar.jsx';
 import TANG_NANO_20K from 'bw-circuit-ui/parts-data/tang_nano_20k.json';
 import {parseCst, emitCst} from '../../lib/bw-fpga/cst.js';
 import {bridge, constraintsFromBindings} from '../../lib/bw-fpga/port-bridge.js';
@@ -29,6 +29,7 @@ import {defaultCatalog, probeBackends, selectBackend, offerable}
 const L10N = {
     en: {
         workspace: 'Workspace',
+        more: 'More FPGA controls',
         designWorkspace: 'Design',
         buildWorkspace: 'Build',
         simulateWorkspace: 'Simulate',
@@ -219,6 +220,7 @@ const L10N = {
     },
     de: {
         workspace: 'Arbeitsbereich',
+        more: 'Weitere FPGA-Werkzeuge',
         designWorkspace: 'Entwerfen',
         buildWorkspace: 'Erstellen',
         simulateWorkspace: 'Simulieren',
@@ -515,6 +517,8 @@ const FpgaInfo = ({id, label, children}) => {
 
 const FPGA_AUTOSAVE_KEY = 'bw-fpga-autosave';
 
+const workspaceModes = [['design', 'build'], ['build', 'chip'], ['simulate', 'simulate']];
+
 const FpgaTab = (props) => {
     const T = L10N[pickLocale(props.locale)];
     const tools = toolStyles(false);
@@ -526,6 +530,7 @@ const FpgaTab = (props) => {
     // These select presentation only. Keep the canvas, waveform and schematic
     // mounted when switching workspaces so their design/session state survives.
     const [workspace, setWorkspace] = React.useState('design');
+    const [workspaceMenuOpen, setWorkspaceMenuOpen] = React.useState(false);
     const [editor, setEditor] = React.useState('canvas');
     const [exampleId, setExampleId] = React.useState(EXAMPLES[0].id);
     const [realization, setRealization] = React.useState('demo');
@@ -1085,10 +1090,11 @@ const FpgaTab = (props) => {
     return (
         <div data-testid="bw-fpga-workspace" style={{position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, overflowY: 'auto',
             padding: '0.75rem', lineHeight: 1.5, boxSizing: 'border-box'}}>
-            <div style={{...toolbar, position: 'sticky', top: 0, zIndex: 5}}>
+            <div data-fpga-toolbar style={{...toolbar, position: 'sticky', top: 0, zIndex: 5,
+                containerType: 'inline-size', flexWrap: 'nowrap'}}>
                 <strong style={{fontSize: 14, marginRight: '0.25rem'}}>{T.fpgaTitle}</strong>
-                <nav aria-label={T.workspace} style={{display: 'flex', gap: 4, flexWrap: 'wrap'}}>
-                    {['design', 'build', 'simulate'].map((mode, index) => (
+                <nav data-fpga-toolbar-navigation aria-label={T.workspace}>
+                    {workspaceModes.map(([mode], index) => (
                         <button key={mode} type="button" data-testid={`bw-fpga-workspace-${mode}`}
                             aria-pressed={workspace === mode} aria-controls={`bw-fpga-panel-${mode}`}
                             onClick={() => setWorkspace(mode)} style={workspace === mode ? tools.pressed : ui.secondary}>
@@ -1097,7 +1103,24 @@ const FpgaTab = (props) => {
                         </button>
                     ))}
                 </nav>
-                <span style={{flex: '1 1 0'}} />
+                <span data-fpga-active-workspace>{T[`${workspace}Workspace`]}</span>
+                <span style={{flex: '1 1 0', minWidth: 0}} />
+                <div data-fpga-toolbar-overflow>
+                    <Popup id="fpga-more" label={T.more} overflowMenu align="right" width={270}
+                        open={workspaceMenuOpen}
+                        onToggle={() => setWorkspaceMenuOpen(open => !open)}
+                        onClose={() => setWorkspaceMenuOpen(false)}
+                        button={<button type="button" data-testid="bw-fpga-more" aria-label={T.more}
+                            title={T.more} style={tools.button}><Icon name="more" /></button>}>
+                        {workspaceModes.map(([mode, icon]) => (
+                            <button key={mode} type="button" data-overflow-action aria-pressed={workspace === mode}
+                                aria-controls={`bw-fpga-panel-${mode}`} onClick={() => setWorkspace(mode)}>
+                                <Icon name={icon} />
+                                <span>{T[`${mode}Workspace`]}</span>
+                            </button>
+                        ))}
+                    </Popup>
+                </div>
                 <FpgaInfo id="help" label={T.help}>
                     <strong>{T.labInfo}</strong>
                     <p style={{margin: '0.25rem 0 0.6rem'}}>

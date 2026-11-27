@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import {openCodeActions as openCodeMenu, closeCodeActions as closeCodeMenu} from './lib-code-actions.mjs';
+import {openCodeActions as openCodeMenu, closeCodeActions as closeCodeMenu, openCodeInfo} from './lib-code-actions.mjs';
 import {pixelControl} from './lib-pixel-controls.mjs';
 /** Actual Pixel → Code → Blocks → SB3 journey. VM access observes only. */
 import assert from 'node:assert/strict';
@@ -88,7 +88,8 @@ const apply = async () => {
         const button = document.querySelector('button[title^="Compile this"]');
         return vm.editingTarget?.id !== id && button && !button.disabled;
     }, prior, {timeout: 30000});
-    assert.match(await page.getByTestId('bw-code-status').innerText(), /Blocks loaded/);
+    await (await openCodeInfo(page)).getByTestId('bw-code-status').filter({hasText: /Blocks loaded/}).waitFor();
+    await page.getByRole('button', {name: 'Close Code help'}).click();
 };
 try {
     await page.addInitScript(() => {
@@ -153,7 +154,8 @@ try {
     await openCodeMenu(page);
     await page.getByTestId('bw-open-file').locator('input[type=file]').setInputFiles({name: 'unrelated.bw',
         mimeType: 'text/plain', buffer: Buffer.from('SPRITE Sprite1:\n  WHEN flag clicked:\n    say "new project"\n')});
-    await page.getByTestId('bw-code-status').getByText(/Loaded unrelated/).waitFor({state: 'visible'});
+    await (await openCodeInfo(page)).getByTestId('bw-code-status').filter({hasText: /Loaded unrelated/}).waitFor();
+    await page.getByRole('button', {name: 'Close Code help'}).click();
     await closeCodeMenu(page);
     await apply();
     const unrelated = await archive('unrelated');

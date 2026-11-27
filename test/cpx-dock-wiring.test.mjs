@@ -33,9 +33,15 @@ test('a DEVICE CPX program gets a button that opens the cpx dock', () => {
 test('the cpx dock renders the CPX pane, and restores only for a CPX program', () => {
     assert.match(gui, /import\(\/\* webpackChunkName: "bw-cpx-device" \*\/ '\.\.\/tw-pseudocode\/cpx-device-pane\.jsx'\)/);
     assert.match(gui, /dockMode === 'cpx' \? \([\s\S]{0,300}<CpxDevicePane vm=\{vm\} \/>/, 'gui.jsx renders no pane for it');
-    assert.match(gui, /\['top', 'right', 'controller', 'microbit', 'arcade', 'cpx', /, 'a saved cpx dock is discarded');
-    assert.match(gui, /if \(dock === 'cpx' && \(props\.vm\?\.runtime\?\.bwDeviceId \|\| props\.vm\?\.runtime\?\.stc\?\.device\) !== 'cpx'\) return 'top';/,
-        'a saved cpx dock would reopen over a project that is not a CPX');
+    const initializer = gui.match(/const \[dockMode, setDockMode\] = React\.useState\(\(\) => \{([\s\S]*?)^    \}\);/m);
+    assert.ok(initializer, 'the right-pane restore logic is missing');
+    const restore = new Function('localStorage', 'props', initializer[1]);
+    const storage = {getItem: key => key === 'bw-debug-dock' ? 'cpx' : null};
+    const propsFor = runtime => ({vm: {runtime}});
+    assert.equal(restore(storage, propsFor({bwDeviceId: 'cpx'})), 'cpx');
+    assert.equal(restore(storage, propsFor({stc: {device: 'cpx'}})), 'cpx');
+    assert.equal(restore(storage, propsFor({bwDeviceId: 'arduino-uno', stc: {device: 'cpx'}})), 'top');
+    assert.equal(restore(storage, propsFor({})), 'top');
 });
 
 test('the pane draws the extension\'s state and drives the board only through its input API', () => {

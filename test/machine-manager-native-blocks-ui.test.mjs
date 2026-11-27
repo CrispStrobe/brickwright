@@ -164,3 +164,146 @@ test('FreeDOS file selection survives React 16 clearing a pooled event before st
     assert.equal(runs[0].slots.floppy.url, 'local-media:floppy');
     renderer.unmount();
 });
+
+test('the Build Machine library starts on the selected target and supports showing all targets', async () => {
+    const MachineManager = await loadManager();
+    const store = createMemoryMachineStore([
+        newMachineConfig({title: 'LCD test ROM', machine: 'eater6502', slots: {rom: 'lcd.bin'}}),
+        config('i8086', 'DOS 8086')
+    ]);
+    let renderer;
+    await act(async () => {
+        renderer = create(React.createElement(MachineManager, {store, preferredMachine: 'eater6502', locale: 'en'}));
+    });
+    try {
+        const filter = renderer.root.findByProps({'aria-label': 'Machine type'});
+        assert.equal(filter.props.value, 'eater6502');
+        assert.equal(renderer.root.findAllByProps({'data-testid': 'bw-mm-row'}).length, 1);
+        await act(async () => filter.props.onChange({target: {value: ''}}));
+        assert.equal(renderer.root.findAllByProps({'data-testid': 'bw-mm-row'}).length, 2);
+    } finally {
+        renderer.unmount();
+    }
+});
+
+test('an HTTPS media manifest resolves relative ROM paths in the supplied repository', async t => {
+    const MachineManager = await loadManager();
+    const store = createMemoryMachineStore();
+    const manifest = 'https://raw.githubusercontent.com/example/media/0123456789/brickwright-media.json';
+    const request = t.mock.method(globalThis, 'fetch', async (url, options) => {
+        assert.equal(url.href, manifest);
+        assert.equal(options.redirect, 'error');
+        return {ok: true, json: async () => ({
+            title: 'Open demonstration', machine: 'eater6502', license: 'MIT', slots: {rom: 'hello.rom'}
+        })};
+    });
+    let renderer;
+    await act(async () => {
+        renderer = create(React.createElement(MachineManager, {store, preferredMachine: 'eater6502', locale: 'en'}));
+    });
+    try {
+        await act(async () => renderer.root.findByProps({'data-testid': 'bw-mm-import-text'})
+            .props.onChange({target: {value: manifest}}));
+        await act(async () => renderer.root.findByProps({'data-testid': 'bw-mm-import'}).props.onClick());
+        assert.equal(request.mock.callCount(), 1);
+        const [imported] = await store.list();
+        assert.equal(imported.slots.rom.url, new URL('hello.rom', manifest).href);
+        assert.equal(imported.provenance.source, manifest);
+    } finally {
+        renderer.unmount();
+    }
+});
+
+test('firmware browsing filters machine-specific media, searches wired presets and opens on the current board', async () => {
+    const MachineManager = await loadManager();
+    const store = createMemoryMachineStore();
+    let launched = false;
+    let renderer;
+    await act(async () => {
+        renderer = create(React.createElement(MachineManager, {
+            store, preferredMachine: 'eater6502', onClose() {},
+            wiredPresets: [
+                {id: 'basic', title: 'MS BASIC (6502)', run: () => { launched = true; }},
+                {id: 'vdp', title: 'VDP Hello', run() {}}
+            ]
+        }));
+    });
+    const get = id => renderer.root.findAllByProps({'data-testid': id});
+    assert.equal(get('bw-mm-local-386').length, 0);
+    assert.equal(get('bw-mm-wired-basic').length, 1);
+    assert.equal(get('bw-mm-wired-vdp').length, 1);
+    assert.equal(get('bw-mm-group-toggle')[0].props['aria-expanded'], true);
+    assert.equal(get('bw-mm-item-description').length, 0);
+    const search = renderer.root.findByProps({type: 'search'});
+    await act(async () => search.props.onChange({target: {value: 'basic'}}));
+    assert.equal(get('bw-mm-wired-vdp').length, 0);
+    await act(async () => get('bw-mm-wired-basic')[0].props.onClick());
+    assert.equal(launched, true);
+    await act(async () => renderer.root.findByType('select').props.onChange({target: {value: 'i80386'}}));
+    assert.equal(get('bw-mm-wired-basic').length, 0);
+    assert.equal(get('bw-mm-local-386').length, 0, 'search still filters the newly selected CPU');
+    await act(async () => search.props.onChange({target: {value: ''}}));
+    assert.equal(get('bw-mm-local-386').length, 1);
+    renderer.unmount();
+});
+
+test('reviewed media uses an immutable manifest URL and rejects a changed machine or license', async () => {
+    const {libraryMedia, openLibraryMedia} = await import('../overlay/scratch-gui/src/lib/bw-machines/library-media.js');
+    const item = libraryMedia.find(row => row.id === 'forth-cpm');
+    const oldFetch = globalThis.fetch;
+    try {
+        const manifest = {title: 'zForth', machine: 'z80', slots: {com: 'FORTH.COM'}, license: 'MIT'};
+        globalThis.fetch = async url => {
+            assert.match(String(url), /\/brickwright-media-lab\/[a-f0-9]{40}\/projects\/forth-cpm\/brickwright-media\.json$/);
+            return {ok: true, json: async () => manifest};
+        };
+        const config = await openLibraryMedia(item);
+        assert.equal(config.machine, 'z80');
+        assert.match(config.slots.com.url, /\/forth-cpm\/FORTH\.COM$/);
+        manifest.license = 'unknown';
+        await assert.rejects(openLibraryMedia(item), /reviewed catalog/);
+    } finally {
+        globalThis.fetch = oldFetch;
+    }
+});
+
+test('the machine picker launches each reviewed ACK binary with its own hash', async t => {
+    const {libraryMedia} = await import('../overlay/scratch-gui/src/lib/bw-machines/library-media.js');
+    const MachineManager = await loadManager();
+    const store = createMemoryMachineStore();
+    const ack = libraryMedia.filter(item => item.project === 'ack');
+    assert.deepEqual(ack.map(item => item.id), ['ack-pascal', 'ack-c', 'ack-modula2']);
+    const programs = [
+        {language: 'pascal', slots: {com: 'sieve.com'}, program: {kind: 'dos'}},
+        {language: 'c', slots: {com: 'fact.com'}, program: {kind: 'dos'}},
+        {language: 'modula2', slots: {com: 'sievemod.com'}, program: {kind: 'dos'}}
+    ];
+    t.mock.method(globalThis, 'fetch', async url => {
+        assert.match(String(url), /\/brickwright-media-lab\/[a-f0-9]{40}\/projects\/ack\/brickwright-media\.json$/);
+        return {ok: true, json: async () => ({machine: 'i8086', programs})};
+    });
+    const launched = [];
+    let renderer;
+    await act(async () => {
+        renderer = create(React.createElement(MachineManager, {
+            store, preferredMachine: 'i8086', locale: 'de',
+            onRun: cfg => { launched.push(cfg); }, onClose() {}
+        }));
+    });
+    try {
+        for (const item of ack) {
+            const row = renderer.root.findByProps({'data-machine-media': item.id});
+            const run = row.findAllByType('button').find(button => button.props.children === 'Starten');
+            assert.ok(run, item.id);
+            await act(async () => run.props.onClick());
+            const config = launched.at(-1);
+            assert.equal(config.title, item.title);
+            assert.equal(config.provenance.license, 'BSD-3-Clause');
+            assert.ok(new URL(config.slots.com.url).pathname.endsWith(`/ack/${item.sample.file}`));
+            assert.equal(config.slots.com.sha256, item.sample.sha256);
+        }
+        assert.equal(launched.length, ack.length);
+    } finally {
+        renderer.unmount();
+    }
+});

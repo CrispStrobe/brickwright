@@ -6,11 +6,16 @@ import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 
 const url = process.env.PROOF_URL || 'http://127.0.0.1:8777/';
-const browser = await chromium.launch({headless: true});
+const browser = await chromium.launch({headless: true,
+    executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
 try {
     const page = await browser.newPage({viewport: {width: 1400, height: 900}});
     const errors = [];
     page.on('pageerror', error => errors.push(String(error)));
+    // Desktop webviews can omit the browser's element fullscreen API.
+    await page.addInitScript(() => {
+        Object.defineProperty(Element.prototype, 'requestFullscreen', {value: undefined});
+    });
     await page.goto(url, {waitUntil: 'domcontentloaded'});
     await page.waitForFunction(() => typeof window.bwMirrorMachineVideo === 'function');
     const dismiss = page.getByTestId('bw-starter-backdrop').getByRole('button', {name: 'Not now'});
@@ -59,18 +64,26 @@ try {
     await page.keyboard.press('a');
     await page.keyboard.up('Control');
     await page.keyboard.down('Shift');
-    await page.getByTestId('bw-machine-fullscreen').click(); // blur releases Shift
-    await page.waitForFunction(() => document.fullscreenElement !== null);
+    const fullScreenButton = page.getByTestId('bw-machine-fullscreen');
+    await fullScreenButton.click();
+    await fullScreenButton.getByText('Exit full screen', {exact: true}).waitFor();
     const fullBox = await canvas.boundingBox();
-    assert.ok(fullBox.width >= 1200 && fullBox.height >= 800, 'full screen fills viewport');
-    await page.getByTestId('bw-machine-fullscreen').click();
-    await page.waitForFunction(() => document.fullscreenElement === null);
+    const viewport = page.viewportSize();
+    assert.ok(fullBox.width >= viewport.width - 3 && fullBox.y <= 36 &&
+        Math.abs(fullBox.y + fullBox.height - viewport.height) <= 1,
+        `full screen fills viewport: ${JSON.stringify(fullBox)}`);
+    assert.ok(await consoleFace.evaluate(element => element === document.activeElement));
+    await page.keyboard.press('b');
+    await page.keyboard.up('Shift');
+    await fullScreenButton.click();
+    await fullScreenButton.getByText('Full screen', {exact: true}).waitFor();
+    assert.deepEqual(await canvas.boundingBox(), box, 'exit restores the docked geometry');
     await canvas.hover({position: {x: 50, y: 50}});
     await page.mouse.move(box.x + 80, box.y + 70);
     await page.mouse.down({button: 'right'});
     await page.mouse.up({button: 'right'});
     const observed = await page.evaluate(() => window.__widgetProof);
-    assert.deepEqual(observed.keys, [0x1d, 0x1e, 0x9e, 0x9d, 0x2a, 0xaa],
+    assert.deepEqual(observed.keys, [0x1d, 0x1e, 0x9e, 0x9d, 0x2a, 0xaa, 0x30, 0xb0],
         'set-1 make/break and blur release reach the runner');
     assert.ok(observed.mouse.some(event => event.dx !== 0 || event.dy !== 0));
     assert.ok(observed.mouse.some(event => event.buttons === 2), 'right button uses PS/2 bit 1');

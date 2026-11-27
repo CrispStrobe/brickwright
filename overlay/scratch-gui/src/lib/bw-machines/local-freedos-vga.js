@@ -42,3 +42,20 @@ export function localFreedosVgaMachine({hdd = null, floppy = null, bios = null,
         provenance: {source: 'local-freedos-vga'},
     });
 }
+
+/** Start the virtual AT at POST without a boot disk. */
+export function localAtBiosMachine({bios = null, vgaRom = null} = {}) {
+    if (bios && bios.size !== 0x10000) throw new Error('AT BIOS must be a 64KB ROM image');
+    if (vgaRom && (vgaRom.size < 1 || vgaRom.size > 0xa000)) {
+        throw new Error('VGA option ROM must fit C0000-C9FFF');
+    }
+    return newMachineConfig({
+        title: bios?.name || '386 AT BIOS',
+        machine: 'i80386', executionMode: 'functional',
+        slots: {bios: {url: bios ? 'local-media:bios' : 'static/roms/free-386-bochs-bios.rom'},
+            ...(vgaRom ? {'vga-rom': {url: 'local-media:vga-rom'}} : {})},
+        bootOrder: ['bios'],
+        widgets: [{name: 'AT VGA', type: 'simplevga', source: 'video',
+            config: {width: 640, height: 480}}],
+    });
+}

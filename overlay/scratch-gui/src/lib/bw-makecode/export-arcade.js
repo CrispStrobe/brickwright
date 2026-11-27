@@ -233,6 +233,8 @@ import {legacyDirectMenuValue} from '../arcadeDialect.js';
 const directMenuValue = (block, slot, blocks) => block.fields?.[slot]?.[0] ?? legacyDirectMenuValue(block, slot, blocks);
 const settingType = (block, blocks) => directMenuValue(block, 'TYPE', blocks);
 import {svgToPixels, quantizeRgba, toImgLiteral, remapPalette, nearestIndex} from './pixel-image.js';
+import {planScratchArcadeKeyboard} from './scratch-arcade-keyboard.js';
+import {scratchArcadeHueTable} from './scratch-arcade-effects.js';
 // arcade-character-animations Predicate members.
 const CHARACTER_PREDICATE_NAMES = ['NotMoving', 'Moving', 'FacingUp', 'FacingRight', 'FacingDown', 'FacingLeft', 'MovingUp', 'MovingRight',
     'MovingDown', 'MovingLeft', 'HittingWallUp', 'HittingWallRight', 'HittingWallDown', 'HittingWallLeft'];
@@ -288,9 +290,9 @@ const ident = name => {
 };
 
 const LEGACY_SCROLLER_REVISION='43651f88b917a98ad886fdd4c1c2ad8001ce9b9c';
-const RESERVED = new Set(['score', 'life', 'info', 'game', 'scene', 'sprites', 'controller', 'Math', 'function', 'let', 'var',
+const RESERVED = new Set(['score', 'life', 'info', 'game', 'scene', 'screen', 'sprites', 'controller', 'Math', 'function', 'let', 'var',
     'if', 'else', 'while', 'for', 'return', 'true', 'false', 'null', 'new', 'this', 'pause', 'forever',
-    '__bwSdkCharCode','__bwSdkConcat','__bwScratchTimerStart','__bwScratchTimer','__bwResetScratchTimer', 'SpriteKind', 'SpriteFlag', 'ControllerButtonEvent', 'DialogLayout', 'Image', 'Buffer', 'NumberFormat', 'console', 'control', 'assets', 'images', 'image', 'hex', 'img', 'undefined', 'bwStringArraySettings']);
+    '__bwSdkCharCode','__bwSdkConcat','__bwScratchTimerStart','__bwScratchTimer','__bwResetScratchTimer', 'SpriteKind', 'SpriteFlag', 'ControllerButtonEvent', 'DialogLayout', 'Image', 'Buffer', 'NumberFormat', 'console', 'control', 'assets', 'images', 'image', 'hex', 'img', 'undefined', 'bwStringArraySettings', '_bwStageSpeech']);
 
 const arraySourceDescriptor=Object.getOwnPropertyDescriptor,arraySourceKeys=Reflect.ownKeys,
     arraySourcePrototype=Object.getPrototypeOf,arraySourceOwn=Object.hasOwn,arraySourceIsArray=Array.isArray,
@@ -574,6 +576,10 @@ class ArcadeEmitter {
         // stays a Boolean. A Scratch-only project keeps Scratch's numbers.
         this.arcadeValues = project.targets.some(t => Object.values(t.blocks || {})
             .some(b => b && /^(arcade|arrays)_/.test(b.opcode || '')));
+        this.scratchKeyboard = project.targets.some(target => Object.values(target.blocks || {})
+            .some(block => block?.opcode?.startsWith('arcade_'))) ? null : planScratchArcadeKeyboard(project.targets);
+        this.variableMonitors = new Map();
+        this.auxiliarySymbols = used;
         this.initialGlobals = new Map();
         this.editedSavedReferenceIds = new Map();
         this.globals = new Map();       // Scratch variable id|name -> TS name
@@ -849,11 +855,15 @@ class ArcadeEmitter {
     analyse () {
         this.clonable = new Set();
         this.costumeUsers = new Set();
+        this.scratchPose = new Set();
+        this.scratchScale = new Set();
+        this.scratchEffects = new Set();
         this.penUsers = new Set();
         this.usesBackdrops = false;
         this.usesPen = false;
         this.usesStopAll = false;
         this.usesSay = false;
+        this.usesStageSpeech = false;
         this.stopOthers = new Set();        // targets whose scripts can be stopped by one of their own
         this.soundWaiters = new Set();      // targets that wait on a tone
         const names = new Set(this.sprites.map(t => t.name));
@@ -876,6 +886,14 @@ class ArcadeEmitter {
                     else if (names.has(what)) this.clonable.add(what);
                 }
                 if (/^looks_(switchcostumeto|nextcostume|costumenumbername)$/.test(b.opcode) && !t.isStage) this.costumeUsers.add(t.name);
+                if (!t.isStage && /^motion_(direction|pointindirection|pointtowards|setrotationstyle|turnleft|turnright|movesteps)$/.test(b.opcode)) {
+                    this.scratchPose.add(t.name);
+                }
+                if (!t.isStage && /^looks_(size|setsizeto|changesizeby)$/.test(b.opcode)) this.scratchScale.add(t.name);
+                if (!t.isStage && (b.opcode === 'looks_cleargraphiceffects' ||
+                    /^looks_(changeeffectby|seteffectto)$/.test(b.opcode) && ['ghost', 'color'].includes(this.field(b, 'EFFECT').toLowerCase()))) {
+                    this.scratchEffects.add(t.name);
+                }
                 if (/^looks_(switchbackdropto|switchbackdroptoandwait|nextbackdrop|backdropnumbername)$|^event_whenbackdropswitchesto$/.test(b.opcode)) {
                     this.usesBackdrops = true;
                 }
@@ -1104,6 +1122,140 @@ class ArcadeEmitter {
         return local ? this.varName(this.target, name) : this.varName(this.project.targets.find(t => t.isStage) || this.target, name);
     }
 
+    scratchButton (key) {
+        return this.scratchKeyboard ? this.scratchKeyboard.controls.get(key) : KEY_BUTTON[key];
+    }
+
+    browserPointer () {
+        if (!this.opts.browserPointer) return null;
+        if (!this.pointer) {
+            this.warn('Mouse and touch controls use the MakeCode Arcade browser simulator.');
+            this.pointer = {
+                x: this.reserveAuxiliarySymbol('__bwPointerX'),
+                y: this.reserveAuxiliarySymbol('__bwPointerY'),
+                down: this.reserveAuxiliarySymbol('__bwPointerDown'),
+                hits: this.reserveAuxiliarySymbol('__bwPointerHits'),
+                scripts: new Map()
+            };
+        }
+        return this.pointer;
+    }
+
+    pointerSource (pre, handlers) {
+        const {x, y, down, hits, scripts} = this.pointer;
+        pre.push(
+            `let ${x} = 80`,
+            `let ${y} = 60`,
+            `let ${down} = false`,
+            [
+                `function ${hits} (sprite: Sprite): boolean {`,
+                '    if (!sprite || (sprite.flags & (SpriteFlag.Invisible | sprites.Flag.Destroyed)) !== 0) return false',
+                `    const dx = ${x} - sprite.x; const dy = ${y} - sprite.y`,
+                '    if (sprite.sx <= 0 || sprite.sy <= 0) return false',
+                '    const sine = Math.sin(sprite.rotation); const cosine = Math.cos(sprite.rotation)',
+                '    const ix = Math.floor((dx * cosine + dy * sine) / sprite.sx + sprite.image.width / 2)',
+                '    const iy = Math.floor((-dx * sine + dy * cosine) / sprite.sy + sprite.image.height / 2)',
+                '    return ix >= 0 && ix < sprite.image.width && iy >= 0 && iy < sprite.image.height && sprite.image.getPixel(ix, iy) !== 0',
+                '}'
+            ].join('\n')
+        );
+        const move = [`    ${x} = Math.clamp(0, 159, Math.floor(px))`, `    ${y} = Math.clamp(0, 119, Math.floor(py))`];
+        handlers.push(
+            ['browserEvents.onMouseMove(function (px, py) {', ...move, '})'].join('\n'),
+            `browserEvents.MouseLeft.onEvent(browserEvents.MouseButtonEvent.Released, function () { ${down} = false })`,
+            `browserEvents.onEvent(browserEvents.Event.PointerCancel, function () { ${down} = false })`,
+            `browserEvents.onEvent(browserEvents.Event.PointerLeave, function () { ${down} = false })`
+        );
+        const click = ['browserEvents.MouseLeft.onEvent(browserEvents.MouseButtonEvent.Pressed, function (px, py) {',
+            ...move, `    ${down} = true`];
+        if (scripts.size) {
+            click.push('    let picked: Sprite = null', '    let target = -1');
+            const shown = this.sprites.filter(sprite => this.emittedSprites.has(sprite));
+            for (const [index, sprite] of shown.entries()) {
+                const clones = this.isClonable(sprite);
+                const group = clones ? this.allOf(sprite.name) : `[${this.spriteVar.get(sprite.name)}]`;
+                click.push(`    for (const sprite of ${group}) {`,
+                    `        if (${hits}(sprite) && (!picked || sprite.z >= picked.z)) {`,
+                    `            picked = sprite; target = ${index}`, '        }', '    }');
+                const action = scripts.get(sprite);
+                if (action) action.index = index;
+            }
+            for (const [sprite, action] of scripts) {
+                const selected = sprite.isStage ? -1 : action.index;
+                if (selected === undefined) continue;
+                click.push(`    if (target === ${selected}) {`, ...action.functions.map(fn =>
+                    `        control.runInParallel(function () { ${fn}(${this.isClonable(sprite) ? 'picked' : ''}) })`), '    }');
+            }
+        }
+        click.push('})');
+        handlers.push(click.join('\n'));
+    }
+
+    reserveAuxiliarySymbol (base) {
+        let name = base;
+        const functions = new Set(this.functionNames());
+        while (this.auxiliarySymbols.has(name) || functions.has(name)) name += '_';
+        this.auxiliarySymbols.add(name);
+        return name;
+    }
+
+    scratchHueTable () {
+        if (!this.hueTableName) this.hueTableName = this.reserveAuxiliarySymbol('__bwScratchHueTable');
+        return this.hueTableName;
+    }
+
+    scratchEffectTable () {
+        this.warn('Scratch color and ghost effects are drawn with Arcade palette colors and dithered transparency.');
+        return this.scratchHueTable();
+    }
+
+    scratchTextAnswer () {
+        if (!this.textAnswer) {
+            this.textAnswer = this.reserveAuxiliarySymbol('__bwScratchAnswer');
+            this.warn('Scratch questions use Arcade’s text entry dialog.');
+        }
+        return this.textAnswer;
+    }
+
+    variableMonitor (id, name) {
+        if (!id || !name) return null;
+        if (this.variableMonitors.has(id)) return this.variableMonitors.get(id);
+        const owner = this.project.targets.find(target => target.variables?.[id]?.[0] === name);
+        if (!owner || !owner.isStage && this.isGlobalVar(name)) return null;
+        const info = this.infoVariable(name);
+        let value;
+        if (info) value = info === 'score' ? 'info.score()' : 'info.life()';
+        else if (this.isClonable(owner)) {
+            const key = `v:${name}`;
+            if (!this.cloneVars.has(owner.name)) this.cloneVars.set(owner.name, new Map());
+            this.cloneVars.get(owner.name).set(key, owner.variables[id][1]);
+            value = `${this.spriteVar.get(owner.name)}.data[${JSON.stringify(key)}]`;
+        } else value = this.varName(owner, name);
+        const flag = this.reserveAuxiliarySymbol('__bwMonitorVisible');
+        const entry = {value, name: owner.isStage ? name : `${owner.name}: ${name}`,
+            flag, visible: false};
+        this.variableMonitors.set(id, entry);
+        return entry;
+    }
+
+    variableMonitorDrawing () {
+        const dark = nearestIndex([0, 0, 0], this.palette);
+        const light = nearestIndex([255, 255, 255], this.palette);
+        const rows = [...this.variableMonitors.values()].map(({flag, value, name}) => [
+            `    if (${flag}) {`,
+            `        const label = (${JSON.stringify(name + ': ')} + (${value})).substr(0, 38)`,
+            '        const width = label.length * image.font5.charWidth + 4',
+            '        if (x + width > screen.width) { x = 2; y += 8 }',
+            '        if (y + 7 <= screen.height) {',
+            `            screen.fillRect(x, y, width, 7, ${dark})`,
+            `            screen.print(label, x + 2, y + 1, ${light}, image.font5)`,
+            '            x += width + 2',
+            '        }',
+            '    }'
+        ].join('\n'));
+        return ['game.onShade(function () {', '    let x = 2; let y = 2', ...rows, '})'].join('\n');
+    }
+
     /**
      * E1's import keeps an Arcade program's own code on a sprite named Game.
      * Dormant artwork on a hidden program host does not create an Arcade
@@ -1273,6 +1425,23 @@ class ArcadeEmitter {
                 this.legacyValueHelpers.set(key,{name,source});
                 return name;
             }
+            if (op === 'getCell' || op === 'setCell') {
+                params += ', rowInput: any, columnInput: any';
+                const index = 'const row = +rowInput; const column = +columnInput';
+                const valid = 'array && row >= 0 && column >= 0 && Math.floor(row) === row && Math.floor(column) === column';
+                if (op === 'getCell') {
+                    body = `${index}
+    return ${valid} && Array.isArray(array[row]) ?
+        ${this.namedOperationHelper('get')}(<any[]>array[row], column) : ""`;
+                } else {
+                    params += ', value: any';
+                    body = `${index}
+    if (${valid}) {
+        if (!array[row]) array[row] = []
+        if (Array.isArray(array[row])) (<any[]>array[row])[column] = ${parse()}(value)
+    }`;
+                }
+            }
             if(op==='pop')body='if (array) {\n        if (array.length) return array.pop()\n    }\n    return ""';
             if(op==='indexOf'){params+=', value: any';body=`return array ? array.indexOf(${parse()}(value)) : -1`;}
             if(op==='contains') {
@@ -1296,7 +1465,7 @@ class ArcadeEmitter {
         ${op==='insert'?`array.insertAt(position, ${parse()}(value))`:'if (position < array.length) array.removeAt(position)'}
     }`;
             }
-            const type=op==='contains'?'boolean':op==='indexOf'?'number':['get','pop'].includes(op)?'any':'void';
+            const type=op==='contains'?'boolean':op==='indexOf'?'number':['get','pop','getCell'].includes(op)?'any':'void';
             this.legacyValueHelpers.set(key,{name,source:`function ${name}(${params}): ${type} {
     ${body}
 }`});
@@ -1614,7 +1783,7 @@ class ArcadeEmitter {
     }
     isBoolean (b) {
         return !!b && ['arrays_valueTruthy','arrays_valueCompare','arrays_referenceRemove','arrays_referenceTruthy', 'arrays_contains', 'operator_and', 'operator_or', 'operator_not', 'operator_gt', 'operator_lt', 'operator_equals',
-            'sensing_touchingobject', 'sensing_keypressed', 'sensing_mousedown', 'data_listcontainsitem',
+            'sensing_touchingobject', 'sensing_keypressed', 'sensing_mousedown', 'data_listcontainsitem', 'planetemaths_multiple',
             'arcade_percentChance','arcade_settingsExists', 'arcade_spriteDataReadBoolean', 'arcade_bufferIsReadOnly', 'arcade_bufferEquals', 'arcade_spriteOverlaps', 'arcade_imagesOverlap', 'arcade_tileIs', 'arcade_tilemapIsWall', 'arcade_spriteTileKindAt', 'arcade_imageEquals', 'arcade_tileIsWall', 'arcade_isHittingTile', 'arcade_hasLife', 'arcade_hasPlayerScore', 'arcade_characterMatchesRule'].includes(b.opcode);
     }
 
@@ -1810,6 +1979,25 @@ class ArcadeEmitter {
         case 'arrays_parseLegacyValue': return this.legacyArrayInput(b);
         case 'arrays_jsonValue': return `${this.legacyValueHelper('json')}(${this.arrayValue(b,'VALUE')})`;
         case 'arrays_length': {const array=this.namedArray(b);return `(${array} ? ${array}.length : 0)`;}
+        case 'planetemaths_nombre_pi': return 'Math.PI';
+        case 'planetemaths_nombre_e': return 'Math.E';
+        case 'planetemaths_factorial':
+            return this.use('scratchFactorial', `_scratchFactorial(${v('NUM1')})`);
+        case 'planetemaths_sommechiffres':
+            return this.use('scratchDigitSum', `_scratchDigitSum(${v('NUM1')})`);
+        case 'planetemaths_multiple': {
+            const mode = this.literalInput(b, 'choix1') || this.menuField(b, 'choix1', 'choix1') || 'multiple';
+            if (mode === 'diviseur') return this.use('scratchMultiple', `_scratchMultiple(${v('NUM2')}, ${v('NUM1')})`);
+            if (mode === 'multiple') return this.use('scratchMultiple', `_scratchMultiple(${v('NUM1')}, ${v('NUM2')})`);
+            this.note('Planète Maths divisor test needs a fixed operation');
+            return 'false';
+        }
+        case 'arrays_get2D':
+            return `${this.namedOperationHelper('getCell')}(${this.namedArray(b)}, ${this.arrayValue(b, 'ROW')}, ${this.arrayValue(b, 'COL')})`;
+        case 'arrays_sum':
+            return this.use('namedArraySum', `_namedArraySum(${this.namedArray(b)})`);
+        case 'arrays_max':
+            return this.use('namedArrayMax', `_namedArrayMax(${this.namedArray(b)})`);
         case 'arrays_get': {
             const name=this.literalInput(b,'NAME');
             if(name!==null){
@@ -2392,7 +2580,8 @@ class ArcadeEmitter {
         }
         case 'motion_xposition': return me ? `((${me}.x - 80) * 3)` : '0';
         case 'motion_yposition': return me ? `((60 - ${me}.y) * 3)` : '0';
-        case 'motion_direction': this.note('direction'); return this.na();
+        case 'motion_direction': return me ? this.use('scratchPose', '_scratchDirection(' + me + ')') : '90';
+        case 'looks_size': return me ? 'Math.round(' + me + '.scale * 100)' : '100';
         case 'sensing_of': {
             const prop = this.field(b, 'PROPERTY');
             const other = this.spriteVar.get(this.menuField(b, 'OBJECT', 'OBJECT'));
@@ -2409,20 +2598,44 @@ class ArcadeEmitter {
             if (this.clonable.has(what)) return this.use('touching', `_touching(${me}, ${this.allOf(what)})`);
             const other = this.spriteVar.get(what);
             if (other) return `${me}.overlapsWith(${other})`;
-            if (what === '_mouse_') this.note(`touching mouse-pointer: ${MOUSE_WHY}`);
+            if (what === '_mouse_') {
+                const pointer = this.browserPointer();
+                if (pointer) return pointer.hits + '(' + me + ')';
+                this.note(`touching mouse-pointer: ${MOUSE_WHY}`);
+            }
             else this.note(`touching ${what || 'the mouse pointer'}`);
             return 'false';
         }
-        case 'sensing_mousex': this.note(`mouse x: ${MOUSE_WHY}`); return this.na();
-        case 'sensing_mousey': this.note(`mouse y: ${MOUSE_WHY}`); return this.na();
-        case 'sensing_mousedown': this.note(`mouse down?: ${MOUSE_WHY}`); return 'false';
-        case 'sensing_distanceto':
-            if (this.menuField(b, 'DISTANCETOMENU', 'DISTANCETOMENU') === '_mouse_') {
-                this.note(`distance to mouse-pointer: ${MOUSE_WHY}`);
-                return this.na();
-            }
-            this.note('sensing_distanceto as a value');
+        case 'sensing_mousex': {
+            const pointer = this.browserPointer();
+            if (pointer) return '(' + pointer.x + ' - 80) * 3';
+            this.note('mouse x: ' + MOUSE_WHY);
             return this.na();
+        }
+        case 'sensing_mousey': {
+            const pointer = this.browserPointer();
+            if (pointer) return '(60 - ' + pointer.y + ') * 3';
+            this.note('mouse y: ' + MOUSE_WHY);
+            return this.na();
+        }
+        case 'sensing_mousedown': {
+            const pointer = this.browserPointer();
+            if (pointer) return pointer.down;
+            this.note('mouse down?: ' + MOUSE_WHY);
+            return 'false';
+        }
+        case 'sensing_distanceto': {
+            const destination = this.menuField(b, 'DISTANCETOMENU', 'DISTANCETOMENU');
+            const pointer = destination === '_mouse_' ? this.browserPointer() : null;
+            const other = this.spriteVar.get(destination);
+            if (me && (other || pointer)) {
+                const dx = me + '.x - ' + (other ? other + '.x' : pointer.x);
+                const dy = me + '.y - ' + (other ? other + '.y' : pointer.y);
+                return 'Math.sqrt((' + dx + ') * (' + dx + ') + (' + dy + ') * (' + dy + ')) * 3';
+            }
+            this.note(destination === '_mouse_' ? 'distance to mouse-pointer: ' + MOUSE_WHY : 'sensing_distanceto as a value');
+            return this.na();
+        }
         // ── costumes and backdrops ──
         case 'looks_costumenumbername': {
             if (!me) return this.na();
@@ -2446,7 +2659,7 @@ class ArcadeEmitter {
         case 'music_getTempo': return this.use('music', '_tempo');
         case 'sensing_keypressed': {
             const key = this.menuField(b, 'KEY_OPTION', 'KEY_OPTION');
-            const btn = KEY_BUTTON[key];
+            const btn = this.scratchButton(key);
             if (btn) return `${btn}.isPressed()`;
             this.note(`key "${key}" pressed (Arcade has arrows, A and B)`);
             return 'false';
@@ -2458,6 +2671,7 @@ class ArcadeEmitter {
             return 'game.runtime()';
         }
         case 'arcade_programMillis': return 'control.millis()';
+        case 'sensing_answer': return this.scratchTextAnswer();
         case 'sensing_timer': return `${this.use('scratchTimer','__bwScratchTimer')}()`;
         default:
             this.note(`${b.opcode} as a value`);
@@ -2592,6 +2806,14 @@ class ArcadeEmitter {
             if(!this.currentClassName)this.createdFieldWriteSites.push({target:this.target,block:b,statement});
             push(statement);return;
         }
+        case 'data_showvariable':
+        case 'data_hidevariable': {
+            const [name, id] = b.fields?.VARIABLE || [];
+            const monitor = this.variableMonitor(id, name);
+            if (monitor) push(`${monitor.flag} = ${b.opcode === 'data_showvariable'}`);
+            else push('// ' + this.note(b.opcode + ': variable monitor has no unambiguous saved owner'));
+            return;
+        }
         case 'data_setvariableto': {
             const scratchName = this.field(b, 'VARIABLE');
             const info = this.infoVariable(scratchName);
@@ -2600,15 +2822,17 @@ class ArcadeEmitter {
                 return;
             }
             const name = this.lookupVar(this.field(b, 'VARIABLE'));
+            const valueBlock = this.block(typeof b.inputs?.VALUE?.[1] === 'string' ? b.inputs.VALUE[1] : null);
+            const scratchAnswer = valueBlock?.opcode === 'sensing_answer';
+            const mixedReporter = ['planetemaths_factorial', 'planetemaths_sommechiffres', 'arrays_get2D'].includes(valueBlock?.opcode);
             if (!this.arcadeValues) {
                 const val = v('VALUE');
-                this.assign(name, val);
+                this.assign(name, val, scratchAnswer ? 'string' : mixedReporter ? 'any' : null);
                 push(`${name} = ${val}`);
                 return;
             }
             // An Arcade program's variable is declared with the type of what
             // flows into it (sprite handle, image, array, Boolean, ...).
-            const valueBlock = this.block(typeof b.inputs?.VALUE?.[1] === 'string' ? b.inputs.VALUE[1] : null);
             this.spawnAssignment = ['arcade_spawnSprite', 'arcade_spawnProjectile', 'arcade_spawnImageProjectile', 'arcade_spawnImageSprite', 'arcade_createSprite', 'arcade_createImageSprite'].includes(valueBlock?.opcode);
             const boolean = this.isBoolean(valueBlock) || this.booleanVariable(b.fields?.VARIABLE?.[1] || b.fields?.VARIABLE?.[0]);
             const val = this.arrayValue(b,'VALUE');
@@ -2623,7 +2847,7 @@ class ArcadeEmitter {
                     this.imageVariableIds.has(b.fields?.VARIABLE?.[1] || b.fields?.VARIABLE?.[0]) ||
                     (valueBlock?.opcode === 'arcade_callFunction' && this.imageReturnFunctions.has(`${this.target.isStage?'':this.target.name}:${this.literalInput(valueBlock,'NAME')}`));
                 if (image) this.imageVars.add(name);
-                this.assign(name, val, arrayType || (image ? 'image' : boolean ? 'boolean' : this.primitiveVariableTypes.get(b.fields?.VARIABLE?.[1] || b.fields?.VARIABLE?.[0]) || null));
+                this.assign(name, val, arrayType || (image ? 'image' : scratchAnswer ? 'string' : mixedReporter ? 'any' : boolean ? 'boolean' : this.primitiveVariableTypes.get(b.fields?.VARIABLE?.[1] || b.fields?.VARIABLE?.[0]) || null));
             }
             push(`${name} = ${val}`);
             if (['arcade_spawnSprite', 'arcade_spawnImageSprite'].includes(valueBlock?.opcode)) {
@@ -2638,6 +2862,10 @@ class ArcadeEmitter {
             else push(`${this.lookupVar(scratchName)} += ${v('VALUE')}`);
             return;
         }
+        case 'sensing_askandwait':
+            push(this.scratchTextAnswer() + ' = game.askForString("" + (' + v('QUESTION') + '))');
+            this.guardLine().forEach(push);
+            return;
         case 'sensing_resettimer':push(`${this.use('scratchTimer','__bwResetScratchTimer')}()`);return;
         case 'control_wait':
             push(`pause(${v('DURATION')} * 1000)`);
@@ -2688,6 +2916,79 @@ class ArcadeEmitter {
             return;
         case 'control_stop': this.stop(b, push); return;
         // A sprite that draws moves through _penTo, which draws the line it moved along.
+        case 'motion_movesteps': {
+            if (!me) return;
+            const step = v('STEPS');
+            const amount = this.reserveAuxiliarySymbol('__bwMove');
+            const angle = this.use('scratchPose', '_scratchDirection(' + me + ') * Math.PI / 180');
+            const x = me + '.x + Math.sin(' + angle + ') * ' + amount + ' / 3';
+            const y = me + '.y - Math.cos(' + angle + ') * ' + amount + ' / 3';
+            push('{');
+            push('    const ' + amount + ' = ' + step);
+            push('    ' + (pen ? this.use('pen', '_penTo(' + me + ', ' + x + ', ' + y + ')') :
+                me + '.setPosition(' + x + ', ' + y + ')'));
+            push('}');
+            return;
+        }
+        case 'motion_turnleft':
+        case 'motion_turnright':
+        case 'motion_pointindirection':
+        case 'motion_pointtowards': {
+            if (!me) return;
+            const destination = b.opcode === 'motion_pointtowards' ? this.menuField(b, 'TOWARDS', 'TOWARDS') : '';
+            const other = this.spriteVar.get(destination);
+            const pointer = destination === '_mouse_' ? this.browserPointer() : null;
+            let direction;
+            if (b.opcode === 'motion_pointindirection') direction = v('DIRECTION');
+            else if (b.opcode === 'motion_turnright' || b.opcode === 'motion_turnleft') {
+                direction = '_scratchDirection(' + me + ')' + (b.opcode === 'motion_turnright' ? ' + ' : ' - ') +
+                    '(' + v('DEGREES') + ')';
+            } else if (other || pointer) {
+                const x = other ? other + '.x' : pointer.x;
+                const y = other ? other + '.y' : pointer.y;
+                direction = 'Math.atan2(' + x + ' - ' + me + '.x, ' + me + '.y - ' + y + ') * 180 / Math.PI';
+            } else if (destination === '_random_') direction = 'randint(-179, 180)';
+            else {
+                const reason = destination === '_mouse_' ? 'point towards mouse-pointer: ' + MOUSE_WHY :
+                    'point towards ' + (destination || 'an unsupported target');
+                push('// ' + this.note(reason));
+                return;
+            }
+            push(this.use('scratchPose', '_scratchPoint(' + me + ', ' + direction + ')'));
+            return;
+        }
+        case 'motion_setrotationstyle': {
+            const style = this.field(b, 'STYLE');
+            if (me) push(this.use('scratchPose', '_scratchRotationStyle(' + me + ', ' + JSON.stringify(style) + ')'));
+            return;
+        }
+        case 'looks_setsizeto':
+        case 'looks_changesizeby': {
+            if (!me) return;
+            const scale = b.opcode === 'looks_setsizeto' ? v('SIZE') + ' / 100' :
+                me + '.scale + (' + v('CHANGE') + ' / 100)';
+            push(me + '.setScale(Math.max(0.01, ' + scale + '))');
+            return;
+        }
+        case 'looks_changeeffectby':
+        case 'looks_seteffectto':
+        case 'looks_cleargraphiceffects': {
+            const effect = this.field(b, 'EFFECT').toLowerCase();
+            if (!me || b.opcode !== 'looks_cleargraphiceffects' && !['color', 'ghost'].includes(effect)) {
+                push('// ' + this.note(b.opcode + (effect ? ': ' + effect : '')));
+                return;
+            }
+            const table = this.scratchEffectTable();
+            if (b.opcode === 'looks_cleargraphiceffects') {
+                push(this.use('scratchEffects', '_scratchClearEffects(' + me + ', ' + table + ')'));
+            } else {
+                const property = effect === 'ghost' ? '_bwScratchGhost' : '_bwScratchHue';
+                const delta = b.opcode === 'looks_changeeffectby';
+                push(this.use('scratchEffects', '_scratchSetEffect(' + me + ', ' + JSON.stringify(property) + ', ' +
+                    v(delta ? 'CHANGE' : 'VALUE') + ', ' + delta + ', ' + table + ')'));
+            }
+            return;
+        }
         case 'motion_changexby':
             if (me && pen) push(this.use('pen', `_penTo(${me}, ${me}.x + ${v('DX')} / 3, ${me}.y)`));
             else if (me) push(`${me}.x += ${v('DX')} / 3`);
@@ -2713,15 +3014,76 @@ class ArcadeEmitter {
             const place = pen ? this.use('pen', `_penTo(${me}, `) : `${me}.setPosition(`;
             if (me && other) push(`${place}${other}.x, ${other}.y)`);
             else if (me && to === '_random_') push(`${place}randint(0, 160), randint(0, 120))`);
-            else if (to === '_mouse_') push(`// ${this.note(`go to mouse-pointer: ${MOUSE_WHY}`)}`);
+            else if (to === '_mouse_') {
+                const pointer = this.browserPointer();
+                if (me && pointer) push(place + pointer.x + ', ' + pointer.y + ')');
+                else push('// ' + this.note('go to mouse-pointer: ' + MOUSE_WHY));
+            }
             else push(`// ${this.note(`go to ${to || '…'}`)}`);
+            return;
+        }
+        case 'motion_glidesecstoxy':
+        case 'motion_glideto': {
+            if (!me) return;
+            const destination = b.opcode === 'motion_glideto' ? this.menuField(b, 'TO', 'TO') : '';
+            const other = this.spriteVar.get(destination);
+            const pointer = destination === '_mouse_' ? this.browserPointer() : null;
+            let endX, endY;
+            if (b.opcode === 'motion_glidesecstoxy') {
+                endX = v('X') + ' / 3 + 80';
+                endY = '60 - ' + v('Y') + ' / 3';
+            } else if (other || pointer) {
+                endX = other ? other + '.x' : pointer.x;
+                endY = other ? other + '.y' : pointer.y;
+            } else if (destination === '_random_') {
+                endX = 'randint(0, 160)';
+                endY = 'randint(0, 120)';
+            } else {
+                const reason = destination === '_mouse_' ? 'glide to mouse-pointer: ' + MOUSE_WHY :
+                    'glide to ' + (destination || 'an unsupported target');
+                push('// ' + this.note(reason));
+                return;
+            }
+            const local = this.reserveAuxiliarySymbol('__bwGlide');
+            const place = (x, y) => pen ? this.use('pen', '_penTo(' + me + ', ' + x + ', ' + y + ')') :
+                me + '.setPosition(' + x + ', ' + y + ')';
+            push('{');
+            push(`    const ${local}Duration = Math.max(0, (${v('SECS')}) * 1000)`);
+            push(`    const ${local}Time = control.millis()`);
+            push(`    const ${local}StartX = ${me}.x; const ${local}StartY = ${me}.y`);
+            push(`    const ${local}EndX = ${endX}; const ${local}EndY = ${endY}`);
+            push(`    while (${local}Duration > 0) {`);
+            push(`        const ${local}Progress = (control.millis() - ${local}Time) / ${local}Duration`);
+            push(`        if (${local}Progress >= 1) break`);
+            push('        ' + place(
+                `${local}StartX + (${local}EndX - ${local}StartX) * ${local}Progress`,
+                `${local}StartY + (${local}EndY - ${local}StartY) * ${local}Progress`
+            ));
+            push('        pause(20)');
+            this.guardLine().forEach(guard => push('        ' + guard));
+            push('    }');
+            push('    ' + place(`${local}EndX`, `${local}EndY`));
+            push('}');
             return;
         }
         case 'motion_ifonedgebounce': if (me) push(`${me}.setBounceOnWall(true)`); return;
         case 'looks_show': if (me) push(`${me}.setFlag(SpriteFlag.Invisible, false)`); return;
         case 'looks_hide': if (me) push(`${me}.setFlag(SpriteFlag.Invisible, true)`); return;
-        case 'looks_sayforsecs': if (me) push(`${me}.sayText(${v('MESSAGE', '""')}, ${v('SECS')} * 1000, true)`); return;
-        case 'looks_say': if (me) push(`${me}.sayText(${v('MESSAGE', '""')})`); return;
+        case 'looks_thinkforsecs':
+        case 'looks_think':
+        case 'looks_sayforsecs':
+        case 'looks_say': {
+            const timed = b.opcode.endsWith('forsecs');
+            if (b.opcode.startsWith('looks_think')) this.warn('Scratch thoughts use Arcade text bubbles');
+            if (this.target.isStage) this.usesStageSpeech = true;
+            const speaker = this.target.isStage ? '_bwStageSpeech' : me;
+            if (speaker) {
+                const duration = timed ? `, ${v('SECS')} * 1000, true` : '';
+                push(`${speaker}.sayText(${v('MESSAGE', '""')}${duration})`);
+                if (timed && this.target.isStage) push(`pause(${v('SECS')} * 1000)`);
+            }
+            return;
+        }
         case 'arcade_setBackgroundImage': push(`scene.setBackgroundImage(${this.literalInput(b,'IMAGE') === '' ? 'null' : v('IMAGE')})`); return;
         case 'arcade_setGameStats': {
             const mode=this.field(b,'MODE');
@@ -2980,6 +3342,12 @@ class ArcadeEmitter {
             push(`${owner}.${mode === 'legacy' ? 'say' : 'sayText'}(${args.join(', ')})`);
             return;
         }
+        case 'arrays_createRange':
+            push(this.use('namedArrayRange', `${this.namedArray(b)} = _namedArrayRange(${this.arrayValue(b, 'START')}, ${this.arrayValue(b, 'END')})`));
+            return;
+        case 'arrays_set2D':
+            push(`${this.namedOperationHelper('setCell')}(${this.namedArray(b)}, ${this.arrayValue(b, 'ROW')}, ${this.arrayValue(b, 'COL')}, ${this.arrayValue(b, 'VALUE')})`);
+            return;
         case 'arrays_createEmpty': push(`${this.namedArray(b)} = []`);return;
         case 'arrays_create1D':
         case 'arrays_create2D': {
@@ -3470,23 +3838,31 @@ class ArcadeEmitter {
             if (!me) return false;
             this.use('costume');
             const set = this.costumeSet(this.target);
+            const setCostume = index => {
+                push(`_setCostume(${me}, ${set}, ${index})`);
+                if (this.scratchEffects.has(this.target.name)) {
+                    push(this.use('scratchEffects', '_scratchEffectsCostume(' + me + ', ' + this.scratchEffectTable() + ')'));
+                } else if (this.scratchPose.has(this.target.name)) {
+                    push(this.use('scratchPose', '_scratchPoseCostume(' + me + ')'));
+                }
+            };
             if (b.opcode === 'looks_nextcostume') {
-                push(`_setCostume(${me}, ${set}, _costume(${me}) + 1)`);
+                setCostume(`_costume(${me}) + 1`);
                 return true;
             }
             const dyn = this.dynamicInput(b, 'COSTUME');
             if (dyn) {
                 this.use('pick');
-                push(`_setCostume(${me}, ${set}, _pick(${this.costumeNames(this.target)}, ${dyn}, _costume(${me})))`);
+                setCostume(`_pick(${this.costumeNames(this.target)}, ${dyn}, _costume(${me}))`);
                 return true;
             }
             const name = this.menuField(b, 'COSTUME', 'COSTUME');
             const index = this.target.costumes.findIndex(c => c.name === name);
-            if (index >= 0) push(`_setCostume(${me}, ${set}, ${index})`);
-            else if (name === 'next costume') push(`_setCostume(${me}, ${set}, _costume(${me}) + 1)`);
-            else if (name === 'previous costume') push(`_setCostume(${me}, ${set}, _costume(${me}) - 1)`);
-            else if (name === 'random costume') push(`_setCostume(${me}, ${set}, randint(0, ${set}.length - 1))`);
-            else if (name.trim() !== '' && Number.isFinite(Number(name))) push(`_setCostume(${me}, ${set}, ${Math.round(Number(name)) - 1})`);
+            if (index >= 0) setCostume(index);
+            else if (name === 'next costume') setCostume(`_costume(${me}) + 1`);
+            else if (name === 'previous costume') setCostume(`_costume(${me}) - 1`);
+            else if (name === 'random costume') setCostume(`randint(0, ${set}.length - 1)`);
+            else if (name.trim() !== '' && Number.isFinite(Number(name))) setCostume(Math.round(Number(name)) - 1);
             else this.missing(push, `switch costume to "${name}": ${this.target.name} has no such costume`);
             return true;
         }
@@ -3566,6 +3942,8 @@ class ArcadeEmitter {
             }
             this.use('pen');
             push(`${me}.data["_pc"] = ${nearestIndex([parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)], this.palette)}`);
+            push(`${me}.data["_pcBase"] = ${me}.data["_pc"]`);
+            push(`${me}.data["_pcHue"] = 0`);
             return true;
         }
         case 'pen_setPenSizeTo':
@@ -3580,6 +3958,14 @@ class ArcadeEmitter {
             return true;
         case 'pen_setPenColorParamTo':
         case 'pen_changePenColorParamBy':
+            if (me && this.menuField(b, 'COLOR_PARAM', 'colorParam') === 'color' &&
+                !this.dynamicInput(b, 'COLOR_PARAM')) {
+                this.warn('Scratch pen hue is quantized to the Arcade palette.');
+                const relative = b.opcode === 'pen_changePenColorParamBy';
+                push(this.use('penHue', `_scratchPenHue(${me}, ${v('VALUE')}, ${relative}, ${this.scratchHueTable()})`));
+                return true;
+            }
+            // falls through for the other pen color parameters.
         case 'pen_setPenHueToNumber':
         case 'pen_changePenHueBy':
         case 'pen_setPenShadeToNumber':
@@ -3644,14 +4030,6 @@ class ArcadeEmitter {
         case 'data_showlist':
         case 'data_hidelist':
             refuse(`${b.opcode === 'data_showlist' ? 'show' : 'hide'} list: Arcade has no list monitors`);
-            return true;
-        case 'motion_pointtowards':
-            if (this.menuField(b, 'TOWARDS', 'TOWARDS') !== '_mouse_') return false;
-            refuse(`point towards mouse-pointer: ${MOUSE_WHY}`);
-            return true;
-        case 'motion_glideto':
-            if (this.menuField(b, 'TO', 'TO') !== '_mouse_') return false;
-            refuse(`glide to mouse-pointer: ${MOUSE_WHY}`);
             return true;
         default:
             return false;
@@ -4884,7 +5262,7 @@ class ArcadeEmitter {
                     if (script.length) flagScripts.push({script, clonable, sv, plain: !clonable && !this.tokened()});
                 } else if (b.opcode === 'event_whenkeypressed') {
                     const key = this.field(b, 'KEY_OPTION');
-                    const btn = KEY_BUTTON[key];
+                    const btn = this.scratchButton(key);
                     if (!btn) {
                         handlers.push(`// ${this.note(`when key "${key}" pressed (Arcade has arrows, A and B)`)}`);
                     } else if (clonable) {
@@ -5022,7 +5400,13 @@ class ArcadeEmitter {
                 } else if (/^(procedures_prototype|argument_|.*_menu$)/.test(b.opcode)) {
                     continue;
                 } else if (b.opcode === 'event_whenthisspriteclicked' || b.opcode === 'event_whenstageclicked') {
-                    handlers.push(`// ${this.note(`when ${b.opcode === 'event_whenstageclicked' ? 'stage' : 'this sprite'} clicked: ${MOUSE_WHY}`)}`);
+                    const pointer = this.browserPointer();
+                    if (!pointer) handlers.push('// ' + this.note('when ' +
+                        (b.opcode === 'event_whenstageclicked' ? 'stage' : 'this sprite') + ' clicked: ' + MOUSE_WHY));
+                    else {
+                        if (!pointer.scripts.has(t)) pointer.scripts.set(t, {functions: []});
+                        pointer.scripts.get(t).functions.push(this.scriptFunction('click', b, false).fn);
+                    }
                 } else if (/^event_|^control_start_as_clone/.test(b.opcode)) {
                     handlers.push(`// ${this.note(`${b.opcode} script`)}`);
                 } else if (!b.parent) {
@@ -5037,6 +5421,21 @@ class ArcadeEmitter {
         }
         for (const token of this.destroyedCallbacks.keys()) {
             if (!this.usedDestroyedCallbacks.has(token)) this.note(`Arcade sprite destruction callback ${token} has no registration`);
+        }
+        for (const monitor of this.project.monitors || []) {
+            if (monitor?.opcode !== 'data_variable' || !monitor.visible) continue;
+            const entry = this.variableMonitor(monitor.id, monitor.params?.VARIABLE);
+            if (entry) entry.visible = true;
+            if (monitor.mode === 'slider') this.note('Scratch variable monitor sliders have no portable Arcade input');
+        }
+        if (this.variableMonitors.size) {
+            this.warn('Scratch variable monitors use compact labels on the Arcade screen');
+            for (const {flag, visible} of this.variableMonitors.values()) pre.push(`let ${flag} = ${visible}`);
+            handlers.push(this.variableMonitorDrawing());
+        }
+        if (this.scratchKeyboard?.setup.length) {
+            out.push(...this.scratchKeyboard.setup);
+            this.warn('Arcade keyboard controls keep the Scratch keys. Physical controllers use the assigned Arcade buttons.');
         }
         // Declarations: every variable the program touched, then the sprites.
         const objectClasses=this.objectClassExport.render();
@@ -5145,6 +5544,17 @@ class ArcadeEmitter {
             }
             out.push(`${s}.setPosition(${Number(t.x || 0)} / 3 + 80, 60 - ${Number(t.y || 0)} / 3)`);
             if (t.visible === false) out.push(`${s}.setFlag(SpriteFlag.Invisible, true)`);
+            if (this.scratchEffects.has(t.name)) {
+                out.push(this.use('scratchEffects', '_scratchEffectsCostume(' + s + ', ' + this.scratchEffectTable() + ')'));
+            }
+            if (this.scratchPose.has(t.name)) {
+                const style = t.rotationStyle || 'all around';
+                out.push(this.use('scratchPose', '_scratchRotationStyle(' + s + ', ' + JSON.stringify(style) + ')'));
+                if (Number.isFinite(t.direction) && t.direction !== 90) out.push('_scratchPoint(' + s + ', ' + t.direction + ')');
+            }
+            if (this.scratchScale.has(t.name) && Number.isFinite(t.size) && t.size !== 100) {
+                out.push(s + '.setScale(Math.max(0.01, ' + t.size / 100 + '))');
+            }
             if (this.penUsers.has(t.name)) out.push(`${s}.data["_pc"] = ${penColour}`);
             for (const [key, init] of this.cloneVars.get(t.name) || []) {
                 const num = typeof init === 'number' || (String(init).trim() !== '' && Number.isFinite(Number(init)));
@@ -5156,6 +5566,9 @@ class ArcadeEmitter {
             const kind = this.kindOf(name);
             pre.push(`const ${kind} = SpriteKind.create()`);
             const keys = ['_c', '_pd', '_pc', '_ps', ...(this.cloneVars.get(name) || new Map()).keys()];
+            const pose = this.scratchPose.has(name);
+            if (pose) keys.push('_bwScratchDirection', '_bwScratchRotationStyle', '_bwScratchFlipped');
+            if (this.scratchEffects.has(name)) keys.push('_bwScratchRawArt', '_bwScratchHue', '_bwScratchGhost');
             generated.push([
                 `function _all_${id} (): Sprite[] {`,
                 `    return [${this.spriteVar.get(name)}].concat(sprites.allOfKind(${kind}))`,
@@ -5169,6 +5582,8 @@ class ArcadeEmitter {
                 '    c.setPosition(src.x, src.y)',
                 '    c.setFlag(SpriteFlag.Invisible, (src.flags & SpriteFlag.Invisible) != 0)',
                 '    c.z = src.z',
+                ...(pose ? ['    c.rotationDegrees = src.rotationDegrees'] : []),
+                ...(this.scratchScale.has(name) ? ['    c.setScale(src.scale)'] : []),
                 `    for (const k of ${JSON.stringify(keys)}) c.data[k] = src.data[k]`,
                 ...(this.cloneScripts.get(name) || []).map(fn => `    control.runInParallel(function () { ${fn}(c) })`),
                 '}'
@@ -5180,6 +5595,11 @@ class ArcadeEmitter {
             pre.push(`let ${mark} = 0  // stop other scripts in ${t.isStage ? 'stage' : t.name}: runs up to here are ended`);
             pre.push(`let ${kept} = 0  // ... except this one, the run that stopped them`);
         }
+        if (this.usesStageSpeech) {
+            out.push('let _bwStageSpeech = sprites.create(image.create(1, 1), SpriteKind.create())');
+            out.push('_bwStageSpeech.setPosition(80, 65)');
+            out.push('_bwStageSpeech.z = 100');
+        }
         if (this.usesStopAll) {
             // Scratch's Runtime.stopAll: every script ends, clones are deleted,
             // sounds stop, speech bubbles clear. The sprites, the pen, the
@@ -5189,6 +5609,7 @@ class ArcadeEmitter {
                 '    _stopMark = _tokens',
                 ...[...this.clonable].map(name => `    sprites.destroyAllSpritesOfKind(${this.kindOf(name)})`),
                 '    music.stopAllSounds()',
+                ...(this.usesStageSpeech ? ['    _bwStageSpeech.sayText("")'] : []),
                 ...(this.usesSay ? this.sprites.filter(t => this.emittedSprites.has(t)).map(t => `    ${this.spriteVar.get(t.name)}.sayText("")`) : []),
                 '}'
             ].join('\n'));
@@ -5222,6 +5643,11 @@ class ArcadeEmitter {
                 if (!nativeArcade) out.push(this.stageMatte());
                 out.push(`scene.setBackgroundImage(${toImgLiteral(bg)})`);
             }
+        }
+        if (this.pointer) this.pointerSource(pre, handlers);
+        if (this.textAnswer) pre.push('let ' + this.textAnswer + ' = ""');
+        if (this.hueTableName) {
+            pre.push('const ' + this.hueTableName + ': number[][] = ' + JSON.stringify(scratchArcadeHueTable(this.palette, 32)));
         }
         // The green flag's scripts run side by side. An imported Arcade program
         // (one flag script, nothing that can stop it) is its own startup code, run
@@ -5322,6 +5748,7 @@ class ArcadeEmitter {
  * @param {(target, costume) => string|null} [opts.costumeSvg] the costume's SVG text, if it is an SVG
  * @param {(target, costume) => {rgba, width, height}|null} [opts.costumeRgba] its pixels, for anything else
  * @param {(target, costume) => Array<string|null>|null} [opts.costumePalette] editable palette, if any
+ * @param {boolean} [opts.browserPointer] keep Scratch pointer controls in the browser simulator
  * @param {Array<object>} [opts.animationDocuments] full published Pixel timeline source documents
  * @param {(stage) => object|null} [opts.stageBackground] a 160x120 palette image for the backdrop
  * @returns {{ts: string, files: object, unsupported: string[], warnings: string[]}}
@@ -5381,7 +5808,7 @@ function emitProjectToArcade (project, opts, snapshotCallbacks) {
         'main.ts': projectTs,
         ...assetFiles,
         'pxt.json': `${JSON.stringify({
-            name, description: 'Exported from BrickWright', dependencies: {device: '*', ...(e.requiresTextSpritePackage ? {'arcade-text':'github:microsoft/arcade-text#fa2439314c6633943666a763fdae32a5c67a9ae8'} : {}), ...(e.requiresSpriteDataPackage ? {'arcade-sprite-data':'github:microsoft/arcade-sprite-data#332026d12c46286c7afe59bc4829ccf08471d5b1'} : {}), ...(e.requiresCarnivalPackage ? {'arcade-carnival':'github:microsoft/arcade-carnival#v0.0.7'} : {}), ...(e.requiresLegacyTilemapPackage ? {'color-coded-tilemap': '*'} : {}), ...(e.requiresAnimationPackage ? {animation: '*'} : {}), ...(e.requiresSevensegPackage ? {sevenseg: '*'} : {}), ...(e.requiresDartsPackage ? {darts: '*'} : {}), ...(e.requiresCorgioPackage ? {corgio: '*'} : {}), ...(e.requiresScrollerPackage ? {'arcade-background-scroll': e.scrollerVersion===LEGACY_SCROLLER_REVISION?`github:riknoll/arcade-background-scroll#${LEGACY_SCROLLER_REVISION}`:'github:microsoft/arcade-background-scroll#v0.1.2'} : {}), ...(e.requiresCharacterAnimationsPackage ? {'arcade-character-animations': `github:microsoft/arcade-character-animations#${e.characterVersion}`} : {}), ...(e.requiresMultiplayerPackage ? {multiplayer: '*'} : {})},
+            name, description: 'Exported from BrickWright', dependencies: {device: '*', ...(e.pointer ? {'browser-events': '*'} : {}), ...(e.requiresTextSpritePackage ? {'arcade-text':'github:microsoft/arcade-text#fa2439314c6633943666a763fdae32a5c67a9ae8'} : {}), ...(e.requiresSpriteDataPackage ? {'arcade-sprite-data':'github:microsoft/arcade-sprite-data#332026d12c46286c7afe59bc4829ccf08471d5b1'} : {}), ...(e.requiresCarnivalPackage ? {'arcade-carnival':'github:microsoft/arcade-carnival#v0.0.7'} : {}), ...(e.requiresLegacyTilemapPackage ? {'color-coded-tilemap': '*'} : {}), ...(e.requiresAnimationPackage ? {animation: '*'} : {}), ...(e.requiresSevensegPackage ? {sevenseg: '*'} : {}), ...(e.requiresDartsPackage ? {darts: '*'} : {}), ...(e.requiresCorgioPackage ? {corgio: '*'} : {}), ...(e.requiresScrollerPackage ? {'arcade-background-scroll': e.scrollerVersion===LEGACY_SCROLLER_REVISION?`github:riknoll/arcade-background-scroll#${LEGACY_SCROLLER_REVISION}`:'github:microsoft/arcade-background-scroll#v0.1.2'} : {}), ...(e.requiresCharacterAnimationsPackage ? {'arcade-character-animations': `github:microsoft/arcade-character-animations#${e.characterVersion}`} : {}), ...(e.requiresMultiplayerPackage ? {multiplayer: '*'} : {})},
             files: [...Object.keys(assetFiles), 'main.ts'], preferredEditor: 'tsprj',
             ...(!samePalette(e.palette, ARCADE_PALETTE) ? {palette: ['#000000', ...e.palette.slice(1)]} : {})
         }, null, 4)}\n`

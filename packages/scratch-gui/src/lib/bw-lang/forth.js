@@ -378,10 +378,11 @@ const BIN = {'+': '+', '-': '-', '*': '*', '/': '/', '<': '<', '>': '>', '=': '=
 export default function forthToPseudocode (source) {
     const warnings = [];
     const globals = new Set();
-    const defNames = new Set();   // every defined word, incl. main
     const procNames = new Set();  // defined words other than main (custom blocks)
     const procBlocks = [];        // {name, lines} for each custom block, in order
-    let mainBody = [];
+    let mainBody = null;
+    const startup = [];
+    let mainCalled = false;
     const toks = tokenize(String(source || ''));
     let pos = 0;
     const rename = name => {
@@ -592,7 +593,6 @@ export default function forthToPseudocode (source) {
         const nm = next();
         if (!nm || nm.t !== 'word') throw new ForthReadError(': without a name');
         const name = nm.v;
-        defNames.add(name);
         if (name !== 'main') procNames.add(name);
         const lines = [];
         for (;;) {
@@ -619,11 +619,16 @@ export default function forthToPseudocode (source) {
             continue;
         }
         if (tk.t === 'word' && tk.v === ':') { parseDefinition(); continue; }
-        if (tk.t === 'word' && defNames.has(tk.v)) { next(); continue; } // the `main` (or word) invocation
+        if (tk.t === 'word' && tk.v === 'main' && mainBody) {
+            next();
+            startup.push(...mainBody);
+            mainCalled = true;
+            continue;
+        }
         const before = pos;
         const s = readStatement(1);
         if (s === null) { const t = next(); warnings.push(`unexpected "${(t || {}).v}" at top level`); continue; }
-        // loose top-level statements are not part of the generator's shape
+        startup.push(...s);
         if (pos === before) next();
     }
 
@@ -631,7 +636,7 @@ export default function forthToPseudocode (source) {
     const globalLines = [...globals].sort().map(g => `GLOBAL ${g}`);
     if (globalLines.length) lines.push(...globalLines, '');
     for (const pb of procBlocks) lines.push(`DEFINE ${pb.name}:`, ...pb.lines, '');
-    const realMain = mainBody.filter(Boolean);
+    const realMain = mainCalled ? startup : [...startup, ...(mainBody || [])];
     if (realMain.length) lines.push('WHEN flag clicked:', ...realMain);
     if (!realMain.length && !procBlocks.length && String(source || '').trim()) {
         warnings.push('no Forth the blocks can represent was found');

@@ -3315,7 +3315,7 @@ class SimLabPane extends React.Component {
                 <span style={{flex: '1 1 0', minWidth: 0}} />
                 {this.renderHelp()}
                 {more.length > 0 && (
-                    <Popup id="more" open={this.state.menu === 'more'} label={TT.actions.more} width={270} align="right"
+                    <Popup id="more" overflowMenu open={this.state.menu === 'more'} label={TT.actions.more} width={270} align="right"
                         onToggle={() => this.toggleMenu('more')} onClose={() => this.setState({menu: null})}
                         button={(
                             <button type="button" data-testid="bw-sim-lab-more" aria-label={TT.actions.more} title={TT.actions.more} style={s.button}>

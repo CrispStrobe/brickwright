@@ -47,16 +47,16 @@ function digest(value) {
 }
 
 // Until task B11 the vendored build had no complete-state ABI and the target
-// declined checkpoints. emu8051-stc 68ef757a exports it (build 0x80510102,
-// UART receive FIFO included) and bw-board df7dae85 accepts that layout, so
-// the target now offers checkpoints: a snapshot must restore the exact visible
+// declined checkpoints. The shipping native pin exports the UART receive FIFO
+// and hidden Timer0 state, and the shipping bw-board pin accepts that layout.
+// The target offers checkpoints: a snapshot must restore the exact visible
 // state and continuation, and a malformed one must still be refused untouched.
 test('8051 offers checkpoints for the vendored build and keeps no generic snapshot alias', {skip: have ? false : 'the vendored emu8051 WASM is not present'}, async () => {
     const target = await fixture();
     const caps = target.capabilities();
     assert.deepEqual(caps.recording, ['checkpoint', 'restore']);
     assert.deepEqual(caps.extensions.checkpoint,
-        {supported: true, version: 1, buildId: 0x80510102, size: 443557});
+        {supported: true, version: 1, buildId: 0x80510103, size: 443561});
     assert.equal(target.saveState, undefined,
         'generic machine snapshot callers go through captureCheckpoint, not an alias');
     assert.equal(target.loadState, undefined);

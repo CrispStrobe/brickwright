@@ -117,7 +117,7 @@ export const apiInteractions = async ({browser, errors, openSimLab, wallBudget})
         await page.waitForFunction(() => window.__bwSimLab.status === 'ready' && window.__bwSimLab._pane.state.modelFile === 'motor-bench.ldr' &&
             window.__bwSimLab._pane.session, null, {timeout: 60000});
 
-        await page.waitForFunction(() => document.querySelector('[data-testid="bw-code-status"]')?.textContent.includes('Blocks loaded.'),
+        await page.waitForFunction(() => document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus.includes('Blocks loaded.'),
             null, {timeout: 60000});
         assert.match(await page.locator('.cm-content').first().textContent(), /lab run motor A for 360 degrees at 180 degrees per second/,
             'the example\'s lab words are in the Code tab');

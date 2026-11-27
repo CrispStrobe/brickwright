@@ -3729,7 +3729,6 @@ STAGE:
 SPRITE Foil:
   SHAPE art tidegate-rush/foil
   COSTUME boost art tidegate-rush/boost
-  SOUND splash 260
   WHEN flag clicked:
     set score to 0
     set gates to 0
@@ -3808,6 +3807,7 @@ SPRITE LockGate:
   SHAPE art tidegate-rush/gate
   COSTUME buoy art tidegate-rush/buoy
   SOUND lock 720
+  SOUND splash 260
   WHEN flag clicked:
     hide
   WHEN I receive "start tidegate rush":
@@ -4223,7 +4223,7 @@ SPRITE ChargeMeter:
   WHEN I receive "start orbit hoops":
     show
     REPEAT UNTIL active = 0:
-      set size to 20 + charge * 4 %
+      set size to 20 + charge * 4
       wait 0.03 seconds
     hide
 
@@ -4633,7 +4633,7 @@ SPRITE SonarRing:
     hide
   WHEN I receive "sonar pulse":
     go to Sub
-    set size to 20 %
+    set size to 20
     show
     REPEAT 8:
       change size by 22
@@ -5558,7 +5558,7 @@ SPRITE CraneBlock:
       IF blockX < -190 THEN:
         set sweepDir to 1
       go to x: blockX y: 120
-      set size to blockWidth %
+      set size to blockWidth
       IF perfect > 2 THEN:
         switch costume to hot
       ELSE:
@@ -5605,7 +5605,7 @@ SPRITE FrozenFloor:
     hide
   WHEN I receive "freeze floor":
     go to x: towerX y: landingY
-    set size to blockWidth %
+    set size to blockWidth
     create clone of myself
   WHEN I start as a clone:
     change color effect by level * 13
@@ -5778,7 +5778,7 @@ SPRITE PlasmaOrb:
           set orbY to -105
           set orbVY to 8 + orbTier
         go to x: orbX y: orbY
-        set size to 35 + orbTier * 18 %
+        set size to 35 + orbTier * 18
         IF touching Lance and lanceOn = 1 THEN:
           change score by 5
           change orbTier by -1
@@ -7464,7 +7464,7 @@ SPRITE Caller:
         set c to 1
         REPEAT 5:
           go to x: (cx + ((c - 3) * 27)) y: (58 - ((r - 1) * 27))
-          set size to 33 %
+          set size to 33
           IF item row ((p * 5) + r) col c of array "daubs" = 1 THEN:
             switch costume to daub
           ELSE:
@@ -7480,12 +7480,12 @@ SPRITE Caller:
       change p by 1
     IF called > 0 THEN:
       go to x: 0 y: 140
-      set size to 90 %
+      set size to 90
       switch costume to ("n" join called)
       stamp
     go to x: 0 y: 200
     switch costume to blank
-    set size to 100 %
+    set size to 100
 
   DEFINE call numbers:
     REPEAT UNTIL started = 0:
@@ -7496,7 +7496,7 @@ SPRITE Caller:
           set called to (item i of array "pool")
           remove item i of array "pool"
           change calls by 1
-          play sound call
+          play sound "call"
           render tables
         ELSE:
           set started to 0
@@ -7558,7 +7558,7 @@ SPRITE Caller:
     IF run = 1 THEN:
       set started to 0
       set winner to (who + 1)
-      play sound bingo
+      play sound "bingo"
       say (join "BINGO! Player " (join winner (join " wins after " (join calls " calls")))) for 4 seconds
 
   WHEN q key pressed:

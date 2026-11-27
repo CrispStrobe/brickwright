@@ -238,6 +238,7 @@ try {
     await device.waitFor({state:'visible',timeout:60000});
     await device.selectOption('__manage__');
     await page.getByTestId('bw-machine-manager').waitFor({state:'visible'});
+    await page.getByRole('combobox', {name: 'Machine type'}).selectOption('i80386');
     await page.getByTestId('bw-mm-free386-floppy').setInputFiles({
         name:'x86BOOT-1200.img',mimeType:'application/octet-stream',buffer:floppy});
     await page.getByTestId('bw-mm-free386-hdd').setInputFiles({

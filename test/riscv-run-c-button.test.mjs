@@ -11,21 +11,21 @@ const src = readFileSync(new URL(
     '../overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx', import.meta.url), 'utf8');
 
 test('the Code tab offers a ▶ Run C on RISC-V button + a route chooser, for the riscv32 device', () => {
-    assert.match(src, /data-testid="bw-run-c-riscv"/, 'the C tab has a ▶ for RISC-V');
+    assert.match(src, /data-testid=\{menu \? "bw-run-c-riscv-menu" : "bw-run-c-riscv"\}/, 'the C tab has a ▶ for RISC-V');
     assert.match(src, /asmTargetForDevice\(this\.currentDevice\(\)\) === 'riscv32'/,
         'the button appears only for the riscv32 target');
     assert.match(src, /onClick=\{\(\) => this\.runCOnRiscv\(\)\}/, 'it is wired to the handler');
     // the user picks browser (wasm subset) vs server (hosted full C)
-    assert.match(src, /data-testid="bw-riscv-c-route"/, 'a route <select> is offered');
+    assert.match(src, /data-testid=\{menu \? "bw-riscv-c-route-menu" : "bw-riscv-c-route"\}/, 'a route <select> is offered');
     assert.match(src, /riscvCRoute: e\.target\.value/, 'the select updates the chosen route');
     assert.match(src, /value="browser"[^]*value="server"/, 'both routes are options');
     // a C-example picker seeds the buffer
-    assert.match(src, /data-testid="bw-riscv-c-examples"/, 'a C-example <select> is offered');
+    assert.match(src, /data-testid=\{menu \? "bw-riscv-c-examples-menu" : "bw-riscv-c-examples"\}/, 'a C-example <select> is offered');
     assert.match(src, /this\.loadRiscvCExample\(e\.target\.value\)/, 'it loads the chosen example');
 });
 
 test('a subset failure offers a one-click retry on the full (server) compiler', () => {
-    assert.match(src, /data-testid="bw-run-c-riscv-server"/, 'the retry button exists');
+    assert.match(src, /data-testid=\{menu \? "bw-run-c-riscv-server-menu" : "bw-run-c-riscv-server"\}/, 'the retry button exists');
     assert.match(src, /this\.runCOnRiscv\('server'\)/, 'it forces the server route');
     assert.match(src, /riscvCanRetryServer/, 'gated on the subset-rejected flag');
     // the flag is only set for a browser-route source error with an endpoint

@@ -230,13 +230,10 @@ export async function assembleLocal8086 (source, opts = {}) {
  * ECALL ABI (a7=64 write, a7=93 exit).
  */
 /**
- * The build-time RISC-V C-compile endpoint, the twin of the FPGA
- * BW_SYNTHESIS_ENDPOINT. Injected by webpack's DefinePlugin; `null` in a build
- * that has not configured one, which makes the C route refuse by name rather
- * than pretend. Set it to a deployed `services/riscv-cc/` base URL.
+ * Webpack substitutes this property with the build's configured endpoint.
+ * The browser and desktop webview do not need a Node process object.
  */
-export const RISCV_CC_ENDPOINT =
-    (typeof process !== 'undefined' && process.env && process.env.BW_RISCV_CC_ENDPOINT) || null;
+export const RISCV_CC_ENDPOINT = process.env.BW_RISCV_CC_ENDPOINT || null;
 
 /**
  * The RISC-V C route for the Code tab. Compiles C to the shared loadable

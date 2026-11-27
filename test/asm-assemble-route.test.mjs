@@ -188,7 +188,7 @@ test('the tab decides the route through this module, and in one place', () => {
     assert.match(src, /data-testid="bw-asm-assemble"/, 'the ▶ button is gone');
     assert.match(src, /from '\.\.\/\.\.\/lib\/bw-asm\/assemble-route\.js'/,
         'the tab no longer routes through assemble-route.js');
-    assert.match(src, /out = await requestAssembly\(\{source, device, dialect: this\.state\.asmDialect\}\);/,
+    assert.match(src, /out = await requestAssembly\(\{source, device, dialect: machine \? 'auto' : this\.state\.asmDialect\}\);/,
         'the ▶ handler must call requestAssembly with NO injected assembler — ' +
         'an override here is a second local path that no gate runs');
     assert.equal(src.split('stc-compiler.vercel.app/assemble').length - 1, 0,
@@ -203,8 +203,8 @@ test('the tab decides the route through this module, and in one place', () => {
     // The device the examples are for and the device the button assembles
     // for must be ONE answer.
     assert.equal(src.split('_asmDevice ()').length - 1, 1, '_asmDevice is defined more than once');
-    assert.match(src, /return asmExamplesFor\(this\._asmDevice\(\)\)/);
-    assert.match(src, /const device = this\._asmDevice\(\);/);
+    assert.match(src, /asmExamplesFor\(this\._asmDevice\(\)\)/);
+    assert.match(src, /const device = machine\?\.device \|\| this\._asmDevice\(\);/);
 });
 
 test('an assembled 8086 image is delivered as a DOS executable, not as a ROM', () => {
@@ -320,7 +320,7 @@ test('the ASM tab offers the selector for the 8086 only, passes the choice, and 
     const src = readFileSync(join(REPO, 'overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx'), 'utf8');
     assert.match(src, /data-testid="bw-asm-dialect"/);
     assert.match(src, /asmTargetForDevice\(this\._asmDevice\(\)\) === 'i8086' && \(/, 'the selector is gated by the route function');
-    assert.match(src, /requestAssembly\(\{source, device, dialect: this\.state\.asmDialect\}\)/);
+    assert.match(src, /requestAssembly\(\{source, device, dialect: machine \? 'auto' : this\.state\.asmDialect\}\)/);
     assert.match(src, /this\.L\.asmDialectUsed\(out\.dialect\)/, 'the status line names the dialect used');
     for (const key of ['asmDialectLabel', 'asmDialectTitle', 'asmDialectNames', 'asmDialectUsed']) {
         assert.equal((src.match(new RegExp(`^\\s+${key}:`, 'gm')) || []).length, 2, `${key} must exist in EN and DE`);

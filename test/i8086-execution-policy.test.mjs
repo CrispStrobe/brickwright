@@ -33,8 +33,8 @@ test('preference persists, rejects bad values, and has storage-free tab fallback
     assert.equal(blocked.getPreference(), 'functional');
 });
 
-test('Auto preserves DOS/hardware semantics and exact 8086/80186 family', needsPolicy, async () => {
-    for (const context of ['dos', 'hardware']) for (const family of ['8086', '80186']) {
+test('Auto preserves DOS/hardware semantics and exact 8086, 80186 and 80286 family', needsPolicy, async () => {
+    for (const context of ['dos', 'hardware']) for (const family of ['8086', '80186', '80286']) {
         const app = controller();
         const result = await app.construct({context, family}, async () => ({}));
         const status = app.statusFor(result);
@@ -162,7 +162,7 @@ test('target boundaries, lifecycle and GUI hold actual admission/status and mirr
     assert.match(texts[0], /import\('bw-board\/execution-policy'\)/);
     assert.match(texts[1], /i8086Execution\.construct\(\{context: 'dos'/);
     assert.match(texts[2], /i8086Execution\.construct\(\{context: 'hardware'/);
-    assert.match(texts[2], /destroy\(\{preserveRuntime = false\} = \{\}\) \{\s*i8086ExecutionLifetime\.abort\(\);\s*i8086Execution\.release/);
+    assert.match(texts[2], /destroy\(\{preserveRuntime = false\} = \{\}\) \{\s*publishBasicSerial\(false\);\s*i8086ExecutionLifetime\.abort\(\);\s*i8086Execution\.release/);
     assert.match(texts[2], /catch \(e\) \{\s*unschedule\(\);\s*i8086Execution\.release/);
     assert.match(texts[3], /i8086Execution\.subscribe\(setExecutionState\)/);
     assert.match(texts[3], /Wired digital \(unavailable/);

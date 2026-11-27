@@ -158,10 +158,7 @@ async function createI8086DosBenchSelected (opts) {
     const dos = createDos8086(machine, {
         files: diskFiles,
         onChar: onChar || null,
-        // On a disk boot the injected program is PROG.COM by convention, so with
-        // no keys supplied we auto-type "PROG\r" at the A> prompt to run it —
-        // "P","R","O","G",CR. Any explicit keys win (a program that reads input).
-        keys: (keys && keys.length) ? keys : (format === 'disk' ? [80, 82, 79, 71, 13] : []),
+        keys: keys || [],
         // format 'disk' boots a REAL MS-DOS 2.0 kernel from a FAT12 image (the
         // 360K MIT boot disk with a code-tab program injected) rather than
         // loading a .COM onto the service layer: the boot sector loads IO.SYS ->
@@ -178,8 +175,8 @@ async function createI8086DosBenchSelected (opts) {
     }).install();
 
     if (format === 'disk') dos.loadBoot(bytes.subarray(0, 512), 0);
-    else if (format === 'exe') dos.loadExe(bytes);
-    else dos.loadCom(bytes);
+    else if (format === 'exe') dos.loadExe(bytes, {args: opts.args});
+    else dos.loadCom(bytes, {args: opts.args});
 
     let exitAnnounced = false;
     const realStep = machine.step.bind(machine);
@@ -190,8 +187,7 @@ async function createI8086DosBenchSelected (opts) {
             return realStep();
         }
         // Idempotent by construction; safe before OR after an instruction.
-        if (dos.service() !== null) return 0;
-        const cycles = realStep();
+        const cycles = dos.step();
         if (dos.terminated && !exitAnnounced) {
             exitAnnounced = true;
             if (onExit) onExit(dos.exitCode);

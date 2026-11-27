@@ -21,14 +21,14 @@ export const CIRCUIT_PANEL_TEXT = {
     en: {
         'group': 'Circuit panels',
         'name.designer': 'Designer',
-        'name.warnings': 'Warnings',
+        'name.warnings': 'Circuit Check',
         'name.bom': 'Parts list',
         'name.examples': 'Examples',
         'help.designer': 'Build the circuit on the breadboard and simulate it',
         'help.warnings': 'Design-rule check: shorts, missing resistors, overloaded pins',
         'help.bom': 'Every part on the board, counted, with a CSV for ordering',
         'help.examples': 'Starter circuits and programs to open and change',
-        'heading.warnings': 'Warnings ({count})',
+        'heading.warnings': 'Circuit Check ({count})',
         'hint.warnings': 'Checked again whenever the circuit changes. Red items can damage a real part.',
         'hint.bom': 'Counts every part on the board. Copy the CSV to order them.',
         'hint.examples': 'Opening an example replaces the circuit on the board.',
@@ -51,14 +51,14 @@ export const CIRCUIT_PANEL_TEXT = {
     de: {
         'group': 'Schaltungsbereiche',
         'name.designer': 'Designer',
-        'name.warnings': 'Warnungen',
+        'name.warnings': 'Schaltungsprüfung',
         'name.bom': 'Stückliste',
         'name.examples': 'Beispiele',
         'help.designer': 'Die Schaltung auf dem Steckbrett bauen und simulieren',
         'help.warnings': 'Entwurfsregelprüfung: Kurzschlüsse, fehlende Widerstände, überlastete Pins',
         'help.bom': 'Alle Bauteile auf der Platine, gezählt, mit CSV zum Bestellen',
         'help.examples': 'Startschaltungen und -programme zum Öffnen und Ändern',
-        'heading.warnings': 'Warnungen ({count})',
+        'heading.warnings': 'Schaltungsprüfung ({count})',
         'hint.warnings': 'Wird bei jeder Änderung neu geprüft. Rote Einträge können ein echtes Bauteil beschädigen.',
         'hint.bom': 'Zählt alle Bauteile auf der Platine. Kopiere die CSV zum Bestellen.',
         'hint.examples': 'Ein Beispiel zu öffnen ersetzt die Schaltung auf der Platine.',
@@ -119,6 +119,7 @@ export const bomView = (locale, ui, circuit) => {
 
 /** The badge on the Warnings button: a real count only (never "0" for a check that could not run). */
 export const warningsBadge = drc => {
-    if (!drc || !drc.warnings || !drc.warnings.length) return null;
-    return {count: drc.warnings.length, danger: drc.warnings.some(w => w.severity === 'danger' || w.severity === 'error')};
+    const findings = drc?.warnings?.filter(w => w.severity !== 'info');
+    if (!findings?.length) return null;
+    return {count: findings.length, danger: findings.some(w => w.severity === 'danger' || w.severity === 'error')};
 };

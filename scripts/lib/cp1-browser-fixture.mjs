@@ -9,7 +9,7 @@ export async function cp1BrowserFixture ({root, deps, compilerDeps = deps, board
     const requireDeps = createRequire(path.join(deps, '__cp1_browser__.cjs'));
     const requireCompiler = createRequire(path.join(compilerDeps, '__cp1_browser_compiler__.cjs'));
     const requireRoot = createRequire(path.join(root, 'package.json'));
-    const {createServer, build} = await import(pathToFileURL(requireCompiler.resolve('vite')).href);
+    const {createServer, build, preview} = await import(pathToFileURL(requireCompiler.resolve('vite')).href);
     const {default: reactPlugin} = await import(pathToFileURL(requireCompiler.resolve('@vitejs/plugin-react')).href);
     // resolve() selects Playwright's CommonJS entry; importing that file by URL
     // exposes its API under default on Node 22/24, not named chromium. Use the
@@ -75,5 +75,5 @@ export async function cp1BrowserFixture ({root, deps, compilerDeps = deps, board
         ]},
         server: {host: '127.0.0.1', port: 0, fs: {allow: [root, board, deps, compilerDeps, ...(circuit ? [circuit] : [])]}}
     };
-    return {config, createServer, build, chromium, react};
+    return {config, createServer, build, preview, chromium, react};
 }

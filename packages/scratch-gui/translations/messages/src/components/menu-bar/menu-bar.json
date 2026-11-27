@@ -50,6 +50,10 @@
     "defaultMessage": "File"
   },
   {
+    "id": "gui.menuBar.machines",
+    "defaultMessage": "Machines…"
+  },
+  {
     "id": "gui.menuBar.brickwrightLessons",
     "description": "Open the interactive Brickwright lessons library",
     "defaultMessage": "Brickwright lessons…"

@@ -1,22 +1,32 @@
 import React from 'react';
+import MachineScreenHeader from './machine-screen-header.jsx';
+import {keyToBytes} from '../../lib/bw-debug/terminal-keys.js';
 import {pcSet1Bytes} from '../../lib/bw-machines/pc-scancodes.js';
 import {ps2ButtonBit, ps2Delta} from '../../lib/bw-machines/ps2-pointer.js';
 
+const spectrumSpecialKeys = {
+    ShiftLeft: ['caps'], ShiftRight: ['caps'], AltLeft: ['sym'], AltRight: ['sym'],
+    Enter: ['enter'], NumpadEnter: ['enter'], Space: ['space'], Backspace: ['caps', '0'],
+    ArrowLeft: ['caps', '5'], ArrowDown: ['caps', '6'], ArrowUp: ['caps', '7'], ArrowRight: ['caps', '8']
+};
+
+function spectrumKeys (code) {
+    if (/^Key[A-Z]$/.test(code)) return [code.slice(3).toLowerCase()];
+    if (/^Digit[0-9]$/.test(code)) return [code.slice(5)];
+    return spectrumSpecialKeys[code] || [];
+}
+
 /** Large, focusable VGA face for the Widgets pane. The panel owns frame storage;
  * this face only paints it and sends live input to the active machine runner. */
-export default function MachineConsole({widget, keyIn, mouseIn, keyboardSet}) {
+export default function MachineConsole({widget, keyIn, serialIn, mouseIn, keyboardSet, isFullScreen, onToggleFullScreen, locale}) {
     const root = React.useRef(null);
     const canvas = React.useRef(null);
+    const aspect = widget.config.displayAspect;
+    const hasDisplayAspect = Number.isFinite(aspect) && aspect > 0;
     const held = React.useRef(new Set());
     const buttons = React.useRef(0);
     const point = React.useRef(null);
-    const [full, setFull] = React.useState(false);
     const [focused, setFocused] = React.useState(false);
-    React.useEffect(() => {
-        const sync = () => setFull(document.fullscreenElement === root.current);
-        document.addEventListener('fullscreenchange', sync);
-        return () => document.removeEventListener('fullscreenchange', sync);
-    }, []);
     React.useEffect(() => {
         const el = canvas.current;
         const rgba = widget?.state?.rgba;
@@ -29,8 +39,12 @@ export default function MachineConsole({widget, keyIn, mouseIn, keyboardSet}) {
             new ImageData(new Uint8ClampedArray(rgba), width, height), 0, 0);
     }, [widget?.state?.rgba, widget?.state?.frame, widget?.config?.width, widget?.config?.height]);
     const release = () => {
-        for (const code of held.current) {
-            for (const byte of pcSet1Bytes(code, false, keyboardSet === 'at-set1')) keyIn?.(byte);
+        if (keyboardSet === 'spectrum') {
+            if (held.current.size) keyIn?.([]);
+        } else {
+            for (const code of held.current) {
+                for (const byte of pcSet1Bytes(code, false, keyboardSet === 'at-set1')) keyIn?.(byte);
+            }
         }
         held.current.clear();
         if (buttons.current) mouseIn?.({dx: 0, dy: 0, buttons: 0});
@@ -48,12 +62,31 @@ export default function MachineConsole({widget, keyIn, mouseIn, keyboardSet}) {
         };
     }, [keyIn, mouseIn, keyboardSet]);
     React.useEffect(() => {
-        if (!keyIn) return undefined;
+        if (!keyIn && !serialIn) return undefined;
         // Scratch's global keyboard listener can stop propagation before React's
         // delegated onKeyDown reaches this component. Window capture runs first,
         // and only when the console itself has focus.
         const onKey = (e, down) => {
             if (document.activeElement !== root.current) return;
+            if (serialIn) {
+                if (!down || e.key === 'Tab') return;
+                const encoded = keyToBytes(e);
+                if (!encoded || encoded.length !== 1 || encoded[0] > 0x7f) return;
+                e.preventDefault();
+                e.stopPropagation();
+                serialIn(e.key === 'Backspace' ? 0x08 : encoded[0]);
+                return;
+            }
+            if (keyboardSet === 'spectrum') {
+                const names = spectrumKeys(e.code);
+                if (!names.length) return;
+                e.preventDefault();
+                e.stopPropagation();
+                if (down) held.current.add(e.code);
+                else held.current.delete(e.code);
+                keyIn([...new Set([...held.current].flatMap(spectrumKeys))]);
+                return;
+            }
             const bytes = pcSet1Bytes(e.code, down, keyboardSet === 'at-set1');
             if (bytes == null) return;
             e.preventDefault(); e.stopPropagation();
@@ -74,7 +107,7 @@ export default function MachineConsole({widget, keyIn, mouseIn, keyboardSet}) {
             window.removeEventListener('keydown', down, true);
             window.removeEventListener('keyup', up, true);
         };
-    }, [keyIn, keyboardSet]);
+    }, [keyIn, serialIn, keyboardSet]);
     const pointerMove = e => {
         if (!mouseIn) return;
         const next = {x: e.clientX, y: e.clientY};
@@ -100,38 +133,33 @@ export default function MachineConsole({widget, keyIn, mouseIn, keyboardSet}) {
         buttons.current &= ~ps2ButtonBit(e.button);
         mouseIn({dx: 0, dy: 0, buttons: buttons.current});
     };
-    const toggleFull = async () => {
-        try {
-            if (document.fullscreenElement === root.current) await document.exitFullscreen();
-            else await root.current?.requestFullscreen();
-        } catch { /* browser declined fullscreen; pane mode still works */ }
+    const toggleFull = () => {
+        release();
+        onToggleFullScreen();
+        root.current?.focus();
     };
     return (
         <div ref={root} data-testid="bw-machine-console" tabIndex={0}
             onFocus={() => setFocused(true)} onBlur={() => { setFocused(false); release(); }}
             style={{width: '100%', height: '100%', minHeight: 0, background: '#000',
                 display: 'flex', flexDirection: 'column', outline: focused ? '2px solid #60a5fa' : 'none'}}>
-            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '4px 8px', background: '#111827', color: '#cbd5e1', fontSize: 12}}>
-                <span>{widget.name} · {focused ? 'Keyboard active' : 'Click screen for keyboard'}</span>
-                <button type="button" onClick={toggleFull} data-testid="bw-machine-fullscreen"
-                    onPointerDown={e => e.stopPropagation()} onPointerUp={e => e.stopPropagation()}
-                    onKeyDown={e => e.stopPropagation()} onKeyUp={e => e.stopPropagation()}
-                    style={{background: '#374151', color: '#fff', border: 0, borderRadius: 4,
-                        padding: '4px 9px', cursor: 'pointer'}}>
-                    {full ? 'Exit full screen' : 'Full screen'}
-                </button>
-            </div>
+            <MachineScreenHeader locale={locale} title={widget.name}
+                help={(keyIn || serialIn) && (mouseIn ? 'Click the screen to use the keyboard and mouse.'
+                    : 'Click the screen to type into the machine.')}
+                isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen && toggleFull} />
             <div onPointerMove={pointerMove} onPointerDown={pointerDown} onPointerUp={pointerUp}
                 onLostPointerCapture={() => {
                     if (buttons.current) { buttons.current = 0; mouseIn?.({dx: 0, dy: 0, buttons: 0}); }
                     point.current = null;
                 }}
                 onContextMenu={e => { if (mouseIn) e.preventDefault(); }}
-                style={{flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                style={{flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    containerType: hasDisplayAspect ? 'size' : undefined}}>
                 <canvas ref={canvas} data-testid="bw-machine-canvas"
-                    style={{display: 'block', width: '100%', height: '100%', objectFit: 'contain',
-                        imageRendering: 'pixelated'}} />
+                    style={{display: 'block', imageRendering: 'pixelated',
+                        width: hasDisplayAspect ? `min(100cqw, ${100 * aspect}cqh)` : '100%',
+                        height: hasDisplayAspect ? `min(100cqh, ${100 / aspect}cqw)` : '100%',
+                        objectFit: hasDisplayAspect ? 'fill' : 'contain'}} />
                 {!widget.state.signal && <span style={{position: 'absolute', color: '#4ade80'}}>NO SIGNAL</span>}
             </div>
         </div>

@@ -61,6 +61,7 @@ class LazyPseudocodeImporter extends React.Component {
         };
         this.importerReady = false;
         this.pendingPseudocodeDetail = null;
+        this.pendingReadBlocks = false;
         this.Importer = createLazyImporter();
     }
     static getDerivedStateFromError (error) {
@@ -76,6 +77,7 @@ class LazyPseudocodeImporter extends React.Component {
     componentDidMount () {
         window.addEventListener('bw-project-bundle-loaded', this.handleBundleLoaded);
         window.addEventListener('bw-load-pseudocode', this.handleLoadPseudocode);
+        window.addEventListener('bw-read-blocks-into-code', this.handleReadBlocks);
         this.bindRuntime(this.props.vm);
     }
     componentDidUpdate (previousProps) {
@@ -90,6 +92,7 @@ class LazyPseudocodeImporter extends React.Component {
         this.pendingPseudocodeDetail = null;
         window.removeEventListener('bw-project-bundle-loaded', this.handleBundleLoaded);
         window.removeEventListener('bw-load-pseudocode', this.handleLoadPseudocode);
+        window.removeEventListener('bw-read-blocks-into-code', this.handleReadBlocks);
         this.unbindRuntime(this.props.vm);
     }
     bindRuntime (vm) {
@@ -119,6 +122,11 @@ class LazyPseudocodeImporter extends React.Component {
         this.pendingPseudocodeDetail = event.detail;
         this.setState({activated: true});
     };
+    handleReadBlocks = () => {
+        if (this.importerReady) return;
+        this.pendingReadBlocks = true;
+        this.setState({activated: true});
+    };
     handleImporterReady = () => {
         // The child has installed its event listener before calling onReady.
         // Mark readiness synchronously so replay is handled only by that child.
@@ -127,6 +135,10 @@ class LazyPseudocodeImporter extends React.Component {
         const detail = this.pendingPseudocodeDetail;
         this.pendingPseudocodeDetail = null;
         if (detail) window.dispatchEvent(new CustomEvent('bw-load-pseudocode', {detail}));
+        if (this.pendingReadBlocks) {
+            this.pendingReadBlocks = false;
+            window.dispatchEvent(new CustomEvent('bw-read-blocks-into-code'));
+        }
     };
     handleRetry = () => {
         this.importerReady = false;
@@ -178,6 +190,8 @@ class LazyPseudocodeImporter extends React.Component {
                     key={this.state.generation}
                     isVisible={this.props.isVisible}
                     onCp1CodeSlot={this.props.onCp1CodeSlot}
+                    onCardiacCodeSlot={this.props.onCardiacCodeSlot}
+                    onCardiacToolsSlot={this.props.onCardiacToolsSlot}
                     pendingBundleDetail={this.state.pendingBundleDetail}
                     onPendingBundleHandled={this.handlePendingBundleHandled}
                     onReady={this.handleImporterReady}
@@ -189,6 +203,8 @@ class LazyPseudocodeImporter extends React.Component {
 
 LazyPseudocodeImporter.propTypes = {
     onCp1CodeSlot: PropTypes.func,
+    onCardiacCodeSlot: PropTypes.func,
+    onCardiacToolsSlot: PropTypes.func,
     isVisible: PropTypes.bool,
     vm: PropTypes.shape({runtime: PropTypes.shape({
         on: PropTypes.func,

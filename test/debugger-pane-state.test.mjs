@@ -69,14 +69,14 @@ function storageWith (values = {}) {
     const entries = new Map(Object.entries(values));
     return {getItem: key => entries.get(key) ?? null, setItem: (key, value) => entries.set(key, String(value))};
 }
-function fixture ({dock, storage = storageWith({'bw-debug-dock': dock}), visible = false,
-    buildCircuit = makeCircuit} = {}) {
+function fixture ({dock, storage = storageWith({'bw-debug-dock': dock, 'bw-stage-circuit': '1'}), visible = false,
+    buildCircuit = makeCircuit, window = {}} = {}) {
     const connected = new Set();
     const document = {contains: node => connected.has(node),
         createElement: () => ({dataset: {}, style: {}})};
     const ReactDOM = {createPortal: (children, container, key) => ({portal: true, children, container, key})};
     const Panel = () => null;
-    const CircuitTab = buildCircuit({React, ReactDOM, document, localStorage: storage, DebugPanel: Panel,
+    const CircuitTab = buildCircuit({React, ReactDOM, document, window, localStorage: storage, DebugPanel: Panel,
         loadBenchTemperature: () => 25, getReactPerformanceProbe: () => null,
         profileReactSubtree: (_react, _name, element) => element, pt: (_locale, key) => key,
         advanceDebugPhase, shouldRefreshDesignerDebugState, applyBenchTemperature});
@@ -111,6 +111,25 @@ test('invalid or inaccessible saved settings retain the ordinary right-dock defa
     }
     const storage = {getItem () {throw new Error('storage unavailable');}};
     assert.equal(fixture({storage}).host.state.debugDock, 'right');
+});
+
+test('Scratch owns the pane on fresh load and after leaving a running debugger', () => {
+    const {host} = fixture({storage: storageWith({'bw-debug-dock': 'right'})});
+    host.state.Designer = () => null;
+    assert.equal(host._stagePortalOn(), false);
+    host.state.showInStage = true;
+    host.render();
+    applyHostVisibility.call(host);
+    assert.equal(host._stageHost.style.display, 'block');
+    const debugHost = host._debugHost;
+    for (const visible of [false, true]) {
+        host.props.isVisible = visible;
+        host.state.showInStage = false;
+        const shown = portals(host.render());
+        applyHostVisibility.call(host);
+        assert.equal(host._stageHost.style.display, 'none');
+        assert.deepEqual(shown.map(portal => portal.container), [debugHost]);
+    }
 });
 
 test('setDock switches in both directions and persists only recognized pane modes', () => {
@@ -188,9 +207,7 @@ test('designer loading retains the same active panel when switching from debugge
     host.state.machineBooted = true;
     const first = portals(host.render()).find(portal => portal.key === 'debug-panel');
     assert.ok(first);
-    // The controller (Widgets) dock is split with a live debugger; see the
-    // next test. Every other device pane owns the whole column.
-    for (const dock of deviceDocks.filter(d => d !== 'controller')) {
+    for (const dock of deviceDocks) {
         host.setDock(dock);
         const next = portals(host.render());
         assert.equal(next.length, 1);
@@ -227,17 +244,7 @@ test('real React reconciles the actual dock renders without remounting or destro
                 });
             }
         });
-        // It also predates the :scope pseudo-class that _layoutStageHost uses
-        // to find its sibling dock. Resolve exactly ':scope > X' as the direct
-        // children matching X; every other selector goes to jsdom unchanged.
-        for (const proto of [document.defaultView.Element.prototype, document.defaultView.Document.prototype]) {
-            const original = proto.querySelector;
-            proto.querySelector = function (selector) {
-                const scoped = /^:scope\\s*>\\s*(.+)$/.exec(selector);
-                if (!scoped) return original.call(this, selector);
-                return Array.from(this.querySelectorAll(scoped[1])).find(node => node.parentNode === this) || null;
-            };
-        }
+
         const React = require(${JSON.stringify(requireGui.resolve('react'))});
         const ReactDOM = require(${JSON.stringify(requireGui.resolve('react-dom'))});
         const makeCircuit = new Function('env', ${JSON.stringify(factoryCode)});
@@ -264,7 +271,7 @@ test('real React reconciles the actual dock renders without remounting or destro
             render () {return React.createElement('button', {'data-live-runner': true}, 'Run');}
         }
         const CircuitTab = makeCircuit({React, ReactDOM, document, window,
-            localStorage: storageWith({'bw-debug-dock': 'right', 'bw-right-pane-hidden': '0'}),
+            localStorage: storageWith({'bw-debug-dock': 'right', 'bw-right-pane-hidden': '0', 'bw-stage-circuit': '1'}),
             DebugPanel: LivePanel, loadBenchTemperature: () => 25,
             getReactPerformanceProbe: () => null,
             profileReactSubtree: (_react, _name, element) => element,
@@ -394,34 +401,26 @@ test('building, attaching, ready, and error statuses are not mislabeled as an em
     }
 });
 
-test('beside a live machine the controller dock shares the column with the debugger (I3/I4)', () => {
+test('Controller keeps the entire pane with a live machine and retains the debugger runner', () => {
     for (const live of [{machineBooted: true}, {stc: {pins: [{name: 'led1'}]}}]) {
         const {host} = fixture({dock: 'right'});
         Object.assign(host.state, live);
         const first = portals(host.render()).find(portal => portal.key === 'debug-panel');
         host.setDock('controller');
-        assert.equal(host._stagePortalOn(), true, JSON.stringify(live));
-        const tree = host.render();
-        const next = portals(tree);
-        assert.equal(next.length, 2, 'the debugger pane portal plus the keyed panel');
-        assert.equal(next[0].container, host._stageHost);
-        assert.equal(next[1].key, first.key);
-        assert.equal(next[1].container, first.container);
-        host._portalRendered = true;
-        let split = null;
-        host._layoutStageHost = value => { split = value; };
+        assert.equal(host._stagePortalOn(), false, JSON.stringify(live));
+        const [panel, ...others] = portals(host.render());
+        assert.deepEqual(others, []);
+        assert.equal(panel.key, first.key);
+        assert.equal(panel.container, first.container);
         applyHostVisibility.call(host);
-        assert.equal(host._stageHost.style.display, 'block');
-        assert.equal(split, true, 'the live debugger takes the lower half of the split column');
+        assert.equal(host._stageHost.style.display, 'none');
     }
-    // Without a live machine or program the controller face keeps its column.
-    const {host} = fixture({dock: 'controller'});
+});
+
+test('CP1 controller keeps its keypad without a second CP1 debugger face', () => {
+    const {host} = fixture({dock: 'controller', window: {__bwMachineExtracted: {kind: 'cp1'}}});
+    host.state.machineBooted = true;
     assert.equal(host._stagePortalOn(), false);
-    for (const dock of deviceDocks.filter(d => d !== 'controller')) {
-        host.state.machineBooted = true;
-        host.setDock(dock);
-        assert.equal(host._stagePortalOn(), false, dock);
-    }
 });
 
 test('restoring the original dock refusals or removing stage ownership fails the same pane contracts', () => {
@@ -436,16 +435,17 @@ test('restoring the original dock refusals or removing stage ownership fails the
                 host.setDock('controller');
                 assert.equal(host.state.debugDock, 'controller');
             }],
-        ['device column covered', 'if (!CIRCUIT_DOCKS.has(this.state.debugDock) && !this._controllerSplitLive()) return false;',
+        ['device column covered', 'if (!CIRCUIT_DOCKS.has(this.state.debugDock)) return false;',
             '', buildCircuit => {
                 const {host} = fixture({dock: 'controller', buildCircuit});
                 assert.equal(host._stagePortalOn(), false);
             }],
-        ['controller split dropped (I3/I4 regression)', 'this.state.debugDock === \'controller\' &&',
-            'false &&', buildCircuit => {
+        ['live debugger covers the controller', 'if (!CIRCUIT_DOCKS.has(this.state.debugDock)) return false;',
+            "if (!CIRCUIT_DOCKS.has(this.state.debugDock) && !(this.state.debugDock === 'controller' && this.state.machineBooted)) return false;",
+            buildCircuit => {
                 const {host} = fixture({dock: 'controller', buildCircuit});
                 host.state.machineBooted = true;
-                assert.equal(host._stagePortalOn(), true);
+                assert.equal(host._stagePortalOn(), false);
             }]
     ]) {
         oracle(makeCircuit);
@@ -465,5 +465,50 @@ test('losing either loaded-input guard makes the actual cue falsely claim an emp
         assert.equal(cueCode.split(needle).length, 2, 'one actual production guard');
         const mutant = new Function('React', `${cueCode.replace(needle, 'true')}\nreturn renderCue;`)(React);
         assert.throws(() => oracle(mutant), {name: 'AssertionError'}, needle);
+    }
+});
+
+test('a wired gallery ROM waits for the matching circuit and sees its board before dispatch', () => {
+    const runtime = {};
+    const snapshots = [];
+    const window = {dispatchEvent: event => snapshots.push({
+        type: event.type, media: event.detail, board: runtime.circuitBoard
+    })};
+    const {host} = fixture({window});
+    host.props.vm.runtime = runtime;
+    const old = {}, selected = {}, board = {};
+    const media = {kind: 'eater6502', name: 'rom.bin'};
+    host._wiredExample = {data: selected, media};
+    host.handleWiredBootReady(old, {}, {ok: true});
+    assert.equal(snapshots.length, 0);
+    host.handleWiredBootReady(selected, board, {ok: true});
+    assert.deepEqual(snapshots.map(item => item.type), ['bw-board-ready', 'bw-machine-media-load']);
+    assert.equal(snapshots[1].board, board);
+    assert.equal(snapshots[1].media, media);
+    host.handleWiredBootReady(selected, board, {ok: true});
+    assert.equal(snapshots.length, 2);
+});
+
+test('a failed gallery extract exposes its reason and leaves the ROM unbooted', () => {
+    const {host} = fixture({window: {dispatchEvent: () => assert.fail('unexpected boot')}});
+    const data = {};
+    host._wiredExample = {data, media: {kind: 'eater6502'}};
+    host.handleWiredBootReady(data, {}, {ok: false, reasons: ['Missing reset vector']});
+    assert.equal(host.state.examplesError, 'Missing reset vector');
+    assert.equal(host._wiredExample, null);
+});
+
+test('the debugger keeps transport, target and status visible while history starts folded', () => {
+    const find = attribute => allNodes(panelRender, node => node.type === 'JSXElement' &&
+        node.openingElement.attributes.some(item => item.name?.name === attribute));
+    for (const marker of ['data-debug-transport', 'data-debug-target-controls', 'data-debug-status']) {
+        assert.equal(find(marker).length, 1, marker);
+    }
+    const [history] = find('data-debug-history');
+    assert.equal(history.openingElement.name.name, 'details');
+    assert.equal(history.openingElement.attributes.some(item => item.name?.name === 'open'), false);
+    const historyMarkers = allNodes(history, node => node.type === 'JSXAttribute').map(node => node.name.name);
+    for (const marker of ['data-debug-record', 'data-debug-checkpoint', 'data-debug-timeline-controls']) {
+        assert.ok(historyMarkers.includes(marker), marker);
     }
 });

@@ -1,0 +1,168 @@
+name: CARDIAC browser qualification
+
+on:
+  push:
+    branches: [main, 'feat/cardiac-lab-20261126']
+    paths:
+      - '.github/workflows/cardiac-lab.yml'
+      - 'vendor-pins.json'
+      - 'package*.json'
+      - 'packages/scratch-gui/package*.json'
+      - 'overlay/scratch-gui/src/components/tw-pseudocode/cardiac-*'
+      - 'overlay/scratch-gui/src/components/tw-pseudocode/circuit-tab.jsx'
+      - 'overlay/scratch-gui/src/components/tw-pseudocode/debug-panel.jsx'
+      - 'overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx'
+      - 'overlay/scratch-gui/src/components/tw-pseudocode/controller-panel*.jsx'
+      - 'overlay/scratch-gui/src/components/gui/gui.jsx'
+      - 'overlay/scratch-gui/src/components/gui/guided-lessons.*'
+      - 'overlay/scratch-gui/src/components/gui/lesson-waves/cardiac-*.json'
+      - 'overlay/scratch-gui/src/containers/lazy-pseudocode-importer.jsx'
+      - 'overlay/scratch-gui/src/containers/controls.jsx'
+      - 'packages/scratch-gui/src/components/tw-pseudocode/cardiac-*'
+      - 'packages/scratch-gui/src/components/tw-pseudocode/circuit-tab.jsx'
+      - 'packages/scratch-gui/src/components/tw-pseudocode/debug-panel.jsx'
+      - 'packages/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx'
+      - 'packages/scratch-gui/src/components/tw-pseudocode/controller-panel*.jsx'
+      - 'packages/scratch-gui/src/components/gui/gui.jsx'
+      - 'packages/scratch-gui/src/components/gui/guided-lessons.*'
+      - 'packages/scratch-gui/src/components/gui/lesson-waves/cardiac-*.json'
+      - 'packages/scratch-gui/src/containers/lazy-pseudocode-importer.jsx'
+      - 'packages/scratch-gui/src/containers/controls.jsx'
+      - 'overlay/scratch-gui/src/lib/cardiac-*'
+      - 'overlay/scratch-gui/src/lib/bw-debug/**'
+      - 'overlay/scratch-gui/src/lib/bw-project-*'
+      - 'packages/scratch-gui/src/lib/cardiac-*'
+      - 'packages/scratch-gui/src/lib/bw-debug/**'
+      - 'packages/scratch-gui/src/lib/bw-project-*'
+      - 'overlay/scratch-gui/examples/cardiac-*/**'
+      - 'packages/scratch-gui/examples/cardiac-*/**'
+      - 'scripts/verify-cardiac-lab-browser.mjs'
+      - 'scripts/lib/cardiac-browser-fixture.mjs'
+      - 'scripts/ci-vendor-pins.mjs'
+      - 'scripts/lib/register-gui-scope.mjs'
+      - 'test/cardiac-*.test.mjs'
+      - 'test/fixtures/cardiac-lab/**'
+  pull_request:
+    paths:
+      - '.github/workflows/cardiac-lab.yml'
+      - 'vendor-pins.json'
+      - 'package*.json'
+      - 'packages/scratch-gui/package*.json'
+      - 'overlay/scratch-gui/src/components/tw-pseudocode/cardiac-*'
+      - 'overlay/scratch-gui/src/components/tw-pseudocode/circuit-tab.jsx'
+      - 'overlay/scratch-gui/src/components/tw-pseudocode/debug-panel.jsx'
+      - 'overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx'
+      - 'overlay/scratch-gui/src/components/tw-pseudocode/controller-panel*.jsx'
+      - 'overlay/scratch-gui/src/components/gui/gui.jsx'
+      - 'overlay/scratch-gui/src/components/gui/guided-lessons.*'
+      - 'overlay/scratch-gui/src/components/gui/lesson-waves/cardiac-*.json'
+      - 'overlay/scratch-gui/src/containers/lazy-pseudocode-importer.jsx'
+      - 'overlay/scratch-gui/src/containers/controls.jsx'
+      - 'packages/scratch-gui/src/components/tw-pseudocode/cardiac-*'
+      - 'packages/scratch-gui/src/components/tw-pseudocode/circuit-tab.jsx'
+      - 'packages/scratch-gui/src/components/tw-pseudocode/debug-panel.jsx'
+      - 'packages/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx'
+      - 'packages/scratch-gui/src/components/tw-pseudocode/controller-panel*.jsx'
+      - 'packages/scratch-gui/src/components/gui/gui.jsx'
+      - 'packages/scratch-gui/src/components/gui/guided-lessons.*'
+      - 'packages/scratch-gui/src/components/gui/lesson-waves/cardiac-*.json'
+      - 'packages/scratch-gui/src/containers/lazy-pseudocode-importer.jsx'
+      - 'packages/scratch-gui/src/containers/controls.jsx'
+      - 'overlay/scratch-gui/src/lib/cardiac-*'
+      - 'overlay/scratch-gui/src/lib/bw-debug/**'
+      - 'overlay/scratch-gui/src/lib/bw-project-*'
+      - 'packages/scratch-gui/src/lib/cardiac-*'
+      - 'packages/scratch-gui/src/lib/bw-debug/**'
+      - 'packages/scratch-gui/src/lib/bw-project-*'
+      - 'overlay/scratch-gui/examples/cardiac-*/**'
+      - 'packages/scratch-gui/examples/cardiac-*/**'
+      - 'scripts/verify-cardiac-lab-browser.mjs'
+      - 'scripts/lib/cardiac-browser-fixture.mjs'
+      - 'scripts/ci-vendor-pins.mjs'
+      - 'scripts/lib/register-gui-scope.mjs'
+      - 'test/cardiac-*.test.mjs'
+      - 'test/fixtures/cardiac-lab/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Resolve adopted supplier revisions
+        id: vendor_pins
+        run: node scripts/ci-vendor-pins.mjs >> "$GITHUB_OUTPUT"
+      - name: Check out adopted Circuit UI
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: CrispStrobe/bw-circuit-ui
+          ref: ${{ steps.vendor_pins.outputs.bw-circuit-ui }}
+          path: .cardiac-ci/bw-circuit-ui
+          persist-credentials: false
+      - name: Check out adopted engine
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: CrispStrobe/bw-board
+          ref: ${{ steps.vendor_pins.outputs.bw-board }}
+          path: .cardiac-ci/bw-board
+          persist-credentials: false
+      - name: Install locked root inputs
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Install locked Circuit UI browser dependencies
+        working-directory: .cardiac-ci/bw-circuit-ui
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Install the actual GUI React runtime
+        working-directory: packages/scratch-gui
+        run: npm ci --ignore-scripts --legacy-peer-deps --no-audit --no-fund
+      - name: Install Playwright Chromium and system libraries
+        working-directory: .cardiac-ci/bw-circuit-ui
+        run: npx playwright install --with-deps chromium
+      - name: Record exact execution inputs
+        run: |
+          node --input-type=module <<'NODE'
+          import {mkdirSync, readFileSync, writeFileSync} from 'node:fs';
+          const read = file => JSON.parse(readFileSync(file, 'utf8'));
+          mkdirSync('test-results/cardiac-browser', {recursive: true});
+          writeFileSync('test-results/cardiac-browser/inputs.json', JSON.stringify({
+            root: process.env.GITHUB_SHA, suppliers: read('vendor-pins.json'), node: process.version,
+            playwright: read('.cardiac-ci/bw-circuit-ui/node_modules/playwright/package.json').version,
+            react18: read('.cardiac-ci/bw-circuit-ui/node_modules/react/package.json').version,
+            guiReact: read('packages/scratch-gui/node_modules/react/package.json').version,
+            fullApplicationBuild: false
+          }, null, 2) + '\n');
+          NODE
+      - name: Verify CARDIAC host, bundle, routing and lesson contracts
+        run: node --test --import ./scripts/lib/register-gui-scope.mjs test/cardiac-*.test.mjs
+      - name: Shared CARDIAC lab with Circuit UI React 18
+        timeout-minutes: 4
+        run: >-
+          node scripts/verify-cardiac-lab-browser.mjs
+          --deps .cardiac-ci/bw-circuit-ui/node_modules
+          --board .cardiac-ci/bw-board --circuit .cardiac-ci/bw-circuit-ui
+          --out test-results/cardiac-browser/react18
+      - name: Shared CARDIAC lab with GUI React 16
+        if: ${{ !cancelled() }}
+        timeout-minutes: 4
+        run: >-
+          node scripts/verify-cardiac-lab-browser.mjs
+          --deps packages/scratch-gui/node_modules
+          --compiler-deps .cardiac-ci/bw-circuit-ui/node_modules
+          --board .cardiac-ci/bw-board --circuit .cardiac-ci/bw-circuit-ui
+          --out test-results/cardiac-browser/react16
+      - name: Preserve browser observations and failure evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: cardiac-browser-${{ github.sha }}
+          path: test-results/cardiac-browser/
+          if-no-files-found: error
+          retention-days: 14

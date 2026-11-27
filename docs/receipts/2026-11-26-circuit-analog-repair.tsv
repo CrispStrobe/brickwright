@@ -1,0 +1,19 @@
+example	device	circuit	previous	startup	functional_verdict	receipt
+pc59-nor-memory		pc59-nor-memory/circuit.json	fail	pass	pass	pc59-nor-memory.json
+arduino-06-ping	stm32f030	arduino-06-ping/circuit.stm32f030.json	pass	pass	pass	arduino-06-ping-stm32f030.json
+pc63-555-bistabil		pc63-555-bistabil/circuit.json	fail	pass	pass	pc63-555-bistabil.json
+pc64-555-retrigger		pc64-555-retrigger/circuit.json	fail	pass	pass	pc64-555-retrigger.json
+pc65-555-metronom		pc65-555-metronom/circuit.json	fail	pass	pass	pc65-555-metronom.json
+pc66-555-langzeit		pc66-555-langzeit/circuit.json	fail	pass	pass	pc66-555-langzeit.json
+pc68-555-sirene		pc68-555-sirene/circuit.json	fail	pass	pass	pc68-555-sirene.json
+pc74-ldr-555-blinker		pc74-ldr-555-blinker/circuit.json	fail	pass	pass	pc74-ldr-555-blinker.json
+pc75-alarmgeber		pc75-alarmgeber/circuit.json	fail	pass	pass	pc75-alarmgeber.json
+pc76-alarmschaltung		pc76-alarmschaltung/circuit.json	fail	pass	pass	pc76-alarmschaltung.json
+pc81-led-lauflicht		pc81-led-lauflicht/circuit.json	fail	pass	pass	pc81-led-lauflicht.json
+pc83-gluecksrad		pc83-gluecksrad/circuit.json	fail	pass	pass	pc83-gluecksrad.json
+pc84-led-herz		pc84-led-herz/circuit.json	fail	pass	pass	pc84-led-herz.json
+pc85-led-lampe-puls		pc85-led-lampe-puls/circuit.json	fail	pass	pass	pc85-led-lampe-puls.json
+pc86-led-sanduhr		pc86-led-sanduhr/circuit.json	fail	pass	pass	pc86-led-sanduhr.json
+school-miniorgan-107056		school-miniorgan-107056/circuit.json	fail	pass	pass	school-miniorgan-107056.json
+lab-meissner-squegg		lab-meissner-squegg/circuit.json	fail	pass	pass	lab-meissner-squegg.json
+lab-fibre-pll-music		lab-fibre-pll-music/circuit.json	pass	pass	pass	lab-fibre-pll-music-startup.json

@@ -59,3 +59,12 @@ export async function closeCodeActions (page, {timeout = 30000} = {}) {
     const menu = page.getByTestId('bw-code-actions');
     if (await menu.count() && await menu.evaluate(el => el.open)) await menu.locator('summary').click({timeout});
 }
+
+/** Open Code help the same way a user opens the unread status counter. */
+export async function openCodeInfo (page) {
+    const button = page.getByTestId('bw-code-info');
+    const panel = page.getByTestId('bw-code-info-popover');
+    if (!(await panel.isVisible())) await button.click();
+    await panel.waitFor();
+    return panel;
+}

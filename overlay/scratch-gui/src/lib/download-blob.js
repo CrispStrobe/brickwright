@@ -34,7 +34,7 @@ const browserDownload = (filename, blob) => {
 // Brickwright: under Tauri, route "downloads" (project .sb3 export, sprite/costume/
 // sound exports) through a native Save dialog instead of a browser download. Falls
 // back to the normal browser download everywhere else.
-export default (filename, blob) => {
+export default (filename, blob, {allowBrowserShare = true} = {}) => {
     const tauri = typeof window !== 'undefined' && window.__TAURI__;
     if (tauri && tauri.core && typeof tauri.core.invoke === 'function') {
         const invoke = tauri.core.invoke;
@@ -68,7 +68,7 @@ export default (filename, blob) => {
     // Installed PWAs and supporting browsers can expose the same system share
     // targets as native apps. If the browser rejects it (commonly because user
     // activation expired while an archive was built), retain the download path.
-    if (typeof navigator.share === 'function' && typeof File === 'function') {
+    if (allowBrowserShare && typeof navigator.share === 'function' && typeof File === 'function') {
         const file = new File([blob], filename, {type: blob.type || 'application/octet-stream'});
         const shareData = {files: [file], title: filename};
         if (!navigator.canShare || navigator.canShare(shareData)) {

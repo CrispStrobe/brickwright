@@ -145,7 +145,7 @@ try {
         await page.keyboard.insertText(source);
         await page.getByTestId('bw-asm-assemble').click();
         await page.waitForFunction(() => /Assembled \d+ bytes in this browser/.test(
-            document.querySelector('[data-testid="bw-code-status"]')?.textContent || ''),
+            document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus || ''),
         null, {timeout: 40000});
         await page.getByRole('tab', {name: /Circuit/}).click();
         await page.locator('[data-debug-panel]:visible').first().waitFor({timeout: 40000});
@@ -182,7 +182,7 @@ try {
             blocks: document.querySelectorAll('[data-debug-chip-refusals]').length,
             lines: document.querySelectorAll('[data-debug-chip-refusal]').length,
             phase: document.querySelector('[data-debug-panel]')?.getAttribute('data-debug-phase'),
-            status: document.querySelector('[data-testid="bw-code-status"]')?.textContent?.slice(0, 160)
+            status: document.querySelector('[data-testid="bw-code-editor"]')?.dataset.codeOperationStatus?.slice(0, 160)
         }));
         const verdict = trail.state === 'none'
             ? 'THIS BENCH HAS NO COLLECTOR — the attached machine exposes no chipRefusals(), so '

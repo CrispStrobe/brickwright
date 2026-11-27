@@ -107,7 +107,7 @@ const TABLE = {
         'linux.phase.console': 'the serial console is up',
         'linux.phase.init': 'starting /init',
         'linux.phase.userspace': 'BusyBox is starting',
-        'linux.ready': 'Linux on RISC-V — type a command at the bwb# prompt (try uname -a)',
+        'linux.ready': 'Linux on RISC-V',
         'linux.noKernel': 'the Linux lesson has no kernel image to boot',
         'ready.dosBench': '{name} loaded as a .{format} on the DOS bench '
             + '— output is the CGA screen and the console',
@@ -202,7 +202,7 @@ const TABLE = {
         'linux.phase.console': 'die serielle Konsole ist bereit',
         'linux.phase.init': '/init wird gestartet',
         'linux.phase.userspace': 'BusyBox startet',
-        'linux.ready': 'Linux auf RISC-V — tippe einen Befehl am bwb#-Prompt (z. B. uname -a)',
+        'linux.ready': 'Linux auf RISC-V',
         'linux.noKernel': 'die Linux-Lektion hat kein Kernel-Image zum Starten',
         'ready.dosBench': '{name} als .{format} auf der DOS-Werkbank geladen '
             + '— die Ausgabe sind der CGA-Bildschirm und die Konsole',

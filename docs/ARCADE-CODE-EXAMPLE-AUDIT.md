@@ -1,0 +1,69 @@
+# Code example exports to MakeCode Arcade
+
+The example audit reads the Code menu, its two source banks and the Circuit catalogue from this checkout. The Code menu contains 62 examples. It includes 52 Arcade candidates and 10 explicitly targeted 8051 or 8086 programs. The source banks contain another 15 archived games outside the menu.
+
+The Circuit catalogue contains 807 rows. Of those, 79 publish no program, 537 publish a comment-only description, 179 declare a dedicated device, and 11 provide Controller- or circuit-dependent programs without a dedicated device. `pybadge01-hello` is the remaining structural candidate. It uses Brickwright Controller variables, so any successful Arcade compilation still needs a display and input behavior check. These 68 structural candidates are the export census.
+
+## First complete pass
+
+All 68 structural candidates were attempted in one fixed checkout with Scratch monitor rendering, remapped keyboard controls and browser pointer support. The native Arcade compiler accepted 66. All 66 compiled projects presented a real frame in the browser simulator. The 66 comprise 25 projects without unsupported operations and 41 with named gaps. The full per-example inventory, diagnostics, adaptations and simulator results are in the [first-pass receipt](receipts/2026-11-27-code-arcade-first-pass.json).
+
+| Source | Candidates attempted | Compiled and reached the simulator | Compiler refusals |
+|---|---:|---:|---:|
+| Shipped Code menu | 52 | 51 | 1 |
+| Legacy source | 15 | 15 | 0 |
+| Circuit catalogue | 1 | 0 | 1 |
+
+The Complete Game rerun compiled and displayed a frame after the Scratch answer value was implemented. The PyBadge rerun compiled and displayed a frame after the exporter reserved the SDK's `screen` identifier. Across the first pass and these reruns, each of the 68 candidates compiled and reached the simulator. The PyBadge frame contains one color. Its display and buttons still depend on the Brickwright Controller bindings. The Looks demo also compiled and booted with its new thought bubble and sprite scaling. [Gameplay and Complete Game](receipts/2026-11-27-code-arcade-gameplay.json) · [PyBadge and Looks](receipts/2026-11-27-code-arcade-pybadge-looks.json)
+
+## Rechecks after translation repairs
+
+The motion, text, color and pointer changes affected 46 candidates. The first recheck compiled and presented 41. The remaining five failures exposed eight size expressions ending in a literal percent sign. The Pseudocode size commands already take percentages, so the suffix had made the expressions text. Orbit Hoops, Echo Trench, Lumen Stack, Plasma Posse and Triple Bingo all compiled, reached their title-ready state and presented a frame after the eight expressions were corrected.
+
+By the end of the size and title rechecks, all 67 Code and legacy candidates had compiled and presented frames. Of these, 61 had no unsupported operations and six retained named gaps. The 68th candidate, PyBadge, also compiled in its dedicated rerun. This aggregate spans the recorded exporter versions. The [affected recheck receipt](receipts/2026-11-27-code-arcade-rechecks.json) contains 46 project hashes and before/after results. The [size and title receipt](receipts/2026-11-27-code-arcade-size-and-start-repairs.json) contains the five corrected projects and Nova Grid’s verified title gate.
+
+| Example | Export gaps at the size and title recheck |
+|---|---|
+| Sound | Sampled Pop sound |
+| Digital Art | Pen color parameter changes |
+| Planète Maths | Factorial, sum of digits, π and multiple test |
+| Arrays & Vectors | Range, sum and maximum |
+| Tidegate Rush | Sampled splash sound |
+| Triple Bingo | Range, two-dimensional array access and a sound chosen by a reporter |
+
+## Numeric and tone rechecks
+
+Planète Maths, Arrays & Vectors, Tidegate Rush and Triple Bingo were compiled and run in the native PXT browser simulator after the numeric, array and authored sound-reference fixes. All four presented complete 160×120 frames with zero unsupported operations. Tidegate Rush and Triple Bingo advanced through their title gates. A separate runtime fixture checked factorial, digit sum, π, divisibility, array sum, maximum and two-dimensional indexing. The source regression checks resolve the original splash, call and bingo names to their authored frequencies. The generic browser runs cover compilation, startup and frame publication. See the [numeric and tone receipt](receipts/2026-11-27-code-arcade-math-and-tones.json).
+
+Digital Art compiled and painted six colors across nine observed frame updates after pen hue was mapped to the Arcade palette. The sampled Pop effect in the legacy Sound example and the PyBadge Controller bindings remain open. [Digital Art receipt](receipts/2026-11-27-code-arcade-art.json)
+
+## Run the audit
+
+Use a fixed source checkout with the pinned, integrated MakeCode target and its browser simulator.
+
+```sh
+node --import ./scripts/lib/register-gui-scope.mjs scripts/audit-code-arcade-examples.mjs \
+  --inventory --report /tmp/arcade-inventory.json
+
+node --import ./scripts/lib/register-gui-scope.mjs scripts/audit-code-arcade-examples.mjs \
+  --simulate --report /tmp/arcade-examples.json
+```
+
+Set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` to use an existing Chromium executable. Repeat `--only EXAMPLE_ID` to rerun selected rows. Prefix Circuit items with `circuit:`. Use `--portable` to exclude simulated browser pointer support. Add `--output DIRECTORY` to save each converted MakeCode project with its outcome and hash in the report. The source tree, dependency scope and PXT files must stay fixed until the audit completes. The comparison hashes and per-example results are written atomically after each candidate. Record the PXT source hash before reusing an earlier compiler or browser result. The source opcodes identify which programs need targeted reruns after an exporter change.
+
+The receipt records source conversion warnings, asset adaptations, compiler diagnostics and browser results separately. A generic browser check sends controller input and verifies a complete 160×120 frame from the original simulator. The shipped games also check their title gate before sending input. A game-specific check asserts the named mechanism described in its result. The Scratch versions of those checks and the remaining per-title gameplay acceptance inventory live in [pseudocode-game-examples.test.mjs](../test/pseudocode-game-examples.test.mjs).
+
+## Verified changes
+
+- Rift Rally now uses separate Arcade controllers for W/S and Up/Down. The real PXT simulator kept the right paddle at 0 while W moved the left paddle to 135. ArrowDown then moved only the right paddle to −135. All three variable monitors became visible after serve, with 13 colors and 15 observed screen publications in the run.
+- Scratch variable monitors display their current values as compact Arcade labels. Saved visible monitors appear on startup. Show and hide blocks update the same monitor by its saved variable ID.
+- Browser pointer support follows the bundled MakeCode Arcade browser-events library. A real click hit the visibly upper sprite first, then the lower sprite after the upper sprite hid. The click position also converted to the expected Scratch coordinates. A physical Arcade board needs alternate button controls for mouse-dependent games.
+
+- Scratch motion uses Arcade’s sprite direction, rotation, scale and timing APIs. A real browser run moved an actor north and east, verified its normalized heading and uniform size, and waited for an exact glide destination.
+- Arcade delivers a typed answer back to the Scratch script. The Complete Game demo compiles and boots with its game-over prompt and answer comparison intact.
+- Canal Command lifted four boats through legal on-screen gate and pump actions. Flux Vault accepted the three authored keyboard solutions and registered 14 pushes. Vector Seven moved its paddle to Scratch x=120 and launched the serve toward its rival.
+- Sigil Grid accepted the upper-left tap and the solo rival placed its reply in the center. This verifies the opening and reply. The original forced-win and replay acceptance checks still apply.
+
+- Color and ghost effects use Arcade’s palette and dithered transparency. The browser test rotated a red costume’s hue and verified 32 tinted and 32 transparent pixels in the 8×8 sprite. This is a palette rendering approximation.
+
+Open items include each game’s complete victory, loss and restart sequence on the exported runtime, alongside any refusal recorded by the current census. Palette conversion, embedded audio fidelity and hardware input parity need separate evidence.
