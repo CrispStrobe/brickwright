@@ -1999,3 +1999,28 @@ The example uses the updated CAD document with the shipped SDK. CrispCAD
 has the updated model factory. Sustained 1× in the production app remains
 open.
 [CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/5c922ea961c92928616915245d4ca3b3c24da456)
+
+### Reuse CAD collision shapes after physics edits
+
+A parked simulation worker now accepts the current document revision when
+the same design is edited. It retains the native compounds when the
+qualified hulls and fixed mates match. Each restart builds a fresh world
+with the current gravity, materials, masses and joint settings. Opening a
+different design releases the parked worker.
+
+In paired Chrome worker runs, each model made six timed restarts per
+version after gravity and friction edits. Atlas went from six native
+compound builds per restart to zero, and the median fell from 259 ms to
+147 ms. Scout went from three builds to zero and from 356 ms to 231 ms.
+All recorded poses and joint telemetry matched the fresh-compound
+baseline, and changing gravity changed the motion in both versions.
+The 23 controller and worker tests passed, including project replacement
+and fixed-mate changes.
+
+The Brickwright SDK pins CrispCAD `ae107ae`. All 842 manifest hashes and
+nine pin tests passed. In the existing Brickwright Chrome host, Atlas
+completed Run, Stop, Reset and repeat Run. After a gravity edit, it
+reused the same worker and restarted in 313 ms. The six-second run
+sustained 0.223× under the test machine's load. Sustained 1× playback
+remains open.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/ae107ae07ceda425ff64c9692ce77324517ff4f2)
