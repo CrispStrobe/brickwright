@@ -495,7 +495,8 @@ test('runner: the legacy six-poll absence guard remains a nonvacuous independent
 
 test('runner: explicit scalar parts respect compiled GitHub format limits and refuse partial delivery', () => {
     const mapping = runnerSourceMap(RUNNER_WORKFLOW), fixture = getRunnerFixture(), shard = mapping.job.shards[0];
-    assert.equal(mapping.scalars.length, 3);
+    assert.equal(mapping.scalars.length, Math.ceil(mapping.steps.length / 100),
+        'every source step travels in a bounded 100-row scalar part');
     for (const part of mapping.scalars) {
         const bounds = runnerScalarExpressionBounds(part.lines.join('\n')+'\n');
         assert.ok(bounds.parameters <= 255 && bounds.characters <= 21000, JSON.stringify(bounds));
@@ -503,8 +504,10 @@ test('runner: explicit scalar parts respect compiled GitHub format limits and re
     const single = runnerScalarExpressionBounds(mapping.scalars.flatMap(p => p.lines).join('\n')+'\n');
     assert.ok(single.parameters > 255 && single.characters > 21000, 'one field over all current rows would exceed platform expression limits');
     const env = runnerEnvironment(shard, fixture.head, fixture.directory), wire = renderRunnerContext(RUNNER_WORKFLOW, runnerContext(RUNNER_WORKFLOW, shard), env, shard);
-    for (const changes of [{[RUNNER_WIRE_ENV+'_2']: undefined}, {[RUNNER_WIRE_ENV+'_2']: ''}, {[RUNNER_WIRE_ENV+'_2']: 'not-terminal'},
-        {[RUNNER_WIRE_ENV+'_4']: 'extra\n'}, {[RUNNER_WIRE_ENV+'_2']: 'x'.repeat(RUNNER_INPUT_CAP + 1)}]) {
+    const incomplete = mapping.scalars.flatMap(({key}) => [undefined, '', 'not-terminal'].map(value => ({[key]: value})));
+    const extraPart = RUNNER_WIRE_ENV+'_'+(mapping.scalars.length + 1);
+    for (const changes of [...incomplete,
+        {[extraPart]: 'extra\n'}, {[RUNNER_WIRE_ENV+'_2']: 'x'.repeat(RUNNER_INPUT_CAP + 1)}]) {
         const result = runnerCLI(shard, wire, changes);assert.equal(result.status, 1);
         assert.ok(result.stderr.includes('"complete":false'));assert.doesNotMatch(result.stderr, /authored-private/);
     }

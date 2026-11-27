@@ -277,3 +277,19 @@ patch binding is retained, and historical receipts are not rewritten.
 
 These are bounded local results. The remaining browser coverage/lifecycle
 inventory repairs and exact-head hosted qualification are still open.
+
+### Browser source and executable coverage repairs
+
+The subsequent [browser source repair](BROWSER-GATE-SOURCE-REPAIR-2026-11-27.md)
+passes all 21 scanner, request-observer and controller controls. It requires
+actual disappearance after close/finish actions, retains complete request
+origins and routes, and reads the real shipped controller corpus instead of
+returning from an empty directory. No scanner baseline or allow marker changes.
+
+The [CI coverage repair](BROWSER-PROOF-CI-COVERAGE-2026-11-27.md) gives all 38
+previously unreferenced browser proof scripts direct, independently guarded
+steps in five new shards. Its 66 local controls verify executable callers,
+correct fixture arguments, failure preservation, family selection, browser
+installation and bounded runner audit delivery. All previous budget readings
+remain unchanged; the new entries have zero observations. Real hosted browser
+qualification and a fresh bound Code-tab bundle receipt remain required.

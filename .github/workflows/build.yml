@@ -210,9 +210,18 @@ jobs:
           NEED_LIGHT: ${{ steps.files.outputs.scope_light }}
           NEED_ROBOTLAB: ${{ steps.files.outputs.scope_robotlab }}
           NEED_FPGA: ${{ steps.files.outputs.scope_fpga }}
+          NEED_LIGHTCAD1: ${{ steps.files.outputs.scope_lightcad1 }}
+          NEED_LIGHTCAD2: ${{ steps.files.outputs.scope_lightcad2 }}
+          NEED_LIGHTCAD3: ${{ steps.files.outputs.scope_lightcad3 }}
+          NEED_LIGHTARTWORK: ${{ steps.files.outputs.scope_lightartwork }}
+          NEED_ROBOTVIEW: ${{ steps.files.outputs.scope_robotview }}
         run: |
           set -euo pipefail
           fast=true; thorough=true
+          # These proof shards use the existing light and Robot Lab tier families.
+          # Aggregate before exclusions, including PRs that also change another family.
+          if [ "$NEED_LIGHTCAD1" = "true" ] || [ "$NEED_LIGHTCAD2" = "true" ] || [ "$NEED_LIGHTCAD3" = "true" ] || [ "$NEED_LIGHTARTWORK" = "true" ]; then NEED_LIGHT=true; fi
+          if [ "$NEED_ROBOTVIEW" = "true" ]; then NEED_ROBOTLAB=true; fi
           # Per shard: every shard on non-PR events, and on a ci:full PR whose
           # files need none (the label is then an explicit request for all).
           heavy=true; light=true; robotlab=true; fpga=true
@@ -1617,12 +1626,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [heavy, light, robotlab, robotdraw, robotlink, robotmotion, robotbench, robotlink2, robotbench2, robotdraw2, robotdraw3, robotmotion2, robotaddon1, robotaddon2, robotaddon3, robotaddon4, robotaddon5, robotaddon6, robotaddon7, robotaddon8, robotaddon9, robotaddon10, robotaddon11, robotaddon12, robotaddon13, robotaddon14, robotaddon15, robotaddon16, robotaddon18, robotaddon19, robotaddon22, robotaddon24]
+        shard: [heavy, light, lightcad1, lightcad2, lightcad3, lightartwork, robotlab, robotdraw, robotlink, robotmotion, robotbench, robotlink2, robotbench2, robotdraw2, robotdraw3, robotmotion2, robotaddon1, robotaddon2, robotaddon3, robotaddon4, robotaddon5, robotaddon6, robotaddon7, robotaddon8, robotaddon9, robotaddon10, robotaddon11, robotaddon12, robotaddon13, robotaddon14, robotaddon15, robotaddon16, robotaddon18, robotaddon19, robotaddon22, robotaddon24, robotview]
         # Path-aware PR runs (scripts/ci-browser-scope.mjs): a shard the changed
         # files do not reach is left out. Non-PR events set every shard true.
         exclude:
           - shard: ${{ needs.scope.outputs.heavy != 'true' && 'heavy' || 'none' }}
           - shard: ${{ needs.scope.outputs.light != 'true' && 'light' || 'none' }}
+          - shard: ${{ needs.scope.outputs.light != 'true' && 'lightcad1' || 'none' }}
+          - shard: ${{ needs.scope.outputs.light != 'true' && 'lightcad2' || 'none' }}
+          - shard: ${{ needs.scope.outputs.light != 'true' && 'lightcad3' || 'none' }}
+          - shard: ${{ needs.scope.outputs.light != 'true' && 'lightartwork' || 'none' }}
           - shard: ${{ needs.scope.outputs.robotlab != 'true' && 'robotlab' || 'none' }}
           - shard: ${{ needs.scope.outputs.robotlab != 'true' && 'robotdraw' || 'none' }}
           - shard: ${{ needs.scope.outputs.robotlab != 'true' && 'robotlink' || 'none' }}
@@ -1653,6 +1666,7 @@ jobs:
           - shard: ${{ needs.scope.outputs.robotlab != 'true' && 'robotaddon19' || 'none' }}
           - shard: ${{ needs.scope.outputs.robotlab != 'true' && 'robotaddon22' || 'none' }}
           - shard: ${{ needs.scope.outputs.robotlab != 'true' && 'robotaddon24' || 'none' }}
+          - shard: ${{ needs.scope.outputs.robotlab != 'true' && 'robotview' || 'none' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     # Job-level permissions REPLACE the workflow's for this job, so the two it
@@ -1755,7 +1769,7 @@ jobs:
         id: build_editor_browser
         if: ${{ !cancelled() && steps.overlays_browser.outcome == 'success' && steps.browser_package_provenance.outcome == 'success' }}
         env:
-          BW_ENABLE_CAD: ${{ matrix.shard == 'light' && '1' || '0' }}
+          BW_ENABLE_CAD: ${{ startsWith(matrix.shard, 'light') && '1' || '0' }}
         run: cd packages/scratch-gui && NODE_ENV=production NODE_OPTIONS=--max-old-space-size=2560 npm run build
 
       - name: Guard — emitted native broker proof bytes retain reviewed authority
@@ -1785,21 +1799,25 @@ jobs:
         # npm ci already installed the root's locked Playwright dependency.
         # Use that CLI directly; resolving it again adds an unnecessary registry
         # request and can fail before any browser acceptance runs.
+        env:
+          BW_BROWSER_SHARD: ${{ matrix.shard }}
         run: |
+          browsers=(chromium)
+          if [ "$BW_BROWSER_SHARD" = "robotview" ]; then browsers+=(firefox); fi
           # Playwright's chromium download can hang on a flaky mirror; with no
           # timeout a stalled download froze the whole deploy for ~90 min. Bound
           # each attempt and retry so it fails fast and recovers.
           test -x ./node_modules/.bin/playwright
           # Install apt dependencies once under a root-owned timeout group. A
           # timed-out sudo child otherwise retains the dpkg lock across retries.
-          sudo env "PATH=$PATH" timeout --kill-after=15s 300 ./node_modules/.bin/playwright install-deps chromium
+          sudo env "PATH=$PATH" timeout --kill-after=15s 300 ./node_modules/.bin/playwright install-deps "${browsers[@]}"
           ok=0
           for i in 1 2 3; do
-            if timeout --kill-after=15s 300 ./node_modules/.bin/playwright install chromium; then ok=1; break; fi
-            echo "playwright chromium install attempt $i failed/timed out; retrying"
+            if timeout --kill-after=15s 300 ./node_modules/.bin/playwright install "${browsers[@]}"; then ok=1; break; fi
+            echo "playwright ${browsers[*]} install attempt $i failed/timed out; retrying"
             sleep 5
           done
-          [ "$ok" = 1 ] || { echo "::error::playwright chromium install failed after 3 attempts"; exit 1; }
+          [ "$ok" = 1 ] || { echo "::error::playwright ${browsers[*]} install failed after 3 attempts"; exit 1; }
       # Keyed on `playwright` rather than `serve` because this gate needs no
       # server: it drives the packaged broker document from local files. It still
       # carries `!cancelled()` for the same reason every gate below does.
@@ -1859,6 +1877,434 @@ jobs:
         run: |
           python3 -m http.server 8617 --directory packages/scratch-gui/build &
           for i in $(seq 1 30); do curl -sf http://localhost:8617/ >/dev/null && break; sleep 1; done
+      # These proofs previously had no executable CI caller. Each keeps its own
+      # verdict and bounded timeout against this job's production build.
+      # Zero-reading budgets are provisional, not observations of a passing run.
+      - name: Browser gate — CAD command palette
+        id: bw_proof_cad_command_palette_browser
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightcad1' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightcad1"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-cad-command-palette-browser.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/cad-command-palette-browser.log"
+
+      - name: Browser gate — CAD sketch paths
+        id: bw_proof_cad_sketch_path_browser
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightcad1' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightcad1"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-cad-sketch-path-browser.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/cad-sketch-path-browser.log"
+
+      - name: Browser gate — CAD outline constraints
+        id: bw_proof_cad_outline_constraints_browser
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightcad1' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightcad1"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-cad-outline-constraints-browser.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/cad-outline-constraints-browser.log"
+
+      - name: Browser gate — CAD path locks
+        id: bw_proof_cad_path_lock_browser
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightcad1' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightcad1"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-cad-path-lock-browser.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/cad-path-lock-browser.log"
+
+      - name: Browser gate — CAD curved offsets
+        id: bw_proof_cad_curved_offset_browser
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightcad1' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightcad1"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-cad-curved-offset-browser.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/cad-curved-offset-browser.log"
+
+      - name: Browser gate — CAD sketch offsets
+        id: bw_proof_cad_offset_browser
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightcad1' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightcad1"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-cad-offset-browser.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/cad-offset-browser.log"
+
+      - name: Browser gate — CAD tangent constraints
+        id: bw_proof_cad_tangent_browser
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightcad1' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightcad1"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-cad-tangent-browser.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/cad-tangent-browser.log"
+
+      - name: Retain lightcad1 proof logs and exported artifacts
+        id: bw_proof_lightcad1_evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always() && steps.serve.outcome == 'success' && matrix.shard == 'lightcad1'
+        with:
+          name: browser-proof-lightcad1
+          path: test-results/browser-proof/lightcad1/
+          if-no-files-found: error
+
+      - name: Browser gate — CAD mirrored sketches
+        id: bw_proof_cad_mirror_browser
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightcad2' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightcad2"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-cad-mirror-browser.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/cad-mirror-browser.log"
+
+      - name: Browser gate — CAD sketch patterns
+        id: bw_proof_cad_pattern_browser
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightcad2' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightcad2"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-cad-pattern-browser.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/cad-pattern-browser.log"
+
+      - name: Browser gate — CAD sketch revolutions
+        id: bw_proof_cad_revolution_browser
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightcad2' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightcad2"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-cad-revolution-browser.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/cad-revolution-browser.log"
+
+      - name: Browser gate — CAD trimmed sketches
+        id: bw_proof_cad_trim_browser
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightcad2' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightcad2"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-cad-trim-browser.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/cad-trim-browser.log"
+
+      - name: Browser gate — CAD preview demand
+        id: bw_proof_cad_preview_demand
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightcad2' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightcad2"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-cad-preview-demand.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/cad-preview-demand.log"
+
+      - name: Browser gate — CAD printability
+        id: bw_proof_cad_printability
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightcad2' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightcad2"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-cad-printability.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/cad-printability.log"
+
+      - name: Browser gate — CAD workspace persistence
+        id: bw_proof_cad_workspace_browser
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightcad2' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightcad2"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-cad-workspace-browser.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/cad-workspace-browser.log"
+
+      - name: Retain lightcad2 proof logs and exported artifacts
+        id: bw_proof_lightcad2_evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always() && steps.serve.outcome == 'success' && matrix.shard == 'lightcad2'
+        with:
+          name: browser-proof-lightcad2
+          path: test-results/browser-proof/lightcad2/
+          if-no-files-found: error
+
+      - name: Browser gate — CAD drawing sheets and PDF export
+        id: bw_proof_cad_drawing_sheet_browser
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightcad3' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightcad3"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-cad-drawing-sheet-browser.mjs http://127.0.0.1:8617/ "$proof_dir/sheet.pdf" "$proof_dir/set.pdf" 2>&1 | tee "$proof_dir/cad-drawing-sheet-browser.log"
+
+      - name: Browser gate — CAD DWG import and round trip
+        id: bw_proof_cad_dwg_browser
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightcad3' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightcad3"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-cad-dwg-browser.mjs http://127.0.0.1:8617/ test/fixtures/cad/browser/inch-plate.dwg "$proof_dir/roundtrip.dwg" 2>&1 | tee "$proof_dir/cad-dwg-browser.log"
+
+      - name: Browser gate — CAD DXF regions and drawing export
+        id: bw_proof_cad_dxf_region_browser
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightcad3' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightcad3"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-cad-dxf-region-browser.mjs http://127.0.0.1:8617/ '' "$proof_dir/region.dxf" "$proof_dir/region.pdf" 2>&1 | tee "$proof_dir/cad-dxf-region-browser.log"
+
+      - name: Browser gate — CAD Microtronic gallery and controls
+        id: bw_proof_cad_microtronic_browser
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightcad3' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightcad3"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-cad-microtronic-browser.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/cad-microtronic-browser.log"
+
+      - name: Browser gate — CAD DXF path import and export
+        id: bw_proof_cad_path_dxf_browser
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightcad3' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightcad3"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-cad-path-dxf-browser.mjs http://127.0.0.1:8617/ '' "$proof_dir/path.dxf" 2>&1 | tee "$proof_dir/cad-path-dxf-browser.log"
+
+      - name: Browser gate — CAD STEP import and project round trip
+        id: bw_proof_cad_step_browser
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightcad3' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightcad3"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-cad-step-browser.mjs http://127.0.0.1:8617/ test/fixtures/cad/browser/Adafruit3777.step 2>&1 | tee "$proof_dir/cad-step-browser.log"
+
+      - name: Retain lightcad3 proof logs and exported artifacts
+        id: bw_proof_lightcad3_evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always() && steps.serve.outcome == 'success' && matrix.shard == 'lightcad3'
+        with:
+          name: browser-proof-lightcad3
+          path: test-results/browser-proof/lightcad3/
+          if-no-files-found: error
+
+      - name: Browser gate — circuit palette artwork
+        id: bw_proof_circuit_palette_artwork
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightartwork' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightartwork"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-circuit-palette-artwork.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/circuit-palette-artwork.log"
+
+      - name: Browser gate — costume gradient handoff
+        id: bw_proof_costume_gradient_handoff
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightartwork' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightartwork"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-costume-gradient-handoff.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/costume-gradient-handoff.log"
+
+      - name: Browser gate — costume precision geometry
+        id: bw_proof_costume_precision_browser
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightartwork' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightartwork"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-costume-precision-browser.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/costume-precision-browser.log"
+
+      - name: Browser gate — costume precision drawing
+        id: bw_proof_costume_precision_drawing
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightartwork' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightartwork"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-costume-precision-drawing.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/costume-precision-drawing.log"
+
+      - name: Browser gate — costume sketch refresh
+        id: bw_proof_costume_sketch_refresh
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightartwork' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightartwork"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-costume-sketch-refresh.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/costume-sketch-refresh.log"
+
+      - name: Browser gate — costume to CAD workflow
+        id: bw_proof_costume_to_cad_workflow
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightartwork' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightartwork"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-costume-to-cad-workflow.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/costume-to-cad-workflow.log"
+
+      - name: Browser gate — costume toolbar
+        id: bw_proof_costume_toolbar
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightartwork' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightartwork"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-costume-toolbar.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/costume-toolbar.log"
+
+      - name: Browser gate — editor help
+        id: bw_proof_editor_help_browser
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightartwork' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightartwork"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-editor-help-browser.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/editor-help-browser.log"
+
+      - name: Browser gate — gallery artwork
+        id: bw_proof_gallery_artwork_browser
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightartwork' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightartwork"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-gallery-artwork-browser.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/gallery-artwork-browser.log"
+
+      - name: Browser gate — owned console Code tab journey
+        id: bw_proof_owned_console_code_tab
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightartwork' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightartwork"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-owned-console-code-tab.mjs --url http://127.0.0.1:8617/ --out "$proof_dir/owned-console/current.json" 2>&1 | tee "$proof_dir/owned-console-code-tab.log"
+
+      - name: Browser gate — shared 3D navigation
+        id: bw_proof_shared_3d_navigation
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'lightartwork' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/lightartwork"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-shared-3d-navigation.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/shared-3d-navigation.log"
+
+      - name: Retain lightartwork proof logs and exported artifacts
+        id: bw_proof_lightartwork_evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always() && steps.serve.outcome == 'success' && matrix.shard == 'lightartwork'
+        with:
+          name: browser-proof-lightartwork
+          path: test-results/browser-proof/lightartwork/
+          if-no-files-found: error
+
+      - name: Browser gate — Robot Lab flexible tubes
+        id: bw_proof_robot_lab_flexible_tubes
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'robotview' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/robotview"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-robot-lab-flexible-tubes.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/robot-lab-flexible-tubes.log"
+
+      - name: Browser gate — Robot Lab measurement overlay
+        id: bw_proof_robot_lab_measurement_overlay
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'robotview' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/robotview"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-robot-lab-measurement-overlay.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/robot-lab-measurement-overlay.log"
+
+      - name: Browser gate — Robot Lab overlay buffers
+        id: bw_proof_robot_lab_overlay_buffers
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'robotview' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/robotview"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-robot-lab-overlay-buffers.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/robot-lab-overlay-buffers.log"
+
+      - name: Browser gate — Robot Lab run controls
+        id: bw_proof_robot_lab_run
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'robotview' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/robotview"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-robot-lab-run.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/robot-lab-run.log"
+
+      - name: Browser gate — Robot Lab startup downloads
+        id: bw_proof_robot_lab_startup_downloads
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'robotview' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/robotview"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-robot-lab-startup-downloads.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/robot-lab-startup-downloads.log"
+
+      - name: Browser gate — Robot Lab thumbnail cache
+        id: bw_proof_robot_lab_thumbnail_cache
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'robotview' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/robotview"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-robot-lab-thumbnail-cache.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/robot-lab-thumbnail-cache.log"
+
+      - name: Browser gate — Robot Lab Twistspan motion
+        id: bw_proof_robot_lab_twistspan_motion
+        timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
+        if: ${{ !cancelled() && steps.serve.outcome == 'success' && matrix.shard == 'robotview' }}
+        run: |
+          set -euo pipefail
+          proof_dir="test-results/browser-proof/robotview"
+          mkdir -p "$proof_dir"
+          node --import ./scripts/lib/register-gui-scope.mjs scripts/verify-robot-lab-twistspan-motion.mjs http://127.0.0.1:8617/ 2>&1 | tee "$proof_dir/robot-lab-twistspan-motion.log"
+
+      - name: Retain robotview proof logs and exported artifacts
+        id: bw_proof_robotview_evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always() && steps.serve.outcome == 'success' && matrix.shard == 'robotview'
+        with:
+          name: browser-proof-robotview
+          path: test-results/browser-proof/robotview/
+          if-no-files-found: error
+
       - name: Browser gate — CAD editor
         id: bw_browser_cad_editor
         timeout-minutes: 8  # PROVISIONAL — 0 reading(s), fewer than 5; derived once 5 green runs exist (gen-gate-budgets.mjs)
@@ -3965,6 +4411,49 @@ jobs:
             playwright	${{ steps['playwright'].outcome }}	${{ steps['playwright'].conclusion }}
             bw_browser_audit_0020	${{ steps['bw_browser_audit_0020'].outcome }}	${{ steps['bw_browser_audit_0020'].conclusion }}
             serve	${{ steps['serve'].outcome }}	${{ steps['serve'].conclusion }}
+            bw_proof_cad_command_palette_browser	${{ steps['bw_proof_cad_command_palette_browser'].outcome }}	${{ steps['bw_proof_cad_command_palette_browser'].conclusion }}
+            bw_proof_cad_sketch_path_browser	${{ steps['bw_proof_cad_sketch_path_browser'].outcome }}	${{ steps['bw_proof_cad_sketch_path_browser'].conclusion }}
+            bw_proof_cad_outline_constraints_browser	${{ steps['bw_proof_cad_outline_constraints_browser'].outcome }}	${{ steps['bw_proof_cad_outline_constraints_browser'].conclusion }}
+            bw_proof_cad_path_lock_browser	${{ steps['bw_proof_cad_path_lock_browser'].outcome }}	${{ steps['bw_proof_cad_path_lock_browser'].conclusion }}
+            bw_proof_cad_curved_offset_browser	${{ steps['bw_proof_cad_curved_offset_browser'].outcome }}	${{ steps['bw_proof_cad_curved_offset_browser'].conclusion }}
+            bw_proof_cad_offset_browser	${{ steps['bw_proof_cad_offset_browser'].outcome }}	${{ steps['bw_proof_cad_offset_browser'].conclusion }}
+            bw_proof_cad_tangent_browser	${{ steps['bw_proof_cad_tangent_browser'].outcome }}	${{ steps['bw_proof_cad_tangent_browser'].conclusion }}
+            bw_proof_lightcad1_evidence	${{ steps['bw_proof_lightcad1_evidence'].outcome }}	${{ steps['bw_proof_lightcad1_evidence'].conclusion }}
+            bw_proof_cad_mirror_browser	${{ steps['bw_proof_cad_mirror_browser'].outcome }}	${{ steps['bw_proof_cad_mirror_browser'].conclusion }}
+            bw_proof_cad_pattern_browser	${{ steps['bw_proof_cad_pattern_browser'].outcome }}	${{ steps['bw_proof_cad_pattern_browser'].conclusion }}
+            bw_proof_cad_revolution_browser	${{ steps['bw_proof_cad_revolution_browser'].outcome }}	${{ steps['bw_proof_cad_revolution_browser'].conclusion }}
+            bw_proof_cad_trim_browser	${{ steps['bw_proof_cad_trim_browser'].outcome }}	${{ steps['bw_proof_cad_trim_browser'].conclusion }}
+            bw_proof_cad_preview_demand	${{ steps['bw_proof_cad_preview_demand'].outcome }}	${{ steps['bw_proof_cad_preview_demand'].conclusion }}
+            bw_proof_cad_printability	${{ steps['bw_proof_cad_printability'].outcome }}	${{ steps['bw_proof_cad_printability'].conclusion }}
+            bw_proof_cad_workspace_browser	${{ steps['bw_proof_cad_workspace_browser'].outcome }}	${{ steps['bw_proof_cad_workspace_browser'].conclusion }}
+            bw_proof_lightcad2_evidence	${{ steps['bw_proof_lightcad2_evidence'].outcome }}	${{ steps['bw_proof_lightcad2_evidence'].conclusion }}
+            bw_proof_cad_drawing_sheet_browser	${{ steps['bw_proof_cad_drawing_sheet_browser'].outcome }}	${{ steps['bw_proof_cad_drawing_sheet_browser'].conclusion }}
+            bw_proof_cad_dwg_browser	${{ steps['bw_proof_cad_dwg_browser'].outcome }}	${{ steps['bw_proof_cad_dwg_browser'].conclusion }}
+            bw_proof_cad_dxf_region_browser	${{ steps['bw_proof_cad_dxf_region_browser'].outcome }}	${{ steps['bw_proof_cad_dxf_region_browser'].conclusion }}
+            bw_proof_cad_microtronic_browser	${{ steps['bw_proof_cad_microtronic_browser'].outcome }}	${{ steps['bw_proof_cad_microtronic_browser'].conclusion }}
+            bw_proof_cad_path_dxf_browser	${{ steps['bw_proof_cad_path_dxf_browser'].outcome }}	${{ steps['bw_proof_cad_path_dxf_browser'].conclusion }}
+            bw_proof_cad_step_browser	${{ steps['bw_proof_cad_step_browser'].outcome }}	${{ steps['bw_proof_cad_step_browser'].conclusion }}
+            bw_proof_lightcad3_evidence	${{ steps['bw_proof_lightcad3_evidence'].outcome }}	${{ steps['bw_proof_lightcad3_evidence'].conclusion }}
+            bw_proof_circuit_palette_artwork	${{ steps['bw_proof_circuit_palette_artwork'].outcome }}	${{ steps['bw_proof_circuit_palette_artwork'].conclusion }}
+            bw_proof_costume_gradient_handoff	${{ steps['bw_proof_costume_gradient_handoff'].outcome }}	${{ steps['bw_proof_costume_gradient_handoff'].conclusion }}
+            bw_proof_costume_precision_browser	${{ steps['bw_proof_costume_precision_browser'].outcome }}	${{ steps['bw_proof_costume_precision_browser'].conclusion }}
+            bw_proof_costume_precision_drawing	${{ steps['bw_proof_costume_precision_drawing'].outcome }}	${{ steps['bw_proof_costume_precision_drawing'].conclusion }}
+            bw_proof_costume_sketch_refresh	${{ steps['bw_proof_costume_sketch_refresh'].outcome }}	${{ steps['bw_proof_costume_sketch_refresh'].conclusion }}
+            bw_proof_costume_to_cad_workflow	${{ steps['bw_proof_costume_to_cad_workflow'].outcome }}	${{ steps['bw_proof_costume_to_cad_workflow'].conclusion }}
+            bw_proof_costume_toolbar	${{ steps['bw_proof_costume_toolbar'].outcome }}	${{ steps['bw_proof_costume_toolbar'].conclusion }}
+            bw_proof_editor_help_browser	${{ steps['bw_proof_editor_help_browser'].outcome }}	${{ steps['bw_proof_editor_help_browser'].conclusion }}
+            bw_proof_gallery_artwork_browser	${{ steps['bw_proof_gallery_artwork_browser'].outcome }}	${{ steps['bw_proof_gallery_artwork_browser'].conclusion }}
+            bw_proof_owned_console_code_tab	${{ steps['bw_proof_owned_console_code_tab'].outcome }}	${{ steps['bw_proof_owned_console_code_tab'].conclusion }}
+            bw_proof_shared_3d_navigation	${{ steps['bw_proof_shared_3d_navigation'].outcome }}	${{ steps['bw_proof_shared_3d_navigation'].conclusion }}
+            bw_proof_lightartwork_evidence	${{ steps['bw_proof_lightartwork_evidence'].outcome }}	${{ steps['bw_proof_lightartwork_evidence'].conclusion }}
+            bw_proof_robot_lab_flexible_tubes	${{ steps['bw_proof_robot_lab_flexible_tubes'].outcome }}	${{ steps['bw_proof_robot_lab_flexible_tubes'].conclusion }}
+            bw_proof_robot_lab_measurement_overlay	${{ steps['bw_proof_robot_lab_measurement_overlay'].outcome }}	${{ steps['bw_proof_robot_lab_measurement_overlay'].conclusion }}
+            bw_proof_robot_lab_overlay_buffers	${{ steps['bw_proof_robot_lab_overlay_buffers'].outcome }}	${{ steps['bw_proof_robot_lab_overlay_buffers'].conclusion }}
+            bw_proof_robot_lab_run	${{ steps['bw_proof_robot_lab_run'].outcome }}	${{ steps['bw_proof_robot_lab_run'].conclusion }}
+            bw_proof_robot_lab_startup_downloads	${{ steps['bw_proof_robot_lab_startup_downloads'].outcome }}	${{ steps['bw_proof_robot_lab_startup_downloads'].conclusion }}
+            bw_proof_robot_lab_thumbnail_cache	${{ steps['bw_proof_robot_lab_thumbnail_cache'].outcome }}	${{ steps['bw_proof_robot_lab_thumbnail_cache'].conclusion }}
+            bw_proof_robot_lab_twistspan_motion	${{ steps['bw_proof_robot_lab_twistspan_motion'].outcome }}	${{ steps['bw_proof_robot_lab_twistspan_motion'].conclusion }}
+            bw_proof_robotview_evidence	${{ steps['bw_proof_robotview_evidence'].outcome }}	${{ steps['bw_proof_robotview_evidence'].conclusion }}
             bw_browser_cad_editor	${{ steps['bw_browser_cad_editor'].outcome }}	${{ steps['bw_browser_cad_editor'].conclusion }}
             bw_browser_cad_repairs	${{ steps['bw_browser_cad_repairs'].outcome }}	${{ steps['bw_browser_cad_repairs'].conclusion }}
             bw_browser_cad_robots	${{ steps['bw_browser_cad_robots'].outcome }}	${{ steps['bw_browser_cad_robots'].conclusion }}
@@ -4000,6 +4489,7 @@ jobs:
             bw_browser_audit_0047	${{ steps['bw_browser_audit_0047'].outcome }}	${{ steps['bw_browser_audit_0047'].conclusion }}
             bw_browser_audit_0048	${{ steps['bw_browser_audit_0048'].outcome }}	${{ steps['bw_browser_audit_0048'].conclusion }}
             bw_browser_audit_0049	${{ steps['bw_browser_audit_0049'].outcome }}	${{ steps['bw_browser_audit_0049'].conclusion }}
+          BW_BROWSER_RUNNER_TERMINALS_V1_2: |
             bw_browser_audit_0050	${{ steps['bw_browser_audit_0050'].outcome }}	${{ steps['bw_browser_audit_0050'].conclusion }}
             bw_browser_audit_0051	${{ steps['bw_browser_audit_0051'].outcome }}	${{ steps['bw_browser_audit_0051'].conclusion }}
             bw_browser_audit_0052	${{ steps['bw_browser_audit_0052'].outcome }}	${{ steps['bw_browser_audit_0052'].conclusion }}
@@ -4043,7 +4533,6 @@ jobs:
             bw_browser_audit_0271	${{ steps['bw_browser_audit_0271'].outcome }}	${{ steps['bw_browser_audit_0271'].conclusion }}
             bw_browser_audit_0277	${{ steps['bw_browser_audit_0277'].outcome }}	${{ steps['bw_browser_audit_0277'].conclusion }}
             bw_browser_audit_0279	${{ steps['bw_browser_audit_0279'].outcome }}	${{ steps['bw_browser_audit_0279'].conclusion }}
-          BW_BROWSER_RUNNER_TERMINALS_V1_2: |
             bw_browser_audit_0064	${{ steps['bw_browser_audit_0064'].outcome }}	${{ steps['bw_browser_audit_0064'].conclusion }}
             bw_browser_audit_0065	${{ steps['bw_browser_audit_0065'].outcome }}	${{ steps['bw_browser_audit_0065'].conclusion }}
             bw_browser_audit_0066	${{ steps['bw_browser_audit_0066'].outcome }}	${{ steps['bw_browser_audit_0066'].conclusion }}
@@ -4101,6 +4590,7 @@ jobs:
             stage_after_load	${{ steps['stage_after_load'].outcome }}	${{ steps['stage_after_load'].conclusion }}
             bw_browser_audit_0117	${{ steps['bw_browser_audit_0117'].outcome }}	${{ steps['bw_browser_audit_0117'].conclusion }}
             chip_refusal_line	${{ steps['chip_refusal_line'].outcome }}	${{ steps['chip_refusal_line'].conclusion }}
+          BW_BROWSER_RUNNER_TERMINALS_V1_3: |
             bw_browser_audit_0119	${{ steps['bw_browser_audit_0119'].outcome }}	${{ steps['bw_browser_audit_0119'].conclusion }}
             machine_loader_rom	${{ steps['machine_loader_rom'].outcome }}	${{ steps['machine_loader_rom'].conclusion }}
             bw_browser_audit_0121	${{ steps['bw_browser_audit_0121'].outcome }}	${{ steps['bw_browser_audit_0121'].conclusion }}
@@ -4144,7 +4634,6 @@ jobs:
             bw_browser_audit_0158	${{ steps['bw_browser_audit_0158'].outcome }}	${{ steps['bw_browser_audit_0158'].conclusion }}
             bw_browser_audit_0159	${{ steps['bw_browser_audit_0159'].outcome }}	${{ steps['bw_browser_audit_0159'].conclusion }}
             bw_browser_audit_0160	${{ steps['bw_browser_audit_0160'].outcome }}	${{ steps['bw_browser_audit_0160'].conclusion }}
-          BW_BROWSER_RUNNER_TERMINALS_V1_3: |
             bw_browser_audit_0161	${{ steps['bw_browser_audit_0161'].outcome }}	${{ steps['bw_browser_audit_0161'].conclusion }}
             bw_browser_audit_0162	${{ steps['bw_browser_audit_0162'].outcome }}	${{ steps['bw_browser_audit_0162'].conclusion }}
             bw_browser_audit_0163	${{ steps['bw_browser_audit_0163'].outcome }}	${{ steps['bw_browser_audit_0163'].conclusion }}
@@ -4202,6 +4691,7 @@ jobs:
             bw_browser_audit_0211	${{ steps['bw_browser_audit_0211'].outcome }}	${{ steps['bw_browser_audit_0211'].conclusion }}
             bw_browser_audit_0212	${{ steps['bw_browser_audit_0212'].outcome }}	${{ steps['bw_browser_audit_0212'].conclusion }}
             bw_browser_audit_0213	${{ steps['bw_browser_audit_0213'].outcome }}	${{ steps['bw_browser_audit_0213'].conclusion }}
+          BW_BROWSER_RUNNER_TERMINALS_V1_4: |
             bw_browser_audit_0214	${{ steps['bw_browser_audit_0214'].outcome }}	${{ steps['bw_browser_audit_0214'].conclusion }}
             bw_browser_audit_0215	${{ steps['bw_browser_audit_0215'].outcome }}	${{ steps['bw_browser_audit_0215'].conclusion }}
             bw_browser_audit_0216	${{ steps['bw_browser_audit_0216'].outcome }}	${{ steps['bw_browser_audit_0216'].conclusion }}

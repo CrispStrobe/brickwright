@@ -6,9 +6,11 @@ import {join} from 'node:path';
 import JSZip from 'jszip';
 import {chromium} from 'playwright';
 import {CAD_PROJECT_PATH} from '../overlay/scratch-gui/src/lib/bw-cad-project.js';
+import {loadCadBrowserFixture} from './lib/cad-browser-fixtures.mjs';
 
 const [url,fixture,output]=process.argv.slice(2);
 if(!url||!fixture)throw Error('Usage: node scripts/verify-cad-dwg-browser.mjs <app-url> <inch plate.dwg> [exported.dwg]');
+const fixtureFile=await loadCadBrowserFixture('dwg',fixture);
 const dir=await mkdtemp(join(tmpdir(),'bw-dwg-project-'));
 const browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
 const tab=page=>page.getByRole('tab',{name:'CAD',exact:true});
@@ -33,7 +35,7 @@ try{
  await page.getByRole('button',{name:'Sketch',exact:true}).tap();
  const sketch=page.getByRole('dialog',{name:'Sketch and extrusion'});
  await sketch.getByText('Import DXF or DWG outline',{exact:true}).tap();
- await sketch.getByLabel('Choose DWG file',{exact:true}).setInputFiles(fixture);
+ await sketch.getByLabel('Choose DWG file',{exact:true}).setInputFiles(fixtureFile);
  const layers=sketch.getByRole('group',{name:'DWG layers',exact:true});
  await layers.getByRole('checkbox',{name:'GUIDES',exact:true}).uncheck();
  await sketch.getByText('Paper-space layout entities were skipped.',{exact:true}).waitFor();
