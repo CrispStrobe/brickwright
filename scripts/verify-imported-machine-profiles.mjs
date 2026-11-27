@@ -18,7 +18,13 @@ basic.set(keyboardRom, 7);
 
 const makeXtRom = prefix => {
     const rom = new Uint8Array(32768).fill(0xff);
-    rom.set([...prefix, 0x8e, 0xc0, 0xb8, 0x41, 0x1f, 0x26, 0xa3, 0, 0, 0xf4]);
+    rom.set([...prefix,
+        0x8e, 0xc0,                         // ES = B800h (CGA text memory).
+        0xba, 0xd8, 0x03, 0xb0, 0x29, 0xee, // Enable 80-column CGA text video.
+        0xb8, 0x41, 0x1f, 0x26, 0xa3, 0, 0, // Show A when the firmware is ready.
+        0xe4, 0x60, 0x3c, 0x1e, 0x75, 0xfa, // Poll the XT keyboard for KeyA's make code.
+        0xb8, 0x4b, 0x1f, 0x26, 0xa3, 2, 0, 0xf4 // Write K and halt on receipt.
+    ]);
     rom.set([0xea, 0, 0, 0, 0xf8], 0x7ff0);
     return rom;
 };
@@ -60,10 +66,29 @@ try {
             } else if (kind.startsWith('i80')) {
                 await page.waitForFunction(() => {
                     const target = window.__benchTarget;
-                    return target?.regs()?.halted && target.readMem('mem', 0xb8000, 2)[0] === 0x41;
+                    return target?.readMem('mem', 0xb8000, 2)[0] === 0x41;
                 });
                 const topology = await page.evaluate(() => window.__benchTarget.captureCheckpoint().topology);
                 assert.equal(JSON.parse(topology).variant, kind === 'i8088' ? '8086' : '80186');
+                const controller = page.locator('[data-bw-stage-dock="controller"]');
+                const screen = controller.getByTestId('bw-machine-canvas');
+                await screen.waitFor();
+                await page.waitForFunction(() => {
+                    const canvas = document.querySelector('[data-bw-stage-dock="controller"] [data-testid="bw-machine-canvas"]');
+                    const pixels = canvas?.getContext('2d').getImageData(0, 0, 8, 8).data;
+                    return pixels?.some((channel, index) => index % 4 !== 3 && channel > 150);
+                });
+                const fullscreen = controller.getByTestId('bw-machine-fullscreen');
+                await fullscreen.click();
+                assert.equal(await fullscreen.innerText(), 'Exit full screen');
+                await screen.click();
+                await page.keyboard.press('a');
+                await page.waitForFunction(() => {
+                    const target = window.__benchTarget;
+                    return target?.regs()?.halted && target.readMem('mem', 0xb8002, 2)[0] === 0x4b;
+                });
+                await fullscreen.click();
+                assert.equal(await fullscreen.innerText(), 'Full screen');
             } else {
                 const screen = page.getByTestId('bw-machine-canvas');
                 await screen.waitFor();
@@ -82,7 +107,9 @@ try {
                 await page.waitForFunction(keyReleased, true);
             }
             assert.deepEqual(errors, []);
-            console.log(`${kind} imported through Machines and executes its own firmware`);
+            console.log(kind.startsWith('i80')
+                ? `${kind} imports firmware, paints CGA text, and receives a Controller key in full screen`
+                : `${kind} imported through Machines and executes its own firmware`);
         } catch (error) {
             console.error(await page.evaluate(() => {
                 const target = window.__benchTarget;

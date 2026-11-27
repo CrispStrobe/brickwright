@@ -27,15 +27,27 @@ try {
                 const regs = target?.regs();
                 return regs && (regs.cycles > 1000 || regs.eip > 1000) && target.video()?.width > 0;
             }, null, {timeout: 20000});
-            const screen = page.locator('[data-bw-stage-dock="controller"]').getByTestId('bw-machine-canvas');
+            const controller = page.locator('[data-bw-stage-dock="controller"]');
+            const screen = controller.getByTestId('bw-machine-canvas');
             await screen.waitFor();
+            await page.waitForFunction(() => {
+                const canvas = document.querySelector('[data-bw-stage-dock="controller"] [data-testid="bw-machine-canvas"]');
+                const pixels = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+                return pixels.some((channel, index) => index % 4 !== 3 && channel > 70);
+            });
+            const fullscreen = controller.getByTestId('bw-machine-fullscreen');
+            await fullscreen.click();
+            assert.equal(await fullscreen.innerText(), 'Exit full screen');
+            await screen.waitFor();
+            await fullscreen.click();
+            assert.equal(await fullscreen.innerText(), 'Full screen');
             assert.equal(await page.locator('[data-vdp-screen]').count(), 0);
             if (variant) {
                 const topology = await page.evaluate(() => window.__benchTarget.captureCheckpoint().topology);
                 assert.equal(JSON.parse(topology).variant, variant);
             }
             assert.deepEqual(errors, []);
-            console.log(`${kind} from Debugger → Run executes the bundled BIOS and drives video`);
+            console.log(`${kind} from Debugger → Run executes the bundled BIOS and paints a Controller screen with full-screen controls`);
         } catch (error) {
             console.error(await page.locator('[data-debug-panel]:visible').innerText({timeout: 2000}).catch(() => 'Debugger closed'));
             throw error;

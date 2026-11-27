@@ -43,11 +43,12 @@ import path from 'node:path';
 // sha-addressing: EXPECT below is the content hash of each file, so even a
 // compromised CDN cannot substitute a binary. The pin says WHICH build; the
 // hashes say WHAT arrived. Keep both.
-// 2026-10-05 (task B11): 63b4d4bc -> 68ef757a, emu8051-stc #1 (STC89 12T timers) and
-// #2 (UART1 receive FIFO; checkpoint layout 0x80510102 / 443557, matched by bw-board #410).
-const PIN = '68ef757aab3adc606796df4602f4724b627a500b';
+// 2026-11-25 (bw8051_1): emu8051-stc #3, STC15 Timer0 auto-reload, W408AS
+// identity and reset-preserved board bindings. Checkpoint build 0x80510103 uses 443561 bytes.
+// Built with Emscripten 6.0.11 from a6f4f2aa2390288db1ba06beb5184ee56bf1a188.
+const PIN = 'b3d28a7a45d5a49ca14e702f75f9f49d09b58e74';
 const EXPECT = {
-    'emu8051.wasm': 'ea39886982909b0d38427d7414e829097082d214ebeda96358973f0f5507b048',
+    'emu8051.wasm': '013f7498fee877751be39ebe82129609916b1a57d39660905794bd392a3b0c7f',
     'emu8051.js': '99d371302bac871c8b269d503635bcf9a245a8892f7c4da6677595ed9e21f64b'
 };
 
