@@ -234,9 +234,6 @@ export const REFUSED = Object.freeze({
         // in the Microtronic/CP1 panels; neither is a Code-tab peripheral verb.
         // Microtronic classification carried from the reviewed #1846 candidate.
         'busch-microtronic', 'kosmos-cp1',
-        // Dedicated machine programs/control (6502 KIM-1 and decimal CARDIAC),
-        // not generic Code-tab pin peripherals.
-        'kim-1', 'cardiac',
         // The MakeCode boards (bw-board #44): a MakeCode program drives them
         // from the MakeCode pane's runtime bridge, not from the Code tab.
         'calliopemini', 'circuit_playground_express', 'pybadge',
@@ -247,8 +244,6 @@ export const REFUSED = Object.freeze({
     'dip-surface': [
         'i8251', 'i8253', 'i8254', 'i8255', 'i8259', 'i8284', 'm6532', 'mc6850',
         'ns16c550', 'w65c22', 'w65c51', 'ay8912', 'tms9918', 'simplevga_card',
-        // Memory-mapped CRT controller surface used by the host machine bus.
-        'mc6845',
         'ps2', 'ps2mouse', 'um245r', 'um66t', 'kd9561', 'isd1820'
     ],
     passive: [
