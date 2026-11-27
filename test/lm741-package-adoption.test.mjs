@@ -15,7 +15,7 @@ const terminals = ['offset_1', 'inn', 'inp', 'vneg', 'offset_5', 'out', 'vpos', 
 test('the exact installed packages expose and solve the physical LM741', async () => {
     const pins = JSON.parse(readFileSync(path.join(root, 'vendor-pins.json'), 'utf8'));
     assert.equal(pins['bw-board'], 'd21d6d8b819263eb08231134b7556efa82289a90');
-    assert.equal(pins['bw-circuit-ui'], 'd9e0982aa186bb1d75406367e7e57803c03fd8ad');
+    assert.equal(pins['bw-circuit-ui'], 'bd341e9b22652018df21238615d92b686b754d2f');
 
     const sidecar = JSON.parse(readFileSync(
         path.join(root, 'node_modules/bw-circuit-ui/src/parts-data/lm741.json'), 'utf8'));

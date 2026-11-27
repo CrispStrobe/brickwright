@@ -158,7 +158,7 @@
         "@xterm/xterm": "6.0.0",
         "acorn": "8.14.0",
         "bw-board": "github:CrispStrobe/bw-board#d21d6d8b819263eb08231134b7556efa82289a90",
-        "bw-circuit-ui": "github:CrispStrobe/bw-circuit-ui#d9e0982aa186bb1d75406367e7e57803c03fd8ad",
+        "bw-circuit-ui": "github:CrispStrobe/bw-circuit-ui#bd341e9b22652018df21238615d92b686b754d2f",
         "digitaljs": "^0.14.2",
         "jszip": "3.10.1",
         "playwright": "^1.62.1",
