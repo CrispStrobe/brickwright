@@ -2235,3 +2235,26 @@ With the packaged bw.11 SIMD engine in the existing Brickwright
 browser host, Atlas and Scout passed one-click Run, Stop, Reset,
 and repeat Run. Atlas also reused its worker after a gravity edit.
 Sustained playback measured 0.570× for Atlas and 0.848× for Scout.
+
+### Limit Circuit–CAD progress notifications
+
+Brickwright keeps a coherent status snapshot for every completed
+program batch and publishes progress at most once per 100 ms.
+The first completed batch and lifecycle updates are published
+immediately. The expanded panel consumes that cadence directly.
+The collapsed panel keeps its once-per-second readout.
+
+With the shared Chromium binary and SDK `afb2984`, the same Atlas
+project ran for 6.065 simulated seconds before and after the change.
+Progress events fell from 182 to 90. The full CAD frame and circuit
+readings matched exactly, and both runs passed Run, Stop, Reset,
+repeat Run, and a restart after a gravity edit. Sustained playback
+measured 0.637× and 0.590× under changing load. Scout passed Run,
+Stop, Reset, and repeat Run at 0.682× with the change. These checks
+served the updated modules in the existing Brickwright GUI bundle.
+Sustained 1× playback remains open.
+
+All 46 focused tests passed. The new bridge regression verifies
+that direct status reads stay current between notifications,
+readings stay aligned with the last completed batch while a tick
+is in flight, and Stop and Reset publish immediately.

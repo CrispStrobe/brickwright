@@ -19,7 +19,7 @@ export function observeCircuitCadPanel ({
     const publishStatus = (next, force = false) => {
         if (!next || stopped) return;
         const time = now();
-        if (!force && next.phase === 'running' && lastPhase === next.phase && time - lastStatusAt < (expanded ? 100 : 1000)) return;
+        if (!force && !expanded && next.phase === 'running' && lastPhase === next.phase && time - lastStatusAt < 1000) return;
         lastStatusAt = time;
         lastPhase = next.phase;
         onStatus(next);

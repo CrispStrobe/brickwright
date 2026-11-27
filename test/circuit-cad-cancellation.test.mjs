@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {EventEmitter, getEventListeners} from 'node:events';
 import {setImmediate as nextTurn} from 'node:timers/promises';
-import {installCircuitCadBridge} from '../overlay/scratch-gui/src/lib/bw-cad-circuit/bridge.js';
+import {installCircuitCadBridge, STATUS_EVENT} from '../overlay/scratch-gui/src/lib/bw-cad-circuit/bridge.js';
 
 // No hardware engine is needed to observe startup ownership and cancellation.
 // Deadlines are controlled so a leaked 30-second waiter cannot slow the suite.
@@ -89,6 +89,60 @@ function fixture (t, {ready = false} = {}) {
         }
     };
 }
+
+test('progress events are throttled while synchronous status and Stop retain the latest readings', async t => {
+    const f = fixture(t, {ready: true});
+    try {
+        let wallTime = 0, hold = false, finishStep;
+        t.mock.method(performance, 'now', () => wallTime);
+        const claimClock = f.board.claimExternalClock;
+        f.board.claimExternalClock = () => ({...claimClock(), run: advance => advance()});
+        f.board.advanceTo = time => {f.board.timeNs = time;};
+        f.board.takeMechanicalShaftImpulse = () => ({impulseNms: 0, currentA: Number(f.board.timeNs) / 1e9});
+        f.runtime.cadSimulation.acquireExternalClock = async () => {
+            const frame = structuredClone(f.frame);
+            return {
+                snapshot: () => structuredClone(frame),
+                async step () {
+                    if (hold) await new Promise(resolve => {finishStep = resolve;});
+                    frame.time += .005;
+                    return structuredClone(frame);
+                },
+                release () {}
+            };
+        };
+        const events = [];
+        window.addEventListener(STATUS_EVENT, event => events.push(event.detail));
+        const start = f.start(); await nextTurn(); f.owners[0].ready(); await nextTurn();
+        assert.equal(start.settled, true);
+        assert.deepEqual(f.api.state().readings, []);
+        const session = f.runtime.bwProgramClock.session;
+        for (let tick = 0; tick < 15; tick++) {
+            wallTime = tick * 10;
+            session.tick(10); await session.idle();
+        }
+        const progress = events.filter(event => event.phase === 'running' && event.time > 0);
+        assert.deepEqual(progress.map(event => Math.round(event.time * 1000)), [10, 110]);
+        assert.equal(progress[0].readings[0].currentA, .01);
+        assert.equal(Math.round(f.api.state().time * 1000), 150);
+        assert.equal(f.api.state().readings[0].currentA, .15);
+        wallTime += 10;
+        session.tick(10); await session.idle();
+        hold = true;
+        session.tick(10); await nextTurn();
+        assert.ok(finishStep);
+        assert.equal(Math.round(f.api.state().time * 1000), 160);
+        assert.equal(f.api.state().readings[0].currentA, .16);
+        f.api.stop();
+        finishStep(); await session.idle();
+        assert.equal(events.at(-1).phase, 'idle');
+        assert.equal(Math.round(events.at(-1).time * 1000), 160);
+        assert.equal(events.at(-1).readings[0].currentA, .16);
+        f.api.reset();
+        assert.equal(f.api.state().time, 0);
+        assert.deepEqual(f.api.state().readings, []);
+    } finally {f.close();}
+});
 
 test('Stop settles an unavailable Circuit start and removes its listener and deadline', async t => {
     const f = fixture(t);
