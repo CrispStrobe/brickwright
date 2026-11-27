@@ -293,3 +293,53 @@ correct fixture arguments, failure preservation, family selection, browser
 installation and bounded runner audit delivery. All previous budget readings
 remain unchanged; the new entries have zero observations. Real hosted browser
 qualification and a fresh bound Code-tab bundle receipt remain required.
+
+### Landed Board and committed-pin qualification checkpoint
+
+The RF engine prerequisite is now qualified and merged in
+[Board #782](https://github.com/CrispStrobe/bw-board/pull/782) at
+`b47e7e09ed873b33ca2fd912b21e136decc5e677`. Its complete tree is identical to
+the qualified candidate `6b9e281ca0104ebccacca6d8020295fe18ceb929`; the merge
+does not introduce an untested source delta. Applicable hosted Board tests,
+vector/corpus controls and native/hybrid qualification passed before landing.
+
+Consumer checkpoint `66da9e8c6fa7959be1db1c29c0047a2eb4650d25` adopts that
+landed Board through the official package/provenance producers. Both installed
+roots match the exact pinned payload: 13,850 Board files and 1,463 Circuit UI
+files each, with single-engine resolution. The package/provenance selection
+passes 153 cases with six explicit missing-optional-checkout skips; the final
+full-history/workflow selection passes 79/79 with zero skips. BIOS, seven demo
+ROMs and controller bundle bytes are unchanged. See the
+[complete adoption record](BOARD-PACKAGE-ADOPTION-2026-11-27.md).
+
+The [committed-pin qualification mode](OWNED-CONSOLE-COMMITTED-PIN-QUALIFICATION.md)
+now permits a fresh local Code-tab journey after normal supplier adoption. It
+requires explicit clean consumer/supplier commits, the committed supplier pin,
+an empty tracked patch and a complete inventory of matching source and integrated
+mirrors. Browser admission drains late response reads and requires every
+observed emitted script to match the recorded build. Twenty selected positive
+and negative controls pass. Both local modes retain `shippingEvidence: false`;
+the actual build command/log, fresh browser receipt and hosted qualification
+remain separate required evidence.
+
+As of 2026-11-27T15:32:38Z, supplier candidate
+`8c9a7aacbed998a07d5c44b44d0f2dd25f4c6432` is published in
+[supplier #246](https://github.com/CrispStrobe/sb3-creator/pull/246). It adopts
+the landed Board, replaces the invalid startup-crossing oracle with settled
+carrier/mixer/speaker agreement and an open-RF-input negative, and records fresh
+provenance for 315 lesson pages. The four hosted test shards and WebGL job have
+not all completed. The older failed measurements above remain historical
+evidence; the published repair is not yet a supplier release qualification.
+
+The consumer's diagnostic run `46019734010` is bound to `29e5265`, before the
+later source-binding and Board checkpoints. Separate runs for that same head
+have passed CP1, the selected 386 controls, debugger checks and Tauri tests.
+Its known stale-gallery failure remains open, and no queued or unselected job
+is treated as a pass. The shipping compiler/gallery pin remains
+`1c29f69fd22c86ecb0051938eedb246921cb3b88`.
+
+Remaining order: qualify and merge the supplier; use its exact landed commit
+for official compiler/gallery sync and dependent identity regeneration; build
+the resulting clean committed consumer; obtain a new bound Code-tab receipt
+and applicable hosted qualification; then merge the consumer. The earlier
+experimental receipt keeps its original source/build identities throughout.
