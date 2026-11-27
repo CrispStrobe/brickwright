@@ -11,6 +11,7 @@
 // app. Inline styles, matching the rest of tw-pseudocode.
 
 import React from 'react';
+import {makeT} from '../../lib/bw-i18n.js';
 import {currentBox, overlayStyleFor, subscribeVisualViewport} from '../../lib/visual-viewport.js';
 import {
     fromMediaManifest, fromDosboxConf
@@ -25,11 +26,28 @@ import {localAtBiosMachine, localFreedosVgaMachine} from '../../lib/bw-machines/
 import {defaultImageFetcher} from '../../lib/bw-machines/activate.js';
 import {remoteMachineImagesAllowed} from '../../lib/distribution-policy.js';
 import {CIRCUIT_LIBRARY_MACHINES, libraryCircuitPrograms} from '../../lib/bw-machines/library-circuits.js';
-import {libraryMedia, openLibraryMedia, readLibraryCode, readMediaManifest} from '../../lib/bw-machines/library-media.js';
+import {
+    libraryMedia, libraryLicenseUrl, localizedMedia, openLibraryMedia, readLibraryCode, readMediaManifest
+} from '../../lib/bw-machines/library-media.js';
 import {lessonMachines, lessonT} from '../../lib/bw-machines/lessons.js';
 
 const T = {
     en: {
+        wiredFirmware: 'Wired firmware',
+        local386: 'Local 386 media',
+        localDos: 'Boot a local DOSBox HDD',
+        localDosInfo: 'Select a raw hard-disk image. An optional DOSBox configuration supplies the 386 CPU and disk geometry. Its imgmount filename must match the image.',
+        localPackage: 'Local DOS package (STORED ZIP)',
+        localPackageInfo: 'Select an uncompressed ZIP up to 16 MiB containing one DOSBox configuration and its matching raw hard-disk image.',
+        localFreeDos: 'FreeDOS VGA (named 386 profile)',
+        localFreeDosInfo: 'Select a boot floppy or a type-1 HDD. Leave the ROM fields empty to use the bundled BIOS and VGA firmware.',
+        bootDisk: 'Boot disk',
+        bootPackage: 'Boot package HDD',
+        bootFreeDos: 'Boot FreeDOS VGA',
+        bootBios: 'Boot BIOS only',
+        diskImage: 'Disk image',
+        zipFile: 'ZIP file',
+        floppy: 'Floppy',
         title: 'Machines', empty: 'No machines yet — import one below.',
         run: 'Run', dup: 'Duplicate', del: 'Delete', close: 'Close',
         importL: 'Import a manifest URL, machine JSON, or DOSBox .conf',
@@ -37,9 +55,33 @@ const T = {
         imported: 'Imported.', exported: 'Exported below — copy it.', removed: 'Deleted.',
         duped: 'Duplicated.', badImport: 'Could not import: ',
         nativeBlocks: 'Native blocks (experimental)', nativeSaved: 'Execution setting saved.'
+    },
+    de: {
+        wiredFirmware: 'Firmware für die Schaltung',
+        local386: 'Lokale 386-Medien',
+        localDos: 'Lokales DOSBox-Festplattenabbild starten',
+        localDosInfo: 'Wähle ein Rohabbild der Festplatte. Eine optionale DOSBox-Konfiguration legt die 386-CPU und die Geometrie fest. Der Dateiname im imgmount-Befehl muss zum Abbild passen.',
+        localPackage: 'Lokales DOS-Paket (unkomprimiertes ZIP)',
+        localPackageInfo: 'Wähle ein unkomprimiertes ZIP bis 16 MiB mit einer DOSBox-Konfiguration und dem passenden Rohabbild der Festplatte.',
+        localFreeDos: 'FreeDOS VGA (386-Profil)',
+        localFreeDosInfo: 'Wähle eine Startdiskette oder eine Typ-1-Festplatte. Leere ROM-Felder verwenden das mitgelieferte BIOS und die VGA-Firmware.',
+        bootDisk: 'Festplatte starten',
+        bootPackage: 'Paket-Festplatte starten',
+        bootFreeDos: 'FreeDOS VGA starten',
+        bootBios: 'Nur BIOS starten',
+        diskImage: 'Festplattenabbild',
+        zipFile: 'ZIP-Datei',
+        floppy: 'Diskette',
+        title: 'Maschinen', empty: 'Noch keine Maschinen vorhanden.',
+        run: 'Starten', dup: 'Duplizieren', del: 'Löschen', close: 'Schließen',
+        importL: 'Manifest-URL, Maschinen-JSON oder DOSBox-Konfiguration importieren',
+        importB: 'Importieren', exportB: 'Alle exportieren',
+        imported: 'Importiert.', exported: 'Exportiert. Kopiere die Daten unten.', removed: 'Gelöscht.',
+        duped: 'Dupliziert.', badImport: 'Import fehlgeschlagen: ',
+        nativeBlocks: 'Native Blöcke (experimentell)', nativeSaved: 'Ausführungseinstellung gespeichert.'
     }
 };
-const tr = (locale, k) => (T[(locale || 'en').slice(0, 2)] || T.en)[k] || T.en[k] || k;
+const tr = makeT(T);
 
 const virtual8086Presets = [
     ['Serial Shell', 'serial-monitor', 'serialshell'], ['Keyboard Echo', 'keyboard-demo', 'kbddemo'],
@@ -121,7 +163,8 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
         ? (wiredPresets || []).filter(preset => matchesTitle(preset.title)) : [];
     const showLocal386 = matchesType('i80386');
     const mediaAllowed = remoteMachineImagesAllowed();
-    const matchingMedia = mediaAllowed ? libraryMedia.filter(item => matchesType(item.machine) && matchesTitle(item.title)) : [];
+    const matchingMedia = mediaAllowed ? libraryMedia.map(item => localizedMedia(item, locale))
+        .filter(item => matchesType(item.machine) && matchesTitle(item.title)) : [];
     const [circuits, setCircuits] = React.useState(null);
     const [launching, setLaunching] = React.useState(null);
     const [status, setStatus] = React.useState('');
@@ -357,7 +400,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
         media: matchingMedia.filter(item => item.machine === kind),
         examples: showCircuitPrograms ? matchingCircuits.filter(example => example.machine === kind) : [],
         local: kind === 'i80386' && (
-            !query.trim() || ['Local 386 media', 'DOSBox HDD', 'DOS package', 'FreeDOS VGA'].some(matchesTitle))
+            !query.trim() || ['local386', 'localDos', 'localPackage', 'localFreeDos'].some(key => matchesTitle(t(key))))
     })).filter(group => group.bios || group.local || group.graphics || group.virtual.length || group.presets.length ||
         group.lessons.length || group.saved.length || group.media.length || group.examples.length);
 
@@ -431,7 +474,7 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                             <button type="button" style={primary} data-testid={`bw-mm-8086-${name}`}
                                                 onClick={() => runVirtual8086(label, name, profile)}>{t('run')}</button>
                                         } />)}
-                                    {group.presets.length > 0 && <section aria-label="Wired firmware" data-testid="bw-mm-wired-presets">
+                                    {group.presets.length > 0 && <section aria-label={t('wiredFirmware')} data-testid="bw-mm-wired-presets">
                                         {group.presets.map(preset => <MachineEntry key={preset.id} title={preset.title}
                                             info={preset.summary} infoPrefix={infoPrefix} actions={
                                                 <button type="button" onClick={() => launch(preset.id, preset.run)}
@@ -480,9 +523,12 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                     ))}
                                     {group.media.length > 0 && <div data-testid="bw-mm-downloadable-media">
                                         {group.media.map(item => <MachineEntry key={item.id} title={item.title} infoPrefix={infoPrefix}
+                                            rowAttributes={{'data-machine-media': item.id}}
                                             info={<>
                                                 {item.summary && <div>{item.summary}</div>}
-                                                {/^de/i.test(locale) ? `Lizenz · ${item.license}` : `License · ${item.license}`}
+                                                {item.licenseFile ? <a href={libraryLicenseUrl(item)} target="_blank" rel="noopener noreferrer">
+                                                    {item.license}
+                                                </a> : (/^de/i.test(locale) ? `Lizenz · ${item.license}` : `License · ${item.license}`)}
                                             </>}
                                             actions={
                                                 <button type="button" disabled={launching !== null || (!item.benchmark && !onRun)} style={btn}
@@ -507,13 +553,13 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                             </button>
                                         } />)}
                                     </div>}
-                                    {group.local && <div data-testid="bw-mm-local-386" aria-label="Local 386 media">
-                                        <MachineEntry title="Boot a local DOSBox HDD" infoPrefix={infoPrefix}
-                                            info="Select a raw hard-disk image. An optional DOSBox configuration supplies the 386 CPU and disk geometry. Its imgmount filename must match the image."
+                                    {group.local && <div data-testid="bw-mm-local-386" aria-label={t('local386')}>
+                                        <MachineEntry title={t('localDos')} infoPrefix={infoPrefix}
+                                            info={t('localDosInfo')}
                                             actions={<button onClick={() => {invalidateDosPackage(); return runLocal();}} style={primary}
-                                                data-testid="bw-mm-local-run">Boot disk</button>}>
+                                                data-testid="bw-mm-local-run">{t('bootDisk')}</button>}>
                                             <div style={fieldsStyle}>
-                                                <label>Disk image{' '}
+                                                <label>{t('diskImage')}{' '}
                                                     <input type="file" accept=".img,.ima,.bin" data-testid="bw-mm-local-disk"
                                                         onChange={e => setLocalDisk(e.target.files?.[0] || null)} />
                                                 </label>
@@ -532,28 +578,28 @@ export default function MachineManager({store, onRun, onClose, locale, preferred
                                                 </label>
                                             </div>
                                         </MachineEntry>
-                                        <MachineEntry title="Local DOS package (STORED ZIP)" infoPrefix={infoPrefix}
-                                            info="Select an uncompressed ZIP up to 16 MiB containing one DOSBox configuration and its matching raw hard-disk image."
+                                        <MachineEntry title={t('localPackage')} infoPrefix={infoPrefix}
+                                            info={t('localPackageInfo')}
                                             actions={<button data-testid="bw-mm-dos-package-run" style={primary}
-                                                disabled={!dosPackageFile || dosPackageBusy} onClick={runDosPackage}>Boot package HDD</button>}>
+                                                disabled={!dosPackageFile || dosPackageBusy} onClick={runDosPackage}>{t('bootPackage')}</button>}>
                                             <div style={fieldsStyle}>
-                                                <label>ZIP file{' '}
+                                                <label>{t('zipFile')}{' '}
                                                     <input type="file" accept=".zip" data-testid="bw-mm-dos-package"
                                                         onChange={e => selectDosPackage(e.target.files?.[0] || null)} />
                                                 </label>
                                             </div>
                                         </MachineEntry>
-                                        <MachineEntry title="FreeDOS VGA (named 386 profile)" infoPrefix={infoPrefix}
-                                            info="Select a boot floppy or a type-1 HDD. Leave the ROM fields empty to use the bundled BIOS and VGA firmware."
+                                        <MachineEntry title={t('localFreeDos')} infoPrefix={infoPrefix}
+                                            info={t('localFreeDosInfo')}
                                             actions={<>
                                                 <button onClick={() => {invalidateDosPackage(); return runFree386();}} style={primary}
-                                                    data-testid="bw-mm-free386-run">Boot FreeDOS VGA</button>
+                                                    data-testid="bw-mm-free386-run">{t('bootFreeDos')}</button>
                                                 {(freeMedia.bios || freeMedia.vgaRom) && <button type="button" style={btn}
-                                                    onClick={runBios}>Boot BIOS only</button>}
+                                                    onClick={runBios}>{t('bootBios')}</button>}
                                             </>}>
                                             <div style={fieldsStyle}>
                                                 {[
-                                                    ['floppy', 'Floppy', '.img,.ima,.dsk'],
+                                                    ['floppy', t('floppy'), '.img,.ima,.dsk'],
                                                     ['hdd', 'HDD', '.img,.ima'],
                                                     ['bios', 'AT BIOS', '.rom,.bin'],
                                                     ['vgaRom', 'VGA ROM', '.rom,.bin'],

@@ -1,9 +1,15 @@
 import React from 'react';
+import {browserLocale, makeT} from '../../lib/bw-i18n.js';
+
+const t = makeT({
+    en: {help: 'Screen help', fullScreen: 'Full screen', exitFullScreen: 'Exit full screen'},
+    de: {help: 'Hilfe zum Bildschirm', fullScreen: 'Vollbild', exitFullScreen: 'Vollbild verlassen'}
+});
 
 const button = {background: '#374151', color: '#fff', border: 0, borderRadius: 4,
     padding: '4px 9px', cursor: 'pointer'};
 
-export default function MachineScreenHeader({title, help, isFullScreen, onToggleFullScreen}) {
+export default function MachineScreenHeader({title, help, isFullScreen, onToggleFullScreen, locale = browserLocale()}) {
     const [helpOpen, setHelpOpen] = React.useState(false);
     return (
         <header style={{position: 'relative', display: 'flex', alignItems: 'center', gap: 4,
@@ -11,13 +17,13 @@ export default function MachineScreenHeader({title, help, isFullScreen, onToggle
             <span style={{flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap'}}>{title}</span>
             {help && (
-                <button type="button" style={button} aria-label="Screen help" title="Screen help"
+                <button type="button" style={button} aria-label={t(locale, 'help')} title={t(locale, 'help')}
                     aria-expanded={helpOpen} onClick={() => setHelpOpen(!helpOpen)}>ⓘ</button>
             )}
             {onToggleFullScreen && (
                 <button type="button" style={button} data-testid="bw-machine-fullscreen"
                     onClick={onToggleFullScreen}>
-                    {isFullScreen ? 'Exit full screen' : 'Full screen'}
+                    {t(locale, isFullScreen ? 'exitFullScreen' : 'fullScreen')}
                 </button>
             )}
             {helpOpen && <div role="note" style={{position: 'absolute', top: '100%', right: 8, zIndex: 5,

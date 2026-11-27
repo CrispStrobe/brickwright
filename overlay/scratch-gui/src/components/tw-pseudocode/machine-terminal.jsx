@@ -5,7 +5,7 @@ const LinuxTerminal = React.lazy(() =>
     import(/* webpackChunkName: "bw-xterm" */ './linux-terminal.jsx')
 );
 
-export default function MachineTerminal({session, isFullScreen, onToggleFullScreen}) {
+export default function MachineTerminal({session, isFullScreen, onToggleFullScreen, locale}) {
     const [text, setText] = React.useState('');
     const [line, setLine] = React.useState('');
     const output = React.useRef(null);
@@ -17,7 +17,7 @@ export default function MachineTerminal({session, isFullScreen, onToggleFullScre
         <section aria-label={session.title} data-testid="bw-machine-terminal"
             style={{height: '100%', minHeight: 0, display: 'flex', flexDirection: 'column',
                 background: '#0d1117', color: '#d0d7de'}}>
-            <MachineScreenHeader title={session.title} help={session.help}
+            <MachineScreenHeader locale={locale} title={session.title} help={session.help}
                 isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen} />
             {session.raw ? (
                 <div style={{flex: 1, minHeight: 0, overflow: 'auto'}}>

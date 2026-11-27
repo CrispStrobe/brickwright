@@ -266,3 +266,44 @@ test('reviewed media uses an immutable manifest URL and rejects a changed machin
         globalThis.fetch = oldFetch;
     }
 });
+
+test('the machine picker launches each reviewed ACK binary with its own hash', async t => {
+    const {libraryMedia} = await import('../overlay/scratch-gui/src/lib/bw-machines/library-media.js');
+    const MachineManager = await loadManager();
+    const store = createMemoryMachineStore();
+    const ack = libraryMedia.filter(item => item.project === 'ack');
+    assert.deepEqual(ack.map(item => item.id), ['ack-pascal', 'ack-c', 'ack-modula2']);
+    const programs = [
+        {language: 'pascal', slots: {com: 'sieve.com'}, program: {kind: 'dos'}},
+        {language: 'c', slots: {com: 'fact.com'}, program: {kind: 'dos'}},
+        {language: 'modula2', slots: {com: 'sievemod.com'}, program: {kind: 'dos'}}
+    ];
+    t.mock.method(globalThis, 'fetch', async url => {
+        assert.match(String(url), /\/brickwright-media-lab\/[a-f0-9]{40}\/projects\/ack\/brickwright-media\.json$/);
+        return {ok: true, json: async () => ({machine: 'i8086', programs})};
+    });
+    const launched = [];
+    let renderer;
+    await act(async () => {
+        renderer = create(React.createElement(MachineManager, {
+            store, preferredMachine: 'i8086', locale: 'de',
+            onRun: cfg => { launched.push(cfg); }, onClose() {}
+        }));
+    });
+    try {
+        for (const item of ack) {
+            const row = renderer.root.findByProps({'data-machine-media': item.id});
+            const run = row.findAllByType('button').find(button => button.props.children === 'Starten');
+            assert.ok(run, item.id);
+            await act(async () => run.props.onClick());
+            const config = launched.at(-1);
+            assert.equal(config.title, item.title);
+            assert.equal(config.provenance.license, 'BSD-3-Clause');
+            assert.ok(new URL(config.slots.com.url).pathname.endsWith(`/ack/${item.sample.file}`));
+            assert.equal(config.slots.com.sha256, item.sample.sha256);
+        }
+        assert.equal(launched.length, ack.length);
+    } finally {
+        renderer.unmount();
+    }
+});

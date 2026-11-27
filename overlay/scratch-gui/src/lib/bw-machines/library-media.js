@@ -1,20 +1,47 @@
+import {makeT} from '../bw-i18n.js';
 import {fromMediaManifest} from './importers.js';
 import {validateMachineConfig} from './machine-config.js';
 
+const mediaInfo = makeT({
+    en: {sieve: 'CP/M Sieve', forthCpm: 'zForth on CP/M',
+        ackPascal: 'Prints the primes first. The DOS service then reports a file-close error.',
+        ubasic: 'Open the sample in BAS. Edit the program and run it again to see the new output in Controller.'},
+    de: {sieve: 'CP/M-Primzahlsieb', forthCpm: 'zForth unter CP/M',
+        ackPascal: 'Gibt zuerst die Primzahlen aus. Danach meldet der DOS-Dienst einen Fehler beim Schließen der Datei.',
+        ubasic: 'Öffne das Beispiel in BAS. Bearbeite das Programm und starte es erneut, um die neue Ausgabe im Controller zu sehen.'}
+});
+
+export function localizedMedia (item, locale) {
+    return {...item, title: item.titleKey ? mediaInfo(locale, item.titleKey) : item.title,
+        summary: item.infoKey ? mediaInfo(locale, item.infoKey) : item.summary};
+}
+
 // Reviewed manifest references only. Program bytes stay in media-lab.
 const MEDIA_REVISION = '081bd4156797cf8b14b9ceef7245ff9e100577e5';
-const mediaDirectory = item => new URL(`https://raw.githubusercontent.com/CrispStrobe/brickwright-media-lab/${item.revision || MEDIA_REVISION}/projects/${item.id}/`);
+const mediaDirectory = item => new URL(`https://raw.githubusercontent.com/CrispStrobe/brickwright-media-lab/${item.revision || MEDIA_REVISION}/projects/${item.project || item.id}/`);
+
+const ackSamples = [
+    ['pascal', 'ACK Pascal (DOS)', 'sieve.com', 'db1ce4885bc04a942ac503730168af5e639c584a81e1077e3fc7e21fb732ae5c'],
+    ['c', 'ACK C (DOS)', 'fact.com', 'f53d2a613deb2b5da1b107c18570ae3e131c532ed76522279acbe85e0c916bf7'],
+    ['modula2', 'ACK Modula-2 (DOS)', 'sievemod.com', 'c9be50f40ce0b8076872b861852d7c4e9f99491aabc7fdd0a04122fc6f6c66b1']
+].map(([language, title, file, sha256]) => ({
+    id: `ack-${language}`, project: 'ack', title, machine: 'i8086',
+    license: 'BSD-3-Clause', licenseFile: 'COPYING.ACK',
+    ...(language === 'pascal' ? {infoKey: 'ackPascal'} : {}),
+    sample: {language, file, sha256}
+}));
 
 export const libraryMedia = [
-    {id: 'forth-cpm', title: 'zForth on CP/M', machine: 'z80', license: 'MIT'},
-    {id: 'cpm-software', title: 'CP/M Sieve', machine: 'z80', license: 'BSD-2-Clause',
+    {id: 'forth-cpm', title: mediaInfo('en', 'forthCpm'), titleKey: 'forthCpm', machine: 'z80', license: 'MIT'},
+    {id: 'cpm-software', title: mediaInfo('en', 'sieve'), titleKey: 'sieve', machine: 'z80', license: 'BSD-2-Clause',
         code: {language: 'c', path: 'src/sieve.c', compilerTarget: 'z80-cpm'}},
     {id: 'fe-dos', title: 'fe Lisp (DOS)', machine: 'i8086', license: 'MIT'},
     {id: 'forth-dos', title: 'zForth (DOS)', machine: 'i8086', license: 'MIT'},
     {id: 'tcl-dos', title: 'partcl Tcl (DOS)', machine: 'i8086', license: 'MIT'},
     {id: 'ubasic-dos', title: 'uBASIC (DOS)', machine: 'i8086', license: 'BSD-3-Clause',
-        summary: 'Open the sample in BAS. Edit the program and run it again to see the new output in Controller.',
+        infoKey: 'ubasic',
         code: {language: 'basic', path: 'samples/demo.bas', dosSourceName: 'PROG.BAS'}},
+    ...ackSamples,
     {id: 'x86-benchmarks/topbench', title: 'TOPBENCH (386)', machine: 'i80386', license: 'MIT', benchmark: 'topbench'},
     {id: 'picobb-rp2040', title: 'PicoBB BBC BASIC', machine: 'rp2040js', license: 'Zlib',
         revision: 'd6f09f79a6c73a2fcdf7f53b75624aa01f096baf'}
@@ -30,13 +57,31 @@ export async function openLibraryMedia (item) {
     const baseUrl = mediaDirectory(item);
     const source = new URL('brickwright-media.json', baseUrl).href;
     const manifest = await readMediaManifest(source);
-    if (manifest.machine !== item.machine || manifest.license !== item.license || manifest.boot === false) {
+    // ACK's pinned manifest predates the license field. Its sibling COPYING.ACK
+    // and the per-program hashes were reviewed when these entries were admitted.
+    const reviewedLegacyLicense = item.project === 'ack' && item.licenseFile === 'COPYING.ACK' &&
+        manifest.license == null;
+    if (manifest.machine !== item.machine ||
+        (!reviewedLegacyLicense && manifest.license !== item.license) || manifest.boot === false) {
         throw new Error('Media manifest differs from the reviewed catalog entry.');
     }
-    const config = fromMediaManifest(manifest, {source, baseUrl: baseUrl.href});
+    let launchManifest = manifest;
+    if (item.sample) {
+        const sample = manifest.programs?.find(program => program.language === item.sample.language);
+        if (sample?.slots?.com !== item.sample.file || sample.program?.kind !== 'dos') {
+            throw new Error('DOS sample differs from the reviewed catalog entry.');
+        }
+        launchManifest = {...manifest, title: item.title, license: item.license, program: sample.program,
+            slots: {com: {url: item.sample.file, sha256: item.sample.sha256}}};
+    }
+    const config = fromMediaManifest(launchManifest, {source, baseUrl: baseUrl.href});
     const verdict = validateMachineConfig(config);
     if (!verdict.ok) throw new Error(verdict.errors.join('; '));
     return config;
+}
+
+export function libraryLicenseUrl (item) {
+    return item.licenseFile ? new URL(item.licenseFile, mediaDirectory(item)).href : null;
 }
 
 export async function readLibraryCode (item) {

@@ -1,3 +1,4 @@
+import {pickLocale} from '../../lib/bw-i18n.js';
 import React from 'react';
 import {setCircuitView} from '../../lib/bw-debug/debug-view.js';
 import {s040PartIds} from '../../lib/bw-debug/s040-part-ids.js';
@@ -56,6 +57,15 @@ const SwitchPanel = React.lazy(() =>
 
 const L10N = {
     en: {
+        markGood: 'Mark good',
+        markBad: 'Mark bad',
+        bisect: 'Bisect divergence',
+        cancelBisect: 'Cancel bisection',
+        firstMismatch: 'First mismatch',
+        exportSession: 'Export session',
+        importSession: 'Import session',
+        consoleController: 'Controller terminal',
+        consoleDebugger: 'Debugger console',
         run: 'Run', pause: 'Pause', step: 'Step', reverseStep: 'Reverse Step', reverseCycle: 'Reverse Cycle',
         reverseContinue: 'Reverse Continue', stop: 'Stop',
         speed: 'Speed', idle: 'not running', building: 'building…', attaching: 'starting…',
@@ -132,6 +142,15 @@ const L10N = {
         actionLog: 'Log', actionCounters: 'Counters', actionEvent: 'event'
     },
     de: {
+        markGood: 'Als korrekt markieren',
+        markBad: 'Als fehlerhaft markieren',
+        bisect: 'Abweichung eingrenzen',
+        cancelBisect: 'Eingrenzung abbrechen',
+        firstMismatch: 'Erste Abweichung',
+        exportSession: 'Sitzung exportieren',
+        importSession: 'Sitzung importieren',
+        consoleController: 'Controller-Terminal',
+        consoleDebugger: 'Debugger-Konsole',
         run: 'Start', pause: 'Pause', step: 'Schritt', reverseStep: 'Zurück', reverseCycle: 'Takt zurück',
         reverseContinue: 'Zurück fortsetzen', stop: 'Stopp',
         speed: 'Tempo', idle: 'läuft nicht', building: 'wird gebaut…', attaching: 'startet…',
@@ -963,7 +982,7 @@ class DebugPanel extends React.Component {
     }
 
     tx (key) {
-        const table = L10N[this.props.locale] || L10N.en;
+        const table = L10N[pickLocale(this.props.locale, L10N)];
         return table[key] || L10N.en[key];
     }
 
@@ -2113,6 +2132,7 @@ class DebugPanel extends React.Component {
                 </details>
 
                 {this.state.runner ? <DebugSessionTransfer
+                    t={key => this.tx(key)}
                     disabled={running || busy}
                     status={this.state.sessionTransferStatus}
                     onExport={this.onDebugSessionExport}
@@ -2120,6 +2140,7 @@ class DebugPanel extends React.Component {
                 /> : null}
 
                 {this.state.runner ? <DebugDivergenceBisection
+                    t={key => this.tx(key)}
                     disabled={running || busy}
                     status={this.state.runner.debugBisectionStatus()}
                     onMarkGood={this.onBisectionMarkGood}
@@ -2522,13 +2543,13 @@ class DebugPanel extends React.Component {
                                     ? ` (${ui.serialOutput.length})` : ''}
                             </span>
                             {consoleMonitors.length > 0 && (
-                                <select aria-label="Console output" title="Console output" value={consoleDestination}
+                                <select aria-label={this.tx('esp32s3Console')} title={this.tx('esp32s3Console')} value={consoleDestination}
                                     style={{minWidth: 0}} onChange={event => {
                                         this.setState({consoleDestination: event.target.value},
                                             () => this._publish6502Console(this.state.runner, this.state.ui));
                                     }}>
-                                    <option value="controller">Controller terminal</option>
-                                    <option value="debugger">Debugger console</option>
+                                    <option value="controller">{this.tx('consoleController')}</option>
+                                    <option value="debugger">{this.tx('consoleDebugger')}</option>
                                     {consoleMonitors.map(widget => (
                                         <option key={widget.name} value={widget.name}>
                                             {widget.layout?.label || widget.name} (Controller)

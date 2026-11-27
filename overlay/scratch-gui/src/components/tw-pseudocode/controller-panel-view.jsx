@@ -6,6 +6,7 @@ import {clearControllerPanel, createWidgetButtonInputs, releaseMomentaryButtons,
 import EditorHelp from '../gui/editor-help.jsx';
 import MachineConsole from './machine-console.jsx';
 import MachineTerminal from './machine-terminal.jsx';
+import {browserLocale, makeT} from '../../lib/bw-i18n.js';
 import {activateUndoSurface, notifyUndoState, registerUndoSurface} from '../../lib/global-undo.js';
 import {addCardiacFace, addKim1Face, addMicrotronicFace, isCardiacFace, isKim1Face, isMicrotronicFace, MACHINE_WIDGET_HEIGHT} from '../../lib/controller-machine-faces.js';
 import {LOGIKUS_LAMP_WIDGETS, LOGIKUS_SWITCH_WIDGETS, LOGIKUS_TEST_WIDGET} from '../../lib/logikus/controller-bridge.js';
@@ -17,6 +18,13 @@ const Kim1Surface = React.lazy(() => import(/* webpackChunkName: "bw-kim1-surfac
 
 const L10N = {
     en: {
+        virtualSerial: 'Virtual serial console',
+        sendLine: 'Send console line',
+        consoleInput: '6502 console input',
+        surface: 'Controller surface',
+        gridSnap: 'Grid snap',
+        gridOn: 'Grid snap on',
+        gridOff: 'Grid snap off',
         'cancel': 'Cancel',
         'pinPlaceholder': 'P1.0 / D9',
         'chooseImage': 'Choose an Image',
@@ -40,6 +48,13 @@ const L10N = {
         toggleHint: 'latches on press',
     },
     de: {
+        virtualSerial: 'Virtuelle serielle Konsole',
+        sendLine: 'Konsolenzeile senden',
+        consoleInput: '6502-Konsoleneingabe',
+        surface: 'Controller-Oberfläche',
+        gridSnap: 'Am Raster ausrichten',
+        gridOn: 'Rasterfang ein',
+        gridOff: 'Rasterfang aus',
         'cancel': 'Abbrechen',
         'pinPlaceholder': 'P1.0 / D9',
         'chooseImage': 'Ein Bild wählen',
@@ -63,8 +78,9 @@ const L10N = {
         toggleHint: 'rastet beim Drücken ein',
     }
 };
-const pickLocale = () => { try { return /^de/i.test(navigator.language) ? 'de' : 'en'; } catch { return 'en'; } };
-const t = key => (L10N[pickLocale()] || L10N.en)[key] || L10N.en[key] || key;
+const translate = makeT(L10N);
+const t = (key, locale = browserLocale()) => translate(locale, key);
+const BASIC_INPUT_EXAMPLE = 'PRINT 2+2';
 
 // ─── Functional widget config ─────────────────────────────────────────────
 //
@@ -1062,7 +1078,7 @@ function ImageWidget({ widget }) {
     );
 }
 
-function MonitorConsole({route, interactive}) {
+function MonitorConsole({route, interactive, locale}) {
     const output = useRef(null);
     const [line, setLine] = React.useState('');
     useEffect(() => {
@@ -1072,7 +1088,7 @@ function MonitorConsole({route, interactive}) {
         position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', padding: 8,
         background: '#0d1117', color: '#9ae6b4', font: '12px monospace', userSelect: 'text'
     }}>
-        <span title="Virtual serial console">{route.source}</span>
+        <span title={t('virtualSerial', locale)}>{route.source}</span>
         <pre ref={output} style={{flex: 1, minHeight: 0, margin: '4px 0', overflow: 'auto',
             whiteSpace: 'pre-wrap', overflowWrap: 'anywhere'}}>{route.text}</pre>
         {interactive && <form style={{display: 'flex', gap: 4}} onSubmit={event => {
@@ -1080,10 +1096,10 @@ function MonitorConsole({route, interactive}) {
             event.stopPropagation();
             if (sendConsoleLine(route.runner, line)) setLine('');
         }}>
-            <input aria-label="6502 console input" value={line} onChange={event => setLine(event.target.value)}
+            <input aria-label={t('consoleInput', locale)} value={line} onChange={event => setLine(event.target.value)}
                 autoCapitalize="off" autoComplete="off" spellCheck={false}
                 style={{flex: 1, minWidth: 0, font: 'inherit'}} />
-            <button type="submit" aria-label="Send console line" title="Send console line">↵</button>
+            <button type="submit" aria-label={t('sendLine', locale)} title={t('sendLine', locale)}>↵</button>
         </form>}
     </div>;
 }
@@ -1103,7 +1119,7 @@ function useMonitorConsole(runtime, name) {
     return route;
 }
 
-function SimpleVgaWidget({widget, route, interactive}) {
+function SimpleVgaWidget({widget, route, interactive, locale}) {
     const ref = useRef(null);
     useEffect(() => {
         const canvas = ref.current;
@@ -1122,7 +1138,7 @@ function SimpleVgaWidget({widget, route, interactive}) {
             style={{position: 'relative', background: '#000', borderRadius: 2, overflow: 'hidden'}}>
             <canvas ref={ref} style={{display: 'block', width: '100%', height: '100%', objectFit: 'contain',
                 aspectRatio: `${widget.config.width} / ${widget.config.height}`, imageRendering: 'pixelated'}} />
-            {route ? <MonitorConsole route={route} interactive={interactive} /> :
+            {route ? <MonitorConsole route={route} interactive={interactive} locale={locale} /> :
                 !widget.state.signal && <span style={{position: 'absolute', inset: 0, display: 'grid',
                 placeItems: 'center', color: '#0f0', fontSize: 10, fontFamily: 'monospace'}}>NO SIGNAL</span>}
         </div>
@@ -1204,7 +1220,7 @@ function SerialKeyboard({name, sendLine, label, placeholder}) {
     </form>;
 }
 
-function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBindings, buttonInputs, sendBasicLine, runtime, videoKind }) {
+function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBindings, buttonInputs, sendBasicLine, runtime, videoKind, locale }) {
     const serialRoute = useMonitorConsole(runtime, isConsoleMonitor(widget) ? widget.name : null);
     const displayLabel = {tms9918: 'TMS9918', mc6845: 'MC6845'}[videoKind] || 'VGA';
     const typeLabels = {
@@ -1367,7 +1383,7 @@ function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBi
             )}
 
             {widget.type === 'keyboard' && (sendBasicLine ?
-                <SerialKeyboard name={widget.name} sendLine={sendBasicLine} placeholder="PRINT 2+2"
+                <SerialKeyboard name={widget.name} sendLine={sendBasicLine} placeholder={BASIC_INPUT_EXAMPLE}
                     label={/^de/i.test(navigator.language) ? 'BASIC-Serieneingabe' : 'BASIC serial input'} /> :
                 <input type="text" data-testid={'bw-ctl-keyboard-' + widget.name}
                     disabled={mode !== 'play'}
@@ -1410,7 +1426,7 @@ function WidgetCard({ widget, mode, panel, onInput, onRemove, onBindPart, hideBi
             )}
 
             {widget.type === 'simplevga' && (
-                <SimpleVgaWidget widget={widget} route={serialRoute} interactive={mode === 'play'} />
+                <SimpleVgaWidget locale={locale} widget={widget} route={serialRoute} interactive={mode === 'play'} />
             )}
 
             {widget.type === 'mono_lcd' && (
@@ -1889,7 +1905,7 @@ class ControllerPanelView extends React.Component {
                         {t('title')}
                     </span>
                     {((session && (screen || widgets.length > 0)) || hasOtherWidgets) && (
-                        <select aria-label="Controller surface" title="Controller surface"
+                        <select aria-label={t('surface', this.props.locale)} title={t('surface', this.props.locale)}
                             value={terminal ? 'terminal' : machineWidget ? 'screen' : 'widgets'}
                             onChange={event => this.setState({machineSurface: event.target.value})}>
                             {screen && <option value="screen">Screen</option>}
@@ -1978,9 +1994,9 @@ class ControllerPanelView extends React.Component {
                     {mode === 'edit' && (
                         <button
                             data-testid="bw-ctl-snap-toggle"
-                            aria-label={'Grid snap'} aria-pressed={this.state.snap}
+                            aria-label={t('gridSnap', this.props.locale)} aria-pressed={this.state.snap}
                             onClick={() => this.setState(st => ({ snap: !st.snap }))}
-                            title={'Grid snap ' + (this.state.snap ? 'on' : 'off') + ' (' + this.state.grid + 'px)'}
+                            title={`${t(this.state.snap ? 'gridOn' : 'gridOff', this.props.locale)} (${this.state.grid}px)`}
                             style={{
                                 padding: 0, width: 24, height: 28, flexShrink: 0, fontSize: 14, borderRadius: 6,
                                 border: '1px solid #cbd5e1', cursor: 'pointer', fontWeight: 600,
@@ -2076,7 +2092,7 @@ class ControllerPanelView extends React.Component {
                             {t('noWidgets')}
                         </div>
                     )}
-                    {machineWidget && <MachineConsole widget={machineWidget}
+                    {machineWidget && <MachineConsole widget={machineWidget} locale={this.props.locale}
                         keyboardSet={this.props.machineConsole.keyboardSet}
                         keyIn={this.props.machineConsole.keyIn}
                         serialIn={this.props.machineConsole.serialIn}
@@ -2084,7 +2100,7 @@ class ControllerPanelView extends React.Component {
                         onToggleFullScreen={toggleMachineFullScreen}
                         mouseIn={this.props.machineConsole.mouseIn} />}
                     {terminal && <div style={{height: '100%', minHeight: 0}}>
-                        <MachineTerminal session={terminal} isFullScreen={this.props.isFullScreen}
+                        <MachineTerminal session={terminal} locale={this.props.locale} isFullScreen={this.props.isFullScreen}
                             onToggleFullScreen={toggleMachineFullScreen} />
                     </div>}
                     <div hidden={machineFullScreen || Boolean(terminal)} style={machineWidget || (cp1WidgetSlot && widgets.length) ? {
@@ -2138,7 +2154,7 @@ class ControllerPanelView extends React.Component {
                                             this.setState({selected: null});
                                         }} />}
                                     </section>
-                                ) : <WidgetCard
+                                ) : <WidgetCard locale={this.props.locale}
                                     widget={w}
                                     mode={mode}
                                     panel={panel}

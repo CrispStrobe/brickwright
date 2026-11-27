@@ -18,7 +18,7 @@ function spectrumKeys (code) {
 
 /** Large, focusable VGA face for the Widgets pane. The panel owns frame storage;
  * this face only paints it and sends live input to the active machine runner. */
-export default function MachineConsole({widget, keyIn, serialIn, mouseIn, keyboardSet, isFullScreen, onToggleFullScreen}) {
+export default function MachineConsole({widget, keyIn, serialIn, mouseIn, keyboardSet, isFullScreen, onToggleFullScreen, locale}) {
     const root = React.useRef(null);
     const canvas = React.useRef(null);
     const aspect = widget.config.displayAspect;
@@ -143,7 +143,7 @@ export default function MachineConsole({widget, keyIn, serialIn, mouseIn, keyboa
             onFocus={() => setFocused(true)} onBlur={() => { setFocused(false); release(); }}
             style={{width: '100%', height: '100%', minHeight: 0, background: '#000',
                 display: 'flex', flexDirection: 'column', outline: focused ? '2px solid #60a5fa' : 'none'}}>
-            <MachineScreenHeader title={widget.name}
+            <MachineScreenHeader locale={locale} title={widget.name}
                 help={(keyIn || serialIn) && (mouseIn ? 'Click the screen to use the keyboard and mouse.'
                     : 'Click the screen to type into the machine.')}
                 isFullScreen={isFullScreen} onToggleFullScreen={onToggleFullScreen && toggleFull} />

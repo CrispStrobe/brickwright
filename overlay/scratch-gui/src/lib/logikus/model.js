@@ -1,3 +1,5 @@
+import {makeT} from '../bw-i18n.js';
+
 /**
  * An ideal-contact model of the Kosmos Logikus patchboard.
  *
@@ -35,10 +37,15 @@ export const ENDPOINTS = Object.freeze([
 const endpointSet = new Set(ENDPOINTS);
 const isRecord = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 
-export function createEmptyProgram () {
+const programTitle = makeT({
+    en: {untitled: 'My Logikus circuit'},
+    de: {untitled: 'Meine Logikus-Schaltung'}
+});
+
+export function createEmptyProgram (locale) {
     return {
         version: 1,
-        title: 'My Logikus circuit',
+        title: programTitle(locale, 'untitled'),
         switchLabels: Array.from({length: SWITCH_COUNT}, (_, i) => `S${i}`),
         lampLabels: Array.from({length: LAMP_COUNT}, (_, i) => `L${i}`),
         wires: []

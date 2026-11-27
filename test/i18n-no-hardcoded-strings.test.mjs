@@ -274,7 +274,7 @@ test('no component reads a locale identifier it does not have', () => {
         const moduleHasLocale = /^(?:const|let|var|function)\s+locale\b/m.test(text);
         let params = null;          // parameter text of the innermost component
         lines.forEach((line, i) => {
-            const decl = /^(?:export\s+)?(?:const|function)\s+[A-Z][A-Za-z0-9_]*\s*=?\s*(?:function\s*)?\(([^)]*)\)/.exec(line);
+            const decl = /^(?:export\s+(?:default\s+)?)?(?:const|function)\s+[A-Z][A-Za-z0-9_]*\s*=?\s*(?:function\s*)?\(([^)]*)\)/.exec(line);
             if (decl) params = decl[1];
             if (params === null || /^\s*[*/]/.test(line)) return;
             const hasPropsParam = /\bprops\b/.test(params);

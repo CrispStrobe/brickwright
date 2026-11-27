@@ -1,5 +1,18 @@
 // SPDX-License-Identifier: BSD-3-Clause
+import {makeT} from '../bw-i18n.js';
 import {asmExamplesFor} from './examples.js';
+
+const machineLabel = makeT({
+    en: {'6502-wired': '6502 · breadboard PB0', '6502-virtual': '6502 · virtual PB0',
+        'z80-virtual': 'Z80 · virtual port 01h'},
+    de: {'6502-wired': '6502 · Steckbrett PB0', '6502-virtual': '6502 · virtuell PB0',
+        'z80-virtual': 'Z80 · virtueller Port 01h'}
+});
+
+export function blinkMachineLabel (machine, locale) {
+    const localized = machineLabel(locale, machine.id);
+    return localized === machine.id ? machine.label : localized;
+}
 
 export const blinkStarter = '; Blink 0\n; Choose a machine when you run this example.';
 
@@ -10,10 +23,10 @@ export const blinkMachines = [
         circuit: '01-blink/circuit.stc12c5a60s2.json', led: 'LED_led1'},
     {id: 'stc16', family: '8051', device: 'stc12c5a16s2', label: 'STC12C5A16S2 · P1.0',
         circuit: '01-blink/circuit.stc12c5a60s2.json', led: 'LED_led1'},
-    {id: '6502-wired', family: '6502', device: 'eater6502', label: '6502 · breadboard PB0',
+    {id: '6502-wired', family: '6502', device: 'eater6502', label: machineLabel('en', '6502-wired'),
         circuit: 'eater6502-blink/circuit.json', led: 'led0'},
-    {id: '6502-virtual', family: '6502', device: 'eater6502', label: '6502 · virtual PB0'},
-    {id: 'z80-virtual', family: 'z80', device: 'z80', label: 'Z80 · virtual port 01h'}
+    {id: '6502-virtual', family: '6502', device: 'eater6502', label: machineLabel('en', '6502-virtual')},
+    {id: 'z80-virtual', family: 'z80', device: 'z80', label: machineLabel('en', 'z80-virtual')}
 ];
 
 const families = {

@@ -22,7 +22,7 @@ import {IMPORT_ACCEPT, isImportableArtefact} from '../../lib/bw-makecode/accept.
 // synchronous — and the module is a few KB of strings, not a chunk worth
 // splitting.
 import {asmExamplesFor, riscvCExamplesFor, arduinoSketchExamplesFor} from '../../lib/bw-asm/examples.js';
-import {blinkChoices, blinkFamily, blinkMachines, blinkProgramSource, blinkSource, blinkStarter} from '../../lib/bw-asm/blink-machines.js';
+import {blinkChoices, blinkMachineLabel, blinkFamily, blinkMachines, blinkProgramSource, blinkSource, blinkStarter} from '../../lib/bw-asm/blink-machines.js';
 import {requestSketchBuild, sketchBoardFor, sketchFirmware} from '../../lib/bw-debug/arduino-sketch.js';
 import {armRunFor, imageFromIntelHex} from '../../lib/bw-asm/arm-image.js';
 import {
@@ -101,6 +101,8 @@ const FPGA_TAB_INDEX = 5;
 
 const L10N = {
     en: {
+        closeNotice: 'Close',
+        cpmRunHint: 'Run the CP/M program. Edits build with hosted SDCC.',
         actionFiles: 'Files', actionPrograms: 'Program and export', actionExamples: 'Examples',
         fileMenuTitle: 'Open, save, import, examples and reference',
         makeCircuit: '⚙ Make this a circuit',
@@ -451,6 +453,8 @@ const L10N = {
         }
     },
     de: {
+        closeNotice: 'Schließen',
+        cpmRunHint: 'Führe das CP/M-Programm aus. Änderungen werden mit dem SDCC-Dienst kompiliert.',
         actionFiles: 'Dateien', actionPrograms: 'Programm und Export', actionExamples: 'Beispiele',
         fileMenuTitle: 'Öffnen, speichern, importieren, Beispiele und Referenz',
         makeCircuit: '⚙ Daraus eine Schaltung bauen',
@@ -3276,7 +3280,7 @@ class PseudocodeImporter extends React.Component {
                     <select id="bw-blink-machine" autoFocus value={request.id}
                         onChange={event => this.setState({blinkChoice: {...request, id: event.target.value}})}>
                         {request.choices.map(machine => <option key={machine.id} value={machine.id}>
-                            {machine.label}
+                            {blinkMachineLabel(machine, this.props.locale)}
                         </option>)}
                     </select>
                     {request.choices.find(option => option.id === request.id)?.circuit &&
@@ -3425,7 +3429,7 @@ class PseudocodeImporter extends React.Component {
         if (machine?.family === '8051') {
             this.deliverAssembly({format: 'firmware', kind: 'emulator',
                 firmware: {name: 'blink0.ihx', bytes: out.bytes, device, blinkOutputOnly: true}}, asmBlink,
-            this.L.asmBlinkRunning(machine.label, routeName));
+            this.L.asmBlinkRunning(blinkMachineLabel(machine, this.props.locale), routeName));
             return;
         }
         if (bench) {
@@ -3445,7 +3449,7 @@ class PseudocodeImporter extends React.Component {
                 ...(chips.length ? {chips} : {})};
             const builtLen = out.bytes ? out.bytes.length
                 : (out.image ? out.image.segments.reduce((n, s) => n + s.bytes.length, 0) : 0);
-            this.deliverAssembly(detail, asmBlink, machine ? this.L.asmBlinkRunning(machine.label, routeName) + warn :
+            this.deliverAssembly(detail, asmBlink, machine ? this.L.asmBlinkRunning(blinkMachineLabel(machine, this.props.locale), routeName) + warn :
                 this.L.asmBuiltBench(builtLen, routeName, bench) + warn);
         } else if (armRunFor(out.target)) {
             // N4: the hosted ARM chain returns Intel HEX; the STM32F030 light
@@ -6124,7 +6128,7 @@ class PseudocodeImporter extends React.Component {
                 padding: 8, border: '1px solid #94a3b8', borderRadius: 8, fontSize: 12}}>
             <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4}}>
                 <strong>{pickLocale(this.props.locale) === 'de' ? 'Zielsystem' : 'Machine'}</strong>
-                <button type="button" style={toolStyles(false).button} aria-label="Close" onClick={close}>×</button>
+                <button type="button" style={toolStyles(false).button} aria-label={this.L.closeNotice} onClick={close}>×</button>
             </div>
             <button type="button" style={{...toolStyles(false).button, justifyContent: 'flex-start', width: '100%'}}
                 onClick={() => choose('__manage__')}>{pickLocale(this.props.locale) === 'de' ? 'Maschinen verwalten…' : 'Manage machines…'}</button>
@@ -6909,7 +6913,7 @@ class PseudocodeImporter extends React.Component {
                         </>}
                         {this.state.lang === this.state.libraryProgram?.language && (
                             <button type="button" style={actionBtn} onClick={this.runLibraryProgram}
-                                disabled={this.state.busy} title="Run the CP/M program. Edits build with hosted SDCC."
+                                disabled={this.state.busy} title={this.L.cpmRunHint}
                                 data-testid={menu ? 'bw-library-code-run-menu' : 'bw-library-code-run'}>
                                 {menu ? <Icon name="run" /> : '▶ '}{this.state.libraryProgram.title}
                             </button>

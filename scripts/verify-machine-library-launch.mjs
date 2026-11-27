@@ -46,6 +46,22 @@ try {
     console.log('File → Machines → partcl Tcl (DOS) → Run executes the real sample Tcl script.');
     await dos.close();
 
+    for (const [id, output] of [
+        ['ack-pascal', /Primes up to 50:[\s\S]*47[\s\S]*done\./],
+        ['ack-c', /Factorials, compiled by ACK[\s\S]*40320/],
+        ['ack-modula2', /Primes up to 50, from Modula-2:[\s\S]*47[\s\S]*done\./]
+    ]) {
+        const page = await freshProject();
+        try {
+            await openFromFile(page, 'i8086');
+            await page.locator(`[data-machine-media="${id}"]`).getByRole('button', {name: 'Run', exact: true}).click();
+            await page.locator('[data-bw-stage-dock="controller"]').getByTestId('bw-serial-console').getByText(output).waitFor();
+            console.log(`File → Machines → ${id} produces the expected DOS output in Controller.`);
+        } finally {
+            await page.close();
+        }
+    }
+
     const forth = await freshProject();
     await openFromFile(forth, 'i8086');
     await forth.getByRole('searchbox', {name: 'Search firmware'}).fill('zForth (DOS)');

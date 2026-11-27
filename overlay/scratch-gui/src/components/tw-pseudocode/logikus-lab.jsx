@@ -273,7 +273,7 @@ export default function LogikusLab ({workspace, button, locale, error, onChange,
                             data-active={workspace.presetId === item.id} aria-pressed={workspace.presetId === item.id}
                             onClick={() => choosePreset(item.id)}>{copy(item.copy, de).title}</button>)}
                         <button type="button" data-active={!workspace.presetId}
-                            onClick={() => { change(createWorkspace({program: createEmptyProgram(), controller: workspace.controller})); setTab('wire'); }}>
+                            onClick={() => { change(createWorkspace({program: createEmptyProgram(locale), controller: workspace.controller})); setTab('wire'); }}>
                             {say('Blank patch board', 'Leeres Steckfeld')}</button>
                     </nav>
                     {brief && <div className={styles.challenge}>
