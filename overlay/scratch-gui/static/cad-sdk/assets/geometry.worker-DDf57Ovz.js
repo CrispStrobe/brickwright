@@ -3027,7 +3027,7 @@ function t7(e, q) {
   if (!A5(s) || s.maxAnalysisBytes !== 16777216 || s.maxAnalysisTriangles !== 83333 || l.bytes > s.maxAnalysisBytes || s.maxTriangles > s.maxAnalysisTriangles || !Number.isSafeInteger(t.triangles) || t.triangles < 1 || t.triangles > s.maxTriangles || !V2(t.boundsMm, "min max") || !$4(t.boundsMm.min) || !$4(t.boundsMm.max) || !t.boundsMm.max.every((p, x) => p >= t.boundsMm.min[x] && p - t.boundsMm.min[x] <= s.maxExtentMm) || !L5(t.signedVolumeMm3))
     return !1;
   const u = e.evidence;
-  if (!V2(u, "fileSha256 checkedOn toMillimetresZUp engine engineVersion qualifierVersion qualified scope geometrySha256 sourceVolumeMm3 hulls certificate nativeCheck") || u.fileSha256 !== l.sha256 || u.checkedOn !== t.checkedOn || !Q2(u.toMillimetresZUp, s.toMillimetresZUp) || u.engine !== "Jolt" || !["1.1.0-bw.9", "1.1.0-bw.10"].includes(u.engineVersion) || u.qualifierVersion !== "brickwright-library-collision/1" || u.qualified !== !0 || u.scope !== "rigid-collision-preview" || !l7(u.geometrySha256) || !L5(u.sourceVolumeMm3))
+  if (!V2(u, "fileSha256 checkedOn toMillimetresZUp engine engineVersion qualifierVersion qualified scope geometrySha256 sourceVolumeMm3 hulls certificate nativeCheck") || u.fileSha256 !== l.sha256 || u.checkedOn !== t.checkedOn || !Q2(u.toMillimetresZUp, s.toMillimetresZUp) || u.engine !== "Jolt" || !["1.1.0-bw.9", "1.1.0-bw.10", "1.1.0-bw.11"].includes(u.engineVersion) || u.qualifierVersion !== "brickwright-library-collision/1" || u.qualified !== !0 || u.scope !== "rigid-collision-preview" || !l7(u.geometrySha256) || !L5(u.sourceVolumeMm3))
     return !1;
   const a = u.certificate;
   if (!(V2(a, "sourceSHA256 algorithm strategy maxHulls missingVolumeMm3 extraVolumeMm3 relativeError boundsErrorMm tolerance") || V2(a, "sourceSHA256 algorithm strategy maxHulls missingVolumeMm3 extraVolumeMm3 numericalResidualVolumeMm3 relativeError boundsErrorMm tolerance")) || a.sourceSHA256 !== u.geometrySha256 || a.algorithm !== "manifold-compound/v1" || a.strategy !== "bsp" || !Number.isSafeInteger(a.maxHulls) || a.maxHulls < 1 || a.maxHulls > 2048 || !Number.isSafeInteger(u.hulls) || u.hulls < 1 || u.hulls > a.maxHulls)
@@ -12023,7 +12023,7 @@ self.onmessage = async (e) => {
   try {
     if ($e(e.data.locale ?? "en"), "exact" in e.data) {
       const i = performance.now(), r = e.data.exactLimits;
-      Z5 ?? (Z5 = import("./exact/dist-GacQQJ_v.js").then(async (u) => ({ module: u, backend: await u.createExactBackend(r ? u.exactKernelOptions(r) : {}) })).catch((u) => {
+      Z5 ?? (Z5 = import("./exact/dist-dXfU3e5K.js").then(async (u) => ({ module: u, backend: await u.createExactBackend(r ? u.exactKernelOptions(r) : {}) })).catch((u) => {
         throw Z5 = null, u;
       }));
       const { module: o, backend: s } = await Z5;
@@ -12052,7 +12052,7 @@ self.onmessage = async (e) => {
     }
     const n = t.evaluate(e.data.document);
     if (e.data.printability) {
-      const { checkPrintability: i } = await import("./printability-Bjkvz5kU.js");
+      const { checkPrintability: i } = await import("./printability-D5FlJl4v.js");
       self.postMessage({ request: q, result: i(n.bodies, e.data.printability) });
       return;
     }
