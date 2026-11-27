@@ -6,10 +6,12 @@ import {PICOBB_FLASH} from './pico-basic-flash.js';
 
 const mediaInfo = makeT({
     en: {minix: 'Click the screen and press = to boot MINIX. Log in as root and try ls.', sieve: 'CP/M Sieve',
+        animation6502: 'Watch the 6502 copy four frames to video RAM at $2000. The screen updates when the guest publishes a frame.',
         tali65c02: 'Choose ACIA in Controller. Define a word, or write grayscale pixels at $3000. Switch to Screen to see the framebuffer.', forthCpm: 'zForth on CP/M',
         ackPascal: 'Prints the primes first. The DOS service then reports a file-close error.',
         ubasic: 'Open the sample in BAS. Edit the program and run it again to see the new output in Controller.'},
     de: {minix: 'Klicke auf den Bildschirm und drücke =, um MINIX zu starten. Melde dich als root an und probiere ls.', sieve: 'CP/M-Primzahlsieb',
+        animation6502: 'Der 6502 kopiert vier Bilder in den Bildspeicher ab $2000. Die Anzeige übernimmt fertige Bilder.',
         tali65c02: 'Wähle im Controller ACIA. Definiere ein Wort oder schreibe Graustufenpixel ab $3000. Wähle Bildschirm für die Bildausgabe.', forthCpm: 'zForth unter CP/M',
         ackPascal: 'Gibt zuerst die Primzahlen aus. Danach meldet der DOS-Dienst einen Fehler beim Schließen der Datei.',
         ubasic: 'Öffne das Beispiel in BAS. Bearbeite das Programm und starte es erneut, um die neue Ausgabe im Controller zu sehen.'}
@@ -46,6 +48,10 @@ export const libraryMedia = [
         infoKey: 'ubasic',
         code: {language: 'basic', path: 'samples/demo.bas', dosSourceName: 'PROG.BAS'}},
     ...ackSamples,
+    {id: '6502-animation', title: '6502 Animation Lab', machine: 'eater6502',
+        license: 'MIT', licenseFile: 'LICENSE', infoKey: 'animation6502', framebufferFormat: 'gray6',
+        revision: '5e54caab98d7ca6f641d7cc3e21f2ebdab937400',
+        romHash: '45504aefefd3adc676028013b568332289876da79afc3f682045d6052e41c396'},
     {id: 'tali-forth-65c02', title: 'Tali Forth 2 with framebuffer', machine: 'eater6502',
         license: 'LicenseRef-Public-Domain', licenseFile: 'LICENSE.upstream', infoKey: 'tali65c02',
         revision: '5e54caab98d7ca6f641d7cc3e21f2ebdab937400',
@@ -97,6 +103,14 @@ export async function openLibraryMedia (item) {
     if (item.romHash) {
         launchManifest = {...launchManifest, slots: {...launchManifest.slots,
             rom: {url: launchManifest.slots.rom, sha256: item.romHash}}};
+    }
+    if (item.framebufferFormat) {
+        const {framebuffer, frameSerialAddress} = manifest.observation;
+        const {address, width, height, stride} = framebuffer;
+        const chip = manifest.machineConfig.chips.find(entry => entry.kind === 'framebuffer' && entry.at === address)?.name;
+        launchManifest = {...launchManifest, program: {...launchManifest.program, framebuffer: {
+            chip, at: address, width, height, stride, format: item.framebufferFormat, publishAt: frameSerialAddress
+        }}};
     }
     const config = fromMediaManifest(launchManifest, {source, baseUrl: baseUrl.href});
     const verdict = validateMachineConfig(config);

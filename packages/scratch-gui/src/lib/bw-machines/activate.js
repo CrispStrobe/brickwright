@@ -278,6 +278,11 @@ export async function activateConfig(config, opts = {}) {
     const program = cfg.provenance?.program;
     if (cfg.machine === 'eater6502' && bootSlotId === 'rom' && program?.framebuffer) {
         const grayFramebuffer = grayFramebufferSpec(machineConfig?.chips, program.framebuffer);
+        const {publishAt} = grayFramebuffer;
+        if (publishAt !== undefined && !machineConfig.regions?.some(region =>
+            region.kind === 'ram' && !region.perm && publishAt >= region.start && publishAt <= region.end)) {
+            throw new Error('The 65C02 framebuffer publication address must be in RAM');
+        }
         const pacedConsole = machineConfig.chips.find(chip => chip.kind === 'acia' && chip.name === program.console)?.name;
         machineConfig = {...machineConfig, grayFramebuffer, pacedConsole};
         if (!widgets.some(widget => widget?.source === 'video')) {

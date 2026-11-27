@@ -798,3 +798,20 @@ test('a declared 65C02 gray framebuffer reaches Controller through the machine h
     cfg.provenance.program.framebuffer = {...framebuffer, stride: 128};
     await assert.rejects(runMachineConfig(cfg, {fetcher, dispatch () {}}), /Invalid 65C02 grayscale framebuffer/);
 });
+
+test('published 65C02 frames need a writable counter outside the framebuffer', async () => {
+    const {fetcher} = stubFetcher();
+    const framebuffer = {chip: 'screen', at: 0x2000, width: 100, height: 64, stride: 128,
+        format: 'gray6', publishAt: 0x200};
+    const cfg = fromMediaManifest({machine: 'eater6502', slots: {rom: 'animation.rom'},
+        machineConfig: {regions: [{kind: 'ram', start: 0, end: 0x3fff}],
+            chips: [{kind: 'framebuffer', name: 'screen', at: 0x2000, size: 8192}]},
+        program: {framebuffer}});
+    const {detail} = await runMachineConfig(cfg, {fetcher, dispatch () {}});
+    assert.deepEqual(detail.machineConfig6502.grayFramebuffer, framebuffer);
+    assert.equal(detail.machineConfig6502.pacedConsole, undefined);
+    cfg.provenance.program.framebuffer = {...framebuffer, publishAt: 0x2000};
+    await assert.rejects(runMachineConfig(cfg, {fetcher, dispatch () {}}), /Invalid 65C02 framebuffer publication address/);
+    cfg.provenance.program.framebuffer = {...framebuffer, publishAt: 0x4000};
+    await assert.rejects(runMachineConfig(cfg, {fetcher, dispatch () {}}), /publication address must be in RAM/);
+});

@@ -42,7 +42,7 @@ import {
 } from './breakpoints.js';
 import { parseCondition } from './condition.js';
 import {createLinuxConsole, TERMINAL_COLS, TERMINAL_ROWS} from './linux-console.js';
-import {createGrayFramebufferVideo, grayFramebufferSpec} from '../bw-machines/gray-framebuffer.js';
+import {capturePublishedFramebuffer, createGrayFramebufferVideo, grayFramebufferSpec} from '../bw-machines/gray-framebuffer.js';
 import {createReadyGatedInput} from './ready-gated-input.js';
 import {createTerminalOutput} from './terminal-output.js';
 import {picoBasicAtPrompt, picoBasicConsoleSpec} from '../bw-machines/pico-basic-source.js';
@@ -3223,15 +3223,19 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         }
         if (declaredMachine?.grayFramebuffer) {
             const spec = grayFramebufferSpec(declaredMachine.chips, declaredMachine.grayFramebuffer);
-            const devices = result.adapter.machine.chips;
-            runner.video = createGrayFramebufferVideo(devices[spec.chip], spec);
-            const acia = devices[declaredMachine.pacedConsole];
+            const machine = result.adapter.machine;
+            const source = machine.chips[spec.chip];
+            runner.video = spec.publishAt === undefined ? createGrayFramebufferVideo(source, spec) :
+                capturePublishedFramebuffer(machine, source, spec);
+            const acia = machine.chips[declaredMachine.pacedConsole];
             if (typeof acia?.rdrf === 'boolean') {
                 const input = createReadyGatedInput({isReady: () => serialLines.some(line => line.length),
                     send: runner.sendSerial, canAccept: () => !acia.rdrf, burst: 1});
                 runner.sendSerial = data => typeof data === 'number' ? input.push(data) :
                     input.write(Uint8Array.from(String(data), ch => ch.charCodeAt(0)));
                 terminalFrame = input.flush;
+            } else if (spec.publishAt !== undefined) {
+                delete runner.sendSerial;
             }
         }
         if (targetOpts.py65mon) runner.console6502Source = 'py65mon';
