@@ -30,6 +30,8 @@ import {pathToFileURL} from 'node:url';
 import test from 'node:test';
 import {registeredArraysSource, renderRegisteredArraysCarrier} from '../scripts/lib/arrays-carrier.mjs';
 
+import {blinkFamily} from '../overlay/scratch-gui/src/lib/bw-asm/blink-machines.js';
+
 const root = path.resolve(import.meta.dirname, '..');
 const read = file => readFileSync(path.join(root, file), 'utf8');
 const guiRequire = createRequire(path.join(root, 'packages/scratch-gui/package.json'));
@@ -256,7 +258,7 @@ const SITES = [
             };
             const load = asMethod(methodSource(IMPORTER, method, src[IMPORTER]), {
                 confirmAsync: helper.confirmAsync, pickLocale: () => 'en',
-                riscvCExamplesFor: examples, arduinoSketchExamplesFor: examples
+                riscvCExamplesFor: examples, arduinoSketchExamplesFor: examples, blinkFamily
             });
             await load.call(self, 'ex');
             await settle();

@@ -12,8 +12,14 @@ const terminals = ['offset_1', 'inn', 'inp', 'vneg', 'offset_5', 'out', 'vpos', 
 
 test('the exact installed packages expose and solve the physical LT1001', async () => {
     const pins = JSON.parse(readFileSync(path.join(root, 'vendor-pins.json'), 'utf8'));
-    assert.equal(pins['bw-board'], 'da447ee8d66e566b38de5b84e638f90bd7d78524');
-    assert.equal(pins['bw-circuit-ui'], '1ec24a77f1782a824484b0644e017079c5392910');
+    const guiRoot = path.join(root, 'packages/scratch-gui');
+    const manifest = JSON.parse(readFileSync(path.join(guiRoot, 'package.json'), 'utf8'));
+    const lock = JSON.parse(readFileSync(path.join(guiRoot, 'package-lock.json'), 'utf8'));
+    for (const name of ['bw-board', 'bw-circuit-ui']) {
+        assert.match(pins[name], /^[0-9a-f]{40}$/);
+        assert.equal(manifest.dependencies[name], `github:CrispStrobe/${name}#${pins[name]}`);
+        assert.equal(new URL(lock.packages[`node_modules/${name}`].resolved).hash, `#${pins[name]}`);
+    }
 
     const sidecar = JSON.parse(readFileSync(
         path.join(root, 'node_modules/bw-circuit-ui/src/parts-data/lt1001.json'), 'utf8'));
