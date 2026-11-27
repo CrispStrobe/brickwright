@@ -124,7 +124,7 @@ test('costumes are handed over under the names compile() reads', () => {
     for (const field of ['sprite:', 'filename:', 'svg:', 'mode:']) {
         assert.ok(uploads.includes(field), `uploads entries must carry ${field}`);
     }
-    const signature = 'async compile ({strict = false, pseudocode = null} = {}) {';
+    const signature = 'async compile ({strict = false, pseudocode = null, scratchExample = false} = {}) {';
     const method = balancedFrom(source, source.indexOf(signature) + signature.length - 1, '{', '}');
     assert.match(method, /const uploads = this\.state\.uploads/);
     const compile = scopeAfter(method, 'uploads.forEach');

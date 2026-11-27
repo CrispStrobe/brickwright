@@ -6142,15 +6142,19 @@ class PseudocodeImporter extends React.Component {
         });
     }
 
+    dismissCodeNotice (notice) {
+        this.setState(state => ({
+            codeNotices: state.codeNotices.filter(item => item.id !== notice.id),
+            ...(notice.report && notice.report === state.conversionReport ? {conversionReport: null} : {})
+        }));
+    }
+
     renderCodeInfo (machine) {
         const {lang, asmMode, codeNotices, showInfo, emptyTabOffer} = this.state;
         const locale = pickLocale(this.props.locale);
         const de = locale === 'de';
         const local = (english, german) => de ? german : english;
         const close = () => this.setState({showInfo: false});
-        const dismiss = id => this.setState(state => ({
-            codeNotices: state.codeNotices.filter(notice => notice.id !== id)
-        }));
         const count = codeNotices.filter(notice => notice.unread).length;
         const latestStatus = codeNotices.find(notice => notice.status);
         const latestReport = codeNotices.find(notice => notice.report);
@@ -6192,7 +6196,7 @@ class PseudocodeImporter extends React.Component {
                             title={local('Clear all notices', 'Alle Meldungen löschen')}
                             onClick={() => {
                                 this.codeHelpClose?.focus();
-                                this.setState({codeNotices: []});
+                                this.setState({codeNotices: [], conversionReport: null, status: '', emptyTabOffer: null});
                             }}>×</button>
                     </div>
                     {codeNotices.map(notice => {
@@ -6228,7 +6232,7 @@ class PseudocodeImporter extends React.Component {
                                 {notice === latestStatus && notice.offer && notice.offer === emptyTabOffer &&
                                     <button type="button" data-testid="bw-open-empty-tab" onClick={() => {
                                         this.openEmptyTab(notice.offer);
-                                        dismiss(notice.id);
+                                        this.dismissCodeNotice(notice);
                                         close();
                                     }}>{this.L.openEmptyTab(notice.offer)}</button>}
                             </div>}
@@ -6239,7 +6243,7 @@ class PseudocodeImporter extends React.Component {
                                 aria-label={this.L.dismissNotice} title={this.L.dismissNotice}
                                 onClick={() => {
                                     this.codeHelpClose?.focus();
-                                    dismiss(notice.id);
+                                    this.dismissCodeNotice(notice);
                                 }}>×</button>
                         </div>;
                     })}

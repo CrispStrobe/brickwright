@@ -57,7 +57,10 @@ async function run(visibilityBlocks) {
             await report.getByText('Conversion report: Blocks → Arcade run', {exact: false}).first().click();
         }
         const labels = (await unsupported.innerText()).replace(/^Unsupported:\s*/, '').split(' · ').sort();
-        assert.deepEqual(labels, visibilityBlocks ? ['data_hidevariable', 'data_showvariable'] : ['nothing reported']);
+        assert.deepEqual(labels, ['nothing reported']);
+        if (visibilityBlocks) {
+            assert.match(await report.getByTestId('bw-conversion-changed').innerText(), /variable monitors use compact labels/i);
+        }
         assert.match(await report.getByTestId('bw-conversion-preserved').innerText(), /compiled and sent to the player/i);
         assert.equal(await page.evaluate(() => window.arcadeSpeechCompiled), true, 'compiled program contains the speech');
 
