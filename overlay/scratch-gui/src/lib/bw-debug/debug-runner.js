@@ -3073,7 +3073,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         const result = await createDebugTarget('cp1', options);
         wireMachineBench(result, createDebugSession);
         delete runner.sendSerial;
-        setStatus('ready', `CP1 firmware loaded: ${media.name || 'user ROM'}`);
+        setStatus('ready', S('ready.cp1', {name: media.name || S('noun.userRom')}));
         return session;
     }
 

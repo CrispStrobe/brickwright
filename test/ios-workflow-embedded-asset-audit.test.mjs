@@ -6,6 +6,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {spawnSync} from 'node:child_process';
 const workflow = readFileSync(new URL('../.github/workflows/mobile.yml', import.meta.url), 'utf8');
+const repositoryId = '1291854269';
 test('ad-hoc diagnostics print only device count and preserve the actual assertion', () => {
     assert.match(workflow, /DEVICE_COUNT=\$\(plutil -extract ProvisionedDevices xml1 -o - "\$WORK\/embedded.plist" \| grep -c '<string>'\)/);
     assert.match(workflow, /\[ "\$DEVICE_COUNT" -gt 0 \]/);
@@ -116,7 +117,7 @@ else: sys.exit(39)
     const script = join(dir, 'capture.py'); writeFileSync(script, source);
     const commandLog = join(dir, 'commands.log');
     const env = {...process.env, PATH: `${bin}:${process.env.PATH}`, GITHUB_WORKSPACE: root, RUNNER_TEMP: temp,
-        GITHUB_EVENT_NAME: 'workflow_dispatch', GITHUB_REPOSITORY: 'CrispStrobe/brickwright-lite',
+        GITHUB_EVENT_NAME: 'workflow_dispatch', GITHUB_REPOSITORY: 'CrispStrobe/brickwright', GITHUB_REPOSITORY_ID: repositoryId,
         GITHUB_REF: 'refs/heads/lane/ios-active-asset-source-20261018', GITHUB_SHA: 'a'.repeat(40),
         GITHUB_RUN_ID: '100', GITHUB_RUN_ATTEMPT: '2', GITHUB_JOB: 'ios', BW_RETAIN_IOS_INPUTS: 'true',
         BW_SIGN_IOS: 'false', BW_DEVICE_IPA: 'false', AUTHORED_COMMAND_LOG: commandLog};
@@ -173,7 +174,7 @@ test('actual embedded producer retains authored inputs and products with limited
 
 test('disabled, signing, device, wrong-repository and tag requests refuse before reading inputs', () => {
     for (const overrides of [{BW_RETAIN_IOS_INPUTS: 'false'}, {BW_SIGN_IOS: 'true'}, {BW_DEVICE_IPA: 'true'},
-        {GITHUB_EVENT_NAME: 'push'}, {GITHUB_REPOSITORY: 'upstream/repo'}, {GITHUB_REF: 'refs/tags/v0.0.0'},
+        {GITHUB_EVENT_NAME: 'push'}, {GITHUB_REPOSITORY_ID: '0'}, {GITHUB_REPOSITORY_ID: ''}, {GITHUB_REF: 'refs/tags/v0.0.0'},
         {GITHUB_REF: 'refs/heads/unreviewed'}]) {
         withRetention(f => {
             refused(f.run('before', overrides));
@@ -181,6 +182,10 @@ test('disabled, signing, device, wrong-repository and tag requests refuse before
         });
     }
 });
+
+test('retention admission follows the reviewed repository ID across a repository rename', () => withRetention(f => {
+    succeeded(f.run('before', {GITHUB_REPOSITORY: 'CrispStrobe/brickwright-lite'}));
+}));
 
 test('retention refuses overwrite, command failure and changed or extra build inputs', () => {
     withRetention(f => { succeeded(f.run('before')); refused(f.run('before')); });
@@ -2708,7 +2713,7 @@ class DirectoryProfileControls(unittest.TestCase):
         root=Path(tempfile.mkdtemp(prefix='bw-directory-profile-'));self.addCleanup(shutil.rmtree,root)
         (root/'.github/workflows').mkdir(parents=True);(root/'.github/workflows/mobile.yml').write_text(workflow)
         env={'RUNNER_TEMP':str(root),'GITHUB_WORKSPACE':str(root),'GITHUB_EVENT_NAME':'workflow_dispatch',
-            'GITHUB_REPOSITORY':'CrispStrobe/brickwright-lite','GITHUB_REF':'refs/heads/lane/ios-active-asset-source-20261018',
+            'GITHUB_REPOSITORY':'CrispStrobe/brickwright','GITHUB_REPOSITORY_ID':'${repositoryId}','GITHUB_REF':'refs/heads/lane/ios-active-asset-source-20261018',
             'GITHUB_SHA':'a'*40,'GITHUB_RUN_ID':'123','GITHUB_RUN_ATTEMPT':'1','GITHUB_JOB':'ios-audit-directory',
             'BW_DIRECTORY_MODE':'true','BW_DIRECTORY_OTHER_MODE':'false','BW_DIRECTORY_RETAIN':'true',
             'BW_DIRECTORY_SIGN':'false','BW_DIRECTORY_DEVICE':'false','BW_DIRECTORY_RUNTIME':'','BW_DIRECTORY_BUILD':''}
@@ -2727,7 +2732,7 @@ class DirectoryProfileControls(unittest.TestCase):
         self.assertLess(len(raw),65536);self.assertNotIn(str(root).encode(),raw);self.assertEqual(r['workflowSHA256'],hashlib.sha256(WORKFLOW_TEXT.encode()).hexdigest())
         for flag in ('actualAppQualified','namespaceOwnershipQualified','processFamilyQualified','resourceLifetimeQualified','simulatorCommandsInvoked'):self.assertIs(r[flag],False)
     def test_malformed_modes_and_platform_refuse_before_directory_factory(self):
-        for key,value in [('BW_DIRECTORY_MODE','false'),('BW_DIRECTORY_OTHER_MODE','true'),('BW_DIRECTORY_RETAIN','false'),('BW_DIRECTORY_SIGN','true'),('BW_DIRECTORY_DEVICE','true'),('BW_DIRECTORY_RUNTIME','selected'),('BW_DIRECTORY_BUILD','selected'),('GITHUB_REF','refs/heads/main')]:
+        for key,value in [('BW_DIRECTORY_MODE','false'),('BW_DIRECTORY_OTHER_MODE','true'),('BW_DIRECTORY_RETAIN','false'),('BW_DIRECTORY_SIGN','true'),('BW_DIRECTORY_DEVICE','true'),('BW_DIRECTORY_RUNTIME','selected'),('BW_DIRECTORY_BUILD','selected'),('GITHUB_REF','refs/heads/main'),('GITHUB_REPOSITORY_ID','0'),('GITHUB_REPOSITORY_ID','')]:
             code,r,_,root=self.execute(changes={key:value});self.assertEqual(code,1);self.assertEqual(r['failure']['stage'],'admission')
             self.assertEqual(sorted(p.name for p in (root/'bw-ios-device-set-directory').iterdir()),['report.json'])
         code,r,_,_=self.execute(host='linux');self.assertEqual(code,1);self.assertEqual(r['failure']['stage'],'admission')

@@ -15,6 +15,7 @@ const L10N = {
         'chooseImage': 'Choose an Image',
         title: 'Controller',
         edit: 'Edit', play: 'Play',
+        gridSnap: 'Grid snap', gridSnapOn: 'Grid snap on', gridSnapOff: 'Grid snap off',
         enterFullScreen: 'Full screen',
         exitFullScreen: 'Exit full screen',
         addWidget: '+ Add Widget',
@@ -38,6 +39,7 @@ const L10N = {
         'chooseImage': 'Ein Bild wählen',
         title: 'Controller',
         edit: 'Bearbeiten', play: 'Spielen',
+        gridSnap: 'Rasterfang', gridSnapOn: 'Rasterfang ein', gridSnapOff: 'Rasterfang aus',
         enterFullScreen: 'Vollbild',
         exitFullScreen: 'Vollbild verlassen',
         addWidget: '+ Widget hinzufügen',
@@ -1844,9 +1846,9 @@ class ControllerPanelView extends React.Component {
                     {mode === 'edit' && (
                         <button
                             data-testid="bw-ctl-snap-toggle"
-                            aria-label={'Grid snap'} aria-pressed={this.state.snap}
+                            aria-label={t('gridSnap')} aria-pressed={this.state.snap}
                             onClick={() => this.setState(st => ({ snap: !st.snap }))}
-                            title={'Grid snap ' + (this.state.snap ? 'on' : 'off') + ' (' + this.state.grid + 'px)'}
+                            title={t(this.state.snap ? 'gridSnapOn' : 'gridSnapOff') + ' (' + this.state.grid + 'px)'}
                             style={{
                                 padding: 0, width: 24, height: 28, flexShrink: 0, fontSize: 14, borderRadius: 6,
                                 border: '1px solid #cbd5e1', cursor: 'pointer', fontWeight: 600,

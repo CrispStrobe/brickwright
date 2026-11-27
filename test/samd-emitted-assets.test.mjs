@@ -5,12 +5,23 @@ import {readFileSync} from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import vm from 'node:vm';
+import {parse} from 'acorn';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const config = readFileSync(path.join(root, 'overlay/scratch-gui/webpack.config.js'), 'utf8');
-const expression = config.match(/const preserveProofAssetInfo = ([\s\S]*?);/)[1];
+const ast = parse(config, {ecmaVersion: 'latest', sourceType: 'script'});
+const binding = ast.body.filter(node => node.type === 'VariableDeclaration')
+    .flatMap(node => node.declarations).find(node => node.id.name === 'preserveProofAssetInfo');
+assert.equal(binding?.init.type, 'ArrowFunctionExpression', 'the actual asset-info policy must exist');
+const expression = config.slice(binding.init.start, binding.init.end);
 const info = vm.runInNewContext(`(${expression})`);
 const glue = 'static/labwired/labwired_wasm.js';
+function* nodes (node) {
+    if (!node || typeof node !== 'object') return;
+    if (node.type) yield node;
+    for (const child of Object.values(node)) yield* nodes(child);
+}
+const property = (node, name) => node?.properties?.find(item => !item.computed && item.key?.name === name)?.value;
 
 test('the SHA-bound LabWired runtime glue retains its bytes through asset optimization', () => {
     assert.equal(info({filename: glue}).minimized, true);
@@ -30,7 +41,13 @@ test('the runtime exception leaves unrelated code and near-miss paths optimized'
 
 test('both tracked configurations wire the same exact-byte static-copy hook', () => {
     assert.equal(readFileSync(path.join(root, 'packages/scratch-gui/webpack.config.js'), 'utf8'), config);
-    assert.match(config, /from: 'static',\s+to: 'static',\s+(?:globOptions:[^\n]+\s+)?info: preserveProofAssetInfo/);
+    const patterns = [...nodes(ast)].filter(node => node.type === 'NewExpression' &&
+        node.callee.type === 'Identifier' && node.callee.name === 'CopyWebpackPlugin')
+        .flatMap(node => property(node.arguments[0], 'patterns')?.elements || [])
+        .filter(node => property(node, 'from')?.value === 'static' && property(node, 'to')?.value === 'static');
+    assert.equal(patterns.length, 1, 'one actual CopyWebpackPlugin pattern owns the static tree');
+    assert.equal(property(patterns[0], 'info')?.type, 'Identifier');
+    assert.equal(property(patterns[0], 'info').name, 'preserveProofAssetInfo');
 });
 
 test('omitting the real runtime pathname removes its byte preservation', () => {

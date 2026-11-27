@@ -86,6 +86,7 @@ const TABLE = {
         'boot.free386Named': 'booting the free-386 — {name}…',
 
         // ---- the ready sentence: where the output will appear
+        'ready.cp1': 'CP1 firmware loaded: {name}',
         'ready.emptyRom': 'extracted machine booted with an empty ROM — load a program '
             + '(presets, file, or ASM tab)',
         'ready.py65mon': '{name} on the py65mon console map',
@@ -134,6 +135,7 @@ const TABLE = {
         'noun.cpmProgram': 'CP/M program',
         'noun.program': 'program',
         'noun.theProgram': 'the program',
+        'noun.userRom': 'user ROM',
         'noun.ramRom': 'ram/rom',
 
         // ---- the app itself
@@ -182,6 +184,7 @@ const TABLE = {
         'boot.free386': 'free-386 wird gestartet…',
         'boot.free386Named': 'free-386 wird gestartet — {name}…',
 
+        'ready.cp1': 'CP1-Firmware geladen: {name}',
         'ready.emptyRom': 'extrahierte Maschine mit leerem ROM gestartet — lade ein Programm '
             + '(Vorlagen, Datei oder ASM-Reiter)',
         'ready.py65mon': '{name} auf der py65mon-Konsolenbelegung',
@@ -230,6 +233,7 @@ const TABLE = {
         'noun.cpmProgram': 'CP/M-Programm',
         'noun.program': 'Programm',
         'noun.theProgram': 'das Programm',
+        'noun.userRom': 'Benutzer-ROM',
         'noun.ramRom': 'ram/rom',
 
         'app.updated': 'App aktualisiert — der neue Build wird geladen…'

@@ -2,9 +2,19 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
+import {createRequire} from 'node:module';
 
 const root = resolve(new URL('..', import.meta.url).pathname);
 const read = file => readFileSync(resolve(root, file), 'utf8');
+const requireGui = createRequire(new URL('../packages/scratch-gui/package.json', import.meta.url));
+const requireBabel = createRequire(requireGui.resolve('@babel/core'));
+const {parse} = requireBabel('@babel/parser');
+const parseSource = source => parse(source, {sourceType: 'module', plugins: ['jsx']});
+function* nodes (node) {
+    if (!node || typeof node !== 'object') return;
+    if (node.type) yield node;
+    for (const child of Object.values(node)) yield* nodes(child);
+}
 const {t: designerText} = await import(new URL('../node_modules/bw-circuit-ui/src/i18n/strings.js', import.meta.url));
 
 test('Circuit Designer has a view toggle (realistic / schematic) and a mode attribute', () => {
@@ -46,7 +56,14 @@ test('Circuit Designer side selectors expose toggle and divider', () => {
     assert.match(designer, /data-selectors-panel/);
     assert.match(designer, /data-selector-divider/);
     assert.match(designer, /data-parts-selector/);
-    assert.match(designer, /data-examples-selector/);
+    const ast = parseSource(designer);
+    const examplesImport = ast.program.body.find(node => node.type === 'ImportDeclaration' &&
+        node.specifiers.some(specifier => specifier.imported?.name === 'ExamplesBrowser'));
+    assert.equal(examplesImport?.source.value, './ExamplesBrowser.jsx');
+    const examplesName = examplesImport.specifiers.find(specifier => specifier.imported?.name === 'ExamplesBrowser').local.name;
+    assert.ok([...nodes(ast)].some(node => node.type === 'JSXOpeningElement' && node.name.name === examplesName),
+        'the designer must mount its imported examples selector');
+    assert.match(read('node_modules/bw-circuit-ui/src/components/ExamplesBrowser.jsx'), /data-examples-selector/);
 });
 
 test('Circuit Designer keeps simulation and debugger controls in the instruments column', () => {
@@ -99,18 +116,24 @@ test('oscilloscope exposes real scale, edge trigger, and time-cursor controls', 
 
 test('debugger selection is not disabled merely because the Circuit tab is active', () => {
     const source = read('overlay/scratch-gui/src/components/tw-pseudocode/circuit-tab.jsx');
-    // `dock` is debugDock with 'solo' folded back to 'top' on the dedicated
-    // Circuit tab — the designer keeps its instruments-column debugger there.
-    assert.match(source, /const dock = this\.state\.debugDock === 'solo' \? 'top'\s*:\s*CIRCUIT_DOCKS\.has\(this\.state\.debugDock\) \? this\.state\.debugDock : 'off';/);
-    // All circuit docks retain their prior behaviour; a device-owned dock must
-    // not leave the instruments-column debugger covering the device pane.
-    const dockExpression = source.match(/const dock = (this\.state\.debugDock === 'solo'[\s\S]*?);/);
-    assert.ok(dockExpression, 'actual Circuit tab dock selection');
-    const chooseDock = new Function('CIRCUIT_DOCKS', `return function () { return ${dockExpression[1]}; };`)(
-        new Set(['top', 'right', 'off', 'solo']));
-    for (const [input, expected] of [['solo', 'top'], ['top', 'top'], ['right', 'right'],
-        ['off', 'off'], ['controller', 'off'], ['microbit', 'off']]) {
-        assert.equal(chooseDock.call({state: {debugDock: input}}), expected, input);
+    // Execute the declarations inside the actual render method. The controller
+    // dock shares CP1's debugger; other device docks retain their own column.
+    const host = parseSource(source).program.body.find(node => node.type === 'ClassDeclaration' && node.id.name === 'CircuitTab');
+    const render = host?.body.body.find(node => node.key?.name === 'render');
+    assert.ok(render, 'actual Circuit tab render method');
+    const declarations = ['cp1ControllerDock', 'dock'].map(name => {
+        const declaration = render.body.body.find(node => node.type === 'VariableDeclaration' &&
+            node.declarations.some(binding => binding.id.name === name));
+        assert.ok(declaration, `actual render declaration ${name}`);
+        return source.slice(declaration.start, declaration.end);
+    }).join('\n');
+    const makeChooseDock = new Function('CIRCUIT_DOCKS', 'window', `return function () { ${declarations}\nreturn dock; };`);
+    for (const machine of [undefined, {kind: 'cp1'}, {kind: 'other'}]) {
+        const chooseDock = makeChooseDock(new Set(['top', 'right', 'off', 'solo']), {__bwMachineExtracted: machine});
+        for (const [input, expected] of [['solo', 'top'], ['top', 'top'], ['right', 'right'],
+            ['off', 'off'], ['controller', machine?.kind === 'cp1' ? 'top' : 'off'], ['microbit', 'off']]) {
+            assert.equal(chooseDock.call({state: {debugDock: input}}), expected, `${input}, machine=${machine?.kind}`);
+        }
     }
     assert.match(source, /debuggerOn=\{dock === 'top'\}/);
     // The panel now renders through ONE portal into a persistent host node;

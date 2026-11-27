@@ -227,3 +227,18 @@ runner, debugger pane context and the reviewed parsed start-method boundaries.
 compact accessible mode buttons, and classification of the generated
 gzip-compressed Robot Lab LDraw archive as binary. These are separate selected
 sets; remaining failures and the RF investigation are still open.
+
+### Additional fixture and localization checkpoint
+
+The next bounded repair retains the production CP1 dock, component ownership,
+static-asset copy wiring, and immutable iOS repository identity in their test
+readers. The emitted-asset controls passed 8 cases, Circuit component controls
+passed 27, and the four selected iOS admission/controller tests passed; their
+existing tamper, stale-receiver and missing-activation controls remain active.
+
+Two user-visible strings now use the existing English/German localization
+tables: the CP1 firmware-ready status (including its unnamed-ROM fallback) and
+the controller grid-snap label/state tooltip. The overlay and package mirrors
+are identical. The localization and controller undo selection passed 19/19,
+with no skipped cases. These changes do not qualify the still-open RF or full
+integration jobs.
