@@ -16,6 +16,21 @@ All 68 structural candidates were attempted in one fixed checkout with Scratch m
 
 The Complete Game rerun compiled and displayed a frame after the Scratch answer value was implemented. The PyBadge rerun compiled and displayed a frame after the exporter reserved the SDK's `screen` identifier. Across the first pass and these reruns, each of the 68 candidates compiled and reached the simulator. The PyBadge frame contains one color. Its display and buttons still depend on the Brickwright Controller bindings. The Looks demo also compiled and booted with its new thought bubble and sprite scaling. [Gameplay and Complete Game](receipts/2026-11-27-code-arcade-gameplay.json) · [PyBadge and Looks](receipts/2026-11-27-code-arcade-pybadge-looks.json)
 
+## Rechecks after translation repairs
+
+The motion, text, color and pointer changes affected 46 candidates. The first recheck compiled and presented 41. The remaining five failures exposed eight size expressions ending in a literal percent sign. The Pseudocode size commands already take percentages, so the suffix had made the expressions text. Orbit Hoops, Echo Trench, Lumen Stack, Plasma Posse and Triple Bingo all compiled, reached their title-ready state and presented a frame after the eight expressions were corrected.
+
+Across the frozen pass and the focused rechecks, 67 candidates have compiled and presented frames. Of these, 61 have no unsupported operations and six retain named gaps. The PyBadge first-pass refusal is tracked separately because its original interface uses Brickwright Controller state. This aggregate spans the recorded exporter versions. The [affected recheck receipt](receipts/2026-11-27-code-arcade-rechecks.json) contains 46 project hashes and before/after results. The [size and title receipt](receipts/2026-11-27-code-arcade-size-and-start-repairs.json) contains the five corrected projects and Nova Grid’s verified title gate.
+
+| Example | Remaining export gaps |
+|---|---|
+| Sound | Sampled Pop sound |
+| Digital Art | Pen color parameter changes |
+| Planète Maths | Factorial, sum of digits, π and multiple test |
+| Arrays & Vectors | Range, sum and maximum |
+| Tidegate Rush | Sampled splash sound |
+| Triple Bingo | Range, two-dimensional array access and a sound chosen by a reporter |
+
 ## Run the audit
 
 Use a fixed source checkout with the pinned, integrated MakeCode target and its browser simulator.
