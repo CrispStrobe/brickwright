@@ -69,6 +69,10 @@ export const ICONS = {
     open: 'M3 6h6l2 2h10v3M3 6v13h15l3-8H6l-3 8',
     save: 'M12 4v11M7 10l5 5 5-5M4 20h16',
     example: 'M14 3H6v18h12V7zM14 3v4h4M10 12l-2 2 2 2M14 12l2 2-2 2',
+    'clean-up': 'M8 4h12M8 9h12M8 14h12M8 19h12M4 4h.01M4 9h.01M4 14h.01M4 19h.01',
+    'zoom-in': 'M10 3a7 7 0 1 0 0 14a7 7 0 0 0 0-14zM15 15l6 6M7 10h6M10 7v6',
+    'zoom-out': 'M10 3a7 7 0 1 0 0 14a7 7 0 0 0 0-14zM15 15l6 6M7 10h6',
+    'add-extension': 'M10 3H5a2 2 0 0 0-2 2v4a3 3 0 0 1 0 6v4a2 2 0 0 0 2 2h5a3 3 0 0 1 6 0h3a2 2 0 0 0 2-2v-4a3 3 0 0 1 0-6V5a2 2 0 0 0-2-2h-3a3 3 0 0 1-6 0z',
     'to-blocks': 'M20 4h-7v16h7zM10 12H3m0 0 4-4m-4 4 4 4',
     'from-blocks': 'M4 4h7v16H4zM14 12h7m0 0-4-4m4 4-4 4',
     debugger: 'M8 9h8v6a4 4 0 0 1-8 0zM9 9V7a3 3 0 0 1 6 0v2M5 10l3 2M4 15h4m-3 5 4-3m10-7-3 2m4 3h-4m3 5-4-3M9 5 7 3m8 2 2-2',
@@ -242,7 +246,12 @@ export const Popup = ({id, open, onToggle, onClose, button, children, align = 'l
                     const pick = e.target.closest('button');
                     // A disclosure button (aria-expanded) or one marked data-keep-open opens something INSIDE
                     // the menu; closing would hide what it just showed.
-                    if (pick && !pick.closest('[aria-expanded], [data-keep-open]')) onClose();
+                    if (pick && !pick.closest('[aria-expanded], [data-keep-open]')) {
+                        if (overflowMenu && e.detail === 0 && panel.current?.contains(document.activeElement)) {
+                            anchor.current?.querySelector('button')?.focus();
+                        }
+                        onClose();
+                    }
                 }}
                 style={{position: 'fixed', ...position, zIndex: 3000, width, maxWidth: 'calc(100vw - 16px)', maxHeight: '65vh',
                     overflowY: 'auto', display: open ? 'flex' : 'none', flexDirection: 'column', alignItems: 'stretch', gap: 2, padding: 6, fontSize: 12,

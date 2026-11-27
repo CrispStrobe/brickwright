@@ -7,6 +7,8 @@ assert.ok(url, 'Pass the URL of the frontend assembled with CAD and FPGA');
 const browser = await chromium.launch({headless: true, executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH});
 const page = await browser.newPage({viewport: {width: 1170, height: 800}, locale: 'en-US', serviceWorkers: 'block'});
 const checks = [];
+const errors = [];
+page.on('pageerror', error => errors.push(error.message));
 await page.addInitScript(() => {
     localStorage.setItem('bw-starter-v1-complete', '1');
     localStorage.setItem('bw-right-pane-hidden', '1');
@@ -25,7 +27,37 @@ const check = async (label, menu) => {
 };
 try {
     await page.goto(url, {waitUntil: 'domcontentloaded'});
-    await page.getByRole('tab', {name: 'Code', exact: true}).click();
+    const blocksTab = page.getByRole('tab', {name: 'Blocks', exact: true});
+    const codeTab = page.getByRole('tab', {name: 'Code', exact: true});
+    await blocksTab.click();
+    const blocksMore = page.getByTestId('bw-blocks-actions-trigger');
+    const blocksMenu = page.getByTestId('bw-sim-lab-blocks-actions-menu');
+    await blocksMore.click();
+    await check('Blocks', blocksMenu);
+    assert.ok(await blocksMore.evaluate(button => document.activeElement === button), 'Escape restores focus');
+    await blocksMore.press('ArrowDown');
+    const cleanup = blocksMenu.getByRole('button', {name: 'Clean up blocks', exact: true});
+    await page.waitForFunction(() => document.activeElement?.textContent === 'Clean up blocks');
+    const zoomIn = blocksMenu.getByRole('button', {name: 'Zoom in', exact: true});
+    const commandBounds = await Promise.all([cleanup.boundingBox(), zoomIn.boundingBox()]);
+    assert.equal(commandBounds[0].width, commandBounds[1].width, 'commands use full-width rows');
+    assert.ok(await zoomIn.locator('svg[aria-hidden="true"]').count(), 'the zoom row has a shared icon');
+    const scripts = page.locator('.blocklyBlockCanvas');
+    const scale = () => scripts.evaluateAll(canvases => canvases.find(canvas => !canvas.closest('.blocklyFlyout'))
+        .getScreenCTM().a);
+    const before = await scale();
+    await page.keyboard.press('ArrowDown');
+    assert.ok(await zoomIn.evaluate(button => document.activeElement === button), 'ArrowDown moves to Zoom in');
+    await page.keyboard.press('Enter');
+    await blocksMenu.waitFor({state: 'hidden'});
+    assert.ok(await scale() > before, 'keyboard activation zooms the actual Blocks workspace');
+    assert.ok(await blocksMore.evaluate(button => document.activeElement === button), 'activation restores focus');
+    await blocksMore.click();
+    await codeTab.click();
+    await blocksMenu.waitFor({state: 'hidden'});
+    await blocksTab.click();
+    assert.equal(await blocksMore.getAttribute('aria-expanded'), 'false');
+    await codeTab.click();
     await page.getByTestId('bw-code-actions-trigger').click();
     await check('Code', page.getByTestId('bw-code-actions-menu'));
     await page.getByRole('tab', {name: /Circuit/}).click();
@@ -41,7 +73,51 @@ try {
     await fpga.click();
     await page.getByTestId('bw-fpga-info-help-button').waitFor();
     assert.equal(await fpga.getAttribute('aria-selected'), 'true');
-    console.log(`Shared popup styling verified for ${checks.join(', ')}. FPGA opens in the full build.`);
+    const fpgaMore = page.getByTestId('bw-fpga-more');
+    const fpgaMenu = page.getByTestId('bw-sim-lab-fpga-more-menu');
+    const fpgaDesign = page.getByTestId('bw-fpga-workspace-design');
+    await fpgaDesign.waitFor();
+    assert.equal(await fpgaMore.isVisible(), false, 'wide FPGA has visible workspace buttons');
+    await page.getByTestId('bw-fpga-editor').selectOption('verilog');
+    const verilog = page.getByTestId('bw-fpga-verilog');
+    const draft = "module preview(output led); assign led = 1'b1; endmodule";
+    await verilog.fill(draft);
+
+    const paneToggle = page.getByRole('button', {name: 'Show right panel', exact: true});
+    await paneToggle.click();
+    const divider = page.getByRole('separator', {name: 'Resize the stage column'});
+    const split = await divider.boundingBox();
+    const y = split.y + split.height / 2;
+    await page.mouse.move(split.x + split.width / 2, y);
+    await page.mouse.down();
+    await page.mouse.move(380, y, {steps: 8});
+    await page.mouse.up();
+    await fpgaMore.waitFor();
+    assert.equal(await fpgaDesign.isVisible(), false, 'narrow FPGA moves workspace buttons into More');
+    await fpgaMore.click();
+    await check('FPGA', fpgaMenu);
+    await fpgaMore.press('ArrowDown');
+    const design = fpgaMenu.getByRole('button', {name: 'Design', exact: true});
+    await page.waitForFunction(() => document.activeElement?.textContent === 'Design');
+    assert.equal(await design.getAttribute('aria-pressed'), 'true');
+    for (const [label, panel] of [['Build', 'build'], ['Simulate', 'simulate']]) {
+        await page.keyboard.press(label === 'Build' ? 'ArrowDown' : 'ArrowUp');
+        const command = fpgaMenu.getByRole('button', {name: label, exact: true});
+        assert.ok(await command.evaluate(button => document.activeElement === button), `focused ${label}`);
+        await page.keyboard.press('Enter');
+        await page.getByTestId(`bw-fpga-panel-${panel}`).waitFor();
+        await fpgaMenu.waitFor({state: 'hidden'});
+        await fpgaMore.press('ArrowDown');
+        assert.equal(await command.getAttribute('aria-pressed'), 'true');
+        await page.waitForFunction(() => document.activeElement?.textContent === 'Design');
+    }
+    await page.getByRole('button', {name: 'Hide right panel', exact: true}).click();
+    await fpgaMenu.waitFor({state: 'hidden'});
+    assert.equal(await page.getByTestId('bw-fpga-workspace-simulate').getAttribute('aria-pressed'), 'true');
+    await fpgaDesign.click();
+    assert.equal(await verilog.inputValue(), draft, 'switching from More keeps the authored design');
+    assert.deepEqual(errors, []);
+    console.log(`Shared popup styles verified for ${checks.join(', ')}. Blocks zoom and FPGA workspace navigation passed by keyboard.`);
 } finally {
     await browser.close();
 }

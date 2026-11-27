@@ -3,7 +3,7 @@ import debounce from 'lodash.debounce';
 import defaultsDeep from 'lodash.defaultsdeep';
 import makeToolboxXML from '../lib/make-toolbox-xml';
 import PropTypes from 'prop-types';
-import {Popup, toolStyles} from '../components/tw-pseudocode/sim-lab-toolbar.jsx';
+import {Icon, Popup, toolStyles} from '../components/tw-pseudocode/sim-lab-toolbar.jsx';
 import React from 'react';
 import VMScratchBlocks from '../lib/blocks';
 import VM from 'scratch-vm';
@@ -329,6 +329,7 @@ class Blocks extends React.Component {
             window.dispatchEvent(new Event('resize'));
         } else {
             this.workspace.setVisible(false);
+            if (this.state.toolsOpen) this.setState({toolsOpen: false});
         }
     }
     componentWillUnmount () {
@@ -711,31 +712,30 @@ class Blocks extends React.Component {
         const de = /^de/i.test(this.props.locale);
         const title = de ? 'Weitere Blockwerkzeuge' : 'More Blocks controls';
         const commands = [
-            ['↶', de ? 'Rückgängig' : 'Undo', () => this.workspace.undo(false), this.workspace?.undoStack_.length > 0],
-            ['↷', de ? 'Wiederholen' : 'Redo', () => this.workspace.undo(true), this.workspace?.redoStack_.length > 0],
-            ['▤', de ? 'Blöcke aufräumen' : 'Clean up blocks', () => this.workspace.cleanUp()],
-            ['＋', de ? 'Vergrößern' : 'Zoom in', () => this.workspace.zoomCenter(1)],
-            ['−', de ? 'Verkleinern' : 'Zoom out', () => this.workspace.zoomCenter(-1)],
-            ['⊡', de ? 'Ansicht zurücksetzen' : 'Reset view', () => {
+            ['undo', de ? 'Rückgängig' : 'Undo', () => this.workspace.undo(false), this.workspace?.undoStack_.length > 0],
+            ['redo', de ? 'Wiederholen' : 'Redo', () => this.workspace.undo(true), this.workspace?.redoStack_.length > 0],
+            ['clean-up', de ? 'Blöcke aufräumen' : 'Clean up blocks', () => this.workspace.cleanUp()],
+            ['zoom-in', de ? 'Vergrößern' : 'Zoom in', () => this.workspace.zoomCenter(1)],
+            ['zoom-out', de ? 'Verkleinern' : 'Zoom out', () => this.workspace.zoomCenter(-1)],
+            ['view-home', de ? 'Ansicht zurücksetzen' : 'Reset view', () => {
                 this.workspace.setScale(this.workspace.options.zoomOptions.startScale);
                 this.workspace.scrollCenter();
             }],
-            ...(onReadCode ? [['⇨', de ? 'Als Code lesen' : 'Read Blocks into Code', onReadCode]] : []),
-            ...(onAddExtension ? [['⊕', de ? 'Erweiterung hinzufügen' : 'Add extension', onAddExtension]] : [])
+            ...(onReadCode ? [['from-blocks', de ? 'Als Code lesen' : 'Read Blocks into Code', onReadCode]] : []),
+            ...(onAddExtension ? [['add-extension', de ? 'Erweiterung hinzufügen' : 'Add extension', onAddExtension]] : [])
         ];
         return (
             <div style={{position: 'absolute', top: 8, right: 10, zIndex: 2}}>
-                <Popup id="blocks-actions" label={title} align="right" width={220}
+                <Popup id="blocks-actions" overflowMenu label={title} align="right" width={270}
                     open={this.props.isVisible && this.state.toolsOpen}
                     onToggle={() => this.setState(s => ({toolsOpen: !s.toolsOpen}))}
                     onClose={() => this.setState({toolsOpen: false})}
                     button={<button type="button" data-testid="bw-blocks-actions-trigger"
-                        title={title} aria-label={title} style={toolStyles(false).button}>⋯</button>}>
+                        title={title} aria-label={title} style={toolStyles(false).button}><Icon name="more" /></button>}>
                     {commands.map(([icon, label, run, enabled = true]) => (
-                        <button key={label} type="button" onClick={run} disabled={!enabled || !this.workspace}
-                            style={{border: 0, background: 'transparent', minHeight: 32,
-                                textAlign: 'left', font: 'inherit', padding: '4px 8px', color: enabled ? '#1e293b' : '#64748b'}}>
-                            <span aria-hidden="true" style={{display: 'inline-block', width: 23}}>{icon}</span>{label}
+                        <button key={icon} type="button" data-overflow-action onClick={run} disabled={!enabled || !this.workspace}>
+                            <Icon name={icon} />
+                            <span>{label}</span>
                         </button>
                     ))}
                 </Popup>

@@ -106,6 +106,23 @@ ${rows}:disabled {
     min-width: 0;
     width: auto;
 }
+[data-fpga-toolbar-navigation] {
+    display: flex;
+    gap: 4px;
+}
+[data-fpga-toolbar] :is([data-fpga-toolbar-overflow], [data-fpga-active-workspace]) {
+    display: none;
+}
+@container (max-width: 420px) {
+    [data-fpga-toolbar] [data-fpga-toolbar-navigation] { display: none; }
+    [data-fpga-toolbar] :is([data-fpga-toolbar-overflow], [data-fpga-active-workspace]) { display: block; }
+    [data-fpga-active-workspace] {
+        font-size: 12px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
 @media (pointer: coarse) {
     ${rows} {
         min-height: 40px;
