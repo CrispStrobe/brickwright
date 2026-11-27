@@ -110,7 +110,10 @@ firmware and can replace the running interpreter's in-memory listing using a
 3.3 V USB-to-UART adapter. Controller stays connected for input and Ctrl+C.
 The first connection waits for the selected firmware banner and prompt, so
 reset the Pico after choosing the adapter. The BOOTSEL image contains the
-interpreter. Storage support for Stefan's BASIC remains open.
+interpreter. Stefan’s BASIC provides 128 KiB of LittleFS for named files.
+Use `SAVE "demo.bas"`, `CATALOG`, and `LOAD "demo.bas"` in Controller.
+A simulated rerun preserves that partition in the current project session.
+Closing or reloading the app starts a new simulation session.
 
 The browser test uses a scripted serial adapter. The host protocol proof drives
 the three pinned UF2s in the RP2040 emulator. Physical UART and native desktop

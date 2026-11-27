@@ -185,3 +185,6 @@ The combined JSON ledger and individual raw receipts are in `artifacts/circuit-f
 - The Pico BASIC actions in Code offer the selected BOOTSEL image and a
   prompt-paced UART transfer to Controller. Physical-board qualification
   still requires a Pico and a 3.3 V USB-to-UART adapter.
+- Stefan’s BASIC supports LittleFS save, catalog, reload, and simulated
+  reruns. The firmware initializes erased flash and keeps a nonblank
+  unmountable partition intact until an explicit format.

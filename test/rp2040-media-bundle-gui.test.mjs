@@ -75,6 +75,21 @@ test('Pico BASIC source is dispatched using the selected firmware dialect', asyn
     assert.equal(events.length, 3);
 });
 
+test('Pico media hands a pinned sector-aligned storage partition to the runner', async () => {
+    const sha256 = 'f'.repeat(64);
+    const flashStorage = {offset: 0x1df000, length: 0x20000};
+    const config = newMachineConfig({
+        executionMode: 'functional', machine: 'rp2040js',
+        slots: {flash: {url: 'stefan_basic_uart.uf2', sha256}},
+        provenance: {program: {basicConsole: 'stefan', flashStorage}}
+    });
+    const result = await runMachineConfig(config, {
+        fetcher: async () => ({bytes: Uint8Array.of(1, 2, 3)}),
+        dispatch () {}
+    });
+    assert.deepEqual(result.detail.picoFlashStorage, {...flashStorage, sha256});
+});
+
 const picoUf2 = process.env.PICOBB_UF2;
 const havePico = picoUf2 && existsSync(picoUf2);
 

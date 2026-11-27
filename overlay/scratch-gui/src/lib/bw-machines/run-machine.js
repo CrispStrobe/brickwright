@@ -79,6 +79,7 @@ export async function runMachineConfig(config, opts = {}) {
     if (bm.spectrum) detail.spectrum = bm.spectrum;
     if (bm.picoWakeOnPrompt) detail.picoWakeOnPrompt = true;
     if (bm.picoBasicConsole) detail.picoBasicConsole = bm.picoBasicConsole;
+    if (bm.picoFlashStorage) detail.picoFlashStorage = bm.picoFlashStorage;
     if (opts.picoBasicSource != null) {
         if (!bm.picoBasicConsole || detail.kind !== 'rp2040js' || bm.slot !== 'flash') {
             throw new Error('BASIC source needs compatible Pico UART firmware.');

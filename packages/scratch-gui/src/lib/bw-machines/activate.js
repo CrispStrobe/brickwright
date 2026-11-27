@@ -14,6 +14,7 @@
 // Framework-free: no React, no bundler globals. `defaultImageFetcher` uses the
 // host `fetch` + Web Crypto, both present in the browser and Node ≥ 18.
 
+import {picoFlashStorageFor} from './pico-basic-flash.js';
 import {
     normalizeMachineConfig, validateMachineConfig
 } from './machine-config.js';
@@ -247,6 +248,7 @@ export async function activateConfig(config, opts = {}) {
         const basicConsole = cfg.provenance?.program?.basicConsole;
         if (basicConsole === 'piccolo' || basicConsole === 'stefan') {
             bootMedia.picoBasicConsole = basicConsole;
+            bootMedia.picoFlashStorage = picoFlashStorageFor(cfg.provenance?.program?.flashStorage, bootRef.sha256);
         } else if (cfg.provenance?.program?.startKey === '\r') {
             bootMedia.picoWakeOnPrompt = true;
             bootMedia.picoBasicConsole = 'bbc';

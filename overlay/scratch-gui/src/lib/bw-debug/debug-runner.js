@@ -45,6 +45,7 @@ import {createLinuxConsole, TERMINAL_COLS, TERMINAL_ROWS} from './linux-console.
 import {createReadyGatedInput} from './ready-gated-input.js';
 import {createTerminalOutput} from './terminal-output.js';
 import {picoBasicAtPrompt, picoBasicConsoleSpec} from '../bw-machines/pico-basic-source.js';
+import {mountPicoFlashStorage} from '../bw-machines/pico-basic-flash.js';
 import {createEngineeringInputRoute} from './engineering-input-route.js';
 import {cpmFileName} from './cpm-z80.js';
 import { canRecordDebugInput } from 'bw-board/debug-replay-contract.js';
@@ -2140,6 +2141,9 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
         const adapter = createRp2040jsAdapter({ clockHz, vcc: 3.3 });
         adapter.attachBoard(board);
         adapter.bootFromFlash(flash);
+        const saveFlashStorage = mountPicoFlashStorage(vm?.runtime?.getTargetForStage?.(),
+            adapter.rp2040.flash, flash.length, bootMedia.picoFlashStorage);
+
 
         const uart = adapter.rp2040.uart[0];
         const feedByte = byte => uart.feedByte(byte & 0xff);
@@ -2165,6 +2169,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             }
         }));
         disposeTerminal = () => {
+            saveFlashStorage?.();
             unsubscribeCursor();
             cursor.dispose();
         };

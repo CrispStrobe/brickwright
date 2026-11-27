@@ -62,7 +62,7 @@ try {
     const bytes = await readFile(await uf2.path());
     assert.equal(bytes.readUInt32LE(0), 0x0a324655);
     assert.equal(createHash('sha256').update(bytes).digest('hex'),
-        '86343f53953f958d3aa3cc29b4035d15cbf05b336b5cb1e787dfc8b15be72a73');
+        'a544f1f9c14dfc6595c5367a4471881cb28bbff6a49873d8caa306474d433575');
     assert.equal(await page.evaluate(() => window.picoSerialProof.ports), 0);
     await openCodeActions(page);
     await page.getByTestId('bw-pico-basic-hardware-send').click();

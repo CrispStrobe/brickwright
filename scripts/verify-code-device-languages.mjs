@@ -83,6 +83,35 @@ try {
     await page.keyboard.type('21');
     await page.keyboard.press('Enter');
     await rows.getByText('42', {exact: true}).waitFor();
+    const terminal = page.getByTestId('bw-picobb-terminal');
+    const command = async text => {
+        await terminal.locator('textarea').focus();
+        await page.keyboard.type(text);
+        await page.keyboard.press('Enter');
+        await rows.getByText(`> ${text}`, {exact: true}).last().waitFor();
+    };
+    await command('NEW');
+    await command('10 PRINT "STEFAN-SESSION-FILE"');
+    await command('SAVE "session.bas"');
+    await command('CATALOG');
+    await rows.getByText(/^session\.bas\s+\d+$/).waitFor();
+    await command('NEW');
+    await command('LOAD "session.bas"');
+    await command('RUN');
+    await rows.getByText('STEFAN-SESSION-FILE', {exact: true}).waitFor();
+
+    const previousTerminal = await terminal.elementHandle();
+    await page.locator('[class*="green-flag_green-flag"]:visible').first().click();
+    await page.waitForFunction(el => !el.isConnected, previousTerminal);
+    await rows.getByText('?', {exact: true}).waitFor();
+    await terminal.locator('textarea').focus();
+    await page.keyboard.type('0');
+    await page.keyboard.press('Enter');
+    await rows.getByText('0', {exact: true}).waitFor();
+    await command('NEW');
+    await command('LOAD "session.bas"');
+    await command('RUN');
+    await rows.getByText('STEFAN-SESSION-FILE', {exact: true}).waitFor();
 
     await profile.selectOption('pico-bbcbasic');
     await page.getByTestId('bw-code-editor').locator('.cm-content').getByText('PRINT "PICO-FLAG ";6*7', {exact: true}).waitFor();
