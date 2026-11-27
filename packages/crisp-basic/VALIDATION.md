@@ -2,39 +2,106 @@
 
 ## Bounded BASIC simulation bridge milestone
 
-Version `0.1.0-dev.4`, recorded on 2026-11-27. The opt-in WASM bridge and
-adapter contract are described in [SIMULATION.md](SIMULATION.md). The circuit
-canvas, board solver and physical hardware are outside this milestone.
+Version `0.1.0-dev.4`, recorded on 2026-11-27 on `feature/crispbasic`.
+The implementation is in
+[`3357efb0bb27`](https://github.com/CrispStrobe/brickwright/commit/3357efb0bb2742852a75a4b8a1d2448a88d69c75),
+with the EVAL source-provenance follow-up in
+[`de1f11cda40b`](https://github.com/CrispStrobe/brickwright/commit/de1f11cda40b9f742e10ba2185dae3b639b766ed).
+**Both jobs in the follow-up's [qualification run](https://github.com/CrispStrobe/brickwright/actions/runs/46062100678)
+completed successfully: 388 tests passed, with zero failures or skips.**
+The opt-in bridge and adapter contract are described in
+[SIMULATION.md](SIMULATION.md). The Circuit canvas, board solver and physical
+hardware are outside this milestone.
 
-### Local checks
+### Environment and build provenance
 
-This workspace uses Node 24.22.3 on Linux x86-64. A sparse checkout was required
-because only about 353 MiB of disk space was initially available. Emscripten
-and NASM are absent; no local compiler or real-runtime success is claimed for
-this revision at this point. The pinned GitHub workflow performs those builds.
+| Component | Qualification environment |
+| --- | --- |
+| CI host | GitHub Actions Ubuntu 24.04, Linux x86-64 |
+| CI Node | 22.23.5 |
+| Local Node | 24.22.3, Linux x86-64 |
+| Emscripten | 3.1.64 (`a1fe3902bf73a3802eae0357d273d0e37ea79898`) |
+| Playwright | 1.62.1 |
+| Chromium headless shell | 151.0.7922.34 |
+| BBCSDL | `6c302988ee2a08c5f9a65fa3eb8e76bcacc6079f` |
+
+CI rebuilt both real interpreter backends. The final WASM binary is **215771
+bytes**, with SHA-256
+`cc73c82adb438276eba4edbbea6519f2d6e2191dbafb2f2b7a79ef55c397e3ba`.
+Its build record verifies nine local build inputs, six pinned upstream inputs,
+24 allowed imports and five toolchain notice files. The additional host import
+is the dedicated asynchronous scalar simulation hook; no file, process,
+network, native-call or arbitrary JavaScript capability was added. Packaging
+and its check command passed for 20 manifest-listed payload assets plus
+`manifest.json`, including both simulation JavaScript modules.
+
+This workspace began with about 353 MiB of free disk and used a sparse
+checkout. Emscripten and NASM were unavailable locally, so **no local compilation
+is claimed**. The final CI artifact was downloaded, checked against its archive
+digest, and authenticated through the packaging checks against the current
+local build inputs, locks, generated-module/WASM hashes, imports and notices.
+The real WASM suites then passed locally under Node 24.22.3. The standalone
+`examples/run-simulation.mjs` printed `Before: 1` and `After: 0 at 25 ms`, with
+the expected eight-event final trace and a disposed host.
+
+### Results
 
 | Suite | Tests reported | Result |
 | --- | ---: | --- |
 | Source preparation | 13 | Passed |
 | Deterministic simulation-host contract | 13 | Passed |
 | Bounded bridge protocol and JavaScript worker lifecycle | 73 | Passed |
-| Browser asset packaging integrity | 14 | Passed |
-| **Local total** | **113** | **Zero failures or skips** |
+| Native runtime and CLI | 41 | Passed |
+| Existing WASM runtime and restricted-host policy | 120 | Passed |
+| Real C/WASM simulation library, lifecycle and EVAL provenance | 27 | Passed |
+| Native/WASM corpus with fixed expected bytes | 10 | Passed |
+| Real Chromium engine workers, including five simulation cases | 18 | Passed |
+| GUI adapter, editor controls and asset packaging | 56 | Passed |
+| Generated source and GUI adapter through the staged WASM runtime | 9 | Passed |
+| Real Chromium editor-control and renderer integration | 8 | Passed |
+| **CI total** | **388** | **Zero failures or skips** |
 
-The protocol tests include the production JavaScript worker with a small
-explicitly synthetic module; this verifies message/lifecycle behavior and is
-not evidence of C-stack preservation. Separate real-WASM tests exercise the
-actual compiled interpreter, fixed pin/time traces, recursive calls, local
-error traps and parent-owned limits. Four additional Chromium cases exercise
-the real bridge and page responsiveness.
+The CI commands report combined groups of 99, 41, 147, 10, 18, 65 and 8 tests,
+respectively. Local source/host/protocol/packaging checks reported 113 passes;
+local real-WASM execution/policy/simulation checks reported another 147 passes.
+These **260 local checks overlap the CI total** and are not additional distinct
+tests. All local runs had zero failures or skips.
 
-Review found and corrected sparse argument-array validation, duplicate worker
-completion records after malformed replies, and unprintable host exceptions
-that could otherwise escape cleanup. Regression cases pass. The changed
-upstream patcher was applied against four exact SHA-256-verified pinned inputs;
-JavaScript syntax and `git diff --check` pass.
+The 73 protocol tests use the production JavaScript worker with an explicitly
+synthetic module for ABI/message tests; they do not establish C-stack behavior.
+The separate real-WASM and Chromium tests establish stack preservation across
+recursive calls, delayed simulation replies, `ON ERROR LOCAL`, nested EVAL and
+error/exit unwinding. They also cover exact expected pin/time traces, strict
+scalar arguments and results, one pending request, IDs and ownership, fresh
+hosts across runs, cancellation/reset/disposal, stalled replies, stale replies,
+parent-owned request/trace/input/time limits, and retained SYS/memory/file/EVAL
+restrictions. Millisecond reads consume the request budget even without adding
+trace records. Resource failures never become catchable BASIC replies.
 
-Reproduce the local checks from the repository root:
+Review corrected sparse argument-array validation, duplicate terminal records
+after malformed replies, and unprintable host exceptions that could otherwise
+escape cleanup. Regression cases pass. All changed upstream patches were also
+applied against exact SHA-256-verified pinned inputs; JavaScript syntax and
+`git diff --check` passed.
+
+The initial bridge's [382-test run](https://github.com/CrispStrobe/brickwright/actions/runs/46060839892)
+passed before additional real-artifact probes found missing authored locations
+inside EVAL. Two targeted regression tests reproduced that defect against the
+initial binary. The follow-up retains a scoped authored origin across temporary
+expression tokens and restores it before forwarding errors, `END` or `QUIT`.
+Five new WASM tests and one new Chromium test pass against the rebuilt artifact,
+covering nested/local-error recovery, multiple replies, authored function-body
+locations, recursive evaluation and exit forwarding. Normal simulation-disabled
+EVAL keeps its existing environment behavior.
+
+This is focused runtime, packaging and editor-shell qualification. It is not a
+production GUI bundle build, complete VDU compatibility claim, board-solver
+qualification, physical-device test, or full-repository test-suite result.
+Other browser engines and native desktop/mobile shells remain unqualified.
+
+### Reproduction
+
+From the repository root, the checks requiring no compiled backend are:
 
 ```sh
 node --test test/crispbasic-assets.test.mjs \
@@ -43,26 +110,26 @@ node --test test/crispbasic-assets.test.mjs \
   packages/crisp-basic/tests/simulation-bridge.test.mjs
 ```
 
-### Compiler and browser qualification
+With the pinned Emscripten SDK, GCC/NASM and the documented root/package
+JavaScript dependencies prepared, reproduce the CI suites:
 
-The initial bridge commit `3357efb0bb2742852a75a4b8a1d2448a88d69c75`
-passed [both workflow jobs](https://github.com/CrispStrobe/brickwright/actions/runs/46060839892):
-99 source/host/protocol tests, 41 native/CLI, 142 WASM/policy/simulation, 10
-native/WASM parity, 17 Chromium worker, 65 GUI/generated-source/packaging and
-8 staged editor browser tests: **382 passed, zero failures or skips**.
-The run used Ubuntu 24.04, Node 22.23.5 and Emscripten 3.1.64. The downloaded
-214711-byte WASM artifact passed packaging's source, import and digest checks
-locally, and the standalone simulation example produced its expected pin/time
-trace.
+```sh
+npm --prefix packages/crisp-basic run build:native
+npm run build:crispbasic
+npm run package:crispbasic:check
+npm --prefix packages/crisp-basic test
+npm --prefix packages/crisp-basic run test:native
+npm --prefix packages/crisp-basic run test:wasm
+npm --prefix packages/crisp-basic run test:parity
+npm --prefix packages/crisp-basic run test:browser
+npm --prefix packages/crisp-basic run test:brickwright
+node scripts/verify-crispbasic-browser.mjs
+node packages/crisp-basic/examples/run-simulation.mjs
+```
 
-Additional real-artifact probes then found that bridge errors inside `EVAL`
-lost the enclosing authored line. The follow-up scopes an authored origin
-across EVAL's temporary token buffer and restores it while forwarding errors,
-`END` and `QUIT`. Two targeted regression tests reproduce the missing locations
-against the initial artifact. Three companion tests establish recursive delayed
-replies, user-function body locations and exit forwarding. One Chromium case
-also checks the EVAL error location after delayed replies. This follow-up's
-compiler/runtime qualification is pending a fresh workflow build.
+Install Playwright Chromium first or use the documented browser executable
+and module overrides. [README.md](README.md), [wasm/README.md](wasm/README.md)
+and [BRICKWRIGHT.md](BRICKWRIGHT.md) describe dependency and deployment setup.
 
 ## Brickwright integration milestone
 
