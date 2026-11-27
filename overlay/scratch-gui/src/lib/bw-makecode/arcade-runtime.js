@@ -99,6 +99,32 @@ function _othersStopped (s: Sprite, t: number): boolean {
     }
     return false
 }`},
+    scratchPose: {deps: [], ts: `function _scratchDirection (s: Sprite): number {
+    const d = s.data["_bwScratchDirection"]
+    return d === undefined ? 90 : d
+}
+function _scratchPoint (s: Sprite, d: number) {
+    d = ((d % 360) + 360) % 360
+    if (d > 180) d -= 360
+    s.data["_bwScratchDirection"] = d
+    const style = s.data["_bwScratchRotationStyle"]
+    const flip = style === "left-right" && d < 0
+    if (flip !== !!s.data["_bwScratchFlipped"]) {
+        const art = s.image.clone()
+        art.flipX()
+        s.setImage(art)
+        s.data["_bwScratchFlipped"] = flip
+    }
+    s.rotationDegrees = style === "left-right" || style === "don't rotate" ? 0 : d - 90
+}
+function _scratchRotationStyle (s: Sprite, style: string) {
+    s.data["_bwScratchRotationStyle"] = style
+    _scratchPoint(s, _scratchDirection(s))
+}
+function _scratchPoseCostume (s: Sprite) {
+    s.data["_bwScratchFlipped"] = false
+    _scratchPoint(s, _scratchDirection(s))
+}`},
     costume: {deps: [], ts: `function _costume (s: Sprite): number {
     const c = s.data["_c"]
     return c ? c : 0
