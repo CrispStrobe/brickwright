@@ -38,6 +38,14 @@ export function patchWasmUpstream(path, original) {
         replace("if ((((al = *esi) == '!') || (al == '?')) && (*ptype < 128))\n\t    {",
             "if ((((al = *esi) == '!') || (al == '?')) && (*ptype < 128))\n\t    {\n\t\terror (255, \"Memory indirection is not available in the CrispBASIC WASM backend\");");
     } else if (path === 'src/bbexec.c') {
+        replace('#include "BBC.h"', '#include "BBC.h"\nvoid crisp_simulation_callsite(signed char *, signed char *);');
+        // Keep public simulation calls as ordinary library PROC/FN frames.
+        // Capture the original caller before argument evaluation recurses,
+        // then record it only once all ordinary argument transfer completes.
+        replace('esi-- ;\t\t// Point to TFN or TPROC token\n\toldesi = esi ;',
+            'esi-- ;\t\t// Point to TFN or TPROC token\n\tsigned char *crisp_call_site = esi;\n\toldesi = esi ;');
+        replace('*(void **)resesp = esi ;\n\tesi = ebx ;',
+            '*(void **)resesp = esi ;\n\tcrisp_simulation_callsite(crisp_call_site, ebx);\n\tesi = ebx ;');
         // Numeric SYS, CALL and USR bypass symbol lookup in upstream. Denying
         // only sysadr() would therefore still expose the WASM function table.
         deny('TSYS', 'SYS', 2); // Includes ON SYS, whose host event is unavailable.
@@ -68,6 +76,8 @@ export function patchWasmUpstream(path, original) {
             replace(before, before + '\n\t\t\t\t\t\terror (255, "Host event handlers are not available in the CrispBASIC WASM backend");');
         }
     } else if (path === 'src/bbeval.c') {
+        replace('#include "BBC.h"', '#include "BBC.h"\nint crisp_simulation_function(VAR *);');
+        replace('case TFN:\n', 'case TFN:\n\t\t\tif (crisp_simulation_function(&v)) return v;\n');
         deny('TUSR', 'USR');
         deny('TSYS', 'SYS');
         // Unary ^ returns an address; binary exponentiation is unaffected.

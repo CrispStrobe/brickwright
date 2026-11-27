@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <math.h>
 #include "BBC.h"
 #include "crisp-host.h"
 
@@ -25,6 +26,10 @@ extern int basic(void *, void *, void *);
 extern char *lexan(char *, char *, unsigned char);
 extern void error(int, const char *);
 extern unsigned int rnd(void);
+extern VAR expr(void);
+extern signed char nxt(void);
+extern void comma(void);
+extern void braket(void);
 
 void *userRAM, *progRAM;
 static void *userTOP;
@@ -36,9 +41,126 @@ static uint32_t time_origin, time_offset;
 static int cursor_x, cursor_y, vdu_command, vdu_left, vdu_size, pending_lf;
 static unsigned char vdu_args[9];
 
+/* The library occupies its own tokenized records, never user source lines or
+ * BASIC's variable/stack arena. BBCSDL already searches libase before the
+ * user's DEFs, so user definitions keep their ordinary overriding behavior.
+ * Numeric dummies deliberately have no integer suffix: the bridge validates
+ * exact integer values instead of silently truncating fractional arguments. */
+static const unsigned char simulation_source[] =
+    "1 DEF PROCpinMode(_crispPin,_crispMode$):LOCAL _crispResult:_crispResult=FN_crispSimulation(1,_crispPin,_crispMode$):ENDPROC\n"
+    "2 DEF PROCdigitalWrite(_crispPin,_crispValue):LOCAL _crispResult:_crispResult=FN_crispSimulation(2,_crispPin,_crispValue):ENDPROC\n"
+    "3 DEF FNdigitalRead(_crispPin)=FN_crispSimulation(3,_crispPin,0)\n"
+    "4 DEF PROCdelay(_crispMilliseconds):LOCAL _crispResult:_crispResult=FN_crispSimulation(4,_crispMilliseconds,0):ENDPROC\n"
+    "5 DEF FNmillis=FN_crispSimulation(5,0,0)\n";
+static unsigned char simulation_library[4096];
+static int simulation_enabled;
+static heapptr simulation_callsite;
+
+int crisp_simulation_abi(void) { return 1; }
+
+static int in_simulation_library(const signed char *address)
+{
+    uintptr_t pointer = (uintptr_t)address;
+    return pointer >= (uintptr_t)simulation_library &&
+        pointer < (uintptr_t)simulation_library + sizeof(simulation_library);
+}
+
+/* Called after ordinary PROC/FN arguments have been evaluated. A nested call
+ * in an argument therefore cannot replace the outer call's error location.
+ * The trusted wrappers contain no nested public library calls of their own. */
+void crisp_simulation_callsite(signed char *caller, signed char *target)
+{
+    if (simulation_enabled && in_simulation_library(target)) {
+        simulation_callsite = (heapptr)(caller - (signed char *)zero);
+    }
+}
+
+static void simulation_error(int code, heapptr origin)
+{
+    static const char *const messages[] = {
+        NULL,
+        "Simulation invalid-pin: unknown or invalid logical pin",
+        "Simulation invalid-mode: expected input, output or input-pullup",
+        "Simulation invalid-level: expected numeric 0 or 1",
+        "Simulation invalid-time: expected nonnegative integer milliseconds",
+        "Simulation pin-not-output: pin is not configured as output",
+        "Simulation floating-input: pin has no stimulus or pull-up",
+        "Simulation disposed: host is disposed",
+        "Simulation unavailable: host operation is unavailable",
+        "Simulation invalid-operation: unknown bridge operation"
+    };
+    /* All callers supply an enum value, never an unbounded host message. */
+    curlin = origin;
+    error(200 + code, messages[code]);
+}
+
+static int simulation_integer(VAR value, int minimum, int maximum, int code, heapptr origin)
+{
+    if (value.s.t == -1) simulation_error(code, origin);
+    if (value.i.t == 0) {
+        if (value.i.n < minimum || value.i.n > maximum) simulation_error(code, origin);
+        return (int)value.i.n;
+    }
+    if (!isfinite(value.f) || value.f < minimum || value.f > maximum ||
+        trunc(value.f) != value.f) simulation_error(code, origin);
+    return (int)value.f;
+}
+
+/* Narrow intrinsic used by the ordinary library above. This is not a new
+ * keyword, generic host-call facility or address lookup. The evaluator calls
+ * it only at a normal FN expression boundary, preserving its original parser
+ * and stack behavior for every other function name. */
+int crisp_simulation_function(VAR *result)
+{
+    static const char name[] = "_crispSimulation";
+    const size_t length = sizeof(name) - 1;
+    if (!simulation_enabled || strncmp((const char *)esi, name, length) != 0 ||
+        (esi[length] != '(' && esi[length] != ' ')) return 0;
+    heapptr origin = in_simulation_library((signed char *)curlin + (size_t)zero) ?
+        simulation_callsite : curlin;
+    esi += length;
+    if (nxt() != '(') error(16, NULL);
+    esi++;
+    VAR operation_value = expr();
+    comma();
+    VAR first = expr();
+    comma();
+    /* Strings may refer to the shared expression accumulator. Consume and
+     * validate the final argument without evaluating another expression. */
+    VAR second = expr();
+    braket();
+    int operation = simulation_integer(operation_value, 1, 5,
+        CRISP_SIM_INVALID_OPERATION, origin);
+    int argument1 = 0, argument2 = 0;
+    if (operation <= 3) argument1 = simulation_integer(first, 0, 65535, CRISP_SIM_INVALID_PIN, origin);
+    else if (operation == 4) argument1 = simulation_integer(first, 0, INT_MAX, CRISP_SIM_INVALID_TIME, origin);
+    else (void)simulation_integer(first, 0, 0, CRISP_SIM_INVALID_OPERATION, origin);
+    if (operation == 1) {
+        if (second.s.t != -1) simulation_error(CRISP_SIM_INVALID_MODE, origin);
+        const char *mode = (const char *)zero + second.s.p;
+        if (second.s.l == 5 && memcmp(mode, "input", 5) == 0) argument2 = 0;
+        else if (second.s.l == 6 && memcmp(mode, "output", 6) == 0) argument2 = 1;
+        else if (second.s.l == 12 && memcmp(mode, "input-pullup", 12) == 0) argument2 = 2;
+        else simulation_error(CRISP_SIM_INVALID_MODE, origin);
+    } else if (operation == 2) {
+        argument2 = simulation_integer(second, 0, 1, CRISP_SIM_INVALID_LEVEL, origin);
+    } else {
+        (void)simulation_integer(second, 0, 0, CRISP_SIM_INVALID_OPERATION, origin);
+    }
+    int reply = crisp_host_simulation_request(operation, argument1, argument2);
+    if (reply < 0) simulation_error(-reply, origin);
+    result->i.n = reply;
+    result->i.t = 0;
+    return 1;
+}
+
 void crisp_runtime_error(int code, const char *message, unsigned short line)
 {
     failed = 1;
+    /* A diagnostic from trusted library internals must never impersonate a
+     * user line with the same number. Domain errors above use the saved
+     * actual caller; any other internal-library error has no editor line. */
+    if (simulation_enabled && in_simulation_library(errlin + (signed char *)zero)) line = 0;
     crisp_host_error(code, message ? message : "BASIC error", line);
 }
 
@@ -194,11 +316,12 @@ static int source_error(int code, const char *message, unsigned short line)
 
 /* Load bounded bytes through the original BBCSDL tokenizer. Source preparation
  * does not implement a dialect, substitute keywords, or select capabilities. */
-static int load_source(const unsigned char *source, unsigned int size)
+static int load_source(const unsigned char *source, unsigned int size,
+    unsigned char *destination, size_t capacity)
 {
     if (size > SOURCE_LIMIT) return source_error(0, "Source exceeds 4 MiB limit", 0);
     unsigned int offset = 0, previous = 0;
-    unsigned char *destination = progRAM;
+    unsigned char *limit = destination + capacity;
     while (offset < size) {
         unsigned int start = offset;
         while (offset < size && source[offset] != '\n') offset++;
@@ -236,7 +359,7 @@ static int load_source(const unsigned char *source, unsigned int size)
         body[body_length] = '\r'; body[body_length + 1] = 0;
         size_t token_length = (size_t)(lexan(body, tokenized, 1) - tokenized);
         if (token_length + 3 > 255) return source_error(19, "Tokenized BASIC line exceeds 255 bytes", number);
-        if (destination + token_length + 4 >= (unsigned char *)userTOP) return source_error(0, "No room for BASIC program", number);
+        if ((size_t)(limit - destination) <= token_length + 4) return source_error(0, "No room for BASIC program", number);
         *destination++ = (unsigned char)(token_length + 3);
         *destination++ = (unsigned char)number;
         *destination++ = (unsigned char)(number >> 8);
@@ -247,13 +370,18 @@ static int load_source(const unsigned char *source, unsigned int size)
     return 1;
 }
 
-int crisp_run(const unsigned char *source, unsigned int length)
+int crisp_run(const unsigned char *source, unsigned int length, int enable_simulation)
 {
     if (started) {
         crisp_host_error(255, "A fresh WASM instance is required for every run", 0);
         return 1;
     }
     started = 1;
+    if (enable_simulation != 0 && enable_simulation != 1) {
+        source_error(255, "Invalid simulation capability flag", 0);
+        return 1;
+    }
+    simulation_enabled = enable_simulation;
     if (length > SOURCE_LIMIT) {
         source_error(0, "Source exceeds 4 MiB limit", 0);
         return 1;
@@ -278,7 +406,10 @@ int crisp_run(const unsigned char *source, unsigned int length)
     prand.h = prand.l == 0;
     rnd();
     liston = 0x30;
-    if (load_source(source, length)) {
+    if (load_source(source, length, progRAM, (unsigned char *)userTOP - (unsigned char *)progRAM) &&
+        (!simulation_enabled || load_source(simulation_source, sizeof(simulation_source) - 1,
+            simulation_library, sizeof(simulation_library)))) {
+        if (simulation_enabled) libase = (heapptr)(simulation_library - (unsigned char *)zero);
         flags = 0;
         (void)basic(progRAM, userTOP, (void *)-1);
     }

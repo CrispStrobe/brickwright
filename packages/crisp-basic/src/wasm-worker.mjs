@@ -1,5 +1,8 @@
 // Worker-owned runtime. BASIC has access only to the callbacks supplied below;
 // it never receives JavaScript source evaluation, fetch, or Node facilities.
+import {
+    SIMULATION_ABI, validRunId, validSimulationArguments, validSimulationReply, simulationErrorNumber
+} from './simulation-protocol.mjs';
 const isNode = typeof process !== 'undefined' && Boolean(process.versions?.node);
 const port = isNode ? (await import('node:worker_threads')).parentPort : null;
 const send = (message, transfer = []) => {
@@ -11,8 +14,36 @@ const send = (message, transfer = []) => {
 const MAX_INPUT_BYTES = 1024 * 1024;
 const MAX_SOURCE_BYTES = 4 * 1024 * 1024;
 const MAX_DIAGNOSTIC_BYTES = 16 * 1024;
+function errorMessage(error) {
+    try { return String(error?.message || error).slice(0, 4096); }
+    catch { return 'Unprintable host error'; }
+}
 let started = false, completed = false, ended = true, inputTotal = 0;
 let chunks = [], chunkOffset = 0, waiting = null;
+let simulationRunId = null, simulationEnabled = false, simulationSequence = 0, simulationWaiting = null;
+
+function simulationRequest(operation, first, second) {
+    if (completed) return Promise.reject(new Error('WASM worker has already completed'));
+    if (!simulationEnabled) return Promise.resolve(-8); // Catchable unavailable operation.
+    if (simulationWaiting || !validSimulationArguments(operation, [first, second]) ||
+            simulationSequence === Number.MAX_SAFE_INTEGER) {
+        return Promise.reject(new Error('Invalid or concurrent C/WASM simulation request'));
+    }
+    return new Promise((resolve, reject) => {
+        const requestId = ++simulationSequence;
+        simulationWaiting = {requestId, operation, resolve, reject};
+        send({type: 'simulation-request', runId: simulationRunId, requestId, operation, args: [first, second]});
+    });
+}
+
+function simulationReply(message) {
+    const pending = simulationWaiting;
+    if (!pending || !validSimulationReply(message, simulationRunId, pending.requestId, pending.operation)) {
+        throw new Error('Malformed, stale, or unowned simulation reply');
+    }
+    simulationWaiting = null;
+    pending.resolve(message.ok ? message.value : simulationErrorNumber(message.error.code));
+}
 
 function takeByte() {
     if (!chunks.length) return -1;
@@ -39,6 +70,7 @@ function addInput(bytes) {
 }
 
 function readByte(waitMs) {
+    if (completed) return Promise.reject(new Error('WASM worker has already completed'));
     if (chunks.length) return Promise.resolve(takeByte());
     if (ended || waitMs === 0) return Promise.resolve(-1);
     if (waiting) return Promise.reject(new Error('Concurrent WASM input reads are not supported'));
@@ -69,6 +101,7 @@ async function execute(config) {
         if (remaining > 0) diagnostics += (String(message) + '\n').slice(0, remaining);
     };
     const finish = (status, exitCode, error) => {
+        if (completed) return;
         flush();
         completed = true;
         send({type: 'result', status, exitCode, diagnostics, ...(error ? {error} : {})});
@@ -77,11 +110,14 @@ async function execute(config) {
     try {
         if (config.version !== 1 || typeof config.moduleURL !== 'string' ||
             typeof config.source !== 'string' || config.source.length > MAX_SOURCE_BYTES ||
+            !validRunId(config.runId) || typeof config.simulationEnabled !== 'boolean' ||
             typeof config.inputEnded !== 'boolean' || !Number.isInteger(config.maxOutputBytes) ||
             config.maxOutputBytes < 1 || config.maxOutputBytes > 0x7fffffff) {
             throw new Error('Invalid WASM start record');
         }
         ended = config.inputEnded;
+        simulationRunId = config.runId;
+        simulationEnabled = config.simulationEnabled;
         addInput(config.input);
         const moduleURL = new URL(config.moduleURL);
         const {default: factory} = await import(moduleURL.href);
@@ -91,6 +127,7 @@ async function execute(config) {
             print: diagnostic, printErr: diagnostic,
             crispHost: {
                 output(byte) {
+                    if (completed) throw new Error('WASM worker has already completed');
                     if (outputLength === config.maxOutputBytes) {
                         outputLimit = true;
                         flush();
@@ -103,10 +140,15 @@ async function execute(config) {
                     if (outputUsed === output.length || (byte === 10 && performance.now() - lastFlush >= 16)) flush();
                 },
                 inputEvent(method) {
+                    if (completed) throw new Error('WASM worker has already completed');
                     flush();
                     send({type: 'input', method: method === 0 ? 'line' : 'key'});
                 },
                 readByte,
+                simulationRequest(operation, first, second) {
+                    flush();
+                    return simulationRequest(operation, first, second);
+                },
                 now: () => performance.now(),
                 runtimeError(code, message, basicLine) {
                     basicError = {code, message: String(message).slice(0, 4096), basicLine};
@@ -121,19 +163,24 @@ async function execute(config) {
             options.wasmBinary = await readFile(new URL('./crispbasic.wasm', moduleURL));
         }
         module = await factory(options);
+        if (completed) return;
+        if (simulationEnabled && (typeof module._crisp_simulation_abi !== 'function' ||
+                module._crisp_simulation_abi() !== SIMULATION_ABI)) {
+            throw new Error('WASM module does not support simulation bridge version 1; rebuild and package CrispBASIC');
+        }
         sourcePointer = module._malloc(config.source.length + 1);
         if (!sourcePointer) throw new Error('Cannot allocate WASM source buffer');
         for (let index = 0; index < config.source.length; index++) {
             module.HEAPU8[sourcePointer + index] = config.source.charCodeAt(index);
         }
         module.HEAPU8[sourcePointer + config.source.length] = 0;
-        const exit = await module.ccall('crisp_run', 'number', ['number', 'number'],
-            [sourcePointer, config.source.length], {async: true});
+        const exit = await module.ccall('crisp_run', 'number', ['number', 'number', 'number'],
+            [sourcePointer, config.source.length, simulationEnabled ? 1 : 0], {async: true});
         if (!Number.isInteger(exit)) throw new Error('WASM host returned an invalid exit status');
         finish(basicError ? 'error' : 'completed', basicError ? 1 : (requestedExit || (exit & 255)), basicError);
     } catch (error) {
         finish(outputLimit ? 'output-limit' : 'host-error', null,
-            outputLimit ? undefined : {kind: 'host', message: `WASM execution failed: ${error?.message || error}`.slice(0, 4096)});
+            outputLimit ? undefined : {kind: 'host', message: `WASM execution failed: ${errorMessage(error)}`.slice(0, 4096)});
     } finally {
         if (sourcePointer && module) {
             try { module._free(sourcePointer); } catch { /* A trapped instance is discarded by its parent. */ }
@@ -149,11 +196,19 @@ function receive(message) {
             void execute(message);
         } else if (message?.type === 'input' && started && !ended) addInput(message.bytes);
         else if (message?.type === 'end-input' && started) { ended = true; wakeInput(); }
+        else if (message?.type === 'simulation-reply' && started) simulationReply(message);
         else throw new Error('Unexpected WASM parent message');
     } catch (error) {
         completed = true;
+        // Reject a suspended hook too; the parent still owns termination and
+        // treats this protocol failure as a host outcome, never a BASIC error.
+        if (simulationWaiting) {
+            const pending = simulationWaiting;
+            simulationWaiting = null;
+            pending.reject(error);
+        }
         send({type: 'result', status: 'host-error', exitCode: null, diagnostics: '',
-            error: {kind: 'host', message: String(error?.message || error).slice(0, 4096)}});
+            error: {kind: 'host', message: errorMessage(error)}});
     }
 }
 

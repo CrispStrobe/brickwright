@@ -69,6 +69,10 @@ and WASM digests, the actual import list, and licence hashes. The deterministic
 manifest records every shipped asset. `package:crispbasic:check` rejects missing,
 extra, modified and stale files. An invalid build leaves the prior payload
 intact. Source, toolchain and runtime notices accompany the shipped binary.
+Version `0.1.0-dev.4` has 20 manifest-listed payload assets, plus `manifest.json`;
+the added runtime modules are `src/simulation-host.mjs` and
+`src/simulation-protocol.mjs`. Rebuild and repackage the C/WASM artifact when
+upgrading; the simulation API checks its ABI marker before enabling the bridge.
 
 Each run owns a fresh interpreter worker. Cancellation during either lazy-load
 phase revokes the old run's right to create a worker. Run/Reset/Dispose wait for
@@ -91,19 +95,39 @@ qualified. Graphics queries such as `POINT` remain unavailable in the
 restricted interpreter. Text output is a transcript, not a complete terminal
 screen model. No source debugger is supplied by this integration.
 
-## Circuit simulation contract
+## Simulation bridge and remaining circuit adapter
 
 `@crispstrobe/crispbasic/simulation` exposes the dependency-free deterministic
 reference host described in [SIMULATION.md](SIMULATION.md). It defines logical
 pin modes, reads/writes, explicitly scheduled input stimuli, integer-millisecond
 time, bounded traces and reset/disposal semantics.
 
-It advertises `basicBridge: false`, `hardware: false`, and
-`circuitPhysics: false`. BASIC programs do not yet drive the Circuit canvas or
-physical pins. The proposed ordinary `PROCpinMode`, `PROCdigitalWrite`,
-`FNdigitalRead`, `PROCdelay` and `FNmillis` library still needs a bounded
-request/reply bridge and an adapter to the actual board solver. The existing
-restricted SYS/file/raw-memory policy is unchanged.
+The package now implements a bounded BASIC request/reply bridge for WASM
+embedders. `createWasmSession({simulation: {}})` creates a fresh reference host
+and installs the ordinary `PROCpinMode`, `PROCdigitalWrite`, `FNdigitalRead`,
+`PROCdelay` and `FNmillis` library. A synchronous
+`simulation.createHost({signal, runId})` factory can supply a custom host;
+operations may return Promises while cancellation and request/time/I/O limits
+remain parent-owned. The factory, disposer and synchronous operation work must
+return promptly. A future board adapter must check cancellation/disposal before
+deferred changes; ignored late replies do not undo external side effects.
+
+The default Code tab adapter does not yet pass these simulation options, and
+the generator still emits its existing hardware comments. The next integration
+step is the board-solver adapter and explicit GUI wiring. BASIC programs do not
+yet drive the Circuit canvas or physical pins. The standalone reference host
+therefore keeps `basicBridge: false`, `hardware: false`, and
+`circuitPhysics: false`; the configured WASM session separately describes an
+enabled bridge. Native sessions have no bridge. The SYS/file/raw-memory policy,
+`TIME` and `WAIT` semantics remain unchanged.
+
+The library lives outside authored source records, preserving numbering and
+normal user definitions. Its typed domain errors map to original call sites;
+parent resource failures produce `simulation-limit` and cannot be handled away
+by BASIC. [SIMULATION.md](SIMULATION.md) specifies the error codes, ownership,
+ABI negotiation and resource bounds. [VALIDATION.md](VALIDATION.md) records the
+current revision's qualification status; the GUI tests below do not themselves
+establish board-solver or physical-device behavior.
 
 ## Verification
 

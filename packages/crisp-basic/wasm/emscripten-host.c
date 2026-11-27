@@ -21,6 +21,18 @@ EM_ASYNC_JS(void, crisp_host_sleep_ms, (int milliseconds), {
     await new Promise(resolve => setTimeout(resolve, milliseconds));
 });
 
+EM_ASYNC_JS(int, crisp_host_simulation_request, (int operation, int argument1, int argument2), {
+    const result = await Module.crispHost.simulationRequest(operation, argument1, argument2);
+    /* Check before Emscripten coerces a JavaScript value to int32. A malformed
+     * reply is a worker failure, never an error BASIC can catch and ignore. */
+    if (!Number.isInteger(result) || result < -9 || result > 2147483647 ||
+        (result >= 0 && ((operation === 3 && result > 1) ||
+            (operation !== 3 && operation !== 5 && result !== 0)))) {
+        throw new Error('Invalid CrispBASIC simulation reply');
+    }
+    return result;
+});
+
 EM_JS(uint32_t, crisp_host_now_ms, (void), {
     return Module.crispHost.now() >>> 0;
 });

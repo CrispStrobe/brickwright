@@ -48,7 +48,10 @@ export class NativeSession {
     #options;
 
     constructor({executable = DEFAULT_EXECUTABLE, timeoutMs = 5000,
-        maxOutputBytes = 1024 * 1024, onEvent} = {}) {
+        maxOutputBytes = 1024 * 1024, onEvent, simulation} = {}) {
+        if (simulation !== undefined) {
+            throw new TypeError('The simulation bridge requires createWasmSession; it is unavailable in the native backend');
+        }
         if (typeof executable !== 'string' || !executable || executable.includes('\0')) {
             throw new TypeError('executable must be a nonempty path');
         }

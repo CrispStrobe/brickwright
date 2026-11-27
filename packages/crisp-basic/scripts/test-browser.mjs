@@ -405,3 +405,186 @@ test('concurrent browser disposal calls both settle the active run and close the
     assert.equal(actual.status, 'cancelled');
     assert.match(actual.rejection, /disposed/i);
 });
+
+test('browser simulation replies preserve recursive frames, local error traps and fixed pin traces', {timeout: 15000}, async t => {
+    const page = await pageFor(t);
+    const actual = await page.evaluate(async () => {
+        const {createSimulationHost} = await import('/src/simulation-host.mjs');
+        let host, pending = 0, peak = 0;
+        const session = crispbasic.createWasmSession({simulation: {createHost() {
+            host = createSimulationHost();
+            const invoke = method => async (...args) => {
+                pending++;
+                peak = Math.max(peak, pending);
+                try {
+                    await new Promise(resolveReply => setTimeout(resolveReply, 3));
+                    return host[method](...args);
+                } finally { pending--; }
+            };
+            return {
+                pinMode: invoke('pinMode'), digitalWrite: invoke('digitalWrite'),
+                digitalRead: invoke('digitalRead'), delay: invoke('delay'), millis: invoke('millis'),
+                dispose: () => host.dispose()
+            };
+        }}});
+        try {
+            const result = await session.run(`PROCpinMode(0, "output")
+PRINT STR$(FNcycle(3))
+PROCerror
+PRINT "returned"
+END
+DEF FNcycle(depth%)
+LOCAL earlier%, value%
+earlier% = FNmillis
+IF depth% = 0 THEN =FNdigitalRead(0)
+PROCdigitalWrite(0, depth% MOD 2)
+PROCdelay(5)
+value% = FNcycle(depth% - 1)
+=value% + FNmillis - earlier%
+DEF PROCerror
+LOCAL saved%
+saved% = 91
+ON ERROR LOCAL PRINT "handled:" + STR$(ERR) + ":" + STR$(saved%) : ENDPROC
+PRINT STR$(FNdigitalRead(1))
+ENDPROC
+`);
+            return {status: result.status, error: result.error, text: result.text,
+                trace: host.trace, hostState: host.state, peak, pending, isolated: crossOriginIsolated};
+        } finally { await session.dispose(); }
+    });
+    assert.equal(actual.status, 'completed', JSON.stringify(actual.error));
+    assert.equal(actual.text, '31\r\nhandled:206:91\r\nreturned\r\n');
+    assert.equal(actual.hostState, 'disposed');
+    assert.equal(actual.peak, 1);
+    assert.equal(actual.pending, 0);
+    assert.equal(actual.isolated, false);
+    assert.deepEqual(actual.trace, [
+        {sequence: 1, atMs: 0, type: 'pin-mode', pin: 0, mode: 'output'},
+        {sequence: 2, atMs: 0, type: 'digital-write', pin: 0, value: 1},
+        {sequence: 3, atMs: 5, type: 'delay', fromMs: 0, milliseconds: 5},
+        {sequence: 4, atMs: 5, type: 'digital-write', pin: 0, value: 0},
+        {sequence: 5, atMs: 10, type: 'delay', fromMs: 5, milliseconds: 5},
+        {sequence: 6, atMs: 10, type: 'digital-write', pin: 0, value: 1},
+        {sequence: 7, atMs: 15, type: 'delay', fromMs: 10, milliseconds: 5},
+        {sequence: 8, atMs: 15, type: 'digital-read', pin: 0, value: 1}
+    ]);
+});
+
+test('browser reset aborts a pending simulation adapter and ignores its reply during the next run', {timeout: 15000}, async t => {
+    const page = await pageFor(t);
+    const actual = await page.evaluate(async () => {
+        const {createSimulationHost} = await import('/src/simulation-host.mjs');
+        let requested, reply;
+        const entered = new Promise(resolveRequest => { requested = resolveRequest; });
+        const late = new Promise(resolveReply => { reply = resolveReply; });
+        const runs = [];
+        const results = [];
+        const session = crispbasic.createWasmSession({simulation: {createHost({signal}) {
+            const host = createSimulationHost();
+            const run = {host, signal, disposals: 0};
+            runs.push(run);
+            return {
+                pinMode: (...args) => host.pinMode(...args),
+                digitalWrite: (...args) => host.digitalWrite(...args),
+                digitalRead: (...args) => host.digitalRead(...args),
+                delay: (...args) => host.delay(...args),
+                millis() {
+                    if (runs.length === 1) { requested(); return late; }
+                    return host.millis();
+                },
+                dispose() { run.disposals++; host.dispose(); }
+            };
+        }}, onEvent(event) {
+            if (event.type === 'result') results.push(event.result.status);
+        }});
+        try {
+            const pending = session.run('PRINT STR$(FNmillis)\nPRINT "late"\nEND\n');
+            await Promise.race([entered, pending.then(result => {
+                throw new Error('BASIC finished before requesting simulation: ' + JSON.stringify(result));
+            })]);
+            await session.reset();
+            const stopped = await pending;
+            const cleanupBeforeNext = runs[0].signal.aborted && runs[0].disposals === 1 && runs[0].host.state === 'disposed';
+            const next = session.run('PRINT STR$(FNmillis)\nEND\n');
+            reply(99);
+            const completed = await next;
+            return {stopped: {status: stopped.status, text: stopped.text}, cleanupBeforeNext,
+                next: {status: completed.status, text: completed.text, error: completed.error}, results,
+                states: runs.map(run => ({aborted: run.signal.aborted, disposals: run.disposals, state: run.host.state}))};
+        } finally { await session.dispose(); }
+    });
+    assert.deepEqual(actual.stopped, {status: 'cancelled', text: ''});
+    assert.equal(actual.cleanupBeforeNext, true);
+    assert.equal(actual.next.status, 'completed', JSON.stringify(actual.next.error));
+    assert.equal(actual.next.text, '0\r\n');
+    assert.deepEqual(actual.results, ['cancelled', 'completed']);
+    assert.deepEqual(actual.states, [
+        {aborted: true, disposals: 1, state: 'disposed'},
+        {aborted: true, disposals: 1, state: 'disposed'}
+    ]);
+});
+
+test('browser simulation request limits remain outside BASIC ON ERROR and release the host', {timeout: 15000}, async t => {
+    const page = await pageFor(t);
+    const actual = await page.evaluate(async () => {
+        const {createSimulationHost} = await import('/src/simulation-host.mjs');
+        let host, calls = 0;
+        const session = crispbasic.createWasmSession({simulation: {maxRequests: 2, createHost() {
+            host = createSimulationHost();
+            return {
+                pinMode: (...args) => host.pinMode(...args),
+                digitalWrite: (...args) => host.digitalWrite(...args),
+                digitalRead: (...args) => host.digitalRead(...args),
+                delay: (...args) => host.delay(...args),
+                millis() { calls++; return host.millis(); },
+                dispose: () => host.dispose()
+            };
+        }}});
+        try {
+            const result = await session.run('ON ERROR PRINT "caught":END\nREPEAT\nvalue% = FNmillis\nUNTIL FALSE\n');
+            return {status: result.status, error: result.error, text: result.text, calls,
+                trace: host.trace, state: host.state};
+        } finally { await session.dispose(); }
+    });
+    assert.equal(actual.status, 'simulation-limit', JSON.stringify(actual.error));
+    assert.equal(actual.error.kind, 'simulation');
+    assert.equal(actual.error.code, 'request-limit');
+    assert.equal(actual.text, '');
+    assert.equal(actual.calls, 2);
+    assert.deepEqual(actual.trace, []);
+    assert.equal(actual.state, 'disposed');
+});
+
+test('browser deadlines cover stalled simulation replies while the page remains responsive', {timeout: 15000}, async t => {
+    const page = await pageFor(t);
+    const actual = await page.evaluate(async () => {
+        const {createSimulationHost} = await import('/src/simulation-host.mjs');
+        let signal, disposed = 0, requested = false, ticks = 0;
+        const ticker = setInterval(() => ticks++, 10);
+        const session = crispbasic.createWasmSession({timeoutMs: 1500, simulation: {createHost(context) {
+            signal = context.signal;
+            const host = createSimulationHost();
+            return {
+                pinMode: (...args) => host.pinMode(...args),
+                digitalWrite: (...args) => host.digitalWrite(...args),
+                digitalRead: (...args) => host.digitalRead(...args),
+                delay: (...args) => host.delay(...args),
+                millis() { requested = true; return new Promise(() => {}); },
+                dispose() { disposed++; host.dispose(); }
+            };
+        }}});
+        try {
+            const start = performance.now();
+            const result = await session.run('ON ERROR PRINT "caught":END\nPRINT STR$(FNmillis)\nEND\n');
+            return {status: result.status, error: result.error, text: result.text,
+                requested, aborted: signal.aborted, disposed, ticks, elapsed: performance.now() - start};
+        } finally { clearInterval(ticker); await session.dispose(); }
+    });
+    assert.equal(actual.status, 'timeout', JSON.stringify(actual.error));
+    assert.equal(actual.text, '');
+    assert.equal(actual.requested, true);
+    assert.equal(actual.aborted, true);
+    assert.equal(actual.disposed, 1);
+    assert.ok(actual.ticks > 0);
+    assert.ok(actual.elapsed < 7000);
+});

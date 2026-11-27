@@ -22,8 +22,8 @@ uses `setjmp`/`longjmp`. Treating it as a reentrant library, or returning out of
 it to pause and then pretending it can resume, would lose interpreter state.
 One child process per native run supplies a lifetime boundary. The WASM backend
 uses a fresh worker/module per run and Asyncify to preserve the entire C stack
-through asynchronous input and waits; it does not pretend that unwinding the
-recursive executor is a resumable pause.
+through asynchronous input, waits and simulation replies; it does not pretend
+that unwinding the recursive executor is a resumable pause.
 
 The upstream WASM makefile builds the complete SDL application, including SDL
 libraries, threads, assets and platform-specific headers. A headless library
@@ -73,7 +73,8 @@ header or the x86-64 NASM layout. Compile-time checks verify 32-bit pointers,
 or native OS host is linked.
 
 `wasm/crisp-host.h` exposes byte output, line/key input events, asynchronous byte
-reads, monotonic time, sleep and structured errors/exit status. Source arrives
+reads, monotonic time, sleep, structured errors/exit status and an opt-in scalar
+simulation-request hook. Source arrives
 as bounded bytes in linear memory, never as a host path. The BASIC arena is
 16 MiB plus reserved interpreter space within fixed 64 MiB WASM memory. Virtual
 files are explicitly unavailable in this first restricted profile.
@@ -108,6 +109,49 @@ engine through a GUI-owned adapter and the existing partial VDU renderer. See
 [BRICKWRIGHT.md](BRICKWRIGHT.md) for packaging, lifecycle and qualification scope.
 Other browser engines and native desktop/mobile shells remain unqualified.
 
+## Bounded BASIC-to-simulation bridge
+
+WASM sessions can explicitly enable `simulation: {}` for a fresh deterministic
+reference host on each run, or provide a synchronous
+`simulation.createHost({signal, runId})` factory for a custom host. The native
+backend rejects simulation configuration, and default WASM sessions keep the
+bridge disabled. The standalone
+reference host still advertises `basicBridge: false`; the configured session
+describes its separate enabled bridge capability. The complete API and error
+mapping are in [SIMULATION.md](SIMULATION.md).
+
+The ordinary `PROCpinMode`, `PROCdigitalWrite`, `FNdigitalRead`, `PROCdelay` and
+`FNmillis` definitions live in a separate bounded `libase` buffer. They neither
+consume nor renumber user source lines, and normal user `DEF` overrides remain
+possible. One private FN evaluator hook parses and validates the operation's
+complete argument list, then enters an `EM_ASYNC_JS` suspension. A new
+`crisp_simulation_abi()` export prevents enabling the feature with an old module.
+Domain errors use the authored call site; unexpected hidden-library errors have
+no editor line.
+
+The versioned worker channel carries run/request IDs, fixed scalar arguments,
+five allowlisted operations and typed replies. Both ends validate the complete
+record, and only one request may be outstanding. The parent enforces a cumulative
+request budget (default 4096, maximum 1000000) in addition to deadline and I/O
+limits. Host trace, stimulus and time budgets also terminate the run as
+`simulation-limit`; BASIC cannot catch these limits. Ordinary domain failures
+map to catchable `ERR201..209`, with a stable `simulationCode` on an unhandled
+bridge error. No VDU control encoding or SYS/raw-memory capability is added.
+
+Each fresh host belongs to exactly one run; weak ownership tracking rejects
+reuse across runs or sessions. The parent aborts the host's signal before its
+synchronous disposal and discards late replies. Operation methods may return
+Promises, but factories, disposal and synchronous method work must keep the
+parent event loop responsive. Adapters must check the signal/disposed state
+before deferred side effects: terminating the worker cannot undo arbitrary
+external adapter changes. The reference host itself rejects mutations after
+disposal. `TIME` and `WAIT` retain their existing monotonic-clock semantics.
+
+The package includes protocol/lifecycle tests and real-runtime fixtures for
+recursive suspension, errors, source identity and fixed pin/time traces.
+[VALIDATION.md](VALIDATION.md) records which checks actually ran for the current
+revision and distinguishes implementation from qualification.
+
 ## Next implementation sequence
 
 ### 1. Brickwright adapters: implemented slice and remaining work
@@ -119,11 +163,12 @@ bytes to the existing decoder/renderer, provides input and Stop/Reset, and
 preserves the Z80 runner as an explicit retro engine. Fixed output and canvas
 checks cover basic MOVE/DRAW, not full graphics compatibility or queries.
 
-The next integration work is the bounded circuit request/reply bridge and its
-board-solver adapter. [SIMULATION.md](SIMULATION.md) defines an executable,
-deterministic reference host; no BASIC/circuit/physical-pin connection is
-claimed. Preserve parent-owned limits and never encode host control in VDU
-output or reopen SYS/raw-memory access.
+The bounded BASIC-to-simulation request/reply bridge and reference host are now
+implemented. The next integration work is a board-solver adapter and Code tab
+wiring: map logical pins to the active board, define how solver time advances
+between requests, expose required capabilities and reject unavailable features.
+No BASIC-to-Circuit-canvas or physical-pin connection is claimed yet. Preserve
+per-run ownership, cooperative adapter cancellation and parent-owned limits.
 
 The GUI renderer currently implements only part of the VDU semantics. It is
 not a correctness oracle for the full graphics language. CrispBASIC's engine
@@ -144,12 +189,12 @@ unsupported debugger operation must never silently run.
 
 ### 3. Portable physical-computing library
 
-Define ordinary BASIC procedures/functions, starting with `PROCpinMode`,
-`PROCdigitalWrite`, `FNdigitalRead`, `PROCdelay`, and `FNmillis`. Make units,
-pin modes, range errors, deterministic simulation time, and unavailable
-features explicit. The deterministic reference host now exists in
-`src/simulation-host.mjs`; connect it through the bounded request/reply bridge
-before comparing the same observable pin/timing traces on a PicoBB target.
+The first five ordinary BASIC procedures/functions and their deterministic
+simulation bridge are implemented. Their pin modes, integer-millisecond units,
+range errors and unavailable features are explicit. After the board-solver
+adapter, implement the corresponding library on a PicoBB target and compare
+observable pin/timing traces using independent target evidence. Do not treat the
+JavaScript reference host as evidence of physical-device equivalence.
 
 Do not reserve new language keywords or silently emit placeholder hardware
 operations. The existing non-6502 BASIC generator uses commented hardware

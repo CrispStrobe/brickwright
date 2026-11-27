@@ -1,5 +1,5 @@
 // Capabilities describe the implemented backend, not the eventual language profiles.
-export const VERSION = '0.1.0-dev.2';
+export const VERSION = '0.1.0-dev.4';
 export const BACKEND = 'bbcsdl-native';
 
 function freeze(value) {
@@ -19,5 +19,6 @@ export const NATIVE_CAPABILITIES = freeze({
     output: {text: true, rawVdu: true, graphics: false, sound: false},
     debug: {pause: false, step: false, breakpoints: false, variables: false, callStack: false},
     hardware: false,
+    simulation: {available: false, enabled: false, basicBridge: false},
     sandboxed: false
 });

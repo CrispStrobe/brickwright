@@ -8,9 +8,11 @@ processes and restricted WebAssembly workers.** Both use the original tokenizer
 and executor, source maps, raw VDU output, structured errors and bounded session
 lifetimes. The WASM host runs in browsers and Node without SDL or host filesystem
 access. The Brickwright Code tab now adapts this runtime, with interactive input,
-Stop/Reset, mapped diagnostics and the existing partial VDU renderer. A separate
-deterministic simulation-host contract is available; its BASIC/circuit bridge,
-full graphics, source debugging and physical-board targets remain subsequent work.
+Stop/Reset, mapped diagnostics and the existing partial VDU renderer. Version
+`0.1.0-dev.4` adds an opt-in, bounded BASIC-to-simulation bridge for WASM sessions,
+using a deterministic logical-pin reference host or an application-owned adapter.
+Connecting that bridge to Brickwright's board solver and Code tab, full graphics,
+source debugging and physical-board targets remain subsequent work.
 
 ## Try it
 
@@ -67,17 +69,19 @@ separate Z80 engine remains available for retrocomputing. See
 [BRICKWRIGHT.md](BRICKWRIGHT.md) for build order, controls, asset integrity,
 focused integration tests and the exact rendering/circuit boundaries.
 
-The standalone [simulation host](SIMULATION.md) defines deterministic logical
-pins and integer-millisecond time. It does not yet connect BASIC to the circuit
-canvas or physical hardware.
+The [simulation API](SIMULATION.md) defines deterministic logical pins and
+integer-millisecond time and connects them to ordinary BASIC procedures and
+functions when an embedding application enables it. The Code tab does not yet
+enable this bridge, and BASIC does not drive the Circuit canvas or physical
+hardware.
 
 ### Test suites
 
 | Command | Prerequisites and coverage |
 | --- | --- |
-| `npm test` | Source preparation and deterministic simulation contract; no compiled backend needed |
+| `npm test` | Source preparation, deterministic simulation contract and bridge protocol/lifecycle tests; no compiled backend needed |
 | `npm run test:native` | Native build; execution, CLI and process cleanup |
-| `npm run test:wasm` | WASM build; execution, host restrictions and worker lifecycle |
+| `npm run test:wasm` | WASM build; execution, host restrictions, simulation library and worker lifecycle |
 | `npm run test:parity` | Both builds; the same corpus checked against fixed expected bytes |
 | `npm run test:all` | All of the above |
 | `npm run test:browser` | WASM build, Playwright and Chromium; real browser workers |
@@ -254,8 +258,8 @@ API above, with the same execution statuses, source diagnostics and byte events.
 Use `interactive: true` for asynchronous input. `writeInput()` copies bytes into
 a bounded message queue and returns `true`; it does not expose stream
 backpressure. The 1 MiB cumulative input cap, 4 MiB prepared-source cap, deadline
-and output budget also apply to this backend. Time spent loading the module or
-waiting for input counts toward the deadline.
+and output budget also apply to this backend. Time spent loading the module,
+waiting for input or waiting for a simulation reply counts toward the deadline.
 
 Every run owns a new worker and WASM instance. Asyncify preserves the C stack
 across `INPUT`, `GET`, timed `INKEY` and `WAIT`, including recursive functions,
@@ -263,6 +267,55 @@ procedures and `ON ERROR LOCAL`. The parent terminates the worker on timeout,
 cancellation or callback failure, even if BASIC is stuck in a tight loop. Run,
 reset and dispose wait for worker termination before resolving. Separate
 sessions can execute concurrently, and repeated runs share no BASIC variables.
+
+### Opt-in BASIC simulation
+
+Omitting `simulation` leaves the bridge disabled. `simulation: {}` creates a
+fresh deterministic reference host for every run and installs the ordinary
+`PROCpinMode`, `PROCdigitalWrite`, `FNdigitalRead`, `PROCdelay` and `FNmillis`
+library in a separate interpreter library area:
+
+```js
+import {createWasmSession} from './browser.mjs';
+
+const session = createWasmSession({simulation: {maxRequests: 128}});
+try {
+    const result = await session.run(`
+PROCpinMode(0, "output")
+PROCdigitalWrite(0, 1)
+PROCdelay(25)
+PRINT STR$(FNmillis)
+END
+`, {filename: 'pins.bas'});
+    console.log(result.status, result.text); // completed, "25\r\n"
+} finally {
+    await session.dispose();
+}
+```
+
+The C/WASM artifact must be rebuilt for this API: the worker checks
+`crisp_simulation_abi() === 1` before enabling it. Older artifacts produce an
+actionable host error. The native backend has no simulation bridge and explicitly
+rejects a `simulation` option instead of silently ignoring it.
+
+`simulation.createHost({signal, runId})` may synchronously return a custom fresh
+host; its operation methods may return values or Promises. Each host belongs to
+one run, receives cancellation through `signal`, and must provide bounded,
+synchronous `dispose()`. Factories, disposal and synchronous method work must
+return promptly so the parent event loop remains responsive. Deferred adapter
+work must check cancellation/disposal before changing state. The session ignores
+late replies and terminates its worker; it cannot undo an adapter's external
+side effects. [SIMULATION.md](SIMULATION.md) defines the full ownership and
+cancellation contract.
+
+The default request budget is 4096, configurable from 1 to 1000000, including
+`FNmillis` requests that do not create trace records. Request, trace, scheduled
+input and simulated-time budget failures produce the parent-owned
+`simulation-limit` outcome. Ordinary domain failures are catchable BASIC errors
+`201..209`; unhandled bridge errors also carry `error.simulationCode`. User source
+numbers and public library overrides retain their normal meanings. `TIME` and
+`WAIT` continue to use the existing monotonic clock, independently of simulated
+milliseconds.
 
 ## Current capabilities and boundaries
 
@@ -276,11 +329,12 @@ sessions can execute concurrently, and repeated runs share no BASIC variables.
 | Diagnostics | Separate control channel; original editor-line mapping | Separate worker records; same source mapping |
 | Output | Raw VDU bytes and Latin-1 text | Same |
 | Graphics | No renderer or graphics-query emulation | Same; drawing commands emit raw VDU |
-| Sound / GPIO / hardware library | Not implemented | Not implemented; explicit unsupported-operation errors |
+| Logical-pin simulation library | No bridge | Opt-in per-run host, bounded request/reply and deterministic reference implementation |
+| Sound / physical GPIO | Not implemented | Not implemented; explicit unsupported-operation errors |
 | Source debugger | Not implemented | Not implemented |
 | Host files, native calls, raw memory | Retained for trusted local programs | Denied; virtual files also unavailable |
 | Time | Host time | Monotonic `TIME`/`TIME=` and `WAIT`; no `TIME$` or event timers |
-| App integration / physical boards | Planned | Browser engine tested; app adapters and boards planned |
+| App integration / physical boards | Planned | Code tab/VDU integration; board-solver connection and physical boards planned |
 
 **The native backend is for trusted local programs.** It retains upstream
 native memory, `SYS`/`CALL`, filesystem and OS facilities. A temporary working
@@ -310,13 +364,15 @@ URLs are trusted embedding-application configuration, not BASIC program input.
 - `src/source.mjs` normalizes source and records original line identity.
 - `src/native-session.mjs` owns process lifetime, I/O, limits and result mapping.
 - `src/wasm-session.mjs` and `src/wasm-worker.mjs` own WASM worker lifetime and I/O.
+- `src/simulation-host.mjs` implements the deterministic logical-pin contract;
+  `src/simulation-protocol.mjs` validates the bounded per-run worker channel.
 - `native/crispbasic.c` loads source through the upstream tokenizer and supplies
   the batch host's raw VDU and input hooks.
 - `native/patch-upstream.mjs` makes small, exact-match changes to generated
   upstream copies: headless entry, raw I/O, completion and error callbacks.
 - `wasm/crisp-host.h` defines the restricted C embedding boundary;
   `wasm/crispbasic.c` replaces the OS/SDL host, and `wasm/emscripten-host.c`
-  supplies the JavaScript byte/input/time/error hooks.
+  supplies the JavaScript byte/input/time/error and simulation-request hooks.
 - `wasm/patch-upstream.mjs` applies exact-match runtime restrictions and retains
   the upstream WASM data layout without SDL tables or exposed function pointers.
 - `upstream.lock.json` records the upstream revision and every input digest.

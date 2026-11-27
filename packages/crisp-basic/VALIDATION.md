@@ -1,5 +1,56 @@
 # Validation records
 
+## Bounded BASIC simulation bridge milestone
+
+Version `0.1.0-dev.4`, recorded on 2026-11-27. The opt-in WASM bridge and
+adapter contract are described in [SIMULATION.md](SIMULATION.md). The circuit
+canvas, board solver and physical hardware are outside this milestone.
+
+### Local checks
+
+This workspace uses Node 24.22.3 on Linux x86-64. A sparse checkout was required
+because only about 353 MiB of disk space was initially available. Emscripten
+and NASM are absent; no local compiler or real-runtime success is claimed for
+this revision at this point. The pinned GitHub workflow performs those builds.
+
+| Suite | Tests reported | Result |
+| --- | ---: | --- |
+| Source preparation | 13 | Passed |
+| Deterministic simulation-host contract | 13 | Passed |
+| Bounded bridge protocol and JavaScript worker lifecycle | 73 | Passed |
+| Browser asset packaging integrity | 14 | Passed |
+| **Local total** | **113** | **Zero failures or skips** |
+
+The protocol tests include the production JavaScript worker with a small
+explicitly synthetic module; this verifies message/lifecycle behavior and is
+not evidence of C-stack preservation. Separate real-WASM tests exercise the
+actual compiled interpreter, fixed pin/time traces, recursive calls, local
+error traps and parent-owned limits. Four additional Chromium cases exercise
+the real bridge and page responsiveness.
+
+Review found and corrected sparse argument-array validation, duplicate worker
+completion records after malformed replies, and unprintable host exceptions
+that could otherwise escape cleanup. Regression cases pass. The changed
+upstream patcher was applied against four exact SHA-256-verified pinned inputs;
+JavaScript syntax and `git diff --check` pass.
+
+Reproduce the local checks from the repository root:
+
+```sh
+node --test test/crispbasic-assets.test.mjs \
+  packages/crisp-basic/tests/source.test.mjs \
+  packages/crisp-basic/tests/simulation-host.test.mjs \
+  packages/crisp-basic/tests/simulation-bridge.test.mjs
+```
+
+### Compiler and browser qualification
+
+Qualification of this revision is pending. The previous integration commit's
+[workflow run](https://github.com/CrispStrobe/brickwright/actions/runs/46053771626)
+completed successfully; it does not qualify the new bridge. The workflow now
+picks up the additional tests through the package's `test` and `test:wasm`
+commands, alongside the existing native, parity, browser and GUI suites.
+
 ## Brickwright integration milestone
 
 Local validation recorded on 2026-11-27 for version `0.1.0-dev.3`, on

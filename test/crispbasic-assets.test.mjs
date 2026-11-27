@@ -27,7 +27,8 @@ async function fixture(t) {
     const destination = join(directory, 'static/crispbasic');
     const sources = new Set([...WASM_LOCAL_INPUTS, 'package.json', 'browser.mjs',
         'src/source.mjs', 'src/wasm-session.mjs', 'src/wasm-worker.mjs',
-        'src/wasm-capabilities.mjs', 'LICENSE', 'THIRD-PARTY-NOTICES.md']);
+        'src/wasm-capabilities.mjs', 'src/simulation-host.mjs', 'src/simulation-protocol.mjs',
+        'LICENSE', 'THIRD-PARTY-NOTICES.md']);
     for (const source of sources) {
         await write(packageRoot, source, await readFile(join(root, 'packages/crisp-basic', source)));
     }
@@ -64,6 +65,8 @@ test('packaging produces a complete relocatable payload and a deterministic byte
     assert.ok(manifest.files['licenses/EMSCRIPTEN-LICENSE.txt']);
     assert.ok(manifest.files['licenses/MUSL-COPYRIGHT.txt']);
     assert.ok(manifest.files['LICENSE.txt']);
+    assert.ok(manifest.files['src/simulation-host.mjs']);
+    assert.ok(manifest.files['src/simulation-protocol.mjs']);
     assert.equal(Object.keys(manifest.files).some(path => path.startsWith('.') || path.includes('native-session')), false);
     for (const [path, expected] of Object.entries(manifest.files)) {
         const bytes = await readFile(join(options.destination, path));

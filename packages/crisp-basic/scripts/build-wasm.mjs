@@ -86,7 +86,7 @@ const settings = [
     '-sSTACK_SIZE=2097152', '-sINITIAL_MEMORY=67108864', '-sALLOW_MEMORY_GROWTH=0',
     '-sFILESYSTEM=0', '-sDYNAMIC_EXECUTION=0', '-sALLOW_TABLE_GROWTH=0',
     '-sASSERTIONS=1', '-sSTACK_OVERFLOW_CHECK=2', '-sABORTING_MALLOC=0',
-    '-sEXPORTED_FUNCTIONS=["_crisp_run","_malloc","_free"]',
+    '-sEXPORTED_FUNCTIONS=["_crisp_run","_crisp_simulation_abi","_malloc","_free"]',
     '-sEXPORTED_RUNTIME_METHODS=["ccall"]'
 ];
 run(emcc, [...objects, ...settings, '-o', output]);
@@ -97,7 +97,8 @@ const module = await WebAssembly.compile(binary);
 const imports = WebAssembly.Module.imports(module);
 const allowed = new Set([
     'crisp_host_output', 'crisp_host_input_event', '__asyncjs__crisp_host_read_byte',
-    '__asyncjs__crisp_host_sleep_ms', 'crisp_host_now_ms', 'crisp_host_error', 'crisp_host_exit',
+    '__asyncjs__crisp_host_sleep_ms', '__asyncjs__crisp_host_simulation_request',
+    'crisp_host_now_ms', 'crisp_host_error', 'crisp_host_exit',
     '_emscripten_throw_longjmp', '_emscripten_memcpy_js', 'emscripten_resize_heap',
     '__handle_stack_overflow',
     'invoke_v', 'invoke_vi', 'invoke_vii', 'invoke_viii', 'invoke_viiii',

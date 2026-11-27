@@ -44,16 +44,29 @@ policy, parity and browser suites.
 - Byte input with explicit EOF and blocking or timed waits.
 - Monotonic milliseconds and asynchronous sleep.
 - Structured unhandled BASIC errors and intentional `QUIT` status.
+- An opt-in, asynchronous scalar request/reply hook for five simulation operations.
 
-`crisp_run(source, length)` receives prepared Latin-1 numbered source directly in
-memory. It neither opens a source file nor accepts a path. A module instance may
-run once; the owner discards it after the result. The C host validates source
-size, line numbers, control bytes and token-record sizes before execution.
+`crisp_run(source, length, simulation_enabled)` receives prepared Latin-1
+numbered source directly in memory. The third argument must be `0` or `1`.
+Only `1` installs the ordinary BASIC simulation library in a separate bounded
+`libase` buffer and enables its private allowlisted FN intrinsic. The source
+buffer and authored line numbers are unchanged. The entry point neither opens
+a source file nor accepts a path. A module instance may run once; the owner
+discards it after the result. The C host validates source size, line numbers,
+control bytes and token-record sizes before execution.
+
+The worker checks the exported `crisp_simulation_abi()` marker equals `1` before
+enabling simulation. This rejects stale generated modules with an actionable
+host error. `crisp_host_simulation_request(operation, argument1, argument2)`
+allows only pinMode, digitalWrite, digitalRead, delay and millis. All crossing
+values are int32 scalars; modes are enums and domain failures use the fixed
+negative codes in `crisp-host.h`. JavaScript validates replies before int32
+conversion. The parent handles resource/protocol failures without a BASIC reply.
 
 The bridge uses Emscripten
 [`EM_ASYNC_JS` and Asyncify](https://emscripten.org/docs/porting/asyncify.html)
-for input and wait suspension. The session invokes `crisp_run` through an async
-`ccall`, preserving recursive interpreter and error-handler state. Parent-owned
+for input, wait and simulation-reply suspension. The session invokes `crisp_run`
+through an async `ccall`, preserving recursive interpreter and error-handler state. Parent-owned
 worker termination bounds execution even when the core never returns to a hook.
 
 This milestone deliberately denies files, including virtual files. Future
@@ -70,6 +83,8 @@ src/source.mjs
 src/wasm-capabilities.mjs
 src/wasm-session.mjs
 src/wasm-worker.mjs
+src/simulation-host.mjs
+src/simulation-protocol.mjs
 .build/wasm/crispbasic.mjs
 .build/wasm/crispbasic.wasm
 ```
@@ -91,22 +106,45 @@ browser engines and desktop/mobile shells have not yet been qualified.
 ## Limits and profile semantics
 
 The default deadline is 5 seconds and default output cap is 1 MiB. Interactive
-input counts toward the deadline; total input is capped at 1 MiB and prepared
-source at 4 MiB. Limits belong to the parent, independently of BASIC `ON ERROR`.
+input and pending simulation replies count toward the deadline; total input is
+capped at 1 MiB and prepared source at 4 MiB. Limits belong to the parent,
+independently of BASIC `ON ERROR`.
 The input queue is message-based, so `writeInput()` returns `true` after a bounded
 copy rather than a stream backpressure flag. A new run has fresh memory and time
 origin, even on a reused session object.
+
+Simulation is disabled unless the embedding app supplies the session's
+`simulation` options. The default factory creates a fresh reference host per
+run. A custom synchronous `createHost({signal, runId})` factory must return a new
+object with the five operation methods and synchronous `dispose()`. Operations
+may return Promises, but no adapter code may block the parent event loop. The
+parent aborts the signal before disposal, rejects host reuse through weak
+ownership tracking and ignores late settlements. Deferred adapter work must
+check cancellation/disposal before changing state; worker termination cannot
+undo its external effects.
+
+The request cap defaults to 4096 and is configurable through 1000000. Request,
+trace, stimulus and time-budget failures produce the parent-owned
+`simulation-limit` outcome. Ordinary domain failures become catchable BASIC
+`ERR201..209`; unhandled bridge errors also carry `simulationCode`. See
+[SIMULATION.md](../SIMULATION.md) for exact values and adapter requirements.
 
 Normal arrays, structures, procedures, functions, strings and numeric formatting
 remain part of the language. Binary exponentiation remains supported. Raw
 addresses and internal function pointers are unavailable, including through
 dynamic `EVAL`; injected raw internal tokens are rejected before its tokenizer.
 `TIME`/`TIME=` and `WAIT` use monotonic centiseconds; `TIME$` and `ON TIME` are
-unavailable. Graphics statements can emit VDU bytes, but screen queries, sound,
-mouse input, host events and hardware operations return unsupported errors.
+unavailable. The simulation library's explicit millisecond clock does not alter
+those semantics. Graphics statements can emit VDU bytes, but screen queries,
+sound, mouse input, host events and physical hardware operations remain
+unavailable. There is no native-backend bridge or automatic GUI/circuit wiring.
 
 The worker's WASM memory boundary isolates the embedding host. It does not
 guarantee that all possible BASIC programs are free of upstream interpreter
 faults inside that memory. WASM traps are reported as host errors; module memory
 is discarded. Native/WASM differential tests use fixed expected byte anchors,
 but the shared interpreter is not an independent semantic oracle.
+
+The current revision's executed build and runtime checks are recorded in
+[VALIDATION.md](../VALIDATION.md). Real-runtime simulation tests require a rebuilt
+module; static/protocol checks do not qualify C-stack preservation by themselves.
