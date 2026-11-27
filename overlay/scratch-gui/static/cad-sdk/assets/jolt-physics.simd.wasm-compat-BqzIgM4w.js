@@ -1,7 +1,7 @@
 async function mFr(aFr = {}) {
   var n = aFr, jFr = !!globalThis.window, sFr = !!globalThis.WorkerGlobalScope, pi = globalThis.process?.versions?.node && globalThis.process?.type != "renderer";
   if (pi) {
-    let { createRequire: r } = await import("./simulation.worker-DPJI2jMc.js").then(function(t) {
+    let { createRequire: r } = await import("./simulation.worker-Bmcrx7R7.js").then(function(t) {
       return t._;
     });
     var Wo = r(import.meta.url);

@@ -2160,3 +2160,11 @@ machine load. The sustained 1× full-editor target remains open.
 All 24 focused tests passed across the initial run and isolated
 retry. The loose-object and ground-contact test needed more than
 its default five-second deadline on the shared machine.
+
+The production SDK `7b736aa` was tested in the existing Brickwright
+Chrome host `22a9fdd`. Both examples loaded the bundled bw.11 SIMD
+module and moved after one Run click. Atlas reached 45.70 mm of lift
+and 14.74° of tilt at 6.36 simulated seconds. Stop, Reset, repeat Run,
+and worker reuse after a gravity edit passed. Scout passed Stop,
+Reset, and repeat Run. Sustained playback on the shared Mac measured
+0.648× for Atlas and 0.955× for Scout in these runs.
