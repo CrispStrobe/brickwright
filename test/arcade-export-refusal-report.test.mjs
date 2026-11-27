@@ -113,7 +113,8 @@ test('stage exporter opts in to clean observation on the single actual export in
     const AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;
     const execute=new AsyncFunction('assetLibraryRecords','withoutAssetLibraries','projectJsonToArcade',body);
     const out=await execute.call({props:{vm}},()=>[],project=>project,(input,opts)=>{
-        exports++;consumed=input;assert.equal(opts.captureObservation,true);return projectJsonToArcade(input,opts);
+        exports++;consumed=input;assert.equal(opts.captureObservation,true);assert.equal(opts.browserPointer,true);
+        return projectJsonToArcade(input,opts);
     });
     assert.equal(exports,1);assert.deepEqual(out.unsupported,[]);
     const capture=ownObservation(out);assert.equal(capture.captureStatus,'COMPLETE');assert.equal(capture.inputJson,consumed);
