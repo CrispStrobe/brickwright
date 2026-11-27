@@ -578,7 +578,7 @@ class ArcadeEmitter {
         this.scratchKeyboard = project.targets.some(target => Object.values(target.blocks || {})
             .some(block => block?.opcode?.startsWith('arcade_'))) ? null : planScratchArcadeKeyboard(project.targets);
         this.variableMonitors = new Map();
-        this.monitorSymbols = used;
+        this.auxiliarySymbols = used;
         this.initialGlobals = new Map();
         this.editedSavedReferenceIds = new Map();
         this.globals = new Map();       // Scratch variable id|name -> TS name
@@ -1114,6 +1114,78 @@ class ArcadeEmitter {
         return this.scratchKeyboard ? this.scratchKeyboard.controls.get(key) : KEY_BUTTON[key];
     }
 
+    browserPointer () {
+        if (!this.opts.browserPointer) return null;
+        if (!this.pointer) {
+            this.warn('Mouse and touch controls use the MakeCode Arcade browser simulator.');
+            this.pointer = {
+                x: this.reserveAuxiliarySymbol('__bwPointerX'),
+                y: this.reserveAuxiliarySymbol('__bwPointerY'),
+                down: this.reserveAuxiliarySymbol('__bwPointerDown'),
+                hits: this.reserveAuxiliarySymbol('__bwPointerHits'),
+                scripts: new Map()
+            };
+        }
+        return this.pointer;
+    }
+
+    pointerSource (pre, handlers) {
+        const {x, y, down, hits, scripts} = this.pointer;
+        pre.push(
+            `let ${x} = 80`,
+            `let ${y} = 60`,
+            `let ${down} = false`,
+            [
+                `function ${hits} (sprite: Sprite): boolean {`,
+                '    if (!sprite || (sprite.flags & (SpriteFlag.Invisible | sprites.Flag.Destroyed)) !== 0) return false',
+                `    const sx = ${x} - sprite.left; const sy = ${y} - sprite.top`,
+                '    if (sx < 0 || sx >= sprite.width || sy < 0 || sy >= sprite.height) return false',
+                '    const ix = Math.idiv(sx * sprite.image.width, sprite.width)',
+                '    const iy = Math.idiv(sy * sprite.image.height, sprite.height)',
+                '    return sprite.image.getPixel(ix, iy) !== 0',
+                '}'
+            ].join('\n')
+        );
+        const move = [`    ${x} = Math.clamp(0, 159, Math.floor(px))`, `    ${y} = Math.clamp(0, 119, Math.floor(py))`];
+        handlers.push(
+            ['browserEvents.onMouseMove(function (px, py) {', ...move, '})'].join('\n'),
+            `browserEvents.MouseLeft.onEvent(browserEvents.MouseButtonEvent.Released, function () { ${down} = false })`,
+            `browserEvents.onEvent(browserEvents.Event.PointerCancel, function () { ${down} = false })`,
+            `browserEvents.onEvent(browserEvents.Event.PointerLeave, function () { ${down} = false })`
+        );
+        const click = ['browserEvents.MouseLeft.onEvent(browserEvents.MouseButtonEvent.Pressed, function (px, py) {',
+            ...move, `    ${down} = true`];
+        if (scripts.size) {
+            click.push('    let picked: Sprite = null', '    let target = -1');
+            const shown = this.sprites.filter(sprite => this.emittedSprites.has(sprite));
+            for (const [index, sprite] of shown.entries()) {
+                const clones = this.isClonable(sprite);
+                const group = clones ? this.allOf(sprite.name) : `[${this.spriteVar.get(sprite.name)}]`;
+                click.push(`    for (const sprite of ${group}) {`,
+                    `        if (${hits}(sprite) && (!picked || sprite.z >= picked.z)) {`,
+                    `            picked = sprite; target = ${index}`, '        }', '    }');
+                const action = scripts.get(sprite);
+                if (action) action.index = index;
+            }
+            for (const [sprite, action] of scripts) {
+                const selected = sprite.isStage ? -1 : action.index;
+                if (selected === undefined) continue;
+                click.push(`    if (target === ${selected}) {`, ...action.functions.map(fn =>
+                    `        control.runInParallel(function () { ${fn}(${this.isClonable(sprite) ? 'picked' : ''}) })`), '    }');
+            }
+        }
+        click.push('})');
+        handlers.push(click.join('\n'));
+    }
+
+    reserveAuxiliarySymbol (base) {
+        let name = base;
+        const functions = new Set(this.functionNames());
+        while (this.auxiliarySymbols.has(name) || functions.has(name)) name += '_';
+        this.auxiliarySymbols.add(name);
+        return name;
+    }
+
     variableMonitor (id, name) {
         if (!id || !name) return null;
         if (this.variableMonitors.has(id)) return this.variableMonitors.get(id);
@@ -1128,10 +1200,7 @@ class ArcadeEmitter {
             this.cloneVars.get(owner.name).set(key, owner.variables[id][1]);
             value = `${this.spriteVar.get(owner.name)}.data[${JSON.stringify(key)}]`;
         } else value = this.varName(owner, name);
-        let flag = '__bwMonitorVisible';
-        const functions = new Set(this.functionNames());
-        while (this.monitorSymbols.has(flag) || functions.has(flag)) flag += '_';
-        this.monitorSymbols.add(flag);
+        const flag = this.reserveAuxiliarySymbol('__bwMonitorVisible');
         const entry = {value, name: owner.isStage ? name : `${owner.name}: ${name}`,
             flag, visible: false};
         this.variableMonitors.set(id, entry);
@@ -2461,20 +2530,44 @@ class ArcadeEmitter {
             if (this.clonable.has(what)) return this.use('touching', `_touching(${me}, ${this.allOf(what)})`);
             const other = this.spriteVar.get(what);
             if (other) return `${me}.overlapsWith(${other})`;
-            if (what === '_mouse_') this.note(`touching mouse-pointer: ${MOUSE_WHY}`);
+            if (what === '_mouse_') {
+                const pointer = this.browserPointer();
+                if (pointer) return pointer.hits + '(' + me + ')';
+                this.note(`touching mouse-pointer: ${MOUSE_WHY}`);
+            }
             else this.note(`touching ${what || 'the mouse pointer'}`);
             return 'false';
         }
-        case 'sensing_mousex': this.note(`mouse x: ${MOUSE_WHY}`); return this.na();
-        case 'sensing_mousey': this.note(`mouse y: ${MOUSE_WHY}`); return this.na();
-        case 'sensing_mousedown': this.note(`mouse down?: ${MOUSE_WHY}`); return 'false';
-        case 'sensing_distanceto':
-            if (this.menuField(b, 'DISTANCETOMENU', 'DISTANCETOMENU') === '_mouse_') {
-                this.note(`distance to mouse-pointer: ${MOUSE_WHY}`);
-                return this.na();
-            }
-            this.note('sensing_distanceto as a value');
+        case 'sensing_mousex': {
+            const pointer = this.browserPointer();
+            if (pointer) return '(' + pointer.x + ' - 80) * 3';
+            this.note('mouse x: ' + MOUSE_WHY);
             return this.na();
+        }
+        case 'sensing_mousey': {
+            const pointer = this.browserPointer();
+            if (pointer) return '(60 - ' + pointer.y + ') * 3';
+            this.note('mouse y: ' + MOUSE_WHY);
+            return this.na();
+        }
+        case 'sensing_mousedown': {
+            const pointer = this.browserPointer();
+            if (pointer) return pointer.down;
+            this.note('mouse down?: ' + MOUSE_WHY);
+            return 'false';
+        }
+        case 'sensing_distanceto': {
+            const destination = this.menuField(b, 'DISTANCETOMENU', 'DISTANCETOMENU');
+            const pointer = destination === '_mouse_' ? this.browserPointer() : null;
+            const other = this.spriteVar.get(destination);
+            if (me && (other || pointer)) {
+                const dx = me + '.x - ' + (other ? other + '.x' : pointer.x);
+                const dy = me + '.y - ' + (other ? other + '.y' : pointer.y);
+                return 'Math.sqrt((' + dx + ') * (' + dx + ') + (' + dy + ') * (' + dy + ')) * 3';
+            }
+            this.note(destination === '_mouse_' ? 'distance to mouse-pointer: ' + MOUSE_WHY : 'sensing_distanceto as a value');
+            return this.na();
+        }
         // ── costumes and backdrops ──
         case 'looks_costumenumbername': {
             if (!me) return this.na();
@@ -2773,7 +2866,11 @@ class ArcadeEmitter {
             const place = pen ? this.use('pen', `_penTo(${me}, `) : `${me}.setPosition(`;
             if (me && other) push(`${place}${other}.x, ${other}.y)`);
             else if (me && to === '_random_') push(`${place}randint(0, 160), randint(0, 120))`);
-            else if (to === '_mouse_') push(`// ${this.note(`go to mouse-pointer: ${MOUSE_WHY}`)}`);
+            else if (to === '_mouse_') {
+                const pointer = this.browserPointer();
+                if (me && pointer) push(place + pointer.x + ', ' + pointer.y + ')');
+                else push('// ' + this.note('go to mouse-pointer: ' + MOUSE_WHY));
+            }
             else push(`// ${this.note(`go to ${to || '…'}`)}`);
             return;
         }
@@ -5092,7 +5189,13 @@ class ArcadeEmitter {
                 } else if (/^(procedures_prototype|argument_|.*_menu$)/.test(b.opcode)) {
                     continue;
                 } else if (b.opcode === 'event_whenthisspriteclicked' || b.opcode === 'event_whenstageclicked') {
-                    handlers.push(`// ${this.note(`when ${b.opcode === 'event_whenstageclicked' ? 'stage' : 'this sprite'} clicked: ${MOUSE_WHY}`)}`);
+                    const pointer = this.browserPointer();
+                    if (!pointer) handlers.push('// ' + this.note('when ' +
+                        (b.opcode === 'event_whenstageclicked' ? 'stage' : 'this sprite') + ' clicked: ' + MOUSE_WHY));
+                    else {
+                        if (!pointer.scripts.has(t)) pointer.scripts.set(t, {functions: []});
+                        pointer.scripts.get(t).functions.push(this.scriptFunction('click', b, false).fn);
+                    }
                 } else if (/^event_|^control_start_as_clone/.test(b.opcode)) {
                     handlers.push(`// ${this.note(`${b.opcode} script`)}`);
                 } else if (!b.parent) {
@@ -5314,6 +5417,7 @@ class ArcadeEmitter {
                 out.push(`scene.setBackgroundImage(${toImgLiteral(bg)})`);
             }
         }
+        if (this.pointer) this.pointerSource(pre, handlers);
         // The green flag's scripts run side by side. An imported Arcade program
         // (one flag script, nothing that can stop it) is its own startup code, run
         // in place, so it keeps PXT's order: what it creates exists before the
@@ -5413,6 +5517,7 @@ class ArcadeEmitter {
  * @param {(target, costume) => string|null} [opts.costumeSvg] the costume's SVG text, if it is an SVG
  * @param {(target, costume) => {rgba, width, height}|null} [opts.costumeRgba] its pixels, for anything else
  * @param {(target, costume) => Array<string|null>|null} [opts.costumePalette] editable palette, if any
+ * @param {boolean} [opts.browserPointer] keep Scratch pointer controls in the browser simulator
  * @param {Array<object>} [opts.animationDocuments] full published Pixel timeline source documents
  * @param {(stage) => object|null} [opts.stageBackground] a 160x120 palette image for the backdrop
  * @returns {{ts: string, files: object, unsupported: string[], warnings: string[]}}
@@ -5472,7 +5577,7 @@ function emitProjectToArcade (project, opts, snapshotCallbacks) {
         'main.ts': projectTs,
         ...assetFiles,
         'pxt.json': `${JSON.stringify({
-            name, description: 'Exported from BrickWright', dependencies: {device: '*', ...(e.requiresTextSpritePackage ? {'arcade-text':'github:microsoft/arcade-text#fa2439314c6633943666a763fdae32a5c67a9ae8'} : {}), ...(e.requiresSpriteDataPackage ? {'arcade-sprite-data':'github:microsoft/arcade-sprite-data#332026d12c46286c7afe59bc4829ccf08471d5b1'} : {}), ...(e.requiresCarnivalPackage ? {'arcade-carnival':'github:microsoft/arcade-carnival#v0.0.7'} : {}), ...(e.requiresLegacyTilemapPackage ? {'color-coded-tilemap': '*'} : {}), ...(e.requiresAnimationPackage ? {animation: '*'} : {}), ...(e.requiresSevensegPackage ? {sevenseg: '*'} : {}), ...(e.requiresDartsPackage ? {darts: '*'} : {}), ...(e.requiresCorgioPackage ? {corgio: '*'} : {}), ...(e.requiresScrollerPackage ? {'arcade-background-scroll': e.scrollerVersion===LEGACY_SCROLLER_REVISION?`github:riknoll/arcade-background-scroll#${LEGACY_SCROLLER_REVISION}`:'github:microsoft/arcade-background-scroll#v0.1.2'} : {}), ...(e.requiresCharacterAnimationsPackage ? {'arcade-character-animations': `github:microsoft/arcade-character-animations#${e.characterVersion}`} : {}), ...(e.requiresMultiplayerPackage ? {multiplayer: '*'} : {})},
+            name, description: 'Exported from BrickWright', dependencies: {device: '*', ...(e.pointer ? {'browser-events': '*'} : {}), ...(e.requiresTextSpritePackage ? {'arcade-text':'github:microsoft/arcade-text#fa2439314c6633943666a763fdae32a5c67a9ae8'} : {}), ...(e.requiresSpriteDataPackage ? {'arcade-sprite-data':'github:microsoft/arcade-sprite-data#332026d12c46286c7afe59bc4829ccf08471d5b1'} : {}), ...(e.requiresCarnivalPackage ? {'arcade-carnival':'github:microsoft/arcade-carnival#v0.0.7'} : {}), ...(e.requiresLegacyTilemapPackage ? {'color-coded-tilemap': '*'} : {}), ...(e.requiresAnimationPackage ? {animation: '*'} : {}), ...(e.requiresSevensegPackage ? {sevenseg: '*'} : {}), ...(e.requiresDartsPackage ? {darts: '*'} : {}), ...(e.requiresCorgioPackage ? {corgio: '*'} : {}), ...(e.requiresScrollerPackage ? {'arcade-background-scroll': e.scrollerVersion===LEGACY_SCROLLER_REVISION?`github:riknoll/arcade-background-scroll#${LEGACY_SCROLLER_REVISION}`:'github:microsoft/arcade-background-scroll#v0.1.2'} : {}), ...(e.requiresCharacterAnimationsPackage ? {'arcade-character-animations': `github:microsoft/arcade-character-animations#${e.characterVersion}`} : {}), ...(e.requiresMultiplayerPackage ? {multiplayer: '*'} : {})},
             files: [...Object.keys(assetFiles), 'main.ts'], preferredEditor: 'tsprj',
             ...(!samePalette(e.palette, ARCADE_PALETTE) ? {palette: ['#000000', ...e.palette.slice(1)]} : {})
         }, null, 4)}\n`
