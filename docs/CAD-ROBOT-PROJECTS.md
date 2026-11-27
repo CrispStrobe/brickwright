@@ -2258,3 +2258,104 @@ All 46 focused tests passed. The new bridge regression verifies
 that direct status reads stay current between notifications,
 readings stay aligned with the last completed batch while a tick
 is in flight, and Stop and Reset publish immediately.
+
+### Skip hidden Assembly Simulation control updates
+
+The CAD assembly panel refreshes its controls only when visible.
+Rendering, motion traces, and replay recording continue while it is
+hidden. Opening the panel shows the current pose, joint readings, and
+replay range immediately.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/babd27ae4f59b579ec3220bde9c0aed152894711)
+
+In the shared Chromium, Atlas produced 4,785 hidden-panel DOM
+mutations with SDK `02287df` and zero with `babd27a`. The full CAD
+snapshot and Circuit readings matched at 6.065 simulated seconds.
+Both runs passed one-click Run, Stop, Reset, repeat Run, and a restart
+after a gravity edit. Scout also passed the lifecycle checks and
+produced zero hidden-panel mutations. Atlas measured 0.814× with
+the previous SDK and 0.681× with the new one. Scout measured 1.003×
+with the new SDK. Sustained 1× across the full workload remains open.
+The live tests used the existing Brickwright browser host and the
+respective packaged SDKs.
+
+All 49 focused CrispCAD tests passed. The Brickwright SB3 check passed
+for CAD document versions 41–46, the exact kernel loaded and measured
+the smoke-test box in Chromium, and all 842 SDK file hashes and nine
+pin tests passed. The SDK build skips gzip size reporting and completed
+without the previous reporting-stage failure. Brickwright pins
+`babd27a`.
+
+### Reuse the CAD worker watchdog
+
+The simulation client keeps one watchdog for all pending requests.
+Ordinary steps keep their ten-second deadline and startup keeps its
+sixty-second deadline. Completing a request removes it from the
+pending map. When the watchdog wakes, it checks the next pending
+deadline. A stalled worker is terminated and all pending requests
+reject as before.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/059c08ae9a63ef3991ab7cf41a62a6ae7a7c19a9)
+
+Across 600 simulated worker replies, the unit probe counted two timer
+allocations including startup and one cancellation before disposal.
+In the existing Brickwright GUI host with shared Chromium, Atlas
+allocated 1,360 worker timers with SDK `babd27a` and two with `059c08a`
+over roughly six simulated seconds. Both runs passed one-click Run,
+Stop, Reset, repeat Run, and the gravity-edit restart. The new SDK
+measured 1.002× on Atlas and 1.004× on Scout in these runs. Atlas's
+previous SDK measured 0.999×. These runs establish lower timer
+traffic and show real-time playback on this Mac in this run.
+
+All 52 focused tests passed, including overlapping deadlines, worker
+disposal, telemetry, and the incoming hole-driven fastening suite.
+The real Brickwright SB3 write and load path preserved CAD document
+versions 41–47, including the byte representation of a version 47
+standard counterbored hole. Brickwright pins SDK `059c08a`.
+All 842 SDK file hashes and nine pin tests passed.
+
+### Upload only new motion trail vertices
+
+The viewport uploads appended trace vertices and reuses the buffered
+prefix when replay seeks backward. A new trail or the eviction of the
+oldest sample at the 2,000-sample cap rebuilds the buffer. Scenes without
+tracers skip the trace pose map and repeated viewport invalidation.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/8b784d7db79faefa6dd0cfc84afaf59d568f4add)
+
+In the existing Brickwright GUI host with shared Chromium, Atlas
+ran with a chassis tracer for 12.065 simulated seconds in both
+versions. Captured trace-buffer uploads fell from 18,336,000 bytes
+with SDK `059c08a` to 9,288 bytes with `8b784d7`. All 380 shared
+recorded path samples matched exactly. Atlas measured 0.691× and
+0.788× in the separate runs. Scout measured 1.001× over 12.130
+simulated seconds with the new SDK and no added tracer. Both
+robots passed Run, Stop, Reset, and repeat Run. Atlas also passed
+the restart after a gravity edit.
+
+All 37 focused CrispCAD tests passed, including trace append and
+replay, manufacturing, and the editor menu. Brickwright pins SDK
+`8b784d7`. All 843 SDK file hashes and nine pin tests passed.
+The real Brickwright SB3 path passed for CAD document versions 41–47.
+
+### Reuse trail slots after the sample cap
+
+Once a trail has 2,000 points, its next sample overwrites the oldest
+vertex slot. A fixed index buffer draws the slots in chronological
+order across the wrap. Seeking within the buffered trail changes
+the visible range without rewriting its vertices.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/811bc9977e3558bf2c1df712b450817fb9160716)
+
+A shared-Chromium WebGL viewport test seeded the same 2,000-point
+trail and advanced it 240 times in each version. The 240 uploads
+fell from 5,760,000 to 2,880 bytes. Every frame drew the same ordered
+vertices and positioned the marker at the same newest point. Replay
+seeks and repeated wraps passed the focused tests. All 19 tests
+in the focused suite passed.
+
+With the packaged SDK in the existing Brickwright GUI host, Atlas
+with a tracer and Scout passed Run, Stop, Reset, and repeat Run.
+Atlas also passed a restart after a gravity edit. At 12.065
+simulated seconds its full CAD frame and circuit readings matched
+SDK `8b784d7` exactly. All 375 shared trail samples matched.
+The shared Mac measured 0.536× for Atlas and 0.811× for Scout.
+The 1× target remains open across the tested workloads.
+Brickwright pins SDK `811bc99`. All 843 file hashes and nine pin
+tests passed.
