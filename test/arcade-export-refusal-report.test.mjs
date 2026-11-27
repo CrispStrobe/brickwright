@@ -1,4 +1,4 @@
-import {hiddenCodeDrafts} from '../overlay/scratch-gui/src/lib/bw-matrix/code-languages.js';
+import {hiddenCodeDrafts, standaloneBasicDrafts} from '../overlay/scratch-gui/src/lib/bw-matrix/code-languages.js';
 import {test as originalTest} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -171,8 +171,8 @@ test('original export error remains visible and assets are not modified by repor
     const edited=context();edited.state={lang:'pseudocode',buffers:{pseudocode:'old'},conversionReport:{operation:'export'}};
     edited.setState=patch=>{const update=typeof patch==='function'?patch(edited.state):patch;
         if(update&&Object.hasOwn(update,'conversionReport'))throw new Error('report clear failed');if(update)Object.assign(edited.state,update);};
-    const setCode=new Function('LANG_LABEL','hiddenCodeDrafts','text',method('setActiveCode (text)').slice(1,-1));
-    assert.doesNotThrow(()=>setCode.call(edited,{pseudocode:'Pseudocode'},hiddenCodeDrafts,'current source'));
+    const setCode=new Function('LANG_LABEL','hiddenCodeDrafts', 'standaloneBasicDrafts','text',method('setActiveCode (text)').slice(1,-1));
+    assert.doesNotThrow(()=>setCode.call(edited,{pseudocode:'Pseudocode'},hiddenCodeDrafts,standaloneBasicDrafts,'current source'));
     assert.equal(edited.state.buffers.pseudocode,'current source','report-only clearing cannot block the original edit');
 });
 

@@ -66,8 +66,13 @@ test('Pico BASIC source is dispatched using the selected firmware dialect', asyn
     assert.equal(events[1].picoWakeOnPrompt, true);
     assert.deepEqual(events[1].picoBasicCommands, ['10 print 6*7', 'RUN']);
 
+    await runMachineConfig(config({basicConsole: 'stefan'}), opts);
+    assert.equal(events[2].picoBasicConsole, 'stefan');
+    assert.equal(events[2].picoWakeOnPrompt, undefined);
+    assert.deepEqual(events[2].picoBasicCommands, ['10 print 6*7', 'RUN']);
+
     await assert.rejects(runMachineConfig(config({}), opts), /compatible Pico UART firmware/);
-    assert.equal(events.length, 2);
+    assert.equal(events.length, 3);
 });
 
 const picoUf2 = process.env.PICOBB_UF2;

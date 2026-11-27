@@ -21,5 +21,9 @@ export function picoBasicCommands (source, dialect = 'bbc') {
     if (lines.length > 3276 || lines.some(line => /[^\x20-\x7e]/.test(line) || line.length > 240)) {
         throw new Error('PicoBB source must use printable ASCII, with up to 3,276 lines of 240 characters.');
     }
-    return [...(numbered ? lines : lines.map((line, index) => `${(index + 1) * 10} ${line}`)), 'RUN'];
+    const listing = numbered ? lines : lines.map((line, index) => `${(index + 1) * 10} ${line}`);
+    if (dialect === 'stefan' && listing.some(line => line.length > 120)) {
+        throw new Error("Stefan's BASIC accepts up to 120 characters per line, including the line number.");
+    }
+    return [...listing, 'RUN'];
 }

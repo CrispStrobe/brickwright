@@ -244,8 +244,9 @@ export async function activateConfig(config, opts = {}) {
     }
 
     if (cfg.machine === 'rp2040js' && bootSlotId === 'flash') {
-        if (cfg.provenance?.program?.basicConsole === 'piccolo') {
-            bootMedia.picoBasicConsole = 'piccolo';
+        const basicConsole = cfg.provenance?.program?.basicConsole;
+        if (basicConsole === 'piccolo' || basicConsole === 'stefan') {
+            bootMedia.picoBasicConsole = basicConsole;
         } else if (cfg.provenance?.program?.startKey === '\r') {
             bootMedia.picoWakeOnPrompt = true;
             bootMedia.picoBasicConsole = 'bbc';

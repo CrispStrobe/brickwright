@@ -46,7 +46,10 @@ export const libraryMedia = [
     {id: 'picobb-rp2040', title: 'PicoBB BBC BASIC', machine: 'rp2040js', license: 'Zlib',
         revision: 'd6f09f79a6c73a2fcdf7f53b75624aa01f096baf'},
     {id: 'piccolobasic-rp2040', title: 'PiccoloBASIC (UART)', machine: 'rp2040js', license: 'BSD-3-Clause',
-        licenseFile: 'LICENSE', revision: 'a5a7e3c24658ef98675835faa3cc31222787814f'}
+        licenseFile: 'LICENSE', revision: 'a5a7e3c24658ef98675835faa3cc31222787814f'},
+    {id: 'stefan-basic-rp2040', title: 'Stefan’s BASIC (UART)', machine: 'rp2040js',
+        license: 'BSD-3-Clause AND LGPL-2.1-or-later', licenseFile: 'LICENSE',
+        revision: '177883b516f6dad4f0395d68ea1fa75c05382e41'}
 ];
 
 export async function readMediaManifest (url) {

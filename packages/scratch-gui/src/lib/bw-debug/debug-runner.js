@@ -2153,7 +2153,10 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             if (/^\x1b\[\d+;\d+R$/.test(reply)) input.write(new TextEncoder().encode(reply));
         });
         const commands = bootMedia.picoBasicCommands || [];
-        const banner = bootMedia.picoBasicConsole === 'piccolo' ? 'PiccoloBASIC UART' : 'BBC BASIC for Pico Console';
+        const banners = {piccolo: 'PiccoloBASIC UART', stefan: "Stefan's Basic 2.0", bbc: 'BBC BASIC for Pico Console'};
+        const dialect = bootMedia.picoBasicConsole || 'bbc';
+        const banner = banners[dialect];
+        const promptWidth = dialect === 'stefan' ? 2 : 1;
         const encoder = new TextEncoder();
         let nextCommand = 0;
         let sawBanner = false;
@@ -2161,7 +2164,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             if (!sawBanner || nextCommand >= commands.length || input.pending()) return;
             const buffer = cursor.buffer.active;
             const line = buffer.getLine(buffer.baseY + buffer.cursorY)?.translateToString(true);
-            if (line === '>' && buffer.cursorX === 1) {
+            if (line?.trimEnd() === '>' && buffer.cursorX === promptWidth) {
                 input.write(encoder.encode(commands[nextCommand++] + '\r'));
             }
         }));

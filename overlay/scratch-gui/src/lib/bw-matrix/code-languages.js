@@ -7,7 +7,8 @@ const basicProfiles = [
     {id: 'i8086-dos', device: 'i8086', dialect: 'ms'},
     {id: 'i8086-ubasic', device: 'i8086', dialect: 'ms'},
     {id: 'pico-bbcbasic', device: 'pico', dialect: 'bbc', media: 'picobb-rp2040'},
-    {id: 'pico-piccolo', device: 'pico', dialect: 'piccolo', media: 'piccolobasic-rp2040'}
+    {id: 'pico-piccolo', device: 'pico', dialect: 'piccolo', media: 'piccolobasic-rp2040', standalone: true},
+    {id: 'pico-stefan', device: 'pico', dialect: 'stefan', media: 'stefan-basic-rp2040', standalone: true}
 ];
 
 export const basicProfilesFor = device => basicProfiles.filter(profile => device ? profile.device === device : profile.device !== 'pico');
@@ -16,6 +17,13 @@ export const basicProfileFor = (device, preferred) => {
     const profiles = basicProfilesFor(device);
     return profiles.find(profile => profile.id === preferred) || profiles[0];
 };
+
+export const picoBasicProfileForDialect = dialect => basicProfiles.find(profile => profile.media && profile.dialect === dialect);
+
+export function standaloneBasicDrafts (buffers) {
+    return Object.fromEntries(basicProfiles.filter(profile => profile.standalone && buffers[profile.id] != null)
+        .map(profile => [profile.id, buffers[profile.id]]));
+}
 
 export function codeLanguageAvailable (lang, device, {remoteImages = true, riscvHosted = true} = {}) {
     if (!device || lang === 'pseudocode') return true;

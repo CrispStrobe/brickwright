@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {basicProfileFor, basicProfilesFor, codeLanguageAvailable, hiddenCodeDrafts} from '../overlay/scratch-gui/src/lib/bw-matrix/code-languages.js';
+import {basicProfileFor, basicProfilesFor, codeLanguageAvailable, hiddenCodeDrafts, picoBasicProfileForDialect, standaloneBasicDrafts} from '../overlay/scratch-gui/src/lib/bw-matrix/code-languages.js';
 import {picoBasicCommands} from '../overlay/scratch-gui/src/lib/bw-machines/pico-basic-source.js';
 
 const languages = ['pseudocode', 'python', 'javascript', 'c', 'basic', 'asm', 'forth', 'tcl', 'fe'];
@@ -30,7 +30,7 @@ test('BASIC profiles respect the selected machine and retain a compatible prefer
     assert.equal(basicProfileFor('pico', 'ms').id, 'pico-bbcbasic');
     assert.equal(basicProfileFor(null, 'pico-bbcbasic').id, 'bbc');
     assert.equal(basicProfileFor('pico', 'ms').dialect, 'bbc');
-    assert.deepEqual(basicProfilesFor('pico').map(profile => profile.id), ['pico-bbcbasic', 'pico-piccolo']);
+    assert.deepEqual(basicProfilesFor('pico').map(profile => profile.id), ['pico-bbcbasic', 'pico-piccolo', 'pico-stefan']);
     assert.equal(basicProfileFor('pico', 'pico-piccolo').media, 'piccolobasic-rp2040');
     assert.equal(codeLanguageAvailable('basic', 'pico', {remoteImages: false}), false);
     assert.equal(basicProfileFor('stm32f030', 'ms'), undefined);
@@ -60,4 +60,18 @@ test('PiccoloBASIC receives unnumbered lowercase source and keeps labels and str
     assert.throws(() => picoBasicCommands('10 print 42', 'piccolo'), /unnumbered/);
     assert.throws(() => picoBasicCommands('print 42\nNEW', 'piccolo'), /Remove RUN/);
     assert.throws(() => picoBasicCommands('rem filler\n'.repeat(400), 'piccolo'), /4095 ASCII/);
+});
+
+test('Stefan’s BASIC uses numbered lines and respects the UART editor limit', () => {
+    assert.deepEqual(picoBasicCommands('INPUT A\nPRINT A*2', 'stefan'), ['10 INPUT A', '20 PRINT A*2', 'RUN']);
+    assert.deepEqual(picoBasicCommands('30 GOTO 30', 'stefan'), ['30 GOTO 30', 'RUN']);
+    assert.throws(() => picoBasicCommands('10 REM ' + 'x'.repeat(114), 'stefan'), /120 characters/);
+});
+
+test('the two standalone Pico editors retain independent drafts across conversions', () => {
+    assert.equal(picoBasicProfileForDialect('stefan').id, 'pico-stefan');
+    assert.equal(picoBasicProfileForDialect('bbc').standalone, undefined);
+    const buffers = {basic: '10 PRINT "BBC"', 'pico-piccolo': 'print "Piccolo"', 'pico-stefan': '10 PRINT "Stefan"'};
+    assert.deepEqual(standaloneBasicDrafts(buffers),
+        {'pico-piccolo': 'print "Piccolo"', 'pico-stefan': '10 PRINT "Stefan"'});
 });

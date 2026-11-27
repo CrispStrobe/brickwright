@@ -642,8 +642,8 @@ export const CELLS = Object.freeze({
             lowered: [via('c')]
         },
         basic: {
-            native: shipped('bas', 'PicoBB BBC BASIC (Zlib) and PiccoloBASIC (BSD-3-Clause)', 'none', {
-                note: 'Code runs either pinned firmware through UART in rp2040js. PiccoloBASIC uses unnumbered source and labels.'
+            native: shipped('bas', 'PicoBB BBC BASIC, PiccoloBASIC, and Stefan’s BASIC', 'none', {
+                note: 'Code runs pinned firmware through UART in rp2040js. PiccoloBASIC uses labels, and Stefan’s BASIC supports numbered lines and interactive INPUT.'
             }),
             lowered: [via('micropython'), via('c')]
         },

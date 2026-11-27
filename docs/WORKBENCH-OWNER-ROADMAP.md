@@ -178,6 +178,6 @@ The combined JSON ledger and individual raw receipts are in `artifacts/circuit-f
   general-purpose authoring target.
 - Offer only matching BASIC runtimes in the profile selector. PicoBB source
   runs through the pinned RP2040 UART firmware with its output in Controller.
-- PiccoloBASIC has a separate Pico profile and UART monitor. Extend the Pico
-  profiles next with Stefan's BASIC. Track transport, dialect, firmware and Code execution
-  qualification in [the language matrix plan](LANGUAGE-DEVICE-MATRIX-PLAN.md#code-when-a-machine-is-selected).
+- PiccoloBASIC and Stefan’s BASIC have separate Pico profiles and drafts.
+  Stefan’s BASIC runs numbered listings and accepts live input in Controller.
+  Track transport, dialect, firmware and Code execution qualification in [the language matrix plan](LANGUAGE-DEVICE-MATRIX-PLAN.md#code-when-a-machine-is-selected).

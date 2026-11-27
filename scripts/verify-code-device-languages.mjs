@@ -45,7 +45,7 @@ try {
     assert.deepEqual(await profiles(), ['bbc']);
     await target('pico');
     await hasTabs(pseudo, py, c, bas, asm);
-    assert.deepEqual(await profiles(), ['pico-bbcbasic', 'pico-piccolo']);
+    assert.deepEqual(await profiles(), ['pico-bbcbasic', 'pico-piccolo', 'pico-stefan']);
 
     await openCodeActions(page);
     const menu = page.getByTestId('bw-code-actions-menu');
@@ -74,6 +74,16 @@ try {
     await rows.getByText('PiccoloBASIC UART', {exact: true}).waitFor();
     await rows.getByText(/^PICCOLO-GUI\s+42$/).waitFor({timeout: 120000});
 
+    await profile.selectOption('pico-stefan');
+    await typeIntoEditor(page, '10 INPUT A\n20 PRINT A*2');
+    await page.locator('[class*="green-flag_green-flag"]:visible').first().click();
+    await rows.getByText(/^Stefan's Basic 2\.0/).waitFor();
+    await rows.getByText('?', {exact: true}).waitFor();
+    await page.getByTestId('bw-picobb-terminal').locator('textarea').focus();
+    await page.keyboard.type('21');
+    await page.keyboard.press('Enter');
+    await rows.getByText('42', {exact: true}).waitFor();
+
     await profile.selectOption('pico-bbcbasic');
     await page.getByTestId('bw-code-editor').locator('.cm-content').getByText('PRINT "PICO-FLAG ";6*7', {exact: true}).waitFor();
     await profile.selectOption('pico-piccolo');
@@ -88,22 +98,26 @@ try {
     await page.getByTestId('bw-device-select-menu').selectOption('__manage__');
     await menu.waitFor({state: 'hidden'});
     const manager = page.getByTestId('bw-machine-manager');
-    await manager.getByRole('searchbox', {name: 'Search firmware'}).fill('PiccoloBASIC');
+    await manager.getByRole('searchbox', {name: 'Search firmware'}).fill('Stefan');
     await manager.getByTestId('bw-mm-downloadable-media').getByRole('button', {name: 'Run', exact: true}).click();
     await manager.waitFor({state: 'hidden'});
-    await rows.getByText('PiccoloBASIC UART', {exact: true}).waitFor();
+    await rows.getByText(/^Stefan's Basic 2\.0/).waitFor();
     await tab(bas).click();
-    assert.equal(await profile.inputValue(), 'pico-piccolo');
+    assert.equal(await profile.inputValue(), 'pico-stefan');
     await page.waitForFunction(() => {
         const saved = JSON.parse(localStorage.getItem('bw-code-autosave') || 'null');
-        return saved?.profile === 'pico-piccolo' && saved.code.includes('PICCOLO-GUI');
+        return saved?.profile === 'pico-stefan' && saved.code.includes('10 INPUT A');
     });
     await page.reload({waitUntil: 'domcontentloaded'});
     await page.getByRole('tab', {name: 'Code', exact: true}).click();
-    await page.getByTestId('bw-code-editor').locator('.cm-content').getByText('let a=40', {exact: true}).waitFor();
-    assert.equal(await profile.inputValue(), 'pico-piccolo');
+    await page.getByTestId('bw-code-editor').locator('.cm-content').getByText('10 INPUT A', {exact: true}).waitFor();
+    assert.equal(await profile.inputValue(), 'pico-stefan');
     assert.deepEqual(errors, []);
-    console.log('Code tabs, overflow, retained draft, four BASIC profile sets, and both real Pico UART interpreters passed.');
+    console.log('Code tabs, overflow, retained draft, four BASIC profile sets, and three real Pico UART interpreters passed.');
+} catch (error) {
+    const terminal = page.getByTestId('bw-picobb-terminal').locator('.xterm-rows');
+    if (await terminal.count()) console.error(await terminal.innerText());
+    throw error;
 } finally {
     await browser.close();
 }
