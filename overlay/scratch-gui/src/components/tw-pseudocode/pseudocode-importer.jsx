@@ -6420,8 +6420,8 @@ class PseudocodeImporter extends React.Component {
         const summary = !machine && device && matrixSummary(lang, device, locale);
         const standalone = this.standaloneBasicProfile();
         const notes = {
-            piccolo: local('PiccoloBASIC uses unnumbered source, lowercase keywords and labels.',
-                'PiccoloBASIC verwendet Quelltext ohne Zeilennummern, kleingeschriebene Schlüsselwörter und Sprungmarken.'),
+            piccolo: local('Use unnumbered source, lowercase keywords and labels. SAVE, LOAD and FILES use LittleFS. Files are included when you save the Brickwright project.',
+                'Quelltext ohne Zeilennummern, kleingeschriebene Schlüsselwörter und Sprungmarken verwenden. SAVE, LOAD und FILES verwenden LittleFS. Dateien werden mit dem Brickwright-Projekt gespeichert.'),
             stefan: local('Use line numbers for jumps and answer INPUT in Controller. SAVE, CATALOG and LOAD use LittleFS. Files survive reruns and are included when you save the Brickwright project.',
                 'Für Sprünge Zeilennummern verwenden und INPUT im Controller beantworten. SAVE, CATALOG und LOAD verwenden LittleFS. Dateien bleiben bei Neustarts erhalten und werden mit dem Brickwright-Projekt gespeichert.')
         };

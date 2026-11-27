@@ -49,7 +49,7 @@ export const libraryMedia = [
         revision: 'd6f09f79a6c73a2fcdf7f53b75624aa01f096baf',
         flashHash: PICOBB_FLASH.sha256},
     {id: 'piccolobasic-rp2040', title: 'PiccoloBASIC (UART)', machine: 'rp2040js', license: 'BSD-3-Clause',
-        licenseFile: 'LICENSE', revision: 'a5a7e3c24658ef98675835faa3cc31222787814f'},
+        licenseFile: 'README.md', revision: 'b1931dbdc0f17978b5db95ac7e9018b19913eaf7'},
     {id: 'stefan-basic-rp2040', title: 'Stefan’s BASIC (UART)', machine: 'rp2040js',
         license: 'BSD-3-Clause AND LGPL-2.1-or-later', licenseFile: 'README.md',
         revision: 'ac3da4ed3ba0d79168903062dbef6667c361c614'}
