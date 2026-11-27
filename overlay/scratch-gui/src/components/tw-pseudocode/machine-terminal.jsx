@@ -9,7 +9,7 @@ export default function MachineTerminal({session, isFullScreen, onToggleFullScre
     const [text, setText] = React.useState('');
     const [line, setLine] = React.useState('');
     const output = React.useRef(null);
-    React.useEffect(() => session.subscribe(setText), [session]);
+    React.useEffect(() => session.raw ? undefined : session.subscribe(setText), [session]);
     React.useLayoutEffect(() => {
         if (output.current) output.current.scrollTop = output.current.scrollHeight;
     }, [text]);

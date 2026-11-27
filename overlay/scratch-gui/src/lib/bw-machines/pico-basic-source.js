@@ -27,3 +27,15 @@ export function picoBasicCommands (source, dialect = 'bbc') {
     }
     return [...listing, 'RUN'];
 }
+
+const consoleSpecs = {
+    bbc: {banner: 'BBC BASIC for Pico Console', baudRate: 115200, promptWidth: 1, wake: true},
+    piccolo: {banner: 'PiccoloBASIC UART', baudRate: 115200, promptWidth: 1},
+    stefan: {banner: "Stefan's Basic 2.0", baudRate: 9600, promptWidth: 2}
+};
+export const picoBasicConsoleSpec = dialect => consoleSpecs[dialect];
+
+export function picoBasicAtPrompt (buffer, {promptWidth}) {
+    const line = buffer.getLine(buffer.baseY + buffer.cursorY)?.translateToString(true);
+    return buffer.cursorX === promptWidth && line?.trimEnd() === '>';
+}

@@ -105,8 +105,16 @@ each use pinned media-lab UART firmware. Code waits for each interpreter prompt
 before sending the next line, and each profile retains its own draft.
 PiccoloBASIC uses unnumbered source and labels. Stefan’s BASIC uses line numbers
 for jumps and accepts `INPUT` in Controller. Blocks conversion is available
-for PicoBB. Physical deployment from Code and storage support for the
-standalone Stefan profile are open.
+for PicoBB. The Pico BASIC actions in Code download the selected BOOTSEL
+firmware and can replace the running interpreter's in-memory listing using a
+3.3 V USB-to-UART adapter. Controller stays connected for input and Ctrl+C.
+The first connection waits for the selected firmware banner and prompt, so
+reset the Pico after choosing the adapter. The BOOTSEL image contains the
+interpreter. Storage support for Stefan's BASIC remains open.
+
+The browser test uses a scripted serial adapter. The host protocol proof drives
+the three pinned UF2s in the RP2040 emulator. Physical UART and native desktop
+qualification remain open.
 
 ## 2. The matrix as measured on 2026-09-05
 

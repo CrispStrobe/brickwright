@@ -181,3 +181,7 @@ The combined JSON ledger and individual raw receipts are in `artifacts/circuit-f
 - PiccoloBASIC and Stefan’s BASIC have separate Pico profiles and drafts.
   Stefan’s BASIC runs numbered listings and accepts live input in Controller.
   Track transport, dialect, firmware and Code execution qualification in [the language matrix plan](LANGUAGE-DEVICE-MATRIX-PLAN.md#code-when-a-machine-is-selected).
+
+- The Pico BASIC actions in Code offer the selected BOOTSEL image and a
+  prompt-paced UART transfer to Controller. Physical-board qualification
+  still requires a Pico and a 3.3 V USB-to-UART adapter.

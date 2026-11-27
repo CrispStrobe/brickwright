@@ -36,8 +36,9 @@ import {
 } from '../../lib/bw-matrix/capabilities.js';
 import {basicProfileFor, basicProfilesFor, codeLanguageAvailable, hiddenCodeDrafts,
     picoBasicProfileForDialect, standaloneBasicDrafts} from '../../lib/bw-matrix/code-languages.js';
-import {libraryMedia, openLibraryMedia} from '../../lib/bw-machines/library-media.js';
+import {libraryMedia, loadPicoBasicFirmware, openLibraryMedia} from '../../lib/bw-machines/library-media.js';
 import {runMachineConfig} from '../../lib/bw-machines/run-machine.js';
+import {picoBasicCommands, picoBasicConsoleSpec} from '../../lib/bw-machines/pico-basic-source.js';
 import {feProgramToC} from '../../lib/bw-lang/fe-target-c.js';
 import {forthProgramToC} from '../../lib/bw-lang/forth-target-c.js';
 import {fetchTclProgramC} from '../../lib/bw-lang/tcl-target-c.js';
@@ -1706,6 +1707,9 @@ class PseudocodeImporter extends React.Component {
     }
 
     componentDidUpdate (prevProps, prevState) {
+        const hardware = this._picoBasicHardware;
+        if (hardware && (prevProps.vm !== this.props.vm || this.state.lang !== 'basic' ||
+            this.selectedBasicProfile()?.id !== hardware.profile.id)) this.closePicoBasicHardware();
         if ((prevState.lang !== this.state.lang || prevState.libraryTarget !== this.state.libraryTarget ||
             prevState.buffers.pseudocode !== this.state.buffers.pseudocode) &&
             !this.allowsCodeLanguage(this.state.lang)) {
@@ -2860,6 +2864,7 @@ class PseudocodeImporter extends React.Component {
         this.setMaximizedChrome(false);
         this._unmounted = true;
         this.disposeCodeRun();
+        if (this._picoBasicHardware) this.closePicoBasicHardware();
         window.removeEventListener('bw-stop-all', this._onStopCodeRun);
         if (this._codeStopRuntime) this._codeStopRuntime.removeListener('PROJECT_STOP_ALL', this._onStopCodeRun);
         this._codeStopRuntime = null;
@@ -4483,6 +4488,7 @@ class PseudocodeImporter extends React.Component {
     }
 
     async deployToPico () {
+        if (this._picoBasicHardware) await this.closePicoBasicHardware();
         const src = this.state.buffers.pseudocode || '';
         if (!src.trim()) return;
         this.setState({busy: true, status: ''});
@@ -4664,6 +4670,8 @@ class PseudocodeImporter extends React.Component {
         const device = this.currentDevice();
         const family = this.flashFamily(device);
         if (family === 'micropython') {
+            const basic = this.state.lang === 'basic' && this.selectedBasicProfile();
+            if (basic?.media) return this.downloadPicoBasicFirmware(basic);
             // The Pico decides by ARTEFACT KIND, not just device (L2): a C-tab
             // program is a bare-metal bin, which BOOTSEL drag-flashes as a UF2 —
             // the MicroPython REPL (deployToPico) cannot take a bin. Pseudocode
@@ -4926,6 +4934,10 @@ class PseudocodeImporter extends React.Component {
     }
 
     stopCodeRun () {
+        if (this._picoBasicHardware) {
+            if (this.state.busy) this.closePicoBasicHardware();
+            else this._picoBasicHardware.session?.terminal.send([3]);
+        }
         if (this._codeSession) this._codeSession.stop();
     }
 
@@ -5403,7 +5415,127 @@ class PseudocodeImporter extends React.Component {
         return profile?.standalone ? profile : null;
     }
 
+    picoBasicHardwareText (key) {
+        const de = pickLocale(this.props.locale) === 'de';
+        const strings = {
+            terminal: ['Pico UART', 'Pico-UART'],
+            download: ['Download Pico BASIC UF2', 'Pico-BASIC-UF2 herunterladen'],
+            send: ['Replace Pico listing and run…', 'Programm auf Pico ersetzen und ausführen…'],
+            disconnect: ['Disconnect Pico UART', 'Pico-UART trennen'],
+            reset: ['Reset the Pico now. Keep the USB-to-UART adapter connected.', 'Pico jetzt zurücksetzen. Den USB-UART-Adapter verbunden lassen.'],
+            sent: ['Listing sent to Pico UART. Use Controller for input and output.', 'Programm an Pico-UART gesendet. Ein- und Ausgabe erfolgen im Controller.'],
+            noPort: ['No serial adapters found.', 'Keine seriellen Adapter gefunden.'],
+            port: ['Enter the number of your USB-to-UART adapter.', 'Nummer des USB-UART-Adapters eingeben.'],
+            badPort: ['Choose a number from the adapter list.', 'Eine Nummer aus der Adapterliste auswählen.'],
+            firmware: ['Copy the UF2 to the RPI-RP2 drive in BOOTSEL mode. The download contains the interpreter.',
+                'UF2 im BOOTSEL-Modus auf das Laufwerk RPI-RP2 kopieren. Der Download enthält den Interpreter.']
+        };
+        return strings[key][de ? 1 : 0];
+    }
+
+    async downloadPicoBasicFirmware (profile) {
+        if (this.state.busy) return;
+        this.setState({busy: true});
+        try {
+            const bytes = await loadPicoBasicFirmware(profile);
+            if (this._unmounted) return;
+            await downloadBlob(`${profile.media}.uf2`, new Blob([bytes], {type: 'application/octet-stream'}));
+            if (!this._unmounted) this.setState({status: this.picoBasicHardwareText('firmware')});
+        } catch (error) {
+            if (!this._unmounted) this.setState({status: error.message});
+        } finally {
+            if (!this._unmounted) this.setState({busy: false});
+        }
+    }
+
+    closePicoBasicHardware = error => {
+        const job = this._picoBasicHardware;
+        if (!job) return this._picoBasicClosing;
+        this._picoBasicHardware = null;
+        job.unmirror?.();
+        window.removeEventListener('bw-machine-media-load', job.mediaChanged);
+        const close = job.session ? () => job.session.close() : () => job.transport?.close();
+        const closing = Promise.resolve().then(close).catch(() => {}).finally(() => {
+            if (this._picoBasicClosing === closing) this._picoBasicClosing = null;
+        });
+        this._picoBasicClosing = closing;
+        if (!this._unmounted) this.setState({picoBasicConnected: false, status: error ? String(error.message || error) : ''});
+        return closing;
+    };
+
+    async sendPicoBasicToHardware (profile) {
+        if (this.state.busy || this._picoBasicClosing) return;
+        let commands;
+        try {
+            commands = picoBasicCommands(this.activeCode(), profile.dialect);
+        } catch (error) {
+            this.setState({status: error.message});
+            return;
+        }
+        const existing = this._picoBasicHardware;
+        if (existing && existing.profile.id !== profile.id) return;
+        const job = existing || {profile, mediaChanged: () => this.closePicoBasicHardware()};
+        this._picoBasicHardware = job;
+        const owns = () => !this._unmounted && this._picoBasicHardware === job;
+        this.setState({busy: true, status: '', output: null});
+        try {
+            if (!existing) {
+                // Invoke the browser chooser before any asynchronous module loading.
+                const port = !window.__TAURI__?.core ? await navigator.serial.requestPort() : null;
+                const [{createPicoBasicConsole}, {Terminal}, tauri, {webSerialTransport}] = await Promise.all([
+                    import('../../lib/bw-machines/pico-basic-console.js'),
+                    import(/* webpackChunkName: "bw-xterm" */ '@xterm/xterm'),
+                    import('../../lib/pico-tauri-transport.js'),
+                    import('../../lib/pico-repl.js')
+                ]);
+                if (!owns()) return;
+                const {baudRate} = picoBasicConsoleSpec(profile.dialect);
+                if (port) {
+                    await port.open({baudRate});
+                    try {
+                        job.transport = webSerialTransport(port, {throwOnEof: true});
+                    } catch (error) {
+                        await port.close();
+                        throw error;
+                    }
+                } else {
+                    const ports = await tauri.listPorts();
+                    if (!ports.length) throw new Error(this.picoBasicHardwareText('noPort'));
+                    const choices = ports.map((path, i) => `${i + 1}. ${path}`).join('\n');
+                    const choice = await promptAsync(`${this.picoBasicHardwareText('port')}\n${choices}`, ports.length === 1 ? '1' : '');
+                    if (choice === null || !owns()) return;
+                    const path = ports[Number(choice) - 1];
+                    if (!path) throw new Error(this.picoBasicHardwareText('badPort'));
+                    job.transport = await tauri.openTransport(path, baudRate);
+                }
+                if (!owns()) {
+                    await job.transport.close();
+                    return;
+                }
+                job.session = createPicoBasicConsole({
+                    transport: job.transport, cursor: new Terminal({cols: 80, rows: 24, scrollback: 0, allowProposedApi: true}),
+                    dialect: profile.dialect, openingMessage: this.picoBasicHardwareText('reset'),
+                    onError: error => { if (owns()) this.closePicoBasicHardware(error); }
+                });
+                setCircuitView({fullWidth: false, dock: 'controller'});
+                job.unmirror = window.bwMirrorMachineTerminal?.({
+                    title: this.picoBasicHardwareText('terminal'), raw: job.session.terminal
+                }, true);
+                window.addEventListener('bw-machine-media-load', job.mediaChanged);
+                this.setState({picoBasicConnected: true, status: this.picoBasicHardwareText('reset')});
+            }
+            await job.session.run(commands);
+            if (owns()) this.setState({status: this.picoBasicHardwareText('sent')});
+        } catch (error) {
+            if (owns()) await this.closePicoBasicHardware(error.name === 'NotFoundError' ? null : error);
+        } finally {
+            if (owns() && !job.session) this.closePicoBasicHardware();
+            if (!this._unmounted) this.setState({busy: false});
+        }
+    }
+
     async runPicoBasic (source, profile) {
+        if (this._picoBasicHardware) await this.closePicoBasicHardware();
         if (!remoteMachineImagesAllowed()) {
             this.setState({status: 'Remote machine images are disabled in this build.'});
             return;
@@ -6297,6 +6429,10 @@ class PseudocodeImporter extends React.Component {
             'Run BASIC sends your source to the Pico UART console. Block conversion is unavailable for this dialect.',
             'BASIC ausführen sendet den Quelltext an die UART-Konsole des Pico. Für diesen Dialekt ist keine Blockumwandlung verfügbar.'
         ) : {basic: this.L.basicNote, asm: this.L.asmNote, nqc: this.L.nqcNote, c: this.L.cNote}[lang];
+        const picoHardwareHelp = lang === 'basic' && this.selectedBasicProfile()?.media && local(
+            'Download the UF2 and copy it to RPI-RP2 in BOOTSEL mode. Connect a 3.3 V USB-to-UART adapter with TX to GP1, RX to GP0 and GND to GND. Choose Replace Pico listing and run, select the adapter, then reset the Pico when prompted. This replaces the listing in memory. Use Controller for input and Ctrl+C.',
+            'UF2 herunterladen und im BOOTSEL-Modus nach RPI-RP2 kopieren. Einen 3,3-V-USB-UART-Adapter anschließen (TX an GP1, RX an GP0 und GND an GND). Programm auf Pico ersetzen und ausführen wählen, den Adapter auswählen und den Pico bei Aufforderung zurücksetzen. Das Programm im Speicher wird ersetzt. Eingabe und Strg+C erfolgen im Controller.'
+        );
         const sections = standalone ? null : lang === 'pseudocode' ? SYNTAX : SUPPORTED[lang];
         const closeStyle = {...toolStyles(false).button, fontSize: 18, lineHeight: 1};
         const lane = {background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: 6, padding: '5px 8px'};
@@ -6395,6 +6531,7 @@ class PseudocodeImporter extends React.Component {
                         'Zu Blöcken übersetzt den aktiven Editor. Von Blöcken liest das Projekt als Code. Der Umwandlungsbericht nennt nicht unterstützte Befehle.'
                     )}</div>}
                     {note && <div style={{whiteSpace: 'pre-wrap'}} data-code-language-note={lang}>{note}</div>}
+                    {picoHardwareHelp && <div>{picoHardwareHelp}</div>}
                     {sections?.length > 0 && <details><summary>{this.L.reference}</summary>
                         {sections.map(([heading, items]) => <div key={heading}>
                             <strong>{this.L.h[heading] || heading}</strong>
@@ -6704,6 +6841,8 @@ class PseudocodeImporter extends React.Component {
                         </select>)}
                         </div>
         );
+        const picoBasicHardware = this.state.lang === 'basic' && this.selectedBasicProfile()?.media
+            ? this.selectedBasicProfile() : null;
         const renderCodeControls = menu => (
             <React.Fragment>
                     <div data-testid={menu ? undefined : "bw-code-action-row"} style={{display: 'inline-flex', alignSelf: 'center',
@@ -6721,7 +6860,23 @@ class PseudocodeImporter extends React.Component {
                             style={{...actionBtn, background: 'linear-gradient(135deg,#a55b80,#8e4a6c)'}}>
                             {menu ? <><Icon name="from-blocks" />{this.L.fromBlocks.replace(' ⇨', '')}</> : <span aria-hidden="true">▣ ⇨</span>}
                         </button>
-                        {this.currentDevice() === 'pico' && !this.standaloneBasicProfile() ? (
+                        {menu && picoBasicHardware && <React.Fragment>
+                            <button type="button" data-testid="bw-pico-basic-download"
+                                disabled={this.state.busy} onClick={() => this.downloadPicoBasicFirmware(picoBasicHardware)}>
+                                {this.picoBasicHardwareText('download')}
+                            </button>
+                            {(navigator.serial || window.__TAURI__?.core) && <button type="button"
+                                data-testid="bw-pico-basic-hardware-send" disabled={this.state.busy || !this.activeCode().trim()}
+                                onClick={() => {
+                                    this.setState({actionsOpen: false});
+                                    this.sendPicoBasicToHardware(picoBasicHardware);
+                                }}>
+                                {this.picoBasicHardwareText('send')}
+                            </button>}
+                            {this.state.picoBasicConnected && <button type="button" data-testid="bw-pico-basic-disconnect"
+                                onClick={() => this.closePicoBasicHardware()}>{this.picoBasicHardwareText('disconnect')}</button>}
+                        </React.Fragment>}
+                        {this.currentDevice() === 'pico' && !picoBasicHardware ? (
                             <button onClick={this.deployToPico} disabled={this.state.busy}
                                 data-testid={menu ? "bw-deploy-pico-menu" : "bw-deploy-pico"}
                                 title={this.L.deployPicoTitle}

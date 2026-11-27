@@ -44,6 +44,7 @@ import { parseCondition } from './condition.js';
 import {createLinuxConsole, TERMINAL_COLS, TERMINAL_ROWS} from './linux-console.js';
 import {createReadyGatedInput} from './ready-gated-input.js';
 import {createTerminalOutput} from './terminal-output.js';
+import {picoBasicAtPrompt, picoBasicConsoleSpec} from '../bw-machines/pico-basic-source.js';
 import {createEngineeringInputRoute} from './engineering-input-route.js';
 import {cpmFileName} from './cpm-z80.js';
 import { canRecordDebugInput } from 'bw-board/debug-replay-contract.js';
@@ -2153,18 +2154,13 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             if (/^\x1b\[\d+;\d+R$/.test(reply)) input.write(new TextEncoder().encode(reply));
         });
         const commands = bootMedia.picoBasicCommands || [];
-        const banners = {piccolo: 'PiccoloBASIC UART', stefan: "Stefan's Basic 2.0", bbc: 'BBC BASIC for Pico Console'};
-        const dialect = bootMedia.picoBasicConsole || 'bbc';
-        const banner = banners[dialect];
-        const promptWidth = dialect === 'stefan' ? 2 : 1;
+        const consoleSpec = picoBasicConsoleSpec(bootMedia.picoBasicConsole || 'bbc');
         const encoder = new TextEncoder();
         let nextCommand = 0;
         let sawBanner = false;
         const unsubscribeCursor = output.subscribe(bytes => cursor.write(bytes, () => {
             if (!sawBanner || nextCommand >= commands.length || input.pending()) return;
-            const buffer = cursor.buffer.active;
-            const line = buffer.getLine(buffer.baseY + buffer.cursorY)?.translateToString(true);
-            if (line?.trimEnd() === '>' && buffer.cursorX === promptWidth) {
+            if (picoBasicAtPrompt(cursor.buffer.active, consoleSpec)) {
                 input.write(encoder.encode(commands[nextCommand++] + '\r'));
             }
         }));
@@ -2179,7 +2175,7 @@ export function createDebugRunner({ vm, compilerUrl = 'https://stc-compiler.verc
             const ch = String.fromCharCode(byte);
             if (wakeOnPrompt || (commands.length && !sawBanner)) {
                 if (ch === '\n') {
-                    if (lineBuf.includes(banner)) sawBanner = true;
+                    if (lineBuf.includes(consoleSpec.banner)) sawBanner = true;
                     if (wakeOnPrompt && lineBuf.trim() === 'Waiting for connection') {
                         wakeOnPrompt = false;
                         feedByte(13);

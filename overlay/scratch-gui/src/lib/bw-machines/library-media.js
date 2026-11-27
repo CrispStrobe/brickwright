@@ -1,4 +1,5 @@
 import {makeT} from '../bw-i18n.js';
+import {activateConfig} from './activate.js';
 import {fromMediaManifest} from './importers.js';
 import {validateMachineConfig} from './machine-config.js';
 
@@ -44,7 +45,8 @@ export const libraryMedia = [
     ...ackSamples,
     {id: 'x86-benchmarks/topbench', title: 'TOPBENCH (386)', machine: 'i80386', license: 'MIT', benchmark: 'topbench'},
     {id: 'picobb-rp2040', title: 'PicoBB BBC BASIC', machine: 'rp2040js', license: 'Zlib',
-        revision: 'd6f09f79a6c73a2fcdf7f53b75624aa01f096baf'},
+        revision: 'd6f09f79a6c73a2fcdf7f53b75624aa01f096baf',
+        flashHash: 'f0acd59bfd93182c2dcde4af65d36f3d20cf2e8eecc6c6ec760c1ac9654264d8'},
     {id: 'piccolobasic-rp2040', title: 'PiccoloBASIC (UART)', machine: 'rp2040js', license: 'BSD-3-Clause',
         licenseFile: 'LICENSE', revision: 'a5a7e3c24658ef98675835faa3cc31222787814f'},
     {id: 'stefan-basic-rp2040', title: 'Stefan’s BASIC (UART)', machine: 'rp2040js',
@@ -79,6 +81,10 @@ export async function openLibraryMedia (item) {
         launchManifest = {...manifest, title: item.title, license: item.license, program: sample.program,
             slots: {com: {url: item.sample.file, sha256: item.sample.sha256}}};
     }
+    if (item.flashHash) {
+        launchManifest = {...launchManifest, slots: {...launchManifest.slots,
+            flash: {url: launchManifest.slots.flash, sha256: item.flashHash}}};
+    }
     const config = fromMediaManifest(launchManifest, {source, baseUrl: baseUrl.href});
     const verdict = validateMachineConfig(config);
     if (!verdict.ok) throw new Error(verdict.errors.join('; '));
@@ -96,4 +102,15 @@ export async function readLibraryCode (item) {
     if (!response.ok) throw new Error(`Source HTTP ${response.status}`);
     return {language: item.code.language, text: await response.text(), title: item.title,
         machine: item.machine, url: url.href, compilerTarget: item.code.compilerTarget, dosSourceName: item.code.dosSourceName};
+}
+
+export async function loadPicoBasicFirmware (profile) {
+    const entry = libraryMedia.find(item => item.id === profile.media);
+    const config = await openLibraryMedia(entry);
+    if (!config.slots.flash?.sha256) throw new Error('Pico BASIC firmware has no pinned SHA-256.');
+    const {bootMedia} = await activateConfig(config);
+    if (bootMedia?.slot !== 'flash' || bootMedia.picoBasicConsole !== profile.dialect) {
+        throw new Error('Pico BASIC firmware does not match the selected profile.');
+    }
+    return bootMedia.bytes;
 }
