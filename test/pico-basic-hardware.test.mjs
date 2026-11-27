@@ -109,7 +109,7 @@ test('disconnect releases a pending startup and its transport', async () => {
 const localMedia = process.env.PICO_BASIC_MEDIA_DIR;
 for (const profile of basicProfilesFor('pico')) {
     test(`real ${profile.id} UART firmware accepts the host hardware protocol`,
-        {skip: !localMedia}, async () => {
+        {skip: !localMedia, timeout: 150_000}, async () => {
             const media = readFileSync(`${localMedia}/${profile.id}.uf2`);
             const [{createRp2040jsAdapter}, {parseUF2}] = await Promise.all([
                 import('bw-board/rp2040js-adapter.js'), import('bw-board/uf2.js')
@@ -135,7 +135,9 @@ for (const profile of basicProfilesFor('pico')) {
                 },
                 async close () {}
             };
-            const session = createPicoBasicConsole({transport, cursor: cursor(), dialect: profile.dialect});
+            // Instruction-level emulation may take longer to boot than a physical Pico under CI load.
+            const session = createPicoBasicConsole({transport, cursor: cursor(), dialect: profile.dialect,
+                bootTimeout: 120_000});
             let transcript = '';
             session.terminal.subscribe(bytes => { transcript += Buffer.from(bytes).toString(); });
             const source = profile.dialect === 'piccolo' ? 'print "HW-PROOF ";6*7' : '10 PRINT "HW-PROOF ";6*7';
