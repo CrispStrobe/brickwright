@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {readMakeCodeProjectText} from '../overlay/scratch-gui/src/lib/bw-makecode/project-file.js';
+import {runPxtArcade} from '../test/helpers/pxt-arcade-runtime.mjs';
 import {chromium, webkit} from 'playwright';
 import {openCodeActions, openCodeInfo} from './lib-code-actions.mjs';
 import {typeIntoEditor} from './lib/type-into-editor.mjs';
@@ -85,9 +88,56 @@ async function run(visibilityBlocks) {
     }
 }
 
+async function runRiftRallyExport () {
+    const page = await browser.newPage({viewport: {width: 1280, height: 800}, locale: 'en-US', serviceWorkers: 'block'});
+    let files;
+    try {
+        await page.addInitScript(() => localStorage.setItem('bw-starter-v1-complete', '1'));
+        await page.goto(base, {waitUntil: 'domcontentloaded'});
+        await page.getByRole('tab', {name: 'Code', exact: true}).click();
+        await openCodeActions(page);
+        await page.getByTestId('bw-load-example').selectOption('twinwall');
+        await page.waitForFunction(() => {
+            const targets = window.__brickwrightStore?.getState().scratchGui.vm.runtime.targets || [];
+            return targets.some(target => target.sprite?.name === 'LeftWall') &&
+                targets.some(target => target.sprite?.name === 'RightWall');
+        });
+        await openCodeActions(page);
+        const [download] = await Promise.all([
+            page.waitForEvent('download'),
+            page.getByTestId('bw-makecode-arcade-export').click()
+        ]);
+        assert.match(download.suggestedFilename(), /\.mkcd$/);
+        files = (await readMakeCodeProjectText(await readFile(await download.path(), 'utf8'), 'mkcd')).files;
+        const help = await openCodeInfo(page);
+        await help.getByTestId('bw-conversion-report').filter({hasText: 'Blocks → Arcade export'}).waitFor();
+        assert.match(await help.getByTestId('bw-conversion-unsupported').innerText(), /nothing reported/);
+        assert.match(await help.getByTestId('bw-conversion-changed').innerText(), /keyboard controls keep the Scratch keys/i);
+        assert.match(await help.getByTestId('bw-conversion-changed').innerText(), /monitors use compact labels/i);
+    } finally {
+        await page.close();
+    }
+
+    const sample = await runPxtArcade(files, {
+        browser,
+        inspectDisplay: true, waitForDisplay: true, waitForMain: false,
+        buttonActions: {afterGlobals: {started: 1}, steps: [
+            {keyDown: 'w', waitForGlobals: {ly: 135, ry: 0}},
+            {keyUp: 'w'},
+            {keyDown: 'ArrowDown', waitForGlobals: {ly: 135, ry: -135}},
+            {keyUp: 'ArrowDown'}
+        ]}
+    });
+    assert.equal(sample.$display.screen.length, 160 * 120);
+    assert.equal(sample.ly, 135);
+    assert.equal(sample.ry, -135);
+    console.log(`PASS ${engine.name()} Rift Rally .mkcd from Code export, native Arcade display and both paddles`);
+}
+
 try {
     await run(false);
     await run(true);
+    await runRiftRallyExport();
 } finally {
     await browser.close();
 }

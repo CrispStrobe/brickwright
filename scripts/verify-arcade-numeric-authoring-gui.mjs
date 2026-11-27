@@ -595,8 +595,8 @@ try {
         'the unproved addition goes through the helper');
     const details = [];
     assert.match(await page.getByTestId('bw-conversion-preserved').innerText(), /not been compiled or run/);
-    await panel.locator('div').first().click();assert.equal(await unsupported.isVisible(), false);
-    await panel.locator('div').first().click();assert.equal(await unsupported.isVisible(), true);
+    await panel.locator('summary').click();assert.equal(await unsupported.isVisible(), false);
+    await panel.locator('summary').click();assert.equal(await unsupported.isVisible(), true);
     assert.deepEqual(await currentAssets(), assetsBeforeRefusal, 'export reporting retains current asset bytes');
     report.refusalReporting = {details, unsupported: await unsupported.innerText(), assets: assetsBeforeRefusal};
     await page.getByTestId('bw-dismiss-conversion-report').click();assert.equal(await panel.count(), 0);
