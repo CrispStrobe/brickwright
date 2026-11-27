@@ -49,7 +49,7 @@ export function validatePxtActionGlobals(expected) {
     }
 }
 
-export async function runPxtArcade(source, {waitForGlobals = null, dependencies = {device: '*'}, inspectDisplay = false, waitForDisplay = false, buttonActions = null, recordSound = false, recordSongSound = false, waitForMain = true, fakeClock = false, inspectImageGlobals = [], observeEntropy = false, fixedEntropy = null, onCompilation = null, observeControlReset = false, inspectArrayReads = [], inspectStats = false} = {}) {
+export async function runPxtArcade(source, {waitForGlobals = null, dependencies = {device: '*'}, inspectDisplay = false, waitForDisplay = false, buttonActions = null, recordSound = false, recordSongSound = false, waitForMain = true, fakeClock = false, inspectImageGlobals = [], observeEntropy = false, fixedEntropy = null, onCompilation = null, observeControlReset = false, inspectArrayReads = [], inspectStats = false, browser: sharedBrowser = null} = {}) {
     if(fixedEntropy!==null && !(typeof fixedEntropy==='number' && fixedEntropy>=0 && fixedEntropy<1))throw new Error('Fixed entropy must be a number in [0, 1)');
     if(fixedEntropy!==null && observeEntropy)throw new Error('Fixed entropy replaces the platform draws that observation records');
     if (waitForDisplay && !inspectDisplay) throw new Error('Display readiness requires display inspection');
@@ -77,15 +77,15 @@ export async function runPxtArcade(source, {waitForGlobals = null, dependencies 
         } catch {res.writeHead(404);res.end();}
     });
     await new Promise(done=>server.listen(0,'127.0.0.1',done));
-    let browser;
+    let browser, clockContext, page;
     try {
         // An explicitly retained browser can qualify the reference helper without
         // installing another executable. An unset path keeps Playwright's default.
-        browser=await chromium.launch(process.env.BW_PXT_CLOCK_BROWSER_EXECUTABLE ?
+        browser = sharedBrowser || await chromium.launch(process.env.BW_PXT_CLOCK_BROWSER_EXECUTABLE ?
             {executablePath:process.env.BW_PXT_CLOCK_BROWSER_EXECUTABLE} : {});
-        const clockContext=fakeClock ? await browser.newContext() : null;
+        clockContext = fakeClock ? await browser.newContext() : null;
         if(clockContext)await preparePxtInitialClock(clockContext);
-        const page=clockContext ? await clockContext.newPage() : await browser.newPage();
+        page = clockContext ? await clockContext.newPage() : await browser.newPage();
         const errors=[],messages=[];page.on('pageerror',error=>errors.push(error.message));
         page.on('console',message=>{if(['error','warning'].includes(message.type()))messages.push(message.text().slice(0,1000));});
         // Configure the paused context before creating a page. Installing a
@@ -192,6 +192,15 @@ export async function runPxtArcade(source, {waitForGlobals = null, dependencies 
                 if (action.key !== undefined) await page.keyboard.press(action.key);
                 if (action.keyDown !== undefined) await page.keyboard.down(action.keyDown);
                 if (action.keyUp !== undefined) await page.keyboard.up(action.keyUp);
+                if (action.displayClick) {
+                    const position = await page.locator('#game-screen').evaluate((canvas, point) => {
+                        const rect = canvas.getBoundingClientRect();
+                        const scale = Math.min(rect.width / canvas.width, rect.height / canvas.height);
+                        return {x: rect.left + (rect.width - canvas.width * scale) / 2 + point.x * scale,
+                            y: rect.top + (rect.height - canvas.height * scale) / 2 + point.y * scale};
+                    }, action.displayClick);
+                    await page.mouse.click(position.x, position.y);
+                }
                 if(action.button!==undefined)await page.evaluate(({button,held})=>{
                     const board=window.__bwPxtRuntime.board;
                     if(typeof board.setButton!=='function')throw new Error('Original PXT board button input unavailable');
@@ -299,6 +308,15 @@ export async function runPxtArcade(source, {waitForGlobals = null, dependencies 
         },{inspectDisplay,recordSound,recordSongSound,waitForDisplay,displayBaseline,inspectImageGlobals,observeEntropy,fixedEntropy,observeControlReset,inspectArrayReads,inspectStats});
         if(errors.length)throw new Error(JSON.stringify(errors));
         return values;
-    } finally {await browser?.close();await new Promise(done=>server.close(done));}
+    } finally {
+        try {
+            if (sharedBrowser) {
+                if (clockContext) await clockContext.close();
+                else await page?.close();
+            } else await browser?.close();
+        } finally {
+            await new Promise(done => server.close(done));
+        }
+    }
     });
 }
