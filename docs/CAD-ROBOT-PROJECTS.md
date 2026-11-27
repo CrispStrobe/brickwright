@@ -2334,3 +2334,28 @@ All 37 focused CrispCAD tests passed, including trace append and
 replay, manufacturing, and the editor menu. Brickwright pins SDK
 `8b784d7`. All 843 SDK file hashes and nine pin tests passed.
 The real Brickwright SB3 path passed for CAD document versions 41–47.
+
+### Reuse trail slots after the sample cap
+
+Once a trail has 2,000 points, its next sample overwrites the oldest
+vertex slot. A fixed index buffer draws the slots in chronological
+order across the wrap. Seeking within the buffered trail changes
+the visible range without rewriting its vertices.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/811bc9977e3558bf2c1df712b450817fb9160716)
+
+A shared-Chromium WebGL viewport test seeded the same 2,000-point
+trail and advanced it 240 times in each version. The 240 uploads
+fell from 5,760,000 to 2,880 bytes. Every frame drew the same ordered
+vertices and positioned the marker at the same newest point. Replay
+seeks and repeated wraps passed the focused tests. All 19 tests
+in the focused suite passed.
+
+With the packaged SDK in the existing Brickwright GUI host, Atlas
+with a tracer and Scout passed Run, Stop, Reset, and repeat Run.
+Atlas also passed a restart after a gravity edit. At 12.065
+simulated seconds its full CAD frame and circuit readings matched
+SDK `8b784d7` exactly. All 375 shared trail samples matched.
+The shared Mac measured 0.536× for Atlas and 0.811× for Scout.
+The 1× target remains open across the tested workloads.
+Brickwright pins SDK `811bc99`. All 843 file hashes and nine pin
+tests passed.

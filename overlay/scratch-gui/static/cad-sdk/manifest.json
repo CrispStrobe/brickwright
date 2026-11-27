@@ -2,7 +2,7 @@
   "format": "brickwright-cad-sdk",
   "version": 1,
   "repository": "https://github.com/CrispStrobe/brickwright-cad",
-  "commit": "8b784d7db79faefa6dd0cfc84afaf59d568f4add",
+  "commit": "811bc9977e3558bf2c1df712b450817fb9160716",
   "dirty": false,
   "entry": "sdk.js",
   "wasm": "cad-assets/manifold.wasm",
@@ -33,8 +33,8 @@
     "assets/step-tessellator-BrwzROQM.wasm": "5c076c69d9b76be99b8f2fda01224a11ebe3055245aa1104afad991582eb820f",
     "cad-assets/manifold.wasm": "73e3b419ad31294f6b1cc478173944e50efc4a34bfdeeff0107bdfc12975f11c",
     "model-library-cache-DiMFGzp9.js": "75dc4ad7999b4571b227f1c675ca00af698fcc886dc73e98dd4c0eb2604e2b20",
-    "model-library-local-DtIel_SK.js": "d98fb688bacecd1650ffab0b90b9683954037f1140820aa6578bb5c42d4b25a2",
-    "model-library-panel-BZS2ldVW.js": "ffcd5a557719b147b1a8bb12b1d3d23c5b18866312d1b5531a9ef09af972cc7e",
+    "model-library-local-DI87-k-q.js": "f5d624b4bd4821fe75281ac08ee7229cba271cefd675240639556bc27f1a4480",
+    "model-library-panel-BknZwMgI.js": "4b17482d5bbfedc759c851f1b09519fe91abf14fa57781c1ecaf43e0cd2fedf2",
     "previews/0032bf7f999c3572c3411d1149c79066401db463c71ef6d754f08579ac423747.png": "0032bf7f999c3572c3411d1149c79066401db463c71ef6d754f08579ac423747",
     "previews/00923aa5ecc7ed2388365e7abffba7fd79cba2916e3e5d24066abd18ce158a1f.png": "00923aa5ecc7ed2388365e7abffba7fd79cba2916e3e5d24066abd18ce158a1f",
     "previews/00ba924719ee907a0ac919438cbc4a3776ba31d4d63def024419a73e0e750985.png": "00ba924719ee907a0ac919438cbc4a3776ba31d4d63def024419a73e0e750985",
@@ -848,7 +848,7 @@
     "previews/fe8d0d35d9d4a5a2118db14b8b01759048cb9c3e6b32303b4535713240f03324.png": "fe8d0d35d9d4a5a2118db14b8b01759048cb9c3e6b32303b4535713240f03324",
     "previews/fef03d55e4f8953fe85099bd749d404fb778289dc2ac836bf7e2ea88a201f44a.png": "fef03d55e4f8953fe85099bd749d404fb778289dc2ac836bf7e2ea88a201f44a",
     "previews/ff71a6a76b555a4ce21ab970e871ec28d1ce8f81af107d71cc396fa7df109efb.png": "ff71a6a76b555a4ce21ab970e871ec28d1ce8f81af107d71cc396fa7df109efb",
-    "sdk-CMoMUXwu.js": "d856613ccf551943a43b117615e1c0cf9729737582eb891d72e8cabd31f18a2c",
-    "sdk.js": "8616fb078458e5342d6d155bcf9c11a3c31bc68b503c8a3970922e32a73c87eb"
+    "sdk-DMFez5kz.js": "792cecc1df35afc9b0fa3d06fcec0e9e7e254c992214b5c09fe370dc6f46a087",
+    "sdk.js": "f843b17c6ad8ead991e2c906427573e5579d37eb953f5f970995a080ae0c2204"
   }
 }

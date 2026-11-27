@@ -12919,7 +12919,7 @@ class s4 {
     this.variable = e, this.input = t, this.body = n;
   }
 }
-class W3 {
+class K3 {
   constructor(e) {
     P2(this, "parts");
     this.parts = e;
@@ -13077,7 +13077,7 @@ function Jb(i, e = []) {
   function z1(O) {
     Q();
     const Z = l0([O]);
-    return Z ? e2(p2(Z, z1(T0(O)))) : O instanceof o8 ? "true" : O instanceof J0 ? e2(P1(O.condition, z1(O.yes), z1(O.no))) : O instanceof z0 ? O.text.length ? "true" : "false" : O instanceof X9 ? "true" : O instanceof S0 ? "false" : Array.isArray(O) ? O.length ? "true" : "false" : O instanceof n4 || O instanceof s4 || O instanceof W3 ? z1(U1(">", m1(O), "0")) : O;
+    return Z ? e2(p2(Z, z1(T0(O)))) : O instanceof o8 ? "true" : O instanceof J0 ? e2(P1(O.condition, z1(O.yes), z1(O.no))) : O instanceof z0 ? O.text.length ? "true" : "false" : O instanceof X9 ? "true" : O instanceof S0 ? "false" : Array.isArray(O) ? O.length ? "true" : "false" : O instanceof n4 || O instanceof s4 || O instanceof K3 ? z1(U1(">", m1(O), "0")) : O;
   }
   function P1(O, Z, d1) {
     Q();
@@ -13120,7 +13120,7 @@ function Jb(i, e = []) {
         return (O === "!=" ? "!" : "") + "(" + f1.map(z1).join(" && ") + ")";
       }
     }
-    const A1 = E2(Z) ?? E2(d1);
+    const A1 = A2(Z) ?? A2(d1);
     if (A1 && B(A1), Z instanceof S0 || d1 instanceof S0)
       return new S0();
     if (Array.isArray(Z) || Array.isArray(d1)) {
@@ -13128,7 +13128,7 @@ function Jb(i, e = []) {
         if (O === "*" && (Z.some(Array.isArray) || d1.some(Array.isArray))) {
           const f1 = Z.every(Array.isArray) ? Z : [Z], u1 = d1.every(Array.isArray) ? d1 : d1.map((b1) => [b1]);
           (!f1.every((b1) => Array.isArray(b1) && b1.length === u1.length) || !u1.length || !u1.every((b1) => Array.isArray(b1) && b1.length === u1[0].length)) && B("matrix dimensions");
-          const x1 = f1.map((b1) => u1[0].map((N1, G1) => b1.reduce((I1, O1, Y1) => U1("+", I1, U1("*", O1, u1[Y1][G1])), "0")));
+          const x1 = f1.map((b1) => u1[0].map((N1, K1) => b1.reduce((I1, O1, Y1) => U1("+", I1, U1("*", O1, u1[Y1][K1])), "0")));
           return Z.every(Array.isArray) ? d1.every(Array.isArray) ? x1 : x1.map((b1) => b1[0]) : x1[0];
         }
         return Z.length !== d1.length && B("vector dimension mismatch"), O === "*" ? Z.map((f1, u1) => e2(U1("*", f1, d1[u1]))).reduce((f1, u1) => _1(`(${f1}) + (${u1})`), "0") : (["+", "-"].includes(O) || B("vector operator " + O), Z.map((f1, u1) => U1(O, f1, d1[u1])));
@@ -13158,7 +13158,7 @@ function Jb(i, e = []) {
   function r1(O, Z, d1) {
     Q();
     const v1 = l0([O]);
-    return v1 ? p2(e2(r1(v1, Z, d1)), r1(T0(O), Z, d1)) : typeof O == "string" ? O === Z ? d1 : typeof d1 != "string" ? B("non-numeric comprehension substitution") : _1(O.replace(/\b[A-Za-z][A-Za-z0-9_]*\b/g, (A1) => A1 === Z ? `(${d1})` : H.has(A1) && C1(A1, Z) ? `(${e2(r1(H.get(A1), Z, d1))})` : A1)) : Array.isArray(O) ? O.map((A1) => r1(A1, Z, d1)) : O instanceof J0 ? P1(r1(O.condition, Z, d1), r1(O.yes, Z, d1), r1(O.no, Z, d1)) : O instanceof X9 ? new X9(O.parts.map((A1) => A1 instanceof z0 ? A1 : e2(r1(A1, Z, d1)))) : O instanceof n4 ? new n4(e2(r1(O.start, Z, d1)), e2(r1(O.end, Z, d1)), e2(r1(O.step, Z, d1))) : O instanceof s4 ? new s4(O.variable, r1(O.input, Z, d1), r1(O.body, Z, d1)) : O instanceof W3 ? new W3(O.parts.map((A1) => r1(A1, Z, d1))) : O;
+    return v1 ? p2(e2(r1(v1, Z, d1)), r1(T0(O), Z, d1)) : typeof O == "string" ? O === Z ? d1 : typeof d1 != "string" ? B("non-numeric comprehension substitution") : _1(O.replace(/\b[A-Za-z][A-Za-z0-9_]*\b/g, (A1) => A1 === Z ? `(${d1})` : H.has(A1) && C1(A1, Z) ? `(${e2(r1(H.get(A1), Z, d1))})` : A1)) : Array.isArray(O) ? O.map((A1) => r1(A1, Z, d1)) : O instanceof J0 ? P1(r1(O.condition, Z, d1), r1(O.yes, Z, d1), r1(O.no, Z, d1)) : O instanceof X9 ? new X9(O.parts.map((A1) => A1 instanceof z0 ? A1 : e2(r1(A1, Z, d1)))) : O instanceof n4 ? new n4(e2(r1(O.start, Z, d1)), e2(r1(O.end, Z, d1)), e2(r1(O.step, Z, d1))) : O instanceof s4 ? new s4(O.variable, r1(O.input, Z, d1), r1(O.body, Z, d1)) : O instanceof K3 ? new K3(O.parts.map((A1) => r1(A1, Z, d1))) : O;
   }
   function m1(O) {
     if (Q(), O instanceof J0)
@@ -13173,7 +13173,7 @@ function Jb(i, e = []) {
       return O.parts.reduce((Z, d1) => U1("+", Z, d1 instanceof z0 ? String([...d1.text].length) : `formatLengthSCAD(${d1})`), "0");
     if (O instanceof n4)
       return _1(`rangeCount(${O.start},${O.end},${O.step})`);
-    if (O instanceof W3)
+    if (O instanceof K3)
       return O.parts.reduce((Z, d1) => U1("+", Z, m1(d1)), "0");
     if (O instanceof s4) {
       const Z = m1(O.body);
@@ -13197,10 +13197,10 @@ function Jb(i, e = []) {
       return _1(`rangeAt(${O.start},${O.end},${O.step},${e2(Z)})`);
     if (O instanceof s4) {
       if (O.body instanceof J0 && O.input instanceof n4) {
-        const { yes: N1, no: G1, condition: I1 } = O.body, O1 = Array.isArray(N1) && N1.length === 1 && Array.isArray(G1) && G1.length === 0, Y1 = Array.isArray(G1) && G1.length === 1 && Array.isArray(N1) && N1.length === 0;
+        const { yes: N1, no: K1, condition: I1 } = O.body, O1 = Array.isArray(N1) && N1.length === 1 && Array.isArray(K1) && K1.length === 0, Y1 = Array.isArray(K1) && K1.length === 1 && Array.isArray(N1) && N1.length === 0;
         if (O1 || Y1) {
           const c2 = _1(`filterAt(${O.variable},${O.input.start},${O.input.end},${O.input.step},${O1 ? I1 : `!(${I1})`},${e2(Z)})`);
-          return r1((O1 ? N1 : G1)[0], O.variable, c2);
+          return r1((O1 ? N1 : K1)[0], O.variable, c2);
         }
       }
       if (Array.isArray(O.body) && O.body.length === 1)
@@ -13208,11 +13208,11 @@ function Jb(i, e = []) {
       const u1 = m1(O.body), x1 = R1("floor", [U1("/", Z, u1)]), b1 = U1("%", Z, u1);
       return w1(r1(O.body, O.variable, w1(O.input, x1)), b1);
     }
-    if (O instanceof W3) {
+    if (O instanceof K3) {
       let u1 = "0", x1 = new S0();
       for (let b1 = 0; b1 < O.parts.length; b1++) {
-        const N1 = O.parts[b1], G1 = U1("+", u1, m1(N1));
-        x1 = P1(U1("&&", U1(">=", Z, u1), U1("<", Z, G1)), w1(N1, U1("-", Z, u1)), x1), u1 = G1;
+        const N1 = O.parts[b1], K1 = U1("+", u1, m1(N1));
+        x1 = P1(U1("&&", U1(">=", Z, u1), U1("<", Z, K1)), w1(N1, U1("-", Z, u1)), x1), u1 = K1;
       }
       return x1;
     }
@@ -13240,7 +13240,7 @@ function Jb(i, e = []) {
       const v1 = k1(O, Z.yes, d1 + 1), A1 = k1(O, Z.no, d1 + 1);
       return { value: P1(Z.condition, v1.value, A1.value), count: e2(P1(Z.condition, v1.count, A1.count)) };
     }
-    if (Z instanceof W3)
+    if (Z instanceof K3)
       return Z.parts.map((v1) => k1(O, v1, d1 + 1)).reduce((v1, A1) => ({ count: e2(U1("+", v1.count, A1.count)), value: P1(U1(">", v1.count, "0"), P1(U1(">", A1.count, "0"), R1(O, [v1.value, A1.value]), v1.value), A1.value) }), { value: new S0(), count: "0" });
     if (Z instanceof n4) {
       let v1;
@@ -13252,7 +13252,7 @@ function Jb(i, e = []) {
     if (Z instanceof s4) {
       if (Array.isArray(Z.input)) {
         const x1 = Z.input.map((b1) => r1(Z.body, Z.variable, b1));
-        return k1(O, new W3(x1), d1 + 1);
+        return k1(O, new K3(x1), d1 + 1);
       }
       if (!(Z.input instanceof n4))
         return B("list reduction input");
@@ -13291,8 +13291,8 @@ function Jb(i, e = []) {
       return typeof o1 == "string" || o1 instanceof o8 ? new S0() : m1(o1);
     }
     if (O === "concat") {
-      if (Z.some((f1) => f1 instanceof s4 || f1 instanceof n4 || f1 instanceof W3))
-        return new W3(Z.map((f1) => Array.isArray(f1) || f1 instanceof s4 || f1 instanceof n4 || f1 instanceof W3 ? f1 : [f1]));
+      if (Z.some((f1) => f1 instanceof s4 || f1 instanceof n4 || f1 instanceof K3))
+        return new K3(Z.map((f1) => Array.isArray(f1) || f1 instanceof s4 || f1 instanceof n4 || f1 instanceof K3 ? f1 : [f1]));
       const o1 = Z.flatMap((f1) => Array.isArray(f1) ? f1 : [f1]);
       return o1.length > 256 && z(p("OpenSCAD array limit exceeded")), o1;
     }
@@ -13303,7 +13303,7 @@ function Jb(i, e = []) {
       const o1 = Z[0];
       if ((O === "is_num" || O === "is_bool") && typeof o1 == "string")
         return `${O === "is_num" ? "isNumber" : "isBoolean"}(${o1})`;
-      const f1 = O === "is_function" ? o1 instanceof o8 : O === "is_undef" ? o1 instanceof S0 : O === "is_string" ? o1 instanceof z0 || o1 instanceof X9 : O === "is_list" ? Array.isArray(o1) || o1 instanceof s4 || o1 instanceof W3 : O === "is_bool" ? o1 === "true" || o1 === "false" : O === "is_num" ? typeof o1 == "string" && o1 !== "true" && o1 !== "false" : void 0;
+      const f1 = O === "is_function" ? o1 instanceof o8 : O === "is_undef" ? o1 instanceof S0 : O === "is_string" ? o1 instanceof z0 || o1 instanceof X9 : O === "is_list" ? Array.isArray(o1) || o1 instanceof s4 || o1 instanceof K3 : O === "is_bool" ? o1 === "true" || o1 === "false" : O === "is_num" ? typeof o1 == "string" && o1 !== "true" && o1 !== "false" : void 0;
       return f1 === void 0 && B(O), f1 ? "true" : "false";
     }
     if (O === "str") {
@@ -13321,8 +13321,8 @@ function Jb(i, e = []) {
           return;
         }
         if (Array.isArray(u1)) {
-          o1.push(new z0("[")), u1.forEach((N1, G1) => {
-            G1 && o1.push(new z0(", ")), f1(N1, !0);
+          o1.push(new z0("[")), u1.forEach((N1, K1) => {
+            K1 && o1.push(new z0(", ")), f1(N1, !0);
           }), o1.push(new z0("]"));
           return;
         }
@@ -13341,15 +13341,15 @@ function Jb(i, e = []) {
       (f1 > u1 || !Number.isFinite(u1 - f1) || !Number.isSafeInteger(x1) || x1 < 0) && B("rands range and integer count"), x1 > 64 && z(p("Loop exceeds 64 values")), Q(x1), q("scad.random.sequence", p("Random samples use Brickwright’s generator and are fixed in the imported snapshot."));
       let N1;
       b1 === void 0 ? (q("scad.random.sequence", p("Unseeded random calls use a source-derived stream for reproducible imports.")), N1 = R ?? a1(i)) : N1 = a1(String(b1));
-      const G1 = [];
+      const K1 = [];
       for (let I1 = 0; I1 < x1; I1++)
-        N1 = t1(N1), G1.push(String(f1 + (u1 - f1) * (N1 / 4294967296)));
-      return b1 === void 0 && (R = N1, I += x1), G1;
+        N1 = t1(N1), K1.push(String(f1 + (u1 - f1) * (N1 / 4294967296)));
+      return b1 === void 0 && (R = N1, I += x1), K1;
     }
     if (O === "rands") {
       (Z.length < 3 || Z.length > 4) && B("rands arguments");
-      const o1 = Z.map((G1) => typeof G1 == "string" && G1 !== "true" && G1 !== "false" ? M1(G1) : void 0);
-      (Z.some((G1) => typeof G1 != "string" || G1 === "true" || G1 === "false") || o1[0] !== void 0 && o1[1] !== void 0 && o1[0] > o1[1] || o1[2] !== void 0 && (!Number.isSafeInteger(o1[2]) || o1[2] < 0)) && B("rands range and integer count"), q("scad.random.sequence", p("Random values use the repeatable Brickwright generator; seeded sequences differ from OpenSCAD. Unseeded calls use seed 1."));
+      const o1 = Z.map((K1) => typeof K1 == "string" && K1 !== "true" && K1 !== "false" ? M1(K1) : void 0);
+      (Z.some((K1) => typeof K1 != "string" || K1 === "true" || K1 === "false") || o1[0] !== void 0 && o1[1] !== void 0 && o1[0] > o1[1] || o1[2] !== void 0 && (!Number.isSafeInteger(o1[2]) || o1[2] < 0)) && B("rands range and integer count"), q("scad.random.sequence", p("Random values use the repeatable Brickwright generator; seeded sequences differ from OpenSCAD. Unseeded calls use seed 1."));
       const [f1, u1, x1, b1 = "1"] = Z, N1 = `cadRandom${T++}`;
       return new s4(N1, new n4("0", `max(0,floor(${e2(x1)}))-1`, "1"), [`randomValue(${e2(f1)},${e2(u1)},${e2(b1)},${N1})`]);
     }
@@ -13370,13 +13370,13 @@ function Jb(i, e = []) {
       (Z.length < 2 || Z.length > 4) && B("search arguments");
       const [o1, f1] = Z, u1 = M1(Z[2] ?? "1"), x1 = M1(Z[3] ?? "0");
       (u1 === void 0 || x1 === void 0 || !Number.isInteger(u1) || u1 < 0 || !Number.isInteger(x1) || x1 < 0) && B("search count/column");
-      const b1 = f1 instanceof z0 ? [...f1.text].map((O1) => new z0(O1)) : Array.isArray(f1) ? f1 : B("search table"), N1 = typeof o1 == "string", G1 = o1 instanceof z0 ? [...o1.text].map((O1) => new z0(O1)) : Array.isArray(o1) ? o1 : [o1];
+      const b1 = f1 instanceof z0 ? [...f1.text].map((O1) => new z0(O1)) : Array.isArray(f1) ? f1 : B("search table"), N1 = typeof o1 == "string", K1 = o1 instanceof z0 ? [...o1.text].map((O1) => new z0(O1)) : Array.isArray(o1) ? o1 : [o1];
       if (o1 === "true" || o1 === "false")
         return new S0();
-      const I1 = G1.map((O1) => {
+      const I1 = K1.map((O1) => {
         const Y1 = [];
         for (let c2 = 0; c2 < b1.length; c2++) {
-          const T2 = b1[c2], z2 = Array.isArray(T2) ? T2[x1] : T2, t0 = U1("==", O1, z2 ?? new S0()), S2 = M1(t0);
+          const E2 = b1[c2], R2 = Array.isArray(E2) ? E2[x1] : E2, t0 = U1("==", O1, R2 ?? new S0()), S2 = M1(t0);
           if (S2 === void 0 && B("dynamic search matches"), S2 !== 0 && (Y1.push(String(c2)), u1 && Y1.length >= u1))
             break;
         }
@@ -13390,14 +13390,14 @@ function Jb(i, e = []) {
       o1.some((u1, x1) => x1 > 0 && M1(u1[0]) === M1(o1[x1 - 1][0])) && B("duplicate lookup key");
       let f1 = o1.at(-1)[1];
       for (let u1 = o1.length - 2; u1 >= 0; u1--) {
-        const [x1, b1] = o1[u1], [N1, G1] = o1[u1 + 1], I1 = U1("+", b1, U1("*", U1("/", U1("-", Z[0], x1), U1("-", N1, x1)), U1("-", G1, b1)));
+        const [x1, b1] = o1[u1], [N1, K1] = o1[u1 + 1], I1 = U1("+", b1, U1("*", U1("/", U1("-", Z[0], x1), U1("-", N1, x1)), U1("-", K1, b1)));
         f1 = P1(U1("<=", Z[0], N1), I1, f1);
       }
       return P1(U1("<=", Z[0], o1[0][0]), o1[0][1], f1);
     }
     if (O === "pow" && Z.length === 2)
       return U1("^", Z[0], Z[1]);
-    if ((O === "min" || O === "max") && Z.length === 1 && (Array.isArray(Z[0]) || Z[0] instanceof n4 || Z[0] instanceof s4 || Z[0] instanceof W3))
+    if ((O === "min" || O === "max") && Z.length === 1 && (Array.isArray(Z[0]) || Z[0] instanceof n4 || Z[0] instanceof s4 || Z[0] instanceof K3))
       return k1(O, Z[0]).value;
     J.has(O) || B(O);
     const A1 = `${O}(${Z.map((o1) => e2(o1)).join(", ")})`, V = M1(A1);
@@ -13460,7 +13460,7 @@ function Jb(i, e = []) {
           do
             u1 = `cadPoint${T++}`;
           while (t.some((x1) => x1.text === u1));
-          if (Array.isArray(f1) && f1.some((x1) => typeof x1 != "string") ? (L.set(o1.text, w1(f1, u1)), f1 = new n4("0", String(f1.length - 1), "1")) : L.set(o1.text, u1), v1.push({ variable: u1, input: f1 instanceof n4 || f1 instanceof s4 || f1 instanceof W3 || Array.isArray(f1) ? f1 : [f1] }), v1.length > 8 && z(p("OpenSCAD construction limit exceeded")), j() !== ",")
+          if (Array.isArray(f1) && f1.some((x1) => typeof x1 != "string") ? (L.set(o1.text, w1(f1, u1)), f1 = new n4("0", String(f1.length - 1), "1")) : L.set(o1.text, u1), v1.push({ variable: u1, input: f1 instanceof n4 || f1 instanceof s4 || f1 instanceof K3 || Array.isArray(f1) ? f1 : [f1] }), v1.length > 8 && z(p("OpenSCAD construction limit exceeded")), j() !== ",")
             break;
           p1();
         }
@@ -13501,7 +13501,7 @@ function Jb(i, e = []) {
     if (j() === "each") {
       p1();
       const d1 = l2(O + 1);
-      return Array.isArray(d1) || d1 instanceof n4 || d1 instanceof s4 || d1 instanceof W3 || d1 instanceof J0 ? d1 : [d1];
+      return Array.isArray(d1) || d1 instanceof n4 || d1 instanceof s4 || d1 instanceof K3 || d1 instanceof J0 ? d1 : [d1];
     }
     return [l2(O + 1)];
   }
@@ -13535,13 +13535,13 @@ function Jb(i, e = []) {
       const v1 = M1(O.condition);
       return v1 === void 0 ? O : r2(v1 ? O.yes : O.no, Z + 1);
     }
-    if (O instanceof W3) {
+    if (O instanceof K3) {
       const v1 = O.parts.map((A1) => r2(A1, Z + 1));
       if (v1.every(Array.isArray)) {
         const A1 = v1.flat();
         return A1.length > 256 && z(p("OpenSCAD array limit exceeded")), A1;
       }
-      return new W3(v1);
+      return new K3(v1);
     }
     if (Array.isArray(O)) {
       const v1 = G.get(O);
@@ -13570,33 +13570,33 @@ function Jb(i, e = []) {
           const b1 = [o2(O + 1)];
           for (; j() === "," && (p1(), j() !== "]"); )
             b1.push(o2(O + 1, !0)), b1.length > 256 && z(p("OpenSCAD array limit exceeded"));
-          S1("]"), x1 = r2(b1.length === 1 ? b1[0] : new W3(b1));
+          S1("]"), x1 = r2(b1.length === 1 ? b1[0] : new K3(b1));
         } else {
           const b1 = [];
           if (j() !== "]") {
             const N1 = l2(O + 1, [":"]);
             if (j() === ":") {
               p1();
-              const G1 = l2(O + 1, [":"]);
-              let I1 = e2(N1), O1 = e2(G1), Y1 = "1";
-              j() === ":" ? (p1(), Y1 = e2(G1), O1 = e2(l2(O + 1))) : (I1 = e2(R1("min", [N1, G1])), O1 = e2(R1("max", [N1, G1]))), S1("]");
+              const K1 = l2(O + 1, [":"]);
+              let I1 = e2(N1), O1 = e2(K1), Y1 = "1";
+              j() === ":" ? (p1(), Y1 = e2(K1), O1 = e2(l2(O + 1))) : (I1 = e2(R1("min", [N1, K1])), O1 = e2(R1("max", [N1, K1]))), S1("]");
               for (const c2 of [I1, O1, Y1]) {
                 (c2 === "true" || c2 === "false") && Y(p("Expected a numeric OpenSCAD argument"));
-                let T2 = !1;
+                let E2 = !1;
                 try {
                   r5(c2, () => {
-                    throw T2 = !0, Error();
+                    throw E2 = !0, Error();
                   });
                 } catch {
-                  T2 || Y(p("Expected a numeric OpenSCAD argument"));
+                  E2 || Y(p("Expected a numeric OpenSCAD argument"));
                 }
               }
               M1(Y1) === 0 && Y(p("Range step must be nonzero")), x1 = new n4(I1, O1, Y1);
             } else {
-              const G1 = [[N1]];
+              const K1 = [[N1]];
               for (; j() === "," && (p1(), j() !== "]"); )
-                G1.push(o2(O + 1, !0)), G1.length > 256 && z(p("OpenSCAD array limit exceeded"));
-              S1("]"), x1 = r2(G1.length === 1 ? G1[0] : new W3(G1));
+                K1.push(o2(O + 1, !0)), K1.length > 256 && z(p("OpenSCAD array limit exceeded"));
+              S1("]"), x1 = r2(K1.length === 1 ? K1[0] : new K3(K1));
             }
           } else
             p1(), x1 = b1;
@@ -13612,19 +13612,19 @@ function Jb(i, e = []) {
         p1(), x1 = new S0();
       else if (u1 === "let") {
         p1(), S1("(");
-        const b1 = L, N1 = new Map(b1), G1 = [];
+        const b1 = L, N1 = new Map(b1), K1 = [];
         L = N1;
         try {
           for (; j() !== ")"; ) {
             const O1 = p1();
             (!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(O1.text) || O1.text === "$preview") && B("let expression binding", O1.at), S1("=");
             const Y1 = l2(O + 1);
-            if (N1.set(O1.text, Y1), G1.push(Y1), G1.length > 64 && z(p("OpenSCAD construction limit exceeded")), j() !== ",")
+            if (N1.set(O1.text, Y1), K1.push(Y1), K1.length > 64 && z(p("OpenSCAD construction limit exceeded")), j() !== ",")
               break;
             p1();
           }
           S1(")"), x1 = l2(O + 1, Z);
-          const I1 = l0(G1);
+          const I1 = l0(K1);
           I1 && (x1 = p2(I1, x1));
         } finally {
           L = b1;
@@ -13641,12 +13641,12 @@ function Jb(i, e = []) {
         p1();
         const b1 = { rands: ["min_value", "max_value", "value_count", "seed_value"], search: ["match_value", "string_or_vector", "num_returns_per_match", "index_col_num"], lookup: ["key", "table"] };
         if (b1[u1]) {
-          const N1 = p0(u1, t[s - 1].at), G1 = b1[u1];
-          N1.allowed(G1, G1.length);
+          const N1 = p0(u1, t[s - 1].at), K1 = b1[u1];
+          N1.allowed(K1, K1.length);
           const I1 = [];
-          for (let O1 = 0; O1 < G1.length; O1++) {
-            const Y1 = N1.use(G1[O1], O1);
-            Y1 !== void 0 ? I1[O1] = Y1 : u1 === "search" && O1 >= 2 ? I1[O1] = O1 === 2 ? "1" : "0" : (O1 < G1.length - 1 || u1 === "lookup") && B(u1 + " arguments");
+          for (let O1 = 0; O1 < K1.length; O1++) {
+            const Y1 = N1.use(K1[O1], O1);
+            Y1 !== void 0 ? I1[O1] = Y1 : u1 === "search" && O1 >= 2 ? I1[O1] = O1 === 2 ? "1" : "0" : (O1 < K1.length - 1 || u1 === "lookup") && B(u1 + " arguments");
           }
           x1 = R1(u1, I1);
         } else {
@@ -13659,7 +13659,7 @@ function Jb(i, e = []) {
       } else if (u1 && /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(u1)) {
         p1(), u1 === "$preview" && (a = !0);
         const b1 = $(u1) ?? E.get(u1);
-        b1 !== void 0 ? x1 = b1 : u1 === "$t" ? (q("scad.animation.default-time", p("Unbound animation time uses $t=0; motion is not retained.")), x1 = "0") : x1 = u1 === "PI" && !W1.has("PI") ? "3.141592653589793" : u1 === "true" || u1 === "false" ? u1 : N(u1) ?? (u1 === "$children" ? "0" : u1 === "$preview" ? "false" : new S0());
+        b1 !== void 0 ? x1 = b1 : u1 === "$t" ? (q("scad.animation.default-time", p("Unbound animation time uses $t=0; motion is not retained.")), x1 = "0") : x1 = u1 === "PI" && !G1.has("PI") ? "3.141592653589793" : u1 === "true" || u1 === "false" ? u1 : N(u1) ?? (u1 === "$children" ? "0" : u1 === "$preview" ? "false" : new S0());
       } else if (u1 && /^(?:\d|\.\d)/.test(u1))
         p1(), x1 = u1;
       else
@@ -13725,26 +13725,26 @@ function Jb(i, e = []) {
         if (N1 === void 0 || N1 < f1 || d1.has(b1))
           break;
         p1();
-        const G1 = b1 === "&&" || b1 === "||" ? M1(z1(x1)) : void 0;
-        b1 === "&&" && G1 === 0 || b1 === "||" && G1 !== void 0 && G1 !== 0 ? (V(N1 + 1), x1 = b1 === "&&" ? "false" : "true") : x1 = U1(b1, x1, o1(N1 + (b1 === "^" ? 0 : 1), u1 + 1));
+        const K1 = b1 === "&&" || b1 === "||" ? M1(z1(x1)) : void 0;
+        b1 === "&&" && K1 === 0 || b1 === "||" && K1 !== void 0 && K1 !== 0 ? (V(N1 + 1), x1 = b1 === "&&" ? "false" : "true") : x1 = U1(b1, x1, o1(N1 + (b1 === "^" ? 0 : 1), u1 + 1));
       }
       if (f1 === 0 && j() === "?" && !d1.has("?")) {
         p1();
         const b1 = M1(z1(x1));
-        let N1 = new S0(), G1 = new S0();
-        b1 === 0 ? F1([":"]) : N1 = l2(O + 1, [":"]), S1(":"), b1 !== void 0 && b1 !== 0 ? F1(Z) : G1 = l2(O + 1, Z), x1 = b1 !== void 0 ? b1 ? N1 : G1 : P1(x1, N1, G1);
+        let N1 = new S0(), K1 = new S0();
+        b1 === 0 ? F1([":"]) : N1 = l2(O + 1, [":"]), S1(":"), b1 !== void 0 && b1 !== 0 ? F1(Z) : K1 = l2(O + 1, Z), x1 = b1 !== void 0 ? b1 ? N1 : K1 : P1(x1, N1, K1);
       }
       return x1;
     }
     return o1(0, 0);
   }
-  const E2 = (O, Z = /* @__PURE__ */ new Set()) => {
+  const A2 = (O, Z = /* @__PURE__ */ new Set()) => {
     if (Q(), O instanceof S0)
       return O.reason;
     if (!(!Array.isArray(O) || Z.has(O))) {
       Z.add(O);
       for (const d1 of O) {
-        const v1 = E2(d1, Z);
+        const v1 = A2(d1, Z);
         if (v1)
           return v1;
       }
@@ -13755,10 +13755,10 @@ function Jb(i, e = []) {
       return e2(p2(d1, e2(T0(O))));
     if (O instanceof J0)
       return _1(`(${O.condition}) ? (${O.yes instanceof S0 ? "0/0" : e2(O.yes)}) : (${O.no instanceof S0 ? "0/0" : e2(O.no)})`);
-    const v1 = E2(O);
+    const v1 = A2(O);
     return v1 && B(v1), O === void 0 && Z !== void 0 ? Z : typeof O != "string" ? Y(p("Expected a numeric OpenSCAD argument")) : O;
   }, D1 = (O, Z = !1) => {
-    const d1 = E2(O);
+    const d1 = A2(O);
     if (d1 && B(d1), O instanceof J0) {
       const v1 = (A1) => A1 instanceof J0 ? v1(A1.yes) || v1(A1.no) : Array.isArray(A1);
       if (Z && !v1(O)) {
@@ -13774,7 +13774,7 @@ function Jb(i, e = []) {
       return [v1, v1, v1];
     }
     return Array.isArray(O) ? B("vector length other than three") : Y(p("Expected a three-component OpenSCAD vector"));
-  }, d2 = /* @__PURE__ */ new Map(), W1 = /* @__PURE__ */ new Set();
+  }, d2 = /* @__PURE__ */ new Map(), G1 = /* @__PURE__ */ new Set();
   function v2(O) {
     const Z = s, d1 = p1().text, v1 = d1 === "module" ? D : A, A1 = p1();
     /^[A-Za-z_][A-Za-z0-9_]*$/.test(A1.text) || B(`${d1} name`, A1.at), S1("(");
@@ -13836,11 +13836,11 @@ function Jb(i, e = []) {
   e.length > R3.tokens && z(p("Too many source tokens"));
   const m2 = [...e].sort((O, Z) => O.start - Z.start || Z.end - O.end);
   let x2 = -1;
-  const A2 = [];
+  const C2 = [];
   for (const O of m2) {
-    for ((!Number.isInteger(O.start) || !Number.isInteger(O.end) || O.start < 0 || O.end < O.start || O.end > i.length || O.start === x2) && Y(p("Invalid OpenSCAD library range")); A2.length && O.start >= A2.at(-1).end; )
-      A2.pop();
-    A2.length && O.end > A2.at(-1).end && Y(p("Overlapping OpenSCAD library ranges")), A2.push(O), x2 = O.start;
+    for ((!Number.isInteger(O.start) || !Number.isInteger(O.end) || O.start < 0 || O.end < O.start || O.end > i.length || O.start === x2) && Y(p("Invalid OpenSCAD library range")); C2.length && O.start >= C2.at(-1).end; )
+      C2.pop();
+    C2.length && O.end > C2.at(-1).end && Y(p("Overlapping OpenSCAD library ranges")), C2.push(O), x2 = O.start;
   }
   for (const O of [...m2].reverse()) {
     const Z = t.findIndex((u1) => u1.at >= O.start);
@@ -13875,8 +13875,8 @@ function Jb(i, e = []) {
             const I1 = p1().text;
             (I1 === "(" || I1 === "[") && N1++, (I1 === ")" || I1 === "]") && N1--, (N1 < 0 || N1 > 32) && z(p("Expression nesting exceeds 32")), (I1 === "{" || I1 === "}" || s > d1) && B("library variable expression", x1.at);
           }
-          const G1 = s;
-          S1(";"), b1 === G1 && Y(p("Expected a complete dimensional expression"), x1.at), V.set(x1.text, new Wn(b1, G1, V, void 0, D, A));
+          const K1 = s;
+          S1(";"), b1 === K1 && Y(p("Expected a complete dimensional expression"), x1.at), V.set(x1.text, new Wn(b1, K1, V, void 0, D, A));
         } else
           w0();
       }
@@ -13914,10 +13914,10 @@ function Jb(i, e = []) {
           (!b1 || b1 === "{" || b1 === "}") && B("global variable expression", o1.at), (b1 === "(" || b1 === "[") && u1++, (b1 === ")" || b1 === "]") && u1--, (u1 < 0 || u1 > 32) && z(p("Expression nesting exceeds 32")), p1();
         }
         const x1 = s;
-        if (S1(";"), f1 === x1 && Y(p("Expected a complete dimensional expression"), o1.at), W1.add(o1.text), x.set(o1.text, new Wn(f1, x1, /* @__PURE__ */ new Map(), void 0, D, A)), f.set(V, s), !v.has(o1.text)) {
+        if (S1(";"), f1 === x1 && Y(p("Expected a complete dimensional expression"), o1.at), G1.add(o1.text), x.set(o1.text, new Wn(f1, x1, /* @__PURE__ */ new Map(), void 0, D, A)), f.set(V, s), !v.has(o1.text)) {
           const b1 = /^[A-Za-z][A-Za-z0-9_]{0,39}$/.test(o1.text) && !["mm", "cm", "m", "in", "deg", "rad", "constructor", "prototype"].includes(o1.text);
           let N1 = "cadGlobal" + v.size;
-          for (; t.some((G1) => G1.text === N1) || [...v.values()].includes(N1); )
+          for (; t.some((K1) => K1.text === N1) || [...v.values()].includes(N1); )
             N1 += "x";
           v.set(o1.text, b1 ? o1.text : N1);
         }
@@ -13931,39 +13931,39 @@ function Jb(i, e = []) {
     const Z = $1(O);
     typeof Z == "string" && !O.startsWith("$") && m.set(v.get(O), Z), ++o > 4096 && z(p("Too many statements"));
   }
-  function C2(O) {
+  function T2(O) {
     return O.length ? O.length === 1 ? O[0] : `union(${O.join(", ")})` : "empty()";
   }
-  function R2(O, Z = !1, d1 = !1) {
+  function I2(O, Z = !1, d1 = !1) {
     S1("{");
     const v1 = s, A1 = L, V = D, o1 = A, f1 = new Map(A1), u1 = /* @__PURE__ */ new Map();
     D = new Map(D);
     const x1 = y.has(A);
     A = new Map(A), x1 && y.add(A);
-    let b1 = 0, N1 = 0, G1 = 0;
+    let b1 = 0, N1 = 0, K1 = 0;
     for (; s < t.length; ) {
       const I1 = j();
       if (I1 === "}" && b1 === 0)
         break;
-      if (b1 === 0 && N1 === 0 && G1 === 0 && (I1 === "module" || I1 === "function")) {
+      if (b1 === 0 && N1 === 0 && K1 === 0 && (I1 === "module" || I1 === "function")) {
         const O1 = s;
         v2(f1), u1.set(O1, s);
         continue;
       }
-      if (b1 === 0 && N1 === 0 && G1 === 0 && j(1) === "=") {
+      if (b1 === 0 && N1 === 0 && K1 === 0 && j(1) === "=") {
         const O1 = s, Y1 = p1();
         Z && B("assignments in anonymous blocks", Y1.at), /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(Y1.text) || B("local variable name", Y1.at), p1();
         const c2 = s;
-        let T2 = 0;
-        for (; j() !== ";" || T2 !== 0; ) {
+        let E2 = 0;
+        for (; j() !== ";" || E2 !== 0; ) {
           const t0 = j();
-          (!t0 || t0 === "{" || t0 === "}") && B("local variable expression", Y1.at), (t0 === "(" || t0 === "[") && T2++, (t0 === ")" || t0 === "]") && T2--, (T2 < 0 || T2 > 32) && z(p("Expression nesting exceeds 32")), p1();
+          (!t0 || t0 === "{" || t0 === "}") && B("local variable expression", Y1.at), (t0 === "(" || t0 === "[") && E2++, (t0 === ")" || t0 === "]") && E2--, (E2 < 0 || E2 > 32) && z(p("Expression nesting exceeds 32")), p1();
         }
-        const z2 = s;
-        S1(";"), c2 === z2 && Y(p("Expected a complete dimensional expression"), Y1.at), f1.set(Y1.text, new Wn(c2, z2, f1, A1, D, A)), u1.set(O1, s), ++o > 4096 && z(p("OpenSCAD construction limit exceeded"));
+        const R2 = s;
+        S1(";"), c2 === R2 && Y(p("Expected a complete dimensional expression"), Y1.at), f1.set(Y1.text, new Wn(c2, R2, f1, A1, D, A)), u1.set(O1, s), ++o > 4096 && z(p("OpenSCAD construction limit exceeded"));
         continue;
       }
-      I1 === "{" && b1++, I1 === "}" && b1--, I1 === "(" && N1++, I1 === ")" && N1--, I1 === "[" && G1++, I1 === "]" && G1--, p1();
+      I1 === "{" && b1++, I1 === "}" && b1--, I1 === "(" && N1++, I1 === ")" && N1--, I1 === "[" && K1++, I1 === "]" && K1--, p1();
     }
     s = v1, L = f1;
     try {
@@ -13983,7 +13983,7 @@ function Jb(i, e = []) {
     }
   }
   function q2(O, Z = !1) {
-    return C2(R2(O, Z));
+    return T2(I2(O, Z));
   }
   function p0(O, Z) {
     S1("(");
@@ -14083,16 +14083,16 @@ function Jb(i, e = []) {
     return d1 === 0 && Y(p("Assertion failed")), B("parameter-dependent assertion returning empty, string or undefined value");
   }
   function W2(O, Z, d1, v1, A1) {
-    (d1.positional.length > Z.parameters.length || [...d1.named.keys()].some((N1) => !N1.startsWith("$") && !Z.parameters.some((G1) => G1.name === N1))) && q("scad.module.arguments-ignored", p("Extra or unknown module/function arguments are ignored, as in OpenSCAD."));
+    (d1.positional.length > Z.parameters.length || [...d1.named.keys()].some((N1) => !N1.startsWith("$") && !Z.parameters.some((K1) => K1.name === N1))) && q("scad.module.arguments-ignored", p("Extra or unknown module/function arguments are ignored, as in OpenSCAD."));
     const V = s, o1 = L, f1 = D, u1 = A, x1 = [...o1.keys()].filter((N1) => N1.startsWith("$")).map((N1) => [N1, $(N1)]);
-    for (const [N1, G1] of d1.named)
-      N1.startsWith("$") && x1.push([N1, G1]);
+    for (const [N1, K1] of d1.named)
+      N1.startsWith("$") && x1.push([N1, K1]);
     const b1 = new Map([...Z.scope ?? [], ...x1]);
     L = b1, D = Z.moduleScope, A = Z.functionScope;
     try {
-      for (let G1 = 0; G1 < Z.parameters.length; G1++) {
-        const I1 = Z.parameters[G1];
-        let O1 = d1.use(I1.name, G1);
+      for (let K1 = 0; K1 < Z.parameters.length; K1++) {
+        const I1 = Z.parameters[K1];
+        let O1 = d1.use(I1.name, K1);
         if (O1 === void 0 && I1.start !== void 0) {
           s = I1.start, L = new Map([...Z.scope ?? [], ...x1]);
           try {
@@ -14135,8 +14135,8 @@ function Jb(i, e = []) {
       if (u1 !== void 0)
         return u1;
       const b1 = W2("function", v1, A1, d1.at, () => {
-        const N1 = l2(), G1 = l0([...v1.parameters.map((I1) => $(I1.name)), ...A1.positional, ...A1.named.values()]);
-        return G1 ? p2(G1, N1) : N1;
+        const N1 = l2(), K1 = l0([...v1.parameters.map((I1) => $(I1.name)), ...A1.positional, ...A1.named.values()]);
+        return K1 ? p2(K1, N1) : N1;
       });
       return I !== x1 ? W.add(v1) : !W.has(v1) && X < 2048 && (f1.set(o1, b1), n1.set(v1, f1), X++), b1;
     } finally {
@@ -14153,19 +14153,19 @@ function Jb(i, e = []) {
       let f1 = function(x1) {
         if (x1 === A1.length) {
           s = V;
-          const G1 = Z ? D2(O + 1) : j() === "{" ? q2(O + 1) : a2(O + 1);
-          return o1 = s, G1;
+          const K1 = Z ? D2(O + 1) : j() === "{" ? q2(O + 1) : a2(O + 1);
+          return o1 = s, K1;
         }
         const b1 = A1[x1];
-        if (b1.range || b1.items.every((G1) => typeof G1 == "string")) {
+        if (b1.range || b1.items.every((K1) => typeof K1 == "string")) {
           L.set(b1.variable, b1.mapped ?? b1.generated);
-          const G1 = f1(x1 + 1);
-          return b1.range ? `forRange${Z ? "2d" : ""}(${b1.generated}, ${b1.range.join(", ")}, ${G1})` : `forValues${Z ? "2d" : ""}(${b1.generated}, [${b1.items.join(", ")}], ${G1})`;
+          const K1 = f1(x1 + 1);
+          return b1.range ? `forRange${Z ? "2d" : ""}(${b1.generated}, ${b1.range.join(", ")}, ${K1})` : `forValues${Z ? "2d" : ""}(${b1.generated}, [${b1.items.join(", ")}], ${K1})`;
         }
         const N1 = [];
-        for (const G1 of b1.items)
-          L.set(b1.variable, G1), N1.push(f1(x1 + 1));
-        return Z ? `union2d(${N1.join(", ")})` : C2(N1);
+        for (const K1 of b1.items)
+          L.set(b1.variable, K1), N1.push(f1(x1 + 1));
+        return Z ? `union2d(${N1.join(", ")})` : T2(N1);
       };
       for (; ; ) {
         const x1 = p1();
@@ -14175,11 +14175,11 @@ function Jb(i, e = []) {
           b1 = `cadLoop${$0++}`;
         while (P0.has(b1));
         P0.add(b1);
-        let N1, G1 = [];
+        let N1, K1 = [];
         const I1 = l2();
-        I1 instanceof n4 ? N1 = [I1.start, I1.end, I1.step] : I1 instanceof s4 || I1 instanceof W3 ? (N1 = ["0", `(${e2(m1(I1))})-1`, "1"], v1.set(x1.text, w1(I1, b1))) : G1 = Array.isArray(I1) ? I1 : I1 instanceof S0 ? [] : [I1];
+        I1 instanceof n4 ? N1 = [I1.start, I1.end, I1.step] : I1 instanceof s4 || I1 instanceof K3 ? (N1 = ["0", `(${e2(m1(I1))})-1`, "1"], v1.set(x1.text, w1(I1, b1))) : K1 = Array.isArray(I1) ? I1 : I1 instanceof S0 ? [] : [I1];
         const O1 = v1.get(x1.text);
-        if (A1.push({ variable: x1.text, generated: b1, range: N1, items: G1, ...I1 instanceof s4 || I1 instanceof W3 ? { mapped: O1 } : {} }), v1.set(x1.text, I1 instanceof s4 || I1 instanceof W3 ? O1 : b1), A1.length > 8 && z(p("OpenSCAD construction limit exceeded")), j() !== ",")
+        if (A1.push({ variable: x1.text, generated: b1, range: N1, items: K1, ...I1 instanceof s4 || I1 instanceof K3 ? { mapped: O1 } : {} }), v1.set(x1.text, I1 instanceof s4 || I1 instanceof K3 ? O1 : b1), A1.length > 8 && z(p("OpenSCAD construction limit exceeded")), j() !== ",")
           break;
         p1();
       }
@@ -14314,7 +14314,7 @@ function Jb(i, e = []) {
     try {
       return W2("module", D.get(O), Z, d1, () => {
         L.set("$children", String(u1 ? q1(u1) : 0));
-        const b1 = A1 ? D2(v1) : j() === "{" ? q2(v1) : a2(v1), N1 = l0([...D.get(O).parameters.map((G1) => $(G1.name)), ...Z.positional, ...Z.named.values()]);
+        const b1 = A1 ? D2(v1) : j() === "{" ? q2(v1) : a2(v1), N1 = l0([...D.get(O).parameters.map((K1) => $(K1.name)), ...Z.positional, ...Z.named.values()]);
         return N1 ? `assert${A1 ? "2d" : "Shape"}(${N1}, ${b1})` : b1;
       });
     } finally {
@@ -14329,23 +14329,23 @@ function Jb(i, e = []) {
     const V = s, o1 = L, f1 = D, u1 = A, x1 = O3;
     let b1 = [];
     try {
-      s = A1.start, L = new Map(A1.scope), D = A1.moduleScope, A = A1.functionScope, O3 = A1.parent, b1 = j() === "{" ? R2(d1, !1, v1) : [v1 ? D2(d1 + 1) : a2(d1 + 1)];
+      s = A1.start, L = new Map(A1.scope), D = A1.moduleScope, A = A1.functionScope, O3 = A1.parent, b1 = j() === "{" ? I2(d1, !1, v1) : [v1 ? D2(d1 + 1) : a2(d1 + 1)];
     } finally {
       s = V, L = o1, D = f1, A = u1, O3 = x1;
     }
     const N1 = O.use("index", 0);
     if (N1 === void 0)
-      return v1 ? `union2d(${b1.join(",")})` : C2(b1);
-    const G1 = Array.isArray(N1) ? N1 : [N1], I1 = G1.map((O1) => {
+      return v1 ? `union2d(${b1.join(",")})` : T2(b1);
+    const K1 = Array.isArray(N1) ? N1 : [N1], I1 = K1.map((O1) => {
       const Y1 = e2(O1), c2 = M1(Y1);
       if (c2 !== void 0)
         return Number.isInteger(c2) && c2 >= 0 && c2 < b1.length ? b1[c2] : v1 ? "union2d()" : "empty()";
-      let T2 = v1 ? "union2d()" : "empty()";
-      for (let z2 = b1.length - 1; z2 >= 0; z2--)
-        T2 = `choose${v1 ? "2d" : ""}((${Y1}) == ${z2}, ${b1[z2]}, ${T2})`;
-      return T2;
+      let E2 = v1 ? "union2d()" : "empty()";
+      for (let R2 = b1.length - 1; R2 >= 0; R2--)
+        E2 = `choose${v1 ? "2d" : ""}((${Y1}) == ${R2}, ${b1[R2]}, ${E2})`;
+      return E2;
     });
-    return v1 ? `union2d(${I1.join(",")})` : C2(I1);
+    return v1 ? `union2d(${I1.join(",")})` : T2(I1);
   }
   function X1(O, Z) {
     const d1 = L;
@@ -14360,7 +14360,7 @@ function Jb(i, e = []) {
   }
   function Z1(O, Z, d1 = !1) {
     Q();
-    const v1 = E2(O);
+    const v1 = A2(O);
     if (v1 && B(v1, Z), O instanceof J0) {
       Z1(O.yes, Z, !0), Z1(O.no, Z, !0);
       return;
@@ -14379,14 +14379,14 @@ function Jb(i, e = []) {
   function _2(O, Z) {
     return !Array.isArray(O) || ![3, 4].includes(O.length) || !O.every((d1) => Array.isArray(d1) && d1.length === 4) ? B("affine matrix dimensions", Z) : O.slice(0, 3).flatMap((d1) => d1.map((v1) => e2(v1)));
   }
-  function L2(O, Z) {
+  function z2(O, Z) {
     const [d1, v1, A1] = D1(Array.isArray(O) && O.length === 2 ? [...O, "0"] : O ?? ["1", "0", "0"]), V = `((${d1})*(${d1})+(${v1})*(${v1})+(${A1})*(${A1}))`, o1 = [d1, v1, A1];
     return M1(V) === 0 && B("zero mirror normal", Z), o1.flatMap((f1, u1) => [...o1.map((x1, b1) => _1(`${u1 === b1 ? "1" : "0"}-2*(${f1})*(${x1})/${V}`)), "0"]);
   }
   function y2(O) {
     if (Q(), O instanceof J0)
       return `pointChoose(${O.condition}, ${y2(O.yes)}, ${y2(O.no)})`;
-    if (O instanceof W3)
+    if (O instanceof K3)
       return `pointConcat(${O.parts.map(y2).join(", ")})`;
     if (O instanceof s4) {
       const Z = O.input;
@@ -14421,7 +14421,7 @@ function Jb(i, e = []) {
     O > 32 && z(p("OpenSCAD construction nesting exceeds 32")), ++o > 4096 && z(p("OpenSCAD construction limit exceeded"));
     const Z = (x1, b1 = "union2d") => x1.length === 1 && b1 !== "hull2d" ? x1[0] : `${b1}(${x1.join(", ")})`;
     if (j() === "{")
-      return Z(R2(O, !1, !0));
+      return Z(I2(O, !1, !0));
     const d1 = p1(), v1 = d1.text;
     if (v1 === "assert")
       return B2(O, !0);
@@ -14440,8 +14440,8 @@ function Jb(i, e = []) {
       const x1 = z1(l2());
       S1(")");
       const b1 = M1(x1);
-      let N1 = "union2d()", G1 = "union2d()";
-      return b1 === 0 ? w0() : N1 = D2(O + 1), j() === "else" && (p1(), b1 !== void 0 && b1 !== 0 ? w0() : G1 = D2(O + 1)), b1 !== void 0 ? b1 ? N1 : G1 : `choose2d(${x1}, ${N1}, ${G1})`;
+      let N1 = "union2d()", K1 = "union2d()";
+      return b1 === 0 ? w0() : N1 = D2(O + 1), j() === "else" && (p1(), b1 !== void 0 && b1 !== 0 ? w0() : K1 = D2(O + 1)), b1 !== void 0 ? b1 ? N1 : K1 : `choose2d(${x1}, ${N1}, ${K1})`;
     }
     if ((v1 === "child" || v1 === "children") && !D.has(v1)) {
       const x1 = p0(v1, d1.at);
@@ -14455,7 +14455,7 @@ function Jb(i, e = []) {
       return v1 === "color" ? (f1(["c", "alpha"], 2), Z1(o1("c", 0), d1.at), q("scad.appearance.colours", p("Source colours and transparency are not retained; solid geometry is preserved."))) : v1 === "echo" ? q("scad.console.echo", p("Echo console output is omitted from the converted model.")) : f1(v1 === "render" ? ["convexity"] : [], v1 === "render" ? 1 : 0), j() === ";" ? (p1(), "union2d()") : X1(A1, () => D2(O + 1));
     if (v1 === "mirror" || v1 === "multmatrix") {
       f1(v1 === "mirror" ? ["v"] : ["m"], 1);
-      const x1 = v1 === "mirror" ? L2(o1("v", 0), d1.at) : _2(o1("m", 0), d1.at);
+      const x1 = v1 === "mirror" ? z2(o1("v", 0), d1.at) : _2(o1("m", 0), d1.at);
       return `affine2d(${[x1[0], x1[1], x1[3], x1[4], x1[5], x1[7]].join(", ")}, ${X1(A1, () => D2(O + 1))})`;
     }
     if (v1 === "resize") {
@@ -14463,8 +14463,8 @@ function Jb(i, e = []) {
       const x1 = o1("newsize", 0), b1 = o1("auto", 1, "false");
       if (!Array.isArray(x1) || !x1.length || x1.length > 3)
         return B("resize profile dimensions", d1.at);
-      const N1 = d3(b1, 2), G1 = `resize2d(${e2(x1[0])}, ${e2(x1[1] ?? "0")}, ${N1.join(", ")}, ${X1(A1, () => D2(O + 1))})`;
-      return x1.length === 3 ? `assert2d(isNumber(${e2(x1[2])}),${JSON.stringify(p("Expected a numeric OpenSCAD argument"))},${G1})` : G1;
+      const N1 = d3(b1, 2), K1 = `resize2d(${e2(x1[0])}, ${e2(x1[1] ?? "0")}, ${N1.join(", ")}, ${X1(A1, () => D2(O + 1))})`;
+      return x1.length === 3 ? `assert2d(isNumber(${e2(x1[2])}),${JSON.stringify(p("Expected a numeric OpenSCAD argument"))},${K1})` : K1;
     }
     if (v1 === "offset") {
       f1(["r", "delta", "chamfer", "$fn", "$fa", "$fs"], 1);
@@ -14474,15 +14474,15 @@ function Jb(i, e = []) {
     if (["union", "difference", "intersection", "hull", "minkowski"].includes(v1)) {
       f1([], 0);
       const x1 = [];
-      return j() === "{" ? x1.push(...R2(O, !1, !0)) : x1.push(D2(O + 1)), Z(x1, v1 === "difference" ? "subtract2d" : v1 === "intersection" ? "intersect2d" : v1 + "2d");
+      return j() === "{" ? x1.push(...I2(O, !1, !0)) : x1.push(D2(O + 1)), Z(x1, v1 === "difference" ? "subtract2d" : v1 === "intersection" ? "intersect2d" : v1 + "2d");
     }
     if (["translate", "rotate", "scale"].includes(v1)) {
       f1(v1 === "rotate" ? ["a", "v"] : ["v"], v1 === "rotate" ? 2 : 1);
       const x1 = o1(v1 === "rotate" ? "a" : "v", 0);
       let b1;
       if (v1 === "rotate") {
-        const N1 = () => X1(A1, () => D2(O + 1)), G1 = o1("v", 1);
-        if (typeof x1 == "string" && G1 === void 0)
+        const N1 = () => X1(A1, () => D2(O + 1)), K1 = o1("v", 1);
+        if (typeof x1 == "string" && K1 === void 0)
           return `rotate2d(${x1}, ${N1()})`;
         if (Array.isArray(x1)) {
           const n0 = x1.length === 2 ? [...x1, "0"] : x1;
@@ -14492,7 +14492,7 @@ function Jb(i, e = []) {
           return `affine2d(${e2(G9[0])},${e2(G9[1])},0,${e2(G9[2])},${e2(G9[3])},0,${N1()})`;
         }
         typeof x1 != "string" && B("profile rotation angle", d1.at);
-        const I1 = D1(G1), O1 = e2(R1("norm", [I1])), Y1 = I1.map((n0) => U1("/", n0, O1)), [c2, T2, z2] = Y1, t0 = R1("cos", [x1]), S2 = R1("sin", [x1]), q0 = U1("-", "1", t0), M0 = [U1("+", U1("*", q0, U1("*", c2, c2)), t0), U1("-", U1("*", q0, U1("*", c2, T2)), U1("*", S2, z2)), U1("+", U1("*", q0, U1("*", c2, T2)), U1("*", S2, z2)), U1("+", U1("*", q0, U1("*", T2, T2)), t0)];
+        const I1 = D1(K1), O1 = e2(R1("norm", [I1])), Y1 = I1.map((n0) => U1("/", n0, O1)), [c2, E2, R2] = Y1, t0 = R1("cos", [x1]), S2 = R1("sin", [x1]), q0 = U1("-", "1", t0), M0 = [U1("+", U1("*", q0, U1("*", c2, c2)), t0), U1("-", U1("*", q0, U1("*", c2, E2)), U1("*", S2, R2)), U1("+", U1("*", q0, U1("*", c2, E2)), U1("*", S2, R2)), U1("+", U1("*", q0, U1("*", E2, E2)), t0)];
         return M1(O1) === 0 && B("zero rotation axis", d1.at), `affine2d(${e2(M0[0])},${e2(M0[1])},0,${e2(M0[2])},${e2(M0[3])},0,${N1()})`;
       } else if (typeof x1 == "string" && v1 === "scale")
         b1 = [x1, x1];
@@ -14506,7 +14506,7 @@ function Jb(i, e = []) {
       f1(["text", "size", "font", "halign", "valign", "spacing", "direction", "language", "script", "$fn"], 3);
       const x1 = o1("text", 0), b1 = o1("font", 2, new z0("Liberation Sans")), N1 = A1.get("direction") ?? new z0("ltr");
       (!(N1 instanceof z0) || N1.text !== "ltr") && B("text direction", d1.at), q("scad.text.font", p("Text uses bundled Droid fonts; source font metrics, styling and kerning can differ."));
-      const G1 = (O1, Y1) => {
+      const K1 = (O1, Y1) => {
         const c2 = A1.get(O1) ?? new z0(Y1);
         return c2 instanceof z0 || B("text alignment", d1.at), JSON.stringify(c2.text);
       }, I1 = (O1, Y1) => {
@@ -14518,14 +14518,14 @@ function Jb(i, e = []) {
           return "union2d()";
         if (!(O1 instanceof z0) && !(O1 instanceof X9) || !(Y1 instanceof z0))
           return B("text must resolve to a string", d1.at);
-        const c2 = Y1.text.toLowerCase(), T2 = c2.includes("mono") ? "mono" : c2.includes("serif") ? "serif" : "sans";
-        return `text2d(${O1 instanceof X9 ? "formatSCAD(" + O1.parts.map((z2) => z2 instanceof z0 ? JSON.stringify(z2.text) : z2).join(",") + ")" : JSON.stringify(O1.text)}, ${e2(o1("size", 1, "10"))}, ${JSON.stringify(T2)}, ${G1("halign", "left")}, ${G1("valign", "baseline")}, ${e2(A1.get("spacing"), "1")}, 8)`;
+        const c2 = Y1.text.toLowerCase(), E2 = c2.includes("mono") ? "mono" : c2.includes("serif") ? "serif" : "sans";
+        return `text2d(${O1 instanceof X9 ? "formatSCAD(" + O1.parts.map((R2) => R2 instanceof z0 ? JSON.stringify(R2.text) : R2).join(",") + ")" : JSON.stringify(O1.text)}, ${e2(o1("size", 1, "10"))}, ${JSON.stringify(E2)}, ${K1("halign", "left")}, ${K1("valign", "baseline")}, ${e2(A1.get("spacing"), "1")}, 8)`;
       };
       return I1(x1, b1);
     }
     if (v1 === "polygon") {
       f1(["points", "paths", "convexity"], 3);
-      const x1 = o1("points", 0), b1 = o1("paths", 1), N1 = (G1, I1) => G1 instanceof J0 ? `choose2d(${G1.condition}, ${N1(G1.yes, I1)}, ${N1(G1.no, I1)})` : I1 instanceof J0 ? `choose2d(${I1.condition}, ${N1(G1, I1.yes)}, ${N1(G1, I1.no)})` : G1 instanceof S0 || Array.isArray(G1) && G1.length < 3 ? (q("scad.polygon.empty-input", p("Undefined or empty polygon inputs contribute no geometry.")), "union2d()") : G1 instanceof s4 || G1 instanceof W3 ? `polygonGenerated2d(${y2(G1)}${Array.isArray(I1) ? ", [" + I1.map((O1) => "[" + O1.map((Y1) => e2(Y1)).join(",") + "]").join(",") + "]" : ""})` : !Array.isArray(G1) || !G1.every((O1) => Array.isArray(O1) && O1.length === 2) ? Y(p("Expected an OpenSCAD polygon point list"), d1.at) : (I1 !== void 0 && !(I1 instanceof S0) && (!Array.isArray(I1) || !I1.every((O1) => Array.isArray(O1))) && B("polygon paths", d1.at), `polygon2d([${G1.map((O1) => "[" + O1.map((Y1) => e2(Y1)).join(",") + "]").join(",")}]${Array.isArray(I1) ? ", [" + I1.map((O1) => "[" + O1.map((Y1) => e2(Y1)).join(",") + "]").join(",") + "]" : ""})`);
+      const x1 = o1("points", 0), b1 = o1("paths", 1), N1 = (K1, I1) => K1 instanceof J0 ? `choose2d(${K1.condition}, ${N1(K1.yes, I1)}, ${N1(K1.no, I1)})` : I1 instanceof J0 ? `choose2d(${I1.condition}, ${N1(K1, I1.yes)}, ${N1(K1, I1.no)})` : K1 instanceof S0 || Array.isArray(K1) && K1.length < 3 ? (q("scad.polygon.empty-input", p("Undefined or empty polygon inputs contribute no geometry.")), "union2d()") : K1 instanceof s4 || K1 instanceof K3 ? `polygonGenerated2d(${y2(K1)}${Array.isArray(I1) ? ", [" + I1.map((O1) => "[" + O1.map((Y1) => e2(Y1)).join(",") + "]").join(",") + "]" : ""})` : !Array.isArray(K1) || !K1.every((O1) => Array.isArray(O1) && O1.length === 2) ? Y(p("Expected an OpenSCAD polygon point list"), d1.at) : (I1 !== void 0 && !(I1 instanceof S0) && (!Array.isArray(I1) || !I1.every((O1) => Array.isArray(O1))) && B("polygon paths", d1.at), `polygon2d([${K1.map((O1) => "[" + O1.map((Y1) => e2(Y1)).join(",") + "]").join(",")}]${Array.isArray(I1) ? ", [" + I1.map((O1) => "[" + O1.map((Y1) => e2(Y1)).join(",") + "]").join(",") + "]" : ""})`);
       return N1(x1, b1);
     }
     if (v1 === "square") {
@@ -14626,12 +14626,12 @@ function Jb(i, e = []) {
     if (["union", "difference", "intersection", "hull", "minkowski"].includes(d1)) {
       o1([], 0);
       const I1 = [];
-      return j() === "{" ? I1.push(...R2(O)) : I1.push(a2(O + 1)), I1.length ? I1.length === 1 && d1 !== "hull" ? I1[0] : `${d1 === "hull" || d1 === "minkowski" ? d1 : d1 === "difference" ? "subtract" : d1 === "intersection" ? "intersect" : "union"}(${I1.join(", ")})` : "empty()";
+      return j() === "{" ? I1.push(...I2(O)) : I1.push(a2(O + 1)), I1.length ? I1.length === 1 && d1 !== "hull" ? I1[0] : `${d1 === "hull" || d1 === "minkowski" ? d1 : d1 === "difference" ? "subtract" : d1 === "intersection" ? "intersect" : "union"}(${I1.join(", ")})` : "empty()";
     }
     if (d1 === "resize") {
       o1(["newsize", "auto"], 2);
       const I1 = V("newsize", 0), O1 = D1(Array.isArray(I1) && I1.length > 0 && I1.length < 3 ? [...I1, ...Array(3 - I1.length).fill("0")] : I1), Y1 = V("auto", 1, "false"), c2 = d3(Y1, 3);
-      return `resize([${O1.join(", ")}], ${c2.every((T2) => T2 === "false") ? "" : `[${c2.join(", ")}], `}${j() === "{" ? q2(O + 1) : a2(O + 1)})`;
+      return `resize([${O1.join(", ")}], ${c2.every((E2) => E2 === "false") ? "" : `[${c2.join(", ")}], `}${j() === "{" ? q2(O + 1) : a2(O + 1)})`;
     }
     if (["translate", "rotate", "scale", "mirror"].includes(d1)) {
       o1(d1 === "rotate" ? ["a", "v"] : ["v"], d1 === "rotate" ? 2 : 1);
@@ -14649,16 +14649,16 @@ function Jb(i, e = []) {
       v1.has("v") && B("linear_extrude direction vector", Z.at), o1(["height", "center", "convexity", "twist", "slices", "scale", "$fn"], 6);
       const I1 = e2(V("height", 0, "1")), O1 = e2(V("twist", 3), "0"), Y1 = V("scale", 5) ?? "1", c2 = typeof Y1 == "string" ? [Y1, Y1] : Y1;
       (!Array.isArray(c2) || c2.length !== 2 || !c2.every((n0) => typeof n0 == "string")) && B("linear_extrude scale", Z.at);
-      const T2 = V("slices", 4), z2 = T2 === void 0 ? void 0 : M1(T2);
-      z2 !== void 0 && Math.floor(z2) < 1 && (M1(O1) !== 0 || c2.some((n0) => M1(n0) !== 1)) && B("automatic slices for twisted/tapered extrusion", Z.at);
-      const t0 = e2(T2, O1 === "0" ? "1" : e2(v1.get("$fn") ?? $("$fn"), r)), S2 = T2 === void 0 ? t0 : _1(`((${O1})==0 && (${c2[0]})==1 && (${c2[1]})==1) ? max(1,floor(${t0})) : floor(${t0})`), q0 = j2(`extrudeProfile(${I1}, ${X1(v1, () => D2(O + 1))}, -(${O1}), ${S2}, ${c2.join(", ")})`, [I1]), M0 = c3(V("center", 1));
+      const E2 = V("slices", 4), R2 = E2 === void 0 ? void 0 : M1(E2);
+      R2 !== void 0 && Math.floor(R2) < 1 && (M1(O1) !== 0 || c2.some((n0) => M1(n0) !== 1)) && B("automatic slices for twisted/tapered extrusion", Z.at);
+      const t0 = e2(E2, O1 === "0" ? "1" : e2(v1.get("$fn") ?? $("$fn"), r)), S2 = E2 === void 0 ? t0 : _1(`((${O1})==0 && (${c2[0]})==1 && (${c2[1]})==1) ? max(1,floor(${t0})) : floor(${t0})`), q0 = j2(`extrudeProfile(${I1}, ${X1(v1, () => D2(O + 1))}, -(${O1}), ${S2}, ${c2.join(", ")})`, [I1]), M0 = c3(V("center", 1));
       return M0 === "false" ? q0 : `move([0, 0, (${M0}) ? -(${I1}) / 2 : 0], ${q0})`;
     }
     if (S1(";"), d1 === "polyhedron") {
       o1(["points", "faces", "triangles", "convexity"], 2);
       const I1 = V("points", 0), O1 = V("faces", 1) ?? v1.get("triangles");
       (!Array.isArray(I1) || !Array.isArray(O1) || !I1.every((c2) => Array.isArray(c2) && c2.length === 3) || !O1.every((c2) => Array.isArray(c2) && c2.length >= 3)) && B("polyhedron points/faces", Z.at);
-      const Y1 = (c2, T2 = !1) => "[" + c2.map((z2) => "[" + (T2 ? [...z2].reverse() : z2).map((t0) => e2(t0)).join(",") + "]").join(",") + "]";
+      const Y1 = (c2, E2 = !1) => "[" + c2.map((R2) => "[" + (E2 ? [...R2].reverse() : R2).map((t0) => e2(t0)).join(",") + "]").join(",") + "]";
       return `polyhedron(${Y1(I1)}, ${Y1(O1, !0)})`;
     }
     if (d1 === "cube") {
@@ -14674,12 +14674,12 @@ function Jb(i, e = []) {
     }
     if (["r1", "r2", "d1", "d2"].some((I1) => v1.has(I1)) || A1.length > 2) {
       o1(["h", "r", "d", "r1", "r2", "d1", "d2", "center", "$fn", "$fa", "$fs"], 4), (v1.has("r1") && v1.has("d1") || v1.has("r2") && v1.has("d2") || A1[1] !== void 0 && v1.has("d1") || A1[2] !== void 0 && v1.has("d2")) && B("cylinder: duplicate taper radius", Z.at);
-      const I1 = v1.has("r") ? e2(v1.get("r")) : v1.has("d") ? `(${e2(v1.get("d"))}) / 2` : "1", O1 = e2(V("h", 0, "1")), Y1 = v1.has("d1") ? `(${e2(v1.get("d1"))}) / 2` : e2(V("r1", 1, I1)), c2 = v1.has("d2") ? `(${e2(v1.get("d2"))}) / 2` : e2(V("r2", 2, I1)), T2 = j2(`frustum(${Y1}, ${c2}, ${O1}, ${x1("max(" + Y1 + ", " + c2 + ")")})`, [O1, "max(" + Y1 + ", " + c2 + ")"]);
-      return `move([0, 0, ${u1(V("center", 3), O1)}], ${T2})`;
+      const I1 = v1.has("r") ? e2(v1.get("r")) : v1.has("d") ? `(${e2(v1.get("d"))}) / 2` : "1", O1 = e2(V("h", 0, "1")), Y1 = v1.has("d1") ? `(${e2(v1.get("d1"))}) / 2` : e2(V("r1", 1, I1)), c2 = v1.has("d2") ? `(${e2(v1.get("d2"))}) / 2` : e2(V("r2", 2, I1)), E2 = j2(`frustum(${Y1}, ${c2}, ${O1}, ${x1("max(" + Y1 + ", " + c2 + ")")})`, [O1, "max(" + Y1 + ", " + c2 + ")"]);
+      return `move([0, 0, ${u1(V("center", 3), O1)}], ${E2})`;
     }
     o1(["h", "r", "d", "center", "$fn", "$fa", "$fs"], 2), v1.has("d") && (v1.has("r") || A1[1] !== void 0) && B("cylinder: both radius and diameter", Z.at);
-    const b1 = e2(V("h", 0, "1")), N1 = v1.has("d") ? `(${e2(v1.get("d"))}) / 2` : e2(V("r", 1, "1")), G1 = j2(`cylinder(${N1}, ${b1}, ${x1(N1)})`, [N1, b1]);
-    return `move([0, 0, ${u1(v1.get("center"), b1)}], ${G1})`;
+    const b1 = e2(V("h", 0, "1")), N1 = v1.has("d") ? `(${e2(v1.get("d"))}) / 2` : e2(V("r", 1, "1")), K1 = j2(`cylinder(${N1}, ${b1}, ${x1(N1)})`, [N1, b1]);
+    return `move([0, 0, ${u1(v1.get("center"), b1)}], ${K1})`;
   }
   let w2 = 0;
   const g2 = [];
@@ -14692,7 +14692,7 @@ function Jb(i, e = []) {
     w2 = t[s]?.at ?? 0, g2.push(a2());
   }
   b && k && B("assertions combined with root modifier"), g2.length || Y(p("OpenSCAD block contains no supported solid"));
-  const K2 = C2(h.length ? h : g2), k2 = /* @__PURE__ */ new Map(), o0 = /* @__PURE__ */ new Set(), U2 = (O) => [...O.matchAll(/"(?:\\.|[^"\\])*"|\bcadShape[0-9]+\b/g)].map((Z) => Z[0]).filter((Z) => Q1.has(Z));
+  const K2 = T2(h.length ? h : g2), k2 = /* @__PURE__ */ new Map(), o0 = /* @__PURE__ */ new Set(), U2 = (O) => [...O.matchAll(/"(?:\\.|[^"\\])*"|\bcadShape[0-9]+\b/g)].map((Z) => Z[0]).filter((Z) => Q1.has(Z));
   function C0(O) {
     for (const Z of U2(O))
       k2.set(Z, (k2.get(Z) ?? 0) + 1), o0.has(Z) || (o0.add(Z), C0(Q1.get(Z)));
@@ -15676,33 +15676,33 @@ const cm = (i) => !!i && typeof i == "object" && !Array.isArray(i) && [Object.pr
   const n = Object.getOwnPropertyDescriptor(i, t);
   return !!n?.enumerable && Object.hasOwn(n, "value");
 }), jc = new TextEncoder();
-function K3(i, e = "(bundle)", t = 0, n = "", s = "invalid-source") {
+function X3(i, e = "(bundle)", t = 0, n = "", s = "invalid-source") {
   throw new ev(p(i), e, t, n, s);
 }
 function dr(i, e, t = "(bundle)", n = 0, s = "") {
-  (typeof i != "string" || !i || i.length > R3.sourceBytes || i.trim() !== i || /[\u0000-\u001f\u007f\\:<>]/.test(i) || i.startsWith("/")) && K3("Expected a relative bundle path, without control characters, URLs or absolute paths", t, n, s);
+  (typeof i != "string" || !i || i.length > R3.sourceBytes || i.trim() !== i || /[\u0000-\u001f\u007f\\:<>]/.test(i) || i.startsWith("/")) && X3("Expected a relative bundle path, without control characters, URLs or absolute paths", t, n, s);
   const o = [...e];
   for (const r of i.split("/"))
-    !r || r === "." || (r === ".." ? (o.length || K3("Path escapes the source bundle root", t, n, s), o.pop()) : o.push(r));
-  return o.length || K3("Expected a file path inside the source bundle", t, n, s), o.join("/");
+    !r || r === "." || (r === ".." ? (o.length || X3("Path escapes the source bundle root", t, n, s), o.pop()) : o.push(r));
+  return o.length || X3("Expected a file path inside the source bundle", t, n, s), o.join("/");
 }
 function rA(i) {
-  (!cm(i) || !dm(i, ["version", "rootPath", "files"]) || i.version !== 1 || !Array.isArray(i.files)) && K3("Unsupported source bundle schema"), (!i.files.length || i.files.length > N7.files) && K3(p`Source bundle must contain 1–${N7.files} files`, "(bundle)", 0, "", "resource-limit");
+  (!cm(i) || !dm(i, ["version", "rootPath", "files"]) || i.version !== 1 || !Array.isArray(i.files)) && X3("Unsupported source bundle schema"), (!i.files.length || i.files.length > N7.files) && X3(p`Source bundle must contain 1–${N7.files} files`, "(bundle)", 0, "", "resource-limit");
   const e = dr(i.rootPath, []), t = /* @__PURE__ */ new Set();
   let n = 0;
   const s = Array.from(i.files).map((o) => {
-    (!cm(o) || !dm(o, ["path", "source", "sha256"]) || typeof o.source != "string" || typeof o.sha256 != "string" || !/^[a-f0-9]{64}$/.test(o.sha256)) && K3("Each file needs an original source, relative path and exact SHA-256");
+    (!cm(o) || !dm(o, ["path", "source", "sha256"]) || typeof o.source != "string" || typeof o.sha256 != "string" || !/^[a-f0-9]{64}$/.test(o.sha256)) && X3("Each file needs an original source, relative path and exact SHA-256");
     const r = dr(o.path, []);
-    t.has(r) && K3("Duplicate normalized source path", r), t.add(r), o.source.length > N7.originalBytes && K3("Aggregate original source exceeds 32 KiB", r, 0, "", "resource-limit");
+    t.has(r) && X3("Duplicate normalized source path", r), t.add(r), o.source.length > N7.originalBytes && X3("Aggregate original source exceeds 32 KiB", r, 0, "", "resource-limit");
     const a = jc.encode(o.source);
-    n += a.length, n > N7.originalBytes && K3("Aggregate original source exceeds 32 KiB", r, 0, "", "resource-limit"), new TextDecoder("utf-8", { fatal: !0, ignoreBOM: !0 }).decode(a) !== o.source && K3("Original source must be lossless UTF-8 text", r);
+    n += a.length, n > N7.originalBytes && X3("Aggregate original source exceeds 32 KiB", r, 0, "", "resource-limit"), new TextDecoder("utf-8", { fatal: !0, ignoreBOM: !0 }).decode(a) !== o.source && X3("Original source must be lossless UTF-8 text", r);
     const c = [0];
     for (let l = 0; l < o.source.length; l++)
       o.source[l] === `
 ` && c.push(l + 1);
     return { original: Object.freeze({ path: r, originalPath: o.path, source: o.source, sha256: o.sha256, bytes: a.length }), encoded: a, lines: c };
   });
-  return t.has(e) || K3("Root source file is missing", e), { rootPath: e, files: s, originalBytes: n };
+  return t.has(e) || X3("Root source file is missing", e), { rootPath: e, files: s, originalBytes: n };
 }
 function aA(i, e) {
   let t = 0, n = i.length;
@@ -15715,14 +15715,14 @@ function aA(i, e) {
 async function dG(i) {
   const e = rA(i);
   await Promise.all(e.files.map(async (g) => {
-    await nn(g.encoded) !== g.original.sha256 && K3("Source SHA-256 does not match the declared original", g.original.path);
+    await nn(g.encoded) !== g.original.sha256 && X3("Source SHA-256 does not match the declared original", g.original.path);
   }));
   const t = new Map(e.files.map((g) => [g.original.path, g])), n = [], s = [], o = [], r = /* @__PURE__ */ new Set(), a = [];
   let c = 0, l = 0, d = 0;
   const h = (g, f, v) => {
-    g && (c += jc.encode(g).length, c > N7.expandedBytes && K3("Expanded include text exceeds the existing 32 KiB source limit", f, v, t.get(f).original.source, "resource-limit"), s.push({ start: l, end: l + g.length, path: f, sourceStart: v }), l += g.length, n.push(g));
+    g && (c += jc.encode(g).length, c > N7.expandedBytes && X3("Expanded include text exceeds the existing 32 KiB source limit", f, v, t.get(f).original.source, "resource-limit"), s.push({ start: l, end: l + g.length, path: f, sourceStart: v }), l += g.length, n.push(g));
   }, u = (g, f, v = !0) => {
-    f > N7.depth && K3("Include nesting exceeds the existing depth limit", g, 0, t.get(g)?.original.source ?? "", "resource-limit"), r.has(g) && K3("Cyclic include dependency", g, 0, t.get(g).original.source);
+    f > N7.depth && X3("Include nesting exceeds the existing depth limit", g, 0, t.get(g)?.original.source ?? "", "resource-limit"), r.has(g) && X3("Cyclic include dependency", g, 0, t.get(g).original.source);
     const y = t.get(g), b = y.original.source;
     r.add(g);
     let k = 0, _ = 0, M = 0, w = !0;
@@ -15741,7 +15741,7 @@ async function dG(i) {
         }
         if (b.startsWith("/*", E)) {
           const L = b.indexOf("*/", E + 2);
-          L < 0 && K3("Unclosed source comment", g, E, b), E = L + 2;
+          L < 0 && X3("Unclosed source comment", g, E, b), E = L + 2;
           continue;
         }
         break;
@@ -15772,27 +15772,27 @@ async function dG(i) {
             break;
           }
         }
-        F || K3("Unclosed source string", g, E, b), L = b.slice(E, k);
+        F || X3("Unclosed source string", g, E, b), L = b.slice(E, k);
       } else
         L = /^(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?|^[A-Za-z_$][A-Za-z0-9_$]*|^(?:==|!=|<=|>=|&&|\|\|)|^[\s\S]/.exec(b.slice(k))[0], k += L.length;
-      if (L === "use" && (!v || M !== 0 || !w) && K3("OpenSCAD use requires file scope", g, E, b, "unsupported-feature"), L === "include" || L === "use") {
+      if (L === "use" && (!v || M !== 0 || !w) && X3("OpenSCAD use requires file scope", g, E, b, "unsupported-feature"), L === "include" || L === "use") {
         const F = S(k);
-        b[F] !== "<" && K3("Expected a literal include <relative/path> directive", g, E, b);
+        b[F] !== "<" && X3("Expected a literal include <relative/path> directive", g, E, b);
         const D = b.indexOf(">", F + 1);
-        D < 0 && K3("Unclosed include path", g, E, b);
+        D < 0 && X3("Unclosed include path", g, E, b);
         const A = b.slice(F + 1, D);
         let C = dr(A, g.split("/").slice(0, -1), g, E, b), R;
         if (!t.has(C) && !A.split("/").includes("..")) {
           const W = dr(A, [], g, E, b);
           t.has(W) && (C = W, R = "bundle-root");
         }
-        t.has(C) || K3(p`Included source file is missing: ${C}`, g, E, b), o.length >= N7.includes && K3("Include occurrences exceed the existing token budget", g, E, b, "resource-limit"), o.push(Object.freeze({ ...R ? { resolution: R } : {}, ...L === "use" ? { kind: "use" } : {}, fromPath: g, path: C, sourceOffset: E, ...aA(y.lines, E), depth: f + 1 })), h(b.slice(_, E), g, _), h(`
+        t.has(C) || X3(p`Included source file is missing: ${C}`, g, E, b), o.length >= N7.includes && X3("Include occurrences exceed the existing token budget", g, E, b, "resource-limit"), o.push(Object.freeze({ ...R ? { resolution: R } : {}, ...L === "use" ? { kind: "use" } : {}, fromPath: g, path: C, sourceOffset: E, ...aA(y.lines, E), depth: f + 1 })), h(b.slice(_, E), g, _), h(`
 `, g, E);
         const I = { start: l, end: l };
         L === "use" && a.push(I), u(C, f + 1, v && M === 0 && w), I.end = l, h(`
 `, g, E), k = D + 1, _ = k;
       } else
-        ["{", "(", "["].includes(L) && M++, ["}", ")", "]"].includes(L) && M--, w = M === 0 && (L === ";" || L === "}"), d++, d > N7.expandedTokens && K3("Expanded include tokens exceed the existing 8192-token limit", g, E, b, "resource-limit");
+        ["{", "(", "["].includes(L) && M++, ["}", ")", "]"].includes(L) && M--, w = M === 0 && (L === ";" || L === "}"), d++, d > N7.expandedTokens && X3("Expanded include tokens exceed the existing 8192-token limit", g, E, b, "resource-limit");
     }
     h(b.slice(_), g, _), r.delete(g);
   };
@@ -25272,7 +25272,7 @@ function dl(i, e, t, n, s) {
 }
 const a4 = /* @__PURE__ */ new s1(), as = /* @__PURE__ */ new n2();
 let AT = 0;
-class Z3 extends J7 {
+class W3 extends J7 {
   /**
    * Constructs a new buffer attribute.
    *
@@ -25600,7 +25600,7 @@ class Z3 extends J7 {
     this.dispatchEvent({ type: "dispose" });
   }
 }
-class Qv extends Z3 {
+class Qv extends W3 {
   /**
    * Constructs a new buffer attribute.
    *
@@ -25612,7 +25612,7 @@ class Qv extends Z3 {
     super(new Uint16Array(e), t, n);
   }
 }
-class ey extends Z3 {
+class ey extends W3 {
   /**
    * Constructs a new buffer attribute.
    *
@@ -25624,7 +25624,7 @@ class ey extends Z3 {
     super(new Uint32Array(e), t, n);
   }
 }
-class i0 extends Z3 {
+class i0 extends W3 {
   /**
    * Constructs a new buffer attribute.
    *
@@ -26174,7 +26174,7 @@ class A0 extends J7 {
       return;
     }
     const n = t.position, s = t.normal, o = t.uv;
-    this.hasAttribute("tangent") === !1 && this.setAttribute("tangent", new Z3(new Float32Array(4 * n.count), 4));
+    this.hasAttribute("tangent") === !1 && this.setAttribute("tangent", new W3(new Float32Array(4 * n.count), 4));
     const r = this.getAttribute("tangent"), a = [], c = [];
     for (let w = 0; w < n.count; w++)
       a[w] = new s1(), c[w] = new s1();
@@ -26223,7 +26223,7 @@ class A0 extends J7 {
     if (t !== void 0) {
       let n = this.getAttribute("normal");
       if (n === void 0)
-        n = new Z3(new Float32Array(t.count * 3), 3), this.setAttribute("normal", n);
+        n = new W3(new Float32Array(t.count * 3), 3), this.setAttribute("normal", n);
       else
         for (let u = 0, m = n.count; u < m; u++)
           n.setXYZ(u, 0, 0, 0);
@@ -26263,7 +26263,7 @@ class A0 extends J7 {
         for (let f = 0; f < d; f++)
           u[q++] = l[m++];
       }
-      return new Z3(u, d, h);
+      return new W3(u, d, h);
     }
     if (this.index === null)
       return g0("BufferGeometry.toNonIndexed(): BufferGeometry is already non-indexed."), this;
@@ -26743,7 +26743,7 @@ class f6 {
         for (let o = 0; o < this.itemSize; o++)
           t.push(this.data.array[s + o]);
       }
-      return new Z3(new this.array.constructor(t), this.itemSize, this.normalized);
+      return new W3(new this.array.constructor(t), this.itemSize, this.normalized);
     } else
       return e.interleavedBuffers === void 0 && (e.interleavedBuffers = {}), e.interleavedBuffers[this.data.uuid] === void 0 && (e.interleavedBuffers[this.data.uuid] = this.data.clone(e)), new f6(e.interleavedBuffers[this.data.uuid], this.itemSize, this.offset, this.normalized);
   }
@@ -27309,7 +27309,7 @@ class j9 extends Q7 {
   }
 }
 const Hm = /* @__PURE__ */ new R0(), c8 = /* @__PURE__ */ new Pn(), hs = /* @__PURE__ */ new ae(), Gm = /* @__PURE__ */ new s1(), ms = /* @__PURE__ */ new s1(), qs = /* @__PURE__ */ new s1(), fs = /* @__PURE__ */ new s1(), gl = /* @__PURE__ */ new s1(), gs = /* @__PURE__ */ new s1(), Wm = /* @__PURE__ */ new s1(), xs = /* @__PURE__ */ new s1();
-class I2 extends U3 {
+class L2 extends U3 {
   /**
    * Constructs a new mesh.
    *
@@ -29582,7 +29582,7 @@ function ie(i, e) {
   e || (e = i);
   let t = i, n;
   do
-    if (n = !1, !t.steiner && (Ni(t, t.next) || X3(t.prev, t, t.next) === 0)) {
+    if (n = !1, !t.steiner && (Ni(t, t.next) || Z3(t.prev, t, t.next) === 0)) {
       if (xn(t), t = e = t.prev, t === t.next) break;
       n = !0;
     } else
@@ -29608,30 +29608,30 @@ function fn(i, e, t, n, s, o, r) {
 }
 function iP(i) {
   const e = i.prev, t = i, n = i.next;
-  if (X3(e, t, n) >= 0) return !1;
+  if (Z3(e, t, n) >= 0) return !1;
   const s = e.x, o = t.x, r = n.x, a = e.y, c = t.y, l = n.y, d = Math.min(s, o, r), h = Math.min(a, c, l), u = Math.max(s, o, r), m = Math.max(a, c, l);
   let q = n.next;
   for (; q !== e; ) {
-    if (q.x >= d && q.x <= u && q.y >= h && q.y <= m && Ct(s, a, o, c, r, l, q.x, q.y) && X3(q.prev, q, q.next) >= 0) return !1;
+    if (q.x >= d && q.x <= u && q.y >= h && q.y <= m && Ct(s, a, o, c, r, l, q.x, q.y) && Z3(q.prev, q, q.next) >= 0) return !1;
     q = q.next;
   }
   return !0;
 }
 function tP(i, e, t, n) {
   const s = i.prev, o = i, r = i.next;
-  if (X3(s, o, r) >= 0) return !1;
+  if (Z3(s, o, r) >= 0) return !1;
   const a = s.x, c = o.x, l = r.x, d = s.y, h = o.y, u = r.y, m = Math.min(a, c, l), q = Math.min(d, h, u), x = Math.max(a, c, l), g = Math.max(d, h, u), f = $d(m, q, e, t, n), v = $d(x, g, e, t, n);
   let y = i.prevZ, b = i.nextZ;
   for (; y && y.z >= f && b && b.z <= v; ) {
-    if (y.x >= m && y.x <= x && y.y >= q && y.y <= g && y !== s && y !== r && Ct(a, d, c, h, l, u, y.x, y.y) && X3(y.prev, y, y.next) >= 0 || (y = y.prevZ, b.x >= m && b.x <= x && b.y >= q && b.y <= g && b !== s && b !== r && Ct(a, d, c, h, l, u, b.x, b.y) && X3(b.prev, b, b.next) >= 0)) return !1;
+    if (y.x >= m && y.x <= x && y.y >= q && y.y <= g && y !== s && y !== r && Ct(a, d, c, h, l, u, y.x, y.y) && Z3(y.prev, y, y.next) >= 0 || (y = y.prevZ, b.x >= m && b.x <= x && b.y >= q && b.y <= g && b !== s && b !== r && Ct(a, d, c, h, l, u, b.x, b.y) && Z3(b.prev, b, b.next) >= 0)) return !1;
     b = b.nextZ;
   }
   for (; y && y.z >= f; ) {
-    if (y.x >= m && y.x <= x && y.y >= q && y.y <= g && y !== s && y !== r && Ct(a, d, c, h, l, u, y.x, y.y) && X3(y.prev, y, y.next) >= 0) return !1;
+    if (y.x >= m && y.x <= x && y.y >= q && y.y <= g && y !== s && y !== r && Ct(a, d, c, h, l, u, y.x, y.y) && Z3(y.prev, y, y.next) >= 0) return !1;
     y = y.prevZ;
   }
   for (; b && b.z <= v; ) {
-    if (b.x >= m && b.x <= x && b.y >= q && b.y <= g && b !== s && b !== r && Ct(a, d, c, h, l, u, b.x, b.y) && X3(b.prev, b, b.next) >= 0) return !1;
+    if (b.x >= m && b.x <= x && b.y >= q && b.y <= g && b !== s && b !== r && Ct(a, d, c, h, l, u, b.x, b.y) && Z3(b.prev, b, b.next) >= 0) return !1;
     b = b.nextZ;
   }
   return !0;
@@ -29713,7 +29713,7 @@ function lP(i, e) {
   return r;
 }
 function cP(i, e) {
-  return X3(i.prev, i, e.prev) < 0 && X3(e.next, i, i.next) < 0;
+  return Z3(i.prev, i, e.prev) < 0 && Z3(e.next, i, i.next) < 0;
 }
 function dP(i, e, t, n) {
   let s = i;
@@ -29761,17 +29761,17 @@ function Ct(i, e, t, n, s, o, r, a) {
 function hP(i, e) {
   return i.next.i !== e.i && i.prev.i !== e.i && !mP(i, e) && // doesn't intersect other edges
   (gn(i, e) && gn(e, i) && qP(i, e) && // locally visible
-  (X3(i.prev, i, e.prev) || X3(i, e.prev, e)) || // does not create opposite-facing sectors
-  Ni(i, e) && X3(i.prev, i, i.next) > 0 && X3(e.prev, e, e.next) > 0);
+  (Z3(i.prev, i, e.prev) || Z3(i, e.prev, e)) || // does not create opposite-facing sectors
+  Ni(i, e) && Z3(i.prev, i, i.next) > 0 && Z3(e.prev, e, e.next) > 0);
 }
-function X3(i, e, t) {
+function Z3(i, e, t) {
   return (e.y - i.y) * (t.x - e.x) - (e.x - i.x) * (t.y - e.y);
 }
 function Ni(i, e) {
   return i.x === e.x && i.y === e.y;
 }
 function uy(i, e, t, n) {
-  const s = Cs(X3(i, e, t)), o = Cs(X3(i, e, n)), r = Cs(X3(t, n, i)), a = Cs(X3(t, n, e));
+  const s = Cs(Z3(i, e, t)), o = Cs(Z3(i, e, n)), r = Cs(Z3(t, n, i)), a = Cs(Z3(t, n, e));
   return !!(s !== o && r !== a || s === 0 && As(i, t, e) || o === 0 && As(i, n, e) || r === 0 && As(t, i, n) || a === 0 && As(t, e, n));
 }
 function As(i, e, t) {
@@ -29789,7 +29789,7 @@ function mP(i, e) {
   return !1;
 }
 function gn(i, e) {
-  return X3(i.prev, i, i.next) < 0 ? X3(i, e, i.next) >= 0 && X3(i, i.prev, e) >= 0 : X3(i, e, i.prev) < 0 || X3(i, i.next, e) < 0;
+  return Z3(i.prev, i, i.next) < 0 ? Z3(i, e, i.next) >= 0 && Z3(i, i.prev, e) >= 0 : Z3(i, e, i.prev) < 0 || Z3(i, i.next, e) < 0;
 }
 function qP(i, e) {
   let t = i, n = !1;
@@ -32415,7 +32415,7 @@ class FP extends pa {
    */
   constructor(e, t = 16776960) {
     const n = new Uint16Array([0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7]), s = new Float32Array(24), o = new A0();
-    o.setIndex(new Z3(n, 1)), o.setAttribute("position", new Z3(s, 3)), super(o, new _6({ color: t, toneMapped: !1 })), this.object = e, this.type = "BoxHelper", this.matrixAutoUpdate = !1, this.update();
+    o.setIndex(new W3(n, 1)), o.setAttribute("position", new W3(s, 3)), super(o, new _6({ color: t, toneMapped: !1 })), this.object = e, this.type = "BoxHelper", this.matrixAutoUpdate = !1, this.update();
   }
   /**
    * Updates the helper's geometry to match the dimensions of the object,
@@ -32460,7 +32460,7 @@ class UP extends U3 {
    * @param {number} [headWidth=headLength*0.2] - The width of the head of the arrow.
    */
   constructor(e = new s1(0, 0, 1), t = new s1(0, 0, 0), n = 1, s = 16776960, o = n * 0.2, r = o * 0.2) {
-    super(), this.type = "ArrowHelper", Is === void 0 && (Is = new A0(), Is.setAttribute("position", new i0([0, 0, 0, 0, 1, 0], 3)), Ml = new mu(0.5, 1, 5, 1), Ml.translate(0, -0.5, 0)), this.position.copy(t), this.line = new N5(Is, new _6({ color: s, toneMapped: !1 })), this.line.matrixAutoUpdate = !1, this.add(this.line), this.cone = new I2(Ml, new j9({ color: s, toneMapped: !1 })), this.cone.matrixAutoUpdate = !1, this.add(this.cone), this.setDirection(e), this.setLength(n, o, r);
+    super(), this.type = "ArrowHelper", Is === void 0 && (Is = new A0(), Is.setAttribute("position", new i0([0, 0, 0, 0, 1, 0], 3)), Ml = new mu(0.5, 1, 5, 1), Ml.translate(0, -0.5, 0)), this.position.copy(t), this.line = new N5(Is, new _6({ color: s, toneMapped: !1 })), this.line.matrixAutoUpdate = !1, this.add(this.line), this.cone = new L2(Ml, new j9({ color: s, toneMapped: !1 })), this.cone.matrixAutoUpdate = !1, this.add(this.cone), this.setDirection(e), this.setLength(n, o, r);
   }
   /**
    * Sets the direction of the helper.
@@ -37265,7 +37265,7 @@ function MI(i, e, t, n, s, o) {
   }
   function x(v, y) {
     const b = m(y);
-    b && (b.isCubeTexture || b.mapping === da) ? (l === void 0 && (l = new I2(
+    b && (b.isCubeTexture || b.mapping === da) ? (l === void 0 && (l = new L2(
       new E1(1, 1, 1),
       new V9({
         name: "BackgroundCubeMaterial",
@@ -37284,7 +37284,7 @@ function MI(i, e, t, n, s, o) {
       get: function() {
         return this.uniforms.envMap.value;
       }
-    }), n.update(l)), l.material.uniforms.envMap.value = b, l.material.uniforms.backgroundBlurriness.value = y.backgroundBlurriness, l.material.uniforms.backgroundIntensity.value = y.backgroundIntensity, l.material.uniforms.backgroundRotation.value.setFromMatrix4(SI.makeRotationFromEuler(y.backgroundRotation)).transpose(), b.isCubeTexture && b.isRenderTargetTexture === !1 && l.material.uniforms.backgroundRotation.value.premultiply(vy), l.material.toneMapped = Q0.getTransfer(b.colorSpace) !== b3, (d !== b || h !== b.version || u !== i.toneMapping) && (l.material.needsUpdate = !0, d = b, h = b.version, u = i.toneMapping), l.layers.enableAll(), v.unshift(l, l.geometry, l.material, 0, 0, null)) : b && b.isTexture && (c === void 0 && (c = new I2(
+    }), n.update(l)), l.material.uniforms.envMap.value = b, l.material.uniforms.backgroundBlurriness.value = y.backgroundBlurriness, l.material.uniforms.backgroundIntensity.value = y.backgroundIntensity, l.material.uniforms.backgroundRotation.value.setFromMatrix4(SI.makeRotationFromEuler(y.backgroundRotation)).transpose(), b.isCubeTexture && b.isRenderTargetTexture === !1 && l.material.uniforms.backgroundRotation.value.premultiply(vy), l.material.toneMapped = Q0.getTransfer(b.colorSpace) !== b3, (d !== b || h !== b.version || u !== i.toneMapping) && (l.material.needsUpdate = !0, d = b, h = b.version, u = i.toneMapping), l.layers.enableAll(), v.unshift(l, l.geometry, l.material, 0, 0, null)) : b && b.isTexture && (c === void 0 && (c = new L2(
       new le(2, 2),
       new V9({
         name: "BackgroundMaterial",
@@ -37806,12 +37806,12 @@ class Sq {
     return s;
   }
   _compileMaterial(e) {
-    const t = new I2(new A0(), e);
+    const t = new L2(new A0(), e);
     this._renderer.compile(t, rt);
   }
   _sceneToCubeUV(e, t, n, s, o) {
     const c = new o5(90, 1, t, n), l = [1, -1, 1, 1, 1, 1], d = [1, 1, 1, -1, -1, -1], h = this._renderer, u = h.autoClear, m = h.toneMapping;
-    h.getClearColor(kq), h.toneMapping = v6, h.autoClear = !1, h.state.buffers.depth.getReversed() && (h.setRenderTarget(s), h.clearDepth(), h.setRenderTarget(null)), this._backgroundBox === null && (this._backgroundBox = new I2(
+    h.getClearColor(kq), h.toneMapping = v6, h.autoClear = !1, h.state.buffers.depth.getReversed() && (h.setRenderTarget(s), h.clearDepth(), h.setRenderTarget(null)), this._backgroundBox === null && (this._backgroundBox = new L2(
       new E1(),
       new j9({
         name: "PMREM.Background",
@@ -37963,7 +37963,7 @@ function RI(i) {
       b.set(P, f * q * _);
     }
     const k = new A0();
-    k.setAttribute("position", new Z3(v, x)), k.setAttribute("uv", new Z3(y, g)), k.setAttribute("faceIndex", new Z3(b, f)), n.push(new I2(k, null)), s > U7 && s--;
+    k.setAttribute("position", new W3(v, x)), k.setAttribute("uv", new W3(y, g)), k.setAttribute("faceIndex", new W3(b, f)), n.push(new L2(k, null)), s > U7 && s--;
   }
   return { lodMeshes: n, sizeLods: e, sigmas: t };
 }
@@ -38397,7 +38397,7 @@ class yy extends w6 {
       blending: K6
     });
     o.uniforms.tEquirect.value = t;
-    const r = new I2(s, o), a = t.minFilter;
+    const r = new L2(s, o), a = t.minFilter;
     return t.minFilter === O8 && (t.minFilter = H4), new LP(1, 10, this).update(e, r), t.minFilter = a, r.geometry.dispose(), r.material.dispose(), this;
   }
   /**
@@ -38785,7 +38785,7 @@ function VI(i, e, t, n, s) {
     ),
     depthTest: !1,
     depthWrite: !1
-  }), l = new I2(a, c), d = new z5(-1, 1, 1, -1, 0, 1);
+  }), l = new L2(a, c), d = new z5(-1, 1, 1, -1, 0, 1);
   let h = null, u = null, m = !1, q, x = null, g = [], f = !1;
   this.setSize = function(v, y) {
     o.setSize(v, y), r.setSize(v, y);
@@ -39923,7 +39923,7 @@ function pz(i, e, t, n, s, o) {
       e1 = x2.vertexShader, Y = x2.fragmentShader;
     } else
       e1 = w.vertexShader, Y = w.fragmentShader, a.update(w), z = a.getVertexShaderID(w), T = a.getFragmentShaderID(w);
-    const U = i.getRenderTarget(), Q = i.state.buffers.depth.getReversed(), j = L.isInstancedMesh === !0, p1 = L.isBatchedMesh === !0, S1 = !!w.map, B = !!w.matcap, N = !!I, $ = !!w.aoMap, J = !!w.lightMap, H = !!w.bumpMap, K = !!w.normalMap, G = !!w.displacementMap, i1 = !!w.emissiveMap, _1 = !!w.metalnessMap, M1 = !!w.roughnessMap, z1 = w.anisotropy > 0, P1 = w.clearcoat > 0, U1 = w.dispersion > 0, a1 = w.iridescence > 0, t1 = w.sheen > 0, y1 = w.transmission > 0, C1 = z1 && !!w.anisotropyMap, r1 = P1 && !!w.clearcoatMap, m1 = P1 && !!w.clearcoatNormalMap, w1 = P1 && !!w.clearcoatRoughnessMap, k1 = a1 && !!w.iridescenceMap, R1 = a1 && !!w.iridescenceThicknessMap, F1 = t1 && !!w.sheenColorMap, t2 = t1 && !!w.sheenRoughnessMap, o2 = !!w.specularMap, r2 = !!w.specularColorMap, l2 = !!w.specularIntensityMap, E2 = y1 && !!w.transmissionMap, e2 = y1 && !!w.thicknessMap, D1 = !!w.gradientMap, d2 = !!w.alphaMap, W1 = w.alphaTest > 0, v2 = !!w.alphaHash, $1 = !!w.extensions;
+    const U = i.getRenderTarget(), Q = i.state.buffers.depth.getReversed(), j = L.isInstancedMesh === !0, p1 = L.isBatchedMesh === !0, S1 = !!w.map, B = !!w.matcap, N = !!I, $ = !!w.aoMap, J = !!w.lightMap, H = !!w.bumpMap, K = !!w.normalMap, G = !!w.displacementMap, i1 = !!w.emissiveMap, _1 = !!w.metalnessMap, M1 = !!w.roughnessMap, z1 = w.anisotropy > 0, P1 = w.clearcoat > 0, U1 = w.dispersion > 0, a1 = w.iridescence > 0, t1 = w.sheen > 0, y1 = w.transmission > 0, C1 = z1 && !!w.anisotropyMap, r1 = P1 && !!w.clearcoatMap, m1 = P1 && !!w.clearcoatNormalMap, w1 = P1 && !!w.clearcoatRoughnessMap, k1 = a1 && !!w.iridescenceMap, R1 = a1 && !!w.iridescenceThicknessMap, F1 = t1 && !!w.sheenColorMap, t2 = t1 && !!w.sheenRoughnessMap, o2 = !!w.specularMap, r2 = !!w.specularColorMap, l2 = !!w.specularIntensityMap, A2 = y1 && !!w.transmissionMap, e2 = y1 && !!w.thicknessMap, D1 = !!w.gradientMap, d2 = !!w.alphaMap, G1 = w.alphaTest > 0, v2 = !!w.alphaHash, $1 = !!w.extensions;
     let j1 = v6;
     w.toneMapped && (U === null || U.isXRRenderTarget === !0) && (j1 = i.toneMapping);
     const m2 = {
@@ -39978,12 +39978,12 @@ function pz(i, e, t, n, s, o) {
       specularColorMap: r2,
       specularIntensityMap: l2,
       transmission: y1,
-      transmissionMap: E2,
+      transmissionMap: A2,
       thicknessMap: e2,
       gradientMap: D1,
       opaque: w.transparent === !1 && w.blending === qi && w.alphaToCoverage === !1,
       alphaMap: d2,
-      alphaTest: W1,
+      alphaTest: G1,
       alphaHash: v2,
       combine: w.combine,
       //
@@ -40007,7 +40007,7 @@ function pz(i, e, t, n, s, o) {
       specularMapUv: o2 && q(w.specularMap.channel),
       specularColorMapUv: r2 && q(w.specularColorMap.channel),
       specularIntensityMapUv: l2 && q(w.specularIntensityMap.channel),
-      transmissionMapUv: E2 && q(w.transmissionMap.channel),
+      transmissionMapUv: A2 && q(w.transmissionMap.channel),
       thicknessMapUv: e2 && q(w.thicknessMap.channel),
       alphaMapUv: d2 && q(w.alphaMap.channel),
       //
@@ -40544,12 +40544,12 @@ function Sz(i, e, t) {
   const q = new A0();
   q.setAttribute(
     "position",
-    new Z3(
+    new W3(
       new Float32Array([-1, -1, 0.5, 3, -1, 0.5, -1, 3, 0.5]),
       3
     )
   );
-  const x = new I2(q, u), g = this;
+  const x = new L2(q, u), g = this;
   this.enabled = !1, this.autoUpdate = !0, this.needsUpdate = !1, this.type = vo;
   let f = this.type;
   this.render = function(_, M, w) {
@@ -40674,25 +40674,25 @@ function Mz(i, e) {
   function t() {
     let D1 = !1;
     const d2 = new S3();
-    let W1 = null;
+    let G1 = null;
     const v2 = new S3(0, 0, 0, 0);
     return {
       setMask: function($1) {
-        W1 !== $1 && !D1 && (i.colorMask($1, $1, $1, $1), W1 = $1);
+        G1 !== $1 && !D1 && (i.colorMask($1, $1, $1, $1), G1 = $1);
       },
       setLocked: function($1) {
         D1 = $1;
       },
-      setClear: function($1, j1, m2, x2, A2) {
-        A2 === !0 && ($1 *= x2, j1 *= x2, m2 *= x2), d2.set($1, j1, m2, x2), v2.equals(d2) === !1 && (i.clearColor($1, j1, m2, x2), v2.copy(d2));
+      setClear: function($1, j1, m2, x2, C2) {
+        C2 === !0 && ($1 *= x2, j1 *= x2, m2 *= x2), d2.set($1, j1, m2, x2), v2.equals(d2) === !1 && (i.clearColor($1, j1, m2, x2), v2.copy(d2));
       },
       reset: function() {
-        D1 = !1, W1 = null, v2.set(-1, 0, 0, 0);
+        D1 = !1, G1 = null, v2.set(-1, 0, 0, 0);
       }
     };
   }
   function n() {
-    let D1 = !1, d2 = !1, W1 = null, v2 = null, $1 = null;
+    let D1 = !1, d2 = !1, G1 = null, v2 = null, $1 = null;
     return {
       setReversed: function(j1) {
         if (d2 !== j1) {
@@ -40709,7 +40709,7 @@ function Mz(i, e) {
         j1 ? U(i.DEPTH_TEST) : Q(i.DEPTH_TEST);
       },
       setMask: function(j1) {
-        W1 !== j1 && !D1 && (i.depthMask(j1), W1 = j1);
+        G1 !== j1 && !D1 && (i.depthMask(j1), G1 = j1);
       },
       setFunc: function(j1) {
         if (d2 && (j1 = YC[j1]), v2 !== j1) {
@@ -40751,33 +40751,33 @@ function Mz(i, e) {
         $1 !== j1 && ($1 = j1, d2 && (j1 = 1 - j1), i.clearDepth(j1));
       },
       reset: function() {
-        D1 = !1, W1 = null, v2 = null, $1 = null, d2 = !1;
+        D1 = !1, G1 = null, v2 = null, $1 = null, d2 = !1;
       }
     };
   }
   function s() {
-    let D1 = !1, d2 = null, W1 = null, v2 = null, $1 = null, j1 = null, m2 = null, x2 = null, A2 = null;
+    let D1 = !1, d2 = null, G1 = null, v2 = null, $1 = null, j1 = null, m2 = null, x2 = null, C2 = null;
     return {
-      setTest: function(C2) {
-        D1 || (C2 ? U(i.STENCIL_TEST) : Q(i.STENCIL_TEST));
+      setTest: function(T2) {
+        D1 || (T2 ? U(i.STENCIL_TEST) : Q(i.STENCIL_TEST));
       },
-      setMask: function(C2) {
-        d2 !== C2 && !D1 && (i.stencilMask(C2), d2 = C2);
+      setMask: function(T2) {
+        d2 !== T2 && !D1 && (i.stencilMask(T2), d2 = T2);
       },
-      setFunc: function(C2, R2, q2) {
-        (W1 !== C2 || v2 !== R2 || $1 !== q2) && (i.stencilFunc(C2, R2, q2), W1 = C2, v2 = R2, $1 = q2);
+      setFunc: function(T2, I2, q2) {
+        (G1 !== T2 || v2 !== I2 || $1 !== q2) && (i.stencilFunc(T2, I2, q2), G1 = T2, v2 = I2, $1 = q2);
       },
-      setOp: function(C2, R2, q2) {
-        (j1 !== C2 || m2 !== R2 || x2 !== q2) && (i.stencilOp(C2, R2, q2), j1 = C2, m2 = R2, x2 = q2);
+      setOp: function(T2, I2, q2) {
+        (j1 !== T2 || m2 !== I2 || x2 !== q2) && (i.stencilOp(T2, I2, q2), j1 = T2, m2 = I2, x2 = q2);
       },
-      setLocked: function(C2) {
-        D1 = C2;
+      setLocked: function(T2) {
+        D1 = T2;
       },
-      setClear: function(C2) {
-        A2 !== C2 && (i.clearStencil(C2), A2 = C2);
+      setClear: function(T2) {
+        C2 !== T2 && (i.clearStencil(T2), C2 = T2);
       },
       reset: function() {
-        D1 = !1, d2 = null, W1 = null, v2 = null, $1 = null, j1 = null, m2 = null, x2 = null, A2 = null;
+        D1 = !1, d2 = null, G1 = null, v2 = null, $1 = null, j1 = null, m2 = null, x2 = null, C2 = null;
       }
     };
   }
@@ -40789,10 +40789,10 @@ function Mz(i, e) {
   W.indexOf("WebGL") !== -1 ? (I = parseFloat(/^WebGL (\d)/.exec(W)[1]), R = I >= 1) : W.indexOf("OpenGL ES") !== -1 && (I = parseFloat(/^OpenGL ES (\d)/.exec(W)[1]), R = I >= 2);
   let n1 = null, X = {};
   const c1 = i.getParameter(i.SCISSOR_BOX), h1 = i.getParameter(i.VIEWPORT), e1 = new S3().fromArray(c1), Y = new S3().fromArray(h1);
-  function z(D1, d2, W1, v2) {
+  function z(D1, d2, G1, v2) {
     const $1 = new Uint8Array(4), j1 = i.createTexture();
     i.bindTexture(D1, j1), i.texParameteri(D1, i.TEXTURE_MIN_FILTER, i.NEAREST), i.texParameteri(D1, i.TEXTURE_MAG_FILTER, i.NEAREST);
-    for (let m2 = 0; m2 < W1; m2++)
+    for (let m2 = 0; m2 < G1; m2++)
       D1 === i.TEXTURE_3D || D1 === i.TEXTURE_2D_ARRAY ? i.texImage3D(d2, 0, i.RGBA, 1, 1, v2, 0, i.RGBA, i.UNSIGNED_BYTE, $1) : i.texImage2D(d2 + m2, 0, i.RGBA, 1, 1, 0, i.RGBA, i.UNSIGNED_BYTE, $1);
     return j1;
   }
@@ -40808,18 +40808,18 @@ function Mz(i, e) {
     return u[D1] !== d2 ? (i.bindFramebuffer(D1, d2), u[D1] = d2, D1 === i.DRAW_FRAMEBUFFER && (u[i.FRAMEBUFFER] = d2), D1 === i.FRAMEBUFFER && (u[i.DRAW_FRAMEBUFFER] = d2), !0) : !1;
   }
   function p1(D1, d2) {
-    let W1 = q, v2 = !1;
+    let G1 = q, v2 = !1;
     if (D1) {
-      W1 = m.get(d2), W1 === void 0 && (W1 = [], m.set(d2, W1));
+      G1 = m.get(d2), G1 === void 0 && (G1 = [], m.set(d2, G1));
       const $1 = D1.textures;
-      if (W1.length !== $1.length || W1[0] !== i.COLOR_ATTACHMENT0) {
+      if (G1.length !== $1.length || G1[0] !== i.COLOR_ATTACHMENT0) {
         for (let j1 = 0, m2 = $1.length; j1 < m2; j1++)
-          W1[j1] = i.COLOR_ATTACHMENT0 + j1;
-        W1.length = $1.length, v2 = !0;
+          G1[j1] = i.COLOR_ATTACHMENT0 + j1;
+        G1.length = $1.length, v2 = !0;
       }
     } else
-      W1[0] !== i.BACK && (W1[0] = i.BACK, v2 = !0);
-    v2 && i.drawBuffers(W1);
+      G1[0] !== i.BACK && (G1[0] = i.BACK, v2 = !0);
+    v2 && i.drawBuffers(G1);
   }
   function S1(D1) {
     return x !== D1 ? (i.useProgram(D1), x = D1, !0) : !1;
@@ -40847,14 +40847,14 @@ function Mz(i, e) {
     [LC]: i.CONSTANT_ALPHA,
     [zC]: i.ONE_MINUS_CONSTANT_ALPHA
   };
-  function $(D1, d2, W1, v2, $1, j1, m2, x2, A2, C2) {
+  function $(D1, d2, G1, v2, $1, j1, m2, x2, C2, T2) {
     if (D1 === K6) {
       g === !0 && (Q(i.BLEND), g = !1);
       return;
     }
     if (g === !1 && (U(i.BLEND), g = !0), D1 !== bC) {
-      if (D1 !== f || C2 !== P) {
-        if ((v !== D8 || k !== D8) && (i.blendEquation(i.FUNC_ADD), v = D8, k = D8), C2)
+      if (D1 !== f || T2 !== P) {
+        if ((v !== D8 || k !== D8) && (i.blendEquation(i.FUNC_ADD), v = D8, k = D8), T2)
           switch (D1) {
             case qi:
               i.blendFuncSeparate(i.ONE, i.ONE_MINUS_SRC_ALPHA, i.ONE, i.ONE_MINUS_SRC_ALPHA);
@@ -40890,16 +40890,16 @@ function Mz(i, e) {
               Z0("WebGLState: Invalid blending: ", D1);
               break;
           }
-        y = null, b = null, _ = null, M = null, w.set(0, 0, 0), S = 0, f = D1, P = C2;
+        y = null, b = null, _ = null, M = null, w.set(0, 0, 0), S = 0, f = D1, P = T2;
       }
       return;
     }
-    $1 = $1 || d2, j1 = j1 || W1, m2 = m2 || v2, (d2 !== v || $1 !== k) && (i.blendEquationSeparate(B[d2], B[$1]), v = d2, k = $1), (W1 !== y || v2 !== b || j1 !== _ || m2 !== M) && (i.blendFuncSeparate(N[W1], N[v2], N[j1], N[m2]), y = W1, b = v2, _ = j1, M = m2), (x2.equals(w) === !1 || A2 !== S) && (i.blendColor(x2.r, x2.g, x2.b, A2), w.copy(x2), S = A2), f = D1, P = !1;
+    $1 = $1 || d2, j1 = j1 || G1, m2 = m2 || v2, (d2 !== v || $1 !== k) && (i.blendEquationSeparate(B[d2], B[$1]), v = d2, k = $1), (G1 !== y || v2 !== b || j1 !== _ || m2 !== M) && (i.blendFuncSeparate(N[G1], N[v2], N[j1], N[m2]), y = G1, b = v2, _ = j1, M = m2), (x2.equals(w) === !1 || C2 !== S) && (i.blendColor(x2.r, x2.g, x2.b, C2), w.copy(x2), S = C2), f = D1, P = !1;
   }
   function J(D1, d2) {
     D1.side === y5 ? Q(i.CULL_FACE) : U(i.CULL_FACE);
-    let W1 = D1.side === k5;
-    d2 && (W1 = !W1), H(W1), D1.blending === qi && D1.transparent === !1 ? $(K6) : $(D1.blending, D1.blendEquation, D1.blendSrc, D1.blendDst, D1.blendEquationAlpha, D1.blendSrcAlpha, D1.blendDstAlpha, D1.blendColor, D1.blendAlpha, D1.premultipliedAlpha), r.setFunc(D1.depthFunc), r.setTest(D1.depthTest), r.setMask(D1.depthWrite), o.setMask(D1.colorWrite);
+    let G1 = D1.side === k5;
+    d2 && (G1 = !G1), H(G1), D1.blending === qi && D1.transparent === !1 ? $(K6) : $(D1.blending, D1.blendEquation, D1.blendSrc, D1.blendDst, D1.blendEquationAlpha, D1.blendSrcAlpha, D1.blendDstAlpha, D1.blendColor, D1.blendAlpha, D1.premultipliedAlpha), r.setFunc(D1.depthFunc), r.setTest(D1.depthTest), r.setMask(D1.depthWrite), o.setMask(D1.colorWrite);
     const v2 = D1.stencilWrite;
     a.setTest(v2), v2 && (a.setMask(D1.stencilWriteMask), a.setFunc(D1.stencilFunc, D1.stencilRef, D1.stencilFuncMask), a.setOp(D1.stencilFail, D1.stencilZFail, D1.stencilZPass)), i1(D1.polygonOffset, D1.polygonOffsetFactor, D1.polygonOffsetUnits), D1.alphaToCoverage === !0 ? U(i.SAMPLE_ALPHA_TO_COVERAGE) : Q(i.SAMPLE_ALPHA_TO_COVERAGE);
   }
@@ -40912,8 +40912,8 @@ function Mz(i, e) {
   function G(D1) {
     D1 !== F && (R && i.lineWidth(D1), F = D1);
   }
-  function i1(D1, d2, W1) {
-    D1 ? (U(i.POLYGON_OFFSET_FILL), (D !== d2 || A !== W1) && (D = d2, A = W1, r.getReversed() && (d2 = -d2), i.polygonOffset(d2, W1))) : Q(i.POLYGON_OFFSET_FILL);
+  function i1(D1, d2, G1) {
+    D1 ? (U(i.POLYGON_OFFSET_FILL), (D !== d2 || A !== G1) && (D = d2, A = G1, r.getReversed() && (d2 = -d2), i.polygonOffset(d2, G1))) : Q(i.POLYGON_OFFSET_FILL);
   }
   function _1(D1) {
     D1 ? U(i.SCISSOR_TEST) : Q(i.SCISSOR_TEST);
@@ -40921,10 +40921,10 @@ function Mz(i, e) {
   function M1(D1) {
     D1 === void 0 && (D1 = i.TEXTURE0 + C - 1), n1 !== D1 && (i.activeTexture(D1), n1 = D1);
   }
-  function z1(D1, d2, W1) {
-    W1 === void 0 && (n1 === null ? W1 = i.TEXTURE0 + C - 1 : W1 = n1);
-    let v2 = X[W1];
-    v2 === void 0 && (v2 = { type: void 0, texture: void 0 }, X[W1] = v2), (v2.type !== D1 || v2.texture !== d2) && (n1 !== W1 && (i.activeTexture(W1), n1 = W1), i.bindTexture(D1, d2 || T[D1]), v2.type = D1, v2.texture = d2);
+  function z1(D1, d2, G1) {
+    G1 === void 0 && (n1 === null ? G1 = i.TEXTURE0 + C - 1 : G1 = n1);
+    let v2 = X[G1];
+    v2 === void 0 && (v2 = { type: void 0, texture: void 0 }, X[G1] = v2), (v2.type !== D1 || v2.texture !== d2) && (n1 !== G1 && (i.activeTexture(G1), n1 = G1), i.bindTexture(D1, d2 || T[D1]), v2.type = D1, v2.texture = d2);
   }
   function P1() {
     const D1 = X[n1];
@@ -41013,12 +41013,12 @@ function Mz(i, e) {
     Y.equals(D1) === !1 && (i.viewport(D1.x, D1.y, D1.z, D1.w), Y.copy(D1));
   }
   function l2(D1, d2) {
-    let W1 = l.get(d2);
-    W1 === void 0 && (W1 = /* @__PURE__ */ new WeakMap(), l.set(d2, W1));
-    let v2 = W1.get(D1);
-    v2 === void 0 && (v2 = i.getUniformBlockIndex(d2, D1.name), W1.set(D1, v2));
+    let G1 = l.get(d2);
+    G1 === void 0 && (G1 = /* @__PURE__ */ new WeakMap(), l.set(d2, G1));
+    let v2 = G1.get(D1);
+    v2 === void 0 && (v2 = i.getUniformBlockIndex(d2, D1.name), G1.set(D1, v2));
   }
-  function E2(D1, d2) {
+  function A2(D1, d2) {
     const v2 = l.get(d2).get(D1);
     c.get(d2) !== v2 && (i.uniformBlockBinding(d2, v2, D1.__bindingPointIndex), c.set(d2, v2));
   }
@@ -41053,7 +41053,7 @@ function Mz(i, e) {
     pixelStorei: t2,
     getParameter: F1,
     updateUBOMapping: l2,
-    uniformBlockBinding: E2,
+    uniformBlockBinding: A2,
     texStorage2D: m1,
     texStorage3D: w1,
     texSubImage2D: t1,
@@ -41286,8 +41286,8 @@ function Ez(i, e, t, n, s, o, r) {
       m1.sort((t2, o2) => t2.start - o2.start);
       let w1 = 0;
       for (let t2 = 1; t2 < m1.length; t2++) {
-        const o2 = m1[w1], r2 = m1[t2], l2 = o2.start + o2.count, E2 = T(r2.start, t1.width, 4), e2 = T(o2.start, t1.width, 4);
-        r2.start <= l2 + 1 && E2 === e2 && T(r2.start + r2.count - 1, t1.width, 4) === E2 ? o2.count = Math.max(
+        const o2 = m1[w1], r2 = m1[t2], l2 = o2.start + o2.count, A2 = T(r2.start, t1.width, 4), e2 = T(o2.start, t1.width, 4);
+        r2.start <= l2 + 1 && A2 === e2 && T(r2.start + r2.count - 1, t1.width, 4) === A2 ? o2.count = Math.max(
           o2.count,
           r2.start + r2.count - o2.start
         ) : (++w1, m1[w1] = r2);
@@ -41296,8 +41296,8 @@ function Ez(i, e, t, n, s, o, r) {
       const k1 = t.getParameter(i.UNPACK_ROW_LENGTH), R1 = t.getParameter(i.UNPACK_SKIP_PIXELS), F1 = t.getParameter(i.UNPACK_SKIP_ROWS);
       t.pixelStorei(i.UNPACK_ROW_LENGTH, t1.width);
       for (let t2 = 0, o2 = m1.length; t2 < o2; t2++) {
-        const r2 = m1[t2], l2 = Math.floor(r2.start / 4), E2 = Math.ceil(r2.count / 4), e2 = l2 % t1.width, D1 = Math.floor(l2 / t1.width), d2 = E2, W1 = 1;
-        t.pixelStorei(i.UNPACK_SKIP_PIXELS, e2), t.pixelStorei(i.UNPACK_SKIP_ROWS, D1), t.texSubImage2D(i.TEXTURE_2D, 0, e2, D1, d2, W1, y1, C1, t1.data);
+        const r2 = m1[t2], l2 = Math.floor(r2.start / 4), A2 = Math.ceil(r2.count / 4), e2 = l2 % t1.width, D1 = Math.floor(l2 / t1.width), d2 = A2, G1 = 1;
+        t.pixelStorei(i.UNPACK_SKIP_PIXELS, e2), t.pixelStorei(i.UNPACK_SKIP_ROWS, D1), t.texSubImage2D(i.TEXTURE_2D, 0, e2, D1, d2, G1, y1, C1, t1.data);
       }
       a1.clearUpdateRanges(), t.pixelStorei(i.UNPACK_ROW_LENGTH, k1), t.pixelStorei(i.UNPACK_SKIP_PIXELS, R1), t.pixelStorei(i.UNPACK_SKIP_ROWS, F1);
     }
@@ -41310,7 +41310,7 @@ function Ez(i, e, t, n, s, o, r) {
     const w1 = n.get(m1);
     if (m1.version !== w1.__version || r1 === !0) {
       if (t.activeTexture(i.TEXTURE0 + y1), (typeof ImageBitmap < "u" && t1.image instanceof ImageBitmap) === !1) {
-        const W1 = Q0.getPrimaries(Q0.workingColorSpace), v2 = t1.colorSpace === R7 ? null : Q0.getPrimaries(t1.colorSpace), $1 = t1.colorSpace === R7 || W1 === v2 ? i.NONE : i.BROWSER_DEFAULT_WEBGL;
+        const G1 = Q0.getPrimaries(Q0.workingColorSpace), v2 = t1.colorSpace === R7 ? null : Q0.getPrimaries(t1.colorSpace), $1 = t1.colorSpace === R7 || G1 === v2 ? i.NONE : i.BROWSER_DEFAULT_WEBGL;
         t.pixelStorei(i.UNPACK_FLIP_Y_WEBGL, t1.flipY), t.pixelStorei(i.UNPACK_PREMULTIPLY_ALPHA_WEBGL, t1.premultiplyAlpha), t.pixelStorei(i.UNPACK_COLORSPACE_CONVERSION_WEBGL, $1);
       }
       t.pixelStorei(i.UNPACK_ALIGNMENT, t1.unpackAlignment);
@@ -41320,24 +41320,24 @@ function Ez(i, e, t, n, s, o, r) {
       let o2 = b(t1.internalFormat, F1, t2, t1.normalized, t1.colorSpace, t1.isVideoTexture);
       Y(C1, t1);
       let r2;
-      const l2 = t1.mipmaps, E2 = t1.isVideoTexture !== !0, e2 = w1.__version === void 0 || r1 === !0, D1 = m1.dataReady, d2 = _(t1, R1);
+      const l2 = t1.mipmaps, A2 = t1.isVideoTexture !== !0, e2 = w1.__version === void 0 || r1 === !0, D1 = m1.dataReady, d2 = _(t1, R1);
       if (t1.isDepthTexture)
-        o2 = k(t1.format === B8, t1.type), e2 && (E2 ? t.texStorage2D(i.TEXTURE_2D, 1, o2, R1.width, R1.height) : t.texImage2D(i.TEXTURE_2D, 0, o2, R1.width, R1.height, 0, F1, t2, null));
+        o2 = k(t1.format === B8, t1.type), e2 && (A2 ? t.texStorage2D(i.TEXTURE_2D, 1, o2, R1.width, R1.height) : t.texImage2D(i.TEXTURE_2D, 0, o2, R1.width, R1.height, 0, F1, t2, null));
       else if (t1.isDataTexture)
         if (l2.length > 0) {
-          E2 && e2 && t.texStorage2D(i.TEXTURE_2D, d2, o2, l2[0].width, l2[0].height);
-          for (let W1 = 0, v2 = l2.length; W1 < v2; W1++)
-            r2 = l2[W1], E2 ? D1 && t.texSubImage2D(i.TEXTURE_2D, W1, 0, 0, r2.width, r2.height, F1, t2, r2.data) : t.texImage2D(i.TEXTURE_2D, W1, o2, r2.width, r2.height, 0, F1, t2, r2.data);
+          A2 && e2 && t.texStorage2D(i.TEXTURE_2D, d2, o2, l2[0].width, l2[0].height);
+          for (let G1 = 0, v2 = l2.length; G1 < v2; G1++)
+            r2 = l2[G1], A2 ? D1 && t.texSubImage2D(i.TEXTURE_2D, G1, 0, 0, r2.width, r2.height, F1, t2, r2.data) : t.texImage2D(i.TEXTURE_2D, G1, o2, r2.width, r2.height, 0, F1, t2, r2.data);
           t1.generateMipmaps = !1;
         } else
-          E2 ? (e2 && t.texStorage2D(i.TEXTURE_2D, d2, o2, R1.width, R1.height), D1 && U(t1, R1, F1, t2)) : t.texImage2D(i.TEXTURE_2D, 0, o2, R1.width, R1.height, 0, F1, t2, R1.data);
+          A2 ? (e2 && t.texStorage2D(i.TEXTURE_2D, d2, o2, R1.width, R1.height), D1 && U(t1, R1, F1, t2)) : t.texImage2D(i.TEXTURE_2D, 0, o2, R1.width, R1.height, 0, F1, t2, R1.data);
       else if (t1.isCompressedTexture)
         if (t1.isCompressedArrayTexture) {
-          E2 && e2 && t.texStorage3D(i.TEXTURE_2D_ARRAY, d2, o2, l2[0].width, l2[0].height, R1.depth);
-          for (let W1 = 0, v2 = l2.length; W1 < v2; W1++)
-            if (r2 = l2[W1], t1.format !== F9)
+          A2 && e2 && t.texStorage3D(i.TEXTURE_2D_ARRAY, d2, o2, l2[0].width, l2[0].height, R1.depth);
+          for (let G1 = 0, v2 = l2.length; G1 < v2; G1++)
+            if (r2 = l2[G1], t1.format !== F9)
               if (F1 !== null)
-                if (E2) {
+                if (A2) {
                   if (D1)
                     if (t1.layerUpdates.size > 0) {
                       const $1 = wq(r2.width, r2.height, t1.format, t1.type);
@@ -41346,31 +41346,31 @@ function Ez(i, e, t, n, s, o, r) {
                           j1 * $1 / r2.data.BYTES_PER_ELEMENT,
                           (j1 + 1) * $1 / r2.data.BYTES_PER_ELEMENT
                         );
-                        t.compressedTexSubImage3D(i.TEXTURE_2D_ARRAY, W1, 0, 0, j1, r2.width, r2.height, 1, F1, m2);
+                        t.compressedTexSubImage3D(i.TEXTURE_2D_ARRAY, G1, 0, 0, j1, r2.width, r2.height, 1, F1, m2);
                       }
                       t1.clearLayerUpdates();
                     } else
-                      t.compressedTexSubImage3D(i.TEXTURE_2D_ARRAY, W1, 0, 0, 0, r2.width, r2.height, R1.depth, F1, r2.data);
+                      t.compressedTexSubImage3D(i.TEXTURE_2D_ARRAY, G1, 0, 0, 0, r2.width, r2.height, R1.depth, F1, r2.data);
                 } else
-                  t.compressedTexImage3D(i.TEXTURE_2D_ARRAY, W1, o2, r2.width, r2.height, R1.depth, 0, r2.data, 0, 0);
+                  t.compressedTexImage3D(i.TEXTURE_2D_ARRAY, G1, o2, r2.width, r2.height, R1.depth, 0, r2.data, 0, 0);
               else
                 g0("WebGLRenderer: Attempt to load unsupported compressed texture format in .uploadTexture()");
             else
-              E2 ? D1 && t.texSubImage3D(i.TEXTURE_2D_ARRAY, W1, 0, 0, 0, r2.width, r2.height, R1.depth, F1, t2, r2.data) : t.texImage3D(i.TEXTURE_2D_ARRAY, W1, o2, r2.width, r2.height, R1.depth, 0, F1, t2, r2.data);
+              A2 ? D1 && t.texSubImage3D(i.TEXTURE_2D_ARRAY, G1, 0, 0, 0, r2.width, r2.height, R1.depth, F1, t2, r2.data) : t.texImage3D(i.TEXTURE_2D_ARRAY, G1, o2, r2.width, r2.height, R1.depth, 0, F1, t2, r2.data);
         } else {
-          E2 && e2 && t.texStorage2D(i.TEXTURE_2D, d2, o2, l2[0].width, l2[0].height);
-          for (let W1 = 0, v2 = l2.length; W1 < v2; W1++)
-            r2 = l2[W1], t1.format !== F9 ? F1 !== null ? E2 ? D1 && t.compressedTexSubImage2D(i.TEXTURE_2D, W1, 0, 0, r2.width, r2.height, F1, r2.data) : t.compressedTexImage2D(i.TEXTURE_2D, W1, o2, r2.width, r2.height, 0, r2.data) : g0("WebGLRenderer: Attempt to load unsupported compressed texture format in .uploadTexture()") : E2 ? D1 && t.texSubImage2D(i.TEXTURE_2D, W1, 0, 0, r2.width, r2.height, F1, t2, r2.data) : t.texImage2D(i.TEXTURE_2D, W1, o2, r2.width, r2.height, 0, F1, t2, r2.data);
+          A2 && e2 && t.texStorage2D(i.TEXTURE_2D, d2, o2, l2[0].width, l2[0].height);
+          for (let G1 = 0, v2 = l2.length; G1 < v2; G1++)
+            r2 = l2[G1], t1.format !== F9 ? F1 !== null ? A2 ? D1 && t.compressedTexSubImage2D(i.TEXTURE_2D, G1, 0, 0, r2.width, r2.height, F1, r2.data) : t.compressedTexImage2D(i.TEXTURE_2D, G1, o2, r2.width, r2.height, 0, r2.data) : g0("WebGLRenderer: Attempt to load unsupported compressed texture format in .uploadTexture()") : A2 ? D1 && t.texSubImage2D(i.TEXTURE_2D, G1, 0, 0, r2.width, r2.height, F1, t2, r2.data) : t.texImage2D(i.TEXTURE_2D, G1, o2, r2.width, r2.height, 0, F1, t2, r2.data);
         }
       else if (t1.isDataArrayTexture)
-        if (E2) {
+        if (A2) {
           if (e2 && t.texStorage3D(i.TEXTURE_2D_ARRAY, d2, o2, R1.width, R1.height, R1.depth), D1)
             if (t1.layerUpdates.size > 0) {
-              const W1 = wq(R1.width, R1.height, t1.format, t1.type);
+              const G1 = wq(R1.width, R1.height, t1.format, t1.type);
               for (const v2 of t1.layerUpdates) {
                 const $1 = R1.data.subarray(
-                  v2 * W1 / R1.data.BYTES_PER_ELEMENT,
-                  (v2 + 1) * W1 / R1.data.BYTES_PER_ELEMENT
+                  v2 * G1 / R1.data.BYTES_PER_ELEMENT,
+                  (v2 + 1) * G1 / R1.data.BYTES_PER_ELEMENT
                 );
                 t.texSubImage3D(i.TEXTURE_2D_ARRAY, 0, 0, 0, v2, R1.width, R1.height, 1, F1, t2, $1);
               }
@@ -41380,42 +41380,42 @@ function Ez(i, e, t, n, s, o, r) {
         } else
           t.texImage3D(i.TEXTURE_2D_ARRAY, 0, o2, R1.width, R1.height, R1.depth, 0, F1, t2, R1.data);
       else if (t1.isData3DTexture)
-        E2 ? (e2 && t.texStorage3D(i.TEXTURE_3D, d2, o2, R1.width, R1.height, R1.depth), D1 && t.texSubImage3D(i.TEXTURE_3D, 0, 0, 0, 0, R1.width, R1.height, R1.depth, F1, t2, R1.data)) : t.texImage3D(i.TEXTURE_3D, 0, o2, R1.width, R1.height, R1.depth, 0, F1, t2, R1.data);
+        A2 ? (e2 && t.texStorage3D(i.TEXTURE_3D, d2, o2, R1.width, R1.height, R1.depth), D1 && t.texSubImage3D(i.TEXTURE_3D, 0, 0, 0, 0, R1.width, R1.height, R1.depth, F1, t2, R1.data)) : t.texImage3D(i.TEXTURE_3D, 0, o2, R1.width, R1.height, R1.depth, 0, F1, t2, R1.data);
       else if (t1.isFramebufferTexture) {
         if (e2)
-          if (E2)
+          if (A2)
             t.texStorage2D(i.TEXTURE_2D, d2, o2, R1.width, R1.height);
           else {
-            let W1 = R1.width, v2 = R1.height;
+            let G1 = R1.width, v2 = R1.height;
             for (let $1 = 0; $1 < d2; $1++)
-              t.texImage2D(i.TEXTURE_2D, $1, o2, W1, v2, 0, F1, t2, null), W1 >>= 1, v2 >>= 1;
+              t.texImage2D(i.TEXTURE_2D, $1, o2, G1, v2, 0, F1, t2, null), G1 >>= 1, v2 >>= 1;
           }
       } else if (t1.isHTMLTexture) {
         if ("texElementImage2D" in i) {
-          const W1 = i.canvas;
-          if (W1.hasAttribute("layoutsubtree") || W1.setAttribute("layoutsubtree", "true"), R1.parentNode !== W1) {
-            W1.appendChild(R1), h.add(t1), W1.onpaint = (x2) => {
-              const A2 = x2.changedElements;
-              for (const C2 of h)
-                A2.includes(C2.image) && (C2.needsUpdate = !0);
-            }, W1.requestPaint();
+          const G1 = i.canvas;
+          if (G1.hasAttribute("layoutsubtree") || G1.setAttribute("layoutsubtree", "true"), R1.parentNode !== G1) {
+            G1.appendChild(R1), h.add(t1), G1.onpaint = (x2) => {
+              const C2 = x2.changedElements;
+              for (const T2 of h)
+                C2.includes(T2.image) && (T2.needsUpdate = !0);
+            }, G1.requestPaint();
             return;
           }
           const v2 = 0, $1 = i.RGBA, j1 = i.RGBA, m2 = i.UNSIGNED_BYTE;
           i.texElementImage2D(i.TEXTURE_2D, v2, $1, j1, m2, R1), i.texParameteri(i.TEXTURE_2D, i.TEXTURE_MIN_FILTER, i.LINEAR), i.texParameteri(i.TEXTURE_2D, i.TEXTURE_WRAP_S, i.CLAMP_TO_EDGE), i.texParameteri(i.TEXTURE_2D, i.TEXTURE_WRAP_T, i.CLAMP_TO_EDGE);
         }
       } else if (l2.length > 0) {
-        if (E2 && e2) {
-          const W1 = U1(l2[0]);
-          t.texStorage2D(i.TEXTURE_2D, d2, o2, W1.width, W1.height);
+        if (A2 && e2) {
+          const G1 = U1(l2[0]);
+          t.texStorage2D(i.TEXTURE_2D, d2, o2, G1.width, G1.height);
         }
-        for (let W1 = 0, v2 = l2.length; W1 < v2; W1++)
-          r2 = l2[W1], E2 ? D1 && t.texSubImage2D(i.TEXTURE_2D, W1, 0, 0, F1, t2, r2) : t.texImage2D(i.TEXTURE_2D, W1, o2, F1, t2, r2);
+        for (let G1 = 0, v2 = l2.length; G1 < v2; G1++)
+          r2 = l2[G1], A2 ? D1 && t.texSubImage2D(i.TEXTURE_2D, G1, 0, 0, F1, t2, r2) : t.texImage2D(i.TEXTURE_2D, G1, o2, F1, t2, r2);
         t1.generateMipmaps = !1;
-      } else if (E2) {
+      } else if (A2) {
         if (e2) {
-          const W1 = U1(R1);
-          t.texStorage2D(i.TEXTURE_2D, d2, o2, W1.width, W1.height);
+          const G1 = U1(R1);
+          t.texStorage2D(i.TEXTURE_2D, d2, o2, G1.width, G1.height);
         }
         D1 && t.texSubImage2D(i.TEXTURE_2D, 0, 0, 0, F1, t2, R1);
       } else
@@ -41436,7 +41436,7 @@ function Ez(i, e, t, n, s, o, r) {
       const F1 = t1.isCompressedTexture || t1.image[0].isCompressedTexture, t2 = t1.image[0] && t1.image[0].isDataTexture, o2 = [];
       for (let j1 = 0; j1 < 6; j1++)
         !F1 && !t2 ? o2[j1] = g(t1.image[j1], !0, s.maxCubemapSize) : o2[j1] = t2 ? t1.image[j1].image : t1.image[j1], o2[j1] = P1(t1, o2[j1]);
-      const r2 = o2[0], l2 = o.convert(t1.format, t1.colorSpace), E2 = o.convert(t1.type), e2 = b(t1.internalFormat, l2, E2, t1.normalized, t1.colorSpace), D1 = t1.isVideoTexture !== !0, d2 = m1.__version === void 0 || C1 === !0, W1 = r1.dataReady;
+      const r2 = o2[0], l2 = o.convert(t1.format, t1.colorSpace), A2 = o.convert(t1.type), e2 = b(t1.internalFormat, l2, A2, t1.normalized, t1.colorSpace), D1 = t1.isVideoTexture !== !0, d2 = m1.__version === void 0 || C1 === !0, G1 = r1.dataReady;
       let v2 = _(t1, r2);
       Y(i.TEXTURE_CUBE_MAP, t1);
       let $1;
@@ -41446,7 +41446,7 @@ function Ez(i, e, t, n, s, o, r) {
           $1 = o2[j1].mipmaps;
           for (let m2 = 0; m2 < $1.length; m2++) {
             const x2 = $1[m2];
-            t1.format !== F9 ? l2 !== null ? D1 ? W1 && t.compressedTexSubImage2D(i.TEXTURE_CUBE_MAP_POSITIVE_X + j1, m2, 0, 0, x2.width, x2.height, l2, x2.data) : t.compressedTexImage2D(i.TEXTURE_CUBE_MAP_POSITIVE_X + j1, m2, e2, x2.width, x2.height, 0, x2.data) : g0("WebGLRenderer: Attempt to load unsupported compressed texture format in .setTextureCube()") : D1 ? W1 && t.texSubImage2D(i.TEXTURE_CUBE_MAP_POSITIVE_X + j1, m2, 0, 0, x2.width, x2.height, l2, E2, x2.data) : t.texImage2D(i.TEXTURE_CUBE_MAP_POSITIVE_X + j1, m2, e2, x2.width, x2.height, 0, l2, E2, x2.data);
+            t1.format !== F9 ? l2 !== null ? D1 ? G1 && t.compressedTexSubImage2D(i.TEXTURE_CUBE_MAP_POSITIVE_X + j1, m2, 0, 0, x2.width, x2.height, l2, x2.data) : t.compressedTexImage2D(i.TEXTURE_CUBE_MAP_POSITIVE_X + j1, m2, e2, x2.width, x2.height, 0, x2.data) : g0("WebGLRenderer: Attempt to load unsupported compressed texture format in .setTextureCube()") : D1 ? G1 && t.texSubImage2D(i.TEXTURE_CUBE_MAP_POSITIVE_X + j1, m2, 0, 0, x2.width, x2.height, l2, A2, x2.data) : t.texImage2D(i.TEXTURE_CUBE_MAP_POSITIVE_X + j1, m2, e2, x2.width, x2.height, 0, l2, A2, x2.data);
           }
         }
       } else {
@@ -41457,16 +41457,16 @@ function Ez(i, e, t, n, s, o, r) {
         }
         for (let j1 = 0; j1 < 6; j1++)
           if (t2) {
-            D1 ? W1 && t.texSubImage2D(i.TEXTURE_CUBE_MAP_POSITIVE_X + j1, 0, 0, 0, o2[j1].width, o2[j1].height, l2, E2, o2[j1].data) : t.texImage2D(i.TEXTURE_CUBE_MAP_POSITIVE_X + j1, 0, e2, o2[j1].width, o2[j1].height, 0, l2, E2, o2[j1].data);
+            D1 ? G1 && t.texSubImage2D(i.TEXTURE_CUBE_MAP_POSITIVE_X + j1, 0, 0, 0, o2[j1].width, o2[j1].height, l2, A2, o2[j1].data) : t.texImage2D(i.TEXTURE_CUBE_MAP_POSITIVE_X + j1, 0, e2, o2[j1].width, o2[j1].height, 0, l2, A2, o2[j1].data);
             for (let m2 = 0; m2 < $1.length; m2++) {
-              const A2 = $1[m2].image[j1].image;
-              D1 ? W1 && t.texSubImage2D(i.TEXTURE_CUBE_MAP_POSITIVE_X + j1, m2 + 1, 0, 0, A2.width, A2.height, l2, E2, A2.data) : t.texImage2D(i.TEXTURE_CUBE_MAP_POSITIVE_X + j1, m2 + 1, e2, A2.width, A2.height, 0, l2, E2, A2.data);
+              const C2 = $1[m2].image[j1].image;
+              D1 ? G1 && t.texSubImage2D(i.TEXTURE_CUBE_MAP_POSITIVE_X + j1, m2 + 1, 0, 0, C2.width, C2.height, l2, A2, C2.data) : t.texImage2D(i.TEXTURE_CUBE_MAP_POSITIVE_X + j1, m2 + 1, e2, C2.width, C2.height, 0, l2, A2, C2.data);
             }
           } else {
-            D1 ? W1 && t.texSubImage2D(i.TEXTURE_CUBE_MAP_POSITIVE_X + j1, 0, 0, 0, l2, E2, o2[j1]) : t.texImage2D(i.TEXTURE_CUBE_MAP_POSITIVE_X + j1, 0, e2, l2, E2, o2[j1]);
+            D1 ? G1 && t.texSubImage2D(i.TEXTURE_CUBE_MAP_POSITIVE_X + j1, 0, 0, 0, l2, A2, o2[j1]) : t.texImage2D(i.TEXTURE_CUBE_MAP_POSITIVE_X + j1, 0, e2, l2, A2, o2[j1]);
             for (let m2 = 0; m2 < $1.length; m2++) {
               const x2 = $1[m2];
-              D1 ? W1 && t.texSubImage2D(i.TEXTURE_CUBE_MAP_POSITIVE_X + j1, m2 + 1, 0, 0, l2, E2, x2.image[j1]) : t.texImage2D(i.TEXTURE_CUBE_MAP_POSITIVE_X + j1, m2 + 1, e2, l2, E2, x2.image[j1]);
+              D1 ? G1 && t.texSubImage2D(i.TEXTURE_CUBE_MAP_POSITIVE_X + j1, m2 + 1, 0, 0, l2, A2, x2.image[j1]) : t.texImage2D(i.TEXTURE_CUBE_MAP_POSITIVE_X + j1, m2 + 1, e2, l2, A2, x2.image[j1]);
             }
           }
       }
@@ -41850,7 +41850,7 @@ class Pz {
           depthHeight: { value: t.w }
         }
       });
-      this.mesh = new I2(new le(20, 20), n);
+      this.mesh = new L2(new le(20, 20), n);
     }
     return this.mesh;
   }
@@ -42884,9 +42884,9 @@ class Oz {
     } catch (q1) {
       throw Z0("WebGLRenderer: " + q1.message), q1;
     }
-    let M1, z1, P1, U1, a1, t1, y1, C1, r1, m1, w1, k1, R1, F1, t2, o2, r2, l2, E2, e2, D1, d2, W1;
+    let M1, z1, P1, U1, a1, t1, y1, C1, r1, m1, w1, k1, R1, F1, t2, o2, r2, l2, A2, e2, D1, d2, G1;
     function v2() {
-      M1 = new NI(i1), M1.init(), D1 = new Az(i1, M1), z1 = new CI(i1, M1, e, D1), P1 = new Mz(i1, M1), z1.reversedDepthBuffer && u && P1.buffers.depth.setReversed(!0), U1 = new FI(i1), a1 = new uz(), t1 = new Ez(i1, M1, P1, a1, z1, D1, U1), y1 = new zI(P), C1 = new VP(i1), d2 = new EI(i1, C1), r1 = new OI(i1, C1, U1, d2), m1 = new $I(i1, r1, C1, d2, U1), l2 = new UI(i1, z1, t1), t2 = new TI(a1), w1 = new pz(P, y1, M1, z1, d2, t2), k1 = new Iz(P, a1), R1 = new mz(), F1 = new vz(M1), r2 = new MI(P, y1, P1, m1, q, c), o2 = new Sz(P, m1, z1), W1 = new Lz(i1, U1, z1, P1), E2 = new AI(i1, M1, U1), e2 = new BI(i1, M1, U1), U1.programs = w1.programs, P.capabilities = z1, P.extensions = M1, P.properties = a1, P.renderLists = R1, P.shadowMap = o2, P.state = P1, P.info = U1;
+      M1 = new NI(i1), M1.init(), D1 = new Az(i1, M1), z1 = new CI(i1, M1, e, D1), P1 = new Mz(i1, M1), z1.reversedDepthBuffer && u && P1.buffers.depth.setReversed(!0), U1 = new FI(i1), a1 = new uz(), t1 = new Ez(i1, M1, P1, a1, z1, D1, U1), y1 = new zI(P), C1 = new VP(i1), d2 = new EI(i1, C1), r1 = new OI(i1, C1, U1, d2), m1 = new $I(i1, r1, C1, d2, U1), l2 = new UI(i1, z1, t1), t2 = new TI(a1), w1 = new pz(P, y1, M1, z1, d2, t2), k1 = new Iz(P, a1), R1 = new mz(), F1 = new vz(M1), r2 = new MI(P, y1, P1, m1, q, c), o2 = new Sz(P, m1, z1), G1 = new Lz(i1, U1, z1, P1), A2 = new AI(i1, M1, U1), e2 = new BI(i1, M1, U1), U1.programs = w1.programs, P.capabilities = z1, P.extensions = M1, P.properties = a1, P.renderLists = R1, P.shadowMap = o2, P.state = P1, P.info = U1;
     }
     v2(), x !== O5 && (S = new VI(x, t.width, t.height, s, o));
     const $1 = new Dz(P, i1);
@@ -42964,8 +42964,8 @@ class Oz {
           Z1 = g.has(_2);
         }
         if (Z1) {
-          const _2 = A.texture.type, L2 = f.has(_2), y2 = r2.getClearColor(), O2 = r2.getClearAlpha(), B2 = y2.r, D2 = y2.g, T1 = y2.b;
-          L2 ? (v[0] = B2, v[1] = D2, v[2] = T1, v[3] = O2, i1.clearBufferuiv(i1.COLOR, 0, v)) : (y[0] = B2, y[1] = D2, y[2] = T1, y[3] = O2, i1.clearBufferiv(i1.COLOR, 0, y));
+          const _2 = A.texture.type, z2 = f.has(_2), y2 = r2.getClearColor(), O2 = r2.getClearAlpha(), B2 = y2.r, D2 = y2.g, T1 = y2.b;
+          z2 ? (v[0] = B2, v[1] = D2, v[2] = T1, v[3] = O2, i1.clearBufferuiv(i1.COLOR, 0, v)) : (y[0] = B2, y[1] = D2, y[2] = T1, y[3] = O2, i1.clearBufferiv(i1.COLOR, 0, y));
         } else
           X1 |= i1.COLOR_BUFFER_BIT;
       }
@@ -42979,7 +42979,7 @@ class Oz {
     }, this.setNodesHandler = function(q1) {
       q1.setRenderer(this), L = q1;
     }, this.dispose = function() {
-      t.removeEventListener("webglcontextlost", j1, !1), t.removeEventListener("webglcontextrestored", m2, !1), t.removeEventListener("webglcontextcreationerror", x2, !1), r2.dispose(), R1.dispose(), F1.dispose(), a1.dispose(), y1.dispose(), m1.dispose(), d2.dispose(), W1.dispose(), w1.dispose(), $1.dispose(), $1.removeEventListener("sessionstart", f3), $1.removeEventListener("sessionend", l0), T0.stop();
+      t.removeEventListener("webglcontextlost", j1, !1), t.removeEventListener("webglcontextrestored", m2, !1), t.removeEventListener("webglcontextcreationerror", x2, !1), r2.dispose(), R1.dispose(), F1.dispose(), a1.dispose(), y1.dispose(), m1.dispose(), d2.dispose(), G1.dispose(), w1.dispose(), $1.dispose(), $1.removeEventListener("sessionstart", f3), $1.removeEventListener("sessionend", l0), T0.stop();
     };
     function j1(q1) {
       q1.preventDefault(), br("WebGLRenderer: Context Lost."), E = !0;
@@ -42992,14 +42992,14 @@ class Oz {
     function x2(q1) {
       Z0("WebGLRenderer: A WebGL context could not be created. Reason: ", q1.statusMessage);
     }
-    function A2(q1) {
-      const V1 = q1.target;
-      V1.removeEventListener("dispose", A2), C2(V1);
-    }
     function C2(q1) {
-      R2(q1), a1.remove(q1);
+      const V1 = q1.target;
+      V1.removeEventListener("dispose", C2), T2(V1);
     }
-    function R2(q1) {
+    function T2(q1) {
+      I2(q1), a1.remove(q1);
+    }
+    function I2(q1) {
       const V1 = a1.get(q1).programs;
       V1 !== void 0 && (V1.forEach(function(i2) {
         w1.releaseProgram(i2);
@@ -43007,8 +43007,8 @@ class Oz {
     }
     this.renderBufferDirect = function(q1, V1, i2, X1, Z1, _2) {
       V1 === null && (V1 = H);
-      const L2 = Z1.isMesh && Z1.matrixWorld.determinant() < 0, y2 = c3(q1, V1, i2, X1, Z1);
-      P1.setMaterial(X1, L2);
+      const z2 = Z1.isMesh && Z1.matrixWorld.determinant() < 0, y2 = c3(q1, V1, i2, X1, Z1);
+      P1.setMaterial(X1, z2);
       let O2 = i2.index, B2 = 1;
       if (X1.wireframe === !0) {
         if (O2 = r1.getWireframeAttribute(i2), O2 === void 0) return;
@@ -43020,7 +43020,7 @@ class Oz {
       const s2 = Q1 - B1;
       if (s2 < 0 || s2 === 1 / 0) return;
       d2.setup(Z1, X1, y2, i2, O2);
-      let a2, M2 = E2;
+      let a2, M2 = A2;
       if (O2 !== null && (a2 = C1.get(O2), M2 = e2, M2.setIndex(a2)), Z1.isMesh)
         X1.wireframe === !0 ? (P1.setLineWidth(X1.wireframeLinewidth * G()), M2.setMode(i1.LINES)) : M2.setMode(i1.TRIANGLES);
       else if (Z1.isLine) {
@@ -43059,8 +43059,8 @@ class Oz {
         const _2 = Z1.material;
         if (_2)
           if (Array.isArray(_2))
-            for (let L2 = 0; L2 < _2.length; L2++) {
-              const y2 = _2[L2];
+            for (let z2 = 0; z2 < _2.length; z2++) {
+              const y2 = _2[z2];
               q2(y2, i2, Z1), X1.add(y2);
             }
           else
@@ -43070,8 +43070,8 @@ class Oz {
       const X1 = this.compile(q1, V1, i2);
       return new Promise((Z1) => {
         function _2() {
-          if (X1.forEach(function(L2) {
-            a1.get(L2).currentProgram.isReady() && X1.delete(L2);
+          if (X1.forEach(function(z2) {
+            a1.get(z2).currentProgram.isReady() && X1.delete(z2);
           }), X1.size === 0) {
             Z1(q1);
             return;
@@ -43103,19 +43103,19 @@ class Oz {
       L !== null && L.renderStart(q1, V1);
       const i2 = $1.enabled === !0 && $1.isPresenting === !0, X1 = S !== null && (A === null || i2) && S.begin(P, A);
       if (q1.matrixWorldAutoUpdate === !0 && q1.updateMatrixWorld(), V1.parent === null && V1.matrixWorldAutoUpdate === !0 && V1.updateMatrixWorld(), $1.enabled === !0 && $1.isPresenting === !0 && (S === null || S.isCompositing() === !1) && ($1.cameraAutoUpdate === !0 && $1.updateCamera(V1), V1 = $1.getCamera()), q1.isScene === !0 && q1.onBeforeRender(P, q1, V1, A), _ = F1.get(q1, w.length), _.init(V1), _.state.textureUnits = t1.getTextureUnits(), w.push(_), N.multiplyMatrices(V1.projectionMatrix, V1.matrixWorldInverse), p1.setFromProjectionMatrix(N, q6, V1.reversedDepth), B = this.localClippingEnabled, S1 = t2.init(this.clippingPlanes, B), k = R1.get(q1, M.length), k.init(), M.push(k), $1.enabled === !0 && $1.isPresenting === !0) {
-        const L2 = P.xr.getDepthSensingMesh();
-        L2 !== null && p2(L2, V1, -1 / 0, P.sortObjects);
+        const z2 = P.xr.getDepthSensingMesh();
+        z2 !== null && p2(z2, V1, -1 / 0, P.sortObjects);
       }
       p2(q1, V1, 0, P.sortObjects), k.finish(), P.sortObjects === !0 && k.sort(z, T), K = $1.enabled === !1 || $1.isPresenting === !1 || $1.hasDepthSensing() === !1, K && r2.addToRenderList(k, q1), this.info.render.frame++, S1 === !0 && t2.beginShadows();
       const Z1 = _.state.shadowsArray;
       if (o2.render(Z1, q1, V1), S1 === !0 && t2.endShadows(), this.info.autoReset === !0 && this.info.reset(), (X1 && S.hasRenderPass()) === !1) {
-        const L2 = k.opaque, y2 = k.transmissive;
+        const z2 = k.opaque, y2 = k.transmissive;
         if (_.setupLights(), V1.isArrayCamera) {
           const O2 = V1.cameras;
           if (y2.length > 0)
             for (let B2 = 0, D2 = O2.length; B2 < D2; B2++) {
               const T1 = O2[B2];
-              U0(L2, y2, q1, T1);
+              U0(z2, y2, q1, T1);
             }
           K && r2.render(q1);
           for (let B2 = 0, D2 = O2.length; B2 < D2; B2++) {
@@ -43123,7 +43123,7 @@ class Oz {
             W2(k, q1, T1, T1.viewport);
           }
         } else
-          y2.length > 0 && U0(L2, y2, q1, V1), K && r2.render(q1), W2(k, q1, V1);
+          y2.length > 0 && U0(z2, y2, q1, V1), K && r2.render(q1), W2(k, q1, V1);
       }
       A !== null && D === 0 && (t1.updateMultisampleRenderTarget(A), t1.updateRenderTargetMipmap(A)), X1 && S.end(P), q1.isScene === !0 && q1.onAfterRender(P, q1, V1), d2.resetDefaultState(), C = -1, R = null, w.pop(), w.length > 0 ? (_ = w[w.length - 1], t1.setTextureUnits(_.state.textureUnits), S1 === !0 && t2.setGlobalState(P.clippingPlanes, _.state.camera)) : _ = null, M.pop(), M.length > 0 ? k = M[M.length - 1] : k = null, L !== null && L.renderEnd();
     };
@@ -43141,27 +43141,27 @@ class Oz {
         else if (q1.isSprite) {
           if (!q1.frustumCulled || p1.intersectsSprite(q1)) {
             X1 && J.setFromMatrixPosition(q1.matrixWorld).applyMatrix4(N);
-            const L2 = m1.update(q1), y2 = q1.material;
-            y2.visible && k.push(q1, L2, y2, i2, J.z, null);
+            const z2 = m1.update(q1), y2 = q1.material;
+            y2.visible && k.push(q1, z2, y2, i2, J.z, null);
           }
         } else if ((q1.isMesh || q1.isLine || q1.isPoints) && (!q1.frustumCulled || p1.intersectsObject(q1))) {
-          const L2 = m1.update(q1), y2 = q1.material;
-          if (X1 && (q1.boundingSphere !== void 0 ? (q1.boundingSphere === null && q1.computeBoundingSphere(), J.copy(q1.boundingSphere.center)) : (L2.boundingSphere === null && L2.computeBoundingSphere(), J.copy(L2.boundingSphere.center)), J.applyMatrix4(q1.matrixWorld).applyMatrix4(N)), Array.isArray(y2)) {
-            const O2 = L2.groups;
+          const z2 = m1.update(q1), y2 = q1.material;
+          if (X1 && (q1.boundingSphere !== void 0 ? (q1.boundingSphere === null && q1.computeBoundingSphere(), J.copy(q1.boundingSphere.center)) : (z2.boundingSphere === null && z2.computeBoundingSphere(), J.copy(z2.boundingSphere.center)), J.applyMatrix4(q1.matrixWorld).applyMatrix4(N)), Array.isArray(y2)) {
+            const O2 = z2.groups;
             for (let B2 = 0, D2 = O2.length; B2 < D2; B2++) {
               const T1 = O2[B2], B1 = y2[T1.materialIndex];
-              B1 && B1.visible && k.push(q1, L2, B1, i2, J.z, T1);
+              B1 && B1.visible && k.push(q1, z2, B1, i2, J.z, T1);
             }
-          } else y2.visible && k.push(q1, L2, y2, i2, J.z, null);
+          } else y2.visible && k.push(q1, z2, y2, i2, J.z, null);
         }
       }
       const _2 = q1.children;
-      for (let L2 = 0, y2 = _2.length; L2 < y2; L2++)
-        p2(_2[L2], V1, i2, X1);
+      for (let z2 = 0, y2 = _2.length; z2 < y2; z2++)
+        p2(_2[z2], V1, i2, X1);
     }
     function W2(q1, V1, i2, X1) {
-      const { opaque: Z1, transmissive: _2, transparent: L2 } = q1;
-      _.setupLightsView(i2), S1 === !0 && t2.setGlobalState(P.clippingPlanes, i2), X1 && P1.viewport(I.copy(X1)), Z1.length > 0 && I0(Z1, V1, i2), _2.length > 0 && I0(_2, V1, i2), L2.length > 0 && I0(L2, V1, i2), P1.buffers.depth.setTest(!0), P1.buffers.depth.setMask(!0), P1.buffers.color.setMask(!0), P1.setPolygonOffset(!1);
+      const { opaque: Z1, transmissive: _2, transparent: z2 } = q1;
+      _.setupLightsView(i2), S1 === !0 && t2.setGlobalState(P.clippingPlanes, i2), X1 && P1.viewport(I.copy(X1)), Z1.length > 0 && I0(Z1, V1, i2), _2.length > 0 && I0(_2, V1, i2), z2.length > 0 && I0(z2, V1, i2), P1.buffers.depth.setTest(!0), P1.buffers.depth.setMask(!0), P1.buffers.color.setMask(!0), P1.setPolygonOffset(!1);
     }
     function U0(q1, V1, i2, X1) {
       if ((i2.isScene === !0 ? i2.overrideMaterial : null) !== null)
@@ -43180,8 +43180,8 @@ class Oz {
           colorSpace: Q0.workingColorSpace
         });
       }
-      const _2 = _.state.transmissionRenderTarget[X1.id], L2 = X1.viewport || I;
-      _2.setSize(L2.z * P.transmissionResolutionScale, L2.w * P.transmissionResolutionScale);
+      const _2 = _.state.transmissionRenderTarget[X1.id], z2 = X1.viewport || I;
+      _2.setSize(z2.z * P.transmissionResolutionScale, z2.w * P.transmissionResolutionScale);
       const y2 = P.getRenderTarget(), O2 = P.getActiveCubeFace(), B2 = P.getActiveMipmapLevel();
       P.setRenderTarget(_2), P.getClearColor(X), c1 = P.getClearAlpha(), c1 < 1 && P.setClearColor(16777215, 0.5), P.clear(), K && r2.render(i2);
       const D2 = P.toneMapping;
@@ -43203,8 +43203,8 @@ class Oz {
     function I0(q1, V1, i2) {
       const X1 = V1.isScene === !0 ? V1.overrideMaterial : null;
       for (let Z1 = 0, _2 = q1.length; Z1 < _2; Z1++) {
-        const L2 = q1[Z1], { object: y2, geometry: O2, group: B2 } = L2;
-        let D2 = L2.material;
+        const z2 = q1[Z1], { object: y2, geometry: O2, group: B2 } = z2;
+        let D2 = z2.material;
         D2.allowOverride === !0 && X1 !== null && (D2 = X1), y2.layers.test(i2.layers) && $0(y2, V1, i2, O2, D2, B2);
       }
     }
@@ -43213,19 +43213,19 @@ class Oz {
     }
     function P0(q1, V1, i2) {
       V1.isScene !== !0 && (V1 = H);
-      const X1 = a1.get(q1), Z1 = _.state.lights, _2 = _.state.shadowsArray, L2 = Z1.state.version, y2 = w1.getParameters(q1, Z1.state, _2, V1, i2, _.state.lightProbeGridArray), O2 = w1.getProgramCacheKey(y2);
+      const X1 = a1.get(q1), Z1 = _.state.lights, _2 = _.state.shadowsArray, z2 = Z1.state.version, y2 = w1.getParameters(q1, Z1.state, _2, V1, i2, _.state.lightProbeGridArray), O2 = w1.getProgramCacheKey(y2);
       let B2 = X1.programs;
       X1.environment = q1.isMeshStandardMaterial || q1.isMeshLambertMaterial || q1.isMeshPhongMaterial ? V1.environment : null, X1.fog = V1.fog;
       const D2 = q1.isMeshStandardMaterial || q1.isMeshLambertMaterial && !q1.envMap || q1.isMeshPhongMaterial && !q1.envMap;
-      X1.envMap = y1.get(q1.envMap || X1.environment, D2), X1.envMapRotation = X1.environment !== null && q1.envMap === null ? V1.environmentRotation : q1.envMapRotation, B2 === void 0 && (q1.addEventListener("dispose", A2), B2 = /* @__PURE__ */ new Map(), X1.programs = B2);
+      X1.envMap = y1.get(q1.envMap || X1.environment, D2), X1.envMapRotation = X1.environment !== null && q1.envMap === null ? V1.environmentRotation : q1.envMapRotation, B2 === void 0 && (q1.addEventListener("dispose", C2), B2 = /* @__PURE__ */ new Map(), X1.programs = B2);
       let T1 = B2.get(O2);
       if (T1 !== void 0) {
-        if (X1.currentProgram === T1 && X1.lightsStateVersion === L2)
+        if (X1.currentProgram === T1 && X1.lightsStateVersion === z2)
           return w0(q1, y2), T1;
       } else
         y2.uniforms = w1.getUniforms(q1), L !== null && q1.isNodeMaterial && L.build(q1, i2, y2), q1.onBeforeCompile(y2, P), T1 = w1.acquireProgram(y2, O2), B2.set(O2, T1), X1.uniforms = y2.uniforms;
       const B1 = X1.uniforms;
-      return (!q1.isShaderMaterial && !q1.isRawShaderMaterial || q1.clipping === !0) && (B1.clippingPlanes = t2.uniform), w0(q1, y2), X1.needsLights = g3(q1), X1.lightsStateVersion = L2, X1.needsLights && (B1.ambientLightColor.value = Z1.state.ambient, B1.lightProbe.value = Z1.state.probe, B1.directionalLights.value = Z1.state.directional, B1.directionalLightShadows.value = Z1.state.directionalShadow, B1.spotLights.value = Z1.state.spot, B1.spotLightShadows.value = Z1.state.spotShadow, B1.rectAreaLights.value = Z1.state.rectArea, B1.ltc_1.value = Z1.state.rectAreaLTC1, B1.ltc_2.value = Z1.state.rectAreaLTC2, B1.pointLights.value = Z1.state.point, B1.pointLightShadows.value = Z1.state.pointShadow, B1.hemisphereLights.value = Z1.state.hemi, B1.directionalShadowMatrix.value = Z1.state.directionalShadowMatrix, B1.spotLightMatrix.value = Z1.state.spotLightMatrix, B1.spotLightMap.value = Z1.state.spotLightMap, B1.pointShadowMatrix.value = Z1.state.pointShadowMatrix), X1.lightProbeGrid = _.state.lightProbeGridArray.length > 0, X1.currentProgram = T1, X1.uniformsList = null, T1;
+      return (!q1.isShaderMaterial && !q1.isRawShaderMaterial || q1.clipping === !0) && (B1.clippingPlanes = t2.uniform), w0(q1, y2), X1.needsLights = g3(q1), X1.lightsStateVersion = z2, X1.needsLights && (B1.ambientLightColor.value = Z1.state.ambient, B1.lightProbe.value = Z1.state.probe, B1.directionalLights.value = Z1.state.directional, B1.directionalLightShadows.value = Z1.state.directionalShadow, B1.spotLights.value = Z1.state.spot, B1.spotLightShadows.value = Z1.state.spotShadow, B1.rectAreaLights.value = Z1.state.rectArea, B1.ltc_1.value = Z1.state.rectAreaLTC1, B1.ltc_2.value = Z1.state.rectAreaLTC2, B1.pointLights.value = Z1.state.point, B1.pointLightShadows.value = Z1.state.pointShadow, B1.hemisphereLights.value = Z1.state.hemi, B1.directionalShadowMatrix.value = Z1.state.directionalShadowMatrix, B1.spotLightMatrix.value = Z1.state.spotLightMatrix, B1.spotLightMap.value = Z1.state.spotLightMap, B1.pointShadowMatrix.value = Z1.state.pointShadowMatrix), X1.lightProbeGrid = _.state.lightProbeGridArray.length > 0, X1.currentProgram = T1, X1.uniformsList = null, T1;
     }
     function X0(q1) {
       if (q1.uniformsList === null) {
@@ -43251,7 +43251,7 @@ class Oz {
     }
     function c3(q1, V1, i2, X1, Z1) {
       V1.isScene !== !0 && (V1 = H), t1.resetTextureUnits();
-      const _2 = V1.fog, L2 = X1.isMeshStandardMaterial || X1.isMeshLambertMaterial || X1.isMeshPhongMaterial ? V1.environment : null, y2 = A === null ? P.outputColorSpace : A.isXRRenderTarget === !0 ? A.texture.colorSpace : Q0.workingColorSpace, O2 = X1.isMeshStandardMaterial || X1.isMeshLambertMaterial && !X1.envMap || X1.isMeshPhongMaterial && !X1.envMap, B2 = y1.get(X1.envMap || L2, O2), D2 = X1.vertexColors === !0 && !!i2.attributes.color && i2.attributes.color.itemSize === 4, T1 = !!i2.attributes.tangent && (!!X1.normalMap || X1.anisotropy > 0), B1 = !!i2.morphAttributes.position, Q1 = !!i2.morphAttributes.normal, s2 = !!i2.morphAttributes.color;
+      const _2 = V1.fog, z2 = X1.isMeshStandardMaterial || X1.isMeshLambertMaterial || X1.isMeshPhongMaterial ? V1.environment : null, y2 = A === null ? P.outputColorSpace : A.isXRRenderTarget === !0 ? A.texture.colorSpace : Q0.workingColorSpace, O2 = X1.isMeshStandardMaterial || X1.isMeshLambertMaterial && !X1.envMap || X1.isMeshPhongMaterial && !X1.envMap, B2 = y1.get(X1.envMap || z2, O2), D2 = X1.vertexColors === !0 && !!i2.attributes.color && i2.attributes.color.itemSize === 4, T1 = !!i2.attributes.tangent && (!!X1.normalMap || X1.anisotropy > 0), B1 = !!i2.morphAttributes.position, Q1 = !!i2.morphAttributes.normal, s2 = !!i2.morphAttributes.color;
       let a2 = v6;
       X1.toneMapped && (A === null || A.isXRRenderTarget === !0) && (a2 = P.toneMapping);
       const M2 = i2.morphAttributes.position || i2.morphAttributes.normal || i2.morphAttributes.color, w2 = M2 !== void 0 ? M2.length : 0, g2 = a1.get(X1), K2 = _.state.lights;
@@ -43296,7 +43296,7 @@ class Oz {
         const k0 = X1.uniformsGroups;
         for (let h3 = 0, M3 = k0.length; h3 < M3; h3++) {
           const B3 = k0[h3];
-          W1.update(B3, o0), W1.bind(B3, o0);
+          G1.update(B3, o0), G1.bind(B3, o0);
         }
       }
       return o0;
@@ -43361,13 +43361,13 @@ class Oz {
         i1.framebufferTexture2D(i1.FRAMEBUFFER, i1.COLOR_ATTACHMENT0, i1.TEXTURE_2D, y2.__webglTexture, i2);
       }
       C = -1;
-    }, this.readRenderTargetPixels = function(q1, V1, i2, X1, Z1, _2, L2, y2 = 0) {
+    }, this.readRenderTargetPixels = function(q1, V1, i2, X1, Z1, _2, z2, y2 = 0) {
       if (!(q1 && q1.isWebGLRenderTarget)) {
         Z0("WebGLRenderer.readRenderTargetPixels: renderTarget is not THREE.WebGLRenderTarget.");
         return;
       }
       let O2 = a1.get(q1).__webglFramebuffer;
-      if (q1.isWebGLCubeRenderTarget && L2 !== void 0 && (O2 = O2[L2]), O2) {
+      if (q1.isWebGLCubeRenderTarget && z2 !== void 0 && (O2 = O2[z2]), O2) {
         P1.bindFramebuffer(i1.FRAMEBUFFER, O2);
         try {
           const B2 = q1.textures[y2], D2 = B2.format, T1 = B2.type;
@@ -43385,11 +43385,11 @@ class Oz {
           P1.bindFramebuffer(i1.FRAMEBUFFER, B2);
         }
       }
-    }, this.readRenderTargetPixelsAsync = async function(q1, V1, i2, X1, Z1, _2, L2, y2 = 0) {
+    }, this.readRenderTargetPixelsAsync = async function(q1, V1, i2, X1, Z1, _2, z2, y2 = 0) {
       if (!(q1 && q1.isWebGLRenderTarget))
         throw new Error("THREE.WebGLRenderer.readRenderTargetPixels: renderTarget is not THREE.WebGLRenderTarget.");
       let O2 = a1.get(q1).__webglFramebuffer;
-      if (q1.isWebGLCubeRenderTarget && L2 !== void 0 && (O2 = O2[L2]), O2)
+      if (q1.isWebGLCubeRenderTarget && z2 !== void 0 && (O2 = O2[z2]), O2)
         if (V1 >= 0 && V1 <= q1.width - X1 && i2 >= 0 && i2 <= q1.height - Z1) {
           P1.bindFramebuffer(i1.FRAMEBUFFER, O2);
           const B2 = q1.textures[y2], D2 = B2.format, T1 = B2.type;
@@ -43406,18 +43406,18 @@ class Oz {
         } else
           throw new Error("THREE.WebGLRenderer.readRenderTargetPixelsAsync: requested read bounds are out of range.");
     }, this.copyFramebufferToTexture = function(q1, V1 = null, i2 = 0) {
-      const X1 = Math.pow(2, -i2), Z1 = Math.floor(q1.image.width * X1), _2 = Math.floor(q1.image.height * X1), L2 = V1 !== null ? V1.x : 0, y2 = V1 !== null ? V1.y : 0;
-      t1.setTexture2D(q1, 0), i1.copyTexSubImage2D(i1.TEXTURE_2D, i2, 0, 0, L2, y2, Z1, _2), P1.unbindTexture();
+      const X1 = Math.pow(2, -i2), Z1 = Math.floor(q1.image.width * X1), _2 = Math.floor(q1.image.height * X1), z2 = V1 !== null ? V1.x : 0, y2 = V1 !== null ? V1.y : 0;
+      t1.setTexture2D(q1, 0), i1.copyTexSubImage2D(i1.TEXTURE_2D, i2, 0, 0, z2, y2, Z1, _2), P1.unbindTexture();
     };
     const O3 = i1.createFramebuffer(), d5 = i1.createFramebuffer();
     this.copyTextureToTexture = function(q1, V1, i2 = null, X1 = null, Z1 = 0, _2 = 0) {
-      let L2, y2, O2, B2, D2, T1, B1, Q1, s2;
+      let z2, y2, O2, B2, D2, T1, B1, Q1, s2;
       const a2 = q1.isCompressedTexture ? q1.mipmaps[_2] : q1.image;
       if (i2 !== null)
-        L2 = i2.max.x - i2.min.x, y2 = i2.max.y - i2.min.y, O2 = i2.isBox3 ? i2.max.z - i2.min.z : 1, B2 = i2.min.x, D2 = i2.min.y, T1 = i2.isBox3 ? i2.min.z : 0;
+        z2 = i2.max.x - i2.min.x, y2 = i2.max.y - i2.min.y, O2 = i2.isBox3 ? i2.max.z - i2.min.z : 1, B2 = i2.min.x, D2 = i2.min.y, T1 = i2.isBox3 ? i2.min.z : 0;
       else {
         const _0 = Math.pow(2, -Z1);
-        L2 = Math.floor(a2.width * _0), y2 = Math.floor(a2.height * _0), q1.isDataArrayTexture ? O2 = a2.depth : q1.isData3DTexture ? O2 = Math.floor(a2.depth * _0) : O2 = 1, B2 = 0, D2 = 0, T1 = 0;
+        z2 = Math.floor(a2.width * _0), y2 = Math.floor(a2.height * _0), q1.isDataArrayTexture ? O2 = a2.depth : q1.isData3DTexture ? O2 = Math.floor(a2.depth * _0) : O2 = 1, B2 = 0, D2 = 0, T1 = 0;
       }
       X1 !== null ? (B1 = X1.x, Q1 = X1.y, s2 = X1.z) : (B1 = 0, Q1 = 0, s2 = 0);
       const M2 = D1.convert(V1.format), w2 = D1.convert(V1.type);
@@ -43430,16 +43430,16 @@ class Oz {
         const _0 = a1.get(q1), w3 = a1.get(V1), k0 = a1.get(_0.__renderTarget), h3 = a1.get(w3.__renderTarget);
         P1.bindFramebuffer(i1.READ_FRAMEBUFFER, k0.__webglFramebuffer), P1.bindFramebuffer(i1.DRAW_FRAMEBUFFER, h3.__webglFramebuffer);
         for (let M3 = 0; M3 < O2; M3++)
-          n3 && (i1.framebufferTextureLayer(i1.READ_FRAMEBUFFER, i1.COLOR_ATTACHMENT0, a1.get(q1).__webglTexture, Z1, T1 + M3), i1.framebufferTextureLayer(i1.DRAW_FRAMEBUFFER, i1.COLOR_ATTACHMENT0, a1.get(V1).__webglTexture, _2, s2 + M3)), i1.blitFramebuffer(B2, D2, L2, y2, B1, Q1, L2, y2, i1.DEPTH_BUFFER_BIT, i1.NEAREST);
+          n3 && (i1.framebufferTextureLayer(i1.READ_FRAMEBUFFER, i1.COLOR_ATTACHMENT0, a1.get(q1).__webglTexture, Z1, T1 + M3), i1.framebufferTextureLayer(i1.DRAW_FRAMEBUFFER, i1.COLOR_ATTACHMENT0, a1.get(V1).__webglTexture, _2, s2 + M3)), i1.blitFramebuffer(B2, D2, z2, y2, B1, Q1, z2, y2, i1.DEPTH_BUFFER_BIT, i1.NEAREST);
         P1.bindFramebuffer(i1.READ_FRAMEBUFFER, null), P1.bindFramebuffer(i1.DRAW_FRAMEBUFFER, null);
       } else if (Z1 !== 0 || q1.isRenderTargetTexture || a1.has(q1)) {
         const _0 = a1.get(q1), w3 = a1.get(V1);
         P1.bindFramebuffer(i1.READ_FRAMEBUFFER, O3), P1.bindFramebuffer(i1.DRAW_FRAMEBUFFER, d5);
         for (let k0 = 0; k0 < O2; k0++)
-          n3 ? i1.framebufferTextureLayer(i1.READ_FRAMEBUFFER, i1.COLOR_ATTACHMENT0, _0.__webglTexture, Z1, T1 + k0) : i1.framebufferTexture2D(i1.READ_FRAMEBUFFER, i1.COLOR_ATTACHMENT0, i1.TEXTURE_2D, _0.__webglTexture, Z1), J2 ? i1.framebufferTextureLayer(i1.DRAW_FRAMEBUFFER, i1.COLOR_ATTACHMENT0, w3.__webglTexture, _2, s2 + k0) : i1.framebufferTexture2D(i1.DRAW_FRAMEBUFFER, i1.COLOR_ATTACHMENT0, i1.TEXTURE_2D, w3.__webglTexture, _2), Z1 !== 0 ? i1.blitFramebuffer(B2, D2, L2, y2, B1, Q1, L2, y2, i1.COLOR_BUFFER_BIT, i1.NEAREST) : J2 ? i1.copyTexSubImage3D(g2, _2, B1, Q1, s2 + k0, B2, D2, L2, y2) : i1.copyTexSubImage2D(g2, _2, B1, Q1, B2, D2, L2, y2);
+          n3 ? i1.framebufferTextureLayer(i1.READ_FRAMEBUFFER, i1.COLOR_ATTACHMENT0, _0.__webglTexture, Z1, T1 + k0) : i1.framebufferTexture2D(i1.READ_FRAMEBUFFER, i1.COLOR_ATTACHMENT0, i1.TEXTURE_2D, _0.__webglTexture, Z1), J2 ? i1.framebufferTextureLayer(i1.DRAW_FRAMEBUFFER, i1.COLOR_ATTACHMENT0, w3.__webglTexture, _2, s2 + k0) : i1.framebufferTexture2D(i1.DRAW_FRAMEBUFFER, i1.COLOR_ATTACHMENT0, i1.TEXTURE_2D, w3.__webglTexture, _2), Z1 !== 0 ? i1.blitFramebuffer(B2, D2, z2, y2, B1, Q1, z2, y2, i1.COLOR_BUFFER_BIT, i1.NEAREST) : J2 ? i1.copyTexSubImage3D(g2, _2, B1, Q1, s2 + k0, B2, D2, z2, y2) : i1.copyTexSubImage2D(g2, _2, B1, Q1, B2, D2, z2, y2);
         P1.bindFramebuffer(i1.READ_FRAMEBUFFER, null), P1.bindFramebuffer(i1.DRAW_FRAMEBUFFER, null);
       } else
-        J2 ? q1.isDataTexture || q1.isData3DTexture ? i1.texSubImage3D(g2, _2, B1, Q1, s2, L2, y2, O2, M2, w2, a2.data) : V1.isCompressedArrayTexture ? i1.compressedTexSubImage3D(g2, _2, B1, Q1, s2, L2, y2, O2, M2, a2.data) : i1.texSubImage3D(g2, _2, B1, Q1, s2, L2, y2, O2, M2, w2, a2) : q1.isDataTexture ? i1.texSubImage2D(i1.TEXTURE_2D, _2, B1, Q1, L2, y2, M2, w2, a2.data) : q1.isCompressedTexture ? i1.compressedTexSubImage2D(i1.TEXTURE_2D, _2, B1, Q1, a2.width, a2.height, M2, a2.data) : i1.texSubImage2D(i1.TEXTURE_2D, _2, B1, Q1, L2, y2, M2, w2, a2);
+        J2 ? q1.isDataTexture || q1.isData3DTexture ? i1.texSubImage3D(g2, _2, B1, Q1, s2, z2, y2, O2, M2, w2, a2.data) : V1.isCompressedArrayTexture ? i1.compressedTexSubImage3D(g2, _2, B1, Q1, s2, z2, y2, O2, M2, a2.data) : i1.texSubImage3D(g2, _2, B1, Q1, s2, z2, y2, O2, M2, w2, a2) : q1.isDataTexture ? i1.texSubImage2D(i1.TEXTURE_2D, _2, B1, Q1, z2, y2, M2, w2, a2.data) : q1.isCompressedTexture ? i1.compressedTexSubImage2D(i1.TEXTURE_2D, _2, B1, Q1, a2.width, a2.height, M2, a2.data) : i1.texSubImage2D(i1.TEXTURE_2D, _2, B1, Q1, z2, y2, M2, w2, a2);
       P1.pixelStorei(i1.UNPACK_ROW_LENGTH, K2), P1.pixelStorei(i1.UNPACK_IMAGE_HEIGHT, k2), P1.pixelStorei(i1.UNPACK_SKIP_PIXELS, o0), P1.pixelStorei(i1.UNPACK_SKIP_ROWS, U2), P1.pixelStorei(i1.UNPACK_SKIP_IMAGES, C0), _2 === 0 && V1.generateMipmaps && i1.generateMipmap(g2), P1.unbindTexture();
     }, this.initRenderTarget = function(q1) {
       a1.get(q1).__webglFramebuffer === void 0 && t1.setupRenderTarget(q1);
@@ -43673,24 +43673,26 @@ function Fz() {
 }
 const Ty = 2e3;
 function Uz(i) {
-  let e = [];
-  return (t) => {
-    const n = Math.min(t.length, e.length), s = n > 0 && t[0] === e[0] && t[n - 1] === e[n - 1];
-    if (s && t.length <= e.length)
-      return;
-    const o = s ? n : 0;
-    if (e = t, o === t.length)
-      return;
-    for (let l = o; l < t.length; l++)
-      i.setXYZ(l, ...t[l].point);
-    const r = o * 3, a = t.length * 3, c = i.updateRanges[0];
-    if (c) {
-      const l = Math.max(a, c.start + c.count);
-      c.start = Math.min(r, c.start), c.count = l - c.start;
-    } else
-      i.addUpdateRange(r, a - r);
-    i.needsUpdate = !0;
-  };
+  const e = i.count, t = Uint16Array.from({ length: e * 2 }, (r, a) => a % e);
+  let n = [], s = 0;
+  function o(r, a) {
+    const c = r * 3, l = a * 3, d = i.updateRanges, h = d.at(-1);
+    h && c >= h.start && c <= h.start + h.count ? h.count = Math.max(h.count, c + l - h.start) : d.length < 4 ? i.addUpdateRange(c, l) : (i.clearUpdateRanges(), i.addUpdateRange(0, e * 3));
+  }
+  return { indices: t, write(r) {
+    const a = n.indexOf(r[0]), c = a < 0 ? 0 : Math.min(r.length, n.length - a), l = c > 0 && r[c - 1] === n[a + c - 1], d = l ? (s + a) % e : 0, h = l ? c : 0;
+    if (l && h === r.length)
+      return d;
+    n = r, s = d;
+    const u = r.length - h;
+    if (u) {
+      for (let x = h; x < r.length; x++)
+        i.setXYZ((d + x) % e, ...r[x].point);
+      const m = (d + h) % e, q = Math.min(u, e - m);
+      o(m, q), q < u && o(0, u - q), i.needsUpdate = !0;
+    }
+    return d;
+  } };
 }
 function $z() {
   const i = /* @__PURE__ */ new Map();
@@ -43904,8 +43906,8 @@ function Vz(i, e, t, n, s, o) {
           else if (_.time > t2.deadline)
             await J(F1, t2.kind), A.get(F1) === t2 && (A.delete(F1), t2.reject(new Error(p("CAD motor did not reach its target"))));
           else {
-            const E2 = Math.sign(l2) * Math.min(t2.speed, Math.abs(l2) * 4);
-            Math.abs(E2 - t2.lastSpeed) > (t2.kind === "hinge" ? 0.25 : 0.025) && (t2.lastSpeed = E2, await $(F1, t2.kind, E2, D.get(F1)?.limit ?? (t2.kind === "hinge" ? 0.02 : 10)));
+            const A2 = Math.sign(l2) * Math.min(t2.speed, Math.abs(l2) * 4);
+            Math.abs(A2 - t2.lastSpeed) > (t2.kind === "hinge" ? 0.25 : 0.025) && (t2.lastSpeed = A2, await $(F1, t2.kind, A2, D.get(F1)?.limit ?? (t2.kind === "hinge" ? 0.02 : 10)));
           }
         }
       }
@@ -43961,7 +43963,7 @@ function Vz(i, e, t, n, s, o) {
     const o2 = Math.abs(k1), r2 = c, l2 = (m1 === "hinge" ? _.angles[R1.id] : _.linearPositions[R1.id]) + w1;
     if (await $(R1.id, m1, Math.sign(w1) * o2, D.get(R1.id)?.limit ?? (m1 === "hinge" ? 0.02 : 10)), r2 !== c || F1 !== l || F.get(R1.id) !== t2)
       throw new Error(p("Simulation was stopped"));
-    return new Promise((E2, e2) => A.set(R1.id, { kind: m1, target: l2, speed: o2, deadline: _.time + Math.min(180, Math.max(3, Math.abs(w1) / o2 * 4 + 2)), resolve: E2, reject: e2, lastSpeed: Math.sign(w1) * o2 }));
+    return new Promise((A2, e2) => A.set(R1.id, { kind: m1, target: l2, speed: o2, deadline: _.time + Math.min(180, Math.max(3, Math.abs(w1) / o2 * 4 + 2)), resolve: A2, reject: e2, lastSpeed: Math.sign(w1) * o2 }));
   }
   function z1(r1) {
     if (!Number.isFinite(r1))
@@ -44615,24 +44617,24 @@ function Wz(i, e, t, n, s, o = {}) {
       const w1 = document.createElement("fieldset"), k1 = document.createElement("legend");
       k1.textContent = `${m1.port} · ${m1.name}`, w1.append(k1);
       const R1 = document.createElement("label"), F1 = document.createElement("input");
-      F1.value = e.state.document.joints?.find((W1) => W1.id === m1.id)?.control?.port ?? "", F1.placeholder = "A", F1.maxLength = 16, F1.setAttribute("aria-label", `${m1.id}: ${p("Program motor port")}`), R1.append(document.createTextNode(p("Program motor port")), F1), w1.append(R1), F1.onchange = () => {
+      F1.value = e.state.document.joints?.find((G1) => G1.id === m1.id)?.control?.port ?? "", F1.placeholder = "A", F1.maxLength = 16, F1.setAttribute("aria-label", `${m1.id}: ${p("Program motor port")}`), R1.append(document.createTextNode(p("Program motor port")), F1), w1.append(R1), F1.onchange = () => {
         try {
           e.setMotorPort(m1.id, F1.value.trim().toUpperCase() || null);
-        } catch (W1) {
-          a1(W1);
+        } catch (G1) {
+          a1(G1);
         }
       };
-      const t2 = (W1, v2, $1, j1, m2) => {
-        const x2 = document.createElement("label"), A2 = document.createElement("input");
-        return A2.type = "number", A2.value = v2, A2.min = $1, A2.max = j1, A2.step = m2, A2.style.width = "90px", A2.setAttribute("aria-label", `${m1.id}: ${p(W1)}`), x2.append(document.createTextNode(p(W1)), A2), w1.append(x2), A2;
+      const t2 = (G1, v2, $1, j1, m2) => {
+        const x2 = document.createElement("label"), C2 = document.createElement("input");
+        return C2.type = "number", C2.value = v2, C2.min = $1, C2.max = j1, C2.step = m2, C2.style.width = "90px", C2.setAttribute("aria-label", `${m1.id}: ${p(G1)}`), x2.append(document.createTextNode(p(G1)), C2), w1.append(x2), C2;
       }, o2 = document.createElement("label"), r2 = document.createElement("input");
       r2.type = "checkbox", r2.setAttribute("aria-label", `${m1.id}: ${p("Drive joint")}`), o2.append(r2, document.createTextNode(p("Drive joint"))), w1.append(o2);
-      const l2 = m1.kind === "slider", E2 = t2(l2 ? "Speed (mm/s)" : "Speed (degrees/s)", "0", l2 ? "-1000" : "-720", l2 ? "1000" : "720", l2 ? "10" : "15"), e2 = t2(l2 ? "Force limit (N)" : "Torque limit (Nm)", l2 ? "10" : "0.02", "0.001", l2 ? "10000" : "100", "0.01"), D1 = document.createElement("output");
-      D1.value = l2 ? "0.00 mm" : "0.0°", D1.setAttribute("aria-live", "off"), D1.setAttribute("aria-label", `${m1.id}: ${p(l2 ? "Slider position" : "Joint angle")}`), w1.append(D1), Y.set(m1.id, { kind: m1.kind, speed: E2, limit: e2, enabled: r2, position: D1 });
+      const l2 = m1.kind === "slider", A2 = t2(l2 ? "Speed (mm/s)" : "Speed (degrees/s)", "0", l2 ? "-1000" : "-720", l2 ? "1000" : "720", l2 ? "10" : "15"), e2 = t2(l2 ? "Force limit (N)" : "Torque limit (Nm)", l2 ? "10" : "0.02", "0.001", l2 ? "10000" : "100", "0.01"), D1 = document.createElement("output");
+      D1.value = l2 ? "0.00 mm" : "0.0°", D1.setAttribute("aria-live", "off"), D1.setAttribute("aria-label", `${m1.id}: ${p(l2 ? "Slider position" : "Joint angle")}`), w1.append(D1), Y.set(m1.id, { kind: m1.kind, speed: A2, limit: e2, enabled: r2, position: D1 });
       const d2 = () => {
-        U.state.state !== "idle" && (r2.checked ? l2 ? U.setSlider(m1.id, Number(E2.value), Number(e2.value), !1) : U.setMotor(m1.id, Number(E2.value), Number(e2.value), !1) : l2 ? U.stopSlider(m1.id, "coast") : U.stopMotor(m1.id, "coast")).catch(a1);
+        U.state.state !== "idle" && (r2.checked ? l2 ? U.setSlider(m1.id, Number(A2.value), Number(e2.value), !1) : U.setMotor(m1.id, Number(A2.value), Number(e2.value), !1) : l2 ? U.stopSlider(m1.id, "coast") : U.stopMotor(m1.id, "coast")).catch(a1);
       };
-      E2.onchange = () => {
+      A2.onchange = () => {
         r2.checked = !0, d2();
       }, e2.onchange = r2.onchange = d2, h1.append(w1);
     }
@@ -45925,7 +45927,7 @@ function kO(i, e, t, n, s, o, r, a, c) {
     for (const S of n.state.document.joints ?? []) {
       const P = n.state.document.nodes[S.bodyA], E = new t9(), L = wi(S.axisA, P.transform.rotation);
       E.position.fromArray(_5(S.anchorA, P.transform));
-      const F = new I2(new r9(1, 12, 8), new j9({ color: "#eea13d", depthTest: !1, transparent: !0, opacity: 0.95 }));
+      const F = new L2(new r9(1, 12, 8), new j9({ color: "#eea13d", depthTest: !1, transparent: !0, opacity: 0.95 }));
       F.userData.jointId = S.id, F.renderOrder = 120;
       const D = new N5(new A0().setFromPoints([new s1(...L).multiplyScalar(-4), new s1(...L).multiplyScalar(4)]), new _6({ color: "#eea13d", depthTest: !1 }));
       D.renderOrder = 119, E.add(F, D), l.add(E), d.set(S.id, { root: E, ball: F, axis: L });
@@ -46114,7 +46116,7 @@ function tf(i) {
       return console.error("THREE.BufferGeometryUtils: .mergeAttributes() failed. BufferAttribute.gpuType must be consistent across matching attributes."), null;
     o += d.count * t;
   }
-  const r = new e(o), a = new Z3(r, t, n);
+  const r = new e(o), a = new W3(r, t, n);
   let c = 0;
   for (let l = 0; l < i.length; ++l) {
     const d = i[l];
@@ -46147,7 +46149,7 @@ function EO(i, e = Math.PI / 3) {
       w in u || (u[w] = []), u[w].push(k);
     }
   }
-  const m = new Float32Array(h.count * 3), q = new Z3(m, 3, !1);
+  const m = new Float32Array(h.count * 3), q = new W3(m, 3, !1);
   for (let x = 0, g = h.count / 3; x < g; x++) {
     const f = 3 * x, v = s[0].fromBufferAttribute(h, f + 0), y = s[1].fromBufferAttribute(h, f + 1), b = s[2].fromBufferAttribute(h, f + 2);
     o.subVectors(b, y), r.subVectors(v, y), a.crossVectors(o, r).normalize();
@@ -46165,7 +46167,7 @@ function EO(i, e = Math.PI / 3) {
 }
 function Eu(i, e) {
   const t = new A0();
-  t.setAttribute("position", new Z3(i, 3)), t.setIndex(new Z3(e, 1));
+  t.setAttribute("position", new W3(i, 3)), t.setIndex(new W3(e, 1));
   const n = EO(t, Math.PI / 6);
   return n !== t && t.dispose(), n;
 }
@@ -46211,7 +46213,7 @@ function CO(i, e) {
   return Cp(t), t.modelSource && (t.modelSource = { ...t.modelSource, source: or(t.modelSource.source, t) }), t;
 }
 function nf(i, e, t, n, s, o, r = () => !1, a = () => !0, c = "placement") {
-  const l = new t9(), d = new j9({ color: "#70e5ee", transparent: !0, opacity: 0.3, side: y5, depthWrite: !1, polygonOffset: !0, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }), h = new I2(new A0(), d), u = new UP(new s1(0, 0, 1), new s1(), 12, 10287088, 3, 2);
+  const l = new t9(), d = new j9({ color: "#70e5ee", transparent: !0, opacity: 0.3, side: y5, depthWrite: !1, polygonOffset: !0, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }), h = new L2(new A0(), d), u = new UP(new s1(0, 0, 1), new s1(), 12, 10287088, 3, 2);
   h.renderOrder = 30, i.add(l, h, u), l.visible = h.visible = u.visible = !1;
   const m = /* @__PURE__ */ new Set(), q = (I = "") => c + I, x = new le(50, 50);
   let g = !1, f = !1, v = "solid", y = [0, 0, 0], b, k = null, _ = "";
@@ -46233,7 +46235,7 @@ function nf(i, e, t, n, s, o, r = () => !1, a = () => !0, c = "placement") {
       h1.translate(-y[0], -y[1], -y[2]);
       const e1 = new _r({ color: v === "hole" ? "#b5d1df" : c1.color, transparent: !0, opacity: v === "hole" ? 0.3 : 0.6, depthWrite: !1, metalness: 0.05, roughness: 0.65, flatShading: !1 });
       S.push(h1), P.push(e1);
-      const Y = new I2(h1, e1);
+      const Y = new L2(h1, e1);
       Y.renderOrder = 31, Y.userData.originalColor = new a0(c1.color), l.add(Y);
     }
     f = !0, t.dataset[q()] = "ready", A();
@@ -47170,63 +47172,63 @@ class QO extends U3 {
     }
     const k = {
       X: [
-        [new I2(x, o), [0.5, 0, 0], [0, 0, -Math.PI / 2]],
-        [new I2(x, o), [-0.5, 0, 0], [0, 0, Math.PI / 2]],
-        [new I2(v, o), [0, 0, 0], [0, 0, -Math.PI / 2]]
+        [new L2(x, o), [0.5, 0, 0], [0, 0, -Math.PI / 2]],
+        [new L2(x, o), [-0.5, 0, 0], [0, 0, Math.PI / 2]],
+        [new L2(v, o), [0, 0, 0], [0, 0, -Math.PI / 2]]
       ],
       Y: [
-        [new I2(x, r), [0, 0.5, 0]],
-        [new I2(x, r), [0, -0.5, 0], [Math.PI, 0, 0]],
-        [new I2(v, r)]
+        [new L2(x, r), [0, 0.5, 0]],
+        [new L2(x, r), [0, -0.5, 0], [Math.PI, 0, 0]],
+        [new L2(v, r)]
       ],
       Z: [
-        [new I2(x, a), [0, 0, 0.5], [Math.PI / 2, 0, 0]],
-        [new I2(x, a), [0, 0, -0.5], [-Math.PI / 2, 0, 0]],
-        [new I2(v, a), null, [Math.PI / 2, 0, 0]]
+        [new L2(x, a), [0, 0, 0.5], [Math.PI / 2, 0, 0]],
+        [new L2(x, a), [0, 0, -0.5], [-Math.PI / 2, 0, 0]],
+        [new L2(v, a), null, [Math.PI / 2, 0, 0]]
       ],
       XYZ: [
-        [new I2(new ai(0.1, 0), h), [0, 0, 0]]
+        [new L2(new ai(0.1, 0), h), [0, 0, 0]]
       ],
       XY: [
-        [new I2(new E1(0.15, 0.15, 0.01), d), [0.15, 0.15, 0]]
+        [new L2(new E1(0.15, 0.15, 0.01), d), [0.15, 0.15, 0]]
       ],
       YZ: [
-        [new I2(new E1(0.15, 0.15, 0.01), c), [0, 0.15, 0.15], [0, Math.PI / 2, 0]]
+        [new L2(new E1(0.15, 0.15, 0.01), c), [0, 0.15, 0.15], [0, Math.PI / 2, 0]]
       ],
       XZ: [
-        [new I2(new E1(0.15, 0.15, 0.01), l), [0.15, 0, 0.15], [-Math.PI / 2, 0, 0]]
+        [new L2(new E1(0.15, 0.15, 0.01), l), [0.15, 0, 0.15], [-Math.PI / 2, 0, 0]]
       ]
     }, _ = {
       X: [
-        [new I2(new s0(0.2, 0, 0.6, 4), n), [0.3, 0, 0], [0, 0, -Math.PI / 2]],
-        [new I2(new s0(0.2, 0, 0.6, 4), n), [-0.3, 0, 0], [0, 0, Math.PI / 2]]
+        [new L2(new s0(0.2, 0, 0.6, 4), n), [0.3, 0, 0], [0, 0, -Math.PI / 2]],
+        [new L2(new s0(0.2, 0, 0.6, 4), n), [-0.3, 0, 0], [0, 0, Math.PI / 2]]
       ],
       Y: [
-        [new I2(new s0(0.2, 0, 0.6, 4), n), [0, 0.3, 0]],
-        [new I2(new s0(0.2, 0, 0.6, 4), n), [0, -0.3, 0], [0, 0, Math.PI]]
+        [new L2(new s0(0.2, 0, 0.6, 4), n), [0, 0.3, 0]],
+        [new L2(new s0(0.2, 0, 0.6, 4), n), [0, -0.3, 0], [0, 0, Math.PI]]
       ],
       Z: [
-        [new I2(new s0(0.2, 0, 0.6, 4), n), [0, 0, 0.3], [Math.PI / 2, 0, 0]],
-        [new I2(new s0(0.2, 0, 0.6, 4), n), [0, 0, -0.3], [-Math.PI / 2, 0, 0]]
+        [new L2(new s0(0.2, 0, 0.6, 4), n), [0, 0, 0.3], [Math.PI / 2, 0, 0]],
+        [new L2(new s0(0.2, 0, 0.6, 4), n), [0, 0, -0.3], [-Math.PI / 2, 0, 0]]
       ],
       XYZ: [
-        [new I2(new ai(0.2, 0), n)]
+        [new L2(new ai(0.2, 0), n)]
       ],
       XY: [
-        [new I2(new E1(0.2, 0.2, 0.01), n), [0.15, 0.15, 0]]
+        [new L2(new E1(0.2, 0.2, 0.01), n), [0.15, 0.15, 0]]
       ],
       YZ: [
-        [new I2(new E1(0.2, 0.2, 0.01), n), [0, 0.15, 0.15], [0, Math.PI / 2, 0]]
+        [new L2(new E1(0.2, 0.2, 0.01), n), [0, 0.15, 0.15], [0, Math.PI / 2, 0]]
       ],
       XZ: [
-        [new I2(new E1(0.2, 0.2, 0.01), n), [0.15, 0, 0.15], [-Math.PI / 2, 0, 0]]
+        [new L2(new E1(0.2, 0.2, 0.01), n), [0.15, 0, 0.15], [-Math.PI / 2, 0, 0]]
       ]
     }, M = {
       START: [
-        [new I2(new ai(0.01, 2), s), null, null, null, "helper"]
+        [new L2(new ai(0.01, 2), s), null, null, null, "helper"]
       ],
       END: [
-        [new I2(new ai(0.01, 2), s), null, null, null, "helper"]
+        [new L2(new ai(0.01, 2), s), null, null, null, "helper"]
       ],
       DELTA: [
         [new N5(b(), s), null, null, null, "helper"]
@@ -47242,19 +47244,19 @@ class QO extends U3 {
       ]
     }, w = {
       XYZE: [
-        [new I2(y(0.5, 1), q), null, [0, Math.PI / 2, 0]]
+        [new L2(y(0.5, 1), q), null, [0, Math.PI / 2, 0]]
       ],
       X: [
-        [new I2(y(0.5, 0.5), o)]
+        [new L2(y(0.5, 0.5), o)]
       ],
       Y: [
-        [new I2(y(0.5, 0.5), r), null, [0, 0, -Math.PI / 2]]
+        [new L2(y(0.5, 0.5), r), null, [0, 0, -Math.PI / 2]]
       ],
       Z: [
-        [new I2(y(0.5, 0.5), a), null, [0, Math.PI / 2, 0]]
+        [new L2(y(0.5, 0.5), a), null, [0, Math.PI / 2, 0]]
       ],
       E: [
-        [new I2(y(0.75, 1), u), null, [0, Math.PI / 2, 0]]
+        [new L2(y(0.75, 1), u), null, [0, Math.PI / 2, 0]]
       ]
     }, S = {
       AXIS: [
@@ -47262,72 +47264,72 @@ class QO extends U3 {
       ]
     }, P = {
       XYZE: [
-        [new I2(new r9(0.25, 10, 8), n)]
+        [new L2(new r9(0.25, 10, 8), n)]
       ],
       X: [
-        [new I2(new I7(0.5, 0.1, 4, 24), n), [0, 0, 0], [0, -Math.PI / 2, -Math.PI / 2]]
+        [new L2(new I7(0.5, 0.1, 4, 24), n), [0, 0, 0], [0, -Math.PI / 2, -Math.PI / 2]]
       ],
       Y: [
-        [new I2(new I7(0.5, 0.1, 4, 24), n), [0, 0, 0], [Math.PI / 2, 0, 0]]
+        [new L2(new I7(0.5, 0.1, 4, 24), n), [0, 0, 0], [Math.PI / 2, 0, 0]]
       ],
       Z: [
-        [new I2(new I7(0.5, 0.1, 4, 24), n), [0, 0, 0], [0, 0, -Math.PI / 2]]
+        [new L2(new I7(0.5, 0.1, 4, 24), n), [0, 0, 0], [0, 0, -Math.PI / 2]]
       ],
       E: [
-        [new I2(new I7(0.75, 0.1, 2, 24), n)]
+        [new L2(new I7(0.75, 0.1, 2, 24), n)]
       ]
     }, E = {
       X: [
-        [new I2(g, o), [0.5, 0, 0], [0, 0, -Math.PI / 2]],
-        [new I2(v, o), [0, 0, 0], [0, 0, -Math.PI / 2]],
-        [new I2(g, o), [-0.5, 0, 0], [0, 0, Math.PI / 2]]
+        [new L2(g, o), [0.5, 0, 0], [0, 0, -Math.PI / 2]],
+        [new L2(v, o), [0, 0, 0], [0, 0, -Math.PI / 2]],
+        [new L2(g, o), [-0.5, 0, 0], [0, 0, Math.PI / 2]]
       ],
       Y: [
-        [new I2(g, r), [0, 0.5, 0]],
-        [new I2(v, r)],
-        [new I2(g, r), [0, -0.5, 0], [0, 0, Math.PI]]
+        [new L2(g, r), [0, 0.5, 0]],
+        [new L2(v, r)],
+        [new L2(g, r), [0, -0.5, 0], [0, 0, Math.PI]]
       ],
       Z: [
-        [new I2(g, a), [0, 0, 0.5], [Math.PI / 2, 0, 0]],
-        [new I2(v, a), [0, 0, 0], [Math.PI / 2, 0, 0]],
-        [new I2(g, a), [0, 0, -0.5], [-Math.PI / 2, 0, 0]]
+        [new L2(g, a), [0, 0, 0.5], [Math.PI / 2, 0, 0]],
+        [new L2(v, a), [0, 0, 0], [Math.PI / 2, 0, 0]],
+        [new L2(g, a), [0, 0, -0.5], [-Math.PI / 2, 0, 0]]
       ],
       XY: [
-        [new I2(new E1(0.15, 0.15, 0.01), d), [0.15, 0.15, 0]]
+        [new L2(new E1(0.15, 0.15, 0.01), d), [0.15, 0.15, 0]]
       ],
       YZ: [
-        [new I2(new E1(0.15, 0.15, 0.01), c), [0, 0.15, 0.15], [0, Math.PI / 2, 0]]
+        [new L2(new E1(0.15, 0.15, 0.01), c), [0, 0.15, 0.15], [0, Math.PI / 2, 0]]
       ],
       XZ: [
-        [new I2(new E1(0.15, 0.15, 0.01), l), [0.15, 0, 0.15], [-Math.PI / 2, 0, 0]]
+        [new L2(new E1(0.15, 0.15, 0.01), l), [0.15, 0, 0.15], [-Math.PI / 2, 0, 0]]
       ],
       XYZ: [
-        [new I2(new E1(0.1, 0.1, 0.1), h)]
+        [new L2(new E1(0.1, 0.1, 0.1), h)]
       ]
     }, L = {
       X: [
-        [new I2(new s0(0.2, 0, 0.6, 4), n), [0.3, 0, 0], [0, 0, -Math.PI / 2]],
-        [new I2(new s0(0.2, 0, 0.6, 4), n), [-0.3, 0, 0], [0, 0, Math.PI / 2]]
+        [new L2(new s0(0.2, 0, 0.6, 4), n), [0.3, 0, 0], [0, 0, -Math.PI / 2]],
+        [new L2(new s0(0.2, 0, 0.6, 4), n), [-0.3, 0, 0], [0, 0, Math.PI / 2]]
       ],
       Y: [
-        [new I2(new s0(0.2, 0, 0.6, 4), n), [0, 0.3, 0]],
-        [new I2(new s0(0.2, 0, 0.6, 4), n), [0, -0.3, 0], [0, 0, Math.PI]]
+        [new L2(new s0(0.2, 0, 0.6, 4), n), [0, 0.3, 0]],
+        [new L2(new s0(0.2, 0, 0.6, 4), n), [0, -0.3, 0], [0, 0, Math.PI]]
       ],
       Z: [
-        [new I2(new s0(0.2, 0, 0.6, 4), n), [0, 0, 0.3], [Math.PI / 2, 0, 0]],
-        [new I2(new s0(0.2, 0, 0.6, 4), n), [0, 0, -0.3], [-Math.PI / 2, 0, 0]]
+        [new L2(new s0(0.2, 0, 0.6, 4), n), [0, 0, 0.3], [Math.PI / 2, 0, 0]],
+        [new L2(new s0(0.2, 0, 0.6, 4), n), [0, 0, -0.3], [-Math.PI / 2, 0, 0]]
       ],
       XY: [
-        [new I2(new E1(0.2, 0.2, 0.01), n), [0.15, 0.15, 0]]
+        [new L2(new E1(0.2, 0.2, 0.01), n), [0.15, 0.15, 0]]
       ],
       YZ: [
-        [new I2(new E1(0.2, 0.2, 0.01), n), [0, 0.15, 0.15], [0, Math.PI / 2, 0]]
+        [new L2(new E1(0.2, 0.2, 0.01), n), [0, 0.15, 0.15], [0, Math.PI / 2, 0]]
       ],
       XZ: [
-        [new I2(new E1(0.2, 0.2, 0.01), n), [0.15, 0, 0.15], [-Math.PI / 2, 0, 0]]
+        [new L2(new E1(0.2, 0.2, 0.01), n), [0.15, 0, 0.15], [-Math.PI / 2, 0, 0]]
       ],
       XYZ: [
-        [new I2(new E1(0.2, 0.2, 0.2), n), [0, 0, 0]]
+        [new L2(new E1(0.2, 0.2, 0.2), n), [0, 0, 0]]
       ]
     }, F = {
       X: [
@@ -47374,7 +47376,7 @@ class QO extends U3 {
     super.updateMatrixWorld(e);
   }
 }
-class eB extends I2 {
+class eB extends L2 {
   constructor() {
     super(
       new le(1e5, 1e5, 2, 2),
@@ -47605,7 +47607,7 @@ function F8(i, e) {
   const t = new Float32Array(i.getAttribute("position").count * 3);
   for (let n = 0; n < t.length; n += 3)
     t[n] = e.r, t[n + 1] = e.g, t[n + 2] = e.b;
-  return i.setAttribute("color", new Z3(t, 3)), i;
+  return i.setAttribute("color", new W3(t, 3)), i;
 }
 function ut(i, e = "#374151") {
   const t = i.map((n) => F8(Eu(new Float32Array(n.positions), new Uint32Array(n.indices)), n.color ? new a0(...n.color) : new a0(e)));
@@ -47838,9 +47840,9 @@ function UB(i, e, t) {
   function f(v) {
     if (m(), !v.length)
       return;
-    const y = new A0(), b = v.length * h8, k = new Z3(new Float32Array(b * 3), 3).setUsage(So), _ = new Z3(new Float32Array(b * 3), 3).setUsage(So), M = new Z3(new Float32Array(b * 3), 3), w = b <= 65536 ? Uint16Array : Uint32Array, S = new Z3(new w(v.length * ip.length), 1).setUsage(So);
+    const y = new A0(), b = v.length * h8, k = new W3(new Float32Array(b * 3), 3).setUsage(So), _ = new W3(new Float32Array(b * 3), 3).setUsage(So), M = new W3(new Float32Array(b * 3), 3), w = b <= 65536 ? Uint16Array : Uint32Array, S = new W3(new w(v.length * ip.length), 1).setUsage(So);
     y.setAttribute("position", k), y.setAttribute("normal", _), y.setAttribute("color", M), y.setIndex(S), y.setDrawRange(0, 0);
-    const P = new I2(y, new _r({ vertexColors: !0, roughness: 0.55 }));
+    const P = new L2(y, new _r({ vertexColors: !0, roughness: 0.55 }));
     P.name = "Robot cables", P.frustumCulled = !1, P.matrixAutoUpdate = !1, P.visible = !1, n.add(P), o = { mesh: P, positions: k, normals: _, indices: S };
     const E = new a0();
     for (const L of v) {
@@ -48863,7 +48865,7 @@ function KB(i, e, t) {
     }
   }
 }
-class Sr extends I2 {
+class Sr extends L2 {
   /**
    * Constructs a new wide line.
    *
@@ -49014,7 +49016,7 @@ function tF(i, e) {
   if (e.triangles.length) {
     const o = new A0();
     o.setAttribute("position", new i0(e.triangles, 3));
-    const r = new j9({ color: ht, transparent: !0, opacity: 0.55, side: y5, depthWrite: !1, polygonOffset: !0, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }), a = new j9({ color: ht, transparent: !0, opacity: 0.18, side: y5, depthWrite: !1, depthTest: !1 }), c = new I2(o, r), l = new I2(o, a);
+    const r = new j9({ color: ht, transparent: !0, opacity: 0.55, side: y5, depthWrite: !1, polygonOffset: !0, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }), a = new j9({ color: ht, transparent: !0, opacity: 0.18, side: y5, depthWrite: !1, depthTest: !1 }), c = new L2(o, r), l = new L2(o, a);
     c.renderOrder = 61, l.renderOrder = 58, t.add(l, c), n.push(o, r, a);
   }
   const s = [];
@@ -49060,7 +49062,7 @@ function nF(i, e, t, n) {
   m.position.set(80, 50, 50), r.add(m);
   const q = new t9();
   r.add(q);
-  const x = new I2(new le(400, 400), new j9({ color: s.baseplate, side: y5 }));
+  const x = new L2(new le(400, 400), new j9({ color: s.baseplate, side: y5 }));
   x.position.z = -0.14, q.add(x), l.dataset.backgroundColour = s.background, l.dataset.baseplateColour = s.baseplate;
   const g = new vq(400, 400, "#52677a", "#2f4655");
   g.rotation.x = 0, g.position.z = -0.1, q.add(g);
@@ -49081,8 +49083,8 @@ function nF(i, e, t, n) {
     b1.font = "500 32px system-ui", b1.textAlign = "center", b1.textBaseline = "middle", b1.fillStyle = u1, b1.fillText(V, 128, 32);
     const N1 = new FT(x1);
     N1.colorSpace = s5;
-    const G1 = new DT(new ty({ map: N1, depthWrite: !1, transparent: !0 }));
-    G1.position.set(o1, f1, 0.2), G1.scale.set(23, 5.75, 1), q.add(G1), b.push(G1);
+    const K1 = new DT(new ty({ map: N1, depthWrite: !1, transparent: !0 }));
+    K1.position.set(o1, f1, 0.2), K1.scale.set(23, 5.75, 1), q.add(K1), b.push(K1);
   }
   for (let V = -200; V <= 200; V += 50)
     k(String(V), V, -208), k(String(V), -210, V);
@@ -49135,17 +49137,18 @@ function nF(i, e, t, n) {
     for (const x1 of o1) {
       let b1 = U.get(x1.id);
       if (!b1) {
-        const G1 = new A0(), I1 = new Z3(new Float32Array(Ty * 3), 3).setUsage(So);
-        G1.setAttribute("position", I1);
-        const O1 = new N5(G1, new _6({ color: x1.color })), Y1 = new I2(new r9(1.5, 8, 4), new j9({ color: x1.color }));
-        O1.frustumCulled = !1, T.add(O1, Y1), b1 = { line: O1, marker: Y1, write: Uz(I1) }, U.set(x1.id, b1);
+        const I1 = new A0(), O1 = new W3(new Float32Array(Ty * 3), 3).setUsage(So), { indices: Y1, write: c2 } = Uz(O1);
+        I1.setAttribute("position", O1), I1.setIndex(new W3(Y1, 1));
+        const E2 = new N5(I1, new _6({ color: x1.color })), R2 = new L2(new r9(1.5, 8, 4), new j9({ color: x1.color }));
+        E2.frustumCulled = !1, T.add(E2, R2), b1 = { line: E2, marker: R2, write: c2 }, U.set(x1.id, b1);
       }
       let N1 = u1.get(x1.id)?.samples;
       if (!N1?.length) {
-        const G1 = new s1(..._5(x1.point, e.state.document.nodes[x1.bodyId].transform)), I1 = A.get(x1.bodyId);
-        I1 && G1.applyQuaternion(new l3(...I1.quaternion)).add(new s1(...I1.positionMm)), N1 = [{ time: 0, point: G1.toArray() }];
+        const I1 = new s1(..._5(x1.point, e.state.document.nodes[x1.bodyId].transform)), O1 = A.get(x1.bodyId);
+        O1 && I1.applyQuaternion(new l3(...O1.quaternion)).add(new s1(...O1.positionMm)), N1 = [{ time: 0, point: I1.toArray() }];
       }
-      b1.write(N1), b1.line.geometry.setDrawRange(0, N1.length), b1.marker.position.set(...N1.at(-1).point);
+      const K1 = b1.write(N1);
+      b1.line.geometry.setDrawRange(K1, N1.length), b1.marker.position.set(...N1.at(-1).point);
     }
     g3();
   }
@@ -49166,17 +49169,17 @@ function nF(i, e, t, n) {
     C1.end(), a1 && (d.enableRotate = a1.rotate, M.enabled = a1.gizmo, a1 = void 0, M.getHelper().visible = !0), V && o1 && U1?.();
   }
   const m1 = /* @__PURE__ */ new Map();
-  let w1 = "select", k1 = null, R1 = !1, F1 = [], t2 = null, o2 = 1, r2 = !1, l2, E2 = "snap", e2 = -1;
+  let w1 = "select", k1 = null, R1 = !1, F1 = [], t2 = null, o2 = 1, r2 = !1, l2, A2 = "snap", e2 = -1;
   function D1() {
-    const V = mf(E2, o2);
-    l.dataset.gridDisplay = String(E2), l.dataset.displayGridSpacing = String(V), V !== e2 && (e2 = V, g.visible = f.visible = V > 0, g.geometry.dispose(), f.geometry.dispose(), g.geometry = qf(V, "#52677a", "#2f4655"), f.geometry = qf(V * 10, "#8c9c99", "#536861"));
+    const V = mf(A2, o2);
+    l.dataset.gridDisplay = String(A2), l.dataset.displayGridSpacing = String(V), V !== e2 && (e2 = V, g.visible = f.visible = V > 0, g.geometry.dispose(), f.geometry.dispose(), g.geometry = qf(V, "#52677a", "#2f4655"), f.geometry = qf(V * 10, "#8c9c99", "#536861"));
   }
-  let d2 = "dimensions", W1, v2, $1, j1 = [1, 1, 1];
+  let d2 = "dimensions", G1, v2, $1, j1 = [1, 1, 1];
   const m2 = () => $1 ? j1 : _.scale.toArray(), x2 = () => $1 ? "scale" : w1 === "select" ? "translate" : w1;
-  let A2, C2 = !1;
-  const R2 = "http://www.w3.org/2000/svg", q2 = document.createElement("div");
+  let C2, T2 = !1;
+  const I2 = "http://www.w3.org/2000/svg", q2 = document.createElement("div");
   q2.className = "view-cube", q2.setAttribute("role", "group"), q2.setAttribute("aria-label", p("View cube"));
-  const p0 = document.createElementNS(R2, "svg");
+  const p0 = document.createElementNS(I2, "svg");
   p0.setAttribute("viewBox", "0 0 132 132");
   const p3 = document.createElement("span");
   p3.className = "cube-caption", p3.textContent = p("VIEW"), q2.append(p0, p3), i.append(q2);
@@ -49190,9 +49193,9 @@ function nF(i, e, t, n) {
   ], l0 = document.createElement("canvas").getContext("2d");
   l0 && (l0.font = "600 9px system-ui");
   const T0 = f3.map((V) => {
-    const o1 = document.createElementNS(R2, "g");
+    const o1 = document.createElementNS(I2, "g");
     o1.setAttribute("role", "button"), o1.setAttribute("aria-label", p(V.name[0].toUpperCase() + V.name.slice(1))), o1.setAttribute("tabindex", "0");
-    const f1 = document.createElementNS(R2, "polygon"), u1 = document.createElementNS(R2, "text");
+    const f1 = document.createElementNS(I2, "polygon"), u1 = document.createElementNS(I2, "text");
     u1.textContent = p(V.name.toUpperCase()), u1.setAttribute("text-anchor", "middle"), u1.setAttribute("dy", ".35em"), o1.append(f1, u1), p0.append(o1), o1.addEventListener("click", () => v1(V.name)), o1.addEventListener("keydown", (b1) => {
       (b1.key === "Enter" || b1.key === " ") && (b1.preventDefault(), v1(V.name));
     });
@@ -49205,14 +49208,14 @@ function nF(i, e, t, n) {
     for (const b1 of T0) {
       const N1 = new s1(...b1.normal).dot(f1) > 1e-3;
       b1.group.style.display = N1 ? "" : "none", b1.group.setAttribute("tabindex", N1 ? "0" : "-1");
-      const G1 = b1.corners.map((T2) => {
-        const z2 = new s1(...T2);
-        return [66 + z2.dot(V) * 31, 63 - z2.dot(o1) * 31];
+      const K1 = b1.corners.map((E2) => {
+        const R2 = new s1(...E2);
+        return [66 + R2.dot(V) * 31, 63 - R2.dot(o1) * 31];
       });
-      b1.polygon.setAttribute("points", G1.map((T2) => T2.join(",")).join(" "));
-      const I1 = G1.reduce((T2, z2) => T2 + z2[0], 0) / 4, O1 = G1.reduce((T2, z2) => T2 + z2[1], 0) / 4, Y1 = b1.labelWidth / 2 + (b1.text.textContent?.length ?? 0) * 0.15 + 2, c2 = N1 && G1.every(([T2, z2], t0) => {
-        const [S2, q0] = G1[(t0 + 1) % G1.length], M0 = S2 - T2, n0 = q0 - z2;
-        return Math.abs(M0 * (O1 - z2) - n0 * (I1 - T2)) >= Math.abs(M0) * 7 + Math.abs(n0) * Y1;
+      b1.polygon.setAttribute("points", K1.map((E2) => E2.join(",")).join(" "));
+      const I1 = K1.reduce((E2, R2) => E2 + R2[0], 0) / 4, O1 = K1.reduce((E2, R2) => E2 + R2[1], 0) / 4, Y1 = b1.labelWidth / 2 + (b1.text.textContent?.length ?? 0) * 0.15 + 2, c2 = N1 && K1.every(([E2, R2], t0) => {
+        const [S2, q0] = K1[(t0 + 1) % K1.length], M0 = S2 - E2, n0 = q0 - R2;
+        return Math.abs(M0 * (O1 - R2) - n0 * (I1 - E2)) >= Math.abs(M0) * 7 + Math.abs(n0) * Y1;
       });
       b1.text.style.display = c2 ? "" : "none", b1.text.setAttribute("x", String(I1)), b1.text.setAttribute("y", String(O1));
     }
@@ -49230,7 +49233,7 @@ function nF(i, e, t, n) {
       return;
     w0(), l.dataset.navigation !== w && (l.dataset.navigation = w);
     const V = M.axis ?? "";
-    l.dataset.transformAxis !== V && (l.dataset.transformAxis = V), N3?.update(), W1?.update(), q1();
+    l.dataset.transformAxis !== V && (l.dataset.transformAxis = V), N3?.update(), G1?.update(), q1();
     for (const o1 of m1.values())
       o1.update();
     W2.update(), S1 && (clearTimeout(j), j = setTimeout(h3, 120)), c.render(r, a), l.dataset.simulationRecording && l.dispatchEvent(new Event("brickwright-simulation-frame"));
@@ -49256,7 +49259,7 @@ function nF(i, e, t, n) {
     }
   }
   function q1() {
-    if (!A2)
+    if (!C2)
       return;
     let V = F1.filter((S2) => e.state.document.roots.includes(S2)).map((S2) => ({ id: S2, transform: structuredClone(e.state.document.nodes[S2].transform) })), o1 = !0, f1;
     if (t2)
@@ -49282,14 +49285,14 @@ function nF(i, e, t, n) {
     const x1 = u1.isEmpty() ? new s1() : u1.getCenter(new s1()), b1 = (S2) => {
       const q0 = S2.clone().project(a);
       return [(q0.x + 1) * i.clientWidth / 2, (1 - q0.y) * i.clientHeight / 2];
-    }, N1 = b1(x1), G1 = [], I1 = ["X", "Y", "Z"], O1 = w1 === "rotate" ? "rotation" : w1 === "scale" ? "scale" : "position", Y1 = I1.map((S2, q0) => Math.max(34, Math.min(92, String(Number((V[0]?.transform[O1][q0] ?? 0).toFixed(5))).length * 7 + 12))), c2 = (S2, q0) => {
+    }, N1 = b1(x1), K1 = [], I1 = ["X", "Y", "Z"], O1 = w1 === "rotate" ? "rotation" : w1 === "scale" ? "scale" : "position", Y1 = I1.map((S2, q0) => Math.max(34, Math.min(92, String(Number((V[0]?.transform[O1][q0] ?? 0).toFixed(5))).length * 7 + 12))), c2 = (S2, q0) => {
       const M0 = S2[0] - N1[0], n0 = S2[1] - N1[1], x3 = Math.hypot(M0, n0);
       if (x3 < 12)
         return !1;
       const e4 = 8 + Math.abs(M0 / x3) * Y1[q0] / 2 + Math.abs(n0 / x3) * 11, i4 = S2[0] + M0 / x3 * e4, W0 = S2[1] + n0 / x3 * e4;
       return i4 - Y1[q0] / 2 >= 2 && i4 + Y1[q0] / 2 <= i.clientWidth - 2 && W0 >= 16 && W0 <= i.clientHeight - 44;
     };
-    if (C2 && w1 === "select") {
+    if (T2 && w1 === "select") {
       const S2 = u1.isEmpty() ? new s1(20, 20, 20) : u1.getSize(new s1());
       I1.forEach((q0, M0) => {
         let n0 = N1, x3 = !1;
@@ -49307,16 +49310,16 @@ function nF(i, e, t, n) {
             break;
         }
         const e4 = n0[0] - N1[0], i4 = n0[1] - N1[1], W0 = Math.hypot(e4, i4);
-        G1.push({ axis: q0, point: n0, direction: [e4 / (W0 || 1), i4 / (W0 || 1)], visible: x3, guide: { from: N1, to: n0 } });
+        K1.push({ axis: q0, point: n0, direction: [e4 / (W0 || 1), i4 / (W0 || 1)], visible: x3, guide: { from: N1, to: n0 } });
       });
-    } else if (C2 && M.object) {
+    } else if (T2 && M.object) {
       const S2 = M.getHelper();
       S2.updateMatrixWorld(!0);
       const q0 = [[-0.85, -0.5], [0.85, -0.5], [0.5, 0.86]];
       I1.forEach((M0, n0) => {
         let x3 = -1 / 0, e4 = N1;
         S2.traverseVisible((L4) => {
-          if (L4.name !== M0 || !(L4 instanceof I2))
+          if (L4.name !== M0 || !(L4 instanceof L2))
             return;
           const M4 = L4.geometry.getAttribute("position");
           if (M4)
@@ -49329,17 +49332,17 @@ function nF(i, e, t, n) {
             }
         });
         const i4 = e4[0] - N1[0], W0 = e4[1] - N1[1], b4 = Math.hypot(i4, W0);
-        G1.push({ axis: M0, point: e4, direction: [i4 / (b4 || 1), W0 / (b4 || 1)], visible: x3 > -1 / 0 && b4 > 12 });
+        K1.push({ axis: M0, point: e4, direction: [i4 / (b4 || 1), W0 / (b4 || 1)], visible: x3 > -1 / 0 && b4 > 12 });
       });
     }
-    const T2 = [];
+    const E2 = [];
     if (!u1.isEmpty())
       for (const S2 of [u1.min.x, u1.max.x])
         for (const q0 of [u1.min.y, u1.max.y])
           for (const M0 of [u1.min.z, u1.max.z])
-            T2.push(new s1(S2, q0, M0));
-    const z2 = T2.map(b1), t0 = z2.length ? { left: Math.min(...z2.map((S2) => S2[0])), right: Math.max(...z2.map((S2) => S2[0])), top: Math.min(...z2.map((S2) => S2[1])), bottom: Math.max(...z2.map((S2) => S2[1])) } : void 0;
-    A2({ screenBounds: t0, mode: w1, resizing: !!$1, dimensionHandles: d2 === "dimensions", poses: V, dragging: !!t2 || !!k1?.moved, valid: o1, warning: f1, axes: G1, ...u1.isEmpty() ? {} : { bounds: { min: u1.min.toArray(), max: u1.max.toArray() } } });
+            E2.push(new s1(S2, q0, M0));
+    const R2 = E2.map(b1), t0 = R2.length ? { left: Math.min(...R2.map((S2) => S2[0])), right: Math.max(...R2.map((S2) => S2[0])), top: Math.min(...R2.map((S2) => S2[1])), bottom: Math.max(...R2.map((S2) => S2[1])) } : void 0;
+    C2({ screenBounds: t0, mode: w1, resizing: !!$1, dimensionHandles: d2 === "dimensions", poses: V, dragging: !!t2 || !!k1?.moved, valid: o1, warning: f1, axes: K1, ...u1.isEmpty() ? {} : { bounds: { min: u1.min.toArray(), max: u1.max.toArray() } } });
   }
   function V1(V) {
     if (!V.length)
@@ -49348,16 +49351,16 @@ function nF(i, e, t, n) {
     for (const Y1 of V) {
       const c2 = J.get(Y1);
       c2.updateMatrixWorld();
-      const T2 = u1.clone().multiply(c2.matrixWorld), z2 = H.positions(c2);
-      if (z2)
-        for (let t0 = 0; t0 < z2.length; t0 += 3)
-          x1.expandByPoint(b1.set(z2[t0], z2[t0 + 1], z2[t0 + 2]).applyMatrix4(T2));
+      const E2 = u1.clone().multiply(c2.matrixWorld), R2 = H.positions(c2);
+      if (R2)
+        for (let t0 = 0; t0 < R2.length; t0 += 3)
+          x1.expandByPoint(b1.set(R2[t0], R2[t0 + 1], R2[t0 + 2]).applyMatrix4(E2));
     }
     const N1 = x1.getSize(new s1()).toArray();
     if (N1.some((Y1) => Y1 <= 1e-8))
       return;
-    const G1 = x1.getCenter(new s1()).applyQuaternion(f1).toArray(), I1 = new l3().setFromEuler(new f4(...o1[0].rotation.map((Y1) => Y1 * q7), "ZYX")), O1 = o1.some((Y1) => Math.abs(I1.dot(new l3().setFromEuler(new f4(...Y1.rotation.map((c2) => c2 * q7), "ZYX")))) < 1 - 1e-12);
-    return { center: G1, size: N1, rotation: f1, ids: [...V], uniformOnly: O1 || V.some((Y1) => s9(e.state.document.nodes[Y1])) };
+    const K1 = x1.getCenter(new s1()).applyQuaternion(f1).toArray(), I1 = new l3().setFromEuler(new f4(...o1[0].rotation.map((Y1) => Y1 * q7), "ZYX")), O1 = o1.some((Y1) => Math.abs(I1.dot(new l3().setFromEuler(new f4(...Y1.rotation.map((c2) => c2 * q7), "ZYX")))) < 1 - 1e-12);
+    return { center: K1, size: N1, rotation: f1, ids: [...V], uniformOnly: O1 || V.some((Y1) => s9(e.state.document.nodes[Y1])) };
   }
   const i2 = () => {
     if (t2)
@@ -49382,7 +49385,7 @@ function nF(i, e, t, n) {
     for (const o1 of F1)
       e.state.document.roots.includes(o1) && V.set(o1, structuredClone(e.state.document.nodes[o1].transform));
     _.updateMatrixWorld(), t2 = { matrix: _.matrixWorld.clone(), transforms: V };
-  }, _2 = () => $1 ? $1.clone() : (_.updateMatrixWorld(), new R0().multiplyMatrices(_.matrixWorld, t2.matrix.clone().invert())), L2 = () => {
+  }, _2 = () => $1 ? $1.clone() : (_.updateMatrixWorld(), new R0().multiplyMatrices(_.matrixWorld, t2.matrix.clone().invert())), z2 = () => {
     if (!t2)
       return;
     const V = _2();
@@ -49401,8 +49404,8 @@ function nF(i, e, t, n) {
     }
     j2();
   }, y2 = () => {
-    if (c3 = void 0, y1.end(), W1?.active) {
-      W1.cancel();
+    if (c3 = void 0, y1.end(), G1?.active) {
+      G1.cancel();
       return;
     }
     if (z1(), $1 = void 0, k1) {
@@ -49440,7 +49443,7 @@ function nF(i, e, t, n) {
       t(f1), i2();
     }
   };
-  M.addEventListener("dragging-changed", X1), M.addEventListener("mouseDown", Z1), M.addEventListener("objectChange", L2), M.addEventListener("mouseUp", O2);
+  M.addEventListener("dragging-changed", X1), M.addEventListener("mouseDown", Z1), M.addEventListener("objectChange", z2), M.addEventListener("mouseUp", O2);
   const B2 = new ResizeObserver(() => {
     const V = i.clientWidth, o1 = i.clientHeight;
     if (!(!V || !o1)) {
@@ -49604,12 +49607,12 @@ function nF(i, e, t, n) {
         const f1 = G.intersectObjects([...J.values()], !1)[0], u1 = f1?.object.userData.id;
         if (u1) {
           F1.includes(u1) || e.select([u1]);
-          const x1 = a.getWorldDirection(new s1()), b1 = Math.abs(x1.z) < 0.25 ? Math.abs(x1.x) > Math.abs(x1.y) ? new s1(1, 0, 0) : new s1(0, 1, 0) : new s1(0, 0, 1), N1 = new j4().setFromNormalAndCoplanarPoint(b1, f1.point), G1 = G.ray.intersectPlane(N1, new s1());
-          G1 && (k1 = { pointerId: V.pointerId, start: G1.clone(), plane: N1, transforms: new Map(F1.filter((I1) => e.state.document.roots.includes(I1)).map((I1) => [I1, structuredClone(e.state.document.nodes[I1].transform)])), offset: [0, 0, 0], base: (() => {
+          const x1 = a.getWorldDirection(new s1()), b1 = Math.abs(x1.z) < 0.25 ? Math.abs(x1.x) > Math.abs(x1.y) ? new s1(1, 0, 0) : new s1(0, 1, 0) : new s1(0, 0, 1), N1 = new j4().setFromNormalAndCoplanarPoint(b1, f1.point), K1 = G.ray.intersectPlane(N1, new s1());
+          K1 && (k1 = { pointerId: V.pointerId, start: K1.clone(), plane: N1, transforms: new Map(F1.filter((I1) => e.state.document.roots.includes(I1)).map((I1) => [I1, structuredClone(e.state.document.nodes[I1].transform)])), offset: [0, 0, 0], base: (() => {
             const I1 = new z3();
             for (const c2 of F1) {
-              const T2 = J.get(c2);
-              T2 && I1.union(H.read(T2));
+              const E2 = J.get(c2);
+              E2 && I1.union(H.read(E2));
             }
             const O1 = new j4(new s1(0, 0, 1), -I1.min.z), Y1 = G.ray.intersectPlane(O1, new s1()) ?? I1.getCenter(new s1());
             return [Y1.x, Y1.y, I1.min.z];
@@ -49644,11 +49647,11 @@ function nF(i, e, t, n) {
       y1.active || y1.begin([...k1.transforms.keys()], !0);
       const x1 = y1.move(V);
       if (x1) {
-        const b1 = TO([...k1.transforms].map(([N1, G1]) => ({ id: N1, transform: G1 })), k1.base, x1.point, x1.normal);
+        const b1 = TO([...k1.transforms].map(([N1, K1]) => ({ id: N1, transform: K1 })), k1.base, x1.point, x1.normal);
         k1.updates = b1.updates, k1.moved = !0;
         for (const N1 of k1.transforms.keys()) {
-          const G1 = J.get(N1);
-          G1 && (G1.matrixAutoUpdate = !1, G1.matrix.copy(b1.delta), G1.matrixWorldNeedsUpdate = !0);
+          const K1 = J.get(N1);
+          K1 && (K1.matrixAutoUpdate = !1, K1.matrix.copy(b1.delta), K1.matrixWorldNeedsUpdate = !0);
         }
         return;
       }
@@ -49674,13 +49677,13 @@ function nF(i, e, t, n) {
     if (M1?.pointerId === V.pointerId) {
       const I1 = M1, O1 = l.getBoundingClientRect(), Y1 = SO(I1.x - O1.left, I1.y - O1.top, V.clientX - O1.left, V.clientY - O1.top), c2 = [];
       if (a.updateMatrixWorld(), I1.moved)
-        for (const [T2, z2] of J) {
-          const t0 = H.read(z2), S2 = [];
+        for (const [E2, R2] of J) {
+          const t0 = H.read(R2), S2 = [];
           for (const q0 of [t0.min.x, t0.max.x])
             for (const M0 of [t0.min.y, t0.max.y])
               for (const n0 of [t0.min.z, t0.max.z])
                 S2.push(new S3(q0, M0, n0, 1).applyMatrix4(a.matrixWorldInverse).applyMatrix4(a.projectionMatrix));
-          MO(S2, Y1, O1) && c2.push(T2);
+          MO(S2, Y1, O1) && c2.push(E2);
         }
       z1(), e.select(I1.additive ? [.../* @__PURE__ */ new Set([...I1.base, ...c2])] : c2), V.preventDefault(), V.stopImmediatePropagation();
       return;
@@ -49695,7 +49698,7 @@ function nF(i, e, t, n) {
       if (k1 = null, y1.end(), l.hasPointerCapture(V.pointerId) && l.releasePointerCapture(V.pointerId), d.enableRotate = !0, I1.moved) {
         D2 = null, T1.reset(), B1 = !1;
         try {
-          e.transform(I1.updates ?? [...I1.transforms].map(([O1, Y1]) => ({ id: O1, transform: { ...Y1, position: Y1.position.map((c2, T2) => c2 + I1.offset[T2]) } })));
+          e.transform(I1.updates ?? [...I1.transforms].map(([O1, Y1]) => ({ id: O1, transform: { ...Y1, position: Y1.position.map((c2, E2) => c2 + I1.offset[E2]) } })));
         } catch (O1) {
           for (const Y1 of I1.transforms.keys()) {
             const c2 = J.get(Y1);
@@ -49727,8 +49730,8 @@ function nF(i, e, t, n) {
     }
     const x1 = l.getBoundingClientRect();
     i1.set((V.clientX - x1.left) / x1.width * 2 - 1, -(V.clientY - x1.top) / x1.height * 2 + 1), G.setFromCamera(i1, a);
-    const N1 = G.intersectObjects([...J.values()], !1)[0]?.object.userData.id, G1 = r2 || V.shiftKey || V.ctrlKey || V.metaKey || o1?.type === "end" && o1.was === "longPress";
-    e.select(N1 ? G1 ? F1.includes(N1) ? F1.filter((I1) => I1 !== N1) : [...F1, N1] : [N1] : []);
+    const N1 = G.intersectObjects([...J.values()], !1)[0]?.object.userData.id, K1 = r2 || V.shiftKey || V.ctrlKey || V.metaKey || o1?.type === "end" && o1.was === "longPress";
+    e.select(N1 ? K1 ? F1.includes(N1) ? F1.filter((I1) => I1 !== N1) : [...F1, N1] : [N1] : []);
   };
   function w3(V, o1) {
     const f1 = l.getBoundingClientRect();
@@ -49740,7 +49743,7 @@ function nF(i, e, t, n) {
       return;
     const f1 = l.getBoundingClientRect(), u1 = V.clientX - f1.left, x1 = V.clientY - f1.top;
     r.updateMatrixWorld(!0), a.updateMatrixWorld();
-    const b1 = w3(u1, x1), N1 = G.intersectObjects([...J.values()], !1)[0], G1 = V.pointerType === "touch" || V.pointerType === "pen" ? XB : ZB, I1 = N1?.distance ?? 1 / 0, O1 = a instanceof z5 ? (a.top - a.bottom) / a.zoom / Math.max(1, f1.height) : 2 * Math.tan(a.fov * q7 / 2) * (Number.isFinite(I1) ? I1 : 1) / Math.max(1, f1.height), Y1 = QB(o1.overlay.project(a, f1.width, f1.height, b1.origin.clone(), b1.direction.clone()), u1, x1, G1, I1, O1 * G1 * 1.5);
+    const b1 = w3(u1, x1), N1 = G.intersectObjects([...J.values()], !1)[0], K1 = V.pointerType === "touch" || V.pointerType === "pen" ? XB : ZB, I1 = N1?.distance ?? 1 / 0, O1 = a instanceof z5 ? (a.top - a.bottom) / a.zoom / Math.max(1, f1.height) : 2 * Math.tan(a.fov * q7 / 2) * (Number.isFinite(I1) ? I1 : 1) / Math.max(1, f1.height), Y1 = QB(o1.overlay.project(a, f1.width, f1.height, b1.origin.clone(), b1.direction.clone()), u1, x1, K1, I1, O1 * K1 * 1.5);
     Y1 >= 0 && o1.toggle(Y1);
   }
   function h3() {
@@ -49752,12 +49755,12 @@ function nF(i, e, t, n) {
     const u1 = V.overlay.project(a, o1.width, o1.height, a.position.clone(), a.getWorldDirection(new s1())).flatMap((b1, N1) => {
       if (!b1.pickable || !b1.xy.length)
         return [];
-      const G1 = b1.xy.slice(1).map((t0, S2) => Math.hypot(t0[0] - b1.xy[S2][0], t0[1] - b1.xy[S2][1]));
-      let O1 = G1.reduce((t0, S2) => t0 + S2, 0) / 2, Y1 = 0;
-      for (; Y1 < G1.length - 1 && O1 > G1[Y1]; )
-        O1 -= G1[Y1], Y1++;
-      const c2 = G1[Y1] ? O1 / G1[Y1] : 0, T2 = b1.xy[Y1], z2 = b1.xy[Math.min(Y1 + 1, b1.xy.length - 1)];
-      return [{ index: N1, x: Math.round(T2[0] + (z2[0] - T2[0]) * c2), y: Math.round(T2[1] + (z2[1] - T2[1]) * c2), picked: V.picked.has(N1) }];
+      const K1 = b1.xy.slice(1).map((t0, S2) => Math.hypot(t0[0] - b1.xy[S2][0], t0[1] - b1.xy[S2][1]));
+      let O1 = K1.reduce((t0, S2) => t0 + S2, 0) / 2, Y1 = 0;
+      for (; Y1 < K1.length - 1 && O1 > K1[Y1]; )
+        O1 -= K1[Y1], Y1++;
+      const c2 = K1[Y1] ? O1 / K1[Y1] : 0, E2 = b1.xy[Y1], R2 = b1.xy[Math.min(Y1 + 1, b1.xy.length - 1)];
+      return [{ index: N1, x: Math.round(E2[0] + (R2[0] - E2[0]) * c2), y: Math.round(E2[1] + (R2[1] - E2[1]) * c2), picked: V.picked.has(N1) }];
     }), x1 = JSON.stringify(u1);
     l.dataset.edgePickTargets !== x1 && (l.dataset.edgePickTargets = x1);
   }
@@ -49800,7 +49803,7 @@ function nF(i, e, t, n) {
   function d1(V) {
     y2(), Z();
     for (const o1 of V.bodies) {
-      const f1 = o1.hole ? void 0 : NB(e.state.document.nodes[o1.id], e.state.document.nodes), u1 = f1 ?? Eu(o1.positions, o1.indices), x1 = new _r({ color: o1.hole ? "#9eb8c8" : f1 ? "#ffffff" : o1.color, vertexColors: !!f1, transparent: !!o1.hole, opacity: o1.hole ? 0.3 : 1, depthWrite: !o1.hole, metalness: 0.08, roughness: 0.65, flatShading: !1 }), b1 = new I2(u1, x1);
+      const f1 = o1.hole ? void 0 : NB(e.state.document.nodes[o1.id], e.state.document.nodes), u1 = f1 ?? Eu(o1.positions, o1.indices), x1 = new _r({ color: o1.hole ? "#9eb8c8" : f1 ? "#ffffff" : o1.color, vertexColors: !!f1, transparent: !!o1.hole, opacity: o1.hole ? 0.3 : 1, depthWrite: !o1.hole, metalness: 0.08, roughness: 0.65, flatShading: !1 }), b1 = new L2(u1, x1);
       b1.userData.id = o1.id, b1.matrixAutoUpdate = !1, f1 ? (u1.computeBoundingBox(), H.register(b1, u1.getAttribute("position").array, { min: u1.boundingBox.min.toArray(), max: u1.boundingBox.max.toArray() })) : H.register(b1, o1.positions, o1.bounds);
       const N1 = new pa(new $T(u1, 28), new _6({ color: "#172a36", transparent: !0, opacity: 0.8 }));
       b1.add(N1), N1.matrixAutoUpdate = !1, J.set(o1.id, b1), K.set(o1.id, N1), r.add(b1);
@@ -49820,14 +49823,14 @@ function nF(i, e, t, n) {
       for (const [Y1, c2] of J)
         (!o1 || !F1.length || F1.includes(Y1)) && x1.union(new z3().setFromObject(c2));
     x1.isEmpty() && x1.set(new s1(-20, -20, 0), new s1(20, 20, 30));
-    const b1 = x1.getCenter(new s1()), N1 = Math.max(u1, x1.getSize(new s1()).length() / 2), G1 = Math.max(0.1, i.clientWidth / Math.max(1, i.clientHeight)), I1 = N1 / Math.sin(42 * q7 / 2) / Math.min(1, G1) * 1.2, O1 = V ? new s1(...jl[V]) : a.position.clone().sub(d.target);
+    const b1 = x1.getCenter(new s1()), N1 = Math.max(u1, x1.getSize(new s1()).length() / 2), K1 = Math.max(0.1, i.clientWidth / Math.max(1, i.clientHeight)), I1 = N1 / Math.sin(42 * q7 / 2) / Math.min(1, K1) * 1.2, O1 = V ? new s1(...jl[V]) : a.position.clone().sub(d.target);
     if (a instanceof z5) {
-      const Y1 = N1 * 1.2 / Math.min(1, G1);
-      a.top = Y1, a.bottom = -Y1, a.left = -Y1 * G1, a.right = Y1 * G1, a.zoom = 1, a.updateProjectionMatrix();
+      const Y1 = N1 * 1.2 / Math.min(1, K1);
+      a.top = Y1, a.bottom = -Y1, a.left = -Y1 * K1, a.right = Y1 * K1, a.zoom = 1, a.updateProjectionMatrix();
     }
     a.position.copy(b1).addScaledVector(O1.normalize(), I1), d.target.copy(b1), d.update(), j2();
   }
-  return W1 = GB(i, {
+  return G1 = GB(i, {
     frame: () => d2 === "dimensions" && !Q && !S1 && !C1.active && !k1?.moved && !M1 && !E && (w1 === "select" || w1 === "scale") ? v2 : void 0,
     project: (V) => {
       const o1 = V.clone().project(a);
@@ -49853,7 +49856,7 @@ function nF(i, e, t, n) {
       const o1 = HB([...t2.transforms].map(([f1, u1]) => ({ id: f1, transform: u1 })), V);
       for (const f1 of o1)
         Yo(e.state.document, { ...e.state.document.nodes[f1.id], transform: f1.transform });
-      $1 = V.delta, j1 = V.factors, L2();
+      $1 = V.delta, j1 = V.factors, z2();
     },
     commit: (V) => {
       v2 = V.frame, d.enabled = !0, O2();
@@ -49925,7 +49928,7 @@ function nF(i, e, t, n) {
         !A.has(o1) && !f1.matrix.equals(n1) && (f1.matrix.copy(n1), f1.matrixWorldNeedsUpdate = !0);
       for (const o1 of V ?? []) {
         if (o1.previewRadiusMm && !X.has(o1.id)) {
-          const u1 = o1.previewRadiusMm, x1 = o1.previewShape === "box" ? new E1(2 * u1, 2 * u1, 2 * u1) : new r9(u1, 24, 12), b1 = new I2(x1, new _r({ color: "#ea9b4a", roughness: 0.55 }));
+          const u1 = o1.previewRadiusMm, x1 = o1.previewShape === "box" ? new E1(2 * u1, 2 * u1, 2 * u1) : new r9(u1, 24, 12), b1 = new L2(x1, new _r({ color: "#ea9b4a", roughness: 0.55 }));
           b1.userData.id = o1.id, b1.matrixAutoUpdate = !1, r.add(b1), X.set(o1.id, b1);
         }
         const f1 = J.get(o1.id) ?? X.get(o1.id);
@@ -49985,10 +49988,10 @@ function nF(i, e, t, n) {
       C1.active && r1(), y2(), d2 = V === "gizmo" ? "gizmo" : "dimensions", M.setScaleSnap(d2 === "gizmo" ? 0.1 : null), l.dataset.resizeControls = d2, i2();
     },
     setReadoutVisible(V) {
-      C2 = V, j2();
+      T2 = V, j2();
     },
     setTransformPreviewListener(V) {
-      A2 = V, j2();
+      C2 = V, j2();
     },
     setViewListener(V) {
       l2 = V, U0 = void 0, j2();
@@ -50045,10 +50048,10 @@ function nF(i, e, t, n) {
       C1.active && r1(), y2(), w1 = V, l.dataset.mode = V, V !== "select" && (M.setMode(V), M.setSpace(V === "scale" ? "local" : "world")), i2(), j2();
     },
     get gridDisplay() {
-      return E2;
+      return A2;
     },
     setGridDisplay(V) {
-      mf(V, o2), E2 = V, D1(), j2();
+      mf(V, o2), A2 = V, D1(), j2();
     },
     setGrid(V) {
       o2 = V, D1(), C1.refresh(), j2(), M.gridStep = V, M.setTranslationSnap(o2 || null);
@@ -50063,17 +50066,17 @@ function nF(i, e, t, n) {
       const x1 = gf([V, o1, f1], (o2 || 0.1) / (u1 ? 10 : 1));
       e.transform(F1.filter((b1) => e.state.document.roots.includes(b1)).map((b1) => {
         const N1 = structuredClone(e.state.document.nodes[b1].transform);
-        return N1.position = N1.position.map((G1, I1) => G1 + x1[I1]), { id: b1, transform: N1 };
+        return N1.position = N1.position.map((K1, I1) => K1 + x1[I1]), { id: b1, transform: N1 };
       }));
     },
     dispose() {
       B(!1), l.removeEventListener("brickwright-simulation-capture", j2), N3.dispose(), Y(), z(), N();
       for (const V of U.values())
         V.line.geometry.dispose(), V.line.material.dispose(), V.marker.geometry.dispose(), V.marker.material.dispose();
-      U.clear(), W1?.dispose(), W1 = void 0, r1(!1), C1.dispose(), y1.dispose(), z1(), _1.remove(), R1 = !0, d3 !== void 0 && cancelAnimationFrame(d3), l.removeEventListener("wheel", w2, !0), l.removeEventListener("contextmenu", M2, !0), l.removeEventListener("keydown", o0);
+      U.clear(), G1?.dispose(), G1 = void 0, r1(!1), C1.dispose(), y1.dispose(), z1(), _1.remove(), R1 = !0, d3 !== void 0 && cancelAnimationFrame(d3), l.removeEventListener("wheel", w2, !0), l.removeEventListener("contextmenu", M2, !0), l.removeEventListener("keydown", o0);
       for (const V of ["gesturestart", "gesturechange", "gestureend"])
         l.removeEventListener(V, K2);
-      window.removeEventListener("brickwright-camera-input", k2), window.removeEventListener("blur", U2), window.removeEventListener("keyup", B3), B2.disconnect(), T1.reset(), l.removeEventListener("pointerdown", C0, !0), l.removeEventListener("pointermove", n3, !0), l.removeEventListener("pointerup", _0, !0), l.removeEventListener("pointercancel", M3), M.removeEventListener("dragging-changed", X1), M.removeEventListener("mouseDown", Z1), M.removeEventListener("objectChange", L2), M.removeEventListener("mouseUp", O2), M.removeEventListener("change", g3), d.removeEventListener("change", O3), M.dispose(), d.dispose();
+      window.removeEventListener("brickwright-camera-input", k2), window.removeEventListener("blur", U2), window.removeEventListener("keyup", B3), B2.disconnect(), T1.reset(), l.removeEventListener("pointerdown", C0, !0), l.removeEventListener("pointermove", n3, !0), l.removeEventListener("pointerup", _0, !0), l.removeEventListener("pointercancel", M3), M.removeEventListener("dragging-changed", X1), M.removeEventListener("mouseDown", Z1), M.removeEventListener("objectChange", z2), M.removeEventListener("mouseUp", O2), M.removeEventListener("change", g3), d.removeEventListener("change", O3), M.dispose(), d.dispose();
       for (const V of m1.values())
         r.remove(V), V.geometry.dispose(), V.material.dispose();
       m1.clear(), W2.dispose(), Z();
@@ -58556,7 +58559,7 @@ Named shapes use let; one final return produces one rigid body.
       if (!y1.value)
         return;
       const p2 = YE(y1.value);
-      $.value = p2.source, a1([]), X = {}, L || (N.value = Uc.find((W2) => W2.id === y1.value).title[sn()]), q2(), A2(), l2.textContent = p("Example loaded. Preview or apply to check its geometry.");
+      $.value = p2.source, a1([]), X = {}, L || (N.value = Uc.find((W2) => W2.id === y1.value).title[sn()]), q2(), C2(), l2.textContent = p("Example loaded. Preview or apply to check its geometry.");
     }, t1.append(y1, C1);
     const m1 = v0("div"), w1 = v0("button", p("Import source…")), k1 = v0("input"), R1 = v0("select"), F1 = v0("button", p("Export source…"));
     m1.className = "code-interchange", k1.type = "file", k1.accept = ".cadcode,.scad,.jscad,.js", k1.hidden = !0, k1.setAttribute("aria-label", p("Import CAD source")), R1.setAttribute("aria-label", p("Source export format"));
@@ -58571,19 +58574,19 @@ Named shapes use let; one final return produces one rigid body.
           if (p2.size > 32768)
             throw Error(p("Source exceeds 32 KiB"));
           const I0 = await p2.text();
-          if (!W1() || W2 !== e1 || U0 !== Y)
+          if (!G1() || W2 !== e1 || U0 !== Y)
             return;
           const $0 = /\.(?:jscad|js)$/i.test(p2.name) ? oA(I0) : void 0, P0 = $0?.program ?? (/\.scad$/i.test(p2.name) ? Jb(I0) : { version: Da, language: "brickwright-cad-script", source: I0, parameters: {} });
-          n9(P0), n1 = $0 ? P0.version : Da, $.value = P0.source, a1($0?.warnings ?? am(P0)), X = {}, q2(), A2(), l2.textContent = $0 ? $0.warnings[0] ?? p("Source loaded. Preview or apply to check its geometry.") : /\.scad$/i.test(p2.name) ? p("Source converted. Preview before creating.") : p("Source loaded. Preview or apply to check its geometry.");
+          n9(P0), n1 = $0 ? P0.version : Da, $.value = P0.source, a1($0?.warnings ?? am(P0)), X = {}, q2(), C2(), l2.textContent = $0 ? $0.warnings[0] ?? p("Source loaded. Preview or apply to check its geometry.") : /\.scad$/i.test(p2.name) ? p("Source converted. Preview before creating.") : p("Source loaded. Preview or apply to check its geometry.");
         } catch (I0) {
-          W1() && W2 === e1 && U0 === Y && C2(I0, !1);
+          G1() && W2 === e1 && U0 === Y && T2(I0, !1);
         }
     }, F1.onclick = async () => {
       try {
         const p2 = d2(), W2 = R1.value, U0 = W2 === "scad" ? iA(p2) : W2 === "jscad" ? tA(p2) : nA(p2);
-        await s?.({ name: `${(N.value || "object").replace(/[^A-Za-z0-9_-]+/g, "_")}.${W2}`, bytes: new TextEncoder().encode(U0), mime: "text/plain" }), W1() && (l2.textContent = p("Source exported. The model and its history are unchanged."));
+        await s?.({ name: `${(N.value || "object").replace(/[^A-Za-z0-9_-]+/g, "_")}.${W2}`, bytes: new TextEncoder().encode(U0), mime: "text/plain" }), G1() && (l2.textContent = p("Source exported. The model and its history are unchanged."));
       } catch (p2) {
-        W1() && C2(p2, !1);
+        G1() && T2(p2, !1);
       }
     }, m1.append(w1, k1, R1, F1);
     const t2 = v0("div");
@@ -58592,7 +58595,7 @@ Named shapes use let; one final return produces one rigid body.
     o2.alt = p("Preview of the coded solid"), o2.hidden = !0;
     const r2 = v0("p", p("Preview the code to check the solid.")), l2 = v0("p");
     l2.setAttribute("role", "status"), l2.setAttribute("aria-label", p("Code status"));
-    const E2 = v0("button", p("Preview code")), e2 = v0("button", p(L ? "Apply code changes" : "Create code object"));
+    const A2 = v0("button", p("Preview code")), e2 = v0("button", p(L ? "Apply code changes" : "Create code object"));
     e2.className = "primary";
     const D1 = v0("button", p("Use source defaults"));
     D1.onclick = () => {
@@ -58600,12 +58603,12 @@ Named shapes use let; one final return produces one rigid body.
       try {
         q2();
       } catch (p2) {
-        C2(p2, !1);
+        T2(p2, !1);
       }
-      A2(), l2.textContent = p("Overrides cleared. Preview to reload parameter controls.");
+      C2(), l2.textContent = p("Overrides cleared. Preview to reload parameter controls.");
     };
     const d2 = () => ({ version: n1, language: "brickwright-cad-script", source: $.value, parameters: structuredClone(X) });
-    function W1() {
+    function G1() {
       return !h && u === P && c.open;
     }
     function v2() {
@@ -58615,7 +58618,7 @@ Named shapes use let; one final return produces one rigid body.
       G.textContent = p2.accepted ? p2.persistent ? p("Draft saved on this device. Apply updates the model.") : p("Draft kept for this session. Device storage is unavailable.") : p("Draft exceeds workspace storage limits. Export your source to keep it."), G.dataset.warning = String(!p2.persistent);
     }
     function $1() {
-      clearTimeout(z), _ && !W && W1() && (z = setTimeout(() => {
+      clearTimeout(z), _ && !W && G1() && (z = setTimeout(() => {
         p3(!1, !0);
       }, 450));
     }
@@ -58635,15 +58638,15 @@ Named shapes use let; one final return produces one rigid body.
       if (!H)
         return;
       const W2 = H.matches[p2];
-      W2 !== void 0 && ($.setRangeText(W2, H.start, H.end, "end"), $.focus(), A2());
+      W2 !== void 0 && ($.setRangeText(W2, H.start, H.end, "end"), $.focus(), C2());
     }
-    function A2() {
+    function C2() {
       e1++, j1(), $.removeAttribute("aria-invalid"), o2.hidden = !0, r2.textContent = p("Preview is out of date."), l2.textContent = p("Source changed. Preview or apply to rebuild."), v2(), $1();
     }
-    function C2(p2, W2) {
+    function T2(p2, W2) {
       l2.textContent = p2 instanceof Error ? p2.message : String(p2), o2.hidden = !0, p2 instanceof a3 && ($.setAttribute("aria-invalid", "true"), W2 && ($.focus(), $.setSelectionRange(p2.offset, p2.offset + 1)));
     }
-    function R2() {
+    function I2() {
       W = !0, _1.hidden = !_, o2.hidden = !0, clearTimeout(z), l2.textContent = p(_ ? "The model changed. Use current model to keep your draft and review it again." : "The model changed. Close and reopen this editor before applying.");
     }
     function q2() {
@@ -58652,7 +58655,7 @@ Named shapes use let; one final return produces one rigid body.
       for (const [X0, w0] of Object.entries(p2.parameters)) {
         const j2 = v0("label", `${X0} (${w0.unit})`), c3 = v0("input"), d3 = v0("small", `= ${Number(p2.values[X0].value.toFixed(5))} ${w0.unit === "scalar" ? "" : w0.unit}`);
         c3.type = "text", c3.value = X[X0] ?? "", c3.placeholder = p`Default: ${w0.expression}`, c3.dataset.parameter = X0, c3.setAttribute("aria-label", p`Code parameter ${X0}`), c3.oninput = () => {
-          c3.value.trim() ? X[X0] = c3.value.trim() : delete X[X0], A2(), l2.textContent = p("Parameter changed. Preview or apply to rebuild.");
+          c3.value.trim() ? X[X0] = c3.value.trim() : delete X[X0], C2(), l2.textContent = p("Parameter changed. Preview or apply to rebuild.");
         }, j2.append(c3, d3), t2.append(j2);
       }
       if (I0) {
@@ -58670,28 +58673,28 @@ Named shapes use let; one final return produces one rigid body.
       }
     }
     async function p3(p2, W2 = !1) {
-      if (c1 || !W1())
+      if (c1 || !G1())
         return !1;
       if (W || e.state.revision !== D)
-        return R2(), !1;
-      c1 = !0, clearTimeout(z), E2.disabled = e2.disabled = !0, j && (j.disabled = !0), l2.textContent = p("Building coded solid…");
+        return I2(), !1;
+      c1 = !0, clearTimeout(z), A2.disabled = e2.disabled = !0, j && (j.disabled = !0), l2.textContent = p("Building coded solid…");
       const U0 = e1, I0 = d2(), $0 = N.value;
       try {
         n9(I0);
         const P0 = p0(I0), X0 = await t(P0.document);
-        if (!W1())
+        if (!G1())
           return !1;
         if (e.state.revision !== D)
-          return R2(), !1;
+          return I2(), !1;
         if (e1 !== U0)
           return W2 || (l2.textContent = p("Code changed during the build. Preview again.")), !1;
         let w0 = X0.bodies.find((j2) => j2.id === P0.target);
         if (!w0) {
           const j2 = structuredClone(P0.document);
-          if (j2.roots = [P0.target], delete j2.joints, Ht(j2), w0 = (await t(j2)).bodies[0], !W1())
+          if (j2.roots = [P0.target], delete j2.joints, Ht(j2), w0 = (await t(j2)).bodies[0], !G1())
             return !1;
           if (e.state.revision !== D)
-            return R2(), !1;
+            return I2(), !1;
           if (e1 !== U0)
             return !1;
         }
@@ -58712,16 +58715,16 @@ Named shapes use let; one final return produces one rigid body.
         }
         return !0;
       } catch (P0) {
-        return W1() && e1 === U0 && C2(P0, !W2), !1;
+        return G1() && e1 === U0 && T2(P0, !W2), !1;
       } finally {
-        c1 = !1, E2.disabled = e2.disabled = !1, j && (j.disabled = !1), W1() && e1 !== U0 && $1();
+        c1 = !1, A2.disabled = e2.disabled = !1, j && (j.disabled = !1), G1() && e1 !== U0 && $1();
       }
     }
-    E2.onclick = () => {
+    A2.onclick = () => {
       p3(!1);
     }, e2.onclick = () => {
       p3(!0);
-    }, $.oninput = A2, N.oninput = A2, $.onkeydown = (p2) => {
+    }, $.oninput = C2, N.oninput = C2, $.onkeydown = (p2) => {
       if (!p2.isComposing) {
         if (p2.code === "Space" && (p2.ctrlKey || p2.metaKey)) {
           p2.preventDefault(), j1(), H = Zj($.value, $.selectionStart), H.matches.length === 1 ? x2(0) : H.matches.length ? (J.replaceChildren(...H.matches.map((W2, U0) => {
@@ -58745,22 +58748,22 @@ Named shapes use let; one final return produces one rigid body.
           }
           ["Tab", "ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown"].includes(p2.key) && j1();
         }
-        p2.key === "Tab" && !p2.shiftKey ? (p2.preventDefault(), $.setRangeText("  ", $.selectionStart, $.selectionEnd, "end"), A2()) : p2.key === "Enter" && (p2.metaKey || p2.ctrlKey) && (p2.preventDefault(), j1(), p3(!1));
+        p2.key === "Tab" && !p2.shiftKey ? (p2.preventDefault(), $.setRangeText("  ", $.selectionStart, $.selectionEnd, "end"), C2()) : p2.key === "Enter" && (p2.metaKey || p2.ctrlKey) && (p2.preventDefault(), j1(), p3(!1));
       }
     }, $.onpointerdown = j1, $.onblur = j1;
     const f3 = v0("button", p("Upgrade lofts to ruled surfaces"));
     f3.hidden = !(L && A?.kind === "code" && Up(A.program)), f3.title = p("This object’s lofts are triangulated along one diagonal, as saved. Upgrading rebuilds them as ruled surfaces; Undo restores them."), f3.onclick = () => {
-      if (!L || !W1())
+      if (!L || !G1())
         return;
       if (W || e.state.revision !== D) {
-        R2();
+        I2();
         return;
       }
       h1 = !0;
       try {
         e.upgradeLofts([L]);
       } catch (W2) {
-        C2(W2, !1);
+        T2(W2, !1);
         return;
       } finally {
         h1 = !1;
@@ -58769,18 +58772,18 @@ Named shapes use let; one final return produces one rigid body.
       F = e.state.document, D = e.state.revision, p2?.kind === "code" && (I = structuredClone(p2.program)), n1 = 2, f3.hidden = !0, e1++, v2(), $1(), l2.textContent = p("Lofts upgraded to ruled surfaces. Undo restores the triangulated lofts.");
     }, S1.append(N, t1, m1, $, J, i1, G, z1, f3, M1), B.append(o2, r2, t2, D1), p1.append(S1, B);
     const l0 = v0("footer");
-    l0.append(l2, _1, E2, e2), c.append(T, p1, l0);
+    l0.append(l2, _1, A2, e2), c.append(T, p1, l0);
     try {
       q2();
     } catch (p2) {
-      C2(p2, !1);
+      T2(p2, !1);
     }
     const T0 = e.subscribe((p2) => {
-      !h1 && p2.revision !== D && R2();
+      !h1 && p2.revision !== D && I2();
     });
     g = () => {
       clearTimeout(z), v2(), T0();
-    }, f = () => $.focus(), _ ? c.show() : c.showModal(), $.focus(), W ? R2() : $1(), v2();
+    }, f = () => $.focus(), _ ? c.show() : c.showModal(), $.focus(), W ? I2() : $1(), v2();
   }
   return c.addEventListener("cancel", (k) => {
     k.preventDefault(), y();
@@ -60718,18 +60721,18 @@ function YV(i, e, t, n) {
       W.className = "drawing-jog-list";
       const X = [], c1 = () => {
         for (const [$1, j1] of X.entries()) {
-          const m2 = $1 + 2, x2 = (A2, C2) => {
-            A2.setAttribute("aria-label", C2), A2.parentElement.firstChild.textContent = C2;
+          const m2 = $1 + 2, x2 = (C2, T2) => {
+            C2.setAttribute("aria-label", T2), C2.parentElement.firstChild.textContent = T2;
           };
           x2(j1.at, p`Jog ${m2} at (mm)`), x2(j1.position, p`Position after jog ${m2} (mm)`), j1.remove.textContent = p`Remove jog ${m2}`;
         }
         n1.disabled = X.length >= Bg - 1;
       }, h1 = ($1) => {
-        const j1 = f0("div"), m2 = f0("input"), x2 = f0("input"), A2 = f0("button");
-        m2.maxLength = x2.maxLength = 160, m2.value = String($1?.at ?? ""), x2.value = String($1?.position ?? ""), b("Jog at (mm)", m2, j1), b("Section position (mm)", x2, j1), j1.append(A2), W.append(j1);
-        const C2 = { at: m2, position: x2, remove: A2 };
-        return X.push(C2), m2.oninput = x2.oninput = () => W1(), A2.onclick = () => {
-          X.splice(X.indexOf(C2), 1), j1.remove(), c1(), W1(), n1.focus();
+        const j1 = f0("div"), m2 = f0("input"), x2 = f0("input"), C2 = f0("button");
+        m2.maxLength = x2.maxLength = 160, m2.value = String($1?.at ?? ""), x2.value = String($1?.position ?? ""), b("Jog at (mm)", m2, j1), b("Section position (mm)", x2, j1), j1.append(C2), W.append(j1);
+        const T2 = { at: m2, position: x2, remove: C2 };
+        return X.push(T2), m2.oninput = x2.oninput = () => G1(), C2.onclick = () => {
+          X.splice(X.indexOf(T2), 1), j1.remove(), c1(), G1(), n1.focus();
         }, c1(), m2;
       };
       if (u) {
@@ -60738,7 +60741,7 @@ function YV(i, e, t, n) {
           h1($1);
         n1.onclick = () => {
           const $1 = h1();
-          W1(), $1.focus();
+          G1(), $1.focus();
         };
       }
       const e1 = structuredClone(d?.annotations ?? []), Y = structuredClone(d?.edgeDimensions ?? []), z = structuredClone(d?.curveDimensions ?? []), T = f0("details");
@@ -60778,25 +60781,25 @@ function YV(i, e, t, n) {
         if (!m)
           return;
         const $1 = e.state.document, j1 = Object.values($1.nodes).flatMap((x2) => {
-          const A2 = Ln($1, x2.id);
-          return A2 ? [{ ref: A2, name: $1.sketches[A2.sketchId].name + " · " + x2.name }] : [];
+          const C2 = Ln($1, x2.id);
+          return C2 ? [{ ref: C2, name: $1.sketches[C2.sketchId].name + " · " + x2.name }] : [];
         });
-        g.replaceChildren(...j1.map(({ ref: x2, name: A2 }) => new Option(A2, x2.featureId))), t1 === m.featureId && !on($1, m) || !j1.some((x2) => x2.ref.featureId === t1) ? (g.add(new Option(p("Unavailable drawing source"), ""), 0), g.value = "") : g.value = t1;
+        g.replaceChildren(...j1.map(({ ref: x2, name: C2 }) => new Option(C2, x2.featureId))), t1 === m.featureId && !on($1, m) || !j1.some((x2) => x2.ref.featureId === t1) ? (g.add(new Option(p("Unavailable drawing source"), ""), 0), g.value = "") : g.value = t1;
       };
       let m1 = !d?.section, w1;
       const k1 = () => {
         if (u) {
           if (!w1)
             return;
-          const C2 = F.value === "u" ? 0 : 1, R2 = w1.views[0], q2 = C2 === 0 ? R2.width : R2.height;
-          D.value = String(Number((w1.origin[C2] + q2 / 2).toFixed(6)));
+          const T2 = F.value === "u" ? 0 : 1, I2 = w1.views[0], q2 = T2 === 0 ? I2.width : I2.height;
+          D.value = String(Number((w1.origin[T2] + q2 / 2).toFixed(6)));
           return;
         }
         const $1 = e.state.document, j1 = Ln($1, g.value);
         if (!j1)
           return;
-        const m2 = on($1, j1), x2 = F.value === "u" ? 0 : 1, A2 = Mi(m2.node, $1).contour.map((C2) => C2[x2]);
-        D.value = String(Number(((Math.min(...A2) + Math.max(...A2)) / 2).toFixed(6)));
+        const m2 = on($1, j1), x2 = F.value === "u" ? 0 : 1, C2 = Mi(m2.node, $1).contour.map((T2) => T2[x2]);
+        D.value = String(Number(((Math.min(...C2) + Math.max(...C2)) / 2).toFixed(6)));
       }, R1 = () => {
         const $1 = e.state.document;
         if (!x.value.trim())
@@ -60811,13 +60814,13 @@ function YV(i, e, t, n) {
           scale: f.value,
           hiddenLines: v.checked,
           ...Object.keys(j1).length ? { titleBlock: j1 } : {}
-        }, x2 = N9(D), A2 = N9(C), C2 = N9(R);
+        }, x2 = N9(D), C2 = N9(C), T2 = N9(R);
         if (L.checked && x2 === "")
           throw new Error(p("Enter a section position in millimetres."));
-        const R2 = L.checked && A.checked;
-        if (R2 && (A2 === "" || C2 === ""))
+        const I2 = L.checked && A.checked;
+        if (I2 && (C2 === "" || T2 === ""))
           throw new Error(p("Enter the second section position and the jog coordinate."));
-        const q2 = R2 ? X.map((f3, l0) => {
+        const q2 = I2 ? X.map((f3, l0) => {
           const T0 = N9(f3.at), p2 = N9(f3.position);
           if (T0 === "" || p2 === "")
             throw new Error(p`Enter the coordinate and cut position for jog ${l0 + 2}.`);
@@ -60825,7 +60828,7 @@ function YV(i, e, t, n) {
         }) : [], p0 = L.checked ? { section: {
           axis: F.value === "u" ? "u" : "v",
           position: x2,
-          ...R2 ? { jog: { at: C2, position: A2 } } : {},
+          ...I2 ? { jog: { at: T2, position: C2 } } : {},
           ...q2.length ? { additionalJogs: q2 } : {}
         } } : {};
         if (u) {
@@ -60859,7 +60862,7 @@ function YV(i, e, t, n) {
         v2?.reset(), o2(), v2?.refresh();
       };
       let r2 = !1, l2;
-      const E2 = ($1) => {
+      const A2 = ($1) => {
         r2 = $1, i1.classList.toggle("picking", $1), $.setAttribute("aria-pressed", String($1));
       }, e2 = () => ["diameter", "radius", "arc-length"].includes(j.value), D1 = () => {
         const $1 = i1.querySelector("svg");
@@ -60876,52 +60879,52 @@ function YV(i, e, t, n) {
           }
           if (!Fr(m2.id))
             continue;
-          const [x2, A2] = m2.point, C2 = F1.height - A2, R2 = document.createElementNS($1.namespaceURI, "path");
-          R2.setAttribute("class", "drawing-vertex-marker"), R2.setAttribute("d", `M ${x2 - 1.7} ${C2} L ${x2} ${C2 - 1.7} L ${x2 + 1.7} ${C2} L ${x2} ${C2 + 1.7} Z`), $1.append(R2);
+          const [x2, C2] = m2.point, T2 = F1.height - C2, I2 = document.createElementNS($1.namespaceURI, "path");
+          I2.setAttribute("class", "drawing-vertex-marker"), I2.setAttribute("d", `M ${x2 - 1.7} ${T2} L ${x2} ${T2 - 1.7} L ${x2 + 1.7} ${T2} L ${x2} ${T2 + 1.7} Z`), $1.append(I2);
         }
       }, d2 = () => {
-        const $1 = e2(), j1 = F1?.anchors ?? [], m2 = p1.value, x2 = S1.value, A2 = j1.filter((R2) => !R2.arc), C2 = j.value === "arc-length" ? j1.filter((R2) => R2.arc) : j.value === "radius" ? j1.filter((R2) => R2.radius !== void 0) : j.value === "diameter" ? A2.filter((R2) => R2.radius !== void 0) : A2;
-        p1.replaceChildren(...C2.map((R2) => new Option(R2.label, R2.id))), S1.replaceChildren(...A2.map((R2) => new Option(R2.label, R2.id))), [...p1.options].some((R2) => R2.value === m2) && (p1.value = m2), [...S1.options].some((R2) => R2.value === x2) ? S1.value = x2 : S1.options.length > 1 && (S1.selectedIndex = 1), S1.parentElement.hidden = $1, J.disabled = !F1 || !p1.options.length || !l2 && e1.length >= Ot, J.textContent = p(l2 ? "Apply dimension" : "Add dimension"), $.disabled = !F1, H.replaceChildren();
-        for (const [R2, q2] of e1.entries()) {
-          const p0 = f0("li"), p3 = F1?.annotationIssues.includes(q2.id), f3 = f0("button", p`Edit dimension ${R2 + 1}`);
+        const $1 = e2(), j1 = F1?.anchors ?? [], m2 = p1.value, x2 = S1.value, C2 = j1.filter((I2) => !I2.arc), T2 = j.value === "arc-length" ? j1.filter((I2) => I2.arc) : j.value === "radius" ? j1.filter((I2) => I2.radius !== void 0) : j.value === "diameter" ? C2.filter((I2) => I2.radius !== void 0) : C2;
+        p1.replaceChildren(...T2.map((I2) => new Option(I2.label, I2.id))), S1.replaceChildren(...C2.map((I2) => new Option(I2.label, I2.id))), [...p1.options].some((I2) => I2.value === m2) && (p1.value = m2), [...S1.options].some((I2) => I2.value === x2) ? S1.value = x2 : S1.options.length > 1 && (S1.selectedIndex = 1), S1.parentElement.hidden = $1, J.disabled = !F1 || !p1.options.length || !l2 && e1.length >= Ot, J.textContent = p(l2 ? "Apply dimension" : "Add dimension"), $.disabled = !F1, H.replaceChildren();
+        for (const [I2, q2] of e1.entries()) {
+          const p0 = f0("li"), p3 = F1?.annotationIssues.includes(q2.id), f3 = f0("button", p`Edit dimension ${I2 + 1}`);
           f3.title = Q[q2.kind];
           const l0 = f0("button", "×");
-          l0.setAttribute("aria-label", p`Remove dimension ${R2 + 1}`), p3 && p0.append(f0("small", p("Anchor unavailable"))), f3.onclick = () => {
+          l0.setAttribute("aria-label", p`Remove dimension ${I2 + 1}`), p3 && p0.append(f0("small", p("Anchor unavailable"))), f3.onclick = () => {
             l2 = q2.id, j.value = q2.kind, d2(), p1.value = q2.from, S1.value = q2.to ?? "", B.value = String(q2.at[0]), N.value = String(q2.at[1]), D1();
           }, l0.onclick = () => {
-            e1.splice(R2, 1), l2 === q2.id && (l2 = void 0), W1();
+            e1.splice(I2, 1), l2 === q2.id && (l2 = void 0), G1();
           }, p0.append(f3, l0), H.append(p0);
         }
         D1();
-      }, W1 = () => {
+      }, G1 = () => {
         v2?.reset(), F.parentElement.hidden = D.parentElement.hidden = !L.checked, A.parentElement.hidden = !L.checked, C.parentElement.hidden = R.parentElement.hidden = I.hidden = !L.checked || !A.checked;
         const $1 = u ? F.value === "u" ? p("World Y") : p("World X") : F.value === "u" ? p("Sketch Y") : p("Sketch X");
         W.hidden = n1.hidden = !L.checked || !A.checked, I.textContent = X.length ? p`Enter jog coordinates along ${$1} in increasing order.` : p`The jog switches to the second cut at this coordinate along ${$1}.`, i1.replaceChildren(), F1 = void 0, t2 = [], _1.textContent = "", v2?.refresh(), P.disabled = !0, z1.disabled = P1.disabled = !0;
-        const j1 = ++C1, m2 = e.state.document, x2 = (C2, R2) => {
-          if (R2 && (w1 = R2, L.disabled = !1, m1 && !C2.section && k1()), t2 = I_(m2, C2, R2), F1 = t2[0], u) {
+        const j1 = ++C1, m2 = e.state.document, x2 = (T2, I2) => {
+          if (I2 && (w1 = I2, L.disabled = !1, m1 && !T2.section && k1()), t2 = I_(m2, T2, I2), F1 = t2[0], u) {
             const q2 = Number(P.value);
             P.replaceChildren(new Option(p("Drawing views"), "0"), ...t2.slice(1).map((p0, p3) => new Option(p`Parts list ${p3 + 1} of ${t2.length - 1}`, String(p3 + 1)))), P.value = String(q2 < t2.length ? q2 : 0), P.parentElement.hidden = t2.length < 2, P.disabled = !1;
           }
           o2(), v2?.refresh(), z1.disabled = !1, P1.disabled = !!F1.annotationIssues.length, _1.textContent = F1.annotationIssues.length ? p("Repair or remove unavailable drawing dimensions before exporting.") : "";
-        }, A2 = (C2) => {
-          _1.textContent = C2 instanceof Error ? C2.message : String(C2);
+        }, C2 = (T2) => {
+          _1.textContent = T2 instanceof Error ? T2.message : String(T2);
         };
         try {
-          const C2 = R1();
+          const T2 = R1();
           if (u) {
             _1.textContent = E.checked ? p("Projecting assembly from exact edges…") : p("Projecting assembly…");
-            const R2 = () => o.open && o.firstChild === K && j1 === C1 && e.state.document === m2;
-            t([C2], { exact: E.checked }).then((q2) => {
-              R2() && q2 && x2(C2, q2);
+            const I2 = () => o.open && o.firstChild === K && j1 === C1 && e.state.document === m2;
+            t([T2], { exact: E.checked }).then((q2) => {
+              I2() && q2 && x2(T2, q2);
             }).catch((q2) => {
-              R2() && A2(q2);
+              I2() && C2(q2);
             });
           } else
-            x2(C2);
-        } catch (C2) {
-          A2(C2);
+            x2(T2);
+        } catch (T2) {
+          C2(T2);
         }
-        u || d2(), !F1 && r2 && E2(!1);
+        u || d2(), !F1 && r2 && A2(!1);
       };
       j.onchange = d2, p1.onchange = S1.onchange = U.ontoggle = D1, J.onclick = () => {
         if (!F1)
@@ -60946,39 +60949,39 @@ function YV(i, e, t, n) {
           _1.textContent = e2() ? p("Choose an available curve.") : m2.kind === "aligned" ? p("Choose two anchors at different positions.") : p("Choose anchors that have a measurable distance along the selected axis.");
           return;
         }
-        l2 ? e1[e1.findIndex((x2) => x2.id === l2)] = m2 : e1.push(m2), l2 = void 0, E2(!1), W1();
+        l2 ? e1[e1.findIndex((x2) => x2.id === l2)] = m2 : e1.push(m2), l2 = void 0, A2(!1), G1();
       }, $.onclick = () => {
-        E2(!r2), r2 ? _1.textContent = p("Click or tap the sheet to choose the dimension position.") : W1();
+        A2(!r2), r2 ? _1.textContent = p("Click or tap the sheet to choose the dimension position.") : G1();
       }, i1.onpointerup = ($1) => {
         if (!r2 || !F1 || $1.button !== 0)
           return;
         const j1 = i1.querySelector("svg")?.getScreenCTM();
         if (!j1)
           return;
-        const m2 = new DOMPoint($1.clientX, $1.clientY).matrixTransform(j1.inverse()), x2 = Number(m2.x.toFixed(2)), A2 = Number((F1.height - m2.y).toFixed(2));
-        if (!ci(x2, A2)) {
+        const m2 = new DOMPoint($1.clientX, $1.clientY).matrixTransform(j1.inverse()), x2 = Number(m2.x.toFixed(2)), C2 = Number((F1.height - m2.y).toFixed(2));
+        if (!ci(x2, C2)) {
           _1.textContent = p("Pick a position inside the drawing area.");
           return;
         }
-        B.value = String(x2), N.value = String(A2), E2(!1), W1();
+        B.value = String(x2), N.value = String(C2), A2(!1), G1();
       }, r = () => {
         const $1 = e.state;
         if ($1.document.id !== l.id || d && !$1.document.drawings?.some((j1) => j1.id === d.id)) {
           o.close();
           return;
         }
-        $1.revision !== y1 && (y1 = $1.revision, r1(), m1 && k1(), W1());
+        $1.revision !== y1 && (y1 = $1.revision, r1(), m1 && k1(), G1());
       }, g.onchange = () => {
-        t1 = g.value, m1 && k1(), W1();
+        t1 = g.value, m1 && k1(), G1();
       }, F.onchange = () => {
-        m1 && k1(), W1();
+        m1 && k1(), G1();
       }, D.oninput = () => {
-        m1 = !1, W1();
-      }, L.onchange = A.onchange = W1, C.oninput = R.oninput = W1, x.oninput = f.onchange = v.onchange = S.onchange = W1, E.onchange = () => {
-        s = E.checked, W1();
+        m1 = !1, G1();
+      }, L.onchange = A.onchange = G1, C.oninput = R.oninput = G1, x.oninput = f.onchange = v.onchange = S.onchange = G1, E.onchange = () => {
+        s = E.checked, G1();
       };
       for (const $1 of Object.values(_))
-        $1.oninput = W1;
+        $1.oninput = G1;
       z1.onclick = () => {
         try {
           e.saveDrawingSheet(R1(), d?.id), o.close();
@@ -61001,8 +61004,8 @@ function YV(i, e, t, n) {
       };
       const v2 = u ? XV(T, i1, _1, Y, z, () => e.state.document, () => F1, () => {
         P.value = "0", o2();
-      }, W1) : void 0;
-      E2(!1), r(), o.showModal();
+      }, G1) : void 0;
+      A2(!1), r(), o.showModal();
     },
     /** Whether assembly sheets are projected from exact edges (this editor's choice in the dialog). */
     get exactEdges() {
@@ -62355,21 +62358,21 @@ CIRCLE 10, 15, 2`, z.append(T, V2("small", p("One loop per line. Separate outlin
     F1.className = "parameter-status", F1.setAttribute("role", "status"), F1.setAttribute("aria-label", p("Sketch status"));
     const t2 = V2("p", p("Drag the white handles or type exact dimensions.")), o2 = V2("p", p("Enter dimensions or expressions such as width / 2. Define named dimensions in Parameters.")), r2 = V2("details");
     r2.className = "sketch-expressions";
-    const l2 = V2("input"), E2 = V2("input"), e2 = V2("select");
+    const l2 = V2("input"), A2 = V2("input"), e2 = V2("select");
     e2.add(new Option(p("Left of line"), "left")), e2.add(new Option(p("Right of line"), "right"));
-    for (const [T1, B1] of [["First trim point X, Y (mm)", l2], ["Second trim point X, Y (mm)", E2], ["Keep side", e2]]) {
+    for (const [T1, B1] of [["First trim point X, Y (mm)", l2], ["Second trim point X, Y (mm)", A2], ["Keep side", e2]]) {
       const Q1 = V2("label", p(T1));
       Q1.append(B1), r2.append(Q1);
     }
     const D1 = V2("button", p("Pick trim line")), d2 = V2("button", p("Trim draft"));
     D1.type = d2.type = "button", r2.prepend(V2("summary", p("Trim by line")), V2("p", p("Choose two points and keep the left or right side looking from the first point to the second."))), r2.append(D1, d2), S.append(r2);
-    let W1 = 0, v2 = 0;
+    let G1 = 0, v2 = 0;
     function $1(T1) {
-      W1 = T1, D1.setAttribute("aria-pressed", String(T1 !== 0)), D1.textContent = p(T1 === 1 ? "Pick first trim point" : T1 === 2 ? "Pick second trim point" : "Pick trim line"), R1.classList.toggle("trim-picking", T1 !== 0);
+      G1 = T1, D1.setAttribute("aria-pressed", String(T1 !== 0)), D1.textContent = p(T1 === 1 ? "Pick first trim point" : T1 === 2 ? "Pick second trim point" : "Pick trim line"), R1.classList.toggle("trim-picking", T1 !== 0);
     }
     $1(0), D1.onclick = () => {
       if (!(m || q2)) {
-        if (W1) {
+        if (G1) {
           $1(0);
           return;
         }
@@ -62452,7 +62455,7 @@ CIRCLE 10, 15, 2`, z.append(T, V2("small", p("One loop per line. Separate outlin
         revolution: { angle: D5(r1.value), axisOffset: m1.checked ? void 0 : D5(k1.value) }
       };
     };
-    function A2(T1, { sketch: B1, extrusion: Q1, revolution: s2 }, a2) {
+    function C2(T1, { sketch: B1, extrusion: Q1, revolution: s2 }, a2) {
       if (h)
         return f ? T1.editRevolution(h, { sketch: B1, ...s2 }) : T1.editExtrusion(h, { sketch: B1, ...Q1 }), h;
       if (y)
@@ -62460,16 +62463,16 @@ CIRCLE 10, 15, 2`, z.append(T, V2("small", p("One loop per line. Separate outlin
       const M2 = { ...B1.profile, id: $2() }, w2 = { name: B1.name, plane: B1.plane, position: a2 };
       return f ? T1.addSketchRevolution(M2, { ...w2, ...s2 }) : T1.addSketchExtrusion(M2, { ...w2, ...Q1 });
     }
-    function C2(T1) {
+    function T2(T1) {
       const B1 = E5(x);
       try {
-        const Q1 = A2(B1, T1);
+        const Q1 = C2(B1, T1);
         return { document: B1.state.document, id: Q1 };
       } finally {
         B1.dispose();
       }
     }
-    function R2({ sketch: T1, extrusion: B1, revolution: Q1 }) {
+    function I2({ sketch: T1, extrusion: B1, revolution: Q1 }) {
       const s2 = "sketch-preview", a2 = { featureVersion: 1, id: s2, sketchId: s2 }, M2 = { ...x, sketches: { [s2]: { version: 1, id: s2, ...T1 } } };
       return f ? { ...nb({ kind: "revolution", ...a2, ...Q1 }, M2), distance: 0, start: 0 } : { ...Mi({ kind: "extrusion", ...a2, ...B1 }, M2), angle: void 0, axisOffset: void 0 };
     }
@@ -62486,7 +62489,7 @@ CIRCLE 10, 15, 2`, z.append(T, V2("small", p("One loop per line. Separate outlin
     };
     p2(W, "Sketch width"), p2(n1, "Sketch depth"), p2(X, "Sketch radius"), p2(t1, "Extrude");
     function W2() {
-      l?.(), N3.refresh(), O3.refresh(), d5.refresh(), q1.refresh(), B.hidden = !0, r2.hidden = !!y || !["outline", "region"].includes(C.value), r2.hidden && W1 && $1(0), k1.parentElement.hidden = !f || m1.checked, W.parentElement.hidden = n1.parentElement.hidden = C.value !== "rectangle", X.parentElement.hidden = c1.parentElement.hidden = C.value !== "circle", h1.hidden = C.value !== "outline", z.hidden = C.value !== "region", Y.hidden = $.hidden = h1.hidden && z.hidden, J.hidden = $.hidden || !N.checked, R1.replaceChildren(), p0 = void 0, l0 = !1;
+      l?.(), N3.refresh(), O3.refresh(), d5.refresh(), q1.refresh(), B.hidden = !0, r2.hidden = !!y || !["outline", "region"].includes(C.value), r2.hidden && G1 && $1(0), k1.parentElement.hidden = !f || m1.checked, W.parentElement.hidden = n1.parentElement.hidden = C.value !== "rectangle", X.parentElement.hidden = c1.parentElement.hidden = C.value !== "circle", h1.hidden = C.value !== "outline", z.hidden = C.value !== "region", Y.hidden = $.hidden = h1.hidden && z.hidden, J.hidden = $.hidden || !N.checked, R1.replaceChildren(), p0 = void 0, l0 = !1;
       for (const T1 of [W, n1, X, t1])
         if (T1.removeAttribute("aria-invalid"), !T1.parentElement.hidden)
           try {
@@ -62500,18 +62503,18 @@ CIRCLE 10, 15, 2`, z.append(T, V2("small", p("One loop per line. Separate outlin
       try {
         const T1 = x2(), B1 = T1.sketch.profile;
         B.hidden = !(B1.kind === "outline" ? B1.dxfWidths : B1.kind === "region" && B1.loops.some((O1) => O1.kind === "outline" && O1.dxfWidths));
-        const Q1 = R2(T1), s2 = Q1.contour.map((O1) => O1[0]), a2 = Q1.contour.map((O1) => O1[1]), M2 = Math.max(...s2) - Math.min(...s2), w2 = Math.max(...a2) - Math.min(...a2), g2 = Q1.distance, K2 = g2 * 0.45, k2 = -g2 * 0.35, o0 = [Q1.contour, ...Q1.holes ?? []].map((O1) => O1.map(([Y1, c2]) => [Y1 + Q1.start * 0.45, -c2 - Q1.start * 0.35])), U2 = o0.map((O1) => O1.map(([Y1, c2]) => [Y1 + K2, c2 + k2])), [C0] = o0, [n3] = U2, J2 = v2 = Q1.start + g2, _0 = ([O1, Y1]) => [O1 + J2 * 0.45, -Y1 - J2 * 0.35], w3 = z1.flatMap((O1) => O1.contours.map((Y1) => Y1.map(_0))), k0 = z1.flatMap((O1) => O1.openPath ? [O1.openPath.map(_0)] : []), h3 = Q1.axisOffset !== void 0 ? [[Q1.axisOffset, -Math.max(...a2) - w2 * 0.1], [Q1.axisOffset, -Math.min(...a2) + w2 * 0.1]] : [], M3 = "http://www.w3.org/2000/svg", B3 = document.createElementNS(M3, "svg"), O = [...C0, ...n3, ...w3.flat(), ...k0.flat(), ...h3], Z = Math.max(M2, w2, Math.abs(g2), 1), d1 = Z * 0.18, v1 = Math.min(...O.map((O1) => O1[0])) - d1, A1 = Math.min(...O.map((O1) => O1[1])) - d1, V = Math.max(...O.map((O1) => O1[0])) - v1 + d1, o1 = Math.max(...O.map((O1) => O1[1])) - A1 + d1;
+        const Q1 = I2(T1), s2 = Q1.contour.map((O1) => O1[0]), a2 = Q1.contour.map((O1) => O1[1]), M2 = Math.max(...s2) - Math.min(...s2), w2 = Math.max(...a2) - Math.min(...a2), g2 = Q1.distance, K2 = g2 * 0.45, k2 = -g2 * 0.35, o0 = [Q1.contour, ...Q1.holes ?? []].map((O1) => O1.map(([Y1, c2]) => [Y1 + Q1.start * 0.45, -c2 - Q1.start * 0.35])), U2 = o0.map((O1) => O1.map(([Y1, c2]) => [Y1 + K2, c2 + k2])), [C0] = o0, [n3] = U2, J2 = v2 = Q1.start + g2, _0 = ([O1, Y1]) => [O1 + J2 * 0.45, -Y1 - J2 * 0.35], w3 = z1.flatMap((O1) => O1.contours.map((Y1) => Y1.map(_0))), k0 = z1.flatMap((O1) => O1.openPath ? [O1.openPath.map(_0)] : []), h3 = Q1.axisOffset !== void 0 ? [[Q1.axisOffset, -Math.max(...a2) - w2 * 0.1], [Q1.axisOffset, -Math.min(...a2) + w2 * 0.1]] : [], M3 = "http://www.w3.org/2000/svg", B3 = document.createElementNS(M3, "svg"), O = [...C0, ...n3, ...w3.flat(), ...k0.flat(), ...h3], Z = Math.max(M2, w2, Math.abs(g2), 1), d1 = Z * 0.18, v1 = Math.min(...O.map((O1) => O1[0])) - d1, A1 = Math.min(...O.map((O1) => O1[1])) - d1, V = Math.max(...O.map((O1) => O1[0])) - v1 + d1, o1 = Math.max(...O.map((O1) => O1[1])) - A1 + d1;
         B3.setAttribute("viewBox", q2?.viewBox ?? `${v1} ${A1} ${V} ${o1}`), B3.setAttribute("aria-hidden", "true");
         const f1 = (O1, Y1) => {
           const c2 = document.createElementNS(M3, "path");
-          c2.setAttribute("d", O1.map((T2) => "M " + T2.map((z2) => z2.join(" ")).join(" L ") + " Z").join(" ")), c2.setAttribute("fill-rule", "evenodd"), c2.setAttribute("class", Y1), B3.append(c2);
+          c2.setAttribute("d", O1.map((E2) => "M " + E2.map((R2) => R2.join(" ")).join(" L ") + " Z").join(" ")), c2.setAttribute("fill-rule", "evenodd"), c2.setAttribute("class", Y1), B3.append(c2);
         };
         f || f1(o0, "sketch-base");
         for (let O1 = 0; !f && O1 < o0.length; O1++) {
           const Y1 = o0[O1], c2 = U2[O1];
-          for (let T2 = 0; T2 < Y1.length; T2++) {
-            const z2 = (T2 + 1) % Y1.length;
-            f1([[Y1[T2], Y1[z2], c2[z2], c2[T2]]], "sketch-side");
+          for (let E2 = 0; E2 < Y1.length; E2++) {
+            const R2 = (E2 + 1) % Y1.length;
+            f1([[Y1[E2], Y1[R2], c2[R2], c2[E2]]], "sketch-side");
           }
         }
         f1(U2, "sketch-top"), w3.length && f1(w3, "sketch-reference");
@@ -62519,13 +62522,13 @@ CIRCLE 10, 15, 2`, z.append(T, V2("small", p("One loop per line. Separate outlin
           const Y1 = document.createElementNS(M3, "polyline");
           Y1.setAttribute("points", O1.map((c2) => c2.join(",")).join(" ")), Y1.setAttribute("class", "sketch-reference sketch-open-reference"), B3.append(Y1);
         }
-        if (r2.open && !r2.hidden && l2.value && E2.value)
+        if (r2.open && !r2.hidden && l2.value && A2.value)
           try {
-            const [O1, Y1] = _0(L7(l2.value)), [c2, T2] = _0(L7(E2.value)), z2 = c2 - O1, t0 = T2 - Y1, S2 = Math.hypot(z2, t0);
+            const [O1, Y1] = _0(L7(l2.value)), [c2, E2] = _0(L7(A2.value)), R2 = c2 - O1, t0 = E2 - Y1, S2 = Math.hypot(R2, t0);
             if (S2 > 0) {
               const q0 = Math.hypot(V, o1) + Math.hypot(O1 - v1, Y1 - A1) + S2, M0 = document.createElementNS(M3, "line");
-              M0.setAttribute("x1", String(O1 - z2 / S2 * q0)), M0.setAttribute("y1", String(Y1 - t0 / S2 * q0)), M0.setAttribute("x2", String(O1 + z2 / S2 * q0)), M0.setAttribute("y2", String(Y1 + t0 / S2 * q0)), M0.setAttribute("class", "sketch-reference sketch-trim-line"), B3.append(M0);
-              const n0 = e2.value === "left" ? 1 : -1, x3 = z2 / S2, e4 = t0 / S2, i4 = [(O1 + c2) / 2, (Y1 + T2) / 2], W0 = [i4[0] + n0 * e4 * Z * 0.11, i4[1] - n0 * x3 * Z * 0.11], b4 = [i4[0] + n0 * e4 * Z * 0.065, i4[1] - n0 * x3 * Z * 0.065], L4 = document.createElementNS(M3, "path");
+              M0.setAttribute("x1", String(O1 - R2 / S2 * q0)), M0.setAttribute("y1", String(Y1 - t0 / S2 * q0)), M0.setAttribute("x2", String(O1 + R2 / S2 * q0)), M0.setAttribute("y2", String(Y1 + t0 / S2 * q0)), M0.setAttribute("class", "sketch-reference sketch-trim-line"), B3.append(M0);
+              const n0 = e2.value === "left" ? 1 : -1, x3 = R2 / S2, e4 = t0 / S2, i4 = [(O1 + c2) / 2, (Y1 + E2) / 2], W0 = [i4[0] + n0 * e4 * Z * 0.11, i4[1] - n0 * x3 * Z * 0.11], b4 = [i4[0] + n0 * e4 * Z * 0.065, i4[1] - n0 * x3 * Z * 0.065], L4 = document.createElementNS(M3, "path");
               L4.setAttribute("d", `M ${i4.join(" ")} L ${W0.join(" ")} M ${b4[0] - x3 * Z * 0.025} ${b4[1] - e4 * Z * 0.025} L ${W0.join(" ")} L ${b4[0] + x3 * Z * 0.025} ${b4[1] + e4 * Z * 0.025}`), L4.setAttribute("class", "sketch-reference sketch-trim-side"), B3.append(L4);
             }
           } catch {
@@ -62534,37 +62537,37 @@ CIRCLE 10, 15, 2`, z.append(T, V2("small", p("One loop per line. Separate outlin
           const O1 = document.createElementNS(M3, "line");
           O1.setAttribute("x1", String(h3[0][0])), O1.setAttribute("x2", String(h3[1][0])), O1.setAttribute("y1", String(h3[0][1])), O1.setAttribute("y2", String(h3[1][1])), O1.setAttribute("class", "sketch-reference sketch-revolution-axis"), B3.append(O1);
         }
-        const u1 = (O1, Y1, c2, T2) => {
+        const u1 = (O1, Y1, c2, E2) => {
           if (y)
             return;
-          const z2 = document.createElementNS(M3, "circle");
-          z2.setAttribute("cx", String(O1)), z2.setAttribute("cy", String(Y1)), z2.setAttribute("r", String(Z * 0.065)), z2.setAttribute("fill", "transparent"), z2.dataset.resize = c2, z2.style.cursor = c2 === "vertex" || c2 === "curve" ? "move" : c2 === "depth" ? "nesw-resize" : "nwse-resize", T2 && (z2.dataset.loop = String(T2.loop), z2.dataset[c2 === "curve" ? "edge" : "vertex"] = String(T2.index));
+          const R2 = document.createElementNS(M3, "circle");
+          R2.setAttribute("cx", String(O1)), R2.setAttribute("cy", String(Y1)), R2.setAttribute("r", String(Z * 0.065)), R2.setAttribute("fill", "transparent"), R2.dataset.resize = c2, R2.style.cursor = c2 === "vertex" || c2 === "curve" ? "move" : c2 === "depth" ? "nesw-resize" : "nwse-resize", E2 && (R2.dataset.loop = String(E2.loop), R2.dataset[c2 === "curve" ? "edge" : "vertex"] = String(E2.index));
           const t0 = document.createElementNS(M3, "title");
-          t0.textContent = p(c2 === "curve" ? "Drag edge curve" : c2 === "vertex" ? "Drag outline point" : "Drag to change dimensions"), z2.append(t0);
+          t0.textContent = p(c2 === "curve" ? "Drag edge curve" : c2 === "vertex" ? "Drag outline point" : "Drag to change dimensions"), R2.append(t0);
           const S2 = document.createElementNS(M3, "circle");
-          S2.setAttribute("cx", String(O1)), S2.setAttribute("cy", String(Y1)), S2.setAttribute("r", String(Z * 0.023)), S2.classList.add("sketch-handle"), c2 === "curve" && S2.classList.add("sketch-curve-handle"), B3.append(S2, z2);
+          S2.setAttribute("cx", String(O1)), S2.setAttribute("cy", String(Y1)), S2.setAttribute("r", String(Z * 0.023)), S2.classList.add("sketch-handle"), c2 === "curve" && S2.classList.add("sketch-curve-handle"), B3.append(S2, R2);
         }, x1 = (O1) => O1.trim() !== "" && Number.isFinite(Number(O1)), b1 = T1.sketch.profile, N1 = b1.kind === "outline" || b1.kind === "region";
         if (b1.kind === "circle" ? x1(X.value) : b1.kind === "rectangle" && x1(W.value) && x1(n1.value)) {
           const O1 = b1.kind === "circle" ? -(Math.min(...a2) + Math.max(...a2)) / 2 : -Math.min(...a2);
           u1(Math.max(...s2) + J2 * 0.45, O1 - J2 * 0.35, "size");
         }
-        const G1 = b1.kind === "circle" ? Q1.contour[Math.floor(Q1.contour.length / 2)] : N1 ? Q1.contour[0] : [Math.min(...s2), Math.max(...a2)];
+        const K1 = b1.kind === "circle" ? Q1.contour[Math.floor(Q1.contour.length / 2)] : N1 ? Q1.contour[0] : [Math.min(...s2), Math.max(...a2)];
         if (!f && x1(t1.value)) {
           const O1 = N1 ? Q1.start + g2 / 2 : J2;
-          u1(G1[0] + O1 * 0.45, -G1[1] - O1 * 0.35, "depth");
+          u1(K1[0] + O1 * 0.45, -K1[1] - O1 * 0.35, "depth");
         }
         const I1 = (O1, Y1) => {
-          const { points: c2, bulges: T2 } = O1, z2 = f3(O1.id, b1);
+          const { points: c2, bulges: E2 } = O1, R2 = f3(O1.id, b1);
           c2.forEach((t0, S2) => {
             const [q0, M0] = _0(t0);
-            if (S2 === 0 && z2) {
+            if (S2 === 0 && R2) {
               const n0 = document.createElementNS(M3, "circle");
               n0.setAttribute("cx", String(q0)), n0.setAttribute("cy", String(M0)), n0.setAttribute("r", String(Z * 0.023)), n0.setAttribute("class", "sketch-handle sketch-path-locked"), B3.append(n0);
               return;
             }
             u1(q0, M0, "vertex", { loop: Y1, index: S2 });
           }), N.checked && c2.forEach((t0, S2) => {
-            const q0 = c2[(S2 + 1) % c2.length], [M0, n0] = _0(Sp(t0, q0, T2?.[S2] ?? 0));
+            const q0 = c2[(S2 + 1) % c2.length], [M0, n0] = _0(Sp(t0, q0, E2?.[S2] ?? 0));
             u1(M0, n0, "curve", { loop: Y1, index: S2 });
           });
         };
@@ -62573,13 +62576,13 @@ CIRCLE 10, 15, 2`, z.append(T, V2("small", p("One loop per line. Separate outlin
         }), p0 = b1, q2?.target) {
           const [O1, Y1] = _0(q2.target.point);
           if (q2.target.kind === "Tangent") {
-            const [z2, t0] = _0(q2.target.anchor), S2 = document.createElementNS(M3, "line");
-            S2.setAttribute("x1", String(z2)), S2.setAttribute("y1", String(t0)), S2.setAttribute("x2", String(O1)), S2.setAttribute("y2", String(Y1)), S2.setAttribute("class", "sketch-reference sketch-tangent-guide"), B3.append(S2);
+            const [R2, t0] = _0(q2.target.anchor), S2 = document.createElementNS(M3, "line");
+            S2.setAttribute("x1", String(R2)), S2.setAttribute("y1", String(t0)), S2.setAttribute("x2", String(O1)), S2.setAttribute("y2", String(Y1)), S2.setAttribute("class", "sketch-reference sketch-tangent-guide"), B3.append(S2);
           }
           const c2 = document.createElementNS(M3, "circle");
           c2.setAttribute("cx", String(O1)), c2.setAttribute("cy", String(Y1)), c2.setAttribute("r", String(Z * 0.04)), c2.setAttribute("class", "sketch-snap-marker"), B3.append(c2);
-          const T2 = V2("output", p(q2.target.kind));
-          T2.className = "sketch-snap-label", R1.append(T2);
+          const E2 = V2("output", p(q2.target.kind));
+          E2.className = "sketch-snap-label", R1.append(E2);
         }
         R1.prepend(B3), R1.append(V2("output", Q1.angle !== void 0 ? p`${M2.toLocaleString()} × ${w2.toLocaleString()} mm · ${Q1.angle.toLocaleString()}° sweep` : p`${M2.toLocaleString()} × ${w2.toLocaleString()} mm · ${Q1.distance.toLocaleString()} mm extrusion`)), F1.textContent = "", l0 = !0;
       } catch (T1) {
@@ -62604,7 +62607,7 @@ CIRCLE 10, 15, 2`, z.append(T, V2("small", p("One loop per line. Separate outlin
           n3 = { ...U2, points: J2, bulges: _0 };
         } else
           throw new DOMException("Sketch changed", "AbortError");
-        return R2({ ...o0, sketch: { ...o0.sketch, profile: n3 } });
+        return I2({ ...o0, sketch: { ...o0.sketch, profile: n3 } });
       }, (K2) => {
         if (!M2() || !K2) {
           a2.remove();
@@ -62625,10 +62628,10 @@ CIRCLE 10, 15, 2`, z.append(T, V2("small", p("One loop per line. Separate outlin
       if (!s2)
         return;
       const a2 = s2.inverse(), M2 = new DOMPoint(T1.clientX, T1.clientY).matrixTransform(a2);
-      if (W1) {
+      if (G1) {
         T1.preventDefault();
         const k2 = o() / (T1.shiftKey ? 10 : 1), o0 = (C0) => Number((k2 > 0 ? Math.round(C0 / k2) * k2 : C0).toFixed(5)), U2 = [o0(M2.x - v2 * 0.45), o0(-M2.y - v2 * 0.35)].join(", ");
-        W1 === 1 ? (l2.value = U2, E2.value = "", $1(2)) : (E2.value = U2, $1(0)), P0();
+        G1 === 1 ? (l2.value = U2, A2.value = "", $1(2)) : (A2.value = U2, $1(0)), P0();
         return;
       }
       if (!B1)
@@ -62736,7 +62739,7 @@ CIRCLE 10, 15, 2`, z.append(T, V2("small", p("One loop per line. Separate outlin
         if (Q1.kind !== "outline")
           throw new Error(p("Select an outline first."));
         const s2 = { ...Q1, ...T1 };
-        R2({ ...B1, sketch: { ...B1.sketch, profile: s2 } }), j1(s2), P0();
+        I2({ ...B1, sketch: { ...B1.sketch, profile: s2 } }), j1(s2), P0();
       }
     }), O3 = bH(S, r, {
       initial: j,
@@ -62756,7 +62759,7 @@ CIRCLE 10, 15, 2`, z.append(T, V2("small", p("One loop per line. Separate outlin
         if (s2.kind !== "region")
           return;
         const a2 = { ...s2, loops: s2.loops.map((M2) => M2.id === T1 ? { ...M2, ...B1 } : M2) };
-        R2({ ...Q1, sketch: { ...Q1.sketch, profile: a2 } }), j1(a2), P0();
+        I2({ ...Q1, sketch: { ...Q1.sketch, profile: a2 } }), j1(a2), P0();
       }
     }), d5 = vH(S, {
       initial: I?.kind === "region" ? I.placements ?? [] : [],
@@ -62771,7 +62774,7 @@ CIRCLE 10, 15, 2`, z.append(T, V2("small", p("One loop per line. Separate outlin
       },
       apply: (T1) => {
         const B1 = x2(!1, T1);
-        R2(B1), j1(B1.sketch.profile);
+        I2(B1), j1(B1.sketch.profile);
       }
     }), q1 = yH(S, r, {
       initial: I?.kind === "region" ? I.edgeMatches ?? [] : [],
@@ -62794,7 +62797,7 @@ CIRCLE 10, 15, 2`, z.append(T, V2("small", p("One loop per line. Separate outlin
       if (w0()) {
         if (s2 !== $0 || !j2())
           throw new Error(p("The sketch changed during the solve. Solve the outline again."));
-        R2({ ...a2, sketch: { ...a2.sketch, profile: w2 } }), j1(w2);
+        I2({ ...a2, sketch: { ...a2.sketch, profile: w2 } }), j1(w2);
       }
     }
     async function i2(T1, B1, Q1, s2) {
@@ -62828,8 +62831,8 @@ CIRCLE 10, 15, 2`, z.append(T, V2("small", p("One loop per line. Separate outlin
           const T1 = x2();
           if (Z1(T1.sketch.profile))
             throw new Error(p("Clear outline constraints before trimming or offsetting."));
-          const B1 = pv({ version: 1, id: "trim-preview", ...T1.sketch }, x, L7(l2.value), L7(E2.value), e2.value === "left" ? "left" : "right");
-          R2({ ...T1, sketch: { ...T1.sketch, profile: B1 } }), j1(B1), P0();
+          const B1 = pv({ version: 1, id: "trim-preview", ...T1.sketch }, x, L7(l2.value), L7(A2.value), e2.value === "left" ? "left" : "right");
+          I2({ ...T1, sketch: { ...T1.sketch, profile: B1 } }), j1(B1), P0();
         } catch (T1) {
           F1.textContent = T1 instanceof Error && "diagnostic" in T1 ? T1.diagnostic.message : T1 instanceof Error ? T1.message : String(T1);
         }
@@ -62855,7 +62858,7 @@ CIRCLE 10, 15, 2`, z.append(T, V2("small", p("One loop per line. Separate outlin
             return;
           if (w2 !== $0 || q !== e.state.revision)
             throw new Error(p("The sketch changed during the offset. Apply the offset again."));
-          R2({ ...k2, sketch: { ...k2.sketch, profile: o0 } }), j1(o0), $0++;
+          I2({ ...k2, sketch: { ...k2.sketch, profile: o0 } }), j1(o0), $0++;
         } catch (k2) {
           K2 = k2 instanceof Error && "diagnostic" in k2 ? k2.diagnostic.message : k2 instanceof Error ? k2.message : String(k2);
         } finally {
@@ -62873,14 +62876,14 @@ CIRCLE 10, 15, 2`, z.append(T, V2("small", p("One loop per line. Separate outlin
         const B1 = x2(!0);
         if (e.state.revision !== q)
           throw new Error(p("The model changed. Close and reopen this dialog before applying."));
-        const Q1 = C2(B1), a2 = (await t(Q1.document)).bodies.find((M2) => M2.id === Q1.id);
+        const Q1 = T2(B1), a2 = (await t(Q1.document)).bodies.find((M2) => M2.id === Q1.id);
         if (a || c !== T1 || !r.open)
           return;
         if (e.state.revision !== q)
           throw new Error(p("The model changed while checking geometry. Close and reopen this dialog."));
         if (!h && (!a2 || a2.volume <= 0))
           throw new Error(p("The profile must produce a solid with positive volume."));
-        A2(e, B1, [0, 0, -(a2?.bounds.min[2] ?? 0)]), r.close(), await s();
+        C2(e, B1, [0, 0, -(a2?.bounds.min[2] ?? 0)]), r.close(), await s();
       } catch (B1) {
         a || (F1.textContent = B1 instanceof Error && "diagnostic" in B1 ? B1.diagnostic.message : B1 instanceof Error ? B1.message : String(B1));
       } finally {
@@ -62918,8 +62921,8 @@ CIRCLE 10, 15, 2`, z.append(T, V2("small", p("One loop per line. Separate outlin
         }
       }), S.append(T1);
     }
-    const L2 = V2("footer");
-    if (L2.append(F1), !y && !h && !f) {
+    const z2 = V2("footer");
+    if (z2.append(F1), !y && !h && !f) {
       const T1 = V2("button", p("Save sketch"));
       T1.type = "button", T1.onclick = () => {
         if (!(m || q2 || X0()))
@@ -62927,13 +62930,13 @@ CIRCLE 10, 15, 2`, z.append(T, V2("small", p("One loop per line. Separate outlin
             if (e.state.revision !== q)
               throw new Error(p("The model changed. Close and reopen this dialog before applying."));
             const { sketch: B1 } = x2(!0);
-            R2(x2()), v ? e.updateSketch(v, B1) : e.addSketch(B1.profile, { name: B1.name, plane: B1.plane }), r.close();
+            I2(x2()), v ? e.updateSketch(v, B1) : e.addSketch(B1.profile, { name: B1.name, plane: B1.plane }), r.close();
           } catch (B1) {
             F1.textContent = B1 instanceof Error ? B1.message : String(B1);
           }
-      }, L2.append(T1);
+      }, z2.append(T1);
     }
-    v || L2.append(_2);
+    v || z2.append(_2);
     const y2 = V2("div");
     y2.className = "sketch-body";
     const O2 = V2("details");
@@ -62945,7 +62948,7 @@ CIRCLE 10, 15, 2`, z.append(T, V2("small", p("One loop per line. Separate outlin
       const T1 = V2("button", p("Draw outline in 2D"));
       T1.type = "button", T1.className = "sketch-start-outline";
       const B1 = (s2) => {
-        s2 ? Q1.open() : Q1.close(), S.hidden = R1.hidden = t2.hidden = L2.hidden = T1.hidden = s2;
+        s2 ? Q1.open() : Q1.close(), S.hidden = R1.hidden = t2.hidden = z2.hidden = T1.hidden = s2;
       }, Q1 = xH((s2) => {
         C.value = "outline", e1.value = I9(s2).join(`
 `), B1(!1), P0(), T1.focus();
@@ -62962,7 +62965,7 @@ CIRCLE 10, 15, 2`, z.append(T, V2("small", p("One loop per line. Separate outlin
         }
       }, D2.append(T1, Q1.layout);
     }
-    D2.append(R1), y || D2.append(t2), y2.append(D2, S), r.append(w, A, y2, L2), W2(), r.showModal();
+    D2.append(R1), y || D2.append(t2), y2.append(D2, S), r.append(w, A, y2, z2), W2(), r.showModal();
   }
   return r.addEventListener("keydown", (h) => h.stopPropagation()), { open: d, openSavedSketch(h) {
     d(void 0, { sketchId: h, revolve: !1, editOnly: !0 });
@@ -63102,19 +63105,19 @@ function SH(i, e, t, n) {
         const m1 = K();
         if (w.hidden = !m1.profile.dxfWidths, q && q.length !== m1.profile.points.length)
           throw new Error(p("Restore the original point count or remove the point locks and segment constraints."));
-        const { contour: w1 } = W4(m1, a), k1 = w1.map((d2) => d2[0]), R1 = w1.map((d2) => -d2[1]), F1 = Math.min(...k1), t2 = Math.min(...R1), o2 = Math.max(...k1) - F1, r2 = Math.max(...R1) - t2, l2 = Math.max(o2, r2, 1) * 0.15, E2 = document.createElementNS(fc, "svg");
-        E2.setAttribute("viewBox", `${F1 - l2} ${t2 - l2} ${o2 + 2 * l2} ${r2 + 2 * l2}`), E2.setAttribute("aria-hidden", "true");
+        const { contour: w1 } = W4(m1, a), k1 = w1.map((d2) => d2[0]), R1 = w1.map((d2) => -d2[1]), F1 = Math.min(...k1), t2 = Math.min(...R1), o2 = Math.max(...k1) - F1, r2 = Math.max(...R1) - t2, l2 = Math.max(o2, r2, 1) * 0.15, A2 = document.createElementNS(fc, "svg");
+        A2.setAttribute("viewBox", `${F1 - l2} ${t2 - l2} ${o2 + 2 * l2} ${r2 + 2 * l2}`), A2.setAttribute("aria-hidden", "true");
         const e2 = document.createElementNS(fc, "polyline");
-        e2.setAttribute("points", w1.map(([d2, W1]) => `${d2},${-W1}`).join(" ")), e2.setAttribute("class", "sketch-path-line"), E2.append(e2);
+        e2.setAttribute("points", w1.map(([d2, G1]) => `${d2},${-G1}`).join(" ")), e2.setAttribute("class", "sketch-path-line"), A2.append(e2);
         const D1 = d6(m1.profile, a);
-        for (const [d2, W1] of D1.entries()) {
+        for (const [d2, G1] of D1.entries()) {
           const v2 = x?.some((m2) => m2.vertexId === q?.[d2]), $1 = g?.some((m2) => m2.to === q?.[d2]);
           if (!v2 && !$1 && d2 !== 0 && d2 !== D1.length - 1)
             continue;
           const j1 = document.createElementNS(fc, "circle");
-          j1.setAttribute("cx", String(W1[0])), j1.setAttribute("cy", String(-W1[1])), j1.setAttribute("r", String(l2 * 0.15)), j1.setAttribute("class", v2 ? "sketch-handle sketch-path-locked" : "sketch-handle"), $1 && j1.setAttribute("data-driven", "true"), E2.append(j1);
+          j1.setAttribute("cx", String(G1[0])), j1.setAttribute("cy", String(-G1[1])), j1.setAttribute("r", String(l2 * 0.15)), j1.setAttribute("class", v2 ? "sketch-handle sketch-path-locked" : "sketch-handle"), $1 && j1.setAttribute("data-driven", "true"), A2.append(j1);
         }
-        y.append(E2), S1 = !0, $.disabled = J.disabled = z.disabled = Q.disabled = !1, j.disabled = p1;
+        y.append(A2), S1 = !0, $.disabled = J.disabled = z.disabled = Q.disabled = !1, j.disabled = p1;
       } catch (m1) {
         G(m1);
       }
@@ -64415,29 +64418,29 @@ function rG(i, e) {
       });
       return;
     }
-    const K1 = u2("div", `tool-group ${H1}`);
-    K1.setAttribute("role", "group"), K1.setAttribute("aria-label", p(l1));
+    const W1 = u2("div", `tool-group ${H1}`);
+    W1.setAttribute("role", "group"), W1.setAttribute("aria-label", p(l1));
     const J1 = u2("div", "group-tools");
-    K1.append(J1), a.append(K1), z = J1;
+    W1.append(J1), a.append(W1), z = J1;
   }
   function Q(l1) {
-    const H1 = l1.querySelector("summary").getBoundingClientRect(), K1 = l1.querySelector(".command-popup");
-    Object.assign(K1.style, { left: "0px", right: "auto", top: "0px" });
-    const J1 = K1.getBoundingClientRect(), f2 = Math.max(8, Math.min(H1.left, document.documentElement.clientWidth - J1.width - 8)), b2 = H1.bottom + 4, h2 = document.documentElement.clientHeight, Q2 = b2 + J1.height > h2 - 8 && H1.top - J1.height - 4 >= 8 ? H1.top - J1.height - 4 : b2;
-    K1.style.left = `${f2 - J1.left}px`, K1.style.top = `${Q2 - J1.top}px`, K1.style.maxHeight = `${Math.max(40, h2 - Q2 - 8)}px`, K1.style.overflowY = "auto";
+    const H1 = l1.querySelector("summary").getBoundingClientRect(), W1 = l1.querySelector(".command-popup");
+    Object.assign(W1.style, { left: "0px", right: "auto", top: "0px" });
+    const J1 = W1.getBoundingClientRect(), f2 = Math.max(8, Math.min(H1.left, document.documentElement.clientWidth - J1.width - 8)), b2 = H1.bottom + 4, h2 = document.documentElement.clientHeight, Q2 = b2 + J1.height > h2 - 8 && H1.top - J1.height - 4 >= 8 ? H1.top - J1.height - 4 : b2;
+    W1.style.left = `${f2 - J1.left}px`, W1.style.top = `${Q2 - J1.top}px`, W1.style.maxHeight = `${Math.max(40, h2 - Q2 - 8)}px`, W1.style.overflowY = "auto";
   }
   a.addEventListener("scroll", () => T.forEach((l1) => {
     l1.open && Q(l1);
   }), { passive: !0 });
-  function j(l1, H1, K1 = z, J1 = "", f2 = !0) {
+  function j(l1, H1, W1 = z, J1 = "", f2 = !0) {
     const b2 = u2("button", J1), h2 = z9(l1);
     h2 && b2.append(h2);
     const Q2 = f2 ? p(l1) : l1;
-    return b2.append(u2("span", "", Q2)), b2.type = "button", b2.title = Q2, b2.setAttribute("aria-label", Q2), b2.addEventListener("click", () => I(H1)), K1.append(b2), b2;
+    return b2.append(u2("span", "", Q2)), b2.type = "button", b2.title = Q2, b2.setAttribute("aria-label", Q2), b2.addEventListener("click", () => I(H1)), W1.append(b2), b2;
   }
   function p1(l1, H1) {
-    const K1 = getComputedStyle(l1).display !== "none";
-    l1.classList.toggle("closed", K1), l1.classList.toggle("open", !K1), H1.setAttribute("aria-pressed", String(!K1));
+    const W1 = getComputedStyle(l1).display !== "none";
+    l1.classList.toggle("closed", W1), l1.classList.toggle("open", !W1), H1.setAttribute("aria-pressed", String(!W1));
   }
   const S1 = Wz(u, t, e.wasmURL, o4, (l1) => X.setSimulationPoses(l1), { connectorHandles: (l1) => X.setConnectorHandlesVisible(l1), dragEnabled: (l1) => X.setSimulationDragEnabled(l1), pickPoint: (l1) => X.pickPoint(l1), traces: (l1) => X.setSimulationTraces(l1), canvas: X.canvas, onExport: e.onExport, onInterrupt: e.onSimulationInterrupt });
   X.setSimulationDrag((l1) => {
@@ -64452,16 +64455,16 @@ function rG(i, e) {
   async function J(l1) {
     if (!_) {
       if (!$) {
-        const { mountModelLibraryPanel: H1 } = await import("./model-library-panel-BZS2ldVW.js");
+        const { mountModelLibraryPanel: H1 } = await import("./model-library-panel-BknZwMgI.js");
         if (_)
           return;
-        $ ?? ($ = H1(r, t, (K1) => W.evaluate(K1), e.modelLibrary, async () => {
+        $ ?? ($ = H1(r, t, (W1) => W.evaluate(W1), e.modelLibrary, async () => {
           await o4(), X.frame();
         }, e.onExport, e.presetProjects && {
           open: e.presetProjects.open,
-          items: e.presetProjects.items.map((K1) => {
-            const J1 = kn.find((f2) => f2.id === K1.id);
-            return { ...K1, preview: K1.preview ?? (J1 ? () => __(J1) : void 0) };
+          items: e.presetProjects.items.map((W1) => {
+            const J1 = kn.find((f2) => f2.id === W1.id);
+            return { ...W1, preview: W1.preview ?? (J1 ? () => __(J1) : void 0) };
           })
         }));
       }
@@ -64495,10 +64498,10 @@ function rG(i, e) {
   }, { pickEdges: (l1) => X.pickEdges(l1) }), a1 = Hj(r, t, { evaluate: (l1) => W.evaluate(l1), afterApply: async () => {
     await o4();
   }, pickPoint: (l1) => X.pickPoint(l1), bodies: () => w?.bodies, generated: (l1, H1) => si(l1.preset, H1, { recipe: l1 }) }), t1 = (l1 = {}) => {
-    const [H1] = t.state.selection, K1 = t.state.document.nodes[H1];
+    const [H1] = t.state.selection, W1 = t.state.document.nodes[H1];
     if (t.state.selection.length !== 1)
       throw new Error(p("Select a top-level body for the exact feature"));
-    U1.open(H1, K1?.kind === "exact-feature", l1);
+    U1.open(H1, W1?.kind === "exact-feature", l1);
   }, y1 = PH(r, t, P1);
   let C1, r1 = !1;
   const m1 = t.subscribeCommands((l1) => {
@@ -64507,11 +64510,11 @@ function rG(i, e) {
   async function w1(l1 = !1) {
     if (r1)
       return;
-    const H1 = t.state.document, K1 = oo(H1);
-    if (K1.length) {
+    const H1 = t.state.document, W1 = oo(H1);
+    if (W1.length) {
       r1 = !0, f.textContent = p("Recomputing exact features on the exact kernel…");
       try {
-        await Zp(t, P1, K1);
+        await Zp(t, P1, W1);
       } catch (J1) {
         if (!l1 || t.state.document === H1)
           throw J1;
@@ -64535,21 +64538,21 @@ function rG(i, e) {
   R1.title = p("Command palette (Ctrl/⌘+Shift+P)"), R1.setAttribute("aria-keyshortcuts", "Control+Shift+P Meta+Shift+P");
   const F1 = KV(), t2 = /* @__PURE__ */ new WeakMap(), o2 = /* @__PURE__ */ new WeakMap();
   function r2(l1, H1) {
-    let K1 = o2.get(l1);
-    return K1 || (K1 = W.exact.run({ operation: "drawing", document: l1, bodies: [] }, H1).then((J1) => {
+    let W1 = o2.get(l1);
+    return W1 || (W1 = W.exact.run({ operation: "drawing", document: l1, bodies: [] }, H1).then((J1) => {
       if (J1.operation !== "drawing")
         throw new Error(p("The exact kernel returned an unexpected result."));
       return { bodies: J1.bodies, failures: J1.failures };
-    }), o2.set(l1, K1), K1.catch(() => {
-      o2.get(l1) === K1 && o2.delete(l1);
-    })), K1;
+    }), o2.set(l1, W1), W1.catch(() => {
+      o2.get(l1) === W1 && o2.delete(l1);
+    })), W1;
   }
   const l2 = (l1) => r2(l1).catch((H1) => {
     throw new Error(p`Exact edges are unavailable: ${H1 instanceof Error ? H1.message : String(H1)}`);
-  }), E2 = {
-    async check(l1, { bodies: H1, settings: K1 }, J1) {
+  }), A2 = {
+    async check(l1, { bodies: H1, settings: W1 }, J1) {
       let f2, b2;
-      if (K1.exact)
+      if (W1.exact)
         try {
           f2 = await r2(l1, J1);
         } catch (Q2) {
@@ -64559,14 +64562,14 @@ function rG(i, e) {
         }
       J1?.throwIfAborted();
       const h2 = `${tn.id} · ${tn.package} ${tn.version}`;
-      return W.checkManufacturing(l1, { settings: K1, bodies: [...H1], ...f2 ? { exact: f2, kernel: h2 } : {}, ...b2 ? { exactUnavailable: b2 } : {} }, J1);
+      return W.checkManufacturing(l1, { settings: W1, bodies: [...H1], ...f2 ? { exact: f2, kernel: h2 } : {}, ...b2 ? { exactUnavailable: b2 } : {} }, J1);
     }
   };
   async function e2(l1, H1 = {}) {
-    const K1 = t.state.document, J1 = () => !_ && t.state.document === K1, f2 = await o4();
+    const W1 = t.state.document, J1 = () => !_ && t.state.document === W1, f2 = await o4();
     if (!J1())
       return;
-    const b2 = H1.exact ? await l2(K1) : void 0;
+    const b2 = H1.exact ? await l2(W1) : void 0;
     if (!J1())
       return;
     const h2 = await F1.project(f2, b2);
@@ -64576,7 +64579,7 @@ function rG(i, e) {
     for (const t4 of l1)
       if (!(!v5(t4.source) || !t4.section))
         try {
-          const E3 = D_(K1, t4.section), U5 = cp(E3);
+          const E3 = D_(W1, t4.section), U5 = cp(E3);
           let z4 = t2.get(f2);
           z4 || (z4 = /* @__PURE__ */ new Map(), t2.set(f2, z4));
           let u0 = z4.get(U5);
@@ -64594,26 +64597,26 @@ function rG(i, e) {
         }
     return { ...h2, sections: Q2 };
   }
-  const D1 = YV(r, t, e2, e.onExport), d2 = Wj(r, g, t, (l1) => W.evaluate(l1), (l1, H1) => si(l1.preset, H1, { recipe: l1 })), W1 = eV(r, t, (l1) => W.evaluate(l1), async () => {
+  const D1 = YV(r, t, e2, e.onExport), d2 = Wj(r, g, t, (l1) => W.evaluate(l1), (l1, H1) => si(l1.preset, H1, { recipe: l1 })), G1 = eV(r, t, (l1) => W.evaluate(l1), async () => {
     await o4(), X.frame();
-  }, e.onExport, () => I(() => d2.open()), { workspaceStorage: e.workspaceStorage }), v2 = () => W1.openWorkspace(t.state.selection.length === 1 && t.state.document.nodes[t.state.selection[0]]?.kind === "code" ? t.state.selection[0] : void 0), $1 = j("Terminal", () => j1.toggle(), g, "panel-toggle");
+  }, e.onExport, () => I(() => d2.open()), { workspaceStorage: e.workspaceStorage }), v2 = () => G1.openWorkspace(t.state.selection.length === 1 && t.state.document.nodes[t.state.selection[0]]?.kind === "code" ? t.state.selection[0] : void 0), $1 = j("Terminal", () => j1.toggle(), g, "panel-toggle");
   $1.title = p("CAD terminal (Ctrl/⌘+`)"), $1.setAttribute("aria-keyshortcuts", "Control+Backquote Meta+Backquote");
-  const j1 = rV(r, t, { executeEditorCommand: i8, openCodeWorkspace: v2, storage: e.workspaceStorage, exact: P1, manufacturing: E2, saveFile: async (l1) => {
+  const j1 = rV(r, t, { executeEditorCommand: i8, openCodeWorkspace: v2, storage: e.workspaceStorage, exact: P1, manufacturing: A2, saveFile: async (l1) => {
     if (!e.onExport)
       throw new Error(p("This host has not provided file export"));
     await e.onExport({ name: l1.name, bytes: new TextEncoder().encode(l1.text), mime: l1.mime });
   }, pickStepFile: () => n3(), afterStepImport: (l1) => J2(l1), pickPoint: (l1, H1) => X.pickDraftPoint(l1, H1), focusCanvas: () => X.canvas.focus({ preventScroll: !0 }), onVisibilityChange: (l1) => $1.setAttribute("aria-pressed", String(l1)) });
-  j("Code", () => W1.open(t.state.selection.length === 1 && t.state.document.nodes[t.state.selection[0]]?.kind === "code" ? t.state.selection[0] : void 0), a, "compact-icon").title = p("Code an object");
+  j("Code", () => G1.open(t.state.selection.length === 1 && t.state.document.nodes[t.state.selection[0]]?.kind === "code" ? t.state.selection[0] : void 0), a, "compact-icon").title = p("Code an object");
   const m2 = j("Parameters", () => H.open(), a, "compact-icon");
   m2.title = p("Model parameters and formulas"), e.headerContent && (e.headerContent.classList.add("host-actions"), y.append(e.headerContent)), U("Shapes", "shapes-tools");
-  const x2 = j("Shapes", () => T0.toggle(), z, "shape-library-toggle"), A2 = /* @__PURE__ */ new Map(), C2 = /* @__PURE__ */ new Map();
-  function R2(l1, H1, K1, J1) {
-    const f2 = ["text", "name-tag", "icon-tag", "qr"].includes(l1.id), b2 = JSON.stringify([l1.id, f2 ? H1 : "", f2 ? K1 : "", f2 ? J1 : ""]);
-    let h2 = C2.get(b2);
+  const x2 = j("Shapes", () => T0.toggle(), z, "shape-library-toggle"), C2 = /* @__PURE__ */ new Map(), T2 = /* @__PURE__ */ new Map();
+  function I2(l1, H1, W1, J1) {
+    const f2 = ["text", "name-tag", "icon-tag", "qr"].includes(l1.id), b2 = JSON.stringify([l1.id, f2 ? H1 : "", f2 ? W1 : "", f2 ? J1 : ""]);
+    let h2 = T2.get(b2);
     if (!h2) {
-      const Q2 = si(l1.id, H1, { svg: K1, font: J1 });
-      h2 = W.evaluate(Q2).then((t4) => ({ document: Q2, geometry: t4 })), C2.set(b2, h2), C2.size > 80 && C2.delete(C2.keys().next().value), h2.catch(() => {
-        C2.get(b2) === h2 && C2.delete(b2);
+      const Q2 = si(l1.id, H1, { svg: W1, font: J1 });
+      h2 = W.evaluate(Q2).then((t4) => ({ document: Q2, geometry: t4 })), T2.set(b2, h2), T2.size > 80 && T2.delete(T2.keys().next().value), h2.catch(() => {
+        T2.get(b2) === h2 && T2.delete(b2);
       });
     }
     return h2;
@@ -64623,10 +64626,10 @@ function rG(i, e) {
     const l1 = q2;
     l1 && (q2 = void 0, X.cancelPlacement(), t.state.document.id === l1.projectId && t.state.revision === l1.revision && !t.state.selection.length && t.select(l1.selection));
   }
-  function p3(l1, H1, K1, J1, f2) {
+  function p3(l1, H1, W1, J1, f2) {
     p0();
     try {
-      const b2 = R2(l1, H1, K1, J1), h2 = { name: p(l1.name), projectId: t.state.document.id, revision: t.state.revision, selection: [...t.state.selection], ready: Promise.all([b2, o4()]).then(([Q2]) => Q2), point: f2, dropping: !1, role: "solid" };
+      const b2 = I2(l1, H1, W1, J1), h2 = { name: p(l1.name), projectId: t.state.document.id, revision: t.state.revision, selection: [...t.state.selection], ready: Promise.all([b2, o4()]).then(([Q2]) => Q2), point: f2, dropping: !1, role: "solid" };
       q2 = h2, X.beginPlacement(), t.select([]), f2 && X.movePlacement(f2), h2.ready.then(({ geometry: Q2 }) => {
         q2 !== h2 || _ || (X.setPlacementGeometry(Q2), h2.point && X.movePlacement(h2.point));
       }).catch((Q2) => {
@@ -64645,7 +64648,7 @@ function rG(i, e) {
       return !1;
     H1.dropping = !0, H1.point = l1;
     try {
-      const K1 = await H1.ready;
+      const W1 = await H1.ready;
       if (_ || q2 !== H1)
         return !1;
       if (t.state.document.id !== H1.projectId || t.state.revision !== H1.revision)
@@ -64653,22 +64656,22 @@ function rG(i, e) {
       const J1 = X.movePlacement(l1);
       if (!J1)
         return p0(), !1;
-      const f2 = CO(K1.document, J1);
+      const f2 = CO(W1.document, J1);
       if (H1.role === "hole") {
         f2.version = 7;
         for (const b2 of f2.roots)
           f2.nodes[b2].role = "hole";
       }
       return await W.evaluate(f2), _ || q2 !== H1 ? !1 : t.state.document.id !== H1.projectId || t.state.revision !== H1.revision ? (p0(), !1) : (q2 = void 0, X.cancelPlacement(), t.insert(f2, [0, 0, 0], { mergeParameters: !0, label: "Place shape" }), await o4(), T0.placed(H1.name), X.canvas.focus({ preventScroll: !0 }), !0);
-    } catch (K1) {
-      throw q2 === H1 && p0(), K1;
+    } catch (W1) {
+      throw q2 === H1 && p0(), W1;
     }
   }
   X.setPlacementHandlers((l1) => {
     l0(l1).catch(R);
   }, p0);
-  const T0 = $j(d, x2, async (l1, H1, K1, J1) => {
-    const f2 = t.state.document.id, b2 = !t.state.document.roots.length, { document: h2, geometry: Q2 } = await R2(l1, H1, K1, J1);
+  const T0 = $j(d, x2, async (l1, H1, W1, J1) => {
+    const f2 = t.state.document.id, b2 = !t.state.document.roots.length, { document: h2, geometry: Q2 } = await I2(l1, H1, W1, J1);
     if (_)
       return;
     if (t.state.document.id !== f2)
@@ -64676,16 +64679,16 @@ function rG(i, e) {
     const t4 = Math.min(...Q2.bodies.map((E3) => E3.bounds.min[2]));
     t.insert(h2, [t.state.document.roots.length * 12, 0, -t4], { mergeParameters: !0 }), await o4(), b2 && X.frame();
   }, R, (l1, H1) => {
-    const K1 = A2.get(l1.id);
-    return K1 ? Promise.resolve(K1) : R2(l1, "ABC").then(async (J1) => {
+    const W1 = C2.get(l1.id);
+    return W1 ? Promise.resolve(W1) : I2(l1, "ABC").then(async (J1) => {
       await new Promise((h2) => setTimeout(h2, 0));
-      const f2 = A2.get(l1.id);
+      const f2 = C2.get(l1.id);
       if (f2)
         return f2;
       if (_ || !H1())
         throw new Error("Thumbnail no longer shown");
       const b2 = k_(J1.geometry.bodies);
-      return A2.set(l1.id, b2), b2;
+      return C2.set(l1.id, b2), b2;
     });
   }, { excludedIds: e.presetProjects?.items.map((l1) => l1.id), layout: e.shapeBrowserLayout, onLayoutChange: e.onShapeBrowserLayoutChange, placement: { begin: p3, move: f3, drop: l0, cancel: p0 } });
   U("Combine");
@@ -64695,8 +64698,8 @@ function rG(i, e) {
   });
   U("Transform");
   const W2 = ["select", "translate", "rotate", "scale"].map((l1, H1) => {
-    const K1 = j(["Select", "Move", "Rotate", "Scale"][H1], () => n0(l1));
-    return K1.title = p(["Select and drag (V / Esc)", "Move (W)", "Rotate (E)", "Scale (R)"][H1]), K1;
+    const W1 = j(["Select", "Move", "Rotate", "Scale"][H1], () => n0(l1));
+    return W1.title = p(["Select and drag (V / Esc)", "Move (W)", "Rotate (E)", "Scale (R)"][H1]), W1;
   }), U0 = j("Drop to workplane", () => X.dropSelection()), I0 = j("Snap to surfaces", () => $0(!X.surfaceSnap), a, "compact-icon");
   I0.title = p("Snap to surfaces (C) · Alt-drag temporarily bypasses"), I0.setAttribute("aria-pressed", String(X.surfaceSnap)), I0.classList.toggle("active", X.surfaceSnap);
   function $0(l1) {
@@ -64709,16 +64712,16 @@ function rG(i, e) {
   const w0 = u2("input");
   w0.type = "checkbox", w0.setAttribute("aria-label", p("Show on-canvas parameters")), w0.onchange = () => P0.setVisible(w0.checked), X0.prepend(w0), P0.setVisible(e.showTransformReadout ?? !1), X.setTransformPreviewListener((l1) => {
     if (P0.update(l1), l1.bounds)
-      for (const [K1, J1] of ["X", "Y", "Z"].entries()) {
+      for (const [W1, J1] of ["X", "Y", "Z"].entries()) {
         const f2 = m.querySelector(`[data-size-axis=${J1}]`);
-        f2 && (f2.value = String(Number((l1.bounds.max[K1] - l1.bounds.min[K1]).toFixed(3))));
+        f2 && (f2.value = String(Number((l1.bounds.max[W1] - l1.bounds.min[W1]).toFixed(3))));
       }
     const H1 = l1.poses[0]?.transform;
     if (H1)
-      for (const [K1, J1] of [["position", "Position"], ["rotation", "Rotation"], ["scale", "Scale"]])
+      for (const [W1, J1] of [["position", "Position"], ["rotation", "Rotation"], ["scale", "Scale"]])
         for (const [f2, b2] of ["X", "Y", "Z"].entries()) {
           const h2 = Array.from(m.querySelectorAll("input")).find((Q2) => Q2.getAttribute("aria-label") === `${p(J1)} ${b2}`);
-          h2 && (h2.readOnly = l1.dragging, (s.activeElement !== h2 || l1.dragging) && (h2.value = String(Number(H1[K1][f2].toFixed(5)))));
+          h2 && (h2.readOnly = l1.dragging, (s.activeElement !== h2 || l1.dragging) && (h2.value = String(Number(H1[W1][f2].toFixed(5)))));
         }
   });
   const j2 = u2("div", "plane-bar");
@@ -64745,18 +64748,18 @@ function rG(i, e) {
   const i2 = j("Fillet, chamfer, shell", () => t1());
   i2.title = p("Round, bevel or hollow a selected body exactly with the B-rep kernel");
   const X1 = /* @__PURE__ */ new Map(), Z1 = (l1, H1) => {
-    const K1 = $_.find((f2) => f2.command === l1), J1 = j(K1.label, () => i8(l1));
+    const W1 = $_.find((f2) => f2.command === l1), J1 = j(W1.label, () => i8(l1));
     return H1 && (J1.title = p(H1)), X1.set(l1, J1), J1;
   };
   Z1("exact-edges"), Z1("measure-exact", "Volume, area, bounds and centroid from the exact B-rep kernel (selected bodies, or all)"), Z1("recompute-exact");
-  const _2 = j("Cut", () => ce(!0)), L2 = j("Copy", () => ce());
+  const _2 = j("Cut", () => ce(!0)), z2 = j("Copy", () => ce());
   j("Paste", () => ya());
   const y2 = j("Duplicate", () => i8("duplicate")), O2 = j("Delete", () => i8("delete")), B2 = u2("div", "context-actions");
   B2.setAttribute("role", "group"), B2.setAttribute("aria-label", p("Selection actions")), a.append(B2);
   for (const [l1, H1] of [["Copy", "copy"], ["Duplicate", "duplicate"], ["Delete", "delete"]])
     j(l1, () => i8(H1), B2, "compact-icon");
   const D2 = () => {
-    const l1 = [...a.children].filter((K1) => K1 !== B2).reduce((K1, J1) => K1 + J1.getBoundingClientRect().width, 0), H1 = parseFloat(getComputedStyle(a).gap) || 0;
+    const l1 = [...a.children].filter((W1) => W1 !== B2).reduce((W1, J1) => W1 + J1.getBoundingClientRect().width, 0), H1 = parseFloat(getComputedStyle(a).gap) || 0;
     B2.dataset.room = String(a.clientWidth >= l1 + 112 + H1 * a.children.length);
   }, T1 = () => {
     const l1 = e.toolbarContent;
@@ -64792,8 +64795,8 @@ function rG(i, e) {
   M2.disabled = !e.onExport && !e.saveProject;
   const w2 = u2("div", "project-actions");
   w2.setAttribute("role", "group"), w2.setAttribute("aria-label", p("Project actions")), w2.hidden = e.embedded === !0;
-  const g2 = (l1, H1, K1) => {
-    const J1 = j(l1, K1, w2, "project-action");
+  const g2 = (l1, H1, W1) => {
+    const J1 = j(l1, W1, w2, "project-action");
     return J1.setAttribute("aria-label", p(H1)), J1.title = p(H1), J1;
   };
   g2("New", "New project", Q1), g2("Open", "Open project", a2);
@@ -64834,7 +64837,7 @@ function rG(i, e) {
         });
         return;
       }
-      l1.arrayBuffer().then((K1) => H1({ name: l1.name, bytes: new Uint8Array(K1) }), () => H1(void 0));
+      l1.arrayBuffer().then((W1) => H1({ name: l1.name, bytes: new Uint8Array(W1) }), () => H1(void 0));
     }
   }, U2.addEventListener("cancel", () => {
     const l1 = C0;
@@ -64874,8 +64877,8 @@ function rG(i, e) {
   const h3 = u2("select");
   h3.setAttribute("aria-label", p("Export format"));
   for (const [l1, H1] of [["stl", "STL · triangle mesh"], ["3mf", "3MF · packaged mesh"], ["step", "STEP · exact B-rep (loads the exact kernel)"]]) {
-    const K1 = u2("option", "", p(H1));
-    K1.value = l1, h3.append(K1);
+    const W1 = u2("option", "", p(H1));
+    W1.value = l1, h3.append(W1);
   }
   k0.append(h3);
   const M3 = u2("p", "", p("Recorded sources export as one ZIP containing STL and attribution JSON. Distribute both files together and retain any separately required licence texts and notices.")), B3 = u2("label", "", p("Changes since insertion")), O = u2("textarea");
@@ -64918,20 +64921,20 @@ function rG(i, e) {
   k0.append(u1), k0.addEventListener("keydown", (l1) => l1.stopPropagation()), r.append(k0);
   const b1 = j("Export…", V);
   b1.disabled = !0, Z1("export-step"), Z1("drawing"), Z1("drawing-exact");
-  const N1 = sO(r, () => t.state.document, (l1, H1) => W.checkPrintability(l1, H1)), G1 = j("Check printability…", () => N1.open());
-  G1.disabled = !0;
-  const I1 = rO(r, u, { document: () => t.state.document, selection: () => t.state.selection.filter((l1) => t.state.document.roots.includes(l1)), check: (l1, H1, K1) => E2.check(l1, H1, K1), show: (l1) => X.showFinding(l1) }), O1 = j("Check for manufacturing…", () => I1.open());
+  const N1 = sO(r, () => t.state.document, (l1, H1) => W.checkPrintability(l1, H1)), K1 = j("Check printability…", () => N1.open());
+  K1.disabled = !0;
+  const I1 = rO(r, u, { document: () => t.state.document, selection: () => t.state.selection.filter((l1) => t.state.document.roots.includes(l1)), check: (l1, H1, W1) => A2.check(l1, H1, W1), show: (l1) => X.showFinding(l1) }), O1 = j("Check for manufacturing…", () => I1.open());
   O1.disabled = !0;
   const Y1 = u2("div", "view-actions");
   Y1.setAttribute("role", "toolbar"), Y1.setAttribute("aria-label", "View controls"), u.append(Y1), j("Home", () => X.frame("iso"), Y1), j("Fit", () => X.frame(void 0, !0), Y1), j("Zoom in", () => X.zoom(1.25), Y1), j("Zoom out", () => X.zoom(0.8), Y1);
   let c2 = !1;
-  const T2 = j("Orthographic view", () => {
-    c2 = !c2, X.setProjection(c2), T2.setAttribute("aria-pressed", String(c2));
+  const E2 = j("Orthographic view", () => {
+    c2 = !c2, X.setProjection(c2), E2.setAttribute("aria-pressed", String(c2));
   }, Y1);
-  T2.setAttribute("aria-pressed", "false");
-  let z2 = !0;
+  E2.setAttribute("aria-pressed", "false");
+  let R2 = !0;
   const t0 = j("Show workplane", () => {
-    z2 = !z2, X.setWorkplaneVisible(z2), t0.setAttribute("aria-pressed", String(z2));
+    R2 = !R2, X.setWorkplaneVisible(R2), t0.setAttribute("aria-pressed", String(R2));
   }, Y1);
   t0.setAttribute("aria-pressed", "true");
   let S2 = !1;
@@ -64949,7 +64952,7 @@ function rG(i, e) {
     M0.value = l1;
   });
   function n0(l1) {
-    F = l1, X.setMode(F), W2.forEach((H1, K1) => H1.setAttribute("aria-pressed", String(["select", "translate", "rotate", "scale"][K1] === F))), r.dataset.mode = F, (F === "rotate" || F === "scale") && (m.classList.remove("closed"), m.classList.add("open")), b4();
+    F = l1, X.setMode(F), W2.forEach((H1, W1) => H1.setAttribute("aria-pressed", String(["select", "translate", "rotate", "scale"][W1] === F))), r.dataset.mode = F, (F === "rotate" || F === "scale") && (m.classList.remove("closed"), m.classList.add("open")), b4();
   }
   n0("select");
   const x3 = /* @__PURE__ */ new Set();
@@ -64964,7 +64967,7 @@ function rG(i, e) {
       u0.append(u2("span", "", p("History")), c), h.append(u0);
     }
     b.value = t.state.document.title;
-    const K1 = t.state.selection, J1 = t.state.document;
+    const W1 = t.state.selection, J1 = t.state.document;
     e4 !== J1.id && (x3.clear(), e4 = J1.id);
     const f2 = (u0, A3, v4, L0 = !1) => {
       const r4 = u2("details", "browser-section");
@@ -64983,14 +64986,14 @@ function rG(i, e) {
       const H2 = (Q2.get(L0.name) ?? 0) > 1 ? `${L0.name} (${e0})` : L0.name;
       if (!v4) {
         const G0 = u2("input");
-        G0.type = "checkbox", G0.checked = K1.includes(u0), G0.setAttribute("aria-label", p`Select ${H2}`), G0.addEventListener("change", () => {
-          t.select(G0.checked ? [...K1, u0] : K1.filter((j0) => j0 !== u0)), X.canvas.focus({ preventScroll: !0 });
+        G0.type = "checkbox", G0.checked = W1.includes(u0), G0.setAttribute("aria-label", p`Select ${H2}`), G0.addEventListener("change", () => {
+          t.select(G0.checked ? [...W1, u0] : W1.filter((j0) => j0 !== u0)), X.canvas.focus({ preventScroll: !0 });
         }), L1.append(G0);
       }
       const d0 = j(H2, () => {
         t.select([u0]), X.canvas.focus({ preventScroll: !0 });
       }, L1, "", !1), e3 = z9(L0.kind === "code" ? "Code" : L0.kind === "extrusion" ? "Sketch" : L0.kind === "revolution" ? "Revolve" : L0.kind === "mirror" ? "Mirror" : L0.kind === "pattern" ? "Pattern" : L0.kind === "boolean" ? "Union" : L0.kind === "cylinder" ? "Cylinder" : L0.kind === "sphere" ? "Sphere" : "Box");
-      if (e3 && !d0.querySelector("svg") && d0.prepend(e3), d0.classList.toggle("selected", K1.includes(u0)), d0.setAttribute("aria-pressed", String(K1.includes(u0))), L1.classList.toggle("selected", K1.includes(u0)), d0.title = `${H2} · ${L0.role === "hole" ? p("Hole") : p(L0.kind)}`, L0.role === "hole") {
+      if (e3 && !d0.querySelector("svg") && d0.prepend(e3), d0.classList.toggle("selected", W1.includes(u0)), d0.setAttribute("aria-pressed", String(W1.includes(u0))), L1.classList.toggle("selected", W1.includes(u0)), d0.title = `${H2} · ${L0.role === "hole" ? p("Hole") : p(L0.kind)}`, L0.role === "hole") {
         const G0 = u2("small", "hole-tag", p("Hole"));
         L1.append(G0);
       }
@@ -64999,7 +65002,7 @@ function rG(i, e) {
         G0.append(j0), q3(L0).forEach((C3) => t4(C3, j0, !0));
       } else if (L0.kind === "code") {
         const G0 = f2(`code:${u0}`, "Code & parameters", r4);
-        j("Edit code definition", () => W1.open(u0), G0);
+        j("Edit code definition", () => G1.open(u0), G0);
         const j0 = n9(L0.program);
         for (const [C3, c0] of Object.entries(j0.values)) {
           const h0 = u2("div", "browser-value");
@@ -65048,11 +65051,11 @@ function rG(i, e) {
     }
     J1.roots.length || l1.append(u2("p", "hint", p("No objects yet. Start with a box.")));
   }
-  function W0(l1, H1, K1, J1, f2 = "number", b2 = "1") {
+  function W0(l1, H1, W1, J1, f2 = "number", b2 = "1") {
     const h2 = u2("label", "field");
     h2.append(u2("span", "field-name", p(H1)));
     const Q2 = u2("input");
-    return Q2.type = f2, Q2.value = String(K1), Q2.setAttribute("aria-label", p(H1)), Q2.step = b2, Q2.addEventListener("change", () => I(() => J1(Q2.value))), Q2.addEventListener("keydown", (t4) => {
+    return Q2.type = f2, Q2.value = String(W1), Q2.setAttribute("aria-label", p(H1)), Q2.step = b2, Q2.addEventListener("change", () => I(() => J1(Q2.value))), Q2.addEventListener("keydown", (t4) => {
       if (!Mu(Q2, t4) && t4.key === "Enter") {
         t4.preventDefault(), t4.stopPropagation();
         const E3 = Q2.closest(".shape-parameters")?.querySelector(`[aria-label="${p("Apply shape parameters")}"]`);
@@ -65073,8 +65076,8 @@ function rG(i, e) {
       }, m);
       L1.dataset.testid = "add-robot-electronics";
     }
-    const H1 = t.state.selection, K1 = u2("div", "object-style");
-    if (m.append(K1), H1.some((L1) => t.state.document.roots.includes(L1))) {
+    const H1 = t.state.selection, W1 = u2("div", "object-style");
+    if (m.append(W1), H1.some((L1) => t.state.document.roots.includes(L1))) {
       const L1 = u2("div", "property-matrix actual-size");
       L1.setAttribute("role", "group"), L1.setAttribute("aria-label", p("Dimensions after transform (mm)"));
       const e0 = u2("div", "property-kind");
@@ -65092,7 +65095,7 @@ function rG(i, e) {
         const H2 = e0 === "solid" ? "Solid" : "Hole", d0 = j(H2, () => t.setRole(e0), L1, "role-icon");
         d0.setAttribute("aria-pressed", String(H1.every((e3) => (t.state.document.nodes[e3].role ?? "solid") === e0))), d0.dataset.testid = `role-${e0}`, d0.style.setProperty("--part-colour", t.state.document.nodes[H1[0]].color), d0.title = p(e0 === "hole" ? "Union subtracts hole shapes from solid shapes" : "Printable solid");
       }
-      K1.append(L1);
+      W1.append(L1);
     }
     const J1 = F === "rotate" ? "rotation" : F === "scale" ? "scale" : "position";
     function f2(L1, e0) {
@@ -65120,9 +65123,9 @@ function rG(i, e) {
         t.select([L1.id]), X.canvas.focus({ preventScroll: !0 });
       }, m);
     }
-    const Q2 = W0(K1, "Object name", h2.name, (L1) => t.update(b2, { name: L1 }), "text");
-    Q2.parentElement.classList.add("object-name"), Q2.title = p("Object name"), K1.prepend(Q2.parentElement);
-    const t4 = W0(K1, "Color", h2.color, (L1) => t.update(b2, { color: L1 }), "color");
+    const Q2 = W0(W1, "Object name", h2.name, (L1) => t.update(b2, { name: L1 }), "text");
+    Q2.parentElement.classList.add("object-name"), Q2.title = p("Object name"), W1.prepend(Q2.parentElement);
+    const t4 = W0(W1, "Color", h2.color, (L1) => t.update(b2, { color: L1 }), "color");
     t4.parentElement.classList.add("color-swatch"), t4.title = p("Color"), f2([b2], J1);
     for (const L1 of ["position", "rotation", "scale"])
       L1 !== J1 && f2([b2], L1);
@@ -65273,7 +65276,7 @@ function rG(i, e) {
       }
       m.append(H2);
     }
-    if (h2.kind === "code" && j("Edit code", () => W1.open(b2), m), h2.kind === "mirror" && j("Edit mirror", () => i1.open(b2, !0), m), h2.kind === "pattern" && j("Edit pattern", () => M1.open(b2, !0), m), h2.kind === "exact-feature") {
+    if (h2.kind === "code" && j("Edit code", () => G1.open(b2), m), h2.kind === "mirror" && j("Edit mirror", () => i1.open(b2, !0), m), h2.kind === "pattern" && j("Edit pattern", () => M1.open(b2, !0), m), h2.kind === "exact-feature") {
       const L1 = typeof h2.size == "number" ? `${h2.size} mm` : h2.size, e0 = oo(t.state.document, [b2]).includes(b2);
       m.append(u2("p", "hint", p`Exact ${p(h2.operation)} · ${L1} · ${p(e0 ? "out of date" : "up to date")}`)), j("Edit exact feature", () => U1.open(b2, !0), m);
       const H2 = j("Recompute exact", () => w1(), m);
@@ -65401,21 +65404,21 @@ function rG(i, e) {
       for (S = !0, e1.hidden = !1, i.dataset.state = "building"; !_ && M !== t.state.revision; ) {
         const { document: l1, revision: H1 } = t.state;
         try {
-          const K1 = await W.evaluate(l1);
+          const W1 = await W.evaluate(l1);
           if (_)
             break;
           if (H1 !== t.state.revision)
             continue;
-          w = K1, M = H1, L = "", Y.hidden = !0, X.update(K1), h1.hidden = !!l1.roots.length, v.textContent = l1.roots.length === 1 ? p`${l1.roots.length} body · ${K1.triangles.toLocaleString()} triangles · ${K1.volume.toLocaleString(void 0, { maximumFractionDigits: 1 })} mm³` : p`${l1.roots.length} bodies · ${K1.triangles.toLocaleString()} triangles · ${K1.volume.toLocaleString(void 0, { maximumFractionDigits: 1 })} mm³`, f.textContent = C || (l1.roots.length ? "Ready · mm · Z up" : "Add a solid to begin"), i.dataset.state = "ready", i.dataset.triangles = String(K1.triangles);
+          w = W1, M = H1, L = "", Y.hidden = !0, X.update(W1), h1.hidden = !!l1.roots.length, v.textContent = l1.roots.length === 1 ? p`${l1.roots.length} body · ${W1.triangles.toLocaleString()} triangles · ${W1.volume.toLocaleString(void 0, { maximumFractionDigits: 1 })} mm³` : p`${l1.roots.length} bodies · ${W1.triangles.toLocaleString()} triangles · ${W1.volume.toLocaleString(void 0, { maximumFractionDigits: 1 })} mm³`, f.textContent = C || (l1.roots.length ? "Ready · mm · Z up" : "Add a solid to begin"), i.dataset.state = "ready", i.dataset.triangles = String(W1.triangles);
           for (const J1 of A)
-            J1.resolve(K1);
+            J1.resolve(W1);
           A.clear();
-        } catch (K1) {
+        } catch (W1) {
           if (_)
             break;
           if (H1 !== t.state.revision)
             continue;
-          M = H1, w = null, L = K1 instanceof Error ? K1.message : String(K1), Y.textContent = p`${L} Showing the previous geometry. Fix the edit or Undo.`, Y.hidden = !1, i.dataset.state = "error", R(K1), K1 instanceof o9 && K1.code === wM && C1 === H1 && (C1 = void 0, I(() => w1(!0)));
+          M = H1, w = null, L = W1 instanceof Error ? W1.message : String(W1), Y.textContent = p`${L} Showing the previous geometry. Fix the edit or Undo.`, Y.hidden = !1, i.dataset.state = "error", R(W1), W1 instanceof o9 && W1.code === wM && C1 === H1 && (C1 = void 0, I(() => w1(!0)));
           for (const J1 of A)
             J1.reject(new Error(L));
           A.clear();
@@ -65425,35 +65428,35 @@ function rG(i, e) {
     }
   }
   function M4() {
-    const l1 = t.state, H1 = l1.selection.filter((K1) => l1.document.roots.includes(K1));
-    O3.disabled = !l1.canUndo, d5.disabled = !l1.canRedo, y2.disabled = O2.disabled = !H1.length, _2.disabled = L2.disabled = !H1.length, U0.disabled = !H1.length || S || M !== l1.revision || !w, V1.disabled = q1.disabled = i2.disabled = S || l1.selection.length !== 1 || H1.length !== 1 || !!l1.document.nodes[H1[0]]?.reference, p2.forEach((K1) => {
-      K1.disabled = H1.length < 2;
-    }), D2(), B2.hidden = !l1.selection.some((K1) => l1.document.roots.includes(K1));
-    for (const K1 of B2.querySelectorAll("button"))
-      K1.disabled = S;
-    o1(), b1.disabled = x1.disabled = d1 || !e.onExport || S || !w || !w.triangles || M !== l1.revision, k1.refresh(), G1.disabled = S || !w || !w.triangles || M !== l1.revision;
-    for (const K1 of A5()) {
-      const J1 = X1.get(K1.command);
-      J1 && (J1.disabled = !K1.enabled);
+    const l1 = t.state, H1 = l1.selection.filter((W1) => l1.document.roots.includes(W1));
+    O3.disabled = !l1.canUndo, d5.disabled = !l1.canRedo, y2.disabled = O2.disabled = !H1.length, _2.disabled = z2.disabled = !H1.length, U0.disabled = !H1.length || S || M !== l1.revision || !w, V1.disabled = q1.disabled = i2.disabled = S || l1.selection.length !== 1 || H1.length !== 1 || !!l1.document.nodes[H1[0]]?.reference, p2.forEach((W1) => {
+      W1.disabled = H1.length < 2;
+    }), D2(), B2.hidden = !l1.selection.some((W1) => l1.document.roots.includes(W1));
+    for (const W1 of B2.querySelectorAll("button"))
+      W1.disabled = S;
+    o1(), b1.disabled = x1.disabled = d1 || !e.onExport || S || !w || !w.triangles || M !== l1.revision, k1.refresh(), K1.disabled = S || !w || !w.triangles || M !== l1.revision;
+    for (const W1 of A5()) {
+      const J1 = X1.get(W1.command);
+      J1 && (J1.disabled = !W1.enabled);
     }
-    O1.disabled = G1.disabled, I(() => e.onCommandStateChange?.(C5()));
+    O1.disabled = K1.disabled, I(() => e.onCommandStateChange?.(C5()));
   }
   function A5() {
-    const l1 = t.state, H1 = l1.selection.filter((J1) => l1.document.roots.includes(J1)), K1 = C5();
+    const l1 = t.state, H1 = l1.selection.filter((J1) => l1.document.roots.includes(J1)), W1 = C5();
     return RH({
-      canUndo: K1.canUndo,
-      canRedo: K1.canRedo,
-      hasSelection: K1.hasSelection,
-      canDelete: K1.canDelete,
-      canCombine: K1.canCombine,
-      canExport: K1.canExport,
-      hasBodies: K1.hasBodies,
+      canUndo: W1.canUndo,
+      canRedo: W1.canRedo,
+      hasSelection: W1.hasSelection,
+      canDelete: W1.canDelete,
+      canCombine: W1.canCombine,
+      canExport: W1.canExport,
+      hasBodies: W1.hasBodies,
       oneBody: l1.selection.length === 1 && H1.length === 1 && !l1.document.nodes[H1[0]]?.reference && !S,
       canDraw: Bt(l1.document)
     }, e.presetProjects ? /* @__PURE__ */ new Set() : /* @__PURE__ */ new Set(["robot-projects"]));
   }
   function C5() {
-    const l1 = t.state, H1 = l1.selection.filter((K1) => l1.document.roots.includes(K1));
+    const l1 = t.state, H1 = l1.selection.filter((W1) => l1.document.roots.includes(W1));
     return { canUndo: l1.canUndo, canRedo: l1.canRedo, hasSelection: !!l1.selection.length, canDelete: !!H1.length, canCombine: H1.length >= 2, canExport: !!e.onExport && !d1 && !S && !!w?.triangles && M === l1.revision, hasBodies: !!l1.document.roots.length, ready: !S && M === l1.revision && !!w };
   }
   const G9 = t.subscribe((l1) => {
@@ -65463,9 +65466,9 @@ function rG(i, e) {
     const H1 = JSON.stringify(l1.selection);
     H1 !== E && (E = H1, X.setSelection(l1.selection), I(() => e.onSelectionChange?.(l1.selection))), M4();
   }), t7 = (l1) => {
-    const H1 = l1.composedPath().some((b2) => b2 instanceof HTMLInputElement || b2 instanceof HTMLTextAreaElement || b2 instanceof HTMLSelectElement), K1 = l1.ctrlKey || l1.metaKey, J1 = l1.key.toLowerCase();
+    const H1 = l1.composedPath().some((b2) => b2 instanceof HTMLInputElement || b2 instanceof HTMLTextAreaElement || b2 instanceof HTMLSelectElement), W1 = l1.ctrlKey || l1.metaKey, J1 = l1.key.toLowerCase();
     let f2;
-    if (K1 && l1.code === "Backquote" && !l1.altKey) {
+    if (W1 && l1.code === "Backquote" && !l1.altKey) {
       l1.preventDefault(), l1.stopPropagation(), j1.toggle();
       return;
     }
@@ -65473,12 +65476,12 @@ function rG(i, e) {
       l1.preventDefault(), l1.stopPropagation(), j1.controller.submit("").then(() => j1.focus());
       return;
     }
-    if (K1 && l1.shiftKey && J1 === "p" && !l1.altKey) {
+    if (W1 && l1.shiftKey && J1 === "p" && !l1.altKey) {
       l1.preventDefault(), l1.stopPropagation(), k1.open();
       return;
     }
-    if (!(H1 && J1 !== "escape" && !(K1 && J1 === "s"))) {
-      if (H1 && (J1 === "escape" || K1 && J1 === "s") && l1.composedPath()[0].blur(), q2 && !K1 && ["h", "s"].includes(J1)) {
+    if (!(H1 && J1 !== "escape" && !(W1 && J1 === "s"))) {
+      if (H1 && (J1 === "escape" || W1 && J1 === "s") && l1.composedPath()[0].blur(), q2 && !W1 && ["h", "s"].includes(J1)) {
         q2.role = J1 === "h" ? "hole" : "solid", X.setPlacementRole(q2.role), l1.preventDefault(), l1.stopPropagation();
         return;
       }
@@ -65486,7 +65489,7 @@ function rG(i, e) {
         p0(), l1.preventDefault(), l1.stopPropagation();
         return;
       }
-      K1 && J1 === "z" ? f2 = () => l1.shiftKey ? t.redo() : t.undo() : K1 && J1 === "y" ? f2 = () => t.redo() : K1 && J1 === "s" ? f2 = () => de("bcad") : K1 && J1 === "a" ? f2 = () => t.select(t.state.document.roots) : K1 && J1 === "g" ? f2 = () => l1.shiftKey ? t.separate(t.state.selection[0]) : t.combine("union") : !K1 && J1 === "h" && t.state.selection.length ? f2 = () => t.setRole("hole") : !K1 && J1 === "s" && t.state.selection.length ? f2 = () => t.setRole("solid") : !K1 && J1 === "c" ? f2 = () => $0(!X.surfaceSnap) : !K1 && J1 === "d" ? f2 = () => X.dropSelection() : K1 && J1 === "d" ? f2 = () => t.duplicate() : K1 && J1 === "c" ? f2 = () => ce() : K1 && J1 === "x" ? f2 = () => ce(!0) : K1 && J1 === "v" ? f2 = () => ya() : K1 && J1 === "k" || !K1 && l1.shiftKey && J1 === "a" ? f2 = () => T0.open(!0) : J1 === "delete" || J1 === "backspace" ? f2 = () => t.remove() : J1 === "escape" ? f2 = () => {
+      W1 && J1 === "z" ? f2 = () => l1.shiftKey ? t.redo() : t.undo() : W1 && J1 === "y" ? f2 = () => t.redo() : W1 && J1 === "s" ? f2 = () => de("bcad") : W1 && J1 === "a" ? f2 = () => t.select(t.state.document.roots) : W1 && J1 === "g" ? f2 = () => l1.shiftKey ? t.separate(t.state.selection[0]) : t.combine("union") : !W1 && J1 === "h" && t.state.selection.length ? f2 = () => t.setRole("hole") : !W1 && J1 === "s" && t.state.selection.length ? f2 = () => t.setRole("solid") : !W1 && J1 === "c" ? f2 = () => $0(!X.surfaceSnap) : !W1 && J1 === "d" ? f2 = () => X.dropSelection() : W1 && J1 === "d" ? f2 = () => t.duplicate() : W1 && J1 === "c" ? f2 = () => ce() : W1 && J1 === "x" ? f2 = () => ce(!0) : W1 && J1 === "v" ? f2 = () => ya() : W1 && J1 === "k" || !W1 && l1.shiftKey && J1 === "a" ? f2 = () => T0.open(!0) : J1 === "delete" || J1 === "backspace" ? f2 = () => t.remove() : J1 === "escape" ? f2 = () => {
         if (j1.controller.state.prompt) {
           j1.controller.cancel();
           return;
@@ -65498,9 +65501,9 @@ function rG(i, e) {
         }
         const h2 = X.interacting;
         p0(), X.cancelTransform(), T.forEach((Q2) => Q2.open = !1), !h2 && (F !== "select" ? n0("select") : t.select([]));
-      } : J1 === "v" ? f2 = () => n0("select") : !K1 && J1 === "f" ? f2 = () => X.frame(void 0, !l1.shiftKey) : !K1 && J1 === "o" ? f2 = () => T2.click() : !K1 && l1.code === "NumpadDecimal" ? f2 = () => X.frame(void 0, !0) : !K1 && ["Numpad1", "Numpad3", "Numpad7"].includes(l1.code) ? f2 = () => X.setView(l1.code === "Numpad1" ? "front" : l1.code === "Numpad3" ? "right" : "top") : !K1 && l1.code === "Numpad5" ? f2 = () => T2.click() : !K1 && J1 === "home" ? f2 = () => X.frame() : !K1 && ["+", "=", "-", "_"].includes(J1) ? f2 = () => X.zoom(J1 === "-" || J1 === "_" ? 1 / 1.2 : 1.2) : !K1 && /^[1-6]$/.test(J1) ? f2 = () => {
+      } : J1 === "v" ? f2 = () => n0("select") : !W1 && J1 === "f" ? f2 = () => X.frame(void 0, !l1.shiftKey) : !W1 && J1 === "o" ? f2 = () => E2.click() : !W1 && l1.code === "NumpadDecimal" ? f2 = () => X.frame(void 0, !0) : !W1 && ["Numpad1", "Numpad3", "Numpad7"].includes(l1.code) ? f2 = () => X.setView(l1.code === "Numpad1" ? "front" : l1.code === "Numpad3" ? "right" : "top") : !W1 && l1.code === "Numpad5" ? f2 = () => E2.click() : !W1 && J1 === "home" ? f2 = () => X.frame() : !W1 && ["+", "=", "-", "_"].includes(J1) ? f2 = () => X.zoom(J1 === "-" || J1 === "_" ? 1 / 1.2 : 1.2) : !W1 && /^[1-6]$/.test(J1) ? f2 = () => {
         X.setView(["front", "right", "top", "back", "left", "bottom"][Number(J1) - 1]), l1.shiftKey && X.frame(void 0, !0);
-      } : J1.startsWith("arrow") && !t.state.selection.length ? f2 = () => K1 ? X.pan(J1 === "arrowleft" ? -30 : J1 === "arrowright" ? 30 : 0, J1 === "arrowup" ? -30 : J1 === "arrowdown" ? 30 : 0) : X.orbit(J1 === "arrowleft" ? -Math.PI / 6 / 5e-3 : J1 === "arrowright" ? Math.PI / 6 / 5e-3 : 0, J1 === "arrowup" ? -Math.PI / 6 / 5e-3 : J1 === "arrowdown" ? Math.PI / 6 / 5e-3 : 0) : J1 === "w" ? f2 = () => n0("translate") : J1 === "e" ? f2 = () => n0("rotate") : J1 === "r" ? f2 = () => n0("scale") : J1.startsWith("arrow") && t.state.selection.length && (f2 = () => {
+      } : J1.startsWith("arrow") && !t.state.selection.length ? f2 = () => W1 ? X.pan(J1 === "arrowleft" ? -30 : J1 === "arrowright" ? 30 : 0, J1 === "arrowup" ? -30 : J1 === "arrowdown" ? 30 : 0) : X.orbit(J1 === "arrowleft" ? -Math.PI / 6 / 5e-3 : J1 === "arrowright" ? Math.PI / 6 / 5e-3 : 0, J1 === "arrowup" ? -Math.PI / 6 / 5e-3 : J1 === "arrowdown" ? Math.PI / 6 / 5e-3 : 0) : J1 === "w" ? f2 = () => n0("translate") : J1 === "e" ? f2 = () => n0("rotate") : J1 === "r" ? f2 = () => n0("scale") : J1.startsWith("arrow") && t.state.selection.length && (f2 = () => {
         const b2 = l1.shiftKey || X.fine, h2 = (D || 0.1) / (b2 ? 10 : 1);
         X.nudge(J1 === "arrowleft" ? -h2 : J1 === "arrowright" ? h2 : 0, J1 === "arrowup" && !l1.altKey ? h2 : J1 === "arrowdown" && !l1.altKey ? -h2 : 0, l1.altKey ? J1 === "arrowup" ? h2 : J1 === "arrowdown" ? -h2 : 0 : 0, b2);
       }), f2 && (l1.preventDefault(), l1.stopPropagation(), I(f2));
@@ -65509,8 +65512,8 @@ function rG(i, e) {
   r.addEventListener("keydown", t7);
   const e8 = (l1) => {
     const H1 = l1.composedPath();
-    for (const K1 of T)
-      K1.open && !H1.includes(K1) && (K1.open = !1);
+    for (const W1 of T)
+      W1.open && !H1.includes(W1) && (W1.open = !1);
   };
   document.addEventListener("pointerdown", e8, !0), document.addEventListener("focusin", e8, !0);
   function o4() {
@@ -65519,11 +65522,11 @@ function rG(i, e) {
     });
   }
   async function mh(l1, H1) {
-    const K1 = /\.(stl|step|stp)$/i.exec(l1)?.[1].toLowerCase(), J1 = E0(l1.replace(/\.(stl|step|stp)$/i, ""));
-    if (K1 === "stl") {
+    const W1 = /\.(stl|step|stp)$/i.exec(l1)?.[1].toLowerCase(), J1 = E0(l1.replace(/\.(stl|step|stp)$/i, ""));
+    if (W1 === "stl") {
       const f2 = $2();
       J1.nodes[f2] = { ...XN(H1), id: f2, kind: "mesh", name: J1.title, color: "#eea52b", transform: G2() }, J1.roots = [f2];
-    } else if (K1 === "step" || K1 === "stp") {
+    } else if (W1 === "step" || W1 === "stp") {
       f.textContent = p("Reading STEP geometry…");
       const f2 = await lO(H1, k.signal);
       J1.version = 30;
@@ -65546,25 +65549,25 @@ function rG(i, e) {
     return J1;
   }
   async function xa(l1, H1) {
-    const K1 = t.state.revision, J1 = /\.(stl|step|stp)$/i.test(l1) ? await mh(l1, H1) : e.decodeProject ? await e.decodeProject(H1) : Ib(new TextDecoder().decode(H1));
+    const W1 = t.state.revision, J1 = /\.(stl|step|stp)$/i.test(l1) ? await mh(l1, H1) : e.decodeProject ? await e.decodeProject(H1) : Ib(new TextDecoder().decode(H1));
     if (await W.evaluate(J1), !_) {
-      if (t.state.revision !== K1)
+      if (t.state.revision !== W1)
         throw new Error(p("The model changed while opening the file. Try opening it again."));
       t.load(J1), await o4(), X.frame(), X.canvas.focus({ preventScroll: !0 });
     }
   }
   async function ba(l1, H1) {
-    const K1 = t.state.revision, J1 = await mh(l1, H1), f2 = await W.evaluate(J1);
+    const W1 = t.state.revision, J1 = await mh(l1, H1), f2 = await W.evaluate(J1);
     if (_)
       return;
-    if (t.state.revision !== K1)
+    if (t.state.revision !== W1)
       throw new Error(p("The model changed while importing. Try importing again."));
     const b2 = Math.min(...f2.bodies.map((h2) => h2.bounds.min[2]));
     t.insert(J1, [t.state.document.roots.length * 12, 0, -b2], { label: "Import geometry" }), await o4(), X.frame();
   }
   let qh = "", va = 0;
   async function ce(l1 = !1) {
-    const H1 = t.state.revision, K1 = [...t.state.selection], J1 = t.fragment(K1);
+    const H1 = t.state.revision, W1 = [...t.state.selection], J1 = t.fragment(W1);
     Bp(J1);
     const f2 = JSON.stringify({ format: "brickwright-cad-clipboard", version: 1, document: J1 });
     if (e.writeClipboard)
@@ -65576,7 +65579,7 @@ function rG(i, e) {
     if (l1) {
       if (t.state.revision !== H1)
         throw new Error(p("The model changed: objects were copied, but cutting was canceled"));
-      t.remove(K1, "Cut objects");
+      t.remove(W1, "Cut objects");
     }
     X.canvas.focus({ preventScroll: !0 }), f.textContent = l1 ? "Cut objects" : "Copied objects";
   }
@@ -65584,13 +65587,13 @@ function rG(i, e) {
     const l1 = t.state.revision, H1 = e.readClipboard ? await e.readClipboard() : navigator.clipboard?.readText ? await navigator.clipboard.readText() : null;
     if (!H1 || new TextEncoder().encode(H1).length > 16 * 1024 * 1024)
       throw new Error(p("Clipboard does not contain a supported CAD selection"));
-    let K1;
+    let W1;
     try {
-      K1 = JSON.parse(H1);
+      W1 = JSON.parse(H1);
     } catch {
       throw new Error(p("Clipboard does not contain CAD objects"));
     }
-    const J1 = K1;
+    const J1 = W1;
     if (J1?.format !== "brickwright-cad-clipboard" || J1.version !== 1)
       throw new Error(p("Clipboard does not contain CAD objects"));
     const f2 = $4(J1.document);
@@ -65629,7 +65632,7 @@ function rG(i, e) {
         V();
         break;
       case "printability":
-        if (G1.disabled)
+        if (K1.disabled)
           throw new Error(p("Build a solid before checking printability"));
         N1.open();
         break;
@@ -65692,7 +65695,7 @@ function rG(i, e) {
         X.setView(l1);
         break;
       case "projection":
-        T2.click();
+        E2.click();
         break;
       case "workplane":
         t0.click();
@@ -65766,7 +65769,7 @@ function rG(i, e) {
       case "robot-projects":
         return J("projects");
       case "code":
-        W1.open(t.state.selection.length === 1 && t.state.document.nodes[t.state.selection[0]]?.kind === "code" ? t.state.selection[0] : void 0);
+        G1.open(t.state.selection.length === 1 && t.state.document.nodes[t.state.selection[0]]?.kind === "code" ? t.state.selection[0] : void 0);
         break;
       case "readout":
         P0.setVisible(!P0.visible);
@@ -65796,7 +65799,7 @@ function rG(i, e) {
     }
     ["open", "import", "import-step", "save", "export", "parameters", "shapes", "code", "code-workspace", "terminal", "model-source", "sketch", "sketch-path", "revolve", "mirror", "pattern", "edit-mirror", "edit-pattern", "exact-feature", "model-library", "robot-projects", "command-palette", "hole", "standard-part", "fasten", "exact-edges", "measure-exact", "export-step", "drawing", "drawing-exact"].includes(l1) || X.canvas.focus({ preventScroll: !0 });
   }
-  async function de(l1, H1, K1 = () => {
+  async function de(l1, H1, W1 = () => {
   }) {
     if (l1 === "bcad" && e.saveProject) {
       await e.saveProject();
@@ -65812,7 +65815,7 @@ function rG(i, e) {
     const J1 = t.state.revision, f2 = () => {
       if (_)
         throw new Error(p("Editor was disposed"));
-      if (K1(), t.state.revision !== J1)
+      if (W1(), t.state.revision !== J1)
         throw new Error(p("The model changed while exporting. Export again from the current model."));
     };
     if (l1 === "step") {
@@ -65901,8 +65904,8 @@ function rG(i, e) {
     artworkSketchTargets(l1) {
       return vO(t.state.document, l1);
     },
-    previewArtworkSketchRefresh(l1, H1, K1) {
-      return yO(t, (J1) => W.evaluate(J1), l1, H1, () => !_, K1);
+    previewArtworkSketchRefresh(l1, H1, W1) {
+      return yO(t, (J1) => W.evaluate(J1), l1, H1, () => !_, W1);
     },
     setTransformReadoutVisible(l1) {
       P0.setVisible(l1);
@@ -65918,7 +65921,7 @@ function rG(i, e) {
     },
     dispose() {
       if (!_) {
-        a1.dispose(), p0(), S1.dispose(), I1.dispose(), _ = !0, k.abort(), B1.disconnect(), G9(), document.removeEventListener("pointerdown", e8, !0), document.removeEventListener("focusin", e8, !0), r.removeEventListener("keydown", t7), T0.dispose(), $?.dispose(), H.dispose(), K.dispose(), G.dispose(), i1.dispose(), M1.dispose(), U1.dispose(), n1.dispose(), m1(), k1.dispose(), D1.dispose(), F1.dispose(), j1.dispose(), W1.dispose(), d2.dispose(), N1.dispose(), P0.dispose(), X.dispose(), W.dispose();
+        a1.dispose(), p0(), S1.dispose(), I1.dispose(), _ = !0, k.abort(), B1.disconnect(), G9(), document.removeEventListener("pointerdown", e8, !0), document.removeEventListener("focusin", e8, !0), r.removeEventListener("keydown", t7), T0.dispose(), $?.dispose(), H.dispose(), K.dispose(), G.dispose(), i1.dispose(), M1.dispose(), U1.dispose(), n1.dispose(), m1(), k1.dispose(), D1.dispose(), F1.dispose(), j1.dispose(), G1.dispose(), d2.dispose(), N1.dispose(), P0.dispose(), X.dispose(), W.dispose();
         for (const l1 of A)
           l1.reject(new Error(p("Editor was disposed")));
         A.clear(), n && t.dispose(), s.replaceChildren(), e.toolbarContent?.remove(), i.removeAttribute("data-state"), i.removeAttribute("data-triangles");
@@ -65928,7 +65931,7 @@ function rG(i, e) {
 }
 let vc, Ng;
 async function J_() {
-  const [{ createBundledModelLibraryOptions: i }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-DtIel_SK.js"), import("./model-library-cache-DiMFGzp9.js")]);
+  const [{ createBundledModelLibraryOptions: i }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-DI87-k-q.js"), import("./model-library-cache-DiMFGzp9.js")]);
   return vc ?? (vc = i()), { ...vc, cache: e() };
 }
 async function xG() {
