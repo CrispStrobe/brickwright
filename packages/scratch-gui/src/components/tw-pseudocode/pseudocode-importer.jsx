@@ -220,6 +220,18 @@ const L10N = {
         basicInputExhausted: 'Program asked for INPUT but no more answers were provided.',
         basicNoPrompt: 'BASIC did not reach its ready prompt — the ROM may not have loaded.',
         basicLoading: 'Loading BASIC machine…',
+        basicEngine: 'Engine', basicCrispEngine: 'CrispBASIC (browser)', basicZ80Engine: 'BBC BASIC Z80 (retro)',
+        basicCrispLoading: 'Loading CrispBASIC…', basicCrispRunning: 'CrispBASIC is running.',
+        basicCrispStopped: 'CrispBASIC stopped.', basicCrispStopping: 'Stopping CrispBASIC…',
+        basicCrispReset: 'Reset', basicCrispResetDone: 'CrispBASIC reset.',
+        basicCrispCompleted: code => code ? `Completed (exit ${code}).` : 'Completed.',
+        basicCrispTimeout: 'CrispBASIC reached the 60-second run limit.',
+        basicCrispOutputLimit: 'CrispBASIC reached the output limit.',
+        basicCrispError: 'CrispBASIC could not finish this program.',
+        basicInputLine: 'Program input', basicInputKey: 'One character (empty for Enter)',
+        basicInputSend: 'Send', basicInputEnd: 'End input',
+        basicInputKeyError: 'Enter one Latin-1 character, or leave the field empty for Enter.',
+        basicCrispScope: 'Text, input and basic VDU drawing. Files, graphics queries, sound, GPIO and source debugging are unavailable. Runs stop after 60 seconds.',
         basic8086Building: 'Compiling BASIC for the 8086 in this browser…',
         basicRealDosBuilding: 'Compiling BASIC and preparing a real MS-DOS 2.0 boot disk…',
         basicRealDosFailed: (m) => `Could not prepare the MS-DOS boot disk: ${m}`,
@@ -284,7 +296,7 @@ const L10N = {
         stWarn: w => `Loaded with warnings — ${w}`,
         foreverLoop: 'This project has a forever (game) loop, so it runs in the blocks — press the green flag to play it. For a text run, try an algorithmic example (quiz, operators, 2048, …).',
         cNote: 'C for the STC12 / 8051. Paste your own firmware and press ⇦ To blocks, or compile it to a .hex with stc-compiler.vercel.app. One 8051 gap to know: tone (set <buzzer> to N hz) has no STC12 driver yet — it compiles to a SILENT no-op on the 8051 (and on the Pico), with no error; only the Arduino/AVR build makes sound. On the 8086 the C compiles and runs locally (SmallerC + the in-browser assembler); drive the 8255’s pins with the port-I/O primitives bw_outb(port, value) and bw_inb(port) — cdecl, 16-bit args, caller cleans — the same ones the generated C uses. Keep scalar variables and parameters unsigned (word-wide), not unsigned char: reading a byte value makes SmallerC emit MOVZX, an 80386 instruction the 8086 assembler refuses.',
-        basicNote: 'Runs BBC BASIC (R.T. Russell, zlib) or 6502 BASIC (derived from MIT-licensed source). Toggle profile and line numbers above. Multi-WHEN programs cannot be shown (BASIC is single-threaded). The BBC BASIC machine is cross-checked against R.T. Russell\'s BBCSDL reference interpreter by the twin-run oracle.',
+        basicNote: 'BBC BASIC runs in CrispBASIC, the restricted browser build of R.T. Russell’s BBCSDL interpreter. Choose BBC BASIC Z80 for the retro machine, or the 6502/8086 profiles for those targets. VDU rendering supports text and basic drawing; full graphics compatibility, graphics queries, files, sound, GPIO and source debugging are unavailable in CrispBASIC. Conversion to blocks still supports only the reader’s documented subset. Multi-WHEN programs cannot be shown (BASIC is single-threaded).',
         asmNote: 'Write assembly or view the compiled listing. Source mode: write per-device assembly and assemble+run — the 6502/Z80/8086 benches boot the image directly. TWO ASSEMBLERS, and which one runs is always in the status line: 8086 assembly is built IN THIS BROWSER (no network, MASM syntax), while 8051/6502/Z80/AVR go to the hosted toolchain. Listing mode: generated read-only evidence, linked locally for bundled 8051 targets and explicitly hosted for unsupported targets. To blocks: 8086 assembly that ▶ Run on 8086 produced reads back; anything else is refused by name, with a count.',
         asmLifted: n => `${n} assembly statement(s) read back into the dialect`,
         asmLiftRefused: (why, n) => `Not read back: ${why}${n ? ` (${n} statement(s) before it were)` : ''}`,
@@ -562,6 +574,18 @@ const L10N = {
         basicInputExhausted: 'Programm hat INPUT erwartet, aber es waren keine weiteren Antworten vorhanden.',
         basicNoPrompt: 'BASIC hat seine Bereit-Eingabeaufforderung nicht erreicht — das ROM wurde möglicherweise nicht geladen.',
         basicLoading: 'BASIC-Maschine wird geladen…',
+        basicEngine: 'Engine', basicCrispEngine: 'CrispBASIC (Browser)', basicZ80Engine: 'BBC BASIC Z80 (Retro)',
+        basicCrispLoading: 'CrispBASIC wird geladen…', basicCrispRunning: 'CrispBASIC läuft.',
+        basicCrispStopped: 'CrispBASIC gestoppt.', basicCrispStopping: 'CrispBASIC wird gestoppt…',
+        basicCrispReset: 'Zurücksetzen', basicCrispResetDone: 'CrispBASIC zurückgesetzt.',
+        basicCrispCompleted: code => code ? `Beendet (Exit ${code}).` : 'Beendet.',
+        basicCrispTimeout: 'CrispBASIC hat die Laufzeitgrenze von 60 Sekunden erreicht.',
+        basicCrispOutputLimit: 'CrispBASIC hat die Ausgabegrenze erreicht.',
+        basicCrispError: 'CrispBASIC konnte dieses Programm nicht beenden.',
+        basicInputLine: 'Programmeingabe', basicInputKey: 'Ein Zeichen (leer für Eingabetaste)',
+        basicInputSend: 'Senden', basicInputEnd: 'Eingabe beenden',
+        basicInputKeyError: 'Ein Latin-1-Zeichen eingeben oder das Feld für die Eingabetaste leer lassen.',
+        basicCrispScope: 'Text, Eingabe und einfache VDU-Zeichnungen. Dateien, Grafikabfragen, Ton, GPIO und Quelltext-Debugging sind nicht verfügbar. Läufe enden nach 60 Sekunden.',
         basic8086Building: 'Übersetze BASIC für den 8086 in diesem Browser…',
         basicRealDosBuilding: 'Übersetze BASIC und bereite eine echte MS-DOS-2.0-Bootdiskette vor…',
         basicRealDosFailed: (m) => `Die MS-DOS-Bootdiskette konnte nicht vorbereitet werden: ${m}`,
@@ -626,7 +650,7 @@ const L10N = {
         stWarn: w => `Mit Warnungen geladen — ${w}`,
         foreverLoop: 'Dieses Projekt hat eine Endlosschleife (Spiel), es läuft daher in den Blöcken — klicke die grüne Flagge zum Spielen. Für einen Text-Lauf nimm ein algorithmisches Beispiel (Quiz, Operatoren, 2048, …).',
         cNote: 'C für den STC12 / 8051. Eigene Firmware einfügen und „⇦ Zu Blöcken” drücken, oder auf stc-compiler.vercel.app zu .hex kompilieren. Eine 8051-Lücke: tone (set <buzzer> to N hz) hat noch keinen STC12-Treiber — es kompiliert auf dem 8051 (und dem Pico) zu einem STILLEN No-op, ohne Fehler; nur der Arduino/AVR-Build erzeugt Ton. Auf dem 8086 wird das C lokal kompiliert und ausgeführt (SmallerC + der In-Browser-Assembler); die Pins des 8255 werden mit den Port-I/O-Primitiven bw_outb(port, value) und bw_inb(port) angesteuert — cdecl, 16-Bit-Argumente, der Aufrufer räumt auf — dieselben, die das erzeugte C nutzt. Skalare Variablen und Parameter unsigned (wortbreit) halten, nicht unsigned char: das Lesen eines Byte-Werts lässt SmallerC MOVZX erzeugen, eine 80386-Instruktion, die der 8086-Assembler ablehnt.',
-        basicNote: 'BBC BASIC (R.T. Russell, zlib) oder 6502 BASIC (abgeleitet von MIT-lizenzierter Quelle). Profil und Zeilennummern oben umschalten. Multi-WHEN-Programme werden nicht dargestellt (BASIC ist einzel-threaded). Die BBC-BASIC-Maschine wird vom Twin-Run-Orakel gegen R.T. Russells BBCSDL-Referenzinterpreter gegengeprüft.',
+        basicNote: 'BBC BASIC läuft in CrispBASIC, der eingeschränkten Browser-Version von R.T. Russells BBCSDL-Interpreter. Für die Retro-Maschine BBC BASIC Z80 wählen; 6502/8086 haben eigene Profile. Die VDU-Anzeige unterstützt Text und einfache Zeichnungen. Vollständige Grafikkompatibilität, Grafikabfragen, Dateien, Ton, GPIO und Quelltext-Debugging sind in CrispBASIC nicht verfügbar. Die Umwandlung in Blöcke unterstützt weiterhin nur die dokumentierte Teilmenge des Readers. Multi-WHEN-Programme werden nicht dargestellt (BASIC ist einzel-threaded).',
         asmNote: 'Assembler schreiben oder kompiliertes Listing ansehen. Source-Modus: gerätespezifischen Assembler schreiben und assemblieren+ausführen — die 6502-/Z80-/8086-Werkbänke booten das Image direkt. ZWEI ASSEMBLER, und welcher lief, steht immer in der Statuszeile: 8086-Assembler wird IN DIESEM BROWSER gebaut (ohne Netz, MASM-Syntax), 8051/6502/Z80/AVR gehen an den gehosteten Dienst. Listing-Modus: erzeugter, schreibgeschützter Beleg, für gebündelte 8051-Ziele lokal gelinkt und für nicht unterstützte Ziele ausdrücklich gehostet. Zu Blöcken: 8086-Assembler, den ▶ Auf 8086 ausführen erzeugt hat, wird zurückgelesen; alles andere wird namentlich und gezählt abgelehnt.',
         asmLifted: n => `${n} Assembler-Anweisung(en) in den Dialekt zurückgelesen`,
         asmLiftRefused: (why, n) => `Nicht zurückgelesen: ${why}${n ? ` (${n} Anweisung(en) davor schon)` : ''}`,
@@ -1261,7 +1285,11 @@ class PseudocodeImporter extends React.Component {
             // ever left without one — a missing buffer made activeCode()
             // undefined and crashed the tab on open.
             buffers: Object.fromEntries(Object.keys(LANG_LABEL).map(l => [l, ''])),
-            basicProfile: 'bbc', basicLineNumbers: true,
+            basicProfile: 'bbc', basicEngine: 'crispbasic', basicLineNumbers: false,
+            basicFilename: 'editor.bas', basicOutputRunId: 0,
+            basicWarnings: [], basicGenerationFailed: false,
+            basicInputMethod: null, basicInputValue: '', basicInputError: '', basicDiagnostic: null,
+            crispBasicActive: false, basicResetting: false,
             uploads: [], status: '', conversionReport: null, reportExpanded: false, busy: false, showRef: false, showInfo: false, showMatrix: false,
             showRepresentation: true,
             showArt: false, output: null, running: false, picoSimRunning: false,
@@ -1670,6 +1698,8 @@ class PseudocodeImporter extends React.Component {
             this._makeCodeRequest = null;
             this.setState(st => ({
             lang, uploads: [],
+            basicFilename: lang === 'basic' ? file.name : 'editor.bas',
+            basicWarnings: [], basicGenerationFailed: false,
             // Same exclusivity the editor's own onChange uses: one authored
             // buffer at a time, so a stale translation of the PREVIOUS source
             // cannot sit in another tab pretending to match.
@@ -2689,6 +2719,7 @@ class PseudocodeImporter extends React.Component {
 
     componentWillUnmount () {
         this._unmounted = true;
+        this.disposeCrispBasic().catch(() => {});
         if (this._unregisterCodeMenu) this._unregisterCodeMenu();
         this._makeCodeRequest = null;
         const vm = this.props.vm;
@@ -2779,7 +2810,9 @@ class PseudocodeImporter extends React.Component {
     setActiveCode (text) {
         if (this.state.lang === 'asm' && this.state.asmMode === 'listing') return;
         this.invalidateArcadeReport();
-        this.setState(s => ({buffers: {...Object.fromEntries(Object.keys(LANG_LABEL).map(l => [l, ''])), [s.lang]: text}}));
+        this.setState(s => ({buffers: {...Object.fromEntries(Object.keys(LANG_LABEL).map(l => [l, ''])), [s.lang]: text},
+            basicFilename: s.lang === 'basic' ? s.basicFilename : 'editor.bas',
+            basicWarnings: [], basicGenerationFailed: false}));
     }
 
     // Lazily import the compiler through the registering door, which injects this
@@ -2819,19 +2852,23 @@ class PseudocodeImporter extends React.Component {
             creator.parse(pseudo);
             const proj = creator.project;
             let code;
+            let basicWarnings = [];
+            let basicGenerationFailed = false;
             if (to === 'pseudocode') code = new SB3().decompile(proj);
             else if (to === 'python') code = new SB3().generatePython(proj, this.genOpts());
             else if (to === 'c') code = new SB3().generateC(proj);
             else if (to === 'basic') {
                 const r = new SB3().generateBASIC(proj, {profile: this.state.basicProfile.startsWith('i8086') ? 'ms' : this.state.basicProfile, lineNumbers: this.state.basicLineNumbers});
                 code = r.ok ? r.basic : `REM === Cannot show as BASIC ===\n${r.reasons.map(s => 'REM ' + s).join('\n')}`;
+                basicWarnings = [...(r.reasons || []), ...(r.warnings || [])];
+                basicGenerationFailed = !r.ok;
             } else if (to === 'micropython') {
                 const r = new SB3().generateMicroPython(proj);
                 code = r.ok ? r.py : `# === Cannot generate MicroPython ===\n${r.reasons.map(s => '# ' + s).join('\n')}`;
             } else if (DOS_LANG[to]) {
                 code = DOS_LANG[to].generate(await DOS_LANG[to].load(), proj);
             } else code = new SB3().generateJavaScript(proj, this.genOpts());
-            return {code};
+            return {code, ...(to === 'basic' ? {basicWarnings, basicGenerationFailed} : {})};
         } catch (e) { return {error: e.message}; }
     }
 
@@ -2929,11 +2966,13 @@ class PseudocodeImporter extends React.Component {
             return;
         }
         this.setState({busy: true, status: this.L.stConverting(to), emptyTabOffer: null});
-        this.deriveBuffer(src, from, to).then(({code, error}) => {
+        this.deriveBuffer(src, from, to).then(({code, error, basicWarnings = [], basicGenerationFailed = false}) => {
             // A failed conversion keeps the source tab, and offers an explicit
             // way into the requested tab with an empty buffer instead of a dead end.
             if (error) { this.setState({busy: false, status: this.L.stCantShow(to, error), emptyTabOffer: to}); return; }
-            this.setState(s => ({lang: to, busy: false, output: null, status: '', emptyTabOffer: null, buffers: {...s.buffers, [to]: code}}));
+            this.setState(s => ({lang: to, busy: false, output: null, status: '', emptyTabOffer: null,
+                ...(to === 'basic' ? {basicWarnings, basicGenerationFailed, basicFilename: 'editor.bas'} : {}),
+                buffers: {...s.buffers, [to]: code}}));
         });
     }
 
@@ -4908,9 +4947,163 @@ class PseudocodeImporter extends React.Component {
             status: result && result.ok ? this.L.nqcSent : String((result && result.log) || 'download failed')});
     }
 
+    // Keep engine loading behind an overridable method so lifecycle tests can
+    // hold the actual editor at the same asynchronous boundary as a cold tab.
+    async loadCrispBasicRunner () {
+        return import(/* webpackChunkName: "crispbasic-runner" */ '../../lib/crispbasic-runner.js');
+    }
+
+    async runCrispBasic (code) {
+        if (this._unmounted || this._crispBasicRun || this._crispBasicReset || this.state.running) return;
+        const epoch = this._crispBasicEpoch = (this._crispBasicEpoch || 0) + 1;
+        const run = {source: code, filename: this.state.basicFilename || 'editor.bas', runner: null, cancelled: false};
+        this._crispBasicRun = run;
+        const owns = () => !this._unmounted && this._crispBasicRun === run;
+        const ownsOutcome = () => !this._unmounted && this._crispBasicEpoch === epoch;
+        this.setState(s => ({output: '', running: true, status: this.L.basicCrispLoading,
+            basicRawOutput: '', basicIsBbc: true, crispBasicActive: true,
+            basicOutputRunId: s.basicOutputRunId + 1, basicDiagnostic: null,
+            basicInputMethod: null, basicInputValue: '', basicInputError: ''}));
+        this.setHighlightedLine(null);
+        let result;
+        let failure;
+        try {
+            const {createCrispBasicRunner} = await this.loadCrispBasicRunner();
+            if (!owns() || run.cancelled) return;
+            run.runner = createCrispBasicRunner({onEvent: event => {
+                if (!owns() || run.cancelled) return;
+                if (event.type === 'state' && (event.state === 'loading' || event.state === 'running')) {
+                    this.setState(() => ownsOutcome() && !run.cancelled ? {
+                        status: event.state === 'loading' ? this.L.basicCrispLoading : this.L.basicCrispRunning
+                    } : null);
+                    return;
+                }
+                if (event.type !== 'view') return;
+                // React may batch the final bytes with completion. The epoch
+                // keeps those accepted bytes after the active run is cleared,
+                // while Stop, Reset, a newer run and unmount revoke stale work.
+                this.setState(() => ownsOutcome() && !run.cancelled ? {
+                    output: event.output, basicRawOutput: event.rawOutput,
+                    basicInputMethod: event.inputMethod
+                } : null);
+            }});
+            result = await run.runner.run(code, {filename: run.filename, interactive: true, timeoutMs: 60000});
+        } catch (error) {
+            failure = error;
+        } finally {
+            // Run owns a fresh adapter. Do not enable the next Run until its
+            // worker and callbacks have been disposed, even on a host failure.
+            try { if (run.runner) await run.runner.dispose(); }
+            catch (error) { failure = error; }
+            if (owns()) {
+                this._crispBasicRun = null;
+                const error = failure || (result && result.error);
+                let status = this.L.basicCrispError;
+                if (!failure && result) {
+                    if (result.status === 'completed') status = this.L.basicCrispCompleted(result.exitCode);
+                    else if (result.status === 'cancelled') status = this.L.basicCrispStopped;
+                    else if (result.status === 'timeout') status = this.L.basicCrispTimeout;
+                    else if (result.status === 'output-limit') status = this.L.basicCrispOutputLimit;
+                }
+                const diagnostic = error ? this.crispBasicDiagnostic(error, run.filename) : null;
+                this.setState(() => ownsOutcome() ? {running: false, crispBasicActive: false, status, basicDiagnostic: diagnostic,
+                    basicInputMethod: null, basicInputValue: '', basicInputError: ''} : null);
+                if (diagnostic && diagnostic.line && ownsOutcome() && this.state.lang === 'basic' &&
+                    this.state.buffers.basic === run.source) this.setHighlightedLine(diagnostic.line);
+            }
+        }
+        return result;
+    }
+
+    crispBasicDiagnostic (error, filename) {
+        const name = error.filename || filename;
+        const line = Number.isInteger(error.line) ? error.line : null;
+        const column = Number.isInteger(error.column) ? error.column : null;
+        const location = `${name}${line === null ? '' : `:${line}`}${column === null ? '' : `:${column}`}`;
+        const message = String(error.message || error);
+        return {line, message: error.kind === 'host' || message.startsWith(`${location}:`) ? message : `${location}: ${message}`};
+    }
+
+    stopCrispBasic () {
+        const run = this._crispBasicRun;
+        if (!run) return;
+        run.cancelled = true;
+        if (run.runner) {
+            run.runner.cancel();
+            this.setState({basicInputMethod: null, status: this.L.basicCrispStopping});
+        } else {
+            // A cold dynamic import is not cancellable; revoke its right to
+            // start a session when it resolves, and leave the editor usable.
+            this._crispBasicRun = null;
+            this.setState({running: false, crispBasicActive: false, basicInputMethod: null, status: this.L.basicCrispStopped});
+        }
+    }
+
+    async resetCrispBasic () {
+        if (this._crispBasicReset || this._unmounted) return;
+        const reset = this._crispBasicReset = {};
+        this._crispBasicEpoch = (this._crispBasicEpoch || 0) + 1;
+        const run = this._crispBasicRun;
+        this._crispBasicRun = null;
+        if (run) run.cancelled = true;
+        this.setState({basicResetting: true, basicInputMethod: null});
+        let failure;
+        try {
+            if (run && run.runner) {
+                await run.runner.reset();
+            }
+        } catch (error) { failure = error; }
+        try { if (run && run.runner) await run.runner.dispose(); }
+        catch (error) { failure = error; }
+        if (this._unmounted || this._crispBasicReset !== reset) return;
+        this._crispBasicReset = null;
+        this.setState(s => ({running: false, crispBasicActive: false, basicResetting: false, output: '', basicRawOutput: '',
+            basicOutputRunId: s.basicOutputRunId + 1, basicInputMethod: null, basicInputValue: '', basicInputError: '',
+            basicDiagnostic: failure ? this.crispBasicDiagnostic(failure, 'editor.bas') : null,
+            status: failure ? this.L.basicCrispError : this.L.basicCrispResetDone}));
+        this.setHighlightedLine(null);
+    }
+
+    async disposeCrispBasic () {
+        this._crispBasicEpoch = (this._crispBasicEpoch || 0) + 1;
+        this._crispBasicReset = null;
+        const run = this._crispBasicRun;
+        this._crispBasicRun = null;
+        if (run) run.cancelled = true;
+        if (run && run.runner) {
+            run.runner.cancel();
+            await run.runner.dispose();
+        }
+    }
+
+    sendCrispBasicInput (event) {
+        if (event) event.preventDefault();
+        const run = this._crispBasicRun;
+        const method = this.state.basicInputMethod;
+        if (!run || !run.runner || run.cancelled || !method) return;
+        const value = this.state.basicInputValue;
+        try {
+            if (method === 'key' && (value.length > 1 || (value && value.charCodeAt(0) > 255))) {
+                throw new Error(this.L.basicInputKeyError);
+            }
+            run.runner.writeInput(method === 'line' ? `${value}\n` : value || '\r');
+            this.setState({basicInputMethod: null, basicInputValue: '', basicInputError: ''});
+        } catch (error) { this.setState({basicInputError: error.message}); }
+    }
+
+    endCrispBasicInput () {
+        const run = this._crispBasicRun;
+        if (!run || !run.runner || run.cancelled) return;
+        try {
+            run.runner.endInput();
+            this.setState({basicInputMethod: null, basicInputValue: '', basicInputError: ''});
+        } catch (error) { this.setState({basicInputError: error.message}); }
+    }
+
     async runBasic () {
         const code = this.activeCode();
-        if (!code.trim()) return;
+        if (!code.trim() || this.state.running || this.state.basicResetting || this.state.basicGenerationFailed) return;
+        if (this.state.basicProfile === 'bbc' && this.state.basicEngine !== 'z80') return this.runCrispBasic(code);
         // The 8086 profile compiles BASIC to a .COM and boots the DOS bench (the
         // C/asm-tab path), rather than running a 6502/Z80 ROM interpreter.
         if (this.state.basicProfile === 'i8086') return this.runBasicOn8086(code);
@@ -4918,7 +5111,9 @@ class PseudocodeImporter extends React.Component {
         // The libre DOS-native interpreter path: uBASIC.EXE runs the program on
         // the 8086 DOS bench (the language itself runs on the machine).
         if (this.state.basicProfile === 'i8086-ubasic') return this.runBasicOnDosInterp(code);
-        this.setState({output: '', running: true, status: this.L.basicLoading, basicRawOutput: '', basicIsBbc: false});
+        this.setState(s => ({output: '', running: true, status: this.L.basicLoading, basicRawOutput: '',
+            basicIsBbc: false, crispBasicActive: false, basicDiagnostic: null, basicInputMethod: null,
+            basicOutputRunId: s.basicOutputRunId + 1}));
         try {
             const isBbc = this.state.basicProfile === 'bbc';
             let runner;
@@ -5487,9 +5682,13 @@ class PseudocodeImporter extends React.Component {
             if (lang !== 'python') nb.python = new SB3Creator().generatePython(proj, this.genOpts());
             if (lang !== 'javascript') nb.javascript = new SB3Creator().generateJavaScript(proj, this.genOpts());
             nb.c = new SB3Creator().generateC(proj);
+            let basicWarnings = [];
+            let basicGenerationFailed = false;
             {
                 const br = new SB3Creator().generateBASIC(proj, {profile: this.state.basicProfile.startsWith('i8086') ? 'ms' : this.state.basicProfile, lineNumbers: this.state.basicLineNumbers});
                 nb.basic = br.ok ? br.basic : `REM === Cannot show as BASIC ===\n${br.reasons.map(s => 'REM ' + s).join('\n')}`;
+                basicWarnings = [...(br.reasons || []), ...(br.warnings || [])];
+                basicGenerationFailed = !br.ok;
             }
             nb.asm = ''; // cleared — re-fetched on next ASM tab switch
             // fe and Tcl are NOT regenerated here: their generators load lazily, and
@@ -5507,6 +5706,7 @@ class PseudocodeImporter extends React.Component {
             const classified = classifyConversionWarnings(warns);
             publishEditor(state => ({
                 buffers: nb,
+                basicWarnings, basicGenerationFailed, basicFilename: 'editor.bas',
                 // This flag belongs to the admitted buffer regeneration too.
                 importedPython: false,
                 uploads: state.uploads.filter(upload => !appliedUploads.has(upload)),
@@ -5558,6 +5758,8 @@ class PseudocodeImporter extends React.Component {
             const unsupported = unsupportedDiagnostics.length;
             this.setState({
                 buffers,
+                basicWarnings: [...(basicResult.reasons || []), ...(basicResult.warnings || [])],
+                basicGenerationFailed: !basicResult.ok, basicFilename: 'editor.bas',
                 uploads: [], // the live project now owns its artwork; old import SVGs are stale
                 output: null,
                 status: unsupported ?
@@ -6318,10 +6520,24 @@ class PseudocodeImporter extends React.Component {
                             </button>
                         ) : null}
                         {this.state.lang === 'basic' && this.activeCode().trim() ? (
-                            <button onClick={() => this.runBasic()} disabled={this.state.running}
+                            <button onClick={() => this.runBasic()} disabled={this.state.running || this.state.basicResetting || this.state.basicGenerationFailed}
                                 style={{...actionBtn, background: 'linear-gradient(135deg,#37b24d,#2f9e44)'}}
                                 data-testid="bw-basic-run">
                                 {this.L.runBasic}
+                            </button>
+                        ) : null}
+                        {this.state.crispBasicActive && this.state.running ? (
+                            <button type="button" onClick={() => this.stopCrispBasic()} disabled={this.state.basicResetting}
+                                style={{...actionBtn, background: 'linear-gradient(135deg,#fa5252,#e03131)'}}
+                                data-testid="bw-crispbasic-stop">
+                                ■ {this.L.stop}
+                            </button>
+                        ) : null}
+                        {this.state.lang === 'basic' && this.state.basicProfile === 'bbc' && this.state.basicEngine === 'crispbasic' ? (
+                            <button type="button" onClick={() => this.resetCrispBasic()}
+                                disabled={this.state.basicResetting || (this.state.running && !this.state.crispBasicActive)}
+                                style={actionBtn} data-testid="bw-crispbasic-reset">
+                                {this.L.basicCrispReset}
                             </button>
                         ) : null}
                         {this.state.lang === 'fe' && this.activeCode().trim() ? (
@@ -6648,10 +6864,12 @@ class PseudocodeImporter extends React.Component {
                     </div>
                 )}
                 {this.state.lang === 'basic' && !max && (
-                    <div style={{display: 'flex', gap: 16, padding: '6px 12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderTop: 'none', fontSize: 13, alignItems: 'center'}}>
+                    <div style={{display: 'flex', flexWrap: 'wrap', gap: 16, padding: '6px 12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderTop: 'none', fontSize: 13, alignItems: 'center'}}>
                         <label style={{display: 'flex', alignItems: 'center', gap: 4}}>
                             {this.L.profile}
-                            <select value={this.state.basicProfile} onChange={e => this.setState({basicProfile: e.target.value, buffers: {...this.state.buffers, basic: ''}})}
+                            <select value={this.state.basicProfile} disabled={this.state.running || this.state.basicResetting}
+                                onChange={e => this.setState({basicProfile: e.target.value, basicFilename: 'editor.bas',
+                                    basicWarnings: [], basicGenerationFailed: false, buffers: {...this.state.buffers, basic: ''}})}
                                 style={{padding: '2px 6px', borderRadius: 4, border: '1px solid #cbd5e1'}}>
                                 <option value="bbc">{'BBC BASIC'}</option>
                                 <option value="ms">{'6502 BASIC'}</option>
@@ -6660,14 +6878,40 @@ class PseudocodeImporter extends React.Component {
                                 <option value="i8086-ubasic">{'BASIC (uBASIC on DOS)'}</option>
                             </select>
                         </label>
+                        {this.state.basicProfile === 'bbc' ? (
+                            <label style={{display: 'flex', alignItems: 'center', gap: 4}}>
+                                {this.L.basicEngine}
+                                <select value={this.state.basicEngine} disabled={this.state.running || this.state.basicResetting}
+                                    onChange={e => this.setState({basicEngine: e.target.value})}
+                                    style={{padding: '2px 6px', borderRadius: 4, border: '1px solid #cbd5e1'}}
+                                    data-testid="bw-basic-engine">
+                                    <option value="crispbasic">{this.L.basicCrispEngine}</option>
+                                    <option value="z80">{this.L.basicZ80Engine}</option>
+                                </select>
+                            </label>
+                        ) : null}
                         <label style={{display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer'}}>
                             <input type="checkbox" checked={this.state.basicLineNumbers}
-                                disabled={this.state.basicProfile === 'ms'}
-                                onChange={e => this.setState({basicLineNumbers: e.target.checked, buffers: {...this.state.buffers, basic: ''}})} />
+                                disabled={this.state.basicProfile === 'ms' || this.state.running || this.state.basicResetting}
+                                onChange={e => this.setState({basicLineNumbers: e.target.checked, basicWarnings: [],
+                                    basicGenerationFailed: false, basicFilename: 'editor.bas', buffers: {...this.state.buffers, basic: ''}})} />
                             {this.L.lineNumbers}{' '}{this.state.basicProfile === 'ms' ? this.L.alwaysOn6502 : ''}
                         </label>
                     </div>
                 )}
+                {this.state.lang === 'basic' && this.state.basicProfile === 'bbc' && this.state.basicEngine === 'crispbasic' ? (
+                    <div style={{padding: '6px 12px', fontSize: 12, color: '#475569', flexShrink: 0}}
+                        data-testid="bw-crispbasic-capabilities">
+                        {this.L.basicCrispScope}
+                    </div>
+                ) : null}
+                {this.state.lang === 'basic' && this.state.basicWarnings.length ? (
+                    <ul style={{margin: '4px 0', padding: '8px 12px 8px 28px', fontSize: 12, color: '#92400e',
+                        background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 6, flexShrink: 0}}
+                        data-testid="bw-basic-generation-warnings">
+                        {this.state.basicWarnings.map((warning, index) => <li key={index}>{warning}</li>)}
+                    </ul>
+                ) : null}
                 {this.state.lang === 'asm' && !max && (
                     <div style={{display: 'flex', gap: 16, padding: '6px 12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderTop: 'none', fontSize: 13, alignItems: 'center'}}>
                         <label style={{display: 'flex', alignItems: 'center', gap: 4}}>
@@ -7053,8 +7297,32 @@ class PseudocodeImporter extends React.Component {
                 {/* VDU terminal for BBC BASIC — renders DRAW/MOVE/PLOT graphics */}
                 {this.state.basicIsBbc && this.state.basicRawOutput ? (
                     <React.Suspense fallback={null}>
-                        <VduTerminal output={this.state.basicRawOutput} />
+                        <VduTerminal output={this.state.basicRawOutput} resetKey={this.state.basicOutputRunId} />
                     </React.Suspense>
+                ) : null}
+                {this.state.crispBasicActive && this.state.basicInputMethod ? (
+                    <form onSubmit={event => this.sendCrispBasicInput(event)}
+                        style={{display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, padding: '8px 0'}}
+                        data-testid="bw-crispbasic-input-form">
+                        <label style={{display: 'flex', alignItems: 'center', gap: 8}}>
+                            {this.state.basicInputMethod === 'key' ? this.L.basicInputKey : this.L.basicInputLine}
+                            <input type="text" value={this.state.basicInputValue}
+                                maxLength={this.state.basicInputMethod === 'key' ? 1 : 4096}
+                                onChange={event => this.setState({basicInputValue: event.target.value, basicInputError: ''})}
+                                autoComplete="off" spellCheck={false} data-testid="bw-crispbasic-input" />
+                        </label>
+                        <button type="submit" data-testid="bw-crispbasic-send">{this.L.basicInputSend}</button>
+                        <button type="button" onClick={() => this.endCrispBasicInput()}
+                            data-testid="bw-crispbasic-end-input">{this.L.basicInputEnd}</button>
+                        {this.state.basicInputError ? <span role="alert" style={{color: '#b91c1c'}}>{this.state.basicInputError}</span> : null}
+                    </form>
+                ) : null}
+                {this.state.lang === 'basic' && this.state.basicDiagnostic ? (
+                    <div role="alert" style={{padding: '8px 12px', color: '#991b1b', background: '#fef2f2',
+                        border: '1px solid #fecaca', borderRadius: 6, overflowWrap: 'anywhere'}}
+                        data-testid="bw-crispbasic-diagnostic">
+                        {this.state.basicDiagnostic.message}
+                    </div>
                 ) : null}
                 {this.state.output != null ? (
                     <pre data-testid={['basic', 'fe', 'tcl'].includes(this.state.lang) ? `bw-${this.state.lang}-output` : undefined}

@@ -103,18 +103,27 @@ Validation includes the same fixed-output corpus in native and WASM, runtime
 restriction probes, input/error suspension and repeated/concurrent sessions.
 Real Chromium tests verify responsive pages, tight-loop termination and worker
 cleanup without cross-origin isolation. Capabilities describe the actual host.
-This is a working browser engine milestone; the Brickwright UI is not yet wired
-to it. Other browser engines and native desktop/mobile shells remain unqualified.
+The Brickwright Code tab now connects generated or edited BBC BASIC to this
+engine through a GUI-owned adapter and the existing partial VDU renderer. See
+[BRICKWRIGHT.md](BRICKWRIGHT.md) for packaging, lifecycle and qualification scope.
+Other browser engines and native desktop/mobile shells remain unqualified.
 
 ## Next implementation sequence
 
-### 1. Brickwright adapters: text, blocks, graphics and circuits
+### 1. Brickwright adapters: implemented slice and remaining work
 
-Use the existing `generateBASIC(..., {profile: 'bbc', lineNumbers: false})`
-output as source. Keep `basicToPseudocode`'s subset warnings. Feed raw VDU bytes
-to the existing decoder through a thin adapter; qualify graphics primitives
-and queries before claiming full graphics compatibility. Preserve the
-existing Z80 runner for retrocomputing.
+The Code tab now uses the existing
+`generateBASIC(..., {profile: 'bbc', lineNumbers: false})` output as source and
+keeps `basicToPseudocode`'s subset warnings. A GUI-owned adapter feeds raw VDU
+bytes to the existing decoder/renderer, provides input and Stop/Reset, and
+preserves the Z80 runner as an explicit retro engine. Fixed output and canvas
+checks cover basic MOVE/DRAW, not full graphics compatibility or queries.
+
+The next integration work is the bounded circuit request/reply bridge and its
+board-solver adapter. [SIMULATION.md](SIMULATION.md) defines an executable,
+deterministic reference host; no BASIC/circuit/physical-pin connection is
+claimed. Preserve parent-owned limits and never encode host control in VDU
+output or reopen SYS/raw-memory access.
 
 The GUI renderer currently implements only part of the VDU semantics. It is
 not a correctness oracle for the full graphics language. CrispBASIC's engine
@@ -165,8 +174,10 @@ The extraction unit is `packages/crisp-basic/`. Runtime, build inputs, tests,
 examples, license notices and this roadmap live together. The root workflow
 sets up the SDK/build tools and invokes package commands. No current pin of
 another Brickwright package is moved, and the existing external BBCSDL
-reference build keeps its role. The only npm development dependency is the
-locked Playwright browser-test harness; runtime code has no npm dependencies.
+reference build keeps its role. The npm development dependencies are locked Playwright and esbuild for browser
+qualification and JSX transformation; runtime code has no npm dependencies.
+Brickwright integration tests also use the repository's existing pinned
+generator/VDU dependencies.
 
 Any future copied or modified upstream source must retain its notice, have
 an immutable source reference, and be visibly identified as modified. Keep

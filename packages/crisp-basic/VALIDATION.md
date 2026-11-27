@@ -1,4 +1,10 @@
-# Restricted WASM milestone validation
+# Validation records
+
+The current Brickwright integration checks and reproduction commands are in
+[BRICKWRIGHT.md](BRICKWRIGHT.md). The record below is the unchanged engine
+milestone baseline, before app integration.
+
+## Restricted WASM milestone baseline
 
 Local validation recorded on 2026-11-27 for version `0.1.0-dev.2`.
 These are local results. GitHub Actions is configured independently and its

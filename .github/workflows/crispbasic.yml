@@ -4,10 +4,44 @@ on:
     branches: ['**']
     paths:
       - 'packages/crisp-basic/**'
+      - 'overlay/scratch-gui/src/lib/crispbasic-runner.js'
+      - 'packages/scratch-gui/src/lib/crispbasic-runner.js'
+      - 'overlay/scratch-gui/src/lib/sb3-creator*.js'
+      - 'packages/scratch-gui/src/lib/sb3-creator*.js'
+      - 'overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx'
+      - 'packages/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx'
+      - 'overlay/scratch-gui/src/components/tw-pseudocode/vdu-terminal.jsx'
+      - 'packages/scratch-gui/src/components/tw-pseudocode/vdu-terminal.jsx'
+      - 'overlay/scratch-gui/webpack.config.js'
+      - 'packages/scratch-gui/webpack.config.js'
+      - 'scripts/package-crispbasic.mjs'
+      - 'scripts/verify-crispbasic-browser.mjs'
+      - 'scripts/lib/crispbasic-*.mjs'
+      - 'scripts/integrate.mjs'
+      - 'test/crispbasic-*.test.mjs'
+      - 'package.json'
+      - 'package-lock.json'
       - '.github/workflows/crispbasic.yml'
   pull_request:
     paths:
       - 'packages/crisp-basic/**'
+      - 'overlay/scratch-gui/src/lib/crispbasic-runner.js'
+      - 'packages/scratch-gui/src/lib/crispbasic-runner.js'
+      - 'overlay/scratch-gui/src/lib/sb3-creator*.js'
+      - 'packages/scratch-gui/src/lib/sb3-creator*.js'
+      - 'overlay/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx'
+      - 'packages/scratch-gui/src/components/tw-pseudocode/pseudocode-importer.jsx'
+      - 'overlay/scratch-gui/src/components/tw-pseudocode/vdu-terminal.jsx'
+      - 'packages/scratch-gui/src/components/tw-pseudocode/vdu-terminal.jsx'
+      - 'overlay/scratch-gui/webpack.config.js'
+      - 'packages/scratch-gui/webpack.config.js'
+      - 'scripts/package-crispbasic.mjs'
+      - 'scripts/verify-crispbasic-browser.mjs'
+      - 'scripts/lib/crispbasic-*.mjs'
+      - 'scripts/integrate.mjs'
+      - 'test/crispbasic-*.test.mjs'
+      - 'package.json'
+      - 'package-lock.json'
       - '.github/workflows/crispbasic.yml'
   workflow_dispatch:
 permissions:
@@ -67,15 +101,41 @@ jobs:
           sudo apt-get install -y --no-install-recommends build-essential nasm
           npm ci --ignore-scripts --no-audit --no-fund
           npx playwright install --with-deps chromium
+      - name: Install Brickwright source integration dependencies
+        working-directory: .
+        run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Build both real interpreter backends
         env:
           EMCC: ${{ github.workspace }}/packages/crisp-basic/.build/emsdk/upstream/emscripten/emcc
         run: |
           npm run build:native
           npm run build:wasm
+      - name: Retain the pinned WASM build for integration qualification
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: crispbasic-wasm-${{ github.sha }}
+          path: |
+            packages/crisp-basic/.build/wasm/crispbasic.mjs
+            packages/crisp-basic/.build/wasm/crispbasic.wasm
+            packages/crisp-basic/.build/wasm/build.json
+            packages/crisp-basic/.build/wasm/BBCSDL-LICENSE.txt
+            packages/crisp-basic/.build/wasm/licenses/**
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
       - name: Verify WASM lifecycle and restricted host operations
         run: npm run test:wasm
       - name: Compare both backends against fixed expected results
         run: npm run test:parity
       - name: Verify real browser workers and cleanup
         run: npm run test:browser
+      - name: Package and verify the browser runtime assets
+        working-directory: .
+        run: |
+          npm run package:crispbasic
+          npm run package:crispbasic:check
+      - name: Verify generated BASIC and Brickwright session integration
+        run: npm run test:brickwright
+      - name: Verify staged assets and Brickwright rendering in Chromium
+        working-directory: .
+        run: node scripts/verify-crispbasic-browser.mjs

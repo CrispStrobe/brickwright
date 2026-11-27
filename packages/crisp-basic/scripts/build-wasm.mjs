@@ -7,6 +7,7 @@ import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'node:fs';
 import {dirname, join, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {patchWasmUpstream} from '../wasm/patch-upstream.mjs';
+import {WASM_LOCAL_INPUTS, WASM_UPSTREAM_INPUTS} from '../wasm/build-inputs.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const build = join(root, '.build');
@@ -15,8 +16,9 @@ const checkout = process.env.CRISP_BASIC_UPSTREAM ? resolve(process.env.CRISP_BA
 const lock = JSON.parse(readFileSync(join(root, 'upstream.lock.json'), 'utf8')).bbcSDL;
 const toolchain = JSON.parse(readFileSync(join(root, 'wasm/toolchain.lock.json'), 'utf8')).emscripten;
 const emcc = (process.env.EMCC || 'emcc').includes('/') ? resolve(process.env.EMCC) : (process.env.EMCC || 'emcc');
-const selected = new Set(['bin/wasm/BBC.h', 'src/bbmain.c', 'src/bbexec.c',
-    'src/bbeval.c', 'src/bbdata_wasm32.c', 'licence.txt']);
+const selected = new Set(WASM_UPSTREAM_INPUTS);
+const localSourceInputs = WASM_LOCAL_INPUTS.map(path => ({path,
+    sha256: createHash('sha256').update(readFileSync(join(root, path))).digest('hex')}));
 
 for (const folder of [work, join(work, 'src'), join(work, 'include'), join(build, 'tmp')]) {
     mkdirSync(folder, {recursive: true});
@@ -110,9 +112,16 @@ mkdirSync(join(work, 'licenses'), {recursive: true});
 for (const notice of toolchain.notices) {
     writeFileSync(join(work, 'licenses', notice.path.split('/').at(-1)), readFileSync(join(root, notice.path)));
 }
+for (const input of localSourceInputs) {
+    if (createHash('sha256').update(readFileSync(join(root, input.path))).digest('hex') !== input.sha256) {
+        throw new Error('Local WASM build input changed during compilation: ' + input.path);
+    }
+}
 writeFileSync(join(work, 'build.json'), JSON.stringify({
     schemaVersion: 1, backend: 'bbcsdl-wasm', upstreamCommit: lock.commit,
     compiler, settings, sourceInputs: verified, toolchain, imports,
+    localSourceInputs,
+    moduleSha256: createHash('sha256').update(readFileSync(output)).digest('hex'),
     wasmSha256: createHash('sha256').update(binary).digest('hex')
 }, null, 2) + '\n');
 console.log('Built ' + output + ' and crispbasic.wasm');

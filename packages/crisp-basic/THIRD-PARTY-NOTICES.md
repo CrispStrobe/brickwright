@@ -48,6 +48,10 @@ Playwright 1.62.1 is a locked development dependency for the real browser test
 harness and is Apache-2.0 licensed. It is not imported or shipped by the runtime
 API. A Chromium installation is required only to execute the browser tests.
 
+esbuild 0.25.12 (MIT) is a locked development dependency used to transform the
+actual Brickwright JSX renderer and parse the editor during integration tests.
+It is not imported or shipped by the runtime API.
+
 ## Other build tools and proposed backends
 
 GCC, NASM, Git and Node.js are build/runtime tools obtained separately and are

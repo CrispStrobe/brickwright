@@ -7,8 +7,10 @@ on `feature/crispbasic`. It is intended to become an independent repository.
 processes and restricted WebAssembly workers.** Both use the original tokenizer
 and executor, source maps, raw VDU output, structured errors and bounded session
 lifetimes. The WASM host runs in browsers and Node without SDL or host filesystem
-access. Brickwright app integration, graphics rendering, the portable hardware
-library, source debugging and physical-board targets remain subsequent work.
+access. The Brickwright Code tab now adapts this runtime, with interactive input,
+Stop/Reset, mapped diagnostics and the existing partial VDU renderer. A separate
+deterministic simulation-host contract is available; its BASIC/circuit bridge,
+full graphics, source debugging and physical-board targets remain subsequent work.
 
 ## Try it
 
@@ -56,16 +58,29 @@ native symbol resolver, inline assembler or dynamic JavaScript evaluator is
 linked. Unexpected WASM imports fail the build. See [wasm/README.md](wasm/README.md)
 for the C host boundary and deployment layout.
 
+### Brickwright Code tab
+
+From the repository root, `npm run build:crispbasic` builds and packages the
+engine for the GUI. Select **BAS → BBC BASIC → CrispBASIC (browser)**; the
+separate Z80 engine remains available for retrocomputing. See
+[BRICKWRIGHT.md](BRICKWRIGHT.md) for build order, controls, asset integrity,
+focused integration tests and the exact rendering/circuit boundaries.
+
+The standalone [simulation host](SIMULATION.md) defines deterministic logical
+pins and integer-millisecond time. It does not yet connect BASIC to the circuit
+canvas or physical hardware.
+
 ### Test suites
 
 | Command | Prerequisites and coverage |
 | --- | --- |
-| `npm test` | Source preparation; no compiled backend needed |
+| `npm test` | Source preparation and deterministic simulation contract; no compiled backend needed |
 | `npm run test:native` | Native build; execution, CLI and process cleanup |
 | `npm run test:wasm` | WASM build; execution, host restrictions and worker lifecycle |
 | `npm run test:parity` | Both builds; the same corpus checked against fixed expected bytes |
 | `npm run test:all` | All of the above |
 | `npm run test:browser` | WASM build, Playwright and Chromium; real browser workers |
+| `npm run test:brickwright` | WASM build and root dependencies; actual generator, GUI adapter, controls and packaging |
 
 Missing required binaries are failures, never passing skips. To install only
 the package's browser test dependencies and run the browser suite:
