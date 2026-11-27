@@ -30,15 +30,16 @@ function extractBlock () {
     // Take the WHOLE try/catch, not just the body: the catch is what makes a
     // missing image non-fatal, and a harness that supplied its own would be
     // testing the harness.
-    const start = src.lastIndexOf('try {', anchor);
+    const start = src.lastIndexOf('let wiredMedia = null;', anchor);
+    const tryStart = src.lastIndexOf('try {', anchor);
     const warn = src.indexOf("console.warn('[brickwright] example ROM load failed'", anchor);
-    assert.ok(start > 0 && warn > anchor, 'the block no longer sits in its own try/catch');
+    assert.ok(start > 0 && tryStart > start && warn > anchor, 'the block no longer sits in its own try/catch');
     const end = src.indexOf('}', src.indexOf('\n', warn)) + 1;
     return src.slice(start, end);
 }
 
 /** Run the block against a fake example, circuit and window. */
-async function runBlock ({ex, parts, romBytes, romOk = true}) {
+async function runBlock ({ex, parts, romBytes, romOk = true, supportsWiredExampleBoot = false}) {
     const events = [];
     const win = {
         dispatchEvent: (e) => events.push(e),
@@ -54,10 +55,10 @@ async function runBlock ({ex, parts, romBytes, romOk = true}) {
     // eslint-disable-next-line no-new-func
     const warnings = [];
     const fakeConsole = {warn: (...a) => warnings.push(a.join(' '))};
-    const fn = new Function('ex', 'data', 'fetch', 'window', 'CustomEvent', 'console',
-        `return (async () => { ${body} })();`);
-    await fn(ex, {parts}, fetch, win, win.CustomEvent, fakeConsole);
-    return {events, fetched, warnings};
+    const fn = new Function('ex', 'data', 'fetch', 'window', 'CustomEvent', 'console', 'supportsWiredExampleBoot',
+        `return (async function () { ${body}; return wiredMedia; }).call({state: {Designer: {supportsWiredExampleBoot}}});`);
+    const wiredMedia = await fn(ex, {parts}, fetch, win, win.CustomEvent, fakeConsole, supportsWiredExampleBoot);
+    return {events, fetched, warnings, wiredMedia};
 }
 
 describe('an example that declares a ROM loads it', () => {
@@ -86,6 +87,20 @@ describe('an example that declares a ROM loads it', () => {
             romBytes: [0x3E, 0x01],
         });
         assert.equal(events[0].detail.kind, 'z80');
+    });
+
+    test('a wired 6502 boot hands the declared ROM to the designer without dispatching a second boot', async () => {
+        const {events, fetched, wiredMedia, warnings} = await runBlock({
+            ex: {id: 'eater6502-blink', files: {rom: 'eater6502-blink/rom.bin'}},
+            parts: [{kind: 'w65c02'}],
+            romBytes: [0xA9, 0x01, 0x8D],
+            supportsWiredExampleBoot: true
+        });
+        assert.deepEqual(fetched, ['examples/eater6502-blink/rom.bin']);
+        assert.deepEqual(events, []);
+        assert.deepEqual(warnings, []);
+        assert.deepEqual(wiredMedia, {slotId: 'rom', bytes: Uint8Array.of(0xA9, 0x01, 0x8D),
+            kind: 'eater6502', profile: null, name: 'rom.bin'});
     });
 
     test('an example with no ROM dispatches nothing', async () => {
