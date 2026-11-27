@@ -3,14 +3,16 @@
 ## Circuit board adapter milestone
 
 Version `0.1.0-dev.5`, recorded on 2026-11-27 on `feature/crispbasic`.
+The implementation is in
+[`18ac9b8eae55`](https://github.com/CrispStrobe/brickwright/commit/18ac9b8eae55812fa6cfe9e11135a81170c45d83).
 The GUI-owned adapter and Code tab connection are specified in
 [BOARD-SIMULATION.md](BOARD-SIMULATION.md). The prior bridge-only milestone is
 retained below as historical evidence.
 
-**Local qualification: 403 tests passed, with zero failures or skips.**
-Full CI rebuilds and real Chromium qualification are pending for this revision;
-the browser assertions described below have been implemented and syntax-checked
-but are not claimed as locally executed browser evidence.
+**Both jobs in the [qualification run](https://github.com/CrispStrobe/brickwright/actions/runs/46072459728)
+completed successfully: 484 tests passed, with zero failures, cancellations or
+skips.** Local qualification separately reported 403 passing tests that overlap
+the CI suites. Browser execution is CI evidence, not local browser evidence.
 
 ### Implemented boundary
 
@@ -33,6 +35,40 @@ C source, build input, upstream pin, toolchain pin or binary ABI changed. The
 JavaScript parent additionally recognizes adapter `solver-limit` as an
 uncatchable `simulation-limit` outcome.
 
+### CI results and build provenance
+
+The run completed on 2026-11-27 at 21:54:59 UTC against implementation commit
+`18ac9b8eae55812fa6cfe9e11135a81170c45d83`:
+
+| Suite | Passed |
+| --- | ---: |
+| Source preparation, reference host and bridge protocol/lifecycle | 100 |
+| Native runtime and CLI | 41 |
+| Actual WASM execution, restricted-host policy and simulation bridge | 147 |
+| Native/WASM corpus with fixed expected bytes | 10 |
+| Real Chromium engine workers | 18 |
+| GUI adapter, editor, assets, board host/session and generated-source integration | 126 |
+| Shared board ownership and existing CAD bridge/cancellation | 30 |
+| Real Chromium editor-control, renderer and Circuit integration | 12 |
+| **CI total** | **484** |
+
+The native job reports 141 passes and the WASM job 343. Every suite has zero
+failures, cancellations and skips; the standalone native example also completed
+with exit code zero. All four new Chromium Circuit cases passed on the first
+qualification run; no CI-specific implementation correction was required.
+
+CI rebuilt both interpreter backends from the pinned BBCSDL source. The WASM
+job used Node 22.23.5, npm 10.9.9, Emscripten 3.1.64 and Chromium headless shell
+151.0.7922.34; Playwright is lock-pinned to 1.62.1. The rebuilt WASM is 215771
+bytes, SHA-256
+`cc73c82adb438276eba4edbbea6519f2d6e2191dbafb2f2b7a79ef55c397e3ba`.
+The generated JavaScript module is 43705 bytes, SHA-256
+`f13f7b99726c4b7455362b2b6d9446f296bc927a3caead31a7dd1b01f8506655`.
+Both files match the locally qualified modules byte for byte. The downloaded
+CI artifact `15234165869` was verified against GitHub's archive SHA-256
+`4077e594a6b041469d32ad5b13e7583cca9256416efdfbc6288711fa43111642`.
+Packaging and its check command passed for all 20 manifest-listed assets.
+
 ### Local results and provenance
 
 | Suite | Passed |
@@ -48,7 +84,8 @@ editor/VDU checks, 18 actual-solver host checks, 29 circuit-session/ownership
 checks and 16 actual-WASM integration cases. The separate consumer group
 contains 25 CAD cancellation cases, one CAD bridge case and four existing
 one-board/run cases. These totals count each reported test once; the same
-tests will overlap the corresponding CI suites.
+tests overlap the corresponding CI suites; they are not additional distinct
+tests.
 
 The actual-WASM circuit cases run BASIC through the production GUI runner and
 the pinned solver. They verify an Uno LED carrying approximately 13 mA through
