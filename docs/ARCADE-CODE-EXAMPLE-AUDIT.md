@@ -18,7 +18,7 @@ node --import ./scripts/lib/register-gui-scope.mjs scripts/audit-code-arcade-exa
 
 Set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` to use an existing Chromium executable. Repeat `--only EXAMPLE_ID` to rerun selected rows. Prefix Circuit items with `circuit:`. Use `--portable` to exclude simulated browser pointer support. Add `--output DIRECTORY` to save each converted MakeCode project with its outcome and hash in the report. The source tree, dependency scope and PXT files must stay fixed until the audit completes. The comparison hashes and per-example results are written atomically after each candidate. Record the PXT source hash before reusing an earlier compiler or browser result. The source opcodes identify which programs need targeted reruns after an exporter change.
 
-The receipt records source conversion warnings, asset adaptations, compiler diagnostics and browser results separately. A generic browser check sends controller input and verifies a complete 160×120 frame from the original simulator. A game-specific check also asserts the named mechanism described in its result. The Scratch versions of those checks and the remaining per-title gameplay acceptance inventory live in [pseudocode-game-examples.test.mjs](../test/pseudocode-game-examples.test.mjs).
+The receipt records source conversion warnings, asset adaptations, compiler diagnostics and browser results separately. A generic browser check sends controller input and verifies a complete 160×120 frame from the original simulator. The shipped games also check their title gate before sending input. A game-specific check asserts the named mechanism described in its result. The Scratch versions of those checks and the remaining per-title gameplay acceptance inventory live in [pseudocode-game-examples.test.mjs](../test/pseudocode-game-examples.test.mjs).
 
 ## Verified changes
 
@@ -28,6 +28,7 @@ The receipt records source conversion warnings, asset adaptations, compiler diag
 
 - Scratch motion uses Arcade’s sprite direction, rotation, scale and timing APIs. A real browser run moved an actor north and east, verified its normalized heading and uniform size, and waited for an exact glide destination.
 - Arcade delivers a typed answer back to the Scratch script. The Complete Game demo compiles and boots with its game-over prompt and answer comparison intact.
+- Canal Command lifted four boats through legal on-screen gate and pump actions. Flux Vault accepted the three authored keyboard solutions and registered 14 pushes. Vector Seven moved its paddle to Scratch x=120 and launched the serve toward its rival.
 - Sigil Grid accepted the upper-left tap and the solo rival placed its reply in the center. This verifies the opening and reply. The original forced-win and replay acceptance checks still apply.
 
 - Color and ghost effects use Arcade’s palette and dithered transparency. The browser test rotated a red costume’s hue and verified 32 tinted and 32 transparent pixels in the 8×8 sprite. This is a palette rendering approximation.

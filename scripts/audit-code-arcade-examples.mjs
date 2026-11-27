@@ -12,7 +12,7 @@ import {svgToPixels} from '../overlay/scratch-gui/src/lib/bw-makecode/pixel-imag
 import {makeCodeProjectFile} from '../overlay/scratch-gui/src/lib/bw-makecode/project-file.js';
 import {projectJsonToArcade} from '../overlay/scratch-gui/src/lib/bw-makecode/export-arcade.js';
 import {compile} from './lib/pxt-node.mjs';
-import {arcadeExampleChecks} from './lib/arcade-example-checks.mjs';
+import {arcadeExampleChecks, arcadeExampleStartVariable} from './lib/arcade-example-checks.mjs';
 import {runPxtArcade} from '../test/helpers/pxt-arcade-runtime.mjs';
 
 const {values: options} = parseArgs({options: {
@@ -174,10 +174,13 @@ try {
             } else {
                 const functional = options.portable && ['sigil_grid', 'vector_seven', 'canal_command'].includes(id) ?
                     null : arcadeExampleChecks[id];
+                const startVariable = Object.hasOwn(games, id) ? arcadeExampleStartVariable(id, source) : null;
+                if (Object.hasOwn(games, id) && !startVariable) throw new Error('The shipped title gate has no readable state variable.');
                 const sample = await useBrowser(browser => runPxtArcade(output.files, {
                     browser, onCompilation: ({built}) => recordCompilation(built),
                     inspectDisplay: true, waitForDisplay: true, waitForMain: false,
-                    ...(functional?.options || {buttonActions: {steps: [
+                    ...(functional?.options || {buttonActions: {
+                        afterGlobals: startVariable ? {[startVariable]: 1} : null, steps: [
                         {button: 5, held: true, delay: 1000}, {button: 5, held: false, delay: 80},
                         {button: 4, held: true, delay: 80}, {button: 4, held: false, delay: 80}
                     ]}})
@@ -185,10 +188,10 @@ try {
                 if (sample.$display.screen.length !== 160 * 120 || sample.$display.updatesAfterReady < 1) {
                     throw new Error('Arcade simulator did not present a complete native screen frame.');
                 }
-                row.simulator = {check: functional?.name || 'boot and input smoke test',
+                row.simulator = {check: functional?.name || (startVariable ? 'title start, input and display smoke test' : 'boot and input smoke test'),
                     screenPixels: sample.$display.screen.length,
                     colours: new Set(sample.$display.screen).size, displayUpdates: sample.$display.updatesAfterReady,
-                    ...(functional ? functional.observe(sample) : {}),
+                    ...(functional ? functional.observe(sample) : startVariable ? {titleGate: startVariable} : {}),
                     ...(Object.hasOwn(sample, 'started') ? {started: sample.started} : {})};
             }
         } catch (error) {

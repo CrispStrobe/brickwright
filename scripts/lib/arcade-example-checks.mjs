@@ -5,6 +5,11 @@
 const click = (x, y, delay = 0, expect) =>
     ({displayClick: {x, y, hold: 100}, delay, ...(expect ? {waitForGlobals: expect} : {})});
 
+export function arcadeExampleStartVariable (id, source) {
+    if (id === 'g2048') return 'started';
+    return source.match(/WHEN space key pressed:\n    IF ([A-Za-z][A-Za-z0-9]*) = 0 THEN:/)?.[1] || null;
+}
+
 const directions = {U: 'ArrowUp', D: 'ArrowDown', L: 'ArrowLeft', R: 'ArrowRight'};
 const vaultSolutions = ['URRRLLURRLLURR', 'RUUDRRUDDRRUU', 'RDRDLRRDRU'];
 const vaultSteps = vaultSolutions.flatMap((solution, chamber) =>
