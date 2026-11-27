@@ -1,7 +1,7 @@
 var St = Object.defineProperty;
 var Tt = (e, t, n) => t in e ? St(e, t, { enumerable: !0, configurable: !0, writable: !0, value: n }) : e[t] = n;
 var le = (e, t, n) => Tt(e, typeof t != "symbol" ? t + "" : t, n);
-import { c as ut, C as Ct, s as zt, a as Pt, t as N, e as It, f as re, b as _t, d as Nt, g as Ot, h as Lt, i as Rt, j as Ue, k as Ft, l as Bt, M as Dt, m as kt, E as We, n as jt, v as He, o as Xt } from "../geometry.worker-BvsxLtg5.js";
+import { c as ut, C as Ct, s as zt, a as Pt, t as N, e as It, f as re, b as _t, d as Nt, g as Ot, h as Lt, i as Rt, j as Ue, k as Ft, l as Bt, M as Dt, m as kt, E as We, n as jt, v as He, o as Xt } from "../geometry.worker-DDf57Ovz.js";
 var T = class extends Error {
   constructor(t, n, r) {
     super(n, r);
@@ -751,9 +751,9 @@ async function Sn(e) {
   if (e.wasmBinary) return e.wasmBinary;
   const t = $n(), n = e.locateFile ? e.locateFile("smlibwasm.wasm", new URL(".", t).href) : t.href, r = !!globalThis.process?.versions?.node;
   if (n.startsWith("file:") || r && !/^[a-z]+:/i.test(n)) {
-    const { readFile: a } = await import("../geometry.worker-BvsxLtg5.js").then(function(i) {
+    const { readFile: a } = await import("../geometry.worker-DDf57Ovz.js").then(function(i) {
       return i._;
-    }), { fileURLToPath: s } = await import("../geometry.worker-BvsxLtg5.js").then(function(i) {
+    }), { fileURLToPath: s } = await import("../geometry.worker-DDf57Ovz.js").then(function(i) {
       return i._;
     });
     return a(n.startsWith("file:") ? s(n) : n);

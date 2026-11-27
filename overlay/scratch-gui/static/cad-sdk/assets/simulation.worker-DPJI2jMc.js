@@ -3312,7 +3312,7 @@ function a9(e, q) {
   if (!x3(s) || s.maxAnalysisBytes !== 16777216 || s.maxAnalysisTriangles !== 83333 || t.bytes > s.maxAnalysisBytes || s.maxTriangles > s.maxAnalysisTriangles || !Number.isSafeInteger(n.triangles) || n.triangles < 1 || n.triangles > s.maxTriangles || !b5(n.boundsMm, "min max") || !Y6(n.boundsMm.min) || !Y6(n.boundsMm.max) || !n.boundsMm.max.every((f, x) => f >= n.boundsMm.min[x] && f - n.boundsMm.min[x] <= s.maxExtentMm) || !L3(n.signedVolumeMm3))
     return !1;
   const c = e.evidence;
-  if (!b5(c, "fileSha256 checkedOn toMillimetresZUp engine engineVersion qualifierVersion qualified scope geometrySha256 sourceVolumeMm3 hulls certificate nativeCheck") || c.fileSha256 !== t.sha256 || c.checkedOn !== n.checkedOn || !F5(c.toMillimetresZUp, s.toMillimetresZUp) || c.engine !== "Jolt" || !["1.1.0-bw.9", "1.1.0-bw.10"].includes(c.engineVersion) || c.qualifierVersion !== "brickwright-library-collision/1" || c.qualified !== !0 || c.scope !== "rigid-collision-preview" || !r9(c.geometrySha256) || !L3(c.sourceVolumeMm3))
+  if (!b5(c, "fileSha256 checkedOn toMillimetresZUp engine engineVersion qualifierVersion qualified scope geometrySha256 sourceVolumeMm3 hulls certificate nativeCheck") || c.fileSha256 !== t.sha256 || c.checkedOn !== n.checkedOn || !F5(c.toMillimetresZUp, s.toMillimetresZUp) || c.engine !== "Jolt" || !["1.1.0-bw.9", "1.1.0-bw.10", "1.1.0-bw.11"].includes(c.engineVersion) || c.qualifierVersion !== "brickwright-library-collision/1" || c.qualified !== !0 || c.scope !== "rigid-collision-preview" || !r9(c.geometrySha256) || !L3(c.sourceVolumeMm3))
     return !1;
   const m = c.certificate;
   if (!(b5(m, "sourceSHA256 algorithm strategy maxHulls missingVolumeMm3 extraVolumeMm3 relativeError boundsErrorMm tolerance") || b5(m, "sourceSHA256 algorithm strategy maxHulls missingVolumeMm3 extraVolumeMm3 numericalResidualVolumeMm3 relativeError boundsErrorMm tolerance")) || m.sourceSHA256 !== c.geometrySha256 || m.algorithm !== "manifold-compound/v1" || m.strategy !== "bsp" || !Number.isSafeInteger(m.maxHulls) || m.maxHulls < 1 || m.maxHulls > 2048 || !Number.isSafeInteger(c.hulls) || c.hulls < 1 || c.hulls > m.maxHulls)
@@ -12469,14 +12469,14 @@ function Wn(e, q, t, n, l, i = 0.25, r = 2e6) {
   return !0;
 }
 let Se, U4;
-const W4 = () => Se ?? (Se = import("./jolt-physics.wasm-compat-CThJUBrM.js").then((e) => e.default()));
+const W4 = () => Se ?? (Se = import("./jolt-physics.wasm-compat-DDpnCeGS.js").then((e) => e.default()));
 function e8(e) {
   if (!e)
     return W4();
   if (U4)
     return U4;
   const q = new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 4, 1, 96, 0, 0, 3, 2, 1, 0, 10, 9, 1, 7, 0, 65, 0, 253, 15, 26, 11]);
-  return U4 = WebAssembly.validate(q) ? import("./jolt-physics.simd.wasm-compat-C5Tk3-z6.js").then((t) => t.default()).catch(W4) : W4();
+  return U4 = WebAssembly.validate(q) ? import("./jolt-physics.simd.wasm-compat-C_saHl1V.js").then((t) => t.default()).catch(W4) : W4();
 }
 const q8 = /* @__PURE__ */ new WeakMap(), t8 = /* @__PURE__ */ new WeakMap();
 function Zn(e) {
@@ -13600,7 +13600,7 @@ function ql(e, q, t, n, l) {
   try {
     c = new Worker(new URL(
       /* @vite-ignore */
-      "" + new URL("collision-measurement.worker-CN9zGptd.js", import.meta.url).href,
+      "" + new URL("collision-measurement.worker-CqBPxqas.js", import.meta.url).href,
       import.meta.url
     ), { type: "module" });
   } catch {

@@ -3375,7 +3375,7 @@ function Xy(i, e) {
   if (!ot(c) || c.maxAnalysisBytes !== 16777216 || c.maxAnalysisTriangles !== 83333 || t.bytes > c.maxAnalysisBytes || c.maxTriangles > c.maxAnalysisTriangles || !Number.isSafeInteger(n.triangles) || n.triangles < 1 || n.triangles > c.maxTriangles || !R6(n.boundsMm, "min max") || !bp(n.boundsMm.min) || !bp(n.boundsMm.max) || !n.boundsMm.max.every((q, m) => q >= n.boundsMm.min[m] && q - n.boundsMm.min[m] <= c.maxExtentMm) || !Dt(n.signedVolumeMm3))
     return !1;
   const l = i.evidence;
-  if (!R6(l, "fileSha256 checkedOn toMillimetresZUp engine engineVersion qualifierVersion qualified scope geometrySha256 sourceVolumeMm3 hulls certificate nativeCheck") || l.fileSha256 !== t.sha256 || l.checkedOn !== n.checkedOn || !G7(l.toMillimetresZUp, c.toMillimetresZUp) || l.engine !== "Jolt" || !["1.1.0-bw.9", "1.1.0-bw.10"].includes(l.engineVersion) || l.qualifierVersion !== "brickwright-library-collision/1" || l.qualified !== !0 || l.scope !== "rigid-collision-preview" || !Wy(l.geometrySha256) || !Dt(l.sourceVolumeMm3))
+  if (!R6(l, "fileSha256 checkedOn toMillimetresZUp engine engineVersion qualifierVersion qualified scope geometrySha256 sourceVolumeMm3 hulls certificate nativeCheck") || l.fileSha256 !== t.sha256 || l.checkedOn !== n.checkedOn || !G7(l.toMillimetresZUp, c.toMillimetresZUp) || l.engine !== "Jolt" || !["1.1.0-bw.9", "1.1.0-bw.10", "1.1.0-bw.11"].includes(l.engineVersion) || l.qualifierVersion !== "brickwright-library-collision/1" || l.qualified !== !0 || l.scope !== "rigid-collision-preview" || !Wy(l.geometrySha256) || !Dt(l.sourceVolumeMm3))
     return !1;
   const d = l.certificate;
   if (!(R6(d, "sourceSHA256 algorithm strategy maxHulls missingVolumeMm3 extraVolumeMm3 relativeError boundsErrorMm tolerance") || R6(d, "sourceSHA256 algorithm strategy maxHulls missingVolumeMm3 extraVolumeMm3 numericalResidualVolumeMm3 relativeError boundsErrorMm tolerance")) || d.sourceSHA256 !== l.geometrySha256 || d.algorithm !== "manifold-compound/v1" || d.strategy !== "bsp" || !Number.isSafeInteger(d.maxHulls) || d.maxHulls < 1 || d.maxHulls > 2048 || !Number.isSafeInteger(l.hulls) || l.hulls < 1 || l.hulls > d.maxHulls)
@@ -41786,7 +41786,7 @@ return subtract(` + (p.length ? "union(" + [q, ...p].join(",") + ")" : q) + ",un
 function KD() {
   const i = new Worker(new URL(
     /* @vite-ignore */
-    "" + new URL("assets/simulation.worker-Dv65xot7.js", import.meta.url).href,
+    "" + new URL("assets/simulation.worker-DPJI2jMc.js", import.meta.url).href,
     import.meta.url
   ), { type: "module" });
   let e = 0, t = !1;
@@ -43589,7 +43589,7 @@ function gI(i, e, t = {}) {
         throw new Error(h("Geometry worker failed"));
       const E = e ? e() : new Worker(new URL(
         /* @vite-ignore */
-        "" + new URL("assets/geometry.worker-BvsxLtg5.js", import.meta.url).href,
+        "" + new URL("assets/geometry.worker-DDf57Ovz.js", import.meta.url).href,
         import.meta.url
       ), { type: "module" });
       return v = E, E.onmessage = (T) => {
@@ -60827,7 +60827,7 @@ function VU(i, e) {
   async function o1(h1) {
     if (!S) {
       if (!O) {
-        const { mountModelLibraryPanel: Z1 } = await import("./model-library-panel-BEsE0se3.js");
+        const { mountModelLibraryPanel: Z1 } = await import("./model-library-panel-DGRkKDLT.js");
         if (S)
           return;
         O ?? (O = Z1(r, t, (Q1) => G.evaluate(Q1), e.modelLibrary, async () => {
@@ -62134,7 +62134,7 @@ function VU(i, e) {
 }
 let Ta, dm;
 async function Zv() {
-  const [{ createBundledModelLibraryOptions: i }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-C4FnDwwg.js"), import("./model-library-cache-DiMFGzp9.js")]);
+  const [{ createBundledModelLibraryOptions: i }, { createModelLibraryBrowserCache: e }] = await Promise.all([import("./model-library-local-DaAHlSJ2.js"), import("./model-library-cache-DiMFGzp9.js")]);
   return Ta ?? (Ta = i()), { ...Ta, cache: e() };
 }
 async function t$() {

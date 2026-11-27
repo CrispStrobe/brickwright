@@ -2110,5 +2110,25 @@ at 1.000× with the candidate.
 
 These measurements used the SIMD module override with SHA-256
 `3c463978c83694b04a1e4a78c1611f488e195ac087fb5d30a572a4ed10b80af9`.
-The shared release package is being qualified separately. Atlas's
-sustained 1× editor target remains open.
+That SIMD module is the only changed runtime binary in bw.11.
+The remaining 18 files in `dist`, including scalar, debug, and
+multithread payloads and declarations, match bw.10 byte for byte.
+All nine runtime exports initialized. Packed scalar and SIMD
+physical controls, rotor and motor-block tests, and exact rope
+trajectory checks passed. The archive downloaded from GitHub
+matched the tested SHA-256
+`df8525be00293bdfc7b86c6a0cf99113c503a3d0f7a77d1e0995400bf9207aaf`.
+[Qualified package](https://github.com/CrispStrobe/JoltPhysics.js/releases/tag/bw.11-qualified-20261127)
+
+CrispCAD's 30 focused tests passed, including current and historical
+Model Library qualification reports. All 25 targeted Robot Lab tests
+and 12 floor-contact and resting-creep tests passed. Atlas's sustained
+1× editor target remains open.
+
+CrispCAD and Brickwright now pin the same bw.11 archive. The bundled
+SDK `b67ab77` passed the live checks in the existing Brickwright
+Chrome host `22a9fdd` with no engine override. Both runs loaded the
+packaged SIMD module. Atlas sustained 0.900×, reached 45.65 mm
+of lift and 14.98° of tilt at 6.10 simulated seconds, and passed
+Stop, Reset, repeat Run and a restart after a gravity edit. Scout
+sustained 0.960× and passed Stop, Reset and repeat Run.
