@@ -18,8 +18,10 @@ const body = [method('switchTab'), ...(hasOpen ? [method('openEmptyTab')] : [])]
 const pane = (deriveResult) => {
     const p = new Function(`return ({${body}});`)();
     Object.assign(p, {
+        props: {vm: {}},
         state: {lang: 'python', busy: false, status: '', buffers: {python: 'import hub\nhub.light_matrix.show_image("HAPPY")\n', pseudocode: ''}},
         L: {stConverting: to => `Converting to ${to}…`, stCantShow: (to, e) => `Can't show as ${to}: ${e}`},
+        leaveCp1 () {},
         deriveBuffer: async () => deriveResult,
         setState (patch) { Object.assign(this.state, typeof patch === 'function' ? patch(this.state) : patch); }
     });

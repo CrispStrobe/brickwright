@@ -213,3 +213,41 @@ and mock callbacks do not satisfy those gates.
 Keep only the scripts, fixtures, package manifests/lock, README and raw JSON results
 under version control. Do not commit `node_modules`, npm caches, extracted browser
 binaries or temporary browser profiles.
+
+## Production console session probe
+
+`session-browser-probe.mjs` exercises the actual consumer
+`code-execution-session.js` and `code-execution-workers.js` through a static
+localhost harness with real Skulpt. It does not load the React application.
+The existing pinned probe package/lock supplies Playwright, Chromium and Skulpt;
+no application runtime dependencies are added.
+
+From this probe directory, after the existing `npm ci --ignore-scripts` setup:
+
+```sh
+mkdir -p tmp
+TMPDIR="$PWD/tmp" node session-browser-probe.mjs --output=session-browser-rerun.json
+```
+
+An isolated dependency directory can be selected with
+`--runtime-probe-dir=/absolute/path/to/probe-dependencies`; `--app-root` selects
+the repository whose production sources are tested. Otherwise the source root
+is three directories above the script. `--browser` can select an existing
+Chromium executable. This is a Node/Linux probe, not an application build.
+
+The recorded `session-browser-results.json` passes 19/19 cases with zero page
+errors on Chromium 158.0.8127.0, Skulpt 1.2.0 and Node 24.22.3. It includes source
+hashes and raw output/input/cleanup observations. Both languages cover normal and
+error completion, streaming, input waiting beyond the execution budget, Stop
+during input and busy loops, output caps and fresh restart. JS also covers
+explicit awaited completion and synchronous prompt/random replay. A host case
+confirms lazy-source disposal creates no worker. The page has no cross-origin
+isolation or SharedArrayBuffer; only the container's `--no-sandbox` argument is
+supplied to Chromium. Browser termination has no completion acknowledgement.
+
+Synchronous JS prompt replay caches answers and `Math.random()` only; it does
+not roll back global, time, network or persistent side effects. Prefer explicit
+`await input(...)`. Generated detached tasks, the legacy simulator route,
+React UI, production CSP, offline delivery, other browsers/native WebViews and
+mobile/device behavior remain separate gates. The earlier runtime-comparison
+results are retained; this probe closes only the named console-worker checks.
