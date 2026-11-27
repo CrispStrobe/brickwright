@@ -402,3 +402,20 @@ main/dispatch and docs-only decisions, invalid-input and missing-branch refusal,
 the unconditional-success negative, all 38 command-failure controls and mixed
 browser-family selection. This bounded fix does not relabel the older hosted
 run or qualify the pending supplier pin.
+
+Unit shard 3 of the same diagnostic run reported 1,963 passed assertions, two
+documented skips, one existing TODO and zero failures across 267 files, then
+failed its GUI dependency audit. The retained artifact `15215421252` has ZIP
+SHA-256 `0ce5c3e5eea8718b5b126ba1f41055c036232af737e8a6644571388d3578ac37`.
+Replaying its actual redirect log with the unchanged checker names exactly one
+undeclared edge: `three <- test/bw-sim-tube-layer.test.mjs`. That test directly
+imports `Vector3` and the real rope/hose geometry implementations. Its exact
+filename is now declared for `three`; no resolver or wildcard boundary changed.
+
+The original redirect log now passes. The original TAP and census also pass all
+post-run accounting checks, including zero raw stdout, every skip/TODO and every
+expected file. The current and original shard-3 file lists are identical. All
+14 selected dependency-boundary and rope/hose tests pass with zero skips,
+including actual undeclared-package and undeclared-test refusals. This replay
+explains the old failure; a fresh hosted run remains necessary for the current
+consumer candidate.

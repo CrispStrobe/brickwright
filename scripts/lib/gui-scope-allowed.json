@@ -37,11 +37,12 @@
       "test/bw-sim-sarrus-lift.test.mjs",
       "test/bw-sim-scene3d.test.mjs",
       "test/bw-sim-surface-drawing.test.mjs",
+      "test/bw-sim-tube-layer.test.mjs",
       "test/bw-sim-world.test.mjs",
       "test/spike-arena-3d-pane.test.mjs",
       "test/spike-arena-3d.test.mjs"
     ],
-    "why": "the SPIKE arena's 3D scene builder (lib/spike-arena/arena-scene3d.js) and view import three, a GUI-package dependency lazy-loaded with the 3D view; the tests build the scene headless"
+    "why": "the SPIKE arena and simulation 3D views, including rope/hose buffer geometry, import three, a GUI-package dependency; the tests build and update these scenes headless"
   },
   "three/addons/controls/OrbitControls.js": {
     "tests": [
