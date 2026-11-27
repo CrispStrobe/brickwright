@@ -4,6 +4,7 @@ import {readConnections, CONNECTIONS_EVENT} from './connections.js';
 import {CAD_TOGGLE_EVENT} from '../bw-cad-preferences.js';
 import {SimLabClock} from '../bw-sim/sim-clock.js';
 export const STATUS_EVENT = 'bw-cad-circuit-status';
+const PROGRESS_INTERVAL_MS = 100;
 const stoppedError = () => new Error('Coupled simulation was stopped');
 // CAD worker operations can outlive the bridge's preparation attempt. Stop must
 // settle its Run immediately, while a clock arriving afterwards is still released.
@@ -76,9 +77,18 @@ export function installCircuitCadBridge(vm) {
     } : undefined;
     const clock = new SimLabClock({paceNominal: true, defer});
     let session = null, generation = 0, pending = false, disposed = false, ownsCircuit = false, mechanics = null, ownedBoard = null;
-    let preparation = null;
+    let preparation = null, lastProgressAt = -Infinity;
     let status = {phase: 'idle', time: 0, readings: [], error: ''};
-    const publish = next => {status = {...status,...next};window.dispatchEvent(new CustomEvent(STATUS_EVENT, {detail:status}));};
+    const emitStatus = () => window.dispatchEvent(new CustomEvent(STATUS_EVENT, {detail: status}));
+    const publish = next => {status = {...status, ...next};emitStatus();};
+    const reportFrame = frame => {
+        // Keep time and readings from the same completed batch for direct readers.
+        status = {phase: 'running', time: frame.time, realTimeFactor: clock.realTimeFactor, readings: session.readings(), error: ''};
+        const now = performance.now();
+        if (now - lastProgressAt < PROGRESS_INTERVAL_MS) return;
+        lastProgressAt = now;
+        emitStatus();
+    };
     const shutdown = () => {
         generation++;pending=false;
         // Stop also owns startup waits: do not retain Circuit listeners or leave
@@ -102,7 +112,8 @@ export function installCircuitCadBridge(vm) {
             const check=()=>{if(disposed || generation!==expected)throw new Error('Coupled simulation was stopped');};
             try {
                 const config=readConnections();if(!config?.enabled)throw new Error('Enable and save circuit–CAD connections first');
-                publish({phase:'preparing',error:'',time:0,readings:[]});
+                lastProgressAt = -Infinity;
+                publish({phase:'preparing',error:'',time:0,readings:[],realTimeFactor:null});
                 const board=await circuitReady(runtime,controller.signal,config);check();
                 // Acquire the host before compiling or resetting: the designer relinquishes its clock.
                 ownedBoard=board;ownsCircuit=true;await circuitOwner(board,controller.signal);check();
@@ -125,7 +136,7 @@ export function installCircuitCadBridge(vm) {
                     firmware.attachBoard(board);
                 } else if(mode!=='blocks')throw new Error('Unsupported controller mode');
                 const coupled=await createCoupledSession({board,mechanics,connections:config,firmware,signal:controller.signal,
-                    onFrame:frame=>{if(generation===expected)publish({phase:'running',time:frame.time,realTimeFactor:clock.realTimeFactor,readings:session?.readings() || []});},onError:error=>{if(generation===expected)fail(error);}});
+                    onFrame:frame=>{if(generation===expected)reportFrame(frame);},onError:error=>{if(generation===expected)fail(error);}});
                 if(disposed || generation!==expected){coupled.stop();check();}
                 session=coupled;
                 // In firmware mode the VM supplies clock ticks only; its scripts must not drive pins too.
@@ -141,7 +152,7 @@ export function installCircuitCadBridge(vm) {
             finally {if(preparation===controller)preparation=null;}
         },
         stop() {shutdown();vm.stopAll();},
-        reset() {api.stop();runtime.circuitBoard?.reset();runtime.cadSimulation?.reset();publish({time:0,readings:[],error:''});}
+        reset() {api.stop();runtime.circuitBoard?.reset();runtime.cadSimulation?.reset();publish({time:0,readings:[],realTimeFactor:null,error:''});}
     };
     const onStop=()=>{if(!api.starting)shutdown();};
     const onChange=()=>{if(pending || session)api.stop();};

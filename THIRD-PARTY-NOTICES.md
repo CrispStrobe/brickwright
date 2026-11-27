@@ -2753,8 +2753,8 @@ including Three.js (MIT), Manifold (Apache-2.0) and the bundled font licenses.
 The SDK is copied to the application only when `BW_ENABLE_CAD=1`.
 
 The SDK also carries CrispCAD's optional exact B-rep kernel,
-`@crispcad/exact-kernel` 0.1.7 (https://github.com/CrispStrobe/crispcad-kernel-lab,
-release `exact-kernel-v0.1.7`), MIT AND Apache-2.0. It prebundles smlibwasm 0.6.2
+`@crispcad/exact-kernel` 0.1.10 (https://github.com/CrispStrobe/crispcad-kernel-lab,
+release `exact-kernel-v0.1.10`), MIT AND Apache-2.0. It prebundles smlibwasm 0.6.2
 (`@classcad/smlibwasm`, MIT, Copyright 2026 AWV Informatik AG), built from source
 by the kernel lab with recorded provenance, with SMLib
 and its SM_API wrapper from USD BRep (Apache-2.0, Copyright 2020-2026 NVIDIA
@@ -2762,8 +2762,8 @@ CORPORATION & AFFILIATES, a few files modified by AWV Informatik AG), the
 Emscripten runtime (MIT) and the Brotli static dictionary (MIT); it contains no
 OpenCASCADE code. Its NOTICE, LICENSE and full MIT and Apache-2.0 texts are part
 of the SDK's `NOTICE.txt`. The kernel lives under `static/cad-sdk/assets/exact/`
-and is fetched only when a user runs an exact feature, exact measurement or STEP
-export; the service worker caches it only after such a request.
+and is fetched only when a user runs an exact feature, exact measurement, STEP
+export or STEP import; the service worker caches it only after such a request.
 
 The optional Scout TT project generator retains the Adafruit CAD Parts MIT
 notice at `licenses/adafruit-cad-parts-MIT.txt` (Copyright (c) 2016 Adafruit

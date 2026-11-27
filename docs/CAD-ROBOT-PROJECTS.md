@@ -2196,3 +2196,65 @@ served locally passed one-click Run, Stop, Reset, and repeat Run on
 both projects. Atlas also reused its worker after a gravity edit and
 reached 45.65 mm of lift and 14.98° of tilt. Sustained playback on the
 shared Mac measured 0.499× for Atlas and 0.665× for Scout.
+
+### Batch the CAD cable harness
+
+CrispCAD submits the visible harness as one indexed mesh. Vertex
+colors preserve the conductor colors. Cables with missing attachment
+bodies are excluded until their anchors return. Moving cables update
+the affected vertex buffers.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/afb2984bbef61009913fcaeba9f53283ff7a65cb)
+
+In a 100-frame Chrome replay, harness draws went from 33 to one for
+Atlas and from 21 to one for Scout. Total viewport draw calls fell
+from 10,400 to 7,200 for Atlas and from 8,574 to 6,574 for Scout. Both
+comparison orders matched every body transform and the sampled
+conductor positions, normals, and colors. CPU time for frame
+submission across 100 frames, using three replays per version:
+
+| Robot | First order, before → after | Reverse order, before → after |
+| --- | ---: | ---: |
+| Atlas | 288.7 → 228.5 ms | 271.4 → 222.6 ms |
+| Scout | 227.5 → 219.1 ms | 261.8 → 221.4 ms |
+
+Both robots also drew 100 frames in live Chrome runs driven by 600
+circuit and mechanical ticks. The harnesses and chassis moved, and
+parking restored the authored scene. Sustained 1× playback remains open.
+
+The TypeScript build and all four wiring tests passed. The
+attachment-body test passed on an isolated retry after its first run
+exceeded the deadline. The refreshed CrispCAD source also passed 31
+exact STEP import and edge-reference tests.
+
+Brickwright pins SDK `afb2984`. Vite wrote the bundle before the
+process was killed during its gzip size report. The packager then
+validated the emitted SDK, all 842 files matched their manifest
+hashes, and all nine pin tests passed. Chrome loaded the packaged
+exact kernel and measured the test box at 6,000 mm³ and 2,200 mm².
+With the packaged bw.11 SIMD engine in the existing Brickwright
+browser host, Atlas and Scout passed one-click Run, Stop, Reset,
+and repeat Run. Atlas also reused its worker after a gravity edit.
+Sustained playback measured 0.570× for Atlas and 0.848× for Scout.
+
+### Limit Circuit–CAD progress notifications
+
+Brickwright keeps a coherent status snapshot for every completed
+program batch and publishes progress at most once per 100 ms.
+The first completed batch and lifecycle updates are published
+immediately. The expanded panel consumes that cadence directly.
+The collapsed panel keeps its once-per-second readout.
+
+With the shared Chromium binary and SDK `afb2984`, the same Atlas
+project ran for 6.065 simulated seconds before and after the change.
+Progress events fell from 182 to 90. The full CAD frame and circuit
+readings matched exactly, and both runs passed Run, Stop, Reset,
+repeat Run, and a restart after a gravity edit. Sustained playback
+measured 0.637× and 0.590× under changing load. Scout passed Run,
+Stop, Reset, and repeat Run at 0.682× with the change. These checks
+served the updated modules in the existing Brickwright GUI bundle.
+Sustained 1× playback remains open.
+
+All 46 focused tests passed. The new bridge regression verifies
+that direct status reads stay current between notifications,
+readings stay aligned with the last completed batch while a tick
+is in flight, and Stop and Reset publish immediately.
