@@ -44,6 +44,15 @@ Chromium worker cases pass; hosted qualification remains pending, including the
 existing separately owned Microtronic gallery drift. This is a bounded R1/R2/J1
 slice; generated game lifetimes, target/source persistence and export remain open.
 
+The [owned-console continuation](docs/CODE-RUNTIME-AND-GAME-EXPORT.md#82-owned-javascript-console-tasks-and-input-watchdog-continuation)
+adds scoped JavaScript tasks and an input-responsiveness watchdog. Its current
+consumer controls pass 139/139; the canonical opt-in generator passes 201/201
+after a Boolean-value correction. Real Chromium probes pass 39/39 session/task
+cases and 16/16 default-worker CSP cases, including two enforced denial profiles.
+These published drafts retain the inherited gallery/HDD and supplier RF landing
+blockers. Whole-application/deployed-policy and native qualification, normal
+supplier adoption and Code-tab mode selection remain open.
+
 Status: **bounded evaluation recorded; first console candidate awaits qualification;
 new runtimes and game export remain planned**.
 The [evaluation lane](lanes/2026-11-27-code-runtime-game-export-evaluation.md)

@@ -1,7 +1,7 @@
 # Owned JavaScript console tasks — 2026-11-27
 
-Status: DONE — bounded implementation and local qualification; draft publication
-and hosted qualification remain pending. No runtime code has landed on main.
+Status: IMPLEMENTED — published draft checkpoints; hosted qualification and
+coordinated supplier adoption remain blocked. No runtime code has landed on main.
 
 Owner: Code execution continuation maintainer, continuing the repository owner's
 runtime/export request and PR #1855. Branches:
@@ -68,7 +68,37 @@ remain unchanged in the consumer.
   task waiting, and a missing generated procedure owner argument. The earlier emitter failed the new task
   contract controls while preserving the ordinary default-generation control.
 
-The candidates remain unmerged and require hosted qualification plus coordinated
-supplier adoption. The initial remote PR #1855 has the separately owned gallery
-and HDD-control failures recorded in the runtime plan. No unchanged CI rerun,
-gate relaxation or pin advance is part of this continuation.
+### Boolean values and default-worker CSP continuation
+
+The supplier's admitted comparison/Boolean reporters could disappear as
+`undefined` in ordinary value sockets. The owned-only correction is published at
+[`cbdf1791`](https://github.com/CrispStrobe/sb3-creator/commit/cbdf179160a3f3054872d045503659967bd1b72e).
+All eight new executable controls fail against the prior emitter; the corrected
+focused suite passes **201/201**, including **44** owned-console cases. Existing
+outputs remain byte-identical: **240/240** corpus outputs against the original
+baseline and **84/84** outputs from the 14 new graphs under six legacy options
+against `c7584fd0`, including generation after owned mode on the same instance.
+
+The [39-case successor receipt](../scripts/probes/code-runtime/session-console-values-browser-results.json)
+passes with zero page errors against that published supplier. It retains the
+actual SB3 graph and generated source for the Boolean-value regression. The
+consumer production sources are unchanged and its **139/139** controls pass.
+
+The [new default-factory CSP receipt](../scripts/probes/code-runtime/session-csp-browser-results.json)
+passes **16/16** cases and **2/2** enforced-policy negative controls, with zero
+page errors. It uses the production Blob-worker factory under real HTTP CSP:
+permitted execution/input/Stop/output limits and explicit worker/eval denial,
+resource cleanup and fresh recovery. This is localhost browser evidence, not a
+rendered application, deployed-header or native-WebView qualification.
+
+The runtime checkpoint `b875bc6b` has the same separately owned
+[gallery](https://github.com/CrispStrobe/brickwright/actions/runs/45965021137)
+and [HDD-control](https://github.com/CrispStrobe/brickwright/actions/runs/45965021191)
+failures assigned to PR #1846. Supplier checkpoint `c7584fd0` passed all 36
+original owned-console controls in its hosted shard, but that shard failed the
+RF mixer test with **1170.569 Hz versus 5830 ±600 Hz**, exactly matching its
+[baseline failure](https://github.com/CrispStrobe/sb3-creator/actions/runs/45836555459/job/139966847463).
+The RF repair is separately owned as recorded in supplier PR #244. Successor
+hosted runs must qualify their own heads; earlier partial or cancelled runs do
+not qualify them. No unchanged CI rerun, gate relaxation or pin advance is part
+of this continuation.

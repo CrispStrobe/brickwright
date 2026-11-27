@@ -613,7 +613,7 @@ existing JS reverse reader, and its existing numeric/list/initial-state lowering
 does not establish full Scratch semantic equivalence. No shared simulator bridge,
 renderer, game export, new Python runtime or native package is introduced.
 
-**Local evidence:** 139/139 consumer controls pass, no skips, including 18 session
+**Original task-checkpoint evidence:** 139/139 consumer controls pass, no skips, including 18 session
 tests and 18 actual-production-worker task cases plus the existing editor,
 conversion and device-caller controls. The upstream generator, codegen and
 roundtrip suite passes 193/193, no skips; 240 existing generated outputs across
@@ -623,7 +623,7 @@ rejects when only the forwarded owner argument is removed. Removing the input
 watchdog's termination call or the worker's wait for registered tasks likewise
 fails the corresponding behavioral control.
 
-The [new source-hashed browser receipt](../scripts/probes/code-runtime/session-task-browser-results.json)
+The [original task-browser receipt](../scripts/probes/code-runtime/session-task-browser-results.json)
 passes **38/38 cases with zero page errors**. It uses actual production workers,
 Skulpt 1.2.0 and real Chromium 158 without COI/SAB. Three cases execute source
 from the actual canonical generator: concurrent flags/procedure completion,
@@ -638,15 +638,72 @@ consumer cannot adopt this generator until the supplier revision is qualified
 and the separately owned gallery adoption is coordinated. The local evidence
 does not authorize bypassing either repository's landing gates.
 
-The existing remote head of [PR #1855](https://github.com/CrispStrobe/brickwright/pull/1855)
-has two confirmed inherited blockers:
+The earlier `18113510` head of [PR #1855](https://github.com/CrispStrobe/brickwright/pull/1855)
+had two confirmed inherited blockers:
 [gallery freshness](https://github.com/CrispStrobe/brickwright/actions/runs/45956026910)
 (one stale index and three Microtronic orphans) and
 [HDD workflow controls](https://github.com/CrispStrobe/brickwright/actions/runs/45956027049)
 (three repository-identity reader failures). Those source/adoption and test
 paths are already owned by PR #1846 and its gallery/controls claims. Its repairs
 are not duplicated here. The initial Build qualification was incomplete at the
-inspection snapshot; it cannot qualify this later unpublished source.
+inspection snapshot; it cannot qualify the successor checkpoint below.
+
+#### 8.2.1 Boolean values and default-worker loading qualification
+
+The original candidates were published as [Brickwright draft #1855](https://github.com/CrispStrobe/brickwright/pull/1855)
+at `b875bc6b824b11eb82a6e2dd852f934bda2224a3` and
+[supplier draft #246](https://github.com/CrispStrobe/sb3-creator/pull/246)
+at `c7584fd0f4cbb26e0742d45bfc10a04c47f77ebd`. Their complete Git trees matched
+the locally tested candidates. The counts and receipts above describe that
+checkpoint and remain preserved with their original hashes.
+
+Review found an admitted-graph defect: comparison and Boolean reporters placed
+in ordinary value sockets became `undefined`. Supplier
+[`cbdf1791`](https://github.com/CrispStrobe/sb3-creator/commit/cbdf179160a3f3054872d045503659967bd1b72e)
+routes those six opcodes through the existing condition lowering only in owned
+mode. Eight new executable controls fail against the previous emitter and pass
+after correction. The focused suite now passes **201/201**, no skips, including
+44 owned-console cases. The existing **240/240** corpus outputs remain identical
+to the original baseline; **84/84** additional outputs from 14 Boolean graphs
+under six legacy options match `c7584fd0`, including reused generator instances.
+
+The [39-case successor receipt](../scripts/probes/code-runtime/session-console-values-browser-results.json)
+executes the published supplier and passes with zero page errors. Its fourth
+canonical generated program places an actual SB3 comparison reporter in a say
+value socket and requires `true`, preserving the graph, transform description,
+generated source and source hash. Consumer production sources remain unchanged;
+all **139/139** focused controls pass on the restored checkpoint.
+
+The [CSP probe](../scripts/probes/code-runtime/session-csp-browser-probe.mjs) adds
+coverage of the production default Blob-worker factory. Its external harness
+module loads under actual HTTP response policies; instrumentation calls through
+to the real Worker and URL methods. No replacement worker factory or modified
+production source is supplied. Its [receipt](../scripts/probes/code-runtime/session-csp-browser-results.json)
+passes **16/16** cases and **2/2** enforced-policy negative controls with zero
+page errors: permitted JavaScript/Skulpt execution, long input, Stop, bounded
+output, cleanup and fresh state; denied worker loading and dynamic compilation;
+and recovery in the same browser after navigation to a permitted policy.
+Violation events and HTTP reports establish that denial was enforced. Every
+constructed worker and Blob URL is released once. A 120 ms quiet window observes
+no late worker messages; it is not a termination-completion measurement.
+
+The no-CSP baseline and permissive test policy do not establish deployed headers
+or native-host acceptance. The Tauri configuration is read and hashed only as
+configuration evidence. Under Chromium's worker-src denial the worker error
+event is empty, so the session reports generic `Worker error`; detailed policy
+evidence is in the probe. Rendered React UI, hosted production CSP, app protocols,
+offline delivery, other engines and native/mobile WebViews remain unqualified.
+
+**Hosted blockers remain.** Runtime `b875bc6b` failed
+[gallery freshness](https://github.com/CrispStrobe/brickwright/actions/runs/45965021137)
+and [HDD controls](https://github.com/CrispStrobe/brickwright/actions/runs/45965021191)
+with the same PR #1846-owned defects. Supplier `c7584fd0` passed its original
+36 owned-console controls in [shard 4/4](https://github.com/CrispStrobe/sb3-creator/actions/runs/45965165478/job/140391997862),
+but the RF mixer test measured 1170.569 Hz instead of 5830 ±600 Hz, identical to
+[baseline main's failure](https://github.com/CrispStrobe/sb3-creator/actions/runs/45836555459/job/139966847463).
+Supplier PR #244 records that RF repair's separate owner. The successor commits
+need their own hosted qualification. Pins, vendored source, Code-tab generator
+selection, separately owned repairs and workflow gates do not change here.
 
 ## 9. JavaScript execution and game export across platforms
 
