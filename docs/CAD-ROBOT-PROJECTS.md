@@ -2332,5 +2332,5 @@ the restart after a gravity edit.
 
 All 37 focused CrispCAD tests passed, including trace append and
 replay, manufacturing, and the editor menu. Brickwright pins SDK
-`8b784d7`. All 842 SDK file hashes and nine pin tests passed.
+`8b784d7`. All 843 SDK file hashes and nine pin tests passed.
 The real Brickwright SB3 path passed for CAD document versions 41–47.
