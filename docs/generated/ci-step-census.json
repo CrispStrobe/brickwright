@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-29T06:34:29.078Z",
-  "repo": "CrispStrobe/brickwright-lite",
+  "generatedAt": "2026-11-27T14:18:12.449Z",
+  "repo": "CrispStrobe/brickwright",
   "headSha": "a87a7b447",
   "newestMainRun": 36409366028,
   "runs": [
@@ -2019,6 +2019,132 @@
       "workflow": "samd-native-game-qualification.yml",
       "branch": "lane/samd-release-adoption-20261028",
       "sha": "48df0f93f"
+    },
+    {
+      "run": 46009447919,
+      "workflow": "cp1-qualification.yml",
+      "branch": "feat/coherent-retro-workbench",
+      "sha": "0d697c826"
+    },
+    {
+      "run": 45989703316,
+      "workflow": "cp1-qualification.yml",
+      "branch": "feat/coherent-retro-workbench",
+      "sha": "b617a62fb"
+    },
+    {
+      "run": 45982318783,
+      "workflow": "cp1-qualification.yml",
+      "branch": "codex/code-worker-ownership-2026-11-27",
+      "sha": "ccc9e8e0f"
+    },
+    {
+      "run": 45981042168,
+      "workflow": "cp1-qualification.yml",
+      "branch": "codex/code-worker-ownership-2026-11-27",
+      "sha": "71d6854cb"
+    },
+    {
+      "run": 45979693141,
+      "workflow": "cp1-qualification.yml",
+      "branch": "codex/code-worker-ownership-2026-11-27",
+      "sha": "65d724775"
+    },
+    {
+      "run": 45977139642,
+      "workflow": "cp1-qualification.yml",
+      "branch": "codex/code-worker-ownership-2026-11-27",
+      "sha": "8f6ce4aa2"
+    },
+    {
+      "run": 45976994378,
+      "workflow": "cp1-qualification.yml",
+      "branch": "feat/coherent-retro-workbench",
+      "sha": "7ae170e50"
+    },
+    {
+      "run": 45976341183,
+      "workflow": "cp1-qualification.yml",
+      "branch": "feat/coherent-retro-workbench",
+      "sha": "c06454c28"
+    },
+    {
+      "run": 45976038108,
+      "workflow": "cp1-qualification.yml",
+      "branch": "codex/code-worker-ownership-2026-11-27",
+      "sha": "adfe53db0"
+    },
+    {
+      "run": 45975068807,
+      "workflow": "cp1-qualification.yml",
+      "branch": "feat/coherent-retro-workbench",
+      "sha": "af5b9241b"
+    },
+    {
+      "run": 45974748394,
+      "workflow": "cp1-qualification.yml",
+      "branch": "feat/coherent-retro-workbench",
+      "sha": "383ffd3e1"
+    },
+    {
+      "run": 45973729118,
+      "workflow": "cp1-qualification.yml",
+      "branch": "feat/coherent-retro-workbench",
+      "sha": "3549f4156"
+    },
+    {
+      "run": 45971808801,
+      "workflow": "cp1-qualification.yml",
+      "branch": "feat/coherent-retro-workbench",
+      "sha": "2a48222ac"
+    },
+    {
+      "run": 45971550128,
+      "workflow": "cp1-qualification.yml",
+      "branch": "feat/coherent-retro-workbench",
+      "sha": "726f3eb59"
+    },
+    {
+      "run": 45966221120,
+      "workflow": "cp1-qualification.yml",
+      "branch": "feat/coherent-retro-workbench",
+      "sha": "e3a62c264"
+    },
+    {
+      "run": 45963636899,
+      "workflow": "cp1-qualification.yml",
+      "branch": "feat/coherent-retro-workbench",
+      "sha": "900eaa44d"
+    },
+    {
+      "run": 45959098332,
+      "workflow": "cp1-qualification.yml",
+      "branch": "feat/coherent-retro-workbench",
+      "sha": "b13d9d4d2"
+    },
+    {
+      "run": 45958974929,
+      "workflow": "cp1-qualification.yml",
+      "branch": "feat/coherent-retro-workbench",
+      "sha": "5c0e6dac8"
+    },
+    {
+      "run": 45947330798,
+      "workflow": "cp1-qualification.yml",
+      "branch": "feat/coherent-retro-workbench",
+      "sha": "b12f2f452"
+    },
+    {
+      "run": 45946356509,
+      "workflow": "cp1-qualification.yml",
+      "branch": "feat/coherent-retro-workbench",
+      "sha": "54347a61f"
+    },
+    {
+      "run": 45618157734,
+      "workflow": "reference-qualified-instrument-controls.yml",
+      "branch": "fix/publish-privacy-and-canonical-links",
+      "sha": "2775707ee"
     }
   ],
   "workflowsInTree": [
@@ -2030,6 +2156,7 @@
     "build.yml",
     "ci-metrics.yml",
     "circuit-instrument-regression.yml",
+    "cp1-qualification.yml",
     "cycle-core-qualification.yml",
     "debugger.yml",
     "deploy-daily.yml",
@@ -2045,6 +2172,7 @@
     "nightly-corpus-differential.yml",
     "pascal-ack-image.yml",
     "production-sw-probe.yml",
+    "reference-qualified-instrument-controls.yml",
     "reference-qualified-instruments.yml",
     "release.yml",
     "robot-lab-own-firmware.yml",
@@ -8188,11 +8316,383 @@
         }
       },
       "sourceSha": "92a9ab6e7"
+    },
+    "cp1-qualification.yml": {
+      "runs": 20,
+      "stepsInFile": [
+        "Resolve the exact adopted supplier revisions",
+        "Check out the adopted Circuit UI source",
+        "Check out the adopted engine source",
+        "Build the independent CP1 monitor for cassette checks",
+        "Match the shipped monitor to the pinned firmware source",
+        "Install locked Lite inputs",
+        "Install locked browser fixture dependencies",
+        "Install the actual locked GUI React runtime",
+        "Record the distinct connector and shared-runner execution inputs",
+        "Install the locked Playwright Chromium and system libraries",
+        "Verify CP1 source and workflow contracts",
+        "CP4 relay contacts with the independent monitor",
+        "CP4 eight-channel filter and relay bank with the independent monitor",
+        "CP3 expansion sequence through CP4 relay contacts",
+        "CP1 connector static geometry",
+        "CP1 connector real browser interactions",
+        "CP1 host and panel with React 18",
+        "Shared CP1 runner, actual circuit interactions and project restore with React 18",
+        "CP1 host and panel with the installed GUI React 16",
+        "Shared CP1 runner, actual circuit interactions and project restore with the installed GUI React 16",
+        "CP5 live switch contacts and eight real LED branches with the installed GUI React 16",
+        "Preserve browser observations and failure evidence"
+      ],
+      "inFileInNoRun": [],
+      "steps": {
+        "Resolve the exact adopted supplier revisions": {
+          "existed": 20,
+          "ran": 20,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "browser"
+          ],
+          "clause": null,
+          "class": "always"
+        },
+        "Check out the adopted Circuit UI source": {
+          "existed": 20,
+          "ran": 20,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "browser"
+          ],
+          "clause": null,
+          "class": "always"
+        },
+        "Check out the adopted engine source": {
+          "existed": 20,
+          "ran": 20,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "browser"
+          ],
+          "clause": null,
+          "class": "always"
+        },
+        "Build the independent CP1 monitor for cassette checks": {
+          "existed": 20,
+          "ran": 20,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "browser"
+          ],
+          "clause": null,
+          "class": "always"
+        },
+        "Match the shipped monitor to the pinned firmware source": {
+          "existed": 20,
+          "ran": 20,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "browser"
+          ],
+          "clause": null,
+          "class": "always"
+        },
+        "Install locked Lite inputs": {
+          "existed": 20,
+          "ran": 20,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "browser"
+          ],
+          "clause": null,
+          "class": "always"
+        },
+        "Install locked browser fixture dependencies": {
+          "existed": 20,
+          "ran": 20,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "browser"
+          ],
+          "clause": null,
+          "class": "always"
+        },
+        "Install the actual locked GUI React runtime": {
+          "existed": 20,
+          "ran": 20,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "browser"
+          ],
+          "clause": null,
+          "class": "always"
+        },
+        "Record the distinct connector and shared-runner execution inputs": {
+          "existed": 20,
+          "ran": 20,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "browser"
+          ],
+          "clause": null,
+          "class": "always"
+        },
+        "Install the locked Playwright Chromium and system libraries": {
+          "existed": 20,
+          "ran": 20,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "browser"
+          ],
+          "clause": null,
+          "class": "always"
+        },
+        "Verify CP1 source and workflow contracts": {
+          "existed": 20,
+          "ran": 20,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "browser"
+          ],
+          "clause": null,
+          "class": "always"
+        },
+        "CP4 relay contacts with the independent monitor": {
+          "existed": 20,
+          "ran": 20,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "browser"
+          ],
+          "clause": null,
+          "class": "always"
+        },
+        "CP4 eight-channel filter and relay bank with the independent monitor": {
+          "existed": 20,
+          "ran": 20,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "browser"
+          ],
+          "clause": null,
+          "class": "always"
+        },
+        "CP3 expansion sequence through CP4 relay contacts": {
+          "existed": 20,
+          "ran": 20,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "browser"
+          ],
+          "clause": null,
+          "class": "always"
+        },
+        "CP1 connector static geometry": {
+          "existed": 20,
+          "ran": 20,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "browser"
+          ],
+          "clause": null,
+          "class": "always"
+        },
+        "CP1 connector real browser interactions": {
+          "existed": 20,
+          "ran": 20,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "browser"
+          ],
+          "clause": null,
+          "class": "always"
+        },
+        "CP1 host and panel with React 18": {
+          "existed": 20,
+          "ran": 20,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "browser"
+          ],
+          "clause": "${{ !cancelled() }}",
+          "class": "always"
+        },
+        "Shared CP1 runner, actual circuit interactions and project restore with React 18": {
+          "existed": 20,
+          "ran": 20,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "browser"
+          ],
+          "clause": "${{ !cancelled() }}",
+          "class": "always"
+        },
+        "CP1 host and panel with the installed GUI React 16": {
+          "existed": 20,
+          "ran": 20,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "browser"
+          ],
+          "clause": "${{ !cancelled() }}",
+          "class": "always"
+        },
+        "Shared CP1 runner, actual circuit interactions and project restore with the installed GUI React 16": {
+          "existed": 20,
+          "ran": 20,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "browser"
+          ],
+          "clause": "${{ !cancelled() }}",
+          "class": "always"
+        },
+        "CP5 live switch contacts and eight real LED branches with the installed GUI React 16": {
+          "existed": 20,
+          "ran": 20,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "browser"
+          ],
+          "clause": "${{ !cancelled() }}",
+          "class": "always"
+        },
+        "Preserve browser observations and failure evidence": {
+          "existed": 20,
+          "ran": 20,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "browser"
+          ],
+          "clause": "always()",
+          "class": "always"
+        }
+      },
+      "jobs": {
+        "browser": {
+          "existed": 20,
+          "ran": 20,
+          "existedMain": 0,
+          "ranMain": 0,
+          "class": "always"
+        }
+      },
+      "sourceSha": "0d697c826"
+    },
+    "reference-qualified-instrument-controls.yml": {
+      "runs": 1,
+      "stepsInFile": [
+        "Test the protocol and reader with synthetic inputs",
+        "Check the historical intent digest"
+      ],
+      "inFileInNoRun": [],
+      "steps": {
+        "Test the protocol and reader with synthetic inputs": {
+          "existed": 1,
+          "ran": 1,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "controls"
+          ],
+          "clause": null,
+          "class": "always"
+        },
+        "Check the historical intent digest": {
+          "existed": 1,
+          "ran": 1,
+          "existedMain": 0,
+          "ranMain": 0,
+          "skippedInFailedRuns": 0,
+          "skippedInGreenRuns": 0,
+          "jobs": [
+            "controls"
+          ],
+          "clause": null,
+          "class": "always"
+        }
+      },
+      "jobs": {
+        "controls": {
+          "existed": 1,
+          "ran": 1,
+          "existedMain": 0,
+          "ranMain": 0,
+          "class": "always"
+        }
+      },
+      "sourceSha": "2775707ee"
     }
   },
   "lastRefresh": {
-    "workflow": "samd-native-game-qualification.yml",
-    "at": "2026-10-29T06:34:29.078Z",
-    "sourceSha": "e859cecd3"
+    "workflow": "reference-qualified-instrument-controls.yml",
+    "at": "2026-11-27T14:18:12.449Z",
+    "sourceSha": "2775707ee"
   }
 }
