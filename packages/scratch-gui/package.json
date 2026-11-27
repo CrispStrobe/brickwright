@@ -67,7 +67,7 @@
     "get-user-media-promise": "^1.1.4",
     "immutable": "^3.8.2",
     "intl": "^1.2.5",
-    "jolt-physics": "https://github.com/CrispStrobe/JoltPhysics.js/releases/download/bw.10-qualified-20261112/jolt-physics-1.1.0-bw.10.tgz",
+    "jolt-physics": "https://github.com/CrispStrobe/JoltPhysics.js/releases/download/bw.11-qualified-20261127/jolt-physics-1.1.0-bw.11.tgz",
     "js-base64": "^2.4.9",
     "jszip": "^3.10.1",
     "keymirror": "^0.1.1",

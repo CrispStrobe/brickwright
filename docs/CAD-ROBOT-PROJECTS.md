@@ -2059,3 +2059,76 @@ SDK pin tests passed. With the packaged engine, Atlas passed Run,
 Stop, Reset, repeat Run, and a restart after a gravity edit in Chrome.
 It sustained 0.215× and reached 45.59 mm of lift and 14.83° of tilt
 at 6.03 simulated seconds.
+
+### Reuse poses across clearance, control and rendering
+
+CrispCAD now shares the same per-body position and rotation samples
+between hinge clearance, motor reactions, sensor rays, and published
+poses. The private buffers are reused. Each native substep refreshes
+the samples it needs, including in batched stepping, and each returned
+part pose keeps independently writable arrays.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/34e2d180dc5d0f9b2ba1a9ad3720b3cecd368177)
+
+In paired Chrome worker previews using the packaged bw.10 engine,
+Atlas made 1,106 position and 1,106 rotation reads across 600
+coupled ticks, down from 1,206 each. Scout made 1,803 of each,
+down from 2,106 positions and 2,706 rotations. The work reduction
+was repeatable before and after adding buffer reuse. Both comparisons
+produced identical motion, electrical readings, and warm restart
+frames. The final pair ran slower under shared machine load. The
+read counts establish less native work, and sustained 1× playback
+remains open. All 23 actuator and fixed-assembly tests passed on the
+final implementation. The Atlas lift test passed on an isolated retry
+after the first run exceeded the test deadline.
+
+Brickwright vendors SDK `34e2d18`. All 842 manifest hashes and nine
+pin tests passed. The live Atlas example passed Run, Stop, Reset,
+repeat Run, and warm restart after a gravity edit using the packaged
+engine.
+
+### Qualify the collision sweep optimization for the current robots
+
+The candidate keeps the bw.10 native source line and accelerates
+continuous collision checks by pruning disjoint compound children in
+box and convex-hull sweeps. It keeps the original candidate hit order.
+[Native source](https://github.com/CrispStrobe/JoltPhysics/commit/7085d0d)
+[Wrapper source](https://github.com/CrispStrobe/JoltPhysics.js/commit/cd40daa)
+
+The current CAD SDK `34e2d18` replayed 600 Chrome Circuit and CAD
+worker ticks for each robot. The two engines produced identical motion,
+electrical readings and warm restart frames. Atlas improved from
+0.405× to 1.210× and Scout from 0.424× to 1.717× in that harness.
+Atlas's mean mechanical round trip fell from 10.83 ms to 2.78 ms.
+
+The existing Brickwright Chrome host, using the same SDK and Atlas
+project, sustained 0.300× with bw.10 and 0.802× with the candidate
+in separate runs. The candidate reached 45.65 mm of lift and 14.91°
+of tilt after 6.065 simulated seconds. Both engines passed one-click
+Run, Stop, Reset, repeat Run, and a restart after a gravity edit.
+Scout passed the full editor Run, Stop, Reset and repeat Run checks
+at 1.000× with the candidate.
+
+These measurements used the SIMD module override with SHA-256
+`3c463978c83694b04a1e4a78c1611f488e195ac087fb5d30a572a4ed10b80af9`.
+That SIMD module is the only changed runtime binary in bw.11.
+The remaining 18 files in `dist`, including scalar, debug, and
+multithread payloads and declarations, match bw.10 byte for byte.
+All nine runtime exports initialized. Packed scalar and SIMD
+physical controls, rotor and motor-block tests, and exact rope
+trajectory checks passed. The archive downloaded from GitHub
+matched the tested SHA-256
+`df8525be00293bdfc7b86c6a0cf99113c503a3d0f7a77d1e0995400bf9207aaf`.
+[Qualified package](https://github.com/CrispStrobe/JoltPhysics.js/releases/tag/bw.11-qualified-20261127)
+
+CrispCAD's 30 focused tests passed, including current and historical
+Model Library qualification reports. All 25 targeted Robot Lab tests
+and 12 floor-contact and resting-creep tests passed. Atlas's sustained
+1× editor target remains open.
+
+CrispCAD and Brickwright now pin the same bw.11 archive. The bundled
+SDK `b67ab77` passed the live checks in the existing Brickwright
+Chrome host `22a9fdd` with no engine override. Both runs loaded the
+packaged SIMD module. Atlas sustained 0.900×, reached 45.65 mm
+of lift and 14.98° of tilt at 6.10 simulated seconds, and passed
+Stop, Reset, repeat Run and a restart after a gravity edit. Scout
+sustained 0.960× and passed Stop, Reset and repeat Run.
