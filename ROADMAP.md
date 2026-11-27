@@ -2,6 +2,48 @@
 
 The [workbench owner roadmap](docs/WORKBENCH-OWNER-ROADMAP.md) tracks the machine, circuit, desktop, and editor requests and their verification.
 
+## Code runtimes and game export (Python and JavaScript) — 2026-11-27
+
+See the [full plan and acceptance criteria](docs/CODE-RUNTIME-AND-GAME-EXPORT.md)
+and [evaluation claim](lanes/2026-11-27-code-runtime-game-export-evaluation.md).
+This adds a documented execution/export track; it does not declare an interpreter
+replacement or a game exporter implemented.
+
+The [initial evaluation](docs/CODE-RUNTIME-EVALUATION-2026-11-27.md) is recorded:
+Node and headless Chromium runtime probes, a separate pwasm host probe, eight
+reader semantic witnesses, and a Linux authored pygame fixture packaged with
+matching state/frame hashes. R0 has bounded evidence; actual app/device
+qualification remains open. R1/R2 and the G0/G1 game runtime are the next work.
+
+| Order | Work | Required evidence |
+| --- | --- | --- |
+| R0 | Compare existing Skulpt, direct MicroPython/WASM and Pyodide; assess pwasm's role | Pinned versions, identical fixtures, cold/warm measurements, explicit platform gaps; plan lands before probes |
+| R1 | Preserve authored source/projections; explicit runtime/target; repair or refuse wrong Python conversions upstream | Save/tab/reopen tests; floor division, augmented assignment and loop-control semantics; no silent diagnostic loss |
+| R2 | Worker execution service with streamed output, input, Stop/Reset and async completion | Infinite-loop interruption, input cancellation, clean restart and no stale effects |
+| R3 | Add only qualified, lazily loaded runtime modes | Compatibility/budget report and actual supported browser/WebView matrix; no silent dialect switch |
+| R4 | Share stage/circuit/device state and clock through a versioned bridge | Admitted blocks/Python scenarios agree, including device and cancellation lifecycle |
+| G0–G1 | Validate semantic model and export a playable Scratch/Arcade subset as Python + pygame source/assets | Capability report, source/asset manifest, one original-runtime comparison per source profile |
+| G2 | Expand scheduler, sprites/clones, collisions, tilemaps, audio and event coverage | Differential state/event/frame corpus; approximations or refusals remain visible |
+| G3 | Bundle standalone desktop applications | Per-OS/architecture builds; clean-machine execution without installed Python; assets and license inventory |
+| G4 | Evaluate browser and native mobile game packages separately | Target-specific async/lifecycle/build/distribution evidence; no desktop-to-mobile inference |
+
+Keep pwasm as a design reference/optional host experiment unless a concrete need
+justifies its Python-hosted WASM layer. pygame requires a separate game runtime
+and dependency-policy decision; neither MicroPython nor Pyodide automatically
+provides a complete pygame/SDL export stack. Shared converter changes belong
+upstream in `sb3-creator`; this documentation/evaluation lane changes no vendor pin.
+
+The planned [JavaScript execution/export track](docs/CODE-RUNTIME-AND-GAME-EXPORT.md#9-javascript-execution-and-game-export-across-platforms)
+shares source integrity, the owned execution service and the existing simulation
+world with R1/R2/R4. J0 records JS program/export contracts; J1 qualifies awaited
+worker completion, input and Stop; J2 qualifies the shared simulator/device
+bridge; J3 produces an explicitly supported editable JS web game from the
+validated graph/assets. J4 adds offline web/PWA qualification, J5 target-specific
+desktop packages, and J6 separately qualified Android/iOS packages. Prefer the
+existing Tauri tooling; an Electron desktop package needs its own reason and
+dependency/update review. None of these JS gates is closed by the Python runtime
+or authored pygame packaging probes.
+
 ## Examples across the workspace
 
 Use the [example surface audit](docs/EXAMPLE-SURFACES.md) to prioritize examples that leave a stale pane, ship an incomplete bench, or rely on manual setup the example never explains. Use the [repository transition plan](docs/REPOSITORY-RENAME.md) for the Brickwright and Brickwright Legacy cutover.
@@ -1373,6 +1415,12 @@ ours.**
 
 ### 3.9 Language x device matrix — one truth for GUI and docs — PLANNED 2026-09-05
 
+2026-11-27 follow-on: [Code execution/export capabilities](docs/CODE-RUNTIME-AND-GAME-EXPORT.md)
+add explicit runtime, host-platform and convertibility axes. A program can run
+in Python while being unsupported for conversion to blocks; an imported game can
+be admitted by one execution backend and refused by another. Retain the existing
+native/lowered distinction without treating it as whole-program equivalence.
+
 `docs/LANGUAGE-DEVICE-MATRIX-PLAN.md`. Every (language, device) cell is **native**, **lowered**
 (through the dialect AST) or both; there is no refused cell, only `native: null` with a cited
 reason. A frozen data module (`lib/bw-matrix/capabilities.js`) becomes the source for a
@@ -2357,3 +2405,4 @@ solves. That is the next gate, not a solved problem.
   "No space left on device" at 219 MB free; two abandoned lite worktrees held 2.2 GB. Full lite
   checkouts are ~1.1 GB each. Use `git worktree add --no-checkout` + `git sparse-checkout set docs`
   for doc-only work, and prune worktrees whose HEAD is merged and whose tree is clean.
+

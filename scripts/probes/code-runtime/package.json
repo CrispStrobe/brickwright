@@ -1,0 +1,16 @@
+{
+  "name": "brickwright-python-runtime-probe",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Bounded Node and browser Python runtime evaluation; no production integration.",
+  "dependencies": {
+    "@micropython/micropython-webassembly-pyscript": "1.29.0-6",
+    "pyodide": "314.0.8",
+    "skulpt": "1.2.0"
+  },
+  "devDependencies": {
+    "@sparticuz/chromium": "158.0.0",
+    "playwright-core": "1.62.1"
+  }
+}

@@ -2,6 +2,48 @@
 
 The [workbench owner roadmap](docs/WORKBENCH-OWNER-ROADMAP.md) tracks the machine, circuit, desktop, and editor requests and their verification.
 
+## Code execution and game export (Python and JavaScript) — 2026-11-27
+
+The owner-requested [Code runtime and game export plan](docs/CODE-RUNTIME-AND-GAME-EXPORT.md)
+extends milestones 4, 5 and 9 below. Record the plan first, then evaluate the
+existing Skulpt runner against direct MicroPython/WASM and Pyodide with identical
+fixtures. pwasm is a reference for host capabilities and resource limits; its
+Python-hosted WASM engine is not a direct browser Python loader.
+
+Order: source/conversion integrity → owned worker execution with input/Stop →
+measured runtime selection → shared simulator bridge. Preserve lazy loading and
+measure editor/conversion/startup costs before claiming performance gains.
+Supported host platforms and convertible language subsets are separate axes.
+
+The same plan scopes MakeCode Arcade / Scratch / pseudocode → validated semantic
+model → Python + pygame source/assets → separately qualified standalone packages.
+This requires a game runtime preserving events, scheduling, sprites, collisions
+and assets; it is not supplied by installing a Python interpreter. Begin with a
+declared playable subset, then per-OS desktop builds. Browser and native mobile
+exports, dependency licensing, and original-runtime parity have distinct gates.
+
+The [JavaScript track](docs/CODE-RUNTIME-AND-GAME-EXPORT.md#9-javascript-execution-and-game-export-across-platforms)
+uses the engines already present in browsers and Tauri WebViews. First correct
+async completion, input and Stop through the shared execution service; then
+qualify a playable JS web export against the same source-aware graph, assets,
+renderer and simulator contracts. Keep a VM/project web player distinct from an
+editable generated-JS project. Follow with complete offline web/PWA artifacts
+and per-target Tauri desktop/mobile packages. Module/renderer/device capabilities
+and the oldest supported WebViews have separate gates; Electron remains an
+optional desktop alternative for a demonstrated need. This chapter is design
+and source review, not new platform or packaging acceptance.
+
+The [initial evaluation report](docs/CODE-RUNTIME-EVALUATION-2026-11-27.md)
+records the same-engine Node/Chromium probes, a pwasm host check, silent reader
+translation changes and a Linux pygame bundle with matching source/package state
+and frame hashes. It supports explicit Pyodide/CPython and lightweight MicroPython
+modes as follow-on candidates; production integration and device gates remain open.
+
+Status: **bounded evaluation recorded; runtime/export implementation planned**.
+The [evaluation lane](lanes/2026-11-27-code-runtime-game-export-evaluation.md)
+owns documentation/probes only; application and shared-compiler repairs remain
+follow-on work under the existing ownership and upstream adoption rules.
+
 ## Current status — 2026-11-05
 
 The integration has merged, and later browser gates passed after an earlier full
@@ -1507,6 +1549,10 @@ Acceptance criteria:
 
 Status: **in progress — representation capability contract visible**
 
+Follow-on: [source/projection ownership and concrete Python reader defects](docs/CODE-RUNTIME-AND-GAME-EXPORT.md#2-what-exists-and-what-the-review-found),
+with exact-or-refused conversion and source-mapped diagnostics. The new game
+export backend must preserve admitted source semantics through a validated model.
+
 Make the relationship among Blocks, Brickwright Code, Python, and JavaScript visible
 and honest. Show the corresponding construct when switching, distinguish editable
 source from generated previews, and surface unsupported or lossy constructs before
@@ -1523,6 +1569,10 @@ Acceptance criteria:
 ## Milestone 5 — One run and debug model
 
 Status: planned
+
+Follow-on: [one execution service and runtime evaluation](docs/CODE-RUNTIME-AND-GAME-EXPORT.md#4-code-tab-architecture-and-user-experience),
+including explicit source/runtime/target requests, worker-owned input, streaming
+output, reliable Stop/Reset and a shared simulation clock.
 
 Unify run, stop, pause, step, speed, breakpoints, watches, pin activity, circuit time,
 and hardware state into one coherent model. Complete the compact debugger strip
@@ -1587,6 +1637,10 @@ Acceptance criteria:
 ## Milestone 9 — Project integrity and recovery
 
 Status: planned
+
+Follow-on: [versioned authored source and projections](docs/CODE-RUNTIME-AND-GAME-EXPORT.md#41-authored-source-and-projections),
+including runtime/dialect, dependencies, target, revisions and conversion reports.
+Generated exports also retain source/asset provenance and backend versions.
 
 Define and enforce a versioned Brickwright project contract containing all authored
 representations, circuit/controller data, device choice, assets, and migration
@@ -1826,3 +1880,4 @@ crosses, but unsupported ADC still refuses the program. The existing numeric-pri
 direct emitted programs and broad reach 46. N2e is therefore a semantics prerequisite, not a claimed reach
 increase. The ASM route remains deliberately list-free; duplicating production logic merely to construct an
 oracle would weaken the evidence.
+

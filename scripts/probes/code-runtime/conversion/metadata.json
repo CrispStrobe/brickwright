@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "repo": "CrispStrobe/brickwright",
+  "ref": "14de1c42bd2e2ea84086a2162d1eff1fdbbac20d",
+  "sources": [
+    {
+      "path": "overlay/scratch-gui/src/lib/sb3-creator-python.js",
+      "blobSha": "fd06a32c1ebdba260edf21a731d69eb297e35e90",
+      "sha256": "fcfd6d74464842e5418c30d1d5d81a3a3cd08f10cf9c869ef3b7ece25537a6d1"
+    },
+    {
+      "path": "overlay/scratch-gui/src/lib/sb3-creator-scratchruntime.js",
+      "blobSha": "53cd49df01e16c99ec6af3dce0727b94b75f218d",
+      "sha256": "92b1ae396029c47bcf0f71376c31477fd768986cd0019c2740bfbc8d14f59f2c"
+    }
+  ],
+  "fixtures": [
+    {
+      "id": "floor_division",
+      "path": "fixtures/floor_division.py",
+      "expectedNativeStdout": "3\n"
+    },
+    {
+      "id": "negative_floor_division",
+      "path": "fixtures/negative_floor_division.py",
+      "expectedNativeStdout": "-4\n"
+    },
+    {
+      "id": "multiply_assignment",
+      "path": "fixtures/multiply_assignment.py",
+      "expectedNativeStdout": "6\n"
+    },
+    {
+      "id": "divide_assignment",
+      "path": "fixtures/divide_assignment.py",
+      "expectedNativeStdout": "4.0\n"
+    },
+    {
+      "id": "modulo_assignment",
+      "path": "fixtures/modulo_assignment.py",
+      "expectedNativeStdout": "2\n"
+    },
+    {
+      "id": "break",
+      "path": "fixtures/break.py",
+      "expectedNativeStdout": "3\n"
+    },
+    {
+      "id": "continue",
+      "path": "fixtures/continue.py",
+      "expectedNativeStdout": "2\n3\n"
+    },
+    {
+      "id": "supported_plus_assignment",
+      "path": "fixtures/supported_plus_assignment.py",
+      "expectedNativeStdout": "5\n"
+    }
+  ]
+}

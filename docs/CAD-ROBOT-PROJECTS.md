@@ -1860,3 +1860,202 @@ Physics type checking and all 18 actuator and worker telemetry tests
 passed. Brickwright pins SDK `5d40e25`. Sustained 1× in the production app
 remains open.
 [CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/11a68ae843f637cef31716723dae6fd3ef0eb375)
+
+### Share native poses across distance sensors
+
+Pre-step ray validation and post-step sensor sampling reuse the same
+position and rotation for each rigid body at a solver boundary. Welded
+parts share a native pose and retain their own authored ray offsets.
+The next native step invalidates the samples.
+
+In Chrome, 32 distance rays ran across 200 substeps on a moving welded
+assembly. Native pose samples fell from 12,800 to 402 across validation
+and casting. All 6,400 distances and the full and compact frames matched
+exactly in both run orders. Invalid input left the simulation clock
+unchanged, and restarting restored the initial poses.
+
+| Worker time per 6,400 rays | Before | After |
+| --- | ---: | ---: |
+| Validation and sampling, first order | 49.3 ms | 43.5 ms |
+| Validation and sampling, reverse order | 53.8 ms | 53.6 ms |
+
+The timings exclude allocation and pose counters. Physics type checking
+and all 18 actuator and worker telemetry tests passed. Brickwright pins
+SDK `68666ce`, which precedes the two native sensor optimizations.
+Sustained 1× in the production app remains open.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/156bf088187b3fe6226b7b57d4074d8a526c239d)
+
+### Reuse authored distance-sensor coordinates
+
+The simulation worker carries the sensor ID into the physics world.
+For stable sensor definitions, the world reuses authored sensor offsets
+and directions and reuses the final endpoints at the same physics
+boundary. Changing a mounting body, origin, direction or range refreshes
+the cached coordinates. The cache holds at most 32 sensors per world.
+
+A paired Chrome worker run used 32 rays on a moving welded assembly for
+200 substeps. All 6,400 distances and all frame payloads matched exactly
+in both run orders. Invalid rays left simulation time unchanged and
+restarting restored the initial poses.
+
+| Measurement | Before | After |
+| --- | ---: | ---: |
+| Authored ray transforms | 12,800 | 32 |
+| Ray projections into the scene | 12,800 | 6,432 |
+| Validation and sampling, first order | 105.1 ms | 75.8 ms |
+| Validation and sampling, reverse order | 76.9 ms | 64.6 ms |
+
+The timing runs excluded transform counters. Physics type checking
+and all 18 actuator and worker telemetry tests passed. Brickwright
+pins SDK `68666ce`. Sustained 1× in the production app remains open.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/e1fcb4142864ef175268413d5b3632cd518a490e)
+
+### Bind hinge and slider constraints when the world starts
+
+CrispCAD indexes the native hinge and slider bindings as it creates
+each world. Joint telemetry, impulses, velocity motors and position
+servos use those bindings. The 200 Hz sampling path skips a document
+scan and a native constraint cast on each joint read. A fresh world
+builds fresh bindings.
+
+Paired Chrome worker runs used the same bundled Jolt SIMD engine and
+advanced 600 coupled substeps per robot. Full and compact telemetry,
+sampled motion and electrical readings, and warm restart frames matched
+in both run orders.
+
+| Joint sampling per run | Samples | First order, before → after | Reverse order, before → after |
+| --- | ---: | ---: | ---: |
+| Atlas forklift | 2,400 | 24.2 → 17.8 ms | 20.2 → 16.7 ms |
+| Scout TT rover | 1,200 | 11.8 → 7.7 ms | 7.2 → 4.9 ms |
+
+Physics type checking and all 21 actuator, telemetry and gear-train
+tests passed. Overall worker timing varied under Mac load. Brickwright
+pins SDK `68666ce`. Sustained 1× in the production app remains open.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/6db059f5f4b5ccdf773cfa0b5211e1b9f16730f9)
+
+### Share hinge angles between telemetry and servo control
+
+A position servo and hinge telemetry share the native angle at each
+physics boundary. Advancing the solver invalidates the sample. The
+torque limit and target angular velocity still apply on every servo
+command.
+
+The paired Chrome workers ran 600 Circuit–CAD substeps per robot with
+the same bundled Jolt SIMD engine. Atlas made 1,803 native hinge-angle
+reads per run, down from 2,403. Scout made 1,202 in both versions since
+its test uses only drive motors. All sampled motion and electrical
+readings matched in both orders, and both robots restored their initial
+frames on warm restart. Overall worker timing varied under Mac load.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/64de0a51fa33d71d8d058f726bd77d4bb899f6be)
+
+Physics type checking and all 21 actuator, telemetry and gear-train
+tests passed across two runs. The Rover startup-torque case passed
+on an isolated retry after the initial deadline expired.
+
+### Package the native simulation optimizations for Brickwright
+
+The browser SDK from CrispCAD `64de0a5` includes native ray-query reuse,
+shared sensor poses and coordinates, indexed hinge and slider bindings,
+and shared servo angle samples. It was built from the locked exact
+kernel 0.1.7 dependency. All 842 manifest hashes matched the vendored
+copy. The standalone WASM bytes, Jolt code and immutable model source
+URLs match the previous SDK. Jolt's generated worker import names were
+updated.
+
+All 24 pin and fetch tests passed. The packaged exact worker loaded
+its WASM on demand and measured a 10 × 20 × 30 mm box at 6,000 mm³
+and 2,200 mm². Scout passed project selection, Run, motion, Stop, Reset
+and repeat Run in Chrome with the existing Brickwright host build
+`22a9fdd` and the current robot project.
+
+Atlas missed its +15° fork target with both the current pin `68666ce`
+and the candidate. At 3.03 simulated seconds, the complete CAD frame
+and electrical readings matched exactly, including the −53.2° fork
+tilt. A separate parity check verified matching frames and completed
+Atlas Stop, Reset and repeat Run on the candidate. Atlas fork control
+and sustained 1× production performance remain open.
+
+### Stabilize the Atlas forklift with a lower electronics tray
+
+The Atlas factory and Brickwright example use 8 mm tray posts in place
+of 28.3 mm posts. The controller and supply move down while the tray
+stays seated on the chassis. The 16 mm trial held the fork angle but
+finished the three-second worker run at 25.8 mm of lift. The 8 mm trial
+held the fork at 14.99° and reached 45.4 mm of its 48 mm lift travel.
+
+Three-second worker runs used the same pinned SDK, Circuit configuration,
+and controls. Worker throughput rose from 0.088× to 0.247× in the first
+order and from 0.278× to 0.725× in reverse order. Test-machine load varied
+between orders.
+
+In the Chrome Brickwright host with SDK `64de0a5`, the updated example
+passed one-click Run, motion, Stop, Reset and repeat Run. At 6.065 simulated
+seconds the fork held 14.91° against the +15° target, the lift was at
+45.65 mm, and both drive wheels had turned. The run sustained 0.331× on
+the MacBook. All 12 Atlas unit tests passed, and all 22 robot archives
+reproduced byte for byte.
+
+The example uses the updated CAD document with the shipped SDK. CrispCAD
+has the updated model factory. Sustained 1× in the production app remains
+open.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/5c922ea961c92928616915245d4ca3b3c24da456)
+
+### Reuse CAD collision shapes after physics edits
+
+A parked simulation worker now accepts the current document revision when
+the same design is edited. It retains the native compounds when the
+qualified hulls and fixed mates match. Each restart builds a fresh world
+with the current gravity, materials, masses and joint settings. Opening a
+different design releases the parked worker.
+
+In paired Chrome worker runs, each model made six timed restarts per
+version after gravity and friction edits. Atlas went from six native
+compound builds per restart to zero, and the median fell from 259 ms to
+147 ms. Scout went from three builds to zero and from 356 ms to 231 ms.
+All recorded poses and joint telemetry matched the fresh-compound
+baseline, and changing gravity changed the motion in both versions.
+The 23 controller and worker tests passed, including project replacement
+and fixed-mate changes.
+
+The Brickwright SDK pins CrispCAD `ae107ae`. All 842 manifest hashes and
+nine pin tests passed. In the existing Brickwright Chrome host, Atlas
+completed Run, Stop, Reset and repeat Run. After a gravity edit, it
+reused the same worker and restarted in 313 ms. The six-second run
+sustained 0.223× under the test machine's load. Sustained 1× playback
+remains open.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/ae107ae07ceda425ff64c9692ce77324517ff4f2)
+
+### Share body rotations across coupled actuators
+
+CrispCAD now samples a rigid body's quaternion once per physics
+boundary for motor reactions and body-mounted distance sensors. An
+impulse changes velocity while the pose stays fixed until the next
+step. The sensor and motor code keep the same transform math.
+[CrispCAD source](https://github.com/CrispStrobe/CrispCAD/commit/77d503657caf65913ce5985fab18cfdee3f5da30)
+
+Paired Chrome worker runs replayed 600 coupled ticks in both orders
+using the same Jolt 5.7 SIMD candidate in every run. Atlas's native
+rotation reads for these consumers fell from 1,800 to 600. Scout's
+fell from 1,200 to 600. Joint motion, body poses, and electrical
+readings matched exactly. Atlas's mean mechanical round trip fell
+from 4.31 to 3.92 ms and from 4.28 to 3.98 ms. Scout was flat in the
+first order and faster in the reverse order. All 23 focused actuator
+and fixed-assembly tests passed. A further paired replay on the
+packaged bw.10 engine reproduced the same read counts and exact
+traces before and after the change. The two models moved in opposite
+directions on timing under shared machine load, so this pair does
+not establish a speedup on bw.10.
+
+A separate full Brickwright Chrome comparison used the stabilized
+Atlas assembly and the preceding SDK. Jolt 5.7 reached 0.531× against
+0.207× with the packaged engine in that comparison. At about six
+simulated seconds its lift had reached 28.36 mm against 45.59 mm with
+bw.10, below the 30 mm lift check. The package-matrix build was
+stopped after that result, and Brickwright keeps bw.10. The sustained
+1× Atlas viewport target remains open.
+
+Brickwright vendors SDK `77d5036`. All 842 manifest hashes and nine
+SDK pin tests passed. With the packaged engine, Atlas passed Run,
+Stop, Reset, repeat Run, and a restart after a gravity edit in Chrome.
+It sustained 0.215× and reached 45.59 mm of lift and 14.83° of tilt
+at 6.03 simulated seconds.

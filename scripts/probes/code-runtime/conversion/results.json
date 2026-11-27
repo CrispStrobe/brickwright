@@ -1,0 +1,166 @@
+{
+  "schema": 1,
+  "createdAt": "2026-11-27T05:59:21.403Z",
+  "repo": "CrispStrobe/brickwright",
+  "ref": "14de1c42bd2e2ea84086a2162d1eff1fdbbac20d",
+  "environment": {
+    "node": "v24.22.3",
+    "platform": "linux",
+    "arch": "x64",
+    "python": "Python 3.12.14"
+  },
+  "scope": "Actual current reader Tokenizer -> Parser -> Translator plus actual scratchruntime helpers. No Creator, Scratch VM, Code tab, browser, board-specific routing, or game runtime was exercised.",
+  "sourceLoading": "ES module import/export declarations are removed only for isolated class loading; method bodies remain unchanged. No replacement parser/translator or mocked scratchruntime helpers.",
+  "sources": [
+    {
+      "path": "overlay/scratch-gui/src/lib/sb3-creator-python.js",
+      "local": "source/sb3-creator-python.js",
+      "blobSha": "fd06a32c1ebdba260edf21a731d69eb297e35e90",
+      "sha256": "fcfd6d74464842e5418c30d1d5d81a3a3cd08f10cf9c869ef3b7ece25537a6d1"
+    },
+    {
+      "path": "overlay/scratch-gui/src/lib/sb3-creator-scratchruntime.js",
+      "local": "source/sb3-creator-scratchruntime.js",
+      "blobSha": "53cd49df01e16c99ec6af3dce0727b94b75f218d",
+      "sha256": "92b1ae396029c47bcf0f71376c31477fd768986cd0019c2740bfbc8d14f59f2c"
+    }
+  ],
+  "fixtures": [
+    {
+      "id": "floor_division",
+      "code": "def when_flag_clicked():\n    x = 7 // 2\n    print(x)\n\nwhen_flag_clicked()\n\n",
+      "codeSha256": "6b842c87e7829b3ca1e124ec9399a20b49e06908d0af6d35cbb2288897a2b054",
+      "native": {
+        "stdout": "3\n",
+        "stderr": "",
+        "status": 0,
+        "error": null,
+        "expectedStdout": "3\n",
+        "matched": true
+      },
+      "reader": {
+        "pseudocode": "SPRITE Main:\n\n    WHEN flag clicked:\n        set x to (7 / 2)\n        say x\n",
+        "warnings": []
+      }
+    },
+    {
+      "id": "negative_floor_division",
+      "code": "def when_flag_clicked():\n    x = -7 // 2\n    print(x)\n\nwhen_flag_clicked()\n\n",
+      "codeSha256": "22c1891d8a61d6c5dc2c1eba1d872f46fa202e8f883cf542a66e887215a2706e",
+      "native": {
+        "stdout": "-4\n",
+        "stderr": "",
+        "status": 0,
+        "error": null,
+        "expectedStdout": "-4\n",
+        "matched": true
+      },
+      "reader": {
+        "pseudocode": "SPRITE Main:\n\n    WHEN flag clicked:\n        set x to (-7 / 2)\n        say x\n",
+        "warnings": []
+      }
+    },
+    {
+      "id": "multiply_assignment",
+      "code": "def when_flag_clicked():\n    x = 3\n    x *= 2\n    print(x)\n\nwhen_flag_clicked()\n\n",
+      "codeSha256": "69b001d52ebb2a65a23d912ef95757c46b77cb73bd0edfedbe0ca91899f0b57c",
+      "native": {
+        "stdout": "6\n",
+        "stderr": "",
+        "status": 0,
+        "error": null,
+        "expectedStdout": "6\n",
+        "matched": true
+      },
+      "reader": {
+        "pseudocode": "SPRITE Main:\n\n    WHEN flag clicked:\n        set x to 3\n        change x by 2\n        say x\n",
+        "warnings": []
+      }
+    },
+    {
+      "id": "divide_assignment",
+      "code": "def when_flag_clicked():\n    x = 8\n    x /= 2\n    print(x)\n\nwhen_flag_clicked()\n\n",
+      "codeSha256": "f96abfd6000ed8b6f3ac046af35e0697b882b09bd276b42294c03b3c0d82d41d",
+      "native": {
+        "stdout": "4.0\n",
+        "stderr": "",
+        "status": 0,
+        "error": null,
+        "expectedStdout": "4.0\n",
+        "matched": true
+      },
+      "reader": {
+        "pseudocode": "SPRITE Main:\n\n    WHEN flag clicked:\n        set x to 8\n        change x by 2\n        say x\n",
+        "warnings": []
+      }
+    },
+    {
+      "id": "modulo_assignment",
+      "code": "def when_flag_clicked():\n    x = 8\n    x %= 3\n    print(x)\n\nwhen_flag_clicked()\n\n",
+      "codeSha256": "c1c3680bc605de124841ced10251cc12b88e5f0c86edc3b0269fa0421f748878",
+      "native": {
+        "stdout": "2\n",
+        "stderr": "",
+        "status": 0,
+        "error": null,
+        "expectedStdout": "2\n",
+        "matched": true
+      },
+      "reader": {
+        "pseudocode": "SPRITE Main:\n\n    WHEN flag clicked:\n        set x to 8\n        change x by 3\n        say x\n",
+        "warnings": []
+      }
+    },
+    {
+      "id": "break",
+      "code": "def when_flag_clicked():\n    x = 0\n    while True:\n        x += 1\n        if x == 3:\n            break\n    print(x)\n\nwhen_flag_clicked()\n\n",
+      "codeSha256": "5d64d2f76dc58aa2e2d0f1a9f2487857843267a5ddca61c7141702bdbc7ab614",
+      "native": {
+        "stdout": "3\n",
+        "stderr": "",
+        "status": 0,
+        "error": null,
+        "expectedStdout": "3\n",
+        "matched": true
+      },
+      "reader": {
+        "pseudocode": "SPRITE Main:\n\n    WHEN flag clicked:\n        set x to 0\n        FOREVER:\n            change x by 1\n            IF x = 3 THEN:\n        say x\n",
+        "warnings": []
+      }
+    },
+    {
+      "id": "continue",
+      "code": "def when_flag_clicked():\n    x = 0\n    while x < 3:\n        x += 1\n        if x == 1:\n            continue\n        print(x)\n\nwhen_flag_clicked()\n\n",
+      "codeSha256": "498114fe7b6cfe03bc53b61c28a275ff4068480ddfedc9932466f2a61ad84092",
+      "native": {
+        "stdout": "2\n3\n",
+        "stderr": "",
+        "status": 0,
+        "error": null,
+        "expectedStdout": "2\n3\n",
+        "matched": true
+      },
+      "reader": {
+        "pseudocode": "SPRITE Main:\n\n    WHEN flag clicked:\n        set x to 0\n        REPEAT UNTIL (not (x < 3)):\n            change x by 1\n            IF x = 1 THEN:\n            say x\n",
+        "warnings": []
+      }
+    },
+    {
+      "id": "supported_plus_assignment",
+      "code": "def when_flag_clicked():\n    x = 3\n    x += 2\n    print(x)\n\nwhen_flag_clicked()\n\n",
+      "codeSha256": "24bf6511711653c7a6896b9afc1829aab5caf78519f9b3b2e1f32c7d75f44e46",
+      "native": {
+        "stdout": "5\n",
+        "stderr": "",
+        "status": 0,
+        "error": null,
+        "expectedStdout": "5\n",
+        "matched": true
+      },
+      "reader": {
+        "pseudocode": "SPRITE Main:\n\n    WHEN flag clicked:\n        set x to 3\n        change x by 2\n        say x\n",
+        "warnings": []
+      }
+    }
+  ]
+}

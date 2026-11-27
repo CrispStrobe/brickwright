@@ -39,8 +39,8 @@
       "id": "robot-atlas-forklift",
       "name": "Atlas forklift",
       "file": "atlas.sb3",
-      "bytes": 569232,
-      "sha256": "ae8d6168aecd34158ae389f737fb0299b4eb856f2096f758e3bcb2c36f62a140",
+      "bytes": 569219,
+      "sha256": "be4009df6b1fa2e73f5a5d60a31bc677d4be5d0684f7a2003501f4d5b1ed39fc",
       "widgets": [
         "motorA",
         "motorB",

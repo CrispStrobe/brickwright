@@ -1,0 +1,215 @@
+# Python runtime probe
+
+This directory evaluates three pinned runtime distributions in disposable workers.
+It is a diagnostic harness, not a Brickwright runtime implementation or a security
+boundary. It was executed only after the initial plan was published at
+`a29ac18c9e4a8789b6d58f8d5be4b5f034667627`. The reviewed application source baseline
+is `14de1c42bd2e2ea84086a2162d1eff1fdbbac20d`.
+
+See the [evaluation report](../../../docs/CODE-RUNTIME-EVALUATION-2026-11-27.md)
+for decisions and scope. Separate bounded probes cover [reader semantics](conversion/),
+[pwasm on a Python host](pwasm/), and [Linux pygame packaging](pygame/).
+
+## Reproduce
+
+The recorded Node environment was Node 24.22.3 on Linux x64. The package lock pins
+the runtime packages and probe-only browser tooling, with npm integrity hashes.
+Install from this directory:
+
+```sh
+npm ci --ignore-scripts --no-audit --no-fund
+node probe.mjs --plan-commit=a29ac18c9e4a8789b6d58f8d5be4b5f034667627 --output=results-node-rerun.json
+mkdir -p tmp
+TMPDIR="$PWD/tmp" node browser-probe.mjs --plan-commit=a29ac18c9e4a8789b6d58f8d5be4b5f034667627 --output=results-browser-rerun.json
+```
+
+The browser runner defaults to the Linux serverless Chromium package. To use an
+installed compatible Chromium executable, pass `--browser=/absolute/path/to/chrome`.
+That changes the environment and must be reported separately. A machine with a
+normal writable temporary directory does not need the `TMPDIR` override.
+`--engines=skulpt,micropython,pyodide` selects the engines (the default is all three).
+Run the Node and browser probes sequentially to avoid competing timing workloads.
+For the affected-route-only browser rerun recorded here, add
+`--mode=isolated-input --output=results-browser-input-rerun.json`. These rerun
+names preserve the committed observations.
+
+The plan argument records a previously verified publication SHA; the scripts
+check its format, not remote publication. They make no remote writes. Browser
+assets are served from installed files on a transient localhost HTTP port.
+
+| Engine | Exact npm package | Version |
+| --- | --- | --- |
+| Skulpt | `skulpt` | `1.2.0` |
+| MicroPython | `@micropython/micropython-webassembly-pyscript` | `1.29.0-6` |
+| Pyodide | `pyodide` | `314.0.8` |
+| Probe browser | `@sparticuz/chromium` | `158.0.0` |
+| Probe driver | `playwright-core` | `1.62.1` |
+
+MicroPython here is the released PyScript distribution. This probe does not test
+the later JSPI preview build. The browser dependency belongs only to this probe.
+It must not be added to Brickwright's application dependency graph.
+
+## What is measured
+
+`probe.mjs` runs Node `worker_threads`; `browser-probe.mjs` runs actual browser
+module workers through `browser-page.mjs`. Both use `engine-worker.mjs` and
+`fixtures.json`. Each runtime has three fresh worker startups and five repetitions
+of each small warm workload. Raw results retain every sample and failure.
+
+- Startup timing uses already-installed local assets. Browser assets come from
+  localhost, and OS/browser/module caches may be warm. This is neither a cold
+  network download measurement nor application-ready latency.
+- Node asset sizes sum the specified files, record SHA-256, and independently
+  compress each using gzip level 9 and Node's default Brotli settings. They exclude
+  optional packages, application integration, HTTP headers and service-worker
+  behavior. They are not observed production transfer sizes.
+- Node memory fields are diagnostic counters. RSS is process-wide, so these fields
+  must not become a per-engine browser peak-memory ranking. Browser memory is not
+  measured.
+- Core arithmetic, large integers, classes/comprehensions, selected syntax and
+  standard-library examples, traceback text, input and mock host callbacks are
+  separate diagnostics. No aggregate pass percentage measures Python compatibility.
+  The error fixture checks type/marker strings; it does not qualify editor
+  source-line mapping or a complete diagnostic UI.
+- `async_bridge` uses runtime-specific top-level await and JavaScript Promise
+  bridging. The Skulpt adapter intentionally has no `delay` binding. This case is
+  an API diagnostic, not ordinary Python-script conformance.
+- The bridge exposes only deterministic mock arithmetic/sensor functions, delayed
+  results and an explicit asynchronous input request. No Brickwright VM,
+  simulator, hardware or generated application program is exercised.
+
+The limits are 30 seconds for startup, 5 seconds per fixture, a 1 MiB output budget,
+and 200 milliseconds before requesting Stop on an infinite loop. The output cap
+exists to bound the harness; a large-output enforcement test remains pending.
+The live-input reply is deliberately delayed 40 milliseconds, so its timing is not
+a zero-delay runtime throughput measurement.
+
+## Input and Stop distinctions
+
+Buffered input supplies a line before execution. Live synchronous input uses a
+shared-memory mailbox where supported. Skulpt also has a Promise-backed ordinary
+`input()` route through messages. MicroPython and Pyodide additionally exercise
+`await probehost.ask(...)`, an explicit host API that changes the program contract.
+It does not establish transparent `input()` support without shared memory.
+
+The browser standard run omits cross-origin isolation and shared memory. The
+separate isolated-input run serves `Cross-Origin-Opener-Policy: same-origin` and
+`Cross-Origin-Embedder-Policy: require-corp`. Actual page and worker capabilities
+are recorded. The serverless Chromium defaults include flags that relax web
+security or force-enable SharedArrayBuffer; the runner explicitly removes those
+flags. It retains the process-level `--no-sandbox` launch option required by this
+container, so this is not a security-hardening validation.
+
+The released MicroPython port exposes an Emscripten filesystem stdin callback,
+but its built-in `input()` readline path is distinct. In this build, the initial
+buffered and live `input()` probes timed out without calling our stdin callback.
+The byte-returning callback matches the official loader contract; this observation
+is consistent with the v1.29.0 port's `mp_hal_stdin_rx_chr()` macro returning zero.
+The harness records `sys.stdin.readline()` and explicit asynchronous `ask()` as
+separate observations; both passed in Node and the browser. Do not generalize the
+built-in failure to all input APIs:
+
+- [Official loader callback contract](https://github.com/micropython/micropython/blob/v1.29.0/ports/webassembly/api.js)
+- [Official port input macro](https://github.com/micropython/micropython/blob/v1.29.0/ports/webassembly/mphalport.h)
+- [Official async/host API documentation](https://github.com/micropython/micropython/blob/v1.29.0/ports/webassembly/README.md)
+
+For Stop, the parent continues a 10 ms heartbeat while a worker spins. Node records
+elapsed time until the `worker.terminate()` Promise resolves. Browser
+`Worker.terminate()` returns void: its recorded call duration is **not** confirmed
+termination-completion latency. The browser also observes a 200 ms quiet window,
+then runs `print(42)` in a fresh worker. Stop discards interpreter state. Graceful
+runtime interruption and in-place interpreter recovery remain untested.
+
+## Artifacts and interpretation
+
+- `results-node.json`: corrected final Node measurements, stable fixture IDs,
+  category-level observations, awaited termination, source and asset hashes.
+- `results-browser.json`: original real server Chromium observations, launch
+  flags, isolation capabilities, localhost requests and raw samples. Its standard
+  run supplies the browser timing and semantic results. Its initial isolated-input
+  run records the shared-view decoding adapter failure described below.
+- `results-browser-input-corrected.json`: isolated-input-only successor after
+  copying reply bytes before decoding. Skulpt and Pyodide pass; MicroPython's
+  distinct built-in `input()` path still reaches the 5 second deadline without
+  invoking the stdin callback. No page errors occur in the successor run.
+- `results-node-initial.json`: retained first run, including the original
+  MicroPython `input()` failures. Its fixture IDs accidentally include run suffixes,
+  it has an aggregate diagnostic count, and its Stop timing predates the explicit
+  awaited-termination fix. Use final results for timing and categorical summaries.
+
+The initial Node artifact also predates successful browser setup and therefore says
+a browser was unavailable at that point. The browser artifacts supersede that
+coverage note. The ordinary Playwright CDN download returned HTTP 403; one alternate
+npm-packaged Chromium distribution launched successfully. This says nothing about
+end-user browser installation or production asset delivery.
+
+### Source revision of the browser input correction
+
+Both `results-node.json` and `results-browser.json` record this SHA-256 for
+`engine-worker.mjs`:
+
+```text
+8cf9834f9f21620eb736f3711f1b66f9387bd097ce261d081fc678b03f523570
+```
+
+The browser rejected `TextDecoder.decode()` when passed a view backed by a
+SharedArrayBuffer; Node accepted it. The final worker copies the completed reply
+to an ordinary array buffer. This is one expression change inside `sharedInput()`:
+
+```diff
+- return new TextDecoder().decode(new Uint8Array(inputBuffer, 8, length));
++ // Browser TextDecoder rejects shared views; copy the completed reply first.
++ return new TextDecoder().decode(new Uint8Array(inputBuffer, 8, length).slice());
+```
+
+The final worker and `results-browser-input-corrected.json` record SHA-256:
+
+```text
+313f9aebc668f4c039fdb7d5c88227c34e4d339a58f4afdff8cc323fcf37d04c
+```
+
+The browser driver also gained a `--mode` selector to rerun only the affected
+route. Each raw result records its own driver, worker, fixture and lockfile hashes.
+Node and the standard browser timing samples were not rerun after this correction;
+their source hashes deliberately remain those of the earlier worker. The standard
+browser mode has no SharedArrayBuffer and does not enter the changed branch.
+
+### Recorded browser observations
+
+These medians are from three fresh workers in Chromium 158.0.8127.0 on a Linux
+server, using localhost assets. They are not mobile or production load budgets.
+
+| Observation | Skulpt | MicroPython | Pyodide |
+| --- | ---: | ---: | ---: |
+| Median runtime initialization (ms) | 42.6 | 31.4 | 2418.3 |
+| Median worker start to ready (ms) | 50.1 | 37.6 | 2427.1 |
+| Selected asset bytes, uncompressed | 966,760 | 559,673 | 13,530,536 |
+| Selected asset gzip bytes | 233,587 | 231,352 | 6,390,645 |
+| Arithmetic, large integer, class/list fixtures | Pass | Pass | Pass |
+| JSON fixture | Not implemented | Pass | Pass |
+| f-string fixture | Pass | Pass | Pass |
+| dataclass fixture | Internal TypeError | Module absent | Pass |
+| Built-in buffered `input()` | Pass | Deadline | Pass |
+| Message-only live input | Ordinary `input()` passes | Explicit async `ask()` passes | Explicit async `ask()` passes |
+| Isolated shared input after copy correction | Pass | Deadline | Pass |
+| Mock arithmetic/sensor bridge | Pass | Pass | Pass |
+| Hard Stop and fresh worker restart | Pass | Pass | Pass |
+
+Asset sizes come from the Node file/compression measurements, not browser transfer
+timing. The named fixtures are small diagnostics; the table is not a general
+compatibility percentage or an overall speed ranking. In particular, MicroPython
+and Skulpt have similar gzip totals in these selected distributions despite their
+different uncompressed sizes. Browser hard-stop calls returned immediately, but
+that API exposes no completion acknowledgement; no numeric browser termination
+latency is asserted.
+
+Remaining qualification includes Windows/macOS/Linux WebViews, Android/iOS,
+Safari/Firefox, actual mobile memory/thermal limits, production CSP and application
+headers, real slow networks, offline cache/update behavior, cancellation while
+waiting for input, stale responses, repeated-run state reset, output-limit behavior,
+generated program semantics and actual simulator/game integration. Runtime startup
+and mock callbacks do not satisfy those gates.
+
+Keep only the scripts, fixtures, package manifests/lock, README and raw JSON results
+under version control. Do not commit `node_modules`, npm caches, extracted browser
+binaries or temporary browser profiles.

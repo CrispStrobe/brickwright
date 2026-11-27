@@ -1,0 +1,366 @@
+{
+  "schema": 1,
+  "createdAt": "2026-11-27T06:09:30.895Z",
+  "planCommit": "a29ac18c9e4a8789b6d58f8d5be4b5f034667627",
+  "brickwrightHead": "14de1c42bd2e2ea84086a2162d1eff1fdbbac20d",
+  "environment": {
+    "kind": "headless real browser; localhost HTTP",
+    "browserVersion": "158.0.8127.0",
+    "browserDistribution": "@sparticuz/chromium 158.0.0 (serverless Linux Chromium); security-disabling and SAB-enable flags removed",
+    "browserArgs": [
+      "--ash-no-nudges",
+      "--disable-domain-reliability",
+      "--disable-print-preview",
+      "--disk-cache-size=33554432",
+      "--no-default-browser-check",
+      "--no-pings",
+      "--font-render-hinting=none",
+      "--ignore-gpu-blocklist",
+      "--in-process-gpu",
+      "--use-gl=angle",
+      "--use-angle=swiftshader",
+      "--enable-unsafe-swiftshader",
+      "--disable-setuid-sandbox",
+      "--headless='shell'",
+      "--no-sandbox",
+      "--no-zygote"
+    ],
+    "node": "v24.22.3",
+    "platform": "linux",
+    "arch": "x64",
+    "cpuModel": "INTEL(R) XEON(R) PLATINUM 8573C",
+    "cpus": 9
+  },
+  "protocol": {
+    "startupSamples": 3,
+    "warmRepeats": 5,
+    "startupBudgetMs": 30000,
+    "fixtureBudgetMs": 5000,
+    "hardStopDelayMs": 200,
+    "hardStopQuietWindowMs": 200,
+    "outputBudgetBytes": 1048576,
+    "startupMeaning": "fresh worker/runtime, already-installed runtime files served from localhost; browser/OS caches may be warm; not cold network, device launch or app-ready latency",
+    "sharedInputMeaning": "only separately tested with COOP same-origin and COEP require-corp; standard run intentionally has no SharedArrayBuffer",
+    "memoryMeaning": "browser memory/peak RSS not measured",
+    "stopMeaning": "parent event-loop heartbeat and hard Worker.terminate with fresh restart; browser terminate returns void, so no physical termination-completion latency measured",
+    "bridgeMeaning": "mock arithmetic/sensor and explicit async ask only; no actual app/simulator bridge"
+  },
+  "coverage": {
+    "desktopServerChromium": "measured",
+    "windows": "pending",
+    "macos": "pending",
+    "linuxWebView": "pending",
+    "android": "pending",
+    "ios": "pending",
+    "safari": "pending",
+    "firefox": "pending",
+    "offlineBrowser": "pending",
+    "realNetwork": "pending",
+    "stateIsolation": "pending",
+    "outputCapEnforcement": "pending",
+    "inputCancellation": "pending",
+    "generatedPrograms": "pending",
+    "realSimulatorBridge": "pending",
+    "gracefulInterrupt": "pending; hard termination only"
+  },
+  "sourceHashes": {
+    "package-lock.json": "87fff1c87af4e4092df236501f6a7a152f562fa74eea3905e97e59a792404d62",
+    "fixtures.json": "af7a7aa5fe6e3422a1a9a7b6e4ddaeb6618b22350c937bd37e0cceb729aee99c",
+    "engine-worker.mjs": "313f9aebc668f4c039fdb7d5c88227c34e4d339a58f4afdff8cc323fcf37d04c",
+    "browser-page.mjs": "f4b5576b0aee7cf712fa1da1678686ad95dc0a45bb4bfd2a02f289ff0af1989f",
+    "browser-probe.mjs": "24f2d70ffdb43441bac5fe3f5e5321a1b2549d487aa2ffb1a1f04e73995afa58"
+  },
+  "runs": [
+    {
+      "capabilities": {
+        "isSecureContext": true,
+        "crossOriginIsolated": true,
+        "sharedArrayBuffer": true,
+        "wasm": true,
+        "jspi": true,
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.0 Safari/537.36"
+      },
+      "mode": "isolated-input",
+      "engines": {
+        "skulpt": {
+          "startup": [
+            {
+              "type": "ready",
+              "engine": "skulpt",
+              "engineLoadMs": 60.855000000447035,
+              "runtimeVersion": null,
+              "capabilities": {
+                "sharedArrayBuffer": true,
+                "crossOriginIsolated": true,
+                "jspi": true
+              },
+              "memory": null,
+              "workerStartToReadyMs": 74.67999999970198,
+              "firstRun": {
+                "type": "complete",
+                "id": "hello:7bqz49zvmut",
+                "engineMs": 6.4500000001862645,
+                "stdout": "42\n",
+                "stderr": "",
+                "outputBytes": 3,
+                "error": null,
+                "hostCalls": 0,
+                "memory": null,
+                "adapterError": null,
+                "wallMs": 6.714999999850988,
+                "outputEvents": [
+                  {
+                    "stream": "stdout",
+                    "chars": 3,
+                    "atMs": 6.684999999590218
+                  }
+                ],
+                "inputEvents": []
+              },
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            }
+          ],
+          "fixtures": [],
+          "performance": [],
+          "interaction": {
+            "sharedInput": {
+              "type": "complete",
+              "id": "live_input:z32wbo53j6n",
+              "engineMs": 42.669999999925494,
+              "stdout": "before\nhello Ada\n",
+              "stderr": "",
+              "outputBytes": 17,
+              "error": null,
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 42.86500000022352,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 7,
+                  "atMs": 1.9850000003352761
+                },
+                {
+                  "stream": "stdout",
+                  "chars": 10,
+                  "atMs": 42.78000000026077
+                }
+              ],
+              "inputEvents": [
+                {
+                  "mode": "shared",
+                  "prompt": "Name? ",
+                  "atMs": 2.215000000782311
+                }
+              ],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            }
+          }
+        },
+        "micropython": {
+          "startup": [
+            {
+              "type": "ready",
+              "engine": "micropython",
+              "engineLoadMs": 29.865000000223517,
+              "runtimeVersion": null,
+              "capabilities": {
+                "sharedArrayBuffer": true,
+                "crossOriginIsolated": true,
+                "jspi": true
+              },
+              "memory": null,
+              "workerStartToReadyMs": 35.385000000707805,
+              "firstRun": {
+                "type": "complete",
+                "id": "hello:u62nmsbrpm",
+                "engineMs": 2.7850000001490116,
+                "stdout": "42\n",
+                "stderr": "",
+                "outputBytes": 3,
+                "error": null,
+                "hostCalls": 0,
+                "memory": null,
+                "adapterError": null,
+                "wallMs": 3.4500000001862645,
+                "outputEvents": [
+                  {
+                    "stream": "stdout",
+                    "chars": 3,
+                    "atMs": 3.4100000001490116
+                  }
+                ],
+                "inputEvents": []
+              },
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            }
+          ],
+          "fixtures": [],
+          "performance": [],
+          "interaction": {
+            "sharedInput": {
+              "timeout": true,
+              "wallMs": 5002.514999999665,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 7,
+                  "atMs": 0.5199999995529652
+                }
+              ],
+              "inputEvents": [],
+              "validation": {
+                "pass": false,
+                "reason": "fixture deadline exceeded"
+              }
+            }
+          }
+        },
+        "pyodide": {
+          "startup": [
+            {
+              "type": "ready",
+              "engine": "pyodide",
+              "engineLoadMs": 2669.7199999997392,
+              "runtimeVersion": "314.0.8",
+              "capabilities": {
+                "sharedArrayBuffer": true,
+                "crossOriginIsolated": true,
+                "jspi": true
+              },
+              "memory": null,
+              "workerStartToReadyMs": 2694.4700000006706,
+              "firstRun": {
+                "type": "complete",
+                "id": "hello:qsu73znw2m",
+                "engineMs": 4.660000000149012,
+                "stdout": "42\n",
+                "stderr": "",
+                "outputBytes": 3,
+                "error": null,
+                "hostCalls": 0,
+                "memory": null,
+                "adapterError": null,
+                "wallMs": 6.270000000484288,
+                "outputEvents": [
+                  {
+                    "stream": "stdout",
+                    "chars": 3,
+                    "atMs": 5.230000000447035
+                  }
+                ],
+                "inputEvents": []
+              },
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            }
+          ],
+          "fixtures": [],
+          "performance": [],
+          "interaction": {
+            "sharedInput": {
+              "type": "complete",
+              "id": "live_input:a2ce5q45kpu",
+              "engineMs": 42.8199999993667,
+              "stdout": "before\nName? hello Ada\n",
+              "stderr": "",
+              "outputBytes": 23,
+              "error": null,
+              "hostCalls": 0,
+              "memory": null,
+              "adapterError": null,
+              "wallMs": 42.980000000447035,
+              "outputEvents": [
+                {
+                  "stream": "stdout",
+                  "chars": 7,
+                  "atMs": 1.059999999590218
+                },
+                {
+                  "stream": "stdout",
+                  "chars": 6,
+                  "atMs": 1.959999999962747
+                },
+                {
+                  "stream": "stdout",
+                  "chars": 10,
+                  "atMs": 42.639999999664724
+                }
+              ],
+              "inputEvents": [
+                {
+                  "mode": "shared",
+                  "prompt": "",
+                  "atMs": 1.974999999627471
+                }
+              ],
+              "validation": {
+                "pass": true,
+                "reason": "output matched"
+              }
+            }
+          }
+        }
+      },
+      "servedRequests": [
+        {
+          "path": "/browser-page.mjs",
+          "bytes": 9803
+        },
+        {
+          "path": "/engine-worker.mjs",
+          "bytes": 8599
+        },
+        {
+          "path": "/node_modules/skulpt/dist/skulpt.min.js",
+          "bytes": 559460
+        },
+        {
+          "path": "/node_modules/skulpt/dist/skulpt-stdlib.js",
+          "bytes": 407300
+        },
+        {
+          "path": "/node_modules/@micropython/micropython-webassembly-pyscript/micropython.mjs",
+          "bytes": 110120
+        },
+        {
+          "path": "/node_modules/@micropython/micropython-webassembly-pyscript/micropython.wasm",
+          "bytes": 449553
+        },
+        {
+          "path": "/node_modules/pyodide/pyodide.mjs",
+          "bytes": 17758
+        },
+        {
+          "path": "/node_modules/pyodide/pyodide-lock.json",
+          "bytes": 119077
+        },
+        {
+          "path": "/node_modules/pyodide/pyodide.asm.mjs",
+          "bytes": 1250259
+        },
+        {
+          "path": "/node_modules/pyodide/python_stdlib.zip",
+          "bytes": 2545550
+        },
+        {
+          "path": "/node_modules/pyodide/pyodide.asm.wasm",
+          "bytes": 9597892
+        }
+      ],
+      "pageErrors": []
+    }
+  ]
+}
